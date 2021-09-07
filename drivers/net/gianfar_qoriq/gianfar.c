@@ -848,6 +848,7 @@ inline void gfar_hwaccel_tcp4_receive(struct gfar_private *priv,
 	int ph_len;
 	struct rxfcb *fcb;
 	struct sock *gfar_sk;
+	struct rtable *rt;
 
 	gfar_sk = priv->tcp_hw_channel[rx_queue->qindex - TCP_CHL_OFFSET];
 
@@ -887,11 +888,17 @@ inline void gfar_hwaccel_tcp4_receive(struct gfar_private *priv,
 	TCP_SKB_CB(skb)->when	 = 0;
 	TCP_SKB_CB(skb)->flags	 = iph->tos;
 	TCP_SKB_CB(skb)->sacked	 = 0;
+	rt = (struct rtable *)__sk_dst_check(gfar_sk, 0);
+	if (rt) {
+		dst_use(&rt->u.dst, jiffies);
+		skb_dst_set(skb,&rt->u.dst);
+	}
 
 	bh_lock_sock(gfar_sk);
 	if (!sock_owned_by_user(gfar_sk)) {
 		if (tcp_rcv_established(gfar_sk, skb, tcp_hdr(skb), skb->len)) {
-			tcp_v4_send_reset(gfar_sk, skb);
+			if(skb_rtable(skb))
+				tcp_v4_send_reset(gfar_sk, skb);
 			kfree_skb(skb);
 		}
 	} else
@@ -1731,11 +1738,8 @@ static void gfar_enable_filer(struct net_device *dev)
 	temp |= RCTRL_FILREN;
 	temp &= ~RCTRL_FSQEN;
 	temp &= ~RCTRL_PRSDEP_MASK;
-#ifdef CONFIG_SYNO_QORIQ_WOL_SPECIFY_PATTERN
-	temp |= RCTRL_PRSDEP_L2L3L4;
-#else
 	temp |= RCTRL_PRSDEP_L2L3;
-#endif
+
 	gfar_write(&regs->rctrl, temp);
 
 	unlock_rx_qs(priv);
@@ -1811,25 +1815,6 @@ static void gfar_config_filer_table(struct net_device *dev)
 	mb();
 	rqfpr = dest_mac_addr_l;
 	gfar_write_filer(priv, 5, rqfcr, rqfpr);
-
-#ifdef CONFIG_SYNO_QORIQ_WOL_SPECIFY_PATTERN
-	/* UDP packet */
-	rqfcr = (rqfcr_queue << 10) | RQFCR_AND | RQFCR_CMP_EXACT | RQFCR_PID_L4P;
-	rqfpr = 0x11;
-	gfar_write_filer(priv, 6, rqfcr, rqfpr);
-
-	/* source port 1234 */
-	rqfcr = (rqfcr_queue << 10) | RQFCR_AND | RQFCR_CMP_EXACT | RQFCR_PID_SPT;
-	rqfpr = 0x000004D2;
-	mb();
-	gfar_write_filer(priv, 7, rqfcr, rqfpr);
-
-	/* destination port 9999 */
-	rqfcr = RQFCR_GPI | (rqfcr_queue << 10) | RQFCR_CMP_EXACT | RQFCR_PID_DPT;
-	rqfpr = 0x0000270F;
-	mb();
-	gfar_write_filer(priv, 8, rqfcr, rqfpr);
-#endif
 
 	unlock_rx_qs(priv);
 }
@@ -2453,7 +2438,7 @@ void gfar_free_recycle_queue(struct gfar_skb_handler *sh, int lock_flag)
 	while (clist) {
 		skb = clist;
 		clist = clist->next;
-		__kfree_skb(skb);
+		dev_kfree_skb_any(skb);
 	}
 }
 #endif
@@ -2479,7 +2464,7 @@ static void free_skb_tx_queue(struct gfar_priv_tx_q *tx_queue)
 					txbdp->length, DMA_TO_DEVICE);
 		}
 		txbdp++;
-		__kfree_skb(tx_queue->tx_skbuff[i]);
+		dev_kfree_skb_any(tx_queue->tx_skbuff[i]);
 		tx_queue->tx_skbuff[i] = NULL;
 	}
 #ifndef CONFIG_GIANFAR_L2SRAM
@@ -2504,7 +2489,7 @@ static void free_skb_rx_queue(struct gfar_priv_rx_q *rx_queue)
 				rxbdp->bufPtr, priv->rx_buffer_size,
 					DMA_FROM_DEVICE);
 
-				__kfree_skb(rx_queue->rx_skbuff[i]);
+				dev_kfree_skb_any(rx_queue->rx_skbuff[i]);
 				rx_queue->rx_skbuff[i] = NULL;
 			}
 
@@ -3242,11 +3227,22 @@ static inline void gfar_tx_checksum(struct sk_buff *skb, struct txfcb *fcb)
 
 	/* Tell the controller what the protocol is */
 	/* And provide the already calculated phcs */
-	if (ip_hdr(skb)->protocol == IPPROTO_UDP) {
-		flags |= TXFCB_UDP;
-		fcb->phcs = udp_hdr(skb)->check;
-	} else
-		fcb->phcs = tcp_hdr(skb)->check;
+	if (!((ip_hdr(skb)->frag_off) & htons(IP_MF|IP_OFFSET))) {
+		/* If not fragmented packet */
+		if (ip_hdr(skb)->protocol == IPPROTO_UDP) {
+			if (udp_hdr(skb)->check) {
+				fcb->phcs = udp_hdr(skb)->check;
+				flags |= TXFCB_NPH;
+			}
+			flags |= TXFCB_UDP | TXFCB_TUP | TXFCB_CTU;
+		} else if (ip_hdr(skb)->protocol == IPPROTO_TCP) {
+			if (tcp_hdr(skb)->check) {
+				flags |= TXFCB_NPH;
+				fcb->phcs = tcp_hdr(skb)->check;
+			}
+			flags |= TXFCB_TUP | TXFCB_CTU;
+		}
+	}
 
 	/* l3os is the distance between the start of the
 	 * frame (skb->data) and the start of the IP hdr.
@@ -5589,6 +5585,29 @@ static irqreturn_t gfar_error(int irq, void *grp_id)
 			/* Reactivate the Tx Queues */
 			gfar_write(&regs->tstat, gfargrp->tstat);
 		}
+
+		/* internal data parity error */
+		if (events & IEVENT_DPE) {
+			unsigned long flags;
+			u32 temp;
+
+			local_irq_save(flags);
+			lock_tx_qs(priv);
+
+			/* soft reset the controller */
+			temp = gfar_read(&regs->maccfg1);
+			gfar_write(&regs->maccfg1, temp & ~(MACCFG1_TX_FLOW));
+			udelay(10);
+			gfar_write(&regs->maccfg1, temp & ~(MACCFG1_TX_FLOW | MACCFG1_TX_EN));
+			udelay(1);
+			gfar_write(&regs->maccfg1, temp);
+
+			/* Reactivate the Tx Queues */
+			gfar_write(&regs->tstat, gfargrp->tstat);
+
+			unlock_tx_qs(priv);
+			local_irq_restore(flags);
+		}
 		if (netif_msg_tx_err(priv))
 			printk(KERN_DEBUG "%s: Transmit Error\n", dev->name);
 	}
@@ -5679,67 +5698,6 @@ void SynoQorIQWOLSet(void) {
 		/* enable Magic packet */
 		phy_write(priv->phydev, 30, 0x6D);
 		phy_write(priv->phydev, 21, 0x1000);
-	}
-
-	of_node_put(pDevNode);
-
-END:
-	return 0;
-}
-EXPORT_SYMBOL(SynoQorIQWOLSet);
-#endif
-
-#ifdef CONFIG_SYNO_QORIQ_PHY_LED_SET
-int SynoQorIQSetPhyLed(SYNO_LED ledStatus)
-{
-    struct device_node *pDevNode = NULL;
-	struct of_device * ofdev = NULL;
-	struct gfar_private *priv = NULL;
-	static u32 u32BackUpReg26 = 0;
-	static u32 u32BackUpReg28 = 0;
-
-	for (pDevNode = of_find_node_by_name(NULL, "ethernet"); pDevNode;
-		 pDevNode = of_find_node_by_name(pDevNode, "ethernet")) {
-
-		if (NULL == (ofdev = of_find_device_by_node(pDevNode))) {
-			printk("Cannot found ofdev\n");
-			continue;
-		}
-
-		if (NULL == (priv = dev_get_drvdata(&ofdev->dev))) {
-			printk("NULL == (priv = dev_get_drvdata(&ofdev->dev))");
-			continue;
-		}
-
-		if (NULL == priv->ndev) {
-			printk("NULL == priv->ndev\n");
-			continue;
-		}
-
-		if (NULL == priv->phydev) {
-			printk("no phy devices\n");
-			continue;
-		}
-
-		//About the LED control , please refer to the 8211e spec , chapter of 6.12. LED Configuration.
-		phy_write(priv->phydev, 31, 0x0007); //set to extension page
-		phy_write(priv->phydev, 30, 0x002C); //extension page 44
-
-		switch(ledStatus) {
-			case SYNO_LED_ON:
-				phy_write(priv->phydev, 26, phy_read(priv->phydev, 26) | u32BackUpReg26); //Restore the bit of LED2
-				phy_write(priv->phydev, 28, phy_read(priv->phydev, 28) | u32BackUpReg28); //Restore the bit of LED2
-				break;
-			case SYNO_LED_OFF:
-				u32BackUpReg26 = phy_read(priv->phydev, 26) & 0x0040; //Backup the bit of LED2
-				u32BackUpReg28 = phy_read(priv->phydev, 28) & 0x0700; //Backup the bit of LED2
-				phy_write(priv->phydev, 26, phy_read(priv->phydev, 26) & ~(0x0040)); //Disable LED2
-				phy_write(priv->phydev, 28, phy_read(priv->phydev, 28) & ~(0x0700)); //Disable LED2
-				break;
-			default:
-				break;
-		}
-
 		phy_write(priv->phydev, 31, 0x0000); //set PHY to page 0
 	}
 
@@ -5748,7 +5706,7 @@ int SynoQorIQSetPhyLed(SYNO_LED ledStatus)
 END:
 	return 0;
 }
-EXPORT_SYMBOL(SynoQorIQSetPhyLed);
+EXPORT_SYMBOL(SynoQorIQWOLSet);
 #endif
 
 static struct of_device_id gfar_match[] =

@@ -95,8 +95,27 @@ EXPORT_SYMBOL(g_internal_hd_num);
 #endif
 
 #ifdef MY_ABC_HERE
+long g_hdd_hotplug = 0;
+EXPORT_SYMBOL(g_hdd_hotplug);
+#endif
+
+#ifdef MY_ABC_HERE
+long unsigned int guiWakeupDisksNum = 1;
+EXPORT_SYMBOL(guiWakeupDisksNum);
+/* The default spinup time interval is 7000ms. if want modify the interval, you
+ * can modify this value. ex. assign 14 to it means 500ms (7000/14) */
+int giDenoOfTimeInterval = 1;
+EXPORT_SYMBOL(giDenoOfTimeInterval);
+#endif
+
+#ifdef MY_ABC_HERE
 long g_internal_netif_num = -1;
 EXPORT_SYMBOL(g_internal_netif_num);
+#endif
+
+#ifdef SYNO_SAS_DISK_NAME
+long g_is_sas_model = 0;
+EXPORT_SYMBOL(g_is_sas_model);
 #endif
 
 #ifdef MY_ABC_HERE
@@ -179,6 +198,12 @@ EXPORT_SYMBOL(g_esata_7042);
 #include <linux/synosata.h>
 int (*funcSYNOGetHwCapability)(CAPABILITY *) = NULL;
 EXPORT_SYMBOL(funcSYNOGetHwCapability);
+
+#ifdef MY_DEF_HERE
+EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void) = NULL;
+EXPORT_SYMBOL(funcSynoEunitPowerctlType);
+#endif
+
 #endif
 
 /* External variables not in a header file. */
@@ -1211,8 +1236,36 @@ static struct ctl_table kern_table[] = {
 #ifdef MY_ABC_HERE
 	{
 		.ctl_name		= CTL_UNNUMBERED,
+		.procname		= "syno_disks_group",
+		.data			= &guiWakeupDisksNum,
+		.maxlen			= sizeof (unsigned int),
+		.mode			= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+	{
+		.ctl_name		= CTL_UNNUMBERED,
+		.procname		= "syno_deno_of_spinup_time",
+		.data			= &giDenoOfTimeInterval,
+		.maxlen			= sizeof (int),
+		.mode			= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.ctl_name		= CTL_UNNUMBERED,
 		.procname		= "syno_internal_netif_num",
 		.data			= &g_internal_netif_num,
+		.maxlen			= sizeof (int),
+		.mode			= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#ifdef SYNO_SAS_DISK_NAME
+	{
+		.ctl_name		= CTL_UNNUMBERED,
+		.procname		= "syno_is_sas_model",
+		.data			= &g_is_sas_model,
 		.maxlen			= sizeof (int),
 		.mode			= 0644,
 		.proc_handler	= &proc_dointvec,

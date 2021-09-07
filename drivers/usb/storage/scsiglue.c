@@ -67,6 +67,10 @@
 #define VENDOR_ID_PENTAX	0x0a17
 #define VENDOR_ID_MOTOROLA	0x22b8
 
+#ifdef MY_ABC_HERE
+extern struct usb_hub *hdev_to_hub(struct usb_device *hdev);
+extern int syno_get_hub_eh(struct usb_hub *hub);
+#endif
 
 #ifdef MY_ABC_HERE
 extern int gSynoHasDynModule;
@@ -315,6 +319,17 @@ static int queuecommand(struct scsi_cmnd *srb,
  * Error handling functions
  ***********************************************************************/
 
+#ifdef MY_ABC_HERE
+static void wait_for_hub_EH(struct us_data *us)
+{
+	struct usb_device *udev = us->pusb_dev;
+
+	while (syno_get_hub_eh(hdev_to_hub(udev->parent))){
+		printk("hub is in EH\n");
+		msleep(100);
+	}
+}
+#endif
 
 /* Command timeout and abort */
 static int command_abort(struct scsi_cmnd *srb)
@@ -323,6 +338,9 @@ static int command_abort(struct scsi_cmnd *srb)
 
 	US_DEBUGP("%s called\n", __func__);
 
+#ifdef MY_ABC_HERE
+	wait_for_hub_EH(us);
+#endif
 
 	/* us->srb together with the TIMED_OUT, RESETTING, and ABORTING
 	 * bits are protected by the host lock. */
@@ -361,6 +379,9 @@ static int device_reset(struct scsi_cmnd *srb)
 
 	US_DEBUGP("%s called\n", __func__);
 
+#ifdef MY_ABC_HERE
+	wait_for_hub_EH(us);
+#endif
 
 	/* lock the device pointers and do the reset */
 	mutex_lock(&(us->dev_mutex));
@@ -376,6 +397,9 @@ static int bus_reset(struct scsi_cmnd *srb)
 	struct us_data *us = host_to_us(srb->device->host);
 	int result;
 
+#ifdef MY_ABC_HERE
+	wait_for_hub_EH(us);
+#endif
 
 
 	US_DEBUGP("%s called\n", __func__);
@@ -391,6 +415,9 @@ void usb_stor_report_device_reset(struct us_data *us)
 	int i;
 	struct Scsi_Host *host = us_to_host(us);
 
+#ifdef MY_ABC_HERE
+	wait_for_hub_EH(us);
+#endif
 
 	scsi_report_device_reset(host, 0, 0);
 	if (us->fflags & US_FL_SCM_MULT_TARG) {
@@ -406,6 +433,9 @@ void usb_stor_report_bus_reset(struct us_data *us)
 {
 	struct Scsi_Host *host = us_to_host(us);
 
+#ifdef MY_ABC_HERE
+	wait_for_hub_EH(us);
+#endif
 
 	scsi_lock(host);
 	scsi_report_bus_reset(host, 0);
@@ -596,7 +626,7 @@ struct scsi_host_template usb_stor_host_template = {
 #if defined(MY_ABC_HERE)
 	.syno_index_get =		syno_usb_index_get,
 #endif
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	.syno_port_type         = SYNO_PORT_TYPE_USB,
 #endif
 

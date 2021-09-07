@@ -14,9 +14,6 @@
 #define SD_IOCTL_IDLE 4746
 #define SD_IOCTL_SUPPORT_SLEEP 4747
 #endif
-#ifdef SYNO_SATA_IRQ_OFF
-#define SCSI_IOCTL_DEEP_SLEEP 4748
-#endif
 
 /* The door lock/unlock constants are compatible with Sun constants for
    the cdrom */

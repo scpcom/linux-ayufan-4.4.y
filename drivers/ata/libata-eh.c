@@ -93,6 +93,15 @@ enum {
 	ATA_EH_PROBE_TRIALS		= 2,
 };
 
+#ifdef MY_ABC_HERE
+extern unsigned int guiWakeupDisksNum;
+#endif
+
+#ifdef MY_ABC_HERE
+extern int (*funcSYNOSendDiskResetPwrEvent)(unsigned int, unsigned int);
+extern int (*funcSYNOSendDiskPortDisEvent)(unsigned int, unsigned int);
+#endif
+
 /* The following table determines how we sequence resets.  Each entry
  * represents timeout for that try.  The first try can be soft or
  * hardreset.  All others are hardreset if available.  In most cases
@@ -538,6 +547,50 @@ static void ata_eh_unload(struct ata_port *ap)
 	spin_unlock_irqrestore(ap->lock, flags);
 }
 
+#ifdef MY_ABC_HERE
+void SendPwrResetEvent(struct work_struct *work)
+{
+	if (funcSYNOSendDiskResetPwrEvent) {
+		funcSYNOSendDiskResetPwrEvent(0, 0);
+	}
+
+	return;
+}
+
+void SendPortDisEvent(struct work_struct *work)
+{
+	if (funcSYNOSendDiskPortDisEvent) {
+		funcSYNOSendDiskPortDisEvent(0, 0);
+	}
+
+	return;
+}
+
+static int iSynoCountPwrReset(const struct ata_device *dev, int iSet)
+{
+	int iRet = -1;
+	struct scsi_device *sdev = NULL;
+
+	if (!dev) {
+		goto END;
+	}
+
+	sdev = dev->sdev;
+	if (!sdev) {
+		goto END;
+	}
+
+	if (iSet) {
+		sdev->iResetPwrCount += iSet;
+	} else {
+		sdev->iResetPwrCount = 0;
+	}
+
+END:
+	return iRet;
+}
+#endif
+
 /**
  *	ata_scsi_error - SCSI layer error handler callback
  *	@host: SCSI host on which error occurred
@@ -572,11 +625,54 @@ void ata_scsi_error(struct Scsi_Host *host)
 		int i = 0;
 		ata_for_each_link(link, ap, EDGE) {
 			ata_for_each_dev(dev, link, ALL) {
-				uiStatStart |= (ata_dev_enabled(dev)) << i;
+				if(!(dev->ulSflags)) {
+					uiStatStart |= (ata_dev_enabled(dev)) << i;
+				}
 				++i;
 			}
 		}
 		DBGMESG("ata%u: detect stat 0x%x", ap->print_id, uiStatStart);
+	}
+#endif
+
+#ifdef MY_ABC_HERE
+	if (0 < guiWakeupDisksNum && 1 == ap->nr_active_links) {
+		struct ata_queued_cmd *qc_insert = NULL;
+		int tag = 0;
+		spin_lock_irqsave(ap->lock, flags);
+		for (tag = 0; tag < ATA_MAX_QUEUE; tag++) {
+			struct ata_queued_cmd *qc = __ata_qc_from_tag(ap, tag);
+
+			if (qc->flags & ATA_QCFLAG_ACTIVE && NULL == qc->scsicmd && !ata_tag_internal(qc->tag) &&
+				(ATA_CMD_VERIFY == qc->tf.command || ATA_CMD_CHK_POWER == qc->tf.command)) {
+				qc_insert = qc;
+			}
+		}
+		if (qc_insert && (qc_insert->flags & ATA_QCFLAG_ACTIVE)) {
+			/* If our insert verify,chkpwr cmd still exist and jiffies not longer than WAKEINTERVAL,
+			 * we must wait it complete to prevent HSM violation error */
+			while((qc_insert && NULL == qc_insert->scsicmd && (qc_insert->flags & ATA_QCFLAG_ACTIVE) &&
+				   (ATA_CMD_VERIFY == qc_insert->tf.command || ATA_CMD_CHK_POWER == qc_insert->tf.command)) &&
+				  time_before(jiffies, qc_insert->dev->ulLastCmd + WAKEINTERVAL)) {
+				spin_unlock_irqrestore(ap->lock, flags);
+				schedule_timeout_uninterruptible(HZ);
+				spin_lock_irqsave(ap->lock, flags);
+			}
+			if(qc_insert && NULL == qc_insert->scsicmd && (qc_insert->flags & ATA_QCFLAG_ACTIVE) &&
+			   (ATA_CMD_VERIFY == qc_insert->tf.command || ATA_CMD_CHK_POWER == qc_insert->tf.command)) {
+				DBGMESG("port %d insert cmd 0x%x still alive, flush and complete it\n",
+						ap->print_id, qc_insert->tf.command);
+				spin_unlock_irqrestore(ap->lock, flags);
+				ata_port_flush_task(ap);
+				spin_lock_irqsave(ap->lock, flags);
+				if(qc_insert->flags & ATA_QCFLAG_ACTIVE) {
+					qc_insert->flags |= ATA_QCFLAG_FAILED;
+					__ata_qc_complete(qc_insert);
+				}
+
+			}
+		}
+		spin_unlock_irqrestore(ap->lock, flags);
 	}
 #endif
 
@@ -712,7 +808,14 @@ void ata_scsi_error(struct Scsi_Host *host)
 
 		/* invoke EH, skip if unloading or suspended */
 		if (!(ap->pflags & (ATA_PFLAG_UNLOADING | ATA_PFLAG_SUSPENDED)))
+#ifdef CONFIG_SYNO_QORIQ
+			if (PM_EVENT_SUSPEND != ap->pm_mesg.event)
+#endif
 			ap->ops->error_handler(ap);
+#ifdef CONFIG_SYNO_QORIQ
+			else
+				DBGMESG("port %d is in SUSPEND mode, skip reset\n", ap->print_id);
+#endif
 		else {
 			/* if unloading, commence suicide */
 			if ((ap->pflags & ATA_PFLAG_UNLOADING) &&
@@ -779,7 +882,9 @@ void ata_scsi_error(struct Scsi_Host *host)
 
 			ata_for_each_link(link, ap, EDGE) {
 				ata_for_each_dev(dev, link, ALL) {
-					uiStatEnd |= (ata_dev_enabled(dev)) << i;
+					if(!(dev->ulSflags)) {
+						uiStatEnd |= (ata_dev_enabled(dev)) << i;
+					}
 					++i;
 				}
 			}
@@ -803,6 +908,7 @@ void ata_scsi_error(struct Scsi_Host *host)
 	spin_lock_irqsave(ap->lock, flags);
 	if (ap->uiSflags) {
 		iForceDetect = 1;
+		ap->eh_tries = 1; /* FIXME: set eh_tries to 1 to prevent it retry recursively */
 	}
 	spin_unlock_irqrestore(ap->lock, flags);
 
@@ -812,7 +918,7 @@ void ata_scsi_error(struct Scsi_Host *host)
 			DBGMESG("port %d unset Fake Error\n", ap->print_id);
 			ap->iFakeError = 0;
 		}
-		if (iDetectTries) {
+		if (0 < iDetectTries) {
 			ata_port_printk(ap, KERN_ERR, "do detect tries %d\n", iDetectTries);
 			if (ap->ops->syno_force_intr) {
 				/* set force bit to force it occur fake sw plugged */
@@ -871,15 +977,14 @@ void ata_scsi_error(struct Scsi_Host *host)
 				dev->ulSflags = 0;
 			}
 		}
-
-		/* this action will also casue deadlocl, so we can't lock now */
-		if (ap->pflags & ATA_PFLAG_FROZEN) {
-			ata_port_printk(ap, KERN_ERR, "thaw port to prevent it can't detect new disks\n");
-			ata_eh_thaw_port(ap);
-		}
 		spin_lock_irqsave(ap->lock, flags);
 	}
 	spin_unlock_irqrestore(ap->lock, flags);
+	if (ap->pflags & ATA_PFLAG_FROZEN) {
+		ata_port_printk(ap, KERN_ERR, "send port disabled event\n");
+		/* send event */
+		schedule_work(&(ap->SendPortDisEventTask));
+	}
 #endif /* MY_ABC_HERE */
 
 
@@ -1413,7 +1518,7 @@ void ata_dev_disable(struct ata_device *dev)
 	if ((dev->link->uiSflags || (dev->link->ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL))
 		&& ata_dev_enabled(dev)) {
 		ata_dev_printk(dev, KERN_WARNING,
-					   "still have recovery flags, don't disabled it\n");
+					   "still have recovery flags 0x%x, don't disabled it\n", dev->link->uiSflags);
 		dev->ulSflags |= ATA_SYNO_DFLAG_DISABLE;
 		return;
 	}
@@ -1452,7 +1557,7 @@ void ata_eh_detach_dev(struct ata_device *dev)
 	if ((dev->link->uiSflags || (dev->link->ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL))
 		&& ata_dev_enabled(dev)) {
 		ata_dev_printk(dev, KERN_WARNING,
-					   "still have recovery flags, don't detach it\n");
+					   "still have recovery flags 0x%x, don't detach it\n", dev->link->uiSflags);
 		dev->ulSflags |= ATA_SYNO_DFLAG_DETACH;
 		return;
 	}

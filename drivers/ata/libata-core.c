@@ -67,7 +67,7 @@
 
 #include "libata.h"
 
-#if defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 #include <linux/synosata.h>
 #endif
 
@@ -5384,7 +5384,15 @@ void ata_qc_complete(struct ata_queued_cmd *qc)
 			/* always fill result TF for failed qc */
 			fill_result_tf(qc);
 
+#if defined(MY_ABC_HERE) || defined(SYNO_SATA_PM_DEVICE_GPIO)
+			if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) &&
+				(ATA_CMD_CHK_POWER == qc->tf.command || ATA_CMD_PMP_WRITE == qc->tf.command ||
+				 ATA_CMD_PMP_READ || ATA_CMD_VERIFY == qc->tf.command))
+				__ata_qc_complete(qc);
+			else if (!ata_tag_internal(qc->tag))
+#else
 			if (!ata_tag_internal(qc->tag))
+#endif
 				ata_qc_schedule_eh(qc);
 			else
 				__ata_qc_complete(qc);
@@ -5949,6 +5957,11 @@ void ata_link_init(struct ata_port *ap, struct ata_link *link, int pmp)
 #ifdef CONFIG_ATA_ACPI
 		dev->gtf_filter = ata_acpi_gtf_filter;
 #endif
+#ifdef MY_ABC_HERE
+		dev->ulSpinupState = 0;
+		dev->ulLastCmd = 0;
+		dev->iCheckPwr = 0;
+#endif
 		ata_dev_init(dev);
 	}
 }
@@ -6053,6 +6066,8 @@ struct ata_port *ata_port_alloc(struct ata_host *host)
 #endif
 #ifdef MY_ABC_HERE
 	ap->iFakeError = 0;
+	INIT_WORK(&ap->SendPwrResetEventTask, SendPwrResetEvent);
+	INIT_WORK(&ap->SendPortDisEventTask, SendPortDisEvent);
 #endif
 	return ap;
 }
@@ -6435,6 +6450,72 @@ void ata_host_init(struct ata_host *host, struct device *dev,
 
 #ifndef CONFIG_ATA_SYNC_DISK_PROBE // CONFIG_SYNO_PLX_PORTING
 
+#ifdef MY_ABC_HERE
+/*
+ * May do poweron for this port and sleep for hw ready
+ *
+ * @param pAp [IN] the ata port
+ *
+ **/
+static void DelayForHWCtl(struct ata_port *pAp)
+{
+#if defined(CONFIG_SYNO_MPC8533) || defined(CONFIG_SYNO_MPC854X)
+#else
+	int iIsDoLatency = 0;
+#endif
+
+	if (!pAp) {
+		goto END;
+	}
+
+	/* Because not all code check internal disk (ex. SYNOX64IsSupportHDDPowerCtrl not check),
+	 * we ignored non-internal disks here, but one bay internal hd num is 0, we must check it,
+	 * and let it go ahead */
+	if (0 < g_internal_hd_num && g_internal_hd_num < pAp->print_id) {
+		goto END;
+	}
+
+#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_SYNO_MV88F6281)
+	if(SYNOKirkwoodIsBoardNeedPowerUpHDD(pAp->print_id)) {
+		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
+		SleepForLatency();
+		iIsDoLatency = 1;
+	}
+#endif
+
+#ifdef CONFIG_SYNO_QORIQ
+	if(SYNOQorIQIsBoardNeedPowerUpHDD(pAp->print_id)) {
+		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
+		SleepForLatency();
+		iIsDoLatency = 1;
+	}
+#endif
+
+	if (!(pAp->host->flags & ATA_HOST_LLD_SPINUP_DELAY)) {
+#if defined(CONFIG_SYNO_MPC8533) || defined(CONFIG_SYNO_MPC854X)
+		/* 85xx is power on each HD ports every 7s, so we use old delay 10s */
+		SleepForHD(pAp->print_id);
+#else
+		    /* 710+, 411+ is also power on each HD ports every 7s, so we use old delay 10s */
+		if (0 == strncmp(gszSynoHWVersion, HW_DS710p, strlen(HW_DS710p)) ||
+			0 == strncmp(gszSynoHWVersion, HW_DS411p, strlen(HW_DS411p)) ||
+			0 == strncmp(gszSynoHWVersion, HW_DS411pII, strlen(HW_DS411pII)) ||
+			0 == strncmp(gszSynoHWVersion, HW_DS409, strlen(HW_DS409)) ||
+			0 == strncmp(gszSynoHWVersion, HW_DS410j, strlen(HW_DS410j)) ||
+			0 == strncmp(gszSynoHWVersion, HW_DS411j, strlen(HW_DS411j))) {
+			SleepForHD(pAp->print_id);
+		} else {
+			/* New model needn't dely 10s, so we speed it up useing new SleepForHW function */
+			SleepForHW(pAp->print_id, iIsDoLatency);
+		}
+#endif
+	}
+
+END:
+	return;
+}
+#endif
+
 static void async_port_probe(void *data, async_cookie_t cookie)
 {
 	int rc;
@@ -6449,6 +6530,13 @@ static void async_port_probe(void *data, async_cookie_t cookie)
 	 */
 	if (!(ap->host->flags & ATA_HOST_PARALLEL_SCAN) && ap->port_no != 0)
 		async_synchronize_cookie(cookie);
+
+#if defined(MY_ABC_HERE)
+	/* delay Xs to avoid probe disks in the same time(consume too much power)
+	 * If this async_port_probe(..) function is run asynchronously this code is not work,
+	 * so we must disable async_enabled before call async_port_probe(..) */
+	DelayForHWCtl(ap);
+#endif
 
 	/* probe */
 	if (ap->ops->error_handler) {
@@ -6525,6 +6613,9 @@ static void async_port_probe(void *data, async_cookie_t cookie)
 int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 {
 	int i, rc;
+#if defined(MY_ABC_HERE)
+	int async_enabled = 0;
+#endif
 
 	/* host must have been started */
 	if (!(host->flags & ATA_HOST_STARTED)) {
@@ -6580,6 +6671,26 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 		} else
 			ata_port_printk(ap, KERN_INFO, "DUMMY\n");
 	}
+#if defined(MY_ABC_HERE)
+	/* Some SATA I chips can sleep earlier to prevent the
+	 * disk drop problem due to power cable and sata cable order mismatch.
+	 * this mismatch case is only happen in cable model ex. CS407e
+	 * cableless model didn't have this issue
+	 */
+	if (host->flags & ATA_HOST_LLD_SPINUP_DELAY) {
+		for (i = 0; i < host->n_ports; i++) {
+			struct ata_port *ap = host->ports[i];
+			SleepForHD(ap->print_id);
+		}
+	}
+
+	if (0 != g_internal_hd_num) {
+		/* get the async_enabled value, we will disalbe async_schedule, and restore its async_enabled value after probe disks */
+		async_enabled = syno_async_schedule_enabled_get();
+		/* disable async schedule to avoid parallel probe disks */
+		syno_async_schedule_enabled_set(0);
+	}
+#endif
 #ifndef CONFIG_ATA_SYNC_DISK_PROBE // CONFIG_SYNO_PLX_PORTING
 	/* perform each probe asynchronously */
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
@@ -6603,6 +6714,22 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 		struct ata_port *ap = host->ports[i];
 		async_schedule(async_port_probe, ap);
 	}
+#if defined(MY_ABC_HERE)
+	if (0 != g_internal_hd_num) {
+		for (i = 0; i < host->n_ports; i++) {
+			struct ata_port *ap = host->ports[i];
+			ata_port_wait_eh(ap);
+			ata_scsi_scan_host(ap, 1);
+		}
+
+		/* restore async schedule enable value */
+		syno_async_schedule_enabled_set(async_enabled);
+	}
+
+	if (host->flags & ATA_HOST_LLD_SPINUP_DELAY) {
+		host->flags &= ~ATA_HOST_LLD_SPINUP_DELAY;
+	}
+#endif
 #else
  	/* perform each probe synchronously */
  	DPRINTK("probe begin\n");
@@ -7222,6 +7349,108 @@ void syno_ata_info_print(struct ata_port *ap)
 EXPORT_SYMBOL(syno_ata_info_print);
 #endif
 
+#ifdef SYNO_FIX_HORKAGE_15G_MISSING
+/**
+ * return the current ata link horkage stage,
+ * The stages are based on ata_do_link_spd_horkage(..)
+ *
+ * @param [IN] pLink : the ata link
+ *
+ * @return FIRST_APPLY_15G: this link is apply ATA_HORKAGE_1_5_GBPS now
+ *         ALREADY_APPLY_15G : this link is already applied ATA_HORKAGE_1_5_GBPS
+ *         NOT_APPLY_15G : thik link isn't apply ATA_HORKAGE_1_5_GBPS
+ */
+SYNO_HORKAGE_STAGE SynoGetHorkageStage(struct ata_link *pLink)
+{
+	SYNO_HORKAGE_STAGE Ret = UNKNOW_HORKAGE_STAGE;
+	struct ata_device *dev;
+	u32 target = 0;
+	u32 target_limit = 0;
+
+	if (!pLink) {
+		goto END;
+	}
+
+
+	ata_for_each_dev(dev, pLink, ALL) {
+		/* only have ATA_HORKAGE_1_5_GBPS, we should check */
+		if (dev->horkage & ATA_HORKAGE_1_5_GBPS) {
+			target = 1;
+		} else {
+			continue;
+		}
+		target_limit = (1 << target) - 1;
+
+		/* ata_do_link_spd_horkage(..) will do "plink->sata_spd_limit = target_limit",
+		 * so we must chek "pLink->sata_spd > target" at first */
+		if (pLink->sata_spd > target) {
+			Ret = FIRST_APPLY_15G;
+			goto END;
+		}
+
+		/* we must check this after "pLink->sata_spd > target" case */
+		if (pLink->sata_spd_limit <= target_limit) {
+			Ret = ALREADY_APPLY_15G;
+			goto END;
+		}
+
+		printk("Horkage Stage error? break now.\n");
+		break;
+	}
+
+	Ret = NOT_APPLY_15G;
+
+END:
+	return Ret;
+}
+
+/* test if we need reset it again:
+ * if ALREADY_APPLY_15G and not 1.5G speed,
+ * some chip need reset again to adjust speed
+ * back to 1.5G
+ *
+ * @return 0: no need reset
+ *         1: need reset
+ *
+ */
+int iNeedResetAgainFor15G(struct ata_link *pLink)
+{
+	int iRet = 0;
+	u32 sstatus = 0x0;
+	u32 scontrol = 0x0;
+	u32 tmp = 0x0;
+
+	if (!pLink) {
+		goto END;
+	}
+
+	/* only ALREADY_APPLY_15G, we need reset again */
+	if (ALREADY_APPLY_15G != SynoGetHorkageStage(pLink)) {
+		goto END;
+	}
+
+	/* the following most code is copied/modified from
+	 * sata_print_link_status(..) to check if 1.5G now */
+	if (sata_scr_read(pLink, SCR_STATUS, &sstatus)) {
+		/* can't read sstatus */
+		goto END;
+	}
+	sata_scr_read(pLink, SCR_CONTROL, &scontrol);
+
+	tmp = (sstatus >> 4) & 0xf;
+	if (0x1 == tmp) {
+		/* already speed 1.5G, please ref. sstatus register of sata chip spec. */
+		goto END;
+	}
+
+	/* have ALREADY_APPLY_15G and not 1.5G speed, we need reset again */
+	iRet = 1;
+
+END:
+	return iRet;
+}
+#endif
+
 /*
  * libata is essentially a library of internal helper functions for
  * low-level ATA host controller drivers.  As such, the API/ABI is
@@ -7340,6 +7569,17 @@ EXPORT_SYMBOL_GPL(ata_cable_80wire);
 EXPORT_SYMBOL_GPL(ata_cable_unknown);
 EXPORT_SYMBOL_GPL(ata_cable_ignore);
 EXPORT_SYMBOL_GPL(ata_cable_sata);
+#ifdef MY_ABC_HERE
+int (*funcSYNOSendHibernationEvent)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNOSendHibernationEvent);
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+int (*funcSYNOSendDiskResetPwrEvent)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNOSendDiskResetPwrEvent);
+int (*funcSYNOSendDiskPortDisEvent)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNOSendDiskPortDisEvent);
+#endif /* MY_ABC_HERE */
 
 #ifdef MY_DEF_HERE
 int (*funcSYNOSendEboxRefreshEvent)(int portIndex) = NULL;

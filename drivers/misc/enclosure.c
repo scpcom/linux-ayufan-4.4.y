@@ -27,6 +27,9 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/mutex.h>
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#include <scsi/scsi_device.h>
+#endif
 
 static LIST_HEAD(container_list);
 static DEFINE_MUTEX(container_list_lock);
@@ -287,6 +290,14 @@ enclosure_component_register(struct enclosure_device *edev,
 	if (err)
 		ERR_PTR(err);
 
+#ifdef MY_ABC_HERE
+	/* in driver/scsi/ses.c ses_set_locate function, it will overwrite component's original status,
+	 * so we don't need to clear faulty status here */
+	if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == ecomp->type && edev->cb->set_locate) {
+		edev->cb->set_locate(edev, ecomp, 0);
+	}
+#endif
+
 	return ecomp;
 }
 EXPORT_SYMBOL_GPL(enclosure_component_register);
@@ -309,6 +320,10 @@ int enclosure_add_device(struct enclosure_device *edev, int component,
 			 struct device *dev)
 {
 	struct enclosure_component *cdev;
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+	struct scsi_device *scsi_dev;
+	struct scsi_device *scsi_enc;
+#endif
 
 	if (!edev || component >= edev->components)
 		return -EINVAL;
@@ -323,6 +338,22 @@ int enclosure_add_device(struct enclosure_device *edev, int component,
 
 	put_device(cdev->dev);
 	cdev->dev = get_device(dev);
+#ifdef MY_ABC_HERE
+	/* in driver/scsi/ses.c ses_set_locate function, it will overwrite component's original status,
+	 * so we don't need to clear faulty status here */
+	if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type && edev->cb->set_locate) {
+		edev->cb->set_locate(edev, cdev, 1);
+	}
+#endif
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+	if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type) {
+		scsi_dev = to_scsi_device(dev);
+		scsi_enc = to_scsi_device(edev->edev.parent);
+		printk(KERN_INFO "SCSI device (%s) with disk name (%s) plugged in SLOT%02d of enclosure(%s), %.8s-%.16s", 
+				dev_name(dev), scsi_dev->syno_disk_name, cdev->number + 1, dev_name(&(edev->edev)),
+				scsi_enc->vendor, scsi_enc->model);
+	}
+#endif
 	return enclosure_add_links(cdev);
 }
 EXPORT_SYMBOL_GPL(enclosure_add_device);
@@ -338,6 +369,10 @@ EXPORT_SYMBOL_GPL(enclosure_add_device);
 int enclosure_remove_device(struct enclosure_device *edev, struct device *dev)
 {
 	struct enclosure_component *cdev;
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+	struct scsi_device *scsi_dev;
+	struct scsi_device *scsi_enc;
+#endif
 	int i;
 
 	if (!edev || !dev)
@@ -346,6 +381,22 @@ int enclosure_remove_device(struct enclosure_device *edev, struct device *dev)
 	for (i = 0; i < edev->components; i++) {
 		cdev = &edev->component[i];
 		if (cdev->dev == dev) {
+#ifdef MY_ABC_HERE
+			/* in driver/scsi/ses.c ses_set_locate function, it will overwrite component's original status,
+			 * so we don't need to clear faulty status here */
+			if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type && edev->cb->set_locate) {
+				edev->cb->set_locate(edev, cdev, 0);
+			}
+#endif
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+			if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type) {
+				scsi_dev = to_scsi_device(dev);
+				scsi_enc = to_scsi_device(edev->edev.parent);
+				printk(KERN_INFO "SCSI device (%s) with disk name (%s) removed from SLOT%02d of enclosure(%s), %.8s-%.16s", 
+						dev_name(dev), scsi_dev->syno_disk_name, cdev->number + 1, dev_name(&(edev->edev)),
+						scsi_enc->vendor, scsi_enc->model);
+			}
+#endif
 			enclosure_remove_links(cdev);
 			device_del(&cdev->cdev);
 			put_device(dev);

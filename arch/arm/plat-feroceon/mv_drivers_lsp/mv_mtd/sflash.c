@@ -276,6 +276,9 @@ static int sflash_erase(struct mtd_info *mtd, struct erase_info *instr)
 	MV_SFLASH_INFO *sflash = map->fldrv_priv;
 /*	MV_SFLASH_INFO *sflash = mtd->priv;*/
 	MV_U32 fsec, lsec;
+#ifdef CONFIG_SYNO_MV88F6281
+	MV_U32 count, sleep_interval;
+#endif
 	int i;
 	MV_ULONG flags = 0, sflash_in_irq = 0;
 
@@ -314,9 +317,19 @@ static int sflash_erase(struct mtd_info *mtd, struct erase_info *instr)
 #ifndef CONFIG_SYNO_MV88F6281
 	sflash_disable_irqs(flags, sflash_in_irq);
 #endif
+#ifdef CONFIG_SYNO_MV88F6281
+	count = lsec - fsec;
+	do_div(count, 4);
+	sleep_interval = fsec + count;
+#endif
 	for (i=fsec; i<lsec; i++)
 	{
+
 #ifdef CONFIG_SYNO_MV88F6281
+		if (i == sleep_interval) {
+			sleep_interval += count;
+			msleep(1000);
+		}
 		sflash_disable_irqs(flags, sflash_in_irq);
 #endif
 		if (mvSFlashSectorErase(sflash, i) != MV_OK)

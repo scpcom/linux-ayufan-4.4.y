@@ -36,6 +36,332 @@ static int link_quirk;
 module_param(link_quirk, int, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(link_quirk, "Don't clear the chain bit on a link TRB");
 
+#ifdef MY_ABC_HERE
+#include <linux/kthread.h>
+#include <linux/pci.h>
+
+static struct task_struct *xhci_task = NULL;
+static struct usb_hcd *xhci_task_hcd = NULL; // one hcd for both usb2 and usb3
+
+//check every 5s, take action if 2 successive error(10s).
+#define BOUNCE_TIME 10 // seconds
+
+#ifdef MY_ABC_HERE
+extern enum XHCI_SPECIAL_RESET_MODE xhci_special_reset; // from hub.c
+extern unsigned short xhci_vendor;
+
+// SKIP_SPECIAL_RESET_xxx: check SPECIAL_RESET_RETRY in hub.c for reference
+
+// sleep first 60s, do not disturbe the hub init
+// hub_port_init retry 20 times, each spends 1s wait, and 2 ports
+#define SKIP_SPECIAL_RESET_BEFORE 60 // seconds
+
+#define XHCI_PORT_NUM 4 // HCS_MAX_PORTS(hcd_to_xhci(xhci)->hcs_params1)
+// NEC
+//#define IS_USB2(x) (x == 3 || x == 4) // index from 1 // HCS_MAX_PORTS(xhci->hcs_params1) = 4
+//#define IS_USB3(x) (x == 1 || x == 2) // index from 1 // HCS_MAX_PORTS(xhci->hcs_params1) = 4
+// Etron
+//#define IS_USB3(x) (x == 3 || x == 4) // index from 1 // HCS_MAX_PORTS(xhci->hcs_params1) = 4
+//#define IS_USB2(x) (x == 1 || x == 2) // index from 1 // HCS_MAX_PORTS(xhci->hcs_params1) = 4
+static bool inline IS_USB3(unsigned int x)
+{
+	if ((xhci_vendor == PCI_VENDOR_ID_NEC) &&
+		(x == 1 || x == 2)) {
+		return true;
+	} else if ((xhci_vendor == PCI_VENDOR_ID_ETRON) &&
+		(x == 3 || x == 4)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+static bool inline IS_USB2(unsigned int x)
+{
+	return !IS_USB3(x);
+}
+
+#endif
+
+enum STATUS_MONITOR {
+	STATUS_MON_TEST = 0x1,
+	STATUS_MON_RESET = 0x2,
+	STATUS_MON_BH_RESET = 0x4,
+	STATUS_MON_CONNECTION = 0x8,
+	STATUS_MON_SS_DISABLED = 0x10,
+	STATUS_MON_CEC = 0x20,
+	STATUS_MON_CC_RESET_BH = 0x40,
+	STATUS_MON_POWER = 0x80,
+	STATUS_MON_ENABLE = 0x100,
+	STATUS_MON_CC_RESET_BH_EN = 0x200,
+	STATUS_MON_POLLING = 0x400,
+}; // u16 bounce in xhci_thread
+
+enum PORT_MONITOR {
+	PORT_USB2_3 = 0, // one hub for usb2/usb3 both
+	PORT_MONITOR_MAX = 1,
+};
+
+/*
+ * xhci_thread monitor
+ * 1. the strange PLS of port status: (nec only?)
+ *    compliance mode(0xa), test mode(0xb)
+ *    some devices (ex. WD essential) let the port enter into these strange states.
+ * 2. some left status not cleaned
+ * 3. enter disable mode
+ * 4. bh/reset/connect not cleaned (nec only? for flash speed after reboot))
+ * 5. no power
+ * 6. only power&connect but no enable
+ * The monitor bounce 5s, take action if 2 successive error(10s).
+ * Start to monitor after SKIP_SPECIAL_RESET_BEFORE seconds.
+ */
+static int xhci_thread(void *__unused)
+{
+	uint count = 0;
+	const uint count_check = BOUNCE_TIME/2-1;
+	u32 status = 0;
+	uint i = 0, j = 0, k = 0;
+	struct usb_device *hdev[PORT_MONITOR_MAX]; // for lock device
+	struct usb_hcd *hcd[PORT_MONITOR_MAX];
+	uint port_num[PORT_MONITOR_MAX];
+	u16 bounce[PORT_MONITOR_MAX][4]; // each has 4 ports
+
+	for (j = 0; j < PORT_MONITOR_MAX; j++) {
+		hdev[j] = NULL;
+		hcd[j] = NULL;
+		port_num[j] = 0;
+	}
+	memset(&bounce, 0, sizeof(bounce));
+
+	if (xhci_task_hcd) {
+		hcd[PORT_USB2_3] = xhci_task_hcd;
+		hdev[PORT_USB2_3] = xhci_task_hcd->self.root_hub;
+		port_num[PORT_USB2_3] = XHCI_PORT_NUM;
+	}
+
+#ifdef MY_ABC_HERE
+	for (k = 0; k < SKIP_SPECIAL_RESET_BEFORE; k++) {
+		if (kthread_should_stop()) {
+			printk(KERN_INFO "xhci_thread. exit!\n");
+			return 0;
+		}
+		msleep(1000);
+	}
+#endif
+
+	while(1) {
+		if (kthread_should_stop()) {
+			break;
+		}
+
+		if (count >= count_check) {
+
+			if(xhci_task_hcd) {
+
+				for (j = 0; j< PORT_MONITOR_MAX; j++) {
+					usb_lock_device(hdev[j]);
+					for (i = 1; i <= port_num[j]; i++) {
+						status = 0;
+						xhci_hub_control(hcd[j], GetPortStatus, 0, i, (void*) &status, 0);
+						status = le32_to_cpu(status);
+						dbg("xhci_thread. usb%d: 0x%x.\n", i-1, status);
+
+						// test mode, reset usb2/usb3 port both
+						if (status & USB_PORT_STAT_TEST_MODE) {
+							printk(KERN_DEBUG "xhci_thread. usb%d test mode.\n", i-1);
+							if (bounce[j][i-1] & STATUS_MON_TEST) {
+								printk(KERN_DEBUG "xhci_thread. usb%d test mode. reset!\n", i-1);
+								xhci_hub_control(hcd[j], SetPortFeature, USB_PORT_FEAT_RESET, i, 0, 0);
+								//usb_unlock_device(hdev[j]); // prevent deadlock
+								//usb_lock_device(hdev[(j+1)%2]);
+								xhci_hub_control(hcd[j], SetPortFeature, USB_PORT_FEAT_RESET, (i+2-1)%XHCI_PORT_NUM+1, 0, 0);
+								//usb_unlock_device(hdev[(j+1)%2]);
+								//usb_lock_device(hdev[j]);
+								bounce[j][i-1] &= ~STATUS_MON_TEST; // clear
+							} else {
+								bounce[j][i-1] |= STATUS_MON_TEST; // set
+							}
+						} else {
+							bounce[j][i-1] &= ~STATUS_MON_TEST; // clear
+						}
+
+						// reset status left
+						if ((status & USB_PORT_STAT_C_RESET << 16) && 
+											!(status & USB_PORT_STAT_CONNECTION)) {
+							printk(KERN_DEBUG "xhci_thread. usb%d reset change.\n", i-1);
+							if (bounce[j][i-1] & STATUS_MON_RESET) {
+								printk(KERN_DEBUG "xhci_thread. usb%d reset change. clear!\n", i-1);
+								xhci_hub_control(hcd[j], ClearPortFeature, USB_PORT_FEAT_C_RESET, i, 0, 0);
+								bounce[j][i-1] &= ~STATUS_MON_RESET; // clear
+							} else {
+								bounce[j][i-1] |= STATUS_MON_RESET; // set
+							}
+						} else {
+							bounce[j][i-1] &= ~STATUS_MON_RESET; // clear
+						}
+
+						// bh reset status left
+						if ((status & (USB_PORT_STAT_C_BH_RESET << 16)) && 
+											!(status & USB_PORT_STAT_CONNECTION)) {
+							printk(KERN_DEBUG "xhci_thread. usb%d bh reset change.\n", i-1);
+							if (bounce[j][i-1] & STATUS_MON_BH_RESET) {
+								printk(KERN_DEBUG "xhci_thread. usb%d bh reset change. clear.\n", i-1);
+								xhci_hub_control(hcd[j], ClearPortFeature, USB_PORT_FEAT_C_BH_PORT_RESET, i, 0, 0);
+								bounce[j][i-1] &= ~STATUS_MON_BH_RESET; // clear
+							} else {
+								bounce[j][i-1] |= STATUS_MON_BH_RESET; // set
+							}
+						} else {
+							bounce[j][i-1] &= ~STATUS_MON_BH_RESET; // clear
+						}
+
+						// connection status left
+						if ((status & (USB_PORT_STAT_C_CONNECTION << 16)) && 
+											!(status & USB_PORT_STAT_CONNECTION)) {
+							printk(KERN_DEBUG "xhci_thread. usb%d connect change.\n", i-1);
+							if (bounce[j][i-1] & STATUS_MON_CONNECTION) {
+								printk(KERN_DEBUG "xhci_thread. usb%d connect change. clear.\n", i-1);
+								xhci_hub_control(hcd[j], ClearPortFeature, USB_PORT_FEAT_C_CONNECTION, i, 0, 0);
+								bounce[j][i-1] &= ~STATUS_MON_CONNECTION; // clear
+							} else {
+								bounce[j][i-1] |= STATUS_MON_CONNECTION; // set
+							}
+						} else {
+							bounce[j][i-1] &= ~STATUS_MON_CONNECTION; // clear
+						}
+
+						// disable mode
+						if (status == USB_SS_PORT_LS_SS_DISABLED ||
+								(IS_USB2(i) && status == (USB_SS_PORT_LS_SS_DISABLED | USB_PORT_STAT_POWER)) ||
+								(IS_USB3(i) && status == (USB_SS_PORT_LS_SS_DISABLED | USB_SS_PORT_STAT_POWER))) {
+							printk(KERN_DEBUG "xhci_thread. usb%d ss disabled.\n", i-1);
+							if (bounce[j][i-1] & STATUS_MON_SS_DISABLED) {
+								printk(KERN_DEBUG "xhci_thread. usb%d ss disabled. set power.\n", i-1);
+								xhci_hub_control(hcd[j], SetPortFeature, USB_PORT_FEAT_POWER, i, 0, 0);
+								bounce[j][i-1] &= ~STATUS_MON_SS_DISABLED; // clear
+							} else {
+								bounce[j][i-1] |= STATUS_MON_SS_DISABLED; // set
+							}
+						} else {
+							bounce[j][i-1] &= ~STATUS_MON_SS_DISABLED; // clear
+						}
+
+						// PLC/CEC error // trigger clear port to reset them
+						if ((status & (PORT_PLC | PORT_CEC)) &&
+								!(status & USB_PORT_STAT_CONNECTION)) { 
+							printk(KERN_DEBUG "xhci_thread. usb%d plc/cec error.\n", i-1);
+							if (bounce[j][i-1] & STATUS_MON_CEC) {
+								printk(KERN_DEBUG "xhci_thread. usb%d plc/cec error. clear.\n", i-1);
+								xhci_hub_control(hcd[j], ClearPortFeature, USB_PORT_FEAT_C_CONNECTION, i, 0, 0);
+								bounce[j][i-1] &= ~STATUS_MON_CEC; // clear
+							} else {
+								bounce[j][i-1] |= STATUS_MON_CEC; // set
+							}
+						} else {
+							bounce[j][i-1] &= ~STATUS_MON_CEC; // clear
+						}
+
+#ifdef MY_ABC_HERE
+						// connection with cc/reset/bl change  (should be cleared but not)
+						if ((status & USB_PORT_STAT_C_RESET << 16) && 
+								(status & USB_PORT_STAT_C_BH_RESET << 16) && 
+								(status & USB_PORT_STAT_C_CONNECTION << 16) && 
+								(status & USB_PORT_STAT_CONNECTION)) {
+							printk(KERN_DEBUG "xhci_thread. usb%d cc/reset/bh error.\n", i-1);
+							if (bounce[j][i-1] & STATUS_MON_CC_RESET_BH) {
+								printk(KERN_DEBUG "xhci_thread. usb%d cc/reset/bh. re-power.\n", i-1);
+								xhci_hub_control(hcd[j], ClearPortFeature, USB_PORT_FEAT_C_BH_PORT_RESET, i, 0, 0);
+								xhci_hub_control(hcd[j], ClearPortFeature, USB_PORT_FEAT_C_RESET, i, 0, 0);
+								xhci_hub_control(hcd[j], ClearPortFeature, USB_PORT_FEAT_C_CONNECTION, i, 0, 0);
+								xhci_hub_control(hcd[j], ClearPortFeature, USB_PORT_FEAT_POWER, i, 0, 0);
+								//usb_unlock_device(hdev[j]); // prevent deadlock
+								//usb_lock_device(hdev[(j+1)%2]);
+								xhci_hub_control(hcd[j], ClearPortFeature, USB_PORT_FEAT_POWER, (i+2-1)%XHCI_PORT_NUM+1, 0, 0);
+								//usb_unlock_device(hdev[(j+1)%2]);
+								//usb_lock_device(hdev[j]);
+								bounce[j][i-1] &= ~STATUS_MON_CC_RESET_BH; // clear
+							} else {
+								bounce[j][i-1] |= STATUS_MON_CC_RESET_BH; // set
+							}
+						} else {
+							bounce[j][i-1] &= ~STATUS_MON_CC_RESET_BH; // clear
+						}
+
+						// no power
+						if ((IS_USB2(i) && !(status & USB_PORT_STAT_POWER)) ||
+								(IS_USB3(i) && !(status & USB_SS_PORT_STAT_POWER))) {
+							printk(KERN_DEBUG "xhci_thread. usb%d power error.\n", i-1);
+							if (bounce[j][i-1] & STATUS_MON_POWER) {
+								printk(KERN_DEBUG "xhci_thread. usb%d power error. set.\n", i-1);
+								xhci_hub_control(hcd[j], SetPortFeature, USB_PORT_FEAT_POWER, i, 0, 0);
+								bounce[j][i-1] &= ~STATUS_MON_POWER; // clear
+							} else {
+								bounce[j][i-1] |= STATUS_MON_POWER; // set
+							}
+						} else {
+							bounce[j][i-1] &= ~STATUS_MON_POWER; // clear
+						}
+
+						// only power&connect but no enable
+						if ((IS_USB2(i) && (status == (USB_PORT_STAT_POWER | USB_PORT_STAT_CONNECTION))) ||
+								(IS_USB3(i) && (status == (USB_SS_PORT_STAT_POWER | USB_PORT_STAT_CONNECTION)))) {
+							printk(KERN_DEBUG "xhci_thread. usb%d enable error.\n", i-1);
+							if (bounce[j][i-1] & STATUS_MON_ENABLE) {
+								printk(KERN_DEBUG "xhci_thread. usb%d enable error. set.\n", i-1);
+								xhci_hub_control(hcd[j], ClearPortFeature, USB_PORT_FEAT_POWER, i, 0, 0);
+								//usb_unlock_device(hdev[j]); // prevent deadlock
+								//usb_lock_device(hdev[(j+1)%2]);
+								xhci_hub_control(hcd[j], ClearPortFeature, USB_PORT_FEAT_POWER, (i+2-1)%XHCI_PORT_NUM+1, 0, 0);
+								//usb_unlock_device(hdev[(j+1)%2]);
+								//usb_lock_device(hdev[j]);
+								bounce[j][i-1] &= ~STATUS_MON_ENABLE; // clear
+							} else {
+								bounce[j][i-1] |= STATUS_MON_ENABLE; // set
+							}
+						} else {
+							bounce[j][i-1] &= ~STATUS_MON_ENABLE; // clear
+						}
+
+						// polling status left
+						if ((IS_USB2(i) && (status == (USB_PORT_STAT_POWER | USB_SS_PORT_LS_POLLING))) ||
+								(IS_USB3(i) && (status == (USB_SS_PORT_STAT_POWER | USB_SS_PORT_LS_POLLING)))) {
+							printk(KERN_DEBUG "xhci_thread. usb%d polling error.\n", i-1);
+							if (bounce[j][i-1] & STATUS_MON_POLLING) {
+								printk(KERN_DEBUG "xhci_thread. usb%d polling error. reset.\n", i-1);
+								xhci_hub_control(hcd[j], ClearPortFeature, USB_PORT_FEAT_POWER, i, 0, 0);
+								bounce[j][i-1] &= ~STATUS_MON_POLLING; // clear
+							} else {
+								bounce[j][i-1] |= STATUS_MON_POLLING; // set
+							}
+						} else {
+							bounce[j][i-1] &= ~STATUS_MON_POLLING; // clear
+						}
+
+#endif
+
+					}
+					usb_unlock_device(hdev[j]);
+
+				}
+
+			}
+			count = 0;
+
+		}
+		if (kthread_should_stop()) {
+			break;
+		}
+		count++;
+		k++;
+		msleep(1000);
+	}
+
+	printk(KERN_INFO "xhci_thread. exit!\n");
+
+	return 0;
+}
+#endif
+
 /* TODO: copied from ehci-hcd.c - can this be refactored? */
 /*
  * handshake - spin reading hc until handshake completes or fails
@@ -119,8 +445,20 @@ int xhci_reset(struct xhci_hcd *xhci)
 
 	state = xhci_readl(xhci, &xhci->op_regs->status);
 	if ((state & STS_HALT) == 0) {
+#ifdef MY_ABC_HERE
+		xhci_warn(xhci, "Host controller not halted, try halt again.\n");
+		msleep(1000);
+		xhci_halt(xhci);
+		msleep(1000);
+		state = xhci_readl(xhci, &xhci->op_regs->status);
+		if ((state & STS_HALT) == 0) {
+			xhci_warn(xhci, "Host controller not halted, aborting reset!\n");
+			return 0;
+		}
+#else
 		xhci_warn(xhci, "Host controller not halted, aborting reset.\n");
 		return 0;
+#endif
 	}
 
 	xhci_dbg(xhci, "// Reset the HC\n");
@@ -130,7 +468,11 @@ int xhci_reset(struct xhci_hcd *xhci)
 	/* XXX: Why does EHCI set this here?  Shouldn't other code do this? */
 	xhci_to_hcd(xhci)->state = HC_STATE_HALT;
 
+#ifdef MY_ABC_HERE
+	return handshake(xhci, &xhci->op_regs->command, CMD_RESET, 0, 1000 * 1000);
+#else
 	return handshake(xhci, &xhci->op_regs->command, CMD_RESET, 0, 250 * 1000);
+#endif
 }
 
 
@@ -368,6 +710,17 @@ void xhci_event_ring_work(unsigned long arg)
 }
 #endif
 
+#ifdef MY_ABC_HERE
+int disable_usb3 = 0;
+module_param(disable_usb3, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+#endif
+
+#ifdef MY_ABC_HERE
+static int usb_fast_reset = 0;
+module_param(usb_fast_reset, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
+#endif
+
 /*
  * Start the HC after it was halted.
  *
@@ -466,6 +819,35 @@ int xhci_run(struct usb_hcd *hcd)
 
 	xhci_dbg(xhci, "Finished xhci_run\n");
 
+#ifdef MY_ABC_HERE
+	if (disable_usb3) {
+		printk("xhci USB3 ports are disabled!\n");
+	}
+#endif
+
+#ifdef MY_ABC_HERE
+	if (usb_fast_reset) {
+		printk("USB_FAST_RESET enabled!\n");
+		blk_timeout_factory = 1;
+	}
+#endif
+
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
+	xhci_task_hcd = hcd;
+	if(disable_usb3) {
+		xhci_special_reset = XHCI_SPECIAL_RESET_DISABLE;
+	} else { //Both Etron and NEC need special reset but the monitor is only enabled for NEC
+		xhci_special_reset = XHCI_SPECIAL_RESET_PAUSE;
+		if(PCI_VENDOR_ID_ETRON != xhci_vendor) {
+			xhci_task = kthread_run(xhci_thread, NULL, "xhci_thread");
+		}
+	}
+#else
+	xhci_task = kthread_run(xhci_thread, NULL, "xhci_thread");
+#endif
+#endif
+
 
 	return 0;
 }
@@ -483,6 +865,15 @@ void xhci_stop(struct usb_hcd *hcd)
 {
 	u32 temp;
 	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
+
+#ifdef MY_ABC_HERE
+	if (xhci_task) {
+		kthread_stop(xhci_task);
+		xhci_task = NULL;
+	}
+	xhci_task_hcd = NULL;
+#endif
+
 
 	spin_lock_irq(&xhci->lock);
 	xhci_halt(xhci);
@@ -511,6 +902,13 @@ void xhci_stop(struct usb_hcd *hcd)
 	xhci_dbg(xhci, "xhci_stop completed - status = %x\n",
 		    xhci_readl(xhci, &xhci->op_regs->status));
 
+#ifdef MY_ABC_HERE
+	if (usb_fast_reset) {
+		printk("USB_FAST_RESET disabled!\n");
+		blk_timeout_factory = 0;
+	}
+#endif
+
 }
 
 /*
@@ -523,6 +921,13 @@ void xhci_stop(struct usb_hcd *hcd)
 void xhci_shutdown(struct usb_hcd *hcd)
 {
 	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
+
+#ifdef MY_ABC_HERE
+	if (xhci_task) {
+		kthread_stop(xhci_task);
+		xhci_task = NULL;
+	}
+#endif
 
 	spin_lock_irq(&xhci->lock);
 	xhci_halt(xhci);
@@ -1324,7 +1729,11 @@ static int xhci_configure_endpoint(struct xhci_hcd *xhci,
 	/* Wait for the configure endpoint command to complete */
 	timeleft = wait_for_completion_interruptible_timeout(
 			cmd_completion,
+#ifdef MY_ABC_HERE
+			USB_CTRL_SET_TIMEOUT/5);
+#else
 			USB_CTRL_SET_TIMEOUT);
+#endif
 	if (timeleft <= 0) {
 		xhci_warn(xhci, "%s while waiting for %s command\n",
 				timeleft == 0 ? "Timeout" : "Signal",
@@ -1555,6 +1964,12 @@ void xhci_endpoint_reset(struct usb_hcd *hcd,
 		xhci_dbg(xhci, "Control endpoint stall already handled.\n");
 		return;
 	}
+
+#ifdef MY_ABC_HERE
+			//some hd will start slowly and there are many reset to queue,
+			//guess the ring will overflow and cause panic
+			msleep(3000);
+#endif
 
 	xhci_dbg(xhci, "Queueing reset endpoint command\n");
 	spin_lock_irqsave(&xhci->lock, flags);
@@ -2060,7 +2475,11 @@ int xhci_discover_or_reset_device(struct usb_hcd *hcd, struct usb_device *udev)
 	/* Wait for the Reset Device command to finish */
 	timeleft = wait_for_completion_interruptible_timeout(
 			reset_device_cmd->completion,
+#ifdef MY_ABC_HERE
+			USB_CTRL_SET_TIMEOUT/5);
+#else
 			USB_CTRL_SET_TIMEOUT);
+#endif
 	if (timeleft <= 0) {
 		xhci_warn(xhci, "%s while waiting for reset device command\n",
 				timeleft == 0 ? "Timeout" : "Signal");
@@ -2176,6 +2595,10 @@ int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 	int timeleft;
 	int ret;
 
+#ifdef MY_ABC_HERE
+	msleep(1000); // wait device ready
+#endif
+
 	spin_lock_irqsave(&xhci->lock, flags);
 	ret = xhci_queue_slot_control(xhci, TRB_ENABLE_SLOT, 0);
 	if (ret) {
@@ -2188,7 +2611,11 @@ int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 
 	/* XXX: how much time for xHC slot assignment? */
 	timeleft = wait_for_completion_interruptible_timeout(&xhci->addr_dev,
+#ifdef MY_ABC_HERE
+			USB_CTRL_SET_TIMEOUT/5);
+#else
 			USB_CTRL_SET_TIMEOUT);
+#endif
 	if (timeleft <= 0) {
 		xhci_warn(xhci, "%s while waiting for a slot\n",
 				timeleft == 0 ? "Timeout" : "Signal");
@@ -2276,7 +2703,11 @@ int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
 
 	/* ctrl tx can take up to 5 sec; XXX: need more time for xHC? */
 	timeleft = wait_for_completion_interruptible_timeout(&xhci->addr_dev,
+#ifdef MY_ABC_HERE
+			USB_CTRL_SET_TIMEOUT/5);
+#else
 			USB_CTRL_SET_TIMEOUT);
+#endif
 
 	/* FIXME: From section 4.3.4: "Software shall be responsible for timing
 	 * the SetAddress() "recovery interval" required by USB and aborting the
@@ -2333,15 +2764,15 @@ int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
 	 * address given back to us by the HC.
 	 */
 	slot_ctx = xhci_get_slot_ctx(xhci, virt_dev->out_ctx);
-	udev->devnum = (le32_to_cpu(slot_ctx->dev_state) & DEV_ADDR_MASK) + 1;
+	/* Use kernel assigned address for devices; store xHC assigned
+	 * address locally. */
+	virt_dev->address = (le32_to_cpu(slot_ctx->dev_state) & DEV_ADDR_MASK) + 1;
 	/* Zero the input context control for later use */
 	ctrl_ctx = xhci_get_input_control_ctx(xhci, virt_dev->in_ctx);
 	ctrl_ctx->add_flags = 0;
 	ctrl_ctx->drop_flags = 0;
 
-	xhci_dbg(xhci, "Device address = %d\n", udev->devnum);
-	/* XXX Meh, not sure if anyone else but choose_address uses this. */
-	set_bit(udev->devnum, udev->bus->devmap.devicemap);
+	xhci_dbg(xhci, "Internal device address = %d\n", virt_dev->address);
 
 	return 0;
 }

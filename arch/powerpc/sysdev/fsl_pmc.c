@@ -23,6 +23,7 @@
 #include <linux/pm.h>
 #include <linux/interrupt.h>
 #include <asm/fsl_pixis.h>
+#include <asm/immap_85xx.h>
 #include <sysdev/fsl_soc.h>
 
 struct pmc_regs {
@@ -98,6 +99,11 @@ int pmc_enable_wake(struct of_device *ofdev, wakeup_event_t func, bool enable)
 	u32 *pmcdr_mask;
 	struct wake_data *tmp;
 
+	if (!pmc_regs) {
+		printk(KERN_WARNING "PMC is unavailable\n");
+		return -ENOMEM;
+	}
+
 	if (enable && !device_may_wakeup(&ofdev->dev))
 		return -EINVAL;
 
@@ -165,12 +171,9 @@ static int pmc_suspend_enter(suspend_state_t state)
 			mpc85xx_enter_deep_sleep(get_immrbase(),
 					powmgtreq);
 			clrbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK);
+
 		}
 		pr_debug("Resumed from deep sleep\n");
-#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
-		/* delay 1s for HW reset */
-		mdelay(1000);
-#endif
 
 		return 0;
 
@@ -225,24 +228,44 @@ static int pmc_probe(struct of_device *ofdev, const struct of_device_id *id)
 {
 
 	struct device_node *np = ofdev->node;
-	struct device_node *node;
 
-	node = of_find_compatible_node(NULL, NULL, "fsl,mpc8548-pmc");
+	pmc_regs = of_iomap(ofdev->node, 0);
+	if (!pmc_regs)
+		return -ENOMEM;
 
-	if (node) {
-		pmc_regs = of_iomap(ofdev->node, 0);
-		if (!pmc_regs)
-			return -ENOMEM;
+	if (of_device_is_compatible(np, "fsl,mpc8536-pmc"))
+		has_deep_sleep = 1;
 
-		if (of_device_is_compatible(np, "fsl,mpc8536-pmc"))
-			has_deep_sleep = 1;
+	if (of_device_is_compatible(np, "fsl,p1022-pmc")) {
+		has_lossless = 1;
 
-		if (of_device_is_compatible(np, "fsl,p1022-pmc"))
-			has_lossless = 1;
+		if ((mfspr(SPRN_SVR) & 0xff) == 0x11) {
+			struct device_node *node;
+			struct ccsr_guts __iomem *guts;
 
-		of_node_put(node);
+			/* Map the global utilities registers. */
+			node = of_find_compatible_node(NULL, NULL,
+					"fsl,p1022-guts");
+			if (!node) {
+				printk(KERN_WARNING "Not set DSCR --"
+					" Could not find GUTS node\n");
+				goto end;
+			}
+
+			guts = of_iomap(node, 0);
+			of_node_put(node);
+			if (!guts) {
+				printk(KERN_WARNING "Not set DSCR --"
+					" Failed to map GUTS register\n");
+				goto end;
+			}
+
+			/* Enable Power Down for deep sleep mode */
+			setbits32(&guts->dscr, CCSR_GUTS_DSCR_ENB_PWR_DWN);
+		}
 	}
 
+end:
 	pmc_dev = &ofdev->dev;
 	suspend_set_ops(&pmc_suspend_ops);
 	return 0;

@@ -577,7 +577,7 @@ extern const char gfar_driver_version[];
 #define TXFCB_CIP		0x04
 #define TXFCB_CTU		0x02
 #define TXFCB_NPH		0x01
-#define TXFCB_DEFAULT 		(TXFCB_IP|TXFCB_TUP|TXFCB_CTU|TXFCB_NPH)
+#define TXFCB_DEFAULT		(TXFCB_IP|TXFCB_CIP)
 
 /* RxBD status field bits */
 #define RXBD_EMPTY		0x8000

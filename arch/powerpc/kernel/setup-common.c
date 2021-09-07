@@ -174,14 +174,17 @@ void machine_power_off(void)
 #endif
 	extern phys_addr_t get_immrbase(void);
 
-	u32 __iomem *pUP = ioremap((get_immrbase() + UART2_BASE), 0x100);
+	u32 __iomem *pUP = ioremap((get_immrbase() + UART2_BASE), 0x10);
 
 #ifdef MY_ABC_HERE
 	SynoQorIQWOLSet();
 #endif
 	if (pUP) {
-		setbits8((unsigned char *)(pUP + UART2_LCR), SET8N1);
-		setbits8((unsigned char *)(pUP + UART2_TX), SOFTWARE_SHUTDOWN);
+		/* Please refer p1022 reference manaual Table 12-7. Baud Rate Examples, this is CCB 533 baud rate 9600*/
+		out_8((unsigned char *)(pUP + 0), 0xD90 & 0xFF);
+		out_8((unsigned char *)(pUP + 1), 0xD90 >> 8);
+		out_8((unsigned char *)(pUP + UART2_LCR), SET8N1);
+		out_8((unsigned char *)(pUP + UART2_TX), SOFTWARE_SHUTDOWN);
 		iounmap(pUP);
 		while (1) ;
 	} else {

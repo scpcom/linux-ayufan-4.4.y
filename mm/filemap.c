@@ -2736,29 +2736,29 @@ done:
 
 	crgPagePtr = 0;
 
-	while (crgPagePtr < cPagesAllocated) {
-		page = rgPageList[crgPagePtr];
+		while (crgPagePtr < cPagesAllocated) {
+			page = rgPageList[crgPagePtr];
 
-		kunmap(page);
-		write_end_ret = mapping->a_ops->write_end(
-				file, mapping, rgPos[crgPagePtr],
-				rgBytes[crgPagePtr], rgBytes[crgPagePtr],
-				page, fsdata[crgPagePtr]);
-		/* Keep error code if write_end() failed for some reason */
-		if (0 > write_end_ret) {
-			if (0 < kernel_recvmsg_ret) {
-				bytes_received -= rgBytes[crgPagePtr];
+			kunmap(page);
+			write_end_ret = mapping->a_ops->write_end(
+					file, mapping, rgPos[crgPagePtr],
+					rgBytes[crgPagePtr], rgBytes[crgPagePtr],
+					page, fsdata[crgPagePtr]);
+			/* Keep error code if write_end() failed for some reason */
+			if (0 > write_end_ret) {
+				if (0 < kernel_recvmsg_ret) {
+					bytes_received -= rgBytes[crgPagePtr];
+				}
+				if (!err) {
+					err = write_end_ret;
+				}
 			}
-			if (!err) {
-				err = write_end_ret;
-			}
-		}
-#ifdef CONFIG_SYNO_QORIQ
+#if defined(CONFIG_SYNO_QORIQ)
 #else
 			cond_resched();
 #endif
 			crgPagePtr++;
-	}
+		}
 
 	if (0 < bytes_received) {
 		*rbytes = kernel_recvmsg_ret;
@@ -2780,6 +2780,7 @@ done1:
 		return bytes_received;
 	}
 }
+
 #endif
 #endif
 

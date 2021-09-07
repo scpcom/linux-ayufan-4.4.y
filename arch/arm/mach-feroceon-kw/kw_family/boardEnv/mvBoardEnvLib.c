@@ -1527,6 +1527,7 @@ MV_32 mvBoardTdmSpiModeGet(MV_VOID)
 		case SYNO_DS411_ID:
 		case SYNO_DS212_ID:
 		case SYNO_6702_1BAY_ID:
+		case SYNO_RS213_ID:
 #endif
 			 return DUAL_CHIP_SELECT_MODE;
 		default:
@@ -2383,6 +2384,7 @@ MV_32 mvBoardSlicGpioPinGet(MV_U32 slicNum)
 	case SYNO_DS411_ID:
 	case SYNO_DS212_ID:
 	case SYNO_6702_1BAY_ID:
+	case SYNO_RS213_ID:
 #endif
 	default:
 		return MV_ERROR;

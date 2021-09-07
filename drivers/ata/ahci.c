@@ -543,11 +543,15 @@ static struct device_attribute *ahci_shost_attrs[] = {
 	&dev_attr_ahci_host_version,
 	&dev_attr_ahci_port_cmd,
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
+	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_port_thaw,
 #endif
+#endif
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_diskname_trans,
 #endif
 	NULL
 };
@@ -563,6 +567,7 @@ static struct device_attribute *ahci_sdev_attrs[] = {
 #endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_fake_error_ctrl,
+	&dev_attr_syno_pwr_reset_count,
 #endif
 #ifdef MY_DEF_HERE
 	&dev_attr_sw_locate,
@@ -3488,7 +3493,15 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	 * determining the maximum port number requires looking at
 	 * both CAP.NP and port_map.
 	 */
+#ifdef MY_ABC_HERE
+	if(gSynoSataHostCnt < sizeof(gszSataPortMap) && 0 != gszSataPortMap[gSynoSataHostCnt]) {
+		n_ports = gszSataPortMap[gSynoSataHostCnt] - '0';
+	}else{
+#endif
 	n_ports = max(ahci_nr_ports(hpriv->cap), fls(hpriv->port_map));
+#ifdef MY_ABC_HERE
+	}
+#endif
 
 	host = ata_host_alloc_pinfo(&pdev->dev, ppi, n_ports);
 	if (!host)

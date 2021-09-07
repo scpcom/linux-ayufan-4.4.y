@@ -8,8 +8,4 @@
  */
 #define SYNO_BADSECTOR_TEST
 
-#ifndef	SYNO_MAX_INTERNAL_DISK
-#define SYNO_MAX_INTERNAL_DISK	15
-#endif
-
 #endif /* __SYNODEBUG_H_ */

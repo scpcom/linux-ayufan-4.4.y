@@ -300,6 +300,7 @@ int fuse_reverse_inval_inode(struct super_block *sb, u64 nodeid,
 
 static void fuse_umount_begin(struct super_block *sb)
 {
+
 	fuse_abort_conn(get_fuse_conn_super(sb));
 }
 

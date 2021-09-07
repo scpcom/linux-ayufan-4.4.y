@@ -224,32 +224,31 @@ static MV_SFLASH_DEVICE_PARAMS sflash[] = {
 	MV_MX25L3206_MAX_FAST_SPI_FREQ,
 	MV_MX25L3206_FAST_READ_DUMMY_BYTES
     },
-    /* Macronix MXIC MX25L6406E SPI flash, 8MB, 128 blocks of 64K each */
-    {
-     MV_MX25L_WREN_CMND_OPCD,
-     MV_MX25L_WRDI_CMND_OPCD,
-     MV_MX25L_RDID_CMND_OPCD,
-     MV_MX25L_RDSR_CMND_OPCD,
-     MV_MX25L_WRSR_CMND_OPCD,
-     MV_MX25L_READ_CMND_OPCD,
-     MV_MX25L_FAST_RD_CMND_OPCD,
-     MV_MX25L_PP_CMND_OPCD,
-     MV_MX25L_SE_CMND_OPCD,
-     MV_MX25L_BE_CMND_OPCD,
-     MV_MX25L_RES_CMND_OPCD,
-     MV_MX25L_DP_CMND_OPCD,
-     MV_MX25L6406_BLOCK_SIZE,
-     MV_MX25L6406_BLOCK_NUMBER,
-     MV_MXIC_PAGE_SIZE,
-     "MXIC_MX25L6406E",
-     MV_MXIC_MANF_ID,
-     MV_MX25L6406_DEVICE_ID,
-     MV_MX25L6406_MAX_SPI_FREQ,
-     MV_MX25L6406_MAX_FAST_SPI_FREQ,
-     MV_MX25L6406_FAST_READ_DUMMY_BYTES
-    },
+	/* Macron N25Q064 SPI flash, 4MB, 128 sectors of 64K each */
+	{
+	MV_N25Q_WREN_CMND_OPCD,
+	MV_N25Q_WRDI_CMND_OPCD,
+	MV_N25Q_RDID_CMND_OPCD,
+	MV_N25Q_RDSR_CMND_OPCD,
+	MV_N25Q_WRSR_CMND_OPCD,
+	MV_N25Q_READ_CMND_OPCD,
+	MV_N25Q_FAST_RD_CMND_OPCD,
+	MV_N25Q_PP_CMND_OPCD,
+	MV_N25Q_SE_CMND_OPCD,
+	MV_N25Q_BE_CMND_OPCD,
+	MV_SFLASH_NO_SPECIFIC_OPCD,    /* RES not supported in N25Q devices*/
+	MV_SFLASH_NO_SPECIFIC_OPCD,    /* power save not supported. Only 1.8v devices have this, we use 3.3V ones*/
+	MV_N25Q064_SECTOR_SIZE,
+	MV_N25Q064_SECTOR_NUMBER,
+	MV_N25Q_PAGE_SIZE,
+	"ST N25Q064",
+	MV_N25QXXX_ST_MANF_ID,
+	MV_N25Q064_DEVICE_ID,
+	MV_N25Q064_MAX_SPI_FREQ,
+	MV_N25Q064_MAX_FAST_SPI_FREQ,
+	MV_N25Q064_FAST_READ_DUMMY_BYTES
+	},
 #endif
-
     /* Macronix MXIC MX25L6405 SPI flash, 8MB, 128 sectors of 64K each */
     {
      MV_MX25L_WREN_CMND_OPCD,
@@ -267,13 +266,44 @@ static MV_SFLASH_DEVICE_PARAMS sflash[] = {
      MV_MX25L6405_SECTOR_SIZE,
      MV_MX25L6405_SECTOR_NUMBER,
      MV_MXIC_PAGE_SIZE,
-     "MXIC MX25L6405",
+#ifdef CONFIG_SYNO_MV88F6281
+    /* Macronix MXIC MX25L6406E/MX25L6445EM2I-10G SPI flash, 8MB, 128 blocks of 64K each */
+     "MXIC MX25L6406E/MX25L6445EM2I-10G",
+#else
+	 "MXIC MX25L6405",
+#endif
      MV_MXIC_MANF_ID,
      MV_MX25L6405_DEVICE_ID,
      MV_MX25L6405_MAX_SPI_FREQ,
      MV_MX25L6405_MAX_FAST_SPI_FREQ,
      MV_MX25L6405_FAST_READ_DUMMY_BYTES
     },
+#ifdef CONFIG_SYNO_MV88F6281
+    /* SPANSION S25FL064P SPI flash, 8MB, 128 sectors of 64K each */
+    {
+     MV_S25FL_WREN_CMND_OPCD,
+     MV_S25FL_WRDI_CMND_OPCD,
+     MV_S25FL_RDID_CMND_OPCD,
+     MV_S25FL_RDSR_CMND_OPCD,
+     MV_S25FL_WRSR_CMND_OPCD,
+     MV_S25FL_READ_CMND_OPCD,
+     MV_S25FL_FAST_RD_CMND_OPCD,
+     MV_S25FL_PP_CMND_OPCD,
+     MV_S25FL_SE_CMND_OPCD,
+     MV_S25FL_BE_CMND_OPCD,
+     MV_S25FL_RES_CMND_OPCD,
+     MV_S25FL_DP_CMND_OPCD,
+     MV_S25FL064_SECTOR_SIZE,
+     MV_S25FL064_SECTOR_NUMBER,
+     MV_S25FL_PAGE_SIZE,
+     "SPANSION S25FL064",
+     MV_SPANSION_MANF_ID,
+     MV_S25FL064_DEVICE_ID,
+     MV_S25FL064_MAX_SPI_FREQ,
+     MV_S25FL064_MAX_FAST_SPI_FREQ,
+     MV_S25FL064_FAST_READ_DUMMY_BYTES
+    },
+#endif
     /* SPANSION S25FL128P SPI flash, 16MB, 64 sectors of 256K each */
     {
      MV_S25FL_WREN_CMND_OPCD,
@@ -298,6 +328,33 @@ static MV_SFLASH_DEVICE_PARAMS sflash[] = {
      MV_M25P128_MAX_FAST_SPI_FREQ,
      MV_M25P128_FAST_READ_DUMMY_BYTES
     }
+#ifdef CONFIG_SYNO_MV88F6281
+    ,
+    /* SST SST25VF032B SPI Flash, 4MB,  64 sectors of 64KB each */
+   {
+     MV_SST25VF_WREN_CMND_OPCD,
+     MV_SST25VF_WRDI_CMND_OPCD,
+     MV_SST25VF_RDID_CMND_OPCD,
+     MV_SST25VF_RDSR_CMND_OPCD,
+     MV_SST25VF_WRSR_CMND_OPCD,
+     MV_SST25VF_READ_CMND_OPCD,
+     MV_SST25VF_FAST_RD_CMND_OPCD,
+     MV_SST25VF_PP_CMND_OPCD,
+     MV_SST25VF_SE_CMND_OPCD,
+     MV_SST25VF_BE_CMND_OPCD,
+     MV_SST25VF_RES_CMND_OPCD,
+     MV_SFLASH_NO_SPECIFIC_OPCD,
+     MV_SST25VF032_SECTOR_SIZE,
+     MV_SST25VF032_SECTOR_NUMBER,
+     MV_SST_PAGE_SIZE,
+     "SST SST25VF032",
+     MV_SST_MANF_ID,
+     MV_SST25VF032_DEVICE_ID,
+     MV_SST25VF032_MAX_SPI_FREQ,
+     MV_SST25VF032_MAX_FAST_SPI_FREQ,
+     MV_SST25VF032_FAST_READ_DUMMY_BYTES
+    }
+#endif
 };
 
 /* Static Functions */
@@ -1201,6 +1258,51 @@ MV_STATUS mvSFlashWpRegionSet (MV_SFLASH_INFO * pFlinfo, MV_SFLASH_WP_REGION wpR
                 return MV_BAD_PARAM;
         }
     }
+#ifdef CONFIG_SYNO_MV88F6281
+    /* check if the manufacturer is SST then the WP is 3bits */
+    else if (pFlinfo->manufacturerId == MV_SST_MANF_ID)
+    {
+        switch (wpRegion)
+        {
+            case MV_WP_NONE:
+                wpMask = MV_SST25VF_STATUS_BP_NONE;
+                break;
+
+            case MV_WP_UPR_1OF64:
+                wpMask = MV_SST25VF_STATUS_BP_1_OF_64;
+                break;
+
+            case MV_WP_UPR_1OF32:
+                wpMask = MV_SST25VF_STATUS_BP_1_OF_32;
+                break;
+
+            case MV_WP_UPR_1OF16:
+                wpMask = MV_SST25VF_STATUS_BP_1_OF_16;
+                break;
+
+            case MV_WP_UPR_1OF8:
+                wpMask = MV_SST25VF_STATUS_BP_1_OF_8;
+                break;
+
+            case MV_WP_UPR_1OF4:
+                wpMask = MV_SST25VF_STATUS_BP_1_OF_4;
+                break;
+
+            case MV_WP_UPR_1OF2:
+                wpMask = MV_SST25VF_STATUS_BP_1_OF_2;
+                break;
+
+            case MV_WP_ALL:
+                wpMask = MV_SST25VF_STATUS_BP_ALL;
+                break;
+
+
+        default:
+                DB(mvOsPrintf("%s WARNING: Invaild parameter WP region!\n", __FUNCTION__);)
+                return MV_BAD_PARAM;
+        }
+    }
+#endif
     else
     {
         DB(mvOsPrintf("%s WARNING: Invaild parameter Manufacturer ID!\n", __FUNCTION__);)
@@ -1383,6 +1485,50 @@ MV_STATUS mvSFlashWpRegionGet (MV_SFLASH_INFO * pFlinfo, MV_SFLASH_WP_REGION * p
                 return MV_BAD_VALUE;
         }
     }
+#ifdef CONFIG_SYNO_MV88F6281
+    /* Check if the chip is a SST flash; then WP supports only 3 bits */
+    else if (pFlinfo->manufacturerId == MV_SST_MANF_ID)
+    {
+       switch ((reg & MV_SST25VF_STATUS_REG_WP_MASK))
+       {
+            case MV_SST25VF_STATUS_BP_NONE:
+                *pWpRegion = MV_WP_NONE;
+                break;
+
+            case MV_SST25VF_STATUS_BP_1_OF_64:
+                *pWpRegion = MV_WP_UPR_1OF64;
+                break;
+
+            case MV_SST25VF_STATUS_BP_1_OF_32:
+                *pWpRegion = MV_WP_UPR_1OF32;
+                break;
+
+            case MV_SST25VF_STATUS_BP_1_OF_16:
+                *pWpRegion = MV_WP_UPR_1OF16;
+                break;
+
+            case MV_SST25VF_STATUS_BP_1_OF_8:
+                *pWpRegion = MV_WP_UPR_1OF8;
+                break;
+
+            case MV_SST25VF_STATUS_BP_1_OF_4:
+                *pWpRegion = MV_WP_UPR_1OF4;
+                break;
+
+            case MV_SST25VF_STATUS_BP_1_OF_2:
+                *pWpRegion = MV_WP_UPR_1OF2;
+                break;
+
+            case MV_SST25VF_STATUS_BP_ALL:
+                *pWpRegion = MV_WP_ALL;
+                break;
+
+            default:
+                DB(mvOsPrintf("%s WARNING: Unidentified WP region in h/w!\n", __FUNCTION__);)
+                return MV_BAD_VALUE;
+       }
+    }
+#endif
     else
     {
         DB(mvOsPrintf("%s WARNING: Invaild parameter Manufacturer ID!\n", __FUNCTION__);)

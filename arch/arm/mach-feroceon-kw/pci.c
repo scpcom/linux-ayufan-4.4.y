@@ -84,7 +84,9 @@ void __init mv_pci_preinit(void)
 				    goto apply_pcie_workaround;
 			else 
 					goto skip_pcie_workaround;
-		} else if ((0 == strncmp(HW_DS112, gszSynoHWVersion, strlen(HW_DS112))) || (0 == strncmp(HW_DS112pv10, gszSynoHWVersion, strlen(HW_DS112pv10)))) {
+		} else if ((0 == strncmp(HW_DS112, gszSynoHWVersion, strlen(HW_DS112))) || (0 == strncmp(HW_DS112pv10, gszSynoHWVersion, strlen(HW_DS112pv10)))
+				|| (0 == strncmp(HW_DS213airv10, gszSynoHWVersion, strlen(HW_DS213airv10)))
+				|| (0 == strncmp(HW_DS213v10, gszSynoHWVersion, strlen(HW_DS213v10)))) {
 			goto skip_pcie_workaround;
 		}
 apply_pcie_workaround:

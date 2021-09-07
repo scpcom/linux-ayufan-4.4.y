@@ -563,6 +563,13 @@ static void uhci_shutdown(struct pci_dev *pdev)
 {
 	struct usb_hcd *hcd = (struct usb_hcd *) pci_get_drvdata(pdev);
 
+#ifdef MY_ABC_HERE
+	if (hcd->irq >= 0) {
+		//disable_irq(hcd->irq);
+		free_irq(hcd->irq, hcd);
+		hcd->irq = -1;
+	}
+#endif
 	uhci_hc_died(hcd_to_uhci(hcd));
 }
 

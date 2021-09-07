@@ -48,6 +48,10 @@
 #define SDCOPY_PORT_LOCATION 98
 #endif
 
+#ifdef MY_ABC_HERE
+#define CHECKINTERVAL (7UL*HZ)
+#endif
+
 #if	defined(MY_ABC_HERE) || defined(SYNO_BADSECTOR_TEST)
 #if 0
 #define SYNO_MAX_INTERNAL_DISK 19
@@ -59,6 +63,16 @@
 
 #if 1 && defined(MY_ABC_HERE)
 #define SYNO_SATA_PM_DEVICE_GPIO
+#endif
+
+#if defined(SYNO_SATA_PM_DEVICE_GPIO) && defined(MY_ABC_HERE)
+#if 1 
+#define SYNO_MAX_SATA_ID 20
+#define SYNO_PWRPIN_ENCODE_LEN 2
+#define SYNO_PORT_SIGN 'N'
+#define SYNO_PWRPIN_ITEM_LEN 1 + SYNO_PWRPIN_ENCODE_LEN*2
+#endif
+
 #endif
 
 #ifdef MY_ABC_HERE
@@ -115,8 +129,25 @@
 #define SYNO_NFSD_WRITE_SIZE_MIN 131072
 #define SYNO_EXT4_SYNC_DALLOC_RETRY  100
 #ifdef MY_ABC_HERE
+#define SYNO_SATA_DEVICE_PREFIX	   "sd"
 #define SYNO_ISCSI_DEVICE_PREFIX   "isd"
 #define SYNO_ISCSI_DEVICE_INDEX    (26 + 25 * 26)    
+#endif
+
+#if 0
+#if defined(MY_ABC_HERE)
+#define SYNO_SAS_DISK_NAME
+#endif
+
+#if defined(SYNO_SAS_DISK_NAME)
+#define SYNO_SAS_USB_DEVICE_PREFIX		"usb"
+#define SYNO_SAS_DEVICE_PREFIX			"sas"
+#ifdef MY_ABC_HERE
+#define SYNO_SAS_ISCSI_DEVICE_PREFIX	"iscsi"
+#endif
+
+#endif
+
 #endif
 
 #define SYNO_RTL8712_DEBUG_MSG 0

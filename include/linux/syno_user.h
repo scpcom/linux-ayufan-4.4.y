@@ -40,4 +40,8 @@
  */
 #define MY_ABC_HERE
 
+#if defined(SYNO_X86) || defined(SYNO_X64) || defined(SYNO_BROMOLOW)
+#define MY_ABC_HERE
+#endif
+
 #endif /* __SYNO_USER_H_ */

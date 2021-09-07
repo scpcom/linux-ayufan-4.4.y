@@ -950,6 +950,10 @@ static int sata_fsl_softreset(struct ata_link *link, unsigned int *class,
 	return 0;
 
 err:
+#ifdef MY_ABC_HERE
+	ata_link_printk(link, KERN_ERR, "softreset failed, set srst fail flag\n");
+	link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;
+#endif
 	return -EIO;
 }
 
@@ -1015,7 +1019,22 @@ static void sata_fsl_error_intr(struct ata_port *ap)
 		sata_async_notification(ap);
 
 	/* Handle PHYRDY change notification */
+#ifdef MY_ABC_HERE
+	if ((hstatus & INT_ON_PHYRDY_CHG) ||
+		(ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
+		if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR) {
+			ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_INTR;
+			DBGMESG("ata%u: clear ATA_SYNO_FLAG_FORCE_INTR\n", ap->print_id);
+		} else {
+			ap->iDetectStat = 1;
+			DBGMESG("ata%u: set detect stat check\n", ap->print_id);
+		}
+#else
 	if (hstatus & INT_ON_PHYRDY_CHG) {
+#endif
+#ifdef MY_ABC_HERE
+		syno_ata_info_print(ap);
+#endif
 		DPRINTK("SATA FSL: PHYRDY change indication\n");
 
 		/* Setup a soft-reset EH action */
@@ -1115,7 +1134,11 @@ static void sata_fsl_host_intr(struct ata_port *ap)
 		sata_fsl_error_intr(ap);
 	}
 
+#ifdef MY_ABC_HERE
+	if (unlikely(hstatus & INT_ON_ERROR) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
+#else
 	if (unlikely(hstatus & INT_ON_ERROR)) {
+#endif
 		DPRINTK("error interrupt!!\n");
 		sata_fsl_error_intr(ap);
 		return;
@@ -1263,6 +1286,46 @@ static int sata_fsl_init_controller(struct ata_host *host)
 	return 0;
 }
 
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+static struct device_attribute *fsl_shost_attrs[] = {
+	&dev_attr_syno_manutil_power_disable,
+	&dev_attr_syno_pm_gpio,
+	&dev_attr_syno_pm_info,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_port_thaw,
+#endif
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_diskname_trans,
+#endif
+	NULL
+};
+
+static int
+sata_syno_fsl_defer_cmd(struct ata_queued_cmd *qc)
+{
+	struct ata_link *link = qc->dev->link;
+	struct ata_port *ap = link->ap;
+
+	if (ap->excl_link == NULL || ap->excl_link == link) {
+		if (ap->nr_active_links == 0 || ata_link_active(link)) {
+			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+			return ata_std_qc_defer(qc);
+		}
+
+		ap->excl_link = link;
+	} else {
+		/* preempt when no any command in the queue*/
+		if (!ap->nr_active_links) {
+			ap->excl_link = link;
+			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+			return ata_std_qc_defer(qc);
+		}
+	}
+
+	return ATA_DEFER_PORT;
+}
+#endif
+
 /*
  * scsi mid-layer and libata interface structures
  */
@@ -1271,12 +1334,19 @@ static struct scsi_host_template sata_fsl_sht = {
 	.can_queue = SATA_FSL_QUEUE_DEPTH,
 	.sg_tablesize = SATA_FSL_MAX_PRD_USABLE,
 	.dma_boundary = ATA_DMA_BOUNDARY,
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+	.shost_attrs 		= fsl_shost_attrs,
+#endif
 };
 
 static struct ata_port_operations sata_fsl_ops = {
 	.inherits		= &sata_pmp_port_ops,
 
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+	.qc_defer = sata_syno_fsl_defer_cmd,
+#else
 	.qc_defer = ata_std_qc_defer,
+#endif
 	.qc_prep = sata_fsl_qc_prep,
 	.qc_issue = sata_fsl_qc_issue,
 	.qc_fill_rtf = sata_fsl_qc_fill_rtf,
@@ -1297,6 +1367,9 @@ static struct ata_port_operations sata_fsl_ops = {
 
 	.pmp_attach = sata_fsl_pmp_attach,
 	.pmp_detach = sata_fsl_pmp_detach,
+#ifdef MY_ABC_HERE
+	.syno_force_intr	= sata_fsl_host_intr,
+#endif
 };
 
 static const struct ata_port_info sata_fsl_port_info[] = {

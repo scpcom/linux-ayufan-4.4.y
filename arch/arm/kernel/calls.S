@@ -502,11 +502,7 @@
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 #endif
-#ifdef SYNO_RECVFILE_PLUS
-		CALL(sys_SYNOFlushAggregate)	/* 415 */
-#else
 		CALL(sys_ni_syscall)
-#endif /* SYNO_RECVFILE_PLUS */
 #ifndef syscalls_counted
 .equ syscalls_padding, ((NR_syscalls + 3) & ~3) - NR_syscalls
 #define syscalls_counted

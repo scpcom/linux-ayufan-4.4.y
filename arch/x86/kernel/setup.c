@@ -123,12 +123,20 @@ extern long g_internal_hd_num;
 extern long g_internal_netif_num;
 #endif
 
+#ifdef SYNO_SAS_DISK_NAME
+extern long g_is_sas_model;
+#endif
+
 #ifdef MY_ABC_HERE
 extern long g_ahci_switch;
 #endif
 
 #ifdef MY_ABC_HERE
 extern long g_sata_led_special;
+#endif
+
+#ifdef MY_ABC_HERE
+extern long g_hdd_hotplug;
 #endif
 
 #ifdef MY_ABC_HERE
@@ -574,6 +582,20 @@ static int __init early_internal_netif_num(char *p)
 __setup("netif_num=", early_internal_netif_num);
 #endif
 
+#ifdef SYNO_SAS_DISK_NAME
+static int __init early_SASmodel(char *p)
+{
+	g_is_sas_model = simple_strtol(p, NULL, 10);
+
+	if ( 1 == g_is_sas_model) {
+		printk("SAS model: %d\n", (int)g_is_sas_model);
+	}
+
+	return 1;
+}
+__setup("SASmodel=", early_SASmodel);
+#endif
+
 #ifdef  MY_ABC_HERE
 static int __init early_ahci_switch(char *p)
 {
@@ -586,6 +608,20 @@ static int __init early_ahci_switch(char *p)
         return 1;
 }
 __setup("ahci=", early_ahci_switch);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_hdd_hotplug(char *p)
+{
+	g_hdd_hotplug = simple_strtol(p, NULL, 10);
+
+	if ( g_hdd_hotplug > 0 ) {
+		printk("Support HDD Hotplug.\n");
+	}
+
+	return 1;
+}
+__setup("HddHotplug=", early_hdd_hotplug);
 #endif
 
 #ifdef MY_ABC_HERE

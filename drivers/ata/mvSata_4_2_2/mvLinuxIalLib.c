@@ -52,9 +52,9 @@ disclaimer.
 #include "mvLinuxIalLib.h"
 #include "mvIALCommon.h"
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 extern void ResubmitMvCommand(unsigned long data);
-#endif /* SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 
 #ifndef scsi_to_pci_dma_dir
     #define scsi_to_pci_dma_dir(scsi_dir) ((int)(scsi_dir))
@@ -463,11 +463,11 @@ int mv_ial_lib_init_channel(IAL_ADAPTER_T *pAdapter, MV_U8 channelNum)
     mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "[%d,%d]: response queue allocated: 0x%p\n",
              pAdapter->mvSataAdapter.adapterId, channelNum,
              pMvSataChannel->responseQueue);
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 	setup_timer(&pMvSataChannel->rstimer, ResubmitMvCommand, (unsigned long)pMvSataChannel);
 	INIT_LIST_HEAD(&pMvSataChannel->pendinglh);
 	pMvSataChannel->chkpower_flags = 0;
-#endif /* SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
     pMvSataChannel->PMSynoUnique = 0;
     pMvSataChannel->PMdeviceId = 0;
@@ -1901,7 +1901,7 @@ MV_BOOLEAN IALCompletion(struct mvSataAdapter *pSataAdapter,
     return MV_TRUE;
 }
 
-#if defined(MY_DEF_HERE) || defined(SYNO_SPINUP_DELAY)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 int syno_mv_scsi_host_no_get(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex)
 {
     IAL_ADAPTER_T   *pAdapter = NULL;

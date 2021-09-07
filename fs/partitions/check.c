@@ -40,7 +40,7 @@
 
 #ifdef CONFIG_BLK_DEV_MD
 extern void md_autodetect_dev(dev_t dev);
-#elif defined(MY_ABC_HERE)
+#elif defined(MY_DEF_HERE)
 LIST_HEAD(SYNOAllDetectedDevices);
 EXPORT_SYMBOL(SYNOAllDetectedDevices);
 struct detected_devices_node {
@@ -677,7 +677,7 @@ try_scan:
 #ifdef CONFIG_BLK_DEV_MD
 		if (state->parts[p].flags & ADDPART_FLAG_RAID)
 			md_autodetect_dev(part_to_dev(part)->devt);
-#elif defined(MY_ABC_HERE)
+#elif defined(MY_DEF_HERE)
 		if (state->parts[p].flags & ADDPART_FLAG_RAID) {
 			SYNOMdAutodetectDev(part_to_dev(part)->devt);
 		}

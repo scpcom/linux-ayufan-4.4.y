@@ -460,6 +460,12 @@ void __kfree_skb(struct sk_buff *skb)
 		return;
 #endif /* CONFIG_NET_SKB_RECYCLE */
 #endif
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_GFAR_SKBUFF_RECYCLING
+	if (gfar_recycle_skb(skb))
+		return;
+#endif
+#endif
 
 	skb_release_all(skb);
 	kfree_skbmem(skb);
@@ -482,12 +488,6 @@ void kfree_skb(struct sk_buff *skb)
 	else if (likely(!atomic_dec_and_test(&skb->users)))
 		return;
 	trace_kfree_skb(skb, __builtin_return_address(0));
-#ifdef CONFIG_SYNO_QORIQ
-#ifdef CONFIG_GFAR_SKBUFF_RECYCLING
-	if (gfar_recycle_skb(skb))
-		return;
-#endif
-#endif
 	__kfree_skb(skb);
 }
 EXPORT_SYMBOL(kfree_skb);
@@ -508,12 +508,6 @@ void consume_skb(struct sk_buff *skb)
 		smp_rmb();
 	else if (likely(!atomic_dec_and_test(&skb->users)))
 		return;
-#ifdef CONFIG_SYNO_QORIQ
-#ifdef CONFIG_GFAR_SKBUFF_RECYCLING
-	if (gfar_recycle_skb(skb))
-		return;
-#endif
-#endif
 	__kfree_skb(skb);
 }
 EXPORT_SYMBOL(consume_skb);

@@ -981,7 +981,7 @@ int scsi_init_io(struct scsi_cmnd *cmd, gfp_t gfp_mask)
 
 		if (disk) {
 			diskname = disk->disk_name;
-			i = SynoGetDiskNum(diskname);
+			i = SynoGetInternalDiskSeq(diskname);
 			curSector = blk_rq_pos(cmd->request);
 			if (i < max_support_disk && grgSdBadSectors[i].uiEnable) {
 				int j;

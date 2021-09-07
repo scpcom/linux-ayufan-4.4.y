@@ -210,14 +210,13 @@ void xhci_free_or_cache_endpoint_ring(struct xhci_hcd *xhci,
 
 	rings_cached = virt_dev->num_rings_cached;
 	if (rings_cached < XHCI_MAX_RINGS_CACHED) {
-		virt_dev->num_rings_cached++;
-		rings_cached = virt_dev->num_rings_cached;
 		virt_dev->ring_cache[rings_cached] =
 			virt_dev->eps[ep_index].ring;
+		virt_dev->num_rings_cached++;
 		xhci_dbg(xhci, "Cached old ring, "
 				"%d ring%s cached\n",
-				rings_cached,
-				(rings_cached > 1) ? "s" : "");
+				virt_dev->num_rings_cached,
+				(virt_dev->num_rings_cached > 1) ? "s" : "");
 	} else {
 		xhci_ring_free(xhci, virt_dev->eps[ep_index].ring);
 		xhci_dbg(xhci, "Ring cache full (%d rings), "
@@ -1164,6 +1163,15 @@ int xhci_endpoint_init(struct xhci_hcd *xhci,
 		/* dig out max burst from ep companion desc */
 		max_packet = ep->ss_ep_comp.bMaxBurst;
 		ep_ctx->ep_info2 |= cpu_to_le32(MAX_BURST(max_packet));
+#ifdef MY_ABC_HERE
+		if (cpu_to_le16(0x1759) == udev->descriptor.idVendor &&
+			cpu_to_le16(0x5002) == udev->descriptor.idProduct &&
+			cpu_to_le16(0x2580) == udev->descriptor.bcdDevice &&
+			usb_endpoint_is_bulk_in(&ep->desc)) {
+			ep_ctx->ep_info2 &= cpu_to_le32(~MAX_BURST_MASK);
+			ep_ctx->ep_info2 |= cpu_to_le32(MAX_BURST(1));
+		}
+#endif //MY_ABC_HERE
 		break;
 	case USB_SPEED_HIGH:
 		/* bits 11:12 specify the number of additional transaction

@@ -41,7 +41,7 @@
 #include "hwraid.h"
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 extern void md_run_setup(void);
 #endif
 
@@ -1608,6 +1608,12 @@ static void end_sync_read(struct bio *bio, int error)
 	BUG_ON(i < 0);
 	update_head_pos(i, r1_bio);
 
+	/*
+	 * we have read a block, now it needs to be re-written,
+	 * or re-read if the read failed.
+	 * We don't do much here, just schedule handling by raid1d
+	 */
+#ifdef MY_ABC_HERE
 #ifdef MY_ABC_HERE
 	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
 		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__,__FUNCTION__,__LINE__);
@@ -1615,12 +1621,6 @@ static void end_sync_read(struct bio *bio, int error)
 	}
 #endif
 
-	/*
-	 * we have read a block, now it needs to be re-written,
-	 * or re-read if the read failed.
-	 * We don't do much here, just schedule handling by raid1d
-	 */
-#ifdef MY_ABC_HERE
 	if (uptodate) {
 		set_bit(R1BIO_Uptodate, &r1_bio->state);
 	}else{
@@ -2884,7 +2884,7 @@ static struct mdk_personality raid1_personality =
 
 static int __init raid_init(void)
 {
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	mm_segment_t origin_fs;
 
 	register_md_personality(&raid1_personality);

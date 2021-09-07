@@ -310,11 +310,10 @@ int generic_cpu_disable(void)
 	set_cpu_online(cpu, false);
 #ifdef CONFIG_PPC64
 	vdso_data->processorCount--;
-#ifdef CONFIG_SYNO_QORIQ
-#if defined(CONFIG_PPC64) || defined(CONFIG_E500)
 	fixup_irqs(cpu_online_map);
 #endif
-#else
+#ifdef CONFIG_SYNO_QORIQ
+#if defined(CONFIG_PPC64) || defined(CONFIG_E500)
 	fixup_irqs(cpu_online_map);
 #endif
 #endif

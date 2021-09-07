@@ -37,7 +37,10 @@
 #define SYNO_KW_RS411 0x8 
 #define SYNO_KW_RS212 0x9 
 #define SYNO_KW_DS112j 0x0 
-#define SYNO_KW_DS212w 0xc
+#define SYNO_KW_DS213air 0xc
+#define SYNO_KW_DS413j 0xd
+#define SYNO_KW_RS213  0xe
+#define SYNO_KW_RS813  0xf
 
 #define GPIO_UNDEF				0xFF
 
@@ -150,6 +153,8 @@ unsigned int Syno6282ModelIDGet(SYNO_KW_GENERIC_GPIO *pGpio)
 	 * 0x5 DS212
 	 * 0x8 RS411, RS812
 	 * 0x9 RS212
+	 * 0xE RS213
+	 * 0xF RS813
 	 */
 	return  (((gpio_get_value(pGpio->model.model_id_0) ? 1 : 0) << 3) | 
 			 ((gpio_get_value(pGpio->model.model_id_1) ? 1 : 0) << 2) | 
@@ -529,6 +534,9 @@ MV_U8 SYNOKirkwoodIsBoardNeedPowerUpHDD(MV_U32 disk_id) {
 	case SYNO_DS411_ID:
 		if ( 2 <= disk_id && SYNO_KW_DS411 == Syno6282ModelIDGet(&generic_gpio))
 			ret = 1;
+		else if (4 >= disk_id && SYNO_KW_DS413j == Syno6282ModelIDGet(&generic_gpio)) {
+			ret = 1;
+		}
 		break;
 	case SYNO_6702_1BAY_ID:
 		if (1==disk_id)
@@ -651,7 +659,7 @@ KW_6282_211_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 		gpio_211.fan.fan_3 = GPIO_UNDEF;
 		printk("Apply DS 211+ GPIO\n");
 	} else if (SYNO_KW_DS212 == Syno6282ModelIDGet(&gpio_211) ||
-		SYNO_KW_DS212w == Syno6282ModelIDGet(&gpio_211)) {
+		SYNO_KW_DS213air == Syno6282ModelIDGet(&gpio_211)) {
 		gpio_211.fan.fan_1 = GPIO_UNDEF;
 		gpio_211.fan.fan_2 = GPIO_UNDEF;
 		gpio_211.fan.fan_3 = GPIO_UNDEF;
@@ -773,15 +781,19 @@ KW_6282_DS_4BAY_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 						},
 	};
 
-	//DS412j uses the same Model ID with DS411, and their difference is HDD1 power GPIO only
 	if (SYNO_KW_DS411 == Syno6282ModelIDGet(&gpio_ds_6282_4bay)) {
-		if (0 == strncmp(HW_DS412jv10, gszSynoHWVersion, strlen(HW_DS412jv10))){
-			gpio_ds_6282_4bay.hdd_pm.hdd1_pm = 30;
-		}
 		gpio_ds_6282_4bay.hdd_pm.hdd2_pm = 34;
 		gpio_ds_6282_4bay.hdd_pm.hdd3_pm = 44;
 		gpio_ds_6282_4bay.hdd_pm.hdd4_pm = 45;
 		printk("Apply DS 411 GPIO\n");
+	}
+
+	if (SYNO_KW_DS413j == Syno6282ModelIDGet(&gpio_ds_6282_4bay)){
+		gpio_ds_6282_4bay.hdd_pm.hdd1_pm = 30;
+		gpio_ds_6282_4bay.hdd_pm.hdd2_pm = 34;
+		gpio_ds_6282_4bay.hdd_pm.hdd3_pm = 44;
+		gpio_ds_6282_4bay.hdd_pm.hdd4_pm = 45;
+		printk("Apply DS 413j GPIO\n");
 	}
 
 	*global_gpio = gpio_ds_6282_4bay;
@@ -841,7 +853,6 @@ KW_6282_RS411_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 							.alarm_led = GPIO_UNDEF,
 						},
 	};
-
 	if (SYNO_KW_RS212 == Syno6282ModelIDGet(&gpio_rs411)) {
 		gpio_rs411.ext_sata_led.hdd1_led_0 = 38;
 		gpio_rs411.ext_sata_led.hdd1_led_1 = 39;
@@ -850,6 +861,11 @@ KW_6282_RS411_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 		gpio_rs411.fan.fan_fail_2 = 44;
 		gpio_rs411.fan.fan_fail_3 = 45;
 		printk("Apply RS212 GPIO\n");
+	} else if (SYNO_KW_RS213 == Syno6282ModelIDGet(&gpio_rs411) || SYNO_KW_RS813 == Syno6282ModelIDGet(&gpio_rs411)) {
+		gpio_rs411.fan.fan_fail_2 = 44;
+		gpio_rs411.fan.fan_fail_3 = 45;
+
+		printk("Apply RS213/RS813 GPIO\n");
 	}
 
 	*global_gpio = gpio_rs411;
@@ -1351,7 +1367,7 @@ void synology_gpio_init(void)
 		printk("Synology 6282 DS411slim GPIO Init\n");
 		break;
 	case SYNO_RS_6282_ID: //this is ID is used for RS411 and RS812
-		printk("Synology 6282 RS411 / RS812 GPIO Init\n");
+		printk("Synology 6282 RS411 / RS812 / RS212 GPIO Init\n");
 		KW_6282_RS411_GPIO_init(&generic_gpio);
 		break;
 	case SYNO_DS411_ID:
@@ -1385,6 +1401,10 @@ void synology_gpio_init(void)
 	case SYNO_6702_1BAY_ID: //ds112j
 		KW_6702_1BAY_GPIO_init(&generic_gpio);
 		printk("Synology 6702 1 bay GPIO Init\n");
+		break;
+	case SYNO_RS213_ID: //this is ID is used for RS213/RS813
+		printk("Synology 6282 RS213/RS813 Init\n");
+		KW_6282_RS411_GPIO_init(&generic_gpio);
 		break;
 	default:
 		printk("%s BoardID not match\n", __FUNCTION__);

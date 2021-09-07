@@ -144,7 +144,6 @@ extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING
 /* This should be increased if a protocol with a bigger head is added. */
 #define GRO_MAX_HEAD (MAX_HEADER + 128)
 
-
 #ifdef MY_ABC_HERE
 static unsigned int str_to_hex( char ch )
 {

@@ -129,9 +129,50 @@ static u32 xhci_port_state_to_neutral(u32 state)
 	return (state & XHCI_PORT_RO) | (state & XHCI_PORT_RWS);
 }
 
+#ifdef MY_ABC_HERE
+#include <linux/pci.h>
+
+extern int disable_usb3;
+extern unsigned short xhci_vendor;
+
+// NEC
+//#define IS_USB2(y) (y == 2 || y == 3) // index from 0 // HCS_MAX_PORTS(xhci->hcs_params1) = 4
+//#define IS_USB3(y) (y == 0 || y == 1) // index from 0 // HCS_MAX_PORTS(xhci->hcs_params1) = 4
+// Etron
+//#define IS_USB3(y) (y == 2 || y == 3) // index from 0 // HCS_MAX_PORTS(xhci->hcs_params1) = 4
+//#define IS_USB2(y) (y == 0 || y == 1) // index from 0 // HCS_MAX_PORTS(xhci->hcs_params1) = 4
+static bool inline IS_USB3(unsigned int x)
+{
+	if ((xhci_vendor == PCI_VENDOR_ID_NEC) &&
+		(x == 0 || x == 1)) {
+		return true;
+	} else if ((xhci_vendor == PCI_VENDOR_ID_ETRON) &&
+		(x == 2 || x == 3)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+static bool inline IS_USB2(unsigned int x)
+{
+	return !IS_USB3(x);
+}
+
+#endif
+
 static void xhci_disable_port(struct xhci_hcd *xhci, u16 wIndex,
 		__le32 __iomem *addr, u32 port_status)
 {
+#ifdef MY_ABC_HERE
+	/* Don't allow the USB core to disable SuperSpeed ports. */
+	if (IS_USB3(wIndex)) {
+		xhci_dbg(xhci, "Ignoring request to disable "
+				"SuperSpeed port.\n");
+		return;
+	}
+#endif
+
 	/* Write 1 to disable the port */
 	xhci_writel(xhci, port_status | PORT_PE, addr);
 	port_status = xhci_readl(xhci, addr);
@@ -139,11 +180,24 @@ static void xhci_disable_port(struct xhci_hcd *xhci, u16 wIndex,
 			wIndex, port_status);
 }
 
+#ifdef MY_ABC_HERE
+static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
+		u16 wIndex, __le32 __iomem *addr, __le32 __iomem *addr_map, u32 port_status)
+#else
 static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 		u16 wIndex, __le32 __iomem *addr, u32 port_status)
+#endif
 {
 	char *port_change_bit;
 	u32 status;
+#ifdef MY_ABC_HERE
+	u32 port_status_map;
+	int link_state_map;
+#endif
+
+#ifdef MY_ABC_HERE
+	int link_state;
+#endif
 
 	switch (wValue) {
 	case USB_PORT_FEAT_C_RESET:
@@ -162,6 +216,16 @@ static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 		status = PORT_PEC;
 		port_change_bit = "enable/disable";
 		break;
+#ifdef MY_ABC_HERE
+	case USB_PORT_FEAT_C_BH_PORT_RESET:
+		status = PORT_WRC;
+		port_change_bit = "warm(BH) reset";
+		break;
+	case USB_PORT_FEAT_C_PORT_LINK_STATE:
+		status = PORT_PLC;
+		port_change_bit = "link state";
+		break;
+#endif
 
 	default:
 		/* Should never happen */
@@ -171,10 +235,78 @@ static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 	xhci_writel(xhci, port_status | status, addr);
 	port_status = xhci_readl(xhci, addr);
 
+#ifdef MY_ABC_HERE
+	port_status_map = xhci_readl(xhci, addr_map);
+	link_state_map = (port_status_map >> 5) & 0xf;
+#endif
+
+#ifdef MY_ABC_HERE
+	link_state = (port_status >> 5) & 0xf;
+
+	if (status == PORT_CSC) {
+		int ori_status = port_status;
+		if (port_status & (PORT_PLC | PORT_CEC)) {
+			port_status = xhci_port_state_to_neutral(port_status);
+			xhci_dbg(xhci, "set PLC/CEC.\n");
+			xhci_writel(xhci, port_status | (ori_status & (PORT_PLC | PORT_CEC)), addr);
+			port_status = xhci_readl(xhci, addr);
+		}
+		if (link_state == 0x6 || link_state == 0x4) {
+			xhci_dbg(xhci, "set PLS 1.\n");
+			xhci_writel(xhci, (0x5 << 5) | PORT_LINK_STROBE, addr);
+			port_status = xhci_readl(xhci, addr); /* unblock any posted writes */
+		}
+		if (link_state_map == 0x6 || link_state_map == 0x4) { // check the mapping port too
+			xhci_dbg(xhci, "set PLS 2.\n");
+			xhci_writel(xhci, (0x5 << 5) | PORT_LINK_STROBE, addr_map);
+			port_status_map = xhci_readl(xhci, addr_map);
+		}
+
+		xhci_dbg(xhci, "link:%d. link_map:%d.\n", link_state, link_state_map);
+	}
+
+#ifdef MY_ABC_HERE
+	if (disable_usb3) {
+		goto skip_check_power;
+	}
+#endif
+
+#ifdef MY_ABC_HERE
+
+	// check port_power again, because "set PLS" may affect it.
+	port_status_map = xhci_readl(xhci, addr_map);
+	link_state_map = (port_status_map >> 5) & 0xf;
+	port_status = xhci_readl(xhci, addr);
+	link_state = (port_status >> 5) & 0xf;
+
+	if (link_state == 0x4) {
+		xhci_dbg(xhci, "set PP 1 again.\n");
+		xhci_writel(xhci, port_status | PORT_POWER, addr);
+		port_status = xhci_readl(xhci, addr); /* unblock any posted writes */
+	}
+	if (link_state_map == 0x4) {
+		xhci_dbg(xhci, "set PP 2 again.\n");
+		xhci_writel(xhci, port_status_map | PORT_POWER, addr_map);
+		port_status_map = xhci_readl(xhci, addr_map); /* unblock any posted writes */
+	}
+#endif
+
+#ifdef MY_ABC_HERE
+skip_check_power:
+#endif
+
+	xhci_dbg(xhci, "clear port %s change, actual port %d status  = 0x%x. status_map = 0x%x\n",
+			port_change_bit, wIndex, port_status, port_status_map);
+
+#endif
+
 	xhci_dbg(xhci, "clear port %s change, actual port %d status  = 0x%x\n",
 			port_change_bit, wIndex, port_status);
 }
 
+#ifdef MY_ABC_HERE
+extern enum XHCI_SPECIAL_RESET_MODE xhci_special_reset; // from hub.c
+#endif
 
 int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		u16 wIndex, char *buf, u16 wLength)
@@ -183,8 +315,18 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	int ports;
 	unsigned long flags;
 	u32 temp, status;
+#ifdef MY_ABC_HERE
+	u32 temp_map;
+#endif
 	int retval = 0;
 	__le32 __iomem *addr;
+#ifdef MY_ABC_HERE
+	__le32 __iomem *addr_map;
+#endif
+
+#ifdef MY_ABC_HERE
+	xhci_dbg(xhci, "xhci_hub_control.type:0x%x.wvalue:%d.\n", typeReq, wValue);
+#endif
 
 	ports = HCS_MAX_PORTS(xhci->hcs_params1);
 
@@ -206,6 +348,73 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		temp = xhci_readl(xhci, addr);
 		xhci_dbg(xhci, "get port status, actual port %d status = 0x%x\n", wIndex, temp);
 
+#ifdef MY_ABC_HERE
+		addr_map = &xhci->op_regs->port_status_base + NUM_PORT_REGS*((wIndex+1)%ports & 0xff);
+		temp_map = xhci_readl(xhci, addr_map);
+		xhci_dbg(xhci, "get port status, actual port %d status = 0x%x\n", (wIndex+1)%ports, temp_map);
+		addr_map = &xhci->op_regs->port_status_base + NUM_PORT_REGS*((wIndex+2)%ports & 0xff);
+		temp_map = xhci_readl(xhci, addr_map);
+		xhci_dbg(xhci, "get port status, actual port %d status = 0x%x\n", (wIndex+2)%ports, temp_map);
+		addr_map = &xhci->op_regs->port_status_base + NUM_PORT_REGS*((wIndex+3)%ports & 0xff);
+		temp_map = xhci_readl(xhci, addr_map);
+		xhci_dbg(xhci, "get port status, actual port %d status = 0x%x\n", (wIndex+3)%ports, temp_map);
+#endif
+
+#ifdef MY_ABC_HERE
+		/* wPortChange bits */
+		if (temp & PORT_CSC)
+			status |= USB_PORT_STAT_C_CONNECTION << 16;
+		if (temp & PORT_PEC)
+			status |= USB_PORT_STAT_C_ENABLE << 16;
+		if ((temp & PORT_OCC))
+			status |= USB_PORT_STAT_C_OVERCURRENT << 16;
+		if ((temp & PORT_RC))
+			status |= USB_PORT_STAT_C_RESET << 16;
+		/* USB3.0 only */
+		if (IS_USB3(wIndex)) {
+			if ((temp & PORT_PLC))
+				status |= USB_PORT_STAT_C_LINK_STATE << 16;
+			if ((temp & PORT_WRC))
+				status |= USB_PORT_STAT_C_BH_RESET << 16;
+		}
+
+		/*
+		 * FIXME ignoring suspend, reset, and USB 2.1/3.0 specific
+		 * changes
+		 */
+		if (temp & PORT_CONNECT) {
+			status |= USB_PORT_STAT_CONNECTION;
+			status |= xhci_port_speed(temp);
+		}
+		if (temp & PORT_PE)
+			status |= USB_PORT_STAT_ENABLE;
+		if (temp & PORT_OC)
+			status |= USB_PORT_STAT_OVERCURRENT;
+		if (temp & PORT_RESET)
+			status |= USB_PORT_STAT_RESET;
+		if (temp & PORT_POWER){
+			if (IS_USB3(wIndex))
+				status |= USB_SS_PORT_STAT_POWER;
+			else
+				status |= USB_PORT_STAT_POWER;
+		}
+		/* Port Link State */
+		if (IS_USB3(wIndex)) {
+			/* resume state is a xHCI internal state.
+			 * Do not report it to usb core.
+			 */
+			if ((temp & PORT_PLS_MASK) != XDEV_RESUME)
+				status |= (temp & PORT_PLS_MASK);
+		}
+#endif
+
+#ifdef MY_ABC_HERE
+		if (((temp & USB_PORT_STAT_LINK_STATE) == USB_SS_PORT_LS_COMP_MOD ||
+				(temp & USB_PORT_STAT_LINK_STATE) == USB_SS_PORT_LS_LOOPBACK) &&
+				(temp & PORT_POWER))
+			status |= USB_PORT_STAT_TEST_MODE;
+#endif
+
 		xhci_dbg(xhci, "Get port status returned 0x%x\n", status);
 		put_unaligned(cpu_to_le32(status), (__le32 *) buf);
 		break;
@@ -217,6 +426,11 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		addr = &xhci->op_regs->port_status_base + NUM_PORT_REGS*(wIndex & 0xff);
 		temp = xhci_readl(xhci, addr);
 		temp = xhci_port_state_to_neutral(temp);
+#ifdef MY_ABC_HERE
+		addr_map = &xhci->op_regs->port_status_base + NUM_PORT_REGS*((wIndex+ports/2)%ports & 0xff);
+		temp_map = xhci_readl(xhci, addr_map);
+		temp_map = xhci_port_state_to_neutral(temp_map);
+#endif
 		switch (wValue) {
 		case USB_PORT_FEAT_POWER:
 			/*
@@ -225,8 +439,22 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			 * However, khubd will ignore the roothub events until
 			 * the roothub is registered.
 			 */
-
+#ifdef MY_ABC_HERE
+			xhci_dbg(xhci, "set port power. usb%d.\n", wIndex);
+			if (1 == disable_usb3 && IS_USB3(wIndex))
+				xhci_writel(xhci, temp & ~PORT_POWER, addr);
+			else {
+				// set power on usb3 port before usb2 port
+				if((0 == disable_usb3) && IS_USB2(wIndex) && !(temp_map & PORT_POWER)) {
+					xhci_writel(xhci, temp_map | PORT_POWER, addr_map);
+					temp_map = xhci_readl(xhci, addr_map);
+					mdelay(100);
+				}
+				xhci_writel(xhci, temp | PORT_POWER, addr);
+			}
+#else
 			xhci_writel(xhci, temp | PORT_POWER, addr);
+#endif
 
 			temp = xhci_readl(xhci, addr);
 			xhci_dbg(xhci, "set port power, actual port %d status  = 0x%x\n", wIndex, temp);
@@ -234,13 +462,64 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		case USB_PORT_FEAT_RESET:
 			temp = (temp | PORT_RESET);
 
+#ifdef MY_ABC_HERE
+			// reset if connected, or mapping port is in test mode
+			if ((temp & PORT_CONNECT) || (temp_map & PORT_CONNECT) || // reset when connected // check this to prevent syno_nh trying to reset during disconnected
+				(IS_USB2(wIndex) && // no connection but
+				((temp_map & USB_PORT_STAT_LINK_STATE) == USB_SS_PORT_LS_COMP_MOD || //compliance mode
+				(temp_map & USB_PORT_STAT_LINK_STATE) == USB_SS_PORT_LS_LOOPBACK))) // test mode
+				xhci_writel(xhci, temp, addr);
+			else
+				xhci_dbg(xhci, "skip set port reset.\n");
+#else
 			xhci_writel(xhci, temp, addr);
+#endif
 
 			temp = xhci_readl(xhci, addr);
 			xhci_dbg(xhci, "set port reset, actual port %d status  = 0x%x\n", wIndex, temp);
 
-			break;
+#ifdef MY_ABC_HERE
+			xhci_dbg(xhci, "set port reset map, actual port %d status  = 0x%x\n", (wIndex+ports/2)%ports, temp_map);
 
+			temp_map = xhci_readl(xhci, addr_map);
+			// reset if mapping port is in test mode
+			if (IS_USB2(wIndex) &&
+				((temp_map & USB_PORT_STAT_LINK_STATE) == USB_SS_PORT_LS_COMP_MOD ||
+				(temp_map & USB_PORT_STAT_LINK_STATE) == USB_SS_PORT_LS_LOOPBACK)) {
+				xhci_err(xhci, "set port reset for test mode.\n");
+				xhci_writel(xhci, temp_map | PORT_RESET, addr_map);
+				temp_map = xhci_readl(xhci, addr_map);
+			}
+
+			// if host controller reported usb2 connected, try to reset to check if it can morph into SuperSpeed
+			// the sequence and delay time are critical, test before modifying.
+			else if((XHCI_SPECIAL_RESET_RUN == xhci_special_reset) && IS_USB2(wIndex) &&
+							(temp & PORT_CONNECT) &&
+							!(temp_map & PORT_CONNECT)) { // if temp_map connected already, no need to do special reset (ex. external hub)
+				xhci_dbg(xhci, "set port special reset.\n");
+				xhci_writel(xhci, temp_map | PORT_RESET, addr_map);
+				mdelay(200); // 100 is ok for 6281, but not for cedarview. 200 is ok for both
+
+				xhci_writel(xhci, temp | PORT_WR, addr);
+				xhci_writel(xhci, temp_map | PORT_WR, addr_map);
+				mdelay(200);
+			}
+
+			xhci_dbg(xhci, "set port reset, actual port %d status  = 0x%x\n", wIndex, temp);
+			xhci_dbg(xhci, "set port reset map, actual port %d status  = 0x%x\n", (wIndex+ports/2)%ports, temp_map);
+#endif
+			break;
+#ifdef MY_ABC_HERE
+		case USB_PORT_FEAT_BH_PORT_RESET:
+#ifdef MY_ABC_HERE
+			xhci_dbg(xhci, "set USB_PORT_FEAT_BH_PORT_RESET.\n");
+#endif
+			temp |= PORT_WR;
+			xhci_writel(xhci, temp, addr);
+
+			temp = xhci_readl(xhci, addr);
+			break;
+#endif
 		default:
 			goto error;
 		}
@@ -254,16 +533,36 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			NUM_PORT_REGS*(wIndex & 0xff);
 		temp = xhci_readl(xhci, addr);
 		temp = xhci_port_state_to_neutral(temp);
-
+#ifdef MY_ABC_HERE
+		addr_map = &xhci->op_regs->port_status_base + NUM_PORT_REGS*((wIndex+ports/2)%ports & 0xff);
+		temp_map = xhci_readl(xhci, addr_map);
+		temp_map = xhci_port_state_to_neutral(temp_map);
+#endif
 		switch (wValue) {
 		case USB_PORT_FEAT_C_RESET:
 		case USB_PORT_FEAT_C_CONNECTION:
 		case USB_PORT_FEAT_C_OVER_CURRENT:
 		case USB_PORT_FEAT_C_ENABLE:
-
+#ifdef MY_ABC_HERE
+		case USB_PORT_FEAT_C_BH_PORT_RESET:
+		case USB_PORT_FEAT_C_PORT_LINK_STATE:
+#endif
+#ifdef MY_ABC_HERE
+			xhci_clear_port_change_bit(xhci, wValue, wIndex,
+					addr, addr_map, temp);
+#else
 			xhci_clear_port_change_bit(xhci, wValue, wIndex,
 					addr, temp);
+#endif
 			break;
+
+#ifdef MY_ABC_HERE
+		case USB_PORT_FEAT_POWER:
+			xhci_dbg(xhci, "clear USB_PORT_FEAT_POWER.\n");
+			xhci_writel(xhci, temp & ~PORT_POWER, addr);
+			temp = xhci_readl(xhci, addr);
+			break;
+#endif
 
 		case USB_PORT_FEAT_ENABLE:
 			xhci_disable_port(xhci, wIndex, addr, temp);
@@ -294,7 +593,6 @@ int xhci_hub_status_data(struct usb_hcd *hcd, char *buf)
 {
 	unsigned long flags;
 	u32 temp, status;
-	
 	int i, retval;
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
 	int ports;

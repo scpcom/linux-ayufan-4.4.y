@@ -659,6 +659,7 @@ DEVICE_ATTR(syno_phy_ctl, S_IWUGO, NULL, syno_mv_phy_ctl_store);
 
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 static struct device_attribute *sata_mv_shost_attrs[] = {
+	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
 #ifdef MY_ABC_HERE
@@ -666,6 +667,9 @@ static struct device_attribute *sata_mv_shost_attrs[] = {
 #endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_port_thaw,
+#endif
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_diskname_trans,
 #endif
 	NULL
 };
@@ -2399,6 +2403,11 @@ static unsigned int mv_qc_issue(struct ata_queued_cmd *qc)
 		if (IS_GEN_II(hpriv))
 			return mv_qc_issue_fis(qc);
 	}
+#ifdef MY_ABC_HERE
+	if (NULL == qc->scsicmd && ATA_CMD_CHK_POWER == qc->tf.command) {
+		qc->tf.flags |= ATA_TFLAG_DIRECT;
+	}
+#endif
 	return ata_sff_qc_issue(qc);
 }
 

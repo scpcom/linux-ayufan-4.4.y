@@ -387,10 +387,14 @@ static struct pci_driver sil24_pci_driver = {
 
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 static struct device_attribute *sil24_shost_attrs[] = {
+	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_port_thaw,
+#endif
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_diskname_trans,
 #endif
 	NULL
 };
@@ -1024,6 +1028,14 @@ static int sil24_pmp_hardreset(struct ata_link *link, unsigned int *class,
 		return rc;
 	}
 
+#ifdef SYNO_FIX_HORKAGE_15G_MISSING
+	/* test if we need reset it again */
+	if(iNeedResetAgainFor15G(link)) {
+		DBGMESG("ata port %d has ALREADY_APPLY_15G and not 1.5G speed, need to reset it again\n",
+				link->ap->print_id);
+		sata_std_hardreset(link, class, deadline);
+	}
+#endif
 	return sata_std_hardreset(link, class, deadline);
 }
 

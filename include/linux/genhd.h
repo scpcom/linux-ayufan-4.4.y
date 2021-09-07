@@ -170,6 +170,9 @@ struct gendisk {
 	struct blk_integrity *integrity;
 #endif
 	int node_id;
+#ifdef MY_ABC_HERE
+	int systemDisk;
+#endif
 };
 
 static inline struct gendisk *part_to_disk(struct hd_struct *part)

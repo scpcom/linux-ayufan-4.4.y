@@ -44,6 +44,13 @@ typedef struct _tag_SYNO_UPDATE_SB_WORK{
 }SYNO_UPDATE_SB_WORK;
 #endif
 
+#ifdef MY_ABC_HERE
+typedef struct _tag_SYNO_WAKEUP_DEVICE_WORK{
+    struct work_struct work;
+    mddev_t *mddev;
+} SYNO_WAKEUP_DEVICE_WORK;
+#endif
+
 /*
  * MD's 'extended' device
  */
@@ -58,6 +65,9 @@ struct mdk_rdev_s
 	struct block_device *bdev;	/* block device handle */
 
 	struct page	*sb_page;
+#ifdef MY_ABC_HERE
+	struct page	*wakeup_page;
+#endif
 	int		sb_loaded;
 	__u64		sb_events;
 	sector_t	data_offset;	/* start of data in array */
@@ -311,6 +321,11 @@ struct mddev_s
 	struct mutex			bitmap_mutex;
 
 	struct list_head		all_mddevs;
+#ifdef MY_ABC_HERE
+	unsigned char			blActive;  /* to record whether this md is in active or not */
+	spinlock_t				ActLock;   /* lock for Active attr. */
+	unsigned long			ulLastReq; /* the last time received request */
+#endif
 #ifdef MY_ABC_HERE
     unsigned char           nodev_and_crashed;     // 1 ==> nodev && crashed. deny make_request
 #endif

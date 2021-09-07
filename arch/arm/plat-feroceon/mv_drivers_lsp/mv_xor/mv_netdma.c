@@ -71,7 +71,7 @@ disclaimer.
 
 
 #define XOR_STATS
-//#undef XOR_STATS
+#undef XOR_STATS
 #ifdef XOR_STATS
 #define STAT_INC(s) 	xor_stats->s++
 #define STAT_ADD(s,n) 	xor_stats->s[((n)>>STAT_SHIFT)&(STAT_BYTES-1)]++
@@ -1097,6 +1097,7 @@ out:
 	return asm_memcpy((void*)to, (void*)from, n);
 }
 EXPORT_SYMBOL(xor_memcpy);
+
 #endif /* CONFIG_MV_XOR_MEMCOPY */
 
 #ifdef CONFIG_MV_XOR_MEMXOR
@@ -1401,7 +1402,7 @@ out:
 }
 EXPORT_SYMBOL(xor_copy_to_user);
 #else
-#error "Kernel version >= 2,6,26 does not support XOR copy_to_user"
+/* #error "Kernel version >= 2,6,26 does not support XOR copy_to_user" */
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,26) */
 #endif /* CONFIG_MV_XOR_COPY_TO_USER */
 

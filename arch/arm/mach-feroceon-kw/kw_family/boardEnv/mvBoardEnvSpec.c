@@ -1717,6 +1717,43 @@ MV_BOARD_INFO SYNO_RS_6282_INFO = {
     0,
     0
 };
+
+MV_BOARD_MAC_INFO RS213InfoBoardMacInfo[] = 
+	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+{
+	{BOARD_MAC_SPEED_AUTO, 0x0},
+    {BOARD_MAC_SPEED_AUTO, 0x1}
+};
+MV_BOARD_INFO SYNO_RS213_INFO = {
+	"Synology Disk Station",				/* boardName[MAX_BOARD_NAME_LEN] */
+	DB_88F6282A_BOARD_MPP_GROUP_TYPE_NUM,		/* numBoardMppGroupType */
+	db88f6282AInfoBoardMppTypeInfo,
+	DB_88F6282A_BOARD_MPP_CONFIG_NUM,		/* numBoardMppConfig */
+	RS6282InfoBoardMppConfigValue,
+	0,						/* intsGppMaskLow */
+	0,						/* intsGppMaskHigh */
+	DB_88F6282A_BOARD_DEVICE_CONFIG_NUM,		/* numBoardDevIf */
+	db88f6282AInfoBoardDeCsInfo,
+	0,			/* numBoardTwsiDev */
+	NULL,
+	RS_6282_BOARD_MAC_INFO_NUM,			/* numBoardMacInfo */
+	RS213InfoBoardMacInfo,
+	0,			/* numBoardGppInfo */
+	NULL,
+	0,			/* activeLedsNumber */
+	NULL,
+	0,						/* ledsPolarity */
+	0,				/* gppOutEnLow */
+	0,				/* gppOutEnHigh */
+	0,				/* gppOutValLow */
+	0,				/* gppOutValHigh */
+	0,						/* gppPolarityValLow */
+	0, 						/* gppPolarityValHigh */
+	NULL,						/* pSwitchInfo */
+    0,
+    0,
+    0
+};
 /*********************************************************************
  * Synology DS011
  ********************************************************************/
@@ -2065,5 +2102,6 @@ MV_BOARD_INFO*	boardInfoTbl[] = 	{
 					&SYNO_DS411_INFO,				/* SYNO_DS411_ID */
 					&SYNO_DS212_INFO,               /* SYNO_DS212_ID */
 					&SYNO_6702_1BAY_INFO,           /* SYNO_6702_1BAY_ID (for ds112j) */
+					&SYNO_RS213_INFO,				/* SYNO_RS213_ID*/
 #endif
 					};

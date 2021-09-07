@@ -51,13 +51,6 @@ static inline int irq_to_gpio(unsigned int irq)
 	return -EINVAL;
 }
 
-#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
-static inline int iGpioInterruptClear(unsigned int gpio)
-{
-	return __iGpioInterruptClear(gpio);
-}
-#endif
-
 #endif /* CONFIG_GPIOLIB */
 
 #endif /* __ASM_POWERPC_GPIO_H */

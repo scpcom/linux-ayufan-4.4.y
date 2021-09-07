@@ -38,6 +38,10 @@
 #include <scsi/scsi_transport.h>
 #include <scsi/scsi_transport_sas.h>
 
+#ifdef MY_DEF_HERE
+#include <scsi/synoscsi.h>
+#endif
+
 #include "scsi_sas_internal.h"
 struct sas_host_attrs {
 	struct list_head rphy_list;
@@ -957,6 +961,42 @@ int scsi_is_sas_port(const struct device *dev)
 }
 EXPORT_SYMBOL(scsi_is_sas_port);
 
+#ifdef MY_DEF_HERE
+static void syno_sas_link_uevent(struct sas_port *port, struct sas_phy *phy, const char *szEventType)
+{
+	char *envp[5];
+	char szPhy[64] = {0};
+	char szPort[64] = {0};
+	char szParent[64] = {0};
+	char szEvent[64] = {0};
+	// we need Scsi_Host host to send uevent, otherwise those uevent will be filtered
+	struct Scsi_Host *shost = NULL;
+	if (port->dev.parent != NULL) {
+		if (scsi_is_sas_expander_device(port->dev.parent)) {
+			shost = rphy_to_shost(dev_to_rphy(port->dev.parent));
+		} else {
+			shost = dev_to_shost(port->dev.parent);
+		}
+		snprintf(szParent, sizeof(szParent), "PORT_PARENT=%s", dev_name(port->dev.parent));
+		envp[3] = szParent;
+	} else {
+		// no device parent, no shost
+		printk(KERN_ERR "SAS port(%s) has no parent", dev_name(&port->dev));
+		return;
+	}
+	snprintf(szPhy, sizeof(szPhy), "PHY=%s", dev_name(&phy->dev));
+	snprintf(szPort, sizeof(szPort), "PORT=%s", dev_name(&port->dev));
+	snprintf(szEvent, sizeof(szEvent), "%s=%s", SZK_SAS_LINK_HOTPLUG_UEVENT, szEventType);
+	envp[0] = szEvent;
+	envp[1] = szPhy;
+	envp[2] = szPort;
+	envp[4] = NULL;
+	if (shost != NULL) {
+		kobject_uevent_env(&shost->shost_dev.kobj, KOBJ_CHANGE, envp);
+	}
+}
+#endif
+
 /**
  * sas_port_add_phy - add another phy to a port to form a wide port
  * @port:	port to add the phy to
@@ -992,6 +1032,9 @@ void sas_port_add_phy(struct sas_port *port, struct sas_phy *phy)
 		port->num_phys++;
 	}
 	mutex_unlock(&port->phy_list_mutex);
+#ifdef MY_DEF_HERE
+	syno_sas_link_uevent(port, phy, SZV_SAS_PHY_ADD);
+#endif
 }
 EXPORT_SYMBOL(sas_port_add_phy);
 
@@ -1010,6 +1053,9 @@ void sas_port_delete_phy(struct sas_port *port, struct sas_phy *phy)
 	list_del_init(&phy->port_siblings);
 	port->num_phys--;
 	mutex_unlock(&port->phy_list_mutex);
+#ifdef MY_DEF_HERE
+	syno_sas_link_uevent(port, phy, SZV_SAS_PHY_REMOVE);
+#endif
 }
 EXPORT_SYMBOL(sas_port_delete_phy);
 

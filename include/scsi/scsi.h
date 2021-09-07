@@ -577,7 +577,7 @@ typedef struct _tag_SdBadSectors {
 
 extern SDBADSECTORS grgSdBadSectors[SYNO_MAX_INTERNAL_DISK];
 extern int gBadSectorTest;
-#define SynoGetDiskNum(szBdevName)	(szBdevName[2] - 'a')
+#define SynoGetInternalDiskSeq(szBdevName) (szBdevName[2] - 'a')
 #endif
 
 #endif /* _SCSI_SCSI_H */

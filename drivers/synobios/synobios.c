@@ -45,7 +45,7 @@ struct sd_softc {
 static struct sd_softc scSynoBios;
 static SYNO_SYS_STATUS *pgSysStatus = NULL;
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 extern int (*funcSYNOSendHibernationEvent)(unsigned int type, unsigned int diskno);
 #endif
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
@@ -112,7 +112,7 @@ static int synobios_record_raid_event(unsigned int type, unsigned int raidno, un
 }
 #endif
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 static int synobios_record_hibernation_event(unsigned int type, unsigned int diskno)
 {
 	int ret;
@@ -772,7 +772,7 @@ int synobios_init(void)
 #ifdef MY_ABC_HERE
 	funcSYNOSendRaidEvent = synobios_record_raid_event;
 #endif
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 	funcSYNOSendHibernationEvent = synobios_record_hibernation_event;
 #endif
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
@@ -797,7 +797,7 @@ void synobios_cleanup(void)
 #ifdef MY_ABC_HERE
 	funcSYNOSendRaidEvent = NULL;
 #endif
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 	funcSYNOSendHibernationEvent = NULL;
 #endif
 #ifdef SYNO_SATA_PM_DEVICE_GPIO

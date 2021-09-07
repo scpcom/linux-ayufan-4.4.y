@@ -269,7 +269,7 @@ _GLOBAL(mpc85xx_enter_deep_sleep)
 	oris	r4, r4, TSR_DIS@h
 	mtspr	SPRN_TSR, r4
 
-	/* set PMRCCR[VRCNT] to wait power stable for 40ms */
+	/* set PMRCCR[VRCNT] to wait power stable for 200ms */
 	lis	r3, 0xf00e
 	lwz	r4, 0x84(r3)
 	clrlwi	r4, r4, 16

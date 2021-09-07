@@ -294,12 +294,17 @@ static int __devinit coretemp_probe(struct platform_device *pdev)
 	/* read the still undocumented IA32_TEMPERATURE_TARGET it exists
 	   on older CPUs but not in this register, Atoms don't have it either */
 
+
 	if ((c->x86_model > 0xe) && (c->x86_model != 0x1c)) {
 		err = rdmsr_safe_on_cpu(data->id, 0x1a2, &eax, &edx);
+#ifdef MY_DEF_HERE
+		if (!err) {
+#else
 		if (err) {
 			dev_warn(&pdev->dev, "Unable to read"
 					" IA32_TEMPERATURE_TARGET MSR\n");
 		} else {
+#endif
 			data->ttarget = data->tjmax -
 					(((eax >> 8) & 0xff) * 1000);
 			err = device_create_file(&pdev->dev,

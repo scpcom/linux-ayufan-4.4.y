@@ -187,11 +187,13 @@ syno_sata_pmp_read_cpld_ver(struct ata_port *ap)
 	if(0 != iRes) {
 		goto END;
 	}
-
-	ap->PMSynoCpldVer =	GPI_3XXX_CPLDVER_BIT1(stPmPkg.var) |
-				GPI_3XXX_CPLDVER_BIT2(stPmPkg.var) |
-				GPI_3XXX_CPLDVER_BIT3(stPmPkg.var);
-
+	if (IS_SYNOLOGY_DX513(ap->PMSynoUnique) || IS_SYNOLOGY_DX213(ap->PMSynoUnique)) {
+		ap->PMSynoCpldVer =	GPI_3XXX_CPLDVER_BIT3(stPmPkg.var);
+	} else {
+		ap->PMSynoCpldVer =	GPI_3XXX_CPLDVER_BIT1(stPmPkg.var) |
+					GPI_3XXX_CPLDVER_BIT2(stPmPkg.var) |
+					GPI_3XXX_CPLDVER_BIT3(stPmPkg.var);
+	}
 	/*cpld version start from GPIO result 000 (i.e. v1)*/
 	ap->PMSynoCpldVer = ap->PMSynoCpldVer + 1;
 END:
@@ -232,6 +234,90 @@ END:
 	return res;
 }
 
+/*
+ * Query backplane switch mode 
+ *
+ * @param ap ata_port
+ *
+ * @return 0: success 
+ *        overwise fail
+ */
+static unsigned int
+syno_sata_pmp_read_switch_mode(struct ata_port *ap)
+{
+#define GPI_3XXX_SWITCHMODE_BIT(GPIO)	((1<<5)&GPIO)>>5
+	int iRes = 0;
+	SYNO_PM_PKG stPmPkg;
+
+	if (!IS_SYNOLOGY_DX513(ap->PMSynoUnique) && !IS_SYNOLOGY_DX213(ap->PMSynoUnique)) {
+		ap->PMSynoSwitchMode = PMP_SWITCH_MODE_UNKNOWN;
+		goto END;
+	}
+
+	syno_pm_raidledstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+							sata_pmp_gscr_devid(ap->link.device->gscr),
+							&stPmPkg);
+
+	syno_sata_pmp_write_gpio(&(ap->link), &stPmPkg);
+
+	iRes = syno_sata_pmp_read_gpio(&(ap->link), &stPmPkg);
+	if(0 != iRes) {
+		goto END;
+	}
+
+	if (0 == GPI_3XXX_SWITCHMODE_BIT(stPmPkg.var)){
+		ap->PMSynoSwitchMode = PMP_SWITCH_MODE_MANUAL;
+	} else {
+		ap->PMSynoSwitchMode = PMP_SWITCH_MODE_AUTO;
+	}
+END:
+	return iRes;
+}
+
+/*
+ * Check power button whether disable or not
+ *
+ * @param ap ata_port
+ *
+ * @return 0: success 
+ *        overwise fail
+ */
+static unsigned int
+syno_sata_pmp_check_powerbtn(struct ata_port *ap)
+{
+#define GPI_3826_POWERDISABLE_BIT(GPIO)	((1<<4)&GPIO)>>4
+	int iRes = 0;
+	SYNO_PM_PKG stPmPkg;
+
+	if (!IS_SYNOLOGY_DX513(ap->PMSynoUnique) && !IS_SYNOLOGY_DX213(ap->PMSynoUnique)) {
+		goto END;
+	}
+
+	syno_pm_raidledstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+							sata_pmp_gscr_devid(ap->link.device->gscr),
+							&stPmPkg);
+
+	syno_sata_pmp_write_gpio(&(ap->link), &stPmPkg);
+
+	iRes = syno_sata_pmp_read_gpio(&(ap->link), &stPmPkg);
+	if(0 != iRes) {
+		goto END;
+	}
+
+	if (0 == GPI_3826_POWERDISABLE_BIT(stPmPkg.var)){
+		goto END;
+	}
+
+	syno_pm_enable_powerbtn_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+							sata_pmp_gscr_devid(ap->link.device->gscr),
+							&stPmPkg);
+
+	syno_sata_pmp_write_gpio(&(ap->link), &stPmPkg);
+
+END:
+	return iRes;
+}
+
 unsigned int
 syno_sata_pmp_write_gpio(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
 {
@@ -256,10 +342,10 @@ syno_pm_is_synology_3xxx(const struct ata_port *ap)
 
 	if (!IS_SYNOLOGY_RX4(ap->PMSynoUnique) &&
 		!IS_SYNOLOGY_DX5(ap->PMSynoUnique) &&
-		!IS_SYNOLOGY_DX512(ap->PMSynoUnique) &&
+		!IS_SYNOLOGY_DX513(ap->PMSynoUnique) &&
 		!IS_SYNOLOGY_DXC(ap->PMSynoUnique) &&
 		!IS_SYNOLOGY_RXC(ap->PMSynoUnique) &&
-		!IS_SYNOLOGY_DX212(ap->PMSynoUnique)) {
+		!IS_SYNOLOGY_DX213(ap->PMSynoUnique)) {
 		goto END;
 	}
 
@@ -375,11 +461,20 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 		}
 	}
 
+	if (1 == ap->PMSynoPowerDisable) {
+		goto SKIP_POWER_ON;
+	}
+
 	for (iRetry = 0; blPowerOn ^ syno_pm_is_poweron(sata_pmp_gscr_vendor(ap->link.device->gscr),
 													sata_pmp_gscr_devid(ap->link.device->gscr),
 													&pm_pkg)
 					 && iRetry < ATA_EH_PMP_TRIES; ++iRetry) {
 
+		if (!blPowerOn) {
+			if (syno_sata_pmp_check_powerbtn(ap)) {
+				printk("check Eunit port %d power button fail\n", ap->print_id);
+			}
+		}
 
 		syno_pm_poweron_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
 								 sata_pmp_gscr_devid(ap->link.device->gscr),
@@ -389,7 +484,11 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 		}
 
 		if (blPowerOn) {
-			mdelay(5); /* don't do it too fast. Otherwise CPLD might not response */
+			if (IS_SYNOLOGY_DX213(ap->PMSynoUnique)) {
+				mdelay(700); /* HW spec. DX213 clock cycle too slow, so delay 700 ms */
+			} else {
+				mdelay(5); /* don't do it too fast. Otherwise CPLD might not response */
+			}
 		} else {
 			mdelay(7000); /* hardware spec */
 		}
@@ -409,6 +508,8 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 			ap->link.eh_context.i.action |= ATA_EH_SYNO_PWON;
 #endif
 		}
+
+		mdelay(1000);
 
 		/* test if this power control success */
 		syno_pm_unique_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
@@ -447,6 +548,9 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 			ap->PMSynoIsRP = 0;
 		}
 	}
+
+SKIP_POWER_ON:
+	syno_sata_pmp_read_switch_mode(ap);
 
 	iRet = 0;
 
@@ -708,7 +812,7 @@ static void sata_pmp_quirks(struct ata_port *ap)
 	struct ata_link *link;
 
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
-	/*our DX512 use 3826 chip */
+	/*our DX513 and DX213 use 3826 chip */
 	if (vendor == 0x1095 && (devid == 0x3726 || devid == 0x3826)) {
 #else
 	if (vendor == 0x1095 && devid == 0x3726) {
@@ -830,10 +934,6 @@ int sata_pmp_attach(struct ata_device *dev)
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	/* Get information for all PM we supported */
 	syno_prepare_custom_info(ap);
-	/* HW spec: when Power on dx212 must wait 7s */
-	if (IS_SYNOLOGY_DX212(ap->PMSynoUnique)) {
-		mdelay(7000); /* hardware spec */
-	}
 #ifdef MY_ABC_HERE
 	/*For DS1812+ with older version of DX510, the link should be limited to 1.5G*/
 	if (0 == strncmp(gszSynoHWVersion, HW_DS1812p, strlen(HW_DS1812p))) {
@@ -929,8 +1029,12 @@ static void sata_pmp_detach(struct ata_device *dev)
 #ifdef MY_ABC_HERE
 	if ((dev->link->uiSflags || dev->link->ap->uiSflags) && ata_dev_enabled(dev)) {
 		ata_dev_printk(dev, KERN_WARNING,
-				"still have recovery flags, don't detach this pmp dev\n");
+				"still have recovery flags 0x%x, don't detach this pmp dev\n", dev->link->uiSflags);
 		dev->ulSflags |= ATA_SYNO_DFLAG_PMP_DETACH;
+		/*FIXME: set detach flag, copy form ata_eh_detach_dev */
+		ata_for_each_link(tlink, ap, EDGE) {
+			tlink->device->ulSflags |= ATA_SYNO_DFLAG_DETACH;
+		}
 		return;
 	}
 	dev->ulSflags &= ~ATA_SYNO_DFLAG_PMP_DETACH;

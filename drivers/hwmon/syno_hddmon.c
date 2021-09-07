@@ -5,9 +5,6 @@
 #if !defined(CONFIG_SYNO_X64)
 #include <linux/gpio.h>
 #endif
-#ifdef SYNO_SATA_IRQ_OFF
-#include <linux/libata.h>
-#endif
 
 MODULE_LICENSE("Proprietary");
 
@@ -21,7 +18,7 @@ MODULE_LICENSE("Proprietary");
 extern long g_internal_hd_num;
 #endif
 
-#ifdef SYNO_HDD_HOTPLUG
+#ifdef MY_ABC_HERE
 extern long g_hdd_hotplug;
 #endif
 
@@ -85,7 +82,7 @@ static int syno_hddmon_data_init(SynoHddMonData_t *pData)
 
 	memset(pData, 0, sizeof(SynoHddMonData_t));
 
-#ifdef SYNO_HDD_HOTPLUG
+#ifdef MY_ABC_HERE
 	pData->blHddHotPlugSupport = g_hdd_hotplug;
 #endif
 
@@ -110,46 +107,13 @@ END:
 	return iRet;
 }
 
-#ifdef SYNO_SATA_IRQ_OFF
-extern int iIsSynoIRQOff(const struct ata_port *ap);
-
-static int syno_hddmon_is_disk_deepsleep(int iDiskIdx, SynoHddMonData_t *pData)
-{
-	struct Scsi_Host *pScsiHost = NULL;
-	struct ata_port  *pAtaPrt = NULL;
-	int iErr = -1;
-
-	if(NULL == pData) {
-		goto END;
-	}
-
-	if(0 > iDiskIdx || pData->iMaxHddNum < iDiskIdx) {
-		iErr = -EINVAL;
-		goto END;
-	}
-
-	if(NULL == (pScsiHost = scsi_host_lookup(iDiskIdx))) {
-		iErr = -ENODEV;
-		goto END;
-	}
-
-	if(NULL == (pAtaPrt = ata_shost_to_port(pScsiHost))) {
-		iErr = -ENODEV;
-		goto END;
-	}
-
-	iErr = iIsSynoIRQOff(pAtaPrt);
-END:
-	return iErr;
-}
-#endif /*#ifdef SYNO_SATA_IRQ_OFF*/
-
 static int syno_hddmon_unplug_monitor(void *args)
 {
 	int iRet = -1;
 	int iIdx;
 	int iPrzPinVal;
 	SynoHddMonData_t *pData = NULL;
+	unsigned int uiTimeout;
 
 	if (NULL == args) {
 		goto END;
@@ -189,8 +153,11 @@ static int syno_hddmon_unplug_monitor(void *args)
 
 		}
 
-		set_current_state(TASK_UNINTERRUPTIBLE);
-		schedule_timeout(HZ / 2);
+		uiTimeout = HZ / 2;
+		do{
+			set_current_state(TASK_UNINTERRUPTIBLE);
+			uiTimeout = schedule_timeout(uiTimeout);
+		}while(uiTimeout);
 	}
 
 	iRet = 0;
@@ -203,6 +170,7 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 	int iIdx;
 	int iPrzPinVal;
 	static struct task_struct *pUnplugMonitor;
+	unsigned int uiTimeout;
 
 	if (NULL == pData) {
 		goto END;
@@ -222,12 +190,6 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 #endif
 
 		if(pData->blHddEnStat[iIdx] != iPrzPinVal) {
-#ifdef SYNO_SATA_IRQ_OFF
-			/*if the disk is plugged in while deep-sleep, do nothing*/
-			if(iPrzPinVal && syno_hddmon_is_disk_deepsleep(iIdx, pData)) {
-				continue;
-			}
-#endif
 
 			if(iPrzPinVal) {
 				//while starting a port, monitoring other ports for the disks unplugged
@@ -242,8 +204,11 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 			pData->blHddEnStat[iIdx] = iPrzPinVal;
 
 			if(iPrzPinVal) {
-				set_current_state(TASK_UNINTERRUPTIBLE);
-				schedule_timeout(SYNO_HDDMON_EN_WAIT_SEC * HZ);
+				uiTimeout = SYNO_HDDMON_EN_WAIT_SEC * HZ;
+				do{
+					set_current_state(TASK_UNINTERRUPTIBLE);
+					uiTimeout = schedule_timeout(uiTimeout);
+				}while(uiTimeout);
 			}
 
 			if(NULL != pUnplugMonitor) {
@@ -299,6 +264,7 @@ static int syno_hddmon_routine(void *args)
 {
 	int iRet = -1;
 	SynoHddMonData_t *pData = NULL;
+	unsigned int uiTimeout;
 
 	if (NULL == args) {
 		goto END;
@@ -313,8 +279,11 @@ static int syno_hddmon_routine(void *args)
 
 		syno_hddmon_task(pData);
 
-		set_current_state(TASK_UNINTERRUPTIBLE);
-		schedule_timeout(SYNO_HDDMON_POLL_SEC * HZ);
+		uiTimeout = SYNO_HDDMON_POLL_SEC * HZ;
+		do{
+			set_current_state(TASK_UNINTERRUPTIBLE);
+			uiTimeout = schedule_timeout(uiTimeout);
+		}while(uiTimeout);
 	}
 
 	iRet = 0;

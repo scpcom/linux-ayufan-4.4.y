@@ -61,6 +61,10 @@ long g_egiga = 1;
 #endif
 
 #ifdef MY_ABC_HERE
+extern long g_hdd_hotplug;
+#endif
+
+#ifdef MY_ABC_HERE
 extern unsigned char grgbLanMac[4][16];
 #endif
 
@@ -164,6 +168,20 @@ static void __init early_egiga(char *p)
 	}
 }
 __early_param("egiga=", early_egiga);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_hdd_hotplug(char *p)
+{
+	g_hdd_hotplug = simple_strtol(p, NULL, 10);
+
+	if ( g_hdd_hotplug > 0 ) {
+		printk("Support HDD Hotplug.\n");
+	}
+
+	return 1;
+}
+__setup("HddHotplug=", early_hdd_hotplug);
 #endif
 
 #ifdef MY_ABC_HERE

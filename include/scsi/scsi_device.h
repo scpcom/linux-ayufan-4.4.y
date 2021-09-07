@@ -100,6 +100,9 @@ struct scsi_device {
 #ifdef MY_ABC_HERE
 	unsigned char auto_remap;
 #endif
+#ifdef MY_ABC_HERE
+	int iResetPwrCount;  /* the count of disk power reset */
+#endif
 
 	unsigned int manufacturer;	/* Manufacturer of device, for using 
 					 * vendor-specific cmd's */

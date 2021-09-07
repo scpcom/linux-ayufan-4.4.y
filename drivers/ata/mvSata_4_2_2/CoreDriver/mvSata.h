@@ -614,7 +614,7 @@ typedef struct mvSataChannel
     MV_U8                       recoveredErrorsCounter;
     /* NCQ error handling*/
     MV_ERROR_HANDLING_INFO  ErrorHandlingInfo;
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 	unsigned long chkpower_flags;
 	/* bit definitions */
 	#define CHKPOWER_CHECKING 0
@@ -625,7 +625,7 @@ typedef struct mvSataChannel
 	MV_QUEUE_COMMAND_INFO		OrigCmd;
 	struct timer_list	rstimer;
 	struct list_head	pendinglh;
-#endif /* SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 
 #ifdef MY_ABC_HERE
 	unsigned long  ssd_list;  /* ssd mask, start from bit 0 to bit 32 indicate the disk */

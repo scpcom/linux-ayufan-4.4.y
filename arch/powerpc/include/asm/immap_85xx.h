@@ -80,7 +80,13 @@ struct ccsr_guts {
 	u8	res7[0xC0 - 0xB4];
 	__be32	iovselsr;	/* 0x.00c0 - IO Voltage Select Status
 				   Register */
-	u8	res8[0x224 - 0xC4];
+	u8	res8[0x220 - 0xC4];
+	__be32	dscr;
+#define CCSR_GUTS_DSCR_ENB_PWR_DWN	0x80000000
+#define CCSR_GUTS_DSCR_TRI_MCS_B	0x20000000
+#define CCSR_GUTS_DSCR_TRI_MCK		0x10000000
+#define CCSR_GUTS_DSCR_TRI_MCKE		0x08000000
+#define CCSR_GUTS_DSCR_TRI_MODT		0x04000000
 	__be32	iodelay1;	/* 0x.0224 - IO Delay Control Register 1 */
 	__be32  iodelay2;	/* 0x.0228 - IO Delay Control Register 2 */
 	u8	res9[0x800 - 0x22c];

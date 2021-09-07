@@ -228,6 +228,7 @@ MV_CPU_DEC_WIN* mv_sys_map(void)
 	case SYNO_RS_6282_ID:
 	case SYNO_DS411_ID:
 	case SYNO_DS212_ID:
+	case SYNO_RS213_ID:
 #endif
 		return SYSMAP_88F6282;
 	case DB_88F6701A_BP_ID:

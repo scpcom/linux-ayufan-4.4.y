@@ -56,6 +56,10 @@ extern long g_internal_netif_num;
 #endif
 
 #ifdef MY_ABC_HERE
+extern long g_hdd_hotplug;
+#endif
+
+#ifdef MY_ABC_HERE
 extern char gszDiskIdxMap[16];
 #endif
 
@@ -358,6 +362,20 @@ static int __init early_internal_netif_num(char *p)
 	return 1;
 }
 __setup("netif_num=", early_internal_netif_num);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_hdd_hotplug(char *p)
+{
+	g_hdd_hotplug = simple_strtol(p, NULL, 10);
+
+	if ( g_hdd_hotplug > 0 ) {
+		printk("Support HDD Hotplug.\n");
+	}
+
+	return 1;
+}
+__setup("HddHotplug=", early_hdd_hotplug);
 #endif
 
 #ifdef MY_ABC_HERE

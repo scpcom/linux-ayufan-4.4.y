@@ -550,6 +550,76 @@ static void sanitize_inquiry_string(unsigned char *s, int len)
 	}
 }
 
+#ifdef MY_ABC_HERE
+#define SYNO_INQUIRY_TMP_LEN 32
+/**
+ * ssyno_standard_inquiry_strin - refine the vendor and model strings of SATA disks 
+ * @szInqStr: INQUIRY result string to be refined
+ * @uiLen: length of the string
+ *
+ * Description:
+ *             The result of INQUIRY from a SATA disk might set vendor as "ATA"
+ *             and set model as "vendor model." This would confuse the userspace
+ *             applications.
+ *             This function refines the INQUIRY result of SATA disks to correctly
+ *             fill the vendor and model entries. This function resets the result
+ *             string and parses the original model string and fills the correct
+ *             data into each entry.
+ **/
+static void syno_standard_inquiry_string(unsigned char *szInqStr, unsigned int uiLen)
+{
+	char szRevStr[4] = {'\0'};
+	char szTmpStr[SYNO_INQUIRY_TMP_LEN] = {'\0'};
+	int iCharIdx;
+	int blPreIsSpace = 0, blSegmented = 0;
+
+	if (NULL == szInqStr || 0 == uiLen) {
+		goto END;
+	}
+
+	/*
+	 * Only transfering the strings that vendor is ATA.
+	 * vendor set as "ATA" means the disk is a SATA disk
+	 */
+	if (strncmp(szInqStr, "ATA     ", 8)) {
+		goto END;
+	}
+
+	if (uiLen > SYNO_INQUIRY_TMP_LEN) {
+		uiLen = SYNO_INQUIRY_TMP_LEN;
+	}
+
+	memcpy(szRevStr, szInqStr + uiLen - 4, 4);
+	memcpy(szTmpStr, szInqStr + 8, uiLen - 4 - 8);
+
+	for (iCharIdx = 0; iCharIdx < sizeof(szTmpStr); iCharIdx++) {
+		if ('\0' == szTmpStr[iCharIdx]) {
+			break;
+		}
+
+		if (' ' == szTmpStr[iCharIdx]) {
+			blPreIsSpace = 1;
+		} else {
+			if (blPreIsSpace) {
+				blSegmented =1;
+				break;
+			}
+		}
+	}
+
+	if (!blSegmented) {
+		goto END;
+	}
+
+	memset(szInqStr, 0, uiLen);
+
+	memcpy(szInqStr, szTmpStr, iCharIdx);
+	memcpy(szInqStr + 8, szTmpStr + iCharIdx, strlen(szTmpStr) - iCharIdx);
+	memcpy(szInqStr + (uiLen - 4), szRevStr, 4);
+END:
+	return;
+}
+#endif
 /**
  * scsi_probe_lun - probe a single LUN using a SCSI INQUIRY
  * @sdev:	scsi_device to probe
@@ -634,6 +704,9 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	}
 
 	if (result == 0) {
+#ifdef MY_ABC_HERE
+		syno_standard_inquiry_string(&inq_result[8], 28);
+#endif
 		sanitize_inquiry_string(&inq_result[8], 8);
 		sanitize_inquiry_string(&inq_result[16], 16);
 		sanitize_inquiry_string(&inq_result[32], 4);

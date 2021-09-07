@@ -229,6 +229,10 @@ void *dm_get_mdptr(struct mapped_device *md);
  */
 int dm_suspend(struct mapped_device *md, unsigned suspend_flags);
 int dm_resume(struct mapped_device *md);
+#ifdef MY_ABC_HERE
+int dm_active_get(struct mapped_device *md);
+int dm_active_set(struct mapped_device *md, int value);
+#endif
 
 /*
  * Event functions.

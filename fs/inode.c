@@ -194,7 +194,10 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	inode->dirtied_when = 0;
 	
 #ifdef MY_ABC_HERE
-		inode->i_archive_version = 0;
+	inode->i_archive_version = 0;
+#endif
+#ifdef MY_ABC_HERE
+	inode->i_mode2 = 0;   /* set archive bit on creation */
 #endif
 	if (security_inode_alloc(inode))
 		goto out;

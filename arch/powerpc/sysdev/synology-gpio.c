@@ -110,12 +110,6 @@ typedef struct __tag_SYNO_QORIQ_STATUS_LED_GPIO {
 	u8 power_led;
 } SYNO_QORIQ_STATUS_LED_GPIO;
 
-#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
-typedef struct __tag_SYNO_QORIQ_WAKEUP_GPIO {
-	u8 power_btn;
-} SYNO_QORIQ_WAKEUP_GPIO;
-#endif
-
 typedef struct __tag_SYNO_QORIQ_GENERIC_GPIO {
 	SYNO_QORIQ_EXT_HDD_LED_GPIO	ext_sata_led;
 	SYNO_QORIQ_SOC_HDD_LED_GPIO	soc_sata_led;
@@ -125,9 +119,6 @@ typedef struct __tag_SYNO_QORIQ_GENERIC_GPIO {
 	SYNO_QORIQ_RACK_GPIO			rack;
 	SYNO_QORIQ_MULTI_BAY_GPIO		multi_bay;
 	SYNO_QORIQ_STATUS_LED_GPIO		status;
-#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
-	SYNO_QORIQ_WAKEUP_GPIO			wakeup;
-#endif
 }SYNO_QORIQ_GENERIC_GPIO;
 
 static SYNO_QORIQ_GENERIC_GPIO generic_gpio;
@@ -368,7 +359,7 @@ u8 SYNOQorIQIsBoardNeedPowerUpHDD(u32 disk_id)
 {
 	u8 ret = 0;
 
-	if (0 == strncmp(HW_DS412, gszSynoHWVersion, strlen(HW_DS412))) {
+	if (0 == strncmp(HW_DS413, gszSynoHWVersion, strlen(HW_DS413))) {
 		if ( 4 >= disk_id )
 			ret = 1;
 	}
@@ -383,11 +374,8 @@ u8 SYNOQorIQIsBoardNeedPowerUpHDD(u32 disk_id)
 
 void SYNOQorIQDiskLed(int blEnable)
 {
-	if (0 == strncmp(HW_DS412, gszSynoHWVersion, strlen(HW_DS412)) ||
-		0 == strncmp(HW_DS213pv10, gszSynoHWVersion, strlen(HW_DS213pv10))) {
-		WARN_ON(generic_gpio.ext_sata_led.disable_disk_led == GPIO_UNDEF);
+	if (GPIO_UNDEF != generic_gpio.ext_sata_led.disable_disk_led)
 		gpio_set_value(generic_gpio.ext_sata_led.disable_disk_led, blEnable ? 0 : 1);
-	}
 }
 
 int
@@ -408,14 +396,6 @@ END:
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
-int
-SYNOQorIQGPIOWakeInterruptClear(void)
-{
-	return iGpioInterruptClear(generic_gpio.wakeup.power_btn);
-}
-#endif
-
 EXPORT_SYMBOL(SYNO_QORIQ_GPIO_PIN);
 EXPORT_SYMBOL(SYNOQorIQDiskLed);
 EXPORT_SYMBOL(SYNOQorIQIsBoardNeedPowerUpHDD);
@@ -427,14 +407,74 @@ EXPORT_SYMBOL(SYNO_CTRL_FAN_STATUS_GET);
 EXPORT_SYMBOL(SYNO_CTRL_ALARM_LED_SET);
 EXPORT_SYMBOL(SYNO_CTRL_BACKPLANE_STATUS_GET);
 EXPORT_SYMBOL(SYNO_CTRL_BUZZER_CLEARED_GET);
-#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
-EXPORT_SYMBOL(SYNOQorIQGPIOWakeInterruptClear);
-#endif
 
 static void 
-QORIQ_412_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
+QORIQ_813_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 {
-	SYNO_QORIQ_GENERIC_GPIO gpio_412 = {
+	SYNO_QORIQ_GENERIC_GPIO gpio_813 = {
+		.ext_sata_led = {
+							.hdd1_led_0 = GPIO_UNDEF,
+							.hdd1_led_1 = GPIO_UNDEF,
+							.hdd2_led_0 = GPIO_UNDEF,
+							.hdd2_led_1 = GPIO_UNDEF,
+							.hdd3_led_0 = GPIO_UNDEF,
+							.hdd3_led_1 = GPIO_UNDEF,
+							.hdd4_led_0 = GPIO_UNDEF,
+							.hdd4_led_1 = GPIO_UNDEF,
+							.hdd5_led_0 = GPIO_UNDEF,
+							.hdd5_led_1 = GPIO_UNDEF,
+							.disable_disk_led = 60,
+						},
+		.soc_sata_led = {
+							.hdd2_fail_led = GPIO_UNDEF,
+							.hdd1_fail_led = GPIO_UNDEF,
+						},
+		.model		  = {
+							.model_id_0 = GPIO_UNDEF,
+							.model_id_1 = GPIO_UNDEF,
+							.model_id_2 = GPIO_UNDEF,
+							.model_id_3 = GPIO_UNDEF,
+						},
+		.fan		  = {
+							.fan_1 = GPIO_UNDEF,
+							.fan_2 = GPIO_UNDEF,
+							.fan_3 = GPIO_UNDEF,
+							.fan_fail = 28,
+							.fan_fail_2 = 29,
+							.fan_fail_3 = 26,
+						},
+		.hdd_pm		  = {
+							.hdd1_pm = GPIO_UNDEF,
+							.hdd2_pm = GPIO_UNDEF,
+							.hdd3_pm = GPIO_UNDEF,
+							.hdd4_pm = GPIO_UNDEF,
+							.hdd1_present = GPIO_UNDEF,
+							.hdd2_present = GPIO_UNDEF,
+							.hdd3_present = GPIO_UNDEF,
+							.hdd4_present = GPIO_UNDEF,
+						},
+		.rack		  = {
+							.buzzer_mute_req = 27,
+							.buzzer_mute_ack = GPIO_UNDEF,
+							.rps1_on = 71,
+							.rps2_on = 72,
+						},
+		.multi_bay	  = {
+							.inter_lock = GPIO_UNDEF,
+						},
+		.status		  = {
+							.power_led = GPIO_UNDEF,
+							.alarm_led = GPIO_UNDEF,
+						},
+	};
+
+	*global_gpio = gpio_813;
+}
+
+static void 
+QORIQ_413_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
+{
+	SYNO_QORIQ_GENERIC_GPIO gpio_413 = {
 		.ext_sata_led = {
 							.hdd1_led_0 = GPIO_UNDEF,
 							.hdd1_led_1 = GPIO_UNDEF,
@@ -489,14 +529,9 @@ QORIQ_412_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
 						},
-#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
-		.wakeup		  = {
-							.power_btn = 61, /* GPIO2 29 (32 + 29) */
-						},
-#endif
 	};
 
-	*global_gpio = gpio_412;
+	*global_gpio = gpio_413;
 }
 
 static void
@@ -557,27 +592,94 @@ QORIQ_213p_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
 						},
-#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
-		.wakeup		  = {
-							.power_btn = 61, /* GPIO2 29 (32 + 29) */
-						},
-#endif
 	};
 
 	*global_gpio = gpio_213p;
 }
 
+static void
+QORIQ_rs213p_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
+{
+	SYNO_QORIQ_GENERIC_GPIO gpio_rs213p = {
+		.ext_sata_led = {
+							.hdd1_led_0 = 75, //Green
+							.hdd1_led_1 = 70, //Orange
+							.hdd2_led_0 = 71, //Green
+							.hdd2_led_1 = 72, //Orange
+							.hdd3_led_0 = GPIO_UNDEF,
+							.hdd3_led_1 = GPIO_UNDEF,
+							.hdd4_led_0 = GPIO_UNDEF,
+							.hdd4_led_1 = GPIO_UNDEF,
+							.hdd5_led_0 = GPIO_UNDEF,
+							.hdd5_led_1 = GPIO_UNDEF,
+							.disable_disk_led = 60,
+						},
+		.soc_sata_led = {
+							.hdd2_fail_led = GPIO_UNDEF,
+							.hdd1_fail_led = GPIO_UNDEF,
+						},
+		.model		  = {
+							.model_id_0 = GPIO_UNDEF,
+							.model_id_1 = GPIO_UNDEF,
+							.model_id_2 = GPIO_UNDEF,
+							.model_id_3 = GPIO_UNDEF,
+						},
+		.fan		  = {
+							.fan_1 = GPIO_UNDEF,
+							.fan_2 = GPIO_UNDEF,
+							.fan_3 = GPIO_UNDEF,
+							.fan_fail = 28,
+							.fan_fail_2 = 29,
+							.fan_fail_3 = 26,
+						},
+		.hdd_pm		  = {
+							.hdd1_pm = GPIO_UNDEF,
+							.hdd2_pm = GPIO_UNDEF,
+							.hdd3_pm = GPIO_UNDEF,
+							.hdd4_pm = GPIO_UNDEF,
+							.hdd1_present = GPIO_UNDEF,
+							.hdd2_present = GPIO_UNDEF,
+							.hdd3_present = GPIO_UNDEF,
+							.hdd4_present = GPIO_UNDEF,
+						},
+		.rack		  = {
+							.buzzer_mute_req = GPIO_UNDEF,
+							.buzzer_mute_ack = GPIO_UNDEF,
+							.rps1_on = GPIO_UNDEF,
+							.rps2_on = GPIO_UNDEF,
+						},
+		.multi_bay	  = {
+							.inter_lock = GPIO_UNDEF,
+						},
+		.status		  = {
+							.power_led = GPIO_UNDEF,
+							.alarm_led = GPIO_UNDEF,
+						},
+	};
+
+	*global_gpio = gpio_rs213p;
+}
 int __init synology_gpio_init(void)
 {
-	if (0 == strncmp(HW_DS412, gszSynoHWVersion, strlen(HW_DS412))) {
-		printk("Apply DS 412 GPIO\n");
-		QORIQ_412_GPIO_init(&generic_gpio);
+	if (0 == strncmp(HW_DS413, gszSynoHWVersion, strlen(HW_DS413))) {
+		printk("Apply DS 413 GPIO\n");
+		QORIQ_413_GPIO_init(&generic_gpio);
 	}
 
     if (0 == strncmp(HW_DS213pv10, gszSynoHWVersion, strlen(HW_DS213pv10))) {
         printk("Apply DS 213+ GPIO\n");
         QORIQ_213p_GPIO_init(&generic_gpio);
     }
+
+	if (0 == strncmp(HW_RS813, gszSynoHWVersion, strlen(HW_RS813))) {
+		printk("Apply RS 813 GPIO\n");
+		QORIQ_813_GPIO_init(&generic_gpio);
+	}
+
+	if (0 == strncmp(HW_RS213p, gszSynoHWVersion, strlen(HW_RS213p))) {
+		printk("Apply RS 213+ GPIO\n");
+		QORIQ_rs213p_GPIO_init(&generic_gpio);
+	}
 
 	return 0;
 }

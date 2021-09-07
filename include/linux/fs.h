@@ -659,6 +659,7 @@ struct address_space_operations {
 	int (*write_end)(struct file *, struct address_space *mapping,
 				loff_t pos, unsigned len, unsigned copied,
 				struct page *page, void *fsdata);
+
 #ifdef MY_ABC_HERE
 	/*
 	 * ext3 requires that a successful prepare_write() call be followed
@@ -1102,6 +1103,7 @@ struct file {
 #ifdef CONFIG_OXNAS_BACKUP
 	void             *backup_context;
 #endif //CONFIG_OXNAS_BACKUP
+
 };
 #ifdef MY_ABC_HERE
 static inline int blSynostate(int flag, struct file *f)

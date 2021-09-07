@@ -1313,11 +1313,13 @@ static int __link_path_walk(const char *name, struct nameidata *nd)
 		slashes_count = 0;
 		cur_location_updated = 0;
 		next.mounted = 0;
+		spin_lock(&nd->path.dentry->d_lock);
 		if (caselessFlag) {
 			nd->path.dentry->d_flags |= DCACHE_CASELESS_COMPARE;
 		} else {
 			nd->path.dentry->d_flags &= ~DCACHE_CASELESS_COMPARE;
 		}
+		spin_unlock(&nd->path.dentry->d_lock);
 #endif
 		nd->flags |= LOOKUP_CONTINUE;
 #ifdef CONFIG_FS_SYNO_ACL

@@ -218,12 +218,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define     MV_MX25L3206_MAX_FAST_SPI_FREQ      50000000 /*50MHz*/
 #define     MV_MX25L3206_FAST_READ_DUMMY_BYTES  1
 
-#define     MV_MX25L6406_BLOCK_SIZE             0x10000 /* 64K */
-#define     MV_MX25L6406_BLOCK_NUMBER           128
-#define     MV_MX25L6406_DEVICE_ID              0xC22017
-#define     MV_MX25L6406_MAX_SPI_FREQ           20000000 /*20MHz*/
-#define     MV_MX25L6406_MAX_FAST_SPI_FREQ      50000000 /*50MHz*/
-#define     MV_MX25L6406_FAST_READ_DUMMY_BYTES  1
 
 #define		MV_N25Q_WREN_CMND_OPCD				0x06    /* Write Enable */
 #define		MV_N25Q_WRDI_CMND_OPCD				0x04    /* Write Disable */
@@ -237,13 +231,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define		MV_N25Q_BE_CMND_OPCD				0xC7    /* Bulk Erase */
 #define		MV_N25Q032_SECTOR_SIZE				0x10000 /* 64K */
 #define		MV_N25Q032_SECTOR_NUMBER			64
+#define		MV_N25Q064_SECTOR_SIZE				0x10000 /* 64K */
+#define		MV_N25Q064_SECTOR_NUMBER			128
 #define		MV_N25Q_PAGE_SIZE					0x100   /* 256 byte */
 #define		MV_N25QXXX_ST_MANF_ID				0x20
 #define		MV_N25Q032_DEVICE_ID				0xBA16
 #define		MV_N25Q032_MAX_SPI_FREQ				50000000
 #define		MV_N25Q032_MAX_FAST_SPI_FREQ		100000000
 #define		MV_N25Q032_FAST_READ_DUMMY_BYTES	1
+#define		MV_N25Q064_DEVICE_ID				0xBA17
+#define		MV_N25Q064_MAX_SPI_FREQ				54000000
+#define		MV_N25Q064_MAX_FAST_SPI_FREQ		108000000
+#define		MV_N25Q064_FAST_READ_DUMMY_BYTES	1
 
+#define     MV_S25FL064_DEVICE_ID              		0x0216
+#define     MV_S25FL064_MAX_SPI_FREQ           		40000000    /* 40MHz */
+#define     MV_S25FL064_MAX_FAST_SPI_FREQ        	104000000    /* 104MHz */
+#define     MV_S25FL064_FAST_READ_DUMMY_BYTES    	1
+
+/* Sector Sizes and population per device model*/
+#define     MV_S25FL064_SECTOR_SIZE            			0x10000 /* 256K */
+#define     MV_S25FL064_SECTOR_NUMBER          			128
 #endif /*CONFIG_SYNO_MV88F6281*/
 
 #define		MV_S25FL_WREN_CMND_OPCD			    0x06	/* Write Enable */
@@ -270,6 +278,47 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define     	MV_S25FL_STATUS_BP_1_OF_4           	(0x06 << MV_SFLASH_STATUS_REG_WP_OFFSET)
 #define     	MV_S25FL_STATUS_BP_1_OF_2           	(0x07 << MV_SFLASH_STATUS_REG_WP_OFFSET)
 #define     	MV_S25FL_STATUS_BP_ALL              	(0x0F << MV_SFLASH_STATUS_REG_WP_OFFSET)
+
+#ifdef CONFIG_SYNO_MV88F6281
+/************************************/
+/*  SST SST25VF032B Device Specific  */
+/************************************/
+
+/* Manufacturer IDs and Device IDs for SFLASHs supported by the driver */
+#define     MV_SST_MANF_ID                     0xBF
+#define     MV_SST25VF032_DEVICE_ID              0x254A
+#define     MV_SST25VF032_MAX_SPI_FREQ           25000000    /* 25MHz */
+#define     MV_SST25VF032_MAX_FAST_SPI_FREQ      80000000    /* 80MHz */
+#define     MV_SST25VF032_FAST_READ_DUMMY_BYTES  1
+
+/* Sector Sizes and population per device model*/
+#define     MV_SST25VF032_SECTOR_SIZE            0x10000 /* 64KB */
+#define     MV_SST25VF032_SECTOR_NUMBER          64
+#define                MV_SST_PAGE_SIZE                                0x1   /* 1B */
+
+#define                MV_SST25VF_WREN_CMND_OPCD                           0x06        /* Write Enable */
+#define                MV_SST25VF_WRDI_CMND_OPCD                           0x04        /* Write Disable */
+#define                MV_SST25VF_RDID_CMND_OPCD                           0x9F        /* Read ID */
+#define                MV_SST25VF_RDSR_CMND_OPCD                           0x05        /* Read Status Register */
+#define                MV_SST25VF_WRSR_CMND_OPCD                           0x01        /* Write Status Register */
+#define                MV_SST25VF_READ_CMND_OPCD                           0x03        /* Sequential Read */
+#define                MV_SST25VF_FAST_RD_CMND_OPCD                0x0B        /* Fast Read */
+#define                MV_SST25VF_PP_CMND_OPCD                     0x02        /* Page Program */
+#define                MV_SST25VF_SE_CMND_OPCD                     0xD8        /* Sector Erase */
+#define                MV_SST25VF_BE_CMND_OPCD                     0xC7        /* Bulk Erase */
+#define                MV_SST25VF_RES_CMND_OPCD                            0xAB        /* Read Electronic Signature */
+
+/* Status Register Write Protect Bit Masks - 3bits */
+#define                MV_SST25VF_STATUS_REG_WP_MASK           (0x0F << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define     MV_SST25VF_STATUS_BP_NONE             (0x00 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define     MV_SST25VF_STATUS_BP_1_OF_64          (0x01 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define     MV_SST25VF_STATUS_BP_1_OF_32          (0x02 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define     MV_SST25VF_STATUS_BP_1_OF_16          (0x03 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define     MV_SST25VF_STATUS_BP_1_OF_8           (0x04 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define     MV_SST25VF_STATUS_BP_1_OF_4           (0x05 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define     MV_SST25VF_STATUS_BP_1_OF_2           (0x06 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define     MV_SST25VF_STATUS_BP_ALL              (0x07 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#endif
 
 #endif /* __INCmvSFlashSpecH */
 

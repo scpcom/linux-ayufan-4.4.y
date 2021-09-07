@@ -23,6 +23,7 @@
 #include <linux/mutex.h>
 #include <linux/freezer.h>
 #include <linux/usb/quirks.h>
+#include <linux/pci.h>
 
 #include <asm/uaccess.h>
 #include <asm/byteorder.h>
@@ -81,8 +82,14 @@ struct usb_hub {
 	struct delayed_work	leds;
 	struct delayed_work	init_work;
 	void			**port_owners;
+#ifdef MY_ABC_HERE
+	int				syno_hub_eh;
+#endif
 };
 
+#ifdef MY_ABC_HERE
+static int hub_port_debounce(struct usb_hub *hub, int port1);
+#endif
 
 /* Protect struct usb_device->state and ->children members
  * Note: Both are also protected by ->dev.sem, except that ->state can
@@ -96,7 +103,11 @@ static LIST_HEAD(hub_event_list);	/* List of hubs needing servicing */
 /* Wakes up khubd */
 static DECLARE_WAIT_QUEUE_HEAD(khubd_wait);
 
+#ifdef MY_ABC_HERE
+struct task_struct *khubd_task = NULL;
+#else
 static struct task_struct *khubd_task;
+#endif
 
 /* cycle leds on hubs that aren't blinking for attention */
 static int blinkenlights = 0;
@@ -165,12 +176,19 @@ static inline char *portspeed(int portstatus)
 }
 
 /* Note that hdev or one of its children must be locked! */
+#ifndef MY_ABC_HERE
 static struct usb_hub *hdev_to_hub(struct usb_device *hdev)
+#else
+struct usb_hub *hdev_to_hub(struct usb_device *hdev)
+#endif
 {
 	if (!hdev || !hdev->actconfig)
 		return NULL;
 	return usb_get_intfdata(hdev->actconfig->interface[0]);
 }
+#ifdef MY_ABC_HERE
+EXPORT_SYMBOL(hdev_to_hub);
+#endif
 
 /* USB 2.0 spec Section 11.24.4.5 */
 static int get_hub_descriptor(struct usb_device *hdev, void *data, int size)
@@ -373,6 +391,43 @@ static int hub_port_status(struct usb_hub *hub, int port1,
 	mutex_unlock(&hub->status_mutex);
 	return ret;
 }
+
+#ifdef MY_ABC_HERE
+void syno_clear_hub_eh(struct usb_hub *hub)
+{
+	if (!hub)
+		return;
+
+	mutex_lock(&hub->status_mutex);
+	hub->syno_hub_eh = 0;
+	mutex_unlock(&hub->status_mutex);
+}
+
+void syno_set_hub_eh(struct usb_hub *hub)
+{
+	if (!hub)
+		return;
+
+	mutex_lock(&hub->status_mutex);
+	hub->syno_hub_eh = 1;
+	mutex_unlock(&hub->status_mutex);
+}
+
+int syno_get_hub_eh(struct usb_hub *hub)
+{
+	int eh = 0;
+
+	if (!hub)
+		return 0;
+
+	mutex_lock(&hub->status_mutex);
+	eh = hub->syno_hub_eh;
+	mutex_unlock(&hub->status_mutex);
+
+	return eh; 
+}
+EXPORT_SYMBOL(syno_get_hub_eh);
+#endif
 
 static void kick_khubd(struct usb_hub *hub)
 {
@@ -2057,6 +2112,11 @@ static unsigned hub_is_wusb(struct usb_hub *hub)
 #define HUB_SHORT_RESET_TIME	10
 #define HUB_LONG_RESET_TIME	200
 #define HUB_RESET_TIMEOUT	500
+#ifdef MY_ABC_HERE
+// wait device reset, some devices are slow, then set address will fail
+// ex. WD passport, Fujitsu, HP.
+#define HUB_XHCI_ROOT_RESET_TIME	1000
+#endif
 
 static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 				struct usb_device *udev, unsigned int delay)
@@ -2076,6 +2136,15 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 		if (ret < 0)
 			return ret;
 
+#ifdef MY_ABC_HERE
+		if (portchange & (USB_PORT_STAT_C_CONNECTION | USB_PORT_STAT_C_ENABLE))
+		{
+			hub_port_debounce(hub, port1);
+			ret = hub_port_status(hub, port1, &portstatus, &portchange);
+			if (ret < 0)
+				return ret;
+		}
+#else
 		/* Device went away? */
 		if (!(portstatus & USB_PORT_STAT_CONNECTION))
 			return -ENOTCONN;
@@ -2083,12 +2152,18 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 		/* bomb out completely if the connection bounced */
 		if ((portchange & USB_PORT_STAT_C_CONNECTION))
 			return -ENOTCONN;
+#endif
 
 		/* if we`ve finished resetting, then break out of the loop */
 		if (!(portstatus & USB_PORT_STAT_RESET) &&
 		    (portstatus & USB_PORT_STAT_ENABLE)) {
 			if (hub_is_wusb(hub))
 				udev->speed = USB_SPEED_WIRELESS;
+#ifdef MY_ABC_HERE
+			else if ((hub->hdev->parent == NULL) &&
+				(portstatus & (1 << USB_PORT_FEAT_SUPERSPEED)))
+				udev->speed = USB_SPEED_SUPER;
+#endif
 			else if (portstatus & USB_PORT_STAT_HIGH_SPEED)
 				udev->speed = USB_SPEED_HIGH;
 			else if (portstatus & USB_PORT_STAT_LOW_SPEED)
@@ -2107,6 +2182,16 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 			"port %d not reset yet, waiting %dms\n",
 			port1, delay);
 	}
+
+#ifdef MY_ABC_HERE
+	/* Device went away? */
+	if (!(portstatus & USB_PORT_STAT_CONNECTION))
+		return -ENOTCONN;
+
+	/* bomb out completely if the connection bounced */
+	if ((portchange & USB_PORT_STAT_C_CONNECTION))
+		return -ENOTCONN;
+#endif
 
 	return -EBUSY;
 }
@@ -2179,6 +2264,99 @@ static int hub_port_reset(struct usb_hub *hub, int port1,
 	up_read(&ehci_cf_port_reset_rwsem);
 	return status;
 }
+
+#ifdef MY_ABC_HERE
+//NEC
+//#define IS_USB2(x) (x == 3 || x == 4) // index from 1 // HCS_MAX_PORTS(xhci->hcs_params1) = 4
+//#define IS_USB3(x) (x == 1 || x == 2) // index from 1 // HCS_MAX_PORTS(xhci->hcs_params1) = 4
+//Etron
+//#define IS_USB3(x) (x == 3 || x == 4) // index from 1 // HCS_MAX_PORTS(xhci->hcs_params1) = 4
+//#define IS_USB2(x) (x == 1 || x == 2) // index from 1 // HCS_MAX_PORTS(xhci->hcs_params1) = 4
+#define IS_XHCI(hub) (!strcmp(hub->hdev->bus->controller->driver->name, "xhci_hcd"))
+
+unsigned short xhci_vendor = 0;
+EXPORT_SYMBOL(xhci_vendor);
+static bool inline IS_USB3(unsigned int x)
+{
+	if ((xhci_vendor == PCI_VENDOR_ID_NEC) &&
+		(x == 1 || x == 2)) {
+		return true;
+	} else if ((xhci_vendor == PCI_VENDOR_ID_ETRON) &&
+		(x == 3 || x == 4)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+static bool inline IS_USB2(unsigned int x)
+{
+	return !IS_USB3(x);
+}
+#endif
+
+#ifdef MY_ABC_HERE
+/* Warm reset a USB3 protocol port */
+static int hub_port_warm_reset(struct usb_hub *hub, int port)
+{
+	int ret;
+	u16 portstatus, portchange;
+
+	if (!IS_XHCI(hub) ||  !IS_USB3(port)) {
+		dev_err(hub->intfdev, "only USB3 hub support warm reset\n");
+		return -EINVAL;
+	}
+
+	/* Warm reset the port */
+	ret = set_port_feature(hub->hdev,
+				port, USB_PORT_FEAT_BH_PORT_RESET);
+	if (ret) {
+		dev_err(hub->intfdev, "cannot warm reset port %d\n", port);
+		return ret;
+	}
+
+#ifdef MY_ABC_HERE
+	// this sleep is waiting for status change to clear (reset/bh_reset/link_state),
+	// but sometimes it will take longer time to change the status,
+	// so prolong the waiting time.
+	msleep(1000);
+#else
+	msleep(20);
+#endif
+
+	ret = hub_port_status(hub, port, &portstatus, &portchange);
+
+	if (portchange & USB_PORT_STAT_C_RESET)
+		clear_port_feature(hub->hdev, port, USB_PORT_FEAT_C_RESET);
+
+	if (portchange & USB_PORT_STAT_C_BH_RESET)
+		clear_port_feature(hub->hdev, port,
+					USB_PORT_FEAT_C_BH_PORT_RESET);
+
+	if (portchange & USB_PORT_STAT_C_LINK_STATE)
+		clear_port_feature(hub->hdev, port,
+					USB_PORT_FEAT_C_PORT_LINK_STATE);
+
+	return ret;
+}
+
+/* Check if a port is power on */
+static int port_is_power_on(struct usb_hub *hub, unsigned portstatus, int port1)
+{
+	int ret = 0;
+
+	if (IS_XHCI(hub) && IS_USB3(port1)) {
+		if (portstatus & USB_SS_PORT_STAT_POWER)
+			ret = 1;
+	} else {
+		if (portstatus & USB_PORT_STAT_POWER)
+			ret = 1;
+	}
+
+	return ret;
+}
+
+#endif
 
 #ifdef	CONFIG_PM
 
@@ -2689,7 +2867,11 @@ EXPORT_SYMBOL_GPL(usb_ep0_reinit);
 #define usb_sndaddr0pipe()	(PIPE_CONTROL << 30)
 #define usb_rcvaddr0pipe()	((PIPE_CONTROL << 30) | USB_DIR_IN)
 
+#ifdef MY_ABC_HERE
+static int hub_set_address(struct usb_device *udev, int devnum, unsigned int extra_timeout_base)
+#else
 static int hub_set_address(struct usb_device *udev, int devnum)
+#endif
 {
 	int retval;
 	struct usb_hcd *hcd = bus_to_hcd(udev->bus);
@@ -2709,17 +2891,26 @@ static int hub_set_address(struct usb_device *udev, int devnum)
 	} else {
 		retval = usb_control_msg(udev, usb_sndaddr0pipe(),
 				USB_REQ_SET_ADDRESS, 0, devnum, 0,
+#ifdef MY_ABC_HERE
+				NULL, 0, USB_CTRL_SET_TIMEOUT * (extra_timeout_base + 1));
+#else
 				NULL, 0, USB_CTRL_SET_TIMEOUT);
-		if (retval == 0)
-			update_address(udev, devnum);
+#endif
 	}
 	if (retval == 0) {
+		update_address(udev, devnum);
 		/* Device now using proper address. */
 		usb_set_device_state(udev, USB_STATE_ADDRESS);
 		usb_ep0_reinit(udev);
 	}
 	return retval;
 }
+
+#ifdef MY_ABC_HERE
+enum XHCI_SPECIAL_RESET_MODE xhci_special_reset = XHCI_SPECIAL_RESET_PAUSE;
+EXPORT_SYMBOL_GPL(xhci_special_reset);
+#define SPECIAL_RESET_RETRY 20 // times
+#endif
 
 /* Reset device, (re)assign address, get device descriptor.
  * Device connection must be stable, no more debouncing needed.
@@ -2743,10 +2934,27 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 	enum usb_device_speed	oldspeed = udev->speed;
 	char 			*speed, *type;
 	int			devnum = udev->devnum;
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
+	bool reset_for_addr_err = true;
+	int special_reset_retry_count = 0;
+#endif
+	int xhci_retry = 0;
+
+	if (XHCI_SPECIAL_RESET_DISABLE != xhci_special_reset) {
+		xhci_special_reset = XHCI_SPECIAL_RESET_PAUSE;
+	}
+#endif
+
 	/* root hub ports have a slightly longer reset period
 	 * (from USB 2.0 spec, section 7.1.7.5)
 	 */
 	if (!hdev->parent) {
+#ifdef MY_ABC_HERE
+		if (IS_XHCI(hub))
+			delay = HUB_XHCI_ROOT_RESET_TIME;
+		else
+#endif
 		delay = HUB_ROOT_RESET_TIME;
 		if (port1 == hdev->bus->otg_port)
 			hdev->bus->b_hnp_enable = 0;
@@ -2759,13 +2967,33 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 
 	mutex_lock(&usb_address0_mutex);
 
+#ifdef MY_ABC_HERE
+port_init_retry:
+#endif
+
 	if (!udev->config && oldspeed == USB_SPEED_SUPER) {
 		/* Don't reset USB 3.0 devices during an initial setup */
 		usb_set_device_state(udev, USB_STATE_DEFAULT);
 	} else {
 		/* Reset the device; full speed may morph to high speed */
 		/* FIXME a USB 2.0 device may morph into SuperSpeed on reset. */
+#ifdef MY_ABC_HERE
+		// special reset for xhci port only during reboot only
+		if (!IS_XHCI(hub) ||
+				(XHCI_SPECIAL_RESET_RUN != xhci_special_reset)) {
+			retval = hub_port_reset(hub, port1, udev, delay);
+			dev_dbg(&udev->dev, "hub_port_reset1. speed:%d. ret:%d.\n", udev->speed, retval);
+		} else{
+			// Workaround 1 : Innostor will act as usb2 after reboot.
+			// Workaround 2 : WD My Passport Essential SE and My Book Essential plug/unplug will act as usb2.
+			special_reset_retry_count++;
+			dev_dbg(&udev->dev, "start xhci special reset!\n");
+			retval = hub_port_reset(hub, port1, udev, delay);
+			dev_dbg(&udev->dev, "hub_port_reset2. %dth. speed:%d. ret:%d.\n", xhci_retry, udev->speed, retval);
+		}
+#else
 		retval = hub_port_reset(hub, port1, udev, delay);
+#endif
 
 		if (retval < 0)		/* error or disconnect */
 			goto fail;
@@ -2805,7 +3033,7 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 	default:
 		goto fail;
 	}
- 
+
 	type = "";
 	switch (udev->speed) {
 	case USB_SPEED_LOW:	speed = "low";	break;
@@ -2926,7 +3154,11 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
  		 */
 		if (udev->wusb == 0) {
 			for (j = 0; j < SET_ADDRESS_TRIES; ++j) {
+#ifdef MY_ABC_HERE
+				retval = hub_set_address(udev, devnum, j);
+#else
 				retval = hub_set_address(udev, devnum);
+#endif
 				if (retval >= 0)
 					break;
 				msleep(200);
@@ -2936,6 +3168,15 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 					"device not accepting address %d, error %d\n",
 					devnum, retval);
 
+#ifdef MY_ABC_HERE
+				if ((reset_for_addr_err == true) && (oldspeed == USB_SPEED_SUPER)) {
+					oldspeed = USB_SPEED_UNKNOWN;
+					reset_for_addr_err = false;
+					printk("xhci reset for addr err.\n");
+					goto port_init_retry;
+				}
+				else
+#endif
 				goto fail;
 			}
 			if (udev->speed == USB_SPEED_SUPER) {
@@ -2998,6 +3239,31 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 			retval = -ENOMSG;
 		goto fail;
 	}
+
+#ifdef MY_ABC_HERE
+	dev_dbg(&udev->dev, "vid:0x%x.pid:0x%x.\n", le16_to_cpu(udev->descriptor.idVendor), le16_to_cpu(udev->descriptor.idProduct));
+	dev_dbg(&udev->dev, "bcdUSB:0x%x.\n", le16_to_cpu(udev->descriptor.bcdUSB));
+	// check bcdUSB or pid/vid if we need to do special reset to morph the speed to super
+	//if (0x??? == le16_to_cpu(udev->descriptor.idProduct) && 0x??? == le16_to_cpu(udev->descriptor.idVendor)) {
+	if (0x0210 <= le16_to_cpu(udev->descriptor.bcdUSB)) { // Innostor's bcdUSB is 0x210 if it's speed is high, 0x300 if it's speed is super
+		if (IS_XHCI(hub) &&
+				SPECIAL_RESET_RETRY > special_reset_retry_count &&
+				USB_SPEED_SUPER != udev->speed &&
+				((XHCI_SPECIAL_RESET_PAUSE == xhci_special_reset) || (XHCI_SPECIAL_RESET_RUN == xhci_special_reset)) &&
+				NULL == hub->hdev->parent) { // skip special reset for device which is behind a external hub
+			hub_port_disable(hub, port1, 0);
+			update_address(udev, devnum);	/* for disconnect processing */
+			oldspeed = USB_SPEED_UNKNOWN;
+			xhci_special_reset = XHCI_SPECIAL_RESET_RUN;
+			dev_err(&udev->dev, "Special reset for xhci.\n");
+			goto port_init_retry;
+		}
+	}
+
+	if (XHCI_SPECIAL_RESET_DISABLE != xhci_special_reset) {
+		xhci_special_reset = XHCI_SPECIAL_RESET_PAUSE;
+	}
+#endif
 
 	retval = 0;
 
@@ -3112,6 +3378,17 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 	/* Try to resuscitate an existing device */
 	udev = hdev->children[port1-1];
 
+#ifdef MY_ABC_HERE 
+	if ((portstatus == USB_PORT_STAT_POWER) && udev &&
+		(portchange & USB_PORT_STAT_C_CONNECTION)) {
+		//USB_VENDOR_ID_CYBERPOWER
+		if (le16_to_cpu(udev->descriptor.idVendor) == 0x0764) {
+			clear_bit(port1, hub->change_bits);
+			return;
+		}
+	}
+#endif
+
 	if ((portstatus & USB_PORT_STAT_CONNECTION) && udev &&
 			udev->state != USB_STATE_NOTATTACHED) {
 		usb_lock_device(udev);
@@ -3159,10 +3436,17 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 	/* Return now if debouncing failed or nothing is connected */
 	if (!(portstatus & USB_PORT_STAT_CONNECTION)) {
 
+#ifdef MY_ABC_HERE
+	/* maybe switch power back on (e.g. root hub was reset) */
+	if ((wHubCharacteristics & HUB_CHAR_LPSM) < 2
+			&& !port_is_power_on(hub, portstatus, port1))
+		set_port_feature(hdev, port1, USB_PORT_FEAT_POWER);
+#else
 		/* maybe switch power back on (e.g. root hub was reset) */
 		if ((wHubCharacteristics & HUB_CHAR_LPSM) < 2
 				&& !(portstatus & (1 << USB_PORT_FEAT_POWER)))
 			set_port_feature(hdev, port1, USB_PORT_FEAT_POWER);
+#endif
 
 		if (portstatus & USB_PORT_STAT_ENABLE)
   			goto done;
@@ -3205,16 +3489,17 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 			udev->speed = USB_SPEED_UNKNOWN;
 
 		/*
-		 * xHCI needs to issue an address device command later
-		 * in the hub_port_init sequence for SS/HS/FS/LS devices.
+		 * Set the address.
+		 * Note xHCI needs to issue an address device command later
+		 * in the hub_port_init sequence for SS/HS/FS/LS devices,
+		 * and xHC will assign an address to the device. But use
+		 * kernel assigned address here, to avoid any address conflict
+		 * issue.
 		 */
-		if (!(hcd->driver->flags & HCD_USB3)) {
-			/* set the address */
-			choose_address(udev);
-			if (udev->devnum <= 0) {
-				status = -ENOTCONN;	/* Don't retry */
-				goto loop;
-			}
+		choose_address(udev);
+		if (udev->devnum <= 0) {
+			status = -ENOTCONN;     /* Don't retry */
+			goto loop;
 		}
 
 		/* reset (non-USB 3.0 devices) and get descriptor */
@@ -3343,6 +3628,10 @@ static void hub_events(void)
 	 */
 	while (1) {
 
+#ifdef MY_ABC_HERE
+		dbg("hub_events!\n");
+#endif
+
 		/* Grab the first entry at the beginning of the list */
 		spin_lock_irq(&hub_event_lock);
 		if (list_empty(&hub_event_list)) {
@@ -3356,6 +3645,14 @@ static void hub_events(void)
 		hub = list_entry(tmp, struct usb_hub, event_list);
 		kref_get(&hub->kref);
 		spin_unlock_irq(&hub_event_lock);
+
+#ifdef MY_ABC_HERE
+		if ( syno_get_hub_eh(hub) ) {
+			printk(KERN_ERR "hub is performing EH\n");
+			msleep(100);
+			continue;
+		}
+#endif
 
 		hdev = hub->hdev;
 		hub_dev = hub->intfdev;
@@ -3420,6 +3717,10 @@ static void hub_events(void)
 					&portstatus, &portchange);
 			if (ret < 0)
 				continue;
+
+#ifdef MY_ABC_HERE
+			dev_dbg (hub_dev, "status:0x%x.change:0x%x.\n", portstatus, portchange);
+#endif
 
 			if (portchange & USB_PORT_STAT_C_CONNECTION) {
 				clear_port_feature(hdev, i,
@@ -3496,6 +3797,37 @@ static void hub_events(void)
 					USB_PORT_FEAT_C_RESET);
 			}
 
+#ifdef MY_ABC_HERE
+			if ((portchange & USB_PORT_STAT_C_BH_RESET) &&
+					IS_XHCI(hub) && IS_USB3(i)) {
+				dev_dbg(hub_dev,
+					"warm reset change on port %d\n",
+					i);
+				clear_port_feature(hdev, i,
+					USB_PORT_FEAT_C_BH_PORT_RESET);
+			}
+			if (portchange & USB_PORT_STAT_C_LINK_STATE) {
+				clear_port_feature(hub->hdev, i,
+					USB_PORT_FEAT_C_PORT_LINK_STATE);
+			}
+			if (portchange & USB_PORT_STAT_C_CONFIG_ERROR) {
+				dev_warn(hub_dev,
+					"config error on port %d\n",
+					i);
+				clear_port_feature(hub->hdev, i,
+					USB_PORT_FEAT_C_PORT_CONFIG_ERROR);
+			}
+
+			/* Warm reset a USB3 protocol port if it's in
+			 * SS.Inactive state.
+			 */
+			if (IS_XHCI(hub) && IS_USB3(i) &&
+				(portstatus & USB_PORT_STAT_LINK_STATE)
+					== USB_SS_PORT_LS_SS_INACTIVE) {
+				dev_dbg(hub_dev, "warm reset port %d\n", i);
+				hub_port_warm_reset(hub, i);
+			}
+#endif
 
 			if (connect_change)
 				hub_port_connect_change(hub, i,
@@ -3596,6 +3928,9 @@ int usb_hub_init(void)
 	if (!IS_ERR(khubd_task))
 		return 0;
 
+#ifdef MY_ABC_HERE
+	khubd_task = NULL;
+#endif
 	/* Fall through if kernel_thread failed */
 	usb_deregister(&hub_driver);
 	printk(KERN_ERR "%s: can't start khubd\n", usbcore_name);
@@ -3605,7 +3940,14 @@ int usb_hub_init(void)
 
 void usb_hub_cleanup(void)
 {
+#ifdef MY_ABC_HERE
+	if (khubd_task != NULL) {
+		kthread_stop(khubd_task);
+		khubd_task = NULL;
+	}
+#else
 	kthread_stop(khubd_task);
+#endif
 
 	/*
 	 * Hub resources are freed for us by usb_deregister. It calls
@@ -3897,7 +4239,15 @@ int usb_reset_device(struct usb_device *udev)
 		}
 	}
 
+#ifdef MY_ABC_HERE
+	dev_err(&udev->dev, "lock for hub EH\n");
+	syno_set_hub_eh(hdev_to_hub(udev->parent));
+#endif
 	ret = usb_reset_and_verify_device(udev);
+#ifdef MY_ABC_HERE
+	syno_clear_hub_eh(hdev_to_hub(udev->parent));
+	dev_err(&udev->dev, "unlock for hub EH\n");
+#endif
 
 	if (config) {
 		for (i = config->desc.bNumInterfaces - 1; i >= 0; --i) {

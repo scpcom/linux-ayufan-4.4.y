@@ -28,9 +28,14 @@
 #define PCI_VENDOR_ID_FRESCO_LOGIC	0x1b73
 #define PCI_DEVICE_ID_FRESCO_LOGIC_PDK	0x1000
 
-static const char hcd_name[] = "xhci_hcd";
+#ifndef MY_ABC_HERE // move to pci_id.h
+#define PCI_VENDOR_ID_ETRON   0x1b6f
+#define PCI_DEVICE_ID_ASROCK_P67  0x7023
+#else
+extern unsigned short xhci_vendor;
+#endif
 
-unsigned short xhci_vendor = 0;
+static const char hcd_name[] = "xhci_hcd";
 
 /* called after powerup, by probe or system-pm "wakeup" */
 static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
@@ -72,8 +77,6 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	xhci->hcc_params = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
 	xhci_print_registers(xhci);
 
-	xhci_vendor = pdev->vendor;
-
 	/* Look for vendor-specific quirks */
 	if (pdev->vendor == PCI_VENDOR_ID_FRESCO_LOGIC &&
 			pdev->device == PCI_DEVICE_ID_FRESCO_LOGIC_PDK &&
@@ -84,6 +87,15 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	}
 	if (pdev->vendor == PCI_VENDOR_ID_NEC)
 		xhci->quirks |= XHCI_NEC_HOST;
+
+#ifdef MY_ABC_HERE
+	xhci_vendor = pdev->vendor;
+
+  if (pdev->vendor == PCI_VENDOR_ID_ETRON &&
+      pdev->device == PCI_DEVICE_ID_ASROCK_P67) {
+    xhci_err(xhci, "Etron chip found.\n");
+  }
+#endif
 
 	/* Make sure the HC is halted. */
 	retval = xhci_halt(xhci);

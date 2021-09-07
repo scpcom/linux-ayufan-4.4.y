@@ -167,7 +167,7 @@ typedef struct _SynoMsgPkt {
 
 #define SYNO_EVENT_RAID                 0x1900
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 #define SYNO_EVENT_HIBERNATION			0x2000
 #endif
 #define SYNO_EVENT_SHUTDOWN_LOG			0x2200
@@ -181,6 +181,9 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_RAID_REMAP_RECORD 0x2500
 #define SYNO_EVENT_LV_REMAP_RECORD 0x2600
 #endif
+
+#define SYNO_EVENT_DISK_PWR_RESET 0x2700
+#define SYNO_EVENT_DISK_PORT_DISABLED 0x2800
 
 #define SYNO_EVENT_BACK_TEMP_CRITICAL   0x4004
 #define SYNO_EVENT_BACK_TEMP_HIGH       0x4003
@@ -203,6 +206,12 @@ typedef struct _SynoMsgPkt {
 
 #define SYNO_EVENT_USBSTATION_RESET 	0x5000
 #define SYNO_EVENT_USBSTATION_EJECT 	0x5001
+
+#define SYNO_EVENT_WIFIWPS              0x6000
+
+#ifdef SYNO_WIFI_WORKAROUND
+#define SYNO_EVENT_WIFI_NOTIFICATION    0x6001
+#endif /* SYNO_WIFI_WORKAROUND */
 
 #define DRIVER_CLASS_FXP                0x00
 #define DRIVER_CLASS_EM                 0x10
@@ -411,15 +420,15 @@ enum {
 #define MAX_CAPABILITY 4
 
 typedef enum {
-	CAPABILITY_THERMAL      = 2,
-	CAPABILITY_DISK_LED_CTRL= 3,
-	CAPABILITY_AUTO_POWERON = 4,
-	CAPABILITY_EBOX         = 5,
-	CAPABILITY_CPU_TEMP     = 6,
-	CAPABILITY_S_LED_BREATH = 7,
-	CAPABILITY_FAN_RPM_RPT  = 8,
-	CAPABILITY_MICROP_PWM   = 9,
-	CAPABILITY_CARDREADER	= 10,
+	CAPABILITY_THERMAL      = 1,
+	CAPABILITY_DISK_LED_CTRL= 2,
+	CAPABILITY_AUTO_POWERON = 3,
+	CAPABILITY_CPU_TEMP     = 4,
+	CAPABILITY_S_LED_BREATH = 5,
+	CAPABILITY_FAN_RPM_RPT  = 6,
+	CAPABILITY_MICROP_PWM   = 7,
+	CAPABILITY_CARDREADER	= 8,
+	CAPABILITY_LCM		= 9,
 	CAPABILITY_NONE         = -1,
 } SYNO_HW_CAPABILITY;
 
@@ -507,10 +516,11 @@ typedef enum {
 	FAN_NUMBER_4 = 4,
 }FAN_NUMBER_T;
 
-typedef enum _tag_EBOX_TYPE {
-	EBOX_SUPPORT,
-	EBOX_NOT_SUPPORT,
-}EBOX_TYPE;
+typedef enum _tag_EUNIT_PWRON_TYPE {
+	EUNIT_NOT_SUPPORT,
+	EUNIT_PWRON_GPIO,
+	EUNIT_PWRON_ATACMD,
+}EUNIT_PWRON_TYPE;
 
 typedef enum _tag_POWER_IN_SEQ {
 	POWER_IN_SEQ_OFF,
@@ -538,6 +548,18 @@ typedef enum {
 	FAN_RPM_RPT_YES,
 	FAN_RPM_RPT_NO,
 }FAN_RPM_RPT_T;
+
+typedef enum {
+	LCM_UNKNOWN,
+	LCM_YES,
+	LCM_NO
+}LCM_T;
+
+typedef enum {
+	WIFI_WPS_NO = 0x00,
+	WIFI_WPS_213air = 0x28, /* GPIO PIN 40  */
+	WIFI_WPS_UNKNOWN = 0xFF
+}WIFI_WPS_T;
 
 typedef enum {
 	CPU_FREQ_ADJUST_UNKNOWN,
@@ -597,8 +619,11 @@ typedef enum {
 	MICROP_ID_812rp = 0x49, /* 'I' */
 	MICROP_ID_2212p = 0x4A, /* 'J' */
 	MICROP_ID_2212rp = 0x4B, /* 'K' */
-	MICROP_ID_2412p = 0x4C, /* 'L' */
-	MICROP_ID_10812xs = 0x4d, /* 'M' */
+	MICROP_ID_2413p = 0x4C, /* 'L' */
+	MICROP_ID_10613xsp = 0x4d, /* 'M' */
+	MICROP_ID_3413xsp = 0x4e, /* 'N' */
+	MICROP_ID_913p = 0x4f, /* 'O' */
+	MICROP_ID_713p = 0x50, /* 'P' */
 	MICROP_ID_UNKNOW = 0xFF,
 } SYNO_MICROP_ID;
 
@@ -630,12 +655,14 @@ typedef struct {
 	DUAL_POWER_T   dual_power_type   :2;
 	USBCOPY_T      usbcopy_type      :2;
 	FAN_NUMBER_T   fan_number        :4;
-	EBOX_TYPE      ebox_type         :4;
+	EUNIT_PWRON_TYPE eunit_pwron_type:4;
 	POWER_IN_SEQ   pis_type          :4;
 	RTC_TYPE       rtc_type          :4;
 	CPUTMP_T       cputmp_type       :2;
 	STATUS_LED_T   status_led_type   :2;
 	FAN_RPM_RPT_T  fan_rpm_rpt_type  :2;
+	LCM_T          lcm_type		 :2;
+	WIFI_WPS_T		wifi_wps_type	 :8;
 	CPUFREQ_ADJUST_T cpu_freq_adjust :2;
 	CARDREADER_T   has_cardreader    :2;
 	HIBERNATE_LED_T  hibernate_led   :2;
@@ -710,20 +737,24 @@ typedef struct {
 #define HW_DS2411p     "DS2411+"       //"DS2411+"
 #define HW_RS3411rpxs  "RS3411rpxs"    //"RS3411rpxs"
 #define HW_RS3411xs    "RS3411xs"      //"RS3411xs"
+#define HW_RS10613xsp  "RS10613xs+"    //"RS10613xs+"
 #define HW_DS3611xs    "DS3611xs"      //"DS3611xs"
 #define HW_RS3412rpxs  "RS3412rpxs"    //"RS3412rpxs"
 #define HW_RS3412xs    "RS3412xs"      //"RS3412xs"
 #define HW_DS3612xs    "DS3612xs"      //"DS3612xs"
+#define HW_RS3413xsp    "RS3413xs+"      //"RS3413xs+"
 #define HW_DS111j      "DS111j"        //"DS111j"
 #define HW_DS212       "DS212"         //"DS212v10"
-#define HW_DS412       "DS412"         //"DS412"
+#define HW_DS413       "DS413"         //"DS413"
 #define HW_DS412p      "DS412+"        //"DS412+"
+#define HW_DS913p      "DS913+"        //"DS913+"
+#define HW_DS713p      "DS713+"        //"DS713+"
 #define HW_RS812p      "RS812+"        //"RS812+"
 #define HW_RS812rpp	   "RS812rp+"      //"RS812rp+"
 #define HW_DS1812p     "DS1812+"       //"DS1812+"
 #define HW_RS2212p     "RS2212+"       //"RS2212+"
 #define HW_RS2212rpp   "RS2212rp+"     //"RS2212rp+"
-#define HW_DS2412p     "DS2412+"       //"DS2412+"
+#define HW_DS2413p     "DS2413+"       //"DS2413+"
 #define HW_RS212       "RS212"         //"RS212"
 #define HW_DS212jv10   "DS212j"        //"DS212j"
 #define HW_DS212jv20   "DS212jv20"     //"DS212j"
@@ -735,10 +766,15 @@ typedef struct {
 #define HW_DS112       "DS112v10"      //"DS112"
 #define HW_DS112pv10   "DS112pv10"     //"DS112+"
 #define HW_DS112slim   "DS112slim"     //"DS112slim"
-#define HW_DS412jv10   "DS412jv10"     //"DS412jv10"
+#define HW_DS413jv10   "DS413jv10"     //"DS413jv10"
 #define HW_DS213pv10   "DS213pv10"     //"DS213pv10"
-#define HW_DS212wv10   "DS212wv10"     //"DS212wv10"
-
+#define HW_DS213airv10 "DS213airv10"   //"DS213airv10"
+#define HW_DS213v10    "DS213v10"      //"DS213v10"
+#define HW_NVR413v10   "NVR413v10"     //"NVR413v10"
+#define HW_VS240hdv10  "VS240hdv10"    //"VS240hdv10"
+#define HW_RS813       "RS813v10"      //"RS813v10"
+#define HW_RS213p      "RS213pv10"     //"RS213pv10"
+#define HW_RS213       "RS213v10"      //"RS213v10"
 #define HW_UNKNOWN     "DSUnknown"
 									    
 typedef struct _tag_HwCapability {
@@ -803,24 +839,28 @@ typedef enum {
 	MODEL_DS211p,
 	MODEL_RS3411rpxs,
 	MODEL_RS3411xs,
+	MODEL_RS10613xsp,
 	MODEL_DS3611xs,
 	MODEL_RS3412rpxs,
 	MODEL_RS3412xs,
 	MODEL_DS3612xs,
+	MODEL_RS3413xsp,
 	MODEL_RS411,
 	MODEL_DS111j,
 	MODEL_RS2211p,
 	MODEL_RS2211rpp,
 	MODEL_DS2411p,
 	MODEL_DS212,
-	MODEL_DS412,
+	MODEL_DS413,
 	MODEL_DS412p,
+	MODEL_DS913p,
+	MODEL_DS713p,
 	MODEL_RS812p,
 	MODEL_RS812rpp,
 	MODEL_DS1812p,
 	MODEL_RS2212p,
 	MODEL_RS2212rpp,
-	MODEL_DS2412p,
+	MODEL_DS2413p,
 	MODEL_RS212,
 	MODEL_DS212j,
 	MODEL_RS812,
@@ -830,9 +870,15 @@ typedef enum {
 	MODEL_DS112,
 	MODEL_DS112p,
 	MODEL_DS112slim,
-	MODEL_DS412j,
+	MODEL_DS413j,
 	MODEL_DS213p,
-	MODEL_DS212w,
+	MODEL_DS213air,
+	MODEL_DS213,
+	MODEL_NVR413,
+	MODEL_VS240hd,
+	MODEL_RS813,
+	MODEL_RS213p,
+	MODEL_RS213,
 	MODEL_INVALID
 } PRODUCT_MODEL;
 
@@ -969,6 +1015,7 @@ typedef struct _tag_SYNO_SYS_STATUS {
 #define SYNOIO_SET_PWR_LED     _IOWR(SYNOBIOS_IOC_MAGIC, 38, SYNO_LED)
 #define SYNOIO_PWM_CTL     _IOWR(SYNOBIOS_IOC_MAGIC, 39, SynoPWMCTL)
 #define SYNOIO_CHECK_MICROP_ID     _IO(SYNOBIOS_IOC_MAGIC, 40)
+#define SYNOIO_GET_EUNIT_TYPE     _IOR(SYNOBIOS_IOC_MAGIC, 41, EUNIT_PWRON_TYPE)
 
 #define SYNOIO_MANUTIL_MODE       _IOWR(SYNOBIOS_IOC_MAGIC, 128, int)
 #define SYNOIO_RECORD_EVENT       _IOWR(SYNOBIOS_IOC_MAGIC, 129, int)
@@ -1258,6 +1305,41 @@ struct synobios_ops {
 	int		(*check_microp_id)(const struct synobios_ops *);
 	int		(*set_microp_id)(void);
 };
+
+/* TODO: Because user space also need this define, so we define them here. 
+ * But userspace didn't have a common define like SYNO_SATA_PM_DEVICE_GPIO include
+ * kernel space. So we can't define it inside some define */
+#define EBOX_GPIO_KEY			"gpio"
+#define EBOX_INFO_DEV_LIST_KEY	"syno_device_list"
+#define EBOX_INFO_VENDOR_KEY	"vendorid"
+#define EBOX_INFO_DEVICE_KEY	"deviceid"
+#define EBOX_INFO_ERROR_HANDLE	"error_handle"
+#define EBOX_INFO_UNIQUE_KEY	"Unique"
+#define EBOX_INFO_EMID_KEY		"EMID"
+#define EBOX_INFO_SATAHOST_KEY	"sata_host"
+#define EBOX_INFO_PORTNO_KEY	"port_no"
+#define EBOX_INFO_CPLDVER_KEY	"cpld_version"
+#define EBOX_INFO_DEEP_SLEEP	"deepsleep_support"
+#define EBOX_INFO_IRQ_OFF		"irq_off"
+#define EBOX_INFO_UNIQUE_RX410	"RX410"
+#define EBOX_INFO_UNIQUE_DX510	"DX510"
+#define EBOX_INFO_UNIQUE_DX513	"DX513"
+#define EBOX_INFO_UNIQUE_RX4	"RX4"
+#define EBOX_INFO_UNIQUE_DX5	"DX5"
+#define EBOX_INFO_UNIQUE_RXC	"RX1211"
+#define EBOX_INFO_UNIQUE_DXC	"DX1211"
+#define EBOX_INFO_UNIQUE_RXCRP	"RX1211rp"
+#define EBOX_INFO_UNIQUE_DX213	"DX213"
+
+#define SYNO_UNIQUE(x)		(x>>2)
+#define IS_SYNOLOGY_RX4(x) (SYNO_UNIQUE(x) == 0x15 || SYNO_UNIQUE(x) == 0xd)
+#define IS_SYNOLOGY_RX410(x) (SYNO_UNIQUE(x) == 0xd)
+#define IS_SYNOLOGY_DX5(x) (SYNO_UNIQUE(x) == 0xa || SYNO_UNIQUE(x) == 0x1a)
+#define IS_SYNOLOGY_DX510(x) (SYNO_UNIQUE(x) == 0x1a)
+#define IS_SYNOLOGY_DX513(x) (SYNO_UNIQUE(x) == 0x6)
+#define IS_SYNOLOGY_DXC(x) (SYNO_UNIQUE(x) == 0x13)
+#define IS_SYNOLOGY_RXC(x) (SYNO_UNIQUE(x) == 0xb)
+#define IS_SYNOLOGY_DX213(x) (SYNO_UNIQUE(x) == 0x16)
 
 /**************************/
 #define IXP425

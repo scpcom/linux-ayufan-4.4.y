@@ -269,6 +269,12 @@ struct xhci_op_regs {
  * A read gives the current link PM state of the port,
  * a write with Link State Write Strobe set sets the link state.
  */
+#ifdef MY_ABC_HERE
+#define PORT_PLS_MASK	(0xf << 5)
+#define XDEV_U0		(0x0 << 5)
+#define XDEV_U3		(0x3 << 5)
+#define XDEV_RESUME	(0xf << 5)
+#endif
 /* true: port has power (see HCC_PPC) */
 #define PORT_POWER	(1 << 9)
 /* bits 10:13 indicate device speed:
@@ -615,6 +621,9 @@ struct xhci_ep_ctx {
 /* bit 6 reserved */
 /* bit 7 is Host Initiate Disable - for disabling stream selection */
 #define MAX_BURST(p)	(((p)&0xff) << 8)
+#ifdef MY_ABC_HERE
+#define MAX_BURST_MASK (0xff << 8)
+#endif //MY_ABC_HERE
 #define MAX_PACKET(p)	(((p)&0xffff) << 16)
 #define MAX_PACKET_MASK		(0xffff << 16)
 #define MAX_PACKET_DECODED(p)	(((p) >> 16) & 0xffff)
@@ -771,6 +780,8 @@ struct xhci_virt_device {
 	/* Rings saved to ensure old alt settings can be re-instated */
 	struct xhci_ring		**ring_cache;
 	int 			num_rings_cached;
+	/* Store xHC assigned device address */
+	int     address;
 	#define	XHCI_MAX_RINGS_CACHED 31
 
 	struct xhci_virt_ep		eps[31];

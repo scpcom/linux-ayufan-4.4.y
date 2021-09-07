@@ -177,6 +177,8 @@ extern void ata_dev_disable(struct ata_device *dev);
 extern void ata_eh_detach_dev(struct ata_device *dev);
 #ifdef MY_ABC_HERE
 extern void sata_pmp_detach(struct ata_device *dev);
+extern void SendPwrResetEvent(struct work_struct *work);
+extern void SendPortDisEvent(struct work_struct *work);
 #endif
 extern void ata_eh_about_to_do(struct ata_link *link, struct ata_device *dev,
 			       unsigned int action);

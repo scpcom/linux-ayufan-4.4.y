@@ -451,6 +451,13 @@ config SENSORS_IT8728
 
 endchoice
 
+config SENSORS_SYNOHDDMON
+	tristate "Synology Hard Disk Presentation Monitor"
+	help
+	  Synology HDD Hard Disk Presentation Monitor. This creates a
+	  kernel thread to monitor the presentation of Hard Disk and
+	  enables or disables the hard disk power supply.
+
 config SENSORS_LM63
 	tristate "National Semiconductor LM63"
 	depends on I2C

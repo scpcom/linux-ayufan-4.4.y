@@ -58,6 +58,7 @@
 
 #if defined (CONFIG_MV_XOR_MEMCOPY) || defined (CONFIG_MV_IDMA_MEMCOPY)
 ENTRY(asm_memcpy)
+ENTRY(memcpy)
 #else
 ENTRY(memcpy)
 #endif
@@ -66,6 +67,7 @@ ENTRY(memcpy)
 
 #if defined (CONFIG_MV_XOR_MEMCOPY) || defined (CONFIG_MV_IDMA_MEMCOPY)
 ENDPROC(asm_memcpy)
+ENDPROC(memcpy)
 #else
 ENDPROC(memcpy)
 #endif

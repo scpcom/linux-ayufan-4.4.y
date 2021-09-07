@@ -267,6 +267,7 @@ MV_STATUS mvCtrlEnvInit(MV_VOID)
 		(boardId == SYNO_DS411_ID)||
 		(boardId == SYNO_DS212_ID)||
 		(boardId == SYNO_6702_1BAY_ID)||
+		(boardId == SYNO_RS213_ID) ||
 #endif
 		(boardId == DB_88F6180A_BP_ID))
 		mvBoardMppMuxSet();
@@ -352,6 +353,7 @@ MV_STATUS mvCtrlEnvInit(MV_VOID)
 	   mvBoardIdGet() == SYNO_DS411_ID ||
 	   mvBoardIdGet() == SYNO_DS212_ID ||
 	   mvBoardIdGet() == SYNO_6702_1BAY_ID ||
+	   mvBoardIdGet() == SYNO_RS213_ID ||
 #endif
        mvBoardIdGet() == DB_88F6190A_BP_ID || mvBoardIdGet() == DB_88F6180A_BP_ID ||
        mvBoardIdGet() == DB_88F6280A_BP_ID)

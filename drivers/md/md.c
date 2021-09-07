@@ -51,6 +51,13 @@
 #include "bitmap.h"
 
 #ifdef MY_ABC_HERE
+void SynoMDWakeUpDevices(void *md);
+#ifdef MY_ABC_HERE
+extern int SynoDebugFlag;
+#endif
+#endif
+
+#ifdef MY_DEF_HERE
 #undef MODULE
 extern int *SYNOMdpMajor;
 extern struct list_head SYNOAllDetectedDevices;
@@ -227,7 +234,9 @@ static int md_make_request(struct request_queue *q, struct bio *bio)
 {
 	mddev_t *mddev = q->queuedata;
 	int rv;
-	
+#ifdef MY_ABC_HERE
+	unsigned char blActive = 1;
+#endif
 	if (mddev == NULL || mddev->pers == NULL) {
 		bio_io_error(bio);
 		return 0;
@@ -248,6 +257,23 @@ static int md_make_request(struct request_queue *q, struct bio *bio)
 	}
 	atomic_inc(&mddev->active_io);
 	rcu_read_unlock();
+
+#ifdef MY_ABC_HERE
+	/* we only check when after the last request 7s */
+	if (time_after(jiffies, mddev->ulLastReq + CHECKINTERVAL)) {
+		spin_lock(&mddev->ActLock);
+		blActive = mddev->blActive;
+		mddev->blActive = 1;
+		spin_unlock(&mddev->ActLock);
+
+		if (!blActive) {
+			SynoMDWakeUpDevices(mddev);
+		}
+	}
+
+	/* update the last request time */
+	mddev->ulLastReq = jiffies;
+#endif
 
 	rv = mddev->pers->make_request(q, bio);
 	if (atomic_dec_and_test(&mddev->active_io) && mddev->suspended)
@@ -394,6 +420,11 @@ static mddev_t * mddev_find(dev_t unit)
 	atomic_set(&new->openers, 0);
 	atomic_set(&new->active_io, 0);
 	spin_lock_init(&new->write_lock);
+#ifdef MY_ABC_HERE
+	spin_lock_init(&new->ActLock);
+	new->blActive = 1;
+	new->ulLastReq = jiffies;
+#endif
 	init_waitqueue_head(&new->sb_wait);
 	init_waitqueue_head(&new->recovery_wait);
 	new->reshape_position = MaxSector;
@@ -491,6 +522,29 @@ static void free_disk_sb(mdk_rdev_t * rdev)
 		rdev->sectors = 0;
 	}
 }
+#ifdef MY_ABC_HERE
+static int alloc_disk_wakeup_page(mdk_rdev_t * rdev)
+{
+	if (rdev->wakeup_page)
+		MD_BUG();
+
+	rdev->wakeup_page = alloc_page(GFP_KERNEL);
+	if (!rdev->wakeup_page) {
+		printk(KERN_ALERT "md: out of memory.\n");
+		return -ENOMEM;
+	}
+
+	return 0;
+}
+
+static void free_disk_wakeup_page(mdk_rdev_t * rdev)
+{
+	if (rdev->wakeup_page) {
+		put_page(rdev->wakeup_page);
+	}
+}
+
+#endif
 
 static void super_written(struct bio *bio, int error)
 {
@@ -1908,6 +1962,9 @@ static void export_rdev(mdk_rdev_t * rdev)
 	if (rdev->mddev)
 		MD_BUG();
 	free_disk_sb(rdev);
+#ifdef MY_ABC_HERE
+	free_disk_wakeup_page(rdev);
+#endif
 #ifndef MODULE
 	if (test_bit(AutoDetected, &rdev->flags))
 		md_autodetect_dev(rdev->bdev->bd_dev);
@@ -2704,6 +2761,11 @@ static mdk_rdev_t *md_import_device(dev_t newdev, int super_format, int super_mi
 	if ((err = alloc_disk_sb(rdev)))
 		goto abort_free;
 
+#ifdef MY_ABC_HERE
+	if ((err = alloc_disk_wakeup_page(rdev)))
+		goto abort_free;
+#endif
+
 	err = lock_rdev(rdev, newdev, super_format == -2);
 	if (err)
 		goto abort_free;
@@ -2762,6 +2824,11 @@ abort_free:
 			unlock_rdev(rdev);
 		free_disk_sb(rdev);
 	}
+#ifdef MY_ABC_HERE
+	if (rdev->wakeup_page){
+		free_disk_wakeup_page(rdev);
+	}
+#endif
 	kfree(rdev);
 	return ERR_PTR(err);
 }
@@ -3945,6 +4012,41 @@ END:
 static struct md_sysfs_entry md_auto_remap =
 __ATTR(auto_remap, S_IRUGO|S_IWUSR, auto_remap_show, auto_remap_store);
 #endif
+#ifdef MY_ABC_HERE
+static ssize_t
+md_active_show(mddev_t *mddev, char *page)
+{
+	return sprintf(page, "%d\n", mddev->blActive);
+}
+
+static ssize_t
+md_active_store(mddev_t *mddev, const char *page, size_t len)
+{
+	int iNeedWake = 0;
+
+	spin_lock(&mddev->ActLock);
+	if (cmd_match(page, "1")) {
+		if (!(mddev->blActive)) {
+			iNeedWake = 1;
+		}
+		mddev->blActive = 1;
+	} else if (cmd_match(page, "0")) {
+		mddev->blActive = 0;
+	} else {
+		printk("md: %s: active, error input\n", mdname(mddev));
+	}
+	spin_unlock(&mddev->ActLock);
+
+	if (iNeedWake) {
+		SynoMDWakeUpDevices(mddev);
+	}
+
+	return len;
+}
+
+static struct md_sysfs_entry md_active =
+__ATTR(active, S_IRUGO|S_IWUSR, md_active_show, md_active_store);
+#endif
 static ssize_t
 array_size_show(mddev_t *mddev, char *page)
 {
@@ -4003,6 +4105,9 @@ static struct attribute *md_default_attrs[] = {
 	&md_array_size.attr,
 #ifdef MY_ABC_HERE
 	&md_auto_remap.attr,
+#endif
+#ifdef MY_ABC_HERE
+	&md_active.attr,
 #endif
 	NULL,
 };
@@ -7347,7 +7452,7 @@ static int __init md_init(void)
 		unregister_blkdev(MD_MAJOR, "md");
 		return -1;
 	}
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	SYNOMdpMajor = &mdp_major;
 #endif
 	blk_register_region(MKDEV(MD_MAJOR, 0), 1UL<<MINORBITS, THIS_MODULE,
@@ -7387,7 +7492,7 @@ void md_autodetect_dev(dev_t dev)
 	node_detected_dev = kzalloc(sizeof(*node_detected_dev), GFP_KERNEL);
 	if (node_detected_dev) {
 		node_detected_dev->dev = dev;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		list_add_tail(&node_detected_dev->list, &SYNOAllDetectedDevices);
 #else
 		list_add_tail(&node_detected_dev->list, &all_detected_devices);
@@ -7402,7 +7507,9 @@ void md_autodetect_dev(dev_t dev)
 /**
  * Do not assemble disks while ..
  * 
- * 1. derived from port multiplier.
+ * 1. we assemble md only for internal disk (port multiple excluded)
+ * 2. only for first and second partition
+ * 3. the rest, we deny it
  * 
  * @param szDiskName [IN] device name. Should not be NULL
  * 
@@ -7412,29 +7519,26 @@ void md_autodetect_dev(dev_t dev)
 static u8
 blDenyDisks(const struct block_device *pBDev)
 {
-	u8 ret = 0;
-	char *szDiskName;
+	u8 ret = 1;
 	int part = -1;
 
 	if (!pBDev) {
 		goto END;
 	}
+	// this disk are not going to be used as system disk
+#ifdef MY_ABC_HERE
+	if (!(pBDev->bd_disk->systemDisk)) {
+		goto END;
+	}
+#endif
 
-	szDiskName = pBDev->bd_disk->disk_name;
-	if (NULL == strstr(szDiskName, "sd")) {		
+	part = MINOR(pBDev->bd_dev) - pBDev->bd_disk->first_minor;
+	// only assemble the first and second partition
+	if (part > 2) {
 		goto END;
 	}
 
-	/* sd[a-z] is accepted */
-	if (3 >= strlen(szDiskName)) {
-		part = MINOR(pBDev->bd_dev) - pBDev->bd_disk->first_minor;
-		/* 1 , 2 partition is accept for synology */
-		if (2 >= part) {
-			goto END;
-		}
-	}
-
-	ret = 1;
+	ret = 0;
 END:
 	return ret;
 }
@@ -7452,7 +7556,7 @@ static void autostart_arrays(int part)
 
 	printk(KERN_INFO "md: Autodetecting RAID arrays.\n");
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	while (!list_empty(&SYNOAllDetectedDevices) && i_scanned < INT_MAX) {
 		i_scanned++;
 		node_detected_dev = list_entry(SYNOAllDetectedDevices.next,
@@ -7838,6 +7942,13 @@ void SYNORaidUnplugTask(struct work_struct *work)
 
 	szDiskName = raid_unplug_work->szDiskName;
 
+	// not disk name, it means this is not a disk device, may be SAS expander or other scsi devices
+	// so we don't need to kick any disk here from md
+	if (NULL == szDiskName || 0 == szDiskName[0]) {
+		kfree(raid_unplug_work);
+		return;
+	}
+
 	for_each_mddev(mddev, mdev_tmp) {
 		if(0 != mddev_lock(mddev)){
 			WARN_ON(1);
@@ -7853,7 +7964,7 @@ void SYNORaidUnplugTask(struct work_struct *work)
 				continue;
 			}
 
-			if (NULL != strstr(b, szDiskName)) {
+			if (!strcmp(rdev->bdev->bd_disk->disk_name, szDiskName)) {
 				SYNORaidRdevUnplug(mddev, rdev);
 			}
 		}
@@ -7958,8 +8069,90 @@ END:
 
 EXPORT_SYMBOL(SynoUpdateSBTask);
 #endif
-
 #ifdef MY_ABC_HERE
+
+static void wakeup_bi_complete(struct bio *bio, int error)
+{
+	char b[BDEVNAME_SIZE];
+
+	if (0 < SynoDebugFlag) {
+		printk("Sync page end [%s] \n", bdevname(bio->bi_bdev, b));
+	}
+	bio_put(bio);
+}
+
+static void wakeup_io(struct block_device *bdev, sector_t sector, int size,
+		   struct page *page, int rw)
+{
+	struct bio *bio = bio_alloc(GFP_NOIO, 1);
+
+	rw |= (1 << BIO_RW_SYNCIO) | (1 << BIO_RW_UNPLUG);
+
+	bio->bi_bdev = bdev;
+	bio->bi_sector = sector;
+	bio_add_page(bio, page, size, 0);
+	bio->bi_private = NULL;
+	bio->bi_end_io = wakeup_bi_complete;
+	submit_bio(rw, bio);
+}
+
+static void SYNOWakeUpTask(struct work_struct *work) {
+	mdk_rdev_t *rdev = NULL;
+	char b[BDEVNAME_SIZE] = {0};
+	SYNO_WAKEUP_DEVICE_WORK *pWakeup_work = container_of(work, SYNO_WAKEUP_DEVICE_WORK, work);
+	mddev_t *mddev = pWakeup_work->mddev;
+
+	if (!mddev) {
+		goto END;
+	}
+
+	if(0 != mddev_lock(mddev)){
+		goto END;
+	}
+
+	list_for_each_entry(rdev, &mddev->disks, same_set) {
+		if (0 < SynoDebugFlag) {
+			printk("wake up [%s]\n", bdevname(rdev->bdev, b));
+		}
+		wakeup_io(rdev->bdev, rdev->sb_start, MD_SB_BYTES, rdev->wakeup_page, 0);
+	}
+	mddev_unlock(mddev);
+	kfree(pWakeup_work);
+END:
+	return;
+}
+
+void SynoMDWakeUpDevices(void *md)
+{
+	SYNO_WAKEUP_DEVICE_WORK *pWakeup_work = NULL;
+	mddev_t *mddev = md;
+
+	if (!md) {
+		printk("%s no mddev\n", __FUNCTION__);
+		goto END;
+	}
+
+	if (NULL == (pWakeup_work = kzalloc(sizeof(SYNO_WAKEUP_DEVICE_WORK), GFP_ATOMIC))){
+		WARN_ON(!pWakeup_work);
+		goto END;
+	}
+
+	/* schedule to back ground */
+	INIT_WORK(&pWakeup_work->work, SYNOWakeUpTask);
+	pWakeup_work->mddev = mddev;
+	schedule_work(&pWakeup_work->work);
+
+	/* Mark it as active */
+	spin_lock(&mddev->ActLock);
+	mddev->blActive = 1;
+	spin_unlock(&mddev->ActLock);
+END:
+	return;
+}
+EXPORT_SYMBOL(SynoMDWakeUpDevices);
+#endif
+
+#ifdef MY_DEF_HERE
 #define MODULE
 #endif
 

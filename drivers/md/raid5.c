@@ -1630,7 +1630,7 @@ static void raid5_end_read_request(struct bio * bi, int error)
 		clear_bit(R5_UPTODATE, &sh->dev[i].flags);
 		atomic_inc(&rdev->read_errors);
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 		if (conf->mddev->auto_remap &&
 			0 == IsDeviceDisappear(rdev->bdev) &&
 			!test_bit(R5_ReWrite, &sh->dev[i].flags) &&
@@ -1693,7 +1693,7 @@ static void raid5_end_read_request(struct bio * bi, int error)
 		else
 			retry = 1;
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 		if (0 == IsDeviceDisappear(rdev->bdev)) {
 			SynoReportBadSector(bi->bi_sector, READ, conf->mddev->md_minor, rdev->bdev, __FUNCTION__);
 		}

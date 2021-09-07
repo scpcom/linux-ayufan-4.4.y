@@ -3168,7 +3168,11 @@ static int ext4_nonda_switch(struct super_block *sb)
 	free_blocks  = percpu_counter_read_positive(&sbi->s_freeblocks_counter);
 	dirty_blocks = percpu_counter_read_positive(&sbi->s_dirtyblocks_counter);
 	if (2 * free_blocks < 3 * dirty_blocks ||
+#ifdef MY_ABC_HERE
+		free_blocks < (dirty_blocks + (EXT4_FREEBLOCKS_WATERMARK*MAX_PAGES_PER_RECVFILE))) {
+#else
 		free_blocks < (dirty_blocks + EXT4_FREEBLOCKS_WATERMARK)) {
+#endif
 		/*
 		 * free block count is less than 150% of dirty blocks
 		 * or free blocks is less than watermark

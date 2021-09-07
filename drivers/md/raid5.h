@@ -281,7 +281,6 @@ struct r6_state {
 					* sh pages */
 #endif
 
-
 /*
  * Write method
  */

@@ -96,9 +96,6 @@ struct gpio_chip {
 	void			(*dbg_show)(struct seq_file *s,
 						struct gpio_chip *chip);
 
-#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
-	int				(*iInterruptClear)(struct gpio_chip *Chip, const unsigned int uiGpio);
-#endif
 
 	int			base;
 	u16			ngpio;
@@ -127,10 +124,6 @@ extern int gpio_direction_output(unsigned gpio, int value);
 
 extern int gpio_get_value_cansleep(unsigned gpio);
 extern void gpio_set_value_cansleep(unsigned gpio, int value);
-
-#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
-extern int __iGpioInterruptClear(const unsigned int gpio);
-#endif
 
 /* A platform's <asm/gpio.h> code may want to inline the I/O calls when
  * the GPIO is constant and refers to some always-present controller,

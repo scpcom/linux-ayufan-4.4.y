@@ -832,23 +832,24 @@ void xhci_stop_endpoint_command_watchdog(unsigned long arg)
 	struct xhci_ring *ring;
 	struct xhci_td *cur_td;
 	int ret, i, j;
+	unsigned long flags;
 
 	ep = (struct xhci_virt_ep *) arg;
 	xhci = ep->xhci;
 
-	spin_lock(&xhci->lock);
+	spin_lock_irqsave(&xhci->lock, flags);
 
 	ep->stop_cmds_pending--;
 	if (xhci->xhc_state & XHCI_STATE_DYING) {
 		xhci_dbg(xhci, "Stop EP timer ran, but another timer marked "
 				"xHCI as DYING, exiting.\n");
-		spin_unlock(&xhci->lock);
+		spin_unlock_irqrestore(&xhci->lock, flags);
 		return;
 	}
 	if (!(ep->stop_cmds_pending == 0 && (ep->ep_state & EP_HALT_PENDING))) {
 		xhci_dbg(xhci, "Stop EP timer ran, but no command pending, "
 				"exiting.\n");
-		spin_unlock(&xhci->lock);
+		spin_unlock_irqrestore(&xhci->lock, flags);
 		return;
 	}
 
@@ -860,11 +861,11 @@ void xhci_stop_endpoint_command_watchdog(unsigned long arg)
 	xhci->xhc_state |= XHCI_STATE_DYING;
 	/* Disable interrupts from the host controller and start halting it */
 	xhci_quiesce(xhci);
-	spin_unlock(&xhci->lock);
+	spin_unlock_irqrestore(&xhci->lock, flags);
 
 	ret = xhci_halt(xhci);
 
-	spin_lock(&xhci->lock);
+	spin_lock_irqsave(&xhci->lock, flags);
 	if (ret < 0) {
 		/* This is bad; the host is not responding to commands and it's
 		 * not allowing itself to be halted.  At least interrupts are
@@ -913,7 +914,7 @@ void xhci_stop_endpoint_command_watchdog(unsigned long arg)
 			}
 		}
 	}
-	spin_unlock(&xhci->lock);
+	spin_unlock_irqrestore(&xhci->lock, flags);
 	xhci_to_hcd(xhci)->state = HC_STATE_HALT;
 	xhci_dbg(xhci, "Calling usb_hc_died()\n");
 	usb_hc_died(xhci_to_hcd(xhci));
@@ -1506,7 +1507,11 @@ static int process_ctrl_td(struct xhci_hcd *xhci, struct xhci_td *td,
 		}
 		break;
 	case COMP_SHORT_TX:
+#ifdef MY_ABC_HERE
+		xhci_dbg(xhci, "WARN: short transfer on control ep\n");
+#else
 		xhci_warn(xhci, "WARN: short transfer on control ep\n");
+#endif
 		if (td->urb->transfer_flags & URB_SHORT_NOT_OK)
 			*status = -EREMOTEIO;
 		else
@@ -1849,7 +1854,11 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 		xhci_dbg(xhci, "Stopped on No-op or Link TRB\n");
 		break;
 	case COMP_STALL:
+#ifdef MY_ABC_HERE
+		xhci_dbg(xhci, "WARN: Stalled endpoint\n");
+#else
 		xhci_warn(xhci, "WARN: Stalled endpoint\n");
+#endif
 		ep->ep_state |= EP_HALTED;
 		status = -EPIPE;
 		break;
@@ -1859,11 +1868,19 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 		break;
 	case COMP_SPLIT_ERR:
 	case COMP_TX_ERR:
+#ifdef MY_ABC_HERE
+		xhci_dbg(xhci, "WARN: transfer error on endpoint\n");
+#else
 		xhci_warn(xhci, "WARN: transfer error on endpoint\n");
+#endif
 		status = -EPROTO;
 		break;
 	case COMP_BABBLE:
+#ifdef MY_ABC_HERE
+		xhci_dbg(xhci, "WARN: babble error on endpoint\n");
+#else
 		xhci_warn(xhci, "WARN: babble error on endpoint\n");
+#endif
 		status = -EOVERFLOW;
 		break;
 	case COMP_DB_ERR:
@@ -1926,9 +1943,15 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 	 	 * TD list.
 		 */
 	 	if (list_empty(&ep_ring->td_list)) {
+#ifdef MY_ABC_HERE
+			xhci_dbg(xhci, "WARN Event TRB for slot %d ep %d "
+	 				"with no TDs queued?\n",
+	 				TRB_TO_SLOT_ID(le32_to_cpu(event->flags)), ep_index);
+#else
 	 		xhci_warn(xhci, "WARN Event TRB for slot %d ep %d "
 	 				"with no TDs queued?\n",
 	 				TRB_TO_SLOT_ID(event->flags), ep_index);
+#endif
 	 		xhci_dbg(xhci, "Event TRB with TRB type ID %u\n",
 	 			(le32_to_cpu(event->flags) & TRB_TYPE_BITMASK)>>10);
 	 		xhci_print_trb_offsets(xhci, (union xhci_trb *) event);
@@ -2178,7 +2201,11 @@ static int prepare_ring(struct xhci_hcd *xhci, struct xhci_ring *ep_ring,
 	}
 	if (!room_on_ring(xhci, ep_ring, num_trbs)) {
 		/* FIXME allocate more room */
+#ifdef MY_ABC_HERE
+		xhci_dbg(xhci, "ERROR no room on ep ring\n");
+#else
 		xhci_err(xhci, "ERROR no room on ep ring\n");
+#endif
 		return -ENOMEM;
 	}
 
@@ -2942,7 +2969,8 @@ static int xhci_queue_isoc_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 		/* Check TD length */
 		if (running_total != td_len) {
 			xhci_err(xhci, "ISOC TD length unmatch\n");
-			return -EINVAL;
+			ret = -EINVAL;
+			goto cleanup;
 		}
 	}
 

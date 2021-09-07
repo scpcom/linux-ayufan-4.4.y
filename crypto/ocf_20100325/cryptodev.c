@@ -65,6 +65,9 @@ __FBSDID("$FreeBSD: src/sys/opencrypto/cryptodev.c,v 1.34 2007/05/09 19:37:02 gn
 
 extern asmlinkage long sys_dup(unsigned int fildes);
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_OCF_RACE
+static DEFINE_SPINLOCK(syno_lock);
+#endif
 #define debug cryptodev_debug
 int cryptodev_debug = 0;
 module_param(cryptodev_debug, int, 0644);
@@ -316,6 +319,9 @@ cryptodev_op(struct csession *cse, struct crypt_op *cop)
 	 * state,  luckily interrupts will be remembered
 	 */
 	do {
+#ifdef CONFIG_SYNO_QORIQ_FIX_OCF_RACE
+		spin_unlock(&syno_lock);
+#endif
 		error = wait_event_interruptible(crp->crp_waitq,
 				((crp->crp_flags & CRYPTO_F_DONE) != 0));
 		/*
@@ -328,6 +334,9 @@ cryptodev_op(struct csession *cse, struct crypt_op *cop)
 			schedule();
 			error = 0;
 		}
+#ifdef CONFIG_SYNO_QORIQ_FIX_OCF_RACE
+		spin_lock(&syno_lock);
+#endif
 	} while ((crp->crp_flags & CRYPTO_F_DONE) == 0);
 	dprintk("%s finished WAITING error=%d\n", __FUNCTION__, error);
 
@@ -476,6 +485,9 @@ cryptodev_key(struct crypt_kop *kop)
 		goto fail;
 
 	do {
+#ifdef CONFIG_SYNO_QORIQ_FIX_OCF_RACE
+		spin_unlock(&syno_lock);
+#endif
 		error = wait_event_interruptible(krp->krp_waitq,
 				((krp->krp_flags & CRYPTO_KF_DONE) != 0));
 		/*
@@ -488,6 +500,9 @@ cryptodev_key(struct crypt_kop *kop)
 			schedule();
 			error = 0;
 		}
+#ifdef CONFIG_SYNO_QORIQ_FIX_OCF_RACE
+		spin_lock(&syno_lock);
+#endif
 	} while ((krp->krp_flags & CRYPTO_KF_DONE) == 0);
 
 	dprintk("%s finished WAITING error=%d\n", __FUNCTION__, error);
@@ -639,6 +654,9 @@ cryptodev_ioctl(
 
 	dprintk("%s(cmd=%x arg=%lx)\n", __FUNCTION__, cmd, arg);
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_OCF_RACE
+	spin_lock(&syno_lock);
+#endif
 	switch (cmd) {
 
 	case CRIOGET: {
@@ -651,6 +669,9 @@ cryptodev_ioctl(
 		fd = sys_dup(fd);
 		set_fs(fs);
 		put_user(fd, (int *) arg);
+#ifdef CONFIG_SYNO_QORIQ_FIX_OCF_RACE
+		spin_unlock(&syno_lock);
+#endif
 		return IS_ERR_VALUE(fd) ? fd : 0;
 		}
 
@@ -904,8 +925,15 @@ bail:
 	case CIOCKEY:
 	case CIOCKEY2:
 		dprintk("%s(CIOCKEY)\n", __FUNCTION__);
+#ifdef CONFIG_SYNO_QORIQ_FIX_OCF_RACE
+		if (!crypto_userasymcrypto) {
+			spin_unlock(&syno_lock);
+			return (EPERM);
+		}
+#else
 		if (!crypto_userasymcrypto)
 			return (EPERM);		/* XXX compat? */
+#endif
 		if(copy_from_user(&kop, (void*)arg, sizeof(kop))) {
 			dprintk("%s(CIOCKEY) - bad copy\n", __FUNCTION__);
 			error = EFAULT;
@@ -957,6 +985,9 @@ bail:
 		error = EINVAL;
 		break;
 	}
+#ifdef CONFIG_SYNO_QORIQ_FIX_OCF_RACE
+	spin_unlock(&syno_lock);
+#endif
 	return(-error);
 }
 
@@ -982,15 +1013,24 @@ cryptodev_open(struct inode *inode, struct file *filp)
 		return(0);
 	}
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_OCF_RACE
+	spin_lock(&syno_lock);
+#endif
 	fcr = kmalloc(sizeof(*fcr), GFP_KERNEL);
 	if (!fcr) {
 		dprintk("%s() - malloc failed\n", __FUNCTION__);
+#ifdef CONFIG_SYNO_QORIQ_FIX_OCF_RACE
+		spin_unlock(&syno_lock);
+#endif
 		return(-ENOMEM);
 	}
 	memset(fcr, 0, sizeof(*fcr));
 
 	INIT_LIST_HEAD(&fcr->csessions);
 	filp->private_data = fcr;
+#ifdef CONFIG_SYNO_QORIQ_FIX_OCF_RACE
+	spin_unlock(&syno_lock);
+#endif
 	return(0);
 }
 
@@ -1006,12 +1046,18 @@ cryptodev_release(struct inode *inode, struct file *filp)
 		return(0);
 	}
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_OCF_RACE
+	spin_lock(&syno_lock);
+#endif
 	list_for_each_entry_safe(cse, tmp, &fcr->csessions, list) {
 		list_del(&cse->list);
 		(void)csefree(cse);
 	}
 	filp->private_data = NULL;
 	kfree(fcr);
+#ifdef CONFIG_SYNO_QORIQ_FIX_OCF_RACE
+	spin_unlock(&syno_lock);
+#endif
 	return(0);
 }
 
