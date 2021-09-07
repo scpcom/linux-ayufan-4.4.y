@@ -15,7 +15,7 @@
 #include <linux/of.h>
 #include <linux/of_gpio.h>
 #include <linux/gpio.h>
- 
+
 #ifdef CONFIG_SYNO_QORIQ
 #define MPC8XXX_GPIO_PINS	87
 #else
@@ -53,7 +53,7 @@ struct mpc8xxx_gpio_chip {
 	u32 data;
 #endif
 };
- 
+
 static inline u32 mpc8xxx_gpio2mask(unsigned int gpio)
 {
 #ifdef CONFIG_SYNO_QORIQ
@@ -215,7 +215,7 @@ static void __init mpc8xxx_add_controller(struct device_node *np)
 	struct of_gpio_chip *of_gc;
 	struct gpio_chip *gc;
 	int ret;
- 
+
 	mpc8xxx_gc = kzalloc(sizeof(*mpc8xxx_gc), GFP_KERNEL);
 	if (!mpc8xxx_gc) {
 		ret = -ENOMEM;
@@ -235,7 +235,7 @@ static void __init mpc8xxx_add_controller(struct device_node *np)
 	gc->direction_output = mpc8xxx_gpio_dir_out;
 	gc->get = mpc8xxx_gpio_get;
 	gc->set = mpc8xxx_gpio_set;
- 
+
 	ret = of_mm_gpiochip_add(np, mm_gc);
 	if (ret)
 		goto err;

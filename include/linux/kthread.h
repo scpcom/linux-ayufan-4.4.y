@@ -27,6 +27,17 @@ struct task_struct *kthread_create(int (*threadfn)(void *data),
 	__k;								   \
 })
 
+#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+#define kthread_run_on_cpu(cpu, threadfn, data, namefmt, ...) \
+({ \
+	struct task_struct *__k = kthread_create(threadfn, data, namefmt, ## __VA_ARGS__); \
+	if (!IS_ERR(__k)) \
+	kthread_bind(__k, cpu); \
+	wake_up_process(__k); \
+	__k; \
+})
+#endif
+
 void kthread_bind(struct task_struct *k, unsigned int cpu);
 int kthread_stop(struct task_struct *k);
 int kthread_should_stop(void);

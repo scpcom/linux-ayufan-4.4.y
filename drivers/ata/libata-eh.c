@@ -1850,7 +1850,12 @@ static unsigned int ata_eh_analyze_tf(struct ata_queued_cmd *qc,
 		if (err & ATA_IDNF)
 			qc->err_mask |= AC_ERR_INVALID;
 #ifdef MY_ABC_HERE
+		/* Only UNC errors need remaping, and we also make sure that
+		 * the result is reported by log page 10h for NCQ commands.
+		 * This prevents remapping with untrusted LBAs.
+		 */
 		if (!(qc->ap->pflags & ATA_PFLAG_FROZEN) &&
+			(!ata_is_ncq(qc->tf.protocol) || qc->err_mask & AC_ERR_NCQ) &&
 			err & ATA_UNC) {
 			syno_ata_writes_sector(qc);
 		}

@@ -147,7 +147,7 @@ static char __log_buf[__LOG_BUF_LEN];
 static char *log_buf = __log_buf;
 static int log_buf_len = __LOG_BUF_LEN;
 static unsigned logged_chars; /* Number of chars produced since last read+clear operation */
- 
+
 #ifdef CONFIG_KEXEC
 /*
  * This appends the listed symbols to /proc/vmcoreinfo
@@ -292,7 +292,7 @@ int do_syslog(int type, char __user *buf, int len)
 	case 1:		/* Open log */
 		break;
 	case 2:		/* Read from log */
- 		error = -EINVAL;
+		error = -EINVAL;
 		if (!buf || len < 0)
 			goto out;
 		error = 0;

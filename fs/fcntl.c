@@ -31,7 +31,7 @@
 #include "synoacl_int.h"
 #endif
 		 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 
 #define ACL_MASK_NONE 0
 
@@ -227,7 +227,7 @@ unlock:
 	return err;
 }
 EXPORT_SYMBOL(__SYNOArchiveSet);
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_ARCHIVE_BIT */
 
 void set_close_on_exec(unsigned int fd, int flag)
 {
@@ -620,7 +620,7 @@ static long do_fcntl(int fd, unsigned int cmd, unsigned long arg,
 	case F_NOTIFY:
 		err = fcntl_dirnotify(fd, filp, arg);
 		break;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	case SYNO_FCNTL_BASE ... SYNO_FCNTL_LAST:
 		err = __SYNOArchiveSet(filp->f_dentry, cmd);
 		break;

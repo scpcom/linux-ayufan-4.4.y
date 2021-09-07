@@ -6808,7 +6808,13 @@ int ata_host_activate(struct ata_host *host, int irq,
 		      struct scsi_host_template *sht)
 {
 	int i, rc;
- 
+#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+	struct cpumask cpumask_msg_intrs;
+
+	cpumask_clear(&cpumask_msg_intrs);
+	cpumask_set_cpu(0, &cpumask_msg_intrs);
+#endif
+
 	rc = ata_host_start(host);
 	if (rc)
 		return rc;
@@ -6823,7 +6829,11 @@ int ata_host_activate(struct ata_host *host, int irq,
 			      dev_driver_string(host->dev), host);
 	if (rc)
 		return rc;
- 
+
+#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+	irq_set_affinity(irq, &cpumask_msg_intrs);
+#endif
+
 	for (i = 0; i < host->n_ports; i++)
 		ata_port_desc(host->ports[i], "irq %d", irq);
 

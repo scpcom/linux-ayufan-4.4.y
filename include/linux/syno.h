@@ -131,7 +131,8 @@
 #endif
 #endif
 
-#ifdef MY_ABC_HERE
+#define SYNO_ARCHIVE_BIT
+#ifdef SYNO_ARCHIVE_BIT
 
 #if defined (F_CLEAR_ARCHIVE) || defined (F_SETSMB_ARCHIVE) || defined (F_SETSMB_HIDDEN) || \
 	defined (F_SETSMB_SYSTEM) || defined (F_CLRSMB_ARCHIVE) || defined (F_CLRSMB_HIDDEN) || \

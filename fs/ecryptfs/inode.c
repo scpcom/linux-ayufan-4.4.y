@@ -959,7 +959,7 @@ static int ecryptfs_syno_set_crtime(struct dentry *dentry, struct timespec *time
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 static int ecryptfs_syno_set_archive_bit(struct dentry *dentry, unsigned int arbit)
 {
 	int error;
@@ -971,7 +971,7 @@ static int ecryptfs_syno_set_archive_bit(struct dentry *dentry, unsigned int arb
 	}
 	return error;
 }
-#endif //MY_ABC_HERE
+#endif //SYNO_ARCHIVE_BIT
 
 #ifdef MY_ABC_HERE
 static int ecryptfs_syno_set_archive_ver(struct dentry *dentry, u32 version)
@@ -1192,7 +1192,7 @@ int ecryptfs_getattr(struct vfsmount *mnt, struct dentry *dentry,
 	if (!rc) {
 		generic_fillattr(dentry->d_inode, stat);
 		stat->blocks = lower_stat.blocks;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 		stat->SynoMode = lower_stat.SynoMode;
 #endif
 #ifdef MY_ABC_HERE
@@ -1317,7 +1317,7 @@ const struct inode_operations ecryptfs_symlink_iops = {
 #ifdef MY_ABC_HERE
 	.syno_set_crtime = ecryptfs_syno_set_crtime,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.syno_set_archive_bit = ecryptfs_syno_set_archive_bit,
 #endif
 #ifdef MY_ABC_HERE
@@ -1361,7 +1361,7 @@ const struct inode_operations ecryptfs_dir_iops = {
 #ifdef MY_ABC_HERE
 	.syno_set_crtime = ecryptfs_syno_set_crtime,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.syno_set_archive_bit = ecryptfs_syno_set_archive_bit,
 #endif
 #ifdef MY_ABC_HERE
@@ -1391,7 +1391,7 @@ const struct inode_operations ecryptfs_main_iops = {
 #ifdef MY_ABC_HERE
 	.syno_set_crtime = ecryptfs_syno_set_crtime,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.syno_set_archive_bit = ecryptfs_syno_set_archive_bit,
 #endif
 #ifdef MY_ABC_HERE

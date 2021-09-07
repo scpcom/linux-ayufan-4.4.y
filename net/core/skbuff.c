@@ -470,7 +470,7 @@ void __kfree_skb(struct sk_buff *skb)
 	kfree_skbmem(skb);
 }
 EXPORT_SYMBOL(__kfree_skb);
- 
+
 /**
  *	kfree_skb - free an sk_buff
  *	@skb: buffer to free

@@ -2418,7 +2418,20 @@ err_out:
 	talitos_remove(ofdev);
 
 	return err;
-} 
+}
+
+#ifdef CONFIG_PM
+static int talitos_suspend(struct of_device* dev, pm_message_t state)
+{
+	return 0;
+}
+
+static int talitos_resume(struct of_device* dev)
+{
+	init_device(&dev->dev);
+	return 0;
+}
+#endif /* CONFIG_PM */
 
 static struct of_device_id talitos_match[] = {
 	{
@@ -2437,7 +2450,11 @@ static struct of_platform_driver talitos_driver = {
 	.name = "talitos",
 	.match_table = talitos_match,
 	.probe = talitos_probe,
-	.remove = talitos_remove, 
+	.remove = talitos_remove,
+#ifdef CONFIG_PM
+	.suspend = talitos_suspend,
+	.resume = talitos_resume,
+#endif
 };
 
 static int __init talitos_init(void)

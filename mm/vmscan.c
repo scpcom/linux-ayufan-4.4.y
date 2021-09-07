@@ -2156,9 +2156,15 @@ static int kswapd(void *p)
 
 	lockdep_set_current_reclaim_state(GFP_KERNEL);
 
- 	if (!cpumask_empty(cpumask))
+#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+	if (!cpumask_empty(cpumask)) {
+		set_cpus_allowed_ptr(tsk, cpumask_of(0));
+	}
+#else
+	if (!cpumask_empty(cpumask))
 		set_cpus_allowed_ptr(tsk, cpumask);
- 	current->reclaim_state = &reclaim_state;
+#endif
+	current->reclaim_state = &reclaim_state;
 
 	/*
 	 * Tell the memory management that we're a "memory allocator",

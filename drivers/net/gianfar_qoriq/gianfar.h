@@ -1362,7 +1362,8 @@ struct gfar_private {
 #ifdef CONFIG_GFAR_SKBUFF_RECYCLING
 	unsigned int skbuff_truesize;
 	struct gfar_skb_handler skb_handler;
-#endif 
+#endif
+
 	unsigned int ftp_rqfpr[MAX_FILER_IDX + 1];
 	unsigned int ftp_rqfcr[MAX_FILER_IDX + 1];
 };

@@ -2754,7 +2754,10 @@ static void sd_shutdown(struct device *dev)
 
 static int sd_suspend(struct device *dev, pm_message_t mesg)
 {
- 	struct scsi_disk *sdkp = scsi_disk_get_from_dev(dev);
+#ifdef CONFIG_SYNO_QORIQ_FIX_DISK_WAKE_BEFORE_DEEPSLEEP
+	return 0;
+#else
+	struct scsi_disk *sdkp = scsi_disk_get_from_dev(dev);
 	int ret = 0;
 
 	if (!sdkp)
@@ -2775,7 +2778,8 @@ static int sd_suspend(struct device *dev, pm_message_t mesg)
 done:
 	scsi_disk_put(sdkp);
 	return ret;
- }
+#endif
+}
 
 static int sd_resume(struct device *dev)
 {

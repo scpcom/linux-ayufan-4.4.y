@@ -40,7 +40,7 @@ void generic_fillattr(struct inode *inode, struct kstat *stat)
 	stat->dev = inode->i_sb->s_dev;
 	stat->ino = inode->i_ino;
 	stat->mode = inode->i_mode;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	stat->SynoMode = inode->i_mode2;
 #endif
 #ifdef MY_ABC_HERE
@@ -681,13 +681,13 @@ static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYN
 		if (flags & SYNOST_STAT) {
 			error = cp_new_stat64(pKst, &pSt64->st);
 		}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 		if (flags & SYNOST_ARBIT) {
 			if (__put_user(pKst->SynoMode, &pSt64->ext.archBit)){
 				goto Out;
 			}
 		}
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_ARCHIVE_BIT */
 #ifdef MY_ABC_HERE
 		if (flags & SYNOST_CREATIME) {
 			if (copy_to_user(&pSt64->ext.creatTime, &pKst->SynoCreateTime, sizeof(pSt64->ext.creatTime))){
@@ -708,13 +708,13 @@ static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYN
 				goto Out;
 			}
 		}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 		if (flags & SYNOST_ARBIT) {
 			if (__put_user(pKst->SynoMode, &pSt->ext.archBit)){
 				goto Out;
 			}
 		}
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_ARCHIVE_BIT */
 #ifdef MY_ABC_HERE
 		if (flags & SYNOST_CREATIME) {
 			if (copy_to_user(&pSt->ext.creatTime, &pKst->SynoCreateTime, sizeof(pSt->ext.creatTime))){

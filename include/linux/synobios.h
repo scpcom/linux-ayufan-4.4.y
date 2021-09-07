@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 // Copyright (c) 2000-2003 Synology Inc. All rights reserved.
 #ifndef __SYNOBIOS_OEM_H_
 #define __SYNOBIOS_OEM_H_
@@ -195,7 +198,7 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_ERROR_FS 0x2900
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_ERROR_REPORT
 #define SYNO_EVENT_SATA_ERROR_REPORT 0x2a00
 #endif
 
@@ -203,17 +206,17 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_WAKE_FROM_DEEP_SLEEP 0x2b00
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_ERROR_REPORT
 #define SYNO_EVENT_DISK_RETRY_REPORT 0x2c00
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_BTRFS_ERROR_FS_REPORT
 #define SYNO_EVENT_ERROR_FS_BTRFS 0x2d00
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_DETECT_DISK_POWER_SHORT_BREAK
 #define SYNO_EVENT_DSIK_POWER_SHORT_BREAK 0x2e00
-#endif /* MY_DEF_HERE */
+#endif /* SYNO_DETECT_DISK_POWER_SHORT_BREAK */
 
 #define SYNO_EVENT_BACK_TEMP_CRITICAL   0x4004
 #define SYNO_EVENT_BACK_TEMP_HIGH       0x4003
@@ -239,9 +242,9 @@ typedef struct _SynoMsgPkt {
 
 #define SYNO_EVENT_WIFIWPS              0x6000
 
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 #define SYNO_EVENT_WIFI_NOTIFICATION    0x6001
-#endif /* MY_DEF_HERE */
+#endif /* MY_ABC_HERE */
 
 #define DRIVER_CLASS_FXP                0x00
 #define DRIVER_CLASS_EM                 0x10
@@ -514,6 +517,7 @@ typedef enum {
 	FAN_MICROP_PWM_WITH_CPUFAN_AND_GPIO,
 	FAN_ADT,
 	FAN_ADT_FANFAIL_WITH_MICROP,
+	FAN_BMC,
 } FAN_T;
 
 typedef enum {
@@ -690,7 +694,7 @@ typedef enum {
 	MICROP_ID_RS3614xs = 0x5B, /* 'W' RS3614xs */
 	MICROP_ID_RS3614rpxs = 0x5C, /* 'W' RS3614rpxs */
 	MICROP_ID_RC18015xsp = 0x4d, /* 'M' Temporarily using the same microp ID as 10613 */
-	MICROP_ID_RS18015xsp = 0x4d, /* 'M' */
+	MICROP_ID_RS18016xsp = 0x4d, /* 'M' */
 	MICROP_ID_RR36015xsppp = 0x4d, /* 'M' */
 	MICROP_ID_DS2414xs = 0x57, /* 'W' DS2414xs */
 	MICROP_ID_RS3415xsp = 0x60, /* '`' RS3415xs+ cheese cake*/
@@ -915,7 +919,7 @@ typedef struct {
 #define HW_RS814v10    "RS814v10"
 #define HW_DS114p      "DS114+"      //"DS114+"
 #define HW_RC18015xsp  "RC18015xs+"    //"RC18015xs+"
-#define HW_RS18015xsp  "RS18015xs+"    //"RS18015xs+"
+#define HW_RS18016xsp  "RS18016xs+"    //"RS18016xs+"
 #define HW_RR36015xsppp  "RR36015xs+++"    //"RR36015xs+++"
 #define HW_DS714v10    "DS714v10"
 #define HW_RS814p      "RS814+"        //"RS814+"
@@ -936,12 +940,14 @@ typedef struct {
 #define HW_DS215router	"DS215router"      //"DS215router"
 #define HW_RS815	   "RS815"        //"RS815"
 #define HW_DS1515       "DS1515"
-#define HW_DS715p       "DS715+"
+#define HW_DS715        "DS715"
 #define HW_DS215p       "DS215+"
-#define HW_DS415        "DS415"
-#define HW_RS2415p     "RS2415+"       //"RS2415+"
-#define HW_RS2415rpp   "RS2415rp+"     //"RS2415rp+"
-#define HW_DS216j		"DS216j"
+#define HW_DS416        "DS416"
+#define HW_RS2416p     "RS2416+"       //"RS2416+"
+#define HW_RS2416rpp   "RS2416rp+"     //"RS2416rp+"
+#define HW_DS216play		"DS216play"
+#define HW_DS216se	   "DS216se"      //DS216se
+#define HW_DS416play	"DS416play"      //DS416play
 #define HW_UNKNOWN     "DSUnknown"
 
 typedef struct _tag_HwCapability {
@@ -1085,18 +1091,21 @@ typedef enum {
 	MODEL_RS815p,
 	MODEL_RS815rpp,
 	MODEL_DS215router,
-	MODEL_DS715p, // 130
+	MODEL_DS715, // 130
 	MODEL_DS115,
 	MODEL_RS815,
-	MODEL_RS18015xsp,
+	MODEL_RS18016xsp,
 	MODEL_VS360hd,
 	MODEL_DS1515,
 	MODEL_DS215p,
-	MODEL_DS415,
+	MODEL_DS416,
 	MODEL_RR36015xsppp,
-	MODEL_RS2415p,
-	MODEL_RS2415rpp,
-	MODEL_DS216j,
+	MODEL_RS2416p,
+	MODEL_RS2416rpp, //140
+	MODEL_DS216play,
+	MODEL_DS216se,
+	MODEL_DS416play,
+	MODEL_DS716nvr,
 	MODEL_INVALID
 } PRODUCT_MODEL;
 
@@ -1188,6 +1197,9 @@ typedef struct _tag_SYNO_SYS_STATUS {
 typedef struct _tag_SYNO_CPU_INFO {
 	unsigned int core;
 	char clock[16];
+#ifdef CONFIG_SYNO_GRANTLEY
+	unsigned int cpucore[CONFIG_SYNO_GRANTLEY_MAX_CPU_NUM];
+#endif
 } SYNO_CPU_INFO;
 /* Use 'K' as magic number */
 #define SYNOBIOS_IOC_MAGIC  'K'

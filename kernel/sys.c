@@ -358,8 +358,8 @@ void kernel_power_off(void)
 #endif
 	if (pm_power_off_prepare)
 		pm_power_off_prepare();
- 	disable_nonboot_cpus();
- 	sysdev_shutdown();
+	disable_nonboot_cpus();
+	sysdev_shutdown();
 	printk(KERN_EMERG "Power down.\n");
 	machine_power_off();
 }

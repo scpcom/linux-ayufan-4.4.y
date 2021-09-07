@@ -23,6 +23,13 @@ config SYNO_QORIQ_IGNORE_DEFAULT_GATEWAY_ARP
 	help
 	  Say Y here to support ignoring default gateway's ARP packet.
 
+config SYNO_QORIQ_FIX_DISK_WAKE_BEFORE_DEEPSLEEP
+	bool "Fix disk will wakeup before deepsleep"
+	depends on SYNO_QORIQ
+	default y
+	help
+	  Say Y here to let disk don't wakeup before deepsleep
+
 config SYNO_QORIQ_FIX_OCF_RACE
 	bool "fix ocf race"
 	depends on SYNO_QORIQ
@@ -71,6 +78,10 @@ config SYNO_MPC8533_TIMEBASE_FREQ
     default 0
     help
         Overwrite default timebase frequency
+
+config SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+	bool "Choose this to bind irq/kthread on specified cpu"
+	depends on SYNO_QORIQ
 
 config SYNO_QORIQ_GIANFAR_DROP_CACHE
 	bool "Drop cache before gianfar device start up"

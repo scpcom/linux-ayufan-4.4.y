@@ -340,6 +340,9 @@ struct mddev_s
 	void				*syno_private;	  // store lv struct for auto remap report
 	char				lv_name[16];
 #endif
+#ifdef MY_ABC_HERE
+	mempool_t			*syno_mdio_mempool;
+#endif
 #ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
  	struct raidset_s* hw_raid;
 #endif

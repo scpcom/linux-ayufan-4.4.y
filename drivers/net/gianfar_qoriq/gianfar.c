@@ -230,7 +230,7 @@ static const struct net_device_ops gfar_netdev_ops = {
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
 DEFINE_PER_CPU(struct gfar_cpu_dev, gfar_cpu_dev);
 #endif
- 
+
 #ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
 static int syno_gianfar_drop_caches = 0;
 #endif
@@ -1213,8 +1213,12 @@ void gfar_cpu_dev_init(void)
 			goto irq_fail;
 		}
 		cpumask_clear(&cpumask_msg_intrs);
- 		cpumask_set_cpu(i, &cpumask_msg_intrs);
- 		irq_set_affinity(cpu_dev->msg_virtual_rx->irq,
+#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+		cpumask_set_cpu(0, &cpumask_msg_intrs);
+#else
+		cpumask_set_cpu(i, &cpumask_msg_intrs);
+#endif
+		irq_set_affinity(cpu_dev->msg_virtual_rx->irq,
 					&cpumask_msg_intrs);
 		fsl_enable_msg(cpu_dev->msg_virtual_rx);
 
@@ -1701,7 +1705,7 @@ static int gfar_probe(struct of_device *ofdev,
 	for(i = 0; i < priv->num_tx_queues; i++)
 		 printk(KERN_INFO "%s:TX BD ring size for Q[%d]: %d\n",
 			dev->name, i, priv->tx_queue[i]->tx_ring_size);
- 
+
 	return 0;
 
 register_fail:
@@ -1727,7 +1731,7 @@ static int gfar_remove(struct of_device *ofdev)
 	if (priv->tbi_node)
 		of_node_put(priv->tbi_node);
 
- 	dev_set_drvdata(&ofdev->dev, NULL);
+	dev_set_drvdata(&ofdev->dev, NULL);
 
 	unregister_netdev(priv->ndev);
 	unmap_group_regs(priv);
@@ -1749,8 +1753,8 @@ static void gfar_enable_filer(struct net_device *dev)
 	temp |= RCTRL_FILREN;
 	temp &= ~RCTRL_FSQEN;
 	temp &= ~RCTRL_PRSDEP_MASK;
- 	temp |= RCTRL_PRSDEP_L2L3;
- 	gfar_write(&regs->rctrl, temp);
+	temp |= RCTRL_PRSDEP_L2L3;
+	gfar_write(&regs->rctrl, temp);
 
 	unlock_rx_qs(priv);
 }
@@ -1850,7 +1854,7 @@ static void gfar_config_filer_table(struct net_device *dev)
 	rqfcr = RQFCR_GPI | (rqfcr_queue << 10) | RQFCR_CMP_EXACT | RQFCR_PID_DAL;
 	mb();
 	rqfpr = dest_mac_addr_l;
-	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr); 
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
 
 	unlock_rx_qs(priv);
 }
@@ -1999,7 +2003,7 @@ static int gfar_arp_resume(struct net_device *dev)
 
 	netif_device_attach(dev);
 	enable_napi(priv);
- 
+
 #ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
 	syno_gianfar_drop_caches = 1;
 #endif
@@ -2398,7 +2402,7 @@ void free_bds(struct gfar_private *priv)
 			priv->tx_queue[0]->tx_bd_base,
 			gfar_read(&(priv->gfargrp[0].regs)->tbase0));
 #endif
- }
+}
 
 void stop_gfar(struct net_device *dev)
 {
@@ -2436,8 +2440,8 @@ void stop_gfar(struct net_device *dev)
 	}
 
 	free_skb_resources(priv);
- 	free_bds(priv);
- }
+	free_bds(priv);
+}
 
 #ifdef CONFIG_GFAR_SKBUFF_RECYCLING
 /*
@@ -2480,8 +2484,8 @@ void gfar_free_recycle_queue(struct gfar_skb_handler *sh, int lock_flag)
 	while (clist) {
 		skb = clist;
 		clist = clist->next;
- 		dev_kfree_skb_any(skb);
- 	}
+		dev_kfree_skb_any(skb);
+	}
 }
 #endif
 
@@ -2506,8 +2510,8 @@ static void free_skb_tx_queue(struct gfar_priv_tx_q *tx_queue)
 					txbdp->length, DMA_TO_DEVICE);
 		}
 		txbdp++;
- 		dev_kfree_skb_any(tx_queue->tx_skbuff[i]);
- 		tx_queue->tx_skbuff[i] = NULL;
+		dev_kfree_skb_any(tx_queue->tx_skbuff[i]);
+		tx_queue->tx_skbuff[i] = NULL;
 	}
 #ifndef CONFIG_GIANFAR_L2SRAM
 	kfree(tx_queue->tx_skbuff);
@@ -2531,8 +2535,8 @@ static void free_skb_rx_queue(struct gfar_priv_rx_q *rx_queue)
 				rxbdp->bufPtr, priv->rx_buffer_size,
 					DMA_FROM_DEVICE);
 
- 				dev_kfree_skb_any(rx_queue->rx_skbuff[i]);
- 				rx_queue->rx_skbuff[i] = NULL;
+				dev_kfree_skb_any(rx_queue->rx_skbuff[i]);
+				rx_queue->rx_skbuff[i] = NULL;
 			}
 
 			rxbdp->lstatus = 0;
@@ -2581,11 +2585,11 @@ static void free_skb_resources(struct gfar_private *priv)
 
 	if(( priv->device_flags & FSL_GIANFAR_DEV_HAS_ARP_PACKET)) {
 		rx_queue = priv->rx_queue[priv->num_rx_queues-1];
- 		dma_free_coherent(&priv->ofdev->dev,
+		dma_free_coherent(&priv->ofdev->dev,
 			   priv->wk_buffer_size * rx_queue->rx_ring_size \
 			   + RXBUF_ALIGNMENT, (void *)priv->wk_buf_vaddr,
 			   priv->wk_buf_paddr);
- 	}
+	}
 	/* Go through all the buffer descriptors and free their data buffers */
 	for (i = 0; i < priv->num_tx_queues; i++) {
 		tx_queue = priv->tx_queue[i];
@@ -2754,7 +2758,13 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 	int cpus = num_online_cpus();
 	struct cpumask cpumask_msg_intrs;
 #endif
- 
+
+#if defined(CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY) && !defined(CONFIG_GFAR_SW_PKT_STEERING)
+	struct cpumask cpumask_msg_intrs;
+	cpumask_clear(&cpumask_msg_intrs);
+	cpumask_set_cpu(0, &cpumask_msg_intrs);
+#endif
+
 	/* If the device has multiple interrupts, register for
 	 * them.  Otherwise, only register for the one */
 	if (priv->device_flags & FSL_GIANFAR_DEV_HAS_MULTI_INTR) {
@@ -2768,7 +2778,12 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 
 				goto err_irq_fail;
 		}
-		
+#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+		else {
+			irq_set_affinity(grp->interruptError, &cpumask_msg_intrs);
+		}
+#endif
+
 		if ((err = request_irq(grp->interruptTransmit, gfar_transmit,
 				0, grp->int_name_tx, grp)) < 0) {
 			if (netif_msg_intr(priv))
@@ -2776,7 +2791,12 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 					dev->name, grp->interruptTransmit);
 			goto tx_irq_fail;
 		}
- 
+#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+		else {
+			irq_set_affinity(grp->interruptTransmit, &cpumask_msg_intrs);
+		}
+#endif
+
 		if ((err = request_irq(grp->interruptReceive, gfar_receive, 0,
 				grp->int_name_rx, grp)) < 0) {
 			if (netif_msg_intr(priv))
@@ -2784,7 +2804,12 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 					dev->name, grp->interruptReceive);
 			goto rx_irq_fail;
 		}
- 	} else {
+#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+		else {
+			irq_set_affinity(grp->interruptReceive, &cpumask_msg_intrs);
+		}
+#endif
+	} else {
 		if ((err = request_irq(grp->interruptTransmit, gfar_interrupt, 0,
 				grp->int_name_tx, grp)) < 0) {
 			if (netif_msg_intr(priv))
@@ -2792,7 +2817,12 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 					dev->name, grp->interruptTransmit);
 			goto err_irq_fail;
 		}
- 	}
+#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+		else {
+			irq_set_affinity(grp->interruptTransmit, &cpumask_msg_intrs);
+		}
+#endif
+	}
 
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
 	if (priv->sps) {
@@ -2817,8 +2847,12 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 				goto vtx_irq_fail;
 			}
 			cpumask_clear(&cpumask_msg_intrs);
- 			cpumask_set_cpu(i, &cpumask_msg_intrs);
- 			irq_set_affinity(grp->msg_virtual_tx[i]->irq,
+#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+			cpumask_set_cpu(0, &cpumask_msg_intrs);
+#else
+			cpumask_set_cpu(i, &cpumask_msg_intrs);
+#endif
+			irq_set_affinity(grp->msg_virtual_tx[i]->irq,
 						&cpumask_msg_intrs);
 			fsl_enable_msg(grp->msg_virtual_tx[i]);
 		}
@@ -2909,8 +2943,8 @@ int startup_gfar(struct net_device *dev)
 		priv->total_rx_ring_size += priv->rx_queue[i]->rx_ring_size;
 
 	/* Allocate memory for the buffer descriptors */
- 	vaddr = alloc_bds(priv, &addr);
- 
+	vaddr = alloc_bds(priv, &addr);
+
 	if (vaddr == 0) {
 		if (netif_msg_ifup(priv))
 			printk(KERN_ERR "%s: Could not allocate buffer descriptors!\n",
@@ -3097,10 +3131,10 @@ int startup_gfar(struct net_device *dev)
 	/* Alloc wake up rx buffer, wake up buffer need 64 bytes aligned */
 		rx_queue = priv->rx_queue[priv->num_rx_queues-1];
 		rx_queue->cur_rx = rx_queue->rx_bd_base;
- 		vaddr = (unsigned long) dma_alloc_coherent(&priv->ofdev->dev,
+		vaddr = (unsigned long) dma_alloc_coherent(&priv->ofdev->dev,
 				priv->wk_buffer_size * rx_queue->rx_ring_size \
 				+ RXBUF_ALIGNMENT, &addr, GFP_KERNEL);
- 		if (vaddr == 0) {
+		if (vaddr == 0) {
 			if (netif_msg_ifup(priv))
 				printk(KERN_ERR
 					"%s:Could not allocate wakeup buffer!\n"					, dev->name);
@@ -3220,7 +3254,7 @@ int startup_gfar(struct net_device *dev)
 
 irq_fail:
 wk_buf_fail:
- 	dma_free_coherent(&priv->ofdev->dev,
+	dma_free_coherent(&priv->ofdev->dev,
 			priv->wk_buffer_size * priv->rx_queue[priv->num_rx_queues-1]->rx_ring_size \
 			+ RXBUF_ALIGNMENT, (void *)priv->wk_buf_vaddr,
 			priv->wk_buf_paddr);
@@ -4747,8 +4781,8 @@ out:
 		mb();
 		/* Update to the next pointer */
 		if (bdp->status & RXBD_WRAP)
- 			bdp = priv->wk_bd_base;
- 		else
+			bdp = priv->wk_bd_base;
+		else
 			bdp++;
 
 	}
@@ -5766,13 +5800,7 @@ END:
 }
 EXPORT_SYMBOL(SynoQorIQWOLSet);
 #endif
- 
-int SynoQorIQSetPhyLed(SYNO_LED ledStatus)
-{ 
-	return 0;
-}
-EXPORT_SYMBOL(SynoQorIQSetPhyLed);
- 
+
 static struct of_device_id gfar_match[] =
 {
 	{

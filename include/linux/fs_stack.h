@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _LINUX_FS_STACK_H
 #define _LINUX_FS_STACK_H
 
@@ -16,7 +13,7 @@ extern void fsstack_copy_attr_all(struct inode *dest, const struct inode *src,
 
 extern void fsstack_copy_inode_size(struct inode *dst, const struct inode *src);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 extern void fsstack_copy_syno_archive(struct inode *dst, const struct inode *src);
 #endif
 

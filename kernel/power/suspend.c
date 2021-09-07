@@ -254,17 +254,17 @@ static void suspend_finish(void)
 int enter_state(suspend_state_t state)
 {
 	int error;
- 
+
 	if (!valid_state(state))
 		return -ENODEV;
 
 	if (!mutex_trylock(&pm_mutex))
 		return -EBUSY;
- 
- 	printk(KERN_INFO "PM: Syncing filesystems ... ");
+
+	printk(KERN_INFO "PM: Syncing filesystems ... ");
 	sys_sync();
 	printk("done.\n");
- 
+
 	pr_debug("PM: Preparing system for %s sleep\n", pm_states[state]);
 	error = suspend_prepare();
 	if (error)
@@ -280,7 +280,7 @@ int enter_state(suspend_state_t state)
 	pr_debug("PM: Finishing wakeup.\n");
 	suspend_finish();
  Unlock:
- 	mutex_unlock(&pm_mutex);
+	mutex_unlock(&pm_mutex);
 	return error;
 }
 

@@ -3025,7 +3025,7 @@ struct inode *ext3_iget(struct super_block *sb, unsigned long ino)
 	inode->i_CreateTime.tv_sec = (signed)le32_to_cpu(raw_inode->ext3_CreateTime);
 	inode->i_CreateTime.tv_nsec = 0;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	inode->i_mode2 = le32_to_cpu(raw_inode->ext3_mode2);
 #endif
 
@@ -3237,7 +3237,7 @@ again:
 #ifdef MY_ABC_HERE
 	raw_inode->ext3_CreateTime = cpu_to_le32(inode->i_CreateTime.tv_sec);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	raw_inode->ext3_mode2 = cpu_to_le32(inode->i_mode2);
 #endif
 	raw_inode->i_file_acl = cpu_to_le32(ei->i_file_acl);

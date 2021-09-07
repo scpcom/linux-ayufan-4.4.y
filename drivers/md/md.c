@@ -57,6 +57,17 @@
 #include "bitmap.h"
 
 #ifdef MY_ABC_HERE
+static struct kmem_cache *syno_mdio_cache;
+
+struct syno_mdio {
+	unsigned long start_time;
+	mddev_t *mddev;
+	void *bi_private;
+	bio_end_io_t *bi_end_io;
+};
+#endif
+
+#ifdef MY_ABC_HERE
 void SynoMDWakeUpDevices(void *md);
 #ifdef MY_ABC_HERE
 extern int SynoDebugFlag;
@@ -222,6 +233,28 @@ static DEFINE_SPINLOCK(all_mddevs_lock);
 		tmp = tmp->next;})					\
 		)
 
+#ifdef MY_ABC_HERE
+static void syno_md_endio(struct bio *bio, int error)
+{
+	struct syno_mdio *mdio  = bio->bi_private;
+	int rw = bio_data_dir(bio);
+	unsigned long duration = jiffies - mdio->start_time;
+	mddev_t *mddev = mdio->mddev;
+	int cpu;
+
+	cpu = part_stat_lock();
+	part_stat_add(cpu, &mddev->gendisk->part0, ticks[rw], duration);
+	part_round_stats(cpu, &mddev->gendisk->part0);
+	part_dec_in_flight(&mddev->gendisk->part0, rw);
+	part_stat_unlock();
+
+	bio->bi_end_io = mdio->bi_end_io;
+	bio->bi_private = mdio->bi_private;
+	mempool_free(mdio, mddev->syno_mdio_mempool);
+	bio_endio(bio, error);
+}
+#endif
+
 /* Rather than calling directly into the personality make_request function,
  * IO requests come here first so that we can check if the device is
  * being suspended pending a reconfiguration.
@@ -236,6 +269,13 @@ static int md_make_request(struct request_queue *q, struct bio *bio)
 #ifdef MY_ABC_HERE
 	unsigned char blActive = 1;
 #endif
+#ifdef MY_ABC_HERE
+	const int rw = bio_data_dir(bio);
+	int cpu;
+	unsigned int sectors;
+	struct syno_mdio *mdio;
+#endif
+
 	if (mddev == NULL || mddev->pers == NULL) {
 		bio_io_error(bio);
 		return 0;
@@ -273,8 +313,31 @@ static int md_make_request(struct request_queue *q, struct bio *bio)
 	/* update the last request time */
 	mddev->ulLastReq = jiffies;
 #endif
+#ifdef MY_ABC_HERE
+	mdio = mempool_alloc(mddev->syno_mdio_mempool, GFP_NOIO);
+	if (!mdio) {
+		bio_endio(bio, -ENOMEM);
+		return;
+	}
+	mdio->start_time = jiffies;
+	mdio->bi_private = bio->bi_private;
+	mdio->bi_end_io = bio->bi_end_io;
+	mdio->mddev = mddev;
+	bio->bi_end_io = syno_md_endio;
+	bio->bi_private = mdio;
 
+	sectors = bio_sectors(bio);
 	rv = mddev->pers->make_request(q, bio);
+
+	cpu = part_stat_lock();
+	part_stat_inc(cpu, &mddev->gendisk->part0, ios[rw]);
+	part_stat_add(cpu, &mddev->gendisk->part0, sectors[rw], sectors);
+	part_round_stats(cpu, &mddev->gendisk->part0);
+	part_inc_in_flight(&mddev->gendisk->part0, rw);
+	part_stat_unlock();
+#else
+	rv = mddev->pers->make_request(q, bio);
+#endif
 	if (atomic_dec_and_test(&mddev->active_io) && mddev->suspended)
 		wake_up(&mddev->sb_wait);
 
@@ -320,6 +383,10 @@ static void mddev_delayed_delete(struct work_struct *ws);
 
 static void mddev_put(mddev_t *mddev)
 {
+#ifdef MY_ABC_HERE
+	mempool_t *mempool = NULL;
+#endif
+
 	if (!atomic_dec_and_lock(&mddev->active, &all_mddevs_lock))
 		return;
 	if (!mddev->raid_disks && list_empty(&mddev->disks) &&
@@ -327,6 +394,10 @@ static void mddev_put(mddev_t *mddev)
 		/* Array is not configured at all, and not held active,
 		 * so destroy it */
 		list_del(&mddev->all_mddevs);
+#ifdef MY_ABC_HERE
+		mempool = mddev->syno_mdio_mempool;
+		mddev->syno_mdio_mempool = NULL;
+#endif
 		if (mddev->gendisk) {
 			/* we did a probe so need to clean up.
 			 * Call schedule_work inside the spinlock
@@ -340,6 +411,10 @@ static void mddev_put(mddev_t *mddev)
 			kfree(mddev);
 	}
 	spin_unlock(&all_mddevs_lock);
+#ifdef MY_ABC_HERE
+	if (mempool)
+		mempool_destroy(mempool);
+#endif
 }
 
 static mddev_t * mddev_find(dev_t unit)
@@ -4028,6 +4103,7 @@ md_active_store(mddev_t *mddev, const char *page, size_t len)
 static struct md_sysfs_entry md_active =
 __ATTR(active, S_IRUGO|S_IWUSR, md_active_show, md_active_store);
 #endif
+
 static ssize_t
 array_size_show(mddev_t *mddev, char *page)
 {
@@ -4475,6 +4551,14 @@ static int do_md_run(mddev_t * mddev)
 	if (!disk)
 		return -ENOMEM;
 
+#ifdef MY_ABC_HERE
+	if (mddev->syno_mdio_mempool == NULL) {
+		mddev->syno_mdio_mempool = mempool_create_slab_pool(256, syno_mdio_cache);
+		if (mddev->syno_mdio_mempool == NULL) {
+			return -ENOMEM;
+		}
+	}
+#endif
 	spin_lock(&pers_lock);
 	pers = find_pers(mddev->level, mddev->clevel);
 	if (!pers || !try_module_get(pers->owner)) {
@@ -6173,11 +6257,18 @@ mdk_thread_t *md_register_thread(void (*run) (mddev_t *), mddev_t *mddev,
 	thread->run = run;
 	thread->mddev = mddev;
 	thread->timeout = MAX_SCHEDULE_TIMEOUT;
- 	thread->tsk = kthread_run(md_thread, thread,
+#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+	thread->tsk = kthread_run_on_cpu(0, md_thread, thread,
 				  "%s_%s",
 				  mdname(thread->mddev),
 				  name ?: mddev->pers->name);
- 	if (IS_ERR(thread->tsk)) {
+#else
+	thread->tsk = kthread_run(md_thread, thread,
+				  "%s_%s",
+				  mdname(thread->mddev),
+				  name ?: mddev->pers->name);
+#endif
+	if (IS_ERR(thread->tsk)) {
 		kfree(thread);
 		return NULL;
 	}
@@ -7427,6 +7518,15 @@ static int __init md_init(void)
 		unregister_blkdev(MD_MAJOR, "md");
 		return -1;
 	}
+#ifdef MY_ABC_HERE
+	syno_mdio_cache = KMEM_CACHE(syno_mdio, 0);
+	if (!syno_mdio_cache) {
+		unregister_blkdev(mdp_major, "mdp");
+		unregister_blkdev(MD_MAJOR, "md");
+		return -1;
+	}
+#endif
+
 	blk_register_region(MKDEV(MD_MAJOR, 0), 1UL<<MINORBITS, THIS_MODULE,
 			    md_probe, NULL, NULL);
 	blk_register_region(MKDEV(mdp_major, 0), 1UL<<MINORBITS, THIS_MODULE,
@@ -7632,6 +7732,9 @@ static __exit void md_exit(void)
 	mddev_t *mddev;
 	struct list_head *tmp;
 
+#ifdef MY_ABC_HERE
+	kmem_cache_destroy(syno_mdio_cache);
+#endif
 	blk_unregister_region(MKDEV(MD_MAJOR,0), 1U << MINORBITS);
 	blk_unregister_region(MKDEV(mdp_major,0), 1U << MINORBITS);
 

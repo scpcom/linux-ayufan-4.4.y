@@ -797,7 +797,7 @@ static int chown_common(struct dentry * dentry, uid_t user, gid_t group)
 	return error;
 }
 
-#ifdef	MY_ABC_HERE
+#ifdef	SYNO_ARCHIVE_BIT
 extern long __SYNOArchiveSet(struct dentry *, unsigned int cmd);
 
 asmlinkage long sys_SYNOArchiveBit(const char * filename, int cmd)
@@ -818,7 +818,7 @@ asmlinkage long sys_SYNOArchiveBit(const char * filename, int cmd)
 	path_put(&path);
 	return error;
 }
-#endif //MY_ABC_HERE
+#endif //SYNO_ARCHIVE_BIT
 
 SYSCALL_DEFINE3(chown, const char __user *, filename, uid_t, user, gid_t, group)
 {

@@ -1020,7 +1020,7 @@ got:
 #ifdef MY_ABC_HERE
 	inode->i_CreateTime = ei->i_crtime;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	inode->i_mode2 = ALL_SYNO_ARCHIVE;   /* set archive bit on creation */
 #endif
 #ifdef MY_ABC_HERE
