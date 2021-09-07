@@ -1,4 +1,4 @@
-/* $Id: head.S,v 1.7 2003/09/01 17:58:19 lethal Exp $
+/* $Id: head_32.S,v 1.1.1.1 2010/04/15 12:28:04 khchen Exp $
  *
  *  arch/sh/kernel/head.S
  *

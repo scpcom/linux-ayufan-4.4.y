@@ -62,6 +62,9 @@
 /***
  *
  * $Log: ltpc.c,v $
+ * Revision 1.1.1.1  2010/04/15 12:27:53  khchen
+ * log message
+ *
  * Revision 1.1.2.1  2000/03/01 05:35:07  jgarzik
  * at and tr cleanup
  *

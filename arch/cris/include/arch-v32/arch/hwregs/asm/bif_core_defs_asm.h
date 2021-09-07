@@ -8,7 +8,7 @@
  *     last modfied: Mon Apr 11 16:06:33 2005
  *
  *   by /n/asic/design/tools/rdesc/src/rdes2c -asm --outfile asm/bif_core_defs_asm.h ../../inst/bif/rtl/bif_core_regs.r
- *      id: $Id: bif_core_defs_asm.h,v 1.1 2005/04/24 18:31:04 starvik Exp $
+ *      id: $Id: bif_core_defs_asm.h,v 1.1.1.1 2010/04/15 12:28:03 khchen Exp $
  * Any changes here will be lost.
  *
  * -*- buffer-read-only: t -*-

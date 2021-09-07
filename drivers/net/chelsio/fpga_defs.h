@@ -1,4 +1,4 @@
-/* $Date: 2005/03/07 23:59:05 $ $RCSfile: fpga_defs.h,v $ $Revision: 1.4 $ */
+/* $Date: 2010/04/15 12:27:53 $ $RCSfile: fpga_defs.h,v $ $Revision: 1.1.1.1 $ */
 
 /*
  * FPGA specific definitions

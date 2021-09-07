@@ -13,6 +13,9 @@
  * L. Haag
  *
  * $Log: n_r3964.c,v $
+ * Revision 1.1.1.1  2010/04/15 12:27:55  khchen
+ * log message
+ *
  * Revision 1.10  2001/03/18 13:02:24  dwmw2
  * Fix timer usage, use spinlocks properly.
  *
@@ -200,7 +203,7 @@ static int __init r3964_init(void)
 {
 	int status;
 
-	printk("r3964: Philips r3964 Driver $Revision: 1.10 $\n");
+	printk("r3964: Philips r3964 Driver $Revision: 1.1.1.1 $\n");
 
 	/*
 	 * Register the tty line discipline

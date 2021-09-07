@@ -8,7 +8,7 @@
  *     last modfied: Mon Apr 11 16:06:25 2005
  *
  *   by /n/asic/design/tools/rdesc/src/rdes2c --outfile ata_defs.h ../../inst/ata/rtl/ata_regs.r
- *      id: $Id: ata_defs.h,v 1.7 2005/04/24 18:30:58 starvik Exp $
+ *      id: $Id: ata_defs.h,v 1.1.1.1 2010/04/15 12:28:03 khchen Exp $
  * Any changes here will be lost.
  *
  * -*- buffer-read-only: t -*-

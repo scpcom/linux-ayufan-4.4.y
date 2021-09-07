@@ -1,8 +1,8 @@
 /*****************************************************************************
  *                                                                           *
  * File: mv88x201x.c                                                         *
- * $Revision: 1.12 $                                                         *
- * $Date: 2005/04/15 19:27:14 $                                              *
+ * $Revision: 1.1.1.1 $                                                         *
+ * $Date: 2010/04/15 12:27:53 $                                              *
  * Description:                                                              *
  *  Marvell PHY (mv88x201x) functionality.                                   *
  *  part of the Chelsio 10Gb Ethernet Driver.                                *

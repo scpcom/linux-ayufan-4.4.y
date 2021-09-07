@@ -8,7 +8,7 @@
  *     last modfied: Mon Apr 11 16:07:03 2005
  *
  *   by /n/asic/design/tools/rdesc/src/rdes2c -asm --outfile asm/eth_defs_asm.h ../../inst/eth/rtl/eth_regs.r
- *      id: $Id: eth_defs_asm.h,v 1.1 2005/04/24 18:31:04 starvik Exp $
+ *      id: $Id: eth_defs_asm.h,v 1.1.1.1 2010/04/15 12:28:03 khchen Exp $
  * Any changes here will be lost.
  *
  * -*- buffer-read-only: t -*-

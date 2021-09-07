@@ -8,7 +8,7 @@
  *     last modfied: Mon Apr 11 16:08:46 2005
  *
  *   by /n/asic/design/tools/rdesc/src/rdes2c -asm --outfile asm/iop_spu_defs_asm.h ../../inst/io_proc/rtl/iop_spu.r
- *      id: $Id: iop_spu_defs_asm.h,v 1.5 2005/04/24 18:31:06 starvik Exp $
+ *      id: $Id: iop_spu_defs_asm.h,v 1.1.1.1 2010/04/15 12:28:03 khchen Exp $
  * Any changes here will be lost.
  *
  * -*- buffer-read-only: t -*-

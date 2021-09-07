@@ -8,7 +8,7 @@
  *     last modfied: Mon Apr 11 16:09:53 2005
  * 
  *   by /n/asic/design/tools/rdesc/src/rdes2c -asm --outfile asm/timer_defs_asm.h ../../inst/timer/rtl/timer_regs.r
- *      id: $Id: timer_defs_asm.h,v 1.1 2007/04/11 13:51:01 ricardw Exp $
+ *      id: $Id: timer_defs_asm.h,v 1.1.1.1 2010/04/15 12:28:03 khchen Exp $
  * Any changes here will be lost.
  *
  * -*- buffer-read-only: t -*-

@@ -1,4 +1,4 @@
-/* $Id: hysdn_sched.c,v 1.5.6.4 2001/11/06 21:58:19 kai Exp $
+/* $Id: hysdn_sched.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
  *
  * Linux driver for HYSDN cards
  * scheduler routines for handling exchange card <-> pc.

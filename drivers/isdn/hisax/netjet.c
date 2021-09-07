@@ -1,4 +1,4 @@
-/* $Id: netjet.c,v 1.29.2.4 2004/02/11 13:21:34 keil Exp $
+/* $Id: netjet.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
  *
  * low level stuff for Traverse Technologie NETJet ISDN cards
  *

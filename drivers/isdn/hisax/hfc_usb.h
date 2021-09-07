@@ -1,7 +1,7 @@
 /*
  * hfc_usb.h
  *
- * $Id: hfc_usb.h,v 1.1.2.5 2007/08/20 14:36:03 mbachem Exp $
+ * $Id: hfc_usb.h,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
  */
 
 #ifndef __HFC_USB_H__

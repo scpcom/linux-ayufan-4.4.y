@@ -11,6 +11,9 @@
  *	2 of the License, or (at your option) any later version.
  *
  * $Log: pc300.h,v $
+ * Revision 1.1.1.1  2010/04/15 12:27:54  khchen
+ * log message
+ *
  * Revision 3.12  2002/03/07 14:17:09  henrique
  * License data fixed
  *

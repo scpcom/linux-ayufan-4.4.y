@@ -1,4 +1,4 @@
-/* $Id: diva_pci.h,v 1.6 2003/01/04 15:29:45 schindler Exp $ */
+/* $Id: diva_pci.h,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $ */
 
 #ifndef __DIVA_PCI_INTERFACE_H__
 #define __DIVA_PCI_INTERFACE_H__

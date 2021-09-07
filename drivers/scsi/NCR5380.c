@@ -28,6 +28,9 @@
 
 /*
  * $Log: NCR5380.c,v $
+ * Revision 1.1.1.1  2010/04/15 12:27:50  khchen
+ * log message
+ *
 
  * Revision 1.10 1998/9/2	Alan Cox
  *				(alan@lxorguk.ukuu.org.uk)

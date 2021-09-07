@@ -22,7 +22,7 @@
  * BEGIN_DESC
  *
  *  File:
- *	@(#)	pa/fp/fpudispatch.c		$Revision: 1.1 $
+ *	@(#)	pa/fp/fpudispatch.c		$Revision: 1.1.1.1 $
  *
  *  Purpose:
  *	<<please update with a synopsis of the functionality provided by this file>>

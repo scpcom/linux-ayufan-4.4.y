@@ -6,7 +6,7 @@
  * Created:
  * Description:  This file contains the simple DMA Implementation for Blackfin
  *
- * Rev:          $Id: cache-lock.txt 2384 2006-11-01 04:12:43Z magicyang $
+ * Rev:          $Id: cache-lock.txt,v 1.1.1.1 2010/04/15 12:28:20 khchen Exp $
  *
  * Modified:
  *               Copyright 2004-2006 Analog Devices Inc.

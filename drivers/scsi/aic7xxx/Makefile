@@ -1,7 +1,7 @@
 #
 # Makefile for the Linux aic7xxx SCSI driver.
 #
-# $Id: //depot/linux-aic79xx-2.5.0/drivers/scsi/aic7xxx/Makefile#8 $
+# $Id: Makefile,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
 #
 
 # Let kbuild descend into aicasm when cleaning

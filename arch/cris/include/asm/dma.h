@@ -1,4 +1,4 @@
-/* $Id: dma.h,v 1.2 2001/05/09 12:17:42 johana Exp $ */
+/* $Id: dma.h,v 1.1.1.1 2010/04/15 12:28:03 khchen Exp $ */
 
 #ifndef _ASM_DMA_H
 #define _ASM_DMA_H

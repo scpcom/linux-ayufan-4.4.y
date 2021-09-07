@@ -14,7 +14,7 @@
  *     last modified: Fri Feb 20 16:40:04 2004
  * 
  *   by /n/asic/design/tools/rdesc/src/rdes2c -map -base 0xb0000000 ../../rtl/global.rmap ../../mod/modreg.rmap ../../inst/io_proc/rtl/guinness/iop_top.r ../../inst/memarb/rtl/guinness/marb_top.r ../../mod/fakereg.rmap
- *      id: $Id: reg_map.h,v 1.1 2007/02/13 11:55:30 starvik Exp $ 
+ *      id: $Id: reg_map.h,v 1.1.1.1 2010/04/15 12:28:03 khchen Exp $ 
  * Any changes here will be lost.
  *
  * -*- buffer-read-only: t -*-

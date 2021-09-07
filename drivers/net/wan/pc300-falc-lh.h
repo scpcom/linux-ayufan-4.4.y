@@ -10,7 +10,10 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  *
- * $Log: falc-lh.h,v $
+ * $Log: pc300-falc-lh.h,v $
+ * Revision 1.1.1.1  2010/04/15 12:27:54  khchen
+ * log message
+ *
  * Revision 3.1  2001/06/15 12:41:10  regina
  * upping major version number
  *

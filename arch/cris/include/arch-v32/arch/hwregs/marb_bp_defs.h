@@ -8,7 +8,7 @@
  *     last modfied: Fri Nov  7 15:36:04 2003
  *
  *   by /n/asic/projects/guinness/design/top/inst/rdesc/rdes2c ../../rtl/global.rmap ../../mod/modreg.rmap -base 0xb0000000 ../../inst/memarb/rtl/guinness/marb_top.r
- *      id: $Id: marb_bp_defs.h,v 1.2 2004/06/04 07:15:33 starvik Exp $
+ *      id: $Id: marb_bp_defs.h,v 1.1.1.1 2010/04/15 12:28:03 khchen Exp $
  * Any changes here will be lost.
  *
  * -*- buffer-read-only: t -*-

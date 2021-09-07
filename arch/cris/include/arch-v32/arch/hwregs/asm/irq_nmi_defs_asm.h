@@ -8,7 +8,7 @@
  *     last modfied: Thu Jan 22 09:22:43 2004
  *
  *   by /n/asic/design/tools/rdesc/src/rdes2c -asm --outfile asm/irq_nmi_defs_asm.h ../../mod/irq_nmi.r
- *      id: $Id: irq_nmi_defs_asm.h,v 1.1 2005/04/24 18:31:04 starvik Exp $
+ *      id: $Id: irq_nmi_defs_asm.h,v 1.1.1.1 2010/04/15 12:28:03 khchen Exp $
  * Any changes here will be lost.
  *
  * -*- buffer-read-only: t -*-

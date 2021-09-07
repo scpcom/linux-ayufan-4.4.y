@@ -26,7 +26,10 @@
  */
 
 /*
- * $Log: generic_NCR5380.h,v $
+ * $Log: g_NCR5380.h,v $
+ * Revision 1.1.1.1  2010/04/15 12:27:50  khchen
+ * log message
+ *
  */
 
 #ifndef GENERIC_NCR5380_H

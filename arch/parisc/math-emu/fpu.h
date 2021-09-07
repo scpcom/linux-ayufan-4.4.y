@@ -22,7 +22,7 @@
  * BEGIN_DESC
  * 
  *  File: 
- *      @(#)	pa/fp/fpu.h		$Revision: 1.1 $
+ *      @(#)	pa/fp/fpu.h		$Revision: 1.1.1.1 $
  * 
  *  Purpose:
  *      <<please update with a synopis of the functionality provided by this file>>

@@ -1,4 +1,4 @@
-/* $Id: isdn_common.h,v 1.1.2.2 2004/01/12 22:37:19 keil Exp $
+/* $Id: isdn_common.h,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
  *
  * header for Linux ISDN subsystem
  * common used functions and debugging-switches (linklevel).

@@ -8,7 +8,7 @@
  *     last modfied: Mon Jan  9 06:06:41 2006
  *
  *   by /n/asic/design/tools/rdesc/rdes2c eth.r
- *      id: $Id: eth_defs.h,v 1.7 2006/01/26 13:45:30 karljope Exp $
+ *      id: $Id: eth_defs.h,v 1.1.1.1 2010/04/15 12:28:03 khchen Exp $
  * Any changes here will be lost.
  *
  * -*- buffer-read-only: t -*-

@@ -1,4 +1,4 @@
-/* $Id: hfc_2bds0.h,v 1.6.2.2 2004/01/12 22:52:26 keil Exp $
+/* $Id: hfc_2bds0.h,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
  *
  * specific defines for CCD's HFC 2BDS0
  *

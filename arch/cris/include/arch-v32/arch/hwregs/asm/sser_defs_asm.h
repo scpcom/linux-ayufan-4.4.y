@@ -8,7 +8,7 @@
  *     last modfied: Mon Apr 11 16:09:48 2005
  *
  *   by /n/asic/design/tools/rdesc/src/rdes2c -asm --outfile asm/sser_defs_asm.h ../../inst/syncser/rtl/sser_regs.r
- *      id: $Id: sser_defs_asm.h,v 1.1 2005/04/24 18:31:04 starvik Exp $
+ *      id: $Id: sser_defs_asm.h,v 1.1.1.1 2010/04/15 12:28:03 khchen Exp $
  * Any changes here will be lost.
  *
  * -*- buffer-read-only: t -*-
