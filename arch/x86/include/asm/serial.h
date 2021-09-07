@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _ASM_X86_SERIAL_H
 #define _ASM_X86_SERIAL_H
 
@@ -14,9 +11,9 @@
 #define STD_COM4_FLAGS ASYNC_BOOT_AUTOCONF
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(SYNO_X86_TTY_CONSOLE_OUTPUT) || defined(SYNO_X86_MICROP_CTRL)
 
-#if !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_CEDARVIEW)
 #define SERIAL_PORT_DFNS            \
 	           \
 	{ 0, BASE_BAUD, 0x2F8, 3, STD_COM_FLAGS },    \

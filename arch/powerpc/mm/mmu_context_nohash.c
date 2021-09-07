@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifdef DEBUG_HARDER
 #define pr_hard(args...)	printk(KERN_DEBUG args)
@@ -265,7 +262,7 @@ static int __cpuinit mmu_context_cpu_notify(struct notifier_block *self,
 		read_lock(&tasklist_lock);
 		for_each_process(p) {
 			if (p->mm)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 				cpumask_clear_cpu(cpu, mm_cpumask(p->mm));
 #else
 				cpu_mask_clear_cpu(cpu, mm_cpumask(p->mm));

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <net/tcp.h>
 
@@ -1901,7 +1898,7 @@ void tcp_send_delayed_ack(struct sock *sk)
 	sk_reset_timer(sk, &icsk->icsk_delack_timer, timeout);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_TCP_FAST_ACK
 static int tcp_fast_ack(struct sock *sk)
 {
@@ -1981,7 +1978,7 @@ void tcp_send_ack(struct sock *sk)
 	if (sk->sk_state == TCP_CLOSE)
 		return;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_TCP_FAST_ACK
 	if (tcp_fast_ack(sk))
 		return;
@@ -1989,7 +1986,7 @@ void tcp_send_ack(struct sock *sk)
 	buff = NULL;
 #endif
 	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	if (buff == NULL)
 		buff = alloc_skb(MAX_TCP_HEADER, GFP_ATOMIC);
 #else

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _LINUX_SYSCTL_H
 #define _LINUX_SYSCTL_H
@@ -244,7 +241,7 @@ enum
 	NET_CORE_AEVENT_ETIME=20,
 	NET_CORE_AEVENT_RSEQTH=21,
 	NET_CORE_WARNINGS=22,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	RCV_PKT_STEERING = 23,
 #endif
 };

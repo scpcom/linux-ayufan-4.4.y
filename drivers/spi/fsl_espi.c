@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
  
 #include <linux/module.h>
 #include <linux/init.h>
@@ -476,7 +473,7 @@ static int __exit fsl_espi_remove(struct of_device *ofdev)
 	return 0;
 }
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_PM)
+#if defined(CONFIG_SYNO_QORIQ_ESPI_PM) && defined(CONFIG_PM)
 static int fsl_espi_suspend(struct of_device *ofdev, pm_message_t pmsg)
 {
 	struct fsl_espi *fsl_espi;
@@ -525,7 +522,7 @@ static struct of_platform_driver fsl_espi_driver = {
 		.name = "fsl-espi",
 		.owner = THIS_MODULE,
 	},
-#if defined(MY_DEF_HERE) && defined(CONFIG_PM)
+#if defined(CONFIG_SYNO_QORIQ_ESPI_PM) && defined(CONFIG_PM)
 	.suspend = fsl_espi_suspend,
 	.resume  = fsl_espi_resume,
 #endif

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _SOCK_H
 #define _SOCK_H
@@ -107,7 +104,7 @@ struct sock {
 	struct xfrm_policy	*sk_policy[2];
 #endif
 	rwlock_t		sk_dst_lock;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_GFAR_HW_TCP_RECEIVE_OFFLOAD
 	void			*tcp_hw_channel;
 	u32			init_seq;
@@ -122,7 +119,7 @@ struct sock {
 #ifdef CONFIG_NET_DMA
 	struct sk_buff_head	sk_async_wait_queue;
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_TCP_FAST_ACK
 	struct sk_buff_head	sk_ack_queue;
 #endif

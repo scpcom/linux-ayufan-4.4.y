@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/mm.h>
 #include <linux/sysctl.h>
@@ -11,7 +8,7 @@
 #include <net/ip.h>
 #include <net/sock.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_NET_GIANFAR_FP
 extern int netdev_fastroute;
 #endif
@@ -39,7 +36,7 @@ static struct ctl_table net_core_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec
 	},
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_NET_GIANFAR_FP
 	{
 		.ctl_name	= NET_CORE_FASTROUTE,

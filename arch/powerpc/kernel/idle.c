@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/sched.h>
 #include <linux/kernel.h>
@@ -48,7 +45,7 @@ void cpu_idle(void)
 
 				stop_critical_timings();
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 				if (!need_resched() && !cpu_should_die()) {
 #if !defined(CONFIG_DEBUG_CW)
 					ppc_md.power_save();

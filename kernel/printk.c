@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/mm.h>
@@ -96,7 +93,7 @@ static char *log_buf = __log_buf;
 static int log_buf_len = __LOG_BUF_LEN;
 static unsigned logged_chars;  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_DISABLE_KMSG_BEFORE_SYSSLEEP
 int syno_disable_kmsg = 0;
 #endif
 
@@ -218,7 +215,7 @@ int do_syslog(int type, char __user *buf, int len)
 	case 1:		 
 		break;
 	case 2:		 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_DISABLE_KMSG_BEFORE_SYSSLEEP
 		if (syno_disable_kmsg){
 			return -EAGAIN;
 		}

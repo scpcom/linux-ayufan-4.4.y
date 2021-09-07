@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/of.h>
@@ -295,7 +292,7 @@ struct of_modalias_table {
 static struct of_modalias_table of_modalias_table[] = {
 	{ "fsl,mcu-mpc8349emitx", "mcu-mpc8349emitx" },
 	{ "mmc-spi-slot", "mmc_spi" },
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	{ "fsl,espi-flash", "fsl_m25p80"},
 #endif
 };

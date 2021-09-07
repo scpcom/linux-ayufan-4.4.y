@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/pci.h>
 #include <linux/module.h>
@@ -13,7 +10,7 @@
 #include <linux/cpu.h>
 #include "pci.h"
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
 #include <linux/delay.h>
 #endif
 
@@ -419,7 +416,7 @@ static int pci_restore_standard_config(struct pci_dev *pci_dev)
 
 	if (pci_dev->current_state != PCI_D0) {
 		int error = pci_set_power_state(pci_dev, PCI_D0);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
 		while (error) {
 			printk("Last set pci_set_power_state failed. error: %d %s(%d), try set power state again\n", error, __func__, __LINE__);
 			msleep(3000);
@@ -486,7 +483,7 @@ static void pci_pm_complete(struct device *dev)
 
 #ifdef CONFIG_SUSPEND
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #include <asm/io.h>
 #include <sysdev/fsl_pci.h>
 #define PCIE_POW_NUMBER	5
@@ -649,7 +646,7 @@ static int pci_pm_suspend(struct device *dev)
  Fixup:
 	pci_fixup_device(pci_fixup_suspend, pci_dev);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	fsl_pcie_suspend_save();
 #endif
 
@@ -712,7 +709,7 @@ static int pci_pm_resume_noirq(struct device *dev)
 	if (drv && drv->pm && drv->pm->resume_noirq)
 		error = drv->pm->resume_noirq(dev);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	fsl_pcie_resume_restore();
 #endif
 

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/dma-mapping.h>
 #include <linux/pfn.h>
@@ -54,7 +51,7 @@ static int ppc_swiotlb_bus_notify(struct notifier_block *nb,
 	sd = &dev->archdata;
 	sd->max_direct_dma_addr = 0;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	if ((dma_get_mask(dev) + 1) < lmb_end_of_DRAM())
 #else
 	if (dma_get_mask(dev) < lmb_end_of_DRAM())

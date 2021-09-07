@@ -3575,7 +3575,7 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	EXT4_INODE_GET_XTIME(i_atime, inode, raw_inode);
 	EXT4_EINODE_GET_XTIME(i_crtime, ei, raw_inode);
 #ifdef MY_ABC_HERE
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 	if (EXT4_SB(sb)->s_swap_create_time) {
 		inode->i_create_time.tv_sec = (signed)le32_to_cpu(raw_inode->i_crtime);
 		inode->i_create_time.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
@@ -3747,7 +3747,7 @@ static int ext4_do_update_inode(handle_t *handle,
 	EXT4_INODE_SET_XTIME(i_mtime, inode, raw_inode);
 	EXT4_INODE_SET_XTIME(i_atime, inode, raw_inode);
 #ifdef MY_ABC_HERE
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 	if (EXT4_SB(inode->i_sb)->s_swap_create_time) {
 		raw_inode->i_crtime = cpu_to_le32(inode->i_create_time.tv_sec);
 		raw_inode->i_crtime_extra = cpu_to_le32(inode->i_create_time.tv_nsec);

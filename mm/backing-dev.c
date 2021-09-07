@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 
 #include <linux/wait.h>
 #include <linux/backing-dev.h>
@@ -392,7 +389,7 @@ static int bdi_forker_task(void *ptr)
 		spin_unlock_bh(&bdi_lock);
 
 		wb = &bdi->wb;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
 		wb->task = kthread_run_on_cpu(CONFIG_SYNO_QORIQ_DEFAULT_CPU_AFFINITY, bdi_start_fn, wb, "flush-%s",
 					dev_name(bdi->dev));
 #else

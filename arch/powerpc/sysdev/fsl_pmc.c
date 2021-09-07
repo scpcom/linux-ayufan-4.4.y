@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
  
 #include <linux/init.h>
 #include <linux/types.h>
@@ -23,7 +20,7 @@ struct pmc_regs {
 	__be32:32;
 	__be32 pmcsr;
 	__be32:32;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 	__be32 pmpdccr;
 #else
 	__be32:32;
@@ -32,7 +29,7 @@ struct pmc_regs {
 };
 static struct device *pmc_dev;
 static struct pmc_regs __iomem *pmc_regs;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 static struct ccsr_guts __iomem *guts;
 static void __iomem *gpio_base;
 #endif
@@ -45,7 +42,7 @@ static int has_deep_sleep, has_lossless;
 
 void mpc85xx_enter_deep_sleep(phys_addr_t ccsrbar, u32 powmgtreq);
 extern void flush_dcache_L1(void);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 extern int SYNOQorIQHWReset(void);
 #endif
 
@@ -78,7 +75,7 @@ static int pmc_suspend_exit(void)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 extern void GPIOSuspend(void);
 #endif
 int pmc_enable_wake(struct of_device *ofdev, wakeup_event_t func, bool enable)
@@ -111,7 +108,7 @@ int pmc_enable_wake(struct of_device *ofdev, wakeup_event_t func, bool enable)
 	else
 		setbits32(&pmc_regs->pmcdr, *pmcdr_mask);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 	if (enable) {
 		 
 		setbits32(&pmc_regs->pmcdr, 0x00c00800);
@@ -153,7 +150,7 @@ void pmc_enable_lossless(int enable)
 }
 EXPORT_SYMBOL_GPL(pmc_enable_lossless);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 extern unsigned char GPIOShouldWake(void);
 #endif
 static int pmc_suspend_enter(suspend_state_t state)
@@ -169,27 +166,27 @@ static int pmc_suspend_enter(suspend_state_t state)
 		pr_debug("Entering deep sleep\n");
 
 		local_irq_disable();
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 		setbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK);
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 		if (!pmc_suspend_exit() && !GPIOShouldWake()) {
 #else
 		if (!pmc_suspend_exit()) {
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 			 
 			setbits32(&pmc_regs->devdisr, 0x00002000);
 #else
 			setbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK);
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 			clrbits32(&pmc_regs->pmpdccr, 0x1fff0000);
 			setbits32(&pmc_regs->pmpdccr, 0x16ff0000);
 #endif
 			mpc85xx_enter_deep_sleep(get_immrbase(),
 					powmgtreq);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 			 
 			SYNOQorIQHWReset();
 			clrbits32(&pmc_regs->devdisr, 0x00002000);
@@ -198,7 +195,7 @@ static int pmc_suspend_enter(suspend_state_t state)
 #endif
 
 		}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 		clrbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK);
 #endif
 		pr_debug("Resumed from deep sleep\n");
@@ -266,7 +263,7 @@ static int pmc_probe(struct of_device *ofdev, const struct of_device_id *id)
 
 		if ((mfspr(SPRN_SVR) & 0xff) == 0x11) {
 			struct device_node *node;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 			struct device_node *gpio_node;
 #else
 			struct ccsr_guts __iomem *guts;
@@ -288,13 +285,13 @@ static int pmc_probe(struct of_device *ofdev, const struct of_device_id *id)
 				goto end;
 			}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 			setbits32(&guts->dscr, CCSR_GUTS_DSCR_ENB_PWR_DWN|CCSR_GUTS_DSCR_TRI_MCS_B|CCSR_GUTS_DSCR_TRI_MCK|0x40000000);
 #else
 			setbits32(&guts->dscr, CCSR_GUTS_DSCR_ENB_PWR_DWN);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 			 
 			gpio_node = of_find_compatible_node(NULL, NULL,
 					"fsl,mpc8572-gpio");

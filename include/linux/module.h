@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _LINUX_MODULE_H
 #define _LINUX_MODULE_H
  
@@ -355,7 +352,7 @@ void symbol_put_addr(void *addr);
 static inline local_t *__module_ref_addr(struct module *mod, int cpu)
 {
 #ifdef CONFIG_SMP
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	return (local_t *) (mod->refptr + per_cpu_offset(cpu));
 #else
 	return (local_t *) per_cpu_ptr(mod->refptr, cpu);

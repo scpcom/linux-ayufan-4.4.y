@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/types.h>
@@ -2112,7 +2109,7 @@ int set_console(int nr)
 struct tty_driver *console_driver;
 
 #ifdef CONFIG_VT_CONSOLE
-#ifndef MY_DEF_HERE
+#ifndef SYNO_X86_TTY_CONSOLE_OUTPUT
 
 static void vt_console_print(struct console *co, const char *b, unsigned count)
 {
@@ -2519,7 +2516,7 @@ static int __init con_init(void)
 
 	release_console_sem();
 
-#ifndef MY_DEF_HERE
+#ifndef SYNO_X86_TTY_CONSOLE_OUTPUT
 #ifdef CONFIG_VT_CONSOLE
 	register_console(&vt_console_driver);
 #endif

@@ -25,10 +25,10 @@ extern long g_internal_hd_num;
 extern long g_hdd_hotplug;
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_CEDARVIEW)
 static int PrzPinMap[]   = {33, 35, 49, 18};
 static int HddEnPinMap[] = {16, 20, 21, 32};
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_QORIQ)
 static int PrzPinMap[]   = {70, 71, 72, 84};
 static int HddEnPinMap[] = {24, 25, 26, 27};
 #else
@@ -294,7 +294,7 @@ static int __init syno_hddmon_init(void)
 {
 	int iRet = -1;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	gblInversePresent = 1;
 #endif
 

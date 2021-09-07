@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/fs.h>
@@ -26,7 +23,7 @@ u32 booke_wdt_period = WDT_PERIOD_DEFAULT;
 
 #ifdef	CONFIG_FSL_BOOKE
 #define WDTP(x)		((((x)&0x3)<<30)|(((x)&0x3c)<<15))
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #define WDTP_MASK	(WDTP(0xff))
 #else
 #define WDTP_MASK	(WDTP(0))
@@ -81,7 +78,7 @@ static void __booke_wdt_enable(void *data)
 	mtspr(SPRN_TCR, val);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 static void __booke_wdt_disable(void *data)
 {
 	u32 val;
@@ -185,7 +182,7 @@ static const struct file_operations booke_wdt_fops = {
 	.write = booke_wdt_write,
 	.unlocked_ioctl = booke_wdt_ioctl,
 	.open = booke_wdt_open,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	.release = booke_wdt_release,
 #endif
 };

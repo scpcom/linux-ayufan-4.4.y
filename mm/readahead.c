@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/fs.h>
@@ -17,7 +14,7 @@ file_ra_state_init(struct file_ra_state *ra, struct address_space *mapping)
 {
 	ra->ra_pages = mapping->backing_dev_info->ra_pages;
 	ra->prev_pos = -1;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	ra->delay_readahead = 0;
 #endif
 }

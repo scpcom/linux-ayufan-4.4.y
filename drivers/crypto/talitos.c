@@ -2169,7 +2169,7 @@ err_out:
 	return err;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_TALITOS_PM_SUPPORT
 #ifdef CONFIG_PM
 static int talitos_suspend(struct of_device* dev, pm_message_t state)
 {
@@ -2202,7 +2202,7 @@ static struct of_platform_driver talitos_driver = {
 	.match_table = talitos_match,
 	.probe = talitos_probe,
 	.remove = talitos_remove,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_TALITOS_PM_SUPPORT
 #ifdef CONFIG_PM
 	.suspend = talitos_suspend,
 	.resume = talitos_resume,

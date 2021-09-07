@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -381,7 +378,7 @@ static void balance_dirty_pages(struct address_space *mapping,
 		if (!bdi->dirty_exceeded)
 			bdi->dirty_exceeded = 1;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
 		if (bdi_nr_reclaimable) {
 #else

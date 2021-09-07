@@ -41,7 +41,7 @@
 #include <linux/if_tunnel.h>
 #include <linux/rtnetlink.h>
 
-#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) && defined(SYNO_IPV6_110p_IPV6_READY)
 #include <linux/synobios.h>
 #endif
 
@@ -1564,7 +1564,7 @@ static struct inet6_dev *addrconf_add_dev(struct net_device *dev)
 	return idev;
 }
 
-#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) && defined(SYNO_IPV6_110p_IPV6_READY)
 void SYNO_IPV6_ready_timer_workaround(__u32 *valid_lft, __u32 *prefered_lft)
 {
 	if(syno_is_hw_version(HW_DS110p) ||
@@ -1600,7 +1600,7 @@ void addrconf_prefix_rcv(struct net_device *dev, u8 *opt, int len)
 	valid_lft = ntohl(pinfo->valid);
 	prefered_lft = ntohl(pinfo->prefered);
 
-#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) && defined(SYNO_IPV6_110p_IPV6_READY)
 	SYNO_IPV6_ready_timer_workaround(&valid_lft, &prefered_lft);
 #endif
 
@@ -1740,7 +1740,7 @@ ok:
 					if (valid_lft < prefered_lft)
 						prefered_lft = valid_lft;
 					update_lft = 1;
-#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) && defined(SYNO_IPV6_110p_IPV6_READY)
 				SYNO_IPV6_ready_timer_workaround(&valid_lft, &prefered_lft);
 #endif
 				}

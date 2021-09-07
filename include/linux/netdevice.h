@@ -386,7 +386,7 @@ struct net_device_ops {
 						  int new_mtu);
 	int			(*ndo_neigh_setup)(struct net_device *dev,
 						   struct neigh_parms *);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_NET_GIANFAR_FP
 	int                     (*ndo_accept_fastpath)(struct net_device *,
 							   struct dst_entry *);
@@ -597,7 +597,7 @@ struct net_device
 	void			*ml_priv;
 
 	struct net_bridge_port	*br_port;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_NET_GIANFAR_FP
 #define NETDEV_FASTROUTE_HMASK 0xF
 	 

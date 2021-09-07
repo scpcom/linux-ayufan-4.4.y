@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __DMA_FSLDMA_H
 #define __DMA_FSLDMA_H
@@ -24,7 +21,7 @@
 #define FSL_DMA_MR_DAHE		0x00002000
 #define FSL_DMA_MR_SAHE		0x00001000
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
  
 #define FSL_DMA_MR_BWC         0x08000000
 #endif

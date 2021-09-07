@@ -1,7 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
  
 #include <linux/init.h>
 #include <linux/module.h>
@@ -415,7 +415,7 @@ static struct flash_info __devinitdata m25p_data[] = {
 	{ "at26df161a", 0x1f4601, 0, 256, 64 * 1024, 32, SECT_4K, },
 	{ "at26df321",  0x1f4701, 0, 256, 64 * 1024, 64, SECT_4K, },
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	 
 	{ "mx25l8006e", 0xc22014, 0, 256, 64 * 1024, 16, },
 	{ "mx25l6445e", 0xc22017, 0, 256, 64 * 1024, 128, },

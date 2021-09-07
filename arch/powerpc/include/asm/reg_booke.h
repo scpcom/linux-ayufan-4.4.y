@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifdef __KERNEL__
 #ifndef __ASM_POWERPC_REG_BOOKE_H__
@@ -26,7 +23,7 @@
 #define MSR_USER	(MSR_KERNEL|MSR_PR|MSR_EE)
 #else
 
-#if defined(CONFIG_DEBUG_CW) && defined(MY_DEF_HERE)
+#if defined(CONFIG_DEBUG_CW) && defined(CONFIG_SYNO_QORIQ)
 #define MSR_KERNEL      (MSR_ME|MSR_RI|MSR_CE|MSR_DE)
 #else
 #define MSR_KERNEL	(MSR_ME|MSR_RI|MSR_CE)

@@ -5838,7 +5838,7 @@ mdk_thread_t *md_register_thread(void (*run) (mddev_t *), mddev_t *mddev,
 	thread->run = run;
 	thread->mddev = mddev;
 	thread->timeout = MAX_SCHEDULE_TIMEOUT;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
 	thread->tsk = kthread_run_on_cpu(CONFIG_SYNO_QORIQ_DEFAULT_CPU_AFFINITY, md_thread, thread,
 				  "%s_%s",
 				  mdname(thread->mddev),

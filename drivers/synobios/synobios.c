@@ -146,7 +146,7 @@ void synobios_rtc_init(void)
 		printk("%s(%d) read RTC error\n", __FILE__, __LINE__);
 	}
 	 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_X86) || defined(MY_DEF_HERE)
 	tv.tv_sec = mktime(RtcTimePkt.year + 1900, RtcTimePkt.month + 1, RtcTimePkt.day, RtcTimePkt.hour, RtcTimePkt.min, RtcTimePkt.sec);
 	tv.tv_nsec = 0;
 #else
@@ -260,7 +260,7 @@ static int synobios_ioctl (struct inode *inode, struct file *filp,
 		if (ret < 0) {
 			printk("%s: Failed to get rtc time.\n", __FUNCTION__);
 		}
-#if !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_X86) && !defined(MY_DEF_HERE)
 		if ( (signed char)pRtcTimePkt->year < 0) {
 			pRtcTimePkt->year = 0;
 		}
@@ -270,7 +270,7 @@ static int synobios_ioctl (struct inode *inode, struct file *filp,
 	case SYNOIO_RTC_TIME_WRITE:
 		DBGMESG("synobios_ioctl: SYNOIO_RTC_TIME_WRITE\n");
 		pRtcTimePkt = (struct _SynoRtcTimePkt *)arg;
-#if !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_X86) && !defined(MY_DEF_HERE)
 		if ( (signed char)pRtcTimePkt->year < 0) {
 			pRtcTimePkt->year = 0;
 		}

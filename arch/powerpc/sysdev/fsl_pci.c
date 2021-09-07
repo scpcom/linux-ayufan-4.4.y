@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/pci.h>
@@ -29,13 +26,13 @@ static void __init quirk_fsl_pcie_header(struct pci_dev *dev)
 	if (!pci_find_capability(dev, PCI_CAP_ID_EXP))
 		return;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	 
 	if (dev->hdr_type == PCI_HEADER_TYPE_BRIDGE) {
 #endif
 	dev->class = PCI_CLASS_BRIDGE_PCI << 8;
 	fsl_pcie_bus_fixup = 1;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	}
 #endif
 	return;

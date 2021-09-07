@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _LINUX_KTHREAD_H
 #define _LINUX_KTHREAD_H
  
@@ -21,7 +18,7 @@ struct task_struct *kthread_create(int (*threadfn)(void *data),
 	__k;								   \
 })
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
 #define kthread_run_on_cpu(cpu, threadfn, data, namefmt, ...) \
 ({ \
 	struct task_struct *__k = kthread_create(threadfn, data, namefmt, ## __VA_ARGS__); \

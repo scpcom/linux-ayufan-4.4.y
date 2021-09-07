@@ -670,7 +670,7 @@ static inline ssize_t do_tty_write(
 		if (size > chunk)
 			size = chunk;
 		ret = -EFAULT;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_X86_MICROP_CTRL
 		if (0 == strcmp(tty->name, "ttyS1"))
 			memcpy(tty->write_buf, buf, size);
 		else
@@ -735,7 +735,7 @@ static ssize_t tty_write(struct file *file, const char __user *buf,
 	if (!ld->ops->write)
 		ret = -EIO;
 	else
-#ifdef MY_DEF_HERE
+#ifdef SYNO_X86_MICROP_CTRL
 	{
 		if (0 == strcmp(tty->name, "ttyS1"))
 			do_tty_write(ld->ops->write, tty, file, "-", 1);
@@ -1931,7 +1931,7 @@ int syno_ttys_write(const int index, const char* szBuf)
 {
     struct tty_driver *drv = NULL;
     struct tty_struct *tty = NULL;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_X86_MICROP_CTRL
     char *szX86Buf = NULL;
     size_t cbX86Buf = strlen(szBuf) + 2;
 
@@ -1952,7 +1952,7 @@ int syno_ttys_write(const int index, const char* szBuf)
         }
         tty = drv->ttys[index];
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_X86_MICROP_CTRL
         memset(szX86Buf, 0, cbX86Buf);
         snprintf(szX86Buf, cbX86Buf, "%c%s", '-', szBuf);
 
@@ -1962,7 +1962,7 @@ int syno_ttys_write(const int index, const char* szBuf)
 #endif  
     }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_X86_MICROP_CTRL
     kfree(szX86Buf);
 #endif
 

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/types.h>
 #include <linux/mm.h>
@@ -21,7 +18,7 @@
 #include <net/route.h>
 #include <net/xfrm.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_NET_GIANFAR_FP
 extern int netdev_fastroute;
 extern int netdev_fastroute_obstacles;
@@ -39,7 +36,7 @@ static int ip_forward_finish(struct sk_buff *skb)
 	if (unlikely(opt->optlen))
 		ip_forward_options(skb);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_NET_GIANFAR_FP
 	else {
 		struct rtable *rt = (struct rtable *)skb->_skb_dst;

@@ -897,7 +897,7 @@ struct ext4_sb_info {
 	char *s_mount_path;
 	unsigned long s_last_notify_time;
 #endif
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 	int s_swap_create_time;
 #endif
 	 

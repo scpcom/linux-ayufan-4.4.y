@@ -3686,7 +3686,7 @@ out:
 	return NETDEV_TX_OK;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_NET_GIANFAR_FP
 static int bond_accept_fastpath(struct net_device *bond_dev,
 				struct dst_entry *dst)
@@ -3855,7 +3855,7 @@ static const struct net_device_ops bond_netdev_ops = {
 	.ndo_vlan_rx_register	= bond_vlan_rx_register,
 	.ndo_vlan_rx_add_vid 	= bond_vlan_rx_add_vid,
 	.ndo_vlan_rx_kill_vid	= bond_vlan_rx_kill_vid,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_NET_GIANFAR_FP
 	.ndo_accept_fastpath	= bond_accept_fastpath,
 #endif
@@ -3881,7 +3881,7 @@ static void bond_setup(struct net_device *bond_dev)
 
 	bond_dev->destructor = free_netdev;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_NET_GIANFAR_FP
 	bond_dev->accept_fastpath = bond_accept_fastpath;
 #endif

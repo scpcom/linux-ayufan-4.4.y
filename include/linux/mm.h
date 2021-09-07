@@ -871,7 +871,7 @@ int write_one_page(struct page *page, int wait);
 void task_dirty_inc(struct task_struct *tsk);
 
 #ifdef MY_ABC_HERE
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_X86) || defined(MY_DEF_HERE)
 #define VM_MAX_READAHEAD        192      
 #elif defined(MY_ABC_HERE)
 #define VM_MAX_READAHEAD        2048      

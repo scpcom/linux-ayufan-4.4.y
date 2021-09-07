@@ -13,7 +13,7 @@
 #include <linux/kthread.h>
 #include <linux/stop_machine.h>
 #include <linux/mutex.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #include <linux/suspend.h>
 #endif
 
@@ -407,7 +407,7 @@ static int alloc_frozen_cpus(void)
 }
 core_initcall(alloc_frozen_cpus);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
  
 void cpu_hotplug_disable_before_freeze(void)
 {

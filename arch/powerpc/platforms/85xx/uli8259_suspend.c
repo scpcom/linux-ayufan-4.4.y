@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
  
 #include <linux/stddef.h>
 #include <linux/kernel.h>

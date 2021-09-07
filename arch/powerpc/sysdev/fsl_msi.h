@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _POWERPC_SYSDEV_FSL_MSI_H
 #define _POWERPC_SYSDEV_FSL_MSI_H
@@ -24,12 +21,12 @@ struct fsl_msi {
 	u32 msi_addr_hi;
 	void __iomem *msi_regs;
 	u32 feature;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	int msi_virqs[NR_MSI_REG];
 #endif
 
 	struct msi_bitmap bitmap;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 
 	struct list_head list;           
 #endif

@@ -779,7 +779,7 @@ static int sata_fsl_softreset(struct ata_link *link, unsigned int *class,
 
 	msleep(1);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
 	sata_fsl_setup_cmd_hdr_entry(pp, 0, SRST_CMD | CMD_DESC_RES | CMD_DESC_SNOOP_ENABLE,
 #else
 	sata_fsl_setup_cmd_hdr_entry(pp, 0, CMD_DESC_RES | CMD_DESC_SNOOP_ENABLE,
@@ -794,7 +794,7 @@ static int sata_fsl_softreset(struct ata_link *link, unsigned int *class,
 	iowrite32(1, CQ + hcr_base);
 	msleep(150);		 
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
 	ata_port_printk(ap, KERN_INFO,
 				"CEVA Clearing SRST\n");
 
@@ -1069,7 +1069,7 @@ static int sata_fsl_init_controller(struct ata_host *host)
 	void __iomem *hcr_base = host_priv->hcr_base;
 	u32 temp;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	 
 	temp = ioread32(hcr_base + HCONTROL);
 	iowrite32((temp & ~0x10000000), hcr_base + HCONTROL);
@@ -1277,7 +1277,7 @@ static int sata_fsl_resume(struct of_device *op)
 	void __iomem *hcr_base = host_priv->hcr_base;
 	struct ata_port *ap = host->ports[0];
 	struct sata_fsl_port_priv *pp = ap->private_data;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	u32 temp;
 #endif
 
@@ -1290,8 +1290,8 @@ static int sata_fsl_resume(struct of_device *op)
 
 	iowrite32(pp->cmdslot_paddr & 0xffffffff, hcr_base + CHBA);
 
-#ifdef MY_DEF_HERE
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
 	temp = ioread32(hcr_base + HCONTROL);
 #else
 	temp = ioread32(hcr_base + HCONTROL)

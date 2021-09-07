@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/rcupdate.h>
 #include <linux/rculist.h>
@@ -255,7 +252,7 @@ void smp_call_function_many(const struct cpumask *mask,
 	unsigned long flags;
 	int cpu, next_cpu, this_cpu = smp_processor_id();
 
-#ifndef MY_DEF_HERE
+#ifndef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 	WARN_ON_ONCE(cpu_online(this_cpu) && irqs_disabled()
 		     && !oops_in_progress);
 #endif

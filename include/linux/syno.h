@@ -33,7 +33,7 @@
 #define SYNO_USB_FLASH_DEVICE_NAME  "synoboot"
 #define SYNO_USB_FLASH_DEVICE_PATH  "/dev/synoboot"
  
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_X86) || defined(MY_DEF_HERE)
 #define IS_SYNO_USBBOOT_ID_VENDOR(VENDOR) (0xF400 == (VENDOR) || 0xF401 == (VENDOR))
 #define IS_SYNO_USBBOOT_ID_PRODUCT(PRODUCT) (0xF400 == (PRODUCT) || 0xF401 == (PRODUCT))
 #else
@@ -43,29 +43,29 @@
  
 #endif  
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_X86) || defined(MY_DEF_HERE)
 #define SYNO_PCH_GPIO_CTRL
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_X86) || defined(MY_DEF_HERE)
 #define SYNO_PINEVIEW_RTC
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_X86) || defined(MY_DEF_HERE)
 #define SYNO_PINEVIEW_CORETEMP
 #define SYNO_BROMOLOW_CORETEMP
 #define SYNO_CEDARVIEW_CORETEMP
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_X86) || defined(MY_DEF_HERE)
 #define SYNO_X86_TTY_CONSOLE_OUTPUT
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_X86) || defined(MY_DEF_HERE)
 #define SYNO_X86_MICROP_CTRL
 #endif
 
-#if defined(CONFIG_SYNO_MPC854X) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(CONFIG_ARCH_FEROCEON)
+#if defined(CONFIG_SYNO_MPC854X) || defined(CONFIG_SYNO_X86) || defined(MY_DEF_HERE) || defined(CONFIG_ARCH_FEROCEON)
 
 #ifdef MY_ABC_HERE
 #define SYNO_MAX_SWITCHABLE_NET_DEVICE 8
@@ -104,7 +104,7 @@
 
 #if	defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BROMOLOW)
 #define SYNO_MAX_INTERNAL_DISK 19
 #else
 #define SYNO_MAX_INTERNAL_DISK	15
@@ -112,10 +112,10 @@
 
 #endif
 
-#if defined(CONFIG_SYNO_MPC8533) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MPC8533) || defined(CONFIG_SYNO_QORIQ)
 #ifdef MY_ABC_HERE
 #define SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 #define SYNO_CREATE_TIME_SWAP_VERSION 3719
 #endif
 #endif
@@ -207,7 +207,7 @@
 #define SYNO_ISCSI_DEVICE_INDEX    (26 + 25 * 26)     
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_BROMOLOW
  
 #define SYNO_SAS_MPT2_HOTPLUG_PHY
 

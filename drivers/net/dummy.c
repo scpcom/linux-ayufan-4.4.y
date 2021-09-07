@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -37,7 +34,7 @@ static netdev_tx_t dummy_xmit(struct sk_buff *skb, struct net_device *dev)
 	return NETDEV_TX_OK;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_NET_GIANFAR_FP
 static int dummy_accept_fastpath(struct net_device *dev, struct dst_entry *dst)
 {
@@ -51,7 +48,7 @@ static const struct net_device_ops dummy_netdev_ops = {
 	.ndo_validate_addr	= eth_validate_addr,
 	.ndo_set_multicast_list = set_multicast_list,
 	.ndo_set_mac_address	= dummy_set_address,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_NET_GIANFAR_FP
 	.ndo_accept_fastpath 	= dummy_accept_fastpath,
 #endif

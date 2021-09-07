@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #include <linux/stat.h>
 #include <linux/sysctl.h>
 #include "../fs/xfs/linux-2.6/xfs_sysctl.h"
@@ -142,7 +139,7 @@ static const struct trans_ctl_table trans_net_core_table[] = {
 	{ NET_CORE_RMEM_DEFAULT,	"rmem_default" },
 	 
 	{ NET_CORE_MAX_BACKLOG,		"netdev_max_backlog" },
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	{ NET_CORE_FASTROUTE,		"netdev_fastroute" },
 	{ RCV_PKT_STEERING,		"rcv_pkt_steering" },
 #else

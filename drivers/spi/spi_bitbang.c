@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/spinlock.h>
@@ -227,7 +224,7 @@ static void bitbang_work(struct work_struct *work)
 
 		list_for_each_entry (t, &m->transfers, transfer_list) {
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 			if (t->speed_hz || t->bits_per_word ||
 					spi->bits_per_word)
 #else

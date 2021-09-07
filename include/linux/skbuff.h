@@ -220,7 +220,7 @@ struct sk_buff {
 	struct nf_bridge_info	*nf_bridge;
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	void		*skb_owner;
 #endif
 
@@ -294,7 +294,7 @@ static inline struct rtable *skb_rtable(const struct sk_buff *skb)
 extern void kfree_skb(struct sk_buff *skb);
 extern void consume_skb(struct sk_buff *skb);
 extern void	       __kfree_skb(struct sk_buff *skb);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_SKB_RECYCLE
 extern void  __kfree_skb_qoriq(struct sk_buff *skb);
 #endif
 extern struct sk_buff *__alloc_skb(unsigned int size,

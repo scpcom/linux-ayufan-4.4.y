@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/tty.h>
@@ -1009,7 +1006,7 @@ static void uart_close(struct tty_struct *tty, struct file *filp)
 	if (port->count)
 		goto done;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_X86_MICROP_CTRL
         if (0 == strcmp(tty->name, "ttyS1"))
                 goto done;
 #endif

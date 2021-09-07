@@ -1,12 +1,9 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __PPC_FSL_SOC_H
 #define __PPC_FSL_SOC_H
 #ifdef __KERNEL__
 
 #include <asm/mmu.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #include <asm/of_device.h>
 #include <linux/suspend.h>
 #endif
@@ -28,7 +25,7 @@ struct device_node;
 
 extern void fsl_rstcr_restart(char *cmd);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_FSL_PMC
 typedef int (*wakeup_event_t)(struct of_device *);
 int pmc_enable_wake(struct of_device *ofdev, wakeup_event_t func,

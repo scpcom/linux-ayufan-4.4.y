@@ -53,7 +53,7 @@ extern int giSynoAtaDebug;
 #define DBGMESG(x...)
 #endif
 
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(MY_ABC_HERE)
 extern int giSynoHddLedEnabled; 
 #endif
 

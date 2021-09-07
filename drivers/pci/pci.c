@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/delay.h>
@@ -393,7 +390,7 @@ static int pci_raw_set_power_state(struct pci_dev *dev, pci_power_t state)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
 static int syno_pci_raw_set_power_state(struct pci_dev *dev, pci_power_t state)
 {
 	u16 pmcsr;
@@ -531,7 +528,7 @@ int pci_set_power_state(struct pci_dev *dev, pci_power_t state)
 	if (state == PCI_D3hot && (dev->dev_flags & PCI_DEV_FLAGS_NO_D3))
 		return 0;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
 	error = syno_pci_raw_set_power_state(dev, state);
 #else
 	error = pci_raw_set_power_state(dev, state);
@@ -754,7 +751,7 @@ static int do_pci_enable_device(struct pci_dev *dev, int bars)
 	if (err < 0 && err != -EIO)
 		return err;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
 	 
 	msleep(1000);
 #endif

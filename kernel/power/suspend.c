@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/string.h>
 #include <linux/delay.h>
@@ -199,7 +196,7 @@ static void suspend_finish(void)
 int enter_state(suspend_state_t state)
 {
 	int error;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_DISABLE_KMSG_BEFORE_SYSSLEEP
 	extern int syno_disable_kmsg;
 #endif
 
@@ -209,11 +206,11 @@ int enter_state(suspend_state_t state)
 	if (!mutex_trylock(&pm_mutex))
 		return -EBUSY;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_DISABLE_KMSG_BEFORE_SYSSLEEP
 	syno_disable_kmsg = 1;
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 	printk("PM: Filesystem already sync\n");
 #else
 	printk(KERN_INFO "PM: Syncing filesystems ... ");
@@ -236,7 +233,7 @@ int enter_state(suspend_state_t state)
 	pr_debug("PM: Finishing wakeup.\n");
 	suspend_finish();
  Unlock:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_DISABLE_KMSG_BEFORE_SYSSLEEP
 	syno_disable_kmsg = 0;
 #endif
 	mutex_unlock(&pm_mutex);

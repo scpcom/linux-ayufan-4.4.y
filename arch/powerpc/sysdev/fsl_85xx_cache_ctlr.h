@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
  
 #ifndef __FSL_85XX_CACHE_CTLR_H__
 #define __FSL_85XX_CACHE_CTLR_H__

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #undef DEBUG
 
@@ -285,7 +282,7 @@ int generic_cpu_disable(void)
 	vdso_data->processorCount--;
 	fixup_irqs(cpu_online_map);
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #if defined(CONFIG_PPC64) || defined(CONFIG_E500)
 	fixup_irqs(cpu_online_map);
 #endif
@@ -305,7 +302,7 @@ int generic_cpu_enable(unsigned int cpu)
 	while (!cpu_online(cpu))
 		cpu_relax();
 
-#if defined(CONFIG_PPC64) || (defined(CONFIG_E500) && defined(MY_DEF_HERE))
+#if defined(CONFIG_PPC64) || (defined(CONFIG_E500) && defined(CONFIG_SYNO_QORIQ))
 	fixup_irqs(cpu_online_map);
 	 
 	local_irq_enable();

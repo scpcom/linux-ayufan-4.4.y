@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_QORIQ)
 /*
  * Based on swsusp_32.S, modified for FSL BookE by
  * Anton Vorontsov <avorontsov@ru.mvista.com>
@@ -193,4 +190,4 @@ _GLOBAL(swsusp_arch_resume)
 
 	li	r3,0
 	blr
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_QORIQ */

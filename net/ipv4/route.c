@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <asm/uaccess.h>
@@ -1712,7 +1709,7 @@ static void ip_handle_martian_source(struct net_device *dev,
 #endif
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_NET_GIANFAR_FP
 extern int netdev_fastroute;
 extern int netdev_fastroute_obstacles;
@@ -1801,7 +1798,7 @@ static int __mkroute_input(struct sk_buff *skb,
 
 	rth->rt_flags = flags;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_NET_GIANFAR_FP
 #ifdef FASTPATH_DEBUG
 	printk(KERN_INFO" %s: netdev_fastroute = %x, flags = %x, rth = %p",

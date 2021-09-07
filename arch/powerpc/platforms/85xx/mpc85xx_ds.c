@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/stddef.h>
 #include <linux/kernel.h>
@@ -69,7 +66,7 @@ void __init mpc85xx_ds_pic_init(void)
 		return;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	if (of_flat_dt_is_compatible(root, "fsl,MPC8572DS-CAMP") ||
 		of_flat_dt_is_compatible(root, "fsl,P2020DS-CAMP")) {
 #else
@@ -200,7 +197,7 @@ static void __init mpc85xx_ds_setup_arch(void)
 #endif
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_P2020DS_EVENT_IRQ
 static irqreturn_t event_isr(int irq, void *dev_id)
 {
@@ -249,7 +246,7 @@ static struct of_device_id __initdata mpc85xxds_ids[] = {
 	{ .compatible = "soc", },
 	{ .compatible = "simple-bus", },
 	{ .compatible = "gianfar", },
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	{ .compatible = "fsl,rapidio-delta", },
 #endif
 	{},

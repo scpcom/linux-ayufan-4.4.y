@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_QORIQ)
 /*
  * Enter and leave deep sleep/sleep state on MPC85xx
  *
@@ -276,7 +273,7 @@ _GLOBAL(mpc85xx_enter_deep_sleep)
 	lis	r3, 0xf00e
 	lwz	r4, 0x84(r3)
 	clrlwi	r4, r4, 16
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 	oris	r4, r4, 0x16ff
 #else
 	oris	r4, r4, 0x12a3
@@ -289,7 +286,7 @@ _GLOBAL(mpc85xx_enter_deep_sleep)
 	lwz	r8, powmgtreq@l(r3)
 
 	lis	r3, 0xf00e
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 	lwz	r4, 0x80(r3)
 	or	r4, r4, r8
 #else
@@ -635,4 +632,4 @@ _GLOBAL(mpc85xx_cpu_down)
        mtmsr   r7
        isync
 99:    b       99b
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_QORIQ */

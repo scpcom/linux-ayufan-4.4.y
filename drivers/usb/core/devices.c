@@ -410,8 +410,8 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 	if(usbdev && usbdev->bus) {
 		memset(buf, 0, sizeof(buf));
 		sprintf(buf, "%s-%s", usbdev->bus->bus_name, usbdev->devpath); 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_X86) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_CEDARVIEW)
 		if(!strcmp(buf,"0000:00:1d.7-2")) {
 			return 1;
 		}
@@ -451,7 +451,7 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 			return 1;
 		}
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_QORIQ)
 		if(!strcmp(buf,"fsl-ehci.0-1.2")) {
 			return 1;
 		}
@@ -474,7 +474,7 @@ int blIsCardReader(struct usb_device *usbdev)
 			return 1;
 		}
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_QORIQ)
 		if(!strcmp(buf,"fsl-ehci.0-1.3")) {
 			return 1;
 		}

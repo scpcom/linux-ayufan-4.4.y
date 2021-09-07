@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/types.h>
@@ -29,7 +26,7 @@
 #include <net/sock.h>
 #include <net/checksum.h>
 #include <net/xfrm.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #include <net/tcp.h>
 #endif
 
@@ -39,7 +36,7 @@
 
 #include "kmap_skb.h"
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_GFAR_SKBUFF_RECYCLING
 extern int gfar_recycle_skb(struct sk_buff *skb);
 #endif
@@ -328,7 +325,7 @@ void __kfree_skb(struct sk_buff *skb)
 		return;
 #endif  
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_GFAR_SKBUFF_RECYCLING
 	if (gfar_recycle_skb(skb))
 		return;
@@ -340,7 +337,7 @@ void __kfree_skb(struct sk_buff *skb)
 }
 EXPORT_SYMBOL(__kfree_skb);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_SKB_RECYCLE
 void  __kfree_skb_qoriq(struct sk_buff *skb)
 {
 	skb_release_all(skb);
@@ -437,7 +434,7 @@ static void __copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	new->ipvs_property	= old->ipvs_property;
 #endif
 	new->protocol		= old->protocol;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_GFAR_SKBUFF_RECYCLING
 	new->skb_owner		= NULL;
 #endif
@@ -480,7 +477,7 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	n->nohdr = 0;
 	n->destructor = NULL;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_GFAR_SKBUFF_RECYCLING
 	n->skb_owner = NULL;
 	skb->skb_owner = NULL;

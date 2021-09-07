@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _LINUX_ETHTOOL_H
 #define _LINUX_ETHTOOL_H
@@ -491,7 +488,7 @@ struct ethtool_ops {
 #define	AH_V6_FLOW	0x0b
 #define	ESP_V6_FLOW	0x0c
 #define	IP_USER_FLOW	0x0d
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #define IPV4_FLOW       0x10
 #define IPV6_FLOW       0x11
 #endif

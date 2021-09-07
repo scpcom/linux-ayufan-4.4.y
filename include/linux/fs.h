@@ -783,7 +783,7 @@ struct file_ra_state {
 	unsigned int size;		 
 	unsigned int async_size;	 
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	unsigned int delay_readahead;	 
 #endif
 	unsigned int ra_pages;		 

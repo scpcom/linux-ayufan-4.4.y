@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/mm.h>
@@ -74,7 +71,7 @@ int drop_caches_sysctl_handler(ctl_table *table, int write,
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE)
 
 #include <linux/syno_qoriq.h>
 

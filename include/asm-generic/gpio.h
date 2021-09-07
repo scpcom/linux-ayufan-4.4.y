@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _ASM_GENERIC_GPIO_H
 #define _ASM_GENERIC_GPIO_H
 
@@ -50,10 +47,10 @@ struct gpio_chip {
 	void			(*dbg_show)(struct seq_file *s,
 						struct gpio_chip *chip);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
 	int				(*iInterruptClear)(struct gpio_chip *Chip, const unsigned int uiGpio);
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 	void			(*iHWReset)(struct gpio_chip *Chip, const unsigned int uiGpio);
 #endif
 
@@ -80,10 +77,10 @@ extern int gpio_direction_output(unsigned gpio, int value);
 extern int gpio_get_value_cansleep(unsigned gpio);
 extern void gpio_set_value_cansleep(unsigned gpio, int value);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 extern int gpio_hw_reset(unsigned gpio);
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
 extern int iGpioInterruptClear(const unsigned int gpio);
 #endif
 

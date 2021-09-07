@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/bitops.h>
 #include <linux/module.h>
@@ -192,7 +189,7 @@ static void dev_watchdog(unsigned long arg)
 
 			if (some_queue_timedout) {
 				char drivername[64];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_QORIQ_TX_RESTART_HANG_FIX)
 				printk(KERN_DEBUG "[SYNO] NETDEV WATCHDOG: %s (%s): transmit queue %u timed out\n",dev->name, netdev_drivername(dev, drivername, 64), i);
 #else
 				WARN_ONCE(1, KERN_INFO "NETDEV WATCHDOG: %s (%s): transmit queue %u timed out\n",

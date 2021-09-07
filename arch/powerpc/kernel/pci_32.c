@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/pci.h>
@@ -47,7 +44,7 @@ static void
 fixup_hide_host_resource_fsl(struct pci_dev *dev)
 {
 	int i, class = dev->class >> 8;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 	 
 	int prog_if = dev->class & 0xf;
 #endif
@@ -55,7 +52,7 @@ fixup_hide_host_resource_fsl(struct pci_dev *dev)
 	if ((class == PCI_CLASS_PROCESSOR_POWERPC ||
 	     class == PCI_CLASS_BRIDGE_OTHER) &&
 		(dev->hdr_type == PCI_HEADER_TYPE_NORMAL) &&
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 		(prog_if == 0) &&
 #endif
 		(dev->bus->parent == NULL)) {

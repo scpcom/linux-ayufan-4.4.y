@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/bottom_half.h>
 #include <linux/types.h>
@@ -35,7 +32,7 @@
 int sysctl_tcp_tw_reuse __read_mostly;
 int sysctl_tcp_low_latency __read_mostly;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #define TCP_HWACCEL_THRESHOLD	(1024*1024)  
 extern void gfar_setup_hwaccel_tcp4_receive(struct sock *sk, struct sk_buff *skb);
 #endif
@@ -418,7 +415,7 @@ int tcp_v4_gso_send_check(struct sk_buff *skb)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 void tcp_v4_send_reset(struct sock *sk, struct sk_buff *skb)
 #else
 static void tcp_v4_send_reset(struct sock *sk, struct sk_buff *skb)
@@ -1275,7 +1272,7 @@ int tcp_v4_do_rcv(struct sock *sk, struct sk_buff *skb)
 	if (sk->sk_state == TCP_ESTABLISHED) {  
 		TCP_CHECK_TIMER(sk);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_GFAR_HW_TCP_RECEIVE_OFFLOAD
 		if (sk->tcp_hw_channel == NULL &&
 			(TCP_SKB_CB(skb)->seq - sk->init_seq) > TCP_HWACCEL_THRESHOLD &&
@@ -1372,7 +1369,7 @@ skb->tcp_header_len = th->doff*4;
 	if (!sk)
 		goto no_tcp_socket;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_GFAR_HW_TCP_RECEIVE_OFFLOAD
 	if (th->syn)
 		sk->init_seq = ntohl(th->seq);

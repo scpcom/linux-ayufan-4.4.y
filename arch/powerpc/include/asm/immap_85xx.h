@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ
  
 #ifndef __ASM_POWERPC_IMMAP_85XX_H__
 #define __ASM_POWERPC_IMMAP_85XX_H__
