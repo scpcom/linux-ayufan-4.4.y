@@ -107,6 +107,9 @@ unsigned int ata_print_id = 1;
 EXPORT_SYMBOL(ata_print_id);
 #endif
 
+int (*funcSYNODeepSleepEvent)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNODeepSleepEvent);
+
 static struct workqueue_struct *ata_wq;
 
 struct workqueue_struct *ata_aux_wq;
@@ -187,7 +190,6 @@ MODULE_AUTHOR("Jeff Garzik");
 MODULE_DESCRIPTION("Library module for ATA devices");
 MODULE_LICENSE("GPL");
 MODULE_VERSION(DRV_VERSION);
-
 
 static bool ata_sstatus_online(u32 sstatus)
 {
@@ -305,27 +307,6 @@ struct ata_device *ata_dev_next(struct ata_device *dev, struct ata_link *link,
 		goto next;
 	return dev;
 }
-
-#ifdef SYNO_SATA_COMPATIBILITY
-unsigned int uiCheckPortLinksFlags(struct ata_port *pAp) {
-	struct ata_link *pLink = NULL;
-	unsigned int uiFlags = 0x0;
-
-	if (!pAp) {
-		goto END;
-	}
-
-	ata_for_each_link(pLink, pAp, EDGE) {
-		if (pLink->uiSflags) {
-			ata_link_printk(pLink, KERN_ERR, "get error flags 0x%x\n", pLink->uiSflags);
-			uiFlags |= pLink->uiSflags;
-		}
-	}
-
-END:
-	return uiFlags;
-}
-#endif
 
 /**
  *	ata_dev_phys_link - find physical link for a device
@@ -3761,12 +3742,6 @@ static int ata_dev_set_mode(struct ata_device *dev)
 		       ata_mode_string(ata_xfer_mode2mask(dev->xfer_mode)),
 		       dev_err_whine);
 
-#ifdef SYNO_SATA_COMPATIBILITY
-	if (ap->uiSflags & ATA_SYNO_FLAG_REVALID_FAIL) {
-		DBGMESG("port %d set mode sucessfully , clear revalid fail flag\n", ap->print_id);
-		ap->uiSflags &= ~ATA_SYNO_FLAG_REVALID_FAIL;
-	}
-#endif
 	return 0;
 
  fail:
@@ -4260,27 +4235,12 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 	if (check_ready)
 		rc = ata_wait_ready(link, deadline, check_ready);
  out:
-#ifdef SYNO_SATA_COMPATIBILITY
-	if (0 < link->ap->iFakeError) {
-		ata_link_printk(link, KERN_ERR, "generate fake error, Fake count %d\n", link->ap->iFakeError);
-		if (SYNO_ERROR_MAX > link->ap->iFakeError) {
-			--(link->ap->iFakeError);
-		}
-		rc = -EBUSY;
-	}
-#endif
 	if (rc && rc != -EAGAIN) {
 		/* online is set iff link is online && reset succeeded */
 		if (online)
 			*online = false;
 		ata_link_printk(link, KERN_ERR,
 				"COMRESET failed (errno=%d)\n", rc);
-#ifdef SYNO_SATA_COMPATIBILITY
-		if (-EBUSY == rc || -EIO == rc) {
-			ata_link_printk(link, KERN_ERR, "COMRESET fail, set COMRESET fail flag\n");
-			link->uiSflags |= ATA_SYNO_FLAG_COMRESET_FAIL;
-		}
-#endif
 	}
 	DPRINTK("EXIT, rc=%d\n", rc);
 	return rc;
@@ -4520,12 +4480,6 @@ int ata_dev_revalidate(struct ata_device *dev, unsigned int new_class,
 
  fail:
 	ata_dev_printk(dev, KERN_ERR, "revalidation failed (errno=%d)\n", rc);
-#ifdef SYNO_SATA_COMPATIBILITY
-	if (-EIO == rc) {
-		DBGMESG("port %d revalidation failed, set revalid fail flag\n", dev->link->ap->print_id);
-		dev->link->ap->uiSflags |= ATA_SYNO_FLAG_REVALID_FAIL;
-	}
-#endif
 	return rc;
 }
 
@@ -5981,13 +5935,6 @@ void ata_link_init(struct ata_port *ap, struct ata_link *link, int pmp)
 	link->pmp = pmp;
 	link->active_tag = ATA_TAG_POISON;
 	link->hw_sata_spd_limit = UINT_MAX;
-#ifdef SYNO_SATA_COMPATIBILITY
-	link->uiSflags = 0x0;
-#ifdef MY_DEF_HERE
-    INIT_WORK(&link->SendSataErrEventTask, SendSataErrEvent);
-#endif
-
-#endif
 
 	/* can't use iterator, ap isn't initialized yet */
 	for (i = 0; i < ATA_MAX_DEVICES; i++) {
@@ -6108,16 +6055,6 @@ struct ata_port *ata_port_alloc(struct ata_host *host)
 #ifdef ATA_IRQ_TRAP
 	ap->stats.unhandled_irq = 1;
 	ap->stats.idle_irq = 1;
-#endif
-#ifdef SYNO_SATA_COMPATIBILITY
-	ap->uiSflags = 0x0;
-	ap->iFakeError = 0;
-	ap->iDetectStat = 0;
-	INIT_WORK(&ap->SendPwrResetEventTask, SendPwrResetEvent);
-	INIT_WORK(&ap->SendPortDisEventTask, SendPortDisEvent);
-#ifdef MY_DEF_HERE
-	INIT_WORK(&ap->SendDiskRetryEventTask, SendDiskRetryEvent);
-#endif
 #endif
 	return ap;
 }
@@ -6871,7 +6808,7 @@ int ata_host_activate(struct ata_host *host, int irq,
 		      struct scsi_host_template *sht)
 {
 	int i, rc;
-
+ 
 	rc = ata_host_start(host);
 	if (rc)
 		return rc;
@@ -6886,7 +6823,7 @@ int ata_host_activate(struct ata_host *host, int irq,
 			      dev_driver_string(host->dev), host);
 	if (rc)
 		return rc;
-
+ 
 	for (i = 0; i < host->n_ports; i++)
 		ata_port_desc(host->ports[i], "irq %d", irq);
 
@@ -7023,7 +6960,6 @@ void ata_pci_device_do_suspend(struct pci_dev *pdev, pm_message_t mesg)
 int ata_pci_device_do_resume(struct pci_dev *pdev)
 {
 	int rc;
-
 
 #ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
 	rc = pci_set_power_state(pdev, PCI_D0);
@@ -7378,7 +7314,6 @@ const struct ata_port_info ata_dummy_port_info = {
 	.port_ops		= &ata_dummy_port_ops,
 };
 
-
 #ifdef MY_ABC_HERE
 void syno_ata_info_print(struct ata_port *ap)
 {
@@ -7533,18 +7468,14 @@ EXPORT_SYMBOL_GPL(ata_cable_unknown);
 EXPORT_SYMBOL_GPL(ata_cable_ignore);
 EXPORT_SYMBOL_GPL(ata_cable_sata);
 
-#ifdef SYNO_SATA_COMPATIBILITY
 int (*funcSYNOSendDiskResetPwrEvent)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSendDiskResetPwrEvent);
 int (*funcSYNOSendDiskPortDisEvent)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSendDiskPortDisEvent);
-#ifdef MY_DEF_HERE
 int (*funcSYNOSataErrorReport)(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSataErrorReport);
 int (*funcSYNODiskRetryReport)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNODiskRetryReport);
-#endif
-#endif /* MY_ABC_HERE */
 
 #ifdef MY_ABC_HERE
 int (*funcSYNOSendEboxRefreshEvent)(int portIndex) = NULL;
@@ -7555,5 +7486,5 @@ EXPORT_SYMBOL(funcSYNOSendEboxRefreshEvent);
 EXPORT_SYMBOL_GPL(ata_dev_set_feature);
 #endif
 
-int (*funcSYNODeepSleepEvent)(unsigned int, unsigned int) = NULL;
-EXPORT_SYMBOL(funcSYNODeepSleepEvent);
+int (*funcSYNODiskPowerShortBreakReport)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNODiskPowerShortBreakReport);

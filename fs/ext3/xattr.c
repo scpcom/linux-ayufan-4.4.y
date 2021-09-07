@@ -1353,15 +1353,7 @@ static size_t
 ext3_xattr_syno_list(struct inode *inode, char *list, size_t list_size,
 		     const char *name, size_t name_len)
 {
-	const size_t prefix_len = XATTR_SYNO_PREFIX_LEN;
-	const size_t total_len = prefix_len + name_len + 1;
-
-	if (list && total_len <= list_size) {
-		memcpy(list, XATTR_SYNO_PREFIX, prefix_len);
-		memcpy(list+prefix_len, name, name_len);
-		list[prefix_len + name_len] = '\0';
-	}
-	return total_len;
+	return 0;
 }
 
 static int ext3_xattr_syno_get(struct inode *inode, const char *name,

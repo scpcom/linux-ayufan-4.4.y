@@ -76,10 +76,6 @@ DEFINE_SPINLOCK(SYNOLastWakeLock);
 #include <linux/synobios.h>
 #endif
 
-#ifdef MY_DEF_HERE
-extern int (*funcSYNOSataErrorReport)(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
-#endif
-
 #ifdef MY_ABC_HERE
 extern EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void);
 #endif
@@ -105,7 +101,6 @@ static struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
 static int ata_scsi_user_scan(struct Scsi_Host *shost, unsigned int channel,
 			      unsigned int id, unsigned int lun);
 
-
 #define RW_RECOVERY_MPAGE 0x1
 #define RW_RECOVERY_MPAGE_LEN 12
 #define CACHE_MPAGE 0x8
@@ -114,7 +109,6 @@ static int ata_scsi_user_scan(struct Scsi_Host *shost, unsigned int channel,
 #define CONTROL_MPAGE_LEN 12
 #define ALL_MPAGES 0x3f
 #define ALL_SUB_MPAGES 0xff
-
 
 static const u8 def_rw_recovery_mpage[RW_RECOVERY_MPAGE_LEN] = {
 	RW_RECOVERY_MPAGE,
@@ -153,7 +147,6 @@ static struct scsi_transport_template ata_scsi_transport_template = {
 	.eh_timed_out		= ata_scsi_timed_out,
 	.user_scan		= ata_scsi_user_scan,
 };
-
 
 static const struct {
 	enum link_pm	value;
@@ -244,186 +237,6 @@ look_up_scsi_dev_from_ap(struct ata_port *ap)
 }
 EXPORT_SYMBOL(look_up_scsi_dev_from_ap);
 #endif
-
-#ifdef SYNO_SATA_COMPATIBILITY
-static ssize_t
-syno_port_thaw_store(struct device *dev, struct device_attribute *attr, const char * buf, size_t count)
-{
-	struct Scsi_Host *shost = class_to_shost(dev);
-	struct ata_port *ap = ata_shost_to_port(shost);
-	ssize_t ret = -EIO;
-	int iThaw = 1;
-
-	if(!ap) {
-		goto END;
-	}
-
-
-	sscanf(buf, "%d", &iThaw);
-	if (iThaw) {
-		ata_port_schedule_eh(ap);
-	} else {
-		ata_port_printk(ap, KERN_ERR, "port freeze from sysfs control\n");
-		ata_eh_freeze_port(ap);
-	}
-
-	ret = count;
-
-END:
-	return ret;
-}
-
-static ssize_t
-syno_port_thaw_show(struct device *dev, struct device_attribute *attr, char * buf)
-{
-	struct Scsi_Host *shost = class_to_shost(dev);
-	struct ata_port *ap = ata_shost_to_port(shost);
-	ssize_t len = -EIO;
-
-	if(!ap) {
-		goto END;
-	}
-
-
-	if (ap->pflags & ATA_PFLAG_FROZEN) {
-		len = sprintf(buf, "%d%s", 0, "\n");
-	} else {
-		len = sprintf(buf, "%d%s", 1, "\n");
-	}
-
-END:
-	return len;
-}
-DEVICE_ATTR(syno_port_thaw, S_IRUGO | S_IWUGO, syno_port_thaw_show, syno_port_thaw_store);
-EXPORT_SYMBOL_GPL(dev_attr_syno_port_thaw);
-
-/**
- * show this port remaining fake errors
- **/
-static ssize_t
-syno_fake_error_ctrl_show(struct device *dev, struct device_attribute *attr, char *buf)
-{
-	struct scsi_device *sdev = to_scsi_device(dev);
-	struct ata_port *ap = ata_shost_to_port(sdev->host);
-	ssize_t len = -EIO;
-
-	if (!ap) {
-		goto END;
-	}
-
-	len = sprintf(buf, "%d%s", ap->iFakeError, "\n");
-
-END:
-	return len;
-}
-
-/**
- * set this port fake errors
- **/
-static ssize_t
-syno_fake_error_ctrl_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-	struct scsi_device *sdev = to_scsi_device(dev);
-	struct ata_port *ap = ata_shost_to_port(sdev->host);
-	int iFakeError = 0;
-	ssize_t ret = -EIO;
-
-	if (!ap) {
-		goto END;
-	}
-
-	sscanf(buf, "%d", &iFakeError);
-	ap->iFakeError = iFakeError;
-
-	ret = count;
-
-END:
-	return ret;
-}
-DEVICE_ATTR(syno_fake_error_ctrl, S_IRUGO | S_IWUGO, syno_fake_error_ctrl_show, syno_fake_error_ctrl_store);
-EXPORT_SYMBOL_GPL(dev_attr_syno_fake_error_ctrl);
-
-#ifdef MY_DEF_HERE
-/**
- * send an error event to user space
- **/
-static ssize_t
-syno_sata_error_event_debug_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-	struct scsi_device *sdev = to_scsi_device(dev);
-	struct ata_port *ap = ata_shost_to_port(sdev->host);
-	struct ata_device *ata_dev = ata_scsi_find_dev(ap, sdev);
-	ssize_t ret = -EIO;
-	int iStartIdx = 0;
-
-	if (!ap || !ata_dev) {
-		goto END;
-	}
-
-	iStartIdx = syno_libata_index_get(ap->scsi_host, 0, 0, 0);
-
-	if (funcSYNOSataErrorReport) {
-		funcSYNOSataErrorReport(iStartIdx, ap->nr_pmp_links, ata_dev->link->pmp, SERR_10B_8B_ERR, ATA_ICRC);
-		printk(KERN_ERR "----------------------- sent event: {SError: 10B8B} {Error: ICRC} --------------------\n");
-		funcSYNOSataErrorReport(iStartIdx, ap->nr_pmp_links, ata_dev->link->pmp, SERR_HANDSHAKE | SERR_DISPARITY , ATA_UNC);
-		printk(KERN_ERR "----------------------- sent event: {SError: Dispar Handshk} {Error: UNC} --------------------\n");
-		funcSYNOSataErrorReport(iStartIdx, ap->nr_pmp_links, ata_dev->link->pmp, 0, ATA_IDNF | ATA_ABORTED | ATA_UNC);
-		printk(KERN_ERR "----------------------- send event: {Error: UNC IDNF ABORTED} --------------------\n");
-	}
-
-	ret = count;
-
-END:
-	return ret;
-}
-DEVICE_ATTR(syno_sata_error_event_debug, S_IWUGO, NULL, syno_sata_error_event_debug_store);
-EXPORT_SYMBOL_GPL(dev_attr_syno_sata_error_event_debug);
-#endif
-
-/**
- * show this dev power reset count
- **/
-static ssize_t
-syno_pwr_reset_count_show(struct device *dev, struct device_attribute *attr, char *buf)
-{
-	struct scsi_device *sdev = to_scsi_device(dev);
-	ssize_t len = -EIO;
-
-	if (!sdev) {
-		goto END;
-	}
-
-	len = sprintf(buf, "%d%s", sdev->iResetPwrCount, "\n");
-
-END:
-	return len;
-}
-
-/**
- * set this dev power reset count
- **/
-static ssize_t
-syno_pwr_reset_count_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-	struct scsi_device *sdev = to_scsi_device(dev);
-	int iSet = 0;
-	ssize_t ret = -EIO;
-
-	if (!sdev) {
-		goto END;
-	}
-
-	sscanf(buf, "%d", &iSet);
-	sdev->iResetPwrCount = iSet;
-
-	ret = count;
-
-END:
-	return ret;
-}
-DEVICE_ATTR(syno_pwr_reset_count, S_IRUGO | S_IWUGO, syno_pwr_reset_count_show, syno_pwr_reset_count_store);
-EXPORT_SYMBOL_GPL(dev_attr_syno_pwr_reset_count);
-#endif /* SYNO_SATA_COMPATIBILITY */
 
 #ifdef MY_ABC_HERE
 /**
@@ -802,11 +615,8 @@ syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn)
 	struct ata_port *ap = ata_shost_to_port(host);
 	int iRet = -1;
 
-
 	DBGMESG("disk %d do pm control blPowerOn %d\n", ap->print_id, blPowerOn);
-	if (!ap->nr_pmp_links) {
-	}
-	else {
+	if (ap->nr_pmp_links) {
 		if (!syno_is_synology_pm(ap)) {
 			goto END;
 		}
@@ -993,7 +803,6 @@ syno_pm_info_show(struct device *dev, struct device_attribute *attr, char *buf)
 				 "\"\n");
 
 		strncat(szTmp1, szTmp, BDEVNAME_SIZE);
-
 
 		/* unique model name and EMID*/
 		if(IS_SYNOLOGY_RX410(ap->PMSynoUnique)){
@@ -1491,13 +1300,6 @@ struct device_attribute *ata_common_sdev_attrs[] = {
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_wcache,
 #endif
-#ifdef SYNO_SATA_COMPATIBILITY
-	&dev_attr_syno_fake_error_ctrl,
-	&dev_attr_syno_pwr_reset_count,
-#ifdef MY_DEF_HERE
-	&dev_attr_syno_sata_error_event_debug,
-#endif
-#endif
 	NULL
 };
 EXPORT_SYMBOL_GPL(ata_common_sdev_attrs);
@@ -1672,7 +1474,6 @@ int ata_cmd_ioctl(struct scsi_device *scsidev, void __user *arg)
 				rc = -EFAULT;
 		}
 	}
-
 
 	if (cmd_result) {
 		rc = -EIO;
@@ -2541,7 +2342,6 @@ static unsigned int ata_scsi_start_stop_xlat(struct ata_queued_cmd *qc)
 	return 1;
 }
 
-
 /**
  *	ata_scsi_flush_xlat - Translate SCSI SYNCHRONIZE CACHE command
  *	@qc: Storage for translated ATA taskfile
@@ -3099,7 +2899,6 @@ static int syno_ata_scsi_translate(struct ata_device *dev, struct scsi_cmnd *cmd
 				/* jiffies already greater than the wait interval, reset group */
 				giWakingDisks = giGroupDisks = 0;
 			}
-
 
 			/* The following case, we can add this disk to group to wakup
 			 * 1. No body waking
@@ -4140,7 +3939,6 @@ static unsigned int atapi_xlat(struct ata_queued_cmd *qc)
 			qc->tf.feature |= ATAPI_DMADIR;
 	}
 
-
 	/* FIXME: We need to translate 0x05 READ_BLOCK_LIMITS to a MODE_SENSE
 	   as ATAPI tape drives don't get this right otherwise */
 	return 0;
@@ -4634,19 +4432,13 @@ static inline int __ata_scsi_queuecmd(struct scsi_cmnd *scmd,
 	}
 
 	if (xlat_func)
-/* As you see if SYNO_INTERNAL_HD_NUM is not ported, this is not work */
+/* As you see if MY_ABC_HERE is not ported, this is not work */
 #if defined(MY_ABC_HERE)
 	{
 #ifdef MY_ABC_HERE
 		if (dev->link->ap->nr_pmp_links && dev->link->ap->pflags & ATA_PFLAG_SYNO_BOOT_PROBE) {
 			/* I don't know why some EUnit master may not clear ATA_PFLAG_SYNO_BOOT_PROBE,
 			 * so we must clear it again by schedule_eh*/
-			ata_port_schedule_eh(dev->link->ap);
-			goto RETRY;
-		}
-#endif
-#ifdef SYNO_SATA_COMPATIBILITY
-		if (0 < dev->link->ap->iFakeError) {
 			ata_port_schedule_eh(dev->link->ap);
 			goto RETRY;
 		}
@@ -5679,4 +5471,3 @@ int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lu
 	return index;
 }
 #endif
-

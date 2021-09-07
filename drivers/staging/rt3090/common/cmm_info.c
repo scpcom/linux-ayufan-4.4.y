@@ -37,7 +37,6 @@
 #include <linux/sched.h>
 #include "../rt_config.h"
 
-
 INT	Show_SSID_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	OUT	PSTRING			pBuf);
@@ -251,7 +250,6 @@ INT Set_DriverVersion_Proc(
 		DBGPRINT(RT_DEBUG_TRACE, ("Driver version-%s\n", STA_DRIVER_VERSION));
 #endif // CONFIG_STA_SUPPORT //
 
-
     return TRUE;
 }
 
@@ -286,7 +284,6 @@ INT Set_CountryRegion_Proc(
 	return TRUE;
 }
 
-
 /*
     ==========================================================================
     Description:
@@ -317,7 +314,6 @@ INT Set_CountryRegionABand_Proc(
 
 	return TRUE;
 }
-
 
 /*
     ==========================================================================
@@ -438,13 +434,11 @@ INT	Set_Channel_Proc(
 #endif // CONFIG_STA_SUPPORT //
 	}
 
-
 	if (success == TRUE)
 		DBGPRINT(RT_DEBUG_TRACE, ("Set_Channel_Proc::(Channel=%d)\n", pAd->CommonCfg.Channel));
 
 	return success;
 }
-
 
 /*
     ==========================================================================
@@ -466,7 +460,6 @@ INT	Set_ShortSlot_Proc(
 
 	return retval;
 }
-
 
 /*
     ==========================================================================
@@ -531,7 +524,6 @@ INT	Set_BGProtection_Proc(
 			return FALSE;
 	}
 
-
 	DBGPRINT(RT_DEBUG_TRACE, ("Set_BGProtection_Proc::(BGProtection=%ld)\n", pAd->CommonCfg.UseBGProtection));
 
 	return TRUE;
@@ -552,7 +544,6 @@ INT	Set_TxPreamble_Proc(
 	RT_802_11_PREAMBLE	Preamble;
 
 	Preamble = simple_strtol(arg, 0, 10);
-
 
 	switch (Preamble)
 	{
@@ -712,13 +703,11 @@ INT	Set_PktAggregate_Proc(
 	else
 		return FALSE;  //Invalid argument
 
-
 	DBGPRINT(RT_DEBUG_TRACE, ("Set_PktAggregate_Proc::(AGGRE=%d)\n", pAd->CommonCfg.bAggregationCapable));
 
 	return TRUE;
 }
 #endif
-
 
 #ifdef INF_AMAZON_PPA
 INT	Set_INF_AMAZON_SE_PPA_Proc(
@@ -773,7 +762,6 @@ INT	Set_INF_AMAZON_SE_PPA_Proc(
 			}
 		}
 
-
 	}
 	else if (aggre == 0)
 	{
@@ -821,7 +809,6 @@ printk("INF_AMAZON_SE_PPA already disable \n");
 }
 #endif // INF_AMAZON_PPA //
 
-
 /*
     ==========================================================================
     Description:
@@ -850,7 +837,6 @@ INT	Set_IEEE80211H_Proc(
 
 	return TRUE;
 }
-
 
 #ifdef DBG
 /*
@@ -947,7 +933,6 @@ INT	Set_ResetStatCounter_Proc(
 	NdisZeroMemory(&pAd->RalinkCounters, sizeof(COUNTER_RALINK));
 
 	// Reset HotSpot counter
-
 
 	return TRUE;
 }
@@ -1223,7 +1208,6 @@ NDIS_STATUS RTMPWPARemoveKeyProc(
 }
 #endif // CONFIG_STA_SUPPORT //
 
-
 #ifdef CONFIG_STA_SUPPORT
 /*
 	========================================================================
@@ -1276,7 +1260,6 @@ VOID	RTMPWPARemoveAllKeys(
 
 }
 #endif // CONFIG_STA_SUPPORT //
-
 
 /*
 	========================================================================
@@ -1439,10 +1422,8 @@ VOID	RTMPSetPhyMode(
 			break;
 	}
 
-
 	pAd->CommonCfg.BandState = UNKNOWN_BAND;
 }
-
 
 #ifdef DOT11_N_SUPPORT
 /*
@@ -1659,7 +1640,6 @@ VOID	RTMPSetHT(
 	}
 	AsicSetEdcaParm(pAd, &pAd->CommonCfg.APEdcaParm);
 
-
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 		{
@@ -1790,7 +1770,6 @@ VOID	RTMPSetIndividualHT(
 	    MlmeUpdateHtTxRates(pAd, apidx);
 }
 
-
 /*
 	========================================================================
 	Routine Description:
@@ -1798,7 +1777,6 @@ VOID	RTMPSetIndividualHT(
 
 	Arguments:
 		Send all HT IE in beacon/probe rsp/assoc rsp/action frame.
-
 
 	========================================================================
 */
@@ -1895,7 +1873,6 @@ VOID	RTMPAddWcidAttributeEntry(
 
 	RTMP_IO_WRITE32(pAd, offset, WCIDAttri);
 
-
 	// Update IV/EIV table
 	offset = MAC_IVEIV_TABLE_BASE + (Wcid * HW_IVEIV_ENTRY_SIZE);
 
@@ -1977,7 +1954,6 @@ PSTRING GetAuthMode(CHAR auth)
 	return "UNKNOW";
 }
 
-
 /*
     ==========================================================================
     Description:
@@ -1997,8 +1973,6 @@ PSTRING GetAuthMode(CHAR auth)
     ==========================================================================
 */
 #define	LINE_LEN	(4+33+20+23+9+7+3)	// Channel+SSID+Bssid+Security+Signal+WiressMode+NetworkType
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
 VOID	RTMPCommSiteSurveyData(
 	IN  PSTRING		msg,
 	IN  PBSS_ENTRY	pBss)
@@ -2171,9 +2145,6 @@ VOID RTMPIoctlGetSiteSurvey(
     INT         max_len = LINE_LEN;
 	PBSS_ENTRY	pBss;
 
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
-
 	os_alloc_mem(NULL, (PUCHAR *)&msg, sizeof(CHAR)*((MAX_LEN_OF_BSS_TABLE)*max_len));
 
 	if (msg == NULL)
@@ -2186,10 +2157,6 @@ VOID RTMPIoctlGetSiteSurvey(
 	sprintf(msg,"%s","\n");
 	sprintf(msg+strlen(msg),"%-4s%-33s%-20s%-23s%-9s%-7s%-3s\n",
 	    "Ch", "SSID", "BSSID", "Security", "Siganl(%)", "W-Mode", " NT");
-
-#ifdef CONFIG_STA_SUPPORT
-
-#endif // CONFIG_STA_SUPPORT //
 
 	WaitCnt = 0;
 #ifdef CONFIG_STA_SUPPORT
@@ -2208,12 +2175,8 @@ VOID RTMPIoctlGetSiteSurvey(
 		if((strlen(msg)+max_len ) >= IW_SCAN_MAX_DATA)
 			break;
 
-
 		RTMPCommSiteSurveyData(msg, pBss);
 
-#ifdef CONFIG_STA_SUPPORT
-
-#endif // CONFIG_STA_SUPPORT //
 	}
 
 #ifdef CONFIG_STA_SUPPORT
@@ -2310,7 +2273,6 @@ VOID RTMPIoctlGetMacTable(
 
 	kfree(msg);
 }
-
 
 #ifdef DOT11_N_SUPPORT
 INT	Set_BASetup_Proc(
@@ -2601,7 +2563,6 @@ INT	Set_HtGi_Proc(
 	return TRUE;
 }
 
-
 INT	Set_HtTxBASize_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg)
@@ -2760,7 +2721,6 @@ INT	Set_HtBaWinSize_Proc(
 	ULONG Value;
 
 	Value = simple_strtol(arg, 0, 10);
-
 
 	if (Value >=1 && Value <= 64)
 	{
@@ -2948,7 +2908,6 @@ INT	Set_SendPSMPAction_Proc(
 
 	return FALSE;
 
-
 }
 
 INT	Set_HtMIMOPSmode_Proc(
@@ -2971,7 +2930,6 @@ INT	Set_HtMIMOPSmode_Proc(
 	return TRUE;
 }
 
-
 INT	Set_ForceShortGI_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg)
@@ -2992,8 +2950,6 @@ INT	Set_ForceShortGI_Proc(
 
 	return TRUE;
 }
-
-
 
 INT	Set_ForceGF_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -3035,7 +2991,6 @@ INT	Set_HtMimoPs_Proc(
 	return TRUE;
 }
 #endif // DOT11_N_SUPPORT //
-
 
 #ifdef DOT11_N_SUPPORT
 INT	SetCommonHT(
@@ -3116,8 +3071,6 @@ INT	Set_OpMode_Proc(
 }
 #endif // CONFIG_APSTA_MIXED_SUPPORT //
 
-
-
 INT Set_LongRetryLimit_Proc(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	PSTRING			arg)
@@ -3145,7 +3098,6 @@ INT Set_ShortRetryLimit_Proc(
 	DBGPRINT(RT_DEBUG_TRACE, ("IF Set_ShortRetryLimit_Proc::(tx_rty_cfg=0x%x)\n", tx_rty_cfg.word));
 	return TRUE;
 }
-
 
 /////////////////////////////////////////////////////////////////////////
 PSTRING RTMPGetRalinkAuthModeStr(
@@ -3285,7 +3237,6 @@ INT	Show_WirelessMode_Proc(
 	}
 	return 0;
 }
-
 
 INT	Show_TxBurst_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -3457,7 +3408,6 @@ INT	Show_HtExtcha_Proc(
 	return 0;
 }
 
-
 INT	Show_HtMpduDensity_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	OUT	PSTRING			pBuf)
@@ -3582,7 +3532,6 @@ INT	Show_NetworkType_Proc(
 	return 0;
 }
 
-
 #endif // CONFIG_STA_SUPPORT //
 
 INT	Show_AuthMode_Proc(
@@ -3703,7 +3652,6 @@ INT	Show_WPAPSK_Proc(
 {
 	INT	idx;
 	UCHAR	PMK[32] = {0};
-
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)

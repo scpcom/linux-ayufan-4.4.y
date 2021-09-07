@@ -194,9 +194,6 @@
 extern char gszSerialNum[];
 #endif
 
-#ifdef MY_ABC_HERE
-#endif
-
 static int Uninitialize(void);
 
 static int GetBrand(void)

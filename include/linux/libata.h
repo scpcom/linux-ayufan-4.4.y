@@ -63,7 +63,6 @@
 #undef ATA_IRQ_TRAP		/* define to ack screaming irqs */
 #undef ATA_NDEBUG		/* define to disable quick runtime checks */
 
-
 /* note: prints function name for you */
 #ifdef ATA_DEBUG
 #define DPRINTK(fmt, args...) printk(KERN_ERR "%s: " fmt, __func__, ## args)
@@ -95,13 +94,6 @@ extern int giSynoHddLedEnabled;
 #define WAKEINTERVAL (7UL*HZ)
 /* WD suggest 30s */
 #define ISSUEREADTIMEOUT (30UL*HZ)
-#endif
-
-#ifdef SYNO_SATA_COMPATIBILITY
-#define SYNO_ERROR_ALWAYS 999
-#define SYNO_ERROR_TILL_TO_FORCE 998
-#define SYNO_ERROR_TILL_TO_DEEP 997
-#define SYNO_ERROR_MAX 950
 #endif
 
 /* NEW: debug levels */
@@ -185,12 +177,6 @@ enum {
 	ATA_DFLAG_DETACH	= (1 << 24),
 	ATA_DFLAG_DETACHED	= (1 << 25),
 
-#ifdef SYNO_SATA_COMPATIBILITY
-	ATA_SYNO_DFLAG_PMP_DETACH	= (1 << 0), /* forece device detach */
-	ATA_SYNO_DFLAG_DISABLE	= (1 << 1), /* forece device detach */
-	ATA_SYNO_DFLAG_DETACH	= (1 << 2), /* forece device detach */
-#endif
-
 	ATA_DEV_UNKNOWN		= 0,	/* unknown device */
 	ATA_DEV_ATA		= 1,	/* ATA device */
 	ATA_DEV_ATA_UNSUP	= 2,	/* ATA device (unsupported) */
@@ -247,18 +233,7 @@ enum {
 	 */
 	ATA_FLAG_DISABLED	= (1 << 23), /* port is disabled, ignore it */
 
-#ifdef SYNO_SATA_COMPATIBILITY
-	/* if after reset, still have the following fail, we must try force detect */
-	ATA_SYNO_FLAG_SRST_FAIL	= (1 << 0), /* still have SRST fail */
-	ATA_SYNO_FLAG_COMRESET_FAIL	= (1 << 1), /* still COMRESET fail */
-	ATA_SYNO_FLAG_REVALID_FAIL	= (1 << 2), /* still revalid fail */
-	ATA_SYNO_FLAG_GSCR_FAIL	= (1 << 3), /* still read gscr fail */
-	ATA_SYNO_FLAG_FORCE_INTR	= (1 << 4), /* force fake plugged interrupt */
-	ATA_SYNO_FLAG_FORCE_RETRY	= (1 << 5), /* force eh retries */
-#endif
-
 	/* bits 24:31 of ap->flags are reserved for LLD specific flags */
-
 
 	/* struct ata_port pflags */
 	ATA_PFLAG_EH_PENDING	= (1 << 0), /* EH pending */
@@ -696,9 +671,6 @@ struct ata_device {
 	unsigned int		devno;		/* 0 or 1 */
 	unsigned int		horkage;	/* List of broken features */
 	unsigned long		flags;		/* ATA_DFLAG_xxx */
-#ifdef SYNO_SATA_COMPATIBILITY
-	unsigned long		ulSflags;		/* ATA_SYNO_DFLAG_xxx */
-#endif
 	struct scsi_device	*sdev;		/* attached SCSI device */
 #ifdef CONFIG_ATA_ACPI
 	acpi_handle		acpi_handle;
@@ -808,14 +780,6 @@ struct ata_link {
 	u32			sactive;	/* active NCQ commands */
 
 	unsigned int		flags;		/* ATA_LFLAG_xxx */
-#ifdef SYNO_SATA_COMPATIBILITY
-	unsigned int		uiSflags;		/* ATA_SYNO_FLAG_xxx, the same as ata_port */
-#ifdef MY_DEF_HERE
-	unsigned int		uiSError;
-	unsigned int		uiError;
-	struct work_struct	SendSataErrEventTask;
-#endif
-#endif
 
 	u32			saved_scontrol;	/* SControl on probe */
 	unsigned int		hw_sata_spd_limit;
@@ -845,18 +809,6 @@ struct ata_port {
 	unsigned long		flags;	/* ATA_FLAG_xxx */
 	/* Flags that change dynamically, protected by ap->lock */
 	unsigned int		pflags; /* ATA_PFLAG_xxx */
-#ifdef SYNO_SATA_COMPATIBILITY
-	/* SYNO flags */
-	unsigned int		uiSflags; /* ATA_SYNO_FLAG_xxx */
-	int iFakeError;		/* fake errors */
-	int iDetectStat;	/* detect plugged/un-plugged status at eh complete
-						   to prevent port freeze issue */
-	struct work_struct	SendPwrResetEventTask;
-	struct work_struct	SendPortDisEventTask;
-#ifdef MY_DEF_HERE
-	struct work_struct      SendDiskRetryEventTask;
-#endif
-#endif
 	unsigned int		print_id; /* user visible unique port ID */
 	unsigned int		port_no; /* 0 based port no. inside the host */
 
@@ -1041,10 +993,6 @@ struct ata_port_operations {
 #ifdef CONFIG_SYNO_PLX_PORTING
 	int (*acquire_hw)(int port_no, int may_sleep, int timeout_jiffies);
 #endif
-
-#ifdef SYNO_SATA_COMPATIBILITY
-	void (*syno_force_intr)(struct ata_port *ap);
-#endif
 	/*
 	 * ->inherits must be the last field and all the preceding
 	 * fields must be pointers.
@@ -1082,14 +1030,6 @@ struct ata_timing {
 extern struct device_attribute dev_attr_syno_manutil_power_disable;
 extern struct device_attribute dev_attr_syno_pm_gpio;
 extern struct device_attribute dev_attr_syno_pm_info;
-#ifdef SYNO_SATA_COMPATIBILITY
-extern struct device_attribute dev_attr_syno_port_thaw;
-extern struct device_attribute dev_attr_syno_fake_error_ctrl;
-extern struct device_attribute dev_attr_syno_pwr_reset_count;
-#ifdef MY_DEF_HERE
-extern struct device_attribute dev_attr_syno_sata_error_event_debug;
-#endif
-#endif
 #endif
 #ifdef MY_ABC_HERE
 extern struct device_attribute dev_attr_syno_wcache;
@@ -1099,9 +1039,6 @@ extern struct device_attribute dev_attr_syno_disk_serial;
 #endif
 #ifdef MY_ABC_HERE
 extern struct device_attribute dev_attr_syno_diskname_trans;
-#endif
-#ifdef SYNO_SATA_COMPATIBILITY
-extern unsigned int uiCheckPortLinksFlags(struct ata_port *pAp);
 #endif
 
 extern const unsigned long sata_deb_timing_normal[];
@@ -1249,7 +1186,6 @@ extern u8 ata_timing_cycle2mode(unsigned int xfer_shift, int cycle);
 #ifdef MY_ABC_HERE
 extern void syno_ata_info_print(struct ata_port *ap);
 #endif
-
 
 /* PCI */
 #ifdef CONFIG_PCI
@@ -1434,8 +1370,6 @@ extern long g_sata_led_special;
 #define SYNO_DISK_HIBERNATION_MACRO
 #endif
 
-#define SYNO_SATA_IRQ_OFF_MACRO
-
 #define ATA_BASE_SHT(drv_name)					\
 	.module			= THIS_MODULE,			\
 	.name			= drv_name,			\
@@ -1453,7 +1387,6 @@ extern long g_sata_led_special;
 	SYNO_SATA_POWER_CTL_MACRO \
 	SYNO_FIXED_DISK_NAME_MACRO \
 	SYNO_DISK_HIBERNATION_MACRO \
-    SYNO_SATA_IRQ_OFF_MACRO \
 	.sdev_attrs		= ata_common_sdev_attrs
 
 #define ATA_NCQ_SHT(drv_name)					\
@@ -1830,7 +1763,6 @@ extern void sata_pmp_error_handler(struct ata_port *ap);
 #define sata_pmp_error_handler		ata_std_error_handler
 
 #endif /* CONFIG_SATA_PMP */
-
 
 /**************************************************************************
  * SFF - drivers/ata/libata-sff.c

@@ -38,14 +38,12 @@
 #include "rt_config.h"
 #include <linux/pci.h>
 
-
 IRQ_HANDLE_TYPE
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19))
 rt2860_interrupt(int irq, void *dev_instance);
 #else
 rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs);
 #endif
-
 
 static void rx_done_tasklet(unsigned long data);
 static void mgmt_dma_done_tasklet(unsigned long data);
@@ -55,8 +53,6 @@ static void ac2_dma_done_tasklet(unsigned long data);
 static void ac3_dma_done_tasklet(unsigned long data);
 /*static void hcca_dma_done_tasklet(unsigned long data);*/
 static void fifo_statistic_full_tasklet(unsigned long data);
-
-
 
 /*---------------------------------------------------------------------*/
 /* Symbol & Macro Definitions                                          */
@@ -86,7 +82,6 @@ static void fifo_statistic_full_tasklet(unsigned long data);
 #define INT_TONE_RADAR	(RT2860_INT_TONE_RADAR)
 #endif // TONE_RADAR_DETECT_SUPPORT //
 
-
 /***************************************************************************
   *
   *	Interface-depended memory allocation/Free related procedures.
@@ -108,7 +103,6 @@ void RTMP_AllocateTxDescMemory(
 
 }
 
-
 // Function for MgmtDesc Memory allocation.
 void RTMP_AllocateMgmtDescMemory(
 	IN	PRTMP_ADAPTER pAd,
@@ -122,7 +116,6 @@ void RTMP_AllocateMgmtDescMemory(
 	*VirtualAddress = (PVOID)pci_alloc_consistent(pObj->pci_dev,sizeof(char)*Length, PhysicalAddress);
 
 }
-
 
 // Function for RxDesc Memory allocation.
 void RTMP_AllocateRxDescMemory(
@@ -138,7 +131,6 @@ void RTMP_AllocateRxDescMemory(
 
 }
 
-
 // Function for free allocated Desc Memory.
 void RTMP_FreeDescMemory(
 	IN	PRTMP_ADAPTER pAd,
@@ -150,7 +142,6 @@ void RTMP_FreeDescMemory(
 
 	pci_free_consistent(pObj->pci_dev, Length, VirtualAddress, PhysicalAddress);
 }
-
 
 // Function for TxData DMA Memory allocation.
 void RTMP_AllocateFirstTxBuffer(
@@ -166,7 +157,6 @@ void RTMP_AllocateFirstTxBuffer(
 	*VirtualAddress = (PVOID)pci_alloc_consistent(pObj->pci_dev,sizeof(char)*Length, PhysicalAddress);
 }
 
-
 void RTMP_FreeFirstTxBuffer(
 	IN	PRTMP_ADAPTER pAd,
 	IN	ULONG	Length,
@@ -178,7 +168,6 @@ void RTMP_FreeFirstTxBuffer(
 
 	pci_free_consistent(pObj->pci_dev, Length, VirtualAddress, PhysicalAddress);
 }
-
 
 /*
  * FUNCTION: Allocate a common buffer for DMA
@@ -200,7 +189,6 @@ void RTMP_AllocateSharedMemory(
 
 	*VirtualAddress = (PVOID)pci_alloc_consistent(pObj->pci_dev,sizeof(char)*Length, PhysicalAddress);
 }
-
 
 /*
  * FUNCTION: Allocate a packet buffer for DMA
@@ -244,7 +232,6 @@ PNDIS_PACKET RTMP_AllocateRxPacketBuffer(
 	return (PNDIS_PACKET) pkt;
 }
 
-
 VOID Invalid_Remaining_Packet(
 	IN	PRTMP_ADAPTER pAd,
 	IN	 ULONG VirtualAddress)
@@ -253,7 +240,6 @@ VOID Invalid_Remaining_Packet(
 
 	PhysicalAddress = PCI_MAP_SINGLE(pAd, (void *)(VirtualAddress+1600), RX_BUFFER_NORMSIZE-1600, -1, PCI_DMA_FROMDEVICE);
 }
-
 
 int RtmpOSIRQRequest(IN struct net_device *net_dev)
 {
@@ -286,7 +272,6 @@ int RtmpOSIRQRequest(IN struct net_device *net_dev)
 
 }
 
-
 int RtmpOSIRQRelease(IN struct net_device *net_dev)
 {
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER)(RTMP_OS_NETDEV_GET_PRIV(net_dev));
@@ -312,7 +297,6 @@ int RtmpOSIRQRelease(IN struct net_device *net_dev)
 	return 0;
 }
 
-
 NDIS_STATUS RtmpNetTaskInit(IN RTMP_ADAPTER *pAd)
 {
 	POS_COOKIE pObj;
@@ -332,7 +316,6 @@ NDIS_STATUS RtmpNetTaskInit(IN RTMP_ADAPTER *pAd)
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 void RtmpNetTaskExit(IN RTMP_ADAPTER *pAd)
 {
 	POS_COOKIE pObj;
@@ -350,14 +333,11 @@ void RtmpNetTaskExit(IN RTMP_ADAPTER *pAd)
 	tasklet_kill(&pObj->fifo_statistic_full_task);
 }
 
-
 NDIS_STATUS RtmpMgmtTaskInit(IN RTMP_ADAPTER *pAd)
 {
 
-
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 /*
 ========================================================================
@@ -377,10 +357,8 @@ VOID RtmpMgmtTaskExit(
 	IN RTMP_ADAPTER *pAd)
 {
 
-
 	return;
 }
-
 
 static inline void rt2860_int_enable(PRTMP_ADAPTER pAd, unsigned int mode)
 {
@@ -399,7 +377,6 @@ static inline void rt2860_int_enable(PRTMP_ADAPTER pAd, unsigned int mode)
 		RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_ACTIVE);
 }
 
-
 static inline void rt2860_int_disable(PRTMP_ADAPTER pAd, unsigned int mode)
 {
 	u32 regValue;
@@ -413,7 +390,6 @@ static inline void rt2860_int_disable(PRTMP_ADAPTER pAd, unsigned int mode)
 		RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_ACTIVE);
 	}
 }
-
 
 /***************************************************************************
   *
@@ -458,7 +434,6 @@ static void mgmt_dma_done_tasklet(unsigned long data)
 	rt2860_int_enable(pAd, INT_MGMT_DLY);
 	RTMP_INT_UNLOCK(&pAd->irq_lock, flags);
 }
-
 
 static void rx_done_tasklet(unsigned long data)
 {
@@ -505,7 +480,6 @@ static void rx_done_tasklet(unsigned long data)
 
 }
 
-
 void fifo_statistic_full_tasklet(unsigned long data)
 {
 	unsigned long flags;
@@ -539,9 +513,6 @@ void fifo_statistic_full_tasklet(unsigned long data)
 	RTMP_INT_UNLOCK(&pAd->irq_lock, flags);
 
 }
-
-
-
 
 static void ac3_dma_done_tasklet(unsigned long data)
 {
@@ -581,7 +552,6 @@ static void ac3_dma_done_tasklet(unsigned long data)
 	RTMP_INT_UNLOCK(&pAd->irq_lock, flags);
 }
 
-
 static void ac2_dma_done_tasklet(unsigned long data)
 {
 	unsigned long flags;
@@ -620,7 +590,6 @@ static void ac2_dma_done_tasklet(unsigned long data)
 	RTMP_INT_UNLOCK(&pAd->irq_lock, flags);
 }
 
-
 static void ac1_dma_done_tasklet(unsigned long data)
 {
 	unsigned long flags;
@@ -658,7 +627,6 @@ static void ac1_dma_done_tasklet(unsigned long data)
 	rt2860_int_enable(pAd, INT_AC1_DLY);
 	RTMP_INT_UNLOCK(&pAd->irq_lock, flags);
 }
-
 
 static void ac0_dma_done_tasklet(unsigned long data)
 {
@@ -699,9 +667,6 @@ static void ac0_dma_done_tasklet(unsigned long data)
 	RTMP_INT_UNLOCK(&pAd->irq_lock, flags);
 }
 
-
-
-
 /***************************************************************************
   *
   *	interrupt handler related procedures.
@@ -723,12 +688,10 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 
 	pObj = (POS_COOKIE) pAd->OS_Cookie;
 
-
 	/* Note 03312008: we can not return here before
 		RTMP_IO_READ32(pAd, INT_SOURCE_CSR, &IntSource.word);
 		RTMP_IO_WRITE32(pAd, INT_SOURCE_CSR, IntSource.word);
 		Or kernel will panic after ifconfig ra0 down sometimes */
-
 
 	//
 	// Inital the Interrupt source.
@@ -779,11 +742,6 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 	// Should start from highest priority interrupt
 	// The priority can be adjust by altering processing if statement
 	//
-
-#ifdef DBG
-
-#endif
-
 
 	pAd->bPCIclkOff = FALSE;
 
@@ -847,7 +805,6 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 		pAd->int_pending |= INT_RX;
 	}
 
-
 	if (IntSource.word & INT_AC3_DLY)
 	{
 
@@ -907,7 +864,6 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 
 	}
 
-
 	if (IntSource.word & PreTBTTInt)
 	{
 		RTMPHandlePreTBTTInterrupt(pAd);
@@ -917,9 +873,6 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 	{
 		RTMPHandleTBTTInterrupt(pAd);
 	}
-
-
-
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)

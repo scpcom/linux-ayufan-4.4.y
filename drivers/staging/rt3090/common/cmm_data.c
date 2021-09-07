@@ -36,7 +36,6 @@
 
 #include "../rt_config.h"
 
-
 UCHAR	SNAP_802_1H[] = {0xaa, 0xaa, 0x03, 0x00, 0x00, 0x00};
 UCHAR	SNAP_BRIDGE_TUNNEL[] = {0xaa, 0xaa, 0x03, 0x00, 0x00, 0xf8};
 // Add Cisco Aironet SNAP heade for CCX2 support
@@ -78,7 +77,6 @@ UCHAR default_cwmin[]={CW_MIN_IN_BITS, CW_MIN_IN_BITS, CW_MIN_IN_BITS-1, CW_MIN_
 UCHAR default_sta_aifsn[]={3,7,2,2};
 
 UCHAR MapUserPriorityToAccessCategory[8] = {QID_AC_BE, QID_AC_BK, QID_AC_BK, QID_AC_BE, QID_AC_VI, QID_AC_VI, QID_AC_VO, QID_AC_VO};
-
 
 /*
 	========================================================================
@@ -182,7 +180,6 @@ NDIS_STATUS MiniportMMRequest(
 			//pAd->CommonCfg.MlmeTransmit.field.MODE = MODE_CCK;
 			//pAd->CommonCfg.MlmeRate = RATE_2;
 
-
 #ifdef RTMP_MAC_PCI
 			if (bUseDataQ)
 			{
@@ -215,11 +212,8 @@ NDIS_STATUS MiniportMMRequest(
 			DBGPRINT(RT_DEBUG_ERROR, ("Qidx(%d), not enough space in MgmtRing, MgmtRingFullCount=%ld!\n",
 										QueIdx, pAd->RalinkCounters.MgmtRingFullCount));
 
-
-
 		}
 	} while (retryCnt > 0);
-
 
 #ifdef RTMP_MAC_PCI
 	if (bUseDataQ && (!IrqState))
@@ -228,9 +222,6 @@ NDIS_STATUS MiniportMMRequest(
 
 	return Status;
 }
-
-
-
 
 /*
 	========================================================================
@@ -267,8 +258,6 @@ NDIS_STATUS MlmeHardTransmit(
 	PHEADER_802_11	pHeader_802_11;
 
 	if ((pAd->CommonCfg.RadarDetect.RDMode != RD_NORMAL_MODE)
-#ifdef CARRIER_DETECTION_SUPPORT
-#endif // CARRIER_DETECTION_SUPPORT //
 		)
 	{
 		return NDIS_STATUS_FAILURE;
@@ -280,7 +269,6 @@ NDIS_STATUS MlmeHardTransmit(
 
 	pHeader_802_11 = (PHEADER_802_11) (pSrcBufVA + TXINFO_SIZE + TXWI_SIZE);
 
-
 #ifdef RTMP_MAC_PCI
 	if ( pAd->MACVersion == 0x28600100 )
 		return MlmeHardTransmitTxRing(pAd,QueIdx,pPacket);
@@ -289,7 +277,6 @@ NDIS_STATUS MlmeHardTransmit(
 		return MlmeHardTransmitMgmtRing(pAd,QueIdx,pPacket);
 
 }
-
 
 NDIS_STATUS MlmeHardTransmitMgmtRing(
 	IN	PRTMP_ADAPTER	pAd,
@@ -392,10 +379,6 @@ NDIS_STATUS MlmeHardTransmitMgmtRing(
 	}
 #endif // CONFIG_STA_SUPPORT //
 
-
-
-
-
 	bInsertTimestamp = FALSE;
 	if (pHeader_802_11->FC.Type == BTYPE_CNTL) // must be PS-POLL
 	{
@@ -468,7 +451,6 @@ NDIS_STATUS MlmeHardTransmitMgmtRing(
 // management frame doesn't need encryption. so use RESERVED_WCID no matter u are sending to specific wcid or not.
 	PID = PID_MGMT;
 
-
 	if (pMacEntry == NULL)
 	{
 		RTMPWriteTxWI(pAd, pFirstTxWI, FALSE, FALSE, bInsertTimestamp, FALSE, bAckRequired, FALSE,
@@ -498,7 +480,6 @@ NDIS_STATUS MlmeHardTransmitMgmtRing(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 /********************************************************************************
 
 	New DeQueue Procedures.
@@ -516,9 +497,6 @@ NDIS_STATUS MlmeHardTransmitMgmtRing(
 				if (bIntContext == FALSE)						\
 					RTMP_IRQ_UNLOCK((lock), IrqFlags);	\
 			}while(0)
-
-
-
 
 /*
 	========================================================================
@@ -630,7 +608,6 @@ static UCHAR TxPktClassification(
 	return TxFrameType;
 }
 
-
 BOOLEAN RTMP_FillTxBlkInfo(
 	IN RTMP_ADAPTER *pAd,
 	IN TX_BLK *pTxBlk)
@@ -654,7 +631,6 @@ BOOLEAN RTMP_FillTxBlkInfo(
 
 	// Default to clear this flag
 	TX_BLK_CLEAR_FLAG(pTxBlk, fTX_bForceNonQoS);
-
 
 	if (pTxBlk->Wcid == MCAST_WCID)
 	{
@@ -685,7 +661,6 @@ BOOLEAN RTMP_FillTxBlkInfo(
 		pTxBlk->pTransmit = &pTxBlk->pMacEntry->HTPhyMode;
 
 		pMacEntry = pTxBlk->pMacEntry;
-
 
 		// For all unicast packets, need Ack unless the Ack Policy is not set as NORMAL_ACK.
 		if (pAd->CommonCfg.AckPolicy[pTxBlk->QueIdx] != NORMAL_ACK)
@@ -768,7 +743,6 @@ BOOLEAN RTMP_FillTxBlkInfo(
 	return TRUE;
 }
 
-
 BOOLEAN CanDoAggregateTransmit(
 	IN RTMP_ADAPTER *pAd,
 	IN NDIS_PACKET *pPacket,
@@ -805,7 +779,6 @@ BOOLEAN CanDoAggregateTransmit(
 		return FALSE;
 
 }
-
 
 /*
 	========================================================================
@@ -851,7 +824,6 @@ VOID RTMPDeQueuePacket(
 	BOOLEAN			firstRound;
 	RtmpDiagStruct	*pDiagStruct = &pAd->DiagStruct;
 #endif
-
 
 	if (QIdx == NUM_OF_TX_RING)
 	{
@@ -941,7 +913,6 @@ VOID RTMPDeQueuePacket(
 
 			pPacket = QUEUE_ENTRY_TO_PACKET(pEntry);
 
-
 			// Early check to make sure we have enoguh Tx Resource.
 			hasTxDesc = RTMP_HAS_ENOUGH_FREE_DESC(pAd, pTxBlk, FreeNumber[QueIdx], pPacket);
 			if (!hasTxDesc)
@@ -996,9 +967,7 @@ VOID RTMPDeQueuePacket(
 					pTxBlk->TxFrameType = TX_LEGACY_FRAME;
 			}
 
-
 			Count += pTxBlk->TxPacketList.Number;
-
 
 				// Do HardTransmit now.
 #ifdef CONFIG_STA_SUPPORT
@@ -1017,7 +986,6 @@ VOID RTMPDeQueuePacket(
 
 		RTMP_STOP_DEQUEUE(pAd, QueIdx, IrqFlags);
 
-
 #ifdef BLOCK_NET_IF
 		if ((pAd->blockQueueTab[QueIdx].SwTxQueueBlockFlag == TRUE)
 			&& (pAd->TxSwQueue[QueIdx].Number < 1))
@@ -1029,7 +997,6 @@ VOID RTMPDeQueuePacket(
 	}
 
 }
-
 
 /*
 	========================================================================
@@ -1085,7 +1052,6 @@ USHORT	RTMPCalcDuration(
 
 	return (USHORT)Duration;
 }
-
 
 /*
 	========================================================================
@@ -1230,7 +1196,6 @@ VOID RTMPWriteTxWI(
 	NdisMoveMemory(pOutTxWI, &TxWI, sizeof(TXWI_STRUC));
 }
 
-
 VOID RTMPWriteTxWI_Data(
 	IN	PRTMP_ADAPTER		pAd,
 	IN	OUT PTXWI_STRUC		pTxWI,
@@ -1242,12 +1207,10 @@ VOID RTMPWriteTxWI_Data(
 	UCHAR				BASize;
 #endif // DOT11_N_SUPPORT //
 
-
 	ASSERT(pTxWI);
 
 	pTransmit = pTxBlk->pTransmit;
 	pMacEntry = pTxBlk->pMacEntry;
-
 
 	//
 	// Always use Long preamble before verifiation short preamble functionality works well.
@@ -1293,7 +1256,6 @@ VOID RTMPWriteTxWI_Data(
 		BASize = pAd->BATable.BAOriEntry[RABAOriIdx].BAWinSize;
 	}
 
-
 	pTxWI->TxBF = pTransmit->field.TxBF;
 	pTxWI->BAWinSize = BASize;
 	pTxWI->ShortGI = pTransmit->field.ShortGI;
@@ -1302,7 +1264,6 @@ VOID RTMPWriteTxWI_Data(
 
 	pTxWI->MCS = pTransmit->field.MCS;
 	pTxWI->PHYMODE = pTransmit->field.MODE;
-
 
 #ifdef DOT11_N_SUPPORT
 	if (pMacEntry)
@@ -1354,7 +1315,6 @@ VOID RTMPWriteTxWI_Data(
 	}
 #endif // INF_AMAZON_SE //
 }
-
 
 VOID RTMPWriteTxWI_Cache(
 	IN	PRTMP_ADAPTER		pAd,
@@ -1430,7 +1390,6 @@ VOID RTMPWriteTxWI_Cache(
 
 }
 
-
 // should be called only when -
 // 1. MEADIA_CONNECTED
 // 2. AGGREGATION_IN_USED
@@ -1457,7 +1416,6 @@ BOOLEAN TxFrameIsAggregatible(
 	else
 		return FALSE;
 }
-
 
 /*
 	========================================================================
@@ -1502,7 +1460,6 @@ BOOLEAN PeerIsAggreOn(
 	return FALSE;
 
 }
-
 
 /*
 	========================================================================
@@ -1572,7 +1529,6 @@ PQUEUE_HEADER	RTMPCheckTxSwQueue(
 	return (NULL);
 }
 
-
 /*
 	========================================================================
 
@@ -1594,7 +1550,6 @@ VOID	RTMPSuspendMsduTransmission(
 {
 	DBGPRINT(RT_DEBUG_TRACE,("SCANNING, suspend MSDU transmission ...\n"));
 
-
 	//
 	// Before BSS_SCAN_IN_PROGRESS, we need to keep Current R66 value and
 	// use Lowbound as R66 value on ScanNextChannel(...)
@@ -1608,7 +1563,6 @@ VOID	RTMPSuspendMsduTransmission(
 	RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS);
 	//RTMP_IO_WRITE32(pAd, TX_CNTL_CSR, 0x000f0000);		// abort all TX rings
 }
-
 
 /*
 	========================================================================
@@ -1635,7 +1589,6 @@ VOID RTMPResumeMsduTransmission(
 
 	DBGPRINT(RT_DEBUG_TRACE,("SCAN done, resume MSDU transmission ...\n"));
 
-
 	// After finish BSS_SCAN_IN_PROGRESS, we need to restore Current R66 value
 	// R66 should not be 0
 	if (pAd->BbpTuning.R66CurrentValue == 0)
@@ -1655,7 +1608,6 @@ VOID RTMPResumeMsduTransmission(
 	RTMPDeQueuePacket(pAd, FALSE, NUM_OF_TX_RING, MAX_TX_PROCESS);
 }
 
-
 UINT deaggregate_AMSDU_announce(
 	IN	PRTMP_ADAPTER	pAd,
 	PNDIS_PACKET		pPacket,
@@ -1671,8 +1623,6 @@ UINT deaggregate_AMSDU_announce(
 	PUCHAR			pPayload, pDA, pSA, pRemovedLLCSNAP;
 	PNDIS_PACKET	pClonePacket;
 
-
-
 	nMSDU = 0;
 
 	while (DataSize > LENGTH_802_3)
@@ -1685,7 +1635,6 @@ UINT deaggregate_AMSDU_announce(
 		//pData += LENGTH_802_3;
 		PayloadSize = pAMSDUsubheader->Octet[1] + (pAMSDUsubheader->Octet[0]<<8);
 		SubFrameSize = PayloadSize + LENGTH_802_3;
-
 
 		if ((DataSize < SubFrameSize) || (PayloadSize > 1518 ))
 		{
@@ -1738,11 +1687,9 @@ UINT deaggregate_AMSDU_announce(
 #endif // CONFIG_STA_SUPPORT //
 		}
 
-
 		// A-MSDU has padding to multiple of 4 including subframe header.
 		// align SubFrameSize up to multiple of 4
 		SubFrameSize = (SubFrameSize+3)&(~0x3);
-
 
 		if (SubFrameSize > 1528 || SubFrameSize < 32)
 		{
@@ -1767,7 +1714,6 @@ UINT deaggregate_AMSDU_announce(
 	return nMSDU;
 }
 
-
 UINT BA_Reorder_AMSDU_Annnounce(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket)
@@ -1783,7 +1729,6 @@ UINT BA_Reorder_AMSDU_Annnounce(
 
 	return nMSDU;
 }
-
 
 /*
 	==========================================================================
@@ -1915,7 +1860,6 @@ MAC_TABLE_ENTRY *MacTableInsertEntry(
 			else
 				pEntry->apidx = apidx;
 
-
 			{
 
 #ifdef CONFIG_STA_SUPPORT
@@ -1960,12 +1904,9 @@ MAC_TABLE_ENTRY *MacTableInsertEntry(
 #endif // WDS_SUPPORT //
 			InitializeQueueHeader(&pEntry->PsQueue);
 
-
 			pAd->MacTab.Size ++;
 			// Add this entry into ASIC RX WCID search table
 			RTMP_STA_ENTRY_ADD(pAd, pEntry);
-
-
 
 			DBGPRINT(RT_DEBUG_TRACE, ("MacTableInsertEntry - allocate entry #%d, Total= %d\n",i, pAd->MacTab.Size));
 			break;
@@ -2038,7 +1979,6 @@ BOOLEAN MacTableDeleteEntry(
 			BASessionTearDownALL(pAd, pEntry->Aid);
 #endif // DOT11_N_SUPPORT //
 
-
 			pPrevEntry = NULL;
 			pProbeEntry = pAd->MacTab.Hash[HashIdx];
 			ASSERT(pProbeEntry);
@@ -2068,13 +2008,11 @@ BOOLEAN MacTableDeleteEntry(
 
 			RTMP_STA_ENTRY_KEY_DEL(pAd, BSS0, wcid);
 
-
 		if (pEntry->EnqueueEapolStartTimerRunning != EAPOL_START_DISABLE)
 		{
             RTMPCancelTimer(&pEntry->EnqueueStartForPSKTimer, &Cancelled);
 			pEntry->EnqueueEapolStartTimerRunning = EAPOL_START_DISABLE;
         }
-
 
 			NdisZeroMemory(pEntry, sizeof(MAC_TABLE_ENTRY));
 			pAd->MacTab.Size --;
@@ -2101,7 +2039,6 @@ BOOLEAN MacTableDeleteEntry(
 	return TRUE;
 }
 
-
 /*
 	==========================================================================
 	Description:
@@ -2117,7 +2054,6 @@ VOID MacTableReset(
 	DBGPRINT(RT_DEBUG_TRACE, ("MacTableReset\n"));
 	//NdisAcquireSpinLock(&pAd->MacTabLock);
 
-
 	for (i=1; i<MAX_LEN_OF_MAC_TABLE; i++)
 	{
 #ifdef RTMP_MAC_PCI
@@ -2126,16 +2062,12 @@ VOID MacTableReset(
 		if (pAd->MacTab.Content[i].ValidAsCLI == TRUE)
 	   {
 
-
 #ifdef DOT11_N_SUPPORT
 			// free resources of BA
 			BASessionTearDownALL(pAd, i);
 #endif // DOT11_N_SUPPORT //
 
 			pAd->MacTab.Content[i].ValidAsCLI = FALSE;
-
-
-
 
 			//AsicDelWcidTab(pAd, i);
 		}
@@ -2167,7 +2099,6 @@ VOID AssocParmFill(
 	AssocReq->ListenIntv = ListenIntv;
 }
 
-
 /*
 	==========================================================================
 	Description:
@@ -2185,7 +2116,6 @@ VOID DisassocParmFill(
 	COPY_MAC_ADDR(DisassocReq->Addr, pAddr);
 	DisassocReq->Reason = Reason;
 }
-
 
 /*
 	========================================================================
@@ -2279,7 +2209,6 @@ BOOLEAN RTMPCheckDHCPFrame(
 	return TRUE;
 }
 
-
 BOOLEAN RTMPCheckEtherType(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket)
@@ -2290,7 +2219,6 @@ BOOLEAN RTMPCheckEtherType(
 	UINT32	pktLen;
 	UINT16	srcPort, dstPort;
 	BOOLEAN	status = TRUE;
-
 
 	pSrcBuf = GET_OS_PKT_DATAPTR(pPacket);
 	pktLen = GET_OS_PKT_LEN(pPacket);
@@ -2387,8 +2315,6 @@ BOOLEAN RTMPCheckEtherType(
 
 }
 
-
-
 VOID Update_Rssi_Sample(
 	IN PRTMP_ADAPTER	pAd,
 	IN RSSI_SAMPLE		*pRssi,
@@ -2420,8 +2346,6 @@ VOID Update_Rssi_Sample(
 	}
 }
 
-
-
 // Normal legacy Rx packet indication
 VOID Indicate_Legacy_Packet(
 	IN	PRTMP_ADAPTER	pAd,
@@ -2448,9 +2372,7 @@ VOID Indicate_Legacy_Packet(
 		return;
 	}
 
-
 	STATS_INC_RX_PACKETS(pAd, FromWhichBSSID);
-
 
 	wlan_802_11_to_802_3_packet(pAd, pRxBlk, Header802_3, FromWhichBSSID);
 
@@ -2463,7 +2385,6 @@ VOID Indicate_Legacy_Packet(
 #endif // CONFIG_STA_SUPPORT //
 
 }
-
 
 // Normal, AMPDU or AMSDU
 VOID CmmRxnonRalinkFrameIndicate(
@@ -2493,7 +2414,6 @@ VOID CmmRxnonRalinkFrameIndicate(
 	}
 }
 
-
 VOID CmmRxRalinkFrameIndicate(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	MAC_TABLE_ENTRY	*pEntry,
@@ -2505,8 +2425,6 @@ VOID CmmRxRalinkFrameIndicate(
 	UINT16			Payload1Size, Payload2Size;
 	PUCHAR			pData2;
 	PNDIS_PACKET	pPacket2 = NULL;
-
-
 
 	Msdu2Size = *(pRxBlk->pData) + (*(pRxBlk->pData+1) << 8);
 
@@ -2528,7 +2446,6 @@ VOID CmmRxRalinkFrameIndicate(
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 		RTMP_802_11_REMOVE_LLC_AND_CONVERT_TO_802_3(pRxBlk, Header802_3);
 #endif // CONFIG_STA_SUPPORT //
-
 
 	ASSERT(pRxBlk->pRxPacket);
 
@@ -2568,7 +2485,6 @@ VOID CmmRxRalinkFrameIndicate(
 	}
 }
 
-
 #define RESET_FRAGFRAME(_fragFrame) \
 	{								\
 		_fragFrame.RxSize = 0;		\
@@ -2576,7 +2492,6 @@ VOID CmmRxRalinkFrameIndicate(
 		_fragFrame.LastFrag = 0;	\
 		_fragFrame.Flags = 0;		\
 	}
-
 
 PNDIS_PACKET RTMPDeFragmentDataFrame(
 	IN	PRTMP_ADAPTER	pAd,
@@ -2590,7 +2505,6 @@ PNDIS_PACKET RTMPDeFragmentDataFrame(
 	UCHAR			*pFragBuffer = NULL;
 	BOOLEAN			bReassDone = FALSE;
 	UCHAR			HeaderRoom = 0;
-
 
 	ASSERT(pHeader);
 
@@ -2687,7 +2601,6 @@ done:
 	return pRetPacket;
 }
 
-
 VOID Indicate_AMSDU_Packet(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	RX_BLK			*pRxBlk,
@@ -2706,7 +2619,6 @@ VOID Indicate_EAPOL_Packet(
 	IN	UCHAR			FromWhichBSSID)
 {
 	MAC_TABLE_ENTRY *pEntry = NULL;
-
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -2732,7 +2644,6 @@ VOID ReSyncBeaconTime(
 {
 
 	UINT32  Offset;
-
 
 	Offset = (pAd->TbttTickCount) % (BCN_TBTT_OFFSET);
 

@@ -147,11 +147,7 @@ static char __log_buf[__LOG_BUF_LEN];
 static char *log_buf = __log_buf;
 static int log_buf_len = __LOG_BUF_LEN;
 static unsigned logged_chars; /* Number of chars produced since last read+clear operation */
-
-#ifdef CONFIG_SYNO_QORIQ_DISABLE_KMSG_BEFORE_SYSSLEEP
-int syno_disable_kmsg = 0;
-#endif
-
+ 
 #ifdef CONFIG_KEXEC
 /*
  * This appends the listed symbols to /proc/vmcoreinfo
@@ -264,7 +260,6 @@ static inline void boot_delay_msec(void)
 }
 #endif
 
-
 /*
  * Commands to do_syslog:
  *
@@ -297,12 +292,7 @@ int do_syslog(int type, char __user *buf, int len)
 	case 1:		/* Open log */
 		break;
 	case 2:		/* Read from log */
-#ifdef CONFIG_SYNO_QORIQ_DISABLE_KMSG_BEFORE_SYSSLEEP
-		if (syno_disable_kmsg){
-			return -EAGAIN;
-		}
-#endif
-		error = -EINVAL;
+ 		error = -EINVAL;
 		if (!buf || len < 0)
 			goto out;
 		error = 0;
@@ -733,7 +723,6 @@ asmlinkage int vprintk(const char *fmt, va_list args)
 #ifdef CONFIG_DEBUG_LL
 	{ extern void printascii(const char *); printascii(printk_buf); }
 #endif
-
 
 	p = printk_buf;
 

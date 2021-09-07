@@ -99,7 +99,6 @@
 
 #define printk_rl(args...) ((void) (printk_ratelimit() && printk(args)))
 
-
 #ifdef MY_ABC_HERE
 static unsigned char IsDiskErrorSet(mddev_t *mddev)
 {
@@ -215,7 +214,6 @@ static int stripe_operations_active(struct stripe_head *sh)
 	       test_bit(STRIPE_COMPUTE_RUN, &sh->state);
 }
 
-
 static void __release_stripe(raid5_conf_t *conf, struct stripe_head *sh)
 {
 	if (atomic_dec_and_test(&sh->count)) {
@@ -280,7 +278,6 @@ static inline void insert_hash(raid5_conf_t *conf, struct stripe_head *sh)
 	CHECK_DEVLOCK();
 	hlist_add_head(&sh->hash, hp);
 }
-
 
 /* find an idle stripe, make sure it is unhashed, and return it. */
 static struct stripe_head *get_free_stripe(raid5_conf_t *conf)
@@ -356,7 +353,6 @@ static void init_stripe(struct stripe_head *sh, sector_t sector, int previous)
 	sh->sector = sector;
 	stripe_set_idx(sector, conf, previous, sh);
 	sh->state = 0;
-
 
 	for (i = sh->disks; i--; ) {
 		struct r5dev *dev = &sh->dev[i];
@@ -944,7 +940,6 @@ ops_run_compute6_2(struct stripe_head *sh, struct raid5_percpu *percpu)
 		}
 	}
 }
-
 
 static void ops_complete_prexor(void *stripe_head_ref)
 {
@@ -1587,7 +1582,6 @@ static void raid5_end_read_request(struct bio * bi, int error)
 	char b[BDEVNAME_SIZE];
 	mdk_rdev_t *rdev;
 
-
 	for (i=0 ; i<disks; i++)
 		if (bi == &sh->dev[i].req)
 			break;
@@ -2194,7 +2188,6 @@ static sector_t raid5_compute_sector(raid5_conf_t *conf, sector_t r_sector,
 			qd_idx = raid_disks - 1;
 			break;
 
-
 		default:
 			printk(KERN_CRIT "raid6: unsupported algorithm %d\n",
 			       algorithm);
@@ -2215,7 +2208,6 @@ static sector_t raid5_compute_sector(raid5_conf_t *conf, sector_t r_sector,
 	return new_sector;
 }
 
-
 static sector_t compute_blocknr(struct stripe_head *sh, int i, int previous)
 {
 	raid5_conf_t *conf = sh->raid_conf;
@@ -2231,7 +2223,6 @@ static sector_t compute_blocknr(struct stripe_head *sh, int i, int previous)
 	int chunk_number, dummy1, dd_idx = i;
 	sector_t r_sector;
 	struct stripe_head sh2;
-
 
 	chunk_offset = sector_div(new_sector, sectors_per_chunk);
 	stripe = new_sector;
@@ -2340,7 +2331,6 @@ static sector_t compute_blocknr(struct stripe_head *sh, int i, int previous)
 	return r_sector;
 }
 
-
 static void
 schedule_reconstruction(struct stripe_head *sh, struct stripe_head_state *s,
 			 int rcw, int expand)
@@ -2437,7 +2427,6 @@ static int add_stripe_bio(struct stripe_head *sh, struct bio *bi, int dd_idx, in
 	pr_debug("adding bh b#%llu to stripe s#%llu\n",
 		(unsigned long long)bi->bi_sector,
 		(unsigned long long)sh->sector);
-
 
 	spin_lock(&sh->lock);
 	spin_lock_irq(&conf->device_lock);
@@ -2626,9 +2615,6 @@ static int fetch_block5(struct stripe_head *sh, struct stripe_head_state *s,
 	     s->syncing || s->expanding ||
 	     (s->failed &&
 	      (failed_dev->toread ||
-#ifdef SYNO_RAID5_PARITY_CHECK
-		s->to_write ||
-#endif
 	       (failed_dev->towrite &&
 		!test_bit(R5_OVERWRITE, &failed_dev->flags)))))) {
 		/* We would like to get this block, possibly by computing it,
@@ -2783,7 +2769,6 @@ static void handle_stripe_fill6(struct stripe_head *sh,
 	set_bit(STRIPE_HANDLE, &sh->state);
 }
 
-
 /* handle_stripe_clean_event
  * any written block on an uptodate or failed drive can be returned.
  * Note that if we 'wrote' to a failed drive, it will be UPTODATE, but
@@ -2847,10 +2832,6 @@ static void handle_stripe_dirtying5(raid5_conf_t *conf,
 		struct stripe_head *sh,	struct stripe_head_state *s, int disks)
 {
 	int rmw = 0, rcw = 0, i;
-#ifdef SYNO_RAID5_PARITY_CHECK
-	rmw = 2;
-	rcw = 1;
-#else
 	for (i = disks; i--; ) {
 		/* would I have to read this buffer for read_modify_write */
 		struct r5dev *dev = &sh->dev[i];
@@ -2873,7 +2854,6 @@ static void handle_stripe_dirtying5(raid5_conf_t *conf,
 				rcw += 2*disks;
 		}
 	}
-#endif
 	pr_debug("for sector %llu, rmw=%d rcw=%d\n",
 		(unsigned long long)sh->sector, rmw, rcw);
 	set_bit(STRIPE_HANDLE, &sh->state);
@@ -2901,24 +2881,16 @@ static void handle_stripe_dirtying5(raid5_conf_t *conf,
 		}
 	if (rcw <= rmw && rcw > 0)
 		/* want reconstruct write, but need to get some data */
-#ifdef SYNO_RAID5_PARITY_CHECK
-		rcw = 0;
-#endif
 		for (i = disks; i--; ) {
 			struct r5dev *dev = &sh->dev[i];
 			if (!test_bit(R5_OVERWRITE, &dev->flags) &&
 			    i != sh->pd_idx &&
 			    !test_bit(R5_LOCKED, &dev->flags) &&
 			    !(test_bit(R5_UPTODATE, &dev->flags) ||
-#ifndef SYNO_RAID5_PARITY_CHECK
-			    test_bit(R5_Wantcompute, &dev->flags)) &&
-			    test_bit(R5_Insync, &dev->flags)) {
-#else
 			    test_bit(R5_Wantcompute, &dev->flags))) {
                                 rcw++;
 				if (!test_bit(R5_Insync, &dev->flags))
 					continue; /* it's a failed drive */
-#endif
 				if (
 				  test_bit(STRIPE_PREREAD_ACTIVE, &sh->state)) {
 					pr_debug("Read_old block "
@@ -3081,7 +3053,6 @@ static void handle_parity_checks5(raid5_conf_t *conf, struct stripe_head *sh,
 		BUG();
 	}
 }
-
 
 static void handle_parity_checks6(raid5_conf_t *conf, struct stripe_head *sh,
 				  struct stripe_head_state *s,
@@ -3533,9 +3504,6 @@ static void handle_stripe5(struct stripe_head *sh)
 	 * or to load a block that is being partially written.
 	 */
 	if (s.to_read || s.non_overwrite ||
-#ifdef SYNO_RAID5_PARITY_CHECK
-	    (s.to_write && s.failed) ||
-#endif
 	    (s.syncing && (s.uptodate + s.compute < disks)) || s.expanding)
 		handle_stripe_fill5(sh, &s, disks);
 
@@ -4178,7 +4146,6 @@ static int raid5_mergeable_bvec(struct request_queue *q,
 		return max;
 }
 
-
 static int in_chunk_boundary(mddev_t *mddev, struct bio *bio)
 {
 	sector_t sector = bio->bi_sector + get_start_sect(bio->bi_bdev);
@@ -4208,7 +4175,6 @@ static void add_bio_to_retry(struct bio *bi,raid5_conf_t *conf)
 	md_wakeup_thread(conf->mddev->thread);
 }
 
-
 static struct bio *remove_bio_from_retry(raid5_conf_t *conf)
 {
 	struct bio *bi;
@@ -4232,7 +4198,6 @@ static struct bio *remove_bio_from_retry(raid5_conf_t *conf)
 	return bi;
 }
 
-
 /*
  *  The "raid5_align_endio" should check if the read succeeded and if it
  *  did, call bio_endio on the original bio (having bio_put the new bio
@@ -4245,6 +4210,9 @@ static void raid5_align_endio(struct bio *bi, int error)
 	mddev_t *mddev;
 	raid5_conf_t *conf;
 	int uptodate = test_bit(BIO_UPTODATE, &bi->bi_flags);
+#ifdef MY_ABC_HERE
+	int auto_remap = test_and_clear_bit(BIO_AUTO_REMAP, &bi->bi_flags);
+#endif
 	mdk_rdev_t *rdev;
 
 	bio_put(bi);
@@ -4257,8 +4225,7 @@ static void raid5_align_endio(struct bio *bi, int error)
 	rdev_dec_pending(rdev, conf->mddev);
 
 #ifdef MY_ABC_HERE
-	if (bio_flagged(bi, BIO_AUTO_REMAP)) {
-		clear_bit(BIO_AUTO_REMAP, &bi->bi_flags);
+	if (auto_remap) {
 		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__,__FUNCTION__,__LINE__);
 		SynoAutoRemapReport(conf->mddev, raid_bi->bi_sector, rdev->bdev);
 	}
@@ -4307,7 +4274,6 @@ static int bio_fits_rdev(struct bio *bi)
 
 	return 1;
 }
-
 
 static int chunk_aligned_read(struct request_queue *q, struct bio * raid_bio)
 {
@@ -4885,7 +4851,6 @@ static inline sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *ski
 		return sync_blocks * STRIPE_SECTORS; /* keep things rounded to whole stripes */
 	}
 
-
 	bitmap_cond_end_sync(mddev->bitmap, sector_nr);
 
 	sh = get_active_stripe(conf, sector_nr, 0, 1, 0);
@@ -4980,7 +4945,6 @@ static int  retry_aligned_read(raid5_conf_t *conf, struct bio *raid_bio)
 		wake_up(&conf->wait_for_stripe);
 	return handled;
 }
-
 
 /*
  * This is our raid5 kernel thread.
@@ -5417,7 +5381,6 @@ static raid5_conf_t *setup_conf(mddev_t *mddev)
 		return ERR_PTR(-ENOMEM);
 }
 
-
 static int only_parity(int raid_disk, int algo, int raid_disks, int max_degraded)
 {
 	switch (algo) {
@@ -5692,8 +5655,6 @@ abort:
 	printk(KERN_ALERT "raid5: failed to run raid set %s\n", mdname(mddev));
 	return -EIO;
 }
-
-
 
 static int stop(mddev_t *mddev)
 {
@@ -6221,7 +6182,6 @@ static void raid5_quiesce(mddev_t *mddev, int state)
 	}
 }
 
-
 static void *raid5_takeover_raid1(mddev_t *mddev)
 {
 	int chunksect;
@@ -6281,7 +6241,6 @@ static void *raid5_takeover_raid6(mddev_t *mddev)
 	mddev->raid_disks -= 1;
 	return setup_conf(mddev);
 }
-
 
 static int raid5_check_reshape(mddev_t *mddev)
 {
@@ -6377,7 +6336,6 @@ static void *raid5_takeover(mddev_t *mddev)
 	return ERR_PTR(-EINVAL);
 }
 
-
 static struct mdk_personality raid5_personality;
 
 static void *raid6_takeover(mddev_t *mddev)
@@ -6425,7 +6383,6 @@ static void *raid6_takeover(mddev_t *mddev)
 	mddev->raid_disks += 1;
 	return setup_conf(mddev);
 }
-
 
 static struct mdk_personality raid6_personality =
 {

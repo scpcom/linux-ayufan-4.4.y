@@ -58,7 +58,6 @@
 #include <net/tcp.h>
 #endif /* MY_ABC_HERE */
 
-
 /*
  * Shared mappings implemented 30.11.1994. It's not fully working yet,
  * though.
@@ -2428,7 +2427,6 @@ do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
 		goto done1;
 	}
 
-
 	file_remove_suid(file);
 	file_update_time(file);
 
@@ -2619,6 +2617,7 @@ do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
 	struct page    *rgPageList[MAX_PAGES_PER_RECVFILE + 1];
 
 	int             cPagesAllocated;
+	int             failed_write_flag = 0;
 
 	loff_t          rgPos[MAX_PAGES_PER_RECVFILE + 1];
 	unsigned        rgBytes[MAX_PAGES_PER_RECVFILE + 1];
@@ -2729,12 +2728,12 @@ do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
 	} else {
 		err = kernel_recvmsg_ret;
 	}
-	if (err) {
 #ifdef SYNO_DEBUG_BUILD
+	if (err) {
 		printk("do_recvfile: bytes_received %d , count = %d, err = %d\n",
 				bytes_received, count, err);
-#endif
 	}
+#endif
 
 done:
 	*ppos = pos;
@@ -2751,8 +2750,15 @@ done:
 					page, fsdata[crgPagePtr]);
 			/* Keep error code if write_end() failed for some reason */
 			if (0 > write_end_ret) {
-				if (0 < kernel_recvmsg_ret) {
-					bytes_received -= rgBytes[crgPagePtr];
+				if (!failed_write_flag) {
+					failed_write_flag = 1;
+					if (crgPagePtr) {
+						bytes_received = rgBytes[0] + PAGE_CACHE_SIZE*(crgPagePtr-1);
+						if (bytes_received > kernel_recvmsg_ret)
+							bytes_received = kernel_recvmsg_ret;
+					} else {
+						bytes_received = 0;
+					}
 				}
 				if (!err) {
 					err = write_end_ret;
@@ -2785,6 +2791,7 @@ done1:
 		return bytes_received;
 	}
 }
+
 #endif
 #endif
 

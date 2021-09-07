@@ -567,8 +567,7 @@ static int fuse_copy_fill(struct fuse_copy_state *cs)
 
 	return lock_request(cs->fc, cs->req);
 }
-
-
+ 
 static int fuse_copy_do(struct fuse_copy_state *cs, void **val, unsigned *size)
 {
 	unsigned ncpy = min(*size, cs->len);
@@ -585,7 +584,10 @@ static int fuse_copy_do(struct fuse_copy_state *cs, void **val, unsigned *size)
 	return ncpy;
 }
 
-
+/*
+ * Copy a page in the request to/from the userspace buffer.  Must be
+ * done atomically
+ */ 
 static int fuse_copy_page(struct fuse_copy_state *cs, struct page *page,
 			  unsigned offset, unsigned count, int zeroing)
 {
@@ -603,13 +605,12 @@ static int fuse_copy_page(struct fuse_copy_state *cs, struct page *page,
 		if (page) {
 			void *mapaddr = kmap_atomic(page, KM_USER1);
 			void *buf = mapaddr + offset;
-			offset += fuse_copy_do(cs, &buf, &count);
-			kunmap_atomic(mapaddr, KM_USER1);
+ 			offset += fuse_copy_do(cs, &buf, &count);
+ 			kunmap_atomic(mapaddr, KM_USER1);
 		} else
-			offset += fuse_copy_do(cs, NULL, &count);
-	}
-
-
+ 			offset += fuse_copy_do(cs, NULL, &count);
+ 	}
+ 
 	if (page && !cs->write)
 		flush_dcache_page(page);
 	return 0;

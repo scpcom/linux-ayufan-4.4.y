@@ -45,10 +45,6 @@
 #undef STA_WSC_INCLUDED
 #undef WSC_INCLUDED
 
-
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
-
 #if defined(AP_WSC_INCLUDED) || defined(STA_WSC_INCLUDED)
 #define WSC_INCLUDED
 #endif
@@ -73,7 +69,6 @@
 #define	ResourceTypeIdName			("Ralink_ID")
 #endif
 
-
 //#define PACKED
 
 #define RALINK_2883_VERSION		((UINT32)0x28830300)
@@ -97,7 +92,6 @@
 #endif // RTMP_MAC_PCI //
 
 #define PCI_VIRT_TO_PHYS(__Addr)	(((UINT32)(__Addr)) & 0x0FFFFFFF)
-
 
 #ifdef MULTIPLE_CARD_SUPPORT
 // MC: Multple Cards
@@ -126,7 +120,6 @@
 
 #define MAX_RX_PROCESS_CNT	(RX_RING_SIZE)
 
-
 /*
 	WMM Note: If memory of your system is not much, please reduce the definition;
 	or when you do WMM test, the queue for low priority AC will be full, i.e.
@@ -151,7 +144,6 @@
 #define MAX_PACKETS_IN_MCAST_PS_QUEUE		32
 #define MAX_PACKETS_IN_PS_QUEUE				128	//32
 #define WMM_NUM_OF_AC                       4  /* AC0, AC1, AC2, and AC3 */
-
 
 #ifdef RTMP_EFUSE_SUPPORT
 //2008/09/11:KH add to support efuse<--
@@ -339,7 +331,6 @@
 #define ERRLOG_NO_INTERRUPT_RESOURCE    0x00000604L
 #define ERRLOG_NO_MEMORY_RESOURCE       0x00000605L
 
-
 // WDS definition
 #define	MAX_WDS_ENTRY               4
 #define WDS_PAIRWISE_KEY_OFFSET     60    // WDS links uses pairwise key#60 ~ 63 in ASIC pairwise key table
@@ -349,7 +340,6 @@
 #define	WDS_BRIDGE_MODE             2
 #define	WDS_REPEATER_MODE           3
 #define	WDS_LAZY_MODE               4
-
 
 #define MAX_MESH_NUM				0
 
@@ -375,7 +365,6 @@
 
 #define MAIN_MBSSID                 0
 #define FIRST_MBSSID                1
-
 
 #define MAX_BEACON_SIZE				512
 // If the MAX_MBSSID_NUM is larger than 6,
@@ -408,7 +397,6 @@
 
 #define IsGroupKeyWCID(__wcid) (((__wcid) < LAST_SPECIFIC_WCID) && ((__wcid) >= (LAST_SPECIFIC_WCID - (MAX_MBSSID_NUM))))
 
-
 // definition to support multiple BSSID
 #define BSS0                            0
 #define BSS1                            1
@@ -418,7 +406,6 @@
 #define BSS5                            5
 #define BSS6                            6
 #define BSS7                            7
-
 
 //============================================================
 // Length definitions
@@ -500,7 +487,6 @@
 #define BSS_INFRA                       1  // = Ndis802_11Infrastructure
 #define BSS_ANY                         2  // = Ndis802_11AutoUnknown
 #define BSS_MONITOR			            3  // = Ndis802_11Monitor
-
 
 // Reason code definitions
 #define REASON_RESERVED                 0
@@ -610,7 +596,6 @@
 #define IE_ADD_HT                         61    // 802.11n d1. ADDITIONAL HT CAPABILITY. ELEMENT ID TBD
 #define IE_ADD_HT2                        53    // 802.11n d1. ADDITIONAL HT CAPABILITY. ELEMENT ID TBD
 
-
 // For 802.11n D3.03
 //#define IE_NEW_EXT_CHA_OFFSET             62    // 802.11n d1. New extension channel offset elemet
 #define IE_SECONDARY_CH_OFFSET		62	// 802.11n D3.03	Secondary Channel Offset element
@@ -619,7 +604,6 @@
 #define IE_2040_BSS_INTOLERANT_REPORT     73    // 802.11n D3.03
 #define IE_OVERLAPBSS_SCAN_PARM           74    // 802.11n D3.03
 #define IE_EXT_CAPABILITY                127   // 802.11n D3.03
-
 
 #define IE_WPA                          221   // WPA
 #define IE_VENDOR_SPECIFIC              221   // Wifi WMM (WME)
@@ -663,9 +647,7 @@
 #define WSC_STATE_MACHINE            17
 #define WSC_UPNP_STATE_MACHINE		    18
 
-
 #define WPA_STATE_MACHINE			23
-
 
 #ifdef QOS_DLS_SUPPORT
 #define DLS_STATE_MACHINE               26
@@ -747,7 +729,6 @@
 #define MT2_PEER_HT_CATE             7	//	7.4.7
 #define MAX_PEER_CATE_MSG                   7
 
-
 #define MT2_MLME_ADD_BA_CATE             8
 #define MT2_MLME_ORI_DELBA_CATE             9
 #define MT2_MLME_REC_DELBA_CATE             10
@@ -757,7 +738,6 @@
 
 #define MAX_ACT_MSG                   14
 
-
 //Category field
 #define CATEGORY_SPECTRUM		0
 #define CATEGORY_QOS			1
@@ -766,7 +746,6 @@
 #define CATEGORY_PUBLIC		4
 #define CATEGORY_RM			5
 #define CATEGORY_HT			7
-
 
 // DLS Action frame definition
 #define ACTION_DLS_REQUEST			0
@@ -779,7 +758,6 @@
 #define SPEC_TPCRQ	2
 #define SPEC_TPCRP	3
 #define SPEC_CHANNEL_SWITCH	4
-
 
 //BA  Action field value
 #define ADDBA_REQ	0
@@ -796,7 +774,6 @@
 #define ACTION_DSE_MEASUREMENT_REPORT		6	// 11y D9.0
 #define ACTION_MEASUREMENT_PILOT_ACTION		7	// 11y D9.0
 #define ACTION_DSE_POWER_CONSTRAINT			8	// 11y D9.0
-
 
 //HT  Action field value
 #define NOTIFY_BW_ACTION				0
@@ -1023,9 +1000,7 @@
 
 #define APCLI_CTRL_FUNC_SIZE              (APCLI_MAX_CTRL_STATE * APCLI_MAX_CTRL_MSG)
 
-
 #endif // APCLI_SUPPORT //
-
 
 // =============================================================================
 
@@ -1205,7 +1180,6 @@
 #define   MMPS_RSV		2
 #define MMPS_ENABLE		3
 
-
 // A-MSDU size
 #define	AMSDU_0	0
 #define	AMSDU_1		1
@@ -1301,7 +1275,6 @@
 #define CIPHER_TKIP_NO_MIC          7       // MIC appended by driver: not a valid value in hardware key table
 #define CIPHER_SMS4					8
 
-
 // LED Status.
 #define LED_LINK_DOWN               0
 #define LED_LINK_UP                 1
@@ -1311,7 +1284,6 @@
 #define LED_WPS                     5
 #define LED_ON_SITE_SURVEY          6
 #define LED_POWER_UP                7
-
 
 // value domain of pAd->LedCntl.LedMode and E2PROM
 #define LED_MODE_DEFAULT            0
@@ -1331,7 +1303,6 @@
 
 //definition of DRS
 #define MAX_STEP_OF_TX_RATE_SWITCH	32
-
 
 // pre-allocated free NDIS PACKET/BUFFER poll for internal usage
 #define MAX_NUM_OF_FREE_NDIS_PACKET 128
@@ -1400,7 +1371,6 @@
 // MBSSID definition
 #define ENTRY_NOT_FOUND             0xFF
 
-
 /* After Linux 2.6.9,
  * VLAN module use Private (from user) interface flags (netdevice->priv_flags).
  * #define IFF_802_1Q_VLAN 0x1         --    802.1Q VLAN device.  in if.h
@@ -1443,8 +1413,6 @@
 // WEP Key TYPE
 #define WEP_HEXADECIMAL_TYPE    0
 #define WEP_ASCII_TYPE          1
-
-
 
 // WIRELESS EVENTS definition
 /* Max number of char in custom event, refer to wireless_tools.28/wireless.20.h */
@@ -1541,7 +1509,6 @@
 #define GUI_IDLE_POWER_SAVE		3
 // --
 
-
 // definition for WpaSupport flag
 #define WPA_SUPPLICANT_DISABLE				0
 #define WPA_SUPPLICANT_ENABLE				1
@@ -1615,7 +1582,6 @@ enum ANT_DIVERSITY_TYPE {
 
 #define ABS(_x, _y) ((_x) > (_y)) ? ((_x) -(_y)) : ((_y) -(_x))
 
-
 #define A2Dec(_X, _p)				\
 {									\
 	UCHAR *p;						\
@@ -1628,7 +1594,6 @@ enum ANT_DIVERSITY_TYPE {
 		p++;										\
 	}												\
 }
-
 
 #define A2Hex(_X, _p)				\
 do{									\

@@ -13,6 +13,8 @@
 #define SYNO_ACL_GROUP		(0x02)
 #define SYNO_ACL_EVERYONE	(0x04)
 #define SYNO_ACL_OWNER	(0x08)
+#define SYNO_ACL_AUTHENTICATEDUSER	(0x09)
+#define SYNO_ACL_SYSTEM	(0x0A)
 #define SYNO_ACL_TAG_ALL  (SYNO_ACL_USER | SYNO_ACL_GROUP | \
 						   SYNO_ACL_OWNER | SYNO_ACL_EVERYONE)
 						   
@@ -37,7 +39,6 @@ struct syno_acl {
 
 #define FOREACH_SYNOACL_ENTRY(pa, acl, pe) \
 	for(pa=(acl)->a_entries, pe=pa+(acl)->a_count; pa<pe; pa++)
-
 
 /*
  * Duplicate an ACL handle.
@@ -96,7 +97,6 @@ static inline void set_cached_syno_acl(struct inode *inode, struct syno_acl *acl
 	if (old != ACL_NOT_CACHED)
 		syno_acl_release(old);
 }
-
 
 extern int SYNOACLModuleStatusGet(const char *szModName);
 extern void UseACLModule(const char *szModName, int isGet);

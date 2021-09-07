@@ -46,7 +46,6 @@ module_param_array(autom_ap_wds, int, NULL, 0444);
 MODULE_PARM_DESC(autom_ap_wds, "Add WDS connections to other APs "
 		 "automatically");
 
-
 static struct sta_info* ap_get_sta(struct ap_data *ap, u8 *sta);
 static void hostap_event_expired_sta(struct net_device *dev,
 				     struct sta_info *sta);
@@ -58,7 +57,6 @@ static void prism2_send_mgmt(struct net_device *dev,
 			     u16 type_subtype, char *body,
 			     int body_len, u8 *addr, u16 tx_cb_idx);
 #endif /* PRISM2_NO_KERNEL_IEEE80211_MGMT */
-
 
 #ifndef PRISM2_NO_PROCFS_DEBUG
 static int ap_debug_proc_read(char *page, char **start, off_t off,
@@ -84,7 +82,6 @@ static int ap_debug_proc_read(char *page, char **start, off_t off,
 	return (p - page);
 }
 #endif /* PRISM2_NO_PROCFS_DEBUG */
-
 
 static void ap_sta_hash_add(struct ap_data *ap, struct sta_info *sta)
 {
@@ -145,13 +142,11 @@ static void ap_free_sta(struct ap_data *ap, struct sta_info *sta)
 	kfree(sta);
 }
 
-
 static void hostap_set_tim(local_info_t *local, int aid, int set)
 {
 	if (local->func->set_tim)
 		local->func->set_tim(local->dev, aid, set);
 }
-
 
 static void hostap_event_new_sta(struct net_device *dev, struct sta_info *sta)
 {
@@ -162,7 +157,6 @@ static void hostap_event_new_sta(struct net_device *dev, struct sta_info *sta)
 	wireless_send_event(dev, IWEVREGISTERED, &wrqu, NULL);
 }
 
-
 static void hostap_event_expired_sta(struct net_device *dev,
 				     struct sta_info *sta)
 {
@@ -172,7 +166,6 @@ static void hostap_event_expired_sta(struct net_device *dev,
 	wrqu.addr.sa_family = ARPHRD_ETHER;
 	wireless_send_event(dev, IWEVEXPIRED, &wrqu, NULL);
 }
-
 
 #ifndef PRISM2_NO_KERNEL_IEEE80211_MGMT
 
@@ -292,7 +285,6 @@ static void ap_handle_timer(unsigned long data)
 	add_timer(&sta->timer);
 }
 
-
 void hostap_deauth_all_stas(struct net_device *dev, struct ap_data *ap,
 			    int resend)
 {
@@ -320,7 +312,6 @@ void hostap_deauth_all_stas(struct net_device *dev, struct ap_data *ap,
 		mdelay(50);
 	}
 }
-
 
 static int ap_control_proc_read(char *page, char **start, off_t off,
 				int count, int *eof, void *data)
@@ -366,7 +357,6 @@ static int ap_control_proc_read(char *page, char **start, off_t off,
 	return (p - page);
 }
 
-
 int ap_control_add_mac(struct mac_restrictions *mac_restrictions, u8 *mac)
 {
 	struct mac_entry *entry;
@@ -384,7 +374,6 @@ int ap_control_add_mac(struct mac_restrictions *mac_restrictions, u8 *mac)
 
 	return 0;
 }
-
 
 int ap_control_del_mac(struct mac_restrictions *mac_restrictions, u8 *mac)
 {
@@ -407,7 +396,6 @@ int ap_control_del_mac(struct mac_restrictions *mac_restrictions, u8 *mac)
 	spin_unlock_bh(&mac_restrictions->lock);
 	return -1;
 }
-
 
 static int ap_control_mac_deny(struct mac_restrictions *mac_restrictions,
 			       u8 *mac)
@@ -433,7 +421,6 @@ static int ap_control_mac_deny(struct mac_restrictions *mac_restrictions,
 		return found;
 }
 
-
 void ap_control_flush_macs(struct mac_restrictions *mac_restrictions)
 {
 	struct list_head *ptr, *n;
@@ -453,7 +440,6 @@ void ap_control_flush_macs(struct mac_restrictions *mac_restrictions)
 	mac_restrictions->entries = 0;
 	spin_unlock_bh(&mac_restrictions->lock);
 }
-
 
 int ap_control_kick_mac(struct ap_data *ap, struct net_device *dev, u8 *mac)
 {
@@ -485,7 +471,6 @@ int ap_control_kick_mac(struct ap_data *ap, struct net_device *dev, u8 *mac)
 
 #endif /* PRISM2_NO_KERNEL_IEEE80211_MGMT */
 
-
 void ap_control_kickall(struct ap_data *ap)
 {
 	struct list_head *ptr, *n;
@@ -503,7 +488,6 @@ void ap_control_kickall(struct ap_data *ap)
 	}
 	spin_unlock_bh(&ap->sta_table_lock);
 }
-
 
 #ifndef PRISM2_NO_KERNEL_IEEE80211_MGMT
 
@@ -564,7 +548,6 @@ static int prism2_ap_proc_read(char *page, char **start, off_t off,
 }
 #endif /* PRISM2_NO_KERNEL_IEEE80211_MGMT */
 
-
 void hostap_check_sta_fw_version(struct ap_data *ap, int sta_fw_ver)
 {
 	if (!ap)
@@ -583,7 +566,6 @@ void hostap_check_sta_fw_version(struct ap_data *ap, int sta_fw_ver)
 		       ap->local->dev->name);
 	}
 }
-
 
 /* Called only as a tasklet (software IRQ) */
 static void hostap_ap_tx_cb(struct sk_buff *skb, int ok, void *data)
@@ -610,7 +592,6 @@ static void hostap_ap_tx_cb(struct sk_buff *skb, int ok, void *data)
 	memset(skb->cb, 0, sizeof(skb->cb));
 	netif_rx(skb);
 }
-
 
 #ifndef PRISM2_NO_KERNEL_IEEE80211_MGMT
 /* Called only as a tasklet (software IRQ) */
@@ -679,7 +660,6 @@ static void hostap_ap_tx_cb_auth(struct sk_buff *skb, int ok, void *data)
 	}
 	dev_kfree_skb(skb);
 }
-
 
 /* Called only as a tasklet (software IRQ) */
 static void hostap_ap_tx_cb_assoc(struct sk_buff *skb, int ok, void *data)
@@ -774,7 +754,6 @@ static void hostap_ap_tx_cb_poll(struct sk_buff *skb, int ok, void *data)
 }
 #endif /* PRISM2_NO_KERNEL_IEEE80211_MGMT */
 
-
 void hostap_init_data(local_info_t *local)
 {
 	struct ap_data *ap = local->ap;
@@ -824,7 +803,6 @@ void hostap_init_data(local_info_t *local)
 	ap->initialized = 1;
 }
 
-
 void hostap_init_ap_proc(local_info_t *local)
 {
 	struct ap_data *ap = local->ap;
@@ -846,7 +824,6 @@ void hostap_init_ap_proc(local_info_t *local)
 #endif /* PRISM2_NO_KERNEL_IEEE80211_MGMT */
 
 }
-
 
 void hostap_free_data(struct ap_data *ap)
 {
@@ -889,7 +866,6 @@ void hostap_free_data(struct ap_data *ap)
 	ap->initialized = 0;
 }
 
-
 /* caller should have mutex for AP STA list handling */
 static struct sta_info* ap_get_sta(struct ap_data *ap, u8 *sta)
 {
@@ -900,7 +876,6 @@ static struct sta_info* ap_get_sta(struct ap_data *ap, u8 *sta)
 		s = s->hnext;
 	return s;
 }
-
 
 #ifndef PRISM2_NO_KERNEL_IEEE80211_MGMT
 
@@ -946,7 +921,6 @@ static void prism2_send_mgmt(struct net_device *dev,
 	/* FIX: ctrl::ack sending used special HFA384X_TX_CTRL_802_11
 	 * tx_control instead of using local->tx_control */
 
-
 	memcpy(hdr->addr1, addr, ETH_ALEN); /* DA / RA */
 	if (ieee80211_is_data(hdr->frame_control)) {
 		fc |= IEEE80211_FCTL_FROMDS;
@@ -975,7 +949,6 @@ static void prism2_send_mgmt(struct net_device *dev,
 	dev_queue_xmit(skb);
 }
 #endif /* PRISM2_NO_KERNEL_IEEE80211_MGMT */
-
 
 static int prism2_sta_proc_read(char *page, char **start, off_t off,
 				int count, int *eof, void *data)
@@ -1050,7 +1023,6 @@ static int prism2_sta_proc_read(char *page, char **start, off_t off,
 	return (p - page);
 }
 
-
 static void handle_add_proc_queue(struct work_struct *work)
 {
 	struct ap_data *ap = container_of(work, struct ap_data,
@@ -1083,7 +1055,6 @@ static void handle_add_proc_queue(struct work_struct *work)
 		kfree(prev);
 	}
 }
-
 
 static struct sta_info * ap_add_sta(struct ap_data *ap, u8 *addr)
 {
@@ -1133,7 +1104,6 @@ static struct sta_info * ap_add_sta(struct ap_data *ap, u8 *addr)
 	return sta;
 }
 
-
 static int ap_tx_rate_ok(int rateidx, struct sta_info *sta,
 			 local_info_t *local)
 {
@@ -1147,7 +1117,6 @@ static int ap_tx_rate_ok(int rateidx, struct sta_info *sta,
 
 	return 1;
 }
-
 
 static void prism2_check_tx_rates(struct sta_info *sta)
 {
@@ -1195,7 +1164,6 @@ static void prism2_check_tx_rates(struct sta_info *sta)
 	}
 }
 
-
 #ifndef PRISM2_NO_KERNEL_IEEE80211_MGMT
 
 static void ap_crypt_init(struct ap_data *ap)
@@ -1221,7 +1189,6 @@ static void ap_crypt_init(struct ap_data *ap)
 		       "lib80211_crypt_wep.ko\n");
 	}
 }
-
 
 /* Generate challenge data for shared key authentication. IEEE 802.11 specifies
  * that WEP algorithm is used for generating challange. This should be unique,
@@ -1271,7 +1238,6 @@ static char * ap_auth_make_challenge(struct ap_data *ap)
 
 	return tmpbuf;
 }
-
 
 /* Called only as a scheduled task for pending AP frames. */
 static void handle_authen(local_info_t *local, struct sk_buff *skb,
@@ -1485,7 +1451,6 @@ static void handle_authen(local_info_t *local, struct sk_buff *skb,
 	}
 }
 
-
 /* Called only as a scheduled task for pending AP frames. */
 static void handle_assoc(local_info_t *local, struct sk_buff *skb,
 			 struct hostap_80211_rx_status *rx_stats, int reassoc)
@@ -1694,7 +1659,6 @@ static void handle_assoc(local_info_t *local, struct sk_buff *skb,
 #endif
 }
 
-
 /* Called only as a scheduled task for pending AP frames. */
 static void handle_deauth(local_info_t *local, struct sk_buff *skb,
 			  struct hostap_80211_rx_status *rx_stats)
@@ -1735,7 +1699,6 @@ static void handle_deauth(local_info_t *local, struct sk_buff *skb,
 		       hdr->addr2, reason_code);
 	}
 }
-
 
 /* Called only as a scheduled task for pending AP frames. */
 static void handle_disassoc(local_info_t *local, struct sk_buff *skb,
@@ -1778,7 +1741,6 @@ static void handle_disassoc(local_info_t *local, struct sk_buff *skb,
 	}
 }
 
-
 /* Called only as a scheduled task for pending AP frames. */
 static void ap_handle_data_nullfunc(local_info_t *local,
 				    struct ieee80211_hdr *hdr)
@@ -1794,7 +1756,6 @@ static void ap_handle_data_nullfunc(local_info_t *local,
 	prism2_send_mgmt(dev, IEEE80211_FTYPE_CTL | IEEE80211_STYPE_ACK,
 			 NULL, 0, hdr->addr2, 0);
 }
-
 
 /* Called only as a scheduled task for pending AP frames. */
 static void ap_handle_dropped_data(local_info_t *local,
@@ -1828,7 +1789,6 @@ static void ap_handle_dropped_data(local_info_t *local,
 
 #endif /* PRISM2_NO_KERNEL_IEEE80211_MGMT */
 
-
 /* Called only as a scheduled task for pending AP frames. */
 static void pspoll_send_buffered(local_info_t *local, struct sta_info *sta,
 				 struct sk_buff *skb)
@@ -1852,7 +1812,6 @@ static void pspoll_send_buffered(local_info_t *local, struct sta_info *sta,
 	}
 	dev_queue_xmit(skb);
 }
-
 
 /* Called only as a scheduled task for pending AP frames. */
 static void handle_pspoll(local_info_t *local,
@@ -1939,7 +1898,6 @@ static void handle_pspoll(local_info_t *local,
 	atomic_dec(&sta->users);
 }
 
-
 #ifndef PRISM2_NO_KERNEL_IEEE80211_MGMT
 
 static void handle_wds_oper_queue(struct work_struct *work)
@@ -1970,7 +1928,6 @@ static void handle_wds_oper_queue(struct work_struct *work)
 		kfree(prev);
 	}
 }
-
 
 /* Called only as a scheduled task for pending AP frames. */
 static void handle_beacon(local_info_t *local, struct sk_buff *skb,
@@ -2126,7 +2083,6 @@ static void handle_beacon(local_info_t *local, struct sk_buff *skb,
 
 #endif /* PRISM2_NO_KERNEL_IEEE80211_MGMT */
 
-
 /* Called only as a tasklet. */
 static void handle_ap_item(local_info_t *local, struct sk_buff *skb,
 			   struct hostap_80211_rx_status *rx_stats)
@@ -2247,7 +2203,6 @@ static void handle_ap_item(local_info_t *local, struct sk_buff *skb,
 	dev_kfree_skb(skb);
 }
 
-
 /* Called only as a tasklet (software IRQ) */
 void hostap_rx(struct net_device *dev, struct sk_buff *skb,
 	       struct hostap_80211_rx_status *rx_stats)
@@ -2277,7 +2232,6 @@ void hostap_rx(struct net_device *dev, struct sk_buff *skb,
  drop:
 	dev_kfree_skb(skb);
 }
-
 
 /* Called only as a tasklet (software IRQ) */
 static void schedule_packet_send(local_info_t *local, struct sta_info *sta)
@@ -2314,7 +2268,6 @@ static void schedule_packet_send(local_info_t *local, struct sta_info *sta)
 	memset(&rx_stats, 0, sizeof(rx_stats));
 	hostap_rx(local->dev, skb, &rx_stats);
 }
-
 
 int prism2_ap_get_sta_qual(local_info_t *local, struct sockaddr addr[],
 			   struct iw_quality qual[], int buf_size,
@@ -2354,7 +2307,6 @@ int prism2_ap_get_sta_qual(local_info_t *local, struct sockaddr addr[],
 
 	return count;
 }
-
 
 /* Translate our list of Access Points & Stations to a card independant
  * format that the Wireless Tools will understand - Jean II */
@@ -2472,7 +2424,6 @@ int prism2_ap_translate_scan(struct net_device *dev,
 	return current_ev - buffer;
 }
 
-
 static int prism2_hostapd_add_sta(struct ap_data *ap,
 				  struct prism2_hostapd_param *param)
 {
@@ -2511,7 +2462,6 @@ static int prism2_hostapd_add_sta(struct ap_data *ap,
 	return 0;
 }
 
-
 static int prism2_hostapd_remove_sta(struct ap_data *ap,
 				     struct prism2_hostapd_param *param)
 {
@@ -2535,7 +2485,6 @@ static int prism2_hostapd_remove_sta(struct ap_data *ap,
 	return 0;
 }
 
-
 static int prism2_hostapd_get_info_sta(struct ap_data *ap,
 				       struct prism2_hostapd_param *param)
 {
@@ -2557,7 +2506,6 @@ static int prism2_hostapd_get_info_sta(struct ap_data *ap,
 	return 1;
 }
 
-
 static int prism2_hostapd_set_flags_sta(struct ap_data *ap,
 					struct prism2_hostapd_param *param)
 {
@@ -2576,7 +2524,6 @@ static int prism2_hostapd_set_flags_sta(struct ap_data *ap,
 
 	return 0;
 }
-
 
 static int prism2_hostapd_sta_clear_stats(struct ap_data *ap,
 					  struct prism2_hostapd_param *param)
@@ -2602,7 +2549,6 @@ static int prism2_hostapd_sta_clear_stats(struct ap_data *ap,
 	return 0;
 }
 
-
 int prism2_hostapd(struct ap_data *ap, struct prism2_hostapd_param *param)
 {
 	switch (param->cmd) {
@@ -2625,7 +2571,6 @@ int prism2_hostapd(struct ap_data *ap, struct prism2_hostapd_param *param)
 		return -EOPNOTSUPP;
 	}
 }
-
 
 /* Update station info for host-based TX rate control and return current
  * TX rate */
@@ -2669,7 +2614,6 @@ static int ap_update_sta_tx_rate(struct sta_info *sta, struct net_device *dev)
 
 	return ret;
 }
-
 
 /* Called only from software IRQ. Called for each TX frame prior possible
  * encryption and transmit. */
@@ -2805,13 +2749,11 @@ ap_tx_ret hostap_handle_sta_tx(local_info_t *local, struct hostap_tx_data *tx)
 	return ret;
 }
 
-
 void hostap_handle_sta_release(void *ptr)
 {
 	struct sta_info *sta = ptr;
 	atomic_dec(&sta->users);
 }
-
 
 /* Called only as a tasklet (software IRQ) */
 void hostap_handle_sta_tx_exc(local_info_t *local, struct sk_buff *skb)
@@ -2865,7 +2807,6 @@ void hostap_handle_sta_tx_exc(local_info_t *local, struct sk_buff *skb)
 	spin_unlock(&local->ap->sta_table_lock);
 }
 
-
 static void hostap_update_sta_ps2(local_info_t *local, struct sta_info *sta,
 				  int pwrmgt, int type, int stype)
 {
@@ -2884,7 +2825,6 @@ static void hostap_update_sta_ps2(local_info_t *local, struct sta_info *sta,
 			schedule_packet_send(local, sta);
 	}
 }
-
 
 /* Called only as a tasklet (software IRQ). Called for each RX frame to update
  * STA power saving state. pwrmgt is a flag from 802.11 frame_control field. */
@@ -2910,7 +2850,6 @@ int hostap_update_sta_ps(local_info_t *local, struct ieee80211_hdr *hdr)
 	atomic_dec(&sta->users);
 	return 0;
 }
-
 
 /* Called only as a tasklet (software IRQ). Called for each RX frame after
  * getting RX header and payload from hardware. */
@@ -2943,7 +2882,6 @@ ap_rx_ret hostap_handle_sta_rx(local_info_t *local, struct net_device *dev,
 		ret = AP_RX_CONTINUE_NOT_AUTHORIZED;
 	else
 		ret = AP_RX_CONTINUE;
-
 
 	if (fc & IEEE80211_FCTL_TODS) {
 		if (!wds && (sta == NULL || !(sta->flags & WLAN_STA_ASSOC))) {
@@ -3051,7 +2989,6 @@ ap_rx_ret hostap_handle_sta_rx(local_info_t *local, struct net_device *dev,
 	return ret;
 }
 
-
 /* Called only as a tasklet (software IRQ) */
 int hostap_handle_sta_crypto(local_info_t *local,
 			     struct ieee80211_hdr *hdr,
@@ -3080,7 +3017,6 @@ int hostap_handle_sta_crypto(local_info_t *local,
 	return 0;
 }
 
-
 /* Called only as a tasklet (software IRQ) */
 int hostap_is_sta_assoc(struct ap_data *ap, u8 *sta_addr)
 {
@@ -3095,7 +3031,6 @@ int hostap_is_sta_assoc(struct ap_data *ap, u8 *sta_addr)
 
 	return ret;
 }
-
 
 /* Called only as a tasklet (software IRQ) */
 int hostap_is_sta_authorized(struct ap_data *ap, u8 *sta_addr)
@@ -3113,7 +3048,6 @@ int hostap_is_sta_authorized(struct ap_data *ap, u8 *sta_addr)
 
 	return ret;
 }
-
 
 /* Called only as a tasklet (software IRQ) */
 int hostap_add_sta(struct ap_data *ap, u8 *sta_addr)
@@ -3153,7 +3087,6 @@ int hostap_add_sta(struct ap_data *ap, u8 *sta_addr)
 	return ret;
 }
 
-
 /* Called only as a tasklet (software IRQ) */
 int hostap_update_rx_stats(struct ap_data *ap,
 			   struct ieee80211_hdr *hdr,
@@ -3185,7 +3118,6 @@ int hostap_update_rx_stats(struct ap_data *ap,
 	return sta ? 0 : -1;
 }
 
-
 void hostap_update_rates(local_info_t *local)
 {
 	struct sta_info *sta;
@@ -3200,7 +3132,6 @@ void hostap_update_rates(local_info_t *local)
 	}
 	spin_unlock_bh(&ap->sta_table_lock);
 }
-
 
 void * ap_crypt_get_ptrs(struct ap_data *ap, u8 *addr, int permanent,
 			 struct lib80211_crypt_data ***crypt)
@@ -3227,7 +3158,6 @@ void * ap_crypt_get_ptrs(struct ap_data *ap, u8 *addr, int permanent,
 	return sta;
 }
 
-
 void hostap_add_wds_links(local_info_t *local)
 {
 	struct ap_data *ap = local->ap;
@@ -3242,7 +3172,6 @@ void hostap_add_wds_links(local_info_t *local)
 
 	schedule_work(&local->ap->wds_oper_queue);
 }
-
 
 void hostap_wds_link_oper(local_info_t *local, u8 *addr, wds_oper_type type)
 {
@@ -3261,11 +3190,8 @@ void hostap_wds_link_oper(local_info_t *local, u8 *addr, wds_oper_type type)
 	schedule_work(&local->ap->wds_oper_queue);
 }
 
-
 EXPORT_SYMBOL(hostap_init_data);
 EXPORT_SYMBOL(hostap_init_ap_proc);
 EXPORT_SYMBOL(hostap_free_data);
 EXPORT_SYMBOL(hostap_check_sta_fw_version);
 EXPORT_SYMBOL(hostap_handle_sta_tx_exc);
-#ifndef PRISM2_NO_KERNEL_IEEE80211_MGMT
-#endif /* PRISM2_NO_KERNEL_IEEE80211_MGMT */

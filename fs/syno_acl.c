@@ -96,7 +96,6 @@ struct syno_acl *syno_acl_realloc(struct syno_acl *acl, unsigned int counts, gfp
 }
 EXPORT_SYMBOL(syno_acl_realloc);
 
-
 /*---------xattr -------------*/
 static inline int
 ace_syno_from_xattr(struct syno_acl_entry *pAce, syno_acl_xattr_entry *pEntry)
@@ -122,6 +121,16 @@ ace_syno_from_xattr(struct syno_acl_entry *pAce, syno_acl_xattr_entry *pEntry)
 	} else if (SYNO_ACL_XATTR_TAG_ID_OWNER & tag) {
 
 		pAce->e_tag = SYNO_ACL_OWNER;
+		pAce->e_id = SYNO_ACL_UNDEFINED_ID;
+
+	} else if (SYNO_ACL_XATTR_TAG_ID_AUTHENTICATEDUSER & tag) {
+
+		pAce->e_tag = SYNO_ACL_AUTHENTICATEDUSER;
+		pAce->e_id = SYNO_ACL_UNDEFINED_ID;
+
+	} else if (SYNO_ACL_XATTR_TAG_ID_SYSTEM & tag) {
+
+		pAce->e_tag = SYNO_ACL_SYSTEM;
 		pAce->e_id = SYNO_ACL_UNDEFINED_ID;
 
 	} else {
@@ -169,6 +178,12 @@ ace_syno_to_xattr(const struct syno_acl_entry *pAce, syno_acl_xattr_entry *pEntr
 	case SYNO_ACL_OWNER:
 		tag |= SYNO_ACL_XATTR_TAG_ID_OWNER;
 		break;
+	case SYNO_ACL_AUTHENTICATEDUSER:
+		tag |= SYNO_ACL_XATTR_TAG_ID_AUTHENTICATEDUSER;
+		break;
+	case SYNO_ACL_SYSTEM:
+		tag |= SYNO_ACL_XATTR_TAG_ID_SYSTEM;
+		break;
 	default:
 		ret = -EINVAL;
 		goto Err;
@@ -196,7 +211,6 @@ ace_syno_to_xattr(const struct syno_acl_entry *pAce, syno_acl_xattr_entry *pEntr
 Err:
 	return ret;
 }
-
 
 /*
  * Convert from extended attribute to in-memory representation.
@@ -280,5 +294,3 @@ int syno_acl_to_xattr(const struct syno_acl *acl, void *buffer, size_t size)
 	return real_size;
 }
 EXPORT_SYMBOL(syno_acl_to_xattr);
-
-

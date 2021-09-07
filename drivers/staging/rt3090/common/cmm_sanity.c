@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 extern UCHAR	CISCO_OUI[];
 
 extern UCHAR	WPA_OUI[];
@@ -717,9 +716,6 @@ BOOLEAN PeerBeaconAndProbeRspSanity(
                     pEdcaParm->Cwmax[QID_AC_VO] = CW_MAX_IN_BITS-1;
                     pEdcaParm->Txop[QID_AC_VO]  = 48;   // AC_VO: 48*32us ~= 1.5ms
                 }
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
-
 
                 break;
 
@@ -786,7 +782,6 @@ BOOLEAN PeerBeaconAndProbeRspSanity(
 				break;
 #endif // EXT_BUILD_CHANNEL_LIST //
 #endif // CONFIG_STA_SUPPORT //
-
 
             default:
                 break;
@@ -921,8 +916,6 @@ BOOLEAN MlmeScanReqSanity(
 
 	if ((*pBssType == BSS_INFRA || *pBssType == BSS_ADHOC || *pBssType == BSS_ANY)
 		&& (*pScanType == SCAN_ACTIVE || *pScanType == SCAN_PASSIVE
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
 		))
 	{
 		return TRUE;
@@ -1239,7 +1232,6 @@ BOOLEAN PeerWpaMessageSanity(
 	BOOLEAN			bWPA2 = FALSE;
 	KEY_INFO		EapolKeyInfo;
 	UCHAR			GroupKeyIndex = 0;
-
 
 	NdisZeroMemory(mic, sizeof(mic));
 	NdisZeroMemory(digest, sizeof(digest));

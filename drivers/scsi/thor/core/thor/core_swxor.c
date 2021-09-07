@@ -47,8 +47,6 @@ static void sgd_kunmap(
 	MV_PVOID				mapped_addr
 	)
 {
-#ifdef _OS_WINDOWS
-#endif /* _OS_WINDOWS */
 #ifdef _OS_LINUX
 	sgd_pctx_t* pctx = (sgd_pctx_t*)sg;
 	struct scatterlist *ksg = (struct scatterlist *)pctx->u.xctx;
@@ -98,8 +96,6 @@ static void sgd_kunmap_sec(
 	MV_PVOID				mapped_addr
 	)
 {
-#ifdef _OS_WINDOWS
-#endif /* _OS_WINDOWS */
 #ifdef _OS_LINUX
 	sgd_pctx_t* pctx = (sgd_pctx_t*)sg;
 	struct scatterlist *ksg = (struct scatterlist *)pctx->u.xctx;
@@ -346,8 +342,6 @@ XorSGs(
 	}
 }
 
-
-
 #ifdef SIMULATOR
 void _Core_ModuleSendXORRequest(MV_PVOID This, PMV_XOR_Request pXORReq)
 #else	/*SIMULATOR*/
@@ -468,7 +462,6 @@ static void sg_memcpy(
 
 	return;
 }
-
 
 void CopySGs(
 	PCore_Driver_Extension	pCore,

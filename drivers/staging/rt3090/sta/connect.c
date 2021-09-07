@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 UCHAR	CipherSuiteWpaNoneTkip[] = {
 		0x00, 0x50, 0xf2, 0x01,	// oui
 		0x01, 0x00,				// Version
@@ -198,7 +197,6 @@ VOID MlmeCntlMachinePerformAction(
 	}
 }
 
-
 /*
 	==========================================================================
 	Description:
@@ -279,7 +277,6 @@ VOID CntlOidScanProc(
 		return;
 #endif // RALINK_ATE //
 
-
 	// record current BSS if network is connected.
 	// 2003-2-13 do not include current IBSS if this is the only STA in this IBSS.
 	if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED))
@@ -326,7 +323,6 @@ VOID CntlOidSsidProc(
 	PNDIS_802_11_SSID          pOidSsid = (NDIS_802_11_SSID *)Elem->Msg;
 	MLME_DISASSOC_REQ_STRUCT   DisassocReq;
 	ULONG					   Now;
-
 
 	// Step 1. record the desired user settings to MlmeAux
 	NdisZeroMemory(pAd->MlmeAux.Ssid, MAX_LEN_OF_SSID);
@@ -473,7 +469,6 @@ VOID CntlOidSsidProc(
 		}
 	}
 }
-
 
 /*
 	==========================================================================
@@ -870,7 +865,6 @@ VOID CntlWaitJoinProc(
 	}
 }
 
-
 /*
 	==========================================================================
 	Description:
@@ -1150,7 +1144,6 @@ VOID CntlWaitReassocProc(
 	}
 }
 
-
 VOID	AdhocTurnOnQos(
 	IN  PRTMP_ADAPTER pAd)
 {
@@ -1213,7 +1206,6 @@ VOID LinkUp(
 		MacTableDeleteEntry(pAd, pEntry->Aid, pEntry->Addr);
 		pEntry = NULL;
 	}
-
 
 	pEntry = &pAd->MacTab.Content[BSSID_WCID];
 
@@ -1408,7 +1400,6 @@ VOID LinkUp(
 	AsicSetSlotTime(pAd, TRUE);
 	AsicSetEdcaParm(pAd, &pAd->CommonCfg.APEdcaParm);
 
-
 	// Call this for RTS protectionfor legacy rate, we will always enable RTS threshold, but normally it will not hit
 	AsicUpdateProtect(pAd, 0, (OFDMSETPROTECT | CCKSETPROTECT), TRUE, FALSE);
 
@@ -1489,7 +1480,6 @@ VOID LinkUp(
 						RTMPAddWcidAttributeEntry(pAd, BSS0, idx, CipherAlg, NULL);
 					}
 				}
-
 
 			}
 		}
@@ -1696,13 +1686,11 @@ VOID LinkUp(
 		DBGPRINT(RT_DEBUG_TRACE, ("!!! LINK UP !!!  ClientStatusFlags=%lx)\n",
 			pAd->MacTab.Content[BSSID_WCID].ClientStatusFlags));
 
-
 		MlmeUpdateTxRates(pAd, TRUE, BSS0);
 #ifdef DOT11_N_SUPPORT
 		MlmeUpdateHtTxRates(pAd, BSS0);
 		DBGPRINT(RT_DEBUG_TRACE, ("!!! LINK UP !! (StaActive.bHtEnable =%d, )\n", pAd->StaActive.SupportedPhyInfo.bHtEnable));
 #endif // DOT11_N_SUPPORT //
-
 
 		if (pAd->CommonCfg.bAggregationCapable)
 		{
@@ -1740,7 +1728,6 @@ VOID LinkUp(
 			CLIENT_STATUS_CLEAR_FLAG(&pAd->MacTab.Content[BSSID_WCID], fCLIENT_STATUS_RALINK_CHIPSET);
 		}
 	}
-
 
 #ifdef DOT11_N_SUPPORT
 	DBGPRINT(RT_DEBUG_TRACE, ("NDIS_STATUS_MEDIA_CONNECT Event B!.BACapability = %x. ClientStatusFlags = %lx\n", pAd->CommonCfg.BACapability.word, pAd->MacTab.Content[BSSID_WCID].ClientStatusFlags));
@@ -2104,7 +2091,6 @@ VOID LinkDown(
 
 	}
 
-
 	for (i=1; i<MAX_LEN_OF_MAC_TABLE; i++)
 	{
 		if (pAd->MacTab.Content[i].ValidAsCLI == TRUE)
@@ -2190,7 +2176,6 @@ VOID LinkDown(
 	pAd->ExtraInfo = GENERAL_LINK_DOWN;
 
     pAd->StaActive.SupportedPhyInfo.bHtEnable = FALSE;
-
 
 	// Clean association information
 	NdisZeroMemory(&pAd->StaCfg.AssocInfo, sizeof(NDIS_802_11_ASSOCIATION_INFORMATION));
@@ -2361,8 +2346,6 @@ VOID IterateOnBssTab(
 	else // no more BSS
 	{
 
-#ifdef DOT11_N_SUPPORT
-#endif // DOT11_N_SUPPORT //
 		{
 			AsicSwitchChannel(pAd, pAd->CommonCfg.Channel, FALSE);
 			AsicLockChannel(pAd, pAd->CommonCfg.Channel);
@@ -2403,8 +2386,6 @@ VOID IterateOnBssTab2(
 	else // no more BSS
 	{
 
-#ifdef DOT11_N_SUPPORT
-#endif // DOT11_N_SUPPORT //
 		{
 			AsicSwitchChannel(pAd, pAd->CommonCfg.Channel, FALSE);
 			AsicLockChannel(pAd, pAd->CommonCfg.Channel);
@@ -2545,9 +2526,6 @@ VOID ComposeNullFrame(
 	COPY_MAC_ADDR(pAd->NullFrame.Addr3, pAd->CommonCfg.Bssid);
 }
 #endif // RTMP_MAC_PCI //
-
-
-
 
 /*
 	==========================================================================

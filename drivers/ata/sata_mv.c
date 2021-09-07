@@ -595,6 +595,9 @@ static int mv_qc_defer(struct ata_queued_cmd *qc);
 static void mv_qc_prep(struct ata_queued_cmd *qc);
 static void mv_qc_prep_iie(struct ata_queued_cmd *qc);
 static unsigned int mv_qc_issue(struct ata_queued_cmd *qc);
+#ifdef MY_ABC_HERE
+static bool syno_mv_qc_fill_rtf(struct ata_queued_cmd *qc);
+#endif // MY_ABC_HERE
 static int mv_hardreset(struct ata_link *link, unsigned int *class,
 			unsigned long deadline);
 static void mv_eh_freeze(struct ata_port *ap);
@@ -654,10 +657,6 @@ static void mv_bmdma_stop(struct ata_queued_cmd *qc);
 static u8   mv_bmdma_status(struct ata_port *ap);
 static u8 mv_sff_check_status(struct ata_port *ap);
 
-#ifdef SYNO_SATA_COMPATIBILITY
-static void mv_err_intr(struct ata_port *ap);
-#endif
-
 #ifdef MY_ABC_HERE
 static ssize_t
 syno_mv_phy_ctl_store(struct device *dev, struct device_attribute *attr, const char * buf, size_t count);
@@ -671,9 +670,6 @@ static struct device_attribute *sata_mv_shost_attrs[] = {
 	&dev_attr_syno_pm_info,
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_phy_ctl,
-#endif
-#ifdef SYNO_SATA_COMPATIBILITY
-	&dev_attr_syno_port_thaw,
 #endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
@@ -732,6 +728,9 @@ static struct ata_port_operations mv6_ops = {
 	.dev_config             = mv6_dev_config,
 	.scr_read		= mv_scr_read,
 	.scr_write		= mv_scr_write,
+#ifdef MY_ABC_HERE
+	.qc_fill_rtf	= syno_mv_qc_fill_rtf,
+#endif // MY_ABC_HERE
 
 	.pmp_hardreset		= mv_pmp_hardreset,
 	.pmp_softreset		= mv_softreset,
@@ -745,10 +744,6 @@ static struct ata_port_operations mv6_ops = {
 	.bmdma_start		= mv_bmdma_start,
 	.bmdma_stop		= mv_bmdma_stop,
 	.bmdma_status		= mv_bmdma_status,
-
-#ifdef SYNO_SATA_COMPATIBILITY
-	.syno_force_intr	= mv_err_intr,
-#endif
 };
 
 static struct ata_port_operations mv_iie_ops = {
@@ -2412,7 +2407,36 @@ static unsigned int mv_qc_issue(struct ata_queued_cmd *qc)
 	}
 	return ata_sff_qc_issue(qc);
 }
+#ifdef MY_ABC_HERE
+static bool syno_mv_qc_fill_rtf(struct ata_queued_cmd *qc)
+{
+	bool bRet = false;
+	struct ata_taskfile *rtf = &qc->result_tf;
+	struct ata_taskfile *tf = &qc->tf;
 
+	bRet = ata_sff_qc_fill_rtf(qc);
+
+    /* MV7042 would return the LBA even if the NCQ command failed because of UNC error,
+	 * and the scsi layer would take that as a partially success (which is not, of course.)
+	 * Since the LBA register value is not defined in the error return of a ATA_CMD_FPDMA_READ in ATA 8 standard,
+	 * we fill the LBA and device in result taskfile with the preceding setup.
+	 * Reference to "American National Standard T13/1699-D Table 136." for more information.
+     */
+	if (ATA_ERR & rtf->command &&
+		ATA_UNC & rtf->feature &&
+		ATA_TFLAG_LBA48 & tf->flags &&
+		ATA_CMD_FPDMA_READ == tf->command) {
+		rtf->lbal		= tf->lbal;
+		rtf->lbam		= tf->lbam;
+		rtf->lbah		= tf->lbah;
+		rtf->device		= tf->device;
+		rtf->hob_lbal	= tf->hob_lbal;
+		rtf->hob_lbam	= tf->hob_lbam;
+		rtf->hob_lbah	= tf->hob_lbah;
+	}
+	return bRet;
+}
+#endif // MY_ABC_HERE
 static struct ata_queued_cmd *mv_get_active_qc(struct ata_port *ap)
 {
 	struct mv_port_priv *pp = ap->private_data;
@@ -2627,7 +2651,6 @@ static void mv_unexpected_intr(struct ata_port *ap, int edma_was_enabled)
 	ata_port_freeze(ap);
 }
 
-
 /**
  *      mv_err_intr - Handle error interrupts on the port
  *      @ap: ATA channel to manipulate
@@ -2675,7 +2698,6 @@ static void mv_err_intr(struct ata_port *ap)
 			return;
 	}
 
-
 	qc = mv_get_active_qc(ap);
 	ata_ehi_clear_desc(ehi);
 	ata_ehi_push_desc(ehi, "edma_err_cause=%08x pp_flags=%08x",
@@ -2707,19 +2729,7 @@ static void mv_err_intr(struct ata_port *ap)
 		action |= ATA_EH_RESET;
 		ata_ehi_push_desc(ehi, "parity error");
 	}
-#ifdef SYNO_SATA_COMPATIBILITY
-	if ((edma_err_cause & (EDMA_ERR_DEV_DCON | EDMA_ERR_DEV_CON)) ||
-		(ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
-		if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR) {
-			ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_INTR;
-			DBGMESG("ata%u: clear ATA_SYNO_FLAG_FORCE_INTR\n", ap->print_id);
-		} else {
-			ap->iDetectStat = 1;
-			DBGMESG("ata%u: set detect stat check\n", ap->print_id);
-		}
-#else
 	if (edma_err_cause & (EDMA_ERR_DEV_DCON | EDMA_ERR_DEV_CON)) {
-#endif
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
@@ -3184,7 +3194,6 @@ static void mv5_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 	writel(tmp, phy_mmio + MV5_PHY_MODE);
 }
 
-
 #undef ZERO
 #define ZERO(reg) writel(0, port_mmio + (reg))
 static void mv5_reset_hc_port(struct mv_host_priv *hpriv, void __iomem *mmio,
@@ -3388,7 +3397,7 @@ static void mv6_enable_leds(struct mv_host_priv *hpriv, void __iomem *mmio)
 #else
 		writel(0x00000060, mmio + GPIO_PORT_CTL);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 	}
 #endif
 }
@@ -3791,7 +3800,6 @@ static int mv_hardreset(struct ata_link *link, unsigned int *class,
 	pp->pp_flags &= ~MV_PP_FLAG_EDMA_EN;
 	pp->pp_flags &=
 	  ~(MV_PP_FLAG_FBS_EN | MV_PP_FLAG_NCQ_EN | MV_PP_FLAG_FAKE_ATA_BUSY);
-
 
 	/* Workaround for errata FEr SATA#10 (part 2) */
 	do {
@@ -4356,14 +4364,12 @@ static struct platform_driver mv_platform_driver = {
 				  },
 };
 
-
 #ifdef CONFIG_PCI
 static int mv_pci_init_one(struct pci_dev *pdev,
 			   const struct pci_device_id *ent);
 #ifdef CONFIG_PM
 static int mv_pci_device_resume(struct pci_dev *pdev);
 #endif
-
 
 static struct pci_driver mv_pci_driver = {
 	.name			= DRV_NAME,

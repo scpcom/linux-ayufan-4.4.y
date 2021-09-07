@@ -300,7 +300,6 @@ UCHAR RateSwitchTable11BGN3SForABand[] = { // 3*3
 };
 #endif // DOT11_N_SUPPORT //
 
-
 extern UCHAR	 OfdmRateToRxwiMCS[];
 // since RT61 has better RX sensibility, we have to limit TX ACK rate not to exceed our normal data TX rate.
 // otherwise the WLAN peer may not be able to receive the ACK thus downgrade its data TX rate
@@ -347,7 +346,6 @@ UCHAR	SES_OUI[] = {0x00, 0x90, 0x4c};
 UCHAR	ZeroSsid[32] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
-
 /*
 	==========================================================================
 	Description:
@@ -392,17 +390,13 @@ NDIS_STATUS MlmeInit(
 			DlsStateMachineInit(pAd, &pAd->Mlme.DlsMachine, pAd->Mlme.DlsFunc);
 #endif // QOS_DLS_SUPPORT //
 
-
-
 			// Since we are using switch/case to implement it, the init is different from the above
 			// state machine init
 			MlmeCntlInit(pAd, &pAd->Mlme.CntlMachine, NULL);
 		}
 #endif // CONFIG_STA_SUPPORT //
 
-
 		WpaStateMachineInit(pAd, &pAd->Mlme.WpaMachine, pAd->Mlme.WpaFunc);
-
 
 		ActionStateMachineInit(pAd, &pAd->Mlme.ActMachine, pAd->Mlme.ActFunc);
 
@@ -414,7 +408,6 @@ NDIS_STATUS MlmeInit(
 
 		// software-based RX Antenna diversity
 		RTMPInitTimer(pAd, &pAd->Mlme.RxAntEvalTimer, GET_TIMER_FUNCTION(AsicRxAntEvalTimeout), pAd, FALSE);
-
 
 #ifdef CONFIG_STA_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -539,7 +532,6 @@ VOID MlmeHandler(
 					StateMachinePerformAction(pAd, &pAd->Mlme.WpaMachine, Elem);
 					break;
 
-
 				default:
 					DBGPRINT(RT_DEBUG_TRACE, ("ERROR: Illegal machine %ld in MlmeHandler()\n", Elem->Machine));
 					break;
@@ -600,7 +592,6 @@ VOID MlmeHalt(
 		RTMPCancelTimer(&pAd->MlmeAux.BeaconTimer,		&Cancelled);
 		RTMPCancelTimer(&pAd->MlmeAux.ScanTimer,		&Cancelled);
 
-
 #ifdef RTMP_MAC_PCI
 	    if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_PCIE_DEVICE)
 			&&(pAd->StaCfg.PSControl.field.EnableNewPS == TRUE))
@@ -623,8 +614,6 @@ VOID MlmeHalt(
 
 	RTMPCancelTimer(&pAd->Mlme.PeriodicTimer,		&Cancelled);
 	RTMPCancelTimer(&pAd->Mlme.RxAntEvalTimer,		&Cancelled);
-
-
 
 	if (!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))
 	{
@@ -678,7 +667,6 @@ VOID MlmeResetRalinkCounters(
 
 	return;
 }
-
 
 /*
 	==========================================================================
@@ -826,7 +814,6 @@ else
 //	RECBATimerTimeout(SystemSpecific1,FunctionContext,SystemSpecific2,SystemSpecific3);
 	pAd->Mlme.PeriodicRound ++;
 
-
 	// execute every 500ms
 	if ((pAd->Mlme.PeriodicRound % 5 == 0) && RTMPAutoRateSwitchCheck(pAd)/*(OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_TX_RATE_SWITCH_ENABLED))*/)
 	{
@@ -867,13 +854,9 @@ else
 			}
 			MlmeResetRalinkCounters(pAd);
 
-
-
 			return;
 	}
 #endif // RALINK_ATE //
-
-
 
 		//ORIBATimerTimeout(pAd);
 
@@ -898,7 +881,6 @@ else
 		// add the most up-to-date h/w raw counters into software variable, so that
 		// the dynamic tuning mechanism below are based on most up-to-date information
 		NICUpdateRawCounters(pAd);
-
 
 #ifdef DOT11_N_SUPPORT
 		// Need statistics after read counter. So put after NICUpdateRawCounters
@@ -992,10 +974,8 @@ else
 		RTMP_MLME_HANDLER(pAd);
 	}
 
-
 	pAd->bUpdateBcnCntDone = FALSE;
 }
-
 
 /*
 	==========================================================================
@@ -1213,8 +1193,6 @@ VOID MlmeSelectTxRateTable(
 
 			break;
 		}
-#ifdef DOT11_N_SUPPORT
-#endif // DOT11_N_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -1288,16 +1266,12 @@ VOID MlmeSelectTxRateTable(
 	} while(FALSE);
 }
 
-
 #ifdef CONFIG_STA_SUPPORT
 VOID STAMlmePeriodicExec(
 	PRTMP_ADAPTER pAd)
 {
 	ULONG			    TxTotalCnt;
 	int	i;
-
-
-
 
 	/*
 		We return here in ATE mode, because the statistics
@@ -1370,7 +1344,6 @@ if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_PCIE_DEVICE))
 	}
 #endif // PCIE_PS_SUPPORT //
 
-
 #ifdef WPA_SUPPLICANT_SUPPORT
     if (pAd->StaCfg.WpaSupplicantUP == WPA_SUPPLICANT_DISABLE)
 #endif // WPA_SUPPLICANT_SUPPORT //
@@ -1389,9 +1362,6 @@ if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_PCIE_DEVICE))
 		}
 		pAd->PreMediaState = pAd->IndicateMediaState;
 	}
-
-
-
 
 	if (pAd->CommonCfg.PSPXlink && ADHOC_ON(pAd))
 	{
@@ -1505,7 +1475,6 @@ if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_PCIE_DEVICE))
 				(MaxRssi <= dBmToRoam))
 			{
 				DBGPRINT(RT_DEBUG_TRACE, ("Rssi=%d, dBmToRoam=%d\n", MaxRssi, (CHAR)dBmToRoam));
-
 
 				// Add auto seamless roaming
 				if (rv == FALSE)
@@ -1621,7 +1590,6 @@ SKIP_AUTO_SCAN_CONN:
 	}
 #endif // DOT11_N_SUPPORT //
 
-
 #ifdef DOT11_N_SUPPORT
 #ifdef DOT11N_DRAFT3
 	if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_SCAN_2040))
@@ -1720,7 +1688,6 @@ VOID MlmeAutoReconnectLastSSID(
 		RTMP_MLME_HANDLER(pAd);
 	}
 }
-
 
 /*
 	==========================================================================
@@ -2156,8 +2123,6 @@ VOID MlmeDynamicTxRateSwitching(
 		// Keep the last time TxRateChangeAction status.
 		//
 		pEntry->LastTimeTxRateChangeAction = pEntry->LastSecTxRateChangeAction;
-
-
 
 		//
 		// CASE 1. when TX samples are fewer than 15, then decide TX rate solely on RSSI
@@ -2627,7 +2592,6 @@ VOID StaQuickResponeForRateUpExec(
 				TxErrorRatio = ((pEntry->OneSecTxRetryOkCount + pEntry->OneSecTxFailCount) * 100) / TxTotalCnt;
 		}
 
-
 	//
 	// CASE 1. when TX samples are fewer than 15, then decide TX rate solely on RSSI
 	//         (criteria copied from RT2500 for Netopia case)
@@ -2917,15 +2881,12 @@ VOID MlmeCalculateChannelQuality(
 								   RX_WEIGHTING* (100 - RxPER)) / 100;
 	}
 
-
 #ifdef CONFIG_STA_SUPPORT
 	if (pAd->OpMode == OPMODE_STA)
 		pAd->Mlme.ChannelQuality = (ChannelQuality > 100) ? 100 : ChannelQuality;
 #endif // CONFIG_STA_SUPPORT //
 
-
 }
-
 
 // IRQL = DISPATCH_LEVEL
 VOID MlmeSetTxPreamble(
@@ -2974,7 +2935,6 @@ VOID UpdateBasicRateBitmap(
     UCHAR *sup_p = pAdapter->CommonCfg.SupRate;
     UCHAR *ext_p = pAdapter->CommonCfg.ExtRate;
     ULONG bitmap = pAdapter->CommonCfg.BasicRateBitmap;
-
 
     /* if A mode, always use fix BasicRateBitMap */
     //if (pAdapter->CommonCfg.Channel == PHY_11A)
@@ -3492,7 +3452,6 @@ VOID MlmeUpdateHtTxRates(
 	}
 #endif // CONFIG_STA_SUPPORT //
 
-
 	// Decide ht rate
 	pHtPhy->field.STBC = pMaxHtPhy->field.STBC;
 	pHtPhy->field.BW = pMaxHtPhy->field.BW;
@@ -3511,7 +3470,6 @@ VOID MlmeUpdateHtTxRates(
 		pHtPhy->field.BW, pHtPhy->field.ShortGI, pHtPhy->field.MODE));
 	DBGPRINT(RT_DEBUG_TRACE,("MlmeUpdateHtTxRates<=== \n"));
 }
-
 
 VOID BATableInit(
 	IN PRTMP_ADAPTER pAd,
@@ -3553,7 +3511,6 @@ VOID MlmeRadioOn(
 // bss_table.c
 // ===========================================================================================
 
-
 /*! \brief initialize BSS table
  *	\param p_tab pointer to the table
  *	\return none
@@ -3577,7 +3534,6 @@ VOID BssTableInit(
 		Tab->BssEntry[i].Rssi = -127;	// initial the rssi as a minimum value
 	}
 }
-
 
 /*! \brief search the BSS table by SSID
  *	\param p_tab pointer to the bss table
@@ -3663,7 +3619,6 @@ ULONG BssTableSearchWithSSID(
 	return (ULONG)BSS_NOT_FOUND;
 }
 
-
 ULONG BssSsidTableSearchBySSID(
 	IN BSS_TABLE *Tab,
 	IN PUCHAR	 pSsid,
@@ -3680,7 +3635,6 @@ ULONG BssSsidTableSearchBySSID(
 	}
 	return (ULONG)BSS_NOT_FOUND;
 }
-
 
 // IRQL = DISPATCH_LEVEL
 VOID BssTableDeleteEntry(
@@ -3896,7 +3850,6 @@ VOID BssEntrySet(
 	{
 		PEID_STRUCT     pEid;
 		USHORT          Length = 0;
-
 
 		NdisZeroMemory(&pBss->WpaIE.IE[0], MAX_CUSTOM_LEN);
 		NdisZeroMemory(&pBss->RsnIE.IE[0], MAX_CUSTOM_LEN);
@@ -4189,7 +4142,6 @@ VOID BssTableSsidSort(
 		{
 			BSS_ENTRY *pOutBss = &OutTab->BssEntry[OutTab->BssNr];
 
-
 #ifdef EXT_BUILD_CHANNEL_LIST
 			// If no Country IE exists no Connection will be established when IEEE80211dClientMode is strict.
 			if ((pAd->StaCfg.IEEE80211dClientMode == Rt802_11_D_Strict) &&
@@ -4312,7 +4264,6 @@ VOID BssTableSsidSort(
 		{
 			BSS_ENTRY *pOutBss = &OutTab->BssEntry[OutTab->BssNr];
 
-
 #ifdef DOT11_N_SUPPORT
 			// 2.4G/5G N only mode
 			if ((pInBss->HtCapabilityLen == 0) &&
@@ -4405,7 +4356,6 @@ VOID BssTableSsidSort(
 	BssTableSortByRssi(OutTab);
 }
 
-
 // IRQL = DISPATCH_LEVEL
 VOID BssTableSortByRssi(
 	IN OUT BSS_TABLE *OutTab)
@@ -4427,7 +4377,6 @@ VOID BssTableSortByRssi(
 	}
 }
 #endif // CONFIG_STA_SUPPORT //
-
 
 VOID BssCipherParse(
 	IN OUT	PBSS_ENTRY	pBss)
@@ -4469,7 +4418,6 @@ VOID BssCipherParse(
 	pBss->WPA2.GroupCipher	 = Ndis802_11WEPDisabled;
 	pBss->WPA2.RsnCapability = 0;
 	pBss->WPA2.bMixMode	 = FALSE;
-
 
 	Length = (INT) pBss->VarIELen;
 
@@ -5075,7 +5023,6 @@ BOOLEAN MlmeEnqueueForRecv(
 	return TRUE;
 }
 
-
 /*! \brief	 Dequeue a message from the MLME Queue
  *	\param	*Queue	  The MLME Queue
  *	\param	*Elem	  The message dequeued from MLME Queue
@@ -5263,7 +5210,6 @@ VOID MlmeQueueDestroy(
 	NdisReleaseSpinLock(&(pQueue->Lock));
 	NdisFreeSpinLock(&(pQueue->Lock));
 }
-
 
 /*! \brief	 To substitute the message type if the message is coming from external
  *	\param	pFrame		   The frame received
@@ -5548,7 +5494,6 @@ UCHAR RandomByte(
 
 	return R;
 }
-
 
 /*
 	========================================================================
@@ -5905,7 +5850,6 @@ CHAR RTMPMaxRssi(
 	return larger;
 }
 
-
 /*
     ========================================================================
     Routine Description:
@@ -6115,7 +6059,6 @@ VOID AsicRxAntEvalTimeout(
 			if (pAd->StaCfg.Psm == PWR_SAVE)
 				return;
 
-
 			// if the traffic is low, use average rssi as the criteria
 			if (pAd->Mlme.bLowThroughput == TRUE)
 			{
@@ -6169,7 +6112,6 @@ VOID AsicRxAntEvalTimeout(
 #endif // CONFIG_STA_SUPPORT //
 	}
 }
-
 
 VOID APSDPeriodicExec(
 	IN PVOID SystemSpecific1,
@@ -6245,7 +6187,6 @@ BOOLEAN RTMPCheckEntryEnableAutoRateSwitch(
 {
 	BOOLEAN		result = TRUE;
 
-
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
@@ -6264,11 +6205,8 @@ BOOLEAN RTMPCheckEntryEnableAutoRateSwitch(
 	}
 #endif // CONFIG_STA_SUPPORT //
 
-
-
 	return result;
 }
-
 
 BOOLEAN RTMPAutoRateSwitchCheck(
 	IN PRTMP_ADAPTER    pAd)
@@ -6283,7 +6221,6 @@ BOOLEAN RTMPAutoRateSwitchCheck(
 #endif // CONFIG_STA_SUPPORT //
 	return FALSE;
 }
-
 
 /*
     ========================================================================
@@ -6305,7 +6242,6 @@ UCHAR RTMPStaFixedTxMode(
 	IN PMAC_TABLE_ENTRY	pEntry)
 {
 	UCHAR	tx_mode = FIXED_TXMODE_HT;
-
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -6500,7 +6436,6 @@ VOID AsicStaBbpTuning(
 				}
 			}
 		}
-
 
 	}
 }

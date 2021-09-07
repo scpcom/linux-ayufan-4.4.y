@@ -77,10 +77,6 @@ void SYNORaidUnplugTask(struct work_struct *);
 DEFINE_SPINLOCK(MdListLock);
 #endif
 
-#ifdef __LITTLE_ENDIAN
-#define SYNO_RAID_USE_BE_SB
-#endif
-
 #ifndef MODULE
 static void autostart_arrays(int part);
 #endif
@@ -204,7 +200,6 @@ static void md_new_event_inintr(mddev_t *mddev)
 static LIST_HEAD(all_mddevs);
 static DEFINE_SPINLOCK(all_mddevs_lock);
 
-
 /*
  * iterates through all used mddevs in the system.
  * We take care to grab the all_mddevs_lock whenever navigating
@@ -226,7 +221,6 @@ static DEFINE_SPINLOCK(all_mddevs_lock);
 	     ({ spin_lock(&all_mddevs_lock);				\
 		tmp = tmp->next;})					\
 		)
-
 
 /* Rather than calling directly into the personality make_request function,
  * IO requests come here first so that we can check if the device is
@@ -315,7 +309,6 @@ int mddev_congested(mddev_t *mddev, int bits)
 	return mddev->suspended;
 }
 EXPORT_SYMBOL(mddev_congested);
-
 
 static inline mddev_t *mddev_get(mddev_t *mddev)
 {
@@ -758,7 +751,6 @@ static int read_disk_sb(mdk_rdev_t * rdev, int size)
 	if (rdev->sb_loaded)
 		return 0;
 
-
 #ifdef MY_ABC_HERE
 	if (!sync_sb_page_io(rdev->bdev, rdev->sb_start, size, rdev->sb_page, READ))
 		goto fail;
@@ -822,7 +814,6 @@ abort:
 	return ret;
 }
 
-
 static u32 md_csum_fold(u32 csum)
 {
 	csum = (csum & 0xffff) + (csum >> 16);
@@ -843,7 +834,6 @@ static unsigned int calc_sb_csum(mdp_super_t * sb)
 		newcsum += sb32[i];
 	csum = (newcsum & 0xffffffff) + (newcsum>>32);
 
-
 #ifdef CONFIG_ALPHA
 	/* This used to use csum_partial, which was wrong for several
 	 * reasons including that different results are returned on
@@ -859,7 +849,6 @@ static unsigned int calc_sb_csum(mdp_super_t * sb)
 #endif
 	return csum;
 }
-
 
 /*
  * Handle superblock details.
@@ -1149,7 +1138,6 @@ static void super_90_sync(mddev_t *mddev, mdk_rdev_t *rdev)
 	mdk_rdev_t *rdev2;
 	int next_spare = mddev->raid_disks;
 
-
 	/* make rdev->sb match mddev data..
 	 *
 	 * 1/ zero out disks
@@ -1311,7 +1299,6 @@ super_90_rdev_size_change(mdk_rdev_t *rdev, sector_t num_sectors)
 	return num_sectors / 2; /* kB for sysfs */
 }
 
-
 /*
  * version 1 superblock
  */
@@ -1377,7 +1364,6 @@ static int super_1_load(mdk_rdev_t *rdev, mdk_rdev_t *refdev, int minor_version)
 	 */
 	ret = read_disk_sb(rdev, 4096);
 	if (ret) return ret;
-
 
 	sb = (struct mdp_superblock_1*)page_address(rdev->sb_page);
 
@@ -2142,7 +2128,6 @@ static void md_print_devices(void)
 	printk("\n");
 }
 
-
 static void sync_sbs(mddev_t * mddev, int nospares)
 {
 	/* Update each superblock (in-memory image), but
@@ -2534,7 +2519,6 @@ slot_store(mdk_rdev_t *rdev, const char *buf, size_t len)
 	return len;
 }
 
-
 static struct rdev_sysfs_entry rdev_slot =
 __ATTR(slot, S_IRUGO|S_IWUSR, slot_show, slot_store);
 
@@ -2842,7 +2826,6 @@ abort_free:
  * Check a full RAID array for plausibility
  */
 
-
 static void analyze_sbs(mddev_t * mddev)
 {
 	int i;
@@ -2865,7 +2848,6 @@ static void analyze_sbs(mddev_t * mddev)
 				bdevname(rdev->bdev,b));
 			kick_rdev_from_array(rdev);
 		}
-
 
 	super_types[mddev->major_version].
 		validate_super(mddev, freshest);
@@ -3077,7 +3059,6 @@ level_store(mddev_t *mddev, const char *buf, size_t len)
 static struct md_sysfs_entry md_level =
 __ATTR(level, S_IRUGO|S_IWUSR, level_show, level_store);
 
-
 static ssize_t
 layout_show(mddev_t *mddev, char *page)
 {
@@ -3117,7 +3098,6 @@ layout_store(mddev_t *mddev, const char *buf, size_t len)
 }
 static struct md_sysfs_entry md_layout =
 __ATTR(layout, S_IRUGO|S_IWUSR, layout_show, layout_store);
-
 
 static ssize_t
 raid_disks_show(mddev_t *mddev, char *page)
@@ -3440,7 +3420,6 @@ new_dev_store(mddev_t *mddev, const char *buf, size_t len)
 	    minor != MINOR(dev))
 		return -EOVERFLOW;
 
-
 	if (mddev->persistent) {
 		rdev = md_import_device(dev, mddev->major_version,
 					mddev->minor_version);
@@ -3535,7 +3514,6 @@ size_store(mddev_t *mddev, const char *buf, size_t len)
 
 static struct md_sysfs_entry md_size =
 __ATTR(component_size, S_IRUGO|S_IWUSR, size_show, size_store);
-
 
 /* Metdata version.
  * This is one of
@@ -3689,7 +3667,6 @@ mismatch_cnt_show(mddev_t *mddev, char *page)
 
 static struct md_sysfs_entry md_scan_mode =
 __ATTR(sync_action, S_IRUGO|S_IWUSR, action_show, action_store);
-
 
 static struct md_sysfs_entry md_mismatches = __ATTR_RO(mismatch_cnt);
 
@@ -3915,7 +3892,6 @@ suspend_lo_store(mddev_t *mddev, const char *buf, size_t len)
 static struct md_sysfs_entry md_suspend_lo =
 __ATTR(suspend_lo, S_IRUGO|S_IWUSR, suspend_lo_show, suspend_lo_store);
 
-
 static ssize_t
 suspend_hi_show(mddev_t *mddev, char *page)
 {
@@ -4137,7 +4113,6 @@ static struct attribute_group md_redundancy_group = {
 	.name = NULL,
 	.attrs = md_redundancy_attrs,
 };
-
 
 static ssize_t
 md_attr_show(struct kobject *kobj, struct attribute *attr, char *page)
@@ -5467,7 +5442,6 @@ static int set_bitmap_file(mddev_t *mddev, int fd)
 		/* we should be able to change the bitmap.. */
 	}
 
-
 	if (fd >= 0) {
 		if (mddev->bitmap)
 			return -EEXIST; /* cannot add when bitmap is present */
@@ -5661,7 +5635,6 @@ static int update_raid_disks(mddev_t *mddev, int raid_disks)
 	rv = mddev->pers->check_reshape(mddev);
 	return rv;
 }
-
 
 /*
  * update_array_info is used to change the configuration of an
@@ -6200,11 +6173,11 @@ mdk_thread_t *md_register_thread(void (*run) (mddev_t *), mddev_t *mddev,
 	thread->run = run;
 	thread->mddev = mddev;
 	thread->timeout = MAX_SCHEDULE_TIMEOUT;
-	thread->tsk = kthread_run(md_thread, thread,
+ 	thread->tsk = kthread_run(md_thread, thread,
 				  "%s_%s",
 				  mdname(thread->mddev),
 				  name ?: mddev->pers->name);
-	if (IS_ERR(thread->tsk)) {
+ 	if (IS_ERR(thread->tsk)) {
 		kfree(thread);
 		return NULL;
 	}
@@ -6274,7 +6247,6 @@ static void status_unused(struct seq_file *seq)
 
 	seq_printf(seq, "\n");
 }
-
 
 static void status_resync(struct seq_file *seq, mddev_t * mddev)
 {
@@ -6677,7 +6649,6 @@ void md_done_sync(mddev_t *mddev, int blocks, int ok)
 	}
 }
 
-
 /* md_write_start(mddev, bi)
  * If we need to update some array metadata (e.g. 'active' flag
  * in superblock) before writing, schedule a superblock update
@@ -7015,10 +6986,8 @@ void md_do_sync(mddev_t *mddev)
 			last_mark = next;
 		}
 
-
 		if (kthread_should_stop())
 			goto interrupted;
-
 
 		/*
 		 * this loop exits only if either when we are slower than
@@ -7208,7 +7177,6 @@ void md_check_recovery(mddev_t *mddev)
 {
 	mdk_rdev_t *rdev;
 
-
 	if (mddev->bitmap)
 		bitmap_daemon_work(mddev);
 
@@ -7273,7 +7241,6 @@ void md_check_recovery(mddev_t *mddev)
 		list_for_each_entry(rdev, &mddev->disks, same_set)
 			if (test_and_clear_bit(StateChanged, &rdev->flags))
 				sysfs_notify_dirent(rdev->sysfs_state);
-
 
 		if (test_bit(MD_RECOVERY_RUNNING, &mddev->recovery) &&
 		    !test_bit(MD_RECOVERY_DONE, &mddev->recovery)) {
@@ -7475,7 +7442,6 @@ static int __init md_init(void)
 #endif
 	return 0;
 }
-
 
 #ifndef MODULE
 

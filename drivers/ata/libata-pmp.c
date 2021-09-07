@@ -519,7 +519,7 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 								 sata_pmp_gscr_devid(ap->link.device->gscr),
 								 &pm_pkg, 1);
 		if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
-			printk("ata%d pm poweron write 1 fail\n", ap->print_id);
+				printk("ata%d pm poweron write 1 fail\n", ap->print_id);
 			goto END;
 		}
 
@@ -588,7 +588,6 @@ END:
 	return iRet;
 }
 #endif /* MY_ABC_HERE */
-
 
 /**
  *	sata_pmp_qc_defer_cmd_switch - qc_defer for command switching PMP
@@ -709,19 +708,6 @@ static int sata_pmp_read_gscr(struct ata_device *dev, u32 *gscr)
 		if (err_mask) {
 			ata_dev_printk(dev, KERN_ERR, "failed to read PMP "
 				"GSCR[%d] (Emask=0x%x)\n", reg, err_mask);
-#ifdef SYNO_SATA_COMPATIBILITY
-			if ((AC_ERR_OTHER == err_mask || AC_ERR_SYSTEM == err_mask) &&
-				(dev->link->ap->pflags & ATA_PFLAG_FROZEN) &&
-				ata_phys_link_online(dev->link) && ata_is_host_link(dev->link)) {
-				ata_link_printk(dev->link, KERN_INFO,
-								"!!!!!!!!!!link still online, wait 7000ms and thaw for hw ready\n");
-				ata_eh_thaw_port(dev->link->ap);
-				schedule_timeout_uninterruptible(7UL*HZ);
-				/* set link and port flags to prevent pmp detach */
-				dev->link->uiSflags |= ATA_SYNO_FLAG_GSCR_FAIL;
-				dev->link->ap->uiSflags |= ATA_SYNO_FLAG_GSCR_FAIL;
-			}
-#endif
 			return -EIO;
 		}
 	}
@@ -1097,11 +1083,7 @@ int sata_pmp_attach(struct ata_device *dev)
  *	LOCKING:
  *	Kernel thread context (may sleep).
  */
-#ifdef SYNO_SATA_COMPATIBILITY
-void sata_pmp_detach(struct ata_device *dev)
-#else
 static void sata_pmp_detach(struct ata_device *dev)
-#endif
 {
 	struct ata_link *link = dev->link;
 	struct ata_port *ap = link->ap;
@@ -1113,23 +1095,6 @@ static void sata_pmp_detach(struct ata_device *dev)
 	WARN_ON(!ata_is_host_link(link) || dev->devno ||
 		link->pmp != SATA_PMP_CTRL_PORT);
 
-#ifdef SYNO_SATA_COMPATIBILITY
-	if ((dev->link->uiSflags || dev->link->ap->uiSflags) && ata_dev_enabled(dev)) {
-		ata_dev_printk(dev, KERN_WARNING,
-				"still have recovery flags link 0x%x ap 0x%x, don't detach this pmp dev\n", dev->link->uiSflags, dev->link->ap->uiSflags);
-		dev->ulSflags |= ATA_SYNO_DFLAG_PMP_DETACH;
-		/*FIXME: set detach flag, copy form ata_eh_detach_dev */
-		ata_for_each_link(tlink, ap, EDGE) {
-			tlink->device->ulSflags |= ATA_SYNO_DFLAG_DETACH;
-		}
-		return;
-	}
-	dev->ulSflags &= ~ATA_SYNO_DFLAG_PMP_DETACH;
-	ata_for_each_link(tlink, ap, EDGE) {
-		DBGMESG("ata%u: do pmp detach, clear all link uiSflags\n", dev->link->ap->print_id);
-		tlink->uiSflags = 0;
-	}
-#endif
 #ifdef MY_ABC_HERE
 	ap->PMSynoUnique = 0;
 #endif
@@ -1240,7 +1205,7 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 	struct ata_port *ap = link->ap;
 	u32 *gscr = (void *)ap->sector_buf;
 	int rc;
-#if defined(MY_ABC_HERE) 
+#if defined(MY_ABC_HERE)
 	struct ata_port *master_ap = NULL;
 #endif
 
@@ -1293,7 +1258,6 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
  fail:
 	ata_dev_printk(dev, KERN_ERR,
 		       "PMP revalidation failed (errno=%d)\n", rc);
-
 
 	DPRINTK("EXIT, rc=%d\n", rc);
 	return rc;
@@ -1361,9 +1325,6 @@ static int sata_pmp_eh_recover_pmp(struct ata_port *ap,
 	int tries = ATA_EH_PMP_TRIES;
 	int detach = 0, rc = 0;
 	int reval_failed = 0;
-#ifdef SYNO_SATA_COMPATIBILITY
-	unsigned int uiSflags = 0x0;
-#endif
 
 	DPRINTK("ENTER\n");
 
@@ -1435,31 +1396,9 @@ static int sata_pmp_eh_recover_pmp(struct ata_port *ap,
 	ehc->i.flags = 0;
 
 	DPRINTK("EXIT, rc=0\n");
-#ifdef SYNO_SATA_COMPATIBILITY
-	/* GSCR fail is not only attached to link, we must check pmp gscr fail here.
-	 * If pmp recover success, we must clear it here. */
-	if (ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL ||
-		link->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL) {
-		ata_port_printk(ap, KERN_ERR, "recovery success, clear gscr fail flag");
-		ap->uiSflags &= ~ATA_SYNO_FLAG_GSCR_FAIL;
-		link->uiSflags &= ~ATA_SYNO_FLAG_GSCR_FAIL;
-	}
-#endif
 	return 0;
 
  fail:
-#ifdef SYNO_SATA_COMPATIBILITY
-	/* set link error flags to ata port for ata port error handling.
-	 * GSCR may clear by link reset, but it may still have GSCR error,
-	 * so we must check port GSCR fail */
-	if ((uiSflags = uiCheckPortLinksFlags(ap))) {
-		if (ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL) {
-			ap->uiSflags = uiSflags | ATA_SYNO_FLAG_GSCR_FAIL;
-		} else {
-			ap->uiSflags = uiSflags;
-		}
-	}
-#endif
 	sata_pmp_detach(dev);
 	if (detach)
 		ata_eh_detach_dev(dev);
@@ -1560,9 +1499,6 @@ static int sata_pmp_eh_recover(struct ata_port *ap)
 	unsigned int err_mask;
 	u32 gscr_error, sntf;
 	int cnt, rc;
-#ifdef SYNO_SATA_COMPATIBILITY
-	unsigned int uiSflags = 0x0;
-#endif
 
 	pmp_tries = ATA_EH_PMP_TRIES;
 	ata_for_each_link(link, ap, EDGE)
@@ -1677,17 +1613,6 @@ static int sata_pmp_eh_recover(struct ata_port *ap)
 		goto retry;
 	}
 
-#ifdef SYNO_SATA_COMPATIBILITY
-	/* set link error flags to ata port for ata port error handling.
-	 * GSCR may clear by link reset, but it may still have GSCR error,
-	 * so we must check port GSCR fail */
-	uiSflags = uiCheckPortLinksFlags(ap);
-	if (ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL) {
-		ap->uiSflags = uiSflags | ATA_SYNO_FLAG_GSCR_FAIL;
-	} else {
-		ap->uiSflags = uiSflags;
-	}
-#endif
 	return 0;
 
  link_fail:
@@ -1715,18 +1640,6 @@ static int sata_pmp_eh_recover(struct ata_port *ap)
 	ata_port_printk(ap, KERN_ERR,
 			"failed to recover PMP after %d tries, giving up\n",
 			ATA_EH_PMP_TRIES);
-#ifdef SYNO_SATA_COMPATIBILITY
-	/* set link error flags to ata port for ata port error handling.
-	 * GSCR may clear by link reset, but it may still have GSCR error,
-	 * so we must check port GSCR fail */
-	if ((uiSflags = uiCheckPortLinksFlags(ap))) {
-		if (ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL) {
-			ap->uiSflags = uiSflags | ATA_SYNO_FLAG_GSCR_FAIL;
-		} else {
-			ap->uiSflags = uiSflags;
-		}
-	}
-#endif
 	sata_pmp_detach(pmp_dev);
 	ata_dev_disable(pmp_dev);
 

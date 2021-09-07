@@ -18,7 +18,6 @@
 #define LKC_DIRECT_LINK
 #include "lkc.h"
 
-#define SYNO_EXPORT_CONFIG
 static void conf_warning(const char *fmt, ...)
 	__attribute__ ((format (printf, 1, 2)));
 
@@ -903,7 +902,6 @@ void conf_set_changed_callback(void (*fn)(void))
 {
 	conf_changed_callback = fn;
 }
-
 
 void conf_set_all_new_symbols(enum conf_def_mode mode)
 {

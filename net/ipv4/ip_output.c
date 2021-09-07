@@ -85,6 +85,20 @@
 
 int sysctl_ip_default_ttl __read_mostly = IPDEFTTL;
 
+#ifdef MY_ABC_HERE
+extern int gSynoNetfilterStatus;
+#endif
+
+#ifdef MY_ABC_HERE
+extern int gSynoTopologyMode;
+#endif
+
+#ifdef MY_ABC_HERE
+extern int gWifiStaNum;
+extern atomic_t syno_ppp_unit_count;
+extern atomic_t syno_ppp_channel_count;
+#endif
+
 /* Generate a checksum for an outgoing IP datagram. */
 __inline__ void ip_send_check(struct iphdr *iph)
 {
@@ -99,8 +113,18 @@ int __ip_local_out(struct sk_buff *skb)
 	iph->tot_len = htons(skb->len);
 	ip_send_check(iph);
 
+#ifdef MY_ABC_HERE
+	if (!gSynoNetfilterStatus && (3 == gSynoTopologyMode) && !gWifiStaNum &&
+		(!atomic_read(&syno_ppp_unit_count) && !atomic_read(&syno_ppp_channel_count))) {
+		return dst_output(skb);
+	} else {
+		return nf_hook(PF_INET, NF_INET_LOCAL_OUT, skb, NULL, skb_dst(skb)->dev,
+			dst_output);
+	}
+#else
 	return nf_hook(PF_INET, NF_INET_LOCAL_OUT, skb, NULL, skb_dst(skb)->dev,
 		       dst_output);
+#endif
 }
 
 int ip_local_out(struct sk_buff *skb)
@@ -399,7 +423,6 @@ no_route:
 	kfree_skb(skb);
 	return -EHOSTUNREACH;
 }
-
 
 static void ip_copy_metadata(struct sk_buff *to, struct sk_buff *from)
 {
@@ -1118,7 +1141,6 @@ ssize_t	ip_append_page(struct sock *sk, struct page *page,
 		skb_shinfo(skb)->gso_type = SKB_GSO_UDP;
 	}
 
-
 	while (size > 0) {
 		int i;
 
@@ -1335,7 +1357,6 @@ void ip_flush_pending_frames(struct sock *sk)
 
 	ip_cork_release(inet_sk(sk));
 }
-
 
 /*
  *	Fetch data from kernel space and fill in checksum if needed.

@@ -32,7 +32,6 @@
 */
 #include "../rt_config.h"
 
-
 USHORT RtmpPCI_WriteTxResource(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	TX_BLK			*pTxBlk,
@@ -98,7 +97,6 @@ USHORT RtmpPCI_WriteTxResource(
 
 	return RetTxIdx;
 }
-
 
 USHORT RtmpPCI_WriteSingleTxResource(
 	IN	PRTMP_ADAPTER	pAd,
@@ -173,7 +171,6 @@ USHORT RtmpPCI_WriteSingleTxResource(
 
 	return RetTxIdx;
 }
-
 
 USHORT RtmpPCI_WriteMultiTxResource(
 	IN	PRTMP_ADAPTER	pAd,
@@ -274,7 +271,6 @@ USHORT RtmpPCI_WriteMultiTxResource(
 
 }
 
-
 VOID RtmpPCI_FinalWriteTxResource(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	TX_BLK			*pTxBlk,
@@ -296,7 +292,6 @@ VOID RtmpPCI_FinalWriteTxResource(
 #endif // RT_BIG_ENDIAN //
 
 }
-
 
 VOID RtmpPCIDataLastTxIdx(
 	IN	PRTMP_ADAPTER	pAd,
@@ -335,7 +330,6 @@ VOID RtmpPCIDataLastTxIdx(
 
 }
 
-
 USHORT	RtmpPCI_WriteFragTxResource(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	TX_BLK			*pTxBlk,
@@ -370,7 +364,6 @@ USHORT	RtmpPCI_WriteFragTxResource(
 
 	firstDMALen = TXINFO_SIZE + TXWI_SIZE + hwHeaderLen;
 	NdisMoveMemory(pDMAHeaderBufVA, pTxBlk->HeaderBuf, firstDMALen);
-
 
 	//
 	// Build Tx Descriptor
@@ -420,7 +413,6 @@ USHORT	RtmpPCI_WriteFragTxResource(
 	return RetTxIdx;
 
 }
-
 
 /*
 	Must be run in Interrupt context
@@ -489,7 +481,6 @@ int RtmpPCIMgmtKickOut(
 
 	return 0;
 }
-
 
 #ifdef CONFIG_STA_SUPPORT
 /*
@@ -620,7 +611,6 @@ NDIS_STATUS RTMPCheckRxError(
 }
 #endif // CONFIG_STA_SUPPORT //
 
-
 BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 	IN PRTMP_ADAPTER	pAd,
 	IN UCHAR			QueIdx)
@@ -635,7 +625,6 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 	TXD_STRUC	TxD, *pOriTxD;
 	//ULONG		IrqFlags;
 	BOOLEAN			bReschedule = FALSE;
-
 
 	ASSERT(QueIdx < NUM_OF_TX_RING);
 	pTxRing = &pAd->TxRing[QueIdx];
@@ -747,7 +736,6 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 
 		pTxD->DMADONE = 0;
 
-
 #ifdef RALINK_ATE
 		/* Execution of this block is not allowed when ATE is running. */
 		if (!(ATE_ON(pAd)))
@@ -845,11 +833,9 @@ kick_out:
 //         RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
 	}
 
-
 	return  bReschedule;
 
 }
-
 
 /*
 	========================================================================
@@ -906,7 +892,6 @@ BOOLEAN	RTMPHandleTxRingDmaDoneInterrupt(
 	return  bReschedule;
 }
 
-
 /*
 	========================================================================
 
@@ -955,7 +940,6 @@ VOID	RTMPHandleMgmtRingDmaDoneInterrupt(
 		pTxD->DMADONE = 0;
 		pPacket = pMgmtRing->Cell[pMgmtRing->TxSwFreeIdx].pNdisPacket;
 
-
 		if (pPacket)
 		{
 			PCI_UNMAP_SINGLE(pAd, pTxD->SDPtr0, pTxD->SDLen0, PCI_DMA_TODEVICE);
@@ -979,10 +963,7 @@ VOID	RTMPHandleMgmtRingDmaDoneInterrupt(
 	}
 	NdisReleaseSpinLock(&pAd->MgmtRingLock);
 
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
 }
-
 
 /*
 	========================================================================
@@ -1005,7 +986,6 @@ VOID	RTMPHandleTBTTInterrupt(
 	}
 }
 
-
 /*
 	========================================================================
 
@@ -1026,7 +1006,6 @@ VOID	RTMPHandlePreTBTTInterrupt(
 			DBGPRINT(RT_DEBUG_TRACE, ("RTMPHandlePreTBTTInterrupt...\n"));
 		}
 	}
-
 
 }
 
@@ -1062,9 +1041,6 @@ VOID	RTMPHandleRxCoherentInterrupt(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<== RTMPHandleRxCoherentInterrupt \n"));
 }
-
-
-
 
 VOID DBGPRINT_TX_RING(
 	IN PRTMP_ADAPTER  pAd,
@@ -1150,9 +1126,7 @@ VOID DBGPRINT_TX_RING(
 	DBGPRINT_RAW(RT_DEBUG_TRACE,("	TxSwFreeIdx[%d]", AC0freeIdx));
 	DBGPRINT_RAW(RT_DEBUG_TRACE,("	pending-NDIS=%ld\n", pAd->RalinkCounters.PendingNdisPacketCount));
 
-
 }
-
 
 VOID DBGPRINT_RX_RING(
 	IN PRTMP_ADAPTER  pAd)
@@ -1180,7 +1154,6 @@ VOID DBGPRINT_RX_RING(
 	DBGPRINT_RAW(RT_DEBUG_TRACE,("	RxSwReadIdx [%d]=", AC0freeIdx));
 	DBGPRINT_RAW(RT_DEBUG_TRACE,("	pending-NDIS=%ld\n", pAd->RalinkCounters.PendingNdisPacketCount));
 }
-
 
 PNDIS_PACKET GetPacketFromRxRing(
 	IN		PRTMP_ADAPTER	pAd,
@@ -1239,7 +1212,6 @@ PNDIS_PACKET GetPacketFromRxRing(
 		goto done;
 	}
 
-
 	// return rx descriptor
 	NdisMoveMemory(pSaveRxD, pRxD, RXD_SIZE);
 
@@ -1287,7 +1259,6 @@ done:
 	return pRxPacket;
 }
 
-
 NDIS_STATUS MlmeHardTransmitTxRing(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	UCHAR	QueIdx,
@@ -1313,9 +1284,7 @@ NDIS_STATUS MlmeHardTransmitTxRing(
 	ULONG	 FreeNum;
 	MAC_TABLE_ENTRY	*pMacEntry = NULL;
 
-
 	RTMP_QueryPacketInfo(pPacket, &PacketInfo, &pSrcBufVA, &SrcBufLen);
-
 
 	if (pSrcBufVA == NULL)
 	{
@@ -1351,7 +1320,6 @@ NDIS_STATUS MlmeHardTransmitTxRing(
 		//NdisReleaseSpinLock(&pAd->TxRingLock);
 		return NDIS_STATUS_FAILURE;
 	}
-
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -1481,7 +1449,6 @@ NDIS_STATUS MlmeHardTransmitTxRing(
 #endif
 	SrcBufPA = PCI_MAP_SINGLE(pAd, pSrcBufVA, SrcBufLen, 0, PCI_DMA_TODEVICE);
 
-
 	RTMPWriteTxDescriptor(pAd, pTxD, TRUE, FIFO_EDCA);
 	pTxD->LastSec0 = 1;
 	pTxD->LastSec1 = 1;
@@ -1509,7 +1476,6 @@ NDIS_STATUS MlmeHardTransmitTxRing(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 NDIS_STATUS MlmeDataHardTransmit(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	UCHAR	QueIdx,
@@ -1523,7 +1489,6 @@ NDIS_STATUS MlmeDataHardTransmit(
 
 	return MlmeHardTransmitTxRing(pAd,QueIdx,pPacket);
 }
-
 
 /*
 	========================================================================

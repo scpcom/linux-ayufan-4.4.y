@@ -1783,7 +1783,6 @@ unsigned int ata_sff_host_intr(struct ata_port *ap,
 		goto idle_irq;
 	}
 
-
 	/* check main status, clearing INTRQ if needed */
 	status = ata_sff_irq_status(ap);
 	if (status & ATA_BUSY)
@@ -2238,23 +2237,8 @@ int ata_sff_softreset(struct ata_link *link, unsigned int *classes,
 	DPRINTK("about to softreset, devmask=%x\n", devmask);
 	rc = ata_bus_softreset(ap, devmask, deadline);
 	/* if link is occupied, -ENODEV too is an error */
-#ifdef SYNO_SATA_COMPATIBILITY
-	if (0 < ap->iFakeError) {
-		ata_link_printk(link, KERN_ERR, "generate fake SRST, Fake count %d\n", ap->iFakeError);
-		if (SYNO_ERROR_MAX > ap->iFakeError) {
-			--(ap->iFakeError);
-		}
-		rc = -EBUSY;
-	}
-#endif
 	if (rc && (rc != -ENODEV || sata_scr_valid(link))) {
 		ata_link_printk(link, KERN_ERR, "SRST failed (errno=%d)\n", rc);
-#ifdef SYNO_SATA_COMPATIBILITY
-		if (-EBUSY == rc) {
-			ata_link_printk(link, KERN_ERR, "SRST fail, set srst fail flag\n");
-			link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;
-		}
-#endif
 		return rc;
 	}
 

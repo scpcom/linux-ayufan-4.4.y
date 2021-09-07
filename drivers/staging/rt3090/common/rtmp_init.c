@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 UCHAR    BIT8[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 char*   CipherName[] = {"none","wep64","wep128","TKIP","AES","CKIP64","CKIP128"};
 
@@ -62,7 +61,6 @@ REG_PAIR   BBPRegTable[] = {
 	{BBP_R106,		0x35},  // for ShortGI throughput
 };
 #define	NUM_BBP_REG_PARMS	(sizeof(BBPRegTable) / sizeof(REG_PAIR))
-
 
 //
 // ASIC register initialization sets
@@ -148,7 +146,6 @@ RTMP_REG_PAIR	MACRegTable[] =	{
 	{PWR_PIN_CFG,			0x00000003},	// patch for 2880-E
 };
 
-
 #ifdef CONFIG_STA_SUPPORT
 RTMP_REG_PAIR	STAMACRegTable[] =	{
 	{WMM_AIFSN_CFG,		0x00002273},
@@ -161,7 +158,6 @@ RTMP_REG_PAIR	STAMACRegTable[] =	{
 #ifdef CONFIG_STA_SUPPORT
 #define	NUM_STA_MAC_REG_PARMS	(sizeof(STAMACRegTable) / sizeof(RTMP_REG_PAIR))
 #endif // CONFIG_STA_SUPPORT //
-
 
 /*
 	========================================================================
@@ -216,7 +212,6 @@ NDIS_STATUS	RTMPAllocAdapterBlock(
 		pAd->BeaconBuf = pBeaconBuf;
 		DBGPRINT(RT_DEBUG_OFF, ("\n\n=== pAd = %p, size = %d ===\n\n", pAd, (UINT32)sizeof(RTMP_ADAPTER)));
 
-
 		// Init spin locks
 		NdisAllocateSpinLock(&pAd->MgmtRingLock);
 #ifdef RTMP_MAC_PCI
@@ -237,7 +232,6 @@ NDIS_STATUS	RTMPAllocAdapterBlock(
 
 		NdisAllocateSpinLock(&pAd->irq_lock);
 
-
 	} while (FALSE);
 
 	if ((Status != NDIS_STATUS_SUCCESS) && (pBeaconBuf))
@@ -248,7 +242,6 @@ NDIS_STATUS	RTMPAllocAdapterBlock(
 	DBGPRINT_S(Status, ("<-- RTMPAllocAdapterBlock, Status=%x\n", Status));
 	return Status;
 }
-
 
 /*
 	========================================================================
@@ -470,7 +463,6 @@ VOID	RTMPReadTxPwrPerRate(
 	}
 }
 
-
 /*
 	========================================================================
 
@@ -657,7 +649,6 @@ VOID	RTMPReadChannelPwr(
 	/*choffset = 14 + 12 + 16 + 7;*/
 	choffset = 14 + 12 + 16 + 11;
 
-
 }
 
 /*
@@ -692,7 +683,6 @@ NDIS_STATUS	NICReadRegParameters(
 	DBGPRINT_S(Status, ("<-- NICReadRegParameters, Status=%x\n", Status));
 	return Status;
 }
-
 
 /*
 	========================================================================
@@ -787,7 +777,6 @@ VOID	NICReadEEPROMParameters(
 
 		DBGPRINT(RT_DEBUG_TRACE, ("Initialize MAC Address from module parameter \n"));
 	}
-
 
 	{
 		//more conveninet to test mbssid, so ap's bssid &0xf1
@@ -920,8 +909,6 @@ VOID	NICReadEEPROMParameters(
 	}
 
 	NicConfig2.word = pAd->EEPROMDefaultValue[1];
-
-
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -1166,7 +1153,6 @@ VOID	NICReadEEPROMParameters(
 	DBGPRINT(RT_DEBUG_TRACE, ("<-- NICReadEEPROMParameters\n"));
 }
 
-
 /*
 	========================================================================
 
@@ -1210,9 +1196,7 @@ VOID	NICInitAsicFromEEPROM(
 		}
 	}
 
-
 	NicConfig2.word = pAd->EEPROMDefaultValue[1];
-
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -1374,7 +1358,6 @@ VOID	NICInitAsicFromEEPROM(
 	}
 #endif // CONFIG_STA_SUPPORT //
 
-
 	DBGPRINT(RT_DEBUG_TRACE, ("TxPath = %d, RxPath = %d, RFIC=%d, Polar+LED mode=%x\n",
 				pAd->Antenna.field.TxPath, pAd->Antenna.field.RxPath,
 				pAd->RfIcType, pAd->LedCntl.word));
@@ -1465,7 +1448,6 @@ retry:
 		return NDIS_STATUS_FAILURE;
 	}
 
-
 #ifdef RTMP_MAC_PCI
 	// Write AC_BK base address register
 	Value = RTMP_GetPhysicalAddressLow(pAd->TxRing[QID_AC_BK].Cell[0].AllocPa);
@@ -1543,7 +1525,6 @@ retry:
 	RTMP_IO_WRITE32(pAd, RX_MAX_CNT, Value);
 #endif // RTMP_MAC_PCI //
 
-
 	// WMM parameter
 	csr0.word = 0;
 	RTMP_IO_WRITE32(pAd, WMM_TXOP0_CFG, csr0.word);
@@ -1558,7 +1539,6 @@ retry:
 		csr0.field.Ac1Txop = 48;	// AC_VO: 48*32us ~= 1.5ms
 	}
 	RTMP_IO_WRITE32(pAd, WMM_TXOP1_CFG, csr0.word);
-
 
 #ifdef RTMP_MAC_PCI
 	// 3. Set DMA global configuration except TX_DMA_EN and RX_DMA_EN bits:
@@ -1580,7 +1560,6 @@ retry:
 	IntCfg.word = 0;
 	RTMP_IO_WRITE32(pAd, DELAY_INT_CFG, IntCfg.word);
 #endif // RTMP_MAC_PCI //
-
 
 	// reset action
 	// Load firmware
@@ -1646,7 +1625,6 @@ NDIS_STATUS	NICInitializeAsic(
 		RTMP_IO_WRITE32(pAd, MACRegTable[Index].Register, MACRegTable[Index].Value);
 	}
 
-
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
@@ -1657,7 +1635,6 @@ NDIS_STATUS	NICInitializeAsic(
 	}
 #endif // CONFIG_STA_SUPPORT //
 #endif // RTMP_MAC_PCI //
-
 
 #ifdef RT30xx
 	// Initialize RT3070 serial MAC registers which is different from RT2870 serial
@@ -1853,7 +1830,6 @@ NDIS_STATUS	NICInitializeAsic(
 		RTMP_IO_WRITE32(pAd, MAX_LEN_CFG, csr);
 	}
 
-
 #ifdef CONFIG_STA_SUPPORT
 	// Add radio off control
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -1906,7 +1882,6 @@ NDIS_STATUS	NICInitializeAsic(
 				RTMP_IO_WRITE32(pAd, pAd->BeaconOffset[apidx] + i, 0x00);
 		}
 	}
-
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -2022,7 +1997,6 @@ VOID NICUpdateFifoStaCounters(
 				break;
 
 			wcid = (UCHAR)StaFifo.field.wcid;
-
 
 		/* ignore NoACK and MGMT frame use 0xFF as WCID */
 			if ((StaFifo.field.TxAckRequired == 0) || (wcid >= MAX_LEN_OF_MAC_TABLE))
@@ -2195,7 +2169,6 @@ VOID NICUpdateRawCounters(
 	TX_AGG_CNT7_STRUC	TxAggCnt7;
 	COUNTER_RALINK		*pRalinkCounters;
 
-
 	pRalinkCounters = &pAd->RalinkCounters;
 
 	RTMP_IO_READ32(pAd, RX_STA_CNT0, &RxStaCnt0.word);
@@ -2230,7 +2203,6 @@ VOID NICUpdateRawCounters(
 
 	//pAd->RalinkCounters.RxCount = 0;
 
-
 	//if (!OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_TX_RATE_SWITCH_ENABLED) ||
 	//	(OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_TX_RATE_SWITCH_ENABLED) && (pAd->MacTab.Size != 1)))
 	if (!pAd->bUpdateBcnCntDone)
@@ -2247,7 +2219,6 @@ VOID NICUpdateRawCounters(
 	pAd->WlanCounters.RetryCount.u.LowPart += StaTx1.field.TxRetransmit;
 	pAd->WlanCounters.FailedCount.u.LowPart += TxStaCnt0.field.TxFailCount;
 	}
-
 
 	//if (pAd->bStaFifoTest == TRUE)
 	{
@@ -2376,9 +2347,7 @@ VOID NICUpdateRawCounters(
 	}
 #endif // DBG_DIAGNOSE //
 
-
 }
-
 
 /*
 	========================================================================
@@ -2418,7 +2387,6 @@ VOID	NICResetFromError(
 	AsicLockChannel(pAd, pAd->CommonCfg.CentralChannel);
 }
 
-
 NDIS_STATUS NICLoadFirmware(
 	IN PRTMP_ADAPTER pAd)
 {
@@ -2428,7 +2396,6 @@ NDIS_STATUS NICLoadFirmware(
 
 	return status;
 }
-
 
 /*
 	========================================================================
@@ -2450,7 +2417,6 @@ VOID NICEraseFirmware(
 		pAd->chipOps.eraseFirmware(pAd);
 
 }/* End of NICEraseFirmware */
-
 
 /*
 	========================================================================
@@ -2478,7 +2444,6 @@ NDIS_STATUS NICLoadRateSwitchingParams(
 {
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 /*
 	========================================================================
@@ -2525,7 +2490,6 @@ ULONG	RTMPCompareMemory(
 	return (0);
 }
 
-
 /*
 	========================================================================
 
@@ -2560,7 +2524,6 @@ VOID	RTMPZeroMemory(
 		pMem[Index] = 0x00;
 	}
 }
-
 
 /*
 	========================================================================
@@ -2602,7 +2565,6 @@ VOID RTMPMoveMemory(
 		pMem1[Index] = pMem2[Index];
 	}
 }
-
 
 /*
 	========================================================================
@@ -2688,8 +2650,6 @@ VOID	UserCfgInit(
 	pAd->CommonCfg.RadarDetect.CSPeriod = 10;
 	pAd->CommonCfg.RadarDetect.CSCount = 0;
 	pAd->CommonCfg.RadarDetect.RDMode = RD_NORMAL_MODE;
-
-
 
 #ifdef TONE_RADAR_DETECT_SUPPORT
 #ifdef CARRIER_DETECTION_SUPPORT
@@ -2781,7 +2741,6 @@ VOID	UserCfgInit(
 	pAd->CommonCfg.MlmeTransmit.field.MODE = MODE_OFDM;
 
 	pAd->CommonCfg.BeaconPeriod = 100;     // in mSec
-
 
 	//
 	// part II. intialize STA specific configuration
@@ -2894,7 +2853,6 @@ pAd->StaCfg.PSControl.field.rt30xxFollowHostASPM=1;
 
 		NdisZeroMemory(pAd->StaCfg.ReplayCounter, 8);
 
-
 		pAd->StaCfg.bAutoConnectByBssid = FALSE;
 		pAd->StaCfg.BeaconLostTime = BEACON_LOST_TIME;
 		NdisZeroMemory(pAd->StaCfg.WpaPassPhrase, 64);
@@ -2913,7 +2871,6 @@ pAd->StaCfg.PSControl.field.rt30xxFollowHostASPM=1;
 	//
 	// part III. AP configurations
 	//
-
 
 	//
 	// part IV. others
@@ -2974,13 +2931,11 @@ pAd->StaCfg.PSControl.field.rt30xxFollowHostASPM=1;
 	pAd->ate.bFWLoading = FALSE;
 #endif // RTMP_MAC_PCI //
 
-
 #ifdef RALINK_28xx_QA
 	pAd->ate.TxStatus = 0;
 	pAd->ate.AtePid = THREAD_PID_INIT_VALUE;
 #endif // RALINK_28xx_QA //
 #endif // RALINK_ATE //
-
 
 	pAd->CommonCfg.bWiFiTest = FALSE;
 #ifdef RTMP_MAC_PCI
@@ -3053,10 +3008,8 @@ void AtoH(PSTRING src, PUCHAR dest, int destlen)
 	}
 }
 
-
 //+++Mark by shiang, not use now, need to remove after confirm
 //---Mark by shiang, not use now, need to remove after confirm
-
 
 /*
 	========================================================================
@@ -3102,7 +3055,6 @@ VOID	RTMPInitTimer(
 	RTMP_OS_Init_Timer(pAd, &pTimer->TimerObj,	pTimerFunc, (PVOID) pTimer);
 }
 
-
 /*
 	========================================================================
 
@@ -3145,7 +3097,6 @@ VOID	RTMPSetTimer(
 		DBGPRINT_ERR(("RTMPSetTimer failed, Timer hasn't been initialize!\n"));
 	}
 }
-
 
 /*
 	========================================================================
@@ -3190,7 +3141,6 @@ VOID	RTMPModTimer(
 		DBGPRINT_ERR(("RTMPModTimer failed, Timer hasn't been initialize!\n"));
 	}
 }
-
 
 /*
 	========================================================================
@@ -3238,7 +3188,6 @@ VOID	RTMPCancelTimer(
 		DBGPRINT_ERR(("RTMPCancelTimer failed, Timer hasn't been initialize!\n"));
 	}
 }
-
 
 /*
 	========================================================================
@@ -3318,8 +3267,6 @@ VOID RTMPSetLED(
 			HighByte = 0x04;
 			AsicSendCommandToMcu(pAd, 0x50, 0xff, LowByte, HighByte);
 			break;
-#ifdef RALINK_ATE
-#endif // RALINK_ATE //
 		default:
 			DBGPRINT(RT_DEBUG_WARN, ("RTMPSetLED::Unknown Status %d\n", Status));
 			break;
@@ -3394,8 +3341,6 @@ VOID RTMPSetSignalLED(
 	}
 }
 
-
-
 /*
 	========================================================================
 
@@ -3431,7 +3376,6 @@ VOID RTMPEnableRxTx(
 	{
 		rx_filter_flag = APNORMAL;
 
-
 		RTMP_IO_WRITE32(pAd, RX_FILTR_CFG, rx_filter_flag);     // enable RX of DMA block
 	}
 	else
@@ -3447,13 +3391,11 @@ VOID RTMPEnableRxTx(
 	DBGPRINT(RT_DEBUG_TRACE, ("<== RTMPEnableRxTx\n"));
 }
 
-
 //+++Add by shiang, move from os/linux/rt_main_dev.c
 void CfgInitHook(PRTMP_ADAPTER pAd)
 {
 	pAd->bBroadComHT = TRUE;
 }
-
 
 int rt28xx_init(
 	IN PRTMP_ADAPTER pAd,
@@ -3484,7 +3426,6 @@ int rt28xx_init(
 	}
 #endif // RTMP_MAC_PCI //
 #endif // CONFIG_STA_SUPPORT //
-
 
 	// reset Adapter flags
 	RTMP_CLEAR_FLAGS(pAd);
@@ -3528,7 +3469,6 @@ int rt28xx_init(
 
 	// Disable DMA
 	RT28XXDMADisable(pAd);
-
 
 	// Load 8051 firmware
 	Status = NICLoadFirmware(pAd);
@@ -3584,7 +3524,6 @@ int rt28xx_init(
 
 	CfgInitHook(pAd);
 
-
 #ifdef BLOCK_NET_IF
 	initblockQueueTab(pAd);
 #endif // BLOCK_NET_IF //
@@ -3618,8 +3557,6 @@ int rt28xx_init(
 		goto err4;
 	}
 
-
-
 #ifdef DOT11_N_SUPPORT
 	//Init Ba Capability parameters.
 //	RT28XX_BA_INIT(pAd);
@@ -3644,8 +3581,6 @@ int rt28xx_init(
 
 	// We should read EEPROM for all cases.  rt2860b
 	NICReadEEPROMParameters(pAd, (PUCHAR)pDefaultMac);
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
 
 	DBGPRINT(RT_DEBUG_OFF, ("3. Phy Mode = %d\n", pAd->CommonCfg.PhyMode));
 
@@ -3676,8 +3611,6 @@ int rt28xx_init(
 	//Init RT30xx RFRegisters after read RFIC type from EEPROM
 	NICInitRFRegisters(pAd);
 #endif // RTMP_RF_RW_SUPPORT //
-
-
 
 //		APInitialize(pAd);
 
@@ -3716,16 +3649,12 @@ int rt28xx_init(
 
 		DBGPRINT(RT_DEBUG_TRACE, ("NDIS_STATUS_MEDIA_DISCONNECT Event B!\n"));
 
-
 	}// end of else
-
 
 	// Set up the Mac address
 	RtmpOSNetDevAddrSet(pAd->net_dev, &pAd->CurrentAddress[0]);
 
 	// Various AP function init
-
-
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -3740,12 +3669,9 @@ int rt28xx_init(
 	}
 #endif // CONFIG_STA_SUPPORT //
 
-
-
 	DBGPRINT_S(Status, ("<==== rt28xx_init, Status=%x\n", Status));
 
 	return TRUE;
-
 
 err4:
 err3:
@@ -3772,7 +3698,6 @@ err0:
 }
 //---Add by shiang, move from os/linux/rt_main_dev.c
 
-
 static INT RtmpChipOpsRegister(
 	IN RTMP_ADAPTER *pAd,
 	IN INT			infType)
@@ -3796,14 +3721,12 @@ static INT RtmpChipOpsRegister(
 			break;
 #endif // RTMP_PCI_SUPPORT //
 
-
 		default:
 			break;
 	}
 
 	return status;
 }
-
 
 INT RtmpRaDevCtrlInit(
 	IN RTMP_ADAPTER *pAd,
@@ -3814,13 +3737,10 @@ INT RtmpRaDevCtrlInit(
 	// Assign the interface type. We need use it when do register/EEPROM access.
 	pAd->infType = infType;
 
-
 #ifdef CONFIG_STA_SUPPORT
 	pAd->OpMode = OPMODE_STA;
 	DBGPRINT(RT_DEBUG_TRACE, ("STA Driver version-%s\n", STA_DRIVER_VERSION));
 #endif // CONFIG_STA_SUPPORT //
-
-
 
 	RtmpChipOpsRegister(pAd, infType);
 
@@ -3844,7 +3764,6 @@ INT RtmpRaDevCtrlInit(
 	return 0;
 }
 
-
 BOOLEAN RtmpRaDevCtrlExit(IN RTMP_ADAPTER *pAd)
 {
 #ifdef MULTIPLE_CARD_SUPPORT
@@ -3854,12 +3773,10 @@ extern UINT8  MC_CardUsed[MAX_NUM_OF_MULTIPLE_CARD];
 		MC_CardUsed[pAd->MC_RowID] = 0; // not clear MAC address
 #endif // MULTIPLE_CARD_SUPPORT //
 
-
 	RTMPFreeAdapter(pAd);
 
 	return TRUE;
 }
-
 
 // not yet support MBSS
 PNET_DEV get_netdev_from_bssid(
@@ -3867,8 +3784,6 @@ PNET_DEV get_netdev_from_bssid(
 	IN	UCHAR			FromWhichBSSID)
 {
 	PNET_DEV dev_p = NULL;
-
-
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)

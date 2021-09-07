@@ -41,10 +41,6 @@
 
 #include "rtmp_dot11.h"
 
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
-
-
 // maximum supported capability information -
 // ESS, IBSS, Privacy, Short Preamble, Spectrum mgmt, Short Slot
 #define SUPPORTED_CAPABILITY_INFO   0x0533
@@ -78,7 +74,6 @@
 #define CW_MIN_IN_BITS              4         // actual CwMin = 2^CW_MIN_IN_BITS - 1
 #define LINK_DOWN_TIMEOUT           20000      // unit: msec
 #define AUTO_WAKEUP_TIMEOUT			70			//unit: msec
-
 
 #ifdef CONFIG_STA_SUPPORT
 #define CW_MAX_IN_BITS              10        // actual CwMax = 2^CW_MAX_IN_BITS - 1
@@ -124,7 +119,6 @@ extern UINT32 CW_MAX_IN_BITS;
 //#define PEER_KEY_128BIT_LEN              16
 
 #define BSS_NOT_FOUND                    0xFFFFFFFF
-
 
 #ifdef CONFIG_STA_SUPPORT
 #define MAX_LEN_OF_MLME_QUEUE            40 //10
@@ -387,7 +381,6 @@ typedef struct PACKED _HT_CAPABILITY_IE{
 	HT_AS_CAP		ASCap;	//antenna selection.
 } HT_CAPABILITY_IE, *PHT_CAPABILITY_IE;
 
-
 // 802.11n draft3 related structure definitions.
 // 7.3.2.60
 #define dot11OBSSScanPassiveDwell							20	// in TU. min amount of time that the STA continously scans each channel when performing an active OBSS scan.
@@ -411,7 +404,6 @@ typedef struct PACKED _OVERLAP_BSS_SCAN_IE{
 	USHORT		ScanActThre;				// Scan Activity threshold
 }OVERLAP_BSS_SCAN_IE, *POVERLAP_BSS_SCAN_IE;
 
-
 //  7.3.2.56. 20/40 Coexistence element used in  Element ID = 72 = IE_2040_BSS_COEXIST
 typedef union PACKED _BSS_2040_COEXIST_IE{
  struct PACKED {
@@ -429,7 +421,6 @@ typedef union PACKED _BSS_2040_COEXIST_IE{
     } field;
  UCHAR   word;
 } BSS_2040_COEXIST_IE, *PBSS_2040_COEXIST_IE;
-
 
 typedef struct  _TRIGGER_EVENTA{
 	BOOLEAN			bValid;
@@ -464,14 +455,12 @@ typedef struct PACKED _EXT_CAP_INFO_ELEMENT{
 #endif // RT_BIG_ENDIAN //
 }EXT_CAP_INFO_ELEMENT, *PEXT_CAP_INFO_ELEMENT;
 
-
 // 802.11n 7.3.2.61
 typedef struct PACKED _BSS_2040_COEXIST_ELEMENT{
 	UCHAR					ElementID;		// ID = IE_2040_BSS_COEXIST = 72
 	UCHAR					Len;
 	BSS_2040_COEXIST_IE		BssCoexistIe;
 }BSS_2040_COEXIST_ELEMENT, *PBSS_2040_COEXIST_ELEMENT;
-
 
 //802.11n 7.3.2.59
 typedef struct PACKED _BSS_2040_INTOLERANT_CH_REPORT{
@@ -481,7 +470,6 @@ typedef struct PACKED _BSS_2040_INTOLERANT_CH_REPORT{
 	UCHAR				ChList[0];
 }BSS_2040_INTOLERANT_CH_REPORT, *PBSS_2040_INTOLERANT_CH_REPORT;
 
-
 // The structure for channel switch annoucement IE. This is in 802.11n D3.03
 typedef struct PACKED _CHA_SWITCH_ANNOUNCE_IE{
 	UCHAR			SwitchMode;	//channel switch mode
@@ -489,12 +477,10 @@ typedef struct PACKED _CHA_SWITCH_ANNOUNCE_IE{
 	UCHAR			SwitchCount;	//
 } CHA_SWITCH_ANNOUNCE_IE, *PCHA_SWITCH_ANNOUNCE_IE;
 
-
 // The structure for channel switch annoucement IE. This is in 802.11n D3.03
 typedef struct PACKED _SEC_CHA_OFFSET_IE{
 	UCHAR			SecondaryChannelOffset;	 // 1: Secondary above, 3: Secondary below, 0: no Secondary
 } SEC_CHA_OFFSET_IE, *PSEC_CHA_OFFSET_IE;
-
 
 // This structure is extracted from struct RT_HT_CAPABILITY
 typedef struct {
@@ -596,7 +582,6 @@ typedef struct PACKED{
 	USHORT	rsv2:11;
 #endif
 } ADD_HTINFO2, *PADD_HTINFO2;
-
 
 // TODO: Need sync with spec about the definition of StbcMcs. In Draft 3.03, it's reserved.
 typedef struct PACKED{
@@ -761,7 +746,6 @@ typedef struct {
 	BASEQ_CONTROL	 BAStartingSeq;
 } EACH_TID, *PEACH_TID;
 
-
 // BAREQ AND MTBAREQ have the same subtype BAR, 802.11n BAR use compressed bitmap.
 typedef struct PACKED _FRAME_BA_REQ {
 	FRAME_CONTROL   FC;
@@ -814,14 +798,12 @@ typedef struct PACKED _CHAN_SWITCH_ANNOUNCE {
 	CHA_SWITCH_ANNOUNCE_IE	CSAnnounceIe;
 }   CHAN_SWITCH_ANNOUNCE, *PCHAN_SWITCH_ANNOUNCE;
 
-
 //802.11n : 7.3.2.20a
 typedef struct PACKED _SECOND_CHAN_OFFSET {
 	UCHAR				ElementID;		// ID = IE_SECONDARY_CH_OFFSET = 62
 	UCHAR				Len;
 	SEC_CHA_OFFSET_IE	SecChOffsetIe;
 }   SECOND_CHAN_OFFSET, *PSECOND_CHAN_OFFSET;
-
 
 typedef struct PACKED _FRAME_SPETRUM_CS {
 	HEADER_802_11   Hdr;
@@ -830,7 +812,6 @@ typedef struct PACKED _FRAME_SPETRUM_CS {
 	CHAN_SWITCH_ANNOUNCE	CSAnnounce;
 	SECOND_CHAN_OFFSET		SecondChannel;
 }   FRAME_SPETRUM_CS, *PFRAME_SPETRUM_CS;
-
 
 typedef struct PACKED _FRAME_ADDBA_REQ {
 	HEADER_802_11   Hdr;
@@ -860,7 +841,6 @@ typedef struct PACKED _FRAME_DELBA_REQ {
 	USHORT	ReasonCode;
 }   FRAME_DELBA_REQ, *PFRAME_DELBA_REQ;
 
-
 //7.2.1.7
 typedef struct PACKED _FRAME_BAR {
 	FRAME_CONTROL   FC;
@@ -882,7 +862,6 @@ typedef struct PACKED _FRAME_BA {
 	UCHAR		bitmask[8];
 }   FRAME_BA, *PFRAME_BA;
 
-
 // Radio Measuement Request Frame Format
 typedef struct PACKED _FRAME_RM_REQ_ACTION {
 	HEADER_802_11   Hdr;
@@ -901,7 +880,6 @@ typedef struct PACKED {
 	UCHAR		NewChannelNum;
 	UCHAR		ChannelSwitchCount;
 } HT_EXT_CHANNEL_SWITCH_ANNOUNCEMENT_IE, *PHT_EXT_CHANNEL_SWITCH_ANNOUNCEMENT_IE;
-
 
 //
 // _Limit must be the 2**n - 1
@@ -1009,7 +987,6 @@ typedef struct {
 } WPA_IE_;
 #endif // CONFIG_STA_SUPPORT //
 
-
 typedef struct {
     UCHAR   Bssid[MAC_ADDR_LEN];
     UCHAR   Channel;
@@ -1085,7 +1062,6 @@ typedef struct {
     BSS_ENTRY       BssEntry[MAX_LEN_OF_BSS_TABLE];
 } BSS_TABLE, *PBSS_TABLE;
 
-
 typedef struct _MLME_QUEUE_ELEM {
     ULONG             Machine;
     ULONG             MsgType;
@@ -1121,7 +1097,6 @@ typedef struct _STATE_MACHINE {
     ULONG                           CurrState;
     STATE_MACHINE_FUNC             *TransFunc;
 } STATE_MACHINE, *PSTATE_MACHINE;
-
 
 // MLME AUX data structure that hold temporarliy settings during a connection attempt.
 // Once this attemp succeeds, all settings will be copy to pAd->StaActive.
@@ -1178,8 +1153,6 @@ typedef struct _MLME_AUX {
     RALINK_TIMER_STRUCT AuthTimer;
     RALINK_TIMER_STRUCT AssocTimer, ReassocTimer, DisassocTimer;
 
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
 } MLME_AUX, *PMLME_AUX;
 
 typedef struct _MLME_ADDBA_REQ_STRUCT{
@@ -1191,7 +1164,6 @@ typedef struct _MLME_ADDBA_REQ_STRUCT{
 	UCHAR   Token;
 	USHORT	BaStartSeq;
 } MLME_ADDBA_REQ_STRUCT, *PMLME_ADDBA_REQ_STRUCT;
-
 
 typedef struct _MLME_DELBA_REQ_STRUCT{
 	UCHAR   Wcid;	//
@@ -1355,6 +1327,5 @@ typedef enum _WpaGTKState {
     SETKEYS_DONE,
 } WPA_GTK_STATE;
 // ====================== end of AP mlme.h ============================
-
 
 #endif	// MLME_H__

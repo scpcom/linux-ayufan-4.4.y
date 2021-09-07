@@ -304,7 +304,6 @@ static inline int scsi_status_is_good(int status)
 #define VOLUME_OVERFLOW     0x0d
 #define MISCOMPARE          0x0e
 
-
 /*
  *  DEVICE TYPES
  *  Please keep them in 0x%02x format for $MODALIAS to work
@@ -382,7 +381,6 @@ static inline int scsi_is_wlun(unsigned int lun)
 {
 	return (lun & 0xff00) == SCSI_W_LUN_BASE;
 }
-
 
 /*
  *  MESSAGE CODES
@@ -513,7 +511,6 @@ static inline int scsi_is_wlun(unsigned int lun)
 #define READ_ELEMENT_STATUS_TIMEOUT	(5 * 60 * HZ)
 #define READ_DEFECT_DATA_TIMEOUT	(60 * HZ )
 
-
 #define IDENTIFY_BASE       0x80
 #define IDENTIFY(can_disconnect, lun)   (IDENTIFY_BASE |\
 		     ((can_disconnect) ?  0x40 : 0) |\
@@ -541,7 +538,6 @@ static inline int scsi_is_wlun(unsigned int lun)
 #define SCSI_INQ_PQ_NOT_CON     0x01
 #define SCSI_INQ_PQ_NOT_CAP     0x03
 
-
 /*
  * Here are some scsi specific ioctl commands which are sometimes useful.
  *
@@ -568,6 +564,7 @@ static inline __u32 scsi_to_u32(__u8 *ptr)
 	return (ptr[0]<<24) + (ptr[1]<<16) + (ptr[2]<<8) + ptr[3];
 }
 #ifdef MY_ABC_HERE
+#include <linux/syno.h>
 #define SCSI_IOCTL_SET_BADSECTORS    0x5400
 
 typedef struct _tag_SdBadSectors {

@@ -61,7 +61,6 @@ static int port_cost(struct net_device *dev)
 	return 100;	/* assume old 10Mbps */
 }
 
-
 /*
  * Check for port carrier transistions.
  * Called from work queue to allow for calling functions that
@@ -136,7 +135,13 @@ static void del_nbp(struct net_bridge_port *p)
 
 	sysfs_remove_link(br->ifobj, dev->name);
 
+#ifdef MY_ABC_HERE
+	if (0 != strncmp(dev->name, SYNO_WIFI_INTERFACE, strlen(SYNO_WIFI_INTERFACE))) {
+		dev_set_promiscuity(dev, -1);
+	}
+#else
 	dev_set_promiscuity(dev, -1);
+#endif
 
 	spin_lock_bh(&br->lock);
 	br_stp_disable_port(p);
@@ -397,9 +402,17 @@ int br_add_if(struct net_bridge *br, struct net_device *dev)
 	if (IS_ERR(p))
 		return PTR_ERR(p);
 
+#ifdef MY_ABC_HERE
+	if (0 != strncmp(dev->name, SYNO_WIFI_INTERFACE, strlen(SYNO_WIFI_INTERFACE))) {
+		err = dev_set_promiscuity(dev, 1);
+		if (err)
+			goto put_back;
+	}
+#else
 	err = dev_set_promiscuity(dev, 1);
 	if (err)
 		goto put_back;
+#endif
 
 	err = kobject_init_and_add(&p->kobj, &brport_ktype, &(dev->dev.kobj),
 				   SYSFS_BRIDGE_PORT_ATTR);
@@ -441,7 +454,13 @@ err1:
 	kobject_put(&p->kobj);
 	p = NULL; /* kobject_put frees */
 err0:
+#ifdef MY_ABC_HERE
+	if (0 != strncmp(dev->name, SYNO_WIFI_INTERFACE, strlen(SYNO_WIFI_INTERFACE))) {
+		dev_set_promiscuity(dev, -1);
+	}
+#else
 	dev_set_promiscuity(dev, -1);
+#endif
 put_back:
 	dev_put(dev);
 	kfree(p);

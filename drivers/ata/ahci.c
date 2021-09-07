@@ -404,10 +404,6 @@ static ssize_t ahci_show_host_version(struct device *dev,
 static ssize_t ahci_show_port_cmd(struct device *dev,
 				  struct device_attribute *attr, char *buf);
 
-#ifdef SYNO_SATA_COMPATIBILITY
-static void ahci_port_intr(struct ata_port *ap);
-#endif
-
 DEVICE_ATTR(ahci_host_caps, S_IRUGO, ahci_show_host_caps, NULL);
 DEVICE_ATTR(ahci_host_cap2, S_IRUGO, ahci_show_host_cap2, NULL);
 DEVICE_ATTR(ahci_host_version, S_IRUGO, ahci_show_host_version, NULL);
@@ -549,9 +545,6 @@ static struct device_attribute *ahci_shost_attrs[] = {
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
-#ifdef SYNO_SATA_COMPATIBILITY
-	&dev_attr_syno_port_thaw,
-#endif
 #endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
@@ -567,13 +560,6 @@ static struct device_attribute *ahci_sdev_attrs[] = {
 #endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_disk_serial,
-#endif
-#ifdef SYNO_SATA_COMPATIBILITY
-	&dev_attr_syno_fake_error_ctrl,
-	&dev_attr_syno_pwr_reset_count,
-#ifdef MY_DEF_HERE
-    &dev_attr_syno_sata_error_event_debug,
-#endif
 #endif
 #ifdef SYNO_ATA_AHCI_LED_MSG
 	&dev_attr_sw_locate,
@@ -660,9 +646,6 @@ static struct ata_port_operations ahci_ops = {
 #endif
 	.port_start		= ahci_port_start,
 	.port_stop		= ahci_port_stop,
-#ifdef SYNO_SATA_COMPATIBILITY
-	.syno_force_intr	= ahci_port_intr,
-#endif
 };
 
 static struct ata_port_operations ahci_vt8251_ops = {
@@ -936,7 +919,6 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	{ }	/* terminate list */
 };
 
-
 static struct pci_driver ahci_pci_driver = {
 	.name			= DRV_NAME,
 	.id_table		= ahci_pci_tbl,
@@ -961,7 +943,6 @@ static int marvell_enable = 1;
 #endif
 module_param(marvell_enable, int, 0644);
 MODULE_PARM_DESC(marvell_enable, "Marvell SATA via AHCI (1 = enabled)");
-
 
 static inline int ahci_nr_ports(u32 cap)
 {
@@ -2148,12 +2129,6 @@ static int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 
  fail:
 	ata_link_printk(link, KERN_ERR, "softreset failed (%s)\n", reason);
-#ifdef SYNO_SATA_COMPATIBILITY
-	if (-EBUSY == rc) {
-		ata_link_printk(link, KERN_ERR, "SRST fail, set srst fail flag\n");
-		link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;
-	}
-#endif
 	return rc;
 }
 
@@ -2434,7 +2409,6 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 	ahci_scr_write(&ap->link, SCR_ERROR, serror);
 	host_ehi->serror |= serror;
 
-
 	/* some controllers set IRQ_IF_ERR on device errors, ignore it */
 	if (hpriv->flags & AHCI_HFLAG_IGN_IRQ_IF_ERR)
 		irq_stat &= ~PORT_IRQ_IF_ERR;
@@ -2481,18 +2455,7 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 		ata_ehi_push_desc(host_ehi, "interface fatal error");
 	}
 
-#ifdef SYNO_SATA_COMPATIBILITY
-	if ((irq_stat & (PORT_IRQ_CONNECT | PORT_IRQ_PHYRDY)) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
-		if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR) {
-			ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_INTR;
-			DBGMESG("ata%u: clear ATA_SYNO_FLAG_FORCE_INTR\n", ap->print_id);
-		} else {
-			ap->iDetectStat = 1;
-			DBGMESG("ata%u: set detect stat check\n", ap->print_id);
-		}
-#else
 	if (irq_stat & (PORT_IRQ_CONNECT | PORT_IRQ_PHYRDY)) {
-#endif
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
@@ -2543,11 +2506,7 @@ static void ahci_port_intr(struct ata_port *ap)
 		ahci_scr_write(&ap->link, SCR_ERROR, ((1 << 16) | (1 << 18)));
 	}
 
-#ifdef SYNO_SATA_COMPATIBILITY
-	if (unlikely(status & PORT_IRQ_ERROR) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
-#else
 	if (unlikely(status & PORT_IRQ_ERROR)) {
-#endif
 		ahci_error_intr(ap, status);
 		return;
 	}
@@ -3543,7 +3502,6 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		if (ap->flags & ATA_FLAG_EM)
 			ap->em_message_type = ahci_em_messages;
 
-
 		/* disabled/not-implemented port */
 		if (!(hpriv->port_map & (1 << i)))
 			ap->ops = &ata_dummy_port_ops;
@@ -3639,7 +3597,6 @@ static void __exit ahci_exit(void)
 {
 	pci_unregister_driver(&ahci_pci_driver);
 }
-
 
 MODULE_AUTHOR("Jeff Garzik");
 MODULE_DESCRIPTION("AHCI SATA low-level driver");

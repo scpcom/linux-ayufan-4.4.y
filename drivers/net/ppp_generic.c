@@ -58,7 +58,6 @@
 
 #define PPP_VERSION	"2.4.2"
 
-
 #ifdef CONFIG_MV_ETH_NFP_PPP
 extern int fp_ppp_info_set(u32 if_ppp, u32 if_eth, u16 sid, u8 *mac, u32 channel);
 #endif
@@ -188,8 +187,15 @@ struct channel {
  * channel.downl.
  */
 
+#if defined(MY_ABC_HERE)
+
+extern atomic_t syno_ppp_unit_count;
+extern atomic_t syno_ppp_channel_count;
+
+#else
 static atomic_t ppp_unit_count = ATOMIC_INIT(0);
 static atomic_t channel_count = ATOMIC_INIT(0);
+#endif
 
 /* per-net private data for this module */
 static int ppp_net_id;
@@ -2152,7 +2158,11 @@ int ppp_register_net_channel(struct net *net, struct ppp_channel *chan)
 	pch->file.index = ++pn->last_channel_index;
 	list_add(&pch->list, &pn->new_channels);
 
+#if defined(MY_ABC_HERE)
+	atomic_inc(&syno_ppp_channel_count);
+#else
 	atomic_inc(&channel_count);
+#endif
 	spin_unlock_bh(&pn->all_channels_lock);
 
 	return 0;
@@ -2617,7 +2627,11 @@ ppp_create_interface(struct net *net, int unit, int *retp)
 
 	ppp->ppp_net = net;
 
+#if defined(MY_ABC_HERE)
+	atomic_inc(&syno_ppp_unit_count);
+#else
 	atomic_inc(&ppp_unit_count);
+#endif
 	mutex_unlock(&pn->all_ppp_mutex);
 
 	*retp = 0;
@@ -2680,7 +2694,11 @@ static void ppp_shutdown_interface(struct ppp *ppp)
 static void ppp_destroy_interface(struct ppp *ppp)
 {
 
+#if defined(MY_ABC_HERE)
+	atomic_dec(&syno_ppp_unit_count);
+#else
 	atomic_dec(&ppp_unit_count);
+#endif
 
 	if (!ppp->file.dead || ppp->n_channels) {
 		/* "can't happen" */
@@ -2829,7 +2847,11 @@ ppp_disconnect_channel(struct channel *pch)
 static void ppp_destroy_channel(struct channel *pch)
 {
 
+#if defined(MY_ABC_HERE)
+	atomic_dec(&syno_ppp_channel_count);
+#else
 	atomic_dec(&channel_count);
+#endif
 
 	if (!pch->file.dead) {
 		/* "can't happen" */
@@ -2846,7 +2868,11 @@ static void __exit ppp_cleanup(void)
 {
 	/* should never happen */
 
+#if defined(MY_ABC_HERE)
+	if (atomic_read(&syno_ppp_unit_count) || atomic_read(&syno_ppp_channel_count))
+#else
 	if (atomic_read(&ppp_unit_count) || atomic_read(&channel_count))
+#endif
 		printk(KERN_ERR "PPP: removing module but units remain!\n");
 	unregister_chrdev(PPP_MAJOR, "ppp");
 	device_destroy(ppp_class, MKDEV(PPP_MAJOR, 0));

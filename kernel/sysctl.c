@@ -86,7 +86,7 @@ char gszSynoHWVersion[16];
 EXPORT_SYMBOL(gszSynoHWVersion);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 int gSynoRaidSyncFlag = 0;
 EXPORT_SYMBOL(gSynoRaidSyncFlag);
 #endif
@@ -187,7 +187,6 @@ EXPORT_SYMBOL(gSwitchDev);
 EXPORT_SYMBOL(gDevPCIName);
 #endif
 
-
 #if defined(SYNO_ATA_AHCI_LED_MSG) && defined(MY_ABC_HERE)
 int giSynoHddLedEnabled = 1;
 EXPORT_SYMBOL(giSynoHddLedEnabled);
@@ -217,8 +216,36 @@ EXPORT_SYMBOL(funcSynoEunitPowerctlType);
 
 #endif
 
+#ifdef MY_ABC_HERE
+int gSynoNetfilterStatus = 0;
+EXPORT_SYMBOL(gSynoNetfilterStatus);
+#endif
+
+#ifdef MY_ABC_HERE
+/*
+ * Please refer to libsynosdk/lib/net/net.h "typedef enum _tag_TOPOLOGY_MODE" for the definition.
+ * 0:unknow, 1:station, 2:bridge, 3:router
+ */
+int gSynoTopologyMode = 0;
+EXPORT_SYMBOL(gSynoTopologyMode);
+#endif
+
+#ifdef MY_ABC_HERE
+int gSynoWiFiSignalAntanna1 = 0;
+int gSynoWiFiSignalAntanna2 = 0;
+EXPORT_SYMBOL(gSynoWiFiSignalAntanna1);
+EXPORT_SYMBOL(gSynoWiFiSignalAntanna2);
+#endif
+
+#ifdef MY_ABC_HERE
 int (*funcSYNOWIFINotification)(void) = NULL;
 EXPORT_SYMBOL(funcSYNOWIFINotification);
+#endif
+
+#ifdef CONFIG_SYNO_IGNORE_NETBIOS_BROADCAST 
+int gSynoIgnoreNetBIOSBroadcast = 0;
+EXPORT_SYMBOL(gSynoIgnoreNetBIOSBroadcast);
+#endif
 
 #ifdef CONFIG_SYNO_DISPLAY_CPUINFO
 unsigned int gSynoCPUInfoCore = 0;
@@ -1415,6 +1442,54 @@ static struct ctl_table kern_table[] = {
 		.mode		= 0444,
 		.proc_handler	= &proc_dointvec,
 	},
+#endif
+#ifdef MY_ABC_HERE
+        {
+            .ctl_name       = CTL_UNNUMBERED,
+            .procname       = "syno_netfilter_status",
+            .data           = &gSynoNetfilterStatus,
+            .maxlen         = sizeof (int),
+            .mode           = 0644,
+            .proc_handler   = &proc_dointvec,
+        },
+#endif
+#ifdef MY_ABC_HERE
+        {
+            .ctl_name       = CTL_UNNUMBERED,
+            .procname       = "syno_topology_mode",
+            .data           = &gSynoTopologyMode,
+            .maxlen         = sizeof (int),
+            .mode           = 0644,
+            .proc_handler   = &proc_dointvec,
+        },
+#endif
+#ifdef MY_ABC_HERE
+        {
+            .ctl_name       = CTL_UNNUMBERED,
+            .procname       = "syno_wifi_signal_antenna1",
+            .data           = &gSynoWiFiSignalAntanna1,
+            .maxlen         = sizeof (int),
+            .mode           = 0644,
+            .proc_handler   = &proc_dointvec,
+        },
+        {
+            .ctl_name       = CTL_UNNUMBERED,
+            .procname       = "syno_wifi_signal_antenna2",
+            .data           = &gSynoWiFiSignalAntanna2,
+            .maxlen         = sizeof (int),
+            .mode           = 0644,
+            .proc_handler   = &proc_dointvec,
+        },
+#endif
+#ifdef CONFIG_SYNO_IGNORE_NETBIOS_BROADCAST 
+        {
+            .ctl_name       = CTL_UNNUMBERED,
+            .procname       = "syno_ignore_netbios_broadcast",
+            .data           = &gSynoIgnoreNetBIOSBroadcast,
+            .maxlen         = sizeof (int),
+            .mode           = 0644,
+            .proc_handler   = &proc_dointvec,
+        },
 #endif
 #ifdef CONFIG_SYNO_DISPLAY_CPUINFO
         {
@@ -2749,7 +2824,6 @@ int proc_dostring(struct ctl_table *table, int write,
 			       buffer, lenp, ppos);
 }
 
-
 static int do_proc_dointvec_conv(int *negp, unsigned long *lvalp,
 				 int *valp,
 				 int write, void *data)
@@ -3159,7 +3233,6 @@ int proc_doulongvec_ms_jiffies_minmax(struct ctl_table *table, int write,
 				     lenp, ppos, HZ, 1000l);
 }
 
-
 static int do_proc_dointvec_jiffies_conv(int *negp, unsigned long *lvalp,
 					 int *valp,
 					 int write, void *data)
@@ -3367,9 +3440,7 @@ int proc_doulongvec_ms_jiffies_minmax(struct ctl_table *table, int write,
     return -ENOSYS;
 }
 
-
 #endif /* CONFIG_PROC_FS */
-
 
 #ifdef CONFIG_SYSCTL_SYSCALL
 /*
@@ -3560,10 +3631,7 @@ int sysctl_ms_jiffies(struct ctl_table *table,
 	return 1;
 }
 
-
-
 #else /* CONFIG_SYSCTL_SYSCALL */
-
 
 SYSCALL_DEFINE1(sysctl, struct __sysctl_args __user *, args)
 {

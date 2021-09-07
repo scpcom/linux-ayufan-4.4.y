@@ -12,7 +12,3 @@
  * GNU General Public License for more details.
  *
  */
-
-#ifndef __ASM_ARCH_MSM_HARDWARE_H
-
-#endif

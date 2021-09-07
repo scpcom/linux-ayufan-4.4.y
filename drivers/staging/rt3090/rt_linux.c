@@ -30,7 +30,6 @@
 
 ULONG	RTDebugLevel = RT_DEBUG_ERROR;
 
-
 // for wireless system event message
 char const *pWirelessSysEventText[IW_SYS_EVENT_TYPE_NUM] = {
 	// system status event
@@ -80,7 +79,6 @@ char const *pWirelessFloodEventText[IW_FLOOD_EVENT_TYPE_NUM] = {
     "detected 802.1x eap-request flooding"					/* IW_FLOOD_EAP_REQ_EVENT_FLAG */
 	};
 
-
 /* timeout -- ms */
 VOID RTMP_SetPeriodicTimer(
 	IN	NDIS_MINIPORT_TIMER *pTimer,
@@ -102,7 +100,6 @@ VOID RTMP_OS_Init_Timer(
     pTimer->data = (unsigned long)data;
     pTimer->function = function;
 }
-
 
 VOID RTMP_OS_Add_Timer(
 	IN	NDIS_MINIPORT_TIMER		*pTimer,
@@ -188,9 +185,6 @@ NDIS_STATUS os_free_mem(
 	return (NDIS_STATUS_SUCCESS);
 }
 
-
-
-
 PNDIS_PACKET RtmpOSNetPktAlloc(
 	IN RTMP_ADAPTER *pAd,
 	IN int size)
@@ -201,7 +195,6 @@ PNDIS_PACKET RtmpOSNetPktAlloc(
 
 	return ((PNDIS_PACKET)skb);
 }
-
 
 PNDIS_PACKET RTMP_AllocateFragPacketBuffer(
 	IN	PRTMP_ADAPTER pAd,
@@ -223,7 +216,6 @@ PNDIS_PACKET RTMP_AllocateFragPacketBuffer(
 
 	return (PNDIS_PACKET) pkt;
 }
-
 
 PNDIS_PACKET RTMP_AllocateTxPacketBuffer(
 	IN	PRTMP_ADAPTER pAd,
@@ -253,7 +245,6 @@ PNDIS_PACKET RTMP_AllocateTxPacketBuffer(
 	return (PNDIS_PACKET) pkt;
 }
 
-
 VOID build_tx_packet(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket,
@@ -280,7 +271,6 @@ VOID	RTMPFreeAdapter(
 	if (pAd->BeaconBuf)
 		kfree(pAd->BeaconBuf);
 
-
 	NdisFreeSpinLock(&pAd->MgmtRingLock);
 
 #ifdef RTMP_MAC_PCI
@@ -299,7 +289,6 @@ NdisFreeSpinLock(&pAd->McuCmdLock);
 
 	NdisFreeSpinLock(&pAd->irq_lock);
 
-
 	vfree(pAd); // pci_free_consistent(os_cookie->pci_dev,sizeof(RTMP_ADAPTER),pAd,os_cookie->pAd_pa);
 	if (os_cookie)
 		kfree(os_cookie);
@@ -309,8 +298,6 @@ BOOLEAN OS_Need_Clone_Packet(void)
 {
 	return (FALSE);
 }
-
-
 
 /*
 	========================================================================
@@ -358,14 +345,12 @@ NDIS_STATUS RTMPCloneNdisPacket(
 	NdisMoveMemory(pkt->data, GET_OS_PKT_DATAPTR(pInPacket), GET_OS_PKT_LEN(pInPacket));
 	*ppOutPacket = OSPKT_TO_RTPKT(pkt);
 
-
 	RTMP_SET_PACKET_SOURCE(OSPKT_TO_RTPKT(pkt), PKTSRC_NDIS);
 
 	printk("###Clone###\n");
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 // the allocated NDIS PACKET must be freed via RTMPFreeNdisPacket()
 NDIS_STATUS RTMPAllocateNdisPacket(
@@ -420,7 +405,6 @@ VOID RTMPFreeNdisPacket(
 	dev_kfree_skb_any(RTPKT_TO_OSPKT(pPacket));
 }
 
-
 // IRQL = DISPATCH_LEVEL
 // NOTE: we do have an assumption here, that Byte0 and Byte1 always reasid at the same
 //			 scatter gather buffer
@@ -435,7 +419,6 @@ NDIS_STATUS Sniff2BytesFromNdisBuffer(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 void RTMP_QueryPacketInfo(
 	IN  PNDIS_PACKET pPacket,
@@ -487,7 +470,6 @@ void RTMP_QueryNextPacketInfo(
 	}
 }
 
-
 PNDIS_PACKET DuplicatePacket(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket,
@@ -501,14 +483,12 @@ PNDIS_PACKET DuplicatePacket(
 	DataSize = (USHORT) GET_OS_PKT_LEN(pPacket);
 	pData = (PUCHAR) GET_OS_PKT_DATAPTR(pPacket);
 
-
 	skb = skb_clone(RTPKT_TO_OSPKT(pPacket), MEM_ALLOC_FLAG);
 	if (skb)
 	{
 		skb->dev = get_netdev_from_bssid(pAd, FromWhichBSSID);
 		pRetPacket = OSPKT_TO_RTPKT(skb);
 	}
-
 
 	return pRetPacket;
 
@@ -525,7 +505,6 @@ PNDIS_PACKET duplicate_pkt(
 	struct sk_buff	*skb;
 	PNDIS_PACKET	pPacket = NULL;
 
-
 	if ((skb = __dev_alloc_skb(HdrLen + DataSize + 2, MEM_ALLOC_FLAG)) != NULL)
 	{
 		skb_reserve(skb, 2);
@@ -540,14 +519,12 @@ PNDIS_PACKET duplicate_pkt(
 	return pPacket;
 }
 
-
 #define TKIP_TX_MIC_SIZE		8
 PNDIS_PACKET duplicate_pkt_with_TKIP_MIC(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket)
 {
 	struct sk_buff	*skb, *newskb;
-
 
 	skb = RTPKT_TO_OSPKT(pPacket);
 	if (skb_tailroom(skb) < TKIP_TX_MIC_SIZE)
@@ -565,11 +542,7 @@ PNDIS_PACKET duplicate_pkt_with_TKIP_MIC(
 
 	return OSPKT_TO_RTPKT(skb);
 
-
 }
-
-
-
 
 PNDIS_PACKET ClonePacket(
 	IN	PRTMP_ADAPTER	pAd,
@@ -617,7 +590,6 @@ void  update_os_packet_info(
 	pOSPkt->tail = pOSPkt->data + pOSPkt->len;
 }
 
-
 void wlan_802_11_to_802_3_packet(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	RX_BLK			*pRxBlk,
@@ -647,8 +619,6 @@ void wlan_802_11_to_802_3_packet(
 #endif // CONFIG_STA_SUPPORT //
 	}
 
-
-
 void announce_802_3_packet(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket)
@@ -663,9 +633,6 @@ void announce_802_3_packet(
 	ASSERT(pPacket);
 
 	pRxPkt = RTPKT_TO_OSPKT(pPacket);
-
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
 
     /* Push up the protocol stack */
 #ifdef IKANOS_VX_1X0
@@ -703,7 +670,6 @@ void announce_802_3_packet(
 
 #endif // IKANOS_VX_1X0 //
 }
-
 
 PRTMP_SCATTER_GATHER_LIST
 rt_get_sg_list_from_packet(PNDIS_PACKET pPacket, RTMP_SCATTER_GATHER_LIST *sg)
@@ -837,9 +803,6 @@ VOID RTMPSendWirelessEvent(
 #endif  /* WIRELESS_EXT >= 15 */
 }
 
-
-
-
 #ifdef CONFIG_STA_SUPPORT
 void send_monitor_packets(
 	IN	PRTMP_ADAPTER	pAd,
@@ -854,7 +817,6 @@ void send_monitor_packets(
     u_int32_t ralinkrate[256] = {2,4,11,22, 12,18,24,36,48,72,96,  108,   109, 110, 111, 112, 13, 26, 39, 52,78,104, 117, 130, 26, 52, 78,104, 156, 208, 234, 260, 27, 54,81,108,162, 216, 243, 270, // Last 38
 	54, 108, 162, 216, 324, 432, 486, 540,  14, 29, 43, 57, 87, 115, 130, 144, 29, 59,87,115, 173, 230,260, 288, 30, 60,90,120,180,240,270,300,60,120,180,240,360,480,540,600, 0,1,2,3,4,5,6,7,8,9,10,
 	11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80};
-
 
     ASSERT(pRxBlk->pRxPacket);
     if (pRxBlk->DataSize < 10)
@@ -906,7 +868,6 @@ void send_monitor_packets(
         else
             pRxBlk->pData += header_len;
     } //end if
-
 
 	if (pRxBlk->DataSize < pOSPkt->len) {
         skb_trim(pOSPkt,pRxBlk->DataSize);
@@ -998,7 +959,6 @@ void send_monitor_packets(
 	ph->frmlen.len = 4;
 	ph->frmlen.data	= (u_int32_t)pRxBlk->DataSize;
 
-
     pOSPkt->pkt_type = PACKET_OTHERHOST;
     pOSPkt->protocol = eth_type_trans(pOSPkt, pOSPkt->dev);
     pOSPkt->ip_summed = CHECKSUM_NONE;
@@ -1012,8 +972,6 @@ err_free_sk_buff:
 
 }
 #endif // CONFIG_STA_SUPPORT //
-
-
 
 /*******************************************************************************
 
@@ -1039,12 +997,10 @@ int RtmpOSFileClose(RTMP_OS_FD osfd)
 	return 0;
 }
 
-
 void RtmpOSFileSeek(RTMP_OS_FD osfd, int offset)
 {
 	osfd->f_pos = offset;
 }
-
 
 int RtmpOSFileRead(RTMP_OS_FD osfd, char *pDataPtr, int readLen)
 {
@@ -1060,12 +1016,10 @@ int RtmpOSFileRead(RTMP_OS_FD osfd, char *pDataPtr, int readLen)
 	}
 }
 
-
 int RtmpOSFileWrite(RTMP_OS_FD osfd, char *pDataPtr, int writeLen)
 {
 	return osfd->f_op->write(osfd, pDataPtr, (size_t)writeLen, &osfd->f_pos);
 }
-
 
 void RtmpOSFSInfoChange(RTMP_OS_FS_INFO *pOSFSInfo, BOOLEAN bSet)
 {
@@ -1093,8 +1047,6 @@ void RtmpOSFSInfoChange(RTMP_OS_FS_INFO *pOSFSInfo, BOOLEAN bSet)
 #endif
 	}
 }
-
-
 
 /*******************************************************************************
 
@@ -1142,7 +1094,6 @@ NDIS_STATUS RtmpOSTaskKill(
 
 }
 
-
 INT RtmpOSTaskNotifyToExit(
 	IN RTMP_OS_TASK *pTask)
 {
@@ -1153,7 +1104,6 @@ INT RtmpOSTaskNotifyToExit(
 
 	return 0;
 }
-
 
 void RtmpOSTaskCustomize(
 	IN RTMP_OS_TASK *pTask)
@@ -1192,7 +1142,6 @@ void RtmpOSTaskCustomize(
 #endif
 }
 
-
 NDIS_STATUS RtmpOSTaskAttach(
 	IN RTMP_OS_TASK *pTask,
 	IN int (*fn)(void *),
@@ -1226,7 +1175,6 @@ NDIS_STATUS RtmpOSTaskAttach(
 	return status;
 }
 
-
 NDIS_STATUS RtmpOSTaskInit(
 	IN RTMP_OS_TASK *pTask,
 	IN PSTRING		pTaskName,
@@ -1255,7 +1203,6 @@ NDIS_STATUS RtmpOSTaskInit(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 void RTMP_IndicateMediaState(
 	IN	PRTMP_ADAPTER	pAd)
 {
@@ -1272,7 +1219,6 @@ void RTMP_IndicateMediaState(
 	}
 }
 
-
 #if LINUX_VERSION_CODE <= 0x20402	// Red Hat 7.1
 //static struct net_device *alloc_netdev(int sizeof_priv, const char *mask, void (*setup)(struct net_device *)) //sample
 struct net_device *alloc_netdev(
@@ -1282,7 +1228,6 @@ struct net_device *alloc_netdev(
 {
     struct net_device	*dev;
     INT					alloc_size;
-
 
     /* ensure 32-byte alignment of the private area */
     alloc_size = sizeof (*dev) + sizeof_priv + 31;
@@ -1306,7 +1251,6 @@ struct net_device *alloc_netdev(
     return dev;
 }
 #endif // LINUX_VERSION_CODE //
-
 
 int RtmpOSWrielessEventSend(
 	IN RTMP_ADAPTER *pAd,
@@ -1333,7 +1277,6 @@ int RtmpOSWrielessEventSend(
 	return 0;
 }
 
-
 int RtmpOSNetDevAddrSet(
 	IN PNET_DEV pNetDev,
 	IN PUCHAR	pMacAddr)
@@ -1359,8 +1302,6 @@ int RtmpOSNetDevAddrSet(
 	return 0;
 }
 
-
-
 /*
   *	Assign the network dev name for created Ralink WiFi interface.
   */
@@ -1375,7 +1316,6 @@ static int RtmpOSNetDevRequestName(
 	STRING		desiredName[IFNAMSIZ];
 	int	ifNameIdx, prefixLen, slotNameLen;
 	int Status;
-
 
 	prefixLen = strlen(pPrefixStr);
 	ASSERT((prefixLen < IFNAMSIZ));
@@ -1419,13 +1359,11 @@ static int RtmpOSNetDevRequestName(
 	return Status;
 }
 
-
 void RtmpOSNetDevClose(
 	IN PNET_DEV pNetDev)
 {
 	dev_close(pNetDev);
 }
-
 
 void RtmpOSNetDevFree(PNET_DEV pNetDev)
 {
@@ -1437,7 +1375,6 @@ void RtmpOSNetDevFree(PNET_DEV pNetDev)
 	kfree(pNetDev);
 #endif
 }
-
 
 INT RtmpOSNetDevAlloc(
 	IN PNET_DEV *new_dev_p,
@@ -1459,11 +1396,9 @@ INT RtmpOSNetDevAlloc(
 		return NDIS_STATUS_FAILURE;
 }
 
-
 PNET_DEV RtmpOSNetDevGetByName(PNET_DEV pNetDev, PSTRING pDevName)
 {
 	PNET_DEV	pTargetNetDev = NULL;
-
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 
@@ -1494,7 +1429,6 @@ PNET_DEV RtmpOSNetDevGetByName(PNET_DEV pNetDev, PSTRING pDevName)
 	return pTargetNetDev;
 }
 
-
 void RtmpOSNetDeviceRefPut(PNET_DEV pNetDev)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
@@ -1508,7 +1442,6 @@ void RtmpOSNetDeviceRefPut(PNET_DEV pNetDev)
 #endif // LINUX_VERSION_CODE //
 }
 
-
 INT RtmpOSNetDevDestory(
 	IN RTMP_ADAPTER *pAd,
 	IN PNET_DEV		pNetDev)
@@ -1519,12 +1452,10 @@ INT RtmpOSNetDevDestory(
 	return 0;
 }
 
-
 void RtmpOSNetDevDetach(PNET_DEV pNetDev)
 {
 	unregister_netdev(pNetDev);
 }
-
 
 int RtmpOSNetDevAttach(
 	IN PNET_DEV pNetDev,
@@ -1583,7 +1514,6 @@ int RtmpOSNetDevAttach(
 		return NDIS_STATUS_FAILURE;
 }
 
-
 PNET_DEV RtmpOSNetDevCreate(
 	IN RTMP_ADAPTER *pAd,
 	IN INT			devType,
@@ -1594,7 +1524,6 @@ PNET_DEV RtmpOSNetDevCreate(
 	struct net_device *pNetDev = NULL;
 	int status;
 
-
 	/* allocate a new network device */
 	status = RtmpOSNetDevAlloc(&pNetDev, 0 /*privMemSize*/);
 	if (status != NDIS_STATUS_SUCCESS)
@@ -1603,7 +1532,6 @@ PNET_DEV RtmpOSNetDevCreate(
 		DBGPRINT(RT_DEBUG_ERROR, ("Allocate network device fail (%s)...\n", pNamePrefix));
 		return NULL;
 	}
-
 
 	/* find a available interface name, max 32 interfaces */
 	status = RtmpOSNetDevRequestName(pAd, pNetDev, pNamePrefix, devNum);

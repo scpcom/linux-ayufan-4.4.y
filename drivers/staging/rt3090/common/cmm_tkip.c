@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 // Rotation functions on 32 bit values
 #define ROL32( A, n ) \
 	( ((A) << (n)) | ( ((A)>>(32-(n))) & ( (1UL << (n)) - 1 ) ) )
@@ -151,7 +150,6 @@ typedef	struct	PACKED _IV_CONTROL_
 
 	ULONG	IV32;
 }	TKIP_IV, *PTKIP_IV;
-
 
 /*
 	========================================================================
@@ -511,7 +509,6 @@ BOOLEAN	RTMPTkipCompareMICValue(
 	{
 		DBGPRINT_RAW(RT_DEBUG_ERROR, ("RTMPTkipCompareMICValue(): TKIP MIC Error !\n"));  //MIC error.
 
-
 		return (FALSE);
 	}
 	return (TRUE);
@@ -581,7 +578,6 @@ BOOLEAN	RTMPTkipCompareMICValueWithLLC(
 	{
 		DBGPRINT_RAW(RT_DEBUG_ERROR, ("RTMPTkipCompareMICValueWithLLC(): TKIP MIC Error !\n"));  //MIC error.
 
-
 		return (FALSE);
 	}
 	return (TRUE);
@@ -631,8 +627,6 @@ VOID	RTMPCalculateMICValue(
 	if (((*(pSrc + 12) << 8) + *(pSrc + 13)) == 0x8100)
 		vlan_offset = 4;
 
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
 	{
 		RTMPInitMICEngine(
 			pAd,
@@ -642,7 +636,6 @@ VOID	RTMPCalculateMICValue(
 			UserPriority,
 			pKey->TxMic);
 	}
-
 
 	if (pEncap != NULL)
 	{
@@ -667,7 +660,6 @@ VOID	RTMPCalculateMICValue(
 	// Compute the final MIC Value
 	RTMPTkipGetMIC(&pAd->PrivateInfo.Tx);
 }
-
 
 /************************************************************/
 /* tkip_sbox()																*/
@@ -805,7 +797,6 @@ VOID RTMPTkipMixKey(
 	rc4key[14] = ppk5 % 256;
 	rc4key[15] = (ppk5 >> 8) % 256;
 }
-
 
 //
 // TRUE: Success!

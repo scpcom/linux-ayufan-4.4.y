@@ -69,16 +69,9 @@
 #include "rtmp_mcu.h"
 #endif
 
-
-
 #undef AP_WSC_INCLUDED
 #undef STA_WSC_INCLUDED
 #undef WSC_INCLUDED
-
-
-
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
 
 #ifdef BLOCK_NET_IF
 #include "netif_block.h"
@@ -98,13 +91,9 @@
 #endif // RALINK_ATE //
 #endif // RALINK_28xx_QA //
 
-
-
-
 #if defined(AP_WSC_INCLUDED) || defined(STA_WSC_INCLUDED)
 #define WSC_INCLUDED
 #endif
-
 
 #ifdef CONFIG_STA_SUPPORT
 #ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
@@ -115,12 +104,8 @@
 
 #endif // CONFIG_STA_SUPPORT //
 
-
-
 #ifdef IKANOS_VX_1X0
 #include "vr_ikans.h"
 #endif // IKANOS_VX_1X0 //
-
-
 
 #endif	// __RT_CONFIG_H__

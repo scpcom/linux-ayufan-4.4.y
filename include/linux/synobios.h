@@ -2,7 +2,10 @@
 #ifndef __SYNOBIOS_OEM_H_
 #define __SYNOBIOS_OEM_H_
 
+#ifndef SYNO_HI_3535
 #include <linux/syno.h>
+#endif
+
 #ifdef MY_ABC_HERE
 #include <linux/string.h>
 extern char gszSynoHWVersion[];
@@ -208,6 +211,10 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_ERROR_FS_BTRFS 0x2d00
 #endif
 
+#ifdef MY_DEF_HERE
+#define SYNO_EVENT_DSIK_POWER_SHORT_BREAK 0x2e00
+#endif /* MY_DEF_HERE */
+
 #define SYNO_EVENT_BACK_TEMP_CRITICAL   0x4004
 #define SYNO_EVENT_BACK_TEMP_HIGH       0x4003
 #define SYNO_EVENT_BACK_TEMP_HEAT       0x4002
@@ -239,7 +246,6 @@ typedef struct _SynoMsgPkt {
 #define DRIVER_CLASS_FXP                0x00
 #define DRIVER_CLASS_EM                 0x10
 #define DRIVER_CLASS_RL                 0x20
-
 
 /*************************************************************************
  * Ioctl definitions
@@ -381,6 +387,12 @@ typedef struct _tag_DiskLedStatus {
     int diskno;
     SYNO_DISK_LED status;
 } DISKLEDSTATUS;
+
+typedef enum {
+	AHA_LED_OFF = 0,
+	AHA_LED_GREEN_SOLID,
+	AHA_LED_ORANGE_SOLID,
+} SYNO_AHA_LED;
 
 typedef	enum {
 	FAN_STATUS_UNKNOWN = -1,
@@ -679,6 +691,7 @@ typedef enum {
 	MICROP_ID_RS3614rpxs = 0x5C, /* 'W' RS3614rpxs */
 	MICROP_ID_RC18015xsp = 0x4d, /* 'M' Temporarily using the same microp ID as 10613 */
 	MICROP_ID_RS18015xsp = 0x4d, /* 'M' */
+	MICROP_ID_RR36015xsppp = 0x4d, /* 'M' */
 	MICROP_ID_DS2414xs = 0x57, /* 'W' DS2414xs */
 	MICROP_ID_RS3415xsp = 0x60, /* '`' RS3415xs+ cheese cake*/
 	MICROP_ID_3615xs = 0x5D, /* ']' DS3615xs*/
@@ -701,6 +714,7 @@ typedef enum {
 
 typedef enum {
 	CPU_UNKNOWN,
+	CPU_E5_2609v3,
 	CPU_E3_1230v2,
 	CPU_I3_2100,
 	CPU_I3_4130,
@@ -720,12 +734,15 @@ typedef enum {
 	CPU_8533e,
 	CPU_P1022,
 	CPU_C2000,
+	CPU_LS1024,
 	CPU_AL212,
 	CPU_AL314,
 	CPU_AL514,
 	CPU_C2538,
 	CPU_BCM58622,
 	CPU_J1800,
+	CPU_HI3535,
+	CPU_H410
 } CPU_ARCH_INFO_T;
 
 typedef enum {
@@ -735,6 +752,9 @@ typedef enum {
 	CRYPTO_AXP,
 	CRYPTO_COMCERTO2K,
 	CRYPTO_ALPINE,
+	CRYPTO_QORIQ,
+	CRYPTO_853X,
+	CRYPTO_628X
 } CRYPTO_HW_INFO_T;
 
 /**
@@ -875,6 +895,7 @@ typedef struct {
 #define HW_DS112slim   "DS112slim"     //"DS112slim"
 #define HW_DS413jv10   "DS413jv10"     //"DS413jv10"
 #define HW_DS414jv10   "DS414jv10"     //"DS414jv10"
+#define HW_DS415jv10   "DS415jv10"     //"DS415jv10"
 #define HW_DS215airv10   "DS215airv10"     //"DS215airv10"
 #define HW_DS213pv10   "DS213pv10"     //"DS213pv10"
 #define HW_DS213airv10 "DS213airv10"   //"DS213airv10"
@@ -895,6 +916,7 @@ typedef struct {
 #define HW_DS114p      "DS114+"      //"DS114+"
 #define HW_RC18015xsp  "RC18015xs+"    //"RC18015xs+"
 #define HW_RS18015xsp  "RS18015xs+"    //"RS18015xs+"
+#define HW_RR36015xsppp  "RR36015xs+++"    //"RR36015xs+++"
 #define HW_DS714v10    "DS714v10"
 #define HW_RS814p      "RS814+"        //"RS814+"
 #define HW_RS814rpp    "RS814rp+"      //"RS814rp+"
@@ -912,11 +934,14 @@ typedef struct {
 #define HW_RS815p      "RS815+"        //"RS815+"
 #define HW_RS815rpp    "RS815rp+"      //"RS815rp+"
 #define HW_DS215router	"DS215router"      //"DS215router"
-#define HW_DS815	   "DS815"        //"DS815"
+#define HW_RS815	   "RS815"        //"RS815"
 #define HW_DS1515       "DS1515"
 #define HW_DS715p       "DS715+"
 #define HW_DS215p       "DS215+"
 #define HW_DS415        "DS415"
+#define HW_RS2415p     "RS2415+"       //"RS2415+"
+#define HW_RS2415rpp   "RS2415rp+"     //"RS2415rp+"
+#define HW_DS216j		"DS216j"
 #define HW_UNKNOWN     "DSUnknown"
 
 typedef struct _tag_HwCapability {
@@ -1020,6 +1045,7 @@ typedef enum {
 	MODEL_DS112slim,
 	MODEL_DS413j,	//90
 	MODEL_DS414j,
+	MODEL_DS415j,
 	MODEL_DS215air,
 	MODEL_DS213p,
 	MODEL_DS213air,
@@ -1063,17 +1089,21 @@ typedef enum {
 	MODEL_DS115,
 	MODEL_RS815,
 	MODEL_RS18015xsp,
+	MODEL_VS360hd,
 	MODEL_DS1515,
 	MODEL_DS215p,
 	MODEL_DS415,
+	MODEL_RR36015xsppp,
+	MODEL_RS2415p,
+	MODEL_RS2415rpp,
+	MODEL_DS216j,
 	MODEL_INVALID
 } PRODUCT_MODEL;
 
 typedef struct _tag_SYNO_MODEL_NAME {
 	PRODUCT_MODEL	model;
 	char*			szHwVersion;
-} MY_ABC_HERE;
-
+} SYNO_MODEL_NAME;
 
 typedef struct _tag_CPLDReg {
     unsigned char diskledctrl;
@@ -1101,7 +1131,6 @@ typedef enum {
     NET_LINK = 0,
 	NET_NOLINK,
 } SYNO_NET_LINK_EVENT;
-
 
 /**
  * from first 0 bit to 6th bit is signature
@@ -1210,19 +1239,22 @@ typedef struct _tag_SYNO_CPU_INFO {
 #define SYNOIO_SET_BUZZER_CLEAR	_IOWR(SYNOBIOS_IOC_MAGIC, 42, unsigned char)
 #define SYNOIO_WRITE_MEM		_IOWR(SYNOBIOS_IOC_MAGIC, 43, SYNO_MEM_ACCESS)
 #define SYNOIO_READ_MEM			_IOWR(SYNOBIOS_IOC_MAGIC, 44, SYNO_MEM_ACCESS)
-
+#define SYNOIO_SET_AHA_LED     _IOWR(SYNOBIOS_IOC_MAGIC, 45, SYNO_AHA_LED)
 
 #define SYNOIO_MANUTIL_MODE       _IOWR(SYNOBIOS_IOC_MAGIC, 128, int)
 #define SYNOIO_RECORD_EVENT       _IOWR(SYNOBIOS_IOC_MAGIC, 129, int)
 
+#ifdef SYNO_HI_3535
+#define SYNOIO_GPIO_PIN_READ      _IOWR(SYNOBIOS_IOC_MAGIC, 205, GPIO_PIN)
+#define SYNOIO_GPIO_PIN_WRITE     _IOWR(SYNOBIOS_IOC_MAGIC, 206, GPIO_PIN)
+#else
 #define SYNOIO_GPIO_PIN_READ      _IOWR(SYNOBIOS_IOC_MAGIC, 205, int)
 #define SYNOIO_GPIO_PIN_WRITE     _IOWR(SYNOBIOS_IOC_MAGIC, 206, int)
-
+#endif
 
 #define SYNOIO_RTC_READ           _IOWR(SYNOBIOS_IOC_MAGIC, 208, struct _SynoRtcPkt)
 #define SYNOIO_RTC_READ_3         _IOWR(SYNOBIOS_IOC_MAGIC, 209, struct _SynoRtcPkt)
 #define SYNOIO_SDA_SDL_READ       _IOWR(SYNOBIOS_IOC_MAGIC, 210, int)
-
 
 #ifdef SYNO_BAD_SECTOR_DISK_DEBUG
 #define DISK_BADSECTOR_ON      _IOWR(SYNOBIOS_IOC_MAGIC, 211, int)
@@ -1391,7 +1423,6 @@ typedef struct _tag_SYNO_CPU_INFO {
 #define POWER_NUM_MAX     16
 #define BATTERY_NUM_MAX   16
 
-
 /*************************************************************************
  * SYNOHWWxternalControl message Id
  ************************************************************************/
@@ -1519,10 +1550,11 @@ struct synobios_ops {
 	int		(*read_memory)(SYNO_MEM_ACCESS*);
 	int		(*write_memory)(SYNO_MEM_ACCESS*);
 	void		(*get_cpu_info)(SYNO_CPU_INFO*, const unsigned int);
+	int     (*set_aha_led)(struct synobios_ops *, SYNO_AHA_LED);
 };
 
 /* TODO: Because user space also need this define, so we define them here.
- * But userspace didn't have a common define like SYNO_SATA_PM_DEVICE_GPIO include
+ * But userspace didn't have a common define like MY_ABC_HERE include
  * kernel space. So we can't define it inside some define */
 #define EBOX_GPIO_KEY			"gpio"
 #define EBOX_INFO_DEV_LIST_KEY	"syno_device_list"
@@ -1568,7 +1600,6 @@ struct synobios_ops {
 /**************************/
 #define IXP425
 
-
 PRODUCT_MODEL synobios_getmodel(void);
 #ifdef MY_ABC_HERE
 static inline int syno_is_hw_version(const char *hw_version)
@@ -1585,4 +1616,3 @@ static inline int syno_is_hw_version(const char *hw_version)
 }
 #endif
 #endif
-

@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 // Reset the RFIC setting to new series
 RTMP_RF_REGS RF2850RegTable[] = {
 //		ch	 R1		 R2		 R3(TX0~4=0) R4
@@ -143,7 +142,6 @@ FREQUENCY_ITEM FreqItems3020[] =
 	{14,   248,	 2,  4},
 };
 UCHAR	NUM_OF_3020_CHNL = (sizeof(FreqItems3020) / sizeof(FREQUENCY_ITEM));
-
 
 VOID AsicUpdateAutoFallBackTable(
 	IN	PRTMP_ADAPTER	pAd,
@@ -526,7 +524,6 @@ VOID	AsicUpdateProtect(
 }
 }
 
-
 /*
 	==========================================================================
 	Description:
@@ -829,7 +826,6 @@ VOID AsicSwitchChannel(
 			TxPinCfg &= 0xFFFFF3FF;
 		}
 
-
 		RTMP_IO_WRITE32(pAd, TX_PIN_CFG, TxPinCfg);
 
 #if defined(RT3090) || defined(RT3390)
@@ -890,7 +886,6 @@ VOID AsicSwitchChannel(
 		{
 			TxPinCfg &= 0xFFFFF3FF;
 		}
-
 
 		RTMP_IO_WRITE32(pAd, TX_PIN_CFG, TxPinCfg);
 
@@ -1017,7 +1012,6 @@ VOID	AsicAntennaSelect(
 			0: means DPDT, set BBP R4 bit 5 to 1
 			1: means SPDT, set BBP R4 bit 5 to 0
 
-
 	========================================================================
 */
 VOID	AsicAntennaSetting(
@@ -1068,7 +1062,6 @@ VOID AsicAdjustTxPower(
 #ifdef CARRIER_SENSE_NEW_ALGO
 	unsigned long flags; //KH Add to Fix PCIe Power-Saving bug
 #endif // CARRIER_SENSE_NEW_ALGO //
-
 
 #ifdef CARRIER_SENSE_NEW_ALGO
 	//KH Add to Fix PCIe Power-Saving bug<--
@@ -1423,7 +1416,6 @@ VOID AsicAdjustTxPower(
 
 }
 
-
 #ifdef CONFIG_STA_SUPPORT
 VOID AsicResetBBPAgent(
 IN PRTMP_ADAPTER pAd)
@@ -1486,7 +1478,6 @@ VOID AsicForceWakeup(
     RTMP_STA_FORCE_WAKEUP(pAd, bFromTx);
 }
 #endif // CONFIG_STA_SUPPORT //
-
 
 /*
 	==========================================================================
@@ -1592,7 +1583,6 @@ VOID AsicDisableRDG(
 {
 	TX_LINK_CFG_STRUC	TxLinkCfg;
 	UINT32				Data = 0;
-
 
 	RTMP_IO_READ32(pAd, TX_LINK_CFG, &TxLinkCfg.word);
 	TxLinkCfg.field.TxRDGEn = 0;
@@ -1724,7 +1714,6 @@ VOID AsicEnableIbssSync(
 		ptr +=4;
 	}
 #endif // RTMP_MAC_PCI //
-
 
 	//
 	// For Wi-Fi faily generated beacons between participating stations.
@@ -1890,11 +1879,6 @@ VOID AsicSetEdcaParm(
 		Ac2Cfg.field.Cwmax = pEdcaParm->Cwmax[QID_AC_VI];
 		}
 		Ac2Cfg.field.Aifsn = pEdcaParm->Aifsn[QID_AC_VI] + 1;
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
-
-#ifdef INF_AMAZON_SE
-#endif // INF_AMAZON_SE //
 
 #ifdef CONFIG_STA_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -1947,7 +1931,6 @@ VOID AsicSetEdcaParm(
 		RTMP_IO_WRITE32(pAd, EDCA_AC2_CFG, Ac2Cfg.word);
 		RTMP_IO_WRITE32(pAd, EDCA_AC3_CFG, Ac3Cfg.word);
 
-
 		//========================================================
 		//      DMA Register has a copy too.
 		//========================================================
@@ -1980,8 +1963,6 @@ VOID AsicSetEdcaParm(
 		AifsnCsr.field.Aifsn0 = Ac0Cfg.field.Aifsn; //pEdcaParm->Aifsn[QID_AC_BE];
 		AifsnCsr.field.Aifsn1 = Ac1Cfg.field.Aifsn; //pEdcaParm->Aifsn[QID_AC_BK];
 		AifsnCsr.field.Aifsn2 = Ac2Cfg.field.Aifsn; //pEdcaParm->Aifsn[QID_AC_VI];
-#ifdef INF_AMAZON_SE
-#endif // INF_AMAZON_SE //
 
 #ifdef CONFIG_STA_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -2203,7 +2184,6 @@ VOID AsicAddSharedKeyEntry(
 	}
 #endif // RTMP_MAC_PCI //
 
-
 	//
 	// Update cipher algorithm. WSTA always use BSS0
 	//
@@ -2277,7 +2257,6 @@ VOID AsicRemoveSharedKeyEntry(
 
 }
 
-
 VOID AsicUpdateWCIDAttribute(
 	IN PRTMP_ADAPTER pAd,
 	IN USHORT		WCID,
@@ -2324,7 +2303,6 @@ VOID AsicUpdateRxWCIDTable(
 	Addr = pAddr[4] + (pAddr[5] << 8);
 	RTMP_IO_WRITE32(pAd, offset + 4, Addr);
 }
-
 
 /*
     ========================================================================
@@ -2425,7 +2403,6 @@ VOID AsicAddKeyEntry(
 	}
 #endif // RTMP_MAC_PCI //
 
-
 	//
 	// 4.) Modify IV/EIV if needs
 	//     This will force Asic to use this key ID by setting IV.
@@ -2493,7 +2470,6 @@ VOID AsicAddKeyEntry(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<== AsicAddKeyEntry\n"));
 }
-
 
 /*
 	========================================================================
@@ -2600,13 +2576,11 @@ BOOLEAN AsicSendCommandToMcu(
 	IN UCHAR		 Arg1)
 {
 
-
 	if (pAd->chipOps.sendCommandToMcu)
 		pAd->chipOps.sendCommandToMcu(pAd, Command, Token, Arg0, Arg1);
 
 	return TRUE;
 }
-
 
 VOID AsicSetRxAnt(
 	IN PRTMP_ADAPTER	pAd,
@@ -2621,7 +2595,6 @@ VOID AsicSetRxAnt(
 #endif // RT30xx //
 #endif // RT33xx //
 }
-
 
 VOID AsicTurnOffRFClk(
 	IN PRTMP_ADAPTER pAd,
@@ -2681,7 +2654,6 @@ VOID AsicTurnOffRFClk(
 		}
 	}
 }
-
 
 VOID AsicTurnOnRFClk(
 	IN PRTMP_ADAPTER pAd,

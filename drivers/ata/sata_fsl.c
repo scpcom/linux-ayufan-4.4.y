@@ -987,10 +987,6 @@ static int sata_fsl_softreset(struct ata_link *link, unsigned int *class,
 	return 0;
 
 err:
-#ifdef SYNO_SATA_COMPATIBILITY
-	ata_link_printk(link, KERN_ERR, "softreset failed, set srst fail flag\n");
-	link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;
-#endif
 	return -EIO;
 }
 
@@ -1043,7 +1039,6 @@ static void sata_fsl_error_intr(struct ata_port *ap)
 	DPRINTK("error_intr,hStat=0x%x,CE=0x%x,DE =0x%x,SErr=0x%x\n",
 		hstatus, cereg, ioread32(hcr_base + DE), SError);
 
-
 	/* handle fatal errors */
 	if (hstatus & FATAL_ERROR_DECODE) {
 		ehi->err_mask |= AC_ERR_ATA_BUS;
@@ -1057,19 +1052,7 @@ static void sata_fsl_error_intr(struct ata_port *ap)
 		sata_async_notification(ap);
 
 	/* Handle PHYRDY change notification */
-#ifdef SYNO_SATA_COMPATIBILITY
-	if ((hstatus & INT_ON_PHYRDY_CHG) ||
-		(ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
-		if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR) {
-			ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_INTR;
-			DBGMESG("ata%u: clear ATA_SYNO_FLAG_FORCE_INTR\n", ap->print_id);
-		} else {
-			ap->iDetectStat = 1;
-			DBGMESG("ata%u: set detect stat check\n", ap->print_id);
-		}
-#else
 	if (hstatus & INT_ON_PHYRDY_CHG) {
-#endif
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
@@ -1175,11 +1158,7 @@ static void sata_fsl_host_intr(struct ata_port *ap)
 		sata_fsl_error_intr(ap);
 	}
 
-#ifdef SYNO_SATA_COMPATIBILITY
-	if (unlikely(hstatus & INT_ON_ERROR) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
-#else
 	if (unlikely(hstatus & INT_ON_ERROR)) {
-#endif
 		DPRINTK("error interrupt!!\n");
 		sata_fsl_error_intr(ap);
 		return;
@@ -1332,9 +1311,6 @@ static struct device_attribute *fsl_shost_attrs[] = {
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
-#ifdef SYNO_SATA_COMPATIBILITY
-	&dev_attr_syno_port_thaw,
-#endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
 #endif
@@ -1408,9 +1384,6 @@ static struct ata_port_operations sata_fsl_ops = {
 
 	.pmp_attach = sata_fsl_pmp_attach,
 	.pmp_detach = sata_fsl_pmp_detach,
-#ifdef SYNO_SATA_COMPATIBILITY
-	.syno_force_intr	= sata_fsl_host_intr,
-#endif
 };
 
 static const struct ata_port_info sata_fsl_port_info[] = {

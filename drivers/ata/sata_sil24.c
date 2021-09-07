@@ -54,7 +54,6 @@ struct sil24_sge {
 	__le32	flags;
 };
 
-
 enum {
 	SIL24_HOST_BAR		= 0,
 	SIL24_PORT_BAR		= 2,
@@ -361,10 +360,6 @@ static int sil24_pci_device_resume(struct pci_dev *pdev);
 static int sil24_port_resume(struct ata_port *ap);
 #endif
 
-#ifdef SYNO_SATA_COMPATIBILITY
-static inline void sil24_host_intr(struct ata_port *ap);
-#endif
-
 static const struct pci_device_id sil24_pci_tbl[] = {
 	{ PCI_VDEVICE(CMD, 0x3124), BID_SIL3124 },
 	{ PCI_VDEVICE(INTEL, 0x3124), BID_SIL3124 },
@@ -393,9 +388,6 @@ static struct device_attribute *sil24_shost_attrs[] = {
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
-#ifdef SYNO_SATA_COMPATIBILITY
-	&dev_attr_syno_port_thaw,
-#endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
 #endif
@@ -439,9 +431,6 @@ static struct ata_port_operations sil24_ops = {
 	.port_start		= sil24_port_start,
 #ifdef CONFIG_PM
 	.port_resume		= sil24_port_resume,
-#endif
-#ifdef SYNO_SATA_COMPATIBILITY
-	.syno_force_intr	= sil24_host_intr,
 #endif
 };
 
@@ -704,15 +693,6 @@ retry:
 	ata_tf_init(link->device, &tf);	/* doesn't really matter */
 	rc = sil24_exec_polled_cmd(ap, pmp, &tf, 0, PRB_CTRL_SRST,
 				   timeout_msec);
-#ifdef SYNO_SATA_COMPATIBILITY
-	if (0 < ap->iFakeError) {
-		ata_link_printk(link, KERN_ERR, "generate fake softreset error, Fake count %d\n", ap->iFakeError);
-		if (SYNO_ERROR_MAX > ap->iFakeError) {
-			--(ap->iFakeError);
-		}
-		rc = -EBUSY;
-	}
-#endif
 	if (rc == -EBUSY) {
 		reason = "timeout";
 		goto err;
@@ -743,10 +723,6 @@ retry:
 
  err:
 	ata_link_printk(link, KERN_ERR, "softreset failed (%s)\n", reason);
-#ifdef SYNO_SATA_COMPATIBILITY
-	ata_link_printk(link, KERN_ERR, "softreset failed, set srst fail flag\n");
-	link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;
-#endif
 	return -EIO;
 }
 
@@ -1076,7 +1052,6 @@ static void sil24_error_intr(struct ata_port *ap)
 	ehi = &link->eh_info;
 	ata_ehi_clear_desc(ehi);
 
-
 	ata_ehi_push_desc(ehi, "irq_stat 0x%08x", irq_stat);
 
 	if (irq_stat & PORT_IRQ_SDB_NOTIFY) {
@@ -1084,19 +1059,7 @@ static void sil24_error_intr(struct ata_port *ap)
 		sata_async_notification(ap);
 	}
 
-#ifdef SYNO_SATA_COMPATIBILITY
-	if ((irq_stat & (PORT_IRQ_PHYRDY_CHG | PORT_IRQ_DEV_XCHG)) ||
-		(ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
-		if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR) {
-			ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_INTR;
-			DBGMESG("ata%u: clear ATA_SYNO_FLAG_FORCE_INTR\n", ap->print_id);
-		} else {
-			ap->iDetectStat = 1;
-			DBGMESG("ata%u: set detect stat check\n", ap->print_id);
-		}
-#else
 	if (irq_stat & (PORT_IRQ_PHYRDY_CHG | PORT_IRQ_DEV_XCHG)) {
-#endif
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
@@ -1221,11 +1184,7 @@ static inline void sil24_host_intr(struct ata_port *ap)
 
 	slot_stat = readl(port + PORT_SLOT_STAT);
 
-#ifdef SYNO_SATA_COMPATIBILITY
-	if (unlikely(slot_stat & HOST_SSTAT_ATTN) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
-#else
 	if (unlikely(slot_stat & HOST_SSTAT_ATTN)) {
-#endif
 		sil24_error_intr(ap);
 		return;
 	}
@@ -1351,7 +1310,6 @@ static void sil24_init_controller(struct ata_host *host)
 	for (i = 0; i < host->n_ports; i++) {
 		struct ata_port *ap = host->ports[i];
 		void __iomem *port = sil24_port_base(ap);
-
 
 		/* Initial PHY setting */
 		writel(0x20c, port + PORT_PHY_CFG);

@@ -20,6 +20,14 @@
 #include <linux/netfilter_bridge.h>
 #include "br_private.h"
 
+#ifdef MY_ABC_HERE
+extern int gSynoNetfilterStatus;
+#endif
+
+#ifdef MY_ABC_HERE
+extern int gSynoTopologyMode;
+#endif
+
 /* Bridge group multicast address 802.1d (pg 51). */
 const u8 br_group_address[ETH_ALEN] = { 0x01, 0x80, 0xc2, 0x00, 0x00, 0x00 };
 
@@ -124,6 +132,13 @@ struct sk_buff *br_handle_frame(struct net_bridge_port *p, struct sk_buff *skb)
 {
 	const unsigned char *dest = eth_hdr(skb)->h_dest;
 	int (*rhook)(struct sk_buff *skb);
+
+#ifdef MY_ABC_HERE
+	if (!gSynoNetfilterStatus && (2 == gSynoTopologyMode) && !compare_ether_addr(skb->dev->dev_addr, eth_hdr(skb)->h_dest)) {
+		skb->pkt_type = PACKET_HOST;
+		return br_handle_frame_finish(skb);
+	}
+#endif
 
 	if (!is_valid_ether_addr(eth_hdr(skb)->h_source))
 		goto drop;

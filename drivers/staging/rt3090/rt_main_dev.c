@@ -37,7 +37,6 @@
 
 #include "rt_config.h"
 
-
 #ifdef CONFIG_APSTA_MIXED_SUPPORT
 UINT32 CW_MAX_IN_BITS;
 #endif // CONFIG_APSTA_MIXED_SUPPORT //
@@ -55,7 +54,6 @@ module_param (mac, charp, 0);
 #endif
 MODULE_PARM_DESC (mac, "rt28xx: wireless mac addr");
 
-
 /*---------------------------------------------------------------------*/
 /* Prototypes of Functions Used                                        */
 /*---------------------------------------------------------------------*/
@@ -66,7 +64,6 @@ int rt28xx_open(struct net_device *net_dev);
 
 // private function prototype
 static INT rt28xx_send_packets(IN struct sk_buff *skb_p, IN struct net_device *net_dev);
-
 
 static struct net_device_stats *RT28xx_get_ether_stats(
     IN  struct net_device *net_dev);
@@ -101,9 +98,6 @@ int MainVirtualIF_close(IN struct net_device *net_dev)
 
 	netif_carrier_off(pAd->net_dev);
 	netif_stop_queue(pAd->net_dev);
-
-
-
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -177,7 +171,6 @@ int MainVirtualIF_close(IN struct net_device *net_dev)
 		RtmpOSWrielessEventSend(pAd, IWEVCUSTOM, RT_INTERFACE_DOWN, NULL, NULL, 0);
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
 #endif // WPA_SUPPLICANT_SUPPORT //
-
 
 	}
 #endif // CONFIG_STA_SUPPORT //
@@ -257,15 +250,12 @@ int rt28xx_close(IN PNET_DEV dev)
 	BOOLEAN			Cancelled;
 	UINT32			i = 0;
 
-
 	DBGPRINT(RT_DEBUG_TRACE, ("===> rt28xx_close\n"));
 
 	Cancelled = FALSE;
 	// Sanity check for pAd
 	if (pAd == NULL)
 		return 0; // close ok
-
-
 
 #ifdef WDS_SUPPORT
 	WdsDown(pAd);
@@ -285,7 +275,6 @@ int rt28xx_close(IN PNET_DEV dev)
 		    AsicForceWakeup(pAd, TRUE);
         }
 
-
 		MlmeRadioOff(pAd);
 #ifdef RTMP_MAC_PCI
 		pAd->bPCIclkOff = FALSE;
@@ -304,14 +293,11 @@ int rt28xx_close(IN PNET_DEV dev)
 		}
 	}
 
-
-
 	// Stop Mlme state machine
 	MlmeHalt(pAd);
 
 	// Close net tasklets
 	RtmpNetTaskExit(pAd);
-
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -320,10 +306,8 @@ int rt28xx_close(IN PNET_DEV dev)
 	}
 #endif // CONFIG_STA_SUPPORT //
 
-
 	MeasureReqTabExit(pAd);
 	TpcReqTabExit(pAd);
-
 
 	// Close kernel threads
 	RtmpMgmtTaskExit(pAd);
@@ -343,7 +327,6 @@ int rt28xx_close(IN PNET_DEV dev)
 			// put to radio off to save power when driver unload.  After radiooff, can't write /read register.  So need to finish all
 			// register access before Radio off.
 
-
 			brc=RT28xxPciAsicRadioOff(pAd, RTMP_HALT, 0);
 
 //In  solution 3 of 3090F, the bPCIclkOff will be set to TRUE after calling RT28xxPciAsicRadioOff
@@ -354,7 +337,6 @@ int rt28xx_close(IN PNET_DEV dev)
 				DBGPRINT(RT_DEBUG_ERROR,("%s call RT28xxPciAsicRadioOff fail !!\n", __FUNCTION__));
 			}
 	}
-
 
 /*
 	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_ACTIVE))
@@ -387,9 +369,6 @@ int rt28xx_close(IN PNET_DEV dev)
 	ba_reordering_resource_release(pAd);
 #endif // DOT11_N_SUPPORT //
 
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
-
 	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_START_UP);
 
 /*+++Modify by woody to solve the bulk fail+++*/
@@ -402,7 +381,6 @@ int rt28xx_close(IN PNET_DEV dev)
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt28xx_close\n"));
 	return 0; // close ok
 } /* End of rt28xx_close */
-
 
 /*
 ========================================================================
@@ -425,7 +403,6 @@ int rt28xx_open(IN PNET_DEV dev)
 	PRTMP_ADAPTER pAd = RTMP_OS_NETDEV_GET_PRIV(net_dev);
 	int retval = 0;
 	//POS_COOKIE pObj;
-
 
 	// Sanity check for pAd
 	if (pAd == NULL)
@@ -471,9 +448,6 @@ int rt28xx_open(IN PNET_DEV dev)
 	if (rt28xx_init(pAd, mac, hostname) == FALSE)
 		goto err;
 
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
-
 	// Enable Interrupt
 	RTMP_IRQ_ENABLE(pAd);
 
@@ -499,7 +473,6 @@ int rt28xx_open(IN PNET_DEV dev)
 //	RTMP_IO_WRITE32(pAd, XIFS_TIME_CFG, reg);
 
 	}
-
 
 #ifdef CONFIG_STA_SUPPORT
 #ifdef RTMP_MAC_PCI
@@ -554,8 +527,6 @@ PNET_DEV RtmpPhyNetDevInit(
 	//net_dev->priv = (PVOID)pAd;
 	pAd->net_dev = net_dev;
 
-
-
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)
 	SET_MODULE_OWNER(net_dev);
 #endif
@@ -565,7 +536,6 @@ PNET_DEV RtmpPhyNetDevInit(
 	return net_dev;
 
 }
-
 
 /*
 ========================================================================
@@ -621,8 +591,6 @@ int rt28xx_packet_xmit(struct sk_buff *skb)
 		goto done;
 	}
 
-
-
 	RTMP_SET_PACKET_5VT(pPacket, 0);
 //	MiniportMMRequest(pAd, pkt->data, pkt->len);
 #ifdef CONFIG_5VT_ENHANCE
@@ -630,8 +598,6 @@ int rt28xx_packet_xmit(struct sk_buff *skb)
 		RTMP_SET_PACKET_5VT(pPacket, 1);
     }
 #endif
-
-
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -647,7 +613,6 @@ done:
 
 	return status;
 }
-
 
 /*
 ========================================================================
@@ -683,15 +648,12 @@ static int rt28xx_send_packets(
 	return rt28xx_packet_xmit(skb_p);
 }
 
-
 #if WIRELESS_EXT >= 12
 // This function will be called when query /proc
 struct iw_statistics *rt28xx_get_wireless_stats(
     IN struct net_device *net_dev)
 {
 	PRTMP_ADAPTER pAd = RTMP_OS_NETDEV_GET_PRIV(net_dev);
-
-
 
 	DBGPRINT(RT_DEBUG_TRACE, ("rt28xx_get_wireless_stats --->\n"));
 
@@ -732,7 +694,6 @@ struct iw_statistics *rt28xx_get_wireless_stats(
 }
 #endif // WIRELESS_EXT //
 
-
 void tbtt_tasklet(unsigned long data)
 {
 //#define MAX_TX_IN_TBTT		(16)
@@ -755,7 +716,6 @@ INT rt28xx_ioctl(
 		return -ENETDOWN;
 	}
 
-
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
@@ -765,7 +725,6 @@ INT rt28xx_ioctl(
 
 	return ret;
 }
-
 
 /*
     ========================================================================
@@ -833,13 +792,10 @@ static struct net_device_stats *RT28xx_get_ether_stats(
 	return NULL;
 }
 
-
 BOOLEAN RtmpPhyNetDevExit(
 	IN RTMP_ADAPTER *pAd,
 	IN PNET_DEV net_dev)
 {
-
-
 
 #ifdef INF_AMAZON_PPA
 	if (ppa_hook_directpath_register_dev_fn && pAd->PPAEnable==TRUE)
@@ -861,7 +817,6 @@ BOOLEAN RtmpPhyNetDevExit(
 	return TRUE;
 
 }
-
 
 /*
 ========================================================================

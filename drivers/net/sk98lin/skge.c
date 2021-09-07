@@ -98,7 +98,6 @@
 /* for debuging on x86 only */
 /* #define BREAKPOINT() asm(" int $3"); */
 
-
 /* Set blink mode*/
 #define OEM_CONFIG_VALUE (	SK_ACT_LED_BLINK | \
 				SK_DUP_LED_NORMAL | \
@@ -107,7 +106,6 @@
 #define CLEAR_AND_START_RX(Port) SK_OUT8(pAC->IoBase, RxQueueAddr[(Port)]+Q_CSR, CSR_START | CSR_IRQ_CL_F)
 #define START_RX(Port) SK_OUT8(pAC->IoBase, RxQueueAddr[(Port)]+Q_CSR, CSR_START)
 #define CLEAR_TX_IRQ(Port,Prio) SK_OUT8(pAC->IoBase, TxQueueAddr[(Port)][(Prio)]+Q_CSR, CSR_IRQ_CL_F)
-
 
 /*******************************************************************************
  *
@@ -277,8 +275,6 @@ static int is_closed = 0;
 static struct proc_dir_entry	*pSkRootDir;
 #endif
 
-
-
 #ifdef ENABLE_FUTURE_ETH
 static struct ethtool_ops sk98lin_ethtool_ops = {
 	.get_sg			= ethtool_op_get_sg,
@@ -333,7 +329,6 @@ static struct pci_driver sk98lin_driver = {
 #endif
 };
 
-
 static struct net_device_ops sk98lin_netdev_ops = {
 	.ndo_open		= SkGeOpen,
 	.ndo_stop		= SkGeClose,
@@ -368,8 +363,6 @@ static int __devinit sk98lin_init_device(struct pci_dev *pdev,
 	DEV_NET			*pNet = NULL;
 	struct SK_NET_DEVICE *dev = NULL;
 	int			retval;
-#ifdef CONFIG_PROC_FS
-#endif
 	int			pci_using_dac;
 
 	retval = pci_enable_device(pdev);
@@ -398,7 +391,6 @@ static int __devinit sk98lin_init_device(struct pci_dev *pdev,
 			return retval;
 		}
 	}
-
 
 	if ((dev = alloc_etherdev(sizeof(DEV_NET))) == NULL) {
 		printk(KERN_ERR "Unable to allocate etherdev "
@@ -652,7 +644,6 @@ static int __devinit sk98lin_init_device(struct pci_dev *pdev,
 		netif_stop_queue(dev);
 		netif_carrier_off(dev);
 
-
 #ifdef CONFIG_PROC_FS
 	/* No further proc file creation here */
 #endif
@@ -669,8 +660,6 @@ static int __devinit sk98lin_init_device(struct pci_dev *pdev,
 	sk98lin_max_boards_found = sk98lin_boards_found;
 	return 0;
 }
-
-
 
 /*****************************************************************************
  *
@@ -897,7 +886,6 @@ DEV_NET *pNet)  /* holds the pointer to adapter control context */
 	}
 }
 
-
 /*****************************************************************************
 *
 * CheckRXCounters - Checks the the statistics for RX path hang
@@ -1031,10 +1019,7 @@ DEV_NET *pNet)  /* holds the pointer to adapter control context */
 		("<== CheckRxPath()\n"));
 }
 
-
-
 #endif
-
 
 #ifdef CONFIG_PM
 /*****************************************************************************
@@ -1196,7 +1181,6 @@ SK_U32	state)  /* what power state is desired by Linux?    */
 	return 0;
 }
 
-
 /******************************************************************************
  *
  *	SkEnableWOMagicPacket - Enable Wake on Magic Packet on the adapter
@@ -1272,7 +1256,6 @@ SK_MAC_ADDR    MacAddr)  /* MacAddr expected in magic packet */
 		SkGmPhyWrite(pAC, IoC, Port, 00, 0xB300);	/* 100 MBit, disable Autoneg */
 	}
 
-
 	/*
 	 * MAC Configuration:
 	 * Set the MAC to 100 HD and enable the auto update features
@@ -1284,7 +1267,6 @@ SK_MAC_ADDR    MacAddr)  /* MacAddr expected in magic packet */
 	 * uses 100 HD.
 	 */
 	SK_OUT16(IoC, 0x2804, 0x3832);
-
 
 	/*
 	 * Set Up Magic Packet parameters
@@ -1318,7 +1300,6 @@ SK_MAC_ADDR    MacAddr)  /* MacAddr expected in magic packet */
 		}
 	}
 
-
 #ifndef USE_ASF_DASH_FW
 	SK_OUT8(IoC, RX_GMF_CTRL_T, (SK_U8)GMF_RST_SET);
 #endif
@@ -1332,7 +1313,6 @@ SK_MAC_ADDR    MacAddr)  /* MacAddr expected in magic packet */
 
 }	/* SkEnableWOMagicPacket */
 #endif
-
 
 /*****************************************************************************
  *
@@ -1508,7 +1488,6 @@ MODULE_PARM(TxModeration, "1-" __MODULE_STRING(SK_MAX_CARD_PARAM) "s");
 MODULE_PARM(BroadcastPrio, "1-" __MODULE_STRING(SK_MAX_CARD_PARAM) "s");
 #endif
 
-
 /*****************************************************************************
  *
  * 	sk98lin_remove_device - device deinit function
@@ -1527,7 +1506,6 @@ SK_AC		*pAC;
 struct SK_NET_DEVICE *next;
 unsigned long Flags;
 struct net_device *dev = pci_get_drvdata(pdev);
-
 
 	/* Device not available. Return. */
 	if (!dev)
@@ -1614,7 +1592,6 @@ struct net_device *dev = pci_get_drvdata(pdev);
 
 }
 
-
 /*****************************************************************************
  *
  * 	SkGeBoardInit - do level 0 and 1 initialization
@@ -1687,7 +1664,6 @@ unsigned long   Flags;    	/* for the spin locks	*/
 #ifdef SK_ASF
 	SkAsfInit(pAC, pAC->IoBase, SK_INIT_DATA);
 #endif
-
 
 	pAC->BoardLevel = SK_INIT_DATA;
 	pAC->RxPort[0].RxBufSize = ETH_BUF_SIZE;
@@ -1841,7 +1817,6 @@ unsigned long   Flags;    	/* for the spin locks	*/
 	return (0);
 } /* SkGeBoardInit */
 
-
 /*****************************************************************************
  *
  * 	BoardAllocMem - allocate the memory for the descriptor rings
@@ -1864,7 +1839,6 @@ size_t		AllocLength;	/* length of complete descriptor area */
 int		i;		/* loop counter */
 unsigned long	BusAddr;
 
-	
 	/* rings plus one for alignment (do not cross 4 GB boundary) */
 	/* RX_RING_SIZE is assumed bigger than TX_RING_SIZE */
 #if (BITS_PER_LONG == 32)
@@ -1909,7 +1883,6 @@ unsigned long	BusAddr;
 	return (SK_TRUE);
 } /* BoardAllocMem */
 
-
 /****************************************************************************
  *
  *	BoardFreeMem - reverse of BoardAllocMem
@@ -1942,7 +1915,6 @@ size_t		AllocLength;	/* length of complete descriptor area */
 		pAC->pDescrMem = NULL;
 	}
 } /* BoardFreeMem */
-
 
 /*****************************************************************************
  *
@@ -2065,7 +2037,6 @@ uintptr_t VNextDescr;	/* the virtual bus address of the next descriptor */
 	*pRingPrevFree       = DescrNum;
 } /* SetupRing */
 
-
 /*****************************************************************************
  *
  * 	PortReInitBmu - re-initiate the descriptor rings for one port
@@ -2106,7 +2077,6 @@ int	PortIndex)	/* index of the port for which to re-init */
 		pAC->RxPort[PortIndex].pRxDescrRing +
 		pAC->RxPort[PortIndex].VRxDescrRing) >> 32));
 } /* PortReInitBmu */
-
 
 /****************************************************************************
  *
@@ -2157,7 +2127,6 @@ SK_U32		IntSrc;		/* interrupts source register contents */
 		CLEAR_TX_IRQ(1, TX_PRIO_LOW);
 	}
 #endif
-
 
 #else
 	while (((IntSrc & IRQ_MASK) & ~SPECIAL_IRQS) != 0) {
@@ -2275,7 +2244,6 @@ SK_U32		IntSrc;		/* interrupts source register contents */
 	return SkIsrRetHandled;
 
 } /* SkGeIsr */
-
 
 /****************************************************************************
  *
@@ -2709,7 +2677,6 @@ struct SK_NET_DEVICE *dev)  /* the device that is to be opened */
 	return (0);
 } /* SkGeOpen */
 
-
 /****************************************************************************
  *
  *	SkGeClose - Stop initialized adapter
@@ -2976,7 +2943,6 @@ struct SK_NET_DEVICE *dev)  /* the device that is to be closed */
 	return (0);
 } /* SkGeClose */
 
-
 /*****************************************************************************
  *
  * 	SkGeXmit - Linux frame transmit function
@@ -3062,7 +3028,6 @@ static int SkGePoll(struct net_device *dev, int *budget)
 	int		WorkDone = 0;
 	unsigned long	Flags;       
 
-
 	if (pAC->dev[0] != pAC->dev[1]) {
 		spin_lock(&pAC->TxPort[1][TX_PRIO_LOW].TxDesRingLock);
 		FreeTxDescriptors(pAC, &pAC->TxPort[1][TX_PRIO_LOW]);
@@ -3145,7 +3110,6 @@ SK_AC		*pAC;
 
 }
 #endif
-
 
 /*****************************************************************************
  *
@@ -3609,7 +3573,6 @@ unsigned long	Flags;
 	spin_unlock_irqrestore(&pRxPort->RxDesRingLock, Flags);
 } /* FillRxRing */
 
-
 /*****************************************************************************
  *
  * 	FillRxDescriptor - fill one buffer into the receive ring
@@ -3664,7 +3627,6 @@ SK_U64		PhysAddr;	/* physical address of a rx buffer */
 	return (SK_TRUE);
 
 } /* FillRxDescriptor */
-
 
 /*****************************************************************************
  *
@@ -4185,7 +4147,6 @@ unsigned long	Flags;
 	return 0;
 } /* SkGeSetMacAddr */
 
-
 /*****************************************************************************
  *
  * 	SkGeSetRxMode - set receive mode
@@ -4260,7 +4221,6 @@ unsigned long		Flags;
 	return;
 } /* SkGeSetRxMode */
 
-
 /*****************************************************************************
  *
  * 	SkSetMtuBufferSize - set the MTU buffer to another value
@@ -4298,7 +4258,6 @@ int	Mtu)		/* pointer to tx prt struct */
 
 	return;
 }
-
 
 /*****************************************************************************
  *
@@ -4386,7 +4345,6 @@ int			WorkDone = 0;
 				pNet->PortNr, -1, SK_TRUE);
 	spin_lock(&pAC->TxPort[pNet->PortNr][TX_PRIO_LOW].TxDesRingLock);
 
-
 	/* Change RxFillLimit to 1 */
 	if ((pAC->GIni.GIMacsFound == 2 ) && (pAC->RlmtNets == 2)) {
 		pAC->RxPort[pNet->PortNr].RxFillLimit = 1;
@@ -4421,7 +4379,6 @@ int			WorkDone = 0;
 
 	spin_unlock(&pAC->TxPort[pNet->PortNr][TX_PRIO_LOW].TxDesRingLock);
 
-
 	/* Notify RLMT about the changing and restarting one (or more) ports */
 	SkLocalEventQueue(pAC, SKGE_RLMT, SK_RLMT_START,
 					pNet->PortNr, -1, SK_TRUE);
@@ -4434,7 +4391,6 @@ int			WorkDone = 0;
 	return 0;
 
 }
-
 
 /*****************************************************************************
  *
@@ -4753,7 +4709,6 @@ fault_diag:
 
 } /* SkGeIoctl */
 
-
 /*****************************************************************************
  *
  * 	SkGeIocMib - handle a GetMib, SetMib- or PresetMib-ioctl message
@@ -4805,7 +4760,6 @@ int		mode)	/* flag for set/preset */
 		("MIB data access succeeded\n"));
 	return (Size);
 } /* SkGeIocMib */
-
 
 /*****************************************************************************
  *
@@ -4869,7 +4823,6 @@ SK_U32	IrqModMask[7][2] =
 #define AN_ON	1
 #define AN_SENS	2
 #define M_CurrPort pAC->GIni.GP[Port]
-
 
 	/*
 	** Set the default values first for both ports!
@@ -5190,8 +5143,6 @@ SK_U32	IrqModMask[7][2] =
 	    pAC->GIni.GP[0].PMSMode = MSMode;
 	}
 	
-
-	
 	/* 
 	** Parse any parameter settings for port B:
 	** a) any LinkSpeed stated?
@@ -5285,7 +5236,6 @@ SK_U32	IrqModMask[7][2] =
 		}
 	}
 
-	
 	/* 
 	** Check for illegal combinations 
 	*/
@@ -5471,7 +5421,6 @@ SK_U32	IrqModMask[7][2] =
 	*/
 #endif
 
-
 	/*
 	** Check the TxModeration parameters
 	*/
@@ -5602,7 +5551,6 @@ SK_U32	IrqModMask[7][2] =
 
 } /* GetConfiguration */
 
-
 /*****************************************************************************
  *
  * 	ProductStr - return a adapter identification string from vpd
@@ -5633,7 +5581,6 @@ static void ProductStr(SK_AC *pAC)
 /****************************************************************************/
 /* functions for common modules *********************************************/
 /****************************************************************************/
-
 
 /*****************************************************************************
  *
@@ -5672,7 +5619,6 @@ struct sk_buff	*pMsgBlock;	/* pointer to a new message block */
 
 } /* SkDrvAllocRlmtMbuf */
 
-
 /*****************************************************************************
  *
  *	SkDrvFreeRlmtMbuf - free an RLMT mbuf
@@ -5702,7 +5648,6 @@ SK_MBUF		*pNextMbuf;
 	} while ( pFreeMbuf != NULL );
 } /* SkDrvFreeRlmtMbuf */
 
-
 /*****************************************************************************
  *
  *	SkOsGetTime - provide a time value
@@ -5723,7 +5668,6 @@ SK_U64 SkOsGetTime(SK_AC *pAC)
 
 	return PrivateJiffies;
 } /* SkOsGetTime */
-
 
 /*****************************************************************************
  *
@@ -5746,7 +5690,6 @@ SK_U32 *pVal)		/* pointer to store the read value */
 	return(0);
 } /* SkPciReadCfgDWord */
 
-
 /*****************************************************************************
  *
  *	SkPciReadCfgWord - read a 16 bit value from pci config space
@@ -5767,7 +5710,6 @@ SK_U16 *pVal)		/* pointer to store the read value */
 	pci_read_config_word(pAC->PciDev, PciAddr, pVal);
 	return(0);
 } /* SkPciReadCfgWord */
-
 
 /*****************************************************************************
  *
@@ -5790,7 +5732,6 @@ SK_U8 *pVal)		/* pointer to store the read value */
 	return(0);
 } /* SkPciReadCfgByte */
 
-
 /*****************************************************************************
  *
  *	SkPciWriteCfgDWord - write a 32 bit value to pci config space
@@ -5811,7 +5752,6 @@ SK_U32 Val)		/* pointer to store the read value */
 	pci_write_config_dword(pAC->PciDev, PciAddr, Val);
 	return(0);
 } /* SkPciWriteCfgDWord */
-
 
 /*****************************************************************************
  *
@@ -5835,7 +5775,6 @@ SK_U16 Val)		/* pointer to store the read value */
 	return(0);
 } /* SkPciWriteCfgWord */
 
-
 /*****************************************************************************
  *
  *	SkPciWriteCfgWord - write a 8 bit value to pci config space
@@ -5857,7 +5796,6 @@ SK_U8 Val)		/* pointer to store the read value */
 	pci_write_config_byte(pAC->PciDev, PciAddr, Val);
 	return(0);
 } /* SkPciWriteCfgByte */
-
 
 /*****************************************************************************
  *
@@ -6192,7 +6130,6 @@ SK_EVPARA  Param)  /* event-parameter            */
 			&pAC->TxPort[FromPort][TX_PRIO_LOW].TxDesRingLock,
 			Flags);
 
-		
 		if (!CHIP_ID_YUKON_2(pAC)) {
 #ifdef CONFIG_SK98LIN_NAPI
 			WorkToDo = 1;
@@ -6447,7 +6384,6 @@ SK_EVPARA  Param)  /* event-parameter            */
 	return (0);
 } /* SkDrvEvent */
 
-
 /******************************************************************************
  *
  *	SkLocalEventQueue()	-	add event to queue
@@ -6475,7 +6411,6 @@ SK_BOOL Dispatcher)	/* Dispatcher flag:
 	EvPara.Para32[0] = Param1;
 	EvPara.Para32[1] = Param2;
 	
-
 	if (Class == SKGE_PNMI) {
 		SkPnmiEvent(	pAC,
 				pAC->IoBase,
@@ -6520,7 +6455,6 @@ SK_BOOL Dispatcher)	/* Dispatcher flag:
 	SK_EVPARA 	EvPara;
 	EvPara.Para64 = Param;
 
-
 	if (Class == SKGE_PNMI) {
 		SkPnmiEvent(	pAC,
 				pAC->IoBase,
@@ -6539,7 +6473,6 @@ SK_BOOL Dispatcher)	/* Dispatcher flag:
 	}
 
 }
-
 
 /*****************************************************************************
  *
@@ -6839,7 +6772,6 @@ static void __exit sk98lin_cleanup(void)
 module_init(sk98lin_init);
 module_exit(sk98lin_cleanup);
 
-
 #ifdef DEBUG
 /****************************************************************************/
 /* "debug only" section *****************************************************/
@@ -6925,7 +6857,6 @@ int    size)  /* the size of that data area in bytes */
 	}
 } /* DumpData */
 
-
 /*****************************************************************************
  *
  *	DumpLong - print a data area as long values
@@ -6986,4 +6917,3 @@ int    size)  /* how large is the variable?        */
  * End of file
  *
  ******************************************************************************/
-
