@@ -165,8 +165,13 @@ unicode_oslm_strings(char **pbcc_area, const struct nls_table *nls_cp)
 	int bytes_ret = 0;
 
 	/* Copy OS version */
+#ifdef MY_ABC_HERE
+	bytes_ret = cifs_strtoUCS((__le16 *)bcc_ptr, "Synology Linux version ", 32,
+				  nls_cp);
+#else
 	bytes_ret = cifs_strtoUCS((__le16 *)bcc_ptr, "Linux version ", 32,
 				  nls_cp);
+#endif
 	bcc_ptr += 2 * bytes_ret;
 	bytes_ret = cifs_strtoUCS((__le16 *) bcc_ptr, init_utsname()->release,
 				  32, nls_cp);
@@ -266,8 +271,13 @@ static void ascii_ssetup_strings(char **pbcc_area, struct cifsSesInfo *ses,
 
 	/* BB check for overflow here */
 
+#ifdef MY_ABC_HERE
+	strcpy(bcc_ptr, "Synology Linux version ");
+	bcc_ptr += strlen("Synology Linux version ");
+#else
 	strcpy(bcc_ptr, "Linux version ");
 	bcc_ptr += strlen("Linux version ");
+#endif
 	strcpy(bcc_ptr, init_utsname()->release);
 	bcc_ptr += strlen(init_utsname()->release) + 1;
 

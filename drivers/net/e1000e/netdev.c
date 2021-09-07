@@ -48,11 +48,6 @@
 
 #include "e1000.h"
 
-#ifdef MY_ABC_HERE
-#include <linux/synobios.h>
-extern int (*funcSYNOSendNetLinkEvent)(unsigned int type, unsigned int ifaceno);
-#endif
-
 #define DRV_VERSION "1.0.2-k2"
 char e1000e_driver_name[] = "e1000e";
 const char e1000e_driver_version[] = DRV_VERSION;
@@ -1937,14 +1932,6 @@ static void e1000_set_itr(struct e1000_adapter *adapter)
 		goto set_itr_now;
 	}
 
-	adapter->tx_itr = e1000_update_itr(adapter,
-				    adapter->tx_itr,
-				    adapter->total_tx_packets,
-				    adapter->total_tx_bytes);
-	/* conservative mode (itr 3) eliminates the lowest_latency setting */
-	if (adapter->itr_setting == 3 && adapter->tx_itr == lowest_latency)
-		adapter->tx_itr = low_latency;
-
 	adapter->rx_itr = e1000_update_itr(adapter,
 				    adapter->rx_itr,
 				    adapter->total_rx_packets,
@@ -3709,12 +3696,6 @@ static void e1000_watchdog_task(struct work_struct *work)
 			if (!test_bit(__E1000_DOWN, &adapter->state))
 				mod_timer(&adapter->phy_info_timer,
 					  round_jiffies(jiffies + 2 * HZ));
-
-#ifdef MY_ABC_HERE
-			if (funcSYNOSendNetLinkEvent) {
-				funcSYNOSendNetLinkEvent(NET_LINK, netdev->ifindex);
-			}
-#endif
 		}
 	} else {
 		if (netif_carrier_ok(netdev)) {
@@ -3730,12 +3711,6 @@ static void e1000_watchdog_task(struct work_struct *work)
 
 			if (adapter->flags & FLAG_RX_NEEDS_RESTART)
 				schedule_work(&adapter->reset_task);
-
-#ifdef MY_ABC_HERE
-			if (funcSYNOSendNetLinkEvent) {
-				funcSYNOSendNetLinkEvent(NET_NOLINK, netdev->ifindex);
-			}
-#endif
 		}
 	}
 

@@ -310,12 +310,14 @@ failed:
  */
 int iblock_activate_device(se_device_t *dev)
 {
+#ifndef MY_ABC_HERE
 	iblock_dev_t *ib_dev = (iblock_dev_t *) dev->dev_ptr;
 	iblock_hba_t *ib_hba = ib_dev->ibd_host;
 
 	printk(KERN_INFO "CORE_iBLOCK[%u] - Activating Device with TCQ: %d at"
 		" Major: %d Minor %d\n", ib_hba->iblock_host_id,
 		ib_dev->ibd_depth, ib_dev->ibd_major, ib_dev->ibd_minor);
+#endif
 
 	return 0;
 }
@@ -326,10 +328,10 @@ int iblock_activate_device(se_device_t *dev)
  */
 void iblock_deactivate_device(se_device_t *dev)
 {
+#ifndef MY_ABC_HERE
 	iblock_dev_t *ib_dev = (iblock_dev_t *) dev->dev_ptr;
 	iblock_hba_t *ib_hba = ib_dev->ibd_host;
 
-#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE_iBLOCK[%u] - Deactivating Device with TCQ: %d"
 		" at Major: %d Minor %d\n", ib_hba->iblock_host_id,
 		ib_dev->ibd_depth, ib_dev->ibd_major, ib_dev->ibd_minor);
@@ -595,15 +597,14 @@ int iblock_do_task(se_task_t *task)
 			" bio->bi_sector: %llu\n", task, bio, bio->bi_sector);
 
 #ifdef MY_ABC_HERE
-        submit_bio(
-            (TASK_CMD(task)->data_direction == DMA_TO_DEVICE),
-            bio);
+		submit_bio(
+			(TASK_CMD(task)->data_direction == DMA_TO_DEVICE),
+			bio);
 #else
-        submit_bio(
-            (TASK_CMD(task)->data_direction == SE_DIRECTION_WRITE),
-            bio);
+		submit_bio(
+			(TASK_CMD(task)->data_direction == SE_DIRECTION_WRITE),
+			bio);
 #endif
-
 
 		bio = nbio;
 	}

@@ -50,10 +50,7 @@ extern long syno_boot_hd_count;
 
 static inline void SleepForLatency(void)
 {
-	if ( ( g_internal_hd_num < 0 ) || /* not specified in boot command line */
-		 syno_boot_hd_count < g_internal_hd_num ) {
-		mdelay(3000);
-	}
+	mdelay(3000);
 }
 
 static inline void SleepForHD(int i)

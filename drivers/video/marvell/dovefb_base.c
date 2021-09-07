@@ -835,7 +835,7 @@ static int dovefb_init_layer(struct platform_device *pdev,
 #ifdef USING_SAME_BUFF
 	if ((gfx_fb_start == 0) || (vid_fb_start == 0) ) {
 #endif
-#ifdef CONFIG_ARCH_DOVE
+#if 1 /* CONFIG_ARCH_DOVE */
 		if (!dfli->fb_start || !dfli->fb_start_dma)
 	dfli->fb_start = dma_alloc_writecombine(dfli->dev, dfli->fb_size,
 						&dfli->fb_start_dma,

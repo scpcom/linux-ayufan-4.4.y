@@ -386,6 +386,68 @@ MV_BOARD_INFO db88f6192AInfo = {
     DB_88F6192A_BOARD_NAND_CONTROL
 };
 
+MV_BOARD_INFO db88f6701AInfo = {
+	"DB-88F6701A-BP",				/* boardName[MAX_BOARD_NAME_LEN] */
+	DB_88F6192A_BOARD_MPP_GROUP_TYPE_NUM,		/* numBoardMppGroupType */
+	db88f6192AInfoBoardMppTypeInfo,
+	DB_88F6192A_BOARD_MPP_CONFIG_NUM,		/* numBoardMppConfig */
+	db88f6192AInfoBoardMppConfigValue,
+	0,						/* intsGppMaskLow */
+	(1 << 3),					/* intsGppMaskHigh */
+	DB_88F6192A_BOARD_DEVICE_CONFIG_NUM,		/* numBoardDevIf */
+	db88f6192AInfoBoardDeCsInfo,
+	DB_88F6192A_BOARD_TWSI_DEF_NUM,			/* numBoardTwsiDev */
+	db88f6192AInfoBoardTwsiDev,					
+	DB_88F6192A_BOARD_MAC_INFO_NUM,			/* numBoardMacInfo */
+	db88f6192AInfoBoardMacInfo,
+	DB_88F6192A_BOARD_GPP_INFO_NUM,			/* numBoardGppInfo */
+	db88f6192AInfoBoardGppInfo,
+	DB_88F6192A_BOARD_DEBUG_LED_NUM,			/* activeLedsNumber */              
+	NULL,
+	0,										/* ledsPolarity */		
+	DB_88F6192A_OE_LOW,				/* gppOutEnLow */
+	DB_88F6192A_OE_HIGH,				/* gppOutEnHigh */
+	DB_88F6192A_OE_VAL_LOW,				/* gppOutValLow */
+	DB_88F6192A_OE_VAL_HIGH,				/* gppOutValHigh */
+	0,						/* gppPolarityValLow */
+	0, 						/* gppPolarityValHigh */
+	NULL,						/* pSwitchInfo */
+    DB_88F6192A_BOARD_NAND_READ_PARAMS,
+    DB_88F6192A_BOARD_NAND_WRITE_PARAMS,
+    DB_88F6192A_BOARD_NAND_CONTROL
+};
+
+MV_BOARD_INFO db88f6702AInfo = {
+	"DB-88F6702A-BP",				/* boardName[MAX_BOARD_NAME_LEN] */
+	DB_88F6192A_BOARD_MPP_GROUP_TYPE_NUM,		/* numBoardMppGroupType */
+	db88f6192AInfoBoardMppTypeInfo,
+	DB_88F6192A_BOARD_MPP_CONFIG_NUM,		/* numBoardMppConfig */
+	db88f6192AInfoBoardMppConfigValue,
+	0,						/* intsGppMaskLow */
+	(1 << 3),					/* intsGppMaskHigh */
+	DB_88F6192A_BOARD_DEVICE_CONFIG_NUM,		/* numBoardDevIf */
+	db88f6192AInfoBoardDeCsInfo,
+	DB_88F6192A_BOARD_TWSI_DEF_NUM,			/* numBoardTwsiDev */
+	db88f6192AInfoBoardTwsiDev,					
+	DB_88F6192A_BOARD_MAC_INFO_NUM,			/* numBoardMacInfo */
+	db88f6192AInfoBoardMacInfo,
+	DB_88F6192A_BOARD_GPP_INFO_NUM,			/* numBoardGppInfo */
+	db88f6192AInfoBoardGppInfo,
+	DB_88F6192A_BOARD_DEBUG_LED_NUM,			/* activeLedsNumber */              
+	NULL,
+	0,										/* ledsPolarity */		
+	DB_88F6192A_OE_LOW,				/* gppOutEnLow */
+	DB_88F6192A_OE_HIGH,				/* gppOutEnHigh */
+	DB_88F6192A_OE_VAL_LOW,				/* gppOutValLow */
+	DB_88F6192A_OE_VAL_HIGH,				/* gppOutValHigh */
+	0,						/* gppPolarityValLow */
+	0, 						/* gppPolarityValHigh */
+	NULL,						/* pSwitchInfo */
+    DB_88F6192A_BOARD_NAND_READ_PARAMS,
+    DB_88F6192A_BOARD_NAND_WRITE_PARAMS,
+    DB_88F6192A_BOARD_NAND_CONTROL
+};
+
 #define DB_88F6190A_BOARD_MAC_INFO_NUM		0x1
 
 MV_BOARD_INFO db88f6190AInfo = {
@@ -1861,6 +1923,113 @@ MV_BOARD_INFO SYNO_DS212_INFO = {
     0
 };
 
+#define SYNO_6702_1BAY_BOARD_MPP_GROUP_TYPE_NUM  0x1
+MV_BOARD_MPP_TYPE_INFO SYNO_6702_1BAYInfoBoardMppTypeInfo[] =
+{
+        { MV_BOARD_AUTO, MV_BOARD_AUDIO }
+};
+
+#define SYNO_6702_1BAY_BOARD_MPP_CONFIG_NUM             0x1
+#define SYNO_6702_1BAY_MPP7_0                    0x01222222
+#define SYNO_6702_1BAY_MPP15_8                   0x30005511
+#define SYNO_6702_1BAY_MPP23_16                  0x00000003
+#define SYNO_6702_1BAY_MPP31_24                  0x00000000
+#define SYNO_6702_1BAY_MPP39_32                  0x00000000
+#define SYNO_6702_1BAY_MPP47_40                  0x00000000
+#define SYNO_6702_1BAY_MPP55_48                  0x00000000
+
+MV_BOARD_MPP_INFO SYNO_6702_1BAY_InfoBoardMppConfigValue[] =
+{
+       {
+               {
+                       SYNO_6702_1BAY_MPP7_0,
+                       SYNO_6702_1BAY_MPP15_8,
+                       SYNO_6702_1BAY_MPP23_16,
+                       SYNO_6702_1BAY_MPP31_24,
+                       SYNO_6702_1BAY_MPP39_32,
+                       SYNO_6702_1BAY_MPP47_40,
+                       SYNO_6702_1BAY_MPP55_48
+               }
+       }
+};
+
+/*
+ *   Marvellvell 886f6702 1 bay, for ds112j
+ *  
+Pin 		Mode	Signal select and definition	Input/output	Pull-up/pull-down
+MPP[0:3]	0x2			SPI signal						out             x000
+MPP[4]		0x2			UART0 RXD						in
+MPP[5]      0x2			UART0 TXD						out				1
+MPP[6]	    0x1			SYSRST_OUTn						out
+MPP[7]		0x0			Fan speed low					out				1
+MPP[8]		0x1			TW_SDA							in/out
+MPP[9]		0x1			TW_SCK							in/out
+MPP[10]		0x5			SATA1_LEDn						out				1	
+MPP[11]		0x5			SATA0 LEDn						out
+MPP[12]		0x0			HDD_PWR_EN_1					out				1
+MPP[13]		0x0			SATA port 1 FAULTn LED			out	
+MPP[14]		0x0			SATA port 0 FAULTn LED			out	
+MPP[15]		0x3			UART0 TXD						out
+MPP[16]     0x3			UART0 RXD						in
+MPP[17]     0x3			MRRSTJ							in
+MPP[18]		0x0			Fan speed middle				out				1
+MPP[19]		0x0			Fan speed high					out				1
+MPP[20:27]	0x0			Reserved
+MPP[28]		0x0			Model ID						in
+*/
+
+MV_DEV_CS_INFO SYNO_DS112jInfoBoardDeCsInfo[] =
+{
+       {0, N_A, BOARD_DEV_SPI_FLASH, 8}
+};
+
+
+#define SYNO_6702_1BAY_OE_LOW                    0x0
+#define SYNO_6702_1BAY_OE_HIGH                   0x0
+#define SYNO_6702_1BAY_OE_VAL_LOW                (BIT13|BIT17|BIT18|BIT19)
+#define SYNO_6702_1BAY_OE_VAL_HIGH               0x0
+
+MV_BOARD_INFO SYNO_6702_1BAY_INFO = {
+    "Synology Disk Station",                      /* boardName[MAX_BOARD_NAME_LEN] */
+
+    SYNO_6702_1BAY_BOARD_MPP_GROUP_TYPE_NUM,          /* numBoardMppGroupType */
+    SYNO_6702_1BAYInfoBoardMppTypeInfo,
+
+    SYNO_6702_1BAY_BOARD_MPP_CONFIG_NUM,              /* numBoardMppConfig */
+    SYNO_6702_1BAY_InfoBoardMppConfigValue,
+
+    0,                                            /* intsGppMaskLow */
+    0,                                            /* intsGppMaskHigh */
+
+    SYNO_DS109_BOARD_DEVICE_CONFIG_NUM,           /* numBoardDevIf */
+	SYNO_DS112jInfoBoardDeCsInfo,
+
+    SYNO_DS109_BOARD_TWSI_DEF_NUM,                /* numBoardTwsiDev */
+    SYNO_DS109InfoBoardTwsiDev,
+
+	DS212_BOARD_MAC_INFO_NUM,                /* numBoardMacInfo */
+	PhyAddr1BoardMacInfo,
+
+	0,												/* numBoardGppInfo */
+	NULL, 
+
+    0,                                            /* activeLedsNumber */
+
+    NULL,
+    N_A,                                          /* ledsPolarity */
+
+    SYNO_6702_1BAY_OE_LOW,                            /* gppOutEnLow */
+    SYNO_6702_1BAY_OE_HIGH,                           /* gppOutEnHigh */
+    SYNO_6702_1BAY_OE_VAL_LOW,                        /* gppOutValLow */
+    SYNO_6702_1BAY_OE_VAL_HIGH,                       /* gppOutValHigh */
+    0,
+	0,
+    NULL,                                          /* pSwitchInfo */
+	0,
+	0,
+	0
+};
+
 #endif //CONFIG_SYNO_MV88F6281
 
 
@@ -1877,11 +2046,11 @@ MV_BOARD_INFO*	boardInfoTbl[] = 	{
                     &sheevaPlugInfo,
                     &db88f6280AInfo,
                     &db88f6282AInfo,
-					&rd88f6282aInfo
+					&rd88f6282aInfo,
+                    &db88f6701AInfo,
+                    &db88f6702AInfo
 #ifdef CONFIG_SYNO_MV88F6281
 						,
-                    NULL,                           /* 0x0D */
-                    NULL,                           /* 0x0E */
                     NULL,                           /* 0x0F */
                     NULL,                           /* 0x10 */
                     NULL,                           /* 0x11 */
@@ -1895,5 +2064,6 @@ MV_BOARD_INFO*	boardInfoTbl[] = 	{
 					&SYNO_RS_6282_INFO,				/* SYNO_RS_6282_ID */
 					&SYNO_DS411_INFO,				/* SYNO_DS411_ID */
 					&SYNO_DS212_INFO,               /* SYNO_DS212_ID */
+					&SYNO_6702_1BAY_INFO,           /* SYNO_6702_1BAY_ID (for ds112j) */
 #endif
 					};

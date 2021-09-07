@@ -213,6 +213,8 @@ static void    mvUsbPhy65nmNewInit(int dev)
         (mvCtrlModelGet() == MV_6280_DEV_ID) ||
        mvCtrlModelGet() == MV_6282_DEV_ID ||
        (mvCtrlModelGet() == MV_6192_DEV_ID) ||
+       (mvCtrlModelGet() == MV_6701_DEV_ID) ||
+       (mvCtrlModelGet() == MV_6702_DEV_ID) ||
         (mvCtrlModelGet() == MV_6190_DEV_ID) ||
         (mvCtrlModelGet() == MV_6180_DEV_ID))
     {
@@ -304,6 +306,8 @@ static void    mvUsbPhy65nmNewInit(int dev)
        mvCtrlModelGet() == MV_6280_DEV_ID ||
        mvCtrlModelGet() == MV_6282_DEV_ID ||
        mvCtrlModelGet() == MV_6192_DEV_ID ||
+       mvCtrlModelGet() == MV_6701_DEV_ID ||
+       mvCtrlModelGet() == MV_6702_DEV_ID ||
        mvCtrlModelGet() == MV_6190_DEV_ID ||
        mvCtrlModelGet() == MV_6180_DEV_ID)
         regVal |= (0x3 << 8);
@@ -764,6 +768,8 @@ MV_STATUS   mvUsbHalInit(int dev, MV_BOOL isHost)
         (mvCtrlModelGet() == MV_6282_DEV_ID)  ||
 	    (mvCtrlModelGet() == MV_6280_DEV_ID)  ||
 	    (mvCtrlModelGet() == MV_6192_DEV_ID) ||
+	(mvCtrlModelGet() == MV_6701_DEV_ID) ||
+	(mvCtrlModelGet() == MV_6702_DEV_ID) ||
         (mvCtrlModelGet() == MV_6190_DEV_ID) ||
         (mvCtrlModelGet() == MV_6180_DEV_ID) ||
 	(mvCtrlModelGet() == MV_6321_DEV_ID) ||

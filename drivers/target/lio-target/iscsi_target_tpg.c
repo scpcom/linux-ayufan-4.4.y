@@ -850,16 +850,16 @@ int iscsi_tpg_del_portal_group(
 #ifdef MY_ABC_HERE
 void iscsi_tpg_active_portal_group(iscsi_portal_group_t* tpg)
 {
-	spin_lock(&tpg->tpg_state_lock);
+	spin_lock_bh(&tpg->tpg_state_lock);
 	tpg->tpg_state = TPG_STATE_ACTIVE;
-	spin_unlock(&tpg->tpg_state_lock);
+	spin_unlock_bh(&tpg->tpg_state_lock);
 }
 
 void iscsi_tpg_deactive_portal_group(iscsi_portal_group_t* tpg)
 {
-	spin_lock(&tpg->tpg_state_lock);
+	spin_lock_bh(&tpg->tpg_state_lock);
 	tpg->tpg_state = TPG_STATE_INACTIVE;
-	spin_unlock(&tpg->tpg_state_lock);
+	spin_unlock_bh(&tpg->tpg_state_lock);
 }
 #endif
 

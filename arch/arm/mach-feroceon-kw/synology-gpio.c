@@ -34,9 +34,9 @@
 #define SYNO_KW_DS411 0x2
 #define SYNO_KW_DS211P 0x3
 #define SYNO_KW_DS212 0x5 
-#define SYNO_KW_RS411 0x8
+#define SYNO_KW_RS411 0x8 
 #define SYNO_KW_RS212 0x9 
-#define SYNO_KW_RS812 0xA
+#define SYNO_KW_DS112j 0x0 
 
 #define GPIO_UNDEF				0xFF
 
@@ -131,6 +131,15 @@ static SYNO_KW_GENERIC_GPIO generic_gpio;
 
 unsigned int Syno6282ModelIDGet(SYNO_KW_GENERIC_GPIO *pGpio)
 {
+	/*
+	 * In 6702 platform, there is only 1 bit model ID
+	 * 0x0 ds112j
+	 * 0x1 Eagle
+	 */
+	 if( mvBoardIdGet() == SYNO_6702_1BAY_ID)
+		 return (gpio_get_value(pGpio->model.model_id_0)?1:0);
+	 else{ 
+
 	/**
 	 * 0x0 DS211
 	 * 0x1 DS111
@@ -138,14 +147,14 @@ unsigned int Syno6282ModelIDGet(SYNO_KW_GENERIC_GPIO *pGpio)
 	 * 0x3 DS211p
 	 * 0x4 DS411Slim
 	 * 0x5 DS212
-	 * 0x8 RS411
+	 * 0x8 RS411, RS812
 	 * 0x9 RS212
-	 * 0xA RS812
 	 */
 	return  (((gpio_get_value(pGpio->model.model_id_0) ? 1 : 0) << 3) | 
 			 ((gpio_get_value(pGpio->model.model_id_1) ? 1 : 0) << 2) | 
 			 ((gpio_get_value(pGpio->model.model_id_2) ? 1 : 0) << 1) | 
 			 ((gpio_get_value(pGpio->model.model_id_3) ? 1 : 0) << 0));
+	 }
 }
 
 int
@@ -487,7 +496,6 @@ int SYNO_CTRL_BUZZER_CLEARED_GET(int *pValue)
 	} else {
 		*pValue = 1;
 		tempVal = 1;
-		gpio_set_value(generic_gpio.rack.buzzer_mute_req, tempVal);
 	}
 
 	return 0;
@@ -499,14 +507,17 @@ MV_U8 SYNOKirkwoodIsBoardNeedPowerUpHDD(MV_U32 disk_id) {
 
 	switch(boardId) {
 	case SYNO_DS109_ID:
-		if (0 == strncmp(gszSynoHWVersion, HW_DS212j, strlen(gszSynoHWVersion)) && 2 <= disk_id)
+		if (0 == strncmp(HW_DS212j, gszSynoHWVersion, strlen(HW_DS212j)) && 2 >= disk_id)
 			ret = 1;
 		else if (2 == disk_id)
 			ret = 1;
 		break;
 	case SYNO_DS212_ID:
-		if (2 >= disk_id )
+		if (0 == strncmp(HW_DS112, gszSynoHWVersion, strlen(HW_DS112)) && 1 == disk_id ) {
 			ret = 1;
+		} else if (2 >= disk_id ) {
+			ret = 1;
+		}
 		break;
 	case SYNO_DS211_ID:
 		if (2 == disk_id &&
@@ -516,6 +527,10 @@ MV_U8 SYNOKirkwoodIsBoardNeedPowerUpHDD(MV_U32 disk_id) {
 	case SYNO_DS411slim_ID: 
 	case SYNO_DS411_ID:
 		if ( 2 <= disk_id && SYNO_KW_DS411 == Syno6282ModelIDGet(&generic_gpio))
+			ret = 1;
+		break;
+	case SYNO_6702_1BAY_ID:
+		if (1==disk_id)
 			ret = 1;
 		break;
 	default:
@@ -643,6 +658,13 @@ KW_6282_211_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 	}
 
 	*global_gpio = gpio_211;
+}
+
+static void 
+KW_6282_112_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
+{
+	KW_6282_211_GPIO_init(global_gpio);
+	global_gpio->hdd_pm.hdd1_pm = 30;
 }
 
 /************************
@@ -812,6 +834,8 @@ KW_6282_RS411_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 		gpio_rs411.ext_sata_led.hdd1_led_1 = 39;
 		gpio_rs411.ext_sata_led.hdd2_led_0 = 36;
 		gpio_rs411.ext_sata_led.hdd2_led_1 = 37;
+		gpio_rs411.fan.fan_fail_2 = 44;
+		gpio_rs411.fan.fan_fail_3 = 45;
 		printk("Apply RS212 GPIO\n");
 	}
 
@@ -897,6 +921,7 @@ KW_6281_109_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 
 	*global_gpio = gpio_109;
 }
+
 static void 
 KW_6281_212j_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 {
@@ -1149,6 +1174,90 @@ KW_6180_011_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
     *global_gpio = gpio_011;
 }
 
+/*
+ *   Marvell 88f6702 1 BAY, used in DS112j, Eagle
+ *
+ *  Pin         Mode    Signal select and definition    Input/output    Pull-up/pull-down
+ *  MPP[0:3]    0x2         SPI signal                      out             x000
+ *  MPP[4]      0x2         UART0 RXD                       in
+ *  MPP[5]      0x2         UART0 TXD                       out             1
+ *  MPP[6]      0x1         SYSRST_OUTn                     out
+ *  MPP[7]      0x0         Fan speed low                   out             1
+ *  MPP[8]      0x1         TW_SDA                          in/out
+ *  MPP[9]      0x1         TW_SCK                          in/out
+ *  MPP[10]     0x5         SATA1_LEDn                      out             1
+ *  MPP[11]     0x5         SATA0 LEDn                      out
+ *  MPP[12]     0x0         HDD_PWR_EN_1                    out             1
+ *  MPP[13]     0x0         SATA port 1 FAULTn LED          out
+ *  MPP[14]     0x3         Reserved
+ *  MPP[15]     0x3         UART0 TXD                       out
+ *  MPP[16]     0x3         UART0 RXD                       in
+ *  MPP[17]     0x0         SATA port 0 FAULTn LED          out
+ *  MPP[18]     0x0         Fan speed middle                out             1
+ *  MPP[19]     0x0         Fan speed high                  out             1
+ *  MPP[20:27]  0x0         Reserved
+ *  MPP[28]     0x0         Model ID                        in
+ */
+
+static void 
+KW_6702_1BAY_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
+{
+	/* 112j */
+	SYNO_KW_GENERIC_GPIO gpio_6702_1bay = {
+		.ext_sata_led = {
+							.hdd1_led_0 = GPIO_UNDEF,
+							.hdd1_led_1 = GPIO_UNDEF,
+							.hdd2_led_0 = GPIO_UNDEF,
+							.hdd2_led_1 = GPIO_UNDEF,
+							.hdd3_led_0 = GPIO_UNDEF,
+							.hdd3_led_1 = GPIO_UNDEF,
+							.hdd4_led_0 = GPIO_UNDEF,
+							.hdd4_led_1 = GPIO_UNDEF,
+							.hdd5_led_0 = GPIO_UNDEF,
+							.hdd5_led_1 = GPIO_UNDEF,
+						},
+		.soc_sata_led = {
+							.hdd2_fail_led = 13,
+							.hdd1_fail_led = 17,
+						},
+		.model		  = {
+							.model_id_0 = 28,
+							.model_id_1 = GPIO_UNDEF,
+							.model_id_2 = GPIO_UNDEF,
+							.model_id_3 = GPIO_UNDEF,
+						},
+		.fan		  = {
+							.fan_1 = 7,
+							.fan_2 = 18,
+							.fan_3 = 19,
+							.fan_fail = 35,
+							.fan_fail_2 = GPIO_UNDEF,
+							.fan_fail_3 = GPIO_UNDEF,
+						},
+		.hdd_pm		  = {
+							.hdd1_pm = 12,
+							.hdd2_pm = GPIO_UNDEF,
+							.hdd3_pm = GPIO_UNDEF,
+							.hdd4_pm = GPIO_UNDEF,
+						},
+		.rack		  = {
+							.buzzer_mute_req = GPIO_UNDEF,
+							.buzzer_mute_ack = GPIO_UNDEF,
+							.rps1_on = GPIO_UNDEF,
+							.rps2_on = GPIO_UNDEF,
+						},
+		.multi_bay	  = {
+							.inter_lock = GPIO_UNDEF,
+						},
+		.status		  = {
+							.power_led = GPIO_UNDEF,
+							.alarm_led = GPIO_UNDEF,
+						},
+	};
+
+	*global_gpio = gpio_6702_1bay;
+}
+
 static void
 KW_default_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 {
@@ -1214,7 +1323,7 @@ void synology_gpio_init(void)
 	switch(boardId) {
 	case SYNO_DS109_ID:
 		printk("Synology 6281 1, 2 bay GPIO Init\n");
-		if (0 == strncmp(gszSynoHWVersion, HW_DS212j, strlen(gszSynoHWVersion))) {
+		if (0 == strncmp(HW_DS212j, gszSynoHWVersion, strlen(HW_DS212j))) {
 			KW_6281_212j_GPIO_init(&generic_gpio);
 		} else {
 			KW_6281_109_GPIO_init(&generic_gpio);
@@ -1229,11 +1338,8 @@ void synology_gpio_init(void)
 		printk("Synology 6282 DS411slim GPIO Init\n");
 		break;
 	case SYNO_RS_6282_ID: //this is ID is used for RS411 and RS812
+		printk("Synology 6282 RS411 / RS812 GPIO Init\n");
 		KW_6282_RS411_GPIO_init(&generic_gpio);
-		if(SYNO_KW_RS812 == Syno6282ModelIDGet(&generic_gpio))
-			printk("Synology 6282 RS812 GPIO Init\n");
-		else
-			printk("Synology 6282 RS411 GPIO Init\n");
 		break;
 	case SYNO_DS411_ID:
 		KW_6282_DS_4BAY_GPIO_init(&generic_gpio);
@@ -1252,8 +1358,17 @@ void synology_gpio_init(void)
 		KW_6180_011_GPIO_init(&generic_gpio);
 		break;
 	case SYNO_DS212_ID:
-		KW_6282_211_GPIO_init(&generic_gpio);
-		printk("Synology 6282 1, 2 bay GPIO Init\n");
+		if (0 == strncmp(HW_DS112, gszSynoHWVersion, strlen(HW_DS112))) {
+			KW_6282_112_GPIO_init(&generic_gpio);
+			printk("Synology 6282 DS112 GPIO Init\n");
+		} else {
+			KW_6282_211_GPIO_init(&generic_gpio);
+			printk("Synology 6282 1, 2 bay GPIO Init\n");
+		}
+		break;
+	case SYNO_6702_1BAY_ID: //ds112j
+		KW_6702_1BAY_GPIO_init(&generic_gpio);
+		printk("Synology 6702 1 bay GPIO Init\n");
 		break;
 	default:
 		printk("%s BoardID not match\n", __FUNCTION__);

@@ -137,6 +137,9 @@ config MV_INCLUDE_LCD
         ---help---
         Please don't change this configs unless you know what you are doing.
 
+config MV_INCLUDE_SWITCH
+        bool "Ethernet Switch Support"
+        default y
 
 endmenu
 

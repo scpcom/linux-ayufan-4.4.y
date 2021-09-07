@@ -190,6 +190,8 @@ MV_STATUS mvCtrlEnvInit(MV_VOID)
             maxMppGrp = MV_6280_MPP_MAX_GROUP;
             break;
 		case MV_6192_DEV_ID:
+	case MV_6701_DEV_ID:
+	case MV_6702_DEV_ID:
 			maxMppGrp = MV_6192_MPP_MAX_GROUP;
 			break;
         case MV_6190_DEV_ID:
@@ -264,6 +266,7 @@ MV_STATUS mvCtrlEnvInit(MV_VOID)
 		(boardId == SYNO_RS_6282_ID) ||
 		(boardId == SYNO_DS411_ID)||
 		(boardId == SYNO_DS212_ID)||
+		(boardId == SYNO_6702_1BAY_ID)||
 #endif
 		(boardId == DB_88F6180A_BP_ID))
 		mvBoardMppMuxSet();
@@ -304,7 +307,7 @@ MV_STATUS mvCtrlEnvInit(MV_VOID)
     	}
     }
 
-	if ((devId == MV_6192_DEV_ID) || (devId == MV_6190_DEV_ID))
+	if ((devId == MV_6192_DEV_ID) || (devId == MV_6190_DEV_ID) || (devId == MV_6701_DEV_ID) || (devId == MV_6702_DEV_ID))
 		return MV_OK;
  	
 	/* Mpp phase 3 */
@@ -340,12 +343,15 @@ MV_STATUS mvCtrlEnvInit(MV_VOID)
     /* Update SSCG configuration register*/
     if(mvBoardIdGet() == DB_88F6281A_BP_ID || mvBoardIdGet() == DB_88F6282A_BP_ID || 
        mvBoardIdGet() == DB_88F6192A_BP_ID ||
+       mvBoardIdGet() == DB_88F6701A_BP_ID ||
+       mvBoardIdGet() == DB_88F6702A_BP_ID ||
 #ifdef CONFIG_SYNO_MV88F6281
 	   mvBoardIdGet() == SYNO_DS211_ID ||
 	   mvBoardIdGet() == SYNO_DS411slim_ID ||
 	   mvBoardIdGet() == SYNO_RS_6282_ID ||
 	   mvBoardIdGet() == SYNO_DS411_ID ||
 	   mvBoardIdGet() == SYNO_DS212_ID ||
+	   mvBoardIdGet() == SYNO_6702_1BAY_ID ||
 #endif
        mvBoardIdGet() == DB_88F6190A_BP_ID || mvBoardIdGet() == DB_88F6180A_BP_ID ||
        mvBoardIdGet() == DB_88F6280A_BP_ID)
@@ -473,6 +479,8 @@ MV_U32 mvCtrlEthMaxPortGet(MV_VOID)
             return MV_6280_ETH_MAX_PORTS;
             break;
 		case MV_6192_DEV_ID:
+	case MV_6701_DEV_ID:
+	case MV_6702_DEV_ID:
 			return MV_6192_ETH_MAX_PORTS;
 			break;
         case MV_6190_DEV_ID:
@@ -566,6 +574,8 @@ MV_U32	  mvCtrlNandSupport(MV_VOID)
             return MV_6280_NAND;
             break;
 		case MV_6192_DEV_ID:
+	case MV_6701_DEV_ID:
+	case MV_6702_DEV_ID:
 			return MV_6192_NAND;
 			break;
         case MV_6190_DEV_ID:
@@ -613,6 +623,8 @@ MV_U32	  mvCtrlSdioSupport(MV_VOID)
             return MV_6280_SDIO;
             break;
 		case MV_6192_DEV_ID:
+	case MV_6701_DEV_ID:
+	case MV_6702_DEV_ID:
 			return MV_6192_SDIO;
 			break;
         case MV_6190_DEV_ID:
@@ -660,6 +672,8 @@ MV_U32	  mvCtrlTsSupport(MV_VOID)
             return MV_6280_TS;
             break;
 		case MV_6192_DEV_ID:
+	case MV_6701_DEV_ID:
+	case MV_6702_DEV_ID:
 			return MV_6192_TS;
 			break;
         case MV_6190_DEV_ID:
@@ -706,6 +720,8 @@ MV_U32	  mvCtrlAudioSupport(MV_VOID)
             return MV_6280_AUDIO;
             break;
 		case MV_6192_DEV_ID:
+	case MV_6701_DEV_ID:
+	case MV_6702_DEV_ID:
 			return MV_6192_AUDIO;
 			break;
         case MV_6190_DEV_ID:
@@ -753,6 +769,8 @@ MV_U32	  mvCtrlTdmSupport(MV_VOID)
             return MV_6280_TDM;
             break;
 		case MV_6192_DEV_ID:
+	case MV_6701_DEV_ID:
+	case MV_6702_DEV_ID:
 			return MV_6192_TDM;
 			break;
         case MV_6190_DEV_ID:
@@ -809,6 +827,13 @@ MV_U16 mvCtrlModelGet(MV_VOID)
         break;
         case 1:
             if (((MV_REG_READ(PEX_CFG_DIRECT_ACCESS(0,PEX_DEVICE_AND_VENDOR_ID))& 0xffff0000) >> 16)
+                    == MV_6701_DEV_ID)
+                model =	MV_6701_DEV_ID;
+
+            else if (((MV_REG_READ(PEX_CFG_DIRECT_ACCESS(0,PEX_DEVICE_AND_VENDOR_ID))& 0xffff0000) >> 16)
+                    == MV_6702_DEV_ID)
+                model =	MV_6702_DEV_ID;
+            else if (((MV_REG_READ(PEX_CFG_DIRECT_ACCESS(0,PEX_DEVICE_AND_VENDOR_ID))& 0xffff0000) >> 16)
                     == MV_6190_DEV_ID)
                 model =	MV_6190_DEV_ID;
             else
@@ -955,6 +980,12 @@ MV_STATUS mvCtrlModelRevNameGet(char *pNameBuff)
         case MV_6192_A1_ID:
                 mvOsSPrintf (pNameBuff, "%s",MV_6192_A1_NAME);
                 break;
+        case MV_6701_A1_ID:
+                mvOsSPrintf (pNameBuff, "%s",MV_6701_A1_NAME);
+                break;
+        case MV_6702_A1_ID:
+                mvOsSPrintf (pNameBuff, "%s",MV_6702_A1_NAME);
+                break;
         case MV_6180_A1_ID:
                 mvOsSPrintf (pNameBuff, "%s",MV_6180_A1_NAME);
                 break;
@@ -964,11 +995,9 @@ MV_STATUS mvCtrlModelRevNameGet(char *pNameBuff)
         case MV_6282_A0_ID:
                 mvOsSPrintf (pNameBuff, "%s",MV_6282_A0_NAME); 
                 break;
-#ifdef CONFIG_SYNO_MV88F6281
         case MV_6282_A1_ID:
                 mvOsSPrintf (pNameBuff, "%s",MV_6282_A1_NAME); 
                 break;
-#endif
         default:
                 mvCtrlNameGet(pNameBuff);
                 break;

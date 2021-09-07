@@ -1056,6 +1056,8 @@ MV_VOID mvBoardMppGroupIdUpdate(MV_VOID)
             maxMppGrp = MV_6280_MPP_MAX_MODULE;
             break;
 		case MV_6192_DEV_ID:
+	case MV_6701_DEV_ID:
+	case MV_6702_DEV_ID:
 			maxMppGrp = MV_6192_MPP_MAX_MODULE;
 			break;
         case MV_6190_DEV_ID:
@@ -1251,6 +1253,8 @@ MV_VOID mvBoardMppMuxSet(MV_VOID)
             maxMppGrp = MV_6280_MPP_MAX_MODULE;
 			break;
 		case MV_6192_DEV_ID:
+	case MV_6701_DEV_ID:
+	case MV_6702_DEV_ID:
 			maxMppGrp = MV_6192_MPP_MAX_MODULE;
 			break;
         case MV_6190_DEV_ID:
@@ -1361,6 +1365,8 @@ MV_VOID mvBoardTdmMppSet(MV_32 chType)
             		maxMppGrp = MV_6280_MPP_MAX_MODULE;
 			break;
 		case MV_6192_DEV_ID:
+		case MV_6701_DEV_ID:
+		case MV_6702_DEV_ID:
 			maxMppGrp = MV_6192_MPP_MAX_MODULE;
 			break;
         	case MV_6190_DEV_ID:
@@ -1506,6 +1512,8 @@ MV_32 mvBoardTdmSpiModeGet(MV_VOID)
 		case DB_88F6281A_BP_ID:
 		case RD_88F6192A_ID:
 		case DB_88F6192A_BP_ID:
+		case DB_88F6701A_BP_ID:
+		case DB_88F6702A_BP_ID:
 		case DB_88F6282A_BP_ID:
 		case RD_88F6282A_ID:
 #ifdef CONFIG_SYNO_MV88F6281
@@ -1518,6 +1526,7 @@ MV_32 mvBoardTdmSpiModeGet(MV_VOID)
 		case SYNO_RS_6282_ID:
 		case SYNO_DS411_ID:
 		case SYNO_DS212_ID:
+		case SYNO_6702_1BAY_ID:
 #endif
 			 return DUAL_CHIP_SELECT_MODE;
 		default:
@@ -1560,6 +1569,8 @@ MV_VOID mvBoardMppModuleTypePrint(MV_VOID)
             maxMppGrp = MV_6280_MPP_MAX_MODULE;
             break;
 		case MV_6192_DEV_ID:
+	case MV_6701_DEV_ID:
+	case MV_6702_DEV_ID:
 			maxMppGrp = MV_6192_MPP_MAX_MODULE;
 			break;
         case MV_6190_DEV_ID:
@@ -2156,6 +2167,10 @@ MV_U32 mvBoardIdGet(MV_VOID)
 		tmpBoardId = RD_88F6282A_ID;
 		#elif defined(DB_88F6192A)
 		tmpBoardId = DB_88F6192A_BP_ID;
+		#elif defined(DB_88F6701A)
+		tmpBoardId = DB_88F6701A_BP_ID;
+		#elif defined(DB_88F6702A)
+		tmpBoardId = DB_88F6702A_BP_ID;
 		#elif defined(DB_88F6190A)
 		tmpBoardId = DB_88F6190A_BP_ID;
 		#elif defined(RD_88F6192A)
@@ -2367,6 +2382,7 @@ MV_32 mvBoardSlicGpioPinGet(MV_U32 slicNum)
 	case SYNO_RS_6282_ID:
 	case SYNO_DS411_ID:
 	case SYNO_DS212_ID:
+	case SYNO_6702_1BAY_ID:
 #endif
 	default:
 		return MV_ERROR;

@@ -2231,8 +2231,13 @@ static int transport_get_read_capacity(se_device_t *dev)
 		return 0;
 	}
 
+#ifdef MY_ABC_HERE
+	printk(KERN_INFO "iSCSI - READ_CAPACITY returned 0xFFFFFFFF, issuing"
+			" SAI_READ_CAPACITY_16\n");
+#else
 	printk(KERN_INFO "READ_CAPACITY returned 0xFFFFFFFF, issuing"
 			" SAI_READ_CAPACITY_16\n");
+#endif
 
 	memset(cdb, 0, SCSI_CDB_SIZE);
 	cdb[0] = 0x9e; /* SERVICE_ACTION_IN */

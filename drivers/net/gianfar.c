@@ -260,6 +260,17 @@ static int gfar_of_init(struct net_device *dev)
 			FSL_GIANFAR_DEV_HAS_MAGIC_PACKET |
 			FSL_GIANFAR_DEV_HAS_EXTENDED_HASH;
 
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+	/*
+	 * avoid tunneled IP frames cannot be properly parsed.
+	 * errata eTSEC 37/39/49/51/52/53/54/56/64/66/70/75/78/80/81/83
+	 */
+	if (MPC8548_ERRATA(2, 1)) {
+		priv->device_flags &=
+		~(FSL_GIANFAR_DEV_HAS_CSUM | FSL_GIANFAR_DEV_HAS_VLAN);
+	}
+#endif
+
 	ctype = of_get_property(np, "phy-connection-type", NULL);
 
 	/* We only care about rgmii-id.  The rest are autodetected */

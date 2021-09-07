@@ -218,7 +218,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define     MV_MX25L3206_MAX_FAST_SPI_FREQ      50000000 /*50MHz*/
 #define     MV_MX25L3206_FAST_READ_DUMMY_BYTES  1
 
-#endif
+#define		MV_N25Q_WREN_CMND_OPCD				0x06    /* Write Enable */
+#define		MV_N25Q_WRDI_CMND_OPCD				0x04    /* Write Disable */
+#define		MV_N25Q_RDID_CMND_OPCD				0x9F    /* Read ID */
+#define		MV_N25Q_RDSR_CMND_OPCD				0x05    /* Read Status Register */
+#define		MV_N25Q_WRSR_CMND_OPCD				0x01    /* Write Status Register */
+#define		MV_N25Q_READ_CMND_OPCD				0x03    /* Sequential Read */
+#define		MV_N25Q_FAST_RD_CMND_OPCD			0x0B    /* Fast Read */
+#define		MV_N25Q_PP_CMND_OPCD				0x02    /* Page Program */
+#define		MV_N25Q_SE_CMND_OPCD				0xD8    /* Sector Erase */
+#define		MV_N25Q_BE_CMND_OPCD				0xC7    /* Bulk Erase */
+#define		MV_N25Q032_SECTOR_SIZE				0x10000 /* 64K */
+#define		MV_N25Q032_SECTOR_NUMBER			64
+#define		MV_N25Q_PAGE_SIZE					0x100   /* 256 byte */
+#define		MV_N25QXXX_ST_MANF_ID				0x20
+#define		MV_N25Q032_DEVICE_ID				0xBA16
+#define		MV_N25Q032_MAX_SPI_FREQ				50000000
+#define		MV_N25Q032_MAX_FAST_SPI_FREQ		100000000
+#define		MV_N25Q032_FAST_READ_DUMMY_BYTES	1
+
+#endif /*CONFIG_SYNO_MV88F6281*/
 
 #define		MV_S25FL_WREN_CMND_OPCD			    0x06	/* Write Enable */
 #define		MV_S25FL_WRDI_CMND_OPCD			    0x04	/* Write Disable */

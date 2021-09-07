@@ -79,11 +79,11 @@ void iscsi_sess_force_logout(struct iscsi_session_s* sess)
 {
 	iscsi_conn_t* conn = NULL;
 
-	spin_lock(&sess->conn_lock);
+	spin_lock_bh(&sess->conn_lock);
 	list_for_each_entry(conn, &sess->sess_conn_list, conn_list) {
 		iscsi_send_async_msg(conn, 0, ASYNC_EVENT_REQUEST_LOGOUT, 0);
 	}
-	spin_unlock(&sess->conn_lock);
+	spin_unlock_bh(&sess->conn_lock);
 }
 
 void iscsi_acl_force_logout(struct se_node_acl_s* acl)
@@ -2488,46 +2488,13 @@ void iscsi_print_session_params(iscsi_session_t *sess)
 	iscsi_dump_sess_ops(sess->sess_ops);
 }
 
-#ifdef MY_ABC_HERE
-void iscsi_rxthread_wakeup(struct iscsi_conn_s* conn)
-{
-	atomic_set(&conn->connection_data_ready, 1);
-	if( conn->thread_set ) {
-		wake_up_process(conn->thread_set->rx_thread);
-	}
-}
-
-void iscsi_sk_write_space(struct sock* sk)
-{
-	struct iscsi_conn_s* conn = sk->sk_user_data;
-
-	iscsi_rxthread_wakeup(conn);
-	conn->old_sk_write_space(sk);
-}
-
-void iscsi_sk_data_ready(struct sock* sk, int len)
-{
-	struct iscsi_conn_s* conn = sk->sk_user_data;
-
-	iscsi_rxthread_wakeup(conn);
-	conn->old_sk_data_ready(sk, len);
-}
-#endif
-
 /*	iscsi_do_rx_data():
  *
  *
  */
-#ifdef MY_ABC_HERE
-static inline int iscsi_do_rx_data(
-	iscsi_conn_t *conn,
-	iscsi_data_count_t *count,
-	int blocking)
-#else
 static inline int iscsi_do_rx_data(
 	iscsi_conn_t *conn,
 	iscsi_data_count_t *count)
-#endif
 {
 	int data = count->data_length, rx_loop = 0, total_rx = 0;
 	u32 rx_marker_val[count->ss_marker_count], rx_marker_iov = 0;
@@ -2634,34 +2601,12 @@ static inline int iscsi_do_rx_data(
 		set_fs(get_ds());
 
 		conn->sock->sk->sk_allocation = GFP_ATOMIC;
-#ifdef MY_ABC_HERE
-		if( !blocking ) {
-			rx_loop = sock_recvmsg(conn->sock, &msg, (data - total_rx), MSG_DONTWAIT | MSG_NOSIGNAL);
-		} else {
-			rx_loop = sock_recvmsg(conn->sock, &msg, (data - total_rx), MSG_WAITALL);
-		}
-#else
 		rx_loop = sock_recvmsg(conn->sock, &msg,
 				(data - total_rx), MSG_WAITALL);
-#endif
 
 		set_fs(oldfs);
 
 		if (rx_loop <= 0) {
-#ifdef MY_ABC_HERE
-			if( !blocking ) {
-				switch( rx_loop ) {
-					case -EAGAIN:
-					case -ERESTARTSYS:
-						if( !atomic_read(&conn->connection_data_ready) ) {
-							__set_current_state(TASK_INTERRUPTIBLE);
-							schedule();
-						}
-						atomic_set(&conn->connection_data_ready, 0);
-						continue;
-				}
-			}
-#endif
 			TRACE(TRACE_NET, "rx_loop: %d total_rx: %d\n",
 				rx_loop, total_rx);
 			return rx_loop;
@@ -2831,20 +2776,11 @@ static inline int iscsi_do_tx_data(
  *
  *
  */
-#ifdef MY_ABC_HERE
-int rx_data(
-	iscsi_conn_t *conn,
-	struct iovec *iov,
-	int iov_count,
-	int data,
-	int blocking)
-#else
 int rx_data(
 	iscsi_conn_t *conn,
 	struct iovec *iov,
 	int iov_count,
 	int data)
-#endif
 {
 	iscsi_data_count_t c;
 
@@ -2863,11 +2799,7 @@ int rx_data(
 			return -1;
 	}
 
-#ifdef MY_ABC_HERE
-	return iscsi_do_rx_data(conn, &c, blocking);
-#else
 	return iscsi_do_rx_data(conn, &c);
-#endif
 }
 
 /*	tx_data():

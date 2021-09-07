@@ -196,6 +196,7 @@ int dma_mmap_writecombine(struct device *, struct vm_area_struct *,
 
 #ifdef CONFIG_MV_SP_I_FTCH_DB_INV
 extern void mv_l2_inv_range(const void *start, const void *end);
+extern void mv_l2_inv_range_pa(dma_addr_t start, dma_addr_t end);
 static inline void mv_l2_sync(const void *start, size_t size, int direction)
 {
 	const void *end = start + size;
@@ -213,6 +214,23 @@ static inline void mv_l2_sync(const void *start, size_t size, int direction)
 		BUG();
 	}
 }
+
+static inline void mv_l2_sync_pa(dma_addr_t start, size_t size, int direction)
+{
+	dma_addr_t end = start + size;
+
+	switch (direction) {
+	case DMA_FROM_DEVICE:           /*  */
+	case DMA_BIDIRECTIONAL:         /*  */
+		mv_l2_inv_range_pa(start, end);
+		break;
+	case DMA_TO_DEVICE:             /* */
+		break;
+	default:
+		BUG();
+	}
+}
+
 #endif
 #ifdef CONFIG_DMABOUNCE
 /*
@@ -375,9 +393,11 @@ static inline void dma_unmap_single(struct device *dev, dma_addr_t handle,
 		size_t size, enum dma_data_direction dir)
 {
 #ifdef CONFIG_MV_SP_I_FTCH_DB_INV
+#ifndef CONFIG_HIGHMEM
 	mv_l2_sync(phys_to_virt(handle), size, dir);
 #else
-	/* nothing to do */
+	mv_l2_sync_pa(handle, size, dir);
+#endif
 #endif
 }
 #endif /* CONFIG_DMABOUNCE */

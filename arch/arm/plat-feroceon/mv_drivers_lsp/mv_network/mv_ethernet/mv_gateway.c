@@ -57,6 +57,7 @@ int SWITCH_PORT_2;
 int SWITCH_PORT_3;
 int SWITCH_PORT_4;
 
+#include "mv_switch/mv_switch.h"
 
 /* use this MACRO to find if a certain port (0-7) is actually connected */
 #define SWITCH_IS_PORT_CONNECTED(p)	                            \
@@ -86,9 +87,6 @@ extern int mv_gtw_igmp_snoop_process(struct sk_buff* skb, unsigned char port, un
 static char *cmdline = NULL;
 
 struct mv_gtw_config    gtw_config;
-
-GT_QD_DEV qddev,        *qd_dev = NULL;
-static GT_SYS_CONFIG    qd_cfg;
 
 static int mv_gtw_port2lport(int port)
 {
@@ -348,42 +346,7 @@ static int mv_gtw_parse_net_config(char* cmdline)
     return status;
 }
 
-GT_BOOL gtwReadMiiWrap(GT_QD_DEV* dev, unsigned int portNumber, unsigned int MIIReg, unsigned int* value)
-{
-    unsigned long   flags;
-    unsigned short  tmp;
-    MV_STATUS       status;
 
-    spin_lock_irqsave(&mii_lock, flags);
-
-    status = mvEthPhyRegRead(portNumber, MIIReg , &tmp);
-    spin_unlock_irqrestore(&mii_lock, flags);
-    *value = tmp;
-
-    if (status == MV_OK)
-        return GT_TRUE;
-
-    return GT_FALSE;
-}
-
-
-GT_BOOL gtwWriteMiiWrap(GT_QD_DEV* dev, unsigned int portNumber, unsigned int MIIReg, unsigned int data)
-{
-    unsigned long   flags;
-    unsigned short  tmp;
-    MV_STATUS       status;
-
-    spin_lock_irqsave(&mii_lock, flags);
-    tmp = (unsigned short)data;
-    status = mvEthPhyRegWrite(portNumber, MIIReg, tmp);
-
-    spin_unlock_irqrestore(&mii_lock, flags);
-
-    if (status == MV_OK)
-        return GT_TRUE;
-
-    return GT_FALSE;
-} 
 
 static int mv_gtw_set_port_based_vlan(unsigned int ports_mask)
 {
@@ -599,7 +562,7 @@ int __init mv_gtw_net_setup(int port)
     return 0;
 }
 
-static int mv_switch_init(int port)
+static int mv_gw_switch_init(int port)
 {
     unsigned int        i, p;
     unsigned char       cnt;
@@ -607,34 +570,12 @@ static int mv_switch_init(int port)
     struct mv_vlan_cfg  *nc;
     GT_JUMBO_MODE       jumbo_mode;
     GT_DEV_EVENT        gt_event;
-    /* printk("init switch layer... "); */
-
-    memset((char*)&qd_cfg,0,sizeof(GT_SYS_CONFIG));
-
-    /* init config structure for qd package */
-    qd_cfg.BSPFunctions.readMii   = gtwReadMiiWrap;
-    qd_cfg.BSPFunctions.writeMii  = gtwWriteMiiWrap;
-    qd_cfg.BSPFunctions.semCreate = NULL;
-    qd_cfg.BSPFunctions.semDelete = NULL;
-    qd_cfg.BSPFunctions.semTake   = NULL;
-    qd_cfg.BSPFunctions.semGive   = NULL;
-    qd_cfg.initPorts = GT_TRUE;
-    qd_cfg.cpuPortNum = SWITCH_PORT_CPU;
-    if (mvBoardSmiScanModeGet(port) == 1) {
-	qd_cfg.mode.baseAddr = 0;
-        qd_cfg.mode.scanMode = SMI_MANUAL_MODE;
-    }
-    else if (mvBoardSmiScanModeGet(port) == 2) {
-        qd_cfg.mode.baseAddr = mvBoardPhyAddrGet(port); /* was 0xA; */
-        qd_cfg.mode.scanMode = SMI_MULTI_ADDR_MODE;
-    }
-    /* load switch sw package */
-    if( qdLoadDriver(&qd_cfg, &qddev) != GT_OK) {
-	printk("qdLoadDriver failed\n");
-        return -1;
-    }
-    qd_dev = &qddev;
-
+    printk("init switch layer... "); 	
+	if (!qd_dev) {
+		printk("qd_dev is NULL in %s\n",__func__);
+		return -1;
+	}
+		
     ETH_DBG( ETH_DBG_LOAD, ("Device ID     : 0x%x\n",qd_dev->deviceId));
     ETH_DBG( ETH_DBG_LOAD, ("Base Reg Addr : 0x%x\n",qd_dev->baseRegAddr));
     ETH_DBG( ETH_DBG_LOAD, ("No. of Ports  : %d\n",qd_dev->numOfPorts));
@@ -1301,8 +1242,8 @@ static void mv_gtw_link_timer_function(unsigned long data)
 int  __init mv_gtw_init_complete(mv_eth_priv* priv)
 {
     int status = 0;
-
-    status = mv_switch_init(priv->port);
+	status = mv_gw_switch_init(priv->port);	 
+	 
     if (status != 0)
 	return status;
 

@@ -112,6 +112,9 @@ extern "C" /*{*/
 #define MV_SATA_DEVICE_ID_6282                 0x6282 /*88f6282 integrated sata*/
 #define MV_SATA_DEVICE_ID_6192                 0x6192 /*88f6192 integrated sata*/
 #define MV_SATA_DEVICE_ID_6190                 0x6190 /*88f6190 integrated sata*/
+#define MV_SATA_DEVICE_ID_6701                 0x6701 /*88f6701 integrated sata*/
+#define MV_SATA_DEVICE_ID_6702                 0x6702 /*88f6702 integrated sata*/
+
 
 #define MV_SATA_CHANNELS_NUM                    8
 #define MV_SATA_UNITS_NUM                       2

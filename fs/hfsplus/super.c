@@ -21,6 +21,11 @@ static void hfsplus_destroy_inode(struct inode *inode);
 
 #include "hfsplus_fs.h"
 
+#ifdef MY_ABC_HERE
+int syno_hfsplus_mutex_init = 0;
+struct mutex syno_hfsplus_global_mutex;
+#endif
+
 struct inode *hfsplus_iget(struct super_block *sb, unsigned long ino)
 {
 	struct hfs_find_data fd;
@@ -316,6 +321,12 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	if (!sbi)
 		return -ENOMEM;
 
+#ifdef MY_ABC_HERE
+    if (0 == syno_hfsplus_mutex_init) {
+        syno_hfsplus_mutex_init = 1;
+        mutex_init(&syno_hfsplus_global_mutex);
+	}
+#endif
 	sb->s_fs_info = sbi;
 	INIT_HLIST_HEAD(&sbi->rsrc_inodes);
 	hfsplus_fill_defaults(sbi);

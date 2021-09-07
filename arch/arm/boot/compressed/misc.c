@@ -18,10 +18,19 @@
 
 unsigned int __machine_arch_type;
 
+#ifdef MY_ABC_HERE
+#define _LINUX_STRING_H_
+#endif
+
 #include <linux/compiler.h>	/* for inline */
 #include <linux/types.h>	/* for size_t */
 #include <linux/stddef.h>	/* for NULL */
 #include <asm/string.h>
+#ifdef MY_ABC_HERE
+#include <linux/linkage.h>
+
+#include <asm/unaligned.h>
+#endif
 
 #ifdef STANDALONE_DEBUG
 #define putstr printf
@@ -190,9 +199,12 @@ static inline __ptr_t memcpy(__ptr_t __dest, __const __ptr_t __src,
 /*
  * gzip delarations
  */
+#ifndef MY_ABC_HERE
 #define OF(args)  args
+#endif
 #define STATIC static
 
+#ifndef MY_ABC_HERE
 typedef unsigned char  uch;
 typedef unsigned short ush;
 typedef unsigned long  ulg;
@@ -217,6 +229,7 @@ static unsigned outcnt;		/* bytes in output buffer */
 #define RESERVED     0xC0 /* bit 6,7:   reserved */
 
 #define get_byte()  (inptr < insize ? inbuf[inptr++] : fill_inbuf())
+#endif
 
 /* Diagnostic functions */
 #ifdef DEBUG
@@ -235,24 +248,37 @@ static unsigned outcnt;		/* bytes in output buffer */
 #  define Tracecv(c,x)
 #endif
 
+#ifndef MY_ABC_HERE
 static int  fill_inbuf(void);
 static void flush_window(void);
+#endif
 static void error(char *m);
 
 extern char input_data[];
 extern char input_data_end[];
 
+#ifdef MY_ABC_HERE
+static unsigned char *output_data;
+static unsigned long output_ptr;
+#else
 static uch *output_data;
 static ulg output_ptr;
 static ulg bytes_out;
+#endif
+
 
 static void error(char *m);
 
 static void putstr(const char *);
 
+#ifdef MY_ABC_HERE
+static unsigned long free_mem_ptr;
+static unsigned long free_mem_end_ptr;
+#else
 extern int end;
 static ulg free_mem_ptr;
 static ulg free_mem_end_ptr;
+#endif
 
 #ifdef STANDALONE_DEBUG
 #define NO_INFLATE_MALLOC
@@ -260,6 +286,19 @@ static ulg free_mem_end_ptr;
 
 #define ARCH_HAS_DECOMP_WDOG
 
+#ifdef MY_ABC_HERE
+#ifdef CONFIG_KERNEL_GZIP
+#include "../../../../lib/decompress_inflate.c"
+#endif
+
+#ifdef CONFIG_KERNEL_LZMA
+#include "../../../../lib/decompress_unlzma.c"
+#endif
+
+#ifdef CONFIG_KERNEL_LZO
+#include "../../../../lib/decompress_unlzo.c"
+#endif
+#else
 #include "../../../../lib/inflate.c"
 
 /* ===========================================================================
@@ -301,6 +340,7 @@ void flush_window(void)
 	putstr(".");
 }
 
+#endif
 #ifndef arch_error
 #define arch_error(x)
 #endif
@@ -316,22 +356,54 @@ static void error(char *x)
 	while(1);	/* Halt */
 }
 
+#ifdef MY_ABC_HERE
+asmlinkage void __div0(void)
+{
+        error("Attempting division by 0!");
+}
+#endif
+
 #ifndef STANDALONE_DEBUG
 
+#ifdef MY_ABC_HERE
+unsigned long
+decompress_kernel(unsigned long output_start, unsigned long free_mem_ptr_p,
+                unsigned long free_mem_ptr_end_p,
+                int arch_id)
+#else
 ulg
 decompress_kernel(ulg output_start, ulg free_mem_ptr_p, ulg free_mem_ptr_end_p,
 		  int arch_id)
+#endif
 {
+#ifdef MY_ABC_HERE
+	unsigned char *tmp;
+
+	output_data             = (unsigned char *)output_start;
+#else
 	output_data		= (uch *)output_start;	/* Points to kernel start */
+#endif
 	free_mem_ptr		= free_mem_ptr_p;
 	free_mem_end_ptr	= free_mem_ptr_end_p;
 	__machine_arch_type	= arch_id;
 
 	arch_decomp_setup();
 
+#ifdef MY_ABC_HERE
+	tmp = (unsigned char *) (((unsigned long)input_data_end) - 4);
+	output_ptr = get_unaligned_le32(tmp);
+#else
 	makecrc();
+#endif
+
 	putstr("Uncompressing Linux...");
+#ifdef MY_ABC_HERE
+	decompress(input_data, input_data_end - input_data,
+				NULL, NULL, output_data, NULL, error);
+#else
 	gunzip();
+#endif
+
 	putstr(" done, booting the kernel.\n");
 	return output_ptr;
 }
@@ -343,9 +415,17 @@ int main()
 {
 	output_data = output_buffer;
 
+#ifndef MY_ABC_HERE
 	makecrc();
+#endif
 	putstr("Uncompressing Linux...");
+#ifndef MY_ABC_HERE
 	gunzip();
+#endif
+#ifdef MY_ABC_HERE
+	decompress(input_data, input_data_end - input_data,
+					NULL, NULL, output_data, NULL, error);
+#endif
 	putstr("done.\n");
 	return 0;
 }

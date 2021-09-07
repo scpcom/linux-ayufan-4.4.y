@@ -129,6 +129,81 @@ static u32 xhci_port_state_to_neutral(u32 state)
 	return (state & XHCI_PORT_RO) | (state & XHCI_PORT_RWS);
 }
 
+#ifdef MY_ABC_HERE
+extern int disable_usb3;
+#endif
+
+static void xhci_disable_port(struct xhci_hcd *xhci, u16 wIndex,
+		u32 __iomem *addr, u32 port_status)
+{
+#ifdef MY_ABC_HERE
+	int ports = HCS_MAX_PORTS(xhci->hcs_params1);
+	/* Don't allow the USB core to disable SuperSpeed ports. */
+	if (0 == disable_usb3 && wIndex < ports/2) {
+		xhci_dbg(xhci, "Ignoring request to disable "
+				"SuperSpeed port.\n");
+		return;
+	}
+#endif
+
+	/* Write 1 to disable the port */
+	xhci_writel(xhci, port_status | PORT_PE, addr);
+	port_status = xhci_readl(xhci, addr);
+	xhci_dbg(xhci, "disable port, actual port %d status  = 0x%x\n",
+			wIndex, port_status);
+}
+
+static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
+		u16 wIndex, u32 __iomem *addr, u32 port_status)
+{
+	char *port_change_bit;
+	u32 status;
+
+	switch (wValue) {
+	case USB_PORT_FEAT_C_RESET:
+		status = PORT_RC;
+		port_change_bit = "reset";
+		break;
+	case USB_PORT_FEAT_C_CONNECTION:
+		status = PORT_CSC;
+		port_change_bit = "connect";
+		break;
+	case USB_PORT_FEAT_C_OVER_CURRENT:
+		status = PORT_OCC;
+		port_change_bit = "over-current";
+		break;
+	case USB_PORT_FEAT_C_ENABLE:
+		status = PORT_PEC;
+		port_change_bit = "enable/disable";
+		break;
+	default:
+		/* Should never happen */
+		return;
+	}
+	/* Change bits are all write 1 to clear */
+	xhci_writel(xhci, port_status | status, addr);
+	port_status = xhci_readl(xhci, addr);
+
+#ifdef MY_ABC_HERE
+	if (status == PORT_CSC) {
+		int link_state = (port_status >> 5) & 0xf;
+		int ori_status = port_status;
+		if (port_status & (PORT_PLC | PORT_CEC)) {
+			port_status = xhci_port_state_to_neutral(port_status);
+			xhci_writel(xhci, port_status | (ori_status & (PORT_PLC | PORT_CEC)), addr);
+			port_status = xhci_readl(xhci, addr);
+		}
+		if (link_state == 0x6 || link_state == 0x4) {
+			xhci_writel(xhci, (0x5 << 5) | PORT_LINK_STROBE, addr);
+			port_status = xhci_readl(xhci, addr); /* unblock any posted writes */
+		}
+	}
+#endif
+
+	xhci_dbg(xhci, "clear port %s change, actual port %d status  = 0x%x\n",
+			port_change_bit, wIndex, port_status);
+}
+
 int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		u16 wIndex, char *buf, u16 wLength)
 {
@@ -138,7 +213,6 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	u32 temp, status;
 	int retval = 0;
 	u32 __iomem *addr;
-	char *port_change_bit;
 
 	ports = HCS_MAX_PORTS(xhci->hcs_params1);
 
@@ -213,6 +287,15 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 
 			temp = xhci_readl(xhci, addr);
 			xhci_dbg(xhci, "set port reset, actual port %d status  = 0x%x\n", wIndex, temp);
+
+#ifdef MY_ABC_HERE
+			// wait device reset, some devices are slow, then set address will fail
+			// ex. WD passport, Fujitsu, HP.
+			msleep(1000);
+			temp = xhci_readl(xhci, addr);
+			xhci_dbg(xhci, "set port reset, actual port %d status  = 0x%x\n", wIndex, temp);
+#endif
+
 			break;
 		default:
 			goto error;
@@ -229,26 +312,18 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		temp = xhci_port_state_to_neutral(temp);
 		switch (wValue) {
 		case USB_PORT_FEAT_C_RESET:
-			status = PORT_RC;
-			port_change_bit = "reset";
-			break;
 		case USB_PORT_FEAT_C_CONNECTION:
-			status = PORT_CSC;
-			port_change_bit = "connect";
-			break;
 		case USB_PORT_FEAT_C_OVER_CURRENT:
-			status = PORT_OCC;
-			port_change_bit = "over-current";
+		case USB_PORT_FEAT_C_ENABLE:
+			xhci_clear_port_change_bit(xhci, wValue, wIndex,
+					addr, temp);
+			break;
+		case USB_PORT_FEAT_ENABLE:
+			xhci_disable_port(xhci, wIndex, addr, temp);
 			break;
 		default:
 			goto error;
 		}
-		/* Change bits are all write 1 to clear */
-		xhci_writel(xhci, temp | status, addr);
-		temp = xhci_readl(xhci, addr);
-		xhci_dbg(xhci, "clear port %s change, actual port %d status  = 0x%x\n",
-				port_change_bit, wIndex, temp);
-		temp = xhci_readl(xhci, addr); /* unblock any posted writes */
 		break;
 	default:
 error:

@@ -76,11 +76,7 @@ int iscsi_login_rx_data(
 		return -1;
 	}
 
-#ifdef MY_ABC_HERE
-	rx_got = rx_data(conn, &iov, 1, length, 1);
-#else
 	rx_got = rx_data(conn, &iov, 1, length);
-#endif
 	if (rx_got != length) {
 		printk(KERN_ERR "rx_data returned %d, expecting %d.\n",
 				rx_got, length);
@@ -1309,7 +1305,7 @@ static int iscsi_check_acceptor_state(iscsi_param_t *param, char *value)
 				return -1;
 		}
 
-#ifndef CONFIG_SYNO_LIO
+#ifndef MY_ABC_HERE
 		if (!strcmp(param->name, MAXRECVDATASEGMENTLENGTH))
 			SET_PSTATE_REPLY_OPTIONAL(param);
 #endif
@@ -1324,9 +1320,15 @@ static int iscsi_check_acceptor_state(iscsi_param_t *param, char *value)
 		negoitated_value = iscsi_check_valuelist_for_support(
 					param, value);
 		if (!(negoitated_value)) {
+#ifdef MY_ABC_HERE
+			printk(KERN_ERR "iSCSI - Proposer's value list \"%s\" contains"
+				" no valid values from Acceptor's value list"
+				" \"%s\".\n", value, param->value);
+#else
 			printk(KERN_ERR "Proposer's value list \"%s\" contains"
 				" no valid values from Acceptor's value list"
 				" \"%s\".\n", value, param->value);
+#endif
 			return -1;
 		}
 		if (iscsi_update_param_value(param, negoitated_value) < 0)

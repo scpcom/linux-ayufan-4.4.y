@@ -46,9 +46,6 @@ static struct sd_softc scSynoBios;
 static SYNO_SYS_STATUS *pgSysStatus = NULL;
 
 #ifdef MY_ABC_HERE
-extern int (*funcSYNOSendNetLinkEvent)(unsigned int type, unsigned int ifaceno);
-#endif
-#ifdef MY_ABC_HERE
 extern int (*funcSYNOSendHibernationEvent)(unsigned int type, unsigned int diskno);
 #endif
 #ifdef MY_ABC_HERE
@@ -125,22 +122,6 @@ static int synobios_record_hibernation_event(unsigned int type, unsigned int dis
 	event.data1 = type;
 	event.data2 = diskno;
 	event.data3 = event.data4 = 0;
-
-	ret = synobios_record_event_new(&scSynoBios, &event);
-
-	return ret;
-}
-#endif
-
-#ifdef MY_ABC_HERE
-static int synobios_record_netlink_event(unsigned int type, unsigned int ifaceno)
-{
-	int ret;
-	SYNOBIOSEVENT   event;
-
-	event.event = SYNO_EVENT_NETLINK;
-	event.data1 = type;
-	event.data2 = ifaceno;
 
 	ret = synobios_record_event_new(&scSynoBios, &event);
 
@@ -792,9 +773,6 @@ int synobios_init(void)
 	funcSYNOSendRaidEvent = synobios_record_raid_event;
 #endif
 #ifdef MY_ABC_HERE
-	funcSYNOSendNetLinkEvent = synobios_record_netlink_event;
-#endif
-#ifdef MY_ABC_HERE
 	funcSYNOSendHibernationEvent = synobios_record_hibernation_event;
 #endif
 #ifdef MY_ABC_HERE
@@ -818,9 +796,6 @@ void synobios_cleanup(void)
 {
 #ifdef MY_ABC_HERE
 	funcSYNOSendRaidEvent = NULL;
-#endif
-#ifdef MY_ABC_HERE
-	funcSYNOSendNetLinkEvent = NULL;
 #endif
 #ifdef MY_ABC_HERE
 	funcSYNOSendHibernationEvent = NULL;

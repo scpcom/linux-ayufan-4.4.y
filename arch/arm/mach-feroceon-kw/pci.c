@@ -22,6 +22,9 @@
 #include <linux/interrupt.h>
 #include <linux/spinlock.h>
 #include <linux/init.h>
+#ifdef CONFIG_SYNO_MV88F6281
+#include <linux/synobios.h>
+#endif
                                                                                                                              
 #include <mach/hardware.h>
 #include <asm/io.h>
@@ -51,6 +54,10 @@ static int __init mv_map_irq_1(struct pci_dev *dev, u8 slot, u8 pin);
 void mv_pci_error_init(u32 pciIf);
 static irqreturn_t pex_error_interrupt(int irq, void *dev_id);
 
+#ifdef CONFIG_SYNO_MV88F6281
+extern char gszSynoHWVersion[];
+#endif
+
 static struct pex_if_error {
 	MV_8 irq_name[PCI_ERR_NAME_LEN];
 	MV_U32 ifNumber;
@@ -70,6 +77,17 @@ void __init mv_pci_preinit(void)
 	for (pciIf = 0; pciIf < maxif; pciIf++) 
 	{
 #ifdef CONFIG_SYNO_MV88F6281
+		//this workaround is for 7042, DS212 does not have one, so it is not necessary.
+		//212+ attaches USB 3.0 on PCIe 0x1, so it cannot be reset.
+		if ( 0 == strncmp(HW_DS212, gszSynoHWVersion, strlen(HW_DS212))) {
+			if( ( 0 == strncmp(HW_DS212p, gszSynoHWVersion, strlen(HW_DS212p))) && (0 == pciIf) )
+				    goto apply_pcie_workaround;
+			else 
+					goto skip_pcie_workaround;
+		} else if (0 == strncmp(HW_DS112, gszSynoHWVersion, strlen(HW_DS112))) {
+			goto skip_pcie_workaround;
+		}
+apply_pcie_workaround:
 		if (!(0x1 & MV_REG_READ(PEX_LINK_STATUS_REG(pciIf)))) {
 			/*
 			* Synology 6281 PCIe link issue workaround.
@@ -95,6 +113,7 @@ void __init mv_pci_preinit(void)
 
 			printk("PCIe link is enable, apply PCIe workaround\n");
 		}
+skip_pcie_workaround:
 #endif
 
 		retval = mvPexInit(pciIf, MV_PEX_ROOT_COMPLEX);

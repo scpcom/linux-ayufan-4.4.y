@@ -141,7 +141,11 @@ struct nand_oobinfo {
 	__u32 useecc;
 	__u32 eccbytes;
 	__u32 oobfree[8][2];
+#ifdef CONFIG_NAND_RS_ECC_SUPPORT
+	__u32 eccpos[40];
+#else
 	__u32 eccpos[32];
+#endif
 };
 
 struct nand_oobfree {

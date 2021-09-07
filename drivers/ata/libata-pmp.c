@@ -9,6 +9,9 @@
 
 #include <linux/kernel.h>
 #include <linux/libata.h>
+#ifdef MY_ABC_HERE
+#include <linux/sched.h>
+#endif
 #include "libata.h"
 
 #ifdef MY_ABC_HERE
@@ -300,13 +303,25 @@ int
 syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 {
 	SYNO_PM_PKG pm_pkg;
-	int iIsFail = 0;
 	int iRet = -1;
+	int iRetry = 0;
 	unsigned long flags = 0;
 
 	if (NULL == ap) {
 		goto END;
 	}
+
+	spin_lock_irqsave(ap->lock, flags);
+	while(ap->pflags & ATA_PFLAG_PMP_PMCTL) {
+		DBGMESG("port %d can't do pmp power ctl %d, must waiting for others\n", ap->print_id, blPowerOn);
+		spin_unlock_irqrestore(ap->lock, flags);
+		schedule_timeout_uninterruptible(HZ);
+		spin_lock_irqsave(ap->lock, flags);
+	}
+	/* lock to prevent others to do pmp power control */
+	ap->pflags |= ATA_PFLAG_PMP_PMCTL;
+	DBGMESG("port %d do pmp power ctl %d\n", ap->print_id, blPowerOn);
+	spin_unlock_irqrestore(ap->lock, flags);
 
 	syno_pm_unique_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
 							sata_pmp_gscr_devid(ap->link.device->gscr),
@@ -329,20 +344,17 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 		}
 	}
 
-	if (blPowerOn ^ syno_pm_is_poweron(sata_pmp_gscr_vendor(ap->link.device->gscr),
-							sata_pmp_gscr_devid(ap->link.device->gscr),
-							&pm_pkg)) {
-		if (!blPowerOn) {
-			spin_lock_irqsave(ap->lock, flags);
-			ap->pflags |= ATA_PFLAG_PMP_PMOFF;
-			spin_unlock_irqrestore(ap->lock, flags);
-		}
+	for (iRetry = 0; blPowerOn ^ syno_pm_is_poweron(sata_pmp_gscr_vendor(ap->link.device->gscr),
+													sata_pmp_gscr_devid(ap->link.device->gscr),
+													&pm_pkg)
+					 && iRetry < ATA_EH_PMP_TRIES; ++iRetry) {
+
 
 		syno_pm_poweron_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
 								 sata_pmp_gscr_devid(ap->link.device->gscr),
 								 &pm_pkg, 0);
-		if ((iIsFail = syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg))) {
-			goto END_GPIO_WRITE;
+		if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
+			goto END;
 		}
 
 		if (blPowerOn) {
@@ -354,26 +366,40 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 		syno_pm_poweron_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
 								 sata_pmp_gscr_devid(ap->link.device->gscr),
 								 &pm_pkg, 1);
-		if ((iIsFail = syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg))) {
-			goto END_GPIO_WRITE;
+		if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
+			goto END;
 		}
 
-#ifdef MY_ABC_HERE
 		if (blPowerOn) {
+			DBGMESG("port %d delay 3000ms wait for HW ready\n", ap->print_id);
+			SleepForLatency();
+#ifdef MY_ABC_HERE
 			ata_port_printk(ap, KERN_INFO, "PMP Power control set ATA_EH_SYNO_PWON\n");
 			ap->link.eh_context.i.action |= ATA_EH_SYNO_PWON;
-		}
 #endif
-
-END_GPIO_WRITE:
-		if (!blPowerOn) {
-			spin_lock_irqsave(ap->lock, flags);
-			ap->pflags &= ~ATA_PFLAG_PMP_PMOFF;
-			spin_unlock_irqrestore(ap->lock, flags);
 		}
 
-		if (iIsFail) {
+		/* test if this power control success */
+		syno_pm_unique_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+				sata_pmp_gscr_devid(ap->link.device->gscr),
+				&pm_pkg);
+		if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
 			goto END;
+		}
+		if (syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg)) {
+			goto END;
+		}
+		if (blPowerOn ^ syno_pm_is_poweron(sata_pmp_gscr_vendor(ap->link.device->gscr),
+										   sata_pmp_gscr_devid(ap->link.device->gscr),
+										   &pm_pkg)) {
+			if (iRetry == (ATA_EH_PMP_TRIES - 1)) {
+				printk("port %d do pmp power ctl %d after %d tries fail\n",
+						ap->print_id, blPowerOn, ATA_EH_PMP_TRIES);
+			} else {
+				printk("port %d do pmp power ctl %d fail, retry it\n", ap->print_id, blPowerOn);
+			}
+		} else {
+			break;
 		}
 	}
 
@@ -392,6 +418,11 @@ END_GPIO_WRITE:
 	iRet = 0;
 
 END:
+	/* unlock to let others can do pmp power control */
+	DBGMESG("port %d do pmp power ctl %d done iRet %d\n", ap->print_id, blPowerOn, iRet);
+	spin_lock_irqsave(ap->lock, flags);
+	ap->pflags &= ~ATA_PFLAG_PMP_PMCTL;
+	spin_unlock_irqrestore(ap->lock, flags);
 	return iRet;
 }
 #endif /* MY_ABC_HERE */
@@ -930,9 +961,6 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 	struct ata_port *ap = link->ap;
 	u32 *gscr = (void *)ap->sector_buf;
 	int rc;
-#ifdef MY_ABC_HERE
-	struct ata_port *master_ap = NULL;
-#endif
 
 	DPRINTK("ENTER\n");
 
@@ -967,14 +995,6 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 		goto fail;
 
 	ata_eh_done(link, NULL, ATA_EH_REVALIDATE);
-
-#ifdef MY_ABC_HERE
-	if(funcSYNOSendEboxRefreshEvent) {
-		if (NULL != ap) {
-			funcSYNOSendEboxRefreshEvent(ap->scsi_host->host_no);
-		}
-	}
-#endif
 
 	DPRINTK("EXIT, rc=0\n");
 	return 0;

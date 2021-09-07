@@ -147,10 +147,12 @@ int core_scsi2_reservation_release(se_cmd_t *cmd)
 		dev->dev_res_bin_isid = 0;
 		dev->dev_flags &= ~DF_SPC2_RESERVATIONS_WITH_ISID;
 	}
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "SCSI-2 Released reservation for %s LUN: %u ->"
 		" MAPPED LUN: %u for %s\n", TPG_TFO(tpg)->get_fabric_name(),
 		SE_LUN(cmd)->unpacked_lun, cmd->se_deve->mapped_lun,
 		sess->se_node_acl->initiatorname);
+#endif
 	spin_unlock(&dev->dev_reservation_lock);
 
 	return 0;
@@ -198,10 +200,12 @@ int core_scsi2_reservation_reserve(se_cmd_t *cmd)
 		dev->dev_res_bin_isid = sess->sess_bin_isid;
 		dev->dev_flags |= DF_SPC2_RESERVATIONS_WITH_ISID;
 	}
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "SCSI-2 Reserved %s LUN: %u -> MAPPED LUN: %u"
 		" for %s\n", TPG_TFO(tpg)->get_fabric_name(),
 		SE_LUN(cmd)->unpacked_lun, cmd->se_deve->mapped_lun,
 		sess->se_node_acl->initiatorname);
+#endif
 	spin_unlock(&dev->dev_reservation_lock);
 
 	return 0;

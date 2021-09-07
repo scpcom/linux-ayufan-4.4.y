@@ -147,9 +147,9 @@ static int __init early_internal_netif_num(char *p)
 }
 __setup("netif_num=", early_internal_netif_num);
 
-static void __init early_egiga(char **p)
+static void __init early_egiga(char *p)
 {
-	g_egiga = simple_strtol(*p, NULL, 10);
+	g_egiga = simple_strtol(p, NULL, 10);
 
 	if ( g_egiga == 0 ) {
 		printk("egiga port is disabled\n");

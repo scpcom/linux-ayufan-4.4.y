@@ -63,7 +63,7 @@ LIST_HEAD(PendingList);
 DEFINE_SPINLOCK(PendingLock);
 static unsigned long CurPendingListSleep = 0;
 static unsigned long CurPendingListWaking = 0;
-static unsigned long int g_jiffies_lastwake = 0;
+static unsigned long g_jiffies_lastwake = 0;
 #endif
 
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
@@ -2569,7 +2569,7 @@ static void SynoScheduleWakeUp(struct ata_device *dev,
 			// add one is for disk order. User space starting with 1.
 			funcSYNOSendHibernationEvent(DISK_WAKE_UP, dev->link->ap->scsi_host->host_no+1);
 		}else{
-			printk("funcSYNOSendHibernationEvent is NULL!!");
+			printk("funcSYNOSendHibernationEvent is NULL!!\n");
 		}
 
 		/* disk is in standby (spinned off)mode */
@@ -2579,24 +2579,23 @@ static void SynoScheduleWakeUp(struct ata_device *dev,
 		if (test_and_set_bit(CHKPOWER_WAKING, &(dev->chkpower_pending))) {
 			/* already waking this disk */
 			printk(" ALREADY WAKING PORT! PROGRAMMING ERROR?\n");
-			BUG();
+			WARN_ON(1);
 		}
 
 		set_bit(dev->link->ap->print_id, &CurPendingListSleep);
 
-		if (
-				/* somebody is being waken up ahead of us */
-				!list_empty(&PendingList)
-				||
-				/* it is too close from last wake-up. */
-				(WAKEINTERVAL > jiffies - g_jiffies_lastwake)) {
 
+		/* somebody is being waken up ahead of us, or it is too close from last wake-up.
+		 * When bootup the jiffies may overflow, so g_jiffies_lastwake is still zero,
+		 * we must check it */
+		if (!list_empty(&PendingList) ||
+			(g_jiffies_lastwake && time_before(jiffies, g_jiffies_lastwake + WAKEINTERVAL))) {
 			/* set timer to do expected work */
 			/* delay seconds to check again */
 			g_jiffies_lastwake += WAKEINTERVAL;
 
-			DBGMESG(" %s: schedule disk %d link->pmp %d to wake up %lu seconds later (%lu) (%lu)\n",
-					__FUNCTION__, dev->link->ap->print_id, dev->link->pmp, (g_jiffies_lastwake-jiffies)/HZ, g_jiffies_lastwake, jiffies);
+			DBGMESG(" %s: schedule disk %d link->pmp %d to wake up %lu ms later (%lu) (%lu)\n",
+					__FUNCTION__, dev->link->ap->print_id, dev->link->pmp, g_jiffies_lastwake-jiffies, g_jiffies_lastwake, jiffies);
 
 			mod_timer(&(dev->rstimer), g_jiffies_lastwake);
 		} else {
@@ -2734,14 +2733,21 @@ static int syno_ata_scsi_translate(struct ata_device *dev, struct scsi_cmnd *cmd
 	/* no insert command while frozen */
 	if (ap->pflags & ATA_PFLAG_FROZEN ||
 		ap->flags & ATA_FLAG_DISABLED) {
+		if (printk_ratelimit()) {
+			DBGMESG("port %d ATA_PFLAG_FROZEN or ATA_FLAG_DISABLED, clear all bits\n", ap->print_id);
+		}
 		clear_bit(CHKPOWER_CHECKING, &(dev->chkpower_pending));
+		clear_bit(CHKPOWER_WAKING, &(dev->chkpower_pending));
+		clear_bit(CHKPOWER_TIMEOUT, &(dev->chkpower_pending));
+		clear_bit(ap->print_id, &CurPendingListWaking);
+		clear_bit(ap->print_id, &CurPendingListSleep);
 		goto PASS;
 	}
 
 	/* if already have ata command executing, don't insert ATA_CMD_CHK_POWER */
 	if(0 != ap->nr_active_links) {
 		goto PASS;
-	} 
+	}
 
 	/* The ATA_CMD_CHK_POWER command won't wake up disk. So we don't check whether
 	 * DS is sleeping now.
@@ -2749,8 +2755,8 @@ static int syno_ata_scsi_translate(struct ata_device *dev, struct scsi_cmnd *cmd
 	if (!(scsicmd[0] == ATA_16 && scsicmd[14] == ATA_CMD_CHK_POWER)) {
 
 		if (scsicmd[0] == ATA_16 && scsicmd[14] == ATA_CMD_STANDBYNOW1) {
-				DBGMESG("disk %d receive standby command no need to check pw\n", ap->print_id);
-				goto PASS;
+			DBGMESG("disk %d receive standby command no need to check pw\n", ap->print_id);
+			goto PASS;
 		}
 
 		if (dev->must_checkpw) {
@@ -2763,7 +2769,7 @@ static int syno_ata_scsi_translate(struct ata_device *dev, struct scsi_cmnd *cmd
 		}
 
 		if (test_bit(ap->print_id, &CurPendingListWaking)) {
-			DBGMESG("****** skip this disk %d list_empty(&PendingList) %d\n", ap->print_id, list_empty(&PendingList));
+			DBGMESG("****** skip this disk %d list_empty(&PendingList) %d scsicmd[0] 0x%x scsicmd[14] 0x%x\n", ap->print_id, list_empty(&PendingList), scsicmd[0], scsicmd[14]);
 			goto PASS;
 		} 
 
@@ -4145,9 +4151,18 @@ static inline int __ata_scsi_queuecmd(struct scsi_cmnd *scmd,
 /* As you see if MY_ABC_HERE is not ported, this is not work */
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 	{
+#ifdef MY_ABC_HERE
+		if (dev->link->ap->nr_pmp_links && dev->link->ap->pflags & ATA_PFLAG_SYNO_BOOT_PROBE) {
+			/* I don't know why some EUnit master may not clear ATA_PFLAG_SYNO_BOOT_PROBE,
+			 * so we must clear it again by schedule_eh*/
+			ata_port_schedule_eh(dev->link->ap);
+			goto RETRY;
 
 		/* please refer synosata.h */
+		} else if (0 == g_internal_hd_num) {
+#else
 		if (0 == g_internal_hd_num) {
+#endif
 			/* no spin up delay */
 			rc = ata_scsi_translate(dev, scmd, done, xlat_func);
 		} else {
@@ -4649,6 +4664,28 @@ void ata_scsi_media_change_notify(struct ata_device *dev)
 				     GFP_ATOMIC);
 }
 
+#ifdef MY_ABC_HERE
+void ata_syno_pmp_hotplug(struct work_struct *work)
+{
+	struct ata_port *ap =
+		container_of(work, struct ata_port, hotplug_task.work);
+	char *envp[2];
+
+	if (ap->pflags & ATA_PFLAG_PMP_DISCONNECT) {
+		envp[0] = SZK_PMP_UEVENT"="SZV_PMP_DISCONNECT;
+		ap->pflags &= ~ATA_PFLAG_PMP_DISCONNECT;
+	} else if (ap->pflags & ATA_PFLAG_PMP_CONNECT) {
+		envp[0] = SZK_PMP_UEVENT"="SZV_PMP_CONNECT;
+		ap->pflags &= ~ATA_PFLAG_PMP_CONNECT;
+	} else {
+		envp[0] = NULL;
+	}
+
+	envp[1] = NULL;
+	kobject_uevent_env(&ap->scsi_host->shost_dev.kobj, KOBJ_CHANGE, envp);
+}
+#endif //MY_ABC_HERE
+
 /**
  *	ata_scsi_hotplug - SCSI part of hotplug
  *	@work: Pointer to ATA port to perform SCSI hotplug on
@@ -5098,6 +5135,52 @@ int syno_libata_diskno_to_scsihostno(int iDiskNo)
 }
 EXPORT_SYMBOL(syno_libata_diskno_to_scsihostno);
 
+int syno_libata_disk_map_table_gen(int *iDiskMapTable)
+{
+	int iScsiHostIdx;
+	int iAtaHostIdx;
+	int iDiskIdx;
+	struct Scsi_Host *pScsiHost = NULL;
+	struct ata_port *pAp = NULL;
+	int iErr = -1;
+
+	if(NULL == iDiskMapTable) {
+		goto END;
+	}
+
+	for(iScsiHostIdx = 0; iScsiHostIdx < (ata_print_id - 1); iScsiHostIdx++) {
+
+		if (NULL == (pScsiHost = scsi_host_lookup(iScsiHostIdx))) {
+			continue;
+		}
+
+		pAp = ata_shost_to_port(pScsiHost);
+		if(!pAp) {
+			scsi_host_put(pScsiHost);
+			continue;
+		}
+
+		iAtaHostIdx = syno_libata_index_get_by_map(pAp->host);
+
+		if( 0 > iAtaHostIdx ) {
+			scsi_host_put(pScsiHost);
+			goto END;
+		}
+
+		iDiskIdx = pAp->print_id - pAp->host->ports[0]->print_id + iAtaHostIdx;
+
+		iDiskMapTable[iDiskIdx] = iScsiHostIdx;
+
+		scsi_host_put(pScsiHost);
+
+	}
+
+        iErr = 0;
+END:
+        return iErr;
+}
+EXPORT_SYMBOL(syno_libata_disk_map_table_gen);
+
 int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun)
 {
 	int index = 0;
@@ -5157,27 +5240,20 @@ int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lu
 int
 syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn)
 {
-#if defined(MY_ABC_HERE)
-	struct ata_port *pAp_master = NULL;
-#endif
 	struct ata_port *ap = ata_shost_to_port(host);
 	int iRet = -1;
 
 	DBGMESG("disk %d do pm control blPowerOn %d\n", ap->print_id, blPowerOn);
-	if (!ap->nr_pmp_links) {
-	}
 #ifdef MY_ABC_HERE
-	else {
-		if (!syno_is_synology_pm(ap)) {
+	if (!syno_is_synology_pm(ap)) {
+		goto END;
+	}
+	/* this port is a master , we no need to get master */
+	if(0 == ap->PMSynoEMID) {
+		if (0 != syno_libata_pm_power_ctl(ap, blPowerOn, 0)) {
 			goto END;
 		}
-		/* this port is a master , we no need to get master */
-		if(0 == ap->PMSynoEMID) {
-			if (0 != syno_libata_pm_power_ctl(ap, blPowerOn, 0)) {
-				goto END;
-			}
-		} 
-	}
+	} 
 #endif
 	
 	iRet = 0;
@@ -5186,4 +5262,3 @@ END:
 	return iRet;
 }
 #endif
-

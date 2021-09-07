@@ -1034,9 +1034,13 @@ static void shrink_submounts(struct vfsmount *mnt, struct list_head *umounts);
 static void fs_set_task_stop(struct vfsmount *mnt)
 {
 	struct task_struct *g, *t;
+	struct vfsmount *tmpMnt = NULL;
+	struct dentry *tmpDentry = NULL;
 	extern void SYNO_stop_task(struct task_struct *);
+	extern int syno_get_empty_dir(struct vfsmount **, struct dentry **);
 
 	read_lock_irq(&tasklist_lock);
+	syno_get_empty_dir(&tmpMnt, &tmpDentry);
 	do_each_thread(g, t) {
 		if(t->fs && t->fs->pwd.mnt == mnt) {
 			if (current != t && current->real_parent != t) {
@@ -1045,8 +1049,8 @@ static void fs_set_task_stop(struct vfsmount *mnt)
 			}
 			dput(t->fs->pwd.dentry);
 			mntput(t->fs->pwd.mnt);
-			t->fs->pwd.dentry = dget(t->fs->root.dentry);
-			t->fs->pwd.mnt = mntget(t->fs->root.mnt);
+			t->fs->pwd.dentry = dget(tmpDentry);
+			t->fs->pwd.mnt = mntget(tmpMnt);
 		}
 	} while_each_thread(g, t);
 	read_unlock_irq(&tasklist_lock);

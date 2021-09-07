@@ -1625,6 +1625,9 @@ static void scsi_request_fn(struct request_queue *q)
 			case READ_16:
 			case WRITE_16:
 			case VERIFY_16:
+#ifdef CONFIG_ARCH_FEROCEON
+			case SYNCHRONIZE_CACHE:
+#endif
 				/* drive is going to spin up, checking if possible */
 				if (scsi_spinup_device(cmd) == 1) {
 					/* not possible: drive queued for spinup in side scsi_spinup_device(), device queue is blocked and the current command is requeued */

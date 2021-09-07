@@ -56,10 +56,6 @@
 
 #undef TARGET_CORE_DEVICE_C
 
-#if defined(CONFIG_SYNO_MV88F6281_USBSTATION)
-void SynoDisableRaid5Enhance(dev_t dev) { }
-#endif
-
 struct block_device *__linux_blockdevice_claim(
 	int major,
 	int minor,
@@ -284,14 +280,20 @@ out:
 	if (!se_lun) {
 #ifdef MY_ABC_HERE
 		if (pre_read_only) {
-			printk(KERN_ERR "iSCSI - Force READ ONLY\n");
-			spin_lock_bh(&deve->se_lun_acl->se_lun_nacl->device_list_lock);
-			deve->lun_flags &= ~TRANSPORT_LUNFLAGS_READ_WRITE;
-			deve->lun_flags &= ~TRANSPORT_LUNFLAGS_PRE_READ_ONLY;
-			deve->lun_flags |= TRANSPORT_LUNFLAGS_READ_ONLY;
-			spin_unlock_bh(&deve->se_lun_acl->se_lun_nacl->device_list_lock);
+			se_dev_entry_t* dev_entry = NULL;
+			se_node_acl_t* nacl = deve->se_lun_acl->se_lun_nacl;
+
+			spin_lock_bh(&nacl->device_list_lock);
+			dev_entry = &nacl->device_list[deve->se_lun_acl->mapped_lun];
+			dev_entry->lun_flags &= ~TRANSPORT_LUNFLAGS_READ_WRITE;
+			dev_entry->lun_flags &= ~TRANSPORT_LUNFLAGS_PRE_READ_ONLY;
+			dev_entry->lun_flags |= TRANSPORT_LUNFLAGS_READ_ONLY;
+			spin_unlock_bh(&nacl->device_list_lock);
+
 			se_cmd->scsi_sense_reason = WRITE_PROTECTED;
 			se_cmd->se_cmd_flags |= SCF_SCSI_CDB_EXCEPTION;
+
+			printk(KERN_ERR "iSCSI - Force READ ONLY\n");
 			return PYX_TRANSPORT_PRE_WRITE_PROTECTED;
 		} else
 #endif
@@ -1060,6 +1062,18 @@ void se_dev_start(se_device_t *dev)
 	}
 	spin_unlock(&hba->device_lock);
 }
+
+#ifdef MY_ABC_HERE
+void se_deve_force_readonly(struct se_dev_entry_s* deve)
+{
+	spin_lock_bh(&deve->se_lun_acl->se_lun_nacl->device_list_lock);
+	if( !(deve->lun_flags & TRANSPORT_LUNFLAGS_PRE_READ_ONLY) &&
+	    !(deve->lun_flags & TRANSPORT_LUNFLAGS_READ_ONLY) ) {
+		deve->lun_flags |= TRANSPORT_LUNFLAGS_PRE_READ_ONLY;
+	}
+	spin_unlock_bh(&deve->se_lun_acl->se_lun_nacl->device_list_lock);
+}
+#endif
 
 void se_dev_stop(se_device_t *dev)
 {

@@ -47,7 +47,7 @@ QD_OBJS		= $(HAL_QD_DIR)/src/driver/gtDrvConfig.o $(HAL_QD_DIR)/src/driver/gtDrv
                   $(HAL_QD_DIR)/src/msapi/gtBrgVtu.o $(HAL_QD_DIR)/src/msapi/gtPortRmon.o 	\
                   $(HAL_QD_DIR)/src/msapi/gtSysStatus.o $(HAL_QD_DIR)/src/msapi/gtPortRateCtrl.o\
                   $(HAL_QD_DIR)/src/msapi/gtPortPav.o $(HAL_QD_DIR)/src/msapi/gtVct.o		\
-		  $(HAL_QD_DIR)/src/msapi/gtPIRL2.o
+				  $(HAL_QD_DIR)/src/msapi/gtPIRL2.o $(HAL_QD_DIR)/src/msapi/gtPCSCtrl.o $(HAL_QD_DIR)/src/msapi/gtCCPVT.o  
 
 LSP_OBJS        = $(LSP_DIR)/core.o $(LSP_DIR)/irq.o $(LSP_DIR)/time.o  	\
                   $(LSP_DIR)/leds.o $(LSP_DIR)/sysmap.o  	\
@@ -93,6 +93,8 @@ obj-$(CONFIG_MV_USE_XOR_ENGINE) 	+= ../plat-feroceon/mv_drivers_lsp/mv_xor/
 obj-$(CONFIG_MV_CESA) 			+= ../plat-feroceon/mv_drivers_lsp/mv_cesa/
 feroceon-$(CONFIG_MV_ETH_NFP) 	        += ../plat-feroceon/mv_drivers_lsp/mv_network/nfp_mgr/mv_nfp_mgr.o
 feroceon-$(CONFIG_MV_ETH_NFP_SEC)       += ../plat-feroceon/mv_drivers_lsp/mv_network/nfp_mgr/mv_nfp_sec.o
+feroceon-$(CONFIG_MV_INCLUDE_SWITCH)       += ../plat-feroceon/mv_drivers_lsp/mv_switch/mv_switch_sysfs.o ../plat-feroceon/mv_drivers_lsp/mv_switch/mv_switch.o 
+
 obj-$(CONFIG_MV_TSU) 			+= ../plat-feroceon/mv_drivers_lsp/mv_tsu/
 #obj-y					+= ../plat-feroceon/mv_drivers_lsp/mv_btns/
 obj-y					+= ../plat-feroceon/mv_drivers_lsp/mv_gpio/
@@ -103,7 +105,8 @@ obj-y					+= ../plat-feroceon/mv_drivers_lsp/mv_gpio/
 feroceon-$(CONFIG_MV_INCLUDE_USB)    	+= $(LSP_DIR)/usb.o
 feroceon-$(CONFIG_PCI)  		+= $(LSP_DIR)/pci.o
 feroceon-$(CONFIG_FEROCEON_PROC) 	+= ../plat-feroceon/mv_drivers_lsp/mv_proc/proc.o
-feroceon-$(CONFIG_MV_GATEWAY) 		+= $(QD_OBJS)
+feroceon-$(CONFIG_MV_INCLUDE_SWITCH) += $(QD_OBJS)
+
 feroceon-$(CONFIG_MV_DBG_TRACE) 	+= $(LSP_DIR)/dbg-trace.o
 obj-$(CONFIG_CPU_FREQ_FEROCEON_KW) += $(LSP_DIR)/cpufreq.o
 feroceon-$(CONFIG_CPU_IDLE)		+= $(LSP_DIR)/cpuidle.o

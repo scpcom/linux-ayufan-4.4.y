@@ -88,6 +88,8 @@ MV_STATUS mvPexHalInit(MV_U32 pexIf, MV_PEX_TYPE pexType)
     (mvCtrlModelGet() != MV_6282_DEV_ID) &&
     (mvCtrlModelGet() != MV_6280_DEV_ID) &&
 	(mvCtrlModelGet() != MV_6192_DEV_ID) &&
+	(mvCtrlModelGet() != MV_6701_DEV_ID) &&
+	(mvCtrlModelGet() != MV_6702_DEV_ID) &&
     (mvCtrlModelGet() != MV_6190_DEV_ID) &&
 	(mvCtrlModelGet() != MV_6180_DEV_ID) &&
     (mvCtrlModelGet() != MV_6183_DEV_ID) &&
@@ -1136,7 +1138,10 @@ MV_VOID mvPexPowerDown(MV_U32 pexIf)
 	if ( (mvCtrlModelGet() == MV_78XX0_DEV_ID) ||
 		(mvCtrlModelGet() == MV_76100_DEV_ID) ||
 		(mvCtrlModelGet() == MV_78100_DEV_ID) ||
-		(mvCtrlModelGet() == MV_78200_DEV_ID) )
+		(mvCtrlModelGet() == MV_78200_DEV_ID) || 
+		 (mvCtrlModelGet() == MV_6321_DEV_ID) ||
+		 (mvCtrlModelGet() == MV_6322_DEV_ID) ||
+		 (mvCtrlModelGet() == MV_6323_DEV_ID))
 	{
 		mvCtrlPwrClckSet(PEX_UNIT_ID, pexIf, MV_FALSE);	
 	}

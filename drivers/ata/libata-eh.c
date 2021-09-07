@@ -560,7 +560,7 @@ void ata_scsi_error(struct Scsi_Host *host)
 
 #ifdef MY_ABC_HERE
 	spin_lock_irqsave(ap->lock, flags);
-	while(ap->pflags & ATA_PFLAG_PMP_PMOFF) {
+	while(ap->pflags & ATA_PFLAG_PMP_PMCTL) {
 		spin_unlock_irqrestore(ap->lock, flags);
 		schedule_timeout_uninterruptible(HZ);
 		spin_lock_irqsave(ap->lock, flags);
@@ -739,7 +739,7 @@ void ata_scsi_error(struct Scsi_Host *host)
 	WARN_ON(host->host_failed || !list_empty(&host->eh_cmd_q));
 
 	scsi_eh_flush_done_q(&ap->eh_done_q);
-
+	
 	/* clean up */
 	spin_lock_irqsave(ap->lock, flags);
 
@@ -761,8 +761,12 @@ void ata_scsi_error(struct Scsi_Host *host)
 	else if (ap->pflags & ATA_PFLAG_PMP_DISCONNECT ||
 			 ap->pflags & ATA_PFLAG_PMP_CONNECT) {
 		/* Clear unused PMP event when no ATA_PFLAG_SCSI_HOTPLUG */
+#if defined(MY_ABC_HERE)
+		queue_delayed_work(ata_aux_wq, &ap->hotplug_task, 0);
+#else
 		ap->pflags &= ~ATA_PFLAG_PMP_DISCONNECT;
 		ap->pflags &= ~ATA_PFLAG_PMP_CONNECT;
+#endif //MY_ABC_HERE
 	}
 #endif
 #ifdef MY_ABC_HERE

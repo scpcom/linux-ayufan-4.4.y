@@ -468,33 +468,35 @@ void sata_syno_ahci_diskled_set(int iDiskNo, int iPresent, int iFault)
 	struct ata_device *pAtaDev = NULL;
 	struct Scsi_Host *pScsiHost = NULL;
 	struct ata_link *pAtaLink = NULL;
-	int i = 0;
 
-	for (i = 0; i < ata_print_id; i++) {
-		//only handle disk led specified by diskno
-		if (iDiskNo != i) {
-			continue;
-		}
-		//get SCSI host
-		if (NULL == (pScsiHost = scsi_host_lookup(i - 1))) {
-			continue;
-		}
-		//get port from SCSI host
-		pAp = ata_shost_to_port(pScsiHost);
-		if (!pAp) {
-			goto CONTINUE;
-		} 
-		//for each devices of each links in port ap
-		ata_for_each_link(pAtaLink, pAp, EDGE) {
-			ata_for_each_dev(pAtaDev, pAtaLink, ALL) {
-				//set disk LED
-				ahci_sw_fault_set(pAtaDev->link, iFault);
-				ahci_sw_locate_set(pAtaDev->link, iPresent);
-			}
-		}
-CONTINUE:
-		scsi_host_put(pScsiHost);
+	if (NULL == (pScsiHost = scsi_host_lookup(iDiskNo - 1))) {
+			goto END;
 	}
+
+	//get port from SCSI host
+	pAp = ata_shost_to_port(pScsiHost);
+	if (!pAp) {
+		goto RELEASESRC;
+	}
+
+	//get rid of pmp ports
+	if (pAp->nr_pmp_links) {
+		goto RELEASESRC;
+	}
+
+	//for each devices of each links in port ap
+	ata_for_each_link(pAtaLink, pAp, EDGE) {
+		ata_for_each_dev(pAtaDev, pAtaLink, ALL) {
+			//set disk LED
+			ahci_sw_fault_set(pAtaDev->link, iFault);
+			ahci_sw_locate_set(pAtaDev->link, iPresent);
+		}
+	}
+
+RELEASESRC:
+	scsi_host_put(pScsiHost);
+END:
+	return;
 }
 EXPORT_SYMBOL(sata_syno_ahci_diskled_set);
 #endif /* MY_DEF_HERE */
@@ -2208,17 +2210,8 @@ static int ahci_hardreset(struct ata_link *link, unsigned int *class,
 
 	ahci_start_engine(ap);
 
-#ifdef MY_DEF_HERE
-	if (online) {
-		*class = ahci_dev_classify(ap);
-		ahci_sw_locate_set(link, 1);
-	} else {
-		ahci_sw_locate_set(link, 0);
-	}
-#else
 	if (online)
 		*class = ahci_dev_classify(ap);
-#endif
 
 	DPRINTK("EXIT, rc=%d, class=%u\n", rc, *class);
 	return rc;

@@ -54,6 +54,8 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	struct pci_dev		*pdev = to_pci_dev(hcd->self.controller);
 	int			retval;
 
+	hcd->self.sg_tablesize = TRBS_PER_SEGMENT - 2;
+
 	xhci->cap_regs = hcd->regs;
 	xhci->op_regs = hcd->regs +
 		HC_LENGTH(xhci_readl(xhci, &xhci->cap_regs->hc_capbase));
@@ -76,6 +78,8 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 			xhci_dbg(xhci, "QUIRK: Fresco Logic xHC needs configure"
 					" endpoint cmd after reset endpoint\n");
 	}
+	if (pdev->vendor == PCI_VENDOR_ID_NEC)
+		xhci->quirks |= XHCI_NEC_HOST;
 
 	/* Make sure the HC is halted. */
 	retval = xhci_halt(xhci);
@@ -137,6 +141,7 @@ static const struct hc_driver xhci_pci_hc_driver = {
 	.reset_bandwidth =	xhci_reset_bandwidth,
 	.address_device =	xhci_address_device,
 	.update_hub_device =	xhci_update_hub_device,
+	.reset_device =		xhci_discover_or_reset_device,
 
 	/*
 	 * scheduling support
@@ -172,12 +177,12 @@ static struct pci_driver xhci_pci_driver = {
 	.shutdown = 	usb_hcd_pci_shutdown,
 };
 
-int xhci_register_pci()
+int xhci_register_pci(void)
 {
 	return pci_register_driver(&xhci_pci_driver);
 }
 
-void xhci_unregister_pci()
+void xhci_unregister_pci(void)
 {
 	pci_unregister_driver(&xhci_pci_driver);
 }

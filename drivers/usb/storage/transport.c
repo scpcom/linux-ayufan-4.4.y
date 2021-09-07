@@ -1023,7 +1023,14 @@ int usb_stor_Bulk_max_lun(struct us_data *us)
 static inline void delay_for_JM(struct us_data *us)
 {
 	if (le16_to_cpu(us->pusb_dev->descriptor.idVendor) == 0x152d) {
-		udelay(100);
+		if (USB_SPEED_SUPER == us->pusb_dev->speed) {
+			if (le16_to_cpu(us->pusb_dev->descriptor.idProduct) == 0x0539) {
+				udelay(300);
+			}
+			udelay(500);
+		} else {
+			udelay(100);
+		}
 	}
 }
 #endif

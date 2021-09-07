@@ -99,13 +99,13 @@ MV_CPU_DEC_WIN SYSMAP_88F6281[] = {
 	{{SDRAM_CS3_BASE ,    0,      SDRAM_CS3_SIZE } ,0xFFFFFFFF,DIS},
 	{{PEX0_MEM_BASE  ,    0,      PEX0_MEM_SIZE  } ,0x1       ,EN},
 	{{PEX0_IO_BASE   ,    0,      PEX0_IO_SIZE   } ,0x0       ,EN},
-        {{PEX1_MEM_BASE  ,    0,      PEX1_MEM_SIZE } ,0x3       ,DIS},
-        {{PEX1_IO_BASE   ,    0,      PEX1_IO_SIZE  } ,0x1       ,DIS},
+    {{PEX1_MEM_BASE  ,    0,      PEX1_MEM_SIZE  } ,0x3       ,DIS},
+    {{PEX1_IO_BASE   ,    0,      PEX1_IO_SIZE   } ,0x1       ,DIS},
 	{{INTER_REGS_BASE,    0,      INTER_REGS_SIZE} ,0x8       ,EN},
-	{{NFLASH_CS_BASE,     0,      NFLASH_CS_SIZE}  ,0x2	  ,EN}, 
+	{{NFLASH_CS_BASE,     0,      NFLASH_CS_SIZE } ,0x2	      ,EN}, 
 	{{SPI_CS_BASE,        0,      SPI_CS_SIZE    } ,0x5       ,EN},
-	{{DEVICE_CS2_BASE,    0,      DEVICE_CS2_SIZE}, 0x6	  ,DIS},
- 	{{BOOTDEV_CS_BASE,    0,      BOOTDEV_CS_SIZE}, 0x4	  ,DIS},
+	{{DEVICE_CS2_BASE,    0,      DEVICE_CS2_SIZE} ,0x6	      ,DIS},
+ 	{{BOOTDEV_CS_BASE,    0,      BOOTDEV_CS_SIZE} ,0x4	      ,DIS},
 	{{CRYPT_ENG_BASE,     0,      CRYPT_ENG_SIZE}  ,0x7  	  ,EN},
 	{{TBL_TERM,TBL_TERM, TBL_TERM} ,TBL_TERM  ,TBL_TERM}		
 };
@@ -137,8 +137,8 @@ MV_CPU_DEC_WIN SYSMAP_88F6180[] = {
 	{{SDRAM_CS3_BASE ,    0,      SDRAM_CS3_SIZE } ,0xFFFFFFFF,DIS},
 	{{PEX0_MEM_BASE  ,    0,      PEX0_MEM_SIZE  } ,0x1       ,EN},
 	{{PEX0_IO_BASE   ,    0,      PEX0_IO_SIZE   } ,0x0       ,EN},
-        {{PEX1_MEM_BASE  ,    0,      PEX1_MEM_SIZE } ,0x3       ,DIS},
-        {{PEX1_IO_BASE   ,    0,      PEX1_IO_SIZE  } ,0x1       ,DIS},
+    {{PEX1_MEM_BASE  ,    0,      PEX1_MEM_SIZE } ,0x3       ,DIS},
+    {{PEX1_IO_BASE   ,    0,      PEX1_IO_SIZE  } ,0x1       ,DIS},
 	{{INTER_REGS_BASE,    0,      INTER_REGS_SIZE} ,0x8       ,EN},
 	{{NFLASH_CS_BASE,     0,      NFLASH_CS_SIZE } ,0x2	  ,EN}, 
 	{{SPI_CS_BASE,        0,      SPI_CS_SIZE}     ,0x5       ,EN}, 
@@ -175,8 +175,8 @@ MV_CPU_DEC_WIN SYSMAP_88F6192[] = {
 	{{SDRAM_CS3_BASE ,    0,      SDRAM_CS3_SIZE } ,0xFFFFFFFF,DIS},
 	{{PEX0_MEM_BASE  ,    0,      PEX0_MEM_SIZE  } ,0x1       ,EN},
 	{{PEX0_IO_BASE   ,    0,      PEX0_IO_SIZE   } ,0x0       ,EN},
-        {{PEX1_MEM_BASE  ,    0,      PEX1_MEM_SIZE } ,0x3       ,DIS},
-        {{PEX1_IO_BASE   ,    0,      PEX1_IO_SIZE  } ,0x1       ,DIS},
+    {{PEX1_MEM_BASE  ,    0,      PEX1_MEM_SIZE } ,0x3       ,DIS},
+    {{PEX1_IO_BASE   ,    0,      PEX1_IO_SIZE  } ,0x1       ,DIS},
 	{{INTER_REGS_BASE,    0,      INTER_REGS_SIZE} ,0x8       ,EN},
 	{{NFLASH_CS_BASE,     0,      NFLASH_CS_SIZE}  ,0x2	  ,EN}, 
 	{{SPI_CS_BASE,        0,      SPI_CS_SIZE}     ,0x5       ,EN},
@@ -230,10 +230,15 @@ MV_CPU_DEC_WIN* mv_sys_map(void)
 	case SYNO_DS212_ID:
 #endif
 		return SYSMAP_88F6282;
+	case DB_88F6701A_BP_ID:
+	case DB_88F6702A_BP_ID:
 	case DB_88F6192A_BP_ID:
 	case RD_88F6192A_ID:
-        case DB_88F6190A_BP_ID:
-        case RD_88F6190A_ID:
+    case DB_88F6190A_BP_ID:
+    case RD_88F6190A_ID:
+#if defined(CONFIG_SYNO_MV88F6281)
+	case SYNO_6702_1BAY_ID:
+#endif
 		return SYSMAP_88F6192;
 	case DB_88F6180A_BP_ID:
 		return SYSMAP_88F6180;

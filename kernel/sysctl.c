@@ -94,6 +94,15 @@ long syno_boot_hd_count = 0;
 EXPORT_SYMBOL(g_internal_hd_num);
 #endif
 
+#ifdef SYNO_HW_POWER_INADEQUATE_WORKAROUND
+long unsigned int guiWakeupDisksNum = 0;
+EXPORT_SYMBOL(guiWakeupDisksNum);
+/* The default spinup time interval is 7000ms. if want modify the interval, you
+ * can modify this value. ex. assign 14 to it means 500ms (7000/14) */
+int giDenoOfTimeInterval = 1;
+EXPORT_SYMBOL(giDenoOfTimeInterval);
+#endif
+
 #ifdef MY_ABC_HERE
 long g_internal_netif_num = -1;
 EXPORT_SYMBOL(g_internal_netif_num);
@@ -142,6 +151,10 @@ unsigned int gSwitchDev = 0;
 char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 EXPORT_SYMBOL(gSwitchDev);
 EXPORT_SYMBOL(gDevPCIName);
+#endif
+
+#ifdef SYNO_SATA_IRQ_OFF
+int grgPwrCtlPin[SYNO_MAX_SATA_ID] = {0};
 #endif
 
 #ifdef MY_ABC_HERE
@@ -1184,6 +1197,24 @@ static struct ctl_table kern_table[] = {
 		.ctl_name		= CTL_UNNUMBERED,
 		.procname		= "syno_internal_hd_num",
 		.data			= &g_internal_hd_num,
+		.maxlen			= sizeof (int),
+		.mode			= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#ifdef SYNO_HW_POWER_INADEQUATE_WORKAROUND
+	{
+		.ctl_name		= CTL_UNNUMBERED,
+		.procname		= "syno_disks_group",
+		.data			= &guiWakeupDisksNum,
+		.maxlen			= sizeof (unsigned int),
+		.mode			= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+	{
+		.ctl_name		= CTL_UNNUMBERED,
+		.procname		= "syno_deno_of_spinup_time",
+		.data			= &giDenoOfTimeInterval,
 		.maxlen			= sizeof (int),
 		.mode			= 0644,
 		.proc_handler	= &proc_dointvec,

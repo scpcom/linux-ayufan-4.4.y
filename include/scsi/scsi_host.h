@@ -43,6 +43,13 @@ struct blk_queue_tags;
 #define DISABLE_CLUSTERING 0
 #define ENABLE_CLUSTERING 1
 
+#ifdef MY_ABC_HERE
+enum {
+   	SYNO_PORT_TYPE_SATA = 1,
+	SYNO_PORT_TYPE_USB = 2,
+};
+#endif /* MY_ABC_HERE */
+
 struct scsi_host_template {
 	struct module *module;
 	const char *name;
@@ -504,6 +511,29 @@ struct scsi_host_template {
 	 * Status: OPTIONAL
 	 */
 	int  (* syno_host_power_ctl)(struct Scsi_Host *host, u8 blPowerOn);
+#endif
+#ifdef SYNO_SATA_IRQ_OFF
+	/*
+	 * This is an optional routine that could do ata port activities or error check
+	 *
+	 * @return : 0 success, otherwise fail
+	 * Status: OPTIONAL
+	 */
+	int  (* syno_host_is_port_acting)(struct Scsi_Host *host);
+	/*
+	 * This is an optional routine that could do ata port deep sleep 
+	 *
+	 * @return : 0 success, otherwise fail
+	 * Status: OPTIONAL
+	 */
+	int  (* syno_host_set_deep_sleep)(struct Scsi_Host *host, const u8 blSet);
+	/*
+	 * This is an optional routine that could do ata port poweroff task 
+	 *
+	 * @return : 0 success, otherwise fail
+	 * Status: OPTIONAL
+	 */
+	int  (* syno_host_poweroff_task)(struct Scsi_Host *host);
 #endif
 #ifdef MY_ABC_HERE
 	int  syno_port_type;

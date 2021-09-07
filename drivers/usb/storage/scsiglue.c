@@ -623,7 +623,7 @@ struct scsi_host_template usb_stor_host_template = {
 	.syno_index_get =		syno_usb_index_get,
 #endif
 #ifdef MY_ABC_HERE
-	.syno_port_type         = PORT_TYPE_USB,
+	.syno_port_type         = SYNO_PORT_TYPE_USB,
 #endif
 
 	/* module management */

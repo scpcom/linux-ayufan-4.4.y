@@ -429,7 +429,7 @@ static int sd_prep_fn(struct request_queue *q, struct request *rq)
 		SCpnt = rq->special;
 		if(NULL != SCpnt && NULL != SCpnt->cmnd){
 			if(START_STOP == SCpnt->cmnd[0] && 0 == SCpnt->cmnd[4]) {
-				if(PORT_TYPE_SATA != sdp->host->hostt->syno_port_type) {
+				if(SYNO_PORT_TYPE_SATA != sdp->host->hostt->syno_port_type) {
 					sdp->spindown = 1;
 				}
 			}
@@ -465,7 +465,7 @@ static int sd_prep_fn(struct request_queue *q, struct request *rq)
 	if (sdp->spindown || (0x0C != SCpnt->cmnd[0] && ATA_16 != SCpnt->cmnd[0])) {
 		sdp->idle = jiffies;
 		/* only sata port into this case, usb case is in the following code */
-		if(PORT_TYPE_SATA == sdp->host->hostt->syno_port_type && sdp->spindown) {
+		if(SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type && sdp->spindown) {
 			if(syno_hibernation_log_sec > 0) {
 				printk(KERN_WARNING"%s[%d]:%s(), %s: cmd 0x%x spin up by pid=%d, comm=%s\n",
 					   __FILE__, __LINE__, __FUNCTION__,
@@ -1105,6 +1105,9 @@ static void sd_prepare_flush(struct request_queue *q, struct request *rq)
 {
 	rq->cmd_type = REQ_TYPE_BLOCK_PC;
 	rq->timeout = SD_TIMEOUT;
+#ifdef CONFIG_ARCH_FEROCEON
+	rq->retries = SD_MAX_RETRIES;
+#endif
 	rq->cmd[0] = SYNCHRONIZE_CACHE;
 	rq->cmd_len = 10;
 }
@@ -2305,6 +2308,12 @@ static int sd_probe(struct device *dev)
 	}
 #endif
 
+#ifdef MY_ABC_HERE
+	if (strcmp(sdp->host->hostt->name, "iSCSI Initiator over TCP/IP") == 0) {
+		IsInternalDisk = 0;
+	}
+#endif
+
 		spin_lock(&sd_index_lock);
 #ifdef MY_ABC_HERE
 	if (IsInternalDisk) {
@@ -2314,12 +2323,10 @@ static int sd_probe(struct device *dev)
 			want_idx = sdp->host->host_no;
 		}
 	} else {
-#ifdef MY_DEF_HERE
-        if (sdp->host->hostt->syno_index_get) {
-            want_idx = sdp->host->hostt->syno_index_get(sdp->host, sdp->channel, sdp->id, sdp->lun);
-        } else
-#endif
-		want_idx = SYNO_MAX_INTERNAL_DISK+1;
+		if (sdp->host->hostt->syno_index_get) {
+			want_idx = sdp->host->hostt->syno_index_get(sdp->host, sdp->channel, sdp->id, sdp->lun);
+		} else
+			want_idx = SYNO_MAX_INTERNAL_DISK+1;
 	}
 
 	error = syno_ida_get_new(&sd_index_ida, want_idx, &index);
@@ -2346,7 +2353,19 @@ static int sd_probe(struct device *dev)
 	if (error)
 		goto out_put;
 
+#ifdef MY_ABC_HERE
+	if (strcmp(sdp->host->hostt->name, "iSCSI Initiator over TCP/IP") == 0) {
+		int start_index = index - SYNO_ISCSI_DEVICE_INDEX;
+		error = sd_format_disk_name(SYNO_ISCSI_DEVICE_PREFIX, start_index, gd->disk_name, DISK_NAME_LEN);
+		printk("got iSCSI disk[%d]\n", start_index);
+
+	} else {
+		error = sd_format_disk_name("sd", index, gd->disk_name, DISK_NAME_LEN);
+	} 
+#else
 	error = sd_format_disk_name("sd", index, gd->disk_name, DISK_NAME_LEN);
+#endif
+
 	if (error)
 		goto out_free_index;
 

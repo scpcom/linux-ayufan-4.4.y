@@ -122,6 +122,8 @@ extern "C" {
 /* kw */
 #define MV_6281_DEV_ID          	0x6281
 #define MV_6282_DEV_ID          	0x6282
+#define MV_6701_DEV_ID          	0x6701
+#define MV_6702_DEV_ID          	0x6702
 #define MV_6192_DEV_ID          	0x6192
 #define MV_6190_DEV_ID          	0x6190
 #define MV_6180_DEV_ID          	0x6180
@@ -166,6 +168,14 @@ extern "C" {
 #define MV_6190_A1_REV              0x3
 #define MV_6190_A1_ID               ((MV_6190_DEV_ID << 16) | MV_6190_A1_REV)
 #define MV_6190_A1_NAME             "88F6190 A1"
+
+#define MV_6701_A1_REV         		0x3
+#define MV_6701_A1_ID          		((MV_6701_DEV_ID << 16) | MV_6701_A1_REV)
+#define MV_6701_A1_NAME         	"88F6701 A1"
+
+#define MV_6702_A1_REV         		0x3
+#define MV_6702_A1_ID          		((MV_6702_DEV_ID << 16) | MV_6702_A1_REV)
+#define MV_6702_A1_NAME         	"88F6702 A1"
 
 #define MV_6180_A1_REV              0x3
 #define MV_6180_A1_ID               ((MV_6180_DEV_ID << 16) | MV_6180_A1_REV)

@@ -888,16 +888,9 @@ static int fd_do_writev(fd_request_t *req, se_task_t *task)
 			           209715200 > statfs.f_bfree * statfs.f_bsize )
 			           /* (i_blocks * 512 + i_bytes) represent the amount of allocated disk space */
 			{
-				struct se_dev_entry_s* deve = task->task_se_cmd->se_deve;
-
 				spin_unlock(&inode->i_lock);
-				spin_lock_bh(&deve->se_lun_acl->se_lun_nacl->device_list_lock);
-				if( !(deve->lun_flags & TRANSPORT_LUNFLAGS_PRE_READ_ONLY) &&
-				    !(deve->lun_flags & TRANSPORT_LUNFLAGS_READ_ONLY) ) {
-					printk(KERN_ERR "iSCSI - Failed to write data. Data volume is full.\n");
-					deve->lun_flags |= TRANSPORT_LUNFLAGS_PRE_READ_ONLY;
-				}
-				spin_unlock_bh(&deve->se_lun_acl->se_lun_nacl->device_list_lock);
+				printk(KERN_ERR "iSCSI - Failed to write data. Data volume is full.\n");
+				se_deve_force_readonly(task->task_se_cmd->se_deve);
 
 				goto END;
 			}
@@ -917,6 +910,12 @@ static int fd_do_writev(fd_request_t *req, se_task_t *task)
 				printk(KERN_ERR "I/O error: vfs_write() returned %d != %d "
 						"(pos: %llu, idx: %llu, fd_pos: %llu)\n",
 						ret, sg[i].length, pos, SYNO_LIO_FILE_IDX(pos), fd_pos);
+#ifdef MY_ABC_HERE
+				if( -EROFS == ret ) {
+					printk(KERN_ERR "iSCSI - Failed to write data. Filesystem is read only.\n");
+					se_deve_force_readonly(task->task_se_cmd->se_deve);
+				}
+#endif
 				goto END;
 			}
 		}

@@ -2609,7 +2609,6 @@ static void mv_unexpected_intr(struct ata_port *ap, int edma_was_enabled)
 	ata_port_freeze(ap);
 }
 
-
 /**
  *      mv_err_intr - Handle error interrupts on the port
  *      @ap: ATA channel to manipulate
@@ -3597,7 +3596,7 @@ void syno_sata_mv_gpio_write(u8 blFaulty, const unsigned short hostnum)
 	void __iomem *host_mmio = NULL;
 	u32 gpio_value = 0;
 	int led_idx;
-	
+
 	if(NULL == shost) {
 		goto END;
 	}

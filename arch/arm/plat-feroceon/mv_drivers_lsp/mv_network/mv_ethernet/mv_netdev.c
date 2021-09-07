@@ -64,6 +64,9 @@ MV_CPU_CNTRS_EVENT* rxfill_event = NULL;
 extern MV_U32 syno_wol_support(mv_eth_priv *priv);
 #endif
 
+#include "mv_switch/mv_switch.h"
+#include "boardEnv/mvBoardEnvLib.h"
+
 static int __init mv_eth_init_module( void );
 static void __exit mv_eth_exit_module( void );
 module_init( mv_eth_init_module );
@@ -1096,14 +1099,6 @@ static INLINE int eth_rx(struct net_device *dev, unsigned int work_to_do, int qu
 		    skb->ip_summed = CHECKSUM_UNNECESSARY;	
 		    ETH_STAT_DBG(priv->eth_stat.rx_csum_hw++);
 		}
-           	else if (fragIP &&
-           		(rx_status & ETH_RX_L4_UDP_TYPE) &&
-                        !(rx_status & ETH_RX_VLAN_TAGGED_FRAME_MASK)) 
-		{
-		    skb->csum = ntohl(0xFFFF ^ ((rx_status & ETH_RX_L4_CHECKSUM_MASK) >> ETH_RX_L4_CHECKSUM_OFFSET));
-		    skb->ip_summed = CHECKSUM_COMPLETE;
-		    ETH_STAT_DBG( priv->eth_stat.rx_csum_hw_frags++);
-		}
                 else
                 {
                     ETH_STAT_DBG(priv->eth_stat.rx_csum_sw++);
@@ -1756,13 +1751,9 @@ int     mv_eth_start_internals(mv_eth_priv *priv, int mtu)
     }
 
     /* set tx/rx coalescing mechanism */
-#ifdef CONFIG_MV_ETH_TOOL
     mvEthTxCoalSet( priv->hal_priv, priv->tx_coal_usec );
     mvEthRxCoalSet( priv->hal_priv, priv->rx_coal_usec );
-#else
-    mvEthTxCoalSet( priv->hal_priv, ETH_TX_COAL );
-    mvEthRxCoalSet( priv->hal_priv, ETH_RX_COAL );
-#endif /* CONFIG_MV_ETH_TOOL */
+
 
 out:
     spin_unlock_irqrestore(priv->lock, flags);
@@ -2098,9 +2089,10 @@ int __init mv_eth_priv_init(mv_eth_priv *priv, int port)
     priv->autoneg_cfg  = AUTONEG_ENABLE;
     priv->speed_cfg    = SPEED_1000;
     priv->duplex_cfg  = DUPLEX_FULL;
+#endif /* CONFIG_MV_ETH_TOOL */
     priv->tx_coal_usec = ETH_TX_COAL;
     priv->rx_coal_usec = ETH_RX_COAL;
-#endif /* CONFIG_MV_ETH_TOOL */
+
 #ifdef MY_ABC_HERE
 	priv->wol = 0;
 	if (mv_eth_tool_read_phy_reg(priv->phy_id, 0, MII_PHYSID1, &phy_id_0) ||
@@ -3087,6 +3079,33 @@ void mv_eth_set_lro_desc(int port, unsigned int value)
         priv->lro_mgr.max_desc = value;
 #endif
 }
+
+/***********************************************************************************
+ ***  Rx / Tx  coal set
+ ***********************************************************************************/
+void mv_eth_rxcoal_set(int port, MV_U32 rx_coal)
+{
+	mv_eth_priv *priv = eth_priv_by_port(port);
+	if (priv == NULL) {
+		printk("eth_status_print: wrong port number %d\n", port);
+		return;
+	}
+	priv->rx_coal_usec = rx_coal;
+	mvEthRxCoalSet(priv->hal_priv, priv->rx_coal_usec);
+	return;
+}
+
+void mv_eth_txcoal_set(int port, MV_U32 tx_coal)
+{
+	mv_eth_priv *priv = eth_priv_by_port(port);
+	if (priv == NULL) {
+		printk("eth_status_print: wrong port number %d\n", port);
+		return;
+	}
+	priv->tx_coal_usec = tx_coal;
+	mvEthTxCoalSet(priv->hal_priv, priv->tx_coal_usec);
+	return;
+}
 /***********************************************************************************
  ***  print Ethernet port status
  ***********************************************************************************/
@@ -3617,6 +3636,15 @@ static int __init mv_eth_init_module( void )
 
 	mv_eth_tos_map_init(port);        
     }
+#ifdef CONFIG_MV_INCLUDE_SWITCH
+    for (port = 0; port < mv_eth_ports_num; port++)
+		{
+			if (mvBoardIsSwitchConnected(port)) {
+				if (mv_switch_load(port))
+					printk(KERN_ERR "\nWarning: Switch load failed\n");
+			}
+		}
+#endif /* CONFIG_MV_INCLUDE_SWITCH */
 
     /* now deal with gateway ports */
     /* We initialize the Gateway interface last to maintain interface name ordering, */
@@ -3653,6 +3681,8 @@ static int __init mv_eth_init_module( void )
         }
 
         priv->isGtw = mvBoardIsSwitchConnected(port);
+		
+		
 	printk("  o Loading Gateway interface(s):\n");
         if( mv_gtw_net_setup(port) < 0)
         {

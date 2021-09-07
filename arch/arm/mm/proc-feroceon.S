@@ -90,6 +90,20 @@ ENTRY(mv_l2_inv_range)
                                                 @ invalidate procedure trigger
         msr     cpsr_c, r2                      @ Restore interrupts
         mov     pc, lr
+
+ENTRY(mv_l2_inv_range_pa)
+#ifndef CONFIG_CPU_L2_DCACHE_WRITETHROUGH
+	tst     r0, #CACHE_DLINESIZE - 1
+	mcrne   p15, 1, r0, c15, c9, 3          @ clean L2 entry by PA
+	tst     r1, #CACHE_DLINESIZE - 1
+	mcrne   p15, 1, r1, c15, c9, 3          @ clean L2 entry by PA
+	mcr     p15, 0, r0, c7, c10, 4          @ drain WB
+#endif
+1:	mcr     p15, 0, r0, c15, c11, 3          @ invalidate L2 entry by PA
+	add     r0, r0, #CACHE_DLINESIZE
+	cmp     r0, r1
+	blo     1b
+	mov     pc, lr
 #endif
 #endif
 

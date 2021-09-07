@@ -127,8 +127,12 @@ static iscsi_chap_t *chap_server_open(
 
 	if (!(auth->naf_flags & NAF_USERID_SET) ||
 	    !(auth->naf_flags & NAF_PASSWORD_SET)) {
+#ifdef MY_ABC_HERE
+		printk(KERN_ERR "iSCSI - CHAP user or password not set for Initiator ACL\n");
+#else
 		printk(KERN_ERR "CHAP user or password not set for"
 				" Initiator ACL\n");
+#endif
 		return NULL;
 	}
 
@@ -254,7 +258,11 @@ int chap_server_compute_md5(
 	}
 
 	if (memcmp(chap_n, auth->userid, strlen(auth->userid)) != 0) {
+#ifdef MY_ABC_HERE
+		printk(KERN_ERR "iSCSI - CHAP_N values do not match!\n");
+#else
 		printk(KERN_ERR "CHAP_N values do not match!\n");
+#endif
 		goto out;
 	}
 	PRINT("[server] Got CHAP_N=%s\n", chap_n);

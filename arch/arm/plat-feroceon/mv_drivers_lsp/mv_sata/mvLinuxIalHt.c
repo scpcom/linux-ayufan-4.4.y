@@ -686,6 +686,10 @@ static int __devinit mv_ial_init_soc_sata(void)
 	pAdapter->maxHosts = MV_SATA_6281_PORT_NUM;
     else if(MV_6192_DEV_ID == mvCtrlModelGet())
 	pAdapter->maxHosts = MV_SATA_6192_PORT_NUM;
+    else if(MV_6701_DEV_ID == mvCtrlModelGet())
+        pAdapter->maxHosts = MV_SATA_6192_PORT_NUM;
+    else if(MV_6702_DEV_ID == mvCtrlModelGet())
+        pAdapter->maxHosts = MV_SATA_6192_PORT_NUM;
     else if(MV_6190_DEV_ID == mvCtrlModelGet())
         pAdapter->maxHosts = MV_SATA_6190_PORT_NUM;
     else if(MV_6282_DEV_ID == mvCtrlModelGet())

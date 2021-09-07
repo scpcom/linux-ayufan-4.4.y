@@ -1475,6 +1475,7 @@ static struct scsi_host_template mv_driver_template = {
         .sg_tablesize                =  MV_MAX_SG_ENTRY,
         .cmd_per_lun                 =  MV_MAX_REQUEST_PER_LUN,
         .use_clustering              =  MV_SHT_USE_CLUSTERING,
+	.support_scattered_spinup    =  1,
         .emulated                    =  MV_SHT_EMULATED,
 };
 

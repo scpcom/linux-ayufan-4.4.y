@@ -2954,6 +2954,59 @@ SYSCALL_DEFINE2(mkdir, const char __user *, pathname, int, mode)
 	return sys_mkdirat(AT_FDCWD, pathname, mode);
 }
 
+#ifdef MY_ABC_HERE
+/**
+ * This function will create a new folder /tmp/forceumount in mode 0.
+ * It will keep this dir's mnt&dentry and do mntget() and dget() to input value.
+ * 
+ * @param empty_mnt
+ * @param empty_dentry
+ * 
+ * @return 
+ */
+int syno_get_empty_dir(struct vfsmount **empty_mnt, struct dentry **empty_dentry)
+{
+	int error = 0;
+	struct dentry *dentry;
+	struct nameidata nd;
+
+	error = do_path_lookup(AT_FDCWD, "/tmp/forceumount", LOOKUP_PARENT,&nd);
+	if (error) {
+		goto out_err;
+	}
+
+	dentry = lookup_create(&nd, 1);
+	error = PTR_ERR(dentry);
+	if (IS_ERR(dentry)) {
+		goto out_unlock;
+	}
+
+	error = mnt_want_write(nd.path.mnt);
+	if (error)
+		goto out_dput;
+	error = security_path_mkdir(&nd.path, dentry, 0);
+	if (error)
+		goto out_drop_write;
+	error = vfs_mkdir(nd.path.dentry->d_inode, dentry, 0);
+	dentry->d_inode->i_flags |= S_IMMUTABLE;
+	mark_inode_dirty(nd.path.dentry->d_inode);
+	*empty_mnt = nd.path.mnt;
+	*empty_dentry = dentry;
+
+out_drop_write:
+	mnt_drop_write(nd.path.mnt);
+out_dput:
+	dput(dentry);
+out_unlock:
+	mutex_unlock(&nd.path.dentry->d_inode->i_mutex);
+	path_put(&nd.path);
+out_err:
+
+	return error;
+}
+EXPORT_SYMBOL(syno_get_empty_dir);
+#endif
+
 /*
  * We try to drop the dentry early: we should have
  * a usage count of 2 if we're the only user of this

@@ -383,6 +383,20 @@ int core_tmr_lun_reset(
 			" %d t_fe_count: %d\n", (preempt_and_abort_list) ?
 			"Preempt" : "", cmd, state,
 			atomic_read(&T_TASK(cmd)->t_fe_count));
+#ifdef MY_ABC_HERE
+		/*
+		 * http://risingtidesystems.com/git/?p=lio-core-backports.git;
+		 * a=commitdiff;h=3a30457076987c89598486aa9c651340ff940472
+		 *
+		 * Signal that the command has failed via cmd->se_cmd_flags,
+		 * and call TFO->new_cmd_failure() to wakeup any fabric
+		 * dependent code used to wait for unsolicited data out
+		 * allocation to complete.  The fabric module is expected
+		 * to dump any remaining unsolicited data out for the aborted
+		 * command at this point.
+		 */
+		transport_new_cmd_failure(cmd);
+#endif
 
 		if (atomic_read(&T_TASK(cmd)->t_fe_count)) {
 			/*

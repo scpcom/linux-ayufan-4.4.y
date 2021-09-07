@@ -125,6 +125,15 @@ static struct us_unusual_dev us_unusual_dev_list[] = {
 #undef COMPLIANT_DEV
 #undef USUAL_DEV
 
+static unsigned int usb_stor_sg_tablesize(struct usb_interface *intf)
+{
+	struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+	if (usb_dev->bus->sg_tablesize) {
+		return usb_dev->bus->sg_tablesize;
+	}
+	return SG_ALL;
+}
 
 #ifdef CONFIG_PM	/* Minimal support for suspend and resume */
 
@@ -881,6 +890,7 @@ int usb_stor_probe1(struct us_data **pus,
 	 * Allow 16-byte CDBs and thus > 2TB
 	 */
 	host->max_cmd_len = 16;
+	host->sg_tablesize = usb_stor_sg_tablesize(intf);
 	*pus = us = host_to_us(host);
 	memset(us, 0, sizeof(struct us_data));
 	mutex_init(&(us->dev_mutex));

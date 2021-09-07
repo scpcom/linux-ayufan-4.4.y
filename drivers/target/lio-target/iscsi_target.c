@@ -1659,8 +1659,6 @@ done:
 			iscsi_tpg_deactive_portal_group(conn->tpg);
 			printk(KERN_ERR "iSCSI - Force initiator to logout\n");
 			iscsi_sess_force_logout(conn->sess);
-		} else if (ret == PYX_TRANSPORT_PRE_WRITE_PROTECTED) {
-			return iscsi_add_reject_from_cmd( REASON_OUT_OF_RESOURCES, 1, 1, buf, cmd);
 		}
 #endif
 
@@ -2077,11 +2075,7 @@ static inline int iscsi_handle_data_out(iscsi_conn_t *conn, unsigned char *buf)
 
 	SE_CMD(cmd)->transport_map_SG_segments(&unmap_sg);
 
-#ifdef MY_ABC_HERE
-	rx_got = rx_data(conn, &SE_CMD(cmd)->iov_data[0], iov_count, rx_size, 0);
-#else
 	rx_got = rx_data(conn, &SE_CMD(cmd)->iov_data[0], iov_count, rx_size);
-#endif
 
 	SE_CMD(cmd)->transport_unmap_SG_segments(&unmap_sg);
 
@@ -2295,11 +2289,7 @@ static inline int iscsi_handle_nop_out(
 			rx_size += CRC_LEN;
 		}
 
-#ifdef MY_ABC_HERE
-		rx_got = rx_data(conn, &cmd->iov_misc[0], niov, rx_size, 1);
-#else
 		rx_got = rx_data(conn, &cmd->iov_misc[0], niov, rx_size);
-#endif
 		if (rx_got != rx_size) {
 			ret = -1;
 			goto out;
@@ -2663,11 +2653,7 @@ static inline int iscsi_handle_text_cmd(
 			rx_size += CRC_LEN;
 		}
 
-#ifdef MY_ABC_HERE
-		rx_got = rx_data(conn, &iov[0], niov, rx_size, 1);
-#else
 		rx_got = rx_data(conn, &iov[0], niov, rx_size);
-#endif
 		if (rx_got != rx_size) {
 			kfree(text_in);
 			return -1;
@@ -3127,11 +3113,7 @@ static int iscsi_handle_immediate_data(
 
 	SE_CMD(cmd)->transport_map_SG_segments(&unmap_sg);
 
-#ifdef MY_ABC_HERE
-	rx_got = rx_data(conn, &SE_CMD(cmd)->iov_data[0], iov_count, rx_size, 0);
-#else
 	rx_got = rx_data(conn, &SE_CMD(cmd)->iov_data[0], iov_count, rx_size);
-#endif
 
 	SE_CMD(cmd)->transport_unmap_SG_segments(&unmap_sg);
 
@@ -4868,11 +4850,7 @@ restart:
 		iov.iov_base	= buffer;
 		iov.iov_len	= ISCSI_HDR_LEN;
 
-#ifdef MY_ABC_HERE
-		ret = rx_data(conn, &iov, 1, ISCSI_HDR_LEN, 1);
-#else
 		ret = rx_data(conn, &iov, 1, ISCSI_HDR_LEN);
-#endif
 		if (ret != ISCSI_HDR_LEN) {
 			iscsi_rx_thread_wait_for_TCP(conn);
 			goto transport_err;
@@ -4892,11 +4870,7 @@ restart:
 			iov.iov_base	= &digest;
 			iov.iov_len	= CRC_LEN;
 
-#ifdef MY_ABC_HERE
-			ret = rx_data(conn, &iov, 1, CRC_LEN, 1);
-#else
 			ret = rx_data(conn, &iov, 1, CRC_LEN);
-#endif
 			if (ret != CRC_LEN) {
 				iscsi_rx_thread_wait_for_TCP(conn);
 				goto transport_err;

@@ -26,7 +26,7 @@
 #define SECONDS_FOR_ASYNC_LOGOUT	10
 #endif
 #ifdef MY_ABC_HERE
-#define SECONDS_FOR_TEMP_INACTIVE	60
+#define SECONDS_FOR_TEMP_INACTIVE	90
 #endif
 #define SECONDS_FOR_ASYNC_TEXT		10
 #define IPV6_ADDRESS_SPACE		48
@@ -593,9 +593,6 @@ typedef struct iscsi_conn_s {
 	atomic_t		connection_reinstatement;
 	atomic_t		connection_wait;
 	atomic_t		connection_wait_rcfr;
-#ifdef MY_ABC_HERE
-	atomic_t		connection_data_ready;
-#endif
 	atomic_t		sleep_on_conn_wait_sem;
 	atomic_t		transport_failed;
 	struct net_device	*net_if;
@@ -637,10 +634,6 @@ typedef struct iscsi_conn_s {
 	struct se_thread_set_s	*thread_set;
 	/* list_head for session connection list */
 	struct list_head	conn_list;
-#ifdef MY_ABC_HERE
-	void (*old_sk_data_ready)(struct sock*, int);
-	void (*old_sk_write_space)(struct sock*);
-#endif
 } ____cacheline_aligned iscsi_conn_t;
 
 #include <iscsi_parameters.h>

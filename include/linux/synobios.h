@@ -170,9 +170,6 @@ typedef struct _SynoMsgPkt {
 #ifdef MY_ABC_HERE
 #define SYNO_EVENT_HIBERNATION			0x2000
 #endif
-#ifdef MY_ABC_HERE
-#define SYNO_EVENT_NETLINK			0x2100
-#endif
 #define SYNO_EVENT_SHUTDOWN_LOG			0x2200
 #ifdef MY_ABC_HERE
 #define SYNO_EVENT_EBOX_REFRESH      0x2300
@@ -181,6 +178,8 @@ typedef struct _SynoMsgPkt {
 #ifdef MY_DEF_HERE
 #define SYNO_EVENT_ECC_NOTIFICATION		0x2400
 #endif
+
+#define SYNO_EVENT_BAD_SECTOR_REMAP_RECORD 0x2500
 
 #define SYNO_EVENT_BACK_TEMP_CRITICAL   0x4004
 #define SYNO_EVENT_BACK_TEMP_HIGH       0x4003
@@ -314,6 +313,11 @@ enum {
     MD_SECTOR_READ_ERROR = 0,
     MD_SECTOR_WRITE_ERROR = 1,
     MD_SECTOR_REWRITE_OK = 2,
+};
+
+enum {
+	MD_SECTOR_READ_ERROR_REMAP = 0,
+	LV_SECTOR_READ_ERROR_REMAP = 1,
 };
 
 typedef enum {
@@ -560,6 +564,7 @@ typedef enum {
 	HIBER_LED_UNKNOWN,
 	HIBER_LED_NORMAL,
 	HIBER_LED_ALLOUT,
+	HIBER_LED_EXCEPTPWR,
 }HIBERNATE_LED_T;
 /**
  * This structure is used to store types of each module
@@ -650,8 +655,11 @@ typedef struct {
 #define HW_RS2211rpp   "RS2211rp+"     //"RS2211rp+"
 #define HW_DS2411p     "DS2411+"       //"DS2411+"
 #define HW_RS3411rpxs  "RS3411rpxs"    //"RS3411rpxs"
-#define HW_RS3411xs    "RS3411xs"    //"RS3411xs"
+#define HW_RS3411xs    "RS3411xs"      //"RS3411xs"
 #define HW_DS3611xs    "DS3611xs"      //"DS3611xs"
+#define HW_RS3412rpxs  "RS3412rpxs"    //"RS3412rpxs"
+#define HW_RS3412xs    "RS3412xs"      //"RS3412xs"
+#define HW_DS3612xs    "DS3612xs"      //"DS3612xs"
 #define HW_DS111j      "DS111j"        //"DS111j"
 #define HW_DS212       "DS212"         //"DS212v10"
 #define HW_DS412p      "DS412+"        //"DS412+"
@@ -659,6 +667,10 @@ typedef struct {
 #define HW_RS212       "RS212"         //"RS212"
 #define HW_DS212j      "DS212j"        //"DS212j"
 #define HW_RS812       "RS812"         //"RS812"
+#define HW_DS1512p     "DS1512+"       //"DS1512+"
+#define HW_DS212p      "DS212pv10"     //"DS212+"
+#define HW_DS112j      "DS112jv10"     //"DS112j"
+#define HW_DS112       "DS112v10"      //"DS112"
 
 #define HW_UNKNOWN     "DSUnknown"
 									    
@@ -725,6 +737,9 @@ typedef enum {
 	MODEL_RS3411rpxs,
 	MODEL_RS3411xs,
 	MODEL_DS3611xs,
+	MODEL_RS3412rpxs,
+	MODEL_RS3412xs,
+	MODEL_DS3612xs,
 	MODEL_RS411,
 	MODEL_DS111j,
 	MODEL_RS2211p,
@@ -736,6 +751,10 @@ typedef enum {
 	MODEL_RS212,
 	MODEL_DS212j,
 	MODEL_RS812,
+	MODEL_DS1512p,
+	MODEL_DS212p,
+	MODEL_DS112j,
+	MODEL_DS112,
 	MODEL_INVALID
 } PRODUCT_MODEL;
 

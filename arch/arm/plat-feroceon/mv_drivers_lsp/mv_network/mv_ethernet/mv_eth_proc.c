@@ -276,7 +276,7 @@ int run_port_queue_cmd(const char *buffer) {
 int run_port_com(const char *buffer) {
 
 	int scan_count;
-    void*   port_hndl;
+    	void*   port_hndl;
 
 	scan_count = sscanf(buffer, PORT_CMD_STRING, PORT_SCANF_LIST);
     
@@ -284,20 +284,20 @@ int run_port_com(const char *buffer) {
 		printk("eth port command bad format %x != %x\n", scan_count, PORT_LIST_LEN );
 		return 1;
 	}
-    if( (port < 0) || (port > mvCtrlEthMaxPortGet()) )
-        return 1;
+    	if( (port < 0) || (port > mvCtrlEthMaxPortGet()) )
+        	return 1;
 
-    port_hndl = mvEthPortHndlGet(port);
-    if(port_hndl == NULL)
-        return 1;
+    	port_hndl = mvEthPortHndlGet(port);
+    	if(port_hndl == NULL)
+        	return 1;
 
     	switch(command) {
         	case COM_RX_COAL:
-            	mvEthRxCoalSet(mvEthPortHndlGet(port), value);
+		mv_eth_rxcoal_set(port, value);
             	break;
 
         	case COM_TX_COAL:
-            	mvEthTxCoalSet(mvEthPortHndlGet(port), value);
+            	mv_eth_txcoal_set(port, value);
         	break;
 
 #ifdef ETH_MV_TX_EN

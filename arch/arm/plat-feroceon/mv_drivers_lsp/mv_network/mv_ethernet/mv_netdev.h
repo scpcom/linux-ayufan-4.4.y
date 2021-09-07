@@ -48,6 +48,7 @@ disclaimer.
 #include "eth-phy/mvEthPhy.h"
 #include "ctrlEnv/sys/mvSysGbe.h"
 #include "dbg-trace.h"
+//#include "msApi.h"
 
 #if defined(CONFIG_MV_ETH_TSO)
 #   define ETH_INCLUDE_TSO
@@ -150,8 +151,8 @@ extern u32 eth_dbg;
 /* phy/link-status-change, tx-done-q0 - q7 */
 #define ETH_PICER_MASK		(ETH_LINK_MASK | ETH_TXQ_MASK) 
 
+#if defined(CONFIG_MV_GATEWAY) 
 
-#if defined(CONFIG_MV_GATEWAY)
 #define GTW_MAX_NUM_OF_IFS  5
 
 struct mv_vlan_cfg {
@@ -303,9 +304,9 @@ typedef struct _mv_eth_priv
     __u16	speed_cfg;
     __u8	duplex_cfg;
     __u8 	autoneg_cfg;
+#endif /* CONFIG_MV_ETH_TOOL */
     MV_U32	rx_coal_usec;
     MV_U32	tx_coal_usec;
-#endif /* CONFIG_MV_ETH_TOOL */
 
 #ifdef MY_ABC_HERE
 	MV_U32	phy_chip;
@@ -503,6 +504,8 @@ extern int  mv_eth_stop(struct net_device *dev);
 extern int  mv_eth_change_mtu(struct net_device *dev, int mtu);
 extern int  mv_eth_set_mac_addr( struct net_device *dev, void *mac );
 extern void mv_eth_set_multicast_list(struct net_device *dev);
+void mv_eth_rxcoal_set(int port, MV_U32 rx_coal);
+void mv_eth_txcoal_set(int port, MV_U32 tx_coal);
 
 int __init                  mv_eth_hal_init(mv_eth_priv *priv, int mtu, u8* mac);
 int __init                  mv_eth_priv_init(mv_eth_priv *priv, int port);

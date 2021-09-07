@@ -22,7 +22,7 @@
 /* versions */
 #define TEST_UBOOT_VER 0x03041200 /* 3.4.18 */
 
-#define LSP_VERSION "KW_LSP_5.1.3_patch18"
+#define LSP_VERSION "KW_LSP_5.1.3_patch29"
 
 
 static inline void arch_idle(void)

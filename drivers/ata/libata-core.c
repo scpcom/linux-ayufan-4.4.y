@@ -1838,10 +1838,9 @@ unsigned syno_ata_exec_internal_gpio(struct ata_device *dev,
 		if (qc->flags & ATA_QCFLAG_ACTIVE) {
 			qc->err_mask |= AC_ERR_TIMEOUT;
 
-			if (ap->ops->error_handler)
-				ata_port_freeze(ap);
-			else
-				ata_qc_complete(qc);
+			DBGMESG("port %d it's our syno gpio cmd timeout, don't freeze, just complete it\n",
+					ap->print_id);
+			ata_qc_complete(qc);
 
 			if (ata_msg_warn(ap))
 				ata_dev_printk(dev, KERN_WARNING,
@@ -5315,8 +5314,9 @@ void ata_qc_complete(struct ata_queued_cmd *qc)
 			fill_result_tf(qc);
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-			if (NULL == qc->scsicmd && 
-				(ATA_CMD_CHK_POWER == qc->tf.command || ATA_CMD_PMP_WRITE == qc->tf.command))
+			if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) &&
+				(ATA_CMD_CHK_POWER == qc->tf.command || ATA_CMD_PMP_WRITE == qc->tf.command ||
+				 ATA_CMD_PMP_READ || ATA_CMD_VERIFY == qc->tf.command))
 				__ata_qc_complete(qc);
 			else if (!ata_tag_internal(qc->tag))
 #else
@@ -5975,6 +5975,9 @@ struct ata_port *ata_port_alloc(struct ata_host *host)
 	INIT_DELAYED_WORK(&ap->port_task, NULL);
 #endif
 	INIT_DELAYED_WORK(&ap->hotplug_task, ata_scsi_hotplug);
+#ifdef MY_ABC_HERE
+	INIT_DELAYED_WORK(&ap->syno_pmp_task, ata_syno_pmp_hotplug);
+#endif //MY_ABC_HERE
 	INIT_WORK(&ap->scsi_rescan_task, ata_scsi_dev_rescan);
 	INIT_LIST_HEAD(&ap->eh_done_q);
 	init_waitqueue_head(&ap->eh_wait_q);
@@ -6551,10 +6554,10 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 	}
 
 	if (0 != g_internal_hd_num) {
-	/* get the async_enabled value, we will disalbe async_schedule, and restore its async_enabled value after probe disks */
-	async_enabled = syno_async_schedule_enabled_get();
-	/* disable async schedule to avoid parallel probe disks */
-	syno_async_schedule_enabled_set(0);
+		/* get the async_enabled value, we will disalbe async_schedule, and restore its async_enabled value after probe disks */
+		async_enabled = syno_async_schedule_enabled_get();
+		/* disable async schedule to avoid parallel probe disks */
+		syno_async_schedule_enabled_set(0);
 	}
 #endif
 #ifndef CONFIG_ATA_SYNC_DISK_PROBE // CONFIG_SYNO_PLX_PORTING
@@ -6564,11 +6567,11 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 		printk("Enable Synology sata fast booting\n");
 	}
 
-		for (i = 0; i < host->n_ports; i++) {
-			struct ata_port *ap = host->ports[i];
-			int class = 0;
+	for (i = 0; i < host->n_ports; i++) {
+		struct ata_port *ap = host->ports[i];
+		int class = 0;
 
-			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
+		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 		if (0 == g_internal_hd_num) {
 			if(ap->ops->hardreset)
 				ap->ops->hardreset(&ap->link, &class, 0);
@@ -6582,11 +6585,11 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 	}
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 	if (0 != g_internal_hd_num) {
-	for (i = 0; i < host->n_ports; i++) {
-		struct ata_port *ap = host->ports[i];
-		ata_port_wait_eh(ap);
-		ata_scsi_scan_host(ap, 1);
-    }
+		for (i = 0; i < host->n_ports; i++) {
+			struct ata_port *ap = host->ports[i];
+			ata_port_wait_eh(ap);
+			ata_scsi_scan_host(ap, 1);
+		}
 
 		/* restore async schedule enable value */
 		syno_async_schedule_enabled_set(async_enabled);

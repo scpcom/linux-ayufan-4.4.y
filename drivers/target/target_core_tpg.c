@@ -297,6 +297,7 @@ static void core_tpg_default_acl_dup_devs(se_node_acl_t* dst_acl, se_node_acl_t*
 	size_t i = 0;
 	u32 lun_access = 0;
 	se_lun_t* lun = NULL;
+	se_dev_entry_t* deve = NULL;
 
 	spin_lock_bh(&src_acl->device_list_lock);
 	for( i = 0; i < TRANSPORT_MAX_LUNS_PER_TPG; ++i ) {
@@ -328,7 +329,8 @@ static void core_tpg_default_acl_dup_devs(se_node_acl_t* dst_acl, se_node_acl_t*
 				"READ-WRITE" : "READ-ONLY");
 #endif
 
-			core_update_device_list_for_node(lun, NULL, lun->unpacked_lun, lun_access, dst_acl, tpg, 1);
+			deve = &src_acl->device_list[i];
+			core_update_device_list_for_node(lun, deve->se_lun_acl, lun->unpacked_lun, lun_access, dst_acl, tpg, 1);
 		}
 
 	}

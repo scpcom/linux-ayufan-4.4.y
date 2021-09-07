@@ -1164,7 +1164,8 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 			qc = ata_qc_from_tag(ap, qc->tag);
 			if (qc) {
 #if defined(MY_ABC_HERE)
-				if (NULL == qc->scsicmd && ATA_CMD_CHK_POWER == qc->tf.command) {
+				if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) &&
+					(ATA_CMD_CHK_POWER == qc->tf.command ||	ATA_CMD_VERIFY == qc->tf.command)) {
 					ap->ops->sff_irq_on(ap);
 					/* read result TF if requested, copy from ata_qc_complete() and fill_result_tf() */
 					if (qc->err_mask || 
@@ -1182,7 +1183,7 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 					ata_qc_complete(qc);
 #ifdef MY_ABC_HERE
 				} else {
-					if (NULL == qc->scsicmd) {
+					if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag)) {
 						DBGMESG("disk %d:its our insert cmd,don't freeze. cmd 0x%x tag %d feature 0x%x\n",
 								qc->ap->print_id, qc->tf.command, qc->tag, qc->tf.feature);
 						__ata_qc_complete(qc);
@@ -1199,7 +1200,8 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 			spin_unlock_irqrestore(ap->lock, flags);
 		} else {
 #if defined(MY_ABC_HERE)
-			if (NULL == qc->scsicmd && ATA_CMD_CHK_POWER == qc->tf.command) {
+			if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) &&
+				(ATA_CMD_CHK_POWER == qc->tf.command ||	ATA_CMD_VERIFY == qc->tf.command)) {
 				/* read result TF if requested, copy from ata_qc_complete() and fill_result_tf() */
 				if (qc->err_mask || 
 					qc->flags & ATA_QCFLAG_RESULT_TF || 
@@ -1215,7 +1217,7 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 				ata_qc_complete(qc);
 #ifdef MY_ABC_HERE
 			else {
-				if (NULL == qc->scsicmd) {
+				if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag)) {
 					DBGMESG("disk %d:its our insert cmd,don't freeze. cmd 0x%x tag %d feature 0x%x\n",
 							qc->ap->print_id, qc->tf.command, qc->tag, qc->tf.feature);
 					__ata_qc_complete(qc);
@@ -1256,15 +1258,14 @@ int ata_sff_hsm_move(struct ata_port *ap, struct ata_queued_cmd *qc,
 	unsigned long flags = 0;
 	int poll_next;
 
-	/* FIXME: when RX1211 have 12 disks, it may WARN_ON_ONCE. But it still work fine. 
-	 * So we temporarily remove it */
-	WARN_ON_ONCE((qc->flags & ATA_QCFLAG_ACTIVE) == 0);
-
+#ifndef MY_ABC_HERE
+	/*FIXME: some cmd in sata_mv ex. chkpwr, we must use directly to issue not wq */
 	/* Make sure ata_sff_qc_issue() does not throw things
 	 * like DMA polling into the workqueue. Notice that
 	 * in_wq is not equivalent to (qc->tf.flags & ATA_TFLAG_POLLING).
 	 */
 	WARN_ON_ONCE(in_wq != ata_hsm_ok_in_wq(ap, qc));
+#endif
 
 fsm_start:
 	DPRINTK("ata%u: protocol %d task_state %d (dev_stat 0x%X)\n",
@@ -1609,19 +1610,21 @@ unsigned int ata_sff_qc_issue(struct ata_queued_cmd *qc)
 		/* copy from ata_pio_task() to send chkpwr cmd directly to prevent work queue timeout issue
 		 * Now we only find sata_mv have timeout issue, so we only on ATA_TFLAG_DIRECT in sata_mv */
 		if (ATA_TFLAG_DIRECT & qc->tf.flags) {
+			DBGMESG("port %d try to use directly issue cmd 0x%x\n", ap->print_id, qc->tf.command);
 			qc->tf.flags &= ~ATA_TFLAG_DIRECT;
 			status = ata_sff_busy_wait(ap, ATA_BUSY, 5);
 			if (status & ATA_BUSY) {
 				mdelay(2);
 				status = ata_sff_busy_wait(ap, ATA_BUSY, 10);
 				if (status & ATA_BUSY) {
-					/*if the status is still BUSY, we use original way ata_pio_queue_task()*/
+					/*if the status is still BUSY, we use original way ata_pio_queue_task() */
 					ata_pio_queue_task(ap, qc, 0);
+					DBGMESG("port %d directly issue cmd 0x%x fail, using queue_task\n", ap->print_id, qc->tf.command);
 				} else {
-					ata_sff_hsm_move(ap, qc, status, 1);
+					ata_sff_hsm_move(ap, qc, status, 0);
 				}
 			} else {
-				ata_sff_hsm_move(ap, qc, status, 1);
+				ata_sff_hsm_move(ap, qc, status, 0);
 			}
 		}
 		else if (qc->tf.flags & ATA_TFLAG_POLLING)

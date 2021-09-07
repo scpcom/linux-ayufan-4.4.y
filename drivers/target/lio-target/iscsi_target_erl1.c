@@ -95,11 +95,7 @@ int iscsi_dump_data_payload(
 		iov.iov_len = size;
 		iov.iov_base = buf;
 
-#ifdef MY_ABC_HERE
-		rx_got = rx_data(conn, &iov, 1, size, 1);
-#else
 		rx_got = rx_data(conn, &iov, 1, size);
-#endif
 		if (rx_got != size) {
 			ret = DATAOUT_CANNOT_RECOVER;
 			goto out;
@@ -116,11 +112,7 @@ int iscsi_dump_data_payload(
 		iov.iov_len = padding;
 		iov.iov_base = pad_bytes;
 
-#ifdef MY_ABC_HERE
-		rx_got = rx_data(conn, &iov, 1, padding, 1);
-#else
 		rx_got = rx_data(conn, &iov, 1, padding);
-#endif
 		if (rx_got != padding) {
 			ret = DATAOUT_CANNOT_RECOVER;
 			goto out;
@@ -133,11 +125,7 @@ int iscsi_dump_data_payload(
 		iov.iov_len = CRC_LEN;
 		iov.iov_base = &data_crc;
 
-#ifdef MY_ABC_HERE
-		rx_got = rx_data(conn, &iov, 1, CRC_LEN, 1);
-#else
 		rx_got = rx_data(conn, &iov, 1, CRC_LEN);
-#endif
 		if (rx_got != CRC_LEN) {
 			ret = DATAOUT_CANNOT_RECOVER;
 			goto out;

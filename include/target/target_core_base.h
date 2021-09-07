@@ -40,6 +40,9 @@
 #ifdef SNMP_SUPPORT
 #include <target/target_core_mib.h>
 #endif /* SNMP_SUPPORT */
+#ifdef SYNO_LIO_IBLOCK_WRITE_BACK
+#include <linux/rbtree.h>
+#endif
 
 #define TARGET_CORE_MOD_VERSION		"v3.4.0"
 #define SHUTDOWN_SIGS	(sigmask(SIGKILL)|sigmask(SIGINT)|sigmask(SIGABRT))
@@ -899,6 +902,11 @@ typedef struct se_device_s {
 	spinlock_t		dev_status_thr_lock;
 	spinlock_t		se_port_lock;
 	spinlock_t		se_tmr_lock;
+#ifdef SYNO_LIO_IBLOCK_WRITE_BACK
+	atomic_t		nr_bios;
+	spinlock_t		task_interval_lock;
+	struct rb_root		task_interval_tree;
+#endif 
 	/* Used for legacy SPC-2 reservationsa */
 	struct se_node_acl_s	*dev_reserved_node_acl;
 	/* Used for ALUA Logical Unit Group membership */

@@ -137,7 +137,8 @@ static int kw_cpufreq_cpu_init(struct cpufreq_policy *policy)
 		kw_freqs[KW_CPUFREQ_LOW].frequency = mvBoardSysClkGet()*2/1000;
 
 	} else if ((dev_id == MV_6281_DEV_ID) ||
-		(dev_id == MV_6192_DEV_ID) || (dev_id == MV_6282_DEV_ID)) {
+		(dev_id == MV_6192_DEV_ID) || (dev_id == MV_6282_DEV_ID) ||
+		(dev_id == MV_6702_DEV_ID) || (dev_id == MV_6701_DEV_ID))  {
 
 		kw_freqs[KW_CPUFREQ_HIGH].frequency = mvCpuPclkGet()/1000;
 		/* CPU low frequency is the DDR frequency. */

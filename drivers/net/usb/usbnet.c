@@ -43,10 +43,6 @@
 #include <linux/mii.h>
 #include <linux/usb.h>
 #include <linux/usb/usbnet.h>
-#ifdef MY_ABC_HERE
-#include <linux/synobios.h>
-extern int (*funcSYNOSendNetLinkEvent)(unsigned int type, unsigned int ifaceno);
-#endif
 
 #define DRIVER_VERSION		"22-Aug-2005"
 
@@ -1187,13 +1183,6 @@ void usbnet_disconnect (struct usb_interface *intf)
 			dev->driver_info->description);
 
 	net = dev->net;
-#ifdef MY_ABC_HERE
-	if (!strcmp(net->name, SYNO_YOTAWIMAX_ETHERNET_NAME"0")) {
-		if (funcSYNOSendNetLinkEvent) {
-			funcSYNOSendNetLinkEvent(NET_NOLINK, SYNO_YOTAWIMAX_NET_NOLINK_EVENT);
-		}
-	}
-#endif
 	unregister_netdev (net);
 
 	/* we don't hold rtnl here ... */
@@ -1356,11 +1345,6 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 
 	// start as if the link is up
 	netif_device_attach (net);
-#ifdef MY_ABC_HERE
-	if (funcSYNOSendNetLinkEvent) {
-		funcSYNOSendNetLinkEvent(NET_LINK, net->ifindex);
-	}
-#endif
 
 	return 0;
 

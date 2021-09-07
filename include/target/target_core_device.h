@@ -61,6 +61,9 @@ extern void se_clear_dev_ports(se_device_t *);
 extern int se_free_virtual_device(se_device_t *, se_hba_t *);
 extern void se_dev_start(se_device_t *);
 extern void se_dev_stop(se_device_t *);
+#ifdef MY_ABC_HERE
+extern void se_deve_force_readonly(struct se_dev_entry_s *);
+#endif
 extern void se_dev_set_default_attribs(se_device_t *);
 extern int se_dev_set_task_timeout(se_device_t *, u32);
 extern int se_dev_set_emulate_ua_intlck_ctrl(se_device_t *, int);

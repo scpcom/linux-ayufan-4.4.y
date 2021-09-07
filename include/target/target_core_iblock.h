@@ -87,6 +87,16 @@ extern void iblock_bio_done(struct bio *, int);
 typedef struct iblock_req_s {
 	unsigned char ib_scsi_cdb[SCSI_CDB_SIZE];
 	atomic_t ib_bio_cnt;
+#ifdef SYNO_LIO_IBLOCK_WRITE_BACK
+	atomic_t        ref_count;
+	se_task_t*      task;
+	struct page**   pg_vec;
+	se_device_t*    se_dev;
+	u32             pg_count;
+	int             data_direction;
+	loff_t          begin;
+	loff_t          end;
+#endif
 	u32	ib_sg_count;
 	void	*ib_buf;
 	struct bio *ib_bio;

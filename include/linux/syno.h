@@ -15,8 +15,14 @@
 #define SYNO_USB_FLASH_DEVICE_INDEX 255
 #define SYNO_USB_FLASH_DEVICE_NAME  "synoboot"
 #define SYNO_USB_FLASH_DEVICE_PATH  "/dev/synoboot"
+#if 0 
 #define IS_SYNO_USBBOOT_ID_VENDOR(VENDOR) (0xF400 == (VENDOR) || 0xF401 == (VENDOR))
 #define IS_SYNO_USBBOOT_ID_PRODUCT(PRODUCT) (0xF400 == (PRODUCT) || 0xF401 == (PRODUCT))
+#else
+#define IS_SYNO_USBBOOT_ID_VENDOR(VENDOR) (0xF400 == (VENDOR))
+#define IS_SYNO_USBBOOT_ID_PRODUCT(PRODUCT) (0xF400 == (PRODUCT))
+#endif
+
 #endif
 
 #if 1
@@ -38,8 +44,6 @@
 #define SDCOPY_PORT_LOCATION 98
 #endif
 
-#define PORT_TYPE_SATA 1
-#define PORT_TYPE_USB  2
 #if	defined(MY_ABC_HERE) || defined(SYNO_BADSECTOR_TEST)
 #if 0
 #define SYNO_MAX_INTERNAL_DISK 19
@@ -102,5 +106,10 @@
 #include <linux/syno_debug.h>
 #define SYNO_NFSD_WRITE_SIZE_MIN 131072
 #define SYNO_EXT4_SYNC_DALLOC_RETRY  100
+#ifdef MY_ABC_HERE
+#define SYNO_ISCSI_DEVICE_PREFIX   "isd"
+#define SYNO_ISCSI_DEVICE_INDEX    (26 + 25 * 26)    
+#endif
+
 #endif
 

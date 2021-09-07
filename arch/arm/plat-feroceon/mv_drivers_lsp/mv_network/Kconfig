@@ -290,6 +290,7 @@ endif
 
 config MV_GATEWAY
         bool "Gateway support"
+	depends on MV_INCLUDE_SWITCH
 	depends on MV_ETHERNET
         ---help---
 	Choose this option to support Gigabit Ethernet Controller connected to 

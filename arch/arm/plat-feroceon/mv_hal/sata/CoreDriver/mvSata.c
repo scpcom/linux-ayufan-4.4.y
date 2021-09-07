@@ -5851,6 +5851,8 @@ MV_BOOLEAN mvSataInitAdapter (MV_SATA_ADAPTER *pAdapter)
 		pAdapter->chipIs62X1Z0 = MV_TRUE;
         break;
 	case MV_SATA_DEVICE_ID_6192:
+        case MV_SATA_DEVICE_ID_6701:
+        case MV_SATA_DEVICE_ID_6702:
 		pAdapter->numberOfChannels = MV_SATA_6192_PORT_NUM;
 		pAdapter->numberOfUnits = 1;
 		pAdapter->portsPerUnit = MV_SATA_6192_PORT_NUM;

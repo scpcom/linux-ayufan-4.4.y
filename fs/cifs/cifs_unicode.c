@@ -196,18 +196,47 @@ cifs_strtoUCS(__le16 *to, const char *from, int len,
 
 	for (i = 0; len && *from; i++, from += charlen, len -= charlen) {
 
+#ifdef MY_ABC_HERE
+		if (0x0d == *from) {	//'\r'
+			to[i] = cpu_to_le16(0xf00d);
+			charlen = 1;
+		} else if (0x2a == *from) {	//'*'
+			to[i] = cpu_to_le16(0xf02a);
+			charlen = 1;
+		} else if (0x2f == *from) {	//'/'
+			to[i] = cpu_to_le16(0xf02f);
+			charlen = 1;
+		} else if (0x3c == *from) {	//'<'
+			to[i] = cpu_to_le16(0xf03c);
+			charlen = 1;
+		} else if (0x3e == *from) {	//'>'
+			to[i] = cpu_to_le16(0xf03e);
+			charlen = 1;
+		} else if (0x3f == *from) {	//'?'
+			to[i] = cpu_to_le16(0xf03f);
+			charlen = 1;
+		} else if (0x7c== *from) {	//'|'
+			to[i] = cpu_to_le16(0xf07c);
+			charlen = 1;
+		} else {
+#endif
 		/* works for 2.4.0 kernel or later */
 		charlen = codepage->char2uni(from, len, &wchar_to[i]);
 		if (charlen < 1) {
+#ifndef MY_ABC_HERE
 			cERROR(1,
 			       ("strtoUCS: char2uni of %d returned %d",
 				(int)*from, charlen));
+#endif
 			/* A question mark */
 			to[i] = cpu_to_le16(0x003f);
 			charlen = 1;
 		} else
 			to[i] = cpu_to_le16(wchar_to[i]);
 
+#ifdef MY_ABC_HERE
+		}
+#endif
 	}
 
 	to[i] = 0;

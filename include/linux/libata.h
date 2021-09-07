@@ -220,7 +220,7 @@ enum {
 	 * removed in not-too-distant future.
 	 */
 	ATA_FLAG_DISABLED	= (1 << 23), /* port is disabled, ignore it */
-
+	
 	/* bits 24:31 of ap->flags are reserved for LLD specific flags */
 
 
@@ -250,10 +250,14 @@ enum {
 	ATA_PFLAG_PMP_CONNECT = (1 << 24),
 #endif
 #ifdef MY_ABC_HERE
-	ATA_PFLAG_PMP_PMOFF			= (1 << 25),
+	ATA_PFLAG_PMP_PMCTL			= (1 << 25),
 #endif
 #ifdef MY_ABC_HERE
-	ATA_PFLAG_SYNO_BOOT_PROBE = (1 << 30),
+	ATA_PFLAG_SYNO_BOOT_PROBE = (1 << 31),
+	/* TODO: PFLAG are exhausted, shouldn't add any more.
+	 * If OSS add any more PFLAG, we should refine SYNO PFLAG.
+	 * ex. ATA_PFLAG_SYNO_DS_WAKING, ATA_PFLAG_SYNO_DS_PWROFF and
+	 * ATA_PFLAG_PMP_PMOFF may removed, it's added for some workaround*/
 #endif
 
 	/* struct ata_queued_cmd flags */
@@ -670,6 +674,8 @@ struct ata_device {
 	#define CHKPOWER_CHECKING 0
 	#define CHKPOWER_WAKING 1
 	#define CHKPOWER_TIMEOUT 2
+	#define CHKPOWER_FIRST_CMD 3
+	#define CHKPOWER_FIRST_WAIT 4
 
 	struct timer_list	rstimer;
 	struct list_head	pendinglh;
@@ -827,6 +833,9 @@ struct ata_port {
 	void			*port_task_data;
 	struct delayed_work	port_task;
 	struct delayed_work	hotplug_task;
+#ifdef MY_ABC_HERE
+	struct delayed_work	syno_pmp_task;
+#endif //MY_ABC_HERE
 	struct work_struct	scsi_rescan_task;
 
 	unsigned int		hsm_task_state;
@@ -969,7 +978,6 @@ struct ata_port_operations {
 #ifdef CONFIG_SYNO_PLX_PORTING
 	int (*acquire_hw)(int port_no, int may_sleep, int timeout_jiffies);
 #endif
-
 	/*
 	 * ->inherits must be the last field and all the preceding
 	 * fields must be pointers.
@@ -1013,6 +1021,7 @@ extern struct device_attribute dev_attr_syno_wcache;
 #ifdef MY_ABC_HERE
 extern struct device_attribute dev_attr_syno_disk_serial;
 #endif
+
 extern const unsigned long sata_deb_timing_normal[];
 extern const unsigned long sata_deb_timing_hotplug[];
 extern const unsigned long sata_deb_timing_long[];
@@ -1314,6 +1323,8 @@ extern unsigned int gSynoSataHostCnt;
 
 #ifdef MY_ABC_HERE
 extern char gszDiskIdxMap[];
+
+extern int syno_libata_disk_map_table_gen(int *iDiskMapTable);
 #endif
 
 #ifdef MY_ABC_HERE
@@ -1337,7 +1348,7 @@ extern long g_sata_led_special;
 #endif 
 
 #ifdef MY_ABC_HERE
-#define	SYNO_DISK_HIBERNATION_MACRO .syno_port_type = PORT_TYPE_SATA,
+#define	SYNO_DISK_HIBERNATION_MACRO .syno_port_type = SYNO_PORT_TYPE_SATA,
 #else	
 #define SYNO_DISK_HIBERNATION_MACRO
 #endif

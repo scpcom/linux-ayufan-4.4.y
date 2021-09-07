@@ -678,13 +678,8 @@ int mv_eth_tool_set_coalesce(struct net_device *netdev,
 		(cmd->tx_coalesce_usecs * 166 / 64 > 0x3FFF))
 		return -EINVAL;
 	
-	/* Save values for mv_eth_start_internals() */
-	priv->rx_coal_usec = cmd->rx_coalesce_usecs;
-	priv->tx_coal_usec = cmd->tx_coalesce_usecs;
-	
-	mvEthRxCoalSet (priv->hal_priv, cmd->rx_coalesce_usecs);
-	mvEthTxCoalSet (priv->hal_priv, cmd->tx_coalesce_usecs);
-
+	mv_eth_rxcoal_set(priv->port, cmd->rx_coalesce_usecs);
+	mv_eth_txcoal_set(priv->port, cmd->tx_coalesce_usecs);
 	return 0;
 }
 
