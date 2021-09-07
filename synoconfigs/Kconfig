@@ -134,11 +134,20 @@ config SYNO_SATA_PM_DEVICE_GPIO
 	depends on SATA_PMP
 	default y
 
+config SYNO_SATA_INTEL_SSD_COMPATIBILITY
+    bool "Solution of Intel S4500 3.84TB Hotplug 100% failed on Marvell 88SE9235"
+    default y
+
 config SYNO_NF_NAT_WORKAROUND
 	bool "Fix BUG_ON on nf_nat_setup_info"
 	default y
 
 config SYNO_MD_SB_RETRY
 	bool "Add an one-time retry for EIO error when updating superblock"
+	default y
+
+config SYNO_OCF_PERMISSION
+	bool "Adjust /dev/crypto permission to 666"
+	depends on OCF_CRYPTODEV
 	default y
 

@@ -637,7 +637,6 @@ static int make_request(struct request_queue *q, struct bio * bio)
 	mirror_info_t *mirror;
 	r10bio_t *r10_bio;
 	struct bio *read_bio;
-	int cpu;
 	int i;
 	int chunk_sects = conf->chunk_mask + 1;
 	const int rw = bio_data_dir(bio);
@@ -692,12 +691,6 @@ static int make_request(struct request_queue *q, struct bio * bio)
 	md_write_start(mddev, bio);
 
 	wait_barrier(conf);
-
-	cpu = part_stat_lock();
-	part_stat_inc(cpu, &mddev->gendisk->part0, ios[rw]);
-	part_stat_add(cpu, &mddev->gendisk->part0, sectors[rw],
-		      bio_sectors(bio));
-	part_stat_unlock();
 
 	r10_bio = mempool_alloc(conf->r10bio_pool, GFP_NOIO);
 
@@ -952,8 +945,8 @@ syno_error_common(mddev_t *mddev,
 
 #ifdef MY_ABC_HERE
 		if (!blRaid10Enough(conf, rdev)) {
-			if (0 == mddev->nodev_and_crashed) {
-				mddev->nodev_and_crashed = 1;
+			if (MD_NOT_CRASHED == mddev->nodev_and_crashed) {
+				mddev->nodev_and_crashed = MD_CRASHED;
 			}
 		}
 #endif
@@ -1373,6 +1366,7 @@ static void sync_request_write(mddev_t *mddev, r10bio_t *r10_bio)
 					   page_address(tbio->bi_io_vec[j].bv_page),
 					   PAGE_SIZE))
 					break;
+
 			if (j == vcnt)
 				continue;
 			mddev->resync_mismatches += r10_bio->sectors;
@@ -2138,7 +2132,9 @@ static int run(mddev_t *mddev)
 	if (!enough(conf)) {
 #endif
 #ifdef MY_ABC_HERE
-		mddev->nodev_and_crashed = 1;
+		if (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+			mddev->nodev_and_crashed = MD_CRASHED;
+		}
 #endif
 		printk(KERN_ERR "raid10: not enough operational mirrors for %s\n",
 		       mdname(mddev));

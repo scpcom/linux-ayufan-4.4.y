@@ -138,8 +138,6 @@ static int multipath_make_request (struct request_queue *q, struct bio * bio)
 	multipath_conf_t *conf = mddev->private;
 	struct multipath_bh * mp_bh;
 	struct multipath_info *multipath;
-	const int rw = bio_data_dir(bio);
-	int cpu;
 
 	if (unlikely(bio_rw_flagged(bio, BIO_RW_BARRIER))) {
 		bio_endio(bio, -EOPNOTSUPP);
@@ -150,12 +148,6 @@ static int multipath_make_request (struct request_queue *q, struct bio * bio)
 
 	mp_bh->master_bio = bio;
 	mp_bh->mddev = mddev;
-
-	cpu = part_stat_lock();
-	part_stat_inc(cpu, &mddev->gendisk->part0, ios[rw]);
-	part_stat_add(cpu, &mddev->gendisk->part0, sectors[rw],
-		      bio_sectors(bio));
-	part_stat_unlock();
 
 	mp_bh->path = multipath_map(conf);
 	if (mp_bh->path < 0) {

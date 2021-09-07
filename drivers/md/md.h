@@ -135,6 +135,9 @@ struct mddev_s
 	int				external_size;  
 	__u64				events;
 
+#ifdef MY_ABC_HERE
+	int                             sb_not_clean;
+#endif  
 	char				uuid[16];
 
 	sector_t			reshape_position;
@@ -227,7 +230,10 @@ struct mddev_s
 	unsigned long			ulLastReq;  
 #endif
 #ifdef MY_ABC_HERE
-    unsigned char           nodev_and_crashed;      
+#define MD_NOT_CRASHED 0
+#define MD_CRASHED 1
+#define MD_CRASHED_ASSEMBLE 2
+	unsigned char			nodev_and_crashed;      
 #endif
 #ifdef MY_ABC_HERE
 	unsigned char			auto_remap;      
@@ -243,6 +249,7 @@ struct mddev_s
 #ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
  	struct raidset_s* hw_raid;
 #endif
+	struct attribute_group		*to_remove;
 };
 
 static inline void rdev_dec_pending(mdk_rdev_t *rdev, mddev_t *mddev)

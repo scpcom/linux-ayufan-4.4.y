@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * eCryptfs: Linux filesystem encryption layer
  *
@@ -191,6 +194,16 @@ static int ecryptfs_open(struct inode *inode, struct file *file)
 				      | ECRYPTFS_ENCRYPTED);
 	}
 	mutex_unlock(&crypt_stat->cs_mutex);
+#ifdef MY_ABC_HERE
+	rc = ecryptfs_get_lower_file(ecryptfs_dentry);
+	if (rc) {
+		printk(KERN_ERR "%s: Error attempting to initialize "
+		       "the lower file for the dentry with name "
+		       "[%s]; rc = [%d]\n", __func__,
+		       ecryptfs_dentry->d_name.name, rc);
+		goto out_free;
+	}
+#else
 	if (!ecryptfs_inode_to_private(inode)->lower_file) {
 		rc = ecryptfs_init_persistent_file(ecryptfs_dentry);
 		if (rc) {
@@ -201,12 +214,19 @@ static int ecryptfs_open(struct inode *inode, struct file *file)
 			goto out;
 		}
 	}
+#endif /* MY_ABC_HERE */
 	if ((ecryptfs_inode_to_private(inode)->lower_file->f_flags & O_RDONLY)
 	    && !(file->f_flags & O_RDONLY)) {
 		rc = -EPERM;
+#ifdef MY_ABC_HERE
+		printk(KERN_WARNING "%s: Lower file is RO; eCryptfs "
+		       "file must hence be opened RO\n", __func__);
+		goto out_put;
+#else
 		printk(KERN_WARNING "%s: Lower persistent file is RO; eCryptfs "
 		       "file must hence be opened RO\n", __func__);
 		goto out;
+#endif /* MY_ABC_HERE */
 	}
 	ecryptfs_set_file_lower(
 		file, ecryptfs_inode_to_private(inode)->lower_file);
@@ -234,7 +254,11 @@ static int ecryptfs_open(struct inode *inode, struct file *file)
 				       "Plaintext passthrough mode is not "
 				       "enabled; returning -EIO\n");
 				mutex_unlock(&crypt_stat->cs_mutex);
+#ifdef MY_ABC_HERE
+				goto out_put;
+#else
 				goto out_free;
+#endif /* MY_ABC_HERE */
 			}
 			rc = 0;
 			crypt_stat->flags &= ~(ECRYPTFS_ENCRYPTED);
@@ -247,6 +271,10 @@ static int ecryptfs_open(struct inode *inode, struct file *file)
 			"size: [0x%.16x]\n", inode, inode->i_ino,
 			i_size_read(inode));
 	goto out;
+#ifdef MY_ABC_HERE
+out_put:
+	ecryptfs_put_lower_file(inode);
+#endif /* MY_ABC_HERE */
 out_free:
 	kmem_cache_free(ecryptfs_file_info_cache,
 			ecryptfs_file_to_private(file));
@@ -256,6 +284,10 @@ out:
 
 static int ecryptfs_flush(struct file *file, fl_owner_t td)
 {
+#ifdef MY_ABC_HERE
+	return file->f_mode & FMODE_WRITE
+	       ? filemap_write_and_wait(file->f_mapping) : 0;
+#else
 	int rc = 0;
 	struct file *lower_file = NULL;
 
@@ -263,10 +295,14 @@ static int ecryptfs_flush(struct file *file, fl_owner_t td)
 	if (lower_file->f_op && lower_file->f_op->flush)
 		rc = lower_file->f_op->flush(lower_file, td);
 	return rc;
+#endif /* MY_ABC_HERE */
 }
 
 static int ecryptfs_release(struct inode *inode, struct file *file)
 {
+#ifdef MY_ABC_HERE
+	ecryptfs_put_lower_file(inode);
+#endif /* MY_ABC_HERE */
 	kmem_cache_free(ecryptfs_file_info_cache,
 			ecryptfs_file_to_private(file));
 	return 0;

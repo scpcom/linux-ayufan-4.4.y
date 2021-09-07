@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*	$OpenBSD: cryptodev.c,v 1.52 2002/06/19 07:22:46 deraadt Exp $	*/
 
 /*-
@@ -1024,11 +1027,13 @@ static struct file_operations cryptodev_fops = {
 	.unlocked_ioctl = cryptodev_unlocked_ioctl,
 #endif
 };
-
 static struct miscdevice cryptodev = {
 	.minor = CRYPTODEV_MINOR,
 	.name = "crypto",
 	.fops = &cryptodev_fops,
+#ifdef MY_ABC_HERE
+	.mode = S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH,
+#endif /* MY_ABC_HERE */
 };
 
 static int __init

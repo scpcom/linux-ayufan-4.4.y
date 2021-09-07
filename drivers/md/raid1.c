@@ -8,7 +8,7 @@
 #include "md.h"
 #include "raid1.h"
 #include "bitmap.h"
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 #include "hwraid.h"
 #endif
 
@@ -539,7 +539,7 @@ static void raid1_unplug(struct request_queue *q)
 
 	unplug_slaves(mddev);
 	md_wakeup_thread(mddev->thread);
-	
+
 #ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	 
     if (mddev->hw_raid &&
@@ -640,11 +640,11 @@ static void lower_barrier(conf_t *conf)
 	conf->barrier--;
 	spin_unlock_irqrestore(&conf->resync_lock, flags);
 	wake_up(&conf->wait_barrier);
-	
+
 #ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	 
     if (conf->mddev->hw_raid &&
-        blk_queue_stopped(conf->mddev->queue)) 
+        blk_queue_stopped(conf->mddev->queue))
     {
         unsigned long flags;
         spin_lock_irqsave(conf->mddev->queue->queue_lock, flags);
@@ -752,7 +752,6 @@ static int make_request(struct request_queue *q, struct bio * bio)
 	struct page **behind_pages = NULL;
 	const int rw = bio_data_dir(bio);
 	const bool do_sync = bio_rw_flagged(bio, BIO_RW_SYNCIO);
-	int cpu;
 	bool do_barriers;
 	mdk_rdev_t *blocked_rdev;
 
@@ -785,12 +784,6 @@ static int make_request(struct request_queue *q, struct bio * bio)
 #endif
 
 	bitmap = mddev->bitmap;
-
-	cpu = part_stat_lock();
-	part_stat_inc(cpu, &mddev->gendisk->part0, ios[rw]);
-	part_stat_add(cpu, &mddev->gendisk->part0, sectors[rw],
-		      bio_sectors(bio));
-	part_stat_unlock();
 
 	r1_bio = mempool_alloc(conf->r1bio_pool, GFP_NOIO);
 
@@ -996,8 +989,8 @@ void syno_error_common(mddev_t *mddev, mdk_rdev_t *rdev)
 		mddev->degraded++;
 #ifdef MY_ABC_HERE
 		if (mddev->degraded >= conf->raid_disks) {
-			if (0 == mddev->nodev_and_crashed) {
-				mddev->nodev_and_crashed = 1;
+			if (MD_NOT_CRASHED == mddev->nodev_and_crashed) {
+				mddev->nodev_and_crashed = MD_CRASHED;
 			}
 		}
 #ifdef MY_ABC_HERE
@@ -1014,12 +1007,12 @@ void syno_error_common(mddev_t *mddev, mdk_rdev_t *rdev)
 	printk(KERN_ALERT "raid1: Disk failure on %s, disabling device. \n"
 		"	Operation continuing on %d devices\n",
 		bdevname(rdev->bdev,b), conf->raid_disks - mddev->degraded);
-	
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	if (mddev->hw_raid) {
 	    hwraid1_error(mddev, rdev);
 	}
-#endif	
+#endif
 }
 
 void syno_error_for_hotplug(mddev_t *mddev, mdk_rdev_t *rdev)
@@ -1034,7 +1027,7 @@ void syno_error_for_hotplug(mddev_t *mddev, mdk_rdev_t *rdev)
 			if(!test_bit(Faulty, &rdev_tmp->flags) &&
 			   !test_bit(In_sync, &rdev_tmp->flags) &&
 			   0 != strcmp(bdevname(rdev_tmp->bdev, b1), bdevname(rdev->bdev, b2))) {
-				printk("[%s] %d: %s is being to unplug, but %s is sync now, disable both\n", 
+				printk("[%s] %d: %s is being to unplug, but %s is sync now, disable both\n",
 					   __FILE__, __LINE__, bdevname(rdev->bdev, b2), bdevname(rdev_tmp->bdev, b1));
 				SYNORaidRdevUnplug(mddev, rdev_tmp);
 			}
@@ -1115,11 +1108,11 @@ static void error(mddev_t *mddev, mdk_rdev_t *rdev)
 		"raid1: Operation continuing on %d devices.\n",
 		bdevname(rdev->bdev,b), conf->raid_disks - mddev->degraded);
 
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	if (mddev->hw_raid) {
 	    hwraid1_error(mddev, rdev);
 	}
-#endif	
+#endif
 }
 #endif  
 
@@ -1150,7 +1143,7 @@ static void print_conf(conf_t *conf)
 
 static void close_sync(conf_t *conf)
 {
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	raid1_wait_barrier(conf);
 	raid1_allow_barrier(conf);
 #else
@@ -1227,12 +1220,12 @@ static int raid1_add_disk(mddev_t *mddev, mdk_rdev_t *rdev)
 			break;
 		}
 
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	 
 	if (!err && mddev->hw_raid) {
 	    err = hwraid1_add_disk(mddev, rdev);
 	}
-#endif	
+#endif
 	md_integrity_add_rdev(rdev, mddev);
 	print_conf(conf);
 	return err;
@@ -1246,8 +1239,8 @@ static int raid1_remove_disk(mddev_t *mddev, int number)
 	mirror_info_t *p = conf->mirrors+ number;
 
 	print_conf(conf);
-	
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	if (mddev->hw_raid && hwraid_stop_new_commands() ) {
 	    printk(KERN_INFO"HW-RAID1: waiting for hwraid to go idle before removing disk\n");
         err = -EBUSY;
@@ -1278,11 +1271,11 @@ static int raid1_remove_disk(mddev_t *mddev, int number)
 		}
 		md_integrity_register(mddev);
 	}
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
     if (mddev->hw_raid) {
         err = hwraid1_remove_disk(mddev, number, rdev);
     }
-#endif	
+#endif
 abort:
 
 	print_conf(conf);
@@ -1427,9 +1420,8 @@ static void sync_request_write(mddev_t *mddev, r1bio_t *r1_bio)
 						s = sbio->bi_io_vec[j].bv_page;
 						if (memcmp(page_address(p),
 							   page_address(s),
-							   PAGE_SIZE)) {
+							   PAGE_SIZE))
 							break;
-						}
 					}
 				} else
 					j = 0;
@@ -1686,7 +1678,7 @@ static void raid1d(mddev_t *mddev)
 	mdk_rdev_t *rdev;
 
 	md_check_recovery(mddev);
-	
+
 	for (;;) {
 		char b[BDEVNAME_SIZE];
 
@@ -1815,7 +1807,7 @@ static int init_resync(conf_t *conf)
 	return 0;
 }
 
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 static sector_t _sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, int go_faster)
 #else
 static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, int go_faster)
@@ -2036,7 +2028,7 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 }
 
 #ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
-static sector_t 
+static sector_t
 sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, int go_faster)
 {
 #ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
@@ -2169,9 +2161,9 @@ static int run(mddev_t *mddev)
 		printk(KERN_NOTICE "raid1: %s is not clean"
 		       " -- starting background reconstruction\n",
 		       mdname(mddev));
-	printk(KERN_INFO 
+	printk(KERN_INFO
 		"raid1: raid set %s active with %d out of %d mirrors\n",
-		mdname(mddev), mddev->raid_disks - mddev->degraded, 
+		mdname(mddev), mddev->raid_disks - mddev->degraded,
 		mddev->raid_disks);
 	 
 	md_set_array_sectors(mddev, raid1_size(mddev, 0, 0));
@@ -2180,13 +2172,13 @@ static int run(mddev_t *mddev)
 	mddev->queue->backing_dev_info.congested_fn = raid1_congested;
 	mddev->queue->backing_dev_info.congested_data = mddev;
 	md_integrity_register(mddev);
-	
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	 
 	if (hwraid1_run(mddev, conf) < 0 ) {
 	    printk(KERN_ERR"Unable to use HW RAID accelleration.");
 	}
-#endif	
+#endif
 	return 0;
 
 out_no_mem:
@@ -2232,11 +2224,11 @@ static int stop(mddev_t *mddev)
 	md_unregister_thread(mddev->thread);
 	mddev->thread = NULL;
 
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	if (mddev->hw_raid) {
 	    hwraid1_stop(mddev);
 	} else
-#endif	    
+#endif
 #ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	{
 #endif
@@ -2338,17 +2330,17 @@ static int raid1_reshape(mddev_t *mddev)
 		return -ENOMEM;
 	}
 
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	raid1_raise_barrier(conf);
 #else
 	raise_barrier(conf);
 #endif
 
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	if (mddev->hw_raid) {
 	    hwraid1_reshape_begin(mddev);
 	}
-#endif	
+#endif
 	oldpool = conf->r1bio_pool;
 	conf->r1bio_pool = newpool;
 
@@ -2383,14 +2375,14 @@ static int raid1_reshape(mddev_t *mddev)
 	mddev->delta_disks = 0;
 
 	conf->last_used = 0;  
-	
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	 
 	if (mddev->hw_raid) {
 	    hwraid1_reshape_end(mddev);
 	}
-#endif	
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+#endif
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	raid1_lower_barrier(conf);
 #else
 	lower_barrier(conf);

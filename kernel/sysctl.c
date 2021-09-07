@@ -73,11 +73,6 @@ EXPORT_SYMBOL(gSynoRaidSyncFlag);
 #endif
 
 #ifdef MY_ABC_HERE
-DECLARE_RWSEM(s_reshape_mount_key);
-EXPORT_SYMBOL(s_reshape_mount_key);
-#endif  
-
-#ifdef MY_ABC_HERE
 long g_internal_hd_num = -1;
 long syno_boot_hd_count = 0;
 EXPORT_SYMBOL(g_internal_hd_num);

@@ -1863,7 +1863,7 @@ static void raid5_end_write_request(struct bio *bi, int error)
 #endif
 
 	rdev_dec_pending(conf->disks[i].rdev, conf->mddev);
-	
+
 #ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
 	if (test_bit(R5_DirectAccess, &sh->dev[i].flags)) {
 		BUG_ON(sh->dev[i].req.bi_io_vec[0].bv_page == sh->dev[i].page);
@@ -1902,7 +1902,7 @@ static struct page *raid5_zero_copy(struct bio *bio, sector_t sector)
 #endif
 
 static sector_t compute_blocknr(struct stripe_head *sh, int i, int previous);
-	
+
 static void raid5_build_block(struct stripe_head *sh, int i, int previous)
 {
 	struct r5dev *dev = &sh->dev[i];
@@ -1948,8 +1948,8 @@ static void error_orig(mddev_t *mddev, mdk_rdev_t *rdev)
 			mddev->degraded++;
 #ifdef MY_ABC_HERE
 			if (mddev->degraded > conf->max_degraded) {
-				if (0 == mddev->nodev_and_crashed) {
-					mddev->nodev_and_crashed = 1;
+				if (MD_NOT_CRASHED == mddev->nodev_and_crashed) {
+					mddev->nodev_and_crashed = MD_CRASHED;
 				}
 			}
 #endif
@@ -2010,7 +2010,7 @@ static void syno_error_for_hotplug(mddev_t *mddev, mdk_rdev_t *rdev)
 		SynoIsRaidReachMaxDegrade(mddev)) {
 		list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
 			if(!test_bit(In_sync, &rdev_tmp->flags) && !test_bit(Faulty, &rdev_tmp->flags)) {
-				printk("[%s] %d: %s is being to unplug, but %s is building parity now, disable both\n", 
+				printk("[%s] %d: %s is being to unplug, but %s is building parity now, disable both\n",
 					   __FILE__, __LINE__, bdevname(rdev->bdev, b2), bdevname(rdev_tmp->bdev, b1));
 				SYNORaidRdevUnplug(mddev, rdev_tmp);
 			}
@@ -3902,8 +3902,8 @@ static int raid5_mergeable_bvec(struct request_queue *q,
 	unsigned int chunk_sectors = mddev->chunk_sectors;
 	unsigned int bio_sectors = bvm->bi_size >> 9;
 
-	if ((bvm->bi_rw & 1) == WRITE)
-		return biovec->bv_len;  
+	if ((bvm->bi_rw & 1) == WRITE || mddev->degraded)
+		return biovec->bv_len;
 
 	if (mddev->new_chunk_sectors < mddev->chunk_sectors)
 		chunk_sectors = mddev->new_chunk_sectors;
@@ -4138,7 +4138,7 @@ static int make_request(struct request_queue *q, struct bio * bi)
 	sector_t logical_sector, last_sector;
 	struct stripe_head *sh;
 	const int rw = bio_data_dir(bi);
-	int cpu, remaining;
+	int remaining;
 
 	if (unlikely(bio_rw_flagged(bi, BIO_RW_BARRIER))) {
 		bio_endio(bi, -EOPNOTSUPP);
@@ -4159,13 +4159,7 @@ static int make_request(struct request_queue *q, struct bio * bi)
 
 	md_write_start(mddev, bi);
 
-	cpu = part_stat_lock();
-	part_stat_inc(cpu, &mddev->gendisk->part0, ios[rw]);
-	part_stat_add(cpu, &mddev->gendisk->part0, sectors[rw],
-		      bio_sectors(bi));
-	part_stat_unlock();
-
-	if (rw == READ &&
+	if (rw == READ && mddev->degraded == 0 &&
 	     mddev->reshape_position == MaxSector &&
 	     chunk_aligned_read(q,bi))
 		return 0;
@@ -4209,7 +4203,7 @@ static int make_request(struct request_queue *q, struct bio * bi)
 						  previous,
 						  &dd_idx, NULL);
 		pr_debug("raid5: make_request, sector %llu logical %llu\n",
-			(unsigned long long)new_sector, 
+			(unsigned long long)new_sector,
 			(unsigned long long)logical_sector);
 
 		sh = get_active_stripe(conf, new_sector, previous,
@@ -4264,7 +4258,7 @@ static int make_request(struct request_queue *q, struct bio * bi)
 			finish_wait(&conf->wait_for_overlap, &w);
 			break;
 		}
-			
+
 	}
 	spin_lock_irq(&conf->device_lock);
 	remaining = raid5_dec_bi_phys_segments(bi);
@@ -4629,7 +4623,7 @@ static void raid5d(mddev_t *mddev)
 		if (!sh)
 			break;
 		spin_unlock_irq(&conf->device_lock);
-		
+
 		handled++;
 		handle_stripe(sh);
 		release_stripe(sh);
@@ -5030,7 +5024,7 @@ static int only_parity(int raid_disk, int algo, int raid_disks, int max_degraded
 			return 1;
 		break;
 	case ALGORITHM_PARITY_0_6:
-		if (raid_disk == 0 || 
+		if (raid_disk == 0 ||
 		    raid_disk == raid_disks - 1)
 			return 1;
 		break;
@@ -5085,18 +5079,27 @@ static int run(mddev_t *mddev)
 		 
 		if (mddev->delta_disks == 0) {
 			 
-			if ((here_new * mddev->new_chunk_sectors != 
+			if ((here_new * mddev->new_chunk_sectors !=
 			     here_old * mddev->chunk_sectors) ||
 			    mddev->ro == 0) {
 				printk(KERN_ERR "raid5: in-place reshape must be started"
 				       " in read-only mode - aborting\n");
 				return -EINVAL;
 			}
+#ifdef MY_ABC_HERE
+		} else if ((mddev->delta_disks < 0
+		    ? (here_new * mddev->new_chunk_sectors <=
+		       here_old * mddev->chunk_sectors)
+		    : (here_new * mddev->new_chunk_sectors >=
+		       here_old * mddev->chunk_sectors))
+                        && mddev->reshape_position != 0) {
+#else  
 		} else if (mddev->delta_disks < 0
 		    ? (here_new * mddev->new_chunk_sectors <=
 		       here_old * mddev->chunk_sectors)
 		    : (here_new * mddev->new_chunk_sectors >=
 		       here_old * mddev->chunk_sectors)) {
+#endif  
 			 
 			printk(KERN_ERR "raid5: reshape_position too early for "
 			       "auto-recovery - aborting.\n");
@@ -5132,11 +5135,11 @@ static int run(mddev_t *mddev)
 		if (mddev->major_version == 0 &&
 		    mddev->minor_version > 90)
 			rdev->recovery_offset = reshape_offset;
-			
+
 		printk("%d: w=%d pa=%d pr=%d m=%d a=%d r=%d op1=%d op2=%d\n",
 		       rdev->raid_disk, working_disks, conf->prev_algo,
 		       conf->previous_raid_disks, conf->max_degraded,
-		       conf->algorithm, conf->raid_disks, 
+		       conf->algorithm, conf->raid_disks,
 		       only_parity(rdev->raid_disk,
 				   conf->prev_algo,
 				   conf->previous_raid_disks,
@@ -5166,7 +5169,9 @@ static int run(mddev_t *mddev)
 
 	if (mddev->degraded > conf->max_degraded) {
 #ifdef MY_ABC_HERE
-		mddev->nodev_and_crashed = 1;
+		if (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+			mddev->nodev_and_crashed = MD_CRASHED;
+		}
 #endif
 #ifndef MY_ABC_HERE
 		printk(KERN_ERR "raid5: not enough operational devices for %s"
@@ -5227,7 +5232,9 @@ static int run(mddev_t *mddev)
 			mddev->queue->backing_dev_info.ra_pages = 2 * stripe;
 	}
 
-	if (sysfs_create_group(&mddev->kobj, &raid5_attrs_group))
+	if (mddev->to_remove == &raid5_attrs_group)
+		mddev->to_remove = NULL;
+	else if (sysfs_create_group(&mddev->kobj, &raid5_attrs_group))
 		printk(KERN_WARNING
 		       "raid5: failed to create sysfs attributes for %s\n",
 		       mdname(mddev));
@@ -5271,14 +5278,9 @@ static int stop(mddev_t *mddev)
 	mddev->thread = NULL;
 	mddev->queue->backing_dev_info.congested_fn = NULL;
 	blk_sync_queue(mddev->queue);  
-#ifdef MY_ABC_HERE
-	free_conf(conf);
-	mddev->private = &raid5_attrs_group;
-#else  
-	sysfs_remove_group(&mddev->kobj, &raid5_attrs_group);
 	free_conf(conf);
 	mddev->private = NULL;
-#endif  
+	mddev->to_remove = &raid5_attrs_group;
 	return 0;
 }
 
@@ -5681,12 +5683,14 @@ static void raid5_finish_reshape(mddev_t *mddev)
 	raid5_conf_t *conf = mddev->private;
 
 	if (!test_bit(MD_RECOVERY_INTR, &mddev->recovery)) {
-
 		if (mddev->delta_disks > 0) {
+#ifdef MY_ABC_HERE
+#else  
 			md_set_array_sectors(mddev, raid5_size(mddev, 0, 0));
 			set_capacity(mddev->gendisk, mddev->array_sectors);
 			mddev->changed = 1;
 			revalidate_disk(mddev->gendisk);
+#endif  
 		} else {
 			int d;
 			mddev->degraded = conf->raid_disks;

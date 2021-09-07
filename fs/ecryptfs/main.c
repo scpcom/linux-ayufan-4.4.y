@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  
 #include <linux/dcache.h>
 #include <linux/file.h>
@@ -52,6 +55,61 @@ void __ecryptfs_printk(const char *fmt, ...)
 	va_end(args);
 }
 
+#ifdef MY_ABC_HERE
+ 
+static int ecryptfs_init_lower_file(struct dentry *dentry,
+				    struct file **lower_file)
+{
+	const struct cred *cred = current_cred();
+	struct dentry *lower_dentry = ecryptfs_dentry_to_lower(dentry);
+	struct vfsmount *lower_mnt = ecryptfs_dentry_to_lower_mnt(dentry);
+	int rc;
+
+	rc = ecryptfs_privileged_open(lower_file, lower_dentry, lower_mnt,
+				      cred);
+	if (rc) {
+		printk(KERN_ERR "Error opening lower file "
+		       "for lower_dentry [0x%p] and lower_mnt [0x%p]; "
+		       "rc = [%d]\n", lower_dentry, lower_mnt, rc);
+		(*lower_file) = NULL;
+	}
+	return rc;
+}
+
+int ecryptfs_get_lower_file(struct dentry *dentry)
+{
+	struct ecryptfs_inode_info *inode_info =
+		ecryptfs_inode_to_private(dentry->d_inode);
+	int count, rc = 0;
+
+	mutex_lock(&inode_info->lower_file_mutex);
+	count = atomic_inc_return(&inode_info->lower_file_count);
+	if (WARN_ON_ONCE(count < 1))
+		rc = -EINVAL;
+	else if (count == 1) {
+		rc = ecryptfs_init_lower_file(dentry,
+					      &inode_info->lower_file);
+		if (rc)
+			atomic_set(&inode_info->lower_file_count, 0);
+	}
+	mutex_unlock(&inode_info->lower_file_mutex);
+	return rc;
+}
+
+void ecryptfs_put_lower_file(struct inode *inode)
+{
+	struct ecryptfs_inode_info *inode_info;
+
+	inode_info = ecryptfs_inode_to_private(inode);
+	if (atomic_dec_and_mutex_lock(&inode_info->lower_file_count,
+				      &inode_info->lower_file_mutex)) {
+		fput(inode_info->lower_file);
+		inode_info->lower_file = NULL;
+		mutex_unlock(&inode_info->lower_file_mutex);
+	}
+}
+#else
+ 
 int ecryptfs_init_persistent_file(struct dentry *ecryptfs_dentry)
 {
 	const struct cred *cred = current_cred();
@@ -82,6 +140,7 @@ int ecryptfs_init_persistent_file(struct dentry *ecryptfs_dentry)
 		ima_counts_get(inode_info->lower_file);
 	return rc;
 }
+#endif  
 
 int ecryptfs_interpose(struct dentry *lower_dentry, struct dentry *dentry,
 		       struct super_block *sb, u32 flags)

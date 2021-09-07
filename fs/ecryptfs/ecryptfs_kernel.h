@@ -270,6 +270,9 @@ struct ecryptfs_inode_info {
 	struct inode *wii_inode;
 	struct file *lower_file;
 	struct mutex lower_file_mutex;
+#ifdef MY_ABC_HERE
+	atomic_t lower_file_count;
+#endif  
 	struct ecryptfs_crypt_stat crypt_stat;
 };
 
@@ -674,7 +677,12 @@ int ecryptfs_privileged_open(struct file **lower_file,
 			     struct dentry *lower_dentry,
 			     struct vfsmount *lower_mnt,
 			     const struct cred *cred);
+#ifdef MY_ABC_HERE
+int ecryptfs_get_lower_file(struct dentry *ecryptfs_dentry);
+void ecryptfs_put_lower_file(struct inode *inode);
+#else
 int ecryptfs_init_persistent_file(struct dentry *ecryptfs_dentry);
+#endif  
 int
 ecryptfs_write_tag_70_packet(char *dest, size_t *remaining_bytes,
 			     size_t *packet_size,

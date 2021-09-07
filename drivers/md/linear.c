@@ -199,7 +199,9 @@ static linear_conf_t *linear_conf(mddev_t *mddev, int raid_disks)
 		 
 		mddev->degraded = mddev->raid_disks - cnt;		
 #ifdef MY_ABC_HERE
-		mddev->nodev_and_crashed = 1;
+		if (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+			mddev->nodev_and_crashed = MD_CRASHED;
+		}
 #endif
 		printk("linear: not enough drives present.\n");
 		return conf;
@@ -286,9 +288,7 @@ static int linear_stop (mddev_t *mddev)
 	rcu_barrier();
 	blk_sync_queue(mddev->queue);  
 	kfree(conf);
-#ifdef MY_ABC_HERE
 	mddev->private = NULL;
-#endif  
 
 	return 0;
 }
@@ -335,11 +335,9 @@ SynoLinearEndRequest(struct bio *bio, int error)
 
 static int linear_make_request (struct request_queue *q, struct bio *bio)
 {
-	const int rw = bio_data_dir(bio);
 	mddev_t *mddev = q->queuedata;
 	dev_info_t *tmp_dev;
 	sector_t start_sector;
-	int cpu;
 #ifdef MY_ABC_HERE
 	struct bio *data_bio;
 #endif
@@ -360,12 +358,6 @@ static int linear_make_request (struct request_queue *q, struct bio *bio)
 		return 0;
 	}
 #endif
-
-	cpu = part_stat_lock();
-	part_stat_inc(cpu, &mddev->gendisk->part0, ios[rw]);
-	part_stat_add(cpu, &mddev->gendisk->part0, sectors[rw],
-		      bio_sectors(bio));
-	part_stat_unlock();
 
 	rcu_read_lock();
 	tmp_dev = which_dev(mddev, bio->bi_sector);
@@ -507,7 +499,9 @@ SynoLinearError(mddev_t *mddev, mdk_rdev_t *rdev)
 			SYNO_UPDATE_SB_WORK *update_sb = NULL;
 			mddev->degraded++;
 #ifdef MY_ABC_HERE
-			mddev->nodev_and_crashed = 1;
+			if (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+				mddev->nodev_and_crashed = MD_CRASHED;
+			}
 #endif
 			set_bit(Faulty, &rdev->flags);
 #ifdef MY_ABC_HERE

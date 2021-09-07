@@ -2991,7 +2991,12 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 
 			pmp_deadline = ata_deadline(jiffies,
 						    ATA_TMOUT_PMP_SRST_WAIT);
+#ifdef MY_ABC_HERE
+			 
+			if (time_before(pmp_deadline, deadline))
+#else
 			if (time_after(pmp_deadline, deadline))
+#endif  
 				pmp_deadline = deadline;
 			ata_wait_ready(link, pmp_deadline, check_ready);
 		}

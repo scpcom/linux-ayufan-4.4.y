@@ -285,6 +285,11 @@ typedef struct _SynoCpuTemp {
 	int cpu_temp[MAX_CPU];
 } SYNOCPUTEMP;
 
+typedef struct _SynoThermalTemp {
+	unsigned char blSurface;
+	int temperature;
+} SYNO_THERMAL_TEMP;
+
 enum {
     MD_SECTOR_READ_ERROR = 0,
     MD_SECTOR_WRITE_ERROR = 1,

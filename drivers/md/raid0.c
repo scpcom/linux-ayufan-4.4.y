@@ -353,7 +353,9 @@ static int raid0_run(mddev_t *mddev)
 #ifdef MY_ABC_HERE
 	if (ret < 0) {
 #ifdef MY_ABC_HERE
-			mddev->nodev_and_crashed = 1;
+		if (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+			mddev->nodev_and_crashed = MD_CRASHED;
+		}
 #endif
 			 
 			mddev->array_sectors = raid0_size(mddev, 0, 0);
@@ -506,8 +508,6 @@ static int raid0_make_request(struct request_queue *q, struct bio *bio)
 	sector_t sector_offset;
 	struct strip_zone *zone;
 	mdk_rdev_t *tmp_dev;
-	const int rw = bio_data_dir(bio);
-	int cpu;
 #ifdef MY_ABC_HERE
 	struct bio *data_bio;
 #endif
@@ -528,12 +528,6 @@ static int raid0_make_request(struct request_queue *q, struct bio *bio)
 		return 0;
 	}
 #endif
-
-	cpu = part_stat_lock();
-	part_stat_inc(cpu, &mddev->gendisk->part0, ios[rw]);
-	part_stat_add(cpu, &mddev->gendisk->part0, sectors[rw],
-		      bio_sectors(bio));
-	part_stat_unlock();
 
 	chunk_sects = mddev->chunk_sectors;
 	if (unlikely(!is_io_in_chunk_boundary(mddev, chunk_sects, bio))) {
@@ -686,7 +680,9 @@ static void SynoRaid0Error(mddev_t *mddev, mdk_rdev_t *rdev)
 			SYNO_UPDATE_SB_WORK *update_sb = NULL;
 			mddev->degraded++;
 #ifdef MY_ABC_HERE
-			mddev->nodev_and_crashed = 1;
+			if (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+				mddev->nodev_and_crashed = MD_CRASHED;
+			}
 #endif
 			set_bit(Faulty, &rdev->flags);
 #ifdef MY_ABC_HERE

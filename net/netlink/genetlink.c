@@ -526,8 +526,14 @@ static int genl_rcv_msg(struct sk_buff *skb, struct nlmsghdr *nlh)
 			return -EOPNOTSUPP;
 
 		genl_unlock();
-		err = netlink_dump_start(net->genl_sock, skb, nlh,
-					 ops->dumpit, ops->done);
+		{
+			struct netlink_dump_control c = {
+				.start = ops->start,
+				.dump = ops->dumpit,
+				.done = ops->done,
+			};
+			err = netlink_dump_start(net->genl_sock, skb, nlh, &c);
+		}
 		genl_lock();
 		return err;
 	}

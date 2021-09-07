@@ -23,6 +23,9 @@ static struct inode *ecryptfs_alloc_inode(struct super_block *sb)
 		goto out;
 	ecryptfs_init_crypt_stat(&inode_info->crypt_stat);
 	mutex_init(&inode_info->lower_file_mutex);
+#ifdef MY_ABC_HERE
+	atomic_set(&inode_info->lower_file_count, 0);
+#endif  
 	inode_info->lower_file = NULL;
 	inode = &inode_info->vfs_inode;
 out:
@@ -34,6 +37,9 @@ static void ecryptfs_destroy_inode(struct inode *inode)
 	struct ecryptfs_inode_info *inode_info;
 
 	inode_info = ecryptfs_inode_to_private(inode);
+#ifdef MY_ABC_HERE
+	BUG_ON(inode_info->lower_file);
+#else
 	if (inode_info->lower_file) {
 		struct dentry *lower_dentry =
 			inode_info->lower_file->f_dentry;
@@ -44,6 +50,7 @@ static void ecryptfs_destroy_inode(struct inode *inode)
 			inode_info->lower_file = NULL;
 		}
 	}
+#endif  
 	ecryptfs_destroy_crypt_stat(&inode_info->crypt_stat);
 	kmem_cache_free(ecryptfs_inode_info_cache, inode_info);
 }
