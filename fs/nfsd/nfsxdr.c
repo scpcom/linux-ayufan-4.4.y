@@ -16,6 +16,9 @@
 #include <linux/nfsd/xdr.h>
 #include <linux/mm.h>
 #include "auth.h"
+#ifdef CONFIG_FS_SYNO_ACL
+#include <linux/sched.h>
+#endif
 
 #define NFSDDBG_FACILITY		NFSDDBG_XDR
 
@@ -207,6 +210,10 @@ __be32 *nfs2svc_encode_fattr(struct svc_rqst *rqstp, __be32 *p, struct svc_fh *f
 {
 	struct kstat stat;
 	vfs_getattr(fhp->fh_export->ex_path.mnt, fhp->fh_dentry, &stat);
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_SYNOACL_DENTRY(fhp->fh_dentry) && current_fsuid() == 0)
+		stat.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+#endif
 	return encode_fattr(rqstp, p, fhp, &stat);
 }
 

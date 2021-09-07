@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/nfs/super.c
  *
@@ -183,6 +186,10 @@ enum {
 static const match_table_t nfs_xprt_protocol_tokens = {
 	{ Opt_xprt_udp, "udp" },
 	{ Opt_xprt_tcp, "tcp" },
+#ifdef MY_ABC_HERE
+	{ Opt_xprt_udp, "udp6" },
+	{ Opt_xprt_tcp, "tcp6" },
+#endif
 	{ Opt_xprt_rdma, "rdma" },
 
 	{ Opt_xprt_err, NULL }

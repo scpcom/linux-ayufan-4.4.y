@@ -54,6 +54,10 @@ extern int gSynoHasDynModule;
 extern void ext4_fill_mount_path(struct super_block *sb, const char *szPath);
 #endif
 
+#ifdef MY_ABC_HERE
+extern struct rw_semaphore s_reshape_mount_key;
+#endif /* MY_ABC_HERE */
+
 static int event;
 static DEFINE_IDA(mnt_id_ida);
 static DEFINE_IDA(mnt_group_ida);
@@ -1243,7 +1247,13 @@ SYSCALL_DEFINE2(umount, char __user *, name, int, flags)
 dput_and_out:
 	/* we mustn't call path_put() as that would clear mnt_expiry_mark */
 	dput(path.dentry);
+#ifdef MY_ABC_HERE
+	down_read(&s_reshape_mount_key);
+#endif /* MY_ABC_HERE */
 	mntput_no_expire(path.mnt);
+#ifdef MY_ABC_HERE
+	up_read(&s_reshape_mount_key);
+#endif /* MY_ABC_HERE */
 #ifdef SYNO_FORCE_UNMOUNT
 	if(flags & MNT_DETACH) {
 		fs_set_task_start();
@@ -2081,6 +2091,9 @@ long do_mount(char *dev_name, char *dir_name, char *type_page,
 	if (retval)
 		goto dput_out;
 
+#ifdef MY_ABC_HERE
+	down_read(&s_reshape_mount_key);
+#endif /* MY_ABC_HERE */
 	if (flags & MS_REMOUNT)
 		retval = do_remount(&path, flags & ~MS_REMOUNT, mnt_flags,
 				    data_page);
@@ -2093,6 +2106,10 @@ long do_mount(char *dev_name, char *dir_name, char *type_page,
 	else
 		retval = do_new_mount(&path, type_page, flags, mnt_flags,
 				      dev_name, data_page);
+#ifdef MY_ABC_HERE
+	up_read(&s_reshape_mount_key);
+#endif /* MY_ABC_HERE */
+
 dput_out:
 	path_put(&path);
 	return retval;

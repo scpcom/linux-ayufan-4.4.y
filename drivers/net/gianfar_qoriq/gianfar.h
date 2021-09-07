@@ -1363,6 +1363,13 @@ struct gfar_private {
 	unsigned int skbuff_truesize;
 	struct gfar_skb_handler skb_handler;
 #endif
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	unsigned long wbuf_vaddr;
+	unsigned long wbuf_addr;
+	unsigned long wbuf_size;
+	unsigned long bds_vaddr;
+	unsigned long bds_addr;
+#endif
 
 	unsigned int ftp_rqfpr[MAX_FILER_IDX + 1];
 	unsigned int ftp_rqfcr[MAX_FILER_IDX + 1];
@@ -1433,10 +1440,38 @@ static inline void gfar_read_filer(struct gfar_private *priv,
 	gfar_write(&regs->rqfpr, fpr);
 }
 
-extern inline void lock_rx_qs(struct gfar_private *priv);
-extern inline void lock_tx_qs(struct gfar_private *priv);
-extern inline void unlock_rx_qs(struct gfar_private *priv);
-extern inline void unlock_tx_qs(struct gfar_private *priv);
+static inline void lock_rx_qs(struct gfar_private *priv)
+{
+        int i = 0x0;
+
+        for (i = 0; i < priv->num_rx_queues; i++)
+                spin_lock(&priv->rx_queue[i]->rxlock);
+}
+
+static inline void lock_tx_qs(struct gfar_private *priv)
+{
+        int i = 0x0;
+
+        for (i = 0; i < priv->num_tx_queues; i++)
+                spin_lock(&priv->tx_queue[i]->txlock);
+}
+
+static inline void unlock_rx_qs(struct gfar_private *priv)
+{
+        int i = 0x0;
+
+        for (i = 0; i < priv->num_rx_queues; i++)
+                spin_unlock(&priv->rx_queue[i]->rxlock);
+}
+
+static inline void unlock_tx_qs(struct gfar_private *priv)
+{
+        int i = 0x0;
+
+        for (i = 0; i < priv->num_tx_queues; i++)
+                spin_unlock(&priv->tx_queue[i]->txlock);
+}
+
 extern irqreturn_t gfar_receive(int irq, void *dev_id);
 extern int startup_gfar(struct net_device *dev);
 extern void stop_gfar(struct net_device *dev);

@@ -684,7 +684,7 @@ do {									       \
 
 #endif /* defined(__KERNEL__) || defined(__linux__) */
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 #define ext4_mode2			i_pad1
 #endif
 

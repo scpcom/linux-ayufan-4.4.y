@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/char/vt.c
  *
@@ -2425,7 +2428,7 @@ int set_console(int nr)
 struct tty_driver *console_driver;
 
 #ifdef CONFIG_VT_CONSOLE
-#ifndef SYNO_X86_TTY_CONSOLE_OUTPUT
+#ifndef MY_DEF_HERE
 
 /*
  *	Console on virtual terminal
@@ -2892,7 +2895,7 @@ static int __init con_init(void)
 
 	release_console_sem();
 
-#ifndef SYNO_X86_TTY_CONSOLE_OUTPUT
+#ifndef MY_DEF_HERE
 #ifdef CONFIG_VT_CONSOLE
 	register_console(&vt_console_driver);
 #endif

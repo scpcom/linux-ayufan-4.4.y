@@ -193,7 +193,6 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 #endif
 
 		if(pData->blHddEnStat[iIdx] != iPrzPinVal) {
-
 			if(iPrzPinVal) {
 				//while starting a port, monitoring other ports for the disks unplugged
 				pUnplugMonitor = kthread_run(syno_hddmon_unplug_monitor, pData, SYNO_HDDMON_UPLG_STR);

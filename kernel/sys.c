@@ -358,14 +358,17 @@ void kernel_power_off(void)
 #endif
 	if (pm_power_off_prepare)
 		pm_power_off_prepare();
+#ifdef CONFIG_SYNO_QORIQ_NO_DISABLE_NON_BOOT_CPU
+#else
 	disable_nonboot_cpus();
+#endif
 	sysdev_shutdown();
 	printk(KERN_EMERG "Power down.\n");
 	machine_power_off();
 }
 EXPORT_SYMBOL_GPL(kernel_power_off);
 
-#ifdef SYNO_X86_MICROP_CTRL
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_SYNO_CEDARVIEW
 #define UART_PORT1_IOBASE   0x2F8
 #else
@@ -417,7 +420,7 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 	lock_kernel();
 	switch (cmd) {
 	case LINUX_REBOOT_CMD_RESTART:
-#ifdef SYNO_X86_MICROP_CTRL
+#ifdef MY_DEF_HERE
         outb(UART_START_TX, UART_PORT1_IOBASE + UART_IER);
         outb(UART_CMD_PREFIX, UART_PORT1_IOBASE + UART_TX);
         outb(UART_CMD_REBOOT, UART_PORT1_IOBASE + UART_TX);
@@ -443,7 +446,7 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 		panic("cannot halt");
 
 	case LINUX_REBOOT_CMD_POWER_OFF:
-#ifdef SYNO_X86_MICROP_CTRL
+#ifdef MY_DEF_HERE
         outb(UART_START_TX, UART_PORT1_IOBASE + UART_IER);
         outb(UART_CMD_PREFIX, UART_PORT1_IOBASE + UART_TX);
         outb(UART_CMD_POWEROFF, UART_PORT1_IOBASE + UART_TX);

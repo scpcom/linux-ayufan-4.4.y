@@ -570,7 +570,7 @@ SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
 	}
 #ifdef CONFIG_FS_SYNO_ACL
 	if (IS_SYNOACL(inode)) {
-		res = synoacl_op_access(path.dentry, mode | MAY_ACCESS);
+		res = synoacl_op_access(path.dentry, mode, 0);
 	} else
 #endif
 	res = inode_permission(inode, mode | MAY_ACCESS);
@@ -797,7 +797,7 @@ static int chown_common(struct dentry * dentry, uid_t user, gid_t group)
 	return error;
 }
 
-#ifdef	SYNO_ARCHIVE_BIT
+#ifdef	MY_ABC_HERE
 extern long __SYNOArchiveSet(struct dentry *, unsigned int cmd);
 
 asmlinkage long sys_SYNOArchiveBit(const char * filename, int cmd)
@@ -818,7 +818,7 @@ asmlinkage long sys_SYNOArchiveBit(const char * filename, int cmd)
 	path_put(&path);
 	return error;
 }
-#endif //SYNO_ARCHIVE_BIT
+#endif //MY_ABC_HERE
 
 SYSCALL_DEFINE3(chown, const char __user *, filename, uid_t, user, gid_t, group)
 {

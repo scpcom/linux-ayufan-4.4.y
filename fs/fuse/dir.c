@@ -786,7 +786,7 @@ static void fuse_fillattr(struct inode *inode, struct fuse_attr *attr,
 	stat->size = attr->size;
 	stat->blocks = attr->blocks;
 	stat->blksize = (1 << inode->i_blkbits);
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	stat->SynoMode = 0;
 #endif
 #ifdef MY_ABC_HERE

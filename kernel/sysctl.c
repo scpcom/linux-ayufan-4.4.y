@@ -92,6 +92,11 @@ EXPORT_SYMBOL(gSynoRaidSyncFlag);
 #endif
 
 #ifdef MY_ABC_HERE
+DECLARE_RWSEM(s_reshape_mount_key);
+EXPORT_SYMBOL(s_reshape_mount_key);
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
 long g_internal_hd_num = -1;
 long syno_boot_hd_count = 0;
 EXPORT_SYMBOL(g_internal_hd_num);
@@ -187,7 +192,7 @@ EXPORT_SYMBOL(gSwitchDev);
 EXPORT_SYMBOL(gDevPCIName);
 #endif
 
-#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 int giSynoHddLedEnabled = 1;
 EXPORT_SYMBOL(giSynoHddLedEnabled);
 #endif

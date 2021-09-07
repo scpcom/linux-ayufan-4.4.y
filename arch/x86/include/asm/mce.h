@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _ASM_X86_MCE_H
 #define _ASM_X86_MCE_H
 
@@ -30,7 +33,7 @@
 #define MCI_STATUS_PCC   (1ULL<<57)  /* processor context corrupt */
 #define MCI_STATUS_S	 (1ULL<<56)  /* Signaled machine check */
 #define MCI_STATUS_AR	 (1ULL<<55)  /* Action required */
-#ifdef SYNO_ECC_NOTIFICATION /* reference: intel 253668-037US chapter15 & 253669-037US appendix E  */
+#ifdef MY_DEF_HERE /* reference: intel 253668-037US chapter15 & 253669-037US appendix E  */
 #define SYNO_MCI_STATUS_UECC_SHIFT 45
 #define SYNO_MCI_STATUS_CECC_SHIFT 46
 #define SYNO_MCI_STATUS_ECC_SYNDROME_SHIFT 47

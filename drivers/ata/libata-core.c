@@ -107,9 +107,6 @@ unsigned int ata_print_id = 1;
 EXPORT_SYMBOL(ata_print_id);
 #endif
 
-int (*funcSYNODeepSleepEvent)(unsigned int, unsigned int) = NULL;
-EXPORT_SYMBOL(funcSYNODeepSleepEvent);
-
 static struct workqueue_struct *ata_wq;
 
 struct workqueue_struct *ata_aux_wq;
@@ -1791,7 +1788,6 @@ unsigned syno_ata_exec_internal_gpio(struct ata_device *dev,
 	DECLARE_COMPLETION_ONSTACK(wait);
 	unsigned int err_mask;
 	int rc;
-
 	spin_lock_irqsave(ap->lock, flags);
 
 	/* no internal command while frozen */
@@ -1840,7 +1836,6 @@ unsigned syno_ata_exec_internal_gpio(struct ata_device *dev,
 	}
 
 	rc = wait_for_completion_timeout(&wait, msecs_to_jiffies(timeout));
-
 	if (!rc) {
 		spin_lock_irqsave(ap->lock, flags);
 
@@ -6812,7 +6807,7 @@ int ata_host_activate(struct ata_host *host, int irq,
 	struct cpumask cpumask_msg_intrs;
 
 	cpumask_clear(&cpumask_msg_intrs);
-	cpumask_set_cpu(0, &cpumask_msg_intrs);
+	cpumask_set_cpu(CONFIG_SYNO_QORIQ_DEFAULT_CPU_AFFINITY, &cpumask_msg_intrs);
 #endif
 
 	rc = ata_host_start(host);
@@ -7495,6 +7490,9 @@ EXPORT_SYMBOL(funcSYNOSendEboxRefreshEvent);
 #ifdef MY_ABC_HERE
 EXPORT_SYMBOL_GPL(ata_dev_set_feature);
 #endif
+
+int (*funcSYNODeepSleepEvent)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNODeepSleepEvent);
 
 int (*funcSYNODiskPowerShortBreakReport)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNODiskPowerShortBreakReport);

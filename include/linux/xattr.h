@@ -63,7 +63,7 @@ struct syno_xattr_archive_version {
 	__le16	v_magic;
 	__le16	v_struct_version;
 	__le32	v_archive_version;
-};
+} __attribute__ ((__packed__));
 #endif
 
 ssize_t xattr_getsecurity(struct inode *, const char *, void *, size_t);

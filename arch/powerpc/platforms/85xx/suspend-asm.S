@@ -273,7 +273,11 @@ _GLOBAL(mpc85xx_enter_deep_sleep)
 	lis	r3, 0xf00e
 	lwz	r4, 0x84(r3)
 	clrlwi	r4, r4, 16
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	oris	r4, r4, 0x16ff
+#else
 	oris	r4, r4, 0x12a3
+#endif
 	stw	r4, 0x84(r3)
 	lwz	r4, 0x84(r3)
 
@@ -282,7 +286,12 @@ _GLOBAL(mpc85xx_enter_deep_sleep)
 	lwz	r8, powmgtreq@l(r3)
 
 	lis	r3, 0xf00e
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	lwz	r4, 0x80(r3)
+	or	r4, r4, r8
+#else
 	mr	r4, r8
+#endif
 	stw	r4, 0x80(r3)
 	lwz	r4, 0x80(r3)		/* read-back to flush write */
 	twi	0, r4, 0

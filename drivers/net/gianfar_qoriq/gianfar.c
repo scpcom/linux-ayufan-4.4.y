@@ -231,6 +231,10 @@ static const struct net_device_ops gfar_netdev_ops = {
 DEFINE_PER_CPU(struct gfar_cpu_dev, gfar_cpu_dev);
 #endif
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+void free_bds(struct gfar_private *priv);
+#endif
+
 #ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
 static int syno_gianfar_drop_caches = 0;
 #endif
@@ -263,38 +267,6 @@ static struct net_device_stats *gfar_get_stats(struct net_device *dev)
 	dev->stats.tx_packets = tx_packets;
 
 	return &dev->stats;
-}
-
-inline void lock_rx_qs(struct gfar_private *priv)
-{
-	int i = 0x0;
-
-	for (i = 0; i < priv->num_rx_queues; i++)
-		spin_lock(&priv->rx_queue[i]->rxlock);
-}
-
-inline void lock_tx_qs(struct gfar_private *priv)
-{
-	int i = 0x0;
-
-	for (i = 0; i < priv->num_tx_queues; i++)
-		spin_lock(&priv->tx_queue[i]->txlock);
-}
-
-inline void unlock_rx_qs(struct gfar_private *priv)
-{
-	int i = 0x0;
-
-	for (i = 0; i < priv->num_rx_queues; i++)
-		spin_unlock(&priv->rx_queue[i]->rxlock);
-}
-
-inline void unlock_tx_qs(struct gfar_private *priv)
-{
-	int i = 0x0;
-
-	for (i = 0; i < priv->num_tx_queues; i++)
-		spin_unlock(&priv->tx_queue[i]->txlock);
 }
 
 /* Returns 1 if incoming frames use an FCB */
@@ -1214,7 +1186,7 @@ void gfar_cpu_dev_init(void)
 		}
 		cpumask_clear(&cpumask_msg_intrs);
 #ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
-		cpumask_set_cpu(0, &cpumask_msg_intrs);
+		cpumask_set_cpu(CONFIG_SYNO_QORIQ_DEFAULT_CPU_AFFINITY, &cpumask_msg_intrs);
 #else
 		cpumask_set_cpu(i, &cpumask_msg_intrs);
 #endif
@@ -1706,6 +1678,11 @@ static int gfar_probe(struct of_device *ofdev,
 		 printk(KERN_INFO "%s:TX BD ring size for Q[%d]: %d\n",
 			dev->name, i, priv->tx_queue[i]->tx_ring_size);
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	priv->wbuf_addr = priv->wbuf_vaddr = priv->wbuf_size  = 0;
+	priv->bds_addr = priv->bds_vaddr = 0;
+#endif
+
 	return 0;
 
 register_fail:
@@ -1731,6 +1708,12 @@ static int gfar_remove(struct of_device *ofdev)
 	if (priv->tbi_node)
 		of_node_put(priv->tbi_node);
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	dma_free_coherent(&priv->ofdev->dev,
+		   priv->wbuf_size, (void *)priv->wbuf_vaddr,
+		   priv->wbuf_addr);
+	free_bds(priv);
+#endif
 	dev_set_drvdata(&ofdev->dev, NULL);
 
 	unregister_netdev(priv->ndev);
@@ -1753,7 +1736,11 @@ static void gfar_enable_filer(struct net_device *dev)
 	temp |= RCTRL_FILREN;
 	temp &= ~RCTRL_FSQEN;
 	temp &= ~RCTRL_PRSDEP_MASK;
+#ifdef CONFIG_SYNO_QORIQ_WOL_SPECIFY_PATTERN
+	temp |= RCTRL_PRSDEP_L2L3L4;
+#else
 	temp |= RCTRL_PRSDEP_L2L3;
+#endif
 	gfar_write(&regs->rctrl, temp);
 
 	unlock_rx_qs(priv);
@@ -1855,6 +1842,50 @@ static void gfar_config_filer_table(struct net_device *dev)
 	mb();
 	rqfpr = dest_mac_addr_l;
 	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
+
+#ifdef CONFIG_SYNO_QORIQ_WOL_SPECIFY_PATTERN
+	/****************Synology DS Assistant*******************************/
+	/* UDP packet */
+	rqfcr = (rqfcr_queue << 10) | RQFCR_AND | RQFCR_CMP_EXACT | RQFCR_PID_L4P;
+	rqfpr = 0x11;
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
+
+	/* source port 1234 */
+	rqfcr = (rqfcr_queue << 10) | RQFCR_AND | RQFCR_CMP_EXACT | RQFCR_PID_SPT;
+	rqfpr = 0x000004D2;
+	mb();
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
+
+	/* destination port 9999 */
+	rqfcr = RQFCR_GPI | (rqfcr_queue << 10) | RQFCR_CMP_EXACT | RQFCR_PID_DPT;
+	rqfpr = 0x0000270F;
+	mb();
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
+
+#ifdef CONFIG_SYNO_IGNORE_NETBIOS_BROADCAST 
+	if (0 == gSynoIgnoreNetBIOSBroadcast) {
+#endif /* SYNO_IGNORE_NETBIOS_BROADCAST */
+	/****************MS nmbd lookup*******************************/
+	/* UDP packet */
+	rqfcr = (rqfcr_queue << 10) | RQFCR_AND | RQFCR_CMP_EXACT | RQFCR_PID_L4P;
+	rqfpr = 0x11;
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
+
+	/* source port 137 */
+	rqfcr = (rqfcr_queue << 10) | RQFCR_AND | RQFCR_CMP_EXACT | RQFCR_PID_SPT;
+	rqfpr = 0x00000089;
+	mb();
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
+
+	/* destination port 137 */
+	rqfcr = RQFCR_GPI | (rqfcr_queue << 10) | RQFCR_CMP_EXACT | RQFCR_PID_DPT;
+	rqfpr = 0x00000089;
+	mb();
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
+#ifdef CONFIG_SYNO_IGNORE_NETBIOS_BROADCAST 
+	}
+#endif /* SYNO_IGNORE_NETBIOS_BROADCAST */
+#endif
 
 	unlock_rx_qs(priv);
 }
@@ -2003,6 +2034,10 @@ static int gfar_arp_resume(struct net_device *dev)
 
 	netif_device_attach(dev);
 	enable_napi(priv);
+
+#ifdef CONFIG_SYNO_QORIQ_WOL_SPECIFY_PATTERN
+	gfar_set_multi(dev);
+#endif
 
 #ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
 	syno_gianfar_drop_caches = 1;
@@ -2273,10 +2308,16 @@ static void gfar_halt_nodisable(struct net_device *dev)
 		tempval |= (DMACTRL_GRS | DMACTRL_GTS);
 		gfar_write(&regs->dmactrl, tempval);
 
+#if defined(CONFIG_SYNO_QORIQ_TX_RESTART_HANG_FIX)
+		spin_event_timeout(((gfar_read(&regs->ievent) &
+						(IEVENT_GRSC | IEVENT_GTSC)) ==
+					(IEVENT_GRSC | IEVENT_GTSC)), 1000000, 0);
+#else
 		while ((gfar_read(&regs->ievent) &
 			 (IEVENT_GRSC | IEVENT_GTSC))!=
 			 (IEVENT_GRSC | IEVENT_GTSC))
 			cpu_relax();
+#endif /* CONFIG_SYNO_QORIQ_TX_RESTART_HANG_FIX */
 		gfar_write(&regs->ievent, IEVENT_GRSC | IEVENT_GTSC);
 	}
 }
@@ -2402,6 +2443,9 @@ void free_bds(struct gfar_private *priv)
 			priv->tx_queue[0]->tx_bd_base,
 			gfar_read(&(priv->gfargrp[0].regs)->tbase0));
 #endif
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	priv->bds_addr = priv->bds_vaddr = 0;
+#endif
 }
 
 void stop_gfar(struct net_device *dev)
@@ -2440,7 +2484,10 @@ void stop_gfar(struct net_device *dev)
 	}
 
 	free_skb_resources(priv);
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#else
 	free_bds(priv);
+#endif
 }
 
 #ifdef CONFIG_GFAR_SKBUFF_RECYCLING
@@ -2484,7 +2531,11 @@ void gfar_free_recycle_queue(struct gfar_skb_handler *sh, int lock_flag)
 	while (clist) {
 		skb = clist;
 		clist = clist->next;
+#ifdef CONFIG_SYNO_QORIQ_FIX_SKB_RECYCLE
+		__kfree_skb_qoriq(skb);
+#else
 		dev_kfree_skb_any(skb);
+#endif
 	}
 }
 #endif
@@ -2510,7 +2561,11 @@ static void free_skb_tx_queue(struct gfar_priv_tx_q *tx_queue)
 					txbdp->length, DMA_TO_DEVICE);
 		}
 		txbdp++;
+#ifdef CONFIG_SYNO_QORIQ_FIX_SKB_RECYCLE
+		__kfree_skb_qoriq(tx_queue->tx_skbuff[i]);
+#else
 		dev_kfree_skb_any(tx_queue->tx_skbuff[i]);
+#endif
 		tx_queue->tx_skbuff[i] = NULL;
 	}
 #ifndef CONFIG_GIANFAR_L2SRAM
@@ -2535,7 +2590,11 @@ static void free_skb_rx_queue(struct gfar_priv_rx_q *rx_queue)
 				rxbdp->bufPtr, priv->rx_buffer_size,
 					DMA_FROM_DEVICE);
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_SKB_RECYCLE
+				__kfree_skb_qoriq(rx_queue->rx_skbuff[i]);
+#else
 				dev_kfree_skb_any(rx_queue->rx_skbuff[i]);
+#endif
 				rx_queue->rx_skbuff[i] = NULL;
 			}
 
@@ -2585,10 +2644,13 @@ static void free_skb_resources(struct gfar_private *priv)
 
 	if(( priv->device_flags & FSL_GIANFAR_DEV_HAS_ARP_PACKET)) {
 		rx_queue = priv->rx_queue[priv->num_rx_queues-1];
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#else
 		dma_free_coherent(&priv->ofdev->dev,
 			   priv->wk_buffer_size * rx_queue->rx_ring_size \
 			   + RXBUF_ALIGNMENT, (void *)priv->wk_buf_vaddr,
 			   priv->wk_buf_paddr);
+#endif
 	}
 	/* Go through all the buffer descriptors and free their data buffers */
 	for (i = 0; i < priv->num_tx_queues; i++) {
@@ -2762,7 +2824,7 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 #if defined(CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY) && !defined(CONFIG_GFAR_SW_PKT_STEERING)
 	struct cpumask cpumask_msg_intrs;
 	cpumask_clear(&cpumask_msg_intrs);
-	cpumask_set_cpu(0, &cpumask_msg_intrs);
+	cpumask_set_cpu(CONFIG_SYNO_QORIQ_DEFAULT_CPU_AFFINITY, &cpumask_msg_intrs);
 #endif
 
 	/* If the device has multiple interrupts, register for
@@ -2848,7 +2910,7 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 			}
 			cpumask_clear(&cpumask_msg_intrs);
 #ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
-			cpumask_set_cpu(0, &cpumask_msg_intrs);
+			cpumask_set_cpu(CONFIG_SYNO_QORIQ_DEFAULT_CPU_AFFINITY, &cpumask_msg_intrs);
 #else
 			cpumask_set_cpu(i, &cpumask_msg_intrs);
 #endif
@@ -2943,7 +3005,18 @@ int startup_gfar(struct net_device *dev)
 		priv->total_rx_ring_size += priv->rx_queue[i]->rx_ring_size;
 
 	/* Allocate memory for the buffer descriptors */
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	if (priv->bds_addr && priv->bds_vaddr) {
+		vaddr = priv->bds_vaddr;
+		addr = priv->bds_addr;
+	} else {
+		vaddr = alloc_bds(priv, &addr);
+		priv->bds_vaddr = vaddr;
+		priv->bds_addr = addr;
+	}
+#else
 	vaddr = alloc_bds(priv, &addr);
+#endif
 
 	if (vaddr == 0) {
 		if (netif_msg_ifup(priv))
@@ -3131,9 +3204,20 @@ int startup_gfar(struct net_device *dev)
 	/* Alloc wake up rx buffer, wake up buffer need 64 bytes aligned */
 		rx_queue = priv->rx_queue[priv->num_rx_queues-1];
 		rx_queue->cur_rx = rx_queue->rx_bd_base;
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+		if (0 == priv->wbuf_size) {
+			priv->wbuf_vaddr = (unsigned long) dma_alloc_coherent(&priv->ofdev->dev, 
+					priv->wk_buffer_size * rx_queue->rx_ring_size \
+					+ RXBUF_ALIGNMENT, &priv->wbuf_addr, GFP_KERNEL);
+			priv->wbuf_size = priv->wk_buffer_size * rx_queue->rx_ring_size + RXBUF_ALIGNMENT;
+		}
+		addr = priv->wbuf_addr;
+		vaddr = priv->wbuf_vaddr;
+#else
 		vaddr = (unsigned long) dma_alloc_coherent(&priv->ofdev->dev,
 				priv->wk_buffer_size * rx_queue->rx_ring_size \
 				+ RXBUF_ALIGNMENT, &addr, GFP_KERNEL);
+#endif
 		if (vaddr == 0) {
 			if (netif_msg_ifup(priv))
 				printk(KERN_ERR
@@ -3254,6 +3338,9 @@ int startup_gfar(struct net_device *dev)
 
 irq_fail:
 wk_buf_fail:
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	priv->wbuf_addr = priv->wbuf_vaddr = priv->wbuf_size  = 0;
+#endif
 	dma_free_coherent(&priv->ofdev->dev,
 			priv->wk_buffer_size * priv->rx_queue[priv->num_rx_queues-1]->rx_ring_size \
 			+ RXBUF_ALIGNMENT, (void *)priv->wk_buf_vaddr,
@@ -4781,7 +4868,11 @@ out:
 		mb();
 		/* Update to the next pointer */
 		if (bdp->status & RXBD_WRAP)
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+			bdp = priv->rx_queue[priv->num_rx_queues-1]->rx_bd_base;
+#else
 			bdp = priv->wk_bd_base;
+#endif
 		else
 			bdp++;
 
@@ -5799,6 +5890,68 @@ END:
 	return 0;
 }
 EXPORT_SYMBOL(SynoQorIQWOLSet);
+#endif
+
+#ifdef CONFIG_SYNO_QORIQ_PHY_LED_SET
+int SynoQorIQSetPhyLed(SYNO_LED ledStatus)
+{
+    struct device_node *pDevNode = NULL;
+	struct of_device * ofdev = NULL;
+	struct gfar_private *priv = NULL;
+	static u32 u32BackUpReg26 = 0;
+	static u32 u32BackUpReg28 = 0;
+
+	for (pDevNode = of_find_node_by_name(NULL, "ethernet"); pDevNode;
+		 pDevNode = of_find_node_by_name(pDevNode, "ethernet")) {
+
+		if (NULL == (ofdev = of_find_device_by_node(pDevNode))) {
+			printk("Cannot found ofdev\n");
+			continue;
+		}
+
+		if (NULL == (priv = dev_get_drvdata(&ofdev->dev))) {
+			printk("NULL == (priv = dev_get_drvdata(&ofdev->dev))");
+			continue;
+		}
+
+		if (NULL == priv->ndev) {
+			printk("NULL == priv->ndev\n");
+			continue;
+		}
+
+		if (NULL == priv->phydev) {
+			printk("no phy devices\n");
+			continue;
+		}
+
+		//About the LED control , please refer to the 8211e spec , chapter of 6.12. LED Configuration.
+		phy_write(priv->phydev, 31, 0x0007); //set to extension page
+		phy_write(priv->phydev, 30, 0x002C); //extension page 44
+
+		switch(ledStatus) {
+			case SYNO_LED_ON:
+				phy_write(priv->phydev, 26, phy_read(priv->phydev, 26) | u32BackUpReg26); //Restore the bit of LED2
+				phy_write(priv->phydev, 28, phy_read(priv->phydev, 28) | u32BackUpReg28); //Restore the bit of LED2
+				break;
+			case SYNO_LED_OFF:
+				u32BackUpReg26 = phy_read(priv->phydev, 26) & 0x0070; //Backup the bit of LED0, LED1, LED2
+				u32BackUpReg28 = phy_read(priv->phydev, 28) & 0x0777; //Backup the bit of LED0, LED1, LED2
+				phy_write(priv->phydev, 26, phy_read(priv->phydev, 26) & ~(0x0070)); //Disable LED0, LED1, LED2
+				phy_write(priv->phydev, 28, phy_read(priv->phydev, 28) & ~(0x0777)); //Disable LED0, LED1, LED2
+				break;
+			default:
+				break;
+		}
+
+		phy_write(priv->phydev, 31, 0x0000); //set PHY to page 0
+	}
+
+	of_node_put(pDevNode);
+
+END:
+	return 0;
+}
+EXPORT_SYMBOL(SynoQorIQSetPhyLed);
 #endif
 
 static struct of_device_id gfar_match[] =

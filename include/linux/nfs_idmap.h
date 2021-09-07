@@ -69,10 +69,10 @@ struct nfs_client;
 int nfs_idmap_new(struct nfs_client *);
 void nfs_idmap_delete(struct nfs_client *);
 
-int nfs_map_name_to_uid(struct nfs_client *, const char *, size_t, __u32 *);
-int nfs_map_group_to_gid(struct nfs_client *, const char *, size_t, __u32 *);
-int nfs_map_uid_to_name(struct nfs_client *, __u32, char *);
-int nfs_map_gid_to_group(struct nfs_client *, __u32, char *);
+int nfs_map_name_to_uid(const struct nfs_server *, const char *, size_t, __u32 *);
+int nfs_map_group_to_gid(const struct nfs_server *, const char *, size_t, __u32 *);
+int nfs_map_uid_to_name(const struct nfs_server *, __u32, char *);
+int nfs_map_gid_to_group(const struct nfs_server *, __u32, char *);
 
 extern unsigned int nfs_idmap_cache_timeout;
 #endif /* __KERNEL__ */

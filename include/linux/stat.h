@@ -66,7 +66,7 @@ struct kstat {
 	u64		ino;
 	dev_t		dev;
 	umode_t		mode;
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	__u32		SynoMode;
 #endif
 #ifdef MY_ABC_HERE
@@ -98,7 +98,6 @@ struct SYNOSTAT_EXTRA {
 	struct timespec creatTime;  //Create Time
 	unsigned int bkpVer;  		//Backup Version
 	unsigned int archBit; 		//Archive Bit
-	unsigned int lastComponent; //For caseless stat, it means parent directory is found.
 };
 struct SYNOSTAT {
 	struct stat st;
@@ -119,7 +118,7 @@ struct SYNOSTAT {
 #endif /* __KERNEL__ */
 #endif /* MY_ABC_HERE */
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 #define S2_IARCHIVE    (1<<0)	// synology backup archive bit
 #define S2_SMB_ARCHIVE (1<<1)	// samba backup archive bit (some other windows ap)
 #define S2_SMB_HIDDEN  (1<<2)	// hidden attribute in samba

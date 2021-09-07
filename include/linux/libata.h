@@ -86,7 +86,7 @@ extern int giSynoAtaDebug;
 #define DBGMESG(x...)
 #endif
 
-#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 extern int giSynoHddLedEnabled; 
 #endif
 
@@ -780,7 +780,6 @@ struct ata_link {
 	u32			sactive;	/* active NCQ commands */
 
 	unsigned int		flags;		/* ATA_LFLAG_xxx */
-
 	u32			saved_scontrol;	/* SControl on probe */
 	unsigned int		hw_sata_spd_limit;
 	unsigned int		sata_spd_limit;
@@ -1288,6 +1287,7 @@ extern void syno_pm_device_info_set(struct ata_port *ap, u8 rw, SYNO_PM_PKG *pm_
 extern int syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo);
 extern unsigned int syno_sata_pmp_is_rp(struct ata_port *ap);
 extern struct ata_port *SynoEunitFindMaster(struct ata_port *ap);
+extern void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag);
 int syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn);
 #endif /* MY_ABC_HERE */
 

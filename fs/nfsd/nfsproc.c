@@ -18,6 +18,9 @@
 #include <linux/namei.h>
 #include <linux/unistd.h>
 #include <linux/slab.h>
+#ifdef CONFIG_FS_SYNO_ACL
+#include <linux/sched.h>
+#endif
 
 #include <linux/sunrpc/clnt.h>
 #include <linux/sunrpc/svc.h>
@@ -40,18 +43,42 @@ nfsd_proc_null(struct svc_rqst *rqstp, void *argp, void *resp)
 static __be32
 nfsd_return_attrs(__be32 err, struct nfsd_attrstat *resp)
 {
+#ifdef CONFIG_FS_SYNO_ACL
+	int ret;
+#endif
 	if (err) return err;
+#ifdef CONFIG_FS_SYNO_ACL
+	ret = vfs_getattr(resp->fh.fh_export->ex_path.mnt,
+				    resp->fh.fh_dentry,
+				    &resp->stat);
+	if (!ret && IS_SYNOACL_DENTRY(resp->fh.fh_dentry) && current_fsuid() == 0)
+		resp->stat.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+	return nfserrno(ret);
+#else
 	return nfserrno(vfs_getattr(resp->fh.fh_export->ex_path.mnt,
 				    resp->fh.fh_dentry,
 				    &resp->stat));
+#endif
 }
 static __be32
 nfsd_return_dirop(__be32 err, struct nfsd_diropres *resp)
 {
+#ifdef CONFIG_FS_SYNO_ACL
+	int ret;
+#endif
 	if (err) return err;
+#ifdef CONFIG_FS_SYNO_ACL
+	ret = vfs_getattr(resp->fh.fh_export->ex_path.mnt,
+				    resp->fh.fh_dentry,
+				    &resp->stat);
+	if (!ret && IS_SYNOACL_DENTRY(resp->fh.fh_dentry) && current_fsuid() == 0)
+		resp->stat.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+	return nfserrno(ret);
+#else
 	return nfserrno(vfs_getattr(resp->fh.fh_export->ex_path.mnt,
 				    resp->fh.fh_dentry,
 				    &resp->stat));
+#endif
 }
 /*
  * Get a file's attributes
@@ -139,6 +166,9 @@ nfsd_proc_read(struct svc_rqst *rqstp, struct nfsd_readargs *argp,
 				       struct nfsd_readres  *resp)
 {
 	__be32	nfserr;
+#ifdef CONFIG_FS_SYNO_ACL
+	int ret;
+#endif
 
 	dprintk("nfsd: READ    %s %d bytes at %d\n",
 		SVCFH_fmt(&argp->fh),
@@ -165,9 +195,18 @@ nfsd_proc_read(struct svc_rqst *rqstp, struct nfsd_readargs *argp,
 				  &resp->count);
 
 	if (nfserr) return nfserr;
+#ifdef CONFIG_FS_SYNO_ACL
+	ret = vfs_getattr(resp->fh.fh_export->ex_path.mnt,
+				    resp->fh.fh_dentry,
+				    &resp->stat);
+	if (!ret && IS_SYNOACL_DENTRY(resp->fh.fh_dentry) && current_fsuid() == 0)
+		resp->stat.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+	return nfserrno(ret);
+#else
 	return nfserrno(vfs_getattr(resp->fh.fh_export->ex_path.mnt,
 				    resp->fh.fh_dentry,
 				    &resp->stat));
+#endif
 }
 
 /*

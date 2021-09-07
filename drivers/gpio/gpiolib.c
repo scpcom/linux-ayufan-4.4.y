@@ -1338,6 +1338,49 @@ int __gpio_to_irq(unsigned gpio)
 }
 EXPORT_SYMBOL_GPL(__gpio_to_irq);
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+int gpio_hw_reset(unsigned gpio)
+{
+	struct gpio_chip	*chip;
+	int iRet =-1;
+
+	chip = gpio_to_chip(gpio);
+	WARN_ON(extra_checks && chip->can_sleep);
+	if(!chip->iHWReset) {
+		goto END;
+	}
+
+	chip->iHWReset(chip, gpio - chip->base);
+
+	iRet = 0;
+
+END:
+	return iRet;
+}
+EXPORT_SYMBOL_GPL(gpio_hw_reset);
+#endif
+
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+/**
+ * copy from __gpio_get_value()
+ * iGpioInterruptClear() - clear gpio interrupt
+ * @gpio: gpio whose interrupt will be cleared
+ * Context: any
+ *
+ * It returns the zero or nonzero value provided by the associated
+ * gpio_chip.iInterruptClear() method; or zero if no such method is provided.
+ */
+int iGpioInterruptClear(unsigned int gpio)
+{
+	struct gpio_chip	*chip;
+
+	chip = gpio_to_chip(gpio);
+	WARN_ON(extra_checks && chip->can_sleep);
+	return chip->iInterruptClear ? chip->iInterruptClear(chip, gpio - chip->base) : 0;
+}
+EXPORT_SYMBOL_GPL(iGpioInterruptClear);
+#endif
+
 /* There's no value in making it easy to inline GPIO calls that may sleep.
  * Common examples include ones connected to I2C or SPI chips.
  */

@@ -5114,7 +5114,7 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	inode->i_CreateTime.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
 #endif
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	inode->i_mode2 = le16_to_cpu(raw_inode->ext4_mode2);
 #endif
 
@@ -5306,7 +5306,7 @@ static int ext4_do_update_inode(handle_t *handle,
 #else
 	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	raw_inode->ext4_mode2 = cpu_to_le16(inode->i_mode2); /* we'll lost upper 16 bits flags */
 #endif
 

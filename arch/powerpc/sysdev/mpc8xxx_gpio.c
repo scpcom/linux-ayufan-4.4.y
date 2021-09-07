@@ -15,6 +15,12 @@
 #include <linux/of.h>
 #include <linux/of_gpio.h>
 #include <linux/gpio.h>
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#include <linux/delay.h>
+#endif
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+#include <linux/interrupt.h>
+#endif
 
 #ifdef CONFIG_SYNO_QORIQ
 #define MPC8XXX_GPIO_PINS	87
@@ -53,6 +59,10 @@ struct mpc8xxx_gpio_chip {
 	u32 data;
 #endif
 };
+
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+extern int SYNOQorIQGPIOWakeInterruptClear(void);
+#endif
 
 static inline u32 mpc8xxx_gpio2mask(unsigned int gpio)
 {
@@ -208,6 +218,92 @@ static int mpc8xxx_gpio_dir_out(struct gpio_chip *gc, unsigned int gpio, int val
 	return 0;
 }
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+static void iMpc8xxxHWReset(struct gpio_chip *gc, unsigned int gpio)
+{
+	struct of_mm_gpio_chip *mm = to_of_mm_gpio_chip(gc);
+	struct mpc8xxx_gpio_chip *mpc8xxx_gc = to_mpc8xxx_gpio_chip(mm);
+	unsigned long flags;
+	unsigned long offset = 0;
+
+	spin_lock_irqsave(&mpc8xxx_gc->lock, flags);
+
+	if (IN_GPIO3(gpio)) {
+		gpio -= 64;
+		offset = GPIO3_OFFSET;
+		mpc8xxx_gc->pData = &mpc8xxx_gc->data_3;
+	} else if (IN_GPIO2(gpio)) {
+		gpio -= 32;
+		offset = GPIO2_OFFSET;
+		mpc8xxx_gc->pData = &mpc8xxx_gc->data_2;
+	} else {
+		mpc8xxx_gc->pData = &mpc8xxx_gc->data_1;
+		offset = 0;
+	}
+
+	/* set this pin LOW for 200ms */
+	*mpc8xxx_gc->pData &= ~mpc8xxx_gpio2mask(gpio);
+	out_be32(mm->regs + offset + GPIO_DAT, *mpc8xxx_gc->pData);
+	mdelay(200);
+	*mpc8xxx_gc->pData |= mpc8xxx_gpio2mask(gpio);
+	out_be32(mm->regs + offset + GPIO_DAT, *mpc8xxx_gc->pData);
+	mdelay(200);
+
+	spin_unlock_irqrestore(&mpc8xxx_gc->lock, flags);
+}
+#endif
+
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+static int iMpc8xxxGpioInterruptClear(struct gpio_chip *gc, const unsigned int gpio)
+{
+	struct of_mm_gpio_chip *mm = to_of_mm_gpio_chip(gc);
+	struct mpc8xxx_gpio_chip *mpc8xxx_gc = to_mpc8xxx_gpio_chip(mm);
+	unsigned long flags = 0x0;
+	unsigned long offset = 0;
+	unsigned int uiGpioTran = gpio;
+
+	spin_lock_irqsave(&mpc8xxx_gc->lock, flags);
+
+	if (IN_GPIO3(gpio)) {
+		uiGpioTran -= 64;
+		offset = GPIO3_OFFSET;
+	} else if (IN_GPIO2(gpio)) {
+		uiGpioTran -= 32;
+		offset = GPIO2_OFFSET;
+	} else {
+		offset = 0;
+	}
+
+	/* clear this GPIO group Interrupts */
+	out_be32(mm->regs + offset + GPIO_IER, in_be32(mm->regs + offset + GPIO_IER));
+
+	spin_unlock_irqrestore(&mpc8xxx_gc->lock, flags);
+
+	return 0;
+}
+
+static unsigned char should_wake = 0;
+void GPIOSuspend(void)
+{
+	should_wake = 0;
+}
+EXPORT_SYMBOL(GPIOSuspend);
+
+unsigned char GPIOShouldWake(void)
+{
+	return should_wake;
+}
+EXPORT_SYMBOL(GPIOShouldWake);
+
+static irqreturn_t ClearGpioIrq(int irq, void *dev_id)
+{
+	SYNOQorIQGPIOWakeInterruptClear();
+	should_wake = 1;
+
+	return IRQ_HANDLED;
+}
+#endif
+
 static void __init mpc8xxx_add_controller(struct device_node *np)
 {
 	struct mpc8xxx_gpio_chip *mpc8xxx_gc;
@@ -215,6 +311,9 @@ static void __init mpc8xxx_add_controller(struct device_node *np)
 	struct of_gpio_chip *of_gc;
 	struct gpio_chip *gc;
 	int ret;
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+	int irq = 0;
+#endif
 
 	mpc8xxx_gc = kzalloc(sizeof(*mpc8xxx_gc), GFP_KERNEL);
 	if (!mpc8xxx_gc) {
@@ -235,6 +334,18 @@ static void __init mpc8xxx_add_controller(struct device_node *np)
 	gc->direction_output = mpc8xxx_gpio_dir_out;
 	gc->get = mpc8xxx_gpio_get;
 	gc->set = mpc8xxx_gpio_set;
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	gc->iHWReset = iMpc8xxxHWReset;
+#endif
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+	gc->iInterruptClear = iMpc8xxxGpioInterruptClear;
+
+	if (NO_IRQ == (irq = irq_of_parse_and_map(np, 0))) {
+		printk("No GPIO IRQ\n");
+	} else if ((ret = request_irq(irq, ClearGpioIrq, 0, "Clear GPIO Interrupt", NULL))) {
+		printk("error %d requesting GPIO IRQ\n", ret);
+	}
+#endif
 
 	ret = of_mm_gpiochip_add(np, mm_gc);
 	if (ret)

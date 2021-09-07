@@ -91,7 +91,7 @@ typedef unsigned int (*ata_xlat_func_t)(struct ata_queued_cmd *qc);
 
 static struct ata_device *__ata_scsi_find_dev(struct ata_port *ap,
 					const struct scsi_device *scsidev);
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
 					    const struct scsi_device *scsidev);
 #else
@@ -616,7 +616,9 @@ syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn)
 	int iRet = -1;
 
 	DBGMESG("disk %d do pm control blPowerOn %d\n", ap->print_id, blPowerOn);
-	if (ap->nr_pmp_links) {
+	if (!ap->nr_pmp_links) {
+	}
+	else {
 		if (!syno_is_synology_pm(ap)) {
 			goto END;
 		}
@@ -632,6 +634,54 @@ syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn)
 
 END:
 	return iRet;
+}
+
+void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag)
+{
+	struct Scsi_Host *ap_host = NULL;
+	struct ata_port *ap = NULL;
+	int i = 0;
+	int unique = 0;
+
+	if (!syno_is_synology_pm(pAp_master)) {
+		goto END;
+	}
+
+	unique = SYNO_UNIQUE(pAp_master->PMSynoUnique);
+	for (i = 1; i < ata_print_id; i++) {
+		if (NULL == (ap_host = scsi_host_lookup(i - 1))) {
+			continue;
+		}
+
+		if (NULL == (ap = ata_shost_to_port(ap_host))) {
+			goto CONTINUE_FOR;
+		}
+
+		/* Step 0. This port must be a eunit */
+		if (!syno_is_synology_pm(ap)) {
+			goto CONTINUE_FOR;
+		}
+
+		/* Step 2. with the same ata host */
+		if (ap->host == pAp_master->host) {
+			unsigned long flags;
+			spin_lock_irqsave(ap->lock, flags);
+			if (blset) {
+				ap->pflags |= flag;
+			} else {
+				ap->pflags &= ~flag;
+			}
+			spin_unlock_irqrestore(ap->lock, flags);
+		}
+CONTINUE_FOR:
+		scsi_host_put(ap_host);
+		ap_host = NULL;
+		ap = NULL;
+	}
+END:
+	if (NULL != ap_host) {
+		scsi_host_put(ap_host);
+	}
 }
 
 /*
@@ -1105,7 +1155,6 @@ END:
 DEVICE_ATTR(syno_diskname_trans, S_IRUGO, syno_trans_host_to_disk_show, NULL);
 EXPORT_SYMBOL_GPL(dev_attr_syno_diskname_trans);
 #endif
-
 static ssize_t ata_scsi_park_show(struct device *device,
 				  struct device_attribute *attr, char *buf)
 {
@@ -4028,7 +4077,7 @@ static struct ata_device *__ata_scsi_find_dev(struct ata_port *ap,
  *	RETURNS:
  *	Associated ATA device, or %NULL if not found.
  */
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 struct ata_device *
 ata_scsi_find_dev(struct ata_port *ap, const struct scsi_device *scsidev)
 #else
@@ -4043,7 +4092,7 @@ ata_scsi_find_dev(struct ata_port *ap, const struct scsi_device *scsidev)
 
 	return dev;
 }
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 EXPORT_SYMBOL(ata_scsi_find_dev);
 #endif
 

@@ -412,7 +412,7 @@ ENTRY(sys_call_table)
 #else
     .long sys_ni_syscall
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
     .long sys_SYNOArchiveBit	/* 403 */
 #else
     .long sys_ni_syscall

@@ -72,7 +72,7 @@ enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 
 extern int user_path_at(int, const char __user *, unsigned, struct path *);
 #ifdef MY_ABC_HERE
-extern int syno_user_path_at(int, const char __user *, unsigned, struct path *, char **, int *, int *);
+extern int syno_user_path_at(int, const char __user *, unsigned, struct path *, char **, int *);
 #endif
 
 #define user_path(name, path) user_path_at(AT_FDCWD, name, LOOKUP_FOLLOW, path)

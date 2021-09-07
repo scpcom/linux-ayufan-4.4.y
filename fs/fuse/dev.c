@@ -569,6 +569,7 @@ static int fuse_copy_fill(struct fuse_copy_state *cs)
 }
 
 /* Do as much copy to/from userspace buffer as we can */
+
 static int fuse_copy_do(struct fuse_copy_state *cs, void **val, unsigned *size)
 {
 	unsigned ncpy = min(*size, cs->len);
@@ -589,6 +590,7 @@ static int fuse_copy_do(struct fuse_copy_state *cs, void **val, unsigned *size)
  * Copy a page in the request to/from the userspace buffer.  Must be
  * done atomically
  */
+
 static int fuse_copy_page(struct fuse_copy_state *cs, struct page *page,
 			  unsigned offset, unsigned count, int zeroing)
 {

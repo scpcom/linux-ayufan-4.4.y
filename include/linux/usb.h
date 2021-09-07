@@ -513,6 +513,11 @@ struct usb_device {
 #endif
 	struct wusb_dev *wusb_dev;
 	int slot_id;
+
+#ifdef MY_ABC_HERE
+#define SYNO_USB_QUIRKS_HC_MORE_TRANSACTION_TRIES 0x01
+	unsigned syno_usb_quirks;
+#endif /* MY_ABC_HERE */
 };
 #define	to_usb_device(d) container_of(d, struct usb_device, dev)
 

@@ -1407,8 +1407,7 @@ static int core_scsi3_tpg_depend_item(se_portal_group_t *tpg)
 
 static void core_scsi3_tpg_undepend_item(se_portal_group_t *tpg)
 {
-	configfs_undepend_item(TPG_TFO(tpg)->tf_subsys,
-			&tpg->tpg_group.cg_item);
+	configfs_undepend_item(&tpg->tpg_group.cg_item);
 
 	atomic_dec(&tpg->tpg_pr_ref_count);
 	smp_mb__after_atomic_dec();
@@ -1435,8 +1434,7 @@ static void core_scsi3_nodeacl_undepend_item(se_node_acl_t *nacl)
 		return;
 	}
 
-	configfs_undepend_item(TPG_TFO(tpg)->tf_subsys,
-			&nacl->acl_group.cg_item);	
+	configfs_undepend_item(&nacl->acl_group.cg_item);	
 
 	atomic_dec(&nacl->acl_pr_ref_count);
 	smp_mb__after_atomic_dec();
@@ -1476,8 +1474,7 @@ static void core_scsi3_lunacl_undepend_item(se_dev_entry_t *se_deve)
 	nacl = lun_acl->se_lun_nacl;
 	tpg = nacl->se_tpg;
 
-	configfs_undepend_item(TPG_TFO(tpg)->tf_subsys,
-			&lun_acl->se_lun_group.cg_item);
+	configfs_undepend_item(&lun_acl->se_lun_group.cg_item);
 
 	atomic_dec(&se_deve->pr_ref_count);
 	smp_mb__after_atomic_dec();

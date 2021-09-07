@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* CPU control.
  * (C) 2001, 2002, 2003, 2004 Rusty Russell
  *
@@ -250,7 +253,7 @@ static int __ref _cpu_down(unsigned int cpu, int tasks_frozen)
 	/* This actually kills the CPU. */
 	__cpu_die(cpu);
 
-#ifdef SYNO_HIBERNATE_TO_DISK 
+#ifdef MY_DEF_HERE 
 	msleep(500);
 #endif
 

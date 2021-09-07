@@ -254,6 +254,9 @@ static void suspend_finish(void)
 int enter_state(suspend_state_t state)
 {
 	int error;
+#ifdef CONFIG_SYNO_QORIQ_DISABLE_KMSG_BEFORE_SYSSLEEP
+	extern int syno_disable_kmsg;
+#endif
 
 	if (!valid_state(state))
 		return -ENODEV;
@@ -261,9 +264,17 @@ int enter_state(suspend_state_t state)
 	if (!mutex_trylock(&pm_mutex))
 		return -EBUSY;
 
+#ifdef CONFIG_SYNO_QORIQ_DISABLE_KMSG_BEFORE_SYSSLEEP
+	syno_disable_kmsg = 1;
+#endif
+
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	printk("PM: Filesystem already sync\n");
+#else
 	printk(KERN_INFO "PM: Syncing filesystems ... ");
 	sys_sync();
 	printk("done.\n");
+#endif
 
 	pr_debug("PM: Preparing system for %s sleep\n", pm_states[state]);
 	error = suspend_prepare();
@@ -280,6 +291,9 @@ int enter_state(suspend_state_t state)
 	pr_debug("PM: Finishing wakeup.\n");
 	suspend_finish();
  Unlock:
+#ifdef CONFIG_SYNO_QORIQ_DISABLE_KMSG_BEFORE_SYSSLEEP
+	syno_disable_kmsg = 0;
+#endif
 	mutex_unlock(&pm_mutex);
 	return error;
 }

@@ -24,20 +24,8 @@
 #define SYNO_FAST_RW_FIX
 #endif
 
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
-#define SYNO_HIBERNATE_TO_DISK
-#endif
-
 #if defined(CONFIG_SYNO_X64)
 #define SYNO_X86_AUTO_POWER_ON
-#endif
-
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
-#define SYNO_PINEVIEW_SYSTEMP
-#endif
-
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
-#define SYNO_PINEVIEW_SUPERIO_RW
 #endif
 
 #if !defined(CONFIG_SYNO_MPC85XX_COMMON)
@@ -69,20 +57,16 @@
 #define SYNO_CEDARVIEW_CORETEMP
 #endif
 
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
-#define SYNO_X86_TTY_CONSOLE_OUTPUT
-#endif
-
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
-#define SYNO_X86_MICROP_CTRL
-#endif
-
 #if defined(CONFIG_SYNO_MPC854X) || defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64) || defined(CONFIG_ARCH_FEROCEON)
 
 #ifdef MY_ABC_HERE
 #define SYNO_MAX_SWITCHABLE_NET_DEVICE 8
 #define SYNO_NET_DEVICE_ENCODING_LENGTH 6
 #endif   
+#endif
+
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+#define SYNO_NET_PHY_NOLINK_SPEED_INIT
 #endif
 
 #ifdef CONFIG_MACH_SYNOLOGY_6281
@@ -95,22 +79,8 @@
 #define SDCOPY_PORT_LOCATION 98
 #endif
 
-#if 0
- 
-#define SYNO_USB_UPS_COMP_ENHANCE
-#endif
-
 #ifdef MY_ABC_HERE
 #define CHECKINTERVAL (7UL*HZ)
-#endif
-
-#if defined(CONFIG_SYNO_X64)
- 
-#define SYNO_ATA_AHCI_LED_MSG
-#endif
-
-#ifdef CONFIG_SYNO_X64
-#define SYNO_ENLARGE_RX_NOISE_TRRESHOLD
 #endif
 
 #if	defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
@@ -131,8 +101,7 @@
 #endif
 #endif
 
-#define SYNO_ARCHIVE_BIT
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 
 #if defined (F_CLEAR_ARCHIVE) || defined (F_SETSMB_ARCHIVE) || defined (F_SETSMB_HIDDEN) || \
 	defined (F_SETSMB_SYSTEM) || defined (F_CLRSMB_ARCHIVE) || defined (F_CLRSMB_HIDDEN) || \
@@ -186,10 +155,6 @@
 #define SYNO_SLOW_DOWN_UEVENT
 #endif
 
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
-#define SYNO_LIMIT_CPU_CORES
-#endif
-
 #ifdef MY_ABC_HERE
 #define MAX_CHANNEL_RETRY       2
 #define CHANNEL_RETRY_INTERVAL  (3*HZ)
@@ -210,10 +175,6 @@
 #define SYNO_NFSD_UDP_DEF_PACKET_SIZE 8192
 #endif
 
-#if defined(CONFIG_SYNO_X64) || defined(SYNO_X64)
-#define SYNO_ECC_NOTIFICATION
-#endif
-
 #ifdef MY_ABC_HERE
 #define SYNO_SATA_DEVICE_PREFIX	   "sd"
 #define SYNO_ISCSI_DEVICE_PREFIX   "isd"
@@ -223,8 +184,6 @@
 #ifdef CONFIG_SYNO_BROMOLOW
  
 #define SYNO_SAS_MPT2_HOTPLUG_PHY
-
-#define SYNO_SAS_LINK_HOTPLUG_UEVENT
 
 #define SYNO_SAS_RECOVER_REMOVED_ENCS
 

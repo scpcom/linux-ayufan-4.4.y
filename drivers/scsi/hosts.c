@@ -499,7 +499,6 @@ int __syno_host_power_ctl_work(struct device *dev, void *data)
 	if (NULL == shost) {
 		goto END;
 	}
-
 	/* should this call deep sleep to on IRQ off flag? */
 	if (shost->hostt->syno_host_power_ctl) {
 		shost->hostt->syno_host_power_ctl(shost, 0);

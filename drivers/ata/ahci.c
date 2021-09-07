@@ -47,7 +47,7 @@
 #include <linux/dmi.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 #include <scsi/scsi.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
@@ -71,12 +71,12 @@
 #define EM_MSG_LED_VALUE_ACTIVITY     0x00070000
 #define EM_MSG_LED_VALUE_OFF          0xfff80000
 #define EM_MSG_LED_VALUE_ON           0x00010000
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 #define EM_MSG_LOCATE_LED_MASK        0x00380000
 #define EM_MSG_FAULT_LED_MASK         0x01c00000
 #endif
 
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 enum{
         ATA_FLAG_SW_LOCATE      = (1 << 24), /* driver supports sw locate led */
         ATA_FLAG_SW_FAULT       = (1 << 25), /* driver supports sw fault led */
@@ -87,11 +87,11 @@ enum{
 extern long g_ahci_switch;
 #endif
 
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 extern unsigned int ata_print_id;
-#endif /* SYNO_ATA_AHCI_LED_MSG */
+#endif /* MY_DEF_HERE */
 
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 extern struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
 					    const struct scsi_device *scsidev);
 #endif
@@ -293,7 +293,7 @@ enum {
 	/* em_ctl bits */
 	EM_CTL_RST			= (1 << 9), /* Reset */
 	EM_CTL_TM			= (1 << 8), /* Transmit Message */
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 	EM_CTL_LED			= (1 << 16), /* LED message type*/
 #endif
 	EM_CTL_ALHD			= (1 << 26), /* Activity LED */
@@ -320,7 +320,7 @@ struct ahci_em_priv {
 	unsigned long saved_activity;
 	unsigned long activity;
 	unsigned long led_state;
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 	unsigned long saved_locate;
 	unsigned long locate;
 	unsigned long saved_fault;
@@ -409,7 +409,7 @@ DEVICE_ATTR(ahci_host_cap2, S_IRUGO, ahci_show_host_cap2, NULL);
 DEVICE_ATTR(ahci_host_version, S_IRUGO, ahci_show_host_version, NULL);
 DEVICE_ATTR(ahci_port_cmd, S_IRUGO, ahci_show_port_cmd, NULL);
 
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 static ssize_t
 ata_ahci_locate_show(struct device *dev, struct device_attribute *attr,
 		char *buf)
@@ -464,7 +464,7 @@ ata_ahci_fault_show(struct device *dev, struct device_attribute *attr,
 
 static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable);
 
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 void sata_syno_ahci_diskled_set(int iDiskNo, int iPresent, int iFault)
 {
 	struct ata_port *pAp = NULL;
@@ -506,7 +506,7 @@ END:
 	return;
 }
 EXPORT_SYMBOL(sata_syno_ahci_diskled_set);
-#endif /* SYNO_ATA_AHCI_LED_MSG */
+#endif /* MY_DEF_HERE */
 
 static ssize_t
 ata_ahci_fault_store(struct device *dev, struct device_attribute *attr,
@@ -561,7 +561,7 @@ static struct device_attribute *ahci_sdev_attrs[] = {
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_disk_serial,
 #endif
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 	&dev_attr_sw_locate,
 	&dev_attr_sw_fault,
 #endif
@@ -1595,7 +1595,7 @@ static void ahci_sw_activity(struct ata_link *link)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 
-#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 	if (!giSynoHddLedEnabled) {
 		return;
 	}
@@ -1608,7 +1608,7 @@ static void ahci_sw_activity(struct ata_link *link)
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(10));
 }
 
-#ifdef SYNO_ATA_AHCI_LED_MSG 
+#ifdef MY_DEF_HERE 
 static void ahci_sw_locate_set(struct ata_link *link, u8 blEnable)
 {
 	struct ata_port *ap = link->ap;
@@ -3432,7 +3432,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 			pi.flags |= ATA_FLAG_EM;
 			if (!(em_ctl & EM_CTL_ALHD))
 				pi.flags |= ATA_FLAG_SW_ACTIVITY;
-#ifdef SYNO_ATA_AHCI_LED_MSG 
+#ifdef MY_DEF_HERE 
 			if (em_ctl & EM_CTL_LED) {
 				pi.flags |= ATA_FLAG_SW_LOCATE;
 				pi.flags |= ATA_FLAG_SW_FAULT;

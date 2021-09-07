@@ -264,6 +264,6 @@ void configfs_unregister_subsystem(struct configfs_subsystem *subsys);
 /* These functions can sleep and can alloc with GFP_KERNEL */
 /* WARNING: These cannot be called underneath configfs callbacks!! */
 int configfs_depend_item(struct configfs_subsystem *subsys, struct config_item *target);
-void configfs_undepend_item(struct configfs_subsystem *subsys, struct config_item *target);
+void configfs_undepend_item(struct config_item *target);
 
 #endif /* _CONFIGFS_H_ */

@@ -561,7 +561,6 @@ void ata_scsi_error(struct Scsi_Host *host)
 {
 	struct ata_port *ap = ata_shost_to_port(host);
 	int i;
-
 	unsigned long flags;
 
 	DPRINTK("ENTER\n");
@@ -1730,6 +1729,9 @@ syno_ata_writes_sector(struct ata_queued_cmd *qc)
 	u8 buf[ATA_SECT_SIZE];
 	u8 blLBA48 = 0;
 	sector_t lba = 0;
+	struct bio* b = NULL;
+	unsigned int len = 0;
+	int i = 0;
 
 	/* if the lba can represent as lba28. we use 28.
 	 * Otherwise we use lba48.
@@ -1761,14 +1763,22 @@ syno_ata_writes_sector(struct ata_queued_cmd *qc)
 	if (!(qc->tf.flags & ATA_TFLAG_WRITE)) {
 		if (qc->scsicmd) {
 			if (qc->scsicmd->request) {
-				qc->scsicmd->request->cmd_flags |= REQ_AUTO_REMAP;
-				printk("%s:%s(%d) set request cmd_flags REQ_AUTO_REMAP on\n",
-					__FILE__, __FUNCTION__, __LINE__);
-			}else{
+				for (b = qc->scsicmd->request->bio; b; b = b->bi_next) {
+					len = 0;
+					for (i = 0; i < b->bi_vcnt; i++) {
+						len += b->bi_io_vec[i].bv_len;
+					}
+					if (b->bi_sector <= lba && lba < b->bi_sector + (len >> 9)) {
+						set_bit(BIO_AUTO_REMAP, &b->bi_flags);
+						printk("%s:%s(%d) set bio BIO_AUTO_REMAP bit on\n",
+							__FILE__, __FUNCTION__, __LINE__);
+					}
+				}
+			} else {
 				printk("%s:%s(%d) cannot trace request from scsi_cmd\n",
 					__FILE__, __FUNCTION__, __LINE__);
 			}
-		}else{
+		} else {
 			printk("%s:%s(%d) cannot trace scsicmd from ata_queued_cmd\n",
 				__FILE__, __FUNCTION__, __LINE__);
 		}
@@ -2503,7 +2513,6 @@ static void ata_eh_link_report(struct ata_link *link)
 		  ehc->i.serror & SERR_UNRECOG_FIS ? "UnrecFIS " : "",
 		  ehc->i.serror & SERR_DEV_XCHG ? "DevExch " : "");
 #endif
-
 	for (tag = 0; tag < ATA_MAX_QUEUE; tag++) {
 		struct ata_queued_cmd *qc = __ata_qc_from_tag(ap, tag);
 		struct ata_taskfile *cmd = &qc->tf, *res = &qc->result_tf;

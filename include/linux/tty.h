@@ -476,7 +476,11 @@ extern int tty_port_close_start(struct tty_port *port,
 extern void tty_port_close_end(struct tty_port *port, struct tty_struct *tty);
 extern void tty_port_close(struct tty_port *port,
 				struct tty_struct *tty, struct file *filp);
+#ifdef CONFIG_SYNO_QORIQ
+static inline int tty_port_users(struct tty_port *port)
+#else
 extern inline int tty_port_users(struct tty_port *port)
+#endif
 {
 	return port->count + port->blocked_open;
 }

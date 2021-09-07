@@ -508,4 +508,9 @@ static inline int algorithm_is_DDF(int layout)
 {
 	return layout >= 8 && layout <= 10;
 }
+
+#ifdef MY_ABC_HERE
+#define sector_mod(a,b) sector_div(a,b)
+#endif
+
 #endif

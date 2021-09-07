@@ -49,13 +49,39 @@
 
 #include <linux/nfs_fs.h>
 
+#include <linux/sunrpc/sched.h>
+#include <linux/nfs4.h>
+#include <linux/nfs_fs_sb.h>
 #include <linux/nfs_idmap.h>
 #include "nfs4_fs.h"
+
+#include <linux/string.h>
+#include <linux/kernel.h>
 
 #define IDMAP_HASH_SZ          128
 
 /* Default cache timeout is 10 minutes */
 unsigned int nfs_idmap_cache_timeout = 600 * HZ;
+
+static int nfs_map_string_to_numeric(const char *name, size_t namelen, __u32 *res)
+{
+	unsigned long val;
+	char buf[16];
+
+	if (memchr(name, '@', namelen) != NULL || namelen >= sizeof(buf))
+		return 0;
+	memcpy(buf, name, namelen);
+	buf[namelen] = '\0';
+	if (strict_strtoul(buf, 0, &val) != 0)
+		return 0;
+	*res = val;
+	return 1;
+}
+
+static int nfs_map_numeric_to_string(__u32 id, char *buf, size_t buflen)
+{
+	return snprintf(buf, buflen, "%u", id);
+}
 
 static int param_set_idmap_timeout(const char *val, struct kernel_param *kp)
 {
@@ -489,29 +515,43 @@ static unsigned int fnvhash32(const void *buf, size_t buflen)
 	return hash;
 }
 
-int nfs_map_name_to_uid(struct nfs_client *clp, const char *name, size_t namelen, __u32 *uid)
+int nfs_map_name_to_uid(const struct nfs_server *server, const char *name, size_t namelen, __u32 *uid)
 {
-	struct idmap *idmap = clp->cl_idmap;
+	struct idmap *idmap = server->nfs_client->cl_idmap;
 
+	if (nfs_map_string_to_numeric(name, namelen, uid))
+		return 0;
 	return nfs_idmap_id(idmap, &idmap->idmap_user_hash, name, namelen, uid);
 }
 
-int nfs_map_group_to_gid(struct nfs_client *clp, const char *name, size_t namelen, __u32 *uid)
+int nfs_map_group_to_gid(const struct nfs_server *server, const char *name, size_t namelen, __u32 *uid)
 {
-	struct idmap *idmap = clp->cl_idmap;
+	struct idmap *idmap = server->nfs_client->cl_idmap;
 
+	if (nfs_map_string_to_numeric(name, namelen, uid))
+		return 0;
 	return nfs_idmap_id(idmap, &idmap->idmap_group_hash, name, namelen, uid);
 }
 
-int nfs_map_uid_to_name(struct nfs_client *clp, __u32 uid, char *buf)
+int nfs_map_uid_to_name(const struct nfs_server *server, __u32 uid, char *buf)
 {
-	struct idmap *idmap = clp->cl_idmap;
+	struct idmap *idmap = server->nfs_client->cl_idmap;
+	int ret = -EINVAL;
 
-	return nfs_idmap_name(idmap, &idmap->idmap_user_hash, uid, buf);
+	if (!(server->caps & NFS_CAP_UIDGID_NOMAP))
+		ret = nfs_idmap_name(idmap, &idmap->idmap_user_hash, uid, buf);
+	if (ret < 0)
+		ret = nfs_map_numeric_to_string(uid, buf, IDMAP_NAMESZ);
+	return ret;
 }
-int nfs_map_gid_to_group(struct nfs_client *clp, __u32 uid, char *buf)
+int nfs_map_gid_to_group(const struct nfs_server *server, __u32 uid, char *buf)
 {
-	struct idmap *idmap = clp->cl_idmap;
+	struct idmap *idmap = server->nfs_client->cl_idmap;
+	int ret = -EINVAL;
 
-	return nfs_idmap_name(idmap, &idmap->idmap_group_hash, uid, buf);
+	if (!(server->caps & NFS_CAP_UIDGID_NOMAP))
+		ret = nfs_idmap_name(idmap, &idmap->idmap_group_hash, uid, buf);
+	if (ret < 0)
+		ret = nfs_map_numeric_to_string(uid, buf, IDMAP_NAMESZ);
+	return ret;
 }

@@ -471,6 +471,15 @@ void __kfree_skb(struct sk_buff *skb)
 }
 EXPORT_SYMBOL(__kfree_skb);
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_SKB_RECYCLE
+void  __kfree_skb_qoriq(struct sk_buff *skb)
+{
+	skb_release_all(skb);
+	kfree_skbmem(skb);
+}
+EXPORT_SYMBOL(__kfree_skb_qoriq);
+#endif
+
 /**
  *	kfree_skb - free an sk_buff
  *	@skb: buffer to free

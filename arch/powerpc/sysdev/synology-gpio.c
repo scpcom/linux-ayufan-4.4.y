@@ -109,6 +109,18 @@ typedef struct __tag_SYNO_QORIQ_STATUS_LED_GPIO {
 	u8 power_led;
 } SYNO_QORIQ_STATUS_LED_GPIO;
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+typedef struct __tag_SYNO_QORIQ_RESET_GPIO {
+	u8 deep_wake;
+} SYNO_QORIQ_RESET_GPIO;
+#endif
+
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+typedef struct __tag_SYNO_QORIQ_WAKEUP_GPIO {
+	u8 power_btn;
+} SYNO_QORIQ_WAKEUP_GPIO;
+#endif
+
 typedef struct __tag_SYNO_QORIQ_GENERIC_GPIO {
 	SYNO_QORIQ_EXT_HDD_LED_GPIO	ext_sata_led;
 	SYNO_QORIQ_SOC_HDD_LED_GPIO	soc_sata_led;
@@ -118,6 +130,12 @@ typedef struct __tag_SYNO_QORIQ_GENERIC_GPIO {
 	SYNO_QORIQ_RACK_GPIO			rack;
 	SYNO_QORIQ_MULTI_BAY_GPIO		multi_bay;
 	SYNO_QORIQ_STATUS_LED_GPIO		status;
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	SYNO_QORIQ_RESET_GPIO			hw_reset;
+#endif
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+	SYNO_QORIQ_WAKEUP_GPIO			wakeup;
+#endif
 }SYNO_QORIQ_GENERIC_GPIO;
 
 static SYNO_QORIQ_GENERIC_GPIO generic_gpio;
@@ -399,6 +417,42 @@ END:
 	return 0;
 }
 
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+int
+SYNOQorIQGPIOWakeInterruptClear(void)
+{
+	int iRet = -1;
+
+	if (GPIO_UNDEF == generic_gpio.wakeup.power_btn) {
+		printk("error wakeup pin un-define\n");
+		goto END;
+	}
+
+	iRet = iGpioInterruptClear(generic_gpio.wakeup.power_btn);
+
+END:
+	return iRet;
+}
+#endif
+
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+int
+SYNOQorIQHWReset(void)
+{
+	int iRet = -1;
+
+	if (GPIO_UNDEF == generic_gpio.hw_reset.deep_wake) {
+		printk("error reset pin un-define\n");
+		goto END;
+	}
+
+	iRet = gpio_hw_reset(generic_gpio.hw_reset.deep_wake);
+
+END:
+	return iRet;
+}
+#endif
+
 /* SYNO_CHECK_HDD_PRESENT
  * Check HDD present for QorIQ
  * input : index - disk index, 1-based.
@@ -447,6 +501,12 @@ EXPORT_SYMBOL(SYNO_CTRL_FAN_STATUS_GET);
 EXPORT_SYMBOL(SYNO_CTRL_ALARM_LED_SET);
 EXPORT_SYMBOL(SYNO_CTRL_BACKPLANE_STATUS_GET);
 EXPORT_SYMBOL(SYNO_CTRL_BUZZER_CLEARED_GET);
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+EXPORT_SYMBOL(SYNOQorIQGPIOWakeInterruptClear);
+#endif
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+EXPORT_SYMBOL(SYNOQorIQHWReset);
+#endif
 EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
 
 static void 
@@ -507,6 +567,16 @@ QORIQ_813_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
 						},
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+		.hw_reset	  =  {
+							.deep_wake = 62, /* GPIO2 30 (32 + 30) */
+						 },
+#endif
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+		.wakeup		  = {
+							.power_btn = 61, /* GPIO2 29 (32 + 29) */
+						},
+#endif
 	};
 
 	*global_gpio = gpio_813;
@@ -570,6 +640,16 @@ QORIQ_413_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
 						},
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+		.hw_reset	  =  {
+							.deep_wake = 62, /* GPIO2 30 (32 + 30) */
+						 },
+#endif
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+		.wakeup		  = {
+							.power_btn = 61, /* GPIO2 29 (32 + 29) */
+						},
+#endif
 	};
 
 	*global_gpio = gpio_413;
@@ -633,6 +713,16 @@ QORIQ_213p_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
 						},
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+		.hw_reset	  =  {
+							.deep_wake = 62, /* GPIO2 30 (32 + 30) */
+						 },
+#endif
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+		.wakeup		  = {
+							.power_btn = 61, /* GPIO2 29 (32 + 29) */
+						},
+#endif
 	};
 
 	*global_gpio = gpio_213p;
@@ -696,6 +786,16 @@ QORIQ_rs213p_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
 						},
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+		.hw_reset	  =  {
+							.deep_wake = 62, /* GPIO2 30 (32 + 30) */
+						 },
+#endif
+#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+		.wakeup		  = {
+							.power_btn = 61, /* GPIO2 29 (32 + 29) */
+						},
+#endif
 	};
 
 	*global_gpio = gpio_rs213p;

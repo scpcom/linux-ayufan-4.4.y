@@ -12,6 +12,7 @@
 #include <linux/namei.h>
 #include <linux/module.h>
 #include <linux/errno.h>
+#include <linux/file.h>
 
 #include "synoacl_int.h"
 
@@ -130,10 +131,10 @@ void synoacl_mod_to_mode(struct dentry *d, struct kstat *stat)
 }
 EXPORT_SYMBOL(synoacl_mod_to_mode);
 
-int synoacl_mod_access(struct dentry *d, int mask)
+int synoacl_mod_access(struct dentry *d, int mask, int syno_acl_access)
 {
 	if (IS_VFS_ACL_READY(syno_acl_access)) {
-		return DO_VFS(syno_acl_access, d, mask);
+		return DO_VFS(syno_acl_access, d, mask, syno_acl_access);
 	}
 	return inode_permission(d->d_inode, mask);
 }
@@ -175,26 +176,129 @@ int synoacl_mod_init_acl(struct dentry *dentry, struct inode *inode)
 }
 EXPORT_SYMBOL(synoacl_mod_init_acl);
 /* --------------- System Call API ---------------- */
-asmlinkage long sys_SYNOACLIsSupport(const char *szPath, int fd, int tag)
+asmlinkage long sys_SYNOACLIsSupport(const char *name, int fd, int tag)
 {
+	int is_path_get = 0;
+	struct path path;
+	struct file *fp = NULL;
+	struct inode *inode = NULL;
+	struct dentry *dentry = NULL;
+	int error = -EINVAL;
+
+	if (name) {
+		error = user_path_at(AT_FDCWD, name, LOOKUP_FOLLOW, &path);
+		if (error)
+			goto out;
+
+		is_path_get = 1;
+
+		if (!path.dentry || !path.dentry->d_inode) {
+			goto out;
+		}
+		inode = path.dentry->d_inode;
+		dentry = path.dentry;
+	} else if (fd >= 0) {
+		fp = fget(fd);
+		if (!fp || !fp->f_path.dentry){
+			error = -EBADF;
+			goto out;
+		}
+		inode = fp->f_path.dentry->d_inode;
+		dentry = fp->f_path.dentry;
+	} else {
+		goto out;
+	}
+
 	if (IS_SYSCALL_ACL_READY(is_acl_support)) {
-		return DO_SYSCALL(is_acl_support, szPath, fd, tag);
+		error = DO_SYSCALL(is_acl_support, dentry, tag);
+	} else {
+		error = -EOPNOTSUPP;
 	}
-	return -EOPNOTSUPP;
+out:
+	if (is_path_get) {
+		path_put(&path);
+	}
+	if (fp) {
+		fput(fp);
+	}
+
+	return error;
 }
 
-asmlinkage long sys_SYNOACLCheckPerm(const char *szPath, int mask)
+asmlinkage long sys_SYNOACLCheckPerm(const char *name, int mask)
 {
+	int is_path_get = 0;
+	struct path path;
+	struct inode * inode = NULL;
+	int error = -EINVAL;
+
+	error = user_path_at(AT_FDCWD, name, LOOKUP_FOLLOW, &path);
+	if (error)
+		goto out;
+
+	is_path_get = 1;
+
+	if (path.dentry && path.dentry->d_inode) {
+		inode = path.dentry->d_inode;
+	} else {
+		goto out;
+	}
+
 	if (IS_SYSCALL_ACL_READY(check_perm)) {
-		return DO_SYSCALL(check_perm, szPath, mask);
+		error = DO_SYSCALL(check_perm, path.dentry, mask);
+	} else {
+		error = -EOPNOTSUPP;
 	}
-	return -EOPNOTSUPP;
+
+out:
+	if (is_path_get) {
+		path_put(&path);
+	}
+	return error;
 }
 
-asmlinkage long sys_SYNOACLGetPerm(const char *szPath, int __user *pOutPerm)
+asmlinkage long sys_SYNOACLGetPerm(const char *name, int __user *out_perm)
 {
-	if (IS_SYSCALL_ACL_READY(get_perm)) {
-		return DO_SYSCALL(get_perm, szPath, pOutPerm);
+	int is_path_get = 0;
+	unsigned int perm_allow = 0;
+	int error = -EINVAL;
+	struct path path;
+	struct inode * inode = NULL;
+
+	error = user_path_at(AT_FDCWD, name, LOOKUP_FOLLOW, &path);
+	if (error)
+		goto err;
+
+	is_path_get = 1;
+
+	if (path.dentry && path.dentry->d_inode) {
+		inode = path.dentry->d_inode;
+	} else {
+		goto err;
 	}
-	return -EOPNOTSUPP;
+
+	if (IS_SYNOACL_SUPERUSER()) {
+		perm_allow = SYNO_PERM_FULL_CONTROL;
+		error = 0;
+		goto end;
+	}
+
+	if (IS_SYSCALL_ACL_READY(get_perm)) {
+		error = DO_SYSCALL(get_perm, path.dentry, &perm_allow);
+	} else {
+		error = -EOPNOTSUPP;
+	}
+
+end:
+	if (copy_to_user(out_perm, &perm_allow, sizeof(perm_allow))){
+		error = -EFAULT;
+		goto err;
+	}
+
+err:
+	if (is_path_get) {
+		path_put(&path);
+	}
+
+	return error;
 }

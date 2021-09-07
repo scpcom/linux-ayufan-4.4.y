@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * drivers/net/phy/phy_device.c
  *
@@ -766,7 +763,7 @@ int genphy_read_status(struct phy_device *phydev)
 			
 			if (lpa & LPA_100FULL)
 				phydev->duplex = DUPLEX_FULL;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_NET_PHY_NOLINK_SPEED_INIT
 		} else if (lpa & (LPA_10FULL | LPA_10HALF)) {
 			phydev->speed = SPEED_10;
 			if (lpa & LPA_10FULL)

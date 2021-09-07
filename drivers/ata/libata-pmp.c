@@ -519,7 +519,7 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 								 sata_pmp_gscr_devid(ap->link.device->gscr),
 								 &pm_pkg, 1);
 		if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
-				printk("ata%d pm poweron write 1 fail\n", ap->print_id);
+			printk("ata%d pm poweron write 1 fail\n", ap->print_id);
 			goto END;
 		}
 
@@ -1205,7 +1205,7 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 	struct ata_port *ap = link->ap;
 	u32 *gscr = (void *)ap->sector_buf;
 	int rc;
-#if defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) 
 	struct ata_port *master_ap = NULL;
 #endif
 
@@ -1258,7 +1258,6 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
  fail:
 	ata_dev_printk(dev, KERN_ERR,
 		       "PMP revalidation failed (errno=%d)\n", rc);
-
 	DPRINTK("EXIT, rc=%d\n", rc);
 	return rc;
 }

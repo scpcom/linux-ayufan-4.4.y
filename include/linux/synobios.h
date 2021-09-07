@@ -10,6 +10,7 @@
 #endif
 
 #ifdef MY_ABC_HERE
+#include <linux/version.h>
 #include <linux/string.h>
 extern char gszSynoHWVersion[];
 #endif
@@ -198,7 +199,7 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_ERROR_FS 0x2900
 #endif
 
-#ifdef SYNO_SATA_ERROR_REPORT
+#ifdef MY_DEF_HERE
 #define SYNO_EVENT_SATA_ERROR_REPORT 0x2a00
 #endif
 
@@ -206,7 +207,7 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_WAKE_FROM_DEEP_SLEEP 0x2b00
 #endif
 
-#ifdef SYNO_SATA_ERROR_REPORT
+#ifdef MY_DEF_HERE
 #define SYNO_EVENT_DISK_RETRY_REPORT 0x2c00
 #endif
 
@@ -214,9 +215,9 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_ERROR_FS_BTRFS 0x2d00
 #endif
 
-#ifdef SYNO_DETECT_DISK_POWER_SHORT_BREAK
+#ifdef MY_DEF_HERE
 #define SYNO_EVENT_DSIK_POWER_SHORT_BREAK 0x2e00
-#endif /* SYNO_DETECT_DISK_POWER_SHORT_BREAK */
+#endif /* MY_DEF_HERE */
 
 #define SYNO_EVENT_BACK_TEMP_CRITICAL   0x4004
 #define SYNO_EVENT_BACK_TEMP_HIGH       0x4003
@@ -267,7 +268,7 @@ typedef struct _SynoRtcTimePkt {
 	unsigned char    weekday;
 	unsigned char    day;
 	unsigned char    month;
-	/// Value starts from 1900. Value 70 ~ 99 (in hex) represents year 2070 ~ 2099 now.
+	// Value starts from 1900 (in dec)
 	unsigned char    year;
 } SYNORTCTIMEPKT;
 
@@ -537,39 +538,38 @@ typedef enum {
 	THERMAL_UNKNOWN,
 	THERMAL_YES,
 	THERMAL_NO,
-}THERMAL_T;
+} THERMAL_T;
 
 //Support get CPU temperature or not
 typedef enum {
 	CPUTMP_UNKNOWN,
 	CPUTMP_YES,
 	CPUTMP_NO,
-}CPUTMP_T;
+} CPUTMP_T;
 
 typedef enum {
 	DISK_LED_CTRL_UNKNOWN,
 	DISK_LED_CTRL_SW,
 	DISK_LED_CTRL_HW,
-}DISK_LED_CTRL_T;
+} DISK_LED_CTRL_T;
 
 typedef enum {
 	AUTO_POWERON_UNKNOWN,
 	AUTO_POWERON_YES,
 	AUTO_POWERON_NO,
-}AUTO_POWERON_T;
+} AUTO_POWERON_T;
 
 typedef enum {
 	POWER_UNKNOWN,
 	POWER_SINGLE,
 	POWER_DUAL,
-}DUAL_POWER_T;
+} DUAL_POWER_T;
 
 typedef enum {
-	USBCOPY_UNKNOWN,
-	USBCOPY_YES,
-	USBCOPY_NO,
-	USBCOPY_MUTE,
-}USBCOPY_T;
+	USBCOPY_NO = 0,
+	USBCOPY_MICROP,
+	USBCOPY_GPIO,
+} USBCOPY_T;
 
 typedef enum {
 	FAN_NUMBER_X = 0,
@@ -579,20 +579,20 @@ typedef enum {
 	FAN_NUMBER_4 = 4,
 	FAN_NUMBER_5 = 5,
 	FAN_NUMBER_6 = 6,
-}FAN_NUMBER_T;
+} FAN_NUMBER_T;
 
 typedef enum _tag_EUNIT_PWRON_TYPE {
 	EUNIT_NOT_SUPPORT,
 	EUNIT_PWRON_GPIO,
 	EUNIT_PWRON_ATACMD,
 	EUNIT_SAS_NO_PWRON,
-}EUNIT_PWRON_TYPE;
+} EUNIT_PWRON_TYPE;
 
 typedef enum _tag_POWER_IN_SEQ {
 	POWER_IN_SEQ_OFF,
 	POWER_IN_SEQ_2,
 	POWER_IN_SEQ_4,
-}POWER_IN_SEQ;
+} POWER_IN_SEQ;
 
 typedef enum _tag_RTC_TYPE {
 	RTC_UNKNOWN,
@@ -600,51 +600,51 @@ typedef enum _tag_RTC_TYPE {
 	RTC_SEIKO,
 	RTC_BANDON,
 	RTC_MV,
-}RTC_TYPE;
+} RTC_TYPE;
 
 typedef enum {
 	FAN_RPM_RPT_UNKNOWN,
 	FAN_RPM_RPT_YES,
 	FAN_RPM_RPT_NO,
-}FAN_RPM_RPT_T;
+} FAN_RPM_RPT_T;
 
 typedef enum {
 	LCM_UNKNOWN,
 	LCM_YES,
 	LCM_NO
-}LCM_T;
+} LCM_T;
 
 typedef enum {
 	WIFI_WPS_215air = 0x0, /* GPIO PIN 0  */
 	WIFI_WPS_213air = 0x28, /* GPIO PIN 40  */
 	WIFI_WPS_NO = 0xFE,
 	WIFI_WPS_UNKNOWN = 0xFF
-}WIFI_WPS_T;
+} WIFI_WPS_T;
 
 typedef enum {
 	CPU_FREQ_ADJUST_UNKNOWN,
 	CPU_FREQ_ADJUST_YES,
 	CPU_FREQ_ADJUST_NO,
-}CPUFREQ_ADJUST_T;
+} CPUFREQ_ADJUST_T;
 
 typedef enum {
 	CARDREADER_UNKNOWN,
 	CARDREADER_YES,
 	CARDREADER_NO,
-}CARDREADER_T;
+} CARDREADER_T;
 
 typedef enum {
 	MICROP_PWM_UNKNOWN,
 	MICROP_PWM_YES,
 	MICROP_PWM_NO,
-}MICROP_PWM_T;
+} MICROP_PWM_T;
 
 typedef enum {
 	HIBER_LED_UNKNOWN,
 	HIBER_LED_STATUS_OFF,    /* status led off, others don't care */
 	HIBER_LED_STATUS_BREATH, /* status led breathing */
 	HIBER_LED_POWER_ONLY,    /* power led on, others off */
-}HIBERNATE_LED_T;
+} HIBERNATE_LED_T;
 
 //For backward compatibility
 #define HIBER_LED_NORMAL HIBER_LED_STATUS_OFF
@@ -656,7 +656,7 @@ typedef enum {
 	RTC_SEIKO_CORR_DEFAULT  = 0x03, /* -5.62 sec/day */
 	RTC_SEIKO_CORR_106B1    = 0x57,
 	RTC_RICOH_CORR_DEFAULT  = 0x0F,
-}RTC_CORRECTION_T;
+} RTC_CORRECTION_T;
 
 typedef enum {
 	MICROP_ID_710p = 0x31, /* '1' */
@@ -690,15 +690,19 @@ typedef enum {
 	MICROP_ID_RS814p = 0x55, /* 'U' */
 	MICROP_ID_RS814rpp = 0x56, /* 'V' */
 	MICROP_ID_RS3614xsp = 0x57, /* 'W' RS3614xsp */
+	MICROP_ID_RS3617xs = 0x57, /* 'W' RS3617xs */
 	MICROP_ID_ES3614xsp = 0x57, /* 'W' ES3614xsp */
 	MICROP_ID_RS3614xs = 0x5B, /* 'W' RS3614xs */
 	MICROP_ID_RS3614rpxs = 0x5C, /* 'W' RS3614rpxs */
 	MICROP_ID_RC18015xsp = 0x4d, /* 'M' Temporarily using the same microp ID as 10613 */
 	MICROP_ID_RS18016xsp = 0x4d, /* 'M' */
-	MICROP_ID_RR36015xsppp = 0x4d, /* 'M' */
+	MICROP_ID_RS18016Dxsp = 0x4d, /* 'M' */
+	MICROP_ID_FS3017 = 0x4d, /* 'M' */
 	MICROP_ID_DS2414xs = 0x57, /* 'W' DS2414xs */
 	MICROP_ID_RS3415xsp = 0x60, /* '`' RS3415xs+ cheese cake*/
 	MICROP_ID_3615xs = 0x5D, /* ']' DS3615xs*/
+	MICROP_ID_RS3614xsR1 = 0x64, /* 'd' RS3614xs R1 */
+	MICROP_ID_RS3614rpxsR1 = 0x65, /* 'e' RS3614rpxs R1 */
 	MICROP_ID_UNKNOW = 0xFF,
 } SYNO_MICROP_ID;
 
@@ -718,8 +722,11 @@ typedef enum {
 
 typedef enum {
 	CPU_UNKNOWN,
+	CPU_E5_2620v3,
 	CPU_E5_2609v3,
 	CPU_E3_1230v2,
+	CPU_D_1527,
+	CPU_D_1528,
 	CPU_I3_2100,
 	CPU_I3_4130,
 	CPU_D410,
@@ -733,6 +740,8 @@ typedef enum {
 	CPU_88F6702,
 	CPU_88F6707,
 	CPU_88F6720,
+	CPU_88F6820,
+	CPU_88F6828,
 	CPU_MV78230,
 	CPU_8241,
 	CPU_8533e,
@@ -746,13 +755,23 @@ typedef enum {
 	CPU_BCM58622,
 	CPU_J1800,
 	CPU_HI3535,
-	CPU_H410
+	CPU_H412,
+	CPU_N3000,
+	CPU_N3050,
+	CPU_N3150,
+	CPU_N3700,
+	CPU_NVR,
+	CPU_N3010,
+	CPU_N3060,
+	CPU_N3160,
+	CPU_N3710
 } CPU_ARCH_INFO_T;
 
 typedef enum {
 	CRYPTO_HW_NONE,
 	CRYPTO_A370,
 	CRYPTO_A375,
+	CRYPTO_A38X,
 	CRYPTO_AXP,
 	CRYPTO_COMCERTO2K,
 	CRYPTO_ALPINE,
@@ -921,6 +940,8 @@ typedef struct {
 #define HW_RC18015xsp  "RC18015xs+"    //"RC18015xs+"
 #define HW_RS18016xsp  "RS18016xs+"    //"RS18016xs+"
 #define HW_RR36015xsppp  "RR36015xs+++"    //"RR36015xs+++"
+#define HW_VirtualDSM	"VirtualDSM"    //"VirtualDSM"
+#define HW_RS18016Dxsp  "RS18016Dxs+"    //"RS18016Dxs+"
 #define HW_DS714v10    "DS714v10"
 #define HW_RS814p      "RS814+"        //"RS814+"
 #define HW_RS814rpp    "RS814rp+"      //"RS814rp+"
@@ -947,7 +968,27 @@ typedef struct {
 #define HW_RS2416rpp   "RS2416rp+"     //"RS2416rp+"
 #define HW_DS216play		"DS216play"
 #define HW_DS216se	   "DS216se"      //DS216se
-#define HW_DS416play	"DS416play"      //DS416play
+#define HW_DS916p	   "DS916+"      //DS916+
+#define HW_DS716p	"DS716+"      //DS716+
+#define HW_DS716pII       "DS716+II"      //DS716+II
+#define HW_RSD18016xsp  "RSD18016xs+"    //"RSD18016xs+"
+#define HW_DockerDSM	"DockerDSM"		//"DockerDSM"
+#define HW_DS1616p      "DS1616+"       //"DS1616+"
+#define HW_RS3618xs  "RS3618xs"    //"RS3618xs"
+#define HW_RS3617rpxs  "RS3617rpxs"    //"RS3617rpxs"
+#define HW_RS3617xsp  "RS3617xs+"    //"RS3617xs+"
+#define HW_DS416j	"DS416j"      //DS416j
+#define HW_DS216	"DS216"      //DS216
+#define HW_DS416slim	"DS416slim"      //DS416slim
+#define HW_DS216p  "DS216+"    //"DS216+"
+#define HW_DS216pII  "DS216+II"    //"DS216+II"
+#define HW_DS216j  "DS216j"    //"DS216j"
+#define HW_RS816  "RS816"     //"RS816"
+#define HW_DS116  "DS116"    //"DS116"
+#define HW_DS416play  "DS416play"    //"DS416play"
+#define HW_RS217  "RS217"     //"RS217"
+#define HW_FS3017	"FS3017"	//"FS3017"
+#define HW_RS3617xs    "RS3617xs"      //"RS3617xs"
 #define HW_UNKNOWN     "DSUnknown"
 
 typedef struct _tag_HwCapability {
@@ -1100,12 +1141,34 @@ typedef enum {
 	MODEL_DS215p,
 	MODEL_DS416,
 	MODEL_RR36015xsppp,
+	MODEL_VirtualDSM,
+	MODEL_RS18016Dxsp,
 	MODEL_RS2416p,
 	MODEL_RS2416rpp, //140
 	MODEL_DS216play,
 	MODEL_DS216se,
+	MODEL_DS916p,
+	MODEL_RSD18016xsp,
+	MODEL_DockerDSM,
+	MODEL_NVR216,
+	MODEL_DS1616p,
+	MODEL_DS716p,
+	MODEL_RS3618xs,
+	MODEL_RS3617rpxs,
+	MODEL_RS3617xsp,
+	MODEL_DS416j,
+	MODEL_DS216,
+	MODEL_DS416slim,
+	MODEL_DS216p,
+	MODEL_DS216j,
+	MODEL_RS816,
+	MODEL_DS116,
 	MODEL_DS416play,
-	MODEL_DS716nvr,
+	MODEL_DS216pII,
+	MODEL_DS716pII,
+	MODEL_RS217,
+	MODEL_FS3017,
+	MODEL_RS3617xs,
 	MODEL_INVALID
 } PRODUCT_MODEL;
 
@@ -1115,20 +1178,20 @@ typedef struct _tag_SYNO_MODEL_NAME {
 } SYNO_MODEL_NAME;
 
 typedef struct _tag_CPLDReg {
-    unsigned char diskledctrl;
-    unsigned char diskpowerstate;
-    unsigned char modelnumber;
-    unsigned char fanstatus;
+	unsigned char diskledctrl;
+	unsigned char diskpowerstate;
+	unsigned char modelnumber;
+	unsigned char fanstatus;
 } CPLDREG;
 
 typedef struct _tag_MEMORY_BYTE {
-    unsigned char offset;
-    unsigned char value;
+	unsigned char offset;
+	unsigned char value;
 } MEMORY_BYTE;
 
 typedef struct _tag_GPIO_PIN {
-    int pin;
-    int value;
+	int pin;
+	int value;
 } GPIO_PIN;
 
 typedef struct _tag_POWER_INFO {
@@ -1137,7 +1200,7 @@ typedef struct _tag_POWER_INFO {
 } POWER_INFO;
 
 typedef enum {
-    NET_LINK = 0,
+	NET_LINK = 0,
 	NET_NOLINK,
 } SYNO_NET_LINK_EVENT;
 
@@ -1252,6 +1315,9 @@ typedef struct _tag_SYNO_CPU_INFO {
 #define SYNOIO_WRITE_MEM		_IOWR(SYNOBIOS_IOC_MAGIC, 43, SYNO_MEM_ACCESS)
 #define SYNOIO_READ_MEM			_IOWR(SYNOBIOS_IOC_MAGIC, 44, SYNO_MEM_ACCESS)
 #define SYNOIO_SET_AHA_LED     _IOWR(SYNOBIOS_IOC_MAGIC, 45, SYNO_AHA_LED)
+#define SYNOIO_GET_COPY_BUTTON _IOWR(SYNOBIOS_IOC_MAGIC, 46, int) // for matching userspace usage, button pressed = 0, else = 1
+
+#define SYNOIO_POWER_OFF		_IOWR(SYNOBIOS_IOC_MAGIC, 65, int)
 
 #define SYNOIO_MANUTIL_MODE       _IOWR(SYNOBIOS_IOC_MAGIC, 128, int)
 #define SYNOIO_RECORD_EVENT       _IOWR(SYNOBIOS_IOC_MAGIC, 129, int)
@@ -1439,7 +1505,6 @@ typedef struct _tag_SYNO_CPU_INFO {
  * SYNOHWWxternalControl message Id
  ************************************************************************/
 
-#define SVALUE(u, v, d)                 ((v<d)?d:((v>u)?u:v))
 #define SYNO_PURE_MESSAGE               0x0000
 #define SYNO_DISABLE_CRITICAL           0x0100
 #define SYNO_ENABLE_CRITICAL            0x0101
@@ -1449,36 +1514,35 @@ typedef struct _tag_SYNO_CPU_INFO {
 #define SYNO_ENABLE_IDENTIFY            0x0300
 #define SYNO_BEEPER_MUTE                0x0400
 #define SYNO_BEEPER_BEEPBEEP            0x0500
-#define SYNO_BEEPER_BEEP(num)           (0x0500+SVALUE(50,num,1))
-#define SYNO_DISK_FULL(p)               (0x0900+SVALUE(100,p,0))
-#define SYNO_CANCEL_DISK_FULL(p)        (0x0800+SVALUE(100,p,0))
-#define SYNO_CANCEL_VOLUME_FULL(v,p)    (0x8000+0x100*SVALUE(VMAX,v,0)+SVALUE(100,p,0))
-#define SYNO_VOLUME_FULL(v,p)           (0x9000+0x100*SVALUE(VMAX,v,0)+SVALUE(100,p,0))
-#define SYNO_DISK_NORMAL(num)           (0x1000+SVALUE(HD_NUM_MAX,num,0))
-#define SYNO_DISK_FAILURE(num)          (0x1100+SVALUE(HD_NUM_MAX,num,0))
-#define SYNO_DISK_REBUILD(num)          (0x1200+SVALUE(HD_NUM_MAX,num,0))
-#define SYNO_DISK_ABSENT(num)           (0x1300+SVALUE(HD_NUM_MAX,num,0))
-#define SYNO_DISK_INITIAL(num)          (0x1400+SVALUE(HD_NUM_MAX,num,0))
-#define SYNO_DISK_EMPTY(num)            (0x1500+SVALUE(HD_NUM_MAX,num,0))
-#define SYNO_DISK_BAD_SECTOR(num)       (0x1600+SVALUE(HD_NUM_MAX,num,0))
-#define SYNO_DISK_BAD_SYS(num)          (0x1700+SVALUE(HD_NUM_MAX,num,0))
-#define SYNO_DISK_BAD_SYSNSEC(num)      (0x1800+SVALUE(HD_NUM_MAX,num,0))
+#define SYNO_CANCEL_DISK_FULL           0x0800
+#define SYNO_DISK_FULL                  0x0900
+#define SYNO_CANCEL_VOLUME_FULL         0x8000
+#define SYNO_VOLUME_FULL                0x9000
+#define SYNO_DISK_NORMAL                0x1000
+#define SYNO_DISK_FAILURE               0x1100
+#define SYNO_DISK_REBUILD               0x1200
+#define SYNO_DISK_ABSENT                0x1300
+#define SYNO_DISK_INITIAL               0x1400
+#define SYNO_DISK_EMPTY                 0x1500
+#define SYNO_DISK_BAD_SECTOR            0x1600
+#define SYNO_DISK_BAD_SYS               0x1700
+#define SYNO_DISK_BAD_SYSNSEC           0x1800
 #define SYNO_CPU_OVERHEAT               0x2101
 #define SYNO_CPU_NORMAL                 0x2001
 #define SYNO_MEM_ECC                    0x2104
-#define SYNO_FAN_FAULT(num)             (0x3000+SVALUE(FAN_NUM_MAX,num,0))
-#define SYNO_POWER_FAULT(num)           (0x3100+SVALUE(POWER_NUM_MAX,num,0))
-#define SYNO_BATTERY_FAILURE(num)       (0x3200+SVALUE(BATTERY_NUM_MAX,num,0))
-#define SYNO_BATTERY_REMOVED(num)       (0x3300+SVALUE(BATTERY_NUM_MAX,num,0))
-#define SYNO_FAN_RECOVERY(num)          (0x3400+SVALUE(FAN_NUM_MAX,num,0))
-#define SYNO_POWER_RECOVERY(num)        (0x3500+SVALUE(POWER_NUM_MAX,num,0))
+#define SYNO_FAN_FAULT                  0x3000
+#define SYNO_POWER_FAULT                0x3100
+#define SYNO_BATTERY_FAILURE            0x3200
+#define SYNO_BATTERY_REMOVED            0x3300
+#define SYNO_FAN_RECOVERY               0x3400
+#define SYNO_POWER_RECOVERY             0x3500
 #define SYNO_NOP_SUCCESS                0x3600
 #define SYNO_NOP_FAILURE                0x3700
-#define SYNO_VOL_NORMAL(num)            (0x3800+SVALUE(256,num,0))
-#define SYNO_VOL_BUILT(num)             (0x3900+SVALUE(256,num,0))
-#define SYNO_VOL_FAILED(num)            (0x3a00+SVALUE(256,num,0))
-#define SYNO_VOL_CREATE(num)            (0x3b00+SVALUE(256,num,0))
-#define SYNO_VOL_REMOVE(num)            (0x3c00+SVALUE(256,num,0))
+#define SYNO_VOL_NORMAL                 0x3800
+#define SYNO_VOL_BUILT                  0x3900
+#define SYNO_VOL_FAILED                 0x3a00
+#define SYNO_VOL_CREATE                 0x3b00
+#define SYNO_VOL_REMOVE                 0x3c00
 #define SYNO_SYS_MSG                    0x4000
 #define SYNO_SYS_BOOT                   0x4001
 #define SYNO_SYS_RUN                    0x4002
@@ -1551,8 +1615,8 @@ struct synobios_ops {
 	int		(*module_type_init)(struct synobios_ops *);
 	int		(*uninitialize)(void);
 	int		(*set_cpu_fan_status)(FAN_STATUS, FAN_SPEED);
-	int             (*set_phy_led)(SYNO_LED);
-	int             (*set_hdd_led)(SYNO_LED);
+	int   (*set_phy_led)(SYNO_LED);
+	int   (*set_hdd_led)(SYNO_LED);
 	int		(*pwm_ctl)(SynoPWMCTL *);
 	int		(*check_microp_id)(const struct synobios_ops *);
 	int		(*set_microp_id)(void);
@@ -1561,8 +1625,9 @@ struct synobios_ops {
 	int		(*exdisplay_handler)(struct _SynoMsgPkt *);
 	int		(*read_memory)(SYNO_MEM_ACCESS*);
 	int		(*write_memory)(SYNO_MEM_ACCESS*);
-	void		(*get_cpu_info)(SYNO_CPU_INFO*, const unsigned int);
-	int     (*set_aha_led)(struct synobios_ops *, SYNO_AHA_LED);
+	void	        (*get_cpu_info)(SYNO_CPU_INFO*, const unsigned int);
+	int             (*set_aha_led)(struct synobios_ops *, SYNO_AHA_LED);
+	int             (*get_copy_button_status)(void); // for matching userspace usage, button pressed = 0, else = 1
 };
 
 /* TODO: Because user space also need this define, so we define them here.
@@ -1590,7 +1655,9 @@ struct synobios_ops {
 #define EBOX_INFO_UNIQUE_DXC	"DX1211"
 #define EBOX_INFO_UNIQUE_RXCRP	"RX1211rp"
 #define EBOX_INFO_UNIQUE_RX1214	"RX1214"
+#define EBOX_INFO_UNIQUE_RX1217	"RX1217"
 #define EBOX_INFO_UNIQUE_RX1214RP	"RX1214rp"
+#define EBOX_INFO_UNIQUE_RX1217RP	"RX1217rp"
 #define EBOX_INFO_UNIQUE_DX213	"DX213"
 #define EBOX_INFO_UNIQUE_RX415  "RX415"
 #define EBOX_INFO_UNIQUE_DX1215 "DX1215"
@@ -1606,6 +1673,7 @@ struct synobios_ops {
 #define IS_SYNOLOGY_DX213(x) (SYNO_UNIQUE(x) == 0x16)
 #define IS_SYNOLOGY_RX413(x) (x == 0x11)
 #define IS_SYNOLOGY_RX1214(x) (x == 0x12)
+#define IS_SYNOLOGY_RX1217(x) (x == 0x14)
 #define IS_SYNOLOGY_RX415(x) (SYNO_UNIQUE(x) == 0x1d)
 #define IS_SYNOLOGY_DX1215(x) (x == 0x13)
 
@@ -1614,17 +1682,36 @@ struct synobios_ops {
 
 PRODUCT_MODEL synobios_getmodel(void);
 #ifdef MY_ABC_HERE
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,77)
+static inline char* syno_get_hw_version(void)
+{
+	static char SynoHwVersion[16] = {0};
+	char *ptr = gszSynoHWVersion + strlen(gszSynoHWVersion) - 2;
+
+	if (ptr && 0 == strcmp(ptr, "-j")) {
+		strncpy(SynoHwVersion, gszSynoHWVersion,
+				(strlen(gszSynoHWVersion) - 2) < (sizeof(SynoHwVersion) - 1) ?
+				(strlen(gszSynoHWVersion) - 2) : (sizeof(SynoHwVersion) - 1));
+	} else {
+		strncpy(SynoHwVersion, gszSynoHWVersion, sizeof(SynoHwVersion) - 1);
+	}
+	return SynoHwVersion;
+}
+
 static inline int syno_is_hw_version(const char *hw_version)
 {
 	if (NULL == hw_version) {
 		return 0;
 	}
 
-	if (0 == strncmp(gszSynoHWVersion, hw_version, strlen(hw_version))) {
+	if (0 == strcmp(syno_get_hw_version(), hw_version)) {
 		return 1;
 	} else {
 		return 0;
 	}
 }
+#else
+int syno_is_hw_version(const char *hw_version);
 #endif
+#endif /* MY_ABC_HERE */
 #endif

@@ -2027,7 +2027,7 @@ struct dentry *lookup_one_noperm(const char *name, struct dentry *base)
 
 #ifdef MY_ABC_HERE
 int syno_user_path_at(int dfd, const char __user *name, unsigned flags,
-		 struct path *path, char **real_filename, int *real_filename_len, int *lastComponent)
+		 struct path *path, char **real_filename, int *real_filename_len)
 {
 	struct nameidata nd;
 	char *tmp = getname(name);
@@ -2042,9 +2042,6 @@ int syno_user_path_at(int dfd, const char __user *name, unsigned flags,
 		if (!err) {
 			*path = nd.path;
 			*real_filename_len = nd.real_filename_len;
-			if (nd.flags & LOOKUP_TO_LASTCOMPONENT) {
-				*lastComponent = 1;
-			}
 		}
 	}
 	return err;

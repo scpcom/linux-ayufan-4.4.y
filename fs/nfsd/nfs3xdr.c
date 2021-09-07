@@ -22,6 +22,9 @@
 #include <linux/nfsd/nfsd.h>
 #include <linux/nfsd/xdr3.h>
 #include "auth.h"
+#ifdef CONFIG_FS_SYNO_ACL
+#include <linux/sched.h>
+#endif
 
 #define NFSDDBG_FACILITY		NFSDDBG_XDR
 
@@ -219,6 +222,10 @@ encode_post_op_attr(struct svc_rqst *rqstp, __be32 *p, struct svc_fh *fhp)
 
 		err = vfs_getattr(fhp->fh_export->ex_path.mnt, dentry, &stat);
 		if (!err) {
+#ifdef CONFIG_FS_SYNO_ACL
+			if (IS_SYNOACL_DENTRY(dentry) && current_fsuid() == 0)
+				stat.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+#endif
 			*p++ = xdr_one;		/* attributes follow */
 			lease_get_mtime(dentry->d_inode, &stat.mtime);
 			return encode_fattr3(rqstp, p, fhp, &stat);
@@ -271,6 +278,10 @@ void fill_post_wcc(struct svc_fh *fhp)
 
 	err = vfs_getattr(fhp->fh_export->ex_path.mnt, fhp->fh_dentry,
 			&fhp->fh_post_attr);
+#ifdef CONFIG_FS_SYNO_ACL
+	if (!err && IS_SYNOACL_DENTRY(fhp->fh_dentry) && current_fsuid() == 0)
+		fhp->fh_post_attr.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+#endif
 	fhp->fh_post_change = fhp->fh_dentry->d_inode->i_version;
 	if (err)
 		fhp->fh_post_saved = 0;

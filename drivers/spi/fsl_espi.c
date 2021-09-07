@@ -513,8 +513,37 @@ static int __exit fsl_espi_remove(struct of_device *ofdev)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_QORIQ_ESPI_PM) && defined(CONFIG_PM)
+static int fsl_espi_suspend(struct of_device *ofdev, pm_message_t pmsg)
+{
+	struct fsl_espi *fsl_espi;
+	struct spi_master *master;
+
+	master = platform_get_drvdata(ofdev);
+	fsl_espi = spi_master_get_devdata(master);
+
+	out_be32(&fsl_espi->regs->mode, (in_be32(&fsl_espi->regs->mode) & ~SPMODE_ENABLE));
+
+	return 0;
+}
+
+static int fsl_espi_resume(struct of_device *ofdev)
+{
+	struct fsl_espi *fsl_espi;
+	struct spi_master *master;
+
+	master = platform_get_drvdata(ofdev);
+	fsl_espi = spi_master_get_devdata(master);
+
+	out_be32(&fsl_espi->regs->mode, (in_be32(&fsl_espi->regs->mode) | SPMODE_ENABLE));
+
+	return 0;
+}
+
+#else
 #define fsl_espi_suspend NULL
 #define fsl_espi_resume  NULL
+#endif
 
 static struct of_device_id fsl_espi_of_match[] = {
 	{ .compatible = "fsl,espi",},
@@ -533,6 +562,10 @@ static struct of_platform_driver fsl_espi_driver = {
 		.name = "fsl-espi",
 		.owner = THIS_MODULE,
 	},
+#if defined(CONFIG_SYNO_QORIQ_ESPI_PM) && defined(CONFIG_PM)
+	.suspend = fsl_espi_suspend,
+	.resume  = fsl_espi_resume,
+#endif
 };
 
 static int __init fsl_espi_init(void)

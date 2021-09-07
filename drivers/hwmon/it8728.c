@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  it87.c - Part of lm_sensors, Linux kernel modules for hardware
  *           monitoring.
@@ -2253,7 +2256,7 @@ static void __exit sm_it87_exit(void)
 	platform_driver_unregister(&it87_driver);
 }
 
-#ifdef SYNO_PINEVIEW_SYSTEMP
+#ifdef MY_DEF_HERE
 int syno_sys_temperature(int *Temperature)
 {
     unsigned short address;
@@ -2285,7 +2288,7 @@ int syno_sys_temperature(int *Temperature)
 EXPORT_SYMBOL(syno_sys_temperature);
 #endif
 
-#ifdef SYNO_PINEVIEW_SUPERIO_RW
+#ifdef MY_DEF_HERE
 struct writable_pin {
     u32         pin;
     u32         en_reg;

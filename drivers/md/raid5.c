@@ -1573,6 +1573,262 @@ static void shrink_stripes(raid5_conf_t *conf)
 	conf->slab_cache = NULL;
 }
 
+#ifdef MY_ABC_HERE
+// given chunk_number in "device", get parity disks (P, Q), and first data disk
+static int syno_raid5_parity_disk_get(const raid5_conf_t* conf, sector_t chunk_number, int *pd_idx, int *qd_idx, int *st_idx)
+{
+	int raid_disks = conf->raid_disks;
+	int data_disks = raid_disks - conf->max_degraded;
+
+	switch (conf->level) {
+	case 4:
+		*pd_idx = data_disks;
+		*qd_idx = -1;
+		*st_idx = 0;
+		break;
+	case 5:
+		*qd_idx = -1;
+		switch (conf->algorithm) {
+		case ALGORITHM_LEFT_ASYMMETRIC:
+			*pd_idx = data_disks - sector_mod(chunk_number, raid_disks);
+			*st_idx = (0 == *pd_idx? 1: 0);
+		case ALGORITHM_RIGHT_ASYMMETRIC:
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*st_idx = (0 == *pd_idx? 1: 0);
+			break;
+		case ALGORITHM_LEFT_SYMMETRIC:
+			*pd_idx = data_disks - sector_mod(chunk_number, raid_disks);
+			*st_idx = (*pd_idx + 1) % raid_disks;
+			break;
+		case ALGORITHM_RIGHT_SYMMETRIC:
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*st_idx = (*pd_idx + 1) % raid_disks;
+			break;
+		case ALGORITHM_PARITY_0:
+			*pd_idx = 0;
+			*st_idx = 1;
+			break;
+		case ALGORITHM_PARITY_N:
+			*pd_idx = data_disks;
+			*st_idx = 0;
+			break;
+		default:
+			BUG();
+		}
+		break;
+	case 6:
+		switch(conf->algorithm) {
+		case ALGORITHM_LEFT_ASYMMETRIC:
+			*pd_idx = raid_disks - 1 - sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (1 >= *qd_idx? *qd_idx + 1: 0);
+			break;
+		case ALGORITHM_RIGHT_ASYMMETRIC:
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (1 >= *qd_idx? *qd_idx + 1: 0);
+			break;
+		case ALGORITHM_LEFT_SYMMETRIC:
+			*pd_idx = raid_disks - 1 - sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (*qd_idx + 1) % raid_disks;
+			break;
+		case ALGORITHM_RIGHT_SYMMETRIC:
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (*qd_idx + 1) % raid_disks;
+			break;
+
+		case ALGORITHM_PARITY_0:
+			*pd_idx = 0;
+			*qd_idx = 1;
+			*st_idx = 2;
+			break;
+		case ALGORITHM_PARITY_N:
+			*pd_idx = data_disks;
+			*qd_idx = data_disks + 1;
+			*st_idx = 0;
+			break;
+
+		case ALGORITHM_ROTATING_ZERO_RESTART:
+			/* Exactly the same as RIGHT_ASYMMETRIC, but or
+			 * of blocks for computing Q is different.
+			 */
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (1 >= *qd_idx? *qd_idx + 1: 0);
+			break;
+
+		case ALGORITHM_ROTATING_N_RESTART:
+			/* Same a left_asymmetric, by first stripe is
+			 * D D D P Q  rather than
+			 * Q D D D P
+			 */
+			chunk_number += 1;
+			*pd_idx = raid_disks - 1 - sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (1 >= *qd_idx? *qd_idx + 1: 0);
+			break;
+
+		case ALGORITHM_ROTATING_N_CONTINUE:
+			/* Same as left_symmetric but Q is before P */
+			*pd_idx = raid_disks - 1 - sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + raid_disks - 1) % raid_disks;
+			*st_idx = (*pd_idx + 1) % raid_disks;
+			break;
+
+		case ALGORITHM_LEFT_ASYMMETRIC_6:
+			/* RAID5 left_asymmetric, with Q on last device */
+			*pd_idx = data_disks - sector_mod(chunk_number, raid_disks - 1);
+			*qd_idx = raid_disks - 1;
+			*st_idx = (0 == *pd_idx? 1: 0);
+			break;
+
+		case ALGORITHM_RIGHT_ASYMMETRIC_6:
+			*pd_idx = sector_mod(chunk_number, raid_disks-1);
+			*qd_idx = raid_disks - 1;
+			*st_idx = (0 == *pd_idx? 1: 0);
+			break;
+
+		case ALGORITHM_LEFT_SYMMETRIC_6:
+			*pd_idx = data_disks - sector_mod(chunk_number, raid_disks - 1);
+			*qd_idx = raid_disks - 1;
+			*st_idx = (*pd_idx + 1) % (raid_disks - 1);
+			break;
+
+		case ALGORITHM_RIGHT_SYMMETRIC_6:
+			*pd_idx = sector_mod(chunk_number, raid_disks - 1);
+			*qd_idx = raid_disks - 1;
+			*st_idx = (*pd_idx + 1) % (raid_disks - 1);
+			break;
+
+		case ALGORITHM_PARITY_0_6:
+			*pd_idx = 0;
+			*qd_idx = raid_disks - 1;
+			*st_idx = 1;
+			break;
+		default:
+			BUG();
+			break;
+		}
+		break;
+	default:
+		BUG();
+		break;
+	}
+
+	return 0;
+}
+
+/*
+ * conf [in]
+ * bad_disk [in] disk with bad sector
+ * bad_disks [out] disk which data will corrupt
+ */
+static int syno_raid5_data_corrupt_disk_get(const raid5_conf_t* conf, const int pd_idx, const int qd_idx, int bad_disk, int* bad_disks, int max_bad_disk)
+{
+	int d = 0;
+	int num_repair = 0;
+	int repair_disk[2] = {-1, -1};
+	int num_bad_disk = 0;
+
+	if (pd_idx != bad_disk && qd_idx != bad_disk) {
+		bad_disks[num_bad_disk++] = bad_disk;
+	}
+
+	for (d = 0; d < conf->raid_disks; d++) {
+		if (conf->disks[d].rdev) {
+			if (!test_bit(In_sync, &conf->disks[d].rdev->flags)) {
+				BUG_ON(num_repair >= conf->max_degraded);
+				repair_disk[num_repair++] = d;
+			}
+		} else {
+			BUG_ON(num_repair >= conf->max_degraded);
+			repair_disk[num_repair++] = d;
+		}
+	}
+	BUG_ON(conf->max_degraded != num_repair);
+
+	for (d = 0; d < num_repair && num_bad_disk < max_bad_disk; d++) {
+		if (pd_idx != repair_disk[d] && qd_idx != repair_disk[d]) {
+			bad_disks[num_bad_disk++] = repair_disk[d];
+		}
+	}
+
+	return num_bad_disk;
+}
+
+static int syno_raid5_disk_ahead_get(const int raid_disks, const int st_idx, int pd_idx, int qd_idx, int disk)
+{
+	int disk_ahead = -1;
+
+	if (0 > st_idx || 0 > pd_idx || 0 > disk) {
+		goto END;
+	}
+
+	if (disk < st_idx) {
+		disk += raid_disks;
+	}
+	disk_ahead = disk - st_idx ;
+
+	if (pd_idx < st_idx) {
+		pd_idx += raid_disks;
+	}
+	disk_ahead -= (pd_idx < disk? 1: 0);
+
+	if (-1 != qd_idx) {
+		if (qd_idx < st_idx) {
+			qd_idx += raid_disks;
+		}
+		disk_ahead -= (qd_idx < disk? 1: 0);
+	}
+
+END:
+	return disk_ahead;
+}
+
+static int syno_raid5_autoremap_report_sectors(const raid5_conf_t* conf, sector_t bad_sector, int bad_disk)
+{
+	sector_t sector = bad_sector ;
+	sector_t chunk_offset = sector_mod(sector, conf->chunk_sectors);
+	sector_t chunk_number = sector;
+	sector_t raid_sector = 0;
+
+	int ret = -1;
+	int raid_disks = conf->raid_disks ;
+	int data_disks = raid_disks - conf->max_degraded ;
+	int pd_idx = -1, qd_idx = -1, st_idx = -1;
+	int d = 0;
+	int bad_disks[3] = {0}; // for now, maximum possible disk with data-corruption is max_degraded of RAID6 (2) + 1
+	int num_bad_disk = 0;
+
+	int disk_ahead = 0;
+
+	mdk_rdev_t *rdev = conf->disks[bad_disk].rdev;
+
+	if (0 > syno_raid5_parity_disk_get(conf, chunk_number, &pd_idx, &qd_idx, &st_idx)) {
+		printk("Failed to syno_raid5_parity_disk_get\n");
+		goto END;
+	}
+
+	num_bad_disk = syno_raid5_data_corrupt_disk_get(conf, pd_idx, qd_idx, bad_disk, bad_disks, 3);
+
+	for (d = 0; d < num_bad_disk; d++) {
+		if (0 > (disk_ahead = syno_raid5_disk_ahead_get(raid_disks, st_idx, pd_idx, qd_idx, bad_disks[d]))) {
+			printk("Failed to syno_raid5_disk_ahead_get\n");
+			goto END;
+		}
+		raid_sector = (chunk_number * data_disks + disk_ahead) * conf->chunk_sectors + chunk_offset ;
+		SynoAutoRemapReport(conf->mddev, raid_sector, rdev->bdev);
+	}
+
+	ret = 0;
+END:
+	return ret;
+}
+
+#endif
+
 static void raid5_end_read_request(struct bio * bi, int error)
 {
 	struct stripe_head *sh = bi->bi_private;
@@ -1596,10 +1852,9 @@ static void raid5_end_read_request(struct bio * bi, int error)
 
 #ifdef MY_ABC_HERE
 	if (bio_flagged(bi, BIO_AUTO_REMAP)) {
-		rdev = conf->disks[i].rdev;
 		clear_bit(BIO_AUTO_REMAP, &bi->bi_flags);
 		printk("%s:%s(%d) BIO_AUTO_REMAP detected, sector:[%llu], sh count:[%d] disk count:[%d]\n", __FILE__,__FUNCTION__,__LINE__, (unsigned long long)sh->sector, atomic_read(&sh->count), i);
-		SynoAutoRemapReport(conf->mddev, sh->sector, rdev->bdev);
+		syno_raid5_autoremap_report_sectors(conf, sh->sector, i);
 	}
 #endif
 
@@ -2077,7 +2332,6 @@ static sector_t raid5_compute_sector(raid5_conf_t *conf, sector_t r_sector,
 		}
 		break;
 	case 6:
-
 		switch (algorithm) {
 		case ALGORITHM_LEFT_ASYMMETRIC:
 			pd_idx = raid_disks - 1 - (stripe % raid_disks);
@@ -2832,6 +3086,7 @@ static void handle_stripe_dirtying5(raid5_conf_t *conf,
 		struct stripe_head *sh,	struct stripe_head_state *s, int disks)
 {
 	int rmw = 0, rcw = 0, i;
+
 	for (i = disks; i--; ) {
 		/* would I have to read this buffer for read_modify_write */
 		struct r5dev *dev = &sh->dev[i];

@@ -375,7 +375,7 @@ struct ext3_inode {
 #ifdef MY_ABC_HERE
 #define ext3_CreateTime		i_reserved1
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 #define ext3_mode2			i_reserved2
 #endif
 

@@ -78,7 +78,7 @@ config SYNO_MTD_PHYSMAP_START
 	default "0x60CE0000"
 	help
 		When your platform do not memory map SPI to a specicfy memory address.
-		Please fill up the mapped base address which you write in sds_sii/ImagePacker.conf.xxxx
+		Please fill up the mapped base address which you write in sds-sii/ImagePacker.conf.xxxx
 
 config MTD_PHYSMAP_OF
 	tristate "Flash device in physical memory map based on OF description"

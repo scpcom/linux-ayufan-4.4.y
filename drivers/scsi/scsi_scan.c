@@ -62,6 +62,7 @@ SYNO_DISK_VENDOR gDiskVendor[] = {
 	{"OCZ", 3},
 	{"Crucial", 7},
 	{"Micron", 6},
+	{"MICRON", 6},
 	{NULL, 0}
 };
 #if defined(MY_ABC_HERE)

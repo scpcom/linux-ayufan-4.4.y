@@ -27,7 +27,8 @@ void syno_do_hibernation_log(const char __user *filename)
     if(strstr(filename, "/dev") == NULL &&
 	   strstr(filename, "/sys") == NULL &&
 	   strstr(filename, "/proc") == NULL &&
-	   strstr(filename, "/tmp") == NULL) {
+	   strstr(filename, "/tmp") == NULL &&
+	   strstr(filename, "/run") == NULL) {
 		timeout = glast_jiffies + syno_hibernation_log_sec * HZ;
 		if(time_after(jiffies, timeout)) {
 			SynoProcessNameGet(current, 0, p_cups, PS_BUF_LEN);

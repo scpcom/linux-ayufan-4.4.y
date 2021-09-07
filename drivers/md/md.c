@@ -75,6 +75,10 @@ extern int SynoDebugFlag;
 #endif
 
 #ifdef MY_ABC_HERE
+extern struct rw_semaphore s_reshape_mount_key;
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
 extern int (*funcSYNORaidDiskUnplug)(char *szDiskName);
 EXPORT_SYMBOL(SYNORaidRdevUnplug);
 int SYNORaidDiskUnplug(char *szArgDiskName);
@@ -4626,6 +4630,11 @@ static int do_md_run(mddev_t * mddev)
 #ifdef MY_ABC_HERE
 	mddev->nodev_and_crashed = 0;
 #endif
+#ifdef MY_ABC_HERE
+	if (0 == strcmp("md0", mdname(mddev)) || 0 == strcmp("md1", mdname(mddev))) {
+		mddev->parallel_resync = 1;
+	}
+#endif /* MY_ABC_HERE */
 
 	if (start_readonly && mddev->ro == 0)
 		mddev->ro = 2; /* read-only, but switch on first write */
@@ -4969,7 +4978,7 @@ static void autorun_array(mddev_t *mddev)
 	}
 }
 
-#if defined(SYNO_HIBERNATE_TO_DISK) && defined(CONFIG_PM_SLEEP) 
+#if defined(MY_DEF_HERE) && defined(CONFIG_PM_SLEEP) 
 	extern int software_resume(void);
 #endif
 /*
@@ -5100,7 +5109,7 @@ static void autorun_devices(int part)
 	}
 	printk(KERN_INFO "md: ... autorun DONE.\n");
 
-#if defined(SYNO_HIBERNATE_TO_DISK) && defined(CONFIG_PM_SLEEP) 
+#if defined(MY_DEF_HERE) && defined(CONFIG_PM_SLEEP) 
 	software_resume();
 #endif
 }
@@ -6258,7 +6267,7 @@ mdk_thread_t *md_register_thread(void (*run) (mddev_t *), mddev_t *mddev,
 	thread->mddev = mddev;
 	thread->timeout = MAX_SCHEDULE_TIMEOUT;
 #ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
-	thread->tsk = kthread_run_on_cpu(0, md_thread, thread,
+	thread->tsk = kthread_run_on_cpu(CONFIG_SYNO_QORIQ_DEFAULT_CPU_AFFINITY, md_thread, thread,
 				  "%s_%s",
 				  mdname(thread->mddev),
 				  name ?: mddev->pers->name);
@@ -6965,7 +6974,11 @@ void md_do_sync(mddev_t *mddev)
 				j = rdev->recovery_offset;
 	}
 
+#ifdef MY_ABC_HERE
+	printk(KERN_WARNING "md: %s of RAID array %s\n", desc, mdname(mddev));
+#else
 	printk(KERN_INFO "md: %s of RAID array %s\n", desc, mdname(mddev));
+#endif
 	printk(KERN_INFO "md: minimum _guaranteed_  speed:"
 		" %d KB/sec/disk.\n", speed_min(mddev));
 	printk(KERN_INFO "md: using maximum available idle IO bandwidth "
@@ -7102,7 +7115,15 @@ void md_do_sync(mddev_t *mddev)
 			}
 		}
 	}
+#ifdef MY_ABC_HERE
+	if (test_bit(MD_RECOVERY_INTR, &mddev->recovery)) {
+		printk(KERN_WARNING "md: %s: %s stop due to MD_RECOVERY_INTR set.\n", mdname(mddev), desc);
+	} else {
+		printk(KERN_WARNING "md: %s: %s done.\n",mdname(mddev), desc);
+	}
+#else /* MY_ABC_HERE */
 	printk(KERN_INFO "md: %s: %s done.\n",mdname(mddev), desc);
+#endif /* MY_ABC_HERE */
 	/*
 	 * this also signals 'finished resyncing' to md_stop
 	 */
@@ -7159,8 +7180,12 @@ void md_do_sync(mddev_t *mddev)
 	/*
 	 * got a signal, exit.
 	 */
+#ifdef MY_ABC_HERE
+	printk(KERN_WARNING "md: md_do_sync() got signal ... exiting\n");
+#else /* MY_ABC_HERE */
 	printk(KERN_INFO
 	       "md: md_do_sync() got signal ... exiting\n");
+#endif /* MY_ABC_HERE */
 	set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 	goto out;
 
@@ -7341,6 +7366,11 @@ void md_check_recovery(mddev_t *mddev)
 		}
 		if (mddev->sync_thread) {
 			/* resync has finished, collect result */
+#ifdef MY_ABC_HERE
+			if (0 == down_write_trylock(&s_reshape_mount_key)) {
+				goto unlock;
+			}
+#endif /* MY_ABC_HERE */
 			md_unregister_thread(mddev->sync_thread);
 			mddev->sync_thread = NULL;
 			if (!test_bit(MD_RECOVERY_INTR, &mddev->recovery) &&
@@ -7368,6 +7398,9 @@ void md_check_recovery(mddev_t *mddev)
 			set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
 			sysfs_notify_dirent(mddev->sysfs_action);
 			md_new_event(mddev);
+#ifdef MY_ABC_HERE
+			up_write(&s_reshape_mount_key);
+#endif /* MY_ABC_HERE */
 			goto unlock;
 		}
 		/* Set RUNNING before clearing NEEDED to avoid

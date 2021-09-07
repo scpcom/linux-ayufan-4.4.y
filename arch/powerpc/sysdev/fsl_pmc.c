@@ -33,11 +33,19 @@ struct pmc_regs {
 	__be32:32;
 	__be32 pmcsr;
 	__be32:32;
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	__be32 pmpdccr;
+#else
 	__be32:32;
+#endif
 	__be32 pmcdr;
 };
 static struct device *pmc_dev;
 static struct pmc_regs __iomem *pmc_regs;
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+static struct ccsr_guts __iomem *guts;
+static void __iomem *gpio_base;
+#endif
 
 #define PMCSR_DPSLP	0x00100000
 #define PMCSR_SLP	0x00020000
@@ -47,6 +55,9 @@ static int has_deep_sleep, has_lossless;
 
 void mpc85xx_enter_deep_sleep(phys_addr_t ccsrbar, u32 powmgtreq);
 extern void flush_dcache_L1(void);
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+extern int SYNOQorIQHWReset(void);
+#endif
 
 /**
  * pmc_enable_wake - enable OF device as wakeup event source
@@ -92,6 +103,9 @@ static int pmc_suspend_exit(void)
 	return 0;
 }
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+extern void GPIOSuspend(void);
+#endif
 int pmc_enable_wake(struct of_device *ofdev, wakeup_event_t func, bool enable)
 {
 	int ret = 0;
@@ -123,6 +137,22 @@ int pmc_enable_wake(struct of_device *ofdev, wakeup_event_t func, bool enable)
 	else
 		setbits32(&pmc_regs->pmcdr, *pmcdr_mask);
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	if (enable) {
+		/* set usb1 function pin to gpio output and disable usb1/2 sap during deep sleep */
+		setbits32(&pmc_regs->pmcdr, 0x00c00800);
+		setbits32(&guts->pmuxcr, 0x20000000);
+		msleep(200);
+		setbits32(gpio_base + 0x100, 0xfff00000);
+		GPIOSuspend();
+	} else {
+		/* recover it */
+		clrbits32(gpio_base + 0x100, 0xfff00000);
+		clrbits32(&guts->pmuxcr, 0x20000000);
+		clrbits32(&pmc_regs->pmcdr, 0x00c00800);
+	}
+#endif
+
 	if (func != NULL) {
 		tmp = kzalloc(sizeof(struct wake_data), GFP_KERNEL);
 		if (!tmp) {
@@ -153,6 +183,9 @@ void pmc_enable_lossless(int enable)
 }
 EXPORT_SYMBOL_GPL(pmc_enable_lossless);
 
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+extern unsigned char GPIOShouldWake(void);
+#endif
 static int pmc_suspend_enter(suspend_state_t state)
 {
 	int ret;
@@ -166,13 +199,38 @@ static int pmc_suspend_enter(suspend_state_t state)
 		pr_debug("Entering deep sleep\n");
 
 		local_irq_disable();
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+		setbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK);
+#endif
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+		if (!pmc_suspend_exit() && !GPIOShouldWake()) {
+#else
 		if (!pmc_suspend_exit()) {
+#endif
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+			/* Force put core 1 to nap mode to prevent gpio wake up failed issue */
+			setbits32(&pmc_regs->devdisr, 0x00002000);
+#else
 			setbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK);
+#endif
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+			clrbits32(&pmc_regs->pmpdccr, 0x1fff0000);
+			setbits32(&pmc_regs->pmpdccr, 0x16ff0000);
+#endif
 			mpc85xx_enter_deep_sleep(get_immrbase(),
 					powmgtreq);
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+			/* Make core 1 back from nap mode */
+			SYNOQorIQHWReset();
+			clrbits32(&pmc_regs->devdisr, 0x00002000);
+#else
 			clrbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK);
+#endif
 
 		}
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+		clrbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK);
+#endif
 		pr_debug("Resumed from deep sleep\n");
 
 		return 0;
@@ -241,7 +299,11 @@ static int pmc_probe(struct of_device *ofdev, const struct of_device_id *id)
 
 		if ((mfspr(SPRN_SVR) & 0xff) == 0x11) {
 			struct device_node *node;
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+			struct device_node *gpio_node;
+#else
 			struct ccsr_guts __iomem *guts;
+#endif
 
 			/* Map the global utilities registers. */
 			node = of_find_compatible_node(NULL, NULL,
@@ -261,7 +323,28 @@ static int pmc_probe(struct of_device *ofdev, const struct of_device_id *id)
 			}
 
 			/* Enable Power Down for deep sleep mode */
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+			setbits32(&guts->dscr, CCSR_GUTS_DSCR_ENB_PWR_DWN|CCSR_GUTS_DSCR_TRI_MCS_B|CCSR_GUTS_DSCR_TRI_MCK|0x40000000);
+#else
 			setbits32(&guts->dscr, CCSR_GUTS_DSCR_ENB_PWR_DWN);
+#endif
+
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+			/* Map the gpio controller space. */
+			gpio_node = of_find_compatible_node(NULL, NULL,
+					"fsl,mpc8572-gpio");
+			if (!gpio_node) {
+				printk(KERN_WARNING "Cannot find fsl,mpc8572-gpio entry\n");
+				goto end;
+			}
+
+			gpio_base = of_iomap(gpio_node, 0);
+			of_node_put(gpio_node);
+			if (!gpio_base) {
+				printk(KERN_WARNING "Cannot map gpio base of fsl,mpc8572-gpio\n");
+				goto end;
+			}
+#endif
 		}
 	}
 

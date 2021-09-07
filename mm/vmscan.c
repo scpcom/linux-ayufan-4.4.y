@@ -2158,7 +2158,7 @@ static int kswapd(void *p)
 
 #ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
 	if (!cpumask_empty(cpumask)) {
-		set_cpus_allowed_ptr(tsk, cpumask_of(0));
+		set_cpus_allowed_ptr(tsk, cpumask_of(CONFIG_SYNO_QORIQ_DEFAULT_CPU_AFFINITY));
 	}
 #else
 	if (!cpumask_empty(cpumask))

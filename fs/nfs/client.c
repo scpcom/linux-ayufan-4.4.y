@@ -55,6 +55,11 @@ static LIST_HEAD(nfs_volume_list);
 static DECLARE_WAIT_QUEUE_HEAD(nfs_client_active_wq);
 
 /*
+ * Turn off NFSv4 uid/gid mapping when using AUTH_SYS
+ */
+static int nfs4_disable_idmapping = 0;
+
+/*
  * RPC cruft for NFS
  */
 static struct rpc_version *nfs_version[5] = {
@@ -1297,6 +1302,13 @@ static int nfs4_init_server(struct nfs_server *server,
 	if (error < 0)
 		goto error;
 
+	/*
+	 * Don't use NFS uid/gid mapping if we're using AUTH_SYS or lower
+	 * authentication.
+	 */
+	if (nfs4_disable_idmapping && data->auth_flavors[0] == RPC_AUTH_UNIX)
+		server->caps |= NFS_CAP_UIDGID_NOMAP;
+
 	if (data->rsize)
 		server->rsize = nfs_block_size(data->rsize, NULL);
 	if (data->wsize)
@@ -1766,3 +1778,7 @@ void nfs_fs_proc_exit(void)
 }
 
 #endif /* CONFIG_PROC_FS */
+
+module_param(nfs4_disable_idmapping, bool, 0644);
+MODULE_PARM_DESC(nfs4_disable_idmapping,
+		"Turn off NFSv4 idmapping when using 'sec=sys'");
