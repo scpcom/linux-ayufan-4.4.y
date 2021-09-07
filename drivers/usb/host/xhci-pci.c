@@ -30,6 +30,8 @@
 
 static const char hcd_name[] = "xhci_hcd";
 
+unsigned short xhci_vendor = 0;
+
 /* called after powerup, by probe or system-pm "wakeup" */
 static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
 {
@@ -69,6 +71,8 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	xhci->hci_version = HC_VERSION(xhci->hcc_params);
 	xhci->hcc_params = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
 	xhci_print_registers(xhci);
+
+	xhci_vendor = pdev->vendor;
 
 	/* Look for vendor-specific quirks */
 	if (pdev->vendor == PCI_VENDOR_ID_FRESCO_LOGIC &&

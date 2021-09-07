@@ -676,6 +676,10 @@ struct ethtool_ops {
 #define	AH_V6_FLOW	0x0b
 #define	ESP_V6_FLOW	0x0c
 #define	IP_USER_FLOW	0x0d
+#ifdef CONFIG_SYNO_QORIQ
+#define IPV4_FLOW       0x10
+#define IPV6_FLOW       0x11
+#endif
 
 /* L3-L4 network traffic flow hash options */
 #define	RXH_L2DA	(1 << 1)

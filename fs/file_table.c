@@ -506,6 +506,7 @@ void fs_force_close_all_files(struct super_block *sb)
 			printk("force close %s file(%ld) dentry(%d)\n",file->f_path.dentry->d_name.name, 
 				   file_count(file), atomic_read(&file->f_dentry->d_count));
 #endif
+			file->f_dentry->d_inode->i_flags |= S_SYNO_FORCE_UMOUNT;
 			get_file(file);
 			fput(file);
 		}

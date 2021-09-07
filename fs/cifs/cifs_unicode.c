@@ -218,6 +218,12 @@ cifs_strtoUCS(__le16 *to, const char *from, int len,
 		} else if (0x7c== *from) {	//'|'
 			to[i] = cpu_to_le16(0xf07c);
 			charlen = 1;
+		} else if (0x3a== *from) {	//':'
+			to[i] = cpu_to_le16(0xf022);
+			charlen = 1;
+		} else if (0x22== *from) {	//'"'
+			to[i] = cpu_to_le16(0xf020);
+			charlen = 1;
 		} else {
 #endif
 		/* works for 2.4.0 kernel or later */

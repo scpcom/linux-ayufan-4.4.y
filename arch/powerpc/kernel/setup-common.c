@@ -106,10 +106,11 @@ void machine_shutdown(void)
 		ppc_md.machine_shutdown();
 }
 
-#ifdef CONFIG_SYNO_MPC85XX_COMMON
+#if defined(CONFIG_SYNO_MPC85XX_COMMON) || defined(CONFIG_SYNO_QORIQ)
 #define UART2_DCR       0x4611
 #define UART2_TX        0x4600
 #define UART2_LCR       0x4603
+#define UART2_BASE      0x4600
 
 #define ENABLE_DUART            0x01
 #define SET8N1                  0x3
@@ -159,6 +160,30 @@ void machine_power_off(void)
 		*ptr = SET8N1;
 		ptr = (unsigned char *)(immr_base + UART2_TX);   // TX
 		*ptr = SOFTWARE_SHUTDOWN;
+	} else {
+		printk("HW Settings Error: Failed to get immr_base\n");
+	}
+#elif defined(CONFIG_SYNO_QORIQ)
+#undef UART2_TX
+#undef UART2_LCR
+
+#define UART2_TX  0x0
+#define UART2_LCR 0x3
+#ifdef MY_ABC_HERE
+	extern void SynoQorIQWOLSet(void);
+#endif
+	extern phys_addr_t get_immrbase(void);
+
+	u32 __iomem *pUP = ioremap((get_immrbase() + UART2_BASE), 0x100);
+
+#ifdef MY_ABC_HERE
+	SynoQorIQWOLSet();
+#endif
+	if (pUP) {
+		setbits8((unsigned char *)(pUP + UART2_LCR), SET8N1);
+		setbits8((unsigned char *)(pUP + UART2_TX), SOFTWARE_SHUTDOWN);
+		iounmap(pUP);
+		while (1) ;
 	} else {
 		printk("HW Settings Error: Failed to get immr_base\n");
 	}

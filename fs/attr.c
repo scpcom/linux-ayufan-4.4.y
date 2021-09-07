@@ -160,6 +160,14 @@ int notify_change(struct dentry * dentry, struct iattr * attr)
 		if (IS_IMMUTABLE(inode) || IS_APPEND(inode))
 			return -EPERM;
 	}
+#ifdef MY_ABC_HERE
+	if (IS_UMOUNTED_FILE(inode)) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+		printk("%s(%d) force umount hit.\n", __func__, __LINE__);
+#endif
+		return -EPERM;
+	}
+#endif
 
 	now = current_fs_time(inode->i_sb);
 

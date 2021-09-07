@@ -53,10 +53,17 @@ static void
 fixup_hide_host_resource_fsl(struct pci_dev *dev)
 {
 	int i, class = dev->class >> 8;
+#ifdef CONFIG_SYNO_QORIQ
+	/*When configured as agent, programing interface = 1*/
+	int prog_if = dev->class & 0xf;
+#endif
 
 	if ((class == PCI_CLASS_PROCESSOR_POWERPC ||
 	     class == PCI_CLASS_BRIDGE_OTHER) &&
 		(dev->hdr_type == PCI_HEADER_TYPE_NORMAL) &&
+#ifdef CONFIG_SYNO_QORIQ
+		(prog_if == 0) &&
+#endif
 		(dev->bus->parent == NULL)) {
 		for (i = 0; i < DEVICE_COUNT_RESOURCE; i++) {
 			dev->resource[i].start = 0;

@@ -895,9 +895,6 @@ static int sil_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	sil_init_controller(host);
 
 	pci_set_master(pdev);
-#ifdef MY_ABC_HERE
-	host->flags |= ATA_HOST_LLD_SPINUP_DELAY;
-#endif
 	return ata_host_activate(host, pdev->irq, sil_interrupt, IRQF_SHARED,
 				 &sil_sht);
 }

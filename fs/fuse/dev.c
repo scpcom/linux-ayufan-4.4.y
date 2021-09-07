@@ -611,6 +611,7 @@ static int fuse_copy_page(struct fuse_copy_state *cs, struct page *page,
 		} else
 			offset += fuse_copy_do(cs, NULL, &count);
 	}
+
 	if (page && !cs->write)
 		flush_dcache_page(page);
 	return 0;

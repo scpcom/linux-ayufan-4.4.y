@@ -97,9 +97,19 @@ config MTD_M25P80
 	  if you want to specify device partitioning or to use a device which
 	  doesn't support the JEDEC ID instruction.
 
+config MTD_FSL_M25P80
+	tristate "Support Flash chips based on Freescale eSPI interface"
+	depends on SPI_MASTER && FSL_ESPI && EXPERIMENTAL
+	help
+	  This only enables access to Freescale eSPI interface
+
+	  Set up your spi devices with the right board-specific platform data,
+	  if you want to specify device partitioning or to use a device which
+	  doesn't support the JEDEC ID instruction.
+
 config M25PXX_USE_FAST_READ
 	bool "Use FAST_READ OPCode allowing SPI CLK <= 50MHz"
-	depends on MTD_M25P80
+	depends on MTD_M25P80 || MTD_FSL_M25P80
 	default y
 	help
 	  This option enables FAST_READ access supported by ST M25Pxx.

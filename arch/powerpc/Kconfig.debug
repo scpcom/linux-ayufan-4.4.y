@@ -148,6 +148,12 @@ config BDI_SWITCH
 	  Unless you are intending to debug the kernel with one of these
 	  machines, say N here.
 
+config DEBUG_CW
+	bool "Include CodeWarrior kernel debugging"
+	depends on DEBUG_KERNEL && PPC32
+	help
+	  Say Y here to enable CodeWarrior kernel debugging.
+
 config BOOTX_TEXT
 	bool "Support for early boot text console (BootX or OpenFirmware only)"
 	depends on PPC_OF && PPC_BOOK3S

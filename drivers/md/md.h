@@ -317,6 +317,11 @@ struct mddev_s
 #ifdef MY_ABC_HERE
 	unsigned char			auto_remap;     // 1 ==> set all rdevs to remap mode.
 #endif
+#ifdef MY_ABC_HERE
+	unsigned char			force_auto_remap; // user open auto remap manually
+	void				*syno_private;	  // store lv struct for auto remap report
+	char				lv_name[16];
+#endif
 #ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
  	struct raidset_s* hw_raid;
 #endif
@@ -382,6 +387,9 @@ struct mdk_personality
 	 * array.
 	 */
 	void *(*takeover) (mddev_t *mddev);
+#ifdef MY_ABC_HERE
+	unsigned char (*ismaxdegrade) (mddev_t *mddev);
+#endif
 };
 
 
@@ -490,7 +498,29 @@ extern int md_integrity_register(mddev_t *mddev);
 void md_integrity_add_rdev(mdk_rdev_t *rdev, mddev_t *mddev);
 
 #ifdef MY_ABC_HERE
+void SynoAutoRemapReport(mddev_t *mddev, sector_t sector, struct block_device *bdev);
+#endif
+
+#ifdef MY_ABC_HERE
 void SYNORaidRdevUnplug(mddev_t *mddev, mdk_rdev_t *rdev);
+#endif
+
+#ifdef MY_ABC_HERE
+void RaidRemapModeSet(struct block_device *, unsigned char);
+
+static inline void
+RaidMemberAutoRemapSet(mddev_t *mddev)
+{
+	mdk_rdev_t *rdev, *tmp;
+	char b[BDEVNAME_SIZE];
+
+	/* enum all rdev and set the bdev */
+	rdev_for_each(rdev, tmp, mddev) {
+		bdevname(rdev->bdev,b);
+		RaidRemapModeSet(rdev->bdev, mddev->auto_remap);
+		printk("md: %s: set %s to auto_remap [%d]\n", mdname(mddev), b, mddev->auto_remap);
+	}
+}
 #endif
 
 #endif /* _MD_MD_H */

@@ -136,6 +136,14 @@ static void req_bio_endio(struct request *rq, struct bio *bio,
 	struct request_queue *q = rq->q;
 
 	if (&q->bar_rq != rq) {
+#ifdef MY_ABC_HERE
+		if (rq->cmd_flags & REQ_AUTO_REMAP){
+			set_bit(BIO_AUTO_REMAP, &bio->bi_flags);
+			rq->cmd_flags &= ~REQ_AUTO_REMAP;
+			printk("%s:%s(%d) set bio BIO_AUTO_REMAP bit on\n",
+				__FILE__, __FUNCTION__, __LINE__);
+		}
+#endif
 		if (error)
 			clear_bit(BIO_UPTODATE, &bio->bi_flags);
 		else if (!test_bit(BIO_UPTODATE, &bio->bi_flags))

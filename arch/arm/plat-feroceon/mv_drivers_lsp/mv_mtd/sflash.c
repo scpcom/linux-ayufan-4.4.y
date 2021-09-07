@@ -91,9 +91,17 @@ static struct mtd_chip_driver sflash_chipdrv = {
 	.module		= THIS_MODULE
 };
 
+#ifdef MY_ABC_HERE
+extern int gSynoHasDynModule;
+#endif
 
 static struct mtd_info *sflash_probe(struct map_info *map)
 {
+#ifdef MY_ABC_HERE
+       if (gSynoHasDynModule) {
+               return NULL;
+       }
+#endif
 	struct mtd_info *mtd = NULL;
 	MV_SFLASH_INFO *sflash = NULL;
 	MV_ULONG flags = 0, sflash_in_irq = 0;

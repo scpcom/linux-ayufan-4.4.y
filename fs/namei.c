@@ -1288,6 +1288,15 @@ static int __link_path_walk(const char *name, struct nameidata *nd)
 	if (!*name)
 		goto return_reval;
 
+#ifdef MY_ABC_HERE
+	if (NULL == nd->path.dentry) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+		printk("%s: force unmount hit\n", __FUNCTION__);
+#endif
+		err = -ENOENT;
+		goto return_err;
+	}
+#endif
 	inode = nd->path.dentry->d_inode;
 	if (nd->depth)
 		lookup_flags = LOOKUP_FOLLOW | (nd->flags & LOOKUP_CONTINUE);

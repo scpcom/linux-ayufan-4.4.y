@@ -2461,6 +2461,80 @@ void tcp_send_delayed_ack(struct sock *sk)
 	sk_reset_timer(sk, &icsk->icsk_delack_timer, timeout);
 }
 
+
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_TCP_FAST_ACK
+static int tcp_fast_ack(struct sock *sk)
+{
+	const struct net_device_ops *ops;
+	struct sk_buff *skb;
+	struct net_device *dev;
+	struct inet_sock *inet;
+	struct tcp_sock *tp;
+	struct tcphdr *th;
+	struct rtable *rt;
+	struct iphdr *iph;
+	int len = 0;
+	int rc;
+	const struct inet_connection_sock *icsk = inet_csk(sk);
+
+	rt = (struct rtable *)__sk_dst_check(sk, 0);
+
+	if (rt == NULL || icsk->icsk_af_ops->send_check != tcp_v4_send_check ||
+	tcp_sk(sk)->rx_opt.tstamp_ok ||
+	icsk->icsk_ca_ops->flags & TCP_CONG_RTT_STAMP)
+		return 0;
+
+	skb = NULL;
+	skb = skb_dequeue(&sk->sk_ack_queue);
+
+	if (!skb)
+		return 0;
+
+	skb_set_owner_w(skb, sk);
+	skb->next = 0;
+	atomic_set(&skb->users, 1);
+	atomic_set(&(skb_shinfo(skb)->dataref), 1);
+	skb->csum = 0;
+
+	tp = tcp_sk(sk);
+	if (tcp_packets_in_flight(tp) == 0)
+		tcp_ca_event(sk, CA_EVENT_TX_START);
+
+	th	= tcp_hdr(skb);
+	th->seq	= tcp_acceptable_seq(sk);
+	th->ack_seq	= htonl(tp->rcv_nxt);
+	th->window	= htons(tcp_select_window(sk));
+	th->check	= 0;
+
+	len	= sizeof(struct tcphdr);
+	inet = inet_sk(sk);
+	th->check	= tcp_v4_check(len, inet->saddr, inet->daddr,
+					csum_partial(th,
+						      th->doff << 2,
+						      skb->csum));
+	tcp_event_ack_sent(sk, tcp_skb_pcount(skb));
+	TCP_INC_STATS(sock_net(sk), TCP_MIB_OUTSEGS);
+	iph = ip_hdr(skb);
+	iph->id = htons(inet_sk(sk)->id);
+	inet_sk(sk)->id += 1;
+	iph->check = 0;
+	iph->check = ip_fast_csum((unsigned char *)iph, iph->ihl);
+	rcu_read_lock_bh();
+	dev = skb->dev;
+	IP_UPD_PO_STATS(dev_net(dev), IPSTATS_MIB_OUT, skb->len);
+	ops = dev->netdev_ops;
+	rc = ops->ndo_start_xmit(skb, dev);
+	rcu_read_unlock_bh();
+	if (likely(rc <= 0))
+		return 1;
+	tcp_enter_cwr(sk, 1);
+	return 0;
+
+}
+#endif
+#endif
+
 /* This routine sends an ack and also updates the window. */
 void tcp_send_ack(struct sock *sk)
 {
@@ -2470,11 +2544,24 @@ void tcp_send_ack(struct sock *sk)
 	if (sk->sk_state == TCP_CLOSE)
 		return;
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_TCP_FAST_ACK
+	if (tcp_fast_ack(sk))
+		return;
+#endif
+	buff = NULL;
+#endif
 	/* We are not putting this on the write queue, so
 	 * tcp_transmit_skb() will set the ownership to this
 	 * sock.
 	 */
+#ifdef CONFIG_SYNO_QORIQ
+	if (buff == NULL)
+		buff = alloc_skb(MAX_TCP_HEADER, GFP_ATOMIC);
+#else
 	buff = alloc_skb(MAX_TCP_HEADER, GFP_ATOMIC);
+#endif
+
 	if (buff == NULL) {
 		inet_csk_schedule_ack(sk);
 		inet_csk(sk)->icsk_ack.ato = TCP_ATO_MIN;

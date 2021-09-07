@@ -26,6 +26,9 @@ file_ra_state_init(struct file_ra_state *ra, struct address_space *mapping)
 {
 	ra->ra_pages = mapping->backing_dev_info->ra_pages;
 	ra->prev_pos = -1;
+#ifdef CONFIG_SYNO_QORIQ
+	ra->delay_readahead = 0;
+#endif
 }
 EXPORT_SYMBOL_GPL(file_ra_state_init);
 

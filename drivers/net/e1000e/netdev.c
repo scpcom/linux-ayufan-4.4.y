@@ -76,6 +76,35 @@ char *e1000e_get_hw_dev_name(struct e1000_hw *hw)
 }
 #endif
 
+#ifdef MY_ABC_HERE
+void e1000e_syno_led_switch(int iEnable)
+{
+	struct net_device *dev = NULL;
+	struct e1000_adapter *adapter = NULL;
+	struct e1000_hw *hw = NULL;
+	u32 ledctlValue;
+
+	for_each_netdev(&init_net, dev) {
+		adapter = netdev_priv(dev);
+		hw = &adapter->hw;
+
+		if (hw->mac.type == e1000_82574) {
+
+			ledctlValue = er32(LEDCTL);
+
+			if (iEnable) {
+				ew32(LEDCTL, hw->mac.ledctl_default);
+			} else {
+				hw->mac.ledctl_default = ledctlValue;
+				ledctlValue |= 0x000F0F0F; //turn off the 3 leds
+				ew32(LEDCTL, ledctlValue);
+			}
+		}
+	}
+}
+EXPORT_SYMBOL(e1000e_syno_led_switch);
+#endif /*MY_ABC_HERE*/
+
 /**
  * e1000_desc_unused - calculate if we have unused descriptors
  **/
@@ -1931,6 +1960,14 @@ static void e1000_set_itr(struct e1000_adapter *adapter)
 		new_itr = 4000;
 		goto set_itr_now;
 	}
+
+	adapter->tx_itr = e1000_update_itr(adapter,
+				    adapter->tx_itr,
+				    adapter->total_tx_packets,
+				    adapter->total_tx_bytes);
+	/* conservative mode (itr 3) eliminates the lowest_latency setting */
+	if (adapter->itr_setting == 3 && adapter->tx_itr == lowest_latency)
+		adapter->tx_itr = low_latency;
 
 	adapter->rx_itr = e1000_update_itr(adapter,
 				    adapter->rx_itr,

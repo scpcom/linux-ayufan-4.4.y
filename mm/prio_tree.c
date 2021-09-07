@@ -14,6 +14,11 @@
 #include <linux/mm.h>
 #include <linux/prio_tree.h>
 
+#ifdef MY_ABC_HERE
+#include <linux/fcntl.h>
+#include <linux/fs.h>
+#endif
+
 /*
  * See lib/prio_tree.c for details on the general radix priority search tree
  * code.
@@ -180,7 +185,16 @@ struct vm_area_struct *vma_prio_tree_next(struct vm_area_struct *vma,
 		} else
 			return NULL;
 	}
-
+#ifdef MY_ABC_HERE
+	if (vma->vm_file) {
+			if (!blSynostate(O_UNMOUNT_OK, vma->vm_file)) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+				printk("%s: force unmount hit\n", __FUNCTION__);
+#endif
+				return NULL;
+			}
+	}
+#endif
 	if (vma->shared.vm_set.parent) {
 		if (vma->shared.vm_set.head) {
 			next = vma->shared.vm_set.head;

@@ -20,9 +20,9 @@
 #include <linux/mtd/compatmac.h>
 
 #include <asm/uaccess.h>
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_ALLOC
 #include <linux/semaphore.h>
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_MTD_ALLOC */
 
 
 /*
@@ -138,7 +138,7 @@ static int mtd_close(struct inode *inode, struct file *file)
 /* FIXME: This _really_ needs to die. In 2.5, we should lock the
    userspace buffer down and use it directly with readv/writev.
 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_ALLOC
 #define MAX_KMALLOC_SIZE 0x10000
 #else
 #define MAX_KMALLOC_SIZE 0x20000
@@ -237,7 +237,7 @@ static ssize_t mtd_read(struct file *file, char __user *buf, size_t count,loff_t
 	return total_retlen;
 } /* mtd_read */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_ALLOC
 #define MYDEBUG
 #ifdef MYDEBUG
 #define DBGMSG(x...) printk(KERN_NOTICE x);
@@ -319,14 +319,14 @@ End:
     up(&write_kbuf_sem);
     return retval;
 } /* sys_SYNOMTDAlloc() */
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_MTD_ALLOC */
 
 
 static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count,loff_t *ppos)
 {
 	struct mtd_file_info *mfi = file->private_data;
 	struct mtd_info *mtd = mfi->mtd;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_MTD_ALLOC
 	char *kbuf;
 #endif
 	size_t retlen;
@@ -345,7 +345,7 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 	if (!count)
 		return 0;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_ALLOC
 	if (!write_kbuf_len) {
 		ret = sys_SYNOMTDAlloc(TRUE);
 		if ( ret != 0 )
@@ -372,9 +372,9 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 			len = count;
 
 		if (copy_from_user(kbuf, buf, len)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_ALLOC
 			up(&write_kbuf_sem);
-#else /* !MY_ABC_HERE */
+#else /* !SYNO_MTD_ALLOC */
 			kfree(kbuf);
 #endif
 			return -EFAULT;
@@ -416,18 +416,18 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 			buf += retlen;
 		}
 		else {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_ALLOC
 			up(&write_kbuf_sem);
-#else /* !MY_ABC_HERE */
+#else /* !SYNO_MTD_ALLOC */
 			kfree(kbuf);
 #endif
 			return ret;
 		}
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_ALLOC
 	up(&write_kbuf_sem);
-#else /* !MY_ABC_HERE */
+#else /* !SYNO_MTD_ALLOC */
 	kfree(kbuf);
 #endif
 	return total_retlen;
@@ -1117,12 +1117,12 @@ static int __init init_mtdchar(void)
 	}
 
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_ALLOC
 	/* XXX
 	 * Allocate and buffer and init spinlock.
 	 */
 	sema_init(&write_kbuf_sem, 1);
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_MTD_ALLOC */
 
 	return status;
 }

@@ -254,6 +254,14 @@ void fsnotify_clear_marks_by_inode(struct inode *inode)
 	struct hlist_node *pos, *n;
 	LIST_HEAD(free_list);
 
+#ifdef MY_ABC_HERE
+	if (IS_UMOUNTED_FILE(inode)) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+		printk("%s(%d) force umount hit.\n", __func__, __LINE__);
+#endif
+		return;
+	}
+#endif
 	spin_lock(&inode->i_lock);
 	hlist_for_each_entry_safe(entry, pos, n, &inode->i_fsnotify_mark_entries, i_list) {
 		list_add(&entry->free_i_list, &free_list);

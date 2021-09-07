@@ -536,7 +536,15 @@ static void balance_dirty_pages(struct address_space *mapping,
 		 * threshold otherwise wait until the disk writes catch
 		 * up.
 		 */
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
+		if (bdi_nr_reclaimable) {
+#else
 		if (bdi_nr_reclaimable > bdi_thresh) {
+#endif
+#else
+		if (bdi_nr_reclaimable > bdi_thresh) {
+#endif
 			writeback_inodes_wbc(&wbc);
 			pages_written += write_chunk - wbc.nr_to_write;
 			get_dirty_limits(&background_thresh, &dirty_thresh,

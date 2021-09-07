@@ -16,6 +16,7 @@
 /* Extended attribute names */
 #define SYNO_ACL_XATTR_ACCESS	"system.syno_acl_self"
 #define SYNO_ACL_XATTR_INHERIT	"system.syno_acl_inherit"
+#define SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY	"system.syno_acl_pseudo_inherit_only"
 
 /* Supported ACL a_version fields */
 #define SYNO_ACL_XATTR_VERSION		0x0001
@@ -112,6 +113,11 @@
 enum {
 	SYNO_KERNEL_IS_FS_SUPPORT = 1, //File System
 	SYNO_KERNEL_IS_FILE_SUPPORT,  //File or Dir
+};
+
+enum {
+	SYNO_ACL_INHERITED = 1, //Includes self-defined and inherited ACL.
+	SYNO_ACL_PSEUDO_INHERIT_ONLY,  //Includes only inherited ACE, even entry has no inherited attribute.
 };
 
 typedef struct {

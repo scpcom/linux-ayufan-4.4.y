@@ -216,6 +216,11 @@ ERR:
 EXPORT_SYMBOL(syno_get_dev_vendor_mac);
 #endif
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_NET_GIANFAR_FP
+static void dev_do_clear_fastroute(struct net_device *dev);
+#endif
+#endif
 /*
  *	The list of packet types we will receive (as opposed to discard)
  *	and the routines to invoke.
@@ -329,6 +334,21 @@ static RAW_NOTIFIER_HEAD(netdev_chain);
 DEFINE_PER_CPU(struct softnet_data, softnet_data);
 EXPORT_PER_CPU_SYMBOL(softnet_data);
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_NET_GIANFAR_FP
+int netdev_fastroute;
+EXPORT_SYMBOL(netdev_fastroute);
+
+int netdev_fastroute_obstacles;
+EXPORT_SYMBOL(netdev_fastroute_obstacles);
+#endif
+
+#ifdef CONFIG_GFAR_SW_PKT_STEERING
+int rcv_pkt_steering;
+EXPORT_SYMBOL(rcv_pkt_steering);
+#endif
+#endif
+
 #ifdef CONFIG_LOCKDEP
 /*
  * register_netdevice() inits txq->_xmit_lock and sets lockdep class
@@ -413,6 +433,40 @@ static inline void netdev_set_addr_lockdep_class(struct net_device *dev)
 }
 #endif
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_NET_GIANFAR_FP
+static void dev_do_clear_fastroute(struct net_device *dev)
+{
+	if (dev->netdev_ops->ndo_accept_fastpath) {
+		int i;
+
+		for (i = 0; i <= NETDEV_FASTROUTE_HMASK; i++) {
+			struct dst_entry *dst;
+
+			write_lock_irq(&dev->fastpath_lock);
+			dst = dev->fastpath[i];
+			dev->fastpath[i] = NULL;
+			write_unlock_irq(&dev->fastpath_lock);
+
+			dst_release(dst);
+		}
+	}
+}
+
+void dev_clear_fastroute(struct net_device *dev)
+{
+	if (dev) {
+		dev_do_clear_fastroute(dev);
+	} else {
+		read_lock(&dev_base_lock);
+		for_each_netdev(dev_net(dev), dev)
+			dev_do_clear_fastroute(dev);
+		read_unlock(&dev_base_lock);
+	}
+}
+#endif
+#endif
+
 /*******************************************************************************
 
 		Protocol management and registration routines
@@ -453,6 +507,14 @@ void dev_add_pack(struct packet_type *pt)
 	int hash;
 
 	spin_lock_bh(&ptype_lock);
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_NET_GIANFAR_FP
+	if (pt->af_packet_priv) {
+		netdev_fastroute_obstacles++;
+		dev_clear_fastroute(pt->dev);
+	}
+#endif
+#endif
 	if (pt->type == htons(ETH_P_ALL))
 		list_add_rcu(&pt->list, &ptype_all);
 	else {
@@ -490,6 +552,12 @@ void __dev_remove_pack(struct packet_type *pt)
 
 	list_for_each_entry(pt1, head, list) {
 		if (pt == pt1) {
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_NET_GIANFAR_FP
+			if (pt->af_packet_priv)
+				netdev_fastroute_obstacles--;
+#endif
+#endif
 			list_del_rcu(&pt->list);
 			goto out;
 		}
@@ -1265,6 +1333,11 @@ int dev_close(struct net_device *dev)
 
 	dev->flags &= ~IFF_UP;
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_NET_GIANFAR_FP
+	dev_clear_fastroute(dev);
+#endif
+#endif
 	/*
 	 * Tell people we are down
 	 */
@@ -2093,6 +2166,12 @@ int netif_rx(struct sk_buff *skb)
 	queue = &__get_cpu_var(softnet_data);
 
 	__get_cpu_var(netdev_rx_stat).total++;
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_NET_GIANFAR_FP
+	if (skb->pkt_type == PACKET_FASTROUTE)
+		return dev_queue_xmit(skb);
+#endif
+#endif
 	if (queue->input_pkt_queue.qlen <= netdev_max_backlog) {
 		if (queue->input_pkt_queue.qlen) {
 enqueue:
@@ -3475,6 +3554,15 @@ static int __dev_set_promiscuity(struct net_device *dev, int inc)
 		}
 	}
 	if (dev->flags != old_flags) {
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_NET_GIANFAR_FP
+		if (dev->flags & IFF_PROMISC) {
+			netdev_fastroute_obstacles++;
+			dev_clear_fastroute(dev);
+		} else
+			netdev_fastroute_obstacles--;
+#endif
+#endif
 		printk(KERN_INFO "device %s %s promiscuous mode\n",
 		       dev->name, (dev->flags & IFF_PROMISC) ? "entered" :
 							       "left");
@@ -4863,6 +4951,11 @@ int register_netdevice(struct net_device *dev)
 	netdev_set_addr_lockdep_class(dev);
 	netdev_init_queue_locks(dev);
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_NET_GIANFAR_FP
+	dev->fastpath_lock = __RW_LOCK_UNLOCKED();
+#endif
+#endif
 	dev->iflink = -1;
 
 	/* Init, if this function is available */

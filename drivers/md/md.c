@@ -51,10 +51,10 @@
 #include "bitmap.h"
 
 #ifdef MY_ABC_HERE
-extern void
-RaidRemapModeSet(struct block_device *, unsigned char);
+#undef MODULE
+extern int *SYNOMdpMajor;
+extern struct list_head SYNOAllDetectedDevices;
 #endif
-
 #ifdef MY_ABC_HERE
 extern int (*funcSYNORaidDiskUnplug)(char *szDiskName);
 EXPORT_SYMBOL(SYNORaidRdevUnplug);
@@ -227,6 +227,7 @@ static int md_make_request(struct request_queue *q, struct bio *bio)
 {
 	mddev_t *mddev = q->queuedata;
 	int rv;
+	
 	if (mddev == NULL || mddev->pers == NULL) {
 		bio_io_error(bio);
 		return 0;
@@ -247,6 +248,7 @@ static int md_make_request(struct request_queue *q, struct bio *bio)
 	}
 	atomic_inc(&mddev->active_io);
 	rcu_read_unlock();
+
 	rv = mddev->pers->make_request(q, bio);
 	if (atomic_dec_and_test(&mddev->active_io) && mddev->suspended)
 		wake_up(&mddev->sb_wait);
@@ -654,6 +656,36 @@ int sync_page_io(struct block_device *bdev, sector_t sector, int size,
 }
 EXPORT_SYMBOL_GPL(sync_page_io);
 
+#ifdef MY_ABC_HERE
+static int sync_sb_page_io(struct block_device *bdev, sector_t sector, int size,
+		   struct page *page, int rw)
+{
+	struct bio *bio = bio_alloc(GFP_NOIO, 1);
+	struct completion event;
+	int ret;
+
+	rw |= (1 << BIO_RW_SYNCIO) | (1 << BIO_RW_UNPLUG);
+
+	bio->bi_bdev = bdev;
+	bio->bi_sector = sector;
+	bio_add_page(bio, page, size, 0);
+	init_completion(&event);
+	bio->bi_private = &event;
+	bio->bi_end_io = bi_complete;
+	submit_bio(rw, bio);
+	wait_for_completion(&event);
+
+	ret = test_bit(BIO_UPTODATE, &bio->bi_flags);
+	if (ret && bio_flagged(bio, BIO_AUTO_REMAP)) {
+		clear_bit(BIO_AUTO_REMAP, &bio->bi_flags);
+		ret = 0;
+	}
+
+	bio_put(bio);
+	return ret;
+}
+#endif
+
 static int read_disk_sb(mdk_rdev_t * rdev, int size)
 {
 	char b[BDEVNAME_SIZE];
@@ -668,8 +700,13 @@ static int read_disk_sb(mdk_rdev_t * rdev, int size)
 		return 0;
 
 
+#ifdef MY_ABC_HERE
+	if (!sync_sb_page_io(rdev->bdev, rdev->sb_start, size, rdev->sb_page, READ))
+		goto fail;
+#else
 	if (!sync_page_io(rdev->bdev, rdev->sb_start, size, rdev->sb_page, READ))
 		goto fail;
+#endif
 
 #if defined(MY_ABC_HERE) || defined(SYNO_RAID_USE_BE_SB)
 	sb = (mdp_super_t*)page_address(rdev->sb_page);
@@ -3868,19 +3905,6 @@ __ATTR(reshape_position, S_IRUGO|S_IWUSR, reshape_position_show,
        reshape_position_store);
 
 #ifdef MY_ABC_HERE
-static inline void
-RaidMemberAutoRemapSet(mddev_t *mddev)
-{
-	mdk_rdev_t *rdev, *tmp;
-	char b[BDEVNAME_SIZE];
-
-	/* enum all rdev and set the bdev */
-	rdev_for_each(rdev, tmp, mddev) {
-		bdevname(rdev->bdev,b);
-		RaidRemapModeSet(rdev->bdev, mddev->auto_remap);
-		printk("md: %s: set %s to auto_remap [%d]\n", mdname(mddev), b, mddev->auto_remap);
-	}
-}
 static ssize_t
 auto_remap_show(mddev_t *mddev, char *page)
 {
@@ -3909,6 +3933,9 @@ auto_remap_store(mddev_t *mddev, const char *page, size_t len)
 		printk("md: %s: auto_remap, error input\n", mdname(mddev));
 		goto END;
 	}
+#ifdef MY_ABC_HERE
+	mddev->force_auto_remap = mddev->auto_remap;
+#endif
 
 	RaidMemberAutoRemapSet(mddev);
 END:
@@ -4220,6 +4247,73 @@ static void md_safemode_timeout(unsigned long data)
 }
 
 #ifdef MY_ABC_HERE
+void SYNOLvInfoSet(struct block_device *bdev, void *private, const char *name)
+{
+	mddev_t *mddev = NULL;
+	char *szDiskName = NULL;
+
+	if (!bdev || !private || !name){
+		printk("%s:%s(%d) error params\n", __FILE__, __FUNCTION__, __LINE__);
+		return;
+	}
+
+        szDiskName = bdev->bd_disk->disk_name;
+        if (NULL == strstr(szDiskName, "md")) {
+		printk("%s:%s(%d) This's not md device:[%s]\n",
+			 __FILE__, __FUNCTION__, __LINE__, szDiskName);
+                return;
+        }
+	
+	mddev = bdev->bd_disk->private_data;
+	if (mddev) {
+		mddev->syno_private = private;
+	}
+
+	snprintf(mddev->lv_name, 16, "%s", name);
+
+}
+EXPORT_SYMBOL(SYNOLvInfoSet);
+
+static int SynoRaidAutoRemapAdjust(mddev_t *mddev, int specify_setting)
+{
+	int old_setting = -1;
+
+	if (NULL == mddev || NULL == mddev->pers){
+		goto END;
+	}
+
+	old_setting = mddev->auto_remap;
+
+	if (0 == specify_setting || 1 == specify_setting) {
+		// if caller specify auto_remap setting, then use it.
+		mddev->auto_remap = specify_setting;
+	}else{
+		// if caller didn't specify setting, then set it by ismaxdegrade
+		if (mddev->pers->ismaxdegrade) {
+			if (mddev->pers->ismaxdegrade(mddev)){
+				mddev->auto_remap = 1;
+			}else{
+				mddev->auto_remap = 0;
+			}
+		}
+	}
+
+	if (0 == mddev->auto_remap) {
+		//if raid doesn't need auto-remap, we use user's setting
+		mddev->auto_remap = mddev->force_auto_remap;
+	}
+
+	if (old_setting != mddev->auto_remap) {
+		RaidMemberAutoRemapSet(mddev);
+	}
+
+END:
+	// return old setting, we need use it to restore auto remap setting when needed.
+	return old_setting;
+}
+#endif
+
+#ifdef MY_ABC_HERE
 static int start_dirty_degraded = 1;
 #else
 static int start_dirty_degraded;
@@ -4240,8 +4334,7 @@ static int do_md_run(mddev_t * mddev)
 		return -EBUSY;
 
 #ifdef MY_ABC_HERE
-	mddev->auto_remap = 0;
-	RaidMemberAutoRemapSet(mddev);
+	mddev->force_auto_remap = 0;
 #endif
 
 	/*
@@ -6576,6 +6669,9 @@ void md_do_sync(mddev_t *mddev)
 	int skipped = 0;
 	mdk_rdev_t *rdev;
 	char *desc;
+#ifdef MY_ABC_HERE
+	int old_auto_remap_setting = -1;
+#endif
 
 #ifdef MY_ABC_HERE
 	set_user_nice(current, 10);
@@ -6586,6 +6682,10 @@ void md_do_sync(mddev_t *mddev)
 		return;
 	if (mddev->ro) /* never try to sync a read-only array */
 		return;
+
+#ifdef MY_ABC_HERE
+	old_auto_remap_setting = SynoRaidAutoRemapAdjust(mddev, -1);
+#endif
 
 	if (test_bit(MD_RECOVERY_SYNC, &mddev->recovery)) {
 		if (test_bit(MD_RECOVERY_CHECK, &mddev->recovery))
@@ -6876,6 +6976,10 @@ void md_do_sync(mddev_t *mddev)
 	wake_up(&resync_wait);
 	set_bit(MD_RECOVERY_DONE, &mddev->recovery);
 	md_wakeup_thread(mddev->thread);
+#ifdef MY_ABC_HERE
+	// restore old setting
+	SynoRaidAutoRemapAdjust(mddev, old_auto_remap_setting);
+#endif
 	return;
 
  interrupted:
@@ -7243,6 +7347,9 @@ static int __init md_init(void)
 		unregister_blkdev(MD_MAJOR, "md");
 		return -1;
 	}
+#ifdef MY_ABC_HERE
+	SYNOMdpMajor = &mdp_major;
+#endif
 	blk_register_region(MKDEV(MD_MAJOR, 0), 1UL<<MINORBITS, THIS_MODULE,
 			    md_probe, NULL, NULL);
 	blk_register_region(MKDEV(mdp_major, 0), 1UL<<MINORBITS, THIS_MODULE,
@@ -7280,7 +7387,11 @@ void md_autodetect_dev(dev_t dev)
 	node_detected_dev = kzalloc(sizeof(*node_detected_dev), GFP_KERNEL);
 	if (node_detected_dev) {
 		node_detected_dev->dev = dev;
+#ifdef MY_ABC_HERE
+		list_add_tail(&node_detected_dev->list, &SYNOAllDetectedDevices);
+#else
 		list_add_tail(&node_detected_dev->list, &all_detected_devices);
+#endif
 	} else {
 		printk(KERN_CRIT "md: md_autodetect_dev: kzalloc failed"
 			", skipping dev(%d,%d)\n", MAJOR(dev), MINOR(dev));
@@ -7341,10 +7452,17 @@ static void autostart_arrays(int part)
 
 	printk(KERN_INFO "md: Autodetecting RAID arrays.\n");
 
+#ifdef MY_ABC_HERE
+	while (!list_empty(&SYNOAllDetectedDevices) && i_scanned < INT_MAX) {
+		i_scanned++;
+		node_detected_dev = list_entry(SYNOAllDetectedDevices.next,
+					struct detected_devices_node, list);
+#else
 	while (!list_empty(&all_detected_devices) && i_scanned < INT_MAX) {
 		i_scanned++;
 		node_detected_dev = list_entry(all_detected_devices.next,
 					struct detected_devices_node, list);
+#endif
 		list_del(&node_detected_dev->list);
 		dev = node_detected_dev->dev;
 		kfree(node_detected_dev);
@@ -7475,6 +7593,8 @@ static void syno_md_error(mddev_t *mddev, mdk_rdev_t *rdev)
 	md_wakeup_thread(mddev->thread);
 	md_new_event_inintr(mddev);
 }
+
+EXPORT_SYMBOL(syno_md_error);
 #endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
 
 #ifdef MY_ABC_HERE
@@ -7835,6 +7955,12 @@ SynoUpdateSBTask(struct work_struct *work)
 END:
 	kfree(update_sb);
 }
+
+EXPORT_SYMBOL(SynoUpdateSBTask);
+#endif
+
+#ifdef MY_ABC_HERE
+#define MODULE
 #endif
 
 EXPORT_SYMBOL(register_md_personality);

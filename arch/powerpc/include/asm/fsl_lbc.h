@@ -27,6 +27,11 @@
 #include <linux/types.h>
 #include <linux/io.h>
 
+#ifdef CONFIG_SYNO_QORIQ
+#include <linux/of_platform.h>
+#include <linux/interrupt.h>
+#endif
+
 struct fsl_lbc_bank {
 	__be32 br;             /**< Base Register  */
 #define BR_BA           0xFFFF8000
@@ -125,8 +130,20 @@ struct fsl_lbc_regs {
 #define LTESR_ATMW 0x00800000
 #define LTESR_ATMR 0x00400000
 #define LTESR_CS   0x00080000
+#ifdef CONFIG_SYNO_QORIQ
+#define LTESR_UPM  0x00000002
+#endif
 #define LTESR_CC   0x00000001
 #define LTESR_NAND_MASK (LTESR_FCT | LTESR_PAR | LTESR_CC)
+#ifdef CONFIG_SYNO_QORIQ
+#define LTESR_MASK      (LTESR_BM | LTESR_FCT | LTESR_PAR | LTESR_WP \
+			 | LTESR_ATMW | LTESR_ATMR | LTESR_CS | LTESR_UPM \
+			 | LTESR_CC)
+#define LTESR_CLEAR	0xFFFFFFFF
+#define LTESR_STATUS	LTESR_MASK
+#define LTEIR_ENABLE	LTESR_MASK
+#define LTEDR_ENABLE	0x00000000
+#endif
 	__be32 ltedr;           /**< Transfer Error Disable Register */
 	__be32 lteir;           /**< Transfer Error Interrupt Register */
 	__be32 lteatr;          /**< Transfer Error Attributes Register */
@@ -235,6 +252,9 @@ struct fsl_upm {
 	int width;
 };
 
+#ifdef CONFIG_SYNO_QORIQ
+extern unsigned int convert_lbc_address(phys_addr_t addr_base);
+#endif
 extern int fsl_lbc_find(phys_addr_t addr_base);
 extern int fsl_upm_find(phys_addr_t addr_base, struct fsl_upm *upm);
 
@@ -265,7 +285,27 @@ static inline void fsl_upm_end_pattern(struct fsl_upm *upm)
 		cpu_relax();
 }
 
+#ifdef CONFIG_SYNO_QORIQ
+/* overview of the fsl lbc controller */
+
+struct fsl_lbc_ctrl {
+	/* device info */
+	struct device			*dev;
+	struct fsl_lbc_regs __iomem	*regs;
+	int				irq;
+	wait_queue_head_t		irq_wait;
+	spinlock_t			lock;
+	void				*nand;
+
+	/* status read from LTESR by irq handler */
+	unsigned int			irq_status;
+};
+#endif
+
 extern int fsl_upm_run_pattern(struct fsl_upm *upm, void __iomem *io_base,
 			       u32 mar);
+#ifdef CONFIG_SYNO_QORIQ
+extern struct fsl_lbc_ctrl *fsl_lbc_ctrl_dev;
+#endif
 
 #endif /* __ASM_FSL_LBC_H */

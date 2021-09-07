@@ -144,6 +144,13 @@ ioremap_flags(phys_addr_t addr, unsigned long size, unsigned long flags)
 	/* we don't want to let _PAGE_USER and _PAGE_EXEC leak out */
 	flags &= ~(_PAGE_USER | _PAGE_EXEC);
 
+#ifdef CONFIG_SYNO_QORIQ
+#if defined(CONFIG_FSL_BOOKE) && defined(CONFIG_PTE_64BIT)
+	/* supervisor read permission has just been cleared, add back */
+	flags |= _PAGE_BAP_SR;
+#endif
+#endif
+
 	return __ioremap_caller(addr, size, flags, __builtin_return_address(0));
 }
 EXPORT_SYMBOL(ioremap_flags);

@@ -138,11 +138,26 @@ invalidate_complete_page(struct address_space *mapping, struct page *page)
 
 int truncate_inode_page(struct address_space *mapping, struct page *page)
 {
+#ifdef MY_ABC_HERE
+#define MAX_FORCE_UNMAP_RETRY 100000
+	int cRetry = 0;
+
+	while (page_mapped(page) && cRetry < MAX_FORCE_UNMAP_RETRY) {
+		if (0 != cRetry) {
+			schedule_timeout_uninterruptible(1 * HZ);
+		}
+		unmap_mapping_range(mapping,
+				   (loff_t)page->index << PAGE_CACHE_SHIFT,
+				   PAGE_CACHE_SIZE, 0);
+		cRetry++;
+	}
+#else
 	if (page_mapped(page)) {
 		unmap_mapping_range(mapping,
 				   (loff_t)page->index << PAGE_CACHE_SHIFT,
 				   PAGE_CACHE_SIZE, 0);
 	}
+#endif
 	return truncate_complete_page(mapping, page);
 }
 

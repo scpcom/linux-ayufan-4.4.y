@@ -116,6 +116,13 @@ KBUILD_CFLAGS += $(call cc-option,-funit-at-a-time)
 # often slow when they are implemented at all
 KBUILD_CFLAGS		+= -mno-string
 
+ifeq ($(CONFIG_SYNO_QORIQ),y)
+ifeq ($(CONFIG_DEBUG_CW),y)
+CFLAGS += -g2 -gdwarf-2
+AFLAGS_KERNEL += -Wa,-gdwarf2
+endif
+endif
+
 ifeq ($(CONFIG_6xx),y)
 KBUILD_CFLAGS		+= -mcpu=powerpc
 endif

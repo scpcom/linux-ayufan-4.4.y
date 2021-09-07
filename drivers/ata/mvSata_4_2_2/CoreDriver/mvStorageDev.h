@@ -156,7 +156,7 @@ extern "C" {
 #define MV_SATA_GSCR_FEATURES_REG_NUM           64
 #define MV_SATA_GSCR_FEATURES_ENABLE_REG_NUM    96
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 #define MV_SATA_GSCR_3726_GPIO                  130
 #endif
 

@@ -63,6 +63,23 @@ extern char gszDiskIdxMap[16];
 extern char giDiskSeqReverse[8];
 #endif
 
+#ifdef MY_ABC_HERE
+extern int gSynoHasDynModule;
+#endif
+
+#ifdef MY_ABC_HERE
+extern unsigned char grgbLanMac[4][16];
+#endif
+
+#ifdef MY_ABC_HERE
+extern char gszSerialNum[12];
+extern char gszCustomSerialNum[32];
+#endif
+
+#ifdef MY_ABC_HERE
+extern long g_sata_led_special;
+#endif
+
 #define DBG(fmt...)
 
 extern void bootx_init(unsigned long r4, unsigned long phys);
@@ -199,6 +216,102 @@ int __init ppc_setup_l2cr(char *str)
 	return 1;
 }
 __setup("l2cr=", ppc_setup_l2cr);
+
+#ifdef MY_ABC_HERE
+static int __init early_is_dyn_module(char *p)
+{
+	int iLen = 0;
+
+	gSynoHasDynModule = 0;
+
+	if ((NULL == p) || (0 == (iLen = strlen(p)))) {
+		goto END;
+	}
+
+	if ( 0 == strcmp (p, "y")) {
+		gSynoHasDynModule = 1;
+		printk("Synology Dynamic Module support.\n");
+	}
+
+END:
+	return 1;
+}
+__setup("syno_dyn_module=", early_is_dyn_module);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_sataled_special(char *p)
+{
+	g_sata_led_special = simple_strtol(p, NULL, 10);
+
+	if ( g_sata_led_special >= 0 ) {
+		printk("Special Sata LEDs.\n");
+	}
+
+	return 1;
+}
+__setup("SataLedSpecial=", early_sataled_special);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_mac1(char *p)
+{
+	snprintf(grgbLanMac[0], sizeof(grgbLanMac[0]), "%s", p);
+
+	printk("Mac1: %s\n", grgbLanMac[0]);
+
+	return 1;
+}
+__setup("mac1=", early_mac1);
+
+static int __init early_mac2(char *p)
+{
+	snprintf(grgbLanMac[1], sizeof(grgbLanMac[1]), "%s", p);
+
+	printk("Mac2: %s\n", grgbLanMac[1]);
+
+	return 1;
+}
+__setup("mac2=", early_mac2);
+
+static int __init early_mac3(char *p)
+{
+	snprintf(grgbLanMac[2], sizeof(grgbLanMac[2]), "%s", p);
+
+	printk("Mac3: %s\n", grgbLanMac[2]);
+
+	return 1;
+}
+__setup("mac3=", early_mac3);
+
+static int __init early_mac4(char *p)
+{
+	snprintf(grgbLanMac[3], sizeof(grgbLanMac[3]), "%s", p);
+
+	printk("Mac4: %s\n", grgbLanMac[3]);
+
+	return 1;
+}
+__setup("mac4=", early_mac4);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_sn(char *p)
+{
+        snprintf(gszSerialNum, sizeof(gszSerialNum), "%s", p);
+        printk("Serial Number: %s\n", gszSerialNum);
+        return 1;
+}
+__setup("sn=", early_sn);
+
+static int __init early_custom_sn(char *p)
+{
+        snprintf(gszCustomSerialNum, sizeof(gszCustomSerialNum), "%s", p);
+        printk("Custom Serial Number: %s\n", gszCustomSerialNum);
+        return 1;
+}
+__setup("custom_sn=", early_custom_sn);
+#endif
 
 #ifdef MY_ABC_HERE
 static int __init early_hw_version(char *p)
@@ -456,3 +569,11 @@ void __init setup_arch(char **cmdline_p)
 	mmu_context_init();
 
 }
+
+#ifdef CONFIG_SYNO_QORIQ
+void cpu_die(void)
+{
+	if (ppc_md.cpu_die)
+		ppc_md.cpu_die();
+}
+#endif

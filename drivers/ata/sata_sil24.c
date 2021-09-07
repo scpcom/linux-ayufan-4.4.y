@@ -358,6 +358,10 @@ static int sil24_pci_device_resume(struct pci_dev *pdev);
 static int sil24_port_resume(struct ata_port *ap);
 #endif
 
+#ifdef MY_ABC_HERE
+static inline void sil24_host_intr(struct ata_port *ap);
+#endif
+
 static const struct pci_device_id sil24_pci_tbl[] = {
 	{ PCI_VDEVICE(CMD, 0x3124), BID_SIL3124 },
 	{ PCI_VDEVICE(INTEL, 0x3124), BID_SIL3124 },
@@ -381,10 +385,13 @@ static struct pci_driver sil24_pci_driver = {
 #endif
 };
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 static struct device_attribute *sil24_shost_attrs[] = {
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_port_thaw,
+#endif
 	NULL
 };
 #endif
@@ -394,7 +401,7 @@ static struct scsi_host_template sil24_sht = {
 	.can_queue		= SIL24_MAX_CMDS,
 	.sg_tablesize		= SIL24_MAX_SGE,
 	.dma_boundary		= ATA_DMA_BOUNDARY,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 	.shost_attrs 		= sil24_shost_attrs,
 #endif
 };
@@ -425,6 +432,9 @@ static struct ata_port_operations sil24_ops = {
 	.port_start		= sil24_port_start,
 #ifdef CONFIG_PM
 	.port_resume		= sil24_port_resume,
+#endif
+#ifdef MY_ABC_HERE
+	.syno_force_intr	= sil24_host_intr,
 #endif
 };
 
@@ -687,6 +697,15 @@ retry:
 	ata_tf_init(link->device, &tf);	/* doesn't really matter */
 	rc = sil24_exec_polled_cmd(ap, pmp, &tf, 0, PRB_CTRL_SRST,
 				   timeout_msec);
+#ifdef MY_ABC_HERE
+	if (0 < ap->iFakeError) {
+		ata_link_printk(link, KERN_ERR, "generate fake softreset error, Fake count %d\n", ap->iFakeError);
+		if (SYNO_ERROR_MAX > ap->iFakeError) {
+			--(ap->iFakeError);
+		}
+		rc = -EBUSY;
+	}
+#endif
 	if (rc == -EBUSY) {
 		reason = "timeout";
 		goto err;
@@ -717,6 +736,10 @@ retry:
 
  err:
 	ata_link_printk(link, KERN_ERR, "softreset failed (%s)\n", reason);
+#ifdef MY_ABC_HERE
+	ata_link_printk(link, KERN_ERR, "softreset failed, set srst fail flag\n");
+	link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;
+#endif
 	return -EIO;
 }
 
@@ -868,7 +891,7 @@ static int sil24_qc_defer(struct ata_queued_cmd *qc)
 				return ATA_DEFER_PORT;
 			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
 		} else
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 		{
 			if (!ap->nr_active_links) {
 				/* Since we are here now, just preempt */
@@ -1001,14 +1024,6 @@ static int sil24_pmp_hardreset(struct ata_link *link, unsigned int *class,
 		return rc;
 	}
 
-#ifdef MY_ABC_HERE
-	/* test if we need reset it again */
-	if(iNeedResetAgainFor15G(link)) {
-		DBGMESG("ata port %d has ALREADY_APPLY_15G and not 1.5G speed, need to reset it again\n",
-				link->ap->print_id);
-		sata_std_hardreset(link, class, deadline);
-	}
-#endif
 	return sata_std_hardreset(link, class, deadline);
 }
 
@@ -1061,7 +1076,19 @@ static void sil24_error_intr(struct ata_port *ap)
 		sata_async_notification(ap);
 	}
 
+#ifdef MY_ABC_HERE
+	if ((irq_stat & (PORT_IRQ_PHYRDY_CHG | PORT_IRQ_DEV_XCHG)) ||
+		(ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
+		if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR) {
+			ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_INTR;
+			DBGMESG("ata%u: clear ATA_SYNO_FLAG_FORCE_INTR\n", ap->print_id);
+		} else {
+			ap->iDetectStat = 1;
+			DBGMESG("ata%u: set detect stat check\n", ap->print_id);
+		}
+#else
 	if (irq_stat & (PORT_IRQ_PHYRDY_CHG | PORT_IRQ_DEV_XCHG)) {
+#endif
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
@@ -1183,7 +1210,11 @@ static inline void sil24_host_intr(struct ata_port *ap)
 
 	slot_stat = readl(port + PORT_SLOT_STAT);
 
+#ifdef MY_ABC_HERE
+	if (unlikely(slot_stat & HOST_SSTAT_ATTN) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
+#else
 	if (unlikely(slot_stat & HOST_SSTAT_ATTN)) {
+#endif
 		sil24_error_intr(ap);
 		return;
 	}

@@ -771,6 +771,12 @@ int dm_table_add_target(struct dm_table *t, const char *type,
 
 	t->highs[t->num_targets++] = tgt->begin + tgt->len - 1;
 
+#ifdef MY_ABC_HERE
+	if (tgt->type->lvinfoset){
+		tgt->type->lvinfoset(tgt);
+	}
+#endif
+
 	return 0;
 
  bad:

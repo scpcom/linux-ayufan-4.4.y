@@ -1971,6 +1971,12 @@ static void ip_handle_martian_source(struct net_device *dev,
 #endif
 }
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_NET_GIANFAR_FP
+extern int netdev_fastroute;
+extern int netdev_fastroute_obstacles;
+#endif
+#endif
 static int __mkroute_input(struct sk_buff *skb,
 			   struct fib_result *res,
 			   struct in_device *in_dev,
@@ -2059,6 +2065,29 @@ static int __mkroute_input(struct sk_buff *skb,
 
 	rth->rt_flags = flags;
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_NET_GIANFAR_FP
+#ifdef FASTPATH_DEBUG
+	printk(KERN_INFO" %s: netdev_fastroute = %x, flags = %x, rth = %p",
+	       __func__, netdev_fastroute, flags, rth);
+#endif
+	if (netdev_fastroute && !(flags&(RTCF_NAT|RTCF_MASQ|RTCF_DOREDIRECT))) {
+		struct net_device *odev = rth->u.dst.dev;
+		struct net_device *dev = in_dev->dev;
+
+		if (odev != dev &&
+		    dev->netdev_ops->ndo_accept_fastpath &&
+		    odev->mtu >= dev->mtu &&
+		    dev->netdev_ops->ndo_accept_fastpath(dev, &rth->u.dst)
+		    == 0) {
+			rth->rt_flags |= RTCF_FAST;
+#ifdef FASTPATH_DEBUG
+			printk(KERN_INFO "fastroute(%s) accept\n", __func__);
+#endif
+		}
+	}
+#endif
+#endif
 	*result = rth;
 
 #ifdef CONFIG_MV_ETH_NFP

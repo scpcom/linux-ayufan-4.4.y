@@ -276,6 +276,12 @@ struct r6_state {
 				    */
 #define R5_Wantdrain	13 /* dev->towrite needs to be drained */
 
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+#define R5_DirectAccess 14 /* access cached pages directly instead of
+					* sh pages */
+#endif
+
+
 /*
  * Write method
  */

@@ -80,11 +80,11 @@ void __init mv_pci_preinit(void)
 		//this workaround is for 7042, DS212 does not have one, so it is not necessary.
 		//212+ attaches USB 3.0 on PCIe 0x1, so it cannot be reset.
 		if ( 0 == strncmp(HW_DS212, gszSynoHWVersion, strlen(HW_DS212))) {
-			if( ( 0 == strncmp(HW_DS212p, gszSynoHWVersion, strlen(HW_DS212p))) && (0 == pciIf) )
+			if( ((0 == strncmp(HW_DS212pv10, gszSynoHWVersion, strlen(HW_DS212pv10))) || (0 == strncmp(HW_DS212pv20, gszSynoHWVersion, strlen(HW_DS212pv20)))) && (0 == pciIf) )
 				    goto apply_pcie_workaround;
 			else 
 					goto skip_pcie_workaround;
-		} else if (0 == strncmp(HW_DS112, gszSynoHWVersion, strlen(HW_DS112))) {
+		} else if ((0 == strncmp(HW_DS112, gszSynoHWVersion, strlen(HW_DS112))) || (0 == strncmp(HW_DS112pv10, gszSynoHWVersion, strlen(HW_DS112pv10)))) {
 			goto skip_pcie_workaround;
 		}
 apply_pcie_workaround:

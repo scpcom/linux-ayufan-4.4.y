@@ -503,7 +503,7 @@ struct scsi_host_template {
 	 */
 	int  (* syno_index_get)(struct Scsi_Host *host, uint channel, uint id, uint lun);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 	/*
 	 * This is an optional routine that could power off host power.
 	 *
@@ -511,29 +511,6 @@ struct scsi_host_template {
 	 * Status: OPTIONAL
 	 */
 	int  (* syno_host_power_ctl)(struct Scsi_Host *host, u8 blPowerOn);
-#endif
-#ifdef SYNO_SATA_IRQ_OFF
-	/*
-	 * This is an optional routine that could do ata port activities or error check
-	 *
-	 * @return : 0 success, otherwise fail
-	 * Status: OPTIONAL
-	 */
-	int  (* syno_host_is_port_acting)(struct Scsi_Host *host);
-	/*
-	 * This is an optional routine that could do ata port deep sleep 
-	 *
-	 * @return : 0 success, otherwise fail
-	 * Status: OPTIONAL
-	 */
-	int  (* syno_host_set_deep_sleep)(struct Scsi_Host *host, const u8 blSet);
-	/*
-	 * This is an optional routine that could do ata port poweroff task 
-	 *
-	 * @return : 0 success, otherwise fail
-	 * Status: OPTIONAL
-	 */
-	int  (* syno_host_poweroff_task)(struct Scsi_Host *host);
 #endif
 #ifdef MY_ABC_HERE
 	int  syno_port_type;

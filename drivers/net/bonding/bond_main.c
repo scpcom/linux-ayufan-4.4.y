@@ -588,6 +588,20 @@ out:
 
 /*------------------------------- Link status -------------------------------*/
 
+#ifdef MY_ABC_HERE
+static void default_operstate(struct net_device *dev)
+{
+	if (!netif_carrier_ok(dev)) {
+		dev->operstate = (dev->ifindex != dev->iflink ?
+			IF_OPER_LOWERLAYERDOWN : IF_OPER_DOWN);
+	} else if (netif_dormant(dev)) {
+		dev->operstate = IF_OPER_DORMANT;
+	} else {
+		dev->operstate = IF_OPER_UP;
+	}
+}
+#endif
+
 /*
  * Set the carrier state for the master according to the state of its
  * slaves.  If any slaves are up, the master is up.  In 802.3ad mode,
@@ -1757,6 +1771,9 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	write_unlock_bh(&bond->curr_slave_lock);
 
 	bond_set_carrier(bond);
+#ifdef MY_ABC_HERE
+	default_operstate(bond->dev);
+#endif
 
 	read_unlock(&bond->lock);
 
@@ -4414,6 +4431,16 @@ out:
 	return NETDEV_TX_OK;
 }
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_NET_GIANFAR_FP
+static int bond_accept_fastpath(struct net_device *bond_dev,
+				struct dst_entry *dst)
+{
+	return -1;
+}
+#endif
+#endif
+
 /*------------------------- Device initialization ---------------------------*/
 
 static void bond_set_xmit_hash_policy(struct bonding *bond)
@@ -4579,6 +4606,11 @@ static const struct net_device_ops bond_netdev_ops = {
 	.ndo_vlan_rx_register	= bond_vlan_rx_register,
 	.ndo_vlan_rx_add_vid 	= bond_vlan_rx_add_vid,
 	.ndo_vlan_rx_kill_vid	= bond_vlan_rx_kill_vid,
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_NET_GIANFAR_FP
+	.ndo_accept_fastpath	= bond_accept_fastpath,
+#endif
+#endif
 };
 
 static void bond_setup(struct net_device *bond_dev)
@@ -4603,6 +4635,11 @@ static void bond_setup(struct net_device *bond_dev)
 
 	bond_dev->destructor = free_netdev;
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_NET_GIANFAR_FP
+	bond_dev->accept_fastpath = bond_accept_fastpath;
+#endif
+#endif
 	/* Initialize the device options */
 	bond_dev->tx_queue_len = 0;
 	bond_dev->flags |= IFF_MASTER|IFF_MULTICAST;

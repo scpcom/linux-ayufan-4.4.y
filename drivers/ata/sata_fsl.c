@@ -34,7 +34,7 @@ enum {
 
 	SATA_FSL_HOST_FLAGS	= (ATA_FLAG_SATA | ATA_FLAG_NO_LEGACY |
 				ATA_FLAG_MMIO | ATA_FLAG_PIO_DMA |
-				ATA_FLAG_PMP | ATA_FLAG_NCQ),
+				ATA_FLAG_PMP | ATA_FLAG_NCQ | ATA_FLAG_AN),
 
 	SATA_FSL_MAX_CMDS	= SATA_FSL_QUEUE_DEPTH,
 	SATA_FSL_CMD_HDR_SIZE	= 16,	/* 4 DWORDS */
@@ -132,7 +132,7 @@ enum {
 	INT_ON_SINGL_DEVICE_ERR = (1 << 1),
 	INT_ON_CMD_COMPLETE = 1,
 
-	INT_ON_ERROR = INT_ON_FATAL_ERR |
+	INT_ON_ERROR = INT_ON_FATAL_ERR | INT_ON_SNOTIFY_UPDATE |
 	    INT_ON_PHYRDY_CHG | INT_ON_SINGL_DEVICE_ERR,
 
 	/*
@@ -153,11 +153,15 @@ enum {
 	IE_ON_CMD_COMPLETE = 1,
 
 	DEFAULT_PORT_IRQ_ENABLE_MASK = IE_ON_FATAL_ERR | IE_ON_PHYRDY_CHG |
-	    IE_ON_SIGNATURE_UPDATE |
+	    IE_ON_SIGNATURE_UPDATE | IE_ON_SNOTIFY_UPDATE |
 	    IE_ON_SINGL_DEVICE_ERR | IE_ON_CMD_COMPLETE,
 
 	EXT_INDIRECT_SEG_PRD_FLAG = (1 << 31),
+#ifdef CONFIG_P1022_DS
+	DATA_SNOOP_ENABLE = (1 << 28),
+#else
 	DATA_SNOOP_ENABLE = (1 << 22),
+#endif
 };
 
 /*
@@ -992,9 +996,8 @@ static void sata_fsl_error_intr(struct ata_port *ap)
 	 */
 
 	sata_fsl_scr_read(&ap->link, SCR_ERROR, &SError);
-	if (unlikely(SError & 0xFFFF0000)) {
+	if (unlikely(SError & 0xFFFF0000))
 		sata_fsl_scr_write(&ap->link, SCR_ERROR, SError);
-	}
 
 	DPRINTK("error_intr,hStat=0x%x,CE=0x%x,DE =0x%x,SErr=0x%x\n",
 		hstatus, cereg, ioread32(hcr_base + DE), SError);
@@ -1006,6 +1009,10 @@ static void sata_fsl_error_intr(struct ata_port *ap)
 
 		freeze = 1;
 	}
+
+	/* Handle SDB FIS receive & notify update */
+	if (hstatus & INT_ON_SNOTIFY_UPDATE)
+		sata_async_notification(ap);
 
 	/* Handle PHYRDY change notification */
 	if (hstatus & INT_ON_PHYRDY_CHG) {
@@ -1035,12 +1042,15 @@ static void sata_fsl_error_intr(struct ata_port *ap)
 
 		/* find out the offending link and qc */
 		if (ap->nr_pmp_links) {
+			unsigned int dev_num;
+
 			dereg = ioread32(hcr_base + DE);
 			iowrite32(dereg, hcr_base + DE);
 			iowrite32(cereg, hcr_base + CE);
 
-			if (dereg < ap->nr_pmp_links) {
-				link = &ap->pmp_link[dereg];
+			dev_num = ffs(dereg) - 1;
+			if (dev_num < ap->nr_pmp_links && dereg != 0) {
+				link = &ap->pmp_link[dev_num];
 				ehi = &link->eh_info;
 				qc = ata_qc_from_tag(ap, link->active_tag);
 				/*
@@ -1070,9 +1080,9 @@ static void sata_fsl_error_intr(struct ata_port *ap)
 	}
 
 	/* record error info */
-	if (qc) {
+	if (qc)
 		qc->err_mask |= err_mask;
-	} else
+	else
 		ehi->err_mask |= err_mask;
 
 	ehi->action |= action;
@@ -1103,7 +1113,6 @@ static void sata_fsl_host_intr(struct ata_port *ap)
 	if (unlikely(SError & 0xFFFF0000)) {
 		DPRINTK("serror @host_intr : 0x%x\n", SError);
 		sata_fsl_error_intr(ap);
-
 	}
 
 	if (unlikely(hstatus & INT_ON_ERROR)) {
@@ -1219,6 +1228,12 @@ static int sata_fsl_init_controller(struct ata_host *host)
 	 * the CHBA, hence main controller initialization is done as
 	 * part of the port_start() callback
 	 */
+
+#ifdef CONFIG_SYNO_QORIQ
+	/* Changing P1022 sata controller to operate in enterprise mode */
+	temp = ioread32(hcr_base + HCONTROL);
+	iowrite32((temp & ~0x10000000), hcr_base + HCONTROL);
+#endif
 
 	/* ack. any pending IRQs for this controller/port */
 	temp = ioread32(hcr_base + HSTATUS);
@@ -1398,6 +1413,9 @@ static int sata_fsl_resume(struct of_device *op)
 	void __iomem *hcr_base = host_priv->hcr_base;
 	struct ata_port *ap = host->ports[0];
 	struct sata_fsl_port_priv *pp = ap->private_data;
+#ifdef CONFIG_SYNO_QORIQ
+	u32 temp;
+#endif
 
 	ret = sata_fsl_init_controller(host);
 	if (ret) {
@@ -1408,6 +1426,11 @@ static int sata_fsl_resume(struct of_device *op)
 
 	/* Recovery the CHBA register in host controller cmd register set */
 	iowrite32(pp->cmdslot_paddr & 0xffffffff, hcr_base + CHBA);
+
+#ifdef CONFIG_SYNO_QORIQ
+	temp = ioread32(hcr_base + HCONTROL);
+	iowrite32(temp | 0x80000700, hcr_base+HCONTROL);
+#endif
 
 	ata_host_resume(host);
 	return 0;

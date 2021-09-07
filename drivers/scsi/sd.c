@@ -49,6 +49,7 @@
 #include <linux/mutex.h>
 #include <linux/string_helpers.h>
 #include <linux/async.h>
+#include <linux/ata.h>
 #include <asm/uaccess.h>
 #include <asm/unaligned.h>
 
@@ -97,6 +98,10 @@ MODULE_ALIAS_SCSI_DEVICE(TYPE_RBC);
 
 #ifdef MY_ABC_HERE
 extern int syno_hibernation_log_sec;
+#endif
+
+#ifdef MY_ABC_HERE
+extern int gSynoHasDynModule;
 #endif
 
 static int  sd_revalidate_disk(struct gendisk *);
@@ -402,6 +407,77 @@ static void sd_prot_op(struct scsi_cmnd *scmd, unsigned int dif)
 	scsi_set_prot_type(scmd, dif);
 }
 
+#ifdef MY_ABC_HERE
+/* the function is used for update hdd hibernation timer
+ * @param sdp: SCSI device 
+ * @param SCpnt: SCSI command
+ * @param disk: the device logical disk name(ex: sdX)
+ **/
+static void syno_hibernation_timer_update(struct scsi_device *sdp, struct scsi_cmnd *SCpnt, struct gendisk *disk)
+{
+	if(NULL == sdp || NULL == SCpnt ){
+		printk("%s[%d]:%s(), bad parameter", __FILE__, __LINE__, __FUNCTION__);
+		goto out;
+	}
+
+	/*the following command which for eunit chip shouldn't wake up hdd, so ignore it */
+	if(ATA_16 == SCpnt->cmnd[0] && (ATA_CMD_PMP_WRITE == SCpnt->cmnd[14] ||ATA_CMD_PMP_READ == SCpnt->cmnd[14])){
+		goto out;
+	}
+
+	/* When spindown or not SMART command(noly marvell vendor unique command and ATA_16 command)
+	 * Update idle-since time
+	 * Ignore SMART command because we will use SAMRT to read temperature periodically.
+	 * But if it's in spindown, we always update the idle timer */
+	if (sdp->spindown || (0x0C != SCpnt->cmnd[0] && ATA_16 != SCpnt->cmnd[0])) {
+		sdp->idle = jiffies;
+		/* only sata port into this case, usb case is in the following code */
+		if(SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type && sdp->spindown) {
+			if(syno_hibernation_log_sec > 0) {
+				/*our SMART read command (SCpnt[0]:ATA_16, SCpnt[14]: 0xb0), it's "disk" is null, so we must check it.*/
+				if (NULL == disk) {
+					printk(KERN_WARNING"%s[%d]:%s(), <NULL>: cmd 0x%x spin up by pid=%d, comm=%s\n",
+						   __FILE__, __LINE__, __FUNCTION__, SCpnt->cmnd[0], current->pid, current->comm);
+				} else {
+					printk(KERN_WARNING"%s[%d]:%s(), %s: cmd 0x%x spin up by pid=%d, comm=%s\n",
+						   __FILE__, __LINE__, __FUNCTION__,
+						   disk->disk_name, SCpnt->cmnd[0], current->pid, current->comm);
+				}
+			}
+			sdp->spindown = 0;
+		}
+	}
+	/* usb device case  */
+	if (sdp->spindown) {
+		if(syno_hibernation_log_sec > 0) {
+			char szBuf[128];
+			struct mm_struct *mm;
+			int len;
+			if (current) {
+				mm = current->mm;
+				if (mm) {
+					len = mm->arg_end - mm->arg_start;
+					memset(szBuf, 0, sizeof(szBuf));
+					memcpy(szBuf, (unsigned char *)mm->arg_start, len);
+					printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid=%d, name=%s\n",
+						   __FILE__, __LINE__, __FUNCTION__,
+						   disk->disk_name, current->pid, szBuf);
+				} else {
+					printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid = %d, current->mm = NULL\n",
+						   __FILE__, __LINE__, __FUNCTION__,
+						   disk->disk_name, current->pid);
+				}
+			} else {
+				printk(KERN_WARNING"%s[%d]:%s(), current = NULL\n",
+					   __FILE__, __LINE__, __FUNCTION__);
+			}
+		}
+		sdp->spindown = 0;
+	}
+out:
+	return;
+}
+#endif
 /**
  *	sd_init_command - build a scsi (read or write) command from
  *	information in the request structure.
@@ -434,6 +510,7 @@ static int sd_prep_fn(struct request_queue *q, struct request *rq)
 				}
 			}
 		}
+		syno_hibernation_timer_update(sdp, SCpnt, disk);
 	}
 #endif
 		goto out;
@@ -458,50 +535,9 @@ static int sd_prep_fn(struct request_queue *q, struct request *rq)
 					this_count));
 
 #ifdef MY_ABC_HERE
-	/* When spindown or not SMART command(noly mv and ATA_16 command)
-	 * Update idle-since time
-	 * Ignore SMART command because we will use SAMRT to read temperature periodically.
-	 * But if it's in spindown, we always update the idle timer */
-	if (sdp->spindown || (0x0C != SCpnt->cmnd[0] && ATA_16 != SCpnt->cmnd[0])) {
-		sdp->idle = jiffies;
-		/* only sata port into this case, usb case is in the following code */
-		if(SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type && sdp->spindown) {
-			if(syno_hibernation_log_sec > 0) {
-				printk(KERN_WARNING"%s[%d]:%s(), %s: cmd 0x%x spin up by pid=%d, comm=%s\n",
-					   __FILE__, __LINE__, __FUNCTION__,
-					   disk->disk_name, SCpnt->cmnd[0], current->pid, current->comm);
-			}
-			sdp->spindown = 0;
-		}
-	}
-	/* usb device case  */
-	if (sdp->spindown) {
-		if(syno_hibernation_log_sec > 0) {
-			char szBuf[128];
-			struct mm_struct *mm;
-			int len;
-			if (current) {
-				mm = current->mm;
-				if (mm) {
-					len = mm->arg_end - mm->arg_start;
-					memset(szBuf, 0, sizeof(szBuf));
-					memcpy(szBuf, (unsigned char *)mm->arg_start, len);
-					printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid=%d, name=%s\n",
-						   __FILE__, __LINE__, __FUNCTION__,
-						   disk->disk_name, current->pid, szBuf);
-				} else {
-					printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid = %d, current->mm = NULL\n",
-						   __FILE__, __LINE__, __FUNCTION__,
-						   disk->disk_name, current->pid);
-				}
-			} else {
-				printk(KERN_WARNING"%s[%d]:%s(), current = NULL\n",
-					   __FILE__, __LINE__, __FUNCTION__);
-			}
-		}
-		sdp->spindown = 0;
-	}
+	syno_hibernation_timer_update(sdp, SCpnt, disk);
 #endif
+
 	if (!sdp || !scsi_device_online(sdp) ||
 	    block + blk_rq_sectors(rq) > get_capacity(disk)) {
 		SCSI_LOG_HLQUEUE(2, scmd_printk(KERN_INFO, SCpnt,
@@ -971,6 +1007,24 @@ static int sd_ioctl(struct block_device *bdev, fmode_t mode,
 			return error;
 		}
 #endif /* MY_ABC_HERE */
+#ifdef SYNO_SATA_IRQ_OFF
+		case SCSI_IOCTL_DEEP_SLEEP:
+		{
+			if(!sdp->host->hostt->syno_host_set_deep_sleep || 
+			   !sdp->host->hostt->syno_host_is_port_acting) {
+				return -EPERM; 
+			} else {
+				/* if port still have activities or errors, return -1 */
+				if(1 == sdp->host->hostt->syno_host_is_port_acting(sdp->host)) {
+					return -1;
+				}
+				if(0 != sdp->host->hostt->syno_host_set_deep_sleep(sdp->host, 1)) {
+					return -1;
+				}
+				return 0;
+			}
+		}
+#endif
 		default:
 			error = scsi_cmd_ioctl(disk->queue, disk, mode, cmd, p);
 			if (error != -ENOTTY)
@@ -2396,8 +2450,8 @@ static int sd_probe(struct device *dev)
 
 	get_device(&sdkp->dev);	/* prevent release before async_schedule */
 	async_schedule(sd_probe_async, sdkp);
-#ifdef MY_DEF_HERE
-    if ( SYNO_USB_FLASH_DEVICE_INDEX == index ) {
+#ifdef MY_ABC_HERE
+    if ( ( SYNO_USB_FLASH_DEVICE_INDEX == index ) && gSynoHasDynModule ) {
         sprintf(gd->disk_name, SYNO_USB_FLASH_DEVICE_NAME);
     }
 #ifdef CONFIG_SYNO_MV88F6281_USBSTATION
@@ -2407,7 +2461,7 @@ static int sd_probe(struct device *dev)
 		SYNO_CTRL_USB_HDD_LED_SET(0x4);
 	}
 #endif
-#endif
+#endif /*MY_ABC_HERE*/
 #ifdef MY_ABC_HERE
 	strlcpy(sdp->syno_disk_name, gd->disk_name, BDEVNAME_SIZE);
 #endif

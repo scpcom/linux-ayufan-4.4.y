@@ -386,6 +386,10 @@ struct sk_buff {
 	struct nf_bridge_info	*nf_bridge;
 #endif
 
+#ifdef CONFIG_SYNO_QORIQ
+	void		*skb_owner;
+#endif
+
 	int			iif;
 #ifdef CONFIG_NET_SCHED
 	__u16			tc_index;	/* traffic control index */

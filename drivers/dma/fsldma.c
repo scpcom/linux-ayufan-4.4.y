@@ -49,8 +49,14 @@ static void dma_init(struct fsl_dma_chan *fsl_chan)
 		 * EOSIE - End of segments interrupt enable (basic mode)
 		 * EOLNIE - End of links interrupt enable
 		 */
+#ifdef CONFIG_SYNO_QORIQ
+		DMA_OUT(fsl_chan, &fsl_chan->reg_base->mr, FSL_DMA_MR_BWC
+				| FSL_DMA_MR_EIE | FSL_DMA_MR_EOLNIE
+				| FSL_DMA_MR_EOSIE, 32);
+#else
 		DMA_OUT(fsl_chan, &fsl_chan->reg_base->mr, FSL_DMA_MR_EIE
 				| FSL_DMA_MR_EOLNIE | FSL_DMA_MR_EOSIE, 32);
+#endif
 		break;
 	case FSL_DMA_IP_83XX:
 		/* Set the channel to below modes:
@@ -1200,7 +1206,17 @@ static int __devinit of_fsl_dma_probe(struct of_device *dev,
 						- fdev->reg.start + 1);
 
 	dma_cap_set(DMA_MEMCPY, fdev->common.cap_mask);
+#ifdef CONFIG_SYNO_QORIQ
+#ifndef	CONFIG_ASYNC_CORE
+	/*
+	 * The DMA_INTERRUPT async_tx is a NULL transfer, which will
+	 * triger a PE interrupt.
+	 */
 	dma_cap_set(DMA_INTERRUPT, fdev->common.cap_mask);
+#endif
+#else
+	dma_cap_set(DMA_INTERRUPT, fdev->common.cap_mask);
+#endif
 	dma_cap_set(DMA_SLAVE, fdev->common.cap_mask);
 	fdev->common.device_alloc_chan_resources = fsl_dma_alloc_chan_resources;
 	fdev->common.device_free_chan_resources = fsl_dma_free_chan_resources;
@@ -1222,6 +1238,10 @@ static int __devinit of_fsl_dma_probe(struct of_device *dev,
 			goto err;
 		}
 	}
+
+#ifdef CONFIG_SYNO_QORIQ
+	dma_set_mask(&(dev->dev), DMA_BIT_MASK(36));
+#endif
 
 	dev_set_drvdata(&(dev->dev), fdev);
 

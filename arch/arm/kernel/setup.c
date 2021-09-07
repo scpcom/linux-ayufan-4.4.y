@@ -89,6 +89,14 @@ extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
 
+#ifdef MY_ABC_HERE
+extern int gSynoHasDynModule;
+#endif
+
+#ifdef MY_ABC_HERE
+extern long gSynoFlashMemorySize;
+#endif
+
 #if defined(CONFIG_FPE_NWFPE) || defined(CONFIG_FPE_FASTFPE)
 char fpe_type[8];
 
@@ -304,6 +312,47 @@ static int __init early_disk_seq_reserve(char *p)
 	return 1;
 }
 __setup("DiskSeqReverse=", early_disk_seq_reserve);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_is_dyn_module(char *p)
+{
+	int iLen = 0;
+
+	gSynoHasDynModule = 0;
+	
+	if ((NULL == p) || (0 == (iLen = strlen(p)))) {
+		goto END;
+	}
+
+	if ( 0 == strcmp (p, "y")) {
+		gSynoHasDynModule = 1;
+		printk("Synology Dynamic Module support.\n");
+	}
+
+END:
+	return 1;
+}
+__setup("syno_dyn_module=", early_is_dyn_module);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_flash_memory_size(char *p)
+{
+	int iLen = 0;
+
+	if ((NULL == p) || (0 == (iLen = strlen(p)))) {
+		gSynoFlashMemorySize = 4;
+	} else {
+		gSynoFlashMemorySize = simple_strtol(p, NULL, 10);
+	}
+
+	printk("Flash Memory Size: %d MB\n", (int)gSynoFlashMemorySize);
+
+END:
+	return 1;
+}
+__setup("flash_size=", early_flash_memory_size);
 #endif
 
 extern void paging_init(struct machine_desc *desc);

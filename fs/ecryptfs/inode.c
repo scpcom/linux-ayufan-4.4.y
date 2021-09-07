@@ -965,13 +965,13 @@ ecryptfs_set_archive(struct dentry *dentry, int cmd)
 #define IS_IOP_READY(x) (i_op && i_op->x)
 #define DO_IOP(x, ...) i_op->x(__VA_ARGS__)
 
-static int ecryptfs_get_syno_acl(struct dentry *dentry, void *value, size_t size)
+static int ecryptfs_get_syno_acl(struct dentry *dentry, int cmd, void *value, size_t size)
 {
 	struct dentry *lower_dentry = ecryptfs_dentry_to_lower(dentry);
 	const struct inode_operations *i_op = lower_dentry->d_inode->i_op;
 
 	if (IS_IOP_READY(syno_acl_get)) {
-		return DO_IOP(syno_acl_get, lower_dentry, value, size);
+		return DO_IOP(syno_acl_get, lower_dentry, cmd, value, size);
 	}
 	return -EOPNOTSUPP;
 }

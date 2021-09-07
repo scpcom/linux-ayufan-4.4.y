@@ -16,6 +16,12 @@ unsigned int real_root_dev;	/* do_proc_dointvec cannot handle kdev_t */
 static int __initdata old_fd, root_fd;
 static int __initdata mount_initrd = 1;
 
+#ifdef MY_ABC_HERE
+extern char * __initdata root_device_name;
+#define SYNO_MD "md0"
+#define SYNO_DEV_MD "/dev/"SYNO_MD
+#endif
+
 static int __init no_initrd(char *str)
 {
 	mount_initrd = 0;
@@ -65,6 +71,13 @@ static void __init handle_initrd(void)
 	if (pid > 0)
 		while (pid != sys_wait4(-1, NULL, 0, NULL))
 			yield();
+
+#ifdef MY_ABC_HERE
+	if (0 == strncmp(root_device_name, SYNO_MD, strlen(SYNO_MD))) {
+		ROOT_DEV = name_to_dev_t(SYNO_DEV_MD);
+		real_root_dev = new_encode_dev(ROOT_DEV);
+	}
+#endif
 
 	current->flags &= ~PF_FREEZER_SKIP;
 

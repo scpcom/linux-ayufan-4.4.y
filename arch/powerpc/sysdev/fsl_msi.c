@@ -21,14 +21,28 @@
 #include <asm/prom.h>
 #include <asm/hw_irq.h>
 #include <asm/ppc-pci.h>
+#ifdef CONFIG_SYNO_QORIQ
+#include <asm/mpic.h>
+#endif
 #include "fsl_msi.h"
+
+#ifdef CONFIG_SYNO_QORIQ
+LIST_HEAD(msi_head);
+#endif
 
 struct fsl_msi_feature {
 	u32 fsl_pic_ip;
 	u32 msiir_offset;
 };
 
+#ifdef CONFIG_SYNO_QORIQ
+struct fsl_msi_cascade_data {
+	struct fsl_msi *msi_data;
+	int index;
+};
+#else
 static struct fsl_msi *fsl_msi;
+#endif
 
 static inline u32 fsl_msi_read(u32 __iomem *base, unsigned int reg)
 {
@@ -53,10 +67,16 @@ static struct irq_chip fsl_msi_chip = {
 static int fsl_msi_host_map(struct irq_host *h, unsigned int virq,
 				irq_hw_number_t hw)
 {
+#ifdef CONFIG_SYNO_QORIQ
+	struct fsl_msi *msi_data = h->host_data;
+#endif
 	struct irq_chip *chip = &fsl_msi_chip;
 
 	get_irq_desc(virq)->status |= IRQ_TYPE_EDGE_FALLING;
 
+#ifdef CONFIG_SYNO_QORIQ
+	set_irq_chip_data(virq, msi_data);
+#endif
 	set_irq_chip_and_handler(virq, chip, handle_edge_irq);
 
 	return 0;
@@ -95,11 +115,18 @@ static int fsl_msi_check_device(struct pci_dev *pdev, int nvec, int type)
 static void fsl_teardown_msi_irqs(struct pci_dev *pdev)
 {
 	struct msi_desc *entry;
+#ifdef CONFIG_SYNO_QORIQ
+	struct fsl_msi *msi_data;
+#else
 	struct fsl_msi *msi_data = fsl_msi;
+#endif
 
 	list_for_each_entry(entry, &pdev->msi_list, list) {
 		if (entry->irq == NO_IRQ)
 			continue;
+#ifdef CONFIG_SYNO_QORIQ
+		msi_data = get_irq_data(entry->irq);
+#endif
 		set_irq_msi(entry->irq, NULL);
 		msi_bitmap_free_hwirqs(&msi_data->bitmap,
 				       virq_to_hw(entry->irq), 1);
@@ -110,9 +137,16 @@ static void fsl_teardown_msi_irqs(struct pci_dev *pdev)
 }
 
 static void fsl_compose_msi_msg(struct pci_dev *pdev, int hwirq,
+#ifdef CONFIG_SYNO_QORIQ
+				struct msi_msg *msg,
+				struct fsl_msi *fsl_msi_data)
+{
+	struct fsl_msi *msi_data = fsl_msi_data;
+#else
 				  struct msi_msg *msg)
 {
 	struct fsl_msi *msi_data = fsl_msi;
+#endif
 	struct pci_controller *hose = pci_bus_to_host(pdev->bus);
 	u32 base = 0;
 
@@ -129,14 +163,31 @@ static void fsl_compose_msi_msg(struct pci_dev *pdev, int hwirq,
 
 static int fsl_setup_msi_irqs(struct pci_dev *pdev, int nvec, int type)
 {
+#ifdef CONFIG_SYNO_QORIQ
+	int rc, hwirq = -ENOMEM;
+#else
 	int rc, hwirq;
+#endif
 	unsigned int virq;
 	struct msi_desc *entry;
 	struct msi_msg msg;
+#ifdef CONFIG_SYNO_QORIQ
+	struct fsl_msi *msi_data;
+#else
 	struct fsl_msi *msi_data = fsl_msi;
+#endif
 
 	list_for_each_entry(entry, &pdev->msi_list, list) {
+#ifdef CONFIG_SYNO_QORIQ
+		list_for_each_entry(msi_data, &msi_head, list) {
+			hwirq = msi_bitmap_alloc_hwirqs(&msi_data->bitmap, 1);
+			if (hwirq >= 0)
+				break;
+		}
+#else
 		hwirq = msi_bitmap_alloc_hwirqs(&msi_data->bitmap, 1);
+#endif
+
 		if (hwirq < 0) {
 			rc = hwirq;
 			pr_debug("%s: fail allocating msi interrupt\n",
@@ -153,9 +204,16 @@ static int fsl_setup_msi_irqs(struct pci_dev *pdev, int nvec, int type)
 			rc = -ENOSPC;
 			goto out_free;
 		}
+#ifdef CONFIG_SYNO_QORIQ
+		set_irq_data(virq, msi_data);
+#endif
 		set_irq_msi(virq, entry);
 
+#ifdef CONFIG_SYNO_QORIQ
+		fsl_compose_msi_msg(pdev, hwirq, &msg, msi_data);
+#else
 		fsl_compose_msi_msg(pdev, hwirq, &msg);
+#endif
 		write_msi_msg(virq, &msg);
 	}
 	return 0;
@@ -167,11 +225,21 @@ out_free:
 static void fsl_msi_cascade(unsigned int irq, struct irq_desc *desc)
 {
 	unsigned int cascade_irq;
+#ifdef CONFIG_SYNO_QORIQ
+	struct fsl_msi *msi_data;
+#else
 	struct fsl_msi *msi_data = fsl_msi;
+#endif
 	int msir_index = -1;
 	u32 msir_value = 0;
 	u32 intr_index;
 	u32 have_shift = 0;
+#ifdef CONFIG_SYNO_QORIQ
+	struct fsl_msi_cascade_data *cascade_data;
+
+	cascade_data = (struct fsl_msi_cascade_data *)get_irq_data(irq);
+	msi_data = cascade_data->msi_data;
+#endif
 
 	spin_lock(&desc->lock);
 	if ((msi_data->feature &  FSL_PIC_IP_MASK) == FSL_PIC_IP_IPIC) {
@@ -186,13 +254,21 @@ static void fsl_msi_cascade(unsigned int irq, struct irq_desc *desc)
 	if (unlikely(desc->status & IRQ_INPROGRESS))
 		goto unlock;
 
+#ifdef CONFIG_SYNO_QORIQ
+	msir_index = cascade_data->index;
+#else
 	msir_index = (int)desc->handler_data;
+#endif
 
 	if (msir_index >= NR_MSI_REG)
 		cascade_irq = NO_IRQ;
 
 	desc->status |= IRQ_INPROGRESS;
+#ifdef CONFIG_SYNO_QORIQ
+	switch (msi_data->feature & FSL_PIC_IP_MASK) {
+#else
 	switch (fsl_msi->feature & FSL_PIC_IP_MASK) {
+#endif
 	case FSL_PIC_IP_MPIC:
 		msir_value = fsl_msi_read(msi_data->msi_regs,
 			msir_index * 0x10);
@@ -228,6 +304,32 @@ unlock:
 	spin_unlock(&desc->lock);
 }
 
+#ifdef CONFIG_SYNO_QORIQ
+static int fsl_of_msi_remove(struct of_device *ofdev)
+{
+	struct fsl_msi *msi = ofdev->dev.platform_data;
+	int virq, i;
+	struct fsl_msi_cascade_data *cascade_data;
+
+	if (msi->list.prev != NULL)
+		list_del(&msi->list);
+	for (i = 0; i < NR_MSI_REG; i++) {
+		virq = msi->msi_virqs[i];
+		if (virq != NO_IRQ) {
+			cascade_data = get_irq_data(virq);
+			kfree(cascade_data);
+			irq_dispose_mapping(virq);
+		}
+	}
+	if (msi->bitmap.bitmap)
+		msi_bitmap_free(&msi->bitmap);
+	iounmap(msi->msi_regs);
+	kfree(msi);
+
+	return 0;
+}
+#endif
+
 static int __devinit fsl_of_msi_probe(struct of_device *dev,
 				const struct of_device_id *match)
 {
@@ -238,15 +340,26 @@ static int __devinit fsl_of_msi_probe(struct of_device *dev,
 	int virt_msir;
 	const u32 *p;
 	struct fsl_msi_feature *features = match->data;
+#ifdef CONFIG_SYNO_QORIQ
+	struct fsl_msi_cascade_data *cascade_data = NULL;
+	int len;
+	u32 offset;
+#endif
 
 	printk(KERN_DEBUG "Setting up Freescale MSI support\n");
 
 	msi = kzalloc(sizeof(struct fsl_msi), GFP_KERNEL);
 	if (!msi) {
 		dev_err(&dev->dev, "No memory for MSI structure\n");
+#ifdef CONFIG_SYNO_QORIQ
+		return -ENOMEM;
+	}
+	dev->dev.platform_data = msi;
+#else
 		err = -ENOMEM;
 		goto error_out;
 	}
+#endif
 
 	msi->irqhost = irq_alloc_host(dev->node, IRQ_HOST_MAP_LINEAR,
 				      NR_MSI_IRQS, &fsl_msi_host_ops, 0);
@@ -297,27 +410,72 @@ static int __devinit fsl_of_msi_probe(struct of_device *dev,
 		err = -EINVAL;
 		goto error_out;
 	}
+#ifdef CONFIG_SYNO_QORIQ
+	offset = 0;
+	p = of_get_property(dev->node, "msi-available-ranges", &len);
+	if (p)
+		offset = *p / IRQS_PER_MSI_REG;
+#endif
 
 	count /= sizeof(u32);
+#ifdef CONFIG_SYNO_QORIQ
+	for (i = 0; i < min(count / 2, NR_MSI_REG); i++) {
+#else
 	for (i = 0; i < count / 2; i++) {
 		if (i > NR_MSI_REG)
 			break;
+#endif
 		virt_msir = irq_of_parse_and_map(dev->node, i);
 		if (virt_msir != NO_IRQ) {
+#ifdef CONFIG_SYNO_QORIQ
+			cascade_data = kzalloc(
+					sizeof(struct fsl_msi_cascade_data),
+					GFP_KERNEL);
+			if (!cascade_data) {
+				dev_err(&dev->dev,
+					"No memory for MSI cascade data\n");
+				err = -ENOMEM;
+				goto error_out;
+			}
+			msi->msi_virqs[i] = virt_msir;
+			cascade_data->index = i + offset;
+			cascade_data->msi_data = msi;
+			set_irq_data(virt_msir, (void *)cascade_data);
+#else
 			set_irq_data(virt_msir, (void *)i);
+#endif
 			set_irq_chained_handler(virt_msir, fsl_msi_cascade);
 		}
 	}
 
+#ifdef CONFIG_SYNO_QORIQ
+	list_add_tail(&msi->list, &msi_head);
+
+	/* The multiple setting ppc_md.setup_msi_irqs will not harm things */
+	if (!ppc_md.setup_msi_irqs) {
+		ppc_md.setup_msi_irqs = fsl_setup_msi_irqs;
+		ppc_md.teardown_msi_irqs = fsl_teardown_msi_irqs;
+		ppc_md.msi_check_device = fsl_msi_check_device;
+	} else if (ppc_md.setup_msi_irqs != fsl_setup_msi_irqs) {
+		dev_err(&dev->dev, "Different MSI driver already installed!\n");
+		err = -ENODEV;
+		goto error_out;
+	}
+#else
 	fsl_msi = msi;
 
 	WARN_ON(ppc_md.setup_msi_irqs);
 	ppc_md.setup_msi_irqs = fsl_setup_msi_irqs;
 	ppc_md.teardown_msi_irqs = fsl_teardown_msi_irqs;
 	ppc_md.msi_check_device = fsl_msi_check_device;
+#endif
 	return 0;
 error_out:
+#ifdef CONFIG_SYNO_QORIQ
+	fsl_of_msi_remove(dev);
+#else
 	kfree(msi);
+#endif
 	return err;
 }
 
@@ -347,6 +505,9 @@ static struct of_platform_driver fsl_of_msi_driver = {
 	.name = "fsl-msi",
 	.match_table = fsl_of_msi_ids,
 	.probe = fsl_of_msi_probe,
+#ifdef CONFIG_SYNO_QORIQ
+	.remove = fsl_of_msi_remove,
+#endif
 };
 
 static __init int fsl_of_msi_init(void)

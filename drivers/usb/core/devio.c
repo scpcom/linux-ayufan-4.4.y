@@ -812,14 +812,14 @@ static int proc_control(struct dev_state *ps, void __user *arg)
 		snoop_urb(dev, NULL, pipe, max(i, 0), min(i, 0), COMPLETE);
 	}
 	free_page((unsigned long)tbuf);
-#ifndef MY_ABC_HERE 
+
 	if (i < 0 && i != -EPIPE) {
 		dev_printk(KERN_DEBUG, &dev->dev, "usbfs: USBDEVFS_CONTROL "
 			   "failed cmd %s rqt %u rq %u len %u ret %d\n",
 			   current->comm, ctrl.bRequestType, ctrl.bRequest,
 			   ctrl.wLength, i);
 	}
-#endif
+
 	return i;
 }
 

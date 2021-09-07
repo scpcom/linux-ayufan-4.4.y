@@ -616,6 +616,11 @@ static void writeback_inodes_wb(struct bdi_writeback *wb,
 	struct super_block *sb = wbc->sb, *pin_sb = NULL;
 	const int is_blkdev_sb = sb_is_blkdev_sb(sb);
 	const unsigned long start = jiffies;	/* livelock avoidance */
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
+	unsigned int find_same_bdi = 0;
+#endif
+#endif
 
 	spin_lock(&inode_lock);
 
@@ -625,6 +630,11 @@ static void writeback_inodes_wb(struct bdi_writeback *wb,
 	while (!list_empty(&wb->b_io)) {
 		struct inode *inode = list_entry(wb->b_io.prev,
 						struct inode, i_list);
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
+		struct inode *inode_tmp;
+#endif
+#endif
 		long pages_skipped;
 
 		/*
@@ -677,10 +687,50 @@ static void writeback_inodes_wb(struct bdi_writeback *wb,
 			continue;
 		}
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
+		/*
+		 * Skip background writeback
+		 */
+		if(wbc->nonblocking && imajor(inode)) {
+			requeue_io(inode);
+			continue;
+		}
+
+		/*
+		 * Find out duplicate bdi and writeback the real inode
+		 */
+		if(imajor(inode))
+			list_for_each_entry(inode_tmp, &wb->b_io, i_list)
+				if((imajor(inode_tmp)==0) && (inode_tmp->i_data.backing_dev_info==inode->i_data.backing_dev_info)) {
+					inode = inode_tmp;
+					find_same_bdi = 1;
+					break;
+				}
+
+		if(imajor(inode) && !find_same_bdi) {
+			list_for_each_entry(inode_tmp, &wb->b_dirty, i_list)
+				if((imajor(inode_tmp)==0) && (inode_tmp->i_data.backing_dev_info==inode->i_data.backing_dev_info)) {
+					requeue_io(inode);
+					continue;
+				}
+			list_for_each_entry(inode_tmp, &wb->b_more_io, i_list)
+				if((imajor(inode_tmp)==0) && (inode_tmp->i_data.backing_dev_info==inode->i_data.backing_dev_info)) {
+					requeue_io(inode);
+					continue;
+			}
+		}
+#endif
+#endif
 		BUG_ON(inode->i_state & (I_FREEING | I_CLEAR));
 		__iget(inode);
 		pages_skipped = wbc->pages_skipped;
 		writeback_single_inode(inode, wbc);
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
+		find_same_bdi = 0;
+#endif
+#endif
 		if (wbc->pages_skipped != pages_skipped) {
 			/*
 			 * writeback is not making progress due to locked
@@ -757,6 +807,13 @@ static long wb_writeback(struct bdi_writeback *wb,
 		.older_than_this	= NULL,
 		.for_kupdate		= args->for_kupdate,
 		.range_cyclic		= args->range_cyclic,
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
+		.nonblocking		= 1,
+#else
+		.nonblocking		= 0,
+#endif
+#endif
 	};
 	unsigned long oldest_jif;
 	long wrote = 0;
@@ -773,6 +830,12 @@ static long wb_writeback(struct bdi_writeback *wb,
 	}
 
 	for (;;) {
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
+		unsigned long background_thresh;
+		unsigned long dirty_thresh;
+#endif
+#endif
 		/*
 		 * Stop writeback when nr_pages has been consumed
 		 */
@@ -786,6 +849,19 @@ static long wb_writeback(struct bdi_writeback *wb,
 		if (args->for_background && !over_bground_thresh())
 			break;
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
+		/*
+		 * Check congestion state if dirty pages is less than thresh
+		 */
+		get_dirty_limits(&background_thresh, &dirty_thresh, NULL, NULL);
+		if (global_page_state(NR_FILE_DIRTY) +
+				global_page_state(NR_UNSTABLE_NFS) < background_thresh)
+			wbc.nonblocking = 0;
+		else
+			wbc.nonblocking = 1;
+#endif
+#endif
 		wbc.more_io = 0;
 		wbc.encountered_congestion = 0;
 		wbc.nr_to_write = MAX_WRITEBACK_PAGES;

@@ -11,11 +11,7 @@
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <asm/io.h>
-#if !defined(CONFIG_SYNO_MV_COMMON) && !defined(CONFIG_SYNO_MPC85XX_COMMON) && !defined(CONFIG_SYNO_PLX_PORTING)
-#include <asm-ppc/ppcboot.h>
-#else
 #include <linux/platform_device.h>
-#endif
 
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/map.h>
@@ -78,6 +74,9 @@ static struct mtd_partition synomtd_partitions[] = {
 	},
 };
 #elif defined(CONFIG_SYNO_MV88F6281)
+#ifdef MY_ABC_HERE
+extern long gSynoFlashMemorySize;
+#endif
 extern struct resource physmap_flash_resource;
 /* Partition definition for the first flash bank which is always present. */
 static struct mtd_partition synomtd_partitions[] = {
@@ -110,6 +109,38 @@ static struct mtd_partition synomtd_partitions[] = {
 		.name   = "FIS directory",      /* flash partition table*/
 		.offset = 0x003F0000,
 		.size   = 0x00010000,           /* 64KB                                 */
+	},
+};
+static struct mtd_partition synomtd_partitions_8M[] = {
+	{
+		.name   = "RedBoot",            /* u-boot               */
+		.offset = 0x00000000,
+		.size   = 0x00090000,           /* 576 KB               */
+	},
+	{
+		.name   = "zImage",             /* linux kernel image   */
+		.offset = 0x00090000,
+		.size   = 0x00300000,           /* 3 MB                 */
+	},
+	{
+		.name   = "rd.gz",              /* ramdisk image        */
+		.offset = 0x00390000,
+		.size   = 0x00440000,           /* 4.2 MB               */
+	},
+	{
+		.name   = "vendor",             /* vendor specific data */
+		.offset = 0x007D0000,
+		.size   = 0x00010000,           /* 64KB                 */
+	},
+	{
+		.name   = "RedBoot Config",     /* configs for u-boot   */
+		.offset = 0x007E0000,
+		.size   = 0x00010000,           /* 64KB                */
+	},
+	{
+		.name   = "FIS directory",      /* flash partition table*/
+		.offset = 0x007F0000,
+		.size   = 0x00010000,           /* 64KB                 */
 	},
 };
 #elif defined(CONFIG_SYNO_PLX_PORTING)
@@ -187,6 +218,7 @@ static int __init init_synomtd(void)
 {
 	int idx = 0, ret = 0;
 	unsigned long flash_addr, flash_size, mtd_size = 0;
+	struct mtd_partition *pMtdPartition = NULL;
 
 #if !defined(CONFIG_SYNO_MV_COMMON) && !defined(CONFIG_SYNO_MPC85XX_COMMON) && !defined(CONFIG_SYNO_PLX_PORTING)
 	bd_t *bd = (bd_t *)__res;
@@ -292,15 +324,21 @@ static int __init init_synomtd(void)
 			/*
 			 * Select static partition definitions
 			 */
+			pMtdPartition = &synomtd_partitions;
 			n = ARRAY_SIZE(synomtd_partitions);
-			part_banks[idx].mtd_part	= synomtd_partitions;
+#ifdef MY_ABC_HERE
+			if (8 == gSynoFlashMemorySize) {
+				pMtdPartition = &synomtd_partitions_8M;
+				n = ARRAY_SIZE(synomtd_partitions_8M);
+			}
+#endif
+			part_banks[idx].mtd_part	= pMtdPartition;
 			part_banks[idx].type	= "static image bank1";
 			part_banks[idx].nums	= n;
 
 			/* update last partition size to cover actual remaining space */
-			synomtd_partitions[n - 1].size =
-				mtd_banks[0]->size -
-				synomtd_partitions[n - 1].offset;
+			pMtdPartition[n - 1].size =
+				mtd_banks[0]->size - pMtdPartition[n - 1].offset;
 		}
 		if (part_banks[idx].nums == 0) {
 			printk(KERN_NOTICE

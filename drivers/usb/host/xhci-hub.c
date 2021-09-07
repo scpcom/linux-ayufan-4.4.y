@@ -58,7 +58,7 @@ static void xhci_hub_descriptor(struct xhci_hcd *xhci,
 	temp |= 0x0008;
 	/* Bits 6:5 - no TTs in root ports */
 	/* Bit  7 - no port indicators */
-	desc->wHubCharacteristics = (__force __u16) cpu_to_le16(temp);
+	desc->wHubCharacteristics = cpu_to_le16(temp);
 }
 
 static unsigned int xhci_port_speed(unsigned int port_status)
@@ -129,23 +129,9 @@ static u32 xhci_port_state_to_neutral(u32 state)
 	return (state & XHCI_PORT_RO) | (state & XHCI_PORT_RWS);
 }
 
-#ifdef MY_ABC_HERE
-extern int disable_usb3;
-#endif
-
 static void xhci_disable_port(struct xhci_hcd *xhci, u16 wIndex,
-		u32 __iomem *addr, u32 port_status)
+		__le32 __iomem *addr, u32 port_status)
 {
-#ifdef MY_ABC_HERE
-	int ports = HCS_MAX_PORTS(xhci->hcs_params1);
-	/* Don't allow the USB core to disable SuperSpeed ports. */
-	if (0 == disable_usb3 && wIndex < ports/2) {
-		xhci_dbg(xhci, "Ignoring request to disable "
-				"SuperSpeed port.\n");
-		return;
-	}
-#endif
-
 	/* Write 1 to disable the port */
 	xhci_writel(xhci, port_status | PORT_PE, addr);
 	port_status = xhci_readl(xhci, addr);
@@ -154,7 +140,7 @@ static void xhci_disable_port(struct xhci_hcd *xhci, u16 wIndex,
 }
 
 static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
-		u16 wIndex, u32 __iomem *addr, u32 port_status)
+		u16 wIndex, __le32 __iomem *addr, u32 port_status)
 {
 	char *port_change_bit;
 	u32 status;
@@ -176,6 +162,7 @@ static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 		status = PORT_PEC;
 		port_change_bit = "enable/disable";
 		break;
+
 	default:
 		/* Should never happen */
 		return;
@@ -184,25 +171,10 @@ static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 	xhci_writel(xhci, port_status | status, addr);
 	port_status = xhci_readl(xhci, addr);
 
-#ifdef MY_ABC_HERE
-	if (status == PORT_CSC) {
-		int link_state = (port_status >> 5) & 0xf;
-		int ori_status = port_status;
-		if (port_status & (PORT_PLC | PORT_CEC)) {
-			port_status = xhci_port_state_to_neutral(port_status);
-			xhci_writel(xhci, port_status | (ori_status & (PORT_PLC | PORT_CEC)), addr);
-			port_status = xhci_readl(xhci, addr);
-		}
-		if (link_state == 0x6 || link_state == 0x4) {
-			xhci_writel(xhci, (0x5 << 5) | PORT_LINK_STROBE, addr);
-			port_status = xhci_readl(xhci, addr); /* unblock any posted writes */
-		}
-	}
-#endif
-
 	xhci_dbg(xhci, "clear port %s change, actual port %d status  = 0x%x\n",
 			port_change_bit, wIndex, port_status);
 }
+
 
 int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		u16 wIndex, char *buf, u16 wLength)
@@ -212,7 +184,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	unsigned long flags;
 	u32 temp, status;
 	int retval = 0;
-	u32 __iomem *addr;
+	__le32 __iomem *addr;
 
 	ports = HCS_MAX_PORTS(xhci->hcs_params1);
 
@@ -232,31 +204,8 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		status = 0;
 		addr = &xhci->op_regs->port_status_base + NUM_PORT_REGS*(wIndex & 0xff);
 		temp = xhci_readl(xhci, addr);
-		xhci_dbg(xhci, "get port status, actual port %d status  = 0x%x\n", wIndex, temp);
+		xhci_dbg(xhci, "get port status, actual port %d status = 0x%x\n", wIndex, temp);
 
-		/* wPortChange bits */
-		if (temp & PORT_CSC)
-			status |= 1 << USB_PORT_FEAT_C_CONNECTION;
-		if (temp & PORT_PEC)
-			status |= 1 << USB_PORT_FEAT_C_ENABLE;
-		if ((temp & PORT_OCC))
-			status |= 1 << USB_PORT_FEAT_C_OVER_CURRENT;
-		/*
-		 * FIXME ignoring suspend, reset, and USB 2.1/3.0 specific
-		 * changes
-		 */
-		if (temp & PORT_CONNECT) {
-			status |= 1 << USB_PORT_FEAT_CONNECTION;
-			status |= xhci_port_speed(temp);
-		}
-		if (temp & PORT_PE)
-			status |= 1 << USB_PORT_FEAT_ENABLE;
-		if (temp & PORT_OC)
-			status |= 1 << USB_PORT_FEAT_OVER_CURRENT;
-		if (temp & PORT_RESET)
-			status |= 1 << USB_PORT_FEAT_RESET;
-		if (temp & PORT_POWER)
-			status |= 1 << USB_PORT_FEAT_POWER;
 		xhci_dbg(xhci, "Get port status returned 0x%x\n", status);
 		put_unaligned(cpu_to_le32(status), (__le32 *) buf);
 		break;
@@ -276,6 +225,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			 * However, khubd will ignore the roothub events until
 			 * the roothub is registered.
 			 */
+
 			xhci_writel(xhci, temp | PORT_POWER, addr);
 
 			temp = xhci_readl(xhci, addr);
@@ -283,20 +233,14 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			break;
 		case USB_PORT_FEAT_RESET:
 			temp = (temp | PORT_RESET);
+
 			xhci_writel(xhci, temp, addr);
 
 			temp = xhci_readl(xhci, addr);
 			xhci_dbg(xhci, "set port reset, actual port %d status  = 0x%x\n", wIndex, temp);
 
-#ifdef MY_ABC_HERE
-			// wait device reset, some devices are slow, then set address will fail
-			// ex. WD passport, Fujitsu, HP.
-			msleep(1000);
-			temp = xhci_readl(xhci, addr);
-			xhci_dbg(xhci, "set port reset, actual port %d status  = 0x%x\n", wIndex, temp);
-#endif
-
 			break;
+
 		default:
 			goto error;
 		}
@@ -310,14 +254,17 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			NUM_PORT_REGS*(wIndex & 0xff);
 		temp = xhci_readl(xhci, addr);
 		temp = xhci_port_state_to_neutral(temp);
+
 		switch (wValue) {
 		case USB_PORT_FEAT_C_RESET:
 		case USB_PORT_FEAT_C_CONNECTION:
 		case USB_PORT_FEAT_C_OVER_CURRENT:
 		case USB_PORT_FEAT_C_ENABLE:
+
 			xhci_clear_port_change_bit(xhci, wValue, wIndex,
 					addr, temp);
 			break;
+
 		case USB_PORT_FEAT_ENABLE:
 			xhci_disable_port(xhci, wIndex, addr, temp);
 			break;
@@ -347,10 +294,11 @@ int xhci_hub_status_data(struct usb_hcd *hcd, char *buf)
 {
 	unsigned long flags;
 	u32 temp, status;
+	
 	int i, retval;
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
 	int ports;
-	u32 __iomem *addr;
+	__le32 __iomem *addr;
 
 	ports = HCS_MAX_PORTS(xhci->hcs_params1);
 

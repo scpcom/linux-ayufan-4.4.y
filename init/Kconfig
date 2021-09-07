@@ -1110,6 +1110,8 @@ config SLOW_WORK_DEBUG
 
 endmenu		# General setup
 
+source "synoconfigs/Kconfig"
+
 config HAVE_GENERIC_DMA_COHERENT
 	bool
 	default n

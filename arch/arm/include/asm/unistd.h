@@ -416,7 +416,7 @@
 #define recvfile(arg1,arg2,arg3,arg4,arg5)      syscall(__NR_recvfile,arg1,arg2,arg3,arg4,arg5)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_ALLOC
 #define __NR_SYNOMTDAlloc       (__NR_SYSCALL_BASE+405)
 #define SYNOMTDAlloc(x)         syscall(__NR_SYNOMTDAlloc, x)
 #endif

@@ -5,7 +5,11 @@ EXTRA_CFLAGS			+= -mno-minimal-toc
 endif
 
 mpic-msi-obj-$(CONFIG_PCI_MSI)	+= mpic_msi.o mpic_u3msi.o mpic_pasemi_msi.o
+ifeq ($(CONFIG_SYNO_QORIQ),y)
+obj-$(CONFIG_MPIC)		+= mpic.o mpic_timer.o $(mpic-msi-obj-y)
+else
 obj-$(CONFIG_MPIC)		+= mpic.o $(mpic-msi-obj-y)
+endif
 fsl-msi-obj-$(CONFIG_PCI_MSI)	+= fsl_msi.o
 obj-$(CONFIG_PPC_MSI_BITMAP)	+= msi_bitmap.o
 
@@ -16,9 +20,19 @@ obj-$(CONFIG_U3_DART)		+= dart_iommu.o
 obj-$(CONFIG_MMIO_NVRAM)	+= mmio_nvram.o
 obj-$(CONFIG_FSL_SOC)		+= fsl_soc.o
 obj-$(CONFIG_FSL_PCI)		+= fsl_pci.o $(fsl-msi-obj-y)
+ifeq ($(CONFIG_SYNO_QORIQ),y)
+obj-$(CONFIG_FSL_PMC)		+= fsl_pmc.o
+obj-$(CONFIG_FSL_PIXIS)		+= fsl_pixis.o
+endif
 obj-$(CONFIG_FSL_LBC)		+= fsl_lbc.o
 obj-$(CONFIG_FSL_GTM)		+= fsl_gtm.o
+ifeq ($(CONFIG_SYNO_QORIQ),y)
+obj-$(CONFIG_FSL_MPIC_MSG_INTS)	+= fsl_msg.o
+obj-$(CONFIG_FSL_85XX_CACHE_SRAM)	+= fsl_85xx_l2ctlr.o fsl_85xx_cache_sram.o
+obj-$(CONFIG_MPC8xxx_GPIO)	+= mpc8xxx_gpio.o synology-gpio.o
+else
 obj-$(CONFIG_MPC8xxx_GPIO)	+= mpc8xxx_gpio.o
+endif
 obj-$(CONFIG_SIMPLE_GPIO)	+= simple_gpio.o
 obj-$(CONFIG_RAPIDIO)		+= fsl_rio.o
 obj-$(CONFIG_TSI108_BRIDGE)	+= tsi108_pci.o tsi108_dev.o

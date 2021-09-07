@@ -1,7 +1,13 @@
 #
 # Makefile for the PowerPC 85xx linux kernel.
 #
+ifeq ($(CONFIG_SYNO_QORIQ),y)
+obj-$(CONFIG_SMP) += smp.o bootpage.o
+obj-$(CONFIG_SUSPEND)     += suspend-asm.o
+obj-$(CONFIG_MPC85xx_CPUFREQ) += cpufreq.o
+else
 obj-$(CONFIG_SMP) += smp.o
+endif
 
 obj-$(CONFIG_MPC8540_ADS) += mpc85xx_ads.o
 obj-$(CONFIG_MPC8560_ADS) += mpc85xx_ads.o
@@ -10,6 +16,9 @@ obj-$(CONFIG_MPC8536_DS)  += mpc8536_ds.o
 obj-$(CONFIG_MPC85xx_DS)  += mpc85xx_ds.o
 obj-$(CONFIG_MPC85xx_MDS) += mpc85xx_mds.o
 obj-$(CONFIG_MPC85xx_RDB) += mpc85xx_rdb.o
+ifeq ($(CONFIG_SYNO_QORIQ),y)
+obj-$(CONFIG_P1022_DS)    += p1022_ds.o
+endif
 obj-$(CONFIG_STX_GP3)	  += stx_gp3.o
 obj-$(CONFIG_TQM85xx)	  += tqm85xx.o
 obj-$(CONFIG_SBC8560)     += sbc8560.o
@@ -17,3 +26,6 @@ obj-$(CONFIG_SBC8548)     += sbc8548.o
 obj-$(CONFIG_SOCRATES)    += socrates.o socrates_fpga_pic.o
 obj-$(CONFIG_KSI8560)	  += ksi8560.o
 obj-$(CONFIG_XES_MPC85xx) += xes_mpc85xx.o
+ifeq ($(CONFIG_SYNO_QORIQ),y)
+obj-$(CONFIG_FSL_PMC)     += uli8259_suspend.o
+endif

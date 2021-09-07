@@ -98,6 +98,12 @@ int kvmppc_core_emulate_mtspr(struct kvm_vcpu *vcpu, int sprn, int rs)
 		vcpu_e500->mas6 = vcpu->arch.gpr[rs]; break;
 	case SPRN_MAS7:
 		vcpu_e500->mas7 = vcpu->arch.gpr[rs]; break;
+#ifdef CONFIG_SYNO_QORIQ
+	case SPRN_L1CSR0:
+		vcpu_e500->l1csr0 = vcpu->arch.gpr[rs];
+		vcpu_e500->l1csr0 &= ~(L1CSR0_DCFI | L1CSR0_CLFC);
+		break;
+#endif
 	case SPRN_L1CSR1:
 		vcpu_e500->l1csr1 = vcpu->arch.gpr[rs]; break;
 	case SPRN_HID0:
@@ -170,6 +176,10 @@ int kvmppc_core_emulate_mfspr(struct kvm_vcpu *vcpu, int sprn, int rt)
 		vcpu->arch.gpr[rt] |= vcpu_e500->guest_tlb_size[1];
 		break;
 
+#ifdef CONFIG_SYNO_QORIQ
+	case SPRN_L1CSR0:
+		vcpu->arch.gpr[rt] = vcpu_e500->l1csr0; break;
+#endif
 	case SPRN_L1CSR1:
 		vcpu->arch.gpr[rt] = vcpu_e500->l1csr1; break;
 	case SPRN_HID0:

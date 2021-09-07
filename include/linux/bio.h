@@ -126,6 +126,9 @@ struct bio {
 #define BIO_NULL_MAPPED 9	/* contains invalid user pages */
 #define BIO_FS_INTEGRITY 10	/* fs owns integrity data, not block layer */
 #define BIO_QUIET	11	/* Make BIO Quiet */
+#ifdef MY_ABC_HERE
+#define BIO_AUTO_REMAP	12	/* record if auto-remap occurred */
+#endif
 #define bio_flagged(bio, flag)	((bio)->bi_flags & (1 << (flag)))
 
 /*

@@ -5855,6 +5855,14 @@ int ext4_mark_inode_dirty(handle_t *handle, struct inode *inode)
 	int err, ret;
 
 	might_sleep();
+#ifdef MY_ABC_HERE
+	if (IS_UMOUNTED_FILE(inode)) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+		printk("%s(%d) force umount hit.\n", __func__, __LINE__);
+#endif
+		return 0;
+	}
+#endif
 	err = ext4_reserve_inode_write(handle, inode, &iloc);
 	if (ext4_handle_valid(handle) &&
 	    EXT4_I(inode)->i_extra_isize < sbi->s_want_extra_isize &&

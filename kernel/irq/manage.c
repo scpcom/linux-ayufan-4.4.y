@@ -137,6 +137,9 @@ int irq_set_affinity(unsigned int irq, const struct cpumask *cpumask)
 	spin_unlock_irqrestore(&desc->lock, flags);
 	return 0;
 }
+#ifdef CONFIG_SYNO_QORIQ
+EXPORT_SYMBOL(irq_set_affinity);
+#endif
 
 #ifndef CONFIG_AUTO_IRQ_AFFINITY
 /*

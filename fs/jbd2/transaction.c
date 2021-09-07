@@ -1024,7 +1024,14 @@ int jbd2_journal_dirty_metadata(handle_t *handle, struct buffer_head *bh)
 		 * once a transaction -bzzz
 		 */
 		jh->b_modified = 1;
+#ifdef MY_ABC_HERE
+		if (0 >= handle->h_buffer_credits) {
+			printk("handle->h_buffer_credits not enough (%d).\n", handle->h_buffer_credits);
+			goto out_unlock_bh;
+		}
+#else
 		J_ASSERT_JH(jh, handle->h_buffer_credits > 0);
+#endif
 		handle->h_buffer_credits--;
 	}
 

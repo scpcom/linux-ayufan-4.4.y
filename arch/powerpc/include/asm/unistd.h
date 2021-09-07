@@ -355,7 +355,7 @@
 #define SYNOmmap(x)					syscall(__NR_SYNOmmap, x)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_ALLOC
 #define __NR_SYNOMTDAlloc			405
 #define SYNOMTDAlloc(x)				syscall(__NR_SYNOMTDAlloc, x)
 #endif

@@ -174,17 +174,24 @@ vfs_getxattr(struct dentry *dentry, const char *name, void *value, size_t size)
 	if (error)
 		return error;
 #ifdef CONFIG_FS_SYNO_ACL
-	if (name && !strcmp(name, SYNO_ACL_XATTR_INHERIT)) {
+	if (name && (!strcmp(name, SYNO_ACL_XATTR_INHERIT) || !strcmp(name, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY))) {
 		int error = 0;
+		int cmd = SYNO_ACL_INHERITED;
 
-		if (!IS_SYNOACL(inode)) {
-			return -EOPNOTSUPP;
+		if (!strcmp(name, SYNO_ACL_XATTR_INHERIT)) {
+			if (!IS_SYNOACL(inode)) {
+				return -EOPNOTSUPP;
+			}
+			cmd = SYNO_ACL_INHERITED;
+		} else if (!strcmp(name, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY)) {
+			//We should return possible inherited ACL even file is in linux mode.
+			cmd = SYNO_ACL_PSEUDO_INHERIT_ONLY;
 		}
 		error = inode->i_op->syno_permission(dentry, MAY_READ_PERMISSION);
 		if (error) {
 			return error;
 		}
-		return inode->i_op->syno_acl_get(dentry, value, size);
+		return inode->i_op->syno_acl_get(dentry, cmd, value, size);
 	}
 #endif //CONFIG_FS_SYNO_ACL
 	if (!strncmp(name, XATTR_SECURITY_PREFIX,

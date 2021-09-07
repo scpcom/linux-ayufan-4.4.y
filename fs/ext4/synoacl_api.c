@@ -50,10 +50,10 @@ int ext4_mod_syno_access(struct dentry *d, int mask)
 	return inode_permission(d->d_inode, mask);
 }
 
-int ext4_mod_get_syno_acl_inherit(struct dentry *d, void *value, size_t size)
+int ext4_mod_get_syno_acl_inherit(struct dentry *d, int cmd, void *value, size_t size)
 {
 	if (IS_EXT4_ACL_READY(get_syno_acl_inherit)) {
-		return DO_EXT4_ACL(get_syno_acl_inherit, d, value, size);
+		return DO_EXT4_ACL(get_syno_acl_inherit, d, cmd, value, size);
 	}
 	return -EOPNOTSUPP;
 }

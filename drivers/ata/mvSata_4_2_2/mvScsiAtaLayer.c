@@ -976,7 +976,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendVerifyCommand(IN MV_SATA_ADAPTE
         pCommandInfo->PMPort = pScb->target;
         pCommandInfo->commandParams.NoneUdmaCommand.bufPtr = NULL;
         pCommandInfo->commandParams.NoneUdmaCommand.callBack = SALCommandCompletionCB;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
         pCommandInfo->commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
 #endif
         pCommandInfo->commandParams.NoneUdmaCommand.command = MV_ATA_COMMAND_READ_VERIFY_SECTORS_EXT;
@@ -1159,7 +1159,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE mvScsiAtaWriteLong(IN MV_SATA_ADAPTER    *pSa
     pCommandInfo->commandParams.NoneUdmaCommand.bufPtr = (MV_U16_PTR)pScb->pDataBuffer;
     pCommandInfo->commandParams.NoneUdmaCommand.isEXT = MV_FALSE;
     pCommandInfo->commandParams.NoneUdmaCommand.callBack = SALCommandCompletionCB;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
     pCommandInfo->commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
 #endif
     pCommandInfo->commandParams.NoneUdmaCommand.commandId = (MV_VOID_PTR) pScb;
@@ -1266,7 +1266,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE mvScsiAtaReadLong(IN MV_SATA_ADAPTER    *pSat
     pCommandInfo->commandParams.NoneUdmaCommand.bufPtr = (MV_U16_PTR)pScb->pDataBuffer;
     pCommandInfo->commandParams.NoneUdmaCommand.isEXT = MV_FALSE;
     pCommandInfo->commandParams.NoneUdmaCommand.callBack = SALCommandCompletionCB;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
     pCommandInfo->commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
 #endif
     pCommandInfo->commandParams.NoneUdmaCommand.commandId = (MV_VOID_PTR) pScb;
@@ -1378,7 +1378,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSyncCacheCommand(IN MV_SATA_ADA
     pCommandInfo->PMPort = pScb->target;
     pCommandInfo->commandParams.NoneUdmaCommand.bufPtr = NULL;
     pCommandInfo->commandParams.NoneUdmaCommand.callBack = SALCommandCompletionCB;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
     pCommandInfo->commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
 #endif
     pCommandInfo->commandParams.NoneUdmaCommand.commandId = (MV_VOID_PTR) pScb;
@@ -1559,7 +1559,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetModeSenseData(IN MV_SATA_ADAPTER
     pCommandInfo->commandParams.NoneUdmaCommand.bufPtr = pDriveData->identifyBuffer;
     pCommandInfo->commandParams.NoneUdmaCommand.count = 256;         /* 512 bytes */
     pCommandInfo->commandParams.NoneUdmaCommand.callBack = SALCommandCompletionCB;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
     pCommandInfo->commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
 #endif
     pCommandInfo->commandParams.NoneUdmaCommand.command = MV_ATA_COMMAND_IDENTIFY;
@@ -2017,7 +2017,7 @@ mvParseModeCachingPage(MV_SATA_ADAPTER *pSataAdapter,
     pCommandInfo->PMPort = pScb->target;
     pCommandInfo->commandParams.NoneUdmaCommand.bufPtr = NULL;
     pCommandInfo->commandParams.NoneUdmaCommand.callBack = SALCommandCompletionCB;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
     pCommandInfo->commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
 #endif
     pCommandInfo->commandParams.NoneUdmaCommand.command = MV_ATA_COMMAND_SET_FEATURES;
@@ -2396,7 +2396,7 @@ SynoInsertBadSectorRemap(MV_SATA_SCSI_CMD_BLOCK *pScb,
     commandInfo.commandParams.NoneUdmaCommand.isEXT = blLBA48;
     /* Put it with malloc buffer, so we can free it in the call back */
     commandInfo.commandParams.NoneUdmaCommand.commandId = pBuf;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
     commandInfo.commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
     commandInfo.pSynoCmdExt = NULL;
 #endif
@@ -2850,7 +2850,7 @@ static MV_VOID  mvScsiAtaSendSplittedVerifyCommand(IN MV_SATA_SCSI_CMD_BLOCK  *p
     pCommandInfo->PMPort = pScb->target;
     pCommandInfo->commandParams.NoneUdmaCommand.bufPtr = NULL;
     pCommandInfo->commandParams.NoneUdmaCommand.callBack = SALCommandCompletionCB;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
     pCommandInfo->commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
 #endif
     pCommandInfo->commandParams.NoneUdmaCommand.command = MV_ATA_COMMAND_READ_VERIFY_SECTORS;
@@ -2938,7 +2938,7 @@ static MV_VOID  mvScsiAtaSendReadLookAhead(IN MV_SATA_ADAPTER *pSataAdapter,
     pCommandInfo->PMPort = pScb->target;
     pCommandInfo->commandParams.NoneUdmaCommand.bufPtr = NULL;
     pCommandInfo->commandParams.NoneUdmaCommand.callBack = SALCommandCompletionCB;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
     pCommandInfo->commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
 #endif
     pCommandInfo->commandParams.NoneUdmaCommand.command = MV_ATA_COMMAND_SET_FEATURES;

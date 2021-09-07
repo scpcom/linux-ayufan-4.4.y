@@ -186,7 +186,11 @@ int of_mm_gpiochip_add(struct device_node *np,
 	if (!mm_gc->regs)
 		goto err1;
 
+#ifdef CONFIG_SYNO_QORIQ
+	gc->base = 0;
+#else
 	gc->base = -1;
+#endif
 
 	if (!of_gc->xlate)
 		of_gc->xlate = of_gpio_simple_xlate;

@@ -2060,6 +2060,11 @@ ext4_mb_regular_allocator(struct ext4_allocation_context *ac)
 	 */
 repeat:
 	for (; cr < 4 && ac->ac_status == AC_STATUS_CONTINUE; cr++) {
+#ifdef MY_ABC_HERE
+#define SYNO_MBALLOC_RANDOM_THRES 1024
+		ext4_group_t random_interval;
+		random_interval = ngroups / (SYNO_MBALLOC_RANDOM_THRES/2);
+#endif /* MY_ABC_HERE */
 		ac->ac_criteria = cr;
 		/*
 		 * searching for the right group start
@@ -2068,8 +2073,28 @@ repeat:
 		group = ac->ac_g_ex.fe_group;
 
 		for (i = 0; i < ngroups; group++, i++) {
+#ifdef MY_ABC_HERE
+			if (0 == cr) { // only do it on cr==0 for safety
+				if (i >= SYNO_MBALLOC_RANDOM_THRES && 
+						ngroups > 2 * SYNO_MBALLOC_RANDOM_THRES) {
+					ext4_group_t step;
+					step = get_random_int() % random_interval;
+					if (2 > step) {
+						step = 0;
+					} else {
+						step -= 2;
+					}
+					group += step;
+					i += step;
+				}
+			}
+			if (group >= ngroups) {
+				group -= ngroups;
+			}
+#else /* !MY_ABC_HERE */
 			if (group == ngroups)
 				group = 0;
+#endif /* MY_ABC_HERE */
 
 			/* This now checks without needing the buddy page */
 			if (!ext4_mb_good_group(ac, group, cr))

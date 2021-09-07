@@ -60,6 +60,7 @@ config MPC85xx_RDB
 	select PPC_I8259
 	select DEFAULT_UIMAGE
 	select FSL_ULI1575
+	select HAS_RAPIDIO
 	select SWIOTLB
 	help
 	  This option enables support for the MPC85xx RDB (P2020 RDB) board
@@ -77,6 +78,13 @@ config SYNO_MPC8533
 config SYNO_MPC85XX_COMMON
 	bool
 	default y if SYNO_MPC854X || SYNO_MPC8533
+
+config P1022_DS
+	bool "Freescale P1022 DS"
+	select DEFAULT_UIMAGE
+	select SWIOTLB
+	help
+	  This option enables support for the P1022DS board
 
 config SOCRATES
 	bool "Socrates"
@@ -157,6 +165,25 @@ config SBC8560
 	select DEFAULT_UIMAGE
 	help
 	  This option enables support for the Wind River SBC8560 board
+
+config FSL_85XX_CACHE_SRAM
+	bool
+	select PPC_LIB_RHEAP
+
+config FSL_85XX_CACHE_SRAM_BASE
+	hex
+	depends on FSL_85XX_CACHE_SRAM
+	default "0xfff00000"
+
+config P2020DS_EVENT_IRQ
+	bool "Freescale P2020DS Event button handler"
+	depends on MPC85xx_DS
+	default n
+	help
+	  Response to the EVENT button on the P2020DS board, can be used
+	  as a wakeup source for power management.  Note: The interrupt
+	  is conflicting with intx interrupt on PCIE slot2.  Enable this
+	  only when the PCIE slot2 is using MSI or not used.
 
 endif # MPC85xx
 

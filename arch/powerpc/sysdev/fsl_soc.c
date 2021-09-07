@@ -434,12 +434,34 @@ err:
 	printk(KERN_DEBUG " error: %d\n", ret);
 	return ret;
 }
-#endif
 
 arch_initcall(fsl_sec2_of_init);
+#endif
 
+#ifdef CONFIG_SYNO_QORIQ
+#define UART2_TX        0x0
+#define UART2_LCR       0x3
+#define UART2_BASE      0x4600
+
+#define ENABLE_DUART            0x01
+#define SET8N1                  0x3
+#define SOFTWARE_SHUTDOWN       0x31
+#define SOFTWARE_REBOOT         0x43
+#endif
 void fsl_rstcr_restart(char *cmd)
 {
+#if defined(CONFIG_SYNO_QORIQ)
+	u32 __iomem *pUP = ioremap(get_immrbase() + UART2_BASE, 0x100);
+
+	if (pUP) {
+		setbits8((unsigned char *)(pUP + UART2_LCR), SET8N1);
+		setbits8((unsigned char *)(pUP + UART2_TX), SOFTWARE_REBOOT);
+		iounmap(pUP);
+		while (1) ;
+	} else {
+		printk("HW Settings Error: Failed to get immr_base\n");
+	}
+#endif
 	local_irq_disable();
 	if (rstcr)
 		/* set reset control register */

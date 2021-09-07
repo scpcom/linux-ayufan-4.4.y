@@ -201,7 +201,7 @@ config REDBOOT
 
 config HIBERNATE_32
 	bool
-	depends on (PPC_PMAC && !SMP) || BROKEN
+	depends on (PPC_PMAC && !SMP) || BROKEN || P1022_DS
 	default y
 
 config HIBERNATE_64
@@ -216,7 +216,8 @@ config ARCH_HIBERNATION_POSSIBLE
 
 config ARCH_SUSPEND_POSSIBLE
 	def_bool y
-	depends on ADB_PMU || PPC_EFIKA || PPC_LITE5200 || PPC_83xx
+	depends on ADB_PMU || PPC_EFIKA || PPC_LITE5200 || PPC_83xx || \
+		   PPC_85xx || PPC_86xx
 
 config PPC_DCR_NATIVE
 	bool
@@ -313,7 +314,7 @@ config SWIOTLB
 
 config HOTPLUG_CPU
 	bool "Support for enabling/disabling CPUs"
-	depends on SMP && HOTPLUG && EXPERIMENTAL && (PPC_PSERIES || PPC_PMAC)
+	depends on SMP && HOTPLUG && EXPERIMENTAL && (PPC_PSERIES || PPC_PMAC || E500)
 	---help---
 	  Say Y here to be able to disable and re-enable individual
 	  CPUs at runtime on SMP machines.
@@ -629,7 +630,7 @@ config ZONE_DMA
 
 config GENERIC_ISA_DMA
 	bool
-	depends on PPC64 || POWER4 || 6xx && !CPM2
+	depends on PPC64 || PPC32 || POWER4 || 6xx && !CPM2
 	default y
 
 config PPC_INDIRECT_PCI
@@ -652,19 +653,37 @@ config FSL_PCI
 	select PPC_INDIRECT_PCI
 	select PCI_QUIRKS
 
+config FSL_PMC
+	bool
+	default y
+	depends on SUSPEND && (PPC_85xx || PPC_86xx)
+	help
+	  Freescale MPC85xx/MPC86xx power management controller support
+	  (suspend/resume). For MPC83xx see platforms/83xx/suspend.c
+
 config 4xx_SOC
 	bool
 
 config FSL_LBC
-	bool
+	bool "Freescale Local Bus support"
+	depends on FSL_SOC
 	help
-	  Freescale Localbus support
+	  Enables reporting of errors from the Freescale local bus
+	  controller.  Also contains some common code used by
+	  drivers for specific local bus peripherals.
 
 config FSL_GTM
 	bool
 	depends on PPC_83xx || QUICC_ENGINE || CPM2
 	help
 	  Freescale General-purpose Timers support
+
+config FSL_MPIC_MSG_INTS
+	bool
+	depends on MPIC
+	default y
+	help
+	  Freescale MPIC based Message Interrupt support
 
 # Yes MCA RS/6000s exist but Linux-PPC does not currently support any
 config MCA

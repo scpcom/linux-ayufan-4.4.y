@@ -273,6 +273,9 @@ struct mpic
 #ifdef CONFIG_SMP
 	struct irq_chip		hc_ipi;
 #endif
+#ifdef CONFIG_SYNO_QORIQ
+	struct irq_chip         hc_tm;
+#endif
 	const char		*name;
 	/* Flags */
 	unsigned int		flags;
@@ -503,6 +506,11 @@ void mpic_set_clk_ratio(struct mpic *mpic, u32 clock_ratio);
 
 /* Enable/Disable EPIC serial interrupt mode */
 void mpic_set_serial_int(struct mpic *mpic, int enable);
+
+#ifdef CONFIG_SYNO_QORIQ
+/* Allow/Disallow the irq routing to IRQ_OUT under EP mode */
+extern void mpic_irq_set_ep(unsigned int irq, unsigned int ep);
+#endif
 
 #endif /* __KERNEL__ */
 #endif	/* _ASM_POWERPC_MPIC_H */

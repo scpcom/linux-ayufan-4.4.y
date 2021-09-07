@@ -52,6 +52,9 @@ struct kvmppc_vcpu_e500 {
 	u32 mas5;
 	u32 mas6;
 	u32 mas7;
+#ifdef CONFIG_SYNO_QORIQ
+	u32 l1csr0;
+#endif
 	u32 l1csr1;
 	u32 hid0;
 	u32 hid1;

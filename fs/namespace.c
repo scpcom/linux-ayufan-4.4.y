@@ -43,6 +43,10 @@ __cacheline_aligned_in_smp DEFINE_SPINLOCK(vfsmount_lock);
 EXPORT_SYMBOL(vfsmount_lock);
 #endif /* SYNO_AUFS */
 
+#ifdef MY_ABC_HERE
+extern int gSynoHasDynModule;
+#endif
+
 static int event;
 static DEFINE_IDA(mnt_id_ida);
 static DEFINE_IDA(mnt_group_ida);
@@ -2008,11 +2012,12 @@ long do_mount(char *dev_name, char *dir_name, char *type_page,
 	struct path path;
 	int retval = 0;
 	int mnt_flags = 0;
-#ifdef MY_DEF_HERE
+#if defined(MY_ABC_HERE)
 	extern int gSynoInstallFlag;
 	if ( 0 == gSynoInstallFlag &&
-            NULL != dev_name &&
-            strstr(dev_name, SYNO_USB_FLASH_DEVICE_PATH) ) {
+			NULL != dev_name &&
+			strstr(dev_name, SYNO_USB_FLASH_DEVICE_PATH) &&
+			gSynoHasDynModule) {
 		return -EINVAL;
 	}
 #endif

@@ -37,6 +37,7 @@
 #define SYNO_KW_RS411 0x8 
 #define SYNO_KW_RS212 0x9 
 #define SYNO_KW_DS112j 0x0 
+#define SYNO_KW_DS212w 0xc
 
 #define GPIO_UNDEF				0xFF
 
@@ -507,13 +508,13 @@ MV_U8 SYNOKirkwoodIsBoardNeedPowerUpHDD(MV_U32 disk_id) {
 
 	switch(boardId) {
 	case SYNO_DS109_ID:
-		if (0 == strncmp(HW_DS212j, gszSynoHWVersion, strlen(HW_DS212j)) && 2 >= disk_id)
+		if ((0 == strncmp(HW_DS212jv10, gszSynoHWVersion, strlen(HW_DS212jv10)) || 0 == strncmp(HW_DS212jv20, gszSynoHWVersion, strlen(HW_DS212jv20))) && 2 >= disk_id)
 			ret = 1;
 		else if (2 == disk_id)
 			ret = 1;
 		break;
 	case SYNO_DS212_ID:
-		if (0 == strncmp(HW_DS112, gszSynoHWVersion, strlen(HW_DS112)) && 1 == disk_id ) {
+		if ((0 == strncmp(HW_DS112, gszSynoHWVersion, strlen(HW_DS112)) || 0 == strncmp(HW_DS112pv10, gszSynoHWVersion, strlen(HW_DS112pv10))) && 1 == disk_id ) {
 			ret = 1;
 		} else if (2 >= disk_id ) {
 			ret = 1;
@@ -649,7 +650,8 @@ KW_6282_211_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 		gpio_211.fan.fan_2 = GPIO_UNDEF;
 		gpio_211.fan.fan_3 = GPIO_UNDEF;
 		printk("Apply DS 211+ GPIO\n");
-	} else if (SYNO_KW_DS212 == Syno6282ModelIDGet(&gpio_211)) {
+	} else if (SYNO_KW_DS212 == Syno6282ModelIDGet(&gpio_211) ||
+		SYNO_KW_DS212w == Syno6282ModelIDGet(&gpio_211)) {
 		gpio_211.fan.fan_1 = GPIO_UNDEF;
 		gpio_211.fan.fan_2 = GPIO_UNDEF;
 		gpio_211.fan.fan_3 = GPIO_UNDEF;
@@ -662,6 +664,13 @@ KW_6282_211_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 
 static void 
 KW_6282_112_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
+{
+	KW_6282_211_GPIO_init(global_gpio);
+	global_gpio->hdd_pm.hdd1_pm = 30;
+}
+
+static void
+KW_6282_112p_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 {
 	KW_6282_211_GPIO_init(global_gpio);
 	global_gpio->hdd_pm.hdd1_pm = 30;
@@ -764,7 +773,11 @@ KW_6282_DS_4BAY_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 						},
 	};
 
+	//DS412j uses the same Model ID with DS411, and their difference is HDD1 power GPIO only
 	if (SYNO_KW_DS411 == Syno6282ModelIDGet(&gpio_ds_6282_4bay)) {
+		if (0 == strncmp(HW_DS412jv10, gszSynoHWVersion, strlen(HW_DS412jv10))){
+			gpio_ds_6282_4bay.hdd_pm.hdd1_pm = 30;
+		}
 		gpio_ds_6282_4bay.hdd_pm.hdd2_pm = 34;
 		gpio_ds_6282_4bay.hdd_pm.hdd3_pm = 44;
 		gpio_ds_6282_4bay.hdd_pm.hdd4_pm = 45;
@@ -1323,7 +1336,7 @@ void synology_gpio_init(void)
 	switch(boardId) {
 	case SYNO_DS109_ID:
 		printk("Synology 6281 1, 2 bay GPIO Init\n");
-		if (0 == strncmp(HW_DS212j, gszSynoHWVersion, strlen(HW_DS212j))) {
+		if (0 == strncmp(HW_DS212jv10, gszSynoHWVersion, strlen(HW_DS212jv10)) || 0 == strncmp(HW_DS212jv20, gszSynoHWVersion, strlen(HW_DS212jv20))) {
 			KW_6281_212j_GPIO_init(&generic_gpio);
 		} else {
 			KW_6281_109_GPIO_init(&generic_gpio);
@@ -1361,6 +1374,9 @@ void synology_gpio_init(void)
 		if (0 == strncmp(HW_DS112, gszSynoHWVersion, strlen(HW_DS112))) {
 			KW_6282_112_GPIO_init(&generic_gpio);
 			printk("Synology 6282 DS112 GPIO Init\n");
+		} else if (0 == strncmp(HW_DS112pv10, gszSynoHWVersion, strlen(HW_DS112pv10))) {
+			KW_6282_112p_GPIO_init(&generic_gpio);
+			printk("Synology 6282 DS112+ GPIO Init\n");
 		} else {
 			KW_6282_211_GPIO_init(&generic_gpio);
 			printk("Synology 6282 1, 2 bay GPIO Init\n");

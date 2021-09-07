@@ -1069,6 +1069,11 @@ static void __sk_free(struct sock *sk)
 	}
 #endif
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_TCP_FAST_ACK
+	skb_queue_purge(&sk->sk_ack_queue);
+#endif
+#endif
 	if (sk->sk_destruct)
 		sk->sk_destruct(sk);
 
@@ -1085,6 +1090,14 @@ static void __sk_free(struct sock *sk)
 		printk(KERN_DEBUG "%s: optmem leakage (%d bytes) detected.\n",
 		       __func__, atomic_read(&sk->sk_omem_alloc));
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_GFAR_HW_TCP_RECEIVE_OFFLOAD
+	if (sk->tcp_hw_channel) {
+		*((struct sock **)sk->tcp_hw_channel) = NULL;
+		sk->tcp_hw_channel = NULL;
+	}
+#endif
+#endif
 	put_net(sock_net(sk));
 	sk_prot_free(sk->sk_prot_creator, sk);
 }
@@ -1153,6 +1166,11 @@ struct sock *sk_clone(const struct sock *sk, const gfp_t priority)
 #ifdef CONFIG_NET_DMA
 		skb_queue_head_init(&newsk->sk_async_wait_queue);
 #endif
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_TCP_FAST_ACK
+		skb_queue_head_init(&newsk->sk_ack_queue);
+#endif
+#endif
 
 		rwlock_init(&newsk->sk_dst_lock);
 		rwlock_init(&newsk->sk_callback_lock);
@@ -1166,6 +1184,12 @@ struct sock *sk_clone(const struct sock *sk, const gfp_t priority)
 		newsk->sk_send_head	= NULL;
 		newsk->sk_userlocks	= sk->sk_userlocks & ~SOCK_BINDPORT_LOCK;
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_GFAR_HW_TCP_RECEIVE_OFFLOAD
+		newsk->init_seq    = sk->init_seq;
+		newsk->tcp_hw_channel = NULL;
+#endif
+#endif
 		sock_reset_flag(newsk, SOCK_DONE);
 		skb_queue_head_init(&newsk->sk_error_queue);
 
@@ -1884,6 +1908,11 @@ void sock_init_data(struct socket *sock, struct sock *sk)
 #ifdef CONFIG_NET_DMA
 	skb_queue_head_init(&sk->sk_async_wait_queue);
 #endif
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_TCP_FAST_ACK
+	skb_queue_head_init(&sk->sk_ack_queue);
+#endif
+#endif
 
 	sk->sk_send_head	=	NULL;
 
@@ -1927,6 +1956,12 @@ void sock_init_data(struct socket *sock, struct sock *sk)
 	sk->sk_rcvtimeo		=	MAX_SCHEDULE_TIMEOUT;
 	sk->sk_sndtimeo		=	MAX_SCHEDULE_TIMEOUT;
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_GFAR_HW_TCP_RECEIVE_OFFLOAD
+	sk->tcp_hw_channel	=	NULL;
+	sk->init_seq		=	0;
+#endif
+#endif
 	sk->sk_stamp = ktime_set(-1L, 0);
 
 	/*

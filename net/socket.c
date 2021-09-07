@@ -2461,6 +2461,14 @@ int kernel_sock_shutdown(struct socket *sock, enum sock_shutdown_cmd how)
 	return sock->ops->shutdown(sock, how);
 }
 
+#ifdef CONFIG_SYNO_QORIQ
+int is_sock_file(struct file *f)
+{
+	return (f->f_op == &socket_file_ops) ? 1 : 0;
+}
+EXPORT_SYMBOL(is_sock_file);
+#endif
+
 EXPORT_SYMBOL(sock_create);
 EXPORT_SYMBOL(sock_create_kern);
 EXPORT_SYMBOL(sock_create_lite);

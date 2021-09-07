@@ -509,6 +509,11 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 			return 1;
 		}
 #endif
+#if defined(CONFIG_SYNO_QORIQ)
+		if(!strcmp(buf,"fsl-ehci.0-1.2")) {
+			return 1;
+		}
+#endif
 	}
 	return 0;
 }
@@ -524,6 +529,11 @@ int blIsCardReader(struct usb_device *usbdev)
 		sprintf(buf, "%s-%s", usbdev->bus->bus_name, usbdev->devpath);
 #if defined(CONFIG_MACH_SYNOLOGY_6282) && !defined(CONFIG_SYNO_MV88F6281_USBSTATION)
 		if(!strcmp(buf,"orion-ehci.0-1.4")) {
+			return 1;
+		}
+#endif
+#if defined(CONFIG_SYNO_QORIQ)
+		if(!strcmp(buf,"fsl-ehci.0-1.3")) {
 			return 1;
 		}
 #endif

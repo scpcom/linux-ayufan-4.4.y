@@ -27,7 +27,11 @@ obj-$(CONFIG_ATL1) += atlx/
 obj-$(CONFIG_ATL2) += atlx/
 obj-$(CONFIG_ATL1E) += atl1e/
 obj-$(CONFIG_ATL1C) += atl1c/
+ifeq ($(CONFIG_SYNO_QORIQ),y)
+obj-$(CONFIG_GIANFAR) += gianfar_qoriq/
+else
 obj-$(CONFIG_GIANFAR) += gianfar_driver.o
+endif
 obj-$(CONFIG_TEHUTI) += tehuti.o
 obj-$(CONFIG_ENIC) += enic/
 obj-$(CONFIG_JME) += jme.o
@@ -35,14 +39,25 @@ obj-$(CONFIG_BE2NET) += benet/
 obj-$(CONFIG_VMXNET3) += vmxnet3/
 obj-$(CONFIG_SYNOPSYS_GMAC) += gmac/
 
+ifeq ($(CONFIG_SYNO_QORIQ),y)
+else
 gianfar_driver-objs := gianfar.o \
 		gianfar_ethtool.o \
 		gianfar_sysfs.o
+endif
 
 obj-$(CONFIG_UCC_GETH) += ucc_geth_driver.o
 ucc_geth_driver-objs := ucc_geth.o ucc_geth_ethtool.o
+ifeq ($(CONFIG_SYNO_QORIQ),y)
+ifeq ($(CONFIG_MPC85xx),y)
+  obj-$(CONFIG_BOARDNET) += fsl_pci_veth/
+  obj-$(CONFIG_CARDNET) += fsl_pci_veth/
+endif
+else
 
 obj-$(CONFIG_FSL_PQ_MDIO) += fsl_pq_mdio.o
+
+endif
 
 #
 # link order important here

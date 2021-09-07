@@ -43,7 +43,7 @@ disclaimer.
 #include "mvIALCommonUtils.h"
 #include "mvStorageDev.h"
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 //#define DEBUGMSG(x...) printk(x)
 #define DEBUGMSG(x...)
 #endif
@@ -291,7 +291,7 @@ MV_BOOLEAN mvAdapterStartInitialization(MV_SATA_ADAPTER *pSataAdapter,
     return mvAdapterStateMachine(ialExt, scsiAdapterExt);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 extern int syno_mv_scsi_host_no_get(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex);
 extern int (*funcSYNOSendEboxRefreshEvent)(int portIndex);
 #endif
@@ -335,7 +335,7 @@ void mvRestartChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
             == MV_SATA_DEVICE_TYPE_PM)
         {
             bBusChangeNotify = MV_TRUE;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 			if(funcSYNOSendEboxRefreshEvent) {
 				funcSYNOSendEboxRefreshEvent(syno_mv_scsi_host_no_get(pSataAdapter, channelIndex));
 			}
@@ -1031,7 +1031,7 @@ static MV_BOOLEAN mvQueuePMAccessRegisterCommand(
     pCommandInfo->commandParams.NoneUdmaCommand.device = (MV_U8)PMPort;
     pCommandInfo->commandParams.NoneUdmaCommand.callBack =
     mvPMCommandCompletionCB;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
     pCommandInfo->commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
 #endif
 
@@ -1106,7 +1106,7 @@ static MV_BOOLEAN mvQueuePMAccessRegisterCommand(
     return MV_TRUE;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 static MV_BOOLEAN SynoMVPMCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
                                           MV_U8 channelIndex,
                                           MV_COMPLETION_TYPE comp_type,
@@ -1461,7 +1461,7 @@ static MV_BOOLEAN mvPMDisableAsyncNotify(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt
 
 
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 static inline void syno_prepare_custom_info(MV_IAL_COMMON_ADAPTER_EXTENSION *pIALExt,
                                             MV_U8 channelIndex,
                                             MV_SATA_PM_DEVICE_INFO *PMInfo)
@@ -1548,7 +1548,7 @@ static MV_BOOLEAN mvConfigurePMDevice(
              PMInfo.numberOfPorts);
     ialExt->IALChannelExt[channelIndex].PMnumberOfPorts = PMInfo.numberOfPorts;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
     syno_prepare_custom_info(ialExt, channelIndex, &PMInfo);
     if (MV_FALSE == syno_mvSata_is_synology_pm(ialExt, channelIndex)) {
         ialExt->IALChannelExt[channelIndex].PMnumberOfPorts = 1;
@@ -3207,7 +3207,7 @@ static MV_BOOLEAN mvGetDisksModes(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     return MV_TRUE;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 static inline void syno_pm_device_info_set(MV_SATA_ADAPTER *pSataAdapter, 
                                     MV_U8 channelIndex, 
                                     u8 rw, 
@@ -3357,7 +3357,7 @@ syno_mvSata_is_synology_pm(MV_IAL_COMMON_ADAPTER_EXTENSION *pIALExt, MV_U8 chann
 END:
     return ret;
 }
-#endif // MY_ABC_HERE
+#endif // SYNO_SATA_PM_DEVICE_GPIO
 
 #ifdef MY_ABC_HERE
 /**

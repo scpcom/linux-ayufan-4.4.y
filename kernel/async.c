@@ -208,44 +208,6 @@ static async_cookie_t __async_schedule(async_func_ptr *ptr, void *data, struct l
 	return newcookie;
 }
 
-#ifdef MY_ABC_HERE
-static void __syno_async_schedule_enabled_set(int iValue)
-{
-	async_enabled = iValue;
-}
-
-static int __syno_async_schedule_enabled_get(void)
-{
-	return async_enabled;
-}
-
-/**
- * syno_async_schedule_enabled_set - set the value of async_enabled
- * @iValue: function to execute asynchronously
- *
- * Note: set async_enabled to
- *       0 : enable async schedule
- *       1 : disable async schedule
- *
- */
-void syno_async_schedule_enabled_set(int iValue)
-{
-	__syno_async_schedule_enabled_set(iValue);
-}
-EXPORT_SYMBOL(syno_async_schedule_enabled_set);
-
-/**
- * syno_async_schedule_enabled_get - get the value of async_enabled
- *
- * Returns the value of async_enabled
- */
-int syno_async_schedule_enabled_get(void)
-{
-	return __syno_async_schedule_enabled_get();
-}
-EXPORT_SYMBOL(syno_async_schedule_enabled_get);
-#endif
-
 /**
  * async_schedule - schedule a function for asynchronous execution
  * @ptr: function to execute asynchronously

@@ -59,6 +59,11 @@ struct mpc_i2c {
 	wait_queue_head_t queue;
 	struct i2c_adapter adap;
 	int irq;
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_SUSPEND
+	u32 fdr, dfsrr;
+#endif
+#endif
 };
 
 struct mpc_i2c_divider {
@@ -622,12 +627,39 @@ static const struct of_device_id mpc_i2c_of_match[] = {
 
 MODULE_DEVICE_TABLE(of, mpc_i2c_of_match);
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_SUSPEND
+static int mpc_i2c_suspend(struct of_device *op, pm_message_t state)
+{
+	struct mpc_i2c *i2c = dev_get_drvdata(&op->dev);
+
+	i2c->fdr = readb(i2c->base + MPC_I2C_FDR);
+	i2c->dfsrr = readb(i2c->base + MPC_I2C_DFSRR);
+	return 0;
+}
+
+static int mpc_i2c_resume(struct of_device *op, pm_message_t state)
+{
+	struct mpc_i2c *i2c = dev_get_drvdata(&op->dev);
+
+	writeb(i2c->fdr, i2c->base + MPC_I2C_FDR);
+	writeb(i2c->dfsrr, i2c->base + MPC_I2C_DFSRR);
+	return 0;
+}
+#endif
+#endif
 
 /* Structure for a device driver */
 static struct of_platform_driver mpc_i2c_driver = {
 	.match_table	= mpc_i2c_of_match,
 	.probe		= fsl_i2c_probe,
 	.remove		= __devexit_p(fsl_i2c_remove),
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_SUSPEND
+	.suspend	= mpc_i2c_suspend,
+	.resume		= mpc_i2c_resume,
+#endif
+#endif
 	.driver		= {
 		.owner	= THIS_MODULE,
 		.name	= DRV_NAME,

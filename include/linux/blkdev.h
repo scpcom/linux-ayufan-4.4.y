@@ -116,6 +116,9 @@ enum rq_flag_bits {
 	__REQ_IO_STAT,		/* account I/O stat */
 	__REQ_MIXED_MERGE,	/* merge of different types, fail separately */
 	__REQ_NR_BITS,		/* stops here */
+#ifdef MY_ABC_HERE
+	__REQ_AUTO_REMAP,	/* auto remap occurred */
+#endif
 };
 
 #define REQ_RW		(1 << __REQ_RW)
@@ -144,6 +147,9 @@ enum rq_flag_bits {
 #define REQ_NOIDLE	(1 << __REQ_NOIDLE)
 #define REQ_IO_STAT	(1 << __REQ_IO_STAT)
 #define REQ_MIXED_MERGE	(1 << __REQ_MIXED_MERGE)
+#ifdef MY_ABC_HERE
+#define REQ_AUTO_REMAP (1 << __REQ_AUTO_REMAP)
+#endif
 
 #define REQ_FAILFAST_MASK	(REQ_FAILFAST_DEV | REQ_FAILFAST_TRANSPORT | \
 				 REQ_FAILFAST_DRIVER)

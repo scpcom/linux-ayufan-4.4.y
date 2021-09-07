@@ -218,6 +218,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define     MV_MX25L3206_MAX_FAST_SPI_FREQ      50000000 /*50MHz*/
 #define     MV_MX25L3206_FAST_READ_DUMMY_BYTES  1
 
+#define     MV_MX25L6406_BLOCK_SIZE             0x10000 /* 64K */
+#define     MV_MX25L6406_BLOCK_NUMBER           128
+#define     MV_MX25L6406_DEVICE_ID              0xC22017
+#define     MV_MX25L6406_MAX_SPI_FREQ           20000000 /*20MHz*/
+#define     MV_MX25L6406_MAX_FAST_SPI_FREQ      50000000 /*50MHz*/
+#define     MV_MX25L6406_FAST_READ_DUMMY_BYTES  1
+
 #define		MV_N25Q_WREN_CMND_OPCD				0x06    /* Write Enable */
 #define		MV_N25Q_WRDI_CMND_OPCD				0x04    /* Write Disable */
 #define		MV_N25Q_RDID_CMND_OPCD				0x9F    /* Read ID */

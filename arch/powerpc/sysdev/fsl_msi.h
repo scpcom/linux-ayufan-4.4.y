@@ -32,8 +32,15 @@ struct fsl_msi {
 	u32 msi_addr_hi;
 	void __iomem *msi_regs;
 	u32 feature;
+#ifdef CONFIG_SYNO_QORIQ
+	int msi_virqs[NR_MSI_REG];
+#endif
 
 	struct msi_bitmap bitmap;
+#ifdef CONFIG_SYNO_QORIQ
+
+	struct list_head list;          /* support multiple MSI banks */
+#endif
 };
 
 #endif /* _POWERPC_SYSDEV_FSL_MSI_H */

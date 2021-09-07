@@ -11,7 +11,7 @@
 #define SYNO_HAVE_KERNEL_VERSION(a,b,c) (LINUX_VERSION_CODE >= KERNEL_VERSION((a),(b),(c)) )
 #define SYNO_HAVE_GCC_VERSION(a,b) (__GNUC__ > (a) || (__GNUC__ == (a) && __GNUC_MINOR__ >= (b)))
 #define SYNO_HAVE_GLIBC_VERSION(a,b) ( __GLIBC__ > (a) || (__GLIBC__ == (a) && __GLIBC_MINOR__ >= (b)))
-#if 0  
+#if 1
 #define SYNO_USB_FLASH_DEVICE_INDEX 255
 #define SYNO_USB_FLASH_DEVICE_NAME  "synoboot"
 #define SYNO_USB_FLASH_DEVICE_PATH  "/dev/synoboot"
@@ -23,6 +23,10 @@
 #define IS_SYNO_USBBOOT_ID_PRODUCT(PRODUCT) (0xF400 == (PRODUCT))
 #endif
 
+#endif
+
+#if defined(MY_ABC_HERE)
+#define SYNO_MTD_ALLOC
 #endif
 
 #if 1
@@ -51,6 +55,10 @@
 #define SYNO_MAX_INTERNAL_DISK	15
 #endif
 
+#endif
+
+#if 1 && defined(MY_ABC_HERE)
+#define SYNO_SATA_PM_DEVICE_GPIO
 #endif
 
 #ifdef MY_ABC_HERE
@@ -111,5 +119,7 @@
 #define SYNO_ISCSI_DEVICE_INDEX    (26 + 25 * 26)    
 #endif
 
+#define SYNO_RTL8712_DEBUG_MSG 0
+#define SYNO_RTL8192_DEBUG_MSG 0
 #endif
 

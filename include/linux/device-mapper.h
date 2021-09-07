@@ -101,6 +101,11 @@ typedef void (*dm_io_hints_fn) (struct dm_target *ti,
  */
 typedef int (*dm_busy_fn) (struct dm_target *ti);
 
+#ifdef MY_ABC_HERE
+typedef void (*dm_lvinfoset_fn) (struct dm_target *ti);
+typedef sector_t (*dm_lg_sector_get_fn) (sector_t sector, struct dm_target *ti);
+#endif
+
 void dm_error(const char *message);
 
 /*
@@ -155,6 +160,10 @@ struct target_type {
 	dm_busy_fn busy;
 	dm_iterate_devices_fn iterate_devices;
 	dm_io_hints_fn io_hints;
+#ifdef MY_ABC_HERE
+	dm_lvinfoset_fn lvinfoset;
+	dm_lg_sector_get_fn lg_sector_get;
+#endif
 
 	/* For internal device-mapper use. */
 	struct list_head list;

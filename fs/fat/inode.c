@@ -1508,7 +1508,9 @@ int fat_fill_super(struct super_block *sb, void *data, int silent,
 	sbi->nls_disk = load_nls(buf);
 	if (!sbi->nls_disk) {
 #ifdef MY_ABC_HERE
-		printk(KERN_ERR "FAT: nls_disk load default table\n");
+		if(!silent) {
+			printk(KERN_ERR "FAT: nls_disk load default table\n");
+		}
 		sbi->nls_disk = load_nls_default();
 		if (!sbi->nls_disk){
 			printk(KERN_ERR "FAT: nls_disk load default failed\n");
@@ -1525,7 +1527,9 @@ int fat_fill_super(struct super_block *sb, void *data, int silent,
 		sbi->nls_io = load_nls(sbi->options.iocharset);
 		if (!sbi->nls_io) {
 #ifdef MY_ABC_HERE
-			printk(KERN_ERR "FAT: nls_io load default table\n");
+			if(!silent) {
+				printk(KERN_ERR "FAT: nls_io load default table\n");
+			}
 			sbi->nls_io = load_nls_default();
 			if (!sbi->nls_io){
 				printk(KERN_ERR "FAT: nls_io load default failed\n");

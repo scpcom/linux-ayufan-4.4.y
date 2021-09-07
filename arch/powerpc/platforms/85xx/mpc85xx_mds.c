@@ -149,17 +149,76 @@ static int mpc8568_mds_phy_fixups(struct phy_device *phydev)
 	return err;
 }
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_PCI
+/*Host/agent status can be read from porbmsr in the global utilities*/
+static int get_p1021mds_host_agent(void)
+{
+	struct device_node *np;
+	void __iomem *gur_regs;
+	u32 host_agent;
+
+	np = of_find_compatible_node(NULL, NULL, "fsl,p1021-guts");
+	if (np == NULL) {
+		printk(KERN_ERR "Could not find global-utilities node\n");
+		return 0;
+	}
+
+	gur_regs = of_iomap(np, 0);
+	of_node_put(np);
+	if (!gur_regs) {
+		printk(KERN_ERR "Failed to map global-utilities register space\n");
+		return 0;
+	}
+	host_agent = (in_be32(gur_regs + 4) & 0x00070000) >> 16 ;
+
+	iounmap(gur_regs);
+
+	return host_agent;
+}
+
+/*
+ * To judge if the PCI(e) controller is host/agent mode through
+ * the PORBMSR register.
+ *     0: agent mode
+ *     1: host mode
+ */
+static bool p1021mds_pci_is_host(u32 host_agent, resource_size_t res)
+{
+	switch (res & 0xfffff) {
+	case 0xa000:    /* PCIe1 */
+		return host_agent & 0x2;
+		break;
+	case 0x9000:    /* PCIe2 */
+		return host_agent & 0x1;
+		break;
+	default:
+		return true;
+	}
+}
+#endif
+#endif
+
 /* ************************************************************************
  *
  * Setup the architecture
  *
  */
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_SMP
+extern void __init mpc85xx_smp_init(void);
+#endif
+#endif
+
 static void __init mpc85xx_mds_setup_arch(void)
 {
 	struct device_node *np;
 	static u8 __iomem *bcsr_regs = NULL;
 #ifdef CONFIG_PCI
 	struct pci_controller *hose;
+#ifdef CONFIG_SYNO_QORIQ
+	u32 host_agent;
+#endif
 #endif
 	dma_addr_t max = 0xffffffff;
 
@@ -177,11 +236,18 @@ static void __init mpc85xx_mds_setup_arch(void)
 	}
 
 #ifdef CONFIG_PCI
+#ifdef CONFIG_SYNO_QORIQ
+	host_agent = get_p1021mds_host_agent();
+#endif
 	for_each_node_by_type(np, "pci") {
 		if (of_device_is_compatible(np, "fsl,mpc8540-pci") ||
 		    of_device_is_compatible(np, "fsl,mpc8548-pcie")) {
 			struct resource rsrc;
 			of_address_to_resource(np, 0, &rsrc);
+#ifdef CONFIG_SYNO_QORIQ
+			if (!p1021mds_pci_is_host(host_agent, rsrc.start))
+				continue;
+#endif
 			if ((rsrc.start & 0xfffff) == 0x8000)
 				fsl_add_bridge(np, 1);
 			else
@@ -192,6 +258,12 @@ static void __init mpc85xx_mds_setup_arch(void)
 					hose->dma_window_size);
 		}
 	}
+#endif
+
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_SMP
+	mpc85xx_smp_init();
+#endif
 #endif
 
 #ifdef CONFIG_QUICC_ENGINE
@@ -317,8 +389,32 @@ static int __init mpc85xx_publish_devices(void)
 machine_device_initcall(mpc8568_mds, mpc85xx_publish_devices);
 machine_device_initcall(mpc8569_mds, mpc85xx_publish_devices);
 
+#ifdef CONFIG_SYNO_QORIQ
+static struct of_device_id p1021_ids[] = {
+	{ .type = "soc", },
+	{ .compatible = "soc", },
+	{ .compatible = "simple-bus", },
+	{ .type = "qe", },
+	{ .compatible = "fsl,qe", },
+	{ .compatible = "gianfar", },
+	{},
+};
+
+static int __init p1021_publish_devices(void)
+{
+	/* Publish the QE devices */
+	of_platform_bus_probe(NULL, p1021_ids, NULL);
+
+	return 0;
+}
+machine_device_initcall(p1021_mds, p1021_publish_devices);
+#endif
+
 machine_arch_initcall(mpc8568_mds, swiotlb_setup_bus_notifier);
 machine_arch_initcall(mpc8569_mds, swiotlb_setup_bus_notifier);
+#ifdef CONFIG_SYNO_QORIQ
+machine_arch_initcall(p1021_mds, swiotlb_setup_bus_notifier);
+#endif
 
 static void __init mpc85xx_mds_pic_init(void)
 {
@@ -337,8 +433,14 @@ static void __init mpc85xx_mds_pic_init(void)
 	}
 
 	mpic = mpic_alloc(np, r.start,
+#ifdef CONFIG_SYNO_QORIQ
+			MPIC_PRIMARY | MPIC_WANTS_RESET | MPIC_BIG_ENDIAN |
+			MPIC_BROKEN_FRR_NIRQS | MPIC_SINGLE_DEST_CPU,
+#else
 			MPIC_PRIMARY | MPIC_WANTS_RESET | MPIC_BIG_ENDIAN,
+#endif
 			0, 256, " OpenPIC  ");
+
 	BUG_ON(mpic == NULL);
 	of_node_put(np);
 
@@ -397,3 +499,27 @@ define_machine(mpc8569_mds) {
 	.pcibios_fixup_bus	= fsl_pcibios_fixup_bus,
 #endif
 };
+
+#ifdef CONFIG_SYNO_QORIQ
+static int __init p1021_mds_probe(void)
+{
+	unsigned long root = of_get_flat_dt_root();
+
+	return of_flat_dt_is_compatible(root, "fsl,P1021MDS");
+
+}
+
+define_machine(p1021_mds) {
+	.name		= "P1021 MDS",
+	.probe		= p1021_mds_probe,
+	.setup_arch	= mpc85xx_mds_setup_arch,
+	.init_IRQ	= mpc85xx_mds_pic_init,
+	.get_irq	= mpic_get_irq,
+	.restart	= fsl_rstcr_restart,
+	.calibrate_decr	= generic_calibrate_decr,
+	.progress	= udbg_progress,
+#ifdef CONFIG_PCI
+	.pcibios_fixup_bus	= fsl_pcibios_fixup_bus,
+#endif
+};
+#endif

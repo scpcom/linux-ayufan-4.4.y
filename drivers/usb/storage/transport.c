@@ -1019,22 +1019,6 @@ int usb_stor_Bulk_max_lun(struct us_data *us)
 	return 0;
 }
 
-#ifdef MY_ABC_HERE
-static inline void delay_for_JM(struct us_data *us)
-{
-	if (le16_to_cpu(us->pusb_dev->descriptor.idVendor) == 0x152d) {
-		if (USB_SPEED_SUPER == us->pusb_dev->speed) {
-			if (le16_to_cpu(us->pusb_dev->descriptor.idProduct) == 0x0539) {
-				udelay(300);
-			}
-			udelay(500);
-		} else {
-			udelay(100);
-		}
-	}
-}
-#endif
-
 int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 {
 	struct bulk_cb_wrap *bcb = (struct bulk_cb_wrap *) us->iobuf;
@@ -1074,9 +1058,6 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 			bcb->Length);
 	result = usb_stor_bulk_transfer_buf(us, us->send_bulk_pipe,
 				bcb, cbwlen, NULL);
-#ifdef MY_ABC_HERE
-	delay_for_JM(us);
-#endif
 	US_DEBUGP("Bulk command transfer result=%d\n", result);
 	if (result != USB_STOR_XFER_GOOD)
 		return USB_STOR_TRANSPORT_ERROR;
@@ -1094,9 +1075,6 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		unsigned int pipe = srb->sc_data_direction == DMA_FROM_DEVICE ? 
 				us->recv_bulk_pipe : us->send_bulk_pipe;
 		result = usb_stor_bulk_srb(us, pipe, srb);
-#ifdef MY_ABC_HERE
-		delay_for_JM(us);
-#endif
 		US_DEBUGP("Bulk data transfer result 0x%x\n", result);
 		if (result == USB_STOR_XFER_ERROR)
 			return USB_STOR_TRANSPORT_ERROR;
@@ -1119,9 +1097,6 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 	US_DEBUGP("Attempting to get CSW...\n");
 	result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, &cswlen);
-#ifdef MY_ABC_HERE
-	delay_for_JM(us);
-#endif
 
 	/* Some broken devices add unnecessary zero-length packets to the
 	 * end of their data transfers.  Such packets show up as 0-length
@@ -1131,9 +1106,6 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		US_DEBUGP("Received 0-length CSW; retrying...\n");
 		result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, &cswlen);
-#ifdef MY_ABC_HERE
-	delay_for_JM(us);
-#endif
 	}
 
 	/* did the attempt to read the CSW fail? */
@@ -1143,9 +1115,6 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		US_DEBUGP("Attempting to get CSW (2nd try)...\n");
 		result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, NULL);
-#ifdef MY_ABC_HERE
-	delay_for_JM(us);
-#endif
 	}
 
 	/* if we still have a failure at this point, we're in trouble */
@@ -1203,9 +1172,6 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		}
 	}
 
-#ifdef MY_ABC_HERE
-	delay_for_JM(us);
-#endif
 
 	/* based on the status code, we report good or bad */
 	switch (bcs->Status) {

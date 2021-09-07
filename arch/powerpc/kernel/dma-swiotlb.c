@@ -71,7 +71,11 @@ static int ppc_swiotlb_bus_notify(struct notifier_block *nb,
 	sd->max_direct_dma_addr = 0;
 
 	/* May need to bounce if the device can't address all of DRAM */
+#ifdef CONFIG_SYNO_QORIQ
+	if ((dma_get_mask(dev) + 1) < lmb_end_of_DRAM())
+#else
 	if (dma_get_mask(dev) < lmb_end_of_DRAM())
+#endif
 		set_dma_ops(dev, &swiotlb_dma_ops);
 
 	return NOTIFY_DONE;

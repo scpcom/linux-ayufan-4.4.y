@@ -2135,7 +2135,7 @@ MV_BOOLEAN  mvStorageDevSetDeviceType(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIn
     }
 
     pSataChannel->deviceType = deviceType;
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(MY_ABC_HERE)
     pSataChannel->oldDeviceType = deviceType;
 #endif
 

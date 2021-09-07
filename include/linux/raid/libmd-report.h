@@ -15,4 +15,9 @@ void SynoReportCorrectBadSector(sector_t sector, int md_minor,
 
 #endif /* MY_ABC_HERE */
 
+#ifdef MY_ABC_HERE
+extern int (*funcSYNOSendAutoRemapLVMEvent)(const char*, unsigned long long, unsigned int);
+extern int (*funcSYNOSendAutoRemapRaidEvent)(unsigned int, unsigned long long, unsigned int);
+#endif
+
 #endif /* _LIBMD_REPORT_H */

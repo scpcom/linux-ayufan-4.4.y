@@ -3,6 +3,10 @@
 #ifdef __KERNEL__
 
 #include <asm/mmu.h>
+#ifdef CONFIG_SYNO_QORIQ
+#include <asm/of_device.h>
+#include <linux/suspend.h>
+#endif
 
 struct spi_device;
 
@@ -20,6 +24,18 @@ struct spi_board_info;
 struct device_node;
 
 extern void fsl_rstcr_restart(char *cmd);
+
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_FSL_PMC
+typedef int (*wakeup_event_t)(struct of_device *);
+int pmc_enable_wake(struct of_device *ofdev, wakeup_event_t func,
+		bool enable);
+void pmc_enable_lossless(int enable);
+#else
+#define pmc_enable_wake(ofdev, func, enable)	(-EINVAL)
+#define pmc_enable_lossless(enable) do {} while (0);
+#endif
+#endif
 
 #if defined(CONFIG_FB_FSL_DIU) || defined(CONFIG_FB_FSL_DIU_MODULE)
 struct platform_diu_data_ops {

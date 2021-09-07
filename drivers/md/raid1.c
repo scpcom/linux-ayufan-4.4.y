@@ -41,6 +41,10 @@
 #include "hwraid.h"
 #endif
 
+#ifdef MY_ABC_HERE
+extern void md_run_setup(void);
+#endif
+
 #define DEBUG 0
 #if DEBUG
 #define PRINTK(x...) printk(x)
@@ -81,6 +85,17 @@ static unsigned char IsDiskErrorSet(mddev_t *mddev)
 	}
 END:
 	return res;
+}
+#endif
+
+#ifdef MY_ABC_HERE
+static inline unsigned char SynoIsRaidReachMaxDegrade(mddev_t *mddev)
+{
+    conf_t *conf = mddev->private;
+    if (mddev->degraded >= conf->raid_disks - 1) {
+        return true;
+    }
+    return false;
 }
 #endif
 
@@ -307,6 +322,13 @@ static void raid1_end_read_request(struct bio *bio, int error)
 	 * this branch is our 'one mirror IO has finished' event handler:
 	 */
 	update_head_pos(mirror, r1_bio);
+
+#ifdef MY_ABC_HERE
+	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
+		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__,__FUNCTION__,__LINE__);
+		SynoAutoRemapReport(conf->mddev, r1_bio->sector, conf->mirrors[mirror].rdev->bdev);
+	}
+#endif
 
 	if (uptodate)
 #ifdef MY_ABC_HERE
@@ -1312,9 +1334,9 @@ void syno_error_for_internal(mddev_t *mddev, mdk_rdev_t *rdev)
 			 */
 			list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
 				if (!test_bit(Faulty, &rdev_tmp->flags) && !test_bit(In_sync, &rdev_tmp->flags)) {
-					printk("[%s] %d: %s has read/write error, but there only has this device so %s is set to faulty\n",
+					printk("[%s] %d: %s has read/write error, but there only has this device, so remove %s from raid\n",
 					   __FILE__, __LINE__, bdevname(rdev->bdev, b1), bdevname(rdev_tmp->bdev, b2));
-					set_bit(Faulty, &rdev_tmp->flags);
+					SYNORaidRdevUnplug(mddev, rdev_tmp);
 					recovery_err = 1;
 				}
 			}
@@ -1585,6 +1607,14 @@ static void end_sync_read(struct bio *bio, int error)
 			break;
 	BUG_ON(i < 0);
 	update_head_pos(i, r1_bio);
+
+#ifdef MY_ABC_HERE
+	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
+		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__,__FUNCTION__,__LINE__);
+		SynoAutoRemapReport(conf->mddev, r1_bio->sector, conf->mirrors[mirror].rdev->bdev);
+	}
+#endif
+
 	/*
 	 * we have read a block, now it needs to be re-written,
 	 * or re-read if the read failed.
@@ -2847,11 +2877,27 @@ static struct mdk_personality raid1_personality =
 	.size		= raid1_size,
 	.check_reshape	= raid1_reshape,
 	.quiesce	= raid1_quiesce,
+#ifdef MY_ABC_HERE
+	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
+#endif
 };
 
 static int __init raid_init(void)
 {
+#ifdef MY_ABC_HERE
+	mm_segment_t origin_fs;
+
+	register_md_personality(&raid1_personality);
+
+	origin_fs = get_fs();
+	set_fs(get_ds());
+	md_run_setup();
+	set_fs(origin_fs);
+
+	return 0;
+#else
 	return register_md_personality(&raid1_personality);
+#endif
 }
 
 static void raid_exit(void)

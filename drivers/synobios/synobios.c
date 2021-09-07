@@ -45,13 +45,13 @@ struct sd_softc {
 static struct sd_softc scSynoBios;
 static SYNO_SYS_STATUS *pgSysStatus = NULL;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 extern int (*funcSYNOSendHibernationEvent)(unsigned int type, unsigned int diskno);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 extern int (*funcSYNOGetHwCapability)(CAPABILITY *);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 extern int (*funcSYNOSendEboxRefreshEvent)(int portIndex);
 #endif
 
@@ -112,7 +112,7 @@ static int synobios_record_raid_event(unsigned int type, unsigned int raidno, un
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 static int synobios_record_hibernation_event(unsigned int type, unsigned int diskno)
 {
 	int ret;
@@ -129,7 +129,7 @@ static int synobios_record_hibernation_event(unsigned int type, unsigned int dis
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 static int synobios_record_ebox_refresh_event(int portIndex)
 {
 	int ret = 0;
@@ -772,13 +772,13 @@ int synobios_init(void)
 #ifdef MY_ABC_HERE
 	funcSYNOSendRaidEvent = synobios_record_raid_event;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 	funcSYNOSendHibernationEvent = synobios_record_hibernation_event;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 	funcSYNOGetHwCapability = GetHwCapability;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	funcSYNOSendEboxRefreshEvent = synobios_record_ebox_refresh_event;
 #endif
 
@@ -797,13 +797,13 @@ void synobios_cleanup(void)
 #ifdef MY_ABC_HERE
 	funcSYNOSendRaidEvent = NULL;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 	funcSYNOSendHibernationEvent = NULL;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 	funcSYNOGetHwCapability = NULL;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	funcSYNOSendEboxRefreshEvent = NULL;
 #endif
 

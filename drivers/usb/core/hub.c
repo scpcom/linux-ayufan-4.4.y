@@ -81,14 +81,8 @@ struct usb_hub {
 	struct delayed_work	leds;
 	struct delayed_work	init_work;
 	void			**port_owners;
-#ifdef MY_ABC_HERE
-	int				syno_hub_eh;
-#endif
 };
 
-#ifdef MY_ABC_HERE
-static int hub_port_debounce(struct usb_hub *hub, int port1);
-#endif
 
 /* Protect struct usb_device->state and ->children members
  * Note: Both are also protected by ->dev.sem, except that ->state can
@@ -171,19 +165,12 @@ static inline char *portspeed(int portstatus)
 }
 
 /* Note that hdev or one of its children must be locked! */
-#ifndef MY_ABC_HERE
 static struct usb_hub *hdev_to_hub(struct usb_device *hdev)
-#else
-struct usb_hub *hdev_to_hub(struct usb_device *hdev)
-#endif
 {
 	if (!hdev || !hdev->actconfig)
 		return NULL;
 	return usb_get_intfdata(hdev->actconfig->interface[0]);
 }
-#ifdef MY_ABC_HERE
-EXPORT_SYMBOL(hdev_to_hub);
-#endif
 
 /* USB 2.0 spec Section 11.24.4.5 */
 static int get_hub_descriptor(struct usb_device *hdev, void *data, int size)
@@ -386,43 +373,6 @@ static int hub_port_status(struct usb_hub *hub, int port1,
 	mutex_unlock(&hub->status_mutex);
 	return ret;
 }
-
-#ifdef MY_ABC_HERE
-void syno_clear_hub_eh(struct usb_hub *hub)
-{
-	if (!hub)
-		return;
-
-	mutex_lock(&hub->status_mutex);
-	hub->syno_hub_eh = 0;
-	mutex_unlock(&hub->status_mutex);
-}
-
-void syno_set_hub_eh(struct usb_hub *hub)
-{
-	if (!hub)
-		return;
-
-	mutex_lock(&hub->status_mutex);
-	hub->syno_hub_eh = 1;
-	mutex_unlock(&hub->status_mutex);
-}
-
-int syno_get_hub_eh(struct usb_hub *hub)
-{
-	int eh = 0;
-
-	if (!hub)
-		return 0;
-
-	mutex_lock(&hub->status_mutex);
-	eh = hub->syno_hub_eh;
-	mutex_unlock(&hub->status_mutex);
-
-	return eh; 
-}
-EXPORT_SYMBOL(syno_get_hub_eh);
-#endif
 
 static void kick_khubd(struct usb_hub *hub)
 {
@@ -1903,19 +1853,6 @@ int usb_new_device(struct usb_device *udev)
 	udev->dev.devt = MKDEV(USB_DEVICE_MAJOR,
 			(((udev->bus->busnum-1) * 128) + (udev->devnum-1)));
 
-	/* Tell the world! */
-	announce_device(udev);
-
-	/* Register the device.  The device driver is responsible
-	 * for configuring the device and invoking the add-device
-	 * notifier chain (used by usbfs and possibly others).
-	 */
-	err = device_add(&udev->dev);
-	if (err) {
-		dev_err(&udev->dev, "can't device_add, error %d\n", err);
-		goto fail;
-	}
-
 #ifdef MY_ABC_HERE
 #define SERIAL_LEN 33
 	/* Make a fake serial number from product name */
@@ -1983,6 +1920,19 @@ RETRY:
 		}
 	}
 #endif
+
+	/* Tell the world! */
+	announce_device(udev);
+
+	/* Register the device.  The device driver is responsible
+	 * for configuring the device and invoking the add-device
+	 * notifier chain (used by usbfs and possibly others).
+	 */
+	err = device_add(&udev->dev);
+	if (err) {
+		dev_err(&udev->dev, "can't device_add, error %d\n", err);
+		goto fail;
+	}
 
 	(void) usb_create_ep_devs(&udev->dev, &udev->ep0, udev);
 	return err;
@@ -2115,11 +2065,6 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 	u16 portstatus;
 	u16 portchange;
 
-#ifdef MY_ABC_HERE
-	u16 portstatus_tmp = 0;
-	u16 portchange_tmp = 0;
-#endif
-
 	for (delay_time = 0;
 			delay_time < HUB_RESET_TIMEOUT;
 			delay_time += delay) {
@@ -2131,20 +2076,6 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 		if (ret < 0)
 			return ret;
 
-#ifdef MY_ABC_HERE
-		if (0 == portstatus_tmp && 0 == portchange_tmp) {
-			portstatus_tmp = portstatus;
-			portchange_tmp = portchange;
-		}
-		
-		if (portchange & (USB_PORT_STAT_C_CONNECTION | USB_PORT_STAT_C_ENABLE))
-		{
-			hub_port_debounce(hub, port1);
-			ret = hub_port_status(hub, port1, &portstatus, &portchange);
-			if (ret < 0)
-				return ret;
-		}
-#else
 		/* Device went away? */
 		if (!(portstatus & USB_PORT_STAT_CONNECTION))
 			return -ENOTCONN;
@@ -2152,7 +2083,6 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 		/* bomb out completely if the connection bounced */
 		if ((portchange & USB_PORT_STAT_C_CONNECTION))
 			return -ENOTCONN;
-#endif
 
 		/* if we`ve finished resetting, then break out of the loop */
 		if (!(portstatus & USB_PORT_STAT_RESET) &&
@@ -2165,6 +2095,7 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 				udev->speed = USB_SPEED_LOW;
 			else
 				udev->speed = USB_SPEED_FULL;
+
 			return 0;
 		}
 
@@ -2176,16 +2107,6 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 			"port %d not reset yet, waiting %dms\n",
 			port1, delay);
 	}
-
-#ifdef MY_ABC_HERE
-	/* Device went away? */
-	if (!(portstatus_tmp & USB_PORT_STAT_CONNECTION))
-		return -ENOTCONN;
-
-	/* bomb out completely if the connection bounced */
-	if ((portchange_tmp & USB_PORT_STAT_C_CONNECTION))
-		return -ENOTCONN;
-#endif
 
 	return -EBUSY;
 }
@@ -2822,7 +2743,6 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 	enum usb_device_speed	oldspeed = udev->speed;
 	char 			*speed, *type;
 	int			devnum = udev->devnum;
-
 	/* root hub ports have a slightly longer reset period
 	 * (from USB 2.0 spec, section 7.1.7.5)
 	 */
@@ -2846,6 +2766,7 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 		/* Reset the device; full speed may morph to high speed */
 		/* FIXME a USB 2.0 device may morph into SuperSpeed on reset. */
 		retval = hub_port_reset(hub, port1, udev, delay);
+
 		if (retval < 0)		/* error or disconnect */
 			goto fail;
 		/* success, speed is known */
@@ -3014,6 +2935,7 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 				dev_err(&udev->dev,
 					"device not accepting address %d, error %d\n",
 					devnum, retval);
+
 				goto fail;
 			}
 			if (udev->speed == USB_SPEED_SUPER) {
@@ -3189,17 +3111,6 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 
 	/* Try to resuscitate an existing device */
 	udev = hdev->children[port1-1];
-
-#ifdef MY_ABC_HERE 
-	if ((portstatus == USB_PORT_STAT_POWER) && udev &&
-		(portchange & USB_PORT_STAT_C_CONNECTION)) {
-		//USB_VENDOR_ID_CYBERPOWER
-		if (le16_to_cpu(udev->descriptor.idVendor) == 0x0764) {
-			clear_bit(port1, hub->change_bits);
-			return;
-		}
-	}
-#endif
 
 	if ((portstatus & USB_PORT_STAT_CONNECTION) && udev &&
 			udev->state != USB_STATE_NOTATTACHED) {
@@ -3446,14 +3357,6 @@ static void hub_events(void)
 		kref_get(&hub->kref);
 		spin_unlock_irq(&hub_event_lock);
 
-#ifdef MY_ABC_HERE
-		if ( syno_get_hub_eh(hub) ) {
-			printk("hub is performing EH\n");
-			msleep(100);
-			continue;
-		}
-#endif
-
 		hdev = hub->hdev;
 		hub_dev = hub->intfdev;
 		intf = to_usb_interface(hub_dev);
@@ -3592,6 +3495,7 @@ static void hub_events(void)
 				clear_port_feature(hdev, i,
 					USB_PORT_FEAT_C_RESET);
 			}
+
 
 			if (connect_change)
 				hub_port_connect_change(hub, i,
@@ -3993,15 +3897,7 @@ int usb_reset_device(struct usb_device *udev)
 		}
 	}
 
-#ifdef MY_ABC_HERE
-	printk("lock for hub EH\n");
-	syno_set_hub_eh(hdev_to_hub(udev->parent));
-#endif
 	ret = usb_reset_and_verify_device(udev);
-#ifdef MY_ABC_HERE
-	syno_clear_hub_eh(hdev_to_hub(udev->parent));
-	printk("unlock for hub EH\n");
-#endif
 
 	if (config) {
 		for (i = config->desc.bNumInterfaces - 1; i >= 0; --i) {

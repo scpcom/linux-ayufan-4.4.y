@@ -67,9 +67,8 @@
 
 #include "libata.h"
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE)
 #include <linux/synosata.h>
-extern void ResubmitCommand(unsigned long data);
 #endif
 
 /* debounce timing parameters in msecs { interval, duration, timeout } */
@@ -101,6 +100,10 @@ static void ata_dev_xfermask(struct ata_device *dev);
 static unsigned long ata_dev_blacklisted(const struct ata_device *dev);
 
 unsigned int ata_print_id = 1;
+#ifdef MY_ABC_HERE
+EXPORT_SYMBOL(ata_print_id);
+#endif
+
 static struct workqueue_struct *ata_wq;
 
 struct workqueue_struct *ata_aux_wq;
@@ -128,6 +131,11 @@ static char ata_force_param_buf[PAGE_SIZE] __initdata;
 
 #if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_SYNO_MV88F6281)
 extern unsigned char SYNOKirkwoodIsBoardNeedPowerUpHDD(u32);
+extern int SYNO_CTRL_HDD_POWERON(int index, int value);
+#endif
+
+#ifdef CONFIG_SYNO_QORIQ
+extern unsigned char SYNOQorIQIsBoardNeedPowerUpHDD(u32);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 #endif
 
@@ -293,6 +301,27 @@ struct ata_device *ata_dev_next(struct ata_device *dev, struct ata_link *link,
 		goto next;
 	return dev;
 }
+
+#ifdef MY_ABC_HERE
+unsigned int uiCheckPortLinksFlags(struct ata_port *pAp) {
+	struct ata_link *pLink = NULL;
+	unsigned int uiFlags = 0x0;
+
+	if (!pAp) {
+		goto END;
+	}
+
+	ata_for_each_link(pLink, pAp, EDGE) {
+		if (pLink->uiSflags) {
+			ata_link_printk(pLink, KERN_ERR, "get error flags 0x%x\n", pLink->uiSflags);
+			uiFlags |= pLink->uiSflags;
+		}
+	}
+
+END:
+	return uiFlags;
+}
+#endif
 
 /**
  *	ata_dev_phys_link - find physical link for a device
@@ -1748,7 +1777,7 @@ static void ata_qc_complete_internal(struct ata_queued_cmd *qc)
 	complete(waiting);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 /**
  * Main for our gpio query. ata_exec_internal_sg don't concern
  * about qc_defer. But it is very important because some sata
@@ -1794,7 +1823,7 @@ unsigned syno_ata_exec_internal_gpio(struct ata_device *dev,
 
 	/* prepare & issue qc */
 	qc->tf = *tf;
-	if (ATA_CMD_PMP_READ == tf->command && SATA_PMP_GSCR_3726_GPIO == tf->feature) {
+	if (ATA_CMD_PMP_READ == tf->command && SATA_PMP_GSCR_3XXX_GPIO == tf->feature) {
 		/* only read need result tf */
 		qc->flags |= ATA_QCFLAG_RESULT_TF;
 	}
@@ -2110,7 +2139,7 @@ unsigned ata_exec_internal(struct ata_device *dev,
 {
 	struct scatterlist *psg = NULL, sg;
 	unsigned int n_elem = 0;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 	struct ata_eh_context *ehc = &dev->link->ap->link.eh_context;
 #endif
 
@@ -2121,9 +2150,9 @@ unsigned ata_exec_internal(struct ata_device *dev,
 		n_elem++;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 	if ((ATA_CMD_PMP_WRITE == tf->command || ATA_CMD_PMP_READ == tf->command) &&
-		SATA_PMP_GSCR_3726_GPIO == tf->feature &&
+		SATA_PMP_GSCR_3XXX_GPIO == tf->feature &&
 		!(ehc->i.action & ATA_EH_REVALIDATE))
 		return syno_ata_exec_internal_gpio(dev, tf, timeout);
 	else
@@ -2558,6 +2587,21 @@ int ata_dev_configure(struct ata_device *dev)
 
 	/* set horkage */
 	dev->horkage |= ata_dev_blacklisted(dev);
+#if defined(SYNO_SATA_PM_DEVICE_GPIO) && defined(MY_ABC_HERE)
+	if(ap->nr_pmp_links) {
+		if (0 == strncmp(gszSynoHWVersion, HW_DS1812p, strlen(HW_DS1812p)) &&
+				IS_SYNOLOGY_DX510(ap->PMSynoUnique) && (1 == ap->PMSynoCpldVer)) {
+
+			if (!(dev->horkage & ATA_HORKAGE_1_5_GBPS)) {
+				ata_dev_printk(dev, KERN_ERR,
+					"DS1812+ with DX510 v1.00, limit the speed to 1.5 GBPS\n");
+
+				dev->horkage |= ATA_HORKAGE_1_5_GBPS;
+			}
+
+		}
+	}
+#endif
 	ata_force_horkage(dev);
 
 	if (dev->horkage & ATA_HORKAGE_DISABLE) {
@@ -3684,6 +3728,12 @@ static int ata_dev_set_mode(struct ata_device *dev)
 		       ata_mode_string(ata_xfer_mode2mask(dev->xfer_mode)),
 		       dev_err_whine);
 
+#ifdef MY_ABC_HERE
+	if (ap->uiSflags & ATA_SYNO_FLAG_REVALID_FAIL) {
+		DBGMESG("port %d set mode sucessfully , clear revalid fail flag\n", ap->print_id);
+		ap->uiSflags &= ~ATA_SYNO_FLAG_REVALID_FAIL;
+	}
+#endif
 	return 0;
 
  fail:
@@ -4177,12 +4227,27 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 	if (check_ready)
 		rc = ata_wait_ready(link, deadline, check_ready);
  out:
+#ifdef MY_ABC_HERE
+	if (0 < link->ap->iFakeError) {
+		ata_link_printk(link, KERN_ERR, "generate fake error, Fake count %d\n", link->ap->iFakeError);
+		if (SYNO_ERROR_MAX > link->ap->iFakeError) {
+			--(link->ap->iFakeError);
+		}
+		rc = -EBUSY;
+	}
+#endif
 	if (rc && rc != -EAGAIN) {
 		/* online is set iff link is online && reset succeeded */
 		if (online)
 			*online = false;
 		ata_link_printk(link, KERN_ERR,
 				"COMRESET failed (errno=%d)\n", rc);
+#ifdef MY_ABC_HERE
+		if (-EBUSY == rc || -EIO == rc) {
+			ata_link_printk(link, KERN_ERR, "COMRESET fail, set COMRESET fail flag\n");
+			link->uiSflags |= ATA_SYNO_FLAG_COMRESET_FAIL;
+		}
+#endif
 	}
 	DPRINTK("EXIT, rc=%d\n", rc);
 	return rc;
@@ -4422,6 +4487,12 @@ int ata_dev_revalidate(struct ata_device *dev, unsigned int new_class,
 
  fail:
 	ata_dev_printk(dev, KERN_ERR, "revalidation failed (errno=%d)\n", rc);
+#ifdef MY_ABC_HERE
+	if (-EIO == rc) {
+		DBGMESG("port %d revalidation failed, set revalid fail flag\n", dev->link->ap->print_id);
+		dev->link->ap->uiSflags |= ATA_SYNO_FLAG_REVALID_FAIL;
+	}
+#endif
 	return rc;
 }
 
@@ -5313,15 +5384,7 @@ void ata_qc_complete(struct ata_queued_cmd *qc)
 			/* always fill result TF for failed qc */
 			fill_result_tf(qc);
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-			if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) &&
-				(ATA_CMD_CHK_POWER == qc->tf.command || ATA_CMD_PMP_WRITE == qc->tf.command ||
-				 ATA_CMD_PMP_READ || ATA_CMD_VERIFY == qc->tf.command))
-				__ata_qc_complete(qc);
-			else if (!ata_tag_internal(qc->tag))
-#else
 			if (!ata_tag_internal(qc->tag))
-#endif
 				ata_qc_schedule_eh(qc);
 			else
 				__ata_qc_complete(qc);
@@ -5886,12 +5949,6 @@ void ata_link_init(struct ata_port *ap, struct ata_link *link, int pmp)
 #ifdef CONFIG_ATA_ACPI
 		dev->gtf_filter = ata_acpi_gtf_filter;
 #endif
-#ifdef MY_ABC_HERE
-		setup_timer(&dev->rstimer, ResubmitCommand, (unsigned long)dev);
-		INIT_LIST_HEAD(&dev->pendinglh);
-		dev->chkpower_pending = 0;
-		dev->must_checkpw = 0;
-#endif
 		ata_dev_init(dev);
 	}
 }
@@ -5993,6 +6050,9 @@ struct ata_port *ata_port_alloc(struct ata_host *host)
 #ifdef ATA_IRQ_TRAP
 	ap->stats.unhandled_irq = 1;
 	ap->stats.idle_irq = 1;
+#endif
+#ifdef MY_ABC_HERE
+	ap->iFakeError = 0;
 #endif
 	return ap;
 }
@@ -6390,23 +6450,6 @@ static void async_port_probe(void *data, async_cookie_t cookie)
 	if (!(ap->host->flags & ATA_HOST_PARALLEL_SCAN) && ap->port_no != 0)
 		async_synchronize_cookie(cookie);
 
-
-#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_SYNO_MV88F6281)
-	if(SYNOKirkwoodIsBoardNeedPowerUpHDD(ap->print_id)) {
-		SYNO_CTRL_HDD_POWERON(ap->print_id, 1);
-		SleepForLatency();
-	}
-#endif
-
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
-		/* delay 10s to avoid probe disks in the same time(consume too much power)
-		 * If this async_port_probe(..) function is run asynchronously this code is not work,
-		 * so we must disable async_enabled before call async_port_probe(..) */
-		if (!(ap->host->flags & ATA_HOST_LLD_SPINUP_DELAY)) {
-			SleepForHD(ap->print_id);
-		}
-#endif
-
 	/* probe */
 	if (ap->ops->error_handler) {
 		struct ata_eh_info *ehi = &ap->link.eh_info;
@@ -6482,9 +6525,6 @@ static void async_port_probe(void *data, async_cookie_t cookie)
 int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 {
 	int i, rc;
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
-	int async_enabled = 0;
-#endif
 
 	/* host must have been started */
 	if (!(host->flags & ATA_HOST_STARTED)) {
@@ -6540,26 +6580,6 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 		} else
 			ata_port_printk(ap, KERN_INFO, "DUMMY\n");
 	}
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
-	/* Some SATA I chips can sleep earlier to prevent the
-	 * disk drop problem due to power cable and sata cable order mismatch.
-	 * this mismatch case is only happen in cable model ex. CS407e
-	 * cableless model didn't have this issue
-	 */
-	if (host->flags & ATA_HOST_LLD_SPINUP_DELAY) {
-		for (i = 0; i < host->n_ports; i++) {
-			struct ata_port *ap = host->ports[i];
-			SleepForHD(ap->print_id);
-		}
-	}
-
-	if (0 != g_internal_hd_num) {
-		/* get the async_enabled value, we will disalbe async_schedule, and restore its async_enabled value after probe disks */
-		async_enabled = syno_async_schedule_enabled_get();
-		/* disable async schedule to avoid parallel probe disks */
-		syno_async_schedule_enabled_set(0);
-	}
-#endif
 #ifndef CONFIG_ATA_SYNC_DISK_PROBE // CONFIG_SYNO_PLX_PORTING
 	/* perform each probe asynchronously */
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
@@ -6583,22 +6603,6 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 		struct ata_port *ap = host->ports[i];
 		async_schedule(async_port_probe, ap);
 	}
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
-	if (0 != g_internal_hd_num) {
-		for (i = 0; i < host->n_ports; i++) {
-			struct ata_port *ap = host->ports[i];
-			ata_port_wait_eh(ap);
-			ata_scsi_scan_host(ap, 1);
-		}
-
-		/* restore async schedule enable value */
-		syno_async_schedule_enabled_set(async_enabled);
-	}
-
-	if (host->flags & ATA_HOST_LLD_SPINUP_DELAY) {
-		host->flags &= ~ATA_HOST_LLD_SPINUP_DELAY;
-	}
-#endif
 #else
  	/* perform each probe synchronously */
  	DPRINTK("probe begin\n");
@@ -7073,6 +7077,7 @@ static int __init ata_init(void)
 		goto free_wq;
 
 	printk(KERN_DEBUG "libata version " DRV_VERSION " loaded.\n");
+
 	return 0;
 
 free_wq:
@@ -7217,108 +7222,6 @@ void syno_ata_info_print(struct ata_port *ap)
 EXPORT_SYMBOL(syno_ata_info_print);
 #endif
 
-#ifdef MY_ABC_HERE
-/**
- * return the current ata link horkage stage,
- * The stages are based on ata_do_link_spd_horkage(..)
- *
- * @param [IN] pLink : the ata link
- *
- * @return FIRST_APPLY_15G: this link is apply ATA_HORKAGE_1_5_GBPS now
- *         ALREADY_APPLY_15G : this link is already applied ATA_HORKAGE_1_5_GBPS
- *         NOT_APPLY_15G : thik link isn't apply ATA_HORKAGE_1_5_GBPS
- */
-SYNO_HORKAGE_STAGE SynoGetHorkageStage(struct ata_link *pLink)
-{
-	SYNO_HORKAGE_STAGE Ret = UNKNOW_HORKAGE_STAGE;
-	struct ata_device *dev;
-	u32 target = 0;
-	u32 target_limit = 0;
-
-	if (!pLink) {
-		goto END;
-	}
-
-
-	ata_for_each_dev(dev, pLink, ALL) {
-		/* only have ATA_HORKAGE_1_5_GBPS, we should check */
-		if (dev->horkage & ATA_HORKAGE_1_5_GBPS) {
-			target = 1;
-		} else {
-			continue;
-		}
-		target_limit = (1 << target) - 1;
-
-		/* ata_do_link_spd_horkage(..) will do "plink->sata_spd_limit = target_limit",
-		 * so we must chek "pLink->sata_spd > target" at first */
-		if (pLink->sata_spd > target) {
-			Ret = FIRST_APPLY_15G;
-			goto END;
-		}
-
-		/* we must check this after "pLink->sata_spd > target" case */
-		if (pLink->sata_spd_limit <= target_limit) {
-			Ret = ALREADY_APPLY_15G;
-			goto END;
-		}
-
-		printk("Horkage Stage error? break now.\n");
-		break;
-	}
-
-	Ret = NOT_APPLY_15G;
-
-END:
-	return Ret;
-}
-
-/* test if we need reset it again:
- * if ALREADY_APPLY_15G and not 1.5G speed,
- * some chip need reset again to adjust speed
- * back to 1.5G
- *
- * @return 0: no need reset
- *         1: need reset
- *
- */
-int iNeedResetAgainFor15G(struct ata_link *pLink)
-{
-	int iRet = 0;
-	u32 sstatus = 0x0;
-	u32 scontrol = 0x0;
-	u32 tmp = 0x0;
-
-	if (!pLink) {
-		goto END;
-	}
-
-	/* only ALREADY_APPLY_15G, we need reset again */
-	if (ALREADY_APPLY_15G != SynoGetHorkageStage(pLink)) {
-		goto END;
-	}
-
-	/* the following most code is copied/modified from
-	 * sata_print_link_status(..) to check if 1.5G now */
-	if (sata_scr_read(pLink, SCR_STATUS, &sstatus)) {
-		/* can't read sstatus */
-		goto END;
-	}
-	sata_scr_read(pLink, SCR_CONTROL, &scontrol);
-
-	tmp = (sstatus >> 4) & 0xf;
-	if (0x1 == tmp) {
-		/* already speed 1.5G, please ref. sstatus register of sata chip spec. */
-		goto END;
-	}
-
-	/* have ALREADY_APPLY_15G and not 1.5G speed, we need reset again */
-	iRet = 1;
-
-END:
-	return iRet;
-}
-#endif
-
 /*
  * libata is essentially a library of internal helper functions for
  * low-level ATA host controller drivers.  As such, the API/ABI is
@@ -7437,12 +7340,8 @@ EXPORT_SYMBOL_GPL(ata_cable_80wire);
 EXPORT_SYMBOL_GPL(ata_cable_unknown);
 EXPORT_SYMBOL_GPL(ata_cable_ignore);
 EXPORT_SYMBOL_GPL(ata_cable_sata);
-#ifdef MY_ABC_HERE
-int (*funcSYNOSendHibernationEvent)(unsigned int, unsigned int) = NULL;
-EXPORT_SYMBOL(funcSYNOSendHibernationEvent);
-#endif /* MY_ABC_HERE */
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 int (*funcSYNOSendEboxRefreshEvent)(int portIndex) = NULL;
 EXPORT_SYMBOL(funcSYNOSendEboxRefreshEvent);
 #endif

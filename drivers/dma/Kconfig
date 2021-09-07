@@ -139,6 +139,14 @@ config ASYNC_TX_DMA
 
 	  If unsure, say N.
 
+config OPTIMIZE_FSL_DMA_MEMCPY
+        bool "Optimized DMA/XOR offload: reduce raid5 memcpy which offloaded for fsl dma"
+        depends on ASYNC_TX_DMA && CRYPTO_DEV_TALITOS
+        help
+          This allows the async_tx api try to reduce raid5 memcpy operations for
+          fsl dma. If you have fsl dma and talitos enabled, you can set it as Y,
+          else N.
+
 config DMATEST
 	tristate "DMA Test client"
 	depends on DMA_ENGINE

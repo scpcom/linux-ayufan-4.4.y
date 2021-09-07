@@ -36,6 +36,15 @@
 #define FSL_DMA_MR_DAHE		0x00002000
 #define FSL_DMA_MR_SAHE		0x00001000
 
+#ifdef CONFIG_SYNO_QORIQ
+/*
+ * Bandwidth/pause control determines how many bytes a given
+ * channel is allowed to transfer before the DMA engine pauses
+ * the current channel and switches to the next channel
+ */
+#define FSL_DMA_MR_BWC         0x08000000
+#endif
+
 /* Special MR definition for MPC8349 */
 #define FSL_DMA_MR_EOTIE	0x00000080
 #define FSL_DMA_MR_PRC_RM	0x00000800

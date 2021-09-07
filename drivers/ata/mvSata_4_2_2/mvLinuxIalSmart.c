@@ -299,7 +299,7 @@ MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSmartCommand(IN  MV_SATA_ADAPTER* pSat
     qCommandInfo.commandParams.NoneUdmaCommand.device = (MV_U8)(MV_BIT6);
     qCommandInfo.commandParams.NoneUdmaCommand.command =
     buff[SMART_BUF_COMMAND_OFFSET];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
     qCommandInfo.commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
 #endif
     qCommandInfo.commandParams.NoneUdmaCommand.callBack =

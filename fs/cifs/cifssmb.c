@@ -164,8 +164,11 @@ cifs_reconnect_tcon(struct cifsTconInfo *tcon, int smb_command)
 	if (!ses->need_reconnect && !tcon->need_reconnect)
 		return 0;
 
+#ifdef MY_ABC_HERE
+	nls_codepage = load_nls("utf8");
+#else
 	nls_codepage = load_nls_default();
-
+#endif
 	/*
 	 * need to prevent multiple threads trying to simultaneously
 	 * reconnect the same SMB session

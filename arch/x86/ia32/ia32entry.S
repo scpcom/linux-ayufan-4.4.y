@@ -954,5 +954,10 @@ ia32_sys_call_table:
 	.quad sys_ni_syscall
 	.quad sys_ni_syscall
 #endif
+#ifdef SYNO_RECVFILE_PLUS
+	.quad sys_SYNOFlushAggregate /* 415 */
+#else
+	.quad sys_ni_syscall
+#endif /* SYNO_RECVFILE_PLUS */
 #endif
 ia32_syscall_end:

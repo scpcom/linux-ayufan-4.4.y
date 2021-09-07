@@ -163,6 +163,10 @@ config NET_SB1000
 
 	  If you don't have this card, of course say N.
 
+if MPC85xx
+	source "drivers/net/fsl_pci_veth/Kconfig"
+endif
+
 source "drivers/net/arcnet/Kconfig"
 
 source "drivers/net/phy/Kconfig"
@@ -2432,6 +2436,84 @@ config GIANFAR
 	help
 	  This driver supports the Gigabit TSEC on the MPC83xx, MPC85xx,
 	  and MPC86xx family of chips, and the FEC on the 8540.
+
+config TCP_FAST_ACK
+	bool "TCP: fast acknowledgment"
+	depends on GIANFAR && EXPERIMENTAL
+	default n
+	help
+	 Accelerate TCP ACK.
+
+config GFAR_HW_TCP_RECEIVE_OFFLOAD
+	default n
+	bool "Hardware TCP receive offload"
+	depends on GIANFAR && EXPERIMENTAL && !BONDING
+	help
+	  Hardware offload receive large TCP data.
+
+config GFAR_TX_NONAPI
+	default n
+	bool "TX non-NAPI mode"
+	depends on GIANFAR && EXPERIMENTAL && !GIANFAR_TXNAPI
+	help
+	  TX non-NAPI mode for Ethernet load balance on multi-core.
+
+config GFAR_SKBUFF_RECYCLING
+	default y
+	bool "Socket Buffer Recycling Support (v1.1.5) (EXPERIMENTAL)"
+	depends on GIANFAR && EXPERIMENTAL
+	help
+	 This implements a new private socket data buffer recycling algorithm
+	 used for fast IPv4 packet forwarding and TCP transmission. Select this
+	 if you would like to improve your latency and throughput performance.
+
+config GIANFAR_TXNAPI
+	default n
+	bool "Introduce seperate tx_napi for cleaning the tx ring(V 0.0.1) (EXPERIMENTAL)"
+	depends on GIANFAR && EXPERIMENTAL
+	help
+	  Selecting this option introduces a seperate TX NAPI for cleaning the
+	  tx ring(s).
+
+config 1588_MUX_eTSEC1
+	bool "Selecting 1588 signals over eTSEC1 signals"
+	depends on GIANFAR
+	default n
+	help
+	  This option switches ON 1588 signals over eth1.
+	  Eth1 will not work if this is selected.
+	  This is needed when user want to use external clock, PPn signals etc
+
+config 1588_MUX_eTSEC2
+	bool "Selecting 1588 signals over eTSEC2 signals"
+	depends on GIANFAR
+	default n
+	help
+	  This option switches ON 1588 signals over eth1.
+	  Eth2 will not work if this is selected.
+	  This is needed when user want to use external clock, PPn signals etc
+
+config GIANFAR_L2SRAM
+	bool "Selecting L2sram bd allocation"
+	depends on (GIANFAR && MPC85xx)
+	select FSL_85XX_CACHE_SRAM if MPC85xx
+	help
+	  This option supports BD alloc in L2SRAM.
+
+config NET_GIANFAR_FP
+	default y
+	bool "Fast Path routing"
+	depends on GIANFAR && EXPERIMENTAL
+	help
+	  Fast path routing. To enable,
+	  $ echo 1 > /proc/sys/net/core/netdev_fastroute
+
+config GFAR_SW_PKT_STEERING
+        default n
+        bool "Enables packet steering between cpus (EXPERIMENTAL)"
+        depends on GIANFAR_TXNAPI && FSL_MPIC_MSG_INTS
+        help
+          Selecting this option enables packet steering between cpus
 
 config UCC_GETH
 	tristate "Freescale QE Gigabit Ethernet"

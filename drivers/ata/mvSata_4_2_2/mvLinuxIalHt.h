@@ -101,15 +101,15 @@ extern int mv_ial_ht_abort(struct scsi_cmnd *SCpnt);
 #define MRVL_SATA_BOUNDARY_MASK (MRVL_SATA_BUFF_BOUNDARY - 1)
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) || defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(SYNO_SATA_POWER_CTL)
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 extern struct class_device_attribute *mvSata_shost_attrs[];
 #else
 #define mvSata_shost_attrs NULL
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_POWER_CTL
 #define SYNO_SHUTDOWN_PORT syno_host_power_ctl: syno_mvSata_port_power_ctl,
 #else
 #define SYNO_SHUTDOWN_PORT

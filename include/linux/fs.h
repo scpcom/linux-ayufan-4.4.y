@@ -271,6 +271,8 @@ struct inodes_stat_t {
 #define S_SWAPFILE	256	/* Do not truncate: swapon got its bmaps */
 #define S_PRIVATE	512	/* Inode is fs-internal */
 
+#define S_SYNO_FORCE_UMOUNT	1024/* Force umount flag. */
+
 /*
  * Note that nosuid etc flags are inode-specific: setting some file-system
  * flags just means all the inodes inherit those flags by default. It might be
@@ -298,6 +300,9 @@ struct inodes_stat_t {
 #define IS_NOQUOTA(inode)	((inode)->i_flags & S_NOQUOTA)
 #define IS_APPEND(inode)	((inode)->i_flags & S_APPEND)
 #define IS_IMMUTABLE(inode)	((inode)->i_flags & S_IMMUTABLE)
+#ifdef MY_ABC_HERE
+#define IS_UMOUNTED_FILE(inode)	((inode)->i_flags & S_SYNO_FORCE_UMOUNT)
+#endif
 #define IS_POSIXACL(inode)	__IS_FLG(inode, MS_POSIXACL)
 
 #ifdef CONFIG_FS_SYNO_ACL
@@ -1019,6 +1024,9 @@ struct file_ra_state {
 	unsigned int async_size;	/* do asynchronous readahead when
 					   there are only # of pages ahead */
 
+#ifdef CONFIG_SYNO_QORIQ
+	unsigned int delay_readahead;	/* delay readahead*/
+#endif
 	unsigned int ra_pages;		/* Maximum readahead window */
 	unsigned int mmap_miss;		/* Cache miss stat for mmap accesses */
 	loff_t prev_pos;		/* Cache last read() position */
@@ -1094,7 +1102,6 @@ struct file {
 #ifdef CONFIG_OXNAS_BACKUP
 	void             *backup_context;
 #endif //CONFIG_OXNAS_BACKUP
-
 };
 #ifdef MY_ABC_HERE
 static inline int blSynostate(int flag, struct file *f)
@@ -1726,7 +1733,7 @@ struct inode_operations {
 	int (*permission) (struct inode *, int);
 	int (*check_acl)(struct inode *, int);
 #ifdef CONFIG_FS_SYNO_ACL
-	int (*syno_acl_get)(struct dentry *, void *value, size_t size);
+	int (*syno_acl_get)(struct dentry *, int cmd, void *value, size_t size);
 	int (*syno_permission)(struct dentry *, int);
 	int (*syno_exec_permission)(struct dentry *);
 	int (*syno_access)(struct dentry *, int);

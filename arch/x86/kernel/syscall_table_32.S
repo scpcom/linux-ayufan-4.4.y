@@ -451,4 +451,9 @@ ENTRY(sys_call_table)
     .long sys_ni_syscall
     .long sys_ni_syscall
 #endif
+#ifdef SYNO_RECVFILE_PLUS
+    .long sys_SYNOFlushAggregate		/* 415 */
+#else
+    .long sys_ni_syscall
+#endif /* SYNO_RECVFILE_PLUS */
 #endif

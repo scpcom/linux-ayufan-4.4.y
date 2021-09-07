@@ -63,12 +63,21 @@
 #include <net/sock.h>
 #include <net/checksum.h>
 #include <net/xfrm.h>
+#ifdef CONFIG_SYNO_QORIQ
+#include <net/tcp.h>
+#endif
 
 #include <asm/uaccess.h>
 #include <asm/system.h>
 #include <trace/events/skb.h>
 
 #include "kmap_skb.h"
+
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_GFAR_SKBUFF_RECYCLING
+extern int gfar_recycle_skb(struct sk_buff *skb);
+#endif
+#endif
 
 static struct kmem_cache *skbuff_head_cache __read_mostly;
 static struct kmem_cache *skbuff_fclone_cache __read_mostly;
@@ -473,6 +482,12 @@ void kfree_skb(struct sk_buff *skb)
 	else if (likely(!atomic_dec_and_test(&skb->users)))
 		return;
 	trace_kfree_skb(skb, __builtin_return_address(0));
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_GFAR_SKBUFF_RECYCLING
+	if (gfar_recycle_skb(skb))
+		return;
+#endif
+#endif
 	__kfree_skb(skb);
 }
 EXPORT_SYMBOL(kfree_skb);
@@ -493,6 +508,12 @@ void consume_skb(struct sk_buff *skb)
 		smp_rmb();
 	else if (likely(!atomic_dec_and_test(&skb->users)))
 		return;
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_GFAR_SKBUFF_RECYCLING
+	if (gfar_recycle_skb(skb))
+		return;
+#endif
+#endif
 	__kfree_skb(skb);
 }
 EXPORT_SYMBOL(consume_skb);
@@ -573,6 +594,11 @@ static void __copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	new->ipvs_property	= old->ipvs_property;
 #endif
 	new->protocol		= old->protocol;
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_GFAR_SKBUFF_RECYCLING
+	new->skb_owner		= NULL;
+#endif
+#endif
 	new->mark		= old->mark;
 	new->iif		= old->iif;
 	__nf_copy(new, old);
@@ -615,6 +641,12 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	n->nohdr = 0;
 	n->destructor = NULL;
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_GFAR_SKBUFF_RECYCLING
+	n->skb_owner = NULL;
+	skb->skb_owner = NULL;
+#endif
+#endif
 #if defined(CONFIG_MV_ETHERNET) && defined(CONFIG_ARCH_FEROCEON)
 #ifdef CONFIG_NET_SKB_RECYCLE
 	n->skb_recycle = NULL;

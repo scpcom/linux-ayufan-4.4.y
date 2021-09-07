@@ -17,11 +17,7 @@
 /*
  * Time out in seconds for disks and Magneto-opticals (which are slower).
  */
-#ifdef MY_ABC_HERE
-#define SD_TIMEOUT		(60 * HZ)
-#else
 #define SD_TIMEOUT		(30 * HZ)
-#endif
 #define SD_MOD_TIMEOUT		(75 * HZ)
 
 /*

@@ -211,6 +211,11 @@ skpinv:	addi	r6,r6,1				/* Increment */
 
 	xori	r6,r4,1
 	slwi	r6,r6,5		/* setup new context with other address space */
+#if defined(CONFIG_SYNO_QORIQ)
+#if defined(CONFIG_DEBUG_CW)
+	ori	r6, r6, 0x200	/* enable DE bit for MSR */
+#endif
+#endif
 	bl	1f		/* Find our address */
 1:	mflr	r9
 	rlwimi	r7,r9,0,20,31
@@ -329,7 +334,7 @@ skpinv:	addi	r6,r6,1				/* Increment */
 	mtspr	SPRN_HID0, r2
 #endif
 
-#if !defined(CONFIG_BDI_SWITCH)
+#if !defined(CONFIG_BDI_SWITCH) && !defined(CONFIG_DEBUG_CW)
 	/*
 	 * The Abatron BDI JTAG debugger does not tolerate others
 	 * mucking with the debug registers.
@@ -385,6 +390,15 @@ skpinv:	addi	r6,r6,1				/* Increment */
 /*
  * Decide what sort of machine this is and initialize the MMU.
  */
+#if defined(CONFIG_SYNO_QORIQ)
+#if defined(CONFIG_DEBUG_CW)
+	lis	r10, 0x1008 /* clear the V bit from the L2MMU_CAM8 register */
+	mtspr	SPRN_MAS0, r10
+	lis	r10, 0x0
+	mtspr	SPRN_MAS1, r10
+	tlbwe
+#endif
+#endif
 	mr	r3,r31
 	mr	r4,r30
 	mr	r5,r29
@@ -440,6 +454,39 @@ skpinv:	addi	r6,r6,1				/* Increment */
 	beq	2f;			/* Bail if no table */			\
 	rlwimi	r12, r10, 22, 20, 29;	/* Compute PTE address */		\
 	lwz	r11, 0(r12);		/* Get Linux PTE */
+#endif
+
+#if defined(CONFIG_SYNO_QORIQ)
+_GLOBAL(flush_disable_L1)
+/*
+ * Flush L1 d-cache, invalidate and disable d-cache,
+ * invalidate and disable i-cache
+ */
+	mflr	r10
+	bl	flush_dcache_L1	/* Flush L1 d-cache */
+	mtlr	r10
+
+	mfspr	r4, SPRN_L1CSR0	/* Invalidate and disable d-cache */
+	li	r5, 2
+	rlwimi	r4, r5, 0, 3
+
+	msync
+	isync
+	mtspr	SPRN_L1CSR0, r4
+	isync
+
+1:	mfspr	r4, SPRN_L1CSR0	/* Wait for the invalidate to finish */
+	andi.	r4, r4, 2
+	bne	1b
+
+	mfspr	r4, SPRN_L1CSR1	/* Invalidate and disable i-cache */
+	li	r5, 2
+	rlwimi	r4, r5, 0, 3
+
+	mtspr	SPRN_L1CSR1, r4
+	isync
+
+	blr
 #endif
 
 /*
@@ -639,6 +686,15 @@ interrupt_base:
 	rlwinm	r12,r12,0,16,1
 	mtspr	SPRN_MAS1,r12
 
+#if defined(CONFIG_SYNO_QORIQ)
+	/* Make up the required permissions for kernel code */
+#ifdef CONFIG_PTE_64BIT
+	li	r13,_PAGE_PRESENT | _PAGE_BAP_SX
+	oris	r13,r13,_PAGE_ACCESSED@h
+#else
+	li	r13,_PAGE_PRESENT | _PAGE_ACCESSED | _PAGE_EXEC
+#endif
+#endif
 	b	4f
 
 	/* Get the PGD for the current thread */
@@ -646,15 +702,26 @@ interrupt_base:
 	mfspr	r11,SPRN_SPRG_THREAD
 	lwz	r11,PGDIR(r11)
 
+#if defined(CONFIG_SYNO_QORIQ)
+	/* Make up the required permissions for user code */
+#else
 4:
 	/* Make up the required permissions */
+#endif
 #ifdef CONFIG_PTE_64BIT
+#if defined(CONFIG_SYNO_QORIQ)
+	li	r13,_PAGE_PRESENT | _PAGE_BAP_UX
+#else
 	li	r13,_PAGE_PRESENT | _PAGE_EXEC
+#endif
 	oris	r13,r13,_PAGE_ACCESSED@h
 #else
 	li	r13,_PAGE_PRESENT | _PAGE_ACCESSED | _PAGE_EXEC
 #endif
 
+#if defined(CONFIG_SYNO_QORIQ)
+4:
+#endif
 	FIND_PTE
 	andc.	r13,r13,r11		/* Check permission */
 

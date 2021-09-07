@@ -47,7 +47,7 @@ extern "C" {
 #include "mvSata.h"
 #include "mvStorageDev.h"
 
-#if defined(MY_ABC_HERE)
+#if defined(SYNO_SATA_PM_DEVICE_GPIO)
 #include <linux/synosata.h>
 #endif
 
@@ -164,7 +164,7 @@ void SynomvStopChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
 extern void SynoIALSCSINotify(struct mvSataAdapter *pSataAdapter, MV_U16 drivesSnapshotSave, MV_U8 channelIndex);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 MV_U32 syno_mvSata_pmp_read_gpio(MV_IAL_COMMON_ADAPTER_EXTENSION *pIALExt, 
                                  MV_U8 channelIndex, 
                                  SYNO_PM_PKG *pPM_pkg);
@@ -175,7 +175,7 @@ MV_U32 syno_mvSata_pmp_write_gpio(MV_IAL_COMMON_ADAPTER_EXTENSION *pIALExt,
 MV_BOOLEAN syno_mvSata_is_synology_pm(MV_IAL_COMMON_ADAPTER_EXTENSION *pIALExt, MV_U8 channelIndex);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 void syno_mvSata_pm_power_ctl(MV_IAL_COMMON_ADAPTER_EXTENSION *pIALExt,
                               MV_U8 channelIndex,
                               SYNO_PM_PKG *pPKG,

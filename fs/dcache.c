@@ -671,7 +671,12 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
 				       atomic_read(&dentry->d_count),
 				       dentry->d_sb->s_type->name,
 				       dentry->d_sb->s_id);
+#ifdef MY_ABC_HERE
+				dump_stack();
+				goto out;
+#else
 				BUG();
+#endif
 			}
 
 			if (IS_ROOT(dentry))

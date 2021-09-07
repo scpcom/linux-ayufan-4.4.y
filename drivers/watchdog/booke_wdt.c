@@ -44,7 +44,11 @@ u32 booke_wdt_period = WDT_PERIOD_DEFAULT;
 
 #ifdef	CONFIG_FSL_BOOKE
 #define WDTP(x)		((((x)&0x3)<<30)|(((x)&0x3c)<<15))
+#ifdef CONFIG_SYNO_QORIQ
+#define WDTP_MASK	(WDTP(0xff))
+#else
 #define WDTP_MASK	(WDTP(0))
+#endif
 #else
 #define WDTP(x)		(TCR_WP(x))
 #define WDTP_MASK	(TCR_WP_MASK)
@@ -113,6 +117,25 @@ static void __booke_wdt_enable(void *data)
 
 	mtspr(SPRN_TCR, val);
 }
+
+#ifdef CONFIG_SYNO_QORIQ
+static void __booke_wdt_disable(void *data)
+{
+	u32 val;
+
+	val = mfspr(SPRN_TCR);
+	printk(KERN_DEBUG "SPRN_TCR=%08x\n", val);
+	val &= ~(TCR_WIE | TCR_WRC_MASK | WDTP_MASK);
+	mtspr(SPRN_TCR, val);
+	printk(KERN_DEBUG "SPRN_TCR=%08x\n", val);
+}
+
+static int booke_wdt_release(struct inode *inode, struct file *file)
+{
+	on_each_cpu(__booke_wdt_disable, NULL, 0);
+	booke_wdt_enabled = 0;
+}
+#endif
 
 static ssize_t booke_wdt_write(struct file *file, const char __user *buf,
 				size_t count, loff_t *ppos)
@@ -199,6 +222,9 @@ static const struct file_operations booke_wdt_fops = {
 	.write = booke_wdt_write,
 	.unlocked_ioctl = booke_wdt_ioctl,
 	.open = booke_wdt_open,
+#ifdef CONFIG_SYNO_QORIQ
+	.release = booke_wdt_release,
+#endif
 };
 
 static struct miscdevice booke_wdt_miscdev = {

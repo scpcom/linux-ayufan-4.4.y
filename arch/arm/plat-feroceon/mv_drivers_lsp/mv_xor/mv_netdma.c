@@ -1521,7 +1521,7 @@ out:
 }
 EXPORT_SYMBOL(xor_copy_from_user);
 #else
-#error "Kernel version >= 2,6,26 does not support XOR copy_from_user"
+/* #error "Kernel version >= 2,6,26 does not support XOR copy_from_user" */
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,26) */
 #endif /* CONFIG_MV_XOR_COPY_FROM_USER */
 

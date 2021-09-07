@@ -324,6 +324,9 @@ static int grow_buffers(struct stripe_head *sh, int num)
 	return 0;
 }
 
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+static struct page *raid5_zero_copy(struct bio *bio, sector_t sector);
+#endif
 static void raid5_build_block(struct stripe_head *sh, int i, int previous);
 static void stripe_set_idx(sector_t stripe, raid5_conf_t *conf, int previous,
 			    struct stripe_head *sh);
@@ -510,6 +513,14 @@ static void ops_run_io(struct stripe_head *sh, struct stripe_head_state *s)
 				set_bit(STRIPE_DEGRADED, &sh->state);
 			pr_debug("skip op %ld on disc %d for sector %llu\n",
 				bi->bi_rw, i, (unsigned long long)sh->sector);
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+			if (test_bit(R5_DirectAccess, &sh->dev[i].flags)) {
+				struct page *pg = sh->dev[i].page;
+				BUG_ON(sh->dev[i].req.bi_io_vec[0].bv_page ==
+					pg);
+				sh->dev[i].req.bi_io_vec[0].bv_page = pg;
+			}
+#endif
 			clear_bit(R5_LOCKED, &sh->dev[i].flags);
 			set_bit(STRIPE_HANDLE, &sh->state);
 		}
@@ -706,10 +717,21 @@ ops_run_compute5(struct stripe_head *sh, struct raid5_percpu *percpu)
 		__func__, (unsigned long long)sh->sector, target);
 	BUG_ON(!test_bit(R5_Wantcompute, &tgt->flags));
 
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+	for (i = disks; i--; ) {
+		struct r5dev *dev = &sh->dev[i];
+		struct page *pg = dev->page;
+		if (i != target)
+			if (test_bit(R5_DirectAccess, &dev->flags))
+				pg = dev->req.bi_io_vec[0].bv_page;
+			xor_srcs[count++] = pg;
+	}
+#else
 	for (i = disks; i--; )
 		if (i != target)
 			xor_srcs[count++] = sh->dev[i].page;
 
+#endif
 	atomic_inc(&sh->count);
 
 	init_async_submit(&submit, ASYNC_TX_FENCE|ASYNC_TX_XOR_ZERO_DST, NULL,
@@ -945,8 +967,17 @@ ops_run_prexor(struct stripe_head *sh, struct raid5_percpu *percpu,
 	for (i = disks; i--; ) {
 		struct r5dev *dev = &sh->dev[i];
 		/* Only process blocks that are known to be uptodate */
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+		if (test_bit(R5_Wantdrain, &dev->flags)) {
+			struct page *pg = dev->page;
+			if (test_bit(R5_DirectAccess, &dev->flags))
+				pg = dev->req.bi_io_vec[0].bv_page;
+			xor_srcs[count++] = pg;
+		}
+#else
 		if (test_bit(R5_Wantdrain, &dev->flags))
 			xor_srcs[count++] = dev->page;
+#endif
 	}
 
 	init_async_submit(&submit, ASYNC_TX_FENCE|ASYNC_TX_XOR_DROP_DST, tx,
@@ -977,8 +1008,28 @@ ops_run_biodrain(struct stripe_head *sh, struct dma_async_tx_descriptor *tx)
 			dev->towrite = NULL;
 			BUG_ON(dev->written);
 			wbi = dev->written = chosen;
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+			set_bit(R5_LOCKED, &dev->flags);
+			BUG_ON(test_bit(R5_DirectAccess, &dev->flags));
 			spin_unlock(&sh->lock);
 
+			if (!wbi->bi_next && test_bit(R5_OVERWRITE, &dev->flags)
+					&& test_bit(R5_Insync, &dev->flags)) {
+				struct page *pg = raid5_zero_copy(wbi,
+								dev->sector);
+				if (pg) {
+					dev->req.bi_io_vec[0].bv_page = pg;
+					set_bit(R5_DirectAccess, &dev->flags);
+					clear_bit(R5_UPTODATE, &dev->flags);
+					clear_bit(R5_OVERWRITE, &dev->flags);
+					continue;
+				}
+			}
+			clear_bit(R5_OVERWRITE, &dev->flags);
+			set_bit(R5_UPTODATE, &dev->flags);
+#else
+			spin_unlock(&sh->lock);
+#endif
 			while (wbi && wbi->bi_sector <
 				dev->sector + STRIPE_SECTORS) {
 				tx = async_copy_data(1, wbi, dev->page,
@@ -1045,15 +1096,35 @@ ops_run_reconstruct5(struct stripe_head *sh, struct raid5_percpu *percpu,
 		xor_dest = xor_srcs[count++] = sh->dev[pd_idx].page;
 		for (i = disks; i--; ) {
 			struct r5dev *dev = &sh->dev[i];
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+			struct page *pg = dev->page;
+
+			if (dev->written) {
+				if (test_bit(R5_DirectAccess, &dev->flags))
+					pg = dev->req.bi_io_vec[0].bv_page;
+				xor_srcs[count++] = pg;
+			}
+#else
 			if (dev->written)
 				xor_srcs[count++] = dev->page;
+#endif
 		}
 	} else {
 		xor_dest = sh->dev[pd_idx].page;
 		for (i = disks; i--; ) {
 			struct r5dev *dev = &sh->dev[i];
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+			struct page *pg = dev->page;
+
+			if (i != pd_idx) {
+				if (test_bit(R5_DirectAccess, &dev->flags))
+					pg = dev->req.bi_io_vec[0].bv_page;
+				xor_srcs[count++] = pg;
+			}
+#else
 			if (i != pd_idx)
 				xor_srcs[count++] = dev->page;
+#endif
 		}
 	}
 
@@ -1524,6 +1595,15 @@ static void raid5_end_read_request(struct bio * bi, int error)
 		return;
 	}
 
+#ifdef MY_ABC_HERE
+	if (bio_flagged(bi, BIO_AUTO_REMAP)) {
+		rdev = conf->disks[i].rdev;
+		clear_bit(BIO_AUTO_REMAP, &bi->bi_flags);
+		printk("%s:%s(%d) BIO_AUTO_REMAP detected, sector:[%llu], sh count:[%d] disk count:[%d]\n", __FILE__,__FUNCTION__,__LINE__, (unsigned long long)sh->sector, atomic_read(&sh->count), i);
+		SynoAutoRemapReport(conf->mddev, sh->sector, rdev->bdev);
+	}
+#endif
+
 	if (uptodate) {
 		set_bit(R5_UPTODATE, &sh->dev[i].flags);
 		if (test_bit(R5_ReadError, &sh->dev[i].flags)) {
@@ -1689,11 +1769,42 @@ static void raid5_end_write_request(struct bio *bi, int error)
 
 	rdev_dec_pending(conf->disks[i].rdev, conf->mddev);
 	
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+	if (test_bit(R5_DirectAccess, &sh->dev[i].flags)) {
+		BUG_ON(sh->dev[i].req.bi_io_vec[0].bv_page == sh->dev[i].page);
+		sh->dev[i].req.bi_io_vec[0].bv_page = sh->dev[i].page;
+	}
+#endif
 	clear_bit(R5_LOCKED, &sh->dev[i].flags);
 	set_bit(STRIPE_HANDLE, &sh->state);
 	release_stripe(sh);
 }
 
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+static struct page *raid5_zero_copy(struct bio *bio, sector_t sector)
+{
+	sector_t bi_sector = bio->bi_sector;
+	struct page *page = NULL;
+	struct bio_vec *bv;
+	int i;
+
+	bio_for_each_segment(bv, bio, i) {
+		if (sector == bi_sector)
+			page = bio_iovec_idx(bio, i)->bv_page;
+
+		bi_sector += bio_iovec_idx(bio, i)->bv_len >> 9;
+		if (bi_sector >= sector + STRIPE_SECTORS) {
+			/* check if the stripe is covered by one page */
+			if (page == bio_iovec_idx(bio, i)->bv_page) {
+				SetPageConstant(page);
+				return page;
+			}
+			return NULL;
+		}
+	}
+	return NULL;
+}
+#endif
 
 static sector_t compute_blocknr(struct stripe_head *sh, int i, int previous);
 	
@@ -1791,16 +1902,16 @@ static void syno_error_for_internal(mddev_t *mddev, mdk_rdev_t *rdev)
 		if (!test_bit(Faulty, &rdev->flags) && !test_bit(DiskError, &rdev->flags)) {
 			set_bit(MD_CHANGE_DEVS, &mddev->flags);
 			/*
-			* find out the disk in sync now, set it to faulty let it fail to building parity
+			* find out the disk in sync now, remove it to let it fail to building parity
 			*/
 			list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
 				if (!test_bit(Faulty, &rdev_tmp->flags) && !test_bit(In_sync, &rdev_tmp->flags)) {
 					printk("%s[%d]:%s: %s has read/write error, but it gonna to crashed. "
-						   "We set %s to faulty for stopping sync\n",
+						   "We remove %s from raid for stopping sync\n",
 						   __FILE__, __LINE__, __FUNCTION__,
 						   bdevname(rdev->bdev, b1), bdevname(rdev_tmp->bdev, b2));
 					set_bit(MD_RECOVERY_INTR, &mddev->recovery);
-					set_bit(Faulty, &rdev_tmp->flags);
+					SYNORaidRdevUnplug(mddev, rdev_tmp);
 				}
 			}
 			set_bit(DiskError, &rdev->flags);
@@ -1831,10 +1942,10 @@ static void syno_error_for_internal(mddev_t *mddev, mdk_rdev_t *rdev)
  * let it be read-only, instead of this, we make it faulty
  *
  * If there is going to be crashed in raid 4/5/6, and we want
- * hotplug it. We need unplug all other disk which are building 
- * parity now. Otherwise the status will be error in such 
- * disks("U" instead of "_" ) 
- * 
+ * hotplug it. We need unplug all other disk which are building
+ * parity now. Otherwise the status will be error in such
+ * disks("U" instead of "_" )
+ *
  * @param mddev passing from md.c
  * @param rdev passing from md.c
  */
@@ -2680,7 +2791,13 @@ static void handle_stripe_clean_event(raid5_conf_t *conf,
 		if (sh->dev[i].written) {
 			dev = &sh->dev[i];
 			if (!test_bit(R5_LOCKED, &dev->flags) &&
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+				(test_bit(R5_UPTODATE, &dev->flags)
+				|| test_bit(R5_DirectAccess, &dev->flags)
+			)) {
+#else
 				test_bit(R5_UPTODATE, &dev->flags)) {
+#endif
 				/* We can return any write requests */
 				struct bio *wbi, *wbi2;
 				int bitmap_end = 0;
@@ -2688,6 +2805,9 @@ static void handle_stripe_clean_event(raid5_conf_t *conf,
 				spin_lock_irq(&conf->device_lock);
 				wbi = dev->written;
 				dev->written = NULL;
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+				clear_bit(R5_DirectAccess, &dev->flags);
+#endif
 				while (wbi && wbi->bi_sector <
 					dev->sector + STRIPE_SECTORS) {
 					wbi2 = r5_next_bio(wbi, dev->sector);
@@ -4107,6 +4227,14 @@ static void raid5_align_endio(struct bio *bi, int error)
 	raid_bi->bi_next = NULL;
 
 	rdev_dec_pending(rdev, conf->mddev);
+
+#ifdef MY_ABC_HERE
+	if (bio_flagged(bi, BIO_AUTO_REMAP)) {
+		clear_bit(BIO_AUTO_REMAP, &bi->bi_flags);
+		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__,__FUNCTION__,__LINE__);
+		SynoAutoRemapReport(conf->mddev, raid_bi->bi_sector, rdev->bdev);
+	}
+#endif
 
 	if (!error && uptodate) {
 		bio_endio(raid_bi, 0);
@@ -6297,6 +6425,9 @@ static struct mdk_personality raid6_personality =
 	.finish_reshape = raid5_finish_reshape,
 	.quiesce	= raid5_quiesce,
 	.takeover	= raid6_takeover,
+#ifdef MY_ABC_HERE
+	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
+#endif
 };
 static struct mdk_personality raid5_personality =
 {
@@ -6324,6 +6455,9 @@ static struct mdk_personality raid5_personality =
 	.finish_reshape = raid5_finish_reshape,
 	.quiesce	= raid5_quiesce,
 	.takeover	= raid5_takeover,
+#ifdef MY_ABC_HERE
+	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
+#endif
 };
 
 static struct mdk_personality raid4_personality =
@@ -6351,6 +6485,9 @@ static struct mdk_personality raid4_personality =
 	.start_reshape  = raid5_start_reshape,
 	.finish_reshape = raid5_finish_reshape,
 	.quiesce	= raid5_quiesce,
+#ifdef MY_ABC_HERE
+	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
+#endif
 };
 
 static int __init raid5_init(void)

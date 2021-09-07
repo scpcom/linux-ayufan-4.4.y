@@ -30,6 +30,14 @@
 #include <linux/syscalls.h>
 #include <linux/uio.h>
 #include <linux/security.h>
+#ifdef CONFIG_SYNO_QORIQ
+#include <linux/socket.h>
+#include <linux/net.h>
+#ifdef CONFIG_SEND_PAGES
+#include <net/tcp.h>
+#include <linux/netdevice.h>
+#endif /*CONFIG_SEND_PAGES*/
+#endif
 #ifdef CONFIG_ARCH_FEROCEON
 #include <net/sock.h>
 #include "read_write.h"
@@ -41,6 +49,21 @@
 extern struct write_sock_to_file_stat write_from_sock;
 #endif /* COLLECT_WRITE_SOCK_TO_FILE_STAT */
 #endif /*CONFIG_ARCH_FEROCEON*/
+
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_SEND_PAGES
+extern int is_sock_file(struct file *f);
+#endif /*CONFIG_SEND_PAGES*/
+
+#define MAX_RECV_PAGES 8
+struct receive_page {
+     struct page *page;
+     loff_t pos;
+     size_t count;
+     void *fsdata;
+};
+#endif
+
 /*
  * Attempt to steal a page from a pipe buffer. This should perhaps go into
  * a vm helper function, it's already simplified quite a bit by the
@@ -367,7 +390,15 @@ __generic_file_splice_read(struct file *in, loff_t *ppos,
 		this_len = min_t(unsigned long, len, PAGE_CACHE_SIZE - loff);
 		page = pages[page_nr];
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_DELAY_ASYNC_READAHEAD
+		if (!in->f_ra.delay_readahead && PageReadahead(page))
+#else
 		if (PageReadahead(page))
+#endif
+#else
+		if (PageReadahead(page))
+#endif
 			page_cache_async_readahead(mapping, &in->f_ra, in,
 					page, index, req_pages - page_nr);
 
@@ -644,6 +675,80 @@ err:
 }
 EXPORT_SYMBOL(default_file_splice_read);
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_SEND_PAGES
+static int pipe_to_sendpages(struct pipe_inode_info *pipe,
+			    struct pipe_buffer *buf, struct splice_desc *sd)
+{
+	struct file *file = sd->u.file;
+	int ret, more;
+	int page_index = 0;
+	unsigned int tlen, len, offset;
+	unsigned int curbuf = pipe->curbuf;
+	struct page *pages[PIPE_BUFFERS];
+	int nrbuf = pipe->nrbufs;
+	int flags;
+	struct socket *sock = file->private_data;
+
+	sd->len = sd->total_len;
+	tlen = 0;
+	offset = buf->offset;
+
+	while (nrbuf) {
+		buf = pipe->bufs + curbuf;
+
+		ret = buf->ops->confirm(pipe, buf);
+		if (ret)
+			break;
+
+		pages[page_index] = buf->page;
+		page_index++;
+		len = (buf->len < sd->len) ? buf->len : sd->len;
+		buf->offset += len;
+		buf->len -= len;
+
+		sd->num_spliced += len;
+		sd->len -= len;
+		sd->pos += len;
+		sd->total_len -= len;
+		tlen += len;
+
+		if (!buf->len) {
+			curbuf = (curbuf + 1) & (PIPE_BUFFERS - 1);
+			nrbuf--;
+		}
+		if (!sd->total_len)
+			break;
+	}
+
+	more = (sd->flags & SPLICE_F_MORE) || sd->len < sd->total_len;
+	flags = !(file->f_flags & O_NONBLOCK) ? 0 : MSG_DONTWAIT;
+	if (more)
+		flags |= MSG_MORE;
+
+	len = tcp_sendpages(sock, pages, offset, tlen, flags);
+
+	if (!ret)
+		ret = len;
+
+	while (page_index) {
+		page_index--;
+		buf = pipe->bufs + pipe->curbuf;
+		if (!buf->len) {
+			buf->ops->release(pipe, buf);
+			buf->ops = NULL;
+			pipe->curbuf = (pipe->curbuf + 1) & (PIPE_BUFFERS - 1);
+			pipe->nrbufs--;
+			if (pipe->inode)
+				sd->need_wakeup = true;
+		}
+	}
+
+	return ret;
+}
+#endif/*CONFIG_SEND_PAGES*/
+#endif /* CONFIG_SYNO_QORIQ */
+
 /*
  * Send 'sd->len' bytes to socket from 'sd->file' at position 'sd->pos'
  * using sendpage(). Return the number of bytes sent.
@@ -655,6 +760,19 @@ static int pipe_to_sendpage(struct pipe_inode_info *pipe,
 	loff_t pos = sd->pos;
 	int ret, more;
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_SEND_PAGES
+	struct socket *sock = file->private_data;
+
+	if (is_sock_file(file) &&
+		sock->ops->sendpage == tcp_sendpage){
+		struct sock *sk = sock->sk;
+		if ((sk->sk_route_caps & NETIF_F_SG) &&
+			(sk->sk_route_caps & NETIF_F_ALL_CSUM))
+			return pipe_to_sendpages(pipe, buf, sd);
+	}
+#endif
+#endif
 	ret = buf->ops->confirm(pipe, buf);
 	if (!ret) {
 		more = (sd->flags & SPLICE_F_MORE) || sd->len < sd->total_len;
@@ -781,6 +899,14 @@ int splice_from_pipe_feed(struct pipe_inode_info *pipe, struct splice_desc *sd,
 			sd->len = sd->total_len;
 
 		ret = actor(pipe, buf, sd);
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_SEND_PAGES
+		if (!sd->total_len)
+			return 0;
+		if (!pipe->nrbufs)
+			break;
+#endif /*CONFIG_SEND_PAGES*/
+#endif
 		if (ret <= 0) {
 			if (ret == -ENODATA)
 				ret = 0;
@@ -1171,6 +1297,13 @@ ssize_t splice_direct_to_actor(struct file *in, struct splice_desc *sd,
 	umode_t i_mode;
 	size_t len;
 	int i, flags;
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_DELAY_ASYNC_READAHEAD
+	int nr_pages, index;
+	struct page *pages[PIPE_BUFFERS];
+	struct address_space *mapping = in->f_mapping;
+#endif
+#endif
 
 	/*
 	 * We require the input being a regular file, as we don't want to
@@ -1218,6 +1351,14 @@ ssize_t splice_direct_to_actor(struct file *in, struct splice_desc *sd,
 		size_t read_len;
 		loff_t pos = sd->pos, prev_pos = pos;
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_DELAY_ASYNC_READAHEAD
+		/*disable async readahead in file splice read*/
+		if (in->f_op->splice_read == generic_file_splice_read)
+			in->f_ra.delay_readahead = 1;
+#endif /*CONFIG_DELAY_ASYNC_READAHEAD*/
+#endif
+
 		ret = do_splice_to(in, &pos, pipe, len, flags);
 		if (unlikely(ret <= 0))
 			goto out_release;
@@ -1231,6 +1372,28 @@ ssize_t splice_direct_to_actor(struct file *in, struct splice_desc *sd,
 		 * could get stuck data in the internal pipe:
 		 */
 		ret = actor(pipe, sd);
+
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_DELAY_ASYNC_READAHEAD
+		/*do async readahead*/
+		if (in->f_ra.delay_readahead) {
+			index = sd->pos >> PAGE_CACHE_SHIFT;
+			nr_pages = (read_len + (sd->pos & ~PAGE_CACHE_MASK)
+					+ PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
+			nr_pages = find_get_pages_contig(mapping, index, nr_pages, pages);
+			for (i = 0; i < nr_pages; i++) {
+				if (PageReadahead(pages[i])) {
+					page_cache_async_readahead(mapping, &in->f_ra, in,
+						pages[i], index, nr_pages - i);
+				}
+				index++;
+				page_cache_release(pages[i]);
+			}
+			in->f_ra.delay_readahead = 0;
+		}
+#endif /*CONFIG_DELAY_ASYNC_READAHEAD*/
+#endif
+
 		if (unlikely(ret <= 0)) {
 			sd->pos = prev_pos;
 			goto out_release;
@@ -1637,6 +1800,116 @@ static long vmsplice_to_user(struct file *file, const struct iovec __user *iov,
 	return ret;
 }
 
+#ifdef CONFIG_SYNO_QORIQ
+static int socket_to_file(struct socket *sock, struct file *file,
+		loff_t pos, size_t count)
+{
+	struct address_space *mapping = file->f_mapping;
+	struct inode *inode = mapping->host;
+	struct receive_page pages[MAX_RECV_PAGES];
+	struct kvec iov[MAX_RECV_PAGES];
+	struct msghdr msg;
+	unsigned long total_remains;
+	unsigned long total_send = 0;
+	int ret;
+	int err = 0;
+	int index = 0;
+	int total_page = 0;
+	int send_page = 0;
+
+	mutex_lock(&inode->i_mutex);
+
+	vfs_check_frozen(inode->i_sb, SB_FREEZE_WRITE);
+	current->backing_dev_info = mapping->backing_dev_info;
+
+	err = generic_write_checks(file, &pos, &count, S_ISBLK(inode->i_mode));
+
+	if (err != 0 || count == 0) {
+		current->backing_dev_info = NULL;
+		mutex_unlock(&inode->i_mutex);
+		return -EFAULT;
+	}
+
+	file_remove_suid(file);
+	file_update_time(file);
+
+	total_remains = count;
+	do {
+		send_page = 0;
+		do {
+			unsigned long bytes;
+			unsigned long offset;
+			struct page *page;
+			void *fsdata;
+
+			offset = (pos & (PAGE_CACHE_SIZE - 1));
+			bytes = min_t(unsigned long, PAGE_CACHE_SIZE - offset,
+					total_remains);
+
+			ret =  mapping->a_ops->write_begin(file, mapping, pos,
+				bytes, AOP_FLAG_UNINTERRUPTIBLE, &page, &fsdata);
+
+			if (unlikely(ret)) {
+				err = -EFAULT;
+				break;
+			}
+
+			pages[send_page].page = page;
+			pages[send_page].pos = pos;
+			pages[send_page].count = bytes;
+			pages[send_page].fsdata = fsdata;
+			iov[send_page].iov_base = kmap(page) + offset;
+			iov[send_page].iov_len = bytes;
+			send_page++;
+			total_remains -= bytes;
+			pos += bytes;
+		} while (total_remains && send_page != MAX_RECV_PAGES);
+
+		total_page += send_page;
+		/*setup socket message*/
+		msg.msg_name = NULL;
+		msg.msg_namelen = 0;
+		msg.msg_iov = (struct iovec *)&iov[0];
+		msg.msg_iovlen = send_page;
+		msg.msg_control = NULL;
+		msg.msg_controllen = 0;
+		msg.msg_flags = MSG_WAITALL;
+		total_send += kernel_recvmsg(sock, &msg, &iov[0], send_page,
+			(count - total_remains - total_send), MSG_WAITALL);
+
+		if ((total_send + total_remains) != count)
+			err = -EPIPE;
+		else
+			err = total_send;
+
+		/*commit pages to file cache*/
+		for (index = 0; index < send_page; index++) {
+			mark_page_accessed(pages[index].page);
+			kunmap(pages[index].page);
+			ret = mapping->a_ops->write_end(file, mapping,
+			pages[index].pos, pages[index].count, pages[index].count,
+			pages[index].page, pages[index].fsdata);
+			if (unlikely(ret < 0)) {
+				err = ret;
+				break;
+			}
+		}
+
+		if (err < 0)
+			break;
+
+	} while (total_remains);
+
+	if (err > 0)
+		balance_dirty_pages_ratelimited_nr(mapping, total_page);
+
+	current->backing_dev_info = NULL;
+	mutex_unlock(&inode->i_mutex);
+
+	return err;
+}
+#endif /* CONFIG_SYNO_QORIQ */
+
 /*
  * vmsplice splices a user address range into a pipe. It can be thought of
  * as splice-from-memory, where the regular splice is splice-from-file (or
@@ -1723,6 +1996,10 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 	struct file *in, *out;
 #endif
 	int fput_in, fput_out;
+#ifdef CONFIG_SYNO_QORIQ
+	struct socket *sock = NULL;
+#endif
+
 	if (unlikely(!len))
 		return 0;
 
@@ -1744,6 +2021,30 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 		return error;
 	}
 #else
+#ifdef CONFIG_SYNO_QORIQ
+	sock = sockfd_lookup(fd_in, &error);
+	if (sock) {
+		loff_t pos;
+		out = NULL;
+
+		if (!sock->sk)
+			return error;
+
+		if (copy_from_user(&pos, off_out, sizeof(loff_t)))
+			return -EFAULT;
+
+		out = fget_light(fd_out, &fput_out);
+		if (out) {
+			if (out->f_mode & FMODE_WRITE)
+				error = socket_to_file(sock, out, pos, len);
+			fput_light(out, fput_out);
+		}
+
+		fput(sock->file);
+		return error;
+	}
+#endif
+
 	in = fget_light(fd_in, &fput_in);
 	if (in) {
 		if (in->f_mode & FMODE_READ) {

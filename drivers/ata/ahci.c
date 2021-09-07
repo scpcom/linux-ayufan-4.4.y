@@ -401,6 +401,10 @@ static ssize_t ahci_show_host_version(struct device *dev,
 static ssize_t ahci_show_port_cmd(struct device *dev,
 				  struct device_attribute *attr, char *buf);
 
+#ifdef MY_ABC_HERE
+static void ahci_port_intr(struct ata_port *ap);
+#endif
+
 DEVICE_ATTR(ahci_host_caps, S_IRUGO, ahci_show_host_caps, NULL);
 DEVICE_ATTR(ahci_host_cap2, S_IRUGO, ahci_show_host_cap2, NULL);
 DEVICE_ATTR(ahci_host_version, S_IRUGO, ahci_show_host_version, NULL);
@@ -484,6 +488,10 @@ void sata_syno_ahci_diskled_set(int iDiskNo, int iPresent, int iFault)
 		goto RELEASESRC;
 	}
 
+#ifdef MY_ABC_HERE
+	iPresent &= giSynoHddLedEnabled;
+	iFault &= giSynoHddLedEnabled;
+#endif
 	//for each devices of each links in port ap
 	ata_for_each_link(pAtaLink, pAp, EDGE) {
 		ata_for_each_dev(pAtaDev, pAtaLink, ALL) {
@@ -534,9 +542,12 @@ static struct device_attribute *ahci_shost_attrs[] = {
 	&dev_attr_ahci_host_cap2,
 	&dev_attr_ahci_host_version,
 	&dev_attr_ahci_port_cmd,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_port_thaw,
+#endif
 #endif
 	NULL
 };
@@ -549,6 +560,9 @@ static struct device_attribute *ahci_sdev_attrs[] = {
 #endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_disk_serial,
+#endif
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_fake_error_ctrl,
 #endif
 #ifdef MY_DEF_HERE
 	&dev_attr_sw_locate,
@@ -566,7 +580,7 @@ static struct scsi_host_template ahci_sht = {
 	.sdev_attrs		= ahci_sdev_attrs,
 };
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 static int
 sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc)
 {
@@ -635,6 +649,9 @@ static struct ata_port_operations ahci_ops = {
 #endif
 	.port_start		= ahci_port_start,
 	.port_stop		= ahci_port_stop,
+#ifdef MY_ABC_HERE
+	.syno_force_intr	= ahci_port_intr,
+#endif
 };
 
 static struct ata_port_operations ahci_vt8251_ops = {
@@ -677,7 +694,7 @@ static const struct ata_port_info ahci_port_info[] = {
 		.flags		= AHCI_FLAG_COMMON,
 		.pio_mask	= ATA_PIO4,
 		.udma_mask	= ATA_UDMA6,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 		.port_ops	= &ahci_pmp_ops,
 #else
 		.port_ops	= &ahci_ops,
@@ -1586,6 +1603,11 @@ static void ahci_sw_activity(struct ata_link *link)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+	if (!giSynoHddLedEnabled) {
+		return;
+	}
+#endif
 	if (!(link->flags & ATA_LFLAG_SW_ACTIVITY))
 		return;
 
@@ -2115,6 +2137,12 @@ static int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 
  fail:
 	ata_link_printk(link, KERN_ERR, "softreset failed (%s)\n", reason);
+#ifdef MY_ABC_HERE
+	if (-EBUSY == rc) {
+		ata_link_printk(link, KERN_ERR, "SRST fail, set srst fail flag\n");
+		link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;
+	}
+#endif
 	return rc;
 }
 
@@ -2441,7 +2469,18 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 		ata_ehi_push_desc(host_ehi, "interface fatal error");
 	}
 
+#ifdef MY_ABC_HERE
+	if ((irq_stat & (PORT_IRQ_CONNECT | PORT_IRQ_PHYRDY)) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
+		if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR) {
+			ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_INTR;
+			DBGMESG("ata%u: clear ATA_SYNO_FLAG_FORCE_INTR\n", ap->print_id);
+		} else {
+			ap->iDetectStat = 1;
+			DBGMESG("ata%u: set detect stat check\n", ap->print_id);
+		}
+#else
 	if (irq_stat & (PORT_IRQ_CONNECT | PORT_IRQ_PHYRDY)) {
+#endif
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
@@ -2487,7 +2526,11 @@ static void ahci_port_intr(struct ata_port *ap)
 		ahci_scr_write(&ap->link, SCR_ERROR, ((1 << 16) | (1 << 18)));
 	}
 
+#ifdef MY_ABC_HERE
+	if (unlikely(status & PORT_IRQ_ERROR) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
+#else
 	if (unlikely(status & PORT_IRQ_ERROR)) {
+#endif
 		ahci_error_intr(ap, status);
 		return;
 	}

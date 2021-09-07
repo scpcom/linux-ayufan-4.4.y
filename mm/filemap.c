@@ -28,6 +28,13 @@
 #include <linux/backing-dev.h>
 #include <linux/pagevec.h>
 #include <linux/blkdev.h>
+
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+#include <linux/rmap.h>
+#endif
+#endif
+
 #include <linux/security.h>
 #include <linux/syscalls.h>
 #include <linux/cpuset.h>
@@ -586,9 +593,29 @@ void end_page_writeback(struct page *page)
 		BUG();
 
 	smp_mb__after_clear_bit();
+
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+	clear_page_constant(page);
+#endif
+#endif
+
 	wake_up_page(page, PG_writeback);
 }
 EXPORT_SYMBOL(end_page_writeback);
+
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
+void clear_page_constant(struct page *page)
+{
+	if (PageConstant(page)) {
+		ClearPageConstant(page);
+		SetPageUptodate(page);
+	}
+}
+EXPORT_SYMBOL(clear_page_constant);
+#endif
+#endif
 
 /**
  * __lock_page - get a lock on the page, assuming we need to sleep to get it
@@ -2708,6 +2735,7 @@ done:
 	*ppos = pos;
 
 	crgPagePtr = 0;
+
 	while (crgPagePtr < cPagesAllocated) {
 		page = rgPageList[crgPagePtr];
 
@@ -2725,9 +2753,13 @@ done:
 				err = write_end_ret;
 			}
 		}
-		cond_resched();
-		crgPagePtr++;
+#ifdef CONFIG_SYNO_QORIQ
+#else
+			cond_resched();
+#endif
+			crgPagePtr++;
 	}
+
 	if (0 < bytes_received) {
 		*rbytes = kernel_recvmsg_ret;
 		*wbytes = bytes_received;

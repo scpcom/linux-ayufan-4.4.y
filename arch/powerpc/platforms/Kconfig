@@ -164,6 +164,14 @@ config CPU_FREQ_PMAC64
 	  This adds support for frequency switching on Apple iMac G5,
 	  and some of the more recent desktop G5 machines as well.
 
+config MPC85xx_CPUFREQ
+	bool "Support for Freescale MPC85xx CPU freq"
+	depends on PPC_85xx && PPC32
+	select CPU_FREQ_TABLE
+	help
+	  This adds support for frequency switching on Freescale MPC85xx,
+	  this currently includes P1022 processor.
+
 config PPC_PASEMI_CPUFREQ
 	bool "Support for PA Semi PWRficient"
 	depends on PPC_PASEMI
@@ -332,5 +340,11 @@ config MCU_MPC8349EMITX
 config XILINX_PCI
 	bool "Xilinx PCI host bridge support"
 	depends on PCI && XILINX_VIRTEX
+
+config FSL_PIXIS
+	tristate "Freescale board control FPGA"
+	depends on FSL_SOC
+	help
+	  Say Y here to support board control FPGA.
 
 endmenu

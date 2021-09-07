@@ -167,19 +167,20 @@ typedef struct _SynoMsgPkt {
 
 #define SYNO_EVENT_RAID                 0x1900
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 #define SYNO_EVENT_HIBERNATION			0x2000
 #endif
 #define SYNO_EVENT_SHUTDOWN_LOG			0x2200
-#ifdef MY_ABC_HERE
 #define SYNO_EVENT_EBOX_REFRESH      0x2300
-#endif
 
 #ifdef MY_DEF_HERE
 #define SYNO_EVENT_ECC_NOTIFICATION		0x2400
 #endif
 
-#define SYNO_EVENT_BAD_SECTOR_REMAP_RECORD 0x2500
+#ifdef MY_ABC_HERE
+#define SYNO_EVENT_RAID_REMAP_RECORD 0x2500
+#define SYNO_EVENT_LV_REMAP_RECORD 0x2600
+#endif
 
 #define SYNO_EVENT_BACK_TEMP_CRITICAL   0x4004
 #define SYNO_EVENT_BACK_TEMP_HIGH       0x4003
@@ -315,11 +316,6 @@ enum {
     MD_SECTOR_REWRITE_OK = 2,
 };
 
-enum {
-	MD_SECTOR_READ_ERROR_REMAP = 0,
-	LV_SECTOR_READ_ERROR_REMAP = 1,
-};
-
 typedef enum {
 	DISK_WAKE_UP = 0,
 } SYNO_DISK_HIBERNATION_EVENT;
@@ -416,7 +412,7 @@ enum {
 
 typedef enum {
 	CAPABILITY_THERMAL      = 2,
-	CAPABILITY_FANCTRL      = 3,
+	CAPABILITY_DISK_LED_CTRL= 3,
 	CAPABILITY_AUTO_POWERON = 4,
 	CAPABILITY_EBOX         = 5,
 	CAPABILITY_CPU_TEMP     = 6,
@@ -479,10 +475,10 @@ typedef enum {
 }CPUTMP_T;
 
 typedef enum {
-	FANCTRL_UNKNOWN,
-	FANCTRL_YES,
-	FANCTRL_NO,
-}FANCTRL_T;
+	DISK_LED_CTRL_UNKNOWN,
+	DISK_LED_CTRL_SW,
+	DISK_LED_CTRL_HW,
+}DISK_LED_CTRL_T;
 
 typedef enum {
 	AUTO_POWERON_UNKNOWN,
@@ -500,6 +496,7 @@ typedef enum {
 	USBCOPY_UNKNOWN,
 	USBCOPY_YES,
 	USBCOPY_NO,
+	USBCOPY_MUTE,
 }USBCOPY_T;
 
 typedef enum {
@@ -566,6 +563,58 @@ typedef enum {
 	HIBER_LED_ALLOUT,
 	HIBER_LED_EXCEPTPWR,
 }HIBERNATE_LED_T;
+
+typedef enum {
+	RTC_NOT_NEED_TO_CORRECT = 0x00,
+	RTC_SEIKO_CORR_DEFAULT  = 0x03,
+	RTC_SEIKO_CORR_106B1    = 0x57,
+	RTC_RICOH_CORR_DEFAULT  = 0x0F,
+}RTC_CORRECTION_T;
+
+typedef enum {
+	FAN_FAIL_ADJUST_NO,
+	FAN_FAIL_ADJUST_FULL,
+}FAN_FAIL_ADJUST_T;
+
+typedef enum {
+	MICROP_ID_710p = 0x31, /* '1' */
+	MICROP_ID_411p = 0x33, /* '3' 411+II is the same*/
+	MICROP_ID_1010p = 0x32, /* '2' */
+	MICROP_ID_1511p = 0x36, /* '6' */
+	MICROP_ID_810p = 0x35, /* '5' */
+	MICROP_ID_810rp = 0x34, /* '4' */
+	MICROP_ID_2211p = 0x37, /* '7' */
+	MICROP_ID_2211rp = 0x38, /* '8' */
+	MICROP_ID_2411p = 0x39, /* '9' */
+	MICROP_ID_3411xs = 0x43, /* 'C' 3412xs is the same */
+	MICROP_ID_3411rpxs = 0x41, /* 'A' 3412rpxs is the same */
+	MICROP_ID_3611xs = 0x42, /* 'B' 3612xs is the same*/
+	MICROP_ID_712p = 0x44, /* 'D' */
+	MICROP_ID_412p = 0x45, /* 'E' */
+	MICROP_ID_1512p = 0x47, /* 'G' */
+	MICROP_ID_1812p = 0x46, /* 'F' */
+	MICROP_ID_812p = 0x48, /* 'H' */
+	MICROP_ID_812rp = 0x49, /* 'I' */
+	MICROP_ID_2212p = 0x4A, /* 'J' */
+	MICROP_ID_2212rp = 0x4B, /* 'K' */
+	MICROP_ID_2412p = 0x4C, /* 'L' */
+	MICROP_ID_10812xs = 0x4d, /* 'M' */
+	MICROP_ID_UNKNOW = 0xFF,
+} SYNO_MICROP_ID;
+
+/* This is for grpup wake setting
+ * [7-4]: how many disks are in one group
+ * [3-0]: the deno of 7s, it means how
+ *        many seconds between each groups
+ * ex. 0x47 means 4 disks in one gorup,
+ *     and delay 7/7 = 1s between each waking groups
+ **/
+typedef enum {
+	ONE_DISK_DENO_ONE = 0x11,     /* this is default settings */
+	FOUR_DISK_DENO_SEVEN = 0x47,  /* if the model is >=8bay, you must use this */
+	UNKNOW_DISK_DENO = 0x00,
+} GROUP_WAKE_CONFIG_T;
+
 /**
  * This structure is used to store types of each module
  * in different DS models, including module fan type,
@@ -576,7 +625,7 @@ typedef struct {
 	RAID_T         raid_type         :2;
 	LED_T          led_type          :4;
 	THERMAL_T      thermal_type      :2;
-	FANCTRL_T      fanctrl_type      :2;
+	DISK_LED_CTRL_T diskled_ctrl_type:2;
 	AUTO_POWERON_T auto_poweron_type :2;
 	DUAL_POWER_T   dual_power_type   :2;
 	USBCOPY_T      usbcopy_type      :2;
@@ -590,6 +639,10 @@ typedef struct {
 	CPUFREQ_ADJUST_T cpu_freq_adjust :2;
 	CARDREADER_T   has_cardreader    :2;
 	HIBERNATE_LED_T  hibernate_led   :2;
+	RTC_CORRECTION_T rtc_corr_value  :8;
+	FAN_FAIL_ADJUST_T fan_fail_adjust:2;
+	SYNO_MICROP_ID microp_id         :8;
+	GROUP_WAKE_CONFIG_T group_wake_config :8;
 } __attribute__((packed)) module_t;
 
 #define HW_DS107e      "DS107e"
@@ -632,7 +685,8 @@ typedef struct {
 #define HW_DS110jv20   "DS110jv20"     //"DS110jv20"
 #define HW_DS110jv30   "DS110jv30"     //"DS110jv30"
 #define HW_DS710p      "DS710+"        //"DS710+"
-#define HW_DS712p      "DS712+"        //"DS712+"
+#define HW_DS712pv10   "DS712+"        //"DS712+"
+#define HW_DS712pv20   "DS712+v20"     //"DS712+v20"
 #define HW_DS1010p     "DS1010+"       //"DS1010+"
 #define HW_DS110p      "DS110p"        //"DS110+"
 #define HW_DS210p      "DS210p"        //"DS210+"
@@ -662,15 +716,28 @@ typedef struct {
 #define HW_DS3612xs    "DS3612xs"      //"DS3612xs"
 #define HW_DS111j      "DS111j"        //"DS111j"
 #define HW_DS212       "DS212"         //"DS212v10"
+#define HW_DS412       "DS412"         //"DS412"
 #define HW_DS412p      "DS412+"        //"DS412+"
+#define HW_RS812p      "RS812+"        //"RS812+"
+#define HW_RS812rpp	   "RS812rp+"      //"RS812rp+"
 #define HW_DS1812p     "DS1812+"       //"DS1812+"
+#define HW_RS2212p     "RS2212+"       //"RS2212+"
+#define HW_RS2212rpp   "RS2212rp+"     //"RS2212rp+"
+#define HW_DS2412p     "DS2412+"       //"DS2412+"
 #define HW_RS212       "RS212"         //"RS212"
-#define HW_DS212j      "DS212j"        //"DS212j"
+#define HW_DS212jv10   "DS212j"        //"DS212j"
+#define HW_DS212jv20   "DS212jv20"     //"DS212j"
 #define HW_RS812       "RS812"         //"RS812"
 #define HW_DS1512p     "DS1512+"       //"DS1512+"
-#define HW_DS212p      "DS212pv10"     //"DS212+"
+#define HW_DS212pv10   "DS212pv10"     //"DS212+"
+#define HW_DS212pv20   "DS212pv20"     //"DS212+"
 #define HW_DS112j      "DS112jv10"     //"DS112j"
 #define HW_DS112       "DS112v10"      //"DS112"
+#define HW_DS112pv10   "DS112pv10"     //"DS112+"
+#define HW_DS112slim   "DS112slim"     //"DS112slim"
+#define HW_DS412jv10   "DS412jv10"     //"DS412jv10"
+#define HW_DS213pv10   "DS213pv10"     //"DS213pv10"
+#define HW_DS212wv10   "DS212wv10"     //"DS212wv10"
 
 #define HW_UNKNOWN     "DSUnknown"
 									    
@@ -746,8 +813,14 @@ typedef enum {
 	MODEL_RS2211rpp,
 	MODEL_DS2411p,
 	MODEL_DS212,
+	MODEL_DS412,
 	MODEL_DS412p,
+	MODEL_RS812p,
+	MODEL_RS812rpp,
 	MODEL_DS1812p,
+	MODEL_RS2212p,
+	MODEL_RS2212rpp,
+	MODEL_DS2412p,
 	MODEL_RS212,
 	MODEL_DS212j,
 	MODEL_RS812,
@@ -755,6 +828,11 @@ typedef enum {
 	MODEL_DS212p,
 	MODEL_DS112j,
 	MODEL_DS112,
+	MODEL_DS112p,
+	MODEL_DS112slim,
+	MODEL_DS412j,
+	MODEL_DS213p,
+	MODEL_DS212w,
 	MODEL_INVALID
 } PRODUCT_MODEL;
 
@@ -890,6 +968,7 @@ typedef struct _tag_SYNO_SYS_STATUS {
 #define SYNOIO_SET_HDD_LED     _IOWR(SYNOBIOS_IOC_MAGIC, 37, SYNO_LED)
 #define SYNOIO_SET_PWR_LED     _IOWR(SYNOBIOS_IOC_MAGIC, 38, SYNO_LED)
 #define SYNOIO_PWM_CTL     _IOWR(SYNOBIOS_IOC_MAGIC, 39, SynoPWMCTL)
+#define SYNOIO_CHECK_MICROP_ID     _IO(SYNOBIOS_IOC_MAGIC, 40)
 
 #define SYNOIO_MANUTIL_MODE       _IOWR(SYNOBIOS_IOC_MAGIC, 128, int)
 #define SYNOIO_RECORD_EVENT       _IOWR(SYNOBIOS_IOC_MAGIC, 129, int)
@@ -1176,6 +1255,8 @@ struct synobios_ops {
 	int             (*set_phy_led)(SYNO_LED);
 	int             (*set_hdd_led)(SYNO_LED);
 	int		(*pwm_ctl)(SynoPWMCTL *);
+	int		(*check_microp_id)(const struct synobios_ops *);
+	int		(*set_microp_id)(void);
 };
 
 /**************************/

@@ -554,11 +554,33 @@ void ata_scsi_error(struct Scsi_Host *host)
 {
 	struct ata_port *ap = ata_shost_to_port(host);
 	int i;
+#ifdef MY_ABC_HERE
+	int iDetectTries = ATA_EH_PMP_TRIES;
+	int iForceDetect = 0;
+	unsigned int uiStatStart = 0x0;
+	unsigned int uiStatEnd = 0x0;
+#endif
+
 	unsigned long flags;
 
 	DPRINTK("ENTER\n");
 
 #ifdef MY_ABC_HERE
+	if (ap->iDetectStat) {
+		struct ata_link *link = NULL;
+		struct ata_device *dev = NULL;
+		int i = 0;
+		ata_for_each_link(link, ap, EDGE) {
+			ata_for_each_dev(dev, link, ALL) {
+				uiStatStart |= (ata_dev_enabled(dev)) << i;
+				++i;
+			}
+		}
+		DBGMESG("ata%u: detect stat 0x%x", ap->print_id, uiStatStart);
+	}
+#endif
+
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 	spin_lock_irqsave(ap->lock, flags);
 	while(ap->pflags & ATA_PFLAG_PMP_PMCTL) {
 		spin_unlock_irqrestore(ap->lock, flags);
@@ -739,7 +761,128 @@ void ata_scsi_error(struct Scsi_Host *host)
 	WARN_ON(host->host_failed || !list_empty(&host->eh_cmd_q));
 
 	scsi_eh_flush_done_q(&ap->eh_done_q);
-	
+
+#ifdef MY_ABC_HERE
+	if (ap->iDetectStat) {
+		if (!(ap->pflags & ATA_PFLAG_FROZEN)) {
+			ap->iDetectStat = 0;
+			spin_lock_irqsave(ap->lock, flags);
+			if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_RETRY) {
+				DBGMESG("ata%u: clear ATA_SYNO_FLAG_FORCE_RETRY\n", ap->print_id);
+				ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_RETRY;
+			}
+			spin_unlock_irqrestore(ap->lock, flags);
+		} else {
+			struct ata_link *link = NULL;
+			struct ata_device *dev = NULL;
+			int i = 0;
+
+			ata_for_each_link(link, ap, EDGE) {
+				ata_for_each_dev(dev, link, ALL) {
+					uiStatEnd |= (ata_dev_enabled(dev)) << i;
+					++i;
+				}
+			}
+			spin_lock_irqsave(ap->lock, flags);
+			if (uiStatStart == uiStatEnd) {
+				/* We received plugged/un-plugged events, but the status is still the same.
+				 * No device plugged/un-plugged but it frozen, we think it's a abnormal status */
+				ata_port_printk(ap, KERN_ERR, "detect abnormal stat 0x%x\n", uiStatEnd);
+				ap->uiSflags |= ATA_SYNO_FLAG_FORCE_RETRY;
+			} else {
+				ata_port_printk(ap, KERN_ERR, "didn't detect abnormal stat, but port frozen \n");
+				ap->iDetectStat = 0;
+				if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_RETRY) {
+					ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_RETRY;
+				}
+			}
+			spin_unlock_irqrestore(ap->lock, flags);
+		}
+	}
+
+	spin_lock_irqsave(ap->lock, flags);
+	if (ap->uiSflags) {
+		iForceDetect = 1;
+	}
+	spin_unlock_irqrestore(ap->lock, flags);
+
+	if (iForceDetect) {
+		iForceDetect = 0;
+		if (SYNO_ERROR_TILL_TO_FORCE == ap->iFakeError) {
+			DBGMESG("port %d unset Fake Error\n", ap->print_id);
+			ap->iFakeError = 0;
+		}
+		if (iDetectTries) {
+			ata_port_printk(ap, KERN_ERR, "do detect tries %d\n", iDetectTries);
+			if (ap->ops->syno_force_intr) {
+				/* set force bit to force it occur fake sw plugged */
+				spin_lock_irqsave(ap->lock, flags);
+				ap->uiSflags |= ATA_SYNO_FLAG_FORCE_INTR;
+				spin_unlock_irqrestore(ap->lock, flags);
+				ap->ops->syno_force_intr(ap);
+			}
+			--iDetectTries;
+			goto repeat;
+		}
+	}
+	spin_lock_irqsave(ap->lock, flags);
+	if (!ap->uiSflags) {
+		/* FIXME: I can't find another properly place to clear them.
+		 * So I clear them here when EH complete and no error flags */
+		struct ata_link *link = NULL;
+		struct ata_device *dev = NULL;
+		/* if no our error flag, clear dev flags */
+		ata_for_each_link(link, ap, EDGE) {
+			ata_for_each_dev(dev, link, ALL) {
+				dev->ulSflags = 0;
+			}
+		}
+	} else {
+		struct ata_link *link = NULL;
+		struct ata_device *dev = NULL;
+
+		/* clear port error flags */
+		DBGMESG("ata%u: detect error flags 0x%x\n", ap->print_id, ap->uiSflags);
+		ap->uiSflags = 0;
+
+		/* if had on our action flag, we must take action now. Some action may cause deadlock (ex.detach),
+		 * so we must unlock now. */
+		spin_unlock_irqrestore(ap->lock, flags);
+		ata_for_each_link(link, ap, EDGE) {
+			link->uiSflags = 0;
+			ata_for_each_dev(dev, link, ALL) {
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+				if (dev->ulSflags & ATA_SYNO_DFLAG_PMP_DETACH) {
+					ata_dev_printk(dev, KERN_WARNING,
+							"force pmp detach\n");
+					sata_pmp_detach(dev);
+				}
+#endif
+				if (dev->ulSflags & ATA_SYNO_DFLAG_DETACH) {
+					ata_dev_printk(dev, KERN_WARNING,
+							"force dev detach\n");
+					ata_eh_detach_dev(dev);
+				}
+				if (dev->ulSflags & ATA_SYNO_DFLAG_DISABLE) {
+					ata_dev_printk(dev, KERN_WARNING,
+							"force dev disable\n");
+					ata_dev_disable(dev);
+				}
+				dev->ulSflags = 0;
+			}
+		}
+
+		/* this action will also casue deadlocl, so we can't lock now */
+		if (ap->pflags & ATA_PFLAG_FROZEN) {
+			ata_port_printk(ap, KERN_ERR, "thaw port to prevent it can't detect new disks\n");
+			ata_eh_thaw_port(ap);
+		}
+		spin_lock_irqsave(ap->lock, flags);
+	}
+	spin_unlock_irqrestore(ap->lock, flags);
+#endif /* MY_ABC_HERE */
+
+
 	/* clean up */
 	spin_lock_irqsave(ap->lock, flags);
 
@@ -1266,6 +1409,17 @@ void ata_dev_disable(struct ata_device *dev)
 	if (!ata_dev_enabled(dev))
 		return;
 
+#ifdef MY_ABC_HERE
+	if ((dev->link->uiSflags || (dev->link->ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL))
+		&& ata_dev_enabled(dev)) {
+		ata_dev_printk(dev, KERN_WARNING,
+					   "still have recovery flags, don't disabled it\n");
+		dev->ulSflags |= ATA_SYNO_DFLAG_DISABLE;
+		return;
+	}
+	dev->ulSflags &= ~ATA_SYNO_DFLAG_DISABLE;
+#endif
+
 	if (ata_msg_drv(dev->link->ap))
 		ata_dev_printk(dev, KERN_WARNING, "disabled\n");
 	ata_acpi_on_disable(dev);
@@ -1293,6 +1447,17 @@ void ata_eh_detach_dev(struct ata_device *dev)
 	struct ata_port *ap = link->ap;
 	struct ata_eh_context *ehc = &link->eh_context;
 	unsigned long flags;
+
+#ifdef MY_ABC_HERE
+	if ((dev->link->uiSflags || (dev->link->ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL))
+		&& ata_dev_enabled(dev)) {
+		ata_dev_printk(dev, KERN_WARNING,
+					   "still have recovery flags, don't detach it\n");
+		dev->ulSflags |= ATA_SYNO_DFLAG_DETACH;
+		return;
+	}
+	dev->ulSflags &= ~ATA_SYNO_DFLAG_DETACH;
+#endif
 
 	ata_dev_disable(dev);
 
@@ -1726,6 +1891,25 @@ syno_ata_writes_sector(struct ata_queued_cmd *qc)
 		!blSectorNeedAutoRemap(qc->scsicmd, lba)) {
 		return 0;
 	}
+
+#ifdef MY_ABC_HERE
+	// only report auto-remap in read
+	if (!(qc->tf.flags & ATA_TFLAG_WRITE)) {
+		if (qc->scsicmd) {
+			if (qc->scsicmd->request) {
+				qc->scsicmd->request->cmd_flags |= REQ_AUTO_REMAP;
+				printk("%s:%s(%d) set request cmd_flags REQ_AUTO_REMAP on\n",
+					__FILE__, __FUNCTION__, __LINE__);
+			}else{
+				printk("%s:%s(%d) cannot trace request from scsi_cmd\n",
+					__FILE__, __FUNCTION__, __LINE__);
+			}
+		}else{
+			printk("%s:%s(%d) cannot trace scsicmd from ata_queued_cmd\n",
+				__FILE__, __FUNCTION__, __LINE__);
+		}
+	}
+#endif
 
 	tf = qc->result_tf;
 	tf.protocol = ATA_PROT_PIO;
@@ -2915,6 +3099,19 @@ int ata_eh_reset(struct ata_link *link, int classify,
 	ap->pflags &= ~ATA_PFLAG_RESETTING;
 	spin_unlock_irqrestore(ap->lock, flags);
 
+#ifdef MY_ABC_HERE
+	spin_lock_irqsave(ap->lock, flags);
+	if (!rc && link->uiSflags) {
+		/* GSCR is pmp fail flag, we shouldn't clear it here */
+		if (link->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL) {
+			link->uiSflags = ATA_SYNO_FLAG_GSCR_FAIL;
+		} else {
+			ata_link_printk(link, KERN_ERR, "link reset sucessfully clear error flags\n");
+			link->uiSflags = 0;
+		}
+	}
+	spin_unlock_irqrestore(ap->lock, flags);
+#endif
 	return rc;
 
  fail:
@@ -3145,6 +3342,12 @@ static int ata_eh_revalidate_and_attach(struct ata_link *link,
 		ehc->i.flags |= ATA_EHI_SETMODE;
 	}
 
+#ifdef MY_ABC_HERE
+	if (ap->uiSflags & ATA_SYNO_FLAG_REVALID_FAIL) {
+		DBGMESG("port %d revalid sucessfully , clear revalid fail flag\n", ap->print_id);
+		ap->uiSflags &= ~ATA_SYNO_FLAG_REVALID_FAIL;
+	}
+#endif
 	return 0;
 
  err:
@@ -3598,7 +3801,11 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 	ata_for_each_link(link, ap, EDGE) {
 		struct ata_eh_context *ehc = &link->eh_context;
 
+#ifdef MY_ABC_HERE
+		if (0 >= ap->iFakeError && !(ehc->i.action & ATA_EH_RESET))
+#else
 		if (!(ehc->i.action & ATA_EH_RESET))
+#endif
 			continue;
 
 		rc = ata_eh_reset(link, ata_link_nr_vacant(link),
@@ -3606,6 +3813,16 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 		if (rc) {
 			ata_link_printk(link, KERN_ERR,
 					"reset failed, giving up\n");
+#ifdef MY_ABC_HERE
+			if (link->uiSflags) {
+				ata_for_each_dev(dev, link, ALL) {
+					if (ATA_DEV_ATA == dev->class) {
+						dev->ulSflags |= ATA_SYNO_DFLAG_DETACH;
+						ata_dev_printk(dev, KERN_ERR, "detect reset link fail, set detach flag\n");
+					}
+				}
+			}
+#endif
 			goto out;
 		}
 	}
@@ -3763,6 +3980,13 @@ dev_fail:
 	if (rc && r_failed_link)
 		*r_failed_link = link;
 
+#ifdef MY_ABC_HERE
+	/* if not pmp, set link flags to ata port flags for ata port error handling.
+	 * pmp handler will handle pmp case by itself */
+	if (!ap->nr_pmp_links) {
+		ap->uiSflags = uiCheckPortLinksFlags(ap);
+	}
+#endif
 	DPRINTK("EXIT, rc=%d\n", rc);
 	return rc;
 }

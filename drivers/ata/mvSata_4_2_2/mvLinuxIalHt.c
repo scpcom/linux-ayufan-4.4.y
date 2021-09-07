@@ -2078,7 +2078,7 @@ static int syno_mvSata_index_get(struct Scsi_Host *shost, uint channel, uint id,
 {
     int index = 0;    
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
     IAL_HOST_T *ial_host = HOSTDATA(shost);
     IAL_ADAPTER_T *pAdapter = MV_IAL_ADAPTER(shost);
 
@@ -2093,7 +2093,7 @@ static int syno_mvSata_index_get(struct Scsi_Host *shost, uint channel, uint id,
 }
 #endif // MY_ABC_HERE
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_POWER_CTL
 int
 syno_mvSata_port_power_ctl(struct Scsi_Host *host, MV_U8 blPowerOn)
 {
@@ -2112,7 +2112,7 @@ syno_mvSata_port_power_ctl(struct Scsi_Host *host, MV_U8 blPowerOn)
         /* hardware not support yet */
         goto END;
     } else {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
         if (!syno_mvSata_is_synology_pm(&pAdapter->ialCommonExt, ial_host->channelIndex)) {
             goto END;
         }
@@ -2124,9 +2124,9 @@ syno_mvSata_port_power_ctl(struct Scsi_Host *host, MV_U8 blPowerOn)
 END:
 	return ret;
 }
-#endif // MY_ABC_HERE
+#endif // SYNO_SATA_POWER_CTL
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 
 static MV_U8 inline
 defer_gpio_cmd(MV_CHANNEL_STATE stat, MV_U32 input, MV_U8 rw)
@@ -2316,9 +2316,9 @@ struct class_device_attribute *mvSata_shost_attrs[] = {
 #endif
     NULL
 };
-#endif // MY_ABC_HERE
+#endif // SYNO_SATA_PM_DEVICE_GPIO
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) || defined(SYNO_SATA_POWER_CTL) || defined(SYNO_SATA_PM_DEVICE_GPIO)
 Scsi_Host_Template driver_template = SynoMvSata;
 #else
 Scsi_Host_Template driver_template = mvSata;

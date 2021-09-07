@@ -311,7 +311,7 @@ void kernel_restart(char *cmd)
 }
 EXPORT_SYMBOL_GPL(kernel_restart);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO 
 extern void scsi_host_poweroff_all(void);
 #endif
 static void kernel_shutdown_prepare(enum system_states state)
@@ -320,7 +320,7 @@ static void kernel_shutdown_prepare(enum system_states state)
 		(state == SYSTEM_HALT)?SYS_HALT:SYS_POWER_OFF, NULL);
 	system_state = state;
 	device_shutdown();
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
 	scsi_host_poweroff_all();
 #endif
 }
@@ -363,7 +363,11 @@ void kernel_power_off(void)
 EXPORT_SYMBOL_GPL(kernel_power_off);
 
 #ifdef MY_DEF_HERE
-#define UART_PORT1_IOBASE   1016
+#ifdef CONFIG_SYNO_CEDARVIEW
+#define UART_PORT1_IOBASE   0x2F8
+#else
+#define UART_PORT1_IOBASE   0x3F8
+#endif
 #define UART_CMD_PREFIX 45 // "-"
 #define UART_CMD_REBOOT 67 // "C"
 #define UART_CMD_POWEROFF   49 // "1"

@@ -79,7 +79,12 @@ void __init mpc85xx_ds_pic_init(void)
 		return;
 	}
 
+#ifdef CONFIG_SYNO_QORIQ
+	if (of_flat_dt_is_compatible(root, "fsl,MPC8572DS-CAMP") ||
+		of_flat_dt_is_compatible(root, "fsl,P2020DS-CAMP")) {
+#else
 	if (of_flat_dt_is_compatible(root, "fsl,MPC8572DS-CAMP")) {
+#endif
 		mpic = mpic_alloc(np, r.start,
 			MPIC_PRIMARY |
 			MPIC_BIG_ENDIAN | MPIC_BROKEN_FRR_NIRQS,
@@ -208,6 +213,34 @@ static void __init mpc85xx_ds_setup_arch(void)
 #endif
 }
 
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_P2020DS_EVENT_IRQ
+static irqreturn_t event_isr(int irq, void *dev_id)
+{
+
+	printk(KERN_INFO "MPC85xxDS: Event button been pushed.\n");
+	return IRQ_HANDLED;
+}
+
+static int __init p2020ds_ngpixis_init(void)
+{
+	int event_irq, ret;
+	struct device_node *np;
+
+	np = of_find_compatible_node(NULL, NULL, "fsl,p2020ds-fpga");
+	if (np) {
+		event_irq = irq_of_parse_and_map(np, 0);
+		ret = request_irq(event_irq, event_isr, 0, "event", NULL);
+		if (ret)
+			printk(KERN_ERR "Can't request board event int\n");
+		of_node_put(np);
+	}
+	return 0;
+}
+machine_device_initcall(p2020_ds, p2020ds_ngpixis_init);
+#endif
+#endif
+
 /*
  * Called very early, device-tree isn't unflattened
  */
@@ -232,6 +265,9 @@ static struct of_device_id __initdata mpc85xxds_ids[] = {
 	{ .compatible = "soc", },
 	{ .compatible = "simple-bus", },
 	{ .compatible = "gianfar", },
+#ifdef CONFIG_SYNO_QORIQ
+	{ .compatible = "fsl,rapidio-delta", },
+#endif
 	{},
 };
 

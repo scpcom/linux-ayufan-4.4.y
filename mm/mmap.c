@@ -221,6 +221,14 @@ void unlink_file_vma(struct vm_area_struct *vma)
 
 	if (file) {
 		struct address_space *mapping = file->f_mapping;
+#ifdef MY_ABC_HERE
+		if (!blSynostate(O_UNMOUNT_OK, file)) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+			printk("%s: force unmount hit\n", __FUNCTION__);
+#endif
+			return;
+		}
+#endif
 		spin_lock(&mapping->i_mmap_lock);
 		__remove_shared_vm_struct(vma, file, mapping);
 		spin_unlock(&mapping->i_mmap_lock);
@@ -421,6 +429,14 @@ static void __vma_link_file(struct vm_area_struct *vma)
 	if (file) {
 		struct address_space *mapping = file->f_mapping;
 
+#ifdef MY_ABC_HERE
+		if (!blSynostate(O_UNMOUNT_OK, file)) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+			printk("%s: force unmount hit\n", __FUNCTION__);
+#endif
+			return;
+		}
+#endif
 		if (vma->vm_flags & VM_DENYWRITE)
 			atomic_dec(&file->f_path.dentry->d_inode->i_writecount);
 		if (vma->vm_flags & VM_SHARED)
@@ -451,6 +467,14 @@ static void vma_link(struct mm_struct *mm, struct vm_area_struct *vma,
 {
 	struct address_space *mapping = NULL;
 
+#ifdef MY_ABC_HERE
+	if (vma->vm_file && !blSynostate(O_UNMOUNT_OK, vma->vm_file)) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+		printk("%s: force unmount hit\n", __FUNCTION__);
+#endif
+		return;
+	}
+#endif
 	if (vma->vm_file)
 		mapping = vma->vm_file->f_mapping;
 
@@ -927,6 +951,16 @@ printk("do_mmap_pgoff() File %p denying due to FAST mode\n", file);
 	}
 #endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
 
+#ifdef MY_ABC_HERE
+	if (file) {
+		if (!blSynostate(O_UNMOUNT_OK, file)) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+			printk("%s: force unmount hit\n", __FUNCTION__);
+#endif
+			return -EINVAL;
+		}
+	}
+#endif
 	/*
 	 * Does the application expect PROT_READ to imply PROT_EXEC?
 	 *
@@ -1183,6 +1217,14 @@ munmap_back:
 
 	if (file) {
 		error = -EINVAL;
+#ifdef MY_ABC_HERE
+		if (!blSynostate(O_UNMOUNT_OK, file)) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+			printk("%s: force unmount hit\n", __FUNCTION__);
+#endif
+			goto free_vma;
+		}
+#endif
 		if (vm_flags & (VM_GROWSDOWN|VM_GROWSUP))
 			goto free_vma;
 		if (vm_flags & VM_DENYWRITE) {
@@ -1217,6 +1259,18 @@ munmap_back:
 		vma->vm_page_prot = vm_get_page_prot(vm_flags & ~VM_SHARED);
 
 	vma_link(mm, vma, prev, rb_link, rb_parent);
+#ifdef MY_ABC_HERE
+		if (vma->vm_file && !blSynostate(O_UNMOUNT_OK, vma->vm_file)) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+			printk("%s: force unmount hit\n", __FUNCTION__);
+#endif
+			if (file) {
+				goto unmap_and_free_vma;
+			} else {
+				goto free_vma;
+			}
+		}
+#endif
 	file = vma->vm_file;
 
 	/* Once vma denies write, undo our temporary denial count */

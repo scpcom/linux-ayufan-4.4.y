@@ -10,7 +10,7 @@ struct synoacl_operations {
 	int (*xattr_set_syno_acl) (struct inode *inode, const void *value,  size_t size);
 	size_t (*xattr_list_syno_acl) (struct inode *inode, char *list, size_t list_len, const char *name, size_t name_len);
 
-	int (*get_syno_acl_inherit) (struct dentry *d, void *value, size_t size);
+	int (*get_syno_acl_inherit) (struct dentry *d, int cmd, void *value, size_t size);
 	int (*syno_permission) (struct dentry *d, int mask);
 	int (*syno_exec_permission) (struct dentry *d);
 	int (*get_syno_permission) (struct dentry *, unsigned int *, unsigned int *);
@@ -26,7 +26,7 @@ struct synoacl_operations {
 
 //synoacl EXT4 API
 int ext4_mod_syno_access(struct dentry *, int);
-int ext4_mod_get_syno_acl_inherit(struct dentry *, void *, size_t);
+int ext4_mod_get_syno_acl_inherit(struct dentry *, int, void *, size_t);
 int ext4_mod_syno_permission(struct dentry *, int);
 int ext4_mod_syno_exec_permission(struct dentry *);
 int ext4_mod_get_syno_permission(struct dentry *, unsigned int *, unsigned int *);

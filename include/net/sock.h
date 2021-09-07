@@ -255,6 +255,12 @@ struct sock {
 	struct xfrm_policy	*sk_policy[2];
 #endif
 	rwlock_t		sk_dst_lock;
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_GFAR_HW_TCP_RECEIVE_OFFLOAD
+	void			*tcp_hw_channel;
+	u32			init_seq;
+#endif
+#endif
 	atomic_t		sk_rmem_alloc;
 	atomic_t		sk_wmem_alloc;
 	atomic_t		sk_omem_alloc;
@@ -263,6 +269,11 @@ struct sock {
 	struct sk_buff_head	sk_write_queue;
 #ifdef CONFIG_NET_DMA
 	struct sk_buff_head	sk_async_wait_queue;
+#endif
+#ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_TCP_FAST_ACK
+	struct sk_buff_head	sk_ack_queue;
+#endif
 #endif
 	int			sk_wmem_queued;
 	int			sk_forward_alloc;

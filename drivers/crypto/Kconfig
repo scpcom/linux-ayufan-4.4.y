@@ -224,4 +224,29 @@ config CRYPTO_DEV_PPC4XX
 	help
 	  This option allows you to have support for AMCC crypto acceleration.
 
+config CRYPTO_DEV_EXTENS_T23X
+	tristate "Extensible Driver (t23x) for Talitos 2.x/3.x (EXPERIMENTAL)"
+        depends on PPC_83xx || PPC_85xx || PPC_86xx
+        default m
+        help
+          Extensible Crypto Driver for PowerQUICC devices containing the
+          SEC 2.x/3.x accelerator core.
+
+          Builds the Resource Manager component (t23xrm), which manages
+          the hardware and enables sharing between APIs
+
+config CRYPTO_DEV_EXTENS_T23X_RMTEST
+        tristate "t23x Resource Manager testing module (EXPERIMENTAL)"
+        depends on CRYPTO_DEV_EXTENS_T23X
+        help
+          Test module (t23xtest) to verify installation of t23x Resource
+          Manager and accelerator hardware under it's control
+
+config CRYPTO_DEV_EXTENS_T23X_SEC2
+        tristate "t23x SEC2 Legacy Device Interface (EXPERIMENTAL)"
+        depends on CRYPTO_DEV_EXTENS_T23X
+        help
+          SEC2 Legacy Driver Interface (t23xsec2) component intended to
+          allow migration of applications dependent on the legacy driver
+
 endif # CRYPTO_HW

@@ -425,7 +425,7 @@ SYSCALL(recvfile)              /* 404 */
 #else
 SYSCALL(ni_syscall)
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_ALLOC
 SYSCALL(SYNOMTDAlloc)		/* 405 */
 #else
 SYSCALL(ni_syscall)
@@ -457,8 +457,8 @@ SYSCALL(ni_syscall)			/* 412 */
 SYSCALL(ni_syscall)			
 SYSCALL(ni_syscall)
 #endif
-SYSCALL(ni_syscall)			/* 415 */
 SYSCALL(ni_syscall)
+SYSCALL(ni_syscall)			/* 416 */
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)

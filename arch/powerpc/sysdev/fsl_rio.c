@@ -198,13 +198,26 @@ static int fsl_rio_doorbell_send(struct rio_mport *mport,
 		out_be16(priv->dbell_win, data);
 		break;
 	case RIO_PHY_SERIAL:
+#ifdef CONFIG_SYNO_QORIQ
+		/* busy wait, replace with spin_event_timeout() later */
+		while (in_be32(&priv->msg_regs->odsr) & 0x4) {
+			cpu_relax();
+		}
+		out_be32(&priv->msg_regs->odsr, 0x1602);
+#else
 		/* In the serial version silicons, such as MPC8548, MPC8641,
 		 * below operations is must be.
 		 */
 		out_be32(&priv->msg_regs->odmr, 0x00000000);
+#endif
 		out_be32(&priv->msg_regs->odretcr, 0x00000004);
 		out_be32(&priv->msg_regs->oddpr, destid << 16);
+#ifdef CONFIG_SYNO_QORIQ
+		out_be32(&priv->msg_regs->oddatr, data | 0x20000000);
+		out_be32(&priv->msg_regs->odmr, 0x00000000);
+#else
 		out_be32(&priv->msg_regs->oddatr, data);
+#endif
 		out_be32(&priv->msg_regs->odmr, 0x00000001);
 		break;
 	}
