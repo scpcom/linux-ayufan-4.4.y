@@ -36,6 +36,10 @@
 #include <linux/hash.h>
 #include <linux/nsproxy.h>
 
+#ifdef MY_ABC_HERE
+#include <cryptodev.h>
+#endif
+
 /* Version verification for shared data structures w/ userspace */
 #define ECRYPTFS_VERSION_MAJOR 0x00
 #define ECRYPTFS_VERSION_MINOR 0x04
@@ -249,6 +253,15 @@ struct ecryptfs_filename {
 	char dentry_name[ECRYPTFS_ENCRYPTED_DENTRY_NAME_LEN + 1];
 };
 
+#ifdef MY_DEF_HERE
+struct ecryptfs_request {
+	struct ablkcipher_request *req;
+	struct completion complete;
+	struct ecryptfs_crypt_stat *crypt_stat;
+	int error;
+};
+#endif
+
 /**
  * This is the primary struct associated with each encrypted file.
  *
@@ -279,7 +292,15 @@ struct ecryptfs_crypt_stat {
 	size_t extent_shift;
 	unsigned int extent_mask;
 	struct ecryptfs_mount_crypt_stat *mount_crypt_stat;
+#ifdef MY_ABC_HERE
+	struct cryptoini cr_dm; /* OCF session */
+#else
+#ifdef MY_DEF_HERE
+	struct crypto_ablkcipher *tfm;
+#else
 	struct crypto_blkcipher *tfm;
+#endif
+#endif
 	struct crypto_hash *hash_tfm; /* Crypto context for generating
 				       * the initialization vectors */
 	unsigned char cipher[ECRYPTFS_MAX_CIPHER_NAME_SIZE];

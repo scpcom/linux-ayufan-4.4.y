@@ -512,6 +512,93 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82801DB_12,
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82801EB_0,		quirk_ich4_lpc_acpi);
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_ESB_1,		quirk_ich4_lpc_acpi);
 
+#ifdef MY_DEF_HERE
+static u32 gpiobase = 0;
+static u32 writable_pin[] = {16, 18, 20, 32, 33, 34, 49, 55, 57};
+u32 syno_ich9_lpc_gpio_pin(int pin, int *pValue, int isWrite)
+{
+    int ret = -1;
+    int i = 0;
+    u32 addr_use_select, addr_io_select, addr_lvl;
+    u32 val_use_select, val_io_select, val_lvl;
+    u32 mppPin = pin;
+    u32 tmpVal;
+    
+    if ( 0 == gpiobase ||
+         ( pin < 0 || pin >= 64 ) ||
+         NULL == pValue )
+    {
+        printk("parameter error.\n");
+        goto END;
+    }
+    
+    if ( 1 == isWrite ) {
+        for ( i = 0; i < sizeof(writable_pin)/sizeof(u32); i++) {
+            if (pin == writable_pin[i]) {
+                break;
+            }
+        }
+        if ( i == sizeof(writable_pin)/sizeof(u32) ) {
+            printk("pin %d is protected by driver.\n", pin);
+            goto END;
+        }
+    }
+    
+    if ( mppPin < 32 ) {
+        addr_use_select = gpiobase + 0x00;
+        addr_io_select = gpiobase + 0x04;
+        addr_lvl = gpiobase + 0x0c;
+    } else {
+        addr_use_select = gpiobase + 0x30;
+        addr_io_select = gpiobase + 0x34;
+        addr_lvl = gpiobase + 0x38;
+        mppPin %= 32;
+    }
+    
+    if ( 1 == isWrite ) {
+        //change use select to GPIO
+        val_use_select = inl(addr_use_select);
+        tmpVal = 1 << mppPin;
+        val_use_select |= tmpVal;
+        outl(val_use_select, addr_use_select);
+
+        //change I/O select to output
+        val_io_select = inl(addr_io_select);
+        tmpVal = ~(1 << mppPin);
+        val_io_select &= tmpVal;
+        outl(val_io_select, addr_io_select);
+
+        //out put value
+        val_lvl = inl(addr_lvl);
+        if ( 1 == *pValue ) {
+            tmpVal = 1 << mppPin;
+            val_lvl |= tmpVal;
+            outl(val_lvl, addr_lvl);
+        } else {
+            tmpVal = ~(1 << mppPin);
+            val_lvl &= tmpVal;
+            outl(val_lvl, addr_lvl);
+        }
+    } else {
+        //change use select to GPIO
+        val_use_select = inl(addr_use_select);
+        tmpVal = 1 << mppPin;
+        val_use_select |= tmpVal;
+        outl(val_use_select, addr_use_select);
+
+        //out put value
+        val_lvl = inl(addr_lvl);
+
+        *pValue = (val_lvl & (1 << mppPin))>>mppPin;
+    }
+    
+    ret = 0;
+    END:
+    return ret;
+}
+EXPORT_SYMBOL(syno_ich9_lpc_gpio_pin);
+#endif
+
 static void __devinit ich6_lpc_acpi_gpio(struct pci_dev *dev)
 {
 	u32 region;
@@ -521,6 +608,10 @@ static void __devinit ich6_lpc_acpi_gpio(struct pci_dev *dev)
 
 	pci_read_config_dword(dev, 0x48, &region);
 	quirk_io_region(dev, region, 64, PCI_BRIDGE_RESOURCES+1, "ICH6 GPIO");
+
+#ifdef MY_DEF_HERE
+    gpiobase = region & 0x0000FF80;
+#endif
 }
 
 static void __devinit ich6_lpc_generic_decode(struct pci_dev *dev, unsigned reg, const char *name, int dynsize)

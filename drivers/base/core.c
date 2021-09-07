@@ -185,6 +185,14 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 				add_uevent_var(env, "DEVMODE=%#o", mode & 0777);
 		}
 	}
+#ifdef MY_ABC_HERE
+	/* host with dev->devt 0, if we want to get hotplug of CABLE_CONNECT/CABLE_DISCONNECT
+	 * we must add DEVNAME in env to pass it to hotplug.
+	 **/
+	else {
+		add_uevent_var(env, "DEVNAME=%s", dev_name(dev));
+	}
+#endif
 
 	if (dev->type && dev->type->name)
 		add_uevent_var(env, "DEVTYPE=%s", dev->type->name);

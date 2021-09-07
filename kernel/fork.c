@@ -551,6 +551,29 @@ struct mm_struct *get_task_mm(struct task_struct *task)
 }
 EXPORT_SYMBOL_GPL(get_task_mm);
 
+#ifdef MY_ABC_HERE
+struct mm_struct *syno_get_task_mm(struct task_struct *task)
+{
+	struct mm_struct *mm;
+	
+	task_lock(task);
+	mm = task->mm;
+	if (mm) {
+		atomic_inc(&mm->mm_users);
+	}else{
+		mm = task->active_mm;
+		if(mm) {
+			atomic_inc(&mm->mm_users);
+		}else{
+			mm = NULL;
+		}
+	}
+	task_unlock(task);
+	return mm;
+}
+EXPORT_SYMBOL_GPL(syno_get_task_mm);
+#endif /* MY_ABC_HERE */
+
 /* Please note the differences between mmput and mm_release.
  * mmput is called whenever we stop holding onto a mm_struct,
  * error success whatever.

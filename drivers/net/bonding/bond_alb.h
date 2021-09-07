@@ -128,5 +128,8 @@ int bond_alb_xmit(struct sk_buff *skb, struct net_device *bond_dev);
 void bond_alb_monitor(struct work_struct *);
 int bond_alb_set_mac_address(struct net_device *bond_dev, void *addr);
 void bond_alb_clear_vlan(struct bonding *bond, unsigned short vlan_id);
+#ifdef	MY_ABC_HERE
+void bond_alb_info_show(struct seq_file *seq);
+#endif
 #endif /* __BOND_ALB_H__ */
 

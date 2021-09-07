@@ -12,7 +12,11 @@
 #include <linux/module.h>
 #include <linux/platform_device.h>
 #include <linux/mbus.h>
+#ifdef MY_ABC_HERE
+#include "../../../arch/arm/plat-orion/include/plat/ehci-orion.h"
+#else
 #include <plat/ehci-orion.h>
+#endif
 
 #define rdl(off)	__raw_readl(hcd->regs + (off))
 #define wrl(off, val)	__raw_writel((val), hcd->regs + (off))
@@ -313,5 +317,5 @@ static struct platform_driver ehci_orion_driver = {
 	.probe		= ehci_orion_drv_probe,
 	.remove		= __exit_p(ehci_orion_drv_remove),
 	.shutdown	= usb_hcd_platform_shutdown,
-	.driver.name	= "orion-ehci",
+	.driver.name    = "orion-ehci",
 };

@@ -108,6 +108,16 @@
 #include <linux/sysctl.h>
 #endif
 
+#ifdef CONFIG_MV_ETH_NFP
+extern int fp_rule_db_init(u32 db_size);
+extern int fp_arp_db_init(u32 db_size);
+extern int fp_routing_info_set(u32 src_ip, u32 dst_ip, u32 def_gtw_ip,
+				int ingress_if, int egress_if);
+extern int fp_routing_info_delete(u32 src_ip, u32 dst_ip);
+extern int fp_is_route_confirmed(u32 src_ip, u32 dst_ip);
+extern int fp_disable_flag;
+#endif /* CONFIG_MV_ETH_NFP */
+
 #define RT_FL_TOS(oldflp) \
     ((u32)(oldflp->fl4_tos & (IPTOS_RT_MASK | RTO_ONLINK)))
 
@@ -610,6 +620,13 @@ static inline int ip_rt_proc_init(void)
 
 static inline void rt_free(struct rtable *rt)
 {
+#ifdef CONFIG_MV_ETH_NFP
+	if ( !fp_disable_flag &&
+	     !(rt->rt_flags & (RTCF_MULTICAST | RTCF_BROADCAST | RTCF_LOCAL | RTCF_REJECT))) {
+		fp_routing_info_delete(rt->rt_src, rt->rt_dst);
+	}
+#endif /* CONFIG_MV_ETH_NFP */
+
 	call_rcu_bh(&rt->u.dst.rcu_head, dst_rcu_free);
 }
 
@@ -645,6 +662,14 @@ static int rt_may_expire(struct rtable *rth, unsigned long tmo1, unsigned long t
 	if (rth->u.dst.expires &&
 	    time_after_eq(jiffies, rth->u.dst.expires))
 		goto out;
+
+#ifdef CONFIG_MV_ETH_NFP
+	if ( !fp_disable_flag &&
+	     !(rth->rt_flags & (RTCF_MULTICAST | RTCF_BROADCAST | RTCF_LOCAL | RTCF_REJECT))) {
+		if (fp_is_route_confirmed(rth->rt_src, rth->rt_dst))
+			rth->u.dst.lastuse = jiffies;
+	}
+#endif /* CONFIG_MV_ETH_NFP */
 
 	age = jiffies - rth->u.dst.lastuse;
 	ret = 0;
@@ -908,6 +933,10 @@ void rt_cache_flush(struct net *net, int delay)
 static void rt_secret_rebuild(unsigned long __net)
 {
 	struct net *net = (struct net *)__net;
+#ifdef CONFIG_MV_ETH_NFP
+	/* If NFP enabled doesn't flush */
+	if(fp_disable_flag)
+#endif /* CONFIG_MV_ETH_NFP */
 	rt_cache_invalidate(net);
 	mod_timer(&net->ipv4.rt_secret_timer, jiffies + ip_rt_secret_interval);
 }
@@ -2031,6 +2060,15 @@ static int __mkroute_input(struct sk_buff *skb,
 	rth->rt_flags = flags;
 
 	*result = rth;
+
+#ifdef CONFIG_MV_ETH_NFP
+	if ( !fp_disable_flag &&
+	     !(rth->rt_flags & (RTCF_MULTICAST | RTCF_BROADCAST | RTCF_LOCAL | RTCF_REJECT))) {
+		fp_routing_info_set(	rth->rt_src, rth->rt_dst,
+					rth->rt_gateway, rth->rt_iif, rth->u.dst.dev->ifindex);
+	}
+#endif /* CONFIG_MV_ETH_NFP */
+
 	err = 0;
  cleanup:
 	/* release the working reference to the output device */
@@ -3450,6 +3488,12 @@ int __init ip_rt_init(void)
 #ifdef CONFIG_SYSCTL
 	register_pernet_subsys(&sysctl_route_ops);
 #endif
+
+#ifdef CONFIG_MV_ETH_NFP
+	fp_rule_db_init(rt_hash_mask + 1);
+	fp_arp_db_init(rt_hash_mask + 1);
+#endif /* CONFIG_MV_ETH_NFP */
+
 	return rc;
 }
 

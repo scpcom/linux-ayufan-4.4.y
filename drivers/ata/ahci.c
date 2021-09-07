@@ -237,6 +237,9 @@ enum {
 	AHCI_HFLAG_SRST_TOUT_IS_OFFLINE	= (1 << 11), /* treat SRST timeout as
 							link offline */
 	AHCI_HFLAG_NO_SNTF		= (1 << 12), /* no sntf */
+#ifdef MY_ABC_HERE
+	AHCI_HFLAG_REPROBE		= (1 << 13),
+#endif
 
 	/* ap->flags bits */
 
@@ -369,6 +372,10 @@ static struct device_attribute *ahci_shost_attrs[] = {
 	&dev_attr_ahci_host_cap2,
 	&dev_attr_ahci_host_version,
 	&dev_attr_ahci_port_cmd,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_pm_gpio,
+	&dev_attr_syno_pm_info,
+#endif
 	NULL
 };
 
@@ -387,6 +394,40 @@ static struct scsi_host_template ahci_sht = {
 	.sdev_attrs		= ahci_sdev_attrs,
 };
 
+#ifdef MY_ABC_HERE
+static int
+sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc)
+{
+	struct ata_link *link = qc->dev->link;
+	struct ata_port *ap = link->ap;
+
+	if (ap->excl_link == NULL || ap->excl_link == link) {
+		if (ap->nr_active_links == 0 || ata_link_active(link)) {
+			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+			return ata_std_qc_defer(qc);
+		}
+
+		ap->excl_link = link;
+	} else {
+		/* preempt when no any command in the queue*/
+		if (!ap->nr_active_links) {
+			ap->excl_link = link;
+			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+			return ata_std_qc_defer(qc);
+		}
+	}
+
+	return ATA_DEFER_PORT;
+}
+
+static struct ata_port_operations ahci_ops;
+
+static const struct ata_port_operations ahci_pmp_ops = {
+	.inherits		= &ahci_ops,
+
+	.qc_defer		= sata_syno_ahci_defer_cmd,
+};
+#endif
 static struct ata_port_operations ahci_ops = {
 	.inherits		= &sata_pmp_port_ops,
 
@@ -464,7 +505,11 @@ static const struct ata_port_info ahci_port_info[] = {
 		.flags		= AHCI_FLAG_COMMON,
 		.pio_mask	= ATA_PIO4,
 		.udma_mask	= ATA_UDMA6,
+#ifdef MY_ABC_HERE
+		.port_ops	= &ahci_pmp_ops,
+#else
 		.port_ops	= &ahci_ops,
+#endif
 	},
 	[board_ahci_sb600] =
 	{
@@ -2165,6 +2210,9 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 	}
 
 	if (irq_stat & (PORT_IRQ_CONNECT | PORT_IRQ_PHYRDY)) {
+#ifdef MY_ABC_HERE
+		syno_ata_info_print(ap);
+#endif
 		ata_ehi_hotplugged(host_ehi);
 		ata_ehi_push_desc(host_ehi, "%s",
 			irq_stat & PORT_IRQ_CONNECT ?
@@ -3013,6 +3061,10 @@ static inline void ahci_gtf_filter_workaround(struct ata_host *host)
 {}
 #endif
 
+#ifdef MY_ABC_HERE
+extern void ata_port_wait_eh(struct ata_port *ap);
+extern void ata_scsi_scan_host(struct ata_port *ap, int sync);
+#endif
 static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
 	static int printed_version;
@@ -3202,8 +3254,66 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	ahci_print_info(host);
 
 	pci_set_master(pdev);
+#ifdef MY_ABC_HERE
+	/* Only wait for JMiron in 6281 platform */
+	if (pdev->vendor != PCI_VENDOR_ID_JMICRON) {
+		rc = ata_host_activate(host, pdev->irq, ahci_interrupt, IRQF_SHARED,
+							   &ahci_sht);
+		goto END;
+	}
+
+	/* flag ap before probe */
+	for (i = 0; i < host->n_ports; i++) {
+		struct ata_port *ap = host->ports[i];
+		unsigned long flags;
+
+		spin_lock_irqsave(ap->lock, flags);
+		ap->pflags |= ATA_PFLAG_SYNC_SCSI_DEVICE;
+		spin_unlock_irqrestore(ap->lock, flags);
+	}
+
+	rc = ata_host_activate(host, pdev->irq, ahci_interrupt, IRQF_SHARED,
+				 &ahci_sht);
+
+	/**
+	 * Handle magic interrupt in 6281. All port should not have EH
+	 * and ata_aux_wq after successfuly probe, so it is safe to
+	 * flush and wait for those ports.
+     */
+	for (i = 0; i < host->n_ports; i++) {
+		struct ata_port *ap = host->ports[i];
+		unsigned long flags;
+		int blScanHost = 0;
+
+		if (!ata_link_online(&ap->link)) {
+			/* Wait for the magic interrupt. */
+			msleep(2000);
+		}
+
+		/* Wait ATA layer EH */
+		ata_port_wait_eh(ap);
+
+		spin_lock_irqsave(ap->lock, flags);
+		if (!(ap->pflags & ATA_PFLAG_SYNC_SCSI_DEVICE)) {
+			/* There really has hotplug */
+			blScanHost = 1;
+		} else {
+			/* There is no any device hotplug */
+			ap->pflags &= ~ATA_PFLAG_SYNC_SCSI_DEVICE;
+		}
+		spin_unlock_irqrestore(ap->lock, flags);
+
+		if (blScanHost) {
+			ata_scsi_scan_host(ap, 1);
+		}
+	}
+
+END:
+	return rc;
+#else
 	return ata_host_activate(host, pdev->irq, ahci_interrupt, IRQF_SHARED,
 				 &ahci_sht);
+#endif
 }
 
 static int __init ahci_init(void)

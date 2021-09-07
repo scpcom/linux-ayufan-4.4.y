@@ -870,6 +870,9 @@ static void pending_complete(struct dm_snap_pending_exception *pe, int success)
 	struct bio *origin_bios = NULL;
 	struct bio *snapshot_bios = NULL;
 	int error = 0;
+#ifdef MY_ABC_HERE
+	chunk_t wait_chunk;
+#endif
 
 	if (!success) {
 		/* Read/write error - snapshot is unusable */
@@ -895,12 +898,18 @@ static void pending_complete(struct dm_snap_pending_exception *pe, int success)
 		goto out;
 	}
 
+#ifdef MY_ABC_HERE
+	/* move conflicting read check after releasing snapshot->lock
+	   thus it would not block mapping bios */
+	wait_chunk = pe->e.old_chunk;
+#else
 	/*
 	 * Check for conflicting reads. This is extremely improbable,
 	 * so msleep(1) is sufficient and there is no need for a wait queue.
 	 */
 	while (__chunk_is_tracked(s, pe->e.old_chunk))
 		msleep(1);
+#endif
 
 	/*
 	 * Add a proper exception, and remove the
@@ -920,6 +929,13 @@ static void pending_complete(struct dm_snap_pending_exception *pe, int success)
 		error_bios(snapshot_bios);
 	else
 		flush_bios(snapshot_bios);
+
+#ifdef MY_ABC_HERE
+	/* move here to avoid race condition */
+	if (!error)
+		while (__chunk_is_tracked(s, wait_chunk))
+			msleep(1);
+#endif
 
 	flush_bios(origin_bios);
 }

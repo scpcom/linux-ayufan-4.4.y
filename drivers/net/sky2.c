@@ -43,6 +43,11 @@
 
 #include <asm/irq.h>
 
+#ifdef MY_ABC_HERE
+#include <linux/synobios.h>
+extern int (*funcSYNOSendNetLinkEvent)(unsigned int type, unsigned int ifaceno);
+#endif
+
 #if defined(CONFIG_VLAN_8021Q) || defined(CONFIG_VLAN_8021Q_MODULE)
 #define SKY2_VLAN_TAG_USED 1
 #endif
@@ -1464,6 +1469,9 @@ static int sky2_up(struct net_device *dev)
 	u32 imask, ramsize;
 	int cap, err;
 	struct net_device *otherdev = hw->dev[sky2->port^1];
+#ifdef MY_ABC_HERE
+	u32 gphy_ctrl = 0;
+#endif
 
 	/*
  	 * On dual port PCI-X card, there is an problem where status
@@ -1488,6 +1496,17 @@ static int sky2_up(struct net_device *dev)
 	tx_init(sky2);
 
 	sky2_mac_init(hw, port);
+#ifdef MY_ABC_HERE
+        gphy_ctrl = sky2_read32(hw, SK_REG(port, GPHY_CTRL));
+
+	//change linking behavior
+	gphy_ctrl |=  0x000000c0;
+
+	//Reg18 Sel value from HW: 1.8V
+	gphy_ctrl &= ~0x00060000;
+	gphy_ctrl |=  0x00020000;
+        sky2_write32(hw, SK_REG(port, GPHY_CTRL), gphy_ctrl);
+#endif
 
 	/* Register is number of 4K blocks on internal RAM buffer. */
 	ramsize = sky2_read8(hw, B2_E_0) * 4;
@@ -1945,6 +1964,11 @@ static void sky2_link_up(struct sky2_port *sky2)
 	gm_phy_write(hw, port, PHY_MARV_INT_MASK, PHY_M_DEF_MSK);
 
 	netif_carrier_on(sky2->netdev);
+#ifdef MY_ABC_HERE
+	if (funcSYNOSendNetLinkEvent) {
+		funcSYNOSendNetLinkEvent(NET_LINK, sky2->netdev->ifindex);
+	}
+#endif
 
 	mod_timer(&hw->watchdog_timer, jiffies + 1);
 
@@ -1973,6 +1997,11 @@ static void sky2_link_down(struct sky2_port *sky2)
 	gma_write16(hw, port, GM_GP_CTRL, reg);
 
 	netif_carrier_off(sky2->netdev);
+#ifdef MY_ABC_HERE
+	if (funcSYNOSendNetLinkEvent) {
+		funcSYNOSendNetLinkEvent(NET_NOLINK, sky2->netdev->ifindex);
+	}
+#endif
 
 	/* Turn on link LED */
 	sky2_write8(hw, SK_REG(port, LNK_LED_REG), LINKLED_OFF);
@@ -2484,7 +2513,11 @@ static int sky2_status_intr(struct sky2_hw *hw, int to_do, u16 idx)
 			 */
 			if (likely(status >> 16 == (status & 0xffff))) {
 				skb = sky2->rx_ring[sky2->rx_next].skb;
+#ifdef MY_ABC_HERE
+				skb->ip_summed = CHECKSUM_UNNECESSARY;
+#else
 				skb->ip_summed = CHECKSUM_COMPLETE;
+#endif
 				skb->csum = le16_to_cpu(status);
 			} else {
 				printk(KERN_NOTICE PFX "%s: hardware receive "

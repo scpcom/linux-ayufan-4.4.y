@@ -516,20 +516,20 @@ EXPORT_SYMBOL_GPL(invalidate_inode_pages2);
  */
 void truncate_pagecache(struct inode *inode, loff_t old, loff_t new)
 {
-	struct address_space *mapping = inode->i_mapping;
-
-	/*
-	 * unmap_mapping_range is called twice, first simply for
-	 * efficiency so that truncate_inode_pages does fewer
-	 * single-page unmaps.  However after this first call, and
-	 * before truncate_inode_pages finishes, it is possible for
-	 * private pages to be COWed, which remain after
-	 * truncate_inode_pages finishes, hence the second
-	 * unmap_mapping_range call must be made for correctness.
-	 */
-	unmap_mapping_range(mapping, new + PAGE_SIZE - 1, 0, 1);
-	truncate_inode_pages(mapping, new);
-	unmap_mapping_range(mapping, new + PAGE_SIZE - 1, 0, 1);
+		struct address_space *mapping = inode->i_mapping;
+	
+		/*
+		 * unmap_mapping_range is called twice, first simply for
+		 * efficiency so that truncate_inode_pages does fewer
+		 * single-page unmaps.  However after this first call, and
+		 * before truncate_inode_pages finishes, it is possible for
+		 * private pages to be COWed, which remain after
+		 * truncate_inode_pages finishes, hence the second
+		 * unmap_mapping_range call must be made for correctness.
+		 */
+		unmap_mapping_range(mapping, new + PAGE_SIZE - 1, 0, 1);
+		truncate_inode_pages(mapping, new);
+		unmap_mapping_range(mapping, new + PAGE_SIZE - 1, 0, 1);
 }
 EXPORT_SYMBOL(truncate_pagecache);
 
@@ -559,3 +559,25 @@ int vmtruncate(struct inode *inode, loff_t offset)
 	return error;
 }
 EXPORT_SYMBOL(vmtruncate);
+
+#ifdef MY_ABC_HERE
+/* Copied from vmtruncate() */
+int ecryptfs_vmtruncate(struct inode *inode, loff_t offset)
+{
+	loff_t oldsize;
+	int error;
+
+	error = inode_newsize_ok(inode, offset);
+	if (error)
+		return error;
+	oldsize = inode->i_size;
+	i_size_write(inode, offset);
+	if (offset < oldsize) {
+		truncate_pagecache(inode, oldsize, offset);
+	}
+	/* ecryptfs have no truncate iop*/
+
+	return error;
+}
+EXPORT_SYMBOL(ecryptfs_vmtruncate);
+#endif

@@ -252,6 +252,11 @@ struct ucred {
 #define MSG_CMSG_CLOEXEC 0x40000000	/* Set close_on_exit for file
 					   descriptor received through
 					   SCM_RIGHTS */
+#ifdef MY_ABC_HERE
+#define MSG_KERNSPACE       0x10000
+#define MSG_NOCATCHSIGNAL   0x20000
+#endif /* MY_ABC_HERE */
+
 #if defined(CONFIG_COMPAT)
 #define MSG_CMSG_COMPAT	0x80000000	/* This message needs 32 bit fixups */
 #else
@@ -296,6 +301,9 @@ struct ucred {
 #define IPX_TYPE	1
 
 #ifdef __KERNEL__
+#ifdef MY_ABC_HERE
+extern void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len);
+#endif
 extern int memcpy_fromiovec(unsigned char *kdata, struct iovec *iov, int len);
 extern int memcpy_fromiovecend(unsigned char *kdata, const struct iovec *iov,
 			       int offset, int len);

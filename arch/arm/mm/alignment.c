@@ -75,7 +75,11 @@ static unsigned long ai_half;
 static unsigned long ai_word;
 static unsigned long ai_dword;
 static unsigned long ai_multi;
+#ifdef CONFIG_ARCH_FEROCEON
+static int ai_usermode = 2;
+#else
 static int ai_usermode;
+#endif
 
 #define UM_WARN		(1 << 0)
 #define UM_FIXUP	(1 << 1)

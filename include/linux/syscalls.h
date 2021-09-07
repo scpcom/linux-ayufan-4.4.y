@@ -873,8 +873,20 @@ asmlinkage long sys_ppoll(struct pollfd __user *, unsigned int,
 			  struct timespec __user *, const sigset_t __user *,
 			  size_t);
 
+#ifdef CONFIG_IA32_EMULATION
+#ifdef MY_ABC_HERE
+asmlinkage long sys_mmap(unsigned long addr, unsigned long len, unsigned long prot,
+						 unsigned long flags, unsigned long fd, unsigned long off);
+#endif
+#endif
+
 int kernel_execve(const char *filename, char *const argv[], char *const envp[]);
 
+#ifdef CONFIG_IA32_EMULATION
+#ifdef MY_ABC_HERE
+asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, size_t *rwbytes);
+#endif
+#endif
 
 asmlinkage long sys_perf_event_open(
 		struct perf_event_attr __user *attr_uptr,

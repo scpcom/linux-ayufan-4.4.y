@@ -49,6 +49,51 @@
 #define NAMEI_RA_SIZE        (NAMEI_RA_CHUNKS * NAMEI_RA_BLOCKS)
 #define NAMEI_RA_INDEX(c,b)  (((c) * NAMEI_RA_BLOCKS) + (b))
 
+#ifdef MY_ABC_HERE
+unsigned int ext3_strhash(const unsigned char *name, unsigned int len)
+{
+	unsigned long hash = init_name_hash();
+
+	while (len--)
+		hash = partial_name_hash(*name++, hash);
+	return end_name_hash(hash);
+}
+
+/* Hash a string to an integer in a caseless way */
+static int ext3_dentry_hash(struct dentry *dentry, struct qstr *this)
+{
+	unsigned int upperlen;
+	unsigned char *UTF8Ext3NameiStrBuf;
+
+	UTF8Ext3NameiStrBuf = kmalloc(PATH_MAX, GFP_KERNEL);
+	if (!UTF8Ext3NameiStrBuf) {
+		return -ENOMEM;
+	}
+	upperlen = SYNOToUpper(UTF8Ext3NameiStrBuf,this->name, PATH_MAX, this->len, NULL);
+	this->hash = ext3_strhash(UTF8Ext3NameiStrBuf, upperlen);
+	kfree(UTF8Ext3NameiStrBuf);
+
+	return 0;
+}
+
+/* return 1 on failure and 0 on success */
+static int ext3_dentry_compare(struct dentry *dentry,
+							   struct qstr *a, struct qstr *b)
+{
+	if (DCACHE_CASELESS_COMPARE & dentry->d_flags) {
+		return SYNOUnicodeUTF8Strcmp(a->name, b->name, a->len, b->len, NULL);
+	} else {
+		return memcmp(a->name, b->name, b->len);
+	}
+}
+
+struct dentry_operations ext3_dentry_operations =
+{
+	.d_hash		= ext3_dentry_hash,
+	.d_compare	= ext3_dentry_compare,
+};
+#endif
+
 static struct buffer_head *ext3_append(handle_t *handle,
 					struct inode *inode,
 					u32 *block, int *err)
@@ -172,9 +217,15 @@ static int ext3_htree_next_block(struct inode *dir, __u32 hash,
 				 struct dx_frame *frame,
 				 struct dx_frame *frames,
 				 __u32 *start_hash);
+#ifdef MY_ABC_HERE
+static struct buffer_head * ext3_dx_find_entry(struct inode *dir,
+			struct qstr *entry, struct ext3_dir_entry_2 **res_dir,
+			int *err, unsigned int caseless);
+#else
 static struct buffer_head * ext3_dx_find_entry(struct inode *dir,
 			struct qstr *entry, struct ext3_dir_entry_2 **res_dir,
 			int *err);
+#endif
 static int ext3_dx_add_entry(handle_t *handle, struct dentry *dentry,
 			     struct inode *inode);
 
@@ -777,8 +828,12 @@ static void dx_insert_block(struct dx_frame *frame, u32 hash, u32 block)
 
 static void ext3_update_dx_flag(struct inode *inode)
 {
+#ifdef MY_ABC_HERE
+	if (EXT3_SB(inode->i_sb)->s_es->s_syno_hash_magic != cpu_to_le32(SYNO_HASH_MAGIC))
+#else
 	if (!EXT3_HAS_COMPAT_FEATURE(inode->i_sb,
 				     EXT3_FEATURE_COMPAT_DIR_INDEX))
+#endif
 		EXT3_I(inode)->i_flags &= ~EXT3_INDEX_FL;
 }
 
@@ -788,6 +843,24 @@ static void ext3_update_dx_flag(struct inode *inode)
  * `len <= EXT3_NAME_LEN' is guaranteed by caller.
  * `de != NULL' is guaranteed by caller.
  */
+#ifdef MY_ABC_HERE
+static inline int ext3_match (int len, const char * const name,
+			      struct ext3_dir_entry_2 * de, int caseless)
+{
+
+	if (len != de->name_len)
+		return 0;
+	if (!de->inode)
+		return 0;
+	if (caseless) {
+		if (!SYNOUnicodeUTF8Strcmp(de->name, name, de->name_len, len, NULL))
+			return 1;
+		return 0;
+	} else {
+		return !memcmp(name, de->name, len);
+	}
+}
+#else
 static inline int ext3_match (int len, const char * const name,
 			      struct ext3_dir_entry_2 * de)
 {
@@ -797,15 +870,24 @@ static inline int ext3_match (int len, const char * const name,
 		return 0;
 	return !memcmp(name, de->name, len);
 }
+#endif
 
 /*
  * Returns 0 if not found, -1 on failure, and 1 on success
  */
+#ifdef MY_ABC_HERE
+static inline int search_dirblock(struct buffer_head * bh,
+				  struct inode *dir,
+				  struct qstr *child,
+				  unsigned long offset,
+				  struct ext3_dir_entry_2 ** res_dir, int caseless)
+#else
 static inline int search_dirblock(struct buffer_head * bh,
 				  struct inode *dir,
 				  struct qstr *child,
 				  unsigned long offset,
 				  struct ext3_dir_entry_2 ** res_dir)
+#endif
 {
 	struct ext3_dir_entry_2 * de;
 	char * dlimit;
@@ -820,12 +902,27 @@ static inline int search_dirblock(struct buffer_head * bh,
 		/* do minimal checking `by hand' */
 
 		if ((char *) de + namelen <= dlimit &&
+#ifdef MY_ABC_HERE
+			ext3_match (namelen, name, de, caseless)) {
+#else
 		    ext3_match (namelen, name, de)) {
+#endif
 			/* found a match - just to be sure, do a full check */
 			if (!ext3_check_dir_entry("ext3_find_entry",
 						  dir, de, bh, offset))
 				return -1;
 			*res_dir = de;
+#ifdef MY_ABC_HERE
+			/* If we do caseless lookup after dentry queue of parent be cleared,
+			* file name may async between dentry queue and disk.
+			* So we should make sure it is the real name before dentry be added to queue.
+			*/
+			if (caseless && (child->len != de->name_len
+				|| memcmp(child->name, de->name, de->name_len))) {
+				memcpy((unsigned char*)child->name, de->name, de->name_len);
+				child->len = de->name_len;
+			}
+#endif
 			return 1;
 		}
 		/* prevent looping on a bad block */
@@ -850,9 +947,15 @@ static inline int search_dirblock(struct buffer_head * bh,
  * The returned buffer_head has ->b_count elevated.  The caller is expected
  * to brelse() it when appropriate.
  */
+#ifdef MY_ABC_HERE
+static struct buffer_head *ext3_find_entry(struct inode *dir,
+					struct qstr *entry,
+					struct ext3_dir_entry_2 **res_dir, int caseless)
+#else
 static struct buffer_head *ext3_find_entry(struct inode *dir,
 					struct qstr *entry,
 					struct ext3_dir_entry_2 **res_dir)
+#endif
 {
 	struct super_block * sb;
 	struct buffer_head * bh_use[NAMEI_RA_SIZE];
@@ -872,7 +975,11 @@ static struct buffer_head *ext3_find_entry(struct inode *dir,
 	if (namelen > EXT3_NAME_LEN)
 		return NULL;
 	if (is_dx(dir)) {
+#ifdef MY_ABC_HERE
+		bh = ext3_dx_find_entry(dir, entry, res_dir, &err, caseless);
+#else
 		bh = ext3_dx_find_entry(dir, entry, res_dir, &err);
+#endif
 		/*
 		 * On success, or if the error was file not found,
 		 * return.  Otherwise, fall back to doing a search the
@@ -923,8 +1030,13 @@ restart:
 			brelse(bh);
 			goto next;
 		}
+#ifdef MY_ABC_HERE
+		i = search_dirblock(bh, dir, entry,
+			    block << EXT3_BLOCK_SIZE_BITS(sb), res_dir, caseless);
+#else
 		i = search_dirblock(bh, dir, entry,
 			    block << EXT3_BLOCK_SIZE_BITS(sb), res_dir);
+#endif
 		if (i == 1) {
 			EXT3_I(dir)->i_dir_start_lookup = block;
 			ret = bh;
@@ -957,9 +1069,15 @@ cleanup_and_exit:
 	return ret;
 }
 
+#ifdef MY_ABC_HERE
+static struct buffer_head * ext3_dx_find_entry(struct inode *dir,
+			struct qstr *entry, struct ext3_dir_entry_2 **res_dir,
+			int *err, unsigned int caseless)
+#else
 static struct buffer_head * ext3_dx_find_entry(struct inode *dir,
 			struct qstr *entry, struct ext3_dir_entry_2 **res_dir,
 			int *err)
+#endif
 {
 	struct super_block * sb;
 	struct dx_hash_info	hinfo;
@@ -1001,9 +1119,26 @@ static struct buffer_head * ext3_dx_find_entry(struct inode *dir,
 				goto errout;
 			}
 
+#ifdef MY_ABC_HERE
+			if (ext3_match(namelen, name, de, caseless)) {
+#else
 			if (ext3_match(namelen, name, de)) {
+#endif
 				*res_dir = de;
 				dx_release(frames);
+#ifdef MY_ABC_HERE
+				/* If we do caseless lookup after dentry queue of parent be cleared,
+				* file name may async between dentry queue and disk.
+				* So we should make sure it is the real name before dentry be added to queue.
+				* We replace dentry name to real name to make sure it.
+				* We do this in ext3_dx_find_entry and search_dirblock.
+				*/
+				if (caseless && (entry->len != de->name_len
+					|| memcmp(entry->name, de->name, de->name_len))) {
+					memcpy((unsigned char*)entry->name, de->name, de->name_len);
+					entry->len = de->name_len;
+				}
+#endif
 				return bh;
 			}
 		}
@@ -1027,16 +1162,54 @@ errout:
 	return NULL;
 }
 
+#ifdef MY_ABC_HERE
+/* this part should be sync with include/linux/namei.h */
+enum { MAX_NESTED_LINKS = 8 };
+
+struct open_intent {
+	int	flags;
+	int	create_mode;
+	struct file *file;
+};
+
+struct nameidata {
+	struct path	path;
+	struct qstr	last;
+	struct path	root;
+	unsigned int	flags;
+	int		last_type;
+	unsigned	depth;
+	char *saved_names[MAX_NESTED_LINKS + 1];
+
+	/* Intent data */
+	union {
+		struct open_intent open;
+	} intent;
+};
+#define LOOKUP_CASELESS_COMPARE 0x2000
+#endif
+
 static struct dentry *ext3_lookup(struct inode * dir, struct dentry *dentry, struct nameidata *nd)
 {
 	struct inode * inode;
 	struct ext3_dir_entry_2 * de;
 	struct buffer_head * bh;
+#ifdef MY_ABC_HERE
+	int caseless = 0;
+
+	if (nd && (nd->flags & LOOKUP_CASELESS_COMPARE)) {
+		caseless = 1;
+	}
+#endif
 
 	if (dentry->d_name.len > EXT3_NAME_LEN)
 		return ERR_PTR(-ENAMETOOLONG);
 
+#ifdef MY_ABC_HERE
+	bh = ext3_find_entry(dir, &dentry->d_name, &de, caseless);
+#else
 	bh = ext3_find_entry(dir, &dentry->d_name, &de);
+#endif
 	inode = NULL;
 	if (bh) {
 		unsigned long ino = le32_to_cpu(de->inode);
@@ -1058,9 +1231,48 @@ static struct dentry *ext3_lookup(struct inode * dir, struct dentry *dentry, str
 			}
 		}
 	}
+#ifdef MY_ABC_HERE
+	dentry->d_op = &ext3_dentry_operations;
+#endif
 	return d_splice_alias(inode, dentry);
 }
 
+#ifdef MY_ABC_HERE
+static struct dentry *ext3_lookup_case(struct inode * dir, struct dentry *dentry, struct nameidata *nd)
+{
+	struct inode * inode;
+	struct ext3_dir_entry_2 * de;
+	struct buffer_head * bh;
+
+	if (dentry->d_name.len > EXT3_NAME_LEN)
+		return ERR_PTR(-ENAMETOOLONG);
+
+	bh = ext3_find_entry(dir, &dentry->d_name, &de, 1);
+	inode = NULL;
+	if (bh) {
+		unsigned long ino = le32_to_cpu(de->inode);
+		brelse (bh);
+		if (!ext3_valid_inum(dir->i_sb, ino)) {
+			ext3_error(dir->i_sb, "ext3_lookup",
+				   "bad inode number: %lu", ino);
+			inode = NULL;
+		} else {
+			inode = iget_locked(dir->i_sb, ino);
+		}
+
+		if (!inode)
+			return ERR_PTR(-EACCES);
+
+		if (is_bad_inode(inode)) {
+			iput(inode);
+			return ERR_PTR(-ENOENT);
+		}
+	}
+	dentry->d_op = &ext3_dentry_operations;
+
+	return d_splice_alias(inode, dentry);
+}
+#endif
 
 struct dentry *ext3_get_parent(struct dentry *child)
 {
@@ -1069,7 +1281,11 @@ struct dentry *ext3_get_parent(struct dentry *child)
 	struct ext3_dir_entry_2 * de;
 	struct buffer_head *bh;
 
+#ifdef MY_ABC_HERE
+	bh = ext3_find_entry(child->d_inode, &dotdot, &de, 1);
+#else
 	bh = ext3_find_entry(child->d_inode, &dotdot, &de);
+#endif
 	if (!bh)
 		return ERR_PTR(-ENOENT);
 	ino = le32_to_cpu(de->inode);
@@ -1281,7 +1497,11 @@ static int add_dirent_to_buf(handle_t *handle, struct dentry *dentry,
 				brelse (bh);
 				return -EIO;
 			}
+#ifdef MY_ABC_HERE
+			if (ext3_match (namelen, name, de, 0)) {
+#else
 			if (ext3_match (namelen, name, de)) {
+#endif
 				brelse (bh);
 				return -EEXIST;
 			}
@@ -1478,7 +1698,12 @@ static int ext3_add_entry (handle_t *handle, struct dentry *dentry,
 			return retval;
 
 		if (blocks == 1 && !dx_fallback &&
+#ifdef MY_ABC_HERE
+			(EXT3_SB(sb)->s_es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC)) &&
+			!EXT3_HAS_COMPAT_FEATURE(sb, EXT3_FEATURE_COMPAT_DIR_INDEX))
+#else
 		    EXT3_HAS_COMPAT_FEATURE(sb, EXT3_FEATURE_COMPAT_DIR_INDEX))
+#endif
 			return make_indexed_dir(handle, dentry, inode, bh);
 		brelse(bh);
 	}
@@ -2064,7 +2289,11 @@ static int ext3_rmdir (struct inode * dir, struct dentry *dentry)
 		return PTR_ERR(handle);
 
 	retval = -ENOENT;
+#ifdef MY_ABC_HERE
+	bh = ext3_find_entry(dir, &dentry->d_name, &de, 0);
+#else
 	bh = ext3_find_entry(dir, &dentry->d_name, &de);
+#endif
 	if (!bh)
 		goto end_rmdir;
 
@@ -2126,7 +2355,11 @@ static int ext3_unlink(struct inode * dir, struct dentry *dentry)
 		handle->h_sync = 1;
 
 	retval = -ENOENT;
+#ifdef MY_ABC_HERE
+	bh = ext3_find_entry(dir, &dentry->d_name, &de, 0);
+#else
 	bh = ext3_find_entry(dir, &dentry->d_name, &de);
+#endif
 	if (!bh)
 		goto end_unlink;
 
@@ -2291,7 +2524,11 @@ static int ext3_rename (struct inode * old_dir, struct dentry *old_dentry,
 	if (IS_DIRSYNC(old_dir) || IS_DIRSYNC(new_dir))
 		handle->h_sync = 1;
 
+#ifdef MY_ABC_HERE
+	old_bh = ext3_find_entry(old_dir, &old_dentry->d_name, &old_de, 0);
+#else
 	old_bh = ext3_find_entry(old_dir, &old_dentry->d_name, &old_de);
+#endif
 	/*
 	 *  Check for inode number is _not_ due to possible IO errors.
 	 *  We might rmdir the source, keep it as pwd of some process
@@ -2304,7 +2541,11 @@ static int ext3_rename (struct inode * old_dir, struct dentry *old_dentry,
 		goto end_rename;
 
 	new_inode = new_dentry->d_inode;
+#ifdef MY_ABC_HERE
+	new_bh = ext3_find_entry(new_dir, &new_dentry->d_name, &new_de, 0);
+#else
 	new_bh = ext3_find_entry(new_dir, &new_dentry->d_name, &new_de);
+#endif
 	if (new_bh) {
 		if (!new_inode) {
 			brelse (new_bh);
@@ -2370,8 +2611,13 @@ static int ext3_rename (struct inode * old_dir, struct dentry *old_dentry,
 		struct buffer_head *old_bh2;
 		struct ext3_dir_entry_2 *old_de2;
 
+#ifdef MY_ABC_HERE
+		old_bh2 = ext3_find_entry(old_dir, &old_dentry->d_name,
+					  &old_de2, 0);
+#else
 		old_bh2 = ext3_find_entry(old_dir, &old_dentry->d_name,
 					  &old_de2);
+#endif
 		if (old_bh2) {
 			retval = ext3_delete_entry(handle, old_dir,
 						   old_de2, old_bh2);
@@ -2431,6 +2677,9 @@ end_rename:
 const struct inode_operations ext3_dir_inode_operations = {
 	.create		= ext3_create,
 	.lookup		= ext3_lookup,
+#ifdef MY_ABC_HERE
+	.lookup_case	= ext3_lookup_case,
+#endif
 	.link		= ext3_link,
 	.unlink		= ext3_unlink,
 	.symlink	= ext3_symlink,

@@ -348,6 +348,11 @@ ssize_t vfs_write(struct file *file, const char __user *buf, size_t count, loff_
 		else
 			ret = do_sync_write(file, buf, count, pos);
 		if (ret > 0) {
+#ifdef MY_ABC_HERE
+			if (!blSynostate(O_UNMOUNT_OK, file)) {
+				return -EINVAL;
+			}
+#endif
 			fsnotify_modify(file->f_path.dentry);
 			add_wchar(current, ret);
 		}
@@ -403,6 +408,126 @@ SYSCALL_DEFINE3(write, unsigned int, fd, const char __user *, buf,
 
 	return ret;
 }
+
+#ifdef MY_ABC_HERE
+asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, size_t *rwbytes)
+{
+	int ret = 0;
+	struct file *file = NULL;                /* reg file struct */
+	struct socket *sock = NULL;
+	struct inode *inode;
+	size_t bytes_received = 0;
+	size_t bytes_written = 0;
+	loff_t pos;                 /* file offset */
+
+	if (!offset) {
+		ret = -EINVAL;
+		goto out;
+	}
+
+	if(copy_from_user(&pos, offset, sizeof(loff_t))) {
+		ret = -EFAULT;
+		goto out;
+	}
+
+	if (nbytes <= 0) {
+		if (nbytes < 0) {
+			ret = -EINVAL;
+		}
+		goto out;
+	}
+
+	/* check fd for regular file */
+	file = fget(fd);
+	if (!file) {
+#ifdef MY_ABC_HERE
+		ret = -EPIPE;
+#else
+		ret = -EBADF;
+#endif
+		goto out;
+	}
+	if (!(file->f_mode & FMODE_WRITE)) {
+		ret = -EBADF;
+		goto out;
+	}
+
+	/* check socket fd */
+	sock = sockfd_lookup(s, &ret);
+	if((!sock) || ret)
+		goto out;
+
+	if(!sock->sk) {
+		/* not a socket */
+		ret = -EINVAL;
+		goto out;
+	}
+
+	inode = file->f_dentry->d_inode->i_mapping->host;
+	mutex_lock(&inode->i_mutex);
+	/* refer to sock_read->sock_recvmsg->tcp_recvmsg */
+	if (nbytes <= (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)){
+		ret = do_recvfile(file, sock, &pos, nbytes, &bytes_received, &bytes_written);
+	} else {
+		/* this case should seldom/never happen */
+		size_t nbytes_left = nbytes;
+		size_t cBytereceived = 0;
+		size_t cBytewritten = 0;
+
+		do {
+			ret = do_recvfile(file, sock, &pos,
+						  (nbytes_left >= (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)) ?
+						   (MAX_PAGES_PER_RECVFILE * PAGE_SIZE) : nbytes_left
+						  , &cBytereceived, &cBytewritten);
+			if(ret > 0) {
+				bytes_received += ret;
+				bytes_written += ret;
+				nbytes_left -= ret;
+			}
+			else  {
+				bytes_received += cBytereceived;
+				bytes_written += cBytewritten;
+				break;
+			}
+#ifdef MY_ABC_HERE
+			if (!blSynostate(O_UNMOUNT_OK, file)) {
+				printk("recvfile: force unmount hit\n");
+				ret = -EPIPE;
+				mutex_unlock(&inode->i_mutex);
+				goto out;
+			}
+#endif
+		} while(nbytes_left > 0);
+		if(ret >= 0)
+			ret = bytes_received;
+	}
+	mutex_unlock(&inode->i_mutex);
+
+	if(rwbytes) {
+#ifdef CONFIG_IA32_EMULATION
+		rwbytes[0]=bytes_received;
+		rwbytes[1]=bytes_written;
+#else
+		if (copy_to_user(&rwbytes[0], &bytes_received, sizeof(size_t)) < 0 ||
+			copy_to_user(&rwbytes[1], &bytes_written, sizeof(size_t)) < 0) {
+			ret = -ENOMEM;
+			goto out;
+		}
+#endif
+	}
+
+	if (ret >= 0)
+		fsnotify_modify(file->f_dentry);
+
+out:
+	if(file)
+		fput(file);
+	if(sock)
+		fput(sock->file);
+
+	return ret;
+}
+#endif /* MY_ABC_HERE */
 
 SYSCALL_DEFINE(pread64)(unsigned int fd, char __user *buf,
 			size_t count, loff_t pos)

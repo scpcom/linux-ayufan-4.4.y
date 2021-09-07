@@ -1,3 +1,6 @@
 include include/asm-generic/Kbuild.asm
 
 unifdef-y += hwcap.h
+unifdef-y += page-nommu.h
+unifdef-y += memory.h
+unifdef-y += sizes.h

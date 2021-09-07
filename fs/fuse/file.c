@@ -683,6 +683,57 @@ static size_t fuse_send_write(struct fuse_req *req, struct file *file,
 	return req->misc.write.out.size;
 }
 
+#ifdef MY_ABC_HERE
+/* copy from linux-2.6.23 */
+static int fuse_prepare_write(struct file *file, struct page *page,
+                 unsigned offset, unsigned to)
+{
+   /* No op */
+   return 0;
+}
+
+/* copy from linux-2.6.23 */
+static int fuse_commit_write(struct file *file, struct page *page,
+                unsigned offset, unsigned to)
+{
+   int err;
+   size_t nres;
+   unsigned count = to - offset;
+   struct inode *inode = page->mapping->host;
+   struct fuse_conn *fc = get_fuse_conn(inode);
+   loff_t pos = page_offset(page) + offset;
+   struct fuse_req *req;
+
+   if (is_bad_inode(inode))
+       return -EIO;
+
+   req = fuse_get_req(fc);
+   if (IS_ERR(req))
+       return PTR_ERR(req);
+
+   req->num_pages = 1;
+   req->pages[0] = page;
+   req->page_offset = offset;
+   nres = fuse_send_write(req, file, pos, count, NULL);
+   err = req->out.h.error;
+   fuse_put_request(fc, req);
+   if (!err && nres != count)
+       err = -EIO;
+   if (!err) {
+       pos += count;
+       spin_lock(&fc->lock);
+       if (pos > inode->i_size)
+           i_size_write(inode, pos);
+       spin_unlock(&fc->lock);
+
+       if (offset == 0 && to == PAGE_CACHE_SIZE)
+           SetPageUptodate(page);
+   }
+   fuse_invalidate_attr(inode);
+   return err;
+}
+#endif
+
 static int fuse_write_begin(struct file *file, struct address_space *mapping,
 			loff_t pos, unsigned len, unsigned flags,
 			struct page **pagep, void **fsdata)
@@ -2012,6 +2063,10 @@ static const struct file_operations fuse_direct_io_file_operations = {
 
 static const struct address_space_operations fuse_file_aops  = {
 	.readpage	= fuse_readpage,
+#ifdef MY_ABC_HERE
+    .prepare_write  = fuse_prepare_write,
+    .commit_write   = fuse_commit_write,
+#endif
 	.writepage	= fuse_writepage,
 	.launder_page	= fuse_launder_page,
 	.write_begin	= fuse_write_begin,

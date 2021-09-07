@@ -432,6 +432,13 @@ static void skb_release_all(struct sk_buff *skb)
 
 void __kfree_skb(struct sk_buff *skb)
 {
+#if defined(CONFIG_MV_ETHERNET) && defined(CONFIG_ARCH_FEROCEON)
+#ifdef CONFIG_NET_SKB_RECYCLE
+	if (skb->skb_recycle && !skb->skb_recycle(skb))
+		return;
+#endif /* CONFIG_NET_SKB_RECYCLE */
+#endif
+
 	skb_release_all(skb);
 	kfree_skbmem(skb);
 }
@@ -516,6 +523,9 @@ int skb_recycle_check(struct sk_buff *skb, int skb_size)
 	memset(&shinfo->hwtstamps, 0, sizeof(shinfo->hwtstamps));
 
 	memset(skb, 0, offsetof(struct sk_buff, tail));
+#if defined(CONFIG_MV_ETHERNET) && defined(CONFIG_ARCH_FEROCEON)
+	skb->truesize = (skb->end - skb->head) + sizeof(struct sk_buff);
+#endif
 	skb->data = skb->head + NET_SKB_PAD;
 	skb_reset_tail_pointer(skb);
 
@@ -582,6 +592,14 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	n->cloned = 1;
 	n->nohdr = 0;
 	n->destructor = NULL;
+
+#if defined(CONFIG_MV_ETHERNET) && defined(CONFIG_ARCH_FEROCEON)
+#ifdef CONFIG_NET_SKB_RECYCLE
+	n->skb_recycle = NULL;
+	n->hw_cookie = NULL;
+#endif /* CONFIG_NET_SKB_RECYCLE */
+#endif
+
 	C(tail);
 	C(end);
 	C(head);

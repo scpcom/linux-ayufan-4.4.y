@@ -103,7 +103,11 @@ static int add_match_busid(char *busid)
 	return -1;
 }
 
+#ifdef MY_ABC_HERE
+int del_match_busid(char *busid)
+#else
 static int del_match_busid(char *busid)
+#endif
 {
 	int i;
 

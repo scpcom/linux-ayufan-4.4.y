@@ -1716,9 +1716,15 @@ static int ocfs2_symlink(struct inode *dir,
 		u32 offset = 0;
 
 		inode->i_op = &ocfs2_symlink_inode_operations;
+#ifdef MY_ABC_HERE
+		status = dquot_alloc_space_nodirty(inode,
+		    ocfs2_clusters_to_bytes(osb->sb, 1));
+		if (status) {
+#else
 		if (vfs_dq_alloc_space_nodirty(inode,
-		    ocfs2_clusters_to_bytes(osb->sb, 1))) {
+			ocfs2_clusters_to_bytes(osb->sb, 1))) {
 			status = -EDQUOT;
+#endif
 			goto bail;
 		}
 		did_quota = 1;
@@ -1788,7 +1794,11 @@ static int ocfs2_symlink(struct inode *dir,
 	d_instantiate(dentry, inode);
 bail:
 	if (status < 0 && did_quota)
+#ifdef MY_ABC_HERE
+		dquot_free_space_nodirty(inode,
+#else
 		vfs_dq_free_space_nodirty(inode,
+#endif
 					ocfs2_clusters_to_bytes(osb->sb, 1));
 	if (status < 0 && did_quota_inode)
 		vfs_dq_free_inode(inode);

@@ -1301,6 +1301,9 @@ static void handle_bad_sector(struct bio *bio)
 {
 	char b[BDEVNAME_SIZE];
 
+#ifdef MY_ABC_HERE
+	if (printk_ratelimit()) {
+#endif
 	printk(KERN_INFO "attempt to access beyond end of device\n");
 	printk(KERN_INFO "%s: rw=%ld, want=%Lu, limit=%Lu\n",
 			bdevname(bio->bi_bdev, b),
@@ -1308,6 +1311,9 @@ static void handle_bad_sector(struct bio *bio)
 			(unsigned long long)bio->bi_sector + bio_sectors(bio),
 			(long long)(bio->bi_bdev->bd_inode->i_size >> 9));
 
+#ifdef MY_ABC_HERE
+	}
+#endif
 	set_bit(BIO_EOF, &bio->bi_flags);
 }
 

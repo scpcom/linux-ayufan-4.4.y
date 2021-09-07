@@ -570,7 +570,11 @@ do_more:
 error_return:
 	brelse(bitmap_bh);
 	release_blocks(sb, freed);
+#ifdef MY_ABC_HERE
+	dquot_free_block(inode, freed);
+#else
 	vfs_dq_free_block(inode, freed);
+#endif
 }
 
 /**
@@ -1236,6 +1240,9 @@ ext2_fsblk_t ext2_new_blocks(struct inode *inode, ext2_fsblk_t goal,
 	unsigned short windowsz = 0;
 	unsigned long ngroups;
 	unsigned long num = *count;
+#ifdef MY_ABC_HERE
+	int ret;
+#endif
 
 	*errp = -ENOSPC;
 	sb = inode->i_sb;
@@ -1247,8 +1254,14 @@ ext2_fsblk_t ext2_new_blocks(struct inode *inode, ext2_fsblk_t goal,
 	/*
 	 * Check quota for allocation of this block.
 	 */
+#ifdef MY_ABC_HERE
+	ret = dquot_alloc_block(inode, num);
+	if (ret) {
+		*errp = ret;
+#else
 	if (vfs_dq_alloc_block(inode, num)) {
-		*errp = -EDQUOT;
+        *errp = -EDQUOT;
+#endif
 		return 0;
 	}
 
@@ -1409,7 +1422,11 @@ allocated:
 
 	*errp = 0;
 	brelse(bitmap_bh);
+#ifdef MY_ABC_HERE
+	dquot_free_block(inode, *count-num);
+#else
 	vfs_dq_free_block(inode, *count-num);
+#endif
 	*count = num;
 	return ret_block;
 
@@ -1420,7 +1437,11 @@ out:
 	 * Undo the block allocation
 	 */
 	if (!performed_allocation)
+#ifdef MY_ABC_HERE
+		dquot_free_block(inode, *count);
+#else
 		vfs_dq_free_block(inode, *count);
+#endif
 	brelse(bitmap_bh);
 	return 0;
 }

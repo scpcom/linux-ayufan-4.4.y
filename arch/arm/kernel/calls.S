@@ -9,6 +9,7 @@
  *
  *  This file is included thrice in entry-common.S
  */
+
 /* 0 */		CALL(sys_restart_syscall)
 		CALL(sys_exit)
 		CALL(sys_fork_wrapper)
@@ -374,6 +375,96 @@
 		CALL(sys_pwritev)
 		CALL(sys_rt_tgsigqueueinfo)
 		CALL(sys_perf_event_open)
+#ifdef MY_ABC_HERE
+/* 365 */	CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+/* 370 */	CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+/* 375 */	CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+/* 380 */	CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+/* 385 */	CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+/* 390 */	CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+/* 395 */	CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+#ifdef MY_ABC_HERE
+		CALL(sys_SYNOmmap)  		/* 400 */
+#else
+		CALL(sys_ni_syscall)
+#endif
+		CALL(sys_ni_syscall)
+#ifdef MY_ABC_HERE
+		CALL(sys_SYNOUtime)	/* 402 */
+#else
+		CALL(sys_ni_syscall)
+#endif
+#ifdef MY_ABC_HERE
+		CALL(sys_SYNOArchiveBit)	/* 403 */
+#else
+		CALL(sys_ni_syscall)
+#endif
+#ifdef MY_ABC_HERE
+		CALL(sys_recvfile)	/* 404 */
+#else
+		CALL(sys_ni_syscall)
+#endif
+#ifdef MY_ABC_HERE
+		CALL(sys_SYNOMTDAlloc)  	/* 405 */
+#else
+		CALL(sys_ni_syscall)
+#endif
+#ifdef MY_ABC_HERE
+		CALL(sys_SYNOCaselessStat64)	/* 406 */
+		CALL(sys_SYNOCaselessLStat64)	/* 407 */
+		CALL(sys_SYNOCaselessStat)	/* 408 */
+		CALL(sys_SYNOCaselessLStat)	/* 409 */
+#else
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+#endif
+#ifdef MY_ABC_HERE
+		CALL(sys_SYNOEcryptName) /* 410 */
+		CALL(sys_SYNODecryptName) /* 411 */
+#else
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+#endif
+#endif
+#ifdef CONFIG_FS_SYNO_ACL
+		CALL(sys_SYNOACLCheckPerm)	/* 412 */
+		CALL(sys_SYNOACLIsSupport)	/* 413 */
+		CALL(sys_SYNOACLGetPerm)	/* 414 */
+#else
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+#endif
 #ifndef syscalls_counted
 .equ syscalls_padding, ((NR_syscalls + 3) & ~3) - NR_syscalls
 #define syscalls_counted

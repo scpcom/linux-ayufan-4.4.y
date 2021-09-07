@@ -30,6 +30,21 @@ static int event_handler(struct usbip_device *ud)
 	while (usbip_event_happened(ud)) {
 		usbip_dbg_eh("pending event %lx\n", ud->event);
 
+		
+#ifdef MY_ABC_HERE
+		/*
+		 * USBIP_EH_CLOSE_SOCKET close socket/cleap up urb and 
+		 * leave stub_rx/stub_tx alive.
+         */
+		if (ud->event & USBIP_EH_CLOSE_SOCKET) {
+			ud->eh_ops.close_connection(ud);
+			ud->eh_ops.cleanup_urb(ud);
+
+			ud->event &= ~USBIP_EH_CLOSE_SOCKET;
+
+			break;
+		}
+#endif
 		/*
 		 * NOTE: shutdown must come first.
 		 * Shutdown the device.
@@ -148,3 +163,23 @@ int usbip_event_happened(struct usbip_device *ud)
 	return happened;
 }
 EXPORT_SYMBOL_GPL(usbip_event_happened);
+
+#ifdef MY_ABC_HERE
+int syno_usbip_event_happened(struct usbip_device *ud)
+{
+	int happened = 0;
+
+	spin_lock(&ud->lock);
+
+	if (SDEV_EVENT_ERROR_TCP == ud->event) {
+		ud->sockfd = -1;
+	} else if (0 != ud->event) {
+		happened = 1;
+	}
+
+	spin_unlock(&ud->lock);
+
+	return happened;
+}
+EXPORT_SYMBOL_GPL(syno_usbip_event_happened);
+#endif

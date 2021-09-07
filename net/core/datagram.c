@@ -361,6 +361,87 @@ fault:
 	return -EFAULT;
 }
 
+#ifdef MY_ABC_HERE
+/**
+ *	skb_copy_datagram_iovec - Copy a datagram to an iovec.
+ *	@skb: buffer to copy
+ *	@offset: offset in the buffer to start copying from
+ *	@to: io vector to copy to
+ *	@len: amount of data to copy from buffer to iovec
+ *
+ *	Note: the iovec is modified during the copy.
+ */
+int skb_copy_datagram_iovec1(const struct sk_buff *skb, int offset,
+			    struct iovec *to, int len)
+{
+	int start = skb_headlen(skb);
+	int i, copy = start - offset;
+	struct sk_buff *frag_iter;
+
+	trace_skb_copy_datagram_iovec(skb, len);
+
+	/* Copy header. */
+	if (copy > 0) {
+		if (copy > len)
+			copy = len;
+		memcpy_tokerneliovec(to, skb->data + offset, copy);
+		if ((len -= copy) == 0)
+			return 0;
+		offset += copy;
+	}
+
+	/* Copy paged appendix. Hmm... why does this look so complicated? */
+	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
+		int end;
+
+		WARN_ON(start > offset + len);
+
+		end = start + skb_shinfo(skb)->frags[i].size;
+		if ((copy = end - offset) > 0) {
+			u8  *vaddr;
+			skb_frag_t *frag = &skb_shinfo(skb)->frags[i];
+			struct page *page = frag->page;
+
+			if (copy > len)
+				copy = len;
+			vaddr = kmap(page);
+			memcpy_tokerneliovec(to, vaddr + frag->page_offset +
+					     offset - start, copy);
+			kunmap(page);
+			if (!(len -= copy))
+				return 0;
+			offset += copy;
+		}
+		start = end;
+	}
+
+	skb_walk_frags(skb, frag_iter) {
+		int end;
+
+		WARN_ON(start > offset + len);
+
+		end = start + frag_iter->len;
+		if ((copy = end - offset) > 0) {
+			if (copy > len)
+				copy = len;
+			if (skb_copy_datagram_iovec1(frag_iter,
+						    offset - start,
+						    to, copy))
+				goto fault;
+			if ((len -= copy) == 0)
+				return 0;
+			offset += copy;
+		}
+		start = end;
+	}
+	if (!len)
+		return 0;
+
+fault:
+	return -EFAULT;
+}
+#endif
+
 /**
  *	skb_copy_datagram_const_iovec - Copy a datagram to an iovec.
  *	@skb: buffer to copy

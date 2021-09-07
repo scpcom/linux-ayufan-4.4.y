@@ -35,3 +35,8 @@ unifdef-y += spu_info.h
 unifdef-y += termios.h
 unifdef-y += types.h
 unifdef-y += unistd.h
+
+unifdef-y += asm-compat.h
+unifdef-y += kdump.h
+unifdef-y += page_32.h
+unifdef-y += socket.h

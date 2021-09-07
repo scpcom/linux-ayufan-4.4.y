@@ -74,6 +74,28 @@ struct tlbcamrange {
 
 extern unsigned int tlbcam_index;
 
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+#define _PAGE_WRENABLE  (_PAGE_RW | _PAGE_DIRTY | _PAGE_HWWRITE)
+#define _PAGE_KERNEL    (_PAGE_BASE | _PAGE_SHARED | _PAGE_WRENABLE)
+#define _PAGE_IO    (_PAGE_KERNEL | _PAGE_NO_CACHE | _PAGE_GUARDED)
+#define _PAGE_RAM   (_PAGE_KERNEL | _PAGE_HWEXEC)
+void __init cam_mapin_extra_chip_select(void)
+{
+	extern phys_addr_t get_immrbase(void);
+	phys_addr_t immr_base = -1;
+
+	immr_base = get_immrbase();
+	if ( immr_base != -1 ) {
+		//configuration base
+		settlbcam(15, immr_base, immr_base, 1024*1024, _PAGE_IO, 0);
+		//CS1: CPLD
+		settlbcam(14, SYNO_CPLD_BASE, SYNO_CPLD_BASE, SYNO_CPLD_SIZE, _PAGE_IO, 0);
+	} else {
+		printk("HW Settings Error: Failed to get immr_base\n");
+	}
+}
+#endif
+
 /*
  * Return PA for this VA if it is mapped by a CAM, or 0
  */

@@ -731,7 +731,7 @@ static void correct_endian_basic(struct usbip_header_basic *base, int send)
 		base->devid	= be32_to_cpu(base->devid);
 		base->direction	= be32_to_cpu(base->direction);
 		base->ep	= be32_to_cpu(base->ep);
-	}
+	}	
 }
 
 static void correct_endian_cmd_submit(struct usbip_header_cmd_submit *pdu,
@@ -813,6 +813,15 @@ void usbip_header_correct_endian(struct usbip_header *pdu, int send)
 	case USBIP_RET_UNLINK:
 		correct_endian_ret_unlink(&pdu->u.ret_unlink, send);
 		break;
+#ifdef MY_ABC_HERE	
+	case USBIP_RESET_DEV:					
+		if(send) {
+			correct_endian_ret_submit(&pdu->u.ret_submit, send);
+		} else {
+			correct_endian_cmd_submit(&pdu->u.cmd_submit, send);
+		}
+		break;
+#endif
 	default:
 		/* NOTREACHED */
 		err("unknown command in pdu header: %d", cmd);
@@ -906,7 +915,7 @@ int usbip_recv_iso(struct usbip_device *ud, struct urb *urb)
 	if (!buff)
 		return -ENOMEM;
 
-	ret = usbip_xmit(0, ud->tcp_socket, buff, size, 0);
+	ret = usbip_xmit(0, ud->tcp_socket, buff, size, 0);	
 	if (ret != size) {
 		dev_err(&urb->dev->dev, "recv iso_frame_descriptor, %d\n",
 			ret);
@@ -961,7 +970,7 @@ int usbip_recv_xbuff(struct usbip_device *ud, struct urb *urb)
 		return 0;
 
 	ret = usbip_xmit(0, ud->tcp_socket, (char *)urb->transfer_buffer,
-			 size, 0);
+			 size, 0);	
 	if (ret != size) {
 		dev_err(&urb->dev->dev, "recv xbuf, %d\n", ret);
 		if (ud->side == USBIP_STUB) {
@@ -976,6 +985,43 @@ int usbip_recv_xbuff(struct usbip_device *ud, struct urb *urb)
 }
 EXPORT_SYMBOL_GPL(usbip_recv_xbuff);
 
+#ifdef MY_ABC_HERE
+/** 
+ * Shutdown connection and set device available. 
+*/
+void syno_usbip_shutdown_connection(struct usbip_device *ud)
+{
+	del_timer(&ud->socket_timer);
+	spin_lock(&ud->lock);
+	ud->sockfd = -1;
+	if (ud->tcp_socket) {
+		kernel_sock_shutdown(ud->tcp_socket, SHUT_RDWR);
+	}
+	ud->status = SDEV_ST_AVAILABLE;
+	spin_unlock(&ud->lock);
+	return;
+}
+EXPORT_SYMBOL_GPL(syno_usbip_shutdown_connection);
+
+/**
+ * Compare the time_diff and close socket if necessary.
+ * add_timer() is necessary.
+*/
+void syno_usbip_timer_timeout(unsigned long param)
+{
+	struct usbip_device *ud = (struct usbip_device *)param;
+	struct timespec current_time = current_kernel_time();
+	long time_diff = current_time.tv_sec - ud->get_socket_time.tv_sec;
+	printk("timeout with socket[%d] ideal[%ld] diff[%ld]!!!\n", ud->sockfd, ud->ideal_time, time_diff);
+	ud->socket_timer.expires = jiffies + SYNO_USBIP_CONNECTION_IDEALCHECK;
+	add_timer(&ud->socket_timer);
+	if (-1 != ud->sockfd && ud->ideal_time <= time_diff) {
+		// no need to clean up urb, the event handler will clean them up
+		ud->eh_ops.close_connection(ud);
+	}
+}
+EXPORT_SYMBOL_GPL(syno_usbip_timer_timeout);
+#endif
 
 /*-------------------------------------------------------------------------*/
 

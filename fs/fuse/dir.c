@@ -783,6 +783,13 @@ static void fuse_fillattr(struct inode *inode, struct fuse_attr *attr,
 	stat->size = attr->size;
 	stat->blocks = attr->blocks;
 	stat->blksize = (1 << inode->i_blkbits);
+#ifdef MY_ABC_HERE
+	stat->SynoMode = 0;
+#endif
+#ifdef MY_ABC_HERE
+	stat->SynoCreateTime.tv_sec = 0;
+	stat->SynoCreateTime.tv_nsec = 0;
+#endif
 }
 
 static int fuse_do_getattr(struct inode *inode, struct kstat *stat,

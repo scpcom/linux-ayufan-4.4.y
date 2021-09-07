@@ -585,10 +585,18 @@ int xtInsert(tid_t tid,		/* transaction id */
 			hint = addressXAD(xad) + lengthXAD(xad) - 1;
 		} else
 			hint = 0;
+#ifdef MY_ABC_HERE
+		if ((rc = dquot_alloc_block(ip, xlen)))
+#else
 		if ((rc = vfs_dq_alloc_block(ip, xlen)))
+#endif
 			goto out;
 		if ((rc = dbAlloc(ip, hint, (s64) xlen, &xaddr))) {
+#ifdef MY_ABC_HERE
+			dquot_free_block(ip, xlen);
+#else
 			vfs_dq_free_block(ip, xlen);
+#endif
 			goto out;
 		}
 	}
@@ -617,7 +625,11 @@ int xtInsert(tid_t tid,		/* transaction id */
 			/* undo data extent allocation */
 			if (*xaddrp == 0) {
 				dbFree(ip, xaddr, (s64) xlen);
+#ifdef MY_ABC_HERE
+				dquot_free_block(ip, xlen);
+#else
 				vfs_dq_free_block(ip, xlen);
+#endif
 			}
 			return rc;
 		}
@@ -985,8 +997,13 @@ xtSplitPage(tid_t tid, struct inode *ip,
 	rbn = addressPXD(pxd);
 
 	/* Allocate blocks to quota. */
+#ifdef MY_ABC_HERE
+	rc = dquot_alloc_block(ip, lengthPXD(pxd));
+	if (rc) {
+#else
 	if (vfs_dq_alloc_block(ip, lengthPXD(pxd))) {
-		rc = -EDQUOT;
+        rc = -EDQUOT;
+#endif
 		goto clean_up;
 	}
 
@@ -1195,7 +1212,11 @@ xtSplitPage(tid_t tid, struct inode *ip,
 
 	/* Rollback quota allocation. */
 	if (quota_allocation)
+#ifdef MY_ABC_HERE
+		dquot_free_block(ip, quota_allocation);
+#else
 		vfs_dq_free_block(ip, quota_allocation);
+#endif
 
 	return (rc);
 }
@@ -1235,6 +1256,9 @@ xtSplitRoot(tid_t tid,
 	struct pxdlist *pxdlist;
 	struct tlock *tlck;
 	struct xtlock *xtlck;
+#ifdef MY_ABC_HERE
+	int rc;
+#endif
 
 	sp = &JFS_IP(ip)->i_xtroot;
 
@@ -1252,9 +1276,18 @@ xtSplitRoot(tid_t tid,
 		return -EIO;
 
 	/* Allocate blocks to quota. */
+#ifdef MY_ABC_HERE
+	rc = dquot_alloc_block(ip, lengthPXD(pxd));
+	if (rc) {
+#else
 	if (vfs_dq_alloc_block(ip, lengthPXD(pxd))) {
+#endif
 		release_metapage(rmp);
+#ifdef MY_ABC_HERE
+		return rc;
+#else
 		return -EDQUOT;
+#endif
 	}
 
 	jfs_info("xtSplitRoot: ip:0x%p rmp:0x%p", ip, rmp);
@@ -3680,7 +3713,11 @@ s64 xtTruncate(tid_t tid, struct inode *ip, s64 newsize, int flag)
 		ip->i_size = newsize;
 
 	/* update quota allocation to reflect freed blocks */
+#ifdef MY_ABC_HERE
+	dquot_free_block(ip, nfreed);
+#else
 	vfs_dq_free_block(ip, nfreed);
+#endif
 
 	/*
 	 * free tlock of invalidated pages

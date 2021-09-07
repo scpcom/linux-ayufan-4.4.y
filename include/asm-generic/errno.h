@@ -108,4 +108,8 @@
 
 #define ERFKILL		132	/* Operation not possible due to RF-kill */
 
+#ifdef MY_ABC_HERE
+#define	ECORRUPT	140	/* corrupt file */
+#endif
+
 #endif

@@ -34,6 +34,9 @@ header-y += atmppp.h
 header-y += atmsap.h
 header-y += atmsvc.h
 header-y += atm_zatm.h
+# SYNO
+header-y += aufs_type.h
+# SYNO
 header-y += auto_fs4.h
 header-y += ax25.h
 header-y += b1lli.h
@@ -384,3 +387,10 @@ unifdef-y += xfrm.h
 objhdr-y += version.h
 header-y += wimax.h
 header-y += wimax/
+
+header-y += syno.h
+header-y += syno_user.h
+header-y += synosata.h
+header-y += syno_debug.h
+header-y += synobios.h
+header-y += syno_acl_xattr_ds.h

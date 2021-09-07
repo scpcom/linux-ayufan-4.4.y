@@ -11,6 +11,10 @@
 #include <linux/libata.h>
 #include "libata.h"
 
+#ifdef MY_ABC_HERE
+extern int (*funcSYNOSendEboxRefreshEvent)(int portIndex);
+#endif
+
 const struct ata_port_operations sata_pmp_port_ops = {
 	.inherits		= &sata_port_ops,
 	.pmp_prereset		= ata_std_prereset,
@@ -90,6 +94,192 @@ static unsigned int sata_pmp_write(struct ata_link *link, int reg, u32 val)
 	return ata_exec_internal(pmp_dev, &tf, NULL, DMA_NONE, NULL, 0,
 				 SATA_PMP_RW_TIMEOUT);
 }
+
+#ifdef MY_ABC_HERE
+void
+syno_pm_device_info_set(struct ata_port *ap, u8 rw, SYNO_PM_PKG *pm_pkg)
+{
+	if (syno_pm_is_3726(sata_pmp_gscr_vendor(ap->link.device->gscr),
+						sata_pmp_gscr_devid(ap->link.device->gscr))) {
+		pm_pkg->decode = SIMG3726_gpio_decode;
+		pm_pkg->encode = SIMG3726_gpio_encode;
+		pm_pkg->gpio_addr = SATA_PMP_GSCR_3726_GPIO;
+		return;
+	}
+}
+
+unsigned int
+syno_sata_pmp_read_gpio(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
+{
+	int res = 0;
+
+	syno_pm_device_info_set(link->ap, READ, pPM_pkg);
+
+	res = sata_pmp_read(link, pPM_pkg->gpio_addr, &(pPM_pkg->var));
+	if (0 != res) {
+		goto END;
+	}
+
+	if (pPM_pkg->decode) {
+		pPM_pkg->decode(pPM_pkg, READ);
+	}
+END:
+	return res;
+}
+
+unsigned int
+syno_sata_pmp_write_gpio(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
+{
+	syno_pm_device_info_set(link->ap, WRITE, pPM_pkg);
+
+	if(pPM_pkg->encode) {
+		pPM_pkg->encode(pPM_pkg, WRITE);
+	}
+
+	return sata_pmp_write(link, pPM_pkg->gpio_addr, pPM_pkg->var);
+}
+
+static u8
+syno_pm_is_synology_3726(struct ata_port *ap)
+{
+	u8 ret = 0;
+
+	if (!syno_pm_is_3726(sata_pmp_gscr_vendor(ap->link.device->gscr),
+						sata_pmp_gscr_devid(ap->link.device->gscr))) {
+		goto END;
+	}
+
+	if (0 >= ap->PMSynoUnique) {
+		goto END;
+	}
+
+	if (!IS_SYNOLOGY_RX4(ap->PMSynoUnique) &&
+		!IS_SYNOLOGY_DX5(ap->PMSynoUnique)) {
+		goto END;
+	}
+
+	ret = 1;
+END:
+	return ret;
+}
+
+u8
+syno_is_synology_pm(struct ata_port *ap)
+{
+	u8 ret = 0;
+
+	/* can't using ap->nr_pmp_links here, because the execution order
+	 * is not right, libata do a bad thing in sata_pmp_attach when
+	 * init ap->nr_pmp_links. It should be placed just after
+	 * sata_pmp_read_gscr(dev, dev->gscr);
+	 */
+	if (!sata_pmp_gscr_ports(ap->link.device->gscr)) {
+		goto END;
+	}
+
+	/*
+	 * skip those models which we do not support
+	 */
+	if (!is_ebox_support()) {
+		goto END;
+	}
+
+	if (syno_pm_is_synology_3726(ap)) {
+		ret = 1;
+		goto END;
+	}
+
+	/* add other port multiplier here */
+END:
+	return ret;
+}
+
+u32
+syno_pmp_ports_num(struct ata_port *ap)
+{
+	u32 ret = 1;
+
+	if (syno_is_synology_pm(ap)) {
+		ret = sata_pmp_gscr_ports(ap->link.device->gscr);
+
+		if (syno_pm_is_synology_3726(ap)) {
+			/* it would read 6 ports from GSCR,
+			 * but this is not what we want
+			 * So we modify here.
+			 */
+			ret = 5;
+		}
+
+		/* add other quirk of port multiplier here */
+	}
+	return ret;
+}
+
+static inline void
+syno_prepare_custom_info(struct ata_port *ap)
+{
+	syno_libata_pm_power_ctl(ap, 1, 1);
+}
+
+void
+syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
+{
+	SYNO_PM_PKG pm_pkg;
+	unsigned long flags;
+
+	if (NULL == ap) {
+		return;
+	}
+
+	syno_pm_unique_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+							sata_pmp_gscr_devid(ap->link.device->gscr),
+							&pm_pkg);
+	syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg);
+	syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg);
+
+	if (blCustomInfo) {
+		ap->PMSynoUnique = pm_pkg.var;
+	}
+
+	if (blPowerOn ^ syno_pm_is_poweron(sata_pmp_gscr_vendor(ap->link.device->gscr),
+							sata_pmp_gscr_devid(ap->link.device->gscr),
+							&pm_pkg)) {
+		if (!blPowerOn) {
+			spin_lock_irqsave(ap->lock, flags);
+			ap->pflags |= ATA_PFLAG_PMP_PMOFF;
+			spin_unlock_irqrestore(ap->lock, flags);
+		}
+
+		syno_pm_poweron_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+								 sata_pmp_gscr_devid(ap->link.device->gscr),
+								 &pm_pkg, 0);
+		syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg);
+
+		if (blPowerOn) {
+			mdelay(5); /* don't do it too fast. Otherwise CPLD might not response */
+		} else {
+			mdelay(7000); /* hardware spec */
+		}
+
+		syno_pm_poweron_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+								 sata_pmp_gscr_devid(ap->link.device->gscr),
+								 &pm_pkg, 1);
+		syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg);
+
+#ifdef MY_ABC_HERE
+		if (blPowerOn) {
+			ata_port_printk(ap, KERN_INFO, "PMP Power control set ATA_EH_SYNO_PWON\n");
+			ap->link.eh_context.i.action |= ATA_EH_SYNO_PWON;
+		}
+#endif
+		if (!blPowerOn) {
+			spin_lock_irqsave(ap->lock, flags);
+			ap->pflags &= ~ATA_PFLAG_PMP_PMOFF;
+			spin_unlock_irqrestore(ap->lock, flags);
+		}
+	}
+}
+#endif
 
 /**
  *	sata_pmp_qc_defer_cmd_switch - qc_defer for command switching PMP
@@ -238,7 +428,11 @@ static int sata_pmp_configure(struct ata_device *dev, int print_info)
 	const char *reason;
 	int nr_ports, rc;
 
+#ifdef MY_ABC_HERE
+	nr_ports = syno_pmp_ports_num(ap);
+#else
 	nr_ports = sata_pmp_gscr_ports(gscr);
+#endif
 
 	if (nr_ports <= 0 || nr_ports > SATA_PMP_MAX_PORTS) {
 		rc = -EINVAL;
@@ -429,12 +623,21 @@ int sata_pmp_attach(struct ata_device *dev)
 	if (rc)
 		goto fail;
 
+#ifdef MY_ABC_HERE
+	/* Get information for all PM we supported */
+	syno_prepare_custom_info(ap);
+#endif
+
 	/* config PMP */
 	rc = sata_pmp_configure(dev, 1);
 	if (rc)
 		goto fail;
 
+#ifdef MY_ABC_HERE
+	rc = sata_pmp_init_links(ap, syno_pmp_ports_num(ap));
+#else
 	rc = sata_pmp_init_links(ap, sata_pmp_gscr_ports(dev->gscr));
+#endif
 	if (rc) {
 		ata_dev_printk(dev, KERN_INFO,
 			       "failed to initialize PMP links\n");
@@ -444,7 +647,11 @@ int sata_pmp_attach(struct ata_device *dev)
 	/* attach it */
 	spin_lock_irqsave(ap->lock, flags);
 	WARN_ON(ap->nr_pmp_links);
+#ifdef MY_ABC_HERE
+	ap->nr_pmp_links = syno_pmp_ports_num(ap);
+#else
 	ap->nr_pmp_links = sata_pmp_gscr_ports(dev->gscr);
+#endif
 	spin_unlock_irqrestore(ap->lock, flags);
 
 	sata_pmp_quirks(ap);
@@ -456,6 +663,10 @@ int sata_pmp_attach(struct ata_device *dev)
 		sata_link_init_spd(tlink);
 
 	ata_acpi_associate_sata_port(ap);
+
+#ifdef MY_ABC_HERE
+	ap->pflags |= ATA_PFLAG_PMP_CONNECT;
+#endif
 
 	return 0;
 
@@ -486,6 +697,10 @@ static void sata_pmp_detach(struct ata_device *dev)
 	WARN_ON(!ata_is_host_link(link) || dev->devno ||
 		link->pmp != SATA_PMP_CTRL_PORT);
 
+#ifdef MY_ABC_HERE
+	ap->PMSynoUnique = 0;
+#endif
+
 	if (ap->ops->pmp_detach)
 		ap->ops->pmp_detach(ap);
 
@@ -498,6 +713,9 @@ static void sata_pmp_detach(struct ata_device *dev)
 	spin_unlock_irqrestore(ap->lock, flags);
 
 	ata_acpi_associate_sata_port(ap);
+#ifdef MY_ABC_HERE
+	ap->pflags |= ATA_PFLAG_PMP_DISCONNECT;
+#endif
 }
 
 /**
@@ -519,13 +737,21 @@ static int sata_pmp_same_pmp(struct ata_device *dev, const u32 *new_gscr)
 	const u32 *old_gscr = dev->gscr;
 	u16 old_vendor, new_vendor, old_devid, new_devid;
 	int old_nr_ports, new_nr_ports;
+#ifdef MY_ABC_HERE
+	struct ata_port *ap = dev->link->ap;
+	u32 old_syno_unique = ap->PMSynoUnique;
+#endif
 
 	old_vendor = sata_pmp_gscr_vendor(old_gscr);
 	new_vendor = sata_pmp_gscr_vendor(new_gscr);
 	old_devid = sata_pmp_gscr_devid(old_gscr);
 	new_devid = sata_pmp_gscr_devid(new_gscr);
+#ifdef MY_ABC_HERE
+	new_nr_ports = old_nr_ports = syno_pmp_ports_num(ap);
+#else
 	old_nr_ports = sata_pmp_gscr_ports(old_gscr);
 	new_nr_ports = sata_pmp_gscr_ports(new_gscr);
+#endif
 
 	if (old_vendor != new_vendor) {
 		ata_dev_printk(dev, KERN_INFO, "Port Multiplier "
@@ -547,6 +773,16 @@ static int sata_pmp_same_pmp(struct ata_device *dev, const u32 *new_gscr)
 			       old_nr_ports, new_nr_ports);
 		return 0;
 	}
+
+#ifdef MY_ABC_HERE
+	/* power on and re-custom */
+	syno_prepare_custom_info(ap);
+	if (SYNO_UNIQUE(old_syno_unique) != SYNO_UNIQUE(ap->PMSynoUnique)) {
+		ata_dev_printk(dev, KERN_ERR,
+					   "Got different EBox Model old [0x%x], new [0x%x]\n", SYNO_UNIQUE(old_syno_unique), SYNO_UNIQUE(ap->PMSynoUnique));
+		return 0;
+	}
+#endif
 
 	return 1;
 }
@@ -605,6 +841,14 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 		goto fail;
 
 	ata_eh_done(link, NULL, ATA_EH_REVALIDATE);
+
+#ifdef MY_ABC_HERE
+	if(funcSYNOSendEboxRefreshEvent) {
+		funcSYNOSendEboxRefreshEvent(ap->scsi_host->host_no);
+	}else{
+		printk("funcSYNOSendEboxRefreshEvent is NULL!!");
+	}
+#endif
 
 	DPRINTK("EXIT, rc=0\n");
 	return 0;

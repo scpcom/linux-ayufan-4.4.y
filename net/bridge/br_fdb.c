@@ -29,6 +29,11 @@ static int fdb_insert(struct net_bridge *br, struct net_bridge_port *source,
 		      const unsigned char *addr);
 
 static u32 fdb_salt __read_mostly;
+#ifdef CONFIG_MV_ETH_NFP_FDB_SUPPORT
+int fp_fdb_db_init(u32 db_size);
+int fp_fdb_info_set(u32 port, u32 vlan, const u8 *mac, int is_local);
+int fp_fdb_info_del(u32 port, u32 vlan, const u8 *mac, int is_local);
+#endif
 
 int __init br_fdb_init(void)
 {
@@ -40,6 +45,9 @@ int __init br_fdb_init(void)
 		return -ENOMEM;
 
 	get_random_bytes(&fdb_salt, sizeof(fdb_salt));
+#ifdef CONFIG_MV_ETH_NFP_FDB_SUPPORT
+	fp_fdb_db_init(BR_HASH_SIZE);
+#endif
 	return 0;
 }
 
@@ -80,6 +88,13 @@ static void fdb_rcu_free(struct rcu_head *head)
 
 static inline void fdb_delete(struct net_bridge_fdb_entry *f)
 {
+#ifdef CONFIG_MV_ETH_NFP_FDB_SUPPORT
+	if (fp_fdb_info_del(f->dst->br->dev->ifindex,
+						f->dst->dev->ifindex, f->addr.addr, f->is_local)) {
+		f->ageing_timer  = jiffies + f->dst->br->forward_delay;
+		return;
+	}
+#endif
 	hlist_del_rcu(&f->hlist);
 	call_rcu(&f->rcu, fdb_rcu_free);
 }
@@ -332,6 +347,9 @@ static struct net_bridge_fdb_entry *fdb_create(struct hlist_head *head,
 		fdb->is_local = is_local;
 		fdb->is_static = is_local;
 		fdb->ageing_timer = jiffies;
+#ifdef CONFIG_MV_ETH_NFP_FDB_SUPPORT
+		fp_fdb_info_set(fdb->dst->br->dev->ifindex, fdb->dst->dev->ifindex, addr, is_local);
+#endif
 	}
 	return fdb;
 }

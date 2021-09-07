@@ -79,8 +79,14 @@ struct usb_hub {
 	struct delayed_work	leds;
 	struct delayed_work	init_work;
 	void			**port_owners;
+#ifdef CONFIG_SYNO_MV88F6281 
+	int				syno_hub_eh;
+#endif
 };
 
+#ifdef CONFIG_SYNO_MV88F6281 
+static int hub_port_debounce(struct usb_hub *hub, int port1);
+#endif
 
 /* Protect struct usb_device->state and ->children members
  * Note: Both are also protected by ->dev.sem, except that ->state can
@@ -369,6 +375,42 @@ static int hub_port_status(struct usb_hub *hub, int port1,
 	mutex_unlock(&hub->status_mutex);
 	return ret;
 }
+
+#ifdef CONFIG_SYNO_MV88F6281
+void syno_clear_hub_eh(struct usb_hub *hub)
+{
+	if (!hub)
+		return;
+
+	mutex_lock(&hub->status_mutex);
+	hub->syno_hub_eh = 0;
+	mutex_unlock(&hub->status_mutex);
+}
+
+void syno_set_hub_eh(struct usb_hub *hub)
+{
+	if (!hub)
+		return;
+
+	mutex_lock(&hub->status_mutex);
+	hub->syno_hub_eh = 1;
+	mutex_unlock(&hub->status_mutex);
+}
+
+int syno_get_hub_eh(struct usb_hub *hub)
+{
+	int eh = 0;
+
+	if (!hub)
+		return;
+
+	mutex_lock(&hub->status_mutex);
+	eh = hub->syno_hub_eh;
+	mutex_unlock(&hub->status_mutex);
+
+	return eh; 
+}
+#endif
 
 static void kick_khubd(struct usb_hub *hub)
 {
@@ -1739,6 +1781,32 @@ fail:
 	return err;
 }
 
+#ifdef MY_ABC_HERE
+/* Return 1 if found the same serial in other usb device. Otherwizs, return 0. */
+static int device_serial_match(struct usb_device *dev, struct usb_device *udev_search)
+{
+	int child, match = 0;
+	
+	/* look through all of the children of this device */
+	for (child = 0; child < dev->maxchild; ++child) {
+		if (dev->children[child] && dev->children[child] != udev_search &&
+				dev->children[child]->serial) {
+		
+			/* Can't down() here. Because when using hub, it will be lock by someone else */			
+			if (dev->children[child]->serial[0] && strcmp(dev->children[child]->serial, udev_search->serial) == 0) {
+				match++;
+			} else {
+				match = device_serial_match(dev->children[child], udev_search);
+			}			
+			
+			if (match) {
+				break;
+			}
+		}
+	}
+	return match;
+}
+#endif /* MY_ABC_HERE*/
 
 /**
  * usb_new_device - perform initial device setup (usbcore-internal)
@@ -1791,6 +1859,74 @@ int usb_new_device(struct usb_device *udev)
 		dev_err(&udev->dev, "can't device_add, error %d\n", err);
 		goto fail;
 	}
+
+#ifdef MY_ABC_HERE
+#define SERIAL_LEN 33
+	/* Make a fake serial number from product name */
+	if ( NULL == udev->product ) {
+		udev->product = kmalloc(16, GFP_KERNEL);
+		if (NULL != udev->product) {
+			snprintf(udev->product, 16, "USBDevice");
+		}
+	}
+	
+	if (NULL == udev->serial && NULL != udev->product) {
+		int i;
+		char seed = 0xb4; /* pick a random number */
+		
+		udev->serial = kmalloc(SERIAL_LEN, GFP_KERNEL);
+		if (NULL != udev->serial) {
+			const int cProductLen = strlen(udev->product);
+			
+			printk("Got empty serial number. Generate serial number from product.\n");
+			udev->serial[0] = '\0';
+			for(i = 0; (i < cProductLen) && (i < (SERIAL_LEN-1)/2); i++) {
+				snprintf(udev->serial + strlen(udev->serial), 
+					   SERIAL_LEN - strlen(udev->serial),
+					   "%02x", (seed ^= udev->product[cProductLen-i-1]));
+			}
+			udev->serial[SERIAL_LEN-1] = '\0';
+		}
+	}
+	
+	if (udev->parent && udev->serial) {
+		int match, counter = 0;
+		struct list_head *buslist;
+		struct usb_bus *bus;
+		
+RETRY:
+		match = 0;
+		for (buslist = usb_bus_list.next;
+			  buslist != &usb_bus_list; 
+			  buslist = buslist->next) {
+			
+			bus = container_of(buslist, struct usb_bus, bus_list);
+			if (!bus->root_hub)
+				continue;
+			match = device_serial_match(bus->root_hub, udev);
+
+			if (match) {
+				break;
+			}
+		}
+		if (match) {
+			int Len = strlen(udev->serial);
+			
+			if (Len == 0) {
+				printk("USB serial length is 0!\n");
+			} else if (counter > 9) {
+				printk("There are to many same devices (%d)\n", counter);
+			} else {
+				udev->serial[Len - 1] = counter + '0';
+				udev->serial[Len] = '\0';
+				printk("%s (%d) Same device found. Change serial to %s \n", __FILE__, __LINE__, udev->serial);
+				
+				counter++;
+				goto RETRY;
+			}
+		}
+	}
+#endif
 
 	(void) usb_create_ep_devs(&udev->dev, &udev->ep0, udev);
 	return err;
@@ -1934,6 +2070,15 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 		if (ret < 0)
 			return ret;
 
+#ifdef CONFIG_SYNO_MV88F6281
+		if (portchange & (USB_PORT_STAT_C_CONNECTION | USB_PORT_STAT_C_ENABLE))
+		{
+			hub_port_debounce(hub, port1);
+			ret = hub_port_status(hub, port1, &portstatus, &portchange);
+			if (ret < 0)
+				return ret;
+		}
+#else
 		/* Device went away? */
 		if (!(portstatus & USB_PORT_STAT_CONNECTION))
 			return -ENOTCONN;
@@ -1941,6 +2086,7 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 		/* bomb out completely if the connection bounced */
 		if ((portchange & USB_PORT_STAT_C_CONNECTION))
 			return -ENOTCONN;
+#endif
 
 		/* if we`ve finished resetting, then break out of the loop */
 		if (!(portstatus & USB_PORT_STAT_RESET) &&
@@ -2747,7 +2893,7 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 			kfree(buf);
 
 			retval = hub_port_reset(hub, port1, udev, delay);
-			if (retval < 0)		/* error or disconnect */
+			if (retval < 0) 		/* error or disconnect */
 				goto fail;
 			if (oldspeed != udev->speed) {
 				dev_dbg(&udev->dev,
@@ -2812,7 +2958,7 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 			break;
 		}
 	}
-	if (retval)
+	if (retval) 
 		goto fail;
 
 	if (udev->descriptor.bMaxPacketSize0 == 0xff ||
@@ -3194,6 +3340,14 @@ static void hub_events(void)
 		kref_get(&hub->kref);
 		spin_unlock_irq(&hub_event_lock);
 
+#ifdef CONFIG_SYNO_MV88F6281
+		if ( syno_get_hub_eh(hub) ) {
+			printk("hub is performing EH\n");
+			msleep(100);
+			continue;
+		}
+#endif
+
 		hdev = hub->hdev;
 		hub_dev = hub->intfdev;
 		intf = to_usb_interface(hub_dev);
@@ -3282,8 +3436,8 @@ static void hub_events(void)
 				if (!(portstatus & USB_PORT_STAT_ENABLE)
 				    && !connect_change
 				    && hdev->children[i-1]) {
-					dev_err (hub_dev,
-					    "port %i "
+						dev_err (hub_dev,
+						"port %i "
 					    "disabled by hub (EMI?), "
 					    "re-enabling...\n",
 						i);
@@ -3704,7 +3858,15 @@ int usb_reset_device(struct usb_device *udev)
 		}
 	}
 
+#ifdef CONFIG_SYNO_MV88F6281
+	printk("lock for hub EH\n");
+	syno_set_hub_eh(hdev_to_hub(udev->parent));
+#endif
 	ret = usb_reset_and_verify_device(udev);
+#ifdef CONFIG_SYNO_MV88F6281
+	syno_clear_hub_eh(hdev_to_hub(udev->parent));
+	printk("unlock for hub EH\n");
+#endif
 
 	if (config) {
 		for (i = config->desc.bNumInterfaces - 1; i >= 0; --i) {

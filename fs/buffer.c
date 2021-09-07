@@ -1156,7 +1156,15 @@ __getblk_slow(struct block_device *bdev, sector_t block, int size)
  */
 void mark_buffer_dirty(struct buffer_head *bh)
 {
+#ifdef MY_ABC_HERE
+	static int SynoWarnings = 0;
+	if (!buffer_uptodate(bh) && !SynoWarnings) {
+		SynoWarnings = 1;
+		printk("%s: Buffer head isn't up to date\n", __FUNCTION__);
+	}
+#else
 	WARN_ON_ONCE(!buffer_uptodate(bh));
+#endif
 
 	/*
 	 * Very *carefully* optimize the it-is-already-dirty case.
@@ -3378,3 +3386,277 @@ void __init buffer_init(void)
 	max_buffer_heads = nrpages * (PAGE_SIZE / sizeof(struct buffer_head));
 	hotcpu_notifier(buffer_cpu_notify, 0);
 }
+
+#ifdef MY_ABC_HERE
+int generic_commit_write(struct file *file, struct page *page,
+		unsigned from, unsigned to)
+{
+	struct inode *inode = page->mapping->host;
+	loff_t pos = ((loff_t)page->index << PAGE_CACHE_SHIFT) + to;
+	__block_commit_write(inode,page,from,to);
+	/*
+	 * No need to use i_size_read() here, the i_size
+	 * cannot change under us because we hold i_mutex.
+	 */
+	if (pos > inode->i_size) {
+		i_size_write(inode, pos);
+		mark_inode_dirty(inode);
+	}
+	return 0;
+}
+EXPORT_SYMBOL(generic_commit_write);
+/*
+ * For moronic filesystems that do not allow holes in file.
+ * We may have to extend the file.
+ */
+
+int cont_prepare_write(struct page *page, unsigned offset,
+       unsigned to, get_block_t *get_block, loff_t *bytes)
+{
+   struct address_space *mapping = page->mapping;
+   struct inode *inode = mapping->host;
+   struct page *new_page;
+   pgoff_t pgpos;
+   long status;
+   unsigned zerofrom;
+   unsigned blocksize = 1 << inode->i_blkbits;
+   void *kaddr;
+
+   while(page->index > (pgpos = *bytes>>PAGE_CACHE_SHIFT)) {
+       status = -ENOMEM;
+       new_page = grab_cache_page(mapping, pgpos);
+       if (!new_page)
+           goto out;
+       /* we might sleep */
+       if (*bytes>>PAGE_CACHE_SHIFT != pgpos) {
+           unlock_page(new_page);
+           page_cache_release(new_page);
+           continue;
+       }
+       zerofrom = *bytes & ~PAGE_CACHE_MASK;
+       if (zerofrom & (blocksize-1)) {
+           *bytes |= (blocksize-1);
+           (*bytes)++;
+       }
+       status = __block_prepare_write(inode, new_page, zerofrom,
+                       PAGE_CACHE_SIZE, get_block);
+       if (status)
+           goto out_unmap;
+        /* Disable the zero padding of page, to fix the FAT 1G file copy bug
+         * kaddr = kmap_atomic(new_page, KM_USER0);
+         * memset(kaddr+zerofrom, 0, PAGE_CACHE_SIZE-zerofrom);
+         * flush_dcache_page(new_page);
+         * kunmap_atomic(kaddr, KM_USER0);
+         * generic_commit_write(NULL, new_page, zerofrom, PAGE_CACHE_SIZE);
+         */
+       unlock_page(new_page);
+       page_cache_release(new_page);
+   }
+
+   if (page->index < pgpos) {
+       /* completely inside the area */
+       zerofrom = offset;
+   } else {
+       /* page covers the boundary, find the boundary offset */
+       zerofrom = *bytes & ~PAGE_CACHE_MASK;
+
+       /* if we will expand the thing last block will be filled */
+       if (to > zerofrom && (zerofrom & (blocksize-1))) {
+           *bytes |= (blocksize-1);
+           (*bytes)++;
+       }
+
+       /* starting below the boundary? Nothing to zero out */
+       if (offset <= zerofrom)
+           zerofrom = offset;
+   }
+   status = __block_prepare_write(inode, page, zerofrom, to, get_block);
+   if (status)
+       goto out1;
+   if (zerofrom < offset) {
+       kaddr = kmap_atomic(page, KM_USER0);
+       memset(kaddr+zerofrom, 0, offset-zerofrom);
+       flush_dcache_page(page);
+       kunmap_atomic(kaddr, KM_USER0);
+       __block_commit_write(inode, page, zerofrom, offset);
+   }
+   return 0;
+out1:
+   ClearPageUptodate(page);
+   return status;
+
+out_unmap:
+   ClearPageUptodate(new_page);
+   unlock_page(new_page);
+   page_cache_release(new_page);
+out:
+   return status;
+}
+EXPORT_SYMBOL(cont_prepare_write);
+
+/*
+ * On entry, the page is fully not uptodate.
+ * On exit the page is fully uptodate in the areas outside (from,to)
+ */
+int nobh_prepare_write(struct page *page, unsigned from, unsigned to,
+           get_block_t *get_block)
+{
+   struct inode *inode = page->mapping->host;
+   const unsigned blkbits = inode->i_blkbits;
+   const unsigned blocksize = 1 << blkbits;
+   struct buffer_head map_bh;
+   struct buffer_head *read_bh[MAX_BUF_PER_PAGE];
+   unsigned block_in_page;
+   unsigned block_start;
+   sector_t block_in_file;
+   char *kaddr;
+   int nr_reads = 0;
+   int i;
+   int ret = 0;
+   int is_mapped_to_disk = 1;
+   int dirtied_it = 0;
+
+   if (PageMappedToDisk(page))
+       return 0;
+
+   block_in_file = (sector_t)page->index << (PAGE_CACHE_SHIFT - blkbits);
+   map_bh.b_page = page;
+
+   /*
+    * We loop across all blocks in the page, whether or not they are
+    * part of the affected region.  This is so we can discover if the
+    * page is fully mapped-to-disk.
+    */
+   for (block_start = 0, block_in_page = 0;
+         block_start < PAGE_CACHE_SIZE;
+         block_in_page++, block_start += blocksize) {
+       unsigned block_end = block_start + blocksize;
+       int create;
+
+       map_bh.b_state = 0;
+       create = 1;
+       if (block_start >= to)
+           create = 0;
+       ret = get_block(inode, block_in_file + block_in_page,
+                   &map_bh, create);
+       if (ret)
+           goto failed;
+       if (!buffer_mapped(&map_bh))
+           is_mapped_to_disk = 0;
+       if (buffer_new(&map_bh))
+           unmap_underlying_metadata(map_bh.b_bdev,
+                           map_bh.b_blocknr);
+       if (PageUptodate(page))
+           continue;
+       if (buffer_new(&map_bh) || !buffer_mapped(&map_bh)) {
+           kaddr = kmap_atomic(page, KM_USER0);
+           if (block_start < from) {
+               memset(kaddr+block_start, 0, from-block_start);
+               dirtied_it = 1;
+           }
+           if (block_end > to) {
+               memset(kaddr + to, 0, block_end - to);
+               dirtied_it = 1;
+           }
+           flush_dcache_page(page);
+           kunmap_atomic(kaddr, KM_USER0);
+           continue;
+       }
+       if (buffer_uptodate(&map_bh))
+           continue;   /* reiserfs does this */
+       if (block_start < from || block_end > to) {
+           struct buffer_head *bh = alloc_buffer_head(GFP_NOFS);
+
+           if (!bh) {
+               ret = -ENOMEM;
+               goto failed;
+           }
+           bh->b_state = map_bh.b_state;
+           atomic_set(&bh->b_count, 0);
+           bh->b_this_page = NULL;
+           bh->b_page = page;
+           bh->b_blocknr = map_bh.b_blocknr;
+           bh->b_size = blocksize;
+           bh->b_data = (char *)(long)block_start;
+           bh->b_bdev = map_bh.b_bdev;
+           bh->b_private = NULL;
+           read_bh[nr_reads++] = bh;
+       }
+   }
+
+   if (nr_reads) {
+       struct buffer_head *bh;
+
+       /*
+        * The page is locked, so these buffers are protected from
+        * any VM or truncate activity.  Hence we don't need to care
+        * for the buffer_head refcounts.
+        */
+       for (i = 0; i < nr_reads; i++) {
+           bh = read_bh[i];
+           lock_buffer(bh);
+           bh->b_end_io = end_buffer_read_nobh;
+           submit_bh(READ, bh);
+       }
+       for (i = 0; i < nr_reads; i++) {
+           bh = read_bh[i];
+           wait_on_buffer(bh);
+           if (!buffer_uptodate(bh))
+               ret = -EIO;
+           free_buffer_head(bh);
+           read_bh[i] = NULL;
+       }
+       if (ret)
+           goto failed;
+   }
+
+   if (is_mapped_to_disk)
+       SetPageMappedToDisk(page);
+   SetPageUptodate(page);
+
+   /*
+    * Setting the page dirty here isn't necessary for the prepare_write
+    * function - commit_write will do that.  But if/when this function is
+    * used within the pagefault handler to ensure that all mmapped pages
+    * have backing space in the filesystem, we will need to dirty the page
+    * if its contents were altered.
+    */
+   if (dirtied_it)
+       set_page_dirty(page);
+
+   return 0;
+
+failed:
+   for (i = 0; i < nr_reads; i++) {
+       if (read_bh[i])
+           free_buffer_head(read_bh[i]);
+   }
+
+   /*
+    * Error recovery is pretty slack.  Clear the page and mark it dirty
+    * so we'll later zero out any blocks which _were_ allocated.
+    */
+   kaddr = kmap_atomic(page, KM_USER0);
+   memset(kaddr, 0, PAGE_CACHE_SIZE);
+   kunmap_atomic(kaddr, KM_USER0);
+   SetPageUptodate(page);
+   set_page_dirty(page);
+   return ret;
+}
+EXPORT_SYMBOL(nobh_prepare_write);
+
+int nobh_commit_write(struct file *file, struct page *page,
+       unsigned from, unsigned to)
+{
+   struct inode *inode = page->mapping->host;
+   loff_t pos = ((loff_t)page->index << PAGE_CACHE_SHIFT) + to;
+
+   set_page_dirty(page);
+   if (pos > inode->i_size) {
+       i_size_write(inode, pos);
+       mark_inode_dirty(inode);
+   }
+   return 0;
+}
+EXPORT_SYMBOL(nobh_commit_write);
+#endif

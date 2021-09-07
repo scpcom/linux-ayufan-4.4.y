@@ -292,6 +292,13 @@ extern int nf_conntrack_set_hashsize(const char *val, struct kernel_param *kp);
 extern unsigned int nf_conntrack_htable_size;
 extern unsigned int nf_conntrack_max;
 
+#ifdef CONFIG_MV_LINUX_COUNTERS_DISABLE
+
+#define NF_CT_STAT_INC(net, count)
+#define NF_CT_STAT_INC_ATOMIC(net, count)
+
+#else
+
 #define NF_CT_STAT_INC(net, count)	\
 	(per_cpu_ptr((net)->ct.stat, raw_smp_processor_id())->count++)
 #define NF_CT_STAT_INC_ATOMIC(net, count)		\
@@ -300,6 +307,8 @@ do {							\
 	per_cpu_ptr((net)->ct.stat, raw_smp_processor_id())->count++;	\
 	local_bh_enable();				\
 } while (0)
+
+#endif /* CONFIG_MV_LINUX_COUNTERS_DISABLE */
 
 #define MODULE_ALIAS_NFCT_HELPER(helper) \
         MODULE_ALIAS("nfct-helper-" helper)

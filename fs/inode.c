@@ -28,6 +28,9 @@
 #include <linux/async.h>
 #include <linux/posix_acl.h>
 
+#ifdef CONFIG_FS_SYNO_ACL
+#include "synoacl_int.h"
+#endif
 /*
  * This is needed for the following functions:
  *  - inode_has_buffers
@@ -167,6 +170,10 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 
 	mutex_init(&inode->i_mutex);
 	lockdep_set_class(&inode->i_mutex, &sb->s_type->i_mutex_key);
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	mutex_init(&inode->i_syno_mutex);
+	lockdep_set_class(&inode->i_syno_mutex, &sb->s_type->i_syno_mutex_key);
+#endif
 
 	init_rwsem(&inode->i_alloc_sem);
 	lockdep_set_class(&inode->i_alloc_sem, &sb->s_type->i_alloc_sem_key);
@@ -192,7 +199,9 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	}
 	inode->i_private = NULL;
 	inode->i_mapping = mapping;
-#ifdef CONFIG_FS_POSIX_ACL
+#ifdef CONFIG_FS_SYNO_ACL
+	inode->i_syno_acl = ACL_NOT_CACHED;
+#elif defined(CONFIG_FS_POSIX_ACL)
 	inode->i_acl = inode->i_default_acl = ACL_NOT_CACHED;
 #endif
 
@@ -238,7 +247,10 @@ void __destroy_inode(struct inode *inode)
 	ima_inode_free(inode);
 	security_inode_free(inode);
 	fsnotify_inode_delete(inode);
-#ifdef CONFIG_FS_POSIX_ACL
+#ifdef CONFIG_FS_SYNO_ACL
+	if (inode->i_syno_acl && inode->i_syno_acl != ACL_NOT_CACHED)
+		synoacl_mod_release(inode->i_syno_acl);
+#elif defined(CONFIG_FS_POSIX_ACL)
 	if (inode->i_acl && inode->i_acl != ACL_NOT_CACHED)
 		posix_acl_release(inode->i_acl);
 	if (inode->i_default_acl && inode->i_default_acl != ACL_NOT_CACHED)

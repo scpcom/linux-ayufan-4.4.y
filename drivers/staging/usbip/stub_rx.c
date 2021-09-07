@@ -377,17 +377,18 @@ static struct usb_host_endpoint *get_ep_from_epnum(struct usb_device *udev,
 	if (!config)
 		return NULL;
 
-	for (i = 0; i < config->desc.bNumInterfaces; i++) {
+	for (i = 0; i < config->desc.bNumInterfaces; i++) {		
 		struct usb_host_interface *setting;
 
 		setting = config->interface[i]->cur_altsetting;
 
 		for (j = 0; j < setting->desc.bNumEndpoints; j++) {
 			ep = &setting->endpoint[j];
-			epnum = (ep->desc.bEndpointAddress & 0x7f);
+			epnum = (ep->desc.bEndpointAddress & 0x7f);			
 
 			if (epnum == epnum0) {
-				/* usbip_uinfo("found epnum %d\n", epnum0);*/
+				/* usbip_uinfo("found epnum %d\n", epnum0);*/				
+				printk("found ep[%d]=epnum %d\n", j, epnum0);
 				found = 1;
 				break;
 			}
@@ -427,34 +428,34 @@ static int get_pipe(struct stub_device *sdev, int epnum, int dir)
 	}
 #endif
 
-	if (usb_endpoint_xfer_control(epd)) {
+	if (usb_endpoint_xfer_control(epd)) {		
 		if (dir == USBIP_DIR_OUT)
 			return usb_sndctrlpipe(udev, epnum);
 		else
 			return usb_rcvctrlpipe(udev, epnum);
 	}
 
-	if (usb_endpoint_xfer_bulk(epd)) {
+	if (usb_endpoint_xfer_bulk(epd)) {		
 		if (dir == USBIP_DIR_OUT)
 			return usb_sndbulkpipe(udev, epnum);
 		else
 			return usb_rcvbulkpipe(udev, epnum);
 	}
 
-	if (usb_endpoint_xfer_int(epd)) {
+	if (usb_endpoint_xfer_int(epd)) {		
 		if (dir == USBIP_DIR_OUT)
 			return usb_sndintpipe(udev, epnum);
 		else
 			return usb_rcvintpipe(udev, epnum);
 	}
 
-	if (usb_endpoint_xfer_isoc(epd)) {
+	if (usb_endpoint_xfer_isoc(epd)) {		
 		if (dir == USBIP_DIR_OUT)
 			return usb_sndisocpipe(udev, epnum);
 		else
 			return usb_rcvisocpipe(udev, epnum);
 	}
-
+	
 	/* NOT REACHED */
 	dev_err(&sdev->interface->dev, "get pipe, epnum %d\n", epnum);
 	return 0;
@@ -467,8 +468,8 @@ static void stub_recv_cmd_submit(struct stub_device *sdev,
 	struct stub_priv *priv;
 	struct usbip_device *ud = &sdev->ud;
 	struct usb_device *udev = interface_to_usbdev(sdev->interface);
-	int pipe = get_pipe(sdev, pdu->base.ep, pdu->base.direction);
-
+	int pipe = get_pipe(sdev, pdu->base.ep, pdu->base.direction);		
+	
 
 	priv = stub_priv_alloc(sdev, pdu);
 	if (!priv)
@@ -532,7 +533,7 @@ static void stub_recv_cmd_submit(struct stub_device *sdev,
 	if (ret == 0)
 		usbip_dbg_stub_rx("submit urb ok, seqnum %u\n",
 							pdu->base.seqnum);
-	else {
+	else {		
 		dev_err(&sdev->interface->dev, "submit_urb error, %d\n", ret);
 		usbip_dump_header(pdu);
 		usbip_dump_urb(priv->urb);
@@ -568,6 +569,10 @@ static void stub_rx_pdu(struct usbip_device *ud)
 		return;
 	}
 
+#ifdef MY_ABC_HERE	
+	ud->get_socket_time = current_kernel_time();	
+#endif	
+
 	usbip_header_correct_endian(&pdu, 0);
 
 	if (usbip_dbg_flag_stub_rx)
@@ -580,11 +585,17 @@ static void stub_rx_pdu(struct usbip_device *ud)
 	}
 
 	switch (pdu.base.command) {
-	case USBIP_CMD_UNLINK:
+	case USBIP_CMD_UNLINK:		
 		stub_recv_cmd_unlink(sdev, &pdu);
 		break;
 
 	case USBIP_CMD_SUBMIT:
+#ifdef MY_ABC_HERE	
+	case USBIP_RESET_DEV:				
+		if(pdu.base.command == USBIP_RESET_DEV) {
+			printk("reset device\n");
+		}
+#endif
 		stub_recv_cmd_submit(sdev, &pdu);
 		break;
 
@@ -597,9 +608,23 @@ static void stub_rx_pdu(struct usbip_device *ud)
 
 }
 
+#ifdef MY_ABC_HERE
+int syno_socket_check(struct usbip_device *ud)
+{
+	if (-1 == ud->sockfd || NULL == ud->tcp_socket) {
+		err("syno_socket_check() stop");
+		return 0;
+	}
+	return 1;
+}
+#endif
+
 void stub_rx_loop(struct usbip_task *ut)
 {
 	struct usbip_device *ud = container_of(ut, struct usbip_device, tcp_rx);
+#ifdef MY_ABC_HERE
+	struct stub_device *sdev = container_of(ud, struct stub_device, ud);
+#endif
 
 	while (1) {
 		if (signal_pending(current)) {
@@ -607,9 +632,15 @@ void stub_rx_loop(struct usbip_task *ut)
 			break;
 		}
 
+#ifdef MY_ABC_HERE
+		if (syno_usbip_event_happened(ud))
+#else
 		if (usbip_event_happened(ud))
+#endif
 			break;
-
+#ifdef MY_ABC_HERE
+		wait_event_interruptible(sdev->rx_waitq, syno_socket_check(ud));
+#endif
 		stub_rx_pdu(ud);
 	}
 }

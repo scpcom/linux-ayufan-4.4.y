@@ -180,8 +180,10 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
 # Default value for CROSS_COMPILE is not to prefix executables
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
 export KBUILD_BUILDHOST := $(SUBARCH)
-ARCH		?= $(SUBARCH)
-CROSS_COMPILE	?=
+#ARCH		?= $(SUBARCH)
+#CROSS_COMPILE	?=
+ARCH		?= arm
+CROSS_COMPILE	?= /usr/local/arm-none-linux-gnueabi/bin/arm-none-linux-gnueabi-
 
 # Architecture as present in compile.h
 UTS_MACHINE 	:= $(ARCH)
@@ -337,7 +339,8 @@ CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 LINUXINCLUDE    := -Iinclude \
                    $(if $(KBUILD_SRC),-Iinclude2 -I$(srctree)/include) \
                    -I$(srctree)/arch/$(hdr-arch)/include               \
-                   -include include/linux/autoconf.h
+                   -include include/linux/autoconf.h \
+                   -include $(if $(KBUILD_SRC),$(srctree)/)include/linux/syno.h
 
 KBUILD_CPPFLAGS := -D__KERNEL__
 
@@ -990,18 +993,18 @@ prepare: prepare0
 # If asm is a stale symlink (point to dir that does not exist) remove it
 define check-symlink
 	set -e;                                                            \
-	if [ -L include/asm ]; then                                        \
-		asmlink=`readlink include/asm | cut -d '-' -f 2`;          \
-		if [ "$$asmlink" != "$(SRCARCH)" ]; then                   \
-			echo "ERROR: the symlink $@ points to asm-$$asmlink but asm-$(SRCARCH) was expected"; \
-			echo "       set ARCH or save .config and run 'make mrproper' to fix it";             \
-			exit 1;                                            \
-		fi;                                                        \
-		test -e $$asmlink || rm include/asm;                       \
-	elif [ -d include/asm ]; then                                      \
-		echo "ERROR: $@ is a directory but a symlink was expected";\
-		exit 1;                                                    \
-	fi
+#	if [ -L include/asm ]; then                                        \
+#		asmlink=`readlink include/asm | cut -d '-' -f 2`;          \
+#		if [ "$$asmlink" != "$(SRCARCH)" ]; then                   \
+#			echo "ERROR: the symlink $@ points to asm-$$asmlink but asm-$(SRCARCH) was expected"; \
+#			echo "       set ARCH or save .config and run 'make mrproper' to fix it";             \
+#			exit 1;                                            \
+#		fi;                                                        \
+#		test -e $$asmlink || rm include/asm;                       \
+#	elif [ -d include/asm ]; then                                      \
+#		echo "ERROR: $@ is a directory but a symlink was expected";\
+#		exit 1;                                                    \
+#	fi
 endef
 
 # We create the target directory of the symlink if it does

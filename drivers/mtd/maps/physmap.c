@@ -136,6 +136,12 @@ static int physmap_flash_probe(struct platform_device *dev)
 
 		simple_map_init(&info->map[i]);
 
+#if defined(CONFIG_SYNO_MV_COMMON) || defined(CONFIG_SYNO_MPC85XX_COMMON)
+		/* To avoid mapping the whole flash in mtd0 */
+		iounmap(info->map[i].virt);
+		return 0;
+#endif
+
 		probe_type = rom_probe_types;
 		for (; info->mtd[i] == NULL && *probe_type != NULL; probe_type++)
 			info->mtd[i] = do_map_probe(*probe_type, &info->map[i]);
@@ -225,7 +231,11 @@ static struct physmap_flash_data physmap_flash_data = {
 	.width		= CONFIG_MTD_PHYSMAP_BANKWIDTH,
 };
 
+#if defined(CONFIG_SYNO_MV_COMMON) || defined(CONFIG_SYNO_MPC85XX_COMMON)
+struct resource physmap_flash_resource = {
+#else
 static struct resource physmap_flash_resource = {
+#endif
 	.start		= CONFIG_MTD_PHYSMAP_START,
 	.end		= CONFIG_MTD_PHYSMAP_START + CONFIG_MTD_PHYSMAP_LEN - 1,
 	.flags		= IORESOURCE_MEM,

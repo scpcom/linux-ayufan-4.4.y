@@ -32,6 +32,9 @@ void fat_fs_error(struct super_block *s, const char *fmt, ...)
 	va_end(args);
 	printk("\n");
 
+#ifdef MY_ABC_HERE
+	s->s_flags |= MS_CORRUPT;
+#endif
 	if (opts->errors == FAT_ERRORS_PANIC)
 		panic("    FAT fs panic from previous error\n");
 	else if (opts->errors == FAT_ERRORS_RO && !(s->s_flags & MS_RDONLY)) {

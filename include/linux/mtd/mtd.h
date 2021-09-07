@@ -344,4 +344,12 @@ static inline void mtd_erase_callback(struct erase_info *instr)
 
 #endif /* CONFIG_MTD_DEBUG */
 
+#ifdef MY_ABC_HERE
+/* written in synopart.c */
+int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned long length);
+
+/* written in redboot.c */
+int SYNOMTDModifyFisInfo(struct mtd_info *mtd, struct SYNO_MTD_FIS_INFO SynoMtdFisInfo);
+#endif /* MY_ABC_HERE */
+
 #endif /* __MTD_MTD_H__ */

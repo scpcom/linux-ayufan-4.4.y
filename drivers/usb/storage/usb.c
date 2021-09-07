@@ -845,6 +845,14 @@ static int usb_stor_scan_thread(void * __us)
 	complete_and_exit(&us->scanning_done, 0);
 }
 
+#ifdef MY_ABC_HERE
+extern int (*SynoUSBDeviceIsSATA)(void *);
+
+int SynoIsSATADisk(void *hostdata)
+{
+       return ((struct us_data *)hostdata)->is_ata_disk;
+}
+#endif
 
 /* First part of general USB mass-storage probing */
 int usb_stor_probe1(struct us_data **pus,
@@ -941,6 +949,18 @@ int usb_stor_probe2(struct us_data *us)
 		goto BadDevice;
 	}
 
+#ifdef MY_ABC_HERE
+	/*
+	 * if it is a flash disk, us->pusb_dev->product will looks like "USB Mass Storage Device"
+	 * if it is a SATA disk, us->pusb_dev->product will looks like "USB to Serial-ATA bridge"
+	 */
+	us->is_ata_disk = 0;
+	if(us->pusb_dev &&
+		us->pusb_dev->product &&
+		NULL != strstr(us->pusb_dev->product, "Serial-ATA")) {
+		us->is_ata_disk = 1;
+	}
+#endif
 	/* Start up the thread for delayed SCSI-device scanning */
 	th = kthread_create(usb_stor_scan_thread, us, "usb-stor-scan");
 	if (IS_ERR(th)) {
@@ -1039,6 +1059,11 @@ static int __init usb_stor_init(void)
 		printk(KERN_INFO "USB Mass Storage support registered.\n");
 		usb_usual_set_present(USB_US_TYPE_STOR);
 	}
+
+#ifdef MY_ABC_HERE
+       SynoUSBDeviceIsSATA = SynoIsSATADisk;
+#endif
+
 	return retval;
 }
 
@@ -1054,6 +1079,10 @@ static void __exit usb_stor_exit(void)
 	usb_deregister(&usb_storage_driver) ;
 
 	usb_usual_clear_present(USB_US_TYPE_STOR);
+
+#ifdef MY_ABC_HERE
+       SynoUSBDeviceIsSATA = NULL;
+#endif
 }
 
 module_init(usb_stor_init);

@@ -816,7 +816,15 @@ int ext3_get_blocks_handle(handle_t *handle, struct inode *inode,
 	int count = 0;
 	ext3_fsblk_t first_block = 0;
 
-
+#ifdef MY_ABC_HERE
+	if (!EXT3_SB(inode->i_sb)) {
+		/* if target force umount, we will get /proc/invalidfile (procfs).
+		 * there has no ext3 super block private data.  It will hit null
+		 * pointer later.
+		 */
+		return -EROFS;
+	}
+#endif
 	J_ASSERT(handle != NULL || create == 0);
 	depth = ext3_block_to_path(inode,iblock,offsets,&blocks_to_boundary);
 
@@ -1172,9 +1180,21 @@ static int ext3_write_begin(struct file *file, struct address_space *mapping,
 	struct page *page;
 	pgoff_t index;
 	unsigned from, to;
+#ifdef MY_ABC_HERE
+	// Add for mark_inode_dirty.
+	int needed_blocks;
+
+	if (flags & AOP_FLAG_RECVFILE) {
+		needed_blocks = ext3_writepage_trans_blocks(inode) + MAX_PAGES_PER_RECVFILE;
+	} else {
+		needed_blocks = ext3_writepage_trans_blocks(inode) + 1;
+	}
+#endif
+#ifndef MY_ABC_HERE
 	/* Reserve one block more for addition to orphan list in case
 	 * we allocate blocks but write fails for some reason */
 	int needed_blocks = ext3_writepage_trans_blocks(inode) + 1;
+#endif
 
 	index = pos >> PAGE_CACHE_SHIFT;
 	from = pos & (PAGE_CACHE_SIZE - 1);
@@ -1213,8 +1233,10 @@ write_begin_failed:
 		 * finishes. Do this only if ext3_can_truncate() agrees so
 		 * that orphan processing code is happy.
 		 */
+#ifndef MY_ABC_HERE
 		if (pos + len > inode->i_size && ext3_can_truncate(inode))
 			ext3_orphan_add(handle, inode);
+#endif
 		ext3_journal_stop(handle);
 		unlock_page(page);
 		page_cache_release(page);
@@ -1223,6 +1245,15 @@ write_begin_failed:
 	}
 	if (ret == -ENOSPC && ext3_should_retry_alloc(inode->i_sb, &retries))
 		goto retry;
+#ifdef MY_ABC_HERE
+	if (ret >= 0 && (flags & AOP_FLAG_RECVFILE)) {
+		if (pos + len > inode->i_size) {
+			// Don't need i_size_write because we hold i_mutex.
+			inode->i_size = pos + len;
+			ext3_mark_inode_dirty(handle, inode);
+		}
+	}
+#endif
 out:
 	return ret;
 }
@@ -1834,6 +1865,145 @@ static int ext3_journalled_set_page_dirty(struct page *page)
 	return __set_page_dirty_nobuffers(page);
 }
 
+#ifdef MY_ABC_HERE
+/* For commit_write() in data=journal mode */
+static int commit_write_fn(handle_t *handle, struct buffer_head *bh)
+{
+   if (!buffer_mapped(bh) || buffer_freed(bh))
+       return 0;
+   set_buffer_uptodate(bh);
+   return ext3_journal_dirty_metadata(handle, bh);
+}
+
+static int ext3_prepare_write(struct file *file, struct page *page,
+                 unsigned from, unsigned to)
+{
+   struct inode *inode = page->mapping->host;
+   int ret, needed_blocks = ext3_writepage_trans_blocks(inode);
+   handle_t *handle;
+   int retries = 0;
+
+retry:
+   handle = ext3_journal_start(inode, needed_blocks);
+   if (IS_ERR(handle)) {
+       ret = PTR_ERR(handle);
+       goto out;
+   }
+
+   if (test_opt(inode->i_sb, NOBH))
+       ret = nobh_prepare_write(page, from, to, ext3_get_block);
+   else
+       ret = block_prepare_write(page, from, to, ext3_get_block);
+   if (ret)
+       goto prepare_write_failed;
+
+   if (ext3_should_journal_data(inode)) {
+       ret = walk_page_buffers(handle, page_buffers(page),
+               from, to, NULL, do_journal_get_write_access);
+   }
+prepare_write_failed:
+   if (ret)
+       ext3_journal_stop(handle);
+   if (ret == -ENOSPC && ext3_should_retry_alloc(inode->i_sb, &retries))
+       goto retry;
+out:
+   return ret;
+}
+
+/*
+ * We need to pick up the new inode size which generic_commit_write gave us
+ * `file' can be NULL - eg, when called from page_symlink().
+ *
+ * ext3 never places buffers on inode->i_mapping->private_list.  metadata
+ * buffers are managed internally.
+ */
+
+static int ext3_ordered_commit_write(struct file *file, struct page *page,
+                unsigned from, unsigned to)
+{
+   handle_t *handle = ext3_journal_current_handle();
+   struct inode *inode = page->mapping->host;
+   int ret = 0, ret2;
+
+   ret = walk_page_buffers(handle, page_buffers(page),
+       from, to, NULL, ext3_journal_dirty_data);
+
+   if (ret == 0) {
+       /*
+        * generic_commit_write() will run mark_inode_dirty() if i_size
+        * changes.  So let's piggyback the i_disksize mark_inode_dirty
+        * into that.
+        */
+       loff_t new_i_size;
+
+       new_i_size = ((loff_t)page->index << PAGE_CACHE_SHIFT) + to;
+       if (new_i_size > EXT3_I(inode)->i_disksize)
+           EXT3_I(inode)->i_disksize = new_i_size;
+       ret = generic_commit_write(file, page, from, to);
+   }
+   ret2 = ext3_journal_stop(handle);
+   if (!ret)
+       ret = ret2;
+   return ret;
+}
+
+static int ext3_writeback_commit_write(struct file *file, struct page *page,
+                unsigned from, unsigned to)
+{
+   handle_t *handle = ext3_journal_current_handle();
+   struct inode *inode = page->mapping->host;
+   int ret = 0, ret2;
+   loff_t new_i_size;
+
+   new_i_size = ((loff_t)page->index << PAGE_CACHE_SHIFT) + to;
+   if (new_i_size > EXT3_I(inode)->i_disksize)
+       EXT3_I(inode)->i_disksize = new_i_size;
+
+   if (test_opt(inode->i_sb, NOBH))
+       ret = nobh_commit_write(file, page, from, to);
+   else
+       ret = generic_commit_write(file, page, from, to);
+
+   ret2 = ext3_journal_stop(handle);
+   if (!ret)
+       ret = ret2;
+   return ret;
+}
+
+static int ext3_journalled_commit_write(struct file *file,
+           struct page *page, unsigned from, unsigned to)
+{
+   handle_t *handle = ext3_journal_current_handle();
+   struct inode *inode = page->mapping->host;
+   int ret = 0, ret2;
+   int partial = 0;
+   loff_t pos;
+
+   /*
+    * Here we duplicate the generic_commit_write() functionality
+    */
+   pos = ((loff_t)page->index << PAGE_CACHE_SHIFT) + to;
+
+   ret = walk_page_buffers(handle, page_buffers(page), from,
+               to, &partial, commit_write_fn);
+   if (!partial)
+       SetPageUptodate(page);
+   if (pos > inode->i_size)
+       i_size_write(inode, pos);
+   EXT3_I(inode)->i_state |= EXT3_STATE_JDATA;
+   if (inode->i_size > EXT3_I(inode)->i_disksize) {
+       EXT3_I(inode)->i_disksize = inode->i_size;
+       ret2 = ext3_mark_inode_dirty(handle, inode);
+       if (!ret)
+           ret = ret2;
+   }
+   ret2 = ext3_journal_stop(handle);
+   if (!ret)
+       ret = ret2;
+   return ret;
+}
+#endif
+
 static const struct address_space_operations ext3_ordered_aops = {
 	.readpage		= ext3_readpage,
 	.readpages		= ext3_readpages,
@@ -1841,6 +2011,10 @@ static const struct address_space_operations ext3_ordered_aops = {
 	.sync_page		= block_sync_page,
 	.write_begin		= ext3_write_begin,
 	.write_end		= ext3_ordered_write_end,
+#ifdef MY_ABC_HERE
+	.prepare_write  = ext3_prepare_write,
+	.commit_write   = ext3_ordered_commit_write,
+#endif
 	.bmap			= ext3_bmap,
 	.invalidatepage		= ext3_invalidatepage,
 	.releasepage		= ext3_releasepage,
@@ -1857,6 +2031,10 @@ static const struct address_space_operations ext3_writeback_aops = {
 	.sync_page		= block_sync_page,
 	.write_begin		= ext3_write_begin,
 	.write_end		= ext3_writeback_write_end,
+#ifdef MY_ABC_HERE
+	.prepare_write  = ext3_prepare_write,
+	.commit_write   = ext3_writeback_commit_write,
+#endif
 	.bmap			= ext3_bmap,
 	.invalidatepage		= ext3_invalidatepage,
 	.releasepage		= ext3_releasepage,
@@ -1873,6 +2051,10 @@ static const struct address_space_operations ext3_journalled_aops = {
 	.sync_page		= block_sync_page,
 	.write_begin		= ext3_write_begin,
 	.write_end		= ext3_journalled_write_end,
+#ifdef MY_ABC_HERE
+	.prepare_write  = ext3_prepare_write,
+	.commit_write   = ext3_journalled_commit_write,
+#endif
 	.set_page_dirty		= ext3_journalled_set_page_dirty,
 	.bmap			= ext3_bmap,
 	.invalidatepage		= ext3_invalidatepage,
@@ -2799,6 +2981,13 @@ struct inode *ext3_iget(struct super_block *sb, unsigned long ino)
 	inode->i_ctime.tv_sec = (signed)le32_to_cpu(raw_inode->i_ctime);
 	inode->i_mtime.tv_sec = (signed)le32_to_cpu(raw_inode->i_mtime);
 	inode->i_atime.tv_nsec = inode->i_ctime.tv_nsec = inode->i_mtime.tv_nsec = 0;
+#ifdef MY_ABC_HERE
+	inode->i_CreateTime.tv_sec = (signed)le32_to_cpu(raw_inode->ext3_CreateTime);
+	inode->i_CreateTime.tv_nsec = 0;
+#endif
+#ifdef MY_ABC_HERE
+	inode->i_mode2 = le32_to_cpu(raw_inode->ext3_mode2);
+#endif
 
 	ei->i_state = 0;
 	ei->i_dir_start_lookup = 0;
@@ -2996,6 +3185,12 @@ again:
 	raw_inode->i_faddr = cpu_to_le32(ei->i_faddr);
 	raw_inode->i_frag = ei->i_frag_no;
 	raw_inode->i_fsize = ei->i_frag_size;
+#endif
+#ifdef MY_ABC_HERE
+	raw_inode->ext3_CreateTime = cpu_to_le32(inode->i_CreateTime.tv_sec);
+#endif
+#ifdef MY_ABC_HERE
+	raw_inode->ext3_mode2 = cpu_to_le32(inode->i_mode2);
 #endif
 	raw_inode->i_file_acl = cpu_to_le32(ei->i_file_acl);
 	if (!S_ISREG(inode->i_mode)) {
@@ -3328,7 +3523,7 @@ int ext3_mark_inode_dirty(handle_t *handle, struct inode *inode)
  * i_size has been changed by generic_commit_write() and we thus need
  * to include the updated inode in the current transaction.
  *
- * Also, vfs_dq_alloc_space() will always dirty the inode when blocks
+ * Also, dquot_alloc_space() will always dirty the inode when blocks
  * are allocated to the file.
  *
  * If the inode is marked synchronous, we don't honour that here - doing

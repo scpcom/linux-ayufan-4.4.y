@@ -145,8 +145,10 @@ static void config_item_cleanup(struct config_item * item)
 	struct config_item * parent = item->ci_parent;
 
 	pr_debug("config_item %s: cleaning up\n",config_item_name(item));
+#ifndef MY_ABC_HERE
 	if (item->ci_name != item->ci_namebuf)
 		kfree(item->ci_name);
+#endif
 	item->ci_name = NULL;
 	if (t && t->ct_item_ops && t->ct_item_ops->release)
 		t->ct_item_ops->release(item);

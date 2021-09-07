@@ -655,7 +655,11 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
 		do {
 			struct inode *inode;
 
+#ifdef MY_ABC_HERE
+			if (atomic_read(&dentry->d_count) != 0 && strcmp(dentry->d_name.name, "forceumount")) {
+#else
 			if (atomic_read(&dentry->d_count) != 0) {
+#endif
 				printk(KERN_ERR
 				       "BUG: Dentry %p{i=%lx,n=%s}"
 				       " still in use (%d)"
@@ -918,13 +922,58 @@ struct dentry *d_alloc(struct dentry * parent, const struct qstr *name)
 {
 	struct dentry *dentry;
 	char *dname;
+#ifdef MY_ABC_HERE
+	int upperlen;
+#endif
 
 	dentry = kmem_cache_alloc(dentry_cache, GFP_KERNEL);
 	if (!dentry)
 		return NULL;
 
+#ifdef MY_ABC_HERE
+	/* We will replace qstr.name to real name in real_lookup,
+	 * so we should get enough space when malloc.
+	 * We assume the length of uppercase name is the longest.
+	*/
+	if (parent && (DCACHE_CASELESS_COMPARE & parent->d_flags)) {
+		int needRecount = 0;
+		int len = name->len;
+		u_int8_t *from;
+
+		from = (u_int8_t *)name->name;
+		while (*from && len > 0) {
+			if (*from & 0x80 ) {
+				needRecount = 1;
+				break;
+			}
+			from++;
+			len--;
+		}
+		if (needRecount) {
+			unsigned char *UTF8DcacheDStrBuf;
+			UTF8DcacheDStrBuf = kmalloc(PATH_MAX, GFP_KERNEL);
+			if (!UTF8DcacheDStrBuf) {
+				return NULL;
+			}
+			upperlen = SYNOToUpper(UTF8DcacheDStrBuf, name->name,
+											  PATH_MAX - 1 , name->len, NULL);
+			if (upperlen < name->len) {
+				upperlen = name->len;
+			}
+			kfree(UTF8DcacheDStrBuf);
+		} else {
+			upperlen = name->len;
+		}
+	}else{
+		upperlen = name->len;
+	}
+
+	if (upperlen > DNAME_INLINE_LEN-1) {
+		dname = kmalloc(upperlen + 1, GFP_KERNEL);
+#else
 	if (name->len > DNAME_INLINE_LEN-1) {
 		dname = kmalloc(name->len + 1, GFP_KERNEL);
+#endif
 		if (!dname) {
 			kmem_cache_free(dentry_cache, dentry); 
 			return NULL;
@@ -1366,6 +1415,9 @@ struct dentry * __d_lookup(struct dentry * parent, struct qstr * name)
 	struct dentry *found = NULL;
 	struct hlist_node *node;
 	struct dentry *dentry;
+#ifdef MY_ABC_HERE
+	int lockFound = 0;
+#endif
 
 	rcu_read_lock();
 	
@@ -1399,12 +1451,43 @@ struct dentry * __d_lookup(struct dentry * parent, struct qstr * name)
 		if (parent->d_op && parent->d_op->d_compare) {
 			if (parent->d_op->d_compare(parent, qstr, name))
 				goto next;
+#ifdef MY_ABC_HERE
+			/* In caseless case, we should backup first dentry which be founded.
+			 * We backup it to "found". If all inode of founded dentries is NULL,
+			 * we can return it.
+			*/
+			if (DCACHE_CASELESS_COMPARE & parent->d_flags){
+				if (!dentry->d_inode) {
+					/* inode is null means file not in disk.
+					 * we return the dentry and don't do real_lookup.
+					*/
+					if (!found) {
+						atomic_inc(&dentry->d_count);
+						found = dentry;
+						lockFound++;
+						/* Continue here, so "found" is still locked.
+						* We will unlocked it before return or before replace "found".
+						*/
+						continue;
+					}
+					goto next;
+				}
+			}
+#endif
 		} else {
 			if (qstr->len != len)
 				goto next;
 			if (memcmp(qstr->name, str, len))
 				goto next;
 		}
+#ifdef MY_ABC_HERE
+		// make sure "found" is unlocked
+		if (lockFound) {
+			atomic_dec(&found->d_count);
+			spin_unlock(&found->d_lock);
+			lockFound = 0;
+		}
+#endif
 
 		atomic_inc(&dentry->d_count);
 		found = dentry;
@@ -1413,6 +1496,12 @@ struct dentry * __d_lookup(struct dentry * parent, struct qstr * name)
 next:
 		spin_unlock(&dentry->d_lock);
  	}
+#ifdef MY_ABC_HERE
+	// make sure "found" is unlocked
+	if (lockFound) {
+		spin_unlock(&found->d_lock);
+	}
+#endif
  	rcu_read_unlock();
 
  	return found;

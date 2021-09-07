@@ -166,7 +166,7 @@ config SPI_OMAP24XX
 
 config SPI_ORION
 	tristate "Orion SPI master (EXPERIMENTAL)"
-	depends on PLAT_ORION && EXPERIMENTAL
+	depends on (PLAT_ORION || ARCH_FEROCEON) && EXPERIMENTAL
 	help
 	  This enables using the SPI master controller on the Orion chips.
 

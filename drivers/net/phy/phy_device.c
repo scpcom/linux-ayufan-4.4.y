@@ -766,9 +766,19 @@ int genphy_read_status(struct phy_device *phydev)
 			
 			if (lpa & LPA_100FULL)
 				phydev->duplex = DUPLEX_FULL;
+#ifdef MY_DEF_HERE
+		} else if (lpa & (LPA_10FULL | LPA_10HALF)) {
+			phydev->speed = SPEED_10;
+			if (lpa & LPA_10FULL)
+				phydev->duplex = DUPLEX_FULL;
+		} else {
+			phydev->speed = 0;
+		}
+#else
 		} else
 			if (lpa & LPA_10FULL)
 				phydev->duplex = DUPLEX_FULL;
+#endif
 
 		if (phydev->duplex == DUPLEX_FULL){
 			phydev->pause = lpa & LPA_PAUSE_CAP ? 1 : 0;

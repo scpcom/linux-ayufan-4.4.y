@@ -428,6 +428,17 @@ int hibernation_restore(int platform_mode)
 	return error;
 }
 
+#ifdef MY_DEF_HERE
+void syno_schedule_power_on_prepare(void)
+{
+    if (!hibernation_ops)
+        return -ENOSYS;
+
+    hibernation_ops->begin();
+    hibernation_ops->end();
+}
+#endif
+
 /**
  *	hibernation_platform_enter - enter the hibernation state using the
  *	platform driver (if available)
@@ -626,7 +637,11 @@ int hibernate(void)
  *
  */
 
+#ifdef  MY_DEF_HERE
+int software_resume(void)
+#else
 static int software_resume(void)
+#endif
 {
 	int error;
 	unsigned int flags;
@@ -744,8 +759,10 @@ close_finish:
 	goto Finish;
 }
 
+#ifndef MY_DEF_HERE
 late_initcall(software_resume);
 
+#endif
 
 static const char * const hibernation_modes[] = {
 	[HIBERNATION_PLATFORM]	= "platform",

@@ -130,11 +130,80 @@
 
 #include "net-sysfs.h"
 
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#include <linux/synobios.h>
+extern char gszSynoHWVersion[16];
+#endif
+
 /* Instead of increasing this, you should create a hash table. */
 #define MAX_GRO_SKBS 8
 
 /* This should be increased if a protocol with a bigger head is added. */
 #define GRO_MAX_HEAD (MAX_HEADER + 128)
+
+#ifdef MY_ABC_HERE
+int (*funcSYNOSendNetLinkEvent)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNOSendNetLinkEvent);
+#endif
+
+#ifdef MY_ABC_HERE
+static unsigned int str_to_hex( char ch )
+{
+	if( (ch >= '0') && (ch <= '9') )
+		return( ch - '0' );
+
+	if( (ch >= 'a') && (ch <= 'f') )
+		return( ch - 'a' + 10 );
+
+	if( (ch >= 'A') && (ch <= 'F') )
+		return( ch - 'A' + 10 );
+
+	return 0;
+}
+
+void convert_str_to_mac( char *source , char *dest )
+{
+	dest[0] = (str_to_hex( source[0] ) << 4) + str_to_hex( source[1] );
+	dest[1] = (str_to_hex( source[2] ) << 4) + str_to_hex( source[3] );
+	dest[2] = (str_to_hex( source[4] ) << 4) + str_to_hex( source[5] );
+	dest[3] = (str_to_hex( source[6] ) << 4) + str_to_hex( source[7] );
+	dest[4] = (str_to_hex( source[8] ) << 4) + str_to_hex( source[9] );
+	dest[5] = (str_to_hex( source[10] ) << 4) + str_to_hex( source[11] );
+}
+
+#define SYNO_VENDOR_MAC_SUCCESS     0
+#define SYNO_VENDOR_MAC_EMPTY       1
+#define SYNO_VENDOR_MAC_FAIL        2
+int syno_get_dev_vendor_mac(const char *szDev, char *szMac)
+{
+	extern unsigned char grgbLanMac[2][16];
+	int err = SYNO_VENDOR_MAC_FAIL;
+
+	if (!szMac || !szDev)
+		goto ERR;
+
+	if (!memcmp(szDev, "eth0", 4)) {
+		if (!strcmp(grgbLanMac[0], "")) {
+			err = SYNO_VENDOR_MAC_EMPTY;
+			goto ERR;
+		}
+		convert_str_to_mac(grgbLanMac[0], szMac);
+	} else if ( !memcmp(szDev, "eth1", 4) ) {
+		if (!strcmp(grgbLanMac[1], "")) {
+			err = SYNO_VENDOR_MAC_EMPTY;
+			goto ERR;
+		}
+		convert_str_to_mac(grgbLanMac[1], szMac);
+	} else {
+		goto ERR;
+	}
+
+	err = SYNO_VENDOR_MAC_SUCCESS;
+ERR:
+	return err;
+}
+EXPORT_SYMBOL(syno_get_dev_vendor_mac);
+#endif
 
 /*
  *	The list of packet types we will receive (as opposed to discard)
@@ -1084,8 +1153,59 @@ int dev_open(struct net_device *dev)
 	if (ret)
 		return ret;
 
+#ifdef MY_ABC_HERE
+	{
+		extern unsigned char grgbLanMac[2][16];
+		struct ifreq ifr;
+		unsigned char rgbLanMac[6];
+		unsigned char szMac[MAX_ADDR_LEN];
+		int changeMac = 0;
+
+		memset(rgbLanMac, 0, sizeof(rgbLanMac));
+		memset(szMac, 0, sizeof(szMac));
+
+		changeMac = syno_get_dev_vendor_mac(dev->name, szMac);
+		if ( SYNO_VENDOR_MAC_EMPTY == changeMac){
+			unsigned char szRandomMac[MAX_ADDR_LEN];
+
+			get_random_bytes(rgbLanMac, 6);
+			rgbLanMac[0] = 0x0;
+			snprintf(szRandomMac, sizeof(szRandomMac),
+				"%02x%02x%02x%02x%02x%02x",
+				rgbLanMac[0],
+				rgbLanMac[1],
+				rgbLanMac[2],
+				rgbLanMac[3],
+				rgbLanMac[4],
+				rgbLanMac[5]);
+			printk("Random MAC address "
+				"%02x:%02x:%02x:%02x:%02x:%02x\n",
+				rgbLanMac[0],
+				rgbLanMac[1],
+				rgbLanMac[2],
+				rgbLanMac[3],
+				rgbLanMac[4],
+				rgbLanMac[5]);
+			convert_str_to_mac(szRandomMac, szMac);
+		}
+
+		/* bonding will set eth0 mac addr to dev hwaddr before dev_open
+		 * if we set bonding and write hwaddr here, we will rewrite dev hwaddr
+		 * and bonding will not work correctly.
+		 * So, if this dev had added to slave, we should not write hwaddr here.
+		 */
+		if (!(dev->flags & IFF_SLAVE)) {
+			if ( SYNO_VENDOR_MAC_FAIL != changeMac ) {
+				memcpy(ifr.ifr_ifru.ifru_hwaddr.sa_data, szMac, ETH_ALEN);
+				ifr.ifr_ifru.ifru_hwaddr.sa_family = ARPHRD_ETHER;
+				dev_set_mac_address(dev, &ifr.ifr_ifru.ifru_hwaddr);
+			}
+		}
+	}
+#endif
+
 	/*
-	 *	Call device private open method
+	 *  Call device private open method
 	 */
 	set_bit(__LINK_STATE_START, &dev->state);
 
@@ -4942,6 +5062,17 @@ int register_netdev(struct net_device *dev)
 		err = dev_alloc_name(dev, dev->name);
 		if (err < 0)
 			goto out;
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+		if ( 0 == strncmp(gszSynoHWVersion, HW_DS508, strlen(HW_DS508)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS1010p, strlen(HW_DS1010p)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS1511p, strlen(HW_DS1511p))) {
+			static int swapped = 0;
+			if ( swapped == 0 && !strcmp(dev->name, "eth0") ) {
+				snprintf(dev->name, sizeof(dev->name), "eth1");
+				swapped = 1;
+			}
+		}
+#endif
 	}
 
 	err = register_netdevice(dev);

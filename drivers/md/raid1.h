@@ -92,6 +92,10 @@ struct r1bio_s {
 
 	struct list_head	retry_list;
 	struct bitmap_update	*bitmap_update;
+#ifdef MY_ABC_HERE
+	unsigned int read_failed;
+	int orig_disk_idx;
+#endif
 	/*
 	 * if the IO is in WRITE direction, then multiple bios are used.
 	 * We choose the number when they are allocated.

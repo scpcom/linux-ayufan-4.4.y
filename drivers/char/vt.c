@@ -2890,8 +2890,10 @@ static int __init con_init(void)
 
 	release_console_sem();
 
+#ifndef MY_DEF_HERE
 #ifdef CONFIG_VT_CONSOLE
 	register_console(&vt_console_driver);
+#endif
 #endif
 	return 0;
 }

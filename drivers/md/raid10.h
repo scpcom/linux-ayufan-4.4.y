@@ -112,4 +112,8 @@ struct r10bio_s {
 #define	R10BIO_IsSync	1
 #define	R10BIO_IsRecover 2
 #define	R10BIO_Degraded 3
+#ifdef MY_ABC_HERE
+#define R10BIO_FIX_READ_ERROR 4
+#endif /* MY_ABC_HERE */
+
 #endif

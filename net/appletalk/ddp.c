@@ -667,8 +667,10 @@ static int atif_ioctl(int cmd, void __user *arg)
 	struct sockaddr_at *sa;
 	struct net_device *dev;
 	struct atalk_iface *atif;
+#ifndef MY_ABC_HERE
 	int ct;
 	int limit;
+#endif
 	struct rtentry rtdef;
 	int add_route;
 
@@ -761,6 +763,11 @@ static int atif_ioctl(int cmd, void __user *arg)
 				rtdef.rt_flags |= RTF_HOST;
 
 			/* Routerless initial state */
+#ifdef MY_ABC_HERE
+			sa->sat_addr.s_net = atif->address.s_net;
+			atrtr_create(&rtdef, dev);
+			atrtr_set_default(dev);
+#else
 			if (nr->nr_firstnet == htons(0) &&
 			    nr->nr_lastnet == htons(0xFFFE)) {
 				sa->sat_addr.s_net = atif->address.s_net;
@@ -780,6 +787,7 @@ static int atif_ioctl(int cmd, void __user *arg)
 						atrtr_create(&rtdef, dev);
 					}
 			}
+#endif
 			dev_mc_add(dev, aarp_mcast, 6, 1);
 			return 0;
 

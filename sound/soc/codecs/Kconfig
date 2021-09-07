@@ -111,6 +111,11 @@ config SND_SOC_CS4270_VD33_ERRATA
 config SND_SOC_CX20442
 	tristate
 
+# Cirrus Logic CS42L51 Codec
+config SND_SOC_CS42L51
+	tristate
+	depends on SND_SOC
+
 config SND_SOC_L3
        tristate
 

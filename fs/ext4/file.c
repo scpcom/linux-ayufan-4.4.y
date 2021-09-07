@@ -28,6 +28,10 @@
 #include "xattr.h"
 #include "acl.h"
 
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+#include "synoacl_int.h"
+#endif
+
 /*
  * Called when an inode is released. Note that this is different
  * from ext4_file_open: open gets called at every open, but release
@@ -35,9 +39,9 @@
  */
 static int ext4_release_file(struct inode *inode, struct file *filp)
 {
-	if (EXT4_I(inode)->i_state & EXT4_STATE_DA_ALLOC_CLOSE) {
+	if (ext4_test_inode_state(inode, EXT4_STATE_DA_ALLOC_CLOSE)) {
 		ext4_alloc_da_blocks(inode);
-		EXT4_I(inode)->i_state &= ~EXT4_STATE_DA_ALLOC_CLOSE;
+		ext4_clear_inode_state(inode, EXT4_STATE_DA_ALLOC_CLOSE);
 	}
 	/* if we are the last writer on the inode, drop the block reservation */
 	if ((filp->f_mode & FMODE_WRITE) &&
@@ -65,7 +69,7 @@ ext4_file_write(struct kiocb *iocb, const struct iovec *iov,
 	 * is smaller than s_maxbytes, which is for extent-mapped files.
 	 */
 
-	if (!(EXT4_I(inode)->i_flags & EXT4_EXTENTS_FL)) {
+	if (!(ext4_test_inode_flag(inode, EXT4_INODE_EXTENTS))) {
 		struct ext4_sb_info *sbi = EXT4_SB(inode->i_sb);
 		size_t length = iov_length(iov, nr_segs);
 
@@ -157,6 +161,14 @@ const struct inode_operations ext4_file_inode_operations = {
 	.getxattr	= generic_getxattr,
 	.listxattr	= ext4_listxattr,
 	.removexattr	= generic_removexattr,
+#endif
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+	.syno_acl_get = ext4_mod_get_syno_acl_inherit,
+	.syno_access = ext4_mod_syno_access,
+	.syno_permission = ext4_mod_syno_permission,
+	.syno_exec_permission = ext4_mod_syno_exec_permission,
+	.syno_permission_get = ext4_mod_get_syno_permission,
+	.syno_inode_change_ok = ext4_mod_syno_inode_change_ok,
 #endif
 	.check_acl	= ext4_check_acl,
 	.fallocate	= ext4_fallocate,

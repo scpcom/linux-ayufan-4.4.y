@@ -28,6 +28,7 @@ obj-$(CONFIG_USB_FSL_QE)	+= fsl_qe_udc.o
 obj-$(CONFIG_USB_CI13XXX)	+= ci13xxx_udc.o
 obj-$(CONFIG_USB_S3C_HSOTG)	+= s3c-hsotg.o
 obj-$(CONFIG_USB_LANGWELL)	+= langwell_udc.o
+obj-$(CONFIG_USB_MRVL)       	+= ../../../arch/arm/plat-feroceon/mv_drivers_lsp/mv_udc/
 
 #
 # USB gadget drivers

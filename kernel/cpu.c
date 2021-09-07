@@ -246,6 +246,10 @@ static int __ref _cpu_down(unsigned int cpu, int tasks_frozen)
 	/* This actually kills the CPU. */
 	__cpu_die(cpu);
 
+#ifdef MY_DEF_HERE 
+	msleep(500);
+#endif
+
 	/* CPU is completely dead: tell everyone.  Too late to complain. */
 	if (raw_notifier_call_chain(&cpu_chain, CPU_DEAD | mod,
 				    hcpu) == NOTIFY_BAD)

@@ -1337,6 +1337,9 @@ found:
 			fat_fs_error(sb, "Odd directory size");
 			dir->i_size = (dir->i_size + sbi->cluster_size - 1)
 				& ~((loff_t)sbi->cluster_size - 1);
+#ifdef MY_ABC_HERE
+			err = -ECORRUPT;
+#endif
 		}
 		dir->i_size += nr_cluster << sbi->cluster_bits;
 		MSDOS_I(dir)->mmu_private += nr_cluster << sbi->cluster_bits;

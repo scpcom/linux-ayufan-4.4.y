@@ -13,7 +13,32 @@ extern char * strrchr(const char * s, int c);
 extern char * strchr(const char * s, int c);
 
 #define __HAVE_ARCH_MEMCPY
+
+#ifdef CONFIG_MV_XOR_MEMCOPY
+extern void * xor_memcpy(void *, const void*, __kernel_size_t);
+extern void * asm_memcpy(void *, const void*, __kernel_size_t);
+
+static inline void* memcpy(void * dest, const void * src, size_t n)
+{
+	if (n < CONFIG_MV_XOR_MEMCOPY_THRESHOLD)
+		return asm_memcpy(dest, src, n);
+	return xor_memcpy(dest, src, n);
+}
+
+#elif defined (CONFIG_MV_IDMA_MEMCOPY)
+
+extern void * dma_memcpy(void *, const void*, __kernel_size_t);
+extern void * asm_memcpy(void *, const void *, __kernel_size_t);
+
+static inline void* memcpy(void * dest, const void * src, size_t n)
+{
+	if (n < CONFIG_MV_IDMA_MEMCOPY_THRESHOLD)
+		return asm_memcpy(dest, src, n);
+	return dma_memcpy(dest, src, n);
+}
+#else
 extern void * memcpy(void *, const void *, __kernel_size_t);
+#endif
 
 #define __HAVE_ARCH_MEMMOVE
 extern void * memmove(void *, const void *, __kernel_size_t);

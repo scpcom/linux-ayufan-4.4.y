@@ -36,6 +36,9 @@
 #include <linux/workqueue.h>
 #include <scsi/scsi_host.h>
 #include <linux/acpi.h>
+#ifdef MY_ABC_HERE
+#include <linux/synosata.h>
+#endif
 #include <linux/cdrom.h>
 
 /*
@@ -228,6 +231,16 @@ enum {
 
 	ATA_PFLAG_PIO32		= (1 << 20),  /* 32bit PIO */
 	ATA_PFLAG_PIO32CHANGE	= (1 << 21),  /* 32bit PIO can be turned on/off */
+#ifdef MY_ABC_HERE
+	ATA_PFLAG_SYNC_SCSI_DEVICE = (1 << 22),
+#endif
+#ifdef MY_ABC_HERE
+	ATA_PFLAG_PMP_DISCONNECT = (1 << 23),
+	ATA_PFLAG_PMP_CONNECT = (1 << 24),
+#endif
+#ifdef MY_ABC_HERE
+	ATA_PFLAG_PMP_PMOFF			= (1 << 25),
+#endif
 
 	/* struct ata_queued_cmd flags */
 	ATA_QCFLAG_ACTIVE	= (1 << 0), /* cmd not yet ack'd to scsi lyer */
@@ -246,6 +259,9 @@ enum {
 	ATA_HOST_SIMPLEX	= (1 << 0),	/* Host is simplex, one DMA channel per host only */
 	ATA_HOST_STARTED	= (1 << 1),	/* Host started */
 	ATA_HOST_PARALLEL_SCAN	= (1 << 2),	/* Ports on this host can be scanned in parallel */
+#ifdef MY_ABC_HERE
+	ATA_HOST_LLD_SPINUP_DELAY	= (1 << 3),	/* host spinup delay in LLD */
+#endif
 
 	/* bits 24:31 of host->flags are reserved for LLD specific flags */
 
@@ -328,6 +344,9 @@ enum {
 	ATA_EH_HARDRESET	= (1 << 2), /* meaningful only in ->prereset */
 	ATA_EH_RESET		= ATA_EH_SOFTRESET | ATA_EH_HARDRESET,
 	ATA_EH_ENABLE_LINK	= (1 << 3),
+#ifdef MY_ABC_HERE
+	ATA_EH_SYNO_PWON	= (1 << 4),
+#endif
 	ATA_EH_LPM		= (1 << 4),  /* link power management action */
 	ATA_EH_PARK		= (1 << 5), /* unload heads and stop I/O */
 
@@ -360,15 +379,27 @@ enum {
 	/* how hard are we gonna try to probe/recover devices */
 	ATA_PROBE_MAX_TRIES	= 3,
 	ATA_EH_DEV_TRIES	= 3,
+#ifdef MY_ABC_HERE
+	ATA_EH_PMP_TRIES	= 3,
+#else
 	ATA_EH_PMP_TRIES	= 5,
+#endif
+#ifdef MY_ABC_HERE
+	ATA_EH_PMP_LINK_TRIES	= 8,
+#else
 	ATA_EH_PMP_LINK_TRIES	= 3,
+#endif
 
 	SATA_PMP_RW_TIMEOUT	= 3000,		/* PMP read/write timeout */
 
 	/* This should match the actual table size of
 	 * ata_eh_cmd_timeout_table in libata-eh.c.
 	 */
+#ifdef MY_ABC_HERE
+	ATA_EH_CMD_TIMEOUT_TABLE_SIZE = 6,
+#else
 	ATA_EH_CMD_TIMEOUT_TABLE_SIZE = 5,
+#endif
 
 	/* Horkage types. May be set by libata or controller on drives
 	   (some horkage may be drive/controller pair dependant */
@@ -592,6 +623,10 @@ struct ata_ering {
 	struct ata_ering_entry	ring[ATA_ERING_SIZE];
 };
 
+#ifdef MY_ABC_HERE
+typedef unsigned int (*ata_xlat_func_t)(struct ata_queued_cmd *qc);
+#endif
+
 struct ata_device {
 	struct ata_link		*link;
 	unsigned int		devno;		/* 0 or 1 */
@@ -603,6 +638,20 @@ struct ata_device {
 	union acpi_object	*gtf_cache;
 	unsigned int		gtf_filter;
 #endif
+#ifdef MY_ABC_HERE
+	/* be careful the ATA_DEVICE_CLEAR_OFFSET when porting this */
+	unsigned long lastcmd_when;
+	unsigned long chkpower_pending;
+
+	/* bit definitions */
+	#define CHKPOWER_CHECKING 0
+	#define CHKPOWER_WAKING 1
+	#define CHKPOWER_TIMEOUT 2
+
+	struct timer_list	rstimer;
+	struct list_head	pendinglh;
+	int					must_checkpw;
+#endif
 	/* n_sector is CLEAR_BEGIN, read comment above CLEAR_BEGIN */
 	u64			n_sectors;	/* size of device, if ATA */
 	u64			n_native_sectors; /* native size, if ATA */
@@ -612,6 +661,9 @@ struct ata_device {
 	u8			pio_mode;
 	u8			dma_mode;
 	u8			xfer_mode;
+#ifdef MY_ABC_HERE
+	u8 is_ssd;
+#endif
 	unsigned int		xfer_shift;	/* ATA_SHIFT_xxx */
 
 	unsigned int		multi_count;	/* sectors count for
@@ -778,6 +830,10 @@ struct ata_port {
 #endif
 	/* owned by EH */
 	u8			sector_buf[ATA_SECT_SIZE] ____cacheline_aligned;
+#ifdef MY_ABC_HERE
+	/* Synology port multiplier unique. greater than 0 is our expansion box. */
+	u8				PMSynoUnique;
+#endif
 };
 
 /* The following initializer overrides a method to NULL whether one of
@@ -911,6 +967,11 @@ struct ata_timing {
 /*
  * Core layer - drivers/ata/libata-core.c
  */
+#ifdef MY_ABC_HERE
+extern struct device_attribute dev_attr_syno_pm_gpio;
+extern struct device_attribute dev_attr_syno_pm_info;
+#endif
+
 extern const unsigned long sata_deb_timing_normal[];
 extern const unsigned long sata_deb_timing_hotplug[];
 extern const unsigned long sata_deb_timing_long[];
@@ -1049,6 +1110,11 @@ extern void ata_timing_merge(const struct ata_timing *,
 			     unsigned int);
 extern u8 ata_timing_cycle2mode(unsigned int xfer_shift, int cycle);
 
+#ifdef MY_ABC_HERE
+extern void syno_ata_info_print(struct ata_port *ap);
+#endif
+
+
 /* PCI */
 #ifdef CONFIG_PCI
 struct pci_dev;
@@ -1139,6 +1205,26 @@ extern void ata_do_eh(struct ata_port *ap, ata_prereset_fn_t prereset,
 extern void ata_std_error_handler(struct ata_port *ap);
 
 /*
+ * Syno function
+ */
+#ifdef MY_ABC_HERE
+extern unsigned int syno_sata_pmp_read_gpio(struct ata_link *, SYNO_PM_PKG *);
+extern unsigned int syno_sata_pmp_write_gpio(struct ata_link *, SYNO_PM_PKG *);
+extern u8 syno_is_synology_pm(struct ata_port *ap);
+extern u32 syno_pmp_ports_num(struct ata_port *ap);
+extern void syno_pm_device_info_set(struct ata_port *ap, u8 rw, SYNO_PM_PKG *pm_pkg);
+extern void syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo);
+#endif
+
+#ifdef MY_ABC_HERE
+int syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn);
+#endif
+
+#ifdef MY_ABC_HERE
+extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun);
+#endif
+
+/*
  * Base operations to inherit from and initializers for sht
  *
  * Operations
@@ -1163,6 +1249,24 @@ extern const struct ata_port_operations ata_base_port_ops;
 extern const struct ata_port_operations sata_port_ops;
 extern struct device_attribute *ata_common_sdev_attrs[];
 
+#ifdef MY_ABC_HERE
+#define SYNO_SATA_POWER_CTL_MACRO .syno_host_power_ctl = syno_libata_port_power_ctl,
+#else
+#define SYNO_SATA_POWER_CTL_MACRO
+#endif
+
+#ifdef MY_ABC_HERE
+#define	SYNO_FIXED_DISK_NAME_MACRO .syno_index_get = syno_libata_index_get,
+#else
+#define	SYNO_FIXED_DISK_NAME_MACRO
+#endif 
+
+#ifdef MY_ABC_HERE
+#define	SYNO_DISK_HIBERNATION_MACRO .syno_port_type = PORT_TYPE_SATA,
+#else	
+#define SYNO_DISK_HIBERNATION_MACRO
+#endif
+
 #define ATA_BASE_SHT(drv_name)					\
 	.module			= THIS_MODULE,			\
 	.name			= drv_name,			\
@@ -1177,6 +1281,9 @@ extern struct device_attribute *ata_common_sdev_attrs[];
 	.slave_configure	= ata_scsi_slave_config,	\
 	.slave_destroy		= ata_scsi_slave_destroy,	\
 	.bios_param		= ata_std_bios_param,		\
+	SYNO_SATA_POWER_CTL_MACRO \
+	SYNO_FIXED_DISK_NAME_MACRO \
+	SYNO_DISK_HIBERNATION_MACRO \
 	.sdev_attrs		= ata_common_sdev_attrs
 
 #define ATA_NCQ_SHT(drv_name)					\

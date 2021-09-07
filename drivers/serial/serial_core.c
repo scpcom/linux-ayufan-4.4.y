@@ -1303,6 +1303,11 @@ static void uart_close(struct tty_struct *tty, struct file *filp)
 	if (port->count)
 		goto done;
 
+#ifdef MY_DEF_HERE
+        if (0 == strcmp(tty->name, "ttyS1"))
+                goto done;
+#endif
+
 	/*
 	 * Now we wait for the transmit buffer to clear; and we notify
 	 * the line discipline to only process XON/XOFF characters by

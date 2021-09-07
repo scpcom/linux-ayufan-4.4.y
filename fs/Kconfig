@@ -30,6 +30,13 @@ config FS_MBCACHE
 source "fs/reiserfs/Kconfig"
 source "fs/jfs/Kconfig"
 
+config FS_SYNO_ACL
+# Synology ACL utility routines (for now, only ext4)
+# ACL depends on SYNO_ARCHIVE_BIT
+	bool
+	default n
+
+
 config FS_POSIX_ACL
 # Posix ACL utility routines (for now, only ext2/ext3/jfs/reiserfs/nfs4)
 #
@@ -188,6 +195,9 @@ source "fs/romfs/Kconfig"
 source "fs/sysv/Kconfig"
 source "fs/ufs/Kconfig"
 source "fs/exofs/Kconfig"
+# SYNO
+source "fs/aufs/Kconfig"
+# SYNO
 
 endif # MISC_FILESYSTEMS
 

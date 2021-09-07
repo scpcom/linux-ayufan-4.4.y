@@ -129,6 +129,12 @@ int inode_setattr(struct inode * inode, struct iattr * attr)
 	if (ia_valid & ATTR_CTIME)
 		inode->i_ctime = timespec_trunc(attr->ia_ctime,
 						inode->i_sb->s_time_gran);
+#ifdef MY_ABC_HERE
+	if (ia_valid & ATTR_CREATE_TIME) {
+		inode->i_CreateTime = timespec_trunc(attr->ia_ctime,
+						inode->i_sb->s_time_gran);
+	}
+#endif
 	if (ia_valid & ATTR_MODE) {
 		umode_t mode = attr->ia_mode;
 

@@ -42,6 +42,11 @@
 #include <linux/mii.h>
 #include <asm/irq.h>
 
+#ifdef MY_ABC_HERE
+#include <linux/synobios.h>
+extern int (*funcSYNOSendNetLinkEvent)(unsigned int type, unsigned int ifaceno);
+#endif
+
 #include "skge.h"
 
 #define DRV_NAME		"skge"
@@ -756,7 +761,11 @@ static void skge_led(struct skge_port *skge, enum led_mode mode)
 		case LED_MODE_ON:
 			gm_phy_write(hw, port, PHY_MARV_LED_CTRL,
 				     PHY_M_LED_PULS_DUR(PULS_170MS) |
+#ifdef MY_ABC_HERE
+				     PHY_M_LED_BLINK_RT(BLINK_340MS) |
+#else
 				     PHY_M_LED_BLINK_RT(BLINK_84MS) |
+#endif
 				     PHY_M_LEDC_TX_CTRL |
 				     PHY_M_LEDC_DP_CTRL);
 
@@ -1071,6 +1080,11 @@ static void skge_link_up(struct skge_port *skge)
 		    LED_BLK_OFF|LED_SYNC_OFF|LED_ON);
 
 	netif_carrier_on(skge->netdev);
+#ifdef MY_ABC_HERE
+	if (funcSYNOSendNetLinkEvent) {
+		funcSYNOSendNetLinkEvent(NET_LINK, skge->netdev->ifindex);
+	}
+#endif
 	netif_wake_queue(skge->netdev);
 
 	if (netif_msg_link(skge)) {
@@ -1086,6 +1100,11 @@ static void skge_link_down(struct skge_port *skge)
 {
 	skge_write8(skge->hw, SK_REG(skge->port, LNK_LED_REG), LED_OFF);
 	netif_carrier_off(skge->netdev);
+#ifdef MY_ABC_HERE
+	if (funcSYNOSendNetLinkEvent) {
+		funcSYNOSendNetLinkEvent(NET_NOLINK, skge->netdev->ifindex);
+	}
+#endif
 	netif_stop_queue(skge->netdev);
 
 	if (netif_msg_link(skge))
@@ -2786,8 +2805,13 @@ static netdev_tx_t skge_xmit_frame(struct sk_buff *skb,
 			control = BMU_UDP_CHECK;
 
 		td->csum_offs = 0;
+#ifdef MY_ABC_HERE
+		td->csum_start = offset + skb->csum_offset;
+		td->csum_write = offset;
+#else
 		td->csum_start = offset;
 		td->csum_write = offset + skb->csum_offset;
+#endif
 	} else
 		control = BMU_CHECK;
 
@@ -3102,7 +3126,11 @@ static struct sk_buff *skge_rx_get(struct net_device *dev,
 
 	skb_put(skb, len);
 	if (skge->rx_csum) {
+#ifdef MY_ABC_HERE
+		skb->csum = le16_to_cpu(csum);
+#else
 		skb->csum = csum;
+#endif
 		skb->ip_summed = CHECKSUM_COMPLETE;
 	}
 
@@ -3870,9 +3898,11 @@ static struct net_device *skge_devinit(struct skge_hw *hw, int port,
 		skge->rx_csum = 1;
 	}
 
+#ifndef MY_ABC_HERE
 	/* read the mac address */
 	memcpy_fromio(dev->dev_addr, hw->regs + B2_MAC_1 + port*8, ETH_ALEN);
 	memcpy(dev->perm_addr, dev->dev_addr, dev->addr_len);
+#endif
 
 	/* device is off until link detection */
 	netif_carrier_off(dev);

@@ -260,14 +260,24 @@ static int ea_write(struct inode *ip, struct jfs_ea_list *ealist, int size,
 	nblocks = (size + (sb->s_blocksize - 1)) >> sb->s_blocksize_bits;
 
 	/* Allocate new blocks to quota. */
+#ifdef MY_ABC_HERE
+	rc = dquot_alloc_block(ip, nblocks);
+	if (rc)
+		return rc;
+#else
 	if (vfs_dq_alloc_block(ip, nblocks)) {
 		return -EDQUOT;
 	}
+#endif
 
 	rc = dbAlloc(ip, INOHINT(ip), nblocks, &blkno);
 	if (rc) {
 		/*Rollback quota allocation. */
+#ifdef MY_ABC_HERE
+		dquot_free_block(ip, nblocks);
+#else
 		vfs_dq_free_block(ip, nblocks);
+#endif
 		return rc;
 	}
 
@@ -332,7 +342,11 @@ static int ea_write(struct inode *ip, struct jfs_ea_list *ealist, int size,
 
       failed:
 	/* Rollback quota allocation. */
+#ifdef MY_ABC_HERE
+	dquot_free_block(ip, nblocks);
+#else
 	vfs_dq_free_block(ip, nblocks);
+#endif
 
 	dbFree(ip, blkno, nblocks);
 	return rc;
@@ -538,7 +552,12 @@ static int ea_get(struct inode *inode, struct ea_buffer *ea_buf, int min_size)
 
 	if (blocks_needed > current_blocks) {
 		/* Allocate new blocks to quota. */
+#ifdef MY_ABC_HERE
+		rc = dquot_alloc_block(inode, blocks_needed);
+		if (rc)
+#else
 		if (vfs_dq_alloc_block(inode, blocks_needed))
+#endif
 			return -EDQUOT;
 
 		quota_allocation = blocks_needed;
@@ -602,7 +621,11 @@ static int ea_get(struct inode *inode, struct ea_buffer *ea_buf, int min_size)
       clean_up:
 	/* Rollback quota allocation */
 	if (quota_allocation)
+#ifdef MY_ABC_HERE
+		dquot_free_block(inode, quota_allocation);
+#else
 		vfs_dq_free_block(inode, quota_allocation);
+#endif
 
 	return (rc);
 }
@@ -677,7 +700,11 @@ static int ea_put(tid_t tid, struct inode *inode, struct ea_buffer *ea_buf,
 
 	/* If old blocks exist, they must be removed from quota allocation. */
 	if (old_blocks)
+#ifdef MY_ABC_HERE
+		dquot_free_block(inode, old_blocks);
+#else
 		vfs_dq_free_block(inode, old_blocks);
+#endif
 
 	inode->i_ctime = CURRENT_TIME;
 

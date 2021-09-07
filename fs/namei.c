@@ -35,7 +35,416 @@
 #include <linux/fs_struct.h>
 #include <asm/uaccess.h>
 
+#ifdef CONFIG_FS_SYNO_ACL
+#include "synoacl_int.h"
+#endif
+
 #define ACC_MODE(x) ("\000\004\002\006"[(x)&O_ACCMODE])
+
+#ifdef MY_ABC_HERE
+int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n);
+int SYNOUnicodeUTF8StrToUTF16Str(u_int16_t *pwcs, const u_int8_t *s, int n);
+int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen);
+int SYNOUnicodeUTF16StrToUTF8Str(u_int8_t *s, const u_int16_t *pwcs, int maxlen);
+u_int16_t *SYNOUnicodeGenerateDefaultUpcaseTable(void);
+int SYNOUnicodeUTF16Strcmp(u_int16_t *utf16str1,u_int16_t *utf16str2, int len,u_int16_t *upcasetable);
+u_int16_t *DefUpcaseTable(void);
+void SYNOUnicodeTblAdd(u_int16_t *UpcaseTbl);
+u_int16_t *SYNOUnicodeTblGet(char *szLocaleName);
+
+/*
+ * Sample implementation from Unicode home page.
+ * http://www.stonehand.com/unicode/standard/fss-utf.html
+ */
+struct utf8_table {
+	int     cmask;
+	int     cval;
+	int     shift;
+	long    lmask;
+	long    lval;
+};
+
+static struct utf8_table utf8_table[] =
+{
+    {0x80,  0x00,   0*6,    0x7F,           0,         /* 1 byte sequence */},
+    {0xE0,  0xC0,   1*6,    0x7FF,          0x80,      /* 2 byte sequence */},
+    {0xF0,  0xE0,   2*6,    0xFFFF,         0x800,     /* 3 byte sequence */},
+    {0xF8,  0xF0,   3*6,    0x1FFFFF,       0x10000,   /* 4 byte sequence */},
+    {0xFC,  0xF8,   4*6,    0x3FFFFFF,      0x200000,  /* 5 byte sequence */},
+    {0xFE,  0xFC,   5*6,    0x7FFFFFFF,     0x4000000, /* 6 byte sequence */},
+    {0,						       /* end of table    */}
+};
+
+int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n)
+{
+	long l;
+	int c0, c, nc;
+	struct utf8_table *t;
+
+	nc = 0;
+	c0 = *s;
+	l = c0;
+	for (t = utf8_table; t->cmask; t++) {
+		nc++;
+		if ((c0 & t->cmask) == t->cval) {
+			l &= t->lmask;
+			if (l < t->lval)
+				return -1;
+			*p = l;
+			return nc;
+		}
+		if (n <= nc)
+			return -1;
+		s++;
+		c = (*s ^ 0x80) & 0xFF;
+		if (c & 0xC0)
+			return -1;
+		l = (l << 6) | c;
+	}
+	return -1;
+}
+
+int SYNOUnicodeUTF8StrToUTF16Str(u_int16_t *pwcs, const u_int8_t *s, int n)
+{
+	u_int16_t *op;
+	const u_int8_t *ip;
+	int size;
+
+	op = pwcs;
+	ip = s;
+	while (*ip && n > 0) {
+		if (*ip & 0x80) {
+			size = SYNOUnicodeUTF8ChrToUTF16Chr(op, ip, n);
+			if (size == -1) {
+				/* Ignore character and move on */
+				ip++;
+				n--;
+			} else {
+				op++;
+				ip += size;
+				n -= size;
+			}
+		} else {
+			*op++ = *ip++;
+            n--;
+		}
+	}
+    *op = 0;
+#ifdef SYNO_DEBUG_BUILD
+    if((op - pwcs) >= UNICODE_UTF16_BUFSIZE)
+        panic("SYNOUnicodeUTF8StrToUTF16Str: UTF8 string too long\n");
+#endif
+	return (op - pwcs);
+}
+
+int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen)
+{
+	long l;
+	int c, nc;
+	struct utf8_table *t;
+
+	if (s == 0)
+		return 0;
+
+	l = wc;
+	nc = 0;
+	for (t = utf8_table; t->cmask && maxlen; t++, maxlen--) {
+		nc++;
+		if (l <= t->lmask) {
+			c = t->shift;
+			*s = t->cval | (l >> c);
+			while (c > 0) {
+				c -= 6;
+				s++;
+				*s = 0x80 | ((l >> c) & 0x3F);
+			}
+			return nc;
+		}
+	}
+	return -1;
+}
+
+int SYNOUnicodeUTF16StrToUTF8Str(u_int8_t *s, const u_int16_t *pwcs, int maxlen)
+{
+	const u_int16_t *ip;
+	u_int8_t *op;
+	int size;
+
+	op = s;
+	ip = pwcs;
+	while (*ip && maxlen > 0) {
+		if (*ip > 0x7f) {
+			size = SYNOUnicodeUTF16ChrToUTF8Chr(op, *ip, maxlen);
+			if (size == -1) {
+				/* Ignore character and move on */
+				maxlen--;
+			} else {
+				op += size;
+				maxlen -= size;
+			}
+		} else {
+			*op++ = (u_int8_t) *ip;
+		}
+		ip++;
+	}
+    *op = 0;
+	return (op - s);
+}
+
+/*
+ * upcase.c - Generate the full NTFS Unicode upcase table in little endian.
+ *	      Part of the Linux-NTFS project.
+ *
+ * Copyright (C) 2001 Richard Russon <ntfs@flatcap.org>
+ * Copyright (c) 2001,2002 Anton Altaparmakov
+ *
+ * Modified for mkntfs inclusion 9 June 2001 by Anton Altaparmakov.
+ * Modified for kernel inclusion 10 September 2001 by Anton Altparmakov.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program (in the main directory of the Linux-NTFS source
+ * in the file COPYING); if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+static u_int16_t gUC[UTF16_UPCASE_TABLE_SIZE];
+
+u_int16_t *SYNOUnicodeGenerateDefaultUpcaseTable(void)
+{
+	const int uc_run_table[][3] = { /* Start, End, Add */
+	{0x0061, 0x007B,  -32}, {0x0451, 0x045D, -80}, {0x1F70, 0x1F72,  74},
+	{0x00E0, 0x00F7,  -32}, {0x045E, 0x0460, -80}, {0x1F72, 0x1F76,  86},
+	{0x00F8, 0x00FF,  -32}, {0x0561, 0x0587, -48}, {0x1F76, 0x1F78, 100},
+	{0x0256, 0x0258, -205}, {0x1F00, 0x1F08,   8}, {0x1F78, 0x1F7A, 128},
+	{0x028A, 0x028C, -217}, {0x1F10, 0x1F16,   8}, {0x1F7A, 0x1F7C, 112},
+	{0x03AC, 0x03AD,  -38}, {0x1F20, 0x1F28,   8}, {0x1F7C, 0x1F7E, 126},
+	{0x03AD, 0x03B0,  -37}, {0x1F30, 0x1F38,   8}, {0x1FB0, 0x1FB2,   8},
+	{0x03B1, 0x03C2,  -32}, {0x1F40, 0x1F46,   8}, {0x1FD0, 0x1FD2,   8},
+	{0x03C2, 0x03C3,  -31}, {0x1F51, 0x1F52,   8}, {0x1FE0, 0x1FE2,   8},
+	{0x03C3, 0x03CC,  -32}, {0x1F53, 0x1F54,   8}, {0x1FE5, 0x1FE6,   7},
+	{0x03CC, 0x03CD,  -64}, {0x1F55, 0x1F56,   8}, {0x2170, 0x2180, -16},
+	{0x03CD, 0x03CF,  -63}, {0x1F57, 0x1F58,   8}, {0x24D0, 0x24EA, -26},
+	{0x0430, 0x0450,  -32}, {0x1F60, 0x1F68,   8}, {0xFF41, 0xFF5B, -32},
+	{0}
+	};
+
+	const int uc_dup_table[][2] = { /* Start, End */
+	{0x0100, 0x012F}, {0x01A0, 0x01A6}, {0x03E2, 0x03EF}, {0x04CB, 0x04CC},
+	{0x0132, 0x0137}, {0x01B3, 0x01B7}, {0x0460, 0x0481}, {0x04D0, 0x04EB},
+	{0x0139, 0x0149}, {0x01CD, 0x01DD}, {0x0490, 0x04BF}, {0x04EE, 0x04F5},
+	{0x014A, 0x0178}, {0x01DE, 0x01EF}, {0x04BF, 0x04BF}, {0x04F8, 0x04F9},
+	{0x0179, 0x017E}, {0x01F4, 0x01F5}, {0x04C1, 0x04C4}, {0x1E00, 0x1E95},
+	{0x018B, 0x018B}, {0x01FA, 0x0218}, {0x04C7, 0x04C8}, {0x1EA0, 0x1EF9},
+	{0}
+	};
+
+	const int uc_word_table[][2] = { /* Offset, Value */
+	{0x00FF, 0x0178}, {0x01AD, 0x01AC}, {0x01F3, 0x01F1}, {0x0269, 0x0196},
+	{0x0183, 0x0182}, {0x01B0, 0x01AF}, {0x0253, 0x0181}, {0x026F, 0x019C},
+	{0x0185, 0x0184}, {0x01B9, 0x01B8}, {0x0254, 0x0186}, {0x0272, 0x019D},
+	{0x0188, 0x0187}, {0x01BD, 0x01BC}, {0x0259, 0x018F}, {0x0275, 0x019F},
+	{0x018C, 0x018B}, {0x01C6, 0x01C4}, {0x025B, 0x0190}, {0x0283, 0x01A9},
+	{0x0192, 0x0191}, {0x01C9, 0x01C7}, {0x0260, 0x0193}, {0x0288, 0x01AE},
+	{0x0199, 0x0198}, {0x01CC, 0x01CA}, {0x0263, 0x0194}, {0x0292, 0x01B7},
+	{0x01A8, 0x01A7}, {0x01DD, 0x018E}, {0x0268, 0x0197},
+	{0}
+	};
+
+#ifdef MY_ABC_HERE
+	/** This is the difference part from Unicode Uppercase Table generated by ICU
+	 *  Since samba/netatalk will call SetToCaseless() and override the default
+	 *  Uppercase Table in kernel. It's batter eliminate those conflict as early
+	 *  as possible.
+     */
+	const int uc_icu_table[][2] = {	/* Offset, Value */
+	{0x00B5, 0x039C}, {0x0131, 0x0049}, {0x017F, 0x0053}, {0x0195, 0x01F6},
+	{0x019E, 0x0220}, {0x01BF, 0x01F7}, {0x01C5, 0x01C4}, {0x01C8, 0x01C7},
+	{0x01CB, 0x01CA}, {0x01F2, 0x01F1}, {0x01F9, 0x01F8}, {0x0219, 0x0218},
+	{0x021B, 0x021A}, {0x021D, 0x021C}, {0x021F, 0x021E}, {0x0223, 0x0222},
+	{0x0225, 0x0224}, {0x0227, 0x0226}, {0x0229, 0x0228}, {0x022B, 0x022A},
+	{0x022D, 0x022C}, {0x022F, 0x022E}, {0x0231, 0x0230}, {0x0233, 0x0232},
+	{0x0280, 0x01A6}, {0x0345, 0x0399}, {0x03D0, 0x0392}, {0x03D1, 0x0398},
+	{0x03D5, 0x03A6}, {0x03D6, 0x03A0}, {0x03D9, 0x03D8}, {0x03DB, 0x03DA},
+	{0x03DD, 0x03DC}, {0x03DF, 0x03DE}, {0x03E1, 0x03E0}, {0x03F0, 0x039A},
+	{0x03F1, 0x03A1}, {0x03F2, 0x03A3}, {0x03F5, 0x0395}, {0x0450, 0x0400},
+	{0x045D, 0x040D}, {0x048B, 0x048A}, {0x048D, 0x048C}, {0x048F, 0x048E},
+	{0x04C6, 0x04C5}, {0x04CA, 0x04C9}, {0x04CE, 0x04CD}, {0x04ED, 0x04EC},
+	{0x0501, 0x0500}, {0x0503, 0x0502}, {0x0505, 0x0504}, {0x0507, 0x0506},
+	{0x0509, 0x0508}, {0x050B, 0x050A}, {0x050D, 0x050C}, {0x050F, 0x050E},
+	{0x1E9B, 0x1E60}, {0x1FBE, 0x0399},
+	{0}
+	};
+#endif /* MY_ABC_HERE */
+	int i, r;
+	u_int16_t *uc;
+
+	uc = gUC;
+
+	memset(uc, 0, UTF16_UPCASE_TABLE_SIZE * sizeof(u_int16_t));
+
+	for (i = 0; i < UTF16_UPCASE_TABLE_SIZE; i++)
+		uc[i] = i;
+	for (r = 0; uc_run_table[r][0]; r++)
+		for (i = uc_run_table[r][0]; i < uc_run_table[r][1]; i++)
+			uc[i] = uc[i] + uc_run_table[r][2];
+	for (r = 0; uc_dup_table[r][0]; r++)
+		for (i = uc_dup_table[r][0]; i < uc_dup_table[r][1]; i += 2)
+			uc[i + 1] = uc[i + 1] - 1;
+	for (r = 0; uc_word_table[r][0]; r++)
+		uc[uc_word_table[r][0]] = uc_word_table[r][1];
+#ifdef MY_ABC_HERE
+	for (r = 0; uc_icu_table[r][0]; r++)
+		uc[uc_icu_table[r][0]] = uc_icu_table[r][1];
+#endif /* MY_ABC_HERE */
+	return uc;
+}
+
+int SYNOUnicodeUTF16Strcmp(u_int16_t *utf16str1,u_int16_t *utf16str2, int len,u_int16_t *upcasetable)
+{
+    int i;
+    for (i = 0; i < len; i++)
+        if(upcasetable[utf16str1[i]] != upcasetable[utf16str2[i]])
+            return -1;
+    return 0;
+}
+
+static u_int16_t *UpcaseTable = NULL;
+
+u_int16_t *DefUpcaseTable()
+{
+    if(UpcaseTable==NULL)
+        UpcaseTable = SYNOUnicodeGenerateDefaultUpcaseTable();
+
+    return UpcaseTable;
+}
+
+static inline int synotoupper(int x)
+{
+	if ((64 < x && 91 > x) || (96 < x && 123 > x))
+		x = x & ~0x20;
+	return x;
+}
+static inline int SYNOAsciiToUpper(u_int8_t *to, const u_int8_t *from, int clenfrom)
+{
+	int n = clenfrom;
+	u_int8_t *op;
+	const u_int8_t *ip;
+
+	op = to;
+	ip = from;
+	while (*ip && *ip != '\\' && n > 0) {
+		if (*ip & 0x80 ) {
+			return 1;
+		}
+		*op++ = synotoupper(*ip++);
+		n--;
+	}
+	*op = 0;
+
+	return 0;
+}
+
+static inline int SYNOUnicodeUTF8toUpper(u_int8_t *to, const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable)
+{
+	u_int16_t *UpcaseTbl;
+	int clenUtf16;
+	int i;
+	int err;
+	u_int16_t *UTF16NameiStrBuf;
+
+	/* We could enhance unicode to upper performance here. Transform char by char, 
+	not all copied to array. It will reduce kmemalloc and memcpy time. */
+	UTF16NameiStrBuf = kmalloc(PATH_MAX, GFP_KERNEL);
+	if (!UTF16NameiStrBuf) {
+		return -ENOMEM;
+	}
+
+	UpcaseTbl = (upcasetable==NULL) ? DefUpcaseTable() : upcasetable;
+	clenUtf16 = SYNOUnicodeUTF8StrToUTF16Str(UTF16NameiStrBuf, from, clenfrom);
+
+	for(i = 0; i < clenUtf16; i++)
+		UTF16NameiStrBuf[i] = UpcaseTbl[UTF16NameiStrBuf[i]];
+	
+	UTF16NameiStrBuf[clenUtf16] = 0;
+	err = SYNOUnicodeUTF16StrToUTF8Str(to, UTF16NameiStrBuf, maxlen);
+	kfree(UTF16NameiStrBuf);
+
+	return err;
+}
+
+int SYNOToUpper(u_int8_t *to, const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable)
+{
+	if (SYNOAsciiToUpper(to, from, clenfrom)) {
+		return SYNOUnicodeUTF8toUpper(to, from, maxlen, clenfrom, upcasetable);
+	}
+	return clenfrom;
+}
+EXPORT_SYMBOL(SYNOToUpper);
+
+int SYNOUnicodeUTF8Strcmp(const u_int8_t *utf8str1,const u_int8_t *utf8str2,int clenUtf8Str1, int clenUtf8Str2, u_int16_t *upcasetable)
+{
+    int clenUtf16Str1,clenUtf16Str2;
+    u_int16_t *UpcaseTbl;
+	int err;
+	u_int16_t *UTF16NameiStrBuf1;
+	u_int16_t *UTF16NameiStrBuf2;
+
+	/* We could enhance unicode to upper performance here. Transform char by char, 
+	not all copied to array. It will reduce kmemalloc and memcpy time. */
+	UTF16NameiStrBuf1 = kmalloc(PATH_MAX, GFP_KERNEL);
+	if (!UTF16NameiStrBuf1) {
+		return -ENOMEM;
+	}
+	UTF16NameiStrBuf2 = kmalloc(PATH_MAX, GFP_KERNEL);
+	if (!UTF16NameiStrBuf2) {
+		kfree(UTF16NameiStrBuf1);
+		return -ENOMEM;
+	}
+
+    UpcaseTbl = (upcasetable==NULL) ? DefUpcaseTable() : upcasetable;
+
+    clenUtf16Str1 = SYNOUnicodeUTF8StrToUTF16Str(UTF16NameiStrBuf1, utf8str1, clenUtf8Str1);
+    clenUtf16Str2 = SYNOUnicodeUTF8StrToUTF16Str(UTF16NameiStrBuf2, utf8str2, clenUtf8Str2);
+
+    if(clenUtf16Str1 != clenUtf16Str2)
+        err = -1;
+    else
+        err = SYNOUnicodeUTF16Strcmp((u_int16_t *)UTF16NameiStrBuf1
+                                      ,(u_int16_t *)UTF16NameiStrBuf2
+                                      ,clenUtf16Str1
+                                      ,UpcaseTbl);
+	kfree(UTF16NameiStrBuf1);
+	kfree(UTF16NameiStrBuf2);
+
+	return err;
+}
+EXPORT_SYMBOL(SYNOUnicodeUTF8Strcmp);
+
+asmlinkage long sys_SYNOUnicodeLoadTbl(u_int16_t *rgUCTable)
+{
+    /* Original, we allow user space to change the unicode table.
+	 * So different application can have different table. But actually,
+	 * every application should use the same table and our kernel
+	 * only saves 1 table.
+	 *
+	 * Therefore, it is no need to allow user space program to change
+	 * unicode table. So use just return 0 here.
+	 */
+
+    return 0;
+}
+
+#endif /* MY_ABC_HERE */
 
 /* [Feb-1997 T. Schoebel-Theuer]
  * Fundamental changes in the pathname lookup mechanisms (namei)
@@ -303,7 +712,15 @@ int inode_permission(struct inode *inode, int mask)
  */
 int file_permission(struct file *file, int mask)
 {
+#ifdef CONFIG_FS_SYNO_ACL
+	struct inode * inode = file->f_path.dentry->d_inode;
+	if (IS_SYNOACL(inode)) {
+		return inode->i_op->syno_permission(file->f_path.dentry, mask);
+	}
+	return inode_permission(inode, mask);
+#else 
 	return inode_permission(file->f_path.dentry->d_inode, mask);
+#endif
 }
 
 /*
@@ -351,6 +768,9 @@ int deny_write_access(struct file * file)
 
 	return 0;
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(deny_write_access);
+#endif /* SYNO_AUFS */
 
 /**
  * path_get - get a reference to a path
@@ -718,6 +1138,9 @@ static int __follow_mount(struct path *path)
 		path->mnt = mounted;
 		path->dentry = dget(mounted->mnt_root);
 		res = 1;
+#ifdef MY_ABC_HERE
+		path->mounted = 1;
+#endif
 	}
 	return res;
 }
@@ -853,9 +1276,60 @@ static int __link_path_walk(const char *name, struct nameidata *nd)
 	struct inode *inode;
 	int err;
 	unsigned int lookup_flags = nd->flags;
-	
+
+#ifdef MY_ABC_HERE
+	/* We do case conversions here.
+	 * The filename converted will be stored in nd->real_filename.
+	 *
+	 * In ext3_find_entry (ext3_dx_find_entry and search_dirblock),
+	 * we sync file name of dentry stored in dentry queue with filename founded from disk.
+	 * So the filename of dentry returned by do_lookup is case converted.
+	 *
+	 * Note:
+	 * 1. If stat success, it will be copied to user space.
+	 *    It means if any error occurs, we don't need store anything in nd->real_filename.
+	 * 2. We should correctly update "name" and "slashes" to "cur_location" each loop.
+	 * 	  We update them in every "continue", "break", "return" point.
+	 * 3. We use slashes_count to count slash numbers of name.
+	 * 	  When update nd->real_filename, we can append slashes according to it.
+	 * 4. If converted string longer than SYNO_SMB_PSTRING_LEN, we should return ENAMETOOLONG.
+	 * 	  We use total_len to monitor it.
+	*/
+	unsigned int slashes_count = 0;
+	int fLastCN = 0;       /* Last component name lookup */
+	int total_len = SYNO_SMB_PSTRING_LEN;
+	int caselessFlag = LOOKUP_CASELESS_COMPARE & nd->flags;
+	int cur_location_updated = 0;
+	unsigned char *cur_location = NULL;
+	struct qstr this;
+
+	if (caselessFlag) {
+		cur_location = nd->real_filename;
+		nd->real_filename_len = 0;
+	}
+
+	while (*name=='/') {
+		name++;
+		slashes_count++;
+	}
+
+	if (cur_location && (caselessFlag)) {
+		/* Append slashes to nd->real_filename.
+		 * Dec total_len ot avoid converted filename too long.
+		*/
+		while (slashes_count != 0) {
+			nd->real_filename_len++;
+			total_len--;
+			*cur_location = '/';
+			cur_location++;
+			slashes_count--;
+		}
+		*cur_location = '\0';
+	}
+#else
 	while (*name=='/')
 		name++;
+#endif
 	if (!*name)
 		goto return_reval;
 
@@ -866,10 +1340,27 @@ static int __link_path_walk(const char *name, struct nameidata *nd)
 	/* At this point we know we have a real path component. */
 	for(;;) {
 		unsigned long hash;
+#ifndef MY_ABC_HERE
 		struct qstr this;
+#endif
 		unsigned int c;
 
+#ifdef MY_ABC_HERE
+		slashes_count = 0;
+		cur_location_updated = 0;
+		next.mounted = 0;
+		if (caselessFlag) {
+			nd->path.dentry->d_flags |= DCACHE_CASELESS_COMPARE;
+		} else {
+			nd->path.dentry->d_flags &= ~DCACHE_CASELESS_COMPARE;
+		}
+#endif
 		nd->flags |= LOOKUP_CONTINUE;
+#ifdef CONFIG_FS_SYNO_ACL
+		if (IS_SYNOACL(inode)) {
+			err = inode->i_op->syno_exec_permission(nd->path.dentry);
+		} else
+#endif
 		err = exec_permission_lite(inode);
  		if (err)
 			break;
@@ -886,12 +1377,30 @@ static int __link_path_walk(const char *name, struct nameidata *nd)
 		this.len = name - (const char *) this.name;
 		this.hash = end_name_hash(hash);
 
+#ifdef MY_ABC_HERE
+		/* remove trailing slashes? */
+		if (!c) {
+			fLastCN = 1;
+			goto last_component;
+		}
+
+		slashes_count++;
+		while (*++name == '/') {
+			slashes_count++;
+		}
+
+		if (!*name) {
+			fLastCN = 1;
+			goto last_with_slashes;
+		}
+#else
 		/* remove trailing slashes? */
 		if (!c)
 			goto last_component;
 		while (*++name == '/');
 		if (!*name)
 			goto last_with_slashes;
+#endif
 
 		/*
 		 * "." and ".." are special - ".." especially so because it has
@@ -908,6 +1417,26 @@ static int __link_path_walk(const char *name, struct nameidata *nd)
 				inode = nd->path.dentry->d_inode;
 				/* fallthrough */
 			case 1:
+#ifdef MY_ABC_HERE
+				if (cur_location && caselessFlag) {
+					cur_location_updated = 1;
+					total_len -= (this.len + slashes_count);
+					if (total_len < 0) {
+						err = -ENAMETOOLONG;
+						break;
+					}
+					memcpy(cur_location, this.name, this.len);
+					cur_location += this.len;
+					nd->real_filename_len += this.len;
+					nd->real_filename_len += slashes_count;
+					while (slashes_count != 0) {
+						*cur_location = '/';
+						cur_location++;
+						slashes_count--;
+					}
+					*cur_location = '\0';
+				}
+#endif
 				continue;
 		}
 		/*
@@ -925,13 +1454,65 @@ static int __link_path_walk(const char *name, struct nameidata *nd)
 		if (err)
 			break;
 
+#ifdef MY_ABC_HERE
+		/* Update cur_location.
+		 * We must do it before do_follow_link to avoid name of next.dentry or next.mnt be changed.
+		*/
+		if (cur_location && caselessFlag) {
+			cur_location_updated = 1;
+			/* After __follow_mount, next.dentry->d_name.name may be replaced to mnt path .
+			 * The original path name is in next.mnt and it is what we need.
+			*/
+			if (next.mounted) {
+				next.mounted = 0;
+				total_len -= (next.mnt->mnt_mountpoint->d_name.len + slashes_count);
+				if (total_len < 0) {
+					err = -ENAMETOOLONG;
+					break;
+				}
+				memcpy(cur_location, next.mnt->mnt_mountpoint->d_name.name, next.mnt->mnt_mountpoint->d_name.len);
+				cur_location += next.mnt->mnt_mountpoint->d_name.len;
+				nd->real_filename_len += next.mnt->mnt_mountpoint->d_name.len;
+			}else{
+				total_len -= (next.dentry->d_name.len + slashes_count);
+				if (total_len < 0) {
+					err = -ENAMETOOLONG;
+					break;
+				}
+				memcpy(cur_location, next.dentry->d_name.name, next.dentry->d_name.len);
+				cur_location += next.dentry->d_name.len;
+				nd->real_filename_len += next.dentry->d_name.len;
+			}
+			nd->real_filename_len += slashes_count;
+			while (slashes_count != 0) {
+				*cur_location = '/';
+				cur_location++;
+				slashes_count--;
+			}
+			*cur_location = '\0';
+		}
+#endif
 		err = -ENOENT;
 		inode = next.dentry->d_inode;
 		if (!inode)
 			goto out_dput;
 
 		if (inode->i_op->follow_link) {
+#ifdef MY_ABC_HERE
+			/* __link_path_walk be called in do_follow_link,
+			 * we set nd->caseless to 0 to avoid append symbolic link path to nd->realname
+			 * before do_follow_link, and set nd->caseless back after do_follow_link.
+			*/
+			if (caselessFlag) {
+				nd->flags &=~ LOOKUP_CASELESS_COMPARE;
+			}
+#endif
 			err = do_follow_link(&next, nd);
+#ifdef MY_ABC_HERE
+			if (caselessFlag) {
+				nd->flags |= LOOKUP_CASELESS_COMPARE;
+			}
+#endif
 			if (err)
 				goto return_err;
 			err = -ENOENT;
@@ -974,9 +1555,61 @@ last_component:
 		err = do_lookup(nd, &this, &next);
 		if (err)
 			break;
+#ifdef MY_ABC_HERE
+		/* Update cur_location.
+		 * We must do it before do_follow_link to avoid name of next.dentry or next.mnt be changed.
+		*/
+		if (cur_location && caselessFlag) {
+			cur_location_updated = 1;
+			/* After __follow_mount, next.dentry->d_name.name may be replaced to mnt path.
+			 * The original path name is in next.mnt and it is what we need.
+			*/
+			if (next.mounted) {
+				next.mounted = 0;
+				total_len -= (next.mnt->mnt_mountpoint->d_name.len + slashes_count);
+				if (total_len < 0) {
+					err = -ENAMETOOLONG;
+					break;
+				}
+				memcpy(cur_location, next.mnt->mnt_mountpoint->d_name.name, next.mnt->mnt_mountpoint->d_name.len);
+				cur_location += next.mnt->mnt_mountpoint->d_name.len;
+				nd->real_filename_len += next.mnt->mnt_mountpoint->d_name.len;
+			}else{
+				total_len -= (next.dentry->d_name.len + slashes_count);
+				if (total_len < 0) {
+					err = -ENAMETOOLONG;
+					break;
+				}
+				memcpy(cur_location, next.dentry->d_name.name, next.dentry->d_name.len);
+				cur_location += next.dentry->d_name.len;
+				nd->real_filename_len += next.dentry->d_name.len;
+			}
+			nd->real_filename_len += slashes_count;
+			while (slashes_count != 0) {
+				*cur_location = '/';
+				cur_location++;
+				slashes_count--;
+			}
+			*cur_location = '\0';
+		}
+#endif
 		inode = next.dentry->d_inode;
 		if (follow_on_final(inode, lookup_flags)) {
+#ifdef MY_ABC_HERE
+			/* __link_path_walk be called in do_follow_link,
+			 * we set nd->caseless to 0 to avoid append symbolic link path to nd->realname
+			 * before do_follow_link, and set nd->caseless back after do_follow_link.
+			*/
+			if (caselessFlag) {
+				nd->flags &=~ LOOKUP_CASELESS_COMPARE;
+			}
+#endif
 			err = do_follow_link(&next, nd);
+#ifdef MY_ABC_HERE
+			if (caselessFlag) {
+				nd->flags |= LOOKUP_CASELESS_COMPARE;
+			}
+#endif
 			if (err)
 				goto return_err;
 			inode = nd->path.dentry->d_inode;
@@ -1016,6 +1649,26 @@ return_reval:
 				break;
 		}
 return_base:
+#ifdef MY_ABC_HERE
+		if (cur_location && caselessFlag && !cur_location_updated) {
+			cur_location_updated = 1;
+			total_len -= (this.len + slashes_count);
+			if (total_len < 0) {
+				err = -ENAMETOOLONG;
+				break;
+			}
+			memcpy(cur_location, this.name, this.len);
+			cur_location += this.len;
+			nd->real_filename_len += this.len;
+			nd->real_filename_len += slashes_count;
+			while (slashes_count != 0) {
+				*cur_location = '/';
+				cur_location++;
+				slashes_count--;
+			}
+			*cur_location = '\0';
+		}
+#endif
 		return 0;
 out_dput:
 		path_put_conditional(&next, nd);
@@ -1023,6 +1676,29 @@ out_dput:
 	}
 	path_put(&nd->path);
 return_err:
+#ifdef MY_ABC_HERE
+	if(fLastCN)
+		nd->flags |= LOOKUP_TO_LASTCOMPONENT;
+
+	if (!err && cur_location && caselessFlag && !cur_location_updated) {
+		cur_location_updated = 1;
+		total_len -= (this.len + slashes_count);
+		if (total_len < 0) {
+			err = -ENAMETOOLONG;
+			return err;
+		}
+		memcpy(cur_location, this.name, this.len);
+		cur_location += this.len;
+		nd->real_filename_len += this.len;
+		nd->real_filename_len += slashes_count;
+		while (slashes_count != 0) {
+			*cur_location = '/';
+			cur_location++;
+			slashes_count--;
+		}
+		*cur_location = '\0';
+	}
+#endif
 	return err;
 }
 
@@ -1230,18 +1906,107 @@ out:
  * needs parent already locked. Doesn't follow mounts.
  * SMP-safe.
  */
+#ifdef MY_ABC_HERE
+extern struct dentry *lookup_hash(struct nameidata *nd)
+#else
+#ifdef CONFIG_AUFS_FS
+extern struct dentry *lookup_hash(struct nameidata *nd)
+#else /* !SYNO_AUFS */
 static struct dentry *lookup_hash(struct nameidata *nd)
+#endif /* SYNO_AUFS */
+#endif
 {
 	int err;
 
+#ifdef CONFIG_FS_SYNO_ACL
+	struct inode *inode = nd->path.dentry->d_inode;
+
+	if (IS_SYNOACL(inode)) {
+		err = inode->i_op->syno_permission(nd->path.dentry, MAY_EXEC);
+	} else {
+		err = inode_permission(inode, MAY_EXEC);
+	}
+#else
 	err = inode_permission(nd->path.dentry->d_inode, MAY_EXEC);
+#endif /* CONFIG_FS_SYNO_ACL */
 	if (err)
 		return ERR_PTR(err);
 	return __lookup_hash(&nd->last, nd->path.dentry, nd);
 }
 
+#ifdef MY_ABC_HERE
+static struct dentry * __lookup_hash1(struct qstr *name,
+		struct dentry * base, struct nameidata *nd)
+{
+	struct dentry * dentry;
+	struct inode *inode;
+	int err;
+
+	inode = base->d_inode;
+
+	/*
+	 * See if the low-level filesystem might want
+	 * to use its own hash..
+	 */
+	if (base->d_op && base->d_op->d_hash) {
+		err = base->d_op->d_hash(base, name);
+		dentry = ERR_PTR(err);
+		if (err < 0)
+			goto out;
+	}
+
+	dentry = cached_lookup(base, name, nd);
+	if (inode->i_op->lookup_case && dentry)  {
+		d_invalidate(dentry);
+		dput(dentry);
+		dentry = NULL;
+	}
+	if (!dentry) {
+		struct dentry *new = d_alloc(base, name);
+		dentry = ERR_PTR(-ENOMEM);
+		if (!new)
+			goto out;
+		if (inode->i_op->lookup_case)
+			dentry = inode->i_op->lookup_case(inode, new, nd);
+		else
+			dentry = inode->i_op->lookup(inode, new, nd);
+		if (!dentry)
+			dentry = new;
+		else
+			dput(new);
+	}
+out:
+	return dentry;
+}
+
+struct dentry * lookup_hash1(struct nameidata *nd)
+{
+	int err;
+
+#ifdef CONFIG_FS_SYNO_ACL
+	struct inode *inode = nd->path.dentry->d_inode;
+
+	if (IS_SYNOACL(inode)) {
+		err = inode->i_op->syno_permission(nd->path.dentry, MAY_EXEC);
+	} else {
+		err = inode_permission(inode, MAY_EXEC);
+	}
+#else
+	err = inode_permission(nd->path.dentry->d_inode, MAY_EXEC);
+#endif /* CONFIG_FS_SYNO_ACL */
+	if (err)
+		return ERR_PTR(err);
+	return __lookup_hash1(&nd->last, nd->path.dentry, nd);
+}
+#endif
+
+#ifdef CONFIG_AUFS_FS
+int __lookup_one_len(const char *name, struct qstr *this,
+		struct dentry *base, int len)
+#else /* !SYNO_AUFS */
 static int __lookup_one_len(const char *name, struct qstr *this,
 		struct dentry *base, int len)
+#endif /* SYNO_AUFS */
 {
 	unsigned long hash;
 	unsigned int c;
@@ -1261,6 +2026,9 @@ static int __lookup_one_len(const char *name, struct qstr *this,
 	this->hash = end_name_hash(hash);
 	return 0;
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(__lookup_one_len);
+#endif /* SYNO_AUFS */
 
 /**
  * lookup_one_len - filesystem helper to lookup single pathname component
@@ -1284,6 +2052,11 @@ struct dentry *lookup_one_len(const char *name, struct dentry *base, int len)
 	if (err)
 		return ERR_PTR(err);
 
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_SYNOACL(base->d_inode)) {
+		err = base->d_inode->i_op->syno_permission(base, MAY_EXEC);
+	} else 
+#endif /* CONFIG_FS_SYNO_ACL */
 	err = inode_permission(base->d_inode, MAY_EXEC);
 	if (err)
 		return ERR_PTR(err);
@@ -1311,6 +2084,32 @@ struct dentry *lookup_one_noperm(const char *name, struct dentry *base)
 		return ERR_PTR(err);
 	return __lookup_hash(&this, base, NULL);
 }
+
+#ifdef MY_ABC_HERE
+int syno_user_path_at(int dfd, const char __user *name, unsigned flags,
+		 struct path *path, char **real_filename, int *real_filename_len, int *lastComponent)
+{
+	struct nameidata nd;
+	char *tmp = getname(name);
+	int err = PTR_ERR(tmp);
+	if (!IS_ERR(tmp)) {
+
+		BUG_ON(flags & LOOKUP_PARENT);
+
+		nd.real_filename = *real_filename;
+		err = do_path_lookup(dfd, tmp, flags, &nd);
+		putname(tmp);
+		if (!err) {
+			*path = nd.path;
+			*real_filename_len = nd.real_filename_len;
+			if (nd.flags & LOOKUP_TO_LASTCOMPONENT) {
+				*lastComponent = 1;
+			}
+		}
+	}
+	return err;
+}
+#endif
 
 int user_path_at(int dfd, const char __user *name, unsigned flags,
 		 struct path *path)
@@ -1394,14 +2193,28 @@ static int may_delete(struct inode *dir,struct dentry *victim,int isdir)
 	BUG_ON(victim->d_parent->d_inode != dir);
 	audit_inode_child(victim->d_name.name, victim, dir);
 
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_FS_SYNOACL(dir)) {
+		error = synoacl_mod_may_delete(victim, dir);
+	} else
+#endif
 	error = inode_permission(dir, MAY_WRITE | MAY_EXEC);
 	if (error)
 		return error;
 	if (IS_APPEND(dir))
 		return -EPERM;
+#ifdef CONFIG_FS_SYNO_ACL
+	if (!IS_SYNOACL(dir) && check_sticky(dir, victim->d_inode)) {
+		return -EPERM;
+	}
+	if (IS_APPEND(victim->d_inode) || IS_IMMUTABLE(victim->d_inode) || IS_SWAPFILE(victim->d_inode)){
+		return -EPERM;
+	}
+#else
 	if (check_sticky(dir, victim->d_inode)||IS_APPEND(victim->d_inode)||
 	    IS_IMMUTABLE(victim->d_inode) || IS_SWAPFILE(victim->d_inode))
 		return -EPERM;
+#endif /* CONFIG_FS_SYNO_ACL */
 	if (isdir) {
 		if (!S_ISDIR(victim->d_inode->i_mode))
 			return -ENOTDIR;
@@ -1424,12 +2237,22 @@ static int may_delete(struct inode *dir,struct dentry *victim,int isdir)
  *  3. We should have write and exec permissions on dir
  *  4. We can't do it if dir is immutable (done in permission())
  */
+#ifdef CONFIG_FS_SYNO_ACL
+static inline int may_create(struct inode *dir, struct dentry *child, int mode)
+#else 
 static inline int may_create(struct inode *dir, struct dentry *child)
+#endif
 {
 	if (child->d_inode)
 		return -EEXIST;
 	if (IS_DEADDIR(dir))
 		return -ENOENT;
+
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_SYNOACL(dir)) {
+		return dir->i_op->syno_permission(child->d_parent, (S_ISDIR(mode)?MAY_APPEND:MAY_WRITE) | MAY_EXEC);
+	} 
+#endif /* CONFIG_FS_SYNO_ACL */
 	return inode_permission(dir, MAY_WRITE | MAY_EXEC);
 }
 
@@ -1494,7 +2317,11 @@ void unlock_rename(struct dentry *p1, struct dentry *p2)
 int vfs_create(struct inode *dir, struct dentry *dentry, int mode,
 		struct nameidata *nd)
 {
+#ifdef CONFIG_FS_SYNO_ACL
+	int error = may_create(dir, dentry, S_IFREG);
+#else
 	int error = may_create(dir, dentry);
+#endif
 
 	if (error)
 		return error;
@@ -1540,6 +2367,11 @@ int may_open(struct path *path, int acc_mode, int flag)
 		break;
 	}
 
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_SYNOACL(inode)) {
+		error = inode->i_op->syno_permission(dentry, acc_mode);
+	} else
+#endif /* CONFIG_FS_SYNO_ACL */
 	error = inode_permission(inode, acc_mode);
 	if (error)
 		return error;
@@ -1993,7 +2825,11 @@ EXPORT_SYMBOL_GPL(lookup_create);
 
 int vfs_mknod(struct inode *dir, struct dentry *dentry, int mode, dev_t dev)
 {
+#ifdef CONFIG_FS_SYNO_ACL
+	int error = may_create(dir, dentry, mode);
+#else
 	int error = may_create(dir, dentry);
+#endif
 
 	if (error)
 		return error;
@@ -2098,8 +2934,11 @@ SYSCALL_DEFINE3(mknod, const char __user *, filename, int, mode, unsigned, dev)
 
 int vfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 {
+#ifdef CONFIG_FS_SYNO_ACL
+	int error = may_create(dir, dentry, S_IFDIR);
+#else
 	int error = may_create(dir, dentry);
-
+#endif
 	if (error)
 		return error;
 
@@ -2383,7 +3222,11 @@ SYSCALL_DEFINE1(unlink, const char __user *, pathname)
 
 int vfs_symlink(struct inode *dir, struct dentry *dentry, const char *oldname)
 {
+#ifdef CONFIG_FS_SYNO_ACL
+	int error = may_create(dir, dentry, S_IFLNK);
+#else
 	int error = may_create(dir, dentry);
+#endif
 
 	if (error)
 		return error;
@@ -2457,7 +3300,11 @@ int vfs_link(struct dentry *old_dentry, struct inode *dir, struct dentry *new_de
 	if (!inode)
 		return -ENOENT;
 
+#ifdef CONFIG_FS_SYNO_ACL
+	error = may_create(dir, new_dentry, inode->i_mode);
+#else
 	error = may_create(dir, new_dentry);
+#endif
 	if (error)
 		return error;
 
@@ -2594,7 +3441,13 @@ static int vfs_rename_dir(struct inode *old_dir, struct dentry *old_dentry,
 	 * we'll need to flip '..'.
 	 */
 	if (new_dir != old_dir) {
+#ifdef CONFIG_FS_SYNO_ACL
+		if (!IS_SYNOACL(old_dentry->d_inode)) {
+			error = inode_permission(old_dentry->d_inode, MAY_WRITE);
+		}
+#else
 		error = inode_permission(old_dentry->d_inode, MAY_WRITE);
+#endif
 		if (error)
 			return error;
 	}
@@ -2668,9 +3521,13 @@ int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	if (error)
 		return error;
 
-	if (!new_dentry->d_inode)
+	if (!new_dentry->d_inode){
+#ifdef CONFIG_FS_SYNO_ACL
+		error = may_create(new_dir, new_dentry, old_dentry->d_inode->i_mode);
+#else
 		error = may_create(new_dir, new_dentry);
-	else
+#endif
+	} else
 		error = may_delete(new_dir, new_dentry, is_dir);
 	if (error)
 		return error;
@@ -2755,7 +3612,41 @@ SYSCALL_DEFINE4(renameat, int, olddfd, const char __user *, oldname,
 	error = -EINVAL;
 	if (old_dentry == trap)
 		goto exit4;
+#ifdef MY_ABC_HERE
+	if (new_dir->d_inode == old_dentry->d_inode) {
+		/* only possible to happen in caseless filesystem */
+		/* reject move myself into subdir of myself */
+		error = -ENOENT;
+		goto exit4;
+	}
+
 	new_dentry = lookup_hash(&newnd);
+	error = PTR_ERR(new_dentry);
+	if (IS_ERR(new_dentry))
+		goto exit4;
+
+	if (new_dentry->d_inode) {
+		if ((new_dir->d_inode->i_ino == old_dir->d_inode->i_ino) &&
+			(new_dentry->d_inode->i_ino == old_dentry->d_inode->i_ino)) {
+			// rename a file with different cases in the same directory.
+			// Ex. mv AAA aaa
+			d_invalidate(new_dentry);
+			dput(new_dentry);
+			new_dentry = lookup_hash1(&newnd);  /* case sensitive lookup */
+		}
+	} else {
+		if (memcmp(new_dentry->d_name.name, newnd.last.name, new_dentry->d_name.len)) {
+			// target doesn't exist and the case of name in cache is different from
+			// the given name, clear old cache information and lookup again to
+			// add new entry to cache list
+			d_invalidate(new_dentry);
+			dput(new_dentry);
+			new_dentry = lookup_hash(&newnd);
+		}
+	}
+#else
+	new_dentry = lookup_hash(&newnd);
+#endif
 	error = PTR_ERR(new_dentry);
 	if (IS_ERR(new_dentry))
 		goto exit4;
@@ -2940,6 +3831,13 @@ EXPORT_SYMBOL(get_write_access); /* binfmt_aout */
 EXPORT_SYMBOL(getname);
 EXPORT_SYMBOL(lock_rename);
 EXPORT_SYMBOL(lookup_one_len);
+#ifdef MY_ABC_HERE
+EXPORT_SYMBOL(lookup_hash);
+#else /* !MY_ABC_HERE */
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(lookup_hash);
+#endif /* SYNO_AUFS */
+#endif
 EXPORT_SYMBOL(page_follow_link_light);
 EXPORT_SYMBOL(page_put_link);
 EXPORT_SYMBOL(page_readlink);

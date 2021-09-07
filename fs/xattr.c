@@ -19,8 +19,9 @@
 #include <linux/fsnotify.h>
 #include <linux/audit.h>
 #include <asm/uaccess.h>
-
-
+#ifdef CONFIG_FS_SYNO_ACL
+#include <linux/syno_acl_xattr_ds.h>
+#endif
 /*
  * Check permissions for extended attribute access.  This is a bit complicated
  * because different namespaces have very different rules.
@@ -172,7 +173,20 @@ vfs_getxattr(struct dentry *dentry, const char *name, void *value, size_t size)
 	error = security_inode_getxattr(dentry, name);
 	if (error)
 		return error;
+#ifdef CONFIG_FS_SYNO_ACL
+	if (name && !strcmp(name, SYNO_ACL_XATTR_INHERIT)) {
+		int error = 0;
 
+		if (!IS_SYNOACL(inode)) {
+			return -EOPNOTSUPP;
+		}
+		error = inode->i_op->syno_permission(dentry, MAY_READ_PERMISSION);
+		if (error) {
+			return error;
+		}
+		return inode->i_op->syno_acl_get(dentry, value, size);
+	}
+#endif //CONFIG_FS_SYNO_ACL
 	if (!strncmp(name, XATTR_SECURITY_PREFIX,
 				XATTR_SECURITY_PREFIX_LEN)) {
 		const char *suffix = name + XATTR_SECURITY_PREFIX_LEN;
@@ -617,6 +631,19 @@ generic_getxattr(struct dentry *dentry, const char *name, void *buffer, size_t s
 	struct xattr_handler *handler;
 	struct inode *inode = dentry->d_inode;
 
+#ifdef CONFIG_FS_SYNO_ACL
+	if (name && !strcmp(name, SYNO_ACL_XATTR_ACCESS)) {
+		int error = 0;
+
+		if (!IS_SYNOACL(inode)) {
+			return -EOPNOTSUPP;
+		}
+		error = inode->i_op->syno_permission(dentry, MAY_READ_PERMISSION);
+		if (error) {
+			return error;
+		}
+	}
+#endif
 	handler = xattr_resolve_name(inode->i_sb->s_xattr, &name);
 	if (!handler)
 		return -EOPNOTSUPP;
@@ -663,9 +690,25 @@ generic_setxattr(struct dentry *dentry, const char *name, const void *value, siz
 
 	if (size == 0)
 		value = "";  /* empty EA, do not remove */
+
+#ifdef CONFIG_FS_SYNO_ACL
+	if (strcmp_prefix(name, SYNO_ACL_XATTR_ACCESS)) {
+		int error = -1;
+
+		if (!IS_FS_SYNOACL(inode)) {
+			return -EOPNOTSUPP;
+		}
+		error = inode->i_op->syno_permission(dentry, MAY_WRITE_PERMISSION);
+		if (error) {
+			return error;
+		}
+	}
+#endif
+
 	handler = xattr_resolve_name(inode->i_sb->s_xattr, &name);
 	if (!handler)
 		return -EOPNOTSUPP;
+
 	return handler->set(inode, name, value, size, flags);
 }
 
@@ -679,6 +722,19 @@ generic_removexattr(struct dentry *dentry, const char *name)
 	struct xattr_handler *handler;
 	struct inode *inode = dentry->d_inode;
 
+#ifdef CONFIG_FS_SYNO_ACL
+	if (strcmp_prefix(name, SYNO_ACL_XATTR_ACCESS)) {
+		int error = -1;
+
+		if (!IS_FS_SYNOACL(inode)) {
+			return -EOPNOTSUPP;
+		}
+		error = inode->i_op->syno_permission(dentry, MAY_WRITE_PERMISSION);
+		if (error) {
+			return error;
+		}
+	}
+#endif
 	handler = xattr_resolve_name(inode->i_sb->s_xattr, &name);
 	if (!handler)
 		return -EOPNOTSUPP;

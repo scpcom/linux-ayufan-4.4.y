@@ -1056,6 +1056,10 @@ static int reg_w(struct sd *sd, __u16 index, __u8 value)
 			sd->gspca_dev.usb_buf, 1, 500);
 	if (ret < 0)
 		PDEBUG(D_ERR, "Write reg [%02x] %02x failed", index, value);
+
+#ifdef CONFIG_ARCH_FEROCEON
+	msleep(1);
+#endif
 	return ret;
 }
 
@@ -1076,6 +1080,10 @@ static int reg_r(struct sd *sd, __u16 index)
 		ret = sd->gspca_dev.usb_buf[0];
 	else
 		PDEBUG(D_ERR, "Read reg [0x%02x] failed", index);
+
+#ifdef CONFIG_ARCH_FEROCEON
+	msleep(1);
+#endif
 	return ret;
 }
 
@@ -1095,6 +1103,10 @@ static int reg_r8(struct sd *sd,
 		ret = sd->gspca_dev.usb_buf[0];
 	else
 		PDEBUG(D_ERR, "Read reg 8 [0x%02x] failed", index);
+
+#ifdef CONFIG_ARCH_FEROCEON
+	msleep(1);
+#endif
 	return ret;
 }
 
@@ -1453,6 +1465,9 @@ static int init_ov_sensor(struct sd *sd)
 		if (i2c_r(sd, 0x00) < 0)
 			return -EIO;
 	}
+#ifdef CONFIG_ARCH_FEROCEON
+    PDEBUG(D_PROBE, "init_ov_sensor failed after %d attempt(s)", i);
+#endif
 	return -EIO;
 }
 

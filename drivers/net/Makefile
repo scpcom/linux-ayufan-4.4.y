@@ -6,6 +6,7 @@ obj-$(CONFIG_MII) += mii.o
 obj-$(CONFIG_MDIO) += mdio.o
 obj-$(CONFIG_PHYLIB) += phy/
 
+obj-$(CONFIG_MV_INCLUDE_GIG_ETH) += ../../arch/arm/plat-feroceon/mv_drivers_lsp/mv_network/mv_ethernet/
 obj-$(CONFIG_TI_DAVINCI_EMAC) += davinci_emac.o
 
 obj-$(CONFIG_E1000) += e1000/
@@ -91,6 +92,7 @@ ps3_gelic-objs += ps3_gelic_net.o $(gelic_wireless-y)
 obj-$(CONFIG_TC35815) += tc35815.o
 obj-$(CONFIG_SKGE) += skge.o
 obj-$(CONFIG_SKY2) += sky2.o
+obj-$(CONFIG_SK98LIN) += sk98lin/
 obj-$(CONFIG_SKFP) += skfp/
 obj-$(CONFIG_KS8842)	+= ks8842.o
 obj-$(CONFIG_KS8851)	+= ks8851.o

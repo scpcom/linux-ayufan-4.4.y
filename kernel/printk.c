@@ -35,6 +35,10 @@
 #include <linux/kexec.h>
 
 #include <asm/uaccess.h>
+#ifdef CONFIG_DEBUG_LL
+/*ll_debug*/
+#include <mach/uncompress.h>
+#endif
 
 /*
  * for_each_console() allows you to iterate on each console
@@ -598,6 +602,9 @@ asmlinkage int printk(const char *fmt, ...)
 	return r;
 }
 
+#ifdef CONFIG_DEBUG_LL
+int ll_debug = 0;
+#endif
 /* cpu currently holding logbuf_lock */
 static volatile unsigned int printk_cpu = UINT_MAX;
 
@@ -713,6 +720,9 @@ asmlinkage int vprintk(const char *fmt, va_list args)
 	/* Emit the output into the temporary buffer */
 	printed_len += vscnprintf(printk_buf + printed_len,
 				  sizeof(printk_buf) - printed_len, fmt, args);
+#ifdef CONFIG_DEBUG_LL
+	{ extern void printascii(const char *); printascii(printk_buf); }
+#endif
 
 
 	p = printk_buf;

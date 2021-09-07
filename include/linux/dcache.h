@@ -186,6 +186,10 @@ d_iput:		no		no		no       yes
 
 #define DCACHE_FSNOTIFY_PARENT_WATCHED	0x0080 /* Parent inode is watched by some fsnotify listener */
 
+#ifdef MY_ABC_HERE
+#define DCACHE_CASELESS_COMPARE 0x0100 /* Do caseless compare */
+#endif
+
 extern spinlock_t dcache_lock;
 extern seqlock_t rename_lock;
 

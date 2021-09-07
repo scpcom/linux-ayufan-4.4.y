@@ -600,6 +600,15 @@ static ssize_t nfs_file_write(struct kiocb *iocb, const struct iovec *iov,
 	ssize_t result;
 	size_t count = iov_length(iov, nr_segs);
 
+#ifdef MY_ABC_HERE
+	if (!blSynostate(O_UNMOUNT_OK, iocb->ki_filp)) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+		printk("%s: force unmount hit\n", __FUNCTION__);
+#endif
+		result = -EIO;
+		goto out;
+	}
+#endif
 	if (iocb->ki_filp->f_flags & O_DIRECT)
 		return nfs_file_direct_write(iocb, iov, nr_segs, pos);
 

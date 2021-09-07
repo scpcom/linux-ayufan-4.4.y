@@ -50,8 +50,8 @@ config MPC85xx_DS
 	bool "Freescale MPC85xx DS"
 	select PPC_I8259
 	select DEFAULT_UIMAGE
-	select FSL_ULI1575
-	select SWIOTLB
+	#select FSL_ULI1575
+	#select SWIOTLB
 	help
 	  This option enables support for the MPC85xx DS (MPC8544 DS) board
 
@@ -63,6 +63,20 @@ config MPC85xx_RDB
 	select SWIOTLB
 	help
 	  This option enables support for the MPC85xx RDB (P2020 RDB) board
+
+config SYNO_MPC854X
+	bool
+	depends on MPC85xx
+	default y if MPC85xx_CDS
+
+config SYNO_MPC8533
+	bool
+	depends on MPC85xx
+	default y if MPC85xx_DS
+
+config SYNO_MPC85XX_COMMON
+	bool
+	default y if SYNO_MPC854X || SYNO_MPC8533
 
 config SOCRATES
 	bool "Socrates"

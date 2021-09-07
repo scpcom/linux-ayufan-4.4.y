@@ -1763,6 +1763,9 @@ extern cputime_t task_gtime(struct task_struct *p);
 #define PF_FREEZER_SKIP	0x40000000	/* Freezer should not count it as freezeable */
 #define PF_FREEZER_NOSIG 0x80000000	/* Freezer won't send signals to it */
 
+#ifdef MY_ABC_HERE
+#define PF_FORCE_UMOUNT_TASK   0x00000020
+#endif
 /*
  * Only the _current_ task can read/write to tsk->flags, but other
  * tasks can access tsk->flags in readonly mode for example

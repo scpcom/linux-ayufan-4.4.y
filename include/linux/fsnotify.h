@@ -16,6 +16,24 @@
 #include <linux/fsnotify_backend.h>
 #include <linux/audit.h>
 
+#ifdef MY_ABC_HERE
+static inline void SYNO_ArchiveBitSet(struct inode *TargetInode)
+{
+	if (NULL == TargetInode) {
+		printk("%s %d: Set backup archive bit on null inode!\n", __FUNCTION__, __LINE__);
+		return;
+	}
+	if (S_ISCHR(TargetInode->i_mode) || S_ISBLK(TargetInode->i_mode) ||
+		S_ISFIFO(TargetInode->i_mode) || S_ISSOCK(TargetInode->i_mode)) {
+		return;
+	}
+	mutex_lock(&TargetInode->i_syno_mutex);
+	TargetInode->i_mode2 |= ALL_SYNO_ARCHIVE;
+	mutex_unlock(&TargetInode->i_syno_mutex);
+	mark_inode_dirty_sync(TargetInode);
+}
+#endif
+
 /*
  * fsnotify_d_instantiate - instantiate a dentry for inode
  * Called with dcache_lock held.
@@ -88,6 +106,12 @@ static inline void fsnotify_move(struct inode *old_dir, struct inode *new_dir,
 	inotify_inode_queue_event(new_dir, IN_MOVED_TO|isdir, in_cookie, new_name,
 				  source);
 
+#ifdef MY_ABC_HERE
+	SYNO_ArchiveBitSet(old_dir);
+	if (old_dir != new_dir) {
+		SYNO_ArchiveBitSet(new_dir);
+	}
+#endif
 	fsnotify(old_dir, old_dir_mask, old_dir, FSNOTIFY_EVENT_INODE, old_name, fs_cookie);
 	fsnotify(new_dir, new_dir_mask, new_dir, FSNOTIFY_EVENT_INODE, new_name, fs_cookie);
 
@@ -101,6 +125,9 @@ static inline void fsnotify_move(struct inode *old_dir, struct inode *new_dir,
 
 	if (source) {
 		inotify_inode_queue_event(source, IN_MOVE_SELF, 0, NULL, NULL);
+#ifdef MY_ABC_HERE
+		SYNO_ArchiveBitSet(source);
+#endif
 		fsnotify(source, FS_MOVE_SELF, moved->d_inode, FSNOTIFY_EVENT_INODE, NULL, 0);
 	}
 	audit_inode_child(new_name, moved, new_dir);
@@ -124,6 +151,9 @@ static inline void fsnotify_nameremove(struct dentry *dentry, int isdir)
 	if (isdir)
 		mask |= FS_IN_ISDIR;
 
+#ifdef MY_ABC_HERE
+	SYNO_ArchiveBitSet(dentry->d_parent->d_inode);
+#endif
 	fsnotify_parent(dentry, mask);
 }
 
@@ -148,6 +178,10 @@ static inline void fsnotify_create(struct inode *inode, struct dentry *dentry)
 				  dentry->d_inode);
 	audit_inode_child(dentry->d_name.name, dentry, inode);
 
+#ifdef MY_ABC_HERE
+	SYNO_ArchiveBitSet(inode);
+	SYNO_ArchiveBitSet(dentry->d_parent->d_inode);
+#endif
 	fsnotify(inode, FS_CREATE, dentry->d_inode, FSNOTIFY_EVENT_INODE, dentry->d_name.name, 0);
 }
 
@@ -177,6 +211,10 @@ static inline void fsnotify_mkdir(struct inode *inode, struct dentry *dentry)
 	inotify_inode_queue_event(inode, mask, 0, dentry->d_name.name, d_inode);
 	audit_inode_child(dentry->d_name.name, dentry, inode);
 
+#ifdef MY_ABC_HERE
+	SYNO_ArchiveBitSet(inode);
+	SYNO_ArchiveBitSet(dentry->d_parent->d_inode);
+#endif
 	fsnotify(inode, mask, d_inode, FSNOTIFY_EVENT_INODE, dentry->d_name.name, 0);
 }
 
@@ -210,6 +248,9 @@ static inline void fsnotify_modify(struct dentry *dentry)
 
 	inotify_inode_queue_event(inode, mask, 0, NULL, NULL);
 
+#ifdef MY_ABC_HERE
+	SYNO_ArchiveBitSet(inode);
+#endif
 	fsnotify_parent(dentry, mask);
 	fsnotify(inode, mask, inode, FSNOTIFY_EVENT_INODE, NULL, 0);
 }
@@ -281,7 +322,14 @@ static inline void fsnotify_change(struct dentry *dentry, unsigned int ia_valid)
 	if (ia_valid & ATTR_GID)
 		mask |= FS_ATTRIB;
 	if (ia_valid & ATTR_SIZE)
+#ifdef MY_ABC_HERE
+	{
 		mask |= FS_MODIFY;
+		SYNO_ArchiveBitSet(inode);
+	}
+#else
+		mask |= FS_MODIFY;
+#endif
 
 	/* both times implies a utime(s) call */
 	if ((ia_valid & (ATTR_ATIME | ATTR_MTIME)) == (ATTR_ATIME | ATTR_MTIME))

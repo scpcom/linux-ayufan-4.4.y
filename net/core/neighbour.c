@@ -36,6 +36,12 @@
 #include <linux/string.h>
 #include <linux/log2.h>
 
+#ifdef CONFIG_MV_ETH_NFP
+extern int fp_arp_info_set(int if_index, u32 ip, const u8 *mac);
+extern int fp_arp_info_delete(u32 ip);
+extern int fp_is_arp_confirmed(u32 ip, const u8 *mac);
+#endif /* CONFIG_MV_ETH_NFP */
+
 #define NEIGH_DEBUG 1
 
 #define NEIGH_PRINTK(x...) printk(x)
@@ -150,6 +156,9 @@ static int neigh_forced_gc(struct neigh_table *tbl)
 				n->dead = 1;
 				shrunk	= 1;
 				write_unlock(&n->lock);
+#ifdef CONFIG_MV_ETH_NFP
+				fp_arp_info_delete(*((u32 *)n->primary_key));
+#endif /* CONFIG_MV_ETH_NFP */
 				neigh_cleanup_and_release(n);
 				continue;
 			}
@@ -231,6 +240,9 @@ static void neigh_flush_dev(struct neigh_table *tbl, struct net_device *dev)
 				NEIGH_PRINTK2("neigh %p is stray.\n", n);
 			}
 			write_unlock(&n->lock);
+#ifdef CONFIG_MV_ETH_NFP
+			fp_arp_info_delete(*((u32 *)n->primary_key));
+#endif
 			neigh_cleanup_and_release(n);
 		}
 	}
@@ -635,6 +647,10 @@ void neigh_destroy(struct neighbour *neigh)
 	if (neigh_del_timer(neigh))
 		printk(KERN_WARNING "Impossible event.\n");
 
+#ifdef CONFIG_MV_ETH_NFP
+	fp_arp_info_delete(*((u32 *)neigh->primary_key));
+#endif
+
 	while ((hh = neigh->hh) != NULL) {
 		neigh->hh = hh->hh_next;
 		hh->hh_next = NULL;
@@ -685,6 +701,10 @@ static void neigh_connect(struct neighbour *neigh)
 	struct hh_cache *hh;
 
 	NEIGH_PRINTK2("neigh %p is connected.\n", neigh);
+
+#ifdef CONFIG_MV_ETH_NFP
+	fp_arp_info_set(neigh->dev->ifindex, *((u32 *)neigh->primary_key), neigh->ha);
+#endif
 
 	neigh->output = neigh->ops->connected_output;
 
@@ -815,6 +835,11 @@ static void neigh_timer_handler(unsigned long arg)
 	}
 
 	if (state & NUD_REACHABLE) {
+
+#ifdef CONFIG_MV_ETH_NFP
+		if (fp_is_arp_confirmed(*((u32 *)neigh->primary_key), neigh->ha))
+			neigh->confirmed = now;
+#endif
 		if (time_before_eq(now,
 				   neigh->confirmed + neigh->parms->reachable_time)) {
 			NEIGH_PRINTK2("neigh %p is still alive.\n", neigh);

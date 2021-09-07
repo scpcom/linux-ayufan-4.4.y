@@ -24,10 +24,21 @@
 #include <linux/wait.h>
 #include <linux/workqueue.h>
 
+#ifdef MY_ABC_HERE
+#include <linux/raid/libmd-report.h>
+#endif
+
 #define MaxSector (~(sector_t)0)
 
 typedef struct mddev_s mddev_t;
 typedef struct mdk_rdev_s mdk_rdev_t;
+
+#ifdef MY_ABC_HERE
+typedef struct _tag_SYNO_UPDATE_SB_WORK{
+    struct work_struct work;
+    mddev_t *mddev;
+}SYNO_UPDATE_SB_WORK;
+#endif
 
 /*
  * MD's 'extended' device
@@ -77,6 +88,10 @@ struct mdk_rdev_s
 #define StateChanged	9		/* Faulty or Blocked has changed during
 					 * interrupt, so it needs to be
 					 * notified by the thread */
+#ifdef MY_ABC_HERE
+#define DiskError	10		/* device is know to have a fault in degraded state */
+#endif /* MY_ABC_HERE */
+
 	wait_queue_head_t blocked_wait;
 
 	int desc_nr;			/* descriptor index in the superblock */
@@ -292,6 +307,15 @@ struct mddev_s
 	struct mutex			bitmap_mutex;
 
 	struct list_head		all_mddevs;
+#ifdef MY_ABC_HERE
+    unsigned char           nodev_and_crashed;     // 1 ==> nodev && crashed. deny make_request
+#endif
+#ifdef MY_ABC_HERE
+	unsigned char			auto_remap;     // 1 ==> set all rdevs to remap mode.
+#endif
+#ifdef MY_ABC_HERE
+	unsigned char			bl_raid5_enhance_disabled; // default: 0
+#endif
 };
 
 
@@ -321,6 +345,14 @@ struct mdk_personality
 	 * if appropriate, and should abort recovery if needed 
 	 */
 	void (*error_handler)(mddev_t *mddev, mdk_rdev_t *rdev);
+#ifdef MY_ABC_HERE
+	/**
+	 *  for our special purpose, like raid1, there is not exist a
+	 *  easy way for distinguish between hotplug or read/write error
+	 *  on last one disk which is in sync
+	 */
+	void (*syno_error_handler)(mddev_t *mddev, mdk_rdev_t *rdev);
+#endif /* MY_ABC_HERE */
 	int (*hot_add_disk) (mddev_t *mddev, mdk_rdev_t *rdev);
 	int (*hot_remove_disk) (mddev_t *mddev, int number);
 	int (*spare_active) (mddev_t *mddev);
@@ -430,6 +462,13 @@ extern void md_write_start(mddev_t *mddev, struct bio *bi);
 extern void md_write_end(mddev_t *mddev);
 extern void md_done_sync(mddev_t *mddev, int blocks, int ok);
 extern void md_error(mddev_t *mddev, mdk_rdev_t *rdev);
+#ifdef MY_ABC_HERE
+extern void syno_md_error (mddev_t *mddev, mdk_rdev_t *rdev);
+extern int IsDeviceDisappear(struct block_device *bdev);
+#endif
+#ifdef MY_ABC_HERE
+extern void SynoUpdateSBTask(struct work_struct *work);
+#endif
 
 extern int mddev_congested(mddev_t *mddev, int bits);
 extern void md_super_write(mddev_t *mddev, mdk_rdev_t *rdev,
@@ -445,5 +484,9 @@ extern void md_set_array_sectors(mddev_t *mddev, sector_t array_sectors);
 extern int md_check_no_bitmap(mddev_t *mddev);
 extern int md_integrity_register(mddev_t *mddev);
 void md_integrity_add_rdev(mdk_rdev_t *rdev, mddev_t *mddev);
+
+#ifdef MY_ABC_HERE
+void SYNORaidRdevUnplug(mddev_t *mddev, mdk_rdev_t *rdev);
+#endif
 
 #endif /* _MD_MD_H */

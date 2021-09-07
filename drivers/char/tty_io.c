@@ -978,6 +978,11 @@ static inline ssize_t do_tty_write(
 		if (size > chunk)
 			size = chunk;
 		ret = -EFAULT;
+#ifdef MY_DEF_HERE
+		if (0 == strcmp(tty->name, "ttyS1"))
+			memcpy(tty->write_buf, buf, size);
+		else
+#endif
 		if (copy_from_user(tty->write_buf, buf, size))
 			break;
 		ret = write(tty, file, tty->write_buf, size);
@@ -1067,7 +1072,15 @@ static ssize_t tty_write(struct file *file, const char __user *buf,
 	if (!ld->ops->write)
 		ret = -EIO;
 	else
+#ifdef MY_DEF_HERE
+	{
+		if (0 == strcmp(tty->name, "ttyS1"))
+			do_tty_write(ld->ops->write, tty, file, "-", 1);
 		ret = do_tty_write(ld->ops->write, tty, file, buf, count);
+	}
+#else
+		ret = do_tty_write(ld->ops->write, tty, file, buf, count);
+#endif
 	tty_ldisc_deref(ld);
 	return ret;
 }
@@ -2773,11 +2786,47 @@ void initialize_tty_struct(struct tty_struct *tty,
 
 int tty_put_char(struct tty_struct *tty, unsigned char ch)
 {
-	if (tty->ops->put_char)
+#ifdef MY_ABC_HERE
+	if (tty->ops->put_char && 0 != strcmp(tty->name, "ttyS1")) { 
+#else
+	if (tty->ops->put_char) { 
+#endif
 		return tty->ops->put_char(tty, ch);
+	}
 	return tty->ops->write(tty, &ch, 1);
 }
 EXPORT_SYMBOL_GPL(tty_put_char);
+
+#ifdef MY_ABC_HERE
+int syno_ttys_write(const int index, const char* szBuf)
+{
+    size_t i = 0;
+    struct tty_driver *drv = NULL;
+    struct tty_struct *tty = NULL;
+
+    list_for_each_entry(drv, &tty_drivers, tty_drivers) {
+        if ( strcmp(drv->name, "ttyS") ) {
+            continue;
+        }
+        if ( index < 0 || index >= drv->num ) {
+            continue;
+        }
+        if ( NULL == drv->ttys || NULL == drv->ttys[index] ) {
+            continue;
+        }
+        tty = drv->ttys[index];
+#ifdef MY_DEF_HERE
+        tty_put_char(tty, '-');
+#endif
+        for( i = 0; i < strlen(szBuf); ++i ) {
+            tty_put_char(tty, szBuf[i]);
+        }
+    }
+
+    return 0;
+}
+EXPORT_SYMBOL(syno_ttys_write);
+#endif
 
 struct class *tty_class;
 

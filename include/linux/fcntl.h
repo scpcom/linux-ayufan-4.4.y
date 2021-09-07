@@ -6,6 +6,16 @@
 #define F_SETLEASE	(F_LINUX_SPECIFIC_BASE + 0)
 #define F_GETLEASE	(F_LINUX_SPECIFIC_BASE + 1)
 
+#ifdef MY_ABC_HERE
+/**
+ * We added a new flags in structure file. So
+ * the bit start from 00000001
+ */
+#define O_UNMOUNT_OK			00000001    /* the data in file is normal */
+#define O_UNMOUNT_WAIT			00000002    /* force unmount is waiting the file to be umount */
+#define O_UNMOUNT_DONE			00000003    /* force unmounted file */
+#endif
+
 /*
  * Cancel a blocking posix lock; internal use only until we expose an
  * asynchronous lock api to userspace:

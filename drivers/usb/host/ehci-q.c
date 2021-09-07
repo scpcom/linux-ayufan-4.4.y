@@ -822,6 +822,9 @@ qh_make (
 			qh->gap_uf = 0;
 
 			qh->period = urb->interval >> 3;
+#ifdef CONFIG_MV_INCLUDE_USB
+			qh->u_period = urb->interval;
+#else
 			if (qh->period == 0 && urb->interval != 1) {
 				/* NOTE interval 2 or 4 uframes could work.
 				 * But interval 1 scheduling is simpler, and
@@ -832,6 +835,7 @@ qh_make (
 				qh->period = ehci->periodic_size;
 				urb->interval = qh->period << 3;
 			}
+#endif
 		} else {
 			int		think_time;
 
@@ -857,6 +861,9 @@ qh_make (
 				qh->period = ehci->periodic_size;
 				urb->interval = qh->period;
 			}
+#ifdef CONFIG_MV_INCLUDE_USB
+			qh->u_period = (unsigned short)~0;
+#endif
 		}
 	}
 

@@ -1779,3 +1779,90 @@ void bond_alb_clear_vlan(struct bonding *bond, unsigned short vlan_id)
 	}
 }
 
+#ifdef MY_ABC_HERE
+void bond_alb_info_show(struct seq_file *seq)
+{
+	struct bonding *bond = seq->private;
+	struct alb_bond_info *bond_info = &(BOND_ALB_INFO(bond));
+	struct rlb_client_info *rclient_info;
+	struct tlb_client_info *tclient_info;
+	struct slave *slave;
+	u32 index;
+	int i;
+	DECLARE_MAC_BUF(mac);
+
+	seq_puts(seq, "\nALB info\n");
+	seq_puts(seq, "\n Receive Load Balancing table:\n");
+	seq_puts(seq, "  Index Slave    Assigned Client-MAC"
+		      "         Server -> Client\n");
+
+	_lock_rx_hashtbl(bond);
+
+	index = bond_info->rx_hashtbl_head;
+	for (; index != RLB_NULL_INDEX; index = rclient_info->next) {
+		rclient_info = &(bond_info->rx_hashtbl[index]);
+		if (rclient_info) {
+			seq_printf(seq,	"%6u: %-8s %6s   %-17s  ",
+				   index,
+				   (rclient_info->slave &&
+				   rclient_info->slave->dev &&
+				   rclient_info->slave->dev->name ?
+				   rclient_info->slave->dev->name : "(none)"),
+				   (rclient_info->assigned ? "yes" : "no"),
+				   print_mac(mac, rclient_info->mac_dst));
+
+			/* Implemented as separate outputs to
+			   support IPv6 in the future (if it's supported) */
+			seq_printf(seq,	NIPQUAD_FMT " -> ",
+				   NIPQUAD(rclient_info->ip_src));
+			seq_printf(seq,	NIPQUAD_FMT "\n",
+				   NIPQUAD(rclient_info->ip_dst));
+		}
+	}
+
+	_unlock_rx_hashtbl(bond);
+
+	seq_puts(seq, "\n Transmit Load Balancing table:\n");
+	seq_printf(seq,	"  Unbalanced load: %u\n"
+			"  Rebalance interval: %u seconds\n\n",
+			bond_info->unbalanced_load,
+			BOND_TLB_REBALANCE_INTERVAL);
+
+	_lock_tx_hashtbl(bond);
+
+	/* Process each slave */
+	bond_for_each_slave(bond, slave, i) {
+
+		if (slave) {
+			seq_puts(seq, "  Slave    Used  Speed    Duplex"
+				      "  Current load\n");
+			seq_printf(seq, "  %-8s %3s   %-8u %4s      %10u\n",
+				   (slave->dev->name ?
+				    slave->dev->name : "none"),
+				   (SLAVE_IS_OK(slave) ? "yes" : "no"),
+				   slave->speed,
+				   (slave->duplex ? "full" : "half"),
+				   SLAVE_TLB_INFO(slave).load);
+
+			seq_puts(seq, "           Index    TX Bytes      "
+				      "Load history\n");
+
+			index = SLAVE_TLB_INFO(slave).head;
+			for (; index != TLB_NULL_INDEX;
+			     index = tclient_info->next) {
+				tclient_info = &(bond_info->tx_hashtbl[index]);
+				if (tclient_info)
+					seq_printf(seq,	"            "
+						   "%3u:  %10u"
+						   "        %10u\n",
+					   index,
+						   tclient_info->tx_bytes,
+						   tclient_info->load_history);
+			}
+			seq_puts(seq, "\n");
+		}
+	}
+
+	_unlock_tx_hashtbl(bond);
+}
+#endif

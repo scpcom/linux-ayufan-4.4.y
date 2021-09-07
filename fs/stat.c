@@ -18,11 +18,20 @@
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+extern int SynoDebugFlag;
+extern int syno_hibernation_log_sec;
+#endif
+
 void generic_fillattr(struct inode *inode, struct kstat *stat)
 {
 	stat->dev = inode->i_sb->s_dev;
 	stat->ino = inode->i_ino;
 	stat->mode = inode->i_mode;
+#ifdef MY_ABC_HERE
+	stat->SynoMode = inode->i_mode2;
+#endif
 	stat->nlink = inode->i_nlink;
 	stat->uid = inode->i_uid;
 	stat->gid = inode->i_gid;
@@ -30,6 +39,9 @@ void generic_fillattr(struct inode *inode, struct kstat *stat)
 	stat->atime = inode->i_atime;
 	stat->mtime = inode->i_mtime;
 	stat->ctime = inode->i_ctime;
+#ifdef MY_ABC_HERE
+	stat->SynoCreateTime = inode->i_CreateTime;
+#endif
 	stat->size = i_size_read(inode);
 	stat->blocks = inode->i_blocks;
 	stat->blksize = (1 << inode->i_blkbits);
@@ -153,6 +165,11 @@ SYSCALL_DEFINE2(stat, char __user *, filename, struct __old_kernel_stat __user *
 	int error;
 
 	error = vfs_stat(filename, &stat);
+#ifdef MY_ABC_HERE
+	if(syno_hibernation_log_sec > 0) {
+		syno_do_hibernation_log(filename);
+	}
+#endif
 	if (error)
 		return error;
 
@@ -229,6 +246,12 @@ static int cp_new_stat(struct kstat *stat, struct stat __user *statbuf)
 	tmp.st_mtime_nsec = stat->mtime.tv_nsec;
 	tmp.st_ctime_nsec = stat->ctime.tv_nsec;
 #endif
+#ifdef MY_ABC_HERE
+	tmp.st_SynoCreateTime = stat->SynoCreateTime.tv_sec;
+#endif
+#ifdef MY_ABC_HERE
+	tmp.st_SynoMode = stat->SynoMode;
+#endif
 	tmp.st_blocks = stat->blocks;
 	tmp.st_blksize = stat->blksize;
 	return copy_to_user(statbuf,&tmp,sizeof(tmp)) ? -EFAULT : 0;
@@ -243,6 +266,137 @@ SYSCALL_DEFINE2(newstat, char __user *, filename, struct stat __user *, statbuf)
 		return error;
 	return cp_new_stat(&stat, statbuf);
 }
+
+#ifdef MY_ABC_HERE
+#include "../fs/ecryptfs/ecryptfs_kernel.h"
+int (*fecryptfs_decode_and_decrypt_filename)(char **plaintext_name,
+                                        size_t *plaintext_name_size,
+                                        struct dentry *ecryptfs_dir_dentry,
+                                        const char *name, size_t name_size) = NULL;
+EXPORT_SYMBOL(fecryptfs_decode_and_decrypt_filename);
+
+asmlinkage long sys_SYNOEcryptName(char __user * src, char __user * dst)
+{
+	int                               err = -1;
+	struct qstr                      *lower_path = NULL;
+	struct path                       path;
+	struct ecryptfs_dentry_info      *crypt_dentry = NULL;
+
+	if (NULL == src || NULL == dst) {
+		return -EINVAL;
+	}
+
+	err = user_path_at(AT_FDCWD, src, LOOKUP_FOLLOW, &path);
+
+	if (err) {
+		return -ENOENT;
+	}
+	if (!path.dentry->d_inode->i_sb->s_type || 
+		strcmp(path.dentry->d_inode->i_sb->s_type->name, "ecryptfs")) {
+		err = -EINVAL;
+		goto OUT_RELEASE;
+	}
+	crypt_dentry = ecryptfs_dentry_to_private(path.dentry);
+	if (!crypt_dentry) {
+		err = -EINVAL;
+		goto OUT_RELEASE;
+	}
+	lower_path = &crypt_dentry->lower_path.dentry->d_name;
+	err = copy_to_user(dst, lower_path->name, lower_path->len + 1);
+
+OUT_RELEASE:
+	path_put(&path);
+
+	return err;
+}
+
+asmlinkage long sys_SYNODecryptName(char __user * root, char __user * src, char __user * dst)
+{
+	int                           err;
+	int                           plaintext_name_size = 0;
+	char                         *plaintext_name = NULL;
+	char                         *token = NULL;
+	char                         *szTarget = NULL;
+	char                         *root_name = NULL;
+	char                         *src_name = NULL;
+	char                         *src_walk = NULL;
+	struct nameidata              nd;
+
+	if (NULL == src || NULL == root || NULL == dst) {
+		return -EINVAL;
+	}
+	if (!fecryptfs_decode_and_decrypt_filename) {
+		return -EPERM;
+	}
+
+	src_name = getname(src);
+	if (IS_ERR(src_name)) {
+		err = PTR_ERR(src_name);
+		goto OUT_RELEASE;
+	}
+	// strsep() will move src_walk, so we should keep the head for free mem
+	src_walk = src_name;
+	root_name = getname(root);
+	if (IS_ERR(root_name)) {
+		err = PTR_ERR(root_name);
+		goto OUT_RELEASE;
+	}
+	szTarget = kmalloc(PATH_MAX, GFP_KERNEL);
+	if (!szTarget) {
+		err = -ENOMEM;
+		goto OUT_RELEASE;
+	}
+	strncpy(szTarget, root_name, PATH_MAX-1);
+	szTarget[PATH_MAX-1] = '\0';
+
+	token = strsep(&src_walk, "/");
+	if (*token == '\0') {
+		token = strsep(&src_walk, "/");
+	}
+	while (token) {
+		memset(&nd, 0, sizeof(struct nameidata));
+		err = path_lookup(szTarget, LOOKUP_FOLLOW, &nd);
+		if (err) {
+			goto OUT_RELEASE;
+		}
+		err = fecryptfs_decode_and_decrypt_filename(
+			&plaintext_name, &plaintext_name_size, nd.path.dentry, token, strlen(token));
+		if (err) {
+			path_put(&nd.path);
+			goto OUT_RELEASE;
+		}
+		if (PATH_MAX < strlen(szTarget) + plaintext_name_size + 1) {
+			path_put(&nd.path);
+			goto OUT_RELEASE;
+		}
+		strcat(szTarget, "/");
+		strcat(szTarget, plaintext_name);
+
+		kfree(plaintext_name);
+		plaintext_name = NULL;
+		path_put(&nd.path);
+
+		token = strsep(&src_walk, "/");
+	}
+	err = copy_to_user(dst, szTarget, strlen(szTarget)+1);
+
+OUT_RELEASE:
+	if (plaintext_name) {
+		kfree(plaintext_name);
+	}
+	if (szTarget) {
+		kfree(szTarget);
+	}
+	if (!IS_ERR(src_name)) {
+		putname(src_name);
+	}
+	if (!IS_ERR(root_name)) {
+		putname(root_name);
+	}
+
+	return err;
+}
+#endif
 
 SYSCALL_DEFINE2(newlstat, char __user *, filename, struct stat __user *, statbuf)
 {
@@ -314,6 +468,100 @@ SYSCALL_DEFINE3(readlink, const char __user *, path, char __user *, buf,
 	return sys_readlinkat(AT_FDCWD, path, buf, bufsiz);
 }
 
+#ifdef MY_ABC_HERE
+/* This stat is used by caseless protocol.
+ * The filename will be convert to real filename and return to user space.
+ * In caller, the length of filename must equal or be larger than SYNO_SMB_PSTRING_LEN.
+*/
+int __SYNOCaselessStat(char __user * filename, struct kstat *stat, unsigned flags, int *lastComponent)
+{
+	struct path path;
+	int error;
+	char *real_filename = NULL;
+	int real_filename_len = 0;
+
+	real_filename = kmalloc(SYNO_SMB_PSTRING_LEN, GFP_KERNEL);
+	if (!real_filename) {
+		return -ENOMEM;
+	}
+
+#ifdef MY_ABC_HERE
+	if (SynoDebugFlag) {
+		printk("%s(%d) orig name:[%s] len:[%d]\n", __FUNCTION__, __LINE__, filename, strlen(filename));
+	}
+#endif
+	error = syno_user_path_at(AT_FDCWD, filename, flags, &path, &real_filename, &real_filename_len, lastComponent);
+	if (!error) {
+		error = vfs_getattr(path.mnt, path.dentry, stat);
+		path_put(&path);
+		if (real_filename_len) {
+			error = copy_to_user(filename, real_filename, real_filename_len) ? -EFAULT : error;
+#ifdef MY_ABC_HERE
+			if (SynoDebugFlag) {
+				printk("%s(%d) convert name:[%s]\n",__FUNCTION__,__LINE__,filename);
+			}
+#endif
+		}
+	}
+#ifdef MY_ABC_HERE
+	if (error && SynoDebugFlag) {
+		printk("%s(%d) convert name:[%s], error:[%d]\n",__FUNCTION__,__LINE__,filename, error);
+	}
+#endif
+
+	kfree(real_filename);
+#ifdef MY_ABC_HERE
+	if(syno_hibernation_log_sec > 0) {
+		syno_do_hibernation_log(filename);
+	}
+#endif
+
+	return error;
+}
+EXPORT_SYMBOL(__SYNOCaselessStat);
+
+asmlinkage long sys_SYNOCaselessStat(char __user * filename, struct stat __user *statbuf)
+{
+	int lastComponent = 0;
+	long error = -1;
+	struct kstat stat;
+
+	error = __SYNOCaselessStat(filename, &stat, LOOKUP_FOLLOW|LOOKUP_CASELESS_COMPARE, &lastComponent);
+	if (!error) {
+		error = cp_new_stat(&stat, statbuf);
+	} else if(error == -ENOENT) {
+		struct stat tmp;
+
+		memset(&tmp, 0, sizeof(tmp));
+		tmp.st_SynoUnicodeStat = lastComponent;
+		error = copy_to_user(statbuf, &tmp, sizeof(tmp)) ? -EFAULT : error;
+	}
+
+	return error;
+}
+
+asmlinkage long sys_SYNOCaselessLStat(char __user * filename, struct stat __user *statbuf)
+{
+	int lastComponent = 0;
+	long error = -1;
+	struct kstat stat;
+
+	error = __SYNOCaselessStat(filename, &stat, LOOKUP_CASELESS_COMPARE, &lastComponent);
+	if (!error) {
+		error = cp_new_stat(&stat, statbuf);
+	} else if(error == -ENOENT) {
+		struct stat tmp;
+
+		memset(&tmp, 0, sizeof(tmp));
+		tmp.st_SynoUnicodeStat = lastComponent;
+		error = copy_to_user(statbuf, &tmp, sizeof(tmp)) ? -EFAULT : error;
+	}
+
+	return error;
+}
+
+#endif
+
 
 /* ---------- LFS-64 ----------- */
 #ifdef __ARCH_WANT_STAT64
@@ -349,6 +597,12 @@ static long cp_new_stat64(struct kstat *stat, struct stat64 __user *statbuf)
 	tmp.st_mtime_nsec = stat->mtime.tv_nsec;
 	tmp.st_ctime = stat->ctime.tv_sec;
 	tmp.st_ctime_nsec = stat->ctime.tv_nsec;
+#ifdef MY_ABC_HERE
+	tmp.st_SynoCreateTime = stat->SynoCreateTime.tv_sec;
+#endif
+#ifdef	MY_ABC_HERE
+	tmp.st_SynoMode = stat->SynoMode;
+#endif
 	tmp.st_size = stat->size;
 	tmp.st_blocks = stat->blocks;
 	tmp.st_blksize = stat->blksize;
@@ -360,6 +614,11 @@ SYSCALL_DEFINE2(stat64, char __user *, filename, struct stat64 __user *, statbuf
 	struct kstat stat;
 	int error = vfs_stat(filename, &stat);
 
+#ifdef MY_ABC_HERE
+	if(syno_hibernation_log_sec > 0) {
+		syno_do_hibernation_log(filename);
+	}
+#endif
 	if (!error)
 		error = cp_new_stat64(&stat, statbuf);
 
@@ -399,6 +658,49 @@ SYSCALL_DEFINE4(fstatat64, int, dfd, char __user *, filename,
 		return error;
 	return cp_new_stat64(&stat, statbuf);
 }
+
+#ifdef MY_ABC_HERE
+asmlinkage long sys_SYNOCaselessStat64(char __user * filename, struct stat64 __user *statbuf)
+{
+	int lastComponent = 0;
+	long error = -1;
+	struct kstat stat;
+
+	error = __SYNOCaselessStat(filename, &stat, LOOKUP_FOLLOW|LOOKUP_CASELESS_COMPARE, &lastComponent);
+	if (!error) {
+		error = cp_new_stat64(&stat, statbuf);
+	} else if(error == -ENOENT) {
+		struct stat64 tmp;
+
+		memset(&tmp, 0, sizeof(tmp));
+		tmp.st_SynoUnicodeStat = lastComponent;
+		error = copy_to_user(statbuf, &tmp, sizeof(tmp)) ? -EFAULT : error;
+	}
+
+	return error;
+}
+
+asmlinkage long sys_SYNOCaselessLStat64(char __user * filename, struct stat64 __user *statbuf)
+{
+	int lastComponent = 0;
+	long error = -1;
+	struct kstat stat;
+
+	error = __SYNOCaselessStat(filename, &stat, LOOKUP_CASELESS_COMPARE, &lastComponent);
+	if (!error) {
+		error = cp_new_stat64(&stat, statbuf);
+	} else if(error == -ENOENT) {
+		struct stat64 tmp;
+
+		memset(&tmp, 0, sizeof(tmp));
+		tmp.st_SynoUnicodeStat = lastComponent;
+		error = copy_to_user(statbuf, &tmp, sizeof(tmp)) ? -EFAULT : error;
+	}
+
+	return error;
+}
+#endif
+
 #endif /* __ARCH_WANT_STAT64 */
 
 /* Caller is here responsible for sufficient locking (ie. inode->i_lock) */

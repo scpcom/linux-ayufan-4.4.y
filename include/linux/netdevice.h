@@ -2013,6 +2013,11 @@ static inline u32 dev_ethtool_get_flags(struct net_device *dev)
 		return 0;
 	return dev->ethtool_ops->get_flags(dev);
 }
+
+#ifdef MY_ABC_HERE
+extern int syno_get_dev_vendor_mac(const char *szDev, char *szMac);
+#endif
+
 #endif /* __KERNEL__ */
 
 #endif	/* _LINUX_NETDEVICE_H */

@@ -18,7 +18,11 @@
 #ifndef _TCP_H
 #define _TCP_H
 
+#ifdef MY_ABC_HERE
+#undef TCP_DEBUG
+#else
 #define TCP_DEBUG 1
+#endif
 #define FASTRETRANS_DEBUG 1
 
 #include <linux/list.h>

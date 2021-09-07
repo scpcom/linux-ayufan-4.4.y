@@ -1968,6 +1968,11 @@ void locks_remove_posix(struct file *filp, fl_owner_t owner)
 {
 	struct file_lock lock;
 
+#ifdef MY_ABC_HERE
+	if (blSynostate(O_UNMOUNT_DONE, filp)) {
+		return;
+	}
+#endif
 	/*
 	 * If there are no locks held on this file, we don't need to call
 	 * posix_lock_file().  Another process could be setting a lock on this
@@ -2032,6 +2037,14 @@ void locks_remove_flock(struct file *filp)
 				lease_modify(before, F_UNLCK);
 				continue;
 			}
+#ifdef MY_ABC_HERE
+			if (IS_POSIX(fl) && blSynostate(O_UNMOUNT_DONE, filp)) {
+				// we should remove all posix lock in force umount "put".
+				// In general, remove posix by owner id.  In this case, we remove all posix lock.
+				locks_delete_lock(before);
+				continue;
+			}
+#endif
 			/* What? */
 			BUG();
  		}

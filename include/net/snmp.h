@@ -136,6 +136,20 @@ struct linux_xfrm_mib {
 #define SNMP_STAT_BHPTR(name)	(name[0])
 #define SNMP_STAT_USRPTR(name)	(name[1])
 
+#ifdef CONFIG_MV_LINUX_COUNTERS_DISABLE
+
+#define SNMP_INC_STATS_BH(mib, field)
+#define SNMP_INC_STATS_USER(mib, field)
+#define SNMP_INC_STATS(mib, field)
+#define SNMP_DEC_STATS(mib, field)
+#define SNMP_ADD_STATS(mib, field, addend)
+#define SNMP_ADD_STATS_BH(mib, field, addend)
+#define SNMP_ADD_STATS_USER(mib, field, addend)
+#define SNMP_UPD_PO_STATS(mib, basefield, addend)
+#define SNMP_UPD_PO_STATS_BH(mib, basefield, addend)
+
+#else
+
 #define SNMP_INC_STATS_BH(mib, field) 	\
 	(per_cpu_ptr(mib[0], raw_smp_processor_id())->mibs[field]++)
 #define SNMP_INC_STATS_USER(mib, field) \
@@ -178,4 +192,7 @@ struct linux_xfrm_mib {
 		ptr->mibs[basefield##PKTS]++; \
 		ptr->mibs[basefield##OCTETS] += addend;\
 	} while (0)
+
+#endif /* CONFIG_MV_LINUX_COUNTERS_DISABLE */
+
 #endif

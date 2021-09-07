@@ -23,6 +23,10 @@ struct nameidata {
 	int		last_type;
 	unsigned	depth;
 	char *saved_names[MAX_NESTED_LINKS + 1];
+#ifdef MY_ABC_HERE
+	unsigned char *real_filename;
+	unsigned int real_filename_len;
+#endif
 
 	/* Intent data */
 	union {
@@ -57,7 +61,16 @@ enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 #define LOOKUP_EXCL		0x0400
 #define LOOKUP_RENAME_TARGET	0x0800
 
+#ifdef MY_ABC_HERE
+/* this namei has done to the last component */
+#define LOOKUP_TO_LASTCOMPONENT 0x1000
+#define LOOKUP_CASELESS_COMPARE 0x2000
+#endif
+
 extern int user_path_at(int, const char __user *, unsigned, struct path *);
+#ifdef MY_ABC_HERE
+extern int syno_user_path_at(int, const char __user *, unsigned, struct path *, char **, int *, int *);
+#endif
 
 #define user_path(name, path) user_path_at(AT_FDCWD, name, LOOKUP_FOLLOW, path)
 #define user_lpath(name, path) user_path_at(AT_FDCWD, name, 0, path)
@@ -75,6 +88,11 @@ extern struct file *lookup_instantiate_filp(struct nameidata *nd, struct dentry 
 extern struct file *nameidata_to_filp(struct nameidata *nd, int flags);
 extern void release_open_intent(struct nameidata *);
 
+#ifdef CONFIG_AUFS_FS
+extern struct dentry *lookup_hash(struct nameidata *nd);
+extern int __lookup_one_len(const char *name, struct qstr *this,
+			    struct dentry *base, int len);
+#endif /* SYNO_AUFS */
 extern struct dentry *lookup_one_len(const char *, struct dentry *, int);
 extern struct dentry *lookup_one_noperm(const char *, struct dentry *);
 

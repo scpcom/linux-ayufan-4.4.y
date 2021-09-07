@@ -196,6 +196,14 @@ void dnotify_flush(struct file *filp, fl_owner_t id)
 	struct dnotify_struct **prev;
 	struct inode *inode;
 
+#ifdef MY_ABC_HERE
+	if (blSynostate(O_UNMOUNT_DONE, filp)) {
+		return;
+	}
+	if (id == NULL) {
+		return;
+	}
+#endif
 	inode = filp->f_path.dentry->d_inode;
 	if (!S_ISDIR(inode->i_mode))
 		return;

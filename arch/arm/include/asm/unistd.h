@@ -13,6 +13,10 @@
 #ifndef __ASM_ARM_UNISTD_H
 #define __ASM_ARM_UNISTD_H
 
+#if 1 //SYNO
+#include <linux/syno.h>
+#endif
+
 #define __NR_OABI_SYSCALL_BASE	0x900000
 
 #if defined(__thumb__) || defined(__ARM_EABI__)
@@ -391,6 +395,71 @@
 #define __NR_pwritev			(__NR_SYSCALL_BASE+362)
 #define __NR_rt_tgsigqueueinfo		(__NR_SYSCALL_BASE+363)
 #define __NR_perf_event_open		(__NR_SYSCALL_BASE+364)
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOmmap				(__NR_SYSCALL_BASE+400)
+#define SYNOmmap(x)					syscall(__NR_SYNOmmap, x)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOUtime                          (__NR_SYSCALL_BASE+402)
+#define SYNOUtime(arg1, arg2)                   syscall(__NR_SYNOUtime, arg1, arg2)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOArchiveBit                     (__NR_SYSCALL_BASE+403)
+#define SYNOArchiveBit(arg1, arg2)              syscall(__NR_SYNOArchiveBit, arg1, arg2)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_recvfile                           (__NR_SYSCALL_BASE+404)
+#define recvfile(arg1,arg2,arg3,arg4,arg5)      syscall(__NR_recvfile,arg1,arg2,arg3,arg4,arg5)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOMTDAlloc       (__NR_SYSCALL_BASE+405)
+#define SYNOMTDAlloc(x)         syscall(__NR_SYNOMTDAlloc, x)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOCaselessStat64			(__NR_SYSCALL_BASE+406)
+#define __NR_SYNOCaselessLStat64			(__NR_SYSCALL_BASE+407)
+#define __NR_SYNOCaselessStat			(__NR_SYSCALL_BASE+408)
+#define __NR_SYNOCaselessLStat			(__NR_SYSCALL_BASE+409)
+
+#if !defined(__KERNEL__)
+/* direct SYNOCaselessStat to stat64 in 32-bit platform
+ * 64-bits arch has no stat64 support */
+#include <bits/wordsize.h>
+#if __WORDSIZE == 64
+#define SYNOCaselessStat(arg1,arg2)                         syscall(__NR_SYNOCaselessStat , arg1,arg2)
+#define SYNOCaselessLStat(arg1,arg2)                         syscall(__NR_SYNOCaselessLStat , arg1,arg2)
+#elif (_FILE_OFFSET_BITS == 64)
+#define SYNOCaselessStat(arg1,arg2)                         syscall(__NR_SYNOCaselessStat64 , arg1,arg2)
+#define SYNOCaselessLStat(arg1,arg2)                         syscall(__NR_SYNOCaselessLStat64 , arg1,arg2)
+#endif
+/* define stat64 interface for compatibility
+   These should be removed after AP modification */
+#define SYNOCaselessStat64(arg1,arg2)                         syscall(__NR_SYNOCaselessStat64 , arg1,arg2)
+#define SYNOCaselessLStat64(arg1,arg2)                         syscall(__NR_SYNOCaselessLStat64 , arg1,arg2)
+#endif
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOEcryptName                 (__NR_SYSCALL_BASE+410)
+#define __NR_SYNODecryptName                (__NR_SYSCALL_BASE+411)
+#define SYNOEcryptName(arg1, arg2)          syscall(__NR_SYNOEcryptName, arg1, arg2)
+#define SYNODecryptName(arg1, arg2, arg3)         syscall(__NR_SYNODecryptName, arg1, arg2, arg3)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOACLCheckPerm               (__NR_SYSCALL_BASE+412)
+#define SYNOACLSysCheckPerm(arg1, arg2)            syscall(__NR_SYNOACLCheckPerm, arg1, arg2)
+#define __NR_SYNOACLIsSupport               (__NR_SYSCALL_BASE+413)
+#define SYNOACLSysIsSupport(arg1, arg2, arg3)            syscall(__NR_SYNOACLIsSupport, arg1, arg2, arg3)
+#define __NR_SYNOACLGetPerm               (__NR_SYSCALL_BASE+414)
+#define SYNOACLSysGetPerm(arg1, arg2)            syscall(__NR_SYNOACLGetPerm, arg1, arg2)
+#endif
 
 /*
  * The following SWIs are ARM private.

@@ -74,7 +74,7 @@ void stub_complete(struct urb *urb)
 		/* OK */
 		break;
 	case -ENOENT:
-		usbip_uinfo("stopped by a call of usb_kill_urb() because of"
+		usbip_uinfo("stopped by a call of usb_kill_urb() because of "
 					"cleaning up a virtual connection\n");
 		return;
 	case -ECONNRESET:
@@ -342,7 +342,11 @@ void stub_tx_loop(struct usbip_task *ut)
 			break;
 		}
 
+#ifdef MY_ABC_HERE
+		if (syno_usbip_event_happened(ud))
+#else
 		if (usbip_event_happened(ud))
+#endif
 			break;
 
 		/*

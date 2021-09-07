@@ -48,6 +48,11 @@
 
 #include "e1000.h"
 
+#ifdef MY_ABC_HERE
+#include <linux/synobios.h>
+extern int (*funcSYNOSendNetLinkEvent)(unsigned int type, unsigned int ifaceno);
+#endif
+
 #define DRV_VERSION "1.0.2-k2"
 char e1000e_driver_name[] = "e1000e";
 const char e1000e_driver_version[] = DRV_VERSION;
@@ -3422,7 +3427,19 @@ void e1000e_update_stats(struct e1000_adapter *adapter)
 					      adapter->stats.roc;
 	adapter->net_stats.rx_crc_errors = adapter->stats.crcerrs;
 	adapter->net_stats.rx_frame_errors = adapter->stats.algnerrc;
+#ifdef MY_ABC_HERE
+	/*
+	 * The "/1000" operation is used to beautify the RX missed
+	 * errors in the "ifconfig" command.
+	 */
+	{
+		int syno_rx_missed = adapter->stats.mpc;
+		syno_rx_missed = syno_rx_missed / 1000;
+		adapter->net_stats.rx_missed_errors = syno_rx_missed;
+    	}
+#else
 	adapter->net_stats.rx_missed_errors = adapter->stats.mpc;
+#endif
 
 	/* Tx Errors */
 	adapter->net_stats.tx_errors = adapter->stats.ecol +
@@ -3692,6 +3709,12 @@ static void e1000_watchdog_task(struct work_struct *work)
 			if (!test_bit(__E1000_DOWN, &adapter->state))
 				mod_timer(&adapter->phy_info_timer,
 					  round_jiffies(jiffies + 2 * HZ));
+
+#ifdef MY_ABC_HERE
+			if (funcSYNOSendNetLinkEvent) {
+				funcSYNOSendNetLinkEvent(NET_LINK, netdev->ifindex);
+			}
+#endif
 		}
 	} else {
 		if (netif_carrier_ok(netdev)) {
@@ -3707,6 +3730,12 @@ static void e1000_watchdog_task(struct work_struct *work)
 
 			if (adapter->flags & FLAG_RX_NEEDS_RESTART)
 				schedule_work(&adapter->reset_task);
+
+#ifdef MY_ABC_HERE
+			if (funcSYNOSendNetLinkEvent) {
+				funcSYNOSendNetLinkEvent(NET_NOLINK, netdev->ifindex);
+			}
+#endif
 		}
 	}
 
@@ -5049,7 +5078,11 @@ static int __devinit e1000_probe(struct pci_dev *pdev,
 	netdev->netdev_ops		= &e1000e_netdev_ops;
 	e1000e_set_ethtool_ops(netdev);
 	netdev->watchdog_timeo		= 5 * HZ;
+#ifdef MY_ABC_HERE
+	netif_napi_add(netdev, &adapter->napi, e1000_clean, 256);
+#else
 	netif_napi_add(netdev, &adapter->napi, e1000_clean, 64);
+#endif
 	strncpy(netdev->name, pci_name(pdev), sizeof(netdev->name) - 1);
 
 	netdev->mem_start = mmio_start;
@@ -5208,6 +5241,10 @@ static int __devinit e1000_probe(struct pci_dev *pdev,
 	/* initialize the wol settings based on the eeprom settings */
 	adapter->wol = adapter->eeprom_wol;
 	device_set_wakeup_enable(&adapter->pdev->dev, adapter->wol);
+
+#if defined(MY_ABC_HERE) && !defined(CONFIG_PM)
+	device_init_wakeup(&adapter->pdev->dev, adapter->wol);
+#endif
 
 	/* save off EEPROM version number */
 	e1000_read_nvm(&adapter->hw, 5, 1, &adapter->eeprom_vers);

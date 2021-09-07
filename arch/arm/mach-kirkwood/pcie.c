@@ -22,8 +22,22 @@
 
 void __init kirkwood_pcie_id(u32 *dev, u32 *rev)
 {
+#ifdef CONFIG_MACH_SYNOLOGY_6281
+	u32 reg = readl(POWER_MNG_CTRL_REG);
+	u8 blShutDownPcie = 0;
+	if ((reg & PMC_PEXSTOPCLOCK_MASK) == PMC_PEXSTOPCLOCK_STOP) {
+		blShutDownPcie = 1;
+		writel(readl(POWER_MNG_CTRL_REG) | PMC_PEXSTOPCLOCK_MASK, POWER_MNG_CTRL_REG);
+	}
+#endif
 	*dev = orion_pcie_dev_id(PCIE_BASE);
 	*rev = orion_pcie_rev(PCIE_BASE);
+
+#ifdef CONFIG_MACH_SYNOLOGY_6281
+	if (blShutDownPcie) {
+		writel(readl(POWER_MNG_CTRL_REG) & ~(PMC_PEXSTOPCLOCK_MASK), POWER_MNG_CTRL_REG);
+	}
+#endif
 }
 
 static int pcie_valid_config(int bus, int dev)

@@ -125,7 +125,9 @@ if [ -n "$dts" ]; then
     if [ -z "$dtb" ]; then
 	dtb="$platform.dtb"
     fi
-    $dtc -O dtb -o "$dtb" -b 0 "$dts"
+#   $dtc -O dtb -o "$dtb" -b 0 "$dts"
+    dtc -f -I dts -O dtb -o "$dtb" -R 8 -b 0 -S 0x3000 "$dts"
+    echo "dtc -f -I dts -O dtb -o '$dtb' -R 8 -b 0 -S 0x3000 '$dts'"
 fi
 
 if [ -z "$kernel" ]; then

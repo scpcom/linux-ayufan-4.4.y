@@ -47,6 +47,13 @@ struct scsi_host_template {
 	struct module *module;
 	const char *name;
 
+#ifdef CONFIG_ARCH_FEROCEON
+	/*
+	* support to scattered spinup in various drivers
+	*/
+	unsigned char support_scattered_spinup;
+#endif
+
 	/*
 	 * Used to initialize old-style drivers.  For new-style drivers
 	 * just perform all work in your module initialization function.
@@ -478,6 +485,29 @@ struct scsi_host_template {
 	 * module_init/module_exit.
 	 */
 	struct list_head legacy_hosts;
+
+#ifdef MY_ABC_HERE
+	/*
+	 * This is an optional routine that allow low level driver can deside
+	 * target start index in scsi layer.
+	 *
+	 * @return : scsi index of what low level driver want
+	 * Status: OPTIONAL
+	 */
+	int  (* syno_index_get)(struct Scsi_Host *host, uint channel, uint id, uint lun);
+#endif
+#ifdef MY_ABC_HERE
+	/*
+	 * This is an optional routine that could power off host power.
+	 *
+	 * @return : 0 success, otherwise fail
+	 * Status: OPTIONAL
+	 */
+	int  (* syno_host_power_ctl)(struct Scsi_Host *host, u8 blPowerOn);
+#endif
+#ifdef MY_ABC_HERE
+	int  syno_port_type;
+#endif
 
 	/*
 	 * Vendor Identifier associated with the host

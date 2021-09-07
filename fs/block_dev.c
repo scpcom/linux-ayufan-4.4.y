@@ -1102,9 +1102,17 @@ int revalidate_disk(struct gendisk *disk)
 	if (!bdev)
 		return ret;
 
+#ifdef MY_ABC_HERE
+	mutex_lock(&bdev->bd_inode->i_mutex);
+#else
 	mutex_lock(&bdev->bd_mutex);
+#endif
 	check_disk_size_change(disk, bdev);
+#ifdef MY_ABC_HERE
+	mutex_unlock(&bdev->bd_inode->i_mutex);
+#else
 	mutex_unlock(&bdev->bd_mutex);
+#endif
 	bdput(bdev);
 	return ret;
 }

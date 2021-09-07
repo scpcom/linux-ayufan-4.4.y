@@ -396,6 +396,10 @@ static int ecryptfs_write_inode_size_to_header(struct inode *ecryptfs_inode)
 	rc = ecryptfs_write_lower(ecryptfs_inode, file_size_virt, 0,
 				  sizeof(u64));
 	kfree(file_size_virt);
+#ifdef MY_ABC_HERE
+	if (-EDQUOT == rc)
+		return rc;  // skip error msg
+#endif
 	if (rc < 0)
 		printk(KERN_ERR "%s: Error writing file size to header; "
 		       "rc = [%d]\n", __func__, rc);
@@ -512,6 +516,9 @@ static int ecryptfs_write_end(struct file *file,
 	}
 	rc = ecryptfs_encrypt_page(page);
 	if (rc) {
+#ifdef MY_ABC_HERE
+		if (-EDQUOT != rc)
+#endif
 		ecryptfs_printk(KERN_WARNING, "Error encrypting page (upper "
 				"index [0x%.16x])\n", index);
 		goto out;
@@ -547,9 +554,175 @@ static sector_t ecryptfs_bmap(struct address_space *mapping, sector_t block)
 	return rc;
 }
 
+#if defined(MY_ABC_HERE) && defined(SYNO_OLD_RECVFILE)
+/**
+ * ecryptfs_prepare_write
+ * @file: The eCryptfs file
+ * @page: The eCryptfs page
+ * @from: The start byte from which we will write
+ * @to: The end byte to which we will write
+ *
+ * This function must zero any hole we create
+ *
+ * Returns zero on success; non-zero otherwise
+ */
+static int ecryptfs_prepare_write(struct file *file, struct page *page,
+				  unsigned from, unsigned to)
+{
+	loff_t prev_page_end_size;
+	int rc = 0;
+
+	if (!PageUptodate(page)) {
+		struct ecryptfs_crypt_stat *crypt_stat =
+			&ecryptfs_inode_to_private(
+				file->f_path.dentry->d_inode)->crypt_stat;
+
+		if (!(crypt_stat->flags & ECRYPTFS_ENCRYPTED)
+		    || (crypt_stat->flags & ECRYPTFS_NEW_FILE)) {
+			rc = ecryptfs_read_lower_page_segment(
+				page, page->index, 0, PAGE_CACHE_SIZE,
+				page->mapping->host);
+			if (rc) {
+				printk(KERN_ERR "%s: Error attemping to read "
+				       "lower page segment; rc = [%d]\n",
+				       __func__, rc);
+				ClearPageUptodate(page);
+				goto out;
+			} else
+				SetPageUptodate(page);
+		} else if (crypt_stat->flags & ECRYPTFS_VIEW_AS_ENCRYPTED) {
+			if (crypt_stat->flags & ECRYPTFS_METADATA_IN_XATTR) {
+				rc = ecryptfs_copy_up_encrypted_with_header(
+					page, crypt_stat);
+				if (rc) {
+					printk(KERN_ERR "%s: Error attempting "
+					       "to copy the encrypted content "
+					       "from the lower file whilst "
+					       "inserting the metadata from "
+					       "the xattr into the header; rc "
+					       "= [%d]\n", __func__, rc);
+					ClearPageUptodate(page);
+					goto out;
+				}
+				SetPageUptodate(page);
+			} else {
+				rc = ecryptfs_read_lower_page_segment(
+					page, page->index, 0, PAGE_CACHE_SIZE,
+					page->mapping->host);
+				if (rc) {
+					printk(KERN_ERR "%s: Error reading "
+					       "page; rc = [%d]\n",
+					       __func__, rc);
+					ClearPageUptodate(page);
+					goto out;
+				}
+				SetPageUptodate(page);
+			}
+		} else {
+			rc = ecryptfs_decrypt_page(page);
+			if (rc) {
+				printk(KERN_ERR "%s: Error decrypting page "
+				       "at index [%ld]; rc = [%d]\n",
+				       __func__, page->index, rc);
+				ClearPageUptodate(page);
+				goto out;
+			}
+			SetPageUptodate(page);
+		}
+	}
+	prev_page_end_size = ((loff_t)page->index << PAGE_CACHE_SHIFT);
+	/* If creating a page or more of holes, zero them out via truncate.
+	 * Note, this will increase i_size. */
+	if (page->index != 0) {
+		if (prev_page_end_size > i_size_read(page->mapping->host)) {
+			rc = ecryptfs_truncate(file->f_path.dentry,
+					       prev_page_end_size);
+			if (rc) {
+				printk(KERN_ERR "%s: Error on attempt to "
+				       "truncate to (higher) offset [%lld];"
+				       " rc = [%d]\n", __func__,
+				       prev_page_end_size, rc);
+				goto out;
+			}
+		}
+	}
+	/* Writing to a new page, and creating a small hole from start
+	 * of page?  Zero it out. */
+	if ((i_size_read(page->mapping->host) == prev_page_end_size)
+	    && (from != 0))
+		zero_user(page, 0, PAGE_CACHE_SIZE);
+out:
+	return rc;
+}
+
+/**
+ * ecryptfs_commit_write
+ * @file: The eCryptfs file object
+ * @page: The eCryptfs page
+ * @from: Ignored (we rotate the page IV on each write)
+ * @to: Ignored
+ *
+ * This is where we encrypt the data and pass the encrypted data to
+ * the lower filesystem.  In OpenPGP-compatible mode, we operate on
+ * entire underlying packets.
+ */
+static int ecryptfs_commit_write(struct file *file, struct page *page,
+				 unsigned from, unsigned to)
+{
+	loff_t pos;
+	struct inode *ecryptfs_inode = page->mapping->host;
+	struct ecryptfs_crypt_stat *crypt_stat =
+		&ecryptfs_inode_to_private(file->f_path.dentry->d_inode)->crypt_stat;
+	int rc;
+
+	if (crypt_stat->flags & ECRYPTFS_NEW_FILE) {
+		ecryptfs_printk(KERN_DEBUG, "ECRYPTFS_NEW_FILE flag set in "
+			"crypt_stat at memory location [%p]\n", crypt_stat);
+		crypt_stat->flags &= ~(ECRYPTFS_NEW_FILE);
+	} else
+		ecryptfs_printk(KERN_DEBUG, "Not a new file\n");
+	ecryptfs_printk(KERN_DEBUG, "Calling fill_zeros_to_end_of_page"
+			"(page w/ index = [0x%.16x], to = [%d])\n", page->index,
+			to);
+	/* Fills in zeros if 'to' goes beyond inode size */
+	rc = fill_zeros_to_end_of_page(page, to);
+	if (rc) {
+		ecryptfs_printk(KERN_WARNING, "Error attempting to fill "
+				"zeros in page with index = [0x%.16x]\n",
+				page->index);
+		goto out;
+	}
+	rc = ecryptfs_encrypt_page(page);
+	if (rc) {
+#ifdef MY_ABC_HERE
+		if (-EDQUOT != rc)
+#endif
+		ecryptfs_printk(KERN_WARNING, "Error encrypting page (upper "
+				"index [0x%.16x])\n", page->index);
+		goto out;
+	}
+	pos = (((loff_t)page->index) << PAGE_CACHE_SHIFT) + to;
+	if (pos > i_size_read(ecryptfs_inode)) {
+		i_size_write(ecryptfs_inode, pos);
+		ecryptfs_printk(KERN_DEBUG, "Expanded file size to "
+				"[0x%.16x]\n", i_size_read(ecryptfs_inode));
+	}
+	rc = ecryptfs_write_inode_size_to_metadata(ecryptfs_inode);
+	if (rc)
+		printk(KERN_ERR "Error writing inode size to metadata; "
+		       "rc = [%d]\n", rc);
+out:
+	return rc;
+}
+#endif
+
 const struct address_space_operations ecryptfs_aops = {
 	.writepage = ecryptfs_writepage,
 	.readpage = ecryptfs_readpage,
+#if defined(MY_ABC_HERE) && defined(SYNO_OLD_RECVFILE)
+	.prepare_write = ecryptfs_prepare_write,
+	.commit_write = ecryptfs_commit_write,
+#endif
 	.write_begin = ecryptfs_write_begin,
 	.write_end = ecryptfs_write_end,
 	.bmap = ecryptfs_bmap,

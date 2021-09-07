@@ -220,6 +220,24 @@ static int find_group_dir(struct super_block *sb, struct inode *parent)
 			best_desc = desc;
 		}
 	}
+#ifdef MY_ABC_HERE
+	if (-1 != best_group) {
+		goto FOUND_GROUP;
+	}
+	/*
+	 * The free-inodes counter is approximate, and for really small
+	 * filesystems the above test can fail to find any blockgroups
+	 */
+	for (group = 0; group < ngroups; group++) {
+		desc = ext3_get_group_desc (sb, group, NULL);
+		if (!desc || !desc->bg_free_inodes_count)
+			continue;
+		best_group = group;
+		goto FOUND_GROUP;
+	}
+
+FOUND_GROUP:
+#endif
 	return best_group;
 }
 
@@ -553,6 +571,12 @@ got:
 	/* This is the optimal IO size (for stat), not the fs block size */
 	inode->i_blocks = 0;
 	inode->i_mtime = inode->i_atime = inode->i_ctime = CURRENT_TIME_SEC;
+#ifdef MY_ABC_HERE
+	inode->i_CreateTime = CURRENT_TIME_SEC;
+#endif
+#ifdef MY_ABC_HERE
+	inode->i_mode2 = ALL_SYNO_ARCHIVE;   /* set archive bit on creation */
+#endif
 
 	memset(ei->i_data, 0, sizeof(ei->i_data));
 	ei->i_dir_start_lookup = 0;

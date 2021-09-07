@@ -17,7 +17,17 @@
 
 #define MIIMIND_BUSY            0x00000001
 #define MIIMIND_NOTVALID        0x00000004
+
+#ifdef MY_ABC_HERE
+#define MIIMCFG_INIT_VALUE_RGMII	0x00000006
+#endif /* MY_ABC_HERE */
+
+#ifdef  MY_ABC_HERE
+#define MIIMCFG_INIT_VALUE     0x00000003
+#else /* MY_ABC_HERE */
 #define MIIMCFG_INIT_VALUE	0x00000007
+#endif /* MY_ABC_HERE */
+
 #define MIIMCFG_RESET           0x80000000
 
 #define MII_READ_COMMAND       0x00000001

@@ -384,6 +384,9 @@ enum {
 	SATA_PMP_GSCR_ERROR_EN	= 33,
 	SATA_PMP_GSCR_FEAT	= 64,
 	SATA_PMP_GSCR_FEAT_EN	= 96,
+#ifdef MY_ABC_HERE
+	SATA_PMP_GSCR_3726_GPIO	= 130,
+#endif
 
 	SATA_PMP_PSCR_STATUS	= 0,
 	SATA_PMP_PSCR_ERROR	= 1,
@@ -437,6 +440,10 @@ enum {
 	ATA_TFLAG_LBA		= (1 << 4), /* enable LBA */
 	ATA_TFLAG_FUA		= (1 << 5), /* enable FUA */
 	ATA_TFLAG_POLLING	= (1 << 6), /* set nIEN to 1 and use polling */
+#ifdef MY_ABC_HERE
+	/* send cmd directly not through ata work queue to prevent timeout issue */
+	ATA_TFLAG_DIRECT    = (1 << 7), 
+#endif
 
 	/* protocol flags */
 	ATA_PROT_FLAG_PIO	= (1 << 0), /* is PIO */

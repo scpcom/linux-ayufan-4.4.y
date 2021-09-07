@@ -2779,7 +2779,11 @@ serial8250_console_write(struct console *co, const char *s, unsigned int count)
 static int __init serial8250_console_setup(struct console *co, char *options)
 {
 	struct uart_port *port;
+#ifdef MY_DEF_HERE
+	int baud = 115200;
+#else
 	int baud = 9600;
+#endif
 	int bits = 8;
 	int parity = 'n';
 	int flow = 'n';

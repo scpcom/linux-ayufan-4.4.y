@@ -21,4 +21,10 @@ config DISPLAY_SUPPORT
 comment "Display hardware drivers"
 	depends on DISPLAY_SUPPORT
 
+config ADI9889
+	tristate "ADI9889 support"
+	default n
+	help
+	  ADI9889 device driver support.
+
 endmenu

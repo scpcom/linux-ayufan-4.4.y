@@ -96,6 +96,30 @@
 
 #define printk_rl(args...) ((void) (printk_ratelimit() && printk(args)))
 
+#ifdef MY_ABC_HERE
+static inline void remove_hash(struct stripe_head *sh);
+#endif
+
+#ifdef MY_ABC_HERE
+static unsigned char IsDiskErrorSet(mddev_t *mddev)
+{
+	int i;
+	unsigned char res = 0;
+	raid5_conf_t *conf = mddev->private;
+	mdk_rdev_t *rdev_tmp = NULL;
+
+	for (i = 0; i < conf->raid_disks; i++) {
+		rdev_tmp = conf->disks[i].rdev;
+		if (rdev_tmp && test_bit(DiskError, &rdev_tmp->flags)) {
+			res = 1;
+			goto END;
+		}
+	}
+END:
+	return res;
+}
+#endif
+
 /*
  * We maintain a biased count of active stripes in the bottom 16 bits of
  * bi_phys_segments, and a count of processed stripes in the upper 16 bits
@@ -191,6 +215,27 @@ static int stripe_operations_active(struct stripe_head *sh)
 	       test_bit(STRIPE_COMPUTE_RUN, &sh->state);
 }
 
+#ifdef MY_ABC_HERE
+static  void SYNORaid5CheckPage(struct stripe_head *sh)
+{
+	raid5_conf_t *conf = sh->raid_conf;
+	int disks = conf->raid_disks, i;
+	int frmsh = 0;
+
+	for (i = disks;i--;) {
+		if (test_bit(R5_UseFSPage, &sh->dev[i].flags)) {
+			put_page(sh->dev[i].page);
+			sh->dev[i].page = sh->dev[i].r5page;
+			sh->dev[i].flags = 0;
+			frmsh = 1;
+		}
+	}
+	if (frmsh) {
+		remove_hash(sh);
+	}
+}
+#endif  // MY_ABC_HERE
+
 static void __release_stripe(raid5_conf_t *conf, struct stripe_head *sh)
 {
 	if (atomic_dec_and_test(&sh->count)) {
@@ -218,6 +263,9 @@ static void __release_stripe(raid5_conf_t *conf, struct stripe_head *sh)
 			}
 			atomic_dec(&conf->active_stripes);
 			if (!test_bit(STRIPE_EXPANDING, &sh->state)) {
+#ifdef MY_ABC_HERE
+				SYNORaid5CheckPage(sh);
+#endif
 				list_add_tail(&sh->lru, &conf->inactive_list);
 				wake_up(&conf->wait_for_stripe);
 				if (conf->retry_read_aligned)
@@ -300,6 +348,9 @@ static int grow_buffers(struct stripe_head *sh, int num)
 			return 1;
 		}
 		sh->dev[i].page = page;
+#ifdef MY_ABC_HERE
+		sh->dev[i].r5page = page;
+#endif
 	}
 	return 0;
 }
@@ -961,9 +1012,34 @@ ops_run_biodrain(struct stripe_head *sh, struct dma_async_tx_descriptor *tx)
 
 			while (wbi && wbi->bi_sector <
 				dev->sector + STRIPE_SECTORS) {
+#ifdef MY_ABC_HERE
+				if (!sh->raid_conf->mddev->degraded &&
+					!sh->raid_conf->mddev->bl_raid5_enhance_disabled &&
+					!test_bit(STRIPE_SYNCING, &sh->state) &&  
+					!test_bit(STRIPE_EXPAND_READY, &sh->state) &&
+					wbi->bi_vcnt == 1 && 
+					wbi->bi_io_vec[0].bv_offset == 0 && 
+					wbi->bi_io_vec[0].bv_len == STRIPE_SIZE &&
+					!PageHighMem(wbi->bi_io_vec[0].bv_page)) {
+					struct page *pPage = sh->dev[i].page;
+					sh->dev[i].page = wbi->bi_io_vec[0].bv_page;
+					sh->dev[i].vec.bv_page = sh->dev[i].page;
+					get_page(sh->dev[i].page);
+					if (test_bit(R5_UseFSPage, &sh->dev[i].flags)) {
+						put_page(pPage);
+					} else {
+						set_bit(R5_UseFSPage, &sh->dev[i].flags);
+					}
+				} else {
+					tx = async_copy_data(1, wbi, dev->page,
+										 dev->sector, tx);
+				}
+				wbi = r5_next_bio(wbi, dev->sector);
+#else
 				tx = async_copy_data(1, wbi, dev->page,
 					dev->sector, tx);
 				wbi = r5_next_bio(wbi, dev->sector);
+#endif
 			}
 		}
 	}
@@ -1393,10 +1469,17 @@ static int resize_stripes(raid5_conf_t *conf, int newsize)
 		osh = get_free_stripe(conf);
 		spin_unlock_irq(&conf->device_lock);
 		atomic_set(&nsh->count, 1);
+#ifdef MY_ABC_HERE
+		for(i=0; i<conf->pool_size; i++)
+			nsh->dev[i].r5page = nsh->dev[i].page = osh->dev[i].page;
+		for( ; i<newsize; i++)
+			nsh->dev[i].r5page = nsh->dev[i].page = NULL;
+#else
 		for(i=0; i<conf->pool_size; i++)
 			nsh->dev[i].page = osh->dev[i].page;
 		for( ; i<newsize; i++)
 			nsh->dev[i].page = NULL;
+#endif
 		kmem_cache_free(conf->slab_cache, osh);
 	}
 	kmem_cache_destroy(conf->slab_cache);
@@ -1442,7 +1525,11 @@ static int resize_stripes(raid5_conf_t *conf, int newsize)
 		for (i=conf->raid_disks; i < newsize; i++)
 			if (nsh->dev[i].page == NULL) {
 				struct page *p = alloc_page(GFP_NOIO);
+#ifdef MY_ABC_HERE
+				nsh->dev[i].r5page = nsh->dev[i].page = p;
+#else
 				nsh->dev[i].page = p;
+#endif
 				if (!p)
 					err = -ENOMEM;
 			}
@@ -1508,6 +1595,9 @@ static void raid5_end_read_request(struct bio * bi, int error)
 		set_bit(R5_UPTODATE, &sh->dev[i].flags);
 		if (test_bit(R5_ReadError, &sh->dev[i].flags)) {
 			rdev = conf->disks[i].rdev;
+#ifdef MY_ABC_HERE
+			SynoReportCorrectBadSector(bi->bi_sector, conf->mddev->md_minor, rdev->bdev, __FUNCTION__);
+#endif
 			printk_rl(KERN_INFO "raid5:%s: read error corrected"
 				  " (%lu sectors at %llu on %s)\n",
 				  mdname(conf->mddev), STRIPE_SECTORS,
@@ -1526,7 +1616,35 @@ static void raid5_end_read_request(struct bio * bi, int error)
 
 		clear_bit(R5_UPTODATE, &sh->dev[i].flags);
 		atomic_inc(&rdev->read_errors);
-		if (conf->mddev->degraded)
+
+#ifdef MY_ABC_HERE
+		if (conf->mddev->auto_remap &&
+			0 == IsDeviceDisappear(rdev->bdev) &&
+			!test_bit(R5_ReWrite, &sh->dev[i].flags) &&
+			test_bit(STRIPE_SYNCING, &sh->state)) {
+			// prevent the sector is really bad, can't do anymore. Like Samsung Disks
+			retry = 1;
+		}
+#endif
+
+#ifdef MY_ABC_HERE
+		if ((conf->mddev->degraded >= conf->max_degraded) && !conf->mddev->auto_remap)
+#else
+		if (conf->mddev->degraded >= conf->max_degraded)
+#endif
+#ifdef MY_ABC_HERE
+		{
+			if (!test_bit(DiskError, &rdev->flags)) {
+				printk_rl(KERN_WARNING
+					  "raid5:%s: read error not correctable "
+					  "(sector %llu on %s).\n",
+					  mdname(conf->mddev),
+					  (unsigned long long)(sh->sector
+							       + rdev->data_offset),
+					  bdn);
+			}
+		}
+#else
 			printk_rl(KERN_WARNING
 				  "raid5:%s: read error not correctable "
 				  "(sector %llu on %s).\n",
@@ -1534,6 +1652,7 @@ static void raid5_end_read_request(struct bio * bi, int error)
 				  (unsigned long long)(sh->sector
 						       + rdev->data_offset),
 				  bdn);
+#endif /* MY_ABC_HERE */
 		else if (test_bit(R5_ReWrite, &sh->dev[i].flags))
 			/* Oh, no!!! */
 			printk_rl(KERN_WARNING
@@ -1545,17 +1664,48 @@ static void raid5_end_read_request(struct bio * bi, int error)
 				  bdn);
 		else if (atomic_read(&rdev->read_errors)
 			 > conf->max_nr_stripes)
+#ifdef MY_ABC_HERE
+		{
+			if (!test_bit(DiskError, &rdev->flags)) {
 			printk(KERN_WARNING
 			       "raid5:%s: Too many read errors, failing device %s.\n",
 			       mdname(conf->mddev), bdn);
+			}
+		}
+#else
+			printk(KERN_WARNING
+			       "raid5:%s: Too many read errors, failing device %s.\n",
+			       mdname(conf->mddev), bdn);
+#endif /* MY_ABC_HERE */
 		else
 			retry = 1;
+
+#ifdef MY_ABC_HERE
+		if (0 == IsDeviceDisappear(rdev->bdev)) {
+			SynoReportBadSector(bi->bi_sector, READ, conf->mddev->md_minor, rdev->bdev, __FUNCTION__);
+		}
+#endif
+
 		if (retry)
 			set_bit(R5_ReadError, &sh->dev[i].flags);
 		else {
 			clear_bit(R5_ReadError, &sh->dev[i].flags);
 			clear_bit(R5_ReWrite, &sh->dev[i].flags);
+#ifdef MY_ABC_HERE
+			if (IsDeviceDisappear(rdev->bdev)) {
+				syno_md_error(conf->mddev, rdev);
+			}else{
+				md_error(conf->mddev, rdev);
+#ifdef MY_ABC_HERE
+				set_bit(STRIPE_NORETRY, &sh->state);
+#endif
+			}
+#else
 			md_error(conf->mddev, rdev);
+#ifdef MY_ABC_HERE
+			set_bit(STRIPE_NORETRY, &sh->state);
+#endif
+#endif
 		}
 	}
 	rdev_dec_pending(conf->disks[i].rdev, conf->mddev);
@@ -1583,8 +1733,22 @@ static void raid5_end_write_request(struct bio *bi, int error)
 		return;
 	}
 
+#ifdef MY_ABC_HERE
+	if (!uptodate) {
+		if (IsDeviceDisappear(conf->disks[i].rdev->bdev)) {
+			syno_md_error(conf->mddev, conf->disks[i].rdev);
+		}else{
+#ifdef MY_ABC_HERE
+			SynoReportBadSector(bi->bi_sector, WRITE,
+								conf->mddev->md_minor, conf->disks[i].rdev->bdev, __FUNCTION__);
+#endif
+			md_error(conf->mddev, conf->disks[i].rdev);
+		}
+	}
+#else
 	if (!uptodate)
 		md_error(conf->mddev, conf->disks[i].rdev);
+#endif
 
 	rdev_dec_pending(conf->disks[i].rdev, conf->mddev);
 	
@@ -1615,6 +1779,147 @@ static void raid5_build_block(struct stripe_head *sh, int i, int previous)
 	dev->sector = compute_blocknr(sh, i, previous);
 }
 
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+
+static inline unsigned char SynoIsRaidReachMaxDegrade(mddev_t *mddev)
+{
+	raid5_conf_t *conf = (raid5_conf_t *) mddev->private;
+
+	if (conf->max_degraded <= mddev->degraded) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * This piece of code is just let you know i am copy oringinal
+ * error function without any modification
+ */
+static void error_orig(mddev_t *mddev, mdk_rdev_t *rdev)
+{
+	char b[BDEVNAME_SIZE];
+	raid5_conf_t *conf = (raid5_conf_t *) mddev->private;
+	pr_debug("raid5: error called\n");
+
+	if (!test_bit(Faulty, &rdev->flags)) {
+		set_bit(MD_CHANGE_DEVS, &mddev->flags);
+		if (test_and_clear_bit(In_sync, &rdev->flags)) {
+			unsigned long flags;
+			spin_lock_irqsave(&conf->device_lock, flags);
+			mddev->degraded++;
+#ifdef MY_ABC_HERE
+			if (mddev->degraded > conf->max_degraded) {
+				if (0 == mddev->nodev_and_crashed) {
+					mddev->nodev_and_crashed = 1;
+				}
+			}
+#endif
+
+			spin_unlock_irqrestore(&conf->device_lock, flags);
+			/*
+			 * if recovery was running, make sure it aborts.
+			 */
+			set_bit(MD_RECOVERY_INTR, &mddev->recovery);
+		}
+		set_bit(Faulty, &rdev->flags);
+		printk (KERN_ALERT
+			"raid5: Disk failure on %s, disabling device."
+			" Operation continuing on %d devices\n",
+			bdevname(rdev->bdev,b), conf->raid_disks - mddev->degraded);
+	}
+}
+
+/**
+ * copy it from original error(...), and modify
+ * the case: conf->max_degraded <= mddev->degraded
+ *
+ * In such case, we must let it can keep read from disk
+ *
+ * @param mddev  passing from md.c
+ * @param rdev   passing from md.c
+ *
+ * @see syno_error_for_hotplug
+ */
+static void syno_error_for_internal(mddev_t *mddev, mdk_rdev_t *rdev)
+{
+	char b1[BDEVNAME_SIZE];
+#ifdef MY_ABC_HERE
+	char b2[BDEVNAME_SIZE];
+	mdk_rdev_t *rdev_tmp;
+#endif
+
+	if (test_bit(In_sync, &rdev->flags) &&
+		SynoIsRaidReachMaxDegrade(mddev)) {
+#ifdef MY_ABC_HERE
+		if (!test_bit(Faulty, &rdev->flags) && !test_bit(DiskError, &rdev->flags)) {
+			set_bit(MD_CHANGE_DEVS, &mddev->flags);
+			/*
+			* find out the disk in sync now, set it to faulty let it fail to building parity
+			*/
+			list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
+				if (!test_bit(Faulty, &rdev_tmp->flags) && !test_bit(In_sync, &rdev_tmp->flags)) {
+					printk("%s[%d]:%s: %s has read/write error, but it gonna to crashed. "
+						   "We set %s to faulty for stopping sync\n",
+						   __FILE__, __LINE__, __FUNCTION__,
+						   bdevname(rdev->bdev, b1), bdevname(rdev_tmp->bdev, b2));
+					set_bit(MD_RECOVERY_INTR, &mddev->recovery);
+					set_bit(Faulty, &rdev_tmp->flags);
+				}
+			}
+			set_bit(DiskError, &rdev->flags);
+		}
+#endif
+		printk("%s[%d]:%s: disk error on %s\n",
+			   __FILE__, __LINE__, __FUNCTION__,
+			   bdevname(rdev->bdev,b1));
+	}else{
+		error_orig(mddev, rdev);
+	}
+}
+
+/**
+ * This function is main for raid5
+ * when the error_handler meet hotplug event.
+ *
+ * Internal raid5 error_handler must using
+ * syno_error_for_internal.
+ *
+ * When md meet a r/w error at conf->max_degraded <=
+ * mddev->degraded, we do not set it faulty, because it
+ * would become crashed, so we just let it become read only in
+ * such situation.
+ *
+ * External raid5 error_handler must using this function.
+ * because this type of error is hotplug event, we can't just
+ * let it be read-only, instead of this, we make it faulty
+ *
+ * If there is going to be crashed in raid 4/5/6, and we want
+ * hotplug it. We need unplug all other disk which are building 
+ * parity now. Otherwise the status will be error in such 
+ * disks("U" instead of "_" ) 
+ * 
+ * @param mddev passing from md.c
+ * @param rdev passing from md.c
+ */
+static void syno_error_for_hotplug(mddev_t *mddev, mdk_rdev_t *rdev)
+{
+	char b1[BDEVNAME_SIZE], b2[BDEVNAME_SIZE];
+	mdk_rdev_t *rdev_tmp;
+
+	if (test_bit(In_sync, &rdev->flags) &&
+		SynoIsRaidReachMaxDegrade(mddev)) {
+		list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
+			if(!test_bit(In_sync, &rdev_tmp->flags) && !test_bit(Faulty, &rdev_tmp->flags)) {
+				printk("[%s] %d: %s is being to unplug, but %s is building parity now, disable both\n", 
+					   __FILE__, __LINE__, bdevname(rdev->bdev, b2), bdevname(rdev_tmp->bdev, b1));
+				SYNORaidRdevUnplug(mddev, rdev_tmp);
+			}
+		}
+	}
+	error_orig(mddev, rdev);
+}
+#else /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
+
 static void error(mddev_t *mddev, mdk_rdev_t *rdev)
 {
 	char b[BDEVNAME_SIZE];
@@ -1640,6 +1945,7 @@ static void error(mddev_t *mddev, mdk_rdev_t *rdev)
 		       bdevname(rdev->bdev,b), conf->raid_disks - mddev->degraded);
 	}
 }
+#endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
 
 /*
  * Input: a 'big' sector number,
@@ -2920,6 +3226,50 @@ static void handle_stripe_expansion(raid5_conf_t *conf, struct stripe_head *sh,
 	}
 }
 
+#ifdef MY_ABC_HERE
+/**
+ * This is only for raid5 besides one day raid6
+ * using degrade raid for buiding a new raid6, we
+ * would need to port this function to handle_stripe6 too.
+ *
+ *
+ * @param conf   [IN] Should no be NULL
+ * @param sh     [IN/OUT] Should no be NULL
+ * @param s      [IN] Should no be NULL
+ * @param dev    [IN/OUT] Should no be NULL
+ */
+void syno_read_err_retry5(raid5_conf_t *conf, struct stripe_head *sh,
+						  struct stripe_head_state *s, struct r5dev *dev, int idr)
+{
+	char b[BDEVNAME_SIZE];
+	mdk_rdev_t *rdev;
+
+	rcu_read_lock();
+	rdev = rcu_dereference(conf->disks[idr].rdev);
+	if(rdev) {
+		bdevname(rdev->bdev, b);
+	}else{
+		strlcpy(b, " ", BDEVNAME_SIZE);
+	}
+	rcu_read_unlock();
+
+	if (!test_bit(R5_ReWrite, &dev->flags)) {
+		printk("%s[%s]: set rewrite, raid%d, %s, sector %llu\n",
+			   __FILE__, __FUNCTION__,
+			   conf->mddev->md_minor, b, sh->sector);
+		set_bit(R5_Wantwrite, &dev->flags);
+		set_bit(R5_ReWrite, &dev->flags);
+		set_bit(R5_LOCKED, &dev->flags);
+	} else {
+		printk("%s[%s]: set reread, md%d, %s, sector %llu\n",
+			   __FILE__, __FUNCTION__,
+			   conf->mddev->md_minor, b, sh->sector);
+		/* let's read it back */
+		set_bit(R5_Wantread, &dev->flags);
+		set_bit(R5_LOCKED, &dev->flags);
+	}
+}
+#endif
 
 /*
  * handle_stripe - do things to a stripe.
@@ -2947,6 +3297,12 @@ static void handle_stripe5(struct stripe_head *sh)
 	struct r5dev *dev;
 	mdk_rdev_t *blocked_rdev = NULL;
 	int prexor;
+#ifdef MY_ABC_HERE
+	unsigned char isSyncError = 0;
+#endif
+#ifdef MY_ABC_HERE
+	unsigned char isBadSH = 0;
+#endif
 
 	memset(&s, 0, sizeof(s));
 	pr_debug("handling stripe %llu, state=%#lx cnt=%d, pd_idx=%d check:%d "
@@ -2958,6 +3314,10 @@ static void handle_stripe5(struct stripe_head *sh)
 	clear_bit(STRIPE_HANDLE, &sh->state);
 	clear_bit(STRIPE_DELAYED, &sh->state);
 
+#ifdef MY_ABC_HERE
+	if (test_and_clear_bit(STRIPE_NORETRY, &sh->state))
+		isBadSH = 1;
+#endif
 	s.syncing = test_bit(STRIPE_SYNCING, &sh->state);
 	s.expanding = test_bit(STRIPE_EXPAND_SOURCE, &sh->state);
 	s.expanded = test_bit(STRIPE_EXPAND_READY, &sh->state);
@@ -3012,10 +3372,37 @@ static void handle_stripe5(struct stripe_head *sh)
 		}
 		if (!rdev || !test_bit(In_sync, &rdev->flags)
 		    || test_bit(R5_ReadError, &dev->flags)) {
+#ifdef MY_ABC_HERE
+			if (s.syncing && conf->mddev->auto_remap) {
+				if(!(rdev && test_bit(In_sync, &rdev->flags)
+					 && test_bit(R5_ReadError, &dev->flags))) {
+					s.failed++;
+					s.failed_num = i;
+				}else{
+					/* not count this as fail */
+					isSyncError = 1;
+				}
+			}else{
+				s.failed++;
+				s.failed_num = i;
+			}
+#else
 			s.failed++;
 			s.failed_num = i;
+#endif
 		} else
+#ifdef MY_ABC_HERE
+		{
+			if (isBadSH || (test_bit(DiskError, &rdev->flags) && s.syncing)) {
+				s.failed++;
+				s.failed_num = i;
+			} else {
+				set_bit(R5_Insync, &dev->flags);
+			}
+		}
+#else
 			set_bit(R5_Insync, &dev->flags);
+#endif
 	}
 	rcu_read_unlock();
 
@@ -3112,6 +3499,18 @@ static void handle_stripe5(struct stripe_head *sh)
 	 */
 	if (s.to_write && !sh->reconstruct_state && !sh->check_state)
 		handle_stripe_dirtying5(conf, sh, &s, disks);
+
+#ifdef MY_ABC_HERE
+	if (s.failed == 1 && isSyncError == 1) {
+		for (i=disks; i--;) {
+			dev = &sh->dev[i];
+			if (test_bit(R5_ReadError, &dev->flags)) {
+				syno_read_err_retry5(conf, sh, &s, dev, i);
+				s.locked++;
+			}
+		}
+	}
+#endif
 
 	/* maybe we need to check and possibly fix the parity for this stripe
 	 * Any reads will already have been scheduled, so we just see if enough
@@ -3211,6 +3610,52 @@ static void handle_stripe5(struct stripe_head *sh)
 	return_io(return_bi);
 }
 
+#ifdef MY_ABC_HERE
+/**
+ * This function would be called
+ * only in raid6 when it has more than
+ * two disk read fail during build parity.
+ *
+ * If we not do this, there would be a infinity loop keep
+ * printing :
+ *
+ * md: md2: resync done.
+ * md: resync of RAID array md2
+ * md: minimum _guaranteed_  speed:
+ *                                  1000 KB/sec/disk. md: using
+ *                                  maximum available idle IO
+ *                                  bandwidth (but not more than
+ *                                  200000 KB/sec) for resync.
+ * md: using 128k window, over a total of * 1000000
+ *     blocks.
+ *
+ * raid5 would never meet this problem because mdadm force
+ * create raid5 with a spare member.(until mdadm 2.6.7) It means
+ * that: while creating raid5, they would not retry a failed
+ * read.(refer raid5_end_read_request)
+ *
+ * @param conf   [IN] Should not be NULL.
+ * @param sh     [IN] Should not be NULL.
+ * @param disks  [IN] disk number is raid
+ */
+static void syno_handle_raid6_sync_error(raid5_conf_t *conf, struct stripe_head *sh, int disks)
+{
+	int i;
+	for (i = disks; i--; ) {
+		if (test_bit(R5_ReadError, &sh->dev[i].flags)) {
+			mdk_rdev_t *rdev;
+			rcu_read_lock();
+			rdev = rcu_dereference(conf->disks[i].rdev);
+			if (rdev && test_bit(In_sync, &rdev->flags)){
+				/* multiple read failures in one stripe */
+				md_error(conf->mddev, rdev);
+			}
+			rcu_read_unlock();
+		}
+	}
+}
+#endif
+
 static void handle_stripe6(struct stripe_head *sh)
 {
 	raid5_conf_t *conf = sh->raid_conf;
@@ -3221,6 +3666,9 @@ static void handle_stripe6(struct stripe_head *sh)
 	struct r6_state r6s;
 	struct r5dev *dev, *pdev, *qdev;
 	mdk_rdev_t *blocked_rdev = NULL;
+#ifdef MY_ABC_HERE
+        unsigned char isBadSH = 0;
+#endif
 
 	pr_debug("handling stripe %llu, state=%#lx cnt=%d, "
 		"pd_idx=%d, qd_idx=%d\n, check:%d, reconstruct:%d\n",
@@ -3233,6 +3681,10 @@ static void handle_stripe6(struct stripe_head *sh)
 	clear_bit(STRIPE_HANDLE, &sh->state);
 	clear_bit(STRIPE_DELAYED, &sh->state);
 
+#ifdef MY_ABC_HERE
+        if (test_and_clear_bit(STRIPE_NORETRY, &sh->state))
+                isBadSH = 1;
+#endif
 	s.syncing = test_bit(STRIPE_SYNCING, &sh->state);
 	s.expanding = test_bit(STRIPE_EXPAND_SOURCE, &sh->state);
 	s.expanded = test_bit(STRIPE_EXPAND_READY, &sh->state);
@@ -3291,7 +3743,19 @@ static void handle_stripe6(struct stripe_head *sh)
 				r6s.failed_num[s.failed] = i;
 			s.failed++;
 		} else
-			set_bit(R5_Insync, &dev->flags);
+#ifdef MY_ABC_HERE
+                {
+                        if (isBadSH || (test_bit(DiskError, &rdev->flags) && s.syncing)) {
+				if (s.failed < 2)
+                                	r6s.failed_num[s.failed] = i;
+				s.failed++;
+                        } else {
+                                set_bit(R5_Insync, &dev->flags);
+                        }
+                }
+#else
+                        set_bit(R5_Insync, &dev->flags);
+#endif
 	}
 	rcu_read_unlock();
 
@@ -3321,6 +3785,9 @@ static void handle_stripe6(struct stripe_head *sh)
 	if (s.failed > 2 && s.to_read+s.to_write+s.written)
 		handle_failed_stripe(conf, sh, &s, disks, &return_bi);
 	if (s.failed > 2 && s.syncing) {
+#ifdef MY_ABC_HERE
+		syno_handle_raid6_sync_error(conf, sh, disks);
+#endif
 		md_done_sync(conf->mddev, STRIPE_SECTORS,0);
 		clear_bit(STRIPE_SYNCING, &sh->state);
 		s.syncing = 0;
@@ -3711,6 +4178,18 @@ static void raid5_align_endio(struct bio *bi, int error)
 		return;
 	}
 
+#ifdef MY_ABC_HERE
+	if (!uptodate) {
+		if (IsDeviceDisappear(rdev->bdev)) {
+			syno_md_error(mddev, rdev);
+		}else{
+#ifdef MY_ABC_HERE
+			SynoReportBadSector(raid_bi->bi_sector, READ,
+								conf->mddev->md_minor, rdev->bdev, __FUNCTION__);
+#endif
+		}
+	}
+#endif
 
 	pr_debug("raid5_align_endio : io error...handing IO for a retry\n");
 
@@ -3869,6 +4348,18 @@ static int make_request(struct request_queue *q, struct bio * bi)
 		bio_endio(bi, -EOPNOTSUPP);
 		return 0;
 	}
+
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
+	if (mddev->nodev_and_crashed) {
+#else
+	if (mddev->degraded > conf->max_degraded) {
+#endif
+		/* if there has more than max_degraded disks lose, we would not permit keeping acceess on it*/
+		bio_endio(bi, 0);
+		return 0;
+	}
+#endif /* MY_ABC_HERE */
 
 	md_write_start(mddev, bi);
 
@@ -4282,6 +4773,16 @@ static inline sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *ski
 		*skipped = 1;
 		return rv;
 	}
+
+#ifdef MY_ABC_HERE
+	if (IsDiskErrorSet(mddev)) {
+		sector_t rv = mddev->dev_sectors - sector_nr;
+		*skipped = 1;
+		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
+		return rv;
+	}
+#endif /* MY_ABC_HERE */
+
 	if (!bitmap_start_sync(mddev->bitmap, sector_nr, &sync_blocks, 1) &&
 	    !test_bit(MD_RECOVERY_REQUESTED, &mddev->recovery) &&
 	    !conf->fullsync && sync_blocks >= STRIPE_SECTORS) {
@@ -4996,10 +5497,15 @@ static int run(mddev_t *mddev)
 			   - working_disks);
 
 	if (mddev->degraded > conf->max_degraded) {
+#ifdef MY_ABC_HERE
+		mddev->nodev_and_crashed = 1;
+#endif
+#ifndef MY_ABC_HERE
 		printk(KERN_ERR "raid5: not enough operational devices for %s"
 			" (%d/%d failed)\n",
 			mdname(mddev), mddev->degraded, conf->raid_disks);
 		goto abort;
+#endif
 	}
 
 	/* device size must be a multiple of chunk size */
@@ -5154,9 +5660,16 @@ static void status(struct seq_file *seq, mddev_t *mddev)
 		mddev->chunk_sectors / 2, mddev->layout);
 	seq_printf (seq, " [%d/%d] [", conf->raid_disks, conf->raid_disks - mddev->degraded);
 	for (i = 0; i < conf->raid_disks; i++)
+#ifdef MY_ABC_HERE
+		seq_printf (seq, "%s",
+			       conf->disks[i].rdev &&
+					test_bit(In_sync, &conf->disks[i].rdev->flags) ?
+						(test_bit(DiskError, &conf->disks[i].rdev->flags) ? "E" : "U") : "_");
+#else
 		seq_printf (seq, "%s",
 			       conf->disks[i].rdev &&
 			       test_bit(In_sync, &conf->disks[i].rdev->flags) ? "U" : "_");
+#endif /* MY_ABC_HERE */
 	seq_printf (seq, "]");
 #ifdef DEBUG
 	seq_printf (seq, "\n");
@@ -5192,6 +5705,12 @@ static int raid5_spare_active(mddev_t *mddev)
 	int i;
 	raid5_conf_t *conf = mddev->private;
 	struct disk_info *tmp;
+
+#ifdef MY_ABC_HERE
+	if (IsDiskErrorSet(mddev)) {
+		return 0;
+	}
+#endif
 
 	for (i = 0; i < conf->raid_disks; i++) {
 		tmp = conf->disks + i;
@@ -5263,6 +5782,12 @@ static int raid5_add_disk(mddev_t *mddev, mdk_rdev_t *rdev)
 		/* no point adding a device */
 		return -EINVAL;
 
+#ifdef MY_ABC_HERE
+	if (IsDiskErrorSet(mddev)) {
+		return -EINVAL;
+	}
+#endif
+
 	if (rdev->raid_disk >= 0)
 		first = last = rdev->raid_disk;
 
@@ -5299,6 +5824,13 @@ static int raid5_resize(mddev_t *mddev, sector_t sectors)
 	 * any io in the removed space completes, but it hardly seems
 	 * worth it.
 	 */
+
+#ifdef MY_ABC_HERE
+	if (IsDiskErrorSet(mddev)) {
+		return -EINVAL;
+	}
+#endif
+
 	sectors &= ~((sector_t)mddev->chunk_sectors - 1);
 	md_set_array_sectors(mddev, raid5_size(mddev, sectors,
 					       mddev->raid_disks));
@@ -5343,6 +5875,12 @@ static int check_stripe_cache(mddev_t *mddev)
 static int check_reshape(mddev_t *mddev)
 {
 	raid5_conf_t *conf = mddev->private;
+
+#ifdef MY_ABC_HERE
+	if (IsDiskErrorSet(mddev)) {
+		return -EINVAL;
+	}
+#endif
 
 	if (mddev->delta_disks == 0 &&
 	    mddev->new_layout == mddev->layout &&
@@ -5396,6 +5934,12 @@ static int raid5_start_reshape(mddev_t *mddev)
 		 * of that size
 		 */
 		return -EINVAL;
+
+#ifdef MY_ABC_HERE
+	if (IsDiskErrorSet(mddev)) {
+		return -EINVAL;
+	}
+#endif
 
 	/* Refuse to reduce size of the array.  Any reductions in
 	 * array size must be through explicit setting of array_size
@@ -5656,6 +6200,12 @@ static int raid5_check_reshape(mddev_t *mddev)
 	raid5_conf_t *conf = mddev->private;
 	int new_chunk = mddev->new_chunk_sectors;
 
+#ifdef MY_ABC_HERE
+	if (IsDiskErrorSet(mddev)) {
+		return -EINVAL;
+	}
+#endif
+
 	if (mddev->new_layout >= 0 && !algorithm_valid_raid5(mddev->new_layout))
 		return -EINVAL;
 	if (new_chunk > 0) {
@@ -5689,6 +6239,12 @@ static int raid5_check_reshape(mddev_t *mddev)
 static int raid6_check_reshape(mddev_t *mddev)
 {
 	int new_chunk = mddev->new_chunk_sectors;
+
+#ifdef MY_ABC_HERE
+	if (IsDiskErrorSet(mddev)) {
+		return -EINVAL;
+	}
+#endif
 
 	if (mddev->new_layout >= 0 && !algorithm_valid_raid6(mddev->new_layout))
 		return -EINVAL;
@@ -5787,7 +6343,12 @@ static struct mdk_personality raid6_personality =
 	.run		= run,
 	.stop		= stop,
 	.status		= status,
+#ifdef MY_ABC_HERE
+	.syno_error_handler = syno_error_for_hotplug,
+	.error_handler	= syno_error_for_internal,
+#else
 	.error_handler	= error,
+#endif
 	.hot_add_disk	= raid5_add_disk,
 	.hot_remove_disk= raid5_remove_disk,
 	.spare_active	= raid5_spare_active,
@@ -5809,7 +6370,12 @@ static struct mdk_personality raid5_personality =
 	.run		= run,
 	.stop		= stop,
 	.status		= status,
+#ifdef MY_ABC_HERE
+	.syno_error_handler = syno_error_for_hotplug,
+	.error_handler	= syno_error_for_internal,
+#else
 	.error_handler	= error,
+#endif
 	.hot_add_disk	= raid5_add_disk,
 	.hot_remove_disk= raid5_remove_disk,
 	.spare_active	= raid5_spare_active,
@@ -5832,7 +6398,12 @@ static struct mdk_personality raid4_personality =
 	.run		= run,
 	.stop		= stop,
 	.status		= status,
+#ifdef MY_ABC_HERE
+	.syno_error_handler = syno_error_for_hotplug,
+	.error_handler	= syno_error_for_internal,
+#else
 	.error_handler	= error,
+#endif
 	.hot_add_disk	= raid5_add_disk,
 	.hot_remove_disk= raid5_remove_disk,
 	.spare_active	= raid5_spare_active,

@@ -381,11 +381,22 @@ static struct pci_driver sil24_pci_driver = {
 #endif
 };
 
+#ifdef MY_ABC_HERE
+static struct device_attribute *sil24_shost_attrs[] = {
+	&dev_attr_syno_pm_gpio,
+	&dev_attr_syno_pm_info,
+	NULL
+};
+#endif
+
 static struct scsi_host_template sil24_sht = {
 	ATA_NCQ_SHT(DRV_NAME),
 	.can_queue		= SIL24_MAX_CMDS,
 	.sg_tablesize		= SIL24_MAX_SGE,
 	.dma_boundary		= ATA_DMA_BOUNDARY,
+#ifdef MY_ABC_HERE
+	.shost_attrs 		= sil24_shost_attrs,
+#endif
 };
 
 static struct ata_port_operations sil24_ops = {
@@ -654,6 +665,9 @@ static int sil24_softreset(struct ata_link *link, unsigned int *class,
 	struct ata_taskfile tf;
 	const char *reason;
 	int rc;
+#ifdef MY_ABC_HERE
+	int retry_count = 0;
+#endif
 
 	DPRINTK("ENTER\n");
 
@@ -667,6 +681,9 @@ static int sil24_softreset(struct ata_link *link, unsigned int *class,
 	if (time_after(deadline, jiffies))
 		timeout_msec = jiffies_to_msecs(deadline - jiffies);
 
+#ifdef MY_ABC_HERE
+retry:
+#endif
 	ata_tf_init(link->device, &tf);	/* doesn't really matter */
 	rc = sil24_exec_polled_cmd(ap, pmp, &tf, 0, PRB_CTRL_SRST,
 				   timeout_msec);
@@ -674,8 +691,22 @@ static int sil24_softreset(struct ata_link *link, unsigned int *class,
 		reason = "timeout";
 		goto err;
 	} else if (rc) {
+#ifdef MY_ABC_HERE
+		/* retry once. And we don't retry port multiplier itself */
+		if (retry_count < 1 && 0xf != link->pmp) {
+			sata_std_hardreset(link, class, deadline+HZ);
+			timeout_msec = jiffies_to_msecs(5*HZ);
+			retry_count++;
+			ata_link_printk(link, KERN_WARNING, "After hardrest, set SRST timeout to 5HZ\n");
+			goto retry;
+		} else {
+			reason = "SRST command error";
+			goto err;
+		}
+#else
 		reason = "SRST command error";
 		goto err;
+#endif
 	}
 
 	sil24_read_tf(ap, 0, &tf);
@@ -721,6 +752,22 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 		pp->do_port_rst = 0;
 		did_port_rst = 1;
 	}
+
+#ifdef MY_ABC_HERE
+	sil24_scr_read(link, SCR_STATUS, &tmp);
+	if (0x1 == tmp) {
+		/* No IPM, seed negotiate and phy is not well communicated.  */
+
+		/* force disable IPM */
+		sil24_scr_read(link, SCR_CONTROL, &tmp);
+		tmp = (tmp & ~(0xf00)) | 0x300;
+		sil24_scr_write(link, SCR_CONTROL, tmp);
+
+		/* force speed to 1.5Gbps,  sata_set_spd would set it*/
+		link->sata_spd_limit = (1 << 4);
+		ata_link_printk(link, KERN_WARNING, "limiting SATA link speed to 1.5Gbps and disable IPM\n");
+	}
+#endif
 
 	/* sil24 does the right thing(tm) without any protection */
 	sata_set_spd(link);
@@ -821,7 +868,24 @@ static int sil24_qc_defer(struct ata_queued_cmd *qc)
 				return ATA_DEFER_PORT;
 			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
 		} else
+#ifdef MY_ABC_HERE
+		{
+			if (!ap->nr_active_links) {
+				/* Since we are here now, just preempt */
+				if (is_excl) {
+					ap->excl_link = link;
+					qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+				} else {
+					/* normal I/O should preempt in this situation */
+					ap->excl_link = NULL;
+				}
+			} else {
+				return ATA_DEFER_PORT;
+			}
+		}
+#else
 			return ATA_DEFER_PORT;
+#endif
 	} else if (unlikely(is_excl)) {
 		ap->excl_link = link;
 		if (ap->nr_active_links)
@@ -990,6 +1054,9 @@ static void sil24_error_intr(struct ata_port *ap)
 	}
 
 	if (irq_stat & (PORT_IRQ_PHYRDY_CHG | PORT_IRQ_DEV_XCHG)) {
+#ifdef MY_ABC_HERE
+		syno_ata_info_print(ap);
+#endif
 		ata_ehi_hotplugged(ehi);
 		ata_ehi_push_desc(ehi, "%s",
 				  irq_stat & PORT_IRQ_PHYRDY_CHG ?

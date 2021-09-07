@@ -9,6 +9,13 @@
 #include <linux/limits.h>
 #include <linux/ioctl.h>
 
+#ifdef MY_ABC_HERE
+#include <linux/net.h>
+#endif /* MY_ABC_HERE */
+
+#ifdef CONFIG_FS_SYNO_ACL
+#include <linux/syno_acl.h>
+#endif
 /*
  * It's silly to have NR_OPEN bigger than NR_FILE, but you can change
  * the file limit at runtime and only root can increase the per-process
@@ -47,13 +54,33 @@ struct inodes_stat_t {
 
 #define NR_FILE  8192	/* this can well be larger on a larger system */
 
+#ifdef CONFIG_FS_SYNO_ACL 
+/* 
+   Note!!!!! It should be consistent with SYNO_ACL_MAY_XXXXX in <linux/syno_acl_xattr_ds.h>
+*/
+#define MAY_EXEC				(0x0001)
+#define MAY_WRITE				(0x0002)
+#define MAY_READ				(0x0004)
+#define MAY_APPEND				(0x0008)
+#define MAY_ACCESS 				(0x0010) 
+#define MAY_OPEN 				(0x0020) 
+#define MAY_READ_EXT_ATTR		(0x0040)
+#define MAY_READ_PERMISSION		(0x0080)
+#define MAY_READ_ATTR			(0x0100)
+#define MAY_WRITE_ATTR			(0x0200)
+#define MAY_WRITE_EXT_ATTR		(0x0400)
+#define MAY_WRITE_PERMISSION	(0x0800)
+#define MAY_DEL					(0x1000)
+#define MAY_DEL_CHILD			(0x2000)
+#define MAY_GET_OWNER_SHIP		(0x4000)
+#else /* CONFIG_FS_SYNO_ACL */
 #define MAY_EXEC 1
 #define MAY_WRITE 2
 #define MAY_READ 4
 #define MAY_APPEND 8
 #define MAY_ACCESS 16
 #define MAY_OPEN 32
-
+#endif /* CONFIG_FS_SYNO_ACL */
 /*
  * flags in file.f_mode.  Note that FMODE_READ and FMODE_WRITE must correspond
  * to O_WRONLY and O_RDWR via the strange trick in __dentry_open()
@@ -208,6 +235,15 @@ struct inodes_stat_t {
 #define MS_KERNMOUNT	(1<<22) /* this is a kern_mount call */
 #define MS_I_VERSION	(1<<23) /* Update inode I_version field */
 #define MS_STRICTATIME	(1<<24) /* Always perform atime updates */
+#ifdef CONFIG_FS_SYNO_ACL  
+#define MS_SYNOACL	(1<<27)	/* Synology ACL */
+#endif
+#ifdef MY_ABC_HERE
+#define MS_UNMOUNT_WAIT	(1<<28)	/* force unmount in process */
+#endif
+#ifdef MY_ABC_HERE
+#define MS_CORRUPT	(1<<29)	/* filesystem corrupt */
+#endif
 #define MS_ACTIVE	(1<<30)
 #define MS_NOUSER	(1<<31)
 
@@ -264,6 +300,22 @@ struct inodes_stat_t {
 #define IS_IMMUTABLE(inode)	((inode)->i_flags & S_IMMUTABLE)
 #define IS_POSIXACL(inode)	__IS_FLG(inode, MS_POSIXACL)
 
+#ifdef CONFIG_FS_SYNO_ACL
+#define IS_SMB_READONLY(inode)	((inode)->i_mode2 & S2_SMB_READONLY)
+#define IS_SYNOACL_SUPERUSER() (0 == current_fsuid())
+
+#define IS_INODE_SYNOACL(inode)	((inode)->i_mode2 & S2_SYNO_ACL_SUPPORT)
+#define IS_FS_SYNOACL(inode)	__IS_FLG(inode, MS_SYNOACL)
+#define IS_SYNOACL(inode)	(IS_INODE_SYNOACL(inode) && IS_FS_SYNOACL(inode))
+
+#define IS_SYNOACL_INHERIT(inode)	((inode)->i_mode2 & S2_SYNO_ACL_INHERIT)
+#define IS_SYNOACL_OWNER_IS_GROUP(inode)	((inode)->i_mode2 & S2_SYNO_ACL_IS_OWNER_GROUP)
+#define IS_SYNOACL_EXIST(inode)	((inode)->i_mode2 & S2_SYNO_ACL_EXIST)
+#define HAS_SYNOACL(inode) ((IS_SYNOACL_EXIST(inode) || IS_SYNOACL_INHERIT(inode)))
+#define is_synoacl_owner(inode)	IS_SYNOACL_OWNER_IS_GROUP(inode)?in_group_p(inode->i_gid):(inode->i_uid == current_fsuid())
+#define is_synoacl_owner_or_capable(inode) (is_synoacl_owner(inode) || capable(CAP_FOWNER))
+
+#endif /* CONFIG_FS_SYNO_ACL */
 #define IS_DEADDIR(inode)	((inode)->i_flags & S_DEAD)
 #define IS_NOCMTIME(inode)	((inode)->i_flags & S_NOCMTIME)
 #define IS_SWAPFILE(inode)	((inode)->i_flags & S_SWAPFILE)
@@ -436,6 +488,9 @@ typedef void (dio_iodone_t)(struct kiocb *iocb, loff_t offset,
 #define ATTR_KILL_PRIV	(1 << 14)
 #define ATTR_OPEN	(1 << 15) /* Truncating from open(O_TRUNC) */
 #define ATTR_TIMES_SET	(1 << 16)
+#ifdef MY_ABC_HERE
+#define ATTR_CREATE_TIME (1 << 17)
+#endif
 
 /*
  * This is the Inode Attributes structure, used for notify_change().  It
@@ -505,6 +560,9 @@ enum positive_aop_returns {
 #define AOP_FLAG_NOFS			0x0004 /* used by filesystem to direct
 						* helper code (eg buffer layer)
 						* to clear GFP_FS from alloc */
+#ifdef MY_ABC_HERE
+#define AOP_FLAG_RECVFILE		0x0008
+#endif
 
 /*
  * oh the beauties of C type declarations.
@@ -587,7 +645,14 @@ struct address_space_operations {
 	int (*write_end)(struct file *, struct address_space *mapping,
 				loff_t pos, unsigned len, unsigned copied,
 				struct page *page, void *fsdata);
-
+#ifdef MY_ABC_HERE
+	/*
+	 * ext3 requires that a successful prepare_write() call be followed
+	 * by a commit_write() call - they must be balanced
+	 */
+	int (*prepare_write)(struct file *, struct page *, unsigned, unsigned);
+	int (*commit_write)(struct file *, struct page *, unsigned, unsigned);
+#endif
 	/* Unfortunately this kludge is needed for FIBMAP. Don't use it */
 	sector_t (*bmap)(struct address_space *, sector_t);
 	void (*invalidatepage) (struct page *, unsigned long);
@@ -738,12 +803,21 @@ struct inode {
 	struct timespec		i_atime;
 	struct timespec		i_mtime;
 	struct timespec		i_ctime;
+#ifdef MY_ABC_HERE
+	struct timespec		i_CreateTime;
+#endif
+#ifdef MY_ABC_HERE
+	__u32			i_mode2;
+#endif
 	blkcnt_t		i_blocks;
 	unsigned int		i_blkbits;
 	unsigned short          i_bytes;
 	umode_t			i_mode;
 	spinlock_t		i_lock;	/* i_blocks, i_bytes, maybe i_size */
 	struct mutex		i_mutex;
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	struct mutex		i_syno_mutex;	/* i_CreateTime, i_mode2 */
+#endif
 	struct rw_semaphore	i_alloc_sem;
 	const struct inode_operations	*i_op;
 	const struct file_operations	*i_fop;	/* former ->i_op->default_file_ops */
@@ -782,7 +856,9 @@ struct inode {
 #ifdef CONFIG_SECURITY
 	void			*i_security;
 #endif
-#ifdef CONFIG_FS_POSIX_ACL
+#ifdef CONFIG_FS_SYNO_ACL
+	struct syno_acl	*i_syno_acl;
+#elif defined(CONFIG_FS_POSIX_ACL)
 	struct posix_acl	*i_acl;
 	struct posix_acl	*i_default_acl;
 #endif
@@ -923,6 +999,10 @@ struct file {
 	const struct file_operations	*f_op;
 	spinlock_t		f_lock;  /* f_ep_links, f_flags, no IRQ */
 	atomic_long_t		f_count;
+#ifdef MY_ABC_HERE
+	unsigned int		f_synostate;
+	spinlock_t			f_synostate_lock;
+#endif
 	unsigned int 		f_flags;
 	fmode_t			f_mode;
 	loff_t			f_pos;
@@ -946,6 +1026,18 @@ struct file {
 	unsigned long f_mnt_write_state;
 #endif
 };
+#ifdef MY_ABC_HERE
+static inline int blSynostate(int flag, struct file *f)
+{
+	spin_lock(&f->f_synostate_lock);
+	if (flag == f->f_synostate) {
+		spin_unlock(&f->f_synostate_lock);
+		return 1;
+	}
+	spin_unlock(&f->f_synostate_lock);
+	return 0;
+}
+#endif
 extern spinlock_t files_lock;
 #define file_list_lock() spin_lock(&files_lock);
 #define file_list_unlock() spin_unlock(&files_lock);
@@ -1514,6 +1606,9 @@ struct file_operations {
 struct inode_operations {
 	int (*create) (struct inode *,struct dentry *,int, struct nameidata *);
 	struct dentry * (*lookup) (struct inode *,struct dentry *, struct nameidata *);
+#ifdef MY_ABC_HERE
+	struct dentry * (*lookup_case) (struct inode *,struct dentry *, struct nameidata *);
+#endif
 	int (*link) (struct dentry *,struct inode *,struct dentry *);
 	int (*unlink) (struct inode *,struct dentry *);
 	int (*symlink) (struct inode *,struct dentry *,const char *);
@@ -1528,6 +1623,17 @@ struct inode_operations {
 	void (*truncate) (struct inode *);
 	int (*permission) (struct inode *, int);
 	int (*check_acl)(struct inode *, int);
+#ifdef CONFIG_FS_SYNO_ACL
+	int (*syno_acl_get)(struct dentry *, void *value, size_t size);
+	int (*syno_permission)(struct dentry *, int);
+	int (*syno_exec_permission)(struct dentry *);
+	int (*syno_access)(struct dentry *, int);
+	int (*syno_permission_get)(struct dentry *, unsigned int *, unsigned int *);
+	int (*syno_inode_change_ok)(struct dentry *, struct iattr *);
+#endif /* CONFIG_FS_SYNO_ACL */
+#ifdef MY_ABC_HERE
+	int (*set_archive)(struct dentry *, int);
+#endif
 	int (*setattr) (struct dentry *, struct iattr *);
 	int (*getattr) (struct vfsmount *mnt, struct dentry *, struct kstat *);
 	int (*setxattr) (struct dentry *, const char *,const void *,size_t,int);
@@ -1753,6 +1859,9 @@ struct file_system_type {
 
 	struct lock_class_key i_lock_key;
 	struct lock_class_key i_mutex_key;
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	struct lock_class_key i_syno_mutex_key;
+#endif
 	struct lock_class_key i_mutex_dir_key;
 	struct lock_class_key i_alloc_sem_key;
 };
@@ -2209,6 +2318,10 @@ extern int generic_file_mmap(struct file *, struct vm_area_struct *);
 extern int generic_file_readonly_mmap(struct file *, struct vm_area_struct *);
 extern int file_read_actor(read_descriptor_t * desc, struct page *page, unsigned long offset, unsigned long size);
 int generic_write_checks(struct file *file, loff_t *pos, size_t *count, int isblk);
+#ifdef MY_ABC_HERE
+#define MAX_PAGES_PER_RECVFILE 16
+extern int do_recvfile(struct file *file, struct socket *sock, loff_t *ppos, size_t count, size_t *rbytes , size_t *wbytes);
+#endif
 extern ssize_t generic_file_aio_read(struct kiocb *, const struct iovec *, unsigned long, loff_t);
 extern ssize_t __generic_file_aio_write(struct kiocb *, const struct iovec *, unsigned long,
 		loff_t *);
@@ -2483,6 +2596,15 @@ int proc_nr_files(struct ctl_table *table, int write,
 		  void __user *buffer, size_t *lenp, loff_t *ppos);
 
 int __init get_filesystem_list(char *buf);
+
+#ifdef MY_ABC_HERE
+#define UTF16_UPCASE_TABLE_SIZE 	0x10000		/* 64k chars */
+#define UNICODE_UTF16_BUFSIZE		4096		/* should be safe enough for namei */
+#define UNICODE_UTF8_BUFSIZE		8192
+
+int SYNOUnicodeUTF8Strcmp(const u_int8_t *utf8str1,const u_int8_t *utf8str2,int clenUtf8Str1, int clenUtf8Str2, u_int16_t *upcasetable);
+int SYNOToUpper(u_int8_t *to,const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable);
+#endif /*MY_ABC_HERE */
 
 #endif /* __KERNEL__ */
 #endif /* _LINUX_FS_H */

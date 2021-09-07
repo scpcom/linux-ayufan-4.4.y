@@ -194,6 +194,26 @@ int dma_mmap_writecombine(struct device *, struct vm_area_struct *,
 		void *, dma_addr_t, size_t);
 
 
+#ifdef CONFIG_MV_SP_I_FTCH_DB_INV
+extern void mv_l2_inv_range(const void *start, const void *end);
+static inline void mv_l2_sync(const void *start, size_t size, int direction)
+{
+	const void *end = start + size;
+
+	BUG_ON(!virt_addr_valid(start) || !virt_addr_valid(end - 1));
+
+	switch (direction) {
+	case DMA_FROM_DEVICE:		/*  */
+	case DMA_BIDIRECTIONAL:		/*  */
+		mv_l2_inv_range(start, end);
+		break;
+	case DMA_TO_DEVICE:		/* */
+		break;
+	default:
+		BUG();
+	}
+}
+#endif
 #ifdef CONFIG_DMABOUNCE
 /*
  * For SA-1111, IXP425, and ADI systems  the dma-mapping functions are "magic"
@@ -302,7 +322,11 @@ static inline dma_addr_t dma_map_single(struct device *dev, void *cpu_addr,
 {
 	BUG_ON(!valid_dma_direction(dir));
 
+#ifdef CONFIG_ARCH_FEROCEON
+	if (!arch_is_coherent() && (size > 0) )
+#else
 	if (!arch_is_coherent())
+#endif
 		dma_cache_maint(cpu_addr, size, dir);
 
 	return virt_to_dma(dev, cpu_addr);
@@ -350,7 +374,11 @@ static inline dma_addr_t dma_map_page(struct device *dev, struct page *page,
 static inline void dma_unmap_single(struct device *dev, dma_addr_t handle,
 		size_t size, enum dma_data_direction dir)
 {
+#ifdef CONFIG_MV_SP_I_FTCH_DB_INV
+	mv_l2_sync(phys_to_virt(handle), size, dir);
+#else
 	/* nothing to do */
+#endif
 }
 #endif /* CONFIG_DMABOUNCE */
 

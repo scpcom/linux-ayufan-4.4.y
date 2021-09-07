@@ -106,6 +106,9 @@ void fsnotify_put_mark(struct fsnotify_mark_entry *entry)
 	if (atomic_dec_and_test(&entry->refcnt))
 		entry->free_mark(entry);
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(fsnotify_put_mark);
+#endif /* SYNO_AUFS */
 
 /*
  * Recalculate the mask of events relevant to a given inode locked.
@@ -216,6 +219,9 @@ void fsnotify_destroy_mark_by_entry(struct fsnotify_mark_entry *entry)
 	if (unlikely(atomic_dec_and_test(&group->num_marks)))
 		fsnotify_final_destroy_group(group);
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(fsnotify_destroy_mark_by_entry);
+#endif /* SYNO_AUFS */
 
 /*
  * Given a group, destroy all of the marks associated with that group.
@@ -282,6 +288,9 @@ struct fsnotify_mark_entry *fsnotify_find_mark_entry(struct fsnotify_group *grou
 	}
 	return NULL;
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(fsnotify_find_mark_entry);
+#endif /* SYNO_AUFS */
 
 /*
  * Nothing fancy, just initialize lists and locks and counters.
@@ -298,6 +307,9 @@ void fsnotify_init_mark(struct fsnotify_mark_entry *entry,
 	entry->inode = NULL;
 	entry->free_mark = free_mark;
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(fsnotify_init_mark);
+#endif /* SYNO_AUFS */
 
 /*
  * Attach an initialized mark entry to a given group and inode.
@@ -353,6 +365,9 @@ int fsnotify_add_mark(struct fsnotify_mark_entry *entry,
 
 	return ret;
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(fsnotify_add_mark);
+#endif /* SYNO_AUFS */
 
 /**
  * fsnotify_unmount_inodes - an sb is unmounting.  handle any watched inodes.

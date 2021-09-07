@@ -275,9 +275,16 @@ int nfsd_create_serv(void)
 		 */
 		nfsd_max_blksize = NFSSVC_MAXBLKSIZE;
 		i.totalram <<= PAGE_SHIFT - 12;
+#if defined(SYNO_NFSD_WRITE_SIZE_MIN)
+		i.totalram >>= 8;
+		if (512 > i.totalram) {
+			nfsd_max_blksize = SYNO_NFSD_WRITE_SIZE_MIN;
+		}
+#else
 		while (nfsd_max_blksize > i.totalram &&
 		       nfsd_max_blksize >= 8*1024*2)
 			nfsd_max_blksize /= 2;
+#endif
 	}
 
 	nfsd_serv = svc_create_pooled(&nfsd_program, nfsd_max_blksize,

@@ -144,6 +144,50 @@ static inline void scsi_netlink_init(void) {}
 static inline void scsi_netlink_exit(void) {}
 #endif
 
+
+#ifdef CONFIG_MV_SCATTERED_SPINUP
+/* scsi_spinup.c */
+extern void standby_add_timer(struct scsi_device *, int,
+		void (*)(struct scsi_device *));
+extern int standby_delete_timer(struct scsi_device *);
+extern void standby_times_out(struct scsi_device *);
+
+extern void spinup_add_timer(struct scsi_device *, int,
+		void (*)(struct scsi_device *));
+extern int spinup_delete_timer(struct scsi_device *);
+extern void spinup_times_out(struct scsi_device *);
+extern int timeout_to_jiffies(int);
+extern int scsi_parse_spinup_max(char *);
+extern int scsi_parse_spinup_timeout(char *);
+extern int  scsi_spinup_down();
+extern int  scsi_spinup_up();
+extern int  scsi_spinup_enabled();
+extern int scsi_spinup_get_timeout();
+extern int __init scsi_spinup_init(void);
+extern int  scsi_spinup_device(struct scsi_cmnd *);
+extern void scsi_spinup_device_queue(struct scsi_device *);
+extern int  scsi_spinup_device_dequeue_next(void);
+#else
+/* only factive declerations for the compiler */
+static inline void scsi_spinup_init(void) {}
+static inline void standby_add_timer(void) {}
+static inline void standby_delete_timer(void) {}
+static inline void standby_times_out(void) {}
+static inline void spinup_add_timer(void) {}
+static inline void spinup_delete_timer(void) {}
+static inline void spinup_times_out(void) {}
+static inline void timeout_to_jiffies(void) {}
+static inline void scsi_parse_spinup_max(void) {}
+static inline void scsi_parse_spinup_timeout(void) {}
+static inline void scsi_spinup_down(void) {}
+static inline void scsi_spinup_up(void) {}
+static inline void scsi_spinup_enabled(void) {}
+static inline void scsi_spinup_get_timeout(void) {}
+static inline void scsi_spinup_device(void) {}
+static inline void scsi_spinup_device_queue(void ) {}
+static inline void scsi_spinup_device_dequeue_next(void) {}
+//static inline void scsi_spinup_exit(void) {}
+#endif
 /* 
  * internal scsi timeout functions: for use by mid-layer and transport
  * classes.

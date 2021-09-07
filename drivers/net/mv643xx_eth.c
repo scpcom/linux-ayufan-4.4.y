@@ -57,6 +57,15 @@
 #include <asm/system.h>
 #include <linux/list.h>
 
+#ifdef MY_ABC_HERE
+#include <linux/synobios.h>
+extern int (*funcSYNOSendNetLinkEvent)(unsigned int type, unsigned int ifaceno);
+#endif
+
+#ifdef MY_DEF_HERE
+#define ETH_CSUM_MAX_BYTE_COUNT 1600
+#endif
+
 static char mv643xx_eth_driver_name[] = "mv643xx_eth";
 static char mv643xx_eth_driver_version[] = "1.4";
 
@@ -298,6 +307,10 @@ struct mv643xx_eth_shared_private {
 static int mv643xx_eth_open(struct net_device *dev);
 static int mv643xx_eth_stop(struct net_device *dev);
 
+#ifdef MY_ABC_HERE
+static int g_netif_count = 0;
+extern long g_internal_netif_num;
+#endif
 
 /* per-port *****************************************************************/
 struct mib_counters {
@@ -427,6 +440,20 @@ struct mv643xx_eth_private {
 };
 
 
+#ifdef MY_DEF_HERE
+/* Tailgate and Kirwood have only 2K TX FIFO, so disable NETIF_F_IP_CSUM when mtu bigger than 1600 */
+static void mv_set_features(struct net_device *dev)
+{
+    dev->features = NETIF_F_SG;
+    dev->vlan_features = NETIF_F_SG;
+
+    if(dev->mtu <= ETH_CSUM_MAX_BYTE_COUNT) {
+        dev->features |= NETIF_F_IP_CSUM;
+        dev->vlan_features |= NETIF_F_IP_CSUM;
+    }
+}
+
+#endif
 /* port register accessors **************************************************/
 static inline u32 rdl(struct mv643xx_eth_private *mp, int offset)
 {
@@ -954,7 +981,9 @@ static int txq_reclaim(struct tx_queue *txq, int budget, int force)
 			skb = __skb_dequeue(&txq->tx_skb);
 
 		if (cmd_sts & ERROR_SUMMARY) {
+#ifndef MY_DEF_HERE
 			dev_printk(KERN_INFO, &mp->dev->dev, "tx error\n");
+#endif
 			mp->dev->stats.tx_errors++;
 		}
 
@@ -2088,6 +2117,11 @@ static void handle_link_event(struct mv643xx_eth_private *mp)
 			printk(KERN_INFO "%s: link down\n", dev->name);
 
 			netif_carrier_off(dev);
+#ifdef MY_ABC_HERE
+			if (funcSYNOSendNetLinkEvent) {
+				funcSYNOSendNetLinkEvent(NET_NOLINK, dev->ifindex);
+			}
+#endif
 
 			for (i = 0; i < mp->txq_count; i++) {
 				struct tx_queue *txq = mp->txq + i;
@@ -2121,8 +2155,17 @@ static void handle_link_event(struct mv643xx_eth_private *mp)
 			 speed, duplex ? "full" : "half",
 			 fc ? "en" : "dis");
 
+#ifdef MY_ABC_HERE
+	if (!netif_carrier_ok(dev)) {
+		netif_carrier_on(dev);
+		if (funcSYNOSendNetLinkEvent) {
+			funcSYNOSendNetLinkEvent(NET_LINK, dev->ifindex);
+		}
+	}
+#else
 	if (!netif_carrier_ok(dev))
 		netif_carrier_on(dev);
+#endif
 }
 
 static int mv643xx_eth_poll(struct napi_struct *napi, int budget)
@@ -2467,6 +2510,10 @@ static int mv643xx_eth_change_mtu(struct net_device *dev, int new_mtu)
 	if (!netif_running(dev))
 		return 0;
 
+#ifdef MY_DEF_HERE
+	mv_set_features(dev);
+#endif
+
 	/*
 	 * Stop and then re-open the interface. This will allocate RX
 	 * skbs of the new MTU.
@@ -2479,6 +2526,11 @@ static int mv643xx_eth_change_mtu(struct net_device *dev, int new_mtu)
 			   "fatal error on re-opening device after "
 			   "MTU change\n");
 	}
+
+#ifdef MY_DEF_HERE
+	/* phy reset is slower let it is easy to loop in scemd. So we sleep 3 sec. */
+	msleep(3000);
+#endif
 
 	return 0;
 }
@@ -2593,6 +2645,15 @@ static int mv643xx_eth_shared_probe(struct platform_device *pdev)
 	struct mv643xx_eth_shared_private *msp;
 	struct resource *res;
 	int ret;
+
+#ifdef MY_ABC_HERE
+	g_netif_count++;
+	if ( g_internal_netif_num >= 0 &&
+		 g_netif_count > g_internal_netif_num )
+	{
+		return -ENODEV;
+	}
+#endif
 
 	if (!mv643xx_eth_version_printed++)
 		printk(KERN_NOTICE "MV-643xx 10/100/1000 ethernet "
@@ -2927,8 +2988,12 @@ static int mv643xx_eth_probe(struct platform_device *pdev)
 	dev->watchdog_timeo = 2 * HZ;
 	dev->base_addr = 0;
 
+#ifdef MY_DEF_HERE
+	mv_set_features(dev);
+#else
 	dev->features = NETIF_F_SG | NETIF_F_IP_CSUM;
 	dev->vlan_features = NETIF_F_SG | NETIF_F_IP_CSUM;
+#endif
 
 	SET_NETDEV_DEV(dev, &pdev->dev);
 

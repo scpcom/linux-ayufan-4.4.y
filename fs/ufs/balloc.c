@@ -84,8 +84,12 @@ void ufs_free_fragments(struct inode *inode, u64 fragment, unsigned count)
 			ufs_error (sb, "ufs_free_fragments",
 				   "bit already cleared for fragment %u", i);
 	}
-	
+
+#ifdef MY_ABC_HERE
+	dquot_free_block(inode, count);
+#else
 	vfs_dq_free_block(inode, count);
+#endif
 
 	
 	fs32_add(sb, &ucg->cg_cs.cs_nffree, count);
@@ -195,7 +199,11 @@ do_more:
 		ubh_setblock(UCPI_UBH(ucpi), ucpi->c_freeoff, blkno);
 		if ((UFS_SB(sb)->s_flags & UFS_CG_MASK) == UFS_CG_44BSD)
 			ufs_clusteracct (sb, ucpi, blkno, 1);
+#ifdef MY_ABC_HERE
+		dquot_free_block(inode, uspi->s_fpb);
+#else
 		vfs_dq_free_block(inode, uspi->s_fpb);
+#endif
 
 		fs32_add(sb, &ucg->cg_cs.cs_nbfree, 1);
 		uspi->cs_total.cs_nbfree++;
@@ -511,6 +519,9 @@ static u64 ufs_add_fragments(struct inode *inode, u64 fragment,
 	struct ufs_cg_private_info * ucpi;
 	struct ufs_cylinder_group * ucg;
 	unsigned cgno, fragno, fragoff, count, fragsize, i;
+#ifdef MY_ABC_HERE
+	int ret;
+#endif
 	
 	UFSD("ENTER, fragment %llu, oldcount %u, newcount %u\n",
 	     (unsigned long long)fragment, oldcount, newcount);
@@ -556,8 +567,14 @@ static u64 ufs_add_fragments(struct inode *inode, u64 fragment,
 		fs32_add(sb, &ucg->cg_frsum[fragsize - count], 1);
 	for (i = oldcount; i < newcount; i++)
 		ubh_clrbit (UCPI_UBH(ucpi), ucpi->c_freeoff, fragno + i);
+#ifdef MY_ABC_HERE
+	ret = dquot_alloc_block(inode, count);
+	if (ret) {
+		*err = ret;
+#else
 	if (vfs_dq_alloc_block(inode, count)) {
-		*err = -EDQUOT;
+        *err = -EDQUOT;
+#endif
 		return 0;
 	}
 
@@ -596,6 +613,9 @@ static u64 ufs_alloc_fragments(struct inode *inode, unsigned cgno,
 	struct ufs_cylinder_group * ucg;
 	unsigned oldcg, i, j, k, allocsize;
 	u64 result;
+#ifdef MY_ABC_HERE
+	int ret;
+#endif
 	
 	UFSD("ENTER, ino %lu, cgno %u, goal %llu, count %u\n",
 	     inode->i_ino, cgno, (unsigned long long)goal, count);
@@ -664,7 +684,11 @@ cg_found:
 		for (i = count; i < uspi->s_fpb; i++)
 			ubh_setbit (UCPI_UBH(ucpi), ucpi->c_freeoff, goal + i);
 		i = uspi->s_fpb - count;
+#ifdef MY_ABC_HERE
+		dquot_free_block(inode, i);
+#else
 		vfs_dq_free_block(inode, i);
+#endif
 
 		fs32_add(sb, &ucg->cg_cs.cs_nffree, i);
 		uspi->cs_total.cs_nffree += i;
@@ -676,8 +700,14 @@ cg_found:
 	result = ufs_bitmap_search (sb, ucpi, goal, allocsize);
 	if (result == INVBLOCK)
 		return 0;
+#ifdef MY_ABC_HERE
+	ret = dquot_alloc_block(inode, count);
+	if (ret) {
+		*err = ret;
+#else
 	if (vfs_dq_alloc_block(inode, count)) {
-		*err = -EDQUOT;
+        *err = -EDQUOT;
+#endif
 		return 0;
 	}
 	for (i = 0; i < count; i++)
@@ -714,6 +744,9 @@ static u64 ufs_alloccg_block(struct inode *inode,
 	struct ufs_super_block_first * usb1;
 	struct ufs_cylinder_group * ucg;
 	u64 result, blkno;
+#ifdef MY_ABC_HERE
+	int ret;
+#endif
 
 	UFSD("ENTER, goal %llu\n", (unsigned long long)goal);
 
@@ -747,8 +780,14 @@ gotit:
 	ubh_clrblock (UCPI_UBH(ucpi), ucpi->c_freeoff, blkno);
 	if ((UFS_SB(sb)->s_flags & UFS_CG_MASK) == UFS_CG_44BSD)
 		ufs_clusteracct (sb, ucpi, blkno, -1);
+#ifdef MY_ABC_HERE
+	ret = dquot_alloc_block(inode, uspi->s_fpb);
+	if (ret) {
+		*err = ret;
+#else
 	if (vfs_dq_alloc_block(inode, uspi->s_fpb)) {
-		*err = -EDQUOT;
+        *err = -EDQUOT;
+#endif
 		return INVBLOCK;
 	}
 

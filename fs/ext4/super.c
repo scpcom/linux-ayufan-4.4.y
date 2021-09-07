@@ -47,6 +47,10 @@
 #include "acl.h"
 #include "mballoc.h"
 
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+#include <linux/syno_acl_xattr_ds.h>
+#endif
+
 #define CREATE_TRACE_POINTS
 #include <trace/events/ext4.h>
 
@@ -69,6 +73,9 @@ static int ext4_unfreeze(struct super_block *sb);
 static void ext4_write_super(struct super_block *sb);
 static int ext4_freeze(struct super_block *sb);
 
+#ifdef MY_ABC_HERE
+extern struct dentry_operations ext4_dentry_operations;
+#endif
 
 ext4_fsblk_t ext4_block_bitmap(struct super_block *sb,
 			       struct ext4_group_desc *bg)
@@ -227,6 +234,21 @@ handle_t *ext4_journal_start_sb(struct super_block *sb, int nblocks)
 	if (sb->s_flags & MS_RDONLY)
 		return ERR_PTR(-EROFS);
 
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
+	/* ext4 has no check of SB_FREEZE_WRITE. which mean it rely on fs
+	   blocking of write action. Other action such as inode delete will
+	   passby barrier in freeze_bdev(). We just add a workaround to
+	   avoid deadlock*/
+	if (!journal_current_handle()) {
+		vfs_check_frozen(sb, SB_FREEZE_TRANS);
+	}
+#else
+	vfs_check_frozen(sb, SB_FREEZE_TRANS);
+#endif
+#else
+	vfs_check_frozen(sb, SB_FREEZE_WRITE);
+#endif
 	/* Special case here: if the journal has aborted behind our
 	 * backs (eg. EIO in the commit thread), then we still need to
 	 * take the FS itself readonly cleanly. */
@@ -240,7 +262,9 @@ handle_t *ext4_journal_start_sb(struct super_block *sb, int nblocks)
 	}
 	return ext4_get_nojournal();
 }
-
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+EXPORT_SYMBOL(ext4_journal_start_sb);
+#endif
 /*
  * The only special thing we need to do here is to make sure that all
  * jbd2_journal_stop calls result in the superblock being marked dirty, so
@@ -267,6 +291,9 @@ int __ext4_journal_stop(const char *where, handle_t *handle)
 		__ext4_std_error(sb, where, err);
 	return err;
 }
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+EXPORT_SYMBOL(__ext4_journal_stop);
+#endif
 
 void ext4_journal_abort_handle(const char *caller, const char *err_fn,
 		struct buffer_head *bh, handle_t *handle, int err)
@@ -702,6 +729,7 @@ static struct inode *ext4_alloc_inode(struct super_block *sb)
 	ei->i_reserved_data_blocks = 0;
 	ei->i_reserved_meta_blocks = 0;
 	ei->i_allocated_meta_blocks = 0;
+	ei->i_da_metadata_calc_len = 0;
 	ei->i_delalloc_reserved_flag = 0;
 	spin_lock_init(&(ei->i_block_reservation_lock));
 #ifdef CONFIG_QUOTA
@@ -790,6 +818,9 @@ static inline void ext4_show_quota_options(struct seq_file *seq,
 #endif
 }
 
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+extern int SynoDebugFlag;
+#endif
 /*
  * Show an option if
  *  - it's set to a non-default value OR
@@ -836,8 +867,18 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 		seq_puts(seq, ",nouid32");
 	if (test_opt(sb, DEBUG) && !(def_mount_opts & EXT4_DEFM_DEBUG))
 		seq_puts(seq, ",debug");
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
+	if(SynoDebugFlag) {
+		if (test_opt(sb, OLDALLOC)) {
+			seq_puts(seq, ",oldalloc");
+		}
+	}
+#endif
+#else
 	if (test_opt(sb, OLDALLOC))
 		seq_puts(seq, ",oldalloc");
+#endif
 #ifdef CONFIG_EXT4_FS_XATTR
 	if (test_opt(sb, XATTR_USER) &&
 		!(def_mount_opts & EXT4_DEFM_XATTR_USER))
@@ -847,7 +888,13 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 		seq_puts(seq, ",nouser_xattr");
 	}
 #endif
-#ifdef CONFIG_EXT4_FS_POSIX_ACL
+
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+	if (test_opt(sb, SYNO_ACL) && !(def_mount_opts & EXT4_DEFM_ACL))
+		seq_puts(seq, ","SYNO_ACL_MNT_OPT);
+	if (!test_opt(sb, SYNO_ACL) && (def_mount_opts & EXT4_DEFM_ACL))
+		seq_puts(seq, ","SYNO_ACL_NOT_MNT_OPT);
+#elif defined(CONFIG_EXT4_FS_POSIX_ACL)
 	if (test_opt(sb, POSIX_ACL) && !(def_mount_opts & EXT4_DEFM_ACL))
 		seq_puts(seq, ",acl");
 	if (!test_opt(sb, POSIX_ACL) && (def_mount_opts & EXT4_DEFM_ACL))
@@ -875,6 +922,8 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 	seq_puts(seq, test_opt(sb, BARRIER) ? "1" : "0");
 	if (test_opt(sb, JOURNAL_ASYNC_COMMIT))
 		seq_puts(seq, ",journal_async_commit");
+	else if (test_opt(sb, JOURNAL_CHECKSUM))
+		seq_puts(seq, ",journal_checksum");
 	if (test_opt(sb, NOBH))
 		seq_puts(seq, ",nobh");
 	if (test_opt(sb, I_VERSION))
@@ -1000,15 +1049,19 @@ static ssize_t ext4_quota_write(struct super_block *sb, int type,
 static const struct dquot_operations ext4_quota_operations = {
 	.initialize	= dquot_initialize,
 	.drop		= dquot_drop,
-	.alloc_space	= dquot_alloc_space,
-	.reserve_space	= dquot_reserve_space,
-	.claim_space	= dquot_claim_space,
-	.release_rsv	= dquot_release_reserved_space,
+#ifndef MY_ABC_HERE
+	.alloc_space    = dquot_alloc_space,
+	.reserve_space  = dquot_reserve_space,
+	.claim_space    = dquot_claim_space,
+	.release_rsv    = dquot_release_reserved_space,
+#endif
 #ifdef CONFIG_QUOTA
 	.get_reserved_space = ext4_get_reserved_space,
 #endif
 	.alloc_inode	= dquot_alloc_inode,
-	.free_space	= dquot_free_space,
+#ifndef MY_ABC_HERE
+    .free_space     = dquot_free_space,
+#endif
 	.free_inode	= dquot_free_inode,
 	.transfer	= dquot_transfer,
 	.write_dquot	= ext4_write_dquot,
@@ -1085,7 +1138,11 @@ enum {
 	Opt_auto_da_alloc, Opt_noauto_da_alloc, Opt_noload, Opt_nobh, Opt_bh,
 	Opt_commit, Opt_min_batch_time, Opt_max_batch_time,
 	Opt_journal_update, Opt_journal_dev,
+#ifdef MY_ABC_HERE
+	Opt_journal_checksum, Opt_nojournal_checksum, Opt_journal_async_commit,
+#else
 	Opt_journal_checksum, Opt_journal_async_commit,
+#endif
 	Opt_abort, Opt_data_journal, Opt_data_ordered, Opt_data_writeback,
 	Opt_data_err_abort, Opt_data_err_ignore,
 	Opt_usrjquota, Opt_grpjquota, Opt_offusrjquota, Opt_offgrpjquota,
@@ -1094,6 +1151,9 @@ enum {
 	Opt_usrquota, Opt_grpquota, Opt_i_version,
 	Opt_stripe, Opt_delalloc, Opt_nodelalloc,
 	Opt_block_validity, Opt_noblock_validity,
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+	Opt_synoacl, Opt_nosynoacl,
+#endif
 	Opt_inode_readahead_blks, Opt_journal_ioprio,
 	Opt_discard, Opt_nodiscard,
 };
@@ -1119,6 +1179,10 @@ static const match_table_t tokens = {
 	{Opt_nouser_xattr, "nouser_xattr"},
 	{Opt_acl, "acl"},
 	{Opt_noacl, "noacl"},
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+	{Opt_synoacl, SYNO_ACL_MNT_OPT},
+	{Opt_nosynoacl, SYNO_ACL_NOT_MNT_OPT},
+#endif
 	{Opt_noload, "noload"},
 	{Opt_noload, "norecovery"},
 	{Opt_nobh, "nobh"},
@@ -1129,6 +1193,9 @@ static const match_table_t tokens = {
 	{Opt_journal_update, "journal=update"},
 	{Opt_journal_dev, "journal_dev=%u"},
 	{Opt_journal_checksum, "journal_checksum"},
+#ifdef MY_ABC_HERE
+	{Opt_nojournal_checksum, "nojournal_checksum"},
+#endif
 	{Opt_journal_async_commit, "journal_async_commit"},
 	{Opt_abort, "abort"},
 	{Opt_data_journal, "data=journal"},
@@ -1206,6 +1273,9 @@ static int parse_options(char *options, struct super_block *sb,
 	char *qname;
 #endif
 
+#ifdef MY_ABC_HERE
+	set_opt(sbi->s_mount_opt, JOURNAL_CHECKSUM);
+#endif
 	if (!options)
 		return 1;
 
@@ -1282,7 +1352,14 @@ static int parse_options(char *options, struct super_block *sb,
 			ext4_msg(sb, KERN_ERR, "(no)user_xattr options not supported");
 			break;
 #endif
-#ifdef CONFIG_EXT4_FS_POSIX_ACL
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+		case Opt_synoacl:
+			set_opt(sbi->s_mount_opt, SYNO_ACL);
+			break;
+		case Opt_nosynoacl:
+			clear_opt(sbi->s_mount_opt, SYNO_ACL);
+			break;
+#elif  defined(CONFIG_EXT4_FS_POSIX_ACL)
 		case Opt_acl:
 			set_opt(sbi->s_mount_opt, POSIX_ACL);
 			break;
@@ -1321,6 +1398,11 @@ static int parse_options(char *options, struct super_block *sb,
 		case Opt_journal_checksum:
 			set_opt(sbi->s_mount_opt, JOURNAL_CHECKSUM);
 			break;
+#ifdef MY_ABC_HERE
+		case Opt_nojournal_checksum:
+			clear_opt(sbi->s_mount_opt, JOURNAL_CHECKSUM);
+			break;
+#endif
 		case Opt_journal_async_commit:
 			set_opt(sbi->s_mount_opt, JOURNAL_ASYNC_COMMIT);
 			set_opt(sbi->s_mount_opt, JOURNAL_CHECKSUM);
@@ -1646,6 +1728,7 @@ static int ext4_setup_super(struct super_block *sb, struct ext4_super_block *es,
 	}
 	if (read_only)
 		return res;
+#ifndef MY_ABC_HERE
 	if (!(sbi->s_mount_state & EXT4_VALID_FS))
 		ext4_msg(sb, KERN_WARNING, "warning: mounting unchecked fs, "
 			 "running e2fsck is recommended");
@@ -1665,6 +1748,7 @@ static int ext4_setup_super(struct super_block *sb, struct ext4_super_block *es,
 		ext4_msg(sb, KERN_WARNING,
 			 "warning: checktime reached, "
 			 "running e2fsck is recommended");
+#endif
 	if (!sbi->s_journal)
 		es->s_state &= cpu_to_le16(~EXT4_VALID_FS);
 	if (!(__s16) le16_to_cpu(es->s_max_mnt_count))
@@ -2330,6 +2414,75 @@ static int ext4_feature_set_ok(struct super_block *sb, int readonly)
 	return 1;
 }
 
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+static int SYNOACLModuleStatusGet(const char *szModName)
+{
+	int st = -1;
+	struct module *mod = NULL;
+
+	mutex_lock(&module_mutex);
+
+	if (NULL == (mod = find_module(szModName))){
+		goto Err;
+	}
+
+	st = mod->state;
+Err:
+	mutex_unlock(&module_mutex);
+
+	return st;
+}
+
+static void UseACLModule(const char *szModName, int isGet)
+{
+	struct module *mod = NULL;
+
+	mutex_lock(&module_mutex);
+
+	if (NULL == (mod = find_module(szModName))){
+		printk("synoacl module [%s] is not loaded \n", szModName);
+		goto Err;
+	}
+
+	if (isGet) {
+		try_module_get(mod);
+	} else {
+		module_put(mod);
+	}
+Err:
+	mutex_unlock(&module_mutex);
+}
+
+static void SYNOACLModuleGet(const char *szModName)
+{
+	UseACLModule(szModName, 1);
+}
+static void SYNOACLModulePut(const char *szModName)
+{
+	UseACLModule(szModName, 0);
+}
+
+static void SYNOACLFlagSet(struct super_block *psb, unsigned long *ps_flags, unsigned int *ps_mount_opt)
+{
+	if (!psb || !ps_flags || !ps_mount_opt) {
+		return;
+	}
+
+	*ps_flags &= ~MS_SYNOACL;
+	if (*ps_mount_opt & EXT4_MOUNT_SYNO_ACL) {
+		if (MODULE_STATE_LIVE != SYNOACLModuleStatusGet("synoacl_ext4") ||
+			MODULE_STATE_LIVE != SYNOACLModuleStatusGet("synoacl_vfs")) {
+			ext4_msg(psb, KERN_ERR, "synoacl module has not been loaded. Unable to mount with synoacl, vfs_mod status=%d, ext4_mod status=%d", SYNOACLModuleStatusGet("synoacl_vfs"), SYNOACLModuleStatusGet("synoacl_ext4"));
+			*ps_mount_opt &= ~EXT4_MOUNT_SYNO_ACL;
+		} else {
+			*ps_flags |= MS_SYNOACL;
+			SYNOACLModuleGet("synoacl_ext4");
+			SYNOACLModuleGet("synoacl_vfs");
+		}
+	}
+}
+#endif
+
 static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 				__releases(kernel_lock)
 				__acquires(kernel_lock)
@@ -2424,7 +2577,10 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	if (def_mount_opts & EXT4_DEFM_XATTR_USER)
 		set_opt(sbi->s_mount_opt, XATTR_USER);
 #endif
-#ifdef CONFIG_EXT4_FS_POSIX_ACL
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+	if (def_mount_opts & EXT4_DEFM_ACL)
+		set_opt(sbi->s_mount_opt, SYNO_ACL);
+#elif defined(CONFIG_EXT4_FS_POSIX_ACL)
 	if (def_mount_opts & EXT4_DEFM_ACL)
 		set_opt(sbi->s_mount_opt, POSIX_ACL);
 #endif
@@ -2448,7 +2604,11 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	sbi->s_min_batch_time = EXT4_DEF_MIN_BATCH_TIME;
 	sbi->s_max_batch_time = EXT4_DEF_MAX_BATCH_TIME;
 
+#ifdef MY_ABC_HERE
+	clear_opt(sbi->s_mount_opt, BARRIER);
+#else
 	set_opt(sbi->s_mount_opt, BARRIER);
+#endif
 
 	/*
 	 * enable delayed allocation by default
@@ -2460,8 +2620,12 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 			   &journal_ioprio, NULL, 0))
 		goto failed_mount;
 
+#ifdef CONFIG_EXT4_FS_SYNO_ACL 
+	SYNOACLFlagSet(sb, &sb->s_flags, &sbi->s_mount_opt);
+#else
 	sb->s_flags = (sb->s_flags & ~MS_POSIXACL) |
 		((sbi->s_mount_opt & EXT4_MOUNT_POSIX_ACL) ? MS_POSIXACL : 0);
+#endif
 
 	if (le32_to_cpu(es->s_rev_level) == EXT4_GOOD_OLD_REV &&
 	    (EXT4_HAS_COMPAT_FEATURE(sb, ~0U) ||
@@ -2693,24 +2857,6 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	get_random_bytes(&sbi->s_next_generation, sizeof(u32));
 	spin_lock_init(&sbi->s_next_gen_lock);
 
-	err = percpu_counter_init(&sbi->s_freeblocks_counter,
-			ext4_count_free_blocks(sb));
-	if (!err) {
-		err = percpu_counter_init(&sbi->s_freeinodes_counter,
-				ext4_count_free_inodes(sb));
-	}
-	if (!err) {
-		err = percpu_counter_init(&sbi->s_dirs_counter,
-				ext4_count_dirs(sb));
-	}
-	if (!err) {
-		err = percpu_counter_init(&sbi->s_dirtyblocks_counter, 0);
-	}
-	if (err) {
-		ext4_msg(sb, KERN_ERR, "insufficient memory");
-		goto failed_mount3;
-	}
-
 	sbi->s_stripe = ext4_get_stripe_size(sbi);
 	sbi->s_max_writeback_mb_bump = 128;
 
@@ -2830,7 +2976,20 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	set_task_ioprio(sbi->s_journal->j_task, journal_ioprio);
 
 no_journal:
-
+	err = percpu_counter_init(&sbi->s_freeblocks_counter,
+				  ext4_count_free_blocks(sb));
+	if (!err)
+		err = percpu_counter_init(&sbi->s_freeinodes_counter,
+					  ext4_count_free_inodes(sb));
+	if (!err)
+		err = percpu_counter_init(&sbi->s_dirs_counter,
+					  ext4_count_dirs(sb));
+	if (!err)
+		err = percpu_counter_init(&sbi->s_dirtyblocks_counter, 0);
+	if (err) {
+		ext4_msg(sb, KERN_ERR, "insufficient memory");
+		goto failed_mount_wq;
+	}
 	if (test_opt(sb, NOBH)) {
 		if (!(test_opt(sb, DATA_FLAGS) == EXT4_MOUNT_WRITEBACK_DATA)) {
 			ext4_msg(sb, KERN_WARNING, "Ignoring nobh option - "
@@ -2868,6 +3027,10 @@ no_journal:
 		goto failed_mount4;
 	}
 
+#ifdef MY_ABC_HERE
+	// root is mounted, attach our dentry operations
+	sb->s_root->d_op = &ext4_dentry_operations;
+#endif
 	ext4_setup_super(sb, es, sb->s_flags & MS_RDONLY);
 
 	/* determine the minimum size of new large inodes, if present */
@@ -2905,7 +3068,7 @@ no_journal:
 	err = ext4_setup_system_zone(sb);
 	if (err) {
 		ext4_msg(sb, KERN_ERR, "failed to initialize system "
-			 "zone (%d)\n", err);
+			 "zone (%d)", err);
 		goto failed_mount4;
 	}
 
@@ -2963,6 +3126,10 @@ failed_mount_wq:
 		jbd2_journal_destroy(sbi->s_journal);
 		sbi->s_journal = NULL;
 	}
+	percpu_counter_destroy(&sbi->s_freeblocks_counter);
+	percpu_counter_destroy(&sbi->s_freeinodes_counter);
+	percpu_counter_destroy(&sbi->s_dirs_counter);
+	percpu_counter_destroy(&sbi->s_dirtyblocks_counter);
 failed_mount3:
 	if (sbi->s_flex_groups) {
 		if (is_vmalloc_addr(sbi->s_flex_groups))
@@ -2970,10 +3137,6 @@ failed_mount3:
 		else
 			kfree(sbi->s_flex_groups);
 	}
-	percpu_counter_destroy(&sbi->s_freeblocks_counter);
-	percpu_counter_destroy(&sbi->s_freeinodes_counter);
-	percpu_counter_destroy(&sbi->s_dirs_counter);
-	percpu_counter_destroy(&sbi->s_dirtyblocks_counter);
 failed_mount2:
 	for (i = 0; i < db_count; i++)
 		brelse(sbi->s_group_desc[i]);
@@ -3390,8 +3553,14 @@ int ext4_force_commit(struct super_block *sb)
 		return 0;
 
 	journal = EXT4_SB(sb)->s_journal;
-	if (journal)
+	if (journal) {
+#ifdef MY_ABC_HERE
+		vfs_check_frozen(sb, SB_FREEZE_TRANS);
+#else
+		vfs_check_frozen(sb, SB_FREEZE_WRITE);
+#endif
 		ret = ext4_journal_force_commit(journal);
+	}
 
 	return ret;
 }
@@ -3440,18 +3609,16 @@ static int ext4_freeze(struct super_block *sb)
 	 * the journal.
 	 */
 	error = jbd2_journal_flush(journal);
-	if (error < 0) {
-	out:
-		jbd2_journal_unlock_updates(journal);
-		return error;
-	}
+	if (error < 0)
+		goto out;
 
 	/* Journal blocked and flushed, clear needs_recovery flag. */
 	EXT4_CLEAR_INCOMPAT_FEATURE(sb, EXT4_FEATURE_INCOMPAT_RECOVER);
 	error = ext4_commit_super(sb, 1);
-	if (error)
-		goto out;
-	return 0;
+out:
+	/* we rely on s_frozen to stop further updates */
+	jbd2_journal_unlock_updates(EXT4_SB(sb)->s_journal);
+	return error;
 }
 
 /*
@@ -3468,7 +3635,6 @@ static int ext4_unfreeze(struct super_block *sb)
 	EXT4_SET_INCOMPAT_FEATURE(sb, EXT4_FEATURE_INCOMPAT_RECOVER);
 	ext4_commit_super(sb, 1);
 	unlock_super(sb);
-	jbd2_journal_unlock_updates(EXT4_SB(sb)->s_journal);
 	return 0;
 }
 
@@ -3517,8 +3683,12 @@ static int ext4_remount(struct super_block *sb, int *flags, char *data)
 	if (sbi->s_mount_flags & EXT4_MF_FS_ABORTED)
 		ext4_abort(sb, __func__, "Abort forced by user");
 
+#ifdef CONFIG_EXT4_FS_SYNO_ACL  
+	SYNOACLFlagSet(sb, &sb->s_flags, &sbi->s_mount_opt);
+#else
 	sb->s_flags = (sb->s_flags & ~MS_POSIXACL) |
 		((sbi->s_mount_opt & EXT4_MOUNT_POSIX_ACL) ? MS_POSIXACL : 0);
+#endif
 
 	es = sbi->s_es;
 
@@ -3989,11 +4159,24 @@ static int ext4_get_sb(struct file_system_type *fs_type, int flags,
 	return get_sb_bdev(fs_type, flags, dev_name, data, ext4_fill_super,mnt);
 }
 
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+static void ext4_kill_sb(struct super_block *sb)
+{
+	kill_block_super(sb);
+	SYNOACLModulePut("synoacl_ext4");
+	SYNOACLModulePut("synoacl_vfs");
+}
+#endif
+
 static struct file_system_type ext4_fs_type = {
 	.owner		= THIS_MODULE,
 	.name		= "ext4",
 	.get_sb		= ext4_get_sb,
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+	.kill_sb	= ext4_kill_sb,
+#else
 	.kill_sb	= kill_block_super,
+#endif
 	.fs_flags	= FS_REQUIRES_DEV,
 };
 
@@ -4001,6 +4184,7 @@ static int __init init_ext4_fs(void)
 {
 	int err;
 
+	ext4_check_flag_values();
 	err = init_ext4_system_zone();
 	if (err)
 		return err;

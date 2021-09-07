@@ -67,6 +67,10 @@
 
 #include "libata.h"
 
+#ifdef MY_ABC_HERE
+#include <linux/synosata.h>
+extern void ResubmitCommand(unsigned long data);
+#endif
 
 /* debounce timing parameters in msecs { interval, duration, timeout } */
 const unsigned long sata_deb_timing_normal[]		= {   5,  100, 2000 };
@@ -119,6 +123,12 @@ static struct ata_force_ent *ata_force_tbl;
 static int ata_force_tbl_size;
 
 static char ata_force_param_buf[PAGE_SIZE] __initdata;
+
+#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_SYNO_MV88F6281)
+extern unsigned char SYNOKirkwoodIsBoardNeedPowerUpHDD(u32);
+extern int SYNO_CTRL_HDD_POWERON(int index, int value);
+#endif
+
 /* param_buf is thrown away after initialization, disallow read */
 module_param_string(force, ata_force_param_buf, sizeof(ata_force_param_buf), 0);
 MODULE_PARM_DESC(force, "Force ATA configurations including cable type, link speed and transfer mode (see Documentation/kernel-parameters.txt for details)");
@@ -1736,6 +1746,141 @@ static void ata_qc_complete_internal(struct ata_queued_cmd *qc)
 	complete(waiting);
 }
 
+#ifdef MY_ABC_HERE
+/**
+ * Main for our gpio query. ata_exec_internal_sg don't concern
+ * about qc_defer. But it is very important because some sata
+ * chip has work around such like sil-3132. So we do it by our
+ * self.
+ *
+ * Be careful here. If the gpio command is too much, the total
+ * throughput would degrade.
+ *
+ * @param dev     [IN] The GPIO target device. Should not be NULL.
+ * @param tf      [IN] The GPIO task files. Should not be NULL.
+ * @param timeout [IN] execution time out.
+ *
+ * @return Zero on success, AC_ERR_* mask on failure
+ */
+unsigned syno_ata_exec_internal_gpio(struct ata_device *dev,
+									 struct ata_taskfile *tf,
+									 unsigned long timeout)
+{
+	struct ata_link *link = dev->link;
+	struct ata_port *ap = link->ap;
+	u8 command = tf->command;
+	int auto_timeout = 0;
+	struct ata_queued_cmd *qc;
+	unsigned long flags;
+	DECLARE_COMPLETION_ONSTACK(wait);
+	unsigned int err_mask;
+	int rc;
+
+	spin_lock_irqsave(ap->lock, flags);
+
+	/* no internal command while frozen */
+	if (ap->pflags & ATA_PFLAG_FROZEN) {
+		spin_unlock_irqrestore(ap->lock, flags);
+		return AC_ERR_SYSTEM;
+	}
+
+	/* retry if there is busy now */
+	if (NULL == (qc = ata_qc_new_init(dev))) {
+		spin_unlock_irqrestore(ap->lock, flags);
+		return AC_ERR_OTHER;
+	}
+
+	/* prepare & issue qc */
+	qc->tf = *tf;
+	if (ATA_CMD_PMP_READ == tf->command && SATA_PMP_GSCR_3726_GPIO == tf->feature) {
+		/* only read need result tf */
+		qc->flags |= ATA_QCFLAG_RESULT_TF;
+	}
+	qc->dma_dir = DMA_NONE;
+
+	qc->private_data = &wait;
+	qc->complete_fn = ata_qc_complete_internal;
+
+	/* retry if defer */
+	if (ap->ops->qc_defer) {
+		if ((rc = ap->ops->qc_defer(qc))) {
+			ata_qc_free(qc);
+			spin_unlock_irqrestore(ap->lock, flags);
+			return AC_ERR_OTHER;
+		}
+	}
+
+	ata_qc_issue(qc);
+
+	spin_unlock_irqrestore(ap->lock, flags);
+
+	if (!timeout) {
+		if (ata_probe_timeout)
+			timeout = ata_probe_timeout * 1000 / HZ;
+		else {
+			timeout = ata_internal_cmd_timeout(dev, command);
+			auto_timeout = 1;
+		}
+	}
+
+	rc = wait_for_completion_timeout(&wait, msecs_to_jiffies(timeout));
+
+	if (!rc) {
+		spin_lock_irqsave(ap->lock, flags);
+
+		/* We're racing with irq here.  If we lose, the
+		 * following test prevents us from completing the qc
+		 * twice.  If we win, the port is frozen and will be
+		 * cleaned up by ->post_internal_cmd().
+		 */
+		if (qc->flags & ATA_QCFLAG_ACTIVE) {
+			qc->err_mask |= AC_ERR_TIMEOUT;
+
+			if (ap->ops->error_handler)
+				ata_port_freeze(ap);
+			else
+				ata_qc_complete(qc);
+
+			if (ata_msg_warn(ap))
+				ata_dev_printk(dev, KERN_WARNING,
+					"syno gpio r/w qc timeout\n");
+		}
+		spin_unlock_irqrestore(ap->lock, flags);
+	}
+
+	/* do post_internal_cmd */
+	if (ap->ops->post_internal_cmd)
+		ap->ops->post_internal_cmd(qc);
+
+	/* perform minimal error analysis */
+	if (qc->flags & ATA_QCFLAG_FAILED) {
+		if (qc->result_tf.command & (ATA_ERR | ATA_DF))
+			qc->err_mask |= AC_ERR_DEV;
+
+		if (!qc->err_mask)
+			qc->err_mask |= AC_ERR_OTHER;
+
+		if (qc->err_mask & ~AC_ERR_OTHER)
+			qc->err_mask &= ~AC_ERR_OTHER;
+	}
+
+	/* finish up */
+	spin_lock_irqsave(ap->lock, flags);
+
+	*tf = qc->result_tf;
+	err_mask = qc->err_mask;
+
+	ata_qc_free(qc);
+
+	spin_unlock_irqrestore(ap->lock, flags);
+
+	if ((err_mask & AC_ERR_TIMEOUT) && auto_timeout) {
+		ata_internal_cmd_timed_out(dev, command);
+	}
+
+	return err_mask;
+}
+#endif
 /**
  *	ata_exec_internal_sg - execute libata internal command
  *	@dev: Device to which the command is sent
@@ -1954,6 +2099,9 @@ unsigned ata_exec_internal(struct ata_device *dev,
 {
 	struct scatterlist *psg = NULL, sg;
 	unsigned int n_elem = 0;
+#ifdef MY_ABC_HERE
+	struct ata_eh_context *ehc = &dev->link->ap->link.eh_context;
+#endif
 
 	if (dma_dir != DMA_NONE) {
 		WARN_ON(!buf);
@@ -1962,6 +2110,13 @@ unsigned ata_exec_internal(struct ata_device *dev,
 		n_elem++;
 	}
 
+#ifdef MY_ABC_HERE
+	if ((ATA_CMD_PMP_WRITE == tf->command || ATA_CMD_PMP_READ == tf->command) &&
+		SATA_PMP_GSCR_3726_GPIO == tf->feature &&
+		!(ehc->i.action & ATA_EH_REVALIDATE))
+		return syno_ata_exec_internal_gpio(dev, tf, timeout);
+	else
+#endif
 	return ata_exec_internal_sg(dev, tf, cdb, dma_dir, psg, n_elem,
 				    timeout);
 }
@@ -2251,6 +2406,12 @@ retry:
 	}
 
 	*p_class = class;
+
+#ifdef MY_ABC_HERE
+	if (syno_ata_id_is_ssd(id)) {
+		dev->is_ssd = 1;
+	}
+#endif
 
 	return 0;
 
@@ -5061,7 +5222,13 @@ void ata_qc_complete(struct ata_queued_cmd *qc)
 			/* always fill result TF for failed qc */
 			fill_result_tf(qc);
 
+#if defined(MY_ABC_HERE)
+			if (NULL == qc->scsicmd && ATA_CMD_CHK_POWER == qc->tf.command)
+				__ata_qc_complete(qc);
+			else if (!ata_tag_internal(qc->tag))
+#else
 			if (!ata_tag_internal(qc->tag))
+#endif
 				ata_qc_schedule_eh(qc);
 			else
 				__ata_qc_complete(qc);
@@ -5626,6 +5793,12 @@ void ata_link_init(struct ata_port *ap, struct ata_link *link, int pmp)
 #ifdef CONFIG_ATA_ACPI
 		dev->gtf_filter = ata_acpi_gtf_filter;
 #endif
+#ifdef MY_ABC_HERE
+		setup_timer(&dev->rstimer, ResubmitCommand, (unsigned long)dev);
+		INIT_LIST_HEAD(&dev->pendinglh);
+		dev->chkpower_pending = 0;
+		dev->must_checkpw = 0;
+#endif
 		ata_dev_init(dev);
 	}
 }
@@ -6111,6 +6284,23 @@ static void async_port_probe(void *data, async_cookie_t cookie)
 	if (!(ap->host->flags & ATA_HOST_PARALLEL_SCAN) && ap->port_no != 0)
 		async_synchronize_cookie(cookie);
 
+
+#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_SYNO_MV88F6281)
+	if(SYNOKirkwoodIsBoardNeedPowerUpHDD(ap->print_id)) {
+		SYNO_CTRL_HDD_POWERON(ap->print_id, 1);
+		SleepForLatency();
+	}
+#endif
+
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+		/* delay 10s to avoid probe disks in the same time(consume too much power)
+		 * If this async_port_probe(..) function is run asynchronously this code is not work,
+		 * so we must disable async_enabled before call async_port_probe(..) */
+		if (!(ap->host->flags & ATA_HOST_LLD_SPINUP_DELAY)) {
+			SleepForHD(ap->print_id);
+		}
+#endif
+
 	/* probe */
 	if (ap->ops->error_handler) {
 		struct ata_eh_info *ehi = &ap->link.eh_info;
@@ -6154,6 +6344,8 @@ static void async_port_probe(void *data, async_cookie_t cookie)
 	ata_scsi_scan_host(ap, 1);
 
 }
+
+
 /**
  *	ata_host_register - register initialized ATA host
  *	@host: ATA host to register
@@ -6173,6 +6365,9 @@ static void async_port_probe(void *data, async_cookie_t cookie)
 int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 {
 	int i, rc;
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+	int async_enabled = 0;
+#endif
 
 	/* host must have been started */
 	if (!(host->flags & ATA_HOST_STARTED)) {
@@ -6228,13 +6423,42 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 		} else
 			ata_port_printk(ap, KERN_INFO, "DUMMY\n");
 	}
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+	/* Some SATA I chips can sleep earlier to prevent the
+	 * disk drop problem due to power cable and sata cable order mismatch.
+	 * this mismatch case is only happen in cable model ex. CS407e
+	 * cableless model didn't have this issue
+	 */
+	if (host->flags & ATA_HOST_LLD_SPINUP_DELAY) {
+		for (i = 0; i < host->n_ports; i++) {
+			struct ata_port *ap = host->ports[i];
+			SleepForHD(ap->print_id);
+		}
+	}
 
+	/* get the async_enabled value, we will disalbe async_schedule, and restore its async_enabled value after probe disks */
+	async_enabled = syno_async_schedule_enabled_get();
+	/* disable async schedule to avoid parallel probe disks */
+	syno_async_schedule_enabled_set(0);
+#endif
 	/* perform each probe asynchronously */
 	for (i = 0; i < host->n_ports; i++) {
 		struct ata_port *ap = host->ports[i];
 		async_schedule(async_port_probe, ap);
 	}
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+	for (i = 0; i < host->n_ports; i++) {
+		struct ata_port *ap = host->ports[i];
+		ata_port_wait_eh(ap);
+		ata_scsi_scan_host(ap, 1);
+    }
 
+	/* restore async schedule enable value */
+	syno_async_schedule_enabled_set(async_enabled);
+	if (host->flags & ATA_HOST_LLD_SPINUP_DELAY) {
+		host->flags &= ~ATA_HOST_LLD_SPINUP_DELAY;
+	}
+#endif
 	return 0;
 }
 
@@ -6760,6 +6984,42 @@ const struct ata_port_info ata_dummy_port_info = {
 	.port_ops		= &ata_dummy_port_ops,
 };
 
+
+#ifdef MY_ABC_HERE
+void syno_ata_info_print(struct ata_port *ap)
+{
+	u32 sstatus;
+
+	if(NULL == ap->ops || NULL == ap->ops->scr_read) {
+		return;
+	}
+
+	ap->ops->scr_read(&ap->link, SCR_STATUS, &sstatus);
+	/**
+	 *  0000 No device detected and PHY communication not
+	 *  	 established
+	 *  0001 Device presence detected but PHY communication not
+	 *  	 established
+	 *  0011 Device presence detected and PHY communication
+	 *       established
+	 *  0100 PHY in offline	mode as a result of the
+	 *       interface being disabled or running in a BIST loopback
+	 *       mode
+	 *
+	 *  PMP port hotplug would not detect by this
+	 */
+	if(0x0 == (0xf & sstatus)) {
+		printk("ata%u: device unplugged sstatus 0x%x\n", ap->print_id, sstatus);
+	}else if (0x1 == (0xf & sstatus) || 0x3 == (0xf & sstatus)) {
+		printk("ata%u: device plugged sstatus 0x%x\n", ap->print_id, sstatus);
+	} else {
+		printk("ata%u: PHY in offline mode 0x%x\n", ap->print_id, sstatus);
+	}
+}
+
+EXPORT_SYMBOL(syno_ata_info_print);
+#endif
+
 /*
  * libata is essentially a library of internal helper functions for
  * low-level ATA host controller drivers.  As such, the API/ABI is
@@ -6878,3 +7138,19 @@ EXPORT_SYMBOL_GPL(ata_cable_80wire);
 EXPORT_SYMBOL_GPL(ata_cable_unknown);
 EXPORT_SYMBOL_GPL(ata_cable_ignore);
 EXPORT_SYMBOL_GPL(ata_cable_sata);
+#ifdef MY_ABC_HERE
+int (*funcSYNOSendHibernationEvent)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNOSendHibernationEvent);
+#endif /* MY_ABC_HERE */
+
+/*
+#ifdef MY_ABC_HERE
+int (*funcSYNOGetHwCapability)(CAPABILITY *) = NULL;
+EXPORT_SYMBOL(funcSYNOGetHwCapability);
+#endif
+*/
+
+#ifdef MY_ABC_HERE
+int (*funcSYNOSendEboxRefreshEvent)(int portIndex) = NULL;
+EXPORT_SYMBOL(funcSYNOSendEboxRefreshEvent);
+#endif

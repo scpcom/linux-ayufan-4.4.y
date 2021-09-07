@@ -508,6 +508,29 @@ static struct device_attribute *sysfs_device_attr_list[] = {
 		NULL,
 		};
 
+#ifdef MY_ABC_HERE
+int syno_usb_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun)
+{
+    int index = 0;
+    struct us_data *us = host_to_us(host);
+    struct usb_device *usbdev = us->pusb_dev;
+    
+    if(usbdev && usbdev->bus) {
+#ifdef MY_DEF_HERE
+		if (SYNO_USBBOOT_ID_VENDOR == usbdev->descriptor.idVendor &&
+				SYNO_USBBOOT_ID_PRODUCT == usbdev->descriptor.idProduct) {
+			index = SYNO_USB_FLASH_DEVICE_INDEX;
+        } else {
+            index = SYNO_MAX_INTERNAL_DISK+1;
+        }
+#else
+        index = SYNO_MAX_INTERNAL_DISK+1;
+#endif
+    }
+    
+    return index;
+}
+#endif
 /*
  * this defines our host template, with which we'll allocate hosts
  */
@@ -557,6 +580,13 @@ struct scsi_host_template usb_stor_host_template = {
 
 	/* sysfs device attributes */
 	.sdev_attrs =			sysfs_device_attr_list,
+
+#ifdef MY_DEF_HERE
+	.syno_index_get =		syno_usb_index_get,
+#endif
+#ifdef MY_ABC_HERE
+	.syno_port_type         = PORT_TYPE_USB,
+#endif
 
 	/* module management */
 	.module =			THIS_MODULE

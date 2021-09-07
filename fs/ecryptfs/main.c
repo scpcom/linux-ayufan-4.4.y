@@ -562,6 +562,11 @@ static int ecryptfs_read_super(struct super_block *sb, const char *dev_name)
 		goto out;
 	}
 	ecryptfs_set_superblock_lower(sb, path.dentry->d_sb);
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_FS_SYNOACL(path.dentry->d_inode)) {
+		sb->s_flags |= MS_SYNOACL;
+	}
+#endif
 	sb->s_maxbytes = path.dentry->d_sb->s_maxbytes;
 	sb->s_blocksize = path.dentry->d_sb->s_blocksize;
 	ecryptfs_set_dentry_lower(sb->s_root, path.dentry);

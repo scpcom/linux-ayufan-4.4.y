@@ -30,11 +30,39 @@ static void raid0_unplug(struct request_queue *q)
 	mdk_rdev_t **devlist = conf->devlist;
 	int i;
 
+#ifndef MY_ABC_HERE
 	for (i=0; i<mddev->raid_disks; i++) {
 		struct request_queue *r_queue = bdev_get_queue(devlist[i]->bdev);
 
 		blk_unplug(r_queue);
 	}
+#else
+	rcu_read_lock();
+	for (i=0; i<mddev->raid_disks; i++) {
+		/* orignal using in stop md array, they will sync all data to these disks
+		 * but when some of them are unpluged by user, we not doing sync here
+		 * because it will be a NULL point in devlist[i]->bdev
+		 */
+		mdk_rdev_t *rdev = rcu_dereference(devlist[i]);
+		struct request_queue *r_queue = NULL;
+
+		if(!rdev ||
+		   test_bit(Faulty, &rdev->flags) ||
+		   !atomic_read(&rdev->nr_pending)) {
+			continue;
+		}
+
+		r_queue = bdev_get_queue(rdev->bdev);
+
+		atomic_inc(&rdev->nr_pending);
+		rcu_read_unlock();
+
+		blk_unplug(r_queue);
+		atomic_dec(&rdev->nr_pending);
+		rcu_read_lock();
+	}
+	rcu_read_unlock();
+#endif
 }
 
 static int raid0_congested(void *data, int bits)
@@ -43,6 +71,17 @@ static int raid0_congested(void *data, int bits)
 	raid0_conf_t *conf = mddev->private;
 	mdk_rdev_t **devlist = conf->devlist;
 	int i, ret = 0;
+
+#ifdef MY_ABC_HERE
+	/* when raid0 lose one of disks, it is not normally,
+	 * So we just do a fake report that it is fine,
+	 * Nor will encounter NULL pointer access in devlist[i]->bdev.
+	 */
+	if(mddev->degraded) {
+		/* just report it's fine */
+		return ret;
+	}
+#endif
 
 	if (mddev_congested(mddev, bits))
 		return 1;
@@ -192,7 +231,15 @@ static int create_strip_zones(mddev_t *mddev)
 	if (cnt != mddev->raid_disks) {
 		printk(KERN_ERR "raid0: too few disks (%d of %d) - "
 			"aborting!\n", cnt, mddev->raid_disks);
+#ifdef MY_ABC_HERE
+		/* for raid0 status consistense to other raid type */
+		mddev->degraded = mddev->raid_disks - cnt;
+		zone->nb_dev = mddev->raid_disks;
+		mddev->private = conf;
+		return -ENOMEM;
+#else
 		goto abort;
+#endif
 	}
 	zone->nb_dev = cnt;
 	zone->zone_end = smallest->sectors * cnt;
@@ -320,6 +367,11 @@ static int raid0_run(mddev_t *mddev)
 {
 	int ret;
 
+#ifdef MY_ABC_HERE
+	mddev->degraded = 0;
+#endif
+
+
 	if (mddev->chunk_sectors == 0) {
 		printk(KERN_ERR "md/raid0: chunk size must be set.\n");
 		return -EINVAL;
@@ -330,8 +382,23 @@ static int raid0_run(mddev_t *mddev)
 	mddev->queue->queue_lock = &mddev->queue->__queue_lock;
 
 	ret = create_strip_zones(mddev);
+#ifdef MY_ABC_HERE
+	if (ret < 0) {
+#ifdef MY_ABC_HERE
+			mddev->nodev_and_crashed = 1;
+#endif
+			/* The size must greater than zero, 
+			 * otherwise this partition would not present in /proc/partitions
+			 */
+			mddev->array_sectors = raid0_size(mddev, 0, 0);
+
+			/* pretend success for printing mdstatus otherwise it will not show raid0 status when it fail on boot*/			
+			return 0;
+	}
+#else /* MY_ABC_HERE */
 	if (ret < 0)
 		return ret;
+#endif /* MY_ABC_HERE */
 
 	/* calculate array device size */
 	md_set_array_sectors(mddev, raid0_size(mddev, 0, 0));
@@ -371,6 +438,52 @@ static int raid0_stop(mddev_t *mddev)
 	mddev->private = NULL;
 	return 0;
 }
+
+#ifdef MY_ABC_HERE
+/**
+ * This is end_io callback function.
+ * We can use this for bad sector report and device error
+ * handing. Prevent umount panic from file system
+ *
+ * @author \$Author: ckya $
+ * @version \$Revision: 1.1
+ *
+ * @param bio    Should not be NULL. Passing from block layer
+ * @param error  error number
+ */
+static void Raid0EndRequest(struct bio *bio, int error)
+{
+	int uptodate = test_bit(BIO_UPTODATE, &bio->bi_flags);
+	mddev_t *mddev;
+	mdk_rdev_t *rdev;
+	struct bio *data_bio;
+
+	data_bio = bio->bi_private;
+
+	rdev = (mdk_rdev_t *)data_bio->bi_next;
+	mddev = rdev->mddev;
+
+	bio->bi_end_io = data_bio->bi_end_io;
+	bio->bi_private = data_bio->bi_private;
+
+	if (!uptodate) {
+		if (-ENODEV == error) {
+			syno_md_error(mddev, rdev);
+		}else{
+			/* Let raid0 could keep read.(md_error would let it become read-only) */
+#ifdef MY_ABC_HERE
+			SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
+#endif
+			md_error(mddev, rdev);
+		}
+	}
+
+	atomic_dec(&rdev->nr_pending);
+	bio_put(data_bio);
+	/* Let mount could successful and bad sector could keep accessing */
+	bio_endio(bio, 0);
+}
+#endif /* MY_ABC_HERE */
 
 /* Find the zone which holds a particular offset
  * Update *sectorp to be an offset in that zone
@@ -452,11 +565,30 @@ static int raid0_make_request(struct request_queue *q, struct bio *bio)
 	mdk_rdev_t *tmp_dev;
 	const int rw = bio_data_dir(bio);
 	int cpu;
+#ifdef MY_ABC_HERE
+	struct bio *data_bio;
+#endif
 
 	if (unlikely(bio_rw_flagged(bio, BIO_RW_BARRIER))) {
 		bio_endio(bio, -EOPNOTSUPP);
 		return 0;
 	}
+
+#ifdef MY_ABC_HERE
+	/**
+	* if there has any device offline, we don't make any request to
+	* our raid0 md array
+	*/
+#ifdef MY_ABC_HERE
+	if (mddev->nodev_and_crashed) {
+#else
+	if (mddev->degraded) {
+#endif
+		bio_endio(bio, 0);
+		return 0;
+	}
+#endif
+
 
 	cpu = part_stat_lock();
 	part_stat_inc(cpu, &mddev->gendisk->part0, ios[rw]);
@@ -497,6 +629,21 @@ static int raid0_make_request(struct request_queue *q, struct bio *bio)
 	bio->bi_bdev = tmp_dev->bdev;
 	bio->bi_sector = sector_offset + zone->dev_start +
 		tmp_dev->data_offset;
+
+#ifdef MY_ABC_HERE
+	data_bio = bio_clone(bio, GFP_NOIO);
+
+	if (data_bio) {
+		atomic_inc(&tmp_dev->nr_pending);
+		data_bio->bi_end_io = bio->bi_end_io;
+		data_bio->bi_private = bio->bi_private;
+		data_bio->bi_next = (void *)tmp_dev;
+
+		bio->bi_end_io = Raid0EndRequest;
+		bio->bi_private = data_bio;
+	}
+#endif
+
 	/*
 	 * Let the main block layer submit the IO and resolve recursion:
 	 */
@@ -511,6 +658,33 @@ bad_map:
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+static void
+syno_raid0_status (struct seq_file *seq, mddev_t *mddev)
+{
+	int k;
+	raid0_conf_t *conf = mddev->private;
+	mdk_rdev_t *rdev;
+	
+	seq_printf(seq, " %dk chunks", mddev->chunk_sectors/2);
+	seq_printf(seq, " [%d/%d] [", mddev->raid_disks, mddev->raid_disks - mddev->degraded);	
+	for (k = 0; k < conf->strip_zone[0].nb_dev; k++) {
+		rdev = conf->devlist[k];
+		if(rdev) {
+#ifdef MY_ABC_HERE
+			seq_printf (seq, "%s", 
+						test_bit(In_sync, &rdev->flags) ? 
+						(test_bit(DiskError, &rdev->flags) ? "E" : "U") : "_");
+#else
+			seq_printf (seq, "%s", "U");
+#endif
+		}else{
+			seq_printf (seq, "%s", "_");
+		}
+	}
+	seq_printf (seq, "]");
+}
+#else /* MY_ABC_HERE */
 static void raid0_status(struct seq_file *seq, mddev_t *mddev)
 {
 #undef MD_DEBUG
@@ -542,6 +716,117 @@ static void raid0_status(struct seq_file *seq, mddev_t *mddev)
 	seq_printf(seq, " %dk chunks", mddev->chunk_sectors / 2);
 	return;
 }
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+int SynoRaid0RemoveDisk(mddev_t *mddev, int number)
+{
+	int err = 0;
+	char nm[20];
+	raid0_conf_t *conf = mddev->private;
+	mdk_rdev_t *rdev;
+
+	rdev = conf->devlist[number];
+	if (!rdev) {
+		goto END;
+	}
+
+	if (atomic_read(&rdev->nr_pending)) {
+		/* lost the race, try later */
+		err = -EBUSY;
+		goto END;
+	}
+
+	/**
+	 * raid0 don't has their own thread, we just remove it's sysfs
+	 * when there has no other pending request
+	 */
+	sprintf(nm,"rd%d", rdev->raid_disk);
+	sysfs_remove_link(&mddev->kobj, nm);
+	rdev->raid_disk = -1;
+	conf->devlist[number] = NULL;
+END:
+	return err;
+}
+
+/**
+ * This is our implement for raid handler.
+ * It mainly for handling device hotplug.
+ * We let it look like other raid type.
+ * Set it faulty could let SDK know it's status
+ *
+ * @author \$Author: ckya $
+ * @version \$Revision: 1.1  *
+ *
+ * @param mddev  Should not be NULL. passing from md.c
+ * @param rdev   Should not be NULL. passing from md.c
+ */
+static void SynoRaid0Error(mddev_t *mddev, mdk_rdev_t *rdev)
+{
+	if (test_and_clear_bit(In_sync, &rdev->flags)) {
+		if (mddev->degraded < mddev->raid_disks) {
+			SYNO_UPDATE_SB_WORK *update_sb = NULL;
+			mddev->degraded++;
+#ifdef MY_ABC_HERE
+			mddev->nodev_and_crashed = 1;
+#endif
+			set_bit(Faulty, &rdev->flags);
+#ifdef MY_ABC_HERE
+			clear_bit(DiskError, &rdev->flags);
+#endif
+			set_bit(MD_CHANGE_DEVS, &mddev->flags);
+
+			if (NULL == (update_sb = kzalloc(sizeof(SYNO_UPDATE_SB_WORK), GFP_ATOMIC))){
+				WARN_ON(!update_sb);
+				goto END;
+			}
+
+			INIT_WORK(&update_sb->work, SynoUpdateSBTask);
+			update_sb->mddev = mddev;
+			schedule_work(&update_sb->work);
+		}
+	}else{
+		set_bit(Faulty, &rdev->flags);
+	}
+END:
+	return;
+}
+
+/**
+ * This is our implement for raid handler.
+ * It mainly for mdadm set device faulty. We let it look like
+ * other raid type. Let it become read only (scemd would remount
+ * if it find DiskError)
+ *
+ * @author \$Author: ckya $
+ * @version \$Revision: 1.1  *
+ *
+ * @param mddev  Should not be NULL. passing from md.c
+ * @param rdev   Should not be NULL. passing from md.c
+ */
+static void SynoRaid0ErrorInternal(mddev_t *mddev, mdk_rdev_t *rdev)
+{
+#ifdef MY_ABC_HERE
+	if (!test_bit(DiskError, &rdev->flags)) {
+		SYNO_UPDATE_SB_WORK *update_sb = NULL;
+
+		set_bit(DiskError, &rdev->flags);
+		if (NULL == (update_sb = kzalloc(sizeof(SYNO_UPDATE_SB_WORK), GFP_ATOMIC))){
+			WARN_ON(!update_sb);
+			goto END;
+		}
+
+		INIT_WORK(&update_sb->work, SynoUpdateSBTask);
+		update_sb->mddev = mddev;
+		schedule_work(&update_sb->work);
+		set_bit(MD_CHANGE_DEVS, &mddev->flags);
+	}
+
+END:
+#endif
+	return;
+}
+#endif /* MY_ABC_HERE */
 
 static struct mdk_personality raid0_personality=
 {
@@ -551,8 +836,17 @@ static struct mdk_personality raid0_personality=
 	.make_request	= raid0_make_request,
 	.run		= raid0_run,
 	.stop		= raid0_stop,
+#ifdef MY_ABC_HERE
+	.status		= syno_raid0_status,
+#else
 	.status		= raid0_status,
+#endif
 	.size		= raid0_size,
+#ifdef MY_ABC_HERE
+	.hot_remove_disk = SynoRaid0RemoveDisk,
+	.error_handler = SynoRaid0ErrorInternal,
+	.syno_error_handler	 = SynoRaid0Error,
+#endif
 };
 
 static int __init raid0_init (void)

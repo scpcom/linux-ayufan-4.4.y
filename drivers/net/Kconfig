@@ -2282,6 +2282,33 @@ config VIA_VELOCITY
 	  To compile this driver as a module, choose M here. The module
 	  will be called via-velocity.
 
+config SK98LIN
+        tristate "Marvell Yukon Chipset / SysKonnect SK-98xx Support"
+        depends on PCI && !SKGE && !SKY2
+        ---help---
+          Say Y here if you have a Marvell Yukon or SysKonnect SK-98xx/SK-95xx
+          compliant Gigabit Ethernet Adapter.
+
+          The adapters support Jumbo Frames.
+          The dual link adapters support link-failover and dual port features.
+          Both Marvell Yukon and SysKonnect SK-98xx/SK-95xx adapters support
+          the scatter-gather functionality with sendfile(). Please refer to
+          Documentation/networking/sk98lin.txt for more information about
+          optional driver parameters.
+          Questions concerning this driver may be addressed to:
+              linux@syskonnect.de
+
+          If you want to compile this driver as a module ( = code which can be
+          inserted in and removed from the running kernel whenever you want),
+          say M here and read Documentation/modules.txt. This is recommended.
+          The module will be called sk98lin. This is recommended.
+
+config SK98LIN_NAPI
+        bool "Use Rx polling (NAPI)"
+        depends on SK98LIN
+        help
+          NAPI is a new driver API designed to reduce CPU and interrupt load
+          when the driver is receiving lots of packets from the card.
 config TIGON3
 	tristate "Broadcom Tigon3 support"
 	depends on PCI

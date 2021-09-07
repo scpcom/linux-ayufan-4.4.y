@@ -95,6 +95,10 @@ MODULE_ALIAS_SCSI_DEVICE(TYPE_RBC);
 #define SD_MINORS	0
 #endif
 
+#ifdef MY_ABC_HERE
+extern int syno_hibernation_log_sec;
+#endif
+
 static int  sd_revalidate_disk(struct gendisk *);
 static int  sd_probe(struct device *);
 static int  sd_remove(struct device *);
@@ -420,6 +424,16 @@ static int sd_prep_fn(struct request_queue *q, struct request *rq)
 
 	if (rq->cmd_type == REQ_TYPE_BLOCK_PC) {
 		ret = scsi_setup_blk_pc_cmnd(sdp, rq);
+#ifdef MY_ABC_HERE
+	SCpnt = rq->special;
+	if(NULL != SCpnt && NULL != SCpnt->cmnd){
+		if(START_STOP == SCpnt->cmnd[0] && 0 == SCpnt->cmnd[4]) {
+			if(PORT_TYPE_SATA != sdp->host->hostt->syno_port_type) {
+				sdp->spindown = 1;
+			}
+		}
+	}
+#endif
 		goto out;
 	} else if (rq->cmd_type != REQ_TYPE_FS) {
 		ret = BLKPREP_KILL;
@@ -441,6 +455,49 @@ static int sd_prep_fn(struct request_queue *q, struct request *rq)
 					(unsigned long long)block,
 					this_count));
 
+#ifdef MY_ABC_HERE
+	/* When spindown or not SMART command(noly mv and ATA_16 command)
+	 * Update idle-since time
+	 * Ignore SMART command because we will use SAMRT to read temperature periodically.
+	 * But if it's in spindown, we always update the idle timer */
+	if (sdp->spindown || (0x0C != SCpnt->cmnd[0] && ATA_16 != SCpnt->cmnd[0])) {
+		sdp->idle = jiffies;
+		/* only sata port into this case, usb case is in the following code */
+		if(PORT_TYPE_SATA == sdp->host->hostt->syno_port_type && sdp->spindown) {
+			if(syno_hibernation_log_sec > 0) {
+				printk(KERN_WARNING"%s[%d]:%s(), %s: cmd 0x%x spin up by pid=%d, comm=%s\n",
+					   __FILE__, __LINE__, __FUNCTION__,
+					   disk->disk_name, SCpnt->cmnd[0], current->pid, current->comm);
+			}
+			sdp->spindown = 0;
+		}
+	}
+	/* usb device case  */
+	if (sdp->spindown) {
+		char szBuf[128];
+		struct mm_struct *mm;
+		int len;
+		if (current) {
+			mm = current->mm;
+			if (mm) {
+				len = mm->arg_end - mm->arg_start;
+				memset(szBuf, 0, sizeof(szBuf));
+				memcpy(szBuf, (unsigned char *)mm->arg_start, len);
+				printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid=%d, name=%s\n",
+					   __FILE__, __LINE__, __FUNCTION__,
+					   disk->disk_name, current->pid, szBuf);
+			} else {
+				printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid = %d, current->mm = NULL\n",
+					   __FILE__, __LINE__, __FUNCTION__,
+					   disk->disk_name, current->pid);
+			}
+		} else {
+			printk(KERN_WARNING"%s[%d]:%s(), current = NULL\n",
+				   __FILE__, __LINE__, __FUNCTION__);
+		}
+		sdp->spindown = 0;
+	}
+#endif
 	if (!sdp || !scsi_device_online(sdp) ||
 	    block + blk_rq_sectors(rq) > get_capacity(disk)) {
 		SCSI_LOG_HLQUEUE(2, scmd_printk(KERN_INFO, SCpnt,
@@ -792,6 +849,40 @@ static int sd_getgeo(struct block_device *bdev, struct hd_geometry *geo)
 	return 0;
 }
 
+#ifdef SYNO_BADSECTOR_TEST
+static int ScsiSetBadSector(struct gendisk *pDisk, SDBADSECTORS *pSectors)
+{
+	int iDrive = SynoGetDiskNum(pDisk->disk_name);
+	int max_support_disk = sizeof(grgSdBadSectors)/sizeof(SDBADSECTORS);
+
+	if (pSectors == NULL) {
+		return -EINVAL;
+	}
+	gBadSectorTest = 1;
+	if (iDrive >= 0 &&
+		iDrive < max_support_disk) {
+
+		if (copy_from_user(&grgSdBadSectors[iDrive], pSectors, sizeof(SDBADSECTORS))) {
+			return -EINVAL;
+		}
+		if (grgSdBadSectors[iDrive].uiEnable) {
+			int i;
+			for (i = 0; i < 100; i++) {
+				printk("%s[%d]:%s set bad sector: %u, max support disk: %d\n",
+					   __FILE__, __LINE__, pDisk->disk_name,
+					   grgSdBadSectors[iDrive].rgSectors[i], max_support_disk);
+				if (grgSdBadSectors[iDrive].rgSectors[i] == 0xFFFFFFFF) {
+					break;
+				}
+			}
+		}
+		return 0;
+	} else {
+		return -EINVAL;
+	}
+}
+#endif
+
 /**
  *	sd_ioctl - process an ioctl
  *	@inode: only i_rdev/i_bdev members may be used
@@ -837,6 +928,45 @@ static int sd_ioctl(struct block_device *bdev, fmode_t mode,
 		case SCSI_IOCTL_GET_IDLUN:
 		case SCSI_IOCTL_GET_BUS_NUMBER:
 			return scsi_ioctl(sdp, cmd, p);
+#ifdef SYNO_BADSECTOR_TEST
+		case SCSI_IOCTL_SET_BADSECTORS:
+			return ScsiSetBadSector(disk, p);
+#endif
+#ifdef MY_ABC_HERE
+		case SD_IOCTL_IDLE:
+		{
+			/* idle_original would set back to idle when standby
+			 * because scemd would query this variable before hibernation */
+			sdp->idle_original = sdp->idle;
+			return (jiffies - sdp->idle) / HZ + 1;
+		}
+		case SD_IOCTL_SUPPORT_SLEEP:
+		{
+			int *pCanSleep = (int *)arg;
+			*pCanSleep = sdp->nospindown ? 0 : 1;
+			return 0;
+		}
+		case SCSI_IOCTL_STOP_UNIT:
+		{
+			error = 0;
+			if (sdp->nospindown == 0) {
+				if ((error = scsi_ioctl(sdp, cmd, p)) == 0) {
+					sdp->spindown = 1;
+				}
+			}
+			return error;
+		}
+		case SCSI_IOCTL_START_UNIT:
+		{
+			error = 0;
+			if (sdp->nospindown == 0) {
+				if ((error = scsi_ioctl(sdp, cmd, p)) == 0) {
+					sdp->spindown = 0;
+				}
+			}
+			return error;
+		}
+#endif /* MY_ABC_HERE */
 		default:
 			error = scsi_cmd_ioctl(disk->queue, disk, mode, cmd, p);
 			if (error != -ENOTTY)
@@ -1986,6 +2116,13 @@ static int sd_revalidate_disk(struct gendisk *disk)
 	return 0;
 }
 
+#ifdef	MY_ABC_HERE
+extern int syno_ida_get_new(struct ida *idp, int starting_id, int *id);
+#endif
+#ifdef	MY_ABC_HERE
+int (*SynoUSBDeviceIsSATA)(void *) = NULL;
+EXPORT_SYMBOL(SynoUSBDeviceIsSATA);
+#endif
 /**
  *	sd_format_disk_name - format disk name
  *	@prefix: name prefix - ie. "sd" for SCSI disks
@@ -2112,6 +2249,11 @@ static int sd_probe(struct device *dev)
 	struct gendisk *gd;
 	u32 index;
 	int error;
+#ifdef	MY_ABC_HERE
+	struct device *parent;
+	int IsInternalDisk = 1;
+	u32 want_idx = 0;
+#endif
 
 	error = -ENODEV;
 	if (sdp->type != TYPE_DISK && sdp->type != TYPE_MOD && sdp->type != TYPE_RBC)
@@ -2133,8 +2275,67 @@ static int sd_probe(struct device *dev)
 		if (!ida_pre_get(&sd_index_ida, GFP_KERNEL))
 			goto out_put;
 
+#ifdef MY_ABC_HERE
+	parent = dev->parent;
+	while (parent) {
+		if (parent->bus && parent->bus->name) {
+			if (strcmp(parent->bus->name, "usb") == 0) {
+				printk("%s (%d) Got USB disk\n", __FILE__, __LINE__);
+				IsInternalDisk = 0;
+#ifdef MY_ABC_HERE
+				sdp->nospindown = 0;
+				/*
+				 * #5895, we don't enable this. Otherwise many usb device would not sleep include iUSB2
+				 *
+				if(NULL != SynoUSBDeviceIsSATA &&
+				   !SynoUSBDeviceIsSATA(sdp->host->hostdata)) {
+					sdp->nospindown = 1;
+					printk("%s (%d) The USB disk is not SATA Disk, not enable usb hibernation function\n", __FILE__, __LINE__);
+				}
+				*/
+#endif
+				break;
+			}
+		}
+		parent = parent->parent;
+	}
+#endif
+
 		spin_lock(&sd_index_lock);
+#ifdef MY_ABC_HERE
+	if (IsInternalDisk) {
+		if (sdp->host->hostt->syno_index_get) {
+			want_idx = sdp->host->hostt->syno_index_get(sdp->host, sdp->channel, sdp->id, sdp->lun);
+		}else{
+			want_idx = sdp->host->host_no;
+		}
+	} else {
+#ifdef MY_DEF_HERE
+        if (sdp->host->hostt->syno_index_get) {
+            want_idx = sdp->host->hostt->syno_index_get(sdp->host, sdp->channel, sdp->id, sdp->lun);
+        } else
+#endif
+		want_idx = SYNO_MAX_INTERNAL_DISK+1;
+	}
+
+	error = syno_ida_get_new(&sd_index_ida, want_idx, &index);
+	if (want_idx != index && IsInternalDisk) {
+		/* Sometimes raid is not release all scsi disk yet. Try to delay and reget */
+		printk("want_idx %d index %d. delay and reget\n", want_idx, index);
+
+		ida_remove(&sd_index_ida, index);
+		spin_unlock(&sd_index_lock);
+
+		schedule_timeout_uninterruptible(HZ);
+
+		spin_lock(&sd_index_lock);
+		error = syno_ida_get_new(&sd_index_ida, want_idx, &index);
+
+		printk("want_idx %d index %d\n", want_idx, index);
+	}
+#else /* MY_ABC_HERE */
 		error = ida_get_new(&sd_index_ida, &index);
+#endif /* MY_ABC_HERE */
 		spin_unlock(&sd_index_lock);
 	} while (error == -EAGAIN);
 
@@ -2172,6 +2373,21 @@ static int sd_probe(struct device *dev)
 
 	get_device(&sdkp->dev);	/* prevent release before async_schedule */
 	async_schedule(sd_probe_async, sdkp);
+#ifdef MY_DEF_HERE
+    if ( SYNO_USB_FLASH_DEVICE_INDEX == index ) {
+        sprintf(gd->disk_name, SYNO_USB_FLASH_DEVICE_NAME);
+    }
+#ifdef CONFIG_SYNO_MV88F6281_USBSTATION
+	else {
+		extern int SYNO_CTRL_USB_HDD_LED_SET(int status);
+		/* we set green blink for usb disk ready. */
+		SYNO_CTRL_USB_HDD_LED_SET(0x4);
+	}
+#endif
+#endif
+#ifdef MY_ABC_HERE
+	strlcpy(sdp->syno_disk_name, gd->disk_name, BDEVNAME_SIZE);
+#endif
 
 	return 0;
 
@@ -2352,6 +2568,10 @@ static int __init init_sd(void)
 		if (register_blkdev(sd_major(i), "sd") == 0)
 			majors++;
 
+#ifdef SYNO_BADSECTOR_TEST
+	gBadSectorTest = 0;
+#endif
+
 	if (!majors)
 		return -ENODEV;
 
@@ -2428,3 +2648,304 @@ static void sd_print_result(struct scsi_disk *sdkp, int result)
 	scsi_show_result(result);
 }
 
+#ifdef MY_ABC_HERE
+int SynoSCSIGetDeviceIndex(struct block_device *bdev)
+{
+	struct gendisk *disk = NULL;
+
+	BUG_ON(bdev == NULL);
+	disk = bdev->bd_disk;
+
+	return container_of(disk->private_data, struct scsi_disk, driver)->index;
+}
+EXPORT_SYMBOL(SynoSCSIGetDeviceIndex);
+#endif /* MY_ABC_HERE */
+
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+/**
+ * Please modify this when SCSI_DISK* is bigger than 15 when
+ * porting kernel
+ *
+ * @param major_idx
+ *
+ * @return unsigned char
+ */
+static unsigned char
+blIsScsiDevice(int major)
+{
+	unsigned char ret = 0;
+
+	switch (major) {
+	case SCSI_DISK0_MAJOR:
+	case SCSI_DISK1_MAJOR ... SCSI_DISK7_MAJOR:
+	case SCSI_DISK8_MAJOR ... SCSI_DISK15_MAJOR:
+		ret = 1;
+		break;
+	default:
+		break;
+	}
+
+	return ret;
+}
+#endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
+
+#ifdef MY_ABC_HERE
+int
+IsDeviceDisappear(struct block_device *bdev)
+{
+	struct gendisk *disk = NULL;
+	struct scsi_disk *sdkp;
+	int ret = 0;
+
+	if (!bdev) {
+		WARN_ON(bdev == NULL);
+		goto END;
+	}
+
+	disk = bdev->bd_disk;
+	if (!disk) {
+		WARN_ON(disk == NULL);
+		goto END;
+	}
+
+	if (!blIsScsiDevice(disk->major)) {
+		/* Only work for scsi disk */
+		printk("This is not a kind of scsi disk %d\n", disk->major);
+		goto END;
+	}
+
+	/* is whole disk */
+	sdkp = container_of(disk->private_data, struct scsi_disk, driver);
+	if (!sdkp) {
+		WARN_ON(!sdkp);
+		goto END;
+	}
+
+	switch (sdkp->device->sdev_state) {
+	case SDEV_OFFLINE:
+	case SDEV_DEL:
+	case SDEV_CANCEL:
+		ret = 1;
+		break;
+	default:
+		break;
+	}
+
+END:
+	return ret;
+}
+
+EXPORT_SYMBOL(IsDeviceDisappear);
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+/**
+ * Set the partition to specify remap mode
+ *
+ * @param gd     [IN] general disk. Should not be NULL
+ * @param phd    [IN] partition. Should not be NULL
+ * @param blAutoRemap
+ *               [IN] remap mode
+ */
+void
+PartitionRemapModeSet(struct gendisk *gd,
+					  struct hd_struct *phd,
+					  unsigned char blAutoRemap)
+{
+	struct scsi_disk *sdkp;
+	struct scsi_device *sdev;
+
+	if (!gd || !phd) {
+		goto END;
+	}
+
+	phd->auto_remap = blAutoRemap;
+	if (!blAutoRemap) {
+		if (!blIsScsiDevice(gd->major)) {
+			/* Only work for scsi disk */
+			printk("This is not a kind of scsi disk %d\n", gd->major);
+			goto END;
+		}
+
+		sdkp = container_of(gd->private_data, struct scsi_disk, driver);
+		if (!sdkp) {
+			printk(" sdkp is NULL\n");
+			goto END;
+		}
+
+		sdev = sdkp->device;
+		if(!sdev) {
+			printk(" sdev is NULL\n");
+			goto END;
+		}
+		sdev->auto_remap = 0;
+	}
+END:
+	return;
+}
+
+/**
+ * Set the scsi device to specift remap mode.
+ *
+ * And also set the relative partition to that mode.
+ *
+ * @param sdev   [IN] scsi devide. Should not be NULL.
+ * @param blAutoRemap
+ *               [IN] auto remap mode.
+ */
+void
+ScsiRemapModeSet(struct scsi_device *sdev,
+				 unsigned char blAutoRemap)
+{
+	struct scsi_disk *sdkp;
+	struct gendisk *gd;
+	struct hd_struct *phd;
+	int i = 0;
+
+	if (!sdev) {
+		goto END;
+	}
+
+	if (TYPE_DISK != sdev->type) {
+		printk("Only support scsi disk\n");
+		goto END;
+	}
+
+	sdev->auto_remap = blAutoRemap;
+	sdkp = dev_get_drvdata(&sdev->sdev_gendev);
+	if (!sdkp) {
+		goto END;
+	}
+
+	gd = sdkp->disk;
+	if (!gd) {
+		goto END;
+	}
+
+	/* disk part */
+	for (i = 0; i < gd->minors; i++) {
+		phd = disk_get_part(gd, i+1);
+		if (!phd || !phd->nr_sects)
+			continue;
+
+		phd->auto_remap = blAutoRemap;
+	}
+END:
+	return;
+}
+
+/**
+ * Set the block device to specify remap mode
+ *
+ * @param bdev   [IN] block device. Should not be NULL.
+ * @param blAutoRemap
+ *               [IN] remap mode
+ */
+void
+RaidRemapModeSet(struct block_device *bdev, unsigned char blAutoRemap)
+{
+	struct gendisk *disk = NULL;
+	struct scsi_disk *sdkp;
+
+	if (!bdev) {
+		WARN_ON(bdev == NULL);
+		return;
+	}
+
+	disk = bdev->bd_disk;
+	if (!disk) {
+		WARN_ON(disk == NULL);
+		return;
+	}
+
+	if (!blIsScsiDevice(disk->major)) {
+		/* Only work for scsi disk */
+		printk("This is not a kind of scsi disk %d\n", disk->major);
+		return;
+	}
+
+	if (bdev->bd_part) {
+		/* is a partition of some disks */
+		bdev->bd_part->auto_remap = blAutoRemap;
+	} else {
+		/* is whole disk */
+		sdkp = container_of(disk->private_data, struct scsi_disk, driver);
+		if (!sdkp) {
+			WARN_ON(!sdkp);
+			return;
+		}
+		ScsiRemapModeSet(sdkp->device, blAutoRemap);
+	}
+}
+
+unsigned char
+blSectorNeedAutoRemap(struct scsi_cmnd *scsi_cmd,
+					  sector_t lba)
+{
+	struct scsi_device *sdev;
+	struct scsi_disk *sdkp;
+	struct gendisk *gd;
+	struct hd_struct *phd;
+	char szName[BDEVNAME_SIZE];
+	sector_t start, end;
+	u8 ret = 0;
+	int i = 0;
+
+
+	if (!scsi_cmd) {
+		WARN_ON(1);
+		goto END;
+	}
+
+	sdev = scsi_cmd->device;
+	if (!sdev) {
+		WARN_ON(1);
+		goto END;
+	}
+
+	if (TYPE_DISK != sdev->type) {
+		printk("Only support scsi disk\n");
+		goto END;
+	}
+
+	/* global disk auto remap */
+	if (sdev->auto_remap) {
+		ret = 1;
+		printk("%s auto remap is on\n", dev_name(&sdev->sdev_gendev));
+		goto END;
+	}
+
+	sdkp = dev_get_drvdata(&sdev->sdev_gendev);
+	if (!sdkp) {
+		goto END;
+	}
+
+	gd = sdkp->disk;
+	if (!gd) {
+		goto END;
+	}
+
+	/* disk part */
+	for (i = 0; i < gd->minors; i++) {
+		phd = disk_get_part(gd, i+1);
+		if (!phd || !phd->nr_sects)
+			continue;
+
+		start = phd->start_sect;
+		end = phd->nr_sects + start - 1;
+
+		if (lba >= start && lba <= end) {
+			printk("lba %llu start %llu end %llu\n", (unsigned long long)lba, (unsigned long long)start, (unsigned long long)end);
+			ret = phd->auto_remap;
+			printk("%s auto_remap %u\n", disk_name(gd, i+1, szName), phd->auto_remap);
+		}
+	}
+END:
+	return ret;
+}
+
+EXPORT_SYMBOL(blSectorNeedAutoRemap);
+EXPORT_SYMBOL(RaidRemapModeSet);
+EXPORT_SYMBOL(ScsiRemapModeSet);
+EXPORT_SYMBOL(PartitionRemapModeSet);
+#endif /* MY_ABC_HERE */

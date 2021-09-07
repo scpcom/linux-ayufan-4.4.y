@@ -311,12 +311,18 @@ void kernel_restart(char *cmd)
 }
 EXPORT_SYMBOL_GPL(kernel_restart);
 
+#ifdef MY_ABC_HERE
+extern void scsi_host_poweroff_all(void);
+#endif
 static void kernel_shutdown_prepare(enum system_states state)
 {
 	blocking_notifier_call_chain(&reboot_notifier_list,
 		(state == SYSTEM_HALT)?SYS_HALT:SYS_POWER_OFF, NULL);
 	system_state = state;
 	device_shutdown();
+#ifdef MY_ABC_HERE
+	scsi_host_poweroff_all();
+#endif
 }
 /**
  *	kernel_halt - halt the system
@@ -340,7 +346,13 @@ EXPORT_SYMBOL_GPL(kernel_halt);
  */
 void kernel_power_off(void)
 {
+#ifdef MY_DEF_HERE 
+	extern int syno_schedule_power_on_prepare(void);
+#endif
 	kernel_shutdown_prepare(SYSTEM_POWER_OFF);
+#ifdef MY_DEF_HERE 
+	syno_schedule_power_on_prepare();
+#endif
 	if (pm_power_off_prepare)
 		pm_power_off_prepare();
 	disable_nonboot_cpus();
@@ -349,6 +361,20 @@ void kernel_power_off(void)
 	machine_power_off();
 }
 EXPORT_SYMBOL_GPL(kernel_power_off);
+
+#ifdef MY_DEF_HERE
+#define UART_PORT1_IOBASE   1016
+#define UART_CMD_PREFIX 45 // "-"
+#define UART_CMD_REBOOT 67 // "C"
+#define UART_CMD_POWEROFF   49 // "1"
+// below is copied from include/linux/serial_reg.h
+#define UART_TX     0   /* Out: Transmit buffer */
+#define UART_IER    1   /* Out: Interrupt Enable Register */
+#define UART_IER_THRI       0x02 /* Enable Transmitter holding register int. */
+#define UART_START_TX   UART_IER_THRI
+#define UART_STOP_TX    0x0
+#endif
+
 /*
  * Reboot system call: for obvious reasons only root may call it,
  * and even root needs to set up some magic numbers in the registers
@@ -384,6 +410,14 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 	lock_kernel();
 	switch (cmd) {
 	case LINUX_REBOOT_CMD_RESTART:
+#ifdef MY_DEF_HERE
+        outb(UART_START_TX, UART_PORT1_IOBASE + UART_IER);
+        outb(UART_CMD_PREFIX, UART_PORT1_IOBASE + UART_TX);
+        outb(UART_CMD_REBOOT, UART_PORT1_IOBASE + UART_TX);
+        outb(13, UART_PORT1_IOBASE + UART_TX);
+        outb(10, UART_PORT1_IOBASE + UART_TX);
+        outb(UART_STOP_TX, UART_PORT1_IOBASE + UART_IER);
+#endif
 		kernel_restart(NULL);
 		break;
 
@@ -402,6 +436,14 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 		panic("cannot halt");
 
 	case LINUX_REBOOT_CMD_POWER_OFF:
+#ifdef MY_DEF_HERE
+        outb(UART_START_TX, UART_PORT1_IOBASE + UART_IER);
+        outb(UART_CMD_PREFIX, UART_PORT1_IOBASE + UART_TX);
+        outb(UART_CMD_POWEROFF, UART_PORT1_IOBASE + UART_TX);
+        outb(13, UART_PORT1_IOBASE + UART_TX);
+        outb(10, UART_PORT1_IOBASE + UART_TX);
+        outb(UART_STOP_TX, UART_PORT1_IOBASE + UART_IER);
+#endif
 		kernel_power_off();
 		unlock_kernel();
 		do_exit(0);

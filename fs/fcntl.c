@@ -24,6 +24,110 @@
 #include <asm/siginfo.h>
 #include <asm/uaccess.h>
 
+#ifdef CONFIG_FS_SYNO_ACL
+#include "synoacl_int.h"
+#endif
+		 
+#ifdef MY_ABC_HERE
+
+#define ACL_MASK_NONE 0
+
+struct syno_archive_map {
+	unsigned int cmd; 	//set archive command
+	unsigned int sAr;	//syno archive
+	int isSetCmd;
+#ifdef CONFIG_FS_SYNO_ACL
+	int tag;
+	int mask;
+#endif
+};
+static struct syno_archive_map rgSynoAr[] = {
+#ifdef CONFIG_FS_SYNO_ACL
+	/* General archive */
+	{F_CLEAR_ARCHIVE, S2_IARCHIVE, 0, PROTECT_BY_ACL, MAY_WRITE_ATTR},
+	{F_CLEAR_S3_ARCHIVE, S3_IARCHIVE, 0, PROTECT_BY_ACL, MAY_WRITE_ATTR},
+	{F_SETSMB_ARCHIVE, S2_SMB_ARCHIVE, 1, PROTECT_BY_ACL, MAY_WRITE_ATTR},
+	{F_CLRSMB_ARCHIVE, S2_SMB_ARCHIVE, 0, PROTECT_BY_ACL, MAY_WRITE_ATTR},
+	{F_SETSMB_HIDDEN, S2_SMB_HIDDEN, 1, PROTECT_BY_ACL, MAY_WRITE_ATTR},
+	{F_CLRSMB_HIDDEN, S2_SMB_HIDDEN, 0, PROTECT_BY_ACL, MAY_WRITE_ATTR},
+	{F_SETSMB_SYSTEM, S2_SMB_SYSTEM, 1, PROTECT_BY_ACL, MAY_WRITE_ATTR},
+	{F_CLRSMB_SYSTEM, S2_SMB_SYSTEM, 0, PROTECT_BY_ACL, MAY_WRITE_ATTR},
+
+	/* ACL archive */
+	{F_SETSMB_READONLY, S2_SMB_READONLY, 1, PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, MAY_WRITE_ATTR},
+	{F_CLRSMB_READONLY, S2_SMB_READONLY, 0, PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, MAY_WRITE_ATTR},
+	{F_SETACL_OWNER_IS_GROUP, S2_SYNO_ACL_IS_OWNER_GROUP, 1, PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, MAY_GET_OWNER_SHIP},
+	{F_CLRACL_OWNER_IS_GROUP, S2_SYNO_ACL_IS_OWNER_GROUP, 0, PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, MAY_GET_OWNER_SHIP},
+	{F_SETACL_INHERIT, S2_SYNO_ACL_INHERIT, 1, PROTECT_BY_ACL | NEED_FS_ACL_SUPPORT, MAY_WRITE_PERMISSION},
+	{F_CLRACL_INHERIT, S2_SYNO_ACL_INHERIT, 0, PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, MAY_WRITE_PERMISSION},
+	{F_SETACL_HAS_ACL, S2_SYNO_ACL_EXIST, 1, NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, ACL_MASK_NONE},
+	{F_CLRACL_HAS_ACL, S2_SYNO_ACL_EXIST, 0, NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, ACL_MASK_NONE},
+	{F_SETACL_SUPPORT, S2_SYNO_ACL_SUPPORT, 1, NEED_FS_ACL_SUPPORT, ACL_MASK_NONE},
+	{F_CLRACL_SUPPORT, S2_SYNO_ACL_SUPPORT, 0, NEED_FS_ACL_SUPPORT, ACL_MASK_NONE},
+	{0, 0, -1, -1, -1}
+#else //CONFIG_FS_SYNO_ACL
+	{F_CLEAR_ARCHIVE, S2_IARCHIVE, 0},
+	{F_CLEAR_S3_ARCHIVE, S3_IARCHIVE, 0},
+	{F_SETSMB_ARCHIVE, S2_SMB_ARCHIVE, 1},
+	{F_CLRSMB_ARCHIVE, S2_SMB_ARCHIVE, 0},
+	{F_SETSMB_HIDDEN, S2_SMB_HIDDEN, 1},
+	{F_CLRSMB_HIDDEN, S2_SMB_HIDDEN, 0},
+	{F_SETSMB_SYSTEM, S2_SMB_SYSTEM, 1},
+	{F_CLRSMB_SYSTEM, S2_SMB_SYSTEM, 0},
+	{0, 0, -1}
+#endif //CONFIG_FS_SYNO_ACL
+};
+
+long __SYNOArchiveSet(struct dentry *dentry, unsigned int cmd)
+{
+	int i = 0;
+	int found = 0;
+	struct inode *inode = dentry->d_inode;
+	long err = -EINVAL;
+
+	for (i = 0; -1 != rgSynoAr[i].isSetCmd; i++) {
+		if (cmd == rgSynoAr[i].cmd) {
+			if ((rgSynoAr[i].isSetCmd == ((inode->i_mode2 & rgSynoAr[i].sAr)?1:0))){
+				found = 1;
+				break;
+			}
+#ifdef CONFIG_FS_SYNO_ACL
+			if (0 > (err = synoacl_mod_archive_change_ok(dentry, cmd, rgSynoAr[i].tag, rgSynoAr[i].mask))){
+				goto Err;
+			}
+#endif //CONFIG_FS_SYNO_ACL
+			mutex_lock(&inode->i_syno_mutex);
+			if (rgSynoAr[i].isSetCmd) {
+				inode->i_mode2 |= rgSynoAr[i].sAr;
+#ifdef CONFIG_FS_SYNO_ACL
+				if (S2_SYNO_ACL_INHERIT == rgSynoAr[i].sAr) {
+					inode->i_mode2 |= S2_SYNO_ACL_SUPPORT;
+				}
+#endif //CONFIG_FS_SYNO_ACL
+			} else {
+				inode->i_mode2 &= ~rgSynoAr[i].sAr;
+			}
+			mutex_unlock(&inode->i_syno_mutex);
+			mark_inode_dirty_sync(inode);
+
+			found = 1;
+			break;
+		}
+	}
+	if (!found) {
+		printk("Archive bit cmd:%x not implement.\n", cmd);
+		err = -EINVAL;
+	} else {
+		err = 0;
+	}
+#ifdef CONFIG_FS_SYNO_ACL
+Err:
+#endif
+	return err;
+}
+EXPORT_SYMBOL(__SYNOArchiveSet);
+#endif /* MY_ABC_HERE */
+
 void set_close_on_exec(unsigned int fd, int flag)
 {
 	struct files_struct *files = current->files;
@@ -195,6 +299,9 @@ static int setfl(int fd, struct file * filp, unsigned long arg)
  out:
 	return error;
 }
+#ifdef CONFIG_SYNO_USE_OCF_LINUX
+EXPORT_SYMBOL(sys_dup);
+#endif
 
 static void f_modown(struct file *filp, struct pid *pid, enum pid_type type,
                      int force)
@@ -413,6 +520,16 @@ static long do_fcntl(int fd, unsigned int cmd, unsigned long arg,
 		err = fcntl_dirnotify(fd, filp, arg);
 		break;
 	default:
+#ifdef MY_ABC_HERE
+		{
+			const struct inode_operations *i_op = filp->f_dentry->d_inode->i_op;
+			if (i_op && i_op->set_archive) {
+				err = i_op->set_archive(filp->f_dentry, cmd);
+			} else {
+				err = __SYNOArchiveSet(filp->f_dentry, cmd);
+			}
+		}
+#endif //MY_ABC_HERE
 		break;
 	}
 	return err;

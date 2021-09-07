@@ -16,6 +16,11 @@
 typedef u64 async_cookie_t;
 typedef void (async_func_ptr) (void *data, async_cookie_t cookie);
 
+#ifdef MY_ABC_HERE
+extern void syno_async_schedule_enabled_set(int iValue);
+extern int syno_async_schedule_enabled_get(void);
+#endif
+
 extern async_cookie_t async_schedule(async_func_ptr *ptr, void *data);
 extern async_cookie_t async_schedule_domain(async_func_ptr *ptr, void *data,
 					    struct list_head *list);

@@ -30,6 +30,10 @@ void fsstack_copy_attr_all(struct inode *dest, const struct inode *src,
 	dest->i_blkbits = src->i_blkbits;
 	dest->i_flags = src->i_flags;
 
+#ifdef MY_ABC_HERE
+	//For ecryptfs archive bit
+	dest->i_mode2 = src->i_mode2;
+#endif
 	/*
 	 * Update the nlinks AFTER updating the above fields, because the
 	 * get_links callback may depend on them.
@@ -40,3 +44,11 @@ void fsstack_copy_attr_all(struct inode *dest, const struct inode *src,
 		dest->i_nlink = (*get_nlinks)(dest);
 }
 EXPORT_SYMBOL_GPL(fsstack_copy_attr_all);
+
+#ifdef MY_ABC_HERE
+void fsstack_copy_syno_archive(struct inode *dest, const struct inode *src)
+{
+	dest->i_mode2 = src->i_mode2;
+}
+EXPORT_SYMBOL_GPL(fsstack_copy_syno_archive);
+#endif

@@ -9,6 +9,12 @@
 
 #include <linux/fs.h>
 
+#ifdef MY_ABC_HERE
+#define DQUOT_SPACE_WARN	0x1
+#define DQUOT_SPACE_RESERVE	0x2
+#define DQUOT_SPACE_NOFAIL	0x4
+#endif
+
 static inline struct quota_info *sb_dqopt(struct super_block *sb)
 {
 	return &sb->s_dquot;
@@ -40,14 +46,27 @@ int dquot_scan_active(struct super_block *sb,
 struct dquot *dquot_alloc(struct super_block *sb, int type);
 void dquot_destroy(struct dquot *dquot);
 
+#ifdef MY_ABC_HERE
+int __dquot_alloc_space(struct inode *inode, qsize_t number, int flags);
+void __dquot_free_space(struct inode *inode, qsize_t number, int flags);
+#else
 int dquot_alloc_space(struct inode *inode, qsize_t number, int prealloc);
 int dquot_alloc_inode(const struct inode *inode, qsize_t number);
+#endif
 
+#ifdef MY_ABC_HERE
+int dquot_alloc_inode(const struct inode *inode, qsize_t number);
+#else
 int dquot_reserve_space(struct inode *inode, qsize_t number, int prealloc);
 int dquot_claim_space(struct inode *inode, qsize_t number);
 void dquot_release_reserved_space(struct inode *inode, qsize_t number);
+#endif
 
+#ifdef MY_ABC_HERE
+int dquot_claim_space_nodirty(struct inode *inode, qsize_t number);
+#else
 int dquot_free_space(struct inode *inode, qsize_t number);
+#endif
 int dquot_free_inode(const struct inode *inode, qsize_t number);
 
 int dquot_transfer(struct inode *inode, struct iattr *iattr);
@@ -153,6 +172,7 @@ static inline void vfs_dq_init(struct inode *inode)
 		inode->i_sb->dq_op->initialize(inode, -1);
 }
 
+#ifndef MY_ABC_HERE
 /* The following allocation/freeing/transfer functions *must* be called inside
  * a transaction (deadlocks possible otherwise) */
 static inline int vfs_dq_prealloc_space_nodirty(struct inode *inode, qsize_t nr)
@@ -206,6 +226,7 @@ static inline int vfs_dq_reserve_space(struct inode *inode, qsize_t nr)
 		inode_add_rsv_space(inode, nr);
 	return 0;
 }
+#endif
 
 static inline int vfs_dq_alloc_inode(struct inode *inode)
 {
@@ -217,6 +238,7 @@ static inline int vfs_dq_alloc_inode(struct inode *inode)
 	return 0;
 }
 
+#ifndef MY_ABC_HERE
 /*
  * Convert in-memory reserved quotas to real consumed quotas
  */
@@ -257,6 +279,7 @@ static inline void vfs_dq_free_space(struct inode *inode, qsize_t nr)
 	vfs_dq_free_space_nodirty(inode, nr);
 	mark_inode_dirty(inode);
 }
+#endif
 
 static inline void vfs_dq_free_inode(struct inode *inode)
 {
@@ -363,6 +386,28 @@ static inline int vfs_dq_transfer(struct inode *inode, struct iattr *iattr)
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+static inline int __dquot_alloc_space(struct inode *inode, qsize_t number,
+		int flags)
+{
+	if (!(flags & DQUOT_SPACE_RESERVE))
+		inode_add_bytes(inode, number);
+	return 0;
+}
+
+static inline void __dquot_free_space(struct inode *inode, qsize_t number,
+		int flags)
+{
+	if (!(flags & DQUOT_SPACE_RESERVE))
+		inode_sub_bytes(inode, number);
+}
+
+static inline int dquot_claim_space_nodirty(struct inode *inode, qsize_t number)
+{
+	inode_add_bytes(inode, number);
+	return 0;
+}
+#else
 static inline int vfs_dq_prealloc_space_nodirty(struct inode *inode, qsize_t nr)
 {
 	inode_add_bytes(inode, nr);
@@ -414,10 +459,105 @@ static inline void vfs_dq_free_space(struct inode *inode, qsize_t nr)
 {
 	vfs_dq_free_space_nodirty(inode, nr);
 	mark_inode_dirty(inode);
-}	
-
+}
+#endif
 #endif /* CONFIG_QUOTA */
 
+#ifdef MY_ABC_HERE
+static inline int dquot_alloc_space_nodirty(struct inode *inode, qsize_t nr)
+{
+	return __dquot_alloc_space(inode, nr, DQUOT_SPACE_WARN);
+}
+
+static inline void dquot_alloc_space_nofail(struct inode *inode, qsize_t nr)
+{
+	__dquot_alloc_space(inode, nr, DQUOT_SPACE_WARN|DQUOT_SPACE_NOFAIL);
+	mark_inode_dirty(inode);
+}
+
+static inline int dquot_alloc_space(struct inode *inode, qsize_t nr)
+{
+	int ret;
+
+	ret = dquot_alloc_space_nodirty(inode, nr);
+	if (!ret)
+		mark_inode_dirty(inode);
+	return ret;
+}
+
+static inline int dquot_alloc_block_nodirty(struct inode *inode, qsize_t nr)
+{
+	return dquot_alloc_space_nodirty(inode, nr << inode->i_blkbits);
+}
+
+static inline void dquot_alloc_block_nofail(struct inode *inode, qsize_t nr)
+{
+	dquot_alloc_space_nofail(inode, nr << inode->i_blkbits);
+}
+
+static inline int dquot_alloc_block(struct inode *inode, qsize_t nr)
+{
+	return dquot_alloc_space(inode, nr << inode->i_blkbits);
+}
+
+static inline int dquot_prealloc_block_nodirty(struct inode *inode, qsize_t nr)
+{
+	return __dquot_alloc_space(inode, nr << inode->i_blkbits, 0);
+}
+
+static inline int dquot_prealloc_block(struct inode *inode, qsize_t nr)
+{
+	int ret;
+
+	ret = dquot_prealloc_block_nodirty(inode, nr);
+	if (!ret)
+		mark_inode_dirty(inode);
+	return ret;
+}
+
+static inline int dquot_reserve_block(struct inode *inode, qsize_t nr)
+{
+	return __dquot_alloc_space(inode, nr << inode->i_blkbits,
+				DQUOT_SPACE_WARN|DQUOT_SPACE_RESERVE);
+}
+
+static inline int dquot_claim_block(struct inode *inode, qsize_t nr)
+{
+	int ret;
+
+	ret = dquot_claim_space_nodirty(inode, nr << inode->i_blkbits);
+	if (!ret)
+		mark_inode_dirty(inode);
+	return ret;
+}
+
+static inline void dquot_free_space_nodirty(struct inode *inode, qsize_t nr)
+{
+	__dquot_free_space(inode, nr, 0);
+}
+
+static inline void dquot_free_space(struct inode *inode, qsize_t nr)
+{
+	dquot_free_space_nodirty(inode, nr);
+	mark_inode_dirty(inode);
+}
+
+static inline void dquot_free_block_nodirty(struct inode *inode, qsize_t nr)
+{
+	dquot_free_space_nodirty(inode, nr << inode->i_blkbits);
+}
+
+static inline void dquot_free_block(struct inode *inode, qsize_t nr)
+{
+	dquot_free_space(inode, nr << inode->i_blkbits);
+}
+
+static inline void dquot_release_reservation_block(struct inode *inode,
+		qsize_t nr)
+{
+	__dquot_free_space(inode, nr << inode->i_blkbits, DQUOT_SPACE_RESERVE);
+}
+#else
 static inline int vfs_dq_prealloc_block_nodirty(struct inode *inode, qsize_t nr)
 {
 	return vfs_dq_prealloc_space_nodirty(inode, nr << inode->i_blkbits);
@@ -463,5 +603,5 @@ static inline void vfs_dq_free_block(struct inode *inode, qsize_t nr)
 {
 	vfs_dq_free_space(inode, nr << inode->i_blkbits);
 }
-
+#endif
 #endif /* _LINUX_QUOTAOPS_ */

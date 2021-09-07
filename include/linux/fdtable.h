@@ -14,6 +14,10 @@
 
 #include <asm/atomic.h>
 
+#ifdef MY_ABC_HERE
+#include <linux/fs.h>
+#endif
+
 /*
  * The default fd array needs to be at least BITS_PER_LONG,
  * as this is the granularity returned by copy_fdset().
@@ -79,6 +83,12 @@ static inline struct file * fcheck_files(struct files_struct *files, unsigned in
 
 	if (fd < fdt->max_fds)
 		file = rcu_dereference(fdt->fd[fd]);
+#ifdef MY_ABC_HERE
+	if(file && !blSynostate(O_UNMOUNT_OK, file)) {
+		return NULL;
+	}
+#endif
+
 	return file;
 }
 

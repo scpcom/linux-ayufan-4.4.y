@@ -256,6 +256,11 @@ static int __devinit coretemp_probe(struct platform_device *pdev)
 
 	data->id = pdev->id;
 	data->name = "coretemp";
+#ifdef MY_DEF_HERE
+	/* if the cpu temp can't read, syno_cpu_temperature() still return this value, 
+	 * so we must set a valid value(default 20 degree C) when init*/
+	data->temp = 20 * 1000;
+#endif
 	mutex_init(&data->update_lock);
 
 	/* test if we can access the THERM_STATUS MSR */
@@ -513,6 +518,50 @@ static void __exit coretemp_exit(void)
 	mutex_unlock(&pdev_list_mutex);
 	platform_driver_unregister(&coretemp_driver);
 }
+
+#ifdef MY_DEF_HERE
+#include <linux/synobios.h>
+int syno_cpu_temperature(struct _SynoCpuTemp *pCpuTemp)
+{
+    struct coretemp_data *data;
+    struct pdev_entry *p, *n;
+    int    iCpuCount = 0;
+    int        iIndex = 0;
+
+    if ( NULL == pCpuTemp ) {
+        printk("coretemp: parameter error.\n");
+        return -1;
+    }
+
+    mutex_lock(&pdev_list_mutex);
+    list_for_each_entry_safe(p, n, &pdev_list, list) {
+        data = coretemp_update_device(&p->pdev->dev);
+        ++iCpuCount;
+#ifdef CONFIG_X86_HT
+        iIndex = p->cpu/2;
+#else
+        iIndex = p->cpu;
+#endif
+        if( MAX_CPU < iIndex ) {
+            printk("Wrong cpu core: %d\n",  iIndex);
+        } else {
+			/* no need to check data->valid, so even !data->valid we also return data->temp which
+			 * is the last valid temperature */
+            pCpuTemp->cpu_temp[iIndex] = data->temp / 1000;
+        }
+    }
+    mutex_unlock(&pdev_list_mutex);
+
+#ifdef CONFIG_X86_HT
+    pCpuTemp->cpu_num = iCpuCount / 2;
+#else
+    pCpuTemp->cpu_num = iCpuCount;
+#endif
+
+    return 0;
+}
+EXPORT_SYMBOL(syno_cpu_temperature);
+#endif
 
 MODULE_AUTHOR("Rudolf Marek <r.marek@assembler.cz>");
 MODULE_DESCRIPTION("Intel Core temperature monitor");

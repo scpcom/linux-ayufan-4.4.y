@@ -222,6 +222,12 @@ static int do_lo_send_aops(struct loop_device *lo, struct bio_vec *bvec,
 	bv_offs = bvec->bv_offset;
 	len = bvec->bv_len;
 	while (len > 0) {
+#ifdef MY_ABC_HERE
+		if (unlikely(!blSynostate(O_UNMOUNT_OK, file))) {
+			ret = -EIO;
+			goto fail;
+		}
+#endif
 		sector_t IV;
 		unsigned size, copied;
 		int transfer_result;
@@ -278,6 +284,12 @@ static int __do_lo_send_write(struct file *file,
 {
 	ssize_t bw;
 	mm_segment_t old_fs = get_fs();
+
+#ifdef MY_ABC_HERE
+	if (unlikely(!blSynostate(O_UNMOUNT_OK, file))) {
+		return -EIO;
+	}
+#endif
 
 	set_fs(get_ds());
 	bw = file->f_op->write(file, buf, len, &pos);
@@ -473,6 +485,13 @@ static int do_bio_filebacked(struct loop_device *lo, struct bio *bio)
 	int ret;
 
 	pos = ((loff_t) bio->bi_sector << 9) + lo->lo_offset;
+
+#ifdef MY_ABC_HERE
+	if (unlikely(!blSynostate(O_UNMOUNT_OK, lo->lo_backing_file))) {
+		ret = -EIO;
+		goto out;
+	}
+#endif
 
 	if (bio_rw(bio) == WRITE) {
 		bool barrier = bio_rw_flagged(bio, BIO_RW_BARRIER);

@@ -100,6 +100,11 @@
 #undef BRIEF_GFAR_ERRORS
 #undef VERBOSE_GFAR_ERRORS
 
+#ifdef MY_ABC_HERE
+static int g_netif_count = 0;
+extern long g_internal_netif_num;
+#endif
+
 const char gfar_driver_name[] = "Gianfar Ethernet";
 const char gfar_driver_version[] = "1.3";
 
@@ -300,6 +305,15 @@ static int gfar_probe(struct of_device *ofdev,
 	int err = 0;
 	int len_devname;
 
+#ifdef MY_ABC_HERE
+	g_netif_count++;
+	if ( g_internal_netif_num >= 0 &&
+		 g_netif_count > g_internal_netif_num )
+	{
+		return -ENODEV;
+	}
+#endif
+
 	/* Create an ethernet device instance */
 	dev = alloc_etherdev(sizeof (*priv));
 
@@ -337,11 +351,21 @@ static int gfar_probe(struct of_device *ofdev,
 	tempval = (MACCFG1_TX_FLOW | MACCFG1_RX_FLOW);
 	gfar_write(&priv->regs->maccfg1, tempval);
 
+#ifdef MY_ABC_HERE
+	if (priv->regs->ecntrl & 0x00000010) {
+		/* RGMII mode */
+		gfar_write(&priv->regs->maccfg2, MACCFG2_INIT_SETTINGS_RGMII);
+		gfar_write(&priv->regs->ecntrl, ECNTRL_INIT_SETTINGS_RGMII);
+	} else {
+#endif /* MY_ABC_HERE */
 	/* Initialize MACCFG2. */
 	gfar_write(&priv->regs->maccfg2, MACCFG2_INIT_SETTINGS);
 
 	/* Initialize ECNTRL */
 	gfar_write(&priv->regs->ecntrl, ECNTRL_INIT_SETTINGS);
+#ifdef MY_ABC_HERE
+	}
+#endif /* MY_ABC_HERE */
 
 	/* Set the dev->base_addr to the gfar reg region */
 	dev->base_addr = (unsigned long) (priv->regs);
@@ -666,6 +690,18 @@ static int init_phy(struct net_device *dev)
 	/* Remove any features not supported by the controller */
 	priv->phydev->supported &= (GFAR_SUPPORTED | gigabit_support);
 	priv->phydev->advertising = priv->phydev->supported;
+
+#ifdef MY_ABC_HERE
+	phy_write(priv->phydev, 0x18, 0x4101);  		// set LED as Link/Active
+	if (priv->regs->ecntrl & 0x00000010) {		// RGMII mode
+		if ((0x001c != phy_read(priv->phydev, MII_PHYSID1)) ||
+		    (0xc912 != phy_read(priv->phydev, MII_PHYSID2))) {
+			phy_write(priv->phydev, 0x14, 0x0CE2);	// set RGMII delay mode
+		}
+		phy_write(priv->phydev, 0x00, 0x9140);	// reset phy
+		udelay(1000);
+	}
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }

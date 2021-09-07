@@ -97,6 +97,8 @@ obj-$(CONFIG_GENERIC_CSUM) += checksum.o
 
 obj-$(CONFIG_GENERIC_ATOMIC64) += atomic64.o
 
+obj-y += synolib/
+
 hostprogs-y	:= gen_crc32table
 clean-files	:= crc32table.h
 

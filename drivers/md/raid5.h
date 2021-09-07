@@ -233,6 +233,9 @@ struct stripe_head {
 		struct bio	req;
 		struct bio_vec	vec;
 		struct page	*page;
+#ifdef MY_ABC_HERE 
+		struct page *r5page;
+#endif
 		struct bio	*toread, *read, *towrite, *written;
 		sector_t	sector;			/* sector of this page */
 		unsigned long	flags;
@@ -275,6 +278,10 @@ struct r6_state {
 				    * filling
 				    */
 #define R5_Wantdrain	13 /* dev->towrite needs to be drained */
+#ifdef MY_ABC_HERE
+#define R5_UseFSPage        18
+#endif
+
 /*
  * Write method
  */
@@ -303,6 +310,10 @@ struct r6_state {
 #define	STRIPE_BIOFILL_RUN	14
 #define	STRIPE_COMPUTE_RUN	15
 #define	STRIPE_OPS_REQ_PENDING	16
+
+#ifdef MY_ABC_HERE
+#define STRIPE_NORETRY		17
+#endif
 
 /*
  * Operation request flags

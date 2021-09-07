@@ -154,6 +154,9 @@ struct us_data {
 #ifdef CONFIG_PM
 	pm_hook			suspend_resume_hook;
 #endif
+#ifdef MY_ABC_HERE
+       u8 is_ata_disk;
+#endif
 
 	/* hacks for READ CAPACITY bug handling */
 	int			use_last_sector_hacks;

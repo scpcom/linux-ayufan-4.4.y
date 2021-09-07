@@ -131,6 +131,8 @@ extern const char gfar_driver_version[];
 		| SUPPORTED_Autoneg \
 		| SUPPORTED_MII)
 
+
+
 /* TBI register addresses */
 #define MII_TBICON		0x11
 
@@ -151,6 +153,9 @@ extern const char gfar_driver_version[];
 #define MACCFG1_SYNCD_TX_EN	0x00000002
 #define MACCFG1_TX_EN		0x00000001
 
+#ifdef MY_ABC_HERE
+#define MACCFG2_INIT_SETTINGS_RGMII	0x00007105
+#endif /* MY_ABC_HERE */
 #define MACCFG2_INIT_SETTINGS	0x00007205
 #define MACCFG2_FULL_DUPLEX	0x00000001
 #define MACCFG2_IF              0x00000300
@@ -160,6 +165,9 @@ extern const char gfar_driver_version[];
 #define MACCFG2_LENGTHCHECK	0x00000010
 #define MACCFG2_MPEN		0x00000008
 
+#ifdef MY_ABC_HERE
+#define ECNTRL_INIT_SETTINGS_RGMII	0x00001018
+#endif /* MY_ABC_HERE */
 #define ECNTRL_INIT_SETTINGS	0x00001000
 #define ECNTRL_TBI_MODE         0x00000020
 #define ECNTRL_REDUCED_MODE	0x00000010

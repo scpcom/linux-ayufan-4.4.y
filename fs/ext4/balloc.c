@@ -419,6 +419,9 @@ void ext4_add_groupblocks(handle_t *handle, struct super_block *sb,
 	    in_range(block, ext4_inode_table(sb, desc), sbi->s_itb_per_group) ||
 	    in_range(block + count - 1, ext4_inode_table(sb, desc),
 		     sbi->s_itb_per_group)) {
+#ifdef MY_ABC_HERE
+		if (printk_ratelimit())
+#endif
 		ext4_error(sb, __func__,
 			   "Adding blocks in system zones - "
 			   "Block = %llu, count = %lu",
@@ -498,17 +501,18 @@ error_return:
 	return;
 }
 
+#ifndef MY_ABC_HERE
 /**
  * ext4_free_blocks() -- Free given blocks and update quota
- * @handle:		handle for this transaction
- * @inode:		inode
- * @block:		start physical block to free
- * @count:		number of blocks to count
- * @metadata: 		Are these metadata blocks
+ * @handle:            handle for this transaction
+ * @inode:             inode
+ * @block:             start physical block to free
+ * @count:             number of blocks to count
+ * @metadata:          Are these metadata blocks
  */
 void ext4_free_blocks(handle_t *handle, struct inode *inode,
-			ext4_fsblk_t block, unsigned long count,
-			int metadata)
+					   ext4_fsblk_t block, unsigned long count,
+					   int metadata)
 {
 	struct super_block *sb;
 	unsigned long dquot_freed_blocks;
@@ -530,11 +534,12 @@ void ext4_free_blocks(handle_t *handle, struct inode *inode,
 	sb = inode->i_sb;
 
 	ext4_mb_free_blocks(handle, inode, block, count,
-			    metadata, &dquot_freed_blocks);
+					metadata, &dquot_freed_blocks);
 	if (dquot_freed_blocks)
 		vfs_dq_free_block(inode, dquot_freed_blocks);
 	return;
 }
+#endif
 
 /**
  * ext4_has_free_blocks()
@@ -614,6 +619,9 @@ int ext4_should_retry_alloc(struct super_block *sb, int *retries)
 
 	return jbd2_journal_force_commit_nested(EXT4_SB(sb)->s_journal);
 }
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+EXPORT_SYMBOL(ext4_should_retry_alloc);
+#endif
 
 /*
  * ext4_new_meta_blocks() -- allocate block for meta data (indexing) blocks
@@ -642,14 +650,17 @@ ext4_fsblk_t ext4_new_meta_blocks(handle_t *handle, struct inode *inode,
 	ret = ext4_mb_new_blocks(handle, &ar, errp);
 	if (count)
 		*count = ar.len;
-
 	/*
-	 * Account for the allocated meta blocks
+	 * Account for the allocated meta blocks.  We will never
+	 * fail EDQUOT for metdata, but we do account for it.
 	 */
 	if (!(*errp) && EXT4_I(inode)->i_delalloc_reserved_flag) {
 		spin_lock(&EXT4_I(inode)->i_block_reservation_lock);
 		EXT4_I(inode)->i_allocated_meta_blocks += ar.len;
 		spin_unlock(&EXT4_I(inode)->i_block_reservation_lock);
+#ifdef MY_ABC_HERE
+		dquot_alloc_block_nofail(inode, ar.len);
+#endif
 	}
 	return ret;
 }

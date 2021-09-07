@@ -10,6 +10,16 @@
 
 #include <linux/types.h>
 
+#if 1 /* SYNO */
+/**
+ * XXX Define u8 type for user-space apps as workaround.
+ * Install kernel header is not work for this case
+ */
+#ifndef __KERNEL__
+typedef unsigned char u8;
+#endif
+#endif /* SYNO */
+
 struct scsi_cmnd;
 
 /*
@@ -106,29 +116,73 @@ struct scsi_cmnd;
 #define PERSISTENT_RESERVE_OUT 0x5f
 #define VARIABLE_LENGTH_CMD   0x7f
 #define REPORT_LUNS           0xa0
+#ifdef MY_ABC_HERE
+#define SECURITY_PROTOCOL_IN  0xa2
+#endif
 #define MAINTENANCE_IN        0xa3
 #define MAINTENANCE_OUT       0xa4
 #define MOVE_MEDIUM           0xa5
 #define EXCHANGE_MEDIUM       0xa6
 #define READ_12               0xa8
 #define WRITE_12              0xaa
+#ifdef MY_ABC_HERE
+#define READ_MEDIA_SERIAL_NUMBER 0xab
+#endif
 #define WRITE_VERIFY_12       0xae
 #define SEARCH_HIGH_12        0xb0
 #define SEARCH_EQUAL_12       0xb1
 #define SEARCH_LOW_12         0xb2
+#ifdef MY_ABC_HERE
+#define SECURITY_PROTOCOL_OUT 0xb5
+#endif
 #define READ_ELEMENT_STATUS   0xb8
 #define SEND_VOLUME_TAG       0xb6
 #define WRITE_LONG_2          0xea
+#ifdef MY_ABC_HERE
+#define EXTENDED_COPY         0x83
+#define RECEIVE_COPY_RESULTS  0x84
+#define ACCESS_CONTROL_IN     0x86
+#define ACCESS_CONTROL_OUT    0x87
+#endif
 #define READ_16               0x88
 #define WRITE_16              0x8a
+#ifdef MY_ABC_HERE
+#define READ_ATTRIBUTE        0x8c
+#define WRITE_ATTRIBUTE	      0x8d
+#endif
 #define VERIFY_16	      0x8f
 #define SERVICE_ACTION_IN     0x9e
 /* values for service action in */
 #define	SAI_READ_CAPACITY_16  0x10
+#ifdef MY_ABC_HERE
+/* values for VARIABLE_LENGTH_CMD service action codes
+ * see spc4r17 Section D.3.5, table D.7 and D.8 */
+#define VLC_SA_RECEIVE_CREDENTIAL 0x1800
+#endif
 /* values for maintenance in */
+#ifdef MY_ABC_HERE
+#define MI_REPORT_IDENTIFYING_INFORMATION 0x05
+#endif
 #define MI_REPORT_TARGET_PGS  0x0a
+#ifdef MY_ABC_HERE
+#define MI_REPORT_ALIASES     0x0b
+#define MI_REPORT_SUPPORTED_OPERATION_CODES 0x0c
+#define MI_REPORT_SUPPORTED_TASK_MANAGEMENT_FUNCTIONS 0x0d
+#define MI_REPORT_PRIORITY   0x0e
+#define MI_REPORT_TIMESTAMP  0x0f
+#define MI_MANAGEMENT_PROTOCOL_IN 0x10
+#endif
 /* values for maintenance out */
+#ifdef MY_ABC_HERE
+#define MO_SET_IDENTIFYING_INFORMATION 0x06
+#endif
 #define MO_SET_TARGET_PGS     0x0a
+#ifdef MY_ABC_HERE
+#define MO_CHANGE_ALIASES     0x0b
+#define MO_SET_PRIORITY       0x0e
+#define MO_SET_TIMESTAMP      0x0f
+#define MO_MANAGEMENT_PROTOCOL_OUT 0x10
+#endif
 /* values for variable length command */
 #define READ_32		      0x09
 #define WRITE_32	      0x0b
@@ -510,5 +564,20 @@ static inline __u32 scsi_to_u32(__u8 *ptr)
 {
 	return (ptr[0]<<24) + (ptr[1]<<16) + (ptr[2]<<8) + ptr[3];
 }
+#ifdef SYNO_BADSECTOR_TEST
+#define SCSI_IOCTL_SET_BADSECTORS    0x5400
+
+typedef struct _tag_SdBadSectors {
+	unsigned int     rgSectors[101];
+	unsigned short     rgEnableSector[101];
+	unsigned short     uiEnable;   // 0-->disable, 1-->enable for read
+} SDBADSECTORS, *PSDBADSECTORS;
+#define EN_BAD_SECTOR_READ      0x01
+#define EN_BAD_SECTOR_WRITE     0x02
+
+extern SDBADSECTORS grgSdBadSectors[SYNO_MAX_INTERNAL_DISK];
+extern int gBadSectorTest;
+#define SynoGetDiskNum(szBdevName)	(szBdevName[2] - 'a')
+#endif
 
 #endif /* _SCSI_SCSI_H */

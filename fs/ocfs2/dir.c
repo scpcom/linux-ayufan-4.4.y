@@ -2964,10 +2964,16 @@ static int ocfs2_expand_inline_dir(struct inode *dir, struct buffer_head *di_bh,
 		goto out;
 	}
 
+#ifdef MY_ABC_HERE
+	ret = dquot_alloc_space_nodirty(dir,
+		ocfs2_clusters_to_bytes(osb->sb, alloc + dx_alloc));
+	if (ret) {
+#else
 	if (vfs_dq_alloc_space_nodirty(dir,
-				ocfs2_clusters_to_bytes(osb->sb,
-							alloc + dx_alloc))) {
+							ocfs2_clusters_to_bytes(osb->sb,
+													alloc + dx_alloc))) {
 		ret = -EDQUOT;
+#endif
 		goto out_commit;
 	}
 	did_quota = 1;
@@ -3178,7 +3184,11 @@ static int ocfs2_expand_inline_dir(struct inode *dir, struct buffer_head *di_bh,
 
 out_commit:
 	if (ret < 0 && did_quota)
+#ifdef MY_ABC_HERE
+		dquot_free_space_nodirty(dir, bytes_allocated);
+#else
 		vfs_dq_free_space_nodirty(dir, bytes_allocated);
+#endif
 
 	ocfs2_commit_trans(osb, handle);
 
@@ -3221,9 +3231,15 @@ static int ocfs2_do_extend_dir(struct super_block *sb,
 	if (extend) {
 		u32 offset = OCFS2_I(dir)->ip_clusters;
 
+#ifdef MY_ABC_HERE
+		status = dquot_alloc_space_nodirty(dir,
+					ocfs2_clusters_to_bytes(sb, 1));
+		if (status) {
+#else
 		if (vfs_dq_alloc_space_nodirty(dir,
-					ocfs2_clusters_to_bytes(sb, 1))) {
-			status = -EDQUOT;
+								ocfs2_clusters_to_bytes(sb, 1))) {
+            status = -EDQUOT;
+#endif
 			goto bail;
 		}
 		did_quota = 1;
@@ -3254,7 +3270,11 @@ static int ocfs2_do_extend_dir(struct super_block *sb,
 	status = 0;
 bail:
 	if (did_quota && status < 0)
+#ifdef MY_ABC_HERE
+		dquot_free_space_nodirty(dir, ocfs2_clusters_to_bytes(sb, 1));
+#else
 		vfs_dq_free_space_nodirty(dir, ocfs2_clusters_to_bytes(sb, 1));
+#endif
 	mlog_exit(status);
 	return status;
 }
@@ -3889,9 +3909,15 @@ static int ocfs2_dx_dir_rebalance(struct ocfs2_super *osb, struct inode *dir,
 		goto out;
 	}
 
+#ifdef MY_ABC_HERE
+	ret = dquot_alloc_space_nodirty(dir,
+				       ocfs2_clusters_to_bytes(dir->i_sb, 1));
+	if (ret) {
+#else
 	if (vfs_dq_alloc_space_nodirty(dir,
-				       ocfs2_clusters_to_bytes(dir->i_sb, 1))) {
+								   ocfs2_clusters_to_bytes(dir->i_sb, 1))) {
 		ret = -EDQUOT;
+#endif
 		goto out_commit;
 	}
 	did_quota = 1;
@@ -3983,7 +4009,11 @@ static int ocfs2_dx_dir_rebalance(struct ocfs2_super *osb, struct inode *dir,
 
 out_commit:
 	if (ret < 0 && did_quota)
+#ifdef MY_ABC_HERE
+		dquot_free_space_nodirty(dir,
+#else
 		vfs_dq_free_space_nodirty(dir,
+#endif
 				ocfs2_clusters_to_bytes(dir->i_sb, 1));
 
 	ocfs2_commit_trans(osb, handle);
@@ -4165,9 +4195,15 @@ static int ocfs2_expand_inline_dx_root(struct inode *dir,
 		goto out;
 	}
 
+#ifdef MY_ABC_HERE
+	ret = dquot_alloc_space_nodirty(dir,
+				       ocfs2_clusters_to_bytes(osb->sb, 1));
+	if (ret) {
+#else
 	if (vfs_dq_alloc_space_nodirty(dir,
-				       ocfs2_clusters_to_bytes(osb->sb, 1))) {
+								   ocfs2_clusters_to_bytes(osb->sb, 1))) {
 		ret = -EDQUOT;
+#endif
 		goto out_commit;
 	}
 	did_quota = 1;
@@ -4229,7 +4265,11 @@ static int ocfs2_expand_inline_dx_root(struct inode *dir,
 
 out_commit:
 	if (ret < 0 && did_quota)
+#ifdef MY_ABC_HERE
+		dquot_free_space_nodirty(dir,
+#else
 		vfs_dq_free_space_nodirty(dir,
+#endif
 					  ocfs2_clusters_to_bytes(dir->i_sb, 1));
 
 	ocfs2_commit_trans(osb, handle);

@@ -172,6 +172,19 @@ static int wait_till_ready(struct m25p *flash)
 	return 1;
 }
 
+#ifdef MY_ABC_HERE
+static int unlock_chip(struct mtd_info *mtd, loff_t ofs, uint64_t len)
+{
+        return 0;
+}
+
+static int lock_chip(struct mtd_info *mtd, loff_t ofs, size_t len)
+{
+        return 0;
+}
+#endif /* MY_ABC_HERE */
+
+
 /*
  * Erase the whole flash memory
  *
@@ -796,6 +809,10 @@ static int __devinit m25p_probe(struct spi_device *spi)
 	flash->mtd.size = info->sector_size * info->n_sectors;
 	flash->mtd.erase = m25p80_erase;
 	flash->mtd.read = m25p80_read;
+#ifdef MY_ABC_HERE
+	flash->mtd.lock    = lock_chip;
+	flash->mtd.unlock  = unlock_chip;
+#endif /* MY_ABC_HERE */
 
 	/* sst flash chips use AAI word program */
 	if (info->jedec_id >> 16 == 0xbf)

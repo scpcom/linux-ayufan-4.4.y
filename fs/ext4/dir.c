@@ -83,10 +83,15 @@ int ext4_check_dir_entry(const char *function, struct inode *dir,
 		error_msg = "inode out of bounds";
 
 	if (error_msg != NULL)
+#ifdef MY_ABC_HERE
+		if (printk_ratelimit())
+#endif
 		ext4_error(dir->i_sb, function,
-			"bad entry in directory #%lu: %s - "
-			"offset=%u, inode=%u, rec_len=%d, name_len=%d",
-			dir->i_ino, error_msg, offset,
+			"bad entry in directory #%lu: %s - block=%llu"
+			"offset=%u(%u), inode=%u, rec_len=%d, name_len=%d",
+			dir->i_ino, error_msg, 
+			(unsigned long long) bh->b_blocknr,     
+			(unsigned) (offset%bh->b_size), offset,
 			le32_to_cpu(de->inode),
 			rlen, de->name_len);
 	return error_msg == NULL ? 1 : 0;
@@ -106,10 +111,14 @@ static int ext4_readdir(struct file *filp,
 	int dir_has_error = 0;
 
 	sb = inode->i_sb;
-
+#ifdef MY_ABC_HERE
+	if ((EXT4_SB(inode->i_sb)->s_es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC)) &&
+		!EXT4_HAS_COMPAT_FEATURE(inode->i_sb, EXT4_FEATURE_COMPAT_DIR_INDEX) &&
+#else
 	if (EXT4_HAS_COMPAT_FEATURE(inode->i_sb,
 				    EXT4_FEATURE_COMPAT_DIR_INDEX) &&
-	    ((EXT4_I(inode)->i_flags & EXT4_INDEX_FL) ||
+#endif
+	    ((ext4_test_inode_flag(inode, EXT4_INODE_INDEX)) ||
 	     ((inode->i_size >> sb->s_blocksize_bits) == 1))) {
 		err = ext4_dx_readdir(filp, dirent, filldir);
 		if (err != ERR_BAD_DX_DIR) {
@@ -120,7 +129,7 @@ static int ext4_readdir(struct file *filp,
 		 * We don't set the inode dirty flag since it's not
 		 * critical that it get flushed back to the disk.
 		 */
-		EXT4_I(filp->f_path.dentry->d_inode)->i_flags &= ~EXT4_INDEX_FL;
+		ext4_clear_inode_flag(filp->f_path.dentry->d_inode, EXT4_INODE_INDEX);
 	}
 	stored = 0;
 	offset = filp->f_pos & (sb->s_blocksize - 1);

@@ -25,6 +25,10 @@
 static int stub_probe(struct usb_interface *interface,
 				const struct usb_device_id *id);
 static void stub_disconnect(struct usb_interface *interface);
+#ifdef MY_ABC_HERE
+static void stub_syno_device_close_socket(struct usbip_device *ud);
+static void stub_syno_device_cleanup_urb(struct usbip_device *ud);
+#endif
 
 
 /*
@@ -114,7 +118,12 @@ static ssize_t store_sockfd(struct device *dev, struct device_attribute *attr,
 
 		spin_lock(&sdev->ud.lock);
 
-		if (sdev->ud.status != SDEV_ST_AVAILABLE) {
+#ifdef MY_ABC_HERE
+		if (sdev->ud.status != SDEV_ST_AVAILABLE && SDEV_ST_USED != sdev->ud.status)
+#else
+		if (sdev->ud.status != SDEV_ST_AVAILABLE)
+#endif
+		{
 			dev_err(dev, "not ready\n");
 			spin_unlock(&sdev->ud.lock);
 			return -EINVAL;
@@ -133,16 +142,34 @@ static ssize_t store_sockfd(struct device *dev, struct device_attribute *attr,
 #endif
 
 		sdev->ud.tcp_socket = socket;
+#ifdef MY_ABC_HERE
+		sdev->ud.sockfd = sockfd;
+		if(0 < sdev->ud.ideal_time) {
+			sdev->ud.get_socket_time = current_kernel_time();
+			sdev->ud.socket_timer.expires = jiffies + SYNO_USBIP_CONNECTION_IDEALCHECK;
+			sdev->ud.socket_timer.function = syno_usbip_timer_timeout;
+			sdev->ud.socket_timer.data = (unsigned long)(&sdev->ud);		
+			add_timer(&sdev->ud.socket_timer);
+		}
+#endif
 
 		spin_unlock(&sdev->ud.lock);
 
+#ifndef MY_ABC_HERE
 		usbip_start_threads(&sdev->ud);
+#else
+		wake_up(&sdev->rx_waitq);
+#endif
 
 		spin_lock(&sdev->ud.lock);
 		sdev->ud.status = SDEV_ST_USED;
 		spin_unlock(&sdev->ud.lock);
 
 	} else {
+#ifdef MY_ABC_HERE
+		stub_syno_device_close_socket(&sdev->ud);
+		stub_syno_device_cleanup_urb(&sdev->ud);
+#else
 		dev_info(dev, "stub down\n");
 
 		spin_lock(&sdev->ud.lock);
@@ -153,11 +180,39 @@ static ssize_t store_sockfd(struct device *dev, struct device_attribute *attr,
 		spin_unlock(&sdev->ud.lock);
 
 		usbip_event_add(&sdev->ud, SDEV_EVENT_DOWN);
+#endif
 	}
 
 	return count;
 }
 static DEVICE_ATTR(usbip_sockfd, S_IWUSR, NULL, store_sockfd);
+
+#ifdef MY_ABC_HERE
+/*
+ * usbip_ideal_time gets the ideal time limitation of this socket connection that
+ * is used to force disconnect by kernel threads.
+ */
+static ssize_t store_ideal_time(struct device *dev, struct device_attribute *attr,
+			    const char *buf, size_t count)
+{
+	struct stub_device *sdev = dev_get_drvdata(dev);
+	long ideal_time = 0;
+
+	if (!sdev) {
+		dev_err(dev, "sdev is null\n");
+		return -ENODEV;
+	}
+
+	sscanf(buf, "%ld", &ideal_time);
+	printk("ideal_time = %ld", ideal_time);
+
+	spin_lock(&sdev->ud.lock);
+	sdev->ud.ideal_time = ideal_time;
+	spin_unlock(&sdev->ud.lock);
+	return count;
+}
+static DEVICE_ATTR(usbip_ideal_time, S_IWUSR, NULL, store_ideal_time);
+#endif
 
 static int stub_add_files(struct device *dev)
 {
@@ -175,10 +230,21 @@ static int stub_add_files(struct device *dev)
 	if (err)
 		goto err_debug;
 
+#ifdef MY_ABC_HERE
+	err = device_create_file(dev, &dev_attr_usbip_ideal_time);
+	if (err)
+		goto err_ideal_time;
+#endif
+
 	return 0;
 
 err_debug:
 	device_remove_file(dev, &dev_attr_usbip_sockfd);
+
+#ifdef MY_ABC_HERE
+err_ideal_time:
+	device_remove_file(dev, &dev_attr_usbip_ideal_time);
+#endif
 
 err_sockfd:
 	device_remove_file(dev, &dev_attr_usbip_status);
@@ -192,6 +258,9 @@ static void stub_remove_files(struct device *dev)
 	device_remove_file(dev, &dev_attr_usbip_status);
 	device_remove_file(dev, &dev_attr_usbip_sockfd);
 	device_remove_file(dev, &dev_attr_usbip_debug);
+#ifdef MY_ABC_HERE
+	device_remove_file(dev, &dev_attr_usbip_ideal_time);
+#endif
 }
 
 
@@ -210,10 +279,14 @@ static void stub_shutdown_connection(struct usbip_device *ud)
 	 * sk_wait_data returned though stub_rx thread was already finished by
 	 * step 1?
 	 */
+#ifdef MY_ABC_HERE
+	stub_syno_device_close_socket(ud);
+#else
 	if (ud->tcp_socket) {
 		usbip_udbg("shutdown tcp_socket %p\n", ud->tcp_socket);
 		kernel_sock_shutdown(ud->tcp_socket, SHUT_RDWR);
 	}
+#endif
 
 	/* 1. stop threads */
 	usbip_stop_threads(ud);
@@ -228,6 +301,12 @@ static void stub_shutdown_connection(struct usbip_device *ud)
 		ud->tcp_socket = NULL;
 	}
 
+#ifdef MY_ABC_HERE
+	stub_syno_device_cleanup_urb(ud);
+	if (del_match_busid(dev_name(sdev->interface->dev.parent)) < 0) {
+		usbip_udbg("del busid(%s) failed", dev_name(sdev->interface->dev.parent));
+	}
+#else
 	/* 3. free used data */
 	stub_device_cleanup_urbs(sdev);
 
@@ -251,7 +330,52 @@ static void stub_shutdown_connection(struct usbip_device *ud)
 
 		spin_unlock_irqrestore(&sdev->priv_lock, flags);
 	}
+#endif
 }
+
+#ifdef MY_ABC_HERE
+static void stub_syno_device_close_socket(struct usbip_device *ud)
+{
+	usbip_udbg("device close socket connection");
+	/* close socket */
+	syno_usbip_shutdown_connection(ud);
+
+	return;
+}
+
+static void stub_syno_device_cleanup_urb(struct usbip_device *ud)
+{
+	struct stub_device *sdev = container_of(ud, struct stub_device, ud);
+
+	usbip_udbg("device release all urb");
+	/* free urb */
+	/* free used data */
+	stub_device_cleanup_urbs(sdev);
+
+	/* free stub_unlink */
+	{
+		unsigned long flags;
+		struct stub_unlink *unlink, *tmp;
+
+		spin_lock_irqsave(&sdev->priv_lock, flags);
+
+		list_for_each_entry_safe(unlink, tmp, &sdev->unlink_tx, list) {
+			list_del(&unlink->list);
+			kfree(unlink);
+		}
+
+		list_for_each_entry_safe(unlink, tmp,
+						 &sdev->unlink_free, list) {
+			list_del(&unlink->list);
+			kfree(unlink);
+		}
+
+		spin_unlock_irqrestore(&sdev->priv_lock, flags);
+	}
+
+	return;
+}
+#endif
 
 static void stub_device_reset(struct usbip_device *ud)
 {
@@ -339,6 +463,11 @@ static struct stub_device *stub_device_alloc(struct usb_interface *interface)
 	/* sdev->ud.lock = SPIN_LOCK_UNLOCKED; */
 	spin_lock_init(&sdev->ud.lock);
 	sdev->ud.tcp_socket = NULL;
+#ifdef MY_ABC_HERE
+	sdev->ud.sockfd = -1;
+	sdev->ud.ideal_time = 0;
+	init_timer(&sdev->ud.socket_timer);
+#endif
 
 	INIT_LIST_HEAD(&sdev->priv_init);
 	INIT_LIST_HEAD(&sdev->priv_tx);
@@ -349,12 +478,22 @@ static struct stub_device *stub_device_alloc(struct usb_interface *interface)
 	spin_lock_init(&sdev->priv_lock);
 
 	init_waitqueue_head(&sdev->tx_waitq);
+#ifdef MY_ABC_HERE
+	init_waitqueue_head(&sdev->rx_waitq);
+#endif
 
 	sdev->ud.eh_ops.shutdown = stub_shutdown_connection;
 	sdev->ud.eh_ops.reset    = stub_device_reset;
 	sdev->ud.eh_ops.unusable = stub_device_unusable;
+#ifdef MY_ABC_HERE
+	sdev->ud.eh_ops.close_connection = stub_syno_device_close_socket;
+	sdev->ud.eh_ops.cleanup_urb = stub_syno_device_cleanup_urb;
+#endif
 
 	usbip_start_eh(&sdev->ud);
+#ifdef MY_ABC_HERE
+	usbip_start_threads(&sdev->ud);
+#endif
 
 	usbip_udbg("register new interface\n");
 	return sdev;

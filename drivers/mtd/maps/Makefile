@@ -61,3 +61,17 @@ obj-$(CONFIG_MTD_BFIN_ASYNC)	+= bfin-async-flash.o
 obj-$(CONFIG_MTD_RBTX4939)	+= rbtx4939-flash.o
 obj-$(CONFIG_MTD_VMU)		+= vmu-flash.o
 obj-$(CONFIG_MTD_GPIO_ADDR)	+= gpio-addr-flash.o
+obj-$(CONFIG_SYNO_MTD_PHYMAPS) += synomap.o
+ifeq ($(CONFIG_ARCH_FEROCEON_ORION),y)
+	include $(srctree)/arch/arm/mach-feroceon-orion/config/mvRules.mk
+	flashmap-objs = ../../../arch/arm/mach-feroceon-orion/flashmap.o
+endif
+ifeq ($(CONFIG_ARCH_FEROCEON_KW),y)
+	include $(srctree)/arch/arm/mach-feroceon-kw/config/mvRules.mk
+	flashmap-objs = ../../../arch/arm/mach-feroceon-kw/flashmap.o
+endif
+ifeq ($(CONFIG_ARCH_FEROCEON_MV78XX0),y)
+	include $(srctree)/arch/arm/mach-feroceon-mv78xx0/config/mvRules.mk
+	flashmap-objs = ../../../arch/arm/mach-feroceon-mv78xx0/flashmap.o
+endif
+

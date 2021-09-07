@@ -153,6 +153,9 @@ struct cred {
 extern void __put_cred(struct cred *);
 extern void exit_creds(struct task_struct *);
 extern int copy_creds(struct task_struct *, unsigned long);
+#ifdef MY_DEF_HERE
+extern const struct cred *get_task_cred(struct task_struct *);
+#endif
 extern struct cred *cred_alloc_blank(void);
 extern struct cred *prepare_creds(void);
 extern struct cred *prepare_exec_creds(void);
@@ -282,6 +285,7 @@ static inline void put_cred(const struct cred *_cred)
 #define __task_cred(task) \
 	((const struct cred *)(rcu_dereference((task)->real_cred)))
 
+#ifndef MY_DEF_HERE
 /**
  * get_task_cred - Get another task's objective credentials
  * @task: The task to query
@@ -301,6 +305,7 @@ static inline void put_cred(const struct cred *_cred)
 	rcu_read_unlock();				\
 	__cred;						\
 })
+#endif
 
 /**
  * get_current_cred - Get the current task's subjective credentials

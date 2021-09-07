@@ -140,6 +140,19 @@ config USB_AT91
 	depends on USB_GADGET_AT91
 	default USB_GADGET
 
+config USB_GADGET_MRVL
+	boolean "Marvell USB Device Port"
+	depends on (USB=y || (USB=m && USB_GADGET=m)) && EXPERIMENTAL
+	select USB_GADGET_DUALSPEED
+	help
+	  ...
+
+config USB_MRVL
+	tristate
+	depends on USB_GADGET_MRVL
+	default USB_GADGET
+	select USB_GADGET_SELECTED
+
 config USB_GADGET_ATMEL_USBA
 	boolean "Atmel USBA"
 	select USB_GADGET_DUALSPEED

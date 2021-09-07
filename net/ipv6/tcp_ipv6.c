@@ -177,9 +177,26 @@ static int tcp_v6_connect(struct sock *sk, struct sockaddr *uaddr,
 			sk->sk_bound_dev_if = usin->sin6_scope_id;
 		}
 
+#ifdef MY_ABC_HERE
+		if (!sk->sk_bound_dev_if) {
+			struct net_device *dev = NULL;
+			for_each_netdev(sock_net(sk), dev) {
+				if(dev && (dev->flags & IFF_UP) && !(dev->flags & (IFF_LOOPBACK | IFF_SLAVE))) {
+					dev_hold(dev);
+					break;
+				}
+			}
+			if(!dev) {
+				return -ENODEV;
+			}
+			sk->sk_bound_dev_if = dev->ifindex;
+			dev_put(dev);
+		}
+#else
 		/* Connect to link-local address requires an interface */
 		if (!sk->sk_bound_dev_if)
 			return -EINVAL;
+#endif
 	}
 
 	if (tp->rx_opt.ts_recent_stamp &&

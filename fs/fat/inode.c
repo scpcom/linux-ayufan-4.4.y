@@ -64,6 +64,14 @@ static inline int __fat_get_block(struct inode *inode, sector_t iblock,
 	sector_t phys;
 	int err, offset;
 
+#ifdef MY_ABC_HERE
+	if(sb->s_flags & MS_UNMOUNT_WAIT) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+		printk("%s: force unmount hit\n", __FUNCTION__);
+#endif
+		return -ECORRUPT;
+	}
+#endif
 	err = fat_bmap(inode, iblock, &phys, &mapped_blocks, create);
 	if (err)
 		return err;
@@ -78,7 +86,11 @@ static inline int __fat_get_block(struct inode *inode, sector_t iblock,
 	if (iblock != MSDOS_I(inode)->mmu_private >> sb->s_blocksize_bits) {
 		fat_fs_error(sb, "corrupted file size (i_pos %lld, %lld)",
 			MSDOS_I(inode)->i_pos, MSDOS_I(inode)->mmu_private);
+#ifdef MY_ABC_HERE
+		return -ECORRUPT;
+#else
 		return -EIO;
+#endif
 	}
 
 	offset = (unsigned long)iblock & (sbi->sec_per_clus - 1);
@@ -146,10 +158,27 @@ static int fat_write_begin(struct file *file, struct address_space *mapping,
 			loff_t pos, unsigned len, unsigned flags,
 			struct page **pagep, void **fsdata)
 {
+#ifdef MY_ABC_HERE
+	int ret;
 	*pagep = NULL;
-	return cont_write_begin(file, mapping, pos, len, flags, pagep, fsdata,
-				fat_get_block,
-				&MSDOS_I(mapping->host)->mmu_private);
+	ret = cont_write_begin(file, mapping, pos, len, flags, pagep, fsdata,
+						   fat_get_block,
+						   &MSDOS_I(mapping->host)->mmu_private);
+#ifdef MY_ABC_HERE
+	if (ret >= 0 && (flags & AOP_FLAG_RECVFILE)) {
+		if (pos+len > mapping->host->i_size) {
+			i_size_write(mapping->host, pos+len);
+			mark_inode_dirty(mapping->host);
+		}
+	}
+#endif
+	return ret;
+#else
+	*pagep = NULL;                                                                              
+	return cont_write_begin(file, mapping, pos, len, flags, pagep, fsdata,                      
+							fat_get_block,                                                      
+							&MSDOS_I(mapping->host)->mmu_private); 
+#endif
 }
 
 static int fat_write_end(struct file *file, struct address_space *mapping,
@@ -209,6 +238,28 @@ static sector_t _fat_bmap(struct address_space *mapping, sector_t block)
 	return blocknr;
 }
 
+#ifdef MY_ABC_HERE
+static int fat_prepare_write(struct file *file, struct page *page,
+                unsigned from, unsigned to)
+{
+   return cont_prepare_write(page, from, to, fat_get_block,
+                 &MSDOS_I(page->mapping->host)->mmu_private);
+}
+
+static int fat_commit_write(struct file *file, struct page *page,
+               unsigned from, unsigned to)
+{
+   struct inode *inode = page->mapping->host;
+   int err = generic_commit_write(file, page, from, to);
+   if (!err && !(MSDOS_I(inode)->i_attrs & ATTR_ARCH)) {
+       inode->i_mtime = inode->i_ctime = CURRENT_TIME_SEC;
+       MSDOS_I(inode)->i_attrs |= ATTR_ARCH;
+       mark_inode_dirty(inode);
+   }
+   return err;
+}
+#endif
+
 static const struct address_space_operations fat_aops = {
 	.readpage	= fat_readpage,
 	.readpages	= fat_readpages,
@@ -217,6 +268,10 @@ static const struct address_space_operations fat_aops = {
 	.sync_page	= block_sync_page,
 	.write_begin	= fat_write_begin,
 	.write_end	= fat_write_end,
+#ifdef MY_ABC_HERE
+    .prepare_write  = fat_prepare_write,
+    .commit_write   = fat_commit_write,
+#endif
 	.direct_IO	= fat_direct_IO,
 	.bmap		= _fat_bmap
 };
@@ -870,7 +925,11 @@ enum {
 	Opt_charset, Opt_shortname_lower, Opt_shortname_win95,
 	Opt_shortname_winnt, Opt_shortname_mixed, Opt_utf8_no, Opt_utf8_yes,
 	Opt_uni_xl_no, Opt_uni_xl_yes, Opt_nonumtail_no, Opt_nonumtail_yes,
+#ifdef MY_ABC_HERE
+	Opt_obsolate, Opt_flush, Opt_noflush, Opt_tz_utc, Opt_rodir, Opt_err_cont,
+#else
 	Opt_obsolate, Opt_flush, Opt_tz_utc, Opt_rodir, Opt_err_cont,
+#endif
 	Opt_err_panic, Opt_err_ro, Opt_err,
 };
 
@@ -895,6 +954,9 @@ static const match_table_t fat_tokens = {
 	{Opt_debug, "debug"},
 	{Opt_immutable, "sys_immutable"},
 	{Opt_flush, "flush"},
+#ifdef MY_ABC_HERE
+	{Opt_noflush, "noflush"},
+#endif
 	{Opt_tz_utc, "tz=UTC"},
 	{Opt_err_cont, "errors=continue"},
 	{Opt_err_panic, "errors=panic"},
@@ -980,6 +1042,9 @@ static int parse_options(char *options, int is_vfat, int silent, int *debug,
 	opts->usefree = opts->nocase = 0;
 	opts->tz_utc = 0;
 	opts->errors = FAT_ERRORS_RO;
+#ifdef MY_ABC_HERE
+	opts->flush = 1;
+#endif
 	*debug = 0;
 
 	if (!options)
@@ -1069,6 +1134,11 @@ static int parse_options(char *options, int is_vfat, int silent, int *debug,
 		case Opt_flush:
 			opts->flush = 1;
 			break;
+#ifdef MY_ABC_HERE
+		case Opt_noflush:
+			opts->flush = 0;
+			break;
+#endif
 		case Opt_tz_utc:
 			opts->tz_utc = 1;
 			break;
@@ -1437,17 +1507,35 @@ int fat_fill_super(struct super_block *sb, void *data, int silent,
 	sprintf(buf, "cp%d", sbi->options.codepage);
 	sbi->nls_disk = load_nls(buf);
 	if (!sbi->nls_disk) {
+#ifdef MY_ABC_HERE
+		printk(KERN_ERR "FAT: nls_disk load default table\n");
+		sbi->nls_disk = load_nls_default();
+		if (!sbi->nls_disk){
+			printk(KERN_ERR "FAT: nls_disk load default failed\n");
+			goto out_fail;
+		}
+#else
 		printk(KERN_ERR "FAT: codepage %s not found\n", buf);
 		goto out_fail;
+#endif
 	}
 
 	/* FIXME: utf8 is using iocharset for upper/lower conversion */
 	if (sbi->options.isvfat) {
 		sbi->nls_io = load_nls(sbi->options.iocharset);
 		if (!sbi->nls_io) {
+#ifdef MY_ABC_HERE
+			printk(KERN_ERR "FAT: nls_io load default table\n");
+			sbi->nls_io = load_nls_default();
+			if (!sbi->nls_io){
+				printk(KERN_ERR "FAT: nls_io load default failed\n");
+				goto out_fail;
+			}
+#else
 			printk(KERN_ERR "FAT: IO charset %s not found\n",
 			       sbi->options.iocharset);
 			goto out_fail;
+#endif
 		}
 	}
 

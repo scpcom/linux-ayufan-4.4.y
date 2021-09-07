@@ -86,6 +86,7 @@ static void icedcc_putc(int ch)
 #define flush()	do { } while (0)
 #endif
 
+#ifndef CONFIG_ARCH_FEROCEON
 static void putstr(const char *ptr)
 {
 	char c;
@@ -98,6 +99,7 @@ static void putstr(const char *ptr)
 
 	flush();
 }
+#endif
 
 #endif
 

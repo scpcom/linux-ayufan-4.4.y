@@ -64,6 +64,66 @@ static int deprecated_sysctl_warning(struct __sysctl_args *args);
 
 #if defined(CONFIG_SYSCTL)
 
+#ifdef MY_ABC_HERE
+int SynoDebugFlag = 0;
+EXPORT_SYMBOL(SynoDebugFlag);
+
+int syno_temperature_debug=0;
+EXPORT_SYMBOL(syno_temperature_debug);
+
+int syno_hibernation_log_sec=0;
+EXPORT_SYMBOL(syno_hibernation_log_sec);
+#endif
+
+#ifdef MY_ABC_HERE
+char gszSynoHWVersion[16];
+EXPORT_SYMBOL(gszSynoHWVersion);
+#endif
+
+#ifdef  MY_ABC_HERE
+int gSynoRaidSyncFlag = 0;
+EXPORT_SYMBOL(gSynoRaidSyncFlag);
+#endif
+
+#ifdef MY_ABC_HERE
+long g_internal_hd_num = -1;
+long syno_boot_hd_count = 0;
+EXPORT_SYMBOL(g_internal_hd_num);
+#endif
+
+#ifdef MY_ABC_HERE
+long g_internal_netif_num = -1;
+EXPORT_SYMBOL(g_internal_netif_num);
+#endif
+
+#ifdef MY_DEF_HERE
+int gSynoInstallFlag = 0;
+EXPORT_SYMBOL(gSynoInstallFlag);
+#endif
+
+#ifdef MY_ABC_HERE
+unsigned char grgbLanMac[2][16];
+EXPORT_SYMBOL(grgbLanMac);
+#endif
+
+#ifdef MY_ABC_HERE
+char gszSerialNum[12];
+EXPORT_SYMBOL(gszSerialNum);
+char gszCustomSerialNum[32];
+EXPORT_SYMBOL(gszCustomSerialNum);
+#endif
+
+#ifdef MY_ABC_HERE
+long g_esata_7042 = -1;
+EXPORT_SYMBOL(g_esata_7042);
+#endif
+
+#if (defined(MY_ABC_HERE) || defined(MY_ABC_HERE))
+#include <linux/synosata.h>
+int (*funcSYNOGetHwCapability)(CAPABILITY *) = NULL;
+EXPORT_SYMBOL(funcSYNOGetHwCapability);
+#endif
+
 /* External variables not in a header file. */
 extern int C_A_D;
 extern int print_fatal_signals;
@@ -1036,6 +1096,93 @@ static struct ctl_table kern_table[] = {
  * NOTE: do not add new entries to this table unless you have read
  * Documentation/sysctl/ctl_unnumbered.txt
  */
+#ifdef MY_ABC_HERE
+	{
+		.ctl_name       = CTL_UNNUMBERED,
+		.procname       = "syno_debug_flag",
+		.data           = &SynoDebugFlag,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
+	},
+	{
+		.ctl_name       = CTL_UNNUMBERED,
+		.procname       = "syno_temperature_debug",
+		.data           = &syno_temperature_debug,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
+	},
+	{
+		.ctl_name       = CTL_UNNUMBERED,
+		.procname       = "syno_hibernation_log_sec",
+		.data           = &syno_hibernation_log_sec,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.ctl_name		= CTL_UNNUMBERED,
+		.procname		= "syno_hw_version",
+		.data			= gszSynoHWVersion,
+		.maxlen			= 16,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+		.strategy		= &sysctl_string,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.ctl_name		= CTL_UNNUMBERED,
+		.procname		= "syno_internal_hd_num",
+		.data			= &g_internal_hd_num,
+		.maxlen			= sizeof (int),
+		.mode			= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.ctl_name       = CTL_UNNUMBERED,
+		.procname       = "syno_raid_sync_flag",
+		.data           = &gSynoRaidSyncFlag,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.ctl_name		= CTL_UNNUMBERED,
+		.procname		= "syno_serial",
+		.data			= &gszSerialNum,
+		.maxlen			= 12,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+		.strategy		= &sysctl_string,
+	},
+	{
+		.ctl_name		= CTL_UNNUMBERED,
+		.procname		= "syno_custom_serial",
+		.data			= &gszCustomSerialNum,
+		.maxlen			= 32,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+		.strategy		= &sysctl_string,
+	},
+#endif
+#ifdef MY_DEF_HERE
+	{
+		.ctl_name       = CTL_UNNUMBERED,
+		.procname       = "syno_install_flag",
+		.data           = &gSynoInstallFlag,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
+	},
+#endif
 	{ .ctl_name = 0 }
 };
 

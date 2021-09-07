@@ -111,6 +111,27 @@
 #endif
 #include <asm/mce.h>
 
+#ifdef  MY_ABC_HERE
+extern char gszSynoHWVersion[];
+#endif
+
+#ifdef MY_ABC_HERE
+extern long g_internal_hd_num;
+#endif
+
+#ifdef MY_ABC_HERE
+extern long g_internal_netif_num;
+#endif
+
+#ifdef MY_ABC_HERE
+extern unsigned char grgbLanMac[2][16];
+#endif
+
+#ifdef MY_ABC_HERE
+extern char gszSerialNum[12];
+extern char gszCustomSerialNum[32];
+#endif
+
 /*
  * end_pfn only includes RAM, while max_pfn_mapped includes all e820 entries.
  * The direct mapping extends to max_pfn_mapped, so that we can directly access
@@ -480,6 +501,93 @@ static void __init reserve_early_setup_data(void)
 		early_iounmap(data, sizeof(*data));
 	}
 }
+
+#ifdef MY_ABC_HERE
+static int __init early_hw_version(char *p)
+{
+	char *szPtr;
+
+	snprintf(gszSynoHWVersion, 16, "%s", p);
+
+	szPtr = gszSynoHWVersion;
+	while ((*szPtr != ' ') && (*szPtr != '\t') && (*szPtr != '\0')) {
+		szPtr++;
+	}
+	*szPtr = 0;
+	strcat(gszSynoHWVersion, "-j");
+
+	printk("Synology Hareware Version: %s\n", gszSynoHWVersion);
+
+	return 1;
+}
+__setup("syno_hw_version=", early_hw_version);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_internal_hd_num(char *p)
+{
+	g_internal_hd_num = simple_strtol(p, NULL, 10);
+
+	printk("Internal HD num: %d\n", (int)g_internal_hd_num);
+
+    return 1;
+}
+__setup("ihd_num=", early_internal_hd_num);
+#endif
+
+#ifdef  MY_ABC_HERE
+static int __init early_internal_netif_num(char *p)
+{
+	g_internal_netif_num = simple_strtol(p, NULL, 10);
+
+	if ( g_internal_netif_num >= 0 ) {
+		printk("Internal netif num: %d\n", (int)g_internal_netif_num);
+	}
+
+	return 1;
+}
+__setup("netif_num=", early_internal_netif_num);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_mac1(char *p)
+{
+	snprintf(grgbLanMac[0], sizeof(grgbLanMac[0]), "%s", p);
+
+	printk("Mac1: %s\n", grgbLanMac[0]);
+
+	return 1;
+}
+__setup("mac1=", early_mac1);
+
+static int __init early_mac2(char *p)
+{
+	snprintf(grgbLanMac[1], sizeof(grgbLanMac[1]), "%s", p);
+
+	printk("Mac2: %s\n", grgbLanMac[1]);
+
+	return 1;
+}
+__setup("mac2=", early_mac2);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_sn(char *p)
+{
+        snprintf(gszSerialNum, sizeof(gszSerialNum), "%s", p);
+        printk("Serial Number: %s\n", gszSerialNum);
+        return 1;
+}
+__setup("sn=", early_sn);
+
+static int __init early_custom_sn(char *p)
+{
+        snprintf(gszCustomSerialNum, sizeof(gszCustomSerialNum), "%s", p);
+        printk("Custom Serial Number: %s\n", gszCustomSerialNum);
+        return 1;
+}
+__setup("custom_sn=", early_custom_sn);
+#endif
 
 /*
  * --------- Crashkernel reservation ------------------------------

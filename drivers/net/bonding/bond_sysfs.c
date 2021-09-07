@@ -277,8 +277,21 @@ static ssize_t bonding_store_slaves(struct device *d,
 		   the master's hardware address to be the same as the
 		   slave's. */
 		if (is_zero_ether_addr(bond->dev->dev_addr))
+#ifdef MY_ABC_HERE
+		{
+			unsigned char szMac[MAX_ADDR_LEN];
+			memset(szMac, 0, sizeof(szMac));
+
+			if (syno_get_dev_vendor_mac(dev->name, szMac)){
+				printk("%s:%s(%d) dev:[%s] get vendor mac fail\n", 
+						__FILE__, __FUNCTION__, __LINE__, dev->name);
+			}
+			memcpy(bond->dev->dev_addr, szMac, dev->addr_len);
+		}
+#else
 			memcpy(bond->dev->dev_addr, dev->dev_addr,
 			       dev->addr_len);
+#endif
 
 		/* Set the slave's MTU to match the bond */
 		original_mtu = dev->mtu;

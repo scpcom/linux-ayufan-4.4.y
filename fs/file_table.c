@@ -25,6 +25,10 @@
 
 #include <asm/atomic.h>
 
+#ifdef MY_ABC_HERE
+#include <linux/fs_struct.h>
+#endif
+
 /* sysctl tunables... */
 struct files_stat_struct files_stat = {
 	.max_files = NR_FILE
@@ -127,6 +131,10 @@ struct file *get_empty_filp(void)
 	INIT_LIST_HEAD(&f->f_u.fu_list);
 	atomic_long_set(&f->f_count, 1);
 	rwlock_init(&f->f_owner.lock);
+#ifdef MY_ABC_HERE
+	spin_lock_init(&f->f_synostate_lock);
+	f->f_synostate = O_UNMOUNT_OK;
+#endif
 	f->f_cred = get_cred(cred);
 	spin_lock_init(&f->f_lock);
 	eventpoll_init_file(f);
@@ -221,8 +229,76 @@ int init_file(struct file *file, struct vfsmount *mnt, struct dentry *dentry,
 }
 EXPORT_SYMBOL(init_file);
 
+#ifdef MY_ABC_HERE
+#include <linux/namei.h>
+#endif
+
 void fput(struct file *file)
 {
+#ifdef MY_ABC_HERE
+	int doForce = 0;
+	struct nameidata nd;
+
+	spin_lock(&file->f_synostate_lock);
+	if (O_UNMOUNT_WAIT == file->f_synostate) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+		printk("put %s file(%ld) dentry(%d)\n",file->f_path.dentry->d_name.name, 
+			   file_count(file), atomic_read(&file->f_dentry->d_count));
+#endif
+		file->f_synostate = O_UNMOUNT_DONE;
+		doForce = 1;
+	}
+	spin_unlock(&file->f_synostate_lock);
+
+	if (doForce) {
+		struct dentry * dentry = file->f_dentry;
+		struct vfsmount * mnt = file->f_vfsmnt;
+		struct inode * inode = dentry->d_inode;
+
+		// copied from filp_close(), before we force close the file, we should flush it.
+		if (file->f_op && file->f_op->flush)
+			file->f_op->flush(file, NULL);
+		/*
+		 * The file may be used. Force to decrease file count, dentry count, mnt count.
+		 * Mark the file umounted. It is invalid.  The following is copied from __fput.
+		 */
+		might_sleep();
+	
+		fsnotify_close(file);
+		/*
+		 * The function eventpoll_release() should be the first called
+		 * in the file cleanup chain.
+		 */
+		eventpoll_release(file);
+		locks_remove_flock(file);
+	
+		if (unlikely(file->f_flags & FASYNC)) {
+			if (file->f_op && file->f_op->fasync)
+				file->f_op->fasync(-1, file, 0);
+		}
+		if (file->f_op && file->f_op->release)
+			file->f_op->release(inode, file);
+		security_file_free(file);
+		ima_file_free(file);
+		if (unlikely(S_ISCHR(inode->i_mode) && inode->i_cdev != NULL))
+			cdev_put(inode->i_cdev);
+		fops_put(file->f_op);
+		put_pid(file->f_owner.pid);
+		if (file->f_mode & FMODE_WRITE)
+			drop_file_write_access(file);
+
+		/* assign path to /proc/invalidfile */
+		path_lookup("/proc/invalidfile", 0, &nd);
+		file->f_dentry = nd.path.dentry;
+		file->f_vfsmnt = nd.path.mnt;
+		file->f_op = fops_get(nd.path.dentry->d_inode->i_fop);
+		file->f_mapping = nd.path.dentry->d_inode->i_mapping;
+
+		/* f_count may not be 0, but we decrease dentry count and mnt count.*/
+		dput(dentry);
+		mntput(mnt);
+	}
+#endif
 	if (atomic_long_dec_and_test(&file->f_count))
 		__fput(file);
 }
@@ -262,6 +338,16 @@ void __fput(struct file *file)
 	struct dentry *dentry = file->f_path.dentry;
 	struct vfsmount *mnt = file->f_path.mnt;
 	struct inode *inode = dentry->d_inode;
+
+#ifdef MY_ABC_HERE
+	if (blSynostate(O_UNMOUNT_DONE, file)) {
+		fops_put(file->f_op);
+		path_put(&file->f_path);
+		file_kill(file);
+		file_free(file);
+		return;
+	}
+#endif
 
 	might_sleep();
 
@@ -374,6 +460,72 @@ void file_kill(struct file *file)
 		file_list_unlock();
 	}
 }
+
+#ifdef MY_ABC_HERE
+#define MAX_FORCE_UNMOUNT_LIMIT 100000
+void fs_set_all_files_umount(struct super_block *sb)
+{
+	struct file *file;
+
+	file_list_lock();
+	/* Mark all files are wait to umount.*/
+	list_for_each_entry(file, &sb->s_files, f_u.fu_list) {
+		spin_lock(&file->f_synostate_lock);
+		file->f_synostate = O_UNMOUNT_WAIT;
+		spin_unlock(&file->f_synostate_lock);
+	}
+	file_list_unlock();
+}
+
+void fs_force_close_all_files(struct super_block *sb)
+{
+	int    cLimit = 0;
+	int    busyFlag = 0;
+	struct file *file;
+
+	do {
+		busyFlag = 0;
+		file_list_lock();
+		/* Mark all files are wait to umount.*/
+		list_for_each_entry(file, &sb->s_files, f_u.fu_list) {
+			if(!blSynostate(O_UNMOUNT_DONE, file)) {
+				busyFlag = 1;
+				break;
+			}
+		}
+		file_list_unlock();
+		if (busyFlag) {
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+			printk("force close %s file(%ld) dentry(%d)\n",file->f_path.dentry->d_name.name, 
+				   file_count(file), atomic_read(&file->f_dentry->d_count));
+#endif
+			get_file(file);
+			fput(file);
+		}
+		if (cLimit > MAX_FORCE_UNMOUNT_LIMIT) {
+			break;
+		}
+		cLimit++;
+	} while (busyFlag);
+}
+
+#ifdef SYNO_DEBUG_FORCE_UNMOUNT
+void fs_show_opened_file(struct super_block *sb)
+{
+	struct file *file;
+
+	file_list_lock();
+	/* Mark all files are wait to umount.*/
+	list_for_each_entry(file, &sb->s_files, f_u.fu_list) {
+		if(!blSynostate(O_UNMOUNT_DONE, file)) {
+			printk("file %s in mnt(%ld) dentry(%d) stat:%d\n",file->f_path.dentry->d_name.name, 
+				   file_count(file), atomic_read(&file->f_dentry->d_count),file->f_synostate);
+		}
+	}
+	file_list_unlock();
+}
+#endif
+#endif
 
 int fs_may_remount_ro(struct super_block *sb)
 {

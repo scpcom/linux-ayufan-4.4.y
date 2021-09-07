@@ -69,6 +69,9 @@ static int ext3_statfs (struct dentry * dentry, struct kstatfs * buf);
 static int ext3_unfreeze(struct super_block *sb);
 static int ext3_freeze(struct super_block *sb);
 
+#ifdef MY_ABC_HERE
+extern struct dentry_operations ext3_dentry_operations;
+#endif
 /*
  * Wrappers for journal_start/end.
  *
@@ -558,6 +561,9 @@ static char *data_mode_string(unsigned long mode)
 	return "unknown";
 }
 
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+extern int SynoDebugFlag;
+#endif
 /*
  * Show an option if
  *  - it's set to a non-default value OR
@@ -604,8 +610,18 @@ static int ext3_show_options(struct seq_file *seq, struct vfsmount *vfs)
 		seq_puts(seq, ",nouid32");
 	if (test_opt(sb, DEBUG))
 		seq_puts(seq, ",debug");
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
+	if(SynoDebugFlag) {
+		if (test_opt(sb, OLDALLOC)) {
+			seq_puts(seq, ",oldalloc");
+		}
+	}
+#endif
+#else
 	if (test_opt(sb, OLDALLOC))
 		seq_puts(seq, ",oldalloc");
+#endif
 #ifdef CONFIG_EXT3_FS_XATTR
 	if (test_opt(sb, XATTR_USER))
 		seq_puts(seq, ",user_xattr");
@@ -725,9 +741,13 @@ static ssize_t ext3_quota_write(struct super_block *sb, int type,
 static const struct dquot_operations ext3_quota_operations = {
 	.initialize	= dquot_initialize,
 	.drop		= dquot_drop,
-	.alloc_space	= dquot_alloc_space,
+#ifndef MY_ABC_HERE
+	.alloc_space    = dquot_alloc_space,
+#endif
 	.alloc_inode	= dquot_alloc_inode,
-	.free_space	= dquot_free_space,
+#ifndef MY_ABC_HERE
+	.free_space     = dquot_free_space,
+#endif
 	.free_inode	= dquot_free_inode,
 	.transfer	= dquot_transfer,
 	.write_dquot	= ext3_write_dquot,
@@ -1255,6 +1275,7 @@ static int ext3_setup_super(struct super_block *sb, struct ext3_super_block *es,
 	}
 	if (read_only)
 		return res;
+#ifndef MY_ABC_HERE
 	if (!(sbi->s_mount_state & EXT3_VALID_FS))
 		printk (KERN_WARNING "EXT3-fs warning: mounting unchecked fs, "
 			"running e2fsck is recommended\n");
@@ -1274,6 +1295,7 @@ static int ext3_setup_super(struct super_block *sb, struct ext3_super_block *es,
 		printk (KERN_WARNING
 			"EXT3-fs warning: checktime reached, "
 			"running e2fsck is recommended\n");
+#endif
 #if 0
 		/* @@@ We _will_ want to clear the valid bit if we find
                    inconsistencies, to force a fsck at reboot.  But for
@@ -1973,6 +1995,10 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		goto failed_mount4;
 	}
 
+#ifdef MY_ABC_HERE
+	// root is mounted, attach our dentry operations
+	sb->s_root->d_op = &ext3_dentry_operations;
+#endif
 	ext3_setup_super (sb, es, sb->s_flags & MS_RDONLY);
 	/*
 	 * akpm: core read_super() calls in here with the superblock locked.
@@ -1992,7 +2018,6 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_JOURNAL_DATA ? "journal":
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_ORDERED_DATA ? "ordered":
 		"writeback");
-
 	lock_kernel();
 	return 0;
 

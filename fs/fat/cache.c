@@ -244,7 +244,11 @@ int fat_get_cluster(struct inode *inode, int cluster, int *fclus, int *dclus)
 			fat_fs_error(sb, "%s: detected the cluster chain loop"
 				     " (i_pos %lld)", __func__,
 				     MSDOS_I(inode)->i_pos);
+#ifdef MY_ABC_HERE
+			nr = -ECORRUPT;
+#else
 			nr = -EIO;
+#endif
 			goto out;
 		}
 
@@ -255,7 +259,11 @@ int fat_get_cluster(struct inode *inode, int cluster, int *fclus, int *dclus)
 			fat_fs_error(sb, "%s: invalid cluster chain"
 				     " (i_pos %lld)", __func__,
 				     MSDOS_I(inode)->i_pos);
+#ifdef MY_ABC_HERE
+			nr = -ECORRUPT;
+#else
 			nr = -EIO;
+#endif
 			goto out;
 		} else if (nr == FAT_ENT_EOF) {
 			fat_cache_add(inode, &cid);
@@ -287,7 +295,11 @@ static int fat_bmap_cluster(struct inode *inode, int cluster)
 	else if (ret == FAT_ENT_EOF) {
 		fat_fs_error(sb, "%s: request beyond EOF (i_pos %lld)",
 			     __func__, MSDOS_I(inode)->i_pos);
+#ifdef MY_ABC_HERE
+		return -ECORRUPT;
+#else
 		return -EIO;
+#endif
 	}
 	return dclus;
 }

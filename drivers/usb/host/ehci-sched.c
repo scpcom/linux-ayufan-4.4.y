@@ -208,7 +208,11 @@ static inline unsigned char tt_start_uframe(struct ehci_hcd *ehci, __hc32 mask)
 }
 
 static const unsigned char
+#ifdef CONFIG_MV_INCLUDE_USB
+max_tt_usecs[] = { 125, 125, 125, 125, 125, 125, 125, 100 };
+#else
 max_tt_usecs[] = { 125, 125, 125, 125, 125, 125, 30, 0 };
+#endif
 
 /* carryover low/fullspeed bandwidth that crosses uframe boundries */
 static inline void carryover_tt_bandwidth(unsigned short tt_usecs[8])
@@ -279,9 +283,11 @@ periodic_tt_usecs (
 
 	carryover_tt_bandwidth(tt_usecs);
 
+#ifndef CONFIG_MV_INCLUDE_USB
 	if (max_tt_usecs[7] < tt_usecs[7])
 		ehci_err(ehci, "frame %d tt sched overrun: %d usecs\n",
 			frame, tt_usecs[7] - max_tt_usecs[7]);
+#endif
 }
 
 /*
@@ -510,6 +516,10 @@ static int disable_periodic (struct ehci_hcd *ehci)
 	ehci_writel(ehci, cmd, &ehci->regs->command);
 	/* posted write ... */
 
+#ifdef CONFIG_MV_INCLUDE_USB
+	free_cached_itd_list(ehci);
+#endif
+
 	ehci->next_uframe = -1;
 	return 0;
 }
@@ -718,8 +728,16 @@ static int check_period (
 	} else {
 		do {
 			claimed = periodic_usecs (ehci, frame, uframe);
+#ifdef CONFIG_MV_INCLUDE_USB
+			if (claimed > usecs) {
+				ehci_dbg(ehci, "check_period FAILED: claimed=%d"
+					 ", usecs=%d\n", claimed, usecs);
+				return 0;
+			}
+#else
 			if (claimed > usecs)
 				return 0;
+#endif
 		} while ((frame += period) < ehci->periodic_size);
 	}
 
@@ -741,8 +759,16 @@ static int check_intr_schedule (
 	if (qh->c_usecs && uframe >= 6)		/* FSTN territory? */
 		goto done;
 
+#ifdef CONFIG_MV_INCLUDE_USB
+	if (!check_period(ehci, frame, uframe, qh->period, qh->usecs)) {
+		ehci_dbg(ehci, "check_intr_schedule: usecs=%d FAILED\n",
+			 qh->usecs);
+		goto done;
+	}
+#else
 	if (!check_period (ehci, frame, uframe, qh->period, qh->usecs))
 		goto done;
+#endif
 	if (!qh->c_usecs) {
 		retval = 0;
 		*c_maskp = 0;
@@ -750,22 +776,46 @@ static int check_intr_schedule (
 	}
 
 #ifdef CONFIG_USB_EHCI_TT_NEWSCHED
+#ifdef CONFIG_MV_INCLUDE_USB
+	if (tt_available(ehci, qh->period, qh->dev, frame, uframe+2,
+#else
 	if (tt_available (ehci, qh->period, qh->dev, frame, uframe,
+#endif
 				qh->tt_usecs)) {
 		unsigned i;
 
 		/* TODO : this may need FSTN for SSPLIT in uframe 5. */
+#ifdef CONFIG_MV_INCLUDE_USB
+		for (i = uframe+2; i < 8 && i < uframe+5; i++)
+#else
 		for (i=uframe+1; i<8 && i<uframe+4; i++)
+#endif
 			if (!check_period (ehci, frame, i,
+#ifdef CONFIG_MV_INCLUDE_USB
+					   qh->period, qh->c_usecs)){
+				ehci_dbg(ehci, "check_intr_schedule: FAILED - "
+					 "frame=%d, uframe=%d, i=%d\n",
+					 frame, uframe, i);
+#else
 						qh->period, qh->c_usecs))
+#endif
 				goto done;
+#ifdef CONFIG_MV_INCLUDE_USB
+			} else
+#else
 			else
+#endif
 				mask |= 1 << i;
 
 		retval = 0;
 
 		*c_maskp = cpu_to_hc32(ehci, mask << 8);
+#ifdef CONFIG_MV_INCLUDE_USB
+	} else
+		ehci_dbg(ehci, "check_intr_schedule: tt_available FAILED\n");
+#else
 	}
+#endif
 #else
 	/* Make sure this tt's buffer is also available for CSPLITs.
 	 * We pessimize a bit; probably the typical full speed case
@@ -799,7 +849,11 @@ static int qh_schedule(struct ehci_hcd *ehci, struct ehci_qh *qh)
 {
 	int		status;
 	unsigned	uframe;
+#ifdef CONFIG_MV_INCLUDE_USB
+	__hc32		c_mask, s_mask = 0;
+#else
 	__hc32		c_mask;
+#endif
 	unsigned	frame;		/* 0..(qh->period - 1), or NO_FRAME */
 	struct ehci_qh_hw	*hw = qh->hw;
 
@@ -837,10 +891,25 @@ static int qh_schedule(struct ehci_hcd *ehci, struct ehci_qh *qh)
 				}
 			}
 
+#ifdef CONFIG_MV_INCLUDE_USB
+			s_mask = (1 << uframe);
+#endif
+
 		/* qh->period == 0 means every uframe */
 		} else {
+#ifdef CONFIG_MV_INCLUDE_USB
+			uframe = 0;
+#endif
 			frame = 0;
 			status = check_intr_schedule (ehci, 0, 0, qh, &c_mask);
+
+#ifdef CONFIG_MV_INCLUDE_USB
+			/* set s_mask */
+			while(uframe < 8) {
+				s_mask |= (1 << uframe);
+				uframe += qh->u_period;
+			}
+#endif
 		}
 		if (status)
 			goto done;
@@ -848,9 +917,13 @@ static int qh_schedule(struct ehci_hcd *ehci, struct ehci_qh *qh)
 
 		/* reset S-frame and (maybe) C-frame masks */
 		hw->hw_info2 &= cpu_to_hc32(ehci, ~(QH_CMASK | QH_SMASK));
+#ifdef CONFIG_MV_INCLUDE_USB
+		hw->hw_info2 |= cpu_to_hc32(ehci, s_mask);
+#else
 		hw->hw_info2 |= qh->period
 			? cpu_to_hc32(ehci, 1 << uframe)
 			: cpu_to_hc32(ehci, QH_SMASK);
+#endif
 		hw->hw_info2 |= c_mask;
 	} else
 		ehci_dbg (ehci, "reused qh %p schedule\n", qh);
@@ -895,8 +968,16 @@ static int intr_submit (
 		goto done;
 	}
 	if (qh->qh_state == QH_STATE_IDLE) {
+#ifdef CONFIG_MV_INCLUDE_USB
+		if ((status = qh_schedule(ehci, qh)) != 0) {
+			ehci_err(ehci, "intr_submit - qh_schedule FAILED: "
+				 "status=%d\n", status);
+			goto done;
+		}
+#else
 		if ((status = qh_schedule (ehci, qh)) != 0)
 			goto done;
+#endif
 	}
 
 	/* then queue the urb's tds to the qh */
@@ -1123,7 +1204,11 @@ iso_stream_find (struct ehci_hcd *ehci, struct urb *urb)
 
 	/* if dev->ep [epnum] is a QH, hw is set */
 	} else if (unlikely (stream->hw != NULL)) {
+#ifdef CONFIG_MV_INCLUDE_USB
+		ehci_dbg(ehci, "dev %s ep%d%s, not iso??\n",
+#else
 		ehci_dbg (ehci, "dev %s ep%d%s, not iso??\n",
+#endif
 			urb->dev->devpath, epnum,
 			usb_pipein(urb->pipe) ? "in" : "out");
 		stream = NULL;
@@ -1400,13 +1485,22 @@ iso_stream_schedule (
 	struct ehci_iso_sched	*sched = urb->hcpriv;
 
 	if (sched->span > (mod - 8 * SCHEDULE_SLOP)) {
+#ifdef CONFIG_MV_INCLUDE_USB
+		ehci_dbg(ehci, "iso request %p too long: (%d > (%d - 80))\n",
+			 urb, sched->span, mod);
+#else
 		ehci_dbg (ehci, "iso request %p too long\n", urb);
+#endif
 		status = -EFBIG;
 		goto fail;
 	}
 
 	if ((stream->depth + sched->span) > mod) {
+#ifdef CONFIG_MV_INCLUDE_USB
+		ehci_dbg(ehci, "request %p would overflow ((%d + %d) > %d)\n",
+#else
 		ehci_dbg (ehci, "request %p would overflow (%d+%d>%d)\n",
+#endif
 			urb, stream->depth, sched->span, mod);
 		status = -EFBIG;
 		goto fail;
@@ -1438,6 +1532,11 @@ iso_stream_schedule (
 
 		/* Tried to schedule too far into the future? */
 		if (unlikely((start + sched->span) >= max)) {
+#ifdef CONFIG_MV_INCLUDE_USB
+			ehci_dbg(ehci, "iso request %p too far into the future"
+				" (%d + %d >= %d)\n",
+				urb, start, sched->span, max);
+#endif
 			status = -EFBIG;
 			goto fail;
 		}
@@ -1480,7 +1579,11 @@ iso_stream_schedule (
 	}
 
 	/* no room in the schedule */
+#ifdef CONFIG_MV_INCLUDE_USB
+	ehci_dbg(ehci, "iso %ssched full %p (now %d max %d)\n",
+#else
 	ehci_dbg (ehci, "iso %ssched full %p (now %d max %d)\n",
+#endif
 		list_empty (&stream->td_list) ? "" : "re",
 		urb, now, max);
 	status = -ENOSPC;
@@ -1774,11 +1877,19 @@ static int itd_submit (struct ehci_hcd *ehci, struct urb *urb,
 	/* Get iso_stream head */
 	stream = iso_stream_find (ehci, urb);
 	if (unlikely (stream == NULL)) {
+#ifdef CONFIG_MV_INCLUDE_USB
+		ehci_err(ehci, "can't get iso stream\n");
+#else
 		ehci_dbg (ehci, "can't get iso stream\n");
+#endif
 		return -ENOMEM;
 	}
 	if (unlikely (urb->interval != stream->interval)) {
+#ifdef CONFIG_MV_INCLUDE_USB
+		ehci_err(ehci, "can't change iso interval %d --> %d\n",
+#else
 		ehci_dbg (ehci, "can't change iso interval %d --> %d\n",
+#endif
 			stream->interval, urb->interval);
 		goto done;
 	}
@@ -1797,7 +1908,11 @@ static int itd_submit (struct ehci_hcd *ehci, struct urb *urb,
 	/* allocate ITDs w/o locking anything */
 	status = itd_urb_transaction (stream, ehci, urb, mem_flags);
 	if (unlikely (status < 0)) {
+#ifdef CONFIG_MV_INCLUDE_USB
+		ehci_err(ehci, "can't init itds\n");
+#else
 		ehci_dbg (ehci, "can't init itds\n");
+#endif
 		goto done;
 	}
 
@@ -1814,8 +1929,15 @@ static int itd_submit (struct ehci_hcd *ehci, struct urb *urb,
 	status = iso_stream_schedule(ehci, urb, stream);
 	if (likely (status == 0))
 		itd_link_urb (ehci, urb, ehci->periodic_size << 3, stream);
+#ifdef CONFIG_MV_INCLUDE_USB
+	else {
+		ehci_err(ehci, "itd_submit: can't schedule iso stream\n");
+		usb_hcd_unlink_urb_from_ep(ehci_to_hcd(ehci), urb);
+	}
+#else
 	else
 		usb_hcd_unlink_urb_from_ep(ehci_to_hcd(ehci), urb);
+#endif
 done_not_linked:
 	spin_unlock_irqrestore (&ehci->lock, flags);
 
@@ -2148,11 +2270,19 @@ static int sitd_submit (struct ehci_hcd *ehci, struct urb *urb,
 	/* Get iso_stream head */
 	stream = iso_stream_find (ehci, urb);
 	if (stream == NULL) {
+#ifdef CONFIG_MV_INCLUDE_USB
+		ehci_err(ehci, "can't get iso stream\n");
+#else
 		ehci_dbg (ehci, "can't get iso stream\n");
+#endif
 		return -ENOMEM;
 	}
 	if (urb->interval != stream->interval) {
+#ifdef CONFIG_MV_INCLUDE_USB
+		ehci_err(ehci, "can't change iso interval %d --> %d\n",
+#else
 		ehci_dbg (ehci, "can't change iso interval %d --> %d\n",
+#endif
 			stream->interval, urb->interval);
 		goto done;
 	}
@@ -2169,7 +2299,11 @@ static int sitd_submit (struct ehci_hcd *ehci, struct urb *urb,
 	/* allocate SITDs */
 	status = sitd_urb_transaction (stream, ehci, urb, mem_flags);
 	if (status < 0) {
+#ifdef CONFIG_MV_INCLUDE_USB
+		ehci_err(ehci, "can't init sitds\n");
+#else
 		ehci_dbg (ehci, "can't init sitds\n");
+#endif
 		goto done;
 	}
 
@@ -2186,8 +2320,15 @@ static int sitd_submit (struct ehci_hcd *ehci, struct urb *urb,
 	status = iso_stream_schedule(ehci, urb, stream);
 	if (status == 0)
 		sitd_link_urb (ehci, urb, ehci->periodic_size << 3, stream);
+#ifdef CONFIG_MV_INCLUDE_USB
+	else {
+		ehci_err(ehci, "sitd_submit: can't schedule iso stream\n");
+		usb_hcd_unlink_urb_from_ep(ehci_to_hcd(ehci), urb);
+	}
+#else
 	else
 		usb_hcd_unlink_urb_from_ep(ehci_to_hcd(ehci), urb);
+#endif
 done_not_linked:
 	spin_unlock_irqrestore (&ehci->lock, flags);
 
@@ -2290,7 +2431,11 @@ restart:
 				 * No need to check for activity unless the
 				 * frame is current.
 				 */
+#ifdef CONFIG_MV_INCLUDE_USB
+				if ((frame == clock_frame) && live) {
+#else
 				if (frame == clock_frame && live) {
+#endif
 					rmb();
 					for (uf = 0; uf < 8; uf++) {
 						if (q.itd->hw_transaction[uf] &
@@ -2326,9 +2471,19 @@ restart:
 				 * No need to check for activity unless the
 				 * frame is current.
 				 */
+#ifdef CONFIG_MV_INCLUDE_USB
+				if (((frame == clock_frame) ||
+				     (((frame + 1) % ehci->periodic_size)
+				      == clock_frame))
+				    && live
+				    && (q.sitd->hw_results &
+					SITD_ACTIVE(ehci))) {
+#else
 				if (frame == clock_frame && live &&
 						(q.sitd->hw_results &
 							SITD_ACTIVE(ehci))) {
+#endif
+
 					incomplete = true;
 					q_p = &q.sitd->sitd_next;
 					hw_p = &q.sitd->hw_next;
@@ -2350,17 +2505,32 @@ restart:
 				q = *q_p;
 				break;
 			default:
+#ifdef CONFIG_MV_INCLUDE_USB
+				ehci_dbg(ehci, "corrupt type %d frame %d shadow"
+					 " %p\n",
+					 type, frame, q.ptr);
+#else
 				dbg ("corrupt type %d frame %d shadow %p",
 					type, frame, q.ptr);
+#endif
 				// BUG ();
 				q.ptr = NULL;
 			}
 
 			/* assume completion callbacks modify the queue */
 			if (unlikely (modified)) {
+#ifdef CONFIG_MV_INCLUDE_USB
+				if (likely(ehci->periodic_sched > 0)) {
+//					restarted = 1;
+					goto restart;
+				}
+				/* maybe we can short-circuit this scan! */
+				/*disable_periodic(ehci);*/
+#else
 				if (likely(ehci->periodic_sched > 0))
 					goto restart;
 				/* short-circuit this scan */
+#endif
 				now_uframe = clock;
 				break;
 			}

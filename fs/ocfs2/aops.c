@@ -1790,10 +1790,17 @@ int ocfs2_write_begin_nolock(struct address_space *mapping,
 
 	wc->w_handle = handle;
 
+#ifdef MY_ABC_HERE
+	if (clusters_to_alloc) {
+		ret = dquot_alloc_space_nodirty(inode,
+			ocfs2_clusters_to_bytes(osb->sb, clusters_to_alloc));
+		if (ret)
+#else
 	if (clusters_to_alloc && vfs_dq_alloc_space_nodirty(inode,
-			ocfs2_clusters_to_bytes(osb->sb, clusters_to_alloc))) {
+					ocfs2_clusters_to_bytes(osb->sb, clusters_to_alloc))) {
 		ret = -EDQUOT;
-		goto out_commit;
+#endif
+			goto out_commit;
 	}
 	/*
 	 * We don't want this to fail in ocfs2_write_end(), so do it
@@ -1836,7 +1843,11 @@ success:
 	return 0;
 out_quota:
 	if (clusters_to_alloc)
+#ifdef MY_ABC_HERE
+		dquot_free_space(inode,
+#else
 		vfs_dq_free_space(inode,
+#endif
 			  ocfs2_clusters_to_bytes(osb->sb, clusters_to_alloc));
 out_commit:
 	ocfs2_commit_trans(osb, handle);

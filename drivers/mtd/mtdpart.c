@@ -18,6 +18,20 @@
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
 #include <linux/mtd/compatmac.h>
+#ifdef MY_ABC_HERE
+#include <linux/rtnetlink.h>
+#include <linux/netdevice.h>
+#include <linux/if_arp.h>
+#endif
+
+#ifdef MY_ABC_HERE
+extern unsigned char grgbLanMac[2][16];
+#endif
+
+#ifdef MY_ABC_HERE
+extern char gszSerialNum[];
+extern char gszCustomSerialNum[];
+#endif
 
 /* Our partition linked list */
 static LIST_HEAD(mtd_partitions);
@@ -500,6 +514,89 @@ out_register:
 	/* register our partition */
 	add_mtd_device(&slave->mtd);
 
+#if defined(MY_ABC_HERE) 
+	if ((memcmp(part->name, "vender", 7)==0) ||
+		(memcmp(part->name, "vendor", 7)==0)) {
+			int gVenderMacNumber = 0;
+
+			u_char rgbszBuf[128];
+			size_t retlen;
+			int i, n, x;
+			unsigned int Sum;
+			u_char ucSum;
+			char rgbLanMac[2][6];
+
+			part_read(&slave->mtd, 0, 128, &retlen, rgbszBuf);
+#ifdef MY_ABC_HERE
+			x = 0;
+			gVenderMacNumber = 0;
+			for (n = 0; n<2; n++) {
+				for (Sum=0,ucSum=0,i=0; i<6; i++) {
+					Sum+=rgbszBuf[i+x];
+					ucSum+=rgbszBuf[i+x];
+					rgbLanMac[n][i] = rgbszBuf[i+x];
+				}
+				x+=6;
+
+				if (Sum==0 || ucSum!=rgbszBuf[x]) {
+					printk("vender Mac%d checksum error ucSum:0x%02x Buf:0x%02x Sum:%d.\n", 
+							n, ucSum, rgbszBuf[x], Sum);
+					grgbLanMac[n][0] = '\0';
+				} else {
+					snprintf(grgbLanMac[n], sizeof(grgbLanMac),
+							"%02x%02x%02x%02x%02x%02x",
+					rgbLanMac[n][0],
+					rgbLanMac[n][1],
+					rgbLanMac[n][2],
+					rgbLanMac[n][3],
+					rgbLanMac[n][4],
+					rgbLanMac[n][5]);
+				}
+
+				x++;
+				gVenderMacNumber++;
+			}
+#endif
+
+#ifdef MY_ABC_HERE
+			//read serial number out, it is in the vender partion shift 32 bytes.
+			x = 32;
+			for (Sum=0,ucSum=0,i=0; i<10; i++) {
+				Sum+=rgbszBuf[i+x];
+				ucSum+=rgbszBuf[i+x];
+				gszSerialNum[i] = rgbszBuf[i+x];
+			}
+			x+=10;
+			if (Sum==0 || ucSum!=rgbszBuf[x]) {
+				printk("No Serial Number or Serial Number checksum error ucSum:0x%02x Buf:0x%02x Sum:%d.\n", 
+						ucSum, rgbszBuf[x], Sum);
+				for (i=0; i<11; i++) {
+					gszSerialNum[i] = 0;
+				}
+			} else {
+				//YMXXZSSSSS
+				printk("Serial Number: %s\n", gszSerialNum );
+			}
+
+			//read custom serial number out, it is in the vender partion shift 64 bytes.
+			x = 64;
+			for (Sum=0,ucSum=0,i=0; i<31; i++) {
+				Sum+=rgbszBuf[i+x];
+				ucSum+=rgbszBuf[i+x];
+				gszCustomSerialNum[i] = rgbszBuf[i+x];
+			}
+			x+=31;
+			if (Sum==0 || ucSum!=rgbszBuf[x]) {
+				for (i=0; i<32; i++) {
+					gszCustomSerialNum[i] = 0;
+				}
+			} else {
+				printk("Custom Serial Number: %s\n", gszCustomSerialNum);
+			}
+#endif
+        }
+#endif
+
 	return slave;
 }
 
@@ -597,3 +694,21 @@ int parse_mtd_partitions(struct mtd_info *master, const char **types,
 	return ret;
 }
 EXPORT_SYMBOL_GPL(parse_mtd_partitions);
+
+#ifdef MY_ABC_HERE
+int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned long length)
+{
+	struct mtd_part *part = PART(mtd);
+
+	part->offset = offset;
+	part->offset &= part->master->size-1;
+
+	mtd->size = length;
+
+	if (part->offset + mtd->size > part->master->size) {
+		return -EFAULT;
+	}
+
+	return 0;
+}
+#endif /* MY_ABC_HERE */

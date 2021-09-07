@@ -39,6 +39,9 @@
 
 /* spinlock for vfsmount related operations, inplace of dcache_lock */
 __cacheline_aligned_in_smp DEFINE_SPINLOCK(vfsmount_lock);
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(vfsmount_lock);
+#endif /* SYNO_AUFS */
 
 static int event;
 static DEFINE_IDA(mnt_id_ida);
@@ -748,6 +751,9 @@ static int show_sb_opts(struct seq_file *m, struct super_block *sb)
 		{ MS_SYNCHRONOUS, ",sync" },
 		{ MS_DIRSYNC, ",dirsync" },
 		{ MS_MANDLOCK, ",mand" },
+#ifdef MY_ABC_HERE
+		{ MS_CORRUPT, ",corrupt" },
+#endif
 		{ 0, NULL }
 	};
 	const struct proc_fs_info *fs_infop;
@@ -1023,6 +1029,58 @@ void umount_tree(struct vfsmount *mnt, int propagate, struct list_head *kill)
 
 static void shrink_submounts(struct vfsmount *mnt, struct list_head *umounts);
 
+#ifdef MY_ABC_HERE
+#include <linux/fdtable.h>
+static void fs_set_task_stop(struct vfsmount *mnt)
+{
+	struct task_struct *g, *t;
+	extern void SYNO_stop_task(struct task_struct *);
+
+	read_lock_irq(&tasklist_lock);
+	do_each_thread(g, t) {
+		if(t->fs && t->fs->pwd.mnt == mnt) {
+			if (current != t && current->real_parent != t) {
+				t->flags |= PF_FORCE_UMOUNT_TASK;
+				SYNO_stop_task(t);
+			}
+			dput(t->fs->pwd.dentry);
+			mntput(t->fs->pwd.mnt);
+			t->fs->pwd.dentry = dget(t->fs->root.dentry);
+			t->fs->pwd.mnt = mntget(t->fs->root.mnt);
+		}
+	} while_each_thread(g, t);
+	read_unlock_irq(&tasklist_lock);
+}
+
+static void fs_set_task_start()
+{
+	int    do_start = 0;
+	struct task_struct *g, *t;
+	extern void SYNO_start_task(struct task_struct *);
+
+	read_lock_irq(&tasklist_lock);
+	do_each_thread(g, t) {
+		if (t->flags & PF_FORCE_UMOUNT_TASK) {
+			do_start = 1;
+			// this is double loop, we can't use break.
+			goto syno_break_task_list;
+		}
+	} while_each_thread(g, t);
+syno_break_task_list:
+    read_unlock_irq(&tasklist_lock);
+
+	if (do_start) {
+		read_lock_irq(&tasklist_lock);
+		do_each_thread(g, t) {
+			if (t->flags & PF_FORCE_UMOUNT_TASK) {
+				t->flags &= ~PF_FORCE_UMOUNT_TASK;
+				SYNO_start_task(t);
+			}
+		} while_each_thread(g, t);
+		read_unlock_irq(&tasklist_lock);
+	}
+}
+#endif
 static int do_umount(struct vfsmount *mnt, int flags)
 {
 	struct super_block *sb = mnt->mnt_sb;
@@ -1050,6 +1108,21 @@ static int do_umount(struct vfsmount *mnt, int flags)
 		if (!xchg(&mnt->mnt_expiry_mark, 1))
 			return -EAGAIN;
 	}
+#ifdef MY_ABC_HERE
+	// close all file before we really do force umount.
+	if (flags & MNT_DETACH) {
+		extern void fs_set_all_files_umount(struct super_block *);
+		extern void fs_force_close_all_files(struct super_block *);
+
+		mnt->mnt_sb->s_flags |= MS_UNMOUNT_WAIT;
+		fs_set_all_files_umount(mnt->mnt_sb);
+
+		/* Wait a second.  Give working application a chance to close normally.*/
+		schedule_timeout_uninterruptible(1 * HZ);
+		fs_set_task_stop(mnt);
+		fs_force_close_all_files(mnt->mnt_sb);
+	}
+#endif
 
 	/*
 	 * If we may have to abort operations to get out of this
@@ -1115,6 +1188,9 @@ static int do_umount(struct vfsmount *mnt, int flags)
  * unixes. Our API is identical to OSF/1 to avoid making a mess of AMD
  */
 
+#ifdef MY_ABC_HERE
+#define MAX_FORCE_UMOUNT_RETRY 5
+#endif
 SYSCALL_DEFINE2(umount, char __user *, name, int, flags)
 {
 	struct path path;
@@ -1134,10 +1210,30 @@ SYSCALL_DEFINE2(umount, char __user *, name, int, flags)
 		goto dput_and_out;
 
 	retval = do_umount(path.mnt, flags);
+#ifdef MY_ABC_HERE
+    if(flags & MNT_DETACH) {
+		int cRetry = 0;
+		while ((atomic_read(&path.mnt->mnt_count) > 1) && 
+			   (MAX_FORCE_UMOUNT_RETRY > cRetry)) {
+			schedule_timeout_uninterruptible(1 * HZ);
+			cRetry++;
+		}
+		if (atomic_read(&path.mnt->mnt_count) > 1) {
+			printk("force umount failed! mnt_count:%d\n", atomic_read(&path.mnt->mnt_count));
+		} else {
+			printk(KERN_INFO "force umount success!\n");
+		}
+	}
+#endif
 dput_and_out:
 	/* we mustn't call path_put() as that would clear mnt_expiry_mark */
 	dput(path.dentry);
 	mntput_no_expire(path.mnt);
+#ifdef MY_ABC_HERE
+	if(flags & MNT_DETACH) {
+		fs_set_task_start();
+	}
+#endif
 out:
 	return retval;
 }
@@ -1908,6 +2004,14 @@ long do_mount(char *dev_name, char *dir_name, char *type_page,
 	struct path path;
 	int retval = 0;
 	int mnt_flags = 0;
+#ifdef MY_DEF_HERE
+	extern int gSynoInstallFlag;
+	if ( 0 == gSynoInstallFlag &&
+            NULL != dev_name &&
+            strstr(dev_name, SYNO_USB_FLASH_DEVICE_PATH) ) {
+		return -EINVAL;
+	}
+#endif
 
 	/* Discard magic */
 	if ((flags & MS_MGC_MSK) == MS_MGC_VAL)

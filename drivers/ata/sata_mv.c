@@ -71,6 +71,11 @@
 #define DRV_NAME	"sata_mv"
 #define DRV_VERSION	"1.28"
 
+#ifdef MY_ABC_HERE
+//#define DBGMESG(x...)	printk(x)
+#define DBGMESG(x...)
+#endif
+
 /*
  * module options
  */
@@ -639,6 +644,23 @@ static void mv_bmdma_stop(struct ata_queued_cmd *qc);
 static u8   mv_bmdma_status(struct ata_port *ap);
 static u8 mv_sff_check_status(struct ata_port *ap);
 
+#ifdef MY_ABC_HERE
+static ssize_t
+syno_mv_phy_ctl_store(struct device *dev, struct device_attribute *attr, const char * buf, size_t count);
+DEVICE_ATTR(syno_phy_ctl, S_IWUGO, NULL, syno_mv_phy_ctl_store);
+#endif
+
+#ifdef MY_ABC_HERE
+static struct device_attribute *sata_mv_shost_attrs[] = {
+	&dev_attr_syno_pm_gpio,
+	&dev_attr_syno_pm_info,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_phy_ctl,
+#endif
+	NULL
+};
+#endif
+
 /* .sg_tablesize is (MV_MAX_SG_CT / 2) in the structures below
  * because we have to allow room for worst case splitting of
  * PRDs for 64K boundaries in mv_fill_sg().
@@ -647,6 +669,9 @@ static struct scsi_host_template mv5_sht = {
 	ATA_BASE_SHT(DRV_NAME),
 	.sg_tablesize		= MV_MAX_SG_CT / 2,
 	.dma_boundary		= MV_DMA_BOUNDARY,
+#ifdef MY_ABC_HERE
+	.syno_index_get         = syno_libata_index_get,
+#endif
 };
 
 static struct scsi_host_template mv6_sht = {
@@ -654,6 +679,9 @@ static struct scsi_host_template mv6_sht = {
 	.can_queue		= MV_MAX_Q_DEPTH - 1,
 	.sg_tablesize		= MV_MAX_SG_CT / 2,
 	.dma_boundary		= MV_DMA_BOUNDARY,
+#ifdef MY_ABC_HERE
+	.shost_attrs		= sata_mv_shost_attrs,
+#endif
 };
 
 static struct ata_port_operations mv5_ops = {
@@ -1398,7 +1426,27 @@ static int mv_qc_defer(struct ata_queued_cmd *qc)
 			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
 			return 0;
 		} else
+#ifdef MY_ABC_HERE
+		{
+			if (!ap->nr_active_links) {
+				/* Since we are here now, just preempt */
+				if ((pp->pp_flags & MV_PP_FLAG_EDMA_EN) &&
+					(pp->pp_flags & MV_PP_FLAG_NCQ_EN) &&
+					!ata_is_ncq(qc->tf.protocol)) {
+					ap->excl_link = link;
+					qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+				} else {
+					/* normal I/O should preempt in this situation */
+					ap->excl_link = NULL;
+				}
+				return 0;
+			} else {
+				return ATA_DEFER_PORT;
+			}
+		}
+#else
 			return ATA_DEFER_PORT;
+#endif
 	}
 
 	/*
@@ -2337,6 +2385,11 @@ static unsigned int mv_qc_issue(struct ata_queued_cmd *qc)
 		if (IS_GEN_II(hpriv))
 			return mv_qc_issue_fis(qc);
 	}
+#ifdef MY_ABC_HERE
+	if (NULL == qc->scsicmd && ATA_CMD_CHK_POWER == qc->tf.command) {
+		qc->tf.flags |= ATA_TFLAG_DIRECT;
+	}
+#endif
 	return ata_sff_qc_issue(qc);
 }
 
@@ -2554,6 +2607,41 @@ static void mv_unexpected_intr(struct ata_port *ap, int edma_was_enabled)
 	ata_port_freeze(ap);
 }
 
+#ifdef MY_ABC_HERE
+/* copy from mv BSP mvSata.c _establishSataComm(..) */
+static void syno_mv_irq_missing_workaround(struct ata_port *ap)
+{
+	u32 scontrol;
+	u32 edma_irr_mask_reg;
+	void __iomem *port_mmio = mv_ap_base(ap);
+
+	DBGMESG("do mv missing workaround, re-enable interrupts, clear error\n");
+	/* read interrupt error register, if it is mask, we should mask it again */
+	edma_irr_mask_reg = readl(port_mmio + EDMA_ERR_IRQ_MASK);
+	/* mask Edma Interrupts */
+	writelfl(0, port_mmio + EDMA_ERR_IRQ_MASK);
+	/* MV sata(ex. 7042) shouldn't set SPD(bit 7:4 in SControl Register) to any speed negotiation,
+	 * this will cause IRQ can't receive */
+	sata_scr_read(&ap->link, SCR_CONTROL, &scontrol);
+	scontrol = (scontrol & ~0x0f0);
+	sata_scr_write(&ap->link, SCR_CONTROL, scontrol);
+	/*clear SError */
+	sata_scr_write(&ap->link, SCR_ERROR, 0xFFFFFFFF);
+	/* clear FIS_INTERRUPT_CAUSE_REG */
+	writelfl(0, port_mmio + FIS_IRQ_CAUSE);
+	/* clear ERROR_CAUSE_REG */
+	writelfl(0, port_mmio + EDMA_ERR_IRQ_CAUSE);
+	/* Unmask EDMA self disable (bit 7), mask errors that cause self disable */
+	writelfl(0xFDDFF198, port_mmio + EDMA_ERR_IRQ_MASK);
+	if(!edma_irr_mask_reg) {
+		/*if interrupt error register is mask before, we must mast it for not broken original framework */
+		DBGMESG("restore interrupt error register to mask\n");
+		writelfl(0, port_mmio + EDMA_ERR_IRQ_MASK);
+	}
+	mdelay(1);
+}
+#endif
+
 /**
  *      mv_err_intr - Handle error interrupts on the port
  *      @ap: ATA channel to manipulate
@@ -2591,6 +2679,11 @@ static void mv_err_intr(struct ata_port *ap)
 		writelfl(~fis_cause, port_mmio + FIS_IRQ_CAUSE);
 	}
 	writelfl(~edma_err_cause, port_mmio + EDMA_ERR_IRQ_CAUSE);
+#ifdef MY_ABC_HERE
+	if( edma_err_cause & EDMA_ERR_DEV_DCON || edma_err_cause & EDMA_ERR_DEV_CON) {
+		syno_mv_irq_missing_workaround(ap);
+	}
+#endif
 
 	if (edma_err_cause & EDMA_ERR_DEV) {
 		/*
@@ -3272,7 +3365,21 @@ static void mv6_read_preamp(struct mv_host_priv *hpriv, int idx,
 
 static void mv6_enable_leds(struct mv_host_priv *hpriv, void __iomem *mmio)
 {
+#ifdef	MY_ABC_HERE
+	/* In order to make LED static when disk present and blinking when
+	 * disk active, we have to set the offset 0x104F0 bit 0-1 to 0x00 and
+	 * bit 2-3 to 1.
+	 * See data sheet page 282 (Table 232: GPIO port control register)
+	 * EugeneHsu:
+	 * These Disk LEDs controlled by 7042 are connected to this address
+	 * "MV_FLASH_GPIO_PORT_CONTROL_OFFSET", and those controlled by 6281
+	 * are not connected to this address. Thus the settings are for 7042 only.
+	 */
+	DBGMESG("set mv led");
+	writel(0x0000007C, mmio + GPIO_PORT_CTL);
+#else
 	writel(0x00000060, mmio + GPIO_PORT_CTL);
+#endif
 }
 
 static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
@@ -3483,6 +3590,50 @@ static bool soc_is_65n(struct mv_host_priv *hpriv)
 	return false;
 }
 
+#ifdef MY_ABC_HERE
+extern struct scsi_device *look_up_scsi_dev_from_ap(struct ata_port *ap);
+/**
+ * Please refer arch/arm/plat-feroceon/mv_hal/sata/CoreDriver/mvSataSoc.c
+ */
+static void syno_mv_phy_ctl(void __iomem *port_mmio, u8 blShutdown)
+{
+	u32 ifcfg = readl(port_mmio + SATA_IFCFG);
+
+	/* Fix for 88SX60x1 FEr SATA#8*/
+	/* according to the spec, bits [31:12] must be set to 0x009B1 */
+	ifcfg = (ifcfg & 0xfff) | 0x9b1000;
+	/* Shutdown phy */
+	if (blShutdown)
+		ifcfg |= (1 << 9);
+	else
+		ifcfg &= ~(1 << 9);
+
+	writelfl(ifcfg, port_mmio + SATA_IFCFG);
+}
+
+static ssize_t
+syno_mv_phy_ctl_store(struct device *dev, struct device_attribute *attr, const char * buf, size_t count)
+{
+	struct Scsi_Host *shost = class_to_shost(dev);
+	struct ata_port *ap = ata_shost_to_port(shost);
+	struct scsi_device *sdev = NULL;
+
+	if (strstr(buf, "off")) {
+		if (NULL != (sdev = look_up_scsi_dev_from_ap(ap)))
+			scsi_remove_device(sdev);
+		syno_mv_phy_ctl(mv_ap_base(ap), 1);
+	} else if (strstr(buf, "on")) {
+		/* a reset is necessary */
+		syno_mv_phy_ctl(mv_ap_base(ap), 0);
+		mv_unexpected_intr(ap, 1);
+	} else {
+		printk("No effect %s\n", buf);
+	}
+
+	return count;
+}
+#endif
+
 static void mv_setup_ifcfg(void __iomem *port_mmio, int want_gen2i)
 {
 	u32 ifcfg = readl(port_mmio + SATA_IFCFG);
@@ -3559,6 +3710,9 @@ static int mv_hardreset(struct ata_link *link, unsigned int *class,
 	struct ata_port *ap = link->ap;
 	struct mv_host_priv *hpriv = ap->host->private_data;
 	struct mv_port_priv *pp = ap->private_data;
+#ifdef MY_ABC_HERE
+	struct ata_link *host_link = &link->ap->link;
+#endif
 	void __iomem *mmio = hpriv->base;
 	int rc, attempts = 0, extra = 0;
 	u32 sstatus;
@@ -3568,6 +3722,13 @@ static int mv_hardreset(struct ata_link *link, unsigned int *class,
 	pp->pp_flags &= ~MV_PP_FLAG_EDMA_EN;
 	pp->pp_flags &=
 	  ~(MV_PP_FLAG_FBS_EN | MV_PP_FLAG_NCQ_EN | MV_PP_FLAG_FAKE_ATA_BUSY);
+
+#ifdef MY_ABC_HERE
+	/* set this two value will cause sata_set_spd_needed(..) function return false, so speed will not be negotiated  */
+	DBGMESG("Do Fix MV IRQ MISSING Workaround, don't negotiate speed to 1.5G\n");
+	link->sata_spd_limit = 0;
+	host_link->sata_spd = 0;
+#endif
 
 	/* Workaround for errata FEr SATA#10 (part 2) */
 	do {
@@ -3987,6 +4148,9 @@ static void mv_conf_mbus_windows(struct mv_host_priv *hpriv,
 	}
 }
 
+#ifdef MY_ABC_HERE
+extern int mvSataWinInit(void);
+#endif
 /**
  *      mv_platform_probe - handle a positive probe of an soc Marvell
  *      host
@@ -4046,6 +4210,10 @@ static int mv_platform_probe(struct platform_device *pdev)
 	 */
 	if (mv_platform_data->dram != NULL)
 		mv_conf_mbus_windows(hpriv, mv_platform_data->dram);
+#ifdef MY_ABC_HERE
+	else
+		mvSataWinInit();
+#endif
 
 	rc = mv_create_dma_pools(hpriv, &pdev->dev);
 	if (rc)
@@ -4255,6 +4423,26 @@ static int __devexit mv_platform_remove(struct platform_device *pdev);
 static int __init mv_init(void)
 {
 	int rc = -ENODEV;
+#if defined(MY_ABC_HERE)
+	extern long g_esata_7042;
+
+	/* 211p use 7042 as external sata device. So we need to reverse the register order. */
+	if (1 == g_esata_7042) {
+		rc = platform_driver_register(&mv_platform_driver);
+
+		if (rc < 0) {
+			printk("Platform driver register failed\n");
+			return rc;
+		}
+
+#ifdef CONFIG_PCI
+		rc = pci_register_driver(&mv_pci_driver);
+		if (rc < 0)
+			return rc;
+#endif
+		return rc;
+	}
+#endif
 #ifdef CONFIG_PCI
 	rc = pci_register_driver(&mv_pci_driver);
 	if (rc < 0)

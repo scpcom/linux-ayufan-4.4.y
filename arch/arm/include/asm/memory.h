@@ -197,6 +197,11 @@ static inline void *phys_to_virt(unsigned long x)
 #define __pfn_to_bus(x)	((x) << PAGE_SHIFT)
 #endif
 
+#if 1 //SYNO
+#ifndef __deprecated
+#define __deprecated
+#endif
+#endif
 static inline __deprecated unsigned long virt_to_bus(void *x)
 {
 	return __virt_to_bus((unsigned long)x);

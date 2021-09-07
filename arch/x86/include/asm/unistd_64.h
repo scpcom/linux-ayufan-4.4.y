@@ -1,6 +1,10 @@
 #ifndef _ASM_X86_UNISTD_64_H
 #define _ASM_X86_UNISTD_64_H
 
+#if 1 //SYNO
+#include <linux/syno.h>
+#endif
+
 #ifndef __SYSCALL
 #define __SYSCALL(a, b)
 #endif
@@ -662,6 +666,165 @@ __SYSCALL(__NR_rt_tgsigqueueinfo, sys_rt_tgsigqueueinfo)
 #define __NR_perf_event_open			298
 __SYSCALL(__NR_perf_event_open, sys_perf_event_open)
 
+#ifdef MY_ABC_HERE
+#define __NR_SYNOUtime                          402
+#define SYNOUtime(arg1, arg2)                   syscall(__NR_SYNOUtime, arg1, arg2)
+__SYSCALL(__NR_SYNOUtime, sys_SYNOUtime)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOArchiveBit                     403
+#define SYNOArchiveBit(arg1, arg2)              syscall(__NR_SYNOArchiveBit, arg1, arg2)
+__SYSCALL(__NR_SYNOArchiveBit, sys_SYNOArchiveBit)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_recvfile                           404
+#define recvfile(arg1,arg2,arg3,arg4,arg5)      syscall(__NR_recvfile,arg1,arg2,arg3,arg4,arg5)
+__SYSCALL(__NR_recvfile, sys_recvfile)
+#endif
+#ifdef MY_ABC_HERE
+#define __NR_SYNOCaselessStat64                 406
+#define __NR_SYNOCaselessLStat64                407
+#define __NR_SYNOCaselessStat                   408
+#define __NR_SYNOCaselessLStat                  409
+#if !defined(__KERNEL__)
+/* direct SYNOCaselessStat to stat64 in 32-bit platform
+ * 64-bits arch has no stat64 support */
+#include <bits/wordsize.h>
+#if __WORDSIZE == 64
+#define SYNOCaselessStat(arg1,arg2)		syscall(__NR_SYNOCaselessStat , arg1,arg2)
+#define SYNOCaselessLStat(arg1,arg2)	syscall(__NR_SYNOCaselessLStat , arg1,arg2)
+__SYSCALL(__NR_SYNOCaselessStat, sys_SYNOCaselessStat)
+__SYSCALL(__NR_SYNOCaselessLStat, sys_SYNOCaselessLStat)
+#elif (_FILE_OFFSET_BITS == 64)
+#define SYNOCaselessStat(arg1,arg2)		syscall(__NR_SYNOCaselessStat64 , arg1,arg2)
+#define SYNOCaselessLStat(arg1,arg2)	syscall(__NR_SYNOCaselessLStat64 , arg1,arg2)
+__SYSCALL(__NR_SYNOCaselessStat64, sys_SYNOCaselessStat64)
+__SYSCALL(__NR_SYNOCaselessLStat64, sys_SYNOCaselessLStat64)
+#endif
+/* define stat64 interface for compatibility
+   These should be removed after AP modification */
+#define SYNOCaselessStat64(arg1,arg2)	syscall(__NR_SYNOCaselessStat64 , arg1,arg2)
+#define SYNOCaselessLStat64(arg1,arg2)	syscall(__NR_SYNOCaselessLStat64 , arg1,arg2)
+__SYSCALL(__NR_SYNOCaselessStat64, sys_SYNOCaselessStat64)
+__SYSCALL(__NR_SYNOCaselessLStat64, sys_SYNOCaselessLStat64)
+#endif
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOEcryptName                 410
+#define SYNOEcryptName(arg1, arg2)              syscall(__NR_SYNOEcryptName, arg1, arg2)
+__SYSCALL(__NR_SYNOEcryptName, sys_SYNOEcryptName)
+#define __NR_SYNODecryptName                411
+#define SYNODecryptName(arg1, arg2, arg3)              syscall(__NR_SYNODecryptName, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNODecryptName, sys_SYNODecryptName)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOACLCheckPerm               412
+#define SYNOACLSysCheckPerm(arg1, arg2)            syscall(__NR_SYNOACLCheckPerm, arg1, arg2)
+__SYSCALL(__NR_SYNOACLCheckPerm, sys_SYNOACLCheckPerm)
+#define __NR_SYNOACLIsSupport               413
+#define SYNOACLSysIsSupport(arg1, arg2, arg3)            syscall(__NR_SYNOACLIsSupport, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNOACLIsSupport, sys_SYNOACLIsSupport)
+#define __NR_SYNOACLGetPerm               414
+#define SYNOACLSysGetPerm(arg1, arg2)            syscall(__NR_SYNOACLGetPerm, arg1, arg2)
+__SYSCALL(__NR_SYNOACLGetPerm, sys_SYNOACLGetPerm)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __syscall_return(type, res) \
+do { \
+	if ((unsigned long)(res) >= (unsigned long)(-127)) { \
+		errno = -(res); \
+		res = -1; \
+	} \
+	return (type) (res); \
+} while (0)
+
+#define __syscall "syscall"
+
+#define _syscall0(type,name) \
+type name(void) \
+{ \
+long __res; \
+__asm__ volatile (__syscall \
+	: "=a" (__res) \
+	: "0" (__NR_##name) : __syscall_clobber ); \
+__syscall_return(type,__res); \
+}
+
+#define _syscall1(type,name,type1,arg1) \
+type name(type1 arg1) \
+{ \
+long __res; \
+__asm__ volatile (__syscall \
+	: "=a" (__res) \
+	: "0" (__NR_##name),"D" ((long)(arg1)) : __syscall_clobber ); \
+__syscall_return(type,__res); \
+}
+
+#define _syscall2(type,name,type1,arg1,type2,arg2) \
+type name(type1 arg1,type2 arg2) \
+{ \
+long __res; \
+__asm__ volatile (__syscall \
+	: "=a" (__res) \
+	: "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)) : __syscall_clobber ); \
+__syscall_return(type,__res); \
+}
+
+#define _syscall3(type,name,type1,arg1,type2,arg2,type3,arg3) \
+type name(type1 arg1,type2 arg2,type3 arg3) \
+{ \
+long __res; \
+__asm__ volatile (__syscall \
+	: "=a" (__res) \
+	: "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)), \
+		  "d" ((long)(arg3)) : __syscall_clobber); \
+__syscall_return(type,__res); \
+}
+
+#define _syscall4(type,name,type1,arg1,type2,arg2,type3,arg3,type4,arg4) \
+type name (type1 arg1, type2 arg2, type3 arg3, type4 arg4) \
+{ \
+long __res; \
+__asm__ volatile ("movq %5,%%r10 ;" __syscall \
+	: "=a" (__res) \
+	: "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)), \
+	  "d" ((long)(arg3)),"g" ((long)(arg4)) : __syscall_clobber,"r10" ); \
+__syscall_return(type,__res); \
+} 
+
+#define _syscall5(type,name,type1,arg1,type2,arg2,type3,arg3,type4,arg4, \
+	  type5,arg5) \
+type name (type1 arg1,type2 arg2,type3 arg3,type4 arg4,type5 arg5) \
+{ \
+long __res; \
+__asm__ volatile ("movq %5,%%r10 ; movq %6,%%r8 ; " __syscall \
+	: "=a" (__res) \
+	: "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)), \
+	  "d" ((long)(arg3)),"g" ((long)(arg4)),"g" ((long)(arg5)) : \
+	__syscall_clobber,"r8","r10" ); \
+__syscall_return(type,__res); \
+}
+
+#define _syscall6(type,name,type1,arg1,type2,arg2,type3,arg3,type4,arg4, \
+	  type5,arg5,type6,arg6) \
+type name (type1 arg1,type2 arg2,type3 arg3,type4 arg4,type5 arg5,type6 arg6) \
+{ \
+long __res; \
+__asm__ volatile ("movq %5,%%r10 ; movq %6,%%r8 ; movq %7,%%r9 ; " __syscall \
+	: "=a" (__res) \
+	: "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)), \
+	  "d" ((long)(arg3)), "g" ((long)(arg4)), "g" ((long)(arg5)), \
+	  "g" ((long)(arg6)) : \
+	__syscall_clobber,"r8","r10","r9" ); \
+__syscall_return(type,__res); \
+}
+#endif
+
 #ifndef __NO_STUBS
 #define __ARCH_WANT_OLD_READDIR
 #define __ARCH_WANT_OLD_STAT
@@ -686,6 +849,12 @@ __SYSCALL(__NR_perf_event_open, sys_perf_event_open)
 #define __ARCH_WANT_SYS_TIME
 #define __ARCH_WANT_COMPAT_SYS_TIME
 #endif	/* __NO_STUBS */
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOmmap							400
+#define SYNOmmap(x)								syscall(__NR_SYNOmmap, x)
+__SYSCALL(__NR_SYNOmmap, sys_SYNOmmap)
+#endif
 
 #ifdef __KERNEL__
 

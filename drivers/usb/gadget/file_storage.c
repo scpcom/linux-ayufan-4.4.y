@@ -247,6 +247,9 @@
 #include <linux/string.h>
 #include <linux/freezer.h>
 #include <linux/utsname.h>
+#ifdef CONFIG_USB_GADGET_MRVL
+#include <linux/version.h>
+#endif
 
 #include <asm/unaligned.h>
 
@@ -285,7 +288,11 @@ MODULE_LICENSE("Dual BSD/GPL");
  *
  * DO NOT REUSE THESE IDs with any other driver!!  Ever!!
  * Instead:  allocate your own, using normal USB-IF procedures. */
+#ifdef CONFIG_USB_GADGET_MRVL
+#define DRIVER_VENDOR_ID	0x1286	// Marvell
+#else
 #define DRIVER_VENDOR_ID	0x0525	// NetChip
+#endif
 #define DRIVER_PRODUCT_ID	0xa4a5	// Linux-USB File-backed Storage Gadget
 
 
@@ -360,6 +367,11 @@ static struct {
 	unsigned short	product;
 	unsigned short	release;
 	unsigned int	buflen;
+#ifdef CONFIG_USB_GADGET_MRVL
+	int		use_directio;
+	int		use_rda;
+	int		use_wr_thread;
+#endif
 
 	int		transport_type;
 	char		*transport_name;
@@ -375,7 +387,18 @@ static struct {
 	.vendor			= DRIVER_VENDOR_ID,
 	.product		= DRIVER_PRODUCT_ID,
 	.release		= 0xffff,	// Use controller chip type
+#ifdef CONFIG_USB_GADGET_MRVL
+	.buflen			= 32768, // 16384,
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,22)
+	.use_directio		= 1,
+#else
+	.use_directio		= 0,
+#endif
+	.use_rda		= 1,
+	.use_wr_thread		= 1,
+#else
 	.buflen			= 16384,
+#endif
 	};
 
 
@@ -392,12 +415,25 @@ MODULE_PARM_DESC(luns, "number of LUNs");
 module_param_named(removable, mod_data.removable, bool, S_IRUGO);
 MODULE_PARM_DESC(removable, "true to simulate removable media");
 
+#ifdef CONFIG_USB_GADGET_MRVL
+module_param_named(use_directio, mod_data.use_directio, bool, S_IRUGO);
+MODULE_PARM_DESC(use_directio, "true to use O_DIRECT for file storage access");
+#else
 module_param_named(stall, mod_data.can_stall, bool, S_IRUGO);
 MODULE_PARM_DESC(stall, "false to prevent bulk stalls");
+#endif
 
+#ifdef CONFIG_USB_GADGET_MRVL
+module_param_named(use_rda, mod_data.use_rda, bool, S_IRUGO);
+MODULE_PARM_DESC(use_rda, "true to use read ahead for performence enhancment");
+
+module_param_named(use_wr_thread, mod_data.use_wr_thread, bool, S_IRUGO);
+MODULE_PARM_DESC(use_wr_thread, "true to use seperate write thread for performence enhancment");
+#else
 module_param_named(cdrom, mod_data.cdrom, bool, S_IRUGO);
 MODULE_PARM_DESC(cdrom, "true to emulate cdrom instead of disk");
 
+#endif
 
 /* In the non-TEST version, only the module parameters listed above
  * are available. */
@@ -421,6 +457,11 @@ MODULE_PARM_DESC(release, "USB release number");
 
 module_param_named(buflen, mod_data.buflen, uint, S_IRUGO);
 MODULE_PARM_DESC(buflen, "I/O buffer size");
+
+#ifdef CONFIG_USB_GADGET_MRVL
+module_param_named(stall, mod_data.can_stall, bool, S_IRUGO);
+MODULE_PARM_DESC(stall, "false to prevent bulk stalls");
+#endif
 
 #endif /* CONFIG_USB_FILE_STORAGE_TEST */
 
@@ -596,7 +637,11 @@ static struct lun *dev_to_lun(struct device *dev)
 #define DELAYED_STATUS	(EP0_BUFSIZE + 999)	// An impossibly large value
 
 /* Number of buffers we will use.  2 is enough for double-buffering */
+#ifdef CONFIG_USB_GADGET_MRVL
+#define NUM_BUFFERS	16 /* 2 */
+#else
 #define NUM_BUFFERS	2
+#endif
 
 enum fsg_buffer_state {
 	BUF_STATE_EMPTY = 0,
@@ -606,6 +651,9 @@ enum fsg_buffer_state {
 
 struct fsg_buffhd {
 	void				*buf;
+#ifdef CONFIG_USB_GADGET_MRVL
+	dma_addr_t			dma;
+#endif
 	enum fsg_buffer_state		state;
 	struct fsg_buffhd		*next;
 
@@ -617,7 +665,17 @@ struct fsg_buffhd {
 	struct usb_request		*inreq;
 	int				inreq_busy;
 	struct usb_request		*outreq;
+#ifdef CONFIG_USB_GADGET_MRVL
+	volatile int			outreq_busy;
+
+	/* added to support async wr */
+	struct file	*file;
+	unsigned int	amount;
+	loff_t		file_offset;
+	struct fsg_buffhd   *next_to_wr;
+#else
 	int				outreq_busy;
+#endif
 };
 
 enum fsg_state {
@@ -687,11 +745,29 @@ struct fsg_dev {
 
 	struct fsg_buffhd	*next_buffhd_to_fill;
 	struct fsg_buffhd	*next_buffhd_to_drain;
+#ifdef CONFIG_USB_GADGET_MRVL
+	struct fsg_buffhd	*next_buffhd_to_wr;
+	struct fsg_buffhd	*next_buffhd_last_to_wr;
 	struct fsg_buffhd	buffhds[NUM_BUFFERS];
+#endif
 
+#ifdef CONFIG_USB_GADGET_MRVL
+	wait_queue_head_t	thread_wqh;
+	wait_queue_head_t	thread_wr_wqh;
+	wait_queue_head_t	thread_rda_wqh;
+#endif
 	int			thread_wakeup_needed;
+#ifdef CONFIG_USB_GADGET_MRVL
+	int			thread_wr_wakeup_needed;
+	int			thread_rda_wakeup_needed;
+#endif
 	struct completion	thread_notifier;
 	struct task_struct	*thread_task;
+#ifdef CONFIG_USB_GADGET_MRVL
+	struct task_struct	*thread_wr_task;
+	struct task_struct	*thread_rda_task;
+	int			num_wr_buf;
+#endif
 
 	int			cmnd_size;
 	u8			cmnd[MAX_COMMAND_SIZE];
@@ -714,6 +790,25 @@ struct fsg_dev {
 	unsigned int		nluns;
 	struct lun		*luns;
 	struct lun		*curlun;
+
+#ifdef CONFIG_USB_GADGET_MRVL
+	struct file		*rda_file;
+	struct file		*rda_dio_file;
+	loff_t			rda_file_offset;
+	loff_t			rda_dio_file_offset;
+	loff_t			rda_file_length;
+	/* rda_dio buffer is ready.						    */
+	/* set to 1 when when complete reading a buffer				    */
+	/* set to 0 when starting to fill new buffer or taking the old buffer out   */
+	int			rda_dio_ready;
+	void			*rda_dio_buf;
+	dma_addr_t		rda_dio_dma;
+	/* mark if rda_dio is valid,						    */
+	/* set to 1 only when request a new rda_dio				    */
+	/* set to 0 - in case of new write, to overcome cases of read after write   */
+	/*	    - in case of disconnect/unbind etc.				    */
+	int			rda_dio_valid;
+#endif
 };
 
 typedef void (*fsg_routine_t)(struct fsg_dev *);
@@ -1549,6 +1644,9 @@ static int sleep_thread(struct fsg_dev *fsg)
 
 /*-------------------------------------------------------------------------*/
 
+#ifdef CONFIG_USB_GADGET_MRVL
+int dio_count = 0;
+#endif
 static int do_read(struct fsg_dev *fsg)
 {
 	struct lun		*curlun = fsg->curlun;
@@ -1559,7 +1657,13 @@ static int do_read(struct fsg_dev *fsg)
 	loff_t			file_offset, file_offset_tmp;
 	unsigned int		amount;
 	unsigned int		partial_page;
+#ifdef CONFIG_USB_GADGET_MRVL
+	ssize_t			nread = 0;
+	int 			i;
+	int			hit_rda_dio = 0;
+#else
 	ssize_t			nread;
+#endif
 
 	/* Get the starting Logical Block Address and check that it's
 	 * not too big */
@@ -1587,7 +1691,34 @@ static int do_read(struct fsg_dev *fsg)
 	if (unlikely(amount_left == 0))
 		return -EIO;		// No default reply
 
+#ifdef CONFIG_USB_GADGET_MRVL
+	if(mod_data.use_rda && !mod_data.use_directio) {
+	    //unsigned int flags;
+	    if(amount_left == 64*1024) {
+		//spin_lock_irqsave(&fsg->lock, flags);
+		fsg->rda_file = curlun->filp;
+		fsg->rda_file_length = curlun->file_length;
+		fsg->rda_file_offset = file_offset + (256*1024);
+		//spin_unlock_irqrestore(&fsg->lock, flags);
+
+		/* Tell the read ahead thread that something has happened */
+		fsg->thread_rda_wakeup_needed = 1;
+		wake_up_all(&fsg->thread_rda_wqh);
+	    }
+	}
+
+	if(mod_data.use_wr_thread) {
+	    /* wait for write to complete */
+	    while(fsg->num_wr_buf != 0) {
+              if ((rc = sleep_thread(fsg)) != 0)
+		  return rc;
+	    }
+	}
+
+	for (i=0;;i++) {
+#else
 	for (;;) {
+#endif
 
 		/* Figure out how much we need to read:
 		 * Try to read the remaining amount.
@@ -1600,10 +1731,19 @@ static int do_read(struct fsg_dev *fsg)
 		amount = min((unsigned int) amount_left, mod_data.buflen);
 		amount = min((loff_t) amount,
 				curlun->file_length - file_offset);
+#ifdef CONFIG_USB_GADGET_MRVL
+		if(!mod_data.use_directio) {
+		    partial_page = file_offset & (PAGE_CACHE_SIZE - 1);
+		    if (partial_page > 0)
+#else
 		partial_page = file_offset & (PAGE_CACHE_SIZE - 1);
 		if (partial_page > 0)
+#endif
 			amount = min(amount, (unsigned int) PAGE_CACHE_SIZE -
 					partial_page);
+#ifdef CONFIG_USB_GADGET_MRVL
+		}
+#endif
 
 		/* Wait for the next buffer to become available */
 		bh = fsg->next_buffhd_to_fill;
@@ -1622,11 +1762,71 @@ static int do_read(struct fsg_dev *fsg)
 			curlun->info_valid = 1;
 			bh->inreq->length = 0;
 			bh->state = BUF_STATE_FULL;
+#ifdef CONFIG_USB_GADGET_MRVL
+			printk("warning trying to read past end of file\n");
+#endif
 			break;
 		}
 
 		/* Perform the read */
 		file_offset_tmp = file_offset;
+
+#ifdef CONFIG_USB_GADGET_MRVL
+		/* if using directio and rda, first check the rda_dio buffer, */
+		/* and set a new rda buffer if needed */
+		if(mod_data.use_directio && mod_data.use_rda) {
+		    hit_rda_dio = 0;
+
+		    //spin_lock_irqsave(&fsg->lock, flags);
+		    /* if we have rda hit */
+		    if((curlun->filp == fsg->rda_dio_file) &&
+			(file_offset_tmp == fsg->rda_dio_file_offset) &&
+			fsg->rda_dio_ready && fsg->rda_dio_valid )
+		    {
+			void *tbuf = bh->buf;
+			/* the dma feild is not used anymore can be removed */
+			dma_addr_t tdma = bh->dma;
+
+			bh->buf = fsg->rda_dio_buf;
+			bh->dma = fsg->rda_dio_dma;
+			bh->inreq->buf = bh->outreq->buf = bh->buf;
+			bh->inreq->dma = bh->outreq->dma = bh->dma;
+			fsg->rda_dio_buf = tbuf;
+			fsg->rda_dio_dma = tdma;
+			amount = min(mod_data.buflen, amount_left);
+			nread = amount;
+			hit_rda_dio = 1;
+			fsg->rda_dio_ready = 0;
+		    }
+		    /* increment mis-counter only on first block of read request, and don't go to infinity */
+		    else if((i == 0) && (dio_count <= 10) )
+			dio_count++;
+
+		    /* if there was no hit in the rda for long time or we just got hit, */
+		    /* lets set the rda again						*/
+		    /* We optimize the read  for 64k seq, can be improved for		*/
+		    /* different sequnce.						*/
+		    if( ((dio_count > 10) || (hit_rda_dio)) && (amount_left == 64*1024)) {
+			dio_count = 0;
+			fsg->rda_dio_valid = 1;
+			fsg->rda_file = curlun->filp;
+			fsg->rda_file_length = curlun->file_length;
+			/* The fsg buffer request max is 64k							    */
+			/* by using 32k buffers and reading 64k ahead we get 50% of rda, this is the best tuning    */
+			/* I could find for now.								    */
+			fsg->rda_file_offset = file_offset + 64*1024;
+
+			/* Tell the read ahead thread that something has happened */
+			fsg->thread_rda_wakeup_needed = 1;
+			wake_up_all(&fsg->thread_rda_wqh);
+		    }
+		    //spin_unlock_irqrestore(fsg->lock,flags);
+		}
+
+
+		/* if there was no hit in the rda the read now. */
+		if(!hit_rda_dio)
+#endif
 		nread = vfs_read(curlun->filp,
 				(char __user *) bh->buf,
 				amount, &file_offset_tmp);
@@ -1637,11 +1837,19 @@ static int do_read(struct fsg_dev *fsg)
 			return -EINTR;
 
 		if (nread < 0) {
+#ifdef CONFIG_USB_GADGET_MRVL
+			printk("error in file read: %d\n",
+#else
 			LDBG(curlun, "error in file read: %d\n",
+#endif
 					(int) nread);
 			nread = 0;
 		} else if (nread < amount) {
+#ifdef CONFIG_USB_GADGET_MRVL
+			printk("partial file read: %d/%u\n",
+#else
 			LDBG(curlun, "partial file read: %d/%u\n",
+#endif
 					(int) nread, amount);
 			nread -= (nread & 511);	// Round down to a block
 		}
@@ -1687,14 +1895,24 @@ static int do_write(struct fsg_dev *fsg)
 	unsigned int		partial_page;
 	ssize_t			nwritten;
 	int			rc;
+#ifdef CONFIG_USB_GADGET_MRVL
+	int 			fua = 0;
+	unsigned long   flags;
+#endif
 
 	if (curlun->ro) {
 		curlun->sense_data = SS_WRITE_PROTECTED;
 		return -EINVAL;
 	}
 	spin_lock(&curlun->filp->f_lock);
+#ifdef CONFIG_USB_GADGET_MRVL
+	if(!mod_data.use_directio)
+#endif
 	curlun->filp->f_flags &= ~O_SYNC;	// Default is not to wait
 	spin_unlock(&curlun->filp->f_lock);
+#ifdef CONFIG_USB_GADGET_MRVL
+	fsg->rda_dio_valid = 0;
+#endif
 
 	/* Get the starting Logical Block Address and check that it's
 	 * not too big */
@@ -1713,6 +1931,10 @@ static int do_write(struct fsg_dev *fsg)
 		}
 		if (fsg->cmnd[1] & 0x08) {	// FUA
 			spin_lock(&curlun->filp->f_lock);
+#ifdef CONFIG_USB_GADGET_MRVL
+		    fua = 1;
+		    if(!mod_data.use_directio)
+#endif
 			curlun->filp->f_flags |= O_SYNC;
 			spin_unlock(&curlun->filp->f_lock);
 		}
@@ -1745,10 +1967,21 @@ static int do_write(struct fsg_dev *fsg)
 			amount = min(amount_left_to_req, mod_data.buflen);
 			amount = min((loff_t) amount, curlun->file_length -
 					usb_offset);
+#ifdef CONFIG_USB_GADGET_MRVL
+			if(!mod_data.use_directio){
+			    partial_page = usb_offset & (PAGE_CACHE_SIZE - 1);
+			    if (partial_page > 0)
+#else
 			partial_page = usb_offset & (PAGE_CACHE_SIZE - 1);
 			if (partial_page > 0)
+#endif
 				amount = min(amount,
+#ifdef CONFIG_USB_GADGET_MRVL
+				    (unsigned int) PAGE_CACHE_SIZE - partial_page);
+			}
+#else
 	(unsigned int) PAGE_CACHE_SIZE - partial_page);
+#endif
 
 			if (amount == 0) {
 				get_some_more = 0;
@@ -1789,10 +2022,16 @@ static int do_write(struct fsg_dev *fsg)
 		bh = fsg->next_buffhd_to_drain;
 		if (bh->state == BUF_STATE_EMPTY && !get_some_more)
 			break;			// We stopped early
+#ifdef CONFIG_USB_GADGET_MRVL
+		if ((bh->state == BUF_STATE_FULL) && ( bh != fsg->next_buffhd_to_fill )) {
+#else
 		if (bh->state == BUF_STATE_FULL) {
+#endif
 			smp_rmb();
 			fsg->next_buffhd_to_drain = bh->next;
+#ifndef CONFIG_USB_GADGET_MRVL
 			bh->state = BUF_STATE_EMPTY;
+#endif
 
 			/* Did something go wrong with the transfer? */
 			if (bh->outreq->status != 0) {
@@ -1804,18 +2043,71 @@ static int do_write(struct fsg_dev *fsg)
 
 			amount = bh->outreq->actual;
 			if (curlun->file_length - file_offset < amount) {
+#ifdef CONFIG_USB_GADGET_MRVL
+				printk("*** write %u @ %llu beyond end %llu\n",
+				    amount, (unsigned long long) file_offset,
+				    (unsigned long long) curlun->file_length);
+				    amount = curlun->file_length - file_offset;
+#else
 				LERROR(curlun,
 	"write %u @ %llu beyond end %llu\n",
 	amount, (unsigned long long) file_offset,
 	(unsigned long long) curlun->file_length);
 				amount = curlun->file_length - file_offset;
+#endif
 			}
 
 			/* Perform the write */
 			file_offset_tmp = file_offset;
+#ifdef CONFIG_USB_GADGET_MRVL
+
+
+			/* if using seperate write thread */
+			if(mod_data.use_wr_thread)
+			{
+			    //unsigned int flags;
+
+			    bh->file_offset = file_offset_tmp;
+			    bh->file = curlun->filp;
+			    bh->amount = amount;
+			    /* assume the write went well */
+			    nwritten = amount;
+
+			    spin_lock_irqsave(&fsg->lock, flags);
+			    /* add the bh to the wr ll */
+			    if(fsg->next_buffhd_to_wr == NULL) /* no write is pending */
+				fsg->next_buffhd_to_wr = bh;
+			    else  /* there is some pending writes */
+				fsg->next_buffhd_last_to_wr->next_to_wr = bh;
+			    fsg->next_buffhd_last_to_wr = bh;
+			    fsg->num_wr_buf++;
+			    spin_unlock_irqrestore(&fsg->lock,flags);
+			    /* Tell the write thread that something has happened */
+			    fsg->thread_wr_wakeup_needed = 1;
+			    wake_up_all(&fsg->thread_wr_wqh);
+
+			    /* in case of fua wait for the actual data to be written */
+			    if(fua) {
+				/* wait for write to complete */
+				while(fsg->num_wr_buf != 0) {
+				    if ((rc = sleep_thread(fsg)) != 0)
+					return rc;
+				}
+			    }
+
+			}
+			else {
+			    bh->state = BUF_STATE_EMPTY;
+
+			    nwritten = vfs_write(curlun->filp,
+					(char __user *) bh->buf,
+					amount, &file_offset_tmp);
+			}
+#else
 			nwritten = vfs_write(curlun->filp,
 					(char __user *) bh->buf,
 					amount, &file_offset_tmp);
+#endif
 			VLDBG(curlun, "file write %u @ %llu -> %d\n", amount,
 					(unsigned long long) file_offset,
 					(int) nwritten);
@@ -1823,12 +2115,21 @@ static int do_write(struct fsg_dev *fsg)
 				return -EINTR;		// Interrupted!
 
 			if (nwritten < 0) {
+#ifdef CONFIG_USB_GADGET_MRVL
+				printk("**** error in file write: %d\n",(int) nwritten);
+								nwritten = 0;
+#else
 				LDBG(curlun, "error in file write: %d\n",
 						(int) nwritten);
 				nwritten = 0;
+#endif
 			} else if (nwritten < amount) {
+#ifdef CONFIG_USB_GADGET_MRVL
+				printk("**** partial file write: %d/%u\n",(int) nwritten, amount);
+#else
 				LDBG(curlun, "partial file write: %d/%u\n",
 						(int) nwritten, amount);
+#endif
 				nwritten -= (nwritten & 511);
 						// Round down to a block
 			}
@@ -1838,6 +2139,9 @@ static int do_write(struct fsg_dev *fsg)
 
 			/* If an error occurred, report it and its position */
 			if (nwritten < amount) {
+#ifdef CONFIG_USB_GADGET_MRVL
+				printk("**** If an error occurred, report it and its position\n");
+#endif
 				curlun->sense_data = SS_WRITE_ERROR;
 				curlun->sense_data_info = file_offset >> 9;
 				curlun->info_valid = 1;
@@ -1846,6 +2150,9 @@ static int do_write(struct fsg_dev *fsg)
 
 			/* Did the host decide to stop early? */
 			if (bh->outreq->actual != bh->outreq->length) {
+#ifdef CONFIG_USB_GADGET_MRVL
+				printk("**** Did the host decide to stop early?\n");
+#endif
 				fsg->short_packet_received = 1;
 				break;
 			}
@@ -1869,9 +2176,22 @@ static int do_write(struct fsg_dev *fsg)
 static int fsync_sub(struct lun *curlun)
 {
 	struct file	*filp = curlun->filp;
+#ifdef CONFIG_USB_GADGET_MRVL
+	int		rc;
+	struct fsg_dev	*fsg = the_fsg;
+#endif
 
 	if (curlun->ro || !filp)
 		return 0;
+#ifdef CONFIG_USB_GADGET_MRVL
+	if(mod_data.use_wr_thread) {
+	    /* wait for write to complete */
+	    while(fsg->num_wr_buf != 0) {
+                if ((rc = sleep_thread(fsg)) != 0)
+		  return rc;
+	    }
+	}
+#endif
 	return vfs_fsync(filp, filp->f_path.dentry, 1);
 }
 
@@ -3237,6 +3557,10 @@ static int do_set_interface(struct fsg_dev *fsg, int altsetting)
 		DBG(fsg, "reset interface\n");
 
 reset:
+#ifdef CONFIG_USB_GADGET_MRVL
+	fsg->rda_dio_valid = 0;
+#endif
+
 	/* Deallocate the requests */
 	for (i = 0; i < NUM_BUFFERS; ++i) {
 		struct fsg_buffhd *bh = &fsg->buffhds[i];
@@ -3592,6 +3916,203 @@ static int fsg_main_thread(void *fsg_)
 	complete_and_exit(&fsg->thread_notifier, 0);
 }
 
+#ifdef CONFIG_USB_GADGET_MRVL
+/* write thread */
+static int fsg_write_thread(void *fsg_)
+{
+    struct fsg_dev	*fsg = (struct fsg_dev *) fsg_;
+    int			rc;
+    struct fsg_buffhd	*bh;
+    ssize_t		nwritten;
+    unsigned long flags;
+
+    /* Allow the thread to be killed by a signal, but set the signal mask
+     * to block everything but INT, TERM, KILL, and USR1. */
+    allow_signal(SIGINT);
+    allow_signal(SIGTERM);
+    allow_signal(SIGKILL);
+    allow_signal(SIGUSR1);
+
+    /* Arrange for userspace references to be interpreted as kernel
+     * pointers.  That way we can pass a kernel pointer to a routine
+     * that expects a __user pointer and it will work okay. */
+    set_fs(get_ds());
+
+
+    while(fsg->state != FSG_STATE_TERMINATED) {
+
+	bh = fsg->next_buffhd_to_wr;
+	while (bh && bh->state == BUF_STATE_FULL) {
+
+	    nwritten = vfs_write(bh->file,
+			(char __user *) bh->buf,
+			bh->amount, &bh->file_offset);
+	    //printk("fsg_write_thread -> file write %u @ %llu -> %d\n", bh->amount,
+	    //(unsigned long long) bh->file_offset,
+	    //(int) nwritten);
+
+	    if(nwritten < bh->amount)
+		printk("write didn't complete correctlly %d ??\n",nwritten);
+
+	    spin_lock_irqsave(&fsg->lock, flags);
+	    fsg->next_buffhd_to_wr = bh->next_to_wr;
+	    bh->next_to_wr = NULL;
+	    bh->state = BUF_STATE_EMPTY;
+	    bh = fsg->next_buffhd_to_wr;
+	    fsg->num_wr_buf--;
+	    spin_unlock_irqrestore(&fsg->lock, flags);
+	    wakeup_thread(fsg);
+	}
+
+	if(bh && bh->state != BUF_STATE_FULL) /* should'nt happen */
+	    printk("bh %p write thread got buffer which isn't FULL (%d)??? \n", bh, bh->state);
+
+	/* no more writes for now */
+	rc = wait_event_interruptible(fsg->thread_wr_wqh,
+			fsg->thread_wr_wakeup_needed);
+	fsg->thread_wr_wakeup_needed = 0;
+
+        if (signal_pending(current))
+                flush_signals(current);
+    }
+
+    complete_and_exit(&fsg->thread_notifier, 0);
+}
+
+
+/* read ahead for direct IO only */
+
+/* BTW: with non preamtive kernel we are sure that kernel thread won't give up the CPU, except for cases of waiting for IO like in vfs_read below, or when going to sleep etc. */
+static int fsg_rda_dio_thread(void *fsg_)
+{
+    struct fsg_dev	*fsg = (struct fsg_dev *) fsg_;
+    int			rc;
+    struct file		*rda_file = NULL;
+    loff_t		rda_file_offset = 0;
+    loff_t		tmp_offset = 0;
+    loff_t		file_length = 0;
+    int			nread;
+    //unsigned long	flags;
+
+    /* Allow the thread to be killed by a signal, but set the signal mask
+     * to block everything but INT, TERM, KILL, and USR1. */
+    allow_signal(SIGINT);
+    allow_signal(SIGTERM);
+    allow_signal(SIGKILL);
+    allow_signal(SIGUSR1);
+
+    /* Arrange for userspace references to be interpreted as kernel
+     * pointers.  That way we can pass a kernel pointer to a routine
+     * that expects a __user pointer and it will work okay. */
+    set_fs(get_ds());
+
+    while(fsg->state != FSG_STATE_TERMINATED) {
+
+	//spin_lock_irqsave(&fsg->lock, flags);
+	rda_file_offset = fsg->rda_file_offset;
+	tmp_offset = rda_file_offset;
+	rda_file = fsg->rda_file;
+	file_length = fsg->rda_file_length;
+
+	if(fsg->rda_dio_valid) {
+	    if(file_length > rda_file_offset + mod_data.buflen) {
+		fsg->rda_dio_ready = 0;
+		nread = vfs_read(rda_file, fsg->rda_dio_buf, mod_data.buflen, &tmp_offset);
+		if(nread != mod_data.buflen) {
+		    printk("read failed to excute %d \n", nread);
+		}
+		else {
+		    fsg->rda_dio_file_offset = rda_file_offset;
+		    fsg->rda_dio_file = rda_file;
+		    fsg->rda_dio_ready = 1;
+		}
+	    }
+	}
+	//spin_unlock_irqrestore(&fsg->lock, flags);
+
+	/* no more read ahead for now */
+	rc = wait_event_interruptible(fsg->thread_rda_wqh,
+			fsg->thread_rda_wakeup_needed);
+	fsg->thread_rda_wakeup_needed = 0;
+
+        if (signal_pending(current))
+		flush_signals(current);
+    }
+
+    complete_and_exit(&fsg->thread_notifier, 0);
+}
+
+/* general read ahead, */
+static int fsg_rda_thread(void *fsg_)
+{
+    struct fsg_dev	*fsg = (struct fsg_dev *) fsg_;
+    int			rc;
+    char    __user  	tmp_buf[32];
+    struct file		*rda_file = NULL;
+    loff_t		rda_file_offset = 0;
+    loff_t		file_length = 0;
+    loff_t		tmp_offset = 0;
+    int			count = 64/4;
+    int			nread;
+    //unsigned int	flags;
+
+    /* Allow the thread to be killed by a signal, but set the signal mask
+     * to block everything but INT, TERM, KILL, and USR1. */
+    allow_signal(SIGINT);
+    allow_signal(SIGTERM);
+    allow_signal(SIGKILL);
+    allow_signal(SIGUSR1);
+
+    /* Arrange for userspace references to be interpreted as kernel
+     * pointers.  That way we can pass a kernel pointer to a routine
+     * that expects a __user pointer and it will work okay. */
+    set_fs(get_ds());
+
+    while(fsg->state != FSG_STATE_TERMINATED) {
+
+	/* we do read ahead of 64K one page each time */
+	while( (count < (64/4)) || (fsg->rda_file_offset != rda_file_offset)
+				|| (fsg->rda_file != rda_file) ) {
+
+	    //spin_lock_irqsave(&fsg->lock, flags);
+	    if((fsg->rda_file_offset != rda_file_offset) || (fsg->rda_file != rda_file)) {
+		rda_file_offset = fsg->rda_file_offset;
+		rda_file = fsg->rda_file;
+		file_length = fsg->rda_file_length;
+		count = 0;
+	    }
+	    //spin_unlock_irqrestore(&fsg->lock, flags);
+
+	    tmp_offset = rda_file_offset + (count * PAGE_SIZE);
+	    if(file_length > tmp_offset + 32) {
+		/* we read only few bytes since we can count that the kernel will read a full page,	    */
+		/* there is no reason we will copy the entire page from the cache buffer to this tmp buffer */
+		nread = vfs_read(rda_file, tmp_buf, 32, &tmp_offset);
+		if(nread != 32)
+		    printk("read failed to excute %d \n", nread);
+		count++;
+
+	    }
+	    else {
+		printk("read ahead got to an end of the file.\n");
+		count = 64/4;
+	    }
+	}
+
+	/* no more read ahead for now */
+	rc = wait_event_interruptible(fsg->thread_rda_wqh,
+			fsg->thread_rda_wakeup_needed);
+	fsg->thread_rda_wakeup_needed = 0;
+
+        if (signal_pending(current))
+		flush_signals(current);
+
+    }
+
+    complete_and_exit(&fsg->thread_notifier, 0);
+
+}
+#endif
 
 /*-------------------------------------------------------------------------*/
 
@@ -3611,6 +4132,12 @@ static int open_backing_file(struct lun *curlun, const char *filename)
 	/* R/W if we can, R/O if we must */
 	ro = curlun->ro;
 	if (!ro) {
+
+#ifdef CONFIG_USB_GADGET_MRVL
+	    if(mod_data.use_directio)
+		filp = filp_open(filename, O_RDWR | O_LARGEFILE | O_DIRECT, 0);
+	    else
+#endif
 		filp = filp_open(filename, O_RDWR | O_LARGEFILE, 0);
 		if (-EROFS == PTR_ERR(filp))
 			ro = 1;
@@ -3840,6 +4367,20 @@ static void /* __init_or_exit */ fsg_unbind(struct usb_gadget *gadget)
 		complete(&fsg->thread_notifier);
 	}
 
+#ifdef CONFIG_USB_GADGET_MRVL
+	if(fsg->thread_wr_task) {
+	    fsg->thread_wr_wakeup_needed = 1;
+	    wake_up_all(&fsg->thread_wr_wqh);
+	    wait_for_completion(&fsg->thread_notifier);
+	}
+
+	if(fsg->thread_rda_task){
+	    fsg->thread_rda_wakeup_needed = 1;
+	    wake_up_all(&fsg->thread_rda_wqh);
+	    wait_for_completion(&fsg->thread_notifier);
+	    fsg->rda_dio_valid = 0;
+	}
+#endif
 	/* Free the data buffers */
 	for (i = 0; i < NUM_BUFFERS; ++i)
 		kfree(fsg->buffhds[i].buf);
@@ -4099,9 +4640,80 @@ static int __init fsg_bind(struct usb_gadget *gadget)
 		bh->buf = kmalloc(mod_data.buflen, GFP_KERNEL);
 		if (!bh->buf)
 			goto out;
+
+#ifdef CONFIG_USB_GADGET_MRVL
+		{
+		    /*
+		     * When using kmalloc the page _count is incremented only for the first page???
+		     * If we will use DirectIO, This will cause that after the dio/bio is completed
+		     * the pages count will be 0 and the page will be release, and we don't want it.
+		     * See in direct-io.c get_ker_pages inc, page_cache_release dec and free.
+		     */
+		    unsigned int        start;
+		    unsigned int        len = 0;
+
+		    if(mod_data.buflen > PAGE_SIZE)
+			len  = mod_data.buflen/PAGE_SIZE;
+
+		    start  = (unsigned int)bh->buf;
+		    while(len) {
+			struct page *t_page;
+
+			t_page = virt_to_page(start);
+			atomic_inc(&t_page->_count);
+			start += PAGE_SIZE;
+			len--;
+		    }
+		}
+#endif
 		bh->next = bh + 1;
+#ifdef CONFIG_USB_GADGET_MRVL
+		bh->next_to_wr = NULL;
+#endif
 	}
+#ifdef CONFIG_USB_GADGET_MRVL
+	fsg->rda_dio_buf = kmalloc(mod_data.buflen, GFP_KERNEL);
+
+	if (!fsg->rda_dio_buf)
+	    goto out;
+	{
+	    /*
+	     * When using kmalloc the page _count is incremented only for the first page???
+	     * If we will use DirectIO, This will cause that after the dio/bio is completed
+	     * the pages count will be 0 and the page will be release, and we don't want it.
+	     * See in direct-io.c get_ker_pages inc, page_cache_release dec and free.
+	     */
+	    unsigned int        start;
+	    unsigned int        len = 0;
+
+	    if(mod_data.buflen > PAGE_SIZE)
+	        len  = mod_data.buflen/PAGE_SIZE;
+
+	    start  = (unsigned int)fsg->rda_dio_buf;
+	    while(len) {
+	        struct page *t_page;
+
+	        t_page = virt_to_page(start);
+	        atomic_inc(&t_page->_count);
+	        start += PAGE_SIZE;
+	        len--;
+	    }
+	}
+
+
+	fsg->rda_dio_ready = 0;
+
+	fsg->num_wr_buf = 0;
+#endif
 	fsg->buffhds[NUM_BUFFERS - 1].next = &fsg->buffhds[0];
+
+#ifdef CONFIG_USB_GADGET_MRVL
+	fsg->rda_file = NULL;
+	fsg->rda_file_offset = fsg->rda_file_length = 0;
+
+	/* init all pointers */
+	fsg->next_buffhd_last_to_wr = fsg->next_buffhd_to_wr = NULL;
+#endif
 
 	/* This should reflect the actual gadget power source */
 	usb_gadget_set_selfpowered(gadget);
@@ -4126,6 +4738,36 @@ static int __init fsg_bind(struct usb_gadget *gadget)
 		rc = PTR_ERR(fsg->thread_task);
 		goto out;
 	}
+
+#ifdef CONFIG_USB_GADGET_MRVL
+	if(mod_data.use_wr_thread) {
+		fsg->thread_wr_task = kthread_create(fsg_write_thread, fsg,
+                       "file-write-gadget");
+            if (IS_ERR(fsg->thread_wr_task)) {
+		rc = PTR_ERR(fsg->thread_wr_task);
+		goto out;
+            }
+	}
+
+	if(mod_data.use_rda) {
+	    if(mod_data.use_directio) {
+		fsg->thread_rda_task = kthread_create(fsg_rda_dio_thread, fsg,
+                        "file-rda-dio-gadget");
+		if (IS_ERR(fsg->thread_rda_task)) {
+			rc = PTR_ERR(fsg->thread_rda_task);
+			goto out;
+		}
+	    }
+	    else {
+		fsg->thread_rda_task = kthread_create(fsg_rda_thread, fsg,
+                        "file-rda-gadget");
+		if (IS_ERR(fsg->thread_rda_task)) {
+			rc = PTR_ERR(fsg->thread_rda_task);
+			goto out;
+		}
+	    }
+	}
+#endif
 
 	INFO(fsg, DRIVER_DESC ", version: " DRIVER_VERSION "\n");
 	INFO(fsg, "Number of LUNs=%d\n", fsg->nluns);
@@ -4162,6 +4804,12 @@ static int __init fsg_bind(struct usb_gadget *gadget)
 
 	/* Tell the thread to start working */
 	wake_up_process(fsg->thread_task);
+#ifdef CONFIG_USB_GADGET_MRVL
+	if(mod_data.use_wr_thread)
+	    wake_up_process(fsg->thread_wr_task);
+	if(mod_data.use_rda)
+	    wake_up_process(fsg->thread_rda_task);
+#endif
 	return 0;
 
 autoconf_fail:
@@ -4231,6 +4879,11 @@ static int __init fsg_alloc(void)
 	spin_lock_init(&fsg->lock);
 	init_rwsem(&fsg->filesem);
 	kref_init(&fsg->ref);
+#ifdef CONFIG_USB_GADGET_MRVL
+	init_waitqueue_head(&fsg->thread_wqh);
+	init_waitqueue_head(&fsg->thread_wr_wqh);
+	init_waitqueue_head(&fsg->thread_rda_wqh);
+#endif
 	init_completion(&fsg->thread_notifier);
 
 	the_fsg = fsg;

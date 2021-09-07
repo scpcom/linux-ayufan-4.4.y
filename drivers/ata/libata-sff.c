@@ -1163,7 +1163,21 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 			 */
 			qc = ata_qc_from_tag(ap, qc->tag);
 			if (qc) {
+#if defined(MY_ABC_HERE)
+				if (NULL == qc->scsicmd && ATA_CMD_CHK_POWER == qc->tf.command) {
+					ap->ops->sff_irq_on(ap);
+					/* read result TF if requested, copy from ata_qc_complete() and fill_result_tf() */
+					if (qc->err_mask || 
+						qc->flags & ATA_QCFLAG_RESULT_TF || 
+						qc->flags & ATA_QCFLAG_FAILED) {
+						qc->result_tf.flags = qc->tf.flags;
+						ap->ops->qc_fill_rtf(qc);
+					}
+					__ata_qc_complete(qc);
+				} else if (likely(!(qc->err_mask & AC_ERR_HSM))) {
+#else
 				if (likely(!(qc->err_mask & AC_ERR_HSM))) {
+#endif
 					ap->ops->sff_irq_on(ap);
 					ata_qc_complete(qc);
 				} else
@@ -1172,7 +1186,20 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 
 			spin_unlock_irqrestore(ap->lock, flags);
 		} else {
+#if defined(MY_ABC_HERE)
+			if (NULL == qc->scsicmd && ATA_CMD_CHK_POWER == qc->tf.command) {
+				/* read result TF if requested, copy from ata_qc_complete() and fill_result_tf() */
+				if (qc->err_mask || 
+					qc->flags & ATA_QCFLAG_RESULT_TF || 
+					qc->flags & ATA_QCFLAG_FAILED) {
+					qc->result_tf.flags = qc->tf.flags;
+					ap->ops->qc_fill_rtf(qc);
+				}
+				__ata_qc_complete(qc);
+			} else if (likely(!(qc->err_mask & AC_ERR_HSM))) 
+#else
 			if (likely(!(qc->err_mask & AC_ERR_HSM)))
+#endif
 				ata_qc_complete(qc);
 			else
 				ata_port_freeze(ap);
@@ -1515,6 +1542,9 @@ fsm_start:
 unsigned int ata_sff_qc_issue(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
+#ifdef MY_ABC_HERE
+	u8 status;
+#endif
 
 	/* Use polling pio if the LLD doesn't handle
 	 * interrupt driven pio and atapi CDB interrupt.
@@ -1549,7 +1579,29 @@ unsigned int ata_sff_qc_issue(struct ata_queued_cmd *qc)
 		ata_tf_to_host(ap, &qc->tf);
 		ap->hsm_task_state = HSM_ST_LAST;
 
+#ifdef MY_ABC_HERE
+		/* copy from ata_pio_task() to send chkpwr cmd directly to prevent work queue timeout issue
+		 * Now we only find sata_mv have timeout issue, so we only on ATA_TFLAG_DIRECT in sata_mv */
+		if (ATA_TFLAG_DIRECT & qc->tf.flags) {
+			qc->tf.flags &= ~ATA_TFLAG_DIRECT;
+			status = ata_sff_busy_wait(ap, ATA_BUSY, 5);
+			if (status & ATA_BUSY) {
+				mdelay(2);
+				status = ata_sff_busy_wait(ap, ATA_BUSY, 10);
+				if (status & ATA_BUSY) {
+					/*if the status is still BUSY, we use original way ata_pio_queue_task()*/
+					ata_pio_queue_task(ap, qc, 0);
+				} else {
+					ata_sff_hsm_move(ap, qc, status, 1);
+				}
+			} else {
+				ata_sff_hsm_move(ap, qc, status, 1);
+			}
+		}
+		else if (qc->tf.flags & ATA_TFLAG_POLLING)
+#else
 		if (qc->tf.flags & ATA_TFLAG_POLLING)
+#endif
 			ata_pio_queue_task(ap, qc, 0);
 
 		break;

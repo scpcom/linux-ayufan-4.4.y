@@ -533,6 +533,30 @@ static int scsi_sdev_check_buf_bit(const char *buf)
 		return -EINVAL;
 }
 #endif
+#ifdef MY_ABC_HERE
+extern void
+ScsiRemapModeSet(struct scsi_device *sdev, unsigned char blAutoRemap);
+static ssize_t
+sdev_show_auto_remap(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	sdev = to_scsi_device(dev);
+	return snprintf (buf, 20, "%d type 0x%x\n", sdev->auto_remap, sdev->type);
+}
+
+static ssize_t
+sdev_store_auto_remap(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev;
+	int val = 0;
+	sdev = to_scsi_device(dev);
+	sscanf (buf, "%d", &val);
+
+	ScsiRemapModeSet(sdev, val ? 1 : 0);
+	return count;
+}
+static DEVICE_ATTR(auto_remap, S_IRUGO | S_IWUSR, sdev_show_auto_remap, sdev_store_auto_remap);
+#endif
 /*
  * Create the actual show/store functions and data structures.
  */
@@ -737,6 +761,9 @@ static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_iodone_cnt.attr,
 	&dev_attr_ioerr_cnt.attr,
 	&dev_attr_modalias.attr,
+#ifdef MY_ABC_HERE
+	&dev_attr_auto_remap.attr,
+#endif
 	REF_EVT(media_change),
 	NULL
 };
@@ -912,6 +939,20 @@ void __scsi_remove_device(struct scsi_device *sdev)
 	struct device *dev = &sdev->sdev_gendev;
 
 	if (sdev->is_visible) {
+#ifdef CONFIG_MV_SCATTERED_SPINUP
+		if (scsi_spinup_enabled()) {
+			if (sdev->standby_timeout_secs > 0) {
+				/* if the device had any standby timer */
+				standby_delete_timer(sdev);
+			}
+			if (sdev->spinup_timeout.function) {
+				/* deleting any spinup timer thats may be still there and freeing the semaphore */
+				spinup_delete_timer(sdev);
+				scsi_spinup_up();
+			}
+		}
+#endif
+
 		if (scsi_device_set_state(sdev, SDEV_CANCEL) != 0)
 			return;
 
@@ -928,6 +969,11 @@ void __scsi_remove_device(struct scsi_device *sdev)
 	put_device(dev);
 }
 
+#ifdef MY_ABC_HERE
+int (*funcSYNORaidDiskUnplug)(char *szDiskName) = NULL;
+EXPORT_SYMBOL(funcSYNORaidDiskUnplug);
+#endif /* MY_ABC_HERE */
+
 /**
  * scsi_remove_device - unregister a device from the scsi bus
  * @sdev:	scsi_device to unregister
@@ -939,6 +985,11 @@ void scsi_remove_device(struct scsi_device *sdev)
 	mutex_lock(&shost->scan_mutex);
 	__scsi_remove_device(sdev);
 	mutex_unlock(&shost->scan_mutex);
+#ifdef MY_ABC_HERE
+	if (funcSYNORaidDiskUnplug) {
+		funcSYNORaidDiskUnplug(sdev->syno_disk_name);
+	}
+#endif  /* MY_ABC_HERE */
 }
 EXPORT_SYMBOL(scsi_remove_device);
 

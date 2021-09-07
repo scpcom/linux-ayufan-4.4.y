@@ -1,6 +1,10 @@
 #ifndef _ASM_X86_UNISTD_32_H
 #define _ASM_X86_UNISTD_32_H
 
+#if 1 //SYNO
+#include <linux/syno.h>
+#endif
+
 /*
  * This file contains the system call numbers.
  */
@@ -343,9 +347,160 @@
 #define __NR_rt_tgsigqueueinfo	335
 #define __NR_perf_event_open	336
 
-#ifdef __KERNEL__
+#ifdef MY_ABC_HERE
+#define __NR_SYNOmmap		400
+#define SYNOmmap(x)		syscall(__NR_SYNOmmap, x)
+#endif
 
+#ifdef MY_ABC_HERE
+#define __NR_SYNOUtime                          402
+#define SYNOUtime(arg1, arg2)                   syscall(__NR_SYNOUtime, arg1, arg2)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOArchiveBit                     403
+#define SYNOArchiveBit(arg1, arg2)              syscall(__NR_SYNOArchiveBit, arg1, arg2)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_recvfile                           404
+#define recvfile(arg1,arg2,arg3,arg4,arg5)      syscall(__NR_recvfile,arg1,arg2,arg3,arg4,arg5)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOCaselessStat64                 406
+#define __NR_SYNOCaselessLStat64                407
+#define __NR_SYNOCaselessStat                   408
+#define __NR_SYNOCaselessLStat                  409
+#if !defined(__KERNEL__)
+/* direct SYNOCaselessStat to stat64 in 32-bit platform
+ * 64-bits arch has no stat64 support */
+#include <bits/wordsize.h>
+#if __WORDSIZE == 64
+#define SYNOCaselessStat(arg1,arg2)		syscall(__NR_SYNOCaselessStat ,arg1,arg2)
+#define SYNOCaselessLStat(arg1,arg2)	syscall(__NR_SYNOCaselessLStat ,arg1,arg2)
+#elif (_FILE_OFFSET_BITS == 64)
+#define SYNOCaselessStat(arg1,arg2)		syscall(__NR_SYNOCaselessStat64 ,arg1,arg2)
+#define SYNOCaselessLStat(arg1,arg2)	syscall(__NR_SYNOCaselessLStat64 ,arg1,arg2)
+#endif
+/* define stat64 interface for compatibility
+   These should be removed after AP modification */
+#define SYNOCaselessStat64(arg1,arg2)	syscall(__NR_SYNOCaselessStat64 ,arg1,arg2)
+#define SYNOCaselessLStat64(arg1,arg2)	syscall(__NR_SYNOCaselessLStat64 ,arg1,arg2)
+#endif
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOEcryptName                 410
+#define __NR_SYNODecryptName                411
+#define SYNOEcryptName(arg1, arg2)          syscall(__NR_SYNOEcryptName, arg1, arg2)
+#define SYNODecryptName(arg1, arg2, arg3)         syscall(__NR_SYNODecryptName, arg1, arg2, arg3)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOACLCheckPerm               412
+#define SYNOACLSysCheckPerm(arg1, arg2)            syscall(__NR_SYNOACLCheckPerm, arg1, arg2)
+#define __NR_SYNOACLIsSupport               413
+#define SYNOACLSysIsSupport(arg1, arg2, arg3)            syscall(__NR_SYNOACLIsSupport, arg1, arg2, arg3)
+#define __NR_SYNOACLGetPerm               414
+#define SYNOACLSysGetPerm(arg1, arg2)            syscall(__NR_SYNOACLGetPerm, arg1, arg2)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __syscall_return(type, res) \
+do { \
+	if ((unsigned long)(res) >= (unsigned long)(-(128 + 1))) { \
+		errno = -(res); \
+		res = -1; \
+	} \
+	return (type) (res); \
+} while (0)
+
+/* XXX - _foo needs to be __foo, while __NR_bar could be _NR_bar. */
+#define _syscall0(type,name) \
+type name(void) \
+{ \
+long __res; \
+__asm__ volatile ("int $0x80" \
+	: "=a" (__res) \
+	: "0" (__NR_##name)); \
+__syscall_return(type,__res); \
+}
+
+#define _syscall1(type,name,type1,arg1) \
+type name(type1 arg1) \
+{ \
+long __res; \
+__asm__ volatile ("int $0x80" \
+	: "=a" (__res) \
+	: "0" (__NR_##name),"b" ((long)(arg1)) : "memory"); \
+__syscall_return(type,__res); \
+}
+
+#define _syscall2(type,name,type1,arg1,type2,arg2) \
+type name(type1 arg1,type2 arg2) \
+{ \
+long __res; \
+__asm__ volatile ("int $0x80" \
+	: "=a" (__res) \
+	: "0" (__NR_##name),"b" ((long)(arg1)),"c" ((long)(arg2)) : "memory"); \
+__syscall_return(type,__res); \
+}
+
+#define _syscall3(type,name,type1,arg1,type2,arg2,type3,arg3) \
+type name(type1 arg1,type2 arg2,type3 arg3) \
+{ \
+long __res; \
+__asm__ volatile ("int $0x80" \
+	: "=a" (__res) \
+	: "0" (__NR_##name),"b" ((long)(arg1)),"c" ((long)(arg2)), \
+		  "d" ((long)(arg3)) : "memory"); \
+__syscall_return(type,__res); \
+}
+
+#define _syscall4(type,name,type1,arg1,type2,arg2,type3,arg3,type4,arg4) \
+type name (type1 arg1, type2 arg2, type3 arg3, type4 arg4) \
+{ \
+long __res; \
+__asm__ volatile ("int $0x80" \
+	: "=a" (__res) \
+	: "0" (__NR_##name),"b" ((long)(arg1)),"c" ((long)(arg2)), \
+	  "d" ((long)(arg3)),"S" ((long)(arg4)) : "memory"); \
+__syscall_return(type,__res); \
+} 
+
+#define _syscall5(type,name,type1,arg1,type2,arg2,type3,arg3,type4,arg4, \
+	  type5,arg5) \
+type name (type1 arg1,type2 arg2,type3 arg3,type4 arg4,type5 arg5) \
+{ \
+long __res; \
+__asm__ volatile ("int $0x80" \
+	: "=a" (__res) \
+	: "0" (__NR_##name),"b" ((long)(arg1)),"c" ((long)(arg2)), \
+	  "d" ((long)(arg3)),"S" ((long)(arg4)),"D" ((long)(arg5)) : "memory"); \
+__syscall_return(type,__res); \
+}
+
+#define _syscall6(type,name,type1,arg1,type2,arg2,type3,arg3,type4,arg4, \
+	  type5,arg5,type6,arg6) \
+type name (type1 arg1,type2 arg2,type3 arg3,type4 arg4,type5 arg5,type6 arg6) \
+{ \
+long __res; \
+__asm__ volatile ("push %%ebp ; movl %%eax,%%ebp ; movl %1,%%eax ; int $0x80 ; pop %%ebp" \
+	: "=a" (__res) \
+	: "i" (__NR_##name),"b" ((long)(arg1)),"c" ((long)(arg2)), \
+	  "d" ((long)(arg3)),"S" ((long)(arg4)),"D" ((long)(arg5)), \
+	  "0" ((long)(arg6)) : "memory"); \
+__syscall_return(type,__res); \
+}
+#endif
+
+#ifdef __KERNEL__
+#ifdef MY_ABC_HERE
+#define NR_syscalls 410
+#else
 #define NR_syscalls 337
+#endif
 
 #define __ARCH_WANT_IPC_PARSE_VERSION
 #define __ARCH_WANT_OLD_READDIR

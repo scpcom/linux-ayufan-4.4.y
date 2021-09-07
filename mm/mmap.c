@@ -83,7 +83,11 @@ pgprot_t vm_get_page_prot(unsigned long vm_flags)
 }
 EXPORT_SYMBOL(vm_get_page_prot);
 
+#ifdef MY_ABC_HERE
+int sysctl_overcommit_memory = OVERCOMMIT_ALWAYS;
+#else
 int sysctl_overcommit_memory = OVERCOMMIT_GUESS;  /* heuristic overcommit */
+#endif
 int sysctl_overcommit_ratio = 50;	/* default is 50% */
 int sysctl_max_map_count __read_mostly = DEFAULT_MAX_MAP_COUNT;
 struct percpu_counter vm_committed_as;

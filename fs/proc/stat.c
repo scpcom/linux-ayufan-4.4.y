@@ -170,3 +170,15 @@ static int __init proc_stat_init(void)
 	return 0;
 }
 module_init(proc_stat_init);
+
+#ifdef MY_ABC_HERE
+static const struct file_operations proc_invalidfile = {
+};
+
+static int __init proc_invalidfile_init(void)
+{
+	proc_create("invalidfile", 0, NULL, &proc_invalidfile);
+	return 0;
+}
+module_init(proc_invalidfile_init);
+#endif

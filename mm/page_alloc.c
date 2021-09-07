@@ -4623,8 +4623,20 @@ void setup_per_zone_wmarks(void)
 			zone->watermark[WMARK_MIN] = tmp;
 		}
 
+#ifdef MY_ABC_HERE
+		if ( !strstr(zone->name, "Normal") || !tmp) {
+			/* Do not adjust DMA, DMA32, HighMem, Movable */
+			zone->watermark[WMARK_LOW]   = min_wmark_pages(zone) + (tmp >> 2);
+			zone->watermark[WMARK_HIGH]  = min_wmark_pages(zone) + (tmp >> 1);
+		} else {
+			/* Only adjust Normal */
+			zone->watermark[WMARK_LOW]   = min_wmark_pages(zone) + 1024; // 4 +  4 =  8MB [kswpd]
+			zone->watermark[WMARK_HIGH]  = min_wmark_pages(zone) + 3072; // 4 + 12 = 16MB [safe]
+		}
+#else
 		zone->watermark[WMARK_LOW]  = min_wmark_pages(zone) + (tmp >> 2);
 		zone->watermark[WMARK_HIGH] = min_wmark_pages(zone) + (tmp >> 1);
+#endif
 		setup_zone_migrate_reserve(zone);
 		spin_unlock_irqrestore(&zone->lock, flags);
 	}

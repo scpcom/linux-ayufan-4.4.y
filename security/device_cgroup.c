@@ -514,6 +514,9 @@ found:
 
 	return -EPERM;
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(devcgroup_inode_permission);
+#endif /* SYNO_AUFS */
 
 int devcgroup_inode_mknod(int mode, dev_t dev)
 {

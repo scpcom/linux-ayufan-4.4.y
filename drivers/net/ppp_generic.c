@@ -55,6 +55,11 @@
 
 #define PPP_VERSION	"2.4.2"
 
+
+#ifdef CONFIG_MV_ETH_NFP_PPP
+extern int fp_ppp_info_set(u32 if_ppp, u32 if_eth, u16 sid, u8 *mac, u32 channel);
+#endif
+
 /*
  * Network protocols we support.
  */
@@ -2774,6 +2779,10 @@ ppp_connect_channel(struct channel *pch, int unit)
 	atomic_inc(&ppp->file.refcnt);
 	ppp_unlock(ppp);
 	ret = 0;
+
+#ifdef CONFIG_MV_ETH_NFP_PPP
+	fp_ppp_info_set(ppp->dev->ifindex, 0, 0, NULL, pch->chan);
+#endif
 
  outl:
 	write_unlock_bh(&pch->upl);

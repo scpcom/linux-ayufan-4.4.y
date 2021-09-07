@@ -63,6 +63,9 @@
 #include <scsi/scsi_eh.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_tcq.h>
+#ifdef CONFIG_MV_SCATTERED_SPINUP
+#include <scsi/scsi_spinup.h>
+#endif
 
 #include "scsi_priv.h"
 #include "scsi_logging.h"
@@ -733,6 +736,43 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 		scsi_done(cmd);
 		goto out;
 	}
+#if defined(MY_ABC_HERE)
+	/* mvSata */
+	if( 0x0C == cmd->cmnd[0] ) {
+		struct scatterlist *sg;
+		unsigned char* pBuffer;
+
+		if( cmd->sdb.table.nents ) {
+			sg = (struct scatterlist *)cmd->sdb.table.sgl;
+			pBuffer = kmap_atomic(sg_page(sg), KM_USER0) + sg->offset;
+		} else {
+			pBuffer = cmd->sdb.table.sgl;
+		}
+
+		/* set disk to standby command */
+		if( 0xE0 == pBuffer[0] ) {
+			cmd->device->idle = cmd->device->idle_original;
+			cmd->device->spindown = 1;
+		}
+
+		if( cmd->sdb.table.nents ) {
+			kunmap_atomic(pBuffer - sg->offset, KM_USER0);
+		}
+	}
+
+	/* libata */
+	/* set disk to standby command */
+	if( ATA_16 == cmd->cmnd[0] && 0xE0 == cmd->cmnd[14] ) {
+		cmd->device->idle = cmd->device->idle_original;
+		cmd->device->spindown = 1;
+	}
+
+	/* scsi start stop commamd */
+	/* if it's spindown, we shouln't restore the idle timer */
+	if(!(cmd->device->spindown) && (START_STOP == cmd->cmnd[0] && 0x0 == cmd->cmnd[4])) {
+		cmd->device->idle = cmd->device->idle_original;
+	}
+#endif /* MY_ABC_HERE  */
 
 	spin_lock_irqsave(host->host_lock, flags);
 	/*
@@ -781,6 +821,30 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
  */
 static void scsi_done(struct scsi_cmnd *cmd)
 {
+#ifdef CONFIG_MV_SCATTERED_SPINUP
+	unsigned long flags = 0;
+
+	/*
+	* TODO: add support to verify failed commands that didn't woke up the drive.
+	*/
+	if (scsi_spinup_enabled())
+	{
+		spin_lock_irqsave(cmd->device->host->host_lock, flags);
+		if (cmd->device->sdev_power_state == SDEV_PW_SPINNING_UP)
+		{
+			if (cmd->device->standby_timeout_secs > 0)
+			{
+				/* had a timer before spinup, restarting the timer again */
+				cmd->device->sdev_power_state = SDEV_PW_STANDBY_TIMEOUT_WAIT;
+				standby_add_timer(cmd->device, cmd->device->standby_timeout_secs, standby_times_out);
+			}
+			else
+				cmd->device->sdev_power_state = SDEV_PW_ON;
+		}
+			spin_unlock_irqrestore(cmd->device->host->host_lock, flags);
+	}
+#endif
+
 	blk_complete_request(cmd->request);
 }
 
@@ -1273,7 +1337,11 @@ struct scsi_device *__scsi_device_lookup(struct Scsi_Host *shost,
 
 	list_for_each_entry(sdev, &shost->__devices, siblings) {
 		if (sdev->channel == channel && sdev->id == id &&
+#ifdef CONFIG_ARCH_FEROCEON
+				sdev->lun == lun && sdev->sdev_state != SDEV_DEL)
+#else
 				sdev->lun ==lun)
+#endif
 			return sdev;
 	}
 
@@ -1317,6 +1385,13 @@ MODULE_PARM_DESC(scsi_logging_level, "a bit mask of logging levels");
 static int __init init_scsi(void)
 {
 	int error;
+
+#ifdef CONFIG_MV_SCATTERED_SPINUP
+	/* init will parse the kernel line for the spinup param */
+	error = scsi_spinup_init();
+	if (error)
+		return error;
+#endif
 
 	error = scsi_init_queue();
 	if (error)
