@@ -25,7 +25,7 @@
 #ifdef CONFIG_FS_SYNO_ACL
 #include "synoacl_int.h"
 #endif
-		 
+
 #ifdef MY_ABC_HERE
 
 #define ACL_MASK_NONE 0
@@ -56,6 +56,8 @@ static struct syno_archive_map rgSynoAr[] = {
 	{S2_SYNO_ACL_IS_OWNER_GROUP, 0}, 
 	{S2_SYNO_ACL_IS_OWNER_GROUP, 1}, 
 #endif
+	{S2_SMB_SPARSE, 1},				 
+	{S2_SMB_SPARSE, 0},				 
 };
 
 #ifdef CONFIG_FS_SYNO_ACL
@@ -78,6 +80,8 @@ const int rgSynoArAclTag[] = {
 	NEED_FS_ACL_SUPPORT,                                            
 	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT,  
 	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT,  
+	PROTECT_BY_ACL,                  
+	PROTECT_BY_ACL,                  
 };
 
 const int rgSynoArAclMask[] = {
@@ -99,6 +103,8 @@ const int rgSynoArAclMask[] = {
 	ACL_MASK_NONE,         
 	MAY_GET_OWNER_SHIP,    
 	MAY_GET_OWNER_SHIP,    
+	MAY_WRITE_ATTR,        
+	MAY_WRITE_ATTR,        
 };
 
 struct syno_archive_permission_mapping {
@@ -111,6 +117,7 @@ static struct syno_archive_permission_mapping rgSynoArPermission[] = {
 	{S2_SMB_ARCHIVE, MAY_WRITE_ATTR},
 	{S2_SMB_HIDDEN, MAY_WRITE_ATTR},
 	{S2_SMB_SYSTEM, MAY_WRITE_ATTR},
+	{S2_SMB_SPARSE, MAY_WRITE_ATTR},
 
 	{S2_SMB_READONLY, MAY_WRITE_ATTR},
 	{S2_SYNO_ACL_IS_OWNER_GROUP, MAY_GET_OWNER_SHIP},
@@ -132,7 +139,7 @@ long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
 	int i = 0;
 #endif
 	mutex_lock(&inode->i_syno_mutex);
-	archive_bit = inode->i_mode2;
+	archive_bit = inode->i_archive_bit;
 
 #ifdef CONFIG_FS_SYNO_ACL
 	if (IS_SYNOACL(inode)) {
@@ -146,6 +153,12 @@ long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
 		if (err) {
 			goto unlock;
 		}
+	} else if (inode->i_op->syno_bypass_is_synoacl) {
+		err = inode->i_op->syno_bypass_is_synoacl(dentry,
+				        BYPASS_SYNOACL_SYNOARCHIVE_OVERWRITE, -EPERM);
+		if (err) {
+			goto unlock;
+		}
 	} else {
 		if (!is_owner_or_cap(inode)) {
 			err = -EPERM;
@@ -153,7 +166,13 @@ long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
 		}
 	}
 	if (ALL_SYNO_ACL_ARCHIVE & flags) {
-		if (!IS_FS_SYNOACL(inode)) {
+		if (inode->i_op->syno_bypass_is_synoacl) {
+			err = inode->i_op->syno_bypass_is_synoacl(dentry,
+					        BYPASS_SYNOACL_SYNOARCHIVE_OVERWRITE_ACL, -EOPNOTSUPP);
+			if (err) {
+				goto unlock;
+			}
+		} else if (!IS_FS_SYNOACL(inode)) {
 			err = -EOPNOTSUPP;
 			goto unlock;
 		}
@@ -193,7 +212,7 @@ long __SYNOArchiveSet(struct dentry *dentry, unsigned int cmd)
 	u32 archive_bit;
 
 	mutex_lock(&inode->i_syno_mutex);
-	archive_bit = inode->i_mode2;
+	archive_bit = inode->i_archive_bit;
 
 	if ((rgSynoAr[i].isSetCmd == ((archive_bit & rgSynoAr[i].sAr)?1:0))){
 		err = 0;

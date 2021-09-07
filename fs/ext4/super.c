@@ -362,8 +362,11 @@ static void ext4_handle_error(struct super_block *sb)
 	 
 	if ((0 != strcmp(es->s_last_mounted, "/"))
 			&& (0 == sbi->s_new_error_fs_event_flag)
+			&& (sbi->s_last_notify_time == 0 ||
+			    time_after(jiffies, sbi->s_last_notify_time + 24*60*60*HZ))
 			&& (es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC))) {
 		sbi->s_new_error_fs_event_flag = 1;
+		sbi->s_last_notify_time = jiffies;
 		SYNOExt4GetDSMVersion(es->s_volume_name, szDsmVersion);
 		if ('\0' != szDsmVersion[0]) {
 			SynoAutoErrorFsReport(szDsmVersion , 0);

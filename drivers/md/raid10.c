@@ -851,6 +851,48 @@ static void status(struct seq_file *seq, mddev_t *mddev)
 }
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#ifdef MY_ABC_HERE
+static inline unsigned char SynoIsRaidReachMaxDegrade(mddev_t *mddev)
+{
+	conf_t *conf = mddev->private;
+	int first = 0;
+	int first_orig = first;
+	int blStandardRaid10 = 0;
+	int ret = 0;
+
+	if (1 < conf->near_copies && !(conf->raid_disks % conf->near_copies)) {
+		blStandardRaid10 = 1;
+	}
+
+	do {
+		int n = conf->copies;
+		int cnt = 0;
+
+		while (n--) {
+			if (conf->mirrors[first].rdev &&
+				!test_bit(Faulty, &conf->mirrors[first].rdev->flags)&&
+				test_bit(In_sync, &conf->mirrors[first].rdev->flags)) {
+				cnt++;
+			}
+			first = (first+1) % conf->raid_disks;
+		}
+
+		if (cnt <= 1) {
+			ret = 1;
+			goto END;
+		}
+
+		if (!blStandardRaid10) {
+			first_orig = (first_orig+1) % conf->raid_disks;
+			first = first_orig;
+		}
+	} while (first != 0);
+
+END:
+	return ret;
+}
+#endif
+
 static int
 blRaid10Enough(conf_t *conf,
 			   mdk_rdev_t *rdev)
@@ -2227,6 +2269,9 @@ static struct mdk_personality raid10_personality =
 	.sync_request	= sync_request,
 	.quiesce	= raid10_quiesce,
 	.size		= raid10_size,
+#ifdef MY_ABC_HERE
+	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
+#endif
 };
 
 static int __init raid_init(void)

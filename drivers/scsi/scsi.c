@@ -548,8 +548,10 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 		if(syno_hibernation_log_sec > 0) {
 			syno_disk_hiternation_cmd_printk(cmd->device, cmd);
 		}
-#endif
-		cmd->device->idle = jiffies;
+#endif  
+		if (0 == cmd->device->do_standby_syncing) {
+			cmd->device->idle = jiffies;
+		}
 		cmd->device->spindown = 0;
 	}
 
@@ -583,13 +585,17 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 			if(syno_hibernation_log_sec > 0) {
 				syno_disk_hiternation_cmd_printk(cmd->device, cmd);
 			}
-#endif
-			cmd->device->idle = jiffies;
+#endif  
+			if (0 == cmd->device->do_standby_syncing) {
+				cmd->device->idle = jiffies;
+			}
 		}
 	} else if(LOG_SENSE != cmd->cmnd[0] &&
 			TEST_UNIT_READY != cmd->cmnd[0] &&
 			SYNCHRONIZE_CACHE != cmd->cmnd[0]) {
-		cmd->device->idle = jiffies;
+		if (0 == cmd->device->do_standby_syncing) {
+			cmd->device->idle = jiffies;
+		}
 	}
 #endif  
 

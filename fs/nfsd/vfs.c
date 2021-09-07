@@ -1706,6 +1706,31 @@ struct readdir_data {
 	int		full;
 };
 
+#ifdef MY_ABC_HERE
+const struct {
+	char * name;
+	int len;
+} hidden_files[] = {
+	{"@eaDir", 6},
+	{"@tmp", 4},
+	{"@sharebin", 9},
+	{".AppleDesktop", 13},
+};
+
+static int is_hidden_file(const char *name, int namlen) {
+	 
+	int i = 0;
+
+	for (i = 0; i < ARRAY_SIZE(hidden_files); i++) {
+		if (namlen == hidden_files[i].len
+			&& !strncmp(name, hidden_files[i].name, namlen)) {
+			return 1;
+		}
+	}
+	return 0;
+}
+#endif
+
 static int nfsd_buffered_filldir(void *__buf, const char *name, int namlen,
 				 loff_t offset, u64 ino, unsigned int d_type)
 {
@@ -1729,8 +1754,13 @@ static int nfsd_buffered_filldir(void *__buf, const char *name, int namlen,
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+static __be32 nfsd_buffered_readdir(struct file *file, filldir_t func,
+				    struct readdir_cd *cdp, loff_t *offsetp, int hide_hidden_file)
+#else
 static __be32 nfsd_buffered_readdir(struct file *file, filldir_t func,
 				    struct readdir_cd *cdp, loff_t *offsetp)
+#endif
 {
 	struct readdir_data buf;
 	struct buffered_dirent *de;
@@ -1751,7 +1781,6 @@ static __be32 nfsd_buffered_readdir(struct file *file, filldir_t func,
 		cdp->err = nfserr_eof;  
 		buf.used = 0;
 		buf.full = 0;
-
 		host_err = vfs_readdir(file, nfsd_buffered_filldir, &buf);
 		if (buf.full)
 			host_err = 0;
@@ -1772,12 +1801,23 @@ static __be32 nfsd_buffered_readdir(struct file *file, filldir_t func,
 		while (size > 0) {
 			offset = de->offset;
 
+#ifdef MY_ABC_HERE
+			if (!hide_hidden_file || !is_hidden_file(de->name, de->namlen)) {
+				if (func(cdp, de->name, de->namlen, de->offset,
+					 de->ino, de->d_type))
+					break;
+
+				if (cdp->err != nfs_ok)
+					break;
+			}
+#else
 			if (func(cdp, de->name, de->namlen, de->offset,
 				 de->ino, de->d_type))
 				break;
 
 			if (cdp->err != nfs_ok)
 				break;
+#endif
 
 			reclen = ALIGN(sizeof(*de) + de->namlen,
 				       sizeof(u64));
@@ -1807,6 +1847,13 @@ nfsd_readdir(struct svc_rqst *rqstp, struct svc_fh *fhp, loff_t *offsetp,
 	__be32		err;
 	struct file	*file;
 	loff_t		offset = *offsetp;
+#ifdef MY_ABC_HERE
+	char ex_path_buf[128] = {0};
+	char path_buf[128] = {0};
+	char *ex_path = NULL;
+	char *path = NULL;
+	int hide_hidden_file = 0;
+#endif
 
 	err = nfsd_open(rqstp, fhp, S_IFDIR, NFSD_MAY_READ, &file);
 	if (err)
@@ -1818,7 +1865,17 @@ nfsd_readdir(struct svc_rqst *rqstp, struct svc_fh *fhp, loff_t *offsetp,
 		goto out_close;
 	}
 
+#ifdef MY_ABC_HERE
+	ex_path = d_path(&fhp->fh_export->ex_path, ex_path_buf, sizeof(ex_path_buf));
+	path = d_path(&file->f_path, path_buf, sizeof(path_buf));
+	if (!IS_ERR(ex_path) && !IS_ERR(path)) {
+		hide_hidden_file = !strcmp(ex_path, path);
+	}
+
+	err = nfsd_buffered_readdir(file, func, cdp, offsetp, hide_hidden_file);
+#else
 	err = nfsd_buffered_readdir(file, func, cdp, offsetp);
+#endif
 
 	if (err == nfserr_eof || err == nfserr_toosmall)
 		err = nfs_ok;  
@@ -1933,7 +1990,8 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 #endif
 	 
 	if (err == -EACCES && S_ISREG(inode->i_mode) &&
-	    acc == (NFSD_MAY_READ | NFSD_MAY_OWNER_OVERRIDE))
+	     (acc == (NFSD_MAY_READ | NFSD_MAY_OWNER_OVERRIDE) ||
+	      acc == (NFSD_MAY_READ | NFSD_MAY_READ_IF_EXEC)))
 #ifdef CONFIG_FS_SYNO_ACL
 	{
 		if (IS_SYNOACL(inode))

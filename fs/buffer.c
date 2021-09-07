@@ -748,7 +748,11 @@ grow_buffers(struct block_device *bdev, sector_t block, int size)
 			bdevname(bdev, b));
 		return -EIO;
 	}
+#ifdef MY_ABC_HERE
+	block = ((sector_t)index) << sizebits;
+#else
 	block = index << sizebits;
+#endif  
 	 
 	page = grow_dev_page(bdev, block, index, size);
 	if (!page)

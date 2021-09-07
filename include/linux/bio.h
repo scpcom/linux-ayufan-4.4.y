@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  
 #ifndef __LINUX_BIO_H
 #define __LINUX_BIO_H
@@ -83,6 +86,9 @@ struct bio {
 #define BIO_NULL_MAPPED 9	 
 #define BIO_FS_INTEGRITY 10	 
 #define BIO_QUIET	11	 
+#ifdef MY_ABC_HERE
+#define BIO_AUTO_REMAP	12	 
+#endif
 #define bio_flagged(bio, flag)	((bio)->bi_flags & (1 << (flag)))
 
 #define BIO_POOL_BITS		(4)

@@ -10,6 +10,15 @@
 #include <linux/sched.h>
 #include <linux/namei.h>
 
+#ifdef MY_ABC_HERE
+#include <linux/xattr.h>
+#endif
+
+#ifdef MY_ABC_HERE
+#include "../ntfs/time.h"
+#include "../ntfs/endian.h"
+#endif  
+
 #if BITS_PER_LONG >= 64
 static inline void fuse_dentry_settime(struct dentry *entry, u64 time)
 {
@@ -707,15 +716,15 @@ static void fuse_fillattr(struct inode *inode, struct fuse_attr *attr,
 	stat->blocks = attr->blocks;
 	stat->blksize = (1 << inode->i_blkbits);
 #ifdef MY_ABC_HERE
-	stat->SynoMode = 0;
+	stat->syno_archive_bit = 0;
 #endif
 #ifdef MY_ABC_HERE
 	 
 	stat->syno_archive_version = 0;
 #endif
 #ifdef MY_ABC_HERE
-	stat->SynoCreateTime.tv_sec = 0;
-	stat->SynoCreateTime.tv_nsec = 0;
+	stat->syno_create_time.tv_sec = 0;
+	stat->syno_create_time.tv_nsec = 0;
 #endif
 }
 
@@ -1422,6 +1431,87 @@ static int fuse_removexattr(struct dentry *entry, const char *name)
 	return err;
 }
 
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#define SZ_FS_NTFS	"ntfs"
+#define IS_NTFS_FS(inode) (inode->i_sb->s_subtype && !strcmp(SZ_FS_NTFS, inode->i_sb->s_subtype))
+#endif  
+#ifdef MY_ABC_HERE
+#define XATTR_NTFS_CREATE_TIME "ntfs_crtime"
+#endif  
+#ifdef MY_ABC_HERE
+static int fuse_syno_ntfs_getattr(struct dentry *dentry, struct kstat *stat, int stat_flag)
+{
+#ifdef MY_ABC_HERE
+	int size = 0;
+	sle64 time_le = 0;
+	s64 time_s = 0;
+
+	if (stat_flag & SYNOST_CREATE_TIME) {
+		size = fuse_getxattr(dentry, XATTR_SYSTEM_PREFIX XATTR_NTFS_CREATE_TIME, &time_s, sizeof(time_s));
+		if (size == sizeof(time_s)) {
+			time_le = cpu_to_sle64(time_s);
+			stat->syno_create_time = ntfs2utc(time_le);
+		} else {
+			memset(&stat->syno_create_time, 0, sizeof(stat->syno_create_time));
+		}
+	}
+#endif  
+#ifdef MY_ABC_HERE
+	if (stat_flag & SYNOST_ARCHIVE_BIT)
+		stat->syno_archive_bit = dentry->d_inode->i_archive_bit;
+#endif  
+#ifdef MY_ABC_HERE
+	if (stat_flag & SYNOST_ARCHIVE_VER)
+		 stat->syno_archive_version = dentry->d_inode->i_archive_version;
+#endif  
+	return 0;
+}
+
+static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int stat_flag)
+{
+	if (IS_NTFS_FS(dentry->d_inode)) {
+		return fuse_syno_ntfs_getattr(dentry, stat, stat_flag);
+	}
+
+#ifdef MY_ABC_HERE
+	if (stat_flag & SYNOST_CREATE_TIME)
+		stat->syno_create_time = dentry->d_inode->i_create_time;
+#endif  
+#ifdef MY_ABC_HERE
+	if (stat_flag & SYNOST_ARCHIVE_BIT)
+		stat->syno_archive_bit = dentry->d_inode->i_archive_bit;
+#endif  
+#ifdef MY_ABC_HERE
+	if (stat_flag & SYNOST_ARCHIVE_VER)
+		 stat->syno_archive_version = dentry->d_inode->i_archive_version;
+#endif  
+	return 0;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+static int fuse_syno_set_ntfs_create_time(struct dentry *dentry, struct timespec* time)
+{
+	sle64 time_le;
+	s64 time_s;
+
+	time_le = utc2ntfs(*time);
+	time_s = sle64_to_cpu(time_le);
+
+	return fuse_setxattr(dentry, XATTR_SYSTEM_PREFIX XATTR_NTFS_CREATE_TIME, &time_s, sizeof(time_s), 0);
+}
+
+static int fuse_create_time_set(struct dentry *dentry, struct timespec* time)
+{
+	struct inode *inode = dentry->d_inode;
+
+	if (IS_NTFS_FS(inode)) {
+		return fuse_syno_set_ntfs_create_time(dentry, time);
+	}
+	return -EOPNOTSUPP;
+}
+#endif  
+
 static const struct inode_operations fuse_dir_inode_operations = {
 	.lookup		= fuse_lookup,
 	.mkdir		= fuse_mkdir,
@@ -1439,6 +1529,12 @@ static const struct inode_operations fuse_dir_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
+#ifdef MY_ABC_HERE
+	.syno_getattr	= fuse_syno_getattr,
+#endif
+#ifdef MY_ABC_HERE
+	.syno_set_crtime = fuse_create_time_set,
+#endif
 };
 
 static const struct file_operations fuse_dir_operations = {
@@ -1458,6 +1554,12 @@ static const struct inode_operations fuse_common_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
+#ifdef MY_ABC_HERE
+	.syno_getattr	= fuse_syno_getattr,
+#endif
+#ifdef MY_ABC_HERE
+	.syno_set_crtime = fuse_create_time_set,
+#endif
 };
 
 static const struct inode_operations fuse_symlink_inode_operations = {
@@ -1470,6 +1572,12 @@ static const struct inode_operations fuse_symlink_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
+#ifdef MY_ABC_HERE
+	.syno_getattr	= fuse_syno_getattr,
+#endif
+#ifdef MY_ABC_HERE
+	.syno_set_crtime = fuse_create_time_set,
+#endif
 };
 
 void fuse_init_common(struct inode *inode)

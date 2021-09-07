@@ -3577,19 +3577,19 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 #ifdef MY_ABC_HERE
 #ifdef MY_DEF_HERE
 	if (EXT4_SB(sb)->s_swap_create_time) {
-		inode->i_CreateTime.tv_sec = (signed)le32_to_cpu(raw_inode->i_crtime);
-		inode->i_CreateTime.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
+		inode->i_create_time.tv_sec = (signed)le32_to_cpu(raw_inode->i_crtime);
+		inode->i_create_time.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
 	} else {
-		inode->i_CreateTime.tv_sec = raw_inode->i_crtime;
-		inode->i_CreateTime.tv_nsec = raw_inode->i_crtime_extra;
+		inode->i_create_time.tv_sec = raw_inode->i_crtime;
+		inode->i_create_time.tv_nsec = raw_inode->i_crtime_extra;
 	}
 #else
-	inode->i_CreateTime.tv_sec = (signed)le32_to_cpu(raw_inode->i_crtime);
-	inode->i_CreateTime.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
+	inode->i_create_time.tv_sec = (signed)le32_to_cpu(raw_inode->i_crtime);
+	inode->i_create_time.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
 #endif
 #endif
 #ifdef MY_ABC_HERE
-	inode->i_mode2 = le16_to_cpu(raw_inode->ext4_mode2);
+	inode->i_archive_bit = le16_to_cpu(raw_inode->ext4_mode2);
 #endif
 
 	inode->i_version = le32_to_cpu(raw_inode->i_disk_version);
@@ -3749,21 +3749,21 @@ static int ext4_do_update_inode(handle_t *handle,
 #ifdef MY_ABC_HERE
 #ifdef MY_DEF_HERE
 	if (EXT4_SB(inode->i_sb)->s_swap_create_time) {
-		raw_inode->i_crtime = cpu_to_le32(inode->i_CreateTime.tv_sec);
-		raw_inode->i_crtime_extra = cpu_to_le32(inode->i_CreateTime.tv_nsec);
+		raw_inode->i_crtime = cpu_to_le32(inode->i_create_time.tv_sec);
+		raw_inode->i_crtime_extra = cpu_to_le32(inode->i_create_time.tv_nsec);
 	} else {
-		raw_inode->i_crtime = inode->i_CreateTime.tv_sec;
-		raw_inode->i_crtime_extra = inode->i_CreateTime.tv_nsec;
+		raw_inode->i_crtime = inode->i_create_time.tv_sec;
+		raw_inode->i_crtime_extra = inode->i_create_time.tv_nsec;
 	}
 #else
-	raw_inode->i_crtime = cpu_to_le32(inode->i_CreateTime.tv_sec);
-	raw_inode->i_crtime_extra = cpu_to_le32(inode->i_CreateTime.tv_nsec);
+	raw_inode->i_crtime = cpu_to_le32(inode->i_create_time.tv_sec);
+	raw_inode->i_crtime_extra = cpu_to_le32(inode->i_create_time.tv_nsec);
 #endif
 #else
 	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
 #endif
 #ifdef MY_ABC_HERE
-	raw_inode->ext4_mode2 = cpu_to_le16(inode->i_mode2);  
+	raw_inode->ext4_mode2 = cpu_to_le16(inode->i_archive_bit);  
 #endif
 
 	if (ext4_inode_blocks_set(handle, raw_inode, ei))

@@ -82,15 +82,14 @@ extern int syno_hibernation_log_sec;
 
 #include <linux/namei.h>
 
-extern int __SYNOCaselessStat(char __user * filename, int isLink, struct kstat *stat, int *lastComponent);
+extern int __SYNOCaselessStat(char __user * filename, int isLink, struct kstat *stat);
 
 asmlinkage long sys32_SYNOCaselessStat(char __user * filename, struct stat64 __user *statbuf)
 {
-	int lastComponent = 0;
 	long error = -1;
 	struct kstat stat;
 
-	error = __SYNOCaselessStat(filename, 0, &stat, &lastComponent);
+	error = __SYNOCaselessStat(filename, 0, &stat);
 	if (!error) {
 		error = cp_stat64(statbuf, &stat);
 	}
@@ -100,11 +99,10 @@ asmlinkage long sys32_SYNOCaselessStat(char __user * filename, struct stat64 __u
 
 asmlinkage long sys32_SYNOCaselessLStat(char __user * filename, struct stat64 __user *statbuf)
 {
-	int lastComponent = 0;
 	long error = -1;
 	struct kstat stat;
 
-	error = __SYNOCaselessStat(filename, 1, &stat, &lastComponent);
+	error = __SYNOCaselessStat(filename, 1, &stat);
 	if (!error) {
 		error = cp_stat64(statbuf, &stat);
 	}
@@ -118,9 +116,9 @@ asmlinkage long sys32_SYNOCaselessLStat(char __user * filename, struct stat64 __
 #include <linux/namei.h>
 
 struct SYNOSTAT64_EXTRA {
-	struct compat_timespec creatTime;   
-	unsigned int bkpVer;  		 
-	unsigned int archBit; 		 
+	struct compat_timespec create_time;   
+	unsigned int archive_version;  		 
+	unsigned int archive_bit; 		 
 	unsigned int lastComponent;  
 };
 
@@ -141,35 +139,35 @@ static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYN
 	}
 
 #ifdef MY_ABC_HERE
-	if (flags & SYNOST_ARBIT) {
-		if (__put_user(pKst->SynoMode, &pSt->archBit)){
+	if (flags & SYNOST_ARCHIVE_BIT) {
+		if (__put_user(pKst->syno_archive_bit, &pSt->archive_bit)){
 			goto Out;
 		}
 	}
 #endif  
 
 #ifdef MY_ABC_HERE
-	if (flags & SYNOST_BKPVER) {
-		if (__put_user(pKst->syno_archive_version, &pSt->bkpVer)){
+	if (flags & SYNOST_ARCHIVE_VER) {
+		if (__put_user(pKst->syno_archive_version, &pSt->archive_version)){
 			goto Out;
 		}
 	}
 #endif  
 
 #ifdef MY_ABC_HERE
-	if (flags & SYNOST_CREATIME) {
-		if (__put_user(pKst->SynoCreateTime.tv_sec, &pSt->creatTime.tv_sec)){
+	if (flags & SYNOST_CREATE_TIME) {
+		if (__put_user(pKst->syno_create_time.tv_sec, &pSt->create_time.tv_sec)){
 			goto Out;
 		}
-		if (pKst->SynoCreateTime.tv_sec != pSt->creatTime.tv_sec) {
+		if (pKst->syno_create_time.tv_sec != pSt->create_time.tv_sec) {
 			error = -EOVERFLOW;
 			goto Out;
 		}
 
-		if (__put_user(pKst->SynoCreateTime.tv_nsec, &pSt->creatTime.tv_nsec)){
+		if (__put_user(pKst->syno_create_time.tv_nsec, &pSt->create_time.tv_nsec)){
 			goto Out;
 		}
-		if (pKst->SynoCreateTime.tv_nsec != pSt->creatTime.tv_nsec) {
+		if (pKst->syno_create_time.tv_nsec != pSt->create_time.tv_nsec) {
 			error = -EOVERFLOW;
 			goto Out;
 		}
@@ -184,19 +182,11 @@ Out:
 static long do_SYNOStat32(char __user * filename, int isLink, unsigned int f, struct SYNOSTAT64 __user * pSt)
 {
 	long error = -EINVAL;
-	int lastComponent = 0;
 	struct kstat kst;
 
 	if (f & SYNOST_IS_CASELESS) {
 #ifdef MY_ABC_HERE
-		error = __SYNOCaselessStat(filename, isLink, &kst, &lastComponent);
-		if (-ENOENT == error) {
-			if (pSt) {
-				if (__put_user(lastComponent, &pSt->ext.lastComponent)){
-					goto Out;
-				}
-			}
-		}
+		error = __SYNOCaselessStat(filename, isLink, &kst);
 #else
 		error = -EOPNOTSUPP;
 #endif

@@ -2139,11 +2139,11 @@ struct inode *ext3_iget(struct super_block *sb, unsigned long ino)
 	inode->i_mtime.tv_sec = (signed)le32_to_cpu(raw_inode->i_mtime);
 	inode->i_atime.tv_nsec = inode->i_ctime.tv_nsec = inode->i_mtime.tv_nsec = 0;
 #ifdef MY_ABC_HERE
-	inode->i_CreateTime.tv_sec = (signed)le32_to_cpu(raw_inode->ext3_CreateTime);
-	inode->i_CreateTime.tv_nsec = 0;
+	inode->i_create_time.tv_sec = (signed)le32_to_cpu(raw_inode->ext3_CreateTime);
+	inode->i_create_time.tv_nsec = 0;
 #endif
 #ifdef MY_ABC_HERE
-	inode->i_mode2 = le32_to_cpu(raw_inode->ext3_mode2);
+	inode->i_archive_bit = le32_to_cpu(raw_inode->ext3_mode2);
 #endif
 
 	ei->i_state = 0;
@@ -2319,10 +2319,10 @@ again:
 	raw_inode->i_fsize = ei->i_frag_size;
 #endif
 #ifdef MY_ABC_HERE
-	raw_inode->ext3_CreateTime = cpu_to_le32(inode->i_CreateTime.tv_sec);
+	raw_inode->ext3_CreateTime = cpu_to_le32(inode->i_create_time.tv_sec);
 #endif
 #ifdef MY_ABC_HERE
-	raw_inode->ext3_mode2 = cpu_to_le32(inode->i_mode2);
+	raw_inode->ext3_mode2 = cpu_to_le32(inode->i_archive_bit);
 #endif
 	raw_inode->i_file_acl = cpu_to_le32(ei->i_file_acl);
 	if (!S_ISREG(inode->i_mode)) {

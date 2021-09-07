@@ -27,10 +27,10 @@ void fsstack_copy_attr_all(struct inode *dest, const struct inode *src,
 
 #ifdef MY_ABC_HERE
 	 
-	dest->i_mode2 = src->i_mode2;
+	dest->i_archive_bit = src->i_archive_bit;
 #endif
 #ifdef MY_ABC_HERE
-	dest->i_CreateTime = src->i_CreateTime;
+	dest->i_create_time = src->i_create_time;
 #endif
 	 
 	if (!get_nlinks)

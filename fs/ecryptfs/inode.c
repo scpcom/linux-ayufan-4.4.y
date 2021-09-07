@@ -555,7 +555,7 @@ out:
 static void CopySynoArchive(struct dentry *ecrypt_entry, struct dentry *lower_entry)
 {
 	if (ecrypt_entry && ecrypt_entry->d_inode && lower_entry && lower_entry->d_inode) {
-		ecrypt_entry->d_inode->i_mode2 = lower_entry->d_inode->i_mode2;
+		ecrypt_entry->d_inode->i_archive_bit = lower_entry->d_inode->i_archive_bit;
 	}
 }
 #endif
@@ -832,7 +832,7 @@ static int ecryptfs_syno_set_crtime(struct dentry *dentry, struct timespec *time
 
 	error = syno_op_set_crtime(lower_dentry, time);
 	if (!error) {
-		dentry->d_inode->i_CreateTime = *time;
+		dentry->d_inode->i_create_time = *time;
 	}
 	return error;
 }
@@ -846,7 +846,7 @@ static int ecryptfs_syno_set_archive_bit(struct dentry *dentry, unsigned int arb
 
 	error = syno_op_set_archive_bit(lower_dentry, arbit);
 	if (!error) {
-		dentry->d_inode->i_mode2 = arbit;
+		dentry->d_inode->i_archive_bit = arbit;
 	}
 	return error;
 }
@@ -1051,10 +1051,10 @@ int ecryptfs_getattr(struct vfsmount *mnt, struct dentry *dentry,
 		generic_fillattr(dentry->d_inode, stat);
 		stat->blocks = lower_stat.blocks;
 #ifdef MY_ABC_HERE
-		stat->SynoMode = lower_stat.SynoMode;
+		stat->syno_archive_bit = lower_stat.syno_archive_bit;
 #endif
 #ifdef MY_ABC_HERE
-		stat->SynoCreateTime = lower_stat.SynoCreateTime;
+		stat->syno_create_time = lower_stat.syno_create_time;
 #endif
 #ifdef MY_ABC_HERE
 		stat->syno_archive_version = lower_stat.syno_archive_version;
@@ -1085,7 +1085,7 @@ ecryptfs_setxattr(struct dentry *dentry, const char *name, const void *value,
 #ifdef CONFIG_FS_SYNO_ACL
 	if (name && !strcmp(name, SYNO_ACL_XATTR_ACCESS)) {
 		 
-		dentry->d_inode->i_mode2 = lower_dentry->d_inode->i_mode2;
+		dentry->d_inode->i_archive_bit = lower_dentry->d_inode->i_archive_bit;
 	}
 #endif
 out:

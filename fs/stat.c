@@ -35,12 +35,6 @@ void generic_fillattr(struct inode *inode, struct kstat *stat)
 	stat->dev = inode->i_sb->s_dev;
 	stat->ino = inode->i_ino;
 	stat->mode = inode->i_mode;
-#ifdef MY_ABC_HERE
-	stat->SynoMode = inode->i_mode2;
-#endif
-#ifdef MY_ABC_HERE
-	stat->syno_archive_version = inode->i_archive_version;
-#endif
 	stat->nlink = inode->i_nlink;
 	stat->uid = inode->i_uid;
 	stat->gid = inode->i_gid;
@@ -48,9 +42,6 @@ void generic_fillattr(struct inode *inode, struct kstat *stat)
 	stat->atime = inode->i_atime;
 	stat->mtime = inode->i_mtime;
 	stat->ctime = inode->i_ctime;
-#ifdef MY_ABC_HERE
-	stat->SynoCreateTime = inode->i_CreateTime;
-#endif
 	stat->size = i_size_read(inode);
 #ifndef SYNO_FAST_RW_FIX
 #ifdef CONFIG_OXNAS_FAST_WRITES
@@ -146,6 +137,62 @@ int vfs_lstat(char __user *name, struct kstat *stat)
 	return vfs_fstatat(AT_FDCWD, name, stat, AT_SYMLINK_NOFOLLOW);
 }
 EXPORT_SYMBOL(vfs_lstat);
+
+#ifdef MY_ABC_HERE
+int __always_inline syno_vfs_getattr(struct path *path, struct kstat *stat, int stat_flags)
+{
+	int error = 0;
+
+	error = vfs_getattr(path->mnt, path->dentry, stat);
+	if ((!error) && stat_flags) {
+		struct inode *inode = path->dentry->d_inode;
+
+		if (inode->i_op->syno_getattr) {
+			error = inode->i_op->syno_getattr(path->dentry, stat, stat_flags);
+		} else {
+#ifdef MY_ABC_HERE
+			stat->syno_create_time = inode->i_create_time;
+#endif
+#ifdef MY_ABC_HERE
+			stat->syno_archive_bit = inode->i_archive_bit;
+#endif
+#ifdef MY_ABC_HERE
+			stat->syno_archive_version = inode->i_archive_version;
+#endif
+		}
+	}
+	return error;
+}
+
+int syno_vfs_fstat(unsigned int fd, struct kstat *stat, int stat_flags)
+{
+	struct file *f = fget(fd);
+	int error = -EBADF;
+
+	if (f) {
+		error = syno_vfs_getattr(&(f->f_path), stat, stat_flags);
+		fput(f);
+	}
+	return error;
+}
+EXPORT_SYMBOL(syno_vfs_fstat);
+
+int syno_vfs_stat(const char __user *name, struct kstat *stat, int flags, int stat_flags)
+{
+	struct path path;
+	int error;
+
+	error = user_path_at(AT_FDCWD, name, flags, &path);
+	if (error)
+		goto out;
+
+	error = syno_vfs_getattr(&path, stat, stat_flags);
+	path_put(&path);
+out:
+	return error;
+}
+EXPORT_SYMBOL(syno_vfs_stat);
+#endif  
 
 #ifdef __ARCH_WANT_OLD_STAT
 
@@ -536,7 +583,7 @@ int __SYNOCaselessStat(char __user * filename, int isLink, struct kstat *stat)
 	}
 	error = syno_user_path_at(AT_FDCWD, filename, flags, &path, &real_filename, &real_filename_len);
 	if (!error) {
-		error = vfs_getattr(path.mnt, path.dentry, stat);
+		error = syno_vfs_getattr(&path, stat, flags);
 		path_put(&path);
 		if (real_filename_len) {
 			error = copy_to_user(filename, real_filename, real_filename_len) ? -EFAULT : error;
@@ -669,22 +716,22 @@ static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYN
 			error = cp_new_stat64(pKst, &pSt64->st);
 		}
 #ifdef MY_ABC_HERE
-		if (flags & SYNOST_ARBIT) {
-			if (__put_user(pKst->SynoMode, &pSt64->ext.archBit)){
+		if (flags & SYNOST_ARCHIVE_BIT) {
+			if (__put_user(pKst->syno_archive_bit, &pSt64->ext.archive_bit)){
 				goto Out;
 			}
 		}
 #endif  
 #ifdef MY_ABC_HERE
-		if (flags & SYNOST_CREATIME) {
-			if (copy_to_user(&pSt64->ext.creatTime, &pKst->SynoCreateTime, sizeof(pSt64->ext.creatTime))){
+		if (flags & SYNOST_CREATE_TIME) {
+			if (copy_to_user(&pSt64->ext.create_time, &pKst->syno_create_time, sizeof(pSt64->ext.create_time))){
 				goto Out;
 			}
 		}
 #endif  
 #ifdef MY_ABC_HERE
-		if (flags & SYNOST_BKPVER) {
-			if (__put_user(pKst->syno_archive_version, &pSt64->ext.bkpVer)){
+		if (flags & SYNOST_ARCHIVE_VER) {
+			if (__put_user(pKst->syno_archive_version, &pSt64->ext.archive_version)){
 				goto Out;
 			}
 		}
@@ -696,22 +743,22 @@ static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYN
 			}
 		}
 #ifdef MY_ABC_HERE
-		if (flags & SYNOST_ARBIT) {
-			if (__put_user(pKst->SynoMode, &pSt->ext.archBit)){
+		if (flags & SYNOST_ARCHIVE_BIT) {
+			if (__put_user(pKst->syno_archive_bit, &pSt->ext.archive_bit)){
 				goto Out;
 			}
 		}
 #endif  
 #ifdef MY_ABC_HERE
-		if (flags & SYNOST_CREATIME) {
-			if (copy_to_user(&pSt->ext.creatTime, &pKst->SynoCreateTime, sizeof(pSt->ext.creatTime))){
+		if (flags & SYNOST_CREATE_TIME) {
+			if (copy_to_user(&pSt->ext.create_time, &pKst->syno_create_time, sizeof(pSt->ext.create_time))){
 				goto Out;
 			}
 		}
 #endif
 #ifdef MY_ABC_HERE
-		if (flags & SYNOST_BKPVER) {
-			if (__put_user(pKst->syno_archive_version, &pSt->ext.bkpVer)){
+		if (flags & SYNOST_ARCHIVE_VER) {
+			if (__put_user(pKst->syno_archive_version, &pSt->ext.archive_version)){
 				goto Out;
 			}
 		}
@@ -739,9 +786,9 @@ static int do_SYNOStat(char __user * filename, int isLink, int f, struct SYNOSTA
 #endif
 	} else {
 		if (isLink) {
-			error = vfs_lstat(filename, &kst);
+			error = syno_vfs_stat(filename, &kst, 0, f);
 		} else {
-			error = vfs_stat(filename, &kst);
+			error = syno_vfs_stat(filename, &kst, LOOKUP_FOLLOW, f);
 #ifdef MY_ABC_HERE
 			if(syno_hibernation_log_sec > 0) {
 				syno_do_hibernation_log(filename);
@@ -764,7 +811,7 @@ static int do_SYNOFStat(unsigned int fd, int flags, struct SYNOSTAT __user * pSt
 	int error;
 	struct kstat kst;
 
-	error = vfs_fstat(fd, &kst);
+	error = syno_vfs_fstat(fd, &kst, flags);
 	if (!error) {
 		error = SYNOStatCopyToUser(&kst, flags, pSt, pSt64);
 	}

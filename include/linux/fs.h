@@ -187,17 +187,17 @@ struct inodes_stat_t {
 #define IS_POSIXACL(inode)	__IS_FLG(inode, MS_POSIXACL)
 
 #ifdef CONFIG_FS_SYNO_ACL
-#define IS_SMB_READONLY(inode)	((inode)->i_mode2 & S2_SMB_READONLY)
+#define IS_SMB_READONLY(inode)	((inode)->i_archive_bit & S2_SMB_READONLY)
 #define IS_SYNOACL_SUPERUSER() (0 == current_fsuid())
 
-#define IS_INODE_SYNOACL(inode)	((inode)->i_mode2 & S2_SYNO_ACL_SUPPORT)
+#define IS_INODE_SYNOACL(inode)	((inode)->i_archive_bit & S2_SYNO_ACL_SUPPORT)
 #define IS_FS_SYNOACL(inode)	__IS_FLG(inode, MS_SYNOACL)
 #define IS_SYNOACL(inode)	(IS_INODE_SYNOACL(inode) && IS_FS_SYNOACL(inode))
 #define IS_SYNOACL_DENTRY(dentry)	(IS_INODE_SYNOACL(dentry->d_inode) && IS_FS_SYNOACL(dentry->d_inode))
 
-#define IS_SYNOACL_INHERIT(inode)	((inode)->i_mode2 & S2_SYNO_ACL_INHERIT)
-#define IS_SYNOACL_OWNER_IS_GROUP(inode)	((inode)->i_mode2 & S2_SYNO_ACL_IS_OWNER_GROUP)
-#define IS_SYNOACL_EXIST(inode)	((inode)->i_mode2 & S2_SYNO_ACL_EXIST)
+#define IS_SYNOACL_INHERIT(inode)	((inode)->i_archive_bit & S2_SYNO_ACL_INHERIT)
+#define IS_SYNOACL_OWNER_IS_GROUP(inode)	((inode)->i_archive_bit & S2_SYNO_ACL_IS_OWNER_GROUP)
+#define IS_SYNOACL_EXIST(inode)	((inode)->i_archive_bit & S2_SYNO_ACL_EXIST)
 #define HAS_SYNOACL(inode) ((IS_SYNOACL_EXIST(inode) || IS_SYNOACL_INHERIT(inode)))
 #define is_synoacl_owner(inode)	IS_SYNOACL_OWNER_IS_GROUP(inode)?in_group_p(inode->i_gid):(inode->i_uid == current_fsuid())
 #define is_synoacl_owner_or_capable(inode) (is_synoacl_owner(inode) || capable(CAP_FOWNER))
@@ -322,6 +322,15 @@ struct inodes_stat_t {
 #include <linux/time.h>
 #endif  
 
+#ifdef MY_ABC_HERE
+enum bypass_synoacl_type {
+	BYPASS_SYNOACL_SYNOUTIME,
+	BYPASS_SYNOACL_SYNOARCHIVE_OVERWRITE,
+	BYPASS_SYNOACL_SYNOARCHIVE_OVERWRITE_ACL,
+	BYPASS_SYNOACL_SYNOACL_XATTR,
+	BYPASS_SYNOACL_MAX
+};
+#endif  
 struct export_operations;
 struct hd_geometry;
 struct iovec;
@@ -601,10 +610,10 @@ struct inode {
 	struct timespec		i_mtime;
 	struct timespec		i_ctime;
 #ifdef MY_ABC_HERE
-	struct timespec		i_CreateTime;
+	struct timespec		i_create_time;
 #endif
 #ifdef MY_ABC_HERE
-	__u32			i_mode2;
+	__u32			i_archive_bit;
 #endif
 #ifdef MY_ABC_HERE
 	__u32			i_archive_version;
@@ -1262,6 +1271,10 @@ struct super_block {
 	struct mutex s_archive_mutex;   
 	u32		s_archive_version;
 #endif
+#ifdef MY_ABC_HERE
+	 
+	long relatime_period;
+#endif  
 };
 
 extern struct timespec current_fs_time(struct super_block *sb);
@@ -1380,6 +1393,9 @@ struct getbmapx;
 #endif
 
 struct inode_operations {
+#ifdef MY_ABC_HERE
+	int (*syno_getattr)(struct dentry *, struct kstat *, int flags);
+#endif  
 	int (*create) (struct inode *,struct dentry *,int, struct nameidata *);
 	struct dentry * (*lookup) (struct inode *,struct dentry *, struct nameidata *);
 #ifdef MY_ABC_HERE
@@ -1411,8 +1427,10 @@ struct inode_operations {
 	int (*syno_setattr_post)(struct dentry *, struct iattr *);
 	int (*syno_acl_init)(struct dentry *, struct inode *);
 	void (*syno_acl_to_mode)(struct dentry *, struct kstat *);
+	int (*syno_bypass_is_synoacl)(struct dentry *, int cmd, int reterr);
 #endif  
 #ifdef MY_ABC_HERE
+	int (*syno_get_archive_bit)(struct dentry *, unsigned int *);
 	int (*syno_set_archive_bit)(struct dentry *, unsigned int);
 #endif
 #ifdef MY_ABC_HERE
@@ -2287,7 +2305,7 @@ static inline int syno_op_set_crtime(struct dentry *dentry, struct timespec *tim
 	if (inode->i_op->syno_set_crtime) {
 		error = inode->i_op->syno_set_crtime(dentry, time);
 	} else {
-		inode->i_CreateTime = timespec_trunc(*time, inode->i_sb->s_time_gran);
+		inode->i_create_time = timespec_trunc(*time, inode->i_sb->s_time_gran);
 		inode->i_ctime = CURRENT_TIME;
 		mark_inode_dirty(inode);
 	}
@@ -2300,8 +2318,20 @@ static inline int syno_op_set_crtime(struct dentry *dentry, struct timespec *tim
 #ifdef MY_ABC_HERE
 static inline int syno_op_get_archive_bit(struct dentry *dentry, unsigned int *pArbit)
 {
-	*pArbit = dentry->d_inode->i_mode2;
-	return 0;
+	int err = 0;
+	struct inode *inode = dentry->d_inode;
+
+	if (inode->i_op->syno_get_archive_bit) {
+		err = inode->i_op->syno_get_archive_bit(dentry, pArbit);
+		if (-ENODATA == err) {
+			err = 0;
+			*pArbit = 0;
+		}
+	} else {
+		*pArbit = inode->i_archive_bit;
+	}
+
+	return err;
 }
 
 static inline int syno_op_set_archive_bit_nolock(struct dentry *dentry, unsigned int arbit)
@@ -2312,7 +2342,7 @@ static inline int syno_op_set_archive_bit_nolock(struct dentry *dentry, unsigned
 	if (inode->i_op->syno_set_archive_bit) {
 		err = inode->i_op->syno_set_archive_bit(dentry, arbit);
 	} else {
-		inode->i_mode2 = arbit;
+		inode->i_archive_bit = arbit;
 		inode->i_ctime = CURRENT_TIME;
 		mark_inode_dirty_sync(inode);
 	}

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _RAID1_H
 #define _RAID1_H
 
@@ -66,10 +63,6 @@ struct r1bio_s {
 
 	struct list_head	retry_list;
 	struct bitmap_update	*bitmap_update;
-#ifdef MY_ABC_HERE
-	unsigned int read_failed;
-	int orig_disk_idx;
-#endif
 	 
 	struct bio		*bios[0];
 	 

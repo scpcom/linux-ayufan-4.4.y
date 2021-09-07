@@ -1154,6 +1154,104 @@ void ata_eh_analyze_ncq_error(struct ata_link *link)
 	ehc->i.err_mask &= ~AC_ERR_DEV;
 }
 
+#ifdef MY_ABC_HERE
+extern unsigned char
+blSectorNeedAutoRemap(struct scsi_cmnd *scsi_cmd, sector_t lba);
+static unsigned int
+syno_ata_writes_sector(struct ata_queued_cmd *qc)
+{
+	struct ata_taskfile tf;
+	u8 buf[ATA_SECT_SIZE];
+	u8 blLBA48 = 0;
+	sector_t lba = 0;
+	struct bio* b = NULL;
+	unsigned int len = 0;
+	int i = 0;
+
+	blLBA48 = (qc->tf.flags & ATA_TFLAG_LBA48) ? 1 : 0;
+
+	lba =   (qc->result_tf.lbal & 0xff) |
+			((sector_t)qc->result_tf.lbam << 8) |
+			((sector_t)qc->result_tf.lbah << 16);
+	if (blLBA48) {
+		lba |=  ((sector_t)qc->result_tf.hob_lbal << 24) |
+				((sector_t)qc->result_tf.hob_lbam << 32) |
+				((sector_t)qc->result_tf.hob_lbah << 40);
+	} else {
+		lba |= (((sector_t)qc->result_tf.device & 0x0f) << 24);
+	}
+
+	ata_dev_printk(qc->dev, KERN_ERR, "%s unc at %llu\n",
+				   (qc->tf.flags & ATA_TFLAG_WRITE) ? "write" : "read",
+				   (unsigned long long)lba);
+
+	if (!(qc->tf.flags & ATA_TFLAG_WRITE) &&
+		!blSectorNeedAutoRemap(qc->scsicmd, lba)) {
+		return 0;
+	}
+
+#ifdef MY_ABC_HERE
+	 
+	if (!(qc->tf.flags & ATA_TFLAG_WRITE)) {
+		if (qc->scsicmd) {
+			if (qc->scsicmd->request) {
+				for (b = qc->scsicmd->request->bio; b; b = b->bi_next) {
+					len = 0;
+					for (i = 0; i < b->bi_vcnt; i++) {
+						len += b->bi_io_vec[i].bv_len;
+					}
+					if (b->bi_sector <= lba && lba < b->bi_sector + (len >> 9)) {
+						set_bit(BIO_AUTO_REMAP, &b->bi_flags);
+						printk("%s:%s(%d) set bio BIO_AUTO_REMAP bit on\n",
+							__FILE__, __FUNCTION__, __LINE__);
+					}
+				}
+			} else {
+				printk("%s:%s(%d) cannot trace request from scsi_cmd\n",
+					__FILE__, __FUNCTION__, __LINE__);
+			}
+		} else {
+			printk("%s:%s(%d) cannot trace scsicmd from ata_queued_cmd\n",
+				__FILE__, __FUNCTION__, __LINE__);
+		}
+	}
+#endif
+
+	tf = qc->result_tf;
+	tf.protocol = ATA_PROT_PIO;
+	tf.flags = (ATA_TFLAG_ISADDR | ATA_TFLAG_DEVICE | ATA_TFLAG_WRITE);
+	tf.flags |= ((blLBA48) ? ATA_TFLAG_LBA48 : 0);
+	tf.command = ((blLBA48) ? ATA_CMD_PIO_WRITE_EXT : ATA_CMD_PIO_WRITE);
+	tf.hob_feature = 0;
+	tf.hob_nsect = 0;  
+	tf.hob_lbah = ((blLBA48) ? tf.hob_lbah : 0);
+	tf.hob_lbam = ((blLBA48) ? tf.hob_lbam : 0);
+	tf.hob_lbal = ((blLBA48) ? tf.hob_lbal : 0);
+	tf.feature = 0;
+	tf.nsect = 1;
+	tf.ctl = qc->dev->link->ap->ctl;
+	tf.device &= ((blLBA48) ? 0 : 0x0f);  
+	tf.device |= ATA_LBA | ATA_DEVICE_OBS;  
+	tf.device = (qc->dev->devno ?
+					tf.device | ATA_DEV1 : tf.device & ~ATA_DEV1);  
+
+	ata_dev_printk(qc->dev, KERN_ERR,
+				   "insert remap command %02x/%02x:%02x:%02x:%02x:%02x/%02x:%02x:%02x:%02x:%02x/%02x ctl %02x flag %lu proto %02x\n",
+				   tf.command, tf.feature, tf.nsect,
+				   tf.lbal, tf.lbam, tf.lbah,
+				   tf.hob_feature, tf.hob_nsect,
+				   tf.hob_lbal, tf.hob_lbam, tf.hob_lbah,
+				   tf.device, tf.ctl, tf.flags, tf.protocol);
+
+	memset(buf, 0, sizeof(buf));
+	ata_dev_printk(qc->dev, KERN_WARNING,
+			       "Insert write command result %d\n",
+				   ata_exec_internal(qc->dev, &tf, NULL, DMA_TO_DEVICE,
+									 buf, ATA_SECT_SIZE, 0));
+	return 0;
+}
+#endif
+
 static unsigned int ata_eh_analyze_tf(struct ata_queued_cmd *qc,
 				      const struct ata_taskfile *tf)
 {
@@ -1178,6 +1276,14 @@ static unsigned int ata_eh_analyze_tf(struct ata_queued_cmd *qc,
 			qc->err_mask |= AC_ERR_MEDIA;
 		if (err & ATA_IDNF)
 			qc->err_mask |= AC_ERR_INVALID;
+#ifdef MY_ABC_HERE
+		 
+		if (!(qc->ap->pflags & ATA_PFLAG_FROZEN) &&
+			(!ata_is_ncq(qc->tf.protocol) || qc->err_mask & AC_ERR_NCQ) &&
+			err & ATA_UNC) {
+			syno_ata_writes_sector(qc);
+		}
+#endif
 		break;
 
 	case ATA_DEV_ATAPI:

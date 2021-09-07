@@ -77,6 +77,9 @@ struct scsi_device {
 #ifdef MY_ABC_HERE
 	char syno_disk_name[BDEVNAME_SIZE];		 
 #endif
+#ifdef MY_ABC_HERE
+	unsigned char auto_remap;
+#endif
 	unsigned int manufacturer;	 
 	unsigned sector_size;	 
 
@@ -144,6 +147,7 @@ struct scsi_device {
 	unsigned long   idle;    
 	unsigned char   spindown;
 	unsigned char   nospindown;
+	unsigned char   do_standby_syncing;
 #endif  
 
 	struct device		sdev_gendev,
@@ -160,7 +164,9 @@ struct scsi_device {
 	unsigned int standby_timeout_secs;
 	struct timer_list standby_timeout;	 
 #endif
-
+#ifdef MY_ABC_HERE
+	int iIsPmp;
+#endif  
 	unsigned long		sdev_data[0];
 } __attribute__((aligned(sizeof(unsigned long))));
 

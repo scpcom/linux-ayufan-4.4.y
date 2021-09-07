@@ -48,6 +48,10 @@ static struct pex_if_error {
 	MV_U32 ifNumber;
 } pex_err[MV_MAX_PEX_IF_NUMBER];
 
+#ifdef MY_ABC_HERE
+extern void printascii(const char *);
+#endif  
+
 void __init mv_pci_preinit(void)
 {
 	MV_ADDR_WIN win;
@@ -77,6 +81,11 @@ void __init mv_pci_preinit(void)
 			goto skip_pcie_workaround;
 		}
 apply_pcie_workaround:
+#ifdef MY_ABC_HERE
+		if (syno_is_hw_version(HW_DS212pv10) || syno_is_hw_version(HW_DS212pv20)) {
+			printascii("Apply DS212+ workaround\n");
+		}
+#endif  
 		if (!(0x1 & MV_REG_READ(PEX_LINK_STATUS_REG(pciIf)))) {
 			 
 			MV_REG_WRITE(PEX_LINK_CONTROL_REG(pciIf), MV_REG_READ(PEX_LINK_CONTROL_REG(pciIf)) | 0x10);
@@ -90,6 +99,11 @@ apply_pcie_workaround:
 
 			printk("PCIe link is enable, apply PCIe workaround\n");
 		}
+#ifdef MY_ABC_HERE
+		if (syno_is_hw_version(HW_DS212pv10) || syno_is_hw_version(HW_DS212pv20)) {
+			printascii("Apply DS212+ workaround done\n");
+		}
+#endif  
 skip_pcie_workaround:
 #endif
 

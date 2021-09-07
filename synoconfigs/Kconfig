@@ -88,6 +88,9 @@ config SYNO_QORIQ_TX_RESTART_HANG_FIX
 	default y
 
 config SYNO_SAS_ENCLOSURE_ID_CTRL
+	bool "This mechanism will help kernel to enum enclosure id control interface in sysfs"
+	depends on SCSI_ENCLOSURE && ENCLOSURE_SERVICES
+	default n
 
 config SYNO_NET_INIT_OPERATION
 	bool "fix the default eth0 status when booting without link"
@@ -125,4 +128,9 @@ config SYNO_213AIR_KERNEL_PANIC_WORK_AROUND
 
 config SYNO_DISPLAY_CPUINFO
     bool "Support display CPU Infomation"
+
+config SYNO_SATA_PM_DEVICE_GPIO
+	bool "Synology Specific PM Device Support"
+	depends on SATA_PMP
+	default y
 

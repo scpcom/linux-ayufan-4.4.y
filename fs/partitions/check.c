@@ -233,6 +233,31 @@ ssize_t part_inflight_show(struct device *dev,
 	return sprintf(buf, "%8u %8u\n", p->in_flight[0], p->in_flight[1]);
 }
 
+#ifdef MY_ABC_HERE
+extern void
+PartitionRemapModeSet(struct gendisk *gd,
+							struct hd_struct *phd,
+							unsigned char blAutoRemap);
+ssize_t part_auto_remap_show(struct device *dev,
+			struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", dev_to_part(dev)->auto_remap);
+}
+
+ssize_t part_auto_remap_store(struct device *dev,
+			struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	unsigned val = 0;
+	struct hd_struct *p = dev_to_part(dev);
+	struct gendisk *disk = part_to_disk(p);
+
+	sscanf(buf, "%d", &val);
+	PartitionRemapModeSet(disk, p, val ? 1 : 0);
+	return count;
+}
+#endif
+
 #ifdef CONFIG_FAIL_MAKE_REQUEST
 ssize_t part_fail_show(struct device *dev,
 		       struct device_attribute *attr, char *buf)
@@ -266,6 +291,9 @@ static DEVICE_ATTR(inflight, S_IRUGO, part_inflight_show, NULL);
 static struct device_attribute dev_attr_fail =
 	__ATTR(make-it-fail, S_IRUGO|S_IWUSR, part_fail_show, part_fail_store);
 #endif
+#ifdef MY_ABC_HERE
+	static DEVICE_ATTR(auto_remap, S_IRUGO|S_IWUSR, part_auto_remap_show, part_auto_remap_store);
+#endif
 
 static struct attribute *part_attrs[] = {
 	&dev_attr_partition.attr,
@@ -276,6 +304,9 @@ static struct attribute *part_attrs[] = {
 	&dev_attr_inflight.attr,
 #ifdef CONFIG_FAIL_MAKE_REQUEST
 	&dev_attr_fail.attr,
+#endif
+#ifdef MY_ABC_HERE
+	&dev_attr_auto_remap.attr,
 #endif
 	NULL
 };
@@ -417,6 +448,10 @@ struct hd_struct *add_partition(struct gendisk *disk, int partno,
 
 	if (!dev_get_uevent_suppress(ddev))
 		kobject_uevent(&pdev->kobj, KOBJ_ADD);
+
+#ifdef MY_ABC_HERE
+	PartitionRemapModeSet(disk, p, 0);
+#endif
 
 	return p;
 

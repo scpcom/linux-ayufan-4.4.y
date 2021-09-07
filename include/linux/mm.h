@@ -951,6 +951,7 @@ struct page *follow_page(struct vm_area_struct *, unsigned long address,
 #ifdef CONFIG_ARCH_FEROCEON
 #define FOLL_PTE_EXIST  0x100    
 #endif
+#define FOLL_COW	0x4000	 
 
 typedef int (*pte_fn_t)(pte_t *pte, pgtable_t token, unsigned long addr,
 			void *data);

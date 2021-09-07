@@ -39,11 +39,11 @@ static inline void SYNO_ArchiveModify(struct inode * TargetInode, int blSetSMBAr
 #ifdef MY_ABC_HERE
 	mutex_lock(&TargetInode->i_syno_mutex);
 	if (blSetSMBArchive) {
-		new_archive_bit = TargetInode->i_mode2 | (S2_SMB_ARCHIVE|ALL_IARCHIVE);
+		new_archive_bit = TargetInode->i_archive_bit | (S2_SMB_ARCHIVE|ALL_IARCHIVE);
 	} else {
-		new_archive_bit = TargetInode->i_mode2 | ALL_IARCHIVE;
+		new_archive_bit = TargetInode->i_archive_bit | ALL_IARCHIVE;
 	}
-	if (new_archive_bit == TargetInode->i_mode2)
+	if (new_archive_bit == TargetInode->i_archive_bit)
 		goto next;
 	syno_op_set_archive_bit_nolock(dentry, new_archive_bit);
 next:

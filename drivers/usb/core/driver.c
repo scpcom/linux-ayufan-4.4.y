@@ -720,7 +720,11 @@ void usb_rebind_intf(struct usb_interface *intf)
 		usb_driver_release_interface(driver, intf);
 	}
 
+#ifdef CONFIG_PM_SLEEP
 	if (intf->dev.power.status == DPM_ON) {
+#else
+	{
+#endif  
 		intf->needs_binding = 0;
 		rc = device_attach(&intf->dev);
 		if (rc < 0)

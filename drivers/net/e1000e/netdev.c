@@ -1,7 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/init.h>
@@ -1609,14 +1609,6 @@ static void e1000_set_itr(struct e1000_adapter *adapter)
 		new_itr = 4000;
 		goto set_itr_now;
 	}
-
-	adapter->tx_itr = e1000_update_itr(adapter,
-				    adapter->tx_itr,
-				    adapter->total_tx_packets,
-				    adapter->total_tx_bytes);
-	 
-	if (adapter->itr_setting == 3 && adapter->tx_itr == lowest_latency)
-		adapter->tx_itr = low_latency;
 
 	adapter->rx_itr = e1000_update_itr(adapter,
 				    adapter->rx_itr,

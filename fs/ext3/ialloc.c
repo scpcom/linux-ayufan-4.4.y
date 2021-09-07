@@ -440,10 +440,10 @@ got:
 	inode->i_blocks = 0;
 	inode->i_mtime = inode->i_atime = inode->i_ctime = CURRENT_TIME_SEC;
 #ifdef MY_ABC_HERE
-	inode->i_CreateTime = CURRENT_TIME_SEC;
+	inode->i_create_time = CURRENT_TIME_SEC;
 #endif
 #ifdef MY_ABC_HERE
-	inode->i_mode2 = ALL_SYNO_ARCHIVE;    
+	inode->i_archive_bit = ALL_SYNO_ARCHIVE;    
 #endif
 #ifdef MY_ABC_HERE
 	inode->i_archive_version = inode->i_sb->s_archive_version;

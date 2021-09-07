@@ -3415,3 +3415,35 @@ EXPORT_SYMBOL(sysctl_ms_jiffies);
 EXPORT_SYMBOL(sysctl_string);
 EXPORT_SYMBOL(sysctl_data);
 EXPORT_SYMBOL(unregister_sysctl_table);
+
+#ifdef MY_ABC_HERE
+char* syno_get_hw_version(void)
+{
+	static char SynoHwVersion[16] = {0};
+	char *ptr = gszSynoHWVersion + strlen(gszSynoHWVersion) - 2;
+
+	if (ptr && 0 == strcmp(ptr, "-j")) {
+		strncpy(SynoHwVersion, gszSynoHWVersion,
+				(strlen(gszSynoHWVersion) - 2) < (sizeof(SynoHwVersion) - 1) ?
+				(strlen(gszSynoHWVersion) - 2) : (sizeof(SynoHwVersion) - 1));
+	} else {
+		strncpy(SynoHwVersion, gszSynoHWVersion, sizeof(SynoHwVersion) - 1);
+	}
+	return SynoHwVersion;
+}
+EXPORT_SYMBOL(syno_get_hw_version);
+
+int syno_is_hw_version(const char *hw_version)
+{
+	if (NULL == hw_version) {
+		return 0;
+	}
+
+	if (0 == strcmp(syno_get_hw_version(), hw_version)) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+EXPORT_SYMBOL(syno_is_hw_version);
+#endif  
