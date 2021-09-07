@@ -81,11 +81,20 @@ extern void iscsi_print_session_params(iscsi_session_t *);
 extern int iscsi_print_dev_to_proc(char *, char **, off_t, int);
 extern int iscsi_print_sessions_to_proc(char *, char **, off_t, int);
 extern int iscsi_print_tpg_to_proc(char *, char **, off_t, int);
+#ifdef MY_ABC_HERE
+extern int rx_data(iscsi_conn_t *, struct iovec *, int, int, int);
+#else
 extern int rx_data(iscsi_conn_t *, struct iovec *, int, int);
+#endif
 extern int tx_data(iscsi_conn_t *, struct iovec *, int, int);
 #ifdef SNMP_SUPPORT
 extern void iscsi_collect_login_stats(iscsi_conn_t *, __u8, __u8);
 extern iscsi_tiqn_t *iscsi_snmp_get_tiqn(iscsi_conn_t *);
+#endif
+#ifdef MY_ABC_HERE
+extern void iscsi_rxthread_wakeup(struct iscsi_conn_s*);
+extern void iscsi_sk_write_space(struct sock*);
+extern void iscsi_sk_data_ready(struct sock*, int);
 #endif
 
 extern struct target_fabric_configfs *lio_target_fabric_configfs;

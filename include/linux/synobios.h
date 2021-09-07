@@ -232,6 +232,7 @@ typedef struct _SynoRtcTimePkt {
 
 #define MAX_CPU 2
 typedef struct _SynoCpuTemp {
+	unsigned char blSurface;
 	int cpu_num;	
 	int cpu_temp[MAX_CPU];
 } SYNOCPUTEMP;
@@ -445,7 +446,6 @@ typedef enum {
 	FAN_MICROP_PWM_WITH_CPUFAN,
 	FAN_MICROP_PWM_WITH_GPIO,
 	FAN_MICROP_PWM_WITH_CPUFAN_AND_GPIO,
-	FAN_MICROP_PWM_WITH_CPUFAN_AND_GPIO_TYPE2,
 } FAN_T;
 
 typedef enum {
@@ -643,7 +643,8 @@ typedef struct {
 #define HW_DS411slim   "DS411slim"     //"DS411slim"
 #define HW_DS411       "DS411"         //"DS411"
 #define HW_DS1511p     "DS1511+"       //"DS1511+"
-#define HW_DS211p      "DS211+"        //"DS211+"
+#define HW_DS211pv10   "DS211pv10"     //"DS211+"
+#define HW_DS211pv20   "DS211pv20"     //"DS211+"
 #define HW_RS411       "RS411"         //"RS411"
 #define HW_RS2211p     "RS2211+"       //"RS2211+"
 #define HW_RS2211rpp   "RS2211rp+"     //"RS2211rp+"
@@ -653,6 +654,11 @@ typedef struct {
 #define HW_DS3611xs    "DS3611xs"      //"DS3611xs"
 #define HW_DS111j      "DS111j"        //"DS111j"
 #define HW_DS212       "DS212"         //"DS212v10"
+#define HW_DS412p      "DS412+"        //"DS412+"
+#define HW_DS1812p     "DS1812+"       //"DS1812+"
+#define HW_RS212       "RS212"         //"RS212"
+#define HW_DS212j      "DS212j"        //"DS212j"
+#define HW_RS812       "RS812"         //"RS812"
 
 #define HW_UNKNOWN     "DSUnknown"
 									    
@@ -725,6 +731,11 @@ typedef enum {
 	MODEL_RS2211rpp,
 	MODEL_DS2411p,
 	MODEL_DS212,
+	MODEL_DS412p,
+	MODEL_DS1812p,
+	MODEL_RS212,
+	MODEL_DS212j,
+	MODEL_RS812,
 	MODEL_INVALID
 } PRODUCT_MODEL;
 

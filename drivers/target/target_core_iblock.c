@@ -595,14 +595,15 @@ int iblock_do_task(se_task_t *task)
 			" bio->bi_sector: %llu\n", task, bio, bio->bi_sector);
 
 #ifdef MY_ABC_HERE
-		submit_bio(
-			(TASK_CMD(task)->data_direction == DMA_TO_DEVICE),
-			bio);
+        submit_bio(
+            (TASK_CMD(task)->data_direction == DMA_TO_DEVICE),
+            bio);
 #else
-		submit_bio(
-			(TASK_CMD(task)->data_direction == SE_DIRECTION_WRITE),
-			bio);
+        submit_bio(
+            (TASK_CMD(task)->data_direction == SE_DIRECTION_WRITE),
+            bio);
 #endif
+
 
 		bio = nbio;
 	}
@@ -928,6 +929,7 @@ int iblock_map_task_SG(se_task_t *task)
 		DEBUG_IBLOCK("task: %p bio: %p Calling bio_add_page(): page:"
 			" %p len: %u offset: %u\n", task, bio, sg_page(&sg[i]),
 				sg[i].length, sg[i].offset);
+
 again:
 		ret = bio_add_page(bio, sg_page(&sg[i]), sg[i].length,
 				sg[i].offset);

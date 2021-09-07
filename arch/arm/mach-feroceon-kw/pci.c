@@ -120,7 +120,8 @@ void __init mv_pci_preinit(void)
 		if(MV_6282_A1_ID == mvCtrlModelRevGet())
 		{
 			/* init PCI express error handling */
-			mv_pci_error_init(pciIf);
+			// There has some board cannot boot if we enable this options. So disable it again.
+			//mv_pci_error_init(pciIf);
 		}
 
 #else

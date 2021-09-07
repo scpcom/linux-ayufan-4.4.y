@@ -66,9 +66,8 @@ static unsigned long CurPendingListWaking = 0;
 static unsigned long int g_jiffies_lastwake = 0;
 #endif
 
-#if defined(CONFIG_SYNO_MV88F6281)
-extern unsigned char SYNOKirkwoodIsBoardNeedPowerUpHDD(u32);
-extern int SYNO_CTRL_HDD_POWERON(int index, int value);
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+extern char gszSynoHWVersion[];
 #endif
 
 #define SECTOR_SIZE		512
@@ -4972,7 +4971,6 @@ int ata_sas_queuecmd(struct scsi_cmnd *cmd, void (*done)(struct scsi_cmnd *),
 EXPORT_SYMBOL_GPL(ata_sas_queuecmd);
 
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
-extern char gszSynoHWVersion[];
 int syno_is_reversed_scsi_host_model(int host_no)
 {
 	int index = -1;
@@ -5008,6 +5006,98 @@ END:
 	return ret;
 }
 
+#ifdef MY_ABC_HERE
+int syno_libata_disk_sequence_reverse(struct Scsi_Host *pScsiHost)
+{
+	int iRet = -1;
+	int iRevPortN;
+	int iAtaHostIdx;
+	int iPortDiff;
+	int iOrgDiskIdx;
+	struct ata_port *pAp = NULL;
+	struct ata_host *pAtaHost = NULL;
+
+	if( NULL == pScsiHost ) {
+		goto END;
+	}
+
+	/* RS810+ and RS810rp+ still need this function called.
+	 * Because that GRUB arguments would not be upgraded.
+	 */
+	iRet = syno_is_reversed_scsi_host_model(pScsiHost->host_no);
+	if( 0 <= iRet) {
+		goto END;
+	}
+
+	pAp = ata_shost_to_port(pScsiHost);
+
+	if( NULL == pAp ) {
+		goto END;
+	}
+
+	pAtaHost = pAp->host;
+
+	if ( 0 == giDiskSeqReverse[pAtaHost->host_no]) {
+		goto END;
+	}
+
+	iRevPortN = giDiskSeqReverse[pAtaHost->host_no] - '0';
+
+	if( 2 > iRevPortN ) {
+		goto END;
+	}
+
+	if( pAtaHost->n_ports < iRevPortN ) {
+		iRevPortN = pAtaHost->n_ports;
+	}
+
+	iAtaHostIdx = syno_libata_index_get_by_map(pAtaHost);
+	iPortDiff = pAp->print_id - pAtaHost->ports[0]->print_id;
+
+	if ( 0 > iAtaHostIdx ) {
+		iOrgDiskIdx = pScsiHost->host_no;
+	} else {
+		iOrgDiskIdx = iAtaHostIdx + iPortDiff;
+	}
+
+	iRet =  iOrgDiskIdx + iRevPortN - (2 * iPortDiff) - 1;
+
+END:
+	return iRet;
+}
+#endif
+
+int syno_libata_diskno_to_scsihostno(int iDiskNo)
+{
+	int iScsiHostNo;
+	struct Scsi_Host *pScsiHost = NULL;
+	struct ata_port *pAp = NULL;
+	int iErr = -1;
+
+	for(iScsiHostNo = 0;iScsiHostNo < ata_print_id; iScsiHostNo++) {
+		if (NULL == (pScsiHost = scsi_host_lookup(iScsiHostNo))) {
+			continue;
+		}
+
+		pAp = ata_shost_to_port(pScsiHost);
+		if(!pAp) {
+			scsi_host_put(pScsiHost);
+			continue;
+		}
+
+		if(pAp->syno_disk_index == (iDiskNo - 1)) {
+			scsi_host_put(pScsiHost);
+			iErr = iScsiHostNo;
+			break;
+		}
+
+		scsi_host_put(pScsiHost);
+	}
+	
+	return iErr;
+}
+EXPORT_SYMBOL(syno_libata_diskno_to_scsihostno);
+
 int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun)
 {
 	int index = 0;
@@ -5018,6 +5108,8 @@ int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lu
 	if(0 < strlen(gszDiskIdxMap)) {
 		mapped_idx = syno_libata_index_get_by_map(pAtaHost);
 	}
+
+	ap->syno_disk_index = -1;
 
 #ifdef MY_ABC_HERE
 	if (syno_is_synology_pm(ap)) {
@@ -5030,7 +5122,11 @@ int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lu
 		index = ((mapped_idx+1)*26) + channel; /* + 1 is for jumping to sdax */
 	} else {
 #endif
+#ifdef MY_ABC_HERE
+		if ( 0 > ( index = syno_libata_disk_sequence_reverse(host) ) ) {
+#else
 		if ( 0 > ( index = syno_is_reversed_scsi_host_model(host->host_no) ) ) {
+#endif
 			if ( 0 > mapped_idx) {
 				mapped_idx = host->host_no;
 			} else {
@@ -5039,6 +5135,8 @@ int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lu
 			/* treat other port multiplier as internal disk	*/
 			index = mapped_idx;
 		}
+
+		ap->syno_disk_index = index;
 #ifdef MY_ABC_HERE
 	}
 #endif
@@ -5088,3 +5186,4 @@ END:
 	return iRet;
 }
 #endif
+

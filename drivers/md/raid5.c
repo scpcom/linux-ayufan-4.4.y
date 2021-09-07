@@ -96,7 +96,6 @@
 
 #define printk_rl(args...) ((void) (printk_ratelimit() && printk(args)))
 
-
 #ifdef MY_ABC_HERE
 static unsigned char IsDiskErrorSet(mddev_t *mddev)
 {
@@ -211,7 +210,6 @@ static int stripe_operations_active(struct stripe_head *sh)
 	       test_bit(STRIPE_BIOFILL_RUN, &sh->state) ||
 	       test_bit(STRIPE_COMPUTE_RUN, &sh->state);
 }
-
 
 static void __release_stripe(raid5_conf_t *conf, struct stripe_head *sh)
 {

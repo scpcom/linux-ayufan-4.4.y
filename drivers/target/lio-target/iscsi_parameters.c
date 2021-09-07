@@ -76,7 +76,11 @@ int iscsi_login_rx_data(
 		return -1;
 	}
 
+#ifdef MY_ABC_HERE
+	rx_got = rx_data(conn, &iov, 1, length, 1);
+#else
 	rx_got = rx_data(conn, &iov, 1, length);
+#endif
 	if (rx_got != length) {
 		printk(KERN_ERR "rx_data returned %d, expecting %d.\n",
 				rx_got, length);

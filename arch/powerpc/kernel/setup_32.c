@@ -59,6 +59,10 @@ extern long g_internal_netif_num;
 extern char gszDiskIdxMap[16];
 #endif
 
+#ifdef MY_ABC_HERE
+extern char giDiskSeqReverse[8];
+#endif
+
 #define DBG(fmt...)
 
 extern void bootx_init(unsigned long r4, unsigned long phys);
@@ -255,6 +259,20 @@ static int __init early_disk_idx_map(char *p)
 	return 1;
 }
 __setup("DiskIdxMap=", early_disk_idx_map);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_disk_seq_reserve(char *p)
+{
+	snprintf(giDiskSeqReverse, sizeof(giDiskSeqReverse), "%s", p);
+
+	if('\0' != giDiskSeqReverse[0]) {
+		printk("Disk Sequence Reverse: %s\n", giDiskSeqReverse);
+	}
+
+	return 1;
+}
+__setup("DiskSeqReverse=", early_disk_seq_reserve);
 #endif
 
 

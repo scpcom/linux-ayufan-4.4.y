@@ -311,8 +311,12 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 	syno_pm_unique_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
 							sata_pmp_gscr_devid(ap->link.device->gscr),
 							&pm_pkg);
-	syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg);
-	syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg);
+	if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
+		goto END;
+	}
+	if (syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg)) {
+		goto END;
+	}
 
 	if (blCustomInfo) {
 		ap->PMSynoUnique = pm_pkg.var;
@@ -390,7 +394,7 @@ END_GPIO_WRITE:
 END:
 	return iRet;
 }
-#endif
+#endif /* MY_ABC_HERE */
 
 /**
  *	sata_pmp_qc_defer_cmd_switch - qc_defer for command switching PMP
@@ -926,6 +930,9 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 	struct ata_port *ap = link->ap;
 	u32 *gscr = (void *)ap->sector_buf;
 	int rc;
+#ifdef MY_ABC_HERE
+	struct ata_port *master_ap = NULL;
+#endif
 
 	DPRINTK("ENTER\n");
 
@@ -963,7 +970,9 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 
 #ifdef MY_ABC_HERE
 	if(funcSYNOSendEboxRefreshEvent) {
-		funcSYNOSendEboxRefreshEvent(ap->scsi_host->host_no);
+		if (NULL != ap) {
+			funcSYNOSendEboxRefreshEvent(ap->scsi_host->host_no);
+		}
 	}
 #endif
 
@@ -973,6 +982,7 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
  fail:
 	ata_dev_printk(dev, KERN_ERR,
 		       "PMP revalidation failed (errno=%d)\n", rc);
+
 	DPRINTK("EXIT, rc=%d\n", rc);
 	return rc;
 }

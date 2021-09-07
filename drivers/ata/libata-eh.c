@@ -765,7 +765,7 @@ void ata_scsi_error(struct Scsi_Host *host)
 		ap->pflags &= ~ATA_PFLAG_PMP_CONNECT;
 	}
 #endif
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 	if (ap->pflags & ATA_PFLAG_SYNO_BOOT_PROBE) {
 		ap->pflags &= ~ATA_PFLAG_SYNO_BOOT_PROBE;
 	}
@@ -3578,7 +3578,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 			ehc->classes[dev->devno] = ATA_DEV_UNKNOWN;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 	if (ap->nr_pmp_links &&
 		ap->pflags & ATA_PFLAG_SYNO_BOOT_PROBE) {
 		ata_port_printk(ap, KERN_INFO, "Apply Synology fast PMP boot\n");

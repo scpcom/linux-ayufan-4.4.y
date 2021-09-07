@@ -24,6 +24,7 @@
 #ifdef CONFIG_SYNO_MV88F6281
 
 #include <linux/gpio.h>
+#include <linux/synobios.h>
 #include "boardEnv/mvBoardEnvSpec.h"
 #include "ctrlEnv/sys/mvSysSata.h"
 #include "mvOs.h"
@@ -34,6 +35,8 @@
 #define SYNO_KW_DS211P 0x3
 #define SYNO_KW_DS212 0x5 
 #define SYNO_KW_RS411 0x8
+#define SYNO_KW_RS212 0x9 
+#define SYNO_KW_RS812 0xA
 
 #define GPIO_UNDEF				0xFF
 
@@ -51,6 +54,10 @@
 #define SYNO_LED_OFF		0
 #define SYNO_LED_ON			1
 #define SYNO_LED_BLINKING	2
+
+#ifdef  MY_ABC_HERE
+extern char gszSynoHWVersion[];
+#endif
 
 typedef struct __tag_SYNO_KW_HDD_PM_GPIO {
 	u8 hdd1_pm;
@@ -132,6 +139,8 @@ unsigned int Syno6282ModelIDGet(SYNO_KW_GENERIC_GPIO *pGpio)
 	 * 0x4 DS411Slim
 	 * 0x5 DS212
 	 * 0x8 RS411
+	 * 0x9 RS212
+	 * 0xA RS812
 	 */
 	return  (((gpio_get_value(pGpio->model.model_id_0) ? 1 : 0) << 3) | 
 			 ((gpio_get_value(pGpio->model.model_id_1) ? 1 : 0) << 2) | 
@@ -490,10 +499,13 @@ MV_U8 SYNOKirkwoodIsBoardNeedPowerUpHDD(MV_U32 disk_id) {
 
 	switch(boardId) {
 	case SYNO_DS109_ID:
-		if (2 == disk_id)
+		if (0 == strncmp(gszSynoHWVersion, HW_DS212j, strlen(gszSynoHWVersion)) && 2 <= disk_id)
+			ret = 1;
+		else if (2 == disk_id)
 			ret = 1;
 		break;
 	case SYNO_DS212_ID:
+		if (2 >= disk_id )
 			ret = 1;
 		break;
 	case SYNO_DS211_ID:
@@ -795,6 +807,14 @@ KW_6282_RS411_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 						},
 	};
 
+	if (SYNO_KW_RS212 == Syno6282ModelIDGet(&gpio_rs411)) {
+		gpio_rs411.ext_sata_led.hdd1_led_0 = 38;
+		gpio_rs411.ext_sata_led.hdd1_led_1 = 39;
+		gpio_rs411.ext_sata_led.hdd2_led_0 = 36;
+		gpio_rs411.ext_sata_led.hdd2_led_1 = 37;
+		printk("Apply RS212 GPIO\n");
+	}
+
 	*global_gpio = gpio_rs411;
 }
 /*
@@ -877,6 +897,13 @@ KW_6281_109_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 
 	*global_gpio = gpio_109;
 }
+static void 
+KW_6281_212j_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
+{
+	KW_6281_109_GPIO_init(global_gpio);
+	global_gpio->hdd_pm.hdd1_pm = 29;
+}
+
 
 /*
 Pin             Mode    Signal definition       Input/output    Pull-up/pull-down
@@ -1187,7 +1214,11 @@ void synology_gpio_init(void)
 	switch(boardId) {
 	case SYNO_DS109_ID:
 		printk("Synology 6281 1, 2 bay GPIO Init\n");
-		KW_6281_109_GPIO_init(&generic_gpio);
+		if (0 == strncmp(gszSynoHWVersion, HW_DS212j, strlen(gszSynoHWVersion))) {
+			KW_6281_212j_GPIO_init(&generic_gpio);
+		} else {
+			KW_6281_109_GPIO_init(&generic_gpio);
+		}
 		break;
 	case SYNO_DS211_ID:
 		KW_6282_211_GPIO_init(&generic_gpio);
@@ -1197,9 +1228,12 @@ void synology_gpio_init(void)
 		KW_6282_DS_4BAY_GPIO_init(&generic_gpio);
 		printk("Synology 6282 DS411slim GPIO Init\n");
 		break;
-	case SYNO_RS_6282_ID:
+	case SYNO_RS_6282_ID: //this is ID is used for RS411 and RS812
 		KW_6282_RS411_GPIO_init(&generic_gpio);
-		printk("Synology 6282 RS411 GPIO Init\n");
+		if(SYNO_KW_RS812 == Syno6282ModelIDGet(&generic_gpio))
+			printk("Synology 6282 RS812 GPIO Init\n");
+		else
+			printk("Synology 6282 RS411 GPIO Init\n");
 		break;
 	case SYNO_DS411_ID:
 		KW_6282_DS_4BAY_GPIO_init(&generic_gpio);

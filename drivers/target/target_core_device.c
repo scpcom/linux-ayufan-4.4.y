@@ -93,7 +93,6 @@ struct block_device *__linux_blockdevice_claim(
 		return bd;
 	}
 
-
 	*ret = 1;
 	return bd;
 }

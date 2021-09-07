@@ -140,6 +140,10 @@ extern char gszDiskIdxMap[16];
 #endif
 
 #ifdef MY_ABC_HERE
+extern char giDiskSeqReverse[8];
+#endif
+
+#ifdef MY_ABC_HERE
 extern unsigned char grgbLanMac[4][16];
 #endif
 
@@ -148,7 +152,7 @@ extern char gszSerialNum[12];
 extern char gszCustomSerialNum[32];
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
@@ -627,6 +631,20 @@ __setup("DiskIdxMap=", early_disk_idx_map);
 #endif
 
 #ifdef MY_ABC_HERE
+static int __init early_disk_seq_reserve(char *p)
+{
+	snprintf(giDiskSeqReverse, sizeof(giDiskSeqReverse), "%s", p);
+
+	if('\0' != giDiskSeqReverse[0]) {
+		printk("Disk Sequence Reverse: %s\n", giDiskSeqReverse);
+	}
+
+	return 1;
+}
+__setup("DiskSeqReverse=", early_disk_seq_reserve);
+#endif
+
+#ifdef MY_ABC_HERE
 static int __init early_mac1(char *p)
 {
 	snprintf(grgbLanMac[0], sizeof(grgbLanMac[0]), "%s", p);
@@ -668,7 +686,7 @@ static int __init early_mac4(char *p)
 __setup("mac4=", early_mac4);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 static int __init early_netif_seq(char *p)
 {
 	int len;
@@ -676,6 +694,27 @@ static int __init early_netif_seq(char *p)
 
 	// no net device switch required
 	if ((NULL == p) || (0 == (len = strlen(p)))) {
+		return 1;
+	}
+
+	/**
+	 *	We change the way that we represent the net device name is due to a truth that
+	 *	when a PCIE extension card is plugged in, the pcie name will change
+	 *	So we give up the pci-name as our matching condition, we use NIC up sequence instead.
+	 *	Because the NIC layout is fixed on our board, we the NIC up sequence won't change.
+	 *	And according to this sequence, we assign the device name to NIC
+	 *
+	 *	Following codes are designed to compatible with bromolow/x64 which has already been produced.
+	 *	Based on the truth that our bromolow/x64 has at least 2 internal lan so far (2011/5/24)
+	 *	And 2 internal lan needs netif_seq whose length is 12
+	 *	So we judge that if netif_seq is less than 12, then it should be new version of netif_seq
+	 *	2411+ has 2 internal lans now so we use 12 as our boundary condition
+	 */
+	if (len <= SYNO_MAX_SWITCHABLE_NET_DEVICE) {
+		netDevCount = len;
+		for(gSwitchDev = 0 ; gSwitchDev < netDevCount && gSwitchDev < SYNO_MAX_SWITCHABLE_NET_DEVICE ; gSwitchDev++) {
+			gDevPCIName[gSwitchDev][0] = *p++;
+		}
 		return 1;
 	}
 

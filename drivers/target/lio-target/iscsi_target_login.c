@@ -1095,6 +1095,18 @@ get_new_sock:
 	conn->conn_state = TARG_CONN_STATE_FREE;
 	conn->sock = new_sock;
 
+#ifdef MY_ABC_HERE
+	write_lock_bh(&conn->sock->sk->sk_callback_lock);
+	conn->sock->sk->sk_user_data = conn;
+
+	conn->old_sk_write_space = conn->sock->sk->sk_write_space;
+	conn->sock->sk->sk_write_space = iscsi_sk_write_space;
+
+	conn->old_sk_data_ready = conn->sock->sk->sk_data_ready; 
+	conn->sock->sk->sk_data_ready = iscsi_sk_data_ready;
+	write_unlock_bh(&conn->sock->sk->sk_callback_lock);
+#endif
+
 	if (set_sctp_conn_flag)
 		conn->conn_flags |= CONNFLAG_SCTP_STRUCT_FILE;
 
@@ -1118,10 +1130,16 @@ get_new_sock:
 	iov.iov_base	= buffer;
 	iov.iov_len	= ISCSI_HDR_LEN;
 
+#ifdef MY_ABC_HERE
+	if (rx_data(conn, &iov, 1, ISCSI_HDR_LEN, 1) <= 0) {
+		goto new_sess_out;
+	}
+#else
 	if (rx_data(conn, &iov, 1, ISCSI_HDR_LEN) <= 0) {
 		printk(KERN_ERR "rx_data() returned an error.\n");
 		goto new_sess_out;
 	}
+#endif
 
 	iscsi_opcode = (buffer[0] & ISCSI_OPCODE);
 	if (!(iscsi_opcode & ISCSI_INIT_LOGIN_CMND)) {
@@ -1295,7 +1313,8 @@ get_new_sock:
 #ifdef MY_ABC_HERE
 	for( i = 0; i <= MAX_LOGIN_RETRY; ++i ) {
 		spin_lock_bh(&tpg->tpg_se_tpg->session_lock);
-		if( atomic_read(&tpg->nr_sessions) < atomic_read(&tpg->max_nr_sessions) ) {
+		if( SESS(conn) && SESS(conn)->sess_ops->SessionType || // skip discovery session
+		    atomic_read(&tpg->nr_sessions) < atomic_read(&tpg->max_nr_sessions) ) {
 			spin_unlock_bh(&tpg->tpg_se_tpg->session_lock);
 			break;
 		} else if( i < MAX_LOGIN_RETRY ) {

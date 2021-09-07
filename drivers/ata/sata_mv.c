@@ -91,6 +91,10 @@ module_param(irq_coalescing_usecs, int, S_IRUGO);
 MODULE_PARM_DESC(irq_coalescing_usecs,
 		 "IRQ coalescing time threshold in usecs");
 
+#ifdef MY_ABC_HERE
+extern void sata_print_link_status(struct ata_link *link);
+#endif
+
 enum {
 	/* BAR's are enumerated in terms of pci_resource_start() terms */
 	MV_PRIMARY_BAR		= 0,	/* offset 0x10: memory space */
@@ -2605,6 +2609,7 @@ static void mv_unexpected_intr(struct ata_port *ap, int edma_was_enabled)
 	ata_port_freeze(ap);
 }
 
+
 /**
  *      mv_err_intr - Handle error interrupts on the port
  *      @ap: ATA channel to manipulate
@@ -3606,7 +3611,7 @@ void syno_sata_mv_gpio_write(u8 blFaulty, const unsigned short hostnum)
 		scsi_host_put(shost);
 		goto END;
 	}
-
+	
 	led_idx = ap->print_id - ap->host->ports[0]->print_id;
 
 	gpio_value = readl(host_mmio + GPIO_CTL_DATA);
@@ -3708,8 +3713,21 @@ static void mv_pmp_select(struct ata_port *ap, int pmp)
 static int mv_pmp_hardreset(struct ata_link *link, unsigned int *class,
 				unsigned long deadline)
 {
+#ifdef MY_ABC_HERE
+	int iRet = 0;
+#endif
+
 	mv_pmp_select(link->ap, sata_srst_pmp(link));
+#ifdef MY_ABC_HERE
+	iRet = sata_std_hardreset(link, class, deadline);
+	if (0 < giSynoAtaDebug) {
+		DBGMESG("-- Syno Debug Show pmp link status --\n");
+		sata_print_link_status(link);
+	}
+	return iRet;
+#else
 	return sata_std_hardreset(link, class, deadline);
+#endif
 }
 
 static int mv_softreset(struct ata_link *link, unsigned int *class,
@@ -3734,7 +3752,6 @@ static int mv_hardreset(struct ata_link *link, unsigned int *class,
 	pp->pp_flags &= ~MV_PP_FLAG_EDMA_EN;
 	pp->pp_flags &=
 	  ~(MV_PP_FLAG_FBS_EN | MV_PP_FLAG_NCQ_EN | MV_PP_FLAG_FAKE_ATA_BUSY);
-
 
 	/* Workaround for errata FEr SATA#10 (part 2) */
 	do {

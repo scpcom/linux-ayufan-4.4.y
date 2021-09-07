@@ -130,7 +130,7 @@
 
 #include "net-sysfs.h"
 
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 #include <linux/synobios.h>
 extern char gszSynoHWVersion[16];
 #include <linux/pci.h>
@@ -5015,6 +5015,10 @@ EXPORT_SYMBOL_GPL(init_dummy_netdev);
 int register_netdev(struct net_device *dev)
 {
 	int err;
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+	// we assume internal lans are comming up before extension lans
+	static int netdevCnt = 0;
+#endif
 
 	rtnl_lock();
 
@@ -5026,7 +5030,7 @@ int register_netdev(struct net_device *dev)
 		err = dev_alloc_name(dev, dev->name);
 		if (err < 0)
 			goto out;
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 		if ( 0 == strncmp(gszSynoHWVersion, HW_DS508, strlen(HW_DS508)) ||
 			 0 == strncmp(gszSynoHWVersion, HW_DS1010p, strlen(HW_DS1010p)) ||
 			 0 == strncmp(gszSynoHWVersion, HW_DS1511p, strlen(HW_DS1511p))) {
@@ -5036,25 +5040,8 @@ int register_netdev(struct net_device *dev)
 				swapped = 1;
 			}
 		}
-		if (gSwitchDev > 0) {
-			struct pci_dev *pcid = to_pci_dev((dev)->dev.parent);
-			char *szPCIName = NULL;
-			char szPCIChangeName[16] = {0};
-			int i;
-
-			if (pcid == NULL) {
-				printk("synology:unable to get the pci device of the network interface: %s\n", dev->name);
-			} else {
-				szPCIName = (char *)pci_name(pcid);
-				for (i = 0 ; i < gSwitchDev ; i++) {
-					snprintf(szPCIChangeName, sizeof(szPCIChangeName), "0000:%c%c:%c%c.%c",
-						gDevPCIName[i][1],gDevPCIName[i][2],gDevPCIName[i][3],gDevPCIName[i][4],gDevPCIName[i][5]);
-					if (0 == strncmp(szPCIName, szPCIChangeName, strlen(szPCIName))) {
-						snprintf(dev->name, sizeof(dev->name), "eth%c", gDevPCIName[i][0]);
-						break;
-					}
-				}
-			}
+		if (gSwitchDev > 0 && netdevCnt < gSwitchDev) {
+			snprintf(dev->name, sizeof(dev->name), "eth%c", gDevPCIName[netdevCnt++][0]);
 		}
 #endif
 	}

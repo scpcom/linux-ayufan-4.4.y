@@ -85,6 +85,10 @@ extern long g_ahci_switch;
 #endif
 
 #ifdef MY_DEF_HERE
+extern unsigned int ata_print_id;
+#endif /* MY_DEF_HERE */
+
+#ifdef MY_DEF_HERE
 extern struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
 					    const struct scsi_device *scsidev);
 #endif
@@ -456,6 +460,44 @@ ata_ahci_fault_show(struct device *dev, struct device_attribute *attr,
 }
 
 static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable);
+
+#ifdef MY_DEF_HERE
+void sata_syno_ahci_diskled_set(int iDiskNo, int iPresent, int iFault)
+{
+	struct ata_port *pAp = NULL;
+	struct ata_device *pAtaDev = NULL;
+	struct Scsi_Host *pScsiHost = NULL;
+	struct ata_link *pAtaLink = NULL;
+	int i = 0;
+
+	for (i = 0; i < ata_print_id; i++) {
+		//only handle disk led specified by diskno
+		if (iDiskNo != i) {
+			continue;
+		}
+		//get SCSI host
+		if (NULL == (pScsiHost = scsi_host_lookup(i - 1))) {
+			continue;
+		}
+		//get port from SCSI host
+		pAp = ata_shost_to_port(pScsiHost);
+		if (!pAp) {
+			goto CONTINUE;
+		} 
+		//for each devices of each links in port ap
+		ata_for_each_link(pAtaLink, pAp, EDGE) {
+			ata_for_each_dev(pAtaDev, pAtaLink, ALL) {
+				//set disk LED
+				ahci_sw_fault_set(pAtaDev->link, iFault);
+				ahci_sw_locate_set(pAtaDev->link, iPresent);
+			}
+		}
+CONTINUE:
+		scsi_host_put(pScsiHost);
+	}
+}
+EXPORT_SYMBOL(sata_syno_ahci_diskled_set);
+#endif /* MY_DEF_HERE */
 
 static ssize_t
 ata_ahci_fault_store(struct device *dev, struct device_attribute *attr,
@@ -852,6 +894,7 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	/* Marvell */
 	{ PCI_VDEVICE(MARVELL, 0x6145), board_ahci_mv },	/* 6145 */
 	{ PCI_VDEVICE(MARVELL, 0x6121), board_ahci_mv },	/* 6121 */
+	{ PCI_VDEVICE(MARVELL, 0x9125), board_ahci },		/* 9125 */
 
 	/* Promise */
 	{ PCI_VDEVICE(PROMISE, 0x3f20), board_ahci },	/* PDC42819 */
@@ -1602,6 +1645,7 @@ static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable)
 	led_message |= (emp->fault << 22);
 	spin_unlock_irqrestore(ap->lock, flags);
 	ahci_transmit_led_message(ap, led_message, 4);
+	mdelay(10);
 END:
 	return;
 }
@@ -3260,6 +3304,7 @@ static inline void ahci_gtf_filter_workaround(struct ata_host *host)
 extern void ata_port_wait_eh(struct ata_port *ap);
 extern void ata_scsi_scan_host(struct ata_port *ap, int sync);
 #endif
+
 static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
 	static int printed_version;

@@ -128,11 +128,16 @@ EXPORT_SYMBOL(gszDiskIdxMap);
 #endif
 
 #ifdef MY_ABC_HERE
+char giDiskSeqReverse[8] = {0};
+EXPORT_SYMBOL(giDiskSeqReverse);
+#endif
+
+#ifdef MY_ABC_HERE
 unsigned char grgbLanMac[4][16];
 EXPORT_SYMBOL(grgbLanMac);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 unsigned int gSwitchDev = 0;
 char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 EXPORT_SYMBOL(gSwitchDev);

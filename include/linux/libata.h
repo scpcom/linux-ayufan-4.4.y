@@ -252,8 +252,8 @@ enum {
 #ifdef MY_ABC_HERE
 	ATA_PFLAG_PMP_PMOFF			= (1 << 25),
 #endif
-#ifdef MY_DEF_HERE
-	ATA_PFLAG_SYNO_BOOT_PROBE = (1 << 29),
+#ifdef MY_ABC_HERE
+	ATA_PFLAG_SYNO_BOOT_PROBE = (1 << 30),
 #endif
 
 	/* struct ata_queued_cmd flags */
@@ -859,6 +859,9 @@ struct ata_port {
 	u8				PMSynoEMID;
 	u8				PMSynoIsRP;
 #endif
+#ifdef MY_ABC_HERE
+	int			syno_disk_index;
+#endif
 };
 
 /* The following initializer overrides a method to NULL whether one of
@@ -1010,7 +1013,6 @@ extern struct device_attribute dev_attr_syno_wcache;
 #ifdef MY_ABC_HERE
 extern struct device_attribute dev_attr_syno_disk_serial;
 #endif
-
 extern const unsigned long sata_deb_timing_normal[];
 extern const unsigned long sata_deb_timing_hotplug[];
 extern const unsigned long sata_deb_timing_long[];
@@ -1258,7 +1260,19 @@ extern u32 syno_pmp_ports_num(struct ata_port *ap);
 extern void syno_pm_device_info_set(struct ata_port *ap, u8 rw, SYNO_PM_PKG *pm_pkg);
 extern int syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo);
 extern unsigned int syno_sata_pmp_is_rp(struct ata_port *ap);
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+typedef enum {
+	UNKNOW_HORKAGE_STAGE = 0,
+	NOT_APPLY_15G,
+	FIRST_APPLY_15G,
+	ALREADY_APPLY_15G,
+} SYNO_HORKAGE_STAGE;
+extern SYNO_HORKAGE_STAGE SynoGetHorkageStage(struct ata_link *pLink);
+extern int iNeedResetAgainFor15G(struct ata_link *pLink);
 #endif
+
 
 #ifdef MY_ABC_HERE
 int syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn);
@@ -1303,6 +1317,10 @@ extern char gszDiskIdxMap[];
 #endif
 
 #ifdef MY_ABC_HERE
+extern char giDiskSeqReverse[];
+#endif
+
+#ifdef MY_ABC_HERE
 extern long g_sata_led_special;
 #endif
 
@@ -1323,7 +1341,6 @@ extern long g_sata_led_special;
 #else	
 #define SYNO_DISK_HIBERNATION_MACRO
 #endif
-
 
 #define ATA_BASE_SHT(drv_name)					\
 	.module			= THIS_MODULE,			\

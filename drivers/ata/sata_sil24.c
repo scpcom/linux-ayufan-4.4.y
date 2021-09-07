@@ -756,7 +756,7 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 #ifdef MY_ABC_HERE
 	sil24_scr_read(link, SCR_STATUS, &tmp);
 	if (0x1 == tmp) {
-		/* No IPM, seed negotiate and phy is not well communicated.  */
+		/* No IPM, speed negotiate and phy is not well communicated.  */
 
 		/* force disable IPM */
 		sil24_scr_read(link, SCR_CONTROL, &tmp);
@@ -1001,6 +1001,14 @@ static int sil24_pmp_hardreset(struct ata_link *link, unsigned int *class,
 		return rc;
 	}
 
+#ifdef MY_ABC_HERE
+	/* test if we need reset it again */
+	if(iNeedResetAgainFor15G(link)) {
+		DBGMESG("ata port %d has ALREADY_APPLY_15G and not 1.5G speed, need to reset it again\n",
+				link->ap->print_id);
+		sata_std_hardreset(link, class, deadline);
+	}
+#endif
 	return sata_std_hardreset(link, class, deadline);
 }
 

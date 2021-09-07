@@ -1356,6 +1356,11 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 
 	// start as if the link is up
 	netif_device_attach (net);
+#ifdef MY_ABC_HERE
+	if (funcSYNOSendNetLinkEvent) {
+		funcSYNOSendNetLinkEvent(NET_LINK, net->ifindex);
+	}
+#endif
 
 	return 0;
 
