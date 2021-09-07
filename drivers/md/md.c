@@ -3580,7 +3580,7 @@ static struct md_sysfs_entry md_sync_speed = __ATTR_RO(sync_speed);
 static ssize_t
 sync_completed_show(mddev_t *mddev, char *page)
 {
-	unsigned long max_sectors, resync;
+	unsigned long long max_sectors, resync;
 
 	if (!test_bit(MD_RECOVERY_RUNNING, &mddev->recovery))
 		return sprintf(page, "none\n");
@@ -3591,7 +3591,7 @@ sync_completed_show(mddev_t *mddev, char *page)
 		max_sectors = mddev->dev_sectors;
 
 	resync = mddev->curr_resync_completed;
-	return sprintf(page, "%lu / %lu\n", resync, max_sectors);
+	return sprintf(page, "%llu / %llu\n", resync, max_sectors);
 }
 
 static struct md_sysfs_entry md_sync_completed = __ATTR_RO(sync_completed);
@@ -5868,6 +5868,9 @@ void md_unregister_thread(mdk_thread_t *thread)
 
 void md_error(mddev_t *mddev, mdk_rdev_t *rdev)
 {
+#ifdef MY_ABC_HERE
+	char b[BDEVNAME_SIZE];
+#endif  
 	if (!mddev) {
 		MD_BUG();
 		return;
@@ -5883,6 +5886,20 @@ void md_error(mddev_t *mddev, mdk_rdev_t *rdev)
 		return;
 	if (!mddev->pers->error_handler)
 		return;
+
+#if defined(MY_ABC_HERE) \
+	&& defined (MY_ABC_HERE) \
+	&& defined (MY_ABC_HERE)
+
+	if (!test_bit(DiskError, &rdev->flags)) {
+		SynoReportFaultyDevice(mddev->md_minor, rdev->bdev);
+	}
+#endif  
+
+#ifdef MY_ABC_HERE
+	printk("%s: %s is being to be set faulty\n",
+		__FUNCTION__, bdevname(rdev->bdev, b));
+#endif  
 	mddev->pers->error_handler(mddev,rdev);
 	if (mddev->degraded)
 		set_bit(MD_RECOVERY_RECOVER, &mddev->recovery);

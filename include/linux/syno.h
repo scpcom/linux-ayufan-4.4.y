@@ -57,6 +57,14 @@
 #define SYNO_CEDARVIEW_CORETEMP
 #endif
 
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#define SYNO_X86_TTY_CONSOLE_OUTPUT
+#endif
+
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#define SYNO_X86_MICROP_CTRL
+#endif
+
 #if defined(CONFIG_SYNO_MPC854X) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(CONFIG_ARCH_FEROCEON)
 
 #ifdef MY_ABC_HERE
@@ -73,6 +81,10 @@
 #define SYNO_6281_MTU_WA
 #endif
 
+#if defined(CONFIG_PPC_85xx)
+#define SYNO_IPV6_110p_IPV6_READY
+#endif
+
 #define USBCOPY_PORT_LOCATION 99
 
 #ifdef MY_ABC_HERE
@@ -83,6 +95,11 @@
 
 #ifdef MY_ABC_HERE
 #define CHECKINTERVAL (7UL*HZ)
+#endif
+
+#if defined(MY_DEF_HERE)
+ 
+#define SYNO_ATA_AHCI_LED_MSG
 #endif
 
 #if	defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
@@ -97,6 +114,7 @@
 
 #if defined(CONFIG_SYNO_MPC8533) || defined(MY_DEF_HERE)
 #ifdef MY_ABC_HERE
+#define SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 #ifdef MY_DEF_HERE
 #define SYNO_CREATE_TIME_SWAP_VERSION 3719
 #endif
@@ -192,6 +210,8 @@
 #ifdef MY_DEF_HERE
  
 #define SYNO_SAS_MPT2_HOTPLUG_PHY
+
+#define SYNO_SAS_LINK_HOTPLUG_UEVENT
 
 #define SYNO_SAS_RECOVER_REMOVED_ENCS
 

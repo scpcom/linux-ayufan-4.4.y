@@ -11,6 +11,8 @@
 #include <linux/jiffies.h>
 #include <linux/module.h>
 
+#include <linux/list.h>
+
 #ifdef  MY_ABC_HERE
 extern int syno_temperature_debug;
 #endif

@@ -151,3 +151,7 @@ config SYNO_OCF_PERMISSION
 	depends on OCF_CRYPTODEV
 	default y
 
+config SYNO_ADD_ROUTE_CHECK
+    bool "check if interface is link up before adding route"
+	default n
+

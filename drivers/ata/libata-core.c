@@ -5312,7 +5312,7 @@ EXPORT_SYMBOL_GPL(ata_cable_sata);
 
 int (*funcSYNOSendDiskResetPwrEvent)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSendDiskResetPwrEvent);
-int (*funcSYNOSendDiskPortDisEvent)(unsigned int, unsigned int) = NULL;
+int (*funcSYNOSendDiskPortDisEvent)(unsigned int, unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSendDiskPortDisEvent);
 int (*funcSYNOSataErrorReport)(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSataErrorReport);

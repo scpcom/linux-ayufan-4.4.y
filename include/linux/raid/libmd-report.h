@@ -16,6 +16,7 @@ void SynoReportBadSector(sector_t sector, unsigned long rw,
 void SynoReportCorrectBadSector(sector_t sector, int md_minor, 
 								struct block_device *bdev, const char *szFuncName);
 
+void SynoReportFaultyDevice(int md_minor, struct block_device *bdev);
 #endif  
 
 #ifdef MY_ABC_HERE
