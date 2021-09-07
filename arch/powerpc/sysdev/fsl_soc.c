@@ -1,20 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * FSL SoC setup code
- *
- * Maintained by Kumar Gala (see MAINTAINERS for contact information)
- *
- * 2006 (c) MontaVista Software, Inc.
- * Vitaly Bordug <vbordug@ru.mvista.com>
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
-
+ 
 #include <linux/stddef.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -133,7 +120,6 @@ u32 get_brgfreq(void)
 		return brgfreq;
 	}
 
-	/* Legacy device binding -- will go away when no users are left. */
 	node = of_find_node_by_type(NULL, "cpm");
 	if (!node)
 		node = of_find_compatible_node(NULL, NULL, "fsl,qe");
@@ -182,7 +168,7 @@ u32 get_baudrate(void)
 }
 
 EXPORT_SYMBOL(get_baudrate);
-#endif /* CONFIG_CPM2 */
+#endif  
 
 #ifdef CONFIG_FIXED_PHY
 static int __init of_add_fixed_phys(void)
@@ -213,7 +199,7 @@ static int __init of_add_fixed_phys(void)
 	return 0;
 }
 arch_initcall(of_add_fixed_phys);
-#endif /* CONFIG_FIXED_PHY */
+#endif  
 
 static enum fsl_usb2_phy_modes determine_usb_phy(const char *phy_type)
 {
@@ -457,7 +443,7 @@ void fsl_rstcr_restart(char *cmd)
 	u32 __iomem *pUP = ioremap(get_immrbase() + UART2_BASE, 0x10);
 
 	if (pUP) {
-		/* Please refer p1022 reference manaual Table 12-7. Baud Rate Examples, this is CCB 533 baud rate 9600*/
+		 
 		out_8((unsigned char *)(pUP + 0), 0xD90 & 0xFF);
 		out_8((unsigned char *)(pUP + 1), 0xD90 >> 8);
 		out_8((unsigned char *)(pUP + UART2_LCR), SET8N1);
@@ -470,8 +456,8 @@ void fsl_rstcr_restart(char *cmd)
 #endif
 	local_irq_disable();
 	if (rstcr)
-		/* set reset control register */
-		out_be32(rstcr, 0x2);	/* HRESET_REQ */
+		 
+		out_be32(rstcr, 0x2);	 
 
 	while (1) ;
 }

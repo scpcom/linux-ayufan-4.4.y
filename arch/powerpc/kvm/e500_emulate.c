@@ -1,20 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2008 Freescale Semiconductor, Inc. All rights reserved.
- *
- * Author: Yu Liu, <yu.liu@freescale.com>
- *
- * Description:
- * This file is derived from arch/powerpc/kvm/44x_emulate.c,
- * by Hollis Blanchard <hollisb@us.ibm.com>.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License, version 2, as
- * published by the Free Software Foundation.
- */
-
+ 
 #include <asm/kvm_ppc.h>
 #include <asm/disassemble.h>
 #include <asm/kvm_e500.h>
@@ -119,7 +106,6 @@ int kvmppc_core_emulate_mtspr(struct kvm_vcpu *vcpu, int sprn, int rs)
 				vcpu->arch.gpr[rs]);
 		break;
 
-	/* extra exceptions */
 	case SPRN_IVOR32:
 		vcpu->arch.ivor[BOOKE_IRQPRIO_SPE_UNAVAIL] = vcpu->arch.gpr[rs];
 		break;
@@ -196,7 +182,6 @@ int kvmppc_core_emulate_mfspr(struct kvm_vcpu *vcpu, int sprn, int rt)
 	case SPRN_MMUCFG:
 		vcpu->arch.gpr[rt] = mfspr(SPRN_MMUCFG); break;
 
-	/* extra exceptions */
 	case SPRN_IVOR32:
 		vcpu->arch.gpr[rt] = vcpu->arch.ivor[BOOKE_IRQPRIO_SPE_UNAVAIL];
 		break;

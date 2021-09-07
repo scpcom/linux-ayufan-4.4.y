@@ -1,7 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-// Copyright (c) 2000-2008 Synology Inc. All rights reserved.
+ 
 #ifndef __SYNOLIB_H_
 #define __SYNOLIB_H_
 
@@ -17,19 +17,10 @@ extern int syno_temperature_debug;
 
 #ifdef CONFIG_SYNO_CROND
 typedef struct _tag_SynoAsyncOperation{
-	//struct timer_list	asyncStartTimer;
-
-	/**
-	 * worker info.
-	 */ 
+	 
 	struct workqueue_struct	*pwq;
 	struct delayed_work sched_work;
 
-	/*
-	* period function, and his ownly data pointer.
-	* period_in_sec is the periodly execution unit.
-	* stopAsyncOperation will cause stop period execution
-	*/	
 	void (*period_func)(void *data);
 	void *period_func_data;
 	unsigned long	period_in_sec;
@@ -53,7 +44,7 @@ extern asmlinkage int SynoPrintk(u8 direct_print, const char *fmt, ...);
 
 struct workqueue_struct *SynoCreateWorkqueue(const char *name);
 void SynoDestroyWorkqueue(struct workqueue_struct *wq);
-#endif /* CONFIG_SYNO_CROND */
+#endif  
 
 #ifdef MY_ABC_HERE
 void syno_do_hibernation_log(const char __user *filename);
@@ -64,4 +55,4 @@ void syno_do_hibernation_log(const char __user *filename);
 int SynoSCSIGetDeviceIndex(struct block_device *bdev); 
 #endif
 
-#endif //__SYNOLIB_H_
+#endif  

@@ -194,7 +194,7 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 
 		if(pData->blHddEnStat[iIdx] != iPrzPinVal) {
 			if(iPrzPinVal) {
-				//while starting a port, monitoring other ports for the disks unplugged
+				 
 				pUnplugMonitor = kthread_run(syno_hddmon_unplug_monitor, pData, SYNO_HDDMON_UPLG_STR);
 			}
 
@@ -243,9 +243,7 @@ static void syno_hddmon_sync(SynoHddMonData_t *pData)
 		else
 			iPrzPinVal = gpio_get_value(pData->iHddPrzPinMap[iIdx]);
 #endif
-		/* HDD Enable pins must be high just after boot-up,
-		 * so turns the pins to low if the hdds do not present.
-		 */
+		 
 		if(!iPrzPinVal) {
 #if defined(MY_DEF_HERE)
 			syno_pch_lpc_gpio_pin(pData->iHddEnPinMap[iIdx], &iPrzPinVal, 1);
@@ -254,7 +252,6 @@ static void syno_hddmon_sync(SynoHddMonData_t *pData)
 #endif
 		}
 
-		/*sync the states*/
 		pData->blHddEnStat[iIdx] = iPrzPinVal;
 
 	}
@@ -308,7 +305,6 @@ static int __init syno_hddmon_init(void)
 
 	syno_hddmon_sync(&synoHddMonData);
 
-	/* processing */
 	pHddPrzPolling = kthread_create(syno_hddmon_routine, &synoHddMonData, SYNO_HDDMON_STR);
 
 	if (IS_ERR(pHddPrzPolling)) {

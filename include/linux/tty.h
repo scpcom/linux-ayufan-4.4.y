@@ -4,10 +4,6 @@
 #ifndef _LINUX_TTY_H
 #define _LINUX_TTY_H
 
-/*
- * 'tty.h' defines some structures used by tty_io.c and some defines.
- */
-
 #ifdef __KERNEL__
 #include <linux/fs.h>
 #include <linux/major.h>
@@ -19,43 +15,33 @@
 
 #include <asm/system.h>
 
-/*
- * (Note: the *_driver.minor_start values 1, 64, 128, 192 are
- * hardcoded at present.)
- */
-#define NR_UNIX98_PTY_DEFAULT	4096      /* Default maximum for Unix98 ptys */
-#define NR_UNIX98_PTY_MAX	(1 << MINORBITS) /* Absolute limit */
+#define NR_UNIX98_PTY_DEFAULT	4096       
+#define NR_UNIX98_PTY_MAX	(1 << MINORBITS)  
 #define NR_LDISCS		20
 
-/* line disciplines */
 #define N_TTY		0
 #define N_SLIP		1
 #define N_MOUSE		2
 #define N_PPP		3
 #define N_STRIP		4
 #define N_AX25		5
-#define N_X25		6	/* X.25 async */
+#define N_X25		6	 
 #define N_6PACK		7
-#define N_MASC		8	/* Reserved for Mobitex module <kaz@cafe.net> */
-#define N_R3964		9	/* Reserved for Simatic R3964 module */
-#define N_PROFIBUS_FDL	10	/* Reserved for Profibus */
-#define N_IRDA		11	/* Linux IrDa - http://irda.sourceforge.net/ */
-#define N_SMSBLOCK	12	/* SMS block mode - for talking to GSM data */
-				/* cards about SMS messages */
-#define N_HDLC		13	/* synchronous HDLC */
-#define N_SYNC_PPP	14	/* synchronous PPP */
-#define N_HCI		15	/* Bluetooth HCI UART */
-#define N_GIGASET_M101	16	/* Siemens Gigaset M101 serial DECT adapter */
-#define N_SLCAN		17	/* Serial / USB serial CAN Adaptors */
-#define N_PPS		18	/* Pulse per Second */
+#define N_MASC		8	 
+#define N_R3964		9	 
+#define N_PROFIBUS_FDL	10	 
+#define N_IRDA		11	 
+#define N_SMSBLOCK	12	 
+				 
+#define N_HDLC		13	 
+#define N_SYNC_PPP	14	 
+#define N_HCI		15	 
+#define N_GIGASET_M101	16	 
+#define N_SLCAN		17	 
+#define N_PPS		18	 
 
-#define N_V253		19	/* Codec control over voice modem */
+#define N_V253		19	 
 
-/*
- * This character is the same as _POSIX_VDISABLE: it cannot be used as
- * a c_cc[] character, but indicates that a particular special character
- * isn't in use (eg VINTR has no character etc)
- */
 #define __DISABLED_CHAR '\0'
 
 struct tty_buffer {
@@ -66,33 +52,21 @@ struct tty_buffer {
 	int size;
 	int commit;
 	int read;
-	/* Data points here */
+	 
 	unsigned long data[0];
 };
-
-/*
- * We default to dicing tty buffer allocations to this many characters
- * in order to avoid multiple page allocations. We know the size of
- * tty_buffer itself but it must also be taken into account that the
- * the buffer is 256 byte aligned. See tty_buffer_find for the allocation
- * logic this must match
- */
 
 #define TTY_BUFFER_PAGE	(((PAGE_SIZE - sizeof(struct tty_buffer)) / 2) & ~0xFF)
 
 struct tty_bufhead {
 	struct delayed_work work;
 	spinlock_t lock;
-	struct tty_buffer *head;	/* Queue head */
-	struct tty_buffer *tail;	/* Active buffer */
-	struct tty_buffer *free;	/* Free queue head */
-	int memory_used;		/* Buffer space used excluding
-								free queue */
+	struct tty_buffer *head;	 
+	struct tty_buffer *tail;	 
+	struct tty_buffer *free;	 
+	int memory_used;		 
 };
-/*
- * When a break, frame error, or parity error happens, these codes are
- * stuffed into the flags buffer.
- */
+ 
 #define TTY_NORMAL	0
 #define TTY_BREAK	1
 #define TTY_FRAME	2
@@ -183,60 +157,34 @@ struct tty_bufhead {
 struct device;
 struct signal_struct;
 
-/*
- * Port level information. Each device keeps its own port level information
- * so provide a common structure for those ports wanting to use common support
- * routines.
- *
- * The tty port has a different lifetime to the tty so must be kept apart.
- * In addition be careful as tty -> port mappings are valid for the life
- * of the tty object but in many cases port -> tty mappings are valid only
- * until a hangup so don't use the wrong path.
- */
-
 struct tty_port;
 
 struct tty_port_operations {
-	/* Return 1 if the carrier is raised */
+	 
 	int (*carrier_raised)(struct tty_port *port);
-	/* Control the DTR line */
+	 
 	void (*dtr_rts)(struct tty_port *port, int raise);
-	/* Called when the last close completes or a hangup finishes
-	   IFF the port was initialized. Do not use to free resources */
+	 
 	void (*shutdown)(struct tty_port *port);
 	void (*drop)(struct tty_port *port);
 };
 	
 struct tty_port {
-	struct tty_struct	*tty;		/* Back pointer */
-	const struct tty_port_operations *ops;	/* Port operations */
-	spinlock_t		lock;		/* Lock protecting tty field */
-	int			blocked_open;	/* Waiting to open */
-	int			count;		/* Usage count */
-	wait_queue_head_t	open_wait;	/* Open waiters */
-	wait_queue_head_t	close_wait;	/* Close waiters */
-	wait_queue_head_t	delta_msr_wait;	/* Modem status change */
-	unsigned long		flags;		/* TTY flags ASY_*/
-	struct mutex		mutex;		/* Locking */
-	unsigned char		*xmit_buf;	/* Optional buffer */
-	unsigned int		close_delay;	/* Close port delay */
-	unsigned int		closing_wait;	/* Delay for output */
-	int			drain_delay;	/* Set to zero if no pure time
-						   based drain is needed else
-						   set to size of fifo */
+	struct tty_struct	*tty;		 
+	const struct tty_port_operations *ops;	 
+	spinlock_t		lock;		 
+	int			blocked_open;	 
+	int			count;		 
+	wait_queue_head_t	open_wait;	 
+	wait_queue_head_t	close_wait;	 
+	wait_queue_head_t	delta_msr_wait;	 
+	unsigned long		flags;		 
+	struct mutex		mutex;		 
+	unsigned char		*xmit_buf;	 
+	unsigned int		close_delay;	 
+	unsigned int		closing_wait;	 
+	int			drain_delay;	 
 };
-
-/*
- * Where all of the state associated with a tty is kept while the tty
- * is open.  Since the termios state should be kept even if the tty
- * has been closed --- for things like the baud rate, etc --- it is
- * not stored here, but rather a pointer to the real state is stored
- * here.  Possible the winsize structure should have the same
- * treatment, but (1) the default 80x24 is usually right and (2) it's
- * most often used by a windowing system, which will set the correct
- * size each time the window is created or resized anyway.
- * 						- TYT, 9/14/92
- */
 
 struct tty_operations;
 
@@ -247,30 +195,29 @@ struct tty_struct {
 	const struct tty_operations *ops;
 	int index;
 
-	/* Protects ldisc changes: Lock tty not pty */
 	struct mutex ldisc_mutex;
 	struct tty_ldisc *ldisc;
 
 	struct mutex termios_mutex;
 	spinlock_t ctrl_lock;
-	/* Termios values are protected by the termios mutex */
+	 
 	struct ktermios *termios, *termios_locked;
-	struct termiox *termiox;	/* May be NULL for unsupported */
+	struct termiox *termiox;	 
 	char name[64];
-	struct pid *pgrp;		/* Protected by ctrl lock */
+	struct pid *pgrp;		 
 	struct pid *session;
 	unsigned long flags;
 	int count;
-	struct winsize winsize;		/* termios mutex */
+	struct winsize winsize;		 
 	unsigned char stopped:1, hw_stopped:1, flow_stopped:1, packet:1;
 	unsigned char low_latency:1, warned:1;
-	unsigned char ctrl_status;	/* ctrl_lock */
-	unsigned int receive_room;	/* Bytes free for queue */
+	unsigned char ctrl_status;	 
+	unsigned int receive_room;	 
 
 	struct tty_struct *link;
 	struct fasync_struct *fasync;
-	struct tty_bufhead buf;		/* Locked internally */
-	int alt_speed;		/* For magic substitution of 38400 bps */
+	struct tty_bufhead buf;		 
+	int alt_speed;		 
 	wait_queue_head_t write_wait;
 	wait_queue_head_t read_wait;
 	struct work_struct hangup_work;
@@ -280,11 +227,6 @@ struct tty_struct {
 
 #define N_TTY_BUF_SIZE 4096
 
-	/*
-	 * The following is data for the N_TTY line discipline.  For
-	 * historical reasons, this is included in the tty structure.
-	 * Mostly locked by the BKL.
-	 */
 	unsigned int column;
 	unsigned char lnext:1, erasing:1, raw:1, real_raw:1, icanon:1;
 	unsigned char closing:1;
@@ -311,40 +253,31 @@ struct tty_struct {
 	unsigned char *write_buf;
 	int write_cnt;
 	spinlock_t read_lock;
-	/* If the tty has a pending do_SAK, queue it here - akpm */
+	 
 	struct work_struct SAK_work;
 	struct tty_port *port;
 };
 
-/* tty magic number */
 #define TTY_MAGIC		0x5401
 
-/*
- * These bits are used in the flags field of the tty structure.
- *
- * So that interrupts won't be able to mess up the queues,
- * copy_to_cooked must be atomic with respect to itself, as must
- * tty->write.  Thus, you must use the inline functions set_bit() and
- * clear_bit() to make things atomic.
- */
-#define TTY_THROTTLED 		0	/* Call unthrottle() at threshold min */
-#define TTY_IO_ERROR 		1	/* Cause an I/O error (may be no ldisc too) */
-#define TTY_OTHER_CLOSED 	2	/* Other side (if any) has closed */
-#define TTY_EXCLUSIVE 		3	/* Exclusive open mode */
-#define TTY_DEBUG 		4	/* Debugging */
-#define TTY_DO_WRITE_WAKEUP 	5	/* Call write_wakeup after queuing new */
-#define TTY_PUSH 		6	/* n_tty private */
-#define TTY_CLOSING 		7	/* ->close() in progress */
-#define TTY_LDISC 		9	/* Line discipline attached */
-#define TTY_LDISC_CHANGING 	10	/* Line discipline changing */
-#define TTY_LDISC_OPEN	 	11	/* Line discipline is open */
-#define TTY_HW_COOK_OUT 	14	/* Hardware can do output cooking */
-#define TTY_HW_COOK_IN 		15	/* Hardware can do input cooking */
-#define TTY_PTY_LOCK 		16	/* pty private */
-#define TTY_NO_WRITE_SPLIT 	17	/* Preserve write boundaries to driver */
-#define TTY_HUPPED 		18	/* Post driver->hangup() */
-#define TTY_FLUSHING		19	/* Flushing to ldisc in progress */
-#define TTY_FLUSHPENDING	20	/* Queued buffer flush pending */
+#define TTY_THROTTLED 		0	 
+#define TTY_IO_ERROR 		1	 
+#define TTY_OTHER_CLOSED 	2	 
+#define TTY_EXCLUSIVE 		3	 
+#define TTY_DEBUG 		4	 
+#define TTY_DO_WRITE_WAKEUP 	5	 
+#define TTY_PUSH 		6	 
+#define TTY_CLOSING 		7	 
+#define TTY_LDISC 		9	 
+#define TTY_LDISC_CHANGING 	10	 
+#define TTY_LDISC_OPEN	 	11	 
+#define TTY_HW_COOK_OUT 	14	 
+#define TTY_HW_COOK_IN 		15	 
+#define TTY_PTY_LOCK 		16	 
+#define TTY_NO_WRITE_SPLIT 	17	 
+#define TTY_HUPPED 		18	 
+#define TTY_FLUSHING		19	 
+#define TTY_FLUSHPENDING	20	 
 
 #define TTY_WRITE_FLUSH(tty) tty_write_flush((tty))
 
@@ -358,15 +291,6 @@ extern void console_init(void);
 extern int vcs_init(void);
 
 extern struct class *tty_class;
-
-/**
- *	tty_kref_get		-	get a tty reference
- *	@tty: tty device
- *
- *	Return a new reference to a tty object. The caller must hold
- *	sufficient locks/counts to ensure that their existing reference cannot
- *	go away
- */
 
 static inline struct tty_struct *tty_kref_get(struct tty_struct *tty)
 {
@@ -495,13 +419,11 @@ extern int tty_ldisc_setup(struct tty_struct *tty, struct tty_struct *o_tty);
 extern void tty_ldisc_release(struct tty_struct *tty, struct tty_struct *o_tty);
 extern void tty_ldisc_init(struct tty_struct *tty);
 extern void tty_ldisc_begin(void);
-/* This last one is just for the tty layer internals and shouldn't be used elsewhere */
+ 
 extern void tty_ldisc_enable(struct tty_struct *tty);
 
-/* n_tty.c */
 extern struct tty_ldisc_ops tty_ldisc_N_TTY;
 
-/* tty_audit.c */
 #ifdef CONFIG_AUDIT
 extern void tty_audit_add_data(struct tty_struct *tty, unsigned char *data,
 			       size_t size);
@@ -534,19 +456,12 @@ static inline void tty_audit_push_task(struct task_struct *tsk,
 }
 #endif
 
-/* tty_ioctl.c */
 extern int n_tty_ioctl_helper(struct tty_struct *tty, struct file *file,
 		       unsigned int cmd, unsigned long arg);
 
-/* serial.c */
-
 extern void serial_console_init(void);
 
-/* pcxx.c */
-
 extern int pcxe_open(struct tty_struct *tty, struct file *filp);
-
-/* vt.c */
 
 extern int vt_ioctl(struct tty_struct *tty, struct file *file,
 		    unsigned int cmd, unsigned long arg);
@@ -554,5 +469,5 @@ extern int vt_ioctl(struct tty_struct *tty, struct file *file,
 extern long vt_compat_ioctl(struct tty_struct *tty, struct file * file,
 		     unsigned int cmd, unsigned long arg);
 
-#endif /* __KERNEL__ */
+#endif  
 #endif

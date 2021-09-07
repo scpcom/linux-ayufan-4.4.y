@@ -1,29 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Synology Kirkwood NAS Board GPIO Setup
- *
- * Maintained by:  KueiHuan Chen <khchen@synology.com>
- *
- * Copyright 2009-2010 Synology, Inc.  All rights reserved.
- * Copyright 2009-2010 KueiHuan.Chen
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; see the file COPYING.  If not, write to
- * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- */
+ 
 #ifdef MY_ABC_HERE
 
 #include <linux/gpio.h>
@@ -51,7 +29,6 @@
 #define SATAHC_LED_ACT          0x0
 #define SATAHC_LED_ACT_PRESENT  0x4
 
-/* copied from synobios.h */
 #define DISK_LED_OFF			0
 #define DISK_LED_GREEN_SOLID	1
 #define DISK_LED_ORANGE_SOLID	2
@@ -134,27 +111,11 @@ static SYNO_KW_GENERIC_GPIO generic_gpio;
 
 unsigned int Syno6282ModelIDGet(SYNO_KW_GENERIC_GPIO *pGpio)
 {
-	/*
-	 * In 6702 platform, there is only 1 bit model ID
-	 * 0x0 ds112j
-	 * 0x1 Eagle
-	 */
+	 
 	 if( mvBoardIdGet() == SYNO_6702_1BAY_ID)
 		 return (gpio_get_value(pGpio->model.model_id_0)?1:0);
 	 else{ 
 
-	/**
-	 * 0x0 DS211
-	 * 0x1 DS111
-	 * 0x2 DS411
-	 * 0x3 DS211p
-	 * 0x4 DS411Slim
-	 * 0x5 DS212
-	 * 0x8 RS411, RS812
-	 * 0x9 RS212
-	 * 0xE RS213
-	 * 0xF RS813
-	 */
 	return  (((gpio_get_value(pGpio->model.model_id_0) ? 1 : 0) << 3) | 
 			 ((gpio_get_value(pGpio->model.model_id_1) ? 1 : 0) << 2) | 
 			 ((gpio_get_value(pGpio->model.model_id_2) ? 1 : 0) << 1) | 
@@ -214,7 +175,6 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 
 	MV_REG_WRITE(SATAHC_LED_CONFIG_REG, SATAHC_LED_ACT_PRESENT);
 
-	//note: hd led is active low
 	if ( DISK_LED_OFF == status ) {
 		fail_led = 1;
 	} else if ( DISK_LED_GREEN_SOLID == status ) {
@@ -273,7 +233,7 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 	case 5:
 		if (generic_gpio.ext_sata_led.hdd5_led_0 == GPIO_UNDEF ||
 			generic_gpio.ext_sata_led.hdd5_led_1 == GPIO_UNDEF) {
-			//some 4 bay model don't contain such gpio.
+			 
 			ret = 0;
 			goto END;
 		}
@@ -281,7 +241,7 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 		pin2 = generic_gpio.ext_sata_led.hdd5_led_1;
 		break;
 	case 6:
-		//for esata
+		 
 		ret = 0;
 		goto END;
 	default:
@@ -562,37 +522,6 @@ EXPORT_SYMBOL(SYNO_CTRL_ALARM_LED_SET);
 EXPORT_SYMBOL(SYNO_CTRL_BACKPLANE_STATUS_GET);
 EXPORT_SYMBOL(SYNO_CTRL_BUZZER_CLEARED_GET);
 
-/*
-Pin			Mode	Signal select and definition	output only		Pull-up/pull-down
-MPP0		0x2		SPI signal
-MPP[1:3]	0x2		SPI signal						V
-MPP4		0x0		GPIO (2bay is inter lock)
-MPP5		0x0		GPIO							V
-MPP6		0x1		SYSRST_OUTn
-MPP7		0x0		GPIO							V
-MPP[8:9]	0x1		TWSI
-MPP10		0x3		UART0							V
-MPP11		0x3		UART0
-MPP12		0x0		GPIO							V
-MPP[13:14]	0x3		UART1
-MPP15		0x0		FAN_150											Default 1 Hi, Low=off
-MPP16		0x0		FAN_100											Default 1 Hi, Low=off
-MPP17		0x0		FAN_33											Default 0 Low, Hi=ON
-MPP[18:19]	0x0		GPIO							V
-MPP20		0x5		SATA port 1 ACT LED								See 8.3 for detail
-MPP21		0x5		SATA port 0 ACT LED								See 8.3 for detail
-MPP22		0x0		SATA port 1 PRESENT LED			
-MPP23		0x0		SATA port 0 PRESENT LED			
-MPP[24:27]	0x0		GPIO
-MPP[28:29]	0x0		GPIO Model ID 0,1
-MPP[30:32]	0x0		GPIO
-MPP33		0x0		GPIO							V
-MPP34		0x0		GPO  (2 bay HDD2 enable)		V
-MPP35		0x0		FAN SENSE										Hi=Fail, pulse=running
-MPP[36:45]	0x0		GPIO
-MPP[46:47]	0x0		GPIO Model ID 2,3
-MPP[48:49]	0x0		GPIO
-*/
 static void 
 KW_6282_211_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 {
@@ -683,48 +612,6 @@ KW_6282_112p_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 	global_gpio->hdd_pm.hdd1_pm = 30;
 }
 
-/************************
-*   DS411slim
-*************************/
-/*
-Pin         Mode    Signal select and definition    output only     Pull-up/pull-down
-MPP0        0x2     SPI signal
-MPP[1:3]    0x2     SPI signal                      V
-MPP4        0x0     Inter lock
-MPP5        0x0     GPIO                            V
-MPP6        0x1     SYSRST_OUTn
-MPP7        0x0     GPIO                            V
-MPP[8:9]    0x1     TWSI
-MPP10       0x3     UART0                           V
-MPP11       0x3     UART0
-MPP12       0x0     GPIO                            V
-MPP[13:14]  0x3     UART1
-MPP15       0x0     FAN_150                                         Default 1 Hi, Low=off
-MPP16       0x0     FAN_100                                         Default 1 Hi, Low=off
-MPP17       0x0     FAN_33                                          Default 0 Low, Hi=ON
-MPP[18:19]  0x0     GPIO                            V
-MPP[20:23]	0x3     GE1 TXD
-MPP[24:27]  0x3     GE1 RXD
-MPP[28:29]  0x0     GPIO Model ID 0,1
-MPP30       0x3     GE1_RXCTL
-MPP31       0x3     GE1_RXCLK
-MPP32       0x3     GE1_TCLKOUT
-MPP33       0x3     GE1_TXCTL                       V
-MPP34       0x0     GPO  (2 bay HDD2 enable) /Buzzer off      V
-MPP35       0x0     FAN SENSE                                       Hi=Fail, pulse=running
-MPP36       0x0     GPIO Disk LED A0
-MPP37       0x0     GPIO Disk LED A1
-MPP38       0x0     GPIO Disk LED B0
-MPP39       0x0     GPIO Disk LED B1
-MPP40       0x0     GPIO Disk LED C0
-MPP41       0x0     GPIO Disk LED C1
-MPP42       0x0     GPIO Disk LED D0
-MPP43       0x0     GPIO Disk LED D1
-MPP44       0x0     GPIO HDD3 enable/ Fan Sense 2
-MPP45       0x0     GPIO HDD4 enable/ Fan sense 3
-MPP[46:47]  0x0     GPIO Model ID 2,3
-MPP[48:49]  0x0     GPIO
-*/
 static void 
 KW_6282_DS_4BAY_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 {
@@ -869,32 +756,11 @@ KW_6282_RS411_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 
 	*global_gpio = gpio_rs411;
 }
-/*
-Pin         Mode    Signal select and definition    Input/output    Pull-up/pull-down
-MPP[0:3]    0x2 SPI signal
-MPP[4:7]    0x0 GPIO
-MPP[8:9]    0x1 TWSI
-MPP[10:11]  0x3 UART0
-MPP12       0x0 GPIO
-MPP[13:14]  0x3 UART1
-MPP[15:19]  0x0 GPIO
-MPP[20]     0x5 SATA port 1 ACT LED     output      See 8.3 for detail
-MPP[21]     0x5 SATA port 0 ACT LED     output      See 8.3 for detail
-MPP[22]     0x0 SATA port 1 FAULT LED       output
-MPP[23]     0x0 SATA port 0 FAULT LED       output
-MPP[24:35]  0x0 GPIO
-MPP31       0x0 HDD2 enable (2 bay only)    output      Default Low, Hi=ON
-MPP32       0x0 FAN_182             output      Default Low, Low=off
-MPP33       0x0 FAN_150             output      Default Low, Low=off
-MPP34       0x0 FAN_100             output      Default Hi, Low=off
-MPP35       0x0 FAN SENSE           input       Hi=Fail, pulse=running
-MPP[36:44]  0x4 I2S
-MPP[45:49]  0x0 GPIO
-*/
+ 
 static void 
 KW_6281_109_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 {
-	/* 109, 110j, 210j, 209, 210j */
+	 
 	SYNO_KW_GENERIC_GPIO gpio_109 = {
 		.ext_sata_led = {
 							.hdd1_led_0 = GPIO_UNDEF,
@@ -957,28 +823,6 @@ KW_6281_212j_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 	global_gpio->hdd_pm.hdd1_pm = 29;
 }
 
-/*
-Pin             Mode    Signal definition       Input/output    Pull-up/pull-down
-MPP[0:3]        0x2     SPI signal
-MPP[4:7]        0x0     GPIO
-MPP[8:9]        0x1     TWSI
-MPP[10:11]      0x3     UART0
-MPP12           0x0     GPIO
-MPP[13:14]      0x3     UART1
-MPP[15:19]      0x0     GPIO
-MPP[20:21]      0x0     DISKA0/A1               output          00=off (default), 01=Green,10=Amber,
-MPP[22:23]      0x0     DISKB0/B1               output
-MPP[24:25]      0x0     DISKC0/C1               output
-MPP[26:27]      0x0     DISKD0/D1               output
-MPP[28:30]      0x0     GPIO
-MPP31           0x0     BP-LOCK-OUT             input           Low=good, Hi=NG
-MPP32           0x0     FAN_150 (409slim)       output          Hi=ON, Low=off
-MPP33           0x0     FAN_120                 output          Default low, Low=off
-MPP34           0x0     FAN_100                 output          Default low, Low=off
-MPP35           0x0     FAN SENSE               input           Hi=Fail, pulse=running
-MPP[36:44]      0x4     I2S
-MPP[45:49]      0x0     GPIO
-*/
 static void 
 KW_6281_409slim_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 {
@@ -1037,34 +881,6 @@ KW_6281_409slim_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 	*global_gpio = gpio_slim;
 }
 
-/*
-Pin         Mode    Signal definition   Input/output    Pull-up/pull-down
-MPP[0:3]    0x2     SPI signal
-MPP[4:7]    0x0     GPIO
-MPP[8:9]    0x1     TWSI
-MPP[10:11]  0x3     UART0
-MPP12       0x0     ALERM_LED           output
-MPP[13:14]  0x3     UART1
-MPP[15:17]  0x0     FAN 150, FAN 120, FAN 100   output
-MPP[18]     0x0     FAN sense           input
-MPP[19]     0x0     INTER-LOCK          input
-MPP[20:23]  0x0     RGMII G2 TX[0:3]    output
-MPP[24:27]  0x0     RGMII G2 RX[0:3]    input
-MPP[28:29]  0x0     MODEL_ID            input           MODEL_ID:
-														00: DS409, DS410j
-														01: DS509
-														10:RS409
-														11:RS409RP
-MPP[30:31]  0x0     RGMII TX_CTL, RGMII TX_CLK  output
-MPP[32:33]  0x0     RGMII RX_CTL, RGMII RX_CLK  input
-MPP34       0x3     ACT internal SATA port 2    output
-MPP35       0x3     ACT internal SATA port 1    output
-MPP[36:45]  0x0     DISK LED STATE      output
-MPP47       0x0     BUZZER_MUTE_REQ     input
-MPP46       0x0     BUZZER_MUTE_ACK     output
-MPP48       0x0     RPS1_ON             input
-MPP49       0x0     RPS2_ON             input
-*/
 static void 
 KW_6281_409_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 {
@@ -1123,26 +939,6 @@ KW_6281_409_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 	*global_gpio = gpio_409;
 }
 
-/*
- * Pin          Mode    Signal select and definition    Input/output    Pull-up/pull-down
- * MPP[0:3]     0x2     SPI signal
- * MPP[4]       0x0     GPIO
- * MPP[5]       0x0     GPO                             output
- * MPP[6]       0x1     SYSRST_OUTn                     output
- * MPP[7]       0x0     GPO                             output
- * MPP[8:9]     0x1     TWSI
- * MPP[10:11]   0x3     UART0
- * MPP[12]      0x0     GPIO
- * MPP[13:14]   0x3     UART1
- * MPP[15:17]   0x0     GPIO
- * MPP[18:19]   0x0     GPO                             output
- * MPP[35]      0x0     GPIO
- * MPP[36]      0x0     USB LED                         output      Default Hi, Low=USB CONNECT
- * MPP[37]      0x0     STATUS LED                      output      Hi=power on, Low=power off
- * MPP[38]      0x0     RESET BUTTON                    input       Active Low
- * MPP[39]      0x0     POWER BUTTON                    input       Active Low
- * MPP[40:44]   0x0     GPIO
- */
 static void
 KW_6180_011_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 {
@@ -1201,35 +997,10 @@ KW_6180_011_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
     *global_gpio = gpio_011;
 }
 
-/*
- *   Marvell 88f6702 1 BAY, used in DS112j, Eagle
- *
- *  Pin         Mode    Signal select and definition    Input/output    Pull-up/pull-down
- *  MPP[0:3]    0x2         SPI signal                      out             x000
- *  MPP[4]      0x2         UART0 RXD                       in
- *  MPP[5]      0x2         UART0 TXD                       out             1
- *  MPP[6]      0x1         SYSRST_OUTn                     out
- *  MPP[7]      0x0         Fan speed low                   out             1
- *  MPP[8]      0x1         TW_SDA                          in/out
- *  MPP[9]      0x1         TW_SCK                          in/out
- *  MPP[10]     0x5         SATA1_LEDn                      out             1
- *  MPP[11]     0x5         SATA0 LEDn                      out
- *  MPP[12]     0x0         HDD_PWR_EN_1                    out             1
- *  MPP[13]     0x0         SATA port 1 FAULTn LED          out
- *  MPP[14]     0x3         Reserved
- *  MPP[15]     0x3         UART0 TXD                       out
- *  MPP[16]     0x3         UART0 RXD                       in
- *  MPP[17]     0x0         SATA port 0 FAULTn LED          out
- *  MPP[18]     0x0         Fan speed middle                out             1
- *  MPP[19]     0x0         Fan speed high                  out             1
- *  MPP[20:27]  0x0         Reserved
- *  MPP[28]     0x0         Model ID                        in
- */
-
 static void 
 KW_6702_1BAY_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 {
-	/* 112j */
+	 
 	SYNO_KW_GENERIC_GPIO gpio_6702_1bay = {
 		.ext_sata_led = {
 							.hdd1_led_0 = GPIO_UNDEF,
@@ -1364,7 +1135,7 @@ void synology_gpio_init(void)
 		KW_6282_DS_4BAY_GPIO_init(&generic_gpio);
 		printk("Synology 6282 DS411slim GPIO Init\n");
 		break;
-	case SYNO_RS_6282_ID: //this is ID is used for RS411 and RS812
+	case SYNO_RS_6282_ID:  
 		printk("Synology 6282 RS411 / RS812 / RS212 GPIO Init\n");
 		KW_6282_RS411_GPIO_init(&generic_gpio);
 		break;
@@ -1396,11 +1167,11 @@ void synology_gpio_init(void)
 			printk("Synology 6282 1, 2 bay GPIO Init\n");
 		}
 		break;
-	case SYNO_6702_1BAY_ID: //ds112j
+	case SYNO_6702_1BAY_ID:  
 		KW_6702_1BAY_GPIO_init(&generic_gpio);
 		printk("Synology 6702 1 bay GPIO Init\n");
 		break;
-	case SYNO_RS213_ID: //this is ID is used for RS213/RS813
+	case SYNO_RS213_ID:  
 		printk("Synology 6282 RS213/RS813 Init\n");
 		KW_6282_RS411_GPIO_init(&generic_gpio);
 		break;
@@ -1410,4 +1181,4 @@ void synology_gpio_init(void)
 		break;
 	}
 }
-#endif /* MY_ABC_HERE */
+#endif  

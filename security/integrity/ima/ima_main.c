@@ -1,21 +1,4 @@
-/*
- * Copyright (C) 2005,2006,2007,2008 IBM Corporation
- *
- * Authors:
- * Reiner Sailer <sailer@watson.ibm.com>
- * Serge Hallyn <serue@us.ibm.com>
- * Kylene Hall <kylene@us.ibm.com>
- * Mimi Zohar <zohar@us.ibm.com>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, version 2 of the
- * License.
- *
- * File: ima_main.c
- *             implements the IMA hooks: ima_bprm_check, ima_file_mmap,
- *             and ima_path_check.
- */
+ 
 #include <linux/module.h>
 #include <linux/file.h>
 #include <linux/binfmts.h>
@@ -35,13 +18,6 @@ static int __init hash_setup(char *str)
 }
 __setup("ima_hash=", hash_setup);
 
-/**
- * ima_file_free - called on __fput()
- * @file: pointer to file structure being freed
- *
- * Flag files that changed, based on i_version;
- * and decrement the iint readcount/writecount.
- */
 void ima_file_free(struct file *file)
 {
 	struct inode *inode = file->f_dentry->d_inode;
@@ -81,16 +57,6 @@ void ima_file_free(struct file *file)
 	kref_put(&iint->refcount, iint_free);
 }
 
-/* ima_read_write_check - reflect possible reading/writing errors in the PCR.
- *
- * When opening a file for read, if the file is already open for write,
- * the file could change, resulting in a file measurement error.
- *
- * Opening a file for write, if the file is already open for read, results
- * in a time of measure, time of use (ToMToU) error.
- *
- * In either case invalidate the PCR.
- */
 enum iint_pcr_error { TOMTOU, OPEN_WRITERS };
 static void ima_read_write_check(enum iint_pcr_error error,
 				 struct ima_iint_cache *iint,
@@ -134,24 +100,6 @@ static void ima_update_counts(struct ima_iint_cache *iint, int mask)
 		iint->readcount++;
 }
 
-/**
- * ima_path_check - based on policy, collect/store measurement.
- * @path: contains a pointer to the path to be measured
- * @mask: contains MAY_READ, MAY_WRITE or MAY_EXECUTE
- *
- * Measure the file being open for readonly, based on the
- * ima_must_measure() policy decision.
- *
- * Keep read/write counters for all files, but only
- * invalidate the PCR for measured files:
- * 	- Opening a file for write when already open for read,
- *	  results in a time of measure, time of use (ToMToU) error.
- *	- Opening a file for read when already open for write,
- * 	  could result in a file measurement error.
- *
- * Always return 0 and audit dentry_open failures.
- * (Return code will be based upon measurement appraisal.)
- */
 int ima_path_check(struct path *path, int mask, int update_counts)
 {
 	struct inode *inode = path->dentry->d_inode;
@@ -237,22 +185,11 @@ out:
 	return rc;
 }
 
-/*
- * ima_counts_put - decrement file counts
- *
- * File counts are incremented in ima_path_check. On file open
- * error, such as ETXTBSY, decrement the counts to prevent
- * unnecessary imbalance messages.
- */
 void ima_counts_put(struct path *path, int mask)
 {
 	struct inode *inode = path->dentry->d_inode;
 	struct ima_iint_cache *iint;
 
-	/* The inode may already have been freed, freeing the iint
-	 * with it. Verify the inode is not NULL before dereferencing
-	 * it.
-	 */
 	if (!ima_initialized || !inode || !S_ISREG(inode->i_mode))
 		return;
 	iint = ima_iint_find_insert_get(inode);
@@ -270,15 +207,6 @@ void ima_counts_put(struct path *path, int mask)
 	kref_put(&iint->refcount, iint_free);
 }
 
-/*
- * ima_counts_get - increment file counts
- *
- * - for IPC shm and shmat file.
- * - for nfsd exported files.
- *
- * Increment the counts for these files to prevent unnecessary
- * imbalance messages.
- */
 void ima_counts_get(struct file *file)
 {
 	struct inode *inode = file->f_dentry->d_inode;
@@ -302,17 +230,6 @@ void ima_counts_get(struct file *file)
 }
 EXPORT_SYMBOL_GPL(ima_counts_get);
 
-/**
- * ima_file_mmap - based on policy, collect/store measurement.
- * @file: pointer to the file to be measured (May be NULL)
- * @prot: contains the protection that will be applied by the kernel.
- *
- * Measure files being mmapped executable based on the ima_must_measure()
- * policy decision.
- *
- * Return 0 on success, an error code on failure.
- * (Based on the results of appraise_measurement().)
- */
 int ima_file_mmap(struct file *file, unsigned long prot)
 {
 	int rc;
@@ -326,21 +243,8 @@ int ima_file_mmap(struct file *file, unsigned long prot)
 }
 #ifdef CONFIG_AUFS_FS
 EXPORT_SYMBOL(ima_file_mmap);
-#endif /* SYNO_AUFS */
+#endif  
 
-/**
- * ima_bprm_check - based on policy, collect/store measurement.
- * @bprm: contains the linux_binprm structure
- *
- * The OS protects against an executable file, already open for write,
- * from being executed in deny_write_access() and an executable file,
- * already open for execute, from being modified in get_write_access().
- * So we can be certain that what we verify and measure here is actually
- * what is being executed.
- *
- * Return 0 on success, an error code on failure.
- * (Based on the results of appraise_measurement().)
- */
 int ima_bprm_check(struct linux_binprm *bprm)
 {
 	int rc;
@@ -365,7 +269,7 @@ static void __exit cleanup_ima(void)
 	ima_cleanup();
 }
 
-late_initcall(init_ima);	/* Start IMA after the TPM is available */
+late_initcall(init_ima);	 
 
 MODULE_DESCRIPTION("Integrity Measurement Architecture");
 MODULE_LICENSE("GPL");

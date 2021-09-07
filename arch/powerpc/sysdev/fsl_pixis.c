@@ -2,23 +2,7 @@
 #define MY_ABC_HERE
 #endif
 #ifdef MY_DEF_HERE
-/*
- * Freescale board control FPGA.
- *
- * Copyright (C) 2010 Freescale Semiconductor, Inc. All rights reserved.
- *
- * Author: Tang Yuantian <b29983@freescale.com>
- *
- * Based on code wrote by Mingkai hu <Mingkai.hu@freescale.com>
- * Based on the bare code wrote by Chris Pettinato (ra5171@freescale.com)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
-
+ 
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/i2c.h>
@@ -38,58 +22,46 @@
 static struct proc_dir_entry *pixis_proc_root;
 static struct proc_dir_entry *pixis_proc_pm_ctrl;
 static struct fsl_pixis *pixis;
-static int ACK_TIMEOUT = 50;	/* unit:ms */
+static int ACK_TIMEOUT = 50;	 
 
-/* table for positive exponent */
 static int pmbus_2power_pos[] = {
-	1,					/* 0000_0 => 0 */
-	2,					/* 0000_1 => 1 */
-	4,					/* 0001_0 => 2 */
-	8,					/* 0001_1 => 3 */
-	16,					/* 0010_0 => 4 */
-	32,					/* 0010_1 => 5 */
-	64,					/* 0011_0 => 6 */
-	128,				/* 0011_1 => 7 */
-	256,				/* 0100_0 => 8 */
-	512,				/* 0100_1 => 9 */
-	1024,				/* 0101_0 => 10 */
-	2048,				/* 0101_1 => 11 */
-	4096,				/* 0110_0 => 12 */
-	8192,				/* 0110_1 => 13 */
-	16384,				/* 0111_0 => 14 */
-	32678				/* 0111_1 => 15 */
+	1,					 
+	2,					 
+	4,					 
+	8,					 
+	16,					 
+	32,					 
+	64,					 
+	128,				 
+	256,				 
+	512,				 
+	1024,				 
+	2048,				 
+	4096,				 
+	8192,				 
+	16384,				 
+	32678				 
 };
 
-/*
- * table for negative exponent.
- * amplified by 1000,000 times.
- */
 static int pmbus_2power_neg[] = {
-	15,					/* 1000_0 => 16 (-16) */
-	30,					/* 1000_1 => 17 (-15) */
-	61,					/* 1001_0 => 18 (-14) */
-	122,				/* 1001_1 => 19 (-13) */
-	244,				/* 1010_0 => 20 (-12) */
-	488,				/* 1010_1 => 21 (-11) */
-	976,				/* 1011_0 => 22 (-10) */
-	1953,				/* 1011_1 => 23 (-9) */
-	3906,				/* 1100_0 => 24 (-8) */
-	7812,				/* 1100_1 => 25 (-7) */
-	15625,				/* 1101_0 => 26 (-6) */
-	31250,				/* 1101_1 => 27 (-5) */
-	62500,				/* 1110_0 => 28 (-4) */
-	125000, 			/* 1110_1 => 29 (-3) */
-	250000, 			/* 1111_0 => 30 (-2) */
-	500000 				/* 1111_1 => 31 (-1) */
+	15,					 
+	30,					 
+	61,					 
+	122,				 
+	244,				 
+	488,				 
+	976,				 
+	1953,				 
+	3906,				 
+	7812,				 
+	15625,				 
+	31250,				 
+	62500,				 
+	125000, 			 
+	250000, 			 
+	500000 				 
 };
 
-/*
- * 1. send VOUT_MODE to get data mode and exponent.
- *	 VOUT is LINEAR mode with exponent value -13.
- * 2. send READ_VOUT to get mantissa.
- *
- * return unit: mv
- */
 int pmbus_2volt(int v)
 {
 	int d;
@@ -101,18 +73,6 @@ int pmbus_2volt(int v)
 }
 EXPORT_SYMBOL(pmbus_2volt);
 
-/*
- * IOUT is Literal data format.
- * 0x1111 1111 1111 1111
- *   ||   |||		   |
- *   | -+- | ----+-----
- *	 |  |  |	 +--> Mantissa X
- *	 |	|  +--------> Mantissa sign
- *	 |  +-----------> Exponent
- *	 +--------------> Exponent sign
- *
- * return unit: mA
- */
 int pmbus_2cur(int a)
 {
 	int d;
@@ -130,11 +90,6 @@ int pmbus_2cur(int a)
 }
 EXPORT_SYMBOL(pmbus_2cur);
 
-/*
- * temperature is Literal data format.
- *
- * return unit: C
- */
 static int pmbus_2temp(int t)
 {
 	int d;
@@ -222,20 +177,14 @@ static int gmsa_check_may_send(void)
 	return 0;
 }
 
-/*
- * Start to execute the CMD in OCM.
- * @addr: the address from which the CMD serials are stored.
- */
 static int gmsa_send_message(int addr)
 {
 	u8	v;
 	int i;
 
-	/* 1. set bit 0 of PX_OCMD to start CMD */
 	pixis_setreg(&pixis->base->omsg, addr);
 	pixis_setreg(&pixis->base->ocmd, PXOC_MSG);
 
-	/* 2. wait for ack */
 	for (i = 0; i < ACK_TIMEOUT; i++) {
 		v = pixis_getreg(&pixis->base->mack);
 		if (v & PXMA_ACK) {
@@ -245,16 +194,13 @@ static int gmsa_send_message(int addr)
 		mdelay(1);
 	}
 
-	/* 3. check the error */
 	if ((i == ACK_TIMEOUT) || (v & PXMA_ERR)) {
 		pr_err("OCM Ack err or timeout.\n");
 		return 1;
 	}
 
-	/* 4. clear the bit 0 of PX_OCMD */
 	pixis_setreg(&pixis->base->ocmd, 0);
 
-	/* 5. wait for OCM to stop */
 	for (i = 0; i < ACK_TIMEOUT; i++) {
 		v = pixis_getreg(&pixis->base->mack);
 		if (!(v & PXMA_ACK)) {
@@ -264,7 +210,6 @@ static int gmsa_send_message(int addr)
 		mdelay(1);
 	}
 
-	/* 6. check the error */
 	if ((i == ACK_TIMEOUT) || (v & PXMA_ERR)) {
 		pr_err("OCM Ack err or timeout.\n");
 		return 1;
@@ -352,10 +297,6 @@ static int pixis_stop_pm(void)
 	return 0;
 }
 
-/*
- * These two functions are provided for Power Manamgement
- * code to call it in sleep mode.
- */
 int pixis_start_pm_sleep(void)
 {
 	int status = 0;
@@ -433,9 +374,6 @@ static int pixis_proc_write_ctrl(struct file *file, const char __user *buffer,
 	return count;
 }
 
-/*
- * pm_status
- */
 static int pixis_proc_show_status(struct seq_file *m, void *v)
 {
 	seq_putc(m, '\n');
@@ -462,9 +400,6 @@ static const struct file_operations pixis_proc_status_fops = {
 	.release	= single_release,
 };
 
-/*
- * pm_results
- */
 static int gmsa_snapshot_report(struct seq_file *m,
 		int indx, int fmt, char *name, char *unit)
 {
@@ -560,7 +495,6 @@ static int __init fsl_pixis_init(void)
 		return -EIO;
 	}
 
-	/* Create the /proc entry */
 	pixis_proc_root = proc_mkdir("pixis_ctrl", NULL);
 	if (!pixis_proc_root) {
 		pr_err("PIXIS: failed to create pixis_ctrl entry.\n");
@@ -575,9 +509,8 @@ static int __init fsl_pixis_init(void)
 	proc_create("pm_result", 0, pixis_proc_root, &pixis_proc_result_fops);
 	proc_create("pm_status", 0, pixis_proc_root, &pixis_proc_status_fops);
 
-	/* enable 9 channel */
 	pixis_enable_channel(0x1FF);
-	/* set timer 240, 1 sample/SEC */
+	 
 	pixis_set_timer(240);
 
 	return 0;
@@ -599,4 +532,4 @@ MODULE_LICENSE("GPL");
 
 module_init(fsl_pixis_init);
 module_exit(fsl_pixis_exit);
-#endif /* MY_DEF_HERE */
+#endif  

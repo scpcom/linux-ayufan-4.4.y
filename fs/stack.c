@@ -5,11 +5,6 @@
 #include <linux/fs.h>
 #include <linux/fs_stack.h>
 
-/* does _NOT_ require i_mutex to be held.
- *
- * This function cannot be inlined since i_size_{read,write} is rather
- * heavy-weight on 32-bit systems
- */
 void fsstack_copy_inode_size(struct inode *dst, const struct inode *src)
 {
 	i_size_write(dst, i_size_read((struct inode *)src));
@@ -17,9 +12,6 @@ void fsstack_copy_inode_size(struct inode *dst, const struct inode *src)
 }
 EXPORT_SYMBOL_GPL(fsstack_copy_inode_size);
 
-/* copy all attributes; get_nlinks is optional way to override the i_nlink
- * copying
- */
 void fsstack_copy_attr_all(struct inode *dest, const struct inode *src,
 				int (*get_nlinks)(struct inode *))
 {
@@ -34,16 +26,13 @@ void fsstack_copy_attr_all(struct inode *dest, const struct inode *src,
 	dest->i_flags = src->i_flags;
 
 #ifdef MY_ABC_HERE
-	//For ecryptfs archive bit
+	 
 	dest->i_mode2 = src->i_mode2;
 #endif
 #ifdef MY_ABC_HERE
 	dest->i_CreateTime = src->i_CreateTime;
 #endif
-	/*
-	 * Update the nlinks AFTER updating the above fields, because the
-	 * get_links callback may depend on them.
-	 */
+	 
 	if (!get_nlinks)
 		dest->i_nlink = src->i_nlink;
 	else

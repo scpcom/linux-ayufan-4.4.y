@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Freescale LBC and UPM routines.
- *
- * Copyright (c) 2007-2008  MontaVista Software, Inc.
- *
- * Author: Anton Vorontsov <avorontsov@ru.mvista.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- */
-
+ 
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -30,14 +18,6 @@ static spinlock_t fsl_lbc_lock = __SPIN_LOCK_UNLOCKED(fsl_lbc_lock);
 struct fsl_lbc_ctrl *fsl_lbc_ctrl_dev;
 EXPORT_SYMBOL(fsl_lbc_ctrl_dev);
 
-/**
- * convert_lbc_address - convert the base address
- * @addr_base:	base address of the memory bank
- *
- * This function converts a base address of lbc into the right format for the BR
- * registers. If the SOC has eLBC then it returns 32bit physical address else
- * it returns 34bit physical address for local bus(Example: MPC8641).
- */
 unsigned int convert_lbc_address(phys_addr_t addr_base)
 {
 	void *dev;
@@ -91,15 +71,6 @@ found:
 arch_initcall(fsl_lbc_init);
 #endif
 
-/**
- * fsl_lbc_find - find Localbus bank
- * @addr_base:	base address of the memory bank
- *
- * This function walks LBC banks comparing "Base address" field of the BR
- * registers with the supplied addr_base argument. When bases match this
- * function returns bank number (starting with 0), otherwise it returns
- * appropriate errno value.
- */
 int fsl_lbc_find(phys_addr_t addr_base)
 {
 	int i;
@@ -132,15 +103,6 @@ int fsl_lbc_find(phys_addr_t addr_base)
 }
 EXPORT_SYMBOL(fsl_lbc_find);
 
-/**
- * fsl_upm_find - find pre-programmed UPM via base address
- * @addr_base:	base address of the memory bank controlled by the UPM
- * @upm:	pointer to the allocated fsl_upm structure
- *
- * This function fills fsl_upm structure so you can use it with the rest of
- * UPM API. On success this function returns 0, otherwise it returns
- * appropriate errno value.
- */
 int fsl_upm_find(phys_addr_t addr_base, struct fsl_upm *upm)
 {
 	int bank;
@@ -203,16 +165,6 @@ int fsl_upm_find(phys_addr_t addr_base, struct fsl_upm *upm)
 }
 EXPORT_SYMBOL(fsl_upm_find);
 
-/**
- * fsl_upm_run_pattern - actually run an UPM pattern
- * @upm:	pointer to the fsl_upm structure obtained via fsl_upm_find
- * @io_base:	remapped pointer to where memory access should happen
- * @mar:	MAR register content during pattern execution
- *
- * This function triggers dummy write to the memory specified by the io_base,
- * thus UPM pattern actually executed. Note that mar usage depends on the
- * pre-programmed AMX bits in the UPM RAM.
- */
 int fsl_upm_run_pattern(struct fsl_upm *upm, void __iomem *io_base, u32 mar)
 {
 	int ret = 0;
@@ -257,19 +209,12 @@ static int __devinit fsl_lbc_ctrl_init(struct fsl_lbc_ctrl *ctrl)
 {
 	struct fsl_lbc_regs __iomem *lbc = ctrl->regs;
 
-	/*
-	 * NAND transactions can tie up the bus for a long time, so set the
-	 * bus timeout to max by clearing LBCR[BMT] (highest base counter
-	 * value) and setting LBCR[BMTPS] to the highest prescaler value.
-	 */
 	clrsetbits_be32(&lbc->lbcr, LBCR_BMT, 15);
 
-	/* clear event registers */
 	setbits32(&lbc->ltesr, LTESR_CLEAR);
 	out_be32(&lbc->lteatr, 0);
 	out_be32(&lbc->ltedr, LTEDR_ENABLE);
 
-	/* Enable interrupts for any detected events */
 	out_be32(&lbc->lteir, LTEIR_ENABLE);
 
 	return 0;
@@ -290,10 +235,6 @@ static int __devexit fsl_lbc_ctrl_remove(struct of_device *ofdev)
 
 	return 0;
 }
-
-/* NOTE: This interrupt is used to report localbus events of various kinds,
- * such as transaction errors on the chipselects.
- */
 
 static irqreturn_t fsl_lbc_ctrl_irq(int irqno, void *data)
 {
@@ -351,15 +292,6 @@ static irqreturn_t fsl_lbc_ctrl_irq(int irqno, void *data)
 	return IRQ_NONE;
 }
 
-/* fsl_lbc_ctrl_probe
- *
- * called by device layer when it finds a device matching
- * one our driver can handled. This code allocates all of
- * the resources needed for the controller only.  The
- * resources for the NAND banks themselves are allocated
- * in the chip probe function.
-*/
-
 static int __devinit fsl_lbc_ctrl_probe(struct of_device *ofdev,
 					 const struct of_device_id *match)
 {
@@ -414,7 +346,6 @@ static struct fsl_lbc_regs lbc_saveed_regs;
 #define COUNT_OF_BANK_P1022 8
 #define COUNT_OF_BANKS COUNT_OF_BANK_P1022
 
-/* save lbc registers */
 static int fsl_lbc_suspend(struct of_device *ofdev, pm_message_t state)
 {
 	struct fsl_lbc_ctrl *ctrl = dev_get_drvdata(&ofdev->dev);
@@ -453,7 +384,6 @@ static int fsl_lbc_suspend(struct of_device *ofdev, pm_message_t state)
 	return 0;
 }
 
-/* restore lbc registers */
 static int fsl_lbc_resume(struct of_device *ofdev)
 {
 	struct fsl_lbc_ctrl *ctrl = dev_get_drvdata(&ofdev->dev);
@@ -492,7 +422,7 @@ static int fsl_lbc_resume(struct of_device *ofdev)
 
 	return 0;
 }
-#endif /* CONFIG_SUSPEND */
+#endif  
 
 static const struct of_device_id fsl_lbc_match[] = {
 	{

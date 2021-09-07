@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2007 Freescale Semiconductor, Inc. All rights reserved.
- *
- * Author:
- *   Zhang Wei <wei.zhang@freescale.com>, Jul 2007
- *   Ebony Zhu <ebony.zhu@freescale.com>, May 2007
- *
- * This is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
+ 
 #ifndef __DMA_FSLDMA_H
 #define __DMA_FSLDMA_H
 
@@ -21,9 +9,6 @@
 #include <linux/dmapool.h>
 #include <linux/dmaengine.h>
 
-/* Define data structures needed by Freescale
- * MPC8540 and MPC8349 DMA controller.
- */
 #define FSL_DMA_MR_CS		0x00000001
 #define FSL_DMA_MR_CC		0x00000002
 #define FSL_DMA_MR_CA		0x00000008
@@ -40,15 +25,10 @@
 #define FSL_DMA_MR_SAHE		0x00001000
 
 #ifdef MY_DEF_HERE
-/*
- * Bandwidth/pause control determines how many bytes a given
- * channel is allowed to transfer before the DMA engine pauses
- * the current channel and switches to the next channel
- */
+ 
 #define FSL_DMA_MR_BWC         0x08000000
 #endif
 
-/* Special MR definition for MPC8349 */
 #define FSL_DMA_MR_EOTIE	0x00000080
 #define FSL_DMA_MR_PRC_RM	0x00000800
 
@@ -109,29 +89,28 @@ struct fsl_desc_sw {
 } __attribute__((aligned(32)));
 
 struct fsl_dma_chan_regs {
-	u32 mr;	/* 0x00 - Mode Register */
-	u32 sr;	/* 0x04 - Status Register */
-	u64 cdar;	/* 0x08 - Current descriptor address register */
-	u64 sar;	/* 0x10 - Source Address Register */
-	u64 dar;	/* 0x18 - Destination Address Register */
-	u32 bcr;	/* 0x20 - Byte Count Register */
-	u64 ndar;	/* 0x24 - Next Descriptor Address Register */
+	u32 mr;	 
+	u32 sr;	 
+	u64 cdar;	 
+	u64 sar;	 
+	u64 dar;	 
+	u32 bcr;	 
+	u64 ndar;	 
 };
 
 struct fsl_dma_chan;
 #define FSL_DMA_MAX_CHANS_PER_DEVICE 4
 
 struct fsl_dma_device {
-	void __iomem *reg_base;	/* DGSR register base */
-	struct resource reg;	/* Resource for register */
+	void __iomem *reg_base;	 
+	struct resource reg;	 
 	struct device *dev;
 	struct dma_device common;
 	struct fsl_dma_chan *chan[FSL_DMA_MAX_CHANS_PER_DEVICE];
-	u32 feature;		/* The same as DMA channels */
-	int irq;		/* Channel IRQ */
+	u32 feature;		 
+	int irq;		 
 };
 
-/* Define macros for fsl_dma_chan->feature property */
 #define FSL_DMA_LITTLE_ENDIAN	0x00000000
 #define FSL_DMA_BIG_ENDIAN	0x00000001
 
@@ -144,15 +123,15 @@ struct fsl_dma_device {
 
 struct fsl_dma_chan {
 	struct fsl_dma_chan_regs __iomem *reg_base;
-	dma_cookie_t completed_cookie;	/* The maximum cookie completed */
-	spinlock_t desc_lock;		/* Descriptor operation lock */
-	struct list_head ld_queue;	/* Link descriptors queue */
-	struct dma_chan common;		/* DMA common channel */
-	struct dma_pool *desc_pool;	/* Descriptors pool */
-	struct device *dev;		/* Channel device */
-	struct resource reg;		/* Resource for register */
-	int irq;			/* Channel IRQ */
-	int id;				/* Raw id of this channel */
+	dma_cookie_t completed_cookie;	 
+	spinlock_t desc_lock;		 
+	struct list_head ld_queue;	 
+	struct dma_chan common;		 
+	struct dma_pool *desc_pool;	 
+	struct device *dev;		 
+	struct resource reg;		 
+	int irq;			 
+	int id;				 
 	struct tasklet_struct tasklet;
 	u32 feature;
 
@@ -180,7 +159,6 @@ static void out_be64(u64 __iomem *addr, u64 val)
 	out_be32((u32 __iomem *)addr + 1, (u32)val);
 }
 
-/* There is no asm instructions for 64 bits reverse loads and stores */
 static u64 in_le64(const u64 __iomem *addr)
 {
 	return ((u64)in_le32((u32 __iomem *)addr + 1) << 32) |
@@ -210,4 +188,4 @@ static void out_le64(u64 __iomem *addr, u64 val)
 			(__force v##width)cpu_to_be##width(c) :		\
 			(__force v##width)cpu_to_le##width(c))
 
-#endif	/* __DMA_FSLDMA_H */
+#endif	 

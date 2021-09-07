@@ -1,13 +1,4 @@
-/*
- * arch/arm/mach-0x820/include/mach/hardware.h
- *
- * Copyright (C) 2009 Oxford Semiconductor Ltd
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #ifndef __ASM_ARCH_HARDWARE_H
 #define __ASM_ARCH_HARDWARE_H
 
@@ -20,12 +11,8 @@
 #define IO_ADDRESS(x)	(x)
 #define __io_address(n)	((void __iomem *)IO_ADDRESS(n))
 
-/* The base of virtual address mappings for hardware cores starts directly
- * after the end of the vmalloc mapping region
- */
 #define OXNAS_HW_PA_TO_VA(x) (VMALLOC_END + (x))
 
-/* Virtual address mapping of hardware core */
 #define USBHOST_BASE			OXNAS_HW_PA_TO_VA(0x00200000)
 #define ETHA_BASE				OXNAS_HW_PA_TO_VA(0x00400000)
 #define MAC_BASE	(ETHA_BASE)
@@ -71,29 +58,26 @@
 #ifdef CONFIG_SUPPORT_LEON
 #define LEON_IMAGE_SIZE			(CONFIG_LEON_PAGES * PAGE_SIZE)
 #define LEON_IMAGE_BASE_PA		(((SRAM_END) + 1) - (LEON_IMAGE_SIZE))
-#else // CONFIG_SUPPORT_LEON
+#else  
 #define LEON_IMAGE_SIZE		0
 #define LEON_IMAGE_BASE_PA	0
-#endif // CONFIG_SUPPORT_LEON
+#endif  
 
 #if (LEON_IMAGE_BASE_PA >= SRAM_PA) && (LEON_IMAGE_BASE_PA <= SRAM_END)
 #define LEON_IMAGE_IN_SRAM
 #endif
 
-/* Amount of SRAM allocated to GMAC descriptors */
 #define DESCRIPTORS_SIZE	(CONFIG_DESCRIPTORS_PAGES * PAGE_SIZE)
 
 #ifdef CONFIG_DESCRIPTORS_PAGES
 #if (CONFIG_DESCRIPTORS_PAGES > CONFIG_SRAM_NUM_PAGES)
 #error "Too many descriptor pages defined - greater than total SRAM pages"
 #endif
-#endif // CONFIG_DESCRIPTORS_PAGES
+#endif  
 
-/* Various DMA descriptors are stored at the base of SRAM */
 #define DESCRIPTORS_BASE_PA	SRAM_PA
 #define DESCRIPTORS_BASE	SRAM_BASE
 
-/* Record the address of the first free location in SRAM */
 #define AVAIL_SRAM_START_PA	(DESCRIPTORS_BASE_PA + DESCRIPTORS_SIZE)
 
 #if (AVAIL_SRAM_START_PA > SRAM_END)
@@ -106,16 +90,9 @@
 #endif
 #endif
 
-/*
- * Location of flags and vectors in SRAM for controlling the booting of the
- * secondary ARM11 processors.
- */
 #define HOLDINGPEN_CPU          (SYS_CONTROL_BASE + 0xc8)
 #define HOLDINGPEN_LOCATION     (SYS_CONTROL_BASE + 0xc4)
 
-/***************************************************************************/
-/* Physical memory map */
-//#define ROM_BASE_PA             0x40000000
 #define USBHOST_BASE_PA         0x40200000
 #define ETHA_BASE_PA            0x40400000
 #define ETHB_BASE_PA            0x40800000
@@ -152,31 +129,25 @@
 #define PCIEA_CLIENT_BASE_PA	0x48000000
 #define PCIEB_CLIENT_BASE_PA	0x4c000000
 
-/* System clock frequencies */
 #ifdef CONFIG_ARCH_OXNAS_FPGA
-/* FPGA CPU clock is entirely independent of rest of SoC */
+ 
 #define NOMINAL_ARMCLK (CONFIG_OXNAS_CORE_CLK)
-#else // CONFIG_ARCH_OXNAS_FPGA
-/* ASIC CPU clock is derived from SoC master clock */
+#else  
+ 
 #define NOMINAL_ARMCLK (CONFIG_NOMINAL_PLL400_FREQ / 2)
-#endif // CONFIG_ARCH_OXNAS_FPGA
+#endif  
 
 #define NOMINAL_SYSCLK (CONFIG_NOMINAL_PLL400_FREQ / 4)
 
-/* RPS timer setup */
 #define TIMER_1_MODE           TIMER_MODE_PERIODIC
 #define TIMER_2_PRESCALE_ENUM  TIMER_PRESCALE_256
 #define TIMER_2_MODE           TIMER_MODE_FREE_RUNNING
 
-/* Useful macros for dealing with sub timer-interrupt intervals - preserve
- * as much precision as possible without using floating point and minimising
- * runtime CPU requirement */
 #define TIMER_1_LOAD_VALUE     ((CLOCK_TICK_RATE) / HZ)
 #define TICKS_TO_US_SCALING    1024
 #define TICKS_TO_US_FACTOR     (((2 * TICKS_TO_US_SCALING * 1000000) + CLOCK_TICK_RATE) / (2 * CLOCK_TICK_RATE))
 #define TICKS_TO_US(ticks)     ((((ticks) * TICKS_TO_US_FACTOR * 2) + TICKS_TO_US_SCALING) / (2 * TICKS_TO_US_SCALING))
 
-/* Remap and pause */
 #define RPS_REMAP_AND_PAUSE    (RPS_BASE + 0x300)
 
 #define USBA_POWO_SEC_MFP  10
@@ -189,7 +160,6 @@
 #define USBB_POWO_TER_MFP  5
 #define USBB_OVERI_TER_MFP 0
 
-/* RPS GPIO registers */
 #define RPS_GPIO_BASE                         (RPS_BASE + 0x3C0)
 #define RPS_GPIO_OUTPUT                       (RPS_BASE + 0x3C0)
 #define RPS_GPIO_OUTPUT_ENABLE                (RPS_BASE + 0x3C4)
@@ -197,7 +167,6 @@
 #define RPS_GPIO_INTERRUPT_EVENT              (RPS_BASE + 0x3CC)
 #define RPS_GPIO_CHIPID                       (RPS_BASE + 0x3FC)
 
-/* GPIO A registers */
 #define GPIO_A_DATA                            GPIO_A_BASE
 #define GPIO_A_OUTPUT_ENABLE                  (GPIO_A_BASE + 0x0004)
 #define GPIO_A_INTERRUPT_ENABLE               (GPIO_A_BASE + 0x0008)
@@ -215,7 +184,6 @@
 #define GPIO_A_LEVEL_INTERRUPT_ENABLE         (GPIO_A_BASE + 0x0038)
 #define GPIO_A_INTERRUPT_STATUS_REGISTER      (GPIO_A_BASE + 0x003C)
 
-/* GPIO B registers */
 #define GPIO_B_DATA                            GPIO_B_BASE
 #define GPIO_B_OUTPUT_ENABLE                  (GPIO_B_BASE + 0x0004)
 #define GPIO_B_INTERRUPT_ENABLE               (GPIO_B_BASE + 0x0008)
@@ -233,7 +201,6 @@
 #define GPIO_B_LEVEL_INTERRUPT_ENABLE         (GPIO_B_BASE + 0x0038)
 #define GPIO_B_INTERRUPT_STATUS_REGISTER      (GPIO_B_BASE + 0x003C)
 
-/* UART_A multi function pins */
 #define UART_A_RI_GPIOA_PIN		24
 #define UART_A_CD_GPIOA_PIN		25
 #define UART_A_DSR_GPIOA_PIN	26
@@ -248,7 +215,6 @@
 #define UART_A_SOUT_GPIOA_PIN	15
 #endif
 
-/* UART_B multi function pins */
 #define UART_B_RI_GPIOB_PIN		8
 #define UART_B_CD_GPIOB_PIN		9
 #define UART_B_DSR_GPIOB_PIN	10
@@ -263,24 +229,20 @@
 #define UART_B_SOUT_GPIOA_PIN	8
 #endif
 
-/* Eth A multi function pins */
 #define MACA_MDC_MF_PIN                3
 #define MACA_MDIO_MF_PIN               4
 
-/* CoProcessor RPS GPIO registers */
 #define COPRO_GPIO_A_BASE            (COPRO_RPS_BASE + 0x3C0)
 #define COPRO_GPIO_A_DATA             COPRO_GPIO_A_BASE
 #define COPRO_GPIO_A_OUTPUT_ENABLE   (COPRO_GPIO_A_BASE + 0x04)
 #define COPRO_GPIO_A_INTERRUPT_MASK  (COPRO_GPIO_A_BASE + 0x08)
 #define COPRO_GPIO_A_INTERRUPT_EVENT (COPRO_GPIO_A_BASE + 0x0C)
 
-/* Static bus registers */
 #define STATIC_CONTROL_VERSION (STATIC_CONTROL_BASE + 0x0)
 #define STATIC_CONTROL_BANK0   (STATIC_CONTROL_BASE + 0x4)
 #define STATIC_CONTROL_BANK1   (STATIC_CONTROL_BASE + 0x8)
 #define STATIC_CONTROL_BANK2   (STATIC_CONTROL_BASE + 0xC)
 
-/* System Control registers */
 #define SYS_CTRL_PCI_STAT               (SYS_CONTROL_BASE + 0x20)
 #define SYS_CTRL_CKEN_CTRL              (SYS_CONTROL_BASE + 0x24)
 #define SYS_CTRL_RSTEN_CTRL             (SYS_CONTROL_BASE + 0x28)
@@ -344,7 +306,6 @@
 #define SYS_CTRL_PCIEB_IN_MSG_LIMIT		(SYS_CONTROL_BASE +0x1A8)
 #define SYS_CTRL_PCIEB_AHB_SLAVE_CTRL	(SYS_CONTROL_BASE +0x1AC)
 
-/* System control multi-function pin function selection */
 #define SYS_CTRL_SECONDARY_SEL          (SYS_CONTROL_BASE + 0x14)
 #define SYS_CTRL_TERTIARY_SEL           (SYS_CONTROL_BASE + 0x8c)
 #define SYS_CTRL_QUATERNARY_SEL         (SYS_CONTROL_BASE + 0x94)
@@ -352,7 +313,6 @@
 #define SYS_CTRL_ALTERNATIVE_SEL        (SYS_CONTROL_BASE + 0xa4)
 #define SYS_CTRL_PULLUP_SEL        		(SYS_CONTROL_BASE + 0xac)
 
-/* Secure control multi-function pin function selection */
 #define SEC_CTRL_SECONDARY_SEL          (SEC_CONTROL_BASE + 0x14)
 #define SEC_CTRL_TERTIARY_SEL           (SEC_CONTROL_BASE + 0x8c)
 #define SEC_CTRL_QUATERNARY_SEL         (SEC_CONTROL_BASE + 0x94)
@@ -368,10 +328,8 @@
 #define SEC_CTRL_PLLB_CTRL1             (SEC_CONTROL_BASE + 0x1F4)
 #define SEC_CTRL_PLLB_CTRL8             (SEC_CONTROL_BASE + 0x1F4)
 
-/* There are 32 MFP in sys_ctrl and another 18 in sec_ctrl */
 #define SYS_CTRL_NUM_PINS	32
 
-/* clock control bits */
 #define SYS_CTRL_CKEN_COPRO_BIT         0
 #define SYS_CTRL_CKEN_DMA_BIT           1
 #define SYS_CTRL_CKEN_CIPHER_BIT        2
@@ -390,7 +348,6 @@
 #define SYS_CTRL_CKEN_DDRPHY_BIT        15
 #define SYS_CTRL_CKEN_DDRCK_BIT         16
 
-/* reset control bits */
 #define SYS_CTRL_RSTEN_SCU_BIT          0
 #define SYS_CTRL_RSTEN_COPRO_BIT        1
 #define SYS_CTRL_RSTEN_ARM0_BIT         2
@@ -475,7 +432,6 @@
 #define SEC_CTRL_COPRO_DOUBLE_CLK	1
 #define SEC_CTRL_COPRO_START_ADR	2
 
-/* AHB monitor base addresses */
 #define AHB_MON_ETM_ARMA		(AHB_MON_BASE + 0x00000)
 #define AHB_MON_ETM_ARMB		(AHB_MON_BASE + 0x10000)
 #define AHB_MON_AXIM_ARMRA		(AHB_MON_BASE + 0x20000)
@@ -493,7 +449,6 @@
 #define AHB_MON_AHBM_USBMPH		(AHB_MON_BASE + 0xE0000)
 #define AHB_MON_AHBM_USBDEV		(AHB_MON_BASE + 0xF0000)
 
-/* AHB write monitor registers */
 #define AHB_MON_MODE_REG_OFFSET         0x00
 #define AHB_MON_HWRITE_REG_OFFSET       0x04
 #define AHB_MON_HADDR_LOW_REG_OFFSET    0x08
@@ -502,7 +457,6 @@
 #define AHB_MON_HPROT_REG_OFFSET        0x14
 #define AHB_MON_TRIGGER_REG_OFFSET      0x18
 
-/* AHB monitor write register field definitions */
 #define AHB_MON_MODE_MODE_BIT           0
 #define AHB_MON_MODE_MODE_NUM_BITS      2
 #define AHB_MON_HWRITE_COUNT_BIT        0
@@ -540,20 +494,17 @@ typedef enum AHB_MON_HBURST {
     AHB_MON_HBURST_WRAP16,
     AHB_MON_HBURST_INCR16
 } AHB_MON_HBURST_T;
-#endif // __ASSEMBLY__
+#endif  
 
-/* AHB read monitor registers */
 #define AHB_MON_CYCLES_REG_OFFSET       0x00
 #define AHB_MON_TRANSFERS_REG_OFFSET    0x04
 #define AHB_MON_WAITS_REG_OFFSET        0x08
 
-#define STATIC_BUS1_CONTROL_VALUE   0x04010484  /*  200nS rd/wr cycles to allow DMAing to SMC91x on static bus */
+#define STATIC_BUS1_CONTROL_VALUE   0x04010484   
 
-/* PWM register definitions */
 #define PWM_DATA_REGISTER_BASE (PWM_BASE)
 #define PWM_CLOCK_REGISTER  (PWM_BASE+0X400)
 
-/* MPCore specific registers */
 #define OX820_ARM11MP_SCU_BASE       (PERIPH_BASE | 0x0000)
 #define OX820_GIC_CPU_BASE_ADDR      (PERIPH_BASE | 0x0100)
 #define OX820_GIC_CPUN_BASE_ADDR(n)  (PERIPH_BASE + 0x0200 + ((n) * 0x100))
@@ -566,12 +517,10 @@ typedef enum AHB_MON_HBURST {
 
 #define OX820_ARM11MP_TWD_SIZE 0x100
 
-/* PCIe support */
 #define pcibios_assign_all_busses() 1
-#define PCIBIOS_MIN_IO	0	/* May need something other than zero once we understand the significance */
+#define PCIBIOS_MIN_IO	0	 
 #define PCIBIOS_MIN_MEM	0
 
-/* PCIe core register contents */
 #define SYS_CTRL_PCIE_DEVICE_TYPE_BIT	0
 #define SYS_CTRL_PCIE_DEVICE_TYPE_ENDPOINT			0
 #define SYS_CTRL_PCIE_DEVICE_TYPE_LEGACY_ENDPOINT	1
@@ -581,10 +530,8 @@ typedef enum AHB_MON_HBURST {
 #define SYS_CTRL_PCIE_LINK_UP_BIT		11
 #define SYS_CTRL_PCIE_OBTRANS_BIT		12
 
-/* PCIe slave control contents */
 #define SYS_CTRL_PCIE_SLAVE_BE_BIT	22
 
-/* Inbound address translation register in the PCIe ELBI region */
 #define PIM0_MEM_ADDR_LIMIT		(PCIEA_ELBI_BASE + 0x00)
 #define PIM1_MEM_ADDR_LIMIT		(PCIEA_ELBI_BASE + 0x08)
 #define PIM0_MEM_ADDR_START		(PCIEA_ELBI_BASE + 0x10)
@@ -594,8 +541,7 @@ typedef enum AHB_MON_HBURST {
 #define IB_ADDR_XLATE_ENABLE	(PCIEA_ELBI_BASE + 0xFC)
 #define ENABLE_IN_ADDR_TRANS_BIT	0
 
-/* Std PCI configuration registers */
 #define PCI_CONFIG_VERSION_DEVICEID_REG_OFFSET	0x00
 #define PCI_CONFIG_COMMAND_STATUS_REG_OFFSET	0x04
 
-#endif // __ASM_ARCH_HARDWARE_H
+#endif  

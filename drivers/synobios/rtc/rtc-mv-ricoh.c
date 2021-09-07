@@ -20,7 +20,6 @@ int rtc_print_registers(SYNO_AUTO_POWERON *pAutoPowerOn)
 		return -EINVAL;
 	}
 	
-	// get Alarm enable bit
 	if ( 0 > (ret = mvI2CCharRead(I2C_RTC_ADDR, (u8 *)&csr, 16, 0)) ) {
 		goto End;
 	}
@@ -69,7 +68,6 @@ int rtc_ricoh_get_auto_poweron(SYNO_AUTO_POWERON *pAutoPowerOn)
 		return -EINVAL;
 	}
 
-	// get Alarm enable bit
 	if ( 0 > (ret = mvI2CCharRead(I2C_RTC_ADDR, (u8 *)&csr, sizeof(csr)/sizeof(u8), I2C_RTC_CONTROL1_OFFSET)) ) {
 		goto End;
 	}
@@ -80,7 +78,6 @@ int rtc_ricoh_get_auto_poweron(SYNO_AUTO_POWERON *pAutoPowerOn)
 		pAutoPowerOn->enabled = (csr >> 6) & 0x1;
 	}
 	
-	// get Alarm data
 	if ( pAutoPowerOn->num == 1 ) {
 		offset = I2C_RTC_ALARMA_OFFSET;
 	} else {
@@ -112,13 +109,12 @@ int rtc_ricoh_set_auto_poweron(SYNO_AUTO_POWERON *pAutoPowerOn)
 		return -EINVAL;
 	}
 	
-	// get Alarm enable bit
 	if ( 0 > (ret = mvI2CCharRead(I2C_RTC_ADDR, (u8 *)&csr, sizeof(csr)/sizeof(u8), I2C_RTC_CONTROL1_OFFSET)) ) {
 		goto End;
 	}
 	
 	if ( SYNO_AUTO_POWERON_DISABLE == pAutoPowerOn->enabled ) {
-		// disable Alarm enable bit
+		 
 		if ( pAutoPowerOn->num == 1 ) {
 			csr &= ~I2C_RTC_ALARMA_ENABLE;
 		} else {
@@ -129,7 +125,7 @@ int rtc_ricoh_set_auto_poweron(SYNO_AUTO_POWERON *pAutoPowerOn)
 			goto End;
 		}
 	} else {
-		// enable Alarm
+		 
 		csr |= I2C_RTC_ALARMAB_SL;
 		if ( pAutoPowerOn->num == 1 ) {
 			csr |= I2C_RTC_ALARMA_ENABLE;
@@ -141,15 +137,11 @@ int rtc_ricoh_set_auto_poweron(SYNO_AUTO_POWERON *pAutoPowerOn)
 			goto End;
 		}
 	
-		// set 24-hour time display system
-		// this will cause #4457 so we mark it
-		// csr = I2C_RTC_ALARMA_24HOUR;
 		csr = 0;
 		if ( 0 > (ret = mvI2CCharWrite(I2C_RTC_ADDR, (u8 *)&csr, sizeof(csr)/sizeof(u8), I2C_RTC_CONTROL2_OFFSET)) ) {
 			goto End;
 		}
 		
-		// set Alarm data
 		if ( pAutoPowerOn->num == 1 ) {
 			offset |= I2C_RTC_ALARMA_OFFSET;
 		} else {
@@ -172,9 +164,6 @@ int rtc_ricoh_auto_poweron_init(void)
 	int err = -1;
 	u8 csr = 0;
 
-	// disable matched bit
-	// this will cause #4457 so we mark it
-	//csr = I2C_RTC_ALARMA_24HOUR;
 	if ( 0 > (err = mvI2CCharWrite(I2C_RTC_ADDR, (u8 *)&csr, sizeof(csr)/sizeof(u8), I2C_RTC_CONTROL2_OFFSET)) ) {
 		goto End;
 	}

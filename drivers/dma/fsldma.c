@@ -1,32 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Freescale MPC85xx, MPC83xx DMA Engine support
- *
- * Copyright (C) 2007 Freescale Semiconductor, Inc. All rights reserved.
- *
- * Author:
- *   Zhang Wei <wei.zhang@freescale.com>, Jul 2007
- *   Ebony Zhu <ebony.zhu@freescale.com>, May 2007
- *
- * Description:
- *   DMA engine driver for Freescale MPC8540 DMA controller, which is
- *   also fit for MPC8560, MPC8555, MPC8548, MPC8641, and etc.
- *   The support for MPC8349 DMA contorller is also added.
- *
- * This driver instructs the DMA controller to issue the PCI Read Multiple
- * command for PCI read operations, instead of using the default PCI Read Line
- * command. Please be aware that this setting may result in read pre-fetching
- * on some platforms.
- *
- * This is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
-
+ 
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/pci.h>
@@ -42,16 +17,12 @@
 
 static void dma_init(struct fsl_dma_chan *fsl_chan)
 {
-	/* Reset the channel */
+	 
 	DMA_OUT(fsl_chan, &fsl_chan->reg_base->mr, 0, 32);
 
 	switch (fsl_chan->feature & FSL_DMA_IP_MASK) {
 	case FSL_DMA_IP_85XX:
-		/* Set the channel to below modes:
-		 * EIE - Error interrupt enable
-		 * EOSIE - End of segments interrupt enable (basic mode)
-		 * EOLNIE - End of links interrupt enable
-		 */
+		 
 #ifdef MY_DEF_HERE
 		DMA_OUT(fsl_chan, &fsl_chan->reg_base->mr, FSL_DMA_MR_BWC
 				| FSL_DMA_MR_EIE | FSL_DMA_MR_EOLNIE
@@ -62,10 +33,7 @@ static void dma_init(struct fsl_dma_chan *fsl_chan)
 #endif
 		break;
 	case FSL_DMA_IP_83XX:
-		/* Set the channel to below modes:
-		 * EOTIE - End-of-transfer interrupt enable
-		 * PRC_RM - PCI read multiple
-		 */
+		 
 		DMA_OUT(fsl_chan, &fsl_chan->reg_base->mr, FSL_DMA_MR_EOTIE
 				| FSL_DMA_MR_PRC_RM, 32);
 		break;
@@ -214,30 +182,12 @@ static void append_ld_queue(struct fsl_dma_chan *fsl_chan,
 	if (list_empty(&fsl_chan->ld_queue))
 		return;
 
-	/* Link to the new descriptor physical address and
-	 * Enable End-of-segment interrupt for
-	 * the last link descriptor.
-	 * (the previous node's next link descriptor)
-	 *
-	 * For FSL_DMA_IP_83xx, the snoop enable bit need be set.
-	 */
 	queue_tail->hw.next_ln_addr = CPU_TO_DMA(fsl_chan,
 			new_desc->async_tx.phys | FSL_DMA_EOSIE |
 			(((fsl_chan->feature & FSL_DMA_IP_MASK)
 				== FSL_DMA_IP_83XX) ? FSL_DMA_SNEN : 0), 64);
 }
 
-/**
- * fsl_chan_set_src_loop_size - Set source address hold transfer size
- * @fsl_chan : Freescale DMA channel
- * @size     : Address loop size, 0 for disable loop
- *
- * The set source address hold transfer size. The source
- * address hold or loop transfer size is when the DMA transfer
- * data from source address (SA), if the loop size is 4, the DMA will
- * read data from SA, SA + 1, SA + 2, SA + 3, then loop back to SA,
- * SA + 1 ... and so on.
- */
 static void fsl_chan_set_src_loop_size(struct fsl_dma_chan *fsl_chan, int size)
 {
 	switch (size) {
@@ -258,17 +208,6 @@ static void fsl_chan_set_src_loop_size(struct fsl_dma_chan *fsl_chan, int size)
 	}
 }
 
-/**
- * fsl_chan_set_dest_loop_size - Set destination address hold transfer size
- * @fsl_chan : Freescale DMA channel
- * @size     : Address loop size, 0 for disable loop
- *
- * The set destination address hold transfer size. The destination
- * address hold or loop transfer size is when the DMA transfer
- * data to destination address (TA), if the loop size is 4, the DMA will
- * write data to TA, TA + 1, TA + 2, TA + 3, then loop back to TA,
- * TA + 1 ... and so on.
- */
 static void fsl_chan_set_dest_loop_size(struct fsl_dma_chan *fsl_chan, int size)
 {
 	switch (size) {
@@ -289,18 +228,6 @@ static void fsl_chan_set_dest_loop_size(struct fsl_dma_chan *fsl_chan, int size)
 	}
 }
 
-/**
- * fsl_chan_set_request_count - Set DMA Request Count for external control
- * @fsl_chan : Freescale DMA channel
- * @size     : Number of bytes to transfer in a single request
- *
- * The Freescale DMA channel can be controlled by the external signal DREQ#.
- * The DMA request count is how many bytes are allowed to transfer before
- * pausing the channel, after which a new assertion of DREQ# resumes channel
- * operation.
- *
- * A size of 0 disables external pause control. The maximum size is 1024.
- */
 static void fsl_chan_set_request_count(struct fsl_dma_chan *fsl_chan, int size)
 {
 	BUG_ON(size > 1024);
@@ -310,15 +237,6 @@ static void fsl_chan_set_request_count(struct fsl_dma_chan *fsl_chan, int size)
 		32);
 }
 
-/**
- * fsl_chan_toggle_ext_pause - Toggle channel external pause status
- * @fsl_chan : Freescale DMA channel
- * @enable   : 0 is disabled, 1 is enabled.
- *
- * The Freescale DMA channel can be controlled by the external signal DREQ#.
- * The DMA Request Count feature should be used in addition to this feature
- * to set the number of bytes to transfer before pausing the channel.
- */
 static void fsl_chan_toggle_ext_pause(struct fsl_dma_chan *fsl_chan, int enable)
 {
 	if (enable)
@@ -327,16 +245,6 @@ static void fsl_chan_toggle_ext_pause(struct fsl_dma_chan *fsl_chan, int enable)
 		fsl_chan->feature &= ~FSL_DMA_CHAN_PAUSE_EXT;
 }
 
-/**
- * fsl_chan_toggle_ext_start - Toggle channel external start status
- * @fsl_chan : Freescale DMA channel
- * @enable   : 0 is disabled, 1 is enabled.
- *
- * If enable the external start, the channel can be started by an
- * external DMA start pin. So the dma_start() does not start the
- * transfer immediately. The DMA channel will wait for the
- * control pin asserted.
- */
 static void fsl_chan_toggle_ext_start(struct fsl_dma_chan *fsl_chan, int enable)
 {
 	if (enable)
@@ -353,7 +261,6 @@ static dma_cookie_t fsl_dma_tx_submit(struct dma_async_tx_descriptor *tx)
 	unsigned long flags;
 	dma_cookie_t cookie;
 
-	/* cookie increment and adding to ld_queue must be atomic */
 	spin_lock_irqsave(&fsl_chan->desc_lock, flags);
 
 	cookie = fsl_chan->common.cookie;
@@ -374,12 +281,6 @@ static dma_cookie_t fsl_dma_tx_submit(struct dma_async_tx_descriptor *tx)
 	return cookie;
 }
 
-/**
- * fsl_dma_alloc_descriptor - Allocate descriptor from channel's DMA pool.
- * @fsl_chan : Freescale DMA channel
- *
- * Return - The descriptor allocated. NULL for failed.
- */
 static struct fsl_desc_sw *fsl_dma_alloc_descriptor(
 					struct fsl_dma_chan *fsl_chan)
 {
@@ -399,25 +300,13 @@ static struct fsl_desc_sw *fsl_dma_alloc_descriptor(
 	return desc_sw;
 }
 
-/**
- * fsl_dma_alloc_chan_resources - Allocate resources for DMA channel.
- * @fsl_chan : Freescale DMA channel
- *
- * This function will create a dma pool for descriptor allocation.
- *
- * Return - The number of descriptors allocated.
- */
 static int fsl_dma_alloc_chan_resources(struct dma_chan *chan)
 {
 	struct fsl_dma_chan *fsl_chan = to_fsl_chan(chan);
 
-	/* Has this channel already been allocated? */
 	if (fsl_chan->desc_pool)
 		return 1;
 
-	/* We need the descriptor to be aligned to 32bytes
-	 * for meeting FSL DMA specification requirement.
-	 */
 	fsl_chan->desc_pool = dma_pool_create("fsl_dma_engine_desc_pool",
 			fsl_chan->dev, sizeof(struct fsl_desc_sw),
 			32, 0);
@@ -430,10 +319,6 @@ static int fsl_dma_alloc_chan_resources(struct dma_chan *chan)
 	return 1;
 }
 
-/**
- * fsl_dma_free_chan_resources - Free all resources of the channel.
- * @fsl_chan : Freescale DMA channel
- */
 static void fsl_dma_free_chan_resources(struct dma_chan *chan)
 {
 	struct fsl_dma_chan *fsl_chan = to_fsl_chan(chan);
@@ -448,7 +333,7 @@ static void fsl_dma_free_chan_resources(struct dma_chan *chan)
 				"LD %p will be released.\n", desc);
 #endif
 		list_del(&desc->node);
-		/* free link descriptor */
+		 
 		dma_pool_free(fsl_chan->desc_pool, desc, desc->async_tx.phys);
 	}
 	spin_unlock_irqrestore(&fsl_chan->desc_lock, flags);
@@ -477,10 +362,8 @@ fsl_dma_prep_interrupt(struct dma_chan *chan, unsigned long flags)
 	new->async_tx.cookie = -EBUSY;
 	new->async_tx.flags = flags;
 
-	/* Insert the link descriptor to the LD ring */
 	list_add_tail(&new->node, &new->tx_list);
 
-	/* Set End-of-link to the last link descriptor of new list*/
 	set_ld_eol(fsl_chan, new);
 
 	return &new->async_tx;
@@ -505,7 +388,6 @@ static struct dma_async_tx_descriptor *fsl_dma_prep_memcpy(
 
 	do {
 
-		/* Allocate the link descriptor from DMA pool */
 		new = fsl_dma_alloc_descriptor(fsl_chan);
 		if (!new) {
 			dev_err(fsl_chan->dev,
@@ -535,14 +417,12 @@ static struct dma_async_tx_descriptor *fsl_dma_prep_memcpy(
 		dma_src += copy;
 		dma_dest += copy;
 
-		/* Insert the link descriptor to the LD ring */
 		list_add_tail(&new->node, &first->tx_list);
 	} while (len);
 
-	new->async_tx.flags = flags; /* client is in control of this ack */
+	new->async_tx.flags = flags;  
 	new->async_tx.cookie = -EBUSY;
 
-	/* Set End-of-link to the last link descriptor of new list*/
 	set_ld_eol(fsl_chan, new);
 
 	return &first->async_tx;
@@ -560,18 +440,6 @@ fail:
 	return NULL;
 }
 
-/**
- * fsl_dma_prep_slave_sg - prepare descriptors for a DMA_SLAVE transaction
- * @chan: DMA channel
- * @sgl: scatterlist to transfer to/from
- * @sg_len: number of entries in @scatterlist
- * @direction: DMA direction
- * @flags: DMAEngine flags
- *
- * Prepare a set of descriptors for a DMA_SLAVE transaction. Following the
- * DMA_SLAVE API, this gets the device-specific information from the
- * chan->private variable.
- */
 static struct dma_async_tx_descriptor *fsl_dma_prep_slave_sg(
 	struct dma_chan *chan, struct scatterlist *sgl, unsigned int sg_len,
 	enum dma_data_direction direction, unsigned long flags)
@@ -604,47 +472,21 @@ static struct dma_async_tx_descriptor *fsl_dma_prep_slave_sg(
 	hw = list_first_entry(&slave->addresses, struct fsl_dma_hw_addr, entry);
 	hw_used = 0;
 
-	/*
-	 * Build the hardware transaction to copy from the scatterlist to
-	 * the hardware, or from the hardware to the scatterlist
-	 *
-	 * If you are copying from the hardware to the scatterlist and it
-	 * takes two hardware entries to fill an entire page, then both
-	 * hardware entries will be coalesced into the same page
-	 *
-	 * If you are copying from the scatterlist to the hardware and a
-	 * single page can fill two hardware entries, then the data will
-	 * be read out of the page into the first hardware entry, and so on
-	 */
 	for_each_sg(sgl, sg, sg_len, i) {
 		sg_used = 0;
 
-		/* Loop until the entire scatterlist entry is used */
 		while (sg_used < sg_dma_len(sg)) {
 
-			/*
-			 * If we've used up the current hardware address/length
-			 * pair, we need to load a new one
-			 *
-			 * This is done in a while loop so that descriptors with
-			 * length == 0 will be skipped
-			 */
 			while (hw_used >= hw->length) {
 
-				/*
-				 * If the current hardware entry is the last
-				 * entry in the list, we're finished
-				 */
 				if (list_is_last(&hw->entry, &slave->addresses))
 					goto finished;
 
-				/* Get the next hardware address/length pair */
 				hw = list_entry(hw->entry.next,
 						struct fsl_dma_hw_addr, entry);
 				hw_used = 0;
 			}
 
-			/* Allocate the link descriptor from DMA pool */
 			new = fsl_dma_alloc_descriptor(fsl_chan);
 			if (!new) {
 				dev_err(fsl_chan->dev, "No free memory for "
@@ -655,21 +497,10 @@ static struct dma_async_tx_descriptor *fsl_dma_prep_slave_sg(
 			dev_dbg(fsl_chan->dev, "new link desc alloc %p\n", new);
 #endif
 
-			/*
-			 * Calculate the maximum number of bytes to transfer,
-			 * making sure it is less than the DMA controller limit
-			 */
 			copy = min_t(size_t, sg_dma_len(sg) - sg_used,
 					     hw->length - hw_used);
 			copy = min_t(size_t, copy, FSL_DMA_BCR_MAX_CNT);
 
-			/*
-			 * DMA_FROM_DEVICE
-			 * from the hardware to the scatterlist
-			 *
-			 * DMA_TO_DEVICE
-			 * from the scatterlist to the hardware
-			 */
 			if (direction == DMA_FROM_DEVICE) {
 				dma_src = hw->address + hw_used;
 				dma_dst = sg_dma_address(sg) + sg_used;
@@ -678,15 +509,10 @@ static struct dma_async_tx_descriptor *fsl_dma_prep_slave_sg(
 				dma_dst = hw->address + hw_used;
 			}
 
-			/* Fill in the descriptor */
 			set_desc_cnt(fsl_chan, &new->hw, copy);
 			set_desc_src(fsl_chan, &new->hw, dma_src);
 			set_desc_dest(fsl_chan, &new->hw, dma_dst);
 
-			/*
-			 * If this is not the first descriptor, chain the
-			 * current descriptor after the previous descriptor
-			 */
 			if (!first) {
 				first = new;
 			} else {
@@ -701,24 +527,20 @@ static struct dma_async_tx_descriptor *fsl_dma_prep_slave_sg(
 			sg_used += copy;
 			hw_used += copy;
 
-			/* Insert the link descriptor into the LD ring */
 			list_add_tail(&new->node, &first->tx_list);
 		}
 	}
 
 finished:
 
-	/* All of the hardware address/length pairs had length == 0 */
 	if (!first || !new)
 		return NULL;
 
 	new->async_tx.flags = flags;
 	new->async_tx.cookie = -EBUSY;
 
-	/* Set End-of-link to the last link descriptor of new list */
 	set_ld_eol(fsl_chan, new);
 
-	/* Enable extra controller features */
 	if (fsl_chan->set_src_loop_size)
 		fsl_chan->set_src_loop_size(fsl_chan, slave->src_loop_size);
 
@@ -737,18 +559,10 @@ finished:
 	return &first->async_tx;
 
 fail:
-	/* If first was not set, then we failed to allocate the very first
-	 * descriptor, and we're done */
+	 
 	if (!first)
 		return NULL;
 
-	/*
-	 * First is set, so all of the descriptors we allocated have been added
-	 * to first->tx_list, INCLUDING "first" itself. Therefore we
-	 * must traverse the list backwards freeing each descriptor in turn
-	 *
-	 * We're re-using variables for the loop, oh well
-	 */
 	tx_list = &first->tx_list;
 	list_for_each_entry_safe_reverse(new, prev, tx_list, node) {
 		list_del_init(&new->node);
@@ -769,12 +583,10 @@ static void fsl_dma_device_terminate_all(struct dma_chan *chan)
 
 	fsl_chan = to_fsl_chan(chan);
 
-	/* Halt the DMA engine */
 	dma_halt(fsl_chan);
 
 	spin_lock_irqsave(&fsl_chan->desc_lock, flags);
 
-	/* Remove and free all of the descriptors in the LD queue */
 	list_for_each_entry_safe(desc, tmp, &fsl_chan->ld_queue, node) {
 		list_del(&desc->node);
 		dma_pool_free(fsl_chan->desc_pool, desc, desc->async_tx.phys);
@@ -783,10 +595,6 @@ static void fsl_dma_device_terminate_all(struct dma_chan *chan)
 	spin_unlock_irqrestore(&fsl_chan->desc_lock, flags);
 }
 
-/**
- * fsl_dma_update_completed_cookie - Update the completed cookie.
- * @fsl_chan : Freescale DMA channel
- */
 static void fsl_dma_update_completed_cookie(struct fsl_dma_chan *fsl_chan)
 {
 	struct fsl_desc_sw *cur_desc, *desc;
@@ -813,14 +621,6 @@ static void fsl_dma_update_completed_cookie(struct fsl_dma_chan *fsl_chan)
 	}
 }
 
-/**
- * fsl_chan_ld_cleanup - Clean up link descriptors
- * @fsl_chan : Freescale DMA channel
- *
- * This function clean up the ld_queue of DMA channel.
- * If 'in_intr' is set, the function will move the link descriptor to
- * the recycle list. Otherwise, free it directly.
- */
 static void fsl_chan_ld_cleanup(struct fsl_dma_chan *fsl_chan)
 {
 	struct fsl_desc_sw *desc, *_desc;
@@ -842,14 +642,12 @@ static void fsl_chan_ld_cleanup(struct fsl_dma_chan *fsl_chan)
 		callback = desc->async_tx.callback;
 		callback_param = desc->async_tx.callback_param;
 
-		/* Remove from ld_queue list */
 		list_del(&desc->node);
 
 		dev_dbg(fsl_chan->dev, "link descriptor %p will be recycle.\n",
 				desc);
 		dma_pool_free(fsl_chan->desc_pool, desc, desc->async_tx.phys);
 
-		/* Run the link descriptor callback function */
 		if (callback) {
 			spin_unlock_irqrestore(&fsl_chan->desc_lock, flags);
 			dev_dbg(fsl_chan->dev, "link descriptor %p callback\n",
@@ -861,10 +659,6 @@ static void fsl_chan_ld_cleanup(struct fsl_dma_chan *fsl_chan)
 	spin_unlock_irqrestore(&fsl_chan->desc_lock, flags);
 }
 
-/**
- * fsl_chan_xfer_ld_queue - Transfer link descriptors in channel ld_queue.
- * @fsl_chan : Freescale DMA channel
- */
 static void fsl_chan_xfer_ld_queue(struct fsl_dma_chan *fsl_chan)
 {
 	struct list_head *ld_node;
@@ -878,11 +672,6 @@ static void fsl_chan_xfer_ld_queue(struct fsl_dma_chan *fsl_chan)
 
 	dma_halt(fsl_chan);
 
-	/* If there are some link descriptors
-	 * not transfered in queue. We need to start it.
-	 */
-
-	/* Find the first un-transfer desciptor */
 	for (ld_node = fsl_chan->ld_queue.next;
 		(ld_node != &fsl_chan->ld_queue)
 			&& (dma_async_is_complete(
@@ -892,7 +681,7 @@ static void fsl_chan_xfer_ld_queue(struct fsl_dma_chan *fsl_chan)
 		ld_node = ld_node->next);
 
 	if (ld_node != &fsl_chan->ld_queue) {
-		/* Get the ld start address from ld_queue */
+		 
 		next_dest_addr = to_fsl_desc(ld_node)->async_tx.phys;
 		dev_dbg(fsl_chan->dev, "xfer LDs staring from 0x%llx\n",
 				(unsigned long long)next_dest_addr);
@@ -907,10 +696,6 @@ out_unlock:
 	spin_unlock_irqrestore(&fsl_chan->desc_lock, flags);
 }
 
-/**
- * fsl_dma_memcpy_issue_pending - Issue the DMA start command
- * @fsl_chan : Freescale DMA channel
- */
 static void fsl_dma_memcpy_issue_pending(struct dma_chan *chan)
 {
 	struct fsl_dma_chan *fsl_chan = to_fsl_chan(chan);
@@ -941,10 +726,6 @@ static void fsl_dma_memcpy_issue_pending(struct dma_chan *chan)
 	fsl_chan_xfer_ld_queue(fsl_chan);
 }
 
-/**
- * fsl_dma_is_complete - Determine the DMA status
- * @fsl_chan : Freescale DMA channel
- */
 static enum dma_status fsl_dma_is_complete(struct dma_chan *chan,
 					dma_cookie_t cookie,
 					dma_cookie_t *done,
@@ -978,7 +759,7 @@ static irqreturn_t fsl_dma_chan_do_interrupt(int irq, void *data)
 	stat = get_sr(fsl_chan);
 	dev_dbg(fsl_chan->dev, "event: channel %d, stat = 0x%x\n",
 						fsl_chan->id, stat);
-	set_sr(fsl_chan, stat);		/* Clear the event register */
+	set_sr(fsl_chan, stat);		 
 
 	stat &= ~(FSL_DMA_SR_CB | FSL_DMA_SR_CH);
 	if (!stat)
@@ -987,26 +768,16 @@ static irqreturn_t fsl_dma_chan_do_interrupt(int irq, void *data)
 	if (stat & FSL_DMA_SR_TE)
 		dev_err(fsl_chan->dev, "Transfer Error!\n");
 
-	/* Programming Error
-	 * The DMA_INTERRUPT async_tx is a NULL transfer, which will
-	 * triger a PE interrupt.
-	 */
 	if (stat & FSL_DMA_SR_PE) {
 		dev_dbg(fsl_chan->dev, "event: Programming Error INT\n");
 		if (get_bcr(fsl_chan) == 0) {
-			/* BCR register is 0, this is a DMA_INTERRUPT async_tx.
-			 * Now, update the completed cookie, and continue the
-			 * next uncompleted transfer.
-			 */
+			 
 			update_cookie = 1;
 			xfer_ld_q = 1;
 		}
 		stat &= ~FSL_DMA_SR_PE;
 	}
 
-	/* If the link descriptor segment transfer finishes,
-	 * we will recycle the used descriptor.
-	 */
 	if (stat & FSL_DMA_SR_EOSI) {
 		dev_dbg(fsl_chan->dev, "event: End-of-segments INT\n");
 		dev_dbg(fsl_chan->dev, "event: clndar 0x%llx, nlndar 0x%llx\n",
@@ -1016,9 +787,6 @@ static irqreturn_t fsl_dma_chan_do_interrupt(int irq, void *data)
 		update_cookie = 1;
 	}
 
-	/* For MPC8349, EOCDI event need to update cookie
-	 * and start the next transfer if it exist.
-	 */
 	if (stat & FSL_DMA_SR_EOCDI) {
 		dev_dbg(fsl_chan->dev, "event: End-of-Chain link INT\n");
 		stat &= ~FSL_DMA_SR_EOCDI;
@@ -1026,10 +794,6 @@ static irqreturn_t fsl_dma_chan_do_interrupt(int irq, void *data)
 		xfer_ld_q = 1;
 	}
 
-	/* If it current transfer is the end-of-transfer,
-	 * we should clear the Channel Start bit for
-	 * prepare next transfer.
-	 */
 	if (stat & FSL_DMA_SR_EOLNI) {
 		dev_dbg(fsl_chan->dev, "event: End-of-link INT\n");
 		stat &= ~FSL_DMA_SR_EOLNI;
@@ -1075,7 +839,6 @@ static int __devinit fsl_dma_chan_probe(struct fsl_dma_device *fdev,
 	struct fsl_dma_chan *new_fsl_chan;
 	int err;
 
-	/* alloc channel */
 	new_fsl_chan = kzalloc(sizeof(struct fsl_dma_chan), GFP_KERNEL);
 	if (!new_fsl_chan) {
 		dev_err(fdev->dev, "No free memory for allocating "
@@ -1083,7 +846,6 @@ static int __devinit fsl_dma_chan_probe(struct fsl_dma_device *fdev,
 		return -ENOMEM;
 	}
 
-	/* get dma channel register base */
 	err = of_address_to_resource(node, 0, &new_fsl_chan->reg);
 	if (err) {
 		dev_err(fdev->dev, "Can't get %s property 'reg'\n",
@@ -1096,9 +858,6 @@ static int __devinit fsl_dma_chan_probe(struct fsl_dma_device *fdev,
 	if (!fdev->feature)
 		fdev->feature = new_fsl_chan->feature;
 
-	/* If the DMA device's feature is different than its channels',
-	 * report the bug.
-	 */
 	WARN_ON(fdev->feature != new_fsl_chan->feature);
 
 	new_fsl_chan->dev = fdev->dev;
@@ -1116,10 +875,8 @@ static int __devinit fsl_dma_chan_probe(struct fsl_dma_device *fdev,
 	tasklet_init(&new_fsl_chan->tasklet, dma_do_tasklet,
 			(unsigned long)new_fsl_chan);
 
-	/* Init the channel */
 	dma_init(new_fsl_chan);
 
-	/* Clear cdar registers */
 	set_cdar(new_fsl_chan, 0);
 
 	switch (new_fsl_chan->feature & FSL_DMA_IP_MASK) {
@@ -1137,7 +894,6 @@ static int __devinit fsl_dma_chan_probe(struct fsl_dma_device *fdev,
 
 	new_fsl_chan->common.device = &fdev->common;
 
-	/* Add the channel to DMA device channel list */
 	list_add_tail(&new_fsl_chan->common.device_node,
 			&fdev->common.channels);
 	fdev->common.chancnt++;
@@ -1193,7 +949,6 @@ static int __devinit of_fsl_dma_probe(struct of_device *dev,
 	fdev->dev = &dev->dev;
 	INIT_LIST_HEAD(&fdev->common.channels);
 
-	/* get DMA controller register base */
 	err = of_address_to_resource(dev->node, 0, &fdev->reg);
 	if (err) {
 		dev_err(&dev->dev, "Can't get %s property 'reg'\n",
@@ -1210,10 +965,7 @@ static int __devinit of_fsl_dma_probe(struct of_device *dev,
 	dma_cap_set(DMA_MEMCPY, fdev->common.cap_mask);
 #ifdef MY_DEF_HERE
 #ifndef	CONFIG_ASYNC_CORE
-	/*
-	 * The DMA_INTERRUPT async_tx is a NULL transfer, which will
-	 * triger a PE interrupt.
-	 */
+	 
 	dma_cap_set(DMA_INTERRUPT, fdev->common.cap_mask);
 #endif
 #else
@@ -1247,10 +999,6 @@ static int __devinit of_fsl_dma_probe(struct of_device *dev,
 
 	dev_set_drvdata(&(dev->dev), fdev);
 
-	/* We cannot use of_platform_bus_probe() because there is no
-	 * of_platform_bus_remove.  Instead, we manually instantiate every DMA
-	 * channel object.
-	 */
 	for_each_child_of_node(dev->node, child) {
 		if (of_device_is_compatible(child, "fsl,eloplus-dma-channel"))
 			fsl_dma_chan_probe(fdev, child,

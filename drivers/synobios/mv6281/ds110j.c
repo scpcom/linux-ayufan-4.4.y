@@ -1,10 +1,9 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-// Copyright (c) 2000-2009 Synology Inc. All rights reserved.
-
-#include <linux/kernel.h> /* printk() */
-#include <linux/errno.h>  /* error codes */
+ 
+#include <linux/kernel.h>  
+#include <linux/errno.h>   
 #include <linux/delay.h>
 #include <linux/string.h>
 #include <linux/synobios.h>

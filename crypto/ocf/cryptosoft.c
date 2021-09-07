@@ -1,42 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * An OCF module that uses the linux kernel cryptoapi, based on the
- * original cryptosoft for BSD by Angelos D. Keromytis (angelos@cis.upenn.edu)
- * but is mostly unrecognisable,
- *
- * Written by David McCullough <david_mccullough@securecomputing.com>
- * Copyright (C) 2004-2007 David McCullough
- * Copyright (C) 2004-2005 Intel Corporation.
- *
- * LICENSE TERMS
- *
- * The free distribution and use of this software in both source and binary
- * form is allowed (with or without changes) provided that:
- *
- *   1. distributions of this source code include the above copyright
- *      notice, this list of conditions and the following disclaimer;
- *
- *   2. distributions in binary form include the above copyright
- *      notice, this list of conditions and the following disclaimer
- *      in the documentation and/or other associated materials;
- *
- *   3. the copyright holder's name is not used to endorse products
- *      built using this software without specific written permission.
- *
- * ALTERNATIVELY, provided that this notice is retained in full, this product
- * may be distributed under the terms of the GNU General Public License (GPL),
- * in which case the provisions of the GPL apply INSTEAD OF those given above.
- *
- * DISCLAIMER
- *
- * This software is provided 'as is' with no explicit or implied warranties
- * in respect of its properties, including, but not limited to, correctness
- * and/or fitness for purpose.
- * ---------------------------------------------------------------------------
- */
-
+ 
 #ifndef AUTOCONF_INCLUDED
 #include <linux/config.h>
 #endif
@@ -60,8 +25,6 @@ struct {
 } swcr_softc;
 
 #define offset_in_page(p) ((unsigned long)(p) & ~PAGE_MASK)
-
-/* Software session entry */
 
 #define SW_TYPE_CIPHER		0
 #define SW_TYPE_HMAC		1
@@ -94,21 +57,13 @@ struct swcr_data {
 };
 
 #ifndef CRYPTO_TFM_MODE_CBC
-/*
- * As of linux-2.6.21 this is no longer defined, and presumably no longer
- * needed to be passed into the crypto core code.
- */
+ 
 #define	CRYPTO_TFM_MODE_CBC	0
 #define	CRYPTO_TFM_MODE_ECB	0
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
-	/*
-	 * Linux 2.6.19 introduced a new Crypto API, setup macro's to convert new
-	 * API into old API.
-	 */
-
-	/* Symmetric/Block Cipher */
+	 
 	struct blkcipher_desc
 	{
 		struct crypto_tfm *tfm;
@@ -128,7 +83,6 @@ struct swcr_data {
 	#define crypto_blkcipher_decrypt_iv(W, X, Y, Z)	\
 				crypto_cipher_decrypt_iv((W)->tfm, X, Y, Z, (u8 *)((W)->info))
 
-	/* Hash/HMAC/Digest */
 	struct hash_desc
 	{
 		struct crypto_tfm *tfm;
@@ -142,10 +96,8 @@ struct swcr_data {
 	#define crypto_hash_digest(W, X, Y, Z)	\
 				crypto_digest_digest((W)->tfm, X, sg_num, Z)
 
-	/* Asymmetric Cipher */
 	#define crypto_has_cipher(X, Y, Z)		crypto_alg_available(X, 0)
 
-	/* Compression */
 	#define crypto_has_comp(X, Y, Z)		crypto_alg_available(X, 0)
 	#define crypto_comp_tfm(X)				X
 	#define crypto_comp_cast(X)				X
@@ -154,7 +106,7 @@ struct swcr_data {
 	#define ecb(X)	"ecb(" #X ")"
 	#define cbc(X)	"cbc(" #X ")"
 	#define hmac(X)	"hmac(" #X ")"
-#endif /* if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19) */
+#endif  
 
 struct crypto_details
 {
@@ -163,15 +115,9 @@ struct crypto_details
 	int sw_type;
 };
 
-/*
- * This needs to be kept updated with CRYPTO_xxx list (cryptodev.h).
- * If the Algorithm is not supported, then insert a {NULL, 0, 0} entry.
- *
- * IMPORTANT: The index to the array IS CRYPTO_xxx.
- */
 static struct crypto_details crypto_details[CRYPTO_ALGORITHM_MAX + 1] = {
 	{ NULL,              0,                   0 },
-	/* CRYPTO_xxx index starts at 1 */
+	 
 	{ cbc(des),          CRYPTO_TFM_MODE_CBC, SW_TYPE_BLKCIPHER },
 	{ cbc(des3_ede),     CRYPTO_TFM_MODE_CBC, SW_TYPE_BLKCIPHER },
 	{ cbc(blowfish),     CRYPTO_TFM_MODE_CBC, SW_TYPE_BLKCIPHER },
@@ -216,7 +162,7 @@ static	int swcr_newsession(device_t, u_int32_t *, struct cryptoini *);
 static	int swcr_freesession(device_t, u_int64_t);
 
 static device_method_t swcr_methods = {
-	/* crypto device methods */
+	 
 	DEVMETHOD(cryptodev_newsession,	swcr_newsession),
 	DEVMETHOD(cryptodev_freesession,swcr_freesession),
 	DEVMETHOD(cryptodev_process,	swcr_process),
@@ -247,11 +193,11 @@ static void ocf_async_wait(struct ocf_request *ocf_req,
 {
     switch (rc) {
     case 0:
-        /* sync */
+         
         break;
     case -EBUSY:
     case -EINPROGRESS:
-        /* async */
+         
         wait_for_completion(&ocf_req->complete);
 
         if (ocf_req->error) {
@@ -269,9 +215,6 @@ static void ocf_async_wait(struct ocf_request *ocf_req,
 }
 #endif
 
-/*
- * Generate a new software session.
- */
 static int
 swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 {
@@ -292,18 +235,18 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 			if (swcr_sessions[i] == NULL)
 				break;
 	} else
-		i = 1;		/* NB: to silence compiler warning */
+		i = 1;		 
 
 	if (swcr_sessions == NULL || i == swcr_sesnum) {
 		if (swcr_sessions == NULL) {
-			i = 1; /* We leave swcr_sessions[0] empty */
+			i = 1;  
 			swcr_sesnum = CRYPTO_SW_SESSIONS;
 		} else
 			swcr_sesnum *= 2;
 
 		swd = kmalloc(swcr_sesnum * sizeof(struct swcr_data *), SLAB_ATOMIC);
 		if (swd == NULL) {
-			/* Reset session number */
+			 
 			if (swcr_sesnum == CRYPTO_SW_SESSIONS)
 				swcr_sesnum = 0;
 			else
@@ -313,7 +256,6 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 		}
 		memset(swd, 0, swcr_sesnum * sizeof(struct swcr_data *));
 
-		/* Copy existing sessions */
 		if (swcr_sessions) {
 			memcpy(swd, swcr_sessions,
 			    (swcr_sesnum / 2) * sizeof(struct swcr_data *));
@@ -352,10 +294,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 		mode = crypto_details[cri->cri_alg].mode;
 		sw_type = crypto_details[cri->cri_alg].sw_type;
 
-		/* Algorithm specific configuration */
 		switch (cri->cri_alg) {
 		case CRYPTO_NULL_CBC:
-			cri->cri_klen = 0; /* make it work with crypto API */
+			cri->cri_klen = 0;  
 			break;
 		default:
 			break;
@@ -465,9 +406,6 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 	return 0;
 }
 
-/*
- * Free a session.
- */
 static int
 swcr_freesession(device_t dev, u_int64_t tid)
 {
@@ -481,7 +419,6 @@ swcr_freesession(device_t dev, u_int64_t tid)
 		return(EINVAL);
 	}
 
-	/* Silently accept and return */
 	if (sid == 0)
 		return(0);
 
@@ -501,9 +438,6 @@ swcr_freesession(device_t dev, u_int64_t tid)
 	return 0;
 }
 
-/*
- * Process a software request.
- */
 static int
 swcr_process(device_t dev, struct cryptop *crp, int hint)
 {
@@ -517,7 +451,7 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 	struct uio *uiop = NULL;
 
 	dprintk("%s()\n", __FUNCTION__);
-	/* Sanity check */
+	 
 	if (crp == NULL) {
 		dprintk("%s,%d: EINVAL\n", __FILE__, __LINE__);
 		return EINVAL;
@@ -539,10 +473,6 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 		goto done;
 	}
 
-	/*
-	 * do some error checking outside of the loop for SKB and IOV processing
-	 * this leaves us with valid skb or uiop pointers for later
-	 */
 	if (crp->crp_flags & CRYPTO_F_SKBUF) {
 		skb = (struct sk_buff *) crp->crp_buf;
 		if (skb_shinfo(skb)->nr_frags >= SCATTERLIST_MAX) {
@@ -559,23 +489,12 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 		}
 	}
 
-	/* Go through crypto descriptors, processing as we go */
 	for (crd = crp->crp_desc; crd; crd = crd->crd_next) {
-		/*
-		 * Find the crypto context.
-		 *
-		 * XXX Note that the logic here prevents us from having
-		 * XXX the same algorithm multiple times in a session
-		 * XXX (or rather, we can but it won't give us the right
-		 * XXX results). To do that, we'd need some way of differentiating
-		 * XXX between the various instances of an algorithm (so we can
-		 * XXX locate the correct crypto context).
-		 */
+		 
 		for (sw = swcr_sessions[lid]; sw && sw->sw_alg != crd->crd_alg;
 				sw = sw->sw_next)
 			;
 
-		/* No such context ? */
 		if (sw == NULL) {
 			crp->crp_etype = EINVAL;
 			dprintk("%s,%d: EINVAL\n", __FILE__, __LINE__);
@@ -584,9 +503,6 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 
 		skip = crd->crd_skip;
 
-		/*
-		 * setup the SG list skip from the start of the buffer
-		 */
 		memset(sg, 0, sizeof(sg));
 		if (crp->crp_flags & CRYPTO_F_SKBUF) {
 			int i, len;
@@ -737,16 +653,14 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 			desc.tfm = crypto_blkcipher_cast(sw->sw_tfm);
 #endif
 
-			if (crd->crd_flags & CRD_F_ENCRYPT) { /* encrypt */
+			if (crd->crd_flags & CRD_F_ENCRYPT) {  
 
 				if (crd->crd_flags & CRD_F_IV_EXPLICIT) {
 					ivp = crd->crd_iv;
 				} else {
 					get_random_bytes(ivp, ivsize);
 				}
-				/*
-				 * do we have to copy the IV back to the buffer ?
-				 */
+				 
 				if ((crd->crd_flags & CRD_F_IV_PRESENT) == 0) {
 					crypto_copyback(crp->crp_flags, crp->crp_buf,
 							crd->crd_inject, ivsize, (caddr_t)ivp);
@@ -759,7 +673,7 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 				crypto_blkcipher_encrypt_iv(&desc, sg, sg, sg_len);
 #endif
 
-			} else { /*decrypt */
+			} else {  
 
 				if (crd->crd_flags & CRD_F_IV_EXPLICIT) {
 					ivp = crd->crd_iv;
@@ -783,7 +697,6 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 			char result[HASH_MAX_LEN];
 			struct hash_desc desc;
 
-			/* check we have room for the result */
 			if (crp->crp_ilen - crd->crd_inject < sw->u.hmac.sw_mlen) {
 				dprintk(
 			"cryptosoft: EINVAL crp_ilen=%d, len=%d, inject=%d digestsize=%d\n",
@@ -806,9 +719,9 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 				crypto_hash_setkey(desc.tfm, sw->u.hmac.sw_key,
 						sw->u.hmac.sw_klen);
 				crypto_hash_digest(&desc, sg, sg_len, result);
-#endif /* #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19) */
+#endif  
 				
-			} else { /* SW_TYPE_HASH */
+			} else {  
 				crypto_hash_digest(&desc, sg, sg_len, result);
 			}
 
@@ -823,14 +736,6 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 			int ilen = sg_len, olen = CRYPTO_MAX_DATA_LEN;
 			int ret = 0;
 
-			/*
-			 * we need to use an additional copy if there is more than one
-			 * input chunk since the kernel comp routines do not handle
-			 * SG yet.  Otherwise we just use the input buffer as is.
-			 * Rather than allocate another buffer we just split the tmp
-			 * buffer we already have.
-			 * Perhaps we should just use zlib directly ?
-			 */
 			if (sg_num > 1) {
 				int blk;
 
@@ -844,7 +749,7 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 			} else
 				ibuf = sg_virt(&sg[0]);
 
-			if (crd->crd_flags & CRD_F_ENCRYPT) { /* compress */
+			if (crd->crd_flags & CRD_F_ENCRYPT) {  
 				ret = crypto_comp_compress(crypto_comp_cast(sw->sw_tfm),
 						ibuf, ilen, obuf, &olen);
 				if (!ret && olen > crd->crd_len) {
@@ -853,7 +758,7 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 					if (swcr_fail_if_compression_grows)
 						ret = ERANGE;
 				}
-			} else { /* decompress */
+			} else {  
 				ret = crypto_comp_decompress(crypto_comp_cast(sw->sw_tfm),
 						ibuf, ilen, obuf, &olen);
 				if (!ret && (olen + crd->crd_inject) > crp->crp_olen) {
@@ -866,13 +771,9 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 			if (ret)
 				dprintk("%s,%d: ret = %d\n", __FILE__, __LINE__, ret);
 
-			/*
-			 * on success copy result back,
-			 * linux crpyto API returns -errno,  we need to fix that
-			 */
 			crp->crp_etype = ret < 0 ? -ret : ret;
 			if (ret == 0) {
-				/* copy back the result and return it's size */
+				 
 				crypto_copyback(crp->crp_flags, crp->crp_buf,
 						crd->crd_inject, olen, obuf);
 				crp->crp_olen = olen;
@@ -881,7 +782,7 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 			} break;
 
 		default:
-			/* Unknown/unsupported algorithm */
+			 
 			dprintk("%s,%d: EINVAL\n", __FILE__, __LINE__);
 			crp->crp_etype = EINVAL;
 			goto done;

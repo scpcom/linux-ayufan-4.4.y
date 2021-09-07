@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * GPIOs on MPC8349/8572/8610 and compatible
- *
- * Copyright (C) 2008 Peter Korsgaard <jacmet@sunsite.dk>
- *
- * This file is licensed under the terms of the GNU General Public License
- * version 2.  This program is licensed "as is" without any warranty of any
- * kind, whether express or implied.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/spinlock.h>
@@ -47,11 +38,6 @@
 struct mpc8xxx_gpio_chip {
 	struct of_mm_gpio_chip mm_gc;
 	spinlock_t lock;
-
-	/*
-	 * shadowed data register to be able to clear/set output pins in
-	 * open drain mode safely
-	 */
 
 #ifdef MY_DEF_HERE
 	u32 *pData;
@@ -244,7 +230,6 @@ static void iMpc8xxxHWReset(struct gpio_chip *gc, unsigned int gpio)
 		offset = 0;
 	}
 
-	/* set this pin LOW for 200ms */
 	*mpc8xxx_gc->pData &= ~mpc8xxx_gpio2mask(gpio);
 	out_be32(mm->regs + offset + GPIO_DAT, *mpc8xxx_gc->pData);
 	mdelay(200);
@@ -277,7 +262,6 @@ static int iMpc8xxxGpioInterruptClear(struct gpio_chip *gc, const unsigned int g
 		offset = 0;
 	}
 
-	/* clear this GPIO group Interrupts */
 	out_be32(mm->regs + offset + GPIO_IER, in_be32(mm->regs + offset + GPIO_IER));
 
 	spin_unlock_irqrestore(&mpc8xxx_gc->lock, flags);

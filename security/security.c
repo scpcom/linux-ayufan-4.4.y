@@ -1,34 +1,20 @@
-/*
- * Security plug functions
- *
- * Copyright (C) 2001 WireX Communications, Inc <chris@wirex.com>
- * Copyright (C) 2001-2002 Greg Kroah-Hartman <greg@kroah.com>
- * Copyright (C) 2001 Networks Associates Technology, Inc <ssmalley@nai.com>
- *
- *	This program is free software; you can redistribute it and/or modify
- *	it under the terms of the GNU General Public License as published by
- *	the Free Software Foundation; either version 2 of the License, or
- *	(at your option) any later version.
- */
-
+ 
 #include <linux/capability.h>
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/security.h>
 
-/* Boot-time LSM user choice */
 static __initdata char chosen_lsm[SECURITY_NAME_MAX + 1];
 
-/* things that live in capability.c */
 extern struct security_operations default_security_ops;
 extern void security_fixup_ops(struct security_operations *ops);
 
-struct security_operations *security_ops;	/* Initialized to NULL */
+struct security_operations *security_ops;	 
 
 static inline int verify(struct security_operations *ops)
 {
-	/* verify the security_operations structure exists */
+	 
 	if (!ops)
 		return -EINVAL;
 	security_fixup_ops(ops);
@@ -45,11 +31,6 @@ static void __init do_security_initcalls(void)
 	}
 }
 
-/**
- * security_init - initializes the security framework
- *
- * This should be called early in the kernel initialization sequence.
- */
 int __init security_init(void)
 {
 	printk(KERN_INFO "Security Framework initialized\n");
@@ -61,7 +42,6 @@ int __init security_init(void)
 	return 0;
 }
 
-/* Save user chosen LSM */
 static int __init choose_lsm(char *str)
 {
 	strncpy(chosen_lsm, str, SECURITY_NAME_MAX);
@@ -69,21 +49,6 @@ static int __init choose_lsm(char *str)
 }
 __setup("security=", choose_lsm);
 
-/**
- * security_module_enable - Load given security module on boot ?
- * @ops: a pointer to the struct security_operations that is to be checked.
- *
- * Each LSM must pass this method before registering its own operations
- * to avoid security registration races. This method may also be used
- * to check if your LSM is currently loaded during kernel initialization.
- *
- * Return true if:
- *	-The passed LSM is the one chosen by user at boot time,
- *	-or user didn't specify a specific LSM and we're the first to ask
- *	 for registration permission,
- *	-or the passed LSM is currently loaded.
- * Otherwise, return false.
- */
 int __init security_module_enable(struct security_operations *ops)
 {
 	if (!*chosen_lsm)
@@ -94,18 +59,6 @@ int __init security_module_enable(struct security_operations *ops)
 	return 1;
 }
 
-/**
- * register_security - registers a security framework with the kernel
- * @ops: a pointer to the struct security_options that is to be registered
- *
- * This function allows a security module to register itself with the
- * kernel security subsystem.  Some rudimentary checking is done on the @ops
- * value passed to this function. You'll need to check first if your LSM
- * is allowed to register its @ops by calling security_module_enable(@ops).
- *
- * If there is already a security module registered with the kernel,
- * an error will be returned.  Otherwise %0 is returned on success.
- */
 int register_security(struct security_operations *ops)
 {
 	if (verify(ops)) {
@@ -121,8 +74,6 @@ int register_security(struct security_operations *ops)
 
 	return 0;
 }
-
-/* Security operations */
 
 int security_ptrace_access_check(struct task_struct *child, unsigned int mode)
 {
@@ -223,8 +174,7 @@ int security_vm_enough_memory_mm(struct mm_struct *mm, long pages)
 
 int security_vm_enough_memory_kern(long pages)
 {
-	/* If current->mm is a kernel thread then we will pass NULL,
-	   for this specific case that is fine */
+	 
 	return security_ops->vm_enough_memory(current->mm, pages);
 }
 
@@ -388,7 +338,7 @@ int security_path_mkdir(struct path *path, struct dentry *dentry, int mode)
 }
 #ifdef CONFIG_AUFS_FS
 EXPORT_SYMBOL(security_path_mkdir);
-#endif /* SYNO_AUFS */
+#endif  
 
 int security_path_rmdir(struct path *path, struct dentry *dentry)
 {
@@ -398,7 +348,7 @@ int security_path_rmdir(struct path *path, struct dentry *dentry)
 }
 #ifdef CONFIG_AUFS_FS
 EXPORT_SYMBOL(security_path_rmdir);
-#endif /* SYNO_AUFS */
+#endif  
 
 int security_path_unlink(struct path *path, struct dentry *dentry)
 {
@@ -408,7 +358,7 @@ int security_path_unlink(struct path *path, struct dentry *dentry)
 }
 #ifdef CONFIG_AUFS_FS
 EXPORT_SYMBOL(security_path_unlink);
-#endif /* SYNO_AUFS */
+#endif  
 
 int security_path_symlink(struct path *path, struct dentry *dentry,
 			  const char *old_name)
@@ -419,7 +369,7 @@ int security_path_symlink(struct path *path, struct dentry *dentry,
 }
 #ifdef CONFIG_AUFS_FS
 EXPORT_SYMBOL(security_path_symlink);
-#endif /* SYNO_AUFS */
+#endif  
 
 int security_path_link(struct dentry *old_dentry, struct path *new_dir,
 		       struct dentry *new_dentry)
@@ -430,7 +380,7 @@ int security_path_link(struct dentry *old_dentry, struct path *new_dir,
 }
 #ifdef CONFIG_AUFS_FS
 EXPORT_SYMBOL(security_path_link);
-#endif /* SYNO_AUFS */
+#endif  
 
 int security_path_rename(struct path *old_dir, struct dentry *old_dentry,
 			 struct path *new_dir, struct dentry *new_dentry)
@@ -443,7 +393,7 @@ int security_path_rename(struct path *old_dir, struct dentry *old_dentry,
 }
 #ifdef CONFIG_AUFS_FS
 EXPORT_SYMBOL(security_path_rename);
-#endif /* SYNO_AUFS */
+#endif  
 
 int security_path_truncate(struct path *path, loff_t length,
 			   unsigned int time_attrs)
@@ -454,7 +404,7 @@ int security_path_truncate(struct path *path, loff_t length,
 }
 #ifdef CONFIG_AUFS_FS
 EXPORT_SYMBOL(security_path_truncate);
-#endif /* SYNO_AUFS */
+#endif  
 #endif
 
 int security_inode_create(struct inode *dir, struct dentry *dentry, int mode)
@@ -528,7 +478,7 @@ int security_inode_readlink(struct dentry *dentry)
 }
 #ifdef CONFIG_AUFS_FS
 EXPORT_SYMBOL(security_inode_readlink);
-#endif /* SYNO_AUFS */
+#endif  
 
 int security_inode_follow_link(struct dentry *dentry, struct nameidata *nd)
 {
@@ -545,7 +495,7 @@ int security_inode_permission(struct inode *inode, int mask)
 }
 #if defined(CONFIG_AUFS_FS) || defined(CONFIG_FS_SYNO_ACL)
 EXPORT_SYMBOL(security_inode_permission);
-#endif /* SYNO_AUFS */
+#endif  
 
 int security_inode_setattr(struct dentry *dentry, struct iattr *attr)
 {
@@ -648,7 +598,7 @@ int security_file_permission(struct file *file, int mask)
 }
 #ifdef CONFIG_AUFS_FS
 EXPORT_SYMBOL(security_file_permission);
-#endif /* SYNO_AUFS */
+#endif  
 
 int security_file_alloc(struct file *file)
 {
@@ -673,7 +623,7 @@ int security_file_mmap(struct file *file, unsigned long reqprot,
 }
 #ifdef CONFIG_AUFS_FS
 EXPORT_SYMBOL(security_file_mmap);
-#endif /* SYNO_AUFS */
+#endif  
 
 int security_file_mprotect(struct vm_area_struct *vma, unsigned long reqprot,
 			    unsigned long prot)
@@ -1196,7 +1146,7 @@ int security_tun_dev_attach(struct sock *sk)
 }
 EXPORT_SYMBOL(security_tun_dev_attach);
 
-#endif	/* CONFIG_SECURITY_NETWORK */
+#endif	 
 
 #ifdef CONFIG_SECURITY_NETWORK_XFRM
 
@@ -1234,10 +1184,7 @@ int security_xfrm_state_alloc_acquire(struct xfrm_state *x,
 {
 	if (!polsec)
 		return 0;
-	/*
-	 * We want the context to be taken from secid which is usually
-	 * from the sock.
-	 */
+	 
 	return security_ops->xfrm_state_alloc_security(x, NULL, secid);
 }
 
@@ -1276,7 +1223,7 @@ void security_skb_classify_flow(struct sk_buff *skb, struct flowi *fl)
 }
 EXPORT_SYMBOL(security_skb_classify_flow);
 
-#endif	/* CONFIG_SECURITY_NETWORK_XFRM */
+#endif	 
 
 #ifdef CONFIG_KEYS
 
@@ -1309,7 +1256,7 @@ int security_key_session_to_parent(const struct cred *cred,
 	return security_ops->key_session_to_parent(cred, parent_cred, key);
 }
 
-#endif	/* CONFIG_KEYS */
+#endif	 
 
 #ifdef CONFIG_AUDIT
 
@@ -1334,4 +1281,4 @@ int security_audit_rule_match(u32 secid, u32 field, u32 op, void *lsmrule,
 	return security_ops->audit_rule_match(secid, field, op, lsmrule, actx);
 }
 
-#endif /* CONFIG_AUDIT */
+#endif  

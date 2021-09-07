@@ -1,31 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  target_core_seobj.c
- *
- * Copyright (c) 2006-2007 SBE, Inc.  All Rights Reserved.
- * Copyright (c) 2007-2009 Rising Tide Software, Inc.
- * Copyright (c) 2008-2009 Linux-iSCSI.org
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #define TARGET_CORE_SEOBJ_C
 
 #include <linux/string.h>
@@ -295,10 +271,6 @@ int dev_obj_do_se_mem_map(
 	u32 tmp_task_offset = *task_offset;
 	int ret = 0;
 
-	/*
-	 * se_subsystem_api_t->do_se_mem_map is used when internal allocation
-	 * has been done by the transport plugin.
-	 */
 	if (TRANSPORT(dev)->do_se_mem_map) {
 		ret = TRANSPORT(dev)->do_se_mem_map(task, se_mem_list,
 				in_mem, in_se_mem, out_se_mem, se_mem_cnt,
@@ -309,16 +281,9 @@ int dev_obj_do_se_mem_map(
 		return ret;
 	}
 
-	/*
-	 * Assume default that transport plugin speaks preallocated
-	 * scatterlists.
-	 */
 	if (!(transport_calc_sg_num(task, in_se_mem, tmp_task_offset)))
 		return -1;
 
-	/*
-	 * se_task_t->task_sg now contains the struct scatterlist array.
-	 */
 	return transport_map_mem_to_sg(task, se_mem_list, task->task_sg,
 		in_se_mem, out_se_mem, se_mem_cnt, task_offset);
 }
@@ -521,13 +486,12 @@ u32 dev_obj_get_cdb_size(
 	se_device_t *dev  = (se_device_t *)p;
 
 	if (TRANSPORT(dev)->get_device_type(dev) == TYPE_TAPE) {
-		if (cdb[1] & 1) { /* sectors */
+		if (cdb[1] & 1) {  
 			return DEV_ATTRIB(dev)->block_size * sectors;
-		} else /* bytes */
+		} else  
 			return sectors;
 	}
 
-	/* sectors */
 #if 0
 	printk(KERN_INFO "Returning block_size: %u, sectors: %u == %u for"
 			" %s object\n", DEV_ATTRIB(dev)->block_size, sectors,

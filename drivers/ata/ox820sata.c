@@ -1,25 +1,4 @@
-/**************************************************************************
- *
- *  Copyright (c) 2007 Oxford Semiconductor Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- *  Module Name:
- *      ox820sata.c
- *
- *  Abstract:
- *      A driver to interface the 934 based sata core present in the ox820
- *      with libata and scsi
- */
-
+ 
 #include <linux/types.h>
 #include <linux/sched.h>
 #include <linux/interrupt.h>
@@ -47,14 +26,9 @@
 #include <mach/memory.h>
 #include <mach/ox820sata.h>
 
-/***************************************************************************
-* DEBUG CONTROL
-***************************************************************************/
-//#define SATA_TF_DUMP
 #define ERROR_INJECTION
 #define CRAZY_DUMP_DEBUG
 
-//#define LOCKING_DEBUG
 #undef LOCKING_DEBUG
 
 #ifdef LOCKING_DEBUG
@@ -81,26 +55,22 @@
     #undef writel
     #endif
     static inline void writel(u32 v,u32 a) {printk("[%08x]<=%08x\n",a,v);*((volatile u32*)(a)) = v;} 
-    //#define writel(vv,aa) {regarray[regindex].a=(aa); regarray[regindex].d=(vv); regarray[regindex].w=1; ++regindex; regindex &= 1023;*((volatile u32*)(aa)) = (vv);} 
-
+     
     #ifdef readl
     #undef readl
     #endif
     static inline u32 myreadl(u32 a) {u32 v =(*((volatile u32*)(a))); printk("[%08x]=>%08x\n",a,v);return v;}
-    //static inline u32 myreadl(u32 a) {u32 v =(*((volatile u32*)(a)));regarray[regindex].a=a; regarray[regindex].d=v; regarray[regindex].w=0; ++regindex; regindex &= 1023;return v;}
+     
     #define readl(a) (myreadl(a))
 #endif
 
 #include <linux/libata.h>
 #include "libata.h"
-/***************************************************************************
-* CONSTANTS
-***************************************************************************/
-
+ 
 #define DRIVER_AUTHOR   "Oxford Semiconductor Ltd."
 #define DRIVER_DESC     "934 SATA core controler"
 #define DRIVER_NAME     "oxnassata"
-/**************************************************************************/
+ 
 MODULE_LICENSE("GPL");
 MODULE_VERSION(1.0);
 MODULE_AUTHOR(DRIVER_AUTHOR);
@@ -111,11 +81,6 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 #define LIMIT_TO_1pt5Gbs
 #endif
 
-/**************************************************************************
-* TYPEDEF
-**************************************************************************/
-
-/* check this matches the space reserved in hardware.h */
 typedef struct {
     volatile u32 qualifier;
     volatile u32 control;
@@ -133,15 +98,12 @@ typedef struct {
 #endif
     
 #ifndef CONFIG_SATA_OXNAS_SINGLE_SATA    
-    /* bitfield of frozen ports */
+     
     unsigned long port_frozen;
 #endif    
     unsigned long port_in_eh;
 } ox820sata_driver_t;
 
-/**
- * Struct to hold per-port private (specific to this driver) data
- */
 typedef struct
 {
     u32* sgdma_controller;
@@ -151,9 +113,6 @@ typedef struct
     u32* reg_base;
 } ox820sata_private_data;
 
-/**************************************************************************
-* PROTOTYPES
-**************************************************************************/
 static int  ox820sata_driver_probe(struct platform_device *);
 static int  ox820sata_driver_remove(struct platform_device *);
 
@@ -212,9 +171,6 @@ static int acquire_hw(int port_no, int may_sleep, int timeout_jiffies);
 extern void ox820hwraid_restart_queue(void);
 #endif
 
-/**************************************************************************
-* STRUCTURES
-**************************************************************************/
 ox820sata_driver_t ox820sata_driver = 
 {
     .driver = {
@@ -229,8 +185,6 @@ ox820sata_driver_t ox820sata_driver =
 #endif
 };
 
-/** If we were writing this in C++ then we would be deriving a subclass of 
-ata_port, these would be the overridden functions*/
 static struct ata_port_operations ox820sata_port_ops =
 {
 	.inherits			= &sata_port_ops,
@@ -263,20 +217,14 @@ static struct ata_port_operations ox820sata_port_ops =
 	.acquire_hw         = acquire_hw,
 };
 
-/** the scsi_host_template structure describes the basic capabilities of libata
-and our 921 core to the SCSI framework, it contains the addresses of functions 
-in the libata library that handle top level comands from the SCSI library */
 static struct scsi_host_template ox820sata_sht = 
 {
     ATA_BASE_SHT(DRIVER_NAME),
     .sg_tablesize       = CONFIG_ARCH_OXNAS_MAX_SATA_SG_ENTRIES,
-    .dma_boundary       = ~0UL, // NAS has no DMA boundary restrictions
+    .dma_boundary       = ~0UL,  
     .unchecked_isa_dma  = 0,
 };
 
-/**
- * port capabilities for the ox820 sata ports.
- */
 static const struct ata_port_info ox820sata_port_info = {
     .flags = ATA_FLAG_SATA |
              ATA_FLAG_SATA_RESET |
@@ -284,13 +232,12 @@ static const struct ata_port_info ox820sata_port_info = {
              ATA_FLAG_NO_ATAPI |
              ATA_FLAG_PIO_DMA |
              ATA_FLAG_PMP ,
-    .pio_mask   = 0x1f, /* pio modes 0..4*/
-    .mwdma_mask = 0x07, /* mwdma0-2 */
-    .udma_mask  = 0x7f, /* udma0-5 */
+    .pio_mask   = 0x1f,  
+    .mwdma_mask = 0x07,  
+    .udma_mask  = 0x7f,  
     .port_ops   = &ox820sata_port_ops,
 };
 
-/* sata core locking stuff */
 static spinlock_t access_lock = SPIN_LOCK_UNLOCKED;
 static int core_locked = 0;
 static int reentrant_port_no = -1;
@@ -304,15 +251,8 @@ static atomic_t scsi_wants_access = ATOMIC_INIT(0);
 static ox820sata_isr_callback_t ox820sata_isr_callback = NULL;
 static unsigned long ox820sata_isr_arg = 0;
 
-/** lock on the access to the link layer registers */
 static spinlock_t async_register_lock = SPIN_LOCK_UNLOCKED; 
 
-/**************************************************************************
-* FUCTIONS
-**************************************************************************/
-/**
- * initialise functions and macros for ASIC implementation 
- */
 #define PH_GAIN         2
 #define FR_GAIN         3
 #define PH_GAIN_OFFSET  6
@@ -330,7 +270,7 @@ static spinlock_t async_register_lock = SPIN_LOCK_UNLOCKED;
 
 static void wait_cr_ack(void){
 	while ((readl(SATA_PHY_ASIC_STAT) >> 16) & 0x1f)
-		/* wait for an ack bit to be set */ ;
+		  ;
 }
 
 static u16 read_cr(u16 address) {
@@ -363,15 +303,6 @@ void workaround5458(void){
 	}
 }
 
-/**************************************************************************/
-/* Locking                                                                */
-/**************************************************************************/
-/**
- * The underlying function that controls access to the sata core
- *
- * @return non-zero indicates that you have acquired exclusive access to the
- *         sata core.
- */
 static int __acquire_sata_core(
 	int                      port_no,
 	ox820sata_isr_callback_t callback,
@@ -399,9 +330,6 @@ static int __acquire_sata_core(
 		if (core_locked) {
 			BUG_ON(!hw_lock_count && !direct_lock_count);
 
-			/* Can only allow access if from SCSI/SATA stack and if
-			   reentrant access is allowed and this access is to the same
-			   port for which the lock is current held */
 			if (hw_access && (port_no == reentrant_port_no)) {
 				BUG_ON(!hw_lock_count);
 				++hw_lock_count;
@@ -439,9 +367,9 @@ check_uid:
 				hw_access);
 
 			if (!hw_access) {
-				/* Direct access attempting to acquire non-contented lock */
-				BUG_ON(!callback);	// Must have callback for direct access
-				BUG_ON(reentrant_port_no != -1); // Sanity check lock state
+				 
+				BUG_ON(!callback);	 
+				BUG_ON(reentrant_port_no != -1);  
 
 				ox820sata_isr_callback = callback;
 				ox820sata_isr_arg = arg;
@@ -449,12 +377,12 @@ check_uid:
 
 				current_locker_type = locker_type;
 			} else {
-				/* SCSI/SATA attempting to acquire non-contented lock */
-				BUG_ON(callback);	// No callbacks for SCSI/SATA access
-				BUG_ON(arg);		// No callback args for SCSI/SATA access
+				 
+				BUG_ON(callback);	 
+				BUG_ON(arg);		 
 
-				BUG_ON(ox820sata_isr_callback);	// Sanity check lock state
-				BUG_ON(ox820sata_isr_arg);		// Sanity check lock state
+				BUG_ON(ox820sata_isr_callback);	 
+				BUG_ON(ox820sata_isr_arg);		 
 
 				++hw_lock_count;
 				reentrant_port_no = port_no;
@@ -474,14 +402,10 @@ wait_for_lock:
 			break;
 		}
 
-		// Core is locked and we're allowed to sleep, so wait to be awoken when
-		// the core is unlocked
 		for (;;) {
 			prepare_to_wait(&sata_wait_queue, &wait, TASK_UNINTERRUPTIBLE);
 			if (!core_locked) {
-				// We're going to use variables that will have been changed by
-				// the waker prior to clearing core_locked so we need to ensure
-				// we see changes to all those variables
+				 
 				smp_rmb();
 				break;
 			}
@@ -528,12 +452,6 @@ static inline int ox820sata_is_host_frozen(void)
 #endif
 }
 
-/**
- * To be used by non-SCSI/SATA stack SATA core users to acquire the SATA core
- *
- * @return non-zero indicates that you have acquired exclusive access to the
- *         sata core.
- */
 int acquire_sata_core_direct(
 	ox820sata_isr_callback_t callback,
 	unsigned long            arg,
@@ -545,18 +463,17 @@ int acquire_sata_core_direct(
     unsigned long end = jiffies + timeout_jiffies;
     int ret = 0;
     do {
-        /* don't attempt to get the sata lock if libATA is doing error stuff */
+         
         if (unlikely(ox820sata_is_host_frozen())) {
             msleep(50);
             continue;
         }
-        /* wait for the core lock */
+         
         ret = __acquire_sata_core(0, callback, arg, 1, timeout_jiffies, 0, uid, locker_type); 
         if (likely(ret)) {
-            /* check that libATA hasn't frozen the sata core whilst we've 
-            been waiting for the lock */
+             
             if (unlikely(ox820sata_is_host_frozen())) {
-                /* if it has, release the lock and try again */
+                 
                 release_sata_core_without_restart(locker_type);
                 ret = 0;
             } else {
@@ -564,20 +481,15 @@ int acquire_sata_core_direct(
             }
         }
         
-    /* loop until we timeout */
     } while (time_before(jiffies, end));
     
 	return ret;
-#else /* CONFIG_SATA_OX820_DIRECT_HWRAID... now the single disk path */
+#else  
 	return __acquire_sata_core(0, callback, arg, 1, timeout_jiffies, 0, uid, locker_type);
 #endif    
 }
 EXPORT_SYMBOL(acquire_sata_core_direct);
 
-/**
- * Used by the hwraid code to acquire the sata core
- * @return 0 = didn't get it
- */
 int acquire_sata_core_hwraid(
 	ox820sata_isr_callback_t callback,
 	unsigned long            arg,
@@ -596,7 +508,6 @@ void release_sata_core_without_restart(sata_locker_t locker_type)
 	LPRINTK("Entered, h/w count %d, d count %d, reentrant_port_no %d, core_locked %d, ox820sata_isr_callback %p\n",
 		hw_lock_count, direct_lock_count, reentrant_port_no, core_locked, ox820sata_isr_callback);
 
-	/* Trap incorrect usage */
 	BUG_ON(!direct_lock_count || (direct_lock_count > 1));
 	BUG_ON(hw_lock_count);
 	BUG_ON(reentrant_port_no != -1);
@@ -625,9 +536,6 @@ void release_sata_core_without_restart(sata_locker_t locker_type)
 	spin_unlock_irqrestore(&access_lock, flags);
 }
  
-/*
- * To be used by non-SCSI/SATA stack SATA core users to release the SATA core
- */
 void release_sata_core(sata_locker_t locker_type)
 {
 	release_sata_core_without_restart(locker_type);
@@ -644,12 +552,6 @@ int sata_core_has_waiters(void)
 }
 EXPORT_SYMBOL(sata_core_has_waiters);
 
-/*
- * ata_port operation to gain ownership of the SATA hardware prior to issuing
- * a command against a SATA host. Allows any number of users of the port against
- * which the lock was first acquired, thus enforcing that only one SATA core
- * port may be operated on at once.
- */
 static int acquire_hw(
 	int port_no,
 	int may_sleep,
@@ -658,9 +560,6 @@ static int acquire_hw(
 	return __acquire_sata_core(port_no, NULL, 0, may_sleep, timeout_jiffies, 1, (void*)HW_LOCKER_UID, SATA_SCSI_STACK);
 }
 
-/*
- * operation to release ownership of the SATA hardware
- */
 static void release_hw(unsigned int port_no)
 {
 	unsigned long flags;
@@ -673,14 +572,14 @@ static void release_hw(unsigned int port_no)
 		hw_lock_count, direct_lock_count, core_locked, reentrant_port_no, ox820sata_isr_callback);
 
 	if (!core_locked) {
-		/* Nobody holds the SATA lock */
+		 
 		printk(KERN_WARNING "Nobody holds SATA lock, port_no %d\n", port_no);
         released = 1;
 	} else if (!hw_lock_count) {
-		/* SCSI/SATA has released without holding the lock */
+		 
 		printk(KERN_WARNING "SCSI/SATA does not hold SATA lock, port_no %d\n", port_no);
 	} else {
-		/* Trap incorrect usage */
+		 
 		BUG_ON(reentrant_port_no == -1);
 		BUG_ON(port_no != reentrant_port_no);
 		BUG_ON(direct_lock_count);
@@ -715,24 +614,13 @@ static void release_hw(unsigned int port_no)
 #endif    
 }
 
-/**
- * Gets the base address of the ata core from the ata_port structure. The value
- * returned will remain the same when hardware raid is active.
- *
- * @param ap pointer to the appropriate ata_port structure
- * @return the base address of the SATA core
- */
 static inline u32* ox820sata_get_io_base(struct ata_port* ap)
 {
     return ((ox820sata_private_data* )(ap->private_data))->reg_base;
 }
 
-/** 
- * Returns 0 if all the host ports are idle 
- * @param ap not used, but kept for commonality with the ox820sata.c driver
- */
 static inline u32 ox820sata_hostportbusy(struct ata_port* ap) {
-    /* port busy */
+     
     u32 reg;
     reg = readl((u32* )SATA0_REGS_BASE + OX820SATA_SATA_COMMAND);
     if (unlikely(reg & CMD_CORE_BUSY)) {
@@ -743,41 +631,30 @@ static inline u32 ox820sata_hostportbusy(struct ata_port* ap) {
        return 1;
     }
     
-    /* idle */
     return 0;
 }
 
-/** 
- * Returns 0 if the scatter gather DMA channel used by ap is idle 
- */
 static inline u32 ox820sata_hostdmabusy(struct ata_port* ap) {
     ox820sata_private_data* pd = (ox820sata_private_data*)ap->private_data;
     
-    /* dma busy */
     if (unlikely(readl(pd->sgdma_controller + OX820SATA_SGDMA_STATUS) & OX820SATA_SGDMA_BUSY)) {
        return 1;
     }
     
-    /* idle */
     return 0;
 }
 
-/**
- * Turns on the cores clock and resets it
- */
 static void ox820sata_reset_core( void ){
-    // Enable the clock to the SATA block
+     
     writel(1UL << SYS_CTRL_CKEN_SATA_BIT, SYS_CTRL_CKEN_SET_CTRL);
     wmb();
 
-    // reset Controller, Link and PHY
     writel( (1UL << SYS_CTRL_RSTEN_SATA_BIT)      |
             (1UL << SYS_CTRL_RSTEN_SATA_LINK_BIT) |
             (1UL << SYS_CTRL_RSTEN_SATA_PHY_BIT), SYS_CTRL_RSTEN_SET_CTRL);
     wmb();
     udelay(50);
     
-    // un-reset the PHY, then Link and Controller
     writel(1UL << SYS_CTRL_RSTEN_SATA_PHY_BIT, SYS_CTRL_RSTEN_CLR_CTRL);
     udelay(50);
     writel( (1UL << SYS_CTRL_RSTEN_SATA_LINK_BIT) |
@@ -785,23 +662,14 @@ static void ox820sata_reset_core( void ){
     udelay(50);
 
     workaround5458();
-    /* tune for sata compatability */
+     
     ox820sata_link_write((u32* )SATA0_REGS_BASE , 0x60, 0x2988 );
 
-    /* each port in turn */
     ox820sata_link_write((u32* )SATA0_REGS_BASE , 0x70, 0x55629 );
     ox820sata_link_write((u32* )SATA1_REGS_BASE , 0x70, 0x55629 );
     udelay(50);
 }
 
-/** 
- * The driver probe function.
- * Registered with the amba bus driver as a parameter of ox820sata_driver.bus
- * it will register the ata device with kernel first performing any 
- * initialisation required (if the correct device is present).
- * @param pdev Pointer to the 921 device structure 
- * @return 0 if no errors
- */
 static int ox820sata_driver_probe(struct platform_device* pdev)
 {
     u32 version;
@@ -815,13 +683,11 @@ static int ox820sata_driver_probe(struct platform_device* pdev)
     struct resource* memres = platform_get_resource(pdev, IORESOURCE_MEM, 0 );
     int irq = platform_get_irq(pdev, 0);
     
-    /* check resourses for sanity */
     if ((memres == NULL) || (irq < 0)) {
         return 0;
     }
     iomem = (void __iomem* ) memres->start;
     
-    /* check we support this version of the core */
     version = readl(((u32* )iomem) + OX820SATA_VERSION);
     switch (version) {
         case OX820SATA_CORE_VERSION:
@@ -833,25 +699,18 @@ static int ox820sata_driver_probe(struct platform_device* pdev)
             break;
     }
 
-    /* allocate memory and check */
     host = ata_host_alloc_pinfo(&(pdev->dev), port_info, OX820SATA_MAX_PORTS);
     if (!host) {
         printk(KERN_ERR DRIVER_NAME " Couldn't create an ata host.\n");
     }
 
-    /* set to base of ata core */
     host->iomap  = iomem;
 
-    /* call ata_device_add and begin probing for drives*/
     ata_host_activate(host, irq, ox820sata_irq_handler, IRQF_SHARED, &ox820sata_sht);
 
     return 0;
 }
 
-/** 
- * Called when the amba bus tells this device to remove itself.
- * @param pdev pointer to the device that needs to be shutdown
- */
 static int ox820sata_driver_remove(struct platform_device* pdev)
 {
     struct ata_host *host_set = dev_get_drvdata( &(pdev->dev) );
@@ -864,16 +723,11 @@ static int ox820sata_driver_remove(struct platform_device* pdev)
         scsi_remove_host( ap->scsi_host );
     }
     
-    // Disable the clock to the SATA block
     writel(1UL << SYS_CTRL_CKEN_SATA_BIT, SYS_CTRL_CKEN_CLR_CTRL);
     
     return 0;
 }
 
-/** 
- * module initialisation
- * @return success
- */
 static int __init ox820sata_init_driver( void )
 {
     int ret;
@@ -892,9 +746,6 @@ static int __init ox820sata_init_driver( void )
     return ret; 
 }
 
-/** 
- * module cleanup
- */
 static void __exit ox820sata_exit_driver( void )
 {
 #ifdef ERROR_INJECTION
@@ -903,33 +754,20 @@ static void __exit ox820sata_exit_driver( void )
     platform_driver_unregister( &ox820sata_driver.driver );
 }
 
-/** 
- * macros to register intiialisation and exit functions with kernal
- */
 module_init(ox820sata_init_driver);
 module_exit(ox820sata_exit_driver);
 
-/**
- *
- * Called after an identify device command has worked out what kind of device
- * is on the port
- *
- * @param port The port to configure
- * @param pdev The hardware associated with controlling the port
- */
 static void ox820sata_dev_config(struct ata_device* pdev)
 {
     
     u32 reg;
     u32 *ioaddr = ox820sata_get_io_base(pdev->link->ap);
 
-    /* Set the bits to put the port into 28 or 48-bit node */
     reg = readl(ioaddr + OX820SATA_DRIVE_CONTROL);
     reg &= ~3;
     reg |= (pdev->flags & ATA_DFLAG_LBA48) ? OX820SATA_DR_CON_48 : OX820SATA_DR_CON_28;
     writel(reg, ioaddr + OX820SATA_DRIVE_CONTROL);
 
-    /* if this is an ATA-6 disk, put the port into ATA-5 auto translate mode */
     if (pdev->flags & ATA_DFLAG_LBA48) {
         reg = readl(ioaddr + OX820SATA_PORT_CONTROL);
         reg |= 2;
@@ -937,19 +775,14 @@ static void ox820sata_dev_config(struct ata_device* pdev)
     }
 }
 
-/** 
- * Output the taskfile for diagnostic reasons, it will always appear in the 
- * debug output as if it's a task file being written.
- * @param tf The taskfile to output
- */
 static void tfdump(const struct ata_taskfile* tf)
 {
     if (tf->flags & ATA_TFLAG_LBA48) {
 #ifdef SATA_TF_DUMP
     printk("Cmd %x Ft %x%x, LBA-48 %02x%02x%02x%02x%02x%02x, nsect %02x%02x, ctl %02x, dev %x\n",
-#else // SATA_TF_DUMP
+#else  
     DPRINTK("Cmd %x Ft %x%x, LBA-48 %02x%02x%02x%02x%02x%02x, nsect %02x%02x, ctl %02x, dev %x\n",
-#endif // SATA_TF_DUMP
+#endif  
         tf->command,
 
         tf->hob_feature,
@@ -969,9 +802,9 @@ static void tfdump(const struct ata_taskfile* tf)
     } else {
 #ifdef SATA_TF_DUMP
     printk("Cmd %x Ft %x, LBA-28 %01x%02x%02x%02x, nsect %02x, ctl %02x, dev %x\n",
-#else // SATA_TF_DUMP
+#else  
     DPRINTK("Cmd %x Ft %x, LBA-28 %01x%02x%02x%02x, nsect %02x, ctl %02x, dev %x\n",
-#endif // SATA_TF_DUMP
+#endif  
         tf->command,
 
         tf->feature,
@@ -987,11 +820,6 @@ static void tfdump(const struct ata_taskfile* tf)
     }
 }
 
-/** 
- * called to write a taskfile into the ORB registers
- * @param ap hardware with the registers in
- * @param tf taskfile to write to the registers
- */
 static void ox820sata_tf_load(struct ata_port *ap, const struct ata_taskfile *tf)
 {
     u32 count = 0;
@@ -1003,7 +831,6 @@ static void ox820sata_tf_load(struct ata_port *ap, const struct ata_taskfile *tf
     u32 *ioaddr = ox820sata_get_io_base(ap);
     unsigned int is_addr = tf->flags & ATA_TFLAG_ISADDR;
 
-    /* wait a maximum of 10ms for the core to be idle */
     do {
         Command_Reg = readl(ioaddr + OX820SATA_SATA_COMMAND);
         if (!(Command_Reg & CMD_CORE_BUSY)) {
@@ -1013,10 +840,8 @@ static void ox820sata_tf_load(struct ata_port *ap, const struct ata_taskfile *tf
 		udelay(50);
     } while (count < 200);
 
-    /* check if the ctl register has interrupts disabled or enabled and
-    modify the interrupt enable registers on the ata core as required */
     if (tf->ctl & ATA_NIEN) {
-        /* interrupts disabled */
+         
         u32 mask = (OX820SATA_COREINT_END << ap->port_no );
         writel(mask, OX820SATA_CORE_INT_DISABLE);
         ox820sata_irq_clear(ap);
@@ -1026,13 +851,12 @@ static void ox820sata_tf_load(struct ata_port *ap, const struct ata_taskfile *tf
 
     Orb2 |= (tf->command)    << 24;
     
-    /* write 48 or 28 bit tf parameters */
     if (is_addr) {
-        /* set LBA bit as it's an address */
+         
         Orb1 |= (tf->device & ATA_LBA) << 24;
 
         if (tf->flags & ATA_TFLAG_LBA48) {
-            //DPRINTK(KERN_INFO" 48 bit tf load \n");
+             
             Orb1 |= ATA_LBA << 24;
 
             Orb2 |= (tf->hob_nsect)  << 8 ;
@@ -1046,8 +870,6 @@ static void ox820sata_tf_load(struct ata_port *ap, const struct ata_taskfile *tf
             Orb3 |= (tf->device & 0xf)<< 24;
         }
 
-        /* write 28-bit lba */
-        //DPRINTK(KERN_INFO" 28 bit tf load\n");
         Orb2 |= (tf->nsect)      << 0 ;
         Orb2 |= (tf->feature)    << 16;
 
@@ -1064,7 +886,6 @@ static void ox820sata_tf_load(struct ata_port *ap, const struct ata_taskfile *tf
     }
     ap->last_ctl = tf->ctl;
 
-    /* write values to registers */
     writel(Orb1, ioaddr + OX820SATA_ORB1 );
     writel(Orb2, ioaddr + OX820SATA_ORB2 );
     writel(Orb3, ioaddr + OX820SATA_ORB3 );
@@ -1073,44 +894,30 @@ static void ox820sata_tf_load(struct ata_port *ap, const struct ata_taskfile *tf
     tfdump(tf);
 }
 
-/**
- * Read a result task-file from the sata core registers.
- */
 static bool ox820sata_qc_fill_rtf(struct ata_queued_cmd *qc)
 {
     DPRINTK("tag %d\n", qc->tag);
 
-	/* Read the most recently received FIS from the SATA core ORB registers
-	   and convert to an ATA taskfile */
 	ox820sata_tf_read(qc->ap, &qc->result_tf);
 	return true;
 }
 
-/** 
- * Called to read the hardware registers / DMA buffers, to
- * obtain the current set of taskfile register values.
- * @param ap hardware with the registers in
- * @param tf taskfile to read the registers into
- */
 static void ox820sata_tf_read(struct ata_port *ap, struct ata_taskfile *tf)
 {
     u32 *ioaddr = ox820sata_get_io_base(ap);
 
-    /* read the orb registers */
     u32 Orb1 = readl(ioaddr + OX820SATA_ORB1); 
     u32 Orb2 = readl(ioaddr + OX820SATA_ORB2); 
     u32 Orb3 = readl(ioaddr + OX820SATA_ORB3);
     u32 Orb4 = readl(ioaddr + OX820SATA_ORB4);
 
-    /* read common 28/48 bit tf parameters */
     tf->device  = (Orb1 >> 24);
     tf->nsect   = (Orb2 >> 0);
     tf->feature = (Orb2 >> 16);
     tf->command = ox820sata_check_status(ap);
 
-    /* read 48 or 28 bit tf parameters */
     if (tf->flags & ATA_TFLAG_LBA48) {
-        //DPRINTK(KERN_INFO" 48 bit tf read \n");
+         
         tf->hob_nsect = (Orb2 >> 8) ;
         
         tf->lbal      = (Orb3 >> 0) ;
@@ -1120,53 +927,34 @@ static void ox820sata_tf_read(struct ata_port *ap, struct ata_taskfile *tf)
         
         tf->hob_lbam  = (Orb4 >> 0) ;
         tf->hob_lbah  = (Orb4 >> 8) ;
-        /* feature ext and control are write only */
+         
     } else {
-        /* read 28-bit lba */
-        //DPRINTK(KERN_INFO" 28 bit tf read\n");
+         
         tf->lbal      = (Orb3 >> 0) ;
         tf->lbam      = (Orb3 >> 8) ;
         tf->lbah      = (Orb3 >> 16) ;
     }
 
-    //tfdump(tf);
 }
 
-/** 
- * Reads the Status ATA shadow register from hardware.
- *
- * @return The status register
- */
 static u8 ox820sata_check_status(struct ata_port *ap)
 {
     u32 Reg;
     u8 status;
     u32 *ioaddr = ox820sata_get_io_base(ap);
 
-//    VPRINTK(KERN_INFO"ox820sata_check_status ");
-
-    /* read byte 3 of Orb2 register */
     status = readl(ioaddr + OX820SATA_ORB2) >> 24;
 
-    /* check for the drive going missing indicated by SCR status bits 0-3 = 0 */
     ox820sata_scr_read_port(ap, SCR_STATUS, &Reg );
 
     if (!(Reg & 0x1)) { 
         status |= ATA_DF;
         status |= ATA_ERR;
     }
-    //VPRINTK("%02x\n",result);
-
+     
     return status;
 }
 
-/**
- *  ata_qc_new - Request an available ATA command, for queueing
- *  @ap: Port associated with device @dev
- *  @return non zero will refuse a new command, zero will may grant on subject
- *          to conditions elsewhere. 
- *
- */
 static int ox820sata_qc_new(struct ata_port *ap)
 {
 	DPRINTK("\n");
@@ -1183,21 +971,12 @@ static int ox820sata_qc_new(struct ata_port *ap)
 #endif
 }
 
-/**
- * Try to work out if the hardware can do this command now, or if it needs
- * to defer it until later
- *
- * Deferal is based on 
- */
 static int ox820sata_qc_defer(struct ata_queued_cmd *qc)
 {
 	DPRINTK("\n");
 	return ata_std_qc_defer(qc);
 }
 
-/**
- * releases the lock on the port the command used
- */
 static void ox820sata_qc_free(struct ata_queued_cmd *qc)
 {
     DPRINTK("\n");
@@ -1220,10 +999,6 @@ static void ox820sata_thaw(struct ata_port* ap)
 }
 #endif
 
-/**
- * Prepare as much as possible for a command without involving anything that is
- * shared between ports. 
- */
 static void ox820sata_qc_prep(struct ata_queued_cmd* qc) 
 {
     ox820sata_private_data* pd;
@@ -1233,35 +1008,30 @@ static void ox820sata_qc_prep(struct ata_queued_cmd* qc)
 
 #ifndef CONFIG_SATA_OXNAS_SINGLE_SATA    
     port_no = qc->ap->port_no;
-    /* set to JBOD mode */
+     
     ox820sata_set_mode(OXNASSATA_NOTRAID, 0);
 
-    /* Turn the work around off as it may have been left on by any HW-RAID
-    code that we've been working with */
     writel( 0x0, OX820SATA_PORT_ERROR_MASK);
 #else
     port_no = 0;
 #endif    
-    /* if the port's not connected, complete now with an error */
+     
     if (!ox820sata_check_link(qc->ap->port_no)) {
         printk(KERN_ERR"port %d not connected completing with error\n",qc->ap->port_no);
         qc->err_mask |= AC_ERR_ATA_BUS;
         ata_qc_complete(qc);
     }
     
-	/* both pio and dma commands use dma */
 	if (ata_is_dma(qc->tf.protocol) || ata_is_pio(qc->tf.protocol) )
 	{
-        /* program the scatterlist into the prd table */
+         
         ata_sff_qc_prep(qc);
         
-        /* point the sgdma controller at the dma request structure */
         pd = (ox820sata_private_data*)qc->ap->private_data;
     
         writel(pd->sgdma_request_pa,
             pd->sgdma_controller + OX820SATA_SGDMA_REQUESTPTR );
         
-        /* setup the request table */
         if (port_no == 0) {
             pd->sgdma_request_va->control = (qc->dma_dir == DMA_FROM_DEVICE) ? 
                     OX820SATA_SGDMA_REQCTL0IN : OX820SATA_SGDMA_REQCTL0OUT ;
@@ -1274,21 +1044,12 @@ static void ox820sata_qc_prep(struct ata_queued_cmd* qc)
         pd->sgdma_request_va->dst_pa = qc->ap->prd_dma;
         smp_wmb();
 
-        /* tell it to wait */
         writel(OX820SATA_SGDMA_CONTROL_NOGO,
             pd->sgdma_controller + OX820SATA_SGDMA_CONTROL);
         
     }
 }
 
-/** 
- * qc_issue is used to make a command active, once the hardware and S/G tables
- * have been prepared. IDE BMDMA drivers use the helper function
- * ata_qc_issue_prot() for taskfile protocol-based dispatch. More advanced drivers
- * roll their own ->qc_issue implementation, using this as the "issue new ATA
- * command to hardware" hook.
- * @param qc the queued command to issue
- */
 static unsigned int ox820sata_qc_issue(struct ata_queued_cmd *qc)
 {
     ox820sata_private_data* pd;
@@ -1306,7 +1067,6 @@ static unsigned int ox820sata_qc_issue(struct ata_queued_cmd *qc)
     port_no = 0;
 #endif
 
-    /* check the core is idle */
     if (readl(ioaddr + OX820SATA_SATA_COMMAND) & CMD_CORE_BUSY)
     {
         int count = 0;
@@ -1315,43 +1075,38 @@ static unsigned int ox820sata_qc_issue(struct ata_queued_cmd *qc)
             mdelay(1);
             if (++count > 100) {
                 DPRINTK(KERN_ERR"core busy for a command on port %d\n",qc->ap->port_no);
-                //CrazyDumpDebug();
+                 
                 ox820sata_cleanup();
             }
         } while (readl(ioaddr + OX820SATA_SATA_COMMAND) & CMD_CORE_BUSY);
     }
 
-    /* enable passing of error signals to DMA sub-core by clearing the 
-    appropriate bit (all transfers are on dma channel 0)*/
     reg = readl(OX820SATA_DATA_PLANE_CTRL);
     reg &= ~(OX820SATA_DPC_ERROR_MASK_BIT << qc->ap->port_no);
     writel(reg, OX820SATA_DATA_PLANE_CTRL);
 
 #ifdef CONFIG_SATA_OXNAS_SINGLE_SATA    
-	/* Disable all interrupts for ports and RAID controller */
+	 
 	writel(~0, (u32*)SATA0_REGS_BASE + OX820SATA_INT_DISABLE);
 	writel(~0, (u32*)SATA1_REGS_BASE + OX820SATA_INT_DISABLE);
 	writel(~0, (u32*)SATARAID_REGS_BASE + OX820SATA_INT_DISABLE);
 
-	/* Disable all interrupts for core */
 	writel(~0, OX820SATA_CORE_INT_DISABLE);
     wmb();
 #endif
 
-	/* Load the command settings into the orb registers */
 	ox820sata_tf_load(qc->ap, &qc->tf);
 	
-	/* both pio and dma commands use dma */
 	if (ata_is_dma(qc->tf.protocol) || ata_is_pio(qc->tf.protocol) )
 	{
-        /* Start the DMA */
+         
         writel(OX820SATA_SGDMA_CONTROL_GO,
             pd->sgdma_controller + OX820SATA_SGDMA_CONTROL);
         wmb();
     }
 
 #ifdef CONFIG_SATA_OXNAS_SINGLE_SATA    
-    /* enable End of command interrupt */
+     
     writel(OX820SATA_INT_WANT, ioaddr + OX820SATA_INT_ENABLE);
     writel(OX820SATA_COREINT_END, OX820SATA_CORE_INT_ENABLE);
     wmb();
@@ -1364,8 +1119,6 @@ static unsigned int ox820sata_qc_issue(struct ata_queued_cmd *qc)
         if (ox820sata_driver.error_period) {
             static int error_on_last_command = 0;
         
-            /* if the request error rate is bigger than prand then instigate
-             * an error */
             if (time_after(jiffies, ox820sata_driver.next_error) && 
                 !error_on_last_command)
             {
@@ -1383,7 +1136,6 @@ static unsigned int ox820sata_qc_issue(struct ata_queued_cmd *qc)
     }
 #endif
 
-    /* Start the command */
 	reg = readl(ioaddr + OX820SATA_SATA_COMMAND);
     reg &= ~SATA_OPCODE_MASK;
     reg |= CMD_WRITE_TO_ORB_REGS;
@@ -1393,10 +1145,6 @@ static unsigned int ox820sata_qc_issue(struct ata_queued_cmd *qc)
     return 0;
 }
 
-/**
- * Will schedule the libATA error handler on the premise that there has 
- * been a hotplug event on the port specified 
- */
 void ox820sata_checkforhotplug(int port_no)
 {
     struct ata_port* ap = ox820sata_driver.ap[port_no];
@@ -1404,7 +1152,6 @@ void ox820sata_checkforhotplug(int port_no)
     ata_port_freeze(ap);
 }
 
-/* This port done an interrupt */
 static void ox820sata_port_irq(struct ata_port* ap)
 {    
     struct ata_queued_cmd* qc;
@@ -1416,17 +1163,12 @@ static void ox820sata_port_irq(struct ata_port* ap)
     qc = ata_qc_from_tag(ap, ap->link.active_tag);    
     pd = (ox820sata_private_data*)ap->private_data;
 
-    /* record the port's interrupt */
     int_status = readl(ioaddr + OX820SATA_INT_STATUS);
 
-    /* If there's no command associated with this IRQ, ignore it. We may get
-    spurious interrupts when cleaning-up after a failed command, ignore these 
-    too. */
     if (likely(qc)) {
-        /* get the status before any error cleanup */
+         
         qc->err_mask = ac_err_mask(ox820sata_check_status(ap));
 
-        /* tell libata we're done */
         DPRINTK(" returning err_mask=0x%x\n", qc->err_mask);
         local_irq_save(flags);
         ox820sata_irq_clear(ap);
@@ -1437,7 +1179,7 @@ static void ox820sata_port_irq(struct ata_port* ap)
     }
 
 #if !defined(CONFIG_SATA_OXNAS_SINGLE_SATA) || defined(CONFIG_SYNO_PLX_PORTING)
-    /* maybe a hotplug event */
+     
     if (unlikely(int_status & OX820SATA_INT_LINK_SERROR)) {
         u32 serror;
         ox820sata_scr_read_port(ap, SCR_ERROR, &serror);
@@ -1449,10 +1191,6 @@ static void ox820sata_port_irq(struct ata_port* ap)
 #endif
 }
 
-/** 
- * irq_handler is the interrupt handling routine registered with the system,
- * by libata.
- */
 static irqreturn_t ox820sata_irq_handler(int irq, void *dev_instance)
 #ifdef CONFIG_SATA_OXNAS_SINGLE_SATA
 {
@@ -1461,7 +1199,6 @@ static irqreturn_t ox820sata_irq_handler(int irq, void *dev_instance)
 
     DPRINTK("\n");
 
-	/* loop until there are no more interrupts */
     while ( (int_status = readl(OX820SATA_CORE_INT_STATUS)) & OX820SATA_COREINT_END ) {
 		int isr_handled = 0;
 		int port;
@@ -1470,21 +1207,14 @@ static irqreturn_t ox820sata_irq_handler(int irq, void *dev_instance)
 		int remainder;
 		int sector_quads_remaining;
 
-        /* clear any interrupt */
         writel(int_status, OX820SATA_CORE_INT_CLEAR);
 
-		/* Only need this workaround for single disk systems as dual disk will
-		   use uCode which prevents this read underrun problem from occuring.
-		   All single disk systems will use port 0 */
 		port = 0;
 
-		/* Only want to apply fix to reads */
 		is_read = !(readl(OX820SATA_DM_DBG1) &
 			(1UL << (port ? OX820SATA_CORE_PORT1_DATA_DIR_BIT :
 							OX820SATA_CORE_PORT0_DATA_DIR_BIT)));
 
-		/* Check for an incomplete transfer, i.e. not a multiple of 512 bytes
-		   transferred (datacount_port register counts quads transferred) */
 		quads_transferred =
 			readl(port ? OX820SATA_DATACOUNT_PORT1 : OX820SATA_DATACOUNT_PORT0);
 
@@ -1504,85 +1234,45 @@ static irqreturn_t ox820sata_irq_handler(int irq, void *dev_instance)
 			volatile u32 *memory_data_ptr;
 			dma_addr_t mapped_adr;
 
-//			printk(KERN_INFO "SATA read fixup, only transfered %d quads, "
-//				"sector_quads_remaining %d\n", quads_transferred, sector_quads_remaining);
-
-			/*
-			 * Cannot determine transfer direction in general so assume it's a
-			 * read that has gone wrong as that's the only failure scenario we
-			 * have seen
-			 */
-
-			 /* Only have implementation to deal with PRD style descriptors */
 #if (!defined(CONFIG_ODRB_USE_PRDS_FOR_SATA) || (defined(CONFIG_OXNAS_FAST_READS_AND_WRITES) && !defined(CONFIG_ODRB_USE_PRDS)))
 #error "SATA read fixup only supported with PRD descriptors"
 #endif
 
-			/*
-			 * Get pointer to start of memory side PRD table from the SGDMA
-			 * controller. Non-uCode always uses SATA DMA channel 0
-			 */
-
 			sg_info_phys = readl(OX820SATA_SGDMA_BASE0 + OX820SATA_SGDMA_REQUESTPTR);
 			sg_info_phys |= DESCRIPTORS_BASE_PA;
-//printk(KERN_WARNING "ox820sata_irq_handler() At 1, sg_info_phys 0x%p\n", (void*)sg_info_phys);
-
+ 
 			sg_info = (oxnas_dma_simple_sg_info_t*)descriptors_phys_to_virt(sg_info_phys);
-//printk(KERN_WARNING "ox820sata_irq_handler() At 2 sg_info = 0x%p\n", sg_info);
-
+ 
 			entry_phys = sg_info->dst_entries;
-//printk(KERN_WARNING "ox820sata_irq_handler() At 3, entry_phys 0x%p\n", (void*)entry_phys);
-
+ 
 			entry = (prd_table_entry_t*)descriptors_phys_to_virt(entry_phys);
-//printk(KERN_WARNING "ox820sata_irq_handler() At 4 entry = 0x%p\n", entry);
-
-			/* Parse the PRD table entries to accumulate the total transfer size
-			   and to get a pointer to the start of the last two quads of the
-			   transfer */
+ 
 			total_len = 0;
-//printk(KERN_WARNING "ox820sata_irq_handler() At 5\n");
+ 
 			while (!(entry->flags_len & PRD_EOF_MASK)) {
 				total_len += (entry->flags_len ?: PRD_MAX_LEN);
-//printk(KERN_INFO "ox820sata_irq_handler() total_len now = %d\n", total_len);
+ 
 				entry++;
 			}
 			last_prd_len = ((entry->flags_len & ~PRD_EOF_MASK) ?: PRD_MAX_LEN);
 			total_len += last_prd_len;
-//printk(KERN_INFO "ox820sata_irq_handler() total_len = %d, last prd len = %d\n", total_len, last_prd_len);
-
-			/* Determine the addresses in the SATA and memory buffers of the
-			   last two quads of the transfer */
+ 
 			BUG_ON(!total_len);
 			sata_offset = ((total_len - 1) % 2048);
-//printk(KERN_INFO "ox820sata_irq_handler() sata_offset = %d\n", sata_offset);
+ 
 			sata_data_ptr = (void*)(port ? OX820SATA_DATA_MUX_RAM1 :
 				OX820SATA_DATA_MUX_RAM0) + sata_offset - 7;
 
 			memory_phys = entry->adr;
-//printk(KERN_WARNING "ox820sata_irq_handler() memory_phys 0x%p\n", (void*)memory_phys);
-
+ 
 			memory_data_ptr = (volatile u32*)(phys_to_virt(memory_phys) + last_prd_len - 8);
-//printk(KERN_INFO "ox820sata_irq_handler() sata_data_ptr 0x%p, memory_data_ptr 0x%p\n", sata_data_ptr, memory_data_ptr);
-
-			/* If the transfer is due to the fast code then the CPU's Dcache for
-			   the data written into DDR by the DMA will not have been
-			   invalidated, so do so now before we write the corrected data
-			   into DDR */
+ 
 			mapped_adr = dma_map_single(0, (void*)memory_data_ptr, 8, DMA_FROM_DEVICE);
 			dma_unmap_single(0, mapped_adr, 8, DMA_FROM_DEVICE);
 
-			/* Copy the correct last two quads of the transfer from the SATA
-			   buffer to memory. The total transfer length will always be at
-			   least a multiple of 512 bytes so no need to worry about wrapping
-			   around the end of the SATA data mux ram FIFO */
-//printk(KERN_INFO "ox820sata_irq_handler() Before: 0x%08u, 0x%08u\n", *memory_data_ptr, *(memory_data_ptr + 1));
 			*memory_data_ptr       = readl(sata_data_ptr);
 			*(memory_data_ptr + 1) = readl(sata_data_ptr + 4);
-//printk(KERN_INFO "ox820sata_irq_handler() After:  0x%08u, 0x%08u\n", *memory_data_ptr, *(memory_data_ptr + 1));
-
-			/* Deal with cache coherency now that CPU has written to memory,
-			   i.e. flush the CPU's data cache to DDR so that subsequent device
-			   access will see the corrected data written by the CPU */
+ 
 			mapped_adr = dma_map_single(0, (void*)memory_data_ptr, 8, DMA_TO_DEVICE);
 			dma_unmap_single(0, mapped_adr, 8, DMA_TO_DEVICE);
 		} else if (sector_quads_remaining) {
@@ -1595,8 +1285,6 @@ static irqreturn_t ox820sata_irq_handler(int irq, void *dev_instance)
 			}
 		}
 
-		/* Make sure we see any changes to ox820sata_isr_callback made by
-		   another CPU */
 		smp_rmb();
 		if (ox820sata_isr_callback) {
 			if (ox820sata_isr_callback(int_status, ox820sata_isr_arg) == IRQ_HANDLED) {
@@ -1610,11 +1298,10 @@ static irqreturn_t ox820sata_irq_handler(int irq, void *dev_instance)
 		if (!isr_handled) {
             u32 port_no;
             for (port_no = 0; port_no < OX820SATA_MAX_PORTS; ++port_no) {
-                /* check the raw end of command interrupt to see if the port is 
-                done */
+                 
                 u32 mask = (OX820SATA_CORERAW_HOST << port_no );
                 if (int_status & mask) {
-                    /* this port had an interrupt, clear it */
+                     
                     writel(mask, OX820SATA_CORE_INT_CLEAR);
                     ox820sata_port_irq(((struct ata_host* )dev_instance)->ports[port_no]);
                     ret = IRQ_HANDLED;
@@ -1625,28 +1312,26 @@ static irqreturn_t ox820sata_irq_handler(int irq, void *dev_instance)
 
     return ret;
 }
-#else /* CONFIG_SATA_OXNAS_SINGLE_SATA */
+#else  
 {
     u32 int_status;
     irqreturn_t ret = IRQ_NONE;
     
-    /* loop until there are no more interrupts */
     while ( (int_status = readl(OX820SATA_CORE_INT_STATUS)) & 0x0300 ) {
 		smp_rmb();
         if (ox820sata_isr_callback) {
-            /* Invoke the interrupt hook routine */
+             
             ret |= ox820sata_isr_callback(irq, ox820sata_isr_arg);
         } else {
             u32 port_no;
-            /* clear any interrupt */
+             
             writel(int_status, OX820SATA_CORE_INT_CLEAR);
             
             for (port_no = 0; port_no < OX820SATA_MAX_PORTS; ++port_no) {
-                /* check the raw end of command interrupt to see if the port is 
-                done */
+                 
                 u32 mask = (OX820SATA_COREINT_END << port_no );
                 if (int_status & mask) {
-                    /* this port had an interrupt, clear it */
+                     
                     writel(mask, OX820SATA_CORE_INT_CLEAR);
                     ox820sata_port_irq(((struct ata_host* )dev_instance)->ports[port_no]);
                     ret = IRQ_HANDLED;
@@ -1657,30 +1342,16 @@ static irqreturn_t ox820sata_irq_handler(int irq, void *dev_instance)
     }
     return ret;
 }
-#endif /* CONFIG_SATA_OXNAS_SINGLE_SATA */
+#endif  
 
-/** 
- * ox820sata_irq_clear is called during probe just before the interrupt handler is
- * registered, to be sure hardware is quiet. It clears and masks interrupt bits
- * in the SATA core.
- *
- * @param ap hardware with the registers in
- */
 static void ox820sata_irq_clear(struct ata_port* ap)
 {
     u32 *ioaddr = ox820sata_get_io_base(ap);
-    //DPRINTK(KERN_INFO"ox820sata_irq_clear\n");
-
-    /* clear pending interrupts */
+     
     writel(~0, ioaddr + OX820SATA_INT_CLEAR);
     writel(OX820SATA_COREINT_END, OX820SATA_CORE_INT_CLEAR);
 }
 
-/**
- * allows access to the link layer registers
- * @param link_reg the link layer register to access (oxsemi indexing ie 
- *        00 = static config, 04 = phy ctrl) 
- */
 u32 ox820sata_link_read(u32* core_addr, unsigned int link_reg) 
 {
     u32 result;
@@ -1701,27 +1372,17 @@ u32 ox820sata_link_read(u32* core_addr, unsigned int link_reg)
 	spin_unlock_irqrestore(&async_register_lock, flags);
 
 #ifdef LIMIT_TO_1pt5Gbs    
-    /* debug: report a speed limit of 1.5Gb */
+     
     if ( sc_reg == 0x28 ) {
         VPRINTK("Reporting a 1.5Gb speed limit\n");
         result |= 0x00000010 ;
     }
-#endif /* LIMIT_TO_1pt5Gbs */
-    //DPRINTK(KERN_INFO"ox820sata_scr_read_port: [0x%02x]->0x%08x\n", sc_reg, result);
+#endif  
+     
     return result;
 }
 EXPORT_SYMBOL(ox820sata_link_read);
-/** 
- *  Read standard SATA phy registers. Currently only used if 
- * ->phy_reset hook called the sata_phy_reset() helper function.
- *
- * These registers are in another clock domain to the processor, access is via
- * some bridging registers
- *
- * @param ap hardware with the registers in
- * @param sc_reg the SATA PHY register
- * @return the value in the register
- */
+ 
 static int ox820sata_scr_read_port(struct ata_port *ap, unsigned int sc_reg, u32 *val)
 {
     u32* ioaddr = ox820sata_get_io_base(ap);
@@ -1734,18 +1395,13 @@ static int ox820sata_scr_read(struct ata_link *link, unsigned int sc_reg, u32 *v
 	return ox820sata_scr_read_port(link->ap, sc_reg, val);
 }
 
-/**
- * allows access to the link layer registers
- * @param link_reg the link layer register to access (oxsemi indexing ie 
- *        00 = static config, 04 = phy ctrl) 
- */
 void ox820sata_link_write(u32* core_addr, unsigned int link_reg, u32 val)
 {
     u32 patience;
     unsigned long flags;
 
     spin_lock_irqsave(&async_register_lock, flags);
-    //DPRINTK("[0x%02x]<-0x%08x\n", sc_reg, val);
+     
     writel(val, core_addr + OX820SATA_LINK_DATA );
     writel(link_reg , core_addr + OX820SATA_LINK_WR_ADDR );
 
@@ -1756,17 +1412,7 @@ void ox820sata_link_write(u32* core_addr, unsigned int link_reg, u32 val)
     }
 	spin_unlock_irqrestore(&async_register_lock, flags);
 }
-/** 
- *  Write standard SATA phy registers. Currently only used if 
- * phy_reset hook called the sata_phy_reset() helper function.
- *
- * These registers are in another clock domain to the processor, access is via
- * some bridging registers
- *
- * @param ap hardware with the registers in
- * @param sc_reg the SATA PHY register
- * @param val the value to write into the register
- */
+ 
 static int ox820sata_scr_write_port(struct ata_port *ap, unsigned int sc_reg, u32 val)
 {
     u32 *ioaddr = ox820sata_get_io_base(ap);
@@ -1779,32 +1425,21 @@ static int ox820sata_scr_write(struct ata_link *link, unsigned int sc_reg, u32 v
 	return ox820sata_scr_write_port(link->ap, sc_reg, val);
 }
 
-/** 
- * port_start() is called just after the data structures for each port are
- * initialized. Typically this is used to alloc per-port DMA buffers, tables
- * rings, enable DMA engines and similar tasks.
- *
- * @return 0 = success
- * @param ap hardware with the registers in
- */
 static int  ox820sata_port_start(struct ata_port *ap)
 {
     ox820sata_private_data* pd;
     int dma_channel;
 
-    /* allocate port private data memory and attach to port */    
     pd = (ox820sata_private_data* )kmalloc(sizeof(ox820sata_private_data), GFP_KERNEL);
     if (!pd) {
         return -ENOMEM;
     }
 
-    /* store the ata_port pointer in the driver structure */
     ox820sata_driver.ap[ap->port_no] = ap;
 
 	ap->private_data = pd;
     DPRINTK("ap[%d] = %p, pd = %p\n", ap->port_no, ap, ap->private_data );
 
-    /* initialise */
 #ifndef CONFIG_SATA_OXNAS_SINGLE_SATA    
     dma_channel = ap->port_no;
 #else
@@ -1817,29 +1452,21 @@ static int  ox820sata_port_start(struct ata_port *ap)
     pd->sgdma_controller = 
         (u32* )(SATASGDMA_REGS_BASE + (dma_channel * OX820SATA_SGDMA_CORESIZE));  
 
-    /* set-up the sgdma controller addresses */
     pd->sgdma_request_va = (sgdma_request_t* )(OX820SATA_SGDMA_REQ + 
         (dma_channel * sizeof(sgdma_request_t)));
     pd->sgdma_request_pa = (dma_addr_t)(OX820SATA_SGDMA_REQ_PA + 
         (dma_channel * sizeof(sgdma_request_t)));
         
-    /* set the PRD tabel pointers to the space for the PRD tables in SRAM */    
     ap->prd = (struct ata_prd* )(OX820SATA_PRD +
         (dma_channel * CONFIG_ODRB_NUM_SATA_PRD_ARRAYS * sizeof(struct ata_prd)));
     ap->prd_dma = OX820SATA_PRD_PA +
         (dma_channel * CONFIG_ODRB_NUM_SATA_PRD_ARRAYS * sizeof(struct ata_prd));
     
-    /* perform post resetnis initialisation */
     ox820sata_post_reset_init(ap);
 
     return 0;
 }
 
-/** 
- * port_stop() is called after ->host_stop(). It's sole function is to 
- * release DMA/memory resources, now that they are no longer actively being
- * used.
- */
 static void ox820sata_port_stop(struct ata_port *ap)
 {
     DPRINTK("\n");
@@ -1853,9 +1480,6 @@ void ox820sata_set_mode(u32 mode, u32 force) {
     unsigned int changeparameters = 0;
     static u32 previous_mode = OX820SATA_UNKNOWN_MODE;
     
-    /* these micro-code programs _should_ include the version word */
-
-    /* JBOD */
     static const unsigned int jbod[] = {
         0x07B400AC, 0x0228A280, 0x00200001, 0x00204002, 0x00224001,
         0x00EE0009, 0x00724901, 0x01A24903, 0x00E40009, 0x00224001,
@@ -1894,7 +1518,6 @@ void ox820sata_set_mode(u32 mode, u32 force) {
         0x00718908, 0x0208A206, 0x00EE0005, ~0
     };
     
-    /* Bi-Modal RAID-0/1 */
     static const unsigned int raid[] = {
         0x00F20145, 0x00EE20FA, 0x00EE20A7, 0x0001C009, 0x00EE0004,
         0x00220000, 0x0001000B, 0x037003FF, 0x00700018, 0x037003FE,
@@ -1972,7 +1595,6 @@ void ox820sata_set_mode(u32 mode, u32 force) {
         return;
     }
     
-    /* decide what needs to be done using the STD in my logbook*/
     switch(previous_mode) {
     case OXNASSATA_RAID1:
         switch(mode) {
@@ -2003,13 +1625,11 @@ void ox820sata_set_mode(u32 mode, u32 force) {
         break;
     }
 
-    /* no need to reprogram everything if already in the right mode */
     if (progmicrocode) {
-        /* reset micro-code processor */
+         
         writel(1, OX820SATA_PROC_RESET);
         wmb();
         
-        /* select micro-code */
         switch(mode) {
         case OXNASSATA_RAID1:
         case OXNASSATA_RAID0:
@@ -2025,7 +1645,6 @@ void ox820sata_set_mode(u32 mode, u32 force) {
             break;
         }
     
-        /* load micro code */
         dst = OX820SATA_UCODE_STORE;
         while (*src != ~0) {
             writel(*src,dst);
@@ -2037,17 +1656,16 @@ void ox820sata_set_mode(u32 mode, u32 force) {
     
     if (changeparameters) {
         u32 reg;
-        /* set other mode dependent flags */    
+             
         switch(mode) {
         case OXNASSATA_RAID1:
-            /* clear JBOD mode */
+             
             reg = readl(OX820SATA_DATA_PLANE_CTRL);
             reg |= OX820SATA_DPC_JBOD_UCODE;
             reg &= ~OX820SATA_DPC_FIS_SWCH;
             writel(reg, OX820SATA_DATA_PLANE_CTRL);
             wmb();
             
-            /* set the hardware up for RAID-1 */
             writel( 0, OX820SATA_RAID_WP_BOT_LOW );
             writel( 0, OX820SATA_RAID_WP_BOT_HIGH);
             writel( 0xffffffff, OX820SATA_RAID_WP_TOP_LOW );
@@ -2057,14 +1675,13 @@ void ox820sata_set_mode(u32 mode, u32 force) {
             wmb();
             break;
         case OXNASSATA_RAID0:
-            /* clear JBOD mode */
+             
             reg = readl(OX820SATA_DATA_PLANE_CTRL);
             reg |= OX820SATA_DPC_JBOD_UCODE;
             reg &= ~OX820SATA_DPC_FIS_SWCH;
             writel(reg, OX820SATA_DATA_PLANE_CTRL);
             wmb();
             
-            /* set the hardware up for RAID-1 */
             writel( 0, OX820SATA_RAID_WP_BOT_LOW );
             writel( 0, OX820SATA_RAID_WP_BOT_HIGH);
             writel( 0xffffffff, OX820SATA_RAID_WP_TOP_LOW );
@@ -2074,14 +1691,13 @@ void ox820sata_set_mode(u32 mode, u32 force) {
             wmb();
             break;
         case OXNASSATA_NOTRAID:
-            /* enable jbod mode */
+             
             reg = readl(OX820SATA_DATA_PLANE_CTRL);
             reg &= ~OX820SATA_DPC_JBOD_UCODE;
             reg |=  OX820SATA_DPC_FIS_SWCH;
             writel(reg, OX820SATA_DATA_PLANE_CTRL);
             wmb();
 
-            /* start micro-code processor*/
             writel(1, OX820SATA_PROC_START);
             break;
         default:
@@ -2100,22 +1716,18 @@ static void ox820sata_post_reset_init(struct ata_port* ap)
 
     VPRINTK("\n");
 #ifndef CONFIG_SATA_OXNAS_SINGLE_SATA    
-    /* default to RAID-1 and force it in */
+     
     ox820sata_set_mode(OXNASSATA_NOTRAID, 1);
 #endif
 
-    /* turn on phy error detection by removing the masks */ 
     ox820sata_link_write(ioaddr, 0x0C, 0x30003);
 
-    /* enable hotplug event detection */    
     ox820sata_scr_write_port(ap, SCR_ERROR, ~0);
     ox820sata_scr_write_port(ap, OX820SATA_SERROR_IRQ_MASK, 0x03feffff);
     ox820sata_scr_write_port(ap, SCR_ACTIVE, ~0 & ~(1 << 26) & ~(1 << 16));
     
-    /* enable interrupts for ports */
     ox820sata_irq_on(ap);
     
-    /* go through all the devices and configure them */
     for (dev = 0; dev < ATA_MAX_DEVICES; ++dev) {
         if (ap->link.device[dev].class == ATA_DEV_ATA) {
             sata_std_hardreset(&ap->link, NULL, jiffies + HZ);
@@ -2123,30 +1735,19 @@ static void ox820sata_post_reset_init(struct ata_port* ap)
 		}
     }
 
-    /* clean up any remaining errors */
     ox820sata_scr_write_port(ap, SCR_ERROR, ~0);
     VPRINTK("done\n");
 }
 
-/** 
- * host_stop() is called when the rmmod or hot unplug process begins. The
- * hook must stop all hardware interrupts, DMA engines, etc.
- *
- * @param ap hardware with the registers in
- */
 static void ox820sata_host_stop(struct ata_host *host_set)
 {
     DPRINTK("\n");
 }
 
-/**
- * sends a sync-escape if there is a link present 
- */
 static inline void ox820sata_send_sync_escape(u32* base)
 {
     u32 reg;
-    /* read the SSTATUS register and only send a sync escape if there is a
-    * link active */
+     
     if ((ox820sata_link_read(base, 0x20) & 3) == 3) {
         reg = readl(base + OX820SATA_SATA_COMMAND);
         reg &= ~SATA_OPCODE_MASK;
@@ -2155,7 +1756,6 @@ static inline void ox820sata_send_sync_escape(u32* base)
     }
 }
 
-/* clears errors */
 static inline void ox820sata_clear_CS_error(u32* base)
 {
     u32 reg;
@@ -2164,10 +1764,6 @@ static inline void ox820sata_clear_CS_error(u32* base)
     writel(reg, base + OX820SATA_SATA_CONTROL);
 }
 
-/**
- * Clears the error caused by the core's registers being accessed when the
- * core is busy. 
- */
 static inline void ox820sata_clear_reg_access_error(u32* base)
 {
     u32 reg;
@@ -2181,10 +1777,6 @@ static inline void ox820sata_clear_reg_access_error(u32* base)
     }    
 }
 
-/**
- * Clean up all the state machines in the sata core.
- * @return post cleanup action required
- */
 cleanup_recovery_t ox820sata_cleanup(void) {
     int actions_required = 0;
 #ifndef CONFIG_SATA_OXNAS_SINGLE_SATA
@@ -2192,8 +1784,6 @@ cleanup_recovery_t ox820sata_cleanup(void) {
     u32 count;
     int was_a_write;
 
-    /* The maximum time waited at each stage of the cleanup before moving on to 
-    a more severe cleanup action (10000 * 50us = 0.5s) */
     const u32 delay_loops = 10000;
     count = delay_loops;
     was_a_write = readl(OX820SATA_DM_DBG1) &
@@ -2204,11 +1794,10 @@ cleanup_recovery_t ox820sata_cleanup(void) {
         ox820sata_clear_reg_access_error((u32*)SATA1_REGS_BASE);
     
         DPRINTK("ox820sata resetting some things.\n");
-        /* reset the SGDMA channels */
+         
         writel( OX820SATA_SGDMA_RESETS_CTRL, OX820SATA_SGDMA_BASE0 + OX820SATA_SGDMA_RESETS);
         writel( OX820SATA_SGDMA_RESETS_CTRL, OX820SATA_SGDMA_BASE1 + OX820SATA_SGDMA_RESETS);
         
-        /* reset the DMA channels */
         reg = readl(OX820SATA_DMA_BASE0 + OX820SATA_DMA_CONTROL);
         reg |= OX820SATA_DMA_CONTROL_RESET;
         writel( reg, OX820SATA_DMA_BASE0 + OX820SATA_DMA_CONTROL);
@@ -2216,14 +1805,12 @@ cleanup_recovery_t ox820sata_cleanup(void) {
         reg |= OX820SATA_DMA_CONTROL_RESET;
         writel( reg, OX820SATA_DMA_BASE1 + OX820SATA_DMA_CONTROL);
     
-        /* set dm port abort for both ports */
         reg = readl(OX820SATA_DEVICE_CONTROL);
         reg |= OX820SATA_DEVICE_CONTROL_DMABT << 0 ;
         reg |= OX820SATA_DEVICE_CONTROL_DMABT << 1 ;
         reg |= OX820SATA_DEVICE_CONTROL_ABORT ;
         writel( reg, OX820SATA_DEVICE_CONTROL);
         
-        /* Wait a maximum af 500ms for both ports in the SATA core to go idle */
         count = 0;
         while ((count < delay_loops) && (
                (readl((u32*)SATA0_REGS_BASE + OX820SATA_SATA_COMMAND) & CMD_CORE_BUSY) ||
@@ -2235,7 +1822,6 @@ cleanup_recovery_t ox820sata_cleanup(void) {
             udelay(50);
         }
     
-        /* still not idle, send a sync escape on each port */
         if (count >= delay_loops ) {
             DPRINTK("ox820sata sending sync escape\n");
             ox820sata_send_sync_escape((u32*)SATA0_REGS_BASE);
@@ -2243,7 +1829,6 @@ cleanup_recovery_t ox820sata_cleanup(void) {
             actions_required |= softreset;
         }
     
-        /* Wait a maximum af 500ms for both ports in the SATA core to go idle */
         count = 0;
         while ((count < delay_loops) && (
                (readl((u32*)SATA0_REGS_BASE + OX820SATA_SATA_COMMAND) & CMD_CORE_BUSY) ||
@@ -2255,18 +1840,15 @@ cleanup_recovery_t ox820sata_cleanup(void) {
             udelay(50);
         }
     
-        /* if the SATA core went idle before the timeout, clear resets */
         if (count < delay_loops ) {
             DPRINTK("Core idle, clear resets.\n");
             
             ox820sata_clear_CS_error((u32*)SATA0_REGS_BASE);
             ox820sata_clear_CS_error((u32*)SATA1_REGS_BASE);
             
-            /* Clear link error */
             ox820sata_scr_write_port(ox820sata_driver.ap[0], SCR_ERROR, ~0);
             ox820sata_scr_write_port(ox820sata_driver.ap[1], SCR_ERROR, ~0);
         
-            /* Clear errors in both ports*/
             reg = readl((u32*)SATA0_REGS_BASE + OX820SATA_SATA_CONTROL);
             reg |= OX820SATA_SCTL_CLR_ERR ;
             writel(reg, (u32*)SATA0_REGS_BASE + OX820SATA_SATA_CONTROL);
@@ -2277,7 +1859,6 @@ cleanup_recovery_t ox820sata_cleanup(void) {
             reg |= OX820SATA_RAID_CLR_ERR ;
             writel(reg, (u32*)SATARAID_REGS_BASE + OX820SATA_SATA_CONTROL);
             
-            /* clear reset for the DMA channel */
             reg = readl(OX820SATA_DMA_BASE0 + OX820SATA_DMA_CONTROL);
             reg &= ~OX820SATA_DMA_CONTROL_RESET;
             writel( reg, OX820SATA_DMA_BASE0 + OX820SATA_DMA_CONTROL);
@@ -2285,14 +1866,12 @@ cleanup_recovery_t ox820sata_cleanup(void) {
             reg &= ~OX820SATA_DMA_CONTROL_RESET;
             writel( reg, OX820SATA_DMA_BASE1 + OX820SATA_DMA_CONTROL);
         
-            /* clear port and dma abort */    
             reg = readl(OX820SATA_DEVICE_CONTROL);
             reg &= ~OX820SATA_DEVICE_CONTROL_DMABT << 0 ;
             reg &= ~OX820SATA_DEVICE_CONTROL_DMABT << 1 ;
             reg &= ~OX820SATA_DEVICE_CONTROL_ABORT ;
             writel(reg, OX820SATA_DEVICE_CONTROL);
     
-            /* set dm_mux_ram reset and port reset */
             reg = readl(OX820SATA_DEVICE_CONTROL);
             reg |= (OX820SATA_DEVICE_CONTROL_PRTRST |
                 OX820SATA_DEVICE_CONTROL_RAMRST) << 0 ;
@@ -2301,10 +1880,8 @@ cleanup_recovery_t ox820sata_cleanup(void) {
             writel( reg, OX820SATA_DEVICE_CONTROL);
             wmb();
             
-            /* resume micro code (shouldn't affect JBOD micro code) */
             writel(OX820SATA_CONFIG_IN_RESUME, OX820SATA_CONFIG_IN);
     
-            /* Wait a maximum af 500ms for both ports in the SATA core to go idle */
             count = 0;
             while ((count < delay_loops) && (
                    (readl((u32*)SATA0_REGS_BASE + OX820SATA_SATA_COMMAND) & CMD_CORE_BUSY) ||
@@ -2318,24 +1895,20 @@ cleanup_recovery_t ox820sata_cleanup(void) {
         }
     }
 
-    /* if didn't go idle reset the core */
     if  (count >= delay_loops) {
-        //CrazyDumpDebug();
+         
         printk(KERN_ERR"ox820sata unable to carefully recover "
             "from SATA error, reseting core\n");
-#else /* CONFIG_SATA_OXNAS_SINGLE_SATA */
+#else  
     {
         printk(KERN_ERR"ox820sata: reseting SATA core\n");
-#endif /* CONFIG_SATA_OXNAS_SINGLE_SATA */
+#endif  
 
-        /* core not recovering, reset it */
         mdelay(5);
         ox820sata_reset_core();
         mdelay(5);
         actions_required |= re_init;
-        /* Perform any SATA core re-initialisation after reset */
-        /* post reset init needs to be called for both ports as there's one reset
-        for both ports*/
+         
         if (ox820sata_driver.ap[0]) {
             ox820sata_post_reset_init(ox820sata_driver.ap[0]);
         }
@@ -2347,9 +1920,6 @@ cleanup_recovery_t ox820sata_cleanup(void) {
     return actions_required;
 }
 
-/**
- *
- */
 void ox820sata_freeze_host(int port_no)
 {
     set_bit(port_no, &ox820sata_driver.port_in_eh);
@@ -2368,28 +1938,16 @@ static void ox820sata_error_handler(struct ata_port *ap)
 	DPRINTK("Enter port_no %d\n", ap->port_no);
 	ox820sata_freeze_host(ap->port_no);
 
-    /*
-	 * Only allow commands to be in progress on one port at a time, but error
-	 * error handling must be allowed through when a SATA command has failed
-	 * to complete within SCSI/SATA stack timeout period in order to clean up
-	 * the port
-	 */
     if (!acquire_hw(ap->port_no, 1, ERROR_HW_ACQUIRE_TIMEOUT_JIFFIES)) {
         DPRINTK("unable to get hardware\n");
-        //CrazyDumpDebug();
+         
         return;
     }
 
-    /* If the core is busy here, make it idle */
     ox820sata_cleanup();
 
 	ata_std_error_handler(ap);
-	/*
-	 * The error handling will have gained the SATA core lock either normally,
-	 * or by breaking the lock obtained via qc_issue() presumably because the
-	 * command has failed and timed-out. In either case we don't expect someone
-	 * else to have release the SATA core lock from under us
-	 */
+	 
 	DPRINTK("Releasing SATA core lock, port_no %d\n", ap->port_no);
 	ox820sata_thaw_host(ap->port_no);
 	release_hw(ap->port_no);
@@ -2397,16 +1955,11 @@ static void ox820sata_error_handler(struct ata_port *ap)
 
 static void ox820sata_post_internal_cmd(struct ata_queued_cmd *qc) {
     if (qc->flags & ATA_QCFLAG_FAILED) {
-         /* If the core is busy here, make it idle */
+          
         ox820sata_cleanup();       
     }
 }
 
-/** 
- * turn on the interrupts
- *
- * @param ap Hardware with the registers in
- */
 static void ox820sata_irq_on(struct ata_port *ap)
 {
     u32* ioaddr = ox820sata_get_io_base(ap);
@@ -2414,12 +1967,10 @@ static void ox820sata_irq_on(struct ata_port *ap)
 
     VPRINTK("\n");
 
-    /* Clear pending interrupts */
     writel(~0, ioaddr + OX820SATA_INT_CLEAR);
     writel(mask, OX820SATA_CORE_INT_STATUS);
     wmb();
     
-    /* enable End of command interrupt */
     writel(OX820SATA_INT_WANT, ioaddr + OX820SATA_INT_ENABLE);
     writel(mask, OX820SATA_CORE_INT_ENABLE);
 }
@@ -2431,7 +1982,6 @@ static int ox820sata_check_ready(struct ata_link *link)
 	return ata_check_ready(status);
 }
 
-/** @return true if the port has a cable connected */
 int ox820sata_check_link(int port_no) 
 {
     int reg;
@@ -2440,7 +1990,6 @@ int ox820sata_check_link(int port_no)
     if (ap) {
         ox820sata_scr_read_port(ap, SCR_STATUS, &reg );
     
-        /* Check for the cable present indicated by SCR status bit-0 set */
         if (reg & 0x1) { 
             result = 1;
         }
@@ -2470,29 +2019,23 @@ static int ox820sata_softreset(struct ata_link *link, unsigned int *class,
 		goto out;
 	}
 
-    /* write value to register */
     writel((ap->ctl) << 24, ioaddr + OX820SATA_ORB4);
 
-    /* command the core to send a control FIS */
     Command_Reg = readl(ioaddr + OX820SATA_SATA_COMMAND);
     Command_Reg &= ~SATA_OPCODE_MASK;
     Command_Reg |= CMD_WRITE_TO_ORB_REGS_NO_COMMAND;
     writel(Command_Reg, ioaddr + OX820SATA_SATA_COMMAND);
-	udelay(20);	/* FIXME: flush */
+	udelay(20);	 
 
-    /* write value to register */
     writel((ap->ctl | ATA_SRST) << 24, ioaddr + OX820SATA_ORB4);
 
-    /* command the core to send a control FIS */
     Command_Reg &= ~SATA_OPCODE_MASK;
     Command_Reg |= CMD_WRITE_TO_ORB_REGS_NO_COMMAND;
     writel(Command_Reg, ioaddr + OX820SATA_SATA_COMMAND);
-	udelay(20);	/* FIXME: flush */
+	udelay(20);	 
     
-    /* write value to register */
     writel((ap->ctl) << 24, ioaddr + OX820SATA_ORB4);
 
-    /* command the core to send a control FIS */
     Command_Reg &= ~SATA_OPCODE_MASK;
     Command_Reg |= CMD_WRITE_TO_ORB_REGS_NO_COMMAND;
     writel(Command_Reg, ioaddr + OX820SATA_SATA_COMMAND);
@@ -2501,13 +2044,11 @@ static int ox820sata_softreset(struct ata_link *link, unsigned int *class,
 
     rc = ata_wait_ready(link, deadline, ox820sata_check_ready);
     
-    /* if link is occupied, -ENODEV too is an error */
 	if (rc && (rc != -ENODEV || sata_scr_valid(link))) {
 		ata_link_printk(link, KERN_ERR, "SRST failed (errno=%d)\n", rc);
 		return rc;
 	}
 
-	/* determine by signature whether we have ATA or ATAPI devices */
 	ox820sata_tf_read(ap, &tf);
 	*class = ata_dev_classify(&tf);
 
@@ -2519,18 +2060,6 @@ static int ox820sata_softreset(struct ata_link *link, unsigned int *class,
 	return 0;
 }
     
-/**
- *	ata_std_postreset - standard postreset callback
- *	@link: the target ata_link
- *	@classes: classes of attached devices
- *
- *	This function is invoked after a successful reset.  Note that
- *	the device might have been reset more than once using
- *	different reset methods before postreset is invoked.
- *
- *	LOCKING:
- *	Kernel thread context (may sleep)
- */
 static void ox820sata_postreset(struct ata_link *link, unsigned int *classes)
 {
 	struct ata_port *ap = link->ap;
@@ -2540,17 +2069,14 @@ static void ox820sata_postreset(struct ata_link *link, unsigned int *classes)
 
 	ata_std_postreset(link, classes);
     
-    /* turn on phy error detection by removing the masks */ 
     ox820sata_link_write((u32* )SATA0_REGS_BASE , 0x0c, 0x30003 );
     ox820sata_link_write((u32* )SATA1_REGS_BASE , 0x0c, 0x30003 );
 
-	/* bail out if no device is present */
 	if (classes[0] == ATA_DEV_NONE && classes[1] == ATA_DEV_NONE) {
 		DPRINTK("EXIT, no device\n");
 		return;
 	}
 
-    /* go through all the devices and configure them */
     for (dev = 0; dev < ATA_MAX_DEVICES; ++dev) {
         if (ap->link.device[dev].class == ATA_DEV_ATA) {
             ox820sata_dev_config(&(ap->link.device[dev]));
@@ -2559,10 +2085,6 @@ static void ox820sata_postreset(struct ata_link *link, unsigned int *classes)
 
 	DPRINTK("EXIT\n");
 }
-
-/**************************************************************************/
-/* Debug                                                                  */
-/**************************************************************************/
 
 static void DumpPRDTable(struct ata_prd* prd) {
     u32 count = 0;
@@ -2576,11 +2098,6 @@ static void DumpPRDTable(struct ata_prd* prd) {
     } 
 }
 
-/** 
- * Outputs all the registers in the SATA core for diagnosis of faults.
- *
- * @param ap Hardware with the registers in
- */
 void CrazyDumpDebug(void)
 {
 #ifdef CRAZY_DUMP_DEBUG
@@ -2605,7 +2122,6 @@ void CrazyDumpDebug(void)
     }
 #endif
 
-    /* port 0 */
     ioaddr = (u32* )SATA0_REGS_BASE;
     printk("Port 0 High level registers\n");
     for(offset = 0; offset < 48;offset++)
@@ -2629,7 +2145,6 @@ void CrazyDumpDebug(void)
         printk("[%02x] %08x\n", offset*4, result);
     }
 
-    /* port 1 */
     ioaddr = (u32* )SATA1_REGS_BASE;
     printk("Port 1 High level registers\n");
     for(offset = 0; offset < 48;offset++)
@@ -2672,7 +2187,6 @@ void CrazyDumpDebug(void)
     DumpPRDTable((struct ata_prd* )(OX820SATA_PRD + (256 * 8 * 1)));
 #endif
     
-    /* port 15 */
     ioaddr = (u32* )SATARAID_REGS_BASE;
     printk("RAID registers (port 15)\n");
     for(offset = 0; offset < 48;offset++)
@@ -2680,7 +2194,6 @@ void CrazyDumpDebug(void)
         printk("[%02x] %08x\n", offset * 4, *(ioaddr + offset));
     }
     
-    /* port 14 */
     ioaddr = (u32* )SATACORE_REGS_BASE;
     printk("CORE registers (port 14)\n");
     for(offset = 0; offset < 80;offset++)
@@ -2694,7 +2207,6 @@ void CrazyDumpDebug(void)
         printk("%d\n", *((volatile u32*)OX820SATA_PROC_PC) );
     }
 
-    /* dump as many of the system flags as possible */
     printk("core_locked %d\n", core_locked);
     printk("reentrant port number %d\n", reentrant_port_no);
     printk("libata/hw lock count %d\n", hw_lock_count);
@@ -2718,10 +2230,6 @@ void CrazyDumpDebug(void)
 
 #ifdef ERROR_INJECTION
 
-/**
- * procfs read-file function, displays the error period in jiffies or "off"
- * if no error injection is enabled
- */
 static int ox820sata_error_inject_show(
     char  *page,
 	char **start,
@@ -2740,14 +2248,9 @@ static int ox820sata_error_inject_show(
         }
     }
 
-    /* if we get here, there's been an error */
     return -EIO;
 }
 
-/**
- * Procfs write-file function, accepts an error period in jiffies, 0 turns error
- * injection off.
- */
 static int ox820sata_error_inject_store(
 	struct file       *file,
 	const char __user *buffer,
@@ -2760,18 +2263,10 @@ static int ox820sata_error_inject_store(
         return count;
     }
 
-    /* if we get here, there's been an error */
     return -EIO;
 }
-#endif /* ERROR_INJECTION */
+#endif  
 
-/**************************************************************************
-* DEVICE CODE
-**************************************************************************/
-
-/**
- * Describes the identity of the SATA core and the resources it requires
- */ 
 static struct resource ox820sata_resources[] = {
 	{
         .name       = "sata_registers",
@@ -2795,69 +2290,51 @@ static struct platform_device ox820sata_dev =
     .dev.coherent_dma_mask = 0xffffffff,
 }; 
 
-/** 
- * module initialisation
- * @return success is 0
- */
 static int __init ox820sata_device_init( void )
 {
     int ret;
 
-    /* reset the core */
     ox820sata_reset_core();
 
-    /* check there is enough space for PRD entries in SRAM */
     if (ATA_PRD_TBL_SZ > OX820SATA_PRD_SIZE) {
         printk(KERN_ERR"PRD table size is bigger than the space allocated for it in hardware.h");
         BUG();
     }
 
-    /* check this matches the space reserved in hardware.h */
     if (sizeof(sgdma_request_t) > OX820SATA_SGDMA_SIZE) {
         printk(KERN_ERR"sgdma_request_t has grown beyond the space allocated for it in hardware.h");
         BUG();
     }
 
 #ifndef CONFIG_OX820SATA_SINGLE_SATA
-    /* check there is enough space for PRD entries in SRAM */
+     
     if ((2 * ATA_PRD_TBL_SZ) > OX820SATA_PRD_SIZE) {
         printk(KERN_ERR"PRD table size is bigger than the space allocated for it in hardware.h");
         BUG();
     }
 
-    /* check this matches the space reserved in hardware.h */
     if ((2 * sizeof(sgdma_request_t)) > OX820SATA_SGDMA_SIZE) {
         printk(KERN_ERR"sgdma_request_t has grown beyond the space allocated for it in hardware.h");
         BUG();
     }
 #endif
-    /* register the ata device for the driver to find */
+     
     ret = platform_device_register( &ox820sata_dev );
     DPRINTK(" %i\n", ret);
    
     return ret;
 }
 
-/** 
- * module cleanup
- */
 static void __exit ox820sata_device_exit(void)
 {
     platform_device_unregister( &ox820sata_dev );
 }
 
-/**
- * Returns ox820 port number the request queue is serviced by.
- *
- * @param queue The queue under investigation.
- * @return The ox820 sata port number servicing the queue or -1 if not found.
- */
 int oxnassata_get_port_no(struct request_queue* q)
 {
     struct ata_port* ap = 0;
     struct scsi_device* sdev = 0;
     
-    /* check port 0 */
     ap = ox820sata_driver.ap[0];
     if (ap)
         shost_for_each_device(sdev, ap->scsi_host) {
@@ -2867,7 +2344,6 @@ int oxnassata_get_port_no(struct request_queue* q)
             }
         }
     
-    /* check port 1 */
     ap = ox820sata_driver.ap[1];
     if (ap)
         shost_for_each_device(sdev, ap->scsi_host) {
@@ -2877,7 +2353,6 @@ int oxnassata_get_port_no(struct request_queue* q)
             }
         }
 
-    /* not found */
     return -1;  
 }
 
@@ -2887,10 +2362,6 @@ int oxnassata_LBA_schemes_compatible( void ) {
     return  1;
 }
 
-/**
- * This function returns the ata_port structure for a particular port number
- * it's role is to allow the fast sata code to use the libATA error handling
- */
 struct ata_port* ox820sata_get_ap(int port_no)
 {
     switch (port_no) {
@@ -2904,13 +2375,9 @@ struct ata_port* ox820sata_get_ap(int port_no)
     }
 }
 
-/** 
- * macros to register intiialisation and exit functions with kernal
- */
 module_init(ox820sata_device_init);
 module_exit(ox820sata_device_exit);
 
-/** @debug: proc filing system stuff for cache processing time */
 static struct proc_dir_entry* debug_proc;
 static int debugproc_read(char *buf, char **start, off_t offset, int count,
     int *eof, void *unused) 

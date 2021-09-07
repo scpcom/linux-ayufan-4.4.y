@@ -1,35 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  target_core_device.c (based on iscsi_target_device.c)
- *
- * This file contains the iSCSI Virtual Device and Disk Transport
- * agnostic related functions.
- *
- * Copyright (c) 2003, 2004, 2005 PyX Technologies, Inc.
- * Copyright (c) 2005-2006 SBE, Inc.  All Rights Reserved.
- * Copyright (c) 2007-2009 Rising Tide Software, Inc.
- * Copyright (c) 2008-2009 Linux-iSCSI.org
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #define TARGET_CORE_DEVICE_C
 
 #include <linux/net.h>
@@ -79,9 +51,7 @@ struct block_device *__linux_blockdevice_claim(
 		*ret = -1;
 		return NULL;
 	}
-	/*
-	 * If no claim pointer was passed from claimee, use struct block_device.
-	 */
+	 
 	if (!claim_ptr)
 		claim_ptr = (void *)bd;
 
@@ -111,9 +81,7 @@ struct block_device *linux_blockdevice_claim(
 
 	if (blkdev_get(bd, FMODE_WRITE|FMODE_READ) < 0)
 		return NULL;
-	/*
-	 * If no claim pointer was passed from claimee, use struct block_device.
-	 */
+	 
 	if (!claim_ptr)
 		claim_ptr = (void *)bd;
 
@@ -152,9 +120,7 @@ int linux_blockdevice_check(int major, int minor)
 	bd = linux_blockdevice_claim(major, minor, NULL);
 	if (!(bd))
 		return -1;
-	/*
-	 * Blockdevice was able to be claimed, now unclaim it and return success
-	 */
+	 
 	linux_blockdevice_release(major, minor, NULL);
 
 	return 0;
@@ -182,10 +148,6 @@ int se_check_devices_access(se_hba_t *hba)
 }
 #endif
 
-/*	se_disable_devices_for_hba():
- *
- *
- */
 void se_disable_devices_for_hba(se_hba_t *hba)
 {
 	se_device_t *dev;
@@ -253,7 +215,7 @@ extern int __transport_get_lun_for_cmd(
 				}
 #ifdef SNMP_SUPPORT
 				deve->write_bytes += se_cmd->data_length;
-#endif /* SNMP_SUPPORT */
+#endif  
 			} else if (se_cmd->data_direction ==
 #ifdef MY_ABC_HERE
 				   DMA_FROM_DEVICE) {
@@ -262,7 +224,7 @@ extern int __transport_get_lun_for_cmd(
 #endif
 #ifdef SNMP_SUPPORT
 				deve->read_bytes += se_cmd->data_length;
-#endif /* SNMP_SUPPORT */
+#endif  
 			}
 		}
 		deve->deve_cmds++;
@@ -315,11 +277,7 @@ out:
 			return -1;
 #endif
 		} else {
-			/*
-			 * Use the se_portal_group->tpg_virt_lun0 to allow for
-			 * REPORT_LUNS, et al to be returned when no active
-			 * MappedLUN=0 exists for this Initiator Port.
-			 */
+			 
 			if (unpacked_lun != 0) {
 				se_cmd->scsi_sense_reason = NON_EXISTENT_LUN;
 				se_cmd->se_cmd_flags |= SCF_SCSI_CDB_EXCEPTION;
@@ -329,9 +287,7 @@ out:
 					unpacked_lun);
 				return -1;
 			}
-			/*
-			 * Force WRITE PROTECT for virtual LUN 0
-			 */
+			 
 #ifdef MY_ABC_HERE
 			if ((se_cmd->data_direction != DMA_FROM_DEVICE) &&
 			    (se_cmd->data_direction != DMA_NONE)) {
@@ -360,10 +316,7 @@ out:
 			se_cmd->se_cmd_flags |= SCF_SE_LUN_CMD;
 		}
 	}
-	/*
-	 * Determine if the se_lun_t is online.
-	 */
-/* #warning FIXME: Check for LUN_RESET + UNIT Attention */
+	 
 #ifdef MY_ABC_HERE
 	if (dev_obj_check_online(se_lun->lun_type_ptr) != 0) {
 #else
@@ -392,12 +345,8 @@ out:
 #endif
 	spin_unlock(&dev->stats_lock);
 	}
-#endif /* SNMP_SUPPORT */
+#endif  
 
-	/*
-	 * Add the iscsi_cmd_t to the se_lun_t's cmd list.  This list is used
-	 * for tracking state of se_cmd_ts during LUN shutdown events.
-	 */
 	spin_lock_irqsave(&se_lun->lun_cmd_lock, flags);
 	list_add_tail(&se_cmd->se_lun_list, &se_lun->lun_cmd_list);
 	atomic_set(&T_TASK(se_cmd)->transport_lun_active, 1);
@@ -432,7 +381,7 @@ extern int transport_get_lun_for_tmr(
 		se_cmd->se_orig_obj_api = SE_LUN(se_cmd)->lun_obj_api;
 #endif
 		se_cmd->se_orig_obj_ptr = SE_LUN(se_cmd)->lun_type_ptr;
-/*		se_cmd->se_cmd_flags |= SCF_SE_LUN_CMD; */
+ 
 	}
 	spin_unlock_bh(&SE_NODE_ACL(se_sess)->device_list_lock);
 
@@ -444,10 +393,7 @@ extern int transport_get_lun_for_tmr(
 		se_cmd->se_cmd_flags |= SCF_SCSI_CDB_EXCEPTION;
 		return -1;
 	}
-	/*
-	 * Determine if the se_lun_t is online.
-	 */
-/* #warning FIXME: Check for LUN_RESET + UNIT Attention */
+	 
 #ifdef MY_ABC_HERE
 	if (dev_obj_check_online(se_lun->lun_type_ptr) != 0) {
 #else
@@ -465,11 +411,6 @@ extern int transport_get_lun_for_tmr(
 }
 EXPORT_SYMBOL(transport_get_lun_for_tmr);
 
-/*
- * This function is called from core_scsi3_emulate_pro_register_and_move()
- * and core_scsi3_decode_spec_i_port(), and will increment &deve->pr_ref_count
- * when a matching rtpi is found.
- */
 se_dev_entry_t *core_get_se_deve_from_rtpi(
 	se_node_acl_t *nacl,
 	u16 rtpi)
@@ -588,10 +529,6 @@ void core_update_device_list_access(
 }
 EXPORT_SYMBOL(core_update_device_list_access);
 
-/*      core_update_device_list_for_node():
- *
- *
- */
 int core_update_device_list_for_node(
 	se_lun_t *lun,
 	se_lun_acl_t *lun_acl,
@@ -604,12 +541,7 @@ int core_update_device_list_for_node(
 	se_port_t *port = lun->lun_sep;
 	se_dev_entry_t *deve = &nacl->device_list[mapped_lun];
 	int trans = 0;
-	/*
-	 * If the MappedLUN entry is being disabled, the entry in
-	 * port->sep_alua_list must be removed now before clearing the
-	 * se_dev_entry_t pointers below as logic in
-	 * core_alua_do_transition_tg_pt() depends on these being present.
-	 */
+	 
 	if (!(enable)) {
 		spin_lock_bh(&port->sep_alua_lock);
 		list_del(&deve->alua_port_list);
@@ -618,11 +550,7 @@ int core_update_device_list_for_node(
 
 	spin_lock_bh(&nacl->device_list_lock);
 	if (enable) {
-		/*
-		 * Check if the call is handling demo mode -> explict LUN ACL
-		 * transition.  This transition must be for the same se_lun_t
-		 * + mapped_lun that was setup in demo mode..
-		 */
+		 
 		if (deve->lun_flags & TRANSPORT_LUNFLAGS_INITIATOR_ACCESS) {
 			if (deve->se_lun_acl != NULL) {
 				printk(KERN_ERR "se_dev_entry_t->se_lun_acl"
@@ -660,7 +588,7 @@ int core_update_device_list_for_node(
 #ifdef SNMP_SUPPORT
 		deve->creation_time = get_jiffies_64();
 		deve->attach_count++;
-#endif /* SNMP_SUPPORT */
+#endif  
 		spin_unlock_bh(&nacl->device_list_lock);
 
 		spin_lock_bh(&port->sep_alua_lock);
@@ -669,17 +597,12 @@ int core_update_device_list_for_node(
 
 		return 0;
 	}
-	/*
-	 * Wait for any in process SPEC_I_PT=1 or REGISTER_AND_MOVE
-	 * PR operation to complete.
-	 */
+	 
 	spin_unlock_bh(&nacl->device_list_lock);
 	while (atomic_read(&deve->pr_ref_count) != 0)
 		msleep(100);
 	spin_lock_bh(&nacl->device_list_lock);
-	/*
-	 * Disable se_dev_entry_t LUN ACL mapping
-	 */
+	 
 	core_scsi3_ua_release_all(deve);
 	deve->se_lun = NULL;
 	deve->se_lun_acl = NULL;
@@ -687,17 +610,13 @@ int core_update_device_list_for_node(
 #ifdef SNMP_SUPPORT
 	deve->creation_time = 0;
 	deve->attach_count--;
-#endif /* SNMP_SUPPORT */
+#endif  
 	spin_unlock_bh(&nacl->device_list_lock);
 
 	core_scsi3_free_pr_reg_from_nacl(lun->se_dev, nacl);
 	return 0;
 }
 
-/*      core_clear_lun_from_tpg():
- *
- *
- */
 void core_clear_lun_from_tpg(se_lun_t *lun, se_portal_group_t *tpg)
 {
 	se_node_acl_t *nacl;
@@ -753,27 +672,13 @@ se_port_t *core_alloc_port(se_device_t *dev)
 		return NULL;
 	}
 again:
-	/*
-	 * Allocate the next RELATIVE TARGET PORT IDENTIFER for this se_device_t
-	 * Here is the table from spc4r17 section 7.7.3.8.
-	 *
-	 *    Table 473 -- RELATIVE TARGET PORT IDENTIFIER field
-	 *
-	 * Code      Description
-	 * 0h        Reserved
-	 * 1h        Relative port 1, historically known as port A
-	 * 2h        Relative port 2, historically known as port B
-	 * 3h to FFFFh    Relative port 3 through 65 535
-	 */
+	 
 	port->sep_rtpi = dev->dev_rpti_counter++;
 	if (!(port->sep_rtpi))
 		goto again;
 
 	list_for_each_entry(port_tmp, &dev->dev_sep_list, sep_list) {
-		/*
-		 * Make sure RELATIVE TARGET PORT IDENTIFER is unique
-		 * for 16-bit wrap..
-		 */
+		 
 		if (port->sep_rtpi == port_tmp->sep_rtpi)
 			goto again;
 	}
@@ -821,20 +726,14 @@ void core_export_port(
 
 	dev->dev_port_count++;
 #ifdef SNMP_SUPPORT
-	port->sep_index = port->sep_rtpi; /* RELATIVE TARGET PORT IDENTIFER */
+	port->sep_index = port->sep_rtpi;  
 #endif
 	return;
 }
 
-/*
- *	Called with se_device_t->se_port_lock spinlock held.
- */
 void core_release_port(se_device_t *dev, se_port_t *port)
 {
-	/*
-	 * Wait for any port reference for PR ALL_TG_PT=1 operation
-	 * to complete in __core_scsi3_alloc_registration()
-	 */
+	 
 	spin_unlock(&dev->se_port_lock);
 	if (atomic_read(&port->sep_tg_pt_ref_cnt))
 		msleep(100);
@@ -867,11 +766,6 @@ int transport_core_report_lun_response(se_cmd_t *se_cmd)
 		return PYX_TRANSPORT_LU_COMM_FAILURE;
 	}
 
-	/*
-	 * If no se_session_t pointer is present, this se_cmd_t is
-	 * coming via a target_core_mod PASSTHROUGH op, and not through
-	 * a $FABRIC_MOD.  In that case, report LUN=0 only.
-	 */
 	if (!(se_sess)) {
 		lun = 0;
 		buf[offset++] = ((lun >> 56) & 0xff);
@@ -892,11 +786,7 @@ int transport_core_report_lun_response(se_cmd_t *se_cmd)
 		if (!(deve->lun_flags & TRANSPORT_LUNFLAGS_INITIATOR_ACCESS))
 			continue;
 		se_lun = deve->se_lun;
-		/*
-		 * We determine the correct LUN LIST LENGTH even once we
-		 * have reached the initial allocation length.
-		 * See SPC2-R20 7.19.
-		 */
+		 
 		lun_count++;
 		if ((cdb_offset + 8) >= se_cmd->data_length)
 			continue;
@@ -914,9 +804,6 @@ int transport_core_report_lun_response(se_cmd_t *se_cmd)
 	}
 	spin_unlock_bh(&SE_NODE_ACL(se_sess)->device_list_lock);
 
-	/*
-	 * See SPC3 r07, page 159.
-	 */
 done:
 	lun_count *= 8;
 	buf[0] = ((lun_count >> 24) & 0xff);
@@ -927,10 +814,6 @@ done:
 	return PYX_TRANSPORT_SENT_TO_TRANSPORT;
 }
 
-/*	se_release_device_for_hba():
- *
- *
- */
 void se_release_device_for_hba(se_device_t *dev)
 {
 	se_hba_t *hba = dev->se_hba;
@@ -983,9 +866,6 @@ int transport_get_lun_for_cmd(
 }
 EXPORT_SYMBOL(transport_get_lun_for_cmd);
 
-/*
- * Called with se_hba_t->device_lock held.
- */
 void se_clear_dev_ports(se_device_t *dev)
 {
 	se_hba_t *hba = dev->se_hba;
@@ -1023,10 +903,6 @@ void se_clear_dev_ports(se_device_t *dev)
 	return;
 }
 
-/*	se_free_virtual_device():
- *
- *	Used for IBLOCK, RAMDISK, and FILEIO Transport Drivers.
- */
 int se_free_virtual_device(se_device_t *dev, se_hba_t *hba)
 {
 	spin_lock(&hba->device_lock);
@@ -1111,30 +987,18 @@ void se_dev_set_default_attribs(se_device_t *dev)
 	DEV_ATTRIB(dev)->emulate_reservations = DA_EMULATE_RESERVATIONS;
 	DEV_ATTRIB(dev)->emulate_alua = DA_EMULATE_ALUA;
 	DEV_ATTRIB(dev)->enforce_pr_isids = DA_ENFORCE_PR_ISIDS;
-	/*
-	 * block_size is based on subsystem plugin dependent requirements.
-	 */
+	 
 	DEV_ATTRIB(dev)->hw_block_size = TRANSPORT(dev)->get_blocksize(dev);
 	DEV_ATTRIB(dev)->block_size = TRANSPORT(dev)->get_blocksize(dev);
-	/*
-	 * max_sectors is based on subsystem plugin dependent requirements.
-	 */
+	 
 	DEV_ATTRIB(dev)->hw_max_sectors = TRANSPORT(dev)->get_max_sectors(dev);
 	DEV_ATTRIB(dev)->max_sectors = TRANSPORT(dev)->get_max_sectors(dev);
-	/*
-	 * queue_depth is based on subsystem plugin dependent requirements.
-	 */
+	 
 	DEV_ATTRIB(dev)->hw_queue_depth = TRANSPORT(dev)->get_queue_depth(dev);
 	DEV_ATTRIB(dev)->queue_depth = TRANSPORT(dev)->get_queue_depth(dev);
-	/*
-	 * task_timeout is based on device type.
-	 */
+	 
 #if 1
-	/*
-	 * Disabled by default due to known BUG in some cases when task_timeout
-	 * fires..  task_timeout, status_thread and status_thread_tur may end
-	 * up being removed in v3.0.
-	 */
+	 
 	DEV_ATTRIB(dev)->task_timeout = 0;
 #else
 	DEV_ATTRIB(dev)->task_timeout = transport_get_default_task_timeout(dev);
@@ -1227,9 +1091,7 @@ int se_dev_set_enforce_pr_isids(se_device_t *dev, int flag)
 		(DEV_ATTRIB(dev)->enforce_pr_isids) ? "Enabled" : "Disabled");
 	return 0;
 }
-/*
- * Note, this can only be called on unexported SE Device Object.
- */
+ 
 int se_dev_set_queue_depth(se_device_t *dev, u32 queue_depth)
 {
 	u32 orig_queue_depth = dev->queue_depth;
@@ -1294,11 +1156,9 @@ int se_dev_set_queue_depth(se_device_t *dev, u32 queue_depth)
 	return 0;
 }
 
-/* #warning FIXME: Forcing max_sectors greater than
-	get_max_sectors() disabled */
 int se_dev_set_max_sectors(se_device_t *dev, u32 max_sectors)
 {
-	int force = 0; /* Force setting for VDEVS */
+	int force = 0;  
 
 #ifdef MY_ABC_HERE
 	if (atomic_read(&dev->dev_export_obj.obj_access_count)) {
@@ -1456,10 +1316,7 @@ se_lun_t *core_dev_add_lun(
 		TPG_TFO(tpg)->tpg_get_tag(tpg), lun_p->unpacked_lun,
 		TPG_TFO(tpg)->get_fabric_name(), hba->hba_id);
 #endif
-	/*
-	 * Update LUN maps for dynamically added initiators when
-	 * generate_node_acl is enabled.
-	 */
+	 
 	if (TPG_TFO(tpg)->tpg_check_demo_mode(tpg)) {
 		se_node_acl_t *acl;
 		spin_lock_bh(&tpg->acl_node_lock);
@@ -1477,10 +1334,6 @@ se_lun_t *core_dev_add_lun(
 }
 EXPORT_SYMBOL(core_dev_add_lun);
 
-/*      core_dev_del_lun():
- *
- *
- */
 int core_dev_del_lun(
 	se_portal_group_t *tpg,
 	u32 unpacked_lun)
@@ -1536,10 +1389,6 @@ se_lun_t *core_get_lun_from_tpg(se_portal_group_t *tpg, u32 unpacked_lun)
 }
 EXPORT_SYMBOL(core_get_lun_from_tpg);
 
-/*      core_dev_get_lun():
- *
- *
- */
 static se_lun_t *core_dev_get_lun(se_portal_group_t *tpg, u32 unpacked_lun)
 {
 	se_lun_t *lun;
@@ -1650,19 +1499,12 @@ int core_dev_add_initiator_node_lun_acl(
 		(lun_access & TRANSPORT_LUNFLAGS_READ_WRITE) ? "RW" : "RO",
 		lacl->initiatorname);
 #endif
-	/*
-	 * Check to see if there are any existing persistent reservation APTPL
-	 * pre-registrations that need to be enabled for this LUN ACL..
-	 */
+	 
 	core_scsi3_check_aptpl_registration(lun->se_dev, tpg, lun, lacl);
 	return 0;
 }
 EXPORT_SYMBOL(core_dev_add_initiator_node_lun_acl);
 
-/*      core_dev_del_initiator_node_lun_acl():
- *
- *
- */
 int core_dev_del_initiator_node_lun_acl(
 	se_portal_group_t *tpg,
 	se_lun_t *lun,

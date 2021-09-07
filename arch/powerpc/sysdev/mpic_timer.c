@@ -2,17 +2,7 @@
 #define MY_ABC_HERE
 #endif
 #ifdef MY_DEF_HERE
-/*
- * Copyright (c) 2008-2010 Freescale Semiconductor, Inc. All rights reserved.
- * Dave Liu <daveliu@freescale.com>
- * copy from the 83xx GTM driver and modify for MPIC global timer,
- * implement the global timer 0 function.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 as published
- * by the Free Software Foundation.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/sched.h>
@@ -65,7 +55,7 @@ static irqreturn_t mpic_tm_isr(int irq, void *dev_id)
 
 	spin_lock_irqsave(&priv->lock, flags);
 	temp = in_be32(&priv->regs->gtbcr);
-	temp |= MPIC_TIMER_STOP; /* counting inhibited */
+	temp |= MPIC_TIMER_STOP;  
 	out_be32(&priv->regs->gtbcr, temp);
 	spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -96,13 +86,12 @@ static ssize_t mpic_tm_timeout_store(struct device *dev,
 
 	spin_lock_irq(&priv->lock);
 
-	/* stop timer 0 */
 	temp = in_be32(&priv->regs->gtbcr);
-	temp |= MPIC_TIMER_STOP; /* counting inhibited */
+	temp |= MPIC_TIMER_STOP;  
 	out_be32(&priv->regs->gtbcr, temp);
 
 	if (interval != 0) {
-		/* start timer */
+		 
 		out_be32(&priv->regs->gtbcr, interval | MPIC_TIMER_STOP);
 		out_be32(&priv->regs->gtbcr, interval);
 	}
@@ -177,14 +166,6 @@ static int __devinit mpic_tm_probe(struct of_device *dev,
 		goto out;
 	}
 
-	/*
-	 * MPIC implementation from Freescale has the TCR register,
-	 * the MPIC_TIMER_TCR_OFFSET is 0x200 from global timer base
-	 * the default clock source to the MPIC timer 0 is CCB freq / 8.
-	 * to extend the timer period, we divide the timer clock source
-	 * as CCB freq / 64, so the max timer period is 336 seconds
-	 * when the CCB frequence is 400MHz.
-	 */
 	if (!has_tcr) {
 		priv->ticks_per_sec = busfreq / 8;
 	} else {
@@ -256,4 +237,4 @@ static void __exit mpic_tm_exit(void)
 
 module_init(mpic_tm_init);
 module_exit(mpic_tm_exit);
-#endif /* MY_DEF_HERE */
+#endif  

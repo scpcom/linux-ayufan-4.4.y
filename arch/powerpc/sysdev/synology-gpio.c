@@ -1,30 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Synology qoriq NAS Board GPIO Setup
- *
- * Maintained by:  KueiHuan Chen <khchen@synology.com>
- *
- * Copyright 2009-2012 Synology, Inc.  All rights reserved.
- * Copyright 2009-2012 KueiHuan.Chen
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; see the file COPYING.  If not, write to
- * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- */
-
+ 
 #include <linux/gpio.h>
 #include <linux/module.h>
 #include <linux/string.h>
@@ -36,7 +13,6 @@
 #define SATAHC_LED_ACT          0x0
 #define SATAHC_LED_ACT_PRESENT  0x4
 
-/* copied from synobios.h */
 #define DISK_LED_OFF			0
 #define DISK_LED_GREEN_SOLID	1
 #define DISK_LED_ORANGE_SOLID	2
@@ -175,9 +151,6 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 	WARN_ON(GPIO_UNDEF == generic_gpio.soc_sata_led.hdd1_fail_led);
 	WARN_ON(GPIO_UNDEF == generic_gpio.soc_sata_led.hdd2_fail_led);
 
-	//MV_REG_WRITE(SATAHC_LED_CONFIG_REG, SATAHC_LED_ACT_PRESENT);
-
-	//note: hd led is active low
 	if ( DISK_LED_OFF == status ) {
 		fail_led = 1;
 	} else if ( DISK_LED_GREEN_SOLID == status ) {
@@ -252,7 +225,7 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 	case 5:
 		if (generic_gpio.ext_sata_led.hdd5_led_0 == GPIO_UNDEF ||
 			generic_gpio.ext_sata_led.hdd5_led_1 == GPIO_UNDEF) {
-			//some 4 bay model don't contain such gpio.
+			 
 			ret = 0;
 			goto END;
 		}
@@ -260,7 +233,7 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 		pin2 = generic_gpio.ext_sata_led.hdd5_led_1;
 		break;
 	case 6:
-		//for esata
+		 
 		ret = 0;
 		goto END;
 	default:
@@ -453,14 +426,9 @@ END:
 }
 #endif
 
-/* SYNO_CHECK_HDD_PRESENT
- * Check HDD present for QorIQ
- * input : index - disk index, 1-based.
- * output: 0 - HDD not present, 1 - HDD present.
- */
 int SYNO_CHECK_HDD_PRESENT(int index)
 {
-	int iPrzVal = 1; /*defult is persent*/
+	int iPrzVal = 1;  
 
 	switch (index) {
 		case 1:
@@ -569,12 +537,12 @@ QORIQ_813_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 						},
 #ifdef MY_DEF_HERE
 		.hw_reset	  =  {
-							.deep_wake = 62, /* GPIO2 30 (32 + 30) */
+							.deep_wake = 62,  
 						 },
 #endif
 #ifdef MY_DEF_HERE
 		.wakeup		  = {
-							.power_btn = 61, /* GPIO2 29 (32 + 29) */
+							.power_btn = 61,  
 						},
 #endif
 	};
@@ -642,12 +610,12 @@ QORIQ_413_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 						},
 #ifdef MY_DEF_HERE
 		.hw_reset	  =  {
-							.deep_wake = 62, /* GPIO2 30 (32 + 30) */
+							.deep_wake = 62,  
 						 },
 #endif
 #ifdef MY_DEF_HERE
 		.wakeup		  = {
-							.power_btn = 61, /* GPIO2 29 (32 + 29) */
+							.power_btn = 61,  
 						},
 #endif
 	};
@@ -660,10 +628,10 @@ QORIQ_213p_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 {
 	SYNO_QORIQ_GENERIC_GPIO gpio_213p = {
 		.ext_sata_led = {
-							.hdd1_led_0 = 75, //Green
-							.hdd1_led_1 = 70, //Orange
-							.hdd2_led_0 = 26, //Green
-							.hdd2_led_1 = 72, //Orange
+							.hdd1_led_0 = 75,  
+							.hdd1_led_1 = 70,  
+							.hdd2_led_0 = 26,  
+							.hdd2_led_1 = 72,  
 							.hdd3_led_0 = GPIO_UNDEF,
 							.hdd3_led_1 = GPIO_UNDEF,
 							.hdd4_led_0 = GPIO_UNDEF,
@@ -715,12 +683,12 @@ QORIQ_213p_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 						},
 #ifdef MY_DEF_HERE
 		.hw_reset	  =  {
-							.deep_wake = 62, /* GPIO2 30 (32 + 30) */
+							.deep_wake = 62,  
 						 },
 #endif
 #ifdef MY_DEF_HERE
 		.wakeup		  = {
-							.power_btn = 61, /* GPIO2 29 (32 + 29) */
+							.power_btn = 61,  
 						},
 #endif
 	};
@@ -733,10 +701,10 @@ QORIQ_rs213p_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 {
 	SYNO_QORIQ_GENERIC_GPIO gpio_rs213p = {
 		.ext_sata_led = {
-							.hdd1_led_0 = 75, //Green
-							.hdd1_led_1 = 70, //Orange
-							.hdd2_led_0 = 71, //Green
-							.hdd2_led_1 = 72, //Orange
+							.hdd1_led_0 = 75,  
+							.hdd1_led_1 = 70,  
+							.hdd2_led_0 = 71,  
+							.hdd2_led_1 = 72,  
 							.hdd3_led_0 = GPIO_UNDEF,
 							.hdd3_led_1 = GPIO_UNDEF,
 							.hdd4_led_0 = GPIO_UNDEF,
@@ -788,12 +756,12 @@ QORIQ_rs213p_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 						},
 #ifdef MY_DEF_HERE
 		.hw_reset	  =  {
-							.deep_wake = 62, /* GPIO2 30 (32 + 30) */
+							.deep_wake = 62,  
 						 },
 #endif
 #ifdef MY_DEF_HERE
 		.wakeup		  = {
-							.power_btn = 61, /* GPIO2 29 (32 + 29) */
+							.power_btn = 61,  
 						},
 #endif
 	};

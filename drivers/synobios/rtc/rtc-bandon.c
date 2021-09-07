@@ -12,12 +12,12 @@
 #define BCD2BIN bcd2bin
 #define BIN2BCD bin2bcd
 
-#define RTC_FREE_ADDR1	0x1F /* for alarm weekday */
+#define RTC_FREE_ADDR1	0x1F  
 
 #define RTC_IRQMASK         (RTC_PF | RTC_AF | RTC_UF)
 #define RTC_MDAY_ALARM_MASK 0x3F
 
-static unsigned long epoch = 1900;  /* year corresponding to 0x00   */
+static unsigned long epoch = 1900;   
 static const unsigned char days_in_mo[] =
 {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
@@ -54,7 +54,6 @@ int rtc_correct_wday(SYNORTCTIMEPKT *pRtcTime)
     localtime_2(&taget_time, t);
     localtime_3(&taget_time, t);
 
-	//correct weekday
     if ( taget_time.weekday != pRtcTime->weekday ) {
 		pRtcTime->weekday = taget_time.weekday; 
 	}
@@ -68,12 +67,12 @@ unsigned char rtc_get_next_weekday(const SYNO_AUTO_POWERON* pAutoPowerOn, const 
     unsigned int mask = 1 << weekday;
     unsigned int weekdays = pAutoPowerOn->RtcAlarmPkt.weekdays & AUTO_POWERON_WEEKDAY_MASK;
 
-    if( weekdays == 0 || mask == 0 ) { // no days set in weekday bitsmask
+    if( weekdays == 0 || mask == 0 ) {  
         goto End;
     }
 
     u8Nextday = weekday;
-    weekdays |= weekdays << 7; // duplicate days into next week
+    weekdays |= weekdays << 7;  
     while( !(mask & weekdays) ) {
         mask <<= 1;
         u8Nextday++;
@@ -214,12 +213,6 @@ int rtc_bandon_get_time(struct _SynoRtcTimePkt* pRtcTimePkt)
     unsigned char ctrl;
 	SYNO_AUTO_POWERON schedule;
 
-    /*
-     * Only the values that we read from the RTC are set. We leave
-     * tm_wday, tm_yday and tm_isdst untouched. Note that while the
-     * RTC has RTC_DAY_OF_WEEK, we should usually ignore it, as it is
-     * only updated by the RTC when initially set to a non-zero value.
-     */
     spin_lock_irqsave(&rtc_lock, flags);
     pRtcTimePkt->sec = CMOS_READ(RTC_SECONDS);
     pRtcTimePkt->min = CMOS_READ(RTC_MINUTES);
@@ -242,10 +235,6 @@ int rtc_bandon_get_time(struct _SynoRtcTimePkt* pRtcTimePkt)
         BCD_TO_BIN(pRtcTimePkt->year);
     }
 
-    /*
-     * Account for differences between how the RTC uses the values
-     * and how they are defined in a struct rtc_time;
-     */
     if ((pRtcTimePkt->year += (epoch - 1900)) <= 69)
         pRtcTimePkt->year += 100;
 
@@ -271,7 +260,7 @@ int rtc_bandon_set_time(struct _SynoRtcTimePkt* pRtcTimePkt)
     }
 
     yrs = pRtcTimePkt->year + 1900;
-    mon = pRtcTimePkt->month + 1;   /* tm_mon starts at zero */
+    mon = pRtcTimePkt->month + 1;    
     day = pRtcTimePkt->day;
     hrs = pRtcTimePkt->hour;
     min = pRtcTimePkt->min;
@@ -292,14 +281,11 @@ int rtc_bandon_set_time(struct _SynoRtcTimePkt* pRtcTimePkt)
     if ((hrs >= 24) || (min >= 60) || (sec >= 60))
         return -EINVAL;
 
-    if ((yrs -= epoch) > 255)    /* They are unsigned */
+    if ((yrs -= epoch) > 255)     
         return -EINVAL;
 
     spin_lock_irq(&rtc_lock);
 
-    /* These limits and adjustments are independent of
-     * whether the chip is in binary mode or not.
-     */
     if (yrs > 169) {
         spin_unlock_irq(&rtc_lock);
         return -EINVAL;

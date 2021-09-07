@@ -77,7 +77,6 @@ static int show_stat(struct seq_file *p, void *v)
 		(unsigned long long)cputime64_to_clock_t(guest));
 	for_each_online_cpu(i) {
 
-		/* Copy values here to work around gcc-2.95.3, gcc-2.96 */
 		user = kstat_cpu(i).cpustat.user;
 		nice = kstat_cpu(i).cpustat.nice;
 		system = kstat_cpu(i).cpustat.system;
@@ -103,7 +102,6 @@ static int show_stat(struct seq_file *p, void *v)
 	}
 	seq_printf(p, "intr %llu", (unsigned long long)sum);
 
-	/* sum again ? it could be updated? */
 	for_each_irq_nr(j) {
 		per_irq_sum = 0;
 		for_each_possible_cpu(i)
@@ -140,7 +138,6 @@ static int stat_open(struct inode *inode, struct file *file)
 	struct seq_file *m;
 	int res;
 
-	/* don't ask for more than the kmalloc() max size, currently 128 KB */
 	if (size > 128 * 1024)
 		size = 128 * 1024;
 	buf = kmalloc(size, GFP_KERNEL);

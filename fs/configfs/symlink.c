@@ -1,32 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* -*- mode: c; c-basic-offset: 8; -*-
- * vim: noexpandtab sw=8 ts=8 sts=0:
- *
- * symlink.c - operations for configfs symlinks.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 021110-1307, USA.
- *
- * Based on sysfs:
- * 	sysfs is Copyright (C) 2001, 2002, 2003 Patrick Mochel
- *
- * configfs Copyright (C) 2005 Oracle.  All rights reserved.
- */
-
+ 
 #include <linux/fs.h>
 #include <linux/module.h>
 #include <linux/namei.h>
@@ -34,7 +9,6 @@
 #include <linux/configfs.h>
 #include "configfs_internal.h"
 
-/* Protects attachments of new symlinks */
 DEFINE_MUTEX(configfs_symlink_mutex);
 
 static int item_depth(struct config_item * item)
@@ -64,7 +38,6 @@ static void fill_item_path(struct config_item * item, char * buffer, int length)
 	for (p = item; p && !configfs_is_root(p); p = p->ci_parent) {
 		int cur = strlen(config_item_name(p));
 
-		/* back up enough to print this bus id with '/' */
 		length -= cur;
 		strncpy(buffer + length,config_item_name(p),cur);
 		*(buffer + --length) = '/';
@@ -139,15 +112,12 @@ int configfs_symlink(struct inode *dir, struct dentry *dentry, const char *symna
 	struct config_item *target_item = NULL;
 	struct config_item_type *type;
 
-	ret = -EPERM;  /* What lack-of-symlink returns */
+	ret = -EPERM;   
 	if (dentry->d_parent == configfs_sb->s_root)
 		goto out;
 
 	sd = dentry->d_parent->d_fsdata;
-	/*
-	 * Fake invisibility if dir belongs to a group/default groups hierarchy
-	 * being attached
-	 */
+	 
 	ret = -ENOENT;
 	if (!configfs_dirent_is_ready(sd))
 		goto out;
@@ -192,7 +162,7 @@ int configfs_unlink(struct inode *dir, struct dentry *dentry)
 	struct config_item_type *type;
 	int ret;
 
-	ret = -EPERM;  /* What lack-of-symlink returns */
+	ret = -EPERM;   
 	if (!(sd->s_type & CONFIGFS_ITEM_LINK))
 		goto out;
 
@@ -204,10 +174,7 @@ int configfs_unlink(struct inode *dir, struct dentry *dentry)
 	type = parent_item->ci_type;
 
 #ifdef MY_ABC_HERE
-	/*
-	 * See if the underlying struct config_item has dependent
-	 * symlinks, and should return -EPERM here.
-	 */
+	 
 	if (type && type->ct_item_ops &&
 	    type->ct_item_ops->check_link) {
 		if (type->ct_item_ops->check_link(parent_item,
@@ -225,11 +192,6 @@ int configfs_unlink(struct inode *dir, struct dentry *dentry)
 	dput(dentry);
 	configfs_put(sd);
 
-	/*
-	 * drop_link() must be called before
-	 * list_del_init(&sl->sl_list), so that the order of
-	 * drop_link(this, target) and drop_item(target) is preserved.
-	 */
 	if (type && type->ct_item_ops &&
 	    type->ct_item_ops->drop_link)
 		type->ct_item_ops->drop_link(parent_item,
@@ -239,7 +201,6 @@ int configfs_unlink(struct inode *dir, struct dentry *dentry)
 	list_del_init(&sl->sl_list);
 	spin_unlock(&configfs_dirent_lock);
 
-	/* Put reference from create_link() */
 	config_item_put(sl->sl_target);
 	kfree(sl);
 

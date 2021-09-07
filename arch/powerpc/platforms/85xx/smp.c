@@ -1,18 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Author: Andy Fleming <afleming@freescale.com>
- * 	   Kumar Gala <galak@kernel.crashing.org>
- *
- * Copyright 2006-2008 Freescale Semiconductor Inc.
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
-
+ 
 #include <linux/stddef.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -54,10 +43,8 @@ struct epapr_entry {
 	u32	r6_l;
 };
 
-/* hold epapr parameter table address */
 static phys_addr_t epapr_tbl[NR_CPUS];
 
-/* access per cpu vars from generic smp.c */
 DECLARE_PER_CPU(int, cpu_state);
 
 #if defined(CONFIG_HOTPLUG_CPU) && defined(CONFIG_PM)
@@ -90,12 +77,12 @@ smp_85xx_reset_core(int nr)
 	if (pcr & cpu) {
 		pic_vaddr = ioremap(get_immrbase() + MPC85xx_PIC_PIR_OFF, 4);
 		pir = in_be32(pic_vaddr);
-		/* reset assert */
+		 
 		pir |= (1 << nr);
 		out_be32(pic_vaddr, pir);
 		pir = in_be32(pic_vaddr);
 		pir &= ~(1 << nr);
-		/* reset negate */
+		 
 		out_be32(pic_vaddr, pir);
 		(void)in_be32(pic_vaddr);
 		iounmap(pic_vaddr);
@@ -112,10 +99,8 @@ smp_85xx_map_bootpg(unsigned long pa)
 	__iomem u32 *bootpg_ptr;
 	u32 bptr;
 
-	/* Get the BPTR */
 	bootpg_ptr = ioremap(get_immrbase() + MPC85xx_BPTR_OFF, 4);
 
-	/* Set the BPTR to the secondary boot page */
 	(void)in_be32(bootpg_ptr);
 
 	bptr = (0x80000000 | (pa >> 12));
@@ -130,10 +115,8 @@ smp_85xx_unmap_bootpg(void)
 {
 	__iomem u32 *bootpg_ptr;
 
-	/* Get the BPTR */
 	bootpg_ptr = ioremap(get_immrbase() + MPC85xx_BPTR_OFF, 4);
 
-	/* Restore the BPTR */
 	if (in_be32(bootpg_ptr) & 0x80000000) {
 		out_be32(bootpg_ptr, 0);
 		(void)in_be32(bootpg_ptr);
@@ -181,7 +164,7 @@ smp_85xx_kick_cpu(int nr)
 		return;
 	}
 #ifdef MY_DEF_HERE
-	/* FIXME: following part doesn't care 36-bit addr mode. */
+	 
 	if (epapr_tbl[nr] == 0)
 		epapr_tbl[nr] = PAGE_MASK | (u32)*cpu_rel_addr;
 	else {
@@ -204,7 +187,6 @@ smp_85xx_kick_cpu(int nr)
 		epapr = ioremap(epapr_tbl[nr], sizeof(struct epapr_entry));
 		smp_85xx_reset_core(nr);
 
-		/* wait until core(nr) is ready... */
 		while ((in_be32(&epapr->addr_l) != 1) && (++n < 1000))
 			udelay(100);
 
@@ -212,19 +194,16 @@ smp_85xx_kick_cpu(int nr)
 		out_be32(&epapr->addr_l, __pa(__early_start));
 	}
 
-	/* Wait a bit for the CPU to ack. */
 	n = 0;
 	while ((__secondary_hold_acknowledge != nr) && (++n < 1000))
 		mdelay(100);
 
 	smp_85xx_unmap_bootpg();
-	/* require dcache flush for cpu-release-addr ? */
-
+	 
 	local_irq_restore(flags);
 	iounmap(epapr);
 #else
 
-	/* Map the spin table */
 	bptr_vaddr = ioremap(*cpu_rel_addr, SIZE_BOOT_ENTRY);
 
 	local_irq_save(flags);
@@ -232,7 +211,6 @@ smp_85xx_kick_cpu(int nr)
 	out_be32(bptr_vaddr + BOOT_ENTRY_PIR, nr);
 	out_be32(bptr_vaddr + BOOT_ENTRY_ADDR_LOWER, __pa(__early_start));
 
-	/* Wait a bit for the CPU to ack. */
 	while ((__secondary_hold_acknowledge != nr) && (++n < 1000))
 		mdelay(1);
 

@@ -1,44 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell 
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or 
-modify this File in accordance with the terms and conditions of the General 
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is 
-available along with the File in the license.txt file or by writing to the Free 
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or 
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt. 
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY 
-DISCLAIMED.  The GPL License provides additional details about this warranty 
-disclaimer.
-*******************************************************************************/
-/*******************************************************************************
-* mvIALCommonUtils.c
-*
-* DESCRIPTION:
-*       C implementation for IAL's extension utility functions.
-*
-* DEPENDENCIES:
-*   mvIALCommonUtils.h
-*
-*******************************************************************************/
-
-/* includes */
+ 
 #include "mvOs.h"
 #include "mvIALCommonUtils.h"
 #ifdef MY_ABC_HERE
@@ -51,7 +14,7 @@ disclaimer.
 struct _EDMAConfiguration
 {
     MV_U8                   configNumber;
-    /*inputs*/
+     
     MV_SATA_GEN             adapterGen;
     MV_SATA_DEVICE_TYPE     connectedDevice;
     MV_BOOLEAN              specificPM;
@@ -59,73 +22,64 @@ struct _EDMAConfiguration
     MV_BOOLEAN              AllNCQ;
     MV_BOOLEAN              AllTCQ;
     MV_U8                   maxDisks;
-    /*outputs*/
+     
     MV_EDMA_MODE            EDMAMode;
     MV_SATA_SWITCHING_MODE  switchingMode;
     MV_BOOLEAN              use128Entries;
 } EDMAConfigurations[] =
 {
-    /*Gen1, TCQ disk*/
+     
     {1, MV_SATA_GEN_I, MV_SATA_DEVICE_TYPE_ATA_DISK, MV_FALSE, MV_ANY_PM, MV_FALSE, MV_TRUE, 1,
         MV_EDMA_MODE_QUEUED, MV_SATA_SWITCHING_MODE_NONE, MV_FALSE},
-    /*Gen1, Normal disk*/
+     
     {2, MV_SATA_GEN_I, MV_SATA_DEVICE_TYPE_ATA_DISK, MV_FALSE, MV_ANY_PM, MV_FALSE, MV_FALSE, 1,
         MV_EDMA_MODE_NOT_QUEUED, MV_SATA_SWITCHING_MODE_NONE, MV_FALSE},
-    /*Gen2, NCQ disk*/
+     
     {3, MV_SATA_GEN_II, MV_SATA_DEVICE_TYPE_ATA_DISK, MV_FALSE, MV_ANY_PM, MV_TRUE, MV_FALSE, 1,
         MV_EDMA_MODE_NATIVE_QUEUING, MV_SATA_SWITCHING_MODE_NONE, MV_FALSE},
-    /*Gen2, TCQ disk*/
+     
     {4, MV_SATA_GEN_II, MV_SATA_DEVICE_TYPE_ATA_DISK, MV_FALSE, MV_ANY_PM, MV_FALSE, MV_TRUE, 1,
         MV_EDMA_MODE_QUEUED, MV_SATA_SWITCHING_MODE_NONE, MV_FALSE},
-    /*Gen2, Normal disk*/
+     
     {5, MV_SATA_GEN_II, MV_SATA_DEVICE_TYPE_ATA_DISK, MV_FALSE, MV_ANY_PM, MV_FALSE, MV_FALSE, 1,
         MV_EDMA_MODE_NOT_QUEUED, MV_SATA_SWITCHING_MODE_NONE, MV_FALSE},
-    /*Gen2, Marvell PM, NCQ disks*/
-    /*{6, MV_SATA_GEN_II, MV_SATA_DEVICE_TYPE_PM, MV_TRUE, MV_MARVELL_PM, MV_TRUE, MV_FALSE, MV_SATA_PM_MAX_PORTS,
-        MV_EDMA_MODE_NATIVE_QUEUING, MV_SATA_SWITCHING_MODE_QCBS, MV_FALSE},*/
-    /*Gen2, Marvell PM, single TCQ disk*/
-    /*{7, MV_SATA_GEN_II, MV_SATA_DEVICE_TYPE_PM, MV_TRUE, MV_MARVELL_PM, MV_FALSE, MV_TRUE, 1,
-        MV_EDMA_MODE_QUEUED, MV_SATA_SWITCHING_MODE_QCBS, MV_FALSE},*/
-    /*Gen2, Marvell PM, Normal disks*/
-    /*{8, MV_SATA_GEN_II, MV_SATA_DEVICE_TYPE_PM, MV_TRUE, MV_MARVELL_PM, MV_FALSE, MV_FALSE, MV_SATA_PM_MAX_PORTS,
-        MV_EDMA_MODE_NOT_QUEUED, MV_SATA_SWITCHING_MODE_QCBS, MV_FALSE},*/
-    /*Gen2, PM, single NCQ disk*/
+     
     {9, MV_SATA_GEN_II, MV_SATA_DEVICE_TYPE_PM, MV_FALSE, MV_ANY_PM, MV_TRUE, MV_FALSE, 1,
         MV_EDMA_MODE_NATIVE_QUEUING, MV_SATA_SWITCHING_MODE_CBS, MV_FALSE},
-    /*Gen2, PM, single TCQ disk*/
+     
     {10, MV_SATA_GEN_II, MV_SATA_DEVICE_TYPE_PM, MV_FALSE, MV_ANY_PM, MV_FALSE, MV_TRUE, 1,
         MV_EDMA_MODE_QUEUED, MV_SATA_SWITCHING_MODE_CBS, MV_FALSE},
-    /*Gen2, PM, Normal disks*/
+     
     {11, MV_SATA_GEN_II, MV_SATA_DEVICE_TYPE_PM, MV_FALSE, MV_ANY_PM, MV_FALSE, MV_FALSE, MV_SATA_PM_MAX_PORTS,
         MV_EDMA_MODE_NOT_QUEUED, MV_SATA_SWITCHING_MODE_CBS, MV_FALSE},
-    /*Gen2E, NCQ disk*/
+     
     {12, MV_SATA_GEN_IIE, MV_SATA_DEVICE_TYPE_ATA_DISK, MV_FALSE, MV_ANY_PM, MV_TRUE, MV_FALSE, 1,
         MV_EDMA_MODE_NATIVE_QUEUING, MV_SATA_SWITCHING_MODE_NONE, MV_FALSE},
-    /*Gen2E, TCQ disk*/
+     
     {13, MV_SATA_GEN_IIE, MV_SATA_DEVICE_TYPE_ATA_DISK, MV_FALSE, MV_ANY_PM, MV_FALSE, MV_TRUE, 1,
         MV_EDMA_MODE_QUEUED, MV_SATA_SWITCHING_MODE_NONE, MV_FALSE},
-    /*Gen2E, Normal disk*/
+     
     {14, MV_SATA_GEN_IIE, MV_SATA_DEVICE_TYPE_ATA_DISK, MV_FALSE, MV_ANY_PM, MV_FALSE, MV_FALSE, 1,
         MV_EDMA_MODE_NOT_QUEUED, MV_SATA_SWITCHING_MODE_NONE, MV_FALSE},
-    /*Gen2E, Marvell PM <= A0, NCQ disks*/
+     
     {15, MV_SATA_GEN_IIE, MV_SATA_DEVICE_TYPE_PM, MV_TRUE, MV_MARVELL_PM_A0, MV_TRUE, MV_FALSE, MV_SATA_PM_MAX_PORTS,
         MV_EDMA_MODE_NOT_QUEUED, MV_SATA_SWITCHING_MODE_CBS, MV_FALSE},
-    /*Gen2E, PM, NCQ disks*/
+     
     {16, MV_SATA_GEN_IIE, MV_SATA_DEVICE_TYPE_PM, MV_FALSE, MV_ANY_PM, MV_TRUE, MV_FALSE, MV_SATA_PM_MAX_PORTS,
         MV_EDMA_MODE_NATIVE_QUEUING, MV_SATA_SWITCHING_MODE_FBS, MV_TRUE},
-    /*Gen2E, Marvell PM <= A0, single TCQ disk*/
+     
     {17, MV_SATA_GEN_IIE, MV_SATA_DEVICE_TYPE_PM, MV_TRUE, MV_MARVELL_PM_A0, MV_FALSE, MV_TRUE, 1,
         MV_EDMA_MODE_QUEUED, MV_SATA_SWITCHING_MODE_CBS, MV_FALSE},
-    /*Gen2E, PM, TCQ disks*/
+     
     {18, MV_SATA_GEN_IIE, MV_SATA_DEVICE_TYPE_PM, MV_FALSE, MV_ANY_PM, MV_FALSE, MV_TRUE, MV_SATA_PM_MAX_PORTS,
         MV_EDMA_MODE_QUEUED, MV_SATA_SWITCHING_MODE_FBS, MV_TRUE},
-    /*Gen2E, Marvell PM <= A0, Normal disks*/
+     
     {19, MV_SATA_GEN_IIE, MV_SATA_DEVICE_TYPE_PM, MV_TRUE, MV_MARVELL_PM_A0, MV_FALSE, MV_FALSE, MV_SATA_PM_MAX_PORTS,
         MV_EDMA_MODE_NOT_QUEUED, MV_SATA_SWITCHING_MODE_CBS, MV_FALSE},
-    /*Gen2E, PM, Normal disks*/
+     
     {20, MV_SATA_GEN_IIE, MV_SATA_DEVICE_TYPE_PM, MV_FALSE, MV_ANY_PM, MV_FALSE, MV_FALSE, MV_SATA_PM_MAX_PORTS,
         MV_EDMA_MODE_NOT_QUEUED, MV_SATA_SWITCHING_MODE_FBS, MV_FALSE},
-    /*Gen2E , ATAPI device*/
+     
     {21, MV_SATA_GEN_IIE, MV_SATA_DEVICE_TYPE_ATAPI_DEVICE, MV_FALSE, MV_ANY_PM, MV_FALSE, MV_FALSE, 1,
         MV_EDMA_MODE_NOT_QUEUED, MV_SATA_SWITCHING_MODE_NONE, MV_FALSE},
 
@@ -189,7 +143,7 @@ MV_VOID mvSelectConfiguration(MV_SATA_ADAPTER        *pSataAdapter,
         *pEdmaMode = EDMAConfigurations[i].EDMAMode;     
         *pSwitchingMode = EDMAConfigurations[i].switchingMode;
         *pUse128Entries = EDMAConfigurations[i].use128Entries;
-	/* some of the integrated adapters doesn't support the EDMA 128 entries mode*/
+	 
 	if(pSataAdapter->hostInterface == MV_HOST_IF_INTEGRATED)
 	{
 		*pUse128Entries = MV_FALSE;
@@ -235,26 +189,13 @@ static MV_VOID mvAta2HostString(MV_U16 *source, MV_U16 *target,
     MV_U32 i;
     for (i=0 ; i < wordsCount; i++)
     {
-        /* Big to little*/
+         
         target[i] = (source[i] >> 8) | ((source[i] & 0xff) << 8);
-        /* Little to cpu*/
+         
         target[i] = MV_LE16_TO_CPU(target[i]);
     }
 }
 
-/******************************************************************************
- *  Name: ParseIdentifyResult
- *
- *  Description:    this functions parses the identify command results, checks
- *                  that the connected deives can be accesed by device EDMA,
- *                  and updates the ATA drive parameters stucture accordingly.
- *
- *  Parameters:     pSataChannel - pointer to the channel data structure.
- *                  pIdentifyInfo- pointer to the ATA parameters structure.
- *
- *  Returns:        MV_TRUE if the ATA drive supported by device.
- *
- ******************************************************************************/
 MV_BOOLEAN mvParseIdentifyResult(MV_U16_PTR  iden,
                                  ATA_IDENTIFY_INFO   *pIdentifyInfo)
 {
@@ -269,7 +210,7 @@ MV_BOOLEAN mvParseIdentifyResult(MV_U16_PTR  iden,
     mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG, "%25s - %s\n","Model", temp);
     memcpy(&pIdentifyInfo->model[0], iden + IDEN_MODEL_OFFSET, 24);
     memcpy(&pIdentifyInfo->firmware[0], iden + IDEN_FIRMWARE_OFFSET, 4);
-    /* ATA version supported*/
+     
     if (iden[IDEN_ATA_VERSION] & MV_BIT7)
     {
         mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG, "%25s - %d\n", "ATA version supported", 7);
@@ -297,7 +238,7 @@ MV_BOOLEAN mvParseIdentifyResult(MV_U16_PTR  iden,
         return MV_FALSE;
     }
     pIdentifyInfo->version = version;
-    /*LBA addressing*/
+     
     if ((version >= 6) && (!(iden[IDEN_CAPACITY_1_OFFSET] & MV_BIT9)))
     {
         mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_ERROR, " IDENTIFY info: LBA not supported\n");
@@ -308,7 +249,7 @@ MV_BOOLEAN mvParseIdentifyResult(MV_U16_PTR  iden,
         mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG, "%25s - %s\n", "Capabilities",
                  "LBA supported");
     }
-    /* 48 bit address */
+     
     if ((version >= 6) && (iden[IDEN_SUPPORTED_COMMANDS2] & MV_BIT10))
     {
         mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG, "%25s - %s\n", "LBA48 addressing", "supported");
@@ -338,7 +279,7 @@ MV_BOOLEAN mvParseIdentifyResult(MV_U16_PTR  iden,
                  ((MV_U32)iden[IDEN_NUM_OF_ADDRESSABLE_SECTORS]));
 
     }
-    /*DMA support*/
+     
     if ((version >= 6) && (!(iden[IDEN_CAPACITY_1_OFFSET] & MV_BIT8)))
     {
         mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_ERROR, "IDENTIFY info: DMA not "
@@ -350,7 +291,7 @@ MV_BOOLEAN mvParseIdentifyResult(MV_U16_PTR  iden,
         mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG, "%25s - %s\n", "Capabilities",
                  "DMA supported");
     }
-    /* PIO */
+     
     if ((iden[IDEN_VALID] & MV_BIT1) == 0)
     {
         mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_ERROR, " IDENTIFY info: not "
@@ -377,7 +318,6 @@ MV_BOOLEAN mvParseIdentifyResult(MV_U16_PTR  iden,
         return MV_FALSE;
     }
 
-    /*UDMA*/
     if ((iden[IDEN_VALID] & MV_BIT2) == 0)
     {
         mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_ERROR, " IDENTIFY info: not "
@@ -575,7 +515,6 @@ MV_BOOLEAN mvParseIdentifyResult(MV_U16_PTR  iden,
                  "Not supported");
     }
 
-    /* check if REAd/WRITE DMA QUEUE commands supported */
     pIdentifyInfo->DMAQueuedModeDepth = (iden[IDEN_QUEUE_DEPTH] & 0x1f) + 1;
     if ((version >= 5) &&(iden[IDEN_SUPPORTED_COMMANDS2] & MV_BIT1))
     {
@@ -591,9 +530,6 @@ MV_BOOLEAN mvParseIdentifyResult(MV_U16_PTR  iden,
         pIdentifyInfo->DMAQueuedModeSupported = MV_FALSE;
     }
 
-    /*check that the non-UDMA ATA commands supported*/
-
-    /*FLUSH CHACHE*/
     if ((version >=6) && ((iden[IDEN_SUPPORTED_COMMANDS2] & MV_BIT12) == 0))
     {
         mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG, "%25s - %s\n",
@@ -703,7 +639,7 @@ MV_BOOLEAN mvParseIdentifyPacketResult(MV_U16_PTR  iden,
     memcpy(&pIdentifyInfo->model[0], iden + IDEN_MODEL_OFFSET, 24);
     memcpy(&pIdentifyInfo->firmware[0], iden + IDEN_FIRMWARE_OFFSET, 4);
     pIdentifyInfo->version = version;
-    /*DMA support*/
+     
     if ((version >= 6) && (!(iden[IDEN_CAPACITY_1_OFFSET] & MV_BIT8)))
     {
         mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_ERROR, "IDENTIFY info: DMA not "
@@ -820,9 +756,6 @@ MV_BOOLEAN mvParseIdentifyPacketResult(MV_U16_PTR  iden,
                  "Not supported");
     }
 
-    /*check that the non-UDMA ATA commands supported*/
-
-    /*FLUSH CHACHE*/
     if ((version >=6) && ((iden[IDEN_SUPPORTED_COMMANDS2] & MV_BIT12) == 0))
     {
         mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG, "%25s - %s\n",
@@ -904,22 +837,6 @@ MV_BOOLEAN mvParseIdentifyPacketResult(MV_U16_PTR  iden,
     return MV_TRUE;
 }
 
-/*******************************************************************************
-* mvGetSataDeviceType - short description
-*
-* DESCRIPTION:
-*       None.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       None.
-*
-*******************************************************************************/
 MV_SATA_DEVICE_TYPE mvGetSataDeviceType(
                                        MV_STORAGE_DEVICE_REGISTERS *mvStorageDevRegisters)
 {
@@ -934,9 +851,7 @@ MV_SATA_DEVICE_TYPE mvGetSataDeviceType(
         return MV_SATA_DEVICE_TYPE_ATA_DISK;
     }
     if ((((mvStorageDevRegisters->lbaMidRegister & 0xff) == 0x14) &&
-         ((mvStorageDevRegisters->lbaHighRegister & 0xff) == 0xEB))/* ||
-         (((mvStorageDevRegisters->lbaMidRegister & 0xff) == 0x69) &&
-         ((mvStorageDevRegisters->lbaHighRegister & 0xff) == 0x96))*/)
+         ((mvStorageDevRegisters->lbaHighRegister & 0xff) == 0xEB)) )
     {
         return MV_SATA_DEVICE_TYPE_ATAPI_DEVICE;
     }
@@ -952,7 +867,7 @@ MV_SATA_DEVICE_TYPE mvGetSataDeviceType(
 static void printIdentifyBuffer(MV_U16_PTR identifyBuffer)
 {
     MV_U8 i,j;
-    /*Print Identify buffer*/
+     
     for (i = 0; i < 0x20; i++)
     {
         mvLogMsg(MV_RAW_MSG_ID,  0, "Words [%03d-%03d]: ", i*8, i*8+7);
@@ -965,23 +880,6 @@ static void printIdentifyBuffer(MV_U16_PTR identifyBuffer)
 }
 #endif
 
-/*******************************************************************************
-* mvConfigSataDisk - short description
-*
-* DESCRIPTION:
-*       None.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       None.
-*
-*******************************************************************************/
-
 MV_BOOLEAN mvConfigSataDisk(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex,
                             MV_U8 PMPort, ATA_IDENTIFY_INFO   *pIdentifyInfo,
                             MV_U16_PTR identifyBuffer)
@@ -989,7 +887,6 @@ MV_BOOLEAN mvConfigSataDisk(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex,
     MV_STORAGE_DEVICE_REGISTERS inATARegs;
     MV_STORAGE_DEVICE_REGISTERS outATARegs;
 
-    /* identify device*/
     memset(&inATARegs, 0, sizeof(inATARegs));
     inATARegs.commandRegister = MV_ATA_COMMAND_IDENTIFY;
     if (mvStorageDevATAIdentifyDevice(pSataAdapter, channelIndex, PMPort,
@@ -1060,9 +957,7 @@ MV_BOOLEAN mvConfigSataDisk(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex,
                  "Ahead enabled\n", pSataAdapter->adapterId, channelIndex,
                  PMPort);
     }
-    /* mvStorageDevATASetFeatures */
-
-    /* Set transfer mode */
+     
     mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG, "[%d %d %d]: Set transfer mode "
              "XFER_PIO_SLOW\n", pSataAdapter->adapterId, channelIndex, PMPort);
     memset(&inATARegs, 0, sizeof(inATARegs));
@@ -1122,22 +1017,6 @@ MV_BOOLEAN mvConfigSataDisk(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex,
     return MV_TRUE;
 }
 
-/*******************************************************************************
-* mvInitSataDisk - short description
-*
-* DESCRIPTION:
-*       None.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       None.
-*
-*******************************************************************************/
 MV_BOOLEAN mvInitSataDisk(MV_SATA_ADAPTER   *pSataAdapter, MV_U8 channelIndex,
                           MV_U8 PMPort, ATA_IDENTIFY_INFO   *pIdentifyInfo,
                           MV_U16_PTR identifyBuffer
@@ -1171,7 +1050,7 @@ MV_BOOLEAN mvInitSataATAPI(MV_SATA_ADAPTER   *pSataAdapter, MV_U8 channelIndex,
     MV_STORAGE_DEVICE_REGISTERS outATARegs;
 
     pIdentifyInfo->deviceType = MV_SATA_DEVICE_TYPE_ATAPI_DEVICE;
-    /* identify device*/
+     
     memset(&inATARegs, 0, sizeof(inATARegs));
     inATARegs.commandRegister = MV_ATA_COMMAND_ATAPI_IDENTIFY;
     inATARegs.featuresRegister = 0x1;
@@ -1199,7 +1078,7 @@ MV_BOOLEAN mvInitSataATAPI(MV_SATA_ADAPTER   *pSataAdapter, MV_U8 channelIndex,
                  channelIndex, PMPort);
         return MV_FALSE;
     }
-    /* Set transfer mode */
+     
     mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG, "[%d %d %d]: Set transfer mode "
              "XFER_PIO_SLOW\n", pSataAdapter->adapterId, channelIndex, PMPort);
     mvMicroSecondsDelay(NULL, 1000);
@@ -1261,12 +1140,7 @@ MV_BOOLEAN  mvGetPMDeviceInfo(MV_SATA_ADAPTER   *pSataAdapter,
     pPMDeviceInfo->numberOfPorts = (MV_U8)(regVal & 0xf);
 
 #ifdef MY_ABC_HERE
-    /* The following Sil quirk taken from linux*/
-  
-    /* Early revisions of sil4726 report one extra port but later
-    * revisions report two extra ports - one for configuration
-    * and the other for enclosure processor.
-    */
+     
     if (pPMDeviceInfo->vendorId == 0x1095 && pPMDeviceInfo->deviceId == 0x4726) 
     {
         if(pPMDeviceInfo->productRevision <= 1)
@@ -1279,7 +1153,6 @@ MV_BOOLEAN  mvGetPMDeviceInfo(MV_SATA_ADAPTER   *pSataAdapter,
         }
     }
  
-    /* sil3726 has fixed number(5) of fanout devices */
     if (pPMDeviceInfo->vendorId == 0x1095 && pPMDeviceInfo->deviceId == 0x3726) 
     {
         pPMDeviceInfo->numberOfPorts = 5;

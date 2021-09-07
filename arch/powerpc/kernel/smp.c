@@ -1,23 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * SMP support for ppc.
- *
- * Written by Cort Dougan (cort@cs.nmt.edu) borrowing a great
- * deal of code from the sparc and intel versions.
- *
- * Copyright (C) 1999 Cort Dougan <cort@cs.nmt.edu>
- *
- * PowerPC-64 Support added by Dave Engebretsen, Peter Bergner, and
- * Mike Corrigan {engebret|bergner|mikec}@us.ibm.com
- *
- *      This program is free software; you can redistribute it and/or
- *      modify it under the terms of the GNU General Public License
- *      as published by the Free Software Foundation; either version
- *      2 of the License, or (at your option) any later version.
- */
-
+ 
 #undef DEBUG
 
 #include <linux/kernel.h>
@@ -68,10 +52,8 @@ DEFINE_PER_CPU(cpumask_t, cpu_core_map) = CPU_MASK_NONE;
 EXPORT_PER_CPU_SYMBOL(cpu_sibling_map);
 EXPORT_PER_CPU_SYMBOL(cpu_core_map);
 
-/* SMP operations for this machine */
 struct smp_ops_t *smp_ops;
 
-/* Can't be static due to PowerMac hackery */
 volatile unsigned int cpu_callin_map[NR_CPUS];
 
 int smt_enabled_at_boot = 1;
@@ -83,11 +65,6 @@ void __devinit smp_generic_kick_cpu(int nr)
 {
 	BUG_ON(nr < 0 || nr >= NR_CPUS);
 
-	/*
-	 * The processor is currently spinning, waiting for the
-	 * cpu_start field to become non-zero After we set cpu_start,
-	 * the processor will continue on to secondary_start
-	 */
 	paca[nr].cpu_start = 1;
 	smp_mb();
 }
@@ -100,7 +77,7 @@ void smp_message_recv(int msg)
 		generic_smp_call_function_interrupt();
 		break;
 	case PPC_MSG_RESCHEDULE:
-		/* we notice need_resched on exit */
+		 
 		break;
 	case PPC_MSG_CALL_FUNC_SINGLE:
 		generic_smp_call_function_single_interrupt();
@@ -113,8 +90,8 @@ void smp_message_recv(int msg)
 #ifdef CONFIG_DEBUGGER
 		debugger_ipi(get_irq_regs());
 		break;
-#endif /* CONFIG_DEBUGGER */
-		/* FALLTHROUGH */
+#endif  
+		 
 	default:
 		printk("SMP %d: smp_message_recv(): unknown msg %d\n",
 		       smp_processor_id(), msg);
@@ -130,7 +107,7 @@ static irqreturn_t call_function_action(int irq, void *data)
 
 static irqreturn_t reschedule_action(int irq, void *data)
 {
-	/* we just need the return path side effect of checking need_resched */
+	 
 	return IRQ_HANDLED;
 }
 
@@ -160,7 +137,6 @@ const char *smp_ipi_name[] = {
 	[PPC_MSG_DEBUGGER_BREAK] = "ipi debugger",
 };
 
-/* optional function to request ipi, for controllers with >= 4 ipis */
 int smp_request_message_ipi(int virq, int msg)
 {
 	int err;
@@ -242,7 +218,6 @@ static void __init smp_create_idle(unsigned int cpu)
 {
 	struct task_struct *p;
 
-	/* create a process for the processor */
 	p = fork_idle(cpu);
 	if (IS_ERR(p))
 		panic("failed fork for CPU %u: %li", cpu, PTR_ERR(p));
@@ -261,13 +236,8 @@ void __init smp_prepare_cpus(unsigned int max_cpus)
 
 	DBG("smp_prepare_cpus\n");
 
-	/* 
-	 * setup_cpu may need to be called on the boot cpu. We havent
-	 * spun any cpus up but lets be paranoid.
-	 */
 	BUG_ON(boot_cpuid != smp_processor_id());
 
-	/* Fixup boot cpu */
 	smp_store_cpu_info(boot_cpuid);
 	cpu_callin_map[boot_cpuid] = 1;
 
@@ -300,7 +270,7 @@ void __devinit smp_prepare_boot_cpu(void)
 }
 
 #ifdef CONFIG_HOTPLUG_CPU
-/* State of each CPU during hotplug phases */
+ 
 DEFINE_PER_CPU(int, cpu_state) = { 0 };
 
 int generic_cpu_disable(void)
@@ -325,12 +295,10 @@ int generic_cpu_disable(void)
 
 int generic_cpu_enable(unsigned int cpu)
 {
-	/* Do the normal bootup if we haven't
-	 * already bootstrapped. */
+	 
 	if (system_state != SYSTEM_RUNNING)
 		return -ENOSYS;
 
-	/* get the target out of it's holding state */
 	per_cpu(cpu_state, cpu) = CPU_UP_PREPARE;
 	smp_wmb();
 
@@ -339,7 +307,7 @@ int generic_cpu_enable(unsigned int cpu)
 
 #if defined(CONFIG_PPC64) || (defined(CONFIG_E500) && defined(MY_DEF_HERE))
 	fixup_irqs(cpu_online_map);
-	/* counter the irq disable in fixup_irqs */
+	 
 	local_irq_enable();
 #endif
 	return 0;
@@ -394,35 +362,19 @@ int __cpuinit __cpu_up(unsigned int cpu)
 	    (smp_ops->cpu_bootable && !smp_ops->cpu_bootable(cpu)))
 		return -EINVAL;
 
-	/* Make sure callin-map entry is 0 (can be leftover a CPU
-	 * hotplug
-	 */
 	cpu_callin_map[cpu] = 0;
 
-	/* The information for processor bringup must
-	 * be written out to main store before we release
-	 * the processor.
-	 */
 	smp_mb();
 
-	/* wake up cpus */
 	DBG("smp: kicking cpu %d\n", cpu);
 	smp_ops->kick_cpu(cpu);
 
-	/*
-	 * wait to see if the cpu made a callin (is actually up).
-	 * use this value that I found through experimentation.
-	 * -- Cort
-	 */
 	if (system_state < SYSTEM_RUNNING)
 		for (c = 50000; c && !cpu_callin_map[cpu]; c--)
 			udelay(100);
 #ifdef CONFIG_HOTPLUG_CPU
 	else
-		/*
-		 * CPUs can take much longer to come up in the
-		 * hotplug case.  Wait five seconds.
-		 */
+		 
 		for (c = 5000; c && !cpu_callin_map[cpu]; c--)
 			msleep(1);
 #endif
@@ -437,16 +389,12 @@ int __cpuinit __cpu_up(unsigned int cpu)
 	if (smp_ops->give_timebase)
 		smp_ops->give_timebase();
 
-	/* Wait until cpu puts itself in the online map */
 	while (!cpu_online(cpu))
 		cpu_relax();
 
 	return 0;
 }
 
-/* Return the value of the reg property corresponding to the given
- * logical cpu.
- */
 int cpu_to_core_id(int cpu)
 {
 	struct device_node *np;
@@ -467,9 +415,6 @@ out:
 	return id;
 }
 
-/* Must be called when no change can occur to cpu_present_map,
- * i.e. during cpu online or offline.
- */
 static struct device_node *cpu_to_l2cache(int cpu)
 {
 	struct device_node *np;
@@ -489,7 +434,6 @@ static struct device_node *cpu_to_l2cache(int cpu)
 	return cache;
 }
 
-/* Activate a secondary processor. */
 int __devinit start_secondary(void *unused)
 {
 	unsigned int cpu = smp_processor_id();
@@ -517,7 +461,7 @@ int __devinit start_secondary(void *unused)
 	ipi_call_lock();
 	notify_cpu_starting(cpu);
 	set_cpu_online(cpu, true);
-	/* Update sibling maps */
+	 
 	base = cpu_first_thread_in_core(cpu);
 	for (i = 0; i < threads_per_core; i++) {
 		if (cpu_is_offline(base + i))
@@ -525,10 +469,6 @@ int __devinit start_secondary(void *unused)
 		cpu_set(cpu, per_cpu(cpu_sibling_map, base + i));
 		cpu_set(base + i, per_cpu(cpu_sibling_map, cpu));
 
-		/* cpu_core_map should be a superset of
-		 * cpu_sibling_map even if we don't have cache
-		 * information, so update the former here, too.
-		 */
 		cpu_set(cpu, per_cpu(cpu_core_map, base +i));
 		cpu_set(base + i, per_cpu(cpu_core_map, cpu));
 	}
@@ -561,10 +501,6 @@ void __init smp_cpus_done(unsigned int max_cpus)
 {
 	cpumask_t old_mask;
 
-	/* We want the setup_cpu() here to be called from CPU 0, but our
-	 * init thread may have been "borrowed" by another CPU in the meantime
-	 * se we pin us down to CPU 0 for a short while
-	 */
 	old_mask = current->cpus_allowed;
 	set_cpus_allowed(current, cpumask_of_cpu(boot_cpuid));
 	
@@ -593,7 +529,6 @@ int __cpu_disable(void)
 	if (err)
 		return err;
 
-	/* Update sibling maps */
 	base = cpu_first_thread_in_core(cpu);
 	for (i = 0; i < threads_per_core; i++) {
 		cpu_clear(cpu, per_cpu(cpu_sibling_map, base + i));

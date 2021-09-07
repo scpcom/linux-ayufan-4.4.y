@@ -58,9 +58,6 @@ extern void iscsi_set_session_parameters(iscsi_sess_ops_t *,
 #define NOTUNDERSTOOD			"NotUnderstood"
 #define REJECT				"Reject"
 
-/*
- * The Parameter Names.
- */
 #define AUTHMETHOD			"AuthMethod"
 #define HEADERDIGEST			"HeaderDigest"
 #define DATADIGEST			"DataDigest"
@@ -92,18 +89,12 @@ extern void iscsi_set_session_parameters(iscsi_sess_ops_t *,
 #define X_EXTENSIONKEY_CISCO_NEW	"X-com.cisco.protocol"
 #define X_EXTENSIONKEY_CISCO_OLD	"X-com.cisco.iscsi.draft"
 
-/*
- * For AuthMethod.
- */
 #define KRB5				"KRB5"
 #define SPKM1				"SPKM1"
 #define SPKM2				"SPKM2"
 #define SRP				"SRP"
 #define CHAP				"CHAP"
 
-/*
- * Initial values for Parameter Negotiation.
- */
 #define INITIAL_AUTHMETHOD			CHAP
 #define INITIAL_HEADERDIGEST			"CRC32C,None"
 #define INITIAL_DATADIGEST			"CRC32C,None"
@@ -143,20 +134,11 @@ extern void iscsi_set_session_parameters(iscsi_sess_ops_t *,
 #define INITIAL_IFMARKINT			"2048~65535"
 #define INITIAL_OFMARKINT			"2048~65535"
 
-/*
- * For [Header,Data]Digests.
- */
 #define CRC32C				"CRC32C"
 
-/*
- * For SessionType.
- */
 #define DISCOVERY			"Discovery"
 #define NORMAL				"Normal"
 
-/*
- * iscsi_param_t->use
- */
 #define USE_LEADING_ONLY		0x01
 #define USE_INITIAL_ONLY		0x02
 #define USE_ALL				0x04
@@ -167,31 +149,22 @@ extern void iscsi_set_session_parameters(iscsi_sess_ops_t *,
 
 #define SET_USE_INITIAL_ONLY(p)		((p)->use |= USE_INITIAL_ONLY)
 
-/*
- * iscsi_param_t->sender
- */
 #define	SENDER_INITIATOR		0x01
 #define SENDER_TARGET			0x02
 #define SENDER_BOTH			0x03
-/* Used in iscsi_check_key() */
+ 
 #define SENDER_RECEIVER			0x04
 
 #define IS_SENDER_INITIATOR(p)		((p)->sender & SENDER_INITIATOR)
 #define IS_SENDER_TARGET(p)		((p)->sender & SENDER_TARGET)
 #define IS_SENDER_BOTH(p)		((p)->sender & SENDER_BOTH)
 
-/*
- * iscsi_param_t->scope
- */
 #define SCOPE_CONNECTION_ONLY		0x01
 #define SCOPE_SESSION_WIDE		0x02
 
 #define IS_SCOPE_CONNECTION_ONLY(p)	((p)->scope & SCOPE_CONNECTION_ONLY)
 #define IS_SCOPE_SESSION_WIDE(p)	((p)->scope & SCOPE_SESSION_WIDE)
 
-/*
- * iscsi_param_t->phase
- */
 #define PHASE_SECURITY			0x01
 #define PHASE_OPERATIONAL		0x02
 #define PHASE_DECLARATIVE		0x04
@@ -202,9 +175,6 @@ extern void iscsi_set_session_parameters(iscsi_sess_ops_t *,
 #define IS_PHASE_DECLARATIVE(p)		((p)->phase & PHASE_DECLARATIVE)
 #define IS_PHASE_FFP0(p)		((p)->phase & PHASE_FFP0)
 
-/*
- * iscsi_param_t->type
- */
 #define TYPE_BOOL_AND			0x01
 #define TYPE_BOOL_OR			0x02
 #define TYPE_NUMBER			0x04
@@ -219,9 +189,6 @@ extern void iscsi_set_session_parameters(iscsi_sess_ops_t *,
 #define IS_TYPE_STRING(p)		((p)->type & TYPE_STRING)
 #define IS_TYPE_VALUE_LIST(p)		((p)->type & TYPE_VALUE_LIST)
 
-/*
- * iscsi_param_t->type_range
- */
 #define TYPERANGE_BOOL_AND		0x0001
 #define TYPERANGE_BOOL_OR		0x0002
 #define TYPERANGE_0_TO_2		0x0004
@@ -252,9 +219,6 @@ extern void iscsi_set_session_parameters(iscsi_sess_ops_t *,
 #define IS_TYPERANGE_SESSIONTYPE(p)	((p)->type_range & \
 						TYPERANGE_SESSIONTYPE)
 
-/*
- * iscsi_param_t->state
- */
 #define PSTATE_ACCEPTOR			0x01
 #define PSTATE_NEGOTIATE		0x02
 #define PSTATE_PROPOSER			0x04
@@ -282,4 +246,4 @@ extern void iscsi_set_session_parameters(iscsi_sess_ops_t *,
 #define SET_PSTATE_RESPONSE_GOT(p)	((p)->state |= PSTATE_RESPONSE_GOT)
 #define SET_PSTATE_RESPONSE_SENT(p)	((p)->state |= PSTATE_RESPONSE_SENT)
 
-#endif /* ISCSI_PARAMETERS_H */
+#endif  

@@ -1,35 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  target_core_rd.c
- *
- * This file contains the Storage Engine <-> Ramdisk transport
- * specific functions.
- *
- * Copyright (c) 2003, 2004, 2005 PyX Technologies, Inc.
- * Copyright (c) 2005, 2006, 2007 SBE, Inc.
- * Copyright (c) 2007-2009 Rising Tide Software, Inc.
- * Copyright (c) 2008-2009 Linux-iSCSI.org
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #define TARGET_CORE_RD_C
 
 #include <linux/version.h>
@@ -49,13 +21,6 @@
 
 #undef TARGET_CORE_RD_C
 
-/* #define DEBUG_RAMDISK_MCP */
-/* #define DEBUG_RAMDISK_DR */
-
-/*	rd_attach_hba(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int rd_attach_hba(se_hba_t *hba, u32 host_id)
 {
 	rd_host_t *rd_host;
@@ -87,10 +52,6 @@ int rd_attach_hba(se_hba_t *hba, u32 host_id)
 	return 0;
 }
 
-/*	rd_detach_hba(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int rd_detach_hba(se_hba_t *hba)
 {
 	rd_host_t *rd_host;
@@ -113,10 +74,6 @@ int rd_detach_hba(se_hba_t *hba)
 	return 0;
 }
 
-/*	rd_release_device_space():
- *
- *
- */
 void rd_release_device_space(rd_dev_t *rd_dev)
 {
 	u32 i, j, page_count = 0, sg_per_table;
@@ -156,10 +113,6 @@ void rd_release_device_space(rd_dev_t *rd_dev)
 	rd_dev->sg_table_count = 0;
 }
 
-/*	rd_build_device_space():
- *
- *
- */
 static int rd_build_device_space(rd_dev_t *rd_dev)
 {
 	u32 i = 0, j, page_offset = 0, sg_per_table, sg_tables, total_sg_needed;
@@ -264,10 +217,6 @@ void *rd_MEMCPY_allocate_virtdevice(se_hba_t *hba, const char *name)
 	return rd_allocate_virtdevice(hba, name, 0);
 }
 
-/*	rd_create_virtdevice():
- *
- *
- */
 static se_device_t *rd_create_virtdevice(
 	se_hba_t *hba,
 	se_subsystem_dev_t *se_dev,
@@ -326,10 +275,6 @@ se_device_t *rd_MEMCPY_create_virtdevice(
 	return rd_create_virtdevice(hba, se_dev, p, 0);
 }
 
-/*	rd_activate_device(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int rd_activate_device(se_device_t *dev)
 {
 #ifndef MY_ABC_HERE
@@ -344,10 +289,6 @@ int rd_activate_device(se_device_t *dev)
 	return 0;
 }
 
-/*	rd_deactivate_device(): (Part of se_subsystem_api_t template)
- *
- *
- */
 void rd_deactivate_device(se_device_t *dev)
 {
 #ifndef MY_ABC_HERE
@@ -360,10 +301,6 @@ void rd_deactivate_device(se_device_t *dev)
 #endif
 }
 
-/*	rd_free_device(): (Part of se_subsystem_api_t template)
- *
- *
- */
 void rd_free_device(void *p)
 {
 	rd_dev_t *rd_dev = (rd_dev_t *) p;
@@ -372,19 +309,11 @@ void rd_free_device(void *p)
 	kfree(rd_dev);
 }
 
-/*	rd_transport_complete(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int rd_transport_complete(se_task_t *task)
 {
 	return 0;
 }
 
-/*	rd_allocate_request(): (Part of se_subsystem_api_t template)
- *
- *
- */
 void *rd_allocate_request(
 	se_task_t *task,
 	se_device_t *dev)
@@ -401,10 +330,6 @@ void *rd_allocate_request(
 	return (void *)rd_req;
 }
 
-/*	rd_emulate_inquiry():
- *
- *
- */
 static int rd_emulate_inquiry(se_task_t *task)
 {
 	unsigned char prod[64], se_location[128];
@@ -423,10 +348,6 @@ static int rd_emulate_inquiry(se_task_t *task)
 			RD_MCP_VERSION, se_location);
 }
 
-/*	rd_emulate_read_cap():
- *
- *
- */
 static int rd_emulate_read_cap(se_task_t *task)
 {
 	rd_dev_t *rd_dev = (rd_dev_t *) task->se_dev->dev_ptr;
@@ -450,10 +371,6 @@ static int rd_emulate_read_cap16(se_task_t *task)
 				blocks_long);
 }
 
-/*	rd_emulate_scsi_cdb():
- *
- *
- */
 static int rd_emulate_scsi_cdb(se_task_t *task)
 {
 	int ret;
@@ -528,10 +445,6 @@ static int rd_emulate_scsi_cdb(se_task_t *task)
 	return PYX_TRANSPORT_SENT_TO_TRANSPORT;
 }
 
-/*	rd_get_sg_table():
- *
- *
- */
 static rd_dev_sg_table_t *rd_get_sg_table(rd_dev_t *rd_dev, u32 page)
 {
 	u32 i;
@@ -550,10 +463,6 @@ static rd_dev_sg_table_t *rd_get_sg_table(rd_dev_t *rd_dev, u32 page)
 	return NULL;
 }
 
-/*	rd_MEMCPY_read():
- *
- *
- */
 static int rd_MEMCPY_read(rd_request_t *req)
 {
 	rd_dev_t *dev = req->rd_dev;
@@ -672,10 +581,6 @@ static int rd_MEMCPY_read(rd_request_t *req)
 	return 0;
 }
 
-/*	rd_MEMCPY_write():
- *
- *
- */
 static int rd_MEMCPY_write(rd_request_t *req)
 {
 	rd_dev_t *dev = req->rd_dev;
@@ -794,10 +699,6 @@ static int rd_MEMCPY_write(rd_request_t *req)
 	return 0;
 }
 
-/*	rd_MEMCPY_do_task(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int rd_MEMCPY_do_task(se_task_t *task)
 {
 	se_device_t *dev = task->se_dev;
@@ -828,10 +729,6 @@ int rd_MEMCPY_do_task(se_task_t *task)
 	return PYX_TRANSPORT_SENT_TO_TRANSPORT;
 }
 
-/*	rd_DIRECT_with_offset():
- *
- *
- */
 static int rd_DIRECT_with_offset(
 	se_task_t *task,
 	struct list_head *se_mem_list,
@@ -931,10 +828,6 @@ out:
 	return 0;
 }
 
-/*	rd_DIRECT_without_offset():
- *
- *
- */
 static int rd_DIRECT_without_offset(
 	se_task_t *task,
 	struct list_head *se_mem_list,
@@ -1012,10 +905,6 @@ out:
 	return 0;
 }
 
-/*	rd_DIRECT_do_se_mem_map():
- *
- *
- */
 int rd_DIRECT_do_se_mem_map(
 	se_task_t *task,
 	struct list_head *se_mem_list,
@@ -1047,20 +936,10 @@ int rd_DIRECT_do_se_mem_map(
 	return ret;
 }
 
-/*	rd_DIRECT_free_DMA():
- *
- *
- */
 void rd_DIRECT_free_DMA(se_cmd_t *cmd)
 {
 	se_mem_t *se_mem, *se_mem_tmp;
 
-	/*
-	 * The scatterlists in the RAMDISK DIRECT case are using the pages
-	 * from the rd_device_t's scatterlist table. They are referencing
-	 * valid memory that is held within the RD transport plugin, so we
-	 * only free the se_mem_t elements.
-	 */
 	list_for_each_entry_safe(se_mem, se_mem_tmp, T_TASK(cmd)->t_mem_list,
 				se_list) {
 		 list_del(&se_mem->se_list);
@@ -1071,10 +950,6 @@ void rd_DIRECT_free_DMA(se_cmd_t *cmd)
 	T_TASK(cmd)->t_task_se_num = 0;
 }
 
-/*	rd_DIRECT_allocate_DMA():
- *
- *	Note that rd_DIRECT_do_se_mem_map() actually does the real work.
- */
 int rd_DIRECT_allocate_DMA(se_cmd_t *cmd, u32 length, u32 dma_size)
 {
 	T_TASK(cmd)->t_mem_list = kzalloc(sizeof(struct list_head), GFP_KERNEL);
@@ -1088,29 +963,17 @@ int rd_DIRECT_allocate_DMA(se_cmd_t *cmd, u32 length, u32 dma_size)
 	return 0;
 }
 
-/*	rd_DIRECT_do_task(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int rd_DIRECT_do_task(se_task_t *task)
 {
 	if (!(TASK_CMD(task)->se_cmd_flags & SCF_SCSI_DATA_SG_IO_CDB))
 		return rd_emulate_scsi_cdb(task);
 
-	/*
-	 * At this point the locally allocated RD tables have been mapped
-	 * to se_mem_t elements in rd_DIRECT_do_se_mem_map().
-	 */
 	task->task_scsi_status = GOOD;
 	transport_complete_task(task, 1);
 
 	return PYX_TRANSPORT_SENT_TO_TRANSPORT;
 }
 
-/*	rd_free_task(): (Part of se_subsystem_api_t template)
- *
- *
- */
 void rd_free_task(se_task_t *task)
 {
 	rd_request_t *req;
@@ -1233,10 +1096,6 @@ void __rd_get_dev_info(rd_dev_t *rd_dev, char *b, int *bl)
 	return;
 }
 
-/*	rd_map_task_non_SG():
- *
- *
- */
 void rd_map_task_non_SG(se_task_t *task)
 {
 	se_cmd_t *cmd = TASK_CMD(task);
@@ -1247,10 +1106,6 @@ void rd_map_task_non_SG(se_task_t *task)
 	req->rd_sg_count	= 0;
 }
 
-/*	rd_map_task_SG():
- *
- *
- */
 void rd_map_task_SG(se_task_t *task)
 {
 	rd_request_t *req = (rd_request_t *) task->transport_req;
@@ -1260,10 +1115,6 @@ void rd_map_task_SG(se_task_t *task)
 	req->rd_sg_count	= task->task_sg_num;
 }
 
-/*      iblock_CDB_inquiry():
- *
- *
- */
 int rd_CDB_inquiry(se_task_t *task, u32 size)
 {
 	rd_request_t *req = (rd_request_t *) task->transport_req;
@@ -1274,10 +1125,6 @@ int rd_CDB_inquiry(se_task_t *task, u32 size)
 	return 0;
 }
 
-/*      rd_CDB_none():
- *
- *
- */
 int rd_CDB_none(se_task_t *task, u32 size)
 {
 	rd_request_t *req = (rd_request_t *) task->transport_req;
@@ -1290,10 +1137,6 @@ int rd_CDB_none(se_task_t *task, u32 size)
 	return 0;
 }
 
-/*	rd_CDB_read_non_SG():
- *
- *
- */
 int rd_CDB_read_non_SG(se_task_t *task, u32 size)
 {
 	rd_request_t *req = (rd_request_t *) task->transport_req;
@@ -1304,10 +1147,6 @@ int rd_CDB_read_non_SG(se_task_t *task, u32 size)
 	return 0;
 }
 
-/*	rd_CDB_read_SG):
- *
- *
- */
 int rd_CDB_read_SG(se_task_t *task, u32 size)
 {
 	rd_request_t *req = (rd_request_t *) task->transport_req;
@@ -1318,10 +1157,6 @@ int rd_CDB_read_SG(se_task_t *task, u32 size)
 	return req->rd_sg_count;
 }
 
-/*	rd_CDB_write_non_SG():
- *
- *
- */
 int rd_CDB_write_non_SG(se_task_t *task, u32 size)
 {
 	rd_request_t *req = (rd_request_t *) task->transport_req;
@@ -1332,10 +1167,6 @@ int rd_CDB_write_non_SG(se_task_t *task, u32 size)
 	return 0;
 }
 
-/*	d_CDB_write_SG():
- *
- *
- */
 int rd_CDB_write_SG(se_task_t *task, u32 size)
 {
 	rd_request_t *req = (rd_request_t *) task->transport_req;
@@ -1346,29 +1177,17 @@ int rd_CDB_write_SG(se_task_t *task, u32 size)
 	return req->rd_sg_count;
 }
 
-/*	rd_DIRECT_check_lba():
- *
- *
- */
 int rd_DIRECT_check_lba(unsigned long long lba, se_device_t *dev)
 {
 	return ((do_div(lba, PAGE_SIZE / DEV_ATTRIB(dev)->block_size)) *
 		 DEV_ATTRIB(dev)->block_size) ? 1 : 0;
 }
 
-/*	rd_MEMCPY_check_lba():
- *
- *
- */
 int rd_MEMCPY_check_lba(unsigned long long lba, se_device_t *dev)
 {
 	return 0;
 }
 
-/*	rd_check_for_SG(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int rd_check_for_SG(se_task_t *task)
 {
 	rd_request_t *req = (rd_request_t *) task->transport_req;
@@ -1376,10 +1195,6 @@ int rd_check_for_SG(se_task_t *task)
 	return req->rd_sg_count;
 }
 
-/*	rd_get_cdb(): (Part of se_subsystem_api_t template)
- *
- *
- */
 unsigned char *rd_get_cdb(se_task_t *task)
 {
 	rd_request_t *req = (rd_request_t *) task->transport_req;
@@ -1387,10 +1202,6 @@ unsigned char *rd_get_cdb(se_task_t *task)
 	return req->rd_scsi_cdb;
 }
 
-/*	rd_get_blocksize(): (Part of se_subsystem_api_t template)
- *
- *
- */
 u32 rd_get_blocksize(se_device_t *dev)
 {
 	return RD_BLOCKSIZE;
@@ -1398,7 +1209,7 @@ u32 rd_get_blocksize(se_device_t *dev)
 
 u32 rd_get_device_rev(se_device_t *dev)
 {
-	return SCSI_SPC_2; /* Returns SPC-3 in Initiator Data */
+	return SCSI_SPC_2;  
 }
 
 u32 rd_get_device_type(se_device_t *dev)
@@ -1406,28 +1217,16 @@ u32 rd_get_device_type(se_device_t *dev)
 	return TYPE_DISK;
 }
 
-/*	rd_get_dma_length(): (Part of se_subsystem_api_t template)
- *
- *
- */
 u32 rd_get_dma_length(u32 task_size, se_device_t *dev)
 {
 	return PAGE_SIZE;
 }
 
-/*	rd_get_max_sectors(): (Part of se_subsystem_api_t template)
- *
- *
- */
 u32 rd_get_max_sectors(se_device_t *dev)
 {
 	return RD_MAX_SECTORS;
 }
 
-/*	rd_get_queue_depth(): (Part of se_subsystem_api_t template)
- *
- *
- */
 u32 rd_get_queue_depth(se_device_t *dev)
 {
 	return RD_DEVICE_QUEUE_DEPTH;

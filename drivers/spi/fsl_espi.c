@@ -2,20 +2,7 @@
 #define MY_ABC_HERE
 #endif
 #ifdef MY_DEF_HERE
-/*
- * Freescale eSPI controller driver.
- *
- * Copyright (C) 2008-2009 Freescale Semiconductor, Inc. All rights reserved.
- *
- * Author:
- * Jerry Huang <Chang-Ming.Huang@freescale.com>
- * Chen Gong <g.chen@freescale.com>
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
+ 
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/types.h>
@@ -35,7 +22,6 @@
 #include <sysdev/fsl_soc.h>
 #include <linux/io.h>
 
-/* SPI Controller registers */
 struct fsl_espi_reg {
 	__be32 mode;
 	__be32 event;
@@ -49,7 +35,6 @@ struct fsl_espi_reg {
 
 #define MAX_CS_NUM		4
 
-/* SPI Controller mode register definitions */
 #define CSMODE_CI_INACTIVEHIGH	(1 << 31)
 #define CSMODE_CP_BEGIN_EDGECLK	(1 << 30)
 #define CSMODE_REV		(1 << 29)
@@ -66,59 +51,49 @@ struct fsl_espi_reg {
 #define SPIMODE_TXTHR(x)	((x) << 8)
 #define SPIMODE_RXTHR(x)	((x) << 0)
 
-/*
- * Default for SPI Mode:
- * 	SPI MODE 0 (inactive low, phase middle, MSB, 8-bit length, slow clk
- */
 #define CSMODE_INIT_VAL (CSMODE_POL_1 | CS_BEF(0) | CS_AFT(0) | CS_CG(1))
 
 #define SPMODE_INIT_VAL (SPIMODE_TXTHR(4) | SPIMODE_RXTHR(3))
 
-/* SPIE register values */
-#define SPIE_RXT	0x00002000	/* RX Over Threshold */
-#define SPIE_NE		0x00000200	/* Not empty */
-#define SPIE_NF		0x00000100	/* Not full */
+#define SPIE_RXT	0x00002000	 
+#define SPIE_NE		0x00000200	 
+#define SPIE_NF		0x00000100	 
 #define SPIE_RXCNT(reg)     ((reg >> 24) & 0x3F)
 #define SPIE_TXCNT(reg)     ((reg >> 16) & 0x3F)
 
-/* SPIM register values */
-#define SPIM_NE		0x00000200	/* Not empty */
-#define SPIM_NF		0x00000100	/* Not full */
+#define SPIM_NE		0x00000200	 
+#define SPIM_NF		0x00000100	 
 
-/* the spi->mode bits understood by this driver: */
 #define MODEBITS	(SPI_CPOL | SPI_CPHA | SPI_CS_HIGH \
 			| SPI_LSB_FIRST | SPI_LOOP)
 
-/* SPI Controller driver's private data. */
 struct fsl_espi {
-	/* bitbang has to be first */
+	 
 	struct spi_bitbang bitbang;
 	struct fsl_espi_reg __iomem *regs;
 	struct completion done;
 
-	/* rx & tx bufs from the spi_transfer */
 	const void *tx;
 	void *rx;
 
-	/* functions to deal with different sized buffers */
 	void (*get_rx) (u32 rx_data, struct fsl_espi *);
 	u32 (*get_tx) (struct fsl_espi *);
 
 	int count;
 	int irq;
 
-	u32 spibrg;		/* SPIBRG input clock */
-	u32 rx_shift;		/* RX data reg shift when in qe mode */
-	u32 tx_shift;		/* TX data reg shift when in qe mode */
+	u32 spibrg;		 
+	u32 rx_shift;		 
+	u32 tx_shift;		 
 };
 
 struct fsl_espi_cs {
-	/* functions to deal with different sized buffers */
+	 
 	void (*get_rx) (u32 rx_data, struct fsl_espi *);
 	u32 (*get_tx) (struct fsl_espi *);
-	u32 rx_shift;		/* RX data reg shift when in qe mode */
-	u32 tx_shift;		/* TX data reg shift when in qe mode */
-	u32 hw_mode;		/* Holds HW mode register settings */
+	u32 rx_shift;		 
+	u32 tx_shift;		 
+	u32 hw_mode;		 
 };
 
 static void fsl_espi_rx_buf(u32 data, struct fsl_espi *fsl_espi)
@@ -159,11 +134,9 @@ int fsl_espi_setup_transfer(struct spi_device *spi, struct spi_transfer *t)
 		hz = 0;
 	}
 
-	/* spi_transfer level calls that work per-word */
 	if (!bits_per_word)
 		bits_per_word = spi->bits_per_word;
 
-	/* Make sure its a bit width we support [4..16] */
 	if (bits_per_word < 4 || bits_per_word > 16)
 		return -EINVAL;
 	bits_per_word -= 1;
@@ -181,7 +154,6 @@ int fsl_espi_setup_transfer(struct spi_device *spi, struct spi_transfer *t)
 	fsl_espi->get_rx = cs->get_rx;
 	fsl_espi->get_tx = cs->get_tx;
 
-	/* mask out bits we are going to set */
 	cs->hw_mode &= ~(CSMODE_LEN(0xF) | CSMODE_DIV16 | CSMODE_PM(0xF));
 
 	cs->hw_mode |= CSMODE_LEN(bits_per_word) | CSMODE_INIT_VAL;
@@ -201,10 +173,9 @@ int fsl_espi_setup_transfer(struct spi_device *spi, struct spi_transfer *t)
 		pm--;
 	cs->hw_mode |= CSMODE_PM(pm);
 
-	/* Reset the hw mode */
 	regval = in_be32(&fsl_espi->regs->mode);
 	local_irq_save(flags);
-	/* Turn off SPI unit prior changing mode */
+	 
 	out_be32(&fsl_espi->regs->mode, regval & ~SPMODE_ENABLE);
 	out_be32(&fsl_espi->regs->csmode[cs_sel], cs->hw_mode);
 	out_be32(&fsl_espi->regs->mode, regval);
@@ -228,15 +199,12 @@ static int fsl_espi_bufs(struct spi_device *spi, struct spi_transfer *t)
 	len = t->len;
 	fsl_espi->count = len;
 
-	/* every frame owns one byte */
 	out_be32(&fsl_espi->regs->command,
 			(spi->chip_select << 30) | (len - 1));
 	INIT_COMPLETION(fsl_espi->done);
 
-	/* enable rx ints */
 	out_be32(&fsl_espi->regs->mask, SPIM_NE);
 
-	/* transmit word */
 	word = fsl_espi->get_tx(fsl_espi);
 	out_be32(&fsl_espi->regs->transmit, word);
 
@@ -278,10 +246,10 @@ static int fsl_espi_setup(struct spi_device *spi)
 	if (!spi->bits_per_word)
 		spi->bits_per_word = 8;
 
-	hw_mode = cs->hw_mode; /* Save orginal settings */
+	hw_mode = cs->hw_mode;  
 	cs->hw_mode =
 		in_be32(&fsl_espi->regs->csmode[spi->chip_select]);
-	/* mask out bits we are going to set */
+	 
 	cs->hw_mode &= ~(CSMODE_CP_BEGIN_EDGECLK | CSMODE_CI_INACTIVEHIGH
 			 | CSMODE_REV);
 
@@ -294,7 +262,7 @@ static int fsl_espi_setup(struct spi_device *spi)
 
 	retval = fsl_espi_setup_transfer(spi, NULL);
 	if (retval < 0) {
-		cs->hw_mode = hw_mode; /* Restore settings */
+		cs->hw_mode = hw_mode;  
 		return retval;
 	}
 
@@ -310,12 +278,10 @@ irqreturn_t fsl_espi_irq(s32 irq, void *context_data)
 	u32 event, rx_data, word;
 	int ret;
 
-	/* Get interrupt events(tx/rx) */
 	event = in_be32(&fsl_espi->regs->event);
 
-	/* We need handle RX first */
 	if (event & SPIE_NE) {
-		/* spin until RX is done */
+		 
 		void *event_ptr = &fsl_espi->regs->event;
 		int limit = min(4, fsl_espi->count);
 
@@ -329,7 +295,7 @@ irqreturn_t fsl_espi_irq(s32 irq, void *context_data)
 		if (fsl_espi->rx)
 			fsl_espi->get_rx(rx_data, fsl_espi);
 	} else {
-		/* Clear the events */
+		 
 		out_be32(&fsl_espi->regs->event, event);
 		return IRQ_HANDLED;
 	}
@@ -337,7 +303,7 @@ irqreturn_t fsl_espi_irq(s32 irq, void *context_data)
 	fsl_espi->count -= 4;
 	if (fsl_espi->count > 0) {
 		if ((event & SPIE_NF) == 0) {
-			/* spin until TX is done */
+			 
 			ret = spin_event_timeout((event =
 				in_be32(&fsl_espi->regs->event)) & SPIE_NF,
 				500, 0);
@@ -348,12 +314,11 @@ irqreturn_t fsl_espi_irq(s32 irq, void *context_data)
 		out_be32(&fsl_espi->regs->transmit, word);
 	} else {
 		fsl_espi->count = 0;
-		/* disable rx ints */
+		 
 		out_be32(&fsl_espi->regs->mask, 0);
 		complete(&fsl_espi->done);
 	}
 
-	/* Clear the events */
 	out_be32(&fsl_espi->regs->event, event);
 
 	return IRQ_HANDLED;
@@ -379,7 +344,6 @@ static int __init fsl_espi_probe(struct of_device *ofdev,
 	int ret = 0;
 	int len;
 
-	/* Get resources(memory, IRQ) associated with the device */
 	master = spi_alloc_master(&ofdev->dev, sizeof(struct fsl_espi));
 
 	if (master == NULL) {
@@ -437,15 +401,14 @@ static int __init fsl_espi_probe(struct of_device *ofdev,
 		goto unmap_io;
 	}
 
-	/* Register for SPI Interrupt */
 	ret = request_irq(fsl_espi->irq, fsl_espi_irq,
 			  0, "fsl-espi", fsl_espi);
 
 	if (ret != 0)
 		goto unmap_io;
 
-	master->bus_num = -1;	/* dynamic bus assignment */
-	/* number of slave select bits is required */
+	master->bus_num = -1;	 
+	 
 	prop = of_get_property(ofdev->node, "espi,num-ss-bits", &len);
 	if (!prop || len < sizeof(*prop)) {
 		dev_warn(&ofdev->dev, "no 'espi,num-ss-bits' property\n");
@@ -453,16 +416,14 @@ static int __init fsl_espi_probe(struct of_device *ofdev,
 	}
 	master->num_chipselect = *prop;
 
-	/* SPI controller initializations */
 	out_be32(&fsl_espi->regs->mode, 0);
 	out_be32(&fsl_espi->regs->mask, 0);
 	out_be32(&fsl_espi->regs->command, 0);
 	out_be32(&fsl_espi->regs->event, 0xffffffff);
 
-	/* Enable SPI interface */
 	regval = SPMODE_INIT_VAL | SPMODE_ENABLE;
 	out_be32(&fsl_espi->regs->mode, regval);
-	/* init CS mode interface */
+	 
 	for (ret = 0; ret < MAX_CS_NUM; ret++)
 		out_be32(&fsl_espi->regs->csmode[ret],
 				CSMODE_INIT_VAL);
@@ -477,7 +438,6 @@ static int __init fsl_espi_probe(struct of_device *ofdev,
 	       "Freescale eSPI Controller driver at 0x%p (irq = %d)\n",
 	       fsl_espi->regs, fsl_espi->irq);
 
-	/* add any subnodes on the SPI bus */
 	of_register_spi_devices(master, ofdev->node);
 
 	return ret;
@@ -588,4 +548,4 @@ MODULE_AUTHOR("Chen Gong <g.chen@freescale.com>, "
 	      "Jerry Huang <Chang-Ming.Huang@freescale.com>");
 MODULE_DESCRIPTION("Freescale eSPI Driver");
 MODULE_LICENSE("GPL");
-#endif /* MY_DEF_HERE */
+#endif  

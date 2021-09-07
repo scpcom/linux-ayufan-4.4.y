@@ -1,23 +1,4 @@
-/*
- * INET		An implementation of the TCP/IP protocol suite for the LINUX
- *		operating system.  INET is implemented using the  BSD Socket
- *		interface as the means of communication with the user level.
- *
- *		Implementation of the Transmission Control Protocol(TCP).
- *
- * Authors:	Ross Biro
- *		Fred N. van Kempen, <waltje@uWalt.NL.Mugnet.ORG>
- *		Mark Evans, <evansmp@uhura.aston.ac.uk>
- *		Corey Minyard <wf-rch!minyard@relay.EU.net>
- *		Florian La Roche, <flla@stud.uni-sb.de>
- *		Charles Hedrick, <hedrick@klinzhai.rutgers.edu>
- *		Linus Torvalds, <torvalds@cs.helsinki.fi>
- *		Alan Cox, <gw4pts@gw4pts.ampr.org>
- *		Matthew Dillon, <dillon@apollo.west.oic.com>
- *		Arnt Gulbrandsen, <agulbra@nvg.unit.no>
- *		Jorge Cwik, <jorge@laser.satlink.net>
- */
-
+ 
 #include <linux/module.h>
 #include <net/tcp.h>
 
@@ -51,28 +32,14 @@ static void tcp_write_err(struct sock *sk)
 	NET_INC_STATS_BH(sock_net(sk), LINUX_MIB_TCPABORTONTIMEOUT);
 }
 
-/* Do not allow orphaned sockets to eat all our resources.
- * This is direct violation of TCP specs, but it is required
- * to prevent DoS attacks. It is called when a retransmission timeout
- * or zero probe timeout occurs on orphaned socket.
- *
- * Criteria is still not confirmed experimentally and may change.
- * We kill the socket, if:
- * 1. If number of orphaned sockets exceeds an administratively configured
- *    limit.
- * 2. If we have strong memory pressure.
- */
 static int tcp_out_of_resources(struct sock *sk, int do_reset)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 	int orphans = percpu_counter_read_positive(&tcp_orphan_count);
 
-	/* If peer does not open window for long time, or did not transmit
-	 * anything for long time, penalize it. */
 	if ((s32)(tcp_time_stamp - tp->lsndtime) > 2*TCP_RTO_MAX || !do_reset)
 		orphans <<= 1;
 
-	/* If some dubious ICMP arrived, penalize even more. */
 	if (sk->sk_err_soft)
 		orphans <<= 1;
 
@@ -80,10 +47,8 @@ static int tcp_out_of_resources(struct sock *sk, int do_reset)
 		if (net_ratelimit())
 			printk(KERN_INFO "Out of socket memory\n");
 
-		/* Catch exceptional cases, when connection requires reset.
-		 *      1. Last segment was sent recently. */
 		if ((s32)(tcp_time_stamp - tp->lsndtime) <= TCP_TIMEWAIT_LEN ||
-		    /*  2. Window is closed. */
+		     
 		    (!tp->snd_wnd && !tp->packets_out))
 			do_reset = 1;
 		if (do_reset)
@@ -95,18 +60,13 @@ static int tcp_out_of_resources(struct sock *sk, int do_reset)
 	return 0;
 }
 
-/* Calculate maximal number or retries on an orphaned socket. */
 static int tcp_orphan_retries(struct sock *sk, int alive)
 {
-	int retries = sysctl_tcp_orphan_retries; /* May be zero. */
+	int retries = sysctl_tcp_orphan_retries;  
 
-	/* We know from an ICMP that something is wrong. */
 	if (sk->sk_err_soft && !alive)
 		retries = 0;
 
-	/* However, if socket sent something recently, select some safe
-	 * number of retries. 8 corresponds to >100 seconds with minimal
-	 * RTO of 200msec. */
 	if (retries == 0 && alive)
 		retries = 8;
 	return retries;
@@ -114,7 +74,7 @@ static int tcp_orphan_retries(struct sock *sk, int alive)
 
 static void tcp_mtu_probing(struct inet_connection_sock *icsk, struct sock *sk)
 {
-	/* Black hole detection */
+	 
 	if (sysctl_tcp_mtu_probing) {
 		if (!icsk->icsk_mtup.enabled) {
 			icsk->icsk_mtup.enabled = 1;
@@ -132,7 +92,6 @@ static void tcp_mtu_probing(struct inet_connection_sock *icsk, struct sock *sk)
 	}
 }
 
-/* A write timeout has occurred. Process the after effects. */
 static int tcp_write_timeout(struct sock *sk)
 {
 	struct inet_connection_sock *icsk = inet_csk(sk);
@@ -145,7 +104,7 @@ static int tcp_write_timeout(struct sock *sk)
 		retry_until = icsk->icsk_syn_retries ? : sysctl_tcp_syn_retries;
 	} else {
 		if (retransmits_timed_out(sk, sysctl_tcp_retries1)) {
-			/* Black hole detection */
+			 
 			tcp_mtu_probing(icsk, sk);
 
 			dst_negative_advice(&sk->sk_dst_cache);
@@ -165,7 +124,7 @@ static int tcp_write_timeout(struct sock *sk)
 	}
 
 	if (retransmits_timed_out(sk, retry_until)) {
-		/* Has it gone just too far? */
+		 
 		tcp_write_err(sk);
 		return 1;
 	}
@@ -195,7 +154,7 @@ static void tcp_delack_timer(unsigned long data)
 #endif
 
 	if (sock_owned_by_user(sk)) {
-		/* Try again later. */
+		 
 		icsk->icsk_ack.blocked = 1;
 		NET_INC_STATS_BH(sock_net(sk), LINUX_MIB_DELAYEDACKLOCKED);
 		sk_reset_timer(sk, &icsk->icsk_delack_timer, jiffies + TCP_DELACK_MIN);
@@ -226,12 +185,10 @@ static void tcp_delack_timer(unsigned long data)
 
 	if (inet_csk_ack_scheduled(sk)) {
 		if (!icsk->icsk_ack.pingpong) {
-			/* Delayed ACK missed: inflate ATO. */
+			 
 			icsk->icsk_ack.ato = min(icsk->icsk_ack.ato << 1, icsk->icsk_rto);
 		} else {
-			/* Delayed ACK missed: leave pingpong mode and
-			 * deflate ATO.
-			 */
+			 
 			icsk->icsk_ack.pingpong = 0;
 			icsk->icsk_ack.ato      = TCP_ATO_MIN;
 		}
@@ -263,21 +220,6 @@ static void tcp_probe_timer(struct sock *sk)
 		return;
 	}
 
-	/* *WARNING* RFC 1122 forbids this
-	 *
-	 * It doesn't AFAIK, because we kill the retransmit timer -AK
-	 *
-	 * FIXME: We ought not to do it, Solaris 2.5 actually has fixing
-	 * this behaviour in Solaris down as a bug fix. [AC]
-	 *
-	 * Let me to explain. icsk_probes_out is zeroed by incoming ACKs
-	 * even if they advertise zero window. Hence, connection is killed only
-	 * if we received no ACKs for normal connection timeout. It is not killed
-	 * only because window stays zero for some time, window may be zero
-	 * until armageddon and even later. We are in full accordance
-	 * with RFCs, only probe timer combines both retransmission timeout
-	 * and probe timeout in one bottle.				--ANK
-	 */
 	max_probes = sysctl_tcp_retries2;
 
 	if (sock_flag(sk, SOCK_DEAD)) {
@@ -292,14 +234,10 @@ static void tcp_probe_timer(struct sock *sk)
 	if (icsk->icsk_probes_out > max_probes) {
 		tcp_write_err(sk);
 	} else {
-		/* Only send another probe if we didn't close things up. */
+		 
 		tcp_send_probe0(sk);
 	}
 }
-
-/*
- *	The TCP retransmit timer.
- */
 
 void tcp_retransmit_timer(struct sock *sk)
 {
@@ -313,11 +251,7 @@ void tcp_retransmit_timer(struct sock *sk)
 
 	if (!tp->snd_wnd && !sock_flag(sk, SOCK_DEAD) &&
 	    !((1 << sk->sk_state) & (TCPF_SYN_SENT | TCPF_SYN_RECV))) {
-		/* Receiver dastardly shrinks window. Our retransmits
-		 * become zero probes, but we should not timeout this
-		 * connection. If the socket is an orphan, time it out,
-		 * we cannot allow such beasts to hang infinitely.
-		 */
+		 
 #ifdef TCP_DEBUG
 		struct inet_sock *inet = inet_sk(sk);
 		if (sk->sk_family == AF_INET) {
@@ -375,9 +309,7 @@ void tcp_retransmit_timer(struct sock *sk)
 	}
 
 	if (tcp_retransmit_skb(sk, tcp_write_queue_head(sk)) > 0) {
-		/* Retransmission failed because of local congestion,
-		 * do not backoff.
-		 */
+		 
 		if (!icsk->icsk_retransmits)
 			icsk->icsk_retransmits = 1;
 		inet_csk_reset_xmit_timer(sk, ICSK_TIME_RETRANS,
@@ -386,21 +318,6 @@ void tcp_retransmit_timer(struct sock *sk)
 		goto out;
 	}
 
-	/* Increase the timeout each time we retransmit.  Note that
-	 * we do not increase the rtt estimate.  rto is initialized
-	 * from rtt, but increases here.  Jacobson (SIGCOMM 88) suggests
-	 * that doubling rto each time is the least we can get away with.
-	 * In KA9Q, Karn uses this for the first few times, and then
-	 * goes to quadratic.  netBSD doubles, but only goes up to *64,
-	 * and clamps at 1 to 64 sec afterwards.  Note that 120 sec is
-	 * defined in the protocol as the maximum possible RTT.  I guess
-	 * we'll have to use something other than TCP to talk to the
-	 * University of Mars.
-	 *
-	 * PAWS allows us longer timeouts and large windows, so once
-	 * implemented ftp to mars will work nicely. We will have to fix
-	 * the 120 second clamps though!
-	 */
 	icsk->icsk_backoff++;
 	icsk->icsk_retransmits++;
 
@@ -432,7 +349,7 @@ static void tcp_write_timer(unsigned long data)
 #endif
 
 	if (sock_owned_by_user(sk)) {
-		/* Try again later */
+		 
 		sk_reset_timer(sk, &icsk->icsk_retransmit_timer, jiffies + (HZ / 20));
 		goto out_unlock;
 	}
@@ -469,10 +386,6 @@ out_unlock:
 	sock_put(sk);
 }
 
-/*
- *	Timer for listening sockets
- */
-
 static void tcp_synack_timer(struct sock *sk)
 {
 	inet_csk_reqsk_queue_prune(sk, TCP_SYNQ_INTERVAL,
@@ -497,7 +410,6 @@ static void tcp_keepalive_timer (unsigned long data)
 	struct tcp_sock *tp = tcp_sk(sk);
 	__u32 elapsed;
 
-	/* Only process if socket is not in use. */
 #ifdef CONFIG_SYNO_PLX_PORTING
 	bh_lock_wsock(sk);
 
@@ -511,7 +423,7 @@ static void tcp_keepalive_timer (unsigned long data)
 #endif
 
 	if (sock_owned_by_user(sk)) {
-		/* Try again later. */
+		 
 		inet_csk_reset_keepalive_timer (sk, HZ/20);
 		goto out;
 	}
@@ -539,7 +451,6 @@ static void tcp_keepalive_timer (unsigned long data)
 
 	elapsed = keepalive_time_when(tp);
 
-	/* It is alive without keepalive 8) */
 	if (tp->packets_out || tcp_send_head(sk))
 		goto resched;
 
@@ -555,13 +466,11 @@ static void tcp_keepalive_timer (unsigned long data)
 			icsk->icsk_probes_out++;
 			elapsed = keepalive_intvl_when(tp);
 		} else {
-			/* If keepalive was lost due to local congestion,
-			 * try harder.
-			 */
+			 
 			elapsed = TCP_RESOURCE_PROBE_INTERVAL;
 		}
 	} else {
-		/* It is tp->rcv_tstamp + keepalive_time_when(tp) */
+		 
 		elapsed = keepalive_time_when(tp) - elapsed;
 	}
 

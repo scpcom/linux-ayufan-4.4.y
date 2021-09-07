@@ -1,12 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Definitions for diskquota-operations. When diskquota is configured these
- * macros expand to the right source-code.
- *
- * Author:  Marco van Wieringen <mvw@planets.elm.net>
- */
+ 
 #ifndef _LINUX_QUOTAOPS_
 #define _LINUX_QUOTAOPS_
 
@@ -25,9 +20,6 @@ static inline struct quota_info *sb_dqopt(struct super_block *sb)
 
 #if defined(CONFIG_QUOTA)
 
-/*
- * declaration of quota_function calls in kernel.
- */
 void sync_quota_sb(struct super_block *sb, int type);
 static inline void writeout_quota_sb(struct super_block *sb, int type)
 {
@@ -104,10 +96,6 @@ static inline struct mem_dqinfo *sb_dqinfo(struct super_block *sb, int type)
 	return sb_dqopt(sb)->info + type;
 }
 
-/*
- * Functions for checking status of quota
- */
-
 static inline int sb_has_quota_usage_enabled(struct super_block *sb, int type)
 {
 	return sb_dqopt(sb)->flags &
@@ -132,10 +120,9 @@ static inline int sb_any_quota_suspended(struct super_block *sb)
 		sb_has_quota_suspended(sb, GRPQUOTA);
 }
 
-/* Does kernel know about any quota information for given sb + type? */
 static inline int sb_has_quota_loaded(struct super_block *sb, int type)
 {
-	/* Currently if anything is on, then quota usage is on as well */
+	 
 	return sb_has_quota_usage_enabled(sb, type);
 }
 
@@ -157,17 +144,12 @@ static inline int sb_any_quota_active(struct super_block *sb)
 	       sb_has_quota_active(sb, GRPQUOTA);
 }
 
-/*
- * Operations supported for diskquotas.
- */
 extern const struct dquot_operations dquot_operations;
 extern const struct quotactl_ops vfs_quotactl_ops;
 
 #define sb_dquot_ops (&dquot_operations)
 #define sb_quotactl_ops (&vfs_quotactl_ops)
 
-/* It is better to call this function outside of any transaction as it might
- * need a lot of space in journal for dquot structure allocation. */
 static inline void vfs_dq_init(struct inode *inode)
 {
 	BUG_ON(!inode->i_sb);
@@ -176,12 +158,11 @@ static inline void vfs_dq_init(struct inode *inode)
 }
 
 #ifndef MY_ABC_HERE
-/* The following allocation/freeing/transfer functions *must* be called inside
- * a transaction (deadlocks possible otherwise) */
+ 
 static inline int vfs_dq_prealloc_space_nodirty(struct inode *inode, qsize_t nr)
 {
 	if (sb_any_quota_active(inode->i_sb)) {
-		/* Used space is updated in alloc_space() */
+		 
 		if (inode->i_sb->dq_op->alloc_space(inode, nr, 1) == NO_QUOTA)
 			return 1;
 	}
@@ -201,7 +182,7 @@ static inline int vfs_dq_prealloc_space(struct inode *inode, qsize_t nr)
 static inline int vfs_dq_alloc_space_nodirty(struct inode *inode, qsize_t nr)
 {
 	if (sb_any_quota_active(inode->i_sb)) {
-		/* Used space is updated in alloc_space() */
+		 
 		if (inode->i_sb->dq_op->alloc_space(inode, nr, 0) == NO_QUOTA)
 			return 1;
 	}
@@ -221,7 +202,7 @@ static inline int vfs_dq_alloc_space(struct inode *inode, qsize_t nr)
 static inline int vfs_dq_reserve_space(struct inode *inode, qsize_t nr)
 {
 	if (sb_any_quota_active(inode->i_sb)) {
-		/* Used space is updated in alloc_space() */
+		 
 		if (inode->i_sb->dq_op->reserve_space(inode, nr, 0) == NO_QUOTA)
 			return 1;
 	}
@@ -242,9 +223,7 @@ static inline int vfs_dq_alloc_inode(struct inode *inode)
 }
 
 #ifndef MY_ABC_HERE
-/*
- * Convert in-memory reserved quotas to real consumed quotas
- */
+ 
 static inline int vfs_dq_claim_space(struct inode *inode, qsize_t nr)
 {
 	if (sb_any_quota_active(inode->i_sb)) {
@@ -257,9 +236,6 @@ static inline int vfs_dq_claim_space(struct inode *inode, qsize_t nr)
 	return 0;
 }
 
-/*
- * Release reserved (in-memory) quotas
- */
 static inline
 void vfs_dq_release_reservation_space(struct inode *inode, qsize_t nr)
 {
@@ -290,7 +266,6 @@ static inline void vfs_dq_free_inode(struct inode *inode)
 		inode->i_sb->dq_op->free_inode(inode, 1);
 }
 
-/* Cannot be called inside a transaction */
 static inline int vfs_dq_off(struct super_block *sb, int remount)
 {
 	int ret = -ENOSYS;
@@ -322,7 +297,6 @@ static inline int sb_any_quota_suspended(struct super_block *sb)
 	return 0;
 }
 
-/* Does kernel know about any quota information for given sb + type? */
 static inline int sb_has_quota_loaded(struct super_block *sb, int type)
 {
 	return 0;
@@ -343,9 +317,6 @@ static inline int sb_any_quota_active(struct super_block *sb)
 	return 0;
 }
 
-/*
- * NO-OP when quota not configured.
- */
 #define sb_dquot_ops				(NULL)
 #define sb_quotactl_ops				(NULL)
 
@@ -464,7 +435,7 @@ static inline void vfs_dq_free_space(struct inode *inode, qsize_t nr)
 	mark_inode_dirty(inode);
 }
 #endif
-#endif /* CONFIG_QUOTA */
+#endif  
 
 #ifdef MY_ABC_HERE
 static inline int dquot_alloc_space_nodirty(struct inode *inode, qsize_t nr)
@@ -607,4 +578,4 @@ static inline void vfs_dq_free_block(struct inode *inode, qsize_t nr)
 	vfs_dq_free_space(inode, nr << inode->i_blkbits);
 }
 #endif
-#endif /* _LINUX_QUOTAOPS_ */
+#endif  

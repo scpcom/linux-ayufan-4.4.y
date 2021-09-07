@@ -1,25 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * MPC83xx/85xx/86xx PCI/PCIE support routing.
- *
- * Copyright 2007-2009 Freescale Semiconductor, Inc.
- * Copyright 2008-2009 MontaVista Software, Inc.
- *
- * Initial author: Xianghua Xiao <x.xiao@freescale.com>
- * Recode: ZHANG WEI <wei.zhang@freescale.com>
- * Rewrite the routing for Frescale PCI and PCI Express
- * 	Roy Zang <tie-fei.zang@freescale.com>
- * MPC83xx PCI-Express support:
- * 	Tony Li <tony.li@freescale.com>
- * 	Anton Vorontsov <avorontsov@ru.mvista.com>
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
+ 
 #include <linux/kernel.h>
 #include <linux/pci.h>
 #include <linux/delay.h>
@@ -43,15 +25,12 @@ static int fsl_pcie_bus_fixup;
 
 static void __init quirk_fsl_pcie_header(struct pci_dev *dev)
 {
-	/* if we aren't a PCIe don't bother */
+	 
 	if (!pci_find_capability(dev, PCI_CAP_ID_EXP))
 		return;
 
 #ifdef MY_DEF_HERE
-	/*
-	 * We should only fix the PCIE when it's configured as RC.
-	 * When configured as EP, the header type is NORMAL
-	 */
+	 
 	if (dev->hdr_type == PCI_HEADER_TYPE_BRIDGE) {
 #endif
 	dev->class = PCI_CLASS_BRIDGE_PCI << 8;
@@ -80,14 +59,14 @@ static int __init setup_one_atmu(struct ccsr_pci __iomem *pci,
 	resource_size_t pci_addr = res->start - offset;
 	resource_size_t phys_addr = res->start;
 	resource_size_t size = res->end - res->start + 1;
-	u32 flags = 0x80044000; /* enable & mem R/W */
+	u32 flags = 0x80044000;  
 	unsigned int i;
 
 	pr_debug("PCI MEM resource start 0x%016llx, size 0x%016llx.\n",
 		(u64)res->start, (u64)size);
 
 	if (res->flags & IORESOURCE_PREFETCH)
-		flags |= 0x10000000; /* enable relaxed ordering */
+		flags |= 0x10000000;  
 
 	for (i = 0; size > 0; i++) {
 		unsigned int bits = min(__ilog2(size),
@@ -109,7 +88,6 @@ static int __init setup_one_atmu(struct ccsr_pci __iomem *pci,
 	return i;
 }
 
-/* atmu setup for fsl pci/pcie controller */
 static void __init setup_pci_atmu(struct pci_controller *hose,
 				  struct resource *rsrc)
 {
@@ -130,13 +108,11 @@ static void __init setup_pci_atmu(struct pci_controller *hose,
 	    return;
 	}
 
-	/* Disable all windows (except powar0 since it's ignored) */
 	for(i = 1; i < 5; i++)
 		out_be32(&pci->pow[i].powar, 0);
 	for(i = 0; i < 3; i++)
 		out_be32(&pci->piw[i].piwar, 0);
 
-	/* Setup outbound MEM window */
 	for(i = 0, j = 1; i < 3; i++) {
 		if (!(hose->mem_resources[i].flags & IORESOURCE_MEM))
 			continue;
@@ -154,7 +130,6 @@ static void __init setup_pci_atmu(struct pci_controller *hose,
 			j += n;
 	}
 
-	/* Setup outbound IO window */
 	if (hose->io_resource.flags & IORESOURCE_IO) {
 		if (j >= 5) {
 			pr_err("Ran out of outbound PCI ATMUs for IO resource\n");
@@ -167,14 +142,13 @@ static void __init setup_pci_atmu(struct pci_controller *hose,
 			out_be32(&pci->pow[j].potar, (hose->io_resource.start >> 12));
 			out_be32(&pci->pow[j].potear, 0);
 			out_be32(&pci->pow[j].powbar, (hose->io_base_phys >> 12));
-			/* Enable, IO R/W */
+			 
 			out_be32(&pci->pow[j].powar, 0x80088000
 				| (__ilog2(hose->io_resource.end
 				- hose->io_resource.start + 1) - 1));
 		}
 	}
 
-	/* convert to pci address space */
 	paddr_hi -= hose->pci_mem_offset;
 	paddr_lo -= hose->pci_mem_offset;
 
@@ -188,7 +162,6 @@ static void __init setup_pci_atmu(struct pci_controller *hose,
 		return ;
 	}
 
-	/* setup PCSRBAR/PEXCSRBAR */
 	early_write_config_dword(hose, 0, 0, PCI_BASE_ADDRESS_0, 0xffffffff);
 	early_read_config_dword(hose, 0, 0, PCI_BASE_ADDRESS_0, &pcicsrbar_sz);
 	pcicsrbar_sz = ~pcicsrbar_sz + 1;
@@ -204,14 +177,12 @@ static void __init setup_pci_atmu(struct pci_controller *hose,
 
 	pr_info("%s: PCICSRBAR @ 0x%x\n", name, pcicsrbar);
 
-	/* Setup inbound mem window */
 	mem = lmb_end_of_DRAM();
 	sz = min(mem, paddr_lo);
 	mem_log = __ilog2_u64(sz);
 
-	/* PCIe can overmap inbound & outbound since RX & TX are separated */
 	if (early_find_capability(hose, 0, 0, PCI_CAP_ID_EXP)) {
-		/* Size window to exact size if power-of-two or one size up */
+		 
 		if ((1ull << mem_log) != mem) {
 			if ((1ull << mem_log) > mem)
 				pr_info("%s: Setting PCI inbound window "
@@ -221,7 +192,6 @@ static void __init setup_pci_atmu(struct pci_controller *hose,
 
 		piwar |= (mem_log - 1);
 
-		/* Setup inbound memory window */
 		out_be32(&pci->piw[win_idx].pitar,  0x00000000);
 		out_be32(&pci->piw[win_idx].piwbar, 0x00000000);
 		out_be32(&pci->piw[win_idx].piwar,  piwar);
@@ -232,7 +202,6 @@ static void __init setup_pci_atmu(struct pci_controller *hose,
 	} else {
 		u64 paddr = 0;
 
-		/* Setup inbound memory window */
 		out_be32(&pci->piw[win_idx].pitar,  paddr >> 12);
 		out_be32(&pci->piw[win_idx].piwbar, paddr >> 12);
 		out_be32(&pci->piw[win_idx].piwar,  (piwar | (mem_log - 1)));
@@ -263,7 +232,7 @@ static void __init setup_pci_atmu(struct pci_controller *hose,
 			"map - enable CONFIG_SWIOTLB to avoid dma errors.\n",
 			 name);
 #endif
-		/* adjusting outbound windows could reclaim space in mem map */
+		 
 		if (paddr_hi < 0xffffffffull)
 			pr_warning("%s: WARNING: Outbound window cfg leaves "
 				"gaps in memory map. Adjusting the memory map "
@@ -275,20 +244,15 @@ static void __init setup_pci_atmu(struct pci_controller *hose,
 	}
 
 #ifdef CONFIG_SYNO_MPC85XX_COMMON 
-	/* fix for ERRATA PIC 7 */
+	 
 	if (MPC8548_ERRATA(2, 1)) {
-		/*
-		 * In RC mode, the PEXIWBAR[1-3] registers reside outside of the
-		 * type 1 header; PEXIWBAR0 is the only inbound BAR that resides
-		 * in the Type 1 header (at offset 0x10).
-		 */
-		/* config PEXIWBAR0 to some memory region unused by PCI Express */
+		 
 		early_write_config_dword(hose, hose->first_busno, 0, 0x10, 0x80000000);
-		/* Setup inbound translation Memory Window @ 2G */
+		 
 		pci->piw[1].pitar = 0x00800000;
-		/* Setup inbound PCIE Memory Window @ 2G */
+		 
 		pci->piw[1].piwbar = 0x00080000;
-		/* Enable, No prefetch, Local Memory, No snoop, 1 MB window */
+		 
 		pci->piw[1].piwar = 0xC0F44013;
 	}
 #endif
@@ -353,13 +317,11 @@ int __init fsl_add_bridge(struct device_node *dev, int is_primary)
 
 	pr_debug("Adding PCI host bridge %s\n", dev->full_name);
 
-	/* Fetch host bridge registers address */
 	if (of_address_to_resource(dev, 0, &rsrc)) {
 		printk(KERN_WARNING "Can't get pci register base!");
 		return -ENOMEM;
 	}
 
-	/* Get bus range if any */
 	bus_range = of_get_property(dev, "bus-range", &len);
 	if (bus_range == NULL || len < 2 * sizeof(int))
 		printk(KERN_WARNING "Can't get bus-range for %s, assume"
@@ -377,7 +339,6 @@ int __init fsl_add_bridge(struct device_node *dev, int is_primary)
 		PPC_INDIRECT_TYPE_BIG_ENDIAN);
 	setup_pci_cmd(hose);
 
-	/* check PCI express link status */
 	if (early_find_capability(hose, 0, 0, PCI_CAP_ID_EXP)) {
 		hose->indirect_type |= PPC_INDIRECT_TYPE_EXT_REG |
 			PPC_INDIRECT_TYPE_SURPRESS_PRIMARY_BUS;
@@ -393,11 +354,8 @@ int __init fsl_add_bridge(struct device_node *dev, int is_primary)
 	pr_debug(" ->Hose at 0x%p, cfg_addr=0x%p,cfg_data=0x%p\n",
 		hose, hose->cfg_addr, hose->cfg_data);
 
-	/* Interpret the "ranges" property */
-	/* This also maps the I/O region and sets isa_io/mem_base */
 	pci_process_bridge_OF_ranges(hose, dev, is_primary);
 
-	/* Setup PEX window registers */
 	setup_pci_atmu(hose, &rsrc);
 
 	return 0;
@@ -443,7 +401,7 @@ DECLARE_PCI_FIXUP_HEADER(0x1957, PCI_DEVICE_ID_P4040E, quirk_fsl_pcie_header);
 DECLARE_PCI_FIXUP_HEADER(0x1957, PCI_DEVICE_ID_P4040, quirk_fsl_pcie_header);
 DECLARE_PCI_FIXUP_HEADER(0x1957, PCI_DEVICE_ID_P4080E, quirk_fsl_pcie_header);
 DECLARE_PCI_FIXUP_HEADER(0x1957, PCI_DEVICE_ID_P4080, quirk_fsl_pcie_header);
-#endif /* CONFIG_PPC_85xx || CONFIG_PPC_86xx */
+#endif  
 
 #if defined(CONFIG_PPC_83xx) || defined(CONFIG_PPC_MPC512x)
 DECLARE_PCI_FIXUP_HEADER(0x1957, PCI_DEVICE_ID_MPC8314E, quirk_fsl_pcie_header);
@@ -461,10 +419,6 @@ struct mpc83xx_pcie_priv {
 	u32 dev_base;
 };
 
-/*
- * With the convention of u-boot, the PCIE outbound window 0 serves
- * as configuration transactions outbound.
- */
 #define PEX_OUTWIN0_BAR		0xCA4
 #define PEX_OUTWIN0_TAL		0xCA8
 #define PEX_OUTWIN0_TAH		0xCAC
@@ -475,11 +429,7 @@ static int mpc83xx_pcie_exclude_device(struct pci_bus *bus, unsigned int devfn)
 
 	if (hose->indirect_type & PPC_INDIRECT_TYPE_NO_PCIE_LINK)
 		return PCIBIOS_DEVICE_NOT_FOUND;
-	/*
-	 * Workaround for the HW bug: for Type 0 configure transactions the
-	 * PCI-E controller does not check the device number bits and just
-	 * assumes that the device number bits are 0.
-	 */
+	 
 	if (bus->number == hose->first_busno ||
 			bus->primary == hose->first_busno) {
 		if (devfn & 0xf8)
@@ -509,7 +459,6 @@ static void __iomem *mpc83xx_pcie_remap_cfg(struct pci_bus *bus,
 
 	offset &= 0xfff;
 
-	/* Type 0 */
 	if (bus->number == hose->first_busno)
 		return pcie->cfg_type0 + offset;
 
@@ -593,7 +542,7 @@ static int __init mpc83xx_pcie_setup(struct pci_controller *hose,
 
 	cfg_bar = in_le32(pcie->cfg_type0 + PEX_OUTWIN0_BAR);
 	if (!cfg_bar) {
-		/* PCI-E isn't configured. */
+		 
 		ret = -ENODEV;
 		goto err1;
 	}
@@ -638,7 +587,6 @@ int __init mpc83xx_add_bridge(struct device_node *dev)
 	}
 	pr_debug("Adding PCI host bridge %s\n", dev->full_name);
 
-	/* Fetch host bridge registers address */
 	if (of_address_to_resource(dev, 0, &rsrc_reg)) {
 		printk(KERN_WARNING "Can't get pci register base!\n");
 		return -ENOMEM;
@@ -650,25 +598,18 @@ int __init mpc83xx_add_bridge(struct device_node *dev)
 		printk(KERN_WARNING
 			"No pci config register base in dev tree, "
 			"using default\n");
-		/*
-		 * MPC83xx supports up to two host controllers
-		 * 	one at 0x8500 has config space registers at 0x8300
-		 * 	one at 0x8600 has config space registers at 0x8380
-		 */
+		 
 		if ((rsrc_reg.start & 0xfffff) == 0x8500)
 			rsrc_cfg.start = (rsrc_reg.start & 0xfff00000) + 0x8300;
 		else if ((rsrc_reg.start & 0xfffff) == 0x8600)
 			rsrc_cfg.start = (rsrc_reg.start & 0xfff00000) + 0x8380;
 	}
-	/*
-	 * Controller at offset 0x8500 is primary
-	 */
+	 
 	if ((rsrc_reg.start & 0xfffff) == 0x8500)
 		primary = 1;
 	else
 		primary = 0;
 
-	/* Get bus range if any */
 	bus_range = of_get_property(dev, "bus-range", &len);
 	if (bus_range == NULL || len < 2 * sizeof(int)) {
 		printk(KERN_WARNING "Can't get bus-range for %s, assume"
@@ -700,8 +641,6 @@ int __init mpc83xx_add_bridge(struct device_node *dev)
 	pr_debug(" ->Hose at 0x%p, cfg_addr=0x%p,cfg_data=0x%p\n",
 	    hose, hose->cfg_addr, hose->cfg_data);
 
-	/* Interpret the "ranges" property */
-	/* This also maps the I/O region and sets isa_io/mem_base */
 	pci_process_bridge_OF_ranges(hose, dev, primary);
 
 	return 0;
@@ -709,4 +648,4 @@ err0:
 	pcibios_free_controller(hose);
 	return ret;
 }
-#endif /* CONFIG_PPC_83xx */
+#endif  

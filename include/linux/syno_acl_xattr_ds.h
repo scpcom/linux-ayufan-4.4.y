@@ -1,10 +1,4 @@
-/*
-  File: linux/syno_acl_xattr_ds.h
-
-  Extended attribute system call representation of Access Control Lists.
-
-  Copyright (c) 2000-2010 Synology Inc.
- */
+ 
 #ifndef _SYNO_ACL_XATTR_DS_H
 #define _SYNO_ACL_XATTR_DS_H
 
@@ -13,28 +7,20 @@
 #define SYNO_ACL_MNT_OPT	"synoacl"
 #define SYNO_ACL_NOT_MNT_OPT	"no"SYNO_ACL_MNT_OPT
 
-/* Extended attribute names */
 #define SYNO_ACL_XATTR_ACCESS	"system.syno_acl_self"
 #define SYNO_ACL_XATTR_ACCESS_NOPERM	"system.syno_acl_noperm_self"
 #define SYNO_ACL_XATTR_INHERIT	"system.syno_acl_inherit"
 #define SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY	"system.syno_acl_pseudo_inherit_only"
 
-/* MAC EA Exttend attribute names */
 #define SYNO_XATTR_EA_PREFIX "user.syno."
 #define SYNO_XATTR_EA_PREFIX_LEN 10
 #define SYNO_XATTR_NETATALK_PREFIX "user.netatalk."
 #define SYNO_XATTR_NETATALK_PREFIX_LEN 14
 
-/* Supported ACL a_version fields */
 #define SYNO_ACL_XATTR_VERSION		0x0001
 
-/* An undefined entry e_id value */
 #define SYNO_ACL_UNDEFINED_ID	(-1)
 
-/* permissions in the e_perm field
-   Note!!!!! It should be consistent with MAY_XXXXX in <linux/fs.h>
-   Define it since MAY_XXXX confliced with user space program
-*/
 #define SYNO_ACL_MAY_EXEC				(0x0001)
 #define SYNO_ACL_MAY_WRITE				(0x0002)
 #define SYNO_ACL_MAY_READ				(0x0004)
@@ -51,7 +37,6 @@
 #define SYNO_ACL_MAY_DEL_CHILD			(0x2000)
 #define SYNO_ACL_MAY_GET_OWNER_SHIP		(0x4000)
 
-/* Classify permission type */
 #define SYNO_PERM_READABLE  ( \
 		SYNO_ACL_MAY_READ | SYNO_ACL_MAY_READ_ATTR | SYNO_ACL_MAY_READ_PERMISSION | SYNO_ACL_MAY_READ_EXT_ATTR \
 )
@@ -73,7 +58,6 @@
         SYNO_ACL_MAY_DEL \
 )
 
-/* inherit mode in the e_inherit field */
 #define SYNO_ACL_INHERIT_ONLY		        (0x0001)
 #define SYNO_ACL_INHERIT_FILE		        (0x0002)
 #define SYNO_ACL_INHERIT_DIR		        (0x0004)
@@ -109,23 +93,15 @@
 						 SYNO_ACL_XATTR_TAG_ID_OWNER | \
 						 SYNO_ACL_XATTR_TAG_ID_AUTHENTICATEDUSER | \
 						 SYNO_ACL_XATTR_TAG_ID_SYSTEM)
-// Reserved: (0X0100)
-// Reserved: (0X0200)
-// Reserved: (0X0400)
-// Reserved: (0X0800)
-// Reserved: (0X1000)
-// Reserved: (0X2000)
-// Reserved: (0X4000)
-// Reserved: (0X8000)
-
+ 
 enum {
-	SYNO_KERNEL_IS_FS_SUPPORT = 1, //File System
-	SYNO_KERNEL_IS_FILE_SUPPORT,  //File or Dir
+	SYNO_KERNEL_IS_FS_SUPPORT = 1,  
+	SYNO_KERNEL_IS_FILE_SUPPORT,   
 };
 
 enum {
-	SYNO_ACL_INHERITED = 1, //Includes self-defined and inherited ACL.
-	SYNO_ACL_PSEUDO_INHERIT_ONLY,  //Includes only inherited ACE, even entry has no inherited attribute.
+	SYNO_ACL_INHERITED = 1,  
+	SYNO_ACL_PSEUDO_INHERIT_ONLY,   
 };
 
 typedef struct {
@@ -159,4 +135,4 @@ syno_acl_xattr_count(size_t size)
 	return size / sizeof(syno_acl_xattr_entry);
 }
 
-#endif	/* _SYNO_ACL_XATTR_DS_H */
+#endif	 

@@ -1,20 +1,4 @@
-/*
- * Copyright (c) 2000-2003,2005 Silicon Graphics, Inc.
- * All Rights Reserved.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it would be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write the Free Software Foundation,
- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
+ 
 #include "xfs.h"
 #include "xfs_fs.h"
 #include "xfs_bit.h"
@@ -114,21 +98,11 @@ xfs_inval_cached_trace(
 }
 #endif
 
-/*
- *	xfs_iozero
- *
- *	xfs_iozero clears the specified range of buffer supplied,
- *	and marks all the affected blocks as valid and modified.  If
- *	an affected block is not allocated, it will be allocated.  If
- *	an affected block is not completely overwritten, and is not
- *	valid before the operation, it will be read from disk before
- *	being partially zeroed.
- */
 STATIC int
 xfs_iozero(
-	struct xfs_inode	*ip,	/* inode			*/
-	loff_t			pos,	/* offset in file		*/
-	size_t			count)	/* size of data to zero		*/
+	struct xfs_inode	*ip,	 
+	loff_t			pos,	 
+	size_t			count)	 
 {
 	struct page		*page;
 	struct address_space	*mapping;
@@ -139,7 +113,7 @@ xfs_iozero(
 		unsigned offset, bytes;
 		void *fsdata;
 
-		offset = (pos & (PAGE_CACHE_SIZE -1)); /* Within page */
+		offset = (pos & (PAGE_CACHE_SIZE -1));  
 		bytes = PAGE_CACHE_SIZE - offset;
 		if (bytes > count)
 			bytes = count;
@@ -154,7 +128,7 @@ xfs_iozero(
 
 		status = pagecache_write_end(NULL, mapping, pos, bytes, bytes,
 					page, fsdata);
-		WARN_ON(status <= 0); /* can't return less than zero! */
+		WARN_ON(status <= 0);  
 		pos += bytes;
 		count -= bytes;
 		status = 0;
@@ -163,7 +137,7 @@ xfs_iozero(
 	return (-status);
 }
 
-ssize_t			/* bytes read, or (-)  error */
+ssize_t			 
 xfs_read(
 	xfs_inode_t		*ip,
 	struct kiocb		*iocb,
@@ -182,20 +156,14 @@ xfs_read(
 
 	XFS_STATS_INC(xs_read_calls);
 
-	/* START copy & waste from filemap.c */
 	for (seg = 0; seg < segs; seg++) {
 		const struct iovec *iv = &iovp[seg];
 
-		/*
-		 * If any segment has a negative length, or the cumulative
-		 * length ever wraps negative then return -EINVAL.
-		 */
 		size += iv->iov_len;
 		if (unlikely((ssize_t)(size|iv->iov_len) < 0))
 			return XFS_ERROR(-EINVAL);
 	}
-	/* END copy & waste from filemap.c */
-
+	 
 	if (unlikely(ioflags & IO_ISDIRECT)) {
 		xfs_buftarg_t	*target =
 			XFS_IS_REALTIME_INODE(ip) ?
@@ -304,9 +272,9 @@ xfs_sendfile(
 	} else {
 		ret = generic_file_sendfile(filp, ppos, count, actor, target);
 	}
-#else // CONFIG_OXNAS_FAST_READS_AND_WRITES
+#else  
 		ret = generic_file_sendfile(filp, ppos, count, actor, target);
-#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
+#endif  
 
 	if (ret > 0)
 		XFS_STATS_ADD(xs_read_bytes, ret);
@@ -424,13 +392,7 @@ xfs_splice_write(
 	return ret;
 }
 
-/*
- * This routine is called to handle zeroing any space in the last
- * block of the file that is beyond the EOF.  We do this since the
- * size is being increased without writing anything to that block
- * and we don't want anyone to read the garbage on the disk.
- */
-STATIC int				/* error (positive) */
+STATIC int				 
 xfs_zero_last_block(
 	xfs_inode_t	*ip,
 	xfs_fsize_t	offset,
@@ -448,10 +410,7 @@ xfs_zero_last_block(
 
 	zero_offset = XFS_B_FSB_OFFSET(mp, isize);
 	if (zero_offset == 0) {
-		/*
-		 * There are no extra bytes in the last block on disk to
-		 * zero, so return.
-		 */
+		 
 		return 0;
 	}
 
@@ -463,18 +422,11 @@ xfs_zero_last_block(
 		return error;
 	}
 	ASSERT(nimaps > 0);
-	/*
-	 * If the block underlying isize is just a hole, then there
-	 * is nothing to zero.
-	 */
+	 
 	if (imap.br_startblock == HOLESTARTBLOCK) {
 		return 0;
 	}
-	/*
-	 * Zero the part of the last block beyond the EOF, and write it
-	 * out sync.  We need to drop the ilock while we do this so we
-	 * don't deadlock when the buffer cache calls back to us.
-	 */
+	 
 	xfs_iunlock(ip, XFS_ILOCK_EXCL);
 
 	zero_len = mp->m_sb.sb_blocksize - zero_offset;
@@ -487,22 +439,11 @@ xfs_zero_last_block(
 	return error;
 }
 
-/*
- * Zero any on disk space between the current EOF and the new,
- * larger EOF.  This handles the normal case of zeroing the remainder
- * of the last block in the file and the unusual case of zeroing blocks
- * out beyond the size of the file.  This second case only happens
- * with fixed size extents and when the system crashes before the inode
- * size was updated but after blocks were allocated.  If fill is set,
- * then any holes in the range are filled and zeroed.  If not, the holes
- * are left alone as holes.
- */
-
-int					/* error (positive) */
+int					 
 xfs_zero_eof(
 	xfs_inode_t	*ip,
-	xfs_off_t	offset,		/* starting I/O offset */
-	xfs_fsize_t	isize)		/* current inode size */
+	xfs_off_t	offset,		 
+	xfs_fsize_t	isize)		 
 {
 	xfs_mount_t	*mp = ip->i_mount;
 	xfs_fileoff_t	start_zero_fsb;
@@ -518,33 +459,18 @@ xfs_zero_eof(
 	ASSERT(xfs_isilocked(ip, XFS_ILOCK_EXCL|XFS_IOLOCK_EXCL));
 	ASSERT(offset > isize);
 
-	/*
-	 * First handle zeroing the block on which isize resides.
-	 * We only zero a part of that block so it is handled specially.
-	 */
 	error = xfs_zero_last_block(ip, offset, isize);
 	if (error) {
 		ASSERT(xfs_isilocked(ip, XFS_ILOCK_EXCL|XFS_IOLOCK_EXCL));
 		return error;
 	}
 
-	/*
-	 * Calculate the range between the new size and the old
-	 * where blocks needing to be zeroed may exist.  To get the
-	 * block where the last byte in the file currently resides,
-	 * we need to subtract one from the size and truncate back
-	 * to a block boundary.  We subtract 1 in case the size is
-	 * exactly on a block boundary.
-	 */
 	last_fsb = isize ? XFS_B_TO_FSBT(mp, isize - 1) : (xfs_fileoff_t)-1;
 	start_zero_fsb = XFS_B_TO_FSB(mp, (xfs_ufsize_t)isize);
 	end_zero_fsb = XFS_B_TO_FSBT(mp, offset - 1);
 	ASSERT((xfs_sfiloff_t)last_fsb < (xfs_sfiloff_t)start_zero_fsb);
 	if (last_fsb == end_zero_fsb) {
-		/*
-		 * The size was only incremented on its last block.
-		 * We took care of that above, so just return.
-		 */
+		 
 		return 0;
 	}
 
@@ -562,23 +488,12 @@ xfs_zero_eof(
 
 		if (imap.br_state == XFS_EXT_UNWRITTEN ||
 		    imap.br_startblock == HOLESTARTBLOCK) {
-			/*
-			 * This loop handles initializing pages that were
-			 * partially initialized by the code below this
-			 * loop. It basically zeroes the part of the page
-			 * that sits on a hole and sets the page as P_HOLE
-			 * and calls remapf if it is a mapped file.
-			 */
+			 
 			start_zero_fsb = imap.br_startoff + imap.br_blockcount;
 			ASSERT(start_zero_fsb <= (end_zero_fsb + 1));
 			continue;
 		}
 
-		/*
-		 * There are blocks we need to zero.
-		 * Drop the inode lock while we're doing the I/O.
-		 * We'll still have the iolock to protect us.
-		 */
 		xfs_iunlock(ip, XFS_ILOCK_EXCL);
 
 		zero_off = XFS_FSB_TO_B(mp, start_zero_fsb);
@@ -606,7 +521,7 @@ out_lock:
 	return error;
 }
 
-ssize_t				/* bytes written, or (-) error */
+ssize_t				 
 xfs_write(
 	struct xfs_inode	*xip,
 	struct kiocb		*iocb,
@@ -683,13 +598,6 @@ start:
 		xfs_ilock(xip, XFS_ILOCK_EXCL);
 		eventsent = 1;
 
-		/*
-		 * The iolock was dropped and reacquired in XFS_SEND_DATA
-		 * so we have to recheck the size when appending.
-		 * We will only "goto start;" once, since having sent the
-		 * event prevents another call to XFS_SEND_DATA, which is
-		 * what allows the size to change in the first place.
-		 */
 		if ((file->f_flags & O_APPEND) && pos != xip->i_size)
 			goto start;
 	}
@@ -721,15 +629,6 @@ start:
 	if (likely(!(ioflags & IO_INVIS)))
 		file_update_time(file);
 
-	/*
-	 * If the offset is beyond the size of the file, we have a couple
-	 * of things to do. First, if there is already space allocated
-	 * we need to either create holes or zero the disk or ...
-	 *
-	 * If there is a page where the previous size lands, we need
-	 * to zero it out up to the new size.
-	 */
-
 	if (pos > xip->i_size) {
 		error = xfs_zero_eof(xip, pos, xip->i_size);
 		if (error) {
@@ -738,13 +637,6 @@ start:
 		}
 	}
 	xfs_iunlock(xip, XFS_ILOCK_EXCL);
-
-	/*
-	 * If we're writing the file then make sure to clear the
-	 * setuid and setgid bits if the process is not being run
-	 * by root.  This keeps people from modifying setuid and
-	 * setgid binaries.
-	 */
 
 	if (((xip->i_d.di_mode & S_ISUID) ||
 	    ((xip->i_d.di_mode & (S_ISGID | S_IXGRP)) ==
@@ -758,7 +650,6 @@ start:
 		}
 	}
 
-	/* We can write back this queue in page reclaim */
 	current->backing_dev_info = mapping->backing_dev_info;
 
 	if ((ioflags & IO_ISDIRECT)) {
@@ -774,7 +665,7 @@ start:
 		}
 
 		if (need_i_mutex) {
-			/* demote the lock now the cached pages are gone */
+			 
 			xfs_ilock_demote(xip, XFS_IOLOCK_EXCL);
 			mutex_unlock(&inode->i_mutex);
 
@@ -787,10 +678,6 @@ start:
 		ret = generic_file_direct_write(iocb, iovp,
 				&segs, pos, offset, count, ocount);
 
-		/*
-		 * direct-io write to a hole: fall through to buffered I/O
-		 * for completing the rest of the request.
-		 */
 		if (ret >= 0 && ret != count) {
 			XFS_STATS_ADD(xs_write_bytes, ret);
 
@@ -810,10 +697,7 @@ write_retry:
 				*offset, ioflags);
 		ret2 = generic_file_buffered_write(iocb, iovp, segs,
 				pos, offset, count, ret);
-		/*
-		 * if we just got an ENOSPC, flush the inode now we
-		 * aren't holding any page locks and retry *once*
-		 */
+		 
 		if (ret2 == -ENOSPC && !enospc) {
 			error = xfs_flush_pages(xip, 0, -1, 0, FI_NONE);
 			if (error)
@@ -847,7 +731,7 @@ write_retry:
 			mutex_unlock(&inode->i_mutex);
 		error = XFS_SEND_NAMESP(xip->i_mount, DM_EVENT_NOSPACE, xip,
 				DM_RIGHT_NULL, xip, DM_RIGHT_NULL, NULL, NULL,
-				0, 0, 0); /* Delay flag intentionally  unused */
+				0, 0, 0);  
 		if (need_i_mutex)
 			mutex_lock(&inode->i_mutex);
 		xfs_ilock(xip, iolock);
@@ -862,7 +746,6 @@ write_retry:
 
 	XFS_STATS_ADD(xs_write_bytes, ret);
 
-	/* Handle various SYNC-type writes */
 	if ((file->f_flags & O_SYNC) || IS_SYNC(inode)) {
 		loff_t end = pos + ret - 1;
 		int error2;
@@ -887,13 +770,7 @@ write_retry:
 	if (xip->i_new_size) {
 		xfs_ilock(xip, XFS_ILOCK_EXCL);
 		xip->i_new_size = 0;
-		/*
-		 * If this was a direct or synchronous I/O that failed (such
-		 * as ENOSPC) then part of the I/O may have been written to
-		 * disk before the error occured.  In this case the on-disk
-		 * file size may have been adjusted beyond the in-memory file
-		 * size and now needs to be truncated back.
-		 */
+		 
 		if (xip->i_d.di_size > xip->i_size)
 			xip->i_d.di_size = xip->i_size;
 		xfs_iunlock(xip, XFS_ILOCK_EXCL);
@@ -967,13 +844,6 @@ start:
 		xfs_ilock(xip, XFS_ILOCK_EXCL);
 		eventsent = 1;
 
-		/*
-		 * The iolock was dropped and reacquired in XFS_SEND_DATA
-		 * so we have to recheck the size when appending.
-		 * We will only "goto start;" once, since having sent the
-		 * event prevents another call to XFS_SEND_DATA, which is
-		 * what allows the size to change in the first place.
-		 */
 		if ((file->f_flags & O_APPEND) && pos != xip->i_size)
 			goto start;
 	}
@@ -984,15 +854,6 @@ start:
 
 	xfs_ichgtime(xip, XFS_ICHGTIME_MOD | XFS_ICHGTIME_CHG);
 
-	/*
-	 * If the offset is beyond the size of the file, we have a couple
-	 * of things to do. First, if there is already space allocated
-	 * we need to either create holes or zero the disk or ...
-	 *
-	 * If there is a page where the previous size lands, we need
-	 * to zero it out up to the new size.
-	 */
-
 	if (pos > xip->i_size) {
 		error = xfs_zero_eof(xip, pos, xip->i_size);
 		if (error) {
@@ -1001,13 +862,6 @@ start:
 		}
 	}
 	xfs_iunlock(xip, XFS_ILOCK_EXCL);
-
-	/*
-	 * If we're writing the file then make sure to clear the
-	 * setuid and setgid bits if the process is not being run
-	 * by root.  This keeps people from modifying setuid and
-	 * setgid binaries.
-	 */
 
 	if (((xip->i_d.di_mode & S_ISUID) ||
 	    ((xip->i_d.di_mode & (S_ISGID | S_IXGRP)) ==
@@ -1021,7 +875,6 @@ start:
 		}
 	}
 
-	/* We can write back this queue in page reclaim */
 	current->backing_dev_info = mapping->backing_dev_info;
 
 	{
@@ -1032,15 +885,9 @@ write_retry:
 		xfs_rw_enter_trace(XFS_WRITE_ENTER, xip, (void *)iovp, segs, *offset,
 			ioflags);
 
-//printk("xfs_direct_netrx_write() Before pos = %lld, *offset = %lld, count = %u, ret = %d\n", pos, *offset, count, ret);
 		ret2 = generic_file_direct_netrx_write(iocb, callback, sock, pos,
 			offset, count, ret);
 
-//printk("xfs_direct_netrx_write() After pos = %lld, *offset = %lld, ret = %d, ret2 = %d\n", pos, *offset, ret, ret2);
-		/*
-		 * if we just got an ENOSPC, flush the inode now we
-		 * aren't holding any page locks and retry *once*
-		 */
 		if (ret2 == -ENOSPC && !enospc) {
 			error = xfs_flush_pages(xip, 0, -1, 0, FI_NONE);
 			if (error)
@@ -1070,7 +917,7 @@ write_retry:
 			mutex_unlock(&inode->i_mutex);
 		error = XFS_SEND_NAMESP(xip->i_mount, DM_EVENT_NOSPACE, xip,
 				DM_RIGHT_NULL, xip, DM_RIGHT_NULL, NULL, NULL,
-				0, 0, 0); /* Delay flag intentionally  unused */
+				0, 0, 0);  
 		if (need_i_mutex)
 			mutex_lock(&inode->i_mutex);
 		xfs_ilock(xip, iolock);
@@ -1085,7 +932,6 @@ write_retry:
 
 	XFS_STATS_ADD(xs_write_bytes, ret);
 
-	/* Handle various SYNC-type writes */
 	if ((file->f_flags & O_SYNC) || IS_SYNC(inode)) {
 		int error2;
 
@@ -1117,13 +963,7 @@ write_retry:
 	if (xip->i_new_size) {
 		xfs_ilock(xip, XFS_ILOCK_EXCL);
 		xip->i_new_size = 0;
-		/*
-		 * If this was a direct or synchronous I/O that failed (such
-		 * as ENOSPC) then part of the I/O may have been written to
-		 * disk before the error occured.  In this case the on-disk
-		 * file size may have been adjusted beyond the in-memory file
-		 * size and now needs to be truncated back.
-		 */
+		 
 		if (xip->i_d.di_size > xip->i_size)
 			xip->i_d.di_size = xip->i_size;
 		xfs_iunlock(xip, XFS_ILOCK_EXCL);
@@ -1137,22 +977,12 @@ write_retry:
 }
 #endif
 
-/*
- * All xfs metadata buffers except log state machine buffers
- * get this attached as their b_bdstrat callback function.
- * This is so that we can catch a buffer
- * after prematurely unpinning it to forcibly shutdown the filesystem.
- */
 int
 xfs_bdstrat_cb(struct xfs_buf *bp)
 {
 	if (XFS_FORCED_SHUTDOWN(bp->b_mount)) {
 		xfs_buftrace("XFS__BDSTRAT IOERROR", bp);
-		/*
-		 * Metadata write that didn't get logged but
-		 * written delayed anyway. These aren't associated
-		 * with a transaction, and can be ignored.
-		 */
+		 
 		if (XFS_BUF_IODONE_FUNC(bp) == NULL &&
 		    (XFS_BUF_ISREAD(bp)) == 0)
 			return (xfs_bioerror_relse(bp));
@@ -1164,11 +994,6 @@ xfs_bdstrat_cb(struct xfs_buf *bp)
 	return 0;
 }
 
-/*
- * Wrapper around bdstrat so that we can stop data from going to disk in case
- * we are shutting down the filesystem.  Typically user data goes thru this
- * path; one of the exceptions is the superblock.
- */
 void
 xfsbdstrat(
 	struct xfs_mount	*mp,
@@ -1184,10 +1009,6 @@ xfsbdstrat(
 	xfs_bioerror_relse(bp);
 }
 
-/*
- * If the underlying (data/log/rt) device is readonly, there are some
- * operations that cannot proceed.
- */
 int
 xfs_dev_is_read_only(
 	xfs_mount_t		*mp,

@@ -1,47 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*	$OpenBSD: cryptodev.c,v 1.52 2002/06/19 07:22:46 deraadt Exp $	*/
-
-/*-
- * Linux port done by David McCullough <david_mccullough@mcafee.com>
- * Copyright (C) 2006-2010 David McCullough
- * Copyright (C) 2004-2005 Intel Corporation.
- * The license and original author are listed below.
- *
- * Copyright (c) 2001 Theo de Raadt
- * Copyright (c) 2002-2006 Sam Leffler, Errno Consulting
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *   notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *   notice, this list of conditions and the following disclaimer in the
- *   documentation and/or other materials provided with the distribution.
- * 3. The name of the author may not be used to endorse or promote products
- *   derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * Effort sponsored in part by the Defense Advanced Research Projects
- * Agency (DARPA) and Air Force Research Laboratory, Air Force
- * Materiel Command, USAF, under agreement number F30602-01-2-0537.
- *
-__FBSDID("$FreeBSD: src/sys/opencrypto/cryptodev.c,v 1.34 2007/05/09 19:37:02 gnn Exp $");
- */
-
+ 
 #ifndef AUTOCONF_INCLUDED
 #include <linux/config.h>
 #endif
@@ -81,10 +41,10 @@ struct csession_info {
 	u_int16_t	minkey, maxkey;
 
 	u_int16_t	keysize;
-	/* u_int16_t	hashsize;  */
+	 
 	u_int16_t	authsize;
 	u_int16_t	authkey;
-	/* u_int16_t	ctxsize; */
+	 
 };
 
 struct csession {
@@ -131,10 +91,6 @@ static	int cryptodev_find(struct crypt_find_op *);
 static int cryptodev_cb(void *);
 static int cryptodev_open(struct inode *inode, struct file *filp);
 
-/*
- * Check a crypto identifier to see if it requested
- * a valid crid and it's capabilities match.
- */
 static int
 checkcrid(int crid)
 {
@@ -142,23 +98,19 @@ checkcrid(int crid)
 	int typ = crid & (CRYPTOCAP_F_SOFTWARE | CRYPTOCAP_F_HARDWARE);
 	int caps = 0;
 	
-	/* if the user hasn't selected a driver, then just call newsession */
 	if (hid == 0 && typ != 0)
 		return 0;
 
 	caps = crypto_getcaps(hid);
 
-	/* didn't find anything with capabilities */
 	if (caps == 0) {
 		dprintk("%s: hid=%x typ=%x not matched\n", __FUNCTION__, hid, typ);
 		return EINVAL;
 	}
 	
-	/* the user didn't specify SW or HW, so the driver is ok */
 	if (typ == 0)
 		return 0;
 
-	/* if the type specified didn't match */
 	if (typ != (caps & (CRYPTOCAP_F_SOFTWARE | CRYPTOCAP_F_HARDWARE))) {
 		dprintk("%s: hid=%x typ=%x caps=%x not matched\n", __FUNCTION__,
 				hid, typ, caps);
@@ -276,7 +228,7 @@ cryptodev_op(struct csession *cse, struct crypt_op *cop)
 			dprintk("%s no crde\n", __FUNCTION__);
 			goto bail;
 		}
-		if (cse->cipher == CRYPTO_ARC4) { /* XXX use flag? */
+		if (cse->cipher == CRYPTO_ARC4) {  
 			error = EINVAL;
 			dprintk("%s arc4 with IV\n", __FUNCTION__);
 			goto bail;
@@ -289,7 +241,7 @@ cryptodev_op(struct csession *cse, struct crypt_op *cop)
 		memcpy(crde->crd_iv, cse->tmp_iv, cse->info.blocksize);
 		crde->crd_flags |= CRD_F_IV_EXPLICIT | CRD_F_IV_PRESENT;
 		crde->crd_skip = 0;
-	} else if (cse->cipher == CRYPTO_ARC4) { /* XXX use flag? */
+	} else if (cse->cipher == CRYPTO_ARC4) {  
 		crde->crd_skip = 0;
 	} else if (crde) {
 		crde->crd_flags |= CRD_F_IV_PRESENT;
@@ -303,13 +255,6 @@ cryptodev_op(struct csession *cse, struct crypt_op *cop)
 		goto bail;
 	}
 
-	/*
-	 * Let the dispatch run unlocked, then, interlock against the
-	 * callback before checking if the operation completed and going
-	 * to sleep.  This insures drivers don't inherit our lock which
-	 * results in a lock order reversal between crypto_dispatch forced
-	 * entry and the crypto_done callback into us.
-	 */
 	error = crypto_dispatch(crp);
 	if (error) {
 		dprintk("%s error in crypto_dispatch\n", __FUNCTION__);
@@ -317,22 +262,14 @@ cryptodev_op(struct csession *cse, struct crypt_op *cop)
 	}
 
 	dprintk("%s about to WAIT\n", __FUNCTION__);
-	/*
-	 * we really need to wait for driver to complete to maintain
-	 * state,  luckily interrupts will be remembered
-	 */
+	 
 	do {
 #ifdef MY_DEF_HERE
 		spin_unlock(&syno_lock);
 #endif
 		error = wait_event_interruptible(crp->crp_waitq,
 				((crp->crp_flags & CRYPTO_F_DONE) != 0));
-		/*
-		 * we can't break out of this loop or we will leave behind
-		 * a huge mess,  however,  staying here means if your driver
-		 * is broken user applications can hang and not be killed.
-		 * The solution,  fix your driver :-)
-		 */
+		 
 		if (error) {
 			schedule();
 			error = 0;
@@ -390,10 +327,7 @@ cryptodev_cb(void *op)
 	if (error == EAGAIN) {
 		crp->crp_flags &= ~CRYPTO_F_DONE;
 #ifdef NOTYET
-		/*
-		 * DAVIDM I am fairly sure that we should turn this into a batch
-		 * request to stop bad karma/lockup, revisit
-		 */
+		 
 		crp->crp_flags |= CRYPTO_F_BATCH;
 #endif
 		return crypto_dispatch(crp);
@@ -493,12 +427,7 @@ cryptodev_key(struct crypt_kop *kop)
 #endif
 		error = wait_event_interruptible(krp->krp_waitq,
 				((krp->krp_flags & CRYPTO_KF_DONE) != 0));
-		/*
-		 * we can't break out of this loop or we will leave behind
-		 * a huge mess,  however,  staying here means if your driver
-		 * is broken user applications can hang and not be killed.
-		 * The solution,  fix your driver :-)
-		 */
+		 
 		if (error) {
 			schedule();
 			error = 0;
@@ -510,7 +439,7 @@ cryptodev_key(struct crypt_kop *kop)
 
 	dprintk("%s finished WAITING error=%d\n", __FUNCTION__, error);
 	
-	kop->crk_crid = krp->krp_crid;		/* device that did the work */
+	kop->crk_crid = krp->krp_crid;		 
 	if (krp->krp_status != 0) {
 		error = krp->krp_status;
 		goto fail;
@@ -846,7 +775,6 @@ cryptodev_ioctl(
 			}
 		}
 
-		/* NB: CIOGSESSION2 has the crid */
 		if (cmd == CIOCGSESSION2) {
 			crid = sop.crid;
 			error = checkcrid(crid);
@@ -856,7 +784,7 @@ cryptodev_ioctl(
 				goto bail;
 			}
 		} else {
-			/* allow either HW or SW to be used */
+			 
 			crid = CRYPTOCAP_F_HARDWARE | CRYPTOCAP_F_SOFTWARE;
 		}
 		error = crypto_newsession(&sid, (info.blocksize ? &crie : &cria), crid);
@@ -875,7 +803,7 @@ cryptodev_ioctl(
 		sop.ses = cse->ses;
 
 		if (cmd == CIOCGSESSION2) {
-			/* return hardware/driver id */
+			 
 			sop.crid = CRYPTO_SESID2HID(cse->sid);
 		}
 
@@ -935,7 +863,7 @@ bail:
 		}
 #else
 		if (!crypto_userasymcrypto)
-			return (EPERM);		/* XXX compat? */
+			return (EPERM);		 
 #endif
 		if(copy_from_user(&kop, (void*)arg, sizeof(kop))) {
 			dprintk("%s(CIOCKEY) - bad copy\n", __FUNCTION__);
@@ -943,7 +871,7 @@ bail:
 			goto bail;
 		}
 		if (cmd == CIOCKEY) {
-			/* NB: crypto core enforces s/w driver use */
+			 
 			kop.crk_crid =
 			    CRYPTOCAP_F_HARDWARE | CRYPTOCAP_F_SOFTWARE;
 		}
@@ -957,12 +885,7 @@ bail:
 	case CIOCASYMFEAT:
 		dprintk("%s(CIOCASYMFEAT)\n", __FUNCTION__);
 		if (!crypto_userasymcrypto) {
-			/*
-			 * NB: if user asym crypto operations are
-			 * not permitted return "no algorithms"
-			 * so well-behaved applications will just
-			 * fallback to doing them in software.
-			 */
+			 
 			feat = 0;
 		} else
 			error = crypto_getfeat(&feat);

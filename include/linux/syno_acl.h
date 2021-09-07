@@ -1,14 +1,10 @@
-/*
- * File: linux/syno_acl.h
- * Copyright (c) 2000-2010 Synology Inc.
- */
+ 
 #ifndef __LINUX_SYNO_ACL_H
 #define __LINUX_SYNO_ACL_H
 
 #include <linux/slab.h>
 #include <linux/syno_acl_xattr_ds.h>
 
-/* e_tag entry in struct syno_acl_entry */
 #define SYNO_ACL_USER		(0x01)
 #define SYNO_ACL_GROUP		(0x02)
 #define SYNO_ACL_EVERYONE	(0x04)
@@ -18,7 +14,6 @@
 #define SYNO_ACL_TAG_ALL  (SYNO_ACL_USER | SYNO_ACL_GROUP | \
 						   SYNO_ACL_OWNER | SYNO_ACL_EVERYONE)
 						   
-/* e_allow */
 #define SYNO_ACL_ALLOW		(0x01)
 #define SYNO_ACL_DENY		(0x02)
 
@@ -40,9 +35,6 @@ struct syno_acl {
 #define FOREACH_SYNOACL_ENTRY(pa, acl, pe) \
 	for(pa=(acl)->a_entries, pe=pa+(acl)->a_count; pa<pe; pa++)
 
-/*
- * Duplicate an ACL handle.
- */
 static inline struct syno_acl *
 syno_acl_dup(struct syno_acl *acl)
 {
@@ -51,9 +43,6 @@ syno_acl_dup(struct syno_acl *acl)
 	return acl;
 }
 
-/*
- * Free an ACL handle.
- */
 static inline void
 syno_acl_release(struct syno_acl *acl)
 {
@@ -104,4 +93,4 @@ extern void UseACLModule(const char *szModName, int isGet);
 #define SYNOACLModuleGet(mod_name) do { UseACLModule(mod_name, 1); } while (0)
 #define SYNOACLModulePut(mod_name) do { UseACLModule(mod_name, 0); } while (0)
 
-#endif  /* __LINUX_SYNO_ACL_H */
+#endif   

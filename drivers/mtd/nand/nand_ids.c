@@ -1,26 +1,7 @@
-/*
- *  drivers/mtd/nandids.c
- *
- *  Copyright (C) 2002 Thomas Gleixner (tglx@linutronix.de)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- */
+ 
 #include <linux/module.h>
 #include <linux/mtd/nand.h>
-/*
-*	Chip ID list
-*
-*	Name. ID code, pagesize, chipsize in MegaByte, eraseblock size,
-*	options
-*
-*	Pagesize; 0, 256, 512
-*	0	get this information from the extended chip ID
-+	256	256 Byte page size
-*	512	512 Byte page size
-*/
+ 
 struct nand_flash_dev nand_flash_ids[] = {
 
 #ifdef CONFIG_MTD_NAND_MUSEUM_IDS
@@ -66,20 +47,14 @@ struct nand_flash_dev nand_flash_ids[] = {
 
 	{"NAND 256MiB 3,3V 8-bit",	0x71, 512, 256, 0x4000, 0},
 
-	/*
-	 * These are the new chips with large page size. The pagesize and the
-	 * erasesize is determined from the extended id bytes
-	 */
 #define LP_OPTIONS (NAND_SAMSUNG_LP_OPTIONS | NAND_NO_READRDY | NAND_NO_AUTOINCR)
 #define LP_OPTIONS16 (LP_OPTIONS | NAND_BUSWIDTH_16)
 
-	/*512 Megabit */
 	{"NAND 64MiB 1,8V 8-bit",	0xA2, 0,  64, 0, LP_OPTIONS},
 	{"NAND 64MiB 3,3V 8-bit",	0xF2, 0,  64, 0, LP_OPTIONS},
 	{"NAND 64MiB 1,8V 16-bit",	0xB2, 0,  64, 0, LP_OPTIONS16},
 	{"NAND 64MiB 3,3V 16-bit",	0xC2, 0,  64, 0, LP_OPTIONS16},
 
-	/* 1 Gigabit */
 	{"NAND 128MiB 1,8V 8-bit",	0xA1, 0, 128, 0, LP_OPTIONS},
 	{"NAND 128MiB 3,3V 8-bit",	0xF1, 0, 128, 0, LP_OPTIONS},
 #ifdef CONFIG_SYNO_PLX_PORTING
@@ -88,40 +63,26 @@ struct nand_flash_dev nand_flash_ids[] = {
 	{"NAND 128MiB 1,8V 16-bit",	0xB1, 0, 128, 0, LP_OPTIONS16},
 	{"NAND 128MiB 3,3V 16-bit",	0xC1, 0, 128, 0, LP_OPTIONS16},
 
-	/* 2 Gigabit */
 	{"NAND 256MiB 1,8V 8-bit",	0xAA, 0, 256, 0, LP_OPTIONS},
 	{"NAND 256MiB 3,3V 8-bit",	0xDA, 0, 256, 0, LP_OPTIONS},
 	{"NAND 256MiB 1,8V 16-bit",	0xBA, 0, 256, 0, LP_OPTIONS16},
 	{"NAND 256MiB 3,3V 16-bit",	0xCA, 0, 256, 0, LP_OPTIONS16},
 
-	/* 4 Gigabit */
 	{"NAND 512MiB 1,8V 8-bit",	0xAC, 0, 512, 0, LP_OPTIONS},
 	{"NAND 512MiB 3,3V 8-bit",	0xDC, 0, 512, 0, LP_OPTIONS},
 	{"NAND 512MiB 1,8V 16-bit",	0xBC, 0, 512, 0, LP_OPTIONS16},
 	{"NAND 512MiB 3,3V 16-bit",	0xCC, 0, 512, 0, LP_OPTIONS16},
 
-	/* 8 Gigabit */
 	{"NAND 1GiB 1,8V 8-bit",	0xA3, 0, 1024, 0, LP_OPTIONS},
 	{"NAND 1GiB 3,3V 8-bit",	0xD3, 0, 1024, 0, LP_OPTIONS},
 	{"NAND 1GiB 1,8V 16-bit",	0xB3, 0, 1024, 0, LP_OPTIONS16},
 	{"NAND 1GiB 3,3V 16-bit",	0xC3, 0, 1024, 0, LP_OPTIONS16},
 
-	/* 16 Gigabit */
 	{"NAND 2GiB 1,8V 8-bit",	0xA5, 0, 2048, 0, LP_OPTIONS},
 	{"NAND 2GiB 3,3V 8-bit",	0xD5, 0, 2048, 0, LP_OPTIONS},
 	{"NAND 2GiB 1,8V 16-bit",	0xB5, 0, 2048, 0, LP_OPTIONS16},
 	{"NAND 2GiB 3,3V 16-bit",	0xC5, 0, 2048, 0, LP_OPTIONS16},
 
-	/*
-	 * Renesas AND 1 Gigabit. Those chips do not support extended id and
-	 * have a strange page/block layout !  The chosen minimum erasesize is
-	 * 4 * 2 * 2048 = 16384 Byte, as those chips have an array of 4 page
-	 * planes 1 block = 2 pages, but due to plane arrangement the blocks
-	 * 0-3 consists of page 0 + 4,1 + 5, 2 + 6, 3 + 7 Anyway JFFS2 would
-	 * increase the eraseblock size so we chose a combined one which can be
-	 * erased in one go There are more speed improvements for reads and
-	 * writes possible, but not implemented now
-	 */
 	{"AND 128MiB 3,3V 8-bit",	0x01, 2048, 128, 0x4000,
 	 NAND_IS_AND | NAND_NO_AUTOINCR |NAND_NO_READRDY | NAND_4PAGE_ARRAY |
 	 BBT_AUTO_REFRESH
@@ -130,9 +91,6 @@ struct nand_flash_dev nand_flash_ids[] = {
 	{NULL,}
 };
 
-/*
-*	Manufacturer ID list
-*/
 struct nand_manufacturers nand_manuf_ids[] = {
 	{NAND_MFR_TOSHIBA, "Toshiba"},
 	{NAND_MFR_SAMSUNG, "Samsung"},

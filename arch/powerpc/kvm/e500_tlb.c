@@ -1,20 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2008 Freescale Semiconductor, Inc. All rights reserved.
- *
- * Author: Yu Liu, yu.liu@freescale.com
- *
- * Description:
- * This file is based on arch/powerpc/kvm/44x_tlb.c,
- * by Hollis Blanchard <hollisb@us.ibm.com>.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License, version 2, as
- * published by the Free Software Foundation.
- */
-
+ 
 #include <linux/types.h>
 #include <linux/string.h>
 #include <linux/kvm.h>
@@ -87,13 +74,11 @@ static inline int tlbe_is_writable(struct tlbe *tlbe)
 
 static inline u32 e500_shadow_mas3_attrib(u32 mas3, int usermode)
 {
-	/* Mask off reserved bits. */
+	 
 	mas3 &= MAS3_ATTRIB_MASK;
 
 	if (!usermode) {
-		/* Guest is in supervisor mode,
-		 * so we need to translate guest
-		 * supervisor permissions into user permissions. */
+		 
 		mas3 &= ~E500_TLB_USER_PERM_MASK;
 		mas3 |= (mas3 & E500_TLB_SUPER_PERM_MASK) << 1;
 	}
@@ -110,9 +95,6 @@ static inline u32 e500_shadow_mas2_attrib(u32 mas2, int usermode)
 #endif
 }
 
-/*
- * writing shadow tlb entry to host TLB
- */
 static inline void __write_host_tlbe(struct tlbe *stlbe)
 {
 	mtspr(SPRN_MAS1, stlbe->mas1);
@@ -149,7 +131,6 @@ void kvmppc_e500_tlb_load(struct kvm_vcpu *vcpu, int cpu)
 	int i;
 	unsigned register mas0;
 
-	/* Load all valid TLB1 entries to reduce guest tlb miss fault */
 	local_irq_disable();
 	mas0 = mfspr(SPRN_MAS0);
 	for (i = 0; i < tlb1_max_shadow_size(); i++) {
@@ -170,13 +151,11 @@ void kvmppc_e500_tlb_put(struct kvm_vcpu *vcpu)
 	_tlbil_all();
 }
 
-/* Search the guest TLB for a matching entry. */
 static int kvmppc_e500_tlb_index(struct kvmppc_vcpu_e500 *vcpu_e500,
 		gva_t eaddr, int tlbsel, unsigned int pid, int as)
 {
 	int i;
 
-	/* XXX Replace loop with fancy data structures. */
 	for (i = 0; i < vcpu_e500->guest_tlb_size[tlbsel]; i++) {
 		struct tlbe *tlbe = &vcpu_e500->guest_tlb[tlbsel][i];
 		unsigned int tid;
@@ -229,7 +208,7 @@ static void kvmppc_e500_stlbe_invalidate(struct kvmppc_vcpu_e500 *vcpu_e500,
 	kvmppc_e500_shadow_release(vcpu_e500, tlbsel, esel);
 	stlbe->mas1 = 0;
 #ifdef MY_DEF_HERE
-	/* XXX doesn't compile */
+	 
 #if 0
 	trace_kvm_stlb_inval(index_of(tlbsel, esel), stlbe->mas1, stlbe->mas2,
 			     stlbe->mas3, stlbe->mas7);
@@ -246,7 +225,6 @@ static void kvmppc_e500_tlb1_invalidate(struct kvmppc_vcpu_e500 *vcpu_e500,
 	unsigned int pid = tid & 0xff;
 	unsigned int i;
 
-	/* XXX Replace loop with fancy data structures. */
 	for (i = 0; i < vcpu_e500->guest_tlb_size[1]; i++) {
 		struct tlbe *stlbe = &vcpu_e500->shadow_tlb[1][i];
 		unsigned int tid;
@@ -276,7 +254,6 @@ static inline void kvmppc_e500_deliver_tlb_miss(struct kvm_vcpu *vcpu,
 	unsigned int victim, pidsel, tsized;
 	int tlbsel;
 
-	/* since we only have two TLBs, only lower bit is used. */
 	tlbsel = (vcpu_e500->mas4 >> 28) & 0x1;
 	victim = (tlbsel == 0) ? tlb0_get_next_victim(vcpu_e500) : 0;
 	pidsel = (vcpu_e500->mas4 >> 16) & 0xf;
@@ -305,7 +282,6 @@ static inline void kvmppc_e500_shadow_map(struct kvmppc_vcpu_e500 *vcpu_e500,
 
 	stlbe = &vcpu_e500->shadow_tlb[tlbsel][esel];
 
-	/* Get reference to new page. */
 	new_page = gfn_to_page(vcpu_e500->vcpu.kvm, gfn);
 	if (is_error_page(new_page)) {
 		printk(KERN_ERR "Couldn't get guest page for gfn %lx!\n", gfn);
@@ -314,12 +290,10 @@ static inline void kvmppc_e500_shadow_map(struct kvmppc_vcpu_e500 *vcpu_e500,
 	}
 	hpaddr = page_to_phys(new_page);
 
-	/* Drop reference to old page. */
 	kvmppc_e500_shadow_release(vcpu_e500, tlbsel, esel);
 
 	vcpu_e500->shadow_pages[tlbsel][esel] = new_page;
 
-	/* Force TS=1 IPROT=0 TSIZE=4KB for all guest mappings. */
 	stlbe->mas1 = MAS1_TSIZE(BOOK3E_PAGESZ_4K)
 		| MAS1_TID(get_tlb_tid(gtlbe)) | MAS1_TS | MAS1_VALID;
 	stlbe->mas2 = (gvaddr & MAS2_EPN)
@@ -334,7 +308,6 @@ static inline void kvmppc_e500_shadow_map(struct kvmppc_vcpu_e500 *vcpu_e500,
 			     stlbe->mas3, stlbe->mas7);
 }
 
-/* XXX only map the one-one case, for now use TLB0 */
 static int kvmppc_e500_stlbe_map(struct kvmppc_vcpu_e500 *vcpu_e500,
 		int tlbsel, int esel)
 {
@@ -349,9 +322,6 @@ static int kvmppc_e500_stlbe_map(struct kvmppc_vcpu_e500 *vcpu_e500,
 	return esel;
 }
 
-/* Caller must ensure that the specified guest TLB entry is safe to insert into
- * the shadow TLB. */
-/* XXX for both one-one and one-to-many , for now use TLB1 */
 static int kvmppc_e500_tlb1_map(struct kvmppc_vcpu_e500 *vcpu_e500,
 		u64 gvaddr, gfn_t gfn, struct tlbe *gtlbe)
 {
@@ -367,16 +337,12 @@ static int kvmppc_e500_tlb1_map(struct kvmppc_vcpu_e500 *vcpu_e500,
 	return victim;
 }
 
-/* Invalidate all guest kernel mappings when enter usermode,
- * so that when they fault back in they will get the
- * proper permission bits. */
 void kvmppc_mmu_priv_switch(struct kvm_vcpu *vcpu, int usermode)
 {
 	if (usermode) {
 		struct kvmppc_vcpu_e500 *vcpu_e500 = to_e500(vcpu);
 		int i;
 
-		/* XXX Replace loop with fancy data structures. */
 		for (i = 0; i < tlb1_max_shadow_size(); i++)
 			kvmppc_e500_stlbe_invalidate(vcpu_e500, 1, i);
 
@@ -432,11 +398,10 @@ int kvmppc_e500_emul_tlbivax(struct kvm_vcpu *vcpu, int ra, int rb)
 
 	ia = (ea >> 2) & 0x1;
 
-	/* since we only have two TLBs, only lower bit is used. */
 	tlbsel = (ea >> 3) & 0x1;
 
 	if (ia) {
-		/* invalidate all entries */
+		 
 		for (esel = 0; esel < vcpu_e500->guest_tlb_size[tlbsel]; esel++)
 			kvmppc_e500_gtlbe_invalidate(vcpu_e500, tlbsel, esel);
 	} else {
@@ -501,7 +466,6 @@ int kvmppc_e500_emul_tlbsx(struct kvm_vcpu *vcpu, int rb)
 	} else {
 		int victim;
 
-		/* since we only have two TLBs, only lower bit is used. */
 		tlbsel = vcpu_e500->mas4 >> 28 & 0x1;
 		victim = (tlbsel == 0) ? tlb0_get_next_victim(vcpu_e500) : 0;
 
@@ -548,11 +512,10 @@ int kvmppc_e500_emul_tlbwe(struct kvm_vcpu *vcpu)
 	trace_kvm_gtlb_write(vcpu_e500->mas0, gtlbe->mas1, gtlbe->mas2,
 			     gtlbe->mas3, gtlbe->mas7);
 
-	/* Invalidate shadow mappings for the about-to-be-clobbered TLBE. */
 	if (tlbe_is_host_safe(vcpu, gtlbe)) {
 		switch (tlbsel) {
 		case 0:
-			/* TLB0 */
+			 
 			gtlbe->mas1 &= ~MAS1_TSIZE(~0);
 			gtlbe->mas1 |= MAS1_TSIZE(BOOK3E_PAGESZ_4K);
 
@@ -562,14 +525,10 @@ int kvmppc_e500_emul_tlbwe(struct kvm_vcpu *vcpu)
 			break;
 
 		case 1:
-			/* TLB1 */
+			 
 			eaddr = get_tlb_eaddr(gtlbe);
 			raddr = get_tlb_raddr(gtlbe);
 
-			/* Create a 4KB mapping on the host.
-			 * If the guest wanted a large page,
-			 * only the first 4KB is mapped here and the rest
-			 * are mapped on the fly. */
 			stlbsel = 1;
 			sesel = kvmppc_e500_tlb1_map(vcpu_e500, eaddr,
 					raddr >> PAGE_SHIFT, gtlbe);
@@ -632,7 +591,6 @@ void kvmppc_mmu_destroy(struct kvm_vcpu *vcpu)
 		for (i = 0; i < vcpu_e500->guest_tlb_size[tlbsel]; i++)
 			kvmppc_e500_shadow_release(vcpu_e500, tlbsel, i);
 
-	/* discard all guest mapping */
 	_tlbil_all();
 }
 
@@ -686,14 +644,12 @@ void kvmppc_e500_tlb_setup(struct kvmppc_vcpu_e500 *vcpu_e500)
 {
 	struct tlbe *tlbe;
 
-	/* Insert large initial mapping for guest. */
 	tlbe = &vcpu_e500->guest_tlb[1][0];
 	tlbe->mas1 = MAS1_VALID | MAS1_TSIZE(BOOK3E_PAGESZ_256M);
 	tlbe->mas2 = 0;
 	tlbe->mas3 = E500_TLB_SUPER_PERM_MASK;
 	tlbe->mas7 = 0;
 
-	/* 4K map for serial output. Used by kernel wrapper. */
 	tlbe = &vcpu_e500->guest_tlb[1][1];
 	tlbe->mas1 = MAS1_VALID | MAS1_TSIZE(BOOK3E_PAGESZ_4K);
 	tlbe->mas2 = (0xe0004500 & 0xFFFFF000) | MAS2_I | MAS2_G;

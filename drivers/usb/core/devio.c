@@ -1,42 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*****************************************************************************/
-
-/*
- *      devio.c  --  User space communication with USB devices.
- *
- *      Copyright (C) 1999-2000  Thomas Sailer (sailer@ife.ee.ethz.ch)
- *
- *      This program is free software; you can redistribute it and/or modify
- *      it under the terms of the GNU General Public License as published by
- *      the Free Software Foundation; either version 2 of the License, or
- *      (at your option) any later version.
- *
- *      This program is distributed in the hope that it will be useful,
- *      but WITHOUT ANY WARRANTY; without even the implied warranty of
- *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *      GNU General Public License for more details.
- *
- *      You should have received a copy of the GNU General Public License
- *      along with this program; if not, write to the Free Software
- *      Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  This file implements the usbfs/x/y files, where
- *  x is the bus number and y the device number.
- *
- *  It allows user space programs/"drivers" to communicate directly
- *  with USB devices without intervening kernel driver.
- *
- *  Revision history
- *    22.12.1999   0.1   Initial release (split from proc_usb.c)
- *    04.01.2000   0.2   Turned into its own filesystem
- *    30.09.2005   0.3   Fix user-triggerable oops in async URB delivery
- *    			 (CAN-2005-3055)
- */
-
-/*****************************************************************************/
-
+ 
 #include <linux/fs.h>
 #include <linux/mm.h>
 #include <linux/slab.h>
@@ -53,24 +18,23 @@
 #include <asm/byteorder.h>
 #include <linux/moduleparam.h>
 
-#include "hcd.h"	/* for usbcore internals */
+#include "hcd.h"	 
 #include "usb.h"
 #include "hub.h"
 
 #define USB_MAXBUS			64
 #define USB_DEVICE_MAX			USB_MAXBUS * 128
 
-/* Mutual exclusion for removal, open, and release */
 DEFINE_MUTEX(usbfs_mutex);
 
 struct dev_state {
-	struct list_head list;      /* state list */
+	struct list_head list;       
 	struct usb_device *dev;
 	struct file *file;
-	spinlock_t lock;            /* protects the async urb lists */
+	spinlock_t lock;             
 	struct list_head async_pending;
 	struct list_head async_completed;
-	wait_queue_head_t wait;     /* wake up if a request completed */
+	wait_queue_head_t wait;      
 	unsigned int discsignr;
 	struct pid *disc_pid;
 	uid_t disc_uid, disc_euid;
@@ -165,7 +129,7 @@ static ssize_t usbdev_read(struct file *file, char __user *buf, size_t nbytes,
 	}
 
 	if (pos < sizeof(struct usb_device_descriptor)) {
-		/* 18 bytes - fits on the stack */
+		 
 		struct usb_device_descriptor temp_desc;
 
 		memcpy(&temp_desc, &dev->descriptor, sizeof(dev->descriptor));
@@ -196,8 +160,6 @@ static ssize_t usbdev_read(struct file *file, char __user *buf, size_t nbytes,
 
 		if (*ppos < pos + length) {
 
-			/* The descriptor may claim to be longer than it
-			 * really is.  Here is the actual allocated length. */
 			unsigned alloclen =
 				le16_to_cpu(dev->config[i].desc.wTotalLength);
 
@@ -205,7 +167,6 @@ static ssize_t usbdev_read(struct file *file, char __user *buf, size_t nbytes,
 			if (len > nbytes)
 				len = nbytes;
 
-			/* Simply don't write (skip over) unallocated parts */
 			if (alloclen > (*ppos - pos)) {
 				alloclen -= (*ppos - pos);
 				if (copy_to_user(buf,
@@ -229,10 +190,6 @@ err:
 	usb_unlock_device(dev);
 	return ret;
 }
-
-/*
- * async list handling
- */
 
 static struct async *alloc_async(unsigned int numisoframes)
 {
@@ -326,7 +283,7 @@ static void snoop_urb(struct usb_device *udev,
 	t = types[usb_pipetype(pipe)];
 	d = dirs[!!usb_pipein(pipe)];
 
-	if (userurb) {		/* Async */
+	if (userurb) {		 
 		if (when == SUBMIT)
 			dev_info(&udev->dev, "userurb %p, ep%d %s-%s, "
 					"length %u\n",
@@ -357,11 +314,6 @@ __acquires(ps->lock)
 {
 	struct async *as;
 
-	/* Mark all the pending URBs that match bulk_addr, up to but not
-	 * including the first one without AS_CONTINUATION.  If such an
-	 * URB is encountered then a new transfer has already started so
-	 * the endpoint doesn't need to be disabled; otherwise it does.
-	 */
 	list_for_each_entry(as, &ps->async_pending, asynclist) {
 		if (as->bulk_addr == bulk_addr) {
 			if (as->bulk_status != AS_CONTINUATION)
@@ -372,12 +324,11 @@ __acquires(ps->lock)
 	}
 	ps->disabled_bulk_eps |= (1 << bulk_addr);
 
-	/* Now carefully unlink all the marked pending URBs */
  rescan:
 	list_for_each_entry(as, &ps->async_pending, asynclist) {
 		if (as->bulk_status == AS_UNLINK) {
-			as->bulk_status = 0;		/* Only once */
-			spin_unlock(&ps->lock);		/* Allow completions */
+			as->bulk_status = 0;		 
+			spin_unlock(&ps->lock);		 
 			usb_unlink_urb(as->urb);
 			spin_lock(&ps->lock);
 			goto rescan;
@@ -435,7 +386,6 @@ static void destroy_async(struct dev_state *ps, struct list_head *list)
 		as = list_entry(list->next, struct async, asynclist);
 		list_del_init(&as->asynclist);
 
-		/* drop the spinlock so the completion handler can run */
 		spin_unlock_irqrestore(&ps->lock, flags);
 		usb_kill_urb(as->urb);
 		spin_lock_irqsave(&ps->lock, flags);
@@ -463,12 +413,6 @@ static void destroy_all_async(struct dev_state *ps)
 	destroy_async(ps, &ps->async_pending);
 }
 
-/*
- * interface claims are made only at the request of user level code,
- * which can also release them (explicitly or by closing files).
- * they're also undone when devices disconnect.
- */
-
 static int driver_probe(struct usb_interface *intf,
 			const struct usb_device_id *id)
 {
@@ -483,10 +427,6 @@ static void driver_disconnect(struct usb_interface *intf)
 	if (!ps)
 		return;
 
-	/* NOTE:  this relies on usbcore having canceled and completed
-	 * all pending I/O requests; 2.6 does that.
-	 */
-
 	if (likely(ifnum < 8*sizeof(ps->ifclaimed)))
 		clear_bit(ifnum, &ps->ifclaimed);
 	else
@@ -495,13 +435,9 @@ static void driver_disconnect(struct usb_interface *intf)
 
 	usb_set_intfdata(intf, NULL);
 
-	/* force async requests to complete */
 	destroy_async_on_interface(ps, ifnum);
 }
 
-/* The following routines are merely placeholders.  There is no way
- * to inform a user task about suspend or resumes.
- */
 static int driver_suspend(struct usb_interface *intf, pm_message_t msg)
 {
 	return 0;
@@ -528,7 +464,7 @@ static int claimintf(struct dev_state *ps, unsigned int ifnum)
 
 	if (ifnum >= 8*sizeof(ps->ifclaimed))
 		return -EINVAL;
-	/* already claimed */
+	 
 	if (test_bit(ifnum, &ps->ifclaimed))
 		return 0;
 
@@ -571,7 +507,7 @@ static int checkintf(struct dev_state *ps, unsigned int ifnum)
 	if (test_bit(ifnum, &ps->ifclaimed))
 		return 0;
 #ifndef MY_ABC_HERE
-	/* if not yet claimed, claim it for the driver */
+	 
 	dev_warn(&ps->dev->dev, "usbfs: process %d (%s) did not claim "
 		 "interface %u before use\n", task_pid_nr(current),
 		 current->comm, ifnum);
@@ -647,9 +583,6 @@ static struct usb_device *usbdev_lookup_by_devt(dev_t devt)
 	return container_of(dev, struct usb_device, dev);
 }
 
-/*
- * file operations
- */
 static int usbdev_open(struct inode *inode, struct file *file)
 {
 	struct usb_device *dev = NULL;
@@ -658,7 +591,7 @@ static int usbdev_open(struct inode *inode, struct file *file)
 	int ret;
 
 	lock_kernel();
-	/* Protect against simultaneous removal or release */
+	 
 	mutex_lock(&usbfs_mutex);
 
 	ret = -ENOMEM;
@@ -668,11 +601,10 @@ static int usbdev_open(struct inode *inode, struct file *file)
 
 	ret = -ENODEV;
 
-	/* usbdev device-node */
 	if (imajor(inode) == USB_DEVICE_MAJOR)
 		dev = usbdev_lookup_by_devt(inode->i_rdev);
 #ifdef CONFIG_USB_DEVICEFS
-	/* procfs file */
+	 
 	if (!dev) {
 		dev = inode->i_private;
 		if (dev && dev->usbfs_dentry &&
@@ -728,7 +660,6 @@ static int usbdev_release(struct inode *inode, struct file *file)
 	usb_lock_device(dev);
 	usb_hub_release_all_ports(dev, ps);
 
-	/* Protect against simultaneous open */
 	mutex_lock(&usbfs_mutex);
 	list_del_init(&ps->list);
 	mutex_unlock(&usbfs_mutex);
@@ -767,7 +698,7 @@ static int proc_control(struct dev_state *ps, void __user *arg)
 	ret = check_ctrlrecip(ps, ctrl.bRequestType, ctrl.wIndex);
 	if (ret)
 		return ret;
-	wLength = ctrl.wLength;		/* To suppress 64k PAGE_SIZE warning */
+	wLength = ctrl.wLength;		 
 	if (wLength > PAGE_SIZE)
 		return -EINVAL;
 	tbuf = (unsigned char *)__get_free_page(GFP_KERNEL);
@@ -991,10 +922,6 @@ static int proc_setconfig(struct dev_state *ps, void __user *arg)
 
 	actconfig = ps->dev->actconfig;
 
-	/* Don't touch the device if any interfaces are claimed.
-	 * It could interfere with other drivers' operations, and if
-	 * an interface is claimed by usbfs it could easily deadlock.
-	 */
 	if (actconfig) {
 		int i;
 
@@ -1015,9 +942,6 @@ static int proc_setconfig(struct dev_state *ps, void __user *arg)
 		}
 	}
 
-	/* SET_CONFIGURATION is often abused as a "cheap" driver reset,
-	 * so avoid usb_set_configuration()'s kick to sysfs
-	 */
 	if (status == 0) {
 		if (actconfig && actconfig->desc.bConfigurationValue == u)
 			status = usb_reset_configuration(ps->dev);
@@ -1072,8 +996,7 @@ static int proc_do_submiturb(struct dev_state *ps, struct usbdevfs_urb *uurb,
 	case USBDEVFS_URB_TYPE_CONTROL:
 		if (!usb_endpoint_xfer_control(&ep->desc))
 			return -EINVAL;
-		/* min 8 byte setup packet,
-		 * max 8 byte setup plus an arbitrary data stage */
+		 
 		if (uurb->buffer_length < 8 ||
 		    uurb->buffer_length > (8 + MAX_USBFS_BUFFER_SIZE))
 			return -EINVAL;
@@ -1111,7 +1034,7 @@ static int proc_do_submiturb(struct dev_state *ps, struct usbdevfs_urb *uurb,
 		case USB_ENDPOINT_XFER_CONTROL:
 		case USB_ENDPOINT_XFER_ISOC:
 			return -EINVAL;
-		/* allow single-shot interrupt transfers, at bogus rates */
+		 
 		}
 		uurb->number_of_packets = 0;
 		if (uurb->buffer_length > MAX_USBFS_BUFFER_SIZE)
@@ -1119,7 +1042,7 @@ static int proc_do_submiturb(struct dev_state *ps, struct usbdevfs_urb *uurb,
 		break;
 
 	case USBDEVFS_URB_TYPE_ISO:
-		/* arbitrary limit */
+		 
 		if (uurb->number_of_packets < 1 ||
 		    uurb->number_of_packets > 128)
 			return -EINVAL;
@@ -1134,15 +1057,14 @@ static int proc_do_submiturb(struct dev_state *ps, struct usbdevfs_urb *uurb,
 			return -EFAULT;
 		}
 		for (totlen = u = 0; u < uurb->number_of_packets; u++) {
-			/* arbitrary limit,
-			 * sufficient for USB 2.0 high-bandwidth iso */
+			 
 			if (isopkt[u].length > 8192) {
 				kfree(isopkt);
 				return -EINVAL;
 			}
 			totlen += isopkt[u].length;
 		}
-		/* 3072 * 64 microframes */
+		 
 		if (totlen > 196608) {
 			kfree(isopkt);
 			return -EINVAL;
@@ -1183,10 +1105,7 @@ static int proc_do_submiturb(struct dev_state *ps, struct usbdevfs_urb *uurb,
 			free_async(as);
 			return -ENOMEM;
 		}
-		/* Isochronous input data may end up being discontiguous
-		 * if some of the packets are short.  Clear the buffer so
-		 * that the gaps don't leak kernel data to userspace.
-		 */
+		 
 		if (is_in && uurb->type == USBDEVFS_URB_TYPE_ISO)
 			memset(as->urb->transfer_buffer, 0,
 					uurb->buffer_length);
@@ -1196,10 +1115,6 @@ static int proc_do_submiturb(struct dev_state *ps, struct usbdevfs_urb *uurb,
 			__create_pipe(ps->dev, uurb->endpoint & 0xf) |
 			(uurb->endpoint & USB_DIR_IN);
 
-	/* This tedious sequence is necessary because the URB_* flags
-	 * are internal to the kernel and subject to change, whereas
-	 * the USBDEVFS_URB_* flags are a user API and must not be changed.
-	 */
 	u = (is_in ? URB_DIR_IN : URB_DIR_OUT);
 	if (uurb->flags & USBDEVFS_URB_ISO_ASAP)
 		u |= URB_ISO_ASAP;
@@ -1256,25 +1171,15 @@ static int proc_do_submiturb(struct dev_state *ps, struct usbdevfs_urb *uurb,
 	if (usb_endpoint_xfer_bulk(&ep->desc)) {
 		spin_lock_irq(&ps->lock);
 
-		/* Not exactly the endpoint address; the direction bit is
-		 * shifted to the 0x10 position so that the value will be
-		 * between 0 and 31.
-		 */
 		as->bulk_addr = usb_endpoint_num(&ep->desc) |
 			((ep->desc.bEndpointAddress & USB_ENDPOINT_DIR_MASK)
 				>> 3);
 
-		/* If this bulk URB is the start of a new transfer, re-enable
-		 * the endpoint.  Otherwise mark it as a continuation URB.
-		 */
 		if (uurb->flags & USBDEVFS_URB_BULK_CONTINUATION)
 			as->bulk_status = AS_CONTINUATION;
 		else
 			ps->disabled_bulk_eps &= ~(1 << as->bulk_addr);
 
-		/* Don't accept continuation URBs if the endpoint is
-		 * disabled because of an earlier error.
-		 */
 		if (ps->disabled_bulk_eps & (1 << as->bulk_addr))
 			ret = -EREMOTEIO;
 		else
@@ -1327,9 +1232,9 @@ static int processcompl(struct async *as, void __user * __user *arg)
 	unsigned int i;
 
 	if (as->userbuffer && urb->actual_length) {
-		if (urb->number_of_packets > 0)		/* Isochronous */
+		if (urb->number_of_packets > 0)		 
 			i = urb->transfer_buffer_length;
-		else					/* Non-Isoc */
+		else					 
 			i = urb->actual_length;
 		if (copy_to_user(as->userbuffer, urb->transfer_buffer, i))
 			goto err_out;
@@ -1555,7 +1460,6 @@ static int proc_ioctl(struct dev_state *ps, struct usbdevfs_ioctl *ctl)
 	struct usb_interface    *intf = NULL;
 	struct usb_driver       *driver = NULL;
 
-	/* alloc buffer */
 	if ((size = _IOC_SIZE(ctl->ioctl_code)) > 0) {
 		if ((buf = kmalloc(size, GFP_KERNEL)) == NULL)
 			return -ENOMEM;
@@ -1580,7 +1484,6 @@ static int proc_ioctl(struct dev_state *ps, struct usbdevfs_ioctl *ctl)
 		retval = -EINVAL;
 	else switch (ctl->ioctl_code) {
 
-	/* disconnect kernel driver from interface */
 	case USBDEVFS_DISCONNECT:
 		if (intf->dev.driver) {
 			driver = to_usb_driver(intf->dev.driver);
@@ -1590,7 +1493,6 @@ static int proc_ioctl(struct dev_state *ps, struct usbdevfs_ioctl *ctl)
 			retval = -ENODATA;
 		break;
 
-	/* let kernel drivers try to (re)bind to the interface */
 	case USBDEVFS_CONNECT:
 		if (!intf->dev.driver)
 			retval = device_attach(&intf->dev);
@@ -1598,7 +1500,6 @@ static int proc_ioctl(struct dev_state *ps, struct usbdevfs_ioctl *ctl)
 			retval = -EBUSY;
 		break;
 
-	/* talk directly to the interface's driver */
 	default:
 		if (intf->dev.driver)
 			driver = to_usb_driver(intf->dev.driver);
@@ -1611,7 +1512,6 @@ static int proc_ioctl(struct dev_state *ps, struct usbdevfs_ioctl *ctl)
 		}
 	}
 
-	/* cleanup and return */
 	if (retval >= 0
 			&& (_IOC_DIR(ctl->ioctl_code) & _IOC_READ) != 0
 			&& size > 0
@@ -1673,11 +1573,6 @@ static int proc_release_port(struct dev_state *ps, void __user *arg)
 	return usb_hub_release_port(ps->dev, portnum, ps);
 }
 
-/*
- * NOTE:  All requests here that have interface numbers as parameters
- * are assuming that somehow the configuration has been prevented from
- * changing.  But there's no mechanism to ensure that...
- */
 static int usbdev_ioctl(struct inode *inode, struct file *file,
 			unsigned int cmd, unsigned long arg)
 {
@@ -1831,7 +1726,6 @@ static int usbdev_ioctl(struct inode *inode, struct file *file,
 	return ret;
 }
 
-/* No kernel lock - fine */
 static unsigned int usbdev_poll(struct file *file,
 				struct poll_table_struct *wait)
 {
@@ -1954,10 +1848,7 @@ int __init usb_devio_init(void)
 		usb_classdev_class = NULL;
 		goto out;
 	}
-	/* devices of this class shadow the major:minor of their parent
-	 * device, so clear ->dev_kobj to prevent adding duplicate entries
-	 * to /sys/dev
-	 */
+	 
 	usb_classdev_class->dev_kobj = NULL;
 #endif
 	usb_register_notify(&usbdev_nb);

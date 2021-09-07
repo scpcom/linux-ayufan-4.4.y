@@ -1,10 +1,9 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-// Copyright (c) 2000-2009 Synology Inc. All rights reserved.
-
-#include <linux/kernel.h> /* printk() */
-#include <linux/errno.h>  /* error codes */
+ 
+#include <linux/kernel.h>  
+#include <linux/errno.h>   
 #include <linux/delay.h>
 #include <linux/string.h>
 #include "../i2c/i2c-mv.h"
@@ -72,11 +71,10 @@ int GetSysTemperature(int *Temperature)
 	data = __swab16(data);
 #endif
 
-	/* The temperature data only 9 bits */
 	data = data >> 7;
 
-	if (data >> 8) { /* bit 9 is minus sign */
-		/* subzero */
+	if (data >> 8) {  
+		 
 		*Temperature = -1 * (0x100 - ((u8 *)&data)[1]);
 	} else {
 		*Temperature = data;

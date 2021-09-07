@@ -1,17 +1,10 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-// Copyright (c) 2000-2008 Synology Inc. All rights reserved.
+ 
 #include <linux/synolib.h>
 #include <linux/module.h>
 
-/**
- * this function is the crond kernel code.
- * 
- * it's used for schedul job to execute
- * 
- * @param work   Should not be NULL. this parm is passing in by kernel code.
- */
 static void _SynoTimePeriodHandler(struct work_struct *work)
 {
 	SYNOASYNCOPERATION	*pSynoAsyncOp = container_of(work, SYNOASYNCOPERATION, sched_work.work);
@@ -24,14 +17,9 @@ static void _SynoTimePeriodHandler(struct work_struct *work)
 
 	spin_lock_irqsave(&pSynoAsyncOp->syno_async_lock, flags);
 	if(!pSynoAsyncOp->stopAsyncOperation) {		
-		/*
-		* calling user job
-		*/		
+		 		
 		pSynoAsyncOp->period_func(pSynoAsyncOp->period_func_data);
 
-		/*
-		* re-schedule
-		*/
 		if(NULL != pSynoAsyncOp->pwq){
 			queue_delayed_work(pSynoAsyncOp->pwq, &pSynoAsyncOp->sched_work, pSynoAsyncOp->period_in_sec*HZ);
 		}else{
@@ -65,23 +53,6 @@ END:
 	return res;
 }
 
-/**
- * Micro kernel crontab initialize function
- * 
- * @param pSynoAsyncOp
- *                   [IN] Please malloc first. Should not be NULL
- * @param pWorkQueue [IN] Please init it before pass in.
- *                   Should not be NULL
- * @param period_func
- *                   [IN] Schedule function, Should not be NULL.
- * @param period_in_sec
- *                   [IN] Scheduled period time.
- *                   Should more than 1 less than 1 week.
- * 
- * @return 0: on success
- *         -1: fail, set SynoDebugFlag=1 for
- *         more information
- */
 int SynoAsyncOperationInit(SYNOASYNCOPERATION *pSynoAsyncOp, struct workqueue_struct *pWorkQueue,
 							 void (*period_func)(void *data), void *user_data, unsigned long period_in_sec)
 {
@@ -94,17 +65,11 @@ int SynoAsyncOperationInit(SYNOASYNCOPERATION *pSynoAsyncOp, struct workqueue_st
 
     spin_lock_init(&pSynoAsyncOp->syno_async_lock);
 
-	/*
-	* Setting user's period task
-	*/
 	pSynoAsyncOp->period_func = period_func;
 	pSynoAsyncOp->period_func_data = user_data;
 	pSynoAsyncOp->period_in_sec = period_in_sec;
 	pSynoAsyncOp->stopAsyncOperation = 0;
 
-	/*
-	* workqueue setting
-	*/
 	if(NULL != pWorkQueue) {
 		pSynoAsyncOp->pwq = pWorkQueue;
 	}else{

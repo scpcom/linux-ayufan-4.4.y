@@ -1,13 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* -*- linux-c -*-
- * sysctl_net_core.c: sysctl interface to net core subsystem.
- *
- * Begun April 1, 1996, Mike Shaver.
- * Added /proc/sys/net/core directory entry (empty =) ). [MS]
- */
-
+ 
 #include <linux/mm.h>
 #include <linux/sysctl.h>
 #include <linux/module.h>
@@ -124,7 +118,7 @@ static struct ctl_table net_core_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec
 	},
-#endif /* CONFIG_NET */
+#endif  
 	{
 		.ctl_name	= NET_CORE_BUDGET,
 		.procname	= "netdev_budget",

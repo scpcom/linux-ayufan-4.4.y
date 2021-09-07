@@ -1,14 +1,4 @@
-/*
- *  linux/arch/arm/mm/dma-mapping.c
- *
- *  Copyright (C) 2000-2004 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- *  DMA uncached mapping support.
- */
+ 
 #include <linux/module.h>
 #include <linux/mm.h>
 #include <linux/slab.h>
@@ -24,7 +14,6 @@
 #include <asm/tlbflush.h>
 #include <asm/sizes.h>
 
-/* Sanity check size */
 #if (CONSISTENT_DMA_SIZE % SZ_2M)
 #error "CONSISTENT_DMA_SIZE must be multiple of 2MiB"
 #endif
@@ -43,10 +32,6 @@ static u64 get_coherent_dma_mask(struct device *dev)
 	if (dev) {
 		mask = dev->coherent_dma_mask;
 
-		/*
-		 * Sanity check the DMA mask - it must be non-zero, and
-		 * must be able to be satisfied by a DMA allocation.
-		 */
 		if (mask == 0) {
 			dev_warn(dev, "coherent DMA mask is unset\n");
 			return 0;
@@ -64,41 +49,10 @@ static u64 get_coherent_dma_mask(struct device *dev)
 }
 
 #ifdef CONFIG_MMU
-/*
- * These are the page tables (2MB each) covering uncached, DMA consistent allocations
- */
+ 
 static pte_t *consistent_pte[NUM_CONSISTENT_PTES];
 static DEFINE_SPINLOCK(consistent_lock);
 
-/*
- * VM region handling support.
- *
- * This should become something generic, handling VM region allocations for
- * vmalloc and similar (ioremap, module space, etc).
- *
- * I envisage vmalloc()'s supporting vm_struct becoming:
- *
- *  struct vm_struct {
- *    struct vm_region	region;
- *    unsigned long	flags;
- *    struct page	**pages;
- *    unsigned int	nr_pages;
- *    unsigned long	phys_addr;
- *  };
- *
- * get_vm_area() would then call vm_region_alloc with an appropriate
- * struct vm_region head (eg):
- *
- *  struct vm_region vmalloc_head = {
- *	.vm_list	= LIST_HEAD_INIT(vmalloc_head.vm_list),
- *	.vm_start	= VMALLOC_START,
- *	.vm_end		= VMALLOC_END,
- *  };
- *
- * However, vmalloc_head.vm_start is variable (typically, it is dependent on
- * the amount of RAM found at boot time.)  I would imagine that get_vm_area()
- * would have to initialise this each time prior to calling vm_region_alloc().
- */
 struct arm_vm_region {
 	struct list_head	vm_list;
 	unsigned long		vm_start;
@@ -137,9 +91,7 @@ arm_vm_region_alloc(struct arm_vm_region *head, size_t size, gfp_t gfp)
 	}
 
  found:
-	/*
-	 * Insert this entry _before_ the one we found.
-	 */
+	 
 	list_add_tail(&new->vm_list, &c->vm_list);
 	new->vm_start = addr;
 	new->vm_end = addr + size;
@@ -191,9 +143,6 @@ __dma_alloc(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp,
 	if (!mask)
 		goto no_page;
 
-	/*
-	 * Sanity check the allocation size.
-	 */
 	size = PAGE_ALIGN(size);
 	limit = (mask + 1) & ~mask;
 	if ((limit && size >= limit) ||
@@ -212,10 +161,6 @@ __dma_alloc(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp,
 	if (!page)
 		goto no_page;
 
-	/*
-	 * Invalidate any data that might be lurking in the
-	 * kernel direct-mapped region for device DMA.
-	 */
 	{
 		void *ptr = page_address(page);
 		memset(ptr, 0, size);
@@ -223,9 +168,6 @@ __dma_alloc(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp,
 		outer_flush_range(__pa(ptr), __pa(ptr) + size);
 	}
 
-	/*
-	 * Allocate a virtual address in the consistent mapping region.
-	 */
 	c = arm_vm_region_alloc(&consistent_head, size,
 			    gfp & ~(__GFP_DMA | __GFP_HIGHMEM));
 	if (c) {
@@ -239,17 +181,11 @@ __dma_alloc(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp,
 
 		split_page(page, order);
 
-		/*
-		 * Set the "dma handle"
-		 */
 		*handle = page_to_dma(dev, page);
 
 		do {
 			BUG_ON(!pte_none(*pte));
 
-			/*
-			 * x86 does not mark the pages reserved...
-			 */
 			SetPageReserved(page);
 			set_pte_ext(pte, mk_pte(page, prot), 0);
 			page++;
@@ -261,9 +197,6 @@ __dma_alloc(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp,
 			}
 		} while (size -= PAGE_SIZE);
 
-		/*
-		 * Free the otherwise unused pages.
-		 */
 		while (page < end) {
 			__free_page(page);
 			page++;
@@ -278,7 +211,7 @@ __dma_alloc(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp,
 	*handle = ~0;
 	return NULL;
 }
-#else	/* !CONFIG_MMU */
+#else	 
 static void *
 __dma_alloc(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp,
 	    pgprot_t prot)
@@ -302,12 +235,8 @@ error:
 	*handle = ~0;
 	return NULL;
 }
-#endif	/* CONFIG_MMU */
+#endif	 
 
-/*
- * Allocate DMA-coherent memory space and return both the kernel remapped
- * virtual and bus address for that space.
- */
 void *
 dma_alloc_coherent(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp)
 {
@@ -332,10 +261,6 @@ dma_alloc_coherent(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gf
 }
 EXPORT_SYMBOL(dma_alloc_coherent);
 
-/*
- * Allocate a writecombining region, in much the same way as
- * dma_alloc_coherent above.
- */
 void *
 dma_alloc_writecombine(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp)
 {
@@ -371,7 +296,7 @@ static int dma_mmap(struct device *dev, struct vm_area_struct *vma,
 					      vma->vm_page_prot);
 		}
 	}
-#endif	/* CONFIG_MMU */
+#endif	 
 
 	return ret;
 }
@@ -392,10 +317,6 @@ int dma_mmap_writecombine(struct device *dev, struct vm_area_struct *vma,
 }
 EXPORT_SYMBOL(dma_mmap_writecombine);
 
-/*
- * free a page as defined by the above mapping.
- * Must not be called with IRQs disabled.
- */
 #ifdef CONFIG_MMU
 void dma_free_coherent(struct device *dev, size_t size, void *cpu_addr, dma_addr_t handle)
 {
@@ -454,9 +375,6 @@ void dma_free_coherent(struct device *dev, size_t size, void *cpu_addr, dma_addr
 			if (pfn_valid(pfn)) {
 				struct page *page = pfn_to_page(pfn);
 
-				/*
-				 * x86 does not mark the pages reserved...
-				 */
 				ClearPageReserved(page);
 
 				__free_page(page);
@@ -483,19 +401,16 @@ void dma_free_coherent(struct device *dev, size_t size, void *cpu_addr, dma_addr
 	       __func__, cpu_addr);
 	dump_stack();
 }
-#else	/* !CONFIG_MMU */
+#else	 
 void dma_free_coherent(struct device *dev, size_t size, void *cpu_addr, dma_addr_t handle)
 {
 	if (dma_release_from_coherent(dev, get_order(size), cpu_addr))
 		return;
 	kfree(cpu_addr);
 }
-#endif	/* CONFIG_MMU */
+#endif	 
 EXPORT_SYMBOL(dma_free_coherent);
 
-/*
- * Initialise the consistent memory allocation.
- */
 static int __init consistent_init(void)
 {
 	int ret = 0;
@@ -526,7 +441,7 @@ static int __init consistent_init(void)
 		consistent_pte[i++] = pte;
 		base += (1 << PGDIR_SHIFT);
 	} while (base < CONSISTENT_END);
-#endif	/* !CONFIG_MMU */
+#endif	 
 
 	return ret;
 }
@@ -537,13 +452,6 @@ core_initcall(consistent_init);
 #include <mach/rps-irq.h>
 #include <mach/ipi.h>
 
-/*
- * PLX: IPI s/w broadcast of cache operations on MPCore in software does not
- *      support outer cache operations at present. If we did then the inner
- *      cache ops on all CPUs could happen in parallel, but the outer cache
- *      ops would have to happen only from a single CPU once inner cache ops
- *      had completed on all CPUs
- */
 void dma_cache_maint(
 	const void *start,
 	size_t      size,
@@ -553,24 +461,18 @@ void dma_cache_maint(
 	unsigned int  cpu;
 	cpumask_t     callmap;
 
-	/* Prevent re-entrance on this processor */
 	local_irq_save(flags);
 	cpu = get_cpu();
 	
-	/* We can support a maximum of 2 CPUs */
 	BUG_ON(cpu > 1);
 
-	/* Find the other CPU */
 	callmap = cpu_online_map;
 	cpu_clear(cpu, callmap);
 
-	/* If we're here when the other CPU is still processing a previous cache
-	   coherency operation then something is wrong */
 	BUG_ON(per_cpu(fiq_coherency_communication, cpu).nents);
 
-	/* Only do this if there is another CPU active */
 	if (!cpus_empty(callmap)) {
-		/* Prepare one memory range */
+		 
 		per_cpu(fiq_coherency_communication, cpu).type = CACHE_COHERENCY;
 		per_cpu(fiq_coherency_communication, cpu).message.cache_coherency.type = direction;
 		per_cpu(fiq_coherency_communication, cpu).message.cache_coherency.range[0].start = start;
@@ -578,11 +480,9 @@ void dma_cache_maint(
 		per_cpu(fiq_coherency_communication, cpu).nents = 1;
 		wmb();
 
-		/* Inform the other CPU that there's per-CPU data to examine */
 		OX820_RPS_trigger_fiq(!cpu);
 	}
 
-	/* Run the local operation in parallel with the other CPU */
 	switch (direction) {
 		case DMA_BIDIRECTIONAL:
 			dmac_flush_range(start, start + size);
@@ -597,7 +497,6 @@ void dma_cache_maint(
 			printk(KERN_WARNING "Unknown DMA direction %d\n", direction);
 	}
 
-	/* Rendezvous the two cpus here */
 	while (per_cpu(fiq_coherency_communication,cpu).nents) {
 		barrier();
 	}
@@ -607,13 +506,6 @@ void dma_cache_maint(
 }
 EXPORT_SYMBOL(dma_cache_maint);
 
-/*
- * PLX: IPI s/w broadcast of cache operations on MPCore in software does not
- *      support outer cache operations at present. If we did then the inner
- *      cache ops on all CPUs could happen in parallel, but the outer cache
- *      ops would have to happen only from a single CPU once inner cache ops
- *      had completed on all CPUs
- */
 static void dma_cache_maint_contiguous(
 	struct page  *page,
 	unsigned long offset,
@@ -623,7 +515,6 @@ static void dma_cache_maint_contiguous(
 	void *vaddr;
 	int   himem = 0;
 
-	/* Get virtual mapping for page and offset */
 	if (!PageHighMem(page)) {
 		vaddr = page_address(page) + offset;
 	} else {
@@ -634,30 +525,23 @@ static void dma_cache_maint_contiguous(
 		}
 	}
 
-	/* Only do cache op if retrieved a virtual mapping for the page */
 	if (vaddr) {
 		unsigned long flags;
 		unsigned int  cpu;
 		cpumask_t     callmap;
 
-		/* Prevent re-entrance on this processor */
 		local_irq_save(flags);
 		cpu = get_cpu();
 	
-		/* We can support a maximum of 2 CPUs */
 		BUG_ON(cpu > 1);
 
-		/* Find the other CPU */
 		callmap = cpu_online_map;
 		cpu_clear(cpu, callmap);
 
-		/* If we're here when the other CPU is still processing a previous cache
-		   coherency operation then something is wrong */
 		BUG_ON(per_cpu(fiq_coherency_communication, cpu).nents);
 
-		/* Only do this if there is another CPU active */
 		if (!cpus_empty(callmap)) {
-			/* Prepare one memory range */
+			 
 			per_cpu(fiq_coherency_communication, cpu).type = CACHE_COHERENCY;
 			per_cpu(fiq_coherency_communication, cpu).message.cache_coherency.type = direction;
 			per_cpu(fiq_coherency_communication, cpu).message.cache_coherency.range[0].start = vaddr;
@@ -665,11 +549,9 @@ static void dma_cache_maint_contiguous(
 			per_cpu(fiq_coherency_communication, cpu).nents = 1;
 			wmb();
 
-			/* Inform the other CPU that there's per-CPU data to examine */
 			OX820_RPS_trigger_fiq(!cpu);
 		}
 
-		/* Run the local operation in parallel with the other CPU */
 		switch (direction) {
 			case DMA_BIDIRECTIONAL:
 				dmac_flush_range(vaddr, vaddr + size);
@@ -684,7 +566,6 @@ static void dma_cache_maint_contiguous(
 				printk(KERN_WARNING "Unknown DMA direction %d\n", direction);
 		}
 
-		/* Rendezvous the two cpus here */
 		while (per_cpu(fiq_coherency_communication,cpu).nents) {
 			barrier();
 		}
@@ -697,13 +578,8 @@ static void dma_cache_maint_contiguous(
 		kunmap_high(page);
 	}
 }
-#else // defined(CONFIG_SYNO_PLX_PORTING) && defined(CONFIG_ARCH_OX820) && defined(CONFIG_SMP)
-/*
- * Make an area consistent for devices.
- * Note: Drivers should NOT use this function directly, as it will break
- * platforms with CONFIG_DMABOUNCE.
- * Use the driver DMA support - see dma-mapping.h (dma_sync_*)
- */
+#else  
+ 
 void dma_cache_maint(const void *start, size_t size, int direction)
 {
 	void (*inner_op)(const void *, const void *);
@@ -712,15 +588,15 @@ void dma_cache_maint(const void *start, size_t size, int direction)
 	BUG_ON(!virt_addr_valid(start) || !virt_addr_valid(start + size - 1));
 
 	switch (direction) {
-	case DMA_FROM_DEVICE:		/* invalidate only */
+	case DMA_FROM_DEVICE:		 
 		inner_op = dmac_inv_range;
 		outer_op = outer_inv_range;
 		break;
-	case DMA_TO_DEVICE:		/* writeback only */
+	case DMA_TO_DEVICE:		 
 		inner_op = dmac_clean_range;
 		outer_op = outer_clean_range;
 		break;
-	case DMA_BIDIRECTIONAL:		/* writeback and invalidate */
+	case DMA_BIDIRECTIONAL:		 
 		inner_op = dmac_flush_range;
 		outer_op = outer_flush_range;
 		break;
@@ -745,15 +621,15 @@ panic("Not expecting dma_cache_maint_contiguous() to be invoked\n");
 #endif
 
 	switch (direction) {
-	case DMA_FROM_DEVICE:		/* invalidate only */
+	case DMA_FROM_DEVICE:		 
 		inner_op = dmac_inv_range;
 		outer_op = outer_inv_range;
 		break;
-	case DMA_TO_DEVICE:		/* writeback only */
+	case DMA_TO_DEVICE:		 
 		inner_op = dmac_clean_range;
 		outer_op = outer_clean_range;
 		break;
-	case DMA_BIDIRECTIONAL:		/* writeback and invalidate */
+	case DMA_BIDIRECTIONAL:		 
 		inner_op = dmac_flush_range;
 		outer_op = outer_flush_range;
 		break;
@@ -776,17 +652,12 @@ panic("Not expecting dma_cache_maint_contiguous() to be invoked\n");
 	paddr = page_to_phys(page) + offset;
 	outer_op(paddr, paddr + size);
 }
-#endif // defined(CONFIG_SYNO_PLX_PORTING) && defined(CONFIG_ARCH_OX820) && defined(CONFIG_SMP)
+#endif  
 
 void dma_cache_maint_page(struct page *page, unsigned long offset,
 			  size_t size, int dir)
 {
-	/*
-	 * A single sg entry may refer to multiple physically contiguous
-	 * pages.  But we still need to process highmem pages individually.
-	 * If highmem is not configured then the bulk of this loop gets
-	 * optimized out.
-	 */
+	 
 	size_t left = size;
 	do {
 		size_t len = left;
@@ -805,23 +676,8 @@ void dma_cache_maint_page(struct page *page, unsigned long offset,
 }
 EXPORT_SYMBOL(dma_cache_maint_page);
 
-#if !defined(CONFIG_ARCH_OX820) || !defined(CONFIG_SMP) // CONFIG_SYNO_PLX_PORTING
-/**
- * dma_map_sg - map a set of SG buffers for streaming mode DMA
- * @dev: valid struct device pointer, or NULL for ISA and EISA-like devices
- * @sg: list of buffers
- * @nents: number of buffers to map
- * @dir: DMA transfer direction
- *
- * Map a set of buffers described by scatterlist in streaming mode for DMA.
- * This is the scatter-gather version of the dma_map_single interface.
- * Here the scatter gather list elements are each tagged with the
- * appropriate dma address and length.  They are obtained via
- * sg_dma_{address,length}.
- *
- * Device ownership issues as mentioned for dma_map_single are the same
- * here.
- */
+#if !defined(CONFIG_ARCH_OX820) || !defined(CONFIG_SMP)  
+ 
 int dma_map_sg(struct device *dev, struct scatterlist *sg, int nents,
 		enum dma_data_direction dir)
 {
@@ -844,16 +700,6 @@ int dma_map_sg(struct device *dev, struct scatterlist *sg, int nents,
 EXPORT_SYMBOL(dma_map_sg);
 #endif
 
-/**
- * dma_unmap_sg - unmap a set of SG buffers mapped by dma_map_sg
- * @dev: valid struct device pointer, or NULL for ISA and EISA-like devices
- * @sg: list of buffers
- * @nents: number of buffers to unmap (returned from dma_map_sg)
- * @dir: DMA transfer direction (same as was passed to dma_map_sg)
- *
- * Unmap a set of streaming mode DMA translations.  Again, CPU access
- * rules concerning calls here are the same as for dma_unmap_single().
- */
 void dma_unmap_sg(struct device *dev, struct scatterlist *sg, int nents,
 		enum dma_data_direction dir)
 {
@@ -865,13 +711,6 @@ void dma_unmap_sg(struct device *dev, struct scatterlist *sg, int nents,
 }
 EXPORT_SYMBOL(dma_unmap_sg);
 
-/**
- * dma_sync_sg_for_cpu
- * @dev: valid struct device pointer, or NULL for ISA and EISA-like devices
- * @sg: list of buffers
- * @nents: number of buffers to map (returned from dma_map_sg)
- * @dir: DMA transfer direction (same as was passed to dma_map_sg)
- */
 void dma_sync_sg_for_cpu(struct device *dev, struct scatterlist *sg,
 			int nents, enum dma_data_direction dir)
 {
@@ -885,13 +724,6 @@ void dma_sync_sg_for_cpu(struct device *dev, struct scatterlist *sg,
 }
 EXPORT_SYMBOL(dma_sync_sg_for_cpu);
 
-/**
- * dma_sync_sg_for_device
- * @dev: valid struct device pointer, or NULL for ISA and EISA-like devices
- * @sg: list of buffers
- * @nents: number of buffers to map (returned from dma_map_sg)
- * @dir: DMA transfer direction (same as was passed to dma_map_sg)
- */
 void dma_sync_sg_for_device(struct device *dev, struct scatterlist *sg,
 			int nents, enum dma_data_direction dir)
 {

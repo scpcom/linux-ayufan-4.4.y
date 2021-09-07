@@ -1,8 +1,4 @@
-/*
- * linux/fs/syno_acl.c
- *
- * Copyright (c) 2000-2013 Synology Inc.
- */
+ 
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/fs.h>
@@ -23,9 +19,6 @@ struct syno_acl *syno_acl_alloc(int count, gfp_t flags)
 }
 EXPORT_SYMBOL(syno_acl_alloc);
 
-/*
- * Clone an ACL.
- */
 struct syno_acl *syno_acl_clone(const struct syno_acl *acl, gfp_t flags)
 {
 	struct syno_acl *clone = NULL;
@@ -41,9 +34,6 @@ struct syno_acl *syno_acl_clone(const struct syno_acl *acl, gfp_t flags)
 }
 EXPORT_SYMBOL(syno_acl_clone);
 
-/*
- * Check if an acl is valid. Returns 0 if it is, or -E... otherwise.
- */
 int syno_acl_valid(const struct syno_acl *acl)
 {
 	const struct syno_acl_entry *pa, *pe;
@@ -67,11 +57,6 @@ int syno_acl_valid(const struct syno_acl *acl)
 }
 EXPORT_SYMBOL(syno_acl_valid);
 
-/*
- * Re-allocate a new ACL with the specified number of entries.
- *
- * The caller must ensure the acl is only referenced once.
- */
 struct syno_acl *syno_acl_realloc(struct syno_acl *acl, unsigned int counts, gfp_t flags)
 {
 	struct syno_acl *acl_re;
@@ -85,8 +70,6 @@ struct syno_acl *syno_acl_realloc(struct syno_acl *acl, unsigned int counts, gfp
 		return NULL;
 	}
 
-	/* assert(atomic_read(acl->a_refcount) == 1); */
-
 	acl_re = krealloc(acl, size, flags);
 	if (acl_re) {
 		acl_re->a_count = counts;
@@ -96,13 +79,11 @@ struct syno_acl *syno_acl_realloc(struct syno_acl *acl, unsigned int counts, gfp
 }
 EXPORT_SYMBOL(syno_acl_realloc);
 
-/*---------xattr -------------*/
 static inline int
 ace_syno_from_xattr(struct syno_acl_entry *pAce, syno_acl_xattr_entry *pEntry)
 {
 	unsigned short tag = le16_to_cpu(pEntry->e_tag);
 
-	//ID: user/group/everyone
 	if (SYNO_ACL_XATTR_TAG_ID_GROUP & tag) {
 
 		pAce->e_tag = SYNO_ACL_GROUP;
@@ -137,7 +118,6 @@ ace_syno_from_xattr(struct syno_acl_entry *pAce, syno_acl_xattr_entry *pEntry)
 		return -1;
 	}
 
-	//Allow/Deny
 	if (SYNO_ACL_XATTR_TAG_IS_DENY & tag) {
 		pAce->e_allow = SYNO_ACL_DENY;
 	} else if (SYNO_ACL_XATTR_TAG_IS_ALLOW & tag){
@@ -146,13 +126,10 @@ ace_syno_from_xattr(struct syno_acl_entry *pAce, syno_acl_xattr_entry *pEntry)
 		return -1;
 	}
 
-	//Permission
 	pAce->e_perm = le32_to_cpu(pEntry->e_perm);
 
-	//Inherit
 	pAce->e_inherit = le16_to_cpu(pEntry->e_inherit);
 
-	//level
 	pAce->e_level = le32_to_cpu(pEntry->e_level);
 
 	return 0;
@@ -164,7 +141,6 @@ ace_syno_to_xattr(const struct syno_acl_entry *pAce, syno_acl_xattr_entry *pEntr
 	int ret = 0;
 	unsigned short tag = 0;
 
-	//ID: user/group/everyone
 	switch(pAce->e_tag){
 	case SYNO_ACL_GROUP:
 		tag |= SYNO_ACL_XATTR_TAG_ID_GROUP;
@@ -189,7 +165,6 @@ ace_syno_to_xattr(const struct syno_acl_entry *pAce, syno_acl_xattr_entry *pEntr
 		goto Err;
 	}
 
-	//Allow/Deny
 	switch(pAce->e_allow){
 	case SYNO_ACL_DENY:
 		tag |= SYNO_ACL_XATTR_TAG_IS_DENY;
@@ -212,9 +187,6 @@ Err:
 	return ret;
 }
 
-/*
- * Convert from extended attribute to in-memory representation.
- */
 struct syno_acl *syno_acl_from_xattr(const void *value, size_t size)
 {
 	syno_acl_xattr_header *header;
@@ -261,9 +233,6 @@ fail:
 }
 EXPORT_SYMBOL(syno_acl_from_xattr);
 
-/*
- * Convert from in-memory to extended attribute representation.
- */
 int syno_acl_to_xattr(const struct syno_acl *acl, void *buffer, size_t size)
 {
 	syno_acl_xattr_header *ext_acl = NULL;

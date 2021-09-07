@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/hfsplus/inode.c
- *
- * Copyright (C) 2001
- * Brad Boyer (flar@allandria.com)
- * (C) 2003 Ardis Technologies <roman@ardistech.com>
- *
- * Inode handling routines
- */
-
+ 
 #include <linux/mm.h>
 #include <linux/fs.h>
 #include <linux/pagemap.h>
@@ -420,7 +411,7 @@ int hfsplus_cat_read_inode(struct inode *inode, struct hfs_find_data *fd)
 		struct hfsplus_cat_folder *folder = &entry.folder;
 
 		if (fd->entrylength < sizeof(struct hfsplus_cat_folder))
-			/* panic? */;
+			 ;
 		hfs_bnode_read(fd->bnode, &entry, fd->entryoffset,
 					sizeof(struct hfsplus_cat_folder));
 		hfsplus_get_perms(inode, &folder->permissions, 1);
@@ -437,7 +428,7 @@ int hfsplus_cat_read_inode(struct inode *inode, struct hfs_find_data *fd)
 		struct hfsplus_cat_file *file = &entry.file;
 
 		if (fd->entrylength < sizeof(struct hfsplus_cat_file))
-			/* panic? */;
+			 ;
 		hfs_bnode_read(fd->bnode, &entry, fd->entryoffset,
 					sizeof(struct hfsplus_cat_file));
 
@@ -482,21 +473,21 @@ int hfsplus_cat_write_inode(struct inode *inode)
 		return 0;
 
 	if (hfs_find_init(HFSPLUS_SB(main_inode->i_sb).cat_tree, &fd))
-		/* panic? */
+		 
 		return -EIO;
 
 	if (hfsplus_find_cat(main_inode->i_sb, main_inode->i_ino, &fd))
-		/* panic? */
+		 
 		goto out;
 
 	if (S_ISDIR(main_inode->i_mode)) {
 		struct hfsplus_cat_folder *folder = &entry.folder;
 
 		if (fd.entrylength < sizeof(struct hfsplus_cat_folder))
-			/* panic? */;
+			 ;
 		hfs_bnode_read(fd.bnode, &entry, fd.entryoffset,
 					sizeof(struct hfsplus_cat_folder));
-		/* simple node checks? */
+		 
 		hfsplus_set_perms(inode, &folder->permissions);
 		folder->access_date = hfsp_ut2mt(inode->i_atime);
 		folder->content_mod_date = hfsp_ut2mt(inode->i_mtime);
@@ -515,7 +506,7 @@ int hfsplus_cat_write_inode(struct inode *inode)
 		struct hfsplus_cat_file *file = &entry.file;
 
 		if (fd.entrylength < sizeof(struct hfsplus_cat_file))
-			/* panic? */;
+			 ;
 		hfs_bnode_read(fd.bnode, &entry, fd.entryoffset,
 					sizeof(struct hfsplus_cat_file));
 		hfsplus_inode_write_fork(inode, &file->data_fork);

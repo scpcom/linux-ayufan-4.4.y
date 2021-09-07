@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * libata-pmp.c - libata port multiplier support
- *
- * Copyright (c) 2007  SUSE Linux Products GmbH
- * Copyright (c) 2007  Tejun Heo <teheo@suse.de>
- *
- * This file is released under the GPLv2.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/libata.h>
 #ifdef MY_ABC_HERE
@@ -32,20 +24,6 @@ const struct ata_port_operations sata_pmp_port_ops = {
 	.error_handler		= sata_pmp_error_handler,
 };
 
-/**
- *	sata_pmp_read - read PMP register
- *	@link: link to read PMP register for
- *	@reg: register to read
- *	@r_val: resulting value
- *
- *	Read PMP register.
- *
- *	LOCKING:
- *	Kernel thread context (may sleep).
- *
- *	RETURNS:
- *	0 on success, AC_ERR_* mask on failure.
- */
 static unsigned int sata_pmp_read(struct ata_link *link, int reg, u32 *r_val)
 {
 	struct ata_port *ap = link->ap;
@@ -69,20 +47,6 @@ static unsigned int sata_pmp_read(struct ata_link *link, int reg, u32 *r_val)
 	return 0;
 }
 
-/**
- *	sata_pmp_write - write PMP register
- *	@link: link to write PMP register for
- *	@reg: register to write
- *	@r_val: value to write
- *
- *	Write PMP register.
- *
- *	LOCKING:
- *	Kernel thread context (may sleep).
- *
- *	RETURNS:
- *	0 on success, AC_ERR_* mask on failure.
- */
 static unsigned int sata_pmp_write(struct ata_link *link, int reg, u32 val)
 {
 	struct ata_port *ap = link->ap;
@@ -200,7 +164,7 @@ syno_sata_pmp_read_cpld_ver(struct ata_port *ap)
 					GPI_3XXX_CPLDVER_BIT2(stPmPkg.var) |
 					GPI_3XXX_CPLDVER_BIT3(stPmPkg.var);
 	}
-	/*cpld version start from GPIO result 000 (i.e. v1)*/
+	 
 	ap->PMSynoCpldVer = ap->PMSynoCpldVer + 1;
 END:
 	return iRes;
@@ -240,14 +204,6 @@ END:
 	return res;
 }
 
-/*
- * Query backplane switch mode 
- *
- * @param ap ata_port
- *
- * @return 0: success 
- *        overwise fail
- */
 static unsigned int
 syno_sata_pmp_read_switch_mode(struct ata_port *ap)
 {
@@ -280,14 +236,6 @@ END:
 	return iRes;
 }
 
-/*
- * Check power button whether disable or not
- *
- * @param ap ata_port
- *
- * @return 0: success 
- *        overwise fail
- */
 static unsigned int
 syno_sata_pmp_check_powerbtn(struct ata_port *ap)
 {
@@ -335,7 +283,7 @@ syno_sata_pmp_write_gpio(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
 	}
 
 	iRet = sata_pmp_write(link, pPM_pkg->gpio_addr, pPM_pkg->var);
-	/* HW suggestions: delay 5ms, wait for CPLD ready */
+	 
 	mdelay(5);
 
 	return iRet;
@@ -371,18 +319,10 @@ syno_is_synology_pm(const struct ata_port *ap)
 {
 	u8 ret = 0;
 
-	/* can't using ap->nr_pmp_links here, because the execution order
-	 * is not right, libata do a bad thing in sata_pmp_attach when
-	 * init ap->nr_pmp_links. It should be placed just after
-	 * sata_pmp_read_gscr(dev, dev->gscr);
-	 */
 	if (!sata_pmp_gscr_ports(ap->link.device->gscr)) {
 		goto END;
 	}
 
-	/*
-	 * skip those models which we do not support
-	 */
 	if (!is_ebox_support()) {
 		goto END;
 	}
@@ -396,7 +336,6 @@ syno_is_synology_pm(const struct ata_port *ap)
 		goto END;
 	}
 
-	/* add other port multiplier here */
 END:
 	return ret;
 }
@@ -410,14 +349,10 @@ syno_pmp_ports_num(struct ata_port *ap)
 		ret = sata_pmp_gscr_ports(ap->link.device->gscr);
 
 		if (syno_pm_is_synology_3xxx(ap)) {
-			/* it would read 6 ports from GSCR,
-			 * but this is not what we want
-			 * So we modify here.
-			 */
+			 
 			ret = 5;
 		}
 
-		/* add other quirk of port multiplier here */
 	}
 	return ret;
 }
@@ -447,9 +382,9 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 		schedule_timeout_uninterruptible(HZ);
 		spin_lock_irqsave(ap->lock, flags);
 	}
-	/* lock to prevent others to do pmp power control */
+	 
 	ap->pflags |= ATA_PFLAG_PMP_PMCTL;
-	/* we should make sure this port isn't frozen */
+	 
 	if (ap->pflags & ATA_PFLAG_FROZEN) {
 		printk("ata%u: is FROZEN, thaw it now\n", ap->print_id);
 		spin_unlock_irqrestore(ap->lock, flags);
@@ -507,12 +442,12 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 
 		if (blPowerOn) {
 			if (IS_SYNOLOGY_DX213(ap->PMSynoUnique)) {
-				mdelay(700); /* HW spec. DX213 clock cycle too slow, so delay 700 ms */
+				mdelay(700);  
 			} else {
-				mdelay(5); /* don't do it too fast. Otherwise CPLD might not response */
+				mdelay(5);  
 			}
 		} else {
-			mdelay(7000); /* hardware spec */
+			mdelay(7000);  
 		}
 
 		syno_pm_poweron_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
@@ -534,7 +469,6 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 
 		mdelay(1000);
 
-		/* test if this power control success */
 		syno_pm_unique_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
 				sata_pmp_gscr_devid(ap->link.device->gscr),
 				&pm_pkg);
@@ -580,28 +514,15 @@ SKIP_POWER_ON:
 	iRet = 0;
 
 END:
-	/* unlock to let others can do pmp power control */
+	 
 	DBGMESG("port %d do pmp power ctl %d done iRet %d\n", ap->print_id, blPowerOn, iRet);
 	spin_lock_irqsave(ap->lock, flags);
 	ap->pflags &= ~ATA_PFLAG_PMP_PMCTL;
 	spin_unlock_irqrestore(ap->lock, flags);
 	return iRet;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
-/**
- *	sata_pmp_qc_defer_cmd_switch - qc_defer for command switching PMP
- *	@qc: ATA command in question
- *
- *	A host which has command switching PMP support cannot issue
- *	commands to multiple links simultaneously.
- *
- *	LOCKING:
- *	spin_lock_irqsave(host lock)
- *
- *	RETURNS:
- *	ATA_DEFER_* if deferring is needed, 0 otherwise.
- */
 int sata_pmp_qc_defer_cmd_switch(struct ata_queued_cmd *qc)
 {
 	struct ata_link *link = qc->dev->link;
@@ -619,21 +540,6 @@ int sata_pmp_qc_defer_cmd_switch(struct ata_queued_cmd *qc)
 	return ATA_DEFER_PORT;
 }
 
-/**
- *	sata_pmp_scr_read - read PSCR
- *	@link: ATA link to read PSCR for
- *	@reg: PSCR to read
- *	@r_val: resulting value
- *
- *	Read PSCR @reg into @r_val for @link, to be called from
- *	ata_scr_read().
- *
- *	LOCKING:
- *	Kernel thread context (may sleep).
- *
- *	RETURNS:
- *	0 on success, -errno on failure.
- */
 int sata_pmp_scr_read(struct ata_link *link, int reg, u32 *r_val)
 {
 	unsigned int err_mask;
@@ -650,21 +556,6 @@ int sata_pmp_scr_read(struct ata_link *link, int reg, u32 *r_val)
 	return 0;
 }
 
-/**
- *	sata_pmp_scr_write - write PSCR
- *	@link: ATA link to write PSCR for
- *	@reg: PSCR to write
- *	@val: value to be written
- *
- *	Write @val to PSCR @reg for @link, to be called from
- *	ata_scr_write() and ata_scr_write_flush().
- *
- *	LOCKING:
- *	Kernel thread context (may sleep).
- *
- *	RETURNS:
- *	0 on success, -errno on failure.
- */
 int sata_pmp_scr_write(struct ata_link *link, int reg, u32 val)
 {
 	unsigned int err_mask;
@@ -681,20 +572,6 @@ int sata_pmp_scr_write(struct ata_link *link, int reg, u32 val)
 	return 0;
 }
 
-/**
- *	sata_pmp_read_gscr - read GSCR block of SATA PMP
- *	@dev: PMP device
- *	@gscr: buffer to read GSCR block into
- *
- *	Read selected PMP GSCRs from the PMP at @dev.  This will serve
- *	as configuration and identification info for the PMP.
- *
- *	LOCKING:
- *	Kernel thread context (may sleep).
- *
- *	RETURNS:
- *	0 on success, -errno on failure.
- */
 static int sata_pmp_read_gscr(struct ata_device *dev, u32 *gscr)
 {
 	static const int gscr_to_read[] = { 0, 1, 2, 32, 33, 64, 96 };
@@ -756,7 +633,6 @@ static int sata_pmp_configure(struct ata_device *dev, int print_info)
 	    (gscr[SATA_PMP_GSCR_FEAT] & SATA_PMP_FEAT_NOTIFY))
 		dev->flags |= ATA_DFLAG_AN;
 
-	/* monitor SERR_PHYRDY_CHG on fan-out ports */
 	err_mask = sata_pmp_write(dev->link, SATA_PMP_GSCR_ERROR_EN,
 				  SERR_PHYRDY_CHG);
 	if (err_mask) {
@@ -765,14 +641,8 @@ static int sata_pmp_configure(struct ata_device *dev, int print_info)
 		goto fail;
 	}
 
-	/* Disable sending Early R_OK.
-	 * With "cached read" HDD testing and multiple ports busy on a SATA
-	 * host controller, 3726 PMP will very rarely drop a deferred
-	 * R_OK that was intended for the host. Symptom will be all
-	 * 5 drives under test will timeout, get reset, and recover.
-	 */
 #ifdef MY_ABC_HERE
-	/*our DX513 and DX213 use 3826 chip */
+	 
 	if (vendor == 0x1095 && (devid == 0x3726 || devid == 0x3826)) {
 #else
 	if (vendor == 0x1095 && devid == 0x3726) {
@@ -855,16 +725,14 @@ static void sata_pmp_quirks(struct ata_port *ap)
 	struct ata_link *link;
 
 #ifdef MY_ABC_HERE
-	/*our DX513 and DX213 use 3826 chip */
+	 
 	if (vendor == 0x1095 && (devid == 0x3726 || devid == 0x3826)) {
 #else
 	if (vendor == 0x1095 && devid == 0x3726) {
 #endif
-		/* sil3726 quirks */
+		 
 		ata_for_each_link(link, ap, EDGE) {
-			/* Class code report is unreliable and SRST
-			 * times out under certain configurations.
-			 */
+			 
 			if (link->pmp < 5)
 #ifdef MY_ABC_HERE
 				link->flags |= ATA_LFLAG_ASSUME_ATA;
@@ -873,69 +741,40 @@ static void sata_pmp_quirks(struct ata_port *ap)
 					       ATA_LFLAG_ASSUME_ATA;
 #endif
 
-			/* port 5 is for SEMB device and it doesn't like SRST */
 			if (link->pmp == 5)
 				link->flags |= ATA_LFLAG_NO_SRST |
 					       ATA_LFLAG_ASSUME_SEMB;
 		}
 	} else if (vendor == 0x1095 && devid == 0x4723) {
-		/* sil4723 quirks */
+		 
 		ata_for_each_link(link, ap, EDGE) {
-			/* class code report is unreliable */
+			 
 			if (link->pmp < 2)
 				link->flags |= ATA_LFLAG_ASSUME_ATA;
 
-			/* the config device at port 2 locks up on SRST */
 			if (link->pmp == 2)
 				link->flags |= ATA_LFLAG_NO_SRST |
 					       ATA_LFLAG_ASSUME_ATA;
 		}
 	} else if (vendor == 0x1095 && devid == 0x4726) {
-		/* sil4726 quirks */
+		 
 		ata_for_each_link(link, ap, EDGE) {
-			/* Class code report is unreliable and SRST
-			 * times out under certain configurations.
-			 * Config device can be at port 0 or 5 and
-			 * locks up on SRST.
-			 */
+			 
 			if (link->pmp <= 5)
 				link->flags |= ATA_LFLAG_NO_SRST |
 					       ATA_LFLAG_ASSUME_ATA;
 
-			/* Port 6 is for SEMB device which doesn't
-			 * like SRST either.
-			 */
 			if (link->pmp == 6)
 				link->flags |= ATA_LFLAG_NO_SRST |
 					       ATA_LFLAG_ASSUME_SEMB;
 		}
 	} else if (vendor == 0x1095 && (devid == 0x5723 || devid == 0x5733 ||
 					devid == 0x5734 || devid == 0x5744)) {
-		/* sil5723/5744 quirks */
-
-		/* sil5723/5744 has either two or three downstream
-		 * ports depending on operation mode.  The last port
-		 * is empty if any actual IO device is available or
-		 * occupied by a pseudo configuration device
-		 * otherwise.  Don't try hard to recover it.
-		 */
+		 
 		ap->pmp_link[ap->nr_pmp_links - 1].flags |= ATA_LFLAG_NO_RETRY;
 	}
 }
 
-/**
- *	sata_pmp_attach - attach a SATA PMP device
- *	@dev: SATA PMP device to attach
- *
- *	Configure and attach SATA PMP device @dev.  This function is
- *	also responsible for allocating and initializing PMP links.
- *
- *	LOCKING:
- *	Kernel thread context (may sleep).
- *
- *	RETURNS:
- *	0 on success, -errno on failure.
- */
 int sata_pmp_attach(struct ata_device *dev)
 {
 	struct ata_link *link = dev->link;
@@ -947,7 +786,6 @@ int sata_pmp_attach(struct ata_device *dev)
 	u32 target = 0, target_limit = 0;
 #endif
 
-	/* is it hanging off the right place? */
 	if (!sata_pmp_supported(ap)) {
 		ata_dev_printk(dev, KERN_ERR,
 			       "host does not support Port Multiplier\n");
@@ -969,18 +807,17 @@ int sata_pmp_attach(struct ata_device *dev)
 	WARN_ON(link->pmp != 0);
 	link->pmp = SATA_PMP_CTRL_PORT;
 
-	/* read GSCR block */
 	rc = sata_pmp_read_gscr(dev, dev->gscr);
 	if (rc)
 		goto fail;
 
 #ifdef MY_ABC_HERE
-	/* Get information for all PM we supported */
+	 
 	syno_prepare_custom_info(ap);
 #ifdef MY_ABC_HERE
-	/*For DS1812+ with older version of DX510, the link should be limited to 1.5G*/
+	 
 	if (syno_is_hw_version(HW_DS1812p)) {
-		/* The old version should be b000 */
+		 
 		if(IS_SYNOLOGY_DX510(ap->PMSynoUnique) && (1 == ap->PMSynoCpldVer)) {
 			target = 1;
 			target_limit = (1 << target) - 1;
@@ -992,7 +829,7 @@ int sata_pmp_attach(struct ata_device *dev)
 				link->sata_spd_limit = target_limit;
 			}
 		}
-	/*For DS412+, qoriq, 6282 with DX513, the link should be limited to 1.5G*/
+	 
 	} else if (IS_SYNOLOGY_DX513(ap->PMSynoUnique) &&
 			(syno_is_hw_version(HW_DS412p) ||
 			 syno_is_hw_version(HW_DS112) ||
@@ -1008,7 +845,7 @@ int sata_pmp_attach(struct ata_device *dev)
 
 			link->sata_spd_limit = target_limit;
 		}
-	/*For DS412+, qoriq, 212p with and DX213, the link should be limited to 1.5G*/
+	 
 	} else if (IS_SYNOLOGY_DX213(ap->PMSynoUnique) &&
 			(syno_is_hw_version(HW_DS412p) ||
 			 syno_is_hw_version(HW_DS212pv10) ||
@@ -1026,7 +863,6 @@ int sata_pmp_attach(struct ata_device *dev)
 #endif	
 #endif
 
-	/* config PMP */
 	rc = sata_pmp_configure(dev, 1);
 	if (rc)
 		goto fail;
@@ -1042,7 +878,6 @@ int sata_pmp_attach(struct ata_device *dev)
 		goto fail;
 	}
 
-	/* attach it */
 	spin_lock_irqsave(ap->lock, flags);
 	WARN_ON(ap->nr_pmp_links);
 #ifdef MY_ABC_HERE
@@ -1073,16 +908,6 @@ int sata_pmp_attach(struct ata_device *dev)
 	return rc;
 }
 
-/**
- *	sata_pmp_detach - detach a SATA PMP device
- *	@dev: SATA PMP device to detach
- *
- *	Detach SATA PMP device @dev.  This function is also
- *	responsible for deconfiguring PMP links.
- *
- *	LOCKING:
- *	Kernel thread context (may sleep).
- */
 static void sata_pmp_detach(struct ata_device *dev)
 {
 	struct ata_link *link = dev->link;
@@ -1116,20 +941,6 @@ static void sata_pmp_detach(struct ata_device *dev)
 #endif
 }
 
-/**
- *	sata_pmp_same_pmp - does new GSCR matches the configured PMP?
- *	@dev: PMP device to compare against
- *	@new_gscr: GSCR block of the new device
- *
- *	Compare @new_gscr against @dev and determine whether @dev is
- *	the PMP described by @new_gscr.
- *
- *	LOCKING:
- *	None.
- *
- *	RETURNS:
- *	1 if @dev matches @new_gscr, 0 otherwise.
- */
 static int sata_pmp_same_pmp(struct ata_device *dev, const u32 *new_gscr)
 {
 	const u32 *old_gscr = dev->gscr;
@@ -1173,7 +984,7 @@ static int sata_pmp_same_pmp(struct ata_device *dev, const u32 *new_gscr)
 	}
 
 #ifdef MY_ABC_HERE
-	/* power on and re-custom */
+	 
 	syno_prepare_custom_info(ap);
 	if (SYNO_UNIQUE(old_syno_unique) != SYNO_UNIQUE(ap->PMSynoUnique)) {
 		ata_dev_printk(dev, KERN_ERR,
@@ -1185,20 +996,6 @@ static int sata_pmp_same_pmp(struct ata_device *dev, const u32 *new_gscr)
 	return 1;
 }
 
-/**
- *	sata_pmp_revalidate - revalidate SATA PMP
- *	@dev: PMP device to revalidate
- *	@new_class: new class code
- *
- *	Re-read GSCR block and make sure @dev is still attached to the
- *	port and properly configured.
- *
- *	LOCKING:
- *	Kernel thread context (may sleep).
- *
- *	RETURNS:
- *	0 on success, -errno otherwise.
- */
 static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 {
 	struct ata_link *link = dev->link;
@@ -1218,18 +1015,15 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 		goto fail;
 	}
 
-	/* wrong class? */
 	if (ata_class_enabled(new_class) && new_class != ATA_DEV_PMP) {
 		rc = -ENODEV;
 		goto fail;
 	}
 
-	/* read GSCR */
 	rc = sata_pmp_read_gscr(dev, gscr);
 	if (rc)
 		goto fail;
 
-	/* is the pmp still there? */
 	if (!sata_pmp_same_pmp(dev, gscr)) {
 		rc = -ENODEV;
 		goto fail;
@@ -1262,18 +1056,6 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 	return rc;
 }
 
-/**
- *	sata_pmp_revalidate_quick - revalidate SATA PMP quickly
- *	@dev: PMP device to revalidate
- *
- *	Make sure the attached PMP is accessible.
- *
- *	LOCKING:
- *	Kernel thread context (may sleep).
- *
- *	RETURNS:
- *	0 on success, -errno otherwise.
- */
 static int sata_pmp_revalidate_quick(struct ata_device *dev)
 {
 	unsigned int err_mask;
@@ -1288,32 +1070,13 @@ static int sata_pmp_revalidate_quick(struct ata_device *dev)
 
 	if (prod_id != dev->gscr[SATA_PMP_GSCR_PROD_ID]) {
 		ata_dev_printk(dev, KERN_ERR, "PMP product ID mismatch\n");
-		/* something weird is going on, request full PMP recovery */
+		 
 		return -EIO;
 	}
 
 	return 0;
 }
 
-/**
- *	sata_pmp_eh_recover_pmp - recover PMP
- *	@ap: ATA port PMP is attached to
- *	@prereset: prereset method (can be NULL)
- *	@softreset: softreset method
- *	@hardreset: hardreset method
- *	@postreset: postreset method (can be NULL)
- *
- *	Recover PMP attached to @ap.  Recovery procedure is somewhat
- *	similar to that of ata_eh_recover() except that reset should
- *	always be performed in hard->soft sequence and recovery
- *	failure results in PMP detachment.
- *
- *	LOCKING:
- *	Kernel thread context (may sleep).
- *
- *	RETURNS:
- *	0 on success, -errno on failure.
- */
 static int sata_pmp_eh_recover_pmp(struct ata_port *ap,
 		ata_prereset_fn_t prereset, ata_reset_fn_t softreset,
 		ata_reset_fn_t hardreset, ata_postreset_fn_t postreset)
@@ -1338,7 +1101,6 @@ static int sata_pmp_eh_recover_pmp(struct ata_port *ap,
 	if (ehc->i.action & ATA_EH_RESET) {
 		struct ata_link *tlink;
 
-		/* reset */
 		rc = ata_eh_reset(link, 0, prereset, softreset, hardreset,
 				  postreset);
 		if (rc) {
@@ -1347,7 +1109,6 @@ static int sata_pmp_eh_recover_pmp(struct ata_port *ap,
 			goto fail;
 		}
 
-		/* PMP is reset, SErrors cannot be trusted, scan all */
 		ata_for_each_link(tlink, ap, EDGE) {
 			struct ata_eh_context *ehc = &tlink->eh_context;
 
@@ -1356,9 +1117,6 @@ static int sata_pmp_eh_recover_pmp(struct ata_port *ap,
 		}
 	}
 
-	/* If revalidation is requested, revalidate and reconfigure;
-	 * otherwise, do quick revalidation.
-	 */
 	if (ehc->i.action & ATA_EH_REVALIDATE)
 		rc = sata_pmp_revalidate(dev, ehc->classes[0]);
 	else
@@ -1370,12 +1128,12 @@ static int sata_pmp_eh_recover_pmp(struct ata_port *ap,
 		if (rc == -ENODEV) {
 			ehc->i.probe_mask |= ATA_ALL_DEVICES;
 			detach = 1;
-			/* give it just two more chances */
+			 
 			tries = min(tries, 2);
 		}
 
 		if (tries) {
-			/* consecutive revalidation failures? speed down */
+			 
 			if (reval_failed)
 				sata_down_spd_limit(link, 0);
 			else
@@ -1391,7 +1149,6 @@ static int sata_pmp_eh_recover_pmp(struct ata_port *ap,
 		}
 	}
 
-	/* okay, PMP resurrected */
 	ehc->i.flags = 0;
 
 	DPRINTK("EXIT, rc=0\n");
@@ -1422,14 +1179,10 @@ static int sata_pmp_eh_handle_disabled_links(struct ata_port *ap)
 
 		spin_unlock_irqrestore(ap->lock, flags);
 
-		/* Some PMPs require hardreset sequence to get
-		 * SError.N working.
-		 */
 		sata_link_hardreset(link, sata_deb_timing_normal,
 				ata_deadline(jiffies, ATA_TMOUT_INTERNAL_QUICK),
 				NULL, NULL);
 
-		/* unconditionally clear SError.N */
 		rc = sata_scr_write(link, SCR_ERROR, SERR_PHYRDY_CHG);
 		if (rc) {
 			ata_link_printk(link, KERN_ERR, "failed to clear "
@@ -1453,7 +1206,6 @@ static int sata_pmp_handle_link_fail(struct ata_link *link, int *link_tries)
 	if (link_tries[link->pmp] && --link_tries[link->pmp])
 		return 1;
 
-	/* disable this link */
 	if (!(link->flags & ATA_LFLAG_DISABLED)) {
 		ata_link_printk(link, KERN_WARNING,
 			"failed to recover link after %d tries, disabling\n",
@@ -1470,21 +1222,6 @@ static int sata_pmp_handle_link_fail(struct ata_link *link, int *link_tries)
 	return 0;
 }
 
-/**
- *	sata_pmp_eh_recover - recover PMP-enabled port
- *	@ap: ATA port to recover
- *
- *	Drive EH recovery operation for PMP enabled port @ap.  This
- *	function recovers host and PMP ports with proper retrials and
- *	fallbacks.  Actual recovery operations are performed using
- *	ata_eh_recover() and sata_pmp_eh_recover_pmp().
- *
- *	LOCKING:
- *	Kernel thread context (may sleep).
- *
- *	RETURNS:
- *	0 on success, -errno on failure.
- */
 static int sata_pmp_eh_recover(struct ata_port *ap)
 {
 	struct ata_port_operations *ops = ap->ops;
@@ -1504,7 +1241,7 @@ static int sata_pmp_eh_recover(struct ata_port *ap)
 		link_tries[link->pmp] = ATA_EH_PMP_LINK_TRIES;
 
  retry:
-	/* PMP attached? */
+	 
 	if (!sata_pmp_attached(ap)) {
 		rc = ata_eh_recover(ap, ops->prereset, ops->softreset,
 				    ops->hardreset, ops->postreset, NULL);
@@ -1517,22 +1254,16 @@ static int sata_pmp_eh_recover(struct ata_port *ap)
 		if (pmp_dev->class != ATA_DEV_PMP)
 			return 0;
 
-		/* new PMP online */
 		ata_for_each_link(link, ap, EDGE)
 			link_tries[link->pmp] = ATA_EH_PMP_LINK_TRIES;
 
-		/* fall through */
 	}
 
-	/* recover pmp */
 	rc = sata_pmp_eh_recover_pmp(ap, ops->prereset, ops->softreset,
 				     ops->hardreset, ops->postreset);
 	if (rc)
 		goto pmp_fail;
 
-	/* PHY event notification can disturb reset and other recovery
-	 * operations.  Turn it off.
-	 */
 	if (gscr[SATA_PMP_GSCR_FEAT_EN] & SATA_PMP_FEAT_NOTIFY) {
 		gscr[SATA_PMP_GSCR_FEAT_EN] &= ~SATA_PMP_FEAT_NOTIFY;
 
@@ -1546,27 +1277,19 @@ static int sata_pmp_eh_recover(struct ata_port *ap)
 		}
 	}
 
-	/* handle disabled links */
 	rc = sata_pmp_eh_handle_disabled_links(ap);
 	if (rc)
 		goto pmp_fail;
 
-	/* recover links */
 	rc = ata_eh_recover(ap, ops->pmp_prereset, ops->pmp_softreset,
 			    ops->pmp_hardreset, ops->pmp_postreset, &link);
 	if (rc)
 		goto link_fail;
 
-	/* Connection status might have changed while resetting other
-	 * links, check SATA_PMP_GSCR_ERROR before returning.
-	 */
-
-	/* clear SNotification */
 	rc = sata_scr_read(&ap->link, SCR_NOTIFICATION, &sntf);
 	if (rc == 0)
 		sata_scr_write(&ap->link, SCR_NOTIFICATION, sntf);
 
-	/* enable notification */
 	if (pmp_dev->flags & ATA_DFLAG_AN) {
 		gscr[SATA_PMP_GSCR_FEAT_EN] |= SATA_PMP_FEAT_NOTIFY;
 
@@ -1580,7 +1303,6 @@ static int sata_pmp_eh_recover(struct ata_port *ap)
 		}
 	}
 
-	/* check GSCR_ERROR */
 	err_mask = sata_pmp_read(pmp_link, SATA_PMP_GSCR_ERROR, &gscr_error);
 	if (err_mask) {
 		ata_dev_printk(pmp_dev, KERN_ERR, "failed to read "
@@ -1620,11 +1342,8 @@ static int sata_pmp_eh_recover(struct ata_port *ap)
 		goto retry;
 	}
 
-	/* fall through */
  pmp_fail:
-	/* Control always ends up here after detaching PMP.  Shut up
-	 * and return if we're unloading.
-	 */
+	 
 	if (ap->pflags & ATA_PFLAG_UNLOADING)
 		return rc;
 
@@ -1645,16 +1364,6 @@ static int sata_pmp_eh_recover(struct ata_port *ap)
 	return rc;
 }
 
-/**
- *	sata_pmp_error_handler - do standard error handling for PMP-enabled host
- *	@ap: host port to handle error for
- *
- *	Perform standard error handling sequence for PMP-enabled host
- *	@ap.
- *
- *	LOCKING:
- *	Kernel thread context (may sleep).
- */
 void sata_pmp_error_handler(struct ata_port *ap)
 {
 	ata_eh_autopsy(ap);

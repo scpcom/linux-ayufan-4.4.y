@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * (C) Copyright 2003-2004
- * Humboldt Solutions Ltd, adrian@humboldt.co.uk.
-
- * This is a combined i2c adapter and algorithm driver for the
- * MPC107/Tsi107 PowerPC northbridge and processors that include
- * the same I2C unit (8240, 8245, 85xx).
- *
- * Release 0.8
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2. This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/sched.h>
@@ -71,7 +57,7 @@ struct mpc_i2c {
 
 struct mpc_i2c_divider {
 	u16 divider;
-	u16 fdr;	/* including dfsrr */
+	u16 fdr;	 
 };
 
 struct mpc_i2c_match_data {
@@ -90,7 +76,7 @@ static irqreturn_t mpc_i2c_isr(int irq, void *dev_id)
 {
 	struct mpc_i2c *i2c = dev_id;
 	if (readb(i2c->base + MPC_I2C_SR) & CSR_MIF) {
-		/* Read again to allow register to stabilise */
+		 
 		i2c->interrupt = readb(i2c->base + MPC_I2C_SR);
 		writeb(0, i2c->base + MPC_I2C_SR);
 		wake_up(&i2c->queue);
@@ -98,11 +84,6 @@ static irqreturn_t mpc_i2c_isr(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-/* Sometimes 9th clock pulse isn't generated, and slave doesn't release
- * the bus, because it wants to send ACK.
- * Following sequence of enabling/disabling and sending start/stop generates
- * the pulse, so it's all OK.
- */
 static void mpc_i2c_fixup(struct mpc_i2c *i2c)
 {
 	writeccr(i2c, 0);
@@ -136,7 +117,7 @@ static int i2c_wait(struct mpc_i2c *i2c, unsigned timeout, int writing)
 		x = readb(i2c->base + MPC_I2C_SR);
 		writeb(0, i2c->base + MPC_I2C_SR);
 	} else {
-		/* Interrupt mode */
+		 
 		result = wait_event_timeout(i2c->queue,
 			(i2c->interrupt & CSR_MIF), timeout);
 
@@ -165,7 +146,7 @@ static int i2c_wait(struct mpc_i2c *i2c, unsigned timeout, int writing)
 
 	if (writing && (x & CSR_RXAK)) {
 		dev_dbg(i2c->dev, "No RXAK\n");
-		/* generate stop */
+		 
 		writeccr(i2c, CCR_MEN);
 		return -EIO;
 	}
@@ -204,16 +185,11 @@ int mpc_i2c_get_fdr_52xx(struct device_node *node, u32 clock, int prescaler)
 	if (!clock)
 		return -EINVAL;
 
-	/* Determine divider value */
 	divider = mpc5xxx_get_bus_frequency(node) / clock;
 
-	/*
-	 * We want to choose an FDR/DFSR that generates an I2C bus speed that
-	 * is equal to or lower than the requested speed.
-	 */
 	for (i = 0; i < ARRAY_SIZE(mpc_i2c_dividers_52xx); i++) {
 		div = &mpc_i2c_dividers_52xx[i];
-		/* Old MPC5200 rev A CPUs do not support the high bits */
+		 
 		if (div->fdr & 0xc0 && pvr == 0x80822011)
 			continue;
 		if (div->divider >= divider)
@@ -230,20 +206,20 @@ static void mpc_i2c_setclock_52xx(struct device_node *node,
 	int ret, fdr;
 
 	ret = mpc_i2c_get_fdr_52xx(node, clock, prescaler);
-	fdr = (ret >= 0) ? ret : 0x3f; /* backward compatibility */
+	fdr = (ret >= 0) ? ret : 0x3f;  
 
 	writeb(fdr & 0xff, i2c->base + MPC_I2C_FDR);
 
 	if (ret >= 0)
 		dev_info(i2c->dev, "clock %d Hz (fdr=%d)\n", clock, fdr);
 }
-#else /* !CONFIG_PPC_MPC52xx */
+#else  
 static void mpc_i2c_setclock_52xx(struct device_node *node,
 				  struct mpc_i2c *i2c,
 				  u32 clock, u32 prescaler)
 {
 }
-#endif /* CONFIG_PPC_MPC52xx*/
+#endif  
 
 #ifdef CONFIG_FSL_SOC
 static const struct mpc_i2c_divider mpc_i2c_dividers_8xxx[] = {
@@ -276,16 +252,13 @@ u32 mpc_i2c_get_sec_cfg_8xxx(void)
 	if (node) {
 		const u32 *prop = of_get_property(node, "reg", NULL);
 		if (prop) {
-			/*
-			 * Map and check POR Device Status Register 2
-			 * (PORDEVSR2) at 0xE0014
-			 */
+			 
 			reg = ioremap(get_immrbase() + *prop + 0x14, 0x4);
 			if (!reg)
 				printk(KERN_ERR
 				       "Error: couldn't map PORDEVSR2\n");
 			else
-				val = in_be32(reg) & 0x00000080; /* sec-cfg */
+				val = in_be32(reg) & 0x00000080;  
 			iounmap(reg);
 		}
 	}
@@ -304,7 +277,6 @@ int mpc_i2c_get_fdr_8xxx(struct device_node *node, u32 clock, u32 prescaler)
 	if (!clock)
 		return -EINVAL;
 
-	/* Determine proper divider value */
 	if (of_device_is_compatible(node, "fsl,mpc8544-i2c"))
 		prescaler = mpc_i2c_get_sec_cfg_8xxx() ? 3 : 2;
 	if (!prescaler)
@@ -315,10 +287,6 @@ int mpc_i2c_get_fdr_8xxx(struct device_node *node, u32 clock, u32 prescaler)
 	pr_debug("I2C: src_clock=%d clock=%d divider=%d\n",
 		 fsl_get_sys_freq(), clock, divider);
 
-	/*
-	 * We want to choose an FDR/DFSR that generates an I2C bus speed that
-	 * is equal to or lower than the requested speed.
-	 */
 	for (i = 0; i < ARRAY_SIZE(mpc_i2c_dividers_8xxx); i++) {
 		div = &mpc_i2c_dividers_8xxx[i];
 		if (div->divider >= divider)
@@ -335,7 +303,7 @@ static void mpc_i2c_setclock_8xxx(struct device_node *node,
 	int ret, fdr;
 
 	ret = mpc_i2c_get_fdr_8xxx(node, clock, prescaler);
-	fdr = (ret >= 0) ? ret : 0x1031; /* backward compatibility */
+	fdr = (ret >= 0) ? ret : 0x1031;  
 
 	writeb(fdr & 0xff, i2c->base + MPC_I2C_FDR);
 	writeb((fdr >> 8) & 0xff, i2c->base + MPC_I2C_DFSRR);
@@ -345,19 +313,19 @@ static void mpc_i2c_setclock_8xxx(struct device_node *node,
 			 clock, fdr >> 8, fdr & 0xff);
 }
 
-#else /* !CONFIG_FSL_SOC */
+#else  
 static void mpc_i2c_setclock_8xxx(struct device_node *node,
 				  struct mpc_i2c *i2c,
 				  u32 clock, u32 prescaler)
 {
 }
-#endif /* CONFIG_FSL_SOC */
+#endif  
 
 static void mpc_i2c_start(struct mpc_i2c *i2c)
 {
-	/* Clear arbitration */
+	 
 	writeb(0, i2c->base + MPC_I2C_SR);
-	/* Start with MEN */
+	 
 	writeccr(i2c, CCR_MEN);
 }
 
@@ -373,9 +341,8 @@ static int mpc_write(struct mpc_i2c *i2c, int target,
 	unsigned timeout = i2c->adap.timeout;
 	u32 flags = restart ? CCR_RSTA : 0;
 
-	/* Start as master */
 	writeccr(i2c, CCR_MIEN | CCR_MEN | CCR_MSTA | CCR_MTX | flags);
-	/* Write target byte */
+	 
 	writeb((target << 1), i2c->base + MPC_I2C_DR);
 
 	result = i2c_wait(i2c, timeout, 1);
@@ -383,7 +350,7 @@ static int mpc_write(struct mpc_i2c *i2c, int target,
 		return result;
 
 	for (i = 0; i < length; i++) {
-		/* Write data byte */
+		 
 		writeb(data[i], i2c->base + MPC_I2C_DR);
 
 		result = i2c_wait(i2c, timeout, 1);
@@ -401,9 +368,8 @@ static int mpc_read(struct mpc_i2c *i2c, int target,
 	int i, result;
 	u32 flags = restart ? CCR_RSTA : 0;
 
-	/* Switch to read - restart */
 	writeccr(i2c, CCR_MIEN | CCR_MEN | CCR_MSTA | CCR_MTX | flags);
-	/* Write target address byte - this time with the read flag set */
+	 
 	writeb((target << 1) | 1, i2c->base + MPC_I2C_DR);
 
 	result = i2c_wait(i2c, timeout, 1);
@@ -415,7 +381,7 @@ static int mpc_read(struct mpc_i2c *i2c, int target,
 			writeccr(i2c, CCR_MIEN | CCR_MEN | CCR_MSTA | CCR_TXAK);
 		else
 			writeccr(i2c, CCR_MIEN | CCR_MEN | CCR_MSTA);
-		/* Dummy read */
+		 
 		readb(i2c->base + MPC_I2C_DR);
 	}
 
@@ -424,10 +390,9 @@ static int mpc_read(struct mpc_i2c *i2c, int target,
 		if (result < 0)
 			return result;
 
-		/* Generate txack on next to last byte */
 		if (i == length - 2)
 			writeccr(i2c, CCR_MIEN | CCR_MEN | CCR_MSTA | CCR_TXAK);
-		/* Do not generate stop on last byte */
+		 
 		if (i == length - 1)
 			writeccr(i2c, CCR_MIEN | CCR_MEN | CCR_MSTA | CCR_MTX);
 		data[i] = readb(i2c->base + MPC_I2C_DR);
@@ -446,7 +411,6 @@ static int mpc_xfer(struct i2c_adapter *adap, struct i2c_msg *msgs, int num)
 
 	mpc_i2c_start(i2c);
 
-	/* Allow bus up to 1s to become not busy */
 	while (readb(i2c->base + MPC_I2C_SR) & CSR_MBB) {
 		if (signal_pending(current)) {
 			dev_dbg(i2c->dev, "Interrupted\n");
@@ -510,7 +474,7 @@ static int __devinit fsl_i2c_probe(struct of_device *op,
 	if (!i2c)
 		return -ENOMEM;
 
-	i2c->dev = &op->dev; /* for debug and error output */
+	i2c->dev = &op->dev;  
 
 	init_waitqueue_head(&i2c->queue);
 
@@ -522,7 +486,7 @@ static int __devinit fsl_i2c_probe(struct of_device *op,
 	}
 
 	i2c->irq = irq_of_parse_and_map(op->node, 0);
-	if (i2c->irq != NO_IRQ) { /* i2c->irq = NO_IRQ implies polling */
+	if (i2c->irq != NO_IRQ) {  
 		result = request_irq(i2c->irq, mpc_i2c_isr,
 				     IRQF_SHARED, "i2c-mpc", i2c);
 		if (result < 0) {
@@ -541,7 +505,7 @@ static int __devinit fsl_i2c_probe(struct of_device *op,
 				(struct mpc_i2c_match_data *)match->data;
 			data->setclock(op->node, i2c, clock, data->prescaler);
 		} else {
-			/* Backwards compatibility */
+			 
 			if (of_get_property(op->node, "dfsrr", NULL))
 				mpc_i2c_setclock_8xxx(op->node, i2c,
 						      clock, 0);
@@ -622,7 +586,7 @@ static const struct of_device_id mpc_i2c_of_match[] = {
 			.setclock = mpc_i2c_setclock_8xxx,
 			.prescaler = 3,
 		},
-	/* Backward compatibility */
+	 
 	},
 	{.compatible = "fsl-i2c", },
 	{},
@@ -652,7 +616,6 @@ static int mpc_i2c_resume(struct of_device *op, pm_message_t state)
 #endif
 #endif
 
-/* Structure for a device driver */
 static struct of_platform_driver mpc_i2c_driver = {
 	.match_table	= mpc_i2c_of_match,
 	.probe		= fsl_i2c_probe,

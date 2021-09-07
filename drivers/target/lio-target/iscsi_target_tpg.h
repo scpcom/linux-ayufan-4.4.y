@@ -27,7 +27,7 @@ extern void lio_tpg_stop_session(struct se_session_s *, int, int);
 extern void lio_tpg_fall_back_to_erl0(struct se_session_s *);
 #ifdef SNMP_SUPPORT
 extern u32 lio_tpg_get_inst_index(struct se_portal_group_s *);
-#endif /* SNMP_SUPPORT */
+#endif  
 extern void lio_set_default_node_attributes(struct se_node_acl_s *);
 
 #ifdef MY_ABC_HERE
@@ -87,4 +87,4 @@ extern int iscsi_free_session(iscsi_session_t *);
 extern int iscsi_release_sessions_for_tpg(iscsi_portal_group_t *, int);
 extern int iscsi_ta_authentication(iscsi_portal_group_t *, __u32);
 
-#endif /* ISCSI_TARGET_TPG_H */
+#endif  

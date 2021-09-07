@@ -1,34 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  iscsi_target_login.c
- *
- * This file contains the login functions used by the iSCSI Target driver.
- *
- * Copyright (c) 2003, 2004, 2005 PyX Technologies, Inc.
- * Copyright (c) 2005, 2006, 2007 SBE, Inc.
- * Copyright (c) 2007 Rising Tide Software, Inc.
- * Copyright (c) 2008 Linux-iSCSI.org
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #define ISCSI_TARGET_LOGIN_C
 
 #include <linux/string.h>
@@ -61,10 +34,6 @@
 
 #undef ISCSI_TARGET_LOGIN_C
 
-/*	iscsi_login_init_conn():
- *
- *
- */
 static void iscsi_login_init_conn(iscsi_conn_t *conn)
 {
 	INIT_LIST_HEAD(&conn->conn_list);
@@ -88,10 +57,6 @@ static void iscsi_login_init_conn(iscsi_conn_t *conn)
 	spin_lock_init(&conn->state_lock);
 }
 
-/*	iscsi_login_check_initiator_version():
- *
- *
- */
 static int iscsi_login_check_initiator_version(
 	iscsi_conn_t *conn,
 	u8 version_max,
@@ -109,10 +74,6 @@ static int iscsi_login_check_initiator_version(
 	return 0;
 }
 
-/*	iscsi_check_for_session_reinstatement():
- *
- *
- */
 int iscsi_check_for_session_reinstatement(iscsi_conn_t *conn)
 {
 	int sessiontype;
@@ -160,9 +121,7 @@ int iscsi_check_for_session_reinstatement(iscsi_conn_t *conn)
 		spin_unlock(&sess_p->conn_lock);
 	}
 	spin_unlock_bh(&se_tpg->session_lock);
-	/*
-	 * If the Time2Retain handler has expired, the session is already gone.
-	 */
+	 
 	if (!sess)
 		return 0;
 
@@ -192,10 +151,7 @@ static void iscsi_login_set_conn_values(
 {
 	conn->sess		= sess;
 	conn->cid 		= cid;
-	/*
-	 * Generate a random Status sequence number (statsn) for the new
-	 * iSCSI connection.
-	 */
+	 
 	get_random_bytes(&conn->stat_sn, sizeof(u32));
 
 	down(&iscsi_global->auth_id_sem);
@@ -203,11 +159,6 @@ static void iscsi_login_set_conn_values(
 	up(&iscsi_global->auth_id_sem);
 }
 
-/*	iscsi_login_zero_tsih():
- *
- *	This is the leading connection of a new session,
- *	or session reinstatement.
- */
 static int iscsi_login_zero_tsih_s1(
 	iscsi_conn_t *conn,
 	unsigned char *buf)
@@ -245,12 +196,8 @@ static int iscsi_login_zero_tsih_s1(
 	sess->session_index = iscsi_get_new_index(ISCSI_SESSION_INDEX);
 	sess->creation_time = get_jiffies_64();
 	spin_lock_init(&sess->session_stats_lock);
-#endif /* SNMP_SUPPORT */
+#endif  
 
-	/*
-	 * The FFP CmdSN window values will be allocated from the TPG's
-	 * Initiator Node's ACL once the login has been successfully completed.
-	 */
 	sess->max_cmd_sn	= pdu->cmd_sn;
 
 	sess->sess_ops = kzalloc(sizeof(iscsi_sess_ops_t), GFP_KERNEL);
@@ -281,17 +228,10 @@ static int iscsi_login_zero_tsih_s2 (
 
 	sess->tpg = conn->tpg;
 
-	/*
-	 * Assign a new TPG Session Handle.  Note this is protected with
-	 * iscsi_portal_group_t->np_login_sem from core_access_np().
-	 */
 	sess->tsih = ++ISCSI_TPG_S(sess)->ntsih;
 	if (!(sess->tsih))
 		sess->tsih = ++ISCSI_TPG_S(sess)->ntsih;
 
-	/*
-	 * Create the default params from user defined values..
-	 */
 	if (iscsi_copy_param_list(&conn->param_list,
 				ISCSI_TPG_C(conn)->param_list, 1) < 0) {
 		iscsi_tx_login_rsp(conn, STAT_CLASS_TARGET,
@@ -307,13 +247,6 @@ static int iscsi_login_zero_tsih_s2 (
 
 	na = iscsi_tpg_get_node_attrib(sess);
 
-	/*
-	 * Need to send TargetPortalGroupTag back in first login response
-	 * on any iSCSI connection where the Initiator provides TargetName.
-	 * See 5.3.1.  Login Phase Start
-	 *
-	 * In our case, we have already located the iscsi_tiqn_t at this point.
-	 */
 	memset(buf, 0, 32);
 	sprintf(buf, "TargetPortalGroupTag=%hu", ISCSI_TPG_S(sess)->tpgt);
 	if (iscsi_change_param_value(buf, TARGET, conn->param_list, 0) < 0) {
@@ -322,11 +255,6 @@ static int iscsi_login_zero_tsih_s2 (
 		return -1;
 	}
 
-	/*
-	 * Workaround for Initiators that have broken connection recovery logic.
-	 *
-	 * "We would really like to get rid of this." Linux-iSCSI.org team
-	 */
 	memset(buf, 0, 32);
 	sprintf(buf, "ErrorRecoveryLevel=%d", na->default_erl);
 	if (iscsi_change_param_value(buf, TARGET, conn->param_list, 0) < 0) {
@@ -341,10 +269,6 @@ static int iscsi_login_zero_tsih_s2 (
 	return 0;
 }
 
-/*
- * Remove PSTATE_NEGOTIATE for the four FIM related keys.
- * The Initiator node will be able to enable FIM by proposing them itself.
- */
 int iscsi_login_disable_FIM_keys(
 	iscsi_param_list_t *param_list,
 	iscsi_conn_t *conn)
@@ -404,10 +328,6 @@ static int iscsi_login_non_zero_tsih_s1 (
 	return 0;
 }
 
-/*	iscsi_login_non_zero_tsih_s2():
- *
- *	Add a new connection to an existing session.
- */
 static int iscsi_login_non_zero_tsih_s2(
 	iscsi_conn_t *conn,
 	unsigned char *buf)
@@ -438,9 +358,6 @@ static int iscsi_login_non_zero_tsih_s2(
 	}
 	spin_unlock_bh(&se_tpg->session_lock);
 
-	/*
-	 * If the Time2Retain handler has expired, the session is already gone.
-	 */
 	if (!sess) {
 		printk(KERN_ERR "Initiator attempting to add a connection to"
 			" a non-existent session, rejecting iSCSI Login.\n");
@@ -449,10 +366,6 @@ static int iscsi_login_non_zero_tsih_s2(
 		return -1;
 	}
 
-	/*
-	 * Stop the Time2Retain timer if this is a failed session, we restart
-	 * the timer if the login is not successful.
-	 */
 	spin_lock_bh(&sess->conn_lock);
 	if (sess->session_state == TARG_SESS_STATE_FAILED)
 		atomic_set(&sess->session_continuation, 1);
@@ -469,13 +382,6 @@ static int iscsi_login_non_zero_tsih_s2(
 
 	iscsi_set_keys_to_negotiate(TARGET, 0, conn->param_list);
 
-	/*
-	 * Need to send TargetPortalGroupTag back in first login response
-	 * on any iSCSI connection where the Initiator provides TargetName.
-	 * See 5.3.1.  Login Phase Start
-	 *
-	 * In our case, we have already located the iscsi_tiqn_t at this point.
-	 */
 	memset(buf, 0, 32);
 	sprintf(buf, "TargetPortalGroupTag=%hu", ISCSI_TPG_S(sess)->tpgt);
 	if (iscsi_change_param_value(buf, TARGET, conn->param_list, 0) < 0) {
@@ -487,10 +393,6 @@ static int iscsi_login_non_zero_tsih_s2(
 	return iscsi_login_disable_FIM_keys(conn->param_list, conn);
 }
 
-/*	iscsi_login_post_auth_non_zero_tsih():
- *
- *
- */
 int iscsi_login_post_auth_non_zero_tsih(
 	iscsi_conn_t *conn,
 	u16 cid,
@@ -500,13 +402,6 @@ int iscsi_login_post_auth_non_zero_tsih(
 	iscsi_conn_recovery_t *cr = NULL;
 	iscsi_session_t *sess = SESS(conn);
 
-	/*
-	 * By following item 5 in the login table,  if we have found
-	 * an existing ISID and a valid/existing TSIH and an existing
-	 * CID we do connection reinstatement.  Currently we dont not
-	 * support it so we send back an non-zero status class to the
-	 * initiator and release the new connection.
-	 */
 	conn_ptr = iscsi_get_conn_from_cid_rcfr(sess, cid);
 	if ((conn_ptr)) {
 		printk(KERN_ERR "Connection exists with CID %hu for %s,"
@@ -517,15 +412,6 @@ int iscsi_login_post_auth_non_zero_tsih(
 		iscsi_dec_conn_usage_count(conn_ptr);
 	}
 
-	/*
-	 * Check for any connection recovery entires containing CID.
-	 * We use the original ExpStatSN sent in the first login request
-	 * to acknowledge commands for the failed connection.
-	 *
-	 * Also note that an explict logout may have already been sent,
-	 * but the response may not be sent due to additional connection
-	 * loss.
-	 */
 	if (SESS_OPS(sess)->ErrorRecoveryLevel == 2) {
 		cr = iscsi_get_inactive_connection_recovery_entry(
 				sess, cid);
@@ -537,12 +423,6 @@ int iscsi_login_post_auth_non_zero_tsih(
 		}
 	}
 
-	/*
-	 * Else we follow item 4 from the login table in that we have
-	 * found an existing ISID and a valid/existing TSIH and a new
-	 * CID we go ahead and continue to add a new connection to the
-	 * session.
-	 */
 	TRACE(TRACE_LOGIN, "Adding CID %hu to existing session for %s.\n",
 			cid, SESS_OPS(sess)->InitiatorName);
 
@@ -558,15 +438,10 @@ int iscsi_login_post_auth_non_zero_tsih(
 	return 0;
 }
 
-/*	iscsi_post_login_start_timers():
- *
- *
- */
 static void iscsi_post_login_start_timers(iscsi_conn_t *conn)
 {
 	iscsi_session_t *sess = SESS(conn);
 
-/* #warning PHY timer is disabled */
 #if 0
 	iscsi_get_network_interface_from_conn(conn);
 
@@ -578,10 +453,6 @@ static void iscsi_post_login_start_timers(iscsi_conn_t *conn)
 		iscsi_start_nopin_timer(conn);
 }
 
-/*	iscsi_post_login_handler():
- *
- *
- */
 static int iscsi_post_login_handler(
 	iscsi_np_t *np,
 	iscsi_conn_t *conn,
@@ -621,9 +492,6 @@ static int iscsi_post_login_handler(
 		ip_np = &buf1_ipv4[0];
 	}
 
-	/*
-	 * SCSI Initiator -> SCSI Target Port Mapping
-	 */
 	ts = iscsi_get_thread_set(TARGET);
 	if (!zero_tsih) {
 		iscsi_set_session_parameters(sess->sess_ops,
@@ -737,10 +605,6 @@ static int iscsi_post_login_handler(
 	return 0;
 }
 
-/*	iscsi_handle_login_thread_timeout():
- *
- *
- */
 static void iscsi_handle_login_thread_timeout(unsigned long data)
 {
 	unsigned char buf_ipv4[IPV4_BUF_SIZE];
@@ -770,16 +634,9 @@ static void iscsi_handle_login_thread_timeout(unsigned long data)
 	spin_unlock_bh(&np->np_thread_lock);
 }
 
-/*	iscsi_start_login_thread_timer():
- *
- *
- */
 static void iscsi_start_login_thread_timer(iscsi_np_t *np)
 {
-	/*
-	 * This used the TA_LOGIN_TIMEOUT constant because at this
-	 * point we do not have access to ISCSI_TPG_ATTRIB(tpg)->login_timeout
-	 */
+	 
 	spin_lock_bh(&np->np_thread_lock);
 	init_timer(&np->np_login_timer);
 	SETUP_TIMER(np->np_login_timer, TA_LOGIN_TIMEOUT, np,
@@ -793,10 +650,6 @@ static void iscsi_start_login_thread_timer(iscsi_np_t *np)
 	spin_unlock_bh(&np->np_thread_lock);
 }
 
-/*	iscsi_stop_login_thread_timer():
- *
- *
- */
 static void iscsi_stop_login_thread_timer(iscsi_np_t *np)
 {
 	spin_lock_bh(&np->np_thread_lock);
@@ -814,10 +667,6 @@ static void iscsi_stop_login_thread_timer(iscsi_np_t *np)
 	spin_unlock_bh(&np->np_thread_lock);
 }
 
-/*	iscsi_target_setup_login_socket():
- *
- *
- */
 static struct socket *iscsi_target_setup_login_socket(iscsi_np_t *np)
 {
 	const char *end;
@@ -855,9 +704,6 @@ static struct socket *iscsi_target_setup_login_socket(iscsi_np_t *np)
 	}
 	np->np_socket = sock;
 
-	/*
-	 * The SCTP stack needs struct socket->file.
-	 */
 	if ((np->np_network_transport == ISCSI_SCTP_TCP) ||
 	    (np->np_network_transport == ISCSI_SCTP_UDP)) {
 		if (!sock->file) {
@@ -897,9 +743,6 @@ static struct socket *iscsi_target_setup_login_socket(iscsi_np_t *np)
 		sock_in.sin_addr.s_addr = htonl(np->np_ipv4);
 	}
 
-	/*
-	 * Set SO_REUSEADDR, and disable Nagel Algorithm with TCP_NODELAY.
-	 */
 	opt = 1;
 	if (np->np_network_transport == ISCSI_TCP) {
 		ret = kernel_setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
@@ -954,10 +797,6 @@ fail:
 	return NULL;
 }
 
-/*	iscsi_target_login_thread():
- *
- *
- */
 int iscsi_target_login_thread(void *arg)
 {
 	u8 buffer[ISCSI_HDR_LEN], iscsi_opcode, zero_tsih = 0;
@@ -1060,9 +899,7 @@ get_new_sock:
 		}
 		goto get_new_sock;
 	}
-	/*
-	 * The SCTP stack needs struct socket->file.
-	 */
+	 
 	if ((np->np_network_transport == ISCSI_SCTP_TCP) ||
 	    (np->np_network_transport == ISCSI_SCTP_UDP)) {
 		if (!new_sock->file) {
@@ -1103,10 +940,6 @@ get_new_sock:
 	TRACE(TRACE_STATE, "Moving to TARG_CONN_STATE_XPT_UP.\n");
 	conn->conn_state = TARG_CONN_STATE_XPT_UP;
 
-	/*
-	 * Allocate conn->conn_ops early as a failure calling
-	 * iscsi_tx_login_rsp() below will call tx_data().
-	 */
 	conn->conn_ops = kzalloc(sizeof(iscsi_conn_ops_t), GFP_KERNEL);
 	if (!(conn->conn_ops)) {
 		printk(KERN_ERR "Unable to allocate memory for"
@@ -1139,10 +972,7 @@ get_new_sock:
 	pdu->init_task_tag	= be32_to_cpu(pdu->init_task_tag);
 	pdu->cmd_sn		= be32_to_cpu(pdu->cmd_sn);
 	pdu->exp_stat_sn	= be32_to_cpu(pdu->exp_stat_sn);
-	/*
-	 * Used by iscsi_tx_login_rsp() for Login Resonses PDUs
-	 * when Status-Class != 0.
-	*/
+	 
 	conn->login_itt		= pdu->init_task_tag;
 
 #ifdef DEBUG_OPCODES
@@ -1247,29 +1077,15 @@ get_new_sock:
 
 	zero_tsih = (pdu->tsih == 0x0000);
 	if ((zero_tsih)) {
-		/*
-		 * This is the leading connection of a new session.
-		 * We wait until after authentication to check for
-		 * session reinstatement.
-		 */
+		 
 		if (iscsi_login_zero_tsih_s1(conn, buffer) < 0)
 			goto new_sess_out;
 	} else {
-		/*
-		 * Add a new connection to an existing session.
-		 * We check for a non-existant session in
-		 * iscsi_login_non_zero_tsih_s2() below based
-		 * on ISID/TSIH, but wait until after authentication
-		 * to check for connection reinstatement, etc.
-		 */
+		 
 		if (iscsi_login_non_zero_tsih_s1(conn, buffer) < 0)
 			goto new_sess_out;
 	}
 
-	/*
-	 * This will process the first login request, and call
-	 * iscsi_target_locate_portal(), and return a valid iscsi_login_t.
-	 */
 	login = iscsi_target_init_negotiation(np, conn, buffer);
 	if (!(login)) {
 		tpg = conn->tpg;
@@ -1297,7 +1113,7 @@ get_new_sock:
 #ifdef MY_ABC_HERE
 	for( i = 0; i <= MAX_LOGIN_RETRY; ++i ) {
 		spin_lock_bh(&tpg->tpg_se_tpg->session_lock);
-		if( (SESS(conn) && SESS(conn)->sess_ops->SessionType) || // skip discovery session
+		if( (SESS(conn) && SESS(conn)->sess_ops->SessionType) ||  
 		    (atomic_read(&tpg->nr_sessions) < atomic_read(&tpg->max_nr_sessions)) ) {
 			spin_unlock_bh(&tpg->tpg_se_tpg->session_lock);
 			break;
@@ -1363,10 +1179,7 @@ new_sess_out:
 		kmem_cache_free(lio_sess_cache, SESS(conn));
 old_sess_out:
 	iscsi_stop_login_thread_timer(np);
-	/*
-	 * If login negotiation fails check if the Time2Retain timer
-	 * needs to be restarted.
-	 */
+	 
 	if (!zero_tsih && SESS(conn)) {
 		spin_lock_bh(&SESS(conn)->conn_lock);
 		if (SESS(conn)->session_state == TARG_SESS_STATE_FAILED) {

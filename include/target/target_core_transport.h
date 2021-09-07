@@ -1,45 +1,17 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  target_core_transport.h
- *
- * This file contains the iSCSI Target Generic DAS Transport Layer definitions.
- *
- * Copyright (c) 2002, 2003, 2004, 2005 PyX Technologies, Inc.
- * Copyright (c) 2005, 2006, 2007 SBE, Inc.
- * Copyright (c) 2007-2009 Rising Tide Software, Inc.
- * Copyright (c) 2008-2009 Linux-iSCSI.org
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #ifndef TARGET_CORE_TRANSPORT_H
 #define TARGET_CORE_TRANSPORT_H
 
 #define TARGET_CORE_VERSION			TARGET_CORE_MOD_VERSION
 
-/* Attempts before moving from SHORT to LONG */
 #define PYX_TRANSPORT_WINDOW_CLOSED_THRESHOLD	3
-#define PYX_TRANSPORT_WINDOW_CLOSED_WAIT_SHORT	3  /* In milliseconds */
-#define PYX_TRANSPORT_WINDOW_CLOSED_WAIT_LONG	10 /* In milliseconds */
+#define PYX_TRANSPORT_WINDOW_CLOSED_WAIT_SHORT	3   
+#define PYX_TRANSPORT_WINDOW_CLOSED_WAIT_LONG	10  
 
-#define PYX_TRANSPORT_STATUS_INTERVAL		5 /* In seconds */
+#define PYX_TRANSPORT_STATUS_INTERVAL		5  
 
 #define PYX_TRANSPORT_SENT_TO_TRANSPORT		0
 #define PYX_TRANSPORT_WRITE_PENDING		1
@@ -71,27 +43,19 @@
 #define TRANSPORT_PLUGIN_VHBA_PDEV		2
 #define TRANSPORT_PLUGIN_VHBA_VDEV		3
 
-/* For SE OBJ Plugins, in seconds */
 #define TRANSPORT_TIMEOUT_TUR			10
 #define TRANSPORT_TIMEOUT_TYPE_DISK		60
 #define TRANSPORT_TIMEOUT_TYPE_ROM		120
 #define TRANSPORT_TIMEOUT_TYPE_TAPE		600
 #define TRANSPORT_TIMEOUT_TYPE_OTHER		300
 
-/* For se_task->task_state_flags */
 #define TSF_EXCEPTION_CLEARED			0x01
 
-/*
- * se_subsystem_dev_t->su_dev_flags
-*/
 #define SDF_FIRMWARE_VPD_UNIT_SERIAL		0x00000001
 #define SDF_EMULATED_VPD_UNIT_SERIAL		0x00000002
 #define SDF_USING_UDEV_PATH			0x00000004
 #define SDF_USING_ALIAS				0x00000008
 
-/*
- * se_device_t->dev_flags
- */
 #define DF_READAHEAD_ACTIVE                     0x00000001
 #define DF_TRANSPORT_DMA_ALLOC			0x00000002
 #define DF_TRANSPORT_BUF_ALLOC			0x00000004
@@ -103,18 +67,16 @@
 #define DF_SPC2_RESERVATIONS			0x00000100
 #define DF_SPC2_RESERVATIONS_WITH_ISID		0x00000200
 
-/* se_dev_attrib_t sanity values */
-/* 10 Minutes, see transport_get_default_task_timeout()  */
 #define DA_TASK_TIMEOUT_MAX			600
-/* Emulation for UNIT ATTENTION Interlock Control */
+ 
 #define DA_EMULATE_UA_INTLLCK_CTRL		0
-/* Emulation for TASK_ABORTED status (TAS) by default */
+ 
 #define DA_EMULATE_TAS				1
-/* No Emulation for PSCSI by default */
+ 
 #define DA_EMULATE_RESERVATIONS			0
-/* No Emulation for PSCSI by default */
+ 
 #define DA_EMULATE_ALUA				0
-/* Enforce SCSI Initiator Port TransportID with 'ISID' for PR */
+ 
 #define DA_ENFORCE_PR_ISIDS			1
 #define DA_STATUS_MAX_SECTORS_MIN		16
 #define DA_STATUS_MAX_SECTORS_MAX		8192
@@ -345,12 +307,6 @@ extern int transport_generic_set_iovec_ptrs(struct se_map_sg_s *map_sg,
 		struct se_unmap_sg_s *unmap_sg);
 #endif
 
-/*
- * Each se_transport_task_t can have N number of possible se_task_t's
- * for the storage transport(s) to possibly execute.
- * Used primarily for splitting up CDBs that exceed the physical storage
- * HBA's maximum sector count per task.
- */
 typedef struct se_mem_s {
 	struct page	*se_page;
 	u32		se_len;
@@ -358,10 +314,6 @@ typedef struct se_mem_s {
 	struct list_head se_list;
 } ____cacheline_aligned se_mem_t;
 
-/*
- * Each type of DAS transport that uses the generic command sequencer needs
- * each of the following function pointers set.
- */
 typedef struct se_subsystem_spc_s {
 	int (*inquiry)(se_task_t *, u32);
 	int (*none)(se_task_t *, u32);
@@ -371,227 +323,109 @@ typedef struct se_subsystem_spc_s {
 	int (*write_SG)(se_task_t *, u32);
 } se_subsystem_spc_t;
 
-/*
- * 	Each type of disk transport supported MUST have a template defined
- *	within its .h file.
- */
 typedef struct se_subsystem_api_s {
-	/*
-	 * The Name. :-)
-	 */
+	 
 	char name[16];
-	/*
-	 * Plugin Type.
-	 */
+	 
 	u8 type;
-	/*
-	 * Transport Type.
-	 */
+	 
 	u8 transport_type;
-	/*
-	 * attach_hba():
-	 */
+	 
 	int (*attach_hba)(se_hba_t *, u32);
-	/*
-	 * detach_hba():
-	 */
+	 
 	int (*detach_hba)(struct se_hba_s *);
-	/*
-	 * pmode_hba(): Used for TCM/pSCSI subsystem plugin HBA ->
-	 *		Linux/SCSI struct Scsi_Host passthrough
-	*/
+	 
 	int (*pmode_enable_hba)(struct se_hba_s *, unsigned long);
-	/*
-	 * claim_phydevice(): Only for Physical HBAs
-	 */
+	 
 	int (*claim_phydevice)(struct se_hba_s *, struct se_device_s *);
-	/*
-	 * allocate_virtdevice():
-	 */
+	 
 	void *(*allocate_virtdevice)(struct se_hba_s *, const char *);
-	/*
-	 * create_virtdevice(): Only for Virtual HBAs
-	 */
+	 
 	se_device_t *(*create_virtdevice)(struct se_hba_s *,
 				struct se_subsystem_dev_s *, void *);
-	/*
-	 * activate_device():
-	 */
+	 
 	int (*activate_device)(struct se_device_s *);
-	/*
-	 * deactivate_device():
-	 */
+	 
 	void (*deactivate_device)(struct se_device_s *);
-	/*
-	 * release_phydevice():
-	 */
+	 
 	int (*release_phydevice)(struct se_device_s *);
-	/*
-	 * free_device():
-	 */
+	 
 	void (*free_device)(void *);
-	/*
-	 * cmd_sequencer():
-	 *
-	 * Use transport_generic_cmd_sequencer() for majority of DAS transport
-	 * drivers with a scsi_transport_spc_t struct as mentioned below.
-	 * Provided out of convenience.
-	 */
+	 
 	int (*cmd_sequencer)(se_cmd_t *cmd);
-	/*
-	 * do_tmr():
-	 *
-	 * Use transport_do_tmr() for majority of DAS transport drivers.
-	 * Provided out of convenience.
-	 */
+	 
 	int (*do_tmr)(se_cmd_t *cmd);
-	/*
-	 * transport_complete():
-	 *
-	 * Use transport_generic_complete() for majority of DAS transport
-	 * drivers.  Provided out of convenience.
-	 */
+	 
 	int (*transport_complete)(se_task_t *task);
-	/*
-	 * allocate_request():
-	 */
+	 
 	void *(*allocate_request)(se_task_t *, se_device_t *);
-	/*
-	 * allocate_buf():
-	 */
+	 
 	int (*allocate_buf)(se_cmd_t *, u32, u32);
-	/*
-	 * allocate_DMA();
-	 */
+	 
 	int (*allocate_DMA)(se_cmd_t *, u32, u32);
-	/*
-	 * free_buf():
-	 */
+	 
 	void (*free_buf)(se_cmd_t *);
-	/*
-	 * free_DMA():
-	 */
+	 
 	void (*free_DMA)(se_cmd_t *);
-	/*
-	 * do_task():
-	 */
+	 
 	int (*do_task)(se_task_t *);
-	/*
-	 * free_task():
-	 */
+	 
 	void (*free_task)(se_task_t *);
-	/*
-	 * check_configfs_dev_params():
-	 */
+	 
 	ssize_t (*check_configfs_dev_params)(se_hba_t *, se_subsystem_dev_t *);
-	/*
-	 * set_configfs_dev_params():
-	 */
+	 
 	ssize_t (*set_configfs_dev_params)(se_hba_t *, se_subsystem_dev_t *,
 						const char *, ssize_t);
-	/*
-	 * show_configfs_dev_params():
-	 */
+	 
 	ssize_t (*show_configfs_dev_params)(se_hba_t *, se_subsystem_dev_t *,
 						char *);
-	/*
-	 * create_virtdevice_from-fd():
-	 */
+	 
 	se_device_t *(*create_virtdevice_from_fd)(se_subsystem_dev_t *,
 						const char *);
-	/*
-	 * plugin_init():
-	 */
+	 
 	int (*plugin_init)(void);
-	/*
-	 * plugin_free():
-	 */
+	 
 	void (*plugin_free)(void);
-	/*
-	 * get_plugin_info():
-	 */
+	 
 	void (*get_plugin_info)(void *, char *, int *);
-	/*
-	 * get_hba_info():
-	 */
+	 
 	void (*get_hba_info)(se_hba_t *, char *, int *);
-	/*
-	 * get_dev_info():
-	 */
+	 
 	void (*get_dev_info)(se_device_t *, char *, int *);
-	/*
-	 * check_lba():
-	 */
+	 
 	int (*check_lba)(unsigned long long lba, se_device_t *);
-	/*
-	 * check_for_SG():
-	 */
+	 
 	int (*check_for_SG)(se_task_t *);
-	/*
-	 * get_cdb():
-	 */
+	 
 	unsigned char *(*get_cdb)(se_task_t *);
-	/*
-	 * get_blocksize():
-	 */
+	 
 	u32 (*get_blocksize)(se_device_t *);
-	/*
-	 * get_device_rev():
-	 */
+	 
 	u32 (*get_device_rev)(se_device_t *);
-	/*
-	 * get_device_type():
-	 */
+	 
 	u32 (*get_device_type)(se_device_t *);
-	/*
-	 * get_dma_length():
-	 */
+	 
 	u32 (*get_dma_length)(u32, se_device_t *);
-	/*
-	 * get_max_cdbs():
-	 */
+	 
 	u32 (*get_max_cdbs)(se_device_t *);
-	/*
-	 * get_max_sectors():
-	 */
+	 
 	 u32 (*get_max_sectors)(se_device_t *);
-	/*
-	 * get_queue_depth():
-	 *
-	 */
+	 
 	u32 (*get_queue_depth)(se_device_t *);
-	/*
-	 * get_max_queue_depth():
-	 */
+	 
 	u32 (*get_max_queue_depth)(se_device_t *);
-	/*
-	 * do_se_mem_map():
-	 */
+	 
 	int (*do_se_mem_map)(se_task_t *, struct list_head *, void *,
 				se_mem_t *, se_mem_t **, u32 *, u32 *);
-	/*
-	 * get_sense_buffer():
-	 */
+	 
 	unsigned char *(*get_sense_buffer)(se_task_t *);
-	/*
-	 * map_task_to_SG():
-	 */
+	 
 	void (*map_task_to_SG)(se_task_t *);
-	/*
-	 * set_iovec_ptrs():
-	 */
+	 
 	int (*set_iovec_ptrs)(se_map_sg_t *, se_unmap_sg_t *);
-	/*
-	 * write_pending():
-	 */
+	 
 	int (*write_pending)(se_task_t *);
-	/*
-	 * se_subsystem_spc_t structure:
-	 *
-	 * Contains function pointers of SPC opcodes to call from the generic
-	 * command sequencer into a transport driver if the generic command
-	 * sequencer is used. (ie: cmd_sequencer() is NULL)
-	 */
+	 
 	se_subsystem_spc_t *spc;
 } ____cacheline_aligned se_subsystem_api_t;
 
@@ -599,4 +433,4 @@ typedef struct se_subsystem_api_s {
 #define TRANSPORT_SPC(dev)	((dev)->transport->spc)
 #define HBA_TRANSPORT(hba)	((hba)->transport)
 
-#endif /* TARGET_CORE_TRANSPORT_H */
+#endif  

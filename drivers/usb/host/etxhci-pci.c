@@ -1,33 +1,11 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * xHCI host controller driver PCI Bus Glue.
- *
- * Copyright (C) 2008 Intel Corp.
- *
- * Author: Sarah Sharp
- * Some code borrowed from the Linux EHCI driver.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
+ 
 #include <linux/pci.h>
 
 #include "etxhci.h"
 
-/* Device for a quirk */
 #define PCI_VENDOR_ID_ETRON		0x1b6f
 #define PCI_DEVICE_ID_ETRON_EJ168	0x7023
 #define PCI_DEVICE_ID_ETRON_EJ188	0x7052
@@ -38,16 +16,9 @@ extern unsigned short xhci_vendor;
 
 static const char hcd_name[] = "etxhci_hcd_130207";
 
-/* called after powerup, by probe or system-pm "wakeup" */
 static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
 {
-	/*
-	 * TODO: Implement finding debug ports later.
-	 * TODO: see if there are any quirks that need to be added to handle
-	 * new extended capabilities.
-	 */
-
-	/* PCI Memory-Write-Invalidate cycle support is optional (uncommon) */
+	 
 	if (!pci_set_mwi(pdev))
 		xhci_dbg(xhci, "MWI active\n");
 
@@ -55,7 +26,6 @@ static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
 	return 0;
 }
 
-/* called during probe() after chip reset completes */
 static int xhci_pci_setup(struct usb_hcd *hcd)
 {
 	struct xhci_hcd		*xhci = hcd_to_xhci(hcd);
@@ -63,10 +33,8 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	int			retval;
 	u32			temp;
 
-	/* Accept arbitrarily long scatter-gather lists */
 	hcd->self.sg_tablesize = ~0;
 
-	/* Look for vendor-specific quirks */
 	hcd->chip_id = HCD_CHIP_ID_UNKNOWN;
 	if (pdev->vendor == PCI_VENDOR_ID_ETRON) {
 		pci_read_config_dword(pdev, 0x58, &xhci->hcc_params1);
@@ -95,7 +63,7 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 		HC_LENGTH(xhci_readl(xhci, &xhci->cap_regs->hc_capbase));
 	xhci->run_regs = hcd->regs +
 		(xhci_readl(xhci, &xhci->cap_regs->run_regs_off) & RTSOFF_MASK);
-	/* Cache read-only capability registers */
+	 
 	xhci->hcs_params1 = xhci_readl(xhci, &xhci->cap_regs->hcs_params1);
 	xhci->hcs_params2 = xhci_readl(xhci, &xhci->cap_regs->hcs_params2);
 	xhci->hcs_params3 = xhci_readl(xhci, &xhci->cap_regs->hcs_params3);
@@ -108,13 +76,12 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	xhci_vendor = pdev->vendor;
 #endif
 
-	/* Make sure the HC is halted. */
 	retval = etxhci_halt(xhci);
 	if (retval)
 		return retval;
 
 	xhci_dbg(xhci, "Resetting HCD\n");
-	/* Reset the internal HC memory state and registers. */
+	 
 	retval = etxhci_reset(xhci);
 	if (retval)
 		return retval;
@@ -129,7 +96,7 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	}
 
 	xhci_dbg(xhci, "Calling HCD init\n");
-	/* Initialize HCD and host controller data structures. */
+	 
 	retval = etxhci_init(hcd);
 	if (retval)
 		return retval;
@@ -138,7 +105,6 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	pci_read_config_byte(pdev, XHCI_SBRN_OFFSET, &xhci->sbrn);
 	xhci_dbg(xhci, "Got SBRN %u\n", (unsigned int) xhci->sbrn);
 
-	/* Find any debug ports */
 	return xhci_pci_reinit(xhci, pdev);
 }
 
@@ -169,7 +135,7 @@ static int xhci_pci_resume(struct usb_hcd *hcd, bool hibernated)
 
 	return retval;
 }
-#endif /* CONFIG_PM */
+#endif  
 
 static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
@@ -184,15 +150,9 @@ static const struct hc_driver xhci_pci_hc_driver = {
 	.product_desc =		"Etron xHCI Host Controller",
 	.hcd_priv_size =	sizeof(struct xhci_hcd),
 
-	/*
-	 * generic hardware linkage
-	 */
 	.irq =			etxhci_irq,
 	.flags =		HCD_MEMORY | HCD_USB3,
 
-	/*
-	 * basic lifecycle operations
-	 */
 	.reset =		xhci_pci_setup,
 	.start =		etxhci_run,
 #ifdef CONFIG_PM
@@ -202,9 +162,6 @@ static const struct hc_driver xhci_pci_hc_driver = {
 	.stop =			etxhci_stop,
 	.shutdown =		etxhci_shutdown,
 
-	/*
-	 * managing i/o requests and associated device resources
-	 */
 	.urb_enqueue =		etxhci_urb_enqueue,
 	.urb_dequeue =		etxhci_urb_dequeue,
 	.alloc_dev =		etxhci_alloc_dev,
@@ -220,39 +177,30 @@ static const struct hc_driver xhci_pci_hc_driver = {
 	.update_hub_device =	etxhci_update_hub_device,
 	.reset_device =		etxhci_discover_or_reset_device,
 
-	/*
-	 * scheduling support
-	 */
 	.get_frame_number =	etxhci_get_frame,
 
-	/* Root hub support */
 	.hub_control =		etxhci_hub_control,
 	.hub_status_data =	etxhci_hub_status_data,
 	.bus_suspend =		etxhci_bus_suspend,
 	.bus_resume =		etxhci_bus_resume,
 };
 
-/*-------------------------------------------------------------------------*/
-
-/* PCI driver selection metadata; PCI hotplugging uses this */
 static const struct pci_device_id pci_ids[] = { {
-	/* handle any USB 3.0 xHCI controller */
+	 
 	PCI_DEVICE_CLASS(PCI_CLASS_SERIAL_USB_XHCI, ~0),
 	.driver_data =	(unsigned long) &xhci_pci_hc_driver,
 	},
-	{ /* end: all zeroes */ }
+	{   }
 };
 MODULE_DEVICE_TABLE(pci, pci_ids);
 
-/* pci driver glue; this is a "new style" PCI driver module */
 static struct pci_driver xhci_pci_driver = {
 	.name =		(char *) hcd_name,
 	.id_table =	pci_ids,
 
 	.probe =	xhci_pci_probe,
 	.remove =	usb_hcd_pci_remove,
-	/* suspend and resume implemented later */
-
+	 
 	.shutdown = 	usb_hcd_pci_shutdown,
 #ifdef CONFIG_PM_SLEEP
 	.driver = {

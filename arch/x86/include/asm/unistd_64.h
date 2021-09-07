@@ -4,7 +4,7 @@
 #ifndef _ASM_X86_UNISTD_64_H
 #define _ASM_X86_UNISTD_64_H
 
-#if 1 //SYNO
+#if 1  
 #include <linux/syno.h>
 #endif
 
@@ -12,13 +12,6 @@
 #define __SYSCALL(a, b)
 #endif
 
-/*
- * This file contains the system call numbers.
- *
- * Note: holes are not allowed.
- */
-
-/* at least 8 syscall per cacheline */
 #define __NR_read				0
 __SYSCALL(__NR_read, sys_read)
 #define __NR_write				1
@@ -240,7 +233,6 @@ __SYSCALL(__NR_getuid, sys_getuid)
 #define __NR_syslog				103
 __SYSCALL(__NR_syslog, sys_syslog)
 
-/* at the very end the stuff that never runs during the benchmarks */
 #define __NR_getgid				104
 __SYSCALL(__NR_getgid, sys_getgid)
 #define __NR_setuid				105
@@ -305,7 +297,6 @@ __SYSCALL(__NR_utime, sys_utime)
 #define __NR_mknod				133
 __SYSCALL(__NR_mknod, sys_mknod)
 
-/* Only needed for a.out */
 #define __NR_uselib				134
 __SYSCALL(__NR_uselib, sys_ni_syscall)
 #define __NR_personality			135
@@ -423,17 +414,14 @@ __SYSCALL(__NR_quotactl, sys_quotactl)
 #define __NR_nfsservctl				180
 __SYSCALL(__NR_nfsservctl, sys_nfsservctl)
 
-/* reserved for LiS/STREAMS */
 #define __NR_getpmsg				181
 __SYSCALL(__NR_getpmsg, sys_ni_syscall)
 #define __NR_putpmsg				182
 __SYSCALL(__NR_putpmsg, sys_ni_syscall)
 
-/* reserved for AFS */
 #define __NR_afs_syscall			183
 __SYSCALL(__NR_afs_syscall, sys_ni_syscall)
 
-/* reserved for tux */
 #define __NR_tuxcall				184
 __SYSCALL(__NR_tuxcall, sys_ni_syscall)
 
@@ -480,7 +468,7 @@ __SYSCALL(__NR_sched_setaffinity, sys_sched_setaffinity)
 #define __NR_sched_getaffinity			204
 __SYSCALL(__NR_sched_getaffinity, sys_sched_getaffinity)
 #define __NR_set_thread_area			205
-__SYSCALL(__NR_set_thread_area, sys_ni_syscall)	/* use arch_prctl */
+__SYSCALL(__NR_set_thread_area, sys_ni_syscall)	 
 #define __NR_io_setup				206
 __SYSCALL(__NR_io_setup, sys_io_setup)
 #define __NR_io_destroy				207
@@ -492,7 +480,7 @@ __SYSCALL(__NR_io_submit, sys_io_submit)
 #define __NR_io_cancel				210
 __SYSCALL(__NR_io_cancel, sys_io_cancel)
 #define __NR_get_thread_area			211
-__SYSCALL(__NR_get_thread_area, sys_ni_syscall)	/* use arch_prctl */
+__SYSCALL(__NR_get_thread_area, sys_ni_syscall)	 
 #define __NR_lookup_dcookie			212
 __SYSCALL(__NR_lookup_dcookie, sys_lookup_dcookie)
 #define __NR_epoll_create			213
@@ -631,7 +619,7 @@ __SYSCALL(__NR_vmsplice, sys_vmsplice)
 __SYSCALL(__NR_move_pages, sys_move_pages)
 #define __NR_utimensat				280
 __SYSCALL(__NR_utimensat, sys_utimensat)
-#define __IGNORE_getcpu		/* implemented as a vsyscall */
+#define __IGNORE_getcpu		 
 #define __NR_epoll_pwait			281
 __SYSCALL(__NR_epoll_pwait, sys_epoll_pwait)
 #define __NR_signalfd				282
@@ -692,8 +680,7 @@ __SYSCALL(__NR_recvfile, sys_recvfile)
 #define __NR_SYNOCaselessStat                   408
 #define __NR_SYNOCaselessLStat                  409
 #if !defined(__KERNEL__)
-/* direct SYNOCaselessStat to stat64 in 32-bit platform
- * 64-bits arch has no stat64 support */
+ 
 #include <bits/wordsize.h>
 #if __WORDSIZE == 64
 #define SYNOCaselessStat(arg1,arg2)		syscall(__NR_SYNOCaselessStat , arg1,arg2)
@@ -706,14 +693,13 @@ __SYSCALL(__NR_SYNOCaselessLStat, sys_SYNOCaselessLStat)
 __SYSCALL(__NR_SYNOCaselessStat64, sys_SYNOCaselessStat64)
 __SYSCALL(__NR_SYNOCaselessLStat64, sys_SYNOCaselessLStat64)
 #endif
-/* define stat64 interface for compatibility
-   These should be removed after AP modification */
+ 
 #define SYNOCaselessStat64(arg1,arg2)	syscall(__NR_SYNOCaselessStat64 , arg1,arg2)
 #define SYNOCaselessLStat64(arg1,arg2)	syscall(__NR_SYNOCaselessLStat64 , arg1,arg2)
 __SYSCALL(__NR_SYNOCaselessStat64, sys_SYNOCaselessStat64)
 __SYSCALL(__NR_SYNOCaselessLStat64, sys_SYNOCaselessLStat64)
 #endif
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 #define __NR_SYNOEcryptName                 410
@@ -751,8 +737,7 @@ __SYSCALL(__NR_SYNOArchiveOverwrite, sys_SYNOArchiveOverwrite)
 #endif
 
 #if !defined(__KERNEL__)
-/* direct SYNOStat to stat64 in 32-bit platform
- * 64-bits arch has no stat64 support */
+ 
 #include <bits/wordsize.h>
 #if __WORDSIZE == 64
 #define SYNOStat(arg1, arg2, arg3)  syscall(__NR_SYNOStat, arg1, arg2, arg3)
@@ -771,9 +756,9 @@ __SYSCALL(__NR_SYNOFStat64, sys_SYNOFStat64)
 __SYSCALL(__NR_SYNOLStat64, sys_SYNOLStat64)
 
 #endif
-#endif /* __KERNEL__ */
+#endif  
 
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 #define __syscall_return(type, res) \
@@ -890,7 +875,7 @@ __syscall_return(type,__res); \
 #define __ARCH_WANT_SYS_RT_SIGSUSPEND
 #define __ARCH_WANT_SYS_TIME
 #define __ARCH_WANT_COMPAT_SYS_TIME
-#endif	/* __NO_STUBS */
+#endif	 
 
 #ifdef __KERNEL__
 
@@ -899,13 +884,7 @@ __syscall_return(type,__res); \
 #define NR_syscalls (__NR_syscall_max + 1)
 #endif
 
-/*
- * "Conditional" syscalls
- *
- * What we want is __attribute__((weak,alias("sys_ni_syscall"))),
- * but it doesn't work on all toolchains, so we just do it by hand
- */
 #define cond_syscall(x) asm(".weak\t" #x "\n\t.set\t" #x ",sys_ni_syscall")
-#endif	/* __KERNEL__ */
+#endif	 
 
-#endif /* _ASM_X86_UNISTD_64_H */
+#endif  

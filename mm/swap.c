@@ -1,18 +1,4 @@
-/*
- *  linux/mm/swap.c
- *
- *  Copyright (C) 1991, 1992, 1993, 1994  Linus Torvalds
- */
-
-/*
- * This file contains the default values for the operation of the
- * Linux VM subsystem. Fine-tuning documentation can be found in
- * Documentation/sysctl/vm.txt.
- * Started 18.12.91
- * Swap aging added 23.2.95, Stephen Tweedie.
- * Buffermem limits added 12.3.98, Rik van Riel.
- */
-
+ 
 #include <linux/mm.h>
 #include <linux/sched.h>
 #include <linux/kernel_stat.h>
@@ -23,7 +9,7 @@
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/mm_inline.h>
-#include <linux/buffer_head.h>	/* for try_to_release_page() */
+#include <linux/buffer_head.h>	 
 #include <linux/percpu_counter.h>
 #include <linux/percpu.h>
 #include <linux/cpu.h>
@@ -33,16 +19,11 @@
 
 #include "internal.h"
 
-/* How many pages do we try to swap or page in/out together? */
 int page_cluster;
 
 static DEFINE_PER_CPU(struct pagevec[NR_LRU_LISTS], lru_add_pvecs);
 static DEFINE_PER_CPU(struct pagevec, lru_rotate_pvecs);
 
-/*
- * This path almost never happens for VM activity - pages are normally
- * freed via pagevecs.  But it gets used by networking.
- */
 static void __page_cache_release(struct page *page)
 {
 	if (PageLRU(page)) {
@@ -82,7 +63,7 @@ void put_page(struct page *page)
 	if (PageIncoherentSendfile(page)) {
 		fast_put(page);
 	} else {
-#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
+#endif  
 		if (unlikely(PageCompound(page))) {
 		put_compound_page(page);
 		} else if (put_page_testzero(page)) {
@@ -90,18 +71,11 @@ void put_page(struct page *page)
 		}
 #ifdef CONFIG_OXNAS_FAST_READS_AND_WRITES
 	}
-#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
+#endif  
 #endif
 }
 EXPORT_SYMBOL(put_page);
 
-/**
- * put_pages_list() - release a list of pages
- * @pages: list of pages threaded on page->lru
- *
- * Release a list of pages which are strung together on page.lru.  Currently
- * used by read_cache_pages() and related error recovery code.
- */
 void put_pages_list(struct list_head *pages)
 {
 	while (!list_empty(pages)) {
@@ -114,10 +88,6 @@ void put_pages_list(struct list_head *pages)
 }
 EXPORT_SYMBOL(put_pages_list);
 
-/*
- * pagevec_move_tail() must be called with IRQ disabled.
- * Otherwise this may cause nasty races.
- */
 static void pagevec_move_tail(struct pagevec *pvec)
 {
 	int i;
@@ -147,11 +117,6 @@ static void pagevec_move_tail(struct pagevec *pvec)
 	pagevec_reinit(pvec);
 }
 
-/*
- * Writeback is about to end against a page which has been marked for immediate
- * reclaim.  If it still appears to be reclaimable, move it to the tail of the
- * inactive list.
- */
 void  rotate_reclaimable_page(struct page *page)
 {
 	if (!PageLocked(page) && !PageDirty(page) && !PageActive(page) &&
@@ -188,9 +153,6 @@ static void update_page_reclaim_stat(struct zone *zone, struct page *page,
 		memcg_reclaim_stat->recent_rotated[file]++;
 }
 
-/*
- * FIXME: speed this up?
- */
 void activate_page(struct page *page)
 {
 	struct zone *zone = page_zone(page);
@@ -211,13 +173,6 @@ void activate_page(struct page *page)
 	spin_unlock_irq(&zone->lru_lock);
 }
 
-/*
- * Mark a page as having seen activity.
- *
- * inactive,unreferenced	->	inactive,referenced
- * inactive,referenced		->	active,unreferenced
- * active,unreferenced		->	active,referenced
- */
 void mark_page_accessed(struct page *page)
 {
 	if (!PageActive(page) && !PageUnevictable(page) &&
@@ -241,11 +196,6 @@ void __lru_cache_add(struct page *page, enum lru_list lru)
 	put_cpu_var(lru_add_pvecs);
 }
 
-/**
- * lru_cache_add_lru - add a page to a page list
- * @page: the page to be added to the LRU.
- * @lru: the LRU list to which the page is added.
- */
 void lru_cache_add_lru(struct page *page, enum lru_list lru)
 {
 	if (PageActive(page)) {
@@ -260,16 +210,6 @@ void lru_cache_add_lru(struct page *page, enum lru_list lru)
 	__lru_cache_add(page, lru);
 }
 
-/**
- * add_page_to_unevictable_list - add a page to the unevictable list
- * @page:  the page to be added to the unevictable list
- *
- * Add page directly to its zone's unevictable list.  To avoid races with
- * tasks that might be making the page evictable, through eg. munlock,
- * munmap or exit, while it's not on the lru, we want to add the page
- * while it's locked or otherwise "invisible" to other tasks.  This is
- * difficult to do when using the pagevec cache, so bypass that.
- */
 void add_page_to_unevictable_list(struct page *page)
 {
 	struct zone *zone = page_zone(page);
@@ -281,11 +221,6 @@ void add_page_to_unevictable_list(struct page *page)
 	spin_unlock_irq(&zone->lru_lock);
 }
 
-/*
- * Drain pages out of the cpu's pagevecs.
- * Either "cpu" is the current CPU, and preemption has already been
- * disabled; or "cpu" is being hot-unplugged, and is already dead.
- */
 static void drain_cpu_pagevecs(int cpu)
 {
 	struct pagevec *pvecs = per_cpu(lru_add_pvecs, cpu);
@@ -302,7 +237,6 @@ static void drain_cpu_pagevecs(int cpu)
 	if (pagevec_count(pvec)) {
 		unsigned long flags;
 
-		/* No harm done if a racing interrupt already did this */
 		local_irq_save(flags);
 		pagevec_move_tail(pvec);
 		local_irq_restore(flags);
@@ -320,27 +254,11 @@ static void lru_add_drain_per_cpu(struct work_struct *dummy)
 	lru_add_drain();
 }
 
-/*
- * Returns 0 for success
- */
 int lru_add_drain_all(void)
 {
 	return schedule_on_each_cpu(lru_add_drain_per_cpu);
 }
 
-/*
- * Batched page_cache_release().  Decrement the reference count on all the
- * passed pages.  If it fell to zero then remove the page from the LRU and
- * free it.
- *
- * Avoid taking zone->lru_lock if possible, but if it is taken, retain it
- * for the remainder of the operation.
- *
- * The locking in this function is against shrink_inactive_list(): we recheck
- * the page count inside the lock to see whether shrink_inactive_list()
- * grabbed the page via the LRU.  If it did, give up: shrink_inactive_list()
- * will free it.
- */
 void release_pages(struct page **pages, int nr, int cold)
 {
 	int i;
@@ -354,7 +272,7 @@ void release_pages(struct page **pages, int nr, int cold)
 
 #ifdef CONFIG_OXNAS_FAST_READS_AND_WRITES
 		WARN_ON(PageIncoherentSendfile(page));
-#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
+#endif  
 		if (unlikely(PageCompound(page))) {
 			if (zone) {
 				spin_unlock_irqrestore(&zone->lru_lock, flags);
@@ -397,16 +315,6 @@ void release_pages(struct page **pages, int nr, int cold)
 	pagevec_free(&pages_to_free);
 }
 
-/*
- * The pages which we're about to release may be in the deferred lru-addition
- * queues.  That would prevent them from really being freed right now.  That's
- * OK from a correctness point of view but is inefficient - those pages may be
- * cache-warm and we want to give them back to the page allocator ASAP.
- *
- * So __pagevec_release() will drain those queues here.  __pagevec_lru_add()
- * and __pagevec_lru_add_active() call release_pages() directly to avoid
- * mutual recursion.
- */
 void __pagevec_release(struct pagevec *pvec)
 {
 	lru_add_drain();
@@ -416,10 +324,6 @@ void __pagevec_release(struct pagevec *pvec)
 
 EXPORT_SYMBOL(__pagevec_release);
 
-/*
- * Add the passed pages to the LRU, then drop the caller's refcount
- * on them.  Reinitialises the caller's pagevec.
- */
 void ____pagevec_lru_add(struct pagevec *pvec, enum lru_list lru)
 {
 	int i;
@@ -458,9 +362,6 @@ void ____pagevec_lru_add(struct pagevec *pvec, enum lru_list lru)
 
 EXPORT_SYMBOL(____pagevec_lru_add);
 
-/*
- * Try to drop buffers from the pages in a pagevec
- */
 void pagevec_strip(struct pagevec *pvec)
 {
 	int i;
@@ -476,22 +377,6 @@ void pagevec_strip(struct pagevec *pvec)
 	}
 }
 
-/**
- * pagevec_lookup - gang pagecache lookup
- * @pvec:	Where the resulting pages are placed
- * @mapping:	The address_space to search
- * @start:	The starting page index
- * @nr_pages:	The maximum number of pages
- *
- * pagevec_lookup() will search for and return a group of up to @nr_pages pages
- * in the mapping.  The pages are placed in @pvec.  pagevec_lookup() takes a
- * reference against the pages in @pvec.
- *
- * The search returns a group of mapping-contiguous pages with ascending
- * indexes.  There may be holes in the indices due to not-present pages.
- *
- * pagevec_lookup() returns the number of pages which were found.
- */
 unsigned pagevec_lookup(struct pagevec *pvec, struct address_space *mapping,
 		pgoff_t start, unsigned nr_pages)
 {
@@ -511,9 +396,6 @@ unsigned pagevec_lookup_tag(struct pagevec *pvec, struct address_space *mapping,
 
 EXPORT_SYMBOL(pagevec_lookup_tag);
 
-/*
- * Perform any setup for the swap system
- */
 void __init swap_setup(void)
 {
 	unsigned long megs = totalram_pages >> (20 - PAGE_SHIFT);
@@ -522,13 +404,9 @@ void __init swap_setup(void)
 	bdi_init(swapper_space.backing_dev_info);
 #endif
 
-	/* Use a smaller cluster for small-memory machines */
 	if (megs < 16)
 		page_cluster = 2;
 	else
 		page_cluster = 3;
-	/*
-	 * Right now other parts of the system means that we
-	 * _really_ don't want to cluster much more
-	 */
+	 
 }

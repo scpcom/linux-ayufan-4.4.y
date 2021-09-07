@@ -1,60 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/proc/array.c
- *
- *  Copyright (C) 1992  by Linus Torvalds
- *  based on ideas by Darren Senn
- *
- * Fixes:
- * Michael. K. Johnson: stat,statm extensions.
- *                      <johnsonm@stolaf.edu>
- *
- * Pauline Middelink :  Made cmdline,envline only break at '\0's, to
- *                      make sure SET_PROCTITLE works. Also removed
- *                      bad '!' which forced address recalculation for
- *                      EVERY character on the current page.
- *                      <middelin@polyware.iaf.nl>
- *
- * Danny ter Haar    :	added cpuinfo
- *			<dth@cistron.nl>
- *
- * Alessandro Rubini :  profile extension.
- *                      <rubini@ipvvis.unipv.it>
- *
- * Jeff Tranter      :  added BogoMips field to cpuinfo
- *                      <Jeff_Tranter@Mitel.COM>
- *
- * Bruno Haible      :  remove 4K limit for the maps file
- *			<haible@ma2s2.mathematik.uni-karlsruhe.de>
- *
- * Yves Arrouye      :  remove removal of trailing spaces in get_array.
- *			<Yves.Arrouye@marin.fdn.fr>
- *
- * Jerome Forissier  :  added per-CPU time information to /proc/stat
- *                      and /proc/<pid>/cpu extension
- *                      <forissier@isia.cma.fr>
- *			- Incorporation and non-SMP safe operation
- *			of forissier patch in 2.1.78 by
- *			Hans Marcus <crowbar@concepts.nl>
- *
- * aeb@cwi.nl        :  /proc/partitions
- *
- *
- * Alan Cox	     :  security fixes.
- *			<alan@lxorguk.ukuu.org.uk>
- *
- * Al Viro           :  safe handling of mm_struct
- *
- * Gerhard Wichert   :  added BIGMEM support
- * Siemens AG           <Gerhard.Wichert@pdb.siemens.de>
- *
- * Al Viro & Jeff Garzik :  moved most of the thing into base.c and
- *			 :  proc_misc.c. The rest may eventually go into
- *			 :  base.c too.
- */
-
+ 
 #include <linux/types.h>
 #include <linux/errno.h>
 #include <linux/time.h>
@@ -130,20 +77,14 @@ static inline void task_name(struct seq_file *m, struct task_struct *p)
 	seq_printf(m, "\n");
 }
 
-/*
- * The task state array is a strange "bitmap" of
- * reasons to sleep. Thus "running" is zero, and
- * you can test for combinations of others with
- * simple bit tests.
- */
 static const char *task_state_array[] = {
-	"R (running)",		/*  0 */
-	"S (sleeping)",		/*  1 */
-	"D (disk sleep)",	/*  2 */
-	"T (stopped)",		/*  4 */
-	"T (tracing stop)",	/*  8 */
-	"Z (zombie)",		/* 16 */
-	"X (dead)"		/* 32 */
+	"R (running)",		 
+	"S (sleeping)",		 
+	"D (disk sleep)",	 
+	"T (stopped)",		 
+	"T (tracing stop)",	 
+	"Z (zombie)",		 
+	"X (dead)"		 
 };
 
 static inline const char *get_task_state(struct task_struct *tsk)
@@ -280,7 +221,6 @@ static inline void task_sig(struct seq_file *m, struct task_struct *p)
 	seq_printf(m, "Threads:\t%d\n", num_threads);
 	seq_printf(m, "SigQ:\t%lu/%lu\n", qsize, qlim);
 
-	/* render them all */
 	render_sigset_t(m, "SigPnd:\t", &pending);
 	render_sigset_t(m, "ShdPnd:\t", &shpending);
 	render_sigset_t(m, "SigBlk:\t", &blocked);
@@ -415,7 +355,7 @@ static inline void task_show_stack_usage(struct seq_file *m,
 static void task_show_stack_usage(struct seq_file *m, struct task_struct *task)
 {
 }
-#endif		/* CONFIG_MMU */
+#endif		 
 
 int proc_pid_status(struct seq_file *m, struct pid_namespace *ns,
 			struct pid *pid, struct task_struct *task)
@@ -500,7 +440,6 @@ static int do_task_stat(struct seq_file *m, struct pid_namespace *ns,
 		cgtime = sig->cgtime;
 		rsslim = sig->rlim[RLIMIT_RSS].rlim_cur;
 
-		/* add up live thread stats at the group level */
 		if (whole) {
 			struct task_cputime cputime;
 			struct task_struct *t = task;
@@ -536,17 +475,13 @@ static int do_task_stat(struct seq_file *m, struct pid_namespace *ns,
 		gtime = task_gtime(task);
 	}
 
-	/* scale priority and nice values from timeslices to -20..20 */
-	/* to make it look like a "normal" Unix priority/nice value  */
 	priority = task_prio(task);
 	nice = task_nice(task);
 
-	/* Temporary variable needed for gcc-2.96 */
-	/* convert timespec -> nsec*/
 	start_time =
 		(unsigned long long)task->real_start_time.tv_sec * NSEC_PER_SEC
 				+ task->real_start_time.tv_nsec;
-	/* convert nsec -> ticks */
+	 
 	start_time = nsec_to_clock_t(start_time);
 
 	seq_printf(m, "%d (%s) %c %d %d %d %d %d %u %lu \
@@ -581,10 +516,7 @@ static int do_task_stat(struct seq_file *m, struct pid_namespace *ns,
 		(permitted && mm) ? task->stack_start : 0,
 		esp,
 		eip,
-		/* The signal information here is obsolete.
-		 * It must be decimal for Linux 2.0 compatibility.
-		 * Use /proc/#/status for real-time signals.
-		 */
+		 
 		task->pending.signal.sig[0] & 0x7fffffffUL,
 		task->blocked.sig[0] & 0x7fffffffUL,
 		sigign      .sig[0] & 0x7fffffffUL,

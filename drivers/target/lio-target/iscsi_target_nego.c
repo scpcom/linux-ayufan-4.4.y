@@ -1,34 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  iscsi_target_nego.c
- *
- * This file contains main functions related to iSCSI Parameter negotiation.
- *
- * Copyright (c) 2002, 2003, 2004, 2005 PyX Technologies, Inc.
- * Copyright (c) 2005, 2006, 2007 SBE, Inc.
- * Copyright (c) 2007 Rising Tide Software, Inc.
- * Copyright (c) 2008 Linux-iSCSI.org
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #define ISCSI_TARGET_NEGOTIATE_C
 
 #include <linux/string.h>
@@ -61,10 +34,6 @@
 
 #define MAX_LOGIN_PDUS	7
 
-/*	iscsi_target_check_login_request():
- *
- *
- */
 static int iscsi_target_check_login_request(
 	iscsi_conn_t *conn,
 	iscsi_login_t *login)
@@ -155,10 +124,6 @@ static int iscsi_target_check_login_request(
 	return 0;
 }
 
-/*	iscsi_target_check_first_request():
- *
- *
- */
 static int iscsi_target_check_first_request(
 	iscsi_conn_t *conn,
 	iscsi_login_t *login)
@@ -197,11 +162,6 @@ static int iscsi_target_check_first_request(
 				return -1;
 			}
 
-			/*
-			 * For non-leading connections, double check that the
-			 * received InitiatorName matches the existing session's
-			 * iscsi_node_acl_t.
-			 */
 			if (!login->leading_connection) {
 				se_nacl = SESS(conn)->se_sess->se_node_acl;
 				if (!(se_nacl)) {
@@ -231,10 +191,6 @@ static int iscsi_target_check_first_request(
 	return 0;
 }
 
-/*	iscsi_target_do_tx_login_io():
- *
- *
- */
 static int iscsi_target_do_tx_login_io(iscsi_conn_t *conn, iscsi_login_t *login)
 {
 	__u32 padding = 0;
@@ -280,10 +236,6 @@ static int iscsi_target_do_tx_login_io(iscsi_conn_t *conn, iscsi_login_t *login)
 	return 0;
 }
 
-/*	iscsi_target_do_rx_login_io():
- *
- *
- */
 static int iscsi_target_do_rx_login_io(iscsi_conn_t *conn, iscsi_login_t *login)
 {
 	__u32 padding = 0;
@@ -321,10 +273,6 @@ static int iscsi_target_do_rx_login_io(iscsi_conn_t *conn, iscsi_login_t *login)
 	return 0;
 }
 
-/*      iscsi_target_do_login_io():
- *
- *
- */
 static int iscsi_target_do_login_io(iscsi_conn_t *conn, iscsi_login_t *login)
 {
 	if (iscsi_target_do_tx_login_io(conn, login) < 0)
@@ -365,12 +313,6 @@ static int iscsi_target_get_initial_payload(
 	return 0;
 }
 
-/*	iscsi_target_check_for_existing_instances():
- *
- *	NOTE: We check for existing sessions or connections AFTER the initiator
- *	has been successfully authenticated in order to protect against faked
- *	ISID/TSIH combinations.
- */
 static int iscsi_target_check_for_existing_instances(
 	iscsi_conn_t *conn,
 	iscsi_login_t *login)
@@ -387,10 +329,6 @@ static int iscsi_target_check_for_existing_instances(
 				login->initial_exp_statsn);
 }
 
-/*	iscsi_target_do_authentication():
- *
- *
- */
 static int iscsi_target_do_authentication(
 	iscsi_conn_t *conn,
 	iscsi_login_t *login)
@@ -462,10 +400,6 @@ static int iscsi_target_do_authentication(
 	return 0;
 }
 
-/*	iscsi_target_handle_csg_zero():
- *
- *
- */
 static int iscsi_target_handle_csg_zero(
 	iscsi_conn_t *conn,
 	iscsi_login_t *login)
@@ -546,10 +480,6 @@ do_auth:
 	return iscsi_target_do_authentication(conn, login);
 }
 
-/*	iscsi_target_handle_csg_one():
- *
- *
- */
 static int iscsi_target_handle_csg_one(iscsi_conn_t *conn, iscsi_login_t *login)
 {
 	int ret;
@@ -601,10 +531,6 @@ static int iscsi_target_handle_csg_one(iscsi_conn_t *conn, iscsi_login_t *login)
 	return 0;
 }
 
-/*	iscsi_target_do_login():
- *
- *
- */
 static int iscsi_target_do_login(iscsi_conn_t *conn, iscsi_login_t *login)
 {
 	int pdu_count = 0;
@@ -690,9 +616,6 @@ static void iscsi_initiatorname_tolower(
 	}
 }
 
-/*
- * Processes the first Login Request..
- */
 static int iscsi_target_locate_portal(
 	iscsi_np_t *np,
 	iscsi_conn_t *conn,
@@ -735,10 +658,6 @@ static int iscsi_target_locate_portal(
 	start = tmpbuf;
 	end = (start + login_req->length);
 
-	/*
-	 * Locate the initial keys expected from the Initiator node in
-	 * the first login request in order to progress with the login phase.
-	 */
 	while (start < end) {
 		if (iscsi_extract_key_value(start, &key, &value) < 0) {
 			ret = -1;
@@ -755,9 +674,6 @@ static int iscsi_target_locate_portal(
 		start += strlen(key) + strlen(value) + 2;
 	}
 
-	/*
-	 * See 5.3.  Login Phase.
-	 */
 	if (!i_buf) {
 		printk(KERN_ERR "InitiatorName key not received"
 			" in first login request.\n");
@@ -766,11 +682,7 @@ static int iscsi_target_locate_portal(
 		ret = -1;
 		goto out;
 	}
-	/*
-	 * Convert the incoming InitiatorName to lowercase following
-	 * RFC-3720 3.2.6.1. section c) that says that iSCSI IQNs
-	 * are NOT case sensitive.
-	 */
+	 
 	iscsi_initiatorname_tolower(i_buf);
 
 	if (!s_buf) {
@@ -789,9 +701,6 @@ static int iscsi_target_locate_portal(
 #endif
 	}
 
-	/*
-	 * Use default portal group for discovery sessions.
-	 */
 	sessiontype = strncmp(s_buf, DISCOVERY, 9);
 	if (!(sessiontype)) {
 		conn->tpg = iscsi_global->discovery_tpg;
@@ -799,10 +708,7 @@ static int iscsi_target_locate_portal(
 			goto get_target;
 
 		SESS_OPS(sess)->SessionType = 1;
-		/*
-		 * Serialize access across the discovery iscsi_portal_group_t to
-		 * process login attempt.
-		 */
+		 
 		if (core_access_np(np, conn->tpg) < 0) {
 			iscsi_tx_login_rsp(conn, STAT_CLASS_TARGET,
 				STAT_DETAIL_SERVICE_UNAVAILABLE);
@@ -824,9 +730,6 @@ get_target:
 		goto out;
 	}
 
-	/*
-	 * Locate Target IQN from Storage Node.
-	 */
 	tiqn = core_get_tiqn_for_login(t_buf);
 	if (!(tiqn)) {
 #ifdef MY_ABC_HERE
@@ -836,7 +739,7 @@ get_target:
 			" Storage Node\n", t_buf);
 #endif
 #ifdef MY_ABC_HERE
-		//FIXME. take care if send right message to initiator.
+		 
 		iscsi_tx_login_rsp(conn, STAT_CLASS_INITIATOR,
 				STAT_DETAIL_NOT_FOUND);
 #else
@@ -850,9 +753,6 @@ get_target:
 	printk(KERN_INFO "Located Storage Object: %s\n", tiqn->tiqn);
 #endif
 
-	/*
-	 * Locate Target Portal Group from Storage Node.
-	 */
 	conn->tpg = core_get_tpg_from_np(tiqn, np);
 	if (!(conn->tpg)) {
 #ifdef MY_ABC_HERE
@@ -863,7 +763,7 @@ get_target:
 #endif
 		core_put_tiqn_for_login(tiqn);
 #ifdef MY_ABC_HERE
-		//FIXME. take care if send right message to initiator.
+		 
 		iscsi_tx_login_rsp(conn, STAT_CLASS_INITIATOR,
 				STAT_DETAIL_NOT_FOUND);
 #else
@@ -877,10 +777,6 @@ get_target:
 	printk(KERN_INFO "Located Portal Group Object: %hu\n", conn->tpg->tpgt);
 #endif
 
-	/*
-	 * Serialize access across the iscsi_portal_group_t to
-	 * process login attempt.
-	 */
 	if (core_access_np(np, conn->tpg) < 0) {
 		core_put_tiqn_for_login(tiqn);
 		iscsi_tx_login_rsp(conn, STAT_CLASS_TARGET,
@@ -890,24 +786,13 @@ get_target:
 		goto out;
 	}
 
-	/*
-	 * SESS(conn)->node_acl will be set when the referenced
-	 * iscsi_session_t is located from received ISID+TSIH in
-	 * iscsi_login_non_zero_tsih_s2().
-	 */
 	if (!login->leading_connection) {
 		ret = 0;
 		goto out;
 	}
 
-	/*
-	 * This value is required in iscsi_login_zero_tsih_s2()
-	 */
 	SESS_OPS(sess)->SessionType = 0;
 
-	/*
-	 * Locate incoming Initiator IQN reference from Storage Node.
-	 */
 	sess->se_sess->se_node_acl = core_tpg_check_initiator_node_acl(
 			conn->tpg->tpg_se_tpg, i_buf);
 	if (!(sess->se_sess->se_node_acl)) {
@@ -926,10 +811,6 @@ out:
 	return ret;
 }
 
-/*	iscsi_target_init_negotiation():
- *
- *
- */
 iscsi_login_t *iscsi_target_init_negotiation(
 	iscsi_np_t *np,
 	iscsi_conn_t *conn,
@@ -961,15 +842,7 @@ iscsi_login_t *iscsi_target_init_negotiation(
 				STAT_DETAIL_OUT_OF_RESOURCE);
 		goto out;
 	}
-	/*
-	 * SessionType: Discovery
-	 *
-	 * 	Locates Default Portal
-	 *
-	 * SessionType: Normal
-	 *
-	 * 	Locates Target Portal from NP -> Target IQN
-	 */
+	 
 	if (iscsi_target_locate_portal(np, conn, login) < 0) {
 #ifdef MY_ABC_HERE
 		printk(KERN_ERR "iSCSI - Login negotiation failed.\n");

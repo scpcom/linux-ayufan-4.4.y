@@ -1,43 +1,11 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-
-  Intel PRO/1000 Linux driver
-  Copyright(c) 1999 - 2008 Intel Corporation.
-
-  This program is free software; you can redistribute it and/or modify it
-  under the terms and conditions of the GNU General Public License,
-  version 2, as published by the Free Software Foundation.
-
-  This program is distributed in the hope it will be useful, but WITHOUT
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-  more details.
-
-  You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc.,
-  51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
-
-  The full GNU General Public License is included in this distribution in
-  the file called "COPYING".
-
-  Contact Information:
-  Linux NICS <linux.nics@intel.com>
-  e1000-devel Mailing List <e1000-devel@lists.sourceforge.net>
-  Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
-
-*******************************************************************************/
-
+ 
 #include <linux/netdevice.h>
 #include <linux/pci.h>
 
 #include "e1000.h"
-
-/*
- * This is the only thing that needs to be changed to adjust the
- * maximum number of ports that the driver can manage.
- */
 
 #define E1000_MAX_NIC 32
 
@@ -51,12 +19,6 @@ module_param(copybreak, uint, 0644);
 MODULE_PARM_DESC(copybreak,
 	"Maximum size of packet that is copied to a new buffer on receive");
 
-/*
- * All parameters are treated the same, as an integer array of values.
- * This macro just reduces the need to repeat the same declaration code
- * over and over (plus this helps to avoid typo bugs).
- */
-
 #define E1000_PARAM_INIT { [0 ... E1000_MAX_NIC] = OPTION_UNSET }
 #define E1000_PARAM(X, desc)					\
 	static int __devinitdata X[E1000_MAX_NIC+1]		\
@@ -65,101 +27,41 @@ MODULE_PARM_DESC(copybreak,
 	module_param_array_named(X, X, int, &num_##X, 0);	\
 	MODULE_PARM_DESC(X, desc);
 
-/*
- * Transmit Interrupt Delay in units of 1.024 microseconds
- * Tx interrupt delay needs to typically be set to something non zero
- *
- * Valid Range: 0-65535
- */
 E1000_PARAM(TxIntDelay, "Transmit Interrupt Delay");
 #define DEFAULT_TIDV 8
 #define MAX_TXDELAY 0xFFFF
 #define MIN_TXDELAY 0
 
-/*
- * Transmit Absolute Interrupt Delay in units of 1.024 microseconds
- *
- * Valid Range: 0-65535
- */
 E1000_PARAM(TxAbsIntDelay, "Transmit Absolute Interrupt Delay");
 #define DEFAULT_TADV 32
 #define MAX_TXABSDELAY 0xFFFF
 #define MIN_TXABSDELAY 0
 
-/*
- * Receive Interrupt Delay in units of 1.024 microseconds
- * hardware will likely hang if you set this to anything but zero.
- *
- * Valid Range: 0-65535
- */
 E1000_PARAM(RxIntDelay, "Receive Interrupt Delay");
 #define DEFAULT_RDTR 0
 #define MAX_RXDELAY 0xFFFF
 #define MIN_RXDELAY 0
 
-/*
- * Receive Absolute Interrupt Delay in units of 1.024 microseconds
- *
- * Valid Range: 0-65535
- */
 E1000_PARAM(RxAbsIntDelay, "Receive Absolute Interrupt Delay");
 #define DEFAULT_RADV 8
 #define MAX_RXABSDELAY 0xFFFF
 #define MIN_RXABSDELAY 0
 
-/*
- * Interrupt Throttle Rate (interrupts/sec)
- *
- * Valid Range: 100-100000 (0=off, 1=dynamic, 3=dynamic conservative)
- */
 E1000_PARAM(InterruptThrottleRate, "Interrupt Throttling Rate");
 #define DEFAULT_ITR 3
 #define MAX_ITR 100000
 #define MIN_ITR 100
-/* IntMode (Interrupt Mode)
- *
- * Valid Range: 0 - 2
- *
- * Default Value: 2 (MSI-X)
- */
+ 
 E1000_PARAM(IntMode, "Interrupt Mode");
 #define MAX_INTMODE	2
 #define MIN_INTMODE	0
 
-/*
- * Enable Smart Power Down of the PHY
- *
- * Valid Range: 0, 1
- *
- * Default Value: 0 (disabled)
- */
 E1000_PARAM(SmartPowerDownEnable, "Enable PHY smart power down");
 
-/*
- * Enable Kumeran Lock Loss workaround
- *
- * Valid Range: 0, 1
- *
- * Default Value: 1 (enabled)
- */
 E1000_PARAM(KumeranLockLoss, "Enable Kumeran lock loss workaround");
 
-/*
- * Write Protect NVM
- *
- * Valid Range: 0, 1
- *
- * Default Value: 1 (enabled)
- */
 E1000_PARAM(WriteProtectNVM, "Write-protect NVM [WARNING: disabling this can lead to corrupted NVM]");
 
-/*
- * Enable CRC Stripping
- *
- * Valid Range: 0, 1
- *
- * Default Value: 1 (enabled)
- */
 E1000_PARAM(CrcStripping, "Enable CRC Stripping, disable if your BMC needs " \
                           "the CRC");
 
@@ -169,11 +71,11 @@ struct e1000_option {
 	const char *err;
 	int def;
 	union {
-		struct { /* range_option info */
+		struct {  
 			int min;
 			int max;
 		} r;
-		struct { /* list_option info */
+		struct {  
 			int nr;
 			struct e1000_opt_list { int i; char *str; } *p;
 		} l;
@@ -230,15 +132,6 @@ static int __devinit e1000_validate_option(unsigned int *value,
 	return -1;
 }
 
-/**
- * e1000e_check_options - Range Checking for Command Line Parameters
- * @adapter: board private structure
- *
- * This routine checks all command line parameters for valid user
- * input.  If an invalid value is given, or if no user specified
- * value exists, a default value is used.  The final value is stored
- * in a variable in the adapter structure.
- **/
 void __devinit e1000e_check_options(struct e1000_adapter *adapter)
 {
 	struct e1000_hw *hw = &adapter->hw;
@@ -249,7 +142,7 @@ void __devinit e1000e_check_options(struct e1000_adapter *adapter)
 		e_notice("Using defaults for all values\n");
 	}
 
-	{ /* Transmit Interrupt Delay */
+	{  
 		const struct e1000_option opt = {
 			.type = range_option,
 			.name = "Transmit Interrupt Delay",
@@ -268,7 +161,7 @@ void __devinit e1000e_check_options(struct e1000_adapter *adapter)
 			adapter->tx_int_delay = opt.def;
 		}
 	}
-	{ /* Transmit Absolute Interrupt Delay */
+	{  
 		const struct e1000_option opt = {
 			.type = range_option,
 			.name = "Transmit Absolute Interrupt Delay",
@@ -287,7 +180,7 @@ void __devinit e1000e_check_options(struct e1000_adapter *adapter)
 			adapter->tx_abs_int_delay = opt.def;
 		}
 	}
-	{ /* Receive Interrupt Delay */
+	{  
 		struct e1000_option opt = {
 			.type = range_option,
 			.name = "Receive Interrupt Delay",
@@ -306,7 +199,7 @@ void __devinit e1000e_check_options(struct e1000_adapter *adapter)
 			adapter->rx_int_delay = opt.def;
 		}
 	}
-	{ /* Receive Absolute Interrupt Delay */
+	{  
 		const struct e1000_option opt = {
 			.type = range_option,
 			.name = "Receive Absolute Interrupt Delay",
@@ -325,7 +218,7 @@ void __devinit e1000e_check_options(struct e1000_adapter *adapter)
 			adapter->rx_abs_int_delay = opt.def;
 		}
 	}
-	{ /* Interrupt Throttling Rate */
+	{  
 		const struct e1000_option opt = {
 			.type = range_option,
 			.name = "Interrupt Throttling Rate (ints/sec)",
@@ -354,24 +247,15 @@ void __devinit e1000e_check_options(struct e1000_adapter *adapter)
 				adapter->itr = 20000;
 				break;
 			default:
-				/*
-				 * Save the setting, because the dynamic bits
-				 * change itr.
-				 */
+				 
 				if (e1000_validate_option(&adapter->itr, &opt,
 							  adapter) &&
 				    (adapter->itr == 3)) {
-					/*
-					 * In case of invalid user value,
-					 * default to conservative mode.
-					 */
+					 
 					adapter->itr_setting = adapter->itr;
 					adapter->itr = 20000;
 				} else {
-					/*
-					 * Clear the lower two bits because
-					 * they are used as control.
-					 */
+					 
 					adapter->itr_setting =
 						adapter->itr & ~3;
 				}
@@ -382,7 +266,7 @@ void __devinit e1000e_check_options(struct e1000_adapter *adapter)
 			adapter->itr = 20000;
 		}
 	}
-	{ /* Interrupt Mode */
+	{  
 		struct e1000_option opt = {
 			.type = range_option,
 			.name = "Interrupt Mode",
@@ -408,7 +292,7 @@ void __devinit e1000e_check_options(struct e1000_adapter *adapter)
 			adapter->int_mode = opt.def;
 		}
 	}
-	{ /* Smart Power Down */
+	{  
 		const struct e1000_option opt = {
 			.type = enable_option,
 			.name = "PHY Smart Power Down",
@@ -424,7 +308,7 @@ void __devinit e1000e_check_options(struct e1000_adapter *adapter)
 				adapter->flags |= FLAG_SMART_POWER_DOWN;
 		}
 	}
-	{ /* CRC Stripping */
+	{  
 		const struct e1000_option opt = {
 			.type = enable_option,
 			.name = "CRC Stripping",
@@ -441,7 +325,7 @@ void __devinit e1000e_check_options(struct e1000_adapter *adapter)
 			adapter->flags2 |= FLAG2_CRC_STRIPPING;
 		}
 	}
-	{ /* Kumeran Lock Loss Workaround */
+	{  
 		const struct e1000_option opt = {
 			.type = enable_option,
 			.name = "Kumeran Lock Loss Workaround",
@@ -461,7 +345,7 @@ void __devinit e1000e_check_options(struct e1000_adapter *adapter)
 								       opt.def);
 		}
 	}
-	{ /* Write-protect NVM */
+	{  
 		const struct e1000_option opt = {
 			.type = enable_option,
 			.name = "Write-protect NVM",

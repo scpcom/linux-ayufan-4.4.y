@@ -1,20 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * MPC85xx DS Board Setup
- *
- * Author Xianghua Xiao (x.xiao@freescale.com)
- * Roy Zang <tie-fei.zang@freescale.com>
- * 	- Add PCI/PCI Exprees support
- * Copyright 2007 Freescale Semiconductor Inc.
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
-
+ 
 #include <linux/stddef.h>
 #include <linux/kernel.h>
 #include <linux/pci.h>
@@ -57,7 +44,7 @@ static void mpc85xx_8259_cascade(unsigned int irq, struct irq_desc *desc)
 	}
 	desc->chip->eoi(irq);
 }
-#endif	/* CONFIG_PPC_I8259 */
+#endif	 
 
 void __init mpc85xx_ds_pic_init(void)
 {
@@ -106,7 +93,7 @@ void __init mpc85xx_ds_pic_init(void)
 	mpic_init(mpic);
 
 #ifdef CONFIG_PPC_I8259
-	/* Initialize the i8259 controller */
+	 
 	for_each_node_by_type(np, "interrupt-controller")
 	    if (of_device_is_compatible(np, "chrp,iic")) {
 		cascade_node = np;
@@ -130,7 +117,7 @@ void __init mpc85xx_ds_pic_init(void)
 	of_node_put(cascade_node);
 
 	set_irq_chained_handler(cascade_irq, mpc85xx_8259_cascade);
-#endif	/* CONFIG_PPC_I8259 */
+#endif	 
 }
 
 #ifdef CONFIG_PCI
@@ -157,11 +144,8 @@ static int mpc85xx_exclude_device(struct pci_controller *hose,
 
 	return PCIBIOS_SUCCESSFUL;
 }
-#endif	/* CONFIG_PCI */
+#endif	 
 
-/*
- * Setup the architecture
- */
 #ifdef CONFIG_SMP
 extern void __init mpc85xx_smp_init(void);
 #endif
@@ -244,9 +228,6 @@ machine_device_initcall(p2020_ds, p2020ds_ngpixis_init);
 #endif
 #endif
 
-/*
- * Called very early, device-tree isn't unflattened
- */
 static int __init mpc8544_ds_probe(void)
 {
 	unsigned long root = of_get_flat_dt_root();
@@ -287,11 +268,9 @@ static void mpc8544_ds_show_cpuinfo(struct seq_file *m)
 	seq_printf(m, "PVR\t\t: 0x%x\n", pvid);
 	seq_printf(m, "SVR\t\t: 0x%x\n", svid);
 
-	/* Display cpu Pll setting */
 	phid1 = mfspr(SPRN_HID1);
 	seq_printf(m, "PLL setting\t: 0x%x\n", ((phid1 >> 24) & 0x3f));
 
-	/* Display the amount of memory */
 	seq_printf(m, "Memory\t\t: %d MB\n", memsize / (1024 * 1024));
 }
 #endif
@@ -313,9 +292,7 @@ machine_arch_initcall(p2020_ds, swiotlb_setup_bus_notifier);
 #endif
 
 #ifndef CONFIG_SYNO_MPC8533
-/*
- * Called very early, device-tree isn't unflattened
- */
+ 
 static int __init mpc8572_ds_probe(void)
 {
 	unsigned long root = of_get_flat_dt_root();
@@ -330,9 +307,6 @@ static int __init mpc8572_ds_probe(void)
 	return 0;
 }
 
-/*
- * Called very early, device-tree isn't unflattened
- */
 static int __init p2020_ds_probe(void)
 {
 	unsigned long root = of_get_flat_dt_root();

@@ -1,33 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/**
- * eCryptfs: Linux filesystem encryption layer
- * Kernel declarations.
- *
- * Copyright (C) 1997-2003 Erez Zadok
- * Copyright (C) 2001-2003 Stony Brook University
- * Copyright (C) 2004-2008 International Business Machines Corp.
- *   Author(s): Michael A. Halcrow <mahalcro@us.ibm.com>
- *              Trevor S. Highland <trevor.highland@gmail.com>
- *              Tyler Hicks <tyhicks@ou.edu>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
- * 02111-1307, USA.
- */
-
+ 
 #ifndef ECRYPTFS_KERNEL_H
 #define ECRYPTFS_KERNEL_H
 
@@ -43,14 +17,10 @@
 #include <cryptodev.h>
 #endif
 
-/* Version verification for shared data structures w/ userspace */
 #define ECRYPTFS_VERSION_MAJOR 0x00
 #define ECRYPTFS_VERSION_MINOR 0x04
 #define ECRYPTFS_SUPPORTED_FILE_VERSION 0x03
-/* These flags indicate which features are supported by the kernel
- * module; userspace tools such as the mount helper read
- * ECRYPTFS_VERSIONING_MASK from a sysfs handle in order to determine
- * how to behave. */
+ 
 #define ECRYPTFS_VERSIONING_PASSPHRASE            0x00000001
 #define ECRYPTFS_VERSIONING_PUBKEY                0x00000002
 #define ECRYPTFS_VERSIONING_PLAINTEXT_PASSTHROUGH 0x00000004
@@ -72,9 +42,7 @@
 #define ECRYPTFS_MAX_PASSPHRASE_BYTES ECRYPTFS_MAX_PASSWORD_LENGTH
 #define ECRYPTFS_SALT_SIZE 8
 #define ECRYPTFS_SALT_SIZE_HEX (ECRYPTFS_SALT_SIZE*2)
-/* The original signature size is only for what is stored on disk; all
- * in-memory representations are expanded hex, so it better adapted to
- * be passed around or referenced on the command line */
+ 
 #define ECRYPTFS_SIG_SIZE 8
 #define ECRYPTFS_SIG_SIZE_HEX (ECRYPTFS_SIG_SIZE*2)
 #define ECRYPTFS_PASSWORD_SIG_SIZE ECRYPTFS_SIG_SIZE_HEX
@@ -103,13 +71,6 @@
 
 #define RFC2440_CIPHER_RSA 0x01
 
-/**
- * For convenience, we may need to pass around the encrypted session
- * key between kernel and userspace because the authentication token
- * may not be extractable.  For example, the TPM may not release the
- * private key, instead requiring the encrypted data and returning the
- * decrypted data.
- */
 struct ecryptfs_session_key {
 #define ECRYPTFS_USERSPACE_SHOULD_TRY_TO_DECRYPT 0x00000001
 #define ECRYPTFS_USERSPACE_SHOULD_TRY_TO_ENCRYPT 0x00000002
@@ -130,10 +91,10 @@ struct ecryptfs_password {
 #define ECRYPTFS_PERSISTENT_PASSWORD 0x01
 #define ECRYPTFS_SESSION_KEY_ENCRYPTION_KEY_SET 0x02
 	u32 flags;
-	/* Iterated-hash concatenation of salt and passphrase */
+	 
 	u8 session_key_encryption_key[ECRYPTFS_MAX_KEY_BYTES];
 	u8 signature[ECRYPTFS_PASSWORD_SIG_SIZE + 1];
-	/* Always in expanded hex */
+	 
 	u8 salt[ECRYPTFS_SALT_SIZE];
 };
 
@@ -147,9 +108,8 @@ struct ecryptfs_private_key {
 	u8 data[];
 };
 
-/* May be a password or a private key */
 struct ecryptfs_auth_tok {
-	u16 version; /* 8-bit major and 8-bit minor */
+	u16 version;  
 	u16 token_type;
 #define ECRYPTFS_ENCRYPT_ONLY 0x00000001
 	u32 flags;
@@ -202,10 +162,10 @@ ecryptfs_get_key_payload_data(struct key *key)
 #define ECRYPTFS_MAX_KEYSET_SIZE 1024
 #define ECRYPTFS_MAX_CIPHER_NAME_SIZE 32
 #define ECRYPTFS_MAX_NUM_ENC_KEYS 64
-#define ECRYPTFS_MAX_IV_BYTES 16	/* 128 bits */
+#define ECRYPTFS_MAX_IV_BYTES 16	 
 #define ECRYPTFS_SALT_BYTES 2
 #define MAGIC_ECRYPTFS_MARKER 0x3c81b7f5
-#define MAGIC_ECRYPTFS_MARKER_SIZE_BYTES 8	/* 4*2 */
+#define MAGIC_ECRYPTFS_MARKER_SIZE_BYTES 8	 
 #define ECRYPTFS_FILE_SIZE_BYTES (sizeof(u64))
 #define ECRYPTFS_DEFAULT_CIPHER "aes"
 #define ECRYPTFS_DEFAULT_KEY_BYTES 16
@@ -218,18 +178,13 @@ ecryptfs_get_key_payload_data(struct key *key)
 #define ECRYPTFS_TAG_65_PACKET_TYPE 0x41
 #define ECRYPTFS_TAG_66_PACKET_TYPE 0x42
 #define ECRYPTFS_TAG_67_PACKET_TYPE 0x43
-#define ECRYPTFS_TAG_70_PACKET_TYPE 0x46 /* FNEK-encrypted filename
-					  * as dentry name */
-#define ECRYPTFS_TAG_71_PACKET_TYPE 0x47 /* FNEK-encrypted filename in
-					  * metadata */
-#define ECRYPTFS_TAG_72_PACKET_TYPE 0x48 /* FEK-encrypted filename as
-					  * dentry name */
-#define ECRYPTFS_TAG_73_PACKET_TYPE 0x49 /* FEK-encrypted filename as
-					  * metadata */
-/* Constraint: ECRYPTFS_FILENAME_MIN_RANDOM_PREPEND_BYTES >=
- * ECRYPTFS_MAX_IV_BYTES */
+#define ECRYPTFS_TAG_70_PACKET_TYPE 0x46  
+#define ECRYPTFS_TAG_71_PACKET_TYPE 0x47  
+#define ECRYPTFS_TAG_72_PACKET_TYPE 0x48  
+#define ECRYPTFS_TAG_73_PACKET_TYPE 0x49  
+ 
 #define ECRYPTFS_FILENAME_MIN_RANDOM_PREPEND_BYTES 16
-#define ECRYPTFS_NON_NULL 0x42 /* A reasonable substitute for NULL */
+#define ECRYPTFS_NON_NULL 0x42  
 #define MD5_DIGEST_SIZE 16
 #define ECRYPTFS_TAG_70_DIGEST_SIZE MD5_DIGEST_SIZE
 #define ECRYPTFS_FEK_ENCRYPTED_FILENAME_PREFIX "ECRYPTFS_FEK_ENCRYPTED."
@@ -265,11 +220,6 @@ struct ecryptfs_request {
 };
 #endif
 
-/**
- * This is the primary struct associated with each encrypted file.
- *
- * TODO: cache align/pack?
- */
 struct ecryptfs_crypt_stat {
 #define ECRYPTFS_STRUCT_INITIALIZED   0x00000001
 #define ECRYPTFS_POLICY_APPLIED       0x00000002
@@ -290,13 +240,13 @@ struct ecryptfs_crypt_stat {
 	unsigned int file_version;
 	size_t iv_bytes;
 	size_t num_header_bytes_at_front;
-	size_t extent_size; /* Data extent size; default is 4096 */
+	size_t extent_size;  
 	size_t key_size;
 	size_t extent_shift;
 	unsigned int extent_mask;
 	struct ecryptfs_mount_crypt_stat *mount_crypt_stat;
 #ifdef MY_ABC_HERE
-	struct cryptoini cr_dm; /* OCF session */
+	struct cryptoini cr_dm;  
 #else
 #ifdef MY_DEF_HERE
 	struct crypto_ablkcipher *tfm;
@@ -304,8 +254,7 @@ struct ecryptfs_crypt_stat {
 	struct crypto_blkcipher *tfm;
 #endif
 #endif
-	struct crypto_hash *hash_tfm; /* Crypto context for generating
-				       * the initialization vectors */
+	struct crypto_hash *hash_tfm;  
 	unsigned char cipher[ECRYPTFS_MAX_CIPHER_NAME_SIZE];
 	unsigned char key[ECRYPTFS_MAX_KEY_BYTES];
 	unsigned char root_iv[ECRYPTFS_MAX_IV_BYTES];
@@ -316,7 +265,6 @@ struct ecryptfs_crypt_stat {
 	struct mutex cs_mutex;
 };
 
-/* inode private data. */
 struct ecryptfs_inode_info {
 	struct inode vfs_inode;
 	struct inode *wii_inode;
@@ -325,32 +273,11 @@ struct ecryptfs_inode_info {
 	struct ecryptfs_crypt_stat crypt_stat;
 };
 
-/* dentry private data. Each dentry must keep track of a lower
- * vfsmount too. */
 struct ecryptfs_dentry_info {
 	struct path lower_path;
 	struct ecryptfs_crypt_stat *crypt_stat;
 };
 
-/**
- * ecryptfs_global_auth_tok - A key used to encrypt all new files under the mountpoint
- * @flags: Status flags
- * @mount_crypt_stat_list: These auth_toks hang off the mount-wide
- *                         cryptographic context. Every time a new
- *                         inode comes into existence, eCryptfs copies
- *                         the auth_toks on that list to the set of
- *                         auth_toks on the inode's crypt_stat
- * @global_auth_tok_key: The key from the user's keyring for the sig
- * @global_auth_tok: The key contents
- * @sig: The key identifier
- *
- * ecryptfs_global_auth_tok structs refer to authentication token keys
- * in the user keyring that apply to newly created files. A list of
- * these objects hangs off of the mount_crypt_stat struct for any
- * given eCryptfs mount. This struct maintains a reference to both the
- * key contents and the key itself so that the key can be put on
- * unmount.
- */
 struct ecryptfs_global_auth_tok {
 #define ECRYPTFS_AUTH_TOK_INVALID 0x00000001
 #define ECRYPTFS_AUTH_TOK_FNEK    0x00000002
@@ -361,20 +288,6 @@ struct ecryptfs_global_auth_tok {
 	unsigned char sig[ECRYPTFS_SIG_SIZE_HEX + 1];
 };
 
-/**
- * ecryptfs_key_tfm - Persistent key tfm
- * @key_tfm: crypto API handle to the key
- * @key_size: Key size in bytes
- * @key_tfm_mutex: Mutex to ensure only one operation in eCryptfs is
- *                 using the persistent TFM at any point in time
- * @key_tfm_list: Handle to hang this off the module-wide TFM list
- * @cipher_name: String name for the cipher for this TFM
- *
- * Typically, eCryptfs will use the same ciphers repeatedly throughout
- * the course of its operations. In order to avoid unnecessarily
- * destroying and initializing the same cipher repeatedly, eCryptfs
- * keeps a list of crypto API contexts around to use when needed.
- */
 struct ecryptfs_key_tfm {
 	struct crypto_blkcipher *key_tfm;
 	size_t key_size;
@@ -385,14 +298,8 @@ struct ecryptfs_key_tfm {
 
 extern struct mutex key_tfm_list_mutex;
 
-/**
- * This struct is to enable a mount-wide passphrase/salt combo. This
- * is more or less a stopgap to provide similar functionality to other
- * crypto filesystems like EncFS or CFS until full policy support is
- * implemented in eCryptfs.
- */
 struct ecryptfs_mount_crypt_stat {
-	/* Pointers to memory we do not own, do not free these */
+	 
 #define ECRYPTFS_PLAINTEXT_PASSTHROUGH_ENABLED 0x00000001
 #define ECRYPTFS_XATTR_METADATA_ENABLED        0x00000002
 #define ECRYPTFS_ENCRYPTED_VIEW_ENABLED        0x00000004
@@ -416,19 +323,16 @@ struct ecryptfs_mount_crypt_stat {
 	char global_default_fnek_sig[ECRYPTFS_SIG_SIZE_HEX + 1];
 };
 
-/* superblock private data. */
 struct ecryptfs_sb_info {
 	struct super_block *wsi_sb;
 	struct ecryptfs_mount_crypt_stat mount_crypt_stat;
 };
 
-/* file private data. */
 struct ecryptfs_file_info {
 	struct file *wfi_file;
 	struct ecryptfs_crypt_stat *crypt_stat;
 };
 
-/* auth_tok <=> encrypted_session_key mappings */
 struct ecryptfs_auth_tok_list_item {
 	unsigned char encrypted_session_key[ECRYPTFS_MAX_KEY_BYTES];
 	struct list_head list;
@@ -436,9 +340,7 @@ struct ecryptfs_auth_tok_list_item {
 };
 
 struct ecryptfs_message {
-	/* Can never be greater than ecryptfs_message_buf_len */
-	/* Used to find the parent msg_ctx */
-	/* Inherits from msg_ctx->index */
+	 
 	u32 index;
 	u32 data_len;
 	u8 data[];
@@ -456,11 +358,7 @@ struct ecryptfs_msg_ctx {
 #define ECRYPTFS_MSG_RESPONSE 103
 	u8 type;
 	u32 index;
-	/* Counter converts to a sequence number. Each message sent
-	 * out for which we expect a response has an associated
-	 * sequence number. The response must have the same sequence
-	 * number as the counter for the msg_stc for the message to be
-	 * valid. */
+	 
 	u32 counter;
 	size_t msg_size;
 	struct ecryptfs_message *msg;
@@ -790,4 +688,4 @@ ecryptfs_parse_tag_70_packet(char **filename, size_t *filename_size,
 int ecryptfs_derive_iv(char *iv, struct ecryptfs_crypt_stat *crypt_stat,
 		       loff_t offset);
 
-#endif /* #ifndef ECRYPTFS_KERNEL_H */
+#endif  

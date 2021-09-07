@@ -1,10 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * drivers/base/cpu.c - basic CPU class support
- */
-
+ 
 #include <linux/sysdev.h>
 #include <linux/module.h>
 #include <linux/init.h>
@@ -91,11 +88,11 @@ void unregister_cpu(struct cpu *cpu)
 	per_cpu(cpu_sys_devices, logical_cpu) = NULL;
 	return;
 }
-#else /* ... !CONFIG_HOTPLUG_CPU */
+#else  
 static inline void register_cpu_control(struct cpu *cpu)
 {
 }
-#endif /* CONFIG_HOTPLUG_CPU */
+#endif  
 
 #ifdef CONFIG_KEXEC
 #include <linux/kexec.h>
@@ -110,12 +107,6 @@ static ssize_t show_crash_notes(struct sys_device *dev, struct sysdev_attribute 
 
 	cpunum = cpu->sysdev.id;
 
-	/*
-	 * Might be reading other cpu's data based on which cpu read thread
-	 * has been scheduled. But cpu data (memory) is allocated once during
-	 * boot up and this data does not change there after. Hence this
-	 * operation should be safe. No locking required.
-	 */
 	addr = __pa(per_cpu_ptr(crash_notes, cpunum));
 	rc = sprintf(buf, "%Lx\n", addr);
 	return rc;
@@ -123,9 +114,6 @@ static ssize_t show_crash_notes(struct sys_device *dev, struct sysdev_attribute 
 static SYSDEV_ATTR(crash_notes, 0400, show_crash_notes, NULL);
 #endif
 
-/*
- * Print cpu online, possible, present, and system maps
- */
 static ssize_t print_cpus_map(char *buf, const struct cpumask *map)
 {
 	int n = cpulist_scnprintf(buf, PAGE_SIZE-2, map);
@@ -147,9 +135,6 @@ print_cpus_func(online);
 print_cpus_func(possible);
 print_cpus_func(present);
 
-/*
- * Print values for NR_CPUS and offlined cpus
- */
 static ssize_t print_cpus_kernel_max(struct sysdev_class *class, char *buf)
 {
 	int n = snprintf(buf, PAGE_SIZE-2, "%d\n", NR_CPUS - 1);
@@ -157,7 +142,6 @@ static ssize_t print_cpus_kernel_max(struct sysdev_class *class, char *buf)
 }
 static SYSDEV_CLASS_ATTR(kernel_max, 0444, print_cpus_kernel_max, NULL);
 
-/* arch-optional setting to enable display of offline cpus >= nr_cpu_ids */
 unsigned int total_cpus;
 
 static ssize_t print_cpus_offline(struct sysdev_class *class, char *buf)
@@ -165,14 +149,12 @@ static ssize_t print_cpus_offline(struct sysdev_class *class, char *buf)
 	int n = 0, len = PAGE_SIZE-2;
 	cpumask_var_t offline;
 
-	/* display offline cpus < nr_cpu_ids */
 	if (!alloc_cpumask_var(&offline, GFP_KERNEL))
 		return -ENOMEM;
 	cpumask_complement(offline, cpu_online_mask);
 	n = cpulist_scnprintf(buf, len, offline);
 	free_cpumask_var(offline);
 
-	/* display offline cpus >= nr_cpu_ids */
 	if (total_cpus && nr_cpu_ids < total_cpus) {
 		if (n && n < len)
 			buf[n++] = ',';
@@ -212,14 +194,6 @@ static int cpu_states_init(void)
 	return err;
 }
 
-/*
- * register_cpu - Setup a sysfs device for a CPU.
- * @cpu - cpu->hotpluggable field set to 1 will generate a control file in
- *	  sysfs for this CPU.
- * @num - CPU number to use when creating the device.
- *
- * Initialize and register the CPU device.
- */
 int __cpuinit register_cpu(struct cpu *cpu, int num)
 {
 	int error;

@@ -115,42 +115,26 @@ END:
 	return ret;
 }
 #else
-/* The TWSI interface supports both 7-bit and 10-bit addressing.
- * This enumerator describes addressing type.
- */
+ 
 typedef enum _mvTwsiAddrType
 {
-        ADDR7_BIT,                      /* 7 bit address    */
-        ADDR10_BIT                      /* 10 bit address   */
+        ADDR7_BIT,                       
+        ADDR10_BIT                       
 }MV_TWSI_ADDR_TYPE;
 
-/* This structure describes TWSI address. */
 typedef struct _mvTwsiAddr
 {
-        u32 address;                    /* address          */
-        MV_TWSI_ADDR_TYPE type;       /* Address type     */
+        u32 address;                     
+        MV_TWSI_ADDR_TYPE type;        
 }MV_TWSI_ADDR;
 
-/* This structure describes a TWSI slave. */
 typedef struct _mvTwsiSlave
 {
         MV_TWSI_ADDR slaveAddr;
-        int validOffset;    /* whether the slave has offset (i.e. Eeprom  etc.) */
-        u32 offset;         /* offset in the slave. */
-        int moreThen256;    /* whether the ofset is bigger then 256 */
+        int validOffset;     
+        u32 offset;          
+        int moreThen256;     
 }MV_TWSI_SLAVE;
-
-/******************************************************************************
- * Marvell 88F5182 i2c control                                                *
- *                                                                            *
- * Those structures are copied from arch/arm/mach-mv88fxx81/Soc/twsi/mvTwsi.h *
- * ***************************************************************************/
-
-/********************************************************************************
- * Marvell 88F6281 i2c control                                                  *
- *                                                                              *
- * Those structures are copied from arch/arm/plat-feroceon/mv_hal/twsi/mvTwsi.h *
- * *****************************************************************************/
 
 #ifdef CONFIG_SYNO_MV88F5x8x
 extern int mvTwsiRead (MV_TWSI_SLAVE *twsiSlave, u8 *pBlock, u32 blockSize);

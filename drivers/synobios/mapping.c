@@ -1,7 +1,7 @@
-// Copyright (c) 2000-2009 Synology Inc. All rights reserved.
+ 
 #include <asm/uaccess.h>
-#include <linux/kernel.h> /* printk() */
-#include <linux/errno.h>  /* error codes */
+#include <linux/kernel.h>  
+#include <linux/errno.h>   
 #include <linux/poll.h>
 #include "mapping.h"
 
@@ -46,7 +46,7 @@ GetFanNum(int *pFanNum)
 	iRet = 0;
 	return iRet;
 }
-#endif // SYNO_HAVE_KERNEL_VERSION(2,6,15)
+#endif  
 
 int 
 GetHwCapability(CAPABILITY *pCapability)
@@ -117,9 +117,7 @@ FanStatusMappingType1(FAN_STATUS status, FAN_SPEED speed, char *pSpeed_value)
 		case FAN_SPEED_TEST_2:
 			*pSpeed_value = CPLD_FAN_SPEED_2;
 			break;
-		/* by spec. The fan speed of 3/4 is inverted. 
-		 * Because the last resistance is smaller than the sum of the others.
-		 */
+		 
 		case FAN_SPEED_MIDDLE:
 		case FAN_SPEED_TEST_3:
 			*pSpeed_value = CPLD_FAN_SPEED_3;

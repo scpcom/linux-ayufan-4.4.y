@@ -1,33 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  iscsi_auth_chap.c
- *
- * This file houses the main functions for the iSCSI Chap support
- *
- * Copyright (c) 2002, 2003, 2004, 2005 PyX Technologies, Inc.
- * Copyright (c) 2005, 2006, 2007 SBE, Inc.
- * Copyright (c) 2007-2009 Linux-iSCSI.org
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #include <linux/string.h>
 #include <linux/crypto.h>
 #include <linux/err.h>
@@ -48,25 +22,21 @@
 unsigned char chap_asciihex_to_binaryhex(unsigned char val[2])
 {
 	unsigned char result = 0;
-	/*
-	 * MSB
-	 */
+	 
 	if ((val[0] >= 'a') && (val[0] <= 'f'))
 		result = ((val[0] - 'a' + 10) & 0xf) << 4;
 	else
 		if ((val[0] >= 'A') && (val[0] <= 'F'))
 			result = ((val[0] - 'A' + 10) & 0xf) << 4;
-		else /* digit */
+		else  
 			result = ((val[0] - '0') & 0xf) << 4;
-	/*
-	 * LSB
-	 */
+	 
 	if ((val[1] >= 'a') && (val[1] <= 'f'))
 		result |= ((val[1] - 'a' + 10) & 0xf);
 	else
 		if ((val[1] >= 'A') && (val[1] <= 'F'))
 			result |= ((val[1] - 'A' + 10) & 0xf);
-		else /* digit */
+		else  
 			result |= ((val[1] - '0') & 0xf);
 
 	return result;
@@ -144,31 +114,23 @@ static iscsi_chap_t *chap_server_open(
 		return NULL;
 
 	chap = (iscsi_chap_t *) conn->auth_protocol;
-	/*
-	 * We only support MD5 MDA presently.
-	 */
+	 
 	if (strncmp(A_str, "CHAP_A=5", 8)) {
 		printk(KERN_ERR "CHAP_A is not MD5.\n");
 		return NULL;
 	}
 	PRINT("[server] Got CHAP_A=5\n");
-	/*
-	 * Send back CHAP_A set to MD5.
-	 */
+	 
 	*AIC_len = sprintf(AIC_str, "CHAP_A=5");
 	*AIC_len += 1;
 	chap->digest_type = CHAP_DIGEST_MD5;
 	PRINT("[server] Sending CHAP_A=%d\n", chap->digest_type);
-	/*
-	 * Set Identifier.
-	 */
+	 
 	chap->id = ISCSI_TPG_C(conn)->tpg_chap_id++;
 	*AIC_len += sprintf(AIC_str + *AIC_len, "CHAP_I=%d", chap->id);
 	*AIC_len += 1;
 	PRINT("[server] Sending CHAP_I=%d\n", chap->id);
-	/*
-	 * Generate Challenge.
-	 */
+	 
 	ret = chap_gen_challenge(conn, 1, AIC_str, AIC_len);
 	if (ret < 0)
 		return NULL;
@@ -196,9 +158,7 @@ int chap_gen_challenge(
 	chap_set_random(chap->challenge, CHAP_CHALLENGE_LENGTH);
 	chap_binaryhex_to_asciihex(challenge_asciihex, chap->challenge,
 					CHAP_CHALLENGE_LENGTH);
-	/*
-	 * Set CHAP_C, and copy the generated challenge into C_str.
-	 */
+	 
 	*C_len += sprintf(C_str + *C_len, "CHAP_C=0x%s", challenge_asciihex);
 	*C_len += 1;
 
@@ -247,9 +207,7 @@ int chap_server_compute_md5(
 		kfree(challenge);
 		return -1;
 	}
-	/*
-	 * Extract CHAP_N.
-	 */
+	 
 	if (extract_param(NR_in_ptr, "CHAP_N", MAX_CHAP_N_SIZE, chap_n,
 				&type) < 0) {
 		printk(KERN_ERR "Could not find CHAP_N.\n");
@@ -269,9 +227,7 @@ int chap_server_compute_md5(
 		goto out;
 	}
 	PRINT("[server] Got CHAP_N=%s\n", chap_n);
-	/*
-	 * Extract CHAP_R.
-	 */
+	 
 	if (extract_param(NR_in_ptr, "CHAP_R", MAX_RESPONSE_LENGTH, chap_r,
 				&type) < 0) {
 		printk(KERN_ERR "Could not find CHAP_R.\n");
@@ -346,18 +302,13 @@ int chap_server_compute_md5(
 	} else
 		PRINT("[server] MD5 Digests match, CHAP connetication"
 				" successful.\n\n");
-	/*
-	 * One way authentication has succeeded, return now if mutual
-	 * authentication is not enabled.
-	 */
+	 
 	if (!auth->authenticate_target) {
 		kfree(challenge);
 		kfree(challenge_binhex);
 		return 0;
 	}
-	/*
-	 * Get CHAP_I.
-	 */
+	 
 	if (extract_param(NR_in_ptr, "CHAP_I", 10, identifier, &type) < 0) {
 		printk(KERN_ERR "Could not find CHAP_I.\n");
 		goto out;
@@ -368,13 +319,9 @@ int chap_server_compute_md5(
 					&endptr, 0);
 	else
 		id = (unsigned char)simple_strtoul(identifier, &endptr, 0);
-	/*
-	 * RFC 1994 says Identifier is no more than octet (8 bits).
-	 */
+	 
 	PRINT("[server] Got CHAP_I=%d\n", id);
-	/*
-	 * Get CHAP_C.
-	 */
+	 
 	if (extract_param(NR_in_ptr, "CHAP_C", CHAP_CHALLENGE_STR_LEN,
 			challenge, &type) < 0) {
 		printk(KERN_ERR "Could not find CHAP_C.\n");
@@ -392,9 +339,7 @@ int chap_server_compute_md5(
 		printk(KERN_ERR "Unable to convert incoming challenge\n");
 		goto out;
 	}
-	/*
-	 * Generate CHAP_N and CHAP_R for mutual authentication.
-	 */
+	 
 	tfm = crypto_alloc_hash("md5", 0, CRYPTO_ALG_ASYNC);
 	if (IS_ERR(tfm)) {
 		printk(KERN_ERR "Unable to allocate struct crypto_hash\n");
@@ -427,9 +372,7 @@ int chap_server_compute_md5(
 		crypto_free_hash(tfm);
 		goto out;
 	}
-	/*
-	 * Convert received challenge to binary hex.
-	 */
+	 
 	sg_init_one(&sg, (void *)challenge_binhex, challenge_len);
 	ret = crypto_hash_update(&desc, &sg, challenge_len);
 	if (ret < 0) {
@@ -445,15 +388,11 @@ int chap_server_compute_md5(
 		goto out;
 	}
 	crypto_free_hash(tfm);
-	/*
-	 * Generate CHAP_N and CHAP_R.
-	 */
+	 
 	*NR_out_len = sprintf(NR_out_ptr, "CHAP_N=%s", auth->userid_mutual);
 	*NR_out_len += 1;
 	PRINT("[server] Sending CHAP_N=%s\n", auth->userid_mutual);
-	/*
-	 * Convert response from binary hex to ascii hext.
-	 */
+	 
 	chap_binaryhex_to_asciihex(response, digest, MD5_SIGNATURE_SIZE);
 	*NR_out_len += sprintf(NR_out_ptr + *NR_out_len, "CHAP_R=0x%s",
 			response);

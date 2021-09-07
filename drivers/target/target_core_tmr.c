@@ -1,32 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  target_core_tmr.c
- *
- * This file contains SPC-3 task management infrastructure
- *
- * Copyright (c) 2009 Rising Tide, Inc.
- * Copyright (c) 2009 Linux-iSCSI.org
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #define TARGET_CORE_TMR_C
 
 #include <linux/version.h>
@@ -78,9 +53,6 @@ se_tmr_req_t *core_tmr_alloc_req(
 }
 EXPORT_SYMBOL(core_tmr_alloc_req);
 
-/*
- * Called with se_device_t->se_tmr_lock held.
- */
 void __core_tmr_release_req(
 	se_tmr_req_t *tmr)
 {
@@ -113,22 +85,9 @@ int core_tmr_lun_reset(
 	se_task_t *task, *task_tmp;
 	unsigned long flags;
 	int fe_count, state, tas;
-	/*
-	 * TASK_ABORTED status bit, this is configurable via ConfigFS
-	 * se_device_t attributes.  spc4r17 section 7.4.6 Control mode page
-	 *
-	 * A task aborted status (TAS) bit set to zero specifies that aborted
-	 * tasks shall be terminated by the device server without any response
-	 * to the application client. A TAS bit set to one specifies that tasks
-	 * aborted by the actions of an I_T nexus other than the I_T nexus on
-	 * which the command was received shall be completed with TASK ABORTED
-	 * status (see SAM-4).
-	 */
+	 
 	tas = DEV_ATTRIB(dev)->emulate_tas;
-	/*
-	 * Determine if this se_tmr is coming from a $FABRIC_MOD
-	 * or se_device_t passthrough..
-	 */
+	 
 	if (tmr && tmr->task_cmd && tmr->task_cmd->se_sess) {
 		tmr_nacl = tmr->task_cmd->se_sess->se_node_acl;
 		tmr_tpg = tmr->task_cmd->se_sess->se_tpg;
@@ -142,15 +101,10 @@ int core_tmr_lun_reset(
 	DEBUG_LR("LUN_RESET: %s starting for [%s], tas: %d\n",
 		(preempt_and_abort_list) ? "Preempt" : "TMR",
 		TRANSPORT(dev)->name, tas);
-	/*
-	 * Release all pending and outgoing TMRs aside from the received
-	 * LUN_RESET tmr..
-	 */
+	 
 	spin_lock(&dev->se_tmr_lock);
 	list_for_each_entry_safe(tmr_p, tmr_pp, &dev->dev_tmr_list, tmr_list) {
-		/*
-		 * Allow the received TMR to return with FUNCTION_COMPLETE.
-		 */
+		 
 		if (tmr && (tmr_p == tmr))
 			continue;
 
@@ -159,11 +113,7 @@ int core_tmr_lun_reset(
 			printk(KERN_ERR "Unable to locate se_cmd_t for TMR\n");
 			continue;
 		}
-		/*
-		 * If this function was called with a valid pr_res_key
-		 * parameter (eg: for PROUT PREEMPT_AND_ABORT service action
-		 * skip non regisration key matching TMRs.
-		 */
+		 
 		if ((preempt_and_abort_list != NULL) &&
 		    (core_scsi3_check_cdb_abort_and_preempt(
 					preempt_and_abort_list, cmd) != 0))
@@ -195,27 +145,7 @@ int core_tmr_lun_reset(
 		spin_lock(&dev->se_tmr_lock);
 	}
 	spin_unlock(&dev->se_tmr_lock);
-	/*
-	 * Complete outstanding se_task_t CDBs with TASK_ABORTED SAM status.
-	 * This is following sam4r17, section 5.6 Aborting commands, Table 38
-	 * for TMR LUN_RESET:
-	 *
-	 * a) "Yes" indicates that each command that is aborted on an I_T nexus
-	 * other than the one that caused the SCSI device condition is
-	 * completed with TASK ABORTED status, if the TAS bit is set to one in
-	 * the Control mode page (see SPC-4). "No" indicates that no status is
-	 * returned for aborted commands.
-	 *
-	 * d) If the logical unit reset is caused by a particular I_T nexus
-	 * (e.g., by a LOGICAL UNIT RESET task management function), then "yes"
-	 * (TASK_ABORTED status) applies.
-	 *
-	 * Otherwise (e.g., if triggered by a hard reset), "no"
-	 * (no TASK_ABORTED SAM status) applies.
-	 *
-	 * Note that this seems to be independent of TAS (Task Aborted Status)
-	 * in the Control Mode Page.
-	 */
+	 
 	spin_lock_irqsave(&dev->execute_task_lock, flags);
 	list_for_each_entry_safe(task, task_tmp, &dev->state_task_list,
 				t_state_list) {
@@ -231,17 +161,12 @@ int core_tmr_lun_reset(
 				CMD_TFO(cmd)->get_task_tag(cmd));
 			continue;
 		}
-		/*
-		 * For PREEMPT_AND_ABORT usage, only process commands
-		 * with a matching reservation key.
-		 */
+		 
 		if ((preempt_and_abort_list != NULL) &&
 		    (core_scsi3_check_cdb_abort_and_preempt(
 					preempt_and_abort_list, cmd) != 0))
 			continue;
-		/*
-		 * Not aborting PROUT PREEMPT_AND_ABORT CDB..
-		 */
+		 
 		if (prout_cmd == cmd)
 			continue;
 
@@ -305,9 +230,7 @@ int core_tmr_lun_reset(
 			spin_unlock_irqrestore(&T_TASK(cmd)->t_state_lock,
 						flags);
 			if (fe_count) {
-				/*
-				 * TASK ABORTED status (TAS) bit support
-				 */
+				 
 				if (((tmr_nacl != NULL) &&
 				     (tmr_nacl == cmd->se_sess->se_node_acl)) ||
 				     tas)
@@ -324,9 +247,7 @@ int core_tmr_lun_reset(
 		spin_unlock_irqrestore(&T_TASK(cmd)->t_state_lock, flags);
 
 		if (fe_count) {
-			/*
-			 * TASK ABORTED status (TAS) bit support
-			 */
+			 
 			if (((tmr_nacl != NULL) &&
 			    (tmr_nacl == cmd->se_sess->se_node_acl)) || tas)
 				transport_send_task_abort(cmd);
@@ -337,21 +258,12 @@ int core_tmr_lun_reset(
 		spin_lock_irqsave(&dev->execute_task_lock, flags);
 	}
 	spin_unlock_irqrestore(&dev->execute_task_lock, flags);
-	/*
-	 * Release all commands remaining in the se_device_t cmd queue.
-	 *
-	 * This follows the same logic as above for the se_device_t
-	 * se_task_t state list, where commands are returned with
-	 * TASK_ABORTED status, if there is an outstanding $FABRIC_MOD
-	 * reference, otherwise the se_cmd_t is released.
-	 */
+	 
 	spin_lock_irqsave(&qobj->cmd_queue_lock, flags);
 	list_for_each_entry_safe(qr, qr_tmp, &qobj->qobj_list, qr_list) {
 		cmd = (se_cmd_t *)qr->cmd;
 		if (!(cmd)) {
-			/*
-			 * Skip these for non PREEMPT_AND_ABORT usage..
-			 */
+			 
 			if (preempt_and_abort_list != NULL)
 				continue;
 
@@ -360,17 +272,12 @@ int core_tmr_lun_reset(
 			kfree(qr);
 			continue;
 		}
-		/*
-		 * For PREEMPT_AND_ABORT usage, only process commands
-		 * with a matching reservation key.
-		 */
+		 
 		if ((preempt_and_abort_list != NULL) &&
 		    (core_scsi3_check_cdb_abort_and_preempt(
 					preempt_and_abort_list, cmd) != 0))
 			continue;
-		/*
-		 * Not aborting PROUT PREEMPT_AND_ABORT CDB..
-		 */
+		 
 		if (prout_cmd == cmd)
 			continue;
 
@@ -387,24 +294,12 @@ int core_tmr_lun_reset(
 			"Preempt" : "", cmd, state,
 			atomic_read(&T_TASK(cmd)->t_fe_count));
 #ifdef MY_ABC_HERE
-		/*
-		 * http://risingtidesystems.com/git/?p=lio-core-backports.git;
-		 * a=commitdiff;h=3a30457076987c89598486aa9c651340ff940472
-		 *
-		 * Signal that the command has failed via cmd->se_cmd_flags,
-		 * and call TFO->new_cmd_failure() to wakeup any fabric
-		 * dependent code used to wait for unsolicited data out
-		 * allocation to complete.  The fabric module is expected
-		 * to dump any remaining unsolicited data out for the aborted
-		 * command at this point.
-		 */
+		 
 		transport_new_cmd_failure(cmd);
 #endif
 
 		if (atomic_read(&T_TASK(cmd)->t_fe_count)) {
-			/*
-			 * TASK ABORTED status (TAS) bit support
-			 */
+			 
 			if (((tmr_nacl != NULL) &&
 			     (tmr_nacl == cmd->se_sess->se_node_acl)) ||
 			      tas)
@@ -416,10 +311,7 @@ int core_tmr_lun_reset(
 		spin_lock_irqsave(&qobj->cmd_queue_lock, flags);
 	}
 	spin_unlock_irqrestore(&qobj->cmd_queue_lock, flags);
-	/*
-	 * Clear any legacy SPC-2 reservation when called during
-	 * LOGICAL UNIT RESET
-	 */
+	 
 	if (!(preempt_and_abort_list) &&
 	     (dev->dev_flags & DF_SPC2_RESERVATIONS)) {
 		spin_lock(&dev->dev_reservation_lock);
@@ -433,7 +325,7 @@ int core_tmr_lun_reset(
 	spin_lock(&dev->stats_lock);
 	dev->num_resets++;
 	spin_unlock(&dev->stats_lock);
-#endif /* SNMP_SUPPORT */
+#endif  
 
 	DEBUG_LR("LUN_RESET: %s for [%s] Complete\n",
 			(preempt_and_abort_list) ? "Preempt" : "TMR",

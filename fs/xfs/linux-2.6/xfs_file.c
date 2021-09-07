@@ -1,20 +1,4 @@
-/*
- * Copyright (c) 2000-2005 Silicon Graphics, Inc.
- * All Rights Reserved.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it would be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write the Free Software Foundation,
- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
+ 
 #include "xfs.h"
 #include "xfs_bit.h"
 #include "xfs_log.h"
@@ -168,10 +152,6 @@ xfs_dir_open(
 	if (error)
 		return error;
 
-	/*
-	 * If there are any blocks, read-ahead block 0 as we're almost
-	 * certain to have the next operation be a read there.
-	 */
 	mode = xfs_ilock_map_shared(ip);
 	if (ip->i_d.di_nextents > 0)
 		xfs_da_reada_buf(NULL, ip, 0, XFS_DATA_FORK);
@@ -187,16 +167,6 @@ xfs_file_release(
 	return -xfs_release(XFS_I(inode));
 }
 
-/*
- * We ignore the datasync flag here because a datasync is effectively
- * identical to an fsync. That is, datasync implies that we need to write
- * only the metadata needed to be able to access the data that is written
- * if we crash after the call completes. Hence if we are writing beyond
- * EOF we have to log the inode size change as well, which makes it a
- * full fsync. If we don't write beyond EOF, the inode core will be
- * clean in memory and so we don't need to log the inode, just like
- * fsync.
- */
 STATIC int
 xfs_file_fsync(
 	struct file		*file,
@@ -220,18 +190,6 @@ xfs_file_readdir(
 	int		error;
 	size_t		bufsize;
 
-	/*
-	 * The Linux API doesn't pass down the total size of the buffer
-	 * we read into down to the filesystem.  With the filldir concept
-	 * it's not needed for correct information, but the XFS dir2 leaf
-	 * code wants an estimate of the buffer size to calculate it's
-	 * readahead window and size the buffers used for mapping to
-	 * physical blocks.
-	 *
-	 * Try to give it an estimate that's good enough, maybe at some
-	 * point we can change the ->readdir prototype to include the
-	 * buffer size.
-	 */
 	bufsize = (size_t)min_t(loff_t, PAGE_SIZE, ip->i_d.di_size);
 
 	error = xfs_readdir(ip, dirent, bufsize,
@@ -253,12 +211,6 @@ xfs_file_mmap(
 	return 0;
 }
 
-/*
- * mmap()d file has taken write protection fault and is being made
- * writable. We can set the page state up correctly for a writable
- * page, which means we can do correct delalloc accounting (ENOSPC
- * checking!) and unwritten extent mapping.
- */
 STATIC int
 xfs_vm_page_mkwrite(
 	struct vm_area_struct	*vma,
@@ -287,9 +239,7 @@ xfs_preallocate(
 	struct xfs_inode *ip = XFS_I(inode);
 	int               ioflags = 0;
 	xfs_flock64_t     info;
-//printk("xfs_preallocate() file %p, start %lld, length %lld\n", filp, start, length);
-
-	/* Tell XFS of the region to preallocate */
+ 
 	info.l_whence = 0;
 	info.l_start  = start;
 	info.l_len    = length;
@@ -314,9 +264,7 @@ xfs_unpreallocate(
 	struct xfs_inode *ip = XFS_I(inode);
 	int               ioflags = 0;
 	xfs_flock64_t     info;
-//printk("xfs_unpreallocate() file %p, start %lld, length %lld\n", filp, start, length);
-
-	/* Tell XFS of the region to preallocate */
+ 
 	info.l_whence = 0;
 	info.l_start  = start;
 	info.l_len    = length;

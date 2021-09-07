@@ -2,17 +2,7 @@
 #define MY_ABC_HERE
 #endif
 #ifdef MY_DEF_HERE
-/*
- * P1022 DS Board Setup
- *
- * Copyright 2010 Freescale Semiconductor, Inc.
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
-
+ 
 #include <linux/stddef.h>
 #include <linux/kernel.h>
 #include <linux/pci.h>
@@ -64,7 +54,6 @@ unsigned int p1022ds_get_pixel_format(unsigned int bits_per_pixel,
 	};
 	unsigned int pix_fmt, arch_monitor;
 
-	/* Fixed ME: monitor_port is 1? */
 	arch_monitor = (monitor_port == 0) ? 0 : 1;
 
 	if (bits_per_pixel == 32)
@@ -83,7 +72,7 @@ void p1022ds_set_gamma_table(int monitor_port, char *gamma_table_base)
 {
 	int i;
 
-	if (monitor_port == 2) {		/* dual link LVDS */
+	if (monitor_port == 2) {		 
 		for (i = 0; i < 256*3; i++)
 			gamma_table_base[i] = (gamma_table_base[i] << 2) |
 					 ((gamma_table_base[i] >> 6) & 0x03);
@@ -99,7 +88,7 @@ void p1022ds_set_pixel_clock(unsigned int pixclock)
 {
 	u32 __iomem *clkdvdr;
 	u32 temp;
-	/* variables for pixel clock calcs */
+	 
 	ulong  bestval, bestfreq, speed_ccb, minpixclock, maxpixclock;
 	ulong pixval;
 	long err;
@@ -111,12 +100,9 @@ void p1022ds_set_pixel_clock(unsigned int pixclock)
 		return;
 	}
 
-	/* Pixel Clock configuration */
 	pr_debug("DIU: Bus Frequency = %d\n", get_busfreq());
 	speed_ccb = get_busfreq();
 
-	/* Calculate the pixel clock with the smallest error */
-	/* calculate the following in steps to avoid overflow */
 	pr_debug("DIU pixclock in ps - %d\n", pixclock);
 	temp = 1000000000/pixclock;
 	temp *= 1000;
@@ -155,10 +141,10 @@ void p1022ds_set_pixel_clock(unsigned int pixclock)
 	pr_debug("DIU chose = %lx\n", bestval);
 	pr_debug("DIU error = %ld\n NomPixClk ", err);
 	pr_debug("DIU: Best Freq = %lx\n", bestfreq);
-	/* Modify PXCLK in GUTS CLKDVDR */
+	 
 	pr_debug("DIU: Current value of CLKDVDR = 0x%08x\n", (*clkdvdr));
 	temp = (*clkdvdr) & 0x2000FFFF;
-	*clkdvdr = temp;		/* turn off clock */
+	*clkdvdr = temp;		 
 	*clkdvdr = temp | 0x80000000 | (((bestval) & 0x1F) << 16);
 	pr_debug("DIU: Modified value of CLKDVDR = 0x%08x\n", (*clkdvdr));
 	iounmap(clkdvdr);
@@ -177,7 +163,7 @@ int p1022ds_set_sysfs_monitor_port(int val)
 {
 	return val < 3 ? val : 0;
 }
-#endif /* defined(CONFIG_FB_FSL_DIU) || defined(CONFIG_FB_FSL_DIU_MODULE) */
+#endif  
 
 void __init p1022_ds_pic_init(void)
 {
@@ -217,7 +203,6 @@ void __init p1022_ds_pic_init(void)
 	mpic_init(mpic);
 }
 
-/*Host/agent status can be read from porbmsr in the global utilities*/
 static int get_p1022ds_host_agent(void)
 {
 	struct device_node *np;
@@ -244,26 +229,20 @@ static int get_p1022ds_host_agent(void)
 	return host_agent;
 }
 
-/*
- * To judge if the PCI(e) controller is host/agent mode through
- * the PORBMSR register.
- * 0: agent mode
- * 1: host mode
- */
 static int p1022ds_pci_is_host(u32 host_agent, resource_size_t res)
 {
 	switch (res & 0xfffff) {
-	case 0xa000:	/* PCIe1 */
+	case 0xa000:	 
 		if (host_agent == 0 || host_agent == 1 ||
 			host_agent == 2 || host_agent == 3)
 			return 0;
 		break;
-	case 0x9000:	/* PCIe2 */
+	case 0x9000:	 
 		if (host_agent == 0 || host_agent == 1 ||
 			host_agent == 4 || host_agent == 5)
 			return 0;
 		break;
-	case 0xb000:	/* PCIe3 */
+	case 0xb000:	 
 		if (host_agent == 0 || host_agent == 2 ||
 			host_agent == 4 || host_agent == 6)
 			return 0;
@@ -274,9 +253,6 @@ static int p1022ds_pci_is_host(u32 host_agent, resource_size_t res)
 	return 1;
 }
 
-/*
- * Setup the architecture
- */
 #ifdef CONFIG_SMP
 extern void __init mpc85xx_smp_init(void);
 #endif
@@ -356,9 +332,6 @@ machine_device_initcall(p1022_ds, p1022_ds_publish_devices);
 
 machine_arch_initcall(p1022_ds, swiotlb_setup_bus_notifier);
 
-/*
- * Called very early, device-tree isn't unflattened
- */
 static int __init p1022_ds_probe(void)
 {
 	unsigned long root = of_get_flat_dt_root();
@@ -379,4 +352,4 @@ define_machine(p1022_ds) {
 	.calibrate_decr		= generic_calibrate_decr,
 	.progress		= udbg_progress,
 };
-#endif /* MY_DEF_HERE */
+#endif  

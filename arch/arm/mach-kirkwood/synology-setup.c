@@ -1,30 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Synology Kirkwood NAS Board Setup
- *
- * Maintained by:  KueiHuan Chen <khchen@synology.com>
- *
- * Copyright 2009-2010 Synology, Inc.  All rights reserved.
- * Copyright 2009-2010 KueiHuan.Chen
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; see the file COPYING.  If not, write to
- * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/platform_device.h>
 #include <linux/mtd/physmap.h>
@@ -47,50 +24,39 @@
 #include "common.h"
 #include "mpp.h"
 
-/****************************************************************************
- * Layout as used by :
- *  0x00000000-0x00080000 : "U-Boot"
- *  0x00080000-0x00280000 : "Kernel"
- *  0x00280000-0x003c0000 : "RootFS"
- *  0x003c0000-0x003d0000 : "Vendor"
- *  0x003d0000-0x003f0000 : "U-Boot Config"
- *  0x003f0000-0x00400000 : "FIS directory"
- *
- ***************************************************************************/
 static struct mtd_partition syno_6281_partitions[] = {
 	{
-		.name   = "RedBoot",		/* u-boot		*/
+		.name   = "RedBoot",		 
 		.offset = 0x00000000,
-		.size   = 0x00080000,		/* 512KB		*/
+		.size   = 0x00080000,		 
 	},
 	{
-		.name   = "zImage",			/* linux kernel image	*/
+		.name   = "zImage",			 
 		.offset = 0x00080000,
-		.size   = 0x00200000,		/* 2 MB			*/
+		.size   = 0x00200000,		 
 	},
 	{
-		.name   = "rd.gz",			/* ramdisk image	*/
+		.name   = "rd.gz",			 
 		.offset = 0x00280000,
-		.size   = 0x00140000,		/* 1.2 MB		*/
+		.size   = 0x00140000,		 
 	},
 	{
-		.name   = "vendor",			/* vendor specific data */
+		.name   = "vendor",			 
 		.offset = 0x003C0000,
-		.size   = 0x00010000,		/* 64KB                 */
+		.size   = 0x00010000,		 
 	},
 	{
-		.name   = "RedBoot Config",	/* configs for u-boot   */
+		.name   = "RedBoot Config",	 
 		.offset = 0x003D0000,
-		.size   = 0x00020000,		/* 128KB                */
+		.size   = 0x00020000,		 
 	},
 	{
-		.name   = "FIS directory",	/* flash partition table*/
+		.name   = "FIS directory",	 
 		.offset = 0x003F0000,
-		.size   = 0x00010000,		/* 64KB                 */
+		.size   = 0x00010000,		 
 	},
 };
 
-/* Not specify type ley it autoprobe the spi flash moduel */
 static const struct flash_platform_data synology_6281_flash = {
 	.name		= "spi_flash",
 	.parts		= syno_6281_partitions,
@@ -120,28 +86,6 @@ static struct mv_sata_platform_data synology_sata_data = {
 	.n_ports	= 2,
 };
 
-/*
-Pin         Mode    Signal select and definition    Input/output    Pull-up/pull-down
-MPP[0:3]    0x2 SPI signal
-MPP[4:7]    0x0 GPIO
-MPP[8:9]    0x1 TWSI
-MPP[10:11]  0x3 UART0
-MPP12       0x0 GPIO
-MPP[13:14]  0x3 UART1
-MPP[15:19]  0x0 GPIO
-MPP[20]     0x5 SATA port 1 ACT LED     output      See 8.3 for detail
-MPP[21]     0x5 SATA port 0 ACT LED     output      See 8.3 for detail
-MPP[22]     0x0 SATA port 1 FAULT LED       output
-MPP[23]     0x0 SATA port 0 FAULT LED       output
-MPP[24:35]  0x0 GPIO
-MPP31       0x0 HDD2 enable (2 bay only)    output      Default Low, Hi=ON
-MPP32       0x0 FAN_182             output      Default Low, Low=off
-MPP33       0x0 FAN_150             output      Default Low, Low=off
-MPP34       0x0 FAN_100             output      Default Hi, Low=off
-MPP35       0x0 FAN SENSE           input       Hi=Fail, pulse=running
-MPP[36:44]  0x4 I2S
-MPP[45:49]  0x0 GPIO
-*/
 static unsigned int synology_109_mpp_config[] __initdata = {
 	MPP0_SPI_SCn,		MPP1_SPI_MOSI,		MPP2_SPI_SCK,				MPP3_SPI_MISO,
 	MPP4_GPIO,			MPP5_GPO,			MPP6_GPIO,					MPP7_GPO,
@@ -168,28 +112,6 @@ static SYNO_109_GPIO gpio_109 = {
 	.fan1_fail = 35,
 };
 
-/*
-Pin             Mode    Signal definition       Input/output    Pull-up/pull-down
-MPP[0:3]        0x2     SPI signal
-MPP[4:7]        0x0     GPIO
-MPP[8:9]        0x1     TWSI
-MPP[10:11]      0x3     UART0
-MPP12           0x0     GPIO
-MPP[13:14]      0x3     UART1
-MPP[15:19]      0x0     GPIO
-MPP[20:21]      0x0     DISKA0/A1               output          00=off (default), 01=Green,10=Amber,
-MPP[22:23]      0x0     DISKB0/B1               output
-MPP[24:25]      0x0     DISKC0/C1               output
-MPP[26:27]      0x0     DISKD0/D1               output
-MPP[28:30]      0x0     GPIO
-MPP31           0x0     BP-LOCK-OUT             input           Low=good, Hi=NG
-MPP32           0x0     FAN_150 (409slim)       output          Hi=ON, Low=off
-MPP33           0x0     FAN_120                 output          Default low, Low=off
-MPP34           0x0     FAN_100                 output          Default low, Low=off
-MPP35           0x0     FAN SENSE               input           Hi=Fail, pulse=running
-MPP[36:44]      0x4     I2S
-MPP[45:49]      0x0     GPIO
-*/
 static unsigned int synology_409slim_mpp_config[] __initdata = {
 	MPP0_SPI_SCn,		MPP1_SPI_MOSI,		MPP2_SPI_SCK,				MPP3_SPI_MISO,
 	MPP4_GPIO,			MPP5_GPO,			MPP6_GPIO,					MPP7_GPO,
@@ -222,34 +144,6 @@ static SYNO_409slim_GPIO gpio_slim = {
 	.fan1_fail = 35,
 };
 
-/*
-Pin         Mode    Signal definition   Input/output    Pull-up/pull-down
-MPP[0:3]    0x2     SPI signal
-MPP[4:7]    0x0     GPIO
-MPP[8:9]    0x1     TWSI
-MPP[10:11]  0x3     UART0
-MPP12       0x0     ALERM_LED           output
-MPP[13:14]  0x3     UART1
-MPP[15:17]  0x0     FAN 150, FAN 120, FAN 100   output
-MPP[18]     0x0     FAN sense           input
-MPP[19]     0x0     INTER-LOCK          input
-MPP[20:23]  0x0     RGMII G2 TX[0:3]    output
-MPP[24:27]  0x0     RGMII G2 RX[0:3]    input
-MPP[28:29]  0x0     MODEL_ID            input           MODEL_ID:
-                                                        00: DS409, DS410j
-                                                        01: DS509
-                                                        10:RS409
-                                                        11:RS409RP
-MPP[30:31]  0x0     RGMII TX_CTL, RGMII TX_CLK  output
-MPP[32:33]  0x0     RGMII RX_CTL, RGMII RX_CLK  input
-MPP34       0x3     ACT internal SATA port 2    output
-MPP35       0x3     ACT internal SATA port 1    output
-MPP[36:45]  0x0     DISK LED STATE      output
-MPP47       0x0     BUZZER_MUTE_REQ     input
-MPP46       0x0     BUZZER_MUTE_ACK     output
-MPP48       0x0     RPS1_ON             input
-MPP49       0x0     RPS2_ON             input
-*/
 static unsigned int synology_4bay_mpp_config[] __initdata = {
 	MPP0_SPI_SCn,		MPP1_SPI_MOSI,		MPP2_SPI_SCK,				MPP3_SPI_MISO,
 	MPP4_GPIO,			MPP5_GPO,			MPP6_GPIO,					MPP7_GPO,
@@ -302,10 +196,6 @@ static int __init parse_tag_mv_uboot(const struct tag *tag)
 }
 __tagtable(ATAG_MV_UBOOT, parse_tag_mv_uboot);
 
-/*****************************************************************************
- * Syonology specific power off method via UART1-attached PIC
- ****************************************************************************/
-
 #define UART1_REG(x)	(UART1_VIRT_BASE + ((UART_##x) << 2))
 #define SET8N1                  0x3
 #define SOFTWARE_SHUTDOWN       0x31
@@ -356,7 +246,6 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 
 	writel(SATAHC_LED_ACT_PRESENT, SATAHC_LED_CONFIG_REG);
 
-	//note: hd led is active low
 	if ( DISK_LED_OFF == status ) {
 		fail_led = 1;
 	} else if ( DISK_LED_GREEN_SOLID == status ) {
@@ -414,7 +303,7 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 		break;
 	case 5:
 		if (SYNO_DS409slim_ID == gBoardId) {
-			//for esata
+			 
 			ret = 0;
 			goto END;
 		}
@@ -422,7 +311,7 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 		pin2 = hdd_led_gpio.hdd5_led_1;
 		break;
 	case 6:
-		//for esata
+		 
 		ret = 0;
 		goto END;
 	default:
@@ -606,7 +495,6 @@ static void __init synology_init(void)
 		hdd_led_gpio.hdd5_led_0 = gpio_409.hdd5_led_0;
 		hdd_led_gpio.hdd5_led_1 = gpio_409.hdd5_led_1;
 
-		/* 01: 509, 10 11 rs409(rp) are dual lan models. Need init second NIC */
 		if (gpio_get_value(gpio_409.model_id_0) ||
 		    gpio_get_value(gpio_409.model_id_1))
 			kirkwood_ge01_init(&synology_ge01_data);
@@ -627,19 +515,7 @@ static int __init synology_pci_init(void)
 	if (((reg & PMC_PEXSTOPCLOCK_MASK) != PMC_PEXSTOPCLOCK_STOP)) {
 		if (!(readl(PCIE_STATUS) & 0x1)) {
 			printk("PCIe link is enable, apply PCIe workaround \n");
-			/*
-			 * Synology 6281 PCIe link issue workaround.
-			 * If we don't reset the PCIe link, the device's register will all be 0xffffffff
-			 * after the PCIe device work for some times.
-			 *
-			 * In DS409slim, 7042 is work as PCIe 4X in 6281. Some board will encounter
-			 * this problem. When the register are all 0xffffffff, the system is just like hang.
-			 *
-			 * Disable PCIe link and wait for that link is really down.
-			 * And then enable it again.
-			 * Please refer 6281 functional Spec page 447.
-			 * PCIe Link control status register bit 4.
-			 */
+			 
 			writel(readl(PCIE_LINK_CTRL) | 0x10, PCIE_LINK_CTRL);
 
 			while (1)

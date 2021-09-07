@@ -2,50 +2,7 @@
 #define MY_ABC_HERE
 #endif
 #ifdef MY_DEF_HERE
-/*
- * zl6100.c - driver for the Intersil zl2006 chip
- *
- * Copyright (C) 2010 Freescale Semiconductor, Inc.
- * Author: Yuantian Tang <b29983@freescale.com>
- *
- * The ZL2006 is a digital DC-DC controller with integrated MOSFET
- * drivers made by Intersil Americas Inc.
- * The ZL2006 is designed to be a flexible building block for DC
- * power and can be easily adapted to designs ranging from a
- * single-phase power supply operating from a 3.3V input to a multi-phase
- * supply operating from a 12V input. The output voltage range is from
- * 0.54V to 5.5V with 1% or -1% output voltage accuracy.
- * All of ZL2006's operating features can be configured by simple
- * pinstrap/resistor selection or through the SMBus serial interface.
- * The ZL2006 uses the PMBus protocol for communication with a host
- * controller. Complete datasheet can be obtained from Intersil's website
- * at:
- *		http://www.intersil.com/products/deviceinfo.asp?pn=ZL2006
- *
- * This driver exports the values of output voltage and current
- * to sysfs. The voltage unit is mV, and the current unit is mA.
- * The user space lm-sensors tool(VER:3.1.2 or above) can get and display
- * these values through the sysfs interface.
- *
- * NOTE: If the lm-sensors tool get the value of 0, probably because something
- * wrong happens with I2C bus, such as BUSY or NOT READY etc.
- * It is recommended to retrieve the data again.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
+ 
 #include <linux/module.h>
 #include <linux/jiffies.h>
 #include <linux/hwmon.h>
@@ -57,46 +14,25 @@
 #include <linux/delay.h>
 #include <asm/fsl_pixis.h>
 
-/*
- * zl6100 COMMAND
- */
-#define VOUT_MODE	0x20	/* the output mode */
-#define DEVICE_ID	0xE4	/* device id */
-#define READ_VOUT	0x8B	/* the output voltage */
-#define READ_IOUT	0x8C	/* the output current */
+#define VOUT_MODE	0x20	 
+#define DEVICE_ID	0xE4	 
+#define READ_VOUT	0x8B	 
+#define READ_IOUT	0x8C	 
 
-/**
- * micro defined
- */
-#define LEN_BYTE		0x01	/* read one byte data */
-#define LEN_WORD		0x02	/* read two bytes data */
-#define ZL6100_ID		"\x10ZL6100-002-FE03"	/* chip id */
+#define LEN_BYTE		0x01	 
+#define LEN_WORD		0x02	 
+#define ZL6100_ID		"\x10ZL6100-002-FE03"	 
 
-/**
- * Client data (each client gets its own)
- */
 struct zl6100_data {
 	struct device *hwmon_dev;
 	s32 val;
 };
 
-/**
- * read zl6100 register
- *
- * @client: handle to slave device
- * @cmd	:	command
- * @len	:	word or byte
- *
- */
 static s32 read_register(struct i2c_client *client, u8 cmd, u8 len)
 {
 
 	struct zl6100_data *priv_data = i2c_get_clientdata(client);
 
-	/* The shortest interval of time between two READ command is 2ms
-	 * for ZL2006 chip.
-	 * So, we delay 2ms, just in case.
-	 */
 	mdelay(2);
 
 	switch (len) {
@@ -115,13 +51,6 @@ static s32 read_register(struct i2c_client *client, u8 cmd, u8 len)
 	return priv_data->val;
 }
 
-/**
- * check the data format, ONLY linear mode data format with value 0x13
- * is supported
- *
- * @client	:	handle to slave device
- *
- */
 static int check_data_mode(struct i2c_client *client)
 {
 	s32	mode;
@@ -136,12 +65,6 @@ static int check_data_mode(struct i2c_client *client)
 	return 0;
 }
 
-/**
- * make sure zl6100 chip is used. id is "\x10ZL6100-002-FE03"
- *
- * @client	:	handle to slave
- *
- */
 static int zl6100_check_id(struct i2c_client *client)
 {
 	s32 id;
@@ -156,11 +79,6 @@ static int zl6100_check_id(struct i2c_client *client)
 	return 0;
 }
 
-/**
- * call back function to output the voltage value
- *
- * If we get error,like BUSY, just return 0 to user
- */
 static int show_volt(struct device *dev, struct device_attribute *attr,
 		char *buf)
 {
@@ -177,11 +95,6 @@ static int show_volt(struct device *dev, struct device_attribute *attr,
 	return sprintf(buf, "%d\n", volt);
 }
 
-/**
- * the call back function to output current value
- *
- * If we get error, just return 0 to user
- */
 static int show_curr(struct device *dev, struct device_attribute *attr,
 		char *buf)
 {
@@ -237,7 +150,6 @@ static int zl6100_probe(struct i2c_client *client,
 		goto exit_remove;
 	}
 
-	/* dummy read, wait for the parameters can be monitored */
 	mdelay(2);
 	i2c_smbus_read_word_data(client, READ_VOUT);
 
@@ -296,4 +208,4 @@ MODULE_LICENSE("GPL");
 
 module_init(zl6100_init);
 module_exit(zl6100_exit);
-#endif /* MY_DEF_HERE */
+#endif  

@@ -1,8 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* Copyright (c) 2003-2013 Synology Inc. All rights reserved. */
-
+ 
 #ifndef _SYNO_QORIR_H
 #define _SYNO_QORIQ_H
 
@@ -14,4 +13,4 @@ enum {
 };
 #endif
 
-#endif // _SYNO_QORIQ_H
+#endif  

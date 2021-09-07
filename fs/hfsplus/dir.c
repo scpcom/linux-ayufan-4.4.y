@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/hfsplus/dir.c
- *
- * Copyright (C) 2001
- * Brad Boyer (flar@allandria.com)
- * (C) 2003 Ardis Technologies <roman@ardistech.com>
- *
- * Handling of directories
- */
-
+ 
 #include <linux/errno.h>
 #include <linux/fs.h>
 #include <linux/slab.h>
@@ -31,7 +22,6 @@ static inline void hfsplus_instantiate(struct dentry *dentry,
 	d_instantiate(dentry, inode);
 }
 
-/* Find the entry inside dir named dentry->d_name */
 static struct dentry *hfsplus_lookup(struct inode *dir, struct dentry *dentry,
 				     struct nameidata *nd)
 {
@@ -65,7 +55,7 @@ again:
 	if (err) {
 		if (err == -ENOENT) {
 			hfs_find_exit(&fd);
-			/* No such entry */
+			 
 			inode = NULL;
 			goto out;
 		}
@@ -94,10 +84,7 @@ again:
 			char name[32];
 
 			if (dentry->d_fsdata) {
-				/*
-				 * We found a link pointing to another link,
-				 * so ignore it and treat it as regular file.
-				 */
+				 
 				cnid = (unsigned long)dentry->d_fsdata;
 				linkid = 0;
 			} else {
@@ -174,11 +161,11 @@ static int hfsplus_readdir(struct file *filp, void *dirent, filldir_t filldir)
 
 	switch ((u32)filp->f_pos) {
 	case 0:
-		/* This is completely artificial... */
+		 
 		if (filldir(dirent, ".", 1, 0, inode->i_ino, DT_DIR))
 			goto out;
 		filp->f_pos++;
-		/* fall through */
+		 
 	case 1:
 		hfs_bnode_read(fd.bnode, &entry, fd.entryoffset, fd.entrylength);
 		if (be16_to_cpu(entry.type) != HFSPLUS_FOLDER_THREAD) {
@@ -195,7 +182,7 @@ static int hfsplus_readdir(struct file *filp, void *dirent, filldir_t filldir)
 			    be32_to_cpu(entry.thread.parentID), DT_DIR))
 			goto out;
 		filp->f_pos++;
-		/* fall through */
+		 
 	default:
 		if (filp->f_pos >= inode->i_size)
 			goto out;
@@ -377,7 +364,7 @@ static int hfsplus_link(struct dentry *src_dentry, struct inode *dst_dir,
 		src_dentry->d_fsdata = (void *)(unsigned long)cnid;
 		res = hfsplus_create_cat(cnid, src_dir, &src_dentry->d_name, inode);
 		if (res) {
-			/* panic? */
+			 
 #ifdef MY_ABC_HERE
 			mutex_unlock(&syno_hfsplus_global_mutex);
 #endif
@@ -642,7 +629,7 @@ static int hfsplus_rename(struct inode *old_dir, struct dentry *old_dentry,
 #ifdef MY_ABC_HERE
 	mutex_lock(&syno_hfsplus_global_mutex);
 #endif
-	/* Unlink destination if it already exists */
+	 
 	if (new_dentry->d_inode) {
 		res = hfsplus_unlink(new_dir, new_dentry);
 		if (res) {

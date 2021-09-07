@@ -1,34 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  target_core_tpg.c
- *
- * This file contains generic Target Portal Group related functions.
- *
- * Copyright (c) 2002, 2003, 2004, 2005 PyX Technologies, Inc.
- * Copyright (c) 2005, 2006, 2007 SBE, Inc.
- * Copyright (c) 2007-2009 Rising Tide Software, Inc.
- * Copyright (c) 2008-2009 Linux-iSCSI.org
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #define TARGET_CORE_TPG_C
 
 #include <linux/net.h>
@@ -54,10 +27,6 @@
 
 #undef TARGET_CORE_TPG_C
 
-/*	core_clear_initiator_node_from_tpg():
- *
- *
- */
 static void core_clear_initiator_node_from_tpg(
 	se_node_acl_t *nacl,
 	se_portal_group_t *tpg)
@@ -113,10 +82,6 @@ static void core_clear_initiator_node_from_tpg(
 	spin_unlock_bh(&nacl->device_list_lock);
 }
 
-/*	__core_tpg_get_initiator_node_acl():
- *
- *	spin_lock_bh(&tpg->acl_node_lock); must be held when calling
- */
 se_node_acl_t *__core_tpg_get_initiator_node_acl(
 	se_portal_group_t *tpg,
 	const char *initiatorname)
@@ -136,10 +101,6 @@ se_node_acl_t *__core_tpg_get_initiator_node_acl(
 	return NULL;
 }
 
-/*	core_tpg_get_initiator_node_acl():
- *
- *
- */
 se_node_acl_t *core_tpg_get_initiator_node_acl(
 	se_portal_group_t *tpg,
 	unsigned char *initiatorname)
@@ -164,10 +125,6 @@ se_node_acl_t *core_tpg_get_initiator_node_acl(
 	return NULL;
 }
 
-/*	core_tpg_add_node_to_devs():
- *
- *
- */
 void core_tpg_add_node_to_devs(
 	se_node_acl_t *acl,
 	se_portal_group_t *tpg)
@@ -189,10 +146,7 @@ void core_tpg_add_node_to_devs(
 		dev = lun->se_dev;
 #endif
 		spin_unlock(&tpg->tpg_lun_lock);
-		/*
-		 * By default in LIO-Target $FABRIC_MOD,
-		 * demo_mode_write_protect is ON, or READ_ONLY;
-		 */
+		 
 		if (!(TPG_TFO(tpg)->tpg_check_demo_mode_write_protect(tpg))) {
 #ifdef MY_ABC_HERE
 			if (dev->dev_flags & DF_READ_ONLY)
@@ -212,10 +166,7 @@ void core_tpg_add_node_to_devs(
 				lun_access = TRANSPORT_LUNFLAGS_READ_WRITE;
 #endif
 		} else {
-			/*
-			 * Allow only optical drives to issue R/W in default RO
-			 * demo mode.
-			 */
+			 
 #ifdef MY_ABC_HERE
 			if (TRANSPORT(dev)->get_device_type(dev) == TYPE_DISK)
 				lun_access = TRANSPORT_LUNFLAGS_READ_ONLY;
@@ -246,10 +197,6 @@ void core_tpg_add_node_to_devs(
 	spin_unlock(&tpg->tpg_lun_lock);
 }
 
-/*      core_set_queue_depth_for_node():
- *
- *
- */
 static int core_set_queue_depth_for_node(
 	se_portal_group_t *tpg,
 	se_node_acl_t *acl)
@@ -264,10 +211,6 @@ static int core_set_queue_depth_for_node(
 	return 0;
 }
 
-/*      core_create_device_list_for_node():
- *
- *
- */
 static int core_create_device_list_for_node(se_node_acl_t *nacl)
 {
 	se_dev_entry_t *deve;
@@ -308,7 +251,7 @@ static void core_tpg_default_acl_dup_devs(se_node_acl_t* dst_acl, se_node_acl_t*
 		}
 
 #ifdef MY_ABC_HERE
-		// reduce complie-time warnning messages
+		 
 		if( (lun = src_acl->device_list[i].se_lun) ) {
 #else
 		if( lun = src_acl->device_list[i].se_lun ) {
@@ -340,10 +283,6 @@ static void core_tpg_default_acl_dup_devs(se_node_acl_t* dst_acl, se_node_acl_t*
 }
 #endif
 
-/*	core_tpg_check_initiator_node_acl()
- *
- *
- */
 se_node_acl_t *core_tpg_check_initiator_node_acl(
 	se_portal_group_t *tpg,
 	unsigned char *initiatorname)
@@ -381,7 +320,7 @@ se_node_acl_t *core_tpg_check_initiator_node_acl(
 #ifdef SNMP_SUPPORT
 	acl->acl_index = scsi_get_new_index(SCSI_AUTH_INTR_INDEX);
 	spin_lock_init(&acl->stats_lock);
-#endif /* SNMP_SUPPORT */
+#endif  
 	acl->nodeacl_flags |= NAF_DYNAMIC_NODE_ACL;
 
 	acl->fabric_acl_ptr = TPG_TFO(tpg)->tpg_alloc_fabric_acl(tpg,
@@ -439,20 +378,13 @@ void core_tpg_wait_for_nacl_pr_ref(se_node_acl_t *nacl)
 		msleep(100);
 }
 
-/*	core_tpg_free_node_acls():
- *
- *
- */
 void core_tpg_free_node_acls(se_portal_group_t *tpg)
 {
 	se_node_acl_t *acl, *acl_tmp;
 
 	spin_lock_bh(&tpg->acl_node_lock);
 	list_for_each_entry_safe(acl, acl_tmp, &tpg->acl_node_list, acl_list) {
-		/*
-		 * The kfree() for dynamically allocated Node ACLS is done in
-		 * transport_deregister_session()
-		 */
+		 
 		if (acl->nodeacl_flags & NAF_DYNAMIC_NODE_ACL)
 			continue;
 
@@ -489,10 +421,6 @@ void core_tpg_clear_object_luns(se_portal_group_t *tpg)
 }
 EXPORT_SYMBOL(core_tpg_clear_object_luns);
 
-/*	core_tpg_add_initiator_node_acl():
- *
- *
- */
 se_node_acl_t *core_tpg_add_initiator_node_acl(
 	se_portal_group_t *tpg,
 	const char *initiatorname,
@@ -538,7 +466,7 @@ se_node_acl_t *core_tpg_add_initiator_node_acl(
 #ifdef SNMP_SUPPORT
 	acl->acl_index = scsi_get_new_index(SCSI_AUTH_INTR_INDEX);
 	spin_lock_init(&acl->stats_lock);
-#endif /* SNMP_SUPPORT */
+#endif  
 
 	acl->fabric_acl_ptr = TPG_TFO(tpg)->tpg_alloc_fabric_acl(tpg,
 			acl);
@@ -578,10 +506,6 @@ done:
 }
 EXPORT_SYMBOL(core_tpg_add_initiator_node_acl);
 
-/*	core_tpg_del_initiator_node_acl():
- *
- *
- */
 int core_tpg_del_initiator_node_acl(
 	se_portal_group_t *tpg,
 	se_node_acl_t *acl,
@@ -604,17 +528,12 @@ int core_tpg_del_initiator_node_acl(
 				&tpg->tpg_sess_list, sess_list) {
 		if (sess->se_node_acl != acl)
 			continue;
-		/*
-		 * Determine if the session needs to be closed by our context.
-		 */
+		 
 		if (!(TPG_TFO(tpg)->shutdown_session(sess)))
 			continue;
 
 		spin_unlock_bh(&tpg->session_lock);
-		/*
-		 * If the $FABRIC_MOD session for the Initiator Node ACL exists,
-		 * forcefully shutdown the $FABRIC_MOD session/nexus.
-		 */
+		 
 		TPG_TFO(tpg)->close_session(sess);
 
 		spin_lock_bh(&tpg->session_lock);
@@ -640,10 +559,6 @@ int core_tpg_del_initiator_node_acl(
 }
 EXPORT_SYMBOL(core_tpg_del_initiator_node_acl);
 
-/*	core_tpg_set_initiator_node_queue_depth():
- *
- *
- */
 int core_tpg_set_initiator_node_queue_depth(
 	se_portal_group_t *tpg,
 	unsigned char *initiatorname,
@@ -690,9 +605,7 @@ int core_tpg_set_initiator_node_queue_depth(
 			spin_unlock_bh(&tpg->acl_node_lock);
 			return -EEXIST;
 		}
-		/*
-		 * Determine if the session needs to be closed by our context.
-		 */
+		 
 		if (!(TPG_TFO(tpg)->shutdown_session(sess)))
 			continue;
 
@@ -700,25 +613,11 @@ int core_tpg_set_initiator_node_queue_depth(
 		break;
 	}
 
-	/*
-	 * User has requested to change the queue depth for a Initiator Node.
-	 * Change the value in the Node's se_node_acl_t, and call
-	 * core_set_queue_depth_for_node() to add the requested queue depth.
-	 *
-	 * Finally call  TPG_TFO(tpg)->close_session() to force session
-	 * reinstatement to occur if there is an active session for the
-	 * $FABRIC_MOD Initiator Node in question.
-	 */
 	acl->queue_depth = queue_depth;
 
 	if (core_set_queue_depth_for_node(tpg, acl) < 0) {
 		spin_unlock_bh(&tpg->session_lock);
-		/*
-		 * Force session reinstatement if
-		 * core_set_queue_depth_for_node() failed, because we assume
-		 * the $FABRIC_MOD has already the set session reinstatement
-		 * bit from TPG_TFO(tpg)->shutdown_session() called above.
-		 */
+		 
 		if (init_sess)
 			TPG_TFO(tpg)->close_session(init_sess);
 
@@ -729,10 +628,7 @@ int core_tpg_set_initiator_node_queue_depth(
 		return -EINVAL;
 	}
 	spin_unlock_bh(&tpg->session_lock);
-	/*
-	 * If the $FABRIC_MOD session for the Initiator Node ACL exists,
-	 * forcefully shutdown the $FABRIC_MOD session/nexus.
-	 */
+	 
 	if (init_sess)
 		TPG_TFO(tpg)->close_session(init_sess);
 
@@ -752,7 +648,7 @@ EXPORT_SYMBOL(core_tpg_set_initiator_node_queue_depth);
 
 static int core_tpg_setup_virtual_lun0(struct se_portal_group_s *se_tpg)
 {
-	/* Set in core_dev_setup_virtual_lun0() */
+	 
 	struct se_device_s *dev = se_global->g_lun0_dev;
 	struct se_lun_s *lun = &se_tpg->tpg_virt_lun0;
 	u32 lun_access = TRANSPORT_LUNFLAGS_READ_ONLY;

@@ -1,17 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/ext3/hash.c
- *
- * Copyright (C) 2002 by Theodore Ts'o
- *
- * This file is released under the GPL v2.
- *
- * This file may be redistributed under the terms of the GNU Public
- * License.
- */
-
+ 
 #include <linux/fs.h>
 #include <linux/jbd.h>
 #include <linux/ext3_fs.h>
@@ -36,7 +26,6 @@ static void TEA_transform(__u32 buf[4], __u32 const in[])
 	buf[1] += b1;
 }
 
-/* The old legacy hash */
 static __u32 dx_hack_hash_unsigned(const char *name, int len)
 {
 	__u32 hash, hash0 = 0x12a3fe2d, hash1 = 0x37abe8f9;
@@ -127,21 +116,9 @@ static void str2hashbuf_unsigned(const char *msg, int len, __u32 *buf, int num)
 
 #ifdef MY_ABC_HERE
 static unsigned char UTF8Ext3HashStrBuf[UNICODE_UTF8_BUFSIZE];
-extern spinlock_t Ext3Hash_buf_lock;  /* init at ext3_fill_super() */
+extern spinlock_t Ext3Hash_buf_lock;   
 #endif
-/*
- * Returns the hash of a filename.  If len is 0 and name is NULL, then
- * this function can be used to test whether or not a hash version is
- * supported.
- *
- * The seed is an 4 longword (32 bits) "secret" which can be used to
- * uniquify a hash.  If the seed is all zero's, then some default seed
- * may be used.
- *
- * A particular hash version specifies whether or not the seed is
- * represented, and whether or not the returned hash is 32 bits or 64
- * bits.  32 bit hashes will return 0 for the minor hash.
- */
+ 
 int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 {
 	__u32	hash;
@@ -166,13 +143,11 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 	}
 #endif
 
-	/* Initialize the default seed for the hash checksum functions */
 	buf[0] = 0x67452301;
 	buf[1] = 0xefcdab89;
 	buf[2] = 0x98badcfe;
 	buf[3] = 0x10325476;
 
-	/* Check to see if the seed is all zero's */
 	if (hinfo->seed) {
 		for (i=0; i < 4; i++) {
 			if (hinfo->seed[i])

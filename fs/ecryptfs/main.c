@@ -1,29 +1,4 @@
-/**
- * eCryptfs: Linux filesystem encryption layer
- *
- * Copyright (C) 1997-2003 Erez Zadok
- * Copyright (C) 2001-2003 Stony Brook University
- * Copyright (C) 2004-2007 International Business Machines Corp.
- *   Author(s): Michael A. Halcrow <mahalcro@us.ibm.com>
- *              Michael C. Thompson <mcthomps@us.ibm.com>
- *              Tyler Hicks <tyhicks@ou.edu>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
- * 02111-1307, USA.
- */
-
+ 
 #include <linux/dcache.h>
 #include <linux/file.h>
 #include <linux/module.h>
@@ -38,9 +13,6 @@
 #include <linux/ima.h>
 #include "ecryptfs_kernel.h"
 
-/**
- * Module parameter that defines the ecryptfs_verbosity level.
- */
 int ecryptfs_verbosity = 0;
 
 module_param(ecryptfs_verbosity, int, 0);
@@ -48,21 +20,12 @@ MODULE_PARM_DESC(ecryptfs_verbosity,
 		 "Initial verbosity level (0 or 1; defaults to "
 		 "0, which is Quiet)");
 
-/**
- * Module parameter that defines the number of message buffer elements
- */
 unsigned int ecryptfs_message_buf_len = ECRYPTFS_DEFAULT_MSG_CTX_ELEMS;
 
 module_param(ecryptfs_message_buf_len, uint, 0);
 MODULE_PARM_DESC(ecryptfs_message_buf_len,
 		 "Number of message buffer elements");
 
-/**
- * Module parameter that defines the maximum guaranteed amount of time to wait
- * for a response from ecryptfsd.  The actual sleep time will be, more than
- * likely, a small amount greater than this specified value, but only less if
- * the message successfully arrives.
- */
 signed long ecryptfs_message_wait_timeout = ECRYPTFS_MAX_MSG_CTX_TTL / HZ;
 
 module_param(ecryptfs_message_wait_timeout, long, 0);
@@ -71,11 +34,6 @@ MODULE_PARM_DESC(ecryptfs_message_wait_timeout,
 		 "sleep while waiting for a message response from "
 		 "userspace");
 
-/**
- * Module parameter that is an estimate of the maximum number of users
- * that will be concurrently using eCryptfs. Set this to the right
- * value to balance performance and memory use.
- */
 unsigned int ecryptfs_number_of_users = ECRYPTFS_DEFAULT_NUM_USERS;
 
 module_param(ecryptfs_number_of_users, uint, 0);
@@ -86,7 +44,7 @@ void __ecryptfs_printk(const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	if (fmt[1] == '7') { /* KERN_DEBUG */
+	if (fmt[1] == '7') {  
 		if (ecryptfs_verbosity >= 1)
 			vprintk(fmt, args);
 	} else
@@ -94,26 +52,6 @@ void __ecryptfs_printk(const char *fmt, ...)
 	va_end(args);
 }
 
-/**
- * ecryptfs_init_persistent_file
- * @ecryptfs_dentry: Fully initialized eCryptfs dentry object, with
- *                   the lower dentry and the lower mount set
- *
- * eCryptfs only ever keeps a single open file for every lower
- * inode. All I/O operations to the lower inode occur through that
- * file. When the first eCryptfs dentry that interposes with the first
- * lower dentry for that inode is created, this function creates the
- * persistent file struct and associates it with the eCryptfs
- * inode. When the eCryptfs inode is destroyed, the file is closed.
- *
- * The persistent file will be opened with read/write permissions, if
- * possible. Otherwise, it is opened read-only.
- *
- * This function does nothing if a lower persistent file is already
- * associated with the eCryptfs inode.
- *
- * Returns zero on success; non-zero otherwise
- */
 int ecryptfs_init_persistent_file(struct dentry *ecryptfs_dentry)
 {
 	const struct cred *cred = current_cred();
@@ -145,17 +83,6 @@ int ecryptfs_init_persistent_file(struct dentry *ecryptfs_dentry)
 	return rc;
 }
 
-/**
- * ecryptfs_interpose
- * @lower_dentry: Existing dentry in the lower filesystem
- * @dentry: ecryptfs' dentry
- * @sb: ecryptfs's super_block
- * @flags: flags to govern behavior of interpose procedure
- *
- * Interposes upper and lower dentries.
- *
- * Returns zero on success; non-zero otherwise
- */
 int ecryptfs_interpose(struct dentry *lower_dentry, struct dentry *dentry,
 		       struct super_block *sb, u32 flags)
 {
@@ -195,8 +122,7 @@ int ecryptfs_interpose(struct dentry *lower_dentry, struct dentry *dentry,
 				   lower_inode->i_rdev);
 	dentry->d_op = &ecryptfs_dops;
 	fsstack_copy_attr_all(inode, lower_inode, NULL);
-	/* This size will be overwritten for real files w/ headers and
-	 * other metadata */
+	 
 	fsstack_copy_inode_size(inode, lower_inode);
 	if (flags & ECRYPTFS_INTERPOSE_FLAG_D_ADD)
 		d_add(dentry, inode);
@@ -266,25 +192,6 @@ static void ecryptfs_init_mount_crypt_stat(
 	mount_crypt_stat->flags |= ECRYPTFS_MOUNT_CRYPT_STAT_INITIALIZED;
 }
 
-/**
- * ecryptfs_parse_options
- * @sb: The ecryptfs super block
- * @options: The options pased to the kernel
- *
- * Parse mount options:
- * debug=N 	   - ecryptfs_verbosity level for debug output
- * sig=XXX	   - description(signature) of the key to use
- *
- * Returns the dentry object of the lower-level (lower/interposed)
- * directory; We want to mount our stackable file system on top of
- * that lower directory.
- *
- * The signature of the key to use must be the description of a key
- * already in the keyring. Mounting will fail if the key can not be
- * found.
- *
- * Returns zero on success; non-zero on error
- */
 static int ecryptfs_parse_options(struct super_block *sb, char *options)
 {
 	char *p;
@@ -488,22 +395,11 @@ out:
 
 struct kmem_cache *ecryptfs_sb_info_cache;
 
-/**
- * ecryptfs_fill_super
- * @sb: The ecryptfs super block
- * @raw_data: The options passed to mount
- * @silent: Not used but required by function prototype
- *
- * Sets up what we can of the sb, rest is done in ecryptfs_read_super
- *
- * Returns zero on success; non-zero otherwise
- */
 static int
 ecryptfs_fill_super(struct super_block *sb, void *raw_data, int silent)
 {
 	int rc = 0;
 
-	/* Released in ecryptfs_put_super() */
 	ecryptfs_set_superblock_private(sb,
 					kmem_cache_zalloc(ecryptfs_sb_info_cache,
 							 GFP_KERNEL));
@@ -513,7 +409,7 @@ ecryptfs_fill_super(struct super_block *sb, void *raw_data, int silent)
 		goto out;
 	}
 	sb->s_op = &ecryptfs_sops;
-	/* Released through deactivate_super(sb) from get_sb_nodev */
+	 
 	sb->s_root = d_alloc(NULL, &(const struct qstr) {
 			     .hash = 0,.name = "/",.len = 1});
 	if (!sb->s_root) {
@@ -524,8 +420,7 @@ ecryptfs_fill_super(struct super_block *sb, void *raw_data, int silent)
 	sb->s_root->d_op = &ecryptfs_dops;
 	sb->s_root->d_sb = sb;
 	sb->s_root->d_parent = sb->s_root;
-	/* Released in d_release when dput(sb->s_root) is called */
-	/* through deactivate_super(sb) from get_sb_nodev() */
+	 
 	ecryptfs_set_dentry_private(sb->s_root,
 				    kmem_cache_zalloc(ecryptfs_dentry_info_cache,
 						     GFP_KERNEL));
@@ -537,20 +432,10 @@ ecryptfs_fill_super(struct super_block *sb, void *raw_data, int silent)
 	}
 	rc = 0;
 out:
-	/* Should be able to rely on deactivate_super called from
-	 * get_sb_nodev */
+	 
 	return rc;
 }
 
-/**
- * ecryptfs_read_super
- * @sb: The ecryptfs super block
- * @dev_name: The path to mount over
- *
- * Read the super block of the lower filesystem, and use
- * ecryptfs_interpose to create our initial inode and super block
- * struct.
- */
 static int ecryptfs_read_super(struct super_block *sb, const char *dev_name)
 {
 	struct path path;
@@ -582,22 +467,6 @@ out:
 	return rc;
 }
 
-/**
- * ecryptfs_get_sb
- * @fs_type
- * @flags
- * @dev_name: The path to mount over
- * @raw_data: The options passed into the kernel
- *
- * The whole ecryptfs_get_sb process is broken into 4 functions:
- * ecryptfs_parse_options(): handle options passed to ecryptfs, if any
- * ecryptfs_fill_super(): used by get_sb_nodev, fills out the super_block
- *                        with as much information as it can before needing
- *                        the lower filesystem.
- * ecryptfs_read_super(): this accesses the lower filesystem and uses
- *                        ecryptfs_interpolate to perform most of the linking
- * ecryptfs_interpolate(): links the lower filesystem into ecryptfs
- */
 static int ecryptfs_get_sb(struct file_system_type *fs_type, int flags,
 			const char *dev_name, void *raw_data,
 			struct vfsmount *mnt)
@@ -623,19 +492,12 @@ static int ecryptfs_get_sb(struct file_system_type *fs_type, int flags,
 	}
 	goto out;
 out_abort:
-	dput(sb->s_root); /* aka mnt->mnt_root, as set by get_sb_nodev() */
+	dput(sb->s_root);  
 	deactivate_locked_super(sb);
 out:
 	return rc;
 }
 
-/**
- * ecryptfs_kill_block_super
- * @sb: The ecryptfs super block
- *
- * Used to bring the superblock down and free the private data.
- * Private data is free'd in ecryptfs_put_super()
- */
 static void ecryptfs_kill_block_super(struct super_block *sb)
 {
 	generic_shutdown_super(sb);
@@ -649,11 +511,6 @@ static struct file_system_type ecryptfs_fs_type = {
 	.fs_flags = 0
 };
 
-/**
- * inode_info_init_once
- *
- * Initializes the ecryptfs_inode_info_cache when it is created
- */
 static void
 inode_info_init_once(void *vptr)
 {
@@ -749,11 +606,6 @@ static void ecryptfs_free_kmem_caches(void)
 	}
 }
 
-/**
- * ecryptfs_init_kmem_caches
- *
- * Returns zero on success; non-zero otherwise
- */
 static int ecryptfs_init_kmem_caches(void)
 {
 	int i;

@@ -1,48 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell 
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or 
-modify this File in accordance with the terms and conditions of the General 
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is 
-available along with the File in the license.txt file or by writing to the Free 
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or 
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt. 
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY 
-DISCLAIMED.  The GPL License provides additional details about this warranty 
-disclaimer.
-*******************************************************************************/
-/*******************************************************************************
-* file_name - mvLinuxIalHt.c
-*
-* DESCRIPTION:  implementation for Linux IAL.
-*
-* DEPENDENCIES:
-*   mvLinuxIalHt.h
-*   mvLinuxIalLib.h
-*   Linux Os header files
-*   Core driver header files
-*
-*
-*******************************************************************************/
-
-/* includes */
-
+ 
 #ifndef LINUX_VERSION_CODE
     #include <linux/version.h>
 #endif
@@ -255,17 +214,6 @@ static void mv_ial_init_log(void)
 #endif
 }
 
-/****************************************************************
- *  Name: set_device_regs
- *
- *  Description:    initialize the device registers.
- *
- *  Parameters:     pMvSataAdapter, pointer to the Device data structure.
- *          pcidev, pointer to the pci device data structure.
- *
- *  Returns:        =0 ->success, < 0 ->failure.
- *
- ****************************************************************/
 static int set_device_regs(MV_SATA_ADAPTER *pMvSataAdapter,
                            struct pci_dev   *pcidev)
 {
@@ -324,14 +272,7 @@ static void mv_ial_free_scsi_hosts(IAL_ADAPTER_T *pAdapter, MV_BOOLEAN freeAdapt
 }
 
 #ifdef MY_ABC_HERE
-/**
- * Call the scsi_done to trigger block layer softirq.
- * 
- * @param ptr     [IN] IAL adapter. Should not be NULL.
- * @param pSataAdapter
- *                [IN] sata adapter. Should not be NULL.
- * @param channel [IN] channel index
- */
+ 
 void
 channel_do_scsi_done(MV_VOID_PTR ptr,
                      struct mvSataAdapter *pSataAdapter,                     
@@ -365,16 +306,6 @@ channel_do_scsi_done(MV_VOID_PTR ptr,
     }
 }
 
-/**
- * Synology EH information init function.
- * 
- * Please call this before channel irq open
- * 
- * @param pIALAdapter
- *               [IN] IAL_ADAPTER_T. Shout not be NULL.
- * @param pMvSataAdapter
- *               [IN] sataadapter. Shout not be NULL.
- */
 void 
 SynoInitChannelEH(MV_VOID_PTR *pIALAdapter, MV_SATA_ADAPTER *pMvSataAdapter)
 {
@@ -518,7 +449,7 @@ static int __devinit  mv_ial_probe_device(struct pci_dev *pcidev,
     }
     
     pMvSataAdapter->adapterId = adapterId++;
-    /* get the revision ID */
+     
     if (pci_read_config_byte(pcidev, PCI_REVISION_ID, &pAdapter->rev_id))
     {
         printk(KERN_WARNING "mvSata: Failed to get revision id.\n");
@@ -542,7 +473,7 @@ static int __devinit  mv_ial_probe_device(struct pci_dev *pcidev,
         pci_disable_device(pcidev);
         return -ENOMEM;
     }
-    /*Do not allow hotplug handler to work*/
+     
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
     init_MUTEX(&pAdapter->rescan_mutex);
     atomic_set(&pAdapter->stopped, 1);
@@ -610,9 +541,9 @@ static int __devinit  mv_ial_probe_device(struct pci_dev *pcidev,
     }
     mvSataScsiInitAdapterExt(pAdapter->ataScsiAdapterExt,
                              pMvSataAdapter);
-    /* let SAL report only the BUS RESET UA event*/
+     
     pAdapter->ataScsiAdapterExt->UAMask = MV_BIT0;
-    /* enable device interrupts even if no storage devices connected now*/
+     
 #ifdef MV_SUPPORT_MSI
     {
     	int err;
@@ -656,7 +587,7 @@ static int __devinit  mv_ial_probe_device(struct pci_dev *pcidev,
         scsi_set_pci_device(pAdapter->host[i]->scsihost, pcidev);
 #endif
         pAdapter->host[i]->scsihost->irq = pcidev->irq;
-        /* each SATA channel will emulate scsi host !!!*/
+         
         if (pMvSataAdapter->sataAdapterGeneration == MV_SATA_GEN_I)
         {
             pAdapter->host[i]->scsihost->max_id = 1;
@@ -733,7 +664,7 @@ static int __devinit  mv_ial_probe_device(struct pci_dev *pcidev,
             scsi_scan_host(pAdapter->host[i]->scsihost);
         }
     }
-    /*Enable hotplug handler*/
+     
     atomic_set(&pAdapter->stopped, 0);
 #endif
     return 0;
@@ -813,7 +744,7 @@ static int __devinit mv_ial_init_soc_sata(void)
         pAdapter->host[i]->scsi_cmnd_done_tail = NULL;
     }
     
-    pAdapter->host[0]->scsihost->base = 0/*pci_resource_start(pcidev, 0)*/;
+    pAdapter->host[0]->scsihost->base = 0 ;
     for (i = 1; i < pAdapter->maxHosts; i++)
     {
         if (pAdapter->host[i] != NULL)
@@ -826,8 +757,7 @@ static int __devinit mv_ial_init_soc_sata(void)
              (ulong)pMvSataAdapter->adapterIoBaseAddress);
     
     pMvSataAdapter->adapterId = adapterId++;
-    /* get the revision ID */
-    
+     
     pMvSataAdapter->pciConfigRevisionId = 0;
     pMvSataAdapter->pciConfigDeviceId = mvCtrlModelGet();
     if (set_device_regs(pMvSataAdapter, NULL))
@@ -835,7 +765,7 @@ static int __devinit mv_ial_init_soc_sata(void)
         mv_ial_free_scsi_hosts(pAdapter, MV_TRUE);
         return -ENOMEM;
     }
-    /*Do not allow hotplug handler to work*/
+     
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
     init_MUTEX(&pAdapter->rescan_mutex);
     atomic_set(&pAdapter->stopped, 1);
@@ -885,9 +815,9 @@ static int __devinit mv_ial_init_soc_sata(void)
     }
     mvSataScsiInitAdapterExt(pAdapter->ataScsiAdapterExt,
                              pMvSataAdapter);
-    /* let SAL report only the BUS RESET UA event*/
+     
     pAdapter->ataScsiAdapterExt->UAMask = MV_BIT0;
-    /* enable device interrupts even if no storage devices connected now*/
+     
     if (request_irq(SATA_IRQ_NUM, mv_ial_lib_int_handler,
                     (IRQF_DISABLED | IRQF_SAMPLE_RANDOM | IRQF_SHARED), "mvSata",
                     pAdapter) < 0)
@@ -962,7 +892,7 @@ static int __devinit mv_ial_init_soc_sata(void)
             scsi_scan_host(pAdapter->host[i]->scsihost);
         }
     }
-    /*Enable hotplug handler*/
+     
     atomic_set(&pAdapter->stopped, 0);
 #endif
     return 0;
@@ -971,16 +901,7 @@ static int __devinit mv_ial_init_soc_sata(void)
 #endif 
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-/****************************************************************
- *  Name: mv_ial_ht_detect
- *
- *  Description:    Detect and initialize our boards.
- *
- *  Parameters:     tpnt - Pointer to SCSI host template structure.
- *
- *  Returns:        Number of adapters installed.
- *
- ****************************************************************/
+ 
 int mv_ial_ht_detect (Scsi_Host_Template *tpnt)
 {
     int                 num_hosts=0;
@@ -1037,16 +958,6 @@ int mv_ial_ht_detect (Scsi_Host_Template *tpnt)
 }
 #endif
 
-/****************************************************************
- *  Name:   mv_ial_ht_release
- *
- *  Description:   release scsi host
- *
- *  Parameters:     SCpnt - Pointer to SCSI host structure.
- *
- *  Returns:          0 on success, otherwise of failure.
- *
- ****************************************************************/
 int mv_ial_ht_release (struct Scsi_Host *pHost)
 {
     IAL_ADAPTER_T *pAdapter = MV_IAL_ADAPTER (pHost);
@@ -1063,7 +974,7 @@ int mv_ial_ht_release (struct Scsi_Host *pHost)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
     if (pAdapter->stopAsyncTimer != MV_TRUE)
     {
-        /* Delete any pending timers */
+         
         pAdapter->stopAsyncTimer = MV_TRUE;
         del_timer_sync(&pAdapter->asyncStartTimer);
     }
@@ -1077,8 +988,7 @@ int mv_ial_ht_release (struct Scsi_Host *pHost)
                             MV_FLUSH_TYPE_CALLBACK);
         mv_ial_lib_free_channel(pAdapter, channel);
    }
-     /* Check if there are commands in the done queue to be completed */
-
+      
     cmnds_done_list = mv_ial_lib_get_first_cmnd (pAdapter, channel);
     if (cmnds_done_list)
     {
@@ -1140,10 +1050,10 @@ static void __devexit mv_ial_remove_device(struct pci_dev *pdev)
     }
 
     numhosts           = pAdapter->maxHosts;
-    /*flush hotplug rescan worker*/
+     
     atomic_inc(&pAdapter->stopped);
     flush_scheduled_work();
-    /* Delete any pending timers */
+     
     spin_lock_irqsave (&pAdapter->adapter_lock, lock_flags);
     pAdapter->stopAsyncTimer = MV_TRUE;
     del_timer_sync(&pAdapter->asyncStartTimer);
@@ -1156,7 +1066,7 @@ static void __devexit mv_ial_remove_device(struct pci_dev *pdev)
             mv_ial_ht_release (pAdapter->host[i]->scsihost);
         }
     }
-    if (pdev != NULL) /* pci device */
+    if (pdev != NULL)  
     {
         free_irq (pAdapter->pcidev->irq, &pAdapter->mvSataAdapter);
 #ifdef MV_SUPPORT_MSI
@@ -1170,7 +1080,7 @@ static void __devexit mv_ial_remove_device(struct pci_dev *pdev)
 	pci_disable_device(pdev);
     }
 #ifdef CONFIG_MV_INCLUDE_INTEG_SATA
-    else /* Soc sata*/
+    else  
     {
         free_irq (SATA_IRQ_NUM, &pAdapter->mvSataAdapter);
 	kfree(pAdapter->ataScsiAdapterExt);
@@ -1181,17 +1091,6 @@ static void __devexit mv_ial_remove_device(struct pci_dev *pdev)
 }
 #endif
 
-/****************************************************************
- *  Name:   mv_ial_ht_queuecommand
- *
- *  Description:    Process a queued command from the SCSI manager.
- *
- *  Parameters:     SCpnt - Pointer to SCSI command structure.
- *                  done  - Pointer to done function to call.
- *
- *  Returns:        Status code.
- *
- ****************************************************************/
 int mv_ial_ht_queuecommand (struct scsi_cmnd * SCpnt, void (*done) (struct scsi_cmnd *))
 {
     IAL_ADAPTER_T   *pAdapter = MV_IAL_ADAPTER(SCpnt->device->host);
@@ -1281,7 +1180,7 @@ int mv_ial_ht_queuecommand (struct scsi_cmnd * SCpnt, void (*done) (struct scsi_
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
     completion_info->kmap_buffer = 0;
 #endif
-    /* prepare the SAL Block paramters*/
+     
     if ((*cmd == READ_6) || (*cmd == READ_10) || (*cmd == READ_16) ||
 	(*cmd == WRITE_6) || (*cmd == WRITE_10) || (*cmd == WRITE_16))
     {
@@ -1293,10 +1192,7 @@ int mv_ial_ht_queuecommand (struct scsi_cmnd * SCpnt, void (*done) (struct scsi_
     else if((pAdapter->ataScsiAdapterExt->ataDriveData[channel][SCpnt->device->id].identifyInfo.deviceType == MV_SATA_DEVICE_TYPE_ATAPI_DEVICE) && (SCpnt->use_sg))
 #endif
     {
-	 /*
-	   for the 60x1 devices don't use DMA for control commands as the BMDMA will
-	   not write date to DRAM in case on underrun.
-	 */
+	  
 	 if(!(pAdapter->mvSataAdapter.sataAdapterGeneration == MV_SATA_GEN_II)){
 	      mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG,
 		       "in queuecommand: PRD for non data command for ATAPI device\n");
@@ -1307,7 +1203,7 @@ int mv_ial_ht_queuecommand (struct scsi_cmnd * SCpnt, void (*done) (struct scsi_
     {
         BUG_ON(((unsigned int)SCpnt->cmnd) & 0x1);
     }
-    /* prepare the SAL Block paramters*/
+     
     if(build_prd_table)
     {
         if(pAdapter->ataScsiAdapterExt->ataDriveData[channel][SCpnt->device->id].identifyInfo.deviceType == MV_SATA_DEVICE_TYPE_ATAPI_DEVICE)
@@ -1440,10 +1336,6 @@ int mv_ial_ht_queuecommand (struct scsi_cmnd * SCpnt, void (*done) (struct scsi_
         mvScsiAtaSendSmartCommand(pMvSataAdapter, completion_info->pSALBlock);
     }
 
-    /*
-     * Check if there is valid commands to be completed. This is usually
-     * an immediate completed commands such as INQUIRY etc...
-     */
     cmnds_done_list = mv_ial_lib_get_first_cmnd(pAdapter, channel);
     spin_unlock_irqrestore(&pAdapter->adapter_lock, lock_flags);
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
@@ -1457,17 +1349,7 @@ int mv_ial_ht_queuecommand (struct scsi_cmnd * SCpnt, void (*done) (struct scsi_
     }
     return 0;
 }
-/****************************************************************
- *  Name:   mv_ial_ht_bus_reset
- *
- *  Description:    reset given devise, all pending commands will be aborted
- *                  with status DID_RESET.
- *
- *  Parameters:     SCpnt - Pointer to SCSI command structure.
- *
- *  Returns:        Status code.
- *
- ****************************************************************/
+ 
 int mv_ial_ht_bus_reset (struct scsi_cmnd *SCpnt)
 {
     IAL_ADAPTER_T   *pAdapter = MV_IAL_ADAPTER(SCpnt->device->host);
@@ -1500,10 +1382,8 @@ int mv_ial_ht_bus_reset (struct scsi_cmnd *SCpnt)
 
     mvSataDisableChannelDma(pMvSataAdapter, channel);
 
-    /* Flush pending commands */
     mvSataFlushDmaQueue (pMvSataAdapter, channel, MV_FLUSH_TYPE_CALLBACK);
 
-    /* Hardware reset channel */
     mvSataChannelHardReset(pMvSataAdapter, channel);
 
     if (pMvSataAdapter->sataChannel[channel])
@@ -1512,7 +1392,7 @@ int mv_ial_ht_bus_reset (struct scsi_cmnd *SCpnt)
                          pAdapter->ataScsiAdapterExt, MV_TRUE);
         mv_ial_block_requests(pAdapter, channel);
     }
-    /* don't call scsi done for the commands on this channel*/
+     
 #ifdef MY_ABC_HERE
     syno_ial_lib_clear_cmnd(pAdapter, channel);
 #else
@@ -1539,16 +1419,6 @@ static MV_VOID mvAta2HostString(IN MV_U16 *source,
     }
 }
 
-/****************************************************************
- *  Name:   mv_ial_ht_proc_info
- *
- *  Description:   /proc file
- *
- *  Parameters:
- *
- *  Returns:
- *
- ****************************************************************/
 int mv_ial_ht_proc_info(struct Scsi_Host *pshost,
                         char *buffer, char **start, off_t offset,
                         int length, int inout)
@@ -1565,10 +1435,10 @@ int mv_ial_ht_proc_info(struct Scsi_Host *pshost,
     temp = pHost->channelIndex;
     spin_lock_irqsave (&pAdapter->adapter_lock, lock_flags);
     if (inout == 1)
-    {                     /* Writing to file */
-        /* The format is 'int_coal <sata unit> <coal_threshold> <timeout>' */
+    {                      
+         
         int i;
-        /* Check signature 'int_coal' at start of buffer */
+         
         if (!strncmp (buffer, "int_coal", strlen ("int_coal")))
         {
             int sata_unit;
@@ -1576,7 +1446,7 @@ int mv_ial_ht_proc_info(struct Scsi_Host *pshost,
             i = sscanf (buffer + strlen ("int_coal"), "%d %d %d\n",
                         &sata_unit, &coal_thre, &time_thre);
             if (i == 3)
-            {        /* Three matched inputs */
+            {         
                 mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "[%d]: Modifying interrupt coalescing of unit %d to %d threshold and %d timer\n",pMvSataAdapter->adapterId, sata_unit, coal_thre, time_thre);
                 mvSataSetIntCoalParams (pMvSataAdapter, sata_unit, coal_thre, time_thre);
             }
@@ -1586,13 +1456,13 @@ int mv_ial_ht_proc_info(struct Scsi_Host *pshost,
                          pMvSataAdapter->adapterId);
             }
         }
-        /* Check signature 'sata_phy_shutdown' at start of buffer */
+         
         else if (!strncmp (buffer, "sata_phy_shutdown", strlen ("sata_phy_shutdown")))
         {
             int sata_phy;
             i = sscanf (buffer + strlen ("sata_phy_shutdown"), "%d\n", &sata_phy);
             if (i == 1)
-            {        /* Three matched inputs */
+            {         
 
                 if (mvSataIsStorageDeviceConnected (pMvSataAdapter, sata_phy, NULL) == MV_TRUE)
                 {
@@ -1614,7 +1484,7 @@ int mv_ial_ht_proc_info(struct Scsi_Host *pshost,
             int sata_phy;
             i = sscanf (buffer + strlen ("sata_phy_powerup"), "%d\n", &sata_phy);
             if (i == 1)
-            {        /* Three matched inputs */
+            {         
                 if (mvSataChannelPhyPowerOn (pMvSataAdapter, sata_phy) == MV_TRUE)
                 {
                     mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "[%d,%d]: Turning on SATA phy\n", pMvSataAdapter->adapterId, sata_phy);
@@ -1630,14 +1500,9 @@ int mv_ial_ht_proc_info(struct Scsi_Host *pshost,
         return length;
     }
     else
-    {      /* Reading from file */
+    {       
         int i;
-        /*
-         * Write to the file the time stamp which is difference between last
-         * jiffies and current one. Next to it write the HZ parameter which
-         * indicates how many time jiffies parameter is incremented in a
-         * second.
-         */
+         
         len += snprintf (buffer + len,length - len, "%s\n", mv_ial_proc_version);
         if (len >= length)
         {
@@ -1649,9 +1514,7 @@ int mv_ial_ht_proc_info(struct Scsi_Host *pshost,
         {
             goto out;
         }
-        /* Write the number of interrupts this adapter generated within the
-         * sampling time.
-         */
+         
         len += snprintf (buffer + len,length - len, "\nNumber of interrupts generated by the adapter is : \n%d\n",
                          pAdapter->procNumOfInterrupts);
         if (len >= length)
@@ -1680,7 +1543,7 @@ int mv_ial_ht_proc_info(struct Scsi_Host *pshost,
                 goto out;
             }
         }
-        else /*integrated sata*/
+        else  
         {
             len += snprintf (buffer + len, length - len, "\nIntegrated Sata adapterId %d,  "
                              "channel %d\n",pAdapter->mvSataAdapter.adapterId,
@@ -1706,23 +1569,7 @@ int mv_ial_ht_proc_info(struct Scsi_Host *pshost,
                 }
             }
         }
-        /*
-         * Check if channel connected.
-         * If not connected write -1 on a line
-         * If connected, write a line that has -
-         * 1.. Adapter number
-         * 2.. SCSI channel number (equivalent to SATA channel number).
-         * 3.. ID
-         * 4.. LUN (always 0)
-         * 5.. vendor name
-         * 6.. number of outstanding commands accumulated
-         * 7.. total sampling of outstanding commands
-         * 8.. total sectors transferred
-         * 9.. flag if queued / non-queued (1/0)
-         * 10. flag if LBA 48 or not (1/0)
-         * 11. flag if the storage device can be removed or not
-         *  (1 means can't be removed / 0 can be removed).
-         */
+         
         len += snprintf (buffer + len,length - len,"\n%s\t%s\t%s\t%s\t%s\t%s\t%s\t\t%s\t%s\n",
                          "Adapter", "Channel", "Id", "LUN", "TO", "TS", "Vendor",
                          "Mode", "LBA48");
@@ -1765,10 +1612,7 @@ int mv_ial_ht_proc_info(struct Scsi_Host *pshost,
                 {
                     goto out;
                 }
-                /*
-                 * Copy first 10 characters of the vendor name from the IDENTIFY
-                 * DEVICE ATA command result buffer
-                 */
+                 
                 if ((len+10) >= length)
                 {
                     goto out;
@@ -1776,10 +1620,7 @@ int mv_ial_ht_proc_info(struct Scsi_Host *pshost,
                 memcpy (buffer+len,
                         pAdapter->ataScsiAdapterExt->ataDriveData[temp][pmPort].identifyInfo.model, 10);
                 mvAta2HostString((MV_U16 *)(buffer+len), (MV_U16 *)(buffer+len), 5);
-                /*
-                 * Clean spaces in vendor name and swap odd and even characters.
-                 * The swap is due to the format of the IDENTIFY DEVICE command
-                 */
+                 
                 for (i=0 ; i<10 ; i+=2)
                 {
                     char ch = buffer[len + i];
@@ -1855,16 +1696,7 @@ int mv_ial_ht_proc_info(struct Scsi_Host *pshost,
 }
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-/****************************************************************
- *  Name:   mv_ial_ht_proc_info (kernel version < 2.6)
- *
- *  Description:   /proc file
- *
- *  Parameters:
- *
- *  Returns:
- *
- ****************************************************************/
+ 
 int mv_ial_ht_proc_info24(char *buffer, char **start, off_t offset,
                         int length, int inode, int inout)
 {
@@ -1915,7 +1747,7 @@ static int mv_ial_ht_slave_configure (struct scsi_device* pDevs)
             pDevice->use_10_for_rw = 1;
             pDevice->use_10_for_ms = 1;
             scsi_adjust_queue_depth(pDevice, 0, 1);
-//                pHost->scsihost->max_cmd_len = 12;
+ 
 	    blk_queue_max_sectors(pDevice->request_queue, 256);
         }
         else
@@ -1956,12 +1788,6 @@ static void mv_ial_ht_select_queue_depths (struct Scsi_Host* pHost,
     if (ial_host != NULL)
     {
         
-        /* linux 2.4 queue depth is not tunable, so we set the device queue */
-        /* to the max value (MV_SATA_SW_QUEUE_SIZE), and limit the number queued */
-        /* commands using the cmd_per_lun */
-
-        /* set can_queue to the max number of queued commands per host (sata */
-        /* channel). This may casue startvation if PortMultiplier is connected*/
         pHost->cmd_per_lun = 31;
         if (ial_host->mode != MV_EDMA_MODE_NOT_QUEUED)
         {   
@@ -1980,7 +1806,6 @@ static void mv_ial_ht_select_queue_depths (struct Scsi_Host* pHost,
             pHost->can_queue = MV_DEFAULT_QUEUE_DEPTH;
         }
         
-        /*always allocate the max number of commands */
         for (pDevice = pDevs; pDevice; pDevice = pDevice->next)
         {
             if (pDevice->host == pHost)
@@ -2066,15 +1891,15 @@ static int syno_mvSata_index_get(struct Scsi_Host *shost, uint channel, uint id,
     IAL_ADAPTER_T *pAdapter = MV_IAL_ADAPTER(shost);
 
     if (MV_TRUE == syno_mvSata_is_synology_pm(&pAdapter->ialCommonExt, ial_host->channelIndex))
-        index = ((shost->host_no+1)*26) + id; /* + 1 is for jumping to sdax */
+        index = ((shost->host_no+1)*26) + id;  
     else 
 #endif
-        /* treat other port multiplier as internal disk */
+         
         index = shost->host_no;
 
     return index;
 }
-#endif // MY_ABC_HERE
+#endif  
 
 #ifdef SYNO_SATA_POWER_CTL
 int
@@ -2085,14 +1910,14 @@ syno_mvSata_port_power_ctl(struct Scsi_Host *host, MV_U8 blPowerOn)
     MV_SATA_ADAPTER * pMvSataAdapter = &pAdapter->mvSataAdapter;
     MV_U8 channelIndex = ial_host->channelIndex;
     MV_SATA_CHANNEL *pSataChannel = pMvSataAdapter->sataChannel[channelIndex];
-    int ret = 0; /* there is no any error in ata now */
+    int ret = 0;  
 
     if (NULL == pSataChannel) {
         goto END;
     }
 
     if (MV_SATA_DEVICE_TYPE_PM != pSataChannel->deviceType) {
-        /* hardware not support yet */
+         
         goto END;
     } else {
 #ifdef MY_ABC_HERE
@@ -2107,7 +1932,7 @@ syno_mvSata_port_power_ctl(struct Scsi_Host *host, MV_U8 blPowerOn)
 END:
 	return ret;
 }
-#endif // SYNO_SATA_POWER_CTL
+#endif  
 
 #ifdef MY_ABC_HERE
 
@@ -2118,15 +1943,10 @@ defer_gpio_cmd(MV_CHANNEL_STATE stat, MV_U32 input, MV_U8 rw)
 
 	if (WRITE == rw && 
 		GPIO_3726_CMD_POWER_CLR == input) {
-		/* 
-		* power relative clear command should not defer 
-		* Note that, sometimes the GPIO_3726_CMD_POWER_CLR may not main for clear power event.
-		* Because the command body is just set all information to normal
-		*/
+		 
 		goto END;
 	}
 
-	/* we don't want to insert any gpio while the port is in error_handling */
 	if (CHANNEL_READY != stat) {
 		ret = 1;
 		goto END;
@@ -2188,7 +2008,7 @@ syno_pm_gpio_store(struct class_device *class_dev, const char * buf, size_t coun
     IAL_HOST_T *ial_host = HOSTDATA(shost);
     IAL_ADAPTER_T *pAdapter = MV_IAL_ADAPTER(shost);
     SYNO_PM_PKG pm_pkg;
-    /* please man 2 write */
+     
     size_t ret = -EIO;
 
     memset(&pm_pkg, 0, sizeof(pm_pkg));
@@ -2239,7 +2059,6 @@ syno_pm_info_show(struct class_device *class_dev, char *buf)
         memset(szTmp, 0, sizeof(szTmp));
         memset(szTmp1, 0, sizeof(szTmp1));
 
-        /* syno_device_list */
         start_idx = syno_mvSata_index_get(shost, 0, 0, 0);
         for (index=0; index<NumOfPMPorts; index++ ) {
             DeviceNameGet(index+start_idx, szTmp);
@@ -2252,7 +2071,6 @@ syno_pm_info_show(struct class_device *class_dev, char *buf)
         }
         snprintf(buf, PAGE_SIZE, "%s%s%s", "syno_device_list=\"", szTmp1, "\"\n");
 
-        /* vendor id and device id */
         snprintf(szTmp, 
                  BDEVNAME_SIZE, 
                  "vendorid=%s0x%x%s", "\"",
@@ -2266,7 +2084,6 @@ syno_pm_info_show(struct class_device *class_dev, char *buf)
                  "\"\n");
         strncat(szTmp1, szTmp, BDEVNAME_SIZE);
 
-        /* error handle processing */
         snprintf(szTmp, 
                  BDEVNAME_SIZE, 
                  "error_handle=%s%s%s", "\"",
@@ -2274,7 +2091,6 @@ syno_pm_info_show(struct class_device *class_dev, char *buf)
                  "\"\n");
         strncat(szTmp1, szTmp, BDEVNAME_SIZE);         
 
-        /* put it together */
         len = snprintf(buf, PAGE_SIZE, "%s%s", buf, szTmp1);
     } else {
         len = snprintf(buf, PAGE_SIZE, "%s%s", "syno_device_list=\"\"", "\n");
@@ -2299,7 +2115,7 @@ struct class_device_attribute *mvSata_shost_attrs[] = {
 #endif
     NULL
 };
-#endif // MY_ABC_HERE
+#endif  
 
 #if defined(MY_ABC_HERE) || defined(SYNO_SATA_POWER_CTL) || defined(MY_ABC_HERE)
 Scsi_Host_Template driver_template = SynoMvSata;

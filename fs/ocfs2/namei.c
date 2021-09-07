@@ -1,44 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* -*- mode: c; c-basic-offset: 8; -*-
- * vim: noexpandtab sw=8 ts=8 sts=0:
- *
- * namei.c
- *
- * Create and rename file, directory, symlinks
- *
- * Copyright (C) 2002, 2004 Oracle.  All rights reserved.
- *
- *  Portions of this code from linux/fs/ext3/dir.c
- *
- *  Copyright (C) 1992, 1993, 1994, 1995
- *  Remy Card (card@masi.ibp.fr)
- *  Laboratoire MASI - Institut Blaise pascal
- *  Universite Pierre et Marie Curie (Paris VI)
- *
- *   from
- *
- *   linux/fs/minix/dir.c
- *
- *   Copyright (C) 1991, 1992 Linux Torvalds
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 021110-1307, USA.
- */
-
+ 
 #include <linux/fs.h>
 #include <linux/types.h>
 #include <linux/slab.h>
@@ -97,7 +60,6 @@ static int ocfs2_create_symlink_data(struct ocfs2_super *osb,
 				     struct inode *inode,
 				     const char *symname);
 
-/* An orphan dir name is an 8 byte value, printed as a hex string */
 #define OCFS2_ORPHAN_NAMELEN ((int)(2 * sizeof(u64)))
 
 static struct dentry *ocfs2_lookup(struct inode *dir, struct dentry *dentry,
@@ -140,11 +102,7 @@ static struct dentry *ocfs2_lookup(struct inode *dir, struct dentry *dentry,
 	}
 
 	oi = OCFS2_I(inode);
-	/* Clear any orphaned state... If we were able to look up the
-	 * inode from a directory, it certainly can't be orphaned. We
-	 * might have the bad state from a node which intended to
-	 * orphan this inode but crashed before it could commit the
-	 * unlink. */
+	 
 	spin_lock(&oi->ip_lock);
 	oi->ip_flags &= ~OCFS2_INODE_MAYBE_ORPHANED;
 	spin_unlock(&oi->ip_lock);
@@ -154,16 +112,7 @@ bail_add:
 	ret = d_splice_alias(inode, dentry);
 
 	if (inode) {
-		/*
-		 * If d_splice_alias() finds a DCACHE_DISCONNECTED
-		 * dentry, it will d_move() it on top of ourse. The
-		 * return value will indicate this however, so in
-		 * those cases, we switch them around for the locking
-		 * code.
-		 *
-		 * NOTE: This dentry already has ->d_op set from
-		 * ocfs2_get_parent() and ocfs2_get_dentry()
-		 */
+		 
 		if (ret)
 			dentry = ret;
 
@@ -177,10 +126,7 @@ bail_add:
 	}
 
 bail_unlock:
-	/* Don't drop the cluster lock until *after* the d_add --
-	 * unlink on another node will message us to remove that
-	 * dentry under this lock so otherwise we can race this with
-	 * the downconvert thread and have a stale dentry. */
+	 
 	ocfs2_inode_unlock(dir, 0);
 
 bail:
@@ -200,9 +146,6 @@ static struct inode *ocfs2_get_init_inode(struct inode *dir, int mode)
 		return NULL;
 	}
 
-	/* populate as many fields early on as possible - many of
-	 * these are used by the support functions here and in
-	 * callers. */
 	if (S_ISDIR(mode))
 		inode->i_nlink = 2;
 	else
@@ -247,7 +190,6 @@ static int ocfs2_mknod(struct inode *dir,
 		   (unsigned long)dev, dentry->d_name.len,
 		   dentry->d_name.name);
 
-	/* get our super block */
 	osb = OCFS2_SB(dir->i_sb);
 
 	status = ocfs2_inode_lock(dir, &parent_fe_bh, 1);
@@ -264,7 +206,7 @@ static int ocfs2_mknod(struct inode *dir,
 
 	dirfe = (struct ocfs2_dinode *) parent_fe_bh->b_data;
 	if (!ocfs2_read_links_count(dirfe)) {
-		/* can't make a file in a deleted directory. */
+		 
 		status = -ENOENT;
 		goto leave;
 	}
@@ -274,7 +216,6 @@ static int ocfs2_mknod(struct inode *dir,
 	if (status)
 		goto leave;
 
-	/* get a spot inside the dir. */
 	status = ocfs2_prepare_dir_for_insert(osb, dir, parent_fe_bh,
 					      dentry->d_name.name,
 					      dentry->d_name.len, &lookup);
@@ -283,7 +224,6 @@ static int ocfs2_mknod(struct inode *dir,
 		goto leave;
 	}
 
-	/* reserve an inode spot */
 	status = ocfs2_reserve_new_inode(osb, &inode_ac);
 	if (status < 0) {
 		if (status != -ENOSPC)
@@ -298,7 +238,6 @@ static int ocfs2_mknod(struct inode *dir,
 		goto leave;
 	}
 
-	/* get security xattr */
 	status = ocfs2_init_security_get(inode, dir, &si);
 	if (status) {
 		if (status == -EOPNOTSUPP)
@@ -309,7 +248,6 @@ static int ocfs2_mknod(struct inode *dir,
 		}
 	}
 
-	/* calculate meta data/clusters for setting security and acl xattr */
 	status = ocfs2_calc_xattr_init(dir, parent_fe_bh, mode,
 				       &si, &want_clusters,
 				       &xattr_credits, &want_meta);
@@ -318,11 +256,9 @@ static int ocfs2_mknod(struct inode *dir,
 		goto leave;
 	}
 
-	/* Reserve a cluster if creating an extent based directory. */
 	if (S_ISDIR(mode) && !ocfs2_supports_inline_data(osb)) {
 		want_clusters += 1;
 
-		/* Dir indexing requires extra space as well */
 		if (ocfs2_supports_indexed_dirs(osb))
 			want_meta++;
 	}
@@ -351,8 +287,6 @@ static int ocfs2_mknod(struct inode *dir,
 		goto leave;
 	}
 
-	/* We don't use standard VFS wrapper because we don't want vfs_dq_init
-	 * to be called. */
 	if (sb_any_quota_active(osb->sb) &&
 	    osb->sb->dq_op->alloc_inode(inode, 1) == NO_QUOTA) {
 		status = -EDQUOT;
@@ -364,7 +298,6 @@ static int ocfs2_mknod(struct inode *dir,
 		   inode->i_mode, (unsigned long)dev, dentry->d_name.len,
 		   dentry->d_name.name);
 
-	/* do the real work now. */
 	status = ocfs2_mknod_locked(osb, dir, inode, dev,
 				    &new_fe_bh, parent_fe_bh, handle,
 				    inode_ac);
@@ -494,9 +427,6 @@ static int ocfs2_mknod_locked(struct ocfs2_super *osb,
 		goto leave;
 	}
 
-	/* populate as many fields early on as possible - many of
-	 * these are used by the support functions here and in
-	 * callers. */
 	inode->i_ino = ino_from_blkno(osb->sb, fe_blkno);
 	OCFS2_I(inode)->ip_blkno = fe_blkno;
 	spin_lock(&osb->osb_lock);
@@ -544,10 +474,6 @@ static int ocfs2_mknod_locked(struct ocfs2_super *osb,
 		cpu_to_le32(CURRENT_TIME.tv_nsec);
 	fe->i_dtime = 0;
 
-	/*
-	 * If supported, directories start with inline data. If inline
-	 * isn't supported, but indexing is, we start them as indexed.
-	 */
 	feat = le16_to_cpu(fe->i_dyn_features);
 	if (S_ISDIR(inode->i_mode) && ocfs2_supports_inline_data(osb)) {
 		fe->i_dyn_features = cpu_to_le16(feat | OCFS2_INLINE_DATA_FL);
@@ -575,8 +501,7 @@ static int ocfs2_mknod_locked(struct ocfs2_super *osb,
 			mlog_errno(status);
 	}
 
-	status = 0; /* error in ocfs2_create_new_inode_locks is not
-		     * critical */
+	status = 0;  
 
 leave:
 	if (status < 0) {
@@ -744,10 +669,6 @@ out:
 	return err;
 }
 
-/*
- * Takes and drops an exclusive lock on the given dentry. This will
- * force other nodes to drop it.
- */
 static int ocfs2_remote_dentry_delete(struct dentry *dentry)
 {
 	int ret;
@@ -846,8 +767,7 @@ static int ocfs2_unlink(struct inode *dir,
 
 	status = ocfs2_remote_dentry_delete(dentry);
 	if (status < 0) {
-		/* This remote delete should succeed under all normal
-		 * circumstances. */
+		 
 		mlog_errno(status);
 		goto leave;
 	}
@@ -888,7 +808,6 @@ static int ocfs2_unlink(struct inode *dir,
 		}
 	}
 
-	/* delete the name from the parent dir */
 	status = ocfs2_delete_entry(handle, dir, &lookup);
 	if (status < 0) {
 		mlog_errno(status);
@@ -927,7 +846,7 @@ leave:
 	ocfs2_inode_unlock(dir, 1);
 
 	if (orphan_dir) {
-		/* This was locked for us in ocfs2_prepare_orphan_dir() */
+		 
 		ocfs2_inode_unlock(orphan_dir, 1);
 		mutex_unlock(&orphan_dir->i_mutex);
 		iput(orphan_dir);
@@ -944,10 +863,6 @@ leave:
 	return status;
 }
 
-/*
- * The only place this should be used is rename!
- * if they have the same id, then the 1st one is the only one locked.
- */
 static int ocfs2_double_lock(struct ocfs2_super *osb,
 			     struct buffer_head **bh1,
 			     struct inode *inode1,
@@ -969,10 +884,9 @@ static int ocfs2_double_lock(struct ocfs2_super *osb,
 	if (*bh2)
 		*bh2 = NULL;
 
-	/* we always want to lock the one with the lower lockid first. */
 	if (oi1->ip_blkno != oi2->ip_blkno) {
 		if (oi1->ip_blkno < oi2->ip_blkno) {
-			/* switch id1 and id2 around */
+			 
 			mlog(0, "switching them around...\n");
 			tmpbh = bh2;
 			bh2 = bh1;
@@ -982,7 +896,7 @@ static int ocfs2_double_lock(struct ocfs2_super *osb,
 			inode2 = inode1;
 			inode1 = tmpinode;
 		}
-		/* lock id2 */
+		 
 		status = ocfs2_inode_lock_nested(inode2, bh2, 1,
 						 OI_LS_RENAME1);
 		if (status < 0) {
@@ -992,13 +906,9 @@ static int ocfs2_double_lock(struct ocfs2_super *osb,
 		}
 	}
 
-	/* lock id1 */
 	status = ocfs2_inode_lock_nested(inode1, bh1, 1, OI_LS_RENAME2);
 	if (status < 0) {
-		/*
-		 * An error return must mean that no cluster locks
-		 * were held on function exit.
-		 */
+		 
 		if (oi1->ip_blkno != oi2->ip_blkno)
 			ocfs2_inode_unlock(inode2, 1);
 
@@ -1046,9 +956,6 @@ static int ocfs2_rename(struct inode *old_dir,
 	struct ocfs2_dir_lookup_result orphan_insert = { NULL, };
 	struct ocfs2_dir_lookup_result target_insert = { NULL, };
 
-	/* At some point it might be nice to break this function up a
-	 * bit. */
-
 	mlog_entry("(0x%p, 0x%p, 0x%p, 0x%p, from='%.*s' to='%.*s')\n",
 		   old_dir, old_dentry, new_dir, new_dentry,
 		   old_dentry->d_name.len, old_dentry->d_name.name,
@@ -1061,17 +968,6 @@ static int ocfs2_rename(struct inode *old_dir,
 			BUG();
 	}
 
-	/* Assume a directory hierarchy thusly:
-	 * a/b/c
-	 * a/d
-	 * a,b,c, and d are all directories.
-	 *
-	 * from cwd of 'a' on both nodes:
-	 * node1: mv b/c d
-	 * node2: mv d   b/c
-	 *
-	 * And that's why, just like the VFS, we need a file system
-	 * rename lock. */
 	if (old_dir != new_dir && S_ISDIR(old_inode->i_mode)) {
 		status = ocfs2_rename_lock(osb);
 		if (status < 0) {
@@ -1081,7 +977,6 @@ static int ocfs2_rename(struct inode *old_dir,
 		rename_lock = 1;
 	}
 
-	/* if old and new are the same, this'll just do one lock. */
 	status = ocfs2_double_lock(osb, &old_dir_bh, old_dir,
 				   &new_dir_bh, new_dir);
 	if (status < 0) {
@@ -1090,8 +985,6 @@ static int ocfs2_rename(struct inode *old_dir,
 	}
 	parents_locked = 1;
 
-	/* make sure both dirs have bhs
-	 * get an extra ref on old_dir_bh if old==new */
 	if (!new_dir_bh) {
 		if (old_dir_bh) {
 			new_dir_bh = old_dir_bh;
@@ -1103,12 +996,6 @@ static int ocfs2_rename(struct inode *old_dir,
 		}
 	}
 
-	/*
-	 * Aside from allowing a meta data update, the locking here
-	 * also ensures that the downconvert thread on other nodes
-	 * won't have to concurrently downconvert the inode and the
-	 * dentry locks.
-	 */
 	status = ocfs2_inode_lock_nested(old_inode, &old_inode_bh, 1,
 					 OI_LS_PARENT);
 	if (status < 0) {
@@ -1156,28 +1043,18 @@ static int ocfs2_rename(struct inode *old_dir,
 		goto bail;
 	}
 
-	/*
-	 *  Check for inode number is _not_ due to possible IO errors.
-	 *  We might rmdir the source, keep it as pwd of some process
-	 *  and merrily kill the link to whatever was created under the
-	 *  same name. Goodbye sticky bit ;-<
-	 */
 	if (old_de_ino != OCFS2_I(old_inode)->ip_blkno) {
 		status = -ENOENT;
 		goto bail;
 	}
 
-	/* check if the target already exists (in which case we need
-	 * to delete it */
 	status = ocfs2_find_files_on_disk(new_dentry->d_name.name,
 					  new_dentry->d_name.len,
 					  &newfe_blkno, new_dir,
 					  &target_lookup_res);
-	/* The only error we allow here is -ENOENT because the new
-	 * file not existing is perfectly valid. */
+	 
 	if ((status < 0) && (status != -ENOENT)) {
-		/* If we cannot find the file specified we should just */
-		/* return the error... */
+		 
 		mlog_errno(status);
 		goto bail;
 	}
@@ -1185,24 +1062,13 @@ static int ocfs2_rename(struct inode *old_dir,
 		target_exists = 1;
 
 	if (!target_exists && new_inode) {
-		/*
-		 * Target was unlinked by another node while we were
-		 * waiting to get to ocfs2_rename(). There isn't
-		 * anything we can do here to help the situation, so
-		 * bubble up the appropriate error.
-		 */
+		 
 		status = -ENOENT;
 		goto bail;
 	}
 
-	/* In case we need to overwrite an existing file, we blow it
-	 * away first */
 	if (target_exists) {
-		/* VFS didn't think there existed an inode here, but
-		 * someone else in the cluster must have raced our
-		 * rename to create one. Today we error cleanly, in
-		 * the future we should consider calling iget to build
-		 * a new struct inode for this entry. */
+		 
 		if (!new_inode) {
 			status = -EACCES;
 
@@ -1306,7 +1172,6 @@ static int ocfs2_rename(struct inode *old_dir,
 			}
 		}
 
-		/* change the dirent to point to the correct inode */
 		status = ocfs2_update_entry(new_dir, handle, &target_lookup_res,
 					    old_inode);
 		if (status < 0) {
@@ -1326,7 +1191,7 @@ static int ocfs2_rename(struct inode *old_dir,
 			goto bail;
 		}
 	} else {
-		/* if the name was not found in new_dir, add it now */
+		 
 		status = ocfs2_add_entry(handle, new_dentry, old_inode,
 					 OCFS2_I(old_inode)->ip_blkno,
 					 new_dir_bh, &target_insert);
@@ -1350,13 +1215,6 @@ static int ocfs2_rename(struct inode *old_dir,
 	} else
 		mlog_errno(status);
 
-	/*
-	 * Now that the name has been added to new_dir, remove the old name.
-	 *
-	 * We don't keep any directory entry context around until now
-	 * because the insert might have changed the type of directory
-	 * we're dealing with.
-	 */
 	status = ocfs2_find_entry(old_dentry->d_name.name,
 				  old_dentry->d_name.len, old_dir,
 				  &old_entry_lookup);
@@ -1394,13 +1252,9 @@ static int ocfs2_rename(struct inode *old_dir,
 	}
 
 	if (old_dir != new_dir) {
-		/* Keep the same times on both directories.*/
+		 
 		new_dir->i_ctime = new_dir->i_mtime = old_dir->i_ctime;
 
-		/*
-		 * This will also pick up the i_nlink change from the
-		 * block above.
-		 */
 		ocfs2_mark_inode_dirty(handle, new_dir, new_dir_bh);
 	}
 
@@ -1440,7 +1294,7 @@ bail:
 		ocfs2_inode_unlock(new_inode, 1);
 
 	if (orphan_dir) {
-		/* This was locked for us in ocfs2_prepare_orphan_dir() */
+		 
 		ocfs2_inode_unlock(orphan_dir, 1);
 		mutex_unlock(&orphan_dir->i_mutex);
 		iput(orphan_dir);
@@ -1468,10 +1322,6 @@ bail:
 	return status;
 }
 
-/*
- * we expect i_size = strlen(symname). Copy symname into the file
- * data, including the null terminator.
- */
 static int ocfs2_create_symlink_data(struct ocfs2_super *osb,
 				     handle_t *handle,
 				     struct inode *inode,
@@ -1484,15 +1334,13 @@ static int ocfs2_create_symlink_data(struct ocfs2_super *osb,
 	int virtual, blocks, status, i, bytes_left;
 
 	bytes_left = i_size_read(inode) + 1;
-	/* we can't trust i_blocks because we're actually going to
-	 * write i_size + 1 bytes. */
+	 
 	blocks = (bytes_left + sb->s_blocksize - 1) >> sb->s_blocksize_bits;
 
 	mlog_entry("i_blocks = %llu, i_size = %llu, blocks = %d\n",
 			(unsigned long long)inode->i_blocks,
 			i_size_read(inode), blocks);
 
-	/* Sanity check -- make sure we're going to fit. */
 	if (bytes_left >
 	    ocfs2_clusters_to_bytes(sb, OCFS2_I(inode)->ip_clusters)) {
 		status = -EIO;
@@ -1514,9 +1362,6 @@ static int ocfs2_create_symlink_data(struct ocfs2_super *osb,
 		goto bail;
 	}
 
-	/* links can never be larger than one cluster so we know this
-	 * is all going to be contiguous, but do a sanity check
-	 * anyway. */
 	if ((p_blocks << sb->s_blocksize_bits) < bytes_left) {
 		status = -EIO;
 		mlog_errno(status);
@@ -1609,7 +1454,6 @@ static int ocfs2_symlink(struct inode *dir,
 
 	credits = ocfs2_calc_symlink_credits(sb);
 
-	/* lock the parent directory */
 	status = ocfs2_inode_lock(dir, &parent_fe_bh, 1);
 	if (status < 0) {
 		if (status != -ENOENT)
@@ -1619,7 +1463,7 @@ static int ocfs2_symlink(struct inode *dir,
 
 	dirfe = (struct ocfs2_dinode *) parent_fe_bh->b_data;
 	if (!ocfs2_read_links_count(dirfe)) {
-		/* can't make a file in a deleted directory. */
+		 
 		status = -ENOENT;
 		goto bail;
 	}
@@ -1651,7 +1495,6 @@ static int ocfs2_symlink(struct inode *dir,
 		goto bail;
 	}
 
-	/* get security xattr */
 	status = ocfs2_init_security_get(inode, dir, &si);
 	if (status) {
 		if (status == -EOPNOTSUPP)
@@ -1662,7 +1505,6 @@ static int ocfs2_symlink(struct inode *dir,
 		}
 	}
 
-	/* calculate meta data/clusters for setting security xattr */
 	if (si.enable) {
 		status = ocfs2_calc_security_init(dir, &si, &want_clusters,
 						  &xattr_credits, &xattr_ac);
@@ -1672,7 +1514,6 @@ static int ocfs2_symlink(struct inode *dir,
 		}
 	}
 
-	/* don't reserve bitmap space for fast symlinks. */
 	if (l > ocfs2_fast_symlink_chars(sb))
 		want_clusters += 1;
 
@@ -1691,8 +1532,6 @@ static int ocfs2_symlink(struct inode *dir,
 		goto bail;
 	}
 
-	/* We don't use standard VFS wrapper because we don't want vfs_dq_init
-	 * to be called. */
 	if (sb_any_quota_active(osb->sb) &&
 	    osb->sb->dq_op->alloc_inode(inode, 1) == NO_QUOTA) {
 		status = -EDQUOT;
@@ -1948,8 +1787,6 @@ static int ocfs2_orphan_add(struct ocfs2_super *osb,
 		goto leave;
 	}
 
-	/* we're a cluster, and nlink can change on disk from
-	 * underneath us... */
 	orphan_fe = (struct ocfs2_dinode *) orphan_dir_bh->b_data;
 	if (S_ISDIR(inode->i_mode))
 		ocfs2_add_links_count(orphan_fe, 1);
@@ -1972,9 +1809,6 @@ static int ocfs2_orphan_add(struct ocfs2_super *osb,
 
 	le32_add_cpu(&fe->i_flags, OCFS2_ORPHANED_FL);
 
-	/* Record which orphan dir our inode now resides
-	 * in. delete_inode will use this to determine which orphan
-	 * dir to lock. */
 	fe->i_orphaned_slot = cpu_to_le16(osb->slot_num);
 
 	mlog(0, "Inode %llu orphaned in slot %d\n",
@@ -1987,7 +1821,6 @@ leave:
 	return status;
 }
 
-/* unlike orphan_add, we expect the orphan dir to already be locked here. */
 int ocfs2_orphan_del(struct ocfs2_super *osb,
 		     handle_t *handle,
 		     struct inode *orphan_dir_inode,
@@ -2011,7 +1844,6 @@ int ocfs2_orphan_del(struct ocfs2_super *osb,
 	     name, (unsigned long long)OCFS2_I(orphan_dir_inode)->ip_blkno,
 	     OCFS2_ORPHAN_NAMELEN);
 
-	/* find it's spot in the orphan directory */
 	status = ocfs2_find_entry(name, OCFS2_ORPHAN_NAMELEN, orphan_dir_inode,
 				  &lookup);
 	if (status) {
@@ -2019,7 +1851,6 @@ int ocfs2_orphan_del(struct ocfs2_super *osb,
 		goto leave;
 	}
 
-	/* remove it from the orphan directory */
 	status = ocfs2_delete_entry(handle, orphan_dir_inode, &lookup);
 	if (status < 0) {
 		mlog_errno(status);
@@ -2035,7 +1866,6 @@ int ocfs2_orphan_del(struct ocfs2_super *osb,
 		goto leave;
 	}
 
-	/* do the i_nlink dance! :) */
 	orphan_fe = (struct ocfs2_dinode *) orphan_dir_bh->b_data;
 	if (S_ISDIR(inode->i_mode))
 		ocfs2_add_links_count(orphan_fe, -1);
@@ -2077,10 +1907,6 @@ int ocfs2_create_inode_in_orphan(struct inode *dir,
 		return status;
 	}
 
-	/*
-	 * We give the orphan dir the root blkno to fake an orphan name,
-	 * and allocate enough space for our insertion.
-	 */
 	status = ocfs2_prepare_orphan_dir(osb, &orphan_dir,
 					  osb->root_blkno,
 					  orphan_name, &orphan_insert);
@@ -2089,7 +1915,6 @@ int ocfs2_create_inode_in_orphan(struct inode *dir,
 		goto leave;
 	}
 
-	/* reserve an inode spot */
 	status = ocfs2_reserve_new_inode(osb, &inode_ac);
 	if (status < 0) {
 		if (status != -ENOSPC)
@@ -2112,8 +1937,6 @@ int ocfs2_create_inode_in_orphan(struct inode *dir,
 		goto leave;
 	}
 
-	/* We don't use standard VFS wrapper because we don't want vfs_dq_init
-	 * to be called. */
 	if (sb_any_quota_active(osb->sb) &&
 	    osb->sb->dq_op->alloc_inode(inode, 1) == NO_QUOTA) {
 		status = -EDQUOT;
@@ -2121,7 +1944,6 @@ int ocfs2_create_inode_in_orphan(struct inode *dir,
 	}
 	did_quota_inode = 1;
 
-	/* do the real work now. */
 	status = ocfs2_mknod_locked(osb, dir, inode,
 				    0, &new_di_bh, parent_di_bh, handle,
 				    inode_ac);
@@ -2144,7 +1966,6 @@ int ocfs2_create_inode_in_orphan(struct inode *dir,
 		goto leave;
 	}
 
-	/* get open lock so that only nodes can't remove it from orphan dir. */
 	status = ocfs2_open_lock(inode);
 	if (status < 0)
 		mlog_errno(status);
@@ -2156,7 +1977,7 @@ leave:
 		ocfs2_commit_trans(osb, handle);
 
 	if (orphan_dir) {
-		/* This was locked for us in ocfs2_prepare_orphan_dir() */
+		 
 		ocfs2_inode_unlock(orphan_dir, 1);
 		mutex_unlock(&orphan_dir->i_mutex);
 		iput(orphan_dir);
@@ -2211,7 +2032,7 @@ int ocfs2_mv_orphaned_inode_to_new(struct inode *dir,
 
 	dir_di = (struct ocfs2_dinode *) parent_di_bh->b_data;
 	if (!dir_di->i_links_count) {
-		/* can't make a file in a deleted directory. */
+		 
 		status = -ENOENT;
 		goto leave;
 	}
@@ -2221,7 +2042,6 @@ int ocfs2_mv_orphaned_inode_to_new(struct inode *dir,
 	if (status)
 		goto leave;
 
-	/* get a spot inside the dir. */
 	status = ocfs2_prepare_dir_for_insert(osb, dir, parent_di_bh,
 					      dentry->d_name.name,
 					      dentry->d_name.len, &lookup);

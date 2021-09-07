@@ -21,11 +21,6 @@ typedef struct {
 
 #else
 
-/*
- * From nommu.h:
- *  Copyright (C) 2002, David McCullough <davidm@snapgear.com>
- *  modified for 2.6 by Hyok S. Choi <hyok.choi@samsung.com>
- */
 typedef struct {
 	unsigned long		end_brk;
 } mm_context_t;

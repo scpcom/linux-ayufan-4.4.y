@@ -11,14 +11,6 @@ struct mirror_info {
 	sector_t	head_position;
 };
 
-/*
- * memory pools need a pointer to the mddev, so they can force an unplug
- * when memory is tight, and a count of the number of drives that the
- * pool was allocated for, so they know how much to allocate and free.
- * mddev->raid_disks cannot be used, as it can change while a pool is active
- * These two datums are stored in a kmalloced struct.
- */
-
 struct pool_info {
 	mddev_t *mddev;
 	int	raid_disks;
@@ -35,12 +27,10 @@ struct r1_private_data_s {
 	spinlock_t		device_lock;
 
 	struct list_head	retry_list;
-	/* queue pending writes and submit them on unplug */
+	 
 	struct bio_list		pending_bio_list;
-	/* queue of writes that have been unplugged */
+	 
 	struct bio_list		flushing_bio_list;
-
-	/* for use when syncing mirrors: */
 
 	spinlock_t		resync_lock;
 	int			nr_pending;
@@ -48,10 +38,7 @@ struct r1_private_data_s {
 	int			nr_queued;
 	int			barrier;
 	sector_t		next_resync;
-	int			fullsync;  /* set to 1 if a full sync is needed,
-					    * (fresh device added).
-					    * Cleared when a sync completes.
-					    */
+	int			fullsync;   
 
 	wait_queue_head_t	wait_barrier;
 
@@ -65,34 +52,16 @@ struct r1_private_data_s {
 
 typedef struct r1_private_data_s conf_t;
 
-/*
- * this is our 'private' RAID1 bio.
- *
- * it contains information about what kind of IO operations were started
- * for this RAID1 operation, and about their status:
- */
-
 struct r1bio_s {
-	atomic_t		remaining; /* 'have we finished' count,
-					    * used from IRQ handlers
-#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
-					            * includes behind_remaining
-#endif
-					    */
-	atomic_t		behind_remaining; /* number of write-behind ios remaining
-						 * in this BehindIO request
-						 */
+	atomic_t		remaining;  
+	atomic_t		behind_remaining;  
 	sector_t		sector;
 	int			sectors;
 	unsigned long		state;
 	mddev_t			*mddev;
-	/*
-	 * original bio going to /dev/mdx
-	 */
+	 
 	struct bio		*master_bio;
-	/*
-	 * if the IO is in READ direction, then this is where we read
-	 */
+	 
 	int			read_disk;
 
 	struct list_head	retry_list;
@@ -101,35 +70,20 @@ struct r1bio_s {
 	unsigned int read_failed;
 	int orig_disk_idx;
 #endif
-	/*
-	 * if the IO is in WRITE direction, then multiple bios are used.
-	 * We choose the number when they are allocated.
-	 */
+	 
 	struct bio		*bios[0];
-	/* DO NOT PUT ANY NEW FIELDS HERE - bios array is contiguously alloced*/
+	 
 };
 
-/* when we get a read error on a read-only array, we redirect to another
- * device without failing the first device, or trying to over-write to
- * correct the read error.  To keep track of bad blocks on a per-bio
- * level, we store IO_BLOCKED in the appropriate 'bios' pointer
- */
 #define IO_BLOCKED ((struct bio*)1)
 
-/* bits for r1bio.state */
 #define	R1BIO_Uptodate	0
 #define	R1BIO_IsSync	1
 #define	R1BIO_Degraded	2
 #define	R1BIO_BehindIO	3
 #define	R1BIO_Barrier	4
 #define R1BIO_BarrierRetry 5
-/* For write-behind requests, we call bi_end_io when
- * the last non-write-behind device completes, providing
- * any write was successful.  Otherwise we call when
- * any write-behind write succeeds, otherwise we call
- * with failure when last write completes (and all failed).
- * Record that bi_end_io was called with this flag...
- */
+ 
 #define	R1BIO_Returned 6
 
 #ifdef CONFIG_SATA_OX820_DIRECT_HWRAID

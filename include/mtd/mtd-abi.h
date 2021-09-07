@@ -1,10 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Portions of MTD ABI definition which are shared by kernel and user space
- */
-
+ 
 #ifndef __MTD_ABI_H__
 #define __MTD_ABI_H__
 
@@ -35,7 +32,7 @@ struct mtd_oob_buf64 {
 
 #ifdef  MY_ABC_HERE
 struct SYNO_MTD_FIS_INFO {
-	unsigned char name[16]; // Null terminated name
+	unsigned char name[16];  
 	u_int32_t offset;
 	u_int32_t size;
 	u_int32_t data_length;
@@ -44,7 +41,7 @@ struct SYNO_MTD_FIS_INFO {
 #define SYNO_MSYS_FLASH_BLOCK_SIZE  ( 16 * 1024 )
 #define SYNO_MSYS_PARTITION_NUMBER  8
 #define SYNO_MSYS_TOTAL_UNITS       967
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define MTD_ABSENT		0
 #define MTD_RAM			1
@@ -54,25 +51,22 @@ struct SYNO_MTD_FIS_INFO {
 #define MTD_DATAFLASH		6
 #define MTD_UBIVOLUME		7
 
-#define MTD_WRITEABLE		0x400	/* Device is writeable */
-#define MTD_BIT_WRITEABLE	0x800	/* Single bits can be flipped */
-#define MTD_NO_ERASE		0x1000	/* No erase necessary */
-#define MTD_POWERUP_LOCK	0x2000	/* Always locked after reset */
+#define MTD_WRITEABLE		0x400	 
+#define MTD_BIT_WRITEABLE	0x800	 
+#define MTD_NO_ERASE		0x1000	 
+#define MTD_POWERUP_LOCK	0x2000	 
 
-// Some common devices / combinations of capabilities
 #define MTD_CAP_ROM		0
 #define MTD_CAP_RAM		(MTD_WRITEABLE | MTD_BIT_WRITEABLE | MTD_NO_ERASE)
 #define MTD_CAP_NORFLASH	(MTD_WRITEABLE | MTD_BIT_WRITEABLE)
 #define MTD_CAP_NANDFLASH	(MTD_WRITEABLE)
 
-/* ECC byte placement */
-#define MTD_NANDECC_OFF		0	// Switch off ECC (Not recommended)
-#define MTD_NANDECC_PLACE	1	// Use the given placement in the structure (YAFFS1 legacy mode)
-#define MTD_NANDECC_AUTOPLACE	2	// Use the default placement scheme
-#define MTD_NANDECC_PLACEONLY	3	// Use the given placement in the structure (Do not store ecc result on read)
-#define MTD_NANDECC_AUTOPL_USR 	4	// Use the given autoplacement scheme rather than using the default
+#define MTD_NANDECC_OFF		0	 
+#define MTD_NANDECC_PLACE	1	 
+#define MTD_NANDECC_AUTOPLACE	2	 
+#define MTD_NANDECC_PLACEONLY	3	 
+#define MTD_NANDECC_AUTOPL_USR 	4	 
 
-/* OTP mode selection */
 #define MTD_OTP_OFF		0
 #define MTD_OTP_FACTORY		1
 #define MTD_OTP_USER		2
@@ -80,21 +74,19 @@ struct SYNO_MTD_FIS_INFO {
 struct mtd_info_user {
 	__u8 type;
 	__u32 flags;
-	__u32 size;	 // Total size of the MTD
+	__u32 size;	  
 	__u32 erasesize;
 	__u32 writesize;
-	__u32 oobsize;   // Amount of OOB data per block (e.g. 16)
-	/* The below two fields are obsolete and broken, do not use them
-	 * (TODO: remove at some point) */
+	__u32 oobsize;    
+	 
 	__u32 ecctype;
 	__u32 eccsize;
 };
 
 struct region_info_user {
-	__u32 offset;		/* At which this region starts,
-					 * from the beginning of the MTD */
-	__u32 erasesize;		/* For this region */
-	__u32 numblocks;		/* Number of blocks in this region */
+	__u32 offset;		 
+	__u32 erasesize;		 
+	__u32 numblocks;		 
 	__u32 regionindex;
 };
 
@@ -134,12 +126,8 @@ struct otp_info {
 #define MSYSMEMPARTITION    _IOW('M', 25, int*)
 #define MSYSMEMPARTITIONINFO    _IOR('M', 26, int*)
 #define MEMREADOOB64		_IOWR('M', 27, struct mtd_oob_buf64)
-#endif /* MY_ABC_HERE */
+#endif  
 
-/*
- * Obsolete legacy interface. Keep it in order not to break userspace
- * interfaces
- */
 struct nand_oobinfo {
 	__u32 useecc;
 	__u32 eccbytes;
@@ -157,10 +145,7 @@ struct nand_oobfree {
 };
 
 #define MTD_MAX_OOBFREE_ENTRIES	8
-/*
- * ECC layout control structure. Exported to userspace for
- * diagnosis and to allow creation of raw images
- */
+ 
 struct nand_ecclayout {
 	__u32 eccbytes;
 	__u32 eccpos[64];
@@ -168,14 +153,6 @@ struct nand_ecclayout {
 	struct nand_oobfree oobfree[MTD_MAX_OOBFREE_ENTRIES];
 };
 
-/**
- * struct mtd_ecc_stats - error correction stats
- *
- * @corrected:	number of corrected bits
- * @failed:	number of uncorrectable errors
- * @badblocks:	number of bad blocks in this partition
- * @bbtblocks:	number of blocks reserved for bad block tables
- */
 struct mtd_ecc_stats {
 	__u32 corrected;
 	__u32 failed;
@@ -183,9 +160,6 @@ struct mtd_ecc_stats {
 	__u32 bbtblocks;
 };
 
-/*
- * Read/write file modes for access to MTD
- */
 enum mtd_file_modes {
 	MTD_MODE_NORMAL = MTD_OTP_OFF,
 	MTD_MODE_OTP_FACTORY = MTD_OTP_FACTORY,
@@ -193,4 +167,4 @@ enum mtd_file_modes {
 	MTD_MODE_RAW,
 };
 
-#endif /* __MTD_ABI_H__ */
+#endif  

@@ -1,25 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
-   raid0.c : Multiple Devices driver for Linux
-             Copyright (C) 1994-96 Marc ZYNGIER
-	     <zyngier@ufr-info-p7.ibp.fr> or
-	     <maz@gloups.fdn.fr>
-             Copyright (C) 1999, 2000 Ingo Molnar, Red Hat
-
-   RAID-0 management functions.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-   
-   You should have received a copy of the GNU General Public License
-   (for example /usr/src/linux/COPYING); if not, write to the Free
-   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
-*/
-
+ 
 #include <linux/blkdev.h>
 #include <linux/seq_file.h>
 #include "md.h"
@@ -44,10 +26,7 @@ static void raid0_unplug(struct request_queue *q)
 #else
 	rcu_read_lock();
 	for (i=0; i<mddev->raid_disks; i++) {
-		/* orignal using in stop md array, they will sync all data to these disks
-		 * but when some of them are unpluged by user, we not doing sync here
-		 * because it will be a NULL point in devlist[i]->bdev
-		 */
+		 
 		mdk_rdev_t *rdev = rcu_dereference(devlist[i]);
 		struct request_queue *r_queue = NULL;
 
@@ -78,12 +57,9 @@ static int raid0_congested(void *data, int bits)
 	int i, ret = 0;
 
 #ifdef MY_ABC_HERE
-	/* when raid0 lose one of disks, it is not normally,
-	 * So we just do a fake report that it is fine,
-	 * Nor will encounter NULL pointer access in devlist[i]->bdev.
-	 */
+	 
 	if(mddev->degraded) {
-		/* just report it's fine */
+		 
 		return ret;
 	}
 #endif
@@ -99,9 +75,6 @@ static int raid0_congested(void *data, int bits)
 	return ret;
 }
 
-/*
- * inform the user of the raid configuration
-*/
 static void dump_zones(mddev_t *mddev)
 {
 	int j, k, h;
@@ -148,7 +121,6 @@ static int create_strip_zones(mddev_t *mddev)
 			bdevname(rdev1->bdev,b));
 		c = 0;
 
-		/* round size to chunk_size */
 		sectors = rdev1->sectors;
 		sector_div(sectors, mddev->chunk_sectors);
 		rdev1->sectors = sectors * mddev->chunk_sectors;
@@ -165,10 +137,7 @@ static int create_strip_zones(mddev_t *mddev)
 				break;
 			}
 			if (rdev2->sectors == rdev1->sectors) {
-				/*
-				 * Not unique, don't count it as a new
-				 * group
-				 */
+				 
 				printk(KERN_INFO "raid0:   EQUAL\n");
 				c = 1;
 				break;
@@ -194,9 +163,6 @@ static int create_strip_zones(mddev_t *mddev)
 	if (!conf->devlist)
 		goto abort;
 
-	/* The first zone must contain all devices, so here we check that
-	 * there is a proper alignment of slots to devices and find them all
-	 */
 	zone = &conf->strip_zone[0];
 	cnt = 0;
 	smallest = NULL;
@@ -219,11 +185,7 @@ static int create_strip_zones(mddev_t *mddev)
 
 		disk_stack_limits(mddev->gendisk, rdev1->bdev,
 				  rdev1->data_offset << 9);
-		/* as we don't honour merge_bvec_fn, we must never risk
-		 * violating it, so limit ->max_phys_segments to 1, lying within
-		 * a single page.
-		 */
-
+		 
 		if (rdev1->bdev->bd_disk->queue->merge_bvec_fn) {
 			blk_queue_max_phys_segments(mddev->queue, 1);
 			blk_queue_segment_boundary(mddev->queue,
@@ -237,7 +199,7 @@ static int create_strip_zones(mddev_t *mddev)
 		printk(KERN_ERR "raid0: too few disks (%d of %d) - "
 			"aborting!\n", cnt, mddev->raid_disks);
 #ifdef MY_ABC_HERE
-		/* for raid0 status consistense to other raid type */
+		 
 		mddev->degraded = mddev->raid_disks - cnt;
 		zone->nb_dev = mddev->raid_disks;
 		mddev->private = conf;
@@ -251,7 +213,6 @@ static int create_strip_zones(mddev_t *mddev)
 
 	curr_zone_end = zone->zone_end;
 
-	/* now do the other zones */
 	for (i = 1; i < conf->nr_strip_zones; i++)
 	{
 		int j;
@@ -297,10 +258,6 @@ static int create_strip_zones(mddev_t *mddev)
 	mddev->queue->backing_dev_info.congested_fn = raid0_congested;
 	mddev->queue->backing_dev_info.congested_data = mddev;
 
-	/*
-	 * now since we have the hard sector sizes, we can make sure
-	 * chunk size is a multiple of that sector size
-	 */
 	if ((mddev->chunk_sectors << 9) % queue_logical_block_size(mddev->queue)) {
 		printk(KERN_ERR "%s chunk_size of %d not valid\n",
 		       mdname(mddev),
@@ -310,13 +267,13 @@ static int create_strip_zones(mddev_t *mddev)
 
 #ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
     if (hwraid0_compatible(mddev, conf)) {
-	    /* switch to hardware raid */
+	     
 	    err = hwraid0_assemble(mddev, conf);
 	    if (err) {
 	        goto abort;
 	    }
 	} else
-#endif /* CONFIG_SATA_OX820_DIRECT_HWRAID */	    
+#endif  	    
 #ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	{
 #endif
@@ -338,14 +295,6 @@ abort:
 	return err;
 }
 
-/**
- *	raid0_mergeable_bvec -- tell bio layer if a two requests can be merged
- *	@q: request queue
- *	@bvm: properties of new bio
- *	@biovec: the request that could be merged to it.
- *
- *	Return amount of bytes we can accept at this offset
- */
 static int raid0_mergeable_bvec(struct request_queue *q,
 				struct bvec_merge_data *bvm,
 				struct bio_vec *biovec)
@@ -362,7 +311,7 @@ static int raid0_mergeable_bvec(struct request_queue *q,
 	else
 		max =  (chunk_sectors - (sector_div(sector, chunk_sectors)
 						+ bio_sectors)) << 9;
-	if (max < 0) max = 0; /* bio_add cannot handle a negative return */
+	if (max < 0) max = 0;  
 	if (max <= biovec->bv_len && bio_sectors == 0)
 		return biovec->bv_len;
 	else 
@@ -406,33 +355,21 @@ static int raid0_run(mddev_t *mddev)
 #ifdef MY_ABC_HERE
 			mddev->nodev_and_crashed = 1;
 #endif
-			/* The size must greater than zero, 
-			 * otherwise this partition would not present in /proc/partitions
-			 */
+			 
 			mddev->array_sectors = raid0_size(mddev, 0, 0);
 
-			/* pretend success for printing mdstatus otherwise it will not show raid0 status when it fail on boot*/			
 			return 0;
 	}
-#else /* MY_ABC_HERE */
+#else  
 	if (ret < 0)
 		return ret;
-#endif /* MY_ABC_HERE */
+#endif  
 
-	/* calculate array device size */
 	md_set_array_sectors(mddev, raid0_size(mddev, 0, 0));
 
 	printk(KERN_INFO "raid0 : md_size is %llu sectors.\n",
 		(unsigned long long)mddev->array_sectors);
-	/* calculate the max read-ahead size.
-	 * For read-ahead of large files to be effective, we need to
-	 * readahead at least twice a whole stripe. i.e. number of devices
-	 * multiplied by chunk size times 2.
-	 * If an individual device has an ra_pages greater than the
-	 * chunk size, then we will not drive that device as hard as it
-	 * wants.  We consider this a configuration error: a larger
-	 * chunksize should be used in that case.
-	 */
+	 
 	{
 		int stripe = mddev->raid_disks *
 			(mddev->chunk_sectors << 9) / PAGE_SIZE;
@@ -458,7 +395,7 @@ static int raid0_stop(mddev_t *mddev)
 #ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	{
 #endif
-	blk_sync_queue(mddev->queue); /* the unplug fn references 'conf'*/
+	blk_sync_queue(mddev->queue);  
 #ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
 	}
 #endif
@@ -470,17 +407,7 @@ static int raid0_stop(mddev_t *mddev)
 }
 
 #ifdef MY_ABC_HERE
-/**
- * This is end_io callback function.
- * We can use this for bad sector report and device error
- * handing. Prevent umount panic from file system
- *
- * @author \$Author: khchen $
- * @version \$Revision: 1.1
- *
- * @param bio    Should not be NULL. Passing from block layer
- * @param error  error number
- */
+ 
 static void Raid0EndRequest(struct bio *bio, int error)
 {
 	int uptodate = test_bit(BIO_UPTODATE, &bio->bi_flags);
@@ -500,7 +427,7 @@ static void Raid0EndRequest(struct bio *bio, int error)
 		if (-ENODEV == error) {
 			syno_md_error(mddev, rdev);
 		}else{
-			/* Let raid0 could keep read.(md_error would let it become read-only) */
+			 
 #ifdef MY_ABC_HERE
 			SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
 #endif
@@ -510,14 +437,11 @@ static void Raid0EndRequest(struct bio *bio, int error)
 
 	atomic_dec(&rdev->nr_pending);
 	bio_put(data_bio);
-	/* Let mount could successful and bad sector could keep accessing */
+	 
 	bio_endio(bio, 0);
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
-/* Find the zone which holds a particular offset
- * Update *sectorp to be an offset in that zone
- */
 static struct strip_zone *find_zone(struct raid0_private_data *conf,
 				    sector_t *sectorp)
 {
@@ -534,10 +458,6 @@ static struct strip_zone *find_zone(struct raid0_private_data *conf,
 	BUG();
 }
 
-/*
- * remaps the bio to the target device. we separate two flows.
- * power 2 flow and a general flow for the sake of perfromance
-*/
 static mdk_rdev_t *map_sector(mddev_t *mddev, struct strip_zone *zone,
 				sector_t sector, sector_t *sector_offset)
 {
@@ -548,31 +468,24 @@ static mdk_rdev_t *map_sector(mddev_t *mddev, struct strip_zone *zone,
 
 	if (is_power_of_2(chunk_sects)) {
 		int chunksect_bits = ffz(~chunk_sects);
-		/* find the sector offset inside the chunk */
+		 
 		sect_in_chunk  = sector & (chunk_sects - 1);
 		sector >>= chunksect_bits;
-		/* chunk in zone */
+		 
 		chunk = *sector_offset;
-		/* quotient is the chunk in real device*/
+		 
 		sector_div(chunk, zone->nb_dev << chunksect_bits);
 	} else{
 		sect_in_chunk = sector_div(sector, chunk_sects);
 		chunk = *sector_offset;
 		sector_div(chunk, chunk_sects * zone->nb_dev);
 	}
-	/*
-	*  position the bio over the real device
-	*  real sector = chunk in device + starting of zone
-	*	+ the position in the chunk
-	*/
+	 
 	*sector_offset = (chunk * chunk_sects) + sect_in_chunk;
 	return conf->devlist[(zone - conf->strip_zone)*mddev->raid_disks
 			     + sector_div(sector, zone->nb_dev)];
 }
 
-/*
- * Is io distribute over 1 or more chunks ?
-*/
 static inline int is_io_in_chunk_boundary(mddev_t *mddev,
 			unsigned int chunk_sects, struct bio *bio)
 {
@@ -605,10 +518,7 @@ static int raid0_make_request(struct request_queue *q, struct bio *bio)
 	}
 
 #ifdef MY_ABC_HERE
-	/**
-	* if there has any device offline, we don't make any request to
-	* our raid0 md array
-	*/
+	 
 #ifdef MY_ABC_HERE
 	if (mddev->nodev_and_crashed) {
 #else
@@ -629,13 +539,11 @@ static int raid0_make_request(struct request_queue *q, struct bio *bio)
 	if (unlikely(!is_io_in_chunk_boundary(mddev, chunk_sects, bio))) {
 		sector_t sector = bio->bi_sector;
 		struct bio_pair *bp;
-		/* Sanity check -- queue functions should prevent this happening */
+		 
 		if (bio->bi_vcnt != 1 ||
 		    bio->bi_idx != 0)
 			goto bad_map;
-		/* This is a one page bio that upper layers
-		 * refuse to split for us, so we need to split it.
-		 */
+		 
 		if (likely(is_power_of_2(chunk_sects)))
 			bp = bio_split(bio, chunk_sects - (sector &
 							   (chunk_sects-1)));
@@ -673,9 +581,6 @@ static int raid0_make_request(struct request_queue *q, struct bio *bio)
 	}
 #endif
 
-	/*
-	 * Let the main block layer submit the IO and resolve recursion:
-	 */
 	return 1;
 
 bad_map:
@@ -713,7 +618,7 @@ syno_raid0_status (struct seq_file *seq, mddev_t *mddev)
 	}
 	seq_printf (seq, "]");
 }
-#else /* MY_ABC_HERE */
+#else  
 static void raid0_status(struct seq_file *seq, mddev_t *mddev)
 {
 #undef MD_DEBUG
@@ -745,7 +650,7 @@ static void raid0_status(struct seq_file *seq, mddev_t *mddev)
 	seq_printf(seq, " %dk chunks", mddev->chunk_sectors / 2);
 	return;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 int SynoRaid0RemoveDisk(mddev_t *mddev, int number)
@@ -761,15 +666,11 @@ int SynoRaid0RemoveDisk(mddev_t *mddev, int number)
 	}
 
 	if (atomic_read(&rdev->nr_pending)) {
-		/* lost the race, try later */
+		 
 		err = -EBUSY;
 		goto END;
 	}
 
-	/**
-	 * raid0 don't has their own thread, we just remove it's sysfs
-	 * when there has no other pending request
-	 */
 	sprintf(nm,"rd%d", rdev->raid_disk);
 	sysfs_remove_link(&mddev->kobj, nm);
 	rdev->raid_disk = -1;
@@ -778,18 +679,6 @@ END:
 	return err;
 }
 
-/**
- * This is our implement for raid handler.
- * It mainly for handling device hotplug.
- * We let it look like other raid type.
- * Set it faulty could let SDK know it's status
- *
- * @author \$Author: khchen $
- * @version \$Revision: 1.1  *
- *
- * @param mddev  Should not be NULL. passing from md.c
- * @param rdev   Should not be NULL. passing from md.c
- */
 static void SynoRaid0Error(mddev_t *mddev, mdk_rdev_t *rdev)
 {
 	if (test_and_clear_bit(In_sync, &rdev->flags)) {
@@ -821,18 +710,6 @@ END:
 	return;
 }
 
-/**
- * This is our implement for raid handler.
- * It mainly for mdadm set device faulty. We let it look like
- * other raid type. Let it become read only (scemd would remount
- * if it find DiskError)
- *
- * @author \$Author: khchen $
- * @version \$Revision: 1.1  *
- *
- * @param mddev  Should not be NULL. passing from md.c
- * @param rdev   Should not be NULL. passing from md.c
- */
 static void SynoRaid0ErrorInternal(mddev_t *mddev, mdk_rdev_t *rdev)
 {
 #ifdef MY_ABC_HERE
@@ -855,7 +732,7 @@ END:
 #endif
 	return;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static struct mdk_personality raid0_personality=
 {
@@ -891,6 +768,6 @@ static void raid0_exit (void)
 module_init(raid0_init);
 module_exit(raid0_exit);
 MODULE_LICENSE("GPL");
-MODULE_ALIAS("md-personality-2"); /* RAID0 */
+MODULE_ALIAS("md-personality-2");  
 MODULE_ALIAS("md-raid0");
 MODULE_ALIAS("md-level-0");

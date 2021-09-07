@@ -1,25 +1,4 @@
-/*
- * coretemp.c - Linux kernel module for hardware monitoring
- *
- * Copyright (C) 2007 Rudolf Marek <r.marek@assembler.cz>
- *
- * Inspired from many hwmon drivers
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301 USA.
- */
-
+ 
 #include <linux/module.h>
 #include <linux/delay.h>
 #include <linux/init.h>
@@ -42,10 +21,6 @@
 typedef enum { SHOW_TEMP, SHOW_TJMAX, SHOW_TTARGET, SHOW_LABEL,
 		SHOW_NAME } SHOW;
 
-/*
- * Functions declaration
- */
-
 static struct coretemp_data *coretemp_update_device(struct device *dev);
 
 struct coretemp_data {
@@ -53,17 +28,13 @@ struct coretemp_data {
 	struct mutex update_lock;
 	const char *name;
 	u32 id;
-	char valid;		/* zero until following fields are valid */
-	unsigned long last_updated;	/* in jiffies */
+	char valid;		 
+	unsigned long last_updated;	 
 	int temp;
 	int tjmax;
 	int ttarget;
 	u8 alarm;
 };
-
-/*
- * Sysfs stuff
- */
 
 static ssize_t show_name(struct device *dev, struct device_attribute
 			  *devattr, char *buf)
@@ -74,7 +45,7 @@ static ssize_t show_name(struct device *dev, struct device_attribute
 
 	if (attr->index == SHOW_NAME)
 		ret = sprintf(buf, "%s\n", data->name);
-	else	/* show label */
+	else	 
 		ret = sprintf(buf, "Core %d\n", data->id);
 	return ret;
 }
@@ -83,7 +54,7 @@ static ssize_t show_alarm(struct device *dev, struct device_attribute
 			  *devattr, char *buf)
 {
 	struct coretemp_data *data = coretemp_update_device(dev);
-	/* read the Out-of-spec log, never clear */
+	 
 	return sprintf(buf, "%d\n", data->alarm);
 }
 
@@ -138,7 +109,7 @@ static struct coretemp_data *coretemp_update_device(struct device *dev)
 		data->valid = 0;
 		rdmsr_on_cpu(data->id, MSR_IA32_THERM_STATUS, &eax, &edx);
 		data->alarm = (eax >> 5) & 1;
-		/* update only if data has been valid */
+		 
 		if (eax & 0x80000000) {
 			data->temp = data->tjmax - (((eax >> 16)
 							& 0x7f) * 1000);
@@ -155,8 +126,7 @@ static struct coretemp_data *coretemp_update_device(struct device *dev)
 
 static int __devinit adjust_tjmax(struct cpuinfo_x86 *c, u32 id, struct device *dev)
 {
-	/* The 100C is default for both mobile and non mobile CPUs */
-
+	 
 	int tjmax = 100000;
 	int tjmax_ee = 85000;
 	int usemsr_ee = 1;
@@ -164,13 +134,9 @@ static int __devinit adjust_tjmax(struct cpuinfo_x86 *c, u32 id, struct device *
 	u32 eax, edx;
 	struct pci_dev *host_bridge;
 
-	/* Early chips have no MSR for TjMax */
-
 	if ((c->x86_model == 0xf) && (c->x86_mask < 4)) {
 		usemsr_ee = 0;
 	}
-
-	/* Atom CPUs */
 
 	if (c->x86_model == 0x1c) {
 		usemsr_ee = 0;
@@ -178,8 +144,8 @@ static int __devinit adjust_tjmax(struct cpuinfo_x86 *c, u32 id, struct device *
 		host_bridge = pci_get_bus_and_slot(0, PCI_DEVFN(0, 0));
 
 		if (host_bridge && host_bridge->vendor == PCI_VENDOR_ID_INTEL
-		    && (host_bridge->device == 0xa000	/* NM10 based nettop */
-		    || host_bridge->device == 0xa010))	/* NM10 based netbook */
+		    && (host_bridge->device == 0xa000	 
+		    || host_bridge->device == 0xa010))	 
 			tjmax = 100000;
 		else
 			tjmax = 90000;
@@ -190,11 +156,6 @@ static int __devinit adjust_tjmax(struct cpuinfo_x86 *c, u32 id, struct device *
 	if ((c->x86_model > 0xe) && (usemsr_ee)) {
 		u8 platform_id;
 
-		/* Now we can detect the mobile CPU using Intel provided table
-		   http://softwarecommunity.intel.com/Wiki/Mobility/720.htm
-		   For Core2 cores, check MSR 0x17, bit 28 1 = Mobile CPU
-		*/
-
 		err = rdmsr_safe_on_cpu(id, 0x17, &eax, &edx);
 		if (err) {
 			dev_warn(dev,
@@ -202,20 +163,15 @@ static int __devinit adjust_tjmax(struct cpuinfo_x86 *c, u32 id, struct device *
 				 " CPU\n");
 			usemsr_ee = 0;
 		} else if (c->x86_model < 0x17 && !(eax & 0x10000000)) {
-			/* Trust bit 28 up to Penryn, I could not find any
-			   documentation on that; if you happen to know
-			   someone at Intel please ask */
+			 
 			usemsr_ee = 0;
 		} else {
-			/* Platform ID bits 52:50 (EDX starts at bit 32) */
+			 
 			platform_id = (edx >> 18) & 0x7;
 
-			/* Mobile Penryn CPU seems to be platform ID 7 or 5
-			  (guesswork) */
 			if ((c->x86_model == 0x17) &&
 			    ((platform_id == 5) || (platform_id == 7))) {
-				/* If MSR EE bit is set, set it to 90 degrees C,
-				   otherwise 105 degrees C */
+				 
 				tjmax_ee = 90000;
 				tjmax = 105000;
 			}
@@ -232,8 +188,7 @@ static int __devinit adjust_tjmax(struct cpuinfo_x86 *c, u32 id, struct device *
 		} else if (eax & 0x40000000) {
 			tjmax = tjmax_ee;
 		}
-	/* if we dont use msr EE it means we are desktop CPU (with exeception
-	   of Atom) */
+	 
 	} else if (tjmax == 100000) {
 		dev_warn(dev, "Using relative temperature scale!\n");
 	}
@@ -257,13 +212,11 @@ static int __devinit coretemp_probe(struct platform_device *pdev)
 	data->id = pdev->id;
 	data->name = "coretemp";
 #ifdef SYNO_PINEVIEW_CORETEMP
-	/* if the cpu temp can't read, syno_cpu_temperature() still return this value, 
-	 * so we must set a valid value(default 20 degree C) when init*/
+	 
 	data->temp = 20 * 1000;
 #endif
 	mutex_init(&data->update_lock);
 
-	/* test if we can access the THERM_STATUS MSR */
 	err = rdmsr_safe_on_cpu(data->id, MSR_IA32_THERM_STATUS, &eax, &edx);
 	if (err) {
 		dev_err(&pdev->dev,
@@ -271,13 +224,8 @@ static int __devinit coretemp_probe(struct platform_device *pdev)
 		goto exit_free;
 	}
 
-	/* Check if we have problem with errata AE18 of Core processors:
-	   Readings might stop update when processor visited too deep sleep,
-	   fixed for stepping D0 (6EC).
-	*/
-
 	if ((c->x86_model == 0xe) && (c->x86_mask < 0xc)) {
-		/* check for microcode update */
+		 
 		rdmsr_on_cpu(data->id, MSR_IA32_UCODE_REV, &eax, &edx);
 		if (edx < 0x39) {
 			err = -ENODEV;
@@ -290,9 +238,6 @@ static int __devinit coretemp_probe(struct platform_device *pdev)
 
 	data->tjmax = adjust_tjmax(c, data->id, &pdev->dev);
 	platform_set_drvdata(pdev, data);
-
-	/* read the still undocumented IA32_TEMPERATURE_TARGET it exists
-	   on older CPUs but not in this register, Atoms don't have it either */
 
 	if ((c->x86_model > 0xe) && (c->x86_model != 0x1c)) {
 		err = rdmsr_safe_on_cpu(data->id, 0x1a2, &eax, &edx);
@@ -443,14 +388,13 @@ static int __cpuinit coretemp_cpu_callback(struct notifier_block *nfb,
 static struct notifier_block coretemp_cpu_notifier __refdata = {
 	.notifier_call = coretemp_cpu_callback,
 };
-#endif				/* !CONFIG_HOTPLUG_CPU */
+#endif				 
 
 static int __init coretemp_init(void)
 {
 	int i, err = -ENODEV;
 	struct pdev_entry *p, *n;
 
-	/* quick check if we run Intel */
 	if (cpu_data(0).x86_vendor != X86_VENDOR_INTEL)
 		goto exit;
 
@@ -461,10 +405,6 @@ static int __init coretemp_init(void)
 	for_each_online_cpu(i) {
 		struct cpuinfo_x86 *c = &cpu_data(i);
 
-		/* check if family 6, models 0xe (Pentium M DC),
-		  0xf (Core 2 DC 65nm), 0x16 (Core 2 SC 65nm),
-		  0x17 (Penryn 45nm), 0x1a (Nehalem), 0x1c (Atom),
-		  0x1e (Lynnfield) */
 		if ((c->cpuid_level < 0) || (c->x86 != 0x6) ||
 		    !((c->x86_model == 0xe) || (c->x86_model == 0xf) ||
 			(c->x86_model == 0x16) || (c->x86_model == 0x17) ||
@@ -477,8 +417,6 @@ static int __init coretemp_init(void)
 #endif
 			(c->x86_model == 0x1e))) {
 
-			/* supported CPU not found, but report the unknown
-			   family 6 CPU */
 			if ((c->x86 == 0x6) && (c->x86_model > 0xf))
 				printk(KERN_WARNING DRVNAME ": Unknown CPU "
 					"model %x\n", c->x86_model);
@@ -555,8 +493,7 @@ int syno_cpu_temperature(struct _SynoCpuTemp *pCpuTemp)
         if( MAX_CPU < iIndex ) {
             printk("Wrong cpu core: %d\n",  iIndex);
         } else {
-			/* no need to check data->valid, so even !data->valid we also return data->temp which
-			 * is the last valid temperature */
+			 
             pCpuTemp->cpu_temp[iIndex] = data->temp / 1000;
         }
     }

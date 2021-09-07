@@ -6,7 +6,6 @@
 
 #include <linux/mutex.h>
 
-/* Since UDF 2.01 is ISO 13346 based... */
 #define UDF_SUPER_MAGIC			0x15013346
 
 #define UDF_MAX_READ_VERSION		0x0250
@@ -25,8 +24,8 @@
 #define UDF_FLAG_VARCONV		8
 #define UDF_FLAG_NLS_MAP		9
 #define UDF_FLAG_UTF8			10
-#define UDF_FLAG_UID_FORGET     11    /* save -1 for uid to disk */
-#define UDF_FLAG_UID_IGNORE     12    /* use sb uid instead of on disk uid */
+#define UDF_FLAG_UID_FORGET     11     
+#define UDF_FLAG_UID_IGNORE     12     
 #define UDF_FLAG_GID_FORGET     13
 #define UDF_FLAG_GID_IGNORE     14
 #define UDF_FLAG_UID_SET	15
@@ -57,7 +56,7 @@
 
 #define UDF_INVALID_MODE		((mode_t)-1)
 
-#pragma pack(1) /* XXX(hch): Why?  This file just defines in-core structures */
+#pragma pack(1)  
 
 struct udf_meta_data {
 	__u32	s_meta_file_loc;
@@ -117,44 +116,35 @@ struct udf_sb_info {
 	struct udf_part_map	*s_partmaps;
 	__u8			s_volume_ident[32];
 
-	/* Overall info */
 	__u16			s_partitions;
 	__u16			s_partition;
 
-	/* Sector headers */
 	__s32			s_session;
 	__u32			s_anchor;
 	__u32			s_last_block;
 
 	struct buffer_head	*s_lvid_bh;
 
-	/* Default permissions */
 	mode_t			s_umask;
 	gid_t			s_gid;
 	uid_t			s_uid;
 	mode_t			s_fmode;
 	mode_t			s_dmode;
 
-	/* Root Info */
 	struct timespec		s_record_time;
 
-	/* Fileset Info */
 	__u16			s_serial_number;
 
-	/* highest UDF revision we have recorded to this media */
 	__u16			s_udfrev;
 
-	/* Miscellaneous flags */
 	__u32			s_flags;
 
-	/* Encoding info */
 	struct nls_table	*s_nls_map;
 
-	/* VAT inode */
 	struct inode		*s_vat_inode;
 
 	struct mutex		s_alloc_mutex;
-	/* Protected by s_alloc_mutex */
+	 
 	unsigned int		s_lvid_dirty;
 };
 
@@ -171,4 +161,4 @@ int udf_compute_nr_groups(struct super_block *sb, u32 partition);
 #define UDF_SET_FLAG(X,Y)			( UDF_SB(X)->s_flags |= ( 1 << (Y) ) )
 #define UDF_CLEAR_FLAG(X,Y)			( UDF_SB(X)->s_flags &= ~( 1 << (Y) ) )
 
-#endif /* __LINUX_UDF_SB_H */
+#endif  

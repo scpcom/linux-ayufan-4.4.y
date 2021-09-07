@@ -1,7 +1,6 @@
-// Copyright (c) 2000-2009 Synology Inc. All rights reserved.
-
-#include <linux/kernel.h> /* printk() */
-#include <linux/errno.h>  /* error codes */
+ 
+#include <linux/kernel.h>  
+#include <linux/errno.h>   
 #include <linux/delay.h>
 #include <linux/synobios.h>
 #include "bandon_common.h"

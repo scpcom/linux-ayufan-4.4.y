@@ -1,8 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-// Copyright (c) 2000-2009 Synology Inc. All rights reserved.
-
+ 
 #include <linux/synobios.h>
 #include "../mapping.h"
 

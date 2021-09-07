@@ -2,22 +2,7 @@
 #define MY_ABC_HERE
 #endif
 #ifdef MY_DEF_HERE
-/*
- * Copyright (C) 2008 Freescale Semiconductor, Inc. All rights reserved.
- *
- * Description: Suspend support for ULI M1575 i8259 on MPC8572DS
- *
- * Changelog:
- * May 2008 Jason Jin <jason.jin@freescale.com >
- * - Initialization
- *
- * This file is part of the Linux kernel
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 as published
- * by the Free Software Foundation.
- */
-
+ 
 #include <linux/stddef.h>
 #include <linux/kernel.h>
 #include <linux/pci.h>
@@ -113,4 +98,4 @@ static int uli8259_suspend_init(void)
 }
 
 module_init(uli8259_suspend_init);
-#endif /* MY_DEF_HERE */
+#endif  

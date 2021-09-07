@@ -1,12 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/stat.c
- *
- *  Copyright (C) 1991, 1992  Linus Torvalds
- */
-
+ 
 #include <linux/module.h>
 #include <linux/mm.h>
 #include <linux/errno.h>
@@ -33,7 +28,7 @@ extern int syno_hibernation_log_sec;
 
 #ifdef CONFIG_OXNAS_FAST_WRITES
 extern inline loff_t i_tent_size_read(const struct inode *inode);
-#endif // CONFIG_OXNAS_FAST_WRITES
+#endif  
 
 void generic_fillattr(struct inode *inode, struct kstat *stat)
 {
@@ -63,7 +58,7 @@ void generic_fillattr(struct inode *inode, struct kstat *stat)
 		loff_t tent_size = i_tent_size_read(inode);
 		stat->size = (tent_size > stat->size) ? tent_size : stat->size;
 	}
-#endif //CONFIG_OXNAS_FAST_WRITES
+#endif  
 #endif
 	stat->blocks = inode->i_blocks;
 	stat->blksize = (1 << inode->i_blkbits);
@@ -93,7 +88,7 @@ int vfs_getattr(struct vfsmount *mnt, struct dentry *dentry, struct kstat *stat)
 
 		return 0;
 	}
-#endif //CONFIG_FS_SYNO_ACL
+#endif  
 
 	if (inode->i_op->getattr)
 		return inode->i_op->getattr(mnt, dentry, stat);
@@ -154,10 +149,6 @@ EXPORT_SYMBOL(vfs_lstat);
 
 #ifdef __ARCH_WANT_OLD_STAT
 
-/*
- * For backward compatibility?  Maybe this should be moved
- * into arch/i386 instead?
- */
 static int cp_old_stat(struct kstat *stat, struct __old_kernel_stat __user * statbuf)
 {
 	static int warncount = 5;
@@ -168,7 +159,7 @@ static int cp_old_stat(struct kstat *stat, struct __old_kernel_stat __user * sta
 		printk(KERN_WARNING "VFS: Warning: %s using old stat() call. Recompile your binary.\n",
 			current->comm);
 	} else if (warncount < 0) {
-		/* it's laughable, but... */
+		 
 		warncount = 0;
 	}
 
@@ -235,7 +226,7 @@ SYSCALL_DEFINE2(fstat, unsigned int, fd, struct __old_kernel_stat __user *, stat
 	return error;
 }
 
-#endif /* __ARCH_WANT_OLD_STAT */
+#endif  
 
 static int cp_new_stat(struct kstat *stat, struct stat __user *statbuf)
 {
@@ -383,7 +374,7 @@ asmlinkage long sys_SYNODecryptName(char __user * root, char __user * src, char 
 		err = PTR_ERR(src_name);
 		goto OUT_RELEASE;
 	}
-	// strsep() will move src_walk, so we should keep the head for free mem
+	 
 	src_walk = src_name;
 	root_name = getname(root);
 	if (IS_ERR(root_name)) {
@@ -518,10 +509,7 @@ SYSCALL_DEFINE3(readlink, const char __user *, path, char __user *, buf,
 }
 
 #ifdef MY_ABC_HERE
-/* This stat is used by caseless protocol.
- * The filename will be convert to real filename and return to user space.
- * In caller, the length of filename must equal or be larger than SYNO_SMB_PSTRING_LEN.
-*/
+ 
 int __SYNOCaselessStat(char __user * filename, int isLink, struct kstat *stat)
 {
 	struct path path;
@@ -577,7 +565,6 @@ int __SYNOCaselessStat(char __user * filename, int isLink, struct kstat *stat)
 EXPORT_SYMBOL(__SYNOCaselessStat);
 #endif
 
-/* ---------- LFS-64 ----------- */
 #ifdef __ARCH_WANT_STAT64
 
 static long cp_new_stat64(struct kstat *stat, struct stat64 __user *statbuf)
@@ -586,7 +573,7 @@ static long cp_new_stat64(struct kstat *stat, struct stat64 __user *statbuf)
 
 	memset(&tmp, 0, sizeof(struct stat64));
 #ifdef CONFIG_MIPS
-	/* mips has weird padding, so we don't get 64 bits there */
+	 
 	if (!new_valid_dev(stat->dev) || !new_valid_dev(stat->rdev))
 		return -EOVERFLOW;
 	tmp.st_dev = new_encode_dev(stat->dev);
@@ -687,21 +674,21 @@ static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYN
 				goto Out;
 			}
 		}
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef MY_ABC_HERE
 		if (flags & SYNOST_CREATIME) {
 			if (copy_to_user(&pSt64->ext.creatTime, &pKst->SynoCreateTime, sizeof(pSt64->ext.creatTime))){
 				goto Out;
 			}
 		}
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef MY_ABC_HERE
 		if (flags & SYNOST_BKPVER) {
 			if (__put_user(pKst->syno_archive_version, &pSt64->ext.bkpVer)){
 				goto Out;
 			}
 		}
-#endif /* MY_ABC_HERE */
+#endif  
 	} else if (pSt) {
 		if (flags & SYNOST_STAT) {
 			if(0 != (error = cp_new_stat(pKst, &pSt->st))){
@@ -714,7 +701,7 @@ static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYN
 				goto Out;
 			}
 		}
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef MY_ABC_HERE
 		if (flags & SYNOST_CREATIME) {
 			if (copy_to_user(&pSt->ext.creatTime, &pKst->SynoCreateTime, sizeof(pSt->ext.creatTime))){
@@ -728,7 +715,7 @@ static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYN
 				goto Out;
 			}
 		}
-#endif /* MY_ABC_HERE */
+#endif  
 	} else {
 		error = -EINVAL;
 		goto Out;
@@ -810,7 +797,7 @@ SYSCALL_DEFINE3(SYNOLStat64, char __user *, filename, unsigned int, flags, struc
 {
 	return do_SYNOStat(filename, 1, flags, NULL, pSt);
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 
@@ -867,9 +854,8 @@ asmlinkage long sys_SYNOCaselessLStat64(char __user * filename, struct stat64 __
 }
 #endif
 
-#endif /* __ARCH_WANT_STAT64 */
+#endif  
 
-/* Caller is here responsible for sufficient locking (ie. inode->i_lock) */
 void __inode_add_bytes(struct inode *inode, loff_t bytes)
 {
 	inode->i_blocks += bytes >> 9;
@@ -919,8 +905,7 @@ EXPORT_SYMBOL(inode_get_bytes);
 
 void inode_set_bytes(struct inode *inode, loff_t bytes)
 {
-	/* Caller is here responsible for sufficient locking
-	 * (ie. inode->i_lock) */
+	 
 	inode->i_blocks = bytes >> 9;
 	inode->i_bytes = bytes & 511;
 }

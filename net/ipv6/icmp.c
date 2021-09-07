@@ -1,34 +1,4 @@
-/*
- *	Internet Control Message Protocol (ICMPv6)
- *	Linux INET6 implementation
- *
- *	Authors:
- *	Pedro Roque		<roque@di.fc.ul.pt>
- *
- *	Based on net/ipv4/icmp.c
- *
- *	RFC 1885
- *
- *	This program is free software; you can redistribute it and/or
- *      modify it under the terms of the GNU General Public License
- *      as published by the Free Software Foundation; either version
- *      2 of the License, or (at your option) any later version.
- */
-
-/*
- *	Changes:
- *
- *	Andi Kleen		:	exception handling
- *	Andi Kleen			add rate limits. never reply to a icmp.
- *					add more length checks and other fixes.
- *	yoshfuji		:	ensure to sent parameter problem for
- *					fragments.
- *	YOSHIFUJI Hideaki @USAGI:	added sysctl for icmp rate limit.
- *	Randy Dunlap and
- *	YOSHIFUJI Hideaki @USAGI:	Per-interface statistics support
- *	Kazunori MIYAZAWA @USAGI:       change output process to use ip6_append_data
- */
-
+ 
 #include <linux/module.h>
 #include <linux/errno.h>
 #include <linux/types.h>
@@ -72,13 +42,6 @@ EXPORT_SYMBOL(icmpv6_statistics);
 DEFINE_SNMP_STAT(struct icmpv6msg_mib, icmpv6msg_statistics) __read_mostly;
 EXPORT_SYMBOL(icmpv6msg_statistics);
 
-/*
- *	The ICMP socket(s). This is the most convenient way to flow control
- *	our ICMP output as well as maintain a clean interface throughout
- *	all layers. All Socketless IP sends will soon be gone.
- *
- *	On SMP we have one ICMP socket per-cpu.
- */
 static inline struct sock *icmpv6_sk(struct net *net)
 {
 	return net->ipv6.icmp_sk[smp_processor_id()];
@@ -103,10 +66,7 @@ static __inline__ struct sock *icmpv6_xmit_lock(struct net *net)
 #else
 	if (unlikely(!spin_trylock(&sk->sk_lock.slock))) {
 #endif
-		/* This can happen if the output path (f.e. SIT or
-		 * ip6ip6 tunnel) signals dst_link_failure() for an
-		 * outgoing ICMP6 packet.
-		 */
+		 
 		local_bh_enable();
 		return NULL;
 	}
@@ -122,25 +82,11 @@ static __inline__ void icmpv6_xmit_unlock(struct sock *sk)
 #endif
 }
 
-/*
- * Slightly more convenient version of icmpv6_send.
- */
 void icmpv6_param_prob(struct sk_buff *skb, u8 code, int pos)
 {
 	icmpv6_send(skb, ICMPV6_PARAMPROB, code, pos, skb->dev);
 	kfree_skb(skb);
 }
-
-/*
- * Figure out, may we reply to this packet with icmp error.
- *
- * We do not reply, if:
- *	- it was icmp error message.
- *	- it is truncated, so that it is known, that protocol is ICMPV6
- *	  (i.e. in the middle of some exthdr)
- *
- *	--ANK (980726)
- */
 
 static int is_ineligible(struct sk_buff *skb)
 {
@@ -166,9 +112,6 @@ static int is_ineligible(struct sk_buff *skb)
 	return 0;
 }
 
-/*
- * Check the ICMP output rate limit
- */
 static inline int icmpv6_xrlim_allow(struct sock *sk, u8 type,
 				     struct flowi *fl)
 {
@@ -176,19 +119,12 @@ static inline int icmpv6_xrlim_allow(struct sock *sk, u8 type,
 	struct net *net = sock_net(sk);
 	int res = 0;
 
-	/* Informational messages are not limited. */
 	if (type & ICMPV6_INFOMSG_MASK)
 		return 1;
 
-	/* Do not limit pmtu discovery, it would break it. */
 	if (type == ICMPV6_PKT_TOOBIG)
 		return 1;
 
-	/*
-	 * Look up the output route.
-	 * XXX: perhaps the expire for routing entries cloned by
-	 * this lookup should be more aggressive (not longer than timeout).
-	 */
 	dst = ip6_route_output(net, sk, fl);
 	if (dst->error) {
 		IP6_INC_STATS(net, ip6_dst_idev(dst),
@@ -199,7 +135,6 @@ static inline int icmpv6_xrlim_allow(struct sock *sk, u8 type,
 		struct rt6_info *rt = (struct rt6_info *)dst;
 		int tmo = net->ipv6.sysctl.icmpv6_time;
 
-		/* Give more bandwidth to wider prefixes. */
 		if (rt->rt6i_dst.plen < 128)
 			tmo >>= ((128 - rt->rt6i_dst.plen)>>5);
 
@@ -208,13 +143,6 @@ static inline int icmpv6_xrlim_allow(struct sock *sk, u8 type,
 	dst_release(dst);
 	return res;
 }
-
-/*
- *	an inline helper for the "simple" if statement below
- *	checks if parameter problem report is caused by an
- *	unrecognized IPv6 option that has the Option Type
- *	highest-order two bits set to 10
- */
 
 static __inline__ int opt_unrec(struct sk_buff *skb, __u32 offset)
 {
@@ -310,9 +238,6 @@ static void mip6_addr_swap(struct sk_buff *skb)
 static inline void mip6_addr_swap(struct sk_buff *skb) {}
 #endif
 
-/*
- *	Send an ICMP message in response to a packet in error
- */
 void icmpv6_send(struct sk_buff *skb, u8 type, u8 code, __u32 info,
 		 struct net_device *dev)
 {
@@ -338,20 +263,10 @@ void icmpv6_send(struct sk_buff *skb, u8 type, u8 code, __u32 info,
 	    (skb->network_header + sizeof(*hdr)) > skb->tail)
 		return;
 
-	/*
-	 *	Make sure we respect the rules
-	 *	i.e. RFC 1885 2.4(e)
-	 *	Rule (e.1) is enforced by not using icmpv6_send
-	 *	in any code that processes icmp errors.
-	 */
 	addr_type = ipv6_addr_type(&hdr->daddr);
 
 	if (ipv6_chk_addr(net, &hdr->daddr, skb->dev, 0))
 		saddr = &hdr->daddr;
-
-	/*
-	 *	Dest addr check
-	 */
 
 	if ((addr_type & IPV6_ADDR_MULTICAST || skb->pkt_type != PACKET_HOST)) {
 		if (type != ICMPV6_PKT_TOOBIG &&
@@ -365,27 +280,14 @@ void icmpv6_send(struct sk_buff *skb, u8 type, u8 code, __u32 info,
 
 	addr_type = ipv6_addr_type(&hdr->saddr);
 
-	/*
-	 *	Source addr check
-	 */
-
 	if (addr_type & IPV6_ADDR_LINKLOCAL)
 		iif = skb->dev->ifindex;
 
-	/*
-	 *	Must not send error if the source does not uniquely
-	 *	identify a single node (RFC2463 Section 2.4).
-	 *	We check unspecified / multicast addresses here,
-	 *	and anycast addresses will be checked later.
-	 */
 	if ((addr_type == IPV6_ADDR_ANY) || (addr_type & IPV6_ADDR_MULTICAST)) {
 		LIMIT_NETDEBUG(KERN_DEBUG "icmpv6_send: addr_any/mcast source\n");
 		return;
 	}
 
-	/*
-	 *	Never answer to a ICMP packet.
-	 */
 	if (is_ineligible(skb)) {
 		LIMIT_NETDEBUG(KERN_DEBUG "icmpv6_send: no reply to icmp error\n");
 		return;
@@ -423,16 +325,11 @@ void icmpv6_send(struct sk_buff *skb, u8 type, u8 code, __u32 info,
 	if (err)
 		goto out;
 
-	/*
-	 * We won't send icmp if the destination is known
-	 * anycast.
-	 */
 	if (((struct rt6_info *)dst)->rt6i_flags & RTF_ANYCAST) {
 		LIMIT_NETDEBUG(KERN_DEBUG "icmpv6_send: acast source\n");
 		goto out_dst_release;
 	}
 
-	/* No need to clone since we're just using its address. */
 	dst2 = dst;
 
 	err = xfrm_lookup(net, &dst, &fl, sk, 0);
@@ -601,7 +498,7 @@ static void icmpv6_notify(struct sk_buff *skb, u8 type, u8 code, __be32 info)
 
 	nexthdr = ((struct ipv6hdr *)skb->data)->nexthdr;
 	if (ipv6_ext_hdr(nexthdr)) {
-		/* now skip over extension headers */
+		 
 		inner_offset = ipv6_skip_exthdr(skb, sizeof(struct ipv6hdr), &nexthdr);
 		if (inner_offset<0)
 			return;
@@ -609,16 +506,8 @@ static void icmpv6_notify(struct sk_buff *skb, u8 type, u8 code, __be32 info)
 		inner_offset = sizeof(struct ipv6hdr);
 	}
 
-	/* Checkin header including 8 bytes of inner protocol header. */
 	if (!pskb_may_pull(skb, inner_offset+8))
 		return;
-
-	/* BUGGG_FUTURE: we should try to parse exthdrs in this packet.
-	   Without this we will not able f.e. to make source routed
-	   pmtu discovery.
-	   Corresponding argument (opt) to notifiers is already added.
-	   --ANK (980726)
-	 */
 
 	hash = nexthdr & (MAX_INET_PROTOS - 1);
 
@@ -630,10 +519,6 @@ static void icmpv6_notify(struct sk_buff *skb, u8 type, u8 code, __be32 info)
 
 	raw6_icmp_error(skb, nexthdr, type, code, inner_offset, info);
 }
-
-/*
- *	Handle icmp messages
- */
 
 static int icmpv6_rcv(struct sk_buff *skb)
 {
@@ -669,13 +554,12 @@ static int icmpv6_rcv(struct sk_buff *skb)
 	saddr = &ipv6_hdr(skb)->saddr;
 	daddr = &ipv6_hdr(skb)->daddr;
 
-	/* Perform checksum. */
 	switch (skb->ip_summed) {
 	case CHECKSUM_COMPLETE:
 		if (!csum_ipv6_magic(saddr, daddr, skb->len, IPPROTO_ICMPV6,
 				     skb->csum))
 			break;
-		/* fall through */
+		 
 	case CHECKSUM_NONE:
 		skb->csum = ~csum_unfold(csum_ipv6_magic(saddr, daddr, skb->len,
 					     IPPROTO_ICMPV6, 0));
@@ -701,25 +585,17 @@ static int icmpv6_rcv(struct sk_buff *skb)
 		break;
 
 	case ICMPV6_ECHO_REPLY:
-		/* we couldn't care less */
+		 
 		break;
 
 	case ICMPV6_PKT_TOOBIG:
-		/* BUGGG_FUTURE: if packet contains rthdr, we cannot update
-		   standard destination cache. Seems, only "advanced"
-		   destination cache will allow to solve this problem
-		   --ANK (980726)
-		 */
+		 
 		if (!pskb_may_pull(skb, sizeof(struct ipv6hdr)))
 			goto discard_it;
 		hdr = icmp6_hdr(skb);
 		orig_hdr = (struct ipv6hdr *) (hdr + 1);
 		rt6_pmtu_discovery(&orig_hdr->daddr, &orig_hdr->saddr, dev,
 				   ntohl(hdr->icmp6_mtu));
-
-		/*
-		 *	Drop through to notify
-		 */
 
 	case ICMPV6_DEST_UNREACH:
 	case ICMPV6_TIME_EXCEED:
@@ -756,14 +632,8 @@ static int icmpv6_rcv(struct sk_buff *skb)
 	default:
 		LIMIT_NETDEBUG(KERN_DEBUG "icmpv6: msg of unknown type\n");
 
-		/* informational */
 		if (type & ICMPV6_INFOMSG_MASK)
 			break;
-
-		/*
-		 * error of unknown type.
-		 * must pass to upper level
-		 */
 
 		icmpv6_notify(skb, type, hdr->icmp6_code, hdr->icmp6_mtu);
 	}
@@ -794,9 +664,6 @@ void icmpv6_flow_init(struct sock *sk, struct flowi *fl,
 	security_sk_classify_flow(sk, fl);
 }
 
-/*
- * Special lock-class for __icmpv6_sk:
- */
 static struct lock_class_key icmpv6_socket_sk_dst_lock_key;
 
 static int __net_init icmpv6_sk_init(struct net *net)
@@ -822,18 +689,9 @@ static int __net_init icmpv6_sk_init(struct net *net)
 
 		net->ipv6.icmp_sk[i] = sk;
 
-		/*
-		 * Split off their lock-class, because sk->sk_dst_lock
-		 * gets used from softirqs, which is safe for
-		 * __icmpv6_sk (because those never get directly used
-		 * via userspace syscalls), but unsafe for normal sockets.
-		 */
 		lockdep_set_class(&sk->sk_dst_lock,
 				  &icmpv6_socket_sk_dst_lock_key);
 
-		/* Enough space for 2 64K ICMP packets, including
-		 * sk_buff struct overhead.
-		 */
 		sk->sk_sndbuf =
 			(2 * ((64 * 1024) + sizeof(struct sk_buff)));
 	}
@@ -890,23 +748,23 @@ static const struct icmp6_err {
 	int err;
 	int fatal;
 } tab_unreach[] = {
-	{	/* NOROUTE */
+	{	 
 		.err	= ENETUNREACH,
 		.fatal	= 0,
 	},
-	{	/* ADM_PROHIBITED */
+	{	 
 		.err	= EACCES,
 		.fatal	= 1,
 	},
-	{	/* Was NOT_NEIGHBOUR, now reserved */
+	{	 
 		.err	= EHOSTUNREACH,
 		.fatal	= 0,
 	},
-	{	/* ADDR_UNREACH	*/
+	{	 
 		.err	= EHOSTUNREACH,
 		.fatal	= 0,
 	},
-	{	/* PORT_UNREACH	*/
+	{	 
 		.err	= ECONNREFUSED,
 		.fatal	= 1,
 	},

@@ -1,27 +1,12 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/fat/misc.c
- *
- *  Written 1992,1993 by Werner Almesberger
- *  22/11/2000 - Fixed fat_date_unix2dos for dates earlier than 01/01/1980
- *		 and date_dos2unix for date==0 by Igor Zhbanov(bsg@uniyar.ac.ru)
- */
-
+ 
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/buffer_head.h>
 #include "fat.h"
 
-/*
- * fat_fs_error reports a file system problem that might indicate fa data
- * corruption/inconsistency. Depending on 'errors' mount option the
- * panic() is called, or error message is printed FAT and nothing is done,
- * or filesystem is remounted read-only (default behavior).
- * In case the file system is remounted read-only, it can be made writable
- * again by remounting it.
- */
 void fat_fs_error(struct super_block *s, const char *fmt, ...)
 {
 	struct fat_mount_options *opts = &MSDOS_SB(s)->options;
@@ -47,8 +32,6 @@ void fat_fs_error(struct super_block *s, const char *fmt, ...)
 }
 EXPORT_SYMBOL_GPL(fat_fs_error);
 
-/* Flushes the number of free clusters on FAT32 */
-/* XXX: Need to write one per FSINFO block.  Currently only writes 1 */
 int fat_clusters_flush(struct super_block *sb)
 {
 	struct msdos_sb_info *sbi = MSDOS_SB(sb);
@@ -65,7 +48,7 @@ int fat_clusters_flush(struct super_block *sb)
 	}
 
 	fsinfo = (struct fat_boot_fsinfo *)bh->b_data;
-	/* Sanity check */
+	 
 	if (!IS_FSINFO(fsinfo)) {
 		printk(KERN_ERR "FAT: Invalid FSINFO signature: "
 		       "0x%08x, 0x%08x (sector = %lu)\n",
@@ -84,20 +67,12 @@ int fat_clusters_flush(struct super_block *sb)
 	return 0;
 }
 
-/*
- * fat_chain_add() adds a new cluster to the chain of clusters represented
- * by inode.
- */
 int fat_chain_add(struct inode *inode, int new_dclus, int nr_cluster)
 {
 	struct super_block *sb = inode->i_sb;
 	struct msdos_sb_info *sbi = MSDOS_SB(sb);
 	int ret, new_fclus, last;
 
-	/*
-	 * We must locate the last cluster of the file to add this new
-	 * one (new_dclus) to the end of the link list (the FAT).
-	 */
 	last = new_fclus = 0;
 	if (MSDOS_I(inode)->i_start) {
 		int fclus, dclus;
@@ -109,7 +84,6 @@ int fat_chain_add(struct inode *inode, int new_dclus, int nr_cluster)
 		last = dclus;
 	}
 
-	/* add new one to the last of the cluster chain */
 	if (last) {
 		struct fat_entry fatent;
 
@@ -122,14 +96,11 @@ int fat_chain_add(struct inode *inode, int new_dclus, int nr_cluster)
 		}
 		if (ret < 0)
 			return ret;
-//		fat_cache_add(inode, new_fclus, new_dclus);
+ 
 	} else {
 		MSDOS_I(inode)->i_start = new_dclus;
 		MSDOS_I(inode)->i_logstart = new_dclus;
-		/*
-		 * Since generic_write_sync() synchronizes regular files later,
-		 * we sync here only directories.
-		 */
+		 
 		if (S_ISDIR(inode->i_mode) && IS_DIRSYNC(inode)) {
 			ret = fat_sync_inode(inode);
 			if (ret)
@@ -150,16 +121,6 @@ int fat_chain_add(struct inode *inode, int new_dclus, int nr_cluster)
 
 extern struct timezone sys_tz;
 
-/*
- * The epoch of FAT timestamp is 1980.
- *     :  bits :     value
- * date:  0 -  4: day	(1 -  31)
- * date:  5 -  8: month	(1 -  12)
- * date:  9 - 15: year	(0 - 127) from 1980
- * time:  0 -  4: sec	(0 -  29) 2sec counts
- * time:  5 - 10: min	(0 -  59)
- * time: 11 - 15: hour	(0 -  23)
- */
 #define SECS_PER_MIN	60
 #define SECS_PER_HOUR	(60 * 60)
 #define SECS_PER_DAY	(SECS_PER_HOUR * 24)
@@ -167,19 +128,17 @@ extern struct timezone sys_tz;
 #if BITS_PER_LONG == 64
 #define UNIX_SECS_2108	4354819200L
 #endif
-/* days between 1.1.70 and 1.1.80 (2 leap days) */
+ 
 #define DAYS_DELTA	(365 * 10 + 2)
-/* 120 (2100 - 1980) isn't leap year */
+ 
 #define YEAR_2100	120
 #define IS_LEAP_YEAR(y)	(!((y) & 3) && (y) != YEAR_2100)
 
-/* Linear day numbers of the respective 1sts in non-leap years. */
 static time_t days_in_year[] = {
-	/* Jan  Feb  Mar  Apr  May  Jun  Jul  Aug  Sep  Oct  Nov  Dec */
+	 
 	0,   0,  31,  59,  90, 120, 151, 181, 212, 243, 273, 304, 334, 0, 0, 0,
 };
 
-/* Convert a FAT time/date pair to a UNIX date (seconds since 1 1 70). */
 void fat_time_fat2unix(struct msdos_sb_info *sbi, struct timespec *ts,
 		       __le16 __time, __le16 __date, u8 time_cs)
 {
@@ -191,7 +150,7 @@ void fat_time_fat2unix(struct msdos_sb_info *sbi, struct timespec *ts,
 	day   = max(1, date & 0x1f) - 1;
 
 	leap_day = (year + 3) / 4;
-	if (year > YEAR_2100)		/* 2100 isn't leap year */
+	if (year > YEAR_2100)		 
 		leap_day--;
 	if (IS_LEAP_YEAR(year) && month > 2)
 		leap_day++;
@@ -215,7 +174,6 @@ void fat_time_fat2unix(struct msdos_sb_info *sbi, struct timespec *ts,
 	}
 }
 
-/* Convert linear UNIX date to a FAT time/date pair. */
 void fat_time_unix2fat(struct msdos_sb_info *sbi, struct timespec *ts,
 		       __le16 *time, __le16 *date, u8 *time_cs)
 {
@@ -225,7 +183,6 @@ void fat_time_unix2fat(struct msdos_sb_info *sbi, struct timespec *ts,
 	if (!sbi->options.tz_utc)
 		second -= sys_tz.tz_minuteswest * SECS_PER_MIN;
 
-	/* Jan 1 GMT 00:00:00 1980. But what about another time zone? */
 	if (second < UNIX_SECS_1980) {
 		*time = 0;
 		*date = cpu_to_le16((0 << 9) | (1 << 5) | 1);
@@ -246,12 +203,12 @@ void fat_time_unix2fat(struct msdos_sb_info *sbi, struct timespec *ts,
 	day = second / SECS_PER_DAY - DAYS_DELTA;
 	year = day / 365;
 	leap_day = (year + 3) / 4;
-	if (year > YEAR_2100)		/* 2100 isn't leap year */
+	if (year > YEAR_2100)		 
 		leap_day--;
 	if (year * 365 + leap_day > day)
 		year--;
 	leap_day = (year + 3) / 4;
-	if (year > YEAR_2100)		/* 2100 isn't leap year */
+	if (year > YEAR_2100)		 
 		leap_day--;
 	day -= year * 365 + leap_day;
 

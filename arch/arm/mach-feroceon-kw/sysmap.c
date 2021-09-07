@@ -1,28 +1,10 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
+ 
 #include "mvSysHwConfig.h"
 #include "ctrlEnv/sys/mvCpuIf.h"
 #include <asm/mach/map.h>
-
-/* for putstr */
-/* #include <asm/arch/uncompress.h> */
 
 MV_CPU_DEC_WIN* mv_sys_map(void);
 
@@ -32,13 +14,10 @@ u32 mv_crypto_base_get(void);
 
 #if defined(CONFIG_MV_INTERNAL_REGS_SELECTIVE_MAPPING)
 
-/* need to make sure it is big enough to hold all mapping entries */
 #define MEM_TABLE_MAX_ENTRIES	30
 
-/* default mapped entries */
 #define MEM_TABLE_ENTRIES	7
 
-/* number of entries to map */
 volatile u32 entries = MEM_TABLE_ENTRIES;
 
 struct _mv_internal_regs_map {
@@ -48,29 +27,26 @@ struct _mv_internal_regs_map {
 	u32 size;
 };
 
-/* Internal registers mapping table */
 struct _mv_internal_regs_map mv_internal_regs_map[] = {
 	{DRAM_UNIT_ID,    0, DRAM_BASE,                SZ_64K},
 	{CESA_UNIT_ID,    0, MV_CESA_TDMA_REG_BASE,    SZ_64K},
 	{USB_UNIT_ID,  	  0, USB_REG_BASE(0),          SZ_64K},
 	{XOR_UNIT_ID,  	  0, MV_XOR_REG_BASE,          SZ_64K},
-	{ETH_GIG_UNIT_ID, 0, MV_ETH_REG_BASE(0),       SZ_8K},  /* GbE port0 registers */
-	{ETH_GIG_UNIT_ID, 1, MV_ETH_REG_BASE(1),       SZ_8K},  /* GbE port1 registers */
-	{SATA_UNIT_ID,    0, (SATA_REG_BASE + 0x2000), SZ_8K }, /* SATA port0 registers */
-	{SATA_UNIT_ID,    1, (SATA_REG_BASE + 0x4000), SZ_8K }, /* SATA port1 registers */
+	{ETH_GIG_UNIT_ID, 0, MV_ETH_REG_BASE(0),       SZ_8K},   
+	{ETH_GIG_UNIT_ID, 1, MV_ETH_REG_BASE(1),       SZ_8K},   
+	{SATA_UNIT_ID,    0, (SATA_REG_BASE + 0x2000), SZ_8K },  
+	{SATA_UNIT_ID,    1, (SATA_REG_BASE + 0x4000), SZ_8K },  
 	{SDIO_UNIT_ID,    0, MV_SDIO_REG_BASE,         SZ_64K},
 	{AUDIO_UNIT_ID,   0, AUDIO_REG_BASE(0),        SZ_64K},
 	{TS_UNIT_ID,      0, TSU_GLOBAL_REG_BASE,      SZ_16K},
 	{TDM_UNIT_ID,     0, TDM_REG_BASE,             SZ_64K}
 };
 
-/* AHB to MBUS mapping entry */
 struct map_desc AHB_TO_MBUS_MAP[] = {
   {(INTER_REGS_BASE + MAX_AHB_TO_MBUS_REG_BASE), __phys_to_pfn(INTER_REGS_BASE + MAX_AHB_TO_MBUS_REG_BASE),
  		 SZ_64K, MT_DEVICE},
   };
 
-/* WARNING: update of this table requires updating MEM_TABLE_ENTRIES */
 struct map_desc  MEM_TABLE[MEM_TABLE_MAX_ENTRIES] = {
   {(INTER_REGS_BASE + MPP_REG_BASE),  __phys_to_pfn(INTER_REGS_BASE + MPP_REG_BASE),  SZ_64K,	      MT_DEVICE},
   {(INTER_REGS_BASE + SATA_REG_BASE), __phys_to_pfn(INTER_REGS_BASE + SATA_REG_BASE), SZ_8K,	      MT_DEVICE},
@@ -83,18 +59,17 @@ struct map_desc  MEM_TABLE[MEM_TABLE_MAX_ENTRIES] = {
 
 #else
 struct map_desc  MEM_TABLE[] =	{
-	/* no use for pex mem remap */	
-  /*{ PEX0_MEM_BASE,  		__phys_to_pfn(PEX0_MEM_BASE),   	PEX0_MEM_SIZE,  	MT_DEVICE},*/
+	 	
   { INTER_REGS_BASE, 		__phys_to_pfn(INTER_REGS_BASE), 	SZ_1M,  	     	MT_DEVICE},
   { PEX0_IO_BASE,   		__phys_to_pfn(PEX0_IO_BASE),   	 	PEX0_IO_SIZE,  		MT_DEVICE},
   { NFLASH_CS_BASE, 		__phys_to_pfn(NFLASH_CS_BASE), 		NFLASH_CS_SIZE, 	MT_DEVICE},
   { SPI_CS_BASE, 		__phys_to_pfn(SPI_CS_BASE), 		SPI_CS_SIZE, 		MT_DEVICE},
   { CRYPT_ENG_BASE, 		      __phys_to_pfn(CRYPT_ENG_BASE), 		      CRYPT_ENG_SIZE, MT_DEVICE},
 };
-#endif /* CONFIG_MV_INTERNAL_REGS_SELECTIVE_MAPPING */
+#endif  
 
 MV_CPU_DEC_WIN SYSMAP_88F6281[] = {
-  	 /* base low        base high    size       	WinNum     enable */
+  	  
 	{{SDRAM_CS0_BASE ,    0,      SDRAM_CS0_SIZE } ,0xFFFFFFFF,DIS},
 	{{SDRAM_CS1_BASE ,    0,      SDRAM_CS1_SIZE } ,0xFFFFFFFF,DIS},
 	{{SDRAM_CS2_BASE ,    0,      SDRAM_CS2_SIZE } ,0xFFFFFFFF,DIS},
@@ -113,7 +88,7 @@ MV_CPU_DEC_WIN SYSMAP_88F6281[] = {
 };
 
 MV_CPU_DEC_WIN SYSMAP_88F6282[] = {
-         /* base low        base high    size           WinNum     enable */
+          
         {{SDRAM_CS0_BASE ,    0,      SDRAM_CS0_SIZE } ,0xFFFFFFFF,DIS},
         {{SDRAM_CS1_BASE ,    0,      SDRAM_CS1_SIZE } ,0xFFFFFFFF,DIS},
         {{SDRAM_CS2_BASE ,    0,      SDRAM_CS2_SIZE } ,0xFFFFFFFF,DIS},
@@ -132,7 +107,7 @@ MV_CPU_DEC_WIN SYSMAP_88F6282[] = {
 };
 
 MV_CPU_DEC_WIN SYSMAP_88F6180[] = {
-  	 /* base low        base high    size       	WinNum     enable */
+  	  
 	{{SDRAM_CS0_BASE ,    0,      SDRAM_CS0_SIZE } ,0xFFFFFFFF,DIS},
 	{{SDRAM_CS1_BASE ,    0,      SDRAM_CS1_SIZE } ,0xFFFFFFFF,DIS},
 	{{SDRAM_CS2_BASE ,    0,      SDRAM_CS2_SIZE } ,0xFFFFFFFF,DIS},
@@ -151,7 +126,7 @@ MV_CPU_DEC_WIN SYSMAP_88F6180[] = {
 };
 
 MV_CPU_DEC_WIN SYSMAP_88F6280[] = {
-         /* base low        base high    size           WinNum     enable */
+          
         {{SDRAM_CS0_BASE ,    0,      SDRAM_CS0_SIZE } ,0xFFFFFFFF,DIS},
         {{SDRAM_CS1_BASE ,    0,      SDRAM_CS1_SIZE } ,0xFFFFFFFF,DIS},
         {{SDRAM_CS2_BASE ,    0,      SDRAM_CS2_SIZE } ,0xFFFFFFFF,DIS},
@@ -170,7 +145,7 @@ MV_CPU_DEC_WIN SYSMAP_88F6280[] = {
 };
 
 MV_CPU_DEC_WIN SYSMAP_88F6192[] = {
-  	 /* base low        base high    size       	WinNum     enable */
+  	  
 	{{SDRAM_CS0_BASE ,    0,      SDRAM_CS0_SIZE } ,0xFFFFFFFF,DIS},
 	{{SDRAM_CS1_BASE ,    0,      SDRAM_CS1_SIZE } ,0xFFFFFFFF,DIS},
 	{{SDRAM_CS2_BASE ,    0,      SDRAM_CS2_SIZE } ,0xFFFFFFFF,DIS},
@@ -194,7 +169,6 @@ void __init mv_build_map_table(void)
 {
 	u32 unit;
 	
-	/* prepare consecutive mapping table */
 	for(unit = 0; unit < ARRAY_SIZE(mv_internal_regs_map); unit++) {
 		if(MV_TRUE == mvCtrlPwrClckGet(mv_internal_regs_map[unit].id, mv_internal_regs_map[unit].index)) {
 			MEM_TABLE[entries].virtual = (INTER_REGS_BASE + mv_internal_regs_map[unit].offset);
@@ -206,7 +180,7 @@ void __init mv_build_map_table(void)
 	}
 }
 
-#endif /* CONFIG_MV_INTERNAL_REGS_SELECTIVE_MAPPING */
+#endif  
 
 MV_CPU_DEC_WIN* mv_sys_map(void)
 {
@@ -263,14 +237,13 @@ u32 mv_crypto_base_get(void)
 void __init mv_map_io(void)
 {
 #if defined(CONFIG_MV_INTERNAL_REGS_SELECTIVE_MAPPING)
-  	/* first, mappping AHB to MBUS entry for mvCtrlPwrClckGet access */
+  	 
 	iotable_init(AHB_TO_MBUS_MAP, ARRAY_SIZE(AHB_TO_MBUS_MAP));
 
-	/* build dynamic mapping table  */
 	mv_build_map_table();
 
 	iotable_init(MEM_TABLE, entries);
 #else
         iotable_init(MEM_TABLE, ARRAY_SIZE(MEM_TABLE));
-#endif /* CONFIG_MV_INTERNAL_REGS_SELECTIVE_MAPPING */	
+#endif  	
 }

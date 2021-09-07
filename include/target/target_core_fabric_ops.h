@@ -24,32 +24,21 @@ struct target_core_fabric_ops {
 	void (*tpg_release_fabric_acl)(struct se_portal_group_s *,
 					struct se_node_acl_s *);
 	u32 (*tpg_get_inst_index)(struct se_portal_group_s *);
-	/*
-	 * Optional function pointer for TCM fabric modules that use
-	 * Linux/NET sockets to allocate struct iovec array to se_cmd_t
-	 */
+	 
 	int (*alloc_cmd_iovecs)(struct se_cmd_s *);
-	/*
-	 * Optional to release se_cmd_t and fabric dependent allocated
-	 * I/O descriptor in transport_cmd_check_stop()
-	 */
+	 
 	void (*check_stop_free)(struct se_cmd_s *);
 	void (*release_cmd_to_pool)(struct se_cmd_s *);
 	void (*release_cmd_direct)(struct se_cmd_s *);
 	int (*dev_del_lun)(struct se_portal_group_s *, u32);
-	/*
-	 * Called with spin_lock_bh(se_portal_group_t->session_lock held.
-	 */
+	 
 	int (*shutdown_session)(struct se_session_s *);
 	void (*close_session)(struct se_session_s *);
 	void (*stop_session)(struct se_session_s *, int, int);
 	void (*fall_back_to_erl0)(struct se_session_s *);
 	int (*sess_logged_in)(struct se_session_s *);
 	u32 (*sess_get_index)(struct se_session_s *);
-	/*
-	 * Used only for SCSI fabrics that contain multi-value TransportIDs
-	 * (like iSCSI).  All other SCSI fabrics should set this to NULL.
-	 */
+	 
 	u32 (*sess_get_initiator_sid)(struct se_session_s *,
 				      unsigned char *, u32);
 	int (*write_pending)(struct se_cmd_s *);

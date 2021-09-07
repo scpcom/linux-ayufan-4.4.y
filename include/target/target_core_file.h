@@ -1,35 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  target_core_file.h
- *
- * This file contains the Storage Engine <-> FILEIO transport specific
- * definitions and prototypes.
- *
- * Copyright (c) 2005 PyX Technologies, Inc.
- * Copyright (c) 2006 SBE, Inc.  All Rights Reserved.
- * Copyright (c) 2007-2009 Rising Tide Software, Inc.
- * Copyright (c) 2008-2009 Linux-iSCSI.org
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #ifndef TARGET_CORE_FILE_H
 #define TARGET_CORE_FILE_H
 
@@ -37,7 +9,7 @@
 #ifdef MY_ABC_HERE
 #   define SYNO_LIO_MAX_NR_FILES    64
 #   define SYNO_LIO_FILE_IDX_WIDTH  3
-#   define SYNO_LIO_FILE_SIZE_SHIFT 40     /* 1T = 2^40 */
+#   define SYNO_LIO_FILE_SIZE_SHIFT 40      
 #   define SYNO_LIO_FILE_IDX(off)   ((off) >> (SYNO_LIO_FILE_SIZE_SHIFT))
 #   define SYNO_LIO_FILE_SIZE_MASK  ((1ULL << (SYNO_LIO_FILE_SIZE_SHIFT)) - 1)
 #   define SYNO_LIO_FILE_POS(off)   ((off) & (SYNO_LIO_FILE_SIZE_MASK))
@@ -46,7 +18,7 @@
 #define FD_VERSION		"3.1"
 
 #define FD_MAX_DEV_NAME		256
-/* Maximum queuedepth for the FILEIO HBA */
+ 
 #define FD_HBA_QUEUE_DEPTH	256
 #define FD_DEVICE_QUEUE_DEPTH	32
 #define FD_MAX_DEVICE_QUEUE_DEPTH 128
@@ -103,35 +75,34 @@ extern u32 fd_get_dma_length(u32, se_device_t *);
 extern u32 fd_get_max_sectors(se_device_t *);
 extern u32 fd_get_queue_depth(se_device_t *);
 extern u32 fd_get_max_queue_depth(se_device_t *);
-#endif /* ! FD_INCLUDE_STRUCTS */
+#endif  
 
 #define RRF_EMULATE_CDB		0x01
 #define RRF_GOT_LBA		0x02
 
 typedef struct fd_request_s {
-	/* SCSI CDB from iSCSI Command PDU */
+	 
 	unsigned char	fd_scsi_cdb[SCSI_CDB_SIZE];
-	/* Data Direction */
+	 
 	u8		fd_data_direction;
-	/* Total length of request */
+	 
 	u32		fd_bufflen;
-	/* RD request flags */
+	 
 	u32		fd_req_flags;
-	/* Offset from start of page */
+	 
 	u32		fd_offset;
 	u32		fd_cur_size;
 	u32		fd_cur_offset;
-	/* Scatterlist count */
+	 
 	u32		fd_sg_count;
-	/* Logical Block Address */
+	 
 	unsigned long long	fd_lba;
 	u64		fd_size;
 	struct kiocb	fd_iocb;
 	struct iovec	*fd_iovs;
-	/* Data buffer containing scatterlists(s) or contingous
-	   memory segments */
+	 
 	void		*fd_buf;
-	/* FILEIO device */
+	 
 	struct fd_dev_s	*fd_dev;
 } ____cacheline_aligned fd_request_t;
 
@@ -152,9 +123,9 @@ typedef struct fd_dev_s {
 	int		fd_claim_bd;
 	int		fd_major;
 	int		fd_minor;
-	/* Unique Ramdisk Device ID in Ramdisk HBA */
+	 
 	u32		fd_dev_id;
-	/* Number of SG tables in sg_table_array */
+	 
 	u32		fd_table_count;
 	u32		fd_queue_depth;
 	unsigned long long fd_dev_size;
@@ -165,9 +136,9 @@ typedef struct fd_dev_s {
 	struct file	*fd_file;
 #endif
 	struct block_device *fd_bd;
-	/* FILEIO HBA device is connected to */
+	 
 	struct fd_host_s *fd_host;
-	/* Next FILEIO Device entry in list */
+	 
 	struct fd_dev_s *next;
 	int (*fd_do_read)(fd_request_t *, se_task_t *);
 	int (*fd_do_write)(fd_request_t *, se_task_t *);
@@ -177,15 +148,12 @@ extern void __fd_get_dev_info(struct fd_dev_s *, char *, int *);
 
 typedef struct fd_host_s {
 	u32		fd_host_dev_id_count;
-	/* Unique FILEIO Host ID */
+	 
 	u32		fd_host_id;
 } ____cacheline_aligned fd_host_t;
 
 #ifndef FD_INCLUDE_STRUCTS
-/*
- * We use the generic command sequencer, so we must setup
- * se_subsystem_spc_t.
- */
+ 
 se_subsystem_spc_t fileio_template_spc = {
 	.inquiry		= fd_CDB_inquiry,
 	.none			= fd_CDB_none,
@@ -194,9 +162,6 @@ se_subsystem_spc_t fileio_template_spc = {
 	.write_non_SG		= fd_CDB_write_non_SG,
 	.write_SG		= fd_CDB_write_SG,
 };
-
-/*#warning FIXME v2.8: transport_type for FILEIO will need to change
-  with DIRECT_IO to blockdevs */
 
 se_subsystem_api_t fileio_template = {
 	.name			= "fileio",
@@ -235,6 +200,6 @@ se_subsystem_api_t fileio_template = {
 	.spc			= &fileio_template_spc,
 };
 
-#endif /* ! FD_INCLUDE_STRUCTS */
+#endif  
 
-#endif /* TARGET_CORE_FILE_H */
+#endif  

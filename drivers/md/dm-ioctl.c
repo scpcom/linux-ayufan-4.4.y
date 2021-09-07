@@ -1,13 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2001, 2002 Sistina Software (UK) Limited.
- * Copyright (C) 2004 - 2006 Red Hat, Inc. All rights reserved.
- *
- * This file is released under the GPL.
- */
-
+ 
 #include "dm.h"
 
 #include <linux/module.h>
@@ -25,10 +19,6 @@
 #define DM_MSG_PREFIX "ioctl"
 #define DM_DRIVER_EMAIL "dm-devel@redhat.com"
 
-/*-----------------------------------------------------------------
- * The ioctl interface needs to be able to look up devices by
- * name or uuid.
- *---------------------------------------------------------------*/
 struct hash_cell {
 	struct list_head name_list;
 	struct list_head uuid_list;
@@ -53,14 +43,8 @@ static struct list_head _uuid_buckets[NUM_BUCKETS];
 
 static void dm_hash_remove_all(int keep_open_devices);
 
-/*
- * Guards access to both hash tables.
- */
 static DECLARE_RWSEM(_hash_lock);
 
-/*
- * Protects use of mdptr to obtain hash cell name and uuid from mapped device.
- */
 static DEFINE_MUTEX(dm_hash_cells_mutex);
 
 static void init_buckets(struct list_head *buckets)
@@ -83,11 +67,6 @@ static void dm_hash_exit(void)
 	dm_hash_remove_all(0);
 }
 
-/*-----------------------------------------------------------------
- * Hash function:
- * We're not really concerned with the str hash function being
- * fast since it's only used by the ioctl interface.
- *---------------------------------------------------------------*/
 static unsigned int hash_str(const char *str)
 {
 	const unsigned int hash_mult = 2654435387U;
@@ -99,9 +78,6 @@ static unsigned int hash_str(const char *str)
 	return h & MASK_BUCKETS;
 }
 
-/*-----------------------------------------------------------------
- * Code for looking up a device by name
- *---------------------------------------------------------------*/
 static struct hash_cell *__get_name_cell(const char *str)
 {
 	struct hash_cell *hc;
@@ -130,9 +106,6 @@ static struct hash_cell *__get_uuid_cell(const char *str)
 	return NULL;
 }
 
-/*-----------------------------------------------------------------
- * Inserting, removing and renaming a device.
- *---------------------------------------------------------------*/
 static struct hash_cell *alloc_cell(const char *name, const char *uuid,
 				    struct mapped_device *md)
 {
@@ -176,24 +149,14 @@ static void free_cell(struct hash_cell *hc)
 	}
 }
 
-/*
- * The kdev_t and uuid of a device can never change once it is
- * initially inserted.
- */
 static int dm_hash_insert(const char *name, const char *uuid, struct mapped_device *md)
 {
 	struct hash_cell *cell, *hc;
 
-	/*
-	 * Allocate the new cells.
-	 */
 	cell = alloc_cell(name, uuid, md);
 	if (!cell)
 		return -ENOMEM;
 
-	/*
-	 * Insert the cell into both hash tables.
-	 */
 	down_write(&_hash_lock);
 	hc = __get_name_cell(name);
 	if (hc) {
@@ -230,7 +193,6 @@ static void __hash_remove(struct hash_cell *hc)
 {
 	struct dm_table *table;
 
-	/* remove from the dev hash */
 	list_del(&hc->uuid_list);
 	list_del(&hc->name_list);
 	mutex_lock(&dm_hash_cells_mutex);
@@ -273,10 +235,6 @@ retry:
 		}
 	}
 
-	/*
-	 * Some mapped devices may be using other mapped devices, so if any
-	 * still exist, repeat until we make no further progress.
-	 */
 	if (dev_skipped) {
 		if (dev_removed)
 			goto retry;
@@ -293,18 +251,12 @@ static int dm_hash_rename(uint32_t cookie, const char *old, const char *new)
 	struct hash_cell *hc;
 	struct dm_table *table;
 
-	/*
-	 * duplicate new.
-	 */
 	new_name = kstrdup(new, GFP_KERNEL);
 	if (!new_name)
 		return -ENOMEM;
 
 	down_write(&_hash_lock);
 
-	/*
-	 * Is new free ?
-	 */
 	hc = __get_name_cell(new);
 	if (hc) {
 		DMWARN("asked to rename to an already existing name %s -> %s",
@@ -315,9 +267,6 @@ static int dm_hash_rename(uint32_t cookie, const char *old, const char *new)
 		return -EBUSY;
 	}
 
-	/*
-	 * Is there such a device as 'old' ?
-	 */
 	hc = __get_name_cell(old);
 	if (!hc) {
 		DMWARN("asked to rename a non existent device %s -> %s",
@@ -327,9 +276,6 @@ static int dm_hash_rename(uint32_t cookie, const char *old, const char *new)
 		return -ENXIO;
 	}
 
-	/*
-	 * rename and move the name cell.
-	 */
 	list_del(&hc->name_list);
 	old_name = hc->name;
 	mutex_lock(&dm_hash_cells_mutex);
@@ -337,9 +283,6 @@ static int dm_hash_rename(uint32_t cookie, const char *old, const char *new)
 	mutex_unlock(&dm_hash_cells_mutex);
 	list_add(&hc->name_list, _name_buckets + hash_str(new_name));
 
-	/*
-	 * Wake up any dm event waiters.
-	 */
 	table = dm_get_table(hc->md);
 	if (table) {
 		dm_table_event(table);
@@ -354,13 +297,6 @@ static int dm_hash_rename(uint32_t cookie, const char *old, const char *new)
 	return 0;
 }
 
-/*-----------------------------------------------------------------
- * Implementation of the ioctl commands
- *---------------------------------------------------------------*/
-/*
- * All the ioctl commands get dispatched to functions with this
- * prototype.
- */
 typedef int (*ioctl_fn)(struct dm_ioctl *param, size_t param_size);
 
 static int remove_all(struct dm_ioctl *param, size_t param_size)
@@ -370,19 +306,12 @@ static int remove_all(struct dm_ioctl *param, size_t param_size)
 	return 0;
 }
 
-/*
- * Round up the ptr to an 8-byte boundary.
- */
 #define ALIGN_MASK 7
 static inline void *align_ptr(void *ptr)
 {
 	return (void *) (((size_t) (ptr + ALIGN_MASK)) & ~ALIGN_MASK);
 }
 
-/*
- * Retrieves the data payload buffer from an already allocated
- * struct dm_ioctl.
- */
 static void *get_result_buffer(struct dm_ioctl *param, size_t param_size,
 			       size_t *len)
 {
@@ -406,10 +335,6 @@ static int list_devices(struct dm_ioctl *param, size_t param_size)
 
 	down_write(&_hash_lock);
 
-	/*
-	 * Loop through all the devices working out how much
-	 * space we need.
-	 */
 	for (i = 0; i < NUM_BUCKETS; i++) {
 		list_for_each_entry (hc, _name_buckets + i, name_list) {
 			needed += sizeof(struct dm_name_list);
@@ -418,9 +343,6 @@ static int list_devices(struct dm_ioctl *param, size_t param_size)
 		}
 	}
 
-	/*
-	 * Grab our output buffer.
-	 */
 	nl = get_result_buffer(param, param_size, &len);
 	if (len < needed) {
 		param->flags |= DM_BUFFER_FULL_FLAG;
@@ -428,11 +350,8 @@ static int list_devices(struct dm_ioctl *param, size_t param_size)
 	}
 	param->data_size = param->data_start + needed;
 
-	nl->dev = 0;	/* Flags no data */
+	nl->dev = 0;	 
 
-	/*
-	 * Now loop through filling out the names.
-	 */
 	for (i = 0; i < NUM_BUCKETS; i++) {
 		list_for_each_entry (hc, _name_buckets + i, name_list) {
 			if (old_nl)
@@ -466,7 +385,6 @@ static void list_version_get_info(struct target_type *tt, void *param)
 {
     struct vers_iter *info = param;
 
-    /* Check space - it might have changed since the first iteration */
     if ((char *)info->vers + sizeof(tt->version) + strlen(tt->name) + 1 >
 	info->end) {
 
@@ -493,15 +411,8 @@ static int list_versions(struct dm_ioctl *param, size_t param_size)
 	struct dm_target_versions *vers;
 	struct vers_iter iter_info;
 
-	/*
-	 * Loop through all the devices working out how much
-	 * space we need.
-	 */
 	dm_target_iterate(list_version_get_needed, &needed);
 
-	/*
-	 * Grab our output buffer.
-	 */
 	vers = get_result_buffer(param, param_size, &len);
 	if (len < needed) {
 		param->flags |= DM_BUFFER_FULL_FLAG;
@@ -515,9 +426,6 @@ static int list_versions(struct dm_ioctl *param, size_t param_size)
 	iter_info.flags = 0;
 	iter_info.end = (char *)vers+len;
 
-	/*
-	 * Now loop through filling out the names & versions.
-	 */
 	dm_target_iterate(list_version_get_info, &iter_info);
 	param->flags |= iter_info.flags;
 
@@ -535,10 +443,6 @@ static int check_name(const char *name)
 	return 0;
 }
 
-/*
- * Fills in a dm_ioctl structure, ready for sending back to
- * userland.
- */
 static int __dev_status(struct mapped_device *md, struct dm_ioctl *param)
 {
 	struct gendisk *disk = dm_disk(md);
@@ -552,11 +456,6 @@ static int __dev_status(struct mapped_device *md, struct dm_ioctl *param)
 
 	param->dev = huge_encode_dev(disk_devt(disk));
 
-	/*
-	 * Yes, this will be out of date by the time it gets back
-	 * to userland, but it is still very useful for
-	 * debugging.
-	 */
 	param->open_count = dm_open_count(md);
 
 	if (get_disk_ro(disk))
@@ -605,9 +504,6 @@ static int dev_create(struct dm_ioctl *param, size_t param_size)
 	return r;
 }
 
-/*
- * Always use UUID for lookups if it's present, otherwise use name or dev.
- */
 static struct hash_cell *__find_device_hash_cell(struct dm_ioctl *param)
 {
 	struct mapped_device *md;
@@ -641,10 +537,6 @@ static struct mapped_device *find_device(struct dm_ioctl *param)
 	if (hc) {
 		md = hc->md;
 
-		/*
-		 * Sneakily write in both the name and the uuid
-		 * while we have the cell.
-		 */
 		strncpy(param->name, hc->name, sizeof(param->name));
 		if (hc->uuid)
 			strncpy(param->uuid, hc->uuid, sizeof(param->uuid)-1);
@@ -678,9 +570,6 @@ static int dev_remove(struct dm_ioctl *param, size_t param_size)
 
 	md = hc->md;
 
-	/*
-	 * Ensure the device is not open and nothing further can open it.
-	 */
 	r = dm_lock_for_deletion(md);
 	if (r) {
 		DMWARN("unable to remove open device %s", hc->name);
@@ -699,10 +588,6 @@ static int dev_remove(struct dm_ioctl *param, size_t param_size)
 	return 0;
 }
 
-/*
- * Check a string doesn't overrun the chunk of
- * memory we copied from userland.
- */
 static int invalid_str(char *str, void *end)
 {
 	while ((void *) str < end)
@@ -830,9 +715,8 @@ static int do_resume(struct dm_ioctl *param)
 
 	up_write(&_hash_lock);
 
-	/* Do we need to load a new map ? */
 	if (new_map) {
-		/* Suspend if it isn't already suspended */
+		 
 		if (param->flags & DM_SKIP_LOCKFS_FLAG)
 			suspend_flags &= ~DM_SUSPEND_LOCKFS_FLAG;
 		if (param->flags & DM_NOFLUSH_FLAG)
@@ -875,10 +759,6 @@ static int dev_active(struct dm_ioctl *param, size_t param_size)
 }
 #endif
 
-/*
- * Set or unset the suspension state of a device.
- * If the device already is in the requested state we just return its status.
- */
 static int dev_suspend(struct dm_ioctl *param, size_t param_size)
 {
 	if (param->flags & DM_SUSPEND_FLAG)
@@ -887,10 +767,6 @@ static int dev_suspend(struct dm_ioctl *param, size_t param_size)
 	return do_resume(param);
 }
 
-/*
- * Copies device info back to user space, used by
- * the create and info ioctls.
- */
 static int dev_status(struct dm_ioctl *param, size_t param_size)
 {
 	int r;
@@ -905,9 +781,6 @@ static int dev_status(struct dm_ioctl *param, size_t param_size)
 	return r;
 }
 
-/*
- * Build up the status struct for each target
- */
 static void retrieve_status(struct dm_table *table,
 			    struct dm_ioctl *param, size_t param_size)
 {
@@ -924,7 +797,6 @@ static void retrieve_status(struct dm_table *table,
 	else
 		type = STATUSTYPE_INFO;
 
-	/* Get all the target info */
 	num_targets = dm_table_get_num_targets(table);
 	for (i = 0; i < num_targets; i++) {
 		struct dm_target *ti = dm_table_get_target(table, i);
@@ -950,7 +822,6 @@ static void retrieve_status(struct dm_table *table,
 			break;
 		}
 
-		/* Get the status/table string from the target driver */
 		if (ti->type->status) {
 			if (ti->type->status(ti, type, outptr, remaining)) {
 				param->flags |= DM_BUFFER_FULL_FLAG;
@@ -972,9 +843,6 @@ static void retrieve_status(struct dm_table *table,
 	param->target_count = num_targets;
 }
 
-/*
- * Wait for a device to report an event
- */
 static int dev_wait(struct dm_ioctl *param, size_t param_size)
 {
 	int r;
@@ -985,19 +853,11 @@ static int dev_wait(struct dm_ioctl *param, size_t param_size)
 	if (!md)
 		return -ENXIO;
 
-	/*
-	 * Wait for a notification event
-	 */
 	if (dm_wait_event(md, param->event_nr)) {
 		r = -ERESTARTSYS;
 		goto out;
 	}
 
-	/*
-	 * The userland program is going to want to know what
-	 * changed to trigger the event, so we may as well tell
-	 * him and save an ioctl.
-	 */
 	r = __dev_status(md, param);
 	if (r)
 		goto out;
@@ -1181,9 +1041,6 @@ static int table_clear(struct dm_ioctl *param, size_t param_size)
 	return r;
 }
 
-/*
- * Retrieves a list of devices used by a particular dm device.
- */
 static void retrieve_deps(struct dm_table *table,
 			  struct dm_ioctl *param, size_t param_size)
 {
@@ -1195,24 +1052,15 @@ static void retrieve_deps(struct dm_table *table,
 
 	deps = get_result_buffer(param, param_size, &len);
 
-	/*
-	 * Count the devices.
-	 */
 	list_for_each (tmp, dm_table_get_devices(table))
 		count++;
 
-	/*
-	 * Check we have enough space.
-	 */
 	needed = sizeof(*deps) + (sizeof(*deps->dev) * count);
 	if (len < needed) {
 		param->flags |= DM_BUFFER_FULL_FLAG;
 		return;
 	}
 
-	/*
-	 * Fill in the devices.
-	 */
 	deps->count = count;
 	count = 0;
 	list_for_each_entry (dd, dm_table_get_devices(table), list)
@@ -1246,10 +1094,6 @@ static int table_deps(struct dm_ioctl *param, size_t param_size)
 	return r;
 }
 
-/*
- * Return the status of a device as a text string for each
- * target.
- */
 static int table_status(struct dm_ioctl *param, size_t param_size)
 {
 	int r;
@@ -1275,9 +1119,6 @@ static int table_status(struct dm_ioctl *param, size_t param_size)
 	return r;
 }
 
-/*
- * Pass a message to the target that's at the supplied device offset.
- */
 static int target_message(struct dm_ioctl *param, size_t param_size)
 {
 	int r, argc;
@@ -1332,17 +1173,13 @@ static int target_message(struct dm_ioctl *param, size_t param_size)
 	return r;
 }
 
-/*-----------------------------------------------------------------
- * Implementation of open/close/ioctl on the special char
- * device.
- *---------------------------------------------------------------*/
 static ioctl_fn lookup_ioctl(unsigned int cmd)
 {
 	static struct {
 		int cmd;
 		ioctl_fn fn;
 	} _ioctls[] = {
-		{DM_VERSION_CMD, NULL},	/* version is dealt with elsewhere */
+		{DM_VERSION_CMD, NULL},	 
 		{DM_REMOVE_ALL_CMD, remove_all},
 		{DM_LIST_DEVICES_CMD, list_devices},
 
@@ -1367,10 +1204,6 @@ static ioctl_fn lookup_ioctl(unsigned int cmd)
 	return (cmd >= ARRAY_SIZE(_ioctls)) ? NULL : _ioctls[cmd].fn;
 }
 
-/*
- * As well as checking the version compatibility this always
- * copies the kernel interface version out.
- */
 static int check_version(unsigned int cmd, struct dm_ioctl __user *user)
 {
 	uint32_t version[3];
@@ -1389,9 +1222,6 @@ static int check_version(unsigned int cmd, struct dm_ioctl __user *user)
 		r = -EINVAL;
 	}
 
-	/*
-	 * Fill in the kernel version.
-	 */
 	version[0] = DM_VERSION_MAJOR;
 	version[1] = DM_VERSION_MINOR;
 	version[2] = DM_VERSION_PATCHLEVEL;
@@ -1431,10 +1261,9 @@ static int copy_params(struct dm_ioctl __user *user, struct dm_ioctl **param)
 
 static int validate_params(uint cmd, struct dm_ioctl *param)
 {
-	/* Always clear this flag */
+	 
 	param->flags &= ~DM_BUFFER_FULL_FLAG;
 
-	/* Ignores parameters */
 	if (cmd == DM_REMOVE_ALL_CMD ||
 	    cmd == DM_LIST_DEVICES_CMD ||
 	    cmd == DM_LIST_VERSIONS_CMD)
@@ -1450,7 +1279,6 @@ static int validate_params(uint cmd, struct dm_ioctl *param)
 		return -EINVAL;
 	}
 
-	/* Ensure strings are terminated */
 	param->name[DM_NAME_LEN - 1] = '\0';
 	param->uuid[DM_UUID_LEN - 1] = '\0';
 
@@ -1465,7 +1293,6 @@ static int ctl_ioctl(uint command, struct dm_ioctl __user *user)
 	ioctl_fn fn = NULL;
 	size_t param_size;
 
-	/* only root can play with this */
 	if (!capable(CAP_SYS_ADMIN))
 		return -EACCES;
 
@@ -1474,17 +1301,10 @@ static int ctl_ioctl(uint command, struct dm_ioctl __user *user)
 
 	cmd = _IOC_NR(command);
 
-	/*
-	 * Check the interface version passed in.  This also
-	 * writes out the kernel's interface version.
-	 */
 	r = check_version(cmd, user);
 	if (r)
 		return r;
 
-	/*
-	 * Nothing more to do for the version command.
-	 */
 	if (cmd == DM_VERSION_CMD)
 		return 0;
 
@@ -1494,15 +1314,8 @@ static int ctl_ioctl(uint command, struct dm_ioctl __user *user)
 		return -ENOTTY;
 	}
 
-	/*
-	 * Trying to avoid low memory issues when a device is
-	 * suspended.
-	 */
 	current->flags |= PF_MEMALLOC;
 
-	/*
-	 * Copy the parameters into kernel space.
-	 */
 	r = copy_params(user, &param);
 
 	current->flags &= ~PF_MEMALLOC;
@@ -1518,9 +1331,6 @@ static int ctl_ioctl(uint command, struct dm_ioctl __user *user)
 	param->data_size = sizeof(*param);
 	r = fn(param, param_size);
 
-	/*
-	 * Copy the results back to userland.
-	 */
 	if (!r && copy_to_user(user, param, param->data_size))
 		r = -EFAULT;
 
@@ -1556,9 +1366,6 @@ static struct miscdevice _dm_misc = {
 	.fops  		= &_ctl_fops
 };
 
-/*
- * Create misc character device and link to DM_DIR/control.
- */
 int __init dm_interface_init(void)
 {
 	int r;
@@ -1588,12 +1395,6 @@ void dm_interface_exit(void)
 	dm_hash_exit();
 }
 
-/**
- * dm_copy_name_and_uuid - Copy mapped device name & uuid into supplied buffers
- * @md: Pointer to mapped_device
- * @name: Buffer (size DM_NAME_LEN) for name
- * @uuid: Buffer (size DM_UUID_LEN) for uuid or empty string if uuid not defined
- */
 int dm_copy_name_and_uuid(struct mapped_device *md, char *name, char *uuid)
 {
 	int r = 0;

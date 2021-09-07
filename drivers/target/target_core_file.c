@@ -1,34 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  target_core_file.c
- *
- * This file contains the Storage Engine <-> FILEIO transport specific functions
- *
- * Copyright (c) 2005 PyX Technologies, Inc.
- * Copyright (c) 2005-2006 SBE, Inc.  All Rights Reserved.
- * Copyright (c) 2007-2009 Rising Tide Software, Inc.
- * Copyright (c) 2008-2009 Linux-iSCSI.org
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #define TARGET_CORE_FILE_C
 
 #include <linux/version.h>
@@ -51,10 +24,6 @@
 
 #undef TARGET_CORE_FILE_C
 
-/*	fd_attach_hba(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int fd_attach_hba(se_hba_t *hba, u32 host_id)
 {
 	fd_host_t *fd_host;
@@ -85,10 +54,6 @@ int fd_attach_hba(se_hba_t *hba, u32 host_id)
 	return 0;
 }
 
-/*	fd_detach_hba(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int fd_detach_hba(se_hba_t *hba)
 {
 	fd_host_t *fd_host;
@@ -179,10 +144,6 @@ void *fd_allocate_virtdevice(se_hba_t *hba, const char *name)
 	return fd_dev;
 }
 
-/*	fd_create_virtdevice(): (Part of se_subsystem_api_t template)
- *
- *
- */
 se_device_t *fd_create_virtdevice(
 	se_hba_t *hba,
 	se_subsystem_dev_t *se_dev,
@@ -225,11 +186,7 @@ se_device_t *fd_create_virtdevice(
 #else
 	flags = O_RDWR | O_CREAT | O_LARGEFILE;
 #endif
-/*	flags |= O_DIRECT; */
-	/*
-	 * If fd_buffered_io=1 has not been set explictly (the default),
-	 * use O_SYNC to force FILEIO writes to disk.
-	 */
+ 
 	if (!(fd_dev->fbd_flags & FDBD_USE_BUFFERED_IO))
 		flags |= O_SYNC;
 #endif
@@ -246,22 +203,14 @@ se_device_t *fd_create_virtdevice(
 #else
 	fd_dev->fd_file = file;
 #endif
-	/*
-	 * If we are claiming a blockend for this struct file, we extract
-	 * fd_dev->fd_size from struct block_device.
-	 *
-	 * Otherwise, we use the passed fd_size= from configfs
-	 */
+	 
 	inode = igrab(file->f_mapping->host);
 	if (!(inode)) {
 		printk(KERN_ERR "FILEIO: Unable to locate struct inode from"
 			" struct file\n");
 		goto fail;
 	}
-	/*
-	 * If struct file is referencing a underlying struct block_device,
-	 * claim it now.
-	 */
+	 
 	if (S_ISBLK(inode->i_mode)) {
 		fd_dev->fd_bd = I_BDEV(file->f_mapping->host);
 		if (!(fd_dev->fd_bd)) {
@@ -284,10 +233,7 @@ se_device_t *fd_create_virtdevice(
 			goto fail;
 		}
 		dev_flags |= DF_CLAIMED_BLOCKDEV;
-		/*
-		 * Determine the number of bytes from i_size_read() minus
-		 * one (1) logical sector from underlying struct block_device
-		 */
+		 
 		fd_dev->fd_dev_size = (i_size_read(file->f_mapping->host) -
 		  		       bdev_logical_block_size(bd));
 
@@ -299,12 +245,7 @@ se_device_t *fd_create_virtdevice(
 			bdev_logical_block_size(bd));
 	} else {
 #ifdef MY_ABC_HERE
-		/*
-		 * 1. Create additional files if fd_dev->fd_files[0] is created
-		 *    successfully and not block device.
-		 * 2. Count the number of bytes when opening each file instead
-		 *    of using fd_size= from configfs
-		 */
+		 
 		if( S_ISREG(inode->i_mode) && SYNO_LIO_FILE_IDX_WIDTH <= strlen(dev_p) ) {
 			size_t idx;
 			size_t path_length = strlen(dev_p);
@@ -323,10 +264,7 @@ se_device_t *fd_create_virtdevice(
 				set_fs(old_fs);
 
 				if( IS_ERR(filp) || !filp || !filp->f_dentry ) {
-					/*
-					 * fd_dev->fd_size is passed from configfs
-					 * will it always be synced with the sum of all fd_dev->fd_files?
-					 */
+					 
 					break;
 				}
 
@@ -334,10 +272,7 @@ se_device_t *fd_create_virtdevice(
 				fd_dev->fd_dev_size += filp->f_dentry->d_inode->i_size;
 				fd_dev->nr_file++;
 			}
-			/*
-			 * Determine the number of bytes from minus total size of all fd_files
-			 * minus one (1) logical sector (FD_BLOCKSIZE)
-			 */
+			 
 			fd_dev->fd_dev_size -= FD_BLOCKSIZE;
 		}
 #else
@@ -349,14 +284,7 @@ se_device_t *fd_create_virtdevice(
 		}
 #endif
 	}
-	/*
-	 * Pass dev_flags for linux_blockdevice_claim_bd or
-	 * linux_blockdevice_claim() from the usage above.
-	 *
-	 * Note that transport_add_device_to_core_hba() will call
-	 * linux_blockdevice_release() internally on failure to
-	 * call bd_release() on the referenced struct block_device.
-	 */
+	 
 	dev = transport_add_device_to_core_hba(hba, &fileio_template,
 				se_dev, dev_flags, (void *)fd_dev);
 	if (!(dev))
@@ -397,10 +325,6 @@ fail:
 	return NULL;
 }
 
-/*	fd_activate_device(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int fd_activate_device(se_device_t *dev)
 {
 #ifndef MY_ABC_HERE
@@ -415,10 +339,6 @@ int fd_activate_device(se_device_t *dev)
 	return 0;
 }
 
-/*	fd_deactivate_device(): (Part of se_subsystem_api_t template)
- *
- *
- */
 void fd_deactivate_device(se_device_t *dev)
 {
 #ifndef MY_ABC_HERE
@@ -433,10 +353,6 @@ void fd_deactivate_device(se_device_t *dev)
 	return;
 }
 
-/*	fd_free_device(): (Part of se_subsystem_api_t template)
- *
- *
- */
 void fd_free_device(void *p)
 {
 	fd_dev_t *fd_dev = (fd_dev_t *) p;
@@ -459,19 +375,11 @@ void fd_free_device(void *p)
 	kfree(fd_dev);
 }
 
-/*	fd_transport_complete(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int fd_transport_complete(se_task_t *task)
 {
 	return 0;
 }
 
-/*	fd_allocate_request(): (Part of se_subsystem_api_t template)
- *
- *
- */
 void *fd_allocate_request(
 	se_task_t *task,
 	se_device_t *dev)
@@ -489,10 +397,6 @@ void *fd_allocate_request(
 	return (void *)fd_req;
 }
 
-/*	fd_emulate_inquiry():
- *
- *
- */
 int fd_emulate_inquiry(se_task_t *task)
 {
 	unsigned char prod[64], se_location[128];
@@ -514,10 +418,6 @@ int fd_emulate_inquiry(se_task_t *task)
 		FD_VERSION, se_location);
 }
 
-/*	fd_emulate_read_cap():
- *
- *
- */
 static int fd_emulate_read_cap(se_task_t *task)
 {
 	fd_dev_t *fd_dev = (fd_dev_t *) task->se_dev->dev_ptr;
@@ -543,10 +443,6 @@ static int fd_emulate_read_cap16(se_task_t *task)
 		blocks_long);
 }
 
-/*	fd_emulate_scsi_cdb():
- *
- *
- */
 static int fd_emulate_scsi_cdb(se_task_t *task)
 {
 	int ret;
@@ -675,7 +571,7 @@ static int fd_do_readv(fd_request_t *req, se_task_t *task)
 	mm_segment_t old_fs;
 
 	if( S_ISBLK(fd->f_dentry->d_inode->i_mode) ) {
-		/* for block device */
+		 
 		struct iovec iov[req->fd_sg_count];
 		memset(iov, 0, sizeof(struct iovec) * req->fd_sg_count);
 
@@ -699,7 +595,7 @@ static int fd_do_readv(fd_request_t *req, se_task_t *task)
 			goto END;
 		}
 	} else {
-		/* for regular file */
+		 
 		loff_t pos = req->fd_lba * DEV_ATTRIB(task->se_dev)->block_size;
 		loff_t fd_pos = 0;
 
@@ -749,11 +645,7 @@ END:
 	set_fs(get_ds());
 	ret = vfs_readv(fd, &iov[0], req->fd_sg_count, &fd->f_pos);
 	set_fs(old_fs);
-	/*
-	 * Return zeros and GOOD status even if the READ did not return
-	 * the expected virt_size for struct file w/o a backing struct
-	 * block_device.
-	 */
+	 
 	if (S_ISBLK(fd->f_dentry->d_inode->i_mode)) {
 		if (ret < 0 || ret != req->fd_size) {
 			printk(KERN_ERR "vfs_readv() returned %d,"
@@ -847,7 +739,7 @@ static int fd_do_writev(fd_request_t *req, se_task_t *task)
 	mm_segment_t old_fs;
 
 	if( S_ISBLK(fd->f_dentry->d_inode->i_mode) ) {
-		/* for block device */
+		 
 		struct iovec iov[req->fd_sg_count];
 		memset(iov, 0, sizeof(struct iovec) * req->fd_sg_count);
 
@@ -871,7 +763,7 @@ static int fd_do_writev(fd_request_t *req, se_task_t *task)
 			goto END;
 		}
 	} else {
-		/* for regular file */
+		 
 #ifdef MY_ABC_HERE
 		struct kstatfs statfs;
 		struct inode* inode = NULL;
@@ -888,7 +780,7 @@ static int fd_do_writev(fd_request_t *req, se_task_t *task)
 				WARN_ON(1);
 			} else if( inode->i_blocks * 512 + inode->i_bytes < inode->i_size &&
 			           209715200 > statfs.f_bfree * statfs.f_bsize )
-			           /* (i_blocks * 512 + i_bytes) represent the amount of allocated disk space */
+			            
 			{
 				spin_unlock(&inode->i_lock);
 				printk(KERN_ERR "iSCSI - Failed to write data. Data volume is full.\n");
@@ -969,10 +861,7 @@ int fd_do_task(se_task_t *task)
 
 	req->fd_lba = task->task_lba;
 	req->fd_size = task->task_size;
-	/*
-	 * Call vectorized fileio functions to map struct scatterlist
-	 * physical memory addresses to struct iovec virtual memory.
-	 */
+	 
 	if (req->fd_data_direction == FD_DATA_READ)
 		ret = fd_do_readv(req, task);
 	else
@@ -989,10 +878,6 @@ int fd_do_task(se_task_t *task)
 	return PYX_TRANSPORT_SENT_TO_TRANSPORT;
 }
 
-/*	fd_free_task(): (Part of se_subsystem_api_t template)
- *
- *
- */
 void fd_free_task(se_task_t *task)
 {
 	fd_request_t *req;
@@ -1144,10 +1029,6 @@ void __fd_get_dev_info(fd_dev_t *fd_dev, char *b, int *bl)
 		*bl += sprintf(b + *bl, "\n");
 }
 
-/*	fd_map_task_non_SG():
- *
- *
- */
 void fd_map_task_non_SG(se_task_t *task)
 {
 	se_cmd_t *cmd = TASK_CMD(task);
@@ -1158,10 +1039,6 @@ void fd_map_task_non_SG(se_task_t *task)
 	req->fd_sg_count	= 0;
 }
 
-/*	fd_map_task_SG():
- *
- *
- */
 void fd_map_task_SG(se_task_t *task)
 {
 	fd_request_t *req = (fd_request_t *) task->transport_req;
@@ -1171,10 +1048,6 @@ void fd_map_task_SG(se_task_t *task)
 	req->fd_sg_count	= task->task_sg_num;
 }
 
-/*      fd_CDB_inquiry():
- *
- *
- */
 int fd_CDB_inquiry(se_task_t *task, u32 size)
 {
 	fd_request_t *req = (fd_request_t *) task->transport_req;
@@ -1185,10 +1058,6 @@ int fd_CDB_inquiry(se_task_t *task, u32 size)
 	return 0;
 }
 
-/*      fd_CDB_none():
- *
- *
- */
 int fd_CDB_none(se_task_t *task, u32 size)
 {
 	fd_request_t *req = (fd_request_t *) task->transport_req;
@@ -1201,10 +1070,6 @@ int fd_CDB_none(se_task_t *task, u32 size)
 	return 0;
 }
 
-/*	fd_CDB_read_non_SG():
- *
- *
- */
 int fd_CDB_read_non_SG(se_task_t *task, u32 size)
 {
 	fd_request_t *req = (fd_request_t *) task->transport_req;
@@ -1215,10 +1080,6 @@ int fd_CDB_read_non_SG(se_task_t *task, u32 size)
 	return 0;
 }
 
-/*	fd_CDB_read_SG):
- *
- *
- */
 int fd_CDB_read_SG(se_task_t *task, u32 size)
 {
 	fd_request_t *req = (fd_request_t *) task->transport_req;
@@ -1229,10 +1090,6 @@ int fd_CDB_read_SG(se_task_t *task, u32 size)
 	return req->fd_sg_count;
 }
 
-/*	fd_CDB_write_non_SG():
- *
- *
- */
 int fd_CDB_write_non_SG(se_task_t *task, u32 size)
 {
 	fd_request_t *req = (fd_request_t *) task->transport_req;
@@ -1243,10 +1100,6 @@ int fd_CDB_write_non_SG(se_task_t *task, u32 size)
 	return 0;
 }
 
-/*	fd_CDB_write_SG():
- *
- *
- */
 int fd_CDB_write_SG(se_task_t *task, u32 size)
 {
 	fd_request_t *req = (fd_request_t *) task->transport_req;
@@ -1257,19 +1110,11 @@ int fd_CDB_write_SG(se_task_t *task, u32 size)
 	return req->fd_sg_count;
 }
 
-/*	fd_check_lba():
- *
- *
- */
 int fd_check_lba(unsigned long long lba, se_device_t *dev)
 {
 	return 0;
 }
 
-/*	fd_check_for_SG(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int fd_check_for_SG(se_task_t *task)
 {
 	fd_request_t *req = (fd_request_t *) task->transport_req;
@@ -1277,10 +1122,6 @@ int fd_check_for_SG(se_task_t *task)
 	return req->fd_sg_count;
 }
 
-/*	fd_get_cdb(): (Part of se_subsystem_api_t template)
- *
- *
- */
 unsigned char *fd_get_cdb(se_task_t *task)
 {
 	fd_request_t *req = (fd_request_t *) task->transport_req;
@@ -1288,55 +1129,31 @@ unsigned char *fd_get_cdb(se_task_t *task)
 	return req->fd_scsi_cdb;
 }
 
-/*	fd_get_blocksize(): (Part of se_subsystem_api_t template)
- *
- *
- */
 u32 fd_get_blocksize(se_device_t *dev)
 {
 	return FD_BLOCKSIZE;
 }
 
-/*	fd_get_device_rev(): (Part of se_subsystem_api_t template)
- *
- *
- */
 u32 fd_get_device_rev(se_device_t *dev)
 {
-	return SCSI_SPC_2; /* Returns SPC-3 in Initiator Data */
+	return SCSI_SPC_2;  
 }
 
-/*	fd_get_device_type(): (Part of se_subsystem_api_t template)
- *
- *
- */
 u32 fd_get_device_type(se_device_t *dev)
 {
 	return TYPE_DISK;
 }
 
-/*	fd_get_dma_length(): (Part of se_subsystem_api_t template)
- *
- *
- */
 u32 fd_get_dma_length(u32 task_size, se_device_t *dev)
 {
 	return PAGE_SIZE;
 }
 
-/*	fd_get_max_sectors(): (Part of se_subsystem_api_t template)
- *
- *
- */
 u32 fd_get_max_sectors(se_device_t *dev)
 {
 	return FD_MAX_SECTORS;
 }
 
-/*	fd_get_queue_depth(): (Part of se_subsystem_api_t template)
- *
- *
- */
 u32 fd_get_queue_depth(se_device_t *dev)
 {
 	return FD_DEVICE_QUEUE_DEPTH;

@@ -1,28 +1,18 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/fat/cache.c
- *
- *  Written 1992,1993 by Werner Almesberger
- *
- *  Mar 1999. AV. Changed cache, so that it uses the starting cluster instead
- *	of inode number.
- *  May 1999. AV. Fixed the bogosity with FAT32 (read "FAT28"). Fscking lusers.
- */
-
+ 
 #include <linux/fs.h>
 #include <linux/buffer_head.h>
 #include "fat.h"
 
-/* this must be > 0. */
 #define FAT_MAX_CACHE	8
 
 struct fat_cache {
 	struct list_head cache_list;
-	int nr_contig;	/* number of contiguous clusters */
-	int fcluster;	/* cluster number in the file. */
-	int dcluster;	/* cluster number on disk. */
+	int nr_contig;	 
+	int fcluster;	 
+	int dcluster;	 
 };
 
 struct fat_cache_id {
@@ -91,7 +81,7 @@ static int fat_cache_lookup(struct inode *inode, int fclus,
 
 	spin_lock(&MSDOS_I(inode)->cache_lru_lock);
 	list_for_each_entry(p, &MSDOS_I(inode)->cache_lru, cache_list) {
-		/* Find the cache of "fclus" or nearest cache. */
+		 
 		if (p->fcluster <= fclus && hit->fcluster < p->fcluster) {
 			hit = p;
 			if ((hit->fcluster + hit->nr_contig) < fclus) {
@@ -123,7 +113,7 @@ static struct fat_cache *fat_cache_merge(struct inode *inode,
 	struct fat_cache *p;
 
 	list_for_each_entry(p, &MSDOS_I(inode)->cache_lru, cache_list) {
-		/* Find the same part as "new" in cluster-chain. */
+		 
 		if (p->fcluster == new->fcluster) {
 			BUG_ON(p->dcluster != new->dcluster);
 			if (new->nr_contig > p->nr_contig)
@@ -138,13 +128,13 @@ static void fat_cache_add(struct inode *inode, struct fat_cache_id *new)
 {
 	struct fat_cache *cache, *tmp;
 
-	if (new->fcluster == -1) /* dummy cache */
+	if (new->fcluster == -1)  
 		return;
 
 	spin_lock(&MSDOS_I(inode)->cache_lru_lock);
 	if (new->id != FAT_CACHE_VALID &&
 	    new->id != MSDOS_I(inode)->cache_valid_id)
-		goto out;	/* this cache was invalidated */
+		goto out;	 
 
 	cache = fat_cache_merge(inode, new);
 	if (cache == NULL) {
@@ -175,10 +165,6 @@ out:
 	spin_unlock(&MSDOS_I(inode)->cache_lru_lock);
 }
 
-/*
- * Cache invalidation occurs rarely, thus the LRU chain is not updated. It
- * fixes itself after a while.
- */
 static void __fat_cache_inval_inode(struct inode *inode)
 {
 	struct msdos_inode_info *i = MSDOS_I(inode);
@@ -190,7 +176,7 @@ static void __fat_cache_inval_inode(struct inode *inode)
 		i->nr_caches--;
 		fat_cache_free(cache);
 	}
-	/* Update. The copy of caches before this id is discarded. */
+	 
 	i->cache_valid_id++;
 	if (i->cache_valid_id == FAT_CACHE_VALID)
 		i->cache_valid_id++;
@@ -233,16 +219,13 @@ int fat_get_cluster(struct inode *inode, int cluster, int *fclus, int *dclus)
 		return 0;
 
 	if (fat_cache_lookup(inode, cluster, &cid, fclus, dclus) < 0) {
-		/*
-		 * dummy, always not contiguous
-		 * This is reinitialized by cache_init(), later.
-		 */
+		 
 		cache_init(&cid, -1, -1);
 	}
 
 	fatent_init(&fatent);
 	while (*fclus < cluster) {
-		/* prevent the infinite loop of cluster chain */
+		 
 		if (*fclus > limit) {
 			fat_fs_error(sb, "%s: detected the cluster chain loop"
 				     " (i_pos %lld)", __func__,
@@ -332,10 +315,6 @@ int fat_bmap(struct inode *inode, sector_t sector, sector_t *phys,
 		if (!create)
 			return 0;
 
-		/*
-		 * ->mmu_private can access on only allocation path.
-		 * (caller must hold ->i_mutex)
-		 */
 		last_block = (MSDOS_I(inode)->mmu_private + (blocksize - 1))
 			>> blocksize_bits;
 		if (sector >= last_block)

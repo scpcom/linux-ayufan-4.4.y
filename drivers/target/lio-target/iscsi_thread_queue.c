@@ -1,33 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  iscsi_thread_queue.c
- *
- * This file contains the iSCSI Login Thread and Thread Queue functions.
- *
- * Copyright (c) 2003 PyX Technologies, Inc.
- * Copyright (c) 2006-2007 SBE, Inc.  All Rights Reserved.
- * Copyright (c) 2007 Rising Tide Software, Inc.
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #define ISCSI_THREAD_QUEUE_C
 
 #include <linux/string.h>
@@ -45,10 +19,6 @@
 
 #undef ISCSI_THREAD_QUEUE_C
 
-/*	iscsi_add_ts_to_active_list():
- *
- *
- */
 static void iscsi_add_ts_to_active_list(se_thread_set_t *ts)
 {
 #if 0
@@ -61,10 +31,6 @@ static void iscsi_add_ts_to_active_list(se_thread_set_t *ts)
 	spin_unlock(&iscsi_global->active_ts_lock);
 }
 
-/*	iscsi_add_ts_to_inactive_list():
- *
- *
- */
 extern void iscsi_add_ts_to_inactive_list(se_thread_set_t *ts)
 {
 #if 0
@@ -77,10 +43,6 @@ extern void iscsi_add_ts_to_inactive_list(se_thread_set_t *ts)
 	spin_unlock(&iscsi_global->inactive_ts_lock);
 }
 
-/*	iscsi_del_ts_from_active_list():
- *
- *
- */
 static void iscsi_del_ts_from_active_list(se_thread_set_t *ts)
 {
 #if 0
@@ -96,10 +58,6 @@ static void iscsi_del_ts_from_active_list(se_thread_set_t *ts)
 		up(&ts->stop_active_sem);
 }
 
-/*	iscsi_get_ts_from_inactive_list():
- *
- *
- */
 static se_thread_set_t *iscsi_get_ts_from_inactive_list(void)
 {
 	se_thread_set_t *ts;
@@ -120,10 +78,6 @@ static se_thread_set_t *iscsi_get_ts_from_inactive_list(void)
 	return ts;
 }
 
-/*	iscsi_allocate_thread_sets():
- *
- *
- */
 extern int iscsi_allocate_thread_sets(u32 thread_pair_count, int role)
 {
 	int allocated_thread_pair_count = 0, i;
@@ -177,10 +131,6 @@ extern int iscsi_allocate_thread_sets(u32 thread_pair_count, int role)
 	return allocated_thread_pair_count;
 }
 
-/*	iscsi_deallocate_thread_sets():
- *
- *
- */
 extern void iscsi_deallocate_thread_sets(int role)
 {
 	u32 released_count = 0;
@@ -216,10 +166,6 @@ extern void iscsi_deallocate_thread_sets(int role)
 #endif
 }
 
-/*	iscsi_deallocate_extra_thread_sets():
- *
- *
- */
 static void iscsi_deallocate_extra_thread_sets(int role)
 {
 	u32 orig_count, released_count = 0;
@@ -262,10 +208,6 @@ static void iscsi_deallocate_extra_thread_sets(int role)
 #endif
 }
 
-/*	iscsi_activate_thread_set():
- *
- *
- */
 void iscsi_activate_thread_set(iscsi_conn_t *conn, se_thread_set_t *ts)
 {
 	iscsi_add_ts_to_active_list(ts);
@@ -277,29 +219,15 @@ void iscsi_activate_thread_set(iscsi_conn_t *conn, se_thread_set_t *ts)
 	ts->conn = conn;
 	spin_unlock_bh(&ts->ts_state_lock);
 
-	/*
-	 * Start up the RX thread and wait on rx_post_start_sem.  The RX
-	 * Thread will then do the same for the TX Thread in
-	 * iscsi_rx_thread_pre_handler().
-	 */
 	up(&ts->rx_start_sem);
 	down(&ts->rx_post_start_sem);
 }
 
-/*	iscsi_get_thread_set_timeout():
- *
- *
- */
 static void iscsi_get_thread_set_timeout(unsigned long data)
 {
 	up((struct semaphore *)data);
 }
 
-/*	iscsi_get_thread_set():
- *
- *	Parameters:	iSCSI Connection Pointer.
- *	Returns:	iSCSI Thread Set Pointer
- */
 se_thread_set_t *iscsi_get_thread_set(int role)
 {
 	int allocate_ts = 0;
@@ -307,12 +235,6 @@ se_thread_set_t *iscsi_get_thread_set(int role)
 	struct timer_list timer;
 	se_thread_set_t *ts = NULL;
 
-	/*
-	 * If no inactive thread set is available on the first call to
-	 * iscsi_get_ts_from_inactive_list(), sleep for a second and
-	 * try again.  If still none are available after two attempts,
-	 * allocate a set ourselves.
-	 */
 get_set:
 	ts = iscsi_get_ts_from_inactive_list();
 	if (!(ts)) {
@@ -339,10 +261,6 @@ get_set:
 	return ts;
 }
 
-/*	iscsi_set_thread_clear():
- *
- *
- */
 void iscsi_set_thread_clear(iscsi_conn_t *conn, u8 thread_clear)
 {
 	se_thread_set_t *ts = NULL;
@@ -365,10 +283,6 @@ void iscsi_set_thread_clear(iscsi_conn_t *conn, u8 thread_clear)
 	spin_unlock_bh(&ts->ts_state_lock);
 }
 
-/*	iscsi_set_thread_set_signal():
- *
- *
- */
 void iscsi_set_thread_set_signal(iscsi_conn_t *conn, u8 signal_sent)
 {
 	se_thread_set_t *ts = NULL;
@@ -384,11 +298,6 @@ void iscsi_set_thread_set_signal(iscsi_conn_t *conn, u8 signal_sent)
 	spin_unlock_bh(&ts->ts_state_lock);
 }
 
-/*	iscsi_release_thread_set():
- *
- *	Parameters:	iSCSI Connection Pointer.
- *	Returns:	0 on success, -1 on error.
- */
 int iscsi_release_thread_set(iscsi_conn_t *conn, int role)
 {
 	int thread_called = 0;
@@ -460,10 +369,6 @@ int iscsi_release_thread_set(iscsi_conn_t *conn, int role)
 	return 0;
 }
 
-/*	iscsi_thread_set_force_reinstatement():
- *
- *
- */
 int iscsi_thread_set_force_reinstatement(iscsi_conn_t *conn)
 {
 	se_thread_set_t *ts;
@@ -499,10 +404,6 @@ int iscsi_thread_set_force_reinstatement(iscsi_conn_t *conn)
 	return 0;
 }
 
-/*	iscsi_check_to_add_additional_sets():
- *
- *
- */
 static void iscsi_check_to_add_additional_sets(int role)
 {
 	int thread_sets_add;
@@ -514,10 +415,6 @@ static void iscsi_check_to_add_additional_sets(int role)
 		iscsi_allocate_thread_sets(1, role);
 }
 
-/*	iscsi_signal_thread_pre_handler():
- *
- *
- */
 static int iscsi_signal_thread_pre_handler(se_thread_set_t *ts)
 {
 #if 0
@@ -534,10 +431,6 @@ static int iscsi_signal_thread_pre_handler(se_thread_set_t *ts)
 	return 0;
 }
 
-/*	iscsi_rx_thread_pre_handler():
- *
- *
- */
 iscsi_conn_t *iscsi_rx_thread_pre_handler(se_thread_set_t *ts, int role)
 {
 	int ret;
@@ -586,9 +479,7 @@ sleep:
 		goto sleep;
 	}
 	iscsi_check_to_add_additional_sets(role);
-	/*
-	 * The RX Thread starts up the TX Thread and sleeps.
-	 */
+	 
 	ts->thread_clear |= ISCSI_CLEAR_RX_THREAD;
 	up(&ts->tx_start_sem);
 	down(&ts->tx_post_start_sem);
@@ -596,10 +487,6 @@ sleep:
 	return ts->conn;
 }
 
-/*	iscsi_tx_thread_pre_handler():
- *
- *
- */
 iscsi_conn_t *iscsi_tx_thread_pre_handler(se_thread_set_t *ts, int role)
 {
 	int ret;
@@ -649,11 +536,7 @@ sleep:
 	}
 
 	iscsi_check_to_add_additional_sets(role);
-	/*
-	 * From the TX thread, up the tx_post_start_sem that the RX Thread is
-	 * sleeping on in iscsi_rx_thread_pre_handler(), then up the
-	 * rx_post_start_sem that iscsi_activate_thread_set() is sleeping on.
-	 */
+	 
 	ts->thread_clear |= ISCSI_CLEAR_TX_THREAD;
 	up(&ts->tx_post_start_sem);
 	up(&ts->rx_post_start_sem);

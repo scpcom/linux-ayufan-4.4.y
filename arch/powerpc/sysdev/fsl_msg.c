@@ -2,29 +2,7 @@
 #define MY_ABC_HERE
 #endif
 #ifdef MY_DEF_HERE
-/*
- * Copyright 2008-2009 Freescale Semiconductor, Inc.
- *
- * Author: Jason Jin <Jason.jin@freescale.com>
- *
- * Get some idea from fsl_gtm.c
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the
- * Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/errno.h>
 #include <linux/list.h>
@@ -99,7 +77,6 @@ void fsl_clear_msg(struct fsl_msg_unit *msg)
 {
 	u32 tmp32;
 
-	/* clear the interrupt by reading the message */
 	fsl_read_msg(msg, &tmp32);
 }
 EXPORT_SYMBOL(fsl_clear_msg);
@@ -108,17 +85,11 @@ void fsl_enable_msg(struct fsl_msg_unit *msg)
 {
 	u32 tmp32;
 
-	/* Set the mer bit */
 	tmp32 = in_be32(msg->mer);
 	out_be32(msg->mer, tmp32 | (1 << msg->msg_num));
 }
 EXPORT_SYMBOL(fsl_enable_msg);
 
-/*
- * Sometimes, we need to set the EIDR[EP] bit for the message interrupt
- * to route it to IRQ_OUT, Most of the times, if the interrupt was
- * routed out. there's no chance to unmask it. so we'll unmask it here.
- */
 void fsl_msg_route_int_to_irqout(struct fsl_msg_unit *msg)
 {
 	mpic_unmask_irq(msg->irq);
@@ -185,7 +156,6 @@ static int __init fsl_init_msg(void)
 		}
 		list_add(&fsl_msg->list_node, &fsl_msgs);
 
-		/* We don't want to lose the node and its ->data */
 		np->data = fsl_msg;
 		of_node_get(np);
 
@@ -196,4 +166,4 @@ err:
 	return 0;
 }
 arch_initcall(fsl_init_msg);
-#endif /* MY_DEF_HERE */
+#endif  

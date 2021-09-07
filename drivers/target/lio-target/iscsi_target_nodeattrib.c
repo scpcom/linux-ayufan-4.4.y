@@ -1,33 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  iscsi_target_nodeattrib.c
- *
- * This file contains the main functions related to Initiator Node Attributes.
- *
- * Copyright (c) 2004, 2005 PyX Technologies, Inc.
- * Copyright (c) 2006-2007 SBE, Inc.  All Rights Reserved.
- * Copyright (c) 2007 Rising Tide Software, Inc.
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #define ISCSI_TARGET_NODEATTRIB_C
 
 #include <linux/string.h>
@@ -53,7 +27,7 @@ static inline char *iscsi_na_get_initiatorname(
 	iscsi_node_acl_t *nacl)
 {
 #ifdef MY_ABC_HERE
-	// reduce compile-time warning messages
+	 
 	se_node_acl_t *se_nacl = nacl->se_node_acl;	
 #else
 	se_node_acl_t *se_nacl = &nacl->se_node_acl;	
@@ -62,10 +36,6 @@ static inline char *iscsi_na_get_initiatorname(
 	return &se_nacl->initiatorname[0];
 }
 
-/*	iscsi_set_default_node_attribues():
- *
- *
- */
 void iscsi_set_default_node_attribues(
 	iscsi_node_acl_t *acl)
 {
@@ -81,10 +51,6 @@ void iscsi_set_default_node_attribues(
 	a->default_erl = NA_DEFAULT_ERL;
 }
 
-/*	iscsi_na_dataout_timeout():
- *
- *
- */
 extern int iscsi_na_dataout_timeout(
 	iscsi_node_acl_t *acl,
 	u32 dataout_timeout)
@@ -110,10 +76,6 @@ extern int iscsi_na_dataout_timeout(
 	return 0;
 }
 
-/*	iscsi_na_dataout_timeout_retries():
- *
- *
- */
 extern int iscsi_na_dataout_timeout_retries(
 	iscsi_node_acl_t *acl,
 	u32 dataout_timeout_retries)
@@ -140,10 +102,6 @@ extern int iscsi_na_dataout_timeout_retries(
 	return 0;
 }
 
-/*	iscsi_na_nopin_timeout():
- *
- *
- */
 extern int iscsi_na_nopin_timeout(
 	iscsi_node_acl_t *acl,
 	u32 nopin_timeout)
@@ -171,9 +129,7 @@ extern int iscsi_na_nopin_timeout(
 	TRACE(TRACE_NODEATTRIB, "Set NopIn Timeout to %u for Initiator"
 		" Node %s\n", a->nopin_timeout,
 		iscsi_na_get_initiatorname(acl));
-	/*
-	 * Reenable disabled nopin_timeout timer for all iSCSI connections.
-	 */
+	 
 	if (!(orig_nopin_timeout)) {
 		spin_lock_bh(&se_nacl->nacl_sess_lock);
 		se_sess = se_nacl->nacl_sess;
@@ -199,10 +155,6 @@ extern int iscsi_na_nopin_timeout(
 	return 0;
 }
 
-/*	iscsi_na_nopin_response_timeout():
- *
- *
- */
 extern int iscsi_na_nopin_response_timeout(
 	iscsi_node_acl_t *acl,
 	u32 nopin_response_timeout)
@@ -229,10 +181,6 @@ extern int iscsi_na_nopin_response_timeout(
 	return 0;
 }
 
-/*	iscsi_na_random_datain_pdu_offsets():
- *
- *
- */
 extern int iscsi_na_random_datain_pdu_offsets(
 	iscsi_node_acl_t *acl,
 	u32 random_datain_pdu_offsets)
@@ -253,10 +201,6 @@ extern int iscsi_na_random_datain_pdu_offsets(
 	return 0;
 }
 
-/*	iscsi_na_random_datain_seq_offsets():
- *
- *
- */
 extern int iscsi_na_random_datain_seq_offsets(
 	iscsi_node_acl_t *acl,
 	u32 random_datain_seq_offsets)
@@ -277,10 +221,6 @@ extern int iscsi_na_random_datain_seq_offsets(
 	return 0;
 }
 
-/*	iscsi_na_random_r2t_offsets():
- *
- *
- */
 extern int iscsi_na_random_r2t_offsets(
 	iscsi_node_acl_t *acl,
 	u32 random_r2t_offsets)

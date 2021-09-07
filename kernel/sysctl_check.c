@@ -33,10 +33,9 @@ static const struct trans_ctl_table trans_pty_table[] = {
 static const struct trans_ctl_table trans_kern_table[] = {
 	{ KERN_OSTYPE,			"ostype" },
 	{ KERN_OSRELEASE,		"osrelease" },
-	/* KERN_OSREV not used */
+	 
 	{ KERN_VERSION,			"version" },
-	/* KERN_SECUREMASK not used */
-	/* KERN_PROF not used */
+	 
 	{ KERN_NODENAME,		"hostname" },
 	{ KERN_DOMAINNAME,		"domainname" },
 
@@ -47,9 +46,6 @@ static const struct trans_ctl_table trans_kern_table[] = {
 	{ KERN_CTLALTDEL,		"ctrl-alt-del" },
 	{ KERN_PRINTK,			"printk" },
 
-	/* KERN_NAMETRANS not used */
-	/* KERN_PPC_HTABRECLAIM not used */
-	/* KERN_PPC_ZEROPAGED not used */
 	{ KERN_PPC_POWERSAVE_NAP,	"powersave-nap" },
 
 	{ KERN_MODPROBE,		"modprobe" },
@@ -57,13 +53,10 @@ static const struct trans_ctl_table trans_kern_table[] = {
 	{ KERN_ACCT,			"acct" },
 	{ KERN_PPC_L2CR,		"l2cr" },
 
-	/* KERN_RTSIGNR not used */
-	/* KERN_RTSIGMAX not used */
-
 	{ KERN_SHMMAX,			"shmmax" },
 	{ KERN_MSGMAX,			"msgmax" },
 	{ KERN_MSGMNB,			"msgmnb" },
-	/* KERN_MSGPOOL not used*/
+	 
 	{ KERN_SYSRQ,			"sysrq" },
 	{ KERN_MAX_THREADS,		"threads-max" },
 	{ KERN_RANDOM,			"random",	trans_random_table },
@@ -119,7 +112,7 @@ static const struct trans_ctl_table trans_vm_table[] = {
 	{ VM_DIRTY_EXPIRE_CS,		"dirty_expire_centisecs" },
 	{ VM_NR_PDFLUSH_THREADS,	"nr_pdflush_threads" },
 	{ VM_OVERCOMMIT_RATIO,		"overcommit_ratio" },
-	/* VM_PAGEBUF unused */
+	 
 	{ VM_HUGETLB_PAGES,		"nr_hugepages" },
 	{ VM_SWAPPINESS,		"swappiness" },
 	{ VM_LOWMEM_RESERVE_RATIO,	"lowmem_reserve_ratio" },
@@ -130,7 +123,7 @@ static const struct trans_ctl_table trans_vm_table[] = {
 	{ VM_HUGETLB_GROUP,		"hugetlb_shm_group" },
 	{ VM_VFS_CACHE_PRESSURE,	"vfs_cache_pressure" },
 	{ VM_LEGACY_VA_LAYOUT,		"legacy_va_layout" },
-	/* VM_SWAP_TOKEN_TIMEOUT unused */
+	 
 	{ VM_DROP_PAGECACHE,		"drop_caches" },
 	{ VM_PERCPU_PAGELIST_FRACTION,	"percpu_pagelist_fraction" },
 	{ VM_ZONE_RECLAIM_MODE,		"zone_reclaim_mode" },
@@ -147,23 +140,18 @@ static const struct trans_ctl_table trans_net_core_table[] = {
 	{ NET_CORE_RMEM_MAX,		"rmem_max" },
 	{ NET_CORE_WMEM_DEFAULT,	"wmem_default" },
 	{ NET_CORE_RMEM_DEFAULT,	"rmem_default" },
-	/* NET_CORE_DESTROY_DELAY unused */
+	 
 	{ NET_CORE_MAX_BACKLOG,		"netdev_max_backlog" },
 #ifdef MY_DEF_HERE
 	{ NET_CORE_FASTROUTE,		"netdev_fastroute" },
 	{ RCV_PKT_STEERING,		"rcv_pkt_steering" },
 #else
-	/* NET_CORE_FASTROUTE unused */
+	 
 #endif
 	{ NET_CORE_MSG_COST,		"message_cost" },
 	{ NET_CORE_MSG_BURST,		"message_burst" },
 	{ NET_CORE_OPTMEM_MAX,		"optmem_max" },
-	/* NET_CORE_HOT_LIST_LENGTH unused */
-	/* NET_CORE_DIVERT_VERSION unused */
-	/* NET_CORE_NO_CONG_THRESH unused */
-	/* NET_CORE_NO_CONG unused */
-	/* NET_CORE_LO_CONG unused */
-	/* NET_CORE_MOD_CONG unused */
+	 
 	{ NET_CORE_DEV_WEIGHT,		"dev_weight" },
 	{ NET_CORE_SOMAXCONN,		"somaxconn" },
 	{ NET_CORE_BUDGET,		"netdev_budget" },
@@ -174,8 +162,7 @@ static const struct trans_ctl_table trans_net_core_table[] = {
 };
 
 static const struct trans_ctl_table trans_net_unix_table[] = {
-	/* NET_UNIX_DESTROY_DELAY unused */
-	/* NET_UNIX_DELETE_DELAY unused */
+	 
 	{ NET_UNIX_MAX_DGRAM_QLEN,	"max_dgram_qlen" },
 	{}
 };
@@ -311,7 +298,7 @@ static const struct trans_ctl_table trans_net_ipv4_table[] = {
 	{ NET_IPV4_CONF,		"conf",		trans_net_ipv4_conf_table },
 	{ NET_IPV4_NEIGH,		"neigh",	trans_net_neigh_table },
 	{ NET_IPV4_ROUTE,		"route",	trans_net_ipv4_route_table },
-	/* NET_IPV4_FIB_HASH unused */
+	 
 	{ NET_IPV4_NETFILTER,		"netfilter",	trans_net_ipv4_netfilter_table },
 
 	{ NET_IPV4_TCP_TIMESTAMPS,		"tcp_timestamps" },
@@ -319,36 +306,32 @@ static const struct trans_ctl_table trans_net_ipv4_table[] = {
 	{ NET_IPV4_TCP_SACK,			"tcp_sack" },
 	{ NET_IPV4_TCP_RETRANS_COLLAPSE,	"tcp_retrans_collapse" },
 	{ NET_IPV4_DEFAULT_TTL,			"ip_default_ttl" },
-	/* NET_IPV4_AUTOCONFIG unused */
+	 
 	{ NET_IPV4_NO_PMTU_DISC,		"ip_no_pmtu_disc" },
 	{ NET_IPV4_TCP_SYN_RETRIES,		"tcp_syn_retries" },
 	{ NET_IPV4_IPFRAG_HIGH_THRESH,		"ipfrag_high_thresh" },
 	{ NET_IPV4_IPFRAG_LOW_THRESH,		"ipfrag_low_thresh" },
 	{ NET_IPV4_IPFRAG_TIME,			"ipfrag_time" },
-	/* NET_IPV4_TCP_MAX_KA_PROBES unused */
+	 
 	{ NET_IPV4_TCP_KEEPALIVE_TIME,		"tcp_keepalive_time" },
 	{ NET_IPV4_TCP_KEEPALIVE_PROBES,	"tcp_keepalive_probes" },
 	{ NET_IPV4_TCP_RETRIES1,		"tcp_retries1" },
 	{ NET_IPV4_TCP_RETRIES2,		"tcp_retries2" },
 	{ NET_IPV4_TCP_FIN_TIMEOUT,		"tcp_fin_timeout" },
-	/* NET_IPV4_IP_MASQ_DEBUG unused */
+	 
 	{ NET_TCP_SYNCOOKIES,			"tcp_syncookies" },
 	{ NET_TCP_STDURG,			"tcp_stdurg" },
 	{ NET_TCP_RFC1337,			"tcp_rfc1337" },
-	/* NET_TCP_SYN_TAILDROP unused */
+	 
 	{ NET_TCP_MAX_SYN_BACKLOG,		"tcp_max_syn_backlog" },
 	{ NET_IPV4_LOCAL_PORT_RANGE,		"ip_local_port_range" },
 	{ NET_IPV4_ICMP_ECHO_IGNORE_ALL,	"icmp_echo_ignore_all" },
 	{ NET_IPV4_ICMP_ECHO_IGNORE_BROADCASTS,	"icmp_echo_ignore_broadcasts" },
-	/* NET_IPV4_ICMP_SOURCEQUENCH_RATE unused */
-	/* NET_IPV4_ICMP_DESTUNREACH_RATE unused */
-	/* NET_IPV4_ICMP_TIMEEXCEED_RATE unused */
-	/* NET_IPV4_ICMP_PARAMPROB_RATE unused */
-	/* NET_IPV4_ICMP_ECHOREPLY_RATE unused */
+	 
 	{ NET_IPV4_ICMP_IGNORE_BOGUS_ERROR_RESPONSES,	"icmp_ignore_bogus_error_responses" },
 	{ NET_IPV4_IGMP_MAX_MEMBERSHIPS,	"igmp_max_memberships" },
 	{ NET_TCP_TW_RECYCLE,			"tcp_tw_recycle" },
-	/* NET_IPV4_ALWAYS_DEFRAG unused */
+	 
 	{ NET_IPV4_TCP_KEEPALIVE_INTVL,		"tcp_keepalive_intvl" },
 	{ NET_IPV4_INET_PEER_THRESHOLD,		"inet_peer_threshold" },
 	{ NET_IPV4_INET_PEER_MINTTL,		"inet_peer_minttl" },
@@ -378,10 +361,10 @@ static const struct trans_ctl_table trans_net_ipv4_table[] = {
 	{ NET_IPV4_IPFRAG_SECRET_INTERVAL,	"ipfrag_secret_interval" },
 	{ NET_IPV4_IGMP_MAX_MSF,		"igmp_max_msf" },
 	{ NET_TCP_NO_METRICS_SAVE,		"tcp_no_metrics_save" },
-	/* NET_TCP_DEFAULT_WIN_SCALE unused */
+	 
 	{ NET_TCP_MODERATE_RCVBUF,		"tcp_moderate_rcvbuf" },
 	{ NET_TCP_TSO_WIN_DIVISOR,		"tcp_tso_win_divisor" },
-	/* NET_TCP_BIC_BETA unused */
+	 
 	{ NET_IPV4_ICMP_ERRORS_USE_INBOUND_IFADDR,	"icmp_errors_use_inbound_ifaddr" },
 	{ NET_TCP_CONG_CONTROL,			"tcp_congestion_control" },
 	{ NET_TCP_ABC,				"tcp_abc" },
@@ -399,13 +382,13 @@ static const struct trans_ctl_table trans_net_ipv4_table[] = {
 	{ NET_TCP_ALLOWED_CONG_CONTROL,		"tcp_allowed_congestion_control" },
 	{ NET_TCP_MAX_SSTHRESH,			"tcp_max_ssthresh" },
 	{ NET_TCP_FRTO_RESPONSE,		"tcp_frto_response" },
-	{ 2088 /* NET_IPQ_QMAX */,		"ip_queue_maxlen" },
+	{ 2088  ,		"ip_queue_maxlen" },
 	{}
 };
 
 static const struct trans_ctl_table trans_net_ipx_table[] = {
 	{ NET_IPX_PPROP_BROADCASTING,	"ipx_pprop_broadcasting" },
-	/* NET_IPX_FORWARDING unused */
+	 
 	{}
 };
 
@@ -544,7 +527,7 @@ static const struct trans_ctl_table trans_net_ipv6_table[] = {
 	{ NET_IPV6_IP6FRAG_TIME,	"ip6frag_time" },
 	{ NET_IPV6_IP6FRAG_SECRET_INTERVAL,	"ip6frag_secret_interval" },
 	{ NET_IPV6_MLD_MAX_MSF,		"mld_max_msf" },
-	{ 2088 /* IPQ_QMAX */,		"ip6_queue_maxlen" },
+	{ 2088  ,		"ip6_queue_maxlen" },
 	{}
 };
 
@@ -701,8 +684,7 @@ static const struct trans_ctl_table trans_net_irda_table[] = {
 
 static const struct trans_ctl_table trans_net_table[] = {
 	{ NET_CORE,		"core",		trans_net_core_table },
-	/* NET_ETHER not used */
-	/* NET_802 not used */
+	 
 	{ NET_UNIX,		"unix",		trans_net_unix_table },
 	{ NET_IPV4,		"ipv4",		trans_net_ipv4_table },
 	{ NET_IPX,		"ipx",		trans_net_ipx_table },
@@ -715,7 +697,7 @@ static const struct trans_ctl_table trans_net_table[] = {
 	{ NET_X25,		"x25",		trans_net_x25_table },
 	{ NET_TR,		"token-ring",	trans_net_tr_table },
 	{ NET_DECNET,		"decnet",	trans_net_decnet_table },
-	/*  NET_ECONET not used */
+	 
 	{ NET_SCTP,		"sctp",		trans_net_sctp_table },
 	{ NET_LLC,		"llc",		trans_net_llc_table },
 	{ NET_NETFILTER,	"netfilter",	trans_net_netfilter_table },
@@ -778,14 +760,11 @@ static const struct trans_ctl_table trans_inotify_table[] = {
 static const struct trans_ctl_table trans_fs_table[] = {
 	{ FS_NRINODE,		"inode-nr" },
 	{ FS_STATINODE,		"inode-state" },
-	/* FS_MAXINODE unused */
-	/* FS_NRDQUOT unused */
-	/* FS_MAXDQUOT unused */
+	 
 	{ FS_NRFILE,		"file-nr" },
 	{ FS_MAXFILE,		"file-max" },
 	{ FS_DENTRY,		"dentry-state" },
-	/* FS_NRSUPER unused */
-	/* FS_MAXUPSER unused */
+	 
 	{ FS_OVERFLOWUID,	"overflowuid" },
 	{ FS_OVERFLOWGID,	"overflowgid" },
 	{ FS_LEASES,		"leases-enable" },
@@ -821,12 +800,11 @@ static const struct trans_ctl_table trans_ipmi_table[] = {
 };
 
 static const struct trans_ctl_table trans_mac_hid_files[] = {
-	/* DEV_MAC_HID_KEYBOARD_SENDS_LINUX_KEYCODES unused */
-	/* DEV_MAC_HID_KEYBOARD_LOCK_KEYCODES unused */
+	 
 	{ DEV_MAC_HID_MOUSE_BUTTON_EMULATION,	"mouse_button_emulation" },
 	{ DEV_MAC_HID_MOUSE_BUTTON2_KEYCODE,	"mouse_button2_keycode" },
 	{ DEV_MAC_HID_MOUSE_BUTTON3_KEYCODE,	"mouse_button3_keycode" },
-	/* DEV_MAC_HID_ADB_MOUSE_SENDS_KEYCODES unused */
+	 
 	{}
 };
 
@@ -880,7 +858,7 @@ static const struct trans_ctl_table trans_parport_table[] = {
 
 static const struct trans_ctl_table trans_dev_table[] = {
 	{ DEV_CDROM,	"cdrom",	trans_cdrom_table },
-	/* DEV_HWMON unused */
+	 
 	{ DEV_PARPORT,	"parport",	trans_parport_table },
 	{ DEV_RAID,	"raid",		trans_raid_table },
 	{ DEV_MAC_HID,	"mac_hid",	trans_mac_hid_files },
@@ -1194,8 +1172,8 @@ static const struct trans_ctl_table trans_arlan_table[] = {
 };
 
 static const struct trans_ctl_table trans_s390dbf_table[] = {
-	{ 5678 /* CTL_S390DBF_STOPPABLE */,	"debug_stoppable" },
-	{ 5679 /* CTL_S390DBF_ACTIVE */,	"debug_active" },
+	{ 5678  ,	"debug_stoppable" },
+	{ 5679  ,	"debug_active" },
 	{}
 };
 
@@ -1212,10 +1190,10 @@ static const struct trans_ctl_table trans_sunrpc_table[] = {
 };
 
 static const struct trans_ctl_table trans_pm_table[] = {
-	{ 1 /* CTL_PM_SUSPEND */,	"suspend" },
-	{ 2 /* CTL_PM_CMODE */,		"cmode" },
-	{ 3 /* CTL_PM_P0 */,		"p0" },
-	{ 4 /* CTL_PM_CM */,		"cm" },
+	{ 1  ,	"suspend" },
+	{ 2  ,		"cmode" },
+	{ 3  ,		"p0" },
+	{ 4  ,		"cm" },
 	{}
 };
 
@@ -1229,13 +1207,13 @@ static const struct trans_ctl_table trans_root_table[] = {
 	{ CTL_KERN,	"kernel",	trans_kern_table },
 	{ CTL_VM,	"vm",		trans_vm_table },
 	{ CTL_NET,	"net",		trans_net_table },
-	/* CTL_PROC not used */
+	 
 	{ CTL_FS,	"fs",		trans_fs_table },
 	{ CTL_DEBUG,	"debug",	trans_debug_table },
 	{ CTL_DEV,	"dev",		trans_dev_table },
 	{ CTL_BUS,	"bus",		trans_bus_table },
 	{ CTL_ABI,	"abi" },
-	/* CTL_CPU not used */
+	 
 	{ CTL_ARLAN,	"arlan",	trans_arlan_table },
 	{ CTL_S390DBF,	"s390dbf",	trans_s390dbf_table },
 	{ CTL_SUNRPC,	"sunrpc",	trans_sunrpc_table },
@@ -1330,11 +1308,7 @@ static void sysctl_print_path(struct ctl_table *table)
 
 static void sysctl_repair_table(struct ctl_table *table)
 {
-	/* Don't complain about the classic default
-	 * sysctl strategy routine.  Maybe later we
-	 * can get the tables fixed and complain about
-	 * this.
-	 */
+	 
 	if (table->ctl_name && table->procname &&
 		(table->proc_handler == proc_dointvec) &&
 		(!table->strategy)) {

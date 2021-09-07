@@ -1,18 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * ioctl32.c: Conversion between 32bit and 64bit native ioctls.
- *
- * Copyright (C) 1997-2000  Jakub Jelinek  (jakub@redhat.com)
- * Copyright (C) 1998  Eddie C. Dost  (ecd@skynet.be)
- * Copyright (C) 2001,2002  Andi Kleen, SuSE Labs 
- * Copyright (C) 2003       Pavel Machek (pavel@suse.cz)
- *
- * These routines maintain argument size conversion between 32bit and 64bit
- * ioctls.
- */
-
+ 
 #include <linux/joystick.h>
 
 #include <linux/types.h>
@@ -301,7 +290,7 @@ struct ifreq32 {
 #define IFHWADDRLEN     6
 #define IFNAMSIZ        16
         union {
-                char    ifrn_name[IFNAMSIZ];            /* if name, e.g. "en0" */
+                char    ifrn_name[IFNAMSIZ];             
         } ifr_ifrn;
         union {
                 struct  sockaddr ifru_addr;
@@ -313,15 +302,15 @@ struct ifreq32 {
                 compat_int_t     ifru_ivalue;
                 compat_int_t     ifru_mtu;
                 struct  ifmap32 ifru_map;
-                char    ifru_slave[IFNAMSIZ];   /* Just fits the size */
+                char    ifru_slave[IFNAMSIZ];    
 		char	ifru_newname[IFNAMSIZ];
                 compat_caddr_t ifru_data;
-	    /* XXXX? ifru_settings should be here */
+	     
         } ifr_ifru;
 };
 
 struct ifconf32 {
-        compat_int_t	ifc_len;                        /* size of buffer       */
+        compat_int_t	ifc_len;                         
         compat_caddr_t  ifcbuf;
 };
 
@@ -398,9 +387,7 @@ static int dev_ifconf(unsigned int fd, unsigned int cmd, unsigned long arg)
 	}
 
 	if (ifc32.ifcbuf == 0) {
-		/* Translate from 64-bit structure multiple to
-		 * a 32-bit one.
-		 */
+		 
 		i = ifc.ifc_len;
 		i = ((i / sizeof(struct ifreq)) * sizeof(struct ifreq32));
 		ifc32.ifc_len = i;
@@ -496,9 +483,6 @@ static int siocdevprivate_ioctl(unsigned int fd, unsigned int cmd, unsigned long
 
 	u_ifreq64 = compat_alloc_user_space(sizeof(*u_ifreq64));
 
-	/* Don't check these user accesses, just let that get trapped
-	 * in the ioctl handler instead.
-	 */
 	if (copy_to_user(&u_ifreq64->ifr_ifrn.ifrn_name[0], &tmp_buf[0],
 			 IFNAMSIZ))
 		return -EFAULT;
@@ -546,10 +530,7 @@ static int dev_ifsioc(unsigned int fd, unsigned int cmd, unsigned long arg)
 	set_fs (old_fs);
 	if (!err) {
 		switch (cmd) {
-		/* TUNSETIFF is defined as _IOW, it should be _IORW
-		 * as the data is copied back to user space, but that
-		 * cannot be fixed without breaking all existing apps.
-		 */
+		 
 		case TUNSETIFF:
 		case TUNGETIFF:
 		case SIOCGIFFLAGS:
@@ -584,20 +565,20 @@ static int dev_ifsioc(unsigned int fd, unsigned int cmd, unsigned long arg)
 
 struct rtentry32 {
         u32   		rt_pad1;
-        struct sockaddr rt_dst;         /* target address               */
-        struct sockaddr rt_gateway;     /* gateway addr (RTF_GATEWAY)   */
-        struct sockaddr rt_genmask;     /* target network mask (IP)     */
+        struct sockaddr rt_dst;          
+        struct sockaddr rt_gateway;      
+        struct sockaddr rt_genmask;      
         unsigned short  rt_flags;
         short           rt_pad2;
         u32   		rt_pad3;
         unsigned char   rt_tos;
         unsigned char   rt_class;
         short           rt_pad4;
-        short           rt_metric;      /* +1 for binary compatibility! */
-        /* char * */ u32 rt_dev;        /* forcing the device at add    */
-        u32   		rt_mtu;         /* per route MTU/Window         */
-        u32   		rt_window;      /* Window clamping              */
-        unsigned short  rt_irtt;        /* Initial RTT                  */
+        short           rt_metric;       
+          u32 rt_dev;         
+        u32   		rt_mtu;          
+        u32   		rt_window;       
+        unsigned short  rt_irtt;         
 
 };
 
@@ -626,7 +607,7 @@ static int routing_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg)
 	
 	struct socket *mysock = sockfd_lookup(fd, &ret);
 
-	if (mysock && mysock->sk && mysock->sk->sk_family == AF_INET6) { /* ipv6 */
+	if (mysock && mysock->sk && mysock->sk->sk_family == AF_INET6) {  
 		struct in6_rtmsg32 __user *ur6 = compat_ptr(arg);
 		ret = copy_from_user (&r6.rtmsg_dst, &(ur6->rtmsg_dst),
 			3 * sizeof(struct in6_addr));
@@ -639,7 +620,7 @@ static int routing_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg)
 		ret |= __get_user (r6.rtmsg_ifindex, &(ur6->rtmsg_ifindex));
 		
 		r = (void *) &r6;
-	} else { /* ipv4 */
+	} else {  
 		struct rtentry32 __user *ur4 = compat_ptr(arg);
 		ret = copy_from_user (&r4.rt_dst, &(ur4->rt_dst),
 					3 * sizeof(struct sockaddr));
@@ -677,30 +658,29 @@ out:
 
 #ifdef CONFIG_BLOCK
 typedef struct sg_io_hdr32 {
-	compat_int_t interface_id;	/* [i] 'S' for SCSI generic (required) */
-	compat_int_t dxfer_direction;	/* [i] data transfer direction  */
-	unsigned char cmd_len;		/* [i] SCSI command length ( <= 16 bytes) */
-	unsigned char mx_sb_len;		/* [i] max length to write to sbp */
-	unsigned short iovec_count;	/* [i] 0 implies no scatter gather */
-	compat_uint_t dxfer_len;		/* [i] byte count of data transfer */
-	compat_uint_t dxferp;		/* [i], [*io] points to data transfer memory
-					      or scatter gather list */
-	compat_uptr_t cmdp;		/* [i], [*i] points to command to perform */
-	compat_uptr_t sbp;		/* [i], [*o] points to sense_buffer memory */
-	compat_uint_t timeout;		/* [i] MAX_UINT->no timeout (unit: millisec) */
-	compat_uint_t flags;		/* [i] 0 -> default, see SG_FLAG... */
-	compat_int_t pack_id;		/* [i->o] unused internally (normally) */
-	compat_uptr_t usr_ptr;		/* [i->o] unused internally */
-	unsigned char status;		/* [o] scsi status */
-	unsigned char masked_status;	/* [o] shifted, masked scsi status */
-	unsigned char msg_status;		/* [o] messaging level data (optional) */
-	unsigned char sb_len_wr;		/* [o] byte count actually written to sbp */
-	unsigned short host_status;	/* [o] errors from host adapter */
-	unsigned short driver_status;	/* [o] errors from software driver */
-	compat_int_t resid;		/* [o] dxfer_len - actual_transferred */
-	compat_uint_t duration;		/* [o] time taken by cmd (unit: millisec) */
-	compat_uint_t info;		/* [o] auxiliary information */
-} sg_io_hdr32_t;  /* 64 bytes long (on sparc32) */
+	compat_int_t interface_id;	 
+	compat_int_t dxfer_direction;	 
+	unsigned char cmd_len;		 
+	unsigned char mx_sb_len;		 
+	unsigned short iovec_count;	 
+	compat_uint_t dxfer_len;		 
+	compat_uint_t dxferp;		 
+	compat_uptr_t cmdp;		 
+	compat_uptr_t sbp;		 
+	compat_uint_t timeout;		 
+	compat_uint_t flags;		 
+	compat_int_t pack_id;		 
+	compat_uptr_t usr_ptr;		 
+	unsigned char status;		 
+	unsigned char masked_status;	 
+	unsigned char msg_status;		 
+	unsigned char sb_len_wr;		 
+	unsigned short host_status;	 
+	unsigned short driver_status;	 
+	compat_int_t resid;		 
+	compat_uint_t duration;		 
+	compat_uint_t info;		 
+} sg_io_hdr32_t;   
 
 typedef struct sg_iovec32 {
 	compat_uint_t iov_base;
@@ -751,7 +731,6 @@ static int sg_ioctl_trans(unsigned int fd, unsigned int cmd, unsigned long arg)
 		sgio = new;
 	}
 
-	/* Ok, now construct.  */
 	if (copy_in_user(&sgio->interface_id, &sgio32->interface_id,
 			 (2 * sizeof(int)) +
 			 (2 * sizeof(unsigned char)) +
@@ -816,7 +795,7 @@ static int sg_ioctl_trans(unsigned int fd, unsigned int cmd, unsigned long arg)
 	return err;
 }
 
-struct compat_sg_req_info { /* used by SG_GET_REQUEST_TABLE ioctl() */
+struct compat_sg_req_info {  
 	char req_state;
 	char orphan;
 	char sg_io_owned;
@@ -849,7 +828,7 @@ static int sg_grt_trans(unsigned int fd, unsigned int cmd, unsigned long arg)
 	}
 	return err;
 }
-#endif /* CONFIG_BLOCK */
+#endif  
 
 struct sock_fprog32 {
 	unsigned short	len;
@@ -1043,7 +1022,7 @@ static int mt_ioctl_trans(unsigned int fd, unsigned int cmd, unsigned long arg)
 	return err ? -EFAULT: 0;
 }
 
-#endif /* CONFIG_BLOCK */
+#endif  
 
 #ifdef CONFIG_VT
 
@@ -1064,22 +1043,18 @@ static int vt_check(struct file *file)
 		return -EINVAL;
 
 	vc = (struct vc_data *)tty->driver_data;
-	if (!vc_cons_allocated(vc->vc_num)) 	/* impossible? */
+	if (!vc_cons_allocated(vc->vc_num)) 	 
 		return -ENOIOCTLCMD;
 
-	/*
-	 * To have permissions to do most of the vt ioctls, we either have
-	 * to be the owner of the tty, or have CAP_SYS_TTY_CONFIG.
-	 */
 	if (current->signal->tty == tty || capable(CAP_SYS_TTY_CONFIG))
 		return 1;
 	return 0;                                                    
 }
 
 struct consolefontdesc32 {
-	unsigned short charcount;       /* characters in font (256 or 512) */
-	unsigned short charheight;      /* scan lines per character (1-32) */
-	compat_caddr_t chardata;	/* font data in expanded form */
+	unsigned short charcount;        
+	unsigned short charheight;       
+	compat_caddr_t chardata;	 
 };
 
 static int do_fontx_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg, struct file *file)
@@ -1130,11 +1105,11 @@ static int do_fontx_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg, 
 }
 
 struct console_font_op32 {
-	compat_uint_t op;        /* operation code KD_FONT_OP_* */
-	compat_uint_t flags;     /* KD_FONT_FLAG_* */
-	compat_uint_t width, height;     /* font size */
+	compat_uint_t op;         
+	compat_uint_t flags;      
+	compat_uint_t width, height;      
 	compat_uint_t charcount;
-	compat_caddr_t data;    /* font data with height fixed to 32 */
+	compat_caddr_t data;     
 };
                                         
 static int do_kdfontop_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg, struct file *file)
@@ -1198,7 +1173,7 @@ static int do_unimap_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg,
 	return 0;
 }
 
-#endif /* CONFIG_VT */
+#endif  
 
 static int do_smb_getmountuid(unsigned int fd, unsigned int cmd, unsigned long arg)
 {
@@ -1393,7 +1368,6 @@ static int ioc_settimeout(unsigned int fd, unsigned int cmd, unsigned long arg)
 	return rw_long(fd, AUTOFS_IOC_SETTIMEOUT, arg);
 }
 
-/* Bluetooth ioctls */
 #define HCIUARTSETPROTO	_IOW('U', 200, int)
 #define HCIUARTGETPROTO	_IOR('U', 201, int)
 
@@ -1477,7 +1451,7 @@ static int raw_ioctl(unsigned fd, unsigned cmd, unsigned long arg)
         }
         return ret;
 }
-#endif /* CONFIG_BLOCK */
+#endif  
 
 struct serial_struct32 {
         compat_int_t    type;
@@ -1492,12 +1466,12 @@ struct serial_struct32 {
         char    io_type;
         char    reserved_char[1];
         compat_int_t    hub6;
-        unsigned short  closing_wait; /* time to wait before closing */
-        unsigned short  closing_wait2; /* no longer used... */
+        unsigned short  closing_wait;  
+        unsigned short  closing_wait2;  
         compat_uint_t   iomem_base;
         unsigned short  iomem_reg_shift;
         unsigned int    port_high;
-     /* compat_ulong_t  iomap_base FIXME */
+      
         compat_int_t    reserved[1];
 };
 
@@ -1549,7 +1523,7 @@ struct usbdevfs_ctrltransfer32 {
         u16 wValue;
         u16 wIndex;
         u16 wLength;
-        u32 timeout;  /* in milliseconds */
+        u32 timeout;   
         compat_caddr_t data;
 };
 
@@ -1571,7 +1545,7 @@ static int do_usbdevfs_control(unsigned int fd, unsigned int cmd, unsigned long 
 struct usbdevfs_bulktransfer32 {
         compat_uint_t ep;
         compat_uint_t len;
-        compat_uint_t timeout; /* in milliseconds */
+        compat_uint_t timeout;  
         compat_caddr_t data;
 };
 
@@ -1594,11 +1568,6 @@ static int do_usbdevfs_bulk(unsigned int fd, unsigned int cmd, unsigned long arg
 
         return sys_ioctl(fd, USBDEVFS_BULK, (unsigned long)p);
 }
-
-/*
- *  USBDEVFS_SUBMITURB, USBDEVFS_REAPURB and USBDEVFS_REAPURBNDELAY
- *  are handled in usbdevfs core.			-Christopher Li
- */
 
 struct usbdevfs_disconnectsignal32 {
         compat_int_t signr;
@@ -1631,10 +1600,6 @@ static int do_usbdevfs_discsignal(unsigned int fd, unsigned int cmd, unsigned lo
         return err;
 }
 
-/*
- * I2C layer ioctls
- */
-
 struct i2c_msg32 {
 	u16 addr;
 	u16 flags;
@@ -1643,7 +1608,7 @@ struct i2c_msg32 {
 };
 
 struct i2c_rdwr_ioctl_data32 {
-	compat_caddr_t msgs; /* struct i2c_msg __user *msgs */
+	compat_caddr_t msgs;  
 	u32 nmsgs;
 };
 
@@ -1651,7 +1616,7 @@ struct i2c_smbus_ioctl_data32 {
 	u8 read_write;
 	u8 command;
 	u32 size;
-	compat_caddr_t data; /* union i2c_smbus_data *data */
+	compat_caddr_t data;  
 };
 
 struct i2c_rdwr_aligned {
@@ -1722,10 +1687,6 @@ static int do_i2c_smbus_ioctl(unsigned int fd, unsigned int cmd, unsigned long a
 	return sys_ioctl(fd, cmd, (unsigned long)tdata);
 }
 
-/* Since old style bridge ioctl's endup using SIOCDEVPRIVATE
- * for some operations; this forces use of the newer bridge-utils that
- * use compatible ioctls
- */
 static int old_bridge_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg)
 {
 	u32 tmp;
@@ -1766,7 +1727,7 @@ static int rtc_ioctl(unsigned fd, unsigned cmd, unsigned long arg)
 	case RTC_EPOCH_SET32:
 		return sys_ioctl(fd, RTC_EPOCH_SET, arg);
 	default:
-		/* unreached */
+		 
 		return -ENOIOCTLCMD;
 	}
 }
@@ -1785,23 +1746,21 @@ lp_timeout_trans(unsigned int fd, unsigned int cmd, unsigned long arg)
 	return sys_ioctl(fd, cmd, (unsigned long)tn);
 }
 
-/* on ia32 l_start is on a 32-bit boundary */
 #if defined(CONFIG_IA64) || defined(CONFIG_X86_64)
 struct space_resv_32 {
 	__s16		l_type;
 	__s16		l_whence;
 	__s64		l_start	__attribute__((packed));
-			/* len == 0 means until end of file */
+			 
 	__s64		l_len __attribute__((packed));
 	__s32		l_sysid;
 	__u32		l_pid;
-	__s32		l_pad[4];	/* reserve area */
+	__s32		l_pad[4];	 
 };
 
 #define FS_IOC_RESVSP_32		_IOW ('X', 40, struct space_resv_32)
 #define FS_IOC_RESVSP64_32	_IOW ('X', 42, struct space_resv_32)
 
-/* just account for different alignment */
 static int compat_ioctl_preallocate(struct file *file, unsigned long arg)
 {
 	struct space_resv_32	__user *p32 = compat_ptr(arg);
@@ -1832,29 +1791,19 @@ struct ioctl_trans {
 #define HANDLE_IOCTL(cmd,handler) \
 	{ (cmd), (ioctl_trans_handler_t)(handler) },
 
-/* pointer to compatible structure or no argument */
 #define COMPATIBLE_IOCTL(cmd) \
 	{ (cmd), do_ioctl32_pointer },
 
-/* argument is an unsigned long integer, not a pointer */
 #define ULONG_IOCTL(cmd) \
 	{ (cmd), (ioctl_trans_handler_t)sys_ioctl },
 
-/* ioctl should not be warned about even if it's not implemented.
-   Valid reasons to use this:
-   - It is implemented with ->compat_ioctl on some device, but programs
-   call it on others too.
-   - The ioctl is not implemented in the native kernel, but programs
-   call it commonly anyways.
-   Most other reasons are not valid. */
 #define IGNORE_IOCTL(cmd) COMPATIBLE_IOCTL(cmd)
 
 static struct ioctl_trans ioctl_start[] = {
-/* compatible ioctls first */
-COMPATIBLE_IOCTL(0x4B50)   /* KDGHWCLK - not in the kernel, but don't complain */
-COMPATIBLE_IOCTL(0x4B51)   /* KDSHWCLK - not in the kernel, but don't complain */
+ 
+COMPATIBLE_IOCTL(0x4B50)    
+COMPATIBLE_IOCTL(0x4B51)    
 
-/* Big T */
 COMPATIBLE_IOCTL(TCGETA)
 COMPATIBLE_IOCTL(TCSETA)
 COMPATIBLE_IOCTL(TCSETAW)
@@ -1872,7 +1821,7 @@ COMPATIBLE_IOCTL(TIOCSBRK)
 COMPATIBLE_IOCTL(TIOCCBRK)
 ULONG_IOCTL(TIOCMIWAIT)
 COMPATIBLE_IOCTL(TIOCGICOUNT)
-/* Little t */
+ 
 COMPATIBLE_IOCTL(TIOCGETD)
 COMPATIBLE_IOCTL(TIOCSETD)
 COMPATIBLE_IOCTL(TIOCEXCL)
@@ -1902,17 +1851,17 @@ COMPATIBLE_IOCTL(TCSETS2)
 COMPATIBLE_IOCTL(TCSETSW2)
 COMPATIBLE_IOCTL(TCSETSF2)
 #endif
-/* Little f */
+ 
 COMPATIBLE_IOCTL(FIOCLEX)
 COMPATIBLE_IOCTL(FIONCLEX)
 COMPATIBLE_IOCTL(FIOASYNC)
 COMPATIBLE_IOCTL(FIONBIO)
-COMPATIBLE_IOCTL(FIONREAD)  /* This is also TIOCINQ */
+COMPATIBLE_IOCTL(FIONREAD)   
 COMPATIBLE_IOCTL(FS_IOC_FIEMAP)
-/* 0x00 */
+ 
 COMPATIBLE_IOCTL(FIBMAP)
 COMPATIBLE_IOCTL(FIGETBSZ)
-/* 'X' - originally XFS but some now in the VFS */
+ 
 COMPATIBLE_IOCTL(FIFREEZE)
 COMPATIBLE_IOCTL(FITHAW)
 #ifdef MY_ABC_HERE
@@ -1920,7 +1869,7 @@ COMPATIBLE_IOCTL(FIGETVERSION)
 COMPATIBLE_IOCTL(FISETVERSION)
 COMPATIBLE_IOCTL(FIINCVERSION)
 #endif
-/* RAID */
+ 
 COMPATIBLE_IOCTL(RAID_VERSION)
 COMPATIBLE_IOCTL(GET_ARRAY_INFO)
 COMPATIBLE_IOCTL(GET_DISK_INFO)
@@ -1942,7 +1891,7 @@ COMPATIBLE_IOCTL(STOP_ARRAY_RO)
 COMPATIBLE_IOCTL(RESTART_ARRAY_RW)
 COMPATIBLE_IOCTL(GET_BITMAP_FILE)
 ULONG_IOCTL(SET_BITMAP_FILE)
-/* Big K */
+ 
 COMPATIBLE_IOCTL(PIO_FONT)
 COMPATIBLE_IOCTL(GIO_FONT)
 COMPATIBLE_IOCTL(PIO_CMAP)
@@ -1977,7 +1926,7 @@ COMPATIBLE_IOCTL(PIO_UNISCRNMAP)
 COMPATIBLE_IOCTL(PIO_FONTRESET)
 COMPATIBLE_IOCTL(PIO_UNIMAPCLR)
 #ifdef CONFIG_BLOCK
-/* Big S */
+ 
 COMPATIBLE_IOCTL(SCSI_IOCTL_GET_IDLUN)
 COMPATIBLE_IOCTL(SCSI_IOCTL_DOORLOCK)
 COMPATIBLE_IOCTL(SCSI_IOCTL_DOORUNLOCK)
@@ -1987,7 +1936,7 @@ COMPATIBLE_IOCTL(SCSI_IOCTL_SEND_COMMAND)
 COMPATIBLE_IOCTL(SCSI_IOCTL_PROBE_HOST)
 COMPATIBLE_IOCTL(SCSI_IOCTL_GET_PCI)
 #endif
-/* Big T */
+ 
 COMPATIBLE_IOCTL(TUNSETNOCSUM)
 COMPATIBLE_IOCTL(TUNSETDEBUG)
 COMPATIBLE_IOCTL(TUNSETPERSIST)
@@ -1999,7 +1948,7 @@ COMPATIBLE_IOCTL(TUNSETOFFLOAD)
 COMPATIBLE_IOCTL(TUNSETTXFILTER)
 COMPATIBLE_IOCTL(TUNGETSNDBUF)
 COMPATIBLE_IOCTL(TUNSETSNDBUF)
-/* Big V */
+ 
 COMPATIBLE_IOCTL(VT_SETMODE)
 COMPATIBLE_IOCTL(VT_GETMODE)
 COMPATIBLE_IOCTL(VT_GETSTATE)
@@ -2013,7 +1962,7 @@ COMPATIBLE_IOCTL(VT_RESIZEX)
 COMPATIBLE_IOCTL(VT_LOCKSWITCH)
 COMPATIBLE_IOCTL(VT_UNLOCKSWITCH)
 COMPATIBLE_IOCTL(VT_GETHIFONTMASK)
-/* Little p (/dev/rtc, /dev/envctrl, etc.) */
+ 
 COMPATIBLE_IOCTL(RTC_AIE_ON)
 COMPATIBLE_IOCTL(RTC_AIE_OFF)
 COMPATIBLE_IOCTL(RTC_UIE_ON)
@@ -2028,17 +1977,12 @@ COMPATIBLE_IOCTL(RTC_RD_TIME)
 COMPATIBLE_IOCTL(RTC_SET_TIME)
 COMPATIBLE_IOCTL(RTC_WKALM_SET)
 COMPATIBLE_IOCTL(RTC_WKALM_RD)
-/*
- * These two are only for the sbus rtc driver, but
- * hwclock tries them on every rtc device first when
- * running on sparc.  On other architectures the entries
- * are useless but harmless.
- */
-COMPATIBLE_IOCTL(_IOR('p', 20, int[7])) /* RTCGET */
-COMPATIBLE_IOCTL(_IOW('p', 21, int[7])) /* RTCSET */
-/* Little m */
+ 
+COMPATIBLE_IOCTL(_IOR('p', 20, int[7]))  
+COMPATIBLE_IOCTL(_IOW('p', 21, int[7]))  
+ 
 COMPATIBLE_IOCTL(MTIOCTOP)
-/* Socket level stuff */
+ 
 COMPATIBLE_IOCTL(FIOQSIZE)
 COMPATIBLE_IOCTL(FIOSETOWN)
 COMPATIBLE_IOCTL(SIOCSPGRP)
@@ -2065,7 +2009,7 @@ COMPATIBLE_IOCTL(SIOCSIFVLAN)
 COMPATIBLE_IOCTL(SIOCBRADDBR)
 COMPATIBLE_IOCTL(SIOCBRDELBR)
 #ifdef CONFIG_BLOCK
-/* SG stuff */
+ 
 COMPATIBLE_IOCTL(SG_SET_TIMEOUT)
 COMPATIBLE_IOCTL(SG_GET_TIMEOUT)
 COMPATIBLE_IOCTL(SG_EMULATED_HOST)
@@ -2090,7 +2034,7 @@ COMPATIBLE_IOCTL(SG_GET_REQUEST_TABLE)
 COMPATIBLE_IOCTL(SG_SET_KEEP_ORPHAN)
 COMPATIBLE_IOCTL(SG_GET_KEEP_ORPHAN)
 #endif
-/* PPP stuff */
+ 
 COMPATIBLE_IOCTL(PPPIOCGFLAGS)
 COMPATIBLE_IOCTL(PPPIOCSFLAGS)
 COMPATIBLE_IOCTL(PPPIOCGASYNCMAP)
@@ -2104,14 +2048,12 @@ COMPATIBLE_IOCTL(PPPIOCSMAXCID)
 COMPATIBLE_IOCTL(PPPIOCGXASYNCMAP)
 COMPATIBLE_IOCTL(PPPIOCSXASYNCMAP)
 COMPATIBLE_IOCTL(PPPIOCXFERUNIT)
-/* PPPIOCSCOMPRESS is translated */
+ 
 COMPATIBLE_IOCTL(PPPIOCGNPMODE)
 COMPATIBLE_IOCTL(PPPIOCSNPMODE)
 COMPATIBLE_IOCTL(PPPIOCGDEBUG)
 COMPATIBLE_IOCTL(PPPIOCSDEBUG)
-/* PPPIOCSPASS is translated */
-/* PPPIOCSACTIVE is translated */
-/* PPPIOCGIDLE is translated */
+ 
 COMPATIBLE_IOCTL(PPPIOCNEWUNIT)
 COMPATIBLE_IOCTL(PPPIOCATTACH)
 COMPATIBLE_IOCTL(PPPIOCDETACH)
@@ -2120,12 +2062,12 @@ COMPATIBLE_IOCTL(PPPIOCCONNECT)
 COMPATIBLE_IOCTL(PPPIOCDISCONN)
 COMPATIBLE_IOCTL(PPPIOCATTCHAN)
 COMPATIBLE_IOCTL(PPPIOCGCHAN)
-/* PPPOX */
+ 
 COMPATIBLE_IOCTL(PPPOEIOCSFWD)
 COMPATIBLE_IOCTL(PPPOEIOCDFWD)
-/* LP */
+ 
 COMPATIBLE_IOCTL(LPGETSTATUS)
-/* ppdev */
+ 
 COMPATIBLE_IOCTL(PPSETMODE)
 COMPATIBLE_IOCTL(PPRSTATUS)
 COMPATIBLE_IOCTL(PPRCONTROL)
@@ -2147,11 +2089,9 @@ COMPATIBLE_IOCTL(PPGETMODE)
 COMPATIBLE_IOCTL(PPGETPHASE)
 COMPATIBLE_IOCTL(PPGETFLAGS)
 COMPATIBLE_IOCTL(PPSETFLAGS)
-/* pktcdvd */
+ 
 COMPATIBLE_IOCTL(PACKET_CTRL_CMD)
-/* Big A */
-/* sparc only */
-/* Big Q for sound/OSS */
+ 
 COMPATIBLE_IOCTL(SNDCTL_SEQ_RESET)
 COMPATIBLE_IOCTL(SNDCTL_SEQ_SYNC)
 COMPATIBLE_IOCTL(SNDCTL_SYNTH_INFO)
@@ -2174,7 +2114,7 @@ COMPATIBLE_IOCTL(SNDCTL_SEQ_GETTIME)
 COMPATIBLE_IOCTL(SNDCTL_SYNTH_ID)
 COMPATIBLE_IOCTL(SNDCTL_SYNTH_CONTROL)
 COMPATIBLE_IOCTL(SNDCTL_SYNTH_REMOVESAMPLE)
-/* Big T for sound/OSS */
+ 
 COMPATIBLE_IOCTL(SNDCTL_TMR_TIMEBASE)
 COMPATIBLE_IOCTL(SNDCTL_TMR_START)
 COMPATIBLE_IOCTL(SNDCTL_TMR_STOP)
@@ -2183,11 +2123,11 @@ COMPATIBLE_IOCTL(SNDCTL_TMR_TEMPO)
 COMPATIBLE_IOCTL(SNDCTL_TMR_SOURCE)
 COMPATIBLE_IOCTL(SNDCTL_TMR_METRONOME)
 COMPATIBLE_IOCTL(SNDCTL_TMR_SELECT)
-/* Little m for sound/OSS */
+ 
 COMPATIBLE_IOCTL(SNDCTL_MIDI_PRETIME)
 COMPATIBLE_IOCTL(SNDCTL_MIDI_MPUMODE)
 COMPATIBLE_IOCTL(SNDCTL_MIDI_MPUCMD)
-/* Big P for sound/OSS */
+ 
 COMPATIBLE_IOCTL(SNDCTL_DSP_RESET)
 COMPATIBLE_IOCTL(SNDCTL_DSP_SYNC)
 COMPATIBLE_IOCTL(SNDCTL_DSP_SPEED)
@@ -2208,8 +2148,7 @@ COMPATIBLE_IOCTL(SNDCTL_DSP_GETTRIGGER)
 COMPATIBLE_IOCTL(SNDCTL_DSP_SETTRIGGER)
 COMPATIBLE_IOCTL(SNDCTL_DSP_GETIPTR)
 COMPATIBLE_IOCTL(SNDCTL_DSP_GETOPTR)
-/* SNDCTL_DSP_MAPINBUF,  XXX needs translation */
-/* SNDCTL_DSP_MAPOUTBUF,  XXX needs translation */
+ 
 COMPATIBLE_IOCTL(SNDCTL_DSP_SETSYNCRO)
 COMPATIBLE_IOCTL(SNDCTL_DSP_SETDUPLEX)
 COMPATIBLE_IOCTL(SNDCTL_DSP_GETODELAY)
@@ -2218,7 +2157,7 @@ COMPATIBLE_IOCTL(SOUND_PCM_READ_RATE)
 COMPATIBLE_IOCTL(SOUND_PCM_READ_CHANNELS)
 COMPATIBLE_IOCTL(SOUND_PCM_READ_BITS)
 COMPATIBLE_IOCTL(SOUND_PCM_READ_FILTER)
-/* Big C for sound/OSS */
+ 
 COMPATIBLE_IOCTL(SNDCTL_COPR_RESET)
 COMPATIBLE_IOCTL(SNDCTL_COPR_LOAD)
 COMPATIBLE_IOCTL(SNDCTL_COPR_RDATA)
@@ -2229,7 +2168,7 @@ COMPATIBLE_IOCTL(SNDCTL_COPR_RUN)
 COMPATIBLE_IOCTL(SNDCTL_COPR_HALT)
 COMPATIBLE_IOCTL(SNDCTL_COPR_SENDMSG)
 COMPATIBLE_IOCTL(SNDCTL_COPR_RCVMSG)
-/* Big M for sound/OSS */
+ 
 COMPATIBLE_IOCTL(SOUND_MIXER_READ_VOLUME)
 COMPATIBLE_IOCTL(SOUND_MIXER_READ_BASS)
 COMPATIBLE_IOCTL(SOUND_MIXER_READ_TREBLE)
@@ -2256,8 +2195,7 @@ COMPATIBLE_IOCTL(MIXER_READ(SOUND_MIXER_VIDEO))
 COMPATIBLE_IOCTL(MIXER_READ(SOUND_MIXER_RADIO))
 COMPATIBLE_IOCTL(MIXER_READ(SOUND_MIXER_MONITOR))
 COMPATIBLE_IOCTL(SOUND_MIXER_READ_MUTE)
-/* SOUND_MIXER_READ_ENHANCE,  same value as READ_MUTE */
-/* SOUND_MIXER_READ_LOUD,  same value as READ_MUTE */
+ 
 COMPATIBLE_IOCTL(SOUND_MIXER_READ_RECSRC)
 COMPATIBLE_IOCTL(SOUND_MIXER_READ_DEVMASK)
 COMPATIBLE_IOCTL(SOUND_MIXER_READ_RECMASK)
@@ -2289,8 +2227,7 @@ COMPATIBLE_IOCTL(MIXER_WRITE(SOUND_MIXER_VIDEO))
 COMPATIBLE_IOCTL(MIXER_WRITE(SOUND_MIXER_RADIO))
 COMPATIBLE_IOCTL(MIXER_WRITE(SOUND_MIXER_MONITOR))
 COMPATIBLE_IOCTL(SOUND_MIXER_WRITE_MUTE)
-/* SOUND_MIXER_WRITE_ENHANCE,  same value as WRITE_MUTE */
-/* SOUND_MIXER_WRITE_LOUD,  same value as WRITE_MUTE */
+ 
 COMPATIBLE_IOCTL(SOUND_MIXER_WRITE_RECSRC)
 COMPATIBLE_IOCTL(SOUND_MIXER_INFO)
 COMPATIBLE_IOCTL(SOUND_OLD_MIXER_INFO)
@@ -2305,7 +2242,7 @@ COMPATIBLE_IOCTL(SOUND_MIXER_PRIVATE5)
 COMPATIBLE_IOCTL(SOUND_MIXER_GETLEVELS)
 COMPATIBLE_IOCTL(SOUND_MIXER_SETLEVELS)
 COMPATIBLE_IOCTL(OSS_GETVERSION)
-/* AUTOFS */
+ 
 ULONG_IOCTL(AUTOFS_IOC_READY)
 ULONG_IOCTL(AUTOFS_IOC_FAIL)
 COMPATIBLE_IOCTL(AUTOFS_IOC_CATATONIC)
@@ -2314,12 +2251,12 @@ COMPATIBLE_IOCTL(AUTOFS_IOC_EXPIRE)
 COMPATIBLE_IOCTL(AUTOFS_IOC_EXPIRE_MULTI)
 COMPATIBLE_IOCTL(AUTOFS_IOC_PROTOSUBVER)
 COMPATIBLE_IOCTL(AUTOFS_IOC_ASKUMOUNT)
-/* Raw devices */
+ 
 COMPATIBLE_IOCTL(RAW_SETBIND)
 COMPATIBLE_IOCTL(RAW_GETBIND)
-/* SMB ioctls which do not need any translations */
+ 
 COMPATIBLE_IOCTL(SMB_IOC_NEWCONN)
-/* Little a */
+ 
 COMPATIBLE_IOCTL(ATMSIGD_CTRL)
 COMPATIBLE_IOCTL(ATMARPD_CTRL)
 COMPATIBLE_IOCTL(ATMLEC_CTRL)
@@ -2335,7 +2272,7 @@ COMPATIBLE_IOCTL(ATMTCP_CREATE)
 COMPATIBLE_IOCTL(ATMTCP_REMOVE)
 COMPATIBLE_IOCTL(ATMMPC_CTRL)
 COMPATIBLE_IOCTL(ATMMPC_DATA)
-/* Watchdog */
+ 
 COMPATIBLE_IOCTL(WDIOC_GETSUPPORT)
 COMPATIBLE_IOCTL(WDIOC_GETSTATUS)
 COMPATIBLE_IOCTL(WDIOC_GETBOOTSTATUS)
@@ -2344,14 +2281,14 @@ COMPATIBLE_IOCTL(WDIOC_SETOPTIONS)
 COMPATIBLE_IOCTL(WDIOC_KEEPALIVE)
 COMPATIBLE_IOCTL(WDIOC_SETTIMEOUT)
 COMPATIBLE_IOCTL(WDIOC_GETTIMEOUT)
-/* Big R */
+ 
 COMPATIBLE_IOCTL(RNDGETENTCNT)
 COMPATIBLE_IOCTL(RNDADDTOENTCNT)
 COMPATIBLE_IOCTL(RNDGETPOOL)
 COMPATIBLE_IOCTL(RNDADDENTROPY)
 COMPATIBLE_IOCTL(RNDZAPENTCNT)
 COMPATIBLE_IOCTL(RNDCLEARPOOL)
-/* Bluetooth */
+ 
 COMPATIBLE_IOCTL(HCIDEVUP)
 COMPATIBLE_IOCTL(HCIDEVDOWN)
 COMPATIBLE_IOCTL(HCIDEVRESET)
@@ -2390,7 +2327,7 @@ COMPATIBLE_IOCTL(HIDPCONNADD)
 COMPATIBLE_IOCTL(HIDPCONNDEL)
 COMPATIBLE_IOCTL(HIDPGETCONNLIST)
 COMPATIBLE_IOCTL(HIDPGETCONNINFO)
-/* CAPI */
+ 
 COMPATIBLE_IOCTL(CAPI_REGISTER)
 COMPATIBLE_IOCTL(CAPI_GET_MANUFACTURER)
 COMPATIBLE_IOCTL(CAPI_GET_VERSION)
@@ -2404,19 +2341,19 @@ COMPATIBLE_IOCTL(CAPI_SET_FLAGS)
 COMPATIBLE_IOCTL(CAPI_CLR_FLAGS)
 COMPATIBLE_IOCTL(CAPI_NCCI_OPENCOUNT)
 COMPATIBLE_IOCTL(CAPI_NCCI_GETUNIT)
-/* Siemens Gigaset */
+ 
 COMPATIBLE_IOCTL(GIGASET_REDIR)
 COMPATIBLE_IOCTL(GIGASET_CONFIG)
 COMPATIBLE_IOCTL(GIGASET_BRKCHARS)
 COMPATIBLE_IOCTL(GIGASET_VERSION)
-/* Misc. */
-COMPATIBLE_IOCTL(0x41545900)		/* ATYIO_CLKR */
-COMPATIBLE_IOCTL(0x41545901)		/* ATYIO_CLKW */
+ 
+COMPATIBLE_IOCTL(0x41545900)		 
+COMPATIBLE_IOCTL(0x41545901)		 
 COMPATIBLE_IOCTL(PCIIOC_CONTROLLER)
 COMPATIBLE_IOCTL(PCIIOC_MMAP_IS_IO)
 COMPATIBLE_IOCTL(PCIIOC_MMAP_IS_MEM)
 COMPATIBLE_IOCTL(PCIIOC_WRITE_COMBINE)
-/* USB */
+ 
 COMPATIBLE_IOCTL(USBDEVFS_RESETEP)
 COMPATIBLE_IOCTL(USBDEVFS_SETINTERFACE)
 COMPATIBLE_IOCTL(USBDEVFS_SETCONFIGURATION)
@@ -2431,7 +2368,7 @@ COMPATIBLE_IOCTL(USBDEVFS_SUBMITURB32)
 COMPATIBLE_IOCTL(USBDEVFS_REAPURB32)
 COMPATIBLE_IOCTL(USBDEVFS_REAPURBNDELAY32)
 COMPATIBLE_IOCTL(USBDEVFS_CLEAR_HALT)
-/* NBD */
+ 
 ULONG_IOCTL(NBD_SET_SOCK)
 ULONG_IOCTL(NBD_SET_BLKSIZE)
 ULONG_IOCTL(NBD_SET_SIZE)
@@ -2441,14 +2378,14 @@ COMPATIBLE_IOCTL(NBD_CLEAR_QUE)
 COMPATIBLE_IOCTL(NBD_PRINT_DEBUG)
 ULONG_IOCTL(NBD_SET_SIZE_BLOCKS)
 COMPATIBLE_IOCTL(NBD_DISCONNECT)
-/* i2c */
+ 
 COMPATIBLE_IOCTL(I2C_SLAVE)
 COMPATIBLE_IOCTL(I2C_SLAVE_FORCE)
 COMPATIBLE_IOCTL(I2C_TENBIT)
 COMPATIBLE_IOCTL(I2C_PEC)
 COMPATIBLE_IOCTL(I2C_RETRIES)
 COMPATIBLE_IOCTL(I2C_TIMEOUT)
-/* hiddev */
+ 
 COMPATIBLE_IOCTL(HIDIOCGVERSION)
 COMPATIBLE_IOCTL(HIDIOCAPPLICATION)
 COMPATIBLE_IOCTL(HIDIOCGDEVINFO)
@@ -2465,7 +2402,7 @@ COMPATIBLE_IOCTL(HIDIOCGFLAG)
 COMPATIBLE_IOCTL(HIDIOCSFLAG)
 COMPATIBLE_IOCTL(HIDIOCGCOLLECTIONINDEX)
 COMPATIBLE_IOCTL(HIDIOCGCOLLECTIONINFO)
-/* dvb */
+ 
 COMPATIBLE_IOCTL(AUDIO_STOP)
 COMPATIBLE_IOCTL(AUDIO_PLAY)
 COMPATIBLE_IOCTL(AUDIO_PAUSE)
@@ -2533,7 +2470,6 @@ COMPATIBLE_IOCTL(VIDEO_SET_ATTRIBUTES)
 COMPATIBLE_IOCTL(VIDEO_GET_SIZE)
 COMPATIBLE_IOCTL(VIDEO_GET_FRAME_RATE)
 
-/* joystick */
 COMPATIBLE_IOCTL(JSIOCGVERSION)
 COMPATIBLE_IOCTL(JSIOCGAXES)
 COMPATIBLE_IOCTL(JSIOCGBUTTONS)
@@ -2605,13 +2541,12 @@ COMPATIBLE_IOCTL(GET_ARRAY_STATUS)
 #ifdef MY_ABC_HERE
 COMPATIBLE_IOCTL(SD_IOCTL_IDLE)
 COMPATIBLE_IOCTL(SD_IOCTL_SUPPORT_SLEEP)
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef MY_ABC_HERE
 COMPATIBLE_IOCTL(SCSI_IOCTL_SET_BADSECTORS)
 #endif
-#endif //MY_DEF_HERE
+#endif  
 
-/* now things that need handlers */
 #ifdef CONFIG_NET
 HANDLE_IOCTL(SIOCGIFNAME, dev_ifname32)
 HANDLE_IOCTL(SIOCGIFCONF, dev_ifconf)
@@ -2635,7 +2570,6 @@ HANDLE_IOCTL(SIOCSIFADDR, dev_ifsioc)
 HANDLE_IOCTL(SIOCSIFHWBROADCAST, dev_ifsioc)
 HANDLE_IOCTL(SIOCSHWTSTAMP, dev_ifsioc)
 
-/* ioctls used by appletalk ddp.c */
 HANDLE_IOCTL(SIOCATALKDIFADDR, dev_ifsioc)
 HANDLE_IOCTL(SIOCDIFADDR, dev_ifsioc)
 HANDLE_IOCTL(SIOCSARP, dev_ifsioc)
@@ -2664,7 +2598,7 @@ HANDLE_IOCTL(SIOCADDRT, routing_ioctl)
 HANDLE_IOCTL(SIOCDELRT, routing_ioctl)
 HANDLE_IOCTL(SIOCBRADDIF, dev_ifsioc)
 HANDLE_IOCTL(SIOCBRDELIF, dev_ifsioc)
-/* Note SIOCRTMSG is no longer, so this is safe and * the user would have seen just an -EINVAL anyways. */
+ 
 HANDLE_IOCTL(SIOCRTMSG, ret_einval)
 HANDLE_IOCTL(SIOCGSTAMP, do_siocgstamp)
 HANDLE_IOCTL(SIOCGSTAMPNS, do_siocgstampns)
@@ -2690,7 +2624,7 @@ HANDLE_IOCTL(PIO_UNIMAP, do_unimap_ioctl)
 HANDLE_IOCTL(GIO_UNIMAP, do_unimap_ioctl)
 HANDLE_IOCTL(KDFONTOP, do_kdfontop_ioctl)
 #endif
-/* One SMB ioctl needs translations. */
+ 
 #define SMB_IOC_GETMOUNTUID_32 _IOR('u', 1, compat_uid_t)
 HANDLE_IOCTL(SMB_IOC_GETMOUNTUID_32, do_smb_getmountuid)
 HANDLE_IOCTL(ATM_GETLINKRATE32, do_atm_ioctl)
@@ -2718,15 +2652,15 @@ HANDLE_IOCTL(SONET_CLRDIAG, do_atm_ioctl)
 HANDLE_IOCTL(SONET_SETFRAMING, do_atm_ioctl)
 HANDLE_IOCTL(SONET_GETFRAMING, do_atm_ioctl)
 HANDLE_IOCTL(SONET_GETFRSENSE, do_atm_ioctl)
-/* block stuff */
+ 
 #ifdef CONFIG_BLOCK
-/* loop */
+ 
 IGNORE_IOCTL(LOOP_CLR_FD)
-/* Raw devices */
+ 
 HANDLE_IOCTL(RAW_SETBIND, raw_ioctl)
 HANDLE_IOCTL(RAW_GETBIND, raw_ioctl)
 #endif
-/* Serial */
+ 
 HANDLE_IOCTL(TIOCGSERIAL, serial_struct_ioctl)
 HANDLE_IOCTL(TIOCSSERIAL, serial_struct_ioctl)
 #ifdef TIOCGLTC
@@ -2734,40 +2668,33 @@ COMPATIBLE_IOCTL(TIOCGLTC)
 COMPATIBLE_IOCTL(TIOCSLTC)
 #endif
 #ifdef TIOCSTART
-/*
- * For these two we have defintions in ioctls.h and/or termios.h on
- * some architectures but no actual implemention.  Some applications
- * like bash call them if they are defined in the headers, so we provide
- * entries here to avoid syslog message spew.
- */
+ 
 COMPATIBLE_IOCTL(TIOCSTART)
 COMPATIBLE_IOCTL(TIOCSTOP)
 #endif
-/* Usbdevfs */
+ 
 HANDLE_IOCTL(USBDEVFS_CONTROL32, do_usbdevfs_control)
 HANDLE_IOCTL(USBDEVFS_BULK32, do_usbdevfs_bulk)
 HANDLE_IOCTL(USBDEVFS_DISCSIGNAL32, do_usbdevfs_discsignal)
 COMPATIBLE_IOCTL(USBDEVFS_IOCTL32)
-/* i2c */
+ 
 HANDLE_IOCTL(I2C_FUNCS, w_long)
 HANDLE_IOCTL(I2C_RDWR, do_i2c_rdwr_ioctl)
 HANDLE_IOCTL(I2C_SMBUS, do_i2c_smbus_ioctl)
-/* bridge */
+ 
 HANDLE_IOCTL(SIOCSIFBR, old_bridge_ioctl)
 HANDLE_IOCTL(SIOCGIFBR, old_bridge_ioctl)
-/* Not implemented in the native kernel */
+ 
 IGNORE_IOCTL(SIOCGIFCOUNT)
 HANDLE_IOCTL(RTC_IRQP_READ32, rtc_ioctl)
 HANDLE_IOCTL(RTC_IRQP_SET32, rtc_ioctl)
 HANDLE_IOCTL(RTC_EPOCH_READ32, rtc_ioctl)
 HANDLE_IOCTL(RTC_EPOCH_SET32, rtc_ioctl)
 
-/* dvb */
 HANDLE_IOCTL(VIDEO_GET_EVENT, do_video_get_event)
 HANDLE_IOCTL(VIDEO_STILLPICTURE, do_video_stillpicture)
 HANDLE_IOCTL(VIDEO_SET_SPU_PALETTE, do_video_set_spu_palette)
 
-/* parport */
 COMPATIBLE_IOCTL(LPTIME)
 COMPATIBLE_IOCTL(LPCHAR)
 COMPATIBLE_IOCTL(LPABORTOPEN)
@@ -2777,13 +2704,10 @@ COMPATIBLE_IOCTL(LPSETIRQ)
 COMPATIBLE_IOCTL(LPGETSTATUS)
 COMPATIBLE_IOCTL(LPGETSTATUS)
 COMPATIBLE_IOCTL(LPRESET)
-/*LPGETSTATS not implemented, but no kernels seem to compile it in anyways*/
+ 
 COMPATIBLE_IOCTL(LPGETFLAGS)
 HANDLE_IOCTL(LPSETTIMEOUT, lp_timeout_trans)
 
-/* fat 'r' ioctls. These are handled by fat with ->compat_ioctl,
-   but we don't want warnings on other file systems. So declare
-   them as compatible here. */
 #define VFAT_IOCTL_READDIR_BOTH32       _IOR('r', 1, struct compat_dirent[2])
 #define VFAT_IOCTL_READDIR_SHORT32      _IOR('r', 2, struct compat_dirent[2])
 
@@ -2791,7 +2715,7 @@ IGNORE_IOCTL(VFAT_IOCTL_READDIR_BOTH32)
 IGNORE_IOCTL(VFAT_IOCTL_READDIR_SHORT32)
 
 #ifdef CONFIG_SPARC
-/* Sparc framebuffers, handled in sbusfb_compat_ioctl() */
+ 
 IGNORE_IOCTL(FBIOGTYPE)
 IGNORE_IOCTL(FBIOSATTR)
 IGNORE_IOCTL(FBIOGATTR)
@@ -2822,7 +2746,6 @@ static void compat_ioctl_error(struct file *filp, unsigned int fd,
 	char *fn = "?";
 	char *path;
 
-	/* find the name of the device. */
 	path = (char *)__get_free_page(GFP_KERNEL);
 	if (path) {
 		fn = d_path(&filp->f_path, path, PAGE_SIZE);
@@ -2856,16 +2779,10 @@ asmlinkage long compat_sys_ioctl(unsigned int fd, unsigned int cmd,
 	if (!filp)
 		goto out;
 
-	/* RED-PEN how should LSM module know it's handling 32bit? */
 	error = security_file_ioctl(filp, cmd, arg);
 	if (error)
 		goto out_fput;
 
-	/*
-	 * To allow the compat_ioctl handlers to be self contained
-	 * we need to check the common ioctls here first.
-	 * Just handle them with the standard handlers below.
-	 */
 	switch (cmd) {
 	case FIOCLEX:
 	case FIONCLEX:
@@ -2896,8 +2813,7 @@ asmlinkage long compat_sys_ioctl(unsigned int fd, unsigned int cmd,
 	case FIONREAD:
 		if (S_ISREG(filp->f_path.dentry->d_inode->i_mode))
 			break;
-		/*FALL THROUGH*/
-
+		 
 	default:
 		if (filp->f_op && filp->f_op->compat_ioctl) {
 			error = filp->f_op->compat_ioctl(filp, cmd, arg);

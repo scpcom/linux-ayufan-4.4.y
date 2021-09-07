@@ -1,34 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Generic pidhash and scalable, time-bounded PID allocator
- *
- * (C) 2002-2003 William Irwin, IBM
- * (C) 2004 William Irwin, Oracle
- * (C) 2002-2004 Ingo Molnar, Red Hat
- *
- * pid-structures are backing objects for tasks sharing a given ID to chain
- * against. There is very little to them aside from hashing them and
- * parking tasks using given ID's on a list.
- *
- * The hash is always changed with the tasklist_lock write-acquired,
- * and the hash is only accessed with the tasklist_lock at least
- * read-acquired, so there's no additional SMP locking needed here.
- *
- * We have a list of bitmap pages, which bitmaps represent the PID space.
- * Allocating and freeing PIDs is completely lockless. The worst-case
- * allocation scenario when all but one out of 1 million PIDs possible are
- * allocated already: the scanning of 32 list entries and at most PAGE_SIZE
- * bytes. The typical fastpath is a single successful setbit. Freeing is O(1).
- *
- * Pid namespaces:
- *    (C) 2007 Pavel Emelyanov <xemul@openvz.org>, OpenVZ, SWsoft Inc.
- *    (C) 2007 Sukadev Bhattiprolu <sukadev@us.ibm.com>, IBM
- *     Many thanks to Oleg Nesterov for comments and help
- *
- */
-
+ 
 #include <linux/mm.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -65,12 +38,6 @@ static inline int mk_pid(struct pid_namespace *pid_ns,
 #define find_next_offset(map, off)					\
 		find_next_zero_bit((map)->page, BITS_PER_PAGE, off)
 
-/*
- * PID-map pages start out as NULL, they get allocated upon
- * first use and are never deallocated. This way a low pid_max
- * value does not cause lots of bitmaps to be allocated, but
- * the scheme scales to up to 4 million PIDs, runtime.
- */
 struct pid_namespace init_pid_ns = {
 	.kref = {
 		.refcount       = ATOMIC_INIT(2),
@@ -99,20 +66,6 @@ int is_container_init(struct task_struct *tsk)
 }
 EXPORT_SYMBOL(is_container_init);
 
-/*
- * Note: disable interrupts while the pidmap_lock is held as an
- * interrupt might come in and do read_lock(&tasklist_lock).
- *
- * If we don't disable interrupts there is a nasty deadlock between
- * detach_pid()->free_pid() and another cpu that does
- * spin_lock(&pidmap_lock) followed by an interrupt routine that does
- * read_lock(&tasklist_lock);
- *
- * After we clean up the tasklist_lock and know there are no
- * irq handlers that take it we can leave the interrupts enabled.
- * For now it is easier to be safe than to prove it can't happen.
- */
-
 static  __cacheline_aligned_in_smp DEFINE_SPINLOCK(pidmap_lock);
 
 static void free_pidmap(struct upid *upid)
@@ -139,10 +92,7 @@ static int alloc_pidmap(struct pid_namespace *pid_ns)
 	for (i = 0; i <= max_scan; ++i) {
 		if (unlikely(!map->page)) {
 			void *page = kzalloc(PAGE_SIZE, GFP_KERNEL);
-			/*
-			 * Free the page if someone raced with us
-			 * installing it:
-			 */
+			 
 			spin_lock_irq(&pidmap_lock);
 			if (map->page)
 				kfree(page);
@@ -161,12 +111,7 @@ static int alloc_pidmap(struct pid_namespace *pid_ns)
 				}
 				offset = find_next_offset(map, offset);
 				pid = mk_pid(pid_ns, map, offset);
-			/*
-			 * find_next_offset() found a bit, the pid from it
-			 * is in-bounds, and if we fell back to the last
-			 * bitmap block and the final block was the same
-			 * as the starting point, pid is before last_pid.
-			 */
+			 
 			} while (offset < BITS_PER_PAGE && pid < pid_max &&
 					(i != max_scan || pid < last ||
 					    !((last+1) & BITS_PER_PAGE_MASK)));
@@ -227,7 +172,7 @@ static void delayed_put_pid(struct rcu_head *rhp)
 
 void free_pid(struct pid *pid)
 {
-	/* We can be called with write_lock_irq(&tasklist_lock) held */
+	 
 	int i;
 	unsigned long flags;
 
@@ -312,9 +257,6 @@ struct pid *find_vpid(int nr)
 }
 EXPORT_SYMBOL_GPL(find_vpid);
 
-/*
- * attach_pid() must be called with the tasklist_lock write-held.
- */
 void attach_pid(struct task_struct *task, enum pid_type type,
 		struct pid *pid)
 {
@@ -357,7 +299,6 @@ void change_pid(struct task_struct *task, enum pid_type type,
 	attach_pid(task, type, pid);
 }
 
-/* transfer_pid is an optimization of attach_pid(new), detach_pid(old) */
 void transfer_pid(struct task_struct *old, struct task_struct *new,
 			   enum pid_type type)
 {
@@ -378,9 +319,6 @@ struct task_struct *pid_task(struct pid *pid, enum pid_type type)
 }
 EXPORT_SYMBOL(pid_task);
 
-/*
- * Must be called under rcu_read_lock() or with tasklist_lock read-held.
- */
 struct task_struct *find_task_by_pid_ns(pid_t nr, struct pid_namespace *ns)
 {
 	return pid_task(find_pid_ns(nr, ns), PIDTYPE_PID);
@@ -478,11 +416,6 @@ struct pid_namespace *task_active_pid_ns(struct task_struct *tsk)
 }
 EXPORT_SYMBOL_GPL(task_active_pid_ns);
 
-/*
- * Used by proc to find the first pid that is greater than or equal to nr.
- *
- * If there is a pid at nr this function is exactly the same as find_pid_ns.
- */
 struct pid *find_ge_pid(int nr, struct pid_namespace *ns)
 {
 	struct pid *pid;
@@ -497,11 +430,6 @@ struct pid *find_ge_pid(int nr, struct pid_namespace *ns)
 	return pid;
 }
 
-/*
- * The pid hash table is scaled according to the amount of memory in the
- * machine.  From a minimum of 16 slots up to 4096 slots at one gigabyte or
- * more.
- */
 void __init pidhash_init(void)
 {
 	int i, pidhash_size;
@@ -518,7 +446,7 @@ void __init pidhash_init(void)
 void __init pidmap_init(void)
 {
 	init_pid_ns.pidmap[0].page = kzalloc(PAGE_SIZE, GFP_KERNEL);
-	/* Reserve PID 0. We never call free_pidmap(0) */
+	 
 	set_bit(0, init_pid_ns.pidmap[0].page);
 	atomic_dec(&init_pid_ns.pidmap[0].nr_free);
 

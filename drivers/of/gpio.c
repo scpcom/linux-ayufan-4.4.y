@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * OF helpers for the GPIO API
- *
- * Copyright (c) 2007-2008  MontaVista Software, Inc.
- *
- * Author: Anton Vorontsov <avorontsov@ru.mvista.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/errno.h>
 #include <linux/io.h>
@@ -21,16 +9,6 @@
 #include <linux/of_gpio.h>
 #include <asm/prom.h>
 
-/**
- * of_get_gpio_flags - Get a GPIO number and flags to use with GPIO API
- * @np:		device node to get GPIO from
- * @index:	index of the GPIO
- * @flags:	a flags pointer to fill in
- *
- * Returns GPIO number to use with Linux generic GPIO API, or one of the errno
- * value on the error condition. If @flags is not NULL the function also fills
- * in flags for the GPIO.
- */
 int of_get_gpio_flags(struct device_node *np, int index,
 		      enum of_gpio_flags *flags)
 {
@@ -65,7 +43,6 @@ int of_get_gpio_flags(struct device_node *np, int index,
 		goto err1;
 	}
 
-	/* .xlate might decide to not fill in the flags, so clear it. */
 	if (flags)
 		*flags = 0;
 
@@ -82,22 +59,6 @@ err0:
 }
 EXPORT_SYMBOL(of_get_gpio_flags);
 
-/**
- * of_gpio_count - Count GPIOs for a device
- * @np:		device node to count GPIOs for
- *
- * The function returns the count of GPIOs specified for a node.
- *
- * Note that the empty GPIO specifiers counts too. For example,
- *
- * gpios = <0
- *          &pio1 1 2
- *          0
- *          &pio2 3 4>;
- *
- * defines four GPIOs (so this function will return 4), two of which
- * are not specified.
- */
 unsigned int of_gpio_count(struct device_node *np)
 {
 	unsigned int cnt = 0;
@@ -107,7 +68,7 @@ unsigned int of_gpio_count(struct device_node *np)
 
 		ret = of_parse_phandles_with_args(np, "gpios", "#gpio-cells",
 						  cnt, NULL, NULL);
-		/* A hole in the gpios = <> counts anyway. */
+		 
 		if (ret < 0 && ret != -EEXIST)
 			break;
 	} while (++cnt);
@@ -116,28 +77,11 @@ unsigned int of_gpio_count(struct device_node *np)
 }
 EXPORT_SYMBOL(of_gpio_count);
 
-/**
- * of_gpio_simple_xlate - translate gpio_spec to the GPIO number and flags
- * @of_gc:	pointer to the of_gpio_chip structure
- * @np:		device node of the GPIO chip
- * @gpio_spec:	gpio specifier as found in the device tree
- * @flags:	a flags pointer to fill in
- *
- * This is simple translation function, suitable for the most 1:1 mapped
- * gpio chips. This function performs only one sanity check: whether gpio
- * is less than ngpios (that is specified in the gpio_chip).
- */
 int of_gpio_simple_xlate(struct of_gpio_chip *of_gc, struct device_node *np,
 			 const void *gpio_spec, enum of_gpio_flags *flags)
 {
 	const u32 *gpio = gpio_spec;
 
-	/*
-	 * We're discouraging gpio_cells < 2, since that way you'll have to
-	 * write your own xlate function (that will have to retrive the GPIO
-	 * number and the flags from a single gpio cell -- this is possible,
-	 * but not recommended).
-	 */
 	if (of_gc->gpio_cells < 2) {
 		WARN_ON(1);
 		return -EINVAL;
@@ -153,27 +97,6 @@ int of_gpio_simple_xlate(struct of_gpio_chip *of_gc, struct device_node *np,
 }
 EXPORT_SYMBOL(of_gpio_simple_xlate);
 
-/**
- * of_mm_gpiochip_add - Add memory mapped GPIO chip (bank)
- * @np:		device node of the GPIO chip
- * @mm_gc:	pointer to the of_mm_gpio_chip allocated structure
- *
- * To use this function you should allocate and fill mm_gc with:
- *
- * 1) In the gpio_chip structure:
- *    - all the callbacks
- *
- * 2) In the of_gpio_chip structure:
- *    - gpio_cells
- *    - xlate callback (optional)
- *
- * 3) In the of_mm_gpio_chip structure:
- *    - save_regs callback (optional)
- *
- * If succeeded, this function will map bank's memory and will
- * do all necessary work for you. Then you'll able to use .regs
- * to manage GPIOs from the callbacks.
- */
 int of_mm_gpiochip_add(struct device_node *np,
 		       struct of_mm_gpio_chip *mm_gc)
 {
@@ -207,7 +130,6 @@ int of_mm_gpiochip_add(struct device_node *np,
 	if (ret)
 		goto err2;
 
-	/* We don't want to lose the node and its ->data */
 	of_node_get(np);
 
 	pr_debug("%s: registered as generic GPIO chip, base is %d\n",

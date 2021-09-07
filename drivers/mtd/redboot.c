@@ -1,11 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Parse RedBoot-style Flash Image System (FIS) tables and
- * produce a Linux partition array to match.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/init.h>
@@ -18,15 +14,15 @@
 #endif
 
 struct fis_image_desc {
-    unsigned char name[16];      // Null terminated name
-    uint32_t	  flash_base;    // Address within FLASH of image
-    uint32_t	  mem_base;      // Address in memory where it executes
-    uint32_t	  size;          // Length of image
-    uint32_t	  entry_point;   // Execution entry point
-    uint32_t	  data_length;   // Length of actual data
+    unsigned char name[16];       
+    uint32_t	  flash_base;     
+    uint32_t	  mem_base;       
+    uint32_t	  size;           
+    uint32_t	  entry_point;    
+    uint32_t	  data_length;    
     unsigned char _pad[256-(16+7*sizeof(uint32_t))];
-    uint32_t	  desc_cksum;    // Checksum over image descriptor
-    uint32_t	  file_cksum;    // Checksum over image data
+    uint32_t	  desc_cksum;     
+    uint32_t	  file_cksum;     
 };
 
 struct fis_list {
@@ -39,7 +35,7 @@ module_param(directory, int, 0);
 
 static inline int redboot_checksum(struct fis_image_desc *img)
 {
-	/* RedBoot doesn't actually write the desc_cksum field yet AFAICT */
+	 
 	return 1;
 }
 
@@ -105,32 +101,15 @@ static int parse_redboot_partitions(struct mtd_info *master,
 	numslots = (master->erasesize / sizeof(struct fis_image_desc));
 	for (i = 0; i < numslots; i++) {
 		if (!memcmp(buf[i].name, "FIS directory", 14)) {
-			/* This is apparently the FIS directory entry for the
-			 * FIS directory itself.  The FIS directory size is
-			 * one erase block; if the buf[i].size field is
-			 * swab32(erasesize) then we know we are looking at
-			 * a byte swapped FIS directory - swap all the entries!
-			 * (NOTE: this is 'size' not 'data_length'; size is
-			 * the full size of the entry.)
-			 */
-
-			/* RedBoot can combine the FIS directory and
-			   config partitions into a single eraseblock;
-			   we assume wrong-endian if either the swapped
-			   'size' matches the eraseblock size precisely,
-			   or if the swapped size actually fits in an
-			   eraseblock while the unswapped size doesn't. */
+			 
 			if (swab32(buf[i].size) == master->erasesize ||
 			    (buf[i].size > master->erasesize
 			     && swab32(buf[i].size) < master->erasesize)) {
 				int j;
-				/* Update numslots based on actual FIS directory size */
+				 
 				numslots = swab32(buf[i].size) / sizeof (struct fis_image_desc);
 				for (j = 0; j < numslots; ++j) {
 
-					/* A single 0xff denotes a deleted entry.
-					 * Two of them in a row is the end of the table.
-					 */
 					if (buf[j].name[0] == 0xff) {
 				  		if (buf[j].name[1] == 0xff) {
 							break;
@@ -139,9 +118,6 @@ static int parse_redboot_partitions(struct mtd_info *master,
 						}
 					}
 
-					/* The unsigned long fields were written with the
-					 * wrong byte sex, name and pad have no byte sex.
-					 */
 					swab32s(&buf[j].flash_base);
 					swab32s(&buf[j].mem_base);
 					swab32s(&buf[j].size);
@@ -151,14 +127,14 @@ static int parse_redboot_partitions(struct mtd_info *master,
 					swab32s(&buf[j].file_cksum);
 				}
 			} else if (buf[i].size < master->erasesize) {
-				/* Update numslots based on actual FIS directory size */
+				 
 				numslots = buf[i].size / sizeof(struct fis_image_desc);
 			}
 			break;
 		}
 	}
 	if (i == numslots) {
-		/* Didn't find it */
+		 
 		printk(KERN_NOTICE "No RedBoot partition table detected in %s\n",
 		       master->name);
 		ret = 0;
@@ -191,9 +167,6 @@ static int parse_redboot_partitions(struct mtd_info *master,
                         buf[i].flash_base &= master->size-1;
                 }
 
-		/* I'm sure the JFFS2 code has done me permanent damage.
-		 * I now think the following is _normal_
-		 */
 #ifdef MY_ABC_HERE
 		if (i == 0) {
 			fl = new_fl;
@@ -203,13 +176,13 @@ static int parse_redboot_partitions(struct mtd_info *master,
 			tmp_fl = new_fl;
 		}
 		new_fl->next = NULL;
-#else /* !MY_ABC_HERE */
+#else  
 		prev = &fl;
 		while(*prev && (*prev)->img->flash_base < new_fl->img->flash_base)
 			prev = &(*prev)->next;
 		new_fl->next = *prev;
 		*prev = new_fl;
-#endif /* MY_ABC_HERE */
+#endif  
 
 		nrparts++;
 	}
@@ -324,7 +297,6 @@ int SYNOMTDModifyFisInfo(struct mtd_info *mtd, struct SYNO_MTD_FIS_INFO SynoMtdF
 		return -ENOMEM;
 	}
 
-	/* Read the start of the last erase block */
 	ret = mtd->read(mtd, 0, PAGE_SIZE, &retlen, (void *)buf);
 
 	if (ret)
@@ -336,12 +308,12 @@ int SYNOMTDModifyFisInfo(struct mtd_info *mtd, struct SYNO_MTD_FIS_INFO SynoMtdF
 	}
 
 	for (i = 0; i < PAGE_SIZE / sizeof(struct fis_image_desc); i++) {
-		if (buf[i].name[0] == 0xff) { /* reach the end of FIS directory */
-			ret = -ENOENT; /* not found */
+		if (buf[i].name[0] == 0xff) {  
+			ret = -ENOENT;  
 			break;
 		}
 
-		if (0 == strcmp(buf[i].name, SynoMtdFisInfo.name)) { /* match */
+		if (0 == strcmp(buf[i].name, SynoMtdFisInfo.name)) {  
 			int lockret, eraseret;
 			struct erase_info einfo;
 
@@ -352,7 +324,7 @@ int SYNOMTDModifyFisInfo(struct mtd_info *mtd, struct SYNO_MTD_FIS_INFO SynoMtdF
 			if (lockret) {
 				printk(KERN_NOTICE "Failed to unlock [%s], error [%d]\n", mtd->name, lockret*(-1));
 			}
-			/* erase something... */
+			 
 			{
 				wait_queue_head_t waitq;
 				DECLARE_WAITQUEUE(wait, current);
@@ -384,8 +356,7 @@ int SYNOMTDModifyFisInfo(struct mtd_info *mtd, struct SYNO_MTD_FIS_INFO SynoMtdF
 				printk(KERN_NOTICE "Failed to erase [%s], error [%d]\n", mtd->name, eraseret*(-1));
 			}
 			else {
-				/*ret = mtd->write(mtd, sizeof(struct fis_image_desc)*i, 
-				sizeof(struct fis_image_desc), &retlen, &buf[i]);*/
+				 
 				ret = mtd->write(mtd, 0, PAGE_SIZE, &retlen, (const u_char*)buf);
 				if (ret) {
 					printk(KERN_NOTICE "Failed to write [%s], error [%d]\n", mtd->name, ret*(-1));
@@ -399,20 +370,19 @@ int SYNOMTDModifyFisInfo(struct mtd_info *mtd, struct SYNO_MTD_FIS_INFO SynoMtdF
 				goto out;
 			}
 
-			/*if (retlen != sizeof(struct fis_image_desc)) {*/
 			if (retlen != PAGE_SIZE) {
 				ret = -EIO;
 				goto out;
 			}
 			break;
 		}
-	} /* for */
+	}  
 
 out:
 	kfree(buf);
 	return ret;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 module_init(redboot_parser_init);
 module_exit(redboot_parser_exit);

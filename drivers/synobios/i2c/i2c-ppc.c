@@ -1,5 +1,4 @@
-// Copyright (c) 2000-2008 Synology Inc. All rights reserved.
-
+ 
 #ifdef CONFIG_SYNO_MPC85XX_COMMON
 #include <asm/io.h>
 #include <linux/jiffies.h>
@@ -45,10 +44,7 @@ extern phys_addr_t get_immrbase(void);
 
 char *i2c_base;
 struct semaphore gsemI2c;
-//*************************************************************************
-//		I2C control for MPC8245
-//*************************************************************************
-
+ 
 static void writeccr(u32 x)
 {
 	writel(x, i2c_base + MPC_I2C_CR);
@@ -77,7 +73,7 @@ static int mpc_i2c_wait(unsigned timeout, int writing)
 
 	if (writing && (x & CSR_RXAK)) {
 		printk("I2C: No RXAK\n");
-		/* generate stop */
+		 
 		writeccr(CCR_MEN);
 		return -EIO;
 	}
@@ -121,12 +117,11 @@ int mpc_i2c_write(int target, const u8 *data, int length, int restart, int offse
 		goto ABORT;
 	}
 
-	/* Start with MEN */
 	if (! restart)
 		writeccr(CCR_MEN);
-	/* Start as master */
+	 
 	writeccr(CCR_MEN | CCR_MSTA | CCR_MTX | flags);
-	/* Write target byte */
+	 
 	writel((target << 1), i2c_base + MPC_I2C_DR);
 
 	if (mpc_i2c_wait(timeout, 1) < 0) {
@@ -144,7 +139,7 @@ int mpc_i2c_write(int target, const u8 *data, int length, int restart, int offse
 	}
 			
 	for(i = 0; i < length; i++) {
-		/* Write data byte */
+		 
 		writel(data[i], i2c_base + MPC_I2C_DR);
 
 		if (mpc_i2c_wait(timeout, 1) < 0) {
@@ -174,12 +169,11 @@ int mpc_i2c_read(int target, u8 *data, int length, int restart, int offset)
 		goto ABORT;
 	}
 
-	/* Start with MEN */
 	if (! restart)
 		writeccr(CCR_MEN);
-	/* Start as master */
+	 
 	writeccr(CCR_MEN | CCR_MSTA | CCR_MTX | flags);
-	/* Write target byte */
+	 
 	writel((target << 1), i2c_base + MPC_I2C_DR);
 
 	if (mpc_i2c_wait(timeout, 1) < 0) {
@@ -196,9 +190,8 @@ int mpc_i2c_read(int target, u8 *data, int length, int restart, int offset)
 		}
 	}
 
-	/* Switch to read - restart */
 	writeccr(CCR_MEN | CCR_MSTA | CCR_MTX | CCR_RSTA);
-	/* Write  target byte - this time with the read flag set */
+	 
 	writel((target<<1) | 1, i2c_base + MPC_I2C_DR);
 
 	if (mpc_i2c_wait(timeout, 0) < 0) {
@@ -210,7 +203,7 @@ int mpc_i2c_read(int target, u8 *data, int length, int restart, int offset)
 		writeccr(CCR_MEN | CCR_MSTA | CCR_TXAK);
 	else
 		writeccr(CCR_MEN | CCR_MSTA);
-		/* Dummy read */
+		 
 	readl(i2c_base + MPC_I2C_DR);
 
 	for(i = 0; i < length; i++) {
@@ -219,10 +212,9 @@ int mpc_i2c_read(int target, u8 *data, int length, int restart, int offset)
 			goto END;
 		}
 
-		/* Generate stop on last byte */
 		if (i == length - 1)
 			writeccr(CCR_MEN | CCR_TXAK);
-		//data[i] = readl(i2c_base + MPC_I2C_DR);
+		 
 		temp = readl(i2c_base + MPC_I2C_DR);
 		data[i] = (u8)temp;
 	}
@@ -243,11 +235,10 @@ int mpc_i2c_init(void)
 
 #ifdef CONFIG_SYNO_MPC85XX_COMMON
 #ifdef CONFIG_SYNO_MPC854X
-	// ((CCB/2)/1920) ~= 100 KHz (CPU_MPC8548ERM.pdf p.531)
-	// initialize i2c frequency by set register I2CFDR
+	 
 	x = 0x0B;
 #elif CONFIG_SYNO_MPC8533
-	// ((CCB/3)/1152) = (400/3)/1152 ~= 100 KHz (MPC8533ERM.pdf p.11-7)
+	 
 	x = 0x08;
 #endif
 	writel(x, i2c_base + MPC_I2C_FDR);

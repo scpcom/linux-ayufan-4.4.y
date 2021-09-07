@@ -1,33 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  iscsi_target_erl1.c
- *
- * This file contains error recovery level one used by the iSCSI Target driver.
- *
- * Copyright (c) 2003, 2004, 2005 PyX Technologies, Inc.
- * Copyright (c) 2006 SBE, Inc.  All Rights Reserved.
- * Copyright (c) 2007 Rising Tide Software, Inc.
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #define ISCSI_TARGET_ERL1_C
 
 #include <linux/net.h>
@@ -62,14 +36,6 @@
 
 #define OFFLOAD_BUF_SIZE	32768
 
-/*	iscsi_dump_data_payload():
- *
- *	Used to dump excess datain payload for certain error recovery
- *	situations.  Receive in OFFLOAD_BUF_SIZE max of datain per rx_data().
- *
- *	dump_padding_digest denotes if padding and data digests need
- *	to be dumped.
- */
 int iscsi_dump_data_payload(
 	iscsi_conn_t *conn,
 	u32 buf_len,
@@ -139,19 +105,11 @@ out:
 	return ret;
 }
 
-/*	iscsi_send_recovery_r2t_for_snack():
- *
- *	Used for retransmitting R2Ts from a R2T SNACK request.
- */
 static int iscsi_send_recovery_r2t_for_snack(
 	iscsi_cmd_t *cmd,
 	iscsi_r2t_t *r2t)
 {
-	/*
-	 * If the iscsi_r2t_t has not been sent yet, we can safely
-	 * ignore retransmission
-	 * of the R2TSN in question.
-	 */
+	 
 	spin_lock_bh(&cmd->r2t_lock);
 	if (!r2t->sent_r2t) {
 		spin_unlock_bh(&cmd->r2t_lock);
@@ -165,10 +123,6 @@ static int iscsi_send_recovery_r2t_for_snack(
 	return 0;
 }
 
-/*	iscsi_handle_r2t_snack():
- *
- *
- */
 static int iscsi_handle_r2t_snack(
 	iscsi_cmd_t *cmd,
 	unsigned char *buf,
@@ -178,10 +132,6 @@ static int iscsi_handle_r2t_snack(
 	u32 last_r2tsn;
 	iscsi_r2t_t *r2t;
 
-	/*
-	 * Make sure the initiator is not requesting retransmission
-	 * of R2TSNs already acknowledged by a TMR TASK_REASSIGN.
-	 */
 	if ((cmd->cmd_flags & ICF_GOT_DATACK_SNACK) &&
 	    (begrun <= cmd->acked_data_sn)) {
 		printk(KERN_ERR "ITT: 0x%08x, R2T SNACK requesting"
@@ -220,15 +170,6 @@ static int iscsi_handle_r2t_snack(
 	return 0;
 }
 
-/*	iscsi_create_recovery_datain_values_datasequenceinorder_yes():
- *
- *	Generates Offsets and NextBurstLength based on Begrun and Runlength
- *	carried in a Data SNACK or ExpDataSN in TMR TASK_REASSIGN.
- *
- *	For DataSequenceInOrder=Yes and DataPDUInOrder=[Yes,No] only.
- *
- *	FIXME: How is this handled for a RData SNACK?
- */
 int iscsi_create_recovery_datain_values_datasequenceinorder_yes(
 	iscsi_cmd_t *cmd,
 	iscsi_datain_req_t *dr)
@@ -267,15 +208,6 @@ int iscsi_create_recovery_datain_values_datasequenceinorder_yes(
 	return 0;
 }
 
-/*	iscsi_create_recovery_datain_values_datasequenceinorder_no():
- *
- *	Generates Offsets and NextBurstLength based on Begrun and Runlength
- *	carried in a Data SNACK or ExpDataSN in TMR TASK_REASSIGN.
- *
- *	For DataSequenceInOrder=No and DataPDUInOrder=[Yes,No] only.
- *
- *	FIXME: How is this handled for a RData SNACK?
- */
 int iscsi_create_recovery_datain_values_datasequenceinorder_no(
 	iscsi_cmd_t *cmd,
 	iscsi_datain_req_t *dr)
@@ -292,25 +224,12 @@ int iscsi_create_recovery_datain_values_datasequenceinorder_no(
 		return -1;
 	}
 
-	/*
-	 * Calculate read_data_done for all sequences containing a
-	 * first_datasn and last_datasn less than the BegRun.
-	 *
-	 * Locate the iscsi_seq_t the BegRun lies within and calculate
-	 * NextBurstLenghth up to the DataSN based on MaxRecvDataSegmentLength.
-	 *
-	 * Also use iscsi_seq_t->seq_send_order to determine where to start.
-	 */
 	for (i = 0; i < cmd->seq_count; i++) {
 		seq = &cmd->seq_list[i];
 
 		if (!seq->seq_send_order)
 			first_seq = seq;
 
-		/*
-		 * No data has been transferred for this DataIN sequence, so the
-		 * seq->first_datasn and seq->last_datasn have not been set.
-		 */
 		if (!seq->sent) {
 #if 0
 			printk(KERN_ERR "Ignoring non-sent sequence 0x%08x ->"
@@ -320,11 +239,6 @@ int iscsi_create_recovery_datain_values_datasequenceinorder_no(
 			continue;
 		}
 
-		/*
-		 * This DataIN sequence is precedes the received BegRun, add the
-		 * total xfer_len of the sequence to read_data_done and reset
-		 * seq->pdu_send_order.
-		 */
 		if ((seq->first_datasn < begrun) &&
 				(seq->last_datasn < begrun)) {
 #if 0
@@ -337,9 +251,6 @@ int iscsi_create_recovery_datain_values_datasequenceinorder_no(
 			continue;
 		}
 
-		/*
-		 * The BegRun lies within this DataIN sequence.
-		 */
 		if ((seq->first_datasn <= begrun) &&
 				(seq->last_datasn >= begrun)) {
 #if 0
@@ -352,18 +263,6 @@ int iscsi_create_recovery_datain_values_datasequenceinorder_no(
 			seq->next_burst_len = seq->pdu_send_order = 0;
 			found_seq = 1;
 
-			/*
-			 * For DataPDUInOrder=Yes, while the first DataSN of
-			 * the sequence is less than the received BegRun, add
-			 * the MaxRecvDataSegmentLength to read_data_done and
-			 * to the sequence's next_burst_len;
-			 *
-			 * For DataPDUInOrder=No, while the first DataSN of the
-			 * sequence is less than the received BegRun, find the
-			 * iscsi_pdu_t of the DataSN in question and add the
-			 * MaxRecvDataSegmentLength to read_data_done and to the
-			 * sequence's next_burst_len;
-			 */
 			if (SESS_OPS_C(conn)->DataPDUInOrder) {
 				while (data_sn < begrun) {
 					seq->pdu_send_order++;
@@ -396,10 +295,6 @@ int iscsi_create_recovery_datain_values_datasequenceinorder_no(
 			continue;
 		}
 
-		/*
-		 * This DataIN sequence is larger than the received BegRun,
-		 * reset seq->pdu_send_order and continue.
-		 */
 		if ((seq->first_datasn > begrun) ||
 				(seq->last_datasn > begrun)) {
 #if 0
@@ -439,10 +334,6 @@ done:
 	return 0;
 }
 
-/*	iscsi_handle_recovery_datain():
- *
- *
- */
 static inline int iscsi_handle_recovery_datain(
 	iscsi_cmd_t *cmd,
 	unsigned char *buf,
@@ -463,10 +354,6 @@ static inline int iscsi_handle_recovery_datain(
 		return 0;
 	}
 
-	/*
-	 * Make sure the initiator is not requesting retransmission
-	 * of DataSNs already acknowledged by a Data ACK SNACK.
-	 */
 	if ((cmd->cmd_flags & ICF_GOT_DATACK_SNACK) &&
 	    (begrun <= cmd->acked_data_sn)) {
 		printk(KERN_ERR "ITT: 0x%08x, Data SNACK requesting"
@@ -479,10 +366,6 @@ static inline int iscsi_handle_recovery_datain(
 				1, 0, buf, cmd);
 	}
 
-	/*
-	 * Make sure BegRun and RunLength in the Data SNACK are sane.
-	 * Note: (cmd->data_sn - 1) will carry the maximum DataSN sent.
-	 */
 	if ((begrun + runlength) > (cmd->data_sn - 1)) {
 		printk(KERN_ERR "Initiator requesting BegRun: 0x%08x, RunLength"
 			": 0x%08x greater than maximum DataSN: 0x%08x.\n",
@@ -509,10 +392,6 @@ static inline int iscsi_handle_recovery_datain(
 	return 0;
 }
 
-/*	iscsi_handle_recovery_datain_or_r2t():
- *
- *
- */
 int iscsi_handle_recovery_datain_or_r2t(
 	iscsi_conn_t *conn,
 	unsigned char *buf,
@@ -527,9 +406,6 @@ int iscsi_handle_recovery_datain_or_r2t(
 	if (!(cmd))
 		return 0;
 
-	/*
-	 * FIXME: This will not work for bidi commands.
-	 */
 	switch (cmd->data_direction) {
 #ifdef MY_ABC_HERE
 	case DMA_TO_DEVICE:
@@ -553,11 +429,6 @@ int iscsi_handle_recovery_datain_or_r2t(
 	return 0;
 }
 
-/*	iscsi_send_recovery_status():
- *
- *
- */
-/* #warning FIXME: Status SNACK needs to be dependent on OPCODE!!! */
 int iscsi_handle_status_snack(
 	iscsi_conn_t *conn,
 	u32 init_task_tag,
@@ -615,10 +486,6 @@ int iscsi_handle_status_snack(
 	return 0;
 }
 
-/*	iscsi_handle_data_ack():
- *
- *
- */
 int iscsi_handle_data_ack(
 	iscsi_conn_t *conn,
 	u32 targ_xfer_tag,
@@ -641,10 +508,6 @@ int iscsi_handle_data_ack(
 		return -1;
 	}
 
-	/*
-	 * For Data ACK SNACK, BegRun is the next expected DataSN.
-	 * (see iSCSI v19: 10.16.6)
-	 */
 	cmd->cmd_flags |= ICF_GOT_DATACK_SNACK;
 	cmd->acked_data_sn = (begrun - 1);
 
@@ -655,10 +518,6 @@ int iscsi_handle_data_ack(
 	return 0;
 }
 
-/*	iscsi_send_recovery_r2t():
- *
- *
- */
 static int iscsi_send_recovery_r2t(
 	iscsi_cmd_t *cmd,
 	u32 offset,
@@ -673,10 +532,6 @@ static int iscsi_send_recovery_r2t(
 	return ret;
 }
 
-/*	iscsi_dataout_datapduinorder_no_fbit():
- *
- *
- */
 int iscsi_dataout_datapduinorder_no_fbit(
 	iscsi_cmd_t *cmd,
 	iscsi_pdu_t *pdu)
@@ -686,10 +541,6 @@ int iscsi_dataout_datapduinorder_no_fbit(
 	iscsi_conn_t *conn = CONN(cmd);
 	iscsi_pdu_t *first_pdu = NULL;
 
-	/*
-	 * Get an iscsi_pdu_t pointer to the first PDU, and total PDU count
-	 * of the DataOUT sequence.
-	 */
 	if (SESS_OPS_C(conn)->DataSequenceInOrder) {
 		for (i = 0; i < cmd->pdu_count; i++) {
 			if (cmd->pdu_list[i].seq_no == pdu->seq_no) {
@@ -710,10 +561,6 @@ int iscsi_dataout_datapduinorder_no_fbit(
 	if (!first_pdu || !pdu_count)
 		return DATAOUT_CANNOT_RECOVER;
 
-	/*
-	 * Loop through the ending DataOUT Sequence checking each iscsi_pdu_t.
-	 * The following ugly logic does batching of not received PDUs.
-	 */
 	for (i = 0; i < pdu_count; i++) {
 		if (first_pdu[i].status == ISCSI_PDU_RECEIVED_OK) {
 			if (!send_recovery_r2t)
@@ -725,15 +572,7 @@ int iscsi_dataout_datapduinorder_no_fbit(
 			send_recovery_r2t = length = offset = 0;
 			continue;
 		}
-		/*
-		 * Set recovery = 1 for any missing, CRC failed, or timed
-		 * out PDUs to let the DataOUT logic know that this sequence
-		 * has not been completed yet.
-		 *
-		 * Also, only send a Recovery R2T for ISCSI_PDU_NOT_RECEIVED.
-		 * We assume if the PDU either failed CRC or timed out
-		 * that a Recovery R2T has already been sent.
-		 */
+		 
 		recovery = 1;
 
 		if (first_pdu[i].status != ISCSI_PDU_NOT_RECEIVED)
@@ -753,10 +592,6 @@ int iscsi_dataout_datapduinorder_no_fbit(
 	return (!recovery) ? DATAOUT_NORMAL : DATAOUT_WITHIN_COMMAND_RECOVERY;
 }
 
-/*	iscsi_recalculate_dataout_values():
- *
- *
- */
 static int iscsi_recalculate_dataout_values(
 	iscsi_cmd_t *cmd,
 	u32 pdu_offset,
@@ -834,10 +669,6 @@ static int iscsi_recalculate_dataout_values(
 	return 0;
 }
 
-/*	iscsi_recover_dataout_crc_sequence():
- *
- *
- */
 int iscsi_recover_dataout_sequence(
 	iscsi_cmd_t *cmd,
 	u32 pdu_offset,
@@ -858,10 +689,6 @@ int iscsi_recover_dataout_sequence(
 	return DATAOUT_WITHIN_COMMAND_RECOVERY;
 }
 
-/*	iscsi_allocate_ooo_cmdsn():
- *
- *
- */
 static inline iscsi_ooo_cmdsn_t *iscsi_allocate_ooo_cmdsn(void)
 {
 	iscsi_ooo_cmdsn_t *ooo_cmdsn = NULL;
@@ -877,38 +704,24 @@ static inline iscsi_ooo_cmdsn_t *iscsi_allocate_ooo_cmdsn(void)
 	return ooo_cmdsn;
 }
 
-/*	iscsi_attach_ooo_cmdsn():
- *
- *	Called with sess->cmdsn_lock held.
- */
 static inline int iscsi_attach_ooo_cmdsn(
 	iscsi_session_t *sess,
 	iscsi_ooo_cmdsn_t *ooo_cmdsn)
 {
 	iscsi_ooo_cmdsn_t *ooo_tail, *ooo_tmp;
-	/*
-	 * We attach the iscsi_ooo_cmdsn_t entry to the out of order
-	 * list in increasing CmdSN order.
-	 * This allows iscsi_execute_ooo_cmdsns() to detect any
-	 * additional CmdSN holes while performing delayed execution.
-	 */
+	 
 	if (list_empty(&sess->sess_ooo_cmdsn_list))
 		list_add_tail(&ooo_cmdsn->ooo_list,
 				&sess->sess_ooo_cmdsn_list);
 	else {
 		ooo_tail = list_entry(sess->sess_ooo_cmdsn_list.prev,
 				typeof(*ooo_tail), ooo_list);
-		/*
-		 * CmdSN is greater than the tail of the list.
-		 */
+		 
 		if (ooo_tail->cmdsn < ooo_cmdsn->cmdsn)
 			list_add_tail(&ooo_cmdsn->ooo_list,
 					&sess->sess_ooo_cmdsn_list);
 		else {
-			/*
-			 * CmdSN is either lower than the head,  or somewhere
-			 * in the middle.
-			 */
+			 
 			list_for_each_entry(ooo_tmp, &sess->sess_ooo_cmdsn_list,
 						ooo_list) {
 				while (ooo_tmp->cmdsn < ooo_cmdsn->cmdsn)
@@ -928,11 +741,6 @@ static inline int iscsi_attach_ooo_cmdsn(
 	return 0;
 }
 
-/*	iscsi_remove_ooo_cmdsn()
- *
- *	Removes an iscsi_ooo_cmdsn_t from a session's list,
- *	called with iscsi_session_t->cmdsn_lock held.
- */
 void iscsi_remove_ooo_cmdsn(
 	iscsi_session_t *sess,
 	iscsi_ooo_cmdsn_t *ooo_cmdsn)
@@ -941,10 +749,6 @@ void iscsi_remove_ooo_cmdsn(
 	kmem_cache_free(lio_ooo_cache, ooo_cmdsn);
 }
 
-/*	iscsi_clear_ooo_cmdsns_for_conn():
- *
- *
- */
 void iscsi_clear_ooo_cmdsns_for_conn(iscsi_conn_t *conn)
 {
 	iscsi_ooo_cmdsn_t *ooo_cmdsn;
@@ -960,10 +764,6 @@ void iscsi_clear_ooo_cmdsns_for_conn(iscsi_conn_t *conn)
 	spin_unlock(&sess->cmdsn_lock);
 }
 
-/*	iscsi_execute_ooo_cmdsns():
- *
- *	Called with sess->cmdsn_lock held.
- */
 int iscsi_execute_ooo_cmdsns(iscsi_session_t *sess)
 {
 	int ooo_count = 0;
@@ -1000,15 +800,6 @@ int iscsi_execute_ooo_cmdsns(iscsi_session_t *sess)
 	return ooo_count;
 }
 
-/*	iscsi_execute_cmd():
- *
- *	Called either:
- *
- *	1. With sess->cmdsn_lock held from iscsi_execute_ooo_cmdsns()
- *	or iscsi_check_received_cmdsn().
- *	2. With no locks held directly from iscsi_handle_XXX_pdu() functions
- *	for immediate commands.
- */
 int iscsi_execute_cmd(iscsi_cmd_t *cmd, int ooo)
 {
 #ifdef SYNO_LIO_TRANSPORT_PATCHES
@@ -1024,11 +815,7 @@ int iscsi_execute_cmd(iscsi_cmd_t *cmd, int ooo)
 
 	switch (cmd->iscsi_opcode) {
 	case ISCSI_INIT_SCSI_CMND:
-		/*
-		 * Go ahead and send the CHECK_CONDITION status for
-		 * any SCSI CDB exceptions that may have occurred, also
-		 * handle the SCF_SCSI_RESERVATION_CONFLICT case here as well.
-		 */
+		 
 		if (se_cmd->se_cmd_flags & SCF_SCSI_CDB_EXCEPTION) {
 			if (se_cmd->se_cmd_flags &
 					SCF_SCSI_RESERVATION_CONFLICT) {
@@ -1039,27 +826,15 @@ int iscsi_execute_cmd(iscsi_cmd_t *cmd, int ooo)
 				return 0;
 			}
 			spin_unlock_bh(&cmd->istate_lock);
-			/*
-			 * Determine if delayed TASK_ABORTED status for WRITEs
-			 * should be sent now if no unsolicited data out
-			 * payloads are expected, or if the delayed status
-			 * should be sent after unsolicited data out with F_BIT
-			 * set in iscsi_handle_data_out()
-			 */
+			 
 			if (transport_check_aborted_status(se_cmd,
 					(cmd->unsolicited_data == 0)) != 0)
 				return 0;
-			/*
-			 * Otherwise send CHECK_CONDITION and sense for
-			 * exception
-			 */
+			 
 			return transport_send_check_condition_and_sense(se_cmd,
 					se_cmd->scsi_sense_reason, 0);
 		}
-		/*
-		 * Special case for delayed CmdSN with Immediate
-		 * Data and/or Unsolicited Data Out attached.
-		 */
+		 
 		if (cmd->immediate_data) {
 			if (cmd->cmd_flags & ICF_GOT_LAST_DATAOUT) {
 				spin_unlock_bh(&cmd->istate_lock);
@@ -1075,11 +850,7 @@ int iscsi_execute_cmd(iscsi_cmd_t *cmd, int ooo)
 
 			if (!(cmd->cmd_flags &
 					ICF_NON_IMMEDIATE_UNSOLICITED_DATA)) {
-				/*
-				 * Send the delayed TASK_ABORTED status for
-				 * WRITEs if no more unsolicitied data is
-				 * expected.
-				 */
+				 
 				if (transport_check_aborted_status(se_cmd, 1)
 						!= 0)
 					return 0;
@@ -1089,9 +860,7 @@ int iscsi_execute_cmd(iscsi_cmd_t *cmd, int ooo)
 			}
 			return 0;
 		}
-		/*
-		 * The default handler.
-		 */
+		 
 		spin_unlock_bh(&cmd->istate_lock);
 
 #ifdef MY_ABC_HERE
@@ -1101,10 +870,7 @@ int iscsi_execute_cmd(iscsi_cmd_t *cmd, int ooo)
 		if ((cmd->data_direction == ISCSI_WRITE) &&
 		    !(cmd->cmd_flags & ICF_NON_IMMEDIATE_UNSOLICITED_DATA)) {
 #endif
-			/*
-			 * Send the delayed TASK_ABORTED status for WRITEs if
-			 * no more nsolicitied data is expected.
-			 */
+			 
 			if (transport_check_aborted_status(se_cmd, 1) != 0)
 				return 0;
 
@@ -1163,10 +929,6 @@ int iscsi_execute_cmd(iscsi_cmd_t *cmd, int ooo)
 	return 0;
 }
 
-/*	iscsi_free_all_ooo_cmdsns():
- *
- *
- */
 void iscsi_free_all_ooo_cmdsns(iscsi_session_t *sess)
 {
 	iscsi_ooo_cmdsn_t *ooo_cmdsn, *ooo_cmdsn_tmp;
@@ -1181,10 +943,6 @@ void iscsi_free_all_ooo_cmdsns(iscsi_session_t *sess)
 	spin_unlock(&sess->cmdsn_lock);
 }
 
-/*	iscsi_handle_ooo_cmdsn():
- *
- *
- */
 int iscsi_handle_ooo_cmdsn(
 	iscsi_session_t *sess,
 	iscsi_cmd_t *cmd,
@@ -1227,10 +985,6 @@ int iscsi_handle_ooo_cmdsn(
 	return CMDSN_HIGHER_THAN_EXP;
 }
 
-/*	 iscsi_set_dataout_timeout_values():
- *
- *
- */
 static int iscsi_set_dataout_timeout_values(
 	iscsi_cmd_t *cmd,
 	u32 *offset,
@@ -1273,10 +1027,6 @@ static int iscsi_set_dataout_timeout_values(
 	return 0;
 }
 
-/*	iscsi_handle_dataout_timeout():
- *
- *	NOTE: Called from interrupt (timer) context.
- */
 static void iscsi_handle_dataout_timeout(unsigned long data)
 {
 	u32 pdu_length = 0, pdu_offset = 0;
@@ -1360,10 +1110,6 @@ failure:
 	return;
 }
 
-/*	iscsi_mod_dataout_timer():
- *
- *
- */
 void iscsi_mod_dataout_timer(iscsi_cmd_t *cmd)
 {
 	iscsi_conn_t *conn = CONN(cmd);
@@ -1382,10 +1128,6 @@ void iscsi_mod_dataout_timer(iscsi_cmd_t *cmd)
 	spin_unlock_bh(&cmd->dataout_timeout_lock);
 }
 
-/*	iscsi_start_dataout_timer():
- *
- *	Called with cmd->dataout_timeout_lock held.
- */
 void iscsi_start_dataout_timer(
 	iscsi_cmd_t *cmd,
 	iscsi_conn_t *conn)
@@ -1407,10 +1149,6 @@ void iscsi_start_dataout_timer(
 	add_timer(&cmd->dataout_timer);
 }
 
-/*	iscsi_stop_dataout_timer():
- *
- *
- */
 void iscsi_stop_dataout_timer(iscsi_cmd_t *cmd)
 {
 	spin_lock_bh(&cmd->dataout_timeout_lock);

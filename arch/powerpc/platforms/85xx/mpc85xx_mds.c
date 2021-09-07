@@ -1,24 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) Freescale Semicondutor, Inc. 2006-2007. All rights reserved.
- *
- * Author: Andy Fleming <afleming@freescale.com>
- *
- * Based on 83xx/mpc8360e_pb.c by:
- *	   Li Yang <LeoLi@freescale.com>
- *	   Yin Olivia <Hong-hua.Yin@freescale.com>
- *
- * Description:
- * MPC85xx MDS board specific routines.
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
-
+ 
 #include <linux/stddef.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -70,7 +53,6 @@ static int mpc8568_fixup_125_clock(struct phy_device *phydev)
 	int scr;
 	int err;
 
-	/* Workaround for the 125 CLK Toggle */
 	scr = phy_read(phydev, MV88E1111_SCR);
 
 	if (scr < 0)
@@ -101,7 +83,6 @@ static int mpc8568_mds_phy_fixups(struct phy_device *phydev)
 	int temp;
 	int err;
 
-	/* Errata */
 	err = phy_write(phydev,29, 0x0006);
 
 	if (err)
@@ -140,7 +121,6 @@ static int mpc8568_mds_phy_fixups(struct phy_device *phydev)
 	if (err)
 		return err;
 
-	/* Disable automatic MDI/MDIX selection */
 	temp = phy_read(phydev, 16);
 
 	if (temp < 0)
@@ -154,7 +134,7 @@ static int mpc8568_mds_phy_fixups(struct phy_device *phydev)
 
 #ifdef MY_DEF_HERE
 #ifdef CONFIG_PCI
-/*Host/agent status can be read from porbmsr in the global utilities*/
+ 
 static int get_p1021mds_host_agent(void)
 {
 	struct device_node *np;
@@ -180,19 +160,13 @@ static int get_p1021mds_host_agent(void)
 	return host_agent;
 }
 
-/*
- * To judge if the PCI(e) controller is host/agent mode through
- * the PORBMSR register.
- *     0: agent mode
- *     1: host mode
- */
 static bool p1021mds_pci_is_host(u32 host_agent, resource_size_t res)
 {
 	switch (res & 0xfffff) {
-	case 0xa000:    /* PCIe1 */
+	case 0xa000:     
 		return host_agent & 0x2;
 		break;
-	case 0x9000:    /* PCIe2 */
+	case 0x9000:     
 		return host_agent & 0x1;
 		break;
 	default:
@@ -202,11 +176,6 @@ static bool p1021mds_pci_is_host(u32 host_agent, resource_size_t res)
 #endif
 #endif
 
-/* ************************************************************************
- *
- * Setup the architecture
- *
- */
 #ifdef MY_DEF_HERE
 #ifdef CONFIG_SMP
 extern void __init mpc85xx_smp_init(void);
@@ -228,7 +197,6 @@ static void __init mpc85xx_mds_setup_arch(void)
 	if (ppc_md.progress)
 		ppc_md.progress("mpc85xx_mds_setup_arch()", 0);
 
-	/* Map BCSR area */
 	np = of_find_node_by_name(NULL, "bcsr");
 	if (np != NULL) {
 		struct resource res;
@@ -298,25 +266,18 @@ static void __init mpc85xx_mds_setup_arch(void)
 #define BCSR_UCC1_MODE_MSK	(0x3 << 4)
 #define BCSR_UCC2_MODE_MSK	(0x3 << 0)
 
-			/* Turn off UCC1 & UCC2 */
 			clrbits8(&bcsr_regs[8], BCSR_UCC1_GETH_EN);
 			clrbits8(&bcsr_regs[9], BCSR_UCC2_GETH_EN);
 
-			/* Mode is RGMII, all bits clear */
 			clrbits8(&bcsr_regs[11], BCSR_UCC1_MODE_MSK |
 						 BCSR_UCC2_MODE_MSK);
 
-			/* Turn UCC1 & UCC2 on */
 			setbits8(&bcsr_regs[8], BCSR_UCC1_GETH_EN);
 			setbits8(&bcsr_regs[9], BCSR_UCC2_GETH_EN);
 		} else if (machine_is(mpc8569_mds)) {
 #define BCSR7_UCC12_GETHnRST	(0x1 << 2)
 #define BCSR8_UEM_MARVELL_RST	(0x1 << 1)
-			/*
-			 * U-Boot mangles interrupt polarity for Marvell PHYs,
-			 * so reset built-in and UEM Marvell PHYs, this puts
-			 * the PHYs into their normal state.
-			 */
+			 
 			clrbits8(&bcsr_regs[7], BCSR7_UCC12_GETHnRST);
 			setbits8(&bcsr_regs[8], BCSR8_UEM_MARVELL_RST);
 
@@ -325,7 +286,7 @@ static void __init mpc85xx_mds_setup_arch(void)
 		}
 		iounmap(bcsr_regs);
 	}
-#endif	/* CONFIG_QUICC_ENGINE */
+#endif	 
 
 #ifdef CONFIG_SWIOTLB
 	if (lmb_end_of_DRAM() > max) {
@@ -354,7 +315,6 @@ static int __init board_fixups(void)
 		phy_register_fixup_for_id(phy_id, mpc8568_fixup_125_clock);
 		phy_register_fixup_for_id(phy_id, mpc8568_mds_phy_fixups);
 
-		/* Register a workaround for errata */
 		snprintf(phy_id, sizeof(phy_id), "%llx:%02x",
 			(unsigned long long)res.start, 7);
 		phy_register_fixup_for_id(phy_id, mpc8568_mds_phy_fixups);
@@ -383,7 +343,6 @@ static int __init mpc85xx_publish_devices(void)
 	if (machine_is(mpc8569_mds))
 		simple_gpiochip_init("fsl,mpc8569mds-bcsr-gpio");
 
-	/* Publish the QE devices */
 	of_platform_bus_probe(NULL, mpc85xx_ids, NULL);
 
 	return 0;
@@ -404,7 +363,7 @@ static struct of_device_id p1021_ids[] = {
 
 static int __init p1021_publish_devices(void)
 {
-	/* Publish the QE devices */
+	 
 	of_platform_bus_probe(NULL, p1021_ids, NULL);
 
 	return 0;
@@ -457,7 +416,7 @@ static void __init mpc85xx_mds_pic_init(void)
 	}
 	qe_ic_init(np, 0, qe_ic_cascade_muxed_mpic, NULL);
 	of_node_put(np);
-#endif				/* CONFIG_QUICC_ENGINE */
+#endif				 
 }
 
 static int __init mpc85xx_mds_probe(void)

@@ -1,12 +1,4 @@
-/*
- *  arch/arm/include/asm/cacheflush.h
- *
- *  Copyright (C) 1999-2002 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #ifndef _ASMARM_CACHEFLUSH_H
 #define _ASMARM_CACHEFLUSH_H
 
@@ -18,10 +10,6 @@
 
 #define CACHE_COLOUR(vaddr)	((vaddr & (SHMLBA - 1)) >> PAGE_SHIFT)
 
-/*
- *	Cache Model
- *	===========
- */
 #undef _CACHE
 #undef MULTI_CACHE
 
@@ -115,103 +103,26 @@
 #endif
 
 #if defined(CONFIG_CPU_V6)
-//# ifdef _CACHE
+ 
 #  define MULTI_CACHE 1
-//# else
-//#  define _CACHE v6
-//# endif
+ 
 #endif
 
 #if defined(CONFIG_CPU_V7)
-//# ifdef _CACHE
+ 
 #  define MULTI_CACHE 1
-//# else
-//#  define _CACHE v7
-//# endif
+ 
 #endif
 
 #if !defined(_CACHE) && !defined(MULTI_CACHE)
 #error Unknown cache maintainence model
 #endif
 
-/*
-#ifdef CONFIG_SYNO_PLX_PORTING
- * This flag is used to indicate that the page pointed to by a pte is clean
- * and does not require cleaning before returning it to the user.
-#else
- * This flag is used to indicate that the page pointed to by a pte
- * is dirty and requires cleaning before returning it to the user.
-#endif
- */
 #ifdef CONFIG_SYNO_PLX_PORTING
 #define PG_dcache_clean PG_arch_1
 #else
 #define PG_dcache_dirty PG_arch_1
 #endif
-
-/*
- *	MM Cache Management
- *	===================
- *
- *	The arch/arm/mm/cache-*.S and arch/arm/mm/proc-*.S files
- *	implement these methods.
- *
- *	Start addresses are inclusive and end addresses are exclusive;
- *	start addresses should be rounded down, end addresses up.
- *
- *	See Documentation/cachetlb.txt for more information.
- *	Please note that the implementation of these, and the required
- *	effects are cache-type (VIVT/VIPT/PIPT) specific.
- *
- *	flush_cache_kern_all()
- *
- *		Unconditionally clean and invalidate the entire cache.
- *
- *	flush_cache_user_mm(mm)
- *
- *		Clean and invalidate all user space cache entries
- *		before a change of page tables.
- *
- *	flush_cache_user_range(start, end, flags)
- *
- *		Clean and invalidate a range of cache entries in the
- *		specified address space before a change of page tables.
- *		- start - user start address (inclusive, page aligned)
- *		- end   - user end address   (exclusive, page aligned)
- *		- flags - vma->vm_flags field
- *
- *	coherent_kern_range(start, end)
- *
- *		Ensure coherency between the Icache and the Dcache in the
- *		region described by start, end.  If you have non-snooping
- *		Harvard caches, you need to implement this function.
- *		- start  - virtual start address
- *		- end    - virtual end address
- *
- *	DMA Cache Coherency
- *	===================
- *
- *	dma_inv_range(start, end)
- *
- *		Invalidate (discard) the specified virtual address range.
- *		May not write back any entries.  If 'start' or 'end'
- *		are not cache line aligned, those lines must be written
- *		back.
- *		- start  - virtual start address
- *		- end    - virtual end address
- *
- *	dma_clean_range(start, end)
- *
- *		Clean (write back) the specified virtual address range.
- *		- start  - virtual start address
- *		- end    - virtual end address
- *
- *	dma_flush_range(start, end)
- *
- *		Clean and invalidate the specified virtual address range.
- *		- start  - virtual start address
- *		- end    - virtual end address
- */
 
 struct cpu_cache_fns {
 	void (*flush_kern_all)(void);
@@ -238,12 +149,7 @@ struct outer_cache_fns {
 };
 
 #ifdef CONFIG_MV_XOR_NET_DMA
-/*
- * Clean and Invalidate L1 cache w/o dsb()
- * The call is intended for multiple calls and when dsb() on commit endpoint
- * HW would align addresses. If 'end' was already aligned, put it
- * one cacheline up.
- */
+ 
 static inline void flush_user_range_fast(unsigned long start,
 										 unsigned long end, unsigned int vmflags)
 {
@@ -254,12 +160,9 @@ static inline void flush_user_range_fast(unsigned long start,
 	__asm__("mcr p15, 5, %0, c15, c15, 1" : : "r" (end-1));
 	raw_local_irq_restore(flags);
 
-	/* dsb();*/
 }
 #endif
-/*
- * Select the calling method
- */
+ 
 #ifdef MULTI_CACHE
 
 extern struct cpu_cache_fns cpu_cache;
@@ -275,12 +178,6 @@ extern struct cpu_cache_fns cpu_cache;
 #define __cpuc_flush_dcache_page	cpu_cache.flush_kern_dcache_page
 #endif
 
-/*
- * These are private to the dma-mapping API.  Do not use directly.
- * Their sole purpose is to ensure that data held in the cache
- * is visible to DMA, or data written by DMA to system memory is
- * visible to the CPU.
- */
 #define dmac_inv_range			cpu_cache.dma_inv_range
 #define dmac_clean_range		cpu_cache.dma_clean_range
 #define dmac_flush_range		cpu_cache.dma_flush_range
@@ -309,12 +206,6 @@ extern void __cpuc_flush_dcache_area(void *, size_t);
 extern void __cpuc_flush_dcache_page(void *);
 #endif
 
-/*
- * These are private to the dma-mapping API.  Do not use directly.
- * Their sole purpose is to ensure that data held in the cache
- * is visible to DMA, or data written by DMA to system memory is
- * visible to the CPU.
- */
 #define dmac_inv_range			__glue(_CACHE,_dma_inv_range)
 #define dmac_clean_range		__glue(_CACHE,_dma_clean_range)
 #define dmac_flush_range		__glue(_CACHE,_dma_flush_range)
@@ -356,11 +247,6 @@ static inline void outer_flush_range(unsigned long start, unsigned long end)
 
 #endif
 
-/*
- * Copy user data from/to a page which is mapped into a different
- * processes address space.  Really, we want to allow our "user
- * space" model to handle this.
- */
 #define copy_to_user_page(vma, page, vaddr, dst, src, len) \
 	do {							\
 		memcpy(dst, src, len);				\
@@ -372,9 +258,6 @@ static inline void outer_flush_range(unsigned long start, unsigned long end)
 		memcpy(dst, src, len);				\
 	} while (0)
 
-/*
- * Convert calls to our calling convention.
- */
 #define flush_cache_all()		__cpuc_flush_kern_all()
 #ifndef CONFIG_CPU_CACHE_VIPT
 static inline void flush_cache_mm(struct mm_struct *mm)
@@ -421,38 +304,13 @@ extern void flush_ptrace_access(struct vm_area_struct *vma, struct page *page,
 
 #define flush_cache_dup_mm(mm) flush_cache_mm(mm)
 
-/*
- * flush_cache_user_range is used when we want to ensure that the
- * Harvard caches are synchronised for the user space address range.
- * This is used for the ARM private sys_cacheflush system call.
- */
 #define flush_cache_user_range(vma,start,end) \
 	__cpuc_coherent_user_range((start) & PAGE_MASK, PAGE_ALIGN(end))
 
-/*
- * Perform necessary cache operations to ensure that data previously
- * stored within this range of addresses can be executed by the CPU.
- */
 #define flush_icache_range(s,e)		__cpuc_coherent_kern_range(s,e)
 
-/*
- * Perform necessary cache operations to ensure that the TLB will
- * see data written in the specified area.
- */
 #define clean_dcache_area(start,size)	cpu_dcache_clean_area(start, size)
 
-/*
- * flush_dcache_page is used when the kernel has written to the page
- * cache page at virtual address page->virtual.
- *
- * If this page isn't mapped (ie, page_mapping == NULL), or it might
- * have userspace mappings, then we _must_ always clean + invalidate
- * the dcache entries associated with the kernel mapping.
- *
- * Otherwise we can defer the operation, and clean the cache when we are
- * about to change to user space.  This is the same method as used on SPARC64.
- * See update_mmu_cache for the user space part.
- */
 extern void flush_dcache_page(struct page *);
 
 extern void __flush_dcache_page(struct address_space *mapping, struct page *page);
@@ -482,7 +340,7 @@ static inline void flush_anon_page(struct vm_area_struct *vma,
 #define ARCH_HAS_FLUSH_KERNEL_DCACHE_PAGE
 static inline void flush_kernel_dcache_page(struct page *page)
 {
-	/* highmem pages are always flushed upon kunmap already */
+	 
 	if ((cache_is_vivt() || cache_is_vipt_aliasing()) && !PageHighMem(page))
 #ifdef CONFIG_SYNO_PLX_PORTING
 		__cpuc_flush_dcache_area(page_address(page), PAGE_SIZE);
@@ -512,10 +370,6 @@ static inline void invalidate_kernel_dcache_addr(void *addr)
 #define flush_icache_user_range(vma,page,addr,len) \
 	flush_dcache_page(page)
 
-/*
- * We don't appear to need to do anything here.  In fact, if we did, we'd
- * duplicate cache flushing elsewhere performed by flush_dcache_page().
- */
 #define flush_icache_page(vma,page)	do { } while (0)
 
 static inline void flush_ioremap_region(unsigned long phys, void __iomem *virt,
@@ -525,22 +379,12 @@ static inline void flush_ioremap_region(unsigned long phys, void __iomem *virt,
 	dmac_inv_range(start, start + size);
 }
 
-/*
- * flush_cache_vmap() is used when creating mappings (eg, via vmap,
- * vmalloc, ioremap etc) in kernel space for pages.  On non-VIPT
- * caches, since the direct-mappings of these pages may contain cached
- * data, we need to do a full cache flush to ensure that writebacks
- * don't corrupt data placed into these pages via the new mappings.
- */
 static inline void flush_cache_vmap(unsigned long start, unsigned long end)
 {
 	if (!cache_is_vipt_nonaliasing())
 		flush_cache_all();
 	else
-		/*
-		 * set_pte_at() called from vmap_pte_range() does not
-		 * have a DSB after cleaning the cache line.
-		 */
+		 
 		dsb();
 }
 

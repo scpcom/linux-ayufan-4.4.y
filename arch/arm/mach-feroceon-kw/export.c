@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+ 
 #include <linux/types.h>
 #include <linux/kernel.h>
 
@@ -29,15 +15,11 @@
 #include "ctrlEnv/mvCtrlEnvLib.h"
 #include "mvOs.h"
 
-/*************************************************************************************************************
- * Environment 
- *************************************************************************************************************/
 extern u32 mvTclk;
 extern u32 mvSysclk;
 
 EXPORT_SYMBOL(mv_early_printk);
-//EXPORT_SYMBOL(arm926_dma_inv_range);
-//EXPORT_SYMBOL(arm926_dma_flush_range);
+ 
 EXPORT_SYMBOL(mvCtrlPwrClckGet);
 EXPORT_SYMBOL(mvCtrlModelRevGet);
 EXPORT_SYMBOL(mvTclk);
@@ -64,9 +46,6 @@ EXPORT_SYMBOL(mvBoardMacSpeedGet);
 EXPORT_SYMBOL(SYNOMppCtrlRegWrite);
 #endif
 
-/*************************************************************************************************************
- * Audio
- *************************************************************************************************************/
 #ifdef CONFIG_MV_INCLUDE_AUDIO
 #include "audio/mvAudio.h"
 #include "ctrlEnv/sys/mvSysAudio.h"
@@ -82,9 +61,6 @@ EXPORT_SYMBOL(mvBoardA2DTwsiAddrGet);
 EXPORT_SYMBOL(mvBoardA2DTwsiAddrTypeGet);
 #endif
 
-/*************************************************************************************************************
- * USB
- *************************************************************************************************************/
 #ifdef CONFIG_MV_INCLUDE_USB
 extern u32 mvIsUsbHost;
 
@@ -94,11 +70,8 @@ EXPORT_SYMBOL(mvCtrlUsbMaxGet);
 EXPORT_SYMBOL(mvUsbGetCapRegAddr);
 EXPORT_SYMBOL(mvUsbGppInit);
 EXPORT_SYMBOL(mvUsbBackVoltageUpdate);
-#endif /* CONFIG_MV_INCLUDE_USB */
+#endif  
 
-/*************************************************************************************************************
- * CESA
- *************************************************************************************************************/
 #ifdef CONFIG_MV_INCLUDE_CESA
 #include "ctrlEnv/sys/mvSysCesa.h"
 #include "cesa/mvCesa.h"
@@ -130,16 +103,13 @@ extern u32 mv_crypto_base_get(void);
 EXPORT_SYMBOL(mv_crypto_base_get);
 EXPORT_SYMBOL(cesaReqResources);
 EXPORT_SYMBOL(mvCesaFinish);
-#endif /* CONFIG_MV_INCLUDE_CESA */
+#endif  
 
 #ifdef CONFIG_MV_CESA_OCF
 extern void cesa_ocf_debug(void);
 EXPORT_SYMBOL(cesa_ocf_debug);
 #endif
 
-/*************************************************************************************************************
- * Flashes
- *************************************************************************************************************/
 #if defined (CONFIG_MV_INCLUDE_SPI)
 #include <sflash/mvSFlash.h>
 #include <sflash/mvSFlashSpec.h>
@@ -158,24 +128,15 @@ EXPORT_SYMBOL(mvSFlashPowerSaveExit);
 EXPORT_SYMBOL(mvSFlashModelGet);
 #endif
 
-/*************************************************************************************************************
- * SATA
- *************************************************************************************************************/
 #ifdef CONFIG_MV_INCLUDE_INTEG_SATA
 #include <ctrlEnv/sys/mvSysSata.h>
 EXPORT_SYMBOL(mvSataWinInit);
 #endif
 
-/*************************************************************************************************************
- * DMA/XOR
- *************************************************************************************************************/
 #if defined (CONFIG_MV_XOR_MEMCOPY) || defined (CONFIG_MV_IDMA_MEMCOPY)
 EXPORT_SYMBOL(asm_memcpy);
 #endif
 
-/*************************************************************************************************************
- * Networking
- *************************************************************************************************************/
 #include "eth/mvEth.h"
 #include "ctrlEnv/sys/mvSysGbe.h"
 #include "eth-phy/mvEthPhy.h"
@@ -187,9 +148,6 @@ EXPORT_SYMBOL(mvEthPhyRegWrite);
 EXPORT_SYMBOL(mv_l2_inv_range);
 #endif
 
-/*************************************************************************************************************
- * TDM
- *************************************************************************************************************/
 #ifdef CONFIG_MV_PHONE
 #include "mv_phone/tal.h"
 EXPORT_SYMBOL(tal_init);
@@ -206,9 +164,6 @@ EXPORT_SYMBOL(tal_pcm_stop);
 EXPORT_SYMBOL(tal_exit);
 #endif
 
-/*************************************************************************************************************
- * Marvell TRACE
- *************************************************************************************************************/
 #ifdef CONFIG_MV_DBG_TRACE
 #include "dbg-trace.h"
 EXPORT_SYMBOL(TRC_INIT);

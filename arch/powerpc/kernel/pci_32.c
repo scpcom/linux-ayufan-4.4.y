@@ -1,10 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Common pmac/prep/chrp pci routines. -- Cort
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/pci.h>
 #include <linux/delay.h>
@@ -39,16 +36,10 @@ void pcibios_make_OF_bus_map(void);
 static void fixup_cpc710_pci64(struct pci_dev* dev);
 static u8* pci_to_OF_bus_map;
 
-/* By default, we don't re-assign bus numbers. We do this only on
- * some pmacs
- */
 static int pci_assign_all_buses;
 
 static int pci_bus_count;
 
-/* This will remain NULL for now, until isa-bridge.c is made common
- * to both 32-bit and 64-bit.
- */
 struct pci_dev *isa_bridge_pcidev;
 EXPORT_SYMBOL_GPL(isa_bridge_pcidev);
 
@@ -57,7 +48,7 @@ fixup_hide_host_resource_fsl(struct pci_dev *dev)
 {
 	int i, class = dev->class >> 8;
 #ifdef MY_DEF_HERE
-	/*When configured as agent, programing interface = 1*/
+	 
 	int prog_if = dev->class & 0xf;
 #endif
 
@@ -81,9 +72,7 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_FREESCALE, PCI_ANY_ID, fixup_hide_host_re
 static void
 fixup_cpc710_pci64(struct pci_dev* dev)
 {
-	/* Hide the PCI64 BARs from the kernel as their content doesn't
-	 * fit well in the resource management
-	 */
+	 
 	dev->resource[0].start = dev->resource[0].end = 0;
 	dev->resource[0].flags = 0;
 	dev->resource[1].start = dev->resource[1].end = 0;
@@ -91,9 +80,6 @@ fixup_cpc710_pci64(struct pci_dev* dev)
 }
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_IBM,	PCI_DEVICE_ID_IBM_CPC710_PCI64,	fixup_cpc710_pci64);
 
-/*
- * Functions below are used on OpenFirmware machines.
- */
 static void
 make_one_node_map(struct device_node* node, u8 pci_bus)
 {
@@ -145,13 +131,9 @@ pcibios_make_OF_bus_map(void)
 		return;
 	}
 
-	/* We fill the bus map with invalid values, that helps
-	 * debugging.
-	 */
 	for (i=0; i<pci_bus_count; i++)
 		pci_to_OF_bus_map[i] = 0xff;
 
-	/* For each hose, we begin searching bridges */
 	list_for_each_entry_safe(hose, tmp, &hose_list, list_node) {
 		struct device_node* node = hose->dn;
 
@@ -192,11 +174,6 @@ scan_OF_pci_childs(struct device_node *parent, pci_OF_scan_iterator filter, void
 			return node;
 		}
 
-		/* For PCI<->PCI bridges or CardBus bridges, we go down
-		 * Note: some OFs create a parent node "multifunc-device" as
-		 * a fake root for all functions of a multi-function device,
-		 * we go down them as well.
-		 */
 		class_code = of_get_property(node, "class-code", NULL);
 		if ((!class_code || ((*class_code >> 8) != PCI_CLASS_BRIDGE_PCI &&
 			(*class_code >> 8) != PCI_CLASS_BRIDGE_CARDBUS)) &&
@@ -223,9 +200,6 @@ static struct device_node *scan_OF_for_pci_dev(struct device_node *parent,
                 if (reg && psize >= 4 && ((reg[0] >> 8) & 0xff) == devfn)
 			return np;
 
-		/* Note: some OFs create a parent node "multifunc-device" as
-		 * a fake root for all functions of a multi-function device,
-		 * we go down them as well. */
                 if (!strcmp(np->name, "multifunc-device")) {
                         cnp = scan_OF_for_pci_dev(np, devfn);
                         if (cnp)
@@ -239,7 +213,6 @@ static struct device_node *scan_OF_for_pci_bus(struct pci_bus *bus)
 {
 	struct device_node *parent, *np;
 
-	/* Are we a root bus ? */
 	if (bus->self == NULL || bus->parent == NULL) {
 		struct pci_controller *hose = pci_bus_to_host(bus);
 		if (hose == NULL)
@@ -247,21 +220,16 @@ static struct device_node *scan_OF_for_pci_bus(struct pci_bus *bus)
 		return of_node_get(hose->dn);
 	}
 
-	/* not a root bus, we need to get our parent */
 	parent = scan_OF_for_pci_bus(bus->parent);
 	if (parent == NULL)
 		return NULL;
 
-	/* now iterate for children for a match */
 	np = scan_OF_for_pci_dev(parent, bus->self->devfn);
 	of_node_put(parent);
 
 	return np;
 }
 
-/*
- * Scans the OF tree for a device node matching a PCI device
- */
 struct device_node *
 pci_busdev_to_OF_node(struct pci_bus *bus, int devfn)
 {
@@ -276,10 +244,6 @@ pci_busdev_to_OF_node(struct pci_bus *bus, int devfn)
 	of_node_put(parent);
 	pr_debug(" result is %s\n", np ? np->full_name : "<NULL>");
 
-	/* XXX most callers don't release the returned node
-	 * mostly because ppc64 doesn't increase the refcount,
-	 * we need to fix that.
-	 */
 	return np;
 }
 EXPORT_SYMBOL(pci_busdev_to_OF_node);
@@ -297,9 +261,6 @@ find_OF_pci_device_filter(struct device_node* node, void* data)
 	return ((void *)node == data);
 }
 
-/*
- * Returns the PCI device matching a given OF node
- */
 int
 pci_device_from_OF_node(struct device_node* node, u8* bus, u8* devfn)
 {
@@ -307,7 +268,6 @@ pci_device_from_OF_node(struct device_node* node, u8* bus, u8* devfn)
 	struct pci_controller* hose;
 	struct pci_dev* dev = NULL;
 	
-	/* Make sure it's really a PCI device */
 	hose = pci_find_hose_for_OF_device(node);
 	if (!hose || !hose->dn)
 		return -ENODEV;
@@ -320,11 +280,6 @@ pci_device_from_OF_node(struct device_node* node, u8* bus, u8* devfn)
 	*bus = (reg[0] >> 16) & 0xff;
 	*devfn = ((reg[0] >> 8) & 0xff);
 
-	/* Ok, here we need some tweak. If we have already renumbered
-	 * all busses, we can't rely on the OF bus number any more.
-	 * the pci_to_OF_bus_map is not enough as several PCI busses
-	 * may match the same OF bus number.
-	 */
 	if (!pci_to_OF_bus_map)
 		return 0;
 
@@ -340,9 +295,6 @@ pci_device_from_OF_node(struct device_node* node, u8* bus, u8* devfn)
 }
 EXPORT_SYMBOL(pci_device_from_OF_node);
 
-/* We create the "pci-OF-bus-map" property now so it appears in the
- * /proc device tree
- */
 void __init
 pci_create_OF_bus_map(void)
 {
@@ -368,7 +320,6 @@ void __devinit pcibios_setup_phb_io_space(struct pci_controller *hose)
 	unsigned long io_offset;
 	struct resource *res = &hose->io_resource;
 
-	/* Fixup IO space offset */
 	io_offset = (unsigned long)hose->io_base_virt - isa_io_base;
 	res->start = (res->start + io_offset) & 0xffffffffu;
 	res->end = (res->end + io_offset) & 0xffffffffu;
@@ -384,7 +335,6 @@ static int __init pcibios_init(void)
 	if (ppc_pci_flags & PPC_PCI_REASSIGN_ALL_BUS)
 		pci_assign_all_buses = 1;
 
-	/* Scan all of the recorded PCI controllers.  */
 	list_for_each_entry_safe(hose, tmp, &hose_list, list_node) {
 		if (pci_assign_all_buses)
 			hose->first_busno = next_busno;
@@ -396,17 +346,11 @@ static int __init pcibios_init(void)
 	}
 	pci_bus_count = next_busno;
 
-	/* OpenFirmware based machines need a map of OF bus
-	 * numbers vs. kernel bus numbers since we may have to
-	 * remap them.
-	 */
 	if (pci_assign_all_buses)
 		pcibios_make_OF_bus_map();
 
-	/* Call common code to handle resource allocation */
 	pcibios_resource_survey();
 
-	/* Call machine dependent post-init code */
 	if (ppc_md.pcibios_after_init)
 		ppc_md.pcibios_after_init();
 
@@ -425,12 +369,6 @@ pci_bus_to_hose(int bus)
 			return hose;
 	return NULL;
 }
-
-/* Provide information on locations of various I/O regions in physical
- * memory.  Do this on a per-card basis so that we choose the right
- * root bridge.
- * Note that the returned IO or memory base is a physical address
- */
 
 long sys_pciconfig_iobase(long which, unsigned long bus, unsigned long devfn)
 {

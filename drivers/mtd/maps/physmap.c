@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Normal mappings of chips in physical memory
- *
- * Copyright (C) 2003 MontaVista Software Inc.
- * Author: Jun Sun, jsun@mvista.com or jsun@junsun.net
- *
- * 031022 - [jsun] add run-time configure and partition setup
- */
-
+ 
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/kernel.h>
@@ -140,7 +132,7 @@ static int physmap_flash_probe(struct platform_device *dev)
 		simple_map_init(&info->map[i]);
 
 #if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_MPC85XX_COMMON)
-		/* To avoid mapping the whole flash in mtd0 */
+		 
 		iounmap(info->map[i].virt);
 		return 0;
 #endif
@@ -162,9 +154,7 @@ static int physmap_flash_probe(struct platform_device *dev)
 	if (devices_found == 1) {
 		info->cmtd = info->mtd[0];
 	} else if (devices_found > 1) {
-		/*
-		 * We detected multiple devices. Concatenate them together.
-		 */
+		 
 #ifdef CONFIG_MTD_CONCAT
 		info->cmtd = mtd_concat_create(info->mtd, devices_found, dev_name(&dev->dev));
 		if (info->cmtd == NULL)
@@ -299,8 +289,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("David Woodhouse <dwmw2@infradead.org>");
 MODULE_DESCRIPTION("Generic configurable MTD map driver");
 
-/* legacy platform drivers can't hotplug or coldplg */
 #ifndef CONFIG_MTD_PHYSMAP_COMPAT
-/* work with hotplug and coldplug */
+ 
 MODULE_ALIAS("platform:physmap-flash");
 #endif

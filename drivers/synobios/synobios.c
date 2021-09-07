@@ -4,8 +4,8 @@
 #include <linux/syno.h>
 
 #include <linux/module.h>
-#include <linux/kernel.h> /* printk() */
-#include <linux/errno.h>  /* error codes */
+#include <linux/kernel.h>  
+#include <linux/errno.h>   
 #include <linux/slab.h>
 #include <linux/init.h>
 #include <linux/genhd.h>
@@ -102,8 +102,8 @@ static int synobios_record_raid_event(unsigned int type, unsigned int raidno, un
 	event.event = SYNO_EVENT_RAID;
 	event.data1 = type;
 	event.data2 = raidno;
-	event.data3 = diskno + 1;   // scemd record disk1,2,3,4, 
-								// raid driver use disk0,1,2,3
+	event.data3 = diskno + 1;    
+								 
 	event.data4 = sector;	
 
 	ret = synobios_record_event_new(&scSynoBios, &event);
@@ -136,7 +136,6 @@ void synobios_rtc_init(void)
 	struct _SynoRtcTimePkt RtcTimePkt;
 	struct timespec tv;
 
-	/* 1. read time from rtc. */
 	if (synobios_ops->get_rtc_time) {
 		ret = synobios_ops->get_rtc_time(&RtcTimePkt);
 	}else{
@@ -146,12 +145,12 @@ void synobios_rtc_init(void)
 	if (ret < 0) {
 		printk("%s(%d) read RTC error\n", __FILE__, __LINE__);
 	}
-	//printk("%s(%d) XX YYYY/MM/DD hh:mm:ss %04x/%02x/%02x %02x:%02x:%02x\n", __FILE__, __LINE__, RtcTimePkt.year, RtcTimePkt.month, RtcTimePkt.day, RtcTimePkt.hour, RtcTimePkt.min, RtcTimePkt.sec);
+	 
 #if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	tv.tv_sec = mktime(RtcTimePkt.year + 1900, RtcTimePkt.month + 1, RtcTimePkt.day, RtcTimePkt.hour, RtcTimePkt.min, RtcTimePkt.sec);
 	tv.tv_nsec = 0;
 #else
-	/* Make RTC time start from year 2000. */
+	 
 	if ( (signed char)RtcTimePkt.year < 0) {
 		RtcTimePkt.year = 0;
 	}
@@ -172,8 +171,6 @@ void synobios_rtc_init(void)
 		RtcTimePkt.hour = BCD_TO_BIN(RtcTimePkt.hour);
 	}
 
-	/* 2. set xscale timer as rtc value. */
-	/*printk("%s(%d) YYYY/MM/DD hh:mm:ss %04d/%02d/%02d %02d:%02d:%02d\n", __FILE__, __LINE__, RtcTimePkt.year+1970, RtcTimePkt.month, RtcTimePkt.day, RtcTimePkt.hour, RtcTimePkt.min, RtcTimePkt.sec);*/
 	tv.tv_sec = mktime(RtcTimePkt.year+1970, RtcTimePkt.month, RtcTimePkt.day, RtcTimePkt.hour, RtcTimePkt.min, RtcTimePkt.sec);
 	tv.tv_nsec = 0;
 #endif
@@ -246,7 +243,7 @@ static int synobios_ioctl (struct inode *inode, struct file *filp,
 		} else if (scSynoBios.countEvents == 0) {
 			ret = -EAGAIN;
 		} else {
-			/*XXX??? need mutex*/
+			 
 			i = scSynoBios.idxPtr + SYNOBIOS_NEVENTS - scSynoBios.countEvents;
 			i %= SYNOBIOS_NEVENTS;
 			copy_to_user((void __user *)arg, &scSynoBios.rgEvents[i], sizeof(SYNOBIOSEVENT));
@@ -291,7 +288,7 @@ static int synobios_ioctl (struct inode *inode, struct file *filp,
 	
     case SYNOIO_MANUTIL_MODE:
         if (*(int *)arg != 0) {
-            /*for manutil test, send manutil mode swich event*/
+             
             printk(KERN_INFO "synobios_ioctl: MANUTIL BUTTON MODE\n");
             ret = synobios_record_event(&scSynoBios, SYNO_EVENT_BUTTON_MANUTIL);
         } else {
@@ -300,7 +297,7 @@ static int synobios_ioctl (struct inode *inode, struct file *filp,
         }
 		break;
 	case SYNOIO_RECORD_EVENT:
-		/*for event test, generate event from user space*/
+		 
 		printk(KERN_INFO "synobios_ioctl: SYNOIO_RECORD_EVENT, event id %x\n", *((u_int *) arg));
 		ret = synobios_record_event(&scSynoBios, *(u_int *)arg);
 		break;
@@ -490,7 +487,7 @@ static int synobios_ioctl (struct inode *inode, struct file *filp,
 		}
 	case SYNOIO_GET_BUZZER_CLEARED:
 		{
-			//for manutil
+			 
 			unsigned char *pucBuzzer_cleared = (unsigned char *)arg;
 			if(synobios_ops->get_buzzer_cleared) {
 				ret = synobios_ops->get_buzzer_cleared(pucBuzzer_cleared);
@@ -597,7 +594,7 @@ static int synobios_ioctl (struct inode *inode, struct file *filp,
 		}
 	default:
 		ret=-ENOSYS;		
-		//printk(KERN_INFO "synobios_ioctl: un-defined ioctl number %x\n", cmd);
+		 
 		break;
 	}
 END:
@@ -615,23 +612,14 @@ int synobios_release(struct inode *inode, struct file *filp)
 }
 
 struct file_operations synobios_fops = {
-	/*llseek:*/
-	/*read:*/
-	/*write:*/
-	/*readdir:*/
+	 
 	poll:     synobios_poll,
 	ioctl:	  synobios_ioctl,
-/*	int (*mmap) (struct file *, struct vm_area_struct *);*/
+ 
 	open:     synobios_open,
-/*	int (*flush) (struct file *);*/
+ 
 	release:  synobios_release,
-/*	int (*fsync) (struct file *, struct dentry *, int datasync);*/
-/*	int (*fasync) (int, struct file *, int);*/
-/*	int (*lock) (struct file *, int, struct file_lock *);*/
-/*	ssize_t (*readv) (struct file *, const struct iovec *, unsigned long, loff_t *);*/
-/*	ssize_t (*writev) (struct file *, const struct iovec *, unsigned long, loff_t *);*/
-/*	ssize_t (*sendpage) (struct file *, struct page *, int, size_t, loff_t *, int);*/
-/*	unsigned long (*get_unmapped_area)(struct file *, unsigned long, unsigned long, unsigned long, unsigned long);*/
+ 
 };
 
 typedef struct _tag_SYNO_MODEL_MAPPING {
@@ -735,7 +723,6 @@ int synobios_init(void)
 		module_type_set(NULL);
 	}
 
-	/*initialize wait queues*/
 	init_waitqueue_head(&(scSynoBios.wq_poll));
 
 	if (NULL == (pgSysStatus = kzalloc(sizeof(SYNO_SYS_STATUS), GFP_KERNEL))) {

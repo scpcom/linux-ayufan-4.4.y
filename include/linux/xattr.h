@@ -1,26 +1,17 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
-  File: linux/xattr.h
-
-  Extended attributes handling.
-
-  Copyright (C) 2001 by Andreas Gruenbacher <a.gruenbacher@computer.org>
-  Copyright (c) 2001-2002 Silicon Graphics, Inc.  All Rights Reserved.
-  Copyright (c) 2004 Red Hat, Inc., James Morris <jmorris@redhat.com>
-*/
+ 
 #ifndef _LINUX_XATTR_H
 #define _LINUX_XATTR_H
 
-#define XATTR_CREATE	0x1	/* set value, fail if attr already exists */
-#define XATTR_REPLACE	0x2	/* set value, fail if attr does not exist */
+#define XATTR_CREATE	0x1	 
+#define XATTR_REPLACE	0x2	 
 
 #ifdef  __KERNEL__
 
 #include <linux/types.h>
 
-/* Namespaces */
 #define XATTR_OS2_PREFIX "os2."
 #define XATTR_OS2_PREFIX_LEN (sizeof (XATTR_OS2_PREFIX) - 1)
 
@@ -81,6 +72,6 @@ int generic_removexattr(struct dentry *dentry, const char *name);
 #ifdef MY_ABC_HERE
 int syno_generic_setxattr(struct inode *inode, const char *name, const void *value, size_t size, int flags);
 #endif
-#endif  /*  __KERNEL__  */
+#endif   
 
-#endif	/* _LINUX_XATTR_H */
+#endif	 

@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * arch/arm/mach-kirkwood/cpufreq.c
- *
- * Clock scaling for Kirkwood SoC
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2. This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/cpufreq.h>
@@ -29,10 +20,6 @@ static struct cpufreq_frequency_table kw_freqs[] = {
 	{ 0, CPUFREQ_TABLE_END  }
 };
 
-/*
- * Power management function: set or unset powersave mode
- * FIXME: a better place ?
- */
 static inline void kw_set_powersave(u8 on)
 {
 #ifndef MY_ABC_HERE
@@ -54,9 +41,6 @@ static int kw_cpufreq_verify(struct cpufreq_policy *policy)
 	return cpufreq_frequency_table_verify(policy, kw_freqs);
 }
 
-/*
- * Get the current frequency for a given cpu.
- */
 static unsigned int kw_cpufreq_get(unsigned int cpu)
 {
 	unsigned int freq;
@@ -65,8 +49,6 @@ static unsigned int kw_cpufreq_get(unsigned int cpu)
 	if (unlikely(!cpu_online(cpu)))
 		return -ENODEV;
 
-	/* To get the current frequency, we have to check if
-	* the powersave mode is set. */
 	reg = MV_REG_READ(POWER_MNG_CTRL_REG);
 
 	if (reg & PMC_POWERSAVE_EN)
@@ -77,9 +59,6 @@ static unsigned int kw_cpufreq_get(unsigned int cpu)
 	return freq;
 }
 
-/*
- * Set the frequency for a given cpu.
- */
 static int kw_cpufreq_target(struct cpufreq_policy *policy,
 		unsigned int target_freq, unsigned int relation)
 {
@@ -89,7 +68,6 @@ static int kw_cpufreq_target(struct cpufreq_policy *policy,
 	if (unlikely(!cpu_online(policy->cpu)))
 		return -ENODEV;
 
-	/* Lookup the next frequency */
 	if (unlikely(cpufreq_frequency_table_target(policy,
 		kw_freqs, target_freq, relation, &index)))
 		return -EINVAL;
@@ -104,8 +82,6 @@ static int kw_cpufreq_target(struct cpufreq_policy *policy,
 
 	cpufreq_notify_transition(&freqs, CPUFREQ_PRECHANGE);
 
-	/* Interruptions will be disabled in the low level power mode
-	* functions. */
 	if (index == KW_CPUFREQ_LOW)
 		kw_set_powersave(1);
 	else if (index == KW_CPUFREQ_HIGH)
@@ -125,15 +101,10 @@ static int kw_cpufreq_cpu_init(struct cpufreq_policy *policy)
 	if (unlikely(!cpu_online(policy->cpu)))
 		return -ENODEV;
 
-	/*
-	 * As 6180 board have different reset sample register values,
-	 * the board type must be checked first.
-	 */
 	if (dev_id == MV_6180_DEV_ID) {
 
 		kw_freqs[KW_CPUFREQ_HIGH].frequency = mvCpuPclkGet()/1000;
-		/* At the lowest frequency CPU goes to DDR data clock rate:
-		 * (2 x DDR clock rate). */
+		 
 		kw_freqs[KW_CPUFREQ_LOW].frequency = mvBoardSysClkGet()*2/1000;
 
 	} else if ((dev_id == MV_6281_DEV_ID) ||
@@ -141,7 +112,7 @@ static int kw_cpufreq_cpu_init(struct cpufreq_policy *policy)
 		(dev_id == MV_6702_DEV_ID) || (dev_id == MV_6701_DEV_ID))  {
 
 		kw_freqs[KW_CPUFREQ_HIGH].frequency = mvCpuPclkGet()/1000;
-		/* CPU low frequency is the DDR frequency. */
+		 
 		kw_freqs[KW_CPUFREQ_LOW].frequency  = mvBoardSysClkGet()/1000;
 
 	} else {

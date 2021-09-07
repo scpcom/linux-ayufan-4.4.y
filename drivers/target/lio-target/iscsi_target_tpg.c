@@ -1,34 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  iscsi_target_tpg.c
- *
- * This file contains iSCSI Target Portal Group related functions.
- *
- * Copyright (c) 2002, 2003, 2004, 2005 PyX Technologies, Inc.
- * Copyright (c) 2005, 2006, 2007 SBE, Inc.
- * Copyright (c) 2007 Rising Tide Software, Inc.
- * Copyright (c) 2008 Linux-iSCSI.org
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #define ISCSI_TARGET_TPG_C
 
 #include <linux/net.h>
@@ -105,60 +78,23 @@ u32 lio_tpg_get_pr_transport_id(
 	u16 len = 0;
 
 	spin_lock(&se_nacl->nacl_sess_lock);
-	/*
-	 * Set PROTOCOL IDENTIFIER to 5h for iSCSI
-	 */
+	 
 	buf[0] = 0x05;
-	/*
-	 * From spc4r17 Section 7.5.4.6: TransportID for initiator
-	 * ports using SCSI over iSCSI.
-	 *
-	 * The null-terminated, null-padded (see 4.4.2) ISCSI NAME field
-	 * shall contain the iSCSI name of an iSCSI initiator node (see
-	 * RFC 3720). The first ISCSI NAME field byte containing an ASCII
-	 * null character terminates the ISCSI NAME field without regard for
-	 * the specified length of the iSCSI TransportID or the contents of
-	 * the ADDITIONAL LENGTH field.
-	 */
+	 
 	len = sprintf(&buf[off], "%s", se_nacl->initiatorname);
-	/*
-	 * Add Extra byte for NULL terminator
-	 */
+	 
 	len++;
-	/*
-	 * If there is ISID present with the registration and *format code == 1
-	 * 1, use iSCSI Initiator port TransportID format.
-	 *
-	 * Otherwise use iSCSI Initiator device TransportID format that
-	 * does not contain the ASCII encoded iSCSI Initiator iSID value
-	 * provied by the iSCSi Initiator during the iSCSI login process.
-	 */
+	 
 	if ((*format_code == 1) &&
 	    (pr_reg->pr_reg_flags & PRF_ISID_PRESENT_AT_REG)) {
-		/*
-		 * Set FORMAT CODE 01b for iSCSI Initiator port TransportID
-		 * format.
-		 */
+		 
 		buf[0] |= 0x40;
-		/*
-		 * From spc4r17 Section 7.5.4.6: TransportID for initiator
-		 * ports using SCSI over iSCSI.  Table 390
-		 *
-		 * The SEPARATOR field shall contain the five ASCII
-		 * characters ",i,0x".
-		 *
-		 * The null-terminated, null-padded ISCSI INITIATOR SESSION ID
-		 * field shall contain the iSCSI initiator session identifier
-		 * (see RFC 3720) in the form of ASCII characters that are the
-		 * hexadecimal digits converted from the binary iSCSI initiator
-		 * session identifier value. The first ISCSI INITIATOR SESSION
-		 * ID field byte containing an ASCII null character
-		 */
-		buf[off+len] = 0x2c; off++; /* ASCII Character: "," */
-		buf[off+len] = 0x69; off++; /* ASCII Character: "i" */
-		buf[off+len] = 0x2c; off++; /* ASCII Character: "," */
-		buf[off+len] = 0x30; off++; /* ASCII Character: "0" */
-		buf[off+len] = 0x78; off++; /* ASCII Character: "x" */
+		 
+		buf[off+len] = 0x2c; off++;  
+		buf[off+len] = 0x69; off++;  
+		buf[off+len] = 0x2c; off++;  
+		buf[off+len] = 0x30; off++;  
+		buf[off+len] = 0x78; off++;  
 		len += 5;
 		buf[off+len] = pr_reg->pr_reg_isid[0]; off++;
 		buf[off+len] = pr_reg->pr_reg_isid[1]; off++;
@@ -170,21 +106,14 @@ u32 lio_tpg_get_pr_transport_id(
 		len += 7;
 	}
 	spin_unlock(&se_nacl->nacl_sess_lock);
-	/*
-	 * The ADDITIONAL LENGTH field specifies the number of bytes that follow
-	 * in the TransportID. The additional length shall be at least 20 and
-	 * shall be a multiple of four.
-	 */
+	 
 	padding = ((-len) & 3);
 	if (padding != 0)
 		len += padding;
 
 	buf[2] = ((len >> 8) & 0xff);
 	buf[3] = (len & 0xff);
-	/*
-	 * Increment value for total payload + header length for
-	 * full status descriptor
-	 */
+	 
 	len += 4;
 
 	return len;
@@ -200,36 +129,21 @@ u32 lio_tpg_get_pr_transport_id_len(
 
 	spin_lock(&se_nacl->nacl_sess_lock);
 	len = strlen(se_nacl->initiatorname);
-	/*
-	 * Add extra byte for NULL terminator
-	 */
+	 
 	len++;
-	/*
-	 * If there is ISID present with the registration, use format code:
-	 * 01b: iSCSI Initiator port TransportID format
-	 *
-	 * If there is not an active iSCSI session, use format code:
-	 * 00b: iSCSI Initiator device TransportID format
-	 */
+	 
 	if (pr_reg->pr_reg_flags & PRF_ISID_PRESENT_AT_REG) {
-		len += 5; /* For ",i,0x" ASCII seperator */
-		len += 7; /* For iSCSI Initiator Session ID + Null terminator */
+		len += 5;  
+		len += 7;  
 		*format_code = 1;
 	} else
 		*format_code = 0;
 	spin_unlock(&se_nacl->nacl_sess_lock);
-	/*
-	 * The ADDITIONAL LENGTH field specifies the number of bytes that follow
-	 * in the TransportID. The additional length shall be at least 20 and
-	 * shall be a multiple of four.
-	 */
+	 
 	padding = ((-len) & 3);
 	if (padding != 0)
 		len += padding;
-	/*
-	 * Increment value for total payload + header length for
-	 * full status descriptor
-	 */
+	 
 	len += 4;
 
 	return len;
@@ -245,35 +159,20 @@ char *lio_tpg_parse_pr_out_transport_id(
 	int i;
 	u16 add_len;
 	u8 format_code = (buf[0] & 0xc0);
-	/*
-	 * Check for FORMAT CODE 00b or 01b from spc4r17, section 7.5.4.6:
-	 *
-	 *	 TransportID for initiator ports using SCSI over iSCSI,
-	 * 	 from Table 388 -- iSCSI TransportID formats.
-	 *
-	 *    00b     Initiator port is identified using the world wide unique
-	 *	      SCSI device name of the iSCSI initiator
-	 *            device containing the initiator port (see table 389).
-	 *    01b     Initiator port is identified using the world wide unique
-	 *            initiator port identifier (see table 390).10b to 11b
-	 *	      Reserved
-	 */
+	 
 	if ((format_code != 0x00) && (format_code != 0x40)) {
 		printk(KERN_ERR "Illegal format code: 0x%02x for iSCSI"
 			" Initiator Transport ID\n", format_code);
 		return NULL;
 	}
-	/*
-	 * If the caller wants the TransportID Length, we set that value for the
-	 * entire iSCSI Tarnsport ID now.
-	 */
+	 
 	if (out_tid_len != NULL) {
 		add_len = ((buf[2] >> 8) & 0xff);
 		add_len |= (buf[3] & 0xff);
 
 		tid_len = strlen((char *)&buf[4]);
-		tid_len += 4; /* Add four bytes for iSCSI Transport ID header */
-		tid_len += 1; /* Add one byte for NULL terminator */
+		tid_len += 4;  
+		tid_len += 1;  
 		padding = ((-tid_len) & 3);
 		if (padding != 0)
 			tid_len += padding;
@@ -286,11 +185,7 @@ char *lio_tpg_parse_pr_out_transport_id(
 		} else
 			*out_tid_len = (add_len + 4);
 	}
-	/*
-	 * Check for ',i,0x' seperator between iSCSI Name and iSCSI Initiator
-	 * Session ID as defined in Table 390 - iSCSI initiator port TransportID
-	 * format.
-	 */
+	 
 	if (format_code == 0x40) {
 		p = strstr((char *)&buf[4], ",i,0x");
 		if (!(p)) {
@@ -299,16 +194,11 @@ char *lio_tpg_parse_pr_out_transport_id(
 				(char *)&buf[4]);
 			return NULL;
 		}
-		*p = '\0'; /* Terminate iSCSI Name */
-		p += 5; /* Skip over ",i,0x" seperator */
+		*p = '\0';  
+		p += 5;  
 
 		*port_nexus_ptr = p;
-		/*
-		 * Go ahead and do the lower case conversion of the received
-		 * 12 ASCII characters representing the ISID in the TransportID
-		 * for comparision against the running iSCSI session's ISID from
-		 * iscsi_target.c:lio_sess_get_initiator_sid()
-		 */
+		 
 		for (i = 0; i < 12; i++) {
 			if (isdigit(*p)) {
 				p++;
@@ -370,12 +260,6 @@ void lio_tpg_release_fabric_acl(
 	kfree(acl);
 }
 
-/*
- * Called with spin_lock_bh(se_portal_group_t->session_lock) held..
- *
- * Also, this function calls iscsi_inc_session_usage_count() on the
- * iscsi_session_t in question.
- */
 int lio_tpg_shutdown_session(se_session_t *se_sess)
 {
 	iscsi_session_t *sess = (iscsi_session_t *)se_sess->fabric_sess_ptr;
@@ -396,17 +280,10 @@ int lio_tpg_shutdown_session(se_session_t *se_sess)
 	return 1;
 }
 
-/*
- * Calls iscsi_dec_session_usage_count() as inverse of
- * lio_tpg_shutdown_session()
- */
 void lio_tpg_close_session(se_session_t *se_sess)
 {
 	iscsi_session_t *sess = (iscsi_session_t *)se_sess->fabric_sess_ptr;
-	/*
-	 * If the iSCSI Session for the iSCSI Initiator Node exists,
-	 * forcefully shutdown the iSCSI NEXUS.
-	 */
+	 
 	iscsi_stop_session(sess, 1, 1);
 	iscsi_dec_session_usage_count(sess);
 	iscsi_close_session(sess);
@@ -434,7 +311,7 @@ u32 lio_tpg_get_inst_index(se_portal_group_t *se_tpg)
 
 	return tpg->tpg_tiqn->tiqn_index;
 }
-#endif /* SNMP_SUPPORT */
+#endif  
 
 void lio_set_default_node_attributes(se_node_acl_t *se_acl)
 {
@@ -498,7 +375,7 @@ iscsi_portal_group_t *core_alloc_portal_group(iscsi_tiqn_t *tiqn, u16 tpgt)
 	init_MUTEX(&tpg->np_login_sem);
 	spin_lock_init(&tpg->tpg_state_lock);
 	spin_lock_init(&tpg->tpg_np_lock);
-	tpg->sid        = 1; /* First Assigned LIO-Target Session ID */
+	tpg->sid        = 1;  
 
 	return tpg;
 }
@@ -524,7 +401,7 @@ int core_load_discovery_tpg(void)
 		return -1;
 	}
 
-	tpg->sid        = 1; /* First Assigned LIO Session ID */
+	tpg->sid        = 1;  
 	INIT_LIST_HEAD(&tpg->tpg_gnp_list);
 	INIT_LIST_HEAD(&tpg->g_tpg_list);
 	INIT_LIST_HEAD(&tpg->tpg_list);
@@ -537,12 +414,7 @@ int core_load_discovery_tpg(void)
 
 	if (iscsi_create_default_params(&tpg->param_list) < 0)
 		goto out;
-	/*
-	 * By default we disable authentication for discovery sessions,
-	 * this can be changed with:
-	 *
-	 * /sys/kernel/config/target/iscsi/discovery_auth/enforce_discovery_auth
-	 */
+	 
 	param = iscsi_find_param_from_key(AUTHMETHOD, tpg->param_list);
 	if (!(param))
 		goto out;
@@ -623,10 +495,6 @@ int iscsi_get_tpg(
 	return ((ret != 0) || signal_pending(current)) ? -1 : 0;
 }
 
-/*	iscsi_put_tpg():
- *
- *
- */
 void iscsi_put_tpg(iscsi_portal_group_t *tpg)
 {
 	up(&tpg->tpg_access_sem);
@@ -646,10 +514,6 @@ static void iscsi_clear_tpg_np_login_thread(
 	return;
 }
 
-/*	iscsi_clear_tpg_np_login_threads():
- *
- *
- */
 void iscsi_clear_tpg_np_login_threads(
 	iscsi_portal_group_t *tpg,
 	int shutdown)
@@ -669,19 +533,11 @@ void iscsi_clear_tpg_np_login_threads(
 	spin_unlock(&tpg->tpg_np_lock);
 }
 
-/*	iscsi_tpg_dump_params():
- *
- *
- */
 void iscsi_tpg_dump_params(iscsi_portal_group_t *tpg)
 {
 	iscsi_print_params(tpg->param_list);
 }
 
-/*	iscsi_tpg_free_network_portals():
- *
- *
- */
 static void iscsi_tpg_free_network_portals(iscsi_portal_group_t *tpg)
 {
 	iscsi_np_t *np;
@@ -730,10 +586,6 @@ static void iscsi_tpg_free_network_portals(iscsi_portal_group_t *tpg)
 	spin_unlock(&tpg->tpg_np_lock);
 }
 
-/*	iscsi_set_default_tpg_attribs():
- *
- *
- */
 static void iscsi_set_default_tpg_attribs(iscsi_portal_group_t *tpg)
 {
 	iscsi_tpg_attrib_t *a = &tpg->tpg_attrib;
@@ -749,10 +601,6 @@ static void iscsi_set_default_tpg_attribs(iscsi_portal_group_t *tpg)
 	a->cache_core_nps = TA_CACHE_CORE_NPS;
 }
 
-/*	iscsi_tpg_add_portal_group():
- *
- *
- */
 int iscsi_tpg_add_portal_group(iscsi_tiqn_t *tiqn, iscsi_portal_group_t *tpg)
 {
 	if (tpg->tpg_state != TPG_STATE_FREE) {
@@ -865,10 +713,6 @@ void iscsi_tpg_deactive_portal_group(iscsi_portal_group_t* tpg)
 }
 #endif
 
-/*	iscsi_tpg_enable_portal_group():
- *
- *
- */
 int iscsi_tpg_enable_portal_group(iscsi_portal_group_t *tpg)
 {
 	iscsi_param_t *param;
@@ -881,11 +725,7 @@ int iscsi_tpg_enable_portal_group(iscsi_portal_group_t *tpg)
 		spin_unlock(&tpg->tpg_state_lock);
 		return -EINVAL;
 	}
-	/*
-	 * Make sure that AuthMethod does not contain None as an option
-	 * unless explictly disabled.  Set the default to CHAP if authentication
-	 * is enforced (as per default), and remove the NONE option.
-	 */
+	 
 	param = iscsi_find_param_from_key(AUTHMETHOD, tpg->param_list);
 	if (!(param)) {
 		spin_unlock(&tpg->tpg_state_lock);
@@ -918,10 +758,6 @@ int iscsi_tpg_enable_portal_group(iscsi_portal_group_t *tpg)
 	return 0;
 }
 
-/*	iscsi_tpg_disable_portal_group():
- *
- *
- */
 int iscsi_tpg_disable_portal_group(iscsi_portal_group_t *tpg, int force)
 {
 	iscsi_tiqn_t *tiqn = tpg->tpg_tiqn;
@@ -962,10 +798,6 @@ int iscsi_tpg_disable_portal_group(iscsi_portal_group_t *tpg, int force)
 	return 0;
 }
 
-/*	iscsi_tpg_add_initiator_node_acl():
- *
- *
- */
 iscsi_node_acl_t *iscsi_tpg_add_initiator_node_acl(
 	iscsi_portal_group_t *tpg,
 	const char *initiatorname,
@@ -981,17 +813,11 @@ iscsi_node_acl_t *iscsi_tpg_add_initiator_node_acl(
 	return (iscsi_node_acl_t *)se_nacl->fabric_acl_ptr;
 }
 
-/*	iscsi_tpg_del_initiator_node_acl():
- *
- *
- */
 void iscsi_tpg_del_initiator_node_acl(
 	iscsi_portal_group_t *tpg,
 	se_node_acl_t *se_nacl)
 {
-	/*
-	 * TPG_TFO(tpg)->tpg_release_acl() will kfree the iscsi_node_acl_t..
-	 */
+	 
 	core_tpg_del_initiator_node_acl(tpg->tpg_se_tpg, se_nacl, 1);
 }
 
@@ -1025,10 +851,6 @@ iscsi_tpg_np_t *iscsi_tpg_locate_child_np(
 	return NULL;
 }
 
-/*	iscsi_tpg_add_network_portal():
- *
- *
- */
 iscsi_tpg_np_t *iscsi_tpg_add_network_portal(
 	iscsi_portal_group_t *tpg,
 	iscsi_np_addr_t *np_addr,
@@ -1051,9 +873,7 @@ iscsi_tpg_np_t *iscsi_tpg_add_network_portal(
 		ip_buf = &buf_ipv4[0];
 		ip = (void *)&np_addr->np_ipv4;
 	}
-	/*
-	 * If the Network Portal does not currently exist, start it up now.
-	 */
+	 
 	np = core_get_np(ip, np_addr->np_port, network_transport);
 	if (!(np)) {
 		np = core_add_np(np_addr, network_transport, &ret);
@@ -1069,7 +889,7 @@ iscsi_tpg_np_t *iscsi_tpg_add_network_portal(
 	}
 #ifdef SNMP_SUPPORT
 	tpg_np->tpg_np_index	= iscsi_get_new_index(ISCSI_PORTAL_INDEX);
-#endif /* SNMP_SUPPORT */
+#endif  
 	INIT_LIST_HEAD(&tpg_np->tpg_np_list);
 	INIT_LIST_HEAD(&tpg_np->tpg_np_child_list);
 	INIT_LIST_HEAD(&tpg_np->tpg_np_parent_list);
@@ -1143,9 +963,6 @@ static int iscsi_tpg_release_np(
 	tpg_np->tpg = NULL;
 	kfree(tpg_np);
 
-	/*
-	 * Shutdown Network Portal when last TPG reference is released.
-	 */
 	spin_lock(&np->np_state_lock);
 	if ((--np->np_exports == 0) && !(ISCSI_TPG_ATTRIB(tpg)->cache_core_nps))
 		atomic_set(&np->np_shutdown, 1);
@@ -1161,10 +978,6 @@ static int iscsi_tpg_release_np(
 	return 0;
 }
 
-/*	iscsi_tpg_del_network_portal():
- *
- *
- */
 int iscsi_tpg_del_network_portal(
 	iscsi_portal_group_t *tpg,
 	iscsi_tpg_np_t *tpg_np)
@@ -1181,11 +994,7 @@ int iscsi_tpg_del_network_portal(
 	}
 
 	if (!tpg_np->tpg_np_parent) {
-		/*
-		 * We are the parent tpg network portal.  Release all of the
-		 * child tpg_np's (eg: the non ISCSI_TCP ones) on our parent
-		 * list first.
-		 */
+		 
 		list_for_each_entry_safe(tpg_np_child, tpg_np_child_tmp,
 				&tpg_np->tpg_np_parent_list,
 				tpg_np_child_list) {
@@ -1195,10 +1004,7 @@ int iscsi_tpg_del_network_portal(
 					" failed: %d\n", ret);
 		}
 	} else {
-		/*
-		 * We are not the parent ISCSI_TCP tpg network portal.  Release
-		 * our own network portals from the child list.
-		 */
+		 
 		spin_lock(&tpg_np->tpg_np_parent->tpg_np_parent_lock);
 		list_del(&tpg_np->tpg_np_child_list);
 		spin_unlock(&tpg_np->tpg_np_parent->tpg_np_parent_lock);
@@ -1214,10 +1020,6 @@ int iscsi_tpg_del_network_portal(
 	return iscsi_tpg_release_np(tpg_np, tpg, np);
 }
 
-/*	iscsi_tpg_set_initiator_node_queue_depth():
- *
- *
- */
 int iscsi_tpg_set_initiator_node_queue_depth(
 	iscsi_portal_group_t *tpg,
 	unsigned char *initiatorname,
@@ -1228,10 +1030,6 @@ int iscsi_tpg_set_initiator_node_queue_depth(
 		initiatorname, queue_depth, force);
 }
 
-/*	iscsi_ta_authentication():
- *
- *
- */
 int iscsi_ta_authentication(iscsi_portal_group_t *tpg, u32 authentication)
 {
 	unsigned char buf1[256], buf2[256], *none = NULL;
@@ -1295,10 +1093,6 @@ out:
 	return 0;
 }
 
-/*	iscsi_ta_login_timeout():
- *
- *
- */
 int iscsi_ta_login_timeout(
 	iscsi_portal_group_t *tpg,
 	u32 login_timeout)
@@ -1322,10 +1116,6 @@ int iscsi_ta_login_timeout(
 	return 0;
 }
 
-/*	iscsi_ta_netif_timeout():
- *
- *
- */
 int iscsi_ta_netif_timeout(
 	iscsi_portal_group_t *tpg,
 	u32 netif_timeout)
@@ -1483,10 +1273,6 @@ void iscsi_disable_tpgs(iscsi_tiqn_t *tiqn)
 	spin_unlock(&tiqn->tiqn_tpg_lock);
 }
 
-/*	iscsi_disable_all_tpgs():
- *
- *
- */
 void iscsi_disable_all_tpgs(void)
 {
 	iscsi_tiqn_t *tiqn;
@@ -1522,10 +1308,6 @@ void iscsi_remove_tpgs(iscsi_tiqn_t *tiqn)
 	spin_unlock(&tiqn->tiqn_tpg_lock);
 }
 
-/*	iscsi_remove_all_tpgs():
- *
- *
- */
 void iscsi_remove_all_tpgs(void)
 {
 	iscsi_tiqn_t *tiqn;

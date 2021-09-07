@@ -1,28 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  iscsi_target_configfs.c
- *
- * This file contains the configfs implementation for iSCSI Target mode
- * from the LIO-Target Project.
- *
- * Copyright (c) 2008-2009 Rising Tide, Inc.
- * Copyright (c) 2008-2009 Linux-iSCSI.org
- *
- * Copyright (c) 2008-2009 Nicholas A. Bellinger <nab@linux-iscsi.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- ****************************************************************************/
-
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/version.h>
@@ -56,7 +35,7 @@
 #include <iscsi_target.h>
 #ifdef SNMP_SUPPORT
 #include <iscsi_target_mib.h>
-#endif /* SNMP_SUPPORT */
+#endif  
 #include <iscsi_target_configfs.h>
 
 struct target_fabric_configfs *lio_target_fabric_configfs;
@@ -89,8 +68,6 @@ iscsi_portal_group_t *lio_get_tpg_from_tpg_item(
 	*tiqn_out = tpg->tpg_tiqn;
 	return tpg;
 }
-
-/* Start items for lio_target_portal_cit */
 
 static ssize_t lio_target_show_np_info(void *p, char *page)
 {
@@ -237,10 +214,6 @@ static struct config_item_type lio_target_portal_cit = {
 	.ct_owner	= THIS_MODULE,
 };
 
-/* Stop items for lio_target_portal_cit */
-
-/* Start items for lio_target_np_cit */
-
 #define MAX_PORTAL_LEN		256
 
 static struct config_group *lio_target_call_addnptotpg(
@@ -289,17 +262,17 @@ static struct config_group *lio_target_call_addnptotpg(
 				" in IPv6 iSCSI network portal address\n");
 			return ERR_PTR(-EINVAL);
 		}
-		str++; /* Skip over leading "[" */
-		*str2 = '\0'; /* Terminate the IPv6 address */
-		str2 += 1; /* Skip over the "]" */
+		str++;  
+		*str2 = '\0';  
+		str2 += 1;  
 		port_str = strstr(str2, ":");
 		if (!(port_str)) {
 			printk(KERN_ERR "Unable to locate \":port\""
 				" in IPv6 iSCSI network portal address\n");
 			return ERR_PTR(-EINVAL);
 		}
-		*port_str = '\0'; /* Terminate string for IP */
-		port_str += 1; /* Skip over ":" */
+		*port_str = '\0';  
+		port_str += 1;  
 		np_addr.np_port = simple_strtoul(port_str, &end_ptr, 0);
 
 		snprintf(np_addr.np_ipv6, IPV6_ADDRESS_SPACE, "%s", str);
@@ -312,8 +285,8 @@ static struct config_group *lio_target_call_addnptotpg(
 				" in IPv4 iSCSI network portal address\n");
 			return ERR_PTR(-EINVAL);
 		}
-		*port_str = '\0'; /* Terminate string for IP */
-		port_str += 1; /* Skip over ":" */
+		*port_str = '\0';  
+		port_str += 1;  
 		np_addr.np_port = simple_strtoul(port_str, &end_ptr, 0);
 
 		ipv4 = in_aton(ip_str);
@@ -330,19 +303,6 @@ static struct config_group *lio_target_call_addnptotpg(
 		" PORTAL: %s\n", config_item_name(tiqn_ci), tpg->tpgt, name);
 #endif
 
-	/*
-	 * Assume ISCSI_TCP by default.  Other network portals for other
-	 * iSCSI fabrics:
-	 *
-	 * Traditional iSCSI over SCTP (initial support)
-	 * iSER/TCP (TODO, hardware available)
-	 * iSER/SCTP (TODO, software emulation with osc-iwarp)
-	 * iSER/IB (TODO, hardware available)
-	 *
-	 * can be enabled with atributes under
-	 * sys/kernel/config/iscsi/$IQN/$TPG/np/$IP:$PORT/
-	 *
-	 */
 	tpg_np = iscsi_tpg_add_network_portal(tpg, &np_addr, NULL, ISCSI_TCP);
 	if (IS_ERR(tpg_np)) {
 		iscsi_put_tpg(tpg);
@@ -427,10 +387,6 @@ static struct config_item_type lio_target_np_cit = {
 	.ct_owner	= THIS_MODULE,
 };
 
-/* End items for lio_target_np_cit */
-
-/* Start items for lio_target_port_cit */
-
 CONFIGFS_EATTR_STRUCT(lio_target_port, se_lun_s);
 #define LIO_PORT_ATTR(_name, _mode)					\
 static struct lio_target_port_attribute lio_target_port_##_name =	\
@@ -443,9 +399,6 @@ static struct lio_target_port_attribute lio_target_port_##_name =	\
 	__CONFIGFS_EATTR_RO(_name,					\
 	lio_target_port_show_attr_##_name);
 
-/*
- * alua_tg_pt_gp
- */
 static ssize_t lio_target_port_show_attr_alua_tg_pt_gp(
 	struct se_lun_s *lun,
 	char *page)
@@ -469,9 +422,6 @@ static ssize_t lio_target_port_store_attr_alua_tg_pt_gp(
 
 LIO_PORT_ATTR(alua_tg_pt_gp, S_IRUGO | S_IWUSR);
 
-/*
- * alua_tg_pt_offline
- */
 static ssize_t lio_target_port_show_attr_alua_tg_pt_offline(
 	struct se_lun_s *lun,
 	char *page)
@@ -495,9 +445,6 @@ static ssize_t lio_target_port_store_attr_alua_tg_pt_offline(
 
 LIO_PORT_ATTR(alua_tg_pt_offline, S_IRUGO | S_IWUSR);
 
-/*
- * alua_tg_pt_status
- */
 static ssize_t lio_target_port_show_attr_alua_tg_pt_status(
 	struct se_lun_s *lun,
 	char *page)
@@ -521,9 +468,6 @@ static ssize_t lio_target_port_store_attr_alua_tg_pt_status(
 
 LIO_PORT_ATTR(alua_tg_pt_status, S_IRUGO | S_IWUSR);
 
-/*
- * alua_tg_pt_write_md
- */
 static ssize_t lio_target_port_show_attr_alua_tg_pt_write_md(
 	struct se_lun_s *lun,
 	char *page)
@@ -682,10 +626,6 @@ static struct config_item_type lio_target_port_cit = {
 	.ct_owner		= THIS_MODULE,
 };
 
-/* End items for lio_target_port_cit */
-
-/* Start items for lio_target_lun_cit */
-
 static struct config_group *lio_target_lun_make_group(
 	struct config_group *group,
 	const char *name)
@@ -703,7 +643,7 @@ static struct config_group *lio_target_lun_make_group(
 				" \"lun_$LUN_NUMBER\"\n");
 		return NULL;
 	}
-	str++; /* Advance over _ delim.. */
+	str++;  
 	lun = simple_strtoul(str, &endptr, 0);
 
 	lun_ci = &group->cg_item;
@@ -799,10 +739,6 @@ static struct config_item_type lio_target_lun_cit = {
 	.ct_owner	= THIS_MODULE,
 };
 
-/* End items for lio_target_lun_cit */
-
-/* Start items for lio_target_nacl_attrib_cit */
-
 #define DEF_NACL_ATTRIB(name)						\
 static ssize_t lio_target_show_nacl_attrib_##name(			\
 	struct iscsi_node_attrib_s *na,					\
@@ -833,60 +769,37 @@ static ssize_t lio_target_store_nacl_attrib_##name(			\
 	return count;							\
 }
 
-/*
- * Define the iSCSI Node attributes using hybrid wrappers from
- * include/linux/configfs.h
- */
 CONFIGFS_EATTR_STRUCT(iscsi_node_attrib, iscsi_node_attrib_s);
 #define NACL_ATTR(_name, _mode)						\
 static struct iscsi_node_attrib_attribute iscsi_node_attrib_##_name =	\
 		__CONFIGFS_EATTR(_name, _mode,				\
 		lio_target_show_nacl_attrib_##_name,			\
 		lio_target_store_nacl_attrib_##_name);
-/*
- * Define iscsi_node_attrib_s_dataout_timeout
- */
+ 
 DEF_NACL_ATTRIB(dataout_timeout);
 NACL_ATTR(dataout_timeout, S_IRUGO | S_IWUSR);
-/*
- * Define iscsi_node_attrib_s_dataout_timeout_retries
- */
+ 
 DEF_NACL_ATTRIB(dataout_timeout_retries);
 NACL_ATTR(dataout_timeout_retries, S_IRUGO | S_IWUSR);
-/*
- * Define iscsi_node_attrib_s_default_erl
- */
+ 
 DEF_NACL_ATTRIB(default_erl);
 NACL_ATTR(default_erl, S_IRUGO | S_IWUSR);
-/*
- * Define iscsi_node_attrib_s_nopin_timeout
- */
+ 
 DEF_NACL_ATTRIB(nopin_timeout);
 NACL_ATTR(nopin_timeout, S_IRUGO | S_IWUSR);
-/*
- * Define iscsi_node_attrib_s_nopin_response_timeout
- */
+ 
 DEF_NACL_ATTRIB(nopin_response_timeout);
 NACL_ATTR(nopin_response_timeout, S_IRUGO | S_IWUSR);
-/*
- * Define iscsi_node_attrib_s_random_datain_pdu_offsets
- */
+ 
 DEF_NACL_ATTRIB(random_datain_pdu_offsets);
 NACL_ATTR(random_datain_pdu_offsets, S_IRUGO | S_IWUSR);
-/*
- * Define iscsi_node_attrib_s_random_datain_seq_offsets
- */
+ 
 DEF_NACL_ATTRIB(random_datain_seq_offsets);
 NACL_ATTR(random_datain_seq_offsets, S_IRUGO | S_IWUSR);
-/*
- * Define iscsi_node_attrib_s_random_r2t_offsets
- */
+ 
 DEF_NACL_ATTRIB(random_r2t_offsets);
 NACL_ATTR(random_r2t_offsets, S_IRUGO | S_IWUSR);
-/*
- * Finally, define functions iscsi_node_attrib_s_attr_show() and
- * iscsi_node_attrib_s_attr_store() for lio_target_nacl_attrib_ops below..
- */
+ 
 CONFIGFS_EATTR_OPS(iscsi_node_attrib, iscsi_node_attrib_s, acl_attrib_group);
 
 static struct configfs_attribute *lio_target_nacl_attrib_attrs[] = {
@@ -911,10 +824,6 @@ static struct config_item_type lio_target_nacl_attrib_cit = {
 	.ct_attrs	= lio_target_nacl_attrib_attrs,
 	.ct_owner	= THIS_MODULE,
 };
-
-/* End items for lio_target_nacl_attrib_cit */
-
-/* Start items for lio_target_nacl_auth_cit */
 
 #define DEF_NACL_AUTH_STR(name, flags)					\
 static ssize_t lio_target_show_nacl_auth_##name(			\
@@ -976,29 +885,19 @@ static struct iscsi_node_auth_attribute iscsi_node_auth_##_name =	\
 static struct iscsi_node_auth_attribute iscsi_node_auth_##_name =	\
 		__CONFIGFS_EATTR_RO(_name,				\
 		lio_target_show_nacl_auth_##_name);
-/*
- * One-way authentication userid
- */
+ 
 DEF_NACL_AUTH_STR(userid, NAF_USERID_SET);
 AUTH_ATTR(userid, S_IRUGO | S_IWUSR);
-/*
- * One-way authentication password
- */
+ 
 DEF_NACL_AUTH_STR(password, NAF_PASSWORD_SET);
 AUTH_ATTR(password, S_IRUGO | S_IWUSR);
-/*
- * Enforce mutual authentication
- */
+ 
 DEF_NACL_AUTH_INT(authenticate_target);
 AUTH_ATTR_RO(authenticate_target);
-/*
- * Mutual authentication userid
- */
+ 
 DEF_NACL_AUTH_STR(userid_mutual, NAF_USERID_IN_SET);
 AUTH_ATTR(userid_mutual, S_IRUGO | S_IWUSR);
-/*
- * Mutual authentication password
- */
+ 
 DEF_NACL_AUTH_STR(password_mutual, NAF_PASSWORD_IN_SET);
 AUTH_ATTR(password_mutual, S_IRUGO | S_IWUSR);
 
@@ -1023,10 +922,6 @@ static struct config_item_type lio_target_nacl_auth_cit = {
 	.ct_attrs	= lio_target_nacl_auth_attrs,
 	.ct_owner	= THIS_MODULE,
 };
-
-/* End items for lio_target_nacl_auth_cit */
-
-/* Start items for lio_target_nacl_param_cit */
 
 #define DEF_NACL_PARAM(name)						\
 static ssize_t lio_target_show_nacl_param_##name(			\
@@ -1119,10 +1014,6 @@ static struct config_item_type lio_target_nacl_param_cit = {
 	.ct_owner	= THIS_MODULE,
 };
 
-/* End items for lio_target_nacl_param_cit */
-
-/* Start items for lio_target_initiator_cit */
-
 static int lio_target_initiator_lacl_link(
 	struct config_item *lun_acl_ci,
 	struct config_item *lun_ci)
@@ -1161,9 +1052,6 @@ static int lio_target_initiator_lacl_link(
 		return -EINVAL;
 	}
 
-	/*
-	 * Make sure the SymLink is going to the same iscsi/$IQN/$TPGT
-	 */
 	if (strcmp(config_item_name(tiqn_ci), config_item_name(tiqn_ci_s))) {
 		printk(KERN_ERR "Illegal Initiator ACL SymLink outside of %s\n",
 			config_item_name(tiqn_ci));
@@ -1175,10 +1063,7 @@ static int lio_target_initiator_lacl_link(
 			config_item_name(tpg_ci));
 		return -EINVAL;
 	}
-	/*
-	 * Now that we have validated the iscsi/$IQN/$TPGT patch,
-	 * grab the se_lun_t
-	 */
+	 
 	lacl = container_of(to_config_group(lun_acl_ci), se_lun_acl_t,
 			se_lun_group);
 	if (!(lacl)) {
@@ -1195,12 +1080,6 @@ static int lio_target_initiator_lacl_link(
 	if (!(tpg))
 		return -EINVAL;
 
-	/*
-	 * If this iscsi_node_acl was dynamically generated with
-	 * tpg_1/attrib/generate_node_acls=1, use the existing deve->lun_flags,
-	 * which be will write protected (READ-ONLY) when
-	 * tpg_1/attrib/demo_mode_write_protect=1
-	 */
 	spin_lock_bh(&lacl->se_lun_nacl->device_list_lock);
 	deve = &lacl->se_lun_nacl->device_list[lacl->mapped_lun];
 	if (deve->lun_flags & TRANSPORT_LUNFLAGS_INITIATOR_ACCESS)
@@ -1211,12 +1090,6 @@ static int lio_target_initiator_lacl_link(
 			TRANSPORT_LUNFLAGS_READ_WRITE;
 	spin_unlock_bh(&lacl->se_lun_nacl->device_list_lock);
 
-	/*
-	 * Determine the actual mapped LUN value user wants..
-	 *
-	 * This value is what the iSCSI Initiator actually sees the
-	 * iscsi/$IQN/$TPGT/lun/lun_* as on their iSCSI Initiator Ports.
-	 */
 	ret = core_dev_add_initiator_node_lun_acl(tpg->tpg_se_tpg, lacl,
 				lun->unpacked_lun, lun_access);
 	if (ret < 0)
@@ -1297,9 +1170,6 @@ out:
 	return ret;
 }
 
-/*
- * Define the LUN ACL Attributes using configfs extended attributes.
- */
 CONFIGFS_EATTR_STRUCT(lio_target_lacl, se_lun_acl_s);
 #define LACL_ATTR(_name, _mode)					\
 static struct lio_target_lacl_attribute lacl_attrib_##_name =	\
@@ -1418,23 +1288,17 @@ static struct config_group *lio_target_initiator_lacl_make_group(
 		goto out;
 	}
 	snprintf(buf, strlen(name) + 1, "%s", name);
-	/*
-	 * Make sure user is creating iscsi/$IQN/$TPGT/acls/$INITIATOR/lun_$ID.
-	 */
+	 
 	ptr = strstr(buf, "lun_");
 	if (!(ptr)) {
 		printk(KERN_ERR "Unable to locate \"lun_\" from buf: %s"
 			" name: %s\n", buf, name);
 		goto out;
 	}
-	ptr += 3; /* Skip to "_" */
-	*ptr = '\0'; /* Terminate the string */
-	ptr++; /* Advance pointer to next characater */
+	ptr += 3;  
+	*ptr = '\0';  
+	ptr++;  
 
-	/*
-	 * Determine the Mapped LUN value.  This is what the iSCSI Initiator
-	 * will actually see.
-	 */
 	mapped_lun = simple_strtoul(ptr, &endptr, 0);
 
 	lacl = core_dev_init_initiator_node_lun_acl(tpg->tpg_se_tpg,
@@ -1689,9 +1553,6 @@ static ssize_t lio_target_initiator_nacl_cmdsn_window_store(
 	if (!(tpg))
 		return -EINVAL;
 
-	/*
-	 * iscsi_tpg_set_initiator_node_queue_depth() assumes force=1
-	 */
 	ret = iscsi_tpg_set_initiator_node_queue_depth(tpg,
 				config_item_name(acl_ci), cmdsn_depth, 1);
 
@@ -1785,10 +1646,6 @@ static struct config_item_type lio_target_initiator_cit = {
 	.ct_owner		= THIS_MODULE,
 };
 
-/* End items for lio_target_initiator_cit */
-
-/* Start items for lio_target_acl_cit */
-
 static struct config_group *lio_target_call_addnodetotpg(
 	struct config_group *group,
 	const char *name)
@@ -1822,11 +1679,7 @@ static struct config_group *lio_target_call_addnodetotpg(
 	tpg = lio_get_tpg_from_tpg_item(tpg_ci, &tiqn);
 	if (!(tpg))
 		return NULL;
-	/*
-	 * ISCSI_TPG_ATTRIB(tpg)->default_cmdsn is used for the default.
-	 * This can be changed in either with or without an active session.
-	 * $FABRIC/$IQN/$TPGT/acl/$INITIATOR_IQN/cmdsn_depth
-	 */
+	 
 	cmdsn_depth = ISCSI_TPG_ATTRIB(tpg)->default_cmdsn_depth;
 
 	acl = iscsi_tpg_add_initiator_node_acl(tpg, name, cmdsn_depth);
@@ -1838,9 +1691,6 @@ static struct config_group *lio_target_call_addnodetotpg(
 	nattr = &acl->node_attrib;
 	auth = &acl->node_auth;
 
-	/*
-	 * Create the default groups for iscsi_node_acl_t
-	 */
 	nacl_cg->default_groups = kzalloc(sizeof(struct config_group) * 4,
 			GFP_KERNEL);
 	if (!(nacl_cg->default_groups))
@@ -1937,10 +1787,6 @@ static struct config_item_type lio_target_acl_cit = {
 	.ct_owner	= THIS_MODULE,
 };
 
-/* End items for lio_target_acl_cit */
-
-/* Start items for lio_target_tpg_attrib_cit */
-
 #define DEF_TPG_ATTRIB(name)						\
 									\
 static ssize_t lio_target_show_tpg_attrib_##name(			\
@@ -1989,10 +1835,6 @@ out:									\
 	return ret;							\
 }
 
-/*
- * Define the iSCSI TPG attributes using hybrid wrappers from
- * include/linux/configfs.h
- */
 CONFIGFS_EATTR_STRUCT(iscsi_tpg_attrib, iscsi_tpg_attrib_s);
 #define TPG_ATTR(_name, _mode)						\
 static struct iscsi_tpg_attrib_attribute iscsi_tpg_attrib_##_name =	\
@@ -2000,51 +1842,30 @@ static struct iscsi_tpg_attrib_attribute iscsi_tpg_attrib_##_name =	\
 		lio_target_show_tpg_attrib_##_name,			\
 		lio_target_store_tpg_attrib_##_name);
 
-/*
- * Define iscsi_tpg_attrib_s_authentication
- */
 DEF_TPG_ATTRIB(authentication);
 TPG_ATTR(authentication, S_IRUGO | S_IWUSR);
-/*
- * Define iscsi_tpg_attrib_s_login_timeout
- */
+ 
 DEF_TPG_ATTRIB(login_timeout);
 TPG_ATTR(login_timeout, S_IRUGO | S_IWUSR);
-/*
- * Define iscsi_tpg_attrib_s_netif_timeout
- */
+ 
 DEF_TPG_ATTRIB(netif_timeout);
 TPG_ATTR(netif_timeout, S_IRUGO | S_IWUSR);
-/*
- * Define iscsi_tpg_attrib_s_generate_node_acls
- */
+ 
 DEF_TPG_ATTRIB(generate_node_acls);
 TPG_ATTR(generate_node_acls, S_IRUGO | S_IWUSR);
-/*
- * Define iscsi_tpg_attrib_s_default_cmdsn_depth
- */
+ 
 DEF_TPG_ATTRIB(default_cmdsn_depth);
 TPG_ATTR(default_cmdsn_depth, S_IRUGO | S_IWUSR);
-/*
- Define iscsi_tpg_attrib_s_cache_dynamic_acls
- */
+ 
 DEF_TPG_ATTRIB(cache_dynamic_acls);
 TPG_ATTR(cache_dynamic_acls, S_IRUGO | S_IWUSR);
-/*
- * Define iscsi_tpg_attrib_s_demo_mode_write_protect
- */
+ 
 DEF_TPG_ATTRIB(demo_mode_write_protect);
 TPG_ATTR(demo_mode_write_protect, S_IRUGO | S_IWUSR);
-/*
- * Define iscsi_tpg_attrib_s_prod_mode_write_protect
- */
+ 
 DEF_TPG_ATTRIB(prod_mode_write_protect);
 TPG_ATTR(prod_mode_write_protect, S_IRUGO | S_IWUSR);
 
-/*
- * Finally, define functions iscsi_tpg_attrib_s_attr_show() and
- * iscsi_tpg_attrib_s_attr_store() for lio_target_tpg_attrib_ops below..
- */
 CONFIGFS_EATTR_OPS(iscsi_tpg_attrib, iscsi_tpg_attrib_s, tpg_attrib_group);
 
 static struct configfs_attribute *lio_target_tpg_attrib_attrs[] = {
@@ -2069,10 +1890,6 @@ static struct config_item_type lio_target_tpg_attrib_cit = {
 	.ct_attrs	= lio_target_tpg_attrib_attrs,
 	.ct_owner	= THIS_MODULE,
 };
-
-/* End items for lio_target_tpg_attrib_cit */
-
-/* Start items for lio_target_tpg_param_cit */
 
 #define DEF_TPG_PARAM(name)						\
 static ssize_t lio_target_show_tpg_param_##name(			\
@@ -2114,7 +1931,7 @@ static ssize_t lio_target_store_tpg_param_##name(			\
 	if (!(buf))							\
 		return -ENOMEM;						\
 	snprintf(buf, PAGE_SIZE, "%s=%s", __stringify(name), page);	\
-	buf[strlen(buf)-1] = '\0'; /* Kill newline */			\
+	buf[strlen(buf)-1] = '\0';  			\
 									\
 	tpg = lio_get_tpg_from_tpg_item(				\
 			&tpg_p->tpg_se_tpg->tpg_group.cg_item, &tiqn);	\
@@ -2239,10 +2056,6 @@ static struct config_item_type lio_target_tpg_param_cit = {
 	.ct_attrs	= lio_target_tpg_param_attrs,
 	.ct_owner	= THIS_MODULE,
 };
-
-/* End items for lio_target_tpg_param_cit */
-
-/* Start items for lio_target_tpg_cit */
 
 #ifdef MY_ABC_HERE
 static ssize_t lio_target_show_tpg_conn(void* p, char* page)
@@ -2426,9 +2239,7 @@ static ssize_t lio_target_store_tpg_enable(
 		if (ret < 0)
 			goto out;
 	} else {
-		/*
-		 * iscsi_tpg_disable_portal_group() assumes force=1
-		 */
+		 
 		ret = iscsi_tpg_disable_portal_group(tpg, 1);
 		if (ret < 0)
 			goto out;
@@ -2526,10 +2337,6 @@ static struct config_item_type lio_target_tpg_cit = {
 	.ct_owner	= THIS_MODULE,
 };
 
-/* End items for lio_target_tpg_cit */
-
-/* Start items for lio_target_tiqn_cit */
-
 static struct config_group *lio_target_tiqn_addtpg(
 	struct config_group *group,
 	const char *name)
@@ -2558,17 +2365,14 @@ static struct config_group *lio_target_tiqn_addtpg(
 		printk(KERN_ERR "Unable to locate iscsi_tiqn_t\n");
 		return NULL;
 	}
-	/*
-	 * Only tpgt_# directory groups can be created below
-	 * target/iscsi/iqn.superturodiskarry/
-	*/
+	 
 	tpgt_str = strstr(name, "tpgt_");
 	if (!(tpgt_str)) {
 		printk(KERN_ERR "Unable to locate \"tpgt_#\" directory"
 				" group\n");
 		return NULL;
 	}
-	tpgt_str += 5; /* Skip ahead of "tpgt_" */
+	tpgt_str += 5;  
 	tpgt = (unsigned short int) simple_strtoul(tpgt_str, &end_ptr, 0);
 
 	tpg = core_alloc_portal_group(tiqn, tpgt);
@@ -2582,9 +2386,7 @@ static struct config_group *lio_target_tiqn_addtpg(
 		return NULL;
 
 	tpg_cg = &tpg->tpg_se_tpg->tpg_group;
-	/*
-	 * Create default configfs groups for iscsi_portal_group_t..
-	 */
+	 
 	tpg_cg->default_groups = kzalloc(sizeof(struct config_group) * 6,
 			GFP_KERNEL);
 	if (!(tpg_cg->default_groups))
@@ -2666,7 +2468,7 @@ static void lio_target_tiqn_deltpg(
 			" group\n");
 		return;
 	}
-	tpgt_str += 5; /* Skip ahead of "tpgt_" */
+	tpgt_str += 5;  
 	tpgt = (unsigned short int) simple_strtoul(tpgt_str, &end_ptr, 0);
 
 	se_tpg = container_of(to_config_group(item), se_portal_group_t,
@@ -2681,10 +2483,7 @@ static void lio_target_tiqn_deltpg(
 	printk(KERN_INFO "LIO_Target_ConfigFS: DEREGISTER -> calling"
 			" config_item_put()\n");
 #endif
-	/*
-	 * Release the default groups the fabric module is using for
-	 * se_portal_group_t->tpg_group.
-	 */
+	 
 	tpg_cg = &tpg->tpg_se_tpg->tpg_group;
 	for (i = 0; tpg_cg->default_groups[i]; i++) {
 		df_item = &tpg_cg->default_groups[i]->cg_item;
@@ -2693,9 +2492,7 @@ static void lio_target_tiqn_deltpg(
 	}
 
 	config_item_put(item);
-	/*
-	 * iscsi_tpg_del_portal_group() assumes force=1
-	 */
+	 
 #ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_Target_ConfigFS: DEREGISTER -> Releasing TPG\n");
 #endif
@@ -2713,10 +2510,6 @@ static struct config_item_type lio_target_tiqn_cit = {
 	.ct_attrs	= NULL,
 	.ct_owner	= THIS_MODULE,
 };
-
-/* End items for lio_target_tiqn_cit */
-
-/* Start LIO-Target TIQN struct contig_item lio_target_cit */
 
 static ssize_t lio_target_attr_show(
 	struct config_item *item,
@@ -2804,10 +2597,6 @@ static struct config_item_type lio_target_cit = {
 	.ct_owner	= THIS_MODULE,
 };
 
-/* End LIO-Target TIQN struct contig_lio_target_cit */
-
-/* Start lio_target_discovery_auth_cit */
-
 CONFIGFS_EATTR_STRUCT(iscsi_discovery_auth, iscsi_node_auth_s);
 #define DISC_AUTH_ATTR(_name, _mode)					\
 static struct iscsi_node_auth_attribute iscsi_disc_auth_##_name =	\
@@ -2815,9 +2604,6 @@ static struct iscsi_node_auth_attribute iscsi_disc_auth_##_name =	\
 		lio_target_show_da_attr_##_name,			\
 		lio_target_store_da_attr_##_name);
 
-/*
- * enforce_discovery_auth
- */
 static ssize_t lio_target_show_da_attr_enforce_discovery_auth(
 	struct iscsi_node_auth_s *auth,
 	char *page)
@@ -2855,9 +2641,7 @@ static ssize_t lio_target_store_da_attr_enforce_discovery_auth(
 		return -EINVAL;
 
 	if (op) {
-		/*
-		 * Reset the AuthMethod key to CHAP.
-		 */
+		 
 		if (iscsi_update_param_value(param, CHAP) < 0)
 			return -EINVAL;
 
@@ -2867,9 +2651,7 @@ static ssize_t lio_target_store_da_attr_enforce_discovery_auth(
 			" authentication enforcement for iSCSI"
 			" Discovery TPG\n");
 	} else {
-		/*
-		 * Reset the AuthMethod key to CHAP,None
-		 */
+		 
 		if (iscsi_update_param_value(param, "CHAP,None") < 0)
 			return -EINVAL;
 
@@ -2887,12 +2669,6 @@ DISC_AUTH_ATTR(enforce_discovery_auth, S_IRUGO | S_IWUSR);
 
 CONFIGFS_EATTR_OPS(iscsi_discovery_auth, iscsi_node_auth_s, auth_attrib_group);
 
-/*
- * Note that we reuse some of the same configfs structure defines for
- * iscsi_node_auth from lio_target_nacl_auth_cit for the normal iSCSI
- * Initiator Node authentication here the discovery auth group that lives in
- * iscsi_global_t->discovery_auth
- */
 static struct configfs_attribute *lio_target_discovery_auth_attrs[] = {
 	&iscsi_node_auth_userid.attr,
 	&iscsi_node_auth_password.attr,
@@ -2914,11 +2690,6 @@ static struct config_item_type lio_target_discovery_auth_cit = {
 	.ct_owner	= THIS_MODULE,
 };
 
-/* End lio_target_discovery_auth_cit */
-
-/*
- * Callback for top level fabric module default configfs groups.
- */
 void lio_target_reg_defgroups(struct target_fabric_configfs *fabric)
 {
 	iscsi_node_auth_t *discovery_auth = &iscsi_global->discovery_auth;
@@ -2941,9 +2712,7 @@ int iscsi_target_register_configfs(void)
 				" LIO-Target failed!\n");
 		return -1;
 	}
-	/*
-	 * Setup the fabric API of function pointers used by target_core_mod..
-	 */
+	 
 	fabric->tf_ops.get_fabric_name = &iscsi_get_fabric_name;
 	fabric->tf_ops.get_fabric_proto_ident = &iscsi_get_fabric_proto_ident;
 	fabric->tf_ops.tpg_get_wwn = &lio_tpg_get_endpoint_wwn;
@@ -2963,10 +2732,8 @@ int iscsi_target_register_configfs(void)
 	fabric->tf_ops.tpg_release_fabric_acl = &lio_tpg_release_fabric_acl;
 #ifdef SNMP_SUPPORT
 	fabric->tf_ops.tpg_get_inst_index = &lio_tpg_get_inst_index;
-#endif /* SNMP_SUPPORT */
-	/*
-	 * Use transport_generic_allocate_iovecs from target_core_mod
-	 */
+#endif  
+	 
 	fabric->tf_ops.alloc_cmd_iovecs = &transport_generic_allocate_iovecs;
 	fabric->tf_ops.release_cmd_to_pool = &lio_release_cmd_to_pool;
 	fabric->tf_ops.release_cmd_direct = &lio_release_cmd_direct;
@@ -2977,7 +2744,7 @@ int iscsi_target_register_configfs(void)
 	fabric->tf_ops.sess_logged_in = &lio_sess_logged_in;
 #ifdef SNMP_SUPPORT
 	fabric->tf_ops.sess_get_index = &lio_sess_get_index;
-#endif /* SNMP_SUPPORT */
+#endif  
 	fabric->tf_ops.sess_get_initiator_sid = &lio_sess_get_initiator_sid;
 	fabric->tf_ops.write_pending = &lio_write_pending;
 	fabric->tf_ops.write_pending_status = &lio_write_pending_status;
@@ -2996,14 +2763,7 @@ int iscsi_target_register_configfs(void)
 	fabric->tf_ops.get_fabric_sense_len = &lio_get_fabric_sense_len;
 	fabric->tf_ops.is_state_remove = &iscsi_is_state_remove;
 	fabric->tf_ops.pack_lun = &iscsi_pack_lun;
-	/*
-	 * Setup default configfs group for iSCSI Discovery Authentication.
-	 *
-	 * Note that the tf_cg->default_groups[] will be registered when
-	 * config_group_init_type_name() gets called for fabric->tf_groups
-	 * in the local callback lio_target_reg_defgroups() in generic
-	 * target_core_mod code in target_core_register_fabric().
-	 */
+	 
 	fabric->reg_default_groups_callback = &lio_target_reg_defgroups;
 	tf_cg = &fabric->tf_group;
 

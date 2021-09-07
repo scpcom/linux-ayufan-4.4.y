@@ -1,5 +1,4 @@
-// Copyright (c) 2000-2009 Synology Inc. All rights reserved.
-
+ 
 #include <linux/synobios.h>
 #include "../mapping.h"
 
@@ -44,10 +43,9 @@ extern int syno_cpu_temperature(struct _SynoCpuTemp *pCpuTemp);
  
 #define UART_TTYS_INDEX 1
 
-/* Mapping FAN_SPEED to duty cycle */
 typedef struct _tag_BANDON_FAN_SPEED_MAPPING_ {
 	FAN_SPEED fanSpeed;
-	int       iDutyCycle; // Range [0, 99]
+	int       iDutyCycle;  
 } BANDON_FAN_SPEED_MAPPING;
 
 struct model_ops {

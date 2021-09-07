@@ -1,25 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2003-2008 Takahiro Hirofuchi
- *
- * This is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
- * USA.
- */
-
+ 
 #include "usbip_common.h"
 #include <linux/kthread.h>
 
@@ -27,17 +9,11 @@ static int event_handler(struct usbip_device *ud)
 {
 	usbip_dbg_eh("enter\n");
 
-	/*
-	 * Events are handled by only this thread.
-	 */
 	while (usbip_event_happened(ud)) {
 		usbip_dbg_eh("pending event %lx\n", ud->event);
 
 #ifdef MY_ABC_HERE
-		/*
-		 * USBIP_EH_CLOSE_SOCKET close socket/cleap up urb and 
-		 * leave stub_rx/stub_tx alive.
-         */
+		 
 		if (ud->event & USBIP_EH_CLOSE_SOCKET) {
 			ud->eh_ops.close_connection(ud);
 			ud->eh_ops.cleanup_urb(ud);
@@ -47,10 +23,7 @@ static int event_handler(struct usbip_device *ud)
 			break;
 		}
 #endif
-		/*
-		 * NOTE: shutdown must come first.
-		 * Shutdown the device.
-		 */
+		 
 		if (ud->event & USBIP_EH_SHUTDOWN) {
 			ud->eh_ops.shutdown(ud);
 
@@ -59,11 +32,9 @@ static int event_handler(struct usbip_device *ud)
 			break;
 		}
 
-		/* Stop the error handler. */
 		if (ud->event & USBIP_EH_BYE)
 			return -1;
 
-		/* Reset the device. */
 		if (ud->event & USBIP_EH_RESET) {
 			ud->eh_ops.reset(ud);
 
@@ -72,7 +43,6 @@ static int event_handler(struct usbip_device *ud)
 			break;
 		}
 
-		/* Mark the device as unusable. */
 		if (ud->event & USBIP_EH_UNUSABLE) {
 			ud->eh_ops.unusable(ud);
 
@@ -81,7 +51,6 @@ static int event_handler(struct usbip_device *ud)
 			break;
 		}
 
-		/* NOTREACHED */
 		printk(KERN_ERR "%s: unknown event\n", __func__);
 		return -1;
 	}

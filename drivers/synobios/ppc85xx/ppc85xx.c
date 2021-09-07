@@ -1,11 +1,11 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-// Copyright (c) 2000-2006 Synology Inc. All rights reserved.
+ 
 #include <linux/syno.h>
 #include <linux/module.h>
-#include <linux/kernel.h> /* printk() */
-#include <linux/errno.h>  /* error codes */
+#include <linux/kernel.h>  
+#include <linux/errno.h>   
 #include <linux/delay.h>
 #include <linux/synobios.h>
 #include <linux/fs.h>
@@ -14,103 +14,6 @@
 #include "../mapping.h"
 #include "../rtc/rtc.h"
 
-/* CPLD definition ( 5Bay )
- * Local Bus CS1 : 
- *      Freescale 8241/8245 CPLD mapping to CPU address  0xff00-0000
- *      Freescale 8343/8347 CPLD mapping to CPU address  0xff00-0000
- *      Freescale 8548/8548 CPLD mapping to CPU address  0xf800-0000
- *      Marvell 88F5x81/5x82 CPLD mapping to CPU address  0xf800-0000
- *
- *              offset 0 --> Disk Led Control (R/W)
- *              offset 1 --> Disk 5 and Model register (R/W)
- *              offset 2 --> Memory Type register (RO)
- *              offset 3 --> Fan status (R/W)
- *              offset 4 --> Power status (For Redundant) (RO)
- *
- * Disk Led Control register :
- *              bit 7,6: Disk1 LED
- *              bit 5,4: Disk2 LED
- *              bit 3,2: Disk3 LED
- *              bit 1,0: Disk4 LED
- *                       11: LED Off (default)
- *                       10: Green LED, allow activity blinking from SATA controller
- *                       01: Solid Yellow
- *                       00: Yellow blinking 2 Hz
- *
- * Disk 5 and Model register :
- *              bit 7, 6: Disk5 LED
- *                       11: LED Off (default)
- *                       10: Green LED, allow activity blinking from SATA controller
- *                       01: Solid Yellow
- *                       00: Yellow blinking 2 Hz
- *              bit 5: Alarm LED
- *                       1: LED Off (Backplane is OK)
- * 						 0: Amber LED Flash, low speed
- *              bit 4: Backplane Lock
- *                       1:no Backplane (Alarm LED flash Green, high speed)
- *						 0:Backplane is OK
- *              bit 3-0:
- *                                               0111: DS410
- *                                               0101: DS210p
- *                       			 1110: RS409RPp
- *                       			 1101: RS409p
- *                       			 1100: DS109p
- *                       			 1000: DS110p
- *                       			 1011: DS509p
- *                       			 1010: DS209p
- *                       			 0100: DS209pII
- *                       			 1001: DS409p
- * 						 0110: Redundant RS408
- * 						 0011: DS508
- * 						 0010: RS408
- * 						 0001: DS408
- * 						 0000: Reserved
- *
- * Memory Type register :
- *              bit 7-5: Memory_size & Conf 
- * 					111: DIMM Module
- *              bit 4-2: Reserved
- *              bit 2,1: Revision
- *                       00: CPLD V1.0
- *						 01: CPLD V1.1
- * 						 10: CPLD V2.0
- * 						 11:Sample version
- *
- * Fan Status register :
- *              bit 7,6 --> Reserved
- *              bit 5-4 --> FAN speed
- *						 00: Ultra-Low speed
- *					 	 01: Low speed
- *						 10: middle speed
- *						 11: Full-speed
- *              bit 3 --> EXT_FAN4 status
- *              bit 2 --> EXT_FAN1 status
- *              bit 1 --> EXT_FAN2 status
- *              bit 0 --> EXT_FAN3 status
- *						 1: FAN is running
- *						 0: FAN is not running
- *
- * Fan Status register : (MODEL_DS509p only)
- *              bit 6-4 --> FAN speed
- *						 000: Fan Off
- *						 001: reserved
- *						 010: Ultra-Low speed
- *						 011: Low speed (power default)
- *						 100: middle speed
- *						 101: Full-speed
- *						 110: reserved
- *						 111: reserved
- *
- * Power Status register :
- *              bit 7-3 --> Reserved
- *              bit 2 --> Clear Buzzer
- *						 0: Clear Buzzer Button Pressed
- *						 1: Normal or Read
- *              bit 1 --> Redundant_1 status
- *              bit 0 --> Redundant_0 status
- *						 0: Power Fail or be removed
- *						 1: Power Good
- */
 #define	SYNO_CPLD_BASE		0xF8000000
 #define	SYNO_CPLD_END		0xF8000010
 
@@ -201,7 +104,6 @@ static int GetBrand(void)
 #ifdef MY_ABC_HERE
 	int Brand = -1;
 
-	//YMXX[Z]SSSSS
 	if ( gszSerialNum[4] == 'M' ) {
 		Brand = BRAND_LOGITEC;
 	} else if ( gszSerialNum[4] == 'U' ) {
@@ -358,7 +260,7 @@ static int SetDiskLedStatus(int disknum, SYNO_DISK_LED status)
 		max_disk = 2;
 	} else if ( model == MODEL_DS109p ||
 		 model == MODEL_DS110p ) {
-		max_disk = 1; /* 109+ don't support this */
+		max_disk = 1;  
 	}
 
 	if (disknum < 1 || disknum > max_disk || 
@@ -602,15 +504,14 @@ SetFanSpeedValue3bits(
 		goto END;
 	}
 
-	// DS2.0 #8126
 	*fan_register &= ~DS509P_CPLD_FAN_SPEED_MASK;
 	*fan_register |= (FAN_ACTIVATION_SPEED << CPLD_SHIFT_FAN_SPEED);
 	mdelay(FAN_ACTIVATION_DURATION);
 
 	speed_value <<= CPLD_SHIFT_FAN_SPEED;
-	/* set fan speed control bit to 00 */
+	 
 	*fan_register &= ~DS509P_CPLD_FAN_SPEED_MASK;
-	/* set current fan speed */
+	 
 	*fan_register |= speed_value;
 
 	res = 0;
@@ -656,7 +557,7 @@ static int SetFanStatus(FAN_STATUS status, FAN_SPEED speed)
 	fan_register = (char *)(SYNO_CPLD_BASE + CPLD_OFFSET_FAN_STATUS);
 
 	if(status == FAN_STATUS_STOP) {
-		/* currently not support fan off */
+		 
 		goto END;
 	}
 
@@ -688,9 +589,8 @@ static int SetFanStatus(FAN_STATUS status, FAN_SPEED speed)
 	}
 	speed_value <<= CPLD_SHIFT_FAN_SPEED_CONTROL;
 
-	/* set fan speed control bit to 00 */
 	*fan_register &= ~CPLD_FAN_SPEED_MASK;
-	/* set current fan speed */
+	 
 	*fan_register |= speed_value;
 	
 	res = 0;
@@ -711,10 +611,9 @@ static int GetSysTemperature(int *Temperature)
 		return -1;
 	}
 
-	/* The temperature data only 9 bits */
 	data = data >> 7;
 
-	if (data >> 8) { /* bit 9 is minus sign */
+	if (data >> 8) {  
 		*Temperature = -1 * (0x100 - ((u8 *)&data)[1]); 
 	} else {
 		*Temperature = data;

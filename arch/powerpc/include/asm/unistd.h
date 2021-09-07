@@ -4,18 +4,9 @@
 #ifndef _ASM_POWERPC_UNISTD_H_
 #define _ASM_POWERPC_UNISTD_H_
 
-#if 1 //SYNO
+#if 1  
 #include <linux/syno.h>
 #endif
-
-/*
- * This file contains the system call numbers.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version
- * 2 of the License, or (at your option) any later version.
- */
 
 #define __NR_restart_syscall	  0
 #define __NR_exit		  1
@@ -154,7 +145,7 @@
 #define __NR_bdflush		134
 #define __NR_sysfs		135
 #define __NR_personality	136
-#define __NR_afs_syscall	137 /* Syscall for Andrew File System */
+#define __NR_afs_syscall	137  
 #define __NR_setfsuid		138
 #define __NR_setfsgid		139
 #define __NR__llseek		140
@@ -204,12 +195,12 @@
 #define __NR_capset		184
 #define __NR_sigaltstack	185
 #define __NR_sendfile		186
-#define __NR_getpmsg		187	/* some people actually want streams */
-#define __NR_putpmsg		188	/* some people actually want streams */
+#define __NR_getpmsg		187	 
+#define __NR_putpmsg		188	 
 #define __NR_vfork		189
-#define __NR_ugetrlimit		190	/* SuS compliant getrlimit */
+#define __NR_ugetrlimit		190	 
 #define __NR_readahead		191
-#ifndef __powerpc64__			/* these are 32-bit only */
+#ifndef __powerpc64__			 
 #define __NR_mmap2		192
 #define __NR_truncate64		193
 #define __NR_ftruncate64	194
@@ -245,7 +236,7 @@
 #define __NR_futex		221
 #define __NR_sched_setaffinity	222
 #define __NR_sched_getaffinity	223
-/* 224 currently unused */
+ 
 #define __NR_tuxcall		225
 #ifndef __powerpc64__
 #define __NR_sendfile64		226
@@ -282,7 +273,7 @@
 #endif
 #define __NR_rtas		255
 #define __NR_sys_debug_setcontext 256
-/* Number 257 is reserved for vserver */
+ 
 #define __NR_migrate_pages	258
 #define __NR_mbind		259
 #define __NR_get_mempolicy	260
@@ -380,8 +371,7 @@
 #define __NR_SYNOCaselessLStat			409
 
 #if !defined(__KERNEL__)
-/* direct SYNOCaselessStat to stat64 in 32-bit platform
- * 64-bits arch has no stat64 support */
+ 
 #include <bits/wordsize.h>
 #if __WORDSIZE == 64
 #define SYNOCaselessStat(arg1,arg2)                         syscall(__NR_SYNOCaselessStat , arg1,arg2)
@@ -390,12 +380,11 @@
 #define SYNOCaselessStat(arg1,arg2)                         syscall(__NR_SYNOCaselessStat64 , arg1,arg2)
 #define SYNOCaselessLStat(arg1,arg2)                         syscall(__NR_SYNOCaselessLStat64 , arg1,arg2)
 #endif
-/* define stat64 interface for compatibility
-   These should be removed after AP modification */
+ 
 #define SYNOCaselessStat64(arg1,arg2)                         syscall(__NR_SYNOCaselessStat64 , arg1,arg2)
 #define SYNOCaselessLStat64(arg1,arg2)                         syscall(__NR_SYNOCaselessLStat64 , arg1,arg2)
 #endif
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 #define __NR_SYNOEcryptName                 410
@@ -411,7 +400,7 @@
 #define SYNOACLSysIsSupport(arg1, arg2, arg3)            syscall(__NR_SYNOACLIsSupport, arg1, arg2, arg3)
 #define __NR_SYNOACLGetPerm               414
 #define SYNOACLSysGetPerm(arg1, arg2)            syscall(__NR_SYNOACLGetPerm, arg1, arg2)
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 #define __NR_SYNOStat              416
@@ -424,11 +413,10 @@
 #ifdef MY_ABC_HERE
 #define __NR_SYNOArchiveOverwrite       427
 #define SYNOArchiveOverwrite(arg1,arg2)      syscall(__NR_SYNOArchiveOverwrite, arg1, arg2)
-#endif /* MY_ABC_HERE */
+#endif  
 
 #if !defined(__KERNEL__)
-/* direct SYNOStat to stat64 in 32-bit platform
- * 64-bits arch has no stat64 support */
+ 
 #include <bits/wordsize.h>
 #if __WORDSIZE == 64
 #define SYNOStat(arg1, arg2, arg3)  syscall(__NR_SYNOStat, arg1, arg2, arg3)
@@ -439,14 +427,14 @@
 #define SYNOFStat(arg1, arg2, arg3) syscall(__NR_SYNOFStat64, arg1, arg2, arg3)
 #define SYNOLStat(arg1, arg2, arg3) syscall(__NR_SYNOLStat64, arg1, arg2, arg3)
 #endif
-#endif /* __KERNEL__ */
+#endif  
 
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef __KERNEL__
 
 #ifdef MY_ABC_HERE 
-/* must match arch/powerpc/include/asm/systbl.h */
+ 
 #define __NR_syscalls		450
 #else
 #define __NR_syscalls		323
@@ -492,13 +480,10 @@
 #define __ARCH_WANT_SYS_NEWFSTATAT
 #endif
 
-/*
- * "Conditional" syscalls
- */
 #define cond_syscall(x) \
 	asmlinkage long x (void) __attribute__((weak,alias("sys_ni_syscall")))
 
-#endif		/* __ASSEMBLY__ */
-#endif		/* __KERNEL__ */
+#endif		 
+#endif		 
 
-#endif /* _ASM_POWERPC_UNISTD_H_ */
+#endif  

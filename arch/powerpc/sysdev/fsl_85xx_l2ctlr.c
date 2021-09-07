@@ -2,28 +2,7 @@
 #define MY_ABC_HERE
 #endif
 #ifdef MY_DEF_HERE
-/*
- * Copyright 2009-2010 Freescale Semiconductor, Inc.
- *
- * QorIQ (P1/P2) L2 controller init for Cache-SRAM instantiation
- *
- * Author: Vivek Mahajan <vivek.mahajan@freescale.com>
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/of_platform.h>
 #include <asm/io.h>
@@ -109,15 +88,9 @@ static int __devinit mpc85xx_l2ctlr_of_probe(struct of_device *dev,
 		return -EFAULT;
 	}
 
-	/*
-	 * Write bits[0-17] to srbar0
-	 */
 	out_be32(&l2ctlr->srbar0,
 		rsrc.start & L2SRAM_BAR_MSK_LO18);
 
-	/*
-	 * Write bits[18-21] to srbare0
-	 */
 #ifdef CONFIG_PHYS_64BIT
 	out_be32(&l2ctlr->srbarea0,
 		(rsrc.start >> 32) & L2SRAM_BARE_MSK_HI4);
@@ -201,4 +174,4 @@ module_exit(mpc85xx_l2ctlr_of_exit);
 
 MODULE_DESCRIPTION("Freescale MPC85xx L2 controller init");
 MODULE_LICENSE("GPL v2");
-#endif /* MY_DEF_HERE */
+#endif  

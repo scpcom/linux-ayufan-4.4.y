@@ -1,24 +1,4 @@
-/*
- *	IPv6 input
- *	Linux INET6 implementation
- *
- *	Authors:
- *	Pedro Roque		<roque@di.fc.ul.pt>
- *	Ian P. Morris		<I.P.Morris@soton.ac.uk>
- *
- *	Based in linux/net/ipv4/ip_input.c
- *
- *	This program is free software; you can redistribute it and/or
- *      modify it under the terms of the GNU General Public License
- *      as published by the Free Software Foundation; either version
- *      2 of the License, or (at your option) any later version.
- */
-/* Changes
- *
- * 	Mitsuru KANDA @USAGI and
- * 	YOSHIFUJI Hideaki @USAGI: Remove ipv6_parse_exthdrs().
- */
-
+ 
 #include <linux/errno.h>
 #include <linux/types.h>
 #include <linux/socket.h>
@@ -78,17 +58,6 @@ int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt
 
 	memset(IP6CB(skb), 0, sizeof(struct inet6_skb_parm));
 
-	/*
-	 * Store incoming device index. When the packet will
-	 * be queued, we cannot refer to skb->dev anymore.
-	 *
-	 * BTW, when we send a packet for our own local address on a
-	 * non-loopback interface (e.g. ethX), it is being delivered
-	 * via the loopback interface (lo) here; skb->dev = loopback_dev.
-	 * It, however, should be considered as if it is being
-	 * arrived via the sending interface (ethX), because of the
-	 * nature of scoping architecture. --yoshfuji
-	 */
 	IP6CB(skb)->iif = skb_dst(skb) ? ip6_dst_idev(skb_dst(skb))->dev->ifindex : dev->ifindex;
 
 	if (unlikely(!pskb_may_pull(skb, sizeof(*hdr))))
@@ -99,11 +68,6 @@ int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt
 	if (hdr->version != 6)
 		goto err;
 
-	/*
-	 * RFC4291 2.5.3
-	 * A packet received on an interface with a destination address
-	 * of loopback must be dropped.
-	 */
 	if (!(dev->flags & IFF_LOOPBACK) &&
 	    ipv6_addr_loopback(&hdr->daddr))
 		goto err;
@@ -113,7 +77,6 @@ int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt
 
 	pkt_len = ntohs(hdr->payload_len);
 
-	/* pkt_len may be zero if Jumbo payload option is present */
 	if (pkt_len || hdr->nexthdr != NEXTHDR_HOP) {
 		if (pkt_len + sizeof(struct ipv6hdr) > skb->len) {
 			IP6_INC_STATS_BH(net,
@@ -137,7 +100,6 @@ int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt
 
 	rcu_read_unlock();
 
-	/* Must drop socket now because of tproxy. */
 	skb_orphan(skb);
 
 	return NF_HOOK(PF_INET6, NF_INET_PRE_ROUTING, skb, dev, NULL,
@@ -150,10 +112,6 @@ drop:
 	return NET_RX_DROP;
 }
 
-/*
- *	Deliver the packet to the host
- */
-
 static int ip6_input_finish(struct sk_buff *skb)
 {
 	const struct inet6_protocol *ipprot;
@@ -162,10 +120,6 @@ static int ip6_input_finish(struct sk_buff *skb)
 	u8 hash;
 	struct inet6_dev *idev;
 	struct net *net = dev_net(skb_dst(skb)->dev);
-
-	/*
-	 *	Parse extension headers
-	 */
 
 	rcu_read_lock();
 resubmit:
@@ -188,9 +142,6 @@ skb->ip_header_len = skb_transport_offset(skb);
 		if (ipprot->flags & INET6_PROTO_FINAL) {
 			struct ipv6hdr *hdr;
 
-			/* Free reference early: we don't need it any more,
-			   and it may hold ip_conntrack module loaded
-			   indefinitely. */
 			nf_reset(skb);
 
 			skb_postpull_rcsum(skb, skb_network_header(skb),
@@ -253,35 +204,26 @@ int ip6_mc_input(struct sk_buff *skb)
 	deliver = ipv6_chk_mcast_addr(skb->dev, &hdr->daddr, NULL);
 
 #ifdef CONFIG_IPV6_MROUTE
-	/*
-	 *      IPv6 multicast router mode is now supported ;)
-	 */
+	 
 	if (dev_net(skb->dev)->ipv6.devconf_all->mc_forwarding &&
 	    !(ipv6_addr_type(&hdr->daddr) & IPV6_ADDR_LINKLOCAL) &&
 	    likely(!(IP6CB(skb)->flags & IP6SKB_FORWARDED))) {
-		/*
-		 * Okay, we try to forward - split and duplicate
-		 * packets.
-		 */
+		 
 		struct sk_buff *skb2;
 		struct inet6_skb_parm *opt = IP6CB(skb);
 
-		/* Check for MLD */
 		if (unlikely(opt->ra)) {
-			/* Check if this is a mld message */
+			 
 			u8 *ptr = skb_network_header(skb) + opt->ra;
 			struct icmp6hdr *icmp6;
 			u8 nexthdr = hdr->nexthdr;
 			int offset;
 
-			/* Check if the value of Router Alert
-			 * is for MLD (0x0000).
-			 */
 			if ((ptr[2] | ptr[3]) == 0) {
 				deliver = 0;
 
 				if (!ipv6_ext_hdr(nexthdr)) {
-					/* BUG */
+					 
 					goto out;
 				}
 				offset = ipv6_skip_exthdr(skb, sizeof(*hdr),
@@ -308,7 +250,7 @@ int ip6_mc_input(struct sk_buff *skb)
 				}
 				goto out;
 			}
-			/* unknown RA - process it normally */
+			 
 		}
 
 		if (deliver)
@@ -327,7 +269,7 @@ out:
 	if (likely(deliver))
 		ip6_input(skb);
 	else {
-		/* discard */
+		 
 		kfree_skb(skb);
 	}
 

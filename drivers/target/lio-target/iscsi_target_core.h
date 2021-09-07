@@ -13,7 +13,7 @@
 #include <scsi/scsi_cmnd.h>
 #endif
 #include <iscsi_linux_defs.h>
-#include <iscsi_target_version.h>	    /* get version definition */
+#include <iscsi_target_version.h>	     
 
 #define SHUTDOWN_SIGS	(sigmask(SIGKILL)|sigmask(SIGINT)|sigmask(SIGABRT))
 #define ISCSI_MISC_IOVECS		5
@@ -36,22 +36,21 @@
 #define IPV4_ADDRESS_SPACE		4
 #define IPV4_BUF_SIZE			18
 #define RESERVED			0xFFFFFFFF
-/* from target_core_base.h */
+ 
 #define ISCSI_MAX_LUNS_PER_TPG		TRANSPORT_MAX_LUNS_PER_TPG
-/* Maximum Target Portal Groups allowed */
+ 
 #define ISCSI_MAX_TPGS			64
-/* Size of the Network Device Name Buffer */
+ 
 #define ISCSI_NETDEV_NAME_SIZE		12
 #ifdef SYNO_LIO_TRANSPORT_PATCHES
-/* Size of iSCSI specific sense buffer */
+ 
 #define ISCSI_SENSE_BUFFER_LEN		TRANSPORT_SENSE_BUFFER + 2
 #endif
 
 #ifdef SNMP_SUPPORT
 #include <iscsi_target_mib.h>
-#endif /* SNMP_SUPPORT */
+#endif  
 
-/* iscsi_tpg_np_t->tpg_np_network_transport */
 #define ISCSI_TCP			0
 #define ISCSI_SCTP_TCP			1
 #define ISCSI_SCTP_UDP			2
@@ -62,7 +61,6 @@
 #define ISCSI_TCP_VERSION		"v3.0"
 #define ISCSI_SCTP_VERSION		"v3.0"
 
-/* iscsi_node_attrib_t sanity values */
 #ifdef MY_ABC_HERE
 #define NA_DATAOUT_TIMEOUT		30
 #else
@@ -94,7 +92,6 @@
 #define NA_DEFAULT_ERL_MAX		2
 #define NA_DEFAULT_ERL_MIN		0
 
-/* iscsi_tpg_attrib_t sanity values */
 #define TA_AUTHENTICATION		1
 #ifdef MY_ABC_HERE
 #define TA_LOGIN_TIMEOUT		30
@@ -111,51 +108,43 @@
 #define TA_DEFAULT_CMDSN_DEPTH_MAX	512
 #define TA_DEFAULT_CMDSN_DEPTH_MIN	1
 #define TA_CACHE_DYNAMIC_ACLS		0
-/* Enabled by default in demo mode (generic_node_acls=1) */
+ 
 #define TA_DEMO_MODE_WRITE_PROTECT	1
-/* Disabled by default in production mode w/ explict ACLs */
+ 
 #define TA_PROD_MODE_WRITE_PROTECT	0
 #define TA_CACHE_CORE_NPS		0
 
-/* iscsi_data_count_t->type */
 #define ISCSI_RX_DATA				1
 #define ISCSI_TX_DATA				2
 
-/* iscsi_datain_req_t->dr_done */
 #define DATAIN_COMPLETE_NORMAL			1
 #define DATAIN_COMPLETE_WITHIN_COMMAND_RECOVERY 2
 #define DATAIN_COMPLETE_CONNECTION_RECOVERY	3
 
-/* iscsi_datain_req_t->recovery */
 #define DATAIN_WITHIN_COMMAND_RECOVERY		1
 #define DATAIN_CONNECTION_RECOVERY		2
 
-/* iscsi_portal_group_t->state */
 #define TPG_STATE_FREE				0
 #define TPG_STATE_ACTIVE			1
 #define TPG_STATE_INACTIVE			2
 #define TPG_STATE_COLD_RESET			3
 
-/* iscsi_set_device_attribute() states */
 #define ISCSI_DEVATTRIB_ENABLE_DEVICE		1
 #define ISCSI_DEVATTRIB_DISABLE_DEVICE		2
 #define ISCSI_DEVATTRIB_ADD_LUN_ACL		3
 #define ISCSI_DEVATTRIB_DELETE_LUN_ACL		4
 
 #ifndef MY_ABC_HERE
-/* iscsi_cmd_t->data_direction, same values as target_core_base.h
-   and se_cmd_t->data_direction  */
+ 
 #define ISCSI_NONE				0
 #define ISCSI_READ				1
 #define ISCSI_WRITE				2
 #define ISCSI_BIDI				3
 #endif
 
-/* iscsi_tiqn_t->tiqn_state */
 #define TIQN_STATE_ACTIVE			1
 #define TIQN_STATE_SHUTDOWN			2
 
-/* iscsi_cmd_t->cmd_flags */
 #define ICF_GOT_LAST_DATAOUT			0x00000001
 #define ICF_GOT_DATACK_SNACK			0x00000002
 #define ICF_NON_IMMEDIATE_UNSOLICITED_DATA	0x00000004
@@ -166,7 +155,6 @@
 #define ICF_OOO_CMDSN				0x00000080
 #define ICF_REJECT_FAIL_CONN			0x00000100
 
-/* iscsi_cmd_t->i_state */
 #define ISTATE_NO_STATE				0
 #define ISTATE_NEW_CMD				1
 #define ISTATE_DEFERRED_CMD			2
@@ -211,28 +199,23 @@
 #define ISTATE_REMOVE				41
 #define ISTATE_FREE				42
 
-/* Used in iscsi_conn_t->conn_flags */
 #define CONNFLAG_SCTP_STRUCT_FILE		0x01
 
-/* Used for iscsi_recover_cmdsn() return values */
 #define CMDSN_ERROR_CANNOT_RECOVER		-1
 #define CMDSN_NORMAL_OPERATION			0
 #define CMDSN_LOWER_THAN_EXP			1
 #define	CMDSN_HIGHER_THAN_EXP			2
 
-/* Used for iscsi_handle_immediate_data() return values */
 #define IMMEDIDATE_DATA_CANNOT_RECOVER		-1
 #define IMMEDIDATE_DATA_NORMAL_OPERATION	0
 #define IMMEDIDATE_DATA_ERL1_CRC_FAILURE	1
 
-/* Used for iscsi_decide_dataout_action() return values */
 #define DATAOUT_CANNOT_RECOVER			-1
 #define DATAOUT_NORMAL				0
 #define DATAOUT_SEND_R2T			1
 #define DATAOUT_SEND_TO_TRANSPORT		2
 #define DATAOUT_WITHIN_COMMAND_RECOVERY		3
 
-/* Used for iscsi_node_auth_t structure members */
 #define MAX_USER_LEN				256
 #define MAX_PASS_LEN				256
 #define NAF_USERID_SET				0x01
@@ -240,45 +223,36 @@
 #define NAF_USERID_IN_SET			0x04
 #define NAF_PASSWORD_IN_SET			0x08
 
-/* Used for iscsi_cmd_t->dataout_timer_flags */
 #define DATAOUT_TF_RUNNING			0x01
 #define DATAOUT_TF_STOP				0x02
 
-/* Used for iscsi_conn_t->netif_timer_flags */
 #define NETIF_TF_RUNNING			0x01
 #define NETIF_TF_STOP				0x02
 
-/* Used for iscsi_conn_t->nopin_timer_flags */
 #define NOPIN_TF_RUNNING			0x01
 #define NOPIN_TF_STOP				0x02
 
-/* Used for iscsi_conn_t->nopin_response_timer_flags */
 #define NOPIN_RESPONSE_TF_RUNNING		0x01
 #define NOPIN_RESPONSE_TF_STOP			0x02
 
-/* Used for iscsi_session_t->time2retain_timer_flags */
 #define T2R_TF_RUNNING				0x01
 #define T2R_TF_STOP				0x02
 #define T2R_TF_EXPIRED				0x04
 
-/* Used for iscsi_tpg_np->tpg_np_login_timer_flags */
 #define TPG_NP_TF_RUNNING			0x01
 #define TPG_NP_TF_STOP				0x02
 
-/* Used for iscsi_np_t->np_flags */
 #define NPF_IP_NETWORK				0x00
 #define NPF_NET_IPV4                            0x01
 #define NPF_NET_IPV6                            0x02
-#define NPF_SCTP_STRUCT_FILE			0x20 /* Bugfix */
+#define NPF_SCTP_STRUCT_FILE			0x20  
 
-/* Used for iscsi_np_t->np_thread_state */
 #define ISCSI_NP_THREAD_ACTIVE			1
 #define ISCSI_NP_THREAD_INACTIVE		2
 #define ISCSI_NP_THREAD_RESET			3
 #define ISCSI_NP_THREAD_SHUTDOWN		4
 #define ISCSI_NP_THREAD_EXIT			5
 
-/* Used for debugging various ERL situations. */
 #define TARGET_ERL_MISSING_CMD_SN			1
 #define TARGET_ERL_MISSING_CMDSN_BATCH			2
 #define TARGET_ERL_MISSING_CMDSN_MIX			3
@@ -290,9 +264,9 @@
 #define TARGET_ERL_DATA_OUT_CRC_FAILURE_MIX		9
 #define TARGET_ERL_DATA_OUT_CRC_FAILURE_MULTI		10
 #define TARGET_ERL_DATA_OUT_FAIL			11
-#define TARGET_ERL_DATA_OUT_MISSING			12 /* TODO */
-#define TARGET_ERL_DATA_OUT_MISSING_BATCH		13 /* TODO */
-#define TARGET_ERL_DATA_OUT_MISSING_MIX			14 /* TODO */
+#define TARGET_ERL_DATA_OUT_MISSING			12  
+#define TARGET_ERL_DATA_OUT_MISSING_BATCH		13  
+#define TARGET_ERL_DATA_OUT_MISSING_MIX			14  
 #define TARGET_ERL_DATA_OUT_TIMEOUT			15
 #define TARGET_ERL_FORCE_TX_TRANSPORT_RESET		16
 #define TARGET_ERL_FORCE_RX_TRANSPORT_RESET		17
@@ -374,154 +348,154 @@ struct scatterlist;
 
 typedef struct iscsi_cmd_s {
 #ifndef MY_ABC_HERE
-	/* iSCSI data direction */
+	 
 	u8			data_direction;
 #endif
 	u8			dataout_timer_flags;
-	/* DataOUT timeout retries */
+	 
 	u8			dataout_timeout_retries;
-	/* Within command recovery count */
+	 
 	u8			error_recovery_count;
-	/* iSCSI dependent state for out or order CmdSNs */
+	 
 	u8			deferred_i_state;
-	/* iSCSI dependent state */
+	 
 	u8			i_state;
-	/* Command is an immediate command (I_BIT set) */
+	 
 	u8			immediate_cmd;
-	/* Immediate data present */
+	 
 	u8			immediate_data;
-	/* iSCSI Opcode */
+	 
 	u8			iscsi_opcode;
-	/* iSCSI Response Code */
+	 
 	u8			iscsi_response;
-	/* Logout reason when iscsi_opcode == ISCSI_INIT_LOGOUT_CMND */
+	 
 	u8			logout_reason;
-	/* Logout response code when iscsi_opcode == ISCSI_INIT_LOGOUT_CMND */
+	 
 	u8			logout_response;
-	/* MaxCmdSN has been incremented */
+	 
 	u8			maxcmdsn_inc;
-	/* Immediate Unsolicited Dataout */
+	 
 	u8			unsolicited_data;
-	/* CID contained in logout PDU when opcode == ISCSI_INIT_LOGOUT_CMND */
+	 
 	u16			logout_cid;
-	/* Command flags */
+	 
 	u32			cmd_flags;
-	/* Initiator Task Tag assigned from Initiator */
+	 
 	u32 			init_task_tag;
-	/* Target Transfer Tag assigned from Target */
+	 
 	u32			targ_xfer_tag;
-	/* CmdSN assigned from Initiator */
+	 
 	u32			cmd_sn;
-	/* ExpStatSN assigned from Initiator */
+	 
 	u32			exp_stat_sn;
-	/* StatSN assigned to this ITT */
+	 
 	u32			stat_sn;
-	/* DataSN Counter */
+	 
 	u32			data_sn;
-	/* R2TSN Counter */
+	 
 	u32			r2t_sn;
-	/* Last DataSN acknowledged via DataAck SNACK */
+	 
 	u32			acked_data_sn;
-	/* Used for echoing NOPOUT ping data */
+	 
 	u32			buf_ptr_size;
-	/* Used to store DataDigest */
+	 
 	u32			data_crc;
-	/* Total size in bytes associated with command */
+	 
 	u32			data_length;
-	/* Counter for MaxOutstandingR2T */
+	 
 	u32			outstanding_r2ts;
-	/* Next R2T Offset when DataSequenceInOrder=Yes */
+	 
 	u32			r2t_offset;
-	/* Number of miscellaneous iovecs used for IP stack calls */
+	 
 	u32			iov_misc_count;
-	/* Bytes used for 32-bit word padding */
+	 
 	u32			pad_bytes;
-	/* Number of iscsi_pdu_t in iscsi_cmd_t->pdu_list */
+	 
 	u32			pdu_count;
-	/* Next iscsi_pdu_t to send in iscsi_cmd_t->pdu_list */
+	 
 	u32			pdu_send_order;
-	/* Current iscsi_pdu_t in iscsi_cmd_t->pdu_list */
+	 
 	u32			pdu_start;
 	u32			residual_count;
-	/* Next iscsi_seq_t to send in iscsi_cmd_t->seq_list */
+	 
 	u32			seq_send_order;
-	/* Number of iscsi_seq_t in iscsi_cmd_t->seq_list */
+	 
 	u32			seq_count;
-	/* Current iscsi_seq_t in iscsi_cmd_t->seq_list */
+	 
 	u32			seq_no;
-	/* Lowest offset in current DataOUT sequence */
+	 
 	u32			seq_start_offset;
-	/* Highest offset in current DataOUT sequence */
+	 
 	u32			seq_end_offset;
-	/* Total size in bytes received so far of READ data */
+	 
 	u32			read_data_done;
-	/* Total size in bytes received so far of WRITE data */
+	 
 	u32			write_data_done;
-	/* Counter for FirstBurstLength key */
+	 
 	u32			first_burst_len;
-	/* Counter for MaxBurstLength key */
+	 
 	u32			next_burst_len;
-	/* Transfer size used for IP stack calls */
+	 
 	u32			tx_size;
-	/* Buffer used for various purposes */
+	 
 	void			*buf_ptr;
 #ifdef MY_ABC_HERE
-	/* See include/linux/dma-mapping.h */
+	 
 	enum dma_data_direction data_direction;
 #endif
-	/* iSCSI PDU Header + CRC */
+	 
 	unsigned char		pdu[ISCSI_HDR_LEN + CRC_LEN];
-	/* Number of times iscsi_cmd_t is present in immediate queue */
+	 
 	atomic_t		immed_queue_count;
 	atomic_t		response_queue_count;
 	atomic_t		transport_sent;
 	spinlock_t		datain_lock;
 	spinlock_t		dataout_timeout_lock;
-	/* spinlock for protecting iscsi_cmd_t->i_state */
+	 
 	spinlock_t		istate_lock;
-	/* spinlock for adding within command recovery entries */
+	 
 	spinlock_t		error_lock;
-	/* spinlock for adding R2Ts */
+	 
 	spinlock_t		r2t_lock;
-	/* DataIN List */
+	 
 	struct list_head	datain_list;
-	/* R2T List */
+	 
 	struct list_head	cmd_r2t_list;
 	struct semaphore	reject_sem;
-	/* Semaphore used for allocating buffer */
+	 
 	struct semaphore	unsolicited_data_sem;
-	/* Timer for DataOUT */
+	 
 	struct timer_list	dataout_timer;
-	/* Iovecs for miscellaneous purposes */
+	 
 	struct iovec		iov_misc[ISCSI_MISC_IOVECS];
-	/* Array of iscsi_pdu_t used for DataPDUInOrder=No */
+	 
 	struct iscsi_pdu_s	*pdu_list;
-	/* Current iscsi_pdu_t used for DataPDUInOrder=No */
+	 
 	struct iscsi_pdu_s	*pdu_ptr;
-	/* Array of iscsi_seq_t used for DataSequenceInOrder=No */
+	 
 	struct iscsi_seq_s	*seq_list;
-	/* Current iscsi_seq_t used for DataSequenceInOrder=No */
+	 
 	struct iscsi_seq_s	*seq_ptr;
-	/* TMR Request when iscsi_opcode == ISCSI_INIT_TASK_MGMT_CMND */
+	 
 	struct iscsi_tmr_req_s	*tmr_req;
-	/* Connection this command is alligient to */
+	 
 	struct iscsi_conn_s 	*conn;
-	/* Pointer to connection recovery entry */
+	 
 	struct iscsi_conn_recovery_s *cr;
-	/* Session the command is part of,  used for connection recovery */
+	 
 	struct iscsi_session_s	*sess;
-	/* Next command in the session pool */
+	 
 	struct iscsi_cmd_s	*next;
-	/* list_head for connection list */
+	 
 	struct list_head	i_list;
-	/* Next command in DAS transport list */
+	 
 	struct iscsi_cmd_s	*t_next;
-	/* Previous command in DAS transport list */
+	 
 	struct iscsi_cmd_s	*t_prev;
 #ifdef SYNO_LIO_TRANSPORT_PATCHES
-	/* The TCM I/O descriptor that is accessed via container_of() */
+	 
 	struct se_cmd_s		se_cmd;
-	/* Sense buffer that will be mapped into outgoing status */
+	 
 	unsigned char		sense_buffer[ISCSI_SENSE_BUFFER_LEN];
 #else
 	struct se_cmd_s		*se_cmd;
@@ -545,9 +519,9 @@ typedef struct iscsi_tmr_req_s {
 
 typedef struct iscsi_conn_s {
 	char			net_dev[ISCSI_NETDEV_NAME_SIZE];
-	/* Authentication Successful for this connection */
+	 
 	u8			auth_complete;
-	/* State connection is currently in */
+	 
 	u8			conn_state;
 	u8			conn_logout_reason;
 	u8			netif_timer_flags;
@@ -556,36 +530,36 @@ typedef struct iscsi_conn_s {
 	u8			nopin_response_timer_flags;
 	u8			tx_immediate_queue;
 	u8			tx_response_queue;
-	/* Used to know what thread encountered a transport failure */
+	 
 	u8			which_thread;
-	/* connection id assigned by the Initiator */
+	 
 	u16			cid;
-	/* Remote TCP Port */
+	 
 	u16			login_port;
 	int			net_size;
 	u32			auth_id;
 	u32			conn_flags;
-	/* Remote TCP IP address */
+	 
 	u32			login_ip;
-	/* Used for iscsi_tx_login_rsp() */
+	 
 	u32			login_itt;
 	u32			exp_statsn;
-	/* Per connection status sequence number */
+	 
 	u32			stat_sn;
-	/* IFMarkInt's Current Value */
+	 
 	u32			if_marker;
-	/* OFMarkInt's Current Value */
+	 
 	u32			of_marker;
-	/* Used for calculating OFMarker offset to next PDU */
+	 
 	u32			of_marker_offset;
-	/* Complete Bad PDU for sending reject */
+	 
 	unsigned char		bad_hdr[ISCSI_HDR_LEN];
 	unsigned char		ipv6_login_ip[IPV6_ADDRESS_SPACE];
 #ifdef SNMP_SUPPORT
 	u16			local_port;
 	u32			local_ip;
 	u32			conn_index;
-#endif /* SNMP_SUPPORT */
+#endif  
 	atomic_t		active_cmds;
 	atomic_t		check_immediate_queue;
 	atomic_t		conn_logout_remove;
@@ -606,14 +580,14 @@ typedef struct iscsi_conn_s {
 	struct semaphore	conn_logout_sem;
 	struct semaphore	rx_half_close_sem;
 	struct semaphore	tx_half_close_sem;
-	/* Semaphore for conn's tx_thread to sleep on */
+	 
 	struct semaphore	tx_sem;
-	/* socket used by this connection */
+	 
 	struct socket		*sock;
 	struct timer_list	nopin_timer;
 	struct timer_list	nopin_response_timer;
 	struct timer_list	transport_timer;;
-	/* Spinlock used for add/deleting cmd's from conn_cmd_list */
+	 
 	spinlock_t		cmd_lock;
 	spinlock_t		conn_usage_lock;
 	spinlock_t		immed_queue_lock;
@@ -621,21 +595,21 @@ typedef struct iscsi_conn_s {
 	spinlock_t		nopin_timer_lock;
 	spinlock_t		response_queue_lock;
 	spinlock_t		state_lock;
-	/* list_head of iscsi_cmd_t for this connection */
+	 
 	struct list_head	conn_cmd_list;
 	struct list_head	immed_queue_list;
 	struct list_head	response_queue_list;
 	iscsi_conn_ops_t	*conn_ops;
 	iscsi_param_list_t	*param_list;
-	/* Used for per connection auth state machine */
+	 
 	void			*auth_protocol;
 	struct iscsi_login_thread_s *login_thread;
 	struct iscsi_portal_group_s *tpg;
-	/* Pointer to parent session */
+	 
 	struct iscsi_session_s	*sess;
-	/* Pointer to thread_set in use for this conn's threads */
+	 
 	struct se_thread_set_s	*thread_set;
-	/* list_head for session connection list */
+	 
 	struct list_head	conn_list;
 } ____cacheline_aligned iscsi_conn_t;
 
@@ -665,23 +639,23 @@ typedef struct iscsi_session_s {
 	u16			cid_called;
 	u16			conn_recovery_count;
 	u16			tsih;
-	/* state session is currently in */
+	 
 	u32			session_state;
-	/* session wide counter: initiator assigned task tag */
+	 
 	u32			init_task_tag;
-	/* session wide counter: target assigned task tag */
+	 
 	u32			targ_xfer_tag;
 	u32			cmdsn_window;
-	/* session wide counter: expected command sequence number */
+	 
 	u32			exp_cmd_sn;
-	/* session wide counter: maximum allowed command sequence number */
+	 
 	u32			max_cmd_sn;
 	u32			ooo_cmdsn_count;
-	/* LIO specific session ID */
+	 
 	u32			sid;
 #ifdef SNMP_SUPPORT
 	char			auth_type[8];
-	/* unique within the target */
+	 
 	u32			session_index;
 	u32			cmd_pdus;
 	u32			rsp_pdus;
@@ -691,8 +665,8 @@ typedef struct iscsi_session_s {
 	u32			conn_timeout_errors;
 	u64			creation_time;
 	spinlock_t		session_stats_lock;
-#endif /* SNMP_SUPPORT */
-	/* Number of active connections */
+#endif  
+	 
 	atomic_t		nconn;
 	atomic_t		session_continuation;
 	atomic_t		session_fall_back_to_erl0;
@@ -703,7 +677,7 @@ typedef struct iscsi_session_s {
 	atomic_t		session_waiting_on_uc;
 	atomic_t		sleep_on_sess_wait_sem;
 	atomic_t		transport_wait_cmds;
-	/* connection list */
+	 
 	struct list_head	sess_conn_list;
 	struct list_head	cr_active_list;
 	struct list_head	cr_inactive_list;
@@ -772,7 +746,7 @@ typedef struct iscsi_debug_erl_s {
 	u32		init_task_tag;
 	u32		sid;
 }  ____cacheline_aligned iscsi_debug_erl_t;
-#endif /* DEBUG_ERL */
+#endif  
 
 typedef struct iscsi_node_attrib_s {
 	u32			dataout_timeout;
@@ -794,8 +768,7 @@ struct se_dev_entry_s;
 typedef struct iscsi_node_auth_s {
 	int			naf_flags;
 	int			authenticate_target;
-	/* Used for iscsi_global->discovery_auth,
-	 * set to zero (auth disabled) by default */
+	 
 	int			enforce_discovery_auth;
 	char			userid[MAX_USER_LEN];
 	char			password[MAX_PASS_LEN];
@@ -868,7 +841,7 @@ typedef struct iscsi_np_s {
 typedef struct iscsi_tpg_np_s {
 #ifdef SNMP_SUPPORT
 	u32			tpg_np_index;
-#endif /* SNMP_SUPPORT */
+#endif  
 	iscsi_np_t		*tpg_np;
 	struct iscsi_portal_group_s *tpg;
 	struct iscsi_tpg_np_s	*tpg_np_parent;
@@ -888,25 +861,25 @@ typedef struct iscsi_np_addr_s {
 
 typedef struct iscsi_portal_group_s {
 	unsigned char		tpg_chap_id;
-	/* TPG State */
+	 
 	u8			tpg_state;
-	/* Target Portal Group Tag */
+	 
 	u16			tpgt;
-	/* Id assigned to target sessions */
+	 
 	u16			ntsih;
-	/* Number of active sessions */
+	 
 	u32			nsessions;
 #ifdef MY_ABC_HERE
-	/* The same as nsessions, but is typed as atomic_t. */
+	 
 	atomic_t	nr_sessions;
-	/* Max number of active sessions */
+	 
 	atomic_t	max_nr_sessions;
 #endif
-	/* Number of Network Portals available for this TPG */
+	 
 	u32			num_tpg_nps;
-	/* Per TPG LIO specific session ID. */
+	 
 	u32			sid;
-	/* Spinlock for adding/removing Network Portals */
+	 
 	spinlock_t		tpg_np_lock;
 	spinlock_t		tpg_state_lock;
 #ifdef MY_ABC_HERE
@@ -920,10 +893,10 @@ typedef struct iscsi_portal_group_s {
 	struct semaphore	tpg_access_sem;
 	struct semaphore	np_login_sem;
 	iscsi_tpg_attrib_t	tpg_attrib;
-	/* Pointer to default list of iSCSI parameters for TPG */
+	 
 	iscsi_param_list_t	*param_list;
 	struct iscsi_tiqn_s	*tpg_tiqn;
-	/* Pointer to next TPG entry */
+	 
 	struct iscsi_portal_group_s *next;
 	struct iscsi_portal_group_s *prev;
 	struct list_head 	tpg_gnp_list;
@@ -955,23 +928,23 @@ typedef struct iscsi_tiqn_s {
 	iscsi_sess_err_stats_t  sess_err_stats;
 	iscsi_login_stats_t     login_stats;
 	iscsi_logout_stats_t    logout_stats;
-#endif /* SNMP_SUPPORT */
+#endif  
 } ____cacheline_aligned iscsi_tiqn_t;
 
 typedef struct iscsi_global_s {
-	/* iSCSI Node Name */
+	 
 	char			targetname[ISCSI_IQN_LEN];
-	/* In module removal */
+	 
 	u32			in_rmmod;
-	/* In core shutdown */
+	 
 	u32			in_shutdown;
-	/* Is the iSCSI Node name set? */
+	 
 	u32			targetname_set;
 	u32			active_ts;
-	/* Unique identifier used for the authentication daemon */
+	 
 	u32			auth_id;
 	u32			inactive_ts;
-	/* Thread ID counter */
+	 
 	u32			thread_id;
 	int (*ti_forcechanoffline)(void *);
 	struct list_head	g_tiqn_list;
@@ -980,34 +953,34 @@ typedef struct iscsi_global_s {
 	struct list_head	g_np_list;
 	spinlock_t		active_ts_lock;
 	spinlock_t		check_thread_lock;
-	/* Spinlock for adding/removing discovery entries */
+	 
 	spinlock_t		discovery_lock;
 	spinlock_t		inactive_ts_lock;
-	/* Spinlock for adding/removing login threads */
+	 
 	spinlock_t		login_thread_lock;
 	spinlock_t		shutdown_lock;
-	/* Spinlock for adding/removing thread sets */
+	 
 	spinlock_t		thread_set_lock;
-	/* Spinlock for iscsi_tiqn_t */
+	 
 	spinlock_t		tiqn_lock;
 	spinlock_t		g_tpg_lock;
-	/* Spinlock g_np_list */
+	 
 	spinlock_t		np_lock;
-	/* Semaphore used for communication to authentication daemon */
+	 
 	struct semaphore	auth_sem;
-	/* Semaphore used for allocate of iscsi_conn_t->auth_id */
+	 
 	struct semaphore	auth_id_sem;
-	/* Used for iSCSI discovery session authentication */
+	 
 	iscsi_node_auth_t	discovery_auth;
 	iscsi_portal_group_t	*discovery_tpg;
 #ifdef DEBUG_ERL
 	iscsi_debug_erl_t	*debug_erl;
 	spinlock_t		debug_erl_lock;
-#endif /* DEBUG_ERL */
+#endif  
 	struct list_head	active_ts_list;
 	struct list_head	inactive_ts_list;
 } ____cacheline_aligned iscsi_global_t;
 
 #define ISCSI_DEBUG_ERL(g)	((iscsi_debug_erl_t *)(g)->debug_erl)
 
-#endif /* ISCSI_TARGET_CORE_H */
+#endif  

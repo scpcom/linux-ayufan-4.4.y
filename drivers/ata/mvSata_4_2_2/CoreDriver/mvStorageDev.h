@@ -1,96 +1,17 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell 
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell Commercial License Option
-
-If you received this File from Marvell and you have entered into a commercial
-license agreement (a "Commercial License") with Marvell, the File is licensed
-to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or 
-modify this File in accordance with the terms and conditions of the General 
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is 
-available along with the File in the license.txt file or by writing to the Free 
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or 
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt. 
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY 
-DISCLAIMED.  The GPL License provides additional details about this warranty 
-disclaimer.
-********************************************************************************
-Marvell BSD License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or 
-modify this File under the following licensing terms. 
-Redistribution and use in source and binary forms, with or without modification, 
-are permitted provided that the following conditions are met:
-
-    *   Redistributions of source code must retain the above copyright notice,
-	    this list of conditions and the following disclaimer. 
-
-    *   Redistributions in binary form must reproduce the above copyright
-        notice, this list of conditions and the following disclaimer in the
-        documentation and/or other materials provided with the distribution. 
-
-    *   Neither the name of Marvell nor the names of its contributors may be 
-        used to endorse or promote products derived from this software without 
-        specific prior written permission. 
-    
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR 
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
-/*******************************************************************************
-* mvStorageDev.h - Header File for mvStorageDev.c.
-*
-* DESCRIPTION:
-*       None.
-*
-* DEPENDENCIES:
-*       mvSata.h.
-*       mvOs.h.
-*       ATA/ATAPI-6 standard
-*
-*******************************************************************************/
+ 
 #ifndef __INCmvStorageDevh
 #define __INCmvStorageDevh
 #ifdef __cplusplus
 
 extern "C" {
-#endif /* __cplusplus */
+#endif  
 
-/* Includes */
 #include "mvOsS.h"
 #include "mvSata.h"
 #include "mvRegs.h"
-
-/* Definitions */
-
-/* ATA register on the ATA drive*/
 
 #define MV_EDMA_ATA_FEATURES_ADDR               0x11
 #define MV_EDMA_ATA_SECTOR_COUNT_ADDR           0x12
@@ -145,7 +66,7 @@ extern "C" {
 
 #ifdef MY_ABC_HERE
 #define MV_ATA_COMMAND_CHECK_POWER              0xe5
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define MV_ATA_COMMAND_PM_READ_REG              0xe4
 #define MV_ATA_COMMAND_PM_WRITE_REG             0xe8
@@ -168,8 +89,8 @@ extern "C" {
 #define MV_SATA_PSCR_SACTIVE_REG_NUM            3
 
 #define MV_ATA_SET_FEATURES_DISABLE_8_BIT_PIO   0x01
-#define MV_ATA_SET_FEATURES_ENABLE_WCACHE       0x02  /* Enable write cache */
-#define MV_ATA_SET_FEATURES_TRANSFER            0x03  /* Set transfer mode  */
+#define MV_ATA_SET_FEATURES_ENABLE_WCACHE       0x02   
+#define MV_ATA_SET_FEATURES_TRANSFER            0x03   
 #define MV_ATA_TRANSFER_UDMA_0                  0x40
 #define MV_ATA_TRANSFER_UDMA_1                  0x41
 #define MV_ATA_TRANSFER_UDMA_2                  0x42
@@ -185,53 +106,35 @@ extern "C" {
 #define MV_ATA_TRANSFER_PIO_3                   0x0B
 #define MV_ATA_TRANSFER_PIO_4                   0x0C
 
-/* Enable advanced power management */
 #define MV_ATA_SET_FEATURES_ENABLE_APM          0x05
 
-/* Disable media status notification*/
 #define MV_ATA_SET_FEATURES_DISABLE_MSN         0x31
 
-/* Disable read look-ahead          */
 #define MV_ATA_SET_FEATURES_DISABLE_RLA         0x55
 
-/* Enable release interrupt         */
 #define MV_ATA_SET_FEATURES_ENABLE_RI           0x5D
 
-/* Enable SERVICE interrupt         */
 #define MV_ATA_SET_FEATURES_ENABLE_SI           0x5E
 
-/* Disable revert power-on defaults */
 #define MV_ATA_SET_FEATURES_DISABLE_RPOD        0x66
 
-/* Disable write cache              */
 #define MV_ATA_SET_FEATURES_DISABLE_WCACHE      0x82
 
-/* Disable advanced power management*/
 #define MV_ATA_SET_FEATURES_DISABLE_APM         0x85
 
-/* Enable media status notification */
 #define MV_ATA_SET_FEATURES_ENABLE_MSN          0x95
 
-/* Enable read look-ahead           */
 #define MV_ATA_SET_FEATURES_ENABLE_RLA          0xAA
 
-/* Enable revert power-on defaults  */
 #define MV_ATA_SET_FEATURES_ENABLE_RPOD         0xCC
 
-/* Disable release interrupt        */
 #define MV_ATA_SET_FEATURES_DISABLE_RI          0xDD
 
-/* Disable SERVICE interrupt        */
 #define MV_ATA_SET_FEATURES_DISABLE_SI          0xDE
 
-/* Defines for parsing the IDENTIFY command results*/
 #define IDEN_SERIAL_NUM_OFFSET                  10
 #ifdef MY_ABC_HERE
-/* mvSata use MV_U8 to declare the storage space to save serial.
-   And also use memcpy or memcmp to compare.
-   This is a dummy bug because they nerver meet this if they don't have software delayed EH.
-   So double the size let we can save the right serial information
-*/
+ 
 #define IDEN_SERIAL_NUM_SIZE                    (20-10)*2
 #else
 #define IDEN_SERIAL_NUM_SIZE                    (20-10)
@@ -255,16 +158,12 @@ extern "C" {
 #define IDEN_ENABLED_COMMANDS2                  86
 #define IDEN_UDMA_MODE                          88
 
-/* Typedefs    */
-
-/* Structures  */
-
     typedef struct mvStorageDevRegisters
     {
-/* Fields set by CORE driver */
+ 
         MV_U8    errorRegister;
-        MV_U16   featuresRegister;/*input only*/
-        MV_U8    commandRegister;/*input only*/
+        MV_U16   featuresRegister; 
+        MV_U8    commandRegister; 
         MV_U16   sectorCountRegister;
         MV_U16   lbaLowRegister;
         MV_U16   lbaMidRegister;
@@ -272,8 +171,6 @@ extern "C" {
         MV_U8    deviceRegister;
         MV_U8    statusRegister;
     } MV_STORAGE_DEVICE_REGISTERS;
-
-/* Function */
 
     MV_BOOLEAN mvStorageDevATAExecuteNonUDMACommand(MV_SATA_ADAPTER *pAdapter,
                                                     MV_U8 channelIndex,
@@ -310,8 +207,6 @@ extern "C" {
                                               MV_U8 PMPort,
                                               MV_STORAGE_DEVICE_REGISTERS *registerStruct
                                              );
-
-/*PM*/
 
     MV_BOOLEAN mvPMDevReadReg(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex,
                               MV_U8 PMPort, MV_U8 PMReg, MV_U32 *pValue,
@@ -364,6 +259,6 @@ extern "C" {
 #ifdef __cplusplus
 
 }
-#endif /* __cplusplus */
+#endif  
 
-#endif /* __INCmvStorageDevh */
+#endif  

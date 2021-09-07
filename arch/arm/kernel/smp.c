@@ -1,12 +1,4 @@
-/*
- *  linux/arch/arm/kernel/smp.c
- *
- *  Copyright (C) 2002 ARM Limited, All Rights Reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #include <linux/module.h>
 #include <linux/delay.h>
 #include <linux/init.h>
@@ -38,17 +30,8 @@
 #include <asm/localtimer.h>
 #include <asm/smp_plat.h>
 
-/*
- * as from 2.5, kernels no longer have an init_tasks structure
- * so we need some other way of telling a new secondary core
- * where to place its SVC stack
- */
 struct secondary_data secondary_data;
 
-/*
- * structures for inter-processor calls
- * - A collection of single bit ipi messages.
- */
 struct ipi_data {
 	spinlock_t lock;
 	unsigned long ipi_count;
@@ -75,10 +58,6 @@ int __cpuinit __cpu_up(unsigned int cpu)
 	pmd_t *pmd;
 	int ret;
 
-	/*
-	 * Spawn a new process manually, if not already done.
-	 * Grab a pointer to its task struct so we can mess with it
-	 */
 	if (!idle) {
 		idle = fork_idle(cpu);
 		if (IS_ERR(idle)) {
@@ -88,37 +67,20 @@ int __cpuinit __cpu_up(unsigned int cpu)
 		ci->idle = idle;
 	}
 
-	/*
-	 * Allocate initial page tables to allow the new CPU to
-	 * enable the MMU safely.  This essentially means a set
-	 * of our "standard" page tables, with the addition of
-	 * a 1:1 mapping for the physical address of the kernel.
-	 */
 	pgd = pgd_alloc(&init_mm);
 	pmd = pmd_offset(pgd + pgd_index(PHYS_OFFSET), PHYS_OFFSET);
 	*pmd = __pmd((PHYS_OFFSET & PGDIR_MASK) |
 		     PMD_TYPE_SECT | PMD_SECT_AP_WRITE);
 	flush_pmd_entry(pmd);
 
-	/*
-	 * We need to tell the secondary core where to find
-	 * its stack and the page tables.
-	 */
 	secondary_data.stack = task_stack_page(idle) + THREAD_START_SP;
 	secondary_data.pgdir = virt_to_phys(pgd);
 	wmb();
 
-	/*
-	 * Now bring the CPU into our world.
-	 */
 	ret = boot_secondary(cpu, idle);
 	if (ret == 0) {
 		unsigned long timeout;
 
-		/*
-		 * CPU was successfully started, wait for it
-		 * to come online or time out.
-		 */
 		timeout = jiffies + HZ;
 		while (time_before(jiffies, timeout)) {
 			if (cpu_online(cpu))
@@ -142,18 +104,13 @@ int __cpuinit __cpu_up(unsigned int cpu)
 	if (ret) {
 		printk(KERN_CRIT "CPU%u: processor failed to boot\n", cpu);
 
-		/*
-		 * FIXME: We need to clean up the new idle thread. --rmk
-		 */
 	}
 
 	return ret;
 }
 
 #ifdef CONFIG_HOTPLUG_CPU
-/*
- * __cpu_disable runs on the processor to be shutdown.
- */
+ 
 int __cpu_disable(void)
 {
 	unsigned int cpu = smp_processor_id();
@@ -164,26 +121,12 @@ int __cpu_disable(void)
 	if (ret)
 		return ret;
 
-	/*
-	 * Take this CPU offline.  Once we clear this, we can't return,
-	 * and we must not schedule until we're ready to give up the cpu.
-	 */
 	set_cpu_online(cpu, false);
 
-	/*
-	 * OK - migrate IRQs away from this CPU
-	 */
 	migrate_irqs();
 
-	/*
-	 * Stop the local timer for this CPU.
-	 */
 	local_timer_stop();
 
-	/*
-	 * Flush user cache and TLB mappings, and then remove this CPU
-	 * from the vm mask set of all processes.
-	 */
 	flush_cache_all();
 	local_flush_tlb_all();
 
@@ -197,24 +140,12 @@ int __cpu_disable(void)
 	return 0;
 }
 
-/*
- * called on the thread which is asking for a CPU to be shutdown -
- * waits until shutdown has completed, or it is timed out.
- */
 void __cpu_die(unsigned int cpu)
 {
 	if (!platform_cpu_kill(cpu))
 		printk("CPU%u: unable to kill\n", cpu);
 }
 
-/*
- * Called from the idle thread for the CPU which has been shutdown.
- *
- * Note that we disable IRQs here, but do not re-enable them
- * before returning to the caller. This is also the behaviour
- * of the other hotplug-cpu capable cores, so presumably coming
- * out of idle fixes this.
- */
 void __ref cpu_die(void)
 {
 	unsigned int cpu = smp_processor_id();
@@ -222,28 +153,15 @@ void __ref cpu_die(void)
 	local_irq_disable();
 	idle_task_exit();
 
-	/*
-	 * actual CPU shutdown procedure is at least platform (if not
-	 * CPU) specific
-	 */
 	platform_cpu_die(cpu);
 
-	/*
-	 * Do not return to the idle loop - jump back to the secondary
-	 * cpu initialisation.  There's some initialisation which needs
-	 * to be repeated to undo the effects of taking the CPU offline.
-	 */
 	__asm__("mov	sp, %0\n"
 	"	b	secondary_start_kernel"
 		:
 		: "r" (task_stack_page(current) + THREAD_SIZE - 8));
 }
-#endif /* CONFIG_HOTPLUG_CPU */
+#endif  
 
-/*
- * This is the secondary CPU boot entry.  We're using this CPUs
- * idle thread stack, but a set of temporary page tables.
- */
 asmlinkage void __cpuinit secondary_start_kernel(void)
 {
 	struct mm_struct *mm = &init_mm;
@@ -251,10 +169,6 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 
 	printk("CPU%u: Booted secondary processor\n", cpu);
 
-	/*
-	 * All kernel threads share the same mm context; grab a
-	 * reference and switch to it.
-	 */
 	atomic_inc(&mm->mm_users);
 	atomic_inc(&mm->mm_count);
 	current->active_mm = mm;
@@ -266,42 +180,23 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 	cpu_init();
 	preempt_disable();
 
-	/*
-	 * Give the platform a chance to do its own initialisation.
-	 */
 	platform_secondary_init(cpu);
 
-	/*
-	 * Enable local interrupts.
-	 */
 	notify_cpu_starting(cpu);
 	local_irq_enable();
 	local_fiq_enable();
 
-	/*
-	 * Setup the percpu timer for this CPU.
-	 */
 	percpu_timer_setup();
 
 	calibrate_delay();
 
 	smp_store_cpu_info(cpu);
 
-	/*
-	 * OK, now it's safe to let the boot CPU continue
-	 */
 	set_cpu_online(cpu, true);
 
-	/*
-	 * OK, it's off to the idle thread for us
-	 */
 	cpu_idle();
 }
 
-/*
- * Called by both boot and secondaries to move global data into
- * per-processor storage.
- */
 void __cpuinit smp_store_cpu_info(unsigned int cpuid)
 {
 	struct cpuinfo_arm *cpu_info = &per_cpu(cpu_data, cpuid);
@@ -346,9 +241,6 @@ static void send_ipi_message(const struct cpumask *mask, enum ipi_msg_type msg)
 		spin_unlock(&ipi->lock);
 	}
 
-	/*
-	 * Call the platform specific cross-CPU call function.
-	 */
 	smp_cross_call(mask);
 
 	local_irq_restore(flags);
@@ -388,9 +280,6 @@ void show_local_irqs(struct seq_file *p)
 	seq_putc(p, '\n');
 }
 
-/*
- * Timer (local or broadcast) support
- */
 static DEFINE_PER_CPU(struct clock_event_device, percpu_clockevent);
 
 static void ipi_timer(void)
@@ -454,9 +343,6 @@ void __cpuinit percpu_timer_setup(void)
 
 static DEFINE_SPINLOCK(stop_lock);
 
-/*
- * ipi_cpu_stop - handle IPI from smp_send_stop()
- */
 static void ipi_cpu_stop(unsigned int cpu)
 {
 	spin_lock(&stop_lock);
@@ -473,15 +359,6 @@ static void ipi_cpu_stop(unsigned int cpu)
 		cpu_relax();
 }
 
-/*
- * Main handler for inter-processor interrupts
- *
- * For ARM, the ipimask now only identifies a single
- * category of IPI (Bit 1 IPIs have been replaced by a
- * different mechanism):
- *
- *  Bit 0 - Inter-processor function call
- */
 asmlinkage void __exception do_IPI(struct pt_regs *regs)
 {
 	unsigned int cpu = smp_processor_id();
@@ -514,10 +391,7 @@ asmlinkage void __exception do_IPI(struct pt_regs *regs)
 				break;
 
 			case IPI_RESCHEDULE:
-				/*
-				 * nothing more to do - eveything is
-				 * done on the interrupt return path
-				 */
+				 
 				break;
 
 			case IPI_CALL_FUNC:
@@ -549,7 +423,7 @@ void smp_send_reschedule(int cpu)
 }
 
 #ifdef CONFIG_SYNO_PLX_PORTING
-/* Added from 2.6.24 to make 820 build for SMP */
+ 
 void smp_send_timer(void)
 {
 	cpumask_t mask = cpu_online_map;
@@ -565,9 +439,6 @@ void smp_send_stop(void)
 	send_ipi_message(&mask, IPI_CPU_STOP);
 }
 
-/*
- * not supported here
- */
 int setup_profiling_timer(unsigned int multiplier)
 {
 	return -EINVAL;
@@ -586,12 +457,7 @@ on_each_cpu_mask(void (*func)(void *), void *info, int wait,
 	preempt_enable();
 }
 
-/**********************************************************************/
-
-/*
- * TLB operations
- */
-#if !defined(CONFIG_ARCH_OX820) || !defined(CONFIG_SMP) //CONFIG_SYNO_PLX_PORTING
+#if !defined(CONFIG_ARCH_OX820) || !defined(CONFIG_SMP)  
 
 struct tlb_args {
 	struct vm_area_struct *ta_vma;
@@ -699,4 +565,4 @@ void flush_tlb_kernel_range(unsigned long start, unsigned long end)
 	} else
 		local_flush_tlb_kernel_range(start, end);
 }
-#endif // !defined(CONFIG_ARCH_OX820) || !defined(CONFIG_SMP)
+#endif  

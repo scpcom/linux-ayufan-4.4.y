@@ -1,9 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  Implementation of operations over global quota file
- */
+ 
 #include <linux/spinlock.h>
 #include <linux/fs.h>
 #include <linux/quota.h>
@@ -38,7 +36,6 @@ static void ocfs2_global_disk2memdqb(struct dquot *dquot, void *dp)
 	struct ocfs2_global_disk_dqblk *d = dp;
 	struct mem_dqblk *m = &dquot->dq_dqb;
 
-	/* Update from disk only entries not set by the admin */
 	if (!test_bit(DQ_LASTSET_B + QIF_ILIMITS_B, &dquot->dq_flags)) {
 		m->dqb_ihardlimit = le64_to_cpu(d->dqb_ihardlimit);
 		m->dqb_isoftlimit = le64_to_cpu(d->dqb_isoftlimit);
@@ -104,11 +101,6 @@ static int ocfs2_validate_quota_block(struct super_block *sb,
 
 	BUG_ON(!buffer_uptodate(bh));
 
-	/*
-	 * If the ecc fails, we return the error but otherwise
-	 * leave the filesystem running.  We know any error is
-	 * local to this block.
-	 */
 	return ocfs2_validate_meta_ecc(sb, bh->b_data, &dqt->dq_check);
 }
 
@@ -132,7 +124,6 @@ int ocfs2_read_quota_block(struct inode *inode, u64 v_block,
 	if (rc)
 		mlog_errno(rc);
 
-	/* If ocfs2_read_virt_blocks() got us a new bh, pass it up. */
 	if (!rc && !*bh)
 		*bh = tmp;
 
@@ -160,9 +151,6 @@ static int ocfs2_get_quota_block(struct inode *inode, int block,
 	return err;
 }
 
-/* Read data from global quotafile - avoid pagecache and such because we cannot
- * afford acquiring the locks... We use quota cluster lock to serialize
- * operations. Caller is responsible for acquiring it. */
 ssize_t ocfs2_quota_read(struct super_block *sb, int type, char *data,
 			 size_t len, loff_t off)
 {
@@ -198,8 +186,6 @@ ssize_t ocfs2_quota_read(struct super_block *sb, int type, char *data,
 	return len;
 }
 
-/* Write to quotafile (we know the transaction is already started and has
- * enough credits) */
 ssize_t ocfs2_quota_write(struct super_block *sb, int type,
 			  const char *data, size_t len, loff_t off)
 {
@@ -228,7 +214,6 @@ ssize_t ocfs2_quota_write(struct super_block *sb, int type,
 		loff_t rounded_end =
 				ocfs2_align_bytes_to_blocks(sb, off + len);
 
-		/* Space is already allocated in ocfs2_global_read_dquot() */
 		err = ocfs2_simple_size_update(gqinode,
 					       oinfo->dqi_gqi_bh,
 					       rounded_end);
@@ -236,7 +221,7 @@ ssize_t ocfs2_quota_write(struct super_block *sb, int type,
 			goto out;
 		new = 1;
 	}
-	/* Not rewriting whole block? */
+	 
 	if ((offset || len < sb->s_blocksize - OCFS2_QBLK_RESERVED_SPACE) &&
 	    !new) {
 		err = ocfs2_read_quota_block(gqinode, blk, &bh);
@@ -306,7 +291,6 @@ void ocfs2_unlock_global_qf(struct ocfs2_mem_dqinfo *oinfo, int ex)
 	spin_unlock(&dq_data_lock);
 }
 
-/* Read information header from global quota file */
 int ocfs2_global_read_info(struct super_block *sb, int type)
 {
 	struct inode *gqinode = NULL;
@@ -319,7 +303,6 @@ int ocfs2_global_read_info(struct super_block *sb, int type)
 
 	mlog_entry_void();
 
-	/* Read global header */
 	gqinode = ocfs2_get_system_file_inode(OCFS2_SB(sb), ino[type],
 			OCFS2_INVALID_SLOT);
 	if (!gqinode) {
@@ -372,8 +355,6 @@ out_err:
 	return status;
 }
 
-/* Write information to global quota file. Expects exlusive lock on quota
- * file inode and quota info */
 static int __ocfs2_global_write_info(struct super_block *sb, int type)
 {
 	struct mem_dqinfo *info = sb_dqinfo(sb, type);
@@ -419,22 +400,16 @@ static int ocfs2_global_qinit_alloc(struct super_block *sb, int type)
 {
 	struct ocfs2_mem_dqinfo *oinfo = sb_dqinfo(sb, type)->dqi_priv;
 
-	/*
-	 * We may need to allocate tree blocks and a leaf block but not the
-	 * root block
-	 */
 	return oinfo->dqi_gi.dqi_qtree_depth;
 }
 
 static int ocfs2_calc_global_qinit_credits(struct super_block *sb, int type)
 {
-	/* We modify all the allocated blocks, tree root, and info block */
+	 
 	return (ocfs2_global_qinit_alloc(sb, type) + 2) *
 			OCFS2_QUOTA_BLOCK_UPDATE_CREDITS;
 }
 
-/* Read in information from global quota file and acquire a reference to it.
- * dquot_acquire() has already started the transaction and locked quota file */
 int ocfs2_global_read_dquot(struct dquot *dquot)
 {
 	int err, err2, ex = 0;
@@ -457,12 +432,9 @@ int ocfs2_global_read_dquot(struct dquot *dquot)
 	OCFS2_DQUOT(dquot)->dq_originodes = dquot->dq_dqb.dqb_curinodes;
 	ocfs2_qinfo_unlock(info, 0);
 
-	if (!dquot->dq_off) {	/* No real quota entry? */
+	if (!dquot->dq_off) {	 
 		ex = 1;
-		/*
-		 * Add blocks to quota file before we start a transaction since
-		 * locking allocators ranks above a transaction start
-		 */
+		 
 		WARN_ON(journal_current_handle());
 		down_write(&OCFS2_I(gqinode)->ip_alloc_sem);
 		err = ocfs2_extend_no_holes(gqinode,
@@ -502,9 +474,6 @@ out:
 	return err;
 }
 
-/* Sync local information about quota modifications with global quota file.
- * Caller must have started the transaction and obtained exclusive lock for
- * global quota file inode */
 int __ocfs2_sync_dquot(struct dquot *dquot, int freeing)
 {
 	int err, err2;
@@ -527,9 +496,6 @@ int __ocfs2_sync_dquot(struct dquot *dquot, int freeing)
 		goto out;
 	}
 
-	/* Update space and inode usage. Get also other information from
-	 * global quota file so that we don't overwrite any changes there.
-	 * We are */
 	spin_lock(&dq_data_lock);
 	spacechange = dquot->dq_dqb.dqb_curspace -
 					OCFS2_DQUOT(dquot)->dq_origspace;
@@ -545,7 +511,7 @@ int __ocfs2_sync_dquot(struct dquot *dquot, int freeing)
 		dquot->dq_dqb.dqb_curspace += spacechange;
 	if (!test_bit(DQ_LASTSET_B + QIF_INODES_B, &dquot->dq_flags))
 		dquot->dq_dqb.dqb_curinodes += inodechange;
-	/* Set properly space grace time... */
+	 
 	if (dquot->dq_dqb.dqb_bsoftlimit &&
 	    dquot->dq_dqb.dqb_curspace > dquot->dq_dqb.dqb_bsoftlimit) {
 		if (!test_bit(DQ_LASTSET_B + QIF_BTIME_B, &dquot->dq_flags) &&
@@ -560,7 +526,7 @@ int __ocfs2_sync_dquot(struct dquot *dquot, int freeing)
 		dquot->dq_dqb.dqb_btime = 0;
 		clear_bit(DQ_BLKS_B, &dquot->dq_flags);
 	}
-	/* Set properly inode grace time... */
+	 
 	if (dquot->dq_dqb.dqb_isoftlimit &&
 	    dquot->dq_dqb.dqb_curinodes > dquot->dq_dqb.dqb_isoftlimit) {
 		if (!test_bit(DQ_LASTSET_B + QIF_ITIME_B, &dquot->dq_flags) &&
@@ -575,7 +541,7 @@ int __ocfs2_sync_dquot(struct dquot *dquot, int freeing)
 		dquot->dq_dqb.dqb_itime = 0;
 		clear_bit(DQ_INODES_B, &dquot->dq_flags);
 	}
-	/* All information is properly updated, clear the flags */
+	 
 	__clear_bit(DQ_LASTSET_B + QIF_SPACE_B, &dquot->dq_flags);
 	__clear_bit(DQ_LASTSET_B + QIF_INODES_B, &dquot->dq_flags);
 	__clear_bit(DQ_LASTSET_B + QIF_BLIMITS_B, &dquot->dq_flags);
@@ -613,9 +579,6 @@ out:
 	return err;
 }
 
-/*
- *  Functions for periodic syncing of dquots with global file
- */
 static int ocfs2_sync_dquot_helper(struct dquot *dquot, unsigned long type)
 {
 	handle_t *handle;
@@ -643,7 +606,7 @@ static int ocfs2_sync_dquot_helper(struct dquot *dquot, unsigned long type)
 	mutex_unlock(&sb_dqopt(sb)->dqio_mutex);
 	if (status < 0)
 		mlog_errno(status);
-	/* We have to write local structure as well... */
+	 
 	dquot_mark_dquot_dirty(dquot);
 	status = dquot_commit(dquot);
 	if (status < 0)
@@ -667,10 +630,6 @@ static void qsync_work_fn(struct work_struct *work)
 	queue_delayed_work(ocfs2_quota_wq, &oinfo->dqi_sync_work,
 			   msecs_to_jiffies(oinfo->dqi_syncms));
 }
-
-/*
- *  Wrappers for generic quota functions
- */
 
 static int ocfs2_write_dquot(struct dquot *dquot)
 {
@@ -696,11 +655,7 @@ out:
 static int ocfs2_calc_qdel_credits(struct super_block *sb, int type)
 {
 	struct ocfs2_mem_dqinfo *oinfo = sb_dqinfo(sb, type)->dqi_priv;
-	/*
-	 * We modify tree, leaf block, global info, local chunk header,
-	 * global and local inode; OCFS2_QINFO_WRITE_CREDITS already
-	 * accounts for inode update
-	 */
+	 
 	return (oinfo->dqi_gi.dqi_qtree_depth + 2) *
 	       OCFS2_QUOTA_BLOCK_UPDATE_CREDITS +
 	       OCFS2_QINFO_WRITE_CREDITS +
@@ -743,8 +698,7 @@ static int ocfs2_acquire_dquot(struct dquot *dquot)
 	int status = 0;
 
 	mlog_entry("id=%u, type=%d", dquot->dq_id, dquot->dq_type);
-	/* We need an exclusive lock, because we're going to update use count
-	 * and instantiate possibly new dquot structure */
+	 
 	status = ocfs2_lock_global_qf(oinfo, 1);
 	if (status < 0)
 		goto out;
@@ -774,14 +728,11 @@ static int ocfs2_mark_dquot_dirty(struct dquot *dquot)
 	mlog_entry("id=%u, type=%d", dquot->dq_id, type);
 	dquot_mark_dquot_dirty(dquot);
 
-	/* In case user set some limits, sync dquot immediately to global
-	 * quota file so that information propagates quicker */
 	spin_lock(&dq_data_lock);
 	if (dquot->dq_flags & mask)
 		sync = 1;
 	spin_unlock(&dq_data_lock);
-	/* This is a slight hack but we can't afford getting global quota
-	 * lock if we already have a transaction started. */
+	 
 	if (!sync || journal_current_handle()) {
 		status = ocfs2_write_dquot(dquot);
 		goto out;
@@ -800,7 +751,7 @@ static int ocfs2_mark_dquot_dirty(struct dquot *dquot)
 		mlog_errno(status);
 		goto out_trans;
 	}
-	/* Now write updated local dquot structure */
+	 
 	status = dquot_commit(dquot);
 out_trans:
 	ocfs2_commit_trans(osb, handle);
@@ -811,7 +762,6 @@ out:
 	return status;
 }
 
-/* This should happen only after set_dqinfo(). */
 static int ocfs2_write_info(struct super_block *sb, int type)
 {
 	handle_t *handle;

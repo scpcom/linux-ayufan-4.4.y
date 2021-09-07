@@ -1,45 +1,13 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
-   md.c : Multiple Devices driver for Linux
-	  Copyright (C) 1998, 1999, 2000 Ingo Molnar
 
-     completely rewritten, based on the MD driver code from Marc Zyngier
-
-   Changes:
-
-   - RAID-1/RAID-5 extensions by Miguel de Icaza, Gadi Oxman, Ingo Molnar
-   - RAID-6 extensions by H. Peter Anvin <hpa@zytor.com>
-   - boot support for linear and striped mode by Harald Hoyer <HarryH@Royal.Net>
-   - kerneld support by Boris Tobotras <boris@xtalk.msk.su>
-   - kmod support by: Cyrus Durgin
-   - RAID0 bugfixes: Mark Anthony Lisher <markal@iname.com>
-   - Devfs support by Richard Gooch <rgooch@atnf.csiro.au>
-
-   - lots of fixes and improvements to the RAID1/RAID5 and generic
-     RAID code (such as request based resynchronization):
-
-     Neil Brown <neilb@cse.unsw.edu.au>.
-
-   - persistent bitmap code
-     Copyright (C) 2003-2004, Paul Clements, SteelEye Technology, Inc.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   You should have received a copy of the GNU General Public License
-   (for example /usr/src/linux/COPYING); if not, write to the Free
-   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
 
 #include <linux/kthread.h>
 #include <linux/blkdev.h>
 #include <linux/sysctl.h>
 #include <linux/seq_file.h>
-#include <linux/buffer_head.h> /* for invalidate_bdev */
+#include <linux/buffer_head.h> 
 #include <linux/poll.h>
 #include <linux/ctype.h>
 #include <linux/hdreg.h>
@@ -76,14 +44,14 @@ extern int SynoDebugFlag;
 
 #ifdef MY_ABC_HERE
 extern struct rw_semaphore s_reshape_mount_key;
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern int (*funcSYNORaidDiskUnplug)(char *szDiskName);
 EXPORT_SYMBOL(SYNORaidRdevUnplug);
 int SYNORaidDiskUnplug(char *szArgDiskName);
 void SYNORaidUnplugTask(struct work_struct *);
-#endif  /* MY_ABC_HERE */
+#endif  
 
 #define DEBUG 0
 #define dprintk(x...) ((void)(DEBUG && printk(x)))
@@ -105,18 +73,7 @@ static DECLARE_WAIT_QUEUE_HEAD(resync_wait);
 
 #define MD_BUG(x...) { printk("md: bug in file %s, line %d\n", __FILE__, __LINE__); md_print_devices(); }
 
-/*
- * Current RAID-1,4,5 parallel reconstruction 'guaranteed speed limit'
- * is 1000 KB/sec, so the extra system load does not show up that much.
- * Increase it if you want to have more _guaranteed_ speed. Note that
- * the RAID driver will use the maximum available bandwidth if the IO
- * subsystem is idle. There is also an 'absolute maximum' reconstruction
- * speed limit - in case reconstruction slows down your system despite
- * idle IO detection.
- *
- * you can change it via /proc/sys/dev/raid/speed_limit_min and _max.
- * or /sys/block/mdX/md/sync_speed_{min,max}
- */
+
 
 static int sysctl_speed_limit_min = 1000;
 static int sysctl_speed_limit_max = 200000;
@@ -180,16 +137,7 @@ static const struct block_device_operations md_fops;
 
 static int start_readonly;
 
-/*
- * We have a system wide 'event count' that is incremented
- * on any 'interesting' event, and readers of /proc/mdstat
- * can use 'poll' or 'select' to find out when the event
- * count increases.
- *
- * Events are:
- *  start array, stop array, error, add device, remove device,
- *  start build, activate spare
- */
+
 static DECLARE_WAIT_QUEUE_HEAD(md_event_waiters);
 static atomic_t md_event_count;
 void md_new_event(mddev_t *mddev)
@@ -199,29 +147,18 @@ void md_new_event(mddev_t *mddev)
 }
 EXPORT_SYMBOL_GPL(md_new_event);
 
-/* Alternate version that can be called from interrupts
- * when calling sysfs_notify isn't needed.
- */
+
 static void md_new_event_inintr(mddev_t *mddev)
 {
 	atomic_inc(&md_event_count);
 	wake_up(&md_event_waiters);
 }
 
-/*
- * Enables to iterate over all existing md arrays
- * all_mddevs_lock protects this list.
- */
+
 static LIST_HEAD(all_mddevs);
 static DEFINE_SPINLOCK(all_mddevs_lock);
 
-/*
- * iterates through all used mddevs in the system.
- * We take care to grab the all_mddevs_lock whenever navigating
- * the list, and to always hold a refcount when unlocked.
- * Any code which breaks out of this loop while own
- * a reference to the current mddev and must mddev_put it.
- */
+
 #define for_each_mddev(mddev,tmp)					\
 									\
 	for (({ spin_lock(&all_mddevs_lock); 				\
@@ -259,13 +196,7 @@ static void syno_md_endio(struct bio *bio, int error)
 }
 #endif
 
-/* Rather than calling directly into the personality make_request function,
- * IO requests come here first so that we can check if the device is
- * being suspended pending a reconfiguration.
- * We hold a refcount over the call to ->make_request.  By the time that
- * call has finished, the bio has been linked into some internal structure
- * and so is visible to ->quiesce(), so we don't need the refcount any more.
- */
+
 static int md_make_request(struct request_queue *q, struct bio *bio)
 {
 	mddev_t *mddev = q->queuedata;
@@ -302,7 +233,7 @@ static int md_make_request(struct request_queue *q, struct bio *bio)
 	rcu_read_unlock();
 
 #ifdef MY_ABC_HERE
-	/* we only check when after the last request 7s */
+	
 	if (time_after(jiffies, mddev->ulLastReq + CHECKINTERVAL)) {
 		spin_lock(&mddev->ActLock);
 		blActive = mddev->blActive;
@@ -314,7 +245,7 @@ static int md_make_request(struct request_queue *q, struct bio *bio)
 		}
 	}
 
-	/* update the last request time */
+	
 	mddev->ulLastReq = jiffies;
 #endif
 #ifdef MY_ABC_HERE
@@ -357,11 +288,7 @@ static void mddev_suspend(mddev_t *mddev)
 	mddev->pers->quiesce(mddev, 1);
 	md_unregister_thread(mddev->thread);
 	mddev->thread = NULL;
-	/* we now know that no code is executing in the personality module,
-	 * except possibly the tail end of a ->bi_end_io function, but that
-	 * is certain to complete before the module has a chance to get
-	 * unloaded
-	 */
+	
 }
 
 static void mddev_resume(mddev_t *mddev)
@@ -395,20 +322,14 @@ static void mddev_put(mddev_t *mddev)
 		return;
 	if (!mddev->raid_disks && list_empty(&mddev->disks) &&
 	    mddev->ctime == 0 && !mddev->hold_active) {
-		/* Array is not configured at all, and not held active,
-		 * so destroy it */
+		
 		list_del(&mddev->all_mddevs);
 #ifdef MY_ABC_HERE
 		mempool = mddev->syno_mdio_mempool;
 		mddev->syno_mdio_mempool = NULL;
 #endif
 		if (mddev->gendisk) {
-			/* we did a probe so need to clean up.
-			 * Call schedule_work inside the spinlock
-			 * so that flush_scheduled_work() after
-			 * mddev_find will succeed in waiting for the
-			 * work to be done.
-			 */
+			
 			INIT_WORK(&mddev->del_work, mddev_delayed_delete);
 			schedule_work(&mddev->del_work);
 		} else
@@ -444,7 +365,7 @@ static mddev_t * mddev_find(dev_t unit)
 			return new;
 		}
 	} else if (new) {
-		/* find an unused unit number */
+		
 		static int next_minor = 512;
 		int start = next_minor;
 		int is_free = 0;
@@ -455,7 +376,7 @@ static mddev_t * mddev_find(dev_t unit)
 			if (next_minor > MINORMASK)
 				next_minor = 0;
 			if (next_minor == start) {
-				/* Oh dear, all in use. */
+				
 				spin_unlock(&all_mddevs_lock);
 				kfree(new);
 				return NULL;
@@ -568,7 +489,7 @@ static struct mdk_personality *find_pers(int level, char *clevel)
 	return NULL;
 }
 
-/* return the offset of the super block in 512byte sectors */
+
 static inline sector_t calc_dev_sboffset(struct block_device *bdev)
 {
 	sector_t num_sectors = bdev->bd_inode->i_size / 512;
@@ -657,7 +578,7 @@ static void super_written_barrier(struct bio *bio, int error)
 	if (!test_bit(BIO_UPTODATE, &bio->bi_flags) &&
 	    error == -EOPNOTSUPP) {
 		unsigned long flags;
-		/* barriers don't appear to be supported :-( */
+		
 		set_bit(BarriersNotsupp, &rdev->flags);
 		mddev->barriers_work = 0;
 		spin_lock_irqsave(&mddev->write_lock, flags);
@@ -703,15 +624,7 @@ void SYNOSwapSuperblock0(mdp_super_t *sb)
 void md_super_write(mddev_t *mddev, mdk_rdev_t *rdev,
 		   sector_t sector, int size, struct page *page)
 {
-	/* write first size bytes of page to sector of rdev
-	 * Increment mddev->pending_writes before returning
-	 * and decrement it on completion, waking up sb_wait
-	 * if zero is reached.
-	 * If an error occurred, call md_error
-	 *
-	 * As we might need to resubmit the request if BIO_RW_BARRIER
-	 * causes ENOTSUPP, we allocate a spare bio...
-	 */
+	
 	struct bio *bio = bio_alloc(GFP_NOIO, 1);
 	int rw = (1<<BIO_RW) | (1<<BIO_RW_SYNCIO) | (1<<BIO_RW_UNPLUG);
 
@@ -736,9 +649,7 @@ void md_super_write(mddev_t *mddev, mdk_rdev_t *rdev,
 
 void md_super_wait(mddev_t *mddev)
 {
-	/* wait for all superblock writes that were scheduled to complete.
-	 * if any had to be retried (due to BARRIER problems), retry them
-	 */
+	
 	DEFINE_WAIT(wq);
 	for(;;) {
 		prepare_to_wait(&mddev->sb_wait, &wq, TASK_UNINTERRUPTIBLE);
@@ -880,9 +791,7 @@ static int sb_equal(mdp_super_t *sb1, mdp_super_t *sb2)
 	*tmp1 = *sb1;
 	*tmp2 = *sb2;
 
-	/*
-	 * nr_disks is not constant
-	 */
+	
 	tmp1->nr_disks = 0;
 	tmp2->nr_disks = 0;
 
@@ -914,14 +823,7 @@ static unsigned int calc_sb_csum(mdp_super_t * sb)
 	csum = (newcsum & 0xffffffff) + (newcsum>>32);
 
 #ifdef CONFIG_ALPHA
-	/* This used to use csum_partial, which was wrong for several
-	 * reasons including that different results are returned on
-	 * different architectures.  It isn't critical that we get exactly
-	 * the same return value as before (we always csum_fold before
-	 * testing, and that removes any differences).  However as we
-	 * know that csum_partial always returned a 16bit value on
-	 * alphas, do a fold to maximise conformity to previous behaviour.
-	 */
+	
 	sb->sb_csum = md_csum_fold(disk_csum);
 #else
 	sb->sb_csum = disk_csum;
@@ -929,35 +831,7 @@ static unsigned int calc_sb_csum(mdp_super_t * sb)
 	return csum;
 }
 
-/*
- * Handle superblock details.
- * We want to be able to handle multiple superblock formats
- * so we have a common interface to them all, and an array of
- * different handlers.
- * We rely on user-space to write the initial superblock, and support
- * reading and updating of superblocks.
- * Interface methods are:
- *   int load_super(mdk_rdev_t *dev, mdk_rdev_t *refdev, int minor_version)
- *      loads and validates a superblock on dev.
- *      if refdev != NULL, compare superblocks on both devices
- *    Return:
- *      0 - dev has a superblock that is compatible with refdev
- *      1 - dev has a superblock that is compatible and newer than refdev
- *          so dev should be used as the refdev in future
- *     -EINVAL superblock incompatible or invalid
- *     -othererror e.g. -EIO
- *
- *   int validate_super(mddev_t *mddev, mdk_rdev_t *dev)
- *      Verify that dev is acceptable into mddev.
- *       The first time, mddev->raid_disks will be 0, and data from
- *       dev should be merged in.  Subsequent calls check that dev
- *       is new enough.  Return 0 or -EINVAL
- *
- *   void sync_super(mddev_t *mddev, mdk_rdev_t *dev)
- *     Update the superblock for rdev with data in mddev
- *     This does not write to disc.
- *
- */
+
 
 struct super_type  {
 	char		    *name;
@@ -970,14 +844,7 @@ struct super_type  {
 						sector_t num_sectors);
 };
 
-/*
- * Check that the given mddev has no bitmap.
- *
- * This function is called from the run method of all personalities that do not
- * support bitmaps. It prints an error message and returns non-zero if mddev
- * has a bitmap. Otherwise, it returns 0.
- *
- */
+
 int md_check_no_bitmap(mddev_t *mddev)
 {
 	if (!mddev->bitmap_file && !mddev->bitmap_offset)
@@ -1003,21 +870,14 @@ super_90_validate_rdev_event(mdk_rdev_t *newest_rdev,
 }
 #endif
 
-/*
- * load_super for 0.90.0 
- */
+
 static int super_90_load(mdk_rdev_t *rdev, mdk_rdev_t *refdev, int minor_version)
 {
 	char b[BDEVNAME_SIZE], b2[BDEVNAME_SIZE];
 	mdp_super_t *sb;
 	int ret;
 
-	/*
-	 * Calculate the position of the superblock (512byte sectors),
-	 * it's at the end of the disk.
-	 *
-	 * It also happens to be a multiple of 4Kb.
-	 */
+	
 	rdev->sb_start = calc_dev_sboffset(rdev->bdev);
 
 	ret = read_disk_sb(rdev, MD_SB_BYTES);
@@ -1087,16 +947,14 @@ static int super_90_load(mdk_rdev_t *rdev, mdk_rdev_t *refdev, int minor_version
 	rdev->sectors = rdev->sb_start;
 
 	if (rdev->sectors < sb->size * 2 && sb->level > 1)
-		/* "this cannot possibly happen" ... */
+		
 		ret = -EINVAL;
 
  abort:
 	return ret;
 }
 
-/*
- * validate_super for 0.90.0
- */
+
 static int super_90_validate(mddev_t *mddev, mdk_rdev_t *rdev)
 {
 	mdp_disk_t *desc;
@@ -1162,19 +1020,17 @@ static int super_90_validate(mddev_t *mddev, mdk_rdev_t *rdev)
 			mddev->bitmap_offset = mddev->default_bitmap_offset;
 
 	} else if (mddev->pers == NULL) {
-		/* Insist on good event counter while assembling */
+		
 		++ev1;
 		if (ev1 < mddev->events) 
 			return -EINVAL;
 	} else if (mddev->bitmap) {
-		/* if adding to array with a bitmap, then we can accept an
-		 * older device ... but not too old.
-		 */
+		
 		if (ev1 < mddev->bitmap->events_cleared)
 			return 0;
 	} else {
 		if (ev1 < mddev->events)
-			/* just a hot-add of a new device, leave raid_disk at -1 */
+			
 			return 0;
 	}
 
@@ -1183,8 +1039,7 @@ static int super_90_validate(mddev_t *mddev, mdk_rdev_t *rdev)
 
 		if (desc->state & (1<<MD_DISK_FAULTY))
 			set_bit(Faulty, &rdev->flags);
-		else if (desc->state & (1<<MD_DISK_SYNC) /* &&
-			    desc->raid_disk < mddev->raid_disks */) {
+		else if (desc->state & (1<<MD_DISK_SYNC) ) {
 			set_bit(In_sync, &rdev->flags);
 			rdev->raid_disk = desc->raid_disk;
 #ifdef MY_ABC_HERE
@@ -1193,9 +1048,7 @@ static int super_90_validate(mddev_t *mddev, mdk_rdev_t *rdev)
 			}
 #endif
 		} else if (desc->state & (1<<MD_DISK_ACTIVE)) {
-			/* active but not in sync implies recovery up to
-			 * reshape position.  We don't know exactly where
-			 * that is, so set to zero for now */
+			
 			if (mddev->minor_version >= 91) {
 				rdev->recovery_offset = 0;
 				rdev->raid_disk = desc->raid_disk;
@@ -1203,30 +1056,19 @@ static int super_90_validate(mddev_t *mddev, mdk_rdev_t *rdev)
 		}
 		if (desc->state & (1<<MD_DISK_WRITEMOSTLY))
 			set_bit(WriteMostly, &rdev->flags);
-	} else /* MULTIPATH are always insync */
+	} else 
 		set_bit(In_sync, &rdev->flags);
 	return 0;
 }
 
-/*
- * sync_super for 0.90.0
- */
+
 static void super_90_sync(mddev_t *mddev, mdk_rdev_t *rdev)
 {
 	mdp_super_t *sb;
 	mdk_rdev_t *rdev2;
 	int next_spare = mddev->raid_disks;
 
-	/* make rdev->sb match mddev data..
-	 *
-	 * 1/ zero out disks
-	 * 2/ Add info for each disk, keeping track of highest desc_nr (next_spare);
-	 * 3/ any empty disks < next_spare become removed
-	 *
-	 * disks[0] gets initialised to REMOVED because
-	 * we cannot be sure from other fields if it has
-	 * been initialised or not.
-	 */
+	
 	int i;
 	int active=0, working=0,failed=0,spare=0,nr_disks=0;
 
@@ -1239,7 +1081,7 @@ static void super_90_sync(mddev_t *mddev, mdk_rdev_t *rdev)
 	sb->md_magic = MD_SB_MAGIC;
 	sb->major_version = mddev->major_version;
 	sb->patch_version = mddev->patch_version;
-	sb->gvalid_words  = 0; /* ignored */
+	sb->gvalid_words  = 0; 
 	memcpy(&sb->set_uuid0, mddev->uuid+0, 4);
 	memcpy(&sb->set_uuid1, mddev->uuid+4, 4);
 	memcpy(&sb->set_uuid2, mddev->uuid+8, 4);
@@ -1291,10 +1133,7 @@ static void super_90_sync(mddev_t *mddev, mdk_rdev_t *rdev)
 
 		if (rdev2->raid_disk >= 0 &&
 		    sb->minor_version >= 91)
-			/* we have nowhere to store the recovery_offset,
-			 * but if it is not below the reshape_position,
-			 * we can piggy-back on that.
-			 */
+			
 			is_active = 1;
 		if (rdev2->raid_disk < 0 ||
 		    test_bit(Faulty, &rdev2->flags))
@@ -1312,7 +1151,7 @@ static void super_90_sync(mddev_t *mddev, mdk_rdev_t *rdev)
 		if (is_active)
 			d->raid_disk = rdev2->raid_disk;
 		else
-			d->raid_disk = rdev2->desc_nr; /* compatibility */
+			d->raid_disk = rdev2->desc_nr; 
 		if (test_bit(Faulty, &rdev2->flags))
 			d->state = (1<<MD_DISK_FAULTY);
 		else if (is_active) {
@@ -1334,7 +1173,7 @@ static void super_90_sync(mddev_t *mddev, mdk_rdev_t *rdev)
 		if (test_bit(WriteMostly, &rdev2->flags))
 			d->state |= (1<<MD_DISK_WRITEMOSTLY);
 	}
-	/* now set the "removed" and "faulty" bits on any missing devices */
+	
 	for (i=0 ; i < mddev->raid_disks ; i++) {
 		mdp_disk_t *d = &sb->disks[i];
 		if (d->state == 0 && d->number == 0) {
@@ -1359,28 +1198,24 @@ static void super_90_sync(mddev_t *mddev, mdk_rdev_t *rdev)
 #endif
 }
 
-/*
- * rdev_size_change for 0.90.0
- */
+
 static unsigned long long
 super_90_rdev_size_change(mdk_rdev_t *rdev, sector_t num_sectors)
 {
 	if (num_sectors && num_sectors < rdev->mddev->dev_sectors)
-		return 0; /* component must fit device */
+		return 0; 
 	if (rdev->mddev->bitmap_offset)
-		return 0; /* can't move bitmap */
+		return 0; 
 	rdev->sb_start = calc_dev_sboffset(rdev->bdev);
 	if (!num_sectors || num_sectors > rdev->sb_start)
 		num_sectors = rdev->sb_start;
 	md_super_write(rdev->mddev, rdev, rdev->sb_start, rdev->sb_size,
 		       rdev->sb_page);
 	md_super_wait(rdev->mddev);
-	return num_sectors / 2; /* kB for sysfs */
+	return num_sectors / 2; 
 }
 
-/*
- * version 1 superblock
- */
+
 
 static __le32 calc_sb_1_csum(struct mdp_superblock_1 * sb)
 {
@@ -1413,14 +1248,7 @@ static int super_1_load(mdk_rdev_t *rdev, mdk_rdev_t *refdev, int minor_version)
 	char b[BDEVNAME_SIZE], b2[BDEVNAME_SIZE];
 	int bmask;
 
-	/*
-	 * Calculate the position of the superblock in 512byte sectors.
-	 * It is always aligned to a 4K boundary and
-	 * depeding on minor_version, it can be:
-	 * 0: At least 8K, but less than 12K, from end of device
-	 * 1: At start of device
-	 * 2: 4K from start of device.
-	 */
+	
 	switch(minor_version) {
 	case 0:
 		sb_start = rdev->bdev->bd_inode->i_size >> 9;
@@ -1438,9 +1266,7 @@ static int super_1_load(mdk_rdev_t *rdev, mdk_rdev_t *refdev, int minor_version)
 	}
 	rdev->sb_start = sb_start;
 
-	/* superblock is rarely larger than 1K, but it can be larger,
-	 * and it is safe to read 4k, so we do that
-	 */
+	
 	ret = read_disk_sb(rdev, 4096);
 	if (ret) return ret;
 
@@ -1571,19 +1397,17 @@ static int super_1_validate(mddev_t *mddev, mdk_rdev_t *rdev)
 		}
 
 	} else if (mddev->pers == NULL) {
-		/* Insist of good event counter while assembling */
+		
 		++ev1;
 		if (ev1 < mddev->events)
 			return -EINVAL;
 	} else if (mddev->bitmap) {
-		/* If adding to array with a bitmap, then we can accept an
-		 * older device, but not too old.
-		 */
+		
 		if (ev1 < mddev->bitmap->events_cleared)
 			return 0;
 	} else {
 		if (ev1 < mddev->events)
-			/* just a hot-add of a new device, leave raid_disk at -1 */
+			
 			return 0;
 	}
 	if (mddev->level != LEVEL_MULTIPATH) {
@@ -1595,9 +1419,9 @@ static int super_1_validate(mddev_t *mddev, mdk_rdev_t *rdev)
 		} else
 			role = le16_to_cpu(sb->dev_roles[rdev->desc_nr]);
 		switch(role) {
-		case 0xffff: /* spare */
+		case 0xffff: 
 			break;
-		case 0xfffe: /* faulty */
+		case 0xfffe: 
 			set_bit(Faulty, &rdev->flags);
 			break;
 		default:
@@ -1618,7 +1442,7 @@ static int super_1_validate(mddev_t *mddev, mdk_rdev_t *rdev)
 		}
 		if (sb->devflags & WriteMostly1)
 			set_bit(WriteMostly, &rdev->flags);
-	} else /* MULTIPATH are always insync */
+	} else 
 		set_bit(In_sync, &rdev->flags);
 
 	return 0;
@@ -1629,7 +1453,7 @@ static void super_1_sync(mddev_t *mddev, mdk_rdev_t *rdev)
 	struct mdp_superblock_1 *sb;
 	mdk_rdev_t *rdev2;
 	int max_dev, i;
-	/* make rdev->sb match mddev and rdev data. */
+	
 
 	sb = (struct mdp_superblock_1*)page_address(rdev->sb_page);
 
@@ -1703,7 +1527,7 @@ static void super_1_sync(mddev_t *mddev, mdk_rdev_t *rdev)
 #ifdef MY_ABC_HERE
 		{
 			if (test_bit(DiskError, &rdev2->flags)) {
-				/* steal the left most bit for our status use. hope the a raid don't contain more the 0x7fff members */
+				
 				sb->dev_roles[i] = cpu_to_le16(0x8000 | rdev2->raid_disk);
 			} else {
 				sb->dev_roles[i] = cpu_to_le16(rdev2->raid_disk);
@@ -1727,18 +1551,18 @@ super_1_rdev_size_change(mdk_rdev_t *rdev, sector_t num_sectors)
 	struct mdp_superblock_1 *sb;
 	sector_t max_sectors;
 	if (num_sectors && num_sectors < rdev->mddev->dev_sectors)
-		return 0; /* component must fit device */
+		return 0; 
 	if (rdev->sb_start < rdev->data_offset) {
-		/* minor versions 1 and 2; superblock before data */
+		
 		max_sectors = rdev->bdev->bd_inode->i_size >> 9;
 		max_sectors -= rdev->data_offset;
 		if (!num_sectors || num_sectors > max_sectors)
 			num_sectors = max_sectors;
 	} else if (rdev->mddev->bitmap_offset) {
-		/* minor version 0 with bitmap we can't move */
+		
 		return 0;
 	} else {
-		/* minor version 0; superblock after data */
+		
 		sector_t sb_start;
 		sb_start = (rdev->bdev->bd_inode->i_size >> 9) - 8*2;
 		sb_start &= ~(sector_t)(4*2 - 1);
@@ -1754,7 +1578,7 @@ super_1_rdev_size_change(mdk_rdev_t *rdev, sector_t num_sectors)
 	md_super_write(rdev->mddev, rdev, rdev->sb_start, rdev->sb_size,
 		       rdev->sb_page);
 	md_super_wait(rdev->mddev);
-	return num_sectors / 2; /* kB for sysfs */
+	return num_sectors / 2; 
 }
 
 static struct super_type super_types[] = {
@@ -1794,47 +1618,35 @@ static int match_mddev_units(mddev_t *mddev1, mddev_t *mddev2)
 
 static LIST_HEAD(pending_raid_disks);
 
-/*
- * Try to register data integrity profile for an mddev
- *
- * This is called when an array is started and after a disk has been kicked
- * from the array. It only succeeds if all working and active component devices
- * are integrity capable with matching profiles.
- */
+
 int md_integrity_register(mddev_t *mddev)
 {
 	mdk_rdev_t *rdev, *reference = NULL;
 
 	if (list_empty(&mddev->disks))
-		return 0; /* nothing to do */
+		return 0; 
 	if (blk_get_integrity(mddev->gendisk))
-		return 0; /* already registered */
+		return 0; 
 	list_for_each_entry(rdev, &mddev->disks, same_set) {
-		/* skip spares and non-functional disks */
+		
 		if (test_bit(Faulty, &rdev->flags))
 			continue;
 		if (rdev->raid_disk < 0)
 			continue;
-		/*
-		 * If at least one rdev is not integrity capable, we can not
-		 * enable data integrity for the md device.
-		 */
+		
 		if (!bdev_get_integrity(rdev->bdev))
 			return -EINVAL;
 		if (!reference) {
-			/* Use the first rdev as the reference */
+			
 			reference = rdev;
 			continue;
 		}
-		/* does this rdev's profile match the reference profile? */
+		
 		if (blk_integrity_compare(reference->bdev->bd_disk,
 				rdev->bdev->bd_disk) < 0)
 			return -EINVAL;
 	}
-	/*
-	 * All component devices are integrity capable and have matching
-	 * profiles, register the common profile for the md device.
-	 */
+	
 #ifdef MY_ABC_HERE
 	if (!reference)
 		return -EINVAL;
@@ -1853,15 +1665,15 @@ int md_integrity_register(mddev_t *mddev)
 }
 EXPORT_SYMBOL(md_integrity_register);
 
-/* Disable data integrity if non-capable/non-matching disk is being added */
+
 void md_integrity_add_rdev(mdk_rdev_t *rdev, mddev_t *mddev)
 {
 	struct blk_integrity *bi_rdev = bdev_get_integrity(rdev->bdev);
 	struct blk_integrity *bi_mddev = blk_get_integrity(mddev->gendisk);
 
-	if (!bi_mddev) /* nothing to do */
+	if (!bi_mddev) 
 		return;
-	if (rdev->raid_disk < 0) /* skip spares */
+	if (rdev->raid_disk < 0) 
 		return;
 	if (bi_rdev && blk_integrity_compare(mddev->gendisk,
 					     rdev->bdev->bd_disk) >= 0)
@@ -1883,28 +1695,22 @@ static int bind_rdev_to_array(mdk_rdev_t * rdev, mddev_t * mddev)
 		return -EINVAL;
 	}
 
-	/* prevent duplicates */
+	
 	if (find_rdev(mddev, rdev->bdev->bd_dev))
 		return -EEXIST;
 
-	/* make sure rdev->sectors exceeds mddev->dev_sectors */
+	
 	if (rdev->sectors && (mddev->dev_sectors == 0 ||
 			rdev->sectors < mddev->dev_sectors)) {
 		if (mddev->pers) {
-			/* Cannot change size, so fail
-			 * If mddev->level <= 0, then we don't care
-			 * about aligning sizes (e.g. linear)
-			 */
+			
 			if (mddev->level > 0)
 				return -ENOSPC;
 		} else
 			mddev->dev_sectors = rdev->sectors;
 	}
 
-	/* Verify rdev->desc_nr is unique.
-	 * If it is -1, assign a free number, else
-	 * check number is not in use
-	 */
+	
 	if (rdev->desc_nr < 0) {
 		int choice = 0;
 		if (mddev->pers) choice = mddev->raid_disks;
@@ -1940,7 +1746,7 @@ static int bind_rdev_to_array(mdk_rdev_t * rdev, mddev_t * mddev)
 	list_add_rcu(&rdev->same_set, &mddev->disks);
 	bd_claim_by_disk(rdev->bdev, rdev->bdev->bd_holder, mddev->gendisk);
 
-	/* May as well allow recovery to be retried once */
+	
 	mddev->recovery_disabled = 0;
 
 	return 0;
@@ -1972,21 +1778,14 @@ static void unbind_rdev_from_array(mdk_rdev_t * rdev)
 	sysfs_remove_link(&rdev->kobj, "block");
 	sysfs_put(rdev->sysfs_state);
 	rdev->sysfs_state = NULL;
-	/* We need to delay this, otherwise we can deadlock when
-	 * writing to 'remove' to "dev/state".  We also need
-	 * to delay it due to rcu usage.
-	 */
+	
 	synchronize_rcu();
 	INIT_WORK(&rdev->del_work, md_delayed_delete);
 	kobject_get(&rdev->kobj);
 	schedule_work(&rdev->del_work);
 }
 
-/*
- * prevent the device from being mounted, repartitioned or
- * otherwise reused by a RAID array (or any other kernel
- * subsystem), by bd_claiming the device.
- */
+
 static int lock_rdev(mdk_rdev_t *rdev, dev_t dev, int shared)
 {
 	int err = 0;
@@ -2209,15 +2008,10 @@ static void md_print_devices(void)
 
 static void sync_sbs(mddev_t * mddev, int nospares)
 {
-	/* Update each superblock (in-memory image), but
-	 * if we are allowed to, skip spares which already
-	 * have the right event counter, or have one earlier
-	 * (which would mean they aren't being marked as dirty
-	 * with the rest of the array)
-	 */
+	
 	mdk_rdev_t *rdev;
 
-	/* First make sure individual recovery_offsets are correct */
+	
 	list_for_each_entry(rdev, &mddev->disks, same_set) {
 		if (rdev->raid_disk >= 0 &&
 		    !test_bit(In_sync, &rdev->flags) &&
@@ -2231,7 +2025,7 @@ static void sync_sbs(mddev_t * mddev, int nospares)
 		     rdev->raid_disk < 0 &&
 		     (rdev->sb_events&1)==0 &&
 		     rdev->sb_events+1 == mddev->events)) {
-			/* Don't update this superblock */
+			
 			rdev->sb_loaded = 2;
 		} else {
 			super_types[mddev->major_version].
@@ -2257,63 +2051,43 @@ repeat:
 	if (test_and_clear_bit(MD_CHANGE_DEVS, &mddev->flags))
 		force_change = 1;
 	if (test_and_clear_bit(MD_CHANGE_CLEAN, &mddev->flags))
-		/* just a clean<-> dirty transition, possibly leave spares alone,
-		 * though if events isn't the right even/odd, we will have to do
-		 * spares after all
-		 */
+		
 		nospares = 1;
 	if (force_change)
 		nospares = 0;
 	if (mddev->degraded)
-		/* If the array is degraded, then skipping spares is both
-		 * dangerous and fairly pointless.
-		 * Dangerous because a device that was removed from the array
-		 * might have a event_count that still looks up-to-date,
-		 * so it can be re-added without a resync.
-		 * Pointless because if there are any spares to skip,
-		 * then a recovery will happen and soon that array won't
-		 * be degraded any more and the spare can go back to sleep then.
-		 */
+		
 		nospares = 0;
 
 	sync_req = mddev->in_sync;
 
-	/* If this is just a dirty<->clean transition, and the array is clean
-	 * and 'events' is odd, we can roll back to the previous clean state */
+	
 	if (nospares
 	    && (mddev->in_sync && mddev->recovery_cp == MaxSector)
 	    && (mddev->events & 1)
 	    && mddev->events != 1)
 		mddev->events--;
 	else {
-		/* otherwise we have to go forward and ... */
+		
 		mddev->events ++;
-		if (!mddev->in_sync || mddev->recovery_cp != MaxSector) { /* not clean */
-			/* .. if the array isn't clean, an 'even' event must also go
-			 * to spares. */
+		if (!mddev->in_sync || mddev->recovery_cp != MaxSector) { 
+			
 			if ((mddev->events&1)==0)
 				nospares = 0;
 		} else {
-			/* otherwise an 'odd' event must go to spares */
+			
 			if ((mddev->events&1))
 				nospares = 0;
 		}
 	}
 
 	if (!mddev->events) {
-		/*
-		 * oops, this 64-bit counter should never wrap.
-		 * Either we are in around ~1 trillion A.C., assuming
-		 * 1 reboot per second, or we have a bug:
-		 */
+		
 		MD_BUG();
 		mddev->events --;
 	}
 
-	/*
-	 * do not write anything to disk if using
-	 * nonpersistent superblocks
-	 */
+	
 	if (!mddev->persistent) {
 		if (!mddev->external)
 			clear_bit(MD_CHANGE_PENDING, &mddev->flags);
@@ -2334,7 +2108,7 @@ repeat:
 		char b[BDEVNAME_SIZE];
 		dprintk(KERN_INFO "md: ");
 		if (rdev->sb_loaded != 1)
-			continue; /* no noise on spare devices */
+			continue; 
 		if (test_bit(Faulty, &rdev->flags))
 			dprintk("(skipping faulty ");
 
@@ -2351,16 +2125,16 @@ repeat:
 		} else
 			dprintk(")\n");
 		if (mddev->level == LEVEL_MULTIPATH)
-			/* only need to write one superblock... */
+			
 			break;
 	}
 	md_super_wait(mddev);
-	/* if there was a failure, MD_CHANGE_DEVS was set, and we re-write super */
+	
 
 	spin_lock_irq(&mddev->write_lock);
 	if (mddev->in_sync != sync_req ||
 	    test_bit(MD_CHANGE_DEVS, &mddev->flags)) {
-		/* have to write it out again */
+		
 		spin_unlock_irq(&mddev->write_lock);
 		goto repeat;
 	}
@@ -2372,15 +2146,10 @@ repeat:
 
 }
 
-/* words written to sysfs files may, or may not, be \n terminated.
- * We want to accept with case. For this we use cmd_match.
- */
+
 static int cmd_match(const char *cmd, const char *str)
 {
-	/* See if cmd, written into a sysfs file, matches
-	 * str.  They must either be the same, or cmd can
-	 * have a trailing newline
-	 */
+	
 	while (*cmd && *str && *cmd == *str) {
 		cmd++;
 		str++;
@@ -2437,15 +2206,7 @@ state_show(mdk_rdev_t *rdev, char *page)
 static ssize_t
 state_store(mdk_rdev_t *rdev, const char *buf, size_t len)
 {
-	/* can write
-	 *  faulty  - simulates and error
-	 *  remove  - disconnects the device
-	 *  writemostly - sets write_mostly
-	 *  -writemostly - clears write_mostly
-	 *  blocked - sets the Blocked flag
-	 *  -blocked - clears the Blocked flag
-	 *  insync - sets Insync providing device isn't active
-	 */
+	
 	int err = -EINVAL;
 	if (cmd_match(buf, "faulty") && rdev->mddev->pers) {
 		md_error(rdev->mddev, rdev);
@@ -2529,16 +2290,10 @@ slot_store(mdk_rdev_t *rdev, const char *buf, size_t len)
 	else if (e==buf || (*e && *e!= '\n'))
 		return -EINVAL;
 	if (rdev->mddev->pers && slot == -1) {
-		/* Setting 'slot' on an active array requires also
-		 * updating the 'rd%d' link, and communicating
-		 * with the personality with ->hot_*_disk.
-		 * For now we only support removing
-		 * failed/spare devices.  This normally happens automatically,
-		 * but not when the metadata is externally managed.
-		 */
+		
 		if (rdev->raid_disk == -1)
 			return -EEXIST;
-		/* personality does all needed checks */
+		
 		if (rdev->mddev->pers->hot_add_disk == NULL)
 			return -EINVAL;
 		err = rdev->mddev->pers->
@@ -2551,9 +2306,7 @@ slot_store(mdk_rdev_t *rdev, const char *buf, size_t len)
 		md_wakeup_thread(rdev->mddev->thread);
 	} else if (rdev->mddev->pers) {
 		mdk_rdev_t *rdev2;
-		/* Activating a spare .. or possibly reactivating
-		 * if we ever get bitmaps working here.
-		 */
+		
 
 		if (rdev->raid_disk != -1)
 			return -EBUSY;
@@ -2584,12 +2337,12 @@ slot_store(mdk_rdev_t *rdev, const char *buf, size_t len)
 			       "%s for %s\n",
 			       nm, mdname(rdev->mddev));
 
-		/* don't wakeup anyone, leave that to userspace. */
+		
 	} else {
 		if (slot >= rdev->mddev->raid_disks)
 			return -ENOSPC;
 		rdev->raid_disk = slot;
-		/* assume it is working */
+		
 		clear_bit(Faulty, &rdev->flags);
 		clear_bit(WriteMostly, &rdev->flags);
 		set_bit(In_sync, &rdev->flags);
@@ -2617,8 +2370,7 @@ offset_store(mdk_rdev_t *rdev, const char *buf, size_t len)
 	if (rdev->mddev->pers && rdev->raid_disk >= 0)
 		return -EBUSY;
 	if (rdev->sectors && rdev->mddev->external)
-		/* Must set offset before size, so overlap checks
-		 * can be sane */
+		
 		return -EBUSY;
 	rdev->data_offset = offset;
 	return len;
@@ -2635,7 +2387,7 @@ rdev_size_show(mdk_rdev_t *rdev, char *page)
 
 static int overlaps(sector_t s1, sector_t l1, sector_t s2, sector_t l2)
 {
-	/* check if two start/length pairs overlap */
+	
 	if (s1+l1 <= s2)
 		return 0;
 	if (s2+l2 <= s1)
@@ -2652,11 +2404,11 @@ static int strict_blocks_to_sectors(const char *buf, sector_t *sectors)
 		return -EINVAL;
 
 	if (blocks & 1ULL << (8 * sizeof(blocks) - 1))
-		return -EINVAL; /* sector conversion overflow */
+		return -EINVAL; 
 
 	new = blocks * 2;
 	if (new != blocks * 2)
-		return -EINVAL; /* unsigned long long to sector_t overflow */
+		return -EINVAL; 
 
 	*sectors = new;
 	return 0;
@@ -2682,15 +2434,11 @@ rdev_size_store(mdk_rdev_t *rdev, const char *buf, size_t len)
 				rdev->data_offset;
 	}
 	if (sectors < my_mddev->dev_sectors)
-		return -EINVAL; /* component must fit device */
+		return -EINVAL; 
 
 	rdev->sectors = sectors;
 	if (sectors > oldsectors && my_mddev->external) {
-		/* need to check that all other rdevs with the same ->bdev
-		 * do not overlap.  We need to unlock the mddev to avoid
-		 * a deadlock.  We have already changed rdev->sectors, and if
-		 * we have to change it back, we will have the lock again.
-		 */
+		
 		mddev_t *mddev;
 		int overlap = 0;
 		struct list_head *tmp;
@@ -2718,12 +2466,7 @@ rdev_size_store(mdk_rdev_t *rdev, const char *buf, size_t len)
 		}
 		mddev_lock(my_mddev);
 		if (overlap) {
-			/* Someone else could have slipped in a size
-			 * change here, but doing so is just silly.
-			 * We put oldsectors back because we *know* it is
-			 * safe, and trust userspace not to race with
-			 * itself
-			 */
+			
 			rdev->sectors = oldsectors;
 			return -EBUSY;
 		}
@@ -2803,16 +2546,7 @@ static struct kobj_type rdev_ktype = {
 	.default_attrs	= rdev_default_attrs,
 };
 
-/*
- * Import a device. If 'super_format' >= 0, then sanity check the superblock
- *
- * mark the device faulty if:
- *
- *   - the device is nonexistent (zero size)
- *   - the device has no valid superblock
- *
- * a faulty rdev _never_ has rdev->sb set.
- */
+
 static mdk_rdev_t *md_import_device(dev_t newdev, int super_format, int super_minor)
 {
 	char b[BDEVNAME_SIZE];
@@ -2901,9 +2635,7 @@ abort_free:
 	return ERR_PTR(err);
 }
 
-/*
- * Check a full RAID array for plausibility
- */
+
 
 static void analyze_sbs(mddev_t * mddev)
 {
@@ -2979,7 +2711,7 @@ safe_delay_store(mddev_t *mddev, const char *cbuf, size_t len)
 	unsigned long msec;
 	char buf[30];
 
-	/* remove a period, and count digits after it */
+	
 	if (len >= sizeof(buf))
 		return -EINVAL;
 	strlcpy(buf, cbuf, sizeof(buf));
@@ -3049,11 +2781,7 @@ level_store(mddev_t *mddev, const char *buf, size_t len)
 		return rv;
 	}
 
-	/* request to change the personality.  Need to ensure:
-	 *  - array is not engaged in resync/recovery/reshape
-	 *  - old personality can be suspended
-	 *  - new personality will access other array.
-	 */
+	
 
 	if (mddev->sync_thread || mddev->reshape_position != MaxSector)
 		return -EBUSY;
@@ -3064,7 +2792,7 @@ level_store(mddev_t *mddev, const char *buf, size_t len)
 		return -EINVAL;
 	}
 
-	/* Now find the new personality */
+	
 	if (len == 0 || len >= sizeof(level))
 		return -EINVAL;
 	strncpy(level, buf, len);
@@ -3083,7 +2811,7 @@ level_store(mddev_t *mddev, const char *buf, size_t len)
 	spin_unlock(&pers_lock);
 
 	if (pers == mddev->pers) {
-		/* Nothing to do! */
+		
 		module_put(pers->owner);
 		return rv;
 	}
@@ -3094,9 +2822,7 @@ level_store(mddev_t *mddev, const char *buf, size_t len)
 		return -EINVAL;
 	}
 
-	/* ->takeover must set new_* and/or delta_disks
-	 * if it succeeds, and may set them when it fails.
-	 */
+	
 	priv = pers->takeover(mddev);
 	if (IS_ERR(priv)) {
 		mddev->new_level = mddev->level;
@@ -3110,11 +2836,11 @@ level_store(mddev_t *mddev, const char *buf, size_t len)
 		return PTR_ERR(priv);
 	}
 
-	/* Looks like we have a winner */
+	
 	mddev_suspend(mddev);
 	mddev->pers->stop(mddev);
 	module_put(mddev->pers->owner);
-	/* Invalidate devices that are now superfluous */
+	
 	list_for_each_entry(rdev, &mddev->disks, same_set)
 		if (rdev->raid_disk >= mddev->raid_disks) {
 			rdev->raid_disk = -1;
@@ -3141,7 +2867,7 @@ __ATTR(level, S_IRUGO|S_IWUSR, level_show, level_store);
 static ssize_t
 layout_show(mddev_t *mddev, char *page)
 {
-	/* just a number, not meaningful for all levels */
+	
 	if (mddev->reshape_position != MaxSector &&
 	    mddev->layout != mddev->new_layout)
 		return sprintf(page, "%d (%d)\n",
@@ -3280,42 +3006,7 @@ resync_start_store(mddev_t *mddev, const char *buf, size_t len)
 static struct md_sysfs_entry md_resync_start =
 __ATTR(resync_start, S_IRUGO|S_IWUSR, resync_start_show, resync_start_store);
 
-/*
- * The array state can be:
- *
- * clear
- *     No devices, no size, no level
- *     Equivalent to STOP_ARRAY ioctl
- * inactive
- *     May have some settings, but array is not active
- *        all IO results in error
- *     When written, doesn't tear down array, but just stops it
- * suspended (not supported yet)
- *     All IO requests will block. The array can be reconfigured.
- *     Writing this, if accepted, will block until array is quiescent
- * readonly
- *     no resync can happen.  no superblocks get written.
- *     write requests fail
- * read-auto
- *     like readonly, but behaves like 'clean' on a write request.
- *
- * clean - no pending writes, but otherwise active.
- *     When written to inactive array, starts without resync
- *     If a write request arrives then
- *       if metadata is known, mark 'dirty' and switch to 'active'.
- *       if not known, block and switch to write-pending
- *     If written to an active array that has pending writes, then fails.
- * active
- *     fully active: IO and resync can be happening.
- *     When written to inactive array, starts with resync
- *
- * write-pending
- *     clean, but writes are blocked waiting for 'active' to be written.
- *
- * active-idle
- *     like active, but no writes have been seen for a while (100msec).
- *
- */
+
 enum array_state { clear, inactive, suspended, readonly, read_auto, clean, active,
 		   write_pending, active_idle, bad_word};
 static char *array_states[] = {
@@ -3378,22 +3069,22 @@ array_state_store(mddev_t *mddev, const char *buf, size_t len)
 	case bad_word:
 		break;
 	case clear:
-		/* stopping an active array */
+		
 		if (atomic_read(&mddev->openers) > 0)
 			return -EBUSY;
 		err = do_md_stop(mddev, 0, 0);
 		break;
 	case inactive:
-		/* stopping an active array */
+		
 		if (mddev->pers) {
 			if (atomic_read(&mddev->openers) > 0)
 				return -EBUSY;
 			err = do_md_stop(mddev, 2, 0);
 		} else
-			err = 0; /* already inactive */
+			err = 0; 
 		break;
 	case suspended:
-		break; /* not supported yet */
+		break; 
 	case readonly:
 		if (mddev->pers)
 			err = do_md_stop(mddev, 1, 0);
@@ -3453,7 +3144,7 @@ array_state_store(mddev_t *mddev, const char *buf, size_t len)
 		break;
 	case write_pending:
 	case active_idle:
-		/* these cannot be set */
+		
 		break;
 	}
 	if (err)
@@ -3475,13 +3166,8 @@ null_show(mddev_t *mddev, char *page)
 static ssize_t
 new_dev_store(mddev_t *mddev, const char *buf, size_t len)
 {
-	/* buf must be %d:%d\n? giving major and minor numbers */
-	/* The new device is added to the array.
-	 * If the array has a persistent superblock, we read the
-	 * superblock to initialise info and check validity.
-	 * Otherwise, only checking done is that in bind_rdev_to_array,
-	 * which mainly checks size.
-	 */
+	
+	
 	char *e;
 	int major = simple_strtoul(buf, &e, 10);
 	int minor;
@@ -3535,11 +3221,11 @@ bitmap_store(mddev_t *mddev, const char *buf, size_t len)
 
 	if (!mddev->bitmap)
 		goto out;
-	/* buf should be <chunk> <chunk> ... or <chunk>-<chunk> ... (range) */
+	
 	while (*buf) {
 		chunk = end_chunk = simple_strtoul(buf, &end, 0);
 		if (buf == end) break;
-		if (*end == '-') { /* range */
+		if (*end == '-') { 
 			buf = end + 1;
 			end_chunk = simple_strtoul(buf, &end, 0);
 			if (buf == end) break;
@@ -3549,7 +3235,7 @@ bitmap_store(mddev_t *mddev, const char *buf, size_t len)
 		buf = end;
 		while (isspace(*buf)) buf++;
 	}
-	bitmap_unplug(mddev->bitmap); /* flush the bits to disk */
+	bitmap_unplug(mddev->bitmap); 
 out:
 	return len;
 }
@@ -3569,10 +3255,7 @@ static int update_size(mddev_t *mddev, sector_t num_sectors);
 static ssize_t
 size_store(mddev_t *mddev, const char *buf, size_t len)
 {
-	/* If array is inactive, we can reduce the component size, but
-	 * not increase it (except from 0).
-	 * If array is active, we can try an on-line resize
-	 */
+	
 	sector_t sectors;
 	int err = strict_blocks_to_sectors(buf, &sectors);
 
@@ -3594,12 +3277,7 @@ size_store(mddev_t *mddev, const char *buf, size_t len)
 static struct md_sysfs_entry md_size =
 __ATTR(component_size, S_IRUGO|S_IWUSR, size_show, size_store);
 
-/* Metdata version.
- * This is one of
- *   'none' for arrays with no metadata (good luck...)
- *   'external' for arrays with externally managed metadata,
- * or N.M for internally known formats
- */
+
 static ssize_t
 metadata_show(mddev_t *mddev, char *page)
 {
@@ -3617,10 +3295,7 @@ metadata_store(mddev_t *mddev, const char *buf, size_t len)
 {
 	int major, minor;
 	char *e;
-	/* Changing the details of 'external' metadata is
-	 * always permitted.  Otherwise there must be
-	 * no devices attached to the array.
-	 */
+	
 	if (mddev->external && strncmp(buf, "external:", 9) == 0)
 		;
 	else if (!list_empty(&mddev->disks))
@@ -3833,7 +3508,7 @@ sync_force_parallel_store(mddev_t *mddev, const char *buf, size_t len)
 	return len;
 }
 
-/* force parallel resync, even with shared block devices */
+
 static struct md_sysfs_entry md_sync_force_parallel =
 __ATTR(sync_force_parallel, S_IRUGO|S_IWUSR,
        sync_force_parallel_show, sync_force_parallel_store);
@@ -3848,7 +3523,7 @@ sync_speed_show(mddev_t *mddev, char *page)
 	dt = (jiffies - mddev->resync_mark) / HZ;
 	if (!dt) dt++;
 	db = resync - mddev->resync_mark_cnt;
-	return sprintf(page, "%lu\n", db/dt/2); /* K/sec */
+	return sprintf(page, "%lu\n", db/dt/2); 
 }
 
 static struct md_sysfs_entry md_sync_speed = __ATTR_RO(sync_speed);
@@ -3889,7 +3564,7 @@ min_sync_store(mddev_t *mddev, const char *buf, size_t len)
 	if (test_bit(MD_RECOVERY_RUNNING, &mddev->recovery))
 		return -EBUSY;
 
-	/* Must be a multiple of chunk_size */
+	
 	if (mddev->chunk_sectors) {
 		sector_t temp = min;
 		if (sector_div(temp, mddev->chunk_sectors))
@@ -3928,7 +3603,7 @@ max_sync_store(mddev_t *mddev, const char *buf, size_t len)
 		    test_bit(MD_RECOVERY_RUNNING, &mddev->recovery))
 			return -EBUSY;
 
-		/* Must be a multiple of chunk_size */
+		
 		if (mddev->chunk_sectors) {
 			sector_t temp = max;
 			if (sector_div(temp, mddev->chunk_sectors))
@@ -4047,7 +3722,7 @@ auto_remap_store(mddev_t *mddev, const char *page, size_t len)
 	}
 #ifdef MY_ABC_HERE
 	if (mddev->nodev_and_crashed) {
-		/* No responce for faulty raid */
+		
 		goto END;
 	}
 #endif
@@ -4294,9 +3969,7 @@ static int md_alloc(dev_t dev, char *name)
 	shift = partitioned ? MdpMinorShift : 0;
 	unit = MINOR(mddev->unit) >> shift;
 
-	/* wait for any previous instance if this device
-	 * to be completed removed (mddev_delayed_delete).
-	 */
+	
 	flush_scheduled_work();
 
 	mutex_lock(&disks_mutex);
@@ -4305,8 +3978,7 @@ static int md_alloc(dev_t dev, char *name)
 		goto abort;
 
 	if (name) {
-		/* Need to ensure that 'name' is not a duplicate.
-		 */
+		
 		mddev_t *mddev2;
 		spin_lock(&all_mddevs_lock);
 
@@ -4325,7 +3997,7 @@ static int md_alloc(dev_t dev, char *name)
 		goto abort;
 	mddev->queue->queuedata = mddev;
 
-	/* Can be unlocked because the queue is new: no concurrency */
+	
 	queue_flag_set_unlocked(QUEUE_FLAG_CLUSTER, mddev->queue);
 
 	blk_queue_make_request(mddev->queue, md_make_request);
@@ -4347,19 +4019,14 @@ static int md_alloc(dev_t dev, char *name)
 	disk->fops = &md_fops;
 	disk->private_data = mddev;
 	disk->queue = mddev->queue;
-	/* Allow extended partitions.  This makes the
-	 * 'mdp' device redundant, but we can't really
-	 * remove it now.
-	 */
+	
 	disk->flags |= GENHD_FL_EXT_DEVT;
 	add_disk(disk);
 	mddev->gendisk = disk;
 	error = kobject_init_and_add(&mddev->kobj, &md_ktype,
 				     &disk_to_dev(disk)->kobj, "%s", "md");
 	if (error) {
-		/* This isn't possible, but as kobject_init_and_add is marked
-		 * __must_check, we must do something with the result
-		 */
+		
 		printk(KERN_WARNING "md: cannot register %s/md - name in use\n",
 		       disk->disk_name);
 		error = 0;
@@ -4382,10 +4049,7 @@ static struct kobject *md_probe(dev_t dev, int *part, void *data)
 
 static int add_named_array(const char *val, struct kernel_param *kp)
 {
-	/* val must be "md_*" where * is not all digits.
-	 * We allocate an array with a large free minor number, and
-	 * set the name to val.  val must not already be an active name.
-	 */
+	
 	int len = strlen(val);
 	char buf[DISK_NAME_LEN];
 
@@ -4450,10 +4114,10 @@ static int SynoRaidAutoRemapAdjust(mddev_t *mddev, int specify_setting)
 	old_setting = mddev->auto_remap;
 
 	if (0 == specify_setting || 1 == specify_setting) {
-		// if caller specify auto_remap setting, then use it.
+		
 		mddev->auto_remap = specify_setting;
 	}else{
-		// if caller didn't specify setting, then set it by ismaxdegrade
+		
 		if (mddev->pers->ismaxdegrade) {
 			if (mddev->pers->ismaxdegrade(mddev)){
 				mddev->auto_remap = 1;
@@ -4464,7 +4128,7 @@ static int SynoRaidAutoRemapAdjust(mddev_t *mddev, int specify_setting)
 	}
 
 	if (0 == mddev->auto_remap) {
-		//if raid doesn't need auto-remap, we use user's setting
+		
 		mddev->auto_remap = mddev->force_auto_remap;
 	}
 
@@ -4473,7 +4137,7 @@ static int SynoRaidAutoRemapAdjust(mddev_t *mddev, int specify_setting)
 	}
 
 END:
-	// return old setting, we need use it to restore auto remap setting when needed.
+	
 	return old_setting;
 }
 #endif
@@ -4492,7 +4156,7 @@ static int do_md_run(mddev_t * mddev)
 	struct mdk_personality *pers;
 
 	if (list_empty(&mddev->disks))
-		/* cannot run an array with no devices.. */
+		
 		return -EINVAL;
 
 	if (mddev->pers)
@@ -4502,9 +4166,7 @@ static int do_md_run(mddev_t * mddev)
 	mddev->force_auto_remap = 0;
 #endif
 
-	/*
-	 * Analyze all RAID superblock(s)
-	 */
+	
 	if (!mddev->raid_disks) {
 		if (!mddev->persistent)
 			return -EINVAL;
@@ -4516,21 +4178,14 @@ static int do_md_run(mddev_t * mddev)
 	else if (mddev->clevel[0])
 		request_module("md-%s", mddev->clevel);
 
-	/*
-	 * Drop all container device buffers, from now on
-	 * the only valid external interface is through the md
-	 * device.
-	 */
+	
 	list_for_each_entry(rdev, &mddev->disks, same_set) {
 		if (test_bit(Faulty, &rdev->flags))
 			continue;
 		sync_blockdev(rdev->bdev);
 		invalidate_bdev(rdev->bdev);
 
-		/* perform some consistency tests on the device.
-		 * We don't want the data to overlap the metadata,
-		 * Internal Bitmap issues have been handled elsewhere.
-		 */
+		
 		if (rdev->data_offset < rdev->sb_start) {
 			if (mddev->dev_sectors &&
 			    rdev->data_offset + mddev->dev_sectors
@@ -4585,16 +4240,14 @@ static int do_md_run(mddev_t * mddev)
 
 	if (mddev->reshape_position != MaxSector &&
 	    pers->start_reshape == NULL) {
-		/* This personality cannot handle reshaping... */
+		
 		mddev->pers = NULL;
 		module_put(pers->owner);
 		return -EINVAL;
 	}
 
 	if (pers->sync_request) {
-		/* Warn if this is a potentially silly
-		 * configuration.
-		 */
+		
 		char b[BDEVNAME_SIZE], b2[BDEVNAME_SIZE];
 		mdk_rdev_t *rdev2;
 		int warned = 0;
@@ -4622,7 +4275,7 @@ static int do_md_run(mddev_t * mddev)
 	}
 
 	mddev->recovery = 0;
-	/* may be over-ridden by personality */
+	
 	mddev->resync_max_sectors = mddev->dev_sectors;
 
 	mddev->barriers_work = 1;
@@ -4634,10 +4287,10 @@ static int do_md_run(mddev_t * mddev)
 	if (0 == strcmp("md0", mdname(mddev)) || 0 == strcmp("md1", mdname(mddev))) {
 		mddev->parallel_resync = 1;
 	}
-#endif /* MY_ABC_HERE */
+#endif 
 
 	if (start_readonly && mddev->ro == 0)
-		mddev->ro = 2; /* read-only, but switch on first write */
+		mddev->ro = 2; 
 
 	err = mddev->pers->run(mddev);
 	if (err)
@@ -4672,14 +4325,14 @@ static int do_md_run(mddev_t * mddev)
 			       "md: cannot register extra attributes for %s\n",
 			       mdname(mddev));
 		mddev->sysfs_action = sysfs_get_dirent(mddev->kobj.sd, "sync_action");
-	} else if (mddev->ro == 2) /* auto-readonly not meaningful */
+	} else if (mddev->ro == 2) 
 		mddev->ro = 0;
 
  	atomic_set(&mddev->writes_pending,0);
 	mddev->safemode = 0;
 	mddev->safemode_timer.function = md_safemode_timeout;
 	mddev->safemode_timer.data = (unsigned long) mddev;
-	mddev->safemode_delay = (200 * HZ)/1000 +1; /* 200 msec delay */
+	mddev->safemode_delay = (200 * HZ)/1000 +1; 
 	mddev->in_sync = 1;
 
 	list_for_each_entry(rdev, &mddev->disks, same_set)
@@ -4693,34 +4346,31 @@ static int do_md_run(mddev_t * mddev)
 
 #ifdef MY_ABC_HERE
 	if (0 == mddev->level || LEVEL_LINEAR == mddev->level) {
-		// This bit should be cleared when RAID level is 0
-		// otherwise our SDK will misunderstand. The related
-		// command of md ioctl used by SDK is GET_SYNC_STATUS.
-		// linear mode has the same problem
+		
+		
+		
+		
 		clear_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
 	} else {
 		set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
 	}
-#else /* MY_ABC_HERE */
+#else 
 	set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
-#endif	/* MY_ABC_HERE */
+#endif	
 	
 	if (mddev->flags)
 		md_update_sb(mddev, 0);
 
 	set_capacity(disk, mddev->array_sectors);
 
-	/* If there is a partially-recovered drive we need to
-	 * start recovery here.  If we leave it to md_check_recovery,
-	 * it will remove the drives and not do the right thing
-	 */
+	
 	if (mddev->degraded && !mddev->sync_thread) {
 		int spares = 0;
 		list_for_each_entry(rdev, &mddev->disks, same_set)
 			if (rdev->raid_disk >= 0 &&
 			    !test_bit(In_sync, &rdev->flags) &&
 			    !test_bit(Faulty, &rdev->flags))
-				/* complete an interrupted recovery */
+				
 				spares++;
 		if (spares && mddev->pers->sync_request) {
 			mddev->recovery = 0;
@@ -4732,13 +4382,13 @@ static int do_md_run(mddev_t * mddev)
 				printk(KERN_ERR "%s: could not start resync"
 				       " thread...\n",
 				       mdname(mddev));
-				/* leave the spares where they are, it shouldn't hurt */
+				
 				mddev->recovery = 0;
 			}
 		}
 	}
 	md_wakeup_thread(mddev->thread);
-	md_wakeup_thread(mddev->sync_thread); /* possibly kick off a reshape */
+	md_wakeup_thread(mddev->sync_thread); 
 
 	revalidate_disk(mddev->gendisk);
 	mddev->changed = 1;
@@ -4755,7 +4405,7 @@ static int restart_array(mddev_t *mddev)
 {
 	struct gendisk *disk = mddev->gendisk;
 
-	/* Complain if it has no devices */
+	
 	if (list_empty(&mddev->disks))
 		return -ENXIO;
 	if (!mddev->pers)
@@ -4767,7 +4417,7 @@ static int restart_array(mddev_t *mddev)
 	set_disk_ro(disk, 0);
 	printk(KERN_INFO "md: %s switched to read-write mode.\n",
 		mdname(mddev));
-	/* Kick recovery or resync if necessary */
+	
 	set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
 	md_wakeup_thread(mddev->thread);
 	md_wakeup_thread(mddev->sync_thread);
@@ -4775,8 +4425,7 @@ static int restart_array(mddev_t *mddev)
 	return 0;
 }
 
-/* similar to deny_write_access, but accounts for our holding a reference
- * to the file ourselves */
+
 static int deny_bitmap_write_access(struct file * file)
 {
 	struct inode *inode = file->f_mapping->host;
@@ -4801,11 +4450,7 @@ static void restore_bitmap_write_access(struct file *file)
 	spin_unlock(&inode->i_lock);
 }
 
-/* mode:
- *   0 - completely stop and dis-assemble array
- *   1 - switch to readonly
- *   2 - stop but do not disassemble array
- */
+
 static int do_md_stop(mddev_t * mddev, int mode, int is_open)
 {
 	int err = 0;
@@ -4828,14 +4473,14 @@ static int do_md_stop(mddev_t * mddev, int mode, int is_open)
 		del_timer_sync(&mddev->safemode_timer);
 
 		switch(mode) {
-		case 1: /* readonly */
+		case 1: 
 			err  = -ENXIO;
 			if (mddev->ro==1)
 				goto out;
 			mddev->ro = 1;
 			break;
-		case 0: /* disassemble */
-		case 2: /* stop */
+		case 0: 
+		case 2: 
 			bitmap_flush(mddev);
 			md_super_wait(mddev);
 			if (mddev->ro)
@@ -4849,7 +4494,7 @@ static int do_md_stop(mddev_t * mddev, int mode, int is_open)
 			if (mddev->pers->sync_request)
 				mddev->private = &md_redundancy_group;
 			mddev->pers = NULL;
-			/* tell userspace to handle 'inactive' */
+			
 			sysfs_notify_dirent(mddev->sysfs_state);
 
 			list_for_each_entry(rdev, &mddev->disks, same_set)
@@ -4870,7 +4515,7 @@ static int do_md_stop(mddev_t * mddev, int mode, int is_open)
 #endif
 		}
 		if (!mddev->in_sync || mddev->flags) {
-			/* mark array as shutdown cleanly */
+			
 			mddev->in_sync = 1;
 			md_update_sb(mddev, 1);
 		}
@@ -4883,9 +4528,7 @@ out:
 	mutex_unlock(&mddev->open_mutex);
 	if (err)
 		return err;
-	/*
-	 * Free resources if final stop
-	 */
+	
 	if (mode == 0) {
 
 		printk(KERN_INFO "md: %s stopped.\n", mdname(mddev));
@@ -4898,7 +4541,7 @@ out:
 		}
 		mddev->bitmap_offset = 0;
 
-		/* make sure all md_delayed_delete calls have finished */
+		
 		flush_scheduled_work();
 
 		export_array(mddev);
@@ -4981,18 +4624,7 @@ static void autorun_array(mddev_t *mddev)
 #if defined(MY_DEF_HERE) && defined(CONFIG_PM_SLEEP) 
 	extern int software_resume(void);
 #endif
-/*
- * lets try to run arrays based on all disks that have arrived
- * until now. (those are in pending_raid_disks)
- *
- * the method: pick the first pending disk, collect all disks with
- * the same UUID, remove all from the pending list and put them into
- * the 'same_array' list. Then order this list based on superblock
- * update time (freshest comes first), kick out 'old' disks and
- * compare superblocks. If everything's fine then run it.
- *
- * If "unit" is allocated, then bump its reference count
- */
+
 static void autorun_devices(int part)
 {
 	mdk_rdev_t *rdev0, *rdev, *tmp;
@@ -5016,11 +4648,7 @@ static void autorun_devices(int part)
 					bdevname(rdev->bdev,b));
 				list_move(&rdev->same_set, &candidates);
 			}
-		/*
-		 * now we have a set of devices, with all of them having
-		 * mostly sane superblocks. It's time to allocate the
-		 * mddev.
-		 */
+		
 		if (part) {
 			dev = MKDEV(mdp_major,
 				    rdev0->preferred_minor << MdpMinorShift);
@@ -5059,7 +4687,7 @@ static void autorun_devices(int part)
 			unsigned int cRaidDisks = 0;
 			unsigned int cCandidates = 0;
 
-			/* find the newest rdev */
+			
 			mdk_rdev_t *rdev_newest = NULL;
 			rdev_for_each_list(rdev, tmp, &candidates) {
 				if (1 == super_90_load(rdev, rdev_newest, mddev->minor_version)) {
@@ -5068,13 +4696,13 @@ static void autorun_devices(int part)
 				cCandidates++;
 			}
 
-			// Refer to LKP2.6.32 #77
+			
 			newest_sb = (mdp_super_t *)page_address(rdev_newest->sb_page);
 			cRaidDisks = newest_sb->raid_disks;
 
 			if (cRaidDisks < cCandidates) {
-				// Refer to DS2.0 #4438.
-				/* remove those out of date rdev */
+				
+				
 				rdev_for_each_list(rdev, tmp, &candidates) {
 					if (rdev != rdev_newest) {
 						if (super_90_validate_rdev_event(rdev_newest, rdev)) {						
@@ -5098,9 +4726,7 @@ static void autorun_devices(int part)
 			autorun_array(mddev);
 			mddev_unlock(mddev);
 		}
-		/* on success, candidates will be empty, on error
-		 * it won't...
-		 */
+		
 		rdev_for_each_list(rdev, tmp, &candidates) {
 			list_del_init(&rdev->same_set);
 			export_rdev(rdev);
@@ -5113,7 +4739,7 @@ static void autorun_devices(int part)
 	software_resume();
 #endif
 }
-#endif /* !MODULE */
+#endif 
 
 static int get_version(void __user * arg)
 {
@@ -5155,7 +4781,7 @@ static int get_array_info(mddev_t * mddev, void __user * arg)
 	info.ctime         = mddev->ctime;
 	info.level         = mddev->level;
 	info.size          = mddev->dev_sectors / 2;
-	if (info.size != mddev->dev_sectors / 2) /* overflow */
+	if (info.size != mddev->dev_sectors / 2) 
 		info.size = -1;
 	info.nr_disks      = nr;
 	info.raid_disks    = mddev->raid_disks;
@@ -5184,7 +4810,7 @@ static int get_array_info(mddev_t * mddev, void __user * arg)
 
 static int get_bitmap_file(mddev_t * mddev, void __user * arg)
 {
-	mdu_bitmap_file_t *file = NULL; /* too big for stack allocation */
+	mdu_bitmap_file_t *file = NULL; 
 	char *ptr, *buf = NULL;
 	int err = -ENOMEM;
 
@@ -5196,7 +4822,7 @@ static int get_bitmap_file(mddev_t * mddev, void __user * arg)
 	if (!file)
 		goto out;
 
-	/* bitmap disabled, zero the first byte and copy out */
+	
 	if (!mddev->bitmap || !mddev->bitmap->file) {
 		file->pathname[0] = '\0';
 		goto copy_out;
@@ -5272,7 +4898,7 @@ static int add_new_disk(mddev_t * mddev, mdu_disk_info_t *info)
 
 	if (!mddev->raid_disks) {
 		int err;
-		/* expecting a device which has a superblock */
+		
 		rdev = md_import_device(dev, mddev->major_version, mddev->minor_version);
 		if (IS_ERR(rdev)) {
 			printk(KERN_WARNING 
@@ -5300,11 +4926,7 @@ static int add_new_disk(mddev_t * mddev, mdu_disk_info_t *info)
 		return err;
 	}
 
-	/*
-	 * add_new_disk can be used once the array is assembled
-	 * to add "hot spares".  They must already have a superblock
-	 * written
-	 */
+	
 	if (mddev->pers) {
 		int err;
 		if (!mddev->pers->hot_add_disk) {
@@ -5324,7 +4946,7 @@ static int add_new_disk(mddev_t * mddev, mdu_disk_info_t *info)
 				PTR_ERR(rdev));
 			return PTR_ERR(rdev);
 		}
-		/* set save_raid_disk if appropriate */
+		
 		if (!mddev->persistent) {
 			if (info->state & (1<<MD_DISK_SYNC)  &&
 			    info->raid_disk < mddev->raid_disks)
@@ -5336,7 +4958,7 @@ static int add_new_disk(mddev_t * mddev, mdu_disk_info_t *info)
 				validate_super(mddev, rdev);
 		rdev->saved_raid_disk = rdev->raid_disk;
 
-		clear_bit(In_sync, &rdev->flags); /* just to be sure */
+		clear_bit(In_sync, &rdev->flags); 
 		if (info->state & (1<<MD_DISK_WRITEMOSTLY))
 			set_bit(WriteMostly, &rdev->flags);
 		else
@@ -5346,14 +4968,11 @@ static int add_new_disk(mddev_t * mddev, mdu_disk_info_t *info)
 		err = bind_rdev_to_array(rdev, mddev);
 #ifdef MY_ABC_HERE
 		if (!err && LEVEL_LINEAR == mddev->level) {
-			/* we extend hot_remove_disk for linear mode. */
+			
 #else
 		if (!err && !mddev->pers->hot_remove_disk) {
 #endif
-			/* If there is hot_add_disk but no hot_remove_disk
-			 * then added disks for geometry changes,
-			 * and should be added immediately.
-			 */
+			
 			super_types[mddev->major_version].
 				validate_super(mddev, rdev);
 			err = mddev->pers->hot_add_disk(mddev, rdev);
@@ -5378,9 +4997,7 @@ static int add_new_disk(mddev_t * mddev, mdu_disk_info_t *info)
 		return err;
 	}
 
-	/* otherwise, add_new_disk is only allowed
-	 * for major_version==0 superblocks
-	 */
+	
 	if (mddev->major_version != 0) {
 		printk(KERN_WARNING "%s: ADD_NEW_DISK not supported\n",
 		       mdname(mddev));
@@ -5500,19 +5117,13 @@ static int hot_add_disk(mddev_t * mddev, dev_t dev)
 	if (err)
 		goto abort_export;
 
-	/*
-	 * The rest should better be atomic, we can have disk failures
-	 * noticed in interrupt contexts ...
-	 */
+	
 
 	rdev->raid_disk = -1;
 
 	md_update_sb(mddev, 1);
 
-	/*
-	 * Kick recovery, maybe this spare has to be added to the
-	 * array immediately.
-	 */
+	
 	set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
 	md_wakeup_thread(mddev->thread);
 	md_new_event(mddev);
@@ -5532,12 +5143,12 @@ static int set_bitmap_file(mddev_t *mddev, int fd)
 			return -EBUSY;
 		if (mddev->recovery || mddev->sync_thread)
 			return -EBUSY;
-		/* we should be able to change the bitmap.. */
+		
 	}
 
 	if (fd >= 0) {
 		if (mddev->bitmap)
-			return -EEXIST; /* cannot add when bitmap is present */
+			return -EEXIST; 
 		mddev->bitmap_file = fget(fd);
 
 		if (mddev->bitmap_file == NULL) {
@@ -5554,9 +5165,9 @@ static int set_bitmap_file(mddev_t *mddev, int fd)
 			mddev->bitmap_file = NULL;
 			return err;
 		}
-		mddev->bitmap_offset = 0; /* file overrides offset */
+		mddev->bitmap_offset = 0; 
 	} else if (mddev->bitmap == NULL)
-		return -ENOENT; /* cannot remove what isn't there */
+		return -ENOENT; 
 	err = 0;
 	if (mddev->pers) {
 		mddev->pers->quiesce(mddev, 1);
@@ -5564,7 +5175,7 @@ static int set_bitmap_file(mddev_t *mddev, int fd)
 			err = bitmap_create(mddev);
 		if (fd < 0 || err) {
 			bitmap_destroy(mddev);
-			fd = -1; /* make sure to put the file */
+			fd = -1; 
 		}
 		mddev->pers->quiesce(mddev, 0);
 	}
@@ -5579,28 +5190,16 @@ static int set_bitmap_file(mddev_t *mddev, int fd)
 	return err;
 }
 
-/*
- * set_array_info is used two different ways
- * The original usage is when creating a new array.
- * In this usage, raid_disks is > 0 and it together with
- *  level, size, not_persistent,layout,chunksize determine the
- *  shape of the array.
- *  This will always create an array with a type-0.90.0 superblock.
- * The newer usage is when assembling an array.
- *  In this case raid_disks will be 0, and the major_version field is
- *  use to determine which style super-blocks are to be found on the devices.
- *  The minor and patch _version numbers are also kept incase the
- *  super_block handler wishes to interpret them.
- */
+
 static int set_array_info(mddev_t * mddev, mdu_array_info_t *info)
 {
 
 	if (info->raid_disks == 0) {
-		/* just setting version number for superblock loading */
+		
 		if (info->major_version < 0 ||
 		    info->major_version >= ARRAY_SIZE(super_types) ||
 		    super_types[info->major_version].name == NULL) {
-			/* maybe try to auto-load a module? */
+			
 			printk(KERN_INFO 
 				"md: superblock version %d not known\n",
 				info->major_version);
@@ -5610,9 +5209,7 @@ static int set_array_info(mddev_t * mddev, mdu_array_info_t *info)
 		mddev->minor_version = info->minor_version;
 		mddev->patch_version = info->patch_version;
 		mddev->persistent = !info->not_persistent;
-		/* ensure mddev_put doesn't delete this now that there
-		 * is some minimal configuration.
-		 */
+		
 		mddev->ctime         = get_seconds();
 		return 0;
 	}
@@ -5625,9 +5222,7 @@ static int set_array_info(mddev_t * mddev, mdu_array_info_t *info)
 	mddev->clevel[0]     = 0;
 	mddev->dev_sectors   = 2 * (sector_t)info->size;
 	mddev->raid_disks    = info->raid_disks;
-	/* don't set md_minor, it is determined by which /dev/md* was
-	 * openned
-	 */
+	
 	if (info->state & (1<<MD_SB_CLEAN))
 		mddev->recovery_cp = MaxSector;
 	else
@@ -5649,9 +5244,7 @@ static int set_array_info(mddev_t * mddev, mdu_array_info_t *info)
 
 	mddev->reshape_position = MaxSector;
 
-	/*
-	 * Generate a 128 bit UUID
-	 */
+	
 	get_random_bytes(mddev->uuid, 16);
 
 	mddev->new_level = mddev->level;
@@ -5681,22 +5274,11 @@ static int update_size(mddev_t *mddev, sector_t num_sectors)
 
 	if (mddev->pers->resize == NULL)
 		return -EINVAL;
-	/* The "num_sectors" is the number of sectors of each device that
-	 * is used.  This can only make sense for arrays with redundancy.
-	 * linear and raid0 always use whatever space is available. We can only
-	 * consider changing this number if no resync or reconstruction is
-	 * happening, and if the new size is acceptable. It must fit before the
-	 * sb_start or, if that is <data_offset, it must fit before the size
-	 * of each device.  If num_sectors is zero, we find the largest size
-	 * that fits.
-
-	 */
+	
 	if (mddev->sync_thread)
 		return -EBUSY;
 	if (mddev->bitmap)
-		/* Sorry, cannot grow a bitmap yet, just remove it,
-		 * grow, and re-add.
-		 */
+		
 		return -EBUSY;
 	list_for_each_entry(rdev, &mddev->disks, same_set) {
 		sector_t avail = rdev->sectors;
@@ -5715,7 +5297,7 @@ static int update_size(mddev_t *mddev, sector_t num_sectors)
 static int update_raid_disks(mddev_t *mddev, int raid_disks)
 {
 	int rv;
-	/* change the number of raid disks */
+	
 	if (mddev->pers->check_reshape == NULL)
 		return -EINVAL;
 	if (raid_disks <= 0 ||
@@ -5729,37 +5311,30 @@ static int update_raid_disks(mddev_t *mddev, int raid_disks)
 	return rv;
 }
 
-/*
- * update_array_info is used to change the configuration of an
- * on-line array.
- * The version, ctime,level,size,raid_disks,not_persistent, layout,chunk_size
- * fields in the info are checked against the array.
- * Any differences that cannot be handled will cause an error.
- * Normally, only one change can be managed at a time.
- */
+
 static int update_array_info(mddev_t *mddev, mdu_array_info_t *info)
 {
 	int rv = 0;
 	int cnt = 0;
 	int state = 0;
 
-	/* calculate expected state,ignoring low bits */
+	
 	if (mddev->bitmap && mddev->bitmap_offset)
 		state |= (1 << MD_SB_BITMAP_PRESENT);
 
 	if (mddev->major_version != info->major_version ||
 	    mddev->minor_version != info->minor_version ||
-/*	    mddev->patch_version != info->patch_version || */
+
 	    mddev->ctime         != info->ctime         ||
 	    mddev->level         != info->level         ||
-/*	    mddev->layout        != info->layout        || */
+
 	    !mddev->persistent	 != info->not_persistent||
 	    mddev->chunk_sectors != info->chunk_size >> 9 ||
-	    /* ignore bottom 8 bits of state, and allow SB_BITMAP_PRESENT to change */
+	    
 	    ((state^info->state) & 0xfffffe00)
 		)
 		return -EINVAL;
-	/* Check there is only one change */
+	
 	if (info->size >= 0 && mddev->dev_sectors / 2 != info->size)
 		cnt++;
 	if (mddev->raid_disks != info->raid_disks)
@@ -5774,10 +5349,7 @@ static int update_array_info(mddev_t *mddev, mdu_array_info_t *info)
 		return -EINVAL;
 
 	if (mddev->layout != info->layout) {
-		/* Change layout
-		 * we don't need to do anything at the md level, the
-		 * personality will take care of it all.
-		 */
+		
 		if (mddev->pers->check_reshape == NULL)
 			return -EINVAL;
 		else {
@@ -5800,7 +5372,7 @@ static int update_array_info(mddev_t *mddev, mdu_array_info_t *info)
 		if (mddev->recovery || mddev->sync_thread)
 			return -EBUSY;
 		if (info->state & (1<<MD_SB_BITMAP_PRESENT)) {
-			/* add the bitmap */
+			
 			if (mddev->bitmap)
 				return -EEXIST;
 			if (mddev->default_bitmap_offset == 0)
@@ -5812,7 +5384,7 @@ static int update_array_info(mddev_t *mddev, mdu_array_info_t *info)
 				bitmap_destroy(mddev);
 			mddev->pers->quiesce(mddev, 0);
 		} else {
-			/* remove the bitmap */
+			
 			if (!mddev->bitmap)
 				return -ENOENT;
 			if (mddev->bitmap->file)
@@ -5842,12 +5414,7 @@ static int set_disk_faulty(mddev_t *mddev, dev_t dev)
 	return 0;
 }
 
-/*
- * We have a problem here : there is no easy way to give a CHS
- * virtual geometry. We currently pretend that we have a 2 heads
- * 4 sectors (with a BIG number of cylinders...). This drives
- * dosfs just mad... ;-)
- */
+
 static int md_getgeo(struct block_device *bdev, struct hd_geometry *geo)
 {
 	mddev_t *mddev = bdev->bd_disk->private_data;
@@ -5868,10 +5435,7 @@ static int md_ioctl(struct block_device *bdev, fmode_t mode,
 	if (!capable(CAP_SYS_ADMIN))
 		return -EACCES;
 
-	/*
-	 * Commands dealing with the RAID driver but not any
-	 * particular array:
-	 */
+	
 	switch (cmd)
 	{
 		case RAID_VERSION:
@@ -5892,9 +5456,7 @@ static int md_ioctl(struct block_device *bdev, fmode_t mode,
 		default:;
 	}
 
-	/*
-	 * Commands creating/starting a new array:
-	 */
+	
 
 	mddev = bdev->bd_disk->private_data;
 
@@ -5957,11 +5519,8 @@ static int md_ioctl(struct block_device *bdev, fmode_t mode,
 		default:;
 	}
 
-	/*
-	 * Commands querying/configuring an existing array:
-	 */
-	/* if we are not initialised yet, only ADD_NEW_DISK, STOP_ARRAY,
-	 * RUN_ARRAY, and GET_ and SET_BITMAP_FILE are allowed */
+	
+	
 	if ((!mddev->raid_disks && !mddev->external)
 	    && cmd != ADD_NEW_DISK && cmd != STOP_ARRAY
 	    && cmd != RUN_ARRAY && cmd != SET_BITMAP_FILE
@@ -5970,9 +5529,7 @@ static int md_ioctl(struct block_device *bdev, fmode_t mode,
 		goto abort_unlock;
 	}
 
-	/*
-	 * Commands even a read-only array can execute:
-	 */
+	
 	switch (cmd)
 	{
 		case GET_ARRAY_INFO:
@@ -6001,13 +5558,7 @@ static int md_ioctl(struct block_device *bdev, fmode_t mode,
 
 	}
 
-	/*
-	 * The remaining ioctls are changing the state of the
-	 * superblock, so we do not allow them on read-only arrays.
-	 * However non-MD ioctls (e.g. get-size) will still come through
-	 * here and hit the 'default' below, so only disallow
-	 * 'md' ioctls, and switch to rw mode if started auto-readonly.
-	 */
+	
 	if (_IOC_TYPE(cmd) == MD_MAJOR && mddev->ro && mddev->pers) {
 		if (mddev->ro == 2) {
 			mddev->ro = 0;
@@ -6053,7 +5604,7 @@ static int md_ioctl(struct block_device *bdev, fmode_t mode,
 			goto done_unlock;
 
 #ifdef MY_ABC_HERE
-		/* 0: Raid status ok, 1: raid degrade, 2: raid crashed */
+		
 		case GET_ARRAY_STATUS:
 			{
 				int ret = 0;
@@ -6135,21 +5686,16 @@ abort:
 
 static int md_open(struct block_device *bdev, fmode_t mode)
 {
-	/*
-	 * Succeed if we can lock the mddev, which confirms that
-	 * it isn't being stopped right now.
-	 */
+	
 	mddev_t *mddev = mddev_find(bdev->bd_dev);
 	int err;
 
 	if (mddev->gendisk != bdev->bd_disk) {
-		/* we are racing with mddev_put which is discarding this
-		 * bd_disk.
-		 */
+		
 		mddev_put(mddev);
-		/* Wait until bdev->bd_disk is definitely gone */
+		
 		flush_scheduled_work();
-		/* Then retry the open from the top */
+		
 		return -ERESTARTSYS;
 	}
 	BUG_ON(mddev != bdev->bd_disk->private_data);
@@ -6206,26 +5752,12 @@ static int md_thread(void * arg)
 {
 	mdk_thread_t *thread = arg;
 
-	/*
-	 * md_thread is a 'system-thread', it's priority should be very
-	 * high. We avoid resource deadlocks individually in each
-	 * raid personality. (RAID5 does preallocation) We also use RR and
-	 * the very same RT priority as kswapd, thus we will never get
-	 * into a priority inversion deadlock.
-	 *
-	 * we definitely have to have equal or higher priority than
-	 * bdflush, otherwise bdflush will deadlock if there are too
-	 * many dirty RAID5 blocks.
-	 */
+	
 
 	allow_signal(SIGKILL);
 	while (!kthread_should_stop()) {
 
-		/* We need to wait INTERRUPTIBLE so that
-		 * we don't add to the load-average.
-		 * That means we need to be sure no signals are
-		 * pending
-		 */
+		
 		if (signal_pending(current))
 			flush_signals(current);
 
@@ -6306,13 +5838,7 @@ void md_error(mddev_t *mddev, mdk_rdev_t *rdev)
 
 	if (mddev->external)
 		set_bit(Blocked, &rdev->flags);
-/*
-	dprintk("md_error dev:%s, rdev:(%d:%d), (caller: %p,%p,%p,%p).\n",
-		mdname(mddev),
-		MAJOR(rdev->bdev->bd_dev), MINOR(rdev->bdev->bd_dev),
-		__builtin_return_address(0),__builtin_return_address(1),
-		__builtin_return_address(2),__builtin_return_address(3));
-*/
+
 	if (!mddev->pers)
 		return;
 	if (!mddev->pers->error_handler)
@@ -6327,7 +5853,7 @@ void md_error(mddev_t *mddev, mdk_rdev_t *rdev)
 	md_new_event_inintr(mddev);
 }
 
-/* seq_file implementation /proc/mdstat */
+
 
 static void status_unused(struct seq_file *seq)
 {
@@ -6363,18 +5889,12 @@ static void status_resync(struct seq_file *seq, mddev_t * mddev)
 	else
 		max_sectors = mddev->dev_sectors;
 
-	/*
-	 * Should not happen.
-	 */
+	
 	if (!max_sectors) {
 		MD_BUG();
 		return;
 	}
-	/* Pick 'scale' such that (resync>>scale)*1000 will fit
-	 * in a sector_t, and (max_sectors>>scale) will fit in a
-	 * u32, as those are the requirements for sector_div.
-	 * Thus 'scale' must be at least 10
-	 */
+	
 	scale = 10;
 	if (sizeof(sector_t) > sizeof(unsigned long)) {
 		while ( max_sectors/2 > (1ULL<<(scale+32)))
@@ -6405,26 +5925,13 @@ static void status_resync(struct seq_file *seq, mddev_t * mddev)
 		   (unsigned long long) resync/2,
 		   (unsigned long long) max_sectors/2);
 
-	/*
-	 * dt: time from mark until now
-	 * db: blocks written from mark until now
-	 * rt: remaining time
-	 *
-	 * rt is a sector_t, so could be 32bit or 64bit.
-	 * So we divide before multiply in case it is 32bit and close
-	 * to the limit.
-	 * We scale the divisor (db) by 32 to avoid loosing precision
-	 * near the end of resync when the number of remaining sectors
-	 * is close to 'db'.
-	 * We then divide rt by 32 after multiplying by db to compensate.
-	 * The '+1' avoids division by zero if db is very small.
-	 */
+	
 	dt = ((jiffies - mddev->resync_mark) / HZ);
 	if (!dt) dt++;
 	db = (mddev->curr_mark_cnt - atomic_read(&mddev->recovery_active))
 		- mddev->resync_mark_cnt;
 
-	rt = max_sectors - resync;    /* number of remaining sectors */
+	rt = max_sectors - resync;    
 	sector_div(rt, db/32+1);
 	rt *= dt;
 	rt >>= 5;
@@ -6444,7 +5951,7 @@ static void *md_seq_start(struct seq_file *seq, loff_t *pos)
 	if (l >= 0x10000)
 		return NULL;
 	if (!l--)
-		/* header */
+		
 		return (void*)1;
 
 	spin_lock(&all_mddevs_lock);
@@ -6457,7 +5964,7 @@ static void *md_seq_start(struct seq_file *seq, loff_t *pos)
 		}
 	spin_unlock(&all_mddevs_lock);
 	if (!l--)
-		return (void*)2;/* tail */
+		return (void*)2;
 	return NULL;
 }
 
@@ -6555,7 +6062,7 @@ static int md_seq_show(struct seq_file *seq, void *v)
 				seq_printf(seq, "(E)");
 #endif
 			} else if (rdev->raid_disk < 0)
-				seq_printf(seq, "(S)"); /* spare */
+				seq_printf(seq, "(S)"); 
 			sectors += rdev->sectors;
 		}
 
@@ -6658,7 +6165,7 @@ static unsigned int mdstat_poll(struct file *filp, poll_table *wait)
 
 	poll_wait(filp, &md_event_waiters, wait);
 
-	/* always allow read */
+	
 	mask = POLLIN | POLLRDNORM;
 
 	if (mi->event != atomic_read(&md_event_count))
@@ -6706,28 +6213,7 @@ static int is_mddev_idle(mddev_t *mddev, int init)
 		curr_events = (int)part_stat_read(&disk->part0, sectors[0]) +
 			      (int)part_stat_read(&disk->part0, sectors[1]) -
 			      atomic_read(&disk->sync_io);
-		/* sync IO will cause sync_io to increase before the disk_stats
-		 * as sync_io is counted when a request starts, and
-		 * disk_stats is counted when it completes.
-		 * So resync activity will cause curr_events to be smaller than
-		 * when there was no such activity.
-		 * non-sync IO will cause disk_stat to increase without
-		 * increasing sync_io so curr_events will (eventually)
-		 * be larger than it was before.  Once it becomes
-		 * substantially larger, the test below will cause
-		 * the array to appear non-idle, and resync will slow
-		 * down.
-		 * If there is a lot of outstanding resync activity when
-		 * we set last_event to curr_events, then all that activity
-		 * completing might cause the array to appear non-idle
-		 * and resync will be slowed down even though there might
-		 * not have been non-resync activity.  This will only
-		 * happen once though.  'last_events' will soon reflect
-		 * the state where there is little or no outstanding
-		 * resync requests, and further resync activity will
-		 * always make curr_events less than last_events.
-		 *
-		 */
+		
 		if (init || curr_events - rdev->last_events > 64) {
 			rdev->last_events = curr_events;
 			idle = 0;
@@ -6739,21 +6225,17 @@ static int is_mddev_idle(mddev_t *mddev, int init)
 
 void md_done_sync(mddev_t *mddev, int blocks, int ok)
 {
-	/* another "blocks" (512byte) blocks have been synced */
+	
 	atomic_sub(blocks, &mddev->recovery_active);
 	wake_up(&mddev->recovery_wait);
 	if (!ok) {
 		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 		md_wakeup_thread(mddev->thread);
-		// stop recovery, signal do_sync ....
+		
 	}
 }
 
-/* md_write_start(mddev, bi)
- * If we need to update some array metadata (e.g. 'active' flag
- * in superblock) before writing, schedule a superblock update
- * and wait for it to complete.
- */
+
 void md_write_start(mddev_t *mddev, struct bio *bi)
 {
 	int did_change = 0;
@@ -6762,7 +6244,7 @@ void md_write_start(mddev_t *mddev, struct bio *bi)
 
 	BUG_ON(mddev->ro == 1);
 	if (mddev->ro == 2) {
-		/* need to switch to read/write */
+		
 		mddev->ro = 0;
 		set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
 		md_wakeup_thread(mddev->thread);
@@ -6799,15 +6281,7 @@ void md_write_end(mddev_t *mddev)
 	}
 }
 
-/* md_allow_write(mddev)
- * Calling this ensures that the array is marked 'active' so that writes
- * may proceed without blocking.  It is important to call this before
- * attempting a GFP_KERNEL allocation while holding the mddev lock.
- * Must be called with mddev_lock held.
- *
- * In the ->external case MD_CHANGE_CLEAN can not be cleared until mddev->lock
- * is dropped, so return -EAGAIN after notifying userspace.
- */
+
 int md_allow_write(mddev_t *mddev)
 {
 	if (!mddev->pers)
@@ -6861,10 +6335,10 @@ void md_do_sync(mddev_t *mddev)
 	set_user_nice(current, 10);
 #endif
 
-	/* just incase thread restarts... */
+	
 	if (test_bit(MD_RECOVERY_DONE, &mddev->recovery))
 		return;
-	if (mddev->ro) /* never try to sync a read-only array */
+	if (mddev->ro) 
 		return;
 
 #ifdef MY_ABC_HERE
@@ -6883,21 +6357,7 @@ void md_do_sync(mddev_t *mddev)
 	else
 		desc = "recovery";
 
-	/* we overload curr_resync somewhat here.
-	 * 0 == not engaged in resync at all
-	 * 2 == checking that there is no conflict with another sync
-	 * 1 == like 2, but have yielded to allow conflicting resync to
-	 *		commense
-	 * other == active in resync - this many blocks
-	 *
-	 * Before starting a resync we must have set curr_resync to
-	 * 2, and then checked that every "conflicting" array has curr_resync
-	 * less than ours.  When we find one that is the same or higher
-	 * we wait on resync_wait.  To avoid deadlock, we reduce curr_resync
-	 * to 1 if we choose to yield (based arbitrarily on address of mddev structure).
-	 * This will mean we have to start checking from the beginning again.
-	 *
-	 */
+	
 
 	do {
 		mddev->curr_resync = 2;
@@ -6915,19 +6375,14 @@ void md_do_sync(mddev_t *mddev)
 			&&  match_mddev_units(mddev, mddev2)) {
 				DEFINE_WAIT(wq);
 				if (mddev < mddev2 && mddev->curr_resync == 2) {
-					/* arbitrarily yield */
+					
 					mddev->curr_resync = 1;
 					wake_up(&resync_wait);
 				}
 				if (mddev > mddev2 && mddev->curr_resync == 1)
-					/* no need to wait here, we can wait the next
-					 * time 'round when curr_resync == 2
-					 */
+					
 					continue;
-				/* We need to wait 'interruptible' so as not to
-				 * contribute to the load average, and not to
-				 * be caught by 'softlockup'
-				 */
+				
 				prepare_to_wait(&resync_wait, &wq, TASK_INTERRUPTIBLE);
 				if (!kthread_should_stop() &&
 				    mddev2->curr_resync >= mddev->curr_resync) {
@@ -6949,12 +6404,10 @@ void md_do_sync(mddev_t *mddev)
 
 	j = 0;
 	if (test_bit(MD_RECOVERY_SYNC, &mddev->recovery)) {
-		/* resync follows the size requested by the personality,
-		 * which defaults to physical size, but can be virtual size
-		 */
+		
 		max_sectors = mddev->resync_max_sectors;
 		mddev->resync_mismatches = 0;
-		/* we don't use the checkpoint if there's a bitmap */
+		
 		if (test_bit(MD_RECOVERY_REQUESTED, &mddev->recovery))
 			j = mddev->resync_min;
 		else if (!mddev->bitmap)
@@ -6963,7 +6416,7 @@ void md_do_sync(mddev_t *mddev)
 	} else if (test_bit(MD_RECOVERY_RESHAPE, &mddev->recovery))
 		max_sectors = mddev->dev_sectors;
 	else {
-		/* recovery follows the physical size of devices */
+		
 		max_sectors = mddev->dev_sectors;
 		j = MaxSector;
 		list_for_each_entry(rdev, &mddev->disks, same_set)
@@ -6985,7 +6438,7 @@ void md_do_sync(mddev_t *mddev)
 	       "(but not more than %d KB/sec) for %s.\n",
 	       speed_max(mddev), desc);
 
-	is_mddev_idle(mddev, 1); /* this initializes IO event counters */
+	is_mddev_idle(mddev, 1); 
 
 	io_sectors = 0;
 	for (m = 0; m < SYNC_MARKS; m++) {
@@ -6996,9 +6449,7 @@ void md_do_sync(mddev_t *mddev)
 	mddev->resync_mark = mark[last_mark];
 	mddev->resync_mark_cnt = mark_cnt[last_mark];
 
-	/*
-	 * Tune reconstruction:
-	 */
+	
 	window = 32*(PAGE_SIZE/512);
 	printk(KERN_INFO "md: using %dk window, over a total of %llu blocks.\n",
 		window/2,(unsigned long long) max_sectors/2);
@@ -7025,7 +6476,7 @@ void md_do_sync(mddev_t *mddev)
 		     (j - mddev->curr_resync_completed)*2
 		     >= mddev->resync_max - mddev->curr_resync_completed
 			    )) {
-			/* time to update curr_resync_completed */
+			
 			blk_unplug(mddev->queue);
 			wait_event(mddev->recovery_wait,
 				   atomic_read(&mddev->recovery_active) == 0);
@@ -7036,11 +6487,8 @@ void md_do_sync(mddev_t *mddev)
 		}
 
 		while (j >= mddev->resync_max && !kthread_should_stop()) {
-			/* As this condition is controlled by user-space,
-			 * we can block indefinitely, so use '_interruptible'
-			 * to avoid triggering warnings.
-			 */
-			flush_signals(current); /* just in case */
+			
+			flush_signals(current); 
 			wait_event_interruptible(mddev->recovery_wait,
 						 mddev->resync_max > j
 						 || kthread_should_stop());
@@ -7056,7 +6504,7 @@ void md_do_sync(mddev_t *mddev)
 			goto out;
 		}
 
-		if (!skipped) { /* actual IO requested */
+		if (!skipped) { 
 			io_sectors += sectors;
 			atomic_add(sectors, &mddev->recovery_active);
 		}
@@ -7065,9 +6513,7 @@ void md_do_sync(mddev_t *mddev)
 		if (j>1) mddev->curr_resync = j;
 		mddev->curr_mark_cnt = io_sectors;
 		if (last_check == 0)
-			/* this is the earliers that rebuilt will be
-			 * visible in /proc/mdstat
-			 */
+			
 			md_new_event(mddev);
 
 		if (last_check + window > io_sectors || j == max_sectors)
@@ -7080,7 +6526,7 @@ void md_do_sync(mddev_t *mddev)
 
 	repeat:
 		if (time_after_eq(jiffies, mark[last_mark] + SYNC_MARK_STEP )) {
-			/* step marks */
+			
 			int next = (last_mark+1) % SYNC_MARKS;
 
 			mddev->resync_mark = mark[next];
@@ -7093,14 +6539,7 @@ void md_do_sync(mddev_t *mddev)
 		if (kthread_should_stop())
 			goto interrupted;
 
-		/*
-		 * this loop exits only if either when we are slower than
-		 * the 'hard' speed limit, or the system was IO-idle for
-		 * a jiffy.
-		 * the system might be non-idle CPU-wise, but we only care
-		 * about not overloading the IO subsystem. (things like an
-		 * e2fsck being done on the RAID array should execute fast)
-		 */
+		
 		blk_unplug(mddev->queue);
 		cond_resched();
 
@@ -7121,18 +6560,16 @@ void md_do_sync(mddev_t *mddev)
 	} else {
 		printk(KERN_WARNING "md: %s: %s done.\n",mdname(mddev), desc);
 	}
-#else /* MY_ABC_HERE */
+#else 
 	printk(KERN_INFO "md: %s: %s done.\n",mdname(mddev), desc);
-#endif /* MY_ABC_HERE */
-	/*
-	 * this also signals 'finished resyncing' to md_stop
-	 */
+#endif 
+	
  out:
 	blk_unplug(mddev->queue);
 
 	wait_event(mddev->recovery_wait, !atomic_read(&mddev->recovery_active));
 
-	/* tell personality that we are finished */
+	
 	mddev->pers->sync_request(mddev, max_sectors, &skipped, 1);
 
 	if (!test_bit(MD_RECOVERY_CHECK, &mddev->recovery) &&
@@ -7164,28 +6601,26 @@ void md_do_sync(mddev_t *mddev)
 	mddev->curr_resync = 0;
 	mddev->curr_resync_completed = 0;
 	if (!test_bit(MD_RECOVERY_INTR, &mddev->recovery))
-		/* We completed so max setting can be forgotten. */
+		
 		mddev->resync_max = MaxSector;
 	sysfs_notify(&mddev->kobj, NULL, "sync_completed");
 	wake_up(&resync_wait);
 	set_bit(MD_RECOVERY_DONE, &mddev->recovery);
 	md_wakeup_thread(mddev->thread);
 #ifdef MY_ABC_HERE
-	// restore old setting
+	
 	SynoRaidAutoRemapAdjust(mddev, old_auto_remap_setting);
 #endif
 	return;
 
  interrupted:
-	/*
-	 * got a signal, exit.
-	 */
+	
 #ifdef MY_ABC_HERE
 	printk(KERN_WARNING "md: md_do_sync() got signal ... exiting\n");
-#else /* MY_ABC_HERE */
+#else 
 	printk(KERN_INFO
 	       "md: md_do_sync() got signal ... exiting\n");
-#endif /* MY_ABC_HERE */
+#endif 
 	set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 	goto out;
 
@@ -7267,28 +6702,7 @@ static int remove_and_add_spares(mddev_t *mddev)
 	}
 	return spares;
 }
-/*
- * This routine is regularly called by all per-raid-array threads to
- * deal with generic issues like resync and super-block update.
- * Raid personalities that don't have a thread (linear/raid0) do not
- * need this as they never do any recovery or update the superblock.
- *
- * It does not do any resync itself, but rather "forks" off other threads
- * to do that as needed.
- * When it is determined that resync is needed, we set MD_RECOVERY_RUNNING in
- * "->recovery" and create a thread at ->sync_thread.
- * When the thread finishes it sets MD_RECOVERY_DONE
- * and wakeups up this thread which will reap the thread and finish up.
- * This thread also removes any faulty devices (with nr_pending == 0).
- *
- * The overall approach is:
- *  1/ if the superblock needs updating, update it.
- *  2/ If a recovery thread is running, don't do anything else.
- *  3/ If recovery has finished, clean up, possibly marking spares active.
- *  4/ If there are any faulty devices, remove them.
- *  5/ If array is degraded, try to add spares devices
- *  6/ If array has spares or is not in-sync, start a resync thread.
- */
+
 void md_check_recovery(mddev_t *mddev)
 {
 	mdk_rdev_t *rdev;
@@ -7324,9 +6738,7 @@ void md_check_recovery(mddev_t *mddev)
 		int spares = 0;
 
 		if (mddev->ro) {
-			/* Only thing we do on a ro array is remove
-			 * failed devices.
-			 */
+			
 			remove_and_add_spares(mddev);
 			clear_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
 			goto unlock;
@@ -7360,23 +6772,23 @@ void md_check_recovery(mddev_t *mddev)
 
 		if (test_bit(MD_RECOVERY_RUNNING, &mddev->recovery) &&
 		    !test_bit(MD_RECOVERY_DONE, &mddev->recovery)) {
-			/* resync/recovery still happening */
+			
 			clear_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
 			goto unlock;
 		}
 		if (mddev->sync_thread) {
-			/* resync has finished, collect result */
+			
 #ifdef MY_ABC_HERE
 			if (0 == down_write_trylock(&s_reshape_mount_key)) {
 				goto unlock;
 			}
-#endif /* MY_ABC_HERE */
+#endif 
 			md_unregister_thread(mddev->sync_thread);
 			mddev->sync_thread = NULL;
 			if (!test_bit(MD_RECOVERY_INTR, &mddev->recovery) &&
 			    !test_bit(MD_RECOVERY_REQUESTED, &mddev->recovery)) {
-				/* success...*/
-				/* activate any spares */
+				
+				
 				if (mddev->pers->spare_active(mddev))
 					sysfs_notify(&mddev->kobj, NULL,
 						     "degraded");
@@ -7386,53 +6798,42 @@ void md_check_recovery(mddev_t *mddev)
 				mddev->pers->finish_reshape(mddev);
 			md_update_sb(mddev, 1);
 
-			/* if array is no-longer degraded, then any saved_raid_disk
-			 * information must be scrapped
-			 */
+			
 			if (!mddev->degraded)
 				list_for_each_entry(rdev, &mddev->disks, same_set)
 					rdev->saved_raid_disk = -1;
 
 			mddev->recovery = 0;
-			/* flag recovery needed just to double check */
+			
 			set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
 			sysfs_notify_dirent(mddev->sysfs_action);
 			md_new_event(mddev);
 #ifdef MY_ABC_HERE
 			up_write(&s_reshape_mount_key);
-#endif /* MY_ABC_HERE */
+#endif 
 			goto unlock;
 		}
-		/* Set RUNNING before clearing NEEDED to avoid
-		 * any transients in the value of "sync_action".
-		 */
+		
 		set_bit(MD_RECOVERY_RUNNING, &mddev->recovery);
 		clear_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
-		/* Clear some bits that don't mean anything, but
-		 * might be left set
-		 */
+		
 		clear_bit(MD_RECOVERY_INTR, &mddev->recovery);
 		clear_bit(MD_RECOVERY_DONE, &mddev->recovery);
 
 		if (test_bit(MD_RECOVERY_FROZEN, &mddev->recovery))
 			goto unlock;
-		/* no recovery is running.
-		 * remove any failed drives, then
-		 * add spares if possible.
-		 * Spare are also removed and re-added, to allow
-		 * the personality to fail the re-add.
-		 */
+		
 
 		if (mddev->reshape_position != MaxSector) {
 #ifdef MY_ABC_HERE
-			/* If it is possible. remove faulty disks */
+			
 			if (mddev->degraded) {
 				remove_faulty(mddev);
 			}
 #endif
 			if (mddev->pers->check_reshape == NULL ||
 			    mddev->pers->check_reshape(mddev) != 0)
-				/* Cannot proceed */
+				
 				goto unlock;
 			set_bit(MD_RECOVERY_RESHAPE, &mddev->recovery);
 			clear_bit(MD_RECOVERY_RECOVER, &mddev->recovery);
@@ -7445,7 +6846,7 @@ void md_check_recovery(mddev_t *mddev)
 			set_bit(MD_RECOVERY_SYNC, &mddev->recovery);
 			clear_bit(MD_RECOVERY_RECOVER, &mddev->recovery);
 		} else if (!test_bit(MD_RECOVERY_SYNC, &mddev->recovery))
-			/* nothing to be done ... */
+			
 			goto unlock;
 
 #ifdef MY_ABC_HERE
@@ -7458,10 +6859,7 @@ void md_check_recovery(mddev_t *mddev)
 #endif
 		if (mddev->pers->sync_request) {
 			if (spares && mddev->bitmap && ! mddev->bitmap->file) {
-				/* We are adding a device or devices to an array
-				 * which has the bitmap stored on all devices.
-				 * So make sure all bitmap pages get written
-				 */
+				
 				bitmap_write_all(mddev->bitmap);
 			}
 			mddev->sync_thread = md_register_thread(md_do_sync,
@@ -7471,7 +6869,7 @@ void md_check_recovery(mddev_t *mddev)
 				printk(KERN_ERR "%s: could not start resync"
 					" thread...\n", 
 					mdname(mddev));
-				/* leave the spares where they are, it shouldn't hurt */
+				
 				mddev->recovery = 0;
 			} else
 				md_wakeup_thread(mddev->sync_thread);
@@ -7512,19 +6910,11 @@ static int md_notify_reboot(struct notifier_block *this,
 
 		for_each_mddev(mddev, tmp)
 			if (mddev_trylock(mddev)) {
-				/* Force a switch to readonly even array
-				 * appears to still be in use.  Hence
-				 * the '100'.
-				 */
+				
 				do_md_stop(mddev, 1, 100);
 				mddev_unlock(mddev);
 			}
-		/*
-		 * certain more exotic SCSI devices are known to be
-		 * volatile wrt too early system reboots. While the
-		 * right place to handle this issue is the given
-		 * driver, we do want to have a safe RAID driver ...
-		 */
+		
 		mdelay(1000*1);
 	}
 	return NOTIFY_DONE;
@@ -7533,7 +6923,7 @@ static int md_notify_reboot(struct notifier_block *this,
 static struct notifier_block md_notifier = {
 	.notifier_call	= md_notify_reboot,
 	.next		= NULL,
-	.priority	= INT_MAX, /* before any real devices */
+	.priority	= INT_MAX, 
 };
 
 static void md_geninit(void)
@@ -7578,10 +6968,7 @@ static int __init md_init(void)
 
 #ifndef MODULE
 
-/*
- * Searches all registered partitions for autorun RAID arrays
- * at boot time.
- */
+
 
 static LIST_HEAD(all_detected_devices);
 struct detected_devices_node {
@@ -7610,18 +6997,7 @@ void md_autodetect_dev(dev_t dev)
 }
 
 #ifdef MY_ABC_HERE
-/**
- * Do not assemble disks while ..
- * 
- * 1. we assemble md only for internal disk (port multiple excluded)
- * 2. only for first and second partition
- * 3. the rest, we deny it
- * 
- * @param szDiskName [IN] device name. Should not be NULL
- * 
- * @return 1: deny
- *         0: not deny
- */
+
 static u8
 blDenyDisks(const struct block_device *pBDev)
 {
@@ -7631,7 +7007,7 @@ blDenyDisks(const struct block_device *pBDev)
 	if (!pBDev) {
 		goto END;
 	}
-	// this disk are not going to be used as system disk
+	
 #ifdef MY_ABC_HERE
 	if (!(pBDev->bd_disk->systemDisk)) {
 		goto END;
@@ -7639,7 +7015,7 @@ blDenyDisks(const struct block_device *pBDev)
 #endif
 
 	part = MINOR(pBDev->bd_dev) - pBDev->bd_disk->first_minor;
-	// only assemble the first and second partition
+	
 	if (part > 2) {
 		goto END;
 	}
@@ -7651,18 +7027,7 @@ END:
 #endif
 
 #ifdef MY_ABC_HERE
-/**
- * This function is comparason function for list_sort
- * database.
- *
- * @param priv merge sort key
- * @param plistHead1 first list_head
- * @param plistHead2 second list_head
- *
- * @return > 0: plistHead1 is front of plistHead2
- * @return = 0: no operation
- * @return < 0: plistHead2 is front of plistHead1
- */
+
 static int device_sort_cmp(void *priv, struct list_head *plistHead1, struct list_head *plistHead2)
 {
 	struct detected_devices_node *pnode1 = NULL;
@@ -7744,7 +7109,7 @@ static void autostart_arrays(int part)
 #endif
 		set_bit(AutoDetected, &rdev->flags);
 #ifdef MY_ABC_HERE
-		// Refer to DS2.0 #5798.
+		
 		list_add_tail(&rdev->same_set, &pending_raid_disks);
 #else
 		list_add(&rdev->same_set, &pending_raid_disks);
@@ -7758,7 +7123,7 @@ static void autostart_arrays(int part)
 	autorun_devices(part);
 }
 
-#endif /* !MODULE */
+#endif 
 
 static __exit void md_exit(void)
 {
@@ -7807,14 +7172,7 @@ module_param_call(new_array, add_named_array, NULL, NULL, S_IWUSR);
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 
-/**
- * This function is copied from md_error,
- * the only difference is to determine whever to call
- * syno_error_handler
- *
- * @param mddev  Should not be NULL.
- * @param rdev   Should not be NULL.
- */
+
 #ifdef MY_ABC_HERE
 void syno_md_error(mddev_t *mddev, mdk_rdev_t *rdev)
 #else
@@ -7828,13 +7186,7 @@ static void syno_md_error(mddev_t *mddev, mdk_rdev_t *rdev)
 
 	if (!rdev || test_bit(Faulty, &rdev->flags))
 		return;
-/*
-	dprintk("md_error dev:%s, rdev:(%d:%d), (caller: %p,%p,%p,%p).\n",
-		mdname(mddev),
-		MAJOR(rdev->bdev->bd_dev), MINOR(rdev->bdev->bd_dev),
-		__builtin_return_address(0),__builtin_return_address(1),
-		__builtin_return_address(2),__builtin_return_address(3));
-*/
+
 	if (!mddev->pers)
 		return;
 	if (!mddev->pers->error_handler)
@@ -7855,13 +7207,10 @@ static void syno_md_error(mddev_t *mddev, mdk_rdev_t *rdev)
 }
 
 EXPORT_SYMBOL(syno_md_error);
-#endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
+#endif 
 
 #ifdef MY_ABC_HERE
-/**
- * because there are no useful number in stander md files
- * So we manunly create a define for our private using
- */
+
 #define SYNO_RAID0 0
 static int syno_hot_remove_disk(mddev_t * mddev, mdk_rdev_t *rdev)
 {
@@ -7877,7 +7226,7 @@ static int syno_hot_remove_disk(mddev_t * mddev, mdk_rdev_t *rdev)
 	}
 
 	list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
-		/* Not release yet */
+		
 		if (rdev_tmp == rdev) {
 			blNoRdev = 0;
 		}
@@ -7896,7 +7245,7 @@ static int syno_hot_remove_disk(mddev_t * mddev, mdk_rdev_t *rdev)
 
 	if(SYNO_RAID0 == mddev->level ||
 	   LEVEL_LINEAR == mddev->level) {
-		/* raid0 and linear are not going to md_recovery */
+		
 		if(mddev->pers->hot_remove_disk) {
 			if(0 != mddev->pers->hot_remove_disk(mddev, rdev->raid_disk)){
 				res = -EAGAIN;
@@ -7904,9 +7253,9 @@ static int syno_hot_remove_disk(mddev_t * mddev, mdk_rdev_t *rdev)
 			}
 		}
 	} else {
-		/* Those raids who have sync_thread */
+		
 		if (mddev->ro) {
-			/* md in read only stat, it cannot remove faulty by sync_thread. */
+			
 			printk(KERN_WARNING "%s (%d): %s is in readonly mode, remove faulty disk %s by ourself\n",__FUNCTION__, __LINE__, mdname(mddev), bdevname(rdev->bdev,b));
 			remove_faulty(mddev);
 		}
@@ -7948,7 +7297,7 @@ static int syno_set_disk_faulty(mddev_t * mddev, mdk_rdev_t *rdev)
 	}
 
 	list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
-		/* Not release yet */
+		
 		if (rdev_tmp == rdev) {
 			blNoRdev = 0;
 		}
@@ -7974,21 +7323,7 @@ ABORT:
 	return res;
 }
 
-/**
- * Let printk also protected in md lock.
- * The main concern is checking
- * rdev->mddev is NULL.
- *
- * because if we has already knick
- * this device. it would set to NULL.
- *
- * @param mddev  Should not be NULL.
- * @param rdev   Should not be NULL.
- *
- * @return 0: success
- *         -EAGAIN: keep retry
- *         -ENODEV: skip this device
- */
+
 static int SynoCheckRdevIsWorking(mddev_t *mddev, mdk_rdev_t *rdev)
 {
 	int res = -1;
@@ -8003,7 +7338,7 @@ static int SynoCheckRdevIsWorking(mddev_t *mddev, mdk_rdev_t *rdev)
 	}
 
 	list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
-		/* Not release yet */
+		
 		if (rdev_tmp == rdev) {
 			blNoRdev = 0;
 		}
@@ -8072,7 +7407,7 @@ AGAIN:
 	}
 
 	if (-EAGAIN == status) {
-		/* schedule out, wait md self thread recovery done. */
+		
 		msleep(1000);
 		goto AGAIN;
 	}
@@ -8098,8 +7433,8 @@ void SYNORaidUnplugTask(struct work_struct *work)
 
 	szDiskName = raid_unplug_work->szDiskName;
 
-	// not disk name, it means this is not a disk device, may be SAS expander or other scsi devices
-	// so we don't need to kick any disk here from md
+	
+	
 	if (NULL == szDiskName || 0 == szDiskName[0]) {
 		kfree(raid_unplug_work);
 		return;
@@ -8113,7 +7448,7 @@ void SYNORaidUnplugTask(struct work_struct *work)
 		}
 
 		list_for_each_entry(rdev, &mddev->disks, same_set) {
-			/* make sure bdev is not release */
+			
 			if (rdev && rdev->mddev) {
 				bdevname(rdev->bdev, b);
 			} else {
@@ -8193,7 +7528,7 @@ void SYNORaidRdevUnplug(mddev_t *mddev, mdk_rdev_t *rdev)
 		printk("%s %d: kmalloc error\n", __FILE__, __LINE__);
 	}
 }
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 void
@@ -8293,12 +7628,12 @@ void SynoMDWakeUpDevices(void *md)
 		goto END;
 	}
 
-	/* schedule to back ground */
+	
 	INIT_WORK(&pWakeup_work->work, SYNOWakeUpTask);
 	pWakeup_work->mddev = mddev;
 	schedule_work(&pWakeup_work->work);
 
-	/* Mark it as active */
+	
 	spin_lock(&mddev->ActLock);
 	mddev->blActive = 1;
 	spin_unlock(&mddev->ActLock);

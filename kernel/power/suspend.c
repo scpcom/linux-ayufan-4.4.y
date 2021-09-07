@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * kernel/power/suspend.c - Suspend to RAM and standby functionality.
- *
- * Copyright (c) 2003 Patrick Mochel
- * Copyright (c) 2003 Open Source Development Lab
- * Copyright (c) 2009 Rafael J. Wysocki <rjw@sisk.pl>, Novell Inc.
- *
- * This file is released under the GPLv2.
- */
-
+ 
 #include <linux/string.h>
 #include <linux/delay.h>
 #include <linux/errno.h>
@@ -28,10 +19,6 @@ const char *const pm_states[PM_SUSPEND_MAX] = {
 
 static struct platform_suspend_ops *suspend_ops;
 
-/**
- *	suspend_set_ops - Set the global suspend method table.
- *	@ops:	Pointer to ops structure.
- */
 void suspend_set_ops(struct platform_suspend_ops *ops)
 {
 	mutex_lock(&pm_mutex);
@@ -41,20 +28,10 @@ void suspend_set_ops(struct platform_suspend_ops *ops)
 
 bool valid_state(suspend_state_t state)
 {
-	/*
-	 * All states need lowlevel support and need to be valid to the lowlevel
-	 * implementation, no valid callback implies that none are valid.
-	 */
+	 
 	return suspend_ops && suspend_ops->valid && suspend_ops->valid(state);
 }
 
-/**
- * suspend_valid_only_mem - generic memory-only valid callback
- *
- * Platform drivers that implement mem suspend only and only need
- * to check for that in their .valid callback can use this instead
- * of rolling their own .valid callback.
- */
 int suspend_valid_only_mem(suspend_state_t state)
 {
 	return state == PM_SUSPEND_MEM;
@@ -68,16 +45,10 @@ static int suspend_test(int level)
 		mdelay(5000);
 		return 1;
 	}
-#endif /* !CONFIG_PM_DEBUG */
+#endif  
 	return 0;
 }
 
-/**
- *	suspend_prepare - Do prep work before entering low-power state.
- *
- *	This is common code that is called for each state that we're entering.
- *	Run suspend notifiers, allocate a console and stop all processes.
- */
 static int suspend_prepare(void)
 {
 	int error;
@@ -107,24 +78,16 @@ static int suspend_prepare(void)
 	return error;
 }
 
-/* default implementation */
 void __attribute__ ((weak)) arch_suspend_disable_irqs(void)
 {
 	local_irq_disable();
 }
 
-/* default implementation */
 void __attribute__ ((weak)) arch_suspend_enable_irqs(void)
 {
 	local_irq_enable();
 }
 
-/**
- *	suspend_enter - enter the desired system sleep state.
- *	@state:		state to enter
- *
- *	This function should be called after devices have been suspended.
- */
 static int suspend_enter(suspend_state_t state)
 {
 	int error;
@@ -184,11 +147,6 @@ static int suspend_enter(suspend_state_t state)
 	return error;
 }
 
-/**
- *	suspend_devices_and_enter - suspend devices and enter the desired system
- *				    sleep state.
- *	@state:		  state to enter
- */
 int suspend_devices_and_enter(suspend_state_t state)
 {
 	int error;
@@ -230,12 +188,6 @@ int suspend_devices_and_enter(suspend_state_t state)
 	goto Resume_devices;
 }
 
-/**
- *	suspend_finish - Do final work before exiting suspend sequence.
- *
- *	Call platform code to clean up, restart processes, and free the
- *	console that we've allocated. This is not called for suspend-to-disk.
- */
 static void suspend_finish(void)
 {
 	suspend_thaw_processes();
@@ -244,16 +196,6 @@ static void suspend_finish(void)
 	pm_restore_console();
 }
 
-/**
- *	enter_state - Do common work of entering low-power state.
- *	@state:		pm_state structure for state we're entering.
- *
- *	Make sure we're the only ones trying to enter a sleep state. Fail
- *	if someone has beat us to it, since we don't want anything weird to
- *	happen when we wake up.
- *	Then, do the setup for suspend, enter the state, and cleaup (after
- *	we've woken up).
- */
 int enter_state(suspend_state_t state)
 {
 	int error;
@@ -301,13 +243,6 @@ int enter_state(suspend_state_t state)
 	return error;
 }
 
-/**
- *	pm_suspend - Externally visible function for suspending system.
- *	@state:		Enumerated value of state to enter.
- *
- *	Determine whether or not value is within range, get state
- *	structure, and enter (above).
- */
 int pm_suspend(suspend_state_t state)
 {
 	if (state > PM_SUSPEND_ON && state <= PM_SUSPEND_MAX)

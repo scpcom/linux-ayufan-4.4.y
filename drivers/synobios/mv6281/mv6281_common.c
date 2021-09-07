@@ -1,12 +1,11 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-// Copyright (c) 2000-2009 Synology Inc. All rights reserved.
-
+ 
 #include <linux/syno.h>
 #include <linux/module.h>
-#include <linux/kernel.h> /* printk() */
-#include <linux/errno.h>  /* error codes */
+#include <linux/kernel.h>  
+#include <linux/errno.h>   
 #include <linux/delay.h>
 #include <linux/synobios.h>
 #include <linux/fs.h>
@@ -66,7 +65,6 @@ int GetBrand(void)
 {
 	int Brand = -1;
 
-	//YMXX[Z]SSSSS
 #ifdef MY_ABC_HERE
 	if ( gszSerialNum[4] == 'M' ) {
 		Brand = BRAND_LOGITEC;
@@ -147,8 +145,7 @@ SetFanStatus(FAN_STATUS status, FAN_SPEED speed)
 
 	switch (model) {
 		case MODEL_RS409:
-			/* this is only for RS409r1, not RS409, RS409 not use FAN_MULTI_ALWAYS in mapping.h
-			 * so it never go to this case even you use this function point */
+			 
 			if (FanStatusMappingRS409r1(status, speed, &speed_value)) {
 				goto END;
 			}
@@ -159,7 +156,6 @@ SetFanStatus(FAN_STATUS status, FAN_SPEED speed)
 			}
 	}
 
-	// DS2.0 #8126
 	if (-1 == SetFanSpeedValue(FAN_ACTIVATION_SPEED)) {
 		goto END;
 	}

@@ -18,4 +18,4 @@ struct path {
 extern void path_get(struct path *);
 extern void path_put(struct path *);
 
-#endif  /* _LINUX_PATH_H */
+#endif   

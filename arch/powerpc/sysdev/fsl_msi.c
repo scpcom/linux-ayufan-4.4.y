@@ -1,20 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2007-2008 Freescale Semiconductor, Inc. All rights reserved.
- *
- * Author: Tony Li <tony.li@freescale.com>
- *	   Jason Jin <Jason.jin@freescale.com>
- *
- * The hwirq alloc and free code reuse from sysdev/mpic_msi.c
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; version 2 of the
- * License.
- *
- */
+ 
 #include <linux/irq.h>
 #include <linux/bootmem.h>
 #include <linux/msi.h>
@@ -52,10 +39,6 @@ static inline u32 fsl_msi_read(u32 __iomem *base, unsigned int reg)
 	return in_be32(base + (reg >> 2));
 }
 
-/*
- * We do not need this actually. The MSIR register has been read once
- * in the cascade interrupt. So, this MSI interrupt has been acked
-*/
 static void fsl_msi_end_irq(unsigned int virq)
 {
 }
@@ -373,7 +356,6 @@ static int __devinit fsl_of_msi_probe(struct of_device *dev,
 		goto error_out;
 	}
 
-	/* Get the MSI reg base */
 	err = of_address_to_resource(dev->node, 0, &res);
 	if (err) {
 		dev_err(&dev->dev, "%s resource error!\n",
@@ -454,7 +436,6 @@ static int __devinit fsl_of_msi_probe(struct of_device *dev,
 #ifdef MY_DEF_HERE
 	list_add_tail(&msi->list, &msi_head);
 
-	/* The multiple setting ppc_md.setup_msi_irqs will not harm things */
 	if (!ppc_md.setup_msi_irqs) {
 		ppc_md.setup_msi_irqs = fsl_setup_msi_irqs;
 		ppc_md.teardown_msi_irqs = fsl_teardown_msi_irqs;

@@ -1,54 +1,4 @@
-/*
- *  linux/drivers/block/loop.c
- *
- *  Written by Theodore Ts'o, 3/29/93
- *
- * Copyright 1993 by Theodore Ts'o.  Redistribution of this file is
- * permitted under the GNU General Public License.
- *
- * DES encryption plus some minor changes by Werner Almesberger, 30-MAY-1993
- * more DES encryption plus IDEA encryption by Nicholas J. Leon, June 20, 1996
- *
- * Modularized and updated for 1.1.16 kernel - Mitch Dsouza 28th May 1994
- * Adapted for 1.3.59 kernel - Andries Brouwer, 1 Feb 1996
- *
- * Fixed do_loop_request() re-entrancy - Vincent.Renardias@waw.com Mar 20, 1997
- *
- * Added devfs support - Richard Gooch <rgooch@atnf.csiro.au> 16-Jan-1998
- *
- * Handle sparse backing files correctly - Kenn Humborg, Jun 28, 1998
- *
- * Loadable modules and other fixes by AK, 1998
- *
- * Make real block number available to downstream transfer functions, enables
- * CBC (and relatives) mode encryption requiring unique IVs per data block.
- * Reed H. Petty, rhp@draper.net
- *
- * Maximum number of loop devices now dynamic via max_loop module parameter.
- * Russell Kroll <rkroll@exploits.org> 19990701
- *
- * Maximum number of loop devices when compiled-in now selectable by passing
- * max_loop=<1-255> to the kernel on boot.
- * Erik I. Bolsø, <eriki@himolde.no>, Oct 31, 1999
- *
- * Completely rewrite request handling to be make_request_fn style and
- * non blocking, pushing work to a helper thread. Lots of fixes from
- * Al Viro too.
- * Jens Axboe <axboe@suse.de>, Nov 2000
- *
- * Support up to 256 loop devices
- * Heinz Mauelshagen <mge@sistina.com>, Feb 2002
- *
- * Support for falling back on the write file operation when the address space
- * operations write_begin is not available on the backing filesystem.
- * Anton Altaparmakov, 16 Feb 2005
- *
- * Still To Fix:
- * - Advisory locking is ignored here.
- * - Should use an own CAP_* category instead of CAP_SYS_ADMIN
- *
- */
-
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/sched.h>
@@ -68,7 +18,7 @@
 #include <linux/suspend.h>
 #include <linux/freezer.h>
 #include <linux/writeback.h>
-#include <linux/buffer_head.h>		/* for invalidate_bdev() */
+#include <linux/buffer_head.h>		 
 #include <linux/completion.h>
 #include <linux/highmem.h>
 #include <linux/gfp.h>
@@ -83,9 +33,6 @@ static DEFINE_MUTEX(loop_devices_mutex);
 static int max_part;
 static int part_shift;
 
-/*
- * Transfer functions
- */
 static int transfer_none(struct loop_device *lo, int cmd,
 			 struct page *raw_page, unsigned raw_off,
 			 struct page *loop_page, unsigned loop_off,
@@ -152,7 +99,6 @@ static struct loop_func_table xor_funcs = {
 	.init = xor_init
 }; 	
 
-/* xfer_funcs[0] is special - its release function is never called */
 static struct loop_func_table *xfer_funcs[MAX_LO_CRYPT] = {
 	&none_funcs,
 	&xor_funcs
@@ -162,17 +108,12 @@ static loff_t get_loop_size(struct loop_device *lo, struct file *file)
 {
 	loff_t size, offset, loopsize;
 
-	/* Compute loopsize in bytes */
 	size = i_size_read(file->f_mapping->host);
 	offset = lo->lo_offset;
 	loopsize = size - offset;
 	if (lo->lo_sizelimit > 0 && lo->lo_sizelimit < loopsize)
 		loopsize = lo->lo_sizelimit;
 
-	/*
-	 * Unfortunately, if we want to do I/O on the device,
-	 * the number of 512-byte sectors has to fit into a sector_t.
-	 */
 	return loopsize >> 9;
 }
 
@@ -201,16 +142,10 @@ lo_do_transfer(struct loop_device *lo, int cmd,
 	return lo->transfer(lo, cmd, rpage, roffs, lpage, loffs, size, rblock);
 }
 
-/**
- * do_lo_send_aops - helper for writing data to a loop device
- *
- * This is the fast version for backing filesystems which implement the address
- * space operations write_begin and write_end.
- */
 static int do_lo_send_aops(struct loop_device *lo, struct bio_vec *bvec,
 		loff_t pos, struct page *unused)
 {
-	struct file *file = lo->lo_backing_file; /* kudos to NFsckingS */
+	struct file *file = lo->lo_backing_file;  
 	struct address_space *mapping = file->f_mapping;
 	pgoff_t index;
 	unsigned offset, bv_offs;
@@ -273,12 +208,6 @@ fail:
 	goto out;
 }
 
-/**
- * __do_lo_send_write - helper for writing data to a loop device
- *
- * This helper just factors out common code between do_lo_send_direct_write()
- * and do_lo_send_write().
- */
 static int __do_lo_send_write(struct file *file,
 		u8 *buf, const int len, loff_t pos)
 {
@@ -303,14 +232,6 @@ static int __do_lo_send_write(struct file *file,
 	return bw;
 }
 
-/**
- * do_lo_send_direct_write - helper for writing data to a loop device
- *
- * This is the fast, non-transforming version for backing filesystems which do
- * not implement the address space operations write_begin and write_end.
- * It uses the write file operation which should be present on all writeable
- * filesystems.
- */
 static int do_lo_send_direct_write(struct loop_device *lo,
 		struct bio_vec *bvec, loff_t pos, struct page *page)
 {
@@ -322,19 +243,6 @@ static int do_lo_send_direct_write(struct loop_device *lo,
 	return bw;
 }
 
-/**
- * do_lo_send_write - helper for writing data to a loop device
- *
- * This is the slow, transforming version for filesystems which do not
- * implement the address space operations write_begin and write_end.  It
- * uses the write file operation which should be present on all writeable
- * filesystems.
- *
- * Using fops->write is slower than using aops->{prepare,commit}_write in the
- * transforming case because we need to double buffer the data as we cannot do
- * the transformations in place as we do not have direct access to the
- * destination pages of the backing file.
- */
 static int do_lo_send_write(struct loop_device *lo, struct bio_vec *bvec,
 		loff_t pos, struct page *page)
 {
@@ -524,17 +432,11 @@ out:
 	return ret;
 }
 
-/*
- * Add bio to back of pending list
- */
 static void loop_add_bio(struct loop_device *lo, struct bio *bio)
 {
 	bio_list_add(&lo->lo_bio_list, bio);
 }
 
-/*
- * Grab first pending buffer
- */
 static struct bio *loop_get_bio(struct loop_device *lo)
 {
 	return bio_list_pop(&lo->lo_bio_list);
@@ -566,9 +468,6 @@ out:
 	return 0;
 }
 
-/*
- * kick off io on the underlying address space
- */
 static void loop_unplug(struct request_queue *q)
 {
 	struct loop_device *lo = q->queuedata;
@@ -595,18 +494,6 @@ static inline void loop_handle_bio(struct loop_device *lo, struct bio *bio)
 	}
 }
 
-/*
- * worker thread that handles reads/writes to file backed loop devices,
- * to avoid blocking in our make_request_fn. it also does loop decrypting
- * on reads for block backed loop, as that is too heavy to do from
- * b_end_io context where irqs may be disabled.
- *
- * Loop explanation:  loop_clr_fd() sets lo_state to Lo_rundown before
- * calling kthread_stop().  Therefore once kthread_should_stop() is
- * true, make_request will not place any more requests.  Therefore
- * once kthread_should_stop() is true and lo_bio is NULL, we are
- * done with the loop.
- */
 static int loop_thread(void *data)
 {
 	struct loop_device *lo = data;
@@ -633,11 +520,6 @@ static int loop_thread(void *data)
 	return 0;
 }
 
-/*
- * loop_switch performs the hard work of switching a backing store.
- * First it needs to flush existing IO, it does this by sending a magic
- * BIO down the pipe. The completion of this BIO does the actual switch.
- */
 static int loop_switch(struct loop_device *lo, struct file *file)
 {
 	struct switch_request w;
@@ -653,28 +535,21 @@ static int loop_switch(struct loop_device *lo, struct file *file)
 	return 0;
 }
 
-/*
- * Helper to flush the IOs in loop, but keeping loop thread running
- */
 static int loop_flush(struct loop_device *lo)
 {
-	/* loop not yet configured, no running thread, nothing to flush */
+	 
 	if (!lo->lo_thread)
 		return 0;
 
 	return loop_switch(lo, NULL);
 }
 
-/*
- * Do the actual switch; called from the BIO completion routine
- */
 static void do_loop_switch(struct loop_device *lo, struct switch_request *p)
 {
 	struct file *file = p->file;
 	struct file *old_file = lo->lo_backing_file;
 	struct address_space *mapping;
 
-	/* if no new file, only flush of queued bios requested */
 	if (!file)
 		goto out;
 
@@ -689,14 +564,6 @@ out:
 	complete(&p->wait);
 }
 
-/*
- * loop_change_fd switched the backing store of a loopback device to
- * a new file. This is useful for operating system installers to free up
- * the original file and in High Availability environments to switch to
- * an alternative location for the content in case of server meltdown.
- * This can only work if the loop device is used read-only, and if the
- * new backing store is the same size and type as the old backing store.
- */
 static int loop_change_fd(struct loop_device *lo, struct block_device *bdev,
 			  unsigned int arg)
 {
@@ -708,7 +575,6 @@ static int loop_change_fd(struct loop_device *lo, struct block_device *bdev,
 	if (lo->lo_state != Lo_bound)
 		goto out;
 
-	/* the loop device has to be read-only */
 	error = -EINVAL;
 	if (!(lo->lo_flags & LO_FLAGS_READ_ONLY))
 		goto out;
@@ -726,11 +592,9 @@ static int loop_change_fd(struct loop_device *lo, struct block_device *bdev,
 	if (!S_ISREG(inode->i_mode) && !S_ISBLK(inode->i_mode))
 		goto out_putf;
 
-	/* size of the new backing store needs to be the same */
 	if (get_loop_size(lo, file) != get_loop_size(lo, old_file))
 		goto out_putf;
 
-	/* and ... switch */
 	error = loop_switch(lo, file);
 	if (error)
 		goto out_putf;
@@ -764,7 +628,6 @@ static int loop_set_fd(struct loop_device *lo, fmode_t mode,
 	int		error;
 	loff_t		size;
 
-	/* This is safe, since we have a reference from open(). */
 	__module_get(THIS_MODULE);
 
 	error = -EBADF;
@@ -776,7 +639,6 @@ static int loop_set_fd(struct loop_device *lo, fmode_t mode,
 	if (lo->lo_state != Lo_unbound)
 		goto out_putf;
 
-	/* Avoid recursion */
 	f = file;
 	while (is_loop_device(f)) {
 		struct loop_device *l;
@@ -839,10 +701,6 @@ static int loop_set_fd(struct loop_device *lo, fmode_t mode,
 
 	bio_list_init(&lo->lo_bio_list);
 
-	/*
-	 * set queue make_request_fn, and add limits based on lower level
-	 * device
-	 */
 	blk_queue_make_request(lo->lo_queue, loop_make_request);
 	lo->lo_queue->queuedata = lo;
 	lo->lo_queue->unplug_fn = loop_unplug;
@@ -880,7 +738,7 @@ out_clr:
  out_putf:
 	fput(file);
  out:
-	/* This is safe: open() is still holding a reference. */
+	 
 	module_put(THIS_MODULE);
 	return error;
 }
@@ -930,7 +788,7 @@ static int loop_clr_fd(struct loop_device *lo, struct block_device *bdev)
 	if (lo->lo_state != Lo_bound)
 		return -ENXIO;
 
-	if (lo->lo_refcnt > 1)	/* we needed one fd for the ioctl */
+	if (lo->lo_refcnt > 1)	 
 		return -EBUSY;
 
 	if (filp == NULL)
@@ -965,17 +823,12 @@ static int loop_clr_fd(struct loop_device *lo, struct block_device *bdev)
 		bd_set_size(bdev, 0);
 	mapping_set_gfp_mask(filp->f_mapping, gfp);
 	lo->lo_state = Lo_unbound;
-	/* This is safe: open() is still holding a reference. */
+	 
 	module_put(THIS_MODULE);
 	if (max_part > 0 && bdev)
 		ioctl_by_bdev(bdev, BLKRRPART, 0);
 	mutex_unlock(&lo->lo_ctl_mutex);
-	/*
-	 * Need not hold lo_ctl_mutex to fput backing file.
-	 * Calling fput holding lo_ctl_mutex triggers a circular
-	 * lock dependency possibility warning as fput can take
-	 * bd_mutex which is usually taken before lo_ctl_mutex.
-	 */
+	 
 	fput(filp);
 	return 0;
 }
@@ -1123,7 +976,6 @@ loop_info64_to_old(const struct loop_info64 *info64, struct loop_info *info)
 		memcpy(info->lo_name, info64->lo_file_name, LO_NAME_SIZE);
 	memcpy(info->lo_encrypt_key, info64->lo_encrypt_key, LO_KEY_SIZE);
 
-	/* error in case values were truncated */
 	if (info->lo_device != info64->lo_device ||
 	    info->lo_rdevice != info64->lo_rdevice ||
 	    info->lo_inode != info64->lo_inode ||
@@ -1201,7 +1053,7 @@ static int loop_set_capacity(struct loop_device *lo, struct block_device *bdev)
 	if (unlikely(err))
 		goto out;
 	sec = get_capacity(lo->lo_disk);
-	/* the width of sector_t may be narrow for bit-shift */
+	 
 	sz = sec;
 	sz <<= 9;
 	mutex_lock(&bdev->bd_mutex);
@@ -1227,7 +1079,7 @@ static int lo_ioctl(struct block_device *bdev, fmode_t mode,
 		err = loop_change_fd(lo, bdev, arg);
 		break;
 	case LOOP_CLR_FD:
-		/* loop_clr_fd would have unlocked lo_ctl_mutex on success */
+		 
 		err = loop_clr_fd(lo, bdev);
 		if (!err)
 			goto out_unlocked;
@@ -1260,24 +1112,20 @@ out_unlocked:
 
 #ifdef CONFIG_COMPAT
 struct compat_loop_info {
-	compat_int_t	lo_number;      /* ioctl r/o */
-	compat_dev_t	lo_device;      /* ioctl r/o */
-	compat_ulong_t	lo_inode;       /* ioctl r/o */
-	compat_dev_t	lo_rdevice;     /* ioctl r/o */
+	compat_int_t	lo_number;       
+	compat_dev_t	lo_device;       
+	compat_ulong_t	lo_inode;        
+	compat_dev_t	lo_rdevice;      
 	compat_int_t	lo_offset;
 	compat_int_t	lo_encrypt_type;
-	compat_int_t	lo_encrypt_key_size;    /* ioctl w/o */
-	compat_int_t	lo_flags;       /* ioctl r/o */
+	compat_int_t	lo_encrypt_key_size;     
+	compat_int_t	lo_flags;        
 	char		lo_name[LO_NAME_SIZE];
-	unsigned char	lo_encrypt_key[LO_KEY_SIZE]; /* ioctl w/o */
+	unsigned char	lo_encrypt_key[LO_KEY_SIZE];  
 	compat_ulong_t	lo_init[2];
 	char		reserved[4];
 };
 
-/*
- * Transfer 32-bit compatibility structure in userspace to 64-bit loop info
- * - noinlined to reduce stack space usage in main part of driver
- */
 static noinline int
 loop_info64_from_compat(const struct compat_loop_info __user *arg,
 			struct loop_info64 *info64)
@@ -1307,10 +1155,6 @@ loop_info64_from_compat(const struct compat_loop_info __user *arg,
 	return 0;
 }
 
-/*
- * Transfer 64-bit loop info to 32-bit compatibility structure in userspace
- * - noinlined to reduce stack space usage in main part of driver
- */
 static noinline int
 loop_info64_to_compat(const struct loop_info64 *info64,
 		      struct compat_loop_info __user *arg)
@@ -1334,7 +1178,6 @@ loop_info64_to_compat(const struct loop_info64 *info64,
 		memcpy(info.lo_name, info64->lo_file_name, LO_NAME_SIZE);
 	memcpy(info.lo_encrypt_key, info64->lo_encrypt_key, LO_KEY_SIZE);
 
-	/* error in case values were truncated */
 	if (info.lo_device != info64->lo_device ||
 	    info.lo_rdevice != info64->lo_rdevice ||
 	    info.lo_inode != info64->lo_inode ||
@@ -1435,18 +1278,12 @@ static int lo_release(struct gendisk *disk, fmode_t mode)
 		goto out;
 
 	if (lo->lo_flags & LO_FLAGS_AUTOCLEAR) {
-		/*
-		 * In autoclear mode, stop the loop thread
-		 * and remove configuration after last close.
-		 */
+		 
 		err = loop_clr_fd(lo, NULL);
 		if (!err)
 			goto out_unlocked;
 	} else {
-		/*
-		 * Otherwise keep thread (if running) and config,
-		 * but flush possible ongoing bios in thread.
-		 */
+		 
 		loop_flush(lo);
 	}
 
@@ -1466,9 +1303,6 @@ static const struct block_device_operations lo_fops = {
 #endif
 };
 
-/*
- * And now the modules code and kernel interface.
- */
 static int max_loop;
 module_param(max_loop, int, 0);
 MODULE_PARM_DESC(max_loop, "Maximum number of loop devices");
@@ -1602,21 +1436,6 @@ static int __init loop_init(void)
 	unsigned long range;
 	struct loop_device *lo, *next;
 
-	/*
-	 * loop module now has a feature to instantiate underlying device
-	 * structure on-demand, provided that there is an access dev node.
-	 * However, this will not work well with user space tool that doesn't
-	 * know about such "feature".  In order to not break any existing
-	 * tool, we do the following:
-	 *
-	 * (1) if max_loop is specified, create that many upfront, and this
-	 *     also becomes a hard limit.
-	 * (2) if max_loop is not specified, create 8 loop device on module
-	 *     load, user can further extend loop device by create dev node
-	 *     themselves and have kernel automatically instantiate actual
-	 *     device on-demand.
-	 */
-
 	part_shift = 0;
 	if (max_part > 0)
 		part_shift = fls(max_part);
@@ -1641,8 +1460,6 @@ static int __init loop_init(void)
 			goto Enomem;
 		list_add_tail(&lo->lo_list, &loop_devices);
 	}
-
-	/* point of no return */
 
 	list_for_each_entry(lo, &loop_devices, lo_list)
 		add_disk(lo->lo_disk);

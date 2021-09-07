@@ -1,20 +1,4 @@
-/*
- * Copyright (c) 2000-2005 Silicon Graphics, Inc.
- * All Rights Reserved.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it would be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write the Free Software Foundation,
- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
+ 
 #include "xfs.h"
 #include "xfs_fs.h"
 #include "xfs_acl.h"
@@ -56,11 +40,6 @@
 #include <linux/falloc.h>
 #include <linux/fiemap.h>
 
-/*
- * Bring the timestamps in the XFS inode uptodate.
- *
- * Used before writing the inode to disk.
- */
 void
 xfs_synchronize_times(
 	xfs_inode_t	*ip)
@@ -75,11 +54,6 @@ xfs_synchronize_times(
 	ip->i_d.di_mtime.t_nsec = (__int32_t)inode->i_mtime.tv_nsec;
 }
 
-/*
- * If the linux inode is valid, mark it dirty.
- * Used when commiting a dirty inode into a transaction so that
- * the inode will get written back by the linux code
- */
 void
 xfs_mark_inode_dirty_sync(
 	xfs_inode_t	*ip)
@@ -90,11 +64,6 @@ xfs_mark_inode_dirty_sync(
 		mark_inode_dirty_sync(inode);
 }
 
-/*
- * Change the requested timestamp in the given inode.
- * We don't lock across timestamp updates, and we don't log them but
- * we do record the fact that there is dirty information in core.
- */
 void
 xfs_ichgtime(
 	xfs_inode_t	*ip,
@@ -117,20 +86,10 @@ xfs_ichgtime(
 		sync_it = 1;
 	}
 
-	/*
-	 * Update complete - now make sure everyone knows that the inode
-	 * is dirty.
-	 */
 	if (sync_it)
 		xfs_mark_inode_dirty_sync(ip);
 }
 
-/*
- * Hook in SELinux.  This is not quite correct yet, what we really need
- * here (as we do for default ACLs) is a mechanism by which creation of
- * these attrs can be journalled at inode creation time (along with the
- * inode, of course, such that log replay can't cause these to be lost).
- */
 STATIC int
 xfs_init_security(
 	struct inode	*inode,
@@ -174,11 +133,6 @@ xfs_cleanup_inode(
 {
 	struct xfs_name	teardown;
 
-	/* Oh, the horror.
-	 * If we can't add the ACL or we fail in
-	 * xfs_init_security we must back out.
-	 * ENOSPC can hit here, among other things.
-	 */
 	xfs_dentry_to_name(&teardown, dentry);
 
 	xfs_remove(XFS_I(dir), &teardown, XFS_I(inode));
@@ -198,10 +152,6 @@ xfs_vn_mknod(
 	struct xfs_name	name;
 	int		error;
 
-	/*
-	 * Irix uses Missed'em'V split, but doesn't want to see
-	 * the upper 5 bits of (14bit) major.
-	 */
 	if (S_ISCHR(mode) || S_ISBLK(mode)) {
 		if (unlikely(!sysv_valid_dev(rdev) || MAJOR(rdev) & ~0x1ff))
 			return -EINVAL;
@@ -311,19 +261,13 @@ xfs_vn_ci_lookup(
 	if (unlikely(error)) {
 		if (unlikely(error != ENOENT))
 			return ERR_PTR(-error);
-		/*
-		 * call d_add(dentry, NULL) here when d_drop_negative_children
-		 * is called in xfs_vn_mknod (ie. allow negative dentries
-		 * with CI filesystems).
-		 */
+		 
 		return NULL;
 	}
 
-	/* if exact match, just splice and exit */
 	if (!ci_name.name)
 		return d_splice_alias(VFS_I(ip), dentry);
 
-	/* else case-insensitive match... */
 	dname.name = ci_name.name;
 	dname.len = ci_name.len;
 	dentry = d_add_ci(dentry, VFS_I(ip), &dname);
@@ -366,11 +310,6 @@ xfs_vn_unlink(
 	if (error)
 		return error;
 
-	/*
-	 * With unlink, the VFS makes the dentry "negative": no inode,
-	 * but still hashed. This is incompatible with case-insensitive
-	 * mode, so invalidate (unhash) the dentry in CI-mode.
-	 */
 	if (xfs_sb_version_hasasciici(&XFS_M(dir->i_sb)->m_sb))
 		d_invalidate(dentry);
 	return 0;
@@ -430,11 +369,6 @@ xfs_vn_rename(
 			   			XFS_I(new_inode) : NULL);
 }
 
-/*
- * careful here - this function can get called recursively, so
- * we need to be very careful about how much stack we use.
- * uio is kmalloced for this reason...
- */
 STATIC void *
 xfs_vn_follow_link(
 	struct dentry		*dentry,
@@ -510,11 +444,7 @@ xfs_vn_getattr(
 		break;
 	default:
 		if (XFS_IS_REALTIME_INODE(ip)) {
-			/*
-			 * If the file blocks are being allocated from a
-			 * realtime volume, then return the inode's realtime
-			 * extent size or the realtime volume's extent size.
-			 */
+			 
 			stat->blksize =
 				xfs_get_extsz_hint(ip) << mp->m_sb.sb_blocklog;
 		} else
@@ -534,11 +464,6 @@ xfs_vn_setattr(
 	return -xfs_setattr(XFS_I(dentry->d_inode), iattr, 0);
 }
 
-/*
- * block_truncate_page can return an error, but we can't propagate it
- * at all here. Leave a complaint + stack trace in the syslog because
- * this could be bad. If it is bad, we need to propagate the error further.
- */
 STATIC void
 xfs_vn_truncate(
 	struct inode	*inode)
@@ -561,7 +486,6 @@ xfs_vn_fallocate(
 	xfs_flock64_t	bf;
 	xfs_inode_t	*ip = XFS_I(inode);
 
-	/* preallocation on directories not yet supported */
 	error = -ENODEV;
 	if (S_ISDIR(inode->i_mode))
 		goto out_error;
@@ -577,7 +501,6 @@ xfs_vn_fallocate(
 	    offset + len > i_size_read(inode))
 		new_size = offset + len;
 
-	/* Change file size if needed */
 	if (new_size) {
 		struct iattr iattr;
 
@@ -593,10 +516,6 @@ out_error:
 
 #define XFS_FIEMAP_FLAGS	(FIEMAP_FLAG_SYNC|FIEMAP_FLAG_XATTR)
 
-/*
- * Call fiemap helper to fill in user data.
- * Returns positive errors to xfs_getbmap.
- */
 STATIC int
 xfs_fiemap_format(
 	void			**arg,
@@ -608,7 +527,6 @@ xfs_fiemap_format(
 	u32			fiemap_flags = 0;
 	u64			logical, physical, length;
 
-	/* Do nothing for a hole */
 	if (bmv->bmv_block == -1LL)
 		return 0;
 
@@ -620,7 +538,7 @@ xfs_fiemap_format(
 		fiemap_flags |= FIEMAP_EXTENT_UNWRITTEN;
 	else if (bmv->bmv_oflags & BMV_OF_DELALLOC) {
 		fiemap_flags |= FIEMAP_EXTENT_DELALLOC;
-		physical = 0;   /* no block yet */
+		physical = 0;    
 	}
 	if (bmv->bmv_oflags & BMV_OF_LAST)
 		fiemap_flags |= FIEMAP_EXTENT_LAST;
@@ -629,7 +547,7 @@ xfs_fiemap_format(
 					length, fiemap_flags);
 	if (error > 0) {
 		error = 0;
-		*full = 1;	/* user array now full */
+		*full = 1;	 
 	}
 
 	return -error;
@@ -650,15 +568,13 @@ xfs_vn_fiemap(
 	if (error)
 		return error;
 
-	/* Set up bmap header for xfs internal routine */
 	bm.bmv_offset = BTOBB(start);
-	/* Special case for whole file */
+	 
 	if (length == FIEMAP_MAX_OFFSET)
 		bm.bmv_length = -1LL;
 	else
 		bm.bmv_length = BTOBB(length);
 
-	/* We add one because in getbmap world count includes the header */
 	bm.bmv_count = fieinfo->fi_extents_max + 1;
 	bm.bmv_iflags = BMV_IF_PREALLOC;
 	if (fieinfo->fi_flags & FIEMAP_FLAG_XATTR)
@@ -674,12 +590,12 @@ xfs_vn_fiemap(
 }
 
 #ifdef CONFIG_SYNO_PLX_PORTING
-extern int					/* error code */
+extern int					 
 xfs_k_getbmap(
 	xfs_inode_t		*ip,
-	struct getbmap	*bmv,	/* user bmap structure */
-	struct getbmapx	*bmx,	/* pointer to user's array */
-	int interface);			/* interface flags */
+	struct getbmap	*bmv,	 
+	struct getbmapx	*bmx,	 
+	int interface);			 
 
 STATIC int
 xfs_k_getbmapx(
@@ -694,8 +610,6 @@ xfs_k_getbmapx(
 
 	iflags = bmx->bmv_iflags;
 
-	/* Want to know about prealloc'ed regions except at the end of the file,
-	 * hopefully this will give me that */
 	iflags |= BMV_IF_PREALLOC;
 
 	if (iflags & (~BMV_IF_VALID))
@@ -708,11 +622,10 @@ xfs_k_getbmapx(
 	return 0;
 }
 
-/* returns the number of extents */
 STATIC int
 xfs_k_get_extents(
-	struct inode *inode,	/* pointer to the file */
-	loff_t 		  size)		/* new size of the file */
+	struct inode *inode,	 
+	loff_t 		  size)		 
 {
 	xfs_inode_t	*ip = XFS_I(inode);
 	int			 retval = 0;
@@ -729,14 +642,10 @@ xfs_k_get_extents(
 	return retval;
 }
 
-/* 1 implies updated and 0 implies not updated */
-/* check on xfs_setfilesize in xfs_aops.c for
- * on disk file size update
- */
 STATIC int 
 xfs_k_setsize(
-	struct inode *inode,	/* pointer to the file */
-	loff_t        size)		/* new size of the file */
+	struct inode *inode,	 
+	loff_t        size)		 
 {
 	xfs_inode_t	*xip = XFS_I(inode);
 	int          retval = 0;
@@ -785,12 +694,7 @@ static const struct inode_operations xfs_dir_inode_operations = {
 	.unlink			= xfs_vn_unlink,
 	.symlink		= xfs_vn_symlink,
 	.mkdir			= xfs_vn_mkdir,
-	/*
-	 * Yes, XFS uses the same method for rmdir and unlink.
-	 *
-	 * There are some subtile differences deeper in the code,
-	 * but we use S_ISDIR to check for those.
-	 */
+	 
 	.rmdir			= xfs_vn_unlink,
 	.mknod			= xfs_vn_mknod,
 	.rename			= xfs_vn_rename,
@@ -810,12 +714,7 @@ static const struct inode_operations xfs_dir_ci_inode_operations = {
 	.unlink			= xfs_vn_unlink,
 	.symlink		= xfs_vn_symlink,
 	.mkdir			= xfs_vn_mkdir,
-	/*
-	 * Yes, XFS uses the same method for rmdir and unlink.
-	 *
-	 * There are some subtile differences deeper in the code,
-	 * but we use S_ISDIR to check for those.
-	 */
+	 
 	.rmdir			= xfs_vn_unlink,
 	.mknod			= xfs_vn_mknod,
 	.rename			= xfs_vn_rename,
@@ -864,18 +763,6 @@ xfs_diflags_to_iflags(
 		inode->i_flags &= ~S_NOATIME;
 }
 
-/*
- * Initialize the Linux inode, set up the operation vectors and
- * unlock the inode.
- *
- * When reading existing inodes from disk this is called directly
- * from xfs_iget, when creating a new inode it is called from
- * xfs_ialloc after setting up the inode.
- *
- * We are always called with an uninitialised linux inode here.
- * We need to initialise the necessary fields and take a reference
- * on it.
- */
 void
 xfs_setup_inode(
 	struct xfs_inode	*ip)

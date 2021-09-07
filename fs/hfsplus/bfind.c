@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/hfsplus/bfind.c
- *
- * Copyright (C) 2001
- * Brad Boyer (flar@allandria.com)
- * (C) 2003 Ardis Technologies <roman@ardistech.com>
- *
- * Search routines for btrees
- */
-
+ 
 #include <linux/slab.h>
 #include "hfsplus_fs.h"
 
@@ -58,7 +49,7 @@ int hfs_find_1st_rec_by_cnid(struct hfs_bnode *bnode,
 		cur_cnid = fd->key->attr.cnid;
 		search_cnid = fd->search_key->attr.cnid;
 	} else {
-		cur_cnid = 0;	/* used-uninitialized warning */
+		cur_cnid = 0;	 
 		search_cnid = 0;
 		BUG();
 	}
@@ -98,7 +89,6 @@ int hfs_find_rec_by_key(struct hfs_bnode *bnode,
 	return 0;
 }
 
-/* Find the record in bnode that best matches key (not greater than...)*/
 #ifdef MY_ABC_HERE
 int __hfs_brec_find(struct hfs_bnode *bnode, struct hfs_find_data *fd,
 					search_strategy_t rec_found)
@@ -192,8 +182,6 @@ done:
 }
 #endif
 
-/* Traverse a B*Tree from the root to a leaf finding best fit to key */
-/* Return allocated copy of node found, set recnum to best record */
 int hfs_brec_find(struct hfs_find_data *fd, search_strategy_t do_key_compare)
 {
 	struct hfs_btree *tree;

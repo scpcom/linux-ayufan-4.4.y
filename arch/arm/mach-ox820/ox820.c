@@ -1,22 +1,4 @@
-/*
- * arch/arm/mach-ox820/ox820.c
- *
- * Copyright (C) 2006,2009 Oxford Semiconductor Ltd
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+ 
 #include <linux/delay.h>
 #include <linux/platform_device.h>
 #include <linux/kernel.h>
@@ -44,7 +26,7 @@
 #ifdef CONFIG_LEON_START_EARLY
 #include <mach/leon.h>
 #include <mach/leon-early-prog.h>
-#endif // CONFIG_LEON_START_EARLY
+#endif  
 
 #ifdef CONFIG_OXNAS_SATA_POWER_GPIO_1
 #if (CONFIG_OXNAS_SATA_POWER_GPIO_1 < SYS_CTRL_NUM_PINS)
@@ -66,7 +48,7 @@
 #endif
 
 #define SATA_POWER_1_MASK   (1UL << (SATA_POWER_1_NUM))
-#endif // CONFIG_OXNAS_SATA_POWER_GPIO_1
+#endif  
 
 #ifdef CONFIG_OXNAS_SATA_POWER_GPIO_2
 #if (CONFIG_OXNAS_SATA_POWER_GPIO_2 < SYS_CTRL_NUM_PINS)
@@ -88,7 +70,7 @@
 #endif
 
 #define SATA_POWER_2_MASK   (1UL << (SATA_POWER_2_NUM))
-#endif // CONFIG_OXNAS_SATA_POWER_GPIO_2
+#endif  
 
 #ifdef CONFIG_OXNAS_USB_HUB_RESET_GPIO
 #if (CONFIG_OXNAS_USB_HUB_RESET_GPIO < SYS_CTRL_NUM_PINS)
@@ -110,15 +92,13 @@
 #endif
 
 #define USB_HUB_RESET_MASK	(1UL << (USB_HUB_RESET_NUM))
-#endif // CONFIG_OXNAS_USB_HUB_RESET_GPIO
+#endif  
 
 extern struct sys_timer oxnas_timer;
 
-// The spinlock exported to allow atomic use of GPIO register set
 spinlock_t oxnas_gpio_spinlock;
 EXPORT_SYMBOL(oxnas_gpio_spinlock);
 
-// To hold LED inversion state
 int oxnas_global_invert_leds = 0;
 #include <linux/module.h>
 EXPORT_SYMBOL(oxnas_global_invert_leds);
@@ -161,9 +141,7 @@ static struct map_desc oxnas_io_desc[] __initdata = {
     { PCIEB_CLIENT_BASE,	__phys_to_pfn(PCIEB_CLIENT_BASE_PA),	SZ_64M,	MT_DEVICE }
 
 #ifdef CONFIG_SUPPORT_LEON
-	/*
-	 * Upto 6 pages for Leon program/data/stack
-	 */
+	 
 #if (CONFIG_LEON_PAGES == 1)
    ,{ LEON_IMAGE_BASE,			__phys_to_pfn(LEON_IMAGE_BASE_PA),			SZ_4K, MT_DEVICE }
 #elif (CONFIG_LEON_PAGES == 2)
@@ -182,12 +160,9 @@ static struct map_desc oxnas_io_desc[] __initdata = {
    ,{ LEON_IMAGE_BASE+0x4000,	__phys_to_pfn(LEON_IMAGE_BASE_PA+0x4000),	SZ_8K,  MT_DEVICE }
 #else
 #error "Unsupported number of Leon code pages"
-#endif // CONFIG_LEON_PAGES
-#endif // CONFIG_SUPPORT_LEON
-	/*
-	 * Upto 10 pages for GMAC/DMA descriptors plus ARM/Leon workspace if
-	 * offloading in use
-	 */
+#endif  
+#endif  
+	 
    ,{ SRAM_BASE,		__phys_to_pfn(SRAM_PA),			SZ_16K,	MT_DEVICE }
    ,{ SRAM_BASE+0x4000,	__phys_to_pfn(SRAM_PA+0x4000),	SZ_16K,	MT_DEVICE }
    ,{ SRAM_BASE+0x8000,	__phys_to_pfn(SRAM_PA+0x8000),	SZ_8K,	MT_DEVICE }
@@ -212,34 +187,34 @@ static u64 usb_dmamask = ~(u32)0;
 #ifdef CONFIG_SYNO_PLX_PORTING
 static struct mtd_partition syno_ox820_partitions[] = {
 	{
-		.name   = "RedBoot",            /* u-boot               */
+		.name   = "RedBoot",             
 		.offset = 0x00010000,
-		.size   = 0x00020000,           /* 128KB                */
+		.size   = 0x00020000,            
 	},
 	{
-		.name   = "zImage",                     /* linux kernel image   */
+		.name   = "zImage",                      
 		.offset = 0x00030000,
-		.size   = 0x00240000,           /* 2.2 MB                                 */
+		.size   = 0x00240000,            
 	},
 	{
-		.name   = "rd.gz",                      /* ramdisk image*/
+		.name   = "rd.gz",                       
 		.offset = 0x00270000,
-		.size   = 0x00170000,           /* 1.2 MB + 64k + 128k              */
+		.size   = 0x00170000,            
 	},
 	{
-		.name   = "vendor",                     /* vendor specific data */
+		.name   = "vendor",                      
 		.offset = 0x003E0000,
-		.size   = 0x00010000,           /* 64KB                                 */
+		.size   = 0x00010000,            
 	},
 	{
-		.name   = "RedBoot Config",     /* stage 1 loader   */
+		.name   = "RedBoot Config",      
 		.offset = 0x00000000,
-		.size   = 0x00010000,           /* 64KB                                */
+		.size   = 0x00010000,            
 	},
 	{
-		.name   = "FIS directory",      /* flash partition table*/
+		.name   = "FIS directory",       
 		.offset = 0x003F0000,
-		.size   = 0x00010000,           /* 64KB                                 */
+		.size   = 0x00010000,            
 	},
 };
 #endif
@@ -262,25 +237,16 @@ static struct spi_board_info ox820_spi_board_info[] __initdata = {
 	},
 };
 
-/* static struct ox820_spi_info ox820_spi_plat_data = {
-} */;
+ ;
 
-/* static struct resource ox820_spi_resources[] = {
-	{
-		.start	= SPI_PHYS_BASE,
-		.end	= SPI_PHYS_BASE + SZ_512 - 1,
-		.flags	= IORESOURCE_MEM,
-	},
-};
- */
 static struct platform_device ox820_spi = {
 	.name		= "spi_ox820_gpio",
 	.id		= 0,
-	// .resource	= ox820_spi_resources,
+	 
 	.dev		= {
-		// .platform_data	= &ox820_spi_plat_data,
+		 
 	},
-//	.num_resources	= ARRAY_SIZE(ox820_spi_resources),
+ 
 };
 
 #endif
@@ -323,7 +289,6 @@ static struct platform_device *platform_devices[] __initdata = {
 #endif
 };
 
-/* used by entry-macro.S */
 void __iomem *gic_cpu_base_addr;
 
 #define STD_COM_FLAGS (ASYNC_BOOT_AUTOCONF | ASYNC_SKIP_TEST )
@@ -343,7 +308,7 @@ static struct uart_port internal_serial_port_1 = {
 	.type		= PORT_16550A,
 	.fifosize	= 16
 };
-#endif // CONFIG_ARCH_OXNAS_UART1
+#endif  
 
 #ifdef CONFIG_ARCH_OXNAS_UART2
 static struct uart_port internal_serial_port_2 = {
@@ -358,19 +323,18 @@ static struct uart_port internal_serial_port_2 = {
 	.type		= PORT_16550A,
 	.fifosize	= 16
 };
-#endif // CONFIG_ARCH_OXNAS_UART2
+#endif  
 
 static void __init oxnas_mapio(void)
 {
     unsigned int uart_line=0;
 
-    // Setup kernel mappings for hardware cores
     iotable_init(oxnas_io_desc, ARRAY_SIZE(oxnas_io_desc));
 
 #ifdef CONFIG_ARCH_OXNAS_UART1
 #if (CONFIG_ARCH_OXNAS_CONSOLE_UART != 1)
     {
-		// Route UART1 SOUT and SIN onto external pins
+		 
 		unsigned long pins = (1UL << UART_A_SIN_GPIOA_PIN) |
 						 	 (1UL << UART_A_SOUT_GPIOA_PIN);
 
@@ -380,17 +344,15 @@ static void __init oxnas_mapio(void)
         *(volatile unsigned long*)SYS_CTRL_DEBUG_SEL       &= ~pins;
         *(volatile unsigned long*)SYS_CTRL_ALTERNATIVE_SEL |=  pins;
 
-		// Setup GPIO line direction for UART1 SOUT
 		*(volatile u32*)GPIO_A_OUTPUT_ENABLE_SET   |= (1UL << UART_A_SOUT_GPIOA_PIN);
 	
-		// Setup GPIO line direction for UART1 SIN
 		*(volatile u32*)GPIO_A_OUTPUT_ENABLE_CLEAR |= (1UL << UART_A_SIN_GPIOA_PIN);
     }
-#endif // (CONFIG_ARCH_OXNAS_CONSOLE_UART != 1)
+#endif  
 
 #ifdef CONFIG_ARCH_OXNAS_UART1_MODEM
     {
-		// Route UART1 modem control line onto external pins
+		 
 		unsigned long pins = (1UL << UART_A_CTS_GPIOA_PIN) |
 							 (1UL << UART_A_RTS_GPIOA_PIN);
 
@@ -411,27 +373,24 @@ static void __init oxnas_mapio(void)
         *(volatile unsigned long*)SYS_CTRL_DEBUG_SEL       |=  pins;
         *(volatile unsigned long*)SYS_CTRL_ALTERNATIVE_SEL &= ~pins;
 
-		// Setup RI, CD, DSR, CTS as outputs
 		*(volatile u32*)GPIO_A_OUTPUT_ENABLE_SET |= ((1UL << UART_A_RI_GPIOA_PIN) |
 													 (1UL << UART_A_CD_GPIOA_PIN) |
 													 (1UL << UART_A_DSR_GPIOA_PIN) |
 													 (1UL << UART_A_CTS_GPIOA_PIN));
 
-		// Setup DTR, RTS as inputs
 		*(volatile u32*)GPIO_A_OUTPUT_ENABLE_CLEAR |= ((1UL << UART_A_DTR_GPIOA_PIN) |
 													   (1UL << UART_A_RTS_GPIOA_PIN));
     }
-#endif // CONFIG_ARCH_OXNAS_UART1_MODEM
+#endif  
 
-    // Give Linux a contiguous numbering scheme for available UARTs
     internal_serial_port_1.line = uart_line++;
     early_serial_setup(&internal_serial_port_1);
-#endif // CONFIG_ARCH_OXNAS_UART1
+#endif  
 
 #ifdef CONFIG_ARCH_OXNAS_UART2
 #if (CONFIG_ARCH_OXNAS_CONSOLE_UART != 2)
     {
-		// Route UART2 SOUT and SIN onto external pins
+		 
 		unsigned long pins = (1UL << UART_B_SIN_GPIOA_PIN) |
 							 (1UL << UART_B_SOUT_GPIOA_PIN);
 
@@ -449,17 +408,15 @@ static void __init oxnas_mapio(void)
         *(volatile unsigned long*)SYS_CTRL_ALTERNATIVE_SEL &= ~pins;
 #endif
 
-		// Setup GPIO line direction for UART2 SOUT
 		*(volatile u32*)GPIO_A_OUTPUT_ENABLE_SET   |= (1UL << UART_B_SOUT_GPIOA_PIN);
 
-		// Setup GPIO line direction for UART2 SIN
 		*(volatile u32*)GPIO_A_OUTPUT_ENABLE_CLEAR |= (1UL << UART_B_SIN_GPIOA_PIN);
     }
-#endif // (CONFIG_ARCH_OXNAS_CONSOLE_UART != 2)
+#endif  
 
 #ifdef CONFIG_ARCH_OXNAS_UART2_MODEM
     {
-		// Route UART2 modem control line onto external pins
+		 
 		unsigned long pins = (1UL << UART_B_CTS_GPIOA_PIN) |
 							 (1UL << UART_B_RTS_GPIOA_PIN);
 
@@ -480,52 +437,44 @@ static void __init oxnas_mapio(void)
         *(volatile unsigned long*)SEC_CTRL_DEBUG_SEL       |=  pins;
         *(volatile unsigned long*)SEC_CTRL_ALTERNATIVE_SEL &= ~pins;
 
-		// Setup RI, CD, DSR, CTS as outputs
 		*(volatile u32*)GPIO_A_OUTPUT_ENABLE_SET |= (1UL << UART_B_CTS_GPIOA_PIN);
 
 		*(volatile u32*)GPIO_B_OUTPUT_ENABLE_SET |= ((1UL << UART_B_RI_GPIOB_PIN) |
 													 (1UL << UART_B_CD_GPIOB_PIN) |
 													 (1UL << UART_B_DSR_GPIOB_PIN));
 
-		// Setup DTR, RTS as inputs
 		*(volatile u32*)GPIO_A_OUTPUT_ENABLE_CLEAR |= (1UL << UART_B_RTS_GPIOA_PIN);
 
 		*(volatile u32*)GPIO_B_OUTPUT_ENABLE_CLEAR |= (1UL << UART_B_DTR_GPIOB_PIN);
 	}
-#endif // CONFIG_ARCH_OXNAS_UART2_MODEM
+#endif  
 
-    // Give Linux a contiguous numbering scheme for available UARTs
     internal_serial_port_2.line = uart_line++;
     early_serial_setup(&internal_serial_port_2);
-#endif // CONFIG_ARCH_OXNAS_UART2
+#endif  
 
 #ifdef CONFIG_OXNAS_SATA_POWER_1
-    // Disable primary, secondary and teriary GPIO functions on SATA 1 power line
+     
     writel(readl(SATA_POWER_1_PRISEL_REG) & ~SATA_POWER_1_MASK, SATA_POWER_1_PRISEL_REG);
     writel(readl(SATA_POWER_1_SECSEL_REG) & ~SATA_POWER_1_MASK, SATA_POWER_1_SECSEL_REG);
     writel(readl(SATA_POWER_1_TERSEL_REG) & ~SATA_POWER_1_MASK, SATA_POWER_1_TERSEL_REG);
 
-    // Enable power to SATA 1
     writel(SATA_POWER_1_MASK, SATA_POWER_1_OUTPUT_SET_REG);
 
-    // Enable GPIO output on SATA 1 power line
     writel(SATA_POWER_1_MASK, SATA_POWER_1_SET_OE_REG);
-#endif // CONFIG_OXNAS_SATA_POWER_1
+#endif  
 
 #ifdef CONFIG_OXNAS_SATA_POWER_2
-    // Disable primary, secondary and teriary GPIO functions on SATA 2 power line
+     
     writel(readl(SATA_POWER_2_PRISEL_REG) & ~SATA_POWER_2_MASK, SATA_POWER_2_PRISEL_REG);
     writel(readl(SATA_POWER_2_SECSEL_REG) & ~SATA_POWER_2_MASK, SATA_POWER_2_SECSEL_REG);
     writel(readl(SATA_POWER_2_TERSEL_REG) & ~SATA_POWER_2_MASK, SATA_POWER_2_TERSEL_REG);
 
-    // Enable power to SATA 2
     writel(SATA_POWER_2_MASK, SATA_POWER_2_OUTPUT_SET_REG);
 
-    // Enable GPIO output on SATA 2 power line
     writel(SATA_POWER_2_MASK, SATA_POWER_2_SET_OE_REG);
-#endif // CONFIG_OXNAS_SATA_POWER_2
+#endif  
 
-    /* Both Ethernet cores will use Ethernet 0 MDIO interface */
     {
         unsigned long pins = (1 << MACA_MDC_MF_PIN ) |
                              (1 << MACA_MDIO_MF_PIN) ;
@@ -553,7 +502,7 @@ static void __init oxnas_mapio(void)
 #define	PCIE_RESET_ALTERNATIVE_SEL	SEC_CTRL_ALTERNATIVE_SEL
 #endif
     {
-	// PCIe card reset line
+	 
 	unsigned long pin = ( 1 << PCIE_RESET_PIN);
         *(volatile u32*)PCIE_RESET_SECONDARY_SEL   &= ~pin ;
         *(volatile u32*)PCIE_RESET_TERTIARY_SEL    &= ~pin ;
@@ -561,7 +510,7 @@ static void __init oxnas_mapio(void)
         *(volatile u32*)PCIE_RESET_DEBUG_SEL       &= ~pin ;
         *(volatile u32*)PCIE_RESET_ALTERNATIVE_SEL &= ~pin ;
     }
-#endif // CONFIG_PCI
+#endif  
 }
 
 static void __init oxnas_fixup(
@@ -591,31 +540,30 @@ printk(KERN_NOTICE "%d memory %s\n", mi->nr_banks, (mi->nr_banks > 1) ? "regions
 #if defined(CONFIG_LEON_POWER_BUTTON_MONITOR) || defined(CONFIG_LEON_POWER_BUTTON_MONITOR_MODULE)
 #include <mach/leon.h>
 #include <mach/leon-power-button-prog.h>
-#endif // CONFIG_LEON_POWER_BUTTON_MONITOR
+#endif  
 
 static void sata_power_off(void)
 {
 #ifdef CONFIG_OXNAS_SATA_POWER_1
-    // Disable power to SATA 1
+     
     printk(KERN_INFO "Turning off disk 1\n");
     writel(SATA_POWER_1_MASK, SATA_POWER_1_OUTPUT_CLR_REG);
-#endif // CONFIG_OXNAS_SATA_POWER_1
+#endif  
 
 #ifdef CONFIG_OXNAS_SATA_POWER_2
-    // Disable power to SATA 2
+     
     printk(KERN_INFO "Turning off disk 2\n");
     writel(SATA_POWER_2_MASK, SATA_POWER_2_OUTPUT_CLR_REG);
-#endif // CONFIG_OXNAS_SATA_POWER_2
+#endif  
 }
 
 static void arch_poweroff(void)
 {
 #if defined(CONFIG_LEON_POWER_BUTTON_MONITOR) || defined(CONFIG_LEON_POWER_BUTTON_MONITOR_MODULE)
-    // Load CoPro program and start it running
+     
     init_copro(leon_srec, oxnas_global_invert_leds);
-#endif // CONFIG_LEON_POWER_BUTTON_MONITOR
+#endif  
 
-    // Turn of power to SATA disk if possible
     sata_power_off();
 #ifdef CONFIG_SYNO_PLX_PORTING
 #define	SOFTWARE_SHUTDOWN		0x31
@@ -636,25 +584,19 @@ extern void synology_gpio_init();
 #endif
 static void __init oxnas_init_machine(void)
 {
-    /* Initialise the spinlock used to make GPIO register set access atomic */
+     
     spin_lock_init(&oxnas_gpio_spinlock);
 
-    /*
-     * Initialise the support for our multi-channel memory-to-memory DMAC
-     * The interrupt subsystem needs to be available before we can initialise
-     * the DMAC support
-     */
     oxnas_dma_init();
 
 #ifdef CONFIG_LEON_START_EARLY
     init_copro(leon_early_srec, 0);
-#endif // CONFIG_LEON_START_EARLY
+#endif  
 #ifdef CONFIG_SPI	
 	spi_register_board_info(ox820_spi_board_info,
 		ARRAY_SIZE(ox820_spi_board_info));
 #endif
 
-	// Add any platform bus devices
 	platform_add_devices(platform_devices, ARRAY_SIZE(platform_devices));
 
 	pm_power_off = arch_poweroff;
@@ -667,15 +609,11 @@ static void __init oxnas_init_machine(void)
 #endif
 }
 
-/*
- * Code to setup the interrupts
- */
 static void __init oxnas_init_irq(void)
 {
-    /* initialise the RPS interrupt controller */
+     
     OX820_RPS_init_irq(OX820_RPS_IRQ_START, OX820_RPS_IRQ_START + NR_RPS_IRQS);
 
-    /* initialise the GIC */
 	gic_cpu_base_addr = __io_address(OX820_GIC_CPU_BASE_ADDR);
 
 	gic_dist_init(0, __io_address(OX820_GIC_DIST_BASE_ADDR), 29);
@@ -684,7 +622,7 @@ static void __init oxnas_init_irq(void)
 }
 
 MACHINE_START(OXNAS, "Oxsemi NAS")
-    /* Maintainer: Oxford Semiconductor Ltd */
+     
 #ifdef CONFIG_ARCH_OXNAS_UART1
     .phys_io = UART_1_BASE_PA,
     .io_pg_offst = (((u32)UART_1_BASE) >> 18) & 0xfffc,

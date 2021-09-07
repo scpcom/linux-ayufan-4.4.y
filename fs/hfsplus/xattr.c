@@ -1,21 +1,13 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * linux/fs/hfsplus/xattr.c
- *
- * Vyacheslav Dubeyko <slava@dubeyko.com>
- *
- * Logic of processing extended attributes
- */
-
+ 
 #include "hfsplus_fs.h"
 #include "xattr.h"
 #ifdef MY_ABC_HERE
-/* Zero out the date added field for the specified cnode */
+ 
 static void hfsplus_zero_dateadded(u16 entry_type, u8 *finderinfo) {
 
-	/* Advance finfo by 16 bytes to the 2nd half of the finderinfo */
     finderinfo = finderinfo + 16;
 
 	if (entry_type == HFSPLUS_FOLDER) {
@@ -65,11 +57,8 @@ static int can_set_xattr(struct inode *inode, const char *name,
 				const void *value, size_t value_len)
 {
 	if (!strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN))
-		return -EOPNOTSUPP; /* TODO: implement ACL support */
+		return -EOPNOTSUPP;  
 
-	/*
-	 * Don't allow setting an attribute in an unknown namespace.
-	 */
 	if (strncmp(name, XATTR_TRUSTED_PREFIX, XATTR_TRUSTED_PREFIX_LEN) &&
 	    strncmp(name, XATTR_SECURITY_PREFIX, XATTR_SECURITY_PREFIX_LEN) &&
 	    strncmp(name, XATTR_USER_PREFIX, XATTR_USER_PREFIX_LEN))
@@ -122,7 +111,7 @@ int __hfsplus_setxattr(struct inode *inode, const char *name,
 			err = -EOPNOTSUPP;
 			goto end_setxattr;
 		}
-#ifdef MY_ABC_HERE // SOLVE GFP call trace
+#ifdef MY_ABC_HERE  
 		cat_entry_type = hfs_bnode_read_u16(cat_fd.bnode, cat_fd.entryoffset);
 		if (cat_entry_type == HFSPLUS_FOLDER) {
 			hfs_bnode_read(cat_fd.bnode, &entry, cat_fd.entryoffset, sizeof(struct hfsplus_cat_folder));

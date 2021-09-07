@@ -1,7 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* Copyright (c) 2000-2008 Synology Inc. All rights reserved. */
+ 
 #include <linux/sched.h>
 #include <linux/module.h>
 #include <linux/jiffies.h>
@@ -42,18 +42,6 @@ void syno_do_hibernation_log(const char __user *filename)
 }
 EXPORT_SYMBOL(syno_do_hibernation_log);
 
-/**
- * Process name get
- * 
- * @param task     [IN] task structure, use for get process info.
- *                 Should not be NULL
- * @param kp       [IN]
- *                 0: get user mm task name
- *                 1: get task->comm process name
- *                 hould not be NULL.
- * @param buf      [IN] for copy process name, Should not be NULL.
- * @param buf_size [IN] buf size, Should more than 1.
- */
 static void SynoProcessNameGet(struct task_struct *task, unsigned char kp, char *buf, int buf_size)
 {
 	if(0 >= buf_size) {
@@ -144,4 +132,4 @@ END:
 	}
 	return res;
 }
-#endif //MY_ABC_HERE
+#endif  

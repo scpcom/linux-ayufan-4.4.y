@@ -30,11 +30,6 @@ EXPORT_SYMBOL_GPL(default_backing_dev_info);
 
 static struct class *bdi_class;
 
-/*
- * bdi_lock protects updates to bdi_list and bdi_pending_list, as well as
- * reader side protection for bdi_pending_list. bdi_list has RCU reader side
- * locking.
- */
 DEFINE_SPINLOCK(bdi_lock);
 LIST_HEAD(bdi_list);
 LIST_HEAD(bdi_pending_list);
@@ -69,10 +64,6 @@ static int bdi_debug_stats_show(struct seq_file *m, void *v)
 	unsigned long nr_dirty, nr_io, nr_more_io, nr_wb;
 	struct inode *inode;
 
-	/*
-	 * inode lock is enough here, the bdi->wb_list is protected by
-	 * RCU on the reader side
-	 */
 	nr_wb = nr_dirty = nr_io = nr_more_io = 0;
 	spin_lock(&inode_lock);
 	list_for_each_entry(wb, &bdi->wb_list, list) {
@@ -278,9 +269,6 @@ static void bdi_task_init(struct backing_dev_info *bdi,
 	tsk->flags |= PF_FLUSHER | PF_SWAPWRITE;
 	set_freezable();
 
-	/*
-	 * Our parent may run at a different priority, just set us to normal
-	 */
 	set_user_nice(tsk, 0);
 }
 
@@ -290,35 +278,22 @@ static int bdi_start_fn(void *ptr)
 	struct backing_dev_info *bdi = wb->bdi;
 	int ret;
 
-	/*
-	 * Add us to the active bdi_list
-	 */
 	spin_lock_bh(&bdi_lock);
 	list_add_rcu(&bdi->bdi_list, &bdi_list);
 	spin_unlock_bh(&bdi_lock);
 
 	bdi_task_init(bdi, wb);
 
-	/*
-	 * Clear pending bit and wakeup anybody waiting to tear us down
-	 */
 	clear_bit(BDI_pending, &bdi->state);
 	smp_mb__after_clear_bit();
 	wake_up_bit(&bdi->state, BDI_pending);
 
 	ret = bdi_writeback_task(wb);
 
-	/*
-	 * Remove us from the list
-	 */
 	spin_lock(&bdi->wb_lock);
 	list_del_rcu(&wb->list);
 	spin_unlock(&bdi->wb_lock);
 
-	/*
-	 * Flush any work that raced with us exiting. No new work
-	 * will be added, since this bdi isn't discoverable anymore.
-	 */
 	if (!list_empty(&bdi->work_list))
 		wb_do_writeback(wb, 1);
 
@@ -344,12 +319,6 @@ static void bdi_flush_io(struct backing_dev_info *bdi)
 	writeback_inodes_wbc(&wbc);
 }
 
-/*
- * kupdated() used to do this. We cannot do it from the bdi_forker_task()
- * or we risk deadlocking on ->s_umount. The longer term solution would be
- * to implement sync_supers_bdi() or similar and simply do it from the
- * bdi writeback tasks individually.
- */
 static int bdi_sync_supers(void *unused)
 {
 	set_user_nice(current, 0);
@@ -358,9 +327,6 @@ static int bdi_sync_supers(void *unused)
 		set_current_state(TASK_INTERRUPTIBLE);
 		schedule();
 
-		/*
-		 * Do this periodically, like kupdated() did before.
-		 */
 		sync_supers();
 	}
 
@@ -391,19 +357,11 @@ static int bdi_forker_task(void *ptr)
 		struct backing_dev_info *bdi, *tmp;
 		struct bdi_writeback *wb;
 
-		/*
-		 * Temporary measure, we want to make sure we don't see
-		 * dirty data on the default backing_dev_info
-		 */
 		if (wb_has_dirty_io(me) || !list_empty(&me->bdi->work_list))
 			wb_do_writeback(me, 0);
 
 		spin_lock_bh(&bdi_lock);
 
-		/*
-		 * Check if any existing bdi's have dirty data without
-		 * a thread registered. If so, set that up.
-		 */
 		list_for_each_entry_safe(bdi, tmp, &bdi_list, bdi_list) {
 			if (bdi->wb.task)
 				continue;
@@ -428,10 +386,6 @@ static int bdi_forker_task(void *ptr)
 
 		__set_current_state(TASK_RUNNING);
 
-		/*
-		 * This is our real job - check for pending entries in
-		 * bdi_pending_list, and create the tasks that got added
-		 */
 		bdi = list_entry(bdi_pending_list.next, struct backing_dev_info,
 				 bdi_list);
 		list_del_init(&bdi->bdi_list);
@@ -445,20 +399,10 @@ static int bdi_forker_task(void *ptr)
 		wb->task = kthread_run(bdi_start_fn, wb, "flush-%s",
 					dev_name(bdi->dev));
 #endif
-		/*
-		 * If task creation fails, then readd the bdi to
-		 * the pending list and force writeout of the bdi
-		 * from this forker thread. That will free some memory
-		 * and we can try again.
-		 */
+		 
 		if (IS_ERR(wb->task)) {
 			wb->task = NULL;
 
-			/*
-			 * Add this 'bdi' to the back, so we get
-			 * a chance to flush other bdi's to free
-			 * memory.
-			 */
 			spin_lock_bh(&bdi_lock);
 			list_add_tail(&bdi->bdi_list, &bdi_pending_list);
 			spin_unlock_bh(&bdi_lock);
@@ -481,17 +425,9 @@ static void bdi_add_to_pending(struct rcu_head *head)
 	list_add_tail(&bdi->bdi_list, &bdi_pending_list);
 	spin_unlock(&bdi_lock);
 
-	/*
-	 * We are now on the pending list, wake up bdi_forker_task()
-	 * to finish the job and add us back to the active bdi_list
-	 */
 	wake_up_process(default_backing_dev_info.wb.task);
 }
 
-/*
- * Add the default flusher task that gets created for any bdi
- * that has dirty data pending writeout
- */
 void static bdi_add_default_flusher_task(struct backing_dev_info *bdi)
 {
 	if (!bdi_cap_writeback_dirty(bdi))
@@ -503,27 +439,13 @@ void static bdi_add_default_flusher_task(struct backing_dev_info *bdi)
 		return;
 	}
 
-	/*
-	 * Check with the helper whether to proceed adding a task. Will only
-	 * abort if we two or more simultanous calls to
-	 * bdi_add_default_flusher_task() occured, further additions will block
-	 * waiting for previous additions to finish.
-	 */
 	if (!test_and_set_bit(BDI_pending, &bdi->state)) {
 		list_del_rcu(&bdi->bdi_list);
 
-		/*
-		 * We must wait for the current RCU period to end before
-		 * moving to the pending list. So schedule that operation
-		 * from an RCU callback.
-		 */
 		call_rcu(&bdi->rcu_head, bdi_add_to_pending);
 	}
 }
 
-/*
- * Remove bdi from bdi_list, and ensure that it is no longer visible
- */
 static void bdi_remove_from_list(struct backing_dev_info *bdi)
 {
 	spin_lock_bh(&bdi_lock);
@@ -540,7 +462,7 @@ int bdi_register(struct backing_dev_info *bdi, struct device *parent,
 	int ret = 0;
 	struct device *dev;
 
-	if (bdi->dev)	/* The driver needs to use separate queues per device */
+	if (bdi->dev)	 
 		goto exit;
 
 	va_start(args, fmt);
@@ -557,11 +479,6 @@ int bdi_register(struct backing_dev_info *bdi, struct device *parent,
 
 	bdi->dev = dev;
 
-	/*
-	 * Just start the forker thread for our default backing_dev_info,
-	 * and add other bdi's to the list. They will get a thread created
-	 * on-demand when they need it.
-	 */
 	if (bdi_cap_flush_forker(bdi)) {
 		struct bdi_writeback *wb = &bdi->wb;
 
@@ -589,9 +506,6 @@ int bdi_register_dev(struct backing_dev_info *bdi, dev_t dev)
 }
 EXPORT_SYMBOL(bdi_register_dev);
 
-/*
- * Remove bdi from the global list and shutdown any threads we have running
- */
 static void bdi_wb_shutdown(struct backing_dev_info *bdi)
 {
 	struct bdi_writeback *wb;
@@ -599,32 +513,17 @@ static void bdi_wb_shutdown(struct backing_dev_info *bdi)
 	if (!bdi_cap_writeback_dirty(bdi))
 		return;
 
-	/*
-	 * If setup is pending, wait for that to complete first
-	 */
 	wait_on_bit(&bdi->state, BDI_pending, bdi_sched_wait,
 			TASK_UNINTERRUPTIBLE);
 
-	/*
-	 * Make sure nobody finds us on the bdi_list anymore
-	 */
 	bdi_remove_from_list(bdi);
 
-	/*
-	 * Finally, kill the kernel threads. We don't need to be RCU
-	 * safe anymore, since the bdi is gone from visibility. Force
-	 * unfreeze of the thread before calling kthread_stop(), otherwise
-	 * it would never exet if it is currently stuck in the refrigerator.
-	 */
 	list_for_each_entry(wb, &bdi->wb_list, list) {
 		wb->task->flags &= ~PF_FROZEN;
 		kthread_stop(wb->task);
 	}
 }
 
-/*
- * This bdi is going away now, make sure that no super_blocks point to it
- */
 static void bdi_prune_sb(struct backing_dev_info *bdi)
 {
 	struct super_block *sb;
@@ -668,9 +567,6 @@ int bdi_init(struct backing_dev_info *bdi)
 
 	bdi_wb_init(&bdi->wb, bdi);
 
-	/*
-	 * Just one thread support for now, hard code mask and count
-	 */
 	bdi->wb_mask = 1;
 	bdi->wb_cnt = 1;
 
@@ -697,10 +593,6 @@ void bdi_destroy(struct backing_dev_info *bdi)
 {
 	int i;
 
-	/*
-	 * Splice our entries to the default_backing_dev_info, if this
-	 * bdi disappears
-	 */
 	if (bdi_has_dirty_io(bdi)) {
 		struct bdi_writeback *dst = &default_backing_dev_info.wb;
 
@@ -747,15 +639,6 @@ void set_bdi_congested(struct backing_dev_info *bdi, int sync)
 }
 EXPORT_SYMBOL(set_bdi_congested);
 
-/**
- * congestion_wait - wait for a backing_dev to become uncongested
- * @sync: SYNC or ASYNC IO
- * @timeout: timeout in jiffies
- *
- * Waits for up to @timeout jiffies for a backing_dev (any backing_dev) to exit
- * write congestion.  If no backing_devs are congested then just wait for the
- * next write to be completed.
- */
 long congestion_wait(int sync, long timeout)
 {
 	long ret;

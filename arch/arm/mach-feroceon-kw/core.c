@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+ 
 #include <linux/types.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -88,14 +74,12 @@
 #include <video/dovefbreg.h>
 #endif
 
-/* I2C */
 #include <linux/i2c.h>	
 #include <linux/mv643xx_i2c.h>
 #include "ctrlEnv/mvCtrlEnvSpec.h"
 
 extern unsigned int irq_int_type[];
 
-/* for debug putstr */
 #include <mach/uncompress.h> 
 static char arr[256];
 
@@ -160,11 +144,11 @@ static int __init parse_tag_mv_uboot(const struct tag *tag)
 #endif    	
 	}
 #ifdef CONFIG_MV_NAND
-               /* get NAND ECC type(1-bit or 4-bit) */
+                
                if((mvUbootVer >> 8) >= 0x3040c)
                        mv_nand_ecc = tag->u.mv_uboot.nand_ecc;
                else
-                       mv_nand_ecc = 1; /* fallback to 1-bit ECC */
+                       mv_nand_ecc = 1;  
 #endif  
 	return 0;
 }
@@ -209,16 +193,10 @@ void print_board_info(void)
     printk(" Detected Tclk %d and SysClk %d \n",mvTclk, mvSysclk);
 }
 
-/*****************************************************************************
- * I2C(TWSI)
- ****************************************************************************/
-
-/*Platform devices list*/
-
 static struct mv64xxx_i2c_pdata kw_i2c_pdata = {
-       .freq_m         = 8, /* assumes 166 MHz TCLK */
+       .freq_m         = 8,  
        .freq_n         = 3,
-       .timeout        = 1000, /* Default timeout of 1 second */
+       .timeout        = 1000,  
 };
 
 static struct resource kw_i2c0_resources[] = {
@@ -271,9 +249,6 @@ static struct platform_device kw_i2c1 = {
        },
 };
 
-/*****************************************************************************
- * UART
- ****************************************************************************/
 static struct resource mv_uart0_resources[] = {
 	{
 		.start		= PORT0_BASE,
@@ -333,7 +308,7 @@ static struct platform_device mv_uart = {
 #ifdef MY_ABC_HERE
 	.num_resources		= ARRAY_SIZE(mv_uart0_resources),
 #else
-	.num_resources		= 2, /*ARRAY_SIZE(mv_uart_resources),*/
+	.num_resources		= 2,  
 #endif
 	.resource		= mv_uart0_resources,
 };
@@ -375,7 +350,7 @@ extern void syno_mv_net_shutdown();
 static void synology_power_off(void)
 {
 #ifdef MY_ABC_HERE
-	/* platform driver will not shutdown when poweroff */
+	 
 	syno_mv_net_shutdown();
 #endif
 	writel(SET8N1, UART1_REG(LCR));
@@ -387,17 +362,12 @@ static void synology_restart(char mode, const char *cmd)
 	writel(SET8N1, UART1_REG(LCR));
 	writel(SOFTWARE_REBOOT, UART1_REG(TX));
 
-	/* Calls original reset function for models those do not use uP
-	 * I.e. USB Station. */
 	arm_machine_restart(mode, cmd);
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef CONFIG_MV_INCLUDE_AUDIO
 
-/*****************************************************************************
- * I2S/SPDIF
- ****************************************************************************/
 static struct resource mv_i2s_resources[] = {
 	[0] = {
 		.start	= INTER_REGS_BASE + AUDIO_REG_BASE(0),
@@ -438,9 +408,6 @@ static struct platform_device mv_mv88fx_i2s = {
 	.id             = -1,
 };
 
-/*****************************************************************************
- * A2D on I2C bus
- ****************************************************************************/
 static struct i2c_board_info __initdata i2c_a2d = {
 	I2C_BOARD_INFO("i2s_i2c", 0x4A),
 };
@@ -452,7 +419,7 @@ void __init mv_i2s_init(void)
 	return;
 }
 
-#endif /* #ifdef CONFIG_MV_INCLUDE_AUDIO */
+#endif  
 
 #if defined(CONFIG_MV_INCLUDE_SDIO)
 
@@ -491,16 +458,7 @@ static struct platform_device mv_sdio_plat = {
 };
 
 #ifdef CONFIG_FB_DOVE
-/*****************************************************************************
- * LCD
- ****************************************************************************/
-
-/*
- * LCD HW output Red[0] to LDD[0] when set bit [19:16] of reg 0x190
- * to 0x0. Which means HW outputs BGR format default. All platforms
- * uses this controller should enable .panel_rbswap. Unless layout
- * design connects Blue[0] to LDD[0] instead.
- */
+ 
 static struct dovefb_mach_info kw_lcd0_dmi = {
 	.id_gfx			= "GFX Layer 0",
 	.id_ovly		= "Video Layer 0",
@@ -547,14 +505,12 @@ static struct dovefb_mach_info kw_lcd0_vid_dmi = {
 
 extern unsigned int lcd0_enable;
 
-#endif /* CONFIG_FB_DOVE */
+#endif  
 
-#endif /* #if defined(CONFIG_MV_INCLUDE_SDIO) */
+#endif  
 
 #ifdef CONFIG_MV_ETHERNET
-/*****************************************************************************
- * Ethernet
- ****************************************************************************/
+ 
 static struct platform_device mv88fx_eth = {
 	.name		= "mv88fx_eth",
 	.id		= 0,
@@ -573,24 +529,15 @@ static void __init kirkwood_l2_init(void)
 #endif
 }
 
-/*****************************************************************************
- * SoC hwmon Thermal Sensor
- ****************************************************************************/
 void __init kw_hwmon_init(void)
 {
 	platform_device_register_simple("kw-temp", 0, NULL, 0);
 }
 
-/*****************************************************************************
- * WATCHDOG
- ****************************************************************************/
-
-/* the orion watchdog device data structure */
 static struct orion_wdt_platform_data mv_wdt_data = {
 	.tclk		= 0,
 };
 
-/* the watchdog device structure */
 static struct platform_device mv_wdt_device = {
 	.name		= "orion_wdt",
 	.id		= -1,
@@ -600,16 +547,13 @@ static struct platform_device mv_wdt_device = {
 	.num_resources	= 0,
 };
 
-/* init the watchdog device */
 static void __init mv_wdt_init(void)
 {
 	mv_wdt_data.tclk = mvTclk;
 	platform_device_register(&mv_wdt_device);
 }
 #ifdef SYNO_6281_SPI_USE_OPENSOURCE
-/*****************************************************************************
- * SPI
- ****************************************************************************/
+ 
 static struct orion_spi_info kirkwood_spi_plat_data = {
 };
 
@@ -636,50 +580,39 @@ void __init kirkwood_spi_init()
 	platform_device_register(&kirkwood_spi);
 }
 
-/****************************************************************************
- * Layout as used by :
- *  0x00000000-0x00080000 : "U-Boot"
- *  0x00080000-0x00280000 : "Kernel"
- *  0x00280000-0x003c0000 : "RootFS"
- *  0x003c0000-0x003d0000 : "Vendor"
- *  0x003d0000-0x003f0000 : "U-Boot Config"
- *  0x003f0000-0x00400000 : "FIS directory"
- *
- ***************************************************************************/
 static struct mtd_partition syno_6281_partitions[] = {
 	{
-		.name   = "RedBoot",        /* u-boot       */
+		.name   = "RedBoot",         
 		.offset = 0x00000000,
-		.size   = 0x00080000,       /* 512KB        */
+		.size   = 0x00080000,        
 	},
 	{
-		.name   = "zImage",         /* linux kernel image   */
+		.name   = "zImage",          
 		.offset = 0x00080000,
-		.size   = 0x00200000,       /* 2 MB         */
+		.size   = 0x00200000,        
 	},
 	{
-		.name   = "rd.gz",          /* ramdisk image    */
+		.name   = "rd.gz",           
 		.offset = 0x00280000,
-		.size   = 0x00140000,       /* 1.2 MB       */
+		.size   = 0x00140000,        
 	},
 	{
-		.name   = "vendor",         /* vendor specific data */
+		.name   = "vendor",          
 		.offset = 0x003C0000,
-		.size   = 0x00010000,       /* 64KB                 */
+		.size   = 0x00010000,        
 	},
 	{
-		.name   = "RedBoot Config", /* configs for u-boot   */
+		.name   = "RedBoot Config",  
 		.offset = 0x003D0000,
-		.size   = 0x00020000,       /* 128KB                */
+		.size   = 0x00020000,        
 	},
 	{
-		.name   = "FIS directory",  /* flash partition table*/
+		.name   = "FIS directory",   
 		.offset = 0x003F0000,
-		.size   = 0x00010000,       /* 64KB                 */
+		.size   = 0x00010000,        
 	},
 };
 
-/* Not specify type let it autoprobe the spi flash module */
 static const struct flash_platform_data synology_6281_flash = {
 	.name       = "spi_flash",
 	.parts      = syno_6281_partitions,
@@ -699,9 +632,7 @@ static struct spi_board_info __initdata synology_spi_slave_info[] = {
 #endif
 
 #ifdef MY_ABC_HERE
-/*****************************************************************************
- * SATA
- ****************************************************************************/
+ 
 static struct mv_sata_platform_data synology_sata_data = {
 	.n_ports	= 2,
 };
@@ -785,16 +716,13 @@ static void __init mv_init(void)
 	kirkwood_l2_init();
 #endif
 
-        /* init the Board environment */
        	mvBoardEnvInit();
 
-        /* init the controller environment */
         if( mvCtrlEnvInit() ) {
             printk( "Controller env initialization failed.\n" );
             return;
         }
 
-	/* Init the CPU windows setting and the access protection windows. */
 	if( mvCpuIfInit(mv_sys_map()) ) {
 
 		printk( "Cpu Interface initialization failed.\n" );
@@ -805,37 +733,32 @@ static void __init mv_init(void)
 		mvBoardHDDPowerControl(1);
 		mvBoardFanPowerControl(1);
 #if defined(CONFIG_MV_INCLUDE_AUDIO)
-		/* SPDIF only */
+		 
 		mv_i2s_plat_data.i2s_rec = mv_i2s_plat_data.i2s_play = 0;	
 #endif
 	}
 
-    	/* Init Tclk & SysClk */
     	mvTclk = mvBoardTclkGet();
    	mvSysclk = mvBoardSysClkGet();
 	
         support_wait_for_interrupt = 1;
   
 #ifdef CONFIG_JTAG_DEBUG
-            support_wait_for_interrupt = 0; /*  for Lauterbach */
+            support_wait_for_interrupt = 0;  
 #endif
 
 	elf_hwcap &= ~HWCAP_JAVA;
 
    	serial_initialize();
 
-	/* At this point, the CPU windows are configured according to default definitions in mvSysHwConfig.h */
-	/* and cpuAddrWinMap table in mvCpuIf.c. Now it's time to change defaults for each platform.         */
 	mvCpuIfAddDecShow();
 
     	print_board_info();
 	
 	mv_gpio_init();
 
-	/* I2C */
 #ifdef CONFIG_FB_DOVE 
-	/* LCD uses i2c 1 interface, while rest (like audio) uses i2c 0.
-	   Currently the i2c linux driver doesn't support 2 interfaces */
+	 
 	if(lcd0_enable == 1)
 		platform_device_register(&kw_i2c1);
 	else
@@ -876,11 +799,10 @@ static void __init mv_init(void)
 #endif
 
 #ifdef CONFIG_MV_ETHERNET
-       /* ethernet */
+        
        platform_device_register(&mv88fx_eth);
 #endif
 
-       /* WATCHDOG */
 	mv_wdt_init();
 
 #ifdef MY_ABC_HERE
@@ -898,7 +820,7 @@ static void __init mv_init(void)
 #endif
 
 #ifdef CONFIG_SENSORS_FEROCEON_KW
-	/* SoC hwmon Thermal Sensor */
+	 
 	if( mvBoardIdGet() == RD_88F6282A_ID ) {
 		kw_hwmon_init();
 	}
@@ -912,11 +834,7 @@ static void __init mv_init(void)
 }
 
 #ifdef CONFIG_FB_DOVE_OPTIMIZED_FB_MEM_ALLOC
-/*
- * This fixup function is used to reserve memory for the GPU and VPU engines
- * as these drivers require large chunks of consecutive memory.
- */
-
+ 
 void __init kw_tag_fixup_mem32(struct machine_desc *mdesc, struct tag *t,
 		char **from, struct meminfo *meminfo)
 {
@@ -939,17 +857,12 @@ void __init kw_tag_fixup_mem32(struct machine_desc *mdesc, struct tag *t,
 		return;
 	}
 
-	/* Resereve memory from last tag for LCD usage.
-	** We assume that each tag is a different DRAM CS.
-	** Allocate GFX & OVLY memory from different DRAM banks.
-	** We assume that each bank is 1/8 of the DRAM.
-	*/
 	bank_size = last_tag->u.mem.size / 8;
 	if((total_size / 2) < bank_size)
 		total_size = bank_size * 2;
 	fb_mem[0] = (void*)last_tag->u.mem.start + last_tag->u.mem.size - total_size;
 	fb_mem[1] = (void*)last_tag->u.mem.start + last_tag->u.mem.size - (total_size / 2);
-	last_tag->u.mem.size = 0; //-= total_size;
+	last_tag->u.mem.size = 0;  
 	fb_mem_size[0] = fb_mem_size[1] = (total_size / 2);
 }
 #endif
@@ -964,7 +877,7 @@ MACHINE_START(SYNOLOGY_6282 ,"Synology 6282 board")
 MACHINE_END
 
 MACHINE_START(FEROCEON_KW ,"Feroceon-KW")
-     /* MAINTAINER("MARVELL") */
+      
     .phys_io = 0xf1000000,
     .io_pg_offst = ((0xf1000000) >> 18) & 0xfffc,
     .boot_params = 0x00000100,
@@ -972,7 +885,7 @@ MACHINE_START(FEROCEON_KW ,"Feroceon-KW")
     .init_irq = mv_init_irq,
     .timer = &mv_timer,
     .init_machine = mv_init,
-/* reserve memory for VMETA and GPU */
+ 
 #ifdef CONFIG_FB_DOVE_OPTIMIZED_FB_MEM_ALLOC
     .fixup = kw_tag_fixup_mem32,
 #endif

@@ -1,35 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  target_core_iblock.c
- *
- * This file contains the Storage Engine  <-> Linux BlockIO transport
- * specific functions.
- *
- * Copyright (c) 2003, 2004, 2005 PyX Technologies, Inc.
- * Copyright (c) 2005, 2006, 2007 SBE, Inc.
- * Copyright (c) 2007-2009 Rising Tide Software, Inc.
- * Copyright (c) 2008-2009 Linux-iSCSI.org
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #define TARGET_CORE_IBLOCK_C
 #include <linux/version.h>
 #include <linux/string.h>
@@ -58,10 +30,6 @@
 #define DEBUG_IBLOCK(x...)
 #endif
 
-/*	iblock_attach_hba(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int iblock_attach_hba(se_hba_t *hba, u32 host_id)
 {
 	iblock_hba_t *ib_host;
@@ -92,10 +60,6 @@ int iblock_attach_hba(se_hba_t *hba, u32 host_id)
 	return 0;
 }
 
-/*	iblock_detach_hba(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int iblock_detach_hba(se_hba_t *hba)
 {
 	iblock_hba_t *ib_host;
@@ -215,15 +179,7 @@ se_device_t *iblock_create_virtdevice(
 		printk(KERN_ERR "Unable to locate iblock_dev_t parameter\n");
 		return 0;
 	}
-	/*
-	 * Check if we have an open file descritpor passed through configfs
-	 * $TARGET/iblock_0/some_bd/fd pointing to an underlying.
-	 * struct block_device.  If so, claim it with the pointer from
-	 * iblock_create_virtdevice_from_fd()
-	 *
-	 * Otherwise, assume that parameters through 'control' attribute
-	 * have set ib_dev->ibd_[major,minor]
-	 */
+	 
 	if (ib_dev->ibd_bd) {
 #ifndef MY_ABC_HERE
 		printk(KERN_INFO  "IBLOCK: Claiming struct block_device: %p\n",
@@ -267,9 +223,7 @@ se_device_t *iblock_create_virtdevice(
 		} else
 			goto failed;
 	}
-	/*
-	 * These settings need to be made tunable..
-	 */
+	 
 	ib_dev->ibd_bio_set = bioset_create(32, 64);
 	if (!(ib_dev->ibd_bio_set)) {
 		printk(KERN_ERR "IBLOCK: Unable to create bioset()\n");
@@ -279,14 +233,7 @@ se_device_t *iblock_create_virtdevice(
 	}
 	printk(KERN_INFO "IBLOCK: Created bio_set() for major/minor: %d:%d\n",
 		ib_dev->ibd_major, ib_dev->ibd_minor);
-	/*
-	 * Pass dev_flags for linux_blockdevice_claim() or
-	 * linux_blockdevice_claim() from the usage above.
-	 *
-	 * Note that transport_add_device_to_core_hba() will call
-	 * linux_blockdevice_release() internally on failure to
-	 * call bd_release() on the referenced struct block_device.
-	 */
+	 
 	dev = transport_add_device_to_core_hba(hba,
 			&iblock_template, se_dev, dev_flags, (void *)ib_dev);
 	if (!(dev))
@@ -307,10 +254,6 @@ failed:
 	return NULL;
 }
 
-/*	iblock_activate_device(): (Part of se_subsystem_api_t template)
- *
- *
- */
 int iblock_activate_device(se_device_t *dev)
 {
 #ifndef MY_ABC_HERE
@@ -325,10 +268,6 @@ int iblock_activate_device(se_device_t *dev)
 	return 0;
 }
 
-/*	iblock_deactivate_device(): (Part of se_subsystem_api_t template)
- *
- *
- */
 void iblock_deactivate_device(se_device_t *dev)
 {
 #ifndef MY_ABC_HERE
@@ -359,10 +298,6 @@ int iblock_transport_complete(se_task_t *task)
 	return 0;
 }
 
-/*	iblock_allocate_request(): (Part of se_subsystem_api_t template)
- *
- *
- */
 void *iblock_allocate_request(
 	se_task_t *task,
 	se_device_t *dev)
@@ -622,11 +557,6 @@ void iblock_free_task(se_task_t *task)
 {
 	iblock_req_t *req = (iblock_req_t *) task->transport_req;
 
-	/*
-	 * We do not release the bio(s) here associated with this task, as
-	 * this is handled by bio_put() and iblock_bio_destructor().
-	 */
-
 	kfree(req);
 
 	task->transport_req = NULL;
@@ -807,10 +737,7 @@ se_device_t *iblock_create_virtdevice_from_fd(
 		fput(filp);
 		return ERR_PTR(-EINVAL);
 	}
-	/*
-	 * iblock_create_virtdevice() will call linux_blockdevice_claim()
-	 * to claim struct block_device.
-	 */
+	 
 	dev = iblock_create_virtdevice(se_dev->se_dev_hba, se_dev, (void *)ibd);
 
 	iput(inode);
@@ -925,10 +852,7 @@ int iblock_map_task_SG(se_task_t *task)
 
 	ib_req->ib_bio = bio;
 	hbio = tbio = bio;
-	/*
-	 * Use fs/bio.c:bio_add_pages() to setup the bio_vec maplist
-	 * from TCM se_mem_t -> task->task_sg -> struct scatterlist memory.
-	 */
+	 
 	for (i = 0; i < task->task_sg_num; i++) {
 		DEBUG_IBLOCK("task: %p bio: %p Calling bio_add_page(): page:"
 			" %p len: %u offset: %u\n", task, bio, sg_page(&sg[i]),
@@ -1036,7 +960,7 @@ u32 iblock_get_blocksize(se_device_t *dev)
 
 u32 iblock_get_device_rev(se_device_t *dev)
 {
-	return SCSI_SPC_2; /* Returns SPC-3 in Initiator Data */
+	return SCSI_SPC_2;  
 }
 
 u32 iblock_get_device_type(se_device_t *dev)
@@ -1081,15 +1005,9 @@ void iblock_bio_done(struct bio *bio, int err)
 	}
 	DEBUG_IBLOCK("done[%p] bio: %p task_lba: %llu bio_lba: %llu err=%d\n",
 		task, bio, task->task_lba, bio->bi_sector, err);
-	/*
-	 * bio_put() will call iblock_bio_destructor() to release the bio back
-	 * to ibr->ib_bio_set.
-	 */
+	 
 	bio_put(bio);
 
-	/*
-	 * Wait to complete the task until the last bio as completed.
-	 */
 	if (!(atomic_dec_and_test(&ibr->ib_bio_cnt)))
 		goto out;
 

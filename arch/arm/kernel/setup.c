@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/kernel/setup.c
- *
- *  Copyright (C) 1995-2001 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/stddef.h>
@@ -245,24 +237,10 @@ static int __init early_netif_seq(char *p)
 	int len;
 	int netDevCount;
 
-	// no net device switch required
 	if ((NULL == p) || (0 == (len = strlen(p)))) {
 		return 1;
 	}
 
-	/**
-	 *	We change the way that we represent the net device name is due to a truth that
-	 *	when a PCIE extension card is plugged in, the pcie name will change
-	 *	So we give up the pci-name as our matching condition, we use NIC up sequence instead.
-	 *	Because the NIC layout is fixed on our board, we the NIC up sequence won't change.
-	 *	And according to this sequence, we assign the device name to NIC
-	 *
-	 *	Following codes are designed to compatible with bromolow/x64 which has already been produced.
-	 *	Based on the truth that our bromolow/x64 has at least 2 internal lan so far (2011/5/24)
-	 *	And 2 internal lan needs netif_seq whose length is 12
-	 *	So we judge that if netif_seq is less than 12, then it should be new version of netif_seq
-	 *	2411+ has 2 internal lans now so we use 12 as our boundary condition
-	 */
 	if (len <= SYNO_MAX_SWITCHABLE_NET_DEVICE) {
 		netDevCount = len;
 		for(gSwitchDev = 0 ; gSwitchDev < netDevCount && gSwitchDev < SYNO_MAX_SWITCHABLE_NET_DEVICE ; gSwitchDev++) {
@@ -277,7 +255,7 @@ static int __init early_netif_seq(char *p)
 	}
 
 	for(gSwitchDev = 0 ; gSwitchDev < netDevCount && gSwitchDev < SYNO_MAX_SWITCHABLE_NET_DEVICE ; gSwitchDev++) {
-		// the format of netif_seq string is device seq (1 character) + device pci name (last 5 characters only)
+		 
 		memcpy(gDevPCIName[gSwitchDev], p, SYNO_NET_DEVICE_ENCODING_LENGTH);
 		p += SYNO_NET_DEVICE_ENCODING_LENGTH;
 	}
@@ -475,9 +453,6 @@ static union { char c[4]; unsigned long l; } endian_test __initdata = { { 'l', '
 
 DEFINE_PER_CPU(struct cpuinfo_arm, cpu_data);
 
-/*
- * Standard memory resources
- */
 static struct resource mem_res[] = {
 	{
 		.name = "Video RAM",
@@ -563,8 +538,6 @@ int cpu_architecture(void)
 	} else if ((read_cpuid_id() & 0x000f0000) == 0x000f0000) {
 		unsigned int mmfr0;
 
-		/* Revised CPUID format. Read the Memory Model Feature
-		 * Register 0 and check for VMSAv7 or PMSAv7 */
 		asm("mrc	p15, 0, %0, c0, c1, 4"
 		    : "=r" (mmfr0));
 		if ((mmfr0 & 0x0000000f) == 0x00000003 ||
@@ -588,7 +561,7 @@ static void __init cacheid_init(void)
 
 	if (arch >= CPU_ARCH_ARMv6) {
 		if ((cachetype & (7 << 29)) == 4 << 29) {
-			/* ARMv7 register format */
+			 
 			cacheid = CACHEID_VIPT_NONALIASING;
 			if ((cachetype & (3 << 14)) == 1 << 14)
 				cacheid |= CACHEID_ASID_TAGGED;
@@ -610,10 +583,6 @@ static void __init cacheid_init(void)
 		cache_is_vipt_nonaliasing() ? "VIPT nonaliasing" : "unknown");
 }
 
-/*
- * These functions re-use the assembly code in head.S, which
- * already provide the required functionality.
- */
 extern struct proc_info_list *lookup_processor_type(unsigned int);
 extern struct machine_desc *lookup_machine_type(unsigned int);
 
@@ -621,11 +590,6 @@ static void __init setup_processor(void)
 {
 	struct proc_info_list *list;
 
-	/*
-	 * locate processor in the list of supported processor
-	 * types.  The linker builds this table for us from the
-	 * entries in arch/arm/mm/proc-*.S
-	 */
 	list = lookup_processor_type(read_cpuid_id());
 	if (!list) {
 		printk("CPU configuration botched (ID %08x), unable "
@@ -663,11 +627,6 @@ static void __init setup_processor(void)
 	cpu_proc_init();
 }
 
-/*
- * cpu_init - initialise one CPU.
- *
- * cpu_init sets up the per-CPU stacks.
- */
 void cpu_init(void)
 {
 	unsigned int cpu = smp_processor_id();
@@ -678,19 +637,12 @@ void cpu_init(void)
 		BUG();
 	}
 
-	/*
-	 * Define the placement constraint for the inline asm directive below.
-	 * In Thumb-2, msr with an immediate value is not allowed.
-	 */
 #ifdef CONFIG_THUMB2_KERNEL
 #define PLC	"r"
 #else
 #define PLC	"I"
 #endif
 
-	/*
-	 * setup stacks for re-entrant exception handlers
-	 */
 #ifdef CONFIG_SYNO_PLX_PORTING
 #if !defined(CONFIG_ARCH_OX820) || !defined(CONFIG_SMP)
 	__asm__ (
@@ -715,7 +667,7 @@ void cpu_init(void)
 	      PLC (PSR_F_BIT | PSR_I_BIT | SVC_MODE)
 	    : "r14");
 #else
-    /* Same as the uniprocessor stacks, but with a FIQ stack added.*/
+     
 	__asm__ (
 	"msr	cpsr_c, %1\n\t"
 	"add	sp, %0, %2\n\t"
@@ -768,9 +720,6 @@ static struct machine_desc * __init setup_machine(unsigned int nr)
 {
 	struct machine_desc *list;
 
-	/*
-	 * locate machine in the list of supported machines.
-	 */
 	list = lookup_machine_type(nr);
 	if (!list) {
 		printk("Machine configuration botched (nr %d), unable "
@@ -793,22 +742,14 @@ static int __init arm_add_memory(unsigned long start, unsigned long size)
 		return -EINVAL;
 	}
 
-	/*
-	 * Ensure that start/size are aligned to a page boundary.
-	 * Size is appropriately rounded down, start is rounded up.
-	 */
 #ifdef CONFIG_ARCH_FEROCEON
-       if(size != 0) /* overcome bug in U-Boot */
+       if(size != 0)  
 #endif
 	size -= start & ~PAGE_MASK;
 	bank->start = PAGE_ALIGN(start);
 	bank->size  = size & PAGE_MASK;
 	bank->node  = PHYS_TO_NID(start);
 
-	/*
-	 * Check whether this memory region has non-zero size or
-	 * invalid node number.
-	 */
 	if (bank->size == 0 || bank->node >= MAX_NUMNODES)
 		return -EINVAL;
 
@@ -816,20 +757,11 @@ static int __init arm_add_memory(unsigned long start, unsigned long size)
 	return 0;
 }
 
-/*
- * Pick out the memory size.  We look for mem=size@start,
- * where start and size are "size[KkMm]"
- */
 static void __init early_mem(char **p)
 {
 	static int usermem __initdata = 0;
 	unsigned long size, start;
 
-	/*
-	 * If the user specifies memory size, we
-	 * blow away any automatically generated
-	 * size.
-	 */
 	if (usermem == 0) {
 		usermem = 1;
 		meminfo.nr_banks = 0;
@@ -844,9 +776,6 @@ static void __init early_mem(char **p)
 }
 __early_param("mem=", early_mem);
 
-/*
- * Initial parsing of the command line.
- */
 static void __init parse_cmdline(char **cmdline_p, char *from)
 {
 	char c = ' ', *to = command_line;
@@ -935,10 +864,6 @@ request_standard_resources(struct meminfo *mi, struct machine_desc *mdesc)
 		request_resource(&iomem_resource, &video_ram);
 	}
 
-	/*
-	 * Some machines don't have the possibility of ever
-	 * possessing lp0, lp1 or lp2
-	 */
 	if (mdesc->reserve_lp0)
 		request_resource(&ioport_resource, &lp0);
 	if (mdesc->reserve_lp1)
@@ -947,16 +872,6 @@ request_standard_resources(struct meminfo *mi, struct machine_desc *mdesc)
 		request_resource(&ioport_resource, &lp2);
 }
 
-/*
- *  Tag parsing.
- *
- * This is the new way of passing data to the kernel at boot time.  Rather
- * than passing a fixed inflexible structure to the kernel, we pass a list
- * of variable-sized tags to the kernel.  The first tag must be a ATAG_CORE
- * tag for the list to be recognised (to distinguish the tagged list from
- * a param_struct).  The list is terminated with a zero-length tag (this tag
- * is not parsed in any way).
- */
 static int __init parse_tag_core(const struct tag *tag)
 {
 	if (tag->hdr.size > 2) {
@@ -1038,11 +953,6 @@ static int __init parse_tag_cmdline(const struct tag *tag)
 
 __tagtable(ATAG_CMDLINE, parse_tag_cmdline);
 
-/*
- * Scan the tag table for this tag, and call its parse function.
- * The tag table is built by the linker from all the __tagtable
- * declarations.
- */
 static int __init parse_tag(const struct tag *tag)
 {
 	extern struct tagtable __tagtable_begin, __tagtable_end;
@@ -1057,10 +967,6 @@ static int __init parse_tag(const struct tag *tag)
 	return t < &__tagtable_end;
 }
 
-/*
- * Parse all tags in the list, checking both the global and architecture
- * specific tag tables.
- */
 static void __init parse_tags(const struct tag *t)
 {
 	for (; t->hdr.size; t = tag_next(t))
@@ -1070,9 +976,6 @@ static void __init parse_tags(const struct tag *t)
 				t->hdr.tag);
 }
 
-/*
- * This holds our defaults.
- */
 static struct init_tags {
 	struct tag_header hdr1;
 	struct tag_core   core;
@@ -1091,7 +994,7 @@ static void (*init_machine)(void) __initdata;
 
 static int __init customize_machine(void)
 {
-	/* customizes platform devices, or adds new ones */
+	 
 	if (init_machine)
 		init_machine();
 	return 0;
@@ -1118,10 +1021,6 @@ void __init setup_arch(char **cmdline_p)
 	else if (mdesc->boot_params)
 		tags = phys_to_virt(mdesc->boot_params);
 
-	/*
-	 * If we have the old style parameters, convert them to
-	 * a tag list.
-	 */
 	if (tags->hdr.tag != ATAG_CORE)
 		convert_to_tag_list(tags);
 	if (tags->hdr.tag != ATAG_CORE)
@@ -1161,9 +1060,6 @@ void __init setup_arch(char **cmdline_p)
 	cpu_init();
 	tcm_init();
 
-	/*
-	 * Set up various architecture-specific pointers
-	 */
 	init_arch_irq = mdesc->init_irq;
 	system_timer = mdesc->timer;
 	init_machine = mdesc->init_machine;
@@ -1221,23 +1117,18 @@ static int c_show(struct seq_file *m, void *v)
 
 #if defined(CONFIG_SMP)
 	for_each_online_cpu(i) {
-		/*
-		 * glibc reads /proc/cpuinfo to determine the number of
-		 * online processors, looking for lines beginning with
-		 * "processor".  Give glibc what it expects.
-		 */
+		 
 		seq_printf(m, "processor\t: %d\n", i);
 		seq_printf(m, "BogoMIPS\t: %lu.%02lu\n\n",
 			   per_cpu(cpu_data, i).loops_per_jiffy / (500000UL/HZ),
 			   (per_cpu(cpu_data, i).loops_per_jiffy / (5000UL/HZ)) % 100);
 	}
-#else /* CONFIG_SMP */
+#else  
 	seq_printf(m, "BogoMIPS\t: %lu.%02lu\n",
 		   loops_per_jiffy / (500000/HZ),
 		   (loops_per_jiffy / (5000/HZ)) % 100);
 #endif
 
-	/* dump out the processor features */
 	seq_puts(m, "Features\t: ");
 
 	for (i = 0; hwcap_str[i]; i++)
@@ -1248,15 +1139,15 @@ static int c_show(struct seq_file *m, void *v)
 	seq_printf(m, "CPU architecture: %s\n", proc_arch[cpu_architecture()]);
 
 	if ((read_cpuid_id() & 0x0008f000) == 0x00000000) {
-		/* pre-ARM7 */
+		 
 		seq_printf(m, "CPU part\t: %07x\n", read_cpuid_id() >> 4);
 	} else {
 		if ((read_cpuid_id() & 0x0008f000) == 0x00007000) {
-			/* ARM7 */
+			 
 			seq_printf(m, "CPU variant\t: 0x%02x\n",
 				   (read_cpuid_id() >> 16) & 127);
 		} else {
-			/* post-ARM7 */
+			 
 			seq_printf(m, "CPU variant\t: 0x%x\n",
 				   (read_cpuid_id() >> 20) & 15);
 		}

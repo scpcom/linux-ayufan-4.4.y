@@ -2,20 +2,7 @@
 #define MY_ABC_HERE
 #endif
 #ifdef MY_DEF_HERE
-/*
- * Suspend/resume support
- *
- * Copyright 2009  MontaVista Software, Inc.
- * Copyright 2007-2010 Freescale Semiconductor Inc.
- *
- * Author: Anton Vorontsov <avorontsov@ru.mvista.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- */
-
+ 
 #include <linux/init.h>
 #include <linux/types.h>
 #include <linux/errno.h>
@@ -62,20 +49,6 @@ extern void flush_dcache_L1(void);
 extern int SYNOQorIQHWReset(void);
 #endif
 
-/**
- * pmc_enable_wake - enable OF device as wakeup event source
- * @ofdev: OF device affected
- * @state: PM state from which device will issue wakeup events
- * @enable: True to enable event generation; false to disable
- *
- * This enables the device as a wakeup event source, or disables it.
- *
- * RETURN VALUE:
- * 0 is returned on success
- * -EINVAL is returned if device is not supposed to wake up the system
- * Error code depending on the platform is returned if both the platform and
- * the native mechanism fail to enable the generation of wake-up events
- */
 static LIST_HEAD(wakeup);
 
 struct wake_data{
@@ -98,7 +71,6 @@ static int pmc_suspend_exit(void)
 {
 	struct wake_data *p;
 
-	/* check the wakeup event */
 	list_for_each_entry(p, &wakeup, link) {
 		if (p->func(p->data))
 			return 1;
@@ -134,7 +106,6 @@ int pmc_enable_wake(struct of_device *ofdev, wakeup_event_t func, bool enable)
 		goto out;
 	}
 
-	/* clear to enable clock in low power mode */
 	if (enable)
 		clrbits32(&pmc_regs->pmcdr, *pmcdr_mask);
 	else
@@ -142,14 +113,14 @@ int pmc_enable_wake(struct of_device *ofdev, wakeup_event_t func, bool enable)
 
 #ifdef MY_DEF_HERE
 	if (enable) {
-		/* set usb1 function pin to gpio output and disable usb1/2 sap during deep sleep */
+		 
 		setbits32(&pmc_regs->pmcdr, 0x00c00800);
 		setbits32(&guts->pmuxcr, 0x20000000);
 		msleep(200);
 		setbits32(gpio_base + 0x100, 0xfff00000);
 		GPIOSuspend();
 	} else {
-		/* recover it */
+		 
 		clrbits32(gpio_base + 0x100, 0xfff00000);
 		clrbits32(&guts->pmuxcr, 0x20000000);
 		clrbits32(&pmc_regs->pmcdr, 0x00c00800);
@@ -173,10 +144,6 @@ out:
 }
 EXPORT_SYMBOL_GPL(pmc_enable_wake);
 
-/**
- * pmc_enable_lossless - enable lossless ethernet in low power mode
- * @enable: True to enable event generation; false to disable
- */
 void pmc_enable_lossless(int enable)
 {
 	if (enable && has_lossless)
@@ -211,7 +178,7 @@ static int pmc_suspend_enter(suspend_state_t state)
 		if (!pmc_suspend_exit()) {
 #endif
 #ifdef MY_DEF_HERE
-			/* Force put core 1 to nap mode to prevent gpio wake up failed issue */
+			 
 			setbits32(&pmc_regs->devdisr, 0x00002000);
 #else
 			setbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK);
@@ -223,7 +190,7 @@ static int pmc_suspend_enter(suspend_state_t state)
 			mpc85xx_enter_deep_sleep(get_immrbase(),
 					powmgtreq);
 #ifdef MY_DEF_HERE
-			/* Make core 1 back from nap mode */
+			 
 			SYNOQorIQHWReset();
 			clrbits32(&pmc_regs->devdisr, 0x00002000);
 #else
@@ -238,17 +205,14 @@ static int pmc_suspend_enter(suspend_state_t state)
 
 		return 0;
 
-	/* else fall-through */
 	case PM_SUSPEND_STANDBY:
 		local_irq_disable();
 		flush_dcache_L1();
 
-		/* Start the power monitor using FPGA */
 		pixis_start_pm_sleep();
 		if (!pmc_suspend_exit()) {
 			setbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK | PMCSR_SLP);
-			/* At this point, the CPU is asleep. */
-			/* Upon resume, wait for SLP bit to be clear. */
+			 
 			ret = spin_event_timeout(
 				(in_be32(&pmc_regs->pmcsr) & PMCSR_SLP)
 				== 0, 10000, 10) ? 0 : -ETIMEDOUT;
@@ -257,7 +221,7 @@ static int pmc_suspend_enter(suspend_state_t state)
 						SLP bit to be cleared\n");
 			clrbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK);
 		}
-		/* Stop the power monitor using FPGA */
+		 
 		pixis_stop_pm_sleep();
 
 		return 0;
@@ -308,7 +272,6 @@ static int pmc_probe(struct of_device *ofdev, const struct of_device_id *id)
 			struct ccsr_guts __iomem *guts;
 #endif
 
-			/* Map the global utilities registers. */
 			node = of_find_compatible_node(NULL, NULL,
 					"fsl,p1022-guts");
 			if (!node) {
@@ -325,7 +288,6 @@ static int pmc_probe(struct of_device *ofdev, const struct of_device_id *id)
 				goto end;
 			}
 
-			/* Enable Power Down for deep sleep mode */
 #ifdef MY_DEF_HERE
 			setbits32(&guts->dscr, CCSR_GUTS_DSCR_ENB_PWR_DWN|CCSR_GUTS_DSCR_TRI_MCS_B|CCSR_GUTS_DSCR_TRI_MCK|0x40000000);
 #else
@@ -333,7 +295,7 @@ static int pmc_probe(struct of_device *ofdev, const struct of_device_id *id)
 #endif
 
 #ifdef MY_DEF_HERE
-			/* Map the gpio controller space. */
+			 
 			gpio_node = of_find_compatible_node(NULL, NULL,
 					"fsl,mpc8572-gpio");
 			if (!gpio_node) {
@@ -374,4 +336,4 @@ static int __init pmc_init(void)
 	return of_register_platform_driver(&pmc_driver);
 }
 device_initcall(pmc_init);
-#endif /* MY_DEF_HERE */
+#endif  

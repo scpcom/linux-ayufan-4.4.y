@@ -1,21 +1,4 @@
-/*
- * Directory notifications for Linux.
- *
- * Copyright (C) 2000,2001,2002 Stephen Rothwell
- *
- * Copyright (C) 2009 Eric Paris <Red Hat Inc>
- * dnotify was largly rewritten to use the new fsnotify infrastructure
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- */
+ 
 #include <linux/fs.h>
 #include <linux/module.h>
 #include <linux/sched.h>
@@ -33,24 +16,11 @@ static struct kmem_cache *dnotify_mark_entry_cache __read_mostly;
 static struct fsnotify_group *dnotify_group __read_mostly;
 static DEFINE_MUTEX(dnotify_mark_mutex);
 
-/*
- * dnotify will attach one of these to each inode (i_fsnotify_mark_entries) which
- * is being watched by dnotify.  If multiple userspace applications are watching
- * the same directory with dnotify their information is chained in dn
- */
 struct dnotify_mark_entry {
 	struct fsnotify_mark_entry fsn_entry;
 	struct dnotify_struct *dn;
 };
 
-/*
- * When a process starts or stops watching an inode the set of events which
- * dnotify cares about for that inode may change.  This function runs the
- * list of everything receiving dnotify events about this directory and calculates
- * the set of all those events.  After it updates what dnotify is interested in
- * it calls the fsnotify function so it can update the set of all events relevant
- * to this inode.
- */
 static void dnotify_recalc_inode_mask(struct fsnotify_mark_entry *entry)
 {
 	__u32 new_mask, old_mask;
@@ -74,14 +44,6 @@ static void dnotify_recalc_inode_mask(struct fsnotify_mark_entry *entry)
 		fsnotify_recalc_inode_mask(entry->inode);
 }
 
-/*
- * Mains fsnotify call where events are delivered to dnotify.
- * Find the dnotify mark on the relevant inode, run the list of dnotify structs
- * on that mark and determine which of them has expressed interest in receiving
- * events of this type.  When found send the correct process and signal and
- * destroy the dnotify struct if it was not registered to receive multiple
- * events.
- */
 static int dnotify_handle_event(struct fsnotify_group *group,
 				struct fsnotify_event *event)
 {
@@ -99,7 +61,6 @@ static int dnotify_handle_event(struct fsnotify_group *group,
 	entry = fsnotify_find_mark_entry(group, to_tell);
 	spin_unlock(&to_tell->i_lock);
 
-	/* unlikely since we alreay passed dnotify_should_send_event() */
 	if (unlikely(!entry))
 		return 0;
 	dnentry = container_of(entry, struct dnotify_mark_entry, fsn_entry);
@@ -128,21 +89,12 @@ static int dnotify_handle_event(struct fsnotify_group *group,
 	return 0;
 }
 
-/*
- * Given an inode and mask determine if dnotify would be interested in sending
- * userspace notification for that pair.
- */
 static bool dnotify_should_send_event(struct fsnotify_group *group,
 				      struct inode *inode, __u32 mask)
 {
 	struct fsnotify_mark_entry *entry;
 	bool send;
 
-	/* !dir_notify_enable should never get here, don't waste time checking
-	if (!dir_notify_enable)
-		return 0; */
-
-	/* not a dir, dnotify doesn't care */
 	if (!S_ISDIR(inode->i_mode))
 		return false;
 
@@ -150,14 +102,13 @@ static bool dnotify_should_send_event(struct fsnotify_group *group,
 	entry = fsnotify_find_mark_entry(group, inode);
 	spin_unlock(&inode->i_lock);
 
-	/* no mark means no dnotify watch */
 	if (!entry)
 		return false;
 
 	mask = (mask & ~FS_EVENT_ON_CHILD);
 	send = (mask & entry->mask);
 
-	fsnotify_put_mark(entry); /* matches fsnotify_find_mark_entry */
+	fsnotify_put_mark(entry);  
 
 	return send;
 }
@@ -181,13 +132,6 @@ static struct fsnotify_ops dnotify_fsnotify_ops = {
 	.free_event_priv = NULL,
 };
 
-/*
- * Called every time a file is closed.  Looks first for a dnotify mark on the
- * inode.  If one is found run all of the ->dn entries attached to that
- * mark for one relevant to this process closing the file and remove that
- * dnotify_struct.  If that was the last dnotify_struct also remove the
- * fsnotify_mark_entry.
- */
 void dnotify_flush(struct file *filp, fl_owner_t id)
 {
 	struct fsnotify_mark_entry *entry;
@@ -231,7 +175,6 @@ void dnotify_flush(struct file *filp, fl_owner_t id)
 
 	spin_unlock(&entry->lock);
 
-	/* nothing else could have found us thanks to the dnotify_mark_mutex */
 	if (dnentry->dn == NULL)
 		fsnotify_destroy_mark_by_entry(entry);
 
@@ -242,7 +185,6 @@ void dnotify_flush(struct file *filp, fl_owner_t id)
 	fsnotify_put_mark(entry);
 }
 
-/* this conversion is done only at watch creation */
 static __u32 convert_arg(unsigned long arg)
 {
 	__u32 new_mask = FS_EVENT_ON_CHILD;
@@ -265,12 +207,6 @@ static __u32 convert_arg(unsigned long arg)
 	return new_mask;
 }
 
-/*
- * If multiple processes watch the same inode with dnotify there is only one
- * dnotify mark in inode->i_fsnotify_mark_entries but we chain a dnotify_struct
- * onto that mark.  This function either attaches the new dnotify_struct onto
- * that list, or it |= the mask onto an existing dnofiy_struct.
- */
 static int attach_dn(struct dnotify_struct *dn, struct dnotify_mark_entry *dnentry,
 		     fl_owner_t id, int fd, struct file *filp, __u32 mask)
 {
@@ -278,7 +214,7 @@ static int attach_dn(struct dnotify_struct *dn, struct dnotify_mark_entry *dnent
 
 	odn = dnentry->dn;
 	while (odn != NULL) {
-		/* adding more events to existing dnofiy_struct? */
+		 
 		if ((odn->dn_owner == id) && (odn->dn_filp == filp)) {
 			odn->dn_fd = fd;
 			odn->dn_mask |= mask;
@@ -297,11 +233,6 @@ static int attach_dn(struct dnotify_struct *dn, struct dnotify_mark_entry *dnent
 	return 0;
 }
 
-/*
- * When a process calls fcntl to attach a dnotify watch to a directory it ends
- * up here.  Allocate both a mark for fsnotify to add and a dnotify_struct to be
- * attached to the fsnotify_mark.
- */
 int fcntl_dirnotify(int fd, struct file *filp, unsigned long arg)
 {
 	struct dnotify_mark_entry *new_dnentry, *dnentry;
@@ -313,7 +244,6 @@ int fcntl_dirnotify(int fd, struct file *filp, unsigned long arg)
 	int destroy = 0, error = 0;
 	__u32 mask;
 
-	/* we use these to tell if we need to kfree */
 	new_entry = NULL;
 	dn = NULL;
 
@@ -322,47 +252,39 @@ int fcntl_dirnotify(int fd, struct file *filp, unsigned long arg)
 		goto out_err;
 	}
 
-	/* a 0 mask means we are explicitly removing the watch */
 	if ((arg & ~DN_MULTISHOT) == 0) {
 		dnotify_flush(filp, id);
 		error = 0;
 		goto out_err;
 	}
 
-	/* dnotify only works on directories */
 	inode = filp->f_path.dentry->d_inode;
 	if (!S_ISDIR(inode->i_mode)) {
 		error = -ENOTDIR;
 		goto out_err;
 	}
 
-	/* expect most fcntl to add new rather than augment old */
 	dn = kmem_cache_alloc(dnotify_struct_cache, GFP_KERNEL);
 	if (!dn) {
 		error = -ENOMEM;
 		goto out_err;
 	}
 
-	/* new fsnotify mark, we expect most fcntl calls to add a new mark */
 	new_dnentry = kmem_cache_alloc(dnotify_mark_entry_cache, GFP_KERNEL);
 	if (!new_dnentry) {
 		error = -ENOMEM;
 		goto out_err;
 	}
 
-	/* convert the userspace DN_* "arg" to the internal FS_* defines in fsnotify */
 	mask = convert_arg(arg);
 
-	/* set up the new_entry and new_dnentry */
 	new_entry = &new_dnentry->fsn_entry;
 	fsnotify_init_mark(new_entry, dnotify_free_mark);
 	new_entry->mask = mask;
 	new_dnentry->dn = NULL;
 
-	/* this is needed to prevent the fcntl/close race described below */
 	mutex_lock(&dnotify_mark_mutex);
 
-	/* add the new_entry or find an old one. */
 	spin_lock(&inode->i_lock);
 	entry = fsnotify_find_mark_entry(dnotify_group, inode);
 	spin_unlock(&inode->i_lock);
@@ -374,7 +296,7 @@ int fcntl_dirnotify(int fd, struct file *filp, unsigned long arg)
 		spin_lock(&new_entry->lock);
 		entry = new_entry;
 		dnentry = new_dnentry;
-		/* we used new_entry, so don't free it */
+		 
 		new_entry = NULL;
 	}
 
@@ -382,18 +304,8 @@ int fcntl_dirnotify(int fd, struct file *filp, unsigned long arg)
 	f = fcheck(fd);
 	rcu_read_unlock();
 
-	/* if (f != filp) means that we lost a race and another task/thread
-	 * actually closed the fd we are still playing with before we grabbed
-	 * the dnotify_mark_mutex and entry->lock.  Since closing the fd is the
-	 * only time we clean up the mark entries we need to get our mark off
-	 * the list. */
 	if (f != filp) {
-		/* if we added ourselves, shoot ourselves, it's possible that
-		 * the flush actually did shoot this entry.  That's fine too
-		 * since multiple calls to destroy_mark is perfectly safe, if
-		 * we found a dnentry already attached to the inode, just sod
-		 * off silently as the flush at close time dealt with it.
-		 */
+		 
 		if (dnentry == new_dnentry)
 			destroy = 1;
 		goto out;
@@ -401,18 +313,17 @@ int fcntl_dirnotify(int fd, struct file *filp, unsigned long arg)
 
 	error = __f_setown(filp, task_pid(current), PIDTYPE_PID, 0);
 	if (error) {
-		/* if we added, we must shoot */
+		 
 		if (dnentry == new_dnentry)
 			destroy = 1;
 		goto out;
 	}
 
 	error = attach_dn(dn, dnentry, id, fd, filp, mask);
-	/* !error means that we attached the dn to the dnentry, so don't free it */
+	 
 	if (!error)
 		dn = NULL;
-	/* -EEXIST means that we didn't add this new dn and used an old one.
-	 * that isn't an error (and the unused dn should be freed) */
+	 
 	else if (error == -EEXIST)
 		error = 0;
 

@@ -1,9 +1,8 @@
-// Copyright (c) 2000-2009 Synology Inc. All rights reserved.
-
+ 
 #include <linux/syno.h>
 #include <linux/module.h>
-#include <linux/kernel.h> /* printk() */
-#include <linux/errno.h>  /* error codes */
+#include <linux/kernel.h>  
+#include <linux/errno.h>   
 #include <linux/delay.h>
 #include <linux/synobios.h>
 #include <linux/fs.h>
@@ -31,9 +30,9 @@ int SetFanStatus(FAN_STATUS status, FAN_SPEED speed)
 	}
 
 	if( FAN_SPEED_PWM_FORMAT_SHIFT <= (int)speed ) {
-		/* PWM format is only for bandon and QC test */
+		 
 		iFanDuty = FAN_SPEED_SHIFT_DUTY_GET((int)speed);
-		/* set fan speed hz */
+		 
 		if(0 < FAN_SPEED_SHIFT_HZ_GET((int)speed)) {
 			snprintf(szUartCmd, sizeof(szUartCmd), "%s%02d", SZ_UART_FAN_FREQUENCY, FAN_SPEED_SHIFT_HZ_GET((int)speed));
 			if( 0 > SetUart(szUartCmd) ) {
@@ -47,7 +46,6 @@ int SetFanStatus(FAN_STATUS status, FAN_SPEED speed)
 		}
 	}
 
-	/* set fan speed duty cycle  */
 	snprintf(szUartCmd, sizeof(szUartCmd), "%s%02d", SZ_UART_FAN_DUTY_CYCLE, iFanDuty);
 	if( 0 > SetUart(szUartCmd) ) {
 		goto END;
@@ -70,9 +68,9 @@ int SetCpuFanStatus(FAN_STATUS status, FAN_SPEED speed)
 	}
 
 	if( FAN_SPEED_PWM_FORMAT_SHIFT <= (int)speed ) {
-		/* PWM format is only for bandon and QC test */
+		 
 		iFanDuty = FAN_SPEED_SHIFT_DUTY_GET((int)speed);
-		/* set fan speed hz */
+		 
 		if(0 < FAN_SPEED_SHIFT_HZ_GET((int)speed)) {
 			snprintf(szUartCmd, sizeof(szUartCmd), "%s%02d", SZ_UART_CPUFAN_FREQUENCY, FAN_SPEED_SHIFT_HZ_GET((int)speed));
 			if( 0 > SetUart(szUartCmd) ) {
@@ -230,10 +228,7 @@ int SetDiskLedStatus(int disknum, SYNO_DISK_LED status)
 		Pin2.pin = SYNO_GPP_HDD5_LED_1;
 		break;
 	case 7:
-		/* The eSata disk is /dev/sdg on DS710+,
-		 * so it is the 7th disk on this model.
-		 * ( 'g' - 'a' + 1 = 7 )
-		 */
+		 
 		if (model_ops && model_ops->x86_set_esata_led_status) {
 			model_ops->x86_set_esata_led_status(status);
 		}
@@ -242,7 +237,7 @@ int SetDiskLedStatus(int disknum, SYNO_DISK_LED status)
 	case 8:
 	case 9:
 	case 10:
-		//for esata
+		 
 		err = 0;
 		goto END;
 	default:

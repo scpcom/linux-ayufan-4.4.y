@@ -1,29 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  Copyright (C) 1995  Linus Torvalds
- *
- *  Support of BIGMEM added by Gerhard Wichert, Siemens AG, July 1999
- *
- *  Memory region support
- *	David Parsons <orc@pell.chi.il.us>, July-August 1999
- *
- *  Added E820 sanitization routine (removes overlapping memory regions);
- *  Brian Moyle <bmoyle@mvista.com>, February 2001
- *
- * Moved CPU detection code to cpu/${cpu}.c
- *    Patrick Mochel <mochel@osdl.org>, March 2002
- *
- *  Provisions for empty E820 memory regions (reported by certain BIOSes).
- *  Alex Achenbach <xela@slit.de>, December 2002.
- *
- */
-
-/*
- * This file handles the architecture-dependent parts of initialization
- */
-
+ 
 #include <linux/sched.h>
 #include <linux/mm.h>
 #include <linux/mmzone.h>
@@ -168,11 +146,6 @@ extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
 
-/*
- * end_pfn only includes RAM, while max_pfn_mapped includes all e820 entries.
- * The direct mapping extends to max_pfn_mapped, so that we can directly access
- * apertures, ACPI and other tables without having to play with fixmaps.
- */
 unsigned long max_low_pfn_mapped;
 unsigned long max_pfn_mapped;
 
@@ -201,9 +174,6 @@ struct boot_params __initdata boot_params;
 struct boot_params boot_params;
 #endif
 
-/*
- * Machine setup..
- */
 static struct resource data_resource = {
 	.name	= "Kernel data",
 	.start	= 0,
@@ -226,9 +196,9 @@ static struct resource bss_resource = {
 };
 
 #ifdef CONFIG_X86_32
-/* cpu data as detected by the assembly code in head.S */
+ 
 struct cpuinfo_x86 new_cpu_data __cpuinitdata = {0, 0, 0, 0, -1, 1, 0, 0, -1};
-/* common cpu data for all cpus */
+ 
 struct cpuinfo_x86 boot_cpu_data __read_mostly = {0, 0, 0, 0, -1, 1, 0, 0, -1};
 EXPORT_SYMBOL(boot_cpu_data);
 static void set_mca_bus(int x)
@@ -240,7 +210,6 @@ static void set_mca_bus(int x)
 
 unsigned int def_to_bigsmp;
 
-/* for MCA, but anyone else can use it if they want */
 unsigned int machine_id;
 unsigned int machine_submodel_id;
 unsigned int BIOS_revision;
@@ -269,12 +238,8 @@ unsigned long mmu_cr4_features;
 unsigned long mmu_cr4_features = X86_CR4_PAE;
 #endif
 
-/* Boot loader ID and version as integers, for the benefit of proc_dointvec */
 int bootloader_type, bootloader_version;
 
-/*
- * Setup options
- */
 struct screen_info screen_info;
 EXPORT_SYMBOL(screen_info);
 struct edid_info edid_info;
@@ -298,11 +263,7 @@ struct edd edd;
 #ifdef CONFIG_EDD_MODULE
 EXPORT_SYMBOL(edd);
 #endif
-/**
- * copy_edd() - Copy the BIOS EDD information
- *              from boot_params into a safe place.
- *
- */
+ 
 static inline void copy_edd(void)
 {
      memcpy(edd.mbr_signature, boot_params.edd_mbr_sig_buffer,
@@ -355,8 +316,6 @@ static void __init reserve_brk(void)
 	if (_brk_end > _brk_start)
 		reserve_early(__pa(_brk_start), __pa(_brk_end), "BRK");
 
-	/* Mark brk area as locked down and no longer taking any
-	   new allocations */
 	_brk_start = 0;
 }
 
@@ -373,7 +332,6 @@ static void __init relocate_initrd(void)
 	unsigned long slop, clen, mapaddr;
 	char *p, *q;
 
-	/* We need to move the initrd down into lowmem */
 	ramdisk_here = find_e820_area(0, end_of_lowmem, ramdisk_size,
 					 PAGE_SIZE);
 
@@ -381,8 +339,6 @@ static void __init relocate_initrd(void)
 		panic("Cannot find place for new RAMDISK of size %lld\n",
 			 ramdisk_size);
 
-	/* Note: this includes all the lowmem currently occupied by
-	   the initrd, we rely on that fact to keep the data intact. */
 	reserve_early(ramdisk_here, ramdisk_here + ramdisk_size,
 			 "NEW RAMDISK");
 	initrd_start = ramdisk_here + PAGE_OFFSET;
@@ -392,7 +348,6 @@ static void __init relocate_initrd(void)
 
 	q = (char *)initrd_start;
 
-	/* Copy any lowmem portion of the initrd */
 	if (ramdisk_image < end_of_lowmem) {
 		clen = end_of_lowmem - ramdisk_image;
 		p = (char *)__va(ramdisk_image);
@@ -402,7 +357,6 @@ static void __init relocate_initrd(void)
 		ramdisk_size  -= clen;
 	}
 
-	/* Copy the highmem portion of the initrd */
 	while (ramdisk_size) {
 		slop = ramdisk_image & ~PAGE_MASK;
 		clen = ramdisk_size;
@@ -416,7 +370,7 @@ static void __init relocate_initrd(void)
 		ramdisk_image += clen;
 		ramdisk_size  -= clen;
 	}
-	/* high pages is not converted by early_res_to_bootmem */
+	 
 	ramdisk_image = boot_params.hdr.ramdisk_image;
 	ramdisk_size  = boot_params.hdr.ramdisk_size;
 	printk(KERN_INFO "Move RAMDISK from %016llx - %016llx to"
@@ -434,7 +388,7 @@ static void __init reserve_initrd(void)
 
 	if (!boot_params.hdr.type_of_loader ||
 	    !ramdisk_image || !ramdisk_size)
-		return;		/* No initrd provided by bootloader */
+		return;		 
 
 	initrd_start = 0;
 
@@ -449,11 +403,7 @@ static void __init reserve_initrd(void)
 			ramdisk_end);
 
 	if (ramdisk_end <= end_of_lowmem) {
-		/* All in lowmem, easy case */
-		/*
-		 * don't need to reserve again, already reserved early
-		 * in i386_start_kernel
-		 */
+		 
 		initrd_start = ramdisk_image + PAGE_OFFSET;
 		initrd_end = initrd_start + ramdisk_size;
 		return;
@@ -467,7 +417,7 @@ static void __init reserve_initrd(void)
 static void __init reserve_initrd(void)
 {
 }
-#endif /* CONFIG_BLK_DEV_INITRD */
+#endif  
 
 static void __init parse_setup_data(void)
 {
@@ -728,24 +678,10 @@ static int __init early_netif_seq(char *p)
 	int len;
 	int netDevCount;
 
-	// no net device switch required
 	if ((NULL == p) || (0 == (len = strlen(p)))) {
 		return 1;
 	}
 
-	/**
-	 *	We change the way that we represent the net device name is due to a truth that
-	 *	when a PCIE extension card is plugged in, the pcie name will change
-	 *	So we give up the pci-name as our matching condition, we use NIC up sequence instead.
-	 *	Because the NIC layout is fixed on our board, we the NIC up sequence won't change.
-	 *	And according to this sequence, we assign the device name to NIC
-	 *
-	 *	Following codes are designed to compatible with bromolow/x64 which has already been produced.
-	 *	Based on the truth that our bromolow/x64 has at least 2 internal lan so far (2011/5/24)
-	 *	And 2 internal lan needs netif_seq whose length is 12
-	 *	So we judge that if netif_seq is less than 12, then it should be new version of netif_seq
-	 *	2411+ has 2 internal lans now so we use 12 as our boundary condition
-	 */
 	if (len <= SYNO_MAX_SWITCHABLE_NET_DEVICE) {
 		netDevCount = len;
 		for(gSwitchDev = 0 ; gSwitchDev < netDevCount && gSwitchDev < SYNO_MAX_SWITCHABLE_NET_DEVICE ; gSwitchDev++) {
@@ -760,7 +696,7 @@ static int __init early_netif_seq(char *p)
 	}
 
 	for(gSwitchDev = 0 ; gSwitchDev < netDevCount && gSwitchDev < SYNO_MAX_SWITCHABLE_NET_DEVICE ; gSwitchDev++) {
-		// the format of netif_seq string is device seq (1 character) + device pci name (last 5 characters only)
+		 
 		memcpy(gDevPCIName[gSwitchDev], p, SYNO_NET_DEVICE_ENCODING_LENGTH);
 		p += SYNO_NET_DEVICE_ENCODING_LENGTH;
 	}
@@ -788,22 +724,12 @@ static int __init early_custom_sn(char *p)
 __setup("custom_sn=", early_custom_sn);
 #endif
 
-/*
- * --------- Crashkernel reservation ------------------------------
- */
-
 #ifdef CONFIG_KEXEC
 
-/**
- * Reserve @size bytes of crashkernel memory at any suitable offset.
- *
- * @size: Size of the crashkernel memory to reserve.
- * Returns the base address on success, and -1ULL on failure.
- */
 static
 unsigned long long __init find_and_reserve_crashkernel(unsigned long long size)
 {
-	const unsigned long long alignment = 16<<20; 	/* 16M */
+	const unsigned long long alignment = 16<<20; 	 
 	unsigned long long start = 0LL;
 
 	while (1) {
@@ -813,7 +739,6 @@ unsigned long long __init find_and_reserve_crashkernel(unsigned long long size)
 		if (start == -1ULL)
 			return start;
 
-		/* try to reserve it */
 		ret = reserve_bootmem_generic(start, size, BOOTMEM_EXCLUSIVE);
 		if (ret >= 0)
 			return start;
@@ -847,7 +772,6 @@ static void __init reserve_crashkernel(void)
 	if (ret != 0 || crash_size <= 0)
 		return;
 
-	/* 0 means: find the address automatically */
 	if (crash_base <= 0) {
 		crash_base = find_and_reserve_crashkernel(crash_size);
 		if (crash_base == -1ULL) {
@@ -908,23 +832,13 @@ void __init reserve_standard_io_resources(void)
 {
 	int i;
 
-	/* request I/O space for devices used on all i[345]86 PCs */
 	for (i = 0; i < ARRAY_SIZE(standard_io_resources); i++)
 		request_resource(&ioport_resource, &standard_io_resources[i]);
 
 }
 
-/*
- * Note: elfcorehdr_addr is not just limited to vmcore. It is also used by
- * is_kdump_kernel() to determine if we are booting after a panic. Hence
- * ifdef it under CONFIG_CRASH_DUMP and not CONFIG_PROC_VMCORE.
- */
-
 #ifdef CONFIG_CRASH_DUMP
-/* elfcorehdr= specifies the location of elf core header
- * stored by the crashed kernel. This option will be passed
- * by kexec loader to the capture kernel.
- */
+ 
 static int __init setup_elfcorehdr(char *arg)
 {
 	char *end;
@@ -950,7 +864,6 @@ static int __init dmi_low_memory_corruption(const struct dmi_system_id *d)
 }
 #endif
 
-/* List of systems that have known low memory corruption BIOS problems */
 static struct dmi_system_id __initdata bad_bios_dmi_table[] = {
 #ifdef CONFIG_X86_RESERVE_LOW_64K
 	{
@@ -974,13 +887,7 @@ static struct dmi_system_id __initdata bad_bios_dmi_table[] = {
 			DMI_MATCH(DMI_BIOS_VENDOR, "Phoenix/MSC"),
 		},
 	},
-	/*
-	 * AMI BIOS with low memory corruption was found on Intel DG45ID and
-	 * DG45FC boards.
-	 * It has a different DMI_BIOS_VENDOR = "Intel Corp.", for now we will
-	 * match only DMI_BOARD_NAME and see if there is more bad products
-	 * with this vendor.
-	 */
+	 
 	{
 		.callback = dmi_low_memory_corruption,
 		.ident = "AMI BIOS",
@@ -999,19 +906,6 @@ static struct dmi_system_id __initdata bad_bios_dmi_table[] = {
 	{}
 };
 
-/*
- * Determine if we were loaded by an EFI loader.  If so, then we have also been
- * passed the efi memmap, systab, etc., so we should use these data structures
- * for initialization.  Note, the efi init code path is determined by the
- * global efi_enabled. This allows the same kernel image to be used on existing
- * systems (with a traditional BIOS) as well as on EFI systems.
- */
-/*
- * setup_arch - architecture-specific boot-time initializations
- *
- * Note: On x86_64, fixmaps are ready for use even before this is called.
- */
-
 void __init setup_arch(char **cmdline_p)
 {
 #ifdef CONFIG_X86_32
@@ -1021,7 +915,6 @@ void __init setup_arch(char **cmdline_p)
 	printk(KERN_INFO "Command line: %s\n", boot_command_line);
 #endif
 
-	/* VMI may relocate the fixmap; do this before touching ioremap area */
 	vmi_init();
 
 	early_cpu_init();
@@ -1071,7 +964,7 @@ void __init setup_arch(char **cmdline_p)
 
 	setup_memory_map();
 	parse_setup_data();
-	/* update the e820_saved too */
+	 
 	e820_reserve_setup_data();
 
 	copy_edd();
@@ -1095,7 +988,7 @@ void __init setup_arch(char **cmdline_p)
 	strlcpy(boot_command_line, builtin_cmdline, COMMAND_LINE_SIZE);
 #else
 	if (builtin_cmdline[0]) {
-		/* append boot loader cmdline to builtin */
+		 
 		strlcat(builtin_cmdline, " ", COMMAND_LINE_SIZE);
 		strlcat(builtin_cmdline, boot_command_line, COMMAND_LINE_SIZE);
 		strlcpy(boot_command_line, builtin_cmdline, COMMAND_LINE_SIZE);
@@ -1107,12 +1000,7 @@ void __init setup_arch(char **cmdline_p)
 	*cmdline_p = command_line;
 
 #ifdef CONFIG_X86_64
-	/*
-	 * Must call this twice: Once just to detect whether hardware doesn't
-	 * support NX (so that the early EHCI debug console setup can safely
-	 * call set_fixmap(), and then again after parsing early parameters to
-	 * honor the respective command line option.
-	 */
+	 
 	check_efer();
 #endif
 
@@ -1122,10 +1010,8 @@ void __init setup_arch(char **cmdline_p)
 	check_efer();
 #endif
 
-	/* Must be before kernel pagetables are setup */
 	vmi_activate();
 
-	/* after early param, so could get panic from serial */
 	reserve_early_setup_data();
 
 	if (acpi_mps_check()) {
@@ -1149,15 +1035,10 @@ void __init setup_arch(char **cmdline_p)
 
 	dmi_check_system(bad_bios_dmi_table);
 
-	/*
-	 * VMware detection requires dmi to be available, so this
-	 * needs to be done after dmi_scan_machine, for the BP.
-	 */
 	init_hypervisor_platform();
 
 	x86_init.resources.probe_roms();
 
-	/* after parse_early_param, so could debug it */
 	insert_resource(&iomem_resource, &code_resource);
 	insert_resource(&iomem_resource, &data_resource);
 	insert_resource(&iomem_resource, &bss_resource);
@@ -1174,29 +1055,22 @@ void __init setup_arch(char **cmdline_p)
 	early_gart_iommu_check();
 #endif
 
-	/*
-	 * partially used pages are not usable - thus
-	 * we are rounding upwards:
-	 */
 	max_pfn = e820_end_of_ram_pfn();
 
-	/* preallocate 4k for mptable mpc */
 	early_reserve_e820_mpc_new();
-	/* update e820 for memory not covered by WB MTRRs */
+	 
 	mtrr_bp_init();
 	if (mtrr_trim_uncached_memory(max_pfn))
 		max_pfn = e820_end_of_ram_pfn();
 
 #ifdef CONFIG_X86_32
-	/* max_low_pfn get updated here */
+	 
 	find_low_pfn_range();
 #else
 	num_physpages = max_pfn;
 
 	check_x2apic();
 
-	/* How many end-of-memory variables you have, grandma! */
-	/* need this before calling reserve_initrd */
 	if (max_pfn > (1UL<<(32 - PAGE_SHIFT)))
 		max_low_pfn = e820_end_of_low_ram_pfn();
 	else
@@ -1217,7 +1091,6 @@ void __init setup_arch(char **cmdline_p)
 
 	init_gbpages();
 
-	/* max_pfn_mapped is updated here */
 	max_low_pfn_mapped = init_memory_mapping(0, max_low_pfn<<PAGE_SHIFT);
 	max_pfn_mapped = max_low_pfn_mapped;
 
@@ -1225,14 +1098,10 @@ void __init setup_arch(char **cmdline_p)
 	if (max_pfn > max_low_pfn) {
 		max_pfn_mapped = init_memory_mapping(1UL<<32,
 						     max_pfn<<PAGE_SHIFT);
-		/* can we preseve max_low_pfn ?*/
+		 
 		max_low_pfn = max_pfn;
 	}
 #endif
-
-	/*
-	 * NOTE: On x86-32, only from this point on, fixmaps are ready for use.
-	 */
 
 #ifdef CONFIG_PROVIDE_OHCI1394_DMA_INIT
 	if (init_ohci1394_dma_early)
@@ -1245,41 +1114,28 @@ void __init setup_arch(char **cmdline_p)
 
 	io_delay_init();
 
-	/*
-	 * Parse the ACPI tables for possible boot-time SMP configuration.
-	 */
 	acpi_boot_table_init();
 
 	early_acpi_boot_init();
 
 #ifdef CONFIG_ACPI_NUMA
-	/*
-	 * Parse SRAT to discover nodes.
-	 */
+	 
 	acpi_numa_init();
 #endif
 
 	initmem_init(0, max_pfn);
 
 #ifdef CONFIG_ACPI_SLEEP
-	/*
-	 * Reserve low memory region for sleep support.
-	 */
+	 
 	acpi_reserve_bootmem();
 #endif
-	/*
-	 * Find and reserve possible boot-time SMP configuration:
-	 */
+	 
 	find_smp_config();
 
 	reserve_crashkernel();
 
 #ifdef CONFIG_X86_64
-	/*
-	 * dma32_reserve_bootmem() allocates bootmem which may conflict
-	 * with the crashkernel command line, so do that after
-	 * reserve_crashkernel()
-	 */
+	 
 	dma32_reserve_bootmem();
 #endif
 
@@ -1303,16 +1159,10 @@ void __init setup_arch(char **cmdline_p)
 
 	early_quirks();
 
-	/*
-	 * Read APIC and some other early information from ACPI tables.
-	 */
 	acpi_boot_init();
 
 	sfi_init();
 
-	/*
-	 * get boot-time SMP configuration:
-	 */
 	if (smp_found_config)
 		get_smp_config();
 
@@ -1325,7 +1175,6 @@ void __init setup_arch(char **cmdline_p)
 	init_apic_mappings();
 	ioapic_init_mappings();
 
-	/* need to wait for io_apic is mapped */
 	probe_nr_irqs_gsi();
 
 	kvm_guest_init();
@@ -1365,4 +1214,4 @@ void __init i386_reserve_resources(void)
 	reserve_standard_io_resources();
 }
 
-#endif /* CONFIG_X86_32 */
+#endif  

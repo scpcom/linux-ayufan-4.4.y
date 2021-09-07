@@ -1,33 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  iscsi_target_tmr.c
- *
- * This file contains the iSCSI Target specific Task Management functions.
- *
- * Copyright (c) 2002, 2003, 2004, 2005 PyX Technologies, Inc.
- * Copyright (c) 2005, 2006, 2007 SBE, Inc.
- * Copyright (c) 2007 Rising Tide Software, Inc.
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #define ISCSI_TARGET_TMR_C
 
 #include <linux/string.h>
@@ -56,10 +30,6 @@
 
 #undef ISCSI_TARGET_TMR_C
 
-/*	iscsi_tmr_abort_task():
- *
- *	Called from iscsi_handle_task_mgt_cmd().
- */
 u8 iscsi_tmr_abort_task(
 	iscsi_cmd_t *cmd,
 	unsigned char *buf)
@@ -106,10 +76,6 @@ u8 iscsi_tmr_abort_task(
 	return FUNCTION_COMPLETE;
 }
 
-/*	iscsi_tmr_task_warm_reset():
- *
- *	Called from iscsi_handle_task_mgt_cmd().
- */
 int iscsi_tmr_task_warm_reset(
 	iscsi_conn_t *conn,
 	iscsi_tmr_req_t *tmr_req,
@@ -127,16 +93,10 @@ int iscsi_tmr_task_warm_reset(
 			SESS_NODE_ACL(sess)->initiatorname);
 		 return -1;
 	}
-	/*
-	 * Do the real work in transport_generic_do_tmr().
-	 */
+	 
 	return 0;
 }
 
-/*	iscsi_tmr_task_cold_reset():
- *
- *	Called from iscsi_handle_task_mgt_cmd().
- */
 int iscsi_tmr_task_cold_reset(
 	iscsi_conn_t *conn,
 	iscsi_tmr_req_t *tmr_req,
@@ -151,16 +111,10 @@ int iscsi_tmr_task_cold_reset(
 			SESS_NODE_ACL(sess)->initiatorname);
 		return -1;
 	}
-	/*
-	 * Do the real work in transport_generic_do_tmr().
-	 */
+	 
 	return 0;
 }
 
-/*	iscsi_tmr_task_reassign():
- *
- *	Called from iscsi_handle_task_mgt_cmd().
- */
 u8 iscsi_tmr_task_reassign(
 	iscsi_cmd_t *cmd,
 	unsigned char *buf)
@@ -203,10 +157,7 @@ u8 iscsi_tmr_task_reassign(
 		return TASK_DOES_NOT_EXIST;
 #endif
 	}
-	/*
-	 * Temporary check to prevent connection recovery for
-	 * connections with a differing MaxRecvDataSegmentLength.
-	 */
+	 
 	if (cr->maxrecvdatasegmentlength !=
 	    CONN_OPS(conn)->MaxRecvDataSegmentLength) {
 		printk(KERN_ERR "Unable to perform connection recovery for"
@@ -226,18 +177,9 @@ u8 iscsi_tmr_task_reassign(
 	tmr_req->exp_data_sn		= hdr->exp_data_sn;
 	tmr_req->conn_recovery		= cr;
 
-	/*
-	 * Command can now be reassigned to a new connection.
-	 * The task management response must be sent before the
-	 * reassignment actually happens.  See iscsi_tmr_post_handler().
-	 */
 	return FUNCTION_COMPLETE;
 }
 
-/*      iscsi_task_reassign_remove_cmd():
- *
- *
- */
 static void iscsi_task_reassign_remove_cmd(
 	iscsi_cmd_t *cmd,
 	iscsi_conn_recovery_t *cr,
@@ -257,10 +199,6 @@ static void iscsi_task_reassign_remove_cmd(
 	return;
 }
 
-/*	iscsi_task_reassign_complete_nop_out():
- *
- *
- */
 static int iscsi_task_reassign_complete_nop_out(
 	iscsi_tmr_req_t *tmr_req,
 	iscsi_conn_t *conn)
@@ -281,11 +219,6 @@ static int iscsi_task_reassign_complete_nop_out(
 	}
 	cr = cmd->cr;
 
-	/*
-	 * Reset the StatSN so a new one for this commands new connection
-	 * will be assigned.
-	 * Reset the ExpStatSN as well so we may receive Status SNACKs.
-	 */
 	cmd->stat_sn = cmd->exp_stat_sn = 0;
 
 	iscsi_task_reassign_remove_cmd(cmd, cr, SESS(conn));
@@ -297,10 +230,6 @@ static int iscsi_task_reassign_complete_nop_out(
 	return 0;
 }
 
-/*	iscsi_task_reassign_complete_write():
- *
- *
- */
 static int iscsi_task_reassign_complete_write(
 	iscsi_cmd_t *cmd,
 	iscsi_tmr_req_t *tmr_req)
@@ -309,10 +238,7 @@ static int iscsi_task_reassign_complete_write(
 	u32 length = 0, offset = 0;
 	iscsi_conn_t *conn = CONN(cmd);
 	se_cmd_t *se_cmd = SE_CMD(cmd);
-	/*
-	 * The Initiator must not send a R2T SNACK with a Begrun less than
-	 * the TMR TASK_REASSIGN's ExpDataSN.
-	 */
+	 
 	if (!tmr_req->exp_data_sn) {
 		cmd->cmd_flags &= ~ICF_GOT_DATACK_SNACK;
 		cmd->acked_data_sn = 0;
@@ -321,11 +247,6 @@ static int iscsi_task_reassign_complete_write(
 		cmd->acked_data_sn = (tmr_req->exp_data_sn - 1);
 	}
 
-	/*
-	 * The TMR TASK_REASSIGN's ExpDataSN contains the next R2TSN the
-	 * Initiator is expecting.  The Target controls all WRITE operations
-	 * so if we have received all DataOUT we can safety ignore Initiator.
-	 */
 	if (cmd->cmd_flags & ICF_GOT_LAST_DATAOUT) {
 		if (!atomic_read(&cmd->transport_sent)) {
 			TRACE(TRACE_ERL2, "WRITE ITT: 0x%08x: t_state: %d"
@@ -339,10 +260,6 @@ static int iscsi_task_reassign_complete_write(
 		return 0;
 	}
 
-	/*
-	 * Special case to deal with DataSequenceInOrder=No and Non-Immeidate
-	 * Unsolicited DataOut.
-	 */
 	if (cmd->unsolicited_data) {
 		cmd->unsolicited_data = 0;
 
@@ -367,16 +284,9 @@ static int iscsi_task_reassign_complete_write(
 			return 0;
 	}
 
-	/*
-	 * iscsi_build_r2ts_for_cmd() can handle the rest from here.
-	 */
 	return iscsi_build_r2ts_for_cmd(cmd, conn, 2);
 }
 
-/*	iscsi_task_reassign_complete_read():
- *
- *
- */
 static int iscsi_task_reassign_complete_read(
 	iscsi_cmd_t *cmd,
 	iscsi_tmr_req_t *tmr_req)
@@ -385,10 +295,6 @@ static int iscsi_task_reassign_complete_read(
 	iscsi_datain_req_t *dr;
 	se_cmd_t *se_cmd = SE_CMD(cmd);
 
-	/*
-	 * The Initiator must not send a Data SNACK with a BegRun less than
-	 * the TMR TASK_REASSIGN's ExpDataSN.
-	 */
 	if (!tmr_req->exp_data_sn) {
 		cmd->cmd_flags &= ~ICF_GOT_DATACK_SNACK;
 		cmd->acked_data_sn = 0;
@@ -416,10 +322,6 @@ static int iscsi_task_reassign_complete_read(
 	if (!(dr))
 		return -1;
 
-	/*
-	 * The TMR TASK_REASSIGN's ExpDataSN contains the next DataSN the
-	 * Initiator is expecting.
-	 */
 	dr->data_sn = dr->begrun = tmr_req->exp_data_sn;
 	dr->runlength = 0;
 	dr->generate_recovery_values = 1;
@@ -432,10 +334,6 @@ static int iscsi_task_reassign_complete_read(
 	return 0;
 }
 
-/*	iscsi_task_reassign_complete_none():
- *
- *
- */
 static int iscsi_task_reassign_complete_none(
 	iscsi_cmd_t *cmd,
 	iscsi_tmr_req_t *tmr_req)
@@ -447,10 +345,6 @@ static int iscsi_task_reassign_complete_none(
 	return 0;
 }
 
-/*	iscsi_task_reassign_complete_scsi_cmnd():
- *
- *
- */
 static int iscsi_task_reassign_complete_scsi_cmnd(
 	iscsi_tmr_req_t *tmr_req,
 	iscsi_conn_t *conn)
@@ -471,11 +365,6 @@ static int iscsi_task_reassign_complete_scsi_cmnd(
 	}
 	cr = cmd->cr;
 
-	/*
-	 * Reset the StatSN so a new one for this commands new connection
-	 * will be assigned.
-	 * Reset the ExpStatSN as well so we may receive Status SNACKs.
-	 */
 	cmd->stat_sn = cmd->exp_stat_sn = 0;
 
 	iscsi_task_reassign_remove_cmd(cmd, cr, SESS(conn));
@@ -512,10 +401,6 @@ static int iscsi_task_reassign_complete_scsi_cmnd(
 	return 0;
 }
 
-/*	iscsi_task_reassign_complete():
- *
- *	Called from iscsi_tmr_post_handler().
- */
 static int iscsi_task_reassign_complete(
 	iscsi_tmr_req_t *tmr_req,
 	iscsi_conn_t *conn)
@@ -561,12 +446,6 @@ static int iscsi_task_reassign_complete(
 	return 0;
 }
 
-/*	iscsi_tmr_post_handler():
- *
- *	Handles special after-the-fact actions related to TMRs.
- *	Right now the only one that its really needed for is
- *	connection recovery releated TASK_REASSIGN.
- */
 extern int iscsi_tmr_post_handler(iscsi_cmd_t *cmd, iscsi_conn_t *conn)
 {
 	iscsi_tmr_req_t *tmr_req = cmd->tmr_req;
@@ -579,10 +458,6 @@ extern int iscsi_tmr_post_handler(iscsi_cmd_t *cmd, iscsi_conn_t *conn)
 	return 0;
 }
 
-/*	iscsi_task_reassign_prepare_read():
- *
- *	Nothing to do here, but leave it for good measure. :-)
- */
 int iscsi_task_reassign_prepare_read(
 	iscsi_tmr_req_t *tmr_req,
 	iscsi_conn_t *conn)
@@ -590,10 +465,6 @@ int iscsi_task_reassign_prepare_read(
 	return 0;
 }
 
-/*	iscsi_task_reassign_prepare_unsolicited_dataout():
- *
- *
- */
 static void iscsi_task_reassign_prepare_unsolicited_dataout(
 	iscsi_cmd_t *cmd,
 	iscsi_conn_t *conn)
@@ -664,10 +535,6 @@ static void iscsi_task_reassign_prepare_unsolicited_dataout(
 	return;
 }
 
-/*	iscsi_task_reassign_prepare_write():
- *
- *
- */
 int iscsi_task_reassign_prepare_write(
 	iscsi_tmr_req_t *tmr_req,
 	iscsi_conn_t *conn)
@@ -679,34 +546,12 @@ int iscsi_task_reassign_prepare_write(
 	iscsi_r2t_t *r2t = NULL, *r2t_tmp;
 	int first_incomplete_r2t = 1, i = 0;
 
-	/*
-	 * The command was in the process of receiving Unsolicited DataOUT when
-	 * the connection failed.
-	 */
 	if (cmd->unsolicited_data)
 		iscsi_task_reassign_prepare_unsolicited_dataout(cmd, conn);
 
-	/*
-	 * The Initiator is requesting R2Ts starting from zero,  skip
-	 * checking acknowledged R2Ts and start checking iscsi_r2t_ts
-	 * greater than zero.
-	 */
 	if (!tmr_req->exp_data_sn)
 		goto drop_unacknowledged_r2ts;
 
-	/*
-	 * We now check that the PDUs in DataOUT sequences below
-	 * the TMR TASK_REASSIGN ExpDataSN (R2TSN the Initiator is
-	 * expecting next) have all the DataOUT they require to complete
-	 * the DataOUT sequence.  First scan from R2TSN 0 to TMR
-	 * TASK_REASSIGN ExpDataSN-1.
-	 *
-	 * If we have not received all DataOUT in question,  we must
-	 * make sure to make the appropriate changes to values in
-	 * iscsi_cmd_t (and elsewhere depending on session parameters)
-	 * so iscsi_build_r2ts_for_cmd() in iscsi_task_reassign_complete_write()
-	 * will resend a new R2T for the DataOUT sequences in question.
-	 */
 	spin_lock_bh(&cmd->r2t_lock);
 	if (list_empty(&cmd->cmd_r2t_list)) {
 		spin_unlock_bh(&cmd->r2t_lock);
@@ -717,49 +562,13 @@ int iscsi_task_reassign_prepare_write(
 
 		if (r2t->r2t_sn >= tmr_req->exp_data_sn)
 			continue;
-		/*
-		 * Safely ignore Recovery R2Ts and R2Ts that have completed
-		 * DataOUT sequences.
-		 */
+		 
 		if (r2t->seq_complete)
 			continue;
 
 		if (r2t->recovery_r2t)
 			continue;
 
-		/*
-		 *                 DataSequenceInOrder=Yes:
-		 *
-		 * Taking into account the iSCSI implementation requirement of
-		 * MaxOutstandingR2T=1 while ErrorRecoveryLevel>0 and
-		 * DataSequenceInOrder=Yes, we must take into consideration
-		 * the following:
-		 *
-		 *                  DataSequenceInOrder=No:
-		 *
-		 * Taking into account that the Initiator controls the (possibly
-		 * random) PDU Order in (possibly random) Sequence Order of
-		 * DataOUT the target requests with R2Ts,  we must take into
-		 * consideration the following:
-		 *
-		 *      DataPDUInOrder=Yes for DataSequenceInOrder=[Yes,No]:
-		 *
-		 * While processing non-complete R2T DataOUT sequence requests
-		 * the Target will re-request only the total sequence length
-		 * minus current received offset.  This is because we must
-		 * assume the initiator will continue sending DataOUT from the
-		 * last PDU before the connection failed.
-		 *
-		 *      DataPDUInOrder=No for DataSequenceInOrder=[Yes,No]:
-		 *
-		 * While processing non-complete R2T DataOUT sequence requests
-		 * the Target will re-request the entire DataOUT sequence if
-		 * any single PDU is missing from the sequence.  This is because
-		 * we have no logical method to determine the next PDU offset,
-		 * and we must assume the Initiator will be sending any random
-		 * PDU offset in the current sequence after TASK_REASSIGN
-		 * has completed.
-		 */
 		if (SESS_OPS_C(conn)->DataSequenceInOrder) {
 			if (!first_incomplete_r2t) {
 				cmd->r2t_offset -= r2t->xfer_len;
@@ -830,16 +639,6 @@ next:
 	}
 	spin_unlock_bh(&cmd->r2t_lock);
 
-	/*
-	 * We now drop all unacknowledged R2Ts, ie: ExpDataSN from TMR
-	 * TASK_REASSIGN to the last R2T in the list..  We are also careful
-	 * to check that the Initiator is not requesting R2Ts for DataOUT
-	 * sequences it has already completed.
-	 *
-	 * Free each R2T in question and adjust values in iscsi_cmd_t
-	 * accordingly so iscsi_build_r2ts_for_cmd() do the rest of
-	 * the work after the TMR TASK_REASSIGN Response is sent.
-	 */
 drop_unacknowledged_r2ts:
 
 	cmd->cmd_flags &= ~ICF_SENT_LAST_R2T;
@@ -847,10 +646,7 @@ drop_unacknowledged_r2ts:
 
 	spin_lock_bh(&cmd->r2t_lock);
 	list_for_each_entry_safe(r2t, r2t_tmp, &cmd->cmd_r2t_list, r2t_list) {
-		/*
-		 * Skip up to the R2T Sequence number provided by the
-		 * iSCSI TASK_REASSIGN TMR
-		 */
+		 
 		if (r2t->r2t_sn < tmr_req->exp_data_sn)
 			continue;
 
@@ -870,22 +666,6 @@ drop_unacknowledged_r2ts:
 			continue;
 		}
 
-		/*		   DataSequenceInOrder=Yes:
-		 *
-		 * Taking into account the iSCSI implementation requirement of
-		 * MaxOutstandingR2T=1 while ErrorRecoveryLevel>0 and
-		 * DataSequenceInOrder=Yes, it's safe to subtract the R2Ts
-		 * entire transfer length from the commands R2T offset marker.
-		 *
-		 *		   DataSequenceInOrder=No:
-		 *
-		 * We subtract the difference from iscsi_seq_t between the
-		 * current offset and original offset from cmd->write_data_done
-		 * for account for DataOUT PDUs already received.  Then reset
-		 * the current offset to the original and zero out the current
-		 * burst length,  to make sure we re-request the entire DataOUT
-		 * sequence.
-		 */
 		if (SESS_OPS_C(conn)->DataSequenceInOrder)
 			cmd->r2t_offset -= r2t->xfer_len;
 		else
@@ -899,11 +679,6 @@ drop_unacknowledged_r2ts:
 	return 0;
 }
 
-/*	iscsi_check_task_reassign_expdatasn():
- *
- *	Performs sanity checks TMR TASK_REASSIGN's ExpDataSN for
- *	a given iscsi_cmd_t.
- */
 int iscsi_check_task_reassign_expdatasn(
 	iscsi_tmr_req_t *tmr_req,
 	iscsi_conn_t *conn)
@@ -930,13 +705,6 @@ int iscsi_check_task_reassign_expdatasn(
 		return 0;
 #endif
 
-	/*
-	 * For READs the TMR TASK_REASSIGNs ExpDataSN contains the next DataSN
-	 * of DataIN the Initiator is expecting.
-	 *
-	 * Also check that the Initiator is not re-requesting DataIN that has
-	 * already been acknowledged with a DataAck SNACK.
-	 */
 #ifdef MY_ABC_HERE
 	if (ref_cmd->data_direction == DMA_FROM_DEVICE) {
 #else
@@ -961,12 +729,6 @@ int iscsi_check_task_reassign_expdatasn(
 		return iscsi_task_reassign_prepare_read(tmr_req, conn);
 	}
 
-	/*
-	 * For WRITEs the TMR TASK_REASSIGNs ExpDataSN contains the next R2TSN
-	 * for R2Ts the Initiator is expecting.
-	 *
-	 * Do the magic in iscsi_task_reassign_prepare_write().
-	 */
 #ifdef MY_ABC_HERE
 	if (ref_cmd->data_direction == DMA_TO_DEVICE) {
 #else

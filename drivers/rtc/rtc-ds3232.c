@@ -2,25 +2,7 @@
 #define MY_ABC_HERE
 #endif
 #ifdef MY_DEF_HERE
-/*
- * RTC client/driver for the Maxim/Dallas DS3232 Real-Time Clock over I2C
- *
- * Based on DS1374 code by Scott Wood <scottwood@freescale.com> and
- * DS1742 code by Atsushi Nemoto <anemo@mba.ocn.ne.jp>
- *
- * Copyright (C) 2009 Freescale Semiconductor, Inc. All rights reserved.
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
-/*
- * It would be more efficient to use i2c msgs/i2c_transfer directly but, as
- * recommened in .../Documentation/i2c/writing-clients section
- * "Sending and receiving", using SMBus level communication is preferred.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
@@ -46,10 +28,6 @@ struct ds3232 {
 	struct rtc_device *rtc;
 	struct work_struct work;
 
-	/* The mutex protects alarm operations, and prevents a race
-	 * between the enable_irq() in the workqueue and the free_irq()
-	 * in the remove function.
-	 */
 	struct mutex mutex;
 	int exiting;
 };
@@ -58,7 +36,7 @@ static struct i2c_driver ds3232_driver;
 
 static int ds3232_check_rtc_status(struct i2c_client *client)
 {
-	/* To be filled later */
+	 
 	return 0;
 }
 
@@ -86,18 +64,14 @@ static int ds3232_read_time(struct device *dev, struct rtc_time *time)
 	month = buf[5];
 	year = buf[6];
 
-	/* Extract additional information for AM/PM and century */
-
 	twelve_hr = hour & 0x40;
 	am_pm = hour & 0x20;
 	century = month & 0x80;
 
-	/* Write to rtc_time structure */
-
 	time->tm_sec = bcd2bin(second);
 	time->tm_min = bcd2bin(minute);
 	if (twelve_hr) {
-		/* Convert to 24 hr */
+		 
 		if (am_pm)
 			time->tm_hour = bcd2bin(hour & 0x10) + 12;
 		else
@@ -122,13 +96,11 @@ static int ds3232_set_time(struct device *dev, struct rtc_time *time)
 	struct i2c_client *client = to_i2c_client(dev);
 	u8 buf[7];
 
-	/* Extract time from rtc_time and load into ds3232*/
-
 	buf[0] = bin2bcd(time->tm_sec);
 	buf[1] = bin2bcd(time->tm_min);
 	buf[2] = bin2bcd(time->tm_hour);
-	buf[3] = bin2bcd(time->tm_wday); /* Day of the week */
-	buf[4] = bin2bcd(time->tm_mday); /* Date */
+	buf[3] = bin2bcd(time->tm_wday);  
+	buf[4] = bin2bcd(time->tm_mday);  
 	buf[5] = bin2bcd(time->tm_mon);
 	if (time->tm_year >= 100) {
 		buf[5] |= 0x80;
@@ -143,13 +115,13 @@ static int ds3232_set_time(struct device *dev, struct rtc_time *time)
 
 static int ds3232_read_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 {
-	/* To be filled later */
+	 
 	return 0;
 }
 
 static int ds3232_set_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 {
-	/* To be filled later */
+	 
 	return 0;
 }
 
@@ -165,7 +137,7 @@ static irqreturn_t ds3232_irq(int irq, void *dev_id)
 
 static void ds3232_work(struct work_struct *work)
 {
-	/* To be filled later */
+	 
 }
 
 static int ds3232_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
@@ -175,7 +147,7 @@ static int ds3232_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
 	int ret = -ENOIOCTLCMD;
 
 	mutex_lock(&ds3232->mutex);
-	/* To be filled later */
+	 
 	mutex_unlock(&ds3232->mutex);
 
 	return ret;
@@ -287,4 +259,4 @@ module_exit(ds3232_exit);
 MODULE_AUTHOR("Srikanth Srinivasan <srikanth.srinivasan@freescale.com>");
 MODULE_DESCRIPTION("Maxim/Dallas DS3232 RTC Driver");
 MODULE_LICENSE("GPL");
-#endif /* MY_DEF_HERE */
+#endif  

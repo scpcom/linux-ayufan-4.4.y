@@ -2,30 +2,7 @@
 #define MY_ABC_HERE
 #endif
 #ifdef MY_DEF_HERE
-/*
- * Copyright (C) 2008-2010 Freescale Semiconductor, Inc.
- * 	Dave Liu <daveliu@freescale.com>
- *
- * The cpufreq driver is for Freescale 85xx processor,
- * based on arch/powerpc/platforms/cell/cbe_cpufreq.c
- * (C) Copyright IBM Deutschland Entwicklung GmbH 2005-2007
- *	Christian Krafft <krafft@de.ibm.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
+ 
 #include <linux/cpufreq.h>
 #include <linux/of_platform.h>
 
@@ -46,20 +23,6 @@ static __be32 __iomem *powmgtcsr;
 #define PMJCR		0xe007c
 #define POWMGTCSR	0xe0080
 
-/* e500 core frequence is ratio * system bus freq (CCB_CLK)
-static struct core_ratio {
-	ulong pll;
-	char *ratio;
-} e500_ratio[] = {
-	{2, "1:1"},
-	{3, "3:2"},
-	{4, "2:1"},
-	{5, "5:2"},
-	{6, "3:1"},
-	{7, "7:2"},
-	{8, "4:1"},
-};
-*/
 static struct cpufreq_frequency_table mpc85xx_freqs[] = {
 	{2,	0},
 	{3,	0},
@@ -71,9 +34,6 @@ static struct cpufreq_frequency_table mpc85xx_freqs[] = {
 	{0,	CPUFREQ_TABLE_END},
 };
 
-/*
- * hardware specific functions
- */
 static int get_pll(int cpu)
 {
 	int ret, shift;
@@ -96,7 +56,7 @@ static void set_pll(unsigned int pll, int cpu)
 	val = (pll & 0x3f) << shift;
 
 	corefreq = ((busfreq * pll) >> 1);
-	/* must set the bit[18/19] if the requested core freq > 533 MHz */
+	 
 	core_spd = (cpu == 1) ? 0x00002000 : 0x00001000;
 	if (corefreq > 533000000)
 		val |= core_spd;
@@ -124,25 +84,18 @@ static void verify_pll(int cpu)
 	printk("PORPLLSR core freq %dMHz at CPU %d\n", corefreq, cpu);
 }
 
-/*
- * cpufreq functions
- */
-
 static int mpc85xx_cpufreq_cpu_init(struct cpufreq_policy *policy)
 {
 	u32 busfreq = fsl_get_sys_freq();
 	int i, cur_pll;
 
-	/* we need the freq unit with kHz */
 	busfreq /= 1000;
 
-	/* initialize frequency table */
 	for (i = 0; mpc85xx_freqs[i].frequency != CPUFREQ_TABLE_END; i++) {
 		mpc85xx_freqs[i].frequency = (busfreq * mpc85xx_freqs[i].index) >> 1;
 		printk("%d: %dkHz\n", i, mpc85xx_freqs[i].frequency);
 	}
 
-	/* the latency of a transition, the unit is ns */
 	policy->cpuinfo.transition_latency = 2000;
 
 	cur_pll = get_pll(policy->cpu);
@@ -156,8 +109,6 @@ static int mpc85xx_cpufreq_cpu_init(struct cpufreq_policy *policy)
 
 	cpufreq_frequency_table_get_attr(mpc85xx_freqs, policy->cpu);
 
-	/* this ensures that policy->cpuinfo_min
-	 * and policy->cpuinfo_max are set correctly */
 	return cpufreq_frequency_table_cpuinfo(policy, mpc85xx_freqs);
 }
 
@@ -220,10 +171,6 @@ static struct cpufreq_driver mpc85xx_cpufreq_driver = {
 	.flags		= CPUFREQ_CONST_LOOPS,
 };
 
-/*
- * module init and destoy
- */
-
 static int __init mpc85xx_cpufreq_init(void)
 {
 	if (!machine_is_compatible("fsl,P1022DS"))
@@ -250,4 +197,4 @@ module_exit(mpc85xx_cpufreq_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dave Liu <daveliu@freescale.com>");
-#endif /* MY_DEF_HERE */
+#endif  

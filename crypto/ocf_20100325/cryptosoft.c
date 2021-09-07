@@ -1,42 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * An OCF module that uses the linux kernel cryptoapi, based on the
- * original cryptosoft for BSD by Angelos D. Keromytis (angelos@cis.upenn.edu)
- * but is mostly unrecognisable,
- *
- * Written by David McCullough <david_mccullough@mcafee.com>
- * Copyright (C) 2004-2010 David McCullough
- * Copyright (C) 2004-2005 Intel Corporation.
- *
- * LICENSE TERMS
- *
- * The free distribution and use of this software in both source and binary
- * form is allowed (with or without changes) provided that:
- *
- *   1. distributions of this source code include the above copyright
- *      notice, this list of conditions and the following disclaimer;
- *
- *   2. distributions in binary form include the above copyright
- *      notice, this list of conditions and the following disclaimer
- *      in the documentation and/or other associated materials;
- *
- *   3. the copyright holder's name is not used to endorse products
- *      built using this software without specific written permission.
- *
- * ALTERNATIVELY, provided that this notice is retained in full, this product
- * may be distributed under the terms of the GNU General Public License (GPL),
- * in which case the provisions of the GPL apply INSTEAD OF those given above.
- *
- * DISCLAIMER
- *
- * This software is provided 'as is' with no explicit or implied warranties
- * in respect of its properties, including, but not limited to, correctness
- * and/or fitness for purpose.
- * ---------------------------------------------------------------------------
- */
-
+ 
 #ifndef AUTOCONF_INCLUDED
 #include <linux/config.h>
 #endif
@@ -75,8 +40,6 @@ struct {
 #define SW_TYPE_ALG_MASK	0x1f
 
 #define SW_TYPE_ASYNC		0x8000
-
-/* We change some of the above if we have an async interface */
 
 #define SW_TYPE_ALG_AMASK	(SW_TYPE_ALG_MASK | SW_TYPE_ASYNC)
 
@@ -119,21 +82,13 @@ static struct kmem_cache *swcr_req_cache;
 #endif
 
 #ifndef CRYPTO_TFM_MODE_CBC
-/*
- * As of linux-2.6.21 this is no longer defined, and presumably no longer
- * needed to be passed into the crypto core code.
- */
+ 
 #define	CRYPTO_TFM_MODE_CBC	0
 #define	CRYPTO_TFM_MODE_ECB	0
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
-	/*
-	 * Linux 2.6.19 introduced a new Crypto API, setup macro's to convert new
-	 * API into old API.
-	 */
-
-	/* Symmetric/Block Cipher */
+	 
 	struct blkcipher_desc
 	{
 		struct crypto_tfm *tfm;
@@ -152,9 +107,8 @@ static struct kmem_cache *swcr_req_cache;
 				crypto_cipher_encrypt_iv((W)->tfm, X, Y, Z, (u8 *)((W)->info))
 	#define crypto_blkcipher_decrypt_iv(W, X, Y, Z)	\
 				crypto_cipher_decrypt_iv((W)->tfm, X, Y, Z, (u8 *)((W)->info))
-	#define crypto_blkcipher_set_flags(x, y)	/* nop */
+	#define crypto_blkcipher_set_flags(x, y)	 
 
-	/* Hash/HMAC/Digest */
 	struct hash_desc
 	{
 		struct crypto_tfm *tfm;
@@ -168,10 +122,8 @@ static struct kmem_cache *swcr_req_cache;
 	#define crypto_hash_digest(W, X, Y, Z)	\
 				crypto_digest_digest((W)->tfm, X, sg_num, Z)
 
-	/* Asymmetric Cipher */
 	#define crypto_has_cipher(X, Y, Z)		crypto_alg_available(X, 0)
 
-	/* Compression */
 	#define crypto_has_comp(X, Y, Z)		crypto_alg_available(X, 0)
 	#define crypto_comp_tfm(X)				X
 	#define crypto_comp_cast(X)				X
@@ -182,13 +134,13 @@ static struct kmem_cache *swcr_req_cache;
 	#define cbc(X)	"cbc(" #X ")" , 0
 	#define hmac(X)	"hmac(" #X ")" , 0
 	#define plain(X)	#X , 0
-#endif /* if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19) */
+#endif  
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
-/* no ablkcipher in older kernels */
+ 
 #define crypto_alloc_ablkcipher(a,b,c)		(NULL)
 #define crypto_ablkcipher_tfm(x)			((struct crypto_tfm *)(x))
-#define crypto_ablkcipher_set_flags(a, b)	/* nop */
+#define crypto_ablkcipher_set_flags(a, b)	 
 #define crypto_ablkcipher_setkey(x, y, z)	(-EINVAL)
 #define	crypto_has_ablkcipher(a,b,c)		(0)
 #else
@@ -196,7 +148,7 @@ static struct kmem_cache *swcr_req_cache;
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32)
-/* no ahash in older kernels */
+ 
 #define crypto_ahash_tfm(x)					((struct crypto_tfm *)(x))
 #define	crypto_alloc_ahash(a,b,c)			(NULL)
 #define	crypto_ahash_digestsize(x)			0
@@ -265,7 +217,7 @@ static	int swcr_newsession(device_t, u_int32_t *, struct cryptoini *);
 static	int swcr_freesession(device_t, u_int64_t);
 
 static device_method_t swcr_methods = {
-	/* crypto device methods */
+	 
 	DEVMETHOD(cryptodev_newsession,	swcr_newsession),
 	DEVMETHOD(cryptodev_freesession,swcr_freesession),
 	DEVMETHOD(cryptodev_process,	swcr_process),
@@ -278,9 +230,6 @@ MODULE_PARM_DESC(swcr_debug, "Enable debug");
 
 static void swcr_process_req(struct swcr_req *req);
 
-/*
- * Generate a new software session.
- */
 static int
 swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 {
@@ -301,18 +250,18 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 			if (swcr_sessions[i] == NULL)
 				break;
 	} else
-		i = 1;		/* NB: to silence compiler warning */
+		i = 1;		 
 
 	if (swcr_sessions == NULL || i == swcr_sesnum) {
 		if (swcr_sessions == NULL) {
-			i = 1; /* We leave swcr_sessions[0] empty */
+			i = 1;  
 			swcr_sesnum = CRYPTO_SW_SESSIONS;
 		} else
 			swcr_sesnum *= 2;
 
 		swd = kmalloc(swcr_sesnum * sizeof(struct swcr_data *), SLAB_ATOMIC);
 		if (swd == NULL) {
-			/* Reset session number */
+			 
 			if (swcr_sesnum == CRYPTO_SW_SESSIONS)
 				swcr_sesnum = 0;
 			else
@@ -322,7 +271,6 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 		}
 		memset(swd, 0, swcr_sesnum * sizeof(struct swcr_data *));
 
-		/* Copy existing sessions */
 		if (swcr_sessions) {
 			memcpy(swd, swcr_sessions,
 			    (swcr_sesnum / 2) * sizeof(struct swcr_data *));
@@ -363,10 +311,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 		(*swd)->sw_type = crypto_details[cri->cri_alg].sw_type;
 		(*swd)->sw_alg = cri->cri_alg;
 
-		/* Algorithm specific configuration */
 		switch (cri->cri_alg) {
 		case CRYPTO_NULL_CBC:
-			cri->cri_klen = 0; /* make it work with crypto API */
+			cri->cri_klen = 0;  
 			break;
 		default:
 			break;
@@ -376,7 +323,6 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 			dprintk("%s crypto_alloc_*blkcipher(%s, 0x%x)\n", __FUNCTION__,
 					algo, mode);
 
-			/* try async first */
 			(*swd)->sw_tfm = swcr_no_ablk ? NULL :
 					crypto_ablkcipher_tfm(crypto_alloc_ablkcipher(algo, 0, 0));
 			if ((*swd)->sw_tfm) {
@@ -403,7 +349,7 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 				dprintk("\n");
 			}
 			if ((*swd)->sw_type & SW_TYPE_ASYNC) {
-				/* OCF doesn't enforce keys */
+				 
 				crypto_ablkcipher_set_flags(
 						__crypto_ablkcipher_cast((*swd)->sw_tfm),
 							CRYPTO_TFM_REQ_WEAK_KEY);
@@ -411,7 +357,7 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 							__crypto_ablkcipher_cast((*swd)->sw_tfm),
 								cri->cri_key, (cri->cri_klen + 7) / 8);
 			} else {
-				/* OCF doesn't enforce keys */
+				 
 				crypto_blkcipher_set_flags(
 						crypto_blkcipher_cast((*swd)->sw_tfm),
 							CRYPTO_TFM_REQ_WEAK_KEY);
@@ -429,7 +375,6 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 			dprintk("%s crypto_alloc_*hash(%s, 0x%x)\n", __FUNCTION__,
 					algo, mode);
 
-			/* try async first */
 			(*swd)->sw_tfm = swcr_no_ahash ? NULL :
 					crypto_ahash_tfm(crypto_alloc_ahash(algo, 0, 0));
 			if ((*swd)->sw_tfm) {
@@ -493,9 +438,6 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 	return 0;
 }
 
-/*
- * Free a session.
- */
 static int
 swcr_freesession(device_t dev, u_int64_t tid)
 {
@@ -509,7 +451,6 @@ swcr_freesession(device_t dev, u_int64_t tid)
 		return(EINVAL);
 	}
 
-	/* Silently accept and return */
 	if (sid == 0)
 		return(0);
 
@@ -556,8 +497,7 @@ swcr_freesession(device_t dev, u_int64_t tid)
 }
 
 #if defined(HAVE_ABLKCIPHER) || defined(HAVE_AHASH)
-/* older kernels had no async interface */
-
+ 
 static void swcr_process_callback(struct crypto_async_request *creq, int err)
 {
 	struct swcr_req *req = creq->data;
@@ -610,7 +550,7 @@ done:
 	crypto_done(req->crp);
 	kmem_cache_free(swcr_req_cache, req);
 }
-#endif /* defined(HAVE_ABLKCIPHER) || defined(HAVE_AHASH) */
+#endif  
 
 static void swcr_process_req(struct swcr_req *req)
 {
@@ -623,20 +563,9 @@ static void swcr_process_req(struct swcr_req *req)
 
 	dprintk("%s()\n", __FUNCTION__);
 
-	/*
-	 * Find the crypto context.
-	 *
-	 * XXX Note that the logic here prevents us from having
-	 * XXX the same algorithm multiple times in a session
-	 * XXX (or rather, we can but it won't give us the right
-	 * XXX results). To do that, we'd need some way of differentiating
-	 * XXX between the various instances of an algorithm (so we can
-	 * XXX locate the correct crypto context).
-	 */
 	for (sw = req->sw_head; sw && sw->sw_alg != crd->crd_alg; sw = sw->sw_next)
 		;
 
-	/* No such context ? */
 	if (sw == NULL) {
 		crp->crp_etype = EINVAL;
 		dprintk("%s,%d: EINVAL\n", __FILE__, __LINE__);
@@ -646,9 +575,6 @@ static void swcr_process_req(struct swcr_req *req)
 	req->sw = sw;
 	skip = crd->crd_skip;
 
-	/*
-	 * setup the SG list skip from the start of the buffer
-	 */
 	memset(req->sg, 0, sizeof(req->sg));
 	sg_init_table(req->sg, SCATTERLIST_MAX);
 	if (crp->crp_flags & CRYPTO_F_SKBUF) {
@@ -724,7 +650,6 @@ static void swcr_process_req(struct swcr_req *req)
 		{
 		int ret;
 
-		/* check we have room for the result */
 		if (crp->crp_ilen - crd->crd_inject < sw->u.hmac.sw_mlen) {
 			dprintk("cryptosoft: EINVAL crp_ilen=%d, len=%d, inject=%d "
 					"digestsize=%d\n", crp->crp_ilen, crd->crd_skip + sg_len,
@@ -763,7 +688,7 @@ static void swcr_process_req(struct swcr_req *req)
 			goto done;
 		}
 		} break;
-#endif /* HAVE_AHASH */
+#endif  
 
 #ifdef HAVE_ABLKCIPHER
 	case SW_TYPE_ABLKCIPHER: {
@@ -809,7 +734,7 @@ static void swcr_process_req(struct swcr_req *req)
 							crd->crd_key[i] & 0xff);
 				dprintk("\n");
 			}
-			/* OCF doesn't enforce keys */
+			 
 			crypto_ablkcipher_set_flags(__crypto_ablkcipher_cast(sw->sw_tfm),
 					CRYPTO_TFM_REQ_WEAK_KEY);
 			error = crypto_ablkcipher_setkey(
@@ -822,15 +747,13 @@ static void swcr_process_req(struct swcr_req *req)
 			}
 		}
 
-		if (crd->crd_flags & CRD_F_ENCRYPT) { /* encrypt */
+		if (crd->crd_flags & CRD_F_ENCRYPT) {  
 
 			if (crd->crd_flags & CRD_F_IV_EXPLICIT)
 				ivp = crd->crd_iv;
 			else
 				get_random_bytes(ivp, ivsize);
-			/*
-			 * do we have to copy the IV back to the buffer ?
-			 */
+			 
 			if ((crd->crd_flags & CRD_F_IV_PRESENT) == 0) {
 				crypto_copyback(crp->crp_flags, crp->crp_buf,
 						crd->crd_inject, ivsize, (caddr_t)ivp);
@@ -839,7 +762,7 @@ static void swcr_process_req(struct swcr_req *req)
 					sg_len, ivp);
 			ret = crypto_ablkcipher_encrypt(req->crypto_req);
 
-		} else { /*decrypt */
+		} else {  
 
 			if (crd->crd_flags & CRD_F_IV_EXPLICIT)
 				ivp = crd->crd_iv;
@@ -865,7 +788,7 @@ static void swcr_process_req(struct swcr_req *req)
 			goto done;
 		}
 		} break;
-#endif /* HAVE_ABLKCIPHER */
+#endif  
 
 	case SW_TYPE_BLKCIPHER: {
 		unsigned char iv[EALG_MAX_BLOCK_LEN];
@@ -898,7 +821,7 @@ static void swcr_process_req(struct swcr_req *req)
 							crd->crd_key[i] & 0xff);
 				dprintk("\n");
 			}
-			/* OCF doesn't enforce keys */
+			 
 			crypto_blkcipher_set_flags(crypto_blkcipher_cast(sw->sw_tfm),
 					CRYPTO_TFM_REQ_WEAK_KEY);
 			error = crypto_blkcipher_setkey(
@@ -914,16 +837,14 @@ static void swcr_process_req(struct swcr_req *req)
 		memset(&desc, 0, sizeof(desc));
 		desc.tfm = crypto_blkcipher_cast(sw->sw_tfm);
 
-		if (crd->crd_flags & CRD_F_ENCRYPT) { /* encrypt */
+		if (crd->crd_flags & CRD_F_ENCRYPT) {  
 
 			if (crd->crd_flags & CRD_F_IV_EXPLICIT) {
 				ivp = crd->crd_iv;
 			} else {
 				get_random_bytes(ivp, ivsize);
 			}
-			/*
-			 * do we have to copy the IV back to the buffer ?
-			 */
+			 
 			if ((crd->crd_flags & CRD_F_IV_PRESENT) == 0) {
 				crypto_copyback(crp->crp_flags, crp->crp_buf,
 						crd->crd_inject, ivsize, (caddr_t)ivp);
@@ -931,7 +852,7 @@ static void swcr_process_req(struct swcr_req *req)
 			desc.info = ivp;
 			crypto_blkcipher_encrypt_iv(&desc, req->sg, req->sg, sg_len);
 
-		} else { /*decrypt */
+		} else {  
 
 			if (crd->crd_flags & CRD_F_IV_EXPLICIT) {
 				ivp = crd->crd_iv;
@@ -950,7 +871,6 @@ static void swcr_process_req(struct swcr_req *req)
 		char result[HASH_MAX_LEN];
 		struct hash_desc desc;
 
-		/* check we have room for the result */
 		if (crp->crp_ilen - crd->crd_inject < sw->u.hmac.sw_mlen) {
 			dprintk("cryptosoft: EINVAL crp_ilen=%d, len=%d, inject=%d "
 					"digestsize=%d\n", crp->crp_ilen, crd->crd_skip + sg_len,
@@ -972,9 +892,9 @@ static void swcr_process_req(struct swcr_req *req)
 			crypto_hash_setkey(desc.tfm, sw->u.hmac.sw_key,
 					sw->u.hmac.sw_klen);
 			crypto_hash_digest(&desc, req->sg, sg_len, result);
-#endif /* LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19) */
+#endif  
 			
-		} else { /* SW_TYPE_HASH */
+		} else {  
 			crypto_hash_digest(&desc, req->sg, sg_len, result);
 		}
 
@@ -989,14 +909,6 @@ static void swcr_process_req(struct swcr_req *req)
 		int ilen = sg_len, olen = CRYPTO_MAX_DATA_LEN;
 		int ret = 0;
 
-		/*
-		 * we need to use an additional copy if there is more than one
-		 * input chunk since the kernel comp routines do not handle
-		 * SG yet.  Otherwise we just use the input buffer as is.
-		 * Rather than allocate another buffer we just split the tmp
-		 * buffer we already have.
-		 * Perhaps we should just use zlib directly ?
-		 */
 		if (sg_num > 1) {
 			int blk;
 
@@ -1010,7 +922,7 @@ static void swcr_process_req(struct swcr_req *req)
 		} else
 			ibuf = sg_virt(&req->sg[0]);
 
-		if (crd->crd_flags & CRD_F_ENCRYPT) { /* compress */
+		if (crd->crd_flags & CRD_F_ENCRYPT) {  
 			ret = crypto_comp_compress(crypto_comp_cast(sw->sw_tfm),
 					ibuf, ilen, obuf, &olen);
 			if (!ret && olen > crd->crd_len) {
@@ -1019,7 +931,7 @@ static void swcr_process_req(struct swcr_req *req)
 				if (swcr_fail_if_compression_grows)
 					ret = ERANGE;
 			}
-		} else { /* decompress */
+		} else {  
 			ret = crypto_comp_decompress(crypto_comp_cast(sw->sw_tfm),
 					ibuf, ilen, obuf, &olen);
 			if (!ret && (olen + crd->crd_inject) > crp->crp_olen) {
@@ -1032,13 +944,9 @@ static void swcr_process_req(struct swcr_req *req)
 		if (ret)
 			dprintk("%s,%d: ret = %d\n", __FILE__, __LINE__, ret);
 
-		/*
-		 * on success copy result back,
-		 * linux crpyto API returns -errno,  we need to fix that
-		 */
 		crp->crp_etype = ret < 0 ? -ret : ret;
 		if (ret == 0) {
-			/* copy back the result and return it's size */
+			 
 			crypto_copyback(crp->crp_flags, crp->crp_buf,
 					crd->crd_inject, olen, obuf);
 			crp->crp_olen = olen;
@@ -1047,7 +955,7 @@ static void swcr_process_req(struct swcr_req *req)
 		} break;
 
 	default:
-		/* Unknown/unsupported algorithm */
+		 
 		dprintk("%s,%d: EINVAL\n", __FILE__, __LINE__);
 		crp->crp_etype = EINVAL;
 		goto done;
@@ -1058,9 +966,6 @@ done:
 	kmem_cache_free(swcr_req_cache, req);
 }
 
-/*
- * Process a crypto request.
- */
 static int
 swcr_process(device_t dev, struct cryptop *crp, int hint)
 {
@@ -1068,7 +973,7 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 	u_int32_t lid;
 
 	dprintk("%s()\n", __FUNCTION__);
-	/* Sanity check */
+	 
 	if (crp == NULL) {
 		dprintk("%s,%d: EINVAL\n", __FILE__, __LINE__);
 		return EINVAL;
@@ -1090,10 +995,6 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 		goto done;
 	}
 
-	/*
-	 * do some error checking outside of the loop for SKB and IOV processing
-	 * this leaves us with valid skb or uiop pointers for later
-	 */
 	if (crp->crp_flags & CRYPTO_F_SKBUF) {
 		struct sk_buff *skb = (struct sk_buff *) crp->crp_buf;
 		if (skb_shinfo(skb)->nr_frags >= SCATTERLIST_MAX) {
@@ -1110,9 +1011,6 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 		}
 	}
 
-	/*
-	 * setup a new request ready for queuing
-	 */
 	req = kmem_cache_alloc(swcr_req_cache, SLAB_ATOMIC);
 	if (req == NULL) {
 		dprintk("%s,%d: ENOMEM\n", __FILE__, __LINE__);

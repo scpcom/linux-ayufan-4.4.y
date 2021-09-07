@@ -1,23 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- /* Copyright (C) 2010 Synology Inc
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
+  
 #include <linux/kernel.h>
 #include <linux/errno.h>
 #include <linux/mutex.h>
@@ -87,7 +71,6 @@ static int gpio_setup(void)
 	if (mutex_lock_interruptible(&ox820_gpio_lock))
                 return -ERESTARTSYS;
 
-	/* Disable primary, secondary and teriary GPIO functions */
 	if (gPLXGPIO.gpio_a_output || gPLXGPIO.gpio_a_input) {
 		unsigned int gpio = gPLXGPIO.gpio_a_output | gPLXGPIO.gpio_a_input;
 		writel(readl(SYS_CTRL_SECONDARY_SEL)   & ~(gpio), SYS_CTRL_SECONDARY_SEL);
@@ -97,7 +80,6 @@ static int gpio_setup(void)
 		writel(readl(SYS_CTRL_ALTERNATIVE_SEL) & ~(gpio), SYS_CTRL_ALTERNATIVE_SEL);
 	}
 
-	// Setup 2nd input source
 	if (gPLXGPIO.gpio_b_output || gPLXGPIO.gpio_b_input) {
 		unsigned int gpio = gPLXGPIO.gpio_b_output | gPLXGPIO.gpio_b_input;
 		writel(readl(SEC_CTRL_SECONDARY_SEL)   & ~(gpio), SEC_CTRL_SECONDARY_SEL);
@@ -107,13 +89,11 @@ static int gpio_setup(void)
 		writel(readl(SEC_CTRL_ALTERNATIVE_SEL) & ~(gpio), SEC_CTRL_ALTERNATIVE_SEL);
 	}
 
-	/* Enable GPIO input  */
 	if (gPLXGPIO.gpio_a_input)
 		writel((gPLXGPIO.gpio_a_input), GPIO_A_OUTPUT_ENABLE_CLEAR);
 	if (gPLXGPIO.gpio_b_input)
 		writel((gPLXGPIO.gpio_b_input), GPIO_B_OUTPUT_ENABLE_CLEAR);
 	
-	/* Enable GPIO output */
 	if (gPLXGPIO.gpio_a_output) {
 		writel(gPLXGPIO.gpio_a_output, GPIO_A_OUTPUT_CLEAR);
 		writel(gPLXGPIO.gpio_a_output, GPIO_A_OUTPUT_ENABLE_SET);
@@ -135,10 +115,6 @@ END:
 	return 0;
 }
 
-/*
- *  ox820_gpio_read - Read OTP pages
- *
- */
 int SYNO820GPIOGet(int pin)
 {
 	uint32_t val = 0;
@@ -175,10 +151,6 @@ END:
 }
 EXPORT_SYMBOL(SYNO820GPIOGet);
 
-/*
- *  ox820_gpio_write - Write OTP pages
- *  .
- */
 int SYNO820GPIOSet(int pin, int val)
 {
 	unsigned int new_pin = 0;

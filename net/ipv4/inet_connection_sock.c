@@ -1,18 +1,4 @@
-/*
- * INET		An implementation of the TCP/IP protocol suite for the LINUX
- *		operating system.  INET is implemented using the  BSD Socket
- *		interface as the means of communication with the user level.
- *
- *		Support for INET connection oriented protocols.
- *
- * Authors:	See the TCP sources
- *
- *		This program is free software; you can redistribute it and/or
- *		modify it under the terms of the GNU General Public License
- *		as published by the Free Software Foundation; either version
- *		2 of the License, or(at your option) any later version.
- */
-
+ 
 #include <linux/module.h>
 #include <linux/jhash.h>
 
@@ -29,9 +15,6 @@ const char inet_csk_timer_bug_msg[] = "inet_csk BUG: unknown timer value\n";
 EXPORT_SYMBOL(inet_csk_timer_bug_msg);
 #endif
 
-/*
- * This struct holds the first and last local port number.
- */
 struct local_ports sysctl_local_ports __read_mostly = {
 	.lock = SEQLOCK_UNLOCKED,
 	.range = { 32768, 61000 },
@@ -57,13 +40,6 @@ int inet_csk_bind_conflict(const struct sock *sk,
 	struct hlist_node *node;
 	int reuse = sk->sk_reuse;
 
-	/*
-	 * Unlike other sk lookup places we do not check
-	 * for sk_net here, since _all_ the socks listed
-	 * in tb->owners list belong to the same net - the
-	 * one this bucket belongs to.
-	 */
-
 	sk_for_each_bound(sk2, node, &tb->owners) {
 		if (sk != sk2 &&
 		    !inet_v6_ipv6only(sk2) &&
@@ -84,9 +60,6 @@ int inet_csk_bind_conflict(const struct sock *sk,
 
 EXPORT_SYMBOL_GPL(inet_csk_bind_conflict);
 
-/* Obtain a reference to a local port for the given sock,
- * if snum is zero it means select any available local port.
- */
 int inet_csk_get_port(struct sock *sk, unsigned short snum)
 {
 	struct inet_hashinfo *hashinfo = sk->sk_prot->h.hashinfo;
@@ -134,12 +107,6 @@ again:
 				rover = low;
 		} while (--remaining > 0);
 
-		/* Exhausted local port range during search?  It is not
-		 * possible for us to be holding one of the bind hash
-		 * locks if this test triggers, because if 'remaining'
-		 * drops to zero, we broke out of the do/while loop at
-		 * the top level, not from the 'break;' statement.
-		 */
 		ret = 1;
 		if (remaining <= 0) {
 			if (smallest_size != -1) {
@@ -148,9 +115,7 @@ again:
 			}
 			goto fail;
 		}
-		/* OK, here is the one we will use.  HEAD is
-		 * non-NULL and we hold it's mutex.
-		 */
+		 
 		snum = rover;
 	} else {
 have_snum:
@@ -209,30 +174,12 @@ fail:
 
 EXPORT_SYMBOL_GPL(inet_csk_get_port);
 
-/*
- * Wait for an incoming connection, avoid race conditions. This must be called
- * with the socket locked.
- */
 static int inet_csk_wait_for_connect(struct sock *sk, long timeo)
 {
 	struct inet_connection_sock *icsk = inet_csk(sk);
 	DEFINE_WAIT(wait);
 	int err;
 
-	/*
-	 * True wake-one mechanism for incoming connections: only
-	 * one process gets woken up, not the 'whole herd'.
-	 * Since we do not 'race & poll' for established sockets
-	 * anymore, the common case will execute the loop only once.
-	 *
-	 * Subtle issue: "add_wait_queue_exclusive()" will be added
-	 * after any current non-exclusive waiters, and we know that
-	 * it will always _stay_ after any new non-exclusive waiters
-	 * because all non-exclusive waiters are added at the
-	 * beginning of the wait-queue. As such, it's ok to "drop"
-	 * our exclusiveness temporarily when we get woken up without
-	 * having to remove and re-insert us on the wait queue.
-	 */
 	for (;;) {
 		prepare_to_wait_exclusive(sk->sk_sleep, &wait,
 					  TASK_INTERRUPTIBLE);
@@ -257,9 +204,6 @@ static int inet_csk_wait_for_connect(struct sock *sk, long timeo)
 	return err;
 }
 
-/*
- * This will accept the next outstanding connection.
- */
 struct sock *inet_csk_accept(struct sock *sk, int flags, int *err)
 {
 	struct inet_connection_sock *icsk = inet_csk(sk);
@@ -268,18 +212,13 @@ struct sock *inet_csk_accept(struct sock *sk, int flags, int *err)
 
 	lock_sock(sk);
 
-	/* We need to make sure that this socket is listening,
-	 * and that it has something pending.
-	 */
 	error = -EINVAL;
 	if (sk->sk_state != TCP_LISTEN)
 		goto out_err;
 
-	/* Find already established connection */
 	if (reqsk_queue_empty(&icsk->icsk_accept_queue)) {
 		long timeo = sock_rcvtimeo(sk, flags & O_NONBLOCK);
 
-		/* If this is a non blocking socket don't sleep */
 		error = -EAGAIN;
 		if (!timeo)
 			goto out_err;
@@ -302,11 +241,6 @@ out_err:
 
 EXPORT_SYMBOL(inet_csk_accept);
 
-/*
- * Using different timers for retransmit, delayed acks and probes
- * We may wish use just one timer maintaining a list of expire jiffies
- * to optimize.
- */
 void inet_csk_init_xmit_timers(struct sock *sk,
 			       void (*retransmit_handler)(unsigned long),
 			       void (*delack_handler)(unsigned long),
@@ -441,12 +375,10 @@ void inet_csk_reqsk_queue_hash_add(struct sock *sk, struct request_sock *req,
 	inet_csk_reqsk_queue_added(sk, timeout);
 }
 
-/* Only thing we need from tcp.h */
 extern int sysctl_tcp_synack_retries;
 
 EXPORT_SYMBOL_GPL(inet_csk_reqsk_queue_hash_add);
 
-/* Decide when to expire the request and when to resend SYN-ACK */
 static inline void syn_ack_recalc(struct request_sock *req, const int thresh,
 				  const int max_retries,
 				  const u8 rskq_defer_accept,
@@ -459,11 +391,7 @@ static inline void syn_ack_recalc(struct request_sock *req, const int thresh,
 	}
 	*expire = req->retrans >= thresh &&
 		  (!inet_rsk(req)->acked || req->retrans >= max_retries);
-	/*
-	 * Do not resend while waiting for data after ACK,
-	 * start to resend on end of deferring period to give
-	 * last chance for data or ACK to create established socket.
-	 */
+	 
 	*resend = !inet_rsk(req)->acked ||
 		  req->retrans >= rskq_defer_accept - 1;
 }
@@ -485,23 +413,6 @@ void inet_csk_reqsk_queue_prune(struct sock *parent,
 	if (lopt == NULL || lopt->qlen == 0)
 		return;
 
-	/* Normally all the openreqs are young and become mature
-	 * (i.e. converted to established socket) for first timeout.
-	 * If synack was not acknowledged for 3 seconds, it means
-	 * one of the following things: synack was lost, ack was lost,
-	 * rtt is high or nobody planned to ack (i.e. synflood).
-	 * When server is a bit loaded, queue is populated with old
-	 * open requests, reducing effective size of queue.
-	 * When server is well loaded, queue size reduces to zero
-	 * after several minutes of work. It is not synflood,
-	 * it is normal operation. The solution is pruning
-	 * too old entries overriding normal timeout, when
-	 * situation becomes dangerous.
-	 *
-	 * Essentially, we reserve half of room for young
-	 * embrions; and abort old ones without pity, if old
-	 * ones are about to clog our table.
-	 */
 	if (lopt->qlen>>(lopt->max_qlen_log-1)) {
 		int young = (lopt->qlen_young<<1);
 
@@ -542,7 +453,6 @@ void inet_csk_reqsk_queue_prune(struct sock *parent,
 					continue;
 				}
 
-				/* Drop this request */
 				inet_csk_reqsk_queue_unlink(parent, req, reqp);
 				reqsk_queue_removed(queue, req);
 				reqsk_free(req);
@@ -583,7 +493,6 @@ struct sock *inet_csk_clone(struct sock *sk, const struct request_sock *req,
 		newicsk->icsk_backoff	  = 0;
 		newicsk->icsk_probes_out  = 0;
 
-		/* Deinitialize accept_queue to trap illegal accesses. */
 		memset(&newicsk->icsk_accept_queue, 0, sizeof(newicsk->icsk_accept_queue));
 
 		security_inet_csk_clone(newsk, req);
@@ -593,21 +502,13 @@ struct sock *inet_csk_clone(struct sock *sk, const struct request_sock *req,
 
 EXPORT_SYMBOL_GPL(inet_csk_clone);
 
-/*
- * At this point, there should be no process reference to this
- * socket, and thus no user references at all.  Therefore we
- * can assume the socket waitqueue is inactive and nobody will
- * try to jump onto it.
- */
 void inet_csk_destroy_sock(struct sock *sk)
 {
 	WARN_ON(sk->sk_state != TCP_CLOSE);
 	WARN_ON(!sock_flag(sk, SOCK_DEAD));
 
-	/* It cannot be in hash table! */
 	WARN_ON(!sk_unhashed(sk));
 
-	/* If it has not 0 inet_sk(sk)->num, it must be bound */
 	WARN_ON(inet_sk(sk)->num && !inet_csk(sk)->icsk_bind_hash);
 
 	sk->sk_prot->destroy(sk);
@@ -637,11 +538,6 @@ int inet_csk_listen_start(struct sock *sk, const int nr_table_entries)
 	sk->sk_ack_backlog = 0;
 	inet_csk_delack_init(sk);
 
-	/* There is race window here: we announce ourselves listening,
-	 * but this transition is still not validated by get_port().
-	 * It is OK, because this socket enters to hash table only
-	 * after validation is complete.
-	 */
 	sk->sk_state = TCP_LISTEN;
 	if (!sk->sk_prot->get_port(sk, inet->num)) {
 		inet->sport = htons(inet->num);
@@ -659,10 +555,6 @@ int inet_csk_listen_start(struct sock *sk, const int nr_table_entries)
 
 EXPORT_SYMBOL_GPL(inet_csk_listen_start);
 
-/*
- *	This routine closes sockets which have been at least partially
- *	opened, but not yet accepted.
- */
 void inet_csk_listen_stop(struct sock *sk)
 {
 	struct inet_connection_sock *icsk = inet_csk(sk);
@@ -671,17 +563,8 @@ void inet_csk_listen_stop(struct sock *sk)
 
 	inet_csk_delete_keepalive_timer(sk);
 
-	/* make all the listen_opt local to us */
 	acc_req = reqsk_queue_yank_acceptq(&icsk->icsk_accept_queue);
 
-	/* Following specs, it would be better either to send FIN
-	 * (and enter FIN-WAIT-1, it is normal close)
-	 * or to send active reset (abort).
-	 * Certainly, it is pretty dangerous while synflood, but it is
-	 * bad justification for our negligence 8)
-	 * To be honest, we are not able to make either
-	 * of the variants now.			--ANK
-	 */
 	reqsk_queue_destroy(&icsk->icsk_accept_queue);
 
 	while ((req = acc_req) != NULL) {

@@ -31,41 +31,26 @@ struct nameidata {
 	unsigned int real_filename_len;
 #endif
 
-	/* Intent data */
 	union {
 		struct open_intent open;
 	} intent;
 };
 
-/*
- * Type of the last component on LOOKUP_PARENT
- */
 enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 
-/*
- * The bitmask for a lookup event:
- *  - follow links at the end
- *  - require a directory
- *  - ending slashes ok even for nonexistent files
- *  - internal "there are more path components" flag
- *  - locked when lookup done with dcache_lock held
- *  - dentry cache is untrusted; force a real lookup
- */
 #define LOOKUP_FOLLOW		 1
 #define LOOKUP_DIRECTORY	 2
 #define LOOKUP_CONTINUE		 4
 #define LOOKUP_PARENT		16
 #define LOOKUP_REVAL		64
-/*
- * Intent data
- */
+ 
 #define LOOKUP_OPEN		0x0100
 #define LOOKUP_CREATE		0x0200
 #define LOOKUP_EXCL		0x0400
 #define LOOKUP_RENAME_TARGET	0x0800
 
 #ifdef MY_ABC_HERE
-/* this namei has done to the last component */
+ 
 #define LOOKUP_TO_LASTCOMPONENT 0x1000
 #define LOOKUP_CASELESS_COMPARE 0x2000
 #endif
@@ -95,7 +80,7 @@ extern void release_open_intent(struct nameidata *);
 extern struct dentry *lookup_hash(struct nameidata *nd);
 extern int __lookup_one_len(const char *name, struct qstr *this,
 			    struct dentry *base, int len);
-#endif /* SYNO_AUFS */
+#endif  
 extern struct dentry *lookup_one_len(const char *, struct dentry *, int);
 extern struct dentry *lookup_one_noperm(const char *, struct dentry *);
 
@@ -120,4 +105,4 @@ static inline void nd_terminate_link(void *name, size_t len, size_t maxlen)
 	((char *) name)[min(len, maxlen)] = '\0';
 }
 
-#endif /* _LINUX_NAMEI_H */
+#endif  

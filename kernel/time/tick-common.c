@@ -1,16 +1,4 @@
-/*
- * linux/kernel/time/tick-common.c
- *
- * This file contains the base functions to manage periodic tick
- * related events.
- *
- * Copyright(C) 2005-2006, Thomas Gleixner <tglx@linutronix.de>
- * Copyright(C) 2005-2007, Red Hat, Inc., Ingo Molnar
- * Copyright(C) 2006-2007, Timesys Corp., Thomas Gleixner
- *
- * This code is licenced under the GPL version 2. For details see
- * kernel-base/COPYING.
- */
+ 
 #include <linux/cpu.h>
 #include <linux/err.h>
 #include <linux/hrtimer.h>
@@ -24,29 +12,18 @@
 
 #include "tick-internal.h"
 
-/*
- * Tick devices
- */
 DEFINE_PER_CPU(struct tick_device, tick_cpu_device);
-/*
- * Tick next event: keeps track of the tick time
- */
+ 
 ktime_t tick_next_period;
 ktime_t tick_period;
 int tick_do_timer_cpu __read_mostly = TICK_DO_TIMER_BOOT;
 DEFINE_SPINLOCK(tick_device_lock);
 
-/*
- * Debugging: see timer_list.c
- */
 struct tick_device *tick_get_device(int cpu)
 {
 	return &per_cpu(tick_cpu_device, cpu);
 }
 
-/**
- * tick_is_oneshot_available - check for a oneshot capable event device
- */
 int tick_is_oneshot_available(void)
 {
 	struct clock_event_device *dev = __get_cpu_var(tick_cpu_device).evtdev;
@@ -54,15 +31,11 @@ int tick_is_oneshot_available(void)
 	return dev && (dev->features & CLOCK_EVT_FEAT_ONESHOT);
 }
 
-/*
- * Periodic tick
- */
 static void tick_periodic(int cpu)
 {
 	if (tick_do_timer_cpu == cpu) {
 		write_seqlock(&xtime_lock);
 
-		/* Keep track of the next tick event */
 		tick_next_period = ktime_add(tick_next_period, tick_period);
 
 		do_timer(1);
@@ -73,9 +46,6 @@ static void tick_periodic(int cpu)
 	profile_tick(CPU_PROFILING);
 }
 
-/*
- * Event handler for periodic ticks
- */
 void tick_handle_periodic(struct clock_event_device *dev)
 {
 	int cpu = smp_processor_id();
@@ -85,37 +55,22 @@ void tick_handle_periodic(struct clock_event_device *dev)
 
 	if (dev->mode != CLOCK_EVT_MODE_ONESHOT)
 		return;
-	/*
-	 * Setup the next period for devices, which do not have
-	 * periodic mode:
-	 */
+	 
 	next = ktime_add(dev->next_event, tick_period);
 	for (;;) {
 		if (!clockevents_program_event(dev, next, ktime_get()))
 			return;
-		/*
-		 * Have to be careful here. If we're in oneshot mode,
-		 * before we call tick_periodic() in a loop, we need
-		 * to be sure we're using a real hardware clocksource.
-		 * Otherwise we could get trapped in an infinite
-		 * loop, as the tick_periodic() increments jiffies,
-		 * when then will increment time, posibly causing
-		 * the loop to trigger again and again.
-		 */
+		 
 		if (timekeeping_valid_for_hres())
 			tick_periodic(cpu);
 		next = ktime_add(next, tick_period);
 	}
 }
 
-/*
- * Setup the device for a periodic tick
- */
 void tick_setup_periodic(struct clock_event_device *dev, int broadcast)
 {
 	tick_set_periodic_handler(dev, broadcast);
 
-	/* Broadcast setup ? */
 	if (!tick_device_is_functional(dev))
 		return;
 
@@ -141,9 +96,6 @@ void tick_setup_periodic(struct clock_event_device *dev, int broadcast)
 	}
 }
 
-/*
- * Setup the tick device
- */
 static void tick_setup_device(struct tick_device *td,
 			      struct clock_event_device *newdev, int cpu,
 			      const struct cpumask *cpumask)
@@ -151,23 +103,14 @@ static void tick_setup_device(struct tick_device *td,
 	ktime_t next_event;
 	void (*handler)(struct clock_event_device *) = NULL;
 
-	/*
-	 * First device setup ?
-	 */
 	if (!td->evtdev) {
-		/*
-		 * If no cpu took the do_timer update, assign it to
-		 * this cpu:
-		 */
+		 
 		if (tick_do_timer_cpu == TICK_DO_TIMER_BOOT) {
 			tick_do_timer_cpu = cpu;
 			tick_next_period = ktime_get();
 			tick_period = ktime_set(0, NSEC_PER_SEC / HZ);
 		}
 
-		/*
-		 * Startup in periodic mode first.
-		 */
 		td->mode = TICKDEV_MODE_PERIODIC;
 	} else {
 		handler = td->evtdev->event_handler;
@@ -177,19 +120,9 @@ static void tick_setup_device(struct tick_device *td,
 
 	td->evtdev = newdev;
 
-	/*
-	 * When the device is not per cpu, pin the interrupt to the
-	 * current cpu:
-	 */
 	if (!cpumask_equal(newdev->cpumask, cpumask))
 		irq_set_affinity(newdev->irq, cpumask);
 
-	/*
-	 * When global broadcasting is active, check if the current
-	 * device is registered as a placeholder for broadcast mode.
-	 * This allows us to handle this x86 misfeature in a generic
-	 * way.
-	 */
 	if (tick_device_uses_broadcast(newdev, cpu))
 		return;
 
@@ -199,9 +132,6 @@ static void tick_setup_device(struct tick_device *td,
 		tick_setup_oneshot(newdev, handler, next_event);
 }
 
-/*
- * Check, if the new registered device should be used.
- */
 static int tick_check_new_device(struct clock_event_device *newdev)
 {
 	struct clock_event_device *curdev;
@@ -218,50 +148,28 @@ static int tick_check_new_device(struct clock_event_device *newdev)
 	td = &per_cpu(tick_cpu_device, cpu);
 	curdev = td->evtdev;
 
-	/* cpu local device ? */
 	if (!cpumask_equal(newdev->cpumask, cpumask_of(cpu))) {
 
-		/*
-		 * If the cpu affinity of the device interrupt can not
-		 * be set, ignore it.
-		 */
 #ifdef CONFIG_SYNO_PLX_PORTING
 #else
 		if (!irq_can_set_affinity(newdev->irq))
 			goto out_bc;
 #endif
 
-		/*
-		 * If we have a cpu local device already, do not replace it
-		 * by a non cpu local device
-		 */
 		if (curdev && cpumask_equal(curdev->cpumask, cpumask_of(cpu)))
 			goto out_bc;
 	}
 
-	/*
-	 * If we have an active device, then check the rating and the oneshot
-	 * feature.
-	 */
 	if (curdev) {
-		/*
-		 * Prefer one shot capable devices !
-		 */
+		 
 		if ((curdev->features & CLOCK_EVT_FEAT_ONESHOT) &&
 		    !(newdev->features & CLOCK_EVT_FEAT_ONESHOT))
 			goto out_bc;
-		/*
-		 * Check the rating
-		 */
+		 
 		if (curdev->rating >= newdev->rating)
 			goto out_bc;
 	}
 
-	/*
-	 * Replace the eventually existing device by the new
-	 * device. If the current device is the broadcast device, do
-	 * not give it back to the clockevents layer !
-	 */
 	if (tick_is_broadcast_device(curdev)) {
 		clockevents_shutdown(curdev);
 		curdev = NULL;
@@ -275,9 +183,7 @@ static int tick_check_new_device(struct clock_event_device *newdev)
 	return NOTIFY_STOP;
 
 out_bc:
-	/*
-	 * Can the new device be used as a broadcast device ?
-	 */
+	 
 	if (tick_check_broadcast_device(newdev))
 		ret = NOTIFY_STOP;
 
@@ -286,11 +192,6 @@ out_bc:
 	return ret;
 }
 
-/*
- * Transfer the do_timer job away from a dying cpu.
- *
- * Called with interrupts disabled.
- */
 static void tick_handover_do_timer(int *cpup)
 {
 	if (*cpup == tick_do_timer_cpu) {
@@ -301,13 +202,6 @@ static void tick_handover_do_timer(int *cpup)
 	}
 }
 
-/*
- * Shutdown an event device on a given cpu:
- *
- * This is called on a life CPU, when a CPU is dead. So we cannot
- * access the hardware device itself.
- * We just set the mode and remove it from the lists.
- */
 static void tick_shutdown(unsigned int *cpup)
 {
 	struct tick_device *td = &per_cpu(tick_cpu_device, *cpup);
@@ -317,10 +211,7 @@ static void tick_shutdown(unsigned int *cpup)
 	spin_lock_irqsave(&tick_device_lock, flags);
 	td->mode = TICKDEV_MODE_PERIODIC;
 	if (dev) {
-		/*
-		 * Prevent that the clock events layer tries to call
-		 * the set mode function!
-		 */
+		 
 		dev->mode = CLOCK_EVT_MODE_UNUSED;
 		clockevents_exchange_device(dev, NULL);
 		td->evtdev = NULL;
@@ -356,9 +247,6 @@ static void tick_resume(void)
 	spin_unlock_irqrestore(&tick_device_lock, flags);
 }
 
-/*
- * Notification about clock event devices
- */
 static int tick_notify(struct notifier_block *nb, unsigned long reason,
 			       void *dev)
 {
@@ -408,11 +296,6 @@ static struct notifier_block tick_notifier = {
 	.notifier_call = tick_notify,
 };
 
-/**
- * tick_init - initialize the tick control
- *
- * Register the notifier with the clockevents framework
- */
 void __init tick_init(void)
 {
 	clockevents_register_notifier(&tick_notifier);

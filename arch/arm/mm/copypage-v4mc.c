@@ -1,18 +1,4 @@
-/*
- *  linux/arch/arm/lib/copypage-armv4mc.S
- *
- *  Copyright (C) 1995-2005 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * This handles the mini data cache, as found on SA11x0 and XScale
- * processors.  When we copy a user page page, we map it in such a way
- * that accesses to this page will not touch the main data cache, but
- * will be cached in the mini data cache.  This prevents us thrashing
- * the main data cache on page faults.
- */
+ 
 #include <linux/init.h>
 #include <linux/mm.h>
 #include <linux/highmem.h>
@@ -23,27 +9,11 @@
 
 #include "mm.h"
 
-/*
- * 0xffff8000 to 0xffffffff is reserved for any ARM architecture
- * specific hacks for copying pages efficiently.
- */
 #define minicache_pgprot __pgprot(L_PTE_PRESENT | L_PTE_YOUNG | \
 				  L_PTE_MT_MINICACHE)
 
 static DEFINE_SPINLOCK(minicache_lock);
 
-/*
- * ARMv4 mini-dcache optimised copy_user_highpage
- *
- * We flush the destination cache lines just before we write the data into the
- * corresponding address.  Since the Dcache is read-allocate, this removes the
- * Dcache aliasing issue.  The writes will be forwarded to the write buffer,
- * and merged as appropriate.
- *
- * Note: We rely on all ARMv4 processors implementing the "invalidate D line"
- * instruction.  If your processor does not supply this, you have to write your
- * own copy_user_highpage that does the right thing.
- */
 static void __naked
 mc_copy_user_page(void *from, void *to)
 {
@@ -92,9 +62,6 @@ void v4_mc_copy_user_highpage(struct page *to, struct page *from,
 	kunmap_atomic(kto, KM_USER1);
 }
 
-/*
- * ARMv4 optimised clear_user_page
- */
 void v4_mc_clear_user_highpage(struct page *page, unsigned long vaddr)
 {
 	void *ptr, *kaddr = kmap_atomic(page, KM_USER0);

@@ -1,33 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  iscsi_parameters.c
- *
- * This file contains main functions related to iSCSI Parameter negotiation.
- *
- * Copyright (c) 2002, 2003, 2004, 2005 PyX Technologies, Inc.
- * Copyright (c) 2005, 2006, 2007 SBE, Inc.
- * Copyright (c) 2007 Rising Tide Software, Inc.
- *
- * Nicholas A. Bellinger <nab@kernel.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #include <linux/slab.h>
 #include <iscsi_linux_defs.h>
 
@@ -47,10 +21,6 @@
 
 #define ISCSI_PARAMETER_C
 
-/*	iscsi_login_rx_data():
- *
- *
- */
 int iscsi_login_rx_data(
 	iscsi_conn_t *conn,
 	char *buf,
@@ -64,11 +34,6 @@ int iscsi_login_rx_data(
 	iov.iov_len	= length;
 	iov.iov_base	= buf;
 
-	/*
-	 * Initial Marker-less Interval.
-	 * Add the values regardless of IFMarker/OFMarker, considering
-	 * it may not be negoitated yet.
-	 */
 	if (role == INITIATOR)
 		conn->if_marker += length;
 	else if (role == TARGET)
@@ -88,10 +53,6 @@ int iscsi_login_rx_data(
 	return 0 ;
 }
 
-/*	iscsi_login_tx_data():
- *
- *
- */
 int iscsi_login_tx_data(
 	iscsi_conn_t *conn,
 	char *pdu_buf,
@@ -110,11 +71,6 @@ int iscsi_login_tx_data(
 	iov[1].iov_len		= text_length;
 	iov[1].iov_base		= text_buf;
 
-	/*
-	 * Initial Marker-less Interval.
-	 * Add the values regardless of IFMarker/OFMarker, considering
-	 * it may not be negoitated yet.
-	 */
 	if (role == INITIATOR)
 		conn->of_marker += length;
 	else if (role == TARGET)
@@ -134,10 +90,6 @@ int iscsi_login_tx_data(
 	return 0;
 }
 
-/*	iscsi_dump_connection_ops():
- *
- *
- */
 void iscsi_dump_conn_ops(iscsi_conn_ops_t *conn_ops)
 {
 	printk(KERN_INFO "HeaderDigest: %s\n", (conn_ops->HeaderDigest) ?
@@ -154,10 +106,6 @@ void iscsi_dump_conn_ops(iscsi_conn_ops_t *conn_ops)
 		printk(KERN_INFO "IFMarkInt: %u\n", conn_ops->IFMarkInt);
 }
 
-/*	iscsi_dump_session_ops():
- *
- *
- */
 void iscsi_dump_sess_ops(iscsi_sess_ops_t *sess_ops)
 {
 	printk(KERN_INFO "InitiatorName: %s\n", sess_ops->InitiatorName);
@@ -188,10 +136,6 @@ void iscsi_dump_sess_ops(iscsi_sess_ops_t *sess_ops)
 			"Discovery" : "Normal");
 }
 
-/*	iscsi_print_params():
- *
- *
- */
 void iscsi_print_params(iscsi_param_list_t *param_list)
 {
 	iscsi_param_t *param;
@@ -200,10 +144,6 @@ void iscsi_print_params(iscsi_param_list_t *param_list)
 		printk(KERN_INFO "%s: %s\n", param->name, param->value);
 }
 
-/*	iscsi_set_default_param():
- *
- *
- */
 static iscsi_param_t *iscsi_set_default_param(iscsi_param_list_t *param_list,
 		char *name, char *value, u8 phase, u8 scope, u8 sender,
 		u16 type_range, u8 use)
@@ -287,11 +227,6 @@ out:
 	return NULL;
 }
 
-/*	iscsi_set_default_params():
- *
- *
- */
-/* #warning Add extension keys */
 int iscsi_create_default_params(iscsi_param_list_t **param_list_ptr)
 {
 	iscsi_param_t *param = NULL;
@@ -306,17 +241,6 @@ int iscsi_create_default_params(iscsi_param_list_t **param_list_ptr)
 	INIT_LIST_HEAD(&pl->param_list);
 	INIT_LIST_HEAD(&pl->extra_response_list);
 
-	/*
-	 * The format for setting the initial parameter definitions are:
-	 *
-	 * Parameter name:
-	 * Initial value:
-	 * Allowable phase:
-	 * Scope:
-	 * Allowable senders:
-	 * Typerange:
-	 * Use:
-	 */
 	param = iscsi_set_default_param(pl, AUTHMETHOD, INITIAL_AUTHMETHOD,
 			PHASE_SECURITY, SCOPE_CONNECTION_ONLY, SENDER_BOTH,
 			TYPERANGE_AUTH, USE_INITIAL_ONLY);
@@ -501,10 +425,6 @@ out:
 	return -1;
 }
 
-/*	iscsi_set_keys_to_negotiate():
- *
- *
- */
 int iscsi_set_keys_to_negotiate(
 	int role,
 	int sessiontype,
@@ -577,10 +497,6 @@ int iscsi_set_keys_to_negotiate(
 	return 0;
 }
 
-/*	iscsi_set_keys_irrelevant_for_discovery():
- *
- *
- */
 int iscsi_set_keys_irrelevant_for_discovery(
 	iscsi_param_list_t *param_list)
 {
@@ -622,10 +538,6 @@ int iscsi_set_keys_irrelevant_for_discovery(
 	return 0;
 }
 
-/*	iscsi_copy_param_list():
- *
- *
- */
 int iscsi_copy_param_list(
 	iscsi_param_list_t **dst_param_list,
 	iscsi_param_list_t *src_param_list,
@@ -703,10 +615,6 @@ err_out:
 	return -1;
 }
 
-/*	iscsi_release_extra_responses():
- *
- *
- */
 static void iscsi_release_extra_responses(iscsi_param_list_t *param_list)
 {
 	iscsi_extra_response_t *er, *er_tmp;
@@ -718,10 +626,6 @@ static void iscsi_release_extra_responses(iscsi_param_list_t *param_list)
 	}
 }
 
-/*	iscsi_release_param_list():
- *
- *
- */
 void iscsi_release_param_list(iscsi_param_list_t *param_list)
 {
 	iscsi_param_t *param, *param_tmp;
@@ -743,10 +647,6 @@ void iscsi_release_param_list(iscsi_param_list_t *param_list)
 	kfree(param_list);
 }
 
-/*	iscsi_find_param_from_key():
- *
- *
- */
 iscsi_param_t *iscsi_find_param_from_key(
 	char *key,
 	iscsi_param_list_t *param_list)
@@ -771,10 +671,6 @@ iscsi_param_t *iscsi_find_param_from_key(
 	return param;
 }
 
-/*	iscsi_extract_key_value():
- *
- *
- */
 int iscsi_extract_key_value(char *textbuf, char **key, char **value)
 {
 	*value = strchr(textbuf, '=');
@@ -791,10 +687,6 @@ int iscsi_extract_key_value(char *textbuf, char **key, char **value)
 	return 0;
 }
 
-/*	iscsi_update_param_value():
- *
- *
- */
 int iscsi_update_param_value(iscsi_param_t *param, char *value)
 {
 	kfree(param->value);
@@ -813,10 +705,6 @@ int iscsi_update_param_value(iscsi_param_t *param, char *value)
 	return 0;
 }
 
-/*	iscsi_add_notunderstood_response():
- *
- *
- */
 static int iscsi_add_notunderstood_response(
 	char *key,
 	char *value,
@@ -847,23 +735,14 @@ static int iscsi_add_notunderstood_response(
 	return 0;
 }
 
-/*	iscsi_check_for_auth_key():
- *
- *
- */
 static int iscsi_check_for_auth_key(char *key)
 {
-	/*
-	 * RFC 1994
-	 */
+	 
 	if (!strcmp(key, "CHAP_A") || !strcmp(key, "CHAP_I") ||
 	    !strcmp(key, "CHAP_C") || !strcmp(key, "CHAP_N") ||
 	    !strcmp(key, "CHAP_R"))
 		return 1;
 
-	/*
-	 * RFC 2945
-	 */
 	if (!strcmp(key, "SRP_U") || !strcmp(key, "SRP_N") ||
 	    !strcmp(key, "SRP_g") || !strcmp(key, "SRP_s") ||
 	    !strcmp(key, "SRP_A") || !strcmp(key, "SRP_B") ||
@@ -873,10 +752,6 @@ static int iscsi_check_for_auth_key(char *key)
 	return 0;
 }
 
-/*	iscsi_check_proposer_for_optional_reply():
- *
- *
- */
 static void iscsi_check_proposer_for_optional_reply(iscsi_param_t *param)
 {
 	if (IS_TYPE_BOOL_AND(param)) {
@@ -885,22 +760,13 @@ static void iscsi_check_proposer_for_optional_reply(iscsi_param_t *param)
 	} else if (IS_TYPE_BOOL_OR(param)) {
 		if (!strcmp(param->value, YES))
 			SET_PSTATE_REPLY_OPTIONAL(param);
-		 /*
-		  * Required for gPXE iSCSI boot client
-		  */
+		  
 		if (!strcmp(param->name, IMMEDIATEDATA))
 			SET_PSTATE_REPLY_OPTIONAL(param);
 	} else if (IS_TYPE_NUMBER(param)) {
 		if (!strcmp(param->name, MAXRECVDATASEGMENTLENGTH))
 			SET_PSTATE_REPLY_OPTIONAL(param);
-		/*
-		 * The GlobalSAN iSCSI Initiator for MacOSX does
-		 * not respond to MaxBurstLength, FirstBurstLength,
-		 * DefaultTime2Wait or DefaultTime2Retain parameter keys.
-		 * So, we set them to 'reply optional' here, and assume the
-		 * the defaults from iscsi_parameters.h if the initiator
-		 * is not RFC compliant and the keys are not negotiated.
-		 */
+		 
 		if (!strcmp(param->name, MAXBURSTLENGTH))
 			SET_PSTATE_REPLY_OPTIONAL(param);
 		if (!strcmp(param->name, FIRSTBURSTLENGTH))
@@ -909,19 +775,13 @@ static void iscsi_check_proposer_for_optional_reply(iscsi_param_t *param)
 			SET_PSTATE_REPLY_OPTIONAL(param);
 		if (!strcmp(param->name, DEFAULTTIME2RETAIN))
 			SET_PSTATE_REPLY_OPTIONAL(param);
-		/*
-		 * Required for gPXE iSCSI boot client
-		 */
+		 
 		if (!strcmp(param->name, MAXCONNECTIONS))
 			SET_PSTATE_REPLY_OPTIONAL(param);
 	} else if (IS_PHASE_DECLARATIVE(param))
 		SET_PSTATE_REPLY_OPTIONAL(param);
 }
 
-/*	iscsi_check_boolean_value():
- *
- *
- */
 static int iscsi_check_boolean_value(iscsi_param_t *param, char *value)
 {
 	if (strcmp(value, YES) && strcmp(value, NO)) {
@@ -933,10 +793,6 @@ static int iscsi_check_boolean_value(iscsi_param_t *param, char *value)
 	return 0;
 }
 
-/*	iscsi_check_numerical_value():
- *
- *
- */
 static int iscsi_check_numerical_value(iscsi_param_t *param, char *value_ptr)
 {
 	char *tmpptr;
@@ -944,7 +800,6 @@ static int iscsi_check_numerical_value(iscsi_param_t *param, char *value_ptr)
 
 	value = simple_strtoul(value_ptr, &tmpptr, 0);
 
-/* #warning FIXME: Fix this */
 #if 0
 	if (strspn(endptr, WHITE_SPACE) != strlen(endptr)) {
 		printk(KERN_ERR "Illegal value \"%s\" for \"%s\".\n",
@@ -1012,10 +867,6 @@ static int iscsi_check_numerical_value(iscsi_param_t *param, char *value_ptr)
 	return 0;
 }
 
-/*	iscsi_check_numerical_range_value():
- *
- *
- */
 static int iscsi_check_numerical_range_value(iscsi_param_t *param, char *value)
 {
 	char *left_val_ptr = NULL, *right_val_ptr = NULL;
@@ -1059,9 +910,6 @@ static int iscsi_check_numerical_range_value(iscsi_param_t *param, char *value)
 		return -1;
 	}
 
-	/*
-	 * For now,  enforce reasonable defaults for [I,O]FMarkInt.
-	 */
 	tilde_ptr = strchr(param->value, '~');
 	if (!(tilde_ptr)) {
 		printk(KERN_ERR "Unable to locate numerical range indicator"
@@ -1102,10 +950,6 @@ static int iscsi_check_numerical_range_value(iscsi_param_t *param, char *value)
 	return 0;
 }
 
-/*	iscsi_check_string_or_list_value():
- *
- *
- */
 static int iscsi_check_string_or_list_value(iscsi_param_t *param, char *value)
 {
 	if (IS_PSTATE_PROPOSER(param))
@@ -1142,11 +986,6 @@ static int iscsi_check_string_or_list_value(iscsi_param_t *param, char *value)
 	return 0;
 }
 
-/*	iscsi_get_value_from_number_range():
- *
- *	This function is used to pick a value range number,  currently just
- *	returns the lesser of both right values.
- */
 static char *iscsi_get_value_from_number_range(
 	iscsi_param_t *param,
 	char *value)
@@ -1170,10 +1009,6 @@ static char *iscsi_get_value_from_number_range(
 		tilde_ptr1 : tilde_ptr2;
 }
 
-/*	iscsi_check_valuelist_for_support():
- *
- *
- */
 static char *iscsi_check_valuelist_for_support(
 	iscsi_param_t *param,
 	char *value)
@@ -1228,10 +1063,6 @@ out:
 	return proposer_values;
 }
 
-/*	iscsi_check_acceptor_state():
- *
- *
- */
 static int iscsi_check_acceptor_state(iscsi_param_t *param, char *value)
 {
 	u8 acceptor_boolean_value = 0, proposer_boolean_value = 0;
@@ -1344,10 +1175,6 @@ static int iscsi_check_acceptor_state(iscsi_param_t *param, char *value)
 	return 0;
 }
 
-/*	iscsi_check_proposer_state():
- *
- *
- */
 static int iscsi_check_proposer_state(iscsi_param_t *param, char *value)
 {
 	if (IS_PSTATE_RESPONSE_GOT(param)) {
@@ -1417,10 +1244,6 @@ static int iscsi_check_proposer_state(iscsi_param_t *param, char *value)
 	return 0;
 }
 
-/*	iscsi_check_value():
- *
- *
- */
 static int iscsi_check_value(iscsi_param_t *param, char *value)
 {
 	char *comma_ptr = NULL;
@@ -1428,10 +1251,7 @@ static int iscsi_check_value(iscsi_param_t *param, char *value)
 	if (!strcmp(value, REJECT)) {
 		if (!strcmp(param->name, IFMARKINT) ||
 		    !strcmp(param->name, OFMARKINT)) {
-			/*
-			 * Reject is not fatal for [I,O]FMarkInt,  and causes
-			 * [I,O]FMarker to be reset to No. (See iSCSI v20 A.3.2)
-			 */
+			 
 			SET_PSTATE_REJECT(param);
 			return 0;
 		}
@@ -1450,7 +1270,6 @@ static int iscsi_check_value(iscsi_param_t *param, char *value)
 			return -1;
 		}
 
-/* #warning FIXME: Add check for X-ExtensionKey here */
 		printk(KERN_ERR "Standard iSCSI key \"%s\" cannot be answered"
 			" with \"%s\", protocol error.\n", param->name, value);
 		return -1;
@@ -1502,10 +1321,6 @@ static int iscsi_check_value(iscsi_param_t *param, char *value)
 	return 0;
 }
 
-/*	__iscsi_check_key()
- *
- *
- */
 static iscsi_param_t *__iscsi_check_key(
 	char *key,
 	int sender,
@@ -1540,10 +1355,6 @@ static iscsi_param_t *__iscsi_check_key(
 	return param;
 }
 
-/*	iscsi_check_key():
- *
- *
- */
 static iscsi_param_t *iscsi_check_key(
 	char *key,
 	int phase,
@@ -1552,9 +1363,6 @@ static iscsi_param_t *iscsi_check_key(
 {
 	iscsi_param_t *param;
 
-	/*
-	 * Key name length must not exceed 63 bytes. (See iSCSI v20 5.1)
-	 */
 	if (strlen(key) > MAX_KEY_NAME_LENGTH) {
 		printk(KERN_ERR "Length of key name \"%s\" exceeds %d.\n",
 			key, MAX_KEY_NAME_LENGTH);
@@ -1605,10 +1413,6 @@ static iscsi_param_t *iscsi_check_key(
 	return param;
 }
 
-/*	iscsi_enforce_integrity_rules():
- *
- *
- */
 static int iscsi_enforce_integrity_rules(
 	u8 phase,
 	iscsi_param_list_t *param_list)
@@ -1726,10 +1530,6 @@ static int iscsi_enforce_integrity_rules(
 	return 0;
 }
 
-/*	iscsi_decode_text_input():
- *
- *
- */
 int iscsi_decode_text_input(
 	u8 phase,
 	u8 sender,
@@ -1806,10 +1606,6 @@ int iscsi_decode_text_input(
 	return 0;
 }
 
-/*	iscsi_encode_text_output():
- *
- *
- */
 int iscsi_encode_text_output(
 	u8 phase,
 	u8 sender,
@@ -1868,10 +1664,6 @@ int iscsi_encode_text_output(
 	return 0;
 }
 
-/*	iscsi_check_negotiated_keys():
- *
- *
- */
 int iscsi_check_negotiated_keys(iscsi_param_list_t *param_list)
 {
 	int ret = 0;
@@ -1892,10 +1684,6 @@ int iscsi_check_negotiated_keys(iscsi_param_list_t *param_list)
 	return ret;
 }
 
-/*	iscsi_set_param_value():
- *
- *
- */
 int iscsi_change_param_value(
 	char *keyvalue,
 	int sender,
@@ -1931,10 +1719,6 @@ int iscsi_change_param_value(
 	return 0;
 }
 
-/*	iscsi_set_connection_parameters():
- *
- *
- */
 void iscsi_set_connection_parameters(
 	iscsi_conn_ops_t *ops,
 	iscsi_param_list_t *param_list)
@@ -2007,10 +1791,6 @@ void iscsi_set_connection_parameters(
 #endif
 }
 
-/*	iscsi_set_session_parameters():
- *
- *
- */
 void iscsi_set_session_parameters(
 	iscsi_sess_ops_t *ops,
 	iscsi_param_list_t *param_list,

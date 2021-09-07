@@ -2,19 +2,7 @@
 #define MY_ABC_HERE
 #endif
 #ifdef MY_DEF_HERE
-/*
- * Watchdog timer tester for PowerPC Book-E systems
- *
- * Copyright 2010 Freescale Semiconductor Inc.
- *
- * Author: Jiang Yutang <b14898@freescale.com>
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
-
+ 
 #include <linux/module.h>
 
 static void __loop_occupy_cpu(void *data)
@@ -33,4 +21,4 @@ module_init(wdt_tester_init);
 
 MODULE_AUTHOR("Jiang Yutang");
 MODULE_LICENSE("GPL");
-#endif /* MY_DEF_HERE */
+#endif  

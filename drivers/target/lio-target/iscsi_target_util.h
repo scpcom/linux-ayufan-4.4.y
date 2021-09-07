@@ -99,4 +99,4 @@ extern struct kmem_cache *lio_r2t_cache;
 
 extern int iscsi_add_nopin(iscsi_conn_t *, int);
 
-#endif /*** ISCSI_TARGET_UTIL_H ***/
+#endif  

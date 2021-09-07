@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/hfsplus/super.c
- *
- * Copyright (C) 2001
- * Brad Boyer (flar@allandria.com)
- * (C) 2003 Ardis Technologies <roman@ardistech.com>
- *
- */
-
+ 
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/pagemap.h>
@@ -30,17 +22,17 @@ struct mutex syno_hfsplus_global_mutex;
 #endif
 
 #ifdef MY_ABC_HERE
-// 3802 byte for 8K node_size
+ 
 static inline size_t hfsplus_get_maxinline_attrsize(struct hfs_btree *btree)
 {
        unsigned int maxsize = btree->node_size;
-       // Copied from Apple open source /xnu-1699.26.8/bsd/hfs/hfs_xattr.c:2169
-       maxsize -= sizeof(struct hfs_bnode_desc);       /* minus node descriptor */
-       maxsize -= 3 * sizeof(u16);                     /* minus 3 index slots */
-       maxsize /= 2;                            /* 2 key/rec pairs minumum */
-       maxsize -= sizeof(struct hfsplus_attr_key);       /* minus maximum key size */
-       maxsize -= sizeof(struct hfsplus_attr_data) - 2;  /* minus data header */
-       maxsize &= 0xFFFFFFFE;                   /* multiple of 2 bytes */
+        
+       maxsize -= sizeof(struct hfs_bnode_desc);        
+       maxsize -= 3 * sizeof(u16);                      
+       maxsize /= 2;                             
+       maxsize -= sizeof(struct hfsplus_attr_key);        
+       maxsize -= sizeof(struct hfsplus_attr_data) - 2;   
+       maxsize &= 0xFFFFFFFE;                    
        return maxsize;
 }
 #endif
@@ -301,7 +293,7 @@ static int hfsplus_remount(struct super_block *sb, int *flags, char *data)
 			sb->s_flags |= MS_RDONLY;
 			*flags |= MS_RDONLY;
 		} else if (sbi.flags & HFSPLUS_SB_FORCE) {
-			/* nothing */
+			 
 		} else if (vhdr->attributes & cpu_to_be32(HFSPLUS_VOL_SOFTLOCK)) {
 			printk(KERN_WARNING "hfs: filesystem is marked locked, leaving read-only.\n");
 			sb->s_flags |= MS_RDONLY;
@@ -362,7 +354,6 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		goto cleanup;
 	}
 
-	/* temporarily use utf8 to correctly find the hidden dir below */
 	nls = sbi->nls;
 	sbi->nls = load_nls("utf8");
 	if (!sbi->nls) {
@@ -371,7 +362,6 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		goto cleanup;
 	}
 
-	/* Grab the volume header */
 	if (hfsplus_read_wrapper(sb)) {
 		if (!silent)
 			printk(KERN_WARNING "hfs: unable to find HFS+ superblock\n");
@@ -380,7 +370,6 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	}
 	vhdr = HFSPLUS_SB(sb).s_vhdr;
 
-	/* Copy parts of the volume header into the superblock */
 	sb->s_magic = HFSPLUS_VOLHEAD_SIG;
 	if (be16_to_cpu(vhdr->version) < HFSPLUS_MIN_VERSION ||
 	    be16_to_cpu(vhdr->version) > HFSPLUS_CURRENT_VERSION) {
@@ -400,7 +389,6 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	if (!HFSPLUS_SB(sb).rsrc_clump_blocks)
 		HFSPLUS_SB(sb).rsrc_clump_blocks = 1;
 
-	/* Set up operations so we can load metadata */
 	sb->s_op = &hfsplus_sops;
 	sb->s_maxbytes = MAX_LFS_FILESIZE;
 
@@ -409,7 +397,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		       "running fsck.hfsplus is recommended.  mounting read-only.\n");
 		sb->s_flags |= MS_RDONLY;
 	} else if (sbi->flags & HFSPLUS_SB_FORCE) {
-		/* nothing */
+		 
 	} else if (vhdr->attributes & cpu_to_be32(HFSPLUS_VOL_SOFTLOCK)) {
 		printk(KERN_WARNING "hfs: Filesystem is marked locked, mounting read-only.\n");
 		sb->s_flags |= MS_RDONLY;
@@ -420,7 +408,6 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	}
 	sbi->flags &= ~HFSPLUS_SB_FORCE;
 
-	/* Load metadata objects (B*Trees) */
 	HFSPLUS_SB(sb).ext_tree = hfs_btree_open(sb, HFSPLUS_EXT_CNID);
 	if (!HFSPLUS_SB(sb).ext_tree) {
 		printk(KERN_ERR "hfs: failed to load extents file\n");
@@ -456,7 +443,6 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	}
 	HFSPLUS_SB(sb).alloc_file = inode;
 
-	/* Load the root directory */
 	root = hfsplus_iget(sb, HFSPLUS_ROOT_CNID);
 	if (IS_ERR(root)) {
 		printk(KERN_ERR "hfs: failed to load root directory\n");
@@ -491,9 +477,6 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	if (sb->s_flags & MS_RDONLY)
 		goto out;
 
-	/* H+LX == hfsplusutils, H+Lx == this driver, H+lx is unused
-	 * all three are registered with Apple for our use
-	 */
 	vhdr->last_mount_vers = cpu_to_be32(HFSP_MOUNT_VERSION);
 	vhdr->modify_date = hfsp_now2mt();
 	be32_add_cpu(&vhdr->write_count, 1);

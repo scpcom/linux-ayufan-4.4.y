@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Freescale MPC85xx/MPC86xx RapidIO support
- *
- * Copyright (C) 2007, 2008 Freescale Semiconductor, Inc.
- * Zhang Wei <wei.zhang@freescale.com>
- *
- * Copyright 2005 MontaVista Software, Inc.
- * Matt Porter <mporter@kernel.crashing.org>
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
-
+ 
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/types.h>
@@ -29,7 +15,6 @@
 
 #include <asm/io.h>
 
-/* RapidIO definition irq, which read from OF-tree */
 #define IRQ_RIO_BELL(m)		(((struct rio_priv *)(m->priv))->bellirq)
 #define IRQ_RIO_TX(m)		(((struct rio_priv *)(m->priv))->txirq)
 #define IRQ_RIO_RX(m)		(((struct rio_priv *)(m->priv))->rxirq)
@@ -40,7 +25,7 @@
 #define RIO_ESCSR		0x158
 #define RIO_CCSR		0x15c
 #define RIO_ISR_AACR		0x10120
-#define RIO_ISR_AACR_AA		0x1	/* Accept All ID */
+#define RIO_ISR_AACR_AA		0x1	 
 #define RIO_MAINT_WIN_SIZE	0x400000
 #define RIO_DBELL_WIN_SIZE	0x1000
 
@@ -179,16 +164,6 @@ struct rio_priv {
 	int rxirq;
 };
 
-/**
- * fsl_rio_doorbell_send - Send a MPC85xx doorbell message
- * @mport: RapidIO master port info
- * @index: ID of RapidIO interface
- * @destid: Destination ID of target device
- * @data: 16-bit info field of RapidIO doorbell message
- *
- * Sends a MPC85xx doorbell message. Returns %0 on success or
- * %-EINVAL on failure.
- */
 static int fsl_rio_doorbell_send(struct rio_mport *mport,
 				int index, u16 destid, u16 data)
 {
@@ -202,15 +177,13 @@ static int fsl_rio_doorbell_send(struct rio_mport *mport,
 		break;
 	case RIO_PHY_SERIAL:
 #ifdef MY_DEF_HERE
-		/* busy wait, replace with spin_event_timeout() later */
+		 
 		while (in_be32(&priv->msg_regs->odsr) & 0x4) {
 			cpu_relax();
 		}
 		out_be32(&priv->msg_regs->odsr, 0x1602);
 #else
-		/* In the serial version silicons, such as MPC8548, MPC8641,
-		 * below operations is must be.
-		 */
+		 
 		out_be32(&priv->msg_regs->odmr, 0x00000000);
 #endif
 		out_be32(&priv->msg_regs->odretcr, 0x00000004);
@@ -228,17 +201,6 @@ static int fsl_rio_doorbell_send(struct rio_mport *mport,
 	return 0;
 }
 
-/**
- * fsl_local_config_read - Generate a MPC85xx local config space read
- * @mport: RapidIO master port info
- * @index: ID of RapdiIO interface
- * @offset: Offset into configuration space
- * @len: Length (in bytes) of the maintenance transaction
- * @data: Value to be read into
- *
- * Generates a MPC85xx local configuration space read. Returns %0 on
- * success or %-EINVAL on failure.
- */
 static int fsl_local_config_read(struct rio_mport *mport,
 				int index, u32 offset, int len, u32 *data)
 {
@@ -250,17 +212,6 @@ static int fsl_local_config_read(struct rio_mport *mport,
 	return 0;
 }
 
-/**
- * fsl_local_config_write - Generate a MPC85xx local config space write
- * @mport: RapidIO master port info
- * @index: ID of RapdiIO interface
- * @offset: Offset into configuration space
- * @len: Length (in bytes) of the maintenance transaction
- * @data: Value to be written
- *
- * Generates a MPC85xx local configuration space write. Returns %0 on
- * success or %-EINVAL on failure.
- */
 static int fsl_local_config_write(struct rio_mport *mport,
 				int index, u32 offset, int len, u32 data)
 {
@@ -273,19 +224,6 @@ static int fsl_local_config_write(struct rio_mport *mport,
 	return 0;
 }
 
-/**
- * fsl_rio_config_read - Generate a MPC85xx read maintenance transaction
- * @mport: RapidIO master port info
- * @index: ID of RapdiIO interface
- * @destid: Destination ID of transaction
- * @hopcount: Number of hops to target device
- * @offset: Offset into configuration space
- * @len: Length (in bytes) of the maintenance transaction
- * @val: Location to be read into
- *
- * Generates a MPC85xx read maintenance transaction. Returns %0 on
- * success or %-EINVAL on failure.
- */
 static int
 fsl_rio_config_read(struct rio_mport *mport, int index, u16 destid,
 			u8 hopcount, u32 offset, int len, u32 *val)
@@ -315,19 +253,6 @@ fsl_rio_config_read(struct rio_mport *mport, int index, u16 destid,
 	return 0;
 }
 
-/**
- * fsl_rio_config_write - Generate a MPC85xx write maintenance transaction
- * @mport: RapidIO master port info
- * @index: ID of RapdiIO interface
- * @destid: Destination ID of transaction
- * @hopcount: Number of hops to target device
- * @offset: Offset into configuration space
- * @len: Length (in bytes) of the maintenance transaction
- * @val: Value to be written
- *
- * Generates an MPC85xx write maintenance transaction. Returns %0 on
- * success or %-EINVAL on failure.
- */
 static int
 fsl_rio_config_write(struct rio_mport *mport, int index, u16 destid,
 			u8 hopcount, u32 offset, int len, u32 val)
@@ -356,17 +281,6 @@ fsl_rio_config_write(struct rio_mport *mport, int index, u16 destid,
 	return 0;
 }
 
-/**
- * rio_hw_add_outb_message - Add message to the MPC85xx outbound message queue
- * @mport: Master port with outbound message queue
- * @rdev: Target of outbound message
- * @mbox: Outbound mailbox
- * @buffer: Message to add to outbound queue
- * @len: Length of message
- *
- * Adds the @buffer message to the MPC85xx outbound message queue. Returns
- * %0 on success or %-EINVAL on failure.
- */
 int
 rio_hw_add_outb_message(struct rio_mport *mport, struct rio_dev *rdev, int mbox,
 			void *buffer, size_t len)
@@ -386,7 +300,6 @@ rio_hw_add_outb_message(struct rio_mport *mport, struct rio_dev *rdev, int mbox,
 		goto out;
 	}
 
-	/* Copy and clear rest of buffer */
 	memcpy(priv->msg_tx_ring.virt_buffer[priv->msg_tx_ring.tx_slot], buffer,
 			len);
 	if (len < (RIO_MAX_MSG_SIZE - 4))
@@ -395,33 +308,27 @@ rio_hw_add_outb_message(struct rio_mport *mport, struct rio_dev *rdev, int mbox,
 
 	switch (mport->phy_type) {
 	case RIO_PHY_PARALLEL:
-		/* Set mbox field for message */
+		 
 		desc->dport = mbox & 0x3;
 
-		/* Enable EOMI interrupt, set priority, and set destid */
 		desc->dattr = 0x28000000 | (rdev->destid << 2);
 		break;
 	case RIO_PHY_SERIAL:
-		/* Set mbox field for message, and set destid */
+		 
 		desc->dport = (rdev->destid << 16) | (mbox & 0x3);
 
-		/* Enable EOMI interrupt and priority */
 		desc->dattr = 0x28000000;
 		break;
 	}
 
-	/* Set transfer size aligned to next power of 2 (in double words) */
 	desc->dwcnt = is_power_of_2(len) ? len : 1 << get_bitmask_order(len);
 
-	/* Set snooping and source buffer address */
 	desc->saddr = 0x00000004
 		| priv->msg_tx_ring.phys_buffer[priv->msg_tx_ring.tx_slot];
 
-	/* Increment enqueue pointer */
 	omr = in_be32(&priv->msg_regs->omr);
 	out_be32(&priv->msg_regs->omr, omr | RIO_MSG_OMR_MUI);
 
-	/* Go to next descriptor */
 	if (++priv->msg_tx_ring.tx_slot == priv->msg_tx_ring.size)
 		priv->msg_tx_ring.tx_slot = 0;
 
@@ -431,14 +338,6 @@ rio_hw_add_outb_message(struct rio_mport *mport, struct rio_dev *rdev, int mbox,
 
 EXPORT_SYMBOL_GPL(rio_hw_add_outb_message);
 
-/**
- * fsl_rio_tx_handler - MPC85xx outbound message interrupt handler
- * @irq: Linux interrupt number
- * @dev_instance: Pointer to interrupt-specific data
- *
- * Handles outbound message interrupts. Executes a register outbound
- * mailbox event handler and acks the interrupt occurrence.
- */
 static irqreturn_t
 fsl_rio_tx_handler(int irq, void *dev_instance)
 {
@@ -466,7 +365,6 @@ fsl_rio_tx_handler(int irq, void *dev_instance)
 		port->outb_msg[0].mcback(port, priv->msg_tx_ring.dev_id, -1,
 				slot);
 
-		/* Ack the end-of-message interrupt */
 		out_be32(&priv->msg_regs->osr, RIO_MSG_OSR_EOMI);
 	}
 
@@ -474,17 +372,6 @@ fsl_rio_tx_handler(int irq, void *dev_instance)
 	return IRQ_HANDLED;
 }
 
-/**
- * rio_open_outb_mbox - Initialize MPC85xx outbound mailbox
- * @mport: Master port implementing the outbound message unit
- * @dev_id: Device specific pointer to pass on event
- * @mbox: Mailbox to open
- * @entries: Number of entries in the outbound mailbox ring
- *
- * Initializes buffer ring, request the outbound message interrupt,
- * and enables the outbound message unit. Returns %0 on success and
- * %-EINVAL or %-ENOMEM on failure.
- */
 int rio_open_outb_mbox(struct rio_mport *mport, void *dev_id, int mbox, int entries)
 {
 	int i, j, rc = 0;
@@ -496,7 +383,6 @@ int rio_open_outb_mbox(struct rio_mport *mport, void *dev_id, int mbox, int entr
 		goto out;
 	}
 
-	/* Initialize shadow copy ring */
 	priv->msg_tx_ring.dev_id = dev_id;
 	priv->msg_tx_ring.size = entries;
 
@@ -518,7 +404,6 @@ int rio_open_outb_mbox(struct rio_mport *mport, void *dev_id, int mbox, int entr
 		}
 	}
 
-	/* Initialize outbound message descriptor ring */
 	priv->msg_tx_ring.virt = dma_alloc_coherent(priv->dev,
 				priv->msg_tx_ring.size * RIO_MSG_DESC_SIZE,
 				&priv->msg_tx_ring.phys, GFP_KERNEL);
@@ -530,37 +415,24 @@ int rio_open_outb_mbox(struct rio_mport *mport, void *dev_id, int mbox, int entr
 			priv->msg_tx_ring.size * RIO_MSG_DESC_SIZE);
 	priv->msg_tx_ring.tx_slot = 0;
 
-	/* Point dequeue/enqueue pointers at first entry in ring */
 	out_be32(&priv->msg_regs->odqdpar, priv->msg_tx_ring.phys);
 	out_be32(&priv->msg_regs->odqepar, priv->msg_tx_ring.phys);
 
-	/* Configure for snooping */
 	out_be32(&priv->msg_regs->osar, 0x00000004);
 
-	/* Clear interrupt status */
 	out_be32(&priv->msg_regs->osr, 0x000000b3);
 
-	/* Hook up outbound message handler */
 	rc = request_irq(IRQ_RIO_TX(mport), fsl_rio_tx_handler, 0,
 			 "msg_tx", (void *)mport);
 	if (rc < 0)
 		goto out_irq;
 
-	/*
-	 * Configure outbound message unit
-	 *      Snooping
-	 *      Interrupts (all enabled, except QEIE)
-	 *      Chaining mode
-	 *      Disable
-	 */
 	out_be32(&priv->msg_regs->omr, 0x00100220);
 
-	/* Set number of entries */
 	out_be32(&priv->msg_regs->omr,
 		 in_be32(&priv->msg_regs->omr) |
 		 ((get_bitmask_order(entries) - 2) << 12));
 
-	/* Now enable the unit */
 	out_be32(&priv->msg_regs->omr, in_be32(&priv->msg_regs->omr) | 0x1);
 
       out:
@@ -580,37 +452,19 @@ int rio_open_outb_mbox(struct rio_mport *mport, void *dev_id, int mbox, int entr
 	return rc;
 }
 
-/**
- * rio_close_outb_mbox - Shut down MPC85xx outbound mailbox
- * @mport: Master port implementing the outbound message unit
- * @mbox: Mailbox to close
- *
- * Disables the outbound message unit, free all buffers, and
- * frees the outbound message interrupt.
- */
 void rio_close_outb_mbox(struct rio_mport *mport, int mbox)
 {
 	struct rio_priv *priv = mport->priv;
-	/* Disable inbound message unit */
+	 
 	out_be32(&priv->msg_regs->omr, 0);
 
-	/* Free ring */
 	dma_free_coherent(priv->dev,
 			  priv->msg_tx_ring.size * RIO_MSG_DESC_SIZE,
 			  priv->msg_tx_ring.virt, priv->msg_tx_ring.phys);
 
-	/* Free interrupt */
 	free_irq(IRQ_RIO_TX(mport), (void *)mport);
 }
 
-/**
- * fsl_rio_rx_handler - MPC85xx inbound message interrupt handler
- * @irq: Linux interrupt number
- * @dev_instance: Pointer to interrupt-specific data
- *
- * Handles inbound message interrupts. Executes a registered inbound
- * mailbox event handler and acks the interrupt occurrence.
- */
 static irqreturn_t
 fsl_rio_rx_handler(int irq, void *dev_instance)
 {
@@ -626,17 +480,10 @@ fsl_rio_rx_handler(int irq, void *dev_instance)
 		goto out;
 	}
 
-	/* XXX Need to check/dispatch until queue empty */
 	if (isr & RIO_MSG_ISR_DIQI) {
-		/*
-		 * We implement *only* mailbox 0, but can receive messages
-		 * for any mailbox/letter to that mailbox destination. So,
-		 * make the callback with an unknown/invalid mailbox number
-		 * argument.
-		 */
+		 
 		port->inb_msg[0].mcback(port, priv->msg_rx_ring.dev_id, -1, -1);
 
-		/* Ack the queueing interrupt */
 		out_be32(&priv->msg_regs->isr, RIO_MSG_ISR_DIQI);
 	}
 
@@ -644,17 +491,6 @@ fsl_rio_rx_handler(int irq, void *dev_instance)
 	return IRQ_HANDLED;
 }
 
-/**
- * rio_open_inb_mbox - Initialize MPC85xx inbound mailbox
- * @mport: Master port implementing the inbound message unit
- * @dev_id: Device specific pointer to pass on event
- * @mbox: Mailbox to open
- * @entries: Number of entries in the inbound mailbox ring
- *
- * Initializes buffer ring, request the inbound message interrupt,
- * and enables the inbound message unit. Returns %0 on success
- * and %-EINVAL or %-ENOMEM on failure.
- */
 int rio_open_inb_mbox(struct rio_mport *mport, void *dev_id, int mbox, int entries)
 {
 	int i, rc = 0;
@@ -666,14 +502,12 @@ int rio_open_inb_mbox(struct rio_mport *mport, void *dev_id, int mbox, int entri
 		goto out;
 	}
 
-	/* Initialize client buffer ring */
 	priv->msg_rx_ring.dev_id = dev_id;
 	priv->msg_rx_ring.size = entries;
 	priv->msg_rx_ring.rx_slot = 0;
 	for (i = 0; i < priv->msg_rx_ring.size; i++)
 		priv->msg_rx_ring.virt_buffer[i] = NULL;
 
-	/* Initialize inbound message ring */
 	priv->msg_rx_ring.virt = dma_alloc_coherent(priv->dev,
 				priv->msg_rx_ring.size * RIO_MAX_MSG_SIZE,
 				&priv->msg_rx_ring.phys, GFP_KERNEL);
@@ -682,14 +516,11 @@ int rio_open_inb_mbox(struct rio_mport *mport, void *dev_id, int mbox, int entri
 		goto out;
 	}
 
-	/* Point dequeue/enqueue pointers at first entry in ring */
 	out_be32(&priv->msg_regs->ifqdpar, (u32) priv->msg_rx_ring.phys);
 	out_be32(&priv->msg_regs->ifqepar, (u32) priv->msg_rx_ring.phys);
 
-	/* Clear interrupt status */
 	out_be32(&priv->msg_regs->isr, 0x00000091);
 
-	/* Hook up inbound message handler */
 	rc = request_irq(IRQ_RIO_RX(mport), fsl_rio_rx_handler, 0,
 			 "msg_rx", (void *)mport);
 	if (rc < 0) {
@@ -699,56 +530,28 @@ int rio_open_inb_mbox(struct rio_mport *mport, void *dev_id, int mbox, int entri
 		goto out;
 	}
 
-	/*
-	 * Configure inbound message unit:
-	 *      Snooping
-	 *      4KB max message size
-	 *      Unmask all interrupt sources
-	 *      Disable
-	 */
 	out_be32(&priv->msg_regs->imr, 0x001b0060);
 
-	/* Set number of queue entries */
 	setbits32(&priv->msg_regs->imr, (get_bitmask_order(entries) - 2) << 12);
 
-	/* Now enable the unit */
 	setbits32(&priv->msg_regs->imr, 0x1);
 
       out:
 	return rc;
 }
 
-/**
- * rio_close_inb_mbox - Shut down MPC85xx inbound mailbox
- * @mport: Master port implementing the inbound message unit
- * @mbox: Mailbox to close
- *
- * Disables the inbound message unit, free all buffers, and
- * frees the inbound message interrupt.
- */
 void rio_close_inb_mbox(struct rio_mport *mport, int mbox)
 {
 	struct rio_priv *priv = mport->priv;
-	/* Disable inbound message unit */
+	 
 	out_be32(&priv->msg_regs->imr, 0);
 
-	/* Free ring */
 	dma_free_coherent(priv->dev, priv->msg_rx_ring.size * RIO_MAX_MSG_SIZE,
 			  priv->msg_rx_ring.virt, priv->msg_rx_ring.phys);
 
-	/* Free interrupt */
 	free_irq(IRQ_RIO_RX(mport), (void *)mport);
 }
 
-/**
- * rio_hw_add_inb_buffer - Add buffer to the MPC85xx inbound message queue
- * @mport: Master port implementing the inbound message unit
- * @mbox: Inbound mailbox number
- * @buf: Buffer to add to inbound queue
- *
- * Adds the @buf buffer to the MPC85xx inbound message queue. Returns
- * %0 on success or %-EINVAL on failure.
- */
 int rio_hw_add_inb_buffer(struct rio_mport *mport, int mbox, void *buf)
 {
 	int rc = 0;
@@ -775,14 +578,6 @@ int rio_hw_add_inb_buffer(struct rio_mport *mport, int mbox, void *buf)
 
 EXPORT_SYMBOL_GPL(rio_hw_add_inb_buffer);
 
-/**
- * rio_hw_get_inb_message - Fetch inbound message from the MPC85xx message unit
- * @mport: Master port implementing the inbound message unit
- * @mbox: Inbound mailbox number
- *
- * Gets the next available inbound message from the inbound message queue.
- * A pointer to the message is returned on success or NULL on failure.
- */
 void *rio_hw_get_inb_message(struct rio_mport *mport, int mbox)
 {
 	struct rio_priv *priv = mport->priv;
@@ -792,7 +587,6 @@ void *rio_hw_get_inb_message(struct rio_mport *mport, int mbox)
 
 	phys_buf = in_be32(&priv->msg_regs->ifqdpar);
 
-	/* If no more messages, then bail out */
 	if (phys_buf == in_be32(&priv->msg_regs->ifqepar))
 		goto out2;
 
@@ -807,10 +601,8 @@ void *rio_hw_get_inb_message(struct rio_mport *mport, int mbox)
 		goto out1;
 	}
 
-	/* Copy max message size, caller is expected to allocate that big */
 	memcpy(buf, (void *)virt_buf, RIO_MAX_MSG_SIZE);
 
-	/* Clear the available buffer */
 	priv->msg_rx_ring.virt_buffer[buf_idx] = NULL;
 
       out1:
@@ -822,14 +614,6 @@ void *rio_hw_get_inb_message(struct rio_mport *mport, int mbox)
 
 EXPORT_SYMBOL_GPL(rio_hw_get_inb_message);
 
-/**
- * fsl_rio_dbell_handler - MPC85xx doorbell interrupt handler
- * @irq: Linux interrupt number
- * @dev_instance: Pointer to interrupt-specific data
- *
- * Handles doorbell interrupts. Parses a list of registered
- * doorbell event handlers and executes a matching event handler.
- */
 static irqreturn_t
 fsl_rio_dbell_handler(int irq, void *dev_instance)
 {
@@ -851,7 +635,6 @@ fsl_rio_dbell_handler(int irq, void *dev_instance)
 		goto out;
 	}
 
-	/* XXX Need to check/dispatch until queue empty */
 	if (dsr & DOORBELL_DSR_DIQI) {
 		u32 dmsg =
 		    (u32) priv->dbell_ring.virt +
@@ -886,20 +669,11 @@ fsl_rio_dbell_handler(int irq, void *dev_instance)
 	return IRQ_HANDLED;
 }
 
-/**
- * fsl_rio_doorbell_init - MPC85xx doorbell interface init
- * @mport: Master port implementing the inbound doorbell unit
- *
- * Initializes doorbell unit hardware and inbound DMA buffer
- * ring. Called from fsl_rio_setup(). Returns %0 on success
- * or %-ENOMEM on failure.
- */
 static int fsl_rio_doorbell_init(struct rio_mport *mport)
 {
 	struct rio_priv *priv = mport->priv;
 	int rc = 0;
 
-	/* Map outbound doorbell window immediately after maintenance window */
 	priv->dbell_win = ioremap(mport->iores.start + RIO_MAINT_WIN_SIZE,
 			    RIO_DBELL_WIN_SIZE);
 	if (!priv->dbell_win) {
@@ -909,7 +683,6 @@ static int fsl_rio_doorbell_init(struct rio_mport *mport)
 		goto out;
 	}
 
-	/* Initialize inbound doorbells */
 	priv->dbell_ring.virt = dma_alloc_coherent(priv->dev, 512 *
 		    DOORBELL_MESSAGE_SIZE, &priv->dbell_ring.phys, GFP_KERNEL);
 	if (!priv->dbell_ring.virt) {
@@ -919,14 +692,11 @@ static int fsl_rio_doorbell_init(struct rio_mport *mport)
 		goto out;
 	}
 
-	/* Point dequeue/enqueue pointers at first entry in ring */
 	out_be32(&priv->msg_regs->dqdpar, (u32) priv->dbell_ring.phys);
 	out_be32(&priv->msg_regs->dqepar, (u32) priv->dbell_ring.phys);
 
-	/* Clear interrupt status */
 	out_be32(&priv->msg_regs->dsr, 0x00000091);
 
-	/* Hook up doorbell handler */
 	rc = request_irq(IRQ_RIO_BELL(mport), fsl_rio_dbell_handler, 0,
 			 "dbell_rx", (void *)mport);
 	if (rc < 0) {
@@ -938,7 +708,6 @@ static int fsl_rio_doorbell_init(struct rio_mport *mport)
 		goto out;
 	}
 
-	/* Configure doorbells for snooping, 512 entries, and enable */
 	out_be32(&priv->msg_regs->dmr, 0x00108161);
 
       out:
@@ -949,7 +718,7 @@ static char *cmdline = NULL;
 
 static int fsl_rio_get_hdid(int index)
 {
-	/* XXX Need to parse multiple entries in some format */
+	 
 	if (!cmdline)
 		return -1;
 
@@ -971,7 +740,7 @@ static inline void fsl_rio_info(struct device *dev, u32 ccsr)
 {
 	const char *str;
 	if (ccsr & 1) {
-		/* Serial phy */
+		 
 		switch (ccsr >> 30) {
 		case 0:
 			str = "1";
@@ -1001,7 +770,7 @@ static inline void fsl_rio_info(struct device *dev, u32 ccsr)
 		}
 		dev_info(dev, "Training connection status: %s\n", str);
 	} else {
-		/* Parallel phy */
+		 
 		if (!(ccsr & 0x80000000))
 			dev_info(dev, "Output port operating in 8-bit mode\n");
 		if (!(ccsr & 0x08000000))
@@ -1009,14 +778,6 @@ static inline void fsl_rio_info(struct device *dev, u32 ccsr)
 	}
 }
 
-/**
- * fsl_rio_setup - Setup Freescale PowerPC RapidIO interface
- * @dev: of_device pointer
- *
- * Initializes MPC85xx RapidIO hardware interface, configures
- * master port with system-specific info, and registers the
- * master port with the RapidIO subsystem.
- */
 int fsl_rio_setup(struct of_device *dev)
 {
 	struct rio_ops *ops;
@@ -1051,19 +812,18 @@ int fsl_rio_setup(struct of_device *dev)
 		return -EFAULT;
 	}
 
-	/* Get node address wide */
 	cell = of_get_property(dev->node, "#address-cells", NULL);
 	if (cell)
 		aw = *cell;
 	else
 		aw = of_n_addr_cells(dev->node);
-	/* Get node size wide */
+	 
 	cell = of_get_property(dev->node, "#size-cells", NULL);
 	if (cell)
 		sw = *cell;
 	else
 		sw = of_n_size_cells(dev->node);
-	/* Get parent address wide wide */
+	 
 	paw = of_n_addr_cells(dev->node);
 
 	law_start = of_read_number(dt_range + aw, paw);
@@ -1125,30 +885,29 @@ int fsl_rio_setup(struct of_device *dev)
 
 	priv->regs_win = ioremap(regs.start, regs.end - regs.start + 1);
 
-	/* Probe the master port phy type */
 	ccsr = in_be32(priv->regs_win + RIO_CCSR);
 	port->phy_type = (ccsr & 1) ? RIO_PHY_SERIAL : RIO_PHY_PARALLEL;
 	dev_info(&dev->dev, "RapidIO PHY type: %s\n",
 			(port->phy_type == RIO_PHY_PARALLEL) ? "parallel" :
 			((port->phy_type == RIO_PHY_SERIAL) ? "serial" :
 			 "unknown"));
-	/* Checking the port training status */
+	 
 	if (in_be32((priv->regs_win + RIO_ESCSR)) & 1) {
 		dev_err(&dev->dev, "Port is not ready. "
 				   "Try to restart connection...\n");
 		switch (port->phy_type) {
 		case RIO_PHY_SERIAL:
-			/* Disable ports */
+			 
 			out_be32(priv->regs_win + RIO_CCSR, 0);
-			/* Set 1x lane */
+			 
 			setbits32(priv->regs_win + RIO_CCSR, 0x02000000);
-			/* Enable ports */
+			 
 			setbits32(priv->regs_win + RIO_CCSR, 0x00600000);
 			break;
 		case RIO_PHY_PARALLEL:
-			/* Disable ports */
+			 
 			out_be32(priv->regs_win + RIO_CCSR, 0x22000000);
-			/* Enable ports */
+			 
 			out_be32(priv->regs_win + RIO_CCSR, 0x44000000);
 			break;
 		}
@@ -1175,20 +934,17 @@ int fsl_rio_setup(struct of_device *dev)
 				((port->phy_type == RIO_PHY_SERIAL) ?
 				RIO_S_MSG_REGS_OFFSET : RIO_P_MSG_REGS_OFFSET));
 
-	/* Set to receive any dist ID for serial RapidIO controller. */
 	if (port->phy_type == RIO_PHY_SERIAL)
 		out_be32((priv->regs_win + RIO_ISR_AACR), RIO_ISR_AACR_AA);
 
-	/* Configure maintenance transaction window */
 	out_be32(&priv->maint_atmu_regs->rowbar, law_start >> 12);
-	out_be32(&priv->maint_atmu_regs->rowar, 0x80077015);	/* 4M */
+	out_be32(&priv->maint_atmu_regs->rowar, 0x80077015);	 
 
 	priv->maint_win = ioremap(law_start, RIO_MAINT_WIN_SIZE);
 
-	/* Configure outbound doorbell window */
 	out_be32(&priv->dbell_atmu_regs->rowbar,
 			(law_start + RIO_MAINT_WIN_SIZE) >> 12);
-	out_be32(&priv->dbell_atmu_regs->rowar, 0x8004200b);	/* 4k */
+	out_be32(&priv->dbell_atmu_regs->rowar, 0x8004200b);	 
 	fsl_rio_doorbell_init(port);
 
 	return 0;
@@ -1203,8 +959,6 @@ err_ops:
 	return rc;
 }
 
-/* The probe function for RapidIO peer-to-peer network.
- */
 static int __devinit fsl_of_rio_rpn_probe(struct of_device *dev,
 				     const struct of_device_id *match)
 {
@@ -1216,7 +970,6 @@ static int __devinit fsl_of_rio_rpn_probe(struct of_device *dev,
 	if (rc)
 		goto out;
 
-	/* Enumerate all registered ports */
 	rc = rio_init_mports();
 out:
 	return rc;

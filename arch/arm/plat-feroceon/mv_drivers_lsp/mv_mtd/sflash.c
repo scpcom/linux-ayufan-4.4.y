@@ -1,40 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell 
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell Commercial License Option
-
-If you received this File from Marvell and you have entered into a commercial
-license agreement (a "Commercial License") with Marvell, the File is licensed
-to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or 
-modify this File in accordance with the terms and conditions of the General 
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is 
-available along with the File in the license.txt file or by writing to the Free 
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or 
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt. 
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY 
-DISCLAIMED.  The GPL License provides additional details about this warranty 
-disclaimer.
-********************************************************************************/
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/types.h>
@@ -48,15 +15,12 @@ disclaimer.
 #include "sflash/mvSFlashSpec.h"
 #include "ctrlEnv/mvCtrlEnvLib.h"
 
-/*#define MTD_SFLASH_DEBUG*/
-
 #ifdef MTD_SFLASH_DEBUG
 #define DB(x)	x
 #else
 #define DB(x)
 #endif
 
-/* macros for interrupts enable/disable */
 #define sflash_disable_irqs(flags, sflash_in_irq)	\
 	sflash_in_irq = in_interrupt();			\
 	if(!sflash_in_irq)	 	 		\
@@ -72,7 +36,6 @@ disclaimer.
 	typedef uint64_t	sflash_size_t;
 #endif
 
-/* Configuration options */
 static struct mtd_info *sflash_probe(struct map_info *map);
 static void sflash_destroy(struct mtd_info *mtd);
 static int sflash_read(struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen, u_char *buf);
@@ -118,7 +81,6 @@ static struct mtd_info *sflash_probe(struct map_info *map)
 
 	DB(printk("\nINFO: entering %s",__FUNCTION__));
 
-	/* allocate the memory for the mtd_info */
 	mtd = kmalloc(sizeof(*mtd), GFP_KERNEL);
 	if(!mtd)
 	{
@@ -126,7 +88,6 @@ static struct mtd_info *sflash_probe(struct map_info *map)
 		return NULL;
 	}
 
-	/* allocate memory for the sflash private structure */
 	sflash = kmalloc(sizeof(MV_SFLASH_INFO), GFP_KERNEL);
 	if(!sflash) 
 	{
@@ -135,13 +96,12 @@ static struct mtd_info *sflash_probe(struct map_info *map)
 		return NULL;
 	}
 		
-	/* clear both structures before usage */
 	memset(mtd, 0, sizeof(*mtd));
 	memset(sflash, 0, sizeof(*sflash));
 	    
 	DB(printk("\nINFO: %s - Base address %08x",__FUNCTION__, sflash->baseAddr));
 #ifdef CONFIG_ARCH_FEROCEON_ORION	
-	/* First check that SPI bus mode is configured to connect to an external SFlash */
+	 
     if (mvCtrlSpiBusModeDetect() != MV_SPI_CONN_TO_EXT_FLASH)
     {
         printk(KERN_NOTICE "\nERROR: %s - SPI interface is not routed to external SPI flash!", __FUNCTION__);
@@ -150,9 +110,9 @@ static struct mtd_info *sflash_probe(struct map_info *map)
 		return NULL;
     }
 #endif
-	/* Try to detect the flash and initialize it over SPI */	
+	 	
 	sflash->baseAddr         = map->phys;
-    sflash->index            = MV_INVALID_DEVICE_NUMBER; /* will be detected in init */	
+    sflash->index            = MV_INVALID_DEVICE_NUMBER;  	
 	sflash_disable_irqs(flags, sflash_in_irq);	
 	if (mvSFlashInit(sflash) != MV_OK)
 	{
@@ -164,10 +124,9 @@ static struct mtd_info *sflash_probe(struct map_info *map)
 	}
 	sflash_enable_irqs(flags, sflash_in_irq);
 	
-	/* After success fill in the MTD structure with the appropriate info */
 	mtd->erasesize = sflash->sectorSize;
 	mtd->size = sflash->sectorSize * sflash->sectorNumber;
-	mtd->priv = map; /*sflash;*/
+	mtd->priv = map;  
 	mtd->type = MTD_NORFLASH;
 	mtd->erase = sflash_erase;
 	mtd->read = sflash_read;
@@ -179,14 +138,13 @@ static struct mtd_info *sflash_probe(struct map_info *map)
 	mtd->unlock = sflash_unlock;
 	mtd->block_isbad = sflash_block_isbad;
 	mtd->block_markbad = sflash_block_markbad;	
-	mtd->flags = (MTD_WRITEABLE | MTD_BIT_WRITEABLE); /* just like MTD_CAP_NORFLASH */
+	mtd->flags = (MTD_WRITEABLE | MTD_BIT_WRITEABLE);  
 	mtd->name = map->name;
 	mtd->writesize = 1;
 	
 	map->fldrv = &sflash_chipdrv;
 	map->fldrv_priv = sflash;
 	
-	/* Print some debug messages with the detected sflash info */
 	DB(printk("\nINFO: %s - Detected SFlash device (size %d)", __FUNCTION__, mtd->size));
 	DB(printk("\n           Base Address    : 0x%08x", sflash->baseAddr));
 	DB(printk("\n           Manufacturer ID : 0x%02x", sflash->manufacturerId));
@@ -209,7 +167,6 @@ static void sflash_destroy(struct mtd_info *mtd)
 
 	DB(printk("\nINFO: %s called", __FUNCTION__));
 
-	/* free memory allocated at probe for the private sflash structure */
 	if (sflash)
 		kfree(sflash);	
 }
@@ -246,7 +203,7 @@ static int sflash_write(struct mtd_info *mtd, loff_t to, size_t len,
 {
 	struct map_info *map = mtd->priv;
 	MV_SFLASH_INFO *sflash = map->fldrv_priv;
-/*	MV_SFLASH_INFO *sflash = mtd->priv;*/
+ 
 	MV_U32 offset = ((MV_U32)to);
 	MV_ULONG flags = 0, sflash_in_irq = 0;
 	
@@ -274,7 +231,7 @@ static int sflash_erase(struct mtd_info *mtd, struct erase_info *instr)
 {
 	struct map_info *map = mtd->priv;
 	MV_SFLASH_INFO *sflash = map->fldrv_priv;
-/*	MV_SFLASH_INFO *sflash = mtd->priv;*/
+ 
 	MV_U32 fsec, lsec;
 #ifdef MY_ABC_HERE
 	MV_U32 count, sleep_interval;
@@ -357,8 +314,7 @@ static int sflash_lock (struct mtd_info *mtd, loff_t ofs, sflash_size_t len)
 	struct map_info *map = mtd->priv;
 	MV_SFLASH_INFO *sflash = map->fldrv_priv;
 	MV_ULONG flags = 0, sflash_in_irq = 0;
-/*	MV_SFLASH_INFO *sflash = mtd->priv;*/
-	
+ 
 	DB(printk("\nINFO: %s called", __FUNCTION__));
 	
 	sflash_disable_irqs(flags, sflash_in_irq);
@@ -382,8 +338,7 @@ static int sflash_unlock (struct mtd_info *mtd, loff_t ofs, sflash_size_t len)
 	struct map_info *map = mtd->priv;
 	MV_SFLASH_INFO *sflash = map->fldrv_priv;
 	MV_ULONG flags = 0, sflash_in_irq = 0;
-/*	MV_SFLASH_INFO *sflash = mtd->priv;*/
-
+ 
 	DB(printk("\nINFO: %s called", __FUNCTION__));
 	
 	sflash_disable_irqs(flags, sflash_in_irq);

@@ -1,31 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
- * Filename:  target_core_mib.c
- *
- * Copyright (c) 2006-2007 SBE, Inc.  All Rights Reserved.
- * Copyright (c) 2007-2009 Rising Tide Software, Inc.
- * Copyright (c) 2008-2009 Linux-iSCSI.org
- *
- * Nicholas A. Bellinger <nab@linux-iscsi.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- ******************************************************************************/
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/delay.h>
@@ -50,14 +26,12 @@
 #include <target/target_core_fabric_ops.h>
 #include <target/target_core_configfs.h>
 
-/* SCSI mib table index */
 scsi_index_table_t scsi_index_table;
 
 #ifndef INITIAL_JIFFIES
 #define INITIAL_JIFFIES ((unsigned long)(unsigned int) (-300*HZ))
 #endif
 
-/* SCSI Instance Table */
 #define SCSI_INST_SW_INDEX		1
 #define SCSI_TRANSPORT_INDEX		1
 
@@ -91,13 +65,6 @@ static void locate_hba_stop(struct seq_file *seq, void *v)
 	spin_unlock(&se_global->g_device_lock);
 }
 
-/****************************************************************************
- * SCSI MIB Tables
- ****************************************************************************/
-
-/*
- * SCSI Instance Table
- */
 static void *scsi_inst_seq_start(
 	struct seq_file *seq,
 	loff_t *pos)
@@ -156,9 +123,6 @@ static const struct file_operations scsi_inst_seq_fops = {
 	.release = seq_release,
 };
 
-/*
- * SCSI Device Table
- */
 static void *scsi_dev_seq_start(struct seq_file *seq, loff_t *pos)
 {
 	return locate_hba_start(seq, pos);
@@ -191,7 +155,7 @@ static int scsi_dev_seq_show(struct seq_file *seq, void *v)
 
 	hba = dev->se_hba;
 	if (!(hba)) {
-		/* Log error ? */
+		 
 		return 0;
 	}
 
@@ -200,13 +164,11 @@ static int scsi_dev_seq_show(struct seq_file *seq, void *v)
 
 	memcpy(&str[0], (void *)DEV_T10_WWN(dev), 28);
 
-	/* vendor */
 	for (k = 0; k < 8; k++)
 		str[k] = ISPRINT(DEV_T10_WWN(dev)->vendor[k]) ?
 				DEV_T10_WWN(dev)->vendor[k] : 0x20;
 	str[k] = 0x20;
 
-	/* model */
 	for (k = 0; k < 16; k++)
 		str[k+9] = ISPRINT(DEV_T10_WWN(dev)->model[k]) ?
 				DEV_T10_WWN(dev)->model[k] : 0x20;
@@ -237,9 +199,6 @@ static const struct file_operations scsi_dev_seq_fops = {
 	.release = seq_release,
 };
 
-/*
- * SCSI Port Table
- */
 static void *scsi_port_seq_start(struct seq_file *seq, loff_t *pos)
 {
 	return locate_hba_start(seq, pos);
@@ -271,11 +230,10 @@ static int scsi_port_seq_show(struct seq_file *seq, void *v)
 
 	hba = dev->se_hba;
 	if (!(hba)) {
-		/* Log error ? */
+		 
 		return 0;
 	}
 
-	/* FIXME: scsiPortBusyStatuses count */
 	spin_lock(&dev->se_port_lock);
 	list_for_each_entry_safe(sep, sep_tmp, &dev->dev_sep_list, sep_list) {
 		seq_printf(seq, "%u %u %u %s%u %u\n", hba->hba_index,
@@ -307,9 +265,6 @@ static const struct file_operations scsi_port_seq_fops = {
 	.release = seq_release,
 };
 
-/*
- * SCSI Transport Table
- */
 static void *scsi_transport_seq_start(struct seq_file *seq, loff_t *pos)
 {
 	return locate_hba_start(seq, pos);
@@ -344,7 +299,7 @@ static int scsi_transport_seq_show(struct seq_file *seq, void *v)
 
 	hba = dev->se_hba;
 	if (!(hba)) {
-		/* Log error ? */
+		 
 		return 0;
 	}
 
@@ -357,14 +312,14 @@ static int scsi_transport_seq_show(struct seq_file *seq, void *v)
 				TPG_TFO(tpg)->get_fabric_name());
 
 		seq_printf(seq, "%u %s %u %s+%s\n",
-			hba->hba_index, /* scsiTransportIndex */
-			buf,  /* scsiTransportType */
+			hba->hba_index,  
+			buf,   
 			(TPG_TFO(tpg)->tpg_get_inst_index != NULL) ?
 			TPG_TFO(tpg)->tpg_get_inst_index(tpg) :
 			0,
 			TPG_TFO(tpg)->tpg_get_wwn(tpg),
 			(strlen(wwn->unit_serial)) ?
-			/* scsiTransportDevName */
+			 
 			wwn->unit_serial : wwn->vendor);
 	}
 	spin_unlock(&dev->se_port_lock);
@@ -392,9 +347,6 @@ static const struct file_operations scsi_transport_seq_fops = {
 	.release = seq_release,
 };
 
-/*
- * SCSI Target Device Table
- */
 static void *scsi_tgt_dev_seq_start(struct seq_file *seq, loff_t *pos)
 {
 	return locate_hba_start(seq, pos);
@@ -410,7 +362,7 @@ static void scsi_tgt_dev_seq_stop(struct seq_file *seq, void *v)
 	locate_hba_stop(seq, v);
 }
 
-#define LU_COUNT	1  /* for now */
+#define LU_COUNT	1   
 static int scsi_tgt_dev_seq_show(struct seq_file *seq, void *v)
 {
 	se_hba_t *hba;
@@ -429,7 +381,7 @@ static int scsi_tgt_dev_seq_show(struct seq_file *seq, void *v)
 
 	hba = dev->se_hba;
 	if (!(hba)) {
-		/* Log error ? */
+		 
 		return 0;
 	}
 
@@ -482,9 +434,6 @@ static const struct file_operations scsi_tgt_dev_seq_fops = {
 	.release = seq_release,
 };
 
-/*
- * SCSI Target Port Table
- */
 static void *scsi_tgt_port_seq_start(struct seq_file *seq, loff_t *pos)
 {
 	return locate_hba_start(seq, pos);
@@ -521,7 +470,7 @@ static int scsi_tgt_port_seq_show(struct seq_file *seq, void *v)
 
 	hba = dev->se_hba;
 	if (!(hba)) {
-		/* Log error ? */
+		 
 		return 0;
 	}
 
@@ -573,12 +522,6 @@ static const struct file_operations scsi_tgt_port_seq_fops = {
 	.release = seq_release,
 };
 
-/*
- * SCSI Authorized Initiator Table:
- * It contains the SCSI Initiators authorized to be attached to one of the
- * local Target ports.
- * Iterates through all active TPGs and extracts the info from the ACLs
- */
 static void *scsi_auth_intr_seq_start(struct seq_file *seq, loff_t *pos)
 {
 	spin_lock_bh(&se_global->se_tpg_lock);
@@ -630,37 +573,37 @@ static int scsi_auth_intr_seq_show(struct seq_file *seq, void *v)
 
 			seq_printf(seq, "%u %u %u %u %u %s %u %u %u %u %u %u"
 					" %u %s\n",
-				/* scsiInstIndex */
+				 
 				(TPG_TFO(se_tpg)->tpg_get_inst_index != NULL) ?
 				TPG_TFO(se_tpg)->tpg_get_inst_index(se_tpg) :
 				0,
-				/* scsiDeviceIndex */
+				 
 				lun->se_dev->dev_index,
-				/* scsiAuthIntrTgtPortIndex */
+				 
 				TPG_TFO(se_tpg)->tpg_get_tag(se_tpg),
-				/* scsiAuthIntrIndex */
+				 
 				se_nacl->acl_index,
-				/* scsiAuthIntrDevOrPort */
+				 
 				1,
-				/* scsiAuthIntrName */
+				 
 				se_nacl->initiatorname[0] ?
 					se_nacl->initiatorname : NONE,
-				/* FIXME: scsiAuthIntrLunMapIndex */
+				 
 				0,
-				/* scsiAuthIntrAttachedTimes */
+				 
 				deve->attach_count,
-				/* scsiAuthIntrOutCommands */
+				 
 				deve->total_cmds,
-				/* scsiAuthIntrReadMegaBytes */
+				 
 				(u32)(deve->read_bytes >> 20),
-				/* scsiAuthIntrWrittenMegaBytes */
+				 
 				(u32)(deve->write_bytes >> 20),
-				/* FIXME: scsiAuthIntrHSOutCommands */
+				 
 				0,
-				/* scsiAuthIntrLastCreation */
+				 
 				(u32)(((u32)deve->creation_time -
 					    INITIAL_JIFFIES) * 100 / HZ),
-				/* FIXME: scsiAuthIntrRowStatus */
+				 
 				"Ready");
 		}
 		spin_unlock(&se_nacl->device_list_lock);
@@ -690,12 +633,6 @@ static const struct file_operations scsi_auth_intr_seq_fops = {
 	.release = seq_release,
 };
 
-/*
- * SCSI Attached Initiator Port Table:
- * It lists the SCSI Initiators attached to one of the local Target ports.
- * Iterates through all active TPGs and use active sessions from each TPG
- * to list the info fo this table.
- */
 static void *scsi_att_intr_port_seq_start(struct seq_file *seq, loff_t *pos)
 {
 	spin_lock_bh(&se_global->se_tpg_lock);
@@ -760,24 +697,24 @@ static int scsi_att_intr_port_seq_show(struct seq_file *seq, void *v)
 					se_sess, (unsigned char *)&buf[0], 64);
 
 			seq_printf(seq, "%u %u %u %u %u %s+i+%s\n",
-				/* scsiInstIndex */
+				 
 				(TPG_TFO(se_tpg)->tpg_get_inst_index != NULL) ?
 				TPG_TFO(se_tpg)->tpg_get_inst_index(se_tpg) :
 				0,
-				/* scsiDeviceIndex */
+				 
 				lun->se_dev->dev_index,
-				/* scsiPortIndex */
+				 
 				TPG_TFO(se_tpg)->tpg_get_tag(se_tpg),
-				/* scsiAttIntrPortIndex */
+				 
 				(TPG_TFO(se_tpg)->sess_get_index != NULL) ?
 				TPG_TFO(se_tpg)->sess_get_index(se_sess) :
 				0,
-				/* scsiAttIntrPortAuthIntrIdx */
+				 
 				se_nacl->acl_index,
-				/* scsiAttIntrPortName */
+				 
 				se_nacl->initiatorname[0] ?
 					se_nacl->initiatorname : NONE,
-				/* scsiAttIntrPortIdentifier */
+				 
 				buf);
 		}
 		spin_unlock(&se_nacl->device_list_lock);
@@ -807,9 +744,6 @@ static const struct file_operations scsi_att_intr_port_seq_fops = {
 	.release = seq_release,
 };
 
-/*
- * SCSI Logical Unit Table
- */
 static void *scsi_lu_seq_start(struct seq_file *seq, loff_t *pos)
 {
 	return locate_hba_start(seq, pos);
@@ -845,35 +779,32 @@ static int scsi_lu_seq_show(struct seq_file *seq, void *v)
 
 	hba = dev->se_hba;
 	if (!(hba)) {
-		/* Log error ? */
+		 
 		return 0;
 	}
 
-	/* Fix LU state, if we can read it from the device */
 	seq_printf(seq, "%u %u %u %llu %s", hba->hba_index,
 			dev->dev_index, SCSI_LU_INDEX,
-			(unsigned long long)0, /* FIXME: scsiLuDefaultLun */
+			(unsigned long long)0,  
 			(strlen(DEV_T10_WWN(dev)->unit_serial)) ?
-			/* scsiLuWwnName */
+			 
 			(char *)&DEV_T10_WWN(dev)->unit_serial[0] :
 			"None");
 
 	memcpy(&str[0], (void *)DEV_T10_WWN(dev), 28);
-	/* scsiLuVendorId */
+	 
 	for (j = 0; j < 8; j++)
 		str[j] = ISPRINT(DEV_T10_WWN(dev)->vendor[j]) ?
 			DEV_T10_WWN(dev)->vendor[j] : 0x20;
 	str[8] = 0;
 	seq_printf(seq, " %s", str);
 
-	/* scsiLuProductId */
 	for (j = 0; j < 16; j++)
 		str[j] = ISPRINT(DEV_T10_WWN(dev)->model[j]) ?
 			DEV_T10_WWN(dev)->model[j] : 0x20;
 	str[16] = 0;
 	seq_printf(seq, " %s", str);
 
-	/* scsiLuRevisionId */
 	for (j = 0; j < 4; j++)
 		str[j] = ISPRINT(DEV_T10_WWN(dev)->revision[j]) ?
 			DEV_T10_WWN(dev)->revision[j] : 0x20;
@@ -881,23 +812,23 @@ static int scsi_lu_seq_show(struct seq_file *seq, void *v)
 	seq_printf(seq, " %s", str);
 
 	seq_printf(seq, " %u %s %s %llu %u %u %u %u %u %u\n",
-		/* scsiLuPeripheralType */
+		 
 #ifdef MY_ABC_HERE
 		   TRANSPORT(dev)->get_device_type(dev),
 #else
 		   dev->dev_obj_api->get_device_type((void *)dev),
 #endif
 		   (dev->dev_status == TRANSPORT_DEVICE_ACTIVATED) ?
-		"available" : "notavailable", /* scsiLuStatus */
-		"exposed", 	/* scsiLuState */
+		"available" : "notavailable",  
+		"exposed", 	 
 		(unsigned long long)dev->num_cmds,
-		/* scsiLuReadMegaBytes */
+		 
 		(u32)(dev->read_bytes >> 20),
-		/* scsiLuWrittenMegaBytes */
+		 
 		(u32)(dev->write_bytes >> 20),
-		dev->num_resets, /* scsiLuInResets */
-		0, /* scsiLuOutTaskSetFullStatus */
-		0, /* scsiLuHSInCommands */
+		dev->num_resets,  
+		0,  
+		0,  
 		(u32)(((u32)dev->creation_time - INITIAL_JIFFIES) *
 							100 / HZ));
 
@@ -924,11 +855,6 @@ static const struct file_operations scsi_lu_seq_fops = {
 	.release = seq_release,
 };
 
-/****************************************************************************/
-
-/*
- * Remove proc fs entries
- */
 void remove_scsi_target_mib(void)
 {
 	remove_proc_entry("scsi_target/mib/scsi_inst", NULL);
@@ -943,9 +869,6 @@ void remove_scsi_target_mib(void)
 	remove_proc_entry("scsi_target/mib", NULL);
 }
 
-/*
- * Create proc fs entries for the mib tables
- */
 int init_scsi_target_mib(void)
 {
 	struct proc_dir_entry *dir_entry;
@@ -1036,19 +959,12 @@ error:
 	return -1;
 }
 
-/*
- * Initialize the index table for allocating unique row indexes to various mib
- * tables
- */
 void init_scsi_index_table(void)
 {
 	memset(&scsi_index_table, 0, sizeof(scsi_index_table));
 	spin_lock_init(&scsi_index_table.lock);
 }
 
-/*
- * Allocate a new row index for the entry type specified
- */
 u32 scsi_get_new_index(scsi_index_t type)
 {
 	u32 new_index;

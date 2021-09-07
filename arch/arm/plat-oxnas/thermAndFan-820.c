@@ -1,13 +1,3 @@
-/*
- * Device driver for the i2c thermostat found on the iBook G4, Albook G4
- *
- * Copyright (C) 2003, 2004 Colin Leroy, Rasmus Rohde, Benjamin Herrenschmidt
- *
- * Documentation from
- * http://www.analog.com/UploadedFiles/Data_Sheets/115254175ADT7467_pra.pdf
- * http://www.analog.com/UploadedFiles/Data_Sheets/3686221171167ADT7460_b.pdf
- *
- */
  
 #include <linux/types.h>
 #include <linux/module.h>
@@ -39,45 +29,9 @@
 #include "mach/taco_820.h"
 #include "thermistorCalibration.h"
 
-//#define DEBUG 1
 #undef DEBUG
 
-/* Set this define to simulate different temperature values and test the 
- * working of the fan control module
- */
-//#define SIMULATE_TEMPERATURE 1
 #undef SIMULATE_TEMPERATURE
-
-/******************************************************************************     
- *                                                                            *
- *  delta t = dutyCycle.Period                                                *
- *                                                                            *
- *  PWM in  >----+    V' =   Vcc - Vt                                         *
- *               |           --------                                         *
- *              _|_             Vcc                                           *
- *            | | |                                                           *
- *             \| |   Rt =    delta t                                         *
- *              | |        -------------                                      *
- *              |\|         -C.ln( V' )                                       *
- *              | |                                                           *
- *              | |\  delta t is discovered by the hardware which performs a  *   
- *              !_! \ varies the PWM duty cycle until one is found that just  *
- *               |    trips the Vt threshold.                                 *
- *               |                                                            *
- *               |----------->  V in (Schmidt trigger @ Vt)                   *
- *               |                                                            *
- *            ___!___                                                         *
- *            _______  C ( eg 100nF )                                         *
- *               |                                                            *
- *               |                                                            *
- *               |                                                            *
- *            ---+---                                                         *
- *                                                                            *
- *  Steinhart Thermistor approximation:                                       *
- *                                                                            *
- *    1/T = A + B.ln(Rt) + C.ln(Rt)^3                                         *
- *                                                                            *
- ******************************************************************************/           
 
 #define MAX_FAN_RATIO_CHANGE 		20
 #define OXSEMI_FAN_SPEED_RATIO_MIN 	0
@@ -91,18 +45,15 @@
 #define FAN_MEASURE_NORMAL 		0
 #define FAN_MEASURE_ERROR 		1
 
-/* This is not absolute temperature but counter val - thermistorCalibration*/
 static int hot_limit 		= 16; 
 static int cold_limit 		= 104;
 static int min_fan_speed_ratio  = 64;
 static int fan_pulse_per_rev 	= 1;
 
-/* Status reporters */
 static int output_flag 		= 0;
 static int current_temp 	= 0;
 static int current_speed 	= 0;
 
-/* Error Reporters */
 static int error_temp 	= 0;
 static int error_fan 	= 0;
                                        	
@@ -163,19 +114,11 @@ static int read_reg( int reg )
 	return data;
 }
 
-/** GetTemperatureCounter is an internal function to the module that reads the
- * temperature as a counter value and returns it to the caller. The counter 
- * value is used in all the internal calculations avoiding the necessity to 
- * convert to Kelvin for interpretation. For corresponding temperature values 
- * in Kelvin look at thermistoCalilbration.h
- */
 int GetTemperatureCounter(void)
 {
 	u32 res;
 	int count = 1;
 	
-	/* Test to ensure we are ready.
-	 */
 	if ( !thermostat ) {
 		printk(KERN_INFO "T&F?::$RERROR - Temperature conv not started\n");
 		return -1;
@@ -183,11 +126,10 @@ int GetTemperatureCounter(void)
 
 	while ( !( read_reg( TACHO_THERMISTOR_CONTROL ) & 
 		   (1 << TACHO_THERMISTOR_CONTROL_THERM_VALID) ) ) {
-/*		printk(KERN_INFO "T&F?::$rWarning - Temperature reading not stabalised\n");
-*/		if(count == NUMBER_OF_ITERATIONS) {
-			/* Error - temperature not getting stabilised */
+ 		if(count == NUMBER_OF_ITERATIONS) {
+			 
 			error_temp = TEMP_MEASURE_ERROR;
-			/* Force count to be hot_limit - implies max fan speed */
+			 
 			return hot_limit;
 		}
 		count ++;
@@ -196,8 +138,6 @@ int GetTemperatureCounter(void)
 
 	res = read_reg( TACHO_THERMISTOR_RC_COUNTER ) & TACHO_THERMISTOR_RC_COUNTER_MASK;
 
-	/* Executing this code implies that the temperature has stabilised */
-	/* Reset temperature measurement error */
 	if(error_temp != TEMP_MEASURE_NORMAL)
 		error_temp = TEMP_MEASURE_NORMAL;
 
@@ -208,14 +148,10 @@ int GetTemperatureCounter(void)
 	return res;
 }
 
-/** This function converts the unit of the temperature from counts to
- * temperature in Kelvin
- */
 int ConverttoKelvin(int tempCount)
 {
 	u32 res, arrayIndex;
 
-	/* Convert the Counter Value to Temperature in Kelvin */
 	arrayIndex = tempCount/THERM_INTERPOLATION_STEP;
 	res = TvsCnt[arrayIndex];
 	if ((THERM_ENTRIES_IN_CALIB_TABLE - 2) > arrayIndex)
@@ -229,10 +165,6 @@ int ConverttoKelvin(int tempCount)
 	return res;
 }
 
-/**
- * GetTemperature reads the temperature from the thermistor and converts it
- * to the corresponding Kelvin equivalent
- */
 int GetTemperature(void)
 {
 	u32 tempCount;
@@ -240,12 +172,6 @@ int GetTemperature(void)
 	return 	ConverttoKelvin(tempCount);
 }
 
-/**
- * GetFanRPM will read the fan tacho register and convert the value to 
- * RPM.
- * @return an int that represents the fan speed in RPM, or a
- * negative value in the case of error.
- */
 int GetFanRPM(void)
 {
 	u32 res;
@@ -264,11 +190,10 @@ int GetFanRPM(void)
 
 	while ( !(read_reg( TACHO_FAN_SPEED_COUNTER ) & 
 			   (1 << TACHO_FAN_SPEED_COUNTER_COUNT_VALID) ) ) {
-/*		printk(KERN_INFO "ThernAndFan::$rWarning - Fan Counter reading not stabalised\n");
-*/		if(count == NUMBER_OF_ITERATIONS) {
-			/* Error - fan speed measuring not stabilised */
+ 		if(count == NUMBER_OF_ITERATIONS) {
+			 
 			error_fan = FAN_MEASURE_ERROR;
-			/* Return previous measured fan speed to be safe */
+			 
 			return (thermostat->curr_speed);
 		}
 		count ++;
@@ -278,19 +203,16 @@ int GetFanRPM(void)
 	iCounterValue = read_reg( TACHO_FAN_SPEED_COUNTER ) 
 						& TACHO_FAN_SPEED_COUNTER_MASK;
 
-	/* Reaching here implies fan speed measurement is working good */
-	/* Reset any error */
 	if(error_fan != FAN_MEASURE_NORMAL)
 		error_fan = FAN_MEASURE_NORMAL;
 
 	++iCounterValue;
 	
-	/* Fan Speed (rpm) = 60 * 2000 / (counter value +1) * pulses per rev */
 	res = (60 * 2000 ) / (iCounterValue * fan_pulse_per_rev);
 
 #ifdef SIMULATE_TEMPERATURE
 	printk(KERN_INFO "thermAndFan::GetFanRPM == %d\n", res);
-#endif /*SIMULATE_TEMPERATURE */
+#endif  
 
 	return res;
 }
@@ -300,7 +222,7 @@ static void read_sensors(struct thermostat *th)
 	static int state;
 #ifdef SIMULATE_TEMPERATURE
 	static int curTemp =  30;
-#endif /* SIMULATE_TEMPERATURE */
+#endif  
 
 	if ( !th ) {
 		printk(KERN_INFO "thermAndFan::read_sensors $RTH NOT ESTABLISHED YET\n");		
@@ -310,16 +232,10 @@ static void read_sensors(struct thermostat *th)
 	case 0:
 		th->temps  = GetTemperatureCounter();
 
-		/* Set to speed measurement */
-/*		write_reg( TACHO_FAN_SPEED_CONTROL, 
-				(1 << (TACHO_FAN_SPEED_CONTROL_PWM_ENABLE_BASE 
-								+ TACHO_FAN_SPEED_CONTROL_PWM_USED)) 
-					| (1 << TACHO_FAN_SPEED_CONTROL_FAN_COUNT_MODE));
-*/
 write_reg( TACHO_FAN_SPEED_CONTROL,(1 << TACHO_FAN_SPEED_CONTROL_FAN_COUNT_MODE));
 		state = 1;
 
-		if(output_flag) /* Set the temperature to user space here */
+		if(output_flag)  
 		{
 			current_temp = th->temps;
 		}
@@ -330,7 +246,7 @@ write_reg( TACHO_FAN_SPEED_CONTROL,(1 << TACHO_FAN_SPEED_CONTROL_FAN_COUNT_MODE)
 		if(curTemp > cold_limit + 20)
 			curTemp = hot_limit - 20;
 		printk(KERN_INFO "thermAndFan::read_sensors Temp Set to - %d\n", curTemp);
-	#endif /* SIMULATE_TEMPERATURE */
+	#endif  
 	break;
 
 	case 1:
@@ -338,12 +254,11 @@ write_reg( TACHO_FAN_SPEED_CONTROL,(1 << TACHO_FAN_SPEED_CONTROL_FAN_COUNT_MODE)
 		
 		th->curr_speed  = GetFanRPM();
 
-		/* Set to Temperature measurement */
 		write_reg( TACHO_THERMISTOR_CONTROL, ((1 << TACHO_THERMISTOR_CONTROL_THERM_ENABLE) 
 							| (0 << TACHO_THERMISTOR_CONTROL_THERM_VALID)) );
 		state = 0;
 		
-		if(output_flag) /* Set the speed to user space here */
+		if(output_flag)  
 		{
 			current_speed = th->curr_speed;
 		}
@@ -352,9 +267,7 @@ write_reg( TACHO_FAN_SPEED_CONTROL,(1 << TACHO_FAN_SPEED_CONTROL_FAN_COUNT_MODE)
 }
 
 #ifdef DEBUG
-/**
- * DumpTachoRegisters is a debug function used to inspect hte tacho registers.
- */
+ 
 void DumpTachoRegisters(void)
 {
 
@@ -370,7 +283,7 @@ void DumpTachoRegisters(void)
 		(u32) (read_reg( TACHO_FAN_SPEED_COUNTER) & TACHO_FAN_SPEED_COUNTER_MASK),	
 		(u32) (read_reg( TACHO_THERMISTOR_RC_COUNTER) & TACHO_THERMISTOR_RC_COUNTER_MASK),	
 		(u32) read_reg( TACHO_THERMISTOR_CONTROL	),	
-		(u32) (read_reg( TACHO_CLOCK_DIVIDER)),// & TACHO_CLOCK_DIVIDER_MASK),	
+		(u32) (read_reg( TACHO_CLOCK_DIVIDER)), 
 		(u32) read_reg( PWM_CLOCK_DIVIDER        ),	
 		(u32) read_reg( FAN_SPEED_RATIO_SET 			 ) );	
 }
@@ -380,9 +293,7 @@ void DumpTachoRegisters(void) {}
 
 static void write_fan_speed(struct thermostat *th, int speed)
 {
-	/* The fan speed can vary between the max and the min speed ratio or 
-	 * it can be min ratio value of 0 
-	 */
+	 
 	if (speed > OXSEMI_FAN_SPEED_RATIO_MAX) 
 		speed = OXSEMI_FAN_SPEED_RATIO_MAX;
 	else if ((speed < min_fan_speed_ratio) && (speed > OXSEMI_FAN_SPEED_RATIO_MIN))
@@ -397,7 +308,7 @@ static void write_fan_speed(struct thermostat *th, int speed)
 
 #ifdef SIMULATE_TEMPERATURE
 	printk(KERN_INFO "Speed Ratio Written - %d\n", speed);
-#endif /* SIMULATE_TEMPERATURE */
+#endif  
 		
 	th->last_speed = speed;			
 }
@@ -425,7 +336,7 @@ EXPORT_SYMBOL(SynoOXSetFanPWM);
 
 int SynoOXGetTemperature(void)
 {
-	/* Set to Temperature measurement */
+	 
 	write_reg( TACHO_THERMISTOR_CONTROL, ((1 << TACHO_THERMISTOR_CONTROL_THERM_ENABLE) 
 						| (0 << TACHO_THERMISTOR_CONTROL_THERM_VALID)) );
 	return GetTemperature() - 273;
@@ -440,28 +351,19 @@ static void display_stats(struct thermostat *th)
 		printk(KERN_INFO 
 			 "thermAndFan:: Temperature infos:\n"
 			 "  * thermostats: %d;\n",
-//			 "  * pwm: %d;\n"
-//			 "  * fan speed: %d RPM\n\n",
+ 
 			 th->temps
-//			 min_fan_speed_ratio,
-//			 GetFanRPM());
+ 
 			 );
 		th->cached_temp = th->temps;
 	}
 }
 #endif
 
-/* 
- * Use fuzzy logic type approach to creating the new fan speed. 
- * if count < cold_limit fan should be off.
- * if count > hot_limit fan should be full on.
- * if count between limits set proportionally to base speed + proportional element.
- */
 static void update_fan_speed(struct thermostat *th)
 {
 	int var = th->temps;
 	
-/* remember that var = 1/T ie smaller var higher temperature and faster fan speed needed */
 	if (abs(var - th->last_var) >= MIN_TEMP_COUNT_CHANGE) {
 		int new_speed;
 
@@ -470,14 +372,12 @@ static void update_fan_speed(struct thermostat *th)
 			if (var < hot_limit)
 			{
 				th->last_var = var;
-				/* too hot for proportional control */
+				 
 				new_speed = OXSEMI_FAN_SPEED_RATIO_MAX;
 			}
 			else
 			{
-				/* fan speed it the user selected starting value for the fan 
-				 * so scale operatation from nominal at cold limit to max at hot limit. 
-				 */
+				 
 				new_speed = OXSEMI_FAN_SPEED_RATIO_MAX - 
 					(OXSEMI_FAN_SPEED_RATIO_MAX - min_fan_speed_ratio) * (var - hot_limit)/(cold_limit - hot_limit);
 
@@ -494,7 +394,7 @@ static void update_fan_speed(struct thermostat *th)
 		else {
 			
 			th->last_var = var;
-			/* var greater than low limit - too cold for fan. */
+			 
 			new_speed = OXSEMI_FAN_SPEED_RATIO_MIN;
 		}
 
@@ -522,11 +422,7 @@ static int monitor_task(void *arg)
 		update_fan_speed(th);
 
 #ifdef DEBUG
-		/* be carefule with the stats displayed. The Fan Counter value depends 
-		 * on what value is written in the register during the read sensors 
-		 * call. If its in temperature read setting, the fan counter and hence 
-		 * the rpm will be WRONG
-		 */
+		 
 		display_stats(th);
 #endif
 	}
@@ -574,13 +470,10 @@ static int __init oxsemi_therm_init(void)
 
 	read_reg(SYS_CTRL_RSTEN_CTRL);
 
-/* release fan/tacho from system reset */		
 	*((volatile unsigned long *) SYS_CTRL_RSTEN_CLR_CTRL) = (1UL << SYS_CTRL_RSTEN_MISC_BIT);
 	
-/* Pull Down the GPIO 0 from the software */
 	*((volatile unsigned long *) SYS_CTRL_PULLUP_SEL) |= TEMP_TACHO_PULLUP_CTRL_VALUE;
 
-/* Enable secondary use */	
 	*((volatile unsigned long *) SYS_CTRL_SECONDARY_SEL) |= (1UL << SECONDARY_FUNCTION_ENABLE_FAN_PWM);
 	*((volatile unsigned long *) SYS_CTRL_SECONDARY_SEL) |= (1UL << SECONDARY_FUNCTION_ENABLE_FAN_TACHO);
 	*((volatile unsigned long *) SYS_CTRL_SECONDARY_SEL) |= (1UL << SECONDARY_FUNCTION_ENABLE_FAN_TEMP);
@@ -604,12 +497,10 @@ static int __init oxsemi_therm_init(void)
 		return -ENODEV;
 	}
 	
-	/* Set the Tacho clock divider up */
 	write_reg( TACHO_CLOCK_DIVIDER, TACHO_CORE_TACHO_DIVIDER_VALUE );
 	
-	/* check tacho divider set correctly */	
 	rc = read_reg(TACHO_CLOCK_DIVIDER);
-	/* Comparing a 10 bit value to a 32 bit return value */
+	 
 	if ((rc & TACHO_CORE_TACHO_DIVIDER_VALUE) != TACHO_CORE_TACHO_DIVIDER_VALUE) {
 		printk(KERN_ERR "thermAndFan: Set Tacho Divider Value Failed readback:%d\n", rc);
 		kfree(th);
@@ -617,7 +508,7 @@ static int __init oxsemi_therm_init(void)
 	}
 	
 #ifdef CONFIG_SYNO_PLX_PORTING
-	/* 25HZ default */
+	 
 	write_reg( PWM_CLOCK_DIVIDER, 0x460 );
 #else
 	write_reg( PWM_CLOCK_DIVIDER, PWM_CORE_CLK_DIVIDER_VALUE );
@@ -631,23 +522,13 @@ static int __init oxsemi_therm_init(void)
 	
 	thermostat = th;
 
-	/* Start the thermister measuring */
 	write_reg( TACHO_THERMISTOR_CONTROL, (1 << TACHO_THERMISTOR_CONTROL_THERM_ENABLE) );
 	
-	/* Start Speed measuring */
-//Register different
-/*	write_reg( TACHO_FAN_SPEED_CONTROL, 
-			(1 << (TACHO_FAN_SPEED_CONTROL_PWM_ENABLE_BASE 
-							+ TACHO_FAN_SPEED_CONTROL_PWM_USED)) 
-				| (1 << TACHO_FAN_SPEED_CONTROL_FAN_COUNT_MODE));
-*/
 write_reg( TACHO_FAN_SPEED_CONTROL,(1 << TACHO_FAN_SPEED_CONTROL_FAN_COUNT_MODE));
 	
-	/* be sure to really write fan speed the first time */
 	th->last_speed    = -2;
 	th->last_var	  = -80;
 
-	/* Set fan to initial speed */
 	write_fan_speed(th, min_fan_speed_ratio);
 
 #ifndef CONFIG_SYNO_PLX_PORTING
@@ -680,9 +561,6 @@ static void __exit oxsemi_therm_exit(void)
 		kthread_stop(thread_therm);
 	}
 	
-	/* Stop the fan so that it doesnot run anymore - dont reset 
-	 * SYS_CTRL_RSTEN_MISC_BIT as other modules may use it
-	 */
 #ifndef CONFIG_SYNO_PLX_PORTING
 	write_fan_speed(thermostat, 0);
 #endif
@@ -699,5 +577,3 @@ static void __exit oxsemi_therm_exit(void)
 
 module_init(oxsemi_therm_init);
 module_exit(oxsemi_therm_exit);
-
-/* End of File */

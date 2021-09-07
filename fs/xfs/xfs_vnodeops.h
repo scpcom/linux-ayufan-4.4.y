@@ -14,10 +14,10 @@ struct xfs_inode;
 struct xfs_iomap;
 
 int xfs_setattr(struct xfs_inode *ip, struct iattr *vap, int flags);
-#define	XFS_ATTR_DMI		0x01	/* invocation from a DMI function */
-#define	XFS_ATTR_NONBLOCK	0x02	/* return EAGAIN if operation would block */
-#define XFS_ATTR_NOLOCK		0x04	/* Don't grab any conflicting locks */
-#define XFS_ATTR_NOACL		0x08	/* Don't call xfs_acl_chmod */
+#define	XFS_ATTR_DMI		0x01	 
+#define	XFS_ATTR_NONBLOCK	0x02	 
+#define XFS_ATTR_NOLOCK		0x04	 
+#define XFS_ATTR_NOACL		0x08	 
 
 int xfs_readlink(struct xfs_inode *ip, char *link);
 int xfs_fsync(struct xfs_inode *ip);
@@ -79,4 +79,4 @@ int xfs_flush_pages(struct xfs_inode *ip, xfs_off_t first,
 		xfs_off_t last, uint64_t flags, int fiopt);
 int xfs_wait_on_pages(struct xfs_inode *ip, xfs_off_t first, xfs_off_t last);
 
-#endif /* _XFS_VNODEOPS_H */
+#endif  

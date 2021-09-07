@@ -1,90 +1,12 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell 
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell Commercial License Option
-
-If you received this File from Marvell and you have entered into a commercial
-license agreement (a "Commercial License") with Marvell, the File is licensed
-to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or 
-modify this File in accordance with the terms and conditions of the General 
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is 
-available along with the File in the license.txt file or by writing to the Free 
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or 
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt. 
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY 
-DISCLAIMED.  The GPL License provides additional details about this warranty 
-disclaimer.
-********************************************************************************
-Marvell BSD License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or 
-modify this File under the following licensing terms. 
-Redistribution and use in source and binary forms, with or without modification, 
-are permitted provided that the following conditions are met:
-
-    *   Redistributions of source code must retain the above copyright notice,
-	    this list of conditions and the following disclaimer. 
-
-    *   Redistributions in binary form must reproduce the above copyright
-        notice, this list of conditions and the following disclaimer in the
-        documentation and/or other materials provided with the distribution. 
-
-    *   Neither the name of Marvell nor the names of its contributors may be 
-        used to endorse or promote products derived from this software without 
-        specific prior written permission. 
-    
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR 
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
-/*******************************************************************************
-* mvStorageDev.c - C File for implementation of the core driver.
-*
-* DESCRIPTION:
-*       None.
-*
-* DEPENDENCIES:
-*   mvOs.h
-*   mvSata.h.
-*   mvStorageDev.h
-*   mvRegs.h
-*
-*******************************************************************************/
+ 
 #include "mvOsS.h"
 #include "mvSata.h"
 #include "mvStorageDev.h"
 #include "mvRegs.h"
 
-/* Defines */
-
-/* functions for internal driver use */
 MV_BOOLEAN waitWhileStorageDevIsBusy(MV_SATA_ADAPTER* pAdapter,
                                      MV_BUS_ADDR_T ioBaseAddr,
                                      MV_U32 eDmaRegsOffset, MV_U32 loops,
@@ -134,39 +56,7 @@ MV_BOOLEAN waitForDRQ(MV_SATA_ADAPTER* pAdapter,
 
 void _startSoftResetDevice(MV_SATA_CHANNEL *pSataChannel);
 MV_BOOLEAN _isDeviceBsyBitOff(MV_SATA_CHANNEL *pSataChannel);
-/*******************************************************************************
-* waitWhileStorageDevIsBusy - Wait for the storage device to be released from
-*                             busy state.
-*
-* DESCRIPTION:
-*   The busy bit is set to one to indicate that the storage device is busy. The
-*   busy bit shall be set to one by the device only when one of the following
-*   events occurs:
-*
-*   1) after either the negation of RESET- or the setting of the SRST bit to one
-*      in the Device Control register.
-*   2) after writing the Command register if the DRQ bit is not set to one.
-*   3) between blocks of a data transfer during PIO data-in commands before the
-*      DRQ bit is cleared to zero.
-*   4) after the transfer of a data block during PIO data-out commands before
-*      the DRQ bit is cleared to zero.
-*   5) during the data transfer of DMA commands either the BSY bit, the DRQ bit,
-*      or both shall be set to one.
-*   6) after the command packet is received during the execution of a PACKET
-*      command.
-*
-* INPUT:
-*     ioBaseAddr     - The PCI I/O window base address of the adapter.
-*     eDmaRegsOffset - The EDMA register's offset of the relevant SATA channel.
-*     loops          - max number of times to pool the status register.
-*     delay          - number of u seconds to wait each loop.
-*
-* RETURN:
-*     MV_TRUE if the device is released from busy state, MV_FALSE otherwise.
-* COMMENTS:
-*     None.
-*
-*******************************************************************************/
+ 
 MV_BOOLEAN waitWhileStorageDevIsBusy(MV_SATA_ADAPTER* pAdapter,
                                      MV_BUS_ADDR_T ioBaseAddr,
                                      MV_U32 eDmaRegsOffset, MV_U32 loops,
@@ -276,24 +166,7 @@ MV_BOOLEAN waitForDRQ(MV_SATA_ADAPTER* pAdapter,
 
     return MV_FALSE;
 }
-/*******************************************************************************
-* enableStorageDevInterrupt - Enable the storage device to be able to issue
-*                       interrupt.
-*
-* DESCRIPTION:
-*   Enable the connected storage device to the given channel to assert INTRQ by
-*   clearing nIEN bit in the Device Control register.
-*
-* INPUT:
-*   pSataChannel - Pointer to the Sata channel data structure.
-*
-* RETURN:
-*   None.
-*
-* COMMENTS:
-*   this function also clears the SRST bit in the Device Control register.
-*
-*******************************************************************************/
+ 
 void enableStorageDevInterrupt(MV_SATA_CHANNEL *pSataChannel)
 {
 
@@ -305,24 +178,6 @@ void enableStorageDevInterrupt(MV_SATA_CHANNEL *pSataChannel)
                      MV_ATA_DEVICE_CONTROL_REG_OFFSET);
 }
 
-/*******************************************************************************
-* disableStorageDevInterrupt - Disable the storage device to be able to issue
-*                              interrupt.
-*
-* DESCRIPTION:
-*   This function disable the connected storage device to the given channel to
-*   assert INTRQ by setting nIEN bit in the Device Control register.
-*
-* INPUT:
-*   pSataChannel - Pointer to the Sata channel data structure.
-*
-* RETURN:
-*   None.
-*
-* COMMENTS:
-*   this function also clears the SRST bit
-*
-*******************************************************************************/
 void disableStorageDevInterrupt(MV_SATA_CHANNEL *pSataChannel)
 {
 
@@ -334,37 +189,12 @@ void disableStorageDevInterrupt(MV_SATA_CHANNEL *pSataChannel)
                      MV_ATA_DEVICE_STATUS_REG_OFFSET);
 }
 
-/*******************************************************************************
-* isStorageDevReadyForPIO - Check that the storage device connected to the given
-*                           channel and the channel itself are ready to perform
-*                           PIO commands.
-*
-* DESCRIPTION:
-*   Check if the device connected to the given channel and the channel itself
-*   are ready for PIO commands.
-*
-* INPUT:
-*       pSataChannel - Pointer to the SATA channel data structure.
-*
-* RETURN:
-*       MV_TRUE if the channel and the connected device ready to do PIO,
-*       MV_FALSE otherwise.
-*
-* COMMENTS:
-*     If the adapter's eEnEDMA bit in the EDMA Command Register is set, PIO
-*     commands cannot be issued. The eEnEDMA bit cannot be reset by the CPU.
-*     Only the EDMA resets it, when bit eDsEDMA is set or when an error
-*     condition occurs.
-*
-*******************************************************************************/
 static MV_BOOLEAN isStorageDevReadyForPIO(MV_SATA_CHANNEL *pSataChannel)
 {
     MV_BUS_ADDR_T ioBaseAddr =pSataChannel->mvSataAdapter->adapterIoBaseAddress;
     MV_U32  eDmaRegsOffset = pSataChannel->eDmaRegsOffset;
     MV_U8   ATAcontrolRegValue;
 
-    /* If the adapter's eEnEDMA bit in the EDMA Command Register is set  */
-    /* PIO commands cannot be issued.                                       */
     if (pSataChannel->queueCommandsEnabled == MV_TRUE)
     {
         mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG_ERROR, " %d %d: PIO command failed:"
@@ -372,13 +202,7 @@ static MV_BOOLEAN isStorageDevReadyForPIO(MV_SATA_CHANNEL *pSataChannel)
                  pSataChannel->channelNumber);
         return MV_FALSE;
     }
-    /* Check if BUSY bit is '0' */
-
-    /* Reading the Control register actually gives us the Alternate Status  */
-    /* register content (ATA protocol). If the busy bit is set in the       */
-    /* Alternate Status register, we wait for 50 mili-sec and try again, if */
-    /* the busy bit is still set, we return false indicating that the       */
-    /* device is not ready for PIO commands.                                */
+     
     ATAcontrolRegValue = MV_REG_READ_BYTE(ioBaseAddr, eDmaRegsOffset +
                                           MV_ATA_DEVICE_CONTROL_REG_OFFSET);
     if ((ATAcontrolRegValue & MV_ATA_BUSY_STATUS)!= 0)
@@ -397,7 +221,7 @@ static MV_BOOLEAN isStorageDevReadyForPIO(MV_SATA_CHANNEL *pSataChannel)
                  pSataChannel->channelNumber, ATAcontrolRegValue);
         return MV_FALSE;
     }
-    /* The device is ready for PIO commands */
+     
     return MV_TRUE;
 }
 
@@ -415,7 +239,7 @@ MV_BOOLEAN mvStorageDevATAIdleImmediate(MV_SATA_ADAPTER *pAdapter, MV_U8 channel
     }
     pSataChannel = pAdapter->sataChannel[channelIndex];
     if (pSataChannel == NULL)
-    {     /* If the pointer do not exists, retrun false */
+    {      
         mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG_FATAL_ERROR, " %d %d:  channel data "
                  "structure is not allocated\n", pAdapter->adapterId,
                  channelIndex);
@@ -458,29 +282,6 @@ MV_BOOLEAN mvStorageDevATAIdleImmediate(MV_SATA_ADAPTER *pAdapter, MV_U8 channel
     return MV_TRUE;
 }
 
-/*******************************************************************************
-* mvStorageDevATAIdentifyDevice - Perform an ATA IDENTIFY device command.
-*
-* DESCRIPTION:
-*       This function issues an IDENTIFY command to the connected device, and
-*       stores all the information in the identifyDevice buffer of the channel.
-*
-* INPUT:
-*       pAdapter     - Pointer to the device data structure.
-*       channelIndex - The index of the channel where the storage device
-*                      connected to.
-*       PMPort       - index of the required destination port multipliers
-*                      device Port (0 if no PM available).
-*       identifyDeviceResult - a buffer that is allocated by IAL that will hold
-*                              the IDENTIFY DEIVICE command result.
-*
-* RETURN:
-*       MV_TRUE on success, MV_FALSE on failure.
-*
-* COMMENTS:
-*       None.
-*
-*******************************************************************************/
 MV_BOOLEAN mvStorageDevATAIdentifyDevice(MV_SATA_ADAPTER *pAdapter,
                                          MV_U8 channelIndex,
                                          MV_U8 PMPort,
@@ -488,7 +289,7 @@ MV_BOOLEAN mvStorageDevATAIdentifyDevice(MV_SATA_ADAPTER *pAdapter,
                                         )
 {
     MV_BOOLEAN result;
-    /* Get the pointer to the relevant channel. */
+     
     MV_SATA_CHANNEL *pSataChannel;
     if (pAdapter == NULL)
     {
@@ -498,14 +299,14 @@ MV_BOOLEAN mvStorageDevATAIdentifyDevice(MV_SATA_ADAPTER *pAdapter,
     }
     pSataChannel = pAdapter->sataChannel[channelIndex];
     if (pSataChannel == NULL)
-    {     /* If the pointer do not exists, retrun false */
+    {      
         mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG_FATAL_ERROR, " %d %d:  channel data "
                  "structure is not allocated\n", pAdapter->adapterId,
                  channelIndex);
         return MV_FALSE;
     }
     if (identifyDeviceResult == NULL)
-    {     /* If the pointer do not exists, retrun false */
+    {      
         mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG_FATAL_ERROR, " %d %d:  identify data buffer"
                  " is not allocated\n", pAdapter->adapterId, channelIndex);
         return MV_FALSE;
@@ -514,16 +315,16 @@ MV_BOOLEAN mvStorageDevATAIdentifyDevice(MV_SATA_ADAPTER *pAdapter,
                                                   PMPort,
                                                   MV_NON_UDMA_PROTOCOL_PIO_DATA_IN,
                                                   MV_FALSE,
-                                                  /* pBuffer */
+                                                   
                                                   identifyDeviceResult,
-                                                  256,     /* count       */
-                                                  0,       /* features    */
-                                                  0,       /* sectorCount */
-                                                  0,       /* lbaLow      */
-                                                  0,       /* lbaMid      */
-                                                  0,       /* lbaHigh     */
-                                                  0,       /* device      */
-                                                  /* The command */
+                                                  256,      
+                                                  0,        
+                                                  0,        
+                                                  0,        
+                                                  0,        
+                                                  0,        
+                                                  0,        
+                                                   
                                                   MV_ATA_COMMAND_IDENTIFY);
     if (result == MV_FALSE)
     {
@@ -531,11 +332,11 @@ MV_BOOLEAN mvStorageDevATAIdentifyDevice(MV_SATA_ADAPTER *pAdapter,
     }
     if (identifyDeviceResult[IDEN_ATA_VERSION] & (MV_BIT7 | MV_BIT6 | MV_BIT5))
     {
-        /* if ATA 5/6/7 then check CRC of Identify command result */
+         
         MV_U8 crc = 0;
         MV_U16 count;
         MV_U8_PTR pointer = (MV_U8_PTR)identifyDeviceResult;
-        /* If no 0xa5 signature valid, then don't check CRC */
+         
         if (pointer[510] != 0xa5)
         {
             return MV_TRUE;
@@ -556,27 +357,6 @@ MV_BOOLEAN mvStorageDevATAIdentifyDevice(MV_SATA_ADAPTER *pAdapter,
     return MV_TRUE;
 }
 
-/*******************************************************************************
-* mvStorageDevATASoftResetDevice - Issue SATA SOFTWARE reset to device.
-*
-* DESCRIPTION:
-*       Perform SOFTWARE RESET to the connected storage device by setting the
-*       SRST bit of the ATA device COMMAND
-*
-* INPUT:
-*       pAdapter     - Pointer to the device data structure.
-*       channelIndex - Index of the required channel.
-*       PMPort       - index of the required destination port multipliers
-*                      device port (0 if no PM available).
-*       registerStruct - Pointer to ATA registers data structure
-*
-* RETURN:
-*       MV_TRUE on success, MV_FALSE otherwise.
-*
-* COMMENTS:
-*       NONE
-*
-*******************************************************************************/
 MV_BOOLEAN mvStorageDevATASoftResetDevice(MV_SATA_ADAPTER *pAdapter,
                                           MV_U8 channelIndex,
                                           MV_U8 PMPort,
@@ -632,17 +412,12 @@ void _startSoftResetDevice(MV_SATA_CHANNEL *pSataChannel)
 
     mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG_NON_UDMA_COMMAND | MV_DEBUG, "Issue SRST COMMAND\n");
 
-/* Write to the Device Control register, bits 1,2:                      */
-/* - bit 1 (nIEN): is the enable bit for the device assertion of INTRQ  */
-/*   to the host. When the nIEN bit is set to one, or the device is not */
-/*   selected, the device shall release the INTRQ signal.               */
-/* - bit 2 (SRST): is the host software reset bit.                      */
     MV_REG_WRITE_BYTE(ioBaseAddr, pSataChannel->eDmaRegsOffset +
                       MV_ATA_DEVICE_CONTROL_REG_OFFSET, MV_BIT2|MV_BIT1);
     MV_REG_READ_BYTE(ioBaseAddr, pSataChannel->eDmaRegsOffset +
                      MV_ATA_DEVICE_CONTROL_REG_OFFSET);
     mvMicroSecondsDelay(pSataChannel->mvSataAdapter, 10);
-    /* enableStorageDevInterrupt will clear the SRST bit*/
+     
     enableStorageDevInterrupt(pSataChannel);
 }
 
@@ -678,29 +453,6 @@ MV_BOOLEAN _isDeviceBsyBitOff(MV_SATA_CHANNEL *pSataChannel)
     }
 }
 
-/*******************************************************************************
-* mvStorageDevATAStartSoftResetDevice -
-*                   begins device software reset
-*
-* DESCRIPTION:
-*
-*   Submits SRST for channel connected device and exit. The IAL must call the
-*   mvStorageIsDeviceBsyBitOff later on to check whether the device is
-*   ready
-*
-* INPUT:
-*       pAdapter    - pointer to the adapter data structure.
-*       channelIndex - channel number
-*       PMPort      - port multiplier port
-*
-* OUTPUT:
-*       None
-* RETURN:
-*       MV_TRUE on success,
-*       MV_FALSE otherwise.
-* COMMENTS:
-*
-*******************************************************************************/
 MV_BOOLEAN mvStorageDevATAStartSoftResetDevice(MV_SATA_ADAPTER *pAdapter,
                                                MV_U8 channelIndex,
                                                MV_U8 PMPort
@@ -739,28 +491,6 @@ MV_BOOLEAN mvStorageDevATAStartSoftResetDevice(MV_SATA_ADAPTER *pAdapter,
     return MV_TRUE;
 }
 
-/*******************************************************************************
-* mvStorageIsDeviceBsyBitOff -
-*                    check if device is BUSY bit cleared after SRST
-*
-* DESCRIPTION:
-*
-*   Checks the if BSY bit in ATA status is on/off
-*
-* INPUT:
-*       pAdapter    - pointer to the adapter data structure.
-*       channelIndex - channel number
-*       registerStruct - If non-zero then this function dumps ATA registers
-*                        to this data structure before exit.
-*
-* OUTPUT:
-*       None
-* RETURN:
-*       MV_TRUE if BSY bit is off
-*       MV_FALSE if BSY bit is on (or on failure)
-* COMMENTS:
-*
-*******************************************************************************/
 MV_BOOLEAN mvStorageIsDeviceBsyBitOff(MV_SATA_ADAPTER *pAdapter,
                                       MV_U8 channelIndex,
                                       MV_STORAGE_DEVICE_REGISTERS *registerStruct
@@ -794,32 +524,6 @@ MV_BOOLEAN mvStorageIsDeviceBsyBitOff(MV_SATA_ADAPTER *pAdapter,
     return result;
 }
 
-/*******************************************************************************
-* mvStorageDevATASetFeatures - Perform ATA SET FEATURES command.
-*
-* DESCRIPTION:
-*       Perform ATA SET FEATURES command to the ATA device connected to the
-*       given channel. This command is used by the host to establish parameters
-*       that affect the execution of certain device features (Table 44 in the
-*       ATA protocol document defines these features).
-*
-* INPUT:
-*       pAdapter            - Pointer to the device data structure.
-*       channelIndex        - Index of the required channel
-*       PMPort              - index of the required destination port multipliers
-*                             device Port (0 if no PM available).
-*       subCommand          - Sub command for the SET FEATURES ATA command
-*       subCommandSpecific1 - First parameter to the sub command.
-*       subCommandSpecific2 - Second parameter to the sub command.
-*       subCommandSpecific3 - Third parameter to the sub command.
-*       subCommandSpecific4 - Fourth parameter to the sub command.
-*
-* RETURN:
-*       MV_TRUE on success, MV_FALSE otherwise.
-* COMMENTS:
-*       NONE
-*
-*******************************************************************************/
 MV_BOOLEAN mvStorageDevATASetFeatures(MV_SATA_ADAPTER *pAdapter,
                                       MV_U8 channelIndex,
                                       MV_U8   PMPort,
@@ -837,52 +541,20 @@ MV_BOOLEAN mvStorageDevATASetFeatures(MV_SATA_ADAPTER *pAdapter,
                                                 PMPort,
                                                 MV_NON_UDMA_PROTOCOL_NON_DATA,
                                                 MV_FALSE,
-                                                NULL,    /* pBuffer*/
-                                                0,       /* count  */
-                                                subCommand,     /*features*/
-                                                /* sectorCount */
+                                                NULL,     
+                                                0,        
+                                                subCommand,      
+                                                 
                                                 subCommandSpecific1,
-                                                subCommandSpecific2,    /* lbaLow */
-                                                subCommandSpecific3,    /* lbaMid */
-                                                /* lbaHigh */
+                                                subCommandSpecific2,     
+                                                subCommandSpecific3,     
+                                                 
                                                 subCommandSpecific4,
-                                                0,      /* device */
-                                                /* command */
+                                                0,       
+                                                 
                                                 MV_ATA_COMMAND_SET_FEATURES);
 }
 
-/*******************************************************************************
-* mvStorageDevATAExecuteNonUdmaCommand - perform ATA non udma command.
-*
-* DESCRIPTION:
-*       perform ATA non UDMA command to the ATA device connected to the given
-*       channel
-*
-* INPUT:
-*   pAdapter    - pointer to the device data structure.
-*   channelIndex    - index of the required channel
-*   PMPort          - index of the required destination port multipliers
-*                     device Port (0 if no PM available).
-*   protocolType    - protocol type of the command
-*   isEXT   - true when the given command is the EXTENDED
-*   bufPtr  - pointer to the buffer to write/read to/from
-*   count   - number of words to transfer
-*   features    - the value to be written to the FEATURES register
-*   sectorCount - the value to be written to the SECTOR COUNT register
-*   lbaLow  - the value to be written to the LBA LOW register
-*   lbaMid  - the value to be written to the LBA MID register
-*   lbaHigh - the value to be written to the LBA HIGH register
-*   device  - the value to be written to the DEVICE register
-*   command - the value to be written to the COMMAND register
-*
-* RETURN:
-*   MV_TRUE on success, MV_FALSE otherwise.
-* COMMENTS:
-*       when the command is EXTENDED, then the high 8 bits of the 16 bits values
-*   will be written first, so they should hold the previous value as defined in
-*   the ATA 6 standard
-*
-*******************************************************************************/
 MV_BOOLEAN mvStorageDevATAExecuteNonUDMACommand(MV_SATA_ADAPTER *pAdapter,
                                                 MV_U8 channelIndex,
                                                 MV_U8 PMPort,
@@ -993,7 +665,6 @@ MV_BOOLEAN executePacketCommand(MV_SATA_ADAPTER *pAdapter,
                       MV_ATA_DEVICE_HEAD_REG_OFFSET, 0);
     MV_CPU_WRITE_BUFFER_FLUSH();
 
-    /* 88SX60X1 FEr SATA #16 */
     if (pAdapter->sataAdapterGeneration >= MV_SATA_GEN_II)
     {
         enableStorageDevInterrupt(pSataChannel);
@@ -1002,7 +673,6 @@ MV_BOOLEAN executePacketCommand(MV_SATA_ADAPTER *pAdapter,
     MV_REG_WRITE_BYTE(ioBaseAddr, eDmaRegsOffset +
                       MV_ATA_DEVICE_COMMAND_REG_OFFSET,MV_ATA_COMMAND_PACKET );
 
-    /* Wait for PIO Setup or completion*/
     if (waitWhileStorageDevIsBusy(pAdapter, ioBaseAddr, eDmaRegsOffset, 3100, 10000) ==
         MV_FALSE)
     {
@@ -1016,7 +686,6 @@ MV_BOOLEAN executePacketCommand(MV_SATA_ADAPTER *pAdapter,
         return MV_TRUE;
     }
     
-    /* Check the status register on DATA request commands */
     ATAstatus = MV_REG_READ_BYTE(ioBaseAddr, eDmaRegsOffset +
                                  MV_ATA_DEVICE_STATUS_REG_OFFSET);
     if (pAdapter->sataAdapterGeneration == MV_SATA_GEN_I)
@@ -1087,7 +756,6 @@ MV_BOOLEAN executePacketCommand(MV_SATA_ADAPTER *pAdapter,
         }
     }
     
-    /* Wait for the storage device to be available */
     mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG, " %d %d: on non-UDMA sequence - checking if"
              " device is has finished the command\n",
              pAdapter->adapterId, channelIndex);
@@ -1122,7 +790,7 @@ MV_BOOLEAN executePacketCommand(MV_SATA_ADAPTER *pAdapter,
     pSataChannel->recoveredErrorsCounter = 0;
     return MV_TRUE;
 }
-#endif /* 0 */
+#endif  
 MV_BOOLEAN executeNonUDMACommand(MV_SATA_ADAPTER *pAdapter,
                                  MV_U8 channelIndex,
                                  MV_U8  PMPort,
@@ -1239,9 +907,6 @@ MV_BOOLEAN executeNonUDMACommand(MV_SATA_ADAPTER *pAdapter,
                       MV_ATA_DEVICE_HEAD_REG_OFFSET, device);
     MV_CPU_WRITE_BUFFER_FLUSH();
 
-    /* 88SX60X1 FEr SATA #16 */
-    /* 88SX6042/88SX7042 FEr SATA #16 */
-    /* 88F5182 FEr #SATA-S11 */
     if (pAdapter->sataAdapterGeneration >= MV_SATA_GEN_II)
     {
         enableStorageDevInterrupt(pSataChannel);
@@ -1252,7 +917,7 @@ MV_BOOLEAN executeNonUDMACommand(MV_SATA_ADAPTER *pAdapter,
 
     if (protocolType == MV_NON_UDMA_PROTOCOL_NON_DATA)
     {
-        /* Wait for the command to complete */
+         
         if (waitWhileStorageDevIsBusy(pAdapter, ioBaseAddr, eDmaRegsOffset, 3100, 10000) ==
             MV_FALSE)
         {
@@ -1263,14 +928,14 @@ MV_BOOLEAN executeNonUDMACommand(MV_SATA_ADAPTER *pAdapter,
         pSataChannel->recoveredErrorsCounter = 0;
         return MV_TRUE;
     }
-    /* Wait for the command to complete */
+     
     if (waitWhileStorageDevIsBusy(pAdapter, ioBaseAddr, eDmaRegsOffset, 3100, 10000) ==
         MV_FALSE)
     {
         enableStorageDevInterrupt(pSataChannel);
         return MV_FALSE;
     }
-    /* Check the status register on DATA request commands */
+     
     ATAstatus = MV_REG_READ_BYTE(ioBaseAddr, eDmaRegsOffset +
                                  MV_ATA_DEVICE_STATUS_REG_OFFSET);
     if (pAdapter->sataAdapterGeneration == MV_SATA_GEN_I)
@@ -1297,18 +962,15 @@ MV_BOOLEAN executeNonUDMACommand(MV_SATA_ADAPTER *pAdapter,
     }
     for (i = 0; i < count; i++)
     {
-        /* Every DRQ data block we have to check the BUSY bit to verify that
-           the Disk is ready for next block transfer  */
+         
         if ((i & (((MV_U32)pSataChannel->DRQDataBlockSize * ATA_SECTOR_SIZE_IN_WORDS) - 1)) == 0)
         {
             if (pAdapter->sataAdapterGeneration >= MV_SATA_GEN_II)
             {
-                /* Perform a dummy read */
+                 
                 MV_REG_READ_BYTE(ioBaseAddr, eDmaRegsOffset +
                                  MV_ATA_DEVICE_ALTERNATE_REG_OFFSET);
-                /* 88SX60X1 FEr SATA #16 */
-                /* 88SX6042/88SX7042 FEr SATA #16 */
-                /* 88F5182 FEr #SATA-S11 */
+                 
                 if (i != 0)
                 {
                     if (waitWhileStorageDevIsBusy_88SX60X1(pAdapter,
@@ -1368,7 +1030,6 @@ MV_BOOLEAN executeNonUDMACommand(MV_SATA_ADAPTER *pAdapter,
         }
     }
 
-    /* Wait for the storage device to be available */
     mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG, " %d %d: on non-UDMA sequence - checking if"
              " device is has finished the command\n",
              pAdapter->adapterId, channelIndex);
@@ -1412,13 +1073,13 @@ MV_BOOLEAN  _PMAccessReg(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex,
         result = executeNonUDMACommand(pAdapter, channelIndex,
                                        MV_SATA_PM_CONTROL_PORT,
                                        MV_NON_UDMA_PROTOCOL_NON_DATA,
-                                       MV_TRUE/*isEXT*/,
-                                       NULL/*bufPtr*/,
-                                       0/*count*/,
-                                       PMReg /*features*/, 0/*sectorCount*/,
-                                       0 /*lbaLow*/, 0 /*lbaMid*/, 0 /*lbaHigh*/,
-                                       PMPort/*device*/,
-                                       MV_ATA_COMMAND_PM_READ_REG/*command*/);
+                                       MV_TRUE ,
+                                       NULL ,
+                                       0 ,
+                                       PMReg  , 0 ,
+                                       0  , 0  , 0  ,
+                                       PMPort ,
+                                       MV_ATA_COMMAND_PM_READ_REG );
         if (result == MV_TRUE)
         {
             MV_BUS_ADDR_T   ioBaseAddr = pAdapter->adapterIoBaseAddress;
@@ -1439,16 +1100,16 @@ MV_BOOLEAN  _PMAccessReg(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex,
         result = executeNonUDMACommand(pAdapter, channelIndex,
                                        MV_SATA_PM_CONTROL_PORT,
                                        MV_NON_UDMA_PROTOCOL_NON_DATA,
-                                       MV_TRUE/*isEXT*/,
-                                       NULL/*bufPtr*/,
-                                       0/*count*/,
-                                       PMReg /*features*/,
-                                       (MV_U16)((*pValue) & 0xff)/*sectorCount*/,
-                                       (MV_U16)(((*pValue) & 0xff00) >> 8) /*lbaLow*/,
-                                       (MV_U16)(((*pValue) & 0xff0000) >> 16)   /*lbaMid*/,
-                                       (MV_U16)(((*pValue) & 0xff000000) >> 24) /*lbaHigh*/,
-                                       PMPort/*device*/,
-                                       MV_ATA_COMMAND_PM_WRITE_REG/*command*/);
+                                       MV_TRUE ,
+                                       NULL ,
+                                       0 ,
+                                       PMReg  ,
+                                       (MV_U16)((*pValue) & 0xff) ,
+                                       (MV_U16)(((*pValue) & 0xff00) >> 8)  ,
+                                       (MV_U16)(((*pValue) & 0xff0000) >> 16)    ,
+                                       (MV_U16)(((*pValue) & 0xff000000) >> 24)  ,
+                                       PMPort ,
+                                       MV_ATA_COMMAND_PM_WRITE_REG );
     }
     if (registerStruct)
     {
@@ -1535,8 +1196,7 @@ void dumpAtaDeviceRegisters(MV_SATA_ADAPTER *pAdapter,
 
     if (isEXT == MV_TRUE)
     {
-        /*set the HOB bit of DEVICE CONTROL REGISTER */
-
+         
         MV_REG_WRITE_BYTE(ioBaseAddr, eDmaRegsOffset +
                           MV_ATA_DEVICE_CONTROL_REG_OFFSET, MV_BIT7);
 
@@ -1577,18 +1237,12 @@ MV_BOOLEAN _doSoftReset(MV_SATA_CHANNEL *pSataChannel)
 
     mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG_NON_UDMA_COMMAND | MV_DEBUG, "Issue SRST COMMAND\n");
 
-/* Write to the Device Control register, bits 1,2:                      */
-/* - bit 1 (nIEN): is the enable bit for the device assertion of INTRQ  */
-/*   to the host. When the nIEN bit is set to one, or the device is not */
-/*   selected, the device shall release the INTRQ signal.               */
-/* - bit 2 (SRST): is the host software reset bit.                      */
     MV_REG_WRITE_BYTE(ioBaseAddr, pSataChannel->eDmaRegsOffset +
                       MV_ATA_DEVICE_CONTROL_REG_OFFSET, MV_BIT2|MV_BIT1);
     MV_REG_READ_BYTE(ioBaseAddr, pSataChannel->eDmaRegsOffset +
                      MV_ATA_DEVICE_CONTROL_REG_OFFSET);
     mvMicroSecondsDelay(pSataChannel->mvSataAdapter, 10);
 
-/* enableStorageDevInterrupt will clear the SRST bit*/
     enableStorageDevInterrupt(pSataChannel);
 
     mvMicroSecondsDelay(pSataChannel->mvSataAdapter, 500);
@@ -1613,31 +1267,6 @@ MV_BOOLEAN _doSoftReset(MV_SATA_CHANNEL *pSataChannel)
     return MV_FALSE;
 }
 
-/*******************************************************************************
-* mvPMDevReadReg - Reads port multiplier's internal register
-*
-*
-* DESCRIPTION:
-*       Performs PIO non-data command for reading port multiplier's internal
-*       register.
-*
-* INPUT:
-*       pAdapter            - Pointer to the device data structure.
-*       channelIndex        - Index of the required channel
-*       PMPort              - This should be port 0xf
-*       PMReg               - The required register to be read
-*       pValue              - A pointer to 32bit data container that holds
-*                             the result.
-*       registerStruct      - A pointer to ATA register data structure. This
-*                             holds the ATA registers dump after command
-*                             is executed.
-*
-* RETURN:
-*       MV_TRUE on success, MV_FALSE otherwise.
-* COMMENTS:
-*       NONE
-*
-*******************************************************************************/
 MV_BOOLEAN  mvPMDevReadReg(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex,
                            MV_U8 PMPort, MV_U8 PMReg, MV_U32 *pValue,
                            MV_STORAGE_DEVICE_REGISTERS *registerStruct)
@@ -1684,30 +1313,6 @@ MV_BOOLEAN  mvPMDevReadReg(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex,
     return result;
 }
 
-/*******************************************************************************
-* mvPMDevWriteReg - Writes to port multiplier's internal register
-*
-*
-* DESCRIPTION:
-*       Performs PIO non-data command for writing to port multiplier's internal
-*       register.
-*
-* INPUT:
-*       pAdapter            - Pointer to the device data structure.
-*       channelIndex        - Index of the required channel
-*       PMPort              - This should be port 0xf
-*       PMReg               - The required register to be read
-*       value               - Holds 32bit of the value to be written
-*       registerStruct      - A pointer to ATA register data structure. This
-*                             holds the ATA registers dump after command
-*                             is executed.
-*
-* RETURN:
-*       MV_TRUE on success, MV_FALSE otherwise.
-* COMMENTS:
-*       NONE
-*
-*******************************************************************************/
 MV_BOOLEAN  mvPMDevWriteReg(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex,
                             MV_U8 PMPort, MV_U8 PMReg, MV_U32 value,
                             MV_STORAGE_DEVICE_REGISTERS *registerStruct)
@@ -1800,52 +1405,11 @@ MV_BOOLEAN  mvPMLinkUp(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex, MV_U8 PMPo
     return result;
 }
 
-/*******************************************************************************
-* mvPMDevEnableStaggeredSpinUp -
-*
-*
-* DESCRIPTION:
-*       Enables commnucation on a port multiplier's device SATA channel
-*
-* INPUT:
-*       pAdapter            - Pointer to the device data structure.
-*       channelIndex        - Index of the required channel
-*       PMPort              - Required device SATA channel on port multiplier
-*
-* RETURN:
-*       MV_TRUE on success, MV_FALSE otherwise.
-* COMMENTS:
-*       NONE
-*
-*******************************************************************************/
 MV_BOOLEAN  mvPMDevEnableStaggeredSpinUp(MV_SATA_ADAPTER *pAdapter,
                                          MV_U8 channelIndex, MV_U8 PMPort)
 {
     return mvPMLinkUp(pAdapter, channelIndex, PMPort, MV_FALSE);
 }
-
-/*******************************************************************************
-* mvPMDevEnableStaggeredSpinUpAll -
-*
-*
-* DESCRIPTION:
-*       Enables commnucation on all port multiplier's device SATA channels
-*
-* INPUT:
-*       pAdapter            - Pointer to the device data structure.
-*       channelIndex        - Index of the required channel
-*       PMNumOfPorts        - Number of device SATA channel the port multiplier
-*                             has.
-*       bitmask             - A pointer to 16bit data container that holds
-*                             a bitmask of '1' when the relevant port multiplier's
-*                             device port staggered spinup operation is success.
-*
-* RETURN:
-*       MV_TRUE on success, MV_FALSE otherwise.
-* COMMENTS:
-*       NONE
-*
-*******************************************************************************/
 
 MV_BOOLEAN mvPMDevEnableStaggeredSpinUpAll(MV_SATA_ADAPTER *pSataAdapter,
                                            MV_U8 channelIndex,
@@ -1859,13 +1423,12 @@ MV_BOOLEAN mvPMDevEnableStaggeredSpinUpAll(MV_SATA_ADAPTER *pSataAdapter,
     {
         return MV_FALSE;
     }
-    /*Do not issue staggered spinup for port 0 - already done because of
-    legacy port mode*/
+     
     *bitmask = 1;
     for (PMPort = 0; PMPort < PMNumOfPorts; PMPort++)
     {
         MV_BOOLEAN error;
-        /* if sata communication already done(No staggered spin-up)*/
+         
         if (_checkPMPortSStatus(pSataAdapter, channelIndex, PMPort, &error) ==
              MV_TRUE)
         {
@@ -1941,24 +1504,6 @@ MV_BOOLEAN mvPMDevEnableStaggeredSpinUpAll(MV_SATA_ADAPTER *pSataAdapter,
     return MV_TRUE;
 }
 
-/*******************************************************************************
-* mvPMDevEnableStaggeredSpinUpPort -
-*
-*
-* DESCRIPTION:
-*       Enables commnucation on port multiplier's device SATA port
-*
-* INPUT:
-*       pAdapter            - Pointer to the device data structure.
-*       channelIndex        - Index of the required channel
-*       PMPort              - the port number 
-*
-* RETURN:
-*       MV_TRUE on success, MV_FALSE otherwise.
-* COMMENTS:
-*       NONE
-*
-*******************************************************************************/
 MV_BOOLEAN mvPMDevEnableStaggeredSpinUpPort(MV_SATA_ADAPTER *pSataAdapter,
 					    MV_U8 channelIndex,
  					    MV_U8 PMPort,
@@ -2012,31 +1557,6 @@ MV_BOOLEAN mvPMDevEnableStaggeredSpinUpPort(MV_SATA_ADAPTER *pSataAdapter,
     return MV_TRUE;
 }
 
-/*******************************************************************************
-* mvStorageDevExecutePIO -
-*
-*
-* DESCRIPTION:
-*       Sends custom PIO command (polling driven)
-*
-* INPUT:
-*   pAdapter    - pointer to the device data structure.
-*   channelIndex    - index of the required channel
-*   PMPort          - index of the required destination port multipliers
-*                     device Port (0 if no PM available).
-*   protocolType    - protocol type of the command
-*   isEXT   - true when the given command is the EXTENDED
-*   bufPtr  - pointer to the buffer to write/read to/from
-*   pInATARegs  - Holds ATA registers for the command
-*   pOutATARegs - Holds ATA registers after the command completed
-*
-* RETURN:
-*   MV_TRUE on success, MV_FALSE otherwise.
-* COMMENTS:
-*       when the command is EXTENDED, then the high 8 bits of the 16 bits values
-*   will be written first, so they should hold the previous value as defined in
-*   the ATA 6 standard
-*******************************************************************************/
 MV_BOOLEAN mvStorageDevExecutePIO(MV_SATA_ADAPTER *pAdapter,
                                   MV_U8 channelIndex,
                                   MV_U8 PMPort,
@@ -2078,25 +1598,6 @@ MV_BOOLEAN mvStorageDevExecutePIO(MV_SATA_ADAPTER *pAdapter,
     return result;
 }
 
-/*******************************************************************************
-* mvStorageDevSetDeviceType -
-*
-*
-* DESCRIPTION:
-*       Sets the device type connected directly to the specific adapter's
-*       SATA channel.
-*
-* INPUT:
-*       pAdapter            - Pointer to the device data structure.
-*       channelIndex        - Index of the required channel
-*       deviceType          - Type of device
-*
-* RETURN:
-*       MV_TRUE on success, MV_FALSE otherwise.
-* COMMENTS:
-*       NONE
-*
-*******************************************************************************/
 MV_BOOLEAN  mvStorageDevSetDeviceType(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex,
                                       MV_SATA_DEVICE_TYPE deviceType)
 {
@@ -2125,24 +1626,6 @@ MV_BOOLEAN  mvStorageDevSetDeviceType(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIn
     return MV_TRUE;
 }
 
-/*******************************************************************************
-* mvStorageDevGetDeviceType -
-*
-*
-* DESCRIPTION:
-*       Gets the device type connected directly to the specific adapter's
-*       SATA channel.
-*
-* INPUT:
-*       pAdapter            - Pointer to the device data structure.
-*       channelIndex        - Index of the required channel
-*
-* RETURN:
-*       MV_TRUE on success, MV_FALSE otherwise.
-* COMMENTS:
-*       NONE
-*
-*******************************************************************************/
 MV_SATA_DEVICE_TYPE mvStorageDevGetDeviceType(MV_SATA_ADAPTER *pAdapter,
                                               MV_U8 channelIndex)
 {

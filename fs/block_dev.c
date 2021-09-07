@@ -1,13 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/block_dev.c
- *
- *  Copyright (C) 1991, 1992  Linus Torvalds
- *  Copyright (C) 2001  Andrea Arcangeli <andrea@suse.de> SuSE
- */
-
+ 
 #include <linux/init.h>
 #include <linux/mm.h>
 #include <linux/fcntl.h>
@@ -64,7 +58,6 @@ static sector_t max_block(struct block_device *bdev)
 	return retval;
 }
 
-/* Kill _all_ buffers and pagecache , dirty or not.. */
 static void kill_bdev(struct block_device *bdev)
 {
 	if (bdev->bd_inode->i_mapping->nrpages == 0)
@@ -75,15 +68,13 @@ static void kill_bdev(struct block_device *bdev)
 
 int set_blocksize(struct block_device *bdev, int size)
 {
-	/* Size must be a power of two, and between 512 and PAGE_SIZE */
+	 
 	if (size > PAGE_SIZE || size < 512 || !is_power_of_2(size))
 		return -EINVAL;
 
-	/* Size cannot be smaller than the size supported by the device */
 	if (size < bdev_logical_block_size(bdev))
 		return -EINVAL;
 
-	/* Don't change the size if it is same as current */
 	if (bdev->bd_block_size != size) {
 		sync_blockdev(bdev);
 		bdev->bd_block_size = size;
@@ -99,8 +90,7 @@ int sb_set_blocksize(struct super_block *sb, int size)
 {
 	if (set_blocksize(sb->s_bdev, size))
 		return 0;
-	/* If we get here, we know size is power of two
-	 * and it's value is between 512 and PAGE_SIZE */
+	 
 	sb->s_blocksize = size;
 	sb->s_blocksize_bits = blksize_bits(size);
 	return sb->s_blocksize;
@@ -126,12 +116,6 @@ blkdev_get_block(struct inode *inode, sector_t iblock,
 		if (create)
 			return -EIO;
 
-		/*
-		 * for reads, we're just trying to fill a partial page.
-		 * return a hole, they will have to call get_block again
-		 * before they can fill it, and they will get -EIO at that
-		 * time
-		 */
 		return 0;
 	}
 	bh->b_bdev = I_BDEV(inode);
@@ -151,11 +135,8 @@ blkdev_get_blocks(struct inode *inode, sector_t iblock,
 		max_blocks = end_block - iblock;
 		if ((long)max_blocks <= 0) {
 			if (create)
-				return -EIO;	/* write fully beyond EOF */
-			/*
-			 * It is a read which is fully beyond EOF.  We return
-			 * a !buffer_mapped buffer
-			 */
+				return -EIO;	 
+			 
 			max_blocks = 0;
 		}
 	}
@@ -188,21 +169,12 @@ int __sync_blockdev(struct block_device *bdev, int wait)
 	return filemap_write_and_wait(bdev->bd_inode->i_mapping);
 }
 
-/*
- * Write out and wait upon all the dirty data associated with a block
- * device via its mapping.  Does not take the superblock lock.
- */
 int sync_blockdev(struct block_device *bdev)
 {
 	return __sync_blockdev(bdev, 1);
 }
 EXPORT_SYMBOL(sync_blockdev);
 
-/*
- * Write out and wait upon all dirty data associated with this
- * device.   Filesystem data as well as the underlying block
- * device.  Takes the superblock lock.
- */
 int fsync_bdev(struct block_device *bdev)
 {
 	struct super_block *sb = get_super(bdev);
@@ -223,7 +195,6 @@ static int sync_wait_fs_sync(struct super_block *sb)
 		int cnt;
 		struct inode *tmp;
 
-		/* fail-safe protection*/
 		if (retry++ > SYNO_EXT4_SYNC_DALLOC_RETRY) {
 			printk(KERN_ERR"freeze_bdev retry sync more than %d times\n", retry);
 			break;
@@ -246,18 +217,7 @@ static int sync_wait_fs_sync(struct super_block *sb)
 	return 0;
 }
 #endif
-/**
- * freeze_bdev  --  lock a filesystem and force it into a consistent state
- * @bdev:	blockdevice to lock
- *
- * If a superblock is found on this device, we take the s_umount semaphore
- * on it to make sure nobody unmounts until the snapshot creation is done.
- * The reference counter (bd_fsfreeze_count) guarantees that only the last
- * unfreeze process can unfreeze the frozen filesystem actually when multiple
- * freeze requests arrive simultaneously. It counts up in freeze_bdev() and
- * count down in thaw_bdev(). When it becomes 0, thaw_bdev() will unfreeze
- * actually.
- */
+ 
 struct super_block *freeze_bdev(struct block_device *bdev)
 {
 	struct super_block *sb;
@@ -265,11 +225,7 @@ struct super_block *freeze_bdev(struct block_device *bdev)
 
 	mutex_lock(&bdev->bd_fsfreeze_mutex);
 	if (++bdev->bd_fsfreeze_count > 1) {
-		/*
-		 * We don't even need to grab a reference - the first call
-		 * to freeze_bdev grab an active reference and only the last
-		 * thaw_bdev drops it.
-		 */
+		 
 		sb = get_super(bdev);
 		drop_super(sb);
 		mutex_unlock(&bdev->bd_fsfreeze_mutex);
@@ -317,17 +273,10 @@ struct super_block *freeze_bdev(struct block_device *bdev)
  out:
 	sync_blockdev(bdev);
 	mutex_unlock(&bdev->bd_fsfreeze_mutex);
-	return sb;	/* thaw_bdev releases s->s_umount */
+	return sb;	 
 }
 EXPORT_SYMBOL(freeze_bdev);
 
-/**
- * thaw_bdev  -- unlock filesystem
- * @bdev:	blockdevice to unlock
- * @sb:		associated superblock
- *
- * Unlocks the filesystem and marks it writeable again after freeze_bdev().
- */
 int thaw_bdev(struct block_device *bdev, struct super_block *sb)
 {
 	int error = -EINVAL;
@@ -415,11 +364,6 @@ static int blkdev_write_end(struct file *file, struct address_space *mapping,
 	return ret;
 }
 
-/*
- * private llseek:
- * for a block special file file->f_path.dentry->d_inode->i_size is zero
- * so we compute the size by hand (just as in block_read/write above)
- */
 static loff_t block_llseek(struct file *file, loff_t offset, int origin)
 {
 	struct inode *bd_inode = file->f_mapping->host;
@@ -447,19 +391,10 @@ static loff_t block_llseek(struct file *file, loff_t offset, int origin)
 	return retval;
 }
 	
-/*
- *	Filp is never NULL; the only case when ->fsync() is called with
- *	NULL first argument is nfsd_sync_dir() and that's not a directory.
- */
- 
 int block_fsync(struct file *filp, struct dentry *dentry, int datasync)
 {
 	return sync_blockdev(I_BDEV(filp->f_mapping->host));
 }
-
-/*
- * pseudo-fs
- */
 
 static  __cacheline_aligned_in_smp DEFINE_SPINLOCK(bdev_lock);
 static struct kmem_cache * bdev_cachep __read_mostly;
@@ -493,7 +428,7 @@ static void init_once(void *foo)
 	INIT_LIST_HEAD(&bdev->bd_holder_list);
 #endif
 	inode_init_once(&ei->vfs_inode);
-	/* Initialize mutex for freeze. */
+	 
 	mutex_init(&bdev->bd_fsfreeze_mutex);
 }
 
@@ -553,19 +488,11 @@ void __init bdev_cache_init(void)
 	bd_mnt = kern_mount(&bd_type);
 	if (IS_ERR(bd_mnt))
 		panic("Cannot create bdev pseudo-fs");
-	/*
-	 * This vfsmount structure is only used to obtain the
-	 * blockdev_superblock, so tell kmemleak not to report it.
-	 */
+	 
 	kmemleak_not_leak(bd_mnt);
-	blockdev_superblock = bd_mnt->mnt_sb;	/* For writeback */
+	blockdev_superblock = bd_mnt->mnt_sb;	 
 }
 
-/*
- * Most likely _very_ bad one - but then it's hardly critical for small
- * /dev and can be fixed when somebody will need really large one.
- * Keep in mind that it will be fed through icache hash function too.
- */
 static inline unsigned long hash(dev_t dev)
 {
 	return MAJOR(dev)+MINOR(dev);
@@ -619,10 +546,6 @@ struct block_device *bdget(dev_t dev)
 
 EXPORT_SYMBOL(bdget);
 
-/**
- * bdgrab -- Grab a reference to an already referenced block device
- * @bdev:	Block device to grab a reference to.
- */
 struct block_device *bdgrab(struct block_device *bdev)
 {
 	atomic_inc(&bdev->bd_inode->i_count);
@@ -665,12 +588,7 @@ static struct block_device *bd_acquire(struct inode *inode)
 	if (bdev) {
 		spin_lock(&bdev_lock);
 		if (!inode->i_bdev) {
-			/*
-			 * We take an additional bd_inode->i_count for inode,
-			 * and it's released in clear_inode() of inode.
-			 * So, we can access it via ->i_mapping always
-			 * without igrab().
-			 */
+			 
 			atomic_inc(&bdev->bd_inode->i_count);
 			inode->i_bdev = bdev;
 			inode->i_mapping = bdev->bd_inode->i_mapping;
@@ -680,8 +598,6 @@ static struct block_device *bd_acquire(struct inode *inode)
 	}
 	return bdev;
 }
-
-/* Call when you free inode */
 
 void bd_forget(struct inode *inode)
 {
@@ -704,27 +620,22 @@ int bd_claim(struct block_device *bdev, void *holder)
 	int res;
 	spin_lock(&bdev_lock);
 
-	/* first decide result */
 	if (bdev->bd_holder == holder)
-		res = 0;	 /* already a holder */
+		res = 0;	  
 	else if (bdev->bd_holder != NULL)
-		res = -EBUSY; 	 /* held by someone else */
+		res = -EBUSY; 	  
 	else if (bdev->bd_contains == bdev)
-		res = 0;  	 /* is a whole device which isn't held */
+		res = 0;  	  
 
 	else if (bdev->bd_contains->bd_holder == bd_claim)
-		res = 0; 	 /* is a partition of a device that is being partitioned */
+		res = 0; 	  
 	else if (bdev->bd_contains->bd_holder != NULL)
-		res = -EBUSY;	 /* is a partition of a held device */
+		res = -EBUSY;	  
 	else
-		res = 0;	 /* is a partition of an un-held device */
+		res = 0;	  
 
-	/* now impose change */
 	if (res==0) {
-		/* note that for a whole device bd_holders
-		 * will be incremented twice, and bd_holder will
-		 * be set to bd_claim before being set to holder
-		 */
+		 
 		bdev->bd_contains->bd_holders ++;
 		bdev->bd_contains->bd_holder = bd_claim;
 		bdev->bd_holders++;
@@ -749,23 +660,7 @@ void bd_release(struct block_device *bdev)
 EXPORT_SYMBOL(bd_release);
 
 #ifdef CONFIG_SYSFS
-/*
- * Functions for bd_claim_by_kobject / bd_release_from_kobject
- *
- *     If a kobject is passed to bd_claim_by_kobject()
- *     and the kobject has a parent directory,
- *     following symlinks are created:
- *        o from the kobject to the claimed bdev
- *        o from "holders" directory of the bdev to the parent of the kobject
- *     bd_release_from_kobject() removes these symlinks.
- *
- *     Example:
- *        If /dev/dm-0 maps to /dev/sda, kobject corresponding to
- *        /sys/block/dm-0/slaves is passed to bd_claim_by_kobject(), then:
- *           /sys/block/dm-0/slaves/sda --> /sys/block/sda
- *           /sys/block/sda/holders/dm-0 --> /sys/block/dm-0
- */
-
+ 
 static int add_symlink(struct kobject *from, struct kobject *to)
 {
 	if (!from || !to)
@@ -780,26 +675,15 @@ static void del_symlink(struct kobject *from, struct kobject *to)
 	sysfs_remove_link(from, kobject_name(to));
 }
 
-/*
- * 'struct bd_holder' contains pointers to kobjects symlinked by
- * bd_claim_by_kobject.
- * It's connected to bd_holder_list which is protected by bdev->bd_sem.
- */
 struct bd_holder {
-	struct list_head list;	/* chain of holders of the bdev */
-	int count;		/* references from the holder */
-	struct kobject *sdir;	/* holder object, e.g. "/block/dm-0/slaves" */
-	struct kobject *hdev;	/* e.g. "/block/dm-0" */
-	struct kobject *hdir;	/* e.g. "/block/sda/holders" */
-	struct kobject *sdev;	/* e.g. "/block/sda" */
+	struct list_head list;	 
+	int count;		 
+	struct kobject *sdir;	 
+	struct kobject *hdev;	 
+	struct kobject *hdir;	 
+	struct kobject *sdev;	 
 };
 
-/*
- * Get references of related kobjects at once.
- * Returns 1 on success. 0 on failure.
- *
- * Should call bd_holder_release_dirs() after successful use.
- */
 static int bd_holder_grab_dirs(struct block_device *bdev,
 			struct bd_holder *bo)
 {
@@ -834,7 +718,6 @@ fail_put_sdir:
 	return 0;
 }
 
-/* Put references of related kobjects at once. */
 static void bd_holder_release_dirs(struct bd_holder *bo)
 {
 	kobject_put(bo->hdir);
@@ -862,16 +745,6 @@ static void free_bd_holder(struct bd_holder *bo)
 	kfree(bo);
 }
 
-/**
- * find_bd_holder - find matching struct bd_holder from the block device
- *
- * @bdev:	struct block device to be searched
- * @bo:		target struct bd_holder
- *
- * Returns matching entry with @bo in @bdev->bd_holder_list.
- * If found, increment the reference count and return the pointer.
- * If not found, returns NULL.
- */
 static struct bd_holder *find_bd_holder(struct block_device *bdev,
 					struct bd_holder *bo)
 {
@@ -886,17 +759,6 @@ static struct bd_holder *find_bd_holder(struct block_device *bdev,
 	return NULL;
 }
 
-/**
- * add_bd_holder - create sysfs symlinks for bd_claim() relationship
- *
- * @bdev:	block device to be bd_claimed
- * @bo:		preallocated and initialized by alloc_bd_holder()
- *
- * Add @bo to @bdev->bd_holder_list, create symlinks.
- *
- * Returns 0 if symlinks are created.
- * Returns -ve if something fails.
- */
 static int add_bd_holder(struct block_device *bdev, struct bd_holder *bo)
 {
 	int err;
@@ -921,21 +783,6 @@ static int add_bd_holder(struct block_device *bdev, struct bd_holder *bo)
 	return 0;
 }
 
-/**
- * del_bd_holder - delete sysfs symlinks for bd_claim() relationship
- *
- * @bdev:	block device to be bd_claimed
- * @kobj:	holder's kobject
- *
- * If there is matching entry with @kobj in @bdev->bd_holder_list
- * and no other bd_claim() from the same kobject,
- * remove the struct bd_holder from the list, delete symlinks for it.
- *
- * Returns a pointer to the struct bd_holder when it's removed from the list
- * and ready to be freed.
- * Returns NULL if matching claim isn't found or there is other bd_claim()
- * by the same kobject.
- */
 static struct bd_holder *del_bd_holder(struct block_device *bdev,
 					struct kobject *kobj)
 {
@@ -959,20 +806,6 @@ static struct bd_holder *del_bd_holder(struct block_device *bdev,
 	return NULL;
 }
 
-/**
- * bd_claim_by_kobject - bd_claim() with additional kobject signature
- *
- * @bdev:	block device to be claimed
- * @holder:	holder's signature
- * @kobj:	holder's kobject
- *
- * Do bd_claim() and if it succeeds, create sysfs symlinks between
- * the bdev and the holder's kobject.
- * Use bd_release_from_kobject() when relesing the claimed bdev.
- *
- * Returns 0 on success. (same as bd_claim())
- * Returns errno on failure.
- */
 static int bd_claim_by_kobject(struct block_device *bdev, void *holder,
 				struct kobject *kobj)
 {
@@ -1007,14 +840,6 @@ fail:
 	return err;
 }
 
-/**
- * bd_release_from_kobject - bd_release() with additional kobject signature
- *
- * @bdev:	block device to be released
- * @kobj:	holder's kobject
- *
- * Do bd_release() and remove sysfs symlinks created by bd_claim_by_kobject().
- */
 static void bd_release_from_kobject(struct block_device *bdev,
 					struct kobject *kobj)
 {
@@ -1027,15 +852,6 @@ static void bd_release_from_kobject(struct block_device *bdev,
 	mutex_unlock(&bdev->bd_mutex);
 }
 
-/**
- * bd_claim_by_disk - wrapper function for bd_claim_by_kobject()
- *
- * @bdev:	block device to be claimed
- * @holder:	holder's signature
- * @disk:	holder's gendisk
- *
- * Call bd_claim_by_kobject() with getting @disk->slave_dir.
- */
 int bd_claim_by_disk(struct block_device *bdev, void *holder,
 			struct gendisk *disk)
 {
@@ -1043,14 +859,6 @@ int bd_claim_by_disk(struct block_device *bdev, void *holder,
 }
 EXPORT_SYMBOL_GPL(bd_claim_by_disk);
 
-/**
- * bd_release_from_disk - wrapper function for bd_release_from_kobject()
- *
- * @bdev:	block device to be claimed
- * @disk:	holder's gendisk
- *
- * Call bd_release_from_kobject() and put @disk->slave_dir.
- */
 void bd_release_from_disk(struct block_device *bdev, struct gendisk *disk)
 {
 	bd_release_from_kobject(bdev, disk->slave_dir);
@@ -1059,13 +867,6 @@ void bd_release_from_disk(struct block_device *bdev, struct gendisk *disk)
 EXPORT_SYMBOL_GPL(bd_release_from_disk);
 #endif
 
-/*
- * Tries to open block device by device number.  Use it ONLY if you
- * really do not have anything better - i.e. when you are behind a
- * truly sucky interface and all you are given is a device number.  _Never_
- * to be used for internal purposes.  If you ever need it - reconsider
- * your API.
- */
 struct block_device *open_by_devnum(dev_t dev, fmode_t mode)
 {
 	struct block_device *bdev = bdget(dev);
@@ -1077,15 +878,6 @@ struct block_device *open_by_devnum(dev_t dev, fmode_t mode)
 
 EXPORT_SYMBOL(open_by_devnum);
 
-/**
- * flush_disk - invalidates all buffer-cache entries on a disk
- *
- * @bdev:      struct block device to be flushed
- *
- * Invalidates all buffer-cache entries on a disk. It should be called
- * when a disk has been changed -- either by a media change or online
- * resize.
- */
 static void flush_disk(struct block_device *bdev)
 {
 	if (__invalidate_device(bdev)) {
@@ -1103,14 +895,6 @@ static void flush_disk(struct block_device *bdev)
 		bdev->bd_invalidated = 1;
 }
 
-/**
- * check_disk_size_change - checks for disk size change and adjusts bdev size.
- * @disk: struct gendisk to check
- * @bdev: struct bdev to adjust.
- *
- * This routine checks to see if the bdev size does not match the disk size
- * and adjusts it if it differs.
- */
 void check_disk_size_change(struct gendisk *disk, struct block_device *bdev)
 {
 	loff_t disk_size, bdev_size;
@@ -1130,14 +914,6 @@ void check_disk_size_change(struct gendisk *disk, struct block_device *bdev)
 }
 EXPORT_SYMBOL(check_disk_size_change);
 
-/**
- * revalidate_disk - wrapper for lower-level driver's revalidate_disk call-back
- * @disk: struct gendisk to be revalidated
- *
- * This routine is a wrapper for lower-level driver's revalidate_disk
- * call-backs.  It is used to do common pre and post operations needed
- * for all revalidate_disk operations.
- */
 int revalidate_disk(struct gendisk *disk)
 {
 	struct block_device *bdev;
@@ -1169,15 +945,6 @@ int revalidate_disk(struct gendisk *disk)
 }
 EXPORT_SYMBOL(revalidate_disk);
 
-/*
- * This routine checks whether a removable media has been changed,
- * and invalidates all buffer-cache-entries in that case. This
- * is a relatively slow routine, so we have to try to minimize using
- * it. Thus it is called only upon a 'mount' or 'open'. This
- * is the best way of combining speed and utility, I think.
- * People changing diskettes in the middle of an operation deserve
- * to lose :-)
- */
 int check_disk_change(struct block_device *bdev)
 {
 	struct gendisk *disk = bdev->bd_disk;
@@ -1213,13 +980,6 @@ EXPORT_SYMBOL(bd_set_size);
 
 static int __blkdev_put(struct block_device *bdev, fmode_t mode, int for_part);
 
-/*
- * bd_mutex locking:
- *
- *  mutex_lock(part->bd_mutex)
- *    mutex_lock_nested(whole->bd_mutex, 1)
- */
-
 static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
 {
 	struct gendisk *disk;
@@ -1231,9 +991,7 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
 		perm |= MAY_READ;
 	if (mode & FMODE_WRITE)
 		perm |= MAY_WRITE;
-	/*
-	 * hooks: /n/, see "layering violations".
-	 */
+	 
 	ret = devcgroup_inode_permission(bdev->bd_inode, perm);
 	if (ret != 0) {
 		bdput(bdev);
@@ -1263,10 +1021,7 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
 			if (disk->fops->open) {
 				ret = disk->fops->open(bdev, mode);
 				if (ret == -ERESTARTSYS) {
-					/* Lost a race with 'disk' being
-					 * deleted, try again.
-					 * See md.c
-					 */
+					 
 					disk_put_part(bdev->bd_part);
 					bdev->bd_part = NULL;
 					module_put(disk->fops->owner);
@@ -1361,12 +1116,6 @@ static int blkdev_open(struct inode * inode, struct file * filp)
 	struct block_device *bdev;
 	int res;
 
-	/*
-	 * Preserve backwards compatibility and allow large file access
-	 * even if userspace doesn't ask for it explicitly. Some mkfs
-	 * binary needs it. We might want to drop this workaround
-	 * during an unstable branch.
-	 */
 	filp->f_flags |= O_LARGEFILE;
 
 	if (filp->f_flags & O_NDELAY)
@@ -1458,10 +1207,6 @@ static long block_ioctl(struct file *file, unsigned cmd, unsigned long arg)
 	struct block_device *bdev = I_BDEV(file->f_mapping->host);
 	fmode_t mode = file->f_mode;
 
-	/*
-	 * O_NDELAY can be altered using fcntl(.., F_SETFL, ..), so we have
-	 * to updated it before every ioctl.
-	 */
 	if (file->f_flags & O_NDELAY)
 		mode |= FMODE_NDELAY;
 	else
@@ -1470,13 +1215,6 @@ static long block_ioctl(struct file *file, unsigned cmd, unsigned long arg)
 	return blkdev_ioctl(bdev, mode, cmd, arg);
 }
 
-/*
- * Write data to the block device.  Only intended for the block device itself
- * and the raw driver which basically is a fake block device.
- *
- * Does not take i_mutex for the write and thus is not for general purpose
- * use.
- */
 ssize_t blkdev_aio_write(struct kiocb *iocb, const struct iovec *iov,
 			 unsigned long nr_segs, loff_t pos)
 {
@@ -1497,10 +1235,6 @@ ssize_t blkdev_aio_write(struct kiocb *iocb, const struct iovec *iov,
 }
 EXPORT_SYMBOL_GPL(blkdev_aio_write);
 
-/*
- * Try to release a page associated with block device when the system
- * is under memory pressure.
- */
 static int blkdev_releasepage(struct page *page, gfp_t wait)
 {
 	struct super_block *super = BDEV_I(page->mapping->host)->bdev.bd_super;
@@ -1552,14 +1286,6 @@ int ioctl_by_bdev(struct block_device *bdev, unsigned cmd, unsigned long arg)
 
 EXPORT_SYMBOL(ioctl_by_bdev);
 
-/**
- * lookup_bdev  - lookup a struct block_device by name
- * @pathname:	special file representing the block device
- *
- * Get a reference to the blockdevice at @pathname in the current
- * namespace if possible and return it.  Return ERR_PTR(error)
- * otherwise.
- */
 struct block_device *lookup_bdev(const char *pathname)
 {
 	struct block_device *bdev;
@@ -1594,16 +1320,6 @@ fail:
 }
 EXPORT_SYMBOL(lookup_bdev);
 
-/**
- * open_bdev_exclusive  -  open a block device by name and set it up for use
- *
- * @path:	special file representing the block device
- * @mode:	FMODE_... combination to pass be used
- * @holder:	owner for exclusion
- *
- * Open the blockdevice described by the special file at @path, claim it
- * for the @holder.
- */
 struct block_device *open_bdev_exclusive(const char *path, fmode_t mode, void *holder)
 {
 	struct block_device *bdev;
@@ -1632,14 +1348,6 @@ blkdev_put:
 
 EXPORT_SYMBOL(open_bdev_exclusive);
 
-/**
- * close_bdev_exclusive  -  close a blockdevice opened by open_bdev_exclusive()
- *
- * @bdev:	blockdevice to close
- * @mode:	mode, must match that used to open.
- *
- * This is the counterpart to open_bdev_exclusive().
- */
 void close_bdev_exclusive(struct block_device *bdev, fmode_t mode)
 {
 	bd_release(bdev);
@@ -1654,12 +1362,7 @@ int __invalidate_device(struct block_device *bdev)
 	int res = 0;
 
 	if (sb) {
-		/*
-		 * no need to lock the super, get_super holds the
-		 * read mutex so the filesystem cannot go away
-		 * under us (->put_super runs with the write lock
-		 * hold).
-		 */
+		 
 		shrink_dcache_sb(sb);
 		res = invalidate_inodes(sb);
 		drop_super(sb);

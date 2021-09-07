@@ -1,30 +1,4 @@
-/*
- * Modifications by Kumar Gala (galak@kernel.crashing.org) to support
- * E500 Book E processors.
- *
- * Copyright 2004 Freescale Semiconductor, Inc
- *
- * This file contains the routines for initializing the MMU
- * on the 4xx series of chips.
- *  -- paulus
- *
- *  Derived from arch/ppc/mm/init.c:
- *    Copyright (C) 1995-1996 Gary Thomas (gdt@linuxppc.org)
- *
- *  Modifications by Paul Mackerras (PowerMac) (paulus@cs.anu.edu.au)
- *  and Cort Dougan (PReP) (cort@cs.nmt.edu)
- *    Copyright (C) 1996 Paul Mackerras
- *
- *  Derived from "arch/i386/mm/init.c"
- *    Copyright (C) 1991, 1992, 1993, 1994  Linus Torvalds
- *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License
- *  as published by the Free Software Foundation; either version
- *  2 of the License, or (at your option) any later version.
- *
- */
-
+ 
 #include <linux/signal.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
@@ -86,9 +60,9 @@ void __init cam_mapin_extra_chip_select(void)
 
 	immr_base = get_immrbase();
 	if ( immr_base != -1 ) {
-		//configuration base
+		 
 		settlbcam(15, immr_base, immr_base, 1024*1024, _PAGE_IO, 0);
-		//CS1: CPLD
+		 
 		settlbcam(14, SYNO_CPLD_BASE, SYNO_CPLD_BASE, SYNO_CPLD_SIZE, _PAGE_IO, 0);
 	} else {
 		printk("HW Settings Error: Failed to get immr_base\n");
@@ -96,9 +70,6 @@ void __init cam_mapin_extra_chip_select(void)
 }
 #endif
 
-/*
- * Return PA for this VA if it is mapped by a CAM, or 0
- */
 phys_addr_t v_mapped_by_tlbcam(unsigned long va)
 {
 	int b;
@@ -108,9 +79,6 @@ phys_addr_t v_mapped_by_tlbcam(unsigned long va)
 	return 0;
 }
 
-/*
- * Return VA for a given PA or 0 if not mapped
- */
 unsigned long p_mapped_by_tlbcam(phys_addr_t pa)
 {
 	int b;
@@ -122,11 +90,6 @@ unsigned long p_mapped_by_tlbcam(phys_addr_t pa)
 	return 0;
 }
 
-/*
- * Set up one of the I/D BAT (block address translation) register pairs.
- * The parameters are not checked; in particular size must be a power
- * of 4 between 4k and 256M.
- */
 void settlbcam(int index, unsigned long virt, phys_addr_t phys,
 		unsigned int size, int flags, unsigned int pid)
 {
@@ -153,7 +116,7 @@ void settlbcam(int index, unsigned long virt, phys_addr_t phys,
 	TLBCAM[index].MAS3 = (phys & PAGE_MASK) | MAS3_SX | MAS3_SR;
 	TLBCAM[index].MAS3 |= ((flags & _PAGE_RW) ? MAS3_SW : 0);
 
-#ifndef CONFIG_KGDB /* want user access for breakpoints */
+#ifndef CONFIG_KGDB  
 	if (flags & _PAGE_USER) {
 	   TLBCAM[index].MAS3 |= MAS3_UX | MAS3_UR;
 	   TLBCAM[index].MAS3 |= ((flags & _PAGE_RW) ? MAS3_UW : 0);
@@ -193,9 +156,6 @@ unsigned long __init mmu_mapin_ram(void)
 	return virt - PAGE_OFFSET;
 }
 
-/*
- * MMU_init_hw does the chip-specific initialization of the MMU hardware.
- */
 void __init MMU_init_hw(void)
 {
 	flush_instruction_cache();
@@ -211,13 +171,10 @@ adjust_total_lowmem(void)
 	unsigned long virt = PAGE_OFFSET & 0xffffffffUL;
 	unsigned long phys = memstart_addr & 0xffffffffUL;
 
-	/* Convert (4^max) kB to (2^max) bytes */
 	max_cam = max_cam * 2 + 10;
 
-	/* adjust lowmem size to __max_low_memory */
 	ram = min((phys_addr_t)__max_low_memory, (phys_addr_t)total_lowmem);
 
-	/* Calculate CAM values */
 	__max_low_memory = 0;
 	for (i = 0; ram && i < ARRAY_SIZE(cam); i++) {
 		unsigned int camsize = __ilog2(ram) & ~1U;

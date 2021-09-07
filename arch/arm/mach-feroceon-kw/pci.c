@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+ 
 #include <linux/autoconf.h>
 #include <linux/kernel.h>
 #include <linux/pci.h>
@@ -69,15 +55,13 @@ void __init mv_pci_preinit(void)
 	u32 pciIf;
 	u32 maxif = mvCtrlPexMaxIfGet();
 
-	/* Check Power State */
 	if (MV_FALSE == mvCtrlPwrClckGet(PEX_UNIT_ID, 0))	
 		return;
 
 	for (pciIf = 0; pciIf < maxif; pciIf++) 
 	{
 #ifdef MY_ABC_HERE
-		//this workaround is for 7042, DS212 does not have one, so it is not necessary.
-		//212+ attaches USB 3.0 on PCIe 0x1, so it cannot be reset.
+		 
 		if ( (syno_is_hw_version(HW_DS212pv10) || syno_is_hw_version(HW_DS212pv20)) && (0 == pciIf) ) {
 			goto apply_pcie_workaround;
 
@@ -94,19 +78,7 @@ void __init mv_pci_preinit(void)
 		}
 apply_pcie_workaround:
 		if (!(0x1 & MV_REG_READ(PEX_LINK_STATUS_REG(pciIf)))) {
-			/*
-			* Synology 6281 PCIe link issue workaround.
-			* If we don't reset the PCIe link, the device's register will all be 0xffffffff
-			* after the PCIe device work for some times.
-			*
-			* In DS409slim, 7042 is work as PCIe 4X in 6281. Some board will encounter
-			* this problem. When the register are all 0xffffffff, the system is just like hang.
-			*
-			* Disable PCIe link and wait for that link is really down.
-			* And then enable it again.
-			* Please refer 6281 functional Spec page 447.
-			* PCIe Link control status register bit 4.
-			*/
+			 
 			MV_REG_WRITE(PEX_LINK_CONTROL_REG(pciIf), MV_REG_READ(PEX_LINK_CONTROL_REG(pciIf)) | 0x10);
 			while(MV_REG_READ(PEX_LINK_STATUS_REG(pciIf)) & 0x1)
 				;
@@ -124,7 +96,7 @@ skip_pcie_workaround:
 		retval = mvPexInit(pciIf, MV_PEX_ROOT_COMPLEX);
 
 		if(retval == MV_NO_SUCH){
-			//printk("pci_init:no such calling mvPexInit for PEX-%x\n",pciIf);
+			 
 			continue;
 		}
 
@@ -134,26 +106,20 @@ skip_pcie_workaround:
 			continue;
 		}
 
-		/* unmask inter A/B/C/D */
-		//printk("writing %x tp %x \n",MV_PCI_MASK_ABCD, MV_PCI_MASK_REG(pciIf) );
 		MV_REG_WRITE(MV_PCI_MASK_REG(pciIf), MV_PCI_MASK_ABCD );
 
 #ifdef MY_ABC_HERE
-		//This Error handling can cause Kernel boot error if the CPU is not 6282A1, 
-		//The BoardID is checked to avoid this error.
+		 
 		if(MV_6282_A1_ID == mvCtrlModelRevGet())
 		{
-			/* init PCI express error handling */
-			// There has some board cannot boot if we enable this options. So disable it again.
-			//mv_pci_error_init(pciIf);
+			 
 		}
 
 #else
-		/* init PCI express error handling */
+		 
 		mv_pci_error_init(pciIf);
 #endif
 
-		/* remmap IO !! */
 		win.baseLow = (pciIf? PEX1_IO_BASE : PEX0_IO_BASE) - IO_SPACE_REMAP;
 		win.baseHigh = 0x0;
 		win.size = pciIf? PEX1_IO_SIZE : PEX0_IO_SIZE;
@@ -161,43 +127,24 @@ skip_pcie_workaround:
 	}
 }
 
-/**
-* mv_pci_error_init
-* DESCRIPTION:	init PCI express error handling
-* INPUTS:	pciIf - number of pex device
-* OUTPUTS:	N/A
-* RETURNS:	N/A
-**/
 void mv_pci_error_init(u32 pciIf)
 {
  	MV_U32      reg_val;
 
-	/* enable PCI express error handling */
 	MV_REG_BIT_SET(MV_IRQ_MASK_HIGH_REG, (1 << (IRQ_PEX_ERR(pciIf) - 32)));
 
-	/* init pex_err structure per each pex */
 	pex_err[pciIf].ifNumber=pciIf;
 	snprintf(pex_err[pciIf].irq_name, PCI_ERR_NAME_LEN, "error_pex%d", pciIf);
 
-	/* register interrupt for PCI express error */
 	if( request_irq(IRQ_PEX_ERR(pciIf), pex_error_interrupt, IRQF_DISABLED ,(const char*)pex_err[pciIf].irq_name, &pex_err[pciIf].ifNumber) < 0){
 		panic("Could not allocate IRQ for PCI express error!");
 	}
 
-	/* init PCI Express Interrupt Mask Register */
-
-	/* get current value of Interrupt Mask Register */
 	reg_val = MV_REG_READ(MV_PCI_MASK_REG(pciIf));
 
-	/* set relevant mask to Interrupt Mask Register */
 	MV_REG_WRITE(MV_PCI_MASK_REG(pciIf), (reg_val | MV_PCI_MASK_ERR));
 }
 
-/* Currentlly the PCI config read/write are implemented as read modify write
-   to 32 bit.
-   TBD: adjust it to realy use 1/2/4 byte(partial) read/write, after the pex
-	read config WA will be removed.
-*/
 static int mv_pci_read_config(struct pci_bus *bus, unsigned int devfn, int where,
                           int size, u32 *val)
 {
@@ -209,14 +156,12 @@ static int mv_pci_read_config(struct pci_bus *bus, unsigned int devfn, int where
  
 	*val = 0xffffffff;
 
-	/* Check Power State */
 	if (MV_FALSE == mvCtrlPwrClckGet(PEX_UNIT_ID, 0))
 		return 0;
 
         bus_num = bus->number;
         dev_no = PCI_SLOT(devfn);
  
-	/* don't return for our device */
 	localBus = mvPexLocalBusNumGet(pciIf);
 	if((dev_no == 0) && ( bus_num == localBus))
 	{
@@ -228,7 +173,7 @@ static int mv_pci_read_config(struct pci_bus *bus, unsigned int devfn, int where
         regOff = (MV_U32)where & PXCAR_REG_NUM_MASK;
 
 #if PCI0_IF_PTP
-	/* WA: use only the first function of the bridge and te first bus*/
+	 
 	if( (bus_num == mvPexLocalBusNumGet(pciIf)) && (dev_no == 1) && (func != 0) )
 	{
 		DB(printk("PCI %x read from bridge func != 0 return 0xffffffff \n",pciIf));
@@ -393,20 +338,11 @@ struct pci_bus *mv_pci_scan_bus(int nr, struct pci_sys_data *sys)
 	return bus;
 }
 
-/**
-* pex_error_interrupt
-* DESCRIPTION: PCI express error interrupt  routine
-* INPUTS:  @irq: irq number
-       @dev_id: device id - ignored
-* OUTPUTS: kernel error message
-* RETURNS: IRQ_HANDLED
-**/
 static irqreturn_t pex_error_interrupt(int irq, void *dev_id)
 {
    MV_U32  reg_val;
    MV_U32 ifPexNumber=*(MV_U32 *)dev_id;
 
-   /* get current value of Interrupt Cause Register */
    reg_val = MV_REG_READ(MV_PCI_IRQ_CAUSE_REG(ifPexNumber));
    printk(KERN_ERR "PCI express error: irq - %d, Pex number: %d, Interrupt Cause Register va  lue: %x  \n", irq, ifPexNumber, reg_val);
 
@@ -434,7 +370,7 @@ static struct hw_pci mv_pci __initdata = {
 static int __init mv_pci_init(void)
 {
 #if defined(MV_INCLUDE_CLK_PWR_CNTRL)
-	 /*Check pex power state */
+	  
 	MV_U32 pexPower;
 	pexPower = mvCtrlPwrClckGet(PEX_UNIT_ID,0);
 	if (pexPower == MV_FALSE)

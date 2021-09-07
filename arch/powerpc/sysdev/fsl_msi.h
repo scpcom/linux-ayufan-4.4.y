@@ -1,18 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2007-2008 Freescale Semiconductor, Inc. All rights reserved.
- *
- * Author: Tony Li <tony.li@freescale.com>
- *	   Jason Jin <Jason.jin@freescale.com>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; version 2 of the
- * License.
- *
- */
+ 
 #ifndef _POWERPC_SYSDEV_FSL_MSI_H
 #define _POWERPC_SYSDEV_FSL_MSI_H
 
@@ -42,8 +31,8 @@ struct fsl_msi {
 	struct msi_bitmap bitmap;
 #ifdef MY_DEF_HERE
 
-	struct list_head list;          /* support multiple MSI banks */
+	struct list_head list;           
 #endif
 };
 
-#endif /* _POWERPC_SYSDEV_FSL_MSI_H */
+#endif  
