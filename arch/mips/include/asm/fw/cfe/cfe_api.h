@@ -32,7 +32,6 @@
 
 typedef long intptr_t;
 
-
 /*
  * Constants
  */
@@ -84,7 +83,6 @@ typedef struct {
 	int64_t fwi_bootarea_pa;	/* PA of boot area */
 	int64_t fwi_bootarea_size;	/* size of boot area */
 } cfe_fwinfo_t;
-
 
 /*
  * Defines and prototypes for functions which take no arguments.

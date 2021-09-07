@@ -51,9 +51,6 @@
 /* V1 RC > 2008/1/31          2.0 */
 #define VMSTOR_PROTOCOL_VERSION_CURRENT VMSTOR_PROTOCOL_VERSION(2, 0)
 
-
-
-
 /*  This will get replaced with the max transfer length that is possible on */
 /*  the host adapter. */
 /*  The max transfer length will be published when we offer a vmbus channel. */
@@ -61,7 +58,6 @@
 #define DEFAULT_PACKET_SIZE (sizeof(struct vmdata_gpa_direct) +	\
 			sizeof(struct vstor_packet) +		\
 			sizesizeof(u64) * (MAX_TRANSFER_LENGTH / PAGE_SIZE)))
-
 
 /*  Packet structure describing virtual storage requests. */
 enum vstor_packet_operation {
@@ -116,7 +112,6 @@ struct vmscsi_request {
 	unsigned char ReservedArray[MAX_DATA_BUFFER_LENGTH_WITH_PADDING];
 	};
 } __attribute((packed));
-
 
 /*
  * This structure is sent during the intialization phase to get the different

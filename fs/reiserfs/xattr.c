@@ -52,7 +52,6 @@
 #define PRIVROOT_NAME ".reiserfs_priv"
 #define XAROOT_NAME   "xattrs"
 
-
 /* Helpers for inode ops. We do this so that we don't have all the VFS
  * overhead and also for proper i_mutex annotation.
  * dir->i_mutex must be held for all of them. */
@@ -453,7 +452,6 @@ out_dput:
 	return err;
 }
 
-
 /* Generic extended attribute operations that can be used by xa plugins */
 
 /*
@@ -717,7 +715,6 @@ find_xattr_handler_prefix(struct xattr_handler **handlers,
 
 	return xah;
 }
-
 
 /*
  * Inode operation getxattr()

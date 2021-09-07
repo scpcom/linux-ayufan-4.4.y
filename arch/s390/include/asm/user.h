@@ -38,7 +38,6 @@
    The minimum core file size is 3 pages, or 12288 bytes.
 */
 
-
 /*
  * This is the old layout of "struct pt_regs", and
  * is still the layout used by user mode (the new

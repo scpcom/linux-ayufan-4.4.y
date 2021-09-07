@@ -38,7 +38,6 @@
 	This software may be used and distributed according to the terms
 	of the GNU General Public License, incorporated herein by reference.
 
-
 -----------------------------------------------------------------------------
 
 				Theory of Operation
@@ -48,7 +47,6 @@ I. Board Compatibility
 This device driver is designed for the RealTek RTL8139 series, the RealTek
 Fast Ethernet controllers for PCI and CardBus.  This chip is used on many
 low-end boards, sometimes with its markings changed.
-
 
 II. Board-specific settings
 
@@ -116,7 +114,6 @@ KERN_INFO NETDRV_DRIVER_LOAD_MSG "\n"
 /* define to 1 to disable lightweight runtime debugging checks */
 #undef NETDRV_NDEBUG
 
-
 #ifdef NETDRV_DEBUG
 /* note: prints function name for you */
 #  define DPRINTK(fmt, args...) printk(KERN_DEBUG "%s: " fmt, __func__ , ## args)
@@ -133,7 +130,6 @@ KERN_INFO NETDRV_DRIVER_LOAD_MSG "\n"
         #expr,__FILE__,__func__,__LINE__);		\
         }
 #endif
-
 
 /* A few user-configurable values. */
 /* media options */
@@ -172,11 +168,9 @@ static int multicast_filter_limit = 32;
 #define RX_DMA_BURST	6	/* Maximum PCI burst, '6' is 1024 */
 #define TX_DMA_BURST	6	/* Maximum PCI burst, '6' is 1024 */
 
-
 /* Operational parameters that usually are not changed. */
 /* Time in jiffies before concluding the transmitter is hung. */
 #define TX_TIMEOUT  (6*HZ)
-
 
 enum {
 	HAS_CHIP_XCVR = 0x020000,
@@ -197,7 +191,6 @@ typedef enum {
 	ADDTRON8139,
 } board_t;
 
-
 /* indexed by board_t, above */
 static struct {
 	const char *name;
@@ -210,7 +203,6 @@ static struct {
 	{ "Addtron Technolgy 8139 10/100BaseTX" },
 };
 
-
 static struct pci_device_id netdrv_pci_tbl[] = {
 	{0x10ec, 0x8139, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RTL8139 },
 	{0x10ec, 0x8138, PCI_ANY_ID, PCI_ANY_ID, 0, 0, NETDRV_CB },
@@ -221,7 +213,6 @@ static struct pci_device_id netdrv_pci_tbl[] = {
 	{0,}
 };
 MODULE_DEVICE_TABLE (pci, netdrv_pci_tbl);
-
 
 /* The rest of these values should never change. */
 
@@ -369,7 +360,6 @@ enum RxConfigBits {
 	RxNoWrap = (1 << 7),
 };
 
-
 /* Twister tuning parameters from RealTek.
    Completely undocumented, but required to tune bad links. */
 enum CSCRBits {
@@ -380,12 +370,10 @@ enum CSCRBits {
 	CSCR_LinkDownCmd = 0x0f3c0,
 };
 
-
 enum Cfg9346Bits {
 	Cfg9346_Lock = 0x00,
 	Cfg9346_Unlock = 0xC0,
 };
-
 
 #define PARA78_default	0x78fa8388
 #define PARA7c_default	0xcb38de43	/* param[0][3] */
@@ -402,7 +390,6 @@ struct ring_info {
 	dma_addr_t mapping;
 };
 
-
 typedef enum {
 	CH_8139 = 0,
 	CH_8139_K,
@@ -411,7 +398,6 @@ typedef enum {
 	CH_8130,
 	CH_8139C,
 } chip_t;
-
 
 /* directly indexed by chip_t, above */
 static const struct {
@@ -450,7 +436,6 @@ static const struct {
 	},
 
 };
-
 
 struct netdrv_private {
 	board_t board;
@@ -507,7 +492,6 @@ static int netdrv_ioctl (struct net_device *dev, struct ifreq *rq, int cmd);
 static void netdrv_set_rx_mode (struct net_device *dev);
 static void netdrv_hw_start (struct net_device *dev);
 
-
 #ifdef USE_IO_OPS
 
 #define NETDRV_R8(reg)		inb (((unsigned long)ioaddr) + (reg))
@@ -540,7 +524,6 @@ static void netdrv_hw_start (struct net_device *dev);
 #define NETDRV_W16_F(reg, val16)	do { writew ((val16), ioaddr + (reg)); readw (ioaddr + (reg)); } while (0)
 #define NETDRV_W32_F(reg, val32)	do { writel ((val32), ioaddr + (reg)); readl (ioaddr + (reg)); } while (0)
 
-
 #ifdef MMIO_FLUSH_AUDIT_COMPLETE
 
 /* write MMIO register */
@@ -564,7 +547,6 @@ static void netdrv_hw_start (struct net_device *dev);
 
 #endif /* USE_IO_OPS */
 
-
 static const u16 netdrv_intr_mask =
 	PCIErr | PCSTimeout | RxUnderrun | RxOverflow | RxFIFOOver |
 	TxErr | TxOK | RxErr | RxOK;
@@ -573,7 +555,6 @@ static const unsigned int netdrv_rx_config =
 	  RxCfgEarlyRxNone | RxCfgRcv32K | RxNoWrap |
 	  (RX_FIFO_THRESH << RxCfgFIFOShift) |
 	  (RX_DMA_BURST << RxCfgDMAShift);
-
 
 static int __devinit netdrv_init_board (struct pci_dev *pdev,
 					 struct net_device **dev_out,
@@ -835,7 +816,6 @@ static int __devinit netdrv_init_one (struct pci_dev *pdev,
 	return 0;
 }
 
-
 static void __devexit netdrv_remove_one (struct pci_dev *pdev)
 {
 	struct net_device *dev = pci_get_drvdata (pdev);
@@ -864,7 +844,6 @@ static void __devexit netdrv_remove_one (struct pci_dev *pdev)
 
 	DPRINTK ("EXIT\n");
 }
-
 
 /* Serial EEPROM section. */
 
@@ -945,7 +924,6 @@ static int __devinit read_eeprom (void *ioaddr, int location, int addr_len)
 
 #define mdio_delay()	readb(mdio_addr)
 
-
 static char mii_2_8139_map[8] = {
 	BasicModeCtrl,
 	BasicModeStatus,
@@ -956,7 +934,6 @@ static char mii_2_8139_map[8] = {
 	NWayExpansion,
 	0
 };
-
 
 /* Syncronize the MII management interface by shifting 32 one bits out. */
 static void mdio_sync (void *mdio_addr)
@@ -974,7 +951,6 @@ static void mdio_sync (void *mdio_addr)
 
 	DPRINTK ("EXIT\n");
 }
-
 
 static int mdio_read (struct net_device *dev, int phy_id, int location)
 {
@@ -1016,7 +992,6 @@ static int mdio_read (struct net_device *dev, int phy_id, int location)
 	DPRINTK ("EXIT, returning %d\n", (retval >> 1) & 0xffff);
 	return (retval >> 1) & 0xffff;
 }
-
 
 static void mdio_write (struct net_device *dev, int phy_id, int location,
 			int value)
@@ -1060,7 +1035,6 @@ static void mdio_write (struct net_device *dev, int phy_id, int location,
 
 	DPRINTK ("EXIT\n");
 }
-
 
 static int netdrv_open (struct net_device *dev)
 {
@@ -1120,7 +1094,6 @@ static int netdrv_open (struct net_device *dev)
 	DPRINTK ("EXIT, returning 0\n");
 	return 0;
 }
-
 
 /* Start the hardware at open or resume. */
 static void netdrv_hw_start (struct net_device *dev)
@@ -1191,7 +1164,6 @@ static void netdrv_hw_start (struct net_device *dev)
 	DPRINTK ("EXIT\n");
 }
 
-
 /* Initialize the Rx and Tx rings, along with various 'dev' bits. */
 static void netdrv_init_ring (struct net_device *dev)
 {
@@ -1212,7 +1184,6 @@ static void netdrv_init_ring (struct net_device *dev)
 
 	DPRINTK ("EXIT\n");
 }
-
 
 static void netdrv_timer (unsigned long data)
 {
@@ -1255,7 +1226,6 @@ static void netdrv_timer (unsigned long data)
 	add_timer (&tp->timer);
 }
 
-
 static void netdrv_tx_clear (struct net_device *dev)
 {
 	int i;
@@ -1279,7 +1249,6 @@ static void netdrv_tx_clear (struct net_device *dev)
 		}
 	}
 }
-
 
 static void netdrv_tx_timeout (struct net_device *dev)
 {
@@ -1326,8 +1295,6 @@ static void netdrv_tx_timeout (struct net_device *dev)
 	netif_wake_queue (dev);
 }
 
-
-
 static int netdrv_start_xmit (struct sk_buff *skb, struct net_device *dev)
 {
 	struct netdrv_private *tp = netdev_priv(dev);
@@ -1358,7 +1325,6 @@ static int netdrv_start_xmit (struct sk_buff *skb, struct net_device *dev)
 
 	return NETDEV_TX_OK;
 }
-
 
 static void netdrv_tx_interrupt (struct net_device *dev,
 				  struct netdrv_private *tp,
@@ -1444,7 +1410,6 @@ static void netdrv_tx_interrupt (struct net_device *dev,
 	atomic_set (&tp->dirty_tx, dirty_tx);
 }
 
-
 /* TODO: clean this up!  Rx reset need not be this intensive */
 static void netdrv_rx_err (u32 rx_status, struct net_device *dev,
 			    struct netdrv_private *tp, void *ioaddr)
@@ -1493,7 +1458,6 @@ static void netdrv_rx_err (u32 rx_status, struct net_device *dev,
 	if (tmp_work <= 0)
 		printk (KERN_WARNING PFX "tx/rx enable wait too long\n");
 }
-
 
 /* The data sheet doesn't describe the Rx ring at all, so I'm guessing at the
    field alignments and semantics. */
@@ -1591,7 +1555,6 @@ static void netdrv_rx_interrupt (struct net_device *dev,
 	tp->cur_rx = cur_rx;
 }
 
-
 static void netdrv_weird_interrupt (struct net_device *dev,
 				     struct netdrv_private *tp,
 				     void *ioaddr,
@@ -1645,7 +1608,6 @@ static void netdrv_weird_interrupt (struct net_device *dev,
 			dev->name, pci_cmd_status);
 	}
 }
-
 
 /* The interrupt handler does all of the Rx thread work and cleans up
    after the Tx thread. */
@@ -1712,7 +1674,6 @@ static irqreturn_t netdrv_interrupt (int irq, void *dev_instance)
 	return IRQ_RETVAL(handled);
 }
 
-
 static int netdrv_close (struct net_device *dev)
 {
 	struct netdrv_private *tp = netdev_priv(dev);
@@ -1761,7 +1722,6 @@ static int netdrv_close (struct net_device *dev)
 	DPRINTK ("EXIT\n");
 	return 0;
 }
-
 
 static int netdrv_ioctl (struct net_device *dev, struct ifreq *rq, int cmd)
 {
@@ -1854,7 +1814,6 @@ static void netdrv_set_rx_mode (struct net_device *dev)
 	DPRINTK ("EXIT\n");
 }
 
-
 #ifdef CONFIG_PM
 
 static int netdrv_suspend (struct pci_dev *pdev, pm_message_t state)
@@ -1886,7 +1845,6 @@ static int netdrv_suspend (struct pci_dev *pdev, pm_message_t state)
 	return 0;
 }
 
-
 static int netdrv_resume (struct pci_dev *pdev)
 {
 	struct net_device *dev = pci_get_drvdata (pdev);
@@ -1904,7 +1862,6 @@ static int netdrv_resume (struct pci_dev *pdev)
 
 #endif /* CONFIG_PM */
 
-
 static struct pci_driver netdrv_pci_driver = {
 	.name		= MODNAME,
 	.id_table	= netdrv_pci_tbl,
@@ -1916,7 +1873,6 @@ static struct pci_driver netdrv_pci_driver = {
 #endif /* CONFIG_PM */
 };
 
-
 static int __init netdrv_init_module (void)
 {
 /* when a module, this is printed whether or not devices are found in probe */
@@ -1926,12 +1882,10 @@ static int __init netdrv_init_module (void)
 	return pci_register_driver(&netdrv_pci_driver);
 }
 
-
 static void __exit netdrv_cleanup_module (void)
 {
 	pci_unregister_driver (&netdrv_pci_driver);
 }
-
 
 module_init(netdrv_init_module);
 module_exit(netdrv_cleanup_module);

@@ -200,7 +200,6 @@ static int ct_pcm_hw_free(struct snd_pcm_substream *substream)
 	return snd_pcm_lib_free_pages(substream);
 }
 
-
 static int ct_pcm_playback_prepare(struct snd_pcm_substream *substream)
 {
 	int err;

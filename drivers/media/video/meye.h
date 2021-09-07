@@ -261,7 +261,6 @@
 #include <linux/meye.h>
 #include <linux/mutex.h>
 
-
 /* Enable jpg software correction */
 #define MEYE_JPEG_CORRECTION	1
 

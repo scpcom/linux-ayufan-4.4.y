@@ -28,7 +28,6 @@
 #ifndef _PCI_HOTPLUG_H
 #define _PCI_HOTPLUG_H
 
-
 /* These values come from the PCI Hotplug Spec */
 enum pci_bus_speed {
 	PCI_SPEED_33MHz			= 0x00,
@@ -241,4 +240,3 @@ static inline int pci_get_hp_params(struct pci_dev *dev,
 
 void pci_configure_slot(struct pci_dev *dev);
 #endif
-

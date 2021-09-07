@@ -27,7 +27,6 @@
 static	u32		last_jiffies = 0;
 static	u32		led_val = 0;
 
-
 void mv_leds_hearbeat(void)
 {
     u32 sec = jiffies_to_msecs(jiffies - last_jiffies) / 1000;

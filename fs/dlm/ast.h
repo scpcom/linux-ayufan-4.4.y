@@ -23,4 +23,3 @@ void dlm_astd_suspend(void);
 void dlm_astd_resume(void);
 
 #endif
-

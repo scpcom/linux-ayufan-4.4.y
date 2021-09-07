@@ -10,7 +10,6 @@
 #include "ql4_dbg.h"
 #include "ql4_inline.h"
 
-
 /**
  * qla4xxx_mailbox_command - issues mailbox commands
  * @ha: Pointer to host adapter structure.
@@ -584,7 +583,6 @@ void qla4xxx_get_conn_event_log(struct scsi_qla_host * ha)
 	uint32_t	max_event_log_entries;
 	uint8_t		i;
 
-
 	memset(&mbox_cmd, 0, sizeof(mbox_cmd));
 	memset(&mbox_sts, 0, sizeof(mbox_cmd));
 
@@ -852,14 +850,12 @@ static int qla4xxx_req_ddb_entry(struct scsi_qla_host *ha, uint32_t *ddb_index)
 	return QLA_SUCCESS;
 }
 
-
 int qla4xxx_send_tgts(struct scsi_qla_host *ha, char *ip, uint16_t port)
 {
 	struct dev_db_entry *fw_ddb_entry;
 	dma_addr_t fw_ddb_entry_dma;
 	uint32_t ddb_index;
 	int ret_val = QLA_SUCCESS;
-
 
 	fw_ddb_entry = dma_alloc_coherent(&ha->pdev->dev,
 					  sizeof(*fw_ddb_entry),
@@ -904,4 +900,3 @@ qla4xxx_send_tgts_exit:
 			  fw_ddb_entry, fw_ddb_entry_dma);
 	return ret_val;
 }
-

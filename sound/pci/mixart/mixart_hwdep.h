@@ -34,7 +34,6 @@
 #define MIXART_MEM(mgr,x)	((mgr)->mem[0].virt + (x))
 #define MIXART_REG(mgr,x)	((mgr)->mem[1].virt + (x))
 
-
 /* Daughter board Type */
 #define DAUGHTER_TYPE_MASK     0x0F 
 #define DAUGHTER_VER_MASK      0xF0 
@@ -43,8 +42,6 @@
 #define MIXART_DAUGHTER_TYPE_NONE     0x00 
 #define MIXART_DAUGHTER_TYPE_COBRANET 0x08 
 #define MIXART_DAUGHTER_TYPE_AES      0x0E
-
-
 
 #define MIXART_BA0_SIZE 	(16 * 1024 * 1024) /* 16M */
 #define MIXART_BA1_SIZE 	(4  * 1024)        /* 4k */
@@ -80,7 +77,6 @@
 /* Global info structure */
 #define  MIXART_PSEUDOREG_DBRD_TYPE_OFFSET         MIXART_PSEUDOREG+0x994    /* Type and version of daughterboard  */
 
-
 /* daughterboard xilinx loader info */
 #define  MIXART_PSEUDOREG_DXLX_BASE_ADDR_OFFSET    MIXART_PSEUDOREG+0x998    /* get the address here where to write the file */ 
 #define  MIXART_PSEUDOREG_DXLX_SIZE_OFFSET         MIXART_PSEUDOREG+0x99C    /* xilinx size in bytes */ 
@@ -113,7 +109,6 @@
 #define MSG_OUTBOUND_FREE_STACK     0x10C000    /* stack of free enveloped for EMB */
 #define MSG_INBOUND_FREE_STACK      0x100000    /* stack of free enveloped for DRV */
 
-
 /* defines for mailbox message frames */
 #define MSG_FRAME_OFFSET            0x64
 #define MSG_FRAME_SIZE              0x6400
@@ -122,7 +117,6 @@
 #define MSG_TO_AGENT_ITMF_OFFSET    (MSG_FROM_AGENT_ITMF_OFFSET + MSG_FRAME_SIZE)
 #define MSG_HOST_RSC_PROTECTION     (MSG_TO_AGENT_ITMF_OFFSET + MSG_FRAME_SIZE)
 #define MSG_AGENT_RSC_PROTECTION    (MSG_HOST_RSC_PROTECTION + 4)
-
 
 /*
  * -----------BAR 1 --------------------------------------------------------------------------------------------------------
@@ -138,7 +132,6 @@
 #define MIXART_HOST_ALL_INTERRUPT_MASKED        0x02B   /* 0000 0010 1011 */
 #define MIXART_ALLOW_OUTBOUND_DOORBELL          0x023   /* 0000 0010 0011 */
 #define MIXART_OIDI                             0x008   /* 0000 0000 1000 */
-
 
 int snd_mixart_setup_firmware(struct mixart_mgr *mgr);
 

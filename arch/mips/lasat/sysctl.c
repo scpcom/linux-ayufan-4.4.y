@@ -54,7 +54,6 @@ int sysctl_lasatstring(ctl_table *table,
 	return 0;
 }
 
-
 /* And the same for proc */
 int proc_dolasatstring(ctl_table *table, int write,
 		       void *buffer, size_t *lenp, loff_t *ppos)

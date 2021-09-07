@@ -75,14 +75,11 @@ There is no suppotr for Header type 01h of pci devices  ( PCI bridges )
 #include "pci-if/mvPciIf.h"
 #include "pci/mvPciRegs.h"
 
-
-
 /* PCI base address low bar mask */
 #define PCI_ERROR_CODE                      0xffffffff
 
 #define PCI_BRIDGE_CLASS					0x6
 #define P2P_BRIDGE_SUB_CLASS_CODE			0x4
-
 
 #define P2P_BUSSES_NUM						0x18
 #define P2P_IO_BASE_LIMIT_SEC_STATUS		0x1C
@@ -129,7 +126,6 @@ There is no suppotr for Header type 01h of pci devices  ( PCI bridges )
 #define PIBLSS_SEC_STATUS_OFFS				16
 #define PIBLSS_SEC_STATUS_MASK				(0xffff << PIBLSS_SEC_STATUS_OFFS)
 
-
 /* P2P_MEM_BASE_LIMIT (PMBL)*/
 
 #define PMBL_MEM_BASE_OFFS					0
@@ -138,13 +134,11 @@ There is no suppotr for Header type 01h of pci devices  ( PCI bridges )
 #define PMBL_MEM_LIMIT_OFFS					16
 #define PMBL_MEM_LIMIT_MASK					(0xffff << PMBL_MEM_LIMIT_OFFS)
 
-
 #define PMBL_LOW_ADDR_OFFS					0
 #define PMBL_LOW_ADDR_MASK					(0xFFFFF << PMBL_LOW_ADDR_OFFS)
 
 #define PMBL_HIGH_ADDR_OFFS					20
 #define PMBL_HIGH_ADDR_MASK					(0xFFF << PMBL_HIGH_ADDR_OFFS)
-
 
 /* P2P_PREF_MEM_BASE_LIMIT (PRMBL) */
 
@@ -172,7 +166,6 @@ There is no suppotr for Header type 01h of pci devices  ( PCI bridges )
 
 #define PRBU_IO_UPP_LIMIT_OFFS				16
 #define PRBU_IO_UPP_LIMIT_MASK				(0xffff << PRBU_IO_UPP_LIMIT_OFFS)
-
 
 /* typedefs */
 
@@ -203,7 +196,6 @@ typedef enum _mvPciHeader
     MV_PCI_PCI2PCI_BRIDGE
 
 }MV_PCI_HEADER;
-
 
 /* BAR structure */
 typedef struct _pciBar
@@ -238,7 +230,6 @@ typedef struct _pciBar
     MV_BOOL            isPrefetchable;
     MV_PCI_BAR_TYPE       barType;
     MV_PCI_BAR_MAPPING    barMapping;
-
 
 } PCI_BAR;
 
@@ -281,7 +272,6 @@ typedef struct _mvPciDevice
 	MV_U32			p2pPrefBaseUpper32Bits;/* P2P Prefetchable upper 32 bits*/
 	MV_U32			p2pPrefLimitUpper32Bits;/* P2P prefetchable limit upper 32*/
 
-
 	MV_U32			pciCacheLine;		/* Pci agent cache line */
 	MV_U32			pciLatencyTimer;	/* Pci agent Latency timer  */
     MV_PCI_HEADER	pciHeader;			/* Pci agent header type*/
@@ -306,18 +296,15 @@ typedef struct _mvPciDevice
 	MV_U32 			barsNum;
     MV_U8           type[60];		/* class name of the pci agent */
 
-
 } MV_PCI_DEVICE;
 
 /* PCI gloabl functions */
 MV_STATUS mvPciClassNameGet(MV_U32 classCode, MV_8 *pType);
-
 
 /* Performs a full scan on both PCIs and returns all possible details on the
    agents found on the bus. */
 MV_STATUS mvPciScan(MV_U32 pciIf,
 					MV_PCI_DEVICE *pPciAgents,
 					MV_U32 *pPciAgentsNum);
-
 
 #endif /* #ifndef __INCmvPciUtilsh */

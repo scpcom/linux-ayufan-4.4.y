@@ -51,7 +51,6 @@
 
 #define MAX_MSG_SIZE (MAX_H_SIZE + TIPC_MAX_USER_MSG_SIZE)
 
-
 /*
 		TIPC user data message header format, version 2
 
@@ -59,7 +58,6 @@
 	  are located in tipc_msg.h.
 	- Remaining definitions available to TIPC internal users appear below.
 */
-
 
 static inline void msg_set_word(struct tipc_msg *m, u32 w, u32 val)
 {
@@ -157,7 +155,6 @@ static inline void msg_set_size(struct tipc_msg *m, u32 sz)
 	m->hdr[0] = htonl((msg_word(m, 0) & ~0x1ffff) | sz);
 }
 
-
 /*
  * Word 1
  */
@@ -207,7 +204,6 @@ static inline void msg_set_bcast_ack(struct tipc_msg *m, u32 n)
 	msg_set_bits(m, 1, 0, 0xffff, n);
 }
 
-
 /*
  * Word 2
  */
@@ -255,7 +251,6 @@ static inline void msg_set_destnode_cache(struct tipc_msg *m, u32 dnode)
 /*
  * Words 3-10
  */
-
 
 static inline void msg_set_prevnode(struct tipc_msg *m, u32 a)
 {
@@ -344,7 +339,6 @@ static inline struct tipc_msg *msg_get_wrapped(struct tipc_msg *m)
 	return (struct tipc_msg *)msg_data(m);
 }
 
-
 /*
 		TIPC internal message header format, version 2
 
@@ -408,7 +402,6 @@ static inline struct tipc_msg *msg_get_wrapped(struct tipc_msg *m)
 #define PUBLICATION       0
 #define WITHDRAWAL        1
 
-
 /*
  * Word 1
  */
@@ -432,7 +425,6 @@ static inline void msg_set_req_links(struct tipc_msg *m, u32 n)
 {
 	msg_set_bits(m, 1, 16, 0xfff, n);
 }
-
 
 /*
  * Word 2
@@ -468,7 +460,6 @@ static inline void msg_set_bcgap_to(struct tipc_msg *m, u32 n)
 	msg_set_bits(m, 2, 0, 0xffff, n);
 }
 
-
 /*
  * Word 4
  */
@@ -483,7 +474,6 @@ static inline void msg_set_last_bcast(struct tipc_msg *m, u32 n)
 	msg_set_bits(m, 4, 16, 0xffff, n);
 }
 
-
 static inline u32 msg_fragm_no(struct tipc_msg *m)
 {
 	return msg_bits(m, 4, 16, 0xffff);
@@ -494,7 +484,6 @@ static inline void msg_set_fragm_no(struct tipc_msg *m, u32 n)
 	msg_set_bits(m, 4, 16, 0xffff, n);
 }
 
-
 static inline u32 msg_next_sent(struct tipc_msg *m)
 {
 	return msg_bits(m, 4, 0, 0xffff);
@@ -504,7 +493,6 @@ static inline void msg_set_next_sent(struct tipc_msg *m, u32 n)
 {
 	msg_set_bits(m, 4, 0, 0xffff, n);
 }
-
 
 static inline u32 msg_long_msgno(struct tipc_msg *m)
 {
@@ -605,7 +593,6 @@ static inline void msg_clear_redundant_link(struct tipc_msg *m)
 	msg_set_bits(m, 5, 12, 0x1, 0);
 }
 
-
 /*
  * Word 9
  */
@@ -653,7 +640,6 @@ static inline void msg_set_link_tolerance(struct tipc_msg *m, u32 n)
 /*
  * Routing table message data
  */
-
 
 static inline u32 msg_remote_node(struct tipc_msg *m)
 {
@@ -720,7 +706,6 @@ static inline u32 msg_tot_importance(struct tipc_msg *m)
 		return msg_importance(msg_get_wrapped(m));
 	return msg_importance(m);
 }
-
 
 static inline void msg_init(struct tipc_msg *m, u32 user, u32 type,
 			    u32 hsize, u32 destnode)

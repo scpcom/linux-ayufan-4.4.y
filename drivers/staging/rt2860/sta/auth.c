@@ -106,11 +106,9 @@ VOID AuthTimeout(
 	if (pAd->Mlme.AuthMachine.CurrState == AUTH_WAIT_SEQ2)
 		Cls2errAction(pAd, pAd->MlmeAux.Bssid);
 
-
     MlmeEnqueue(pAd, AUTH_STATE_MACHINE, MT2_AUTH_TIMEOUT, 0, NULL);
     RT28XX_MLME_HANDLER(pAd);
 }
-
 
 /*
     ==========================================================================
@@ -456,5 +454,3 @@ VOID Cls2errAction(
     pAd->StaCfg.DeauthReason = Reason;
     COPY_MAC_ADDR(pAd->StaCfg.DeauthSta, pAddr);
 }
-
-

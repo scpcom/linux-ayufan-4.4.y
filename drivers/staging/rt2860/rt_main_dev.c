@@ -50,7 +50,6 @@ char *hostname = "";		   // default CMPC
 module_param (mac, charp, 0);
 MODULE_PARM_DESC (mac, "rt28xx: wireless mac addr");
 
-
 /*---------------------------------------------------------------------*/
 /* Prototypes of Functions Used                                        */
 /*---------------------------------------------------------------------*/
@@ -111,7 +110,6 @@ int MainVirtualIF_close(IN struct net_device *net_dev)
 
 	netif_carrier_off(pAd->net_dev);
 	netif_stop_queue(pAd->net_dev);
-
 
 	VIRTUAL_IF_DOWN(pAd);
 
@@ -193,7 +191,6 @@ int rt28xx_close(IN PNET_DEV dev)
 
 	//RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_REMOVE_IN_PROGRESS);
 #endif // RT2870 //
-
 
     DBGPRINT(RT_DEBUG_TRACE, ("===> rt28xx_close\n"));
 
@@ -473,7 +470,6 @@ static int rt28xx_init(IN struct net_device *net_dev)
 		pAd->CommonCfg.NumOfBulkInIRP = 1;
 #endif // RT2870 //
 
-
    	//Init Ba Capability parameters.
 	pAd->CommonCfg.DesiredHtPhy.MpduDensity = (UCHAR)pAd->CommonCfg.BACapability.field.MpduDensity;
 	pAd->CommonCfg.DesiredHtPhy.AmsduEnable = (USHORT)pAd->CommonCfg.BACapability.field.AmsduEnable;
@@ -515,7 +511,6 @@ static int rt28xx_init(IN struct net_device *net_dev)
 	NICInitRT30xxRFRegisters(pAd);
 #endif // RT2870 //
 
-
 		//
 	// Initialize RF register to default value
 	//
@@ -545,7 +540,6 @@ static int rt28xx_init(IN struct net_device *net_dev)
 
 		DBGPRINT(RT_DEBUG_TRACE, ("NDIS_STATUS_MEDIA_DISCONNECT Event B!\n"));
 
-
 #ifdef RT2870
 		RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_RESET_IN_PROGRESS);
 		RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_REMOVE_IN_PROGRESS);
@@ -562,11 +556,9 @@ static int rt28xx_init(IN struct net_device *net_dev)
 #endif // RT2870 //
 	}// end of else
 
-
 	DBGPRINT_S(Status, ("<==== RTMPInitialize, Status=%x\n", Status));
 
 	return TRUE;
-
 
 err4:
 err3:
@@ -583,7 +575,6 @@ err1:
 	printk("!!! %s Initialized fail !!!\n", RT28xx_CHIP_NAME);
 	return FALSE;
 } /* End of rt28xx_init */
-
 
 /*
 ========================================================================
@@ -607,7 +598,6 @@ int rt28xx_open(IN PNET_DEV dev)
 	int retval = 0;
  	POS_COOKIE pObj;
 
-
 	// Sanity check for pAd
 	if (pAd == NULL)
 	{
@@ -626,9 +616,7 @@ int rt28xx_open(IN PNET_DEV dev)
 	// register the interrupt routine with the os
 	RT28XX_IRQ_REQUEST(net_dev);
 
-
 	// Init BssTab & ChannelInfo tabbles for auto channel select.
-
 
 	// Chip & other init
 	if (rt28xx_init(net_dev) == FALSE)
@@ -813,7 +801,6 @@ INT __devinit   rt28xx_probe(
 	*ppAd = pAd;
     return 0; // probe ok
 
-
 	/* --------------------------- ERROR HANDLE --------------------------- */
 err_out_unmap:
 	RTMPFreeAdapter(pAd);
@@ -827,7 +814,6 @@ err_out:
 
 	return -ENODEV; /* probe fail */
 } /* End of rt28xx_probe */
-
 
 /*
 ========================================================================
@@ -886,7 +872,6 @@ done:
 	return status;
 }
 
-
 /*
 ========================================================================
 Routine Description:
@@ -921,21 +906,16 @@ INT rt28xx_send_packets(
 
 } /* End of MBSS_VirtualIF_PacketSend */
 
-
-
-
 void CfgInitHook(PRTMP_ADAPTER pAd)
 {
 	pAd->bBroadComHT = TRUE;
 } /* End of CfgInitHook */
-
 
 // This function will be called when query /proc
 struct iw_statistics *rt28xx_get_wireless_stats(
     IN struct net_device *net_dev)
 {
 	PRTMP_ADAPTER pAd = net_dev->ml_priv;
-
 
 	DBGPRINT(RT_DEBUG_TRACE, ("rt28xx_get_wireless_stats --->\n"));
 
@@ -963,8 +943,6 @@ struct iw_statistics *rt28xx_get_wireless_stats(
 	DBGPRINT(RT_DEBUG_TRACE, ("<--- rt28xx_get_wireless_stats\n"));
 	return &pAd->iw_stats;
 } /* End of rt28xx_get_wireless_stats */
-
-
 
 void tbtt_tasklet(unsigned long data)
 {
@@ -1037,4 +1015,3 @@ struct net_device_stats *RT28xx_get_ether_stats(
 	else
     	return NULL;
 }
-

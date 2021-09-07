@@ -36,7 +36,6 @@
 #include "gpp/mvGpp.h"
 #include "mvOs.h"
 
-
 unsigned int  irq_int_type[NR_IRQS];
 
 static void mv_mask_irq(unsigned int irq)
@@ -120,7 +119,6 @@ void __init mv_init_irq(void)
 	MV_REG_WRITE(MV_GPP_IRQ_EDGE_REG, 0x0);
 	MV_REG_WRITE(MV_GPP_IRQ_HIGH_EDGE_REG, 0x0);
 
-
        /* Set low gpp interrupts as needed */
        gppLowMask = mvBoardGpioIntMaskLowGet();
        mvGppTypeSet(0, gppLowMask , (MV_GPP_IN & gppLowMask));
@@ -147,7 +145,6 @@ void __init mv_init_irq(void)
 	MV_REG_WRITE(MV_GPP_IRQ_CAUSE_REG, 0x0);
 	MV_REG_WRITE(MV_GPP_IRQ_HIGH_CAUSE_REG, 0x0);
 
-
 	/* Do the core module ones */
 	for (i = 0; i < NR_IRQS; i++) {
 		set_irq_chip(i, &mv_chip);
@@ -165,4 +162,3 @@ void __init mv_init_irq(void)
 
 	return;
 }
-

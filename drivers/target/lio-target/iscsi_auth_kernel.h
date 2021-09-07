@@ -71,7 +71,6 @@ int extract_param(
 	return 0;
 }
 
-
 /*	iscsi_handle_authetication():
  *
  *
@@ -154,4 +153,3 @@ void iscsi_remove_failed_auth_entry(
 }
 
 #endif   /*** ISCSI_AUTH_KERNEL_H ***/
-

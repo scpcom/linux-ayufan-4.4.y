@@ -505,7 +505,6 @@
 #define CIC_PCIFLSH_REG		regptr(MSP_CIC_BASE + 0x18)
 #define CIC_VPE0_SWINT_REG	regptr(MSP_CIC_BASE + 0x08)
 
-
 /*
  ***************************************************************************
  * Memory controller registers                                             *

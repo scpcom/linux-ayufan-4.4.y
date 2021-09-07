@@ -123,7 +123,6 @@ static int start_oxnas_usb_ehci(struct platform_device *dev)
 		return -ENODEV;
 	pr_debug(KERN_INFO "starting usb for 810\n");
 
-
 	pr_debug("%s: block sizes: qh %Zd qtd %Zd itd %Zd sitd %Zd\n",
 		hcd_name,
 		sizeof (struct ehci_qh), sizeof (struct ehci_qtd),
@@ -402,7 +401,6 @@ static int start_oxnas_usb_ehci(struct platform_device *dev)
     
     writel((25 << USB_REF_300_DIVIDER), SYS_CTRL_REF300_DIV); // ref 300 divider for 12MHz
  
-    
     // Ensure the USB block is properly reset
     writel(1UL << SYS_CTRL_RSTEN_USBHS_BIT, SYS_CTRL_RSTEN_SET_CTRL);
     wmb();
@@ -477,7 +475,6 @@ static int start_oxnas_usb_ehci(struct platform_device *dev)
 	if (usb_disabled())
 		return -ENODEV;
 	pr_debug(KERN_INFO "starting usb default\n");
-
 
 	pr_debug("%s: block sizes: qh %Zd qtd %Zd itd %Zd sitd %Zd\n",
 		hcd_name,

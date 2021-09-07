@@ -184,7 +184,6 @@ typedef struct xfs_buf {
 #endif
 } xfs_buf_t;
 
-
 /* Finding and Reading Buffers */
 extern xfs_buf_t *_xfs_buf_find(xfs_buftarg_t *, xfs_off_t, size_t,
 				xfs_buf_flags_t, xfs_buf_t *);
@@ -262,7 +261,6 @@ extern void xfs_buf_trace(xfs_buf_t *, char *, void *, void *);
 
 #define xfs_buf_target_name(target)	\
 	({ char __b[BDEVNAME_SIZE]; bdevname((target)->bt_bdev, __b); __b; })
-
 
 #define XFS_B_ASYNC		XBF_ASYNC
 #define XFS_B_DELWRI		XBF_DELWRI
@@ -388,7 +386,6 @@ static inline void xfs_buf_relse(xfs_buf_t *bp)
 #define xfs_biozero(bp, off, len) \
 	    xfs_buf_iomove((bp), (off), (len), NULL, XBRW_ZERO)
 
-
 static inline int XFS_bwrite(xfs_buf_t *bp)
 {
 	int	iowait = (bp->b_flags & XBF_ASYNC) == 0;
@@ -412,7 +409,6 @@ static inline int XFS_bwrite(xfs_buf_t *bp)
 
 #define xfs_baread(target, rablkno, ralen)  \
 	xfs_buf_readahead((target), (rablkno), (ralen), XBF_DONT_BLOCK)
-
 
 /*
  *	Handling of buftargs.

@@ -27,7 +27,6 @@
 /* for debugging messages not to cause an oops when device pointer is NULL*/
 #define MY_DEVNAME(dev)  ( (dev) ? (dev)->name : "DEVICE UNSPECIFIED" )
 
-
 typedef struct isdn_x25iface_proto_data {
 	int magic;
 	enum wan_states state;
@@ -36,8 +35,6 @@ typedef struct isdn_x25iface_proto_data {
 	   enabling us to allocate both with just one kmalloc(): */ 
 	struct concap_proto priv;
 } ix25_pdata_t;
-
-
 
 /* is now in header file (extern): struct concap_proto * isdn_x25iface_proto_new(void); */
 static void isdn_x25iface_proto_del( struct concap_proto * );
@@ -49,7 +46,6 @@ static int isdn_x25iface_xmit( struct concap_proto *, struct sk_buff * );
 static int isdn_x25iface_receive( struct concap_proto *, struct sk_buff * );
 static int isdn_x25iface_connect_ind( struct concap_proto * );
 static int isdn_x25iface_disconn_ind( struct concap_proto * );
-
 
 static struct concap_proto_ops ix25_pops = {
 	&isdn_x25iface_proto_new,

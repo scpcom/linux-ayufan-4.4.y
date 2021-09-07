@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #include "boardEnv/mvBoardEnvLib.h"
 #include "ctrlEnv/mvCtrlEnvLib.h"
 #include "ctrlEnv/sys/mvCpuIf.h"
@@ -70,7 +69,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "device/mvDevice.h"
 #include "ddr1_2/mvDramIfRegs.h"
 #include "twsi/mvTwsi.h"
-
 
 /* defines  */
 #ifdef MV_DEBUG
@@ -298,7 +296,6 @@ MV_U32 mvBoardIdGet(MV_VOID)
 		return tmpBoardId;
 	}
 
-
 	if(boardEepromGet(&boardData) == MV_OK)
 	{
 		tmpBoardId = (MV_U32)boardData.boardId;
@@ -372,7 +369,6 @@ MV_U32 mvBoardIdGet(MV_VOID)
 #endif
 
 	return tmpBoardId;
-
 
 }
 
@@ -458,8 +454,6 @@ MV_STATUS boardEepromGet(BOARD_DATA    *boardData)
        	return MV_FAIL;
    	}
 
-
-
 #if defined(MV_CPU_LE)
 	boardData->magic = MV_BYTE_SWAP_32BIT(boardData->magic);
 	boardData->boardId = MV_BYTE_SWAP_16BIT(boardData->boardId);
@@ -497,6 +491,3 @@ MV_STATUS boardEepromGet(BOARD_DATA    *boardData)
 
 	return MV_FAIL;
 }
-
-
-

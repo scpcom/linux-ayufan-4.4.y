@@ -62,11 +62,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvBoard88F5181EnvSpech
 #define __INCmvBoard88F5181EnvSpech
-
-
 
 /* 88F5181 and 88F5281 based boards ID numbers */
 /* =========================================== */
@@ -137,7 +134,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RD_88F5181_VOIP_MPP_DEV			0x0
 #define RD_88F5181_VOIP_OE  			0x000005F5
 #define RD_88F5181_VOIP_OUT_VAL  		0x0
-
 
 #define DB_88F5X81_DDRX_MPP0_7_NB               0x33442203
 #define DB_88F5X81_DDRX_MPP8_15_NB              0x44000033

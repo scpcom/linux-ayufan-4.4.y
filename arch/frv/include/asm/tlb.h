@@ -24,4 +24,3 @@ extern void check_pgt_cache(void);
 #include <asm-generic/tlb.h>
 
 #endif /* _ASM_TLB_H */
-

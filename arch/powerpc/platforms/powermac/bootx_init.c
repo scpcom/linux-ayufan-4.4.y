@@ -423,7 +423,6 @@ static unsigned long __init bootx_flatten_dt(unsigned long start)
 	return (unsigned long)hdr;
 }
 
-
 #ifdef CONFIG_BOOTX_TEXT
 static void __init btext_welcome(boot_infos_t *bi)
 {
@@ -487,7 +486,6 @@ void __init bootx_init(unsigned long r3, unsigned long r4)
 	/* Fixup depth 16 -> 15 as that's what MacOS calls 16bpp */
 	if (bi->dispDeviceDepth == 16)
 		bi->dispDeviceDepth = 15;
-
 
 #ifdef CONFIG_BOOTX_TEXT
 	ptr = (unsigned long)bi->logicalDisplayBase;

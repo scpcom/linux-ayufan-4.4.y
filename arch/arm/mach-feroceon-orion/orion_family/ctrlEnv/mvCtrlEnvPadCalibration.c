@@ -82,7 +82,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAX_LockN	31
 #define R_NA		0
       
-
 /* Local */
 
 static MV_CTRL_ENV_DEVICE_PROCESS_TYPE deviceProcessType2_5V[MAX_LockN+1]={
@@ -155,7 +154,6 @@ static MV_CTRL_ENV_DEVICE_PROCESS_TYPE deviceProcessType1_8V[MAX_LockN+1]={
 { R_NA, 2574, R_NA },	/* LockN = 31 */
 };
 
-
 static MV_CTRL_ENV_ETHERNET_PAD_CALIBRATION EthPadCalibrationTableHSTL_1_8V[]={
 {11,12},	/* type 1 */
 {18,20},	/* type 2 */
@@ -173,8 +171,6 @@ static MV_CTRL_ENV_ETHERNET_PAD_CALIBRATION EthPadCalibrationTable2_5V[]={		/* M
 {11,11},	/* type 2 */
 { 5, 5}		/* type 3 */
 };
-
-
 
 int CpuPadCalibrationV = MV_CTRL_ENV_CPU_INTERFACE_VOLTAGE_1_8V;
 int EthInterfaceDrivingStrength = MV_CTRL_ENV_INTERFACE_DRIVING_STRENGTH_2_5V;
@@ -374,7 +370,6 @@ static MV_STATUS ctrlEnvCalculatePadCalibration(MV_U32 *pdrvN, MV_U32 *pdrvP)
 #endif
 }
 
-
 /*******************************************************************************
 * mvCtrlEnvEthInterfaceDrivingStrengthSet 
 *
@@ -460,4 +455,3 @@ int mvCtrlEnvEthCpuPadCalibrationVoltGet(void)
 {
 	return CpuPadCalibrationV;
 }
-

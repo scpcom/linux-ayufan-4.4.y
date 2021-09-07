@@ -112,7 +112,6 @@
 #define reg_config_rw_pad_ctrl___phyrst_n___bit 1
 #define reg_config_rw_pad_ctrl_offset 8
 
-
 /* Constants */
 #define regk_config_bw16                          0x00000000
 #define regk_config_bw32                          0x00000001

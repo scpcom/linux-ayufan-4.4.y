@@ -67,7 +67,6 @@ static inline void pte_free(struct mm_struct *mm, pgtable_t ptepage)
 	quicklist_free_page(0, NULL, ptepage);
 }
 
-
 #define pmd_populate_kernel(MM, PMD, PTE)	pmd_set(PMD, PTE)
 #define pmd_populate(MM,PMD,PTE_PAGE)		\
 	pmd_populate_kernel(MM,PMD,page_address(PTE_PAGE))

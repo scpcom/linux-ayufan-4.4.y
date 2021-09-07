@@ -153,7 +153,6 @@ SECTIONS
 	}
 	vsyscall_clock = VVIRT(.vsyscall_clock);
 
-
 	.vsyscall_1 ADDR(.vsyscall_0) + 1024: AT(VLOAD(.vsyscall_1)) {
 		*(.vsyscall_1)
 	}
@@ -303,7 +302,6 @@ SECTIONS
 	/DISCARD/ : { *(.eh_frame) }
 }
 
-
 #ifdef CONFIG_X86_32
 /*
  * The ASSERT() sink to . is intentional, for binutils 2.14 compatibility:
@@ -338,4 +336,3 @@ INIT_PER_CPU(irq_stack_union);
 . = ASSERT(kexec_control_code_size <= KEXEC_CONTROL_CODE_MAX_SIZE,
            "kexec control code size is too big");
 #endif
-

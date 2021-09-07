@@ -99,7 +99,6 @@ USHORT RtmpPCI_WriteTxResource(
 	return RetTxIdx;
 }
 
-
 USHORT RtmpPCI_WriteSingleTxResource(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	TX_BLK			*pTxBlk,
@@ -157,7 +156,6 @@ USHORT RtmpPCI_WriteSingleTxResource(
 
 	return RetTxIdx;
 }
-
 
 USHORT RtmpPCI_WriteMultiTxResource(
 	IN	PRTMP_ADAPTER	pAd,
@@ -238,7 +236,6 @@ USHORT RtmpPCI_WriteMultiTxResource(
 
 }
 
-
 VOID RtmpPCI_FinalWriteTxResource(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	TX_BLK			*pTxBlk,
@@ -256,7 +253,6 @@ VOID RtmpPCI_FinalWriteTxResource(
 	pTxWI = (PTXWI_STRUC) pTxRing->Cell[FirstTxIdx].DmaBuf.AllocVa;
 	pTxWI->MPDUtotalByteCount = totalMPDUSize;
 }
-
 
 VOID RtmpPCIDataLastTxIdx(
 	IN	PRTMP_ADAPTER	pAd,
@@ -278,7 +274,6 @@ VOID RtmpPCIDataLastTxIdx(
 
 	pTxD->LastSec1 = 1;
 }
-
 
 USHORT	RtmpPCI_WriteFragTxResource(
 	IN	PRTMP_ADAPTER	pAd,
@@ -309,7 +304,6 @@ USHORT	RtmpPCI_WriteFragTxResource(
 
 	firstDMALen = TXINFO_SIZE + TXWI_SIZE + hwHeaderLen;
 	NdisMoveMemory(pDMAHeaderBufVA, pTxBlk->HeaderBuf, firstDMALen);
-
 
 	//
 	// Build Tx Descriptor
@@ -737,7 +731,6 @@ VOID RT28xxPciAsicRadioOff(
 	RTMP_CLEAR_PSFLAG(pAd, fRTMP_PS_DISABLE_TX);
 }
 
-
 /*
 	==========================================================================
 	Description:
@@ -1164,7 +1157,6 @@ VOID RT28xxPciMlmeRadioOFF(
 	GloCfg.field.EnableTxDMA = 0;
 	GloCfg.field.EnableRxDMA = 0;
 	RTMP_IO_WRITE32(pAd, WPDMA_GLO_CFG, GloCfg.word);	   // abort all TX rings
-
 
 	// MAC_SYS_CTRL => value = 0x0 => 40mA
 	RTMP_IO_WRITE32(pAd, MAC_SYS_CTRL, 0);

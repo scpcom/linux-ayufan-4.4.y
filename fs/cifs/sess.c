@@ -211,7 +211,6 @@ static void unicode_domain_string(char **pbcc_area, struct cifsSesInfo *ses,
 	*pbcc_area = bcc_ptr;
 }
 
-
 static void unicode_ssetup_strings(char **pbcc_area, struct cifsSesInfo *ses,
 				   const struct nls_table *nls_cp)
 {
@@ -546,7 +545,6 @@ static int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 	sec_blob->SessionKey.MaximumLength = 0;
 	return tmp - pbuffer;
 }
-
 
 static void setup_ntlmssp_neg_req(SESSION_SETUP_ANDX *pSMB,
 				 struct cifsSesInfo *ses)

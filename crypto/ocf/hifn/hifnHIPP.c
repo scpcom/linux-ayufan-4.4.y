@@ -175,7 +175,6 @@ struct hipp_fs_entry {
 	/* other stuff */
 };
 
-
 static ssize_t
 cryptoid_show(struct device *dev,
 	      struct device_attribute *attr,

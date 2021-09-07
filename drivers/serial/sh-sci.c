@@ -1232,7 +1232,6 @@ static struct uart_driver sci_uart_driver = {
 	.cons		= SCI_CONSOLE,
 };
 
-
 static int sci_remove(struct platform_device *dev)
 {
 	struct sh_sci_priv *priv = platform_get_drvdata(dev);

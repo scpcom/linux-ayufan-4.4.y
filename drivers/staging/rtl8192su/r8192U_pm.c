@@ -69,4 +69,3 @@ int rtl8192U_enable_wake (struct pci_dev *dev, u32 state, int enable)
 			state, enable);
 	return(-EAGAIN);
 }
-

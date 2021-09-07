@@ -95,7 +95,6 @@ static struct platform_device msp_usbdev_device = {
 static struct platform_device *msp_devs[1];
 #endif
 
-
 static int __init msp_usb_setup(void)
 {
 #if defined(CONFIG_USB_EHCI_HCD) || defined(CONFIG_USB_GADGET)

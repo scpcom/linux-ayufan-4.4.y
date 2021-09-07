@@ -82,7 +82,6 @@ MODULE_LICENSE("GPL");
 			printk a; \
 	} while( 0 )
 
-
 /* we're only using 32k of memory, so we use 4 TX
    buffers and 16 RX buffers.  These values are expressed as log2. */
 
@@ -104,7 +103,6 @@ MODULE_LICENSE("GPL");
 
 /* Get the address of a packet buffer corresponding to a given buffer head */
 #define	PKTBUF_ADDR(head)	(void *)((unsigned long)(MEM) | (head)->base)
-
 
 /* The LANCE Rx and Tx ring descriptors. */
 struct lance_rx_head {
@@ -369,7 +367,6 @@ static int __init lance_probe( struct net_device *dev)
 	}
 	dev->irq = (unsigned short)LANCE_IRQ;
 
-
 	printk("%s: SUN3 Lance at io %#lx, mem %#lx, irq %d, hwaddr ",
 		   dev->name,
 		   (unsigned long)ioaddr,
@@ -411,7 +408,6 @@ static int __init lance_probe( struct net_device *dev)
 //	KLUDGE -- REMOVE ME
 	set_bit(__LINK_STATE_PRESENT, &dev->state);
 
-
 	return 1;
 }
 
@@ -448,7 +444,6 @@ static int lance_open( struct net_device *dev )
 
 	return( 0 );
 }
-
 
 /* Initialize the LANCE Rx and Tx rings. */
 
@@ -498,7 +493,6 @@ static void lance_init_ring( struct net_device *dev )
 	MEM->init.tlen    = (TX_LOG_RING_SIZE << 13) |
 		(dvma_vtob(MEM->tx_head) >> 16);
 
-
 	/* tell the lance the address of its init block */
 	REGA(CSR1) = dvma_vtob(&(MEM->init));
 	REGA(CSR2) = dvma_vtob(&(MEM->init)) >> 16;
@@ -510,7 +504,6 @@ static void lance_init_ring( struct net_device *dev )
 #endif
 
 }
-
 
 static int lance_start_xmit( struct sk_buff *skb, struct net_device *dev )
 {
@@ -564,7 +557,6 @@ static int lance_start_xmit( struct sk_buff *skb, struct net_device *dev )
 
 		return NETDEV_TX_OK;
 	}
-
 
 	/* Block a timer-based transmit from overlapping.  This could better be
 	   done with atomic_swap(1, dev->tbusy), but set_bit() works as well. */
@@ -682,7 +674,6 @@ static irqreturn_t lance_interrupt( int irq, void *dev_id)
 	if(csr0 & CSR0_ERR)
 		DREG = CSR0_BABL | CSR0_MERR | CSR0_CERR | CSR0_MISS;
 
-
 	DPRINTK( 2, ( "%s: interrupt  csr0=%04x new csr=%04x.\n",
 		      dev->name, csr0, DREG ));
 
@@ -738,7 +729,6 @@ static irqreturn_t lance_interrupt( int irq, void *dev_id)
 		lp->old_tx = old_tx;
 	}
 
-
 	if (netif_queue_stopped(dev)) {
 		/* The ring is no longer full, clear tbusy. */
 		netif_start_queue(dev);
@@ -760,7 +750,6 @@ static irqreturn_t lance_interrupt( int irq, void *dev_id)
 		lance_init_ring(dev);
 		REGA(CSR0) = CSR0_STRT | CSR0_INEA;
 	}
-
 
     /* Clear any other interrupt, and set interrupt enable. */
 //	DREG = CSR0_BABL | CSR0_CERR | CSR0_MISS | CSR0_MERR |
@@ -845,7 +834,6 @@ static int lance_rx( struct net_device *dev )
 					printk( "%s: RX pkt %d type 0x%04x len %d\n ", dev->name, entry, ((u_short *)data)[6], pkt_len);
 				}
 
-
 				skb_reserve( skb, 2 );	/* 16 byte align */
 				skb_put( skb, pkt_len );	/* Make room */
 				skb_copy_to_linear_data(skb,
@@ -873,7 +861,6 @@ static int lance_rx( struct net_device *dev )
 	return 0;
 }
 
-
 static int lance_close( struct net_device *dev )
 {
 	struct lance_private *lp = netdev_priv(dev);
@@ -890,7 +877,6 @@ static int lance_close( struct net_device *dev )
 	DREG = CSR0_STOP;
 	return 0;
 }
-
 
 /* Set or clear the multicast filter for this adaptor.
    num_addrs == -1		Promiscuous mode, receive all packets
@@ -938,7 +924,6 @@ static void set_multicast_list( struct net_device *dev )
 	REGA( CSR0 ) = CSR0_IDON | CSR0_INEA | CSR0_STRT;
 }
 
-
 #ifdef MODULE
 
 static struct net_device *sun3lance_dev;
@@ -961,4 +946,3 @@ void __exit cleanup_module(void)
 }
 
 #endif /* MODULE */
-

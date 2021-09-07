@@ -128,7 +128,6 @@ _scsih_set_fwfault_debug(const char *val, struct kernel_param *kp)
 module_param_call(mpt2sas_fwfault_debug, _scsih_set_fwfault_debug,
     param_get_int, &mpt2sas_fwfault_debug, 0644);
 
-
 /**
  *  mpt2sas_remove_dead_ioc_func - kthread context to remove dead ioc
  * @arg: input argument, used to derive ioc
@@ -152,7 +151,6 @@ static int mpt2sas_remove_dead_ioc_func(void *arg)
         return 0;
 }
 
-
 /**
  * _base_fault_reset_work - workq handling ioc fault conditions
  * @work: input argument, used to derive ioc
@@ -175,7 +173,6 @@ _base_fault_reset_work(void *arg)
 	u32 doorbell;
 	int rc;
 	struct task_struct *p;
-
 
 	spin_lock_irqsave(&ioc->ioc_reset_in_progress_lock, flags);
 	if (ioc->shost_recovery)
@@ -1183,7 +1180,6 @@ _base_add_sg_single_32(void *paddr, u32 flags_length, dma_addr_t dma_addr)
 	sgel->Address = cpu_to_le32(dma_addr);
 }
 
-
 /**
  * _base_add_sg_single_64 - Place a simple 64 bit SGE at address pAddr.
  * @paddr: virtual address for SGE
@@ -1597,7 +1593,6 @@ mpt2sas_base_map_resources(struct MPT2SAS_ADAPTER *ioc)
 		return -ENODEV;
 	}
 
-
 	if (pci_request_selected_regions(pdev, ioc->bars,
 	    MPT2SAS_DRIVER_NAME)) {
 		printk(MPT2SAS_WARN_FMT "pci_request_selected_regions: "
@@ -1942,7 +1937,6 @@ mpt2sas_base_put_smid_scsi_io(struct MPT2SAS_ADAPTER *ioc, u16 smid, u16 handle)
 	Mpi2RequestDescriptorUnion_t descriptor;
 	u64 *request = (u64 *)&descriptor;
 
-
 	descriptor.SCSIIO.RequestFlags = MPI2_REQ_DESCRIPT_FLAGS_SCSI_IO;
 	descriptor.SCSIIO.MSIxIndex =  _base_get_msix_index(ioc);
 	descriptor.SCSIIO.SMID = cpu_to_le16(smid);
@@ -1951,7 +1945,6 @@ mpt2sas_base_put_smid_scsi_io(struct MPT2SAS_ADAPTER *ioc, u16 smid, u16 handle)
 	_base_writeq(*request, &ioc->chip->RequestDescriptorPostLow,
 	    &ioc->scsi_lookup_lock);
 }
-
 
 /**
  * mpt2sas_base_put_smid_hi_priority - send Task Managment request to firmware
@@ -2676,7 +2669,6 @@ _base_allocate_memory_pools(struct MPT2SAS_ADAPTER *ioc,  int sleep_flag)
 	dinitprintk(ioc, printk(MPT2SAS_INFO_FMT "scsi host: "
 	    "can_queue depth (%d)\n", ioc->name, ioc->shost->can_queue));
 
-
 	/* contiguous pool for request and chains, 16 byte align, one extra "
 	 * "frame for smid=0
 	 */
@@ -3386,7 +3378,6 @@ mpt2sas_base_sas_iounit_control(struct MPT2SAS_ADAPTER *ioc,
 	return rc;
 }
 
-
 /**
  * mpt2sas_base_scsi_enclosure_processor - sending request to sep device
  * @ioc: per adapter object
@@ -3644,7 +3635,6 @@ _base_send_ioc_init(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	    cpu_to_le64((u64)ioc->reply_free_dma);
 	mpi_request.ReplyDescriptorPostQueueAddress =
 	    cpu_to_le64((u64)ioc->reply_post_free_dma);
-
 
 	/* This time stamp specifies number of milliseconds
 	 * since epoch ~ midnight January 1, 1970.
@@ -4629,7 +4619,6 @@ mpt2sas_base_attach(struct MPT2SAS_ADAPTER *ioc)
 	ioc->pfacts = NULL;
 	return r;
 }
-
 
 /**
  * mpt2sas_base_detach - remove controller instance

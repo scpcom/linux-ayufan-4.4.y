@@ -30,9 +30,7 @@
 
 /* defines  */
 
-
 /* Public functions */
-
 
 /* Purpose: Create new stack
  * Inputs:
@@ -79,7 +77,6 @@ MV_STATUS   mvStackDelete(void* stackHndl)
 
     return MV_OK;
 }
-
 
 /* PrintOut status of the stack */
 void    mvStackStatus(void* stackHndl, MV_BOOL isPrintElements)

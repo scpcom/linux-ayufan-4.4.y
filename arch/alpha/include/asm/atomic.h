@@ -13,7 +13,6 @@
  * than regular operations.
  */
 
-
 #define ATOMIC_INIT(i)		( (atomic_t) { (i) } )
 #define ATOMIC64_INIT(i)	( (atomic64_t) { (i) } )
 
@@ -88,7 +87,6 @@ static __inline__ void atomic64_sub(long i, atomic64_t * v)
 	:"=&r" (temp), "=m" (v->counter)
 	:"Ir" (i), "m" (v->counter));
 }
-
 
 /*
  * Same as above, but return the result value

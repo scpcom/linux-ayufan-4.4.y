@@ -153,7 +153,6 @@ extern unsigned int textsearch_find_continuous(struct ts_config *,
 					       struct ts_state *,
 					       const void *, unsigned int);
 
-
 #define TS_PRIV_ALIGNTO	8
 #define TS_PRIV_ALIGN(len) (((len) + TS_PRIV_ALIGNTO-1) & ~(TS_PRIV_ALIGNTO-1))
 

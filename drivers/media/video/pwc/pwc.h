@@ -52,7 +52,6 @@
 #define PWC_NAME 	"pwc"
 #define PFX		PWC_NAME ": "
 
-
 /* Trace certain actions in the driver */
 #define PWC_DEBUG_LEVEL_MODULE	(1<<0)
 #define PWC_DEBUG_LEVEL_PROBE	(1<<1)
@@ -73,7 +72,6 @@
 #define PWC_DEBUG_SIZE(fmt, args...) PWC_DEBUG(SIZE, fmt, ##args)
 #define PWC_DEBUG_IOCTL(fmt, args...) PWC_DEBUG(IOCTL, fmt, ##args)
 #define PWC_DEBUG_TRACE(fmt, args...) PWC_DEBUG(TRACE, fmt, ##args)
-
 
 #ifdef CONFIG_USB_PWC_DEBUG
 
@@ -349,7 +347,6 @@ extern int pwc_decompress(struct pwc_device *pdev);
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif
 /* vim: set cino= formatoptions=croql cindent shiftwidth=8 tabstop=8: */

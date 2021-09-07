@@ -57,14 +57,11 @@
 #include <linux/usb.h>
 #include "i2400m-usb.h"
 
-
 #define D_SUBMODULE notif
 #include "usb-debug-levels.h"
 
-
 static const
 __le32 i2400m_ZERO_BARKER[4] = { 0, 0, 0, 0 };
-
 
 /*
  * Process a received notification
@@ -117,7 +114,6 @@ error_bad_size:
 		i2400mu, buf, buf_len, ret);
 	return ret;
 }
-
 
 /*
  * URB callback for the notification endpoint
@@ -190,7 +186,6 @@ out:
 	return;
 }
 
-
 /*
  * setup the notification endpoint
  *
@@ -241,7 +236,6 @@ error_buf_alloc:
 	d_fnend(4, dev, "(i2400m %p) = %d\n", i2400mu, ret);
 	return ret;
 }
-
 
 /*
  * Tear down of the notification mechanism

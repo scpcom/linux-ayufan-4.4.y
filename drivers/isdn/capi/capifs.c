@@ -96,7 +96,6 @@ static const struct super_operations capifs_sops =
 	.show_options	= generic_show_options,
 };
 
-
 static int
 capifs_fill_super(struct super_block *s, void *data, int silent)
 {

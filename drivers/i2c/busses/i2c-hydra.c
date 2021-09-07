@@ -31,7 +31,6 @@
 #include <asm/io.h>
 #include <asm/hydra.h>
 
-
 #define HYDRA_CPD_PD0	0x00000001	/* CachePD lines */
 #define HYDRA_CPD_PD1	0x00000002
 #define HYDRA_CPD_PD2	0x00000004
@@ -148,7 +147,6 @@ static void __devexit hydra_remove(struct pci_dev *dev)
 			   offsetof(struct Hydra, CachePD), 4);
 }
 
-
 static struct pci_driver hydra_driver = {
 	.name		= "hydra_smbus",
 	.id_table	= hydra_ids,
@@ -161,13 +159,10 @@ static int __init i2c_hydra_init(void)
 	return pci_register_driver(&hydra_driver);
 }
 
-
 static void __exit i2c_hydra_exit(void)
 {
 	pci_unregister_driver(&hydra_driver);
 }
-
-
 
 MODULE_AUTHOR("Geert Uytterhoeven <geert@linux-m68k.org>");
 MODULE_DESCRIPTION("i2c for Apple Hydra Mac I/O");
@@ -175,4 +170,3 @@ MODULE_LICENSE("GPL");
 
 module_init(i2c_hydra_init);
 module_exit(i2c_hydra_exit);
-

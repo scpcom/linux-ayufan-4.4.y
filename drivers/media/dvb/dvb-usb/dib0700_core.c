@@ -19,7 +19,6 @@ MODULE_PARM_DESC(dvb_usb_dib0700_ir_proto, "set ir protocol (0=NEC, 1=RC5 (defau
 
 DVB_DEFINE_MOD_OPT_ADAPTER_NR(adapter_nr);
 
-
 int dib0700_get_version(struct dvb_usb_device *d, u32 *hwversion,
 			u32 *romversion, u32 *ramversion, u32 *fwtype)
 {

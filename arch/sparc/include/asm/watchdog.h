@@ -28,4 +28,3 @@
 #define WD_SERVICED 0x10	/* timer interrupt was serviced				*/
 
 #endif /* ifndef _SPARC64_WATCHDOG_H */
-

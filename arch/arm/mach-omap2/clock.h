@@ -96,5 +96,4 @@ static const struct clksel_rate gfx_l3_rates[] = {
 	{ .div = 0 }
 };
 
-
 #endif

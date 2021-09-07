@@ -203,7 +203,6 @@ static __net_init int loopback_net_init(struct net *net)
 	net->loopback_dev = dev;
 	return 0;
 
-
 out_free_netdev:
 	free_netdev(dev);
 out:

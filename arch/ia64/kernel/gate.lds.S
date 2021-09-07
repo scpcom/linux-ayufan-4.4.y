@@ -5,7 +5,6 @@
  * its layout.
  */
 
-
 #include <asm/system.h>
 #include "paravirt_patchlist.h"
 

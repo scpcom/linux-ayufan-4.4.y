@@ -314,7 +314,6 @@ static inline int __is_mmio(const volatile void __iomem *addr)
 	return IO_CONCAT(__IO_PREFIX,is_mmio)(addr);
 }
 
-
 /*
  * If the actual I/O bits are sufficiently trivial, then expand inline.
  */

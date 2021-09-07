@@ -15,7 +15,6 @@
 
 #include "msSample.h"
 
-
 /*
    The following sample sets Trunk Mask Table as follows:
  
@@ -54,4 +53,3 @@ GT_STATUS sampleLoadBalance(GT_QD_DEV *dev)
 
 	return GT_OK;
 }
-

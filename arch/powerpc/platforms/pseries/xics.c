@@ -56,7 +56,6 @@ static int ibm_set_xive;
 static int ibm_int_on;
 static int ibm_int_off;
 
-
 /* Direct hardware low level accessors */
 
 /* The part of the interrupt presentation layer that we care about */
@@ -104,7 +103,6 @@ static inline void direct_qirr_info(int n_cpu, u8 value)
 	out_8(&xics_per_cpu[n_cpu]->qirr.bytes[0], value);
 }
 
-
 /* LPAR low level accessors */
 
 static inline unsigned int lpar_xirr_info_get(void)
@@ -145,7 +143,6 @@ static inline void lpar_qirr_info(int n_cpu , u8 value)
 	if (lpar_rc != H_SUCCESS)
 		panic("bad return code qirr - rc = %lx\n", lpar_rc);
 }
-
 
 /* Interface to generic irq subsystem */
 
@@ -405,7 +402,6 @@ static struct irq_chip xics_pic_lpar = {
 	.set_affinity = xics_set_affinity
 };
 
-
 /* Interface to arch irq controller subsystem layer */
 
 /* Points to the irq_chip we're actually using */
@@ -466,7 +462,6 @@ static void __init xics_init_host(void)
 	BUG_ON(xics_host == NULL);
 	irq_set_default_host(xics_host);
 }
-
 
 /* Inter-processor interrupt support */
 
@@ -582,7 +577,6 @@ int __init smp_xics_probe(void)
 }
 
 #endif /* CONFIG_SMP */
-
 
 /* Initialization */
 

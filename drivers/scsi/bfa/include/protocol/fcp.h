@@ -40,7 +40,6 @@ struct fc_srr_s{
 	u32        res:24;
 };
 
-
 /*
  * FCP_CMND definitions
  */

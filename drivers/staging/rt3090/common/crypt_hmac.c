@@ -26,7 +26,6 @@
 
 #include "../crypt_hmac.h"
 
-
 #ifdef HMAC_SHA1_SUPPORT
 /*
 ========================================================================
@@ -108,7 +107,6 @@ VOID HMAC_SHA1 (
         NdisMoveMemory(MAC, Digest, MACLen);
 } /* End of HMAC_SHA1 */
 #endif /* HMAC_SHA1_SUPPORT */
-
 
 #ifdef HMAC_SHA256_SUPPORT
 /*
@@ -192,7 +190,6 @@ VOID HMAC_SHA256 (
 
 } /* End of HMAC_SHA256 */
 #endif /* HMAC_SHA256_SUPPORT */
-
 
 #ifdef HMAC_MD5_SUPPORT
 /*

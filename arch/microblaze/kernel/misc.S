@@ -99,7 +99,6 @@ early_console_reg_tlb_alloc:
 	swi	r9, r5, 8;	\
 	swi	r10, r5, 12
 
-
 /* FIXME DCACHE_LINE_BYTES (CONFIG_XILINX_MICROBLAZE0_DCACHE_LINE_LEN * 4)*/
 #define DCACHE_LINE_BYTES (4 * 4)
 

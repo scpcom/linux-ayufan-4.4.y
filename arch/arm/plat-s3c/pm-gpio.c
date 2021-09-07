@@ -170,7 +170,6 @@ static void s3c_gpio_pm_2bit_resume(struct s3c_gpio_chip *chip)
 		change_mask |= mask;
 	}
 
-
 	/* Write the new CON settings */
 
 	gpcon = old_gpcon & ~change_mask;

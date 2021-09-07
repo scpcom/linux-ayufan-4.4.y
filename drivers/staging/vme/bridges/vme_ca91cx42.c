@@ -56,8 +56,6 @@ struct mutex vme_int;   /*
 			 */
 struct mutex vme_irq;   /* Locking for VME irq callback configuration */
 
-
-
 static char driver_name[] = "vme_ca91cx42";
 
 static struct pci_device_id ca91cx42_ids[] = {
@@ -153,7 +151,6 @@ static u32 ca91cx42_LERR_irqhandler(void)
 
 	return CA91CX42_LINT_LERR;
 }
-
 
 static u32 ca91cx42_VIRQ_irqhandler(int stat)
 {
@@ -295,7 +292,6 @@ int ca91cx42_request_irq(int level, int statid,
 		printk("VME Interrupt already taken\n");
 		return -EBUSY;
 	}
-
 
 	ca91cx42_bridge->irq[level - 1].count++;
 	ca91cx42_bridge->irq[level - 1].callback[statid].priv_data = priv_data;
@@ -633,7 +629,6 @@ static void ca91cx42_free_resource(struct vme_master_resource *image)
 	kfree(image->pci_resource.name);
 	memset(&(image->pci_resource), 0, sizeof(struct resource));
 }
-
 
 int ca91cx42_master_set(struct vme_master_resource *image, int enabled,
 	unsigned long long vme_base, unsigned long long size,
@@ -1814,7 +1809,6 @@ int ca91cx42_lm_set(vmeLmCfg_t *vmeLm)
 	if (vmeLm->dataAccessType & VME_DATA)
 		temp_ctl |= 0x00400000;
 
-
 	/* Write ctl reg and enable */
 	iowrite32(0x80000000 | temp_ctl, ca91cx42_bridge->base + LM_CTL);
 	temp_ctl = ioread32(ca91cx42_bridge->base + LM_CTL);
@@ -1838,8 +1832,6 @@ int ca91cx42_wait_lm(vmeLmCfg_t *vmeLm)
 
 	return 0;
 }
-
-
 
 int ca91cx42_set_arbiter(vmeArbiterCfg_t *vmeArb)
 {
@@ -1929,6 +1921,5 @@ int ca91cx42_get_requestor(vmeRequesterCfg_t *vmeReq)
 
 	return 0;
 }
-
 
 #endif

@@ -1,7 +1,6 @@
 #if !defined(CORE_ATA_H)
 #define CORE_ATA_H
 
-
 /*
  * ATA IDE Command definition 
  */
@@ -142,8 +141,6 @@ enum {
 
 #endif
 
-
-
 struct _ATA_TaskFile;
 typedef struct _ATA_TaskFile ATA_TaskFile, *PATA_TaskFile;
 
@@ -258,4 +255,3 @@ typedef struct _ATA_Identify_Data {
 #define ATA_REGISTER_DEVICE_CONTROL	0x16
 
 #endif
-

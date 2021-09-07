@@ -47,7 +47,6 @@ static struct {
 	.lock = CVMX_SPINLOCK_UNLOCKED_INITIALIZER
 };
 
-
 /*
  * Global variables that define the min/max of the memory region set
  * up for 32 bit userspace access.
@@ -115,4 +114,3 @@ int cvmx_sysinfo_minimal_initialize(void *phy_mem_desc_ptr,
 
 	return 1;
 }
-

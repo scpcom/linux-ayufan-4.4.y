@@ -651,7 +651,6 @@ static void atmel_rx_from_ring(struct uart_port *port)
 				flg = TTY_FRAME;
 		}
 
-
 		if (uart_handle_sysrq_char(port, c.ch))
 			continue;
 

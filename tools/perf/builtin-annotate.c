@@ -42,7 +42,6 @@ static unsigned long	mmap_window = 32;
 static struct rb_root	threads;
 static struct thread	*last_match;
 
-
 struct sym_ext {
 	struct rb_node	node;
 	double		percent;

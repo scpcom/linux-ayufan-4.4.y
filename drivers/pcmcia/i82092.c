@@ -62,7 +62,6 @@ static struct pci_driver i82092aa_pci_driver = {
 #endif
 };
 
-
 /* the pccard structure and its functions */
 static struct pccard_operations i82092aa_operations = {
 	.init 		 	= i82092aa_init,
@@ -89,7 +88,6 @@ struct socket_info {
 #define MAX_SOCKETS 4
 static struct socket_info sockets[MAX_SOCKETS];
 static int socket_count;  /* shortcut */                                  	                                	
-
 
 static int __devinit i82092aa_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
@@ -264,7 +262,6 @@ static void indirect_setbit(int socket, unsigned short reg, unsigned char mask)
 	spin_unlock_irqrestore(&port_lock,flags);
 }
 
-
 static void indirect_resetbit(int socket, unsigned short reg, unsigned char mask)
 {
 	unsigned short int port;
@@ -314,7 +311,6 @@ static int to_cycles(int ns)
 		return 0;
 }
     
-
 /* Interrupt handler functionality */
 
 static irqreturn_t i82092aa_interrupt(int irq, void *dev)
@@ -377,8 +373,6 @@ static irqreturn_t i82092aa_interrupt(int irq, void *dev)
 /*	leave("i82092aa_interrupt");*/
 }
 
-
-
 /* socket functions */
 
 static int card_present(int socketno)
@@ -391,7 +385,6 @@ static int card_present(int socketno)
 	if (sockets[socketno].io_base == 0)
 		return 0;
 
-		
 	val = indirect_read(socketno, 1); /* Interface status register */
 	if ((val&12)==12) {
 		leave("card_present 1");
@@ -412,11 +405,6 @@ static void set_bridge_state(int sock)
 	leave("set_bridge_state");
 }
 
-
-
-
-
-      
 static int i82092aa_init(struct pcmcia_socket *sock)
 {
 	int i;
@@ -476,11 +464,9 @@ static int i82092aa_get_status(struct pcmcia_socket *socket, u_int *value)
 	 if (status & I365_CS_POWERON)
 	 	(*value) |= SS_POWERON;  /* power is applied to the card */
 
-
 	leave("i82092aa_get_status");
 	return 0;
 }
-
 
 static int i82092aa_set_socket(struct pcmcia_socket *socket, socket_state_t *state) 
 {
@@ -528,7 +514,6 @@ static int i82092aa_set_socket(struct pcmcia_socket *socket, socket_state_t *sta
 			leave("i82092aa_set_socket");
 			return -EINVAL;
 	}
-	
 	
 	switch (state->Vpp) {
 		case 0:	
@@ -641,7 +626,6 @@ static int i82092aa_set_mem_map(struct pcmcia_socket *socket, struct pccard_mem_
 		return -EINVAL;
 	}
 	
-	
 	if ( (mem->card_start > 0x3ffffff) || (region.start > region.end) ||
 	     (mem->speed > 1000) ) {
 		leave("i82092aa_set_mem_map: invalid address / speed");
@@ -657,7 +641,6 @@ static int i82092aa_set_mem_map(struct pcmcia_socket *socket, struct pccard_mem_
 	/* Turn off the window before changing anything */
 	if (indirect_read(sock, I365_ADDRWIN) & I365_ENA_MEM(map))
 	              indirect_resetbit(sock, I365_ADDRWIN, I365_ENA_MEM(map));
-	                 
 	                 
 /* 	printk("set_mem_map: Setting map %i range to %x - %x on socket %i, speed is %i, active = %i \n",map, region.start,region.end,sock,mem->speed,mem->flags & MAP_ACTIVE);  */
 
@@ -726,4 +709,3 @@ static void i82092aa_module_exit(void)
 
 module_init(i82092aa_module_init);
 module_exit(i82092aa_module_exit);
-

@@ -193,7 +193,6 @@ static int mspro_block_bd_open(struct block_device *bdev, fmode_t mode)
 	return rc;
 }
 
-
 static int mspro_block_disk_release(struct gendisk *disk)
 {
 	struct mspro_block_data *msb = disk->private_data;
@@ -1432,7 +1431,6 @@ static struct memstick_device_id mspro_block_id_tbl[] = {
 	 MEMSTICK_CLASS_DUO},
 	{}
 };
-
 
 static struct memstick_driver mspro_block_driver = {
 	.driver = {

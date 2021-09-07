@@ -56,7 +56,6 @@ struct wm8988_priv {
 	u16 reg_cache[WM8988_NUM_REG];
 };
 
-
 #define wm8988_reset(c)	snd_soc_write(c, WM8988_RESET, 0)
 
 /*
@@ -1062,7 +1061,6 @@ static void __exit wm8988_exit(void)
 #endif
 }
 module_exit(wm8988_exit);
-
 
 MODULE_DESCRIPTION("ASoC WM8988 driver");
 MODULE_AUTHOR("Mark Brown <broonie@opensource.wolfsonmicro.com>");

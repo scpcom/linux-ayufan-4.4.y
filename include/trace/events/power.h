@@ -16,8 +16,6 @@ enum {
 };
 #endif
 
-
-
 TRACE_EVENT(power_start,
 
 	TP_PROTO(unsigned int type, unsigned int state),
@@ -54,7 +52,6 @@ TRACE_EVENT(power_end,
 	TP_printk("dummy=%lu", (unsigned long)__entry->dummy)
 
 );
-
 
 TRACE_EVENT(power_frequency,
 

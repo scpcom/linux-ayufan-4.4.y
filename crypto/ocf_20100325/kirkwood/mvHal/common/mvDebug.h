@@ -62,8 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
-
 #ifndef __INCmvDebugh
 #define __INCmvDebugh
 
@@ -116,8 +114,6 @@ extern MV_U32  mvDebugModules[MV_MODULE_MAX];
 # define MV_DEBUG_CODE(module, flags, code)
 #endif
 
-
-
 /* typedefs */
 
 /*  time measurement structure used to check how much time pass between
@@ -133,7 +129,6 @@ typedef struct {
     unsigned long   min;        /* Minimum time from begin to end */
     unsigned long   max;        /* Maximum time from begin to end */
 } MV_DEBUG_TIMES;
-
 
 /* mvDebug.h API list */
 
@@ -163,7 +158,6 @@ void mvDebugUpdateTimeEntry(MV_DEBUG_TIMES* pTimeEntry);
 /* Print out MV_DEBUG_TIMES entry */
 void mvDebugPrintTimeEntry(MV_DEBUG_TIMES* pTimeEntry, MV_BOOL isTitle);
 
-
 /******** General ***********/
 
 /* Change value of mvDebugPrint global variable */
@@ -173,6 +167,4 @@ void    mvDebugModuleEnable(MV_MODULE_ID module, MV_BOOL isEnable);
 void    mvDebugModuleSetFlags(MV_MODULE_ID module, MV_U32 flags);
 void    mvDebugModuleClearFlags(MV_MODULE_ID module, MV_U32 flags);
 
-
 #endif /* __INCmvDebug.h */
-

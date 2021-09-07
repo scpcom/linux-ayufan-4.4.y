@@ -78,6 +78,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define   CL_AUDIO_CODEC_TONE_CTRL_REG             0x15
 #define   CL_AUDIO_CODEC_VOL_OUTA_CTRL_REG         0x16
 
-
 #endif  /* __INCmvCLAudioCodecRegsh */
-

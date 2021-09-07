@@ -431,7 +431,6 @@ static struct of_platform_driver uctrl_driver = {
 	.remove		= __devexit_p(uctrl_remove),
 };
 
-
 static int __init uctrl_init(void)
 {
 	return of_register_driver(&uctrl_driver, &of_bus_type);

@@ -196,7 +196,6 @@ int color_vfprintf(FILE *fp, const char *color, const char *fmt, va_list args)
 	return __color_vfprintf(fp, color, fmt, args, NULL);
 }
 
-
 int color_fprintf(FILE *fp, const char *color, const char *fmt, ...)
 {
 	va_list args;

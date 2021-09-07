@@ -37,9 +37,7 @@
 #include "usb.h"
 #include "hcd.h"
 
-
 /* PCI-based HCs are common, but plenty of non-PCI HCs are used too */
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -152,7 +150,6 @@ int usb_hcd_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	return retval;
 }
 EXPORT_SYMBOL_GPL(usb_hcd_pci_probe);
-
 
 /* may be called without controller electrically present */
 /* may be called with controller, bus, and devices active */

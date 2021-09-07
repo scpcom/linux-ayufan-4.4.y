@@ -19,7 +19,6 @@
 #include <net/netlink.h>
 #include <net/pkt_sched.h>
 
-
 /*	Class-Based Queueing (CBQ) algorithm.
 	=======================================
 
@@ -55,7 +54,6 @@
 	In the worst case we have IntServ estimate with D = W*r+k*MTU
 	and C = MTU*r. The proof (if correct at all) is trivial.
 
-
 	--- It seems that cbq-2.0 is not very accurate. At least, I cannot
 	interpret some places, which look like wrong translations
 	from NS. Anyone is advised to find these differences
@@ -69,7 +67,6 @@
 	very close to an ideal solution.  */
 
 struct cbq_sched_data;
-
 
 struct cbq_class
 {
@@ -113,7 +110,6 @@ struct cbq_class
 	struct cbq_class	*children;	/* Pointer to children chain */
 
 	struct Qdisc		*q;		/* Elementary queueing discipline */
-
 
 /* Variables */
 	unsigned char		cpriority;	/* Effective priority */
@@ -172,7 +168,6 @@ struct cbq_sched_data
 	int			toplevel;
 	u32			hgenerator;
 };
-
 
 #define L2T(cl,len)	qdisc_l2t((cl)->R_tab,len)
 
@@ -1235,7 +1230,6 @@ cbq_reset(struct Qdisc* sch)
 	}
 	sch->q.qlen = 0;
 }
-
 
 static int cbq_set_lss(struct cbq_class *cl, struct tc_cbq_lssopt *lss)
 {

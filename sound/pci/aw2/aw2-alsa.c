@@ -693,8 +693,6 @@ static int __devinit snd_aw2_new_pcm(struct aw2 *chip)
 		       "aw2: snd_pcm_lib_preallocate_pages_for_all error "
 		       "(0x%X)\n", err);
 
-
-
 	err = snd_pcm_new(chip->card, "Audiowerk2 capture", 2, 0, 1,
 			  &pcm_capture);
 
@@ -732,7 +730,6 @@ static int __devinit snd_aw2_new_pcm(struct aw2 *chip)
 		printk(KERN_ERR
 		       "aw2: snd_pcm_lib_preallocate_pages_for_all error "
 		       "(0x%X)\n", err);
-
 
 	/* Create control */
 	err = snd_ctl_add(chip->card, snd_ctl_new1(&aw2_control, chip));

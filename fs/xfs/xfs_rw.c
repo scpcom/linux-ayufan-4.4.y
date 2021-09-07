@@ -152,7 +152,6 @@ xfs_do_force_shutdown(
 	}
 }
 
-
 /*
  * Called when we want to stop a buffer from getting written or read.
  * We attach the EIO error, muck with its flags, and call biodone

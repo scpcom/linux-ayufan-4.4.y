@@ -109,7 +109,6 @@ do { if(rt_global_debug_component & component) \
 #define COMP_DBG				BIT1		// Only for temporary debug message.
 #define COMP_INIT				BIT2		// during driver initialization / halt / reset.
 
-
 #define COMP_RECV				BIT3		// Reveive part data path.
 #define COMP_SEND				BIT4		// Send part path.
 #define COMP_IO					BIT5		// I/O Related. Added by Annie, 2006-03-02.
@@ -413,8 +412,6 @@ typedef struct _tx_status_desc_8192s_usb{
 	u8		RxAGC4;
 }tx_status_desc_8192s_usb, *ptx_status_desc_8192s_usb;
 
-
-
 //
 //Tx Descriptor for RLT8192SU(Load FW mode)
 //
@@ -468,7 +465,6 @@ typedef struct _tx_h2c_desc_cmd_8192s_usb{
 	u32		Rsvd7;
 	u32		Rsvd8;
 }tx_h2c_desc_cmd_8192s_usb, *ptx_h2c_desc_cmd_8192s_usb;
-
 
 typedef struct _tx_h2c_cmd_hdr_8192s_usb{
        // DWORD 0
@@ -577,7 +573,6 @@ typedef struct rx_desc_819x_usb{
 	u32		TSFL;
 //}RX_DESC_STATUS_8192SU, *PRX_DESC_STATUS_8192SU;
 }rx_desc_819x_usb, *prx_desc_819x_usb;
-
 
 //
 // Driver info are written to the begining of the RxBuffer
@@ -708,11 +703,9 @@ typedef enum _RTL8192SUSB_LOOPBACK{
 //+by amy 080507
 #define MAX_RECEIVE_BUFFER_SIZE	9100	// Add this to 9100 bytes to receive A-MSDU from RT-AP
 
-
 /* Firmware Queue Layout */
 #define NUM_OF_FIRMWARE_QUEUE		10
 #define NUM_OF_PAGES_IN_FW		0x100
-
 
 #define NUM_OF_PAGE_IN_FW_QUEUE_BE	0x020
 #define NUM_OF_PAGE_IN_FW_QUEUE_BK	0x020
@@ -724,7 +717,6 @@ typedef enum _RTL8192SUSB_LOOPBACK{
 #define NUM_OF_PAGE_IN_FW_QUEUE_HIGH	0
 #define NUM_OF_PAGE_IN_FW_QUEUE_BCN	0x4
 #define NUM_OF_PAGE_IN_FW_QUEUE_PUB	0x18
-
 
 #define APPLIED_RESERVED_QUEUE_IN_FW	0x80000000
 #define RSVD_FW_QUEUE_PAGE_BK_SHIFT	0x00
@@ -753,7 +745,6 @@ typedef enum _RTL8192SUSB_LOOPBACK{
 
 #define		PHY_RSSI_SLID_WIN_MAX				100
 
-
 typedef enum _WIRELESS_MODE {
 	WIRELESS_MODE_UNKNOWN = 0x00,
 	WIRELESS_MODE_A = 0x01,
@@ -763,7 +754,6 @@ typedef enum _WIRELESS_MODE {
 	WIRELESS_MODE_N_24G = 0x10,
 	WIRELESS_MODE_N_5G = 0x20
 } WIRELESS_MODE;
-
 
 #define RTL_IOCTL_WPA_SUPPLICANT		SIOCIWFIRSTPRIV+30
 
@@ -907,7 +897,6 @@ typedef struct Stats
 	u32	CurrentShowTxate;
 } Stats;
 
-
 // Bandwidth Offset
 #define HAL_PRIME_CHNL_OFFSET_DONT_CARE		0
 #define HAL_PRIME_CHNL_OFFSET_LOWER			1
@@ -1002,7 +991,6 @@ typedef struct _ccktxbbgain_struct
 	u8	ccktxbb_valuearray[8];
 } ccktxbbgain_struct,*pccktxbbgain_struct;
 
-
 typedef struct _init_gain
 {
 	u8				xaagccore1;
@@ -1039,7 +1027,6 @@ typedef struct _phy_cck_rx_status_report_819xusb
 	u8	sq_rpt;
 	u8	cck_agc_rpt;
 }phy_sts_cck_819xusb_t;
-
 
 typedef struct _phy_ofdm_rx_status_rxsc_sgien_exintfflag{
 	u8			reserved:4;
@@ -1163,7 +1150,6 @@ typedef struct r8192_priv
 	short sens;
 	short max_sens;
 
-
 	//	u8 chtxpwr[15]; //channels from 1 to 14, 0 not used
 //	u8 chtxpwr_ofdm[15]; //channels from 1 to 14, 0 not used
 //	u8 cck_txpwr_base;
@@ -1219,7 +1205,6 @@ typedef struct r8192_priv
 	short  tx_urb_index;
 	atomic_t tx_pending[0x10];//UART_PRIORITY+1
 
-
 	struct tasklet_struct irq_rx_tasklet;
 	struct urb *rxurb_task;
 
@@ -1231,7 +1216,6 @@ typedef struct r8192_priv
 
 	u32     LastRxDescTSFHigh;
 	u32     LastRxDescTSFLow;
-
 
 	//2 Rx Related variables
 	u16	EarlyRxThreshold;
@@ -1503,10 +1487,6 @@ typedef struct r8192_priv
 
 	u16 rf_pathmap;
 //#endif
-
-
-
-
 
 }r8192_priv;
 

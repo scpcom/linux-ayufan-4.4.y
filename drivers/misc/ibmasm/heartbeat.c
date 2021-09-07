@@ -61,7 +61,6 @@ void ibmasm_unregister_panic_notifier(void)
 			&panic_notifier);
 }
 
-
 int ibmasm_heartbeat_init(struct service_processor *sp)
 {
 	sp->heartbeat = ibmasm_new_command(sp, HEARTBEAT_BUFFER_SIZE);

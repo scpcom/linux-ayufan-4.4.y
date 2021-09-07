@@ -18,7 +18,6 @@
 
 #include "dumpstack.h"
 
-
 static char x86_stack_ids[][8] = {
 		[DEBUG_STACK - 1] = "#DB",
 		[NMI_STACK - 1] = "NMI",
@@ -303,4 +302,3 @@ int is_valid_bugaddr(unsigned long ip)
 
 	return ud2 == 0x0b0f;
 }
-

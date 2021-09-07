@@ -867,7 +867,6 @@ static inline unsigned long __raw_local_irq_save(void)
 	return f;
 }
 
-
 /* Make sure as little as possible of this mess escapes. */
 #undef PARAVIRT_CALL
 #undef __PVOP_CALL
@@ -898,7 +897,6 @@ extern void default_banner(void);
 	 .byte 772b-771b;			\
 	 .short clobbers;			\
 	.popsection
-
 
 #define COND_PUSH(set, mask, reg)			\
 	.if ((~(set)) & mask); push %reg; .endif
@@ -979,7 +977,6 @@ extern void default_banner(void);
 	PARA_SITE(PARA_PATCH(pv_cpu_ops, PV_CPU_irq_enable_sysexit),	\
 		  CLBR_NONE,						\
 		  jmp PARA_INDIRECT(pv_cpu_ops+PV_CPU_irq_enable_sysexit))
-
 
 #else	/* !CONFIG_X86_32 */
 

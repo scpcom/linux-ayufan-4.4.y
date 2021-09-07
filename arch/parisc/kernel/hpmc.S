@@ -20,7 +20,6 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
 /*
  * This HPMC handler retrieves the HPMC pim data, resets IO and
  * returns to the default trap handler with code set to 1 (HPMC).

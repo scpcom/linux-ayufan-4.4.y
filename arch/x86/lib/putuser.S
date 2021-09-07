@@ -16,7 +16,6 @@
 #include <asm/errno.h>
 #include <asm/asm.h>
 
-
 /*
  * __put_user_X
  *

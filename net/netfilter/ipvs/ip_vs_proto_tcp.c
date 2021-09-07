@@ -27,7 +27,6 @@
 
 #include <net/ip_vs.h>
 
-
 static struct ip_vs_conn *
 tcp_conn_in_get(int af, const struct sk_buff *skb, struct ip_vs_protocol *pp,
 		const struct ip_vs_iphdr *iph, unsigned int proto_off,
@@ -72,7 +71,6 @@ tcp_conn_out_get(int af, const struct sk_buff *skb, struct ip_vs_protocol *pp,
 	}
 }
 
-
 static int
 tcp_conn_schedule(int af, struct sk_buff *skb, struct ip_vs_protocol *pp,
 		  int *verdict, struct ip_vs_conn **cpp)
@@ -116,7 +114,6 @@ tcp_conn_schedule(int af, struct sk_buff *skb, struct ip_vs_protocol *pp,
 	return 1;
 }
 
-
 static inline void
 tcp_fast_csum_update(int af, struct tcphdr *tcph,
 		     const union nf_inet_addr *oldip,
@@ -137,7 +134,6 @@ tcp_fast_csum_update(int af, struct tcphdr *tcph,
 						~csum_unfold(tcph->check))));
 }
 
-
 static inline void
 tcp_partial_csum_update(int af, struct tcphdr *tcph,
 		     const union nf_inet_addr *oldip,
@@ -157,7 +153,6 @@ tcp_partial_csum_update(int af, struct tcphdr *tcph,
 				ip_vs_check_diff2(oldlen, newlen,
 						~csum_unfold(tcph->check))));
 }
-
 
 static int
 tcp_snat_handler(struct sk_buff *skb,
@@ -227,7 +222,6 @@ tcp_snat_handler(struct sk_buff *skb,
 	}
 	return 1;
 }
-
 
 static int
 tcp_dnat_handler(struct sk_buff *skb,
@@ -300,7 +294,6 @@ tcp_dnat_handler(struct sk_buff *skb,
 	return 1;
 }
 
-
 static int
 tcp_csum_check(int af, struct sk_buff *skb, struct ip_vs_protocol *pp)
 {
@@ -347,7 +340,6 @@ tcp_csum_check(int af, struct sk_buff *skb, struct ip_vs_protocol *pp)
 
 	return 1;
 }
-
 
 #define TCP_DIR_INPUT		0
 #define TCP_DIR_OUTPUT		4
@@ -463,7 +455,6 @@ static struct tcp_states_t tcp_states_dos [] = {
 
 static struct tcp_states_t *tcp_state_table = tcp_states;
 
-
 static void tcp_timeout_change(struct ip_vs_protocol *pp, int flags)
 {
 	int on = (flags & 1);		/* secure_tcp */
@@ -562,7 +553,6 @@ set_tcp_state(struct ip_vs_protocol *pp, struct ip_vs_conn *cp,
 	cp->timeout = pp->timeout_table[cp->state = new_state];
 }
 
-
 /*
  *	Handle state transitions
  */
@@ -590,7 +580,6 @@ tcp_state_transition(struct ip_vs_conn *cp, int direction,
 	return 1;
 }
 
-
 /*
  *	Hash table for TCP application incarnations
  */
@@ -606,7 +595,6 @@ static inline __u16 tcp_app_hashkey(__be16 port)
 	return (((__force u16)port >> TCP_APP_TAB_BITS) ^ (__force u16)port)
 		& TCP_APP_TAB_MASK;
 }
-
 
 static int tcp_register_app(struct ip_vs_app *inc)
 {
@@ -632,7 +620,6 @@ static int tcp_register_app(struct ip_vs_app *inc)
 	return ret;
 }
 
-
 static void
 tcp_unregister_app(struct ip_vs_app *inc)
 {
@@ -641,7 +628,6 @@ tcp_unregister_app(struct ip_vs_app *inc)
 	list_del(&inc->p_list);
 	spin_unlock_bh(&tcp_app_lock);
 }
-
 
 static int
 tcp_app_conn_bind(struct ip_vs_conn *cp)
@@ -685,7 +671,6 @@ tcp_app_conn_bind(struct ip_vs_conn *cp)
 	return result;
 }
 
-
 /*
  *	Set LISTEN timeout. (ip_vs_conn_put will setup timer)
  */
@@ -697,18 +682,15 @@ void ip_vs_tcp_conn_listen(struct ip_vs_conn *cp)
 	spin_unlock(&cp->lock);
 }
 
-
 static void ip_vs_tcp_init(struct ip_vs_protocol *pp)
 {
 	IP_VS_INIT_HASH_TABLE(tcp_apps);
 	pp->timeout_table = tcp_timeouts;
 }
 
-
 static void ip_vs_tcp_exit(struct ip_vs_protocol *pp)
 {
 }
-
 
 struct ip_vs_protocol ip_vs_protocol_tcp = {
 	.name =			"TCP",

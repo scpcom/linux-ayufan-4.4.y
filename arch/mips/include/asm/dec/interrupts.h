@@ -17,7 +17,6 @@
 #include <irq.h>
 #include <asm/mipsregs.h>
 
-
 /*
  * The list of possible system devices which provide an
  * interrupt.  Not all devices exist on a given system.
@@ -74,12 +73,10 @@
 
 #define DEC_NR_INTS		41
 
-
 /* Largest of cpu mask_nr tables. */
 #define DEC_MAX_CPU_INTS	6
 /* Largest of asic mask_nr tables. */
 #define DEC_MAX_ASIC_INTS	9
-
 
 /*
  * CPU interrupt bits common to all systems.
@@ -94,7 +91,6 @@
 #define DEC_CPU_IRQ_MASK(n)	(1 << ((n) + CAUSEB_IP))
 #define DEC_CPU_IRQ_ALL		(0xff << CAUSEB_IP)
 
-
 #ifndef __ASSEMBLY__
 
 /*
@@ -105,7 +101,6 @@ extern int dec_interrupt[DEC_NR_INTS];
 extern int_ptr cpu_mask_nr_tbl[DEC_MAX_CPU_INTS][2];
 extern int_ptr asic_mask_nr_tbl[DEC_MAX_ASIC_INTS][2];
 extern int cpu_fpu_mask;
-
 
 /*
  * Common interrupt routine prototypes for all DECStations

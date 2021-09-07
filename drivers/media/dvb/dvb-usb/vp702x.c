@@ -51,7 +51,6 @@ int vp702x_usb_in_op(struct dvb_usb_device *d, u8 req, u16 value, u16 index, u8 
 	} else
 		ret = 0;
 
-
 	deb_xfer("in: req. %02x, val: %04x, ind: %04x, buffer: ",req,value,index);
 	debug_dump(b,blen,deb_xfer);
 
@@ -144,7 +143,6 @@ static int vp702x_set_pid(struct dvb_usb_adapter *adap, u16 pid, u8 id, int onof
 	return 0;
 }
 
-
 static int vp702x_init_pid_filter(struct dvb_usb_adapter *adap)
 {
 	struct vp702x_state *st = adap->priv;
@@ -205,7 +203,6 @@ static int vp702x_rc_query(struct dvb_usb_device *d, u32 *event, int *state)
 		}
 	return 0;
 }
-
 
 static int vp702x_read_mac_addr(struct dvb_usb_device *d,u8 mac[6])
 {

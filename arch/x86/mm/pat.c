@@ -51,7 +51,6 @@ static inline void pat_disable(const char *reason)
 }
 #endif
 
-
 static int debug_enable;
 
 static int __init pat_debug_setup(char *str)
@@ -63,7 +62,6 @@ __setup("debugpat", pat_debug_setup);
 
 #define dprintk(fmt, arg...) \
 	do { if (debug_enable) printk(KERN_INFO fmt, ##arg); } while (0)
-
 
 static u64 __read_mostly boot_pat_state;
 
@@ -566,7 +564,6 @@ unlock_ret:
 
 	return err;
 }
-
 
 /**
  * lookup_memtype - Looksup the memory type for a physical address

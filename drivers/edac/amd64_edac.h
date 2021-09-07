@@ -154,7 +154,6 @@
  * PCI-defined configuration space registers
  */
 
-
 /*
  * Function 1 - Address Map
  */
@@ -175,11 +174,9 @@
 					/* NOTE: Extra mask bit vs K8 */
 #define f10_dhar_offset(dhar)		((dhar & F10_DHAR_OFFSET_MASK) << 16)
 
-
 /* F10 High BASE/LIMIT registers */
 #define F10_DRAM_BASE_HIGH		0x140
 #define F10_DRAM_LIMIT_HIGH		0x144
-
 
 /*
  * Function 2 - DRAM controller
@@ -232,12 +229,10 @@
 
 #define DBAM_MAX_VALUE			11
 
-
 #define F10_DCLR_0			0x90
 #define F10_DCLR_1			0x190
 #define REVE_WIDTH_128			BIT(16)
 #define F10_WIDTH_128			BIT(11)
-
 
 #define F10_DCHR_0			0x94
 #define F10_DCHR_1			0x194
@@ -245,7 +240,6 @@
 #define F10_DCHR_FOUR_RANK_DIMM		BIT(18)
 #define F10_DCHR_Ddr3Mode		BIT(8)
 #define F10_DCHR_MblMode		BIT(6)
-
 
 #define F10_DCTL_SEL_LOW		0x110
 
@@ -282,9 +276,7 @@ enum {
 #define dct_memory_cleared(pvt)    \
 	(pvt->dram_ctl_select_low & F10_DCTL_SEL_LOW_MemCleared)
 
-
 #define F10_DCTL_SEL_HIGH		0x114
-
 
 /*
  * Function 3 - Misc Control
@@ -302,7 +294,6 @@ enum {
 #define K8_NBCFG_ECC_ENABLE		BIT(22)
 
 #define K8_NBSL				0x48
-
 
 /* Family F10h: Normalized Extended Error Codes */
 #define F10_NBSL_EXT_ERR_RES		0x0

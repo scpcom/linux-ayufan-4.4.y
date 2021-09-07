@@ -86,7 +86,6 @@ static void nommu_sync_single_for_device(struct device *dev,
 	flush_write_buffers();
 }
 
-
 static void nommu_sync_sg_for_device(struct device *dev,
 			struct scatterlist *sg, int nelems,
 			enum dma_data_direction dir)

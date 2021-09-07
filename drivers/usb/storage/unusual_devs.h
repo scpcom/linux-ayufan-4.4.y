@@ -568,7 +568,6 @@ UNUSUAL_DEV(  0x054c, 0x0010, 0x0500, 0x0610,
 		USB_SC_8070, USB_PR_DEVICE, NULL,
 		US_FL_SINGLE_LUN ),
 
-
 /* Reported by wim@geeks.nl */
 UNUSUAL_DEV(  0x054c, 0x0025, 0x0100, 0x0100,
 		"Sony",
@@ -1305,7 +1304,6 @@ UNUSUAL_DEV( 0x0dd8, 0xd202, 0x0000, 0x9999,
 		"USB Flash Disk",
 		USB_SC_DEVICE, USB_PR_DEVICE, NULL,
 		US_FL_IGNORE_RESIDUE ),
-
 
 /* Patch by Stephan Walter <stephan.walter@epfl.ch>
  * I don't know why, but it works... */

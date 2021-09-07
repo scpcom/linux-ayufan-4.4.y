@@ -74,7 +74,6 @@ int cbe_cpufreq_set_pmode_pmi(int cpu, unsigned int pmode)
 }
 EXPORT_SYMBOL_GPL(cbe_cpufreq_set_pmode_pmi);
 
-
 static void cbe_cpufreq_handle_pmi(pmi_message_t pmi_msg)
 {
 	u8 node, slow_mode;
@@ -127,8 +126,6 @@ static struct pmi_handler cbe_pmi_handler = {
 	.type			= PMI_TYPE_FREQ_CHANGE,
 	.handle_pmi_message	= cbe_cpufreq_handle_pmi,
 };
-
-
 
 static int __init cbe_cpufreq_pmi_init(void)
 {

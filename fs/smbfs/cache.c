@@ -115,7 +115,6 @@ out_unlock:
 	return dent;
 }
 
-
 /*
  * Create dentry/inode for this file and add it to the dircache.
  */

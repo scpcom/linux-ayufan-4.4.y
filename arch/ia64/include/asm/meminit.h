@@ -7,7 +7,6 @@
  * for more details.
  */
 
-
 /*
  * Entries defined so far:
  * 	- boot param structure itself

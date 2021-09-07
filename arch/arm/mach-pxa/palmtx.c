@@ -565,7 +565,6 @@ static void __init palmtx_udc_init(void)
 	}
 }
 
-
 static void __init palmtx_init(void)
 {
 	pxa2xx_mfp_config(ARRAY_AND_SIZE(palmtx_pin_config));

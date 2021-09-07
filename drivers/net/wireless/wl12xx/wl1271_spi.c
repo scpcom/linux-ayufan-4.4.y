@@ -40,7 +40,6 @@ static int wl1271_translate_mem_addr(struct wl1271 *wl, int addr)
 	return addr - wl->physical_mem_addr + wl->virtual_mem_addr;
 }
 
-
 void wl1271_spi_reset(struct wl1271 *wl)
 {
 	u8 *cmd;

@@ -7,4 +7,3 @@ extern int serial_gt(u32, u32);
 extern int serial_gte(u32, u32);
 
 #endif   /*** ISCSI_SERIAL_H ***/
-

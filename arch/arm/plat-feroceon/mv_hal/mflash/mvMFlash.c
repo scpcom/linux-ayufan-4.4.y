@@ -220,7 +220,6 @@ MV_STATUS mvMFlashInit (MV_MFLASH_INFO *pFlash)
 	return MV_OK;
 }
 
-
 /*******************************************************************************
 * mvMFlashChipErase - Erase the whole flash
 *
@@ -325,7 +324,6 @@ MV_STATUS mvMFlashInfErase (MV_MFLASH_INFO *pFlash)
     mvOsPrintf("%s ERROR: Invalid interface mode!\n", __FUNCTION__);
     return MV_BAD_PARAM;
 }
-
 
 /*******************************************************************************
 * mvMFlashSecErase - Erase the single sector of the main flash region 
@@ -515,8 +513,6 @@ static MV_STATUS mvMFlash64bInfWr (MV_MFLASH_INFO *pFlash, MV_U32 offset,
     return MV_OK;
 }
 
-
-
 /*******************************************************************************
 * mvMFlashBlockByRegionWr - Write a buffer with a custom length and allignment
 *                           based on the region (main or information)
@@ -694,7 +690,6 @@ MV_STATUS mvMFlashBlockWr(MV_MFLASH_INFO *pFlash, MV_U32 offset,
 
     return mvMFlashBlockByRegionWr(pFlash, offset, blockSize, pBlock, verify, MV_TRUE /* main region */);
 }
-
 
 /*******************************************************************************
 * mvMFlashInfBlockWr - Write a buffer with a custom length and allignment to 
@@ -1163,7 +1158,6 @@ MV_STATUS mvMFlashSectorSizeSet (MV_MFLASH_INFO *pFlash, MV_U32 secSize)
     return MV_OK;
 }
 
-
 /*******************************************************************************
 * mvMFlashPrefetchSet - Set the Prefetch mode enable/disable
 *
@@ -1315,6 +1309,3 @@ MV_STATUS mvMFlashReset(MV_MFLASH_INFO *pFlash)
 
 	return MV_OK;
 }
-
-
-

@@ -611,7 +611,6 @@ static int sis190_rx_interrupt(struct net_device *dev,
 				continue;
 			}
 
-
 			if (sis190_try_rx_copy(tp, &skb, pkt_size, addr)) {
 				pci_dma_sync_single_for_device(pdev, addr,
 					tp->rx_buf_sz, PCI_DMA_FROMDEVICE);
@@ -1530,7 +1529,6 @@ static void sis190_tx_timeout(struct net_device *dev)
 	tmp8 = SIS_R8(TxControl);
 	if (tmp8 & CmdTxEnb)
 		SIS_W8(TxControl, tmp8 & ~CmdTxEnb);
-
 
 	net_tx_err(tp, KERN_INFO "%s: Transmit timeout, status %08x %08x.\n",
 		   dev->name, SIS_R32(TxControl), SIS_R32(TxSts));

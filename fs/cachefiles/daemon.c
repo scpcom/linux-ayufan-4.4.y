@@ -78,7 +78,6 @@ static const struct cachefiles_daemon_cmd cachefiles_daemon_cmds[] = {
 	{ "",		NULL				}
 };
 
-
 /*
  * do various checks
  */

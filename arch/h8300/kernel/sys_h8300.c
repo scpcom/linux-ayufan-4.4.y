@@ -205,5 +205,3 @@ int kernel_execve(const char *filename, char *const argv[], char *const envp[])
 			: "cc", "memory");
 	return res;
 }
-
-

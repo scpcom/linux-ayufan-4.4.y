@@ -35,7 +35,6 @@
 
 #include <prom.h>
 
-
 static BCSR * const bcsr = (BCSR *)BCSR_KSEG1_ADDR;
 
 const char *get_system_type(void)

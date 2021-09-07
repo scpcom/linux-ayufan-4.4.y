@@ -558,7 +558,6 @@ static int __devinit snd_sc6000_probe(struct device *devptr, unsigned int dev)
 	char __iomem **vport;
 	char __iomem *vmss_port;
 
-
 	err = snd_card_create(index[dev], id[dev], THIS_MODULE, sizeof(vport),
 				&card);
 	if (err < 0)
@@ -713,7 +712,6 @@ static struct isa_driver snd_sc6000_driver = {
 		.name	= DRV_NAME,
 	},
 };
-
 
 static int __init alsa_card_sc6000_init(void)
 {

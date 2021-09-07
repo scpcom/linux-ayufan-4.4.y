@@ -185,7 +185,6 @@ typedef struct
 	unsigned char samplePeriod;
 } mv_tdm_params_t;
 
-
 /* APIs */
 MV_STATUS mvTdmInit(mv_tdm_params_t* tdmParams);
 MV_VOID mvTdmRelease(MV_VOID);

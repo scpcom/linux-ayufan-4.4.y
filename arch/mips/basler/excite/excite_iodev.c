@@ -30,8 +30,6 @@
 
 #include "excite_iodev.h"
 
-
-
 static const struct resource *iodev_get_resource(struct platform_device *, const char *, unsigned int);
 static int __init iodev_probe(struct platform_device *);
 static int __exit iodev_remove(struct platform_device *);
@@ -41,13 +39,9 @@ static ssize_t iodev_read(struct file *, char __user *, size_t s, loff_t *);
 static unsigned int iodev_poll(struct file *, struct poll_table_struct *);
 static irqreturn_t iodev_irqhdl(int, void *);
 
-
-
 static const char iodev_name[] = "iodev";
 static unsigned int iodev_irq;
 static DECLARE_WAIT_QUEUE_HEAD(wq);
-
-
 
 static const struct file_operations fops =
 {
@@ -74,8 +68,6 @@ static struct platform_driver iodev_driver = {
 	.remove		= __devexit_p(iodev_remove),
 };
 
-
-
 static const struct resource *
 iodev_get_resource(struct platform_device *pdv, const char *name,
 		     unsigned int type)
@@ -85,8 +77,6 @@ iodev_get_resource(struct platform_device *pdv, const char *name,
 		return NULL;
 	return platform_get_resource_byname(pdv, type, buf);
 }
-
-
 
 /* No hotplugging on the platform bus - use __init */
 static int __init iodev_probe(struct platform_device *dev)
@@ -100,8 +90,6 @@ static int __init iodev_probe(struct platform_device *dev)
 	iodev_irq = ri->start;
 	return misc_register(&miscdev);
 }
-
-
 
 static int __exit iodev_remove(struct platform_device *dev)
 {
@@ -124,9 +112,6 @@ static int iodev_release(struct inode *i, struct file *f)
 	return 0;
 }
 
-
-
-
 static ssize_t
 iodev_read(struct file *f, char __user *d, size_t s, loff_t *o)
 {
@@ -140,7 +125,6 @@ iodev_read(struct file *f, char __user *d, size_t s, loff_t *o)
 	finish_wait(&wq, &w);
 	return ret;
 }
-
 
 static unsigned int iodev_poll(struct file *f, struct poll_table_struct *p)
 {
@@ -160,8 +144,6 @@ static int __init iodev_init_module(void)
 	return platform_driver_register(&iodev_driver);
 }
 
-
-
 static void __exit iodev_cleanup_module(void)
 {
 	platform_driver_unregister(&iodev_driver);
@@ -169,8 +151,6 @@ static void __exit iodev_cleanup_module(void)
 
 module_init(iodev_init_module);
 module_exit(iodev_cleanup_module);
-
-
 
 MODULE_AUTHOR("Thomas Koeller <thomas.koeller@baslerweb.com>");
 MODULE_DESCRIPTION("Basler eXcite i/o interrupt handler");

@@ -170,7 +170,6 @@ Wb35Reg_Write(  struct hw_data * pHwData,  u16 RegisterNo,  u32 RegisterValue )
 	struct wb35_reg_queue *reg_queue = NULL;
 	u16		UrbSize;
 
-
 	// Module shutdown
 	if (pHwData->SurpriseRemove)
 		return false;
@@ -383,7 +382,6 @@ Wb35Reg_Read(struct hw_data * pHwData, u16 RegisterNo,  u32 * pRegisterValue )
 	}
 }
 
-
 void
 Wb35Reg_EP0VM_start(  struct hw_data * pHwData )
 {
@@ -405,7 +403,6 @@ Wb35Reg_EP0VM(struct hw_data * pHwData )
 	u32 *		pBuffer;
 	int			ret = -1;
 	struct wb35_reg_queue *reg_queue;
-
 
 	if (reg->SyncIoPause)
 		goto cleanup;
@@ -453,14 +450,12 @@ Wb35Reg_EP0VM(struct hw_data * pHwData )
 	atomic_dec(&reg->RegFireCount);
 }
 
-
 void
 Wb35Reg_EP0VM_complete(struct urb *urb)
 {
 	struct hw_data *  pHwData = (struct hw_data *)urb->context;
 	struct wb35_reg *reg = &pHwData->reg;
 	struct wb35_reg_queue *reg_queue;
-
 
 	// Variable setting
 	reg->EP0vm_state = VM_COMPLETED;
@@ -497,14 +492,12 @@ Wb35Reg_EP0VM_complete(struct urb *urb)
 	usb_free_urb(urb);
 }
 
-
 void
 Wb35Reg_destroy(struct hw_data * pHwData)
 {
 	struct wb35_reg *reg = &pHwData->reg;
 	struct urb	*urb;
 	struct wb35_reg_queue *reg_queue;
-
 
 	Uxx_power_off_procedure(pHwData);
 
@@ -681,7 +674,6 @@ CardComputeCrc(u8 * Buffer, u32 Length)
     return Crc;
 }
 
-
 //==================================================================
 // BitReverse --
 //   Reverse the bits in the input argument, dwData, which is
@@ -742,5 +734,3 @@ void Wb35Reg_phy_calibration(  struct hw_data * pHwData )
 		Wb35Reg_WriteSync( pHwData, 0x1054, BB54 );
 	}
 }
-
-

@@ -29,7 +29,6 @@
 #include "pc.h"
 #include "man_defs.h"
 
-
 extern void diva_mnt_internal_dprintf (dword drv_id, dword type, char* p, ...);
 
 #define MODEM_PARSE_ENTRIES  16 /* amount of variables of interest */
@@ -150,7 +149,6 @@ diva_strace_library_interface_t* DivaSTraceLibraryCreateInstance (int Adapter,
 	pLib->instance.DivaSTraceGetDLayer2Statistics      = \
 																			SuperTraceGetDLayer2Statistics;
 	pLib->instance.DivaSTraceClearCall                 = SuperTraceClearCall;
-
 
 	if (user_proc) {
 		pLib->user_proc_table.user_context      = user_proc->user_context;
@@ -1846,7 +1844,6 @@ static void diva_create_parse_table (diva_strace_context_t* pLib) {
 	pLib->parse_table[pLib->cur_parse_entry++].variable = \
 																		&pLib->InterfaceStat.d2.R_Errors;
 
-
 	pLib->statistic_parse_last  = pLib->cur_parse_entry - 1;
 }
 
@@ -2192,4 +2189,3 @@ dword DivaSTraceGetMemotyRequirement (int channels) {
   return (sizeof(diva_strace_context_t) + \
           (parse_entries * sizeof(diva_strace_path2action_t)));
 }
-

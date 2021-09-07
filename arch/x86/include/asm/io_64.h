@@ -1,7 +1,6 @@
 #ifndef _ASM_X86_IO_64_H
 #define _ASM_X86_IO_64_H
 
-
 /*
  * This file contains the definitions for the x86 IO instructions
  * inb/inw/inl/outb/outw/outl and the "string versions" of the same

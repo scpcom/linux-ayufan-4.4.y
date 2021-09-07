@@ -48,7 +48,6 @@
   * A lot code is taken from net/sched/estimator.c
  */
 
-
 static void estimation_timer(unsigned long arg);
 
 static LIST_HEAD(est_list);

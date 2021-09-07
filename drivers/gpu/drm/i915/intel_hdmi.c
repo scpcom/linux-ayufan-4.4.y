@@ -225,7 +225,6 @@ static const struct drm_encoder_funcs intel_hdmi_enc_funcs = {
 	.destroy = intel_hdmi_enc_destroy,
 };
 
-
 void intel_hdmi_init(struct drm_device *dev, int sdvox_reg)
 {
 	struct drm_i915_private *dev_priv = dev->dev_private;

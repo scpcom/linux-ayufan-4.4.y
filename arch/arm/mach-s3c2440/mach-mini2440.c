@@ -69,7 +69,6 @@ static struct map_desc mini2440_iodesc[] __initdata = {
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
 #define UFCON S3C2410_UFCON_RXTRIG8 | S3C2410_UFCON_FIFOMODE
 
-
 static struct s3c2410_uartcfg mini2440_uartcfgs[] __initdata = {
 	[0] = {
 		.hwport	     = 0,
@@ -117,7 +116,6 @@ static void mini2440_udc_pullup(enum s3c2410_udc_cmd_e cmd)
 static struct s3c2410_udc_mach_info mini2440_udc_cfg __initdata = {
 	.udc_command		= mini2440_udc_pullup,
 };
-
 
 /* LCD timing and setup */
 
@@ -688,7 +686,6 @@ static void __init mini2440_init(void)
 		platform_add_devices(features.optional, features.count);
 
 }
-
 
 MACHINE_START(MINI2440, "MINI2440")
 	/* Maintainer: Michel Pollet <buserror@gmail.com> */

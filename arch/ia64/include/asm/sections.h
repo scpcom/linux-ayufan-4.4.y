@@ -37,6 +37,4 @@ static inline void *dereference_function_descriptor(void *ptr)
 	return ptr;
 }
 
-
 #endif /* _ASM_IA64_SECTIONS_H */
-

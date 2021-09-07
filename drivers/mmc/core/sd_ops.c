@@ -347,4 +347,3 @@ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
 
 	return 0;
 }
-

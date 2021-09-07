@@ -73,7 +73,6 @@ static int __pmu_backlight_update_status(struct backlight_device *bd)
 	struct adb_request req;
 	int level = bd->props.brightness;
 
-
 	if (bd->props.power != FB_BLANK_UNBLANK ||
 	    bd->props.fb_blank != FB_BLANK_UNBLANK)
 		level = 0;
@@ -108,7 +107,6 @@ static int pmu_backlight_update_status(struct backlight_device *bd)
 	spin_unlock_irqrestore(&pmu_backlight_lock, flags);
 	return rc;
 }
-
 
 static int pmu_backlight_get_brightness(struct backlight_device *bd)
 {

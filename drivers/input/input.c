@@ -758,7 +758,6 @@ static int input_attach_handler(struct input_dev *dev, struct input_handler *han
 	return error;
 }
 
-
 #ifdef CONFIG_PROC_FS
 
 static struct proc_dir_entry *proc_bus_input_dir;

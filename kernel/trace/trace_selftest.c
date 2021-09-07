@@ -248,7 +248,6 @@ trace_selftest_startup_function(struct tracer *trace, struct trace_array *tr)
 }
 #endif /* CONFIG_FUNCTION_TRACER */
 
-
 #ifdef CONFIG_FUNCTION_GRAPH_TRACER
 
 /* Maximum number of functions to trace before diagnosing a hang */
@@ -331,7 +330,6 @@ out:
 	return ret;
 }
 #endif /* CONFIG_FUNCTION_GRAPH_TRACER */
-
 
 #ifdef CONFIG_IRQSOFF_TRACER
 int
@@ -638,7 +636,6 @@ trace_selftest_startup_wakeup(struct tracer *trace, struct trace_array *tr)
 	ret = trace_test_buffer(tr, NULL);
 	if (!ret)
 		ret = trace_test_buffer(&max_tr, &count);
-
 
 	trace->reset(tr);
 	tracing_start();

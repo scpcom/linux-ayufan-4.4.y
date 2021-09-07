@@ -232,7 +232,6 @@ static inline void __init MP_ioapic_info(struct mpc_ioapic *m) {}
 static inline void __init MP_intsrc_info(struct mpc_intsrc *m) {}
 #endif /* CONFIG_X86_IO_APIC */
 
-
 static void __init MP_lintsrc_info(struct mpc_lintsrc *m)
 {
 	apic_printk(APIC_VERBOSE, "Lint: type %d, pol %d, trig %d, bus %02x,"
@@ -443,7 +442,6 @@ static void __init construct_default_ioirq_mptable(int mpc_default_type)
 	intsrc.dstirq = 0;	/* 8259A to INTIN0 */
 	MP_intsrc_info(&intsrc);
 }
-
 
 static void __init construct_ioapic_table(int mpc_default_type)
 {

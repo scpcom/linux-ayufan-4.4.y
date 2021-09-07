@@ -51,7 +51,6 @@ extern void putback_lru_page(struct page *page);
 extern void __free_pages_bootmem(struct page *page, unsigned int order);
 extern void prep_compound_page(struct page *page, unsigned long order);
 
-
 /*
  * function for dealing with page's order in buddy system.
  * zone->lock is already acquired when we use these.

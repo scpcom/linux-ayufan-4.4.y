@@ -17,14 +17,10 @@
 #ifndef BNX2X_LINK_H
 #define BNX2X_LINK_H
 
-
-
 /***********************************************************/
 /*                         Defines                         */
 /***********************************************************/
 #define DEFAULT_PHY_DEV_ADDR 3
-
-
 
 #define BNX2X_FLOW_CTRL_AUTO		PORT_FEATURE_FLOW_CONTROL_AUTO
 #define BNX2X_FLOW_CTRL_TX		PORT_FEATURE_FLOW_CONTROL_TX

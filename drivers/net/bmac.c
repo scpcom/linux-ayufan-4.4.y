@@ -214,7 +214,6 @@ void bmwrite(struct net_device *dev, unsigned long reg_offset, unsigned data )
 	out_le16((void __iomem *)dev->base_addr + reg_offset, data);
 }
 
-
 static inline
 unsigned short bmread(struct net_device *dev, unsigned long reg_offset )
 {
@@ -398,7 +397,6 @@ bmac_enable_interrupts(struct net_device *dev)
 	bmwrite(dev, INTDISABLE, EnableNormal);
 }
 #endif
-
 
 static void
 bmac_start_chip(struct net_device *dev)
@@ -639,7 +637,6 @@ bmac_init_rx_ring(struct bmac_data *bp)
 
 	return 1;
 }
-
 
 static int bmac_transmit_packet(struct sk_buff *skb, struct net_device *dev)
 {
@@ -1190,7 +1187,6 @@ bmac_verify_checksum(struct net_device *dev)
 	return 0;
 }
 
-
 static void
 bmac_get_station_address(struct net_device *dev, unsigned char *ea)
 {
@@ -1666,7 +1662,6 @@ static struct macio_driver bmac_driver =
 	.resume		= bmac_resume,
 #endif
 };
-
 
 static int __init bmac_init(void)
 {

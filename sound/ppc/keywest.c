@@ -18,7 +18,6 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-
 #include <linux/init.h>
 #include <linux/i2c.h>
 #include <linux/delay.h>
@@ -31,7 +30,6 @@
  * callback cannot pass a private data.
  */
 static struct pmac_keywest *keywest_ctx;
-
 
 static int keywest_probe(struct i2c_client *client,
 			 const struct i2c_device_id *id)
@@ -91,7 +89,6 @@ static int keywest_remove(struct i2c_client *client)
 
 	return 0;
 }
-
 
 static const struct i2c_device_id keywest_i2c_id[] = {
 	{ "keywest", 0 },

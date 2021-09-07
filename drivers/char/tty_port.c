@@ -55,7 +55,6 @@ void tty_port_free_xmit_buf(struct tty_port *port)
 }
 EXPORT_SYMBOL(tty_port_free_xmit_buf);
 
-
 /**
  *	tty_port_tty_get	-	get a tty reference
  *	@port: tty port

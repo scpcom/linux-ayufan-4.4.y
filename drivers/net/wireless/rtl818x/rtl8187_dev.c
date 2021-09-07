@@ -1372,7 +1372,6 @@ static int __devinit rtl8187_probe(struct usb_interface *intf,
 	priv->band.n_bitrates = ARRAY_SIZE(rtl818x_rates);
 	dev->wiphy->bands[IEEE80211_BAND_2GHZ] = &priv->band;
 
-
 	priv->mode = NL80211_IFTYPE_MONITOR;
 	dev->flags = IEEE80211_HW_HOST_BROADCAST_PS_BUFFERING |
 		     IEEE80211_HW_SIGNAL_DBM |

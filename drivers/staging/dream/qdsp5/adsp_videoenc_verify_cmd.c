@@ -30,7 +30,6 @@
 #include <mach/qdsp5/qdsp5venccmdi.h>
 #include "adsp.h"
 
-
 static unsigned short x_dimension, y_dimension;
 
 static inline void *high_low_short_to_ptr(unsigned short high,
@@ -218,7 +217,6 @@ static int verify_venc_cmd(struct msm_adsp_module *module,
 	return 0;
 }
 
-
 int adsp_videoenc_verify_cmd(struct msm_adsp_module *module,
 			 unsigned int queue_id, void *cmd_data,
 			 size_t cmd_size)
@@ -232,4 +230,3 @@ int adsp_videoenc_verify_cmd(struct msm_adsp_module *module,
 		return 0;
 	}
 }
-

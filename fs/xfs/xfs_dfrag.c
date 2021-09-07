@@ -402,7 +402,6 @@ xfs_swap_extents(
 		break;
 	}
 
-
 	IHOLD(ip);
 	xfs_trans_ijoin(tp, ip, XFS_ILOCK_EXCL | XFS_IOLOCK_EXCL);
 

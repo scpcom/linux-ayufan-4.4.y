@@ -40,7 +40,6 @@
 
 #include "mlme_ex_def.h"
 
-
 VOID StateMachineInitEx(
 	IN STATE_MACHINE_EX *S,
 	IN STATE_MACHINE_FUNC_EX Trans[],

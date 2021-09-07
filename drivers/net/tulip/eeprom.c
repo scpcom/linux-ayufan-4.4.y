@@ -17,8 +17,6 @@
 #include <linux/init.h>
 #include <asm/unaligned.h>
 
-
-
 /* Serial EEPROM section. */
 /* The main routine to parse the very complicated SROM structure.
    Search www.digital.com for "21X4 SROM" to get details.
@@ -79,7 +77,6 @@ static struct eeprom_fixup eeprom_fixups[] __devinitdata = {
   }},
   {NULL}};
 
-
 static const char *block_name[] __devinitdata = {
 	"21140 non-MII",
 	"21140 MII PHY",
@@ -88,7 +85,6 @@ static const char *block_name[] __devinitdata = {
 	"21143 SYM PHY",
 	"21143 reset method"
 };
-
 
 /**
  * tulip_build_fake_mediatable - Build a fake mediatable entry.
@@ -374,4 +370,3 @@ int __devinit tulip_read_eeprom(struct net_device *dev, int location, int addr_l
 	iowrite32(EE_ENB & ~EE_CS, ee_addr);
 	return (tp->flags & HAS_SWAPPED_SEEPROM) ? swab16(retval) : retval;
 }
-

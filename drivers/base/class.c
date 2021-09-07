@@ -76,7 +76,6 @@ static struct kobj_type class_ktype = {
 /* Hotplug events for classes go to the class class_subsys */
 static struct kset *class_kset;
 
-
 int class_create_file(struct class *cls, const struct class_attribute *attr)
 {
 	int error;

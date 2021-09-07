@@ -81,7 +81,6 @@
 
 #include <linux/pci_ids.h>
 
-
 /* ThinkPad CMOS commands */
 #define TP_CMOS_VOLUME_DOWN	0
 #define TP_CMOS_VOLUME_UP	1
@@ -237,7 +236,6 @@ enum tpacpi_hkey_event_t {
 #define enabled(status, bit) ((status) & (1 << (bit)) ? "enabled" : "disabled")
 #define strlencmp(a, b) (strncmp((a), (b), strlen(b)))
 
-
 /****************************************************************************
  * Driver-wide structs and misc. variables
  */
@@ -366,7 +364,6 @@ static int dbg_uwbemul;
 static int tpacpi_uwb_emulstate;
 #endif
 
-
 /*************************************************************************
  *  Debugging helpers
  */
@@ -466,7 +463,6 @@ static unsigned long __init tpacpi_check_quirks(
 	return 0;
 }
 
-
 /****************************************************************************
  ****************************************************************************
  *
@@ -516,7 +512,6 @@ TPACPI_HANDLE(vid, root, "\\_SB.PCI.AGP.VGA",	/* 570 */
 	   "\\_SB.PCI0.VID",	/* A21e, G4x, R50e, X30, X40 */
 	   "\\_SB.PCI0.AGP.VID",	/* all others */
 	   );				/* R30, R31 */
-
 
 /*************************************************************************
  * ACPI helpers
@@ -769,7 +764,6 @@ static int __init register_tpacpi_subdriver(struct ibm_struct *ibm)
 	return rc;
 }
 
-
 /****************************************************************************
  ****************************************************************************
  *
@@ -849,7 +843,6 @@ static char *next_cmd(char **cmds)
 	*cmds = end + 1;
 	return start;
 }
-
 
 /****************************************************************************
  ****************************************************************************
@@ -5485,7 +5478,6 @@ enum { /* TPACPI_THERMAL_TPEC_* */
 	TPACPI_THERMAL_SENSOR_NA = -128000, /* Sensor not available */
 };
 
-
 #define TPACPI_MAX_THERMAL_SENSORS 16	/* Max thermal sensors supported */
 struct ibm_thermal_sensors_struct {
 	s32 temp[TPACPI_MAX_THERMAL_SENSORS];
@@ -5986,7 +5978,6 @@ static void tpacpi_brightness_checkpoint_nvram(void)
 unlock:
 	mutex_unlock(&brightness_mutex);
 }
-
 
 /* call with brightness_mutex held! */
 static int tpacpi_brightness_get_raw(int *status)
@@ -7766,8 +7757,6 @@ static void tpacpi_driver_event(const unsigned int hkey_event)
 	}
 }
 
-
-
 static void hotkey_driver_event(const unsigned int scancode)
 {
 	tpacpi_driver_event(TP_HKEY_EV_HOTKEY_BASE + scancode);
@@ -8063,7 +8052,6 @@ static int __init probe_for_thinkpad(void)
 	return 0;
 }
 
-
 /* Module init, exit, parameters */
 
 static struct ibm_init_struct ibms_init[] __initdata = {
@@ -8284,7 +8272,6 @@ static void thinkpad_acpi_module_exit(void)
 	kfree(thinkpad_id.model_str);
 }
 
-
 static int __init thinkpad_acpi_module_init(void)
 {
 	int ret, i;
@@ -8360,7 +8347,6 @@ static int __init thinkpad_acpi_module_init(void)
 		return ret;
 	}
 	tp_features.sensors_pdrv_attrs_registered = 1;
-
 
 	/* Device initialization */
 	tpacpi_pdev = platform_device_register_simple(TPACPI_DRVR_NAME, -1,

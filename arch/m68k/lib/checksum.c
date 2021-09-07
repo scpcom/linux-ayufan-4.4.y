@@ -127,7 +127,6 @@ __wsum csum_partial(const void *buff, int len, __wsum sum)
 
 EXPORT_SYMBOL(csum_partial);
 
-
 /*
  * copy from user space while checksumming, with exception handling.
  */
@@ -321,7 +320,6 @@ csum_partial_copy_from_user(const void __user *src, void *dst,
 }
 
 EXPORT_SYMBOL(csum_partial_copy_from_user);
-
 
 /*
  * copy from kernel space while checksumming, otherwise like csum_partial

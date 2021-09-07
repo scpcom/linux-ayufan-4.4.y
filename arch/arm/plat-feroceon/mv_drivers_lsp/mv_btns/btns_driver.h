@@ -25,13 +25,11 @@ typedef enum
 	BTN_CHANGE /* Both Push & Release will be monitored */
 } BTN_OP;
 
-
 typedef struct {
         unsigned int btn_id;
         unsigned int btn_push_cntr;
         unsigned int btn_release_cntr;
 } BTN, *BTN_PTR;
-
 
 typedef struct {
 	unsigned int btns_number;
@@ -40,7 +38,6 @@ typedef struct {
 
 #define MV_BTNS_NAME       "BTNS"
 
-
 struct btn_data {
         unsigned int    gpp_id;
         unsigned int    default_gpp_val;
@@ -48,13 +45,10 @@ struct btn_data {
         char            *btn_name;
 };
 
-
 /*
  *  done against open of /dev/gpp, to get a cloned descriptor.
  */
 #define CIOCWAIT_P       _IOWR('c', 150, BTNS_STS)
 #define CIOCNOWAIT_P     _IOWR('c', 151, BTNS_STS)
 
-
 #endif /* _BTNS_DRIVER_H_ */
-

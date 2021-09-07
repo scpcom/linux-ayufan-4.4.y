@@ -131,7 +131,6 @@ out:
 	return result;
 }
 
-
 int option_ms_init(struct us_data *us)
 {
 	int result;
@@ -165,4 +164,3 @@ int option_ms_init(struct us_data *us)
 
 	return 0;
 }
-

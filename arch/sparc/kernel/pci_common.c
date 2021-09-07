@@ -283,7 +283,6 @@ static int sun4v_read_pci_cfg(struct pci_bus *bus_dev, unsigned int devfn,
 		break;
 	};
 
-
 	return PCIBIOS_SUCCESSFUL;
 }
 

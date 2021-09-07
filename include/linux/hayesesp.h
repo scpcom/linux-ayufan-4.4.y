@@ -109,6 +109,4 @@ struct esp_pio_buffer {
 
 #endif /* __KERNEL__ */
 
-
 #endif /* ESP_H */
-

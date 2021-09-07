@@ -508,4 +508,3 @@ islpci_mgt_transaction(struct net_device *ndev,
 	mutex_unlock(&priv->mgmt_lock);
 	return err;
 }
-

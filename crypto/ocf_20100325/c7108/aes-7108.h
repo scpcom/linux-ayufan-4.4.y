@@ -86,7 +86,6 @@
 #define C7108_AES_GO                  (1<<14) /* Run */
 #define C7108_AES_OP_DONE             (1<<15) /* Set when complete */
 
-
 /* Expanded key registers */
 #define C7108_AES_EKEY0_LO            (0x0080)
 #define C7108_AES_EKEY0_HI            (0x0084)
@@ -128,7 +127,5 @@ struct cipher_7108 {
 	} u;
 	struct cipher_7108	*next;
 };
-
-
 
 #endif /* __C7108_AES_7108_H__ */

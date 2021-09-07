@@ -56,7 +56,6 @@ struct map_desc  MEM_TABLE[] =	{
   { CRYPT_ENG_BASE, 		__phys_to_pfn(CRYPT_ENG_BASE), 	CRYPT_ENG_SIZE, 	MT_DEVICE}
 };
 
-
 MV_CPU_DEC_WIN SYSMAP_DB_88F5082_BP[] = {
   	 /* base low        base high    size       	WinNum     enable */
 	{{SDRAM_CS0_BASE ,    0,      SDRAM_CS0_SIZE } ,0xFFFFFFFF,DIS},
@@ -91,5 +90,3 @@ MV_CPU_DEC_WIN SYSMAP_RD_88F5082[] = {
 	{{CRYPT_ENG_BASE,     0,      CRYPT_ENG_SIZE}  ,0x7  	  ,EN},
 	{{TBL_TERM,TBL_TERM, TBL_TERM} ,TBL_TERM  ,TBL_TERM}
 };
-
-

@@ -111,10 +111,8 @@ static struct pwrdm_dep cam_gfx_sleepdeps[] = {
 	{ NULL },
 };
 
-
 #include "powerdomains24xx.h"
 #include "powerdomains34xx.h"
-
 
 /*
  * OMAP2/3 common powerdomains
@@ -148,8 +146,6 @@ static struct powerdomain wkup_pwrdm = {
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_OMAP24XX | CHIP_IS_OMAP3430),
 	.dep_bit	= OMAP_EN_WKUP_SHIFT,
 };
-
-
 
 /* As powerdomains are added or removed above, this list must also be changed */
 static struct powerdomain *powerdomains_omap[] __initdata = {
@@ -188,6 +184,5 @@ static struct powerdomain *powerdomains_omap[] __initdata = {
 
 	NULL
 };
-
 
 #endif

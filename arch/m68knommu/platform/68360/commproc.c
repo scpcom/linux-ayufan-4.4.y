@@ -46,7 +46,6 @@
 extern void *_quicc_base;
 extern unsigned int system_clock;
 
-
 static uint dp_alloc_base;	/* Starting offset in DP ram */
 static uint dp_alloc_top;	/* Max offset + 1 */
 
@@ -60,7 +59,6 @@ static	void	*host_end;	    /* end + 1 */
 QUICC  *pquicc;
 /* QUICC  *quicc_dpram; */ /* mleslie - temporary; use extern pquicc elsewhere instead */
 
-
 /* CPM interrupt vector functions. */
 struct	cpm_action {
 	void	(*handler)(void *);
@@ -73,9 +71,6 @@ static	void	cpm_error_interrupt(void *);
 /* prototypes: */
 void cpm_install_handler(int vec, void (*handler)(), void *dev_id);
 void m360_cpm_reset(void);
-
-
-
 
 void m360_cpm_reset()
 {
@@ -95,12 +90,10 @@ void m360_cpm_reset()
 	 */
 	pquicc->sdma_sdcr = 0x0740;
 
-
 	/* Claim the DP memory for our use.
 	 */
 	dp_alloc_base = CPM_DATAONLY_BASE;
 	dp_alloc_top = dp_alloc_base + CPM_DATAONLY_SIZE;
-
 
 	/* Set the host page for allocation.
 	 */
@@ -115,7 +108,6 @@ void m360_cpm_reset()
 	*/
 /* 	cpmp = (cpm360_t *)commproc; */
 }
-
 
 /* This is called during init_IRQ.  We used to do it above, but this
  * was too early since init_IRQ was not yet called.
@@ -137,7 +129,6 @@ cpm_interrupt_init(void)
 	/* mask all CPM interrupts from reaching the cpu32 core: */
 	pquicc->intr_cimr = 0;
 
-
 	/* mles - If I understand correctly, the 360 just pops over to the CPM
 	 * specific vector, obviating the necessity to vector through the IRQ
 	 * whose priority the CPM is set to. This needs a closer look, though.
@@ -155,8 +146,6 @@ cpm_interrupt_init(void)
 	/* master CPM interrupt enable */
 	/* pquicc->intr_cicr |= CICR_IEN; */ /* no such animal for 360 */
 }
-
-
 
 /* CPM interrupt controller interrupt.
 */
@@ -179,7 +168,6 @@ cpm_interrupt(int irq, void * dev, struct pt_regs * regs)
 	((volatile immap_t *)IMAP_ADDR)->im_cpic.cpic_civr = 1;
 	vec = ((volatile immap_t *)IMAP_ADDR)->im_cpic.cpic_civr;
 	vec >>= 11;
-
 
 	if (cpm_vecs[vec].handler != 0)
 		(*cpm_vecs[vec].handler)(cpm_vecs[vec].dev_id);
@@ -234,9 +222,6 @@ cpm_free_handler(int vec)
 	pquicc->intr_cimr &= ~(1 << vec);
 }
 
-
-
-
 /* Allocate some memory from the dual ported ram.  We may want to
  * enforce alignment restrictions, but right now everyone is a good
  * citizen.
@@ -254,7 +239,6 @@ m360_cpm_dpalloc(uint size)
 
         return(retloc);
 }
-
 
 #if 0 /* mleslie - for now these are simply kmalloc'd */
 /* We also own one page of host buffer space for the allocation of
@@ -274,7 +258,6 @@ m360_cpm_hostalloc(uint size)
 	return(retloc);
 }
 #endif
-
 
 /* Set a baud rate generator.  This needs lots of work.  There are
  * four BRGs, any of which can be wired to any channel.
@@ -297,7 +280,6 @@ m360_cpm_setbrg(uint brg, uint rate)
 	bp += brg;
 	*bp = ((BRG_UART_CLK / rate - 1) << 1) | CPM_BRG_EN;
 }
-
 
 /*
  * Local variables:

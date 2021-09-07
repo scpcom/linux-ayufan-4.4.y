@@ -136,7 +136,6 @@ MV_BOARD_INFO db88f6082BpInfo = {
 	0x1						/* gppPolarityVal */
 };
 
-
 #define DB_88F6082LBP_BOARD_PCI_IF_NUM		0x0
 #define DB_88F6082LBP_BOARD_TWSI_DEF_NUM	0x1
 #define DB_88F6082LBP_BOARD_MAC_INFO_NUM	0x2
@@ -210,7 +209,6 @@ MV_BOARD_INFO db88f6082LBpInfo = {
 	DB_88F6082L_BP_OE_VAL,				/* gppOutVal */
 	0x1						/* gppPolarityVal */
 };
-
 
 #define RD_88F6082NAS_BOARD_PCI_IF_NUM		0x0
 #define RD_88F6082NAS_BOARD_TWSI_DEF_NUM	0x1
@@ -288,7 +286,6 @@ MV_BOARD_INFO rd88f6082NasInfo = {
 	0x0						/* gppPolarityVal */
 };
 
-
 #define RD_88F6082MICRO_DAS_NAS_BOARD_PCI_IF_NUM	0x0
 #define RD_88F6082MICRO_DAS_NAS_BOARD_TWSI_DEF_NUM	0x1
 #define RD_88F6082MICRO_DAS_NAS_BOARD_MAC_INFO_NUM	0x1
@@ -325,7 +322,6 @@ MV_BOARD_MPP_INFO	rd88f6082uDasNasInfoBoardMppConfigValue[] =
 	N_A,							/* mpp16_23 */
 	N_A}}							/* mppDev */						
 	};
-
 
 MV_BOARD_INFO rd88f6082uDasNasInfo = {
 	"RD-88F6082-MICRO-DAS-NAS",				/* boardName[MAX_BOARD_NAME_LEN] */
@@ -434,8 +430,6 @@ MV_BOARD_INFO*	boardInfoTbl[] = 	{&db88f6082BpInfo,
 					 &rd88f6082uDasNasInfo,
 					 &rd88f6082Dx243Info
 					};
-
-
 
 #define	BOARD_ID_BASE				BOARD_ID_88F6082_BASE
 #define MV_MAX_BOARD_ID				BOARD_ID_88F6082_MAX

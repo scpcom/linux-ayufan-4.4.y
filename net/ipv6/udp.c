@@ -1311,7 +1311,6 @@ static struct inet_protosw udpv6_protosw = {
 	.flags =     INET_PROTOSW_PERMANENT,
 };
 
-
 int __init udpv6_init(void)
 {
 	int ret;

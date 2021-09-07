@@ -27,7 +27,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
 #include <linux/module.h>
 #include <linux/version.h>
 #include <linux/init.h>
@@ -40,13 +39,11 @@
 #include <media/v4l2-ioctl.h>
 #include <media/videobuf-vmalloc.h>
 
-
 /* Version Information */
 #define DRIVER_VERSION "v0.73"
 #define ZR364XX_VERSION_CODE KERNEL_VERSION(0, 7, 3)
 #define DRIVER_AUTHOR "Antoine Jacquet, http://royale.zerezo.com/"
 #define DRIVER_DESC "Zoran 364xx"
-
 
 /* Camera */
 #define FRAMES 1
@@ -79,18 +76,15 @@
 #define METHOD1 1
 #define METHOD2 2
 
-
 /* Module parameters */
 static int debug;
 static int mode;
-
 
 /* Module parameters interface */
 module_param(debug, int, 0644);
 MODULE_PARM_DESC(debug, "Debug level");
 module_param(mode, int, 0644);
 MODULE_PARM_DESC(mode, "0 = 320x240, 1 = 160x120, 2 = 640x480");
-
 
 /* Devices supported by this driver
  * .driver_info contains the init method used by the camera */
@@ -238,7 +232,6 @@ static int send_control_msg(struct usb_device *udev, u8 request, u16 value,
 	return status;
 }
 
-
 /* Control messages sent to the camera to initialize it
  * and launch the capture */
 typedef struct {
@@ -302,7 +295,6 @@ static message m2[] = {
 
 /* init table */
 static message *init[3] = { m0, m1, m2 };
-
 
 /* JPEG static data in header (Huffman table, etc) */
 static unsigned char header1[] = {
@@ -1246,7 +1238,6 @@ static int zr364xx_vidioc_streamoff(struct file *file, void *priv,
 	return 0;
 }
 
-
 /* open the camera */
 static int zr364xx_open(struct file *file)
 {
@@ -1386,7 +1377,6 @@ out:
 	return err;
 }
 
-
 static int zr364xx_mmap(struct file *file, struct vm_area_struct *vma)
 {
 	struct zr364xx_camera *cam = video_drvdata(file);
@@ -1456,8 +1446,6 @@ static struct video_device zr364xx_template = {
 	.release = video_device_release,
 	.minor = -1,
 };
-
-
 
 /*******************/
 /* USB integration */
@@ -1639,7 +1627,6 @@ static int zr364xx_probe(struct usb_interface *intf,
 	return 0;
 }
 
-
 static void zr364xx_disconnect(struct usb_interface *intf)
 {
 	struct zr364xx_camera *cam = usb_get_intfdata(intf);
@@ -1648,8 +1635,6 @@ static void zr364xx_disconnect(struct usb_interface *intf)
 	dev_info(&intf->dev, DRIVER_DESC " webcam unplugged\n");
 	zr364xx_destroy(cam);
 }
-
-
 
 /**********************/
 /* Module integration */
@@ -1662,7 +1647,6 @@ static struct usb_driver zr364xx_driver = {
 	.id_table = device_table
 };
 
-
 static int __init zr364xx_init(void)
 {
 	int retval;
@@ -1674,13 +1658,11 @@ static int __init zr364xx_init(void)
 	return retval;
 }
 
-
 static void __exit zr364xx_exit(void)
 {
 	printk(KERN_INFO KBUILD_MODNAME ": " DRIVER_DESC " module unloaded\n");
 	usb_deregister(&zr364xx_driver);
 }
-
 
 module_init(zr364xx_init);
 module_exit(zr364xx_exit);

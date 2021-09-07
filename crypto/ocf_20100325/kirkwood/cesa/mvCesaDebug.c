@@ -346,7 +346,6 @@ void    mvCesaDebugQueue(int mode)
     }
 }
 
-
 void    mvCesaDebugSramSA(MV_CESA_SRAM_SA* pSramSA, int mode)
 {
     if(pSramSA == NULL)
@@ -416,7 +415,6 @@ void    mvCesaDebugSA(short sid, int mode)
         }
     }
 }
-
 
 /**/
 void    mvCesaDebugSram(int mode)

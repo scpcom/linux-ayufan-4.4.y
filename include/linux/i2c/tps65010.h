@@ -152,7 +152,6 @@ extern int tps65010_config_vregs1(unsigned value);
  */
 extern int tps65013_set_low_pwr(unsigned mode);
 
-
 struct i2c_client;
 
 /**
@@ -183,4 +182,3 @@ struct tps65010_board {
 };
 
 #endif /*  __LINUX_I2C_TPS65010_H */
-

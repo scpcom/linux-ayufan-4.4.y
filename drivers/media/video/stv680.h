@@ -150,7 +150,6 @@ struct usb_stv {
 	int nullpackets;
 };
 
-
 static const unsigned char red[256] = {
 	0, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18,
 	18, 18, 18, 18, 18, 18, 18, 25, 30, 35, 38, 42,

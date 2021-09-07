@@ -29,7 +29,6 @@
  *
  ******************************************************************************/
 
-
 #define ISCSI_TARGET_ERL2_C
 
 #include <linux/net.h>
@@ -559,4 +558,3 @@ int iscsi_connection_recovery_transport_reset(iscsi_conn_t *conn)
 
 	return 0;
 }
-

@@ -778,7 +778,6 @@ panic("Not expecting dma_cache_maint_contiguous() to be invoked\n");
 }
 #endif // defined(CONFIG_SYNO_PLX_PORTING) && defined(CONFIG_ARCH_OX820) && defined(CONFIG_SMP)
 
-
 void dma_cache_maint_page(struct page *page, unsigned long offset,
 			  size_t size, int dir)
 {

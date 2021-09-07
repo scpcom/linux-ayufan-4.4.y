@@ -31,7 +31,6 @@
 
 #include <linux/version.h>
 
-
 #include <linux/module.h>
 #include <linux/time.h>
 #include <linux/sched.h>
@@ -42,7 +41,6 @@
 
 #include "cpia2.h"
 #include "cpia2dev.h"
-
 
 //#define _CPIA2_DEBUG_
 
@@ -234,7 +232,6 @@ static struct v4l2_queryctrl controls[] = {
 };
 #define NUM_CONTROLS (ARRAY_SIZE(controls))
 
-
 /******************************************************************************
  *
  *  cpia2_open
@@ -373,7 +370,6 @@ static ssize_t cpia2_v4l_read(struct file *file, char __user *buf, size_t count,
 	return cpia2_read(cam, buf, count, noblock);
 }
 
-
 /******************************************************************************
  *
  *  cpia2_v4l_poll
@@ -394,7 +390,6 @@ static unsigned int cpia2_v4l_poll(struct file *filp, struct poll_table_struct *
 
 	return cpia2_poll(cam, filp, wait);
 }
-
 
 /******************************************************************************
  *
@@ -659,7 +654,6 @@ static int ioctl_sync(void *arg, struct camera_data *cam)
 
 	return sync(cam, frame);
 }
-
 
 /******************************************************************************
  *
@@ -1549,7 +1543,6 @@ static int ioctl_dqbuf(void *arg,struct camera_data *cam, struct file *file)
 		frame = cb->num;
 	}
 
-
 	buf->index = frame;
 	buf->bytesused = cam->buffers[buf->index].length;
 	buf->flags = V4L2_BUF_FLAG_MAPPED | V4L2_BUF_FLAG_DONE;
@@ -2030,7 +2023,6 @@ static void __init check_parameters(void)
 
 /************   Module Stuff ***************/
 
-
 /******************************************************************************
  *
  * cpia2_init/module_init
@@ -2045,7 +2037,6 @@ static int __init cpia2_init(void)
 	return 0;
 }
 
-
 /******************************************************************************
  *
  * cpia2_exit/module_exit
@@ -2059,4 +2050,3 @@ static void __exit cpia2_exit(void)
 
 module_init(cpia2_init);
 module_exit(cpia2_exit);
-

@@ -682,7 +682,6 @@ static int gru_retarget_intr(struct gru_thread_state *gts)
 	return gru_update_cch(gts, 0);
 }
 
-
 /*
  * Insufficient GRU resources available on the local blade. Steal a context from
  * a process. This is a hack until a _real_ resource scheduler is written....
@@ -783,7 +782,6 @@ struct gru_state *gru_assign_gru_context(struct gru_thread_state *gts,
 {
 	struct gru_state *gru, *grux;
 	int i, max_active_contexts;
-
 
 again:
 	gru = NULL;
@@ -893,4 +891,3 @@ again:
 
 	return VM_FAULT_NOPAGE;
 }
-

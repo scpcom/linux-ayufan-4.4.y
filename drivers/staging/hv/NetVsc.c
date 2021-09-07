@@ -27,7 +27,6 @@
 #include "NetVsc.h"
 #include "RndisFilter.h"
 
-
 /* Globals */
 static const char *gDriverName = "netvsc";
 
@@ -71,7 +70,6 @@ static void NetVscOnReceiveCompletion(void *Context);
 static void NetVscSendReceiveCompletion(struct hv_device *Device,
 					u64 TransactionId);
 
-
 static struct netvsc_device *AllocNetDevice(struct hv_device *Device)
 {
 	struct netvsc_device *netDevice;
@@ -95,7 +93,6 @@ static void FreeNetDevice(struct netvsc_device *Device)
 	Device->Device->Extension = NULL;
 	kfree(Device);
 }
-
 
 /* Get the net device object iff exists and its refcount > 1 */
 static struct netvsc_device *GetOutboundNetDevice(struct hv_device *Device)
@@ -585,7 +582,6 @@ static int NetVscDestroySendBuffer(struct netvsc_device *NetDevice)
 
 	return ret;
 }
-
 
 static int NetVscConnectToVsp(struct hv_device *Device)
 {
@@ -1297,7 +1293,6 @@ void NetVscOnChannelCallback(void *Context)
 	struct vmpacket_descriptor *desc;
 	unsigned char *buffer = packet;
 	int bufferlen = netPacketSize;
-
 
 	DPRINT_ENTER(NETVSC);
 

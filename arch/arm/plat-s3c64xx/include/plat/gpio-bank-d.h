@@ -46,4 +46,3 @@
 #define S3C64XX_GPD4_I2S0_D0		(0x03 << 16)
 #define S3C64XX_GPD4_AC97_SDO		(0x04 << 16)
 #define S3C64XX_GPD4_EINT_G3_4		(0x07 << 16)
-

@@ -269,7 +269,6 @@ static ulg output_ptr;
 static ulg bytes_out;
 #endif
 
-
 static void error(char *m);
 
 static void putstr(const char *);

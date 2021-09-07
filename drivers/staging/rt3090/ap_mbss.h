@@ -45,7 +45,6 @@
 
 #endif // MODULE_MBSS //
 
-
 /* Public function list */
 MBSS_EXTERN VOID RT28xx_MBSS_Init(
 	IN PRTMP_ADAPTER ad_p,

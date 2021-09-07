@@ -100,7 +100,6 @@ static const struct vm_operations_struct ncp_file_mmap =
 	.fault = ncp_file_mmap_fault,
 };
 
-
 /* This is used for a general mmap of a ncp file */
 int ncp_mmap(struct file *file, struct vm_area_struct *vma)
 {

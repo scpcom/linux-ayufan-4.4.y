@@ -419,7 +419,6 @@ static int fetch_to_dev_buffer(struct scsi_cmnd *scp, unsigned char *arr,
 	return scsi_sg_copy_to_buffer(scp, arr, arr_len);
 }
 
-
 static const char * inq_vendor_id = "Linux   ";
 static const char * inq_product_id = "scsi_debug      ";
 static const char * inq_product_rev = "0004";
@@ -516,7 +515,6 @@ static int inquiry_evpd_83(unsigned char * arr, int port_group_id,
 	num += 4;
 	return num;
 }
-
 
 static unsigned char vpd84_data[] = {
 /* from 4th byte */ 0x22,0x22,0x22,0x0,0xbb,0x0,
@@ -619,7 +617,6 @@ static int inquiry_evpd_88(unsigned char * arr, int target_dev_id)
 	return num;
 }
 
-
 static unsigned char vpd89_data[] = {
 /* from 4th byte */ 0,0,0,0,
 'l','i','n','u','x',' ',' ',' ',
@@ -669,7 +666,6 @@ static int inquiry_evpd_89(unsigned char * arr)
 	memcpy(arr, vpd89_data, sizeof(vpd89_data));
 	return sizeof(vpd89_data);
 }
-
 
 static unsigned char vpdb0_data[] = {
 	/* from 4th byte */ 0,0,0,4,
@@ -1144,7 +1140,6 @@ static int resp_ctrl_m_pg(unsigned char * p, int pcontrol, int target)
 	return sizeof(ctrl_m_pg);
 }
 
-
 static int resp_iec_m_pg(unsigned char * p, int pcontrol, int target)
 {	/* Informational Exceptions control mode page for mode_sense */
 	unsigned char ch_iec_m_pg[] = {/* 0x1c, 0xa, */ 0x4, 0xf, 0, 0, 0, 0,
@@ -1170,7 +1165,6 @@ static int resp_sas_sf_m_pg(unsigned char * p, int pcontrol, int target)
 		memset(p + 2, 0, sizeof(sas_sf_m_pg) - 2);
 	return sizeof(sas_sf_m_pg);
 }
-
 
 static int resp_sas_pcd_m_spg(unsigned char * p, int pcontrol, int target,
 			      int target_dev_id)
@@ -2040,7 +2034,6 @@ static void timer_intr_handler(unsigned long indx)
 	spin_unlock_irqrestore(&queued_arr_lock, iflags);
 }
 
-
 static struct sdebug_dev_info *
 sdebug_device_create(struct sdebug_host_info *sdbg_host, gfp_t flags)
 {
@@ -2816,7 +2809,6 @@ static ssize_t sdebug_ato_show(struct device_driver *ddp, char *buf)
 }
 DRIVER_ATTR(ato, S_IRUGO, sdebug_ato_show, NULL);
 
-
 /* Note: The following function creates attribute files in the
    /sys/bus/pseudo/drivers/scsi_debug directory. The advantage of these
    files (over those found in the /sys/module/scsi_debug/parameters
@@ -3557,7 +3549,6 @@ static int sdebug_driver_probe(struct device * dev)
 		scsi_host_put(hpnt);
         } else
 		scsi_scan_host(hpnt);
-
 
         return error;
 }

@@ -376,7 +376,6 @@ void sgdl_dump(sgd_t* sg, char* prefix )
 	}
 }
 
-
 void sgdt_dump(sgd_tbl_t *SgTbl, char* prefix)
 {
 	sgd_t* sg = SgTbl->Entry_Ptr;
@@ -676,7 +675,6 @@ int sgdt_append_ref(
 
 	return 0;
 }
-
 
 void
 sgdt_copy_partial(

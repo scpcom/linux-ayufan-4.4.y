@@ -87,4 +87,3 @@ struct gss_cred {
 
 #endif /* __KERNEL__ */
 #endif /* _LINUX_SUNRPC_AUTH_GSS_H */
-

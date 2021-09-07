@@ -24,7 +24,6 @@
 #include "../../mach-at32ap/clock.h"
 #include "flash.h"
 
-
 #define HAMMERHEAD_USB_PERIPH_GCLK0	0x40000000
 #define HAMMERHEAD_USB_PERIPH_CS2	0x02000000
 #define HAMMERHEAD_USB_PERIPH_EXTINT0	0x02000000
@@ -102,7 +101,6 @@ static struct smc_timing isp1160_timing __initdata = {
 	.nrd_setup		= 75,
 	.ncs_write_setup	= 75,
 	.nwe_setup		= 75,
-
 
 	/* We use conservative timing settings, as the minimal settings aren't
 	   stable. There may be room for tweaking. */
@@ -363,7 +361,6 @@ static int __init hammerhead_flash_init(void)
 	smc_set_timing(&fpga_config, &fpga_timing);
 	ret = smc_set_configuration(3, &fpga_config);
 #endif
-
 
 	if (ret < 0) {
 		printk(KERN_ERR "hammerhead: failed to set FPGA timing\n");

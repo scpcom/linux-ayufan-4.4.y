@@ -417,7 +417,6 @@ sctp_timer_event_t *sctp_timer_events[SCTP_NUM_TIMEOUT_TYPES] = {
 	sctp_generate_autoclose_event,
 };
 
-
 /* RFC 2960 8.2 Path Failure Detection
  *
  * When its peer endpoint is multi-homed, an endpoint should keep a
@@ -613,7 +612,6 @@ static void sctp_cmd_t3_rtx_timers_stop(sctp_cmd_seq_t *cmds,
 	}
 }
 
-
 /* Helper function to update the heartbeat timer. */
 static void sctp_cmd_hb_timer_update(sctp_cmd_seq_t *cmds,
 				     struct sctp_transport *t)
@@ -668,7 +666,6 @@ static void sctp_cmd_transport_on(sctp_cmd_seq_t *cmds,
 	if (!mod_timer(&t->hb_timer, sctp_transport_timeout(t)))
 		sctp_transport_hold(t);
 }
-
 
 /* Helper function to process the process SACK command.  */
 static int sctp_cmd_process_sack(sctp_cmd_seq_t *cmds,
@@ -913,7 +910,6 @@ static void sctp_cmd_adaptation_ind(sctp_cmd_seq_t *commands,
 		sctp_ulpq_tail_event(&asoc->ulpq, ev);
 }
 
-
 static void sctp_cmd_t1_timer_update(struct sctp_association *asoc,
 				    sctp_event_timeout_t timer,
 				    char *name)
@@ -960,8 +956,6 @@ static int sctp_cmd_send_msg(struct sctp_association *asoc,
 
 	return error;
 }
-
-
 
 /* These three macros allow us to pull the debugging code out of the
  * main flow of sctp_do_sm() to keep attention focused on the real
@@ -1640,4 +1634,3 @@ nomem:
 	error = -ENOMEM;
 	goto out;
 }
-

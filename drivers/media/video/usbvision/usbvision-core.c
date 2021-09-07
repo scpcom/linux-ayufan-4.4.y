@@ -71,9 +71,7 @@ static unsigned int adjust_Y_Offset = -1;
 module_param(adjust_Y_Offset, int, 0644);
 MODULE_PARM_DESC(adjust_Y_Offset, "adjust Y offset display [core]");
 
-
 #define	ENABLE_HEXDUMP	0	/* Enable if you need it */
-
 
 #ifdef USBVISION_DEBUG
 	#define PDEBUG(level, fmt, args...) { \
@@ -161,7 +159,6 @@ static void usbvision_rvfree(void *mem, unsigned long size)
 	vfree(mem);
 }
 
-
 #if ENABLE_HEXDUMP
 static void usbvision_hexdump(const unsigned char *data, int len)
 {
@@ -194,7 +191,6 @@ static int scratch_len(struct usb_usbvision *usbvision)    /*This returns the am
 	return len;
 }
 
-
 /* This returns the free space left in the buffer */
 static int scratch_free(struct usb_usbvision *usbvision)
 {
@@ -210,7 +206,6 @@ static int scratch_free(struct usb_usbvision *usbvision)
 
 	return free;
 }
-
 
 /* This puts data into the buffer */
 static int scratch_put(struct usb_usbvision *usbvision, unsigned char *data,
@@ -276,7 +271,6 @@ static int scratch_get_extra(struct usb_usbvision *usbvision,
 	return len;
 }
 
-
 /* This sets the scratch extra read pointer */
 static void scratch_set_extra_ptr(struct usb_usbvision *usbvision, int *ptr,
 				  int len)
@@ -286,7 +280,6 @@ static void scratch_set_extra_ptr(struct usb_usbvision *usbvision, int *ptr,
 	PDEBUG(DBG_SCRATCH, "ptr=%d\n", *ptr);
 }
 
-
 /*This increments the scratch extra read pointer */
 static void scratch_inc_extra_ptr(int *ptr, int len)
 {
@@ -294,7 +287,6 @@ static void scratch_inc_extra_ptr(int *ptr, int len)
 
 	PDEBUG(DBG_SCRATCH, "ptr=%d\n", *ptr);
 }
-
 
 /* This gets data from the buffer */
 static int scratch_get(struct usb_usbvision *usbvision, unsigned char *data,
@@ -321,7 +313,6 @@ static int scratch_get(struct usb_usbvision *usbvision, unsigned char *data,
 
 	return len;
 }
-
 
 /* This sets read pointer to next header and returns it */
 static int scratch_get_header(struct usb_usbvision *usbvision,
@@ -351,7 +342,6 @@ static int scratch_get_header(struct usb_usbvision *usbvision,
 	return errCode;
 }
 
-
 /*This removes len bytes of old data from the buffer */
 static void scratch_rm_old(struct usb_usbvision *usbvision, int len)
 {
@@ -360,7 +350,6 @@ static void scratch_rm_old(struct usb_usbvision *usbvision, int len)
 	usbvision->scratch_read_ptr %= scratch_buf_size;
 	PDEBUG(DBG_SCRATCH, "read_ptr is now %d\n", usbvision->scratch_read_ptr);
 }
-
 
 /*This resets the buffer - kills all data in it too */
 static void scratch_reset(struct usb_usbvision *usbvision)
@@ -794,7 +783,6 @@ static int usbvision_decompress(struct usb_usbvision *usbvision,unsigned char *C
 	return Idx;
 }
 
-
 /*
  * usbvision_parse_compress()
  *
@@ -999,7 +987,6 @@ static enum ParseState usbvision_parse_compress(struct usb_usbvision *usbvision,
 
 }
 
-
 /*
  * usbvision_parse_lines_420()
  *
@@ -1063,7 +1050,6 @@ static enum ParseState usbvision_parse_lines_420(struct usb_usbvision *usbvision
 
 	for (block = 0; block < (pixel_per_line / sub_block_size);
 	     block++) {
-
 
 		for (pixel = 0; pixel < sub_block_size; pixel +=2) {
 			scratch_get(usbvision, &y[0], 2);
@@ -1348,11 +1334,9 @@ static void usbvision_parse_data(struct usb_usbvision *usbvision)
 	else
 		frame->grabstate = FrameState_Grabbing;
 
-
 	/* Update the frame's uncompressed length. */
 	frame->scanlength += copylen;
 }
-
 
 /*
  * Make all of the blocks of data contiguous
@@ -1580,7 +1564,6 @@ int usbvision_write_reg(struct usb_usbvision *usbvision, unsigned char reg,
 	return errCode;
 }
 
-
 static void usbvision_ctrlUrb_complete(struct urb *urb)
 {
 	struct usb_usbvision *usbvision = (struct usb_usbvision *)urb->context;
@@ -1591,7 +1574,6 @@ static void usbvision_ctrlUrb_complete(struct urb *urb)
 		wake_up_interruptible(&usbvision->ctrlUrb_wq);
 	}
 }
-
 
 static int usbvision_write_reg_irq(struct usb_usbvision *usbvision,int address,
 									unsigned char *data, int len)
@@ -1629,7 +1611,6 @@ static int usbvision_write_reg_irq(struct usb_usbvision *usbvision,int address,
 	PDEBUG(DBG_IRQ, "submit %d byte: error %d", len, errCode);
 	return errCode;
 }
-
 
 static int usbvision_init_compression(struct usb_usbvision *usbvision)
 {
@@ -1894,7 +1875,6 @@ int usbvision_set_output(struct usb_usbvision *usbvision, int width,
 	return errCode;
 }
 
-
 /*
  * usbvision_frames_alloc
  * allocate the required frames
@@ -2062,10 +2042,8 @@ static int usbvision_set_compress_params(struct usb_usbvision *usbvision)
 		return rc;
 	}
 
-
 	return rc;
 }
-
 
 /*
  * usbvision_set_input()
@@ -2103,7 +2081,6 @@ int usbvision_set_input(struct usb_usbvision *usbvision)
 		       "reconnect or reload driver.\n", proc, rc);
 		return rc;
 	}
-
 
 	if (usbvision->tvnormId & V4L2_STD_PAL) {
 		value[0] = 0xC0;
@@ -2164,7 +2141,6 @@ int usbvision_set_input(struct usb_usbvision *usbvision)
 		return rc;
 	}
 
-
 	dvi_yuv_value = 0x00;	/* U comes after V, Ya comes after U/V, Yb comes after Yb */
 
 	if(usbvision_device_data[usbvision->DevModel].Dvi_yuv_override){
@@ -2177,7 +2153,6 @@ int usbvision_set_input(struct usb_usbvision *usbvision)
 
 	return (usbvision_write_reg(usbvision, USBVISION_DVI_YUV, dvi_yuv_value));
 }
-
 
 /*
  * usbvision_set_dram_settings()
@@ -2280,7 +2255,6 @@ int usbvision_power_on(struct usb_usbvision *usbvision)
 	return errCode;
 }
 
-
 /*
  * usbvision timer stuff
  */
@@ -2294,7 +2268,6 @@ static void call_usbvision_power_off(struct work_struct *work)
 	if(mutex_lock_interruptible(&usbvision->lock)) {
 		return;
 	}
-
 
 	if(usbvision->user == 0) {
 		usbvision_i2c_unregister(usbvision);
@@ -2476,8 +2449,6 @@ int usbvision_init_isoc(struct usb_usbvision *usbvision)
 	usbvision->usb_bandwidth = regValue >> 1;
 	PDEBUG(DBG_ISOC, "USB Bandwidth Usage: %dMbit/Sec",
 	       usbvision->usb_bandwidth);
-
-
 
 	/* We double buffer the Iso lists */
 

@@ -120,7 +120,6 @@ typedef struct _mvXorDesc
     MV_U32 reserved1;
 } MV_XOR_DESC;
 
-
 /* XOR descriptor structure for CRC and DMA descriptor */
 typedef struct _mvCrcDmaDesc
 {
@@ -155,7 +154,6 @@ typedef struct _mvXorDesc
     MV_U32 reserved0;
 	MV_U32 reserved1;
 } MV_XOR_DESC;
-
 
 /* XOR descriptor structure for CRC and DMA descriptor */
 typedef struct _mvCrcDmaDesc

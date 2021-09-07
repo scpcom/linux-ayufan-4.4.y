@@ -22,7 +22,6 @@ static int ultrastor_host_reset(struct scsi_cmnd *);
 static int ultrastor_biosparam(struct scsi_device *, struct block_device *,
 				sector_t, int *);
 
-
 #define ULTRASTOR_14F_MAX_SG 16
 #define ULTRASTOR_24F_MAX_SG 33
 
@@ -30,7 +29,6 @@ static int ultrastor_biosparam(struct scsi_device *, struct block_device *,
 #define ULTRASTOR_MAX_CMDS 16
 
 #define ULTRASTOR_24F_PORT 0xC80
-
 
 #ifdef ULTRASTOR_PRIVATE
 

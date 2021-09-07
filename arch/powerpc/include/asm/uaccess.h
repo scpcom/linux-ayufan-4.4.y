@@ -212,7 +212,6 @@ do {								\
 	__pu_err;						\
 })
 
-
 extern long __get_user_bad(void);
 
 #define __get_user_asm(x, addr, err, op)		\
@@ -320,7 +319,6 @@ do {								\
 	(x) = (__typeof__(*(ptr)))__gu_val;			\
 	__gu_err;						\
 })
-
 
 /* more complex routines */
 

@@ -7,7 +7,6 @@
  * 2002/01 - don't free the whole struct sock on sk->destruct time,
  * 	     use the default destruct function initialized by sock_init_data */
 
-
 #include <linux/ctype.h>
 #include <linux/string.h>
 #include <linux/atmdev.h>
@@ -24,7 +23,6 @@
 #include "common.h"
 #include "resources.h"
 #include "addr.h"
-
 
 LIST_HEAD(atm_devs);
 DEFINE_MUTEX(atm_dev_mutex);
@@ -70,7 +68,6 @@ struct atm_dev *atm_dev_lookup(int number)
 	mutex_unlock(&atm_dev_mutex);
 	return dev;
 }
-
 
 struct atm_dev *atm_dev_register(const char *type, const struct atmdev_ops *ops,
 				 int number, unsigned long *flags)
@@ -135,7 +132,6 @@ out_fail:
 	goto out;
 }
 
-
 void atm_dev_deregister(struct atm_dev *dev)
 {
 	BUG_ON(test_bit(ATM_DF_REMOVED, &dev->flags));
@@ -157,7 +153,6 @@ void atm_dev_deregister(struct atm_dev *dev)
 	atm_dev_put(dev);
 }
 
-
 static void copy_aal_stats(struct k_atm_aal_stats *from,
     struct atm_aal_stats *to)
 {
@@ -166,7 +161,6 @@ static void copy_aal_stats(struct k_atm_aal_stats *from,
 #undef __HANDLE_ITEM
 }
 
-
 static void subtract_aal_stats(struct k_atm_aal_stats *from,
     struct atm_aal_stats *to)
 {
@@ -174,7 +168,6 @@ static void subtract_aal_stats(struct k_atm_aal_stats *from,
 	__AAL_STAT_ITEMS
 #undef __HANDLE_ITEM
 }
-
 
 static int fetch_stats(struct atm_dev *dev, struct atm_dev_stats __user *arg, int zero)
 {
@@ -193,7 +186,6 @@ static int fetch_stats(struct atm_dev *dev, struct atm_dev_stats __user *arg, in
 	}
 	return error ? -EFAULT : 0;
 }
-
 
 int atm_dev_ioctl(unsigned int cmd, void __user *arg, int compat)
 {
@@ -478,7 +470,6 @@ void *atm_dev_seq_next(struct seq_file *seq, void *v, loff_t *pos)
 		? atm_devs.next : ((struct list_head *)v)->next;
 	return (v == &atm_devs) ? NULL : v;
 }
-
 
 EXPORT_SYMBOL(atm_dev_register);
 EXPORT_SYMBOL(atm_dev_deregister);

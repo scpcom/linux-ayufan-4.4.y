@@ -119,11 +119,9 @@ static void change_speed(struct m68k_serial *info);
 #define	DEFAULT_CBAUD		B9600
 #endif
 
-
 static int m68328_console_initted = 0;
 static int m68328_console_baud    = CONSOLE_BAUD_RATE;
 static int m68328_console_cbaud   = DEFAULT_CBAUD;
-
 
 static inline int serial_paranoia_check(struct m68k_serial *info,
 					char *name, const char *routine)
@@ -428,7 +426,6 @@ static void do_serial_hangup(struct work_struct *work)
 
 	tty_hangup(tty);
 }
-
 
 static int startup(struct m68k_serial * info)
 {
@@ -1395,8 +1392,6 @@ rs68328_init(void)
 
 module_init(rs68328_init);
 
-
-
 static void m68328_set_baud(void)
 {
 	unsigned short ustcnt;
@@ -1423,7 +1418,6 @@ again:
 	m68328_console_initted = 1;
 	return;
 }
-
 
 int m68328_console_setup(struct console *cp, char *arg)
 {
@@ -1452,13 +1446,11 @@ int m68328_console_setup(struct console *cp, char *arg)
 	return(0);
 }
 
-
 static struct tty_driver *m68328_console_device(struct console *c, int *index)
 {
 	*index = c->index;
 	return serial_driver;
 }
-
 
 void m68328_console_write (struct console *co, const char *str,
 			   unsigned int count)
@@ -1472,7 +1464,6 @@ void m68328_console_write (struct console *co, const char *str,
     }
 }
 
-
 static struct console m68328_driver = {
 	.name		= "ttyS",
 	.write		= m68328_console_write,
@@ -1481,7 +1472,6 @@ static struct console m68328_driver = {
 	.flags		= CON_PRINTBUFFER,
 	.index		= -1,
 };
-
 
 static int __init m68328_console_init(void)
 {

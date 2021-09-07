@@ -98,7 +98,6 @@ struct dsp_hf_save_area {
 	/* saved as part of HFG context  */
 };
 
-
 /* Task link data structure */
 struct dsp_tree_link {
 	___DSP_DUAL_16BIT_ALLOC(
@@ -115,7 +114,6 @@ struct dsp_tree_link {
 	    this_spb
 	)
 };
-
 
 struct dsp_task_tree_data {
 	___DSP_DUAL_16BIT_ALLOC(
@@ -157,7 +155,6 @@ struct dsp_task_tree_data {
 
 };
 
-
 struct dsp_interval_timer_data
 {
 	/* These data items have the same relative locations to those */
@@ -172,7 +169,6 @@ struct dsp_interval_timer_data
 	     num_intervals
 	)
 };
-
 
 /* This structure contains extra storage for the task tree
    Currently, this additional data is related only to a full context save */
@@ -239,7 +235,6 @@ struct dsp_task_tree_context_block {
 	u32		savershoutxmacmode;
 };
                 
-
 struct dsp_task_tree_control_block {
 	struct dsp_hf_save_area			context;
 	struct dsp_tree_link			links;
@@ -247,6 +242,5 @@ struct dsp_task_tree_control_block {
 	struct dsp_task_tree_context_block	context_blk;
 	struct dsp_interval_timer_data		int_timer;
 };
-
 
 #endif /* __DSP_TASK_TYPES_H__ */

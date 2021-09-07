@@ -1462,7 +1462,6 @@ static void setup_IO_APIC_irq(int apic_id, int pin, unsigned int irq, struct irq
 		    apic_id, mp_ioapics[apic_id].apicid, pin, cfg->vector,
 		    irq, trigger, polarity);
 
-
 	if (setup_ioapic_entry(mp_ioapics[apic_id].apicid, irq, &entry,
 			       dest, trigger, polarity, cfg->vector, pin)) {
 		printk("Failed to setup ioapic entry for ioapic  %d, pin %d\n",
@@ -1635,7 +1634,6 @@ static void __init setup_timer_IRQ0_pin(unsigned int apic_id, unsigned int pin,
 	 */
 	ioapic_write_entry(apic_id, pin, entry);
 }
-
 
 __apicdebuginit(void) print_IO_APIC(void)
 {
@@ -1932,7 +1930,6 @@ __apicdebuginit(int) print_all_ICs(void)
 
 fs_initcall(print_all_ICs);
 
-
 /* Where if anywhere is the i8259 connect in external int mode */
 static struct { int pin, apic; } ioapic_i8259 = { -1, -1 };
 
@@ -2129,7 +2126,6 @@ void __init setup_ioapic_ids_from_mpc(void)
 					mp_ioapics[apic_id].apicid);
 			physids_or(phys_id_present_map, phys_id_present_map, tmp);
 		}
-
 
 		/*
 		 * We need to adjust the IRQ routing table

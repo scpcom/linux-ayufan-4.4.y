@@ -74,7 +74,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DB(x)
 #endif
 
-
 static MV_VOID sizePrint (MV_U32 size, MV_U8 *s);
 
 /*******************************************************************************
@@ -111,7 +110,6 @@ MV_U32 mvFlashInWhichSec(MV_FLASH_INFO *pFlash, MV_U32 offset)
 	/* return illegal sector Number */
 	return FLASH_BAD_SEC_NUM;
 }
-
 
 /**************************************************/
 /* get information from the MV_FLASH_INFO struct  */
@@ -221,7 +219,6 @@ MV_U32 mvFlashDevWidthGet(MV_FLASH_INFO *pFlash)
 
 	return pFlash->devWidth;
 }
-
 
 /*******************************************************************************
 * flashDataExt - Extend Data.
@@ -465,7 +462,6 @@ MV_VOID flashBusWidthDataWr(MV_FLASH_INFO *pFlash, MV_U32 addr, MV_U32 data)
 	return ;
 }
 
-
 /*******************************************************************************
 *  flashPrint - Print flash information structure.
 *
@@ -485,7 +481,6 @@ MV_VOID flashBusWidthDataWr(MV_FLASH_INFO *pFlash, MV_U32 addr, MV_U32 data)
 MV_VOID flashPrint(MV_FLASH_INFO *pFlash)
 {
 	MV_U32 i;
-
 
 	if ((NULL == pFlash) || (mvFlashVenIdGet(pFlash) == 0))
 	{
@@ -602,7 +597,6 @@ MV_VOID flashPrint(MV_FLASH_INFO *pFlash)
         }
 	mvOsOutput(".\n");
 
-
 	mvOsOutput ("  Sector Start Addresses:");
 	for (i=0; i<mvFlashNumOfSecsGet(pFlash); ++i) {
 		if ((i % 5) == 0)
@@ -647,4 +641,3 @@ static MV_VOID sizePrint (MV_U32 size, MV_U8 *s)
 	}
 	mvOsOutput (" %cB%s", c, s);
 }
-

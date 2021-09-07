@@ -24,7 +24,6 @@
  * ########################################################################
  */
 
-
 #include "ieee754dp.h"
 
 int ieee754dp_finite(ieee754dp x)
@@ -38,7 +37,6 @@ ieee754dp ieee754dp_copysign(ieee754dp x, ieee754dp y)
 	DPSIGN(x) = DPSIGN(y);
 	return x;
 }
-
 
 ieee754dp ieee754dp_neg(ieee754dp x)
 {
@@ -64,7 +62,6 @@ ieee754dp ieee754dp_neg(ieee754dp x)
 
 	return x;
 }
-
 
 ieee754dp ieee754dp_abs(ieee754dp x)
 {

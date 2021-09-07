@@ -113,7 +113,6 @@
 #define VMI_PAGE_CLONE           0x20  /* Clone from another shadow */
 #define VMI_PAGE_ZEROED          0x40  /* Page is pre-zeroed */
 
-
 /* Flags shared by Allocate|Release Page and PTE updates */
 #define VMI_PAGE_PT              0x01
 #define VMI_PAGE_PD              0x02
@@ -160,7 +159,6 @@ struct vmi_relocation_info {
 	unsigned char           reserved[3];
 };
 #endif
-
 
 /*
  *---------------------------------------------------------------------

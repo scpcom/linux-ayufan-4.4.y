@@ -1378,7 +1378,6 @@ static int cifs_writepages(struct address_space *mapping,
 	if (iov == NULL)
 		return generic_writepages(mapping, wbc);
 
-
 	/*
 	 * BB: Is this meaningful for a non-block-device file system?
 	 * If it is, we should test it again after we do I/O
@@ -1815,7 +1814,6 @@ ssize_t cifs_user_read(struct file *file, char __user *read_data,
 	return total_read;
 }
 
-
 static ssize_t cifs_read(struct file *file, char *read_data, size_t read_size,
 	loff_t *poffset)
 {
@@ -1902,7 +1900,6 @@ int cifs_file_mmap(struct file *file, struct vm_area_struct *vma)
 	FreeXid(xid);
 	return rc;
 }
-
 
 static void cifs_copy_cache_pages(struct address_space *mapping,
 	struct list_head *pages, int bytes_read, char *data,

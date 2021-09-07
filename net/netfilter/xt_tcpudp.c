@@ -25,7 +25,6 @@ MODULE_ALIAS("ip6t_tcp");
 #define duprintf(format, args...)
 #endif
 
-
 /* Returns 1 if the port is matched by the range, 0 otherwise */
 static inline bool
 port_match(u_int16_t min, u_int16_t max, u_int16_t port, bool invert)

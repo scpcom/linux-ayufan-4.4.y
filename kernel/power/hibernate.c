@@ -27,7 +27,6 @@
 
 #include "power.h"
 
-
 static int noresume = 0;
 static char resume_file[256] = CONFIG_PM_STD_PARTITION;
 dev_t swsusp_resume_device;
@@ -624,7 +623,6 @@ int hibernate(void)
 	return error;
 }
 
-
 /**
  *	software_resume - Resume from a saved image.
  *
@@ -828,7 +826,6 @@ static ssize_t disk_show(struct kobject *kobj, struct kobj_attribute *attr,
 	return buf-start;
 }
 
-
 static ssize_t disk_store(struct kobject *kobj, struct kobj_attribute *attr,
 			  const char *buf, size_t n)
 {
@@ -937,11 +934,9 @@ static struct attribute * g[] = {
 	NULL,
 };
 
-
 static struct attribute_group attr_group = {
 	.attrs = g,
 };
-
 
 static int __init pm_disk_init(void)
 {
@@ -949,7 +944,6 @@ static int __init pm_disk_init(void)
 }
 
 core_initcall(pm_disk_init);
-
 
 static int __init resume_setup(char *str)
 {

@@ -23,7 +23,6 @@
 
 #include <asm/io.h>
 
-
 /* The OMAP1 RTC is a year/month/day/hours/minutes/seconds BCD clock
  * with century-range alarm matching, driven by the 32kHz clock.
  *
@@ -87,10 +86,8 @@
 #define OMAP_RTC_INTERRUPTS_IT_ALARM    (1<<3)
 #define OMAP_RTC_INTERRUPTS_IT_TIMER    (1<<2)
 
-
 #define rtc_read(addr)		omap_readb(OMAP_RTC_BASE + (addr))
 #define rtc_write(val, addr)	omap_writeb(val, OMAP_RTC_BASE + (addr))
-
 
 /* we rely on the rtc framework to handle locking (rtc->ops_lock),
  * so the only other requirement is that register accesses which
@@ -211,7 +208,6 @@ static void bcd2tm(struct rtc_time *tm)
 	/* epoch == 1900 */
 	tm->tm_year = bcd2bin(tm->tm_year) + 100;
 }
-
 
 static int omap_rtc_read_time(struct device *dev, struct rtc_time *tm)
 {

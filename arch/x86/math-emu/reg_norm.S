@@ -19,7 +19,6 @@
 
 #include "fpu_emu.h"
 
-
 .text
 ENTRY(FPU_normalize)
 	pushl	%ebp
@@ -73,7 +72,6 @@ L_exit:
 	leave
 	ret
 
-
 L_zero:
 	movw	$0,EXP(%ebx)
 	movl	TAG_Zero,%eax
@@ -94,8 +92,6 @@ L_overflow:
 	call	arith_overflow
 	pop	%ebx
 	jmp	L_exit
-
-
 
 /* Normalise without reporting underflow or overflow */
 ENTRY(FPU_normalize_nuo)

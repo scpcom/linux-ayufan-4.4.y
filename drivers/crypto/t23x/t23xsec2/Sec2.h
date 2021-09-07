@@ -43,13 +43,8 @@
  *
  */
 
-
-
-
 #ifndef SEC2_H
 #define SEC2_H
-
-
 
 /** @file
  * Top-level driver include file for SEC2 security processor
@@ -57,13 +52,9 @@
  *        - XWC prototype version
  */
 
-
 #ifdef _cplusplus
 extern "C" {
 #endif
-
-
-
 
     /* General types for the driver, if they don't exist elsewhere */
 
@@ -81,8 +72,6 @@ extern "C" {
 #ifndef offsetof
 #define offsetof(s,m)   (size_t)&(((s *)0)->m)
 #endif
-
-
 
     /* IOCTL function code offsets */
     /* Each defines an IOCTL request to be added to a system-defined offset */
@@ -120,7 +109,6 @@ extern "C" {
 #define SEC2_PROC_REQ_BLOCK_VIRTUAL  (31) /**< PROC_REQ_BLOCK using
                                                virtual buffers */
 
-
     /* Base IOCTL function index,                 */
     /* assume 0 to 0x7ff reserved for the host OS */
 #define SEC2_IOCTL_INDEX             (0x800)
@@ -143,9 +131,6 @@ extern "C" {
 
 #define IOCTL_PROC_REQ_VIRTUAL       (SEC2_IOCTL_INDEX + SEC2_PROC_REQ_VIRTUAL)
 #define IOCTL_PROC_REQ_BLOCK_VIRTUAL (SEC2_IOCTL_INDEX + SEC2_PROC_REQ_BLOCK_VIRTUAL)
-
-
-
 
     /* General error/status codes for ioctl() function returns,       */
     /* and for the status field of the general-purpose part of        */
@@ -240,8 +225,6 @@ extern "C" {
     /* Unimplemented request */
 #define SEC2_UNIMPLEMENTED                    (0xE004FFE3)
 
-
-
     /* Security device not found at the specified location  */
     /* This is a legacy error left over from earlier revs   */
 #define SEC2_IO_CARD_NOT_FOUND                     (-1000)
@@ -270,16 +253,10 @@ extern "C" {
     /* User passed a null request pointer to IOCTL_PROC_REQ */
 #define SEC2_INVALID_ADDRESS                       (-1011)
 
-
-
-
-
-
     /* Limit of geometry, for allocators */
 #define MAX_CHANNELS     (4)
 #define MAX_CHAS         (7)
 #define NUM_DPD_FLDS     (7)
-
 
     /*
      * STATUS_REQ
@@ -323,12 +300,8 @@ extern "C" {
         STATUS_REQ driverstatus; /**< Detailed device state block     */
     } SEC2_NOTIFY_ON_ERROR_CTX, *PSEC2_NOTIFY_ON_ERROR_CTX;
 
-
     typedef void (*PSEC2_NOTIFY_ROUTINE) (PSEC2_NOTIFY_CTX pCtx);
     typedef void (*PSEC2_NOTIFY_ON_ERROR_ROUTINE) (PSEC2_NOTIFY_ON_ERROR_CTX pErrCtx);
-
-
-
 
     /**
      * AUX_HANDLER_SPEC
@@ -355,7 +328,6 @@ extern "C" {
                                                 reserved for use    */
     } AUX_HANDLER_SPEC;
 
-
     /**
      * MALLOC_REQ
      * structure used on allocation requests to the driver
@@ -380,8 +352,6 @@ extern "C" {
         char            *from;  /**< copy from                        */
         int             pid;    /**< pid                              */
     } MALLOC_REQ;
-
-
 
     /**
      * KBUF_MULTI
@@ -433,8 +403,6 @@ extern "C" {
         KBUF_ITEM pair[MAX_PAIRS];
     } KBUF_MULTI;
 
-
-
     /**
      * Basic scatter/gather linked list form for general-purpose use
      * This is used by the requestor to identify scatter buffer
@@ -452,13 +420,8 @@ extern "C" {
                                                     fragment          */
     } EXT_SCATTER_ELEMENT;
 
-
-
-
 /* Direct call into the driver's scatter/gather buffer marking function */
 int MarkScatterBuffer(void *request, void *buffer);
-
-
 
 #define RNG_GROUP       (0x1000)          /**< RNG Group              */
 #define DES_GROUP       (0x2000)          /**< Des Groups             */
@@ -477,9 +440,6 @@ int MarkScatterBuffer(void *request, void *buffer);
 #define DESC_TYPE_MASK (0xFF00)
 /* Extracts the request group from an OpId */
 #define DESC_NUM_MASK (0x00FF)
-
-
-
 
 /**
  * Common request block for all request headers
@@ -513,8 +473,6 @@ int MarkScatterBuffer(void *request, void *buffer);
     int                           status; \
     void                         *nextReq;
 
-
-
 /**
  * This gets used by driver functions that need access to
  * just the request header without knowing the remaining
@@ -522,14 +480,11 @@ int MarkScatterBuffer(void *request, void *buffer);
  */
 typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 
-
 /* Bits for use with notifyFlags in the request header                        */
 /* NOTIFY_IS_PID and NOTIFY_ERROR_IS_PID are no longer used in 2.0 and after, */
 /* NOTIFY_SIGNAL is used to tell an RTOS to use a signal if needed            */
 #define NOTIFY_SIGNAL       (0x04) /* notify/notify_on_error contain user-defined */
                                    /* signal values for completion notification   */
-
-
 
     /**
      * RNG_REQ - Random-Number generator request block
@@ -549,11 +504,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 
     /* Get random data from the RNG */
 #define DPD_RNG_GETRN (DPD_RNG_GROUP + 0)
-
-
-
-
-
 
     /**
      * DES_CBC_CRYPT_REQ - DES request with context load
@@ -594,9 +544,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_TDES_OFB_64_CTX_ENCRYPT (DPD_DES_CBC_GROUP + 10)
 #define DPD_TDES_OFB_64_CTX_DECRYPT (DPD_DES_CBC_GROUP + 11)
 
-
-
-
     /**
      * DES_CRYPT_REQ - non-context DES cipher operation
      * These are ECB-only operations
@@ -620,9 +567,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_SDES_ECB_DECRYPT (DPD_DES_ECB_GROUP + 1)
 #define DPD_TDES_ECB_ENCRYPT (DPD_DES_ECB_GROUP + 2)
 #define DPD_TDES_ECB_DECRYPT (DPD_DES_ECB_GROUP + 3)
-
-
-
 
     /*
      * AESA_CRYPT_REQ - AES ciphering operations
@@ -670,9 +614,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_AESA_LRW_DECRYPT           (DPD_AESA_CRYPT_GROUP + 21)
 #define DPD_AESA_LRW_NO_TWEAK_DECRYPT  (DPD_AESA_CRYPT_GROUP + 22)
 
-
-
-
     /**
      * RAID_XOR_REQ - specialty AESA XOR operations
      */
@@ -694,9 +635,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_RAID_XOR_GROUP             (AES_GROUP | 0x0200)
 
 #define DPD_RAID_XOR                   (DPD_RAID_XOR_GROUP + 0)
-
-
-
 
 /*
  * AESA_MAC_REQ - AES authenticity operations
@@ -725,9 +663,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_AESA_CMAC_CMP              (DPD_AESA_MAC_GROUP + 1)
 #define DPD_AESA_XCBCMAC               (DPD_AESA_MAC_GROUP + 2)
 #define DPD_AESA_XCBCMAC_CMP           (DPD_AESA_MAC_GROUP + 3)
-
-
-
 
 /*
  * AESA_GCM_REQ
@@ -762,10 +697,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_AESA_GCM_FINAL_ENCRYPT     (DPD_AESA_GCM_GROUP + 2)
 #define DPD_AESA_GCM_FINAL_DECRYPT     (DPD_AESA_GCM_GROUP + 3)
 #define DPD_AESA_GCM_FINAL_DECRYPT_CMP (DPD_AESA_GCM_GROUP + 4)
-
-
-
-
 
     /**
      * KEA_CRYPT_REQ - Kasumi cipher operations
@@ -806,8 +737,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_KEA_f9_CIPHER_FINAL_CMP            (DPD_KEA_CRYPT_GROUP + 8)
 #define DPD_KEA_f9_CIPHER_INIT_FINAL_CMP       (DPD_KEA_CRYPT_GROUP + 9)
 
-
-
     /**
      * SNOW3G_CRYPT_REQ - SNOW for 3G cipher operations
      * Present >= 3.1
@@ -843,8 +772,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_SNOW3G_UIA2_FINAL_CMP              (DPD_SNOW3G_CRYPT_GROUP + 8)
 #define DPD_SNOW3G_UIA2_INIT_FINAL_CMP         (DPD_SNOW3G_CRYPT_GROUP + 9)
 
-
-
     /**
      * ARC4_LOADCTX_CRYPT_REQ - ARC4 cipher operation with context load
      *
@@ -866,9 +793,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_RC4_LDCTX_CRYPT_ULCTX_GROUP (ARC4_GROUP | 0x0400)
 
 #define DPD_RC4_LDCTX_CRYPT_ULCTX       (DPD_RC4_LDCTX_CRYPT_ULCTX_GROUP + 0)
-
-
-
 
     /**
      * ARC4_LOADKEY_CRYPT_UNLOADCTX_REQ - ARC4 operation with key load
@@ -893,9 +817,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 
 #define DPD_RC4_LDKEY_CRYPT_ULCTX       (DPD_RC4_LDKEY_CRYPT_ULCTX_GROUP + 0)
 
-
-
-
     /**
      * HASH_REQ - combined SHA/MD5 hash operations with context loads
      *            and saves
@@ -914,7 +835,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
         unsigned char *cmpData;   /**< digest compare value,
                                         same len as outData           */
     } HASH_REQ;
-
 
 #define NUM_MDHA_DESC                        (30)
 #define DPD_HASH_LDCTX_HASH_ULCTX_GROUP      (MD_GROUP | 0x0400)
@@ -950,9 +870,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_SHA512_LDCTX_HASH_ULCTX_CMP      (DPD_HASH_LDCTX_HASH_ULCTX_GROUP + 29)
 #define DPD_SHA512_LDCTX_IDGS_HASH_ULCTX_CMP (DPD_HASH_LDCTX_HASH_ULCTX_GROUP + 30)
 
-
-
-
 #define NUM_MDHA_PAD_DESC                        (24)
 #define DPD_HASH_LDCTX_HASH_PAD_ULCTX_GROUP      (MD_GROUP | 0x0500)
 
@@ -980,8 +897,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_SHA512_LDCTX_IDGS_HASH_PAD_ULCTX     (DPD_HASH_LDCTX_HASH_PAD_ULCTX_GROUP + 21)
 #define DPD_SHA512_LDCTX_HASH_PAD_ULCTX_CMP      (DPD_HASH_LDCTX_HASH_PAD_ULCTX_GROUP + 22)
 #define DPD_SHA512_LDCTX_IDGS_HASH_PAD_ULCTX_CMP (DPD_HASH_LDCTX_HASH_PAD_ULCTX_GROUP + 23)
-
-
 
     /**
      * HMAC_PAD_REQ - Hash-message authentication code
@@ -1029,8 +944,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_SHA512_LDCTX_HMAC_ULCTX_CMP     (DPD_HASH_LDCTX_HMAC_ULCTX_GROUP + 22)
 #define DPD_SHA512_LDCTX_HMAC_PAD_ULCTX_CMP (DPD_HASH_LDCTX_HMAC_ULCTX_GROUP + 23)
 
-
-
     /**
      * MOD_EXP_REQ - integer public key (modular expo) operations
      *
@@ -1055,8 +968,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_MM_LDCTX_EXP_ULCTX           (DPD_MM_LDCTX_EXP_ULCTX_GROUP + 0)
 #define DPD_MM_LDCTX_EXP_TEQ_ULCTX       (DPD_MM_LDCTX_EXP_ULCTX_GROUP + 1)
 
-
-
     /**
      * MOD_SS_EXP_REQ - single-stage RSA operations
      *
@@ -1080,8 +991,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_MM_SS_RSA_EXP       (DPD_MM_SS_EXP_GROUP + 0)
 #define DPD_MM_SS_RSA_TEQ_EXP   (DPD_MM_SS_EXP_GROUP + 1)
 
-
-
     /**
      * MOD_R2MODN_REQ - Modular R2 operations
      *
@@ -1101,9 +1010,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 
 #define DPD_MM_LDCTX_R2MODN_ULCTX       (DPD_MM_LDCTX_R2MODN_ULCTX_GROUP + 0)
 #define DPD_F2M_R2                      (DPD_MM_LDCTX_R2MODN_ULCTX_GROUP + 1)
-
-
-
 
     /**
      * MOD_RRMODP_REQ - montgomery precomputation operations
@@ -1125,9 +1031,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 
 #define DPD_MM_LDCTX_RRMODP_ULCTX       (DPD_MM_LDCTX_RRMODP_ULCTX_GROUP + 0)
 
-
-
-
     /**
      * MOD_INV_REQ - Modular Inversion
      *
@@ -1148,8 +1051,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_MM_MOD_INV_ULCTX_GROUP (PK_GROUP | 0x0500)
 
 #define DPD_MM_MOD_INV_ULCTX       (DPD_MM_MOD_INV_ULCTX_GROUP + 0)
-
-
 
     /**
      * MOD_2OP_REQ
@@ -1234,10 +1135,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_POLY_LDCTX_A3_B3_MUL2_ULCTX (DPD_MOD_LDCTX_2OP_ULCTX_GROUP + 50)
 #define DPD_POLY_LDCTX_A3_B3_ADD_ULCTX  (DPD_MOD_LDCTX_2OP_ULCTX_GROUP + 51)
 
-
-
-
-
     /**
      * ECC_POINT_REQ - elliptic curve point processing
      *
@@ -1278,8 +1175,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_EC_F2M_AFF_LDCTX_kP_ULCTX  DPD_EC_F2M_AFF_PT_MULT
 #define DPD_EC_F2M_PROJ_LDCTX_kP_ULCTX DPD_EC_F2M_PROJ_PT_MULT
 
-
-
     /**
      * F2M_INV_REQ - Binary Inversion
      *
@@ -1300,9 +1195,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_F2M_INV_ULCTX_GROUP (PK_GROUP | 0x0600)
 
 #define DPD_F2M_INV_ULCTX       (DPD_F2M_INV_ULCTX_GROUP + 0)
-
-
-
 
     /**
      * ECC_2OP_REQ - F2M elliptic curve operations
@@ -1328,8 +1220,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_F2M_LDCTX_MUL1_ULCTX    (DPD_EC_2OP_GROUP + 0)
 #define DPD_F2M_LDCTX_MUL2_ULCTX    (DPD_EC_2OP_GROUP + 1)
 #define DPD_F2M_LDCTX_ADD_ULCTX     (DPD_EC_2OP_GROUP + 2)
-
-
 
     /**
      * ECC_SPKBUILD_REQ - elliptic curve request builder
@@ -1359,9 +1249,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_EC_SPKBUILD_GROUP (PK_GROUP | 0x0c00)
 
 #define DPD_EC_SPKBUILD       (DPD_EC_SPKBUILD_GROUP + 0)
-
-
-
 
     /**
      * ECC_PTADD_DBL_REQ - elliptic curve point add
@@ -1393,11 +1280,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_EC_FPDBL           (DPD_EC_PTADD_DBL_GROUP + 1)
 #define DPD_EC_F2MADD          (DPD_EC_PTADD_DBL_GROUP + 2)
 #define DPD_EC_F2MDBL          (DPD_EC_PTADD_DBL_GROUP + 3)
-
-
-
-
-
 
     /**
      * IPSEC_CBC_REQ - common IPSec/DES-CBC compound request operations
@@ -1453,8 +1335,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_IPSEC_CBC_TDES_DECRYPT_SHA    DPD_IPSEC_CBC_TDES_DECRYPT_SHA_PAD
 #define DPD_IPSEC_CBC_TDES_DECRYPT_SHA256 DPD_IPSEC_CBC_TDES_DECRYPT_SHA256_PAD
 
-
-
     /**
      * IPSEC_ECB_REQ - common IPSec/DES-ECB compound request operations
      *
@@ -1505,8 +1385,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_IPSEC_ECB_TDES_DECRYPT_SHA    DPD_IPSEC_ECB_TDES_DECRYPT_SHA_PAD
 #define DPD_IPSEC_ECB_TDES_DECRYPT_SHA256 DPD_IPSEC_ECB_TDES_DECRYPT_SHA256_PAD
 
-
-
     /**
      * IPSEC_AES_CBC_REQ - common IPSec/AES-CBC compound request operations
      *
@@ -1546,8 +1424,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_IPSEC_AES_CBC_DECRYPT_SHA               (DPD_IPSEC_AES_CBC_GROUP + 10)
 #define DPD_IPSEC_AES_CBC_DECRYPT_SHA256            (DPD_IPSEC_AES_CBC_GROUP + 11)
 
-
-
     /**
      * IPSEC_AES_ECB_REQ - common IPSec/AES-ECB compound request operations
      *
@@ -1584,9 +1460,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_IPSEC_AES_ECB_DECRYPT_MD5               (DPD_IPSEC_AES_ECB_GROUP + 9)
 #define DPD_IPSEC_AES_ECB_DECRYPT_SHA               (DPD_IPSEC_AES_ECB_GROUP + 10)
 #define DPD_IPSEC_AES_ECB_DECRYPT_SHA256            (DPD_IPSEC_AES_ECB_GROUP + 11)
-
-
-
 
     /**
      * IPSEC_ESP_REQ - IPSec Encapsulated system payload compound operations
@@ -1652,10 +1525,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_IPSEC_ESP_IN_TDES_ECB_DCRPT_SHA_PAD_CMP       (DPD_IPSEC_ESP_GROUP + 34)
 #define DPD_IPSEC_ESP_IN_TDES_ECB_DCRPT_SHA256_PAD_CMP    (DPD_IPSEC_ESP_GROUP + 35)
 
-
-
-
-
     /**
      * CCMP_REQ 802.11 counter mode with CBC MAC protocol operation
      *
@@ -1684,8 +1553,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_802_11_CCMP_OUTBOUND              (DPD_CCMP_GROUP + 0)
 #define DPD_802_11_CCMP_INBOUND               (DPD_CCMP_GROUP + 1)
 #define DPD_802_11_CCMP_INBOUND_CMP           (DPD_CCMP_GROUP + 2)
-
-
 
     /**
      * SRTP_REQ - secure RTP compound operations
@@ -1719,10 +1586,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_SRTP_OUTBOUND                                 (DPD_SRTP_GROUP + 0)
 #define DPD_SRTP_INBOUND                                  (DPD_SRTP_GROUP + 1)
 #define DPD_SRTP_INBOUND_CMP                              (DPD_SRTP_GROUP + 2)
-
-
-
-
 
     /*
      * TLS request types
@@ -1798,8 +1661,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_TLS_BLOCK_INBOUND_AES_SHA1_SMAC       (DPD_TLS_BLOCK_INBOUND_GROUP + 28)
 #define DPD_TLS_BLOCK_INBOUND_AES_SHA1_SMAC_CMP   (DPD_TLS_BLOCK_INBOUND_GROUP + 29)
 
-
-
     /**
      * TLS_BLOCK_OUTBOUND_REQ - SSL/TLS block cipher outbound operation
      * This is a 2.1 request type only
@@ -1838,7 +1699,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_TLS_BLOCK_OUTBOUND_AES_MD5          (DPD_TLS_BLOCK_OUTBOUND_GROUP + 6)
 #define DPD_TLS_BLOCK_OUTBOUND_AES_SHA1         (DPD_TLS_BLOCK_OUTBOUND_GROUP + 7)
 #define DPD_TLS_BLOCK_OUTBOUND_AES_SHA256       (DPD_TLS_BLOCK_OUTBOUND_GROUP + 8)
-
 
     /**
      * TLS_STREAM_INBOUND_REQ - SSL/TLS stream cipher inbound operation
@@ -1884,9 +1744,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_TLS_STREAM_INBOUND_SHA256_CMP         (DPD_TLS_STREAM_INBOUND_GROUP + 10)
 #define DPD_TLS_STREAM_INBOUND_CTX_SHA256_CMP     (DPD_TLS_STREAM_INBOUND_GROUP + 11)
 
-
-
-
     /**
      * TLS_STREAM_OUTBOUND_REQ - SSL/TLS stream cipher outbound
      * operation This is a 2.1 request type only
@@ -1921,11 +1778,6 @@ typedef struct { COMMON_REQ_PREAMBLE } GENERIC_REQ;
 #define DPD_TLS_STREAM_OUTBOUND_CTX_MD5          (DPD_TLS_STREAM_OUTBOUND_GROUP + 3)
 #define DPD_TLS_STREAM_OUTBOUND_CTX_SHA1         (DPD_TLS_STREAM_OUTBOUND_GROUP + 4)
 #define DPD_TLS_STREAM_OUTBOUND_CTX_SHA256       (DPD_TLS_STREAM_OUTBOUND_GROUP + 5)
-
-
-
-
-
 
 #ifdef _cplusplus
 }

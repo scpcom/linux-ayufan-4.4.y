@@ -282,7 +282,6 @@ static void portman_write_midi(struct portman *pm,
 	/* Data sent. */
 }
 
-
 /*
  *  Read MIDI byte from port
  *  Attempt to read input byte from specified hardware input port (0..).
@@ -355,7 +354,6 @@ static int portman_read_midi(struct portman *pm, int port)
 	portman_write_data(pm, 1);	/* Cause rising edge, which shifts data. */
 	portman_write_data(pm, 0);	/* Return data clock low. */
 
-
 	/* De-assert Strobe and return data. */
 	portman_write_command(pm, cmdout);	/* Output saved address+IE. */
 
@@ -390,7 +388,6 @@ static int portman_data_avail(struct portman *pm, int channel)
 	/* No Data available */
 	return 0;
 }
-
 
 /*
  *  Flushes any input
@@ -821,7 +818,6 @@ static int __devexit snd_portman_remove(struct platform_device *pdev)
 
 	return 0;
 }
-
 
 static struct platform_driver snd_portman_driver = {
 	.probe  = snd_portman_probe,

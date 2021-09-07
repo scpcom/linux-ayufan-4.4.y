@@ -12,7 +12,6 @@
 /* include all Core registers and bit definitions */
 #include <asm/def_LPBlackfin.h>
 
-
 /*********************************************************************************** */
 /* System MMR Register Map */
 /*********************************************************************************** */
@@ -46,12 +45,10 @@
 #define	SIC_IAR5			0xFFC00138	/* Interrupt Assignment	Register 5 */
 #define	SIC_IAR6			0xFFC0013C	/* Interrupt Assignment	Register 6 */
 
-
 /* Watchdog Timer (0xFFC00200 -	0xFFC002FF) */
 #define	WDOG_CTL	0xFFC00200  /* Watchdog	Control	Register */
 #define	WDOG_CNT	0xFFC00204  /* Watchdog	Count Register */
 #define	WDOG_STAT	0xFFC00208  /* Watchdog	Status Register */
-
 
 /* Real	Time Clock (0xFFC00300 - 0xFFC003FF) */
 #define	RTC_STAT	0xFFC00300  /* RTC Status Register */
@@ -61,7 +58,6 @@
 #define	RTC_ALARM	0xFFC00310  /* RTC Alarm Time Register */
 #define	RTC_FAST	0xFFC00314  /* RTC Prescaler Enable Register */
 #define	RTC_PREN		0xFFC00314  /* RTC Prescaler Enable Register (alternate	macro) */
-
 
 /* UART0 Controller (0xFFC00400	- 0xFFC004FF) */
 #define	UART0_THR	      0xFFC00400  /* Transmit Holding register */
@@ -76,7 +72,6 @@
 #define	UART0_SCR	      0xFFC0041C  /* SCR Scratch Register */
 #define	UART0_GCTL		     0xFFC00424	 /* Global Control Register */
 
-
 /* SPI0	Controller (0xFFC00500 - 0xFFC005FF) */
 
 #define	SPI0_CTL			0xFFC00500  /* SPI0 Control Register */
@@ -87,7 +82,6 @@
 #define	SPI0_BAUD			0xFFC00514  /* SPI0 Baud rate Register */
 #define	SPI0_SHADOW			0xFFC00518  /* SPI0_RDBR Shadow	Register */
 #define SPI0_REGBASE			SPI0_CTL
-
 
 /* TIMER 0, 1, 2 Registers (0xFFC00600 - 0xFFC006FF) */
 #define	TIMER0_CONFIG			0xFFC00600     /* Timer	0 Configuration	Register */
@@ -109,7 +103,6 @@
 #define	TIMER_DISABLE				0xFFC00644	/* Timer Disable Register */
 #define	TIMER_STATUS				0xFFC00648	/* Timer Status	Register */
 
-
 /* Programmable	Flags (0xFFC00700 - 0xFFC007FF) */
 #define	FIO_FLAG_D				0xFFC00700  /* Flag Mask to directly specify state of pins */
 #define	FIO_FLAG_C			0xFFC00704  /* Peripheral Interrupt Flag Register (clear) */
@@ -128,7 +121,6 @@
 #define	FIO_EDGE			0xFFC00738  /* Flag Source Sensitivity Register */
 #define	FIO_BOTH			0xFFC0073C  /* Flag Set	on BOTH	Edges Register */
 #define	FIO_INEN					0xFFC00740  /* Flag Input Enable Register  */
-
 
 /* SPORT0 Controller (0xFFC00800 - 0xFFC008FF) */
 #define	SPORT0_TCR1				0xFFC00800  /* SPORT0 Transmit Configuration 1 Register */
@@ -154,7 +146,6 @@
 #define	SPORT0_MRCS2			0xFFC00858  /* SPORT0 Multi-Channel Receive Select Register 2 */
 #define	SPORT0_MRCS3			0xFFC0085C  /* SPORT0 Multi-Channel Receive Select Register 3 */
 
-
 /* SPORT1 Controller (0xFFC00900 - 0xFFC009FF) */
 #define	SPORT1_TCR1				0xFFC00900  /* SPORT1 Transmit Configuration 1 Register */
 #define	SPORT1_TCR2				0xFFC00904  /* SPORT1 Transmit Configuration 2 Register */
@@ -179,7 +170,6 @@
 #define	SPORT1_MRCS2			0xFFC00958  /* SPORT1 Multi-Channel Receive Select Register 2 */
 #define	SPORT1_MRCS3			0xFFC0095C  /* SPORT1 Multi-Channel Receive Select Register 3 */
 
-
 /* External Bus	Interface Unit (0xFFC00A00 - 0xFFC00AFF) */
 /* Asynchronous	Memory Controller  */
 #define	EBIU_AMGCTL			0xFFC00A00  /* Asynchronous Memory Global Control Register */
@@ -192,8 +182,6 @@
 #define	EBIU_SDRRC			0xFFC00A18  /* SDRAM Refresh Rate Control Register */
 #define	EBIU_SDSTAT			0xFFC00A1C  /* SDRAM Status Register */
 
-
-
 /* DMA Controller 0 Traffic Control Registers (0xFFC00B00 - 0xFFC00BFF) */
 
 #define	DMAC0_TC_PER			0xFFC00B0C	/* DMA Controller 0 Traffic Control Periods Register */
@@ -202,7 +190,6 @@
 /* Alternate deprecated	register names (below) provided	for backwards code compatibility */
 #define	DMA0_TCPER			DMAC0_TC_PER
 #define	DMA0_TCCNT			DMAC0_TC_CNT
-
 
 /* DMA Controller 0 (0xFFC00C00	- 0xFFC00FFF)							 */
 
@@ -430,14 +417,12 @@
 #define MDMA_S1_CURR_X_COUNT MDMA0_S1_CURR_X_COUNT
 #define MDMA_S1_CURR_Y_COUNT MDMA0_S1_CURR_Y_COUNT
 
-
 /* Parallel Peripheral Interface (PPI) (0xFFC01000 - 0xFFC010FF) */
 #define	PPI_CONTROL			0xFFC01000	/* PPI Control Register */
 #define	PPI_STATUS			0xFFC01004	/* PPI Status Register */
 #define	PPI_COUNT			0xFFC01008	/* PPI Transfer	Count Register */
 #define	PPI_DELAY			0xFFC0100C	/* PPI Delay Count Register */
 #define	PPI_FRAME			0xFFC01010	/* PPI Frame Length Register */
-
 
 /* Two-Wire Interface 0	(0xFFC01400 - 0xFFC014FF)			 */
 #define	TWI0_CLKDIV			0xFFC01400	/* Serial Clock	Divider	Register */
@@ -463,7 +448,6 @@
 #define	TWI0_PRESCALE	 TWI0_CONTROL
 #define	TWI0_INT_SRC	 TWI0_INT_STAT
 #define	TWI0_INT_ENABLE	 TWI0_INT_MASK
-
 
 /* General-Purpose Ports  (0xFFC01500 -	0xFFC015FF)	 */
 
@@ -502,7 +486,6 @@
 /* Alternate deprecated	register names (below) provided	for backwards code compatibility */
 #define	DMA1_TCPER			DMAC1_TC_PER
 #define	DMA1_TCCNT			DMAC1_TC_CNT
-
 
 /* DMA Controller 1 (0xFFC01C00	- 0xFFC01FFF)							 */
 #define	DMA8_NEXT_DESC_PTR		0xFFC01C00	/* DMA Channel 8 Next Descriptor Pointer Register */
@@ -729,7 +712,6 @@
 #define	MDMA1_S1_CURR_X_COUNT	0xFFC01FF0	/* MemDMA1 Stream 1 Source Current X Count Register */
 #define	MDMA1_S1_CURR_Y_COUNT	0xFFC01FF8	/* MemDMA1 Stream 1 Source Current Y Count Register */
 
-
 /* UART1 Controller		(0xFFC02000 - 0xFFC020FF)	 */
 #define	UART1_THR			0xFFC02000	/* Transmit Holding register */
 #define	UART1_RBR			0xFFC02000	/* Receive Buffer register */
@@ -743,7 +725,6 @@
 #define	UART1_SCR			0xFFC0201C	/* SCR Scratch Register */
 #define	UART1_GCTL			0xFFC02024	/* Global Control Register */
 
-
 /* UART2 Controller		(0xFFC02100 - 0xFFC021FF)	 */
 #define	UART2_THR			0xFFC02100	/* Transmit Holding register */
 #define	UART2_RBR			0xFFC02100	/* Receive Buffer register */
@@ -756,7 +737,6 @@
 #define	UART2_LSR			0xFFC02114	/* Line	Status Register */
 #define	UART2_SCR			0xFFC0211C	/* SCR Scratch Register */
 #define	UART2_GCTL			0xFFC02124	/* Global Control Register */
-
 
 /* Two-Wire Interface 1	(0xFFC02200 - 0xFFC022FF)			 */
 #define	TWI1_CLKDIV			0xFFC02200	/* Serial Clock	Divider	Register */
@@ -777,12 +757,10 @@
 #define	TWI1_RCV_DATA16		0xFFC0228C	/* FIFO	Receive	Data Double Byte Register */
 #define TWI1_REGBASE		TWI1_CLKDIV
 
-
 /* the following are for backwards compatibility */
 #define	TWI1_PRESCALE	  TWI1_CONTROL
 #define	TWI1_INT_SRC	  TWI1_INT_STAT
 #define	TWI1_INT_ENABLE	  TWI1_INT_MASK
-
 
 /* SPI1	Controller		(0xFFC02300 - 0xFFC023FF)	 */
 #define	SPI1_CTL			0xFFC02300  /* SPI1 Control Register */
@@ -828,7 +806,6 @@
 #define	SPORT2_MRCS2		0xFFC02558	/* SPORT2 Multi-Channel	Receive	Select Register	2 */
 #define	SPORT2_MRCS3		0xFFC0255C	/* SPORT2 Multi-Channel	Receive	Select Register	3 */
 
-
 /* SPORT3 Controller		(0xFFC02600 - 0xFFC026FF)			 */
 #define	SPORT3_TCR1			0xFFC02600	/* SPORT3 Transmit Configuration 1 Register */
 #define	SPORT3_TCR2			0xFFC02604	/* SPORT3 Transmit Configuration 2 Register */
@@ -852,7 +829,6 @@
 #define	SPORT3_MRCS1		0xFFC02654	/* SPORT3 Multi-Channel	Receive	Select Register	1 */
 #define	SPORT3_MRCS2		0xFFC02658	/* SPORT3 Multi-Channel	Receive	Select Register	2 */
 #define	SPORT3_MRCS3		0xFFC0265C	/* SPORT3 Multi-Channel	Receive	Select Register	3 */
-
 
 /* Media Transceiver (MXVR)   (0xFFC02700 - 0xFFC028FF) */
 
@@ -993,7 +969,6 @@
 #define	MXVR_PLL_CTL_1	      0xFFC028BC  /* MXVR Phase	Lock Loop Control Register 1 */
 #define	MXVR_BLOCK_CNT	      0xFFC028C0  /* MXVR Block	Counter */
 #define	MXVR_PLL_CTL_2	      0xFFC028C4  /* MXVR Phase	Lock Loop Control Register 2 */
-
 
 /* CAN Controller		(0xFFC02A00 - 0xFFC02FFF)				 */
 /* For Mailboxes 0-15											 */
@@ -1417,7 +1392,6 @@
 #define	CAN_MB_DATA1(x)		(CAN_MB00_DATA1+((x)*0x20))
 #define	CAN_MB_DATA0(x)		(CAN_MB00_DATA0+((x)*0x20))
 
-
 /*********************************************************************************** */
 /* System MMR Register Bits and	Macros */
 /******************************************************************************* */
@@ -1508,7 +1482,6 @@
 #define	BMODE			0x0006	/* Boot	Mode - Latched During HW Reset From Mode Pins */
 #define	NOBOOT			0x0010	/* Execute From	L1 or ASYNC Bank 0 When	BMODE =	0 */
 
-
 /* *************  SYSTEM INTERRUPT CONTROLLER MASKS ***************** */
 
 /* Peripheral Masks For	SIC0_ISR, SIC0_IWR, SIC0_IMASK */
@@ -1548,7 +1521,6 @@
 /* the following are for backwards compatibility */
 #define	DMA0_ERR_IRQ		DMAC0_ERR_IRQ
 #define	DMA1_ERR_IRQ		DMAC1_ERR_IRQ
-
 
 /* Peripheral Masks For	SIC_ISR1, SIC_IWR1, SIC_IMASK1	 */
 #define	CAN_ERR_IRQ			0x00000001	/* CAN Error Interrupt Request */
@@ -1608,7 +1580,6 @@
 #define	IWR_DISABLE(x)	(0xFFFFFFFF ^ (1 << ((x)&0x1F)))	/* Wakeup Disable Peripheral #x */
 #endif /* _MISRA_RULES */
 
-
 /* ********* WATCHDOG TIMER MASKS ******************** */
 /* Watchdog Timer WDOG_CTL Register Masks */
 #ifdef _MISRA_RULES
@@ -1642,7 +1613,6 @@
 #define	ICTL_P0			0x01
 #define	ICTL_P1			0x02
 #define	TRO_P			0x0F
-
 
 /* ***************  REAL TIME CLOCK MASKS  **************************/
 /* RTC_STAT and	RTC_ALARM register */
@@ -1692,7 +1662,6 @@
 #define	DAY				DIE		/* 24 Hours (Days) Interrupt Enable */
 #define	DAY_ALARM		DAIE		/* Day Alarm (Day, Hour, Minute, Second) Interrupt Enable */
 #define	WRITE_COMPLETE	WCIE		/* Write Complete Interrupt Enable */
-
 
 /* ***************************** UART CONTROLLER MASKS ********************** */
 /* UARTx_LCR Register */
@@ -1768,7 +1737,6 @@
 #define	TPOLC_P		0x02
 #define	IREN_P		0x01
 #define	UCEN_P		0x00
-
 
 /* **********  SERIAL PORT MASKS  ********************** */
 /* SPORTx_TCR1 Masks */
@@ -1848,7 +1816,6 @@
 #define	SET_WSIZE(x)	(((((x)>>0x3)-1)&0xF) << 0xC)	/* Multichannel	Window Size = (x/8)-1 */
 #endif /* _MISRA_RULES */
 
-
 /*SPORTx_MCMC2 Masks */
 #define	MCCRM		0x0003	/*Multichannel Clock Recovery Mode */
 #define	REC_BYPASS	0x0000		/* Bypass Mode (No Clock Recovery) */
@@ -1875,7 +1842,6 @@
 #define	MFD_13		0xD000		/* Multichannel	Frame Delay = 13 */
 #define	MFD_14		0xE000		/* Multichannel	Frame Delay = 14 */
 #define	MFD_15		0xF000		/* Multichannel	Frame Delay = 15 */
-
 
 /*  *********  PARALLEL	PERIPHERAL INTERFACE (PPI) MASKS ****************   */
 /*  PPI_CONTROL	Masks	      */
@@ -1906,7 +1872,6 @@
 #define	POLC		0x4000		/* PPI Clock Polarity */
 #define	POLS		0x8000		/* PPI Frame Sync Polarity */
 
-
 /* PPI_STATUS Masks					     */
 #define	FLD			0x0400	/* Field Indicator   */
 #define	FT_ERR		0x0800	/* Frame Track Error */
@@ -1914,7 +1879,6 @@
 #define	UNDR		0x2000	/* FIFO	Underrun Error */
 #define	ERR_DET		0x4000	/* Error Detected Indicator */
 #define	ERR_NCOR	0x8000	/* Error Not Corrected Indicator */
-
 
 /* **********  DMA CONTROLLER MASKS  ***********************/
 /* DMAx_CONFIG,	MDMA_yy_CONFIG Masks */
@@ -1997,7 +1961,6 @@
 #define	PMAP_UART2RX	    0xA000  /* PMAP UART2 Receive DMA */
 #define	PMAP_UART2TX	    0xB000  /* PMAP UART2 Transmit DMA */
 
-
 /*  *************  GENERAL PURPOSE TIMER MASKS	******************** */
 /* PWM Timer bit definitions */
 /* TIMER_ENABLE	Register */
@@ -2078,7 +2041,6 @@
 #define	ERR_TYP_P0		0x0E
 #define	ERR_TYP_P1		0x0F
 
-
 /*/ ******************	 GENERAL-PURPOSE I/O  ********************* */
 /*  Flag I/O (FIO_) Masks */
 #define	PF0			0x0001
@@ -2115,7 +2077,6 @@
 #define	PF13_P		0xD
 #define	PF14_P		0xE
 #define	PF15_P		0xF
-
 
 /*******************   GPIO MASKS  *********************/
 /* Port	C Masks */
@@ -2207,7 +2168,6 @@
 #define	PE14_P	0xE
 #define	PE15_P	0xF
 
-
 /* ***********	SERIAL PERIPHERAL INTERFACE (SPI) MASKS	 **************** */
 /* SPIx_CTL Masks */
 #define	TIMOD		0x0003		/* Transfer Initiate Mode */
@@ -2277,7 +2237,6 @@
 #define	FLG5E	0xDFFF		/* Activates SPI_FLOUT5	 */
 #define	FLG6E	0xBFFF		/* Activates SPI_FLOUT6	 */
 #define	FLG7E	0x7FFF		/* Activates SPI_FLOUT7	 */
-
 
 /* *********************  ASYNCHRONOUS MEMORY CONTROLLER MASKS	************* */
 /* EBIU_AMGCTL Masks */
@@ -2548,7 +2507,6 @@
 #define	SDEASE			0x00000010 /* SDRAM EAB	sticky error status - W1C */
 #define	BGSTAT			0x00000020 /* Bus granted */
 
-
 /*  ********************  TWO-WIRE INTERFACE (TWIx) MASKS  ***********************/
 /* TWIx_CLKDIV Macros (Use: *pTWIx_CLKDIV = CLKLOW(x)|CLKHI(y);	 ) */
 #ifdef _MISRA_RULES
@@ -2624,7 +2582,6 @@
 #define	RCV_HALF	0x0004		/*		Receive	FIFO Has 1 Byte	To Read */
 #define	RCV_FULL	0x000C		/*		Receive	FIFO Full (2 Bytes To Read) */
 
-
 /********************************* MXVR	MASKS ****************************************/
 
 /* MXVR_CONFIG Masks */
@@ -2649,7 +2606,6 @@
 #else
 #define	SET_MSB(x)     (((x)&0xF) << 0x9)
 #endif /* _MISRA_RULES */
-
 
 /* MXVR_PLL_CTL_0 Masks */
 
@@ -2722,7 +2678,6 @@
 #define	MFSSEL_PULSE_HI	 0x20000000lu
 #define	MFSSEL_PULSE_LO	 0x40000000lu
 
-
 /* MXVR_PLL_CTL_1 Masks */
 
 #define	MSTO	   0x00000001lu
@@ -2741,7 +2696,6 @@
 #else
 #define	SET_MPLLCNT(x)	   (((x)&0xFFFF) << 0x10)
 #endif /* _MISRA_RULES */
-
 
 /* MXVR_PLL_CTL_2 Masks */
 
@@ -2781,7 +2735,6 @@
 #define	BMERR 0x40000000lu
 #define	DERR  0x80000000lu
 
-
 /* MXVR_INT_EN_0 Masks */
 
 #define	NI2AEN	NI2A
@@ -2815,7 +2768,6 @@
 #define	BMERREN	BMERR
 #define	DERREN	DERR
 
-
 /* MXVR_INT_STAT_1 Masks */
 
 #define	APR   0x00000004lu
@@ -2845,7 +2797,6 @@
 #define	DONEX(x) (0x00000002 <<	(4 * (x)))
 #define	HDONEX(x) (0x00000001 << (4 * (x)))
 
-
 /* MXVR_INT_EN_1 Masks */
 
 #define	APREN	APR
@@ -2874,7 +2825,6 @@
 
 #define	DONEENX(x) (0x00000002 << (4 * (x)))
 #define	HDONEENX(x) (0x00000001	<< (4 *	(x)))
-
 
 /* MXVR_STATE_0	Masks */
 
@@ -2908,7 +2858,6 @@
 #define	RSB	 0x0F000000lu
 #define	DERRNUM	 0xF0000000lu
 
-
 /* MXVR_STATE_1	Masks */
 
 #define	STXNUMB	    0x0000000Flu
@@ -2933,48 +2882,40 @@
 #define	DMAPMEN6    0x40000000lu
 #define	DMAPMEN7    0x80000000lu
 
-
 /* MXVR_POSITION Masks */
 
 #define	PVALID	     0x8000
 #define	POSITION     0x003F
-
 
 /* MXVR_MAX_POSITION Masks */
 
 #define	MPVALID	     0x8000
 #define	MPOSITION    0x003F
 
-
 /* MXVR_DELAY Masks */
 
 #define	DVALID	     0x8000
 #define	DELAY	     0x003F
-
 
 /* MXVR_MAX_DELAY Masks */
 
 #define	MDVALID	     0x8000
 #define	MDELAY	     0x003F
 
-
 /* MXVR_LADDR Masks */
 
 #define	LVALID	     0x80000000lu
 #define	LADDR	     0x0000FFFFlu
-
 
 /* MXVR_GADDR Masks */
 
 #define	GVALID	     0x8000
 #define	GADDRL	     0x00FF
 
-
 /* MXVR_AADDR Masks */
 
 #define	AVALID	     0x80000000lu
 #define	AADDR	     0x0000FFFFlu
-
 
 /* MXVR_ALLOC_0	Masks */
 
@@ -2988,7 +2929,6 @@
 #define	CL2	     0x007F0000lu
 #define	CL3	     0x7F000000lu
 
-
 /* MXVR_ALLOC_1	Masks */
 
 #define	CIU4	     0x00000080lu
@@ -3000,7 +2940,6 @@
 #define	CL5	     0x00007F00lu
 #define	CL6	     0x007F0000lu
 #define	CL7	     0x7F000000lu
-
 
 /* MXVR_ALLOC_2	Masks */
 
@@ -3014,7 +2953,6 @@
 #define	CL10	     0x007F0000lu
 #define	CL11	     0x7F000000lu
 
-
 /* MXVR_ALLOC_3	Masks */
 
 #define	CIU12	     0x00000080lu
@@ -3026,7 +2964,6 @@
 #define	CL13	     0x00007F00lu
 #define	CL14	     0x007F0000lu
 #define	CL15	     0x7F000000lu
-
 
 /* MXVR_ALLOC_4	Masks */
 
@@ -3040,7 +2977,6 @@
 #define	CL18	     0x007F0000lu
 #define	CL19	     0x7F000000lu
 
-
 /* MXVR_ALLOC_5	Masks */
 
 #define	CIU20	     0x00000080lu
@@ -3052,7 +2988,6 @@
 #define	CL21	     0x00007F00lu
 #define	CL22	     0x007F0000lu
 #define	CL23	     0x7F000000lu
-
 
 /* MXVR_ALLOC_6	Masks */
 
@@ -3066,7 +3001,6 @@
 #define	CL26	     0x007F0000lu
 #define	CL27	     0x7F000000lu
 
-
 /* MXVR_ALLOC_7	Masks */
 
 #define	CIU28	     0x00000080lu
@@ -3078,7 +3012,6 @@
 #define	CL29	     0x00007F00lu
 #define	CL30	     0x007F0000lu
 #define	CL31	     0x7F000000lu
-
 
 /* MXVR_ALLOC_8	Masks */
 
@@ -3092,7 +3025,6 @@
 #define	CL34	     0x007F0000lu
 #define	CL35	     0x7F000000lu
 
-
 /* MXVR_ALLOC_9	Masks */
 
 #define	CIU36	     0x00000080lu
@@ -3104,7 +3036,6 @@
 #define	CL37	     0x00007F00lu
 #define	CL38	     0x007F0000lu
 #define	CL39	     0x7F000000lu
-
 
 /* MXVR_ALLOC_10 Masks */
 
@@ -3118,7 +3049,6 @@
 #define	CL42	     0x007F0000lu
 #define	CL43	     0x7F000000lu
 
-
 /* MXVR_ALLOC_11 Masks */
 
 #define	CIU44	     0x00000080lu
@@ -3130,7 +3060,6 @@
 #define	CL45	     0x00007F00lu
 #define	CL46	     0x007F0000lu
 #define	CL47	     0x7F000000lu
-
 
 /* MXVR_ALLOC_12 Masks */
 
@@ -3144,7 +3073,6 @@
 #define	CL50	     0x007F0000lu
 #define	CL51	     0x7F000000lu
 
-
 /* MXVR_ALLOC_13 Masks */
 
 #define	CIU52	     0x00000080lu
@@ -3156,7 +3084,6 @@
 #define	CL53	     0x00007F00lu
 #define	CL54	     0x007F0000lu
 #define	CL55	     0x7F000000lu
-
 
 /* MXVR_ALLOC_14 Masks */
 
@@ -3170,7 +3097,6 @@
 #define	CL58	     0x007F0000lu
 #define	CL59	     0x7F000000lu
 
-
 /* MXVR_SYNC_LCHAN_0 Masks */
 
 #define	LCHANPC0     0x0000000Flu
@@ -3181,7 +3107,6 @@
 #define	LCHANPC5     0x00F00000lu
 #define	LCHANPC6     0x0F000000lu
 #define	LCHANPC7     0xF0000000lu
-
 
 /* MXVR_SYNC_LCHAN_1 Masks */
 
@@ -3194,7 +3119,6 @@
 #define	LCHANPC14    0x0F000000lu
 #define	LCHANPC15    0xF0000000lu
 
-
 /* MXVR_SYNC_LCHAN_2 Masks */
 
 #define	LCHANPC16    0x0000000Flu
@@ -3205,7 +3129,6 @@
 #define	LCHANPC21    0x00F00000lu
 #define	LCHANPC22    0x0F000000lu
 #define	LCHANPC23    0xF0000000lu
-
 
 /* MXVR_SYNC_LCHAN_3 Masks */
 
@@ -3218,7 +3141,6 @@
 #define	LCHANPC30    0x0F000000lu
 #define	LCHANPC31    0xF0000000lu
 
-
 /* MXVR_SYNC_LCHAN_4 Masks */
 
 #define	LCHANPC32    0x0000000Flu
@@ -3229,7 +3151,6 @@
 #define	LCHANPC37    0x00F00000lu
 #define	LCHANPC38    0x0F000000lu
 #define	LCHANPC39    0xF0000000lu
-
 
 /* MXVR_SYNC_LCHAN_5 Masks */
 
@@ -3242,7 +3163,6 @@
 #define	LCHANPC46    0x0F000000lu
 #define	LCHANPC47    0xF0000000lu
 
-
 /* MXVR_SYNC_LCHAN_6 Masks */
 
 #define	LCHANPC48    0x0000000Flu
@@ -3254,14 +3174,12 @@
 #define	LCHANPC54    0x0F000000lu
 #define	LCHANPC55    0xF0000000lu
 
-
 /* MXVR_SYNC_LCHAN_7 Masks */
 
 #define	LCHANPC56    0x0000000Flu
 #define	LCHANPC57    0x000000F0lu
 #define	LCHANPC58    0x00000F00lu
 #define	LCHANPC59    0x0000F000lu
-
 
 /* MXVR_DMAx_CONFIG Masks */
 
@@ -3309,7 +3227,6 @@
 #define	COUNTPOS_6  0x18000000lu
 #define	COUNTPOS_7  0x1C000000lu
 
-
 /* MXVR_AP_CTL Masks */
 
 #define	STARTAP	   0x00000001lu
@@ -3318,7 +3235,6 @@
 #define	APRBE0	   0x00004000lu
 #define	APRBE1	   0x00008000lu
 #define	APRBEX	   0x0000C000lu
-
 
 /* MXVR_CM_CTL Masks */
 
@@ -3342,15 +3258,12 @@
 #define	CMRBE14	   0x40000000lu
 #define	CMRBE15	   0x80000000lu
 
-
 /* MXVR_PAT_DATA_x Masks */
 
 #define	MATCH_DATA_0 0x000000FFlu
 #define	MATCH_DATA_1 0x0000FF00lu
 #define	MATCH_DATA_2 0x00FF0000lu
 #define	MATCH_DATA_3 0xFF000000lu
-
-
 
 /* MXVR_PAT_EN_x Masks */
 
@@ -3390,7 +3303,6 @@
 #define	MATCH_EN_3_6 0x40000000lu
 #define	MATCH_EN_3_7 0x80000000lu
 
-
 /* MXVR_ROUTING_0 Masks */
 
 #define	MUTE_CH0	0x00000080lu
@@ -3403,7 +3315,6 @@
 #define	TX_CH2		0x007F0000lu
 #define	TX_CH3		0x7F000000lu
 
-
 /* MXVR_ROUTING_1 Masks */
 
 #define	MUTE_CH4	0x00000080lu
@@ -3415,7 +3326,6 @@
 #define	TX_CH5		0x00007F00lu
 #define	TX_CH6		0x007F0000lu
 #define	TX_CH7		0x7F000000lu
-
 
 /* MXVR_ROUTING_2 Masks */
 
@@ -3441,7 +3351,6 @@
 #define	TX_CH14		0x007F0000lu
 #define	TX_CH15		0x7F000000lu
 
-
 /* MXVR_ROUTING_4 Masks */
 
 #define	MUTE_CH16	0x00000080lu
@@ -3453,7 +3362,6 @@
 #define	TX_CH17		0x00007F00lu
 #define	TX_CH18		0x007F0000lu
 #define	TX_CH19		0x7F000000lu
-
 
 /* MXVR_ROUTING_5 Masks */
 
@@ -3467,7 +3375,6 @@
 #define	TX_CH22		0x007F0000lu
 #define	TX_CH23		0x7F000000lu
 
-
 /* MXVR_ROUTING_6 Masks */
 
 #define	MUTE_CH24	0x00000080lu
@@ -3479,7 +3386,6 @@
 #define	TX_CH25		0x00007F00lu
 #define	TX_CH26		0x007F0000lu
 #define	TX_CH27		0x7F000000lu
-
 
 /* MXVR_ROUTING_7 Masks */
 
@@ -3493,7 +3399,6 @@
 #define	TX_CH30		0x007F0000lu
 #define	TX_CH31		0x7F000000lu
 
-
 /* MXVR_ROUTING_8 Masks */
 
 #define	MUTE_CH32	0x00000080lu
@@ -3505,7 +3410,6 @@
 #define	TX_CH33		0x00007F00lu
 #define	TX_CH34		0x007F0000lu
 #define	TX_CH35		0x7F000000lu
-
 
 /* MXVR_ROUTING_9 Masks */
 
@@ -3519,7 +3423,6 @@
 #define	TX_CH38		0x007F0000lu
 #define	TX_CH39		0x7F000000lu
 
-
 /* MXVR_ROUTING_10 Masks */
 
 #define	MUTE_CH40	0x00000080lu
@@ -3531,7 +3434,6 @@
 #define	TX_CH41		0x00007F00lu
 #define	TX_CH42		0x007F0000lu
 #define	TX_CH43		0x7F000000lu
-
 
 /* MXVR_ROUTING_11 Masks */
 
@@ -3545,7 +3447,6 @@
 #define	TX_CH46		0x007F0000lu
 #define	TX_CH47		0x7F000000lu
 
-
 /* MXVR_ROUTING_12 Masks */
 
 #define	MUTE_CH48	0x00000080lu
@@ -3557,7 +3458,6 @@
 #define	TX_CH49		0x00007F00lu
 #define	TX_CH50		0x007F0000lu
 #define	TX_CH51		0x7F000000lu
-
 
 /* MXVR_ROUTING_13 Masks */
 
@@ -3571,7 +3471,6 @@
 #define	TX_CH54		0x007F0000lu
 #define	TX_CH55		0x7F000000lu
 
-
 /* MXVR_ROUTING_14 Masks */
 
 #define	MUTE_CH56	0x00000080lu
@@ -3584,7 +3483,6 @@
 #define	TX_CH58		0x007F0000lu
 #define	TX_CH59		0x7F000000lu
 
-
 /* Control Message Receive Buffer (CMRB) Address Offsets */
 
 #define	CMRB_STRIDE	  0x00000016lu
@@ -3592,7 +3490,6 @@
 #define	CMRB_DST_OFFSET	  0x00000000lu
 #define	CMRB_SRC_OFFSET	  0x00000002lu
 #define	CMRB_DATA_OFFSET  0x00000005lu
-
 
 /* Control Message Transmit Buffer (CMTB) Address Offsets */
 
@@ -3611,7 +3508,6 @@
 #define	CMTB_STAT_W_OFFSET  0x00000014lu
 #define	CMTB_STAT_G_OFFSET  0x00000014lu
 
-
 /* Asynchronous	Packet Receive Buffer (APRB) Address Offsets */
 
 #define	APRB_STRIDE	  0x00000400lu
@@ -3621,7 +3517,6 @@
 #define	APRB_SRC_OFFSET	  0x00000004lu
 #define	APRB_DATA_OFFSET  0x00000006lu
 
-
 /* Asynchronous	Packet Transmit	Buffer (APTB) Address Offsets */
 
 #define	APTB_PRIO_OFFSET  0x00000000lu
@@ -3630,13 +3525,10 @@
 #define	APTB_SRC_OFFSET	  0x00000006lu
 #define	APTB_DATA_OFFSET  0x00000008lu
 
-
 /* Remote Read Buffer (RRDB) Address Offsets */
 
 #define	RRDB_WADDR_OFFSET 0x00000100lu
 #define	RRDB_WLEN_OFFSET  0x00000101lu
-
-
 
 /* ************	 CONTROLLER AREA NETWORK (CAN) MASKS  ***************/
 /* CAN_CONTROL Masks					 */

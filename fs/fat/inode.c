@@ -41,7 +41,6 @@
 static int fat_default_codepage = CONFIG_FAT_DEFAULT_CODEPAGE;
 static char fat_default_iocharset[] = CONFIG_FAT_DEFAULT_IOCHARSET;
 
-
 static int fat_add_cluster(struct inode *inode)
 {
 	int err, cluster;

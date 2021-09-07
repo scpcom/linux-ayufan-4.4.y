@@ -145,7 +145,6 @@ struct stub_entry {
 
 #define mask(x,sz)		((x) & ~((1<<(sz))-1))
 
-
 /* The reassemble_* functions prepare an immediate value for
    insertion into an opcode. pa-risc uses all sorts of weird bitfields
    in the instruction to hold the value.  */
@@ -181,7 +180,6 @@ static inline int reassemble_16a(int as16)
 	s = (as16 & 0x8000);
 	return (t ^ s ^ (s >> 1)) | (s >> 15);
 }
-
 
 static inline int reassemble_17(int as17)
 {
@@ -290,7 +288,6 @@ static inline unsigned long count_stubs(const Elf_Rela *rela, unsigned long n)
 	return cnt;
 }
 #endif
-
 
 /* Free memory returned from module_alloc */
 void module_free(struct module *mod, void *module_region)
@@ -456,7 +453,6 @@ static Elf_Addr get_stub(struct module *me, unsigned long value, long addend,
 
 	/* do not write outside available stub area */
 	BUG_ON(0 == me->arch.section[targetsec].stub_entries--);
-
 
 #ifndef CONFIG_64BIT
 /* for 32-bit the stub looks like this:

@@ -67,7 +67,6 @@ static void udf_update_extents(struct inode *,
 			       struct extent_position *);
 static int udf_get_block(struct inode *, sector_t, struct buffer_head *, int);
 
-
 void udf_delete_inode(struct inode *inode)
 {
 	truncate_inode_pages(&inode->i_data, 0);

@@ -65,7 +65,6 @@ csum_partial_copy_from_user(const void __user *src, void *dst,
 	return csum_partial(dst, len, sum);
 }
 
-
 static inline __wsum
 csum_partial_copy_nocheck (const void *src, void *dst, int len, __wsum sum)
 {
@@ -145,5 +144,3 @@ static inline __sum16 ip_compute_csum(const void *buff, int len)
 }
 
 #endif /* _S390_CHECKSUM_H */
-
-

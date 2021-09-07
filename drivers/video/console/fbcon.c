@@ -349,7 +349,6 @@ static inline int get_color(struct vc_data *vc, struct fb_info *info,
 		break;
 	}
 
-
 	return color;
 }
 
@@ -688,7 +687,6 @@ static int fbcon_invalid_charcount(struct fb_info *info, unsigned charcount)
 
 #endif /* CONFIG_MISC_TILEBLITTING */
 
-
 static int con2fb_acquire_newinfo(struct vc_data *vc, struct fb_info *info,
 				  int unit, int oldidx)
 {
@@ -839,7 +837,6 @@ static int set_con2fb_map(int unit, int newidx, int user)
 	con2fb_map[unit] = newidx;
 	if (!err && !found)
  		err = con2fb_acquire_newinfo(vc, info, unit, oldidx);
-
 
 	/*
 	 * If old fb is not mapped to any of the consoles,
@@ -1977,7 +1974,6 @@ static int fbcon_scroll(struct vc_data *vc, int t, int b, int dir,
 	return 0;
 }
 
-
 static void fbcon_bmove(struct vc_data *vc, int sy, int sx, int dy, int dx,
 			int height, int width)
 {
@@ -2290,7 +2286,6 @@ static void fbcon_generic_blank(struct vc_data *vc, struct fb_info *info,
 		fbcon_clear(vc, 0, 0, vc->vc_rows, vc->vc_cols);
 		vc->vc_video_erase_char = oldc;
 	}
-
 
 	if (!lock_fb_info(info))
 		return;

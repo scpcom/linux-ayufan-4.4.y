@@ -87,7 +87,6 @@
 #define MC_EXCEPTION_PROLOG(n, addition)				    \
 	EXCEPTION_PROLOG(n, MC, addition##_MC)
 
-
 /* Variants of the "addition" argument for the prolog
  */
 #define PROLOG_ADDITION_NONE_GEN
@@ -217,7 +216,6 @@ exc_##n##_bad_stack:							    \
 	.section	".toc","aw"
 exception_marker:
 	.tc	ID_EXC_MARKER[TC],STACK_FRAME_REGS_MARKER
-
 
 /*
  * And here we have the exception vectors !
@@ -427,7 +425,6 @@ interrupt_end_book3e:
 
 kernel_dbg_exc:
 	b	.	/* NYI */
-
 
 /*
  * An interrupt came in while soft-disabled; clear EE in SRR1,
@@ -892,7 +889,6 @@ _GLOBAL(start_initialization_book3e)
 	tovirt(r28,r28)
 	mtlr	r28
 	blr
-
 
 /*
  * Secondary core/processor entry

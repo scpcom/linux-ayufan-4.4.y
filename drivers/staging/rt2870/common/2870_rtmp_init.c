@@ -41,7 +41,6 @@
 
 #include "../rt_config.h"
 
-
 static void rx_done_tasklet(unsigned long data);
 static void rt2870_hcca_dma_done_tasklet(unsigned long data);
 static void rt2870_ac3_dma_done_tasklet(unsigned long data);
@@ -53,7 +52,6 @@ static void rt2870_null_frame_complete_tasklet(unsigned long data);
 static void rt2870_rts_frame_complete_tasklet(unsigned long data);
 static void rt2870_pspoll_frame_complete_tasklet(unsigned long data);
 static void rt2870_dataout_complete_tasklet(unsigned long data);
-
 
 /*
 ========================================================================
@@ -80,7 +78,6 @@ NDIS_STATUS	NICInitRecv(
 	UCHAR				i;
 	NDIS_STATUS			Status = NDIS_STATUS_SUCCESS;
 	POS_COOKIE			pObj = (POS_COOKIE) pAd->OS_Cookie;
-
 
 	DBGPRINT(RT_DEBUG_TRACE, ("--> NICInitRecv\n"));
 	pObj = pObj;
@@ -148,7 +145,6 @@ out1:
 
 	return Status;
 }
-
 
 /*
 ========================================================================
@@ -262,7 +258,6 @@ NDIS_STATUS	NICInitTransmit(
 			pAd->BulkOutPending[acidx] = FALSE;
 		}
 
-
 		//
 		// MGMT_RING_SIZE
 		//
@@ -322,7 +317,6 @@ NDIS_STATUS	NICInitTransmit(
 		for(i=0; i<BEACON_RING_SIZE; i++) // 2
 		{
 			PTX_CONTEXT	pBeaconContext = &(pAd->BeaconContext[i]);
-
 
 			NdisZeroMemory(pBeaconContext, sizeof(TX_CONTEXT));
 
@@ -393,7 +387,6 @@ NDIS_STATUS	NICInitTransmit(
 
 	}   while (FALSE);
 
-
 done:
 	DBGPRINT(RT_DEBUG_TRACE, ("<-- NICInitTransmit\n"));
 
@@ -444,7 +437,6 @@ out1:
 	return Status;
 }
 
-
 /*
 ========================================================================
 Routine Description:
@@ -468,9 +460,7 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 	NDIS_STATUS		Status;
 	INT				num;
 
-
 	DBGPRINT(RT_DEBUG_TRACE, ("--> RTMPAllocTxRxRingMemory\n"));
-
 
 	do
 	{
@@ -479,7 +469,6 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 		NdisAcquireSpinLock(&pAd->CmdQLock);
 		RTUSBInitializeCmdQ(&pAd->CmdQ);
 		NdisReleaseSpinLock(&pAd->CmdQLock);
-
 
 		NdisAllocateSpinLock(&pAd->MLMEBulkOutLock);
 		//NdisAllocateSpinLock(&pAd->MLMEWaitQueueLock);
@@ -541,7 +530,6 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 	return Status;
 }
 
-
 /*
 ========================================================================
 Routine Description:
@@ -572,7 +560,6 @@ VOID	RTMPFreeTxRxRingMemory(
 								Context->data_dma);			\
 		Context->TransferBuffer = NULL; }
 
-
 	UINT                i, acidx;
 	PTX_CONTEXT			pNullContext   = &pAd->NullContext;
 	PTX_CONTEXT			pPsPollContext = &pAd->PsPollContext;
@@ -602,7 +589,6 @@ VOID	RTMPFreeTxRxRingMemory(
 	// Free RTS frame resource
 	LM_URB_FREE(pObj, pRTSContext, sizeof(TX_BUFFER));
 
-
 	// Free beacon frame resource
 	for(i=0; i<BEACON_RING_SIZE; i++)
 	{
@@ -610,7 +596,6 @@ VOID	RTMPFreeTxRxRingMemory(
 		if (pBeaconContext)
 			LM_URB_FREE(pObj, pBeaconContext, sizeof(TX_BUFFER));
 	}
-
 
 	// Free mgmt frame resource
 	for(i = 0; i < MGMT_RING_SIZE; i++)
@@ -636,7 +621,6 @@ VOID	RTMPFreeTxRxRingMemory(
 	}
 	if (pAd->MgmtDescRing.AllocVa)
 		NdisFreeMemory(pAd->MgmtDescRing.AllocVa, pAd->MgmtDescRing.AllocSize, 0);
-
 
 	// Free Tx frame resource
 		for(acidx=0; acidx<4; acidx++)
@@ -672,7 +656,6 @@ VOID	RTMPFreeTxRxRingMemory(
 	DBGPRINT(RT_DEBUG_ERROR, ("<--- ReleaseAdapter\n"));
 }
 
-
 /*
 ========================================================================
 Routine Description:
@@ -696,7 +679,6 @@ NDIS_STATUS AdapterBlockAllocateMemory(
 	PUSB_DEV	usb_dev;
 	POS_COOKIE	pObj = (POS_COOKIE) handle;
 
-
 	usb_dev = pObj->pUsb_Dev;
 
 	pObj->MLMEThr_pid	= NULL;
@@ -715,7 +697,6 @@ NDIS_STATUS AdapterBlockAllocateMemory(
 		return (NDIS_STATUS_FAILURE);
 	}
 }
-
 
 /*
 ========================================================================
@@ -851,7 +832,6 @@ VOID	RTMPAddBSSIDCipher(
 
 	if (KeyIdx > 4)
 		return;
-
 
 	if (pAd->MacTab.Content[Aid].PairwiseKey.CipherAlg == CIPHER_TKIP)
 	{	if (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPANone)
@@ -1090,7 +1070,6 @@ label_null:
 	return NULL;
 }
 
-
 /*
 ========================================================================
 Routine Description:
@@ -1117,7 +1096,6 @@ static void rx_done_tasklet(unsigned long data)
 	pRxContext	= (PRX_CONTEXT)pUrb->context;
 	pAd 		= pRxContext->pAd;
 	Status = pUrb->status;
-
 
 	RTMP_IRQ_LOCK(&pAd->BulkInLock, IrqFlags);
 	pRxContext->InUse = FALSE;
@@ -1167,7 +1145,6 @@ static void rx_done_tasklet(unsigned long data)
 
 }
 
-
 static void rt2870_mgmt_dma_done_tasklet(unsigned long data)
 {
 	PRTMP_ADAPTER 	pAd;
@@ -1178,7 +1155,6 @@ static void rt2870_mgmt_dma_done_tasklet(unsigned long data)
 	NTSTATUS		Status;
 	unsigned long	IrqFlags;
 
-
 	pUrb			= (purbb_t)data;
 	pMLMEContext	= (PTX_CONTEXT)pUrb->context;
 	pAd 			= pMLMEContext->pAd;
@@ -1188,7 +1164,6 @@ static void rt2870_mgmt_dma_done_tasklet(unsigned long data)
 	ASSERT((pAd->MgmtRing.TxDmaIdx == index));
 
 	RTMP_IRQ_LOCK(&pAd->BulkOutLock[MGMTPIPEIDX], IrqFlags);
-
 
 	if (Status != USB_ST_NOERROR)
 	{
@@ -1255,7 +1230,6 @@ static void rt2870_mgmt_dma_done_tasklet(unsigned long data)
 
 }
 
-
 static void rt2870_hcca_dma_done_tasklet(unsigned long data)
 {
 	PRTMP_ADAPTER		pAd;
@@ -1301,14 +1275,12 @@ static void rt2870_hcca_dma_done_tasklet(unsigned long data)
 	DBGPRINT_RAW(RT_DEBUG_ERROR, ("<---hcca_dma_done_tasklet\n"));
 }
 
-
 static void rt2870_ac3_dma_done_tasklet(unsigned long data)
 {
 	PRTMP_ADAPTER		pAd;
 	PHT_TX_CONTEXT		pHTTXContext;
 	UCHAR				BulkOutPipeId = 3;
 	purbb_t				pUrb;
-
 
 	pUrb			= (purbb_t)data;
 	pHTTXContext	= (PHT_TX_CONTEXT)pUrb->context;
@@ -1343,10 +1315,8 @@ static void rt2870_ac3_dma_done_tasklet(unsigned long data)
 		}
 	}
 
-
 		return;
 }
-
 
 static void rt2870_ac2_dma_done_tasklet(unsigned long data)
 {
@@ -1354,7 +1324,6 @@ static void rt2870_ac2_dma_done_tasklet(unsigned long data)
 	PHT_TX_CONTEXT		pHTTXContext;
 	UCHAR				BulkOutPipeId = 2;
 	purbb_t				pUrb;
-
 
 	pUrb			= (purbb_t)data;
 	pHTTXContext	= (PHT_TX_CONTEXT)pUrb->context;
@@ -1392,14 +1361,12 @@ static void rt2870_ac2_dma_done_tasklet(unsigned long data)
 		return;
 }
 
-
 static void rt2870_ac1_dma_done_tasklet(unsigned long data)
 {
 	PRTMP_ADAPTER		pAd;
 	PHT_TX_CONTEXT		pHTTXContext;
 	UCHAR				BulkOutPipeId = 1;
 	purbb_t				pUrb;
-
 
 	pUrb			= (purbb_t)data;
 	pHTTXContext	= (PHT_TX_CONTEXT)pUrb->context;
@@ -1434,10 +1401,8 @@ static void rt2870_ac1_dma_done_tasklet(unsigned long data)
 		}
 	}
 
-
 	return;
 }
-
 
 static void rt2870_ac0_dma_done_tasklet(unsigned long data)
 {
@@ -1445,7 +1410,6 @@ static void rt2870_ac0_dma_done_tasklet(unsigned long data)
 	PHT_TX_CONTEXT		pHTTXContext;
 	UCHAR				BulkOutPipeId = 0;
 	purbb_t				pUrb;
-
 
 	pUrb			= (purbb_t)data;
 	pHTTXContext	= (PHT_TX_CONTEXT)pUrb->context;
@@ -1480,11 +1444,9 @@ static void rt2870_ac0_dma_done_tasklet(unsigned long data)
 		}
 	}
 
-
 	return;
 
 }
-
 
 static void rt2870_null_frame_complete_tasklet(unsigned long data)
 {
@@ -1493,7 +1455,6 @@ static void rt2870_null_frame_complete_tasklet(unsigned long data)
 	purbb_t			pUrb;
 	NTSTATUS		Status;
 	unsigned long	irqFlag;
-
 
 	pUrb			= (purbb_t)data;
 	pNullContext	= (PTX_CONTEXT)pUrb->context;
@@ -1538,7 +1499,6 @@ static void rt2870_null_frame_complete_tasklet(unsigned long data)
 
 }
 
-
 static void rt2870_rts_frame_complete_tasklet(unsigned long data)
 {
 	PRTMP_ADAPTER	pAd;
@@ -1546,7 +1506,6 @@ static void rt2870_rts_frame_complete_tasklet(unsigned long data)
 	purbb_t			pUrb;
 	NTSTATUS		Status;
 	unsigned long	irqFlag;
-
 
 	pUrb		= (purbb_t)data;
 	pRTSContext	= (PTX_CONTEXT)pUrb->context;
@@ -1592,14 +1551,12 @@ static void rt2870_rts_frame_complete_tasklet(unsigned long data)
 
 }
 
-
 static void rt2870_pspoll_frame_complete_tasklet(unsigned long data)
 {
 	PRTMP_ADAPTER	pAd;
 	PTX_CONTEXT		pPsPollContext;
 	purbb_t			pUrb;
 	NTSTATUS		Status;
-
 
 	pUrb			= (purbb_t)data;
 	pPsPollContext	= (PTX_CONTEXT)pUrb->context;
@@ -1639,7 +1596,6 @@ static void rt2870_pspoll_frame_complete_tasklet(unsigned long data)
 
 }
 
-
 static void rt2870_dataout_complete_tasklet(unsigned long data)
 {
 	PRTMP_ADAPTER		pAd;
@@ -1649,7 +1605,6 @@ static void rt2870_dataout_complete_tasklet(unsigned long data)
 	UCHAR				BulkOutPipeId;
 	NTSTATUS			Status;
 	unsigned long		IrqFlags;
-
 
 	pUrb			= (purbb_t)data;
 	pHTTXContext	= (PHT_TX_CONTEXT)pUrb->context;
@@ -1679,7 +1634,6 @@ static void rt2870_dataout_complete_tasklet(unsigned long data)
 		//RTMP_IRQ_LOCK(&pAd->TxContextQueueLock[BulkOutPipeId], IrqFlags);
 		FREE_HTTX_RING(pAd, BulkOutPipeId, pHTTXContext);
 		//RTMP_IRQ_UNLOCK(&pAd->TxContextQueueLock[BulkOutPipeId], IrqFlags);
-
 
 	}
 	else	// STATUS_OTHER

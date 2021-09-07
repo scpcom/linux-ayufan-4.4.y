@@ -96,7 +96,6 @@ END_FTR_SECTION_IFCLR(CPU_FTR_1T_SEGMENT)
 	srdi.	r9,r10,USER_ESID_BITS
 	bne-	8f			/* invalid ea bits set */
 
-
 	/* when using slices, we extract the psize off the slice bitmaps
 	 * and then we need to get the sllp encoding off the mmu_psize_defs
 	 * array.
@@ -201,7 +200,6 @@ _GLOBAL(slb_allocate_user)
 
 #endif /* __DISABLED__ */
 
-
 /*
  * Finish loading of an SLB entry and return
  *
@@ -296,4 +294,3 @@ slb_finish_load_1T:
 	/* r3 = EA, r11 = VSID data */
 	clrrdi	r3,r3,SID_SHIFT_1T	/* clear out non-ESID bits */
 	b	7b
-

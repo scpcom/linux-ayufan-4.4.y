@@ -30,7 +30,6 @@
 #include "iuu_phoenix.h"
 #include <linux/random.h>
 
-
 #ifdef CONFIG_USB_SERIAL_DEBUG
 static int debug = 1;
 #else
@@ -82,7 +81,6 @@ struct iuu_private {
 	u8 len;
 	int vcc;		/* vcc (either 3 or 5 V) */
 };
-
 
 static void iuu_free_buf(struct iuu_private *priv)
 {
@@ -200,7 +198,6 @@ static void iuu_rxcmd(struct urb *urb)
 		/* error stop all */
 		return;
 	}
-
 
 	memset(port->write_urb->transfer_buffer, IUU_UART_RX, 1);
 	usb_fill_bulk_urb(port->write_urb, port->serial->dev,
@@ -434,8 +431,6 @@ static void iuu_led_activity_off(struct urb *urb)
 			  iuu_rxcmd, port);
 	result = usb_submit_urb(port->write_urb, GFP_ATOMIC);
 }
-
-
 
 static int iuu_clk(struct usb_serial_port *port, int dwFrq)
 {
@@ -1063,7 +1058,6 @@ static int iuu_open(struct tty_struct *tty, struct usb_serial_port *port)
 					  port->bulk_out_endpointAddress),
 			  port->bulk_out_buffer, 512,
 			  NULL, NULL);
-
 
 	usb_fill_bulk_urb(port->read_urb, port->serial->dev,
 			  usb_rcvbulkpipe(port->serial->dev,

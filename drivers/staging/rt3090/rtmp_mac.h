@@ -38,8 +38,6 @@
 #ifndef __RTMP_MAC_H__
 #define __RTMP_MAC_H__
 
-
-
 // =================================================================================
 // TX / RX ring descriptor format
 // =================================================================================
@@ -49,7 +47,6 @@
 #define FIFO_MGMT                 0
 #define FIFO_HCCA                 1
 #define FIFO_EDCA                 2
-
 
 //
 // TXD Wireless Information format for Tx ring and Mgmt Ring
@@ -129,7 +126,6 @@ typedef	struct	PACKED _TXWI_STRUC {
 }	TXWI_STRUC, *PTXWI_STRUC;
 #endif
 
-
 //
 // RXWI wireless information format, in PBF. invisible in driver.
 //
@@ -195,11 +191,9 @@ typedef	struct	PACKED _RXWI_STRUC {
 }	RXWI_STRUC, *PRXWI_STRUC;
 #endif
 
-
 // =================================================================================
 // Register format
 // =================================================================================
-
 
 //
 // SCH/DMA registers - base address 0x0200
@@ -499,7 +493,6 @@ typedef	union	_CWMAX_CSR_STRUC	{
 }	CWMAX_CSR_STRUC, *PCWMAX_CSR_STRUC;
 #endif
 
-
 //
 // AC_TXOP_CSR0: AC_BK/AC_BE TXOP register
 //
@@ -544,7 +537,6 @@ typedef	union	_AC_TXOP_CSR1_STRUC	{
 }	AC_TXOP_CSR1_STRUC, *PAC_TXOP_CSR1_STRUC;
 #endif
 
-
 #define RINGREG_DIFF			0x10
 #define GPIO_CTRL_CFG    0x0228	//MAC_CSR13
 #define MCU_CMD_CFG    0x022c
@@ -579,7 +571,6 @@ typedef	union	_AC_TXOP_CSR1_STRUC	{
 #define RX_MAX_CNT      0x0294
 #define RX_CRX_IDX       0x0298
 #define RX_DRX_IDX      0x029c
-
 
 #define USB_DMA_CFG      0x02a0
 #ifdef RT_BIG_ENDIAN
@@ -620,7 +611,6 @@ typedef	union	_USB_DMA_CFG_STRUC	{
 }	USB_DMA_CFG_STRUC, *PUSB_DMA_CFG_STRUC;
 #endif
 
-
 //
 //  3  PBF  registers
 //
@@ -651,7 +641,6 @@ typedef	union	_USB_DMA_CFG_STRUC	{
 #define PCIE_PHY_TX_ATTENUATION_CTRL	0x05C8
 #define LDO_CFG0				0x05d4
 #define GPIO_SWITCH				0x05dc
-
 
 //
 //  4  MAC  registers
@@ -1264,7 +1253,6 @@ typedef	union	_LG_FBK_CFG1_STRUC	{
 }	LG_FBK_CFG1_STRUC, *PLG_FBK_CFG1_STRUC;
 #endif
 
-
 //=======================================================
 //================ Protection Paramater================================
 //=======================================================
@@ -1757,7 +1745,6 @@ typedef	union	_MPDU_DEN_CNT_STRUC	{
 #define SHAREDKEYTABLE			0
 #define PAIRWISEKEYTABLE			1
 
-
 #ifdef RT_BIG_ENDIAN
 typedef	union	_SHAREDKEY_MODE_STRUC	{
 	struct	{
@@ -1809,7 +1796,6 @@ typedef struct _HW_WCID_ENTRY {  // 8-byte per entry
     UCHAR   Rsv[2];
 } HW_WCID_ENTRY, PHW_WCID_ENTRY;
 
-
 // =================================================================================
 // WCID  format
 // =================================================================================
@@ -1848,7 +1834,6 @@ typedef	struct	_MAC_ATTRIBUTE_STRUC {
 	UINT32		rsv:22;
 }	MAC_ATTRIBUTE_STRUC, *PMAC_ATTRIBUTE_STRUC;
 #endif
-
 
 // =================================================================================
 // HOST-MCU communication data structure
@@ -1904,7 +1889,6 @@ typedef union _M2H_CMD_DONE_STRUC {
 } M2H_CMD_DONE_STRUC, *PM2H_CMD_DONE_STRUC;
 #endif
 
-
 //NAV_TIME_CFG :NAV
 #ifdef RT_BIG_ENDIAN
 typedef	union	_NAV_TIME_CFG_STRUC	{
@@ -1929,7 +1913,6 @@ typedef	union	_NAV_TIME_CFG_STRUC	{
 	UINT32			word;
 }	NAV_TIME_CFG_STRUC, *PNAV_TIME_CFG_STRUC;
 #endif
-
 
 //
 // RX_FILTR_CFG:  /RX configuration register
@@ -1992,9 +1975,6 @@ typedef	union	_RX_FILTR_CFG_STRUC	{
 }	RX_FILTR_CFG_STRUC, *PRX_FILTR_CFG_STRUC;
 #endif
 
-
-
-
 //
 // PHY_CSR4: RF serial control register
 //
@@ -2021,7 +2001,6 @@ typedef	union	_PHY_CSR4_STRUC	{
 	UINT32			word;
 }	PHY_CSR4_STRUC, *PPHY_CSR4_STRUC;
 #endif
-
 
 //
 // SEC_CSR5: shared key table security mode register
@@ -2072,7 +2051,6 @@ typedef	union	_SEC_CSR5_STRUC	{
 }	SEC_CSR5_STRUC, *PSEC_CSR5_STRUC;
 #endif
 
-
 //
 // HOST_CMD_CSR: For HOST to interrupt embedded processor
 //
@@ -2094,12 +2072,9 @@ typedef	union	_HOST_CMD_CSR_STRUC	{
 }	HOST_CMD_CSR_STRUC, *PHOST_CMD_CSR_STRUC;
 #endif
 
-
 //
 // AIFSN_CSR: AIFSN for each EDCA AC
 //
-
-
 
 //
 // E2PROM_CSR: EEPROM control register
@@ -2211,7 +2186,6 @@ typedef	union	_RF_CSR_CFG_STRUC	{
 }	RF_CSR_CFG_STRUC, *PRF_CSR_CFG_STRUC;
 #endif
 
-
 //
 // Other on-chip shared memory space, base = 0x2000
 //
@@ -2273,8 +2247,6 @@ typedef	union	_RF_CSR_CFG_STRUC	{
 //
 #define E2PROM_CSR          0x0004
 #define IO_CNTL_CSR         0x77d0
-
-
 
 // ================================================================
 // Tx /	Rx / Mgmt ring descriptor definition

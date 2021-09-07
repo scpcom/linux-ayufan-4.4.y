@@ -26,13 +26,10 @@
 #ifndef __mvStack_h__
 #define __mvStack_h__
 
-
 /* includes */
 #include "mvTypes.h"
 
-
 /* defines  */
-
 
 /* typedefs */
 /* Data structure describes general purpose Stack */
@@ -137,4 +134,3 @@ MV_STATUS   mvStackDelete(void* stackHndl);
 void        mvStackStatus(void* stackHndl, MV_BOOL isPrintElements);
 
 #endif /* __mvStack_h__ */
-

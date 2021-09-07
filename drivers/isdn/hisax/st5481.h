@@ -13,7 +13,6 @@
 #ifndef _ST5481_H_
 #define _ST5481_H_
 
-
 // USB IDs, the Product Id is in the range 0x4810-0x481F
 
 #define ST_VENDOR_ID 0x0483
@@ -87,7 +86,6 @@
 #define GPIO_IN			0x54 /* GPIO pins input register */ 
 #define TXCI			0x56 /* CI command to be transmitted */
 
-
 // Format of the interrupt packet received on endpoint 1:
 //
 // +--------+--------+--------+--------+--------+--------+
@@ -126,7 +124,6 @@
 
 #define ANY_REC_INT	(IN_OVERRUN+IN_UP+IN_DOWN+IN_COUNTER_ZEROED)
 #define ANY_XMIT_INT	(OUT_UNDERRUN+OUT_UP+OUT_DOWN+OUT_COUNTER_ZEROED)
-
 
 // Level 1 commands that are sent using the TXCI device request
 #define ST5481_CMD_DR		 0x0 /* Deactivation Request */
@@ -524,7 +521,5 @@ static inline const char *ST5481_CMD_string(int evt)
 #define DBG_ISO_PACKET(level,urb) do {} while (0)
 
 #endif
-
-
 
 #endif 

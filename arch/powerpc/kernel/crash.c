@@ -114,7 +114,6 @@ static void crash_soft_reset_check(int cpu)
 		cpu_relax();
 }
 
-
 static void crash_kexec_prepare_cpus(int cpu)
 {
 	unsigned int msecs;
@@ -358,7 +357,6 @@ void default_machine_crash_shutdown(struct pt_regs *regs)
 {
 	unsigned int i;
 	int (*old_handler)(struct pt_regs *regs);
-
 
 	/*
 	 * This function is only called after the system

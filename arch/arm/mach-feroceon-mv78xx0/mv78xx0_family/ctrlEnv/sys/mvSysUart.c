@@ -62,8 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
-
 #include "mvUart.h"
 #include "mvIdma.h"
 #include "mvUart.h"
@@ -71,10 +69,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mvSysIdma.h"
 #include "mvSysUart.h"
 
-
 /* static variables */
 static volatile MV_UART_PORT* uartBase[MV_UART_MAX_CHAN]; 
-
 
 /*******************************************************************************
 * mvUartDmaInit - Init a uart port in DMA mode.
@@ -149,7 +145,6 @@ MV_VOID mvUartDmaInit(MV_U32 port, MV_U32 baudDivisor, MV_UART_PORT* base,
     return;
 }
 
-
 /*******************************************************************************
 * mvUartDmaTransmit - Transmit a buffer over the UART using the IDMA.
 *
@@ -209,4 +204,3 @@ MV_STATUS mvUartDmaTransmit(MV_U32 port, MV_U32 byteCount, MV_U32 srcAddr)
     else
         return MV_ERROR;    
 }
-

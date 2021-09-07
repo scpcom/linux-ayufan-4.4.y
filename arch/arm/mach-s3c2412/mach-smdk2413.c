@@ -97,11 +97,9 @@ static void smdk2413_udc_pullup(enum s3c2410_udc_cmd_e cmd)
 	}
 }
 
-
 static struct s3c2410_udc_mach_info smdk2413_udc_cfg __initdata = {
 	.udc_command		= smdk2413_udc_pullup,
 };
-
 
 static struct platform_device *smdk2413_devices[] __initdata = {
 	&s3c_device_usb,
@@ -141,7 +139,6 @@ static void __init smdk2413_machine_init(void)
 	s3c2410_modify_misccr(S3C2410_MISCCR_USBHOST |
 			      S3C2410_MISCCR_USBSUSPND0 |
 			      S3C2410_MISCCR_USBSUSPND1, 0x0);
-
 
  	s3c24xx_udc_set_platdata(&smdk2413_udc_cfg);
 	s3c_i2c0_set_platdata(NULL);

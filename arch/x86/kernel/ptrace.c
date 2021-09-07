@@ -1456,7 +1456,6 @@ void send_sigtrap(struct task_struct *tsk, struct pt_regs *regs,
 	force_sig_info(SIGTRAP, &info, tsk);
 }
 
-
 #ifdef CONFIG_X86_32
 # define IS_IA32	1
 #elif defined CONFIG_IA32_EMULATION

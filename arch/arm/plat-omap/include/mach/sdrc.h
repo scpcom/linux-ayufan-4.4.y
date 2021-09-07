@@ -74,7 +74,6 @@
 #define SDRC_RFR_CTRL_110MHz	(0x0002da01 | 1) /* Need to calc */
 #define SDRC_RFR_CTRL_BYPASS	(0x00005000 | 1) /* Need to calc */
 
-
 /*
  * SMS register access
  */
@@ -90,7 +89,6 @@
 
 #define SMS_SYSCONFIG		0x010
 /* REVISIT: fill in other SMS registers here */
-
 
 #ifndef __ASSEMBLER__
 

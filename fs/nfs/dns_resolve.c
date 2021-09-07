@@ -35,7 +35,6 @@ struct nfs_dns_ent {
 	size_t addrlen;
 };
 
-
 static void nfs_dns_ent_update(struct cache_head *cnew,
 		struct cache_head *ckey)
 {
@@ -344,4 +343,3 @@ void nfs_dns_resolver_destroy(void)
 {
 	nfs_cache_unregister(&nfs_dns_resolve);
 }
-

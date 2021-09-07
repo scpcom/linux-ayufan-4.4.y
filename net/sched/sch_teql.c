@@ -216,7 +216,6 @@ static int teql_qdisc_init(struct Qdisc *sch, struct nlattr *opt)
 	return 0;
 }
 
-
 static int
 __teql_resolve(struct sk_buff *skb, struct sk_buff *skb_res, struct net_device *dev)
 {

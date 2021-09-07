@@ -161,4 +161,3 @@
 #define UVC_STATUS_TYPE_STREAMING			2
 
 #endif /* __LINUX_USB_VIDEO_H */
-

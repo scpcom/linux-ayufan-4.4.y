@@ -20,7 +20,6 @@ GT_SYS_CONFIG   cfg;
 GT_QD_DEV       diagDev;
 GT_QD_DEV       *dev=&diagDev;
 
-
 /*
  *  Initialize the QuarterDeck. This should be done in BSP driver init routine.
  *	Since BSP is not combined with QuarterDeck driver, we are doing here.
@@ -112,4 +111,3 @@ GT_STATUS status;
 
 	return GT_OK;
 }
-

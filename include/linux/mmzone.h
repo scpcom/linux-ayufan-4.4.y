@@ -328,7 +328,6 @@ struct zone {
 	unsigned long		*pageblock_flags;
 #endif /* CONFIG_SPARSEMEM */
 
-
 	ZONE_PADDING(_pad1_)
 
 	/* Fields commonly accessed by the page reclaim scanner */
@@ -365,7 +364,6 @@ struct zone {
 	 * this zone's LRU.  Maintained by the pageout code.
 	 */
 	unsigned int inactive_ratio;
-
 
 	ZONE_PADDING(_pad2_)
 	/* Rarely used or read-mostly fields */
@@ -481,7 +479,6 @@ static inline int zone_is_oom_locked(const struct zone *zone)
  */
 #define MAX_ZONELISTS 2
 
-
 /*
  * We cache key information from each zonelist for smaller cache
  * footprint when scanning for free pages in get_page_from_freelist().
@@ -539,7 +536,6 @@ static inline int zone_is_oom_locked(const struct zone *zone)
  * time, we don't lock it.  This is just hint data - if it is wrong now
  * and then, the allocator will still function, perhaps a bit slower.
  */
-
 
 struct zonelist_cache {
 	unsigned short z_to_n[MAX_ZONES_PER_ZONELIST];		/* zone->nid */

@@ -421,7 +421,6 @@ static inline void falcon_notify_tx_desc(struct efx_tx_queue *tx_queue)
 			   TX_DESC_UPD_REG_KER_DWORD, tx_queue->queue);
 }
 
-
 /* For each entry inserted into the software descriptor ring, create a
  * descriptor in the hardware TX descriptor ring (in host memory), and
  * write a doorbell.
@@ -1155,7 +1154,6 @@ void falcon_remove_eventq(struct efx_channel *channel)
 	falcon_free_special_buffer(channel->efx, &channel->eventq);
 }
 
-
 /* Generates a test event on the event queue.  A subsequent call to
  * process_eventq() should pick up the event and place the value of
  * "magic" into channel->eventq_magic;
@@ -1188,7 +1186,6 @@ void falcon_sim_phy_event(struct efx_nic *efx)
  * Flush handling
  *
  **************************************************************************/
-
 
 static void falcon_poll_flush_events(struct efx_nic *efx)
 {
@@ -1469,7 +1466,6 @@ static irqreturn_t falcon_legacy_interrupt_b0(int irq, void *dev_id)
 	return result;
 }
 
-
 static irqreturn_t falcon_legacy_interrupt_a1(int irq, void *dev_id)
 {
 	struct efx_nic *efx = dev_id;
@@ -1544,7 +1540,6 @@ static irqreturn_t falcon_msi_interrupt(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
-
 
 /* Setup RSS indirection table.
  * This maps from the hash value of the packet to RXQ
@@ -2328,7 +2323,6 @@ void falcon_set_multicast_hash(struct efx_nic *efx)
 	falcon_write(efx, &mc_hash->oword[1], MAC_MCAST_HASH_REG1_KER);
 }
 
-
 /**************************************************************************
  *
  * Falcon test code
@@ -2673,7 +2667,6 @@ static int falcon_spi_device_init(struct efx_nic *efx,
 	*spi_device_ret = spi_device;
 	return 0;
 }
-
 
 static void falcon_remove_spi_devices(struct efx_nic *efx)
 {
@@ -3146,4 +3139,3 @@ struct efx_nic_type falcon_b_nic_type = {
 				   * interrupt handler only supports 32
 				   * channels */
 };
-

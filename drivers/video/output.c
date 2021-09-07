@@ -26,7 +26,6 @@
 #include <linux/err.h>
 #include <linux/ctype.h>
 
-
 MODULE_DESCRIPTION("Display Output Switcher Lowlevel Control Abstraction");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Luming Yu <luming.yu@intel.com>");
@@ -72,7 +71,6 @@ static struct device_attribute video_output_attributes[] = {
 	__ATTR(state, 0644, video_output_show_state, video_output_store_state),
 	__ATTR_NULL,
 };
-
 
 static struct class video_output_class = {
 	.name = "video_output",

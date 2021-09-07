@@ -277,7 +277,6 @@ GT_STATUS gpirl2ReadResource
 
 }
 
-
 /*******************************************************************************
 * gpirl2DisableResource
 *
@@ -424,7 +423,6 @@ GT_STATUS gpirl2SetCurTimeUpInt
 
 	return GT_OK;	
 }
-
 
 /*******************************************************************************
 * gpirl2WriteTSMResource
@@ -697,8 +695,6 @@ GT_STATUS gpirl2ReadTSMResource
 
 }
 
-
-
 /****************************************************************************/
 /* Internal functions.                                                  */
 /****************************************************************************/
@@ -745,7 +741,6 @@ GT_STATUS gpirl2Initialize
 
 	return GT_OK;
 }
-
 
 /*******************************************************************************
 * pirl2OperationPerform
@@ -1351,7 +1346,6 @@ static GT_STATUS pirl2WriteResource
 	return GT_OK;	
 }
 
-
 /*******************************************************************************
 * pirl2ReadResource
 *
@@ -1405,7 +1399,6 @@ static GT_STATUS pirl2ReadResource
 		data[i] = (GT_U16)opData.irlData;
 	}
 	
-
 	/* reg0 data */
 	res->bktRateType = (data[0] >> 15) & 0x1;
 	res->bktTypeMask = (data[0] >> 0) & 0x7FFF;
@@ -1440,7 +1433,6 @@ static GT_STATUS pirl2ReadResource
 
 	return GT_OK;
 }
-
 
 /*******************************************************************************
 * pirl2WriteTSMResource
@@ -1525,7 +1517,6 @@ static GT_STATUS pirl2WriteTSMResource
 
 	return GT_OK;	
 }
-
 
 /*******************************************************************************
 * pirl2ReadTSMResource
@@ -1679,4 +1670,3 @@ GT_STATUS pirl2DumpResource
 	return GT_OK;	
 }
 #endif /* PIRL2_DEBUG */
-

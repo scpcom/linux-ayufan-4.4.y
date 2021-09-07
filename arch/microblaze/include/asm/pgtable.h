@@ -514,7 +514,6 @@ extern void add_hash_page(unsigned context, unsigned long va, pte_t *ptep);
 #define __pte_to_swp_entry(pte)	((swp_entry_t) { pte_val(pte) >> 2 })
 #define __swp_entry_to_pte(x)	((pte_t) { (x).val << 2 })
 
-
 /* CONFIG_APUS */
 /* For virtual address to physical address conversion */
 extern void cache_clear(__u32 addr, int length);

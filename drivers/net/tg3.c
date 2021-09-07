@@ -15,7 +15,6 @@
  *	notice is accompanying it.
  */
 
-
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/kernel.h>
@@ -1558,7 +1557,6 @@ static void tg3_phy_toggle_apd(struct tg3 *tp, bool enable)
 		reg |= MII_TG3_MISC_SHDW_SCR5_DLLAPD;
 
 	tg3_writephy(tp, MII_TG3_MISC_SHDW, reg);
-
 
 	reg = MII_TG3_MISC_SHDW_WREN |
 	      MII_TG3_MISC_SHDW_APD_SEL |
@@ -6883,7 +6881,6 @@ static int tg3_load_tso_firmware(struct tg3 *tp)
 	return 0;
 }
 
-
 static int tg3_set_mac_addr(struct net_device *dev, void *p)
 {
 	struct tg3 *tp = netdev_priv(dev);
@@ -7018,7 +7015,6 @@ static void tg3_rings_reset(struct tg3 *tp)
 	     txrcb < limit; txrcb += TG3_BDINFO_SIZE)
 		tg3_write_mem(tp, txrcb + TG3_BDINFO_MAXLEN_FLAGS,
 			      BDINFO_FLAGS_DISABLED);
-
 
 	/* Disable all receive return rings but the first. */
 	if (GET_ASIC_REV(tp->pci_chip_rev_id) == ASIC_REV_5717)
@@ -11177,7 +11173,6 @@ static void __devinit tg3_get_57780_nvram_info(struct tg3 *tp)
 		tp->tg3_flags3 |= TG3_FLG3_NO_NVRAM_ADDR_TRANS;
 }
 
-
 static void __devinit tg3_get_5717_nvram_info(struct tg3 *tp)
 {
 	u32 nvcfg1;
@@ -13992,7 +13987,6 @@ static int __devinit tg3_init_one(struct pci_dev *pdev,
 	else
 		dev->netdev_ops = &tg3_netdev_ops_dma_bug;
 
-
 	/* The EPB bridge inside 5714, 5715, and 5780 and any
 	 * device behind the EPB cannot support DMA addresses > 40-bit.
 	 * On 64-bit systems with IOMMU, use 40-bit dma_mask.
@@ -14072,7 +14066,6 @@ static int __devinit tg3_init_one(struct pci_dev *pdev,
 		    GET_ASIC_REV(tp->pci_chip_rev_id) == ASIC_REV_5717)
 			dev->features |= NETIF_F_TSO_ECN;
 	}
-
 
 	if (tp->pci_chip_rev_id == CHIPREV_ID_5705_A1 &&
 	    !(tp->tg3_flags2 & TG3_FLG2_TSO_CAPABLE) &&

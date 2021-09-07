@@ -349,7 +349,6 @@ struct msm_adsp_ops audrec_adsp_ops = {
 	.event = audrec_dsp_event,
 };
 
-
 #define audio_send_queue_pre(audio, cmd, len) \
 	msm_adsp_write(audio->audpre, QDSP_uPAudPreProcCmdQueue, cmd, len)
 #define audio_send_queue_recbs(audio, cmd, len) \

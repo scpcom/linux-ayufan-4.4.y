@@ -158,7 +158,6 @@ static void		 ip_rt_update_pmtu(struct dst_entry *dst, u32 mtu);
 static int rt_garbage_collect(struct dst_ops *ops);
 static void rt_emergency_hash_rebuild(struct net *net);
 
-
 static struct dst_ops ipv4_dst_ops = {
 	.family =		AF_INET,
 	.protocol =		cpu_to_be16(ETH_P_IP),
@@ -193,7 +192,6 @@ const __u8 ip_tos2prio[16] = {
 	TC_PRIO_INTERACTIVE_BULK,
 	ECN_OR_COST(INTERACTIVE_BULK)
 };
-
 
 /*
  * Route cache.
@@ -431,7 +429,6 @@ static const struct file_operations rt_cache_seq_fops = {
 	.release = seq_release_net,
 };
 
-
 static void *rt_cpu_seq_start(struct seq_file *seq, loff_t *pos)
 {
 	int cpu;
@@ -507,7 +504,6 @@ static const struct seq_operations rt_cpu_seq_ops = {
 	.stop   = rt_cpu_seq_stop,
 	.show   = rt_cpu_seq_show,
 };
-
 
 static int rt_cpu_seq_open(struct inode *inode, struct file *file)
 {
@@ -1940,7 +1936,6 @@ e_inval:
 	return -EINVAL;
 }
 
-
 static void ip_handle_martian_source(struct net_device *dev,
 				     struct in_device *in_dev,
 				     struct sk_buff *skb,
@@ -2000,7 +1995,6 @@ static int __mkroute_input(struct sk_buff *skb,
 		return -EINVAL;
 	}
 
-
 	err = fib_validate_source(saddr, daddr, tos, FIB_RES_OIF(*res),
 				  in_dev->dev, &spec_dst, &itag, skb->mark);
 	if (err < 0) {
@@ -2028,7 +2022,6 @@ static int __mkroute_input(struct sk_buff *skb,
 			goto cleanup;
 		}
 	}
-
 
 	rth = dst_alloc(&ipv4_dst_ops);
 	if (!rth) {
@@ -2447,7 +2440,6 @@ static int __mkroute_output(struct rtable **result,
 		}
 	}
 
-
 	rth = dst_alloc(&ipv4_dst_ops);
 	if (!rth) {
 		err = -ENOBUFS;
@@ -2560,7 +2552,6 @@ static int ip_route_output_slow(struct net *net, struct rtable **rp,
 	int free_res = 0;
 	int err;
 
-
 	res.fi		= NULL;
 #ifdef CONFIG_IP_MULTIPLE_TABLES
 	res.r		= NULL;
@@ -2617,7 +2608,6 @@ static int ip_route_output_slow(struct net *net, struct rtable **rp,
 			dev_out = NULL;
 		}
 	}
-
 
 	if (oldflp->oif) {
 		dev_out = dev_get_by_index(net, oldflp->oif);
@@ -2678,7 +2668,6 @@ static int ip_route_output_slow(struct net *net, struct rtable **rp,
 			   we send packet, ignoring both routing tables
 			   and ifaddr state. --ANK
 
-
 			   We could make it even if oif is unknown,
 			   likely IPv6, but we do not.
 			 */
@@ -2728,10 +2717,8 @@ static int ip_route_output_slow(struct net *net, struct rtable **rp,
 	dev_hold(dev_out);
 	fl.oif = dev_out->ifindex;
 
-
 make_route:
 	err = ip_mkroute_output(rp, &res, &fl, oldflp, dev_out, flags);
-
 
 	if (free_res)
 		fib_res_put(&res);
@@ -2791,7 +2778,6 @@ static struct dst_ops ipv4_dst_blackhole_ops = {
 	.update_pmtu		=	ipv4_rt_blackhole_update_pmtu,
 	.entries		=	ATOMIC_INIT(0),
 };
-
 
 static int ipv4_dst_blackhole(struct net *net, struct rtable **rp, struct flowi *flp)
 {
@@ -3415,7 +3401,6 @@ static __net_initdata struct pernet_operations sysctl_route_ops = {
 };
 #endif
 
-
 static __net_init int rt_secret_timer_init(struct net *net)
 {
 	atomic_set(&net->ipv4.rt_genid,
@@ -3444,7 +3429,6 @@ static __net_initdata struct pernet_operations rt_secret_timer_ops = {
 	.init = rt_secret_timer_init,
 	.exit = rt_secret_timer_exit,
 };
-
 
 #ifdef CONFIG_NET_CLS_ROUTE
 struct ip_rt_acct *ip_rt_acct __read_mostly;

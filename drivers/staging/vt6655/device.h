@@ -74,7 +74,6 @@
 //#define FOR_LED_ON_NOTEBOOK
 //
 
-
 //
 // device specific
 //
@@ -99,14 +98,12 @@
 //#define	TASK_LET
 //PLICE_DEBUG<-
 
-
 /*---------------------  Export Definitions -------------------------*/
 
 #define MAC_MAX_CONTEXT_REG     (256+128)
 
 #define MAX_MULTICAST_ADDRESS_NUM       32
 #define MULTICAST_ADDRESS_LIST_SIZE     (MAX_MULTICAST_ADDRESS_NUM * U_ETHER_ADDR_LEN)
-
 
 //#define OP_MODE_INFRASTRUCTURE  0
 //#define OP_MODE_ADHOC           1
@@ -128,8 +125,6 @@
 #define KEYSEL_TKIP                     2
 #define KEYSEL_CCMP                     3
 
-
-
 #define AUTO_FB_NONE            0
 #define AUTO_FB_0               1
 #define AUTO_FB_1               2
@@ -150,8 +145,6 @@
 #define BB_VGA_LEVEL            4
 #define BB_VGA_CHANGE_THRESHOLD 16
 
-
-
 #ifndef RUN_AT
 #define RUN_AT(x)                       (jiffies+(x))
 #endif
@@ -159,9 +152,7 @@
 // DMA related
 #define RESERV_AC0DMA                   4
 
-
 // BUILD OBJ mode
-
 
 #define	AVAIL_TD(p,q)	((p)->sOpts.nTxDescs[(q)]-((p)->iTDUsed[(q)]))
 
@@ -169,12 +160,9 @@
 #define	NUM				64
 //PLICE_DEUBG <-
 
-
-
 #define PRIVATE_Message                 0
 
 /*---------------------  Export Types  ------------------------------*/
-
 
 #define DBG_PRT(l, p, args...) {if (l<=msglevel) printk( p ,##args);}
 #define PRINT_K(p, args...) {if (PRIVATE_Message) printk( p ,##args);}
@@ -196,7 +184,6 @@ typedef enum _VIA_PKT_TYPE
     PK_TYPE_11GA
 } VIA_PKT_TYPE, *PVIA_PKT_TYPE;
 
-
 typedef enum __device_msg_level {
     MSG_LEVEL_ERR=0,            //Errors that will cause abnormal operation.
     MSG_LEVEL_NOTICE=1,         //Some errors need users to be notified.
@@ -211,7 +198,6 @@ typedef enum __device_init_type {
     DEVICE_INIT_DXPL            // Dx to D0 power lost init
 } DEVICE_INIT_TYPE, *PDEVICE_INIT_TYPE;
 
-
 //++ NDIS related
 
 #define MAX_BSSIDINFO_4_PMKID   16
@@ -221,7 +207,6 @@ typedef enum __device_init_type {
 
 // PMKID Structures
 typedef UCHAR   NDIS_802_11_PMKID_VALUE[16];
-
 
 typedef enum _NDIS_802_11_WEP_STATUS
 {
@@ -240,7 +225,6 @@ typedef enum _NDIS_802_11_WEP_STATUS
 } NDIS_802_11_WEP_STATUS, *PNDIS_802_11_WEP_STATUS,
   NDIS_802_11_ENCRYPTION_STATUS, *PNDIS_802_11_ENCRYPTION_STATUS;
 
-
 typedef enum _NDIS_802_11_STATUS_TYPE
 {
     Ndis802_11StatusType_Authentication,
@@ -254,7 +238,6 @@ typedef struct _PMKID_CANDIDATE {
     NDIS_802_11_MAC_ADDRESS BSSID;
     ULONG Flags;
 } PMKID_CANDIDATE, *PPMKID_CANDIDATE;
-
 
 typedef struct _BSSID_INFO
 {
@@ -296,12 +279,10 @@ typedef struct __chip_info_tbl{
     U32         flags;
 } CHIP_INFO, *PCHIP_INFO;
 
-
 typedef enum {
     OWNED_BY_HOST=0,
     OWNED_BY_NIC=1
 } DEVICE_OWNER_TYPE, *PDEVICE_OWNER_TYPE;
-
 
 // The receive duplicate detection cache entry
 typedef struct tagSCacheEntry{
@@ -331,8 +312,6 @@ typedef struct tagSDeFragControlBlock
     BOOL            bInUse;
 } SDeFragControlBlock, *PSDeFragControlBlock;
 
-
-
 //flags for options
 #define     DEVICE_FLAGS_IP_ALIGN        0x00000001UL
 #define     DEVICE_FLAGS_PREAMBLE_TYPE   0x00000002UL
@@ -360,9 +339,7 @@ typedef struct tagSDeFragControlBlock
 //for device_set_media_duplex
 #define     DEVICE_LINK_CHANGE           0x00000001UL
 
-
 //PLICE_DEBUG->
-
 
 typedef	struct _RxManagementQueue
 {
@@ -371,10 +348,7 @@ typedef	struct _RxManagementQueue
 	PSRxMgmtPacket	Q[NUM];
 } RxManagementQueue,*PSRxManagementQueue;
 
-
-
 //PLICE_DEBUG<-
-
 
 typedef struct __device_opt {
     int         nRxDescs0;    //Number of RX descriptors0
@@ -390,7 +364,6 @@ typedef struct __device_opt {
     int         bbp_type;
     U32         flags;
 } OPTIONS, *POPTIONS;
-
 
 typedef struct __device_info {
     struct __device_info*        next;
@@ -473,7 +446,6 @@ typedef struct __device_info {
 	struct 	semaphore	mlme_semaphore;
 //PLICE_DEBUG <-
 
-
     U32                         rx_bytes;
 
     // Version control
@@ -492,7 +464,6 @@ typedef struct __device_info {
     SStatCounter                scStatistic;
     // 802.11 counter
     SDot11Counters              s802_11Counter;
-
 
     // 802.11 management
     PSMgmtObject                pMgmt;
@@ -523,7 +494,6 @@ typedef struct __device_info {
     BYTE                        bySlot;
     BYTE                        byCWMaxMin;
     CARD_PHY_TYPE               eCurrentPHYType;
-
 
     VIA_BB_TYPE                 byBBType; //0: 11A, 1:11B, 2:11G
     VIA_PKT_TYPE                byPacketType; //0:11a,1:11b,2:11gb(only CCK in BasicRate),3:11ga(OFDM in Basic Rate)
@@ -576,7 +546,6 @@ typedef struct __device_info {
     BOOL                    bPWBitOn;
     WMAC_POWER_MODE         ePSMode;
 
-
     // GPIO Radio Control
     BYTE                    byRadioCtl;
     BYTE                    byGPIO;
@@ -614,8 +583,6 @@ typedef struct __device_info {
     BOOL                    bCmdRunning;
     BOOL                    bCmdClear;
 
-
-
     BOOL                    bRoaming;
     //WOW
     BYTE                    abyIPAddr[4];
@@ -652,15 +619,12 @@ typedef struct __device_info {
     // for OID_802_11_ASSOCIATION_INFORMATION
     BOOL                    bAssocInfoSet;
 
-
     BYTE                    byAutoFBCtrl;
 
     BOOL                    bTxMICFail;
     BOOL                    bRxMICFail;
 
-
     UINT                    uRATEIdx;
-
 
     // For Update BaseBand VGA Gain Offset
     BOOL                    bUpdateBBVGA;
@@ -672,7 +636,6 @@ typedef struct __device_info {
 
     BYTE                    byBBPreEDRSSI;
     BYTE                    byBBPreEDIndex;
-
 
     BOOL                    bRadioCmd;
     DWORD                   dwDiagRefCount;
@@ -703,7 +666,6 @@ typedef struct __device_info {
     I8                      abyRegPwr[CB_MAX_CHANNEL+1];
     I8                      abyLocalPwr[CB_MAX_CHANNEL+1];
 
-
     // BaseBand Loopback Use
     BYTE                    byBBCR4d;
     BYTE                    byBBCRc9;
@@ -724,7 +686,6 @@ typedef struct __device_info {
 #endif
     BYTE            byReAssocCount;   //mike add:re-association retry times!
     BYTE            byLinkWaitCount;
-
 
     BYTE                    abyNodeName[17];
 
@@ -748,10 +709,8 @@ typedef struct __device_info {
     struct timer_list           TimerSQ3Tmax2;
     struct timer_list           TimerSQ3Tmax3;
 
-
     ULONG                   uNumSQ3[MAX_RATE];
     WORD                    wAntDiversityMaxRate;
-
 
     SEthernetHeader         sTxEthHeader;
     SEthernetHeader         sRxEthHeader;
@@ -762,7 +721,6 @@ typedef struct __device_info {
     // Pre-Authentication & PMK cache
     SPMKID                  gsPMKID;
     SPMKIDCandidateEvent    gsPMKIDCandidate;
-
 
     // for 802.11h
     BOOL                    b11hEnable;
@@ -826,9 +784,7 @@ typedef struct __device_info {
 
 } DEVICE_INFO, *PSDevice;
 
-
 //PLICE_DEBUG->
-
 
  inline  static	VOID   EnQueue (PSDevice pDevice,PSRxMgmtPacket  pRxMgmtPacket)
 {
@@ -846,9 +802,6 @@ typedef struct __device_info {
 		//printk("packet num is %d\n",pDevice->rxManeQueue.packet_num);
 	}
 }
-
-
-
 
 	inline  static  PSRxMgmtPacket DeQueue (PSDevice pDevice)
 {
@@ -873,14 +826,7 @@ typedef struct __device_info {
 
 VOID	InitRxManagementQueue(PSDevice   pDevice);
 
-
-
 //PLICE_DEBUG<-
-
-
-
-
-
 
 inline static BOOL device_get_ip(PSDevice pInfo) {
     struct in_device* in_dev=(struct in_device*) pInfo->dev->ip_ptr;
@@ -895,8 +841,6 @@ inline static BOOL device_get_ip(PSDevice pInfo) {
     }
     return FALSE;
 }
-
-
 
 static inline PDEVICE_RD_INFO alloc_rd_info(void) {
     PDEVICE_RD_INFO  ptr;
@@ -924,5 +868,3 @@ BOOL device_dma0_xmit(PSDevice pDevice, struct sk_buff *skb, UINT uNodeIndex);
 BOOL device_alloc_frag_buf(PSDevice pDevice, PSDeFragControlBlock pDeF);
 int Config_FileOperation(PSDevice pDevice,BOOL fwrite,unsigned char *Parameter);
 #endif
-
-

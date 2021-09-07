@@ -184,7 +184,6 @@ static void sctp_eps_seq_stop(struct seq_file *seq, void *v)
 	return;
 }
 
-
 static void * sctp_eps_seq_next(struct seq_file *seq, void *v, loff_t *pos)
 {
 	if (++*pos >= sctp_ep_hashsize)
@@ -192,7 +191,6 @@ static void * sctp_eps_seq_next(struct seq_file *seq, void *v, loff_t *pos)
 
 	return pos;
 }
-
 
 /* Display sctp endpoints (/proc/net/sctp/eps). */
 static int sctp_eps_seq_show(struct seq_file *seq, void *v)
@@ -234,7 +232,6 @@ static const struct seq_operations sctp_eps_ops = {
 	.show  = sctp_eps_seq_show,
 };
 
-
 /* Initialize the seq file operations for 'eps' object. */
 static int sctp_eps_seq_open(struct inode *inode, struct file *file)
 {
@@ -266,7 +263,6 @@ void sctp_eps_proc_exit(void)
 	remove_proc_entry("eps", proc_net_sctp);
 }
 
-
 static void * sctp_assocs_seq_start(struct seq_file *seq, loff_t *pos)
 {
 	if (*pos >= sctp_assoc_hashsize)
@@ -288,7 +284,6 @@ static void sctp_assocs_seq_stop(struct seq_file *seq, void *v)
 {
 	return;
 }
-
 
 static void * sctp_assocs_seq_next(struct seq_file *seq, void *v, loff_t *pos)
 {

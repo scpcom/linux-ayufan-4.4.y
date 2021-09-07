@@ -134,7 +134,6 @@ static int mct_u232_calculate_baud_rate(struct usb_serial *serial, speed_t value
 #define MCT_U232_LSR_OE                 0x02    /* overrun error */
 #define MCT_U232_LSR_DR                 0x01    /* receive data ready */
 
-
 /* -----------------------------------------------------------------------------
  * Technical Specification reverse engineered with SniffUSB on Windows98
  * =====================================================================
@@ -451,4 +450,3 @@ static int mct_u232_calculate_baud_rate(struct usb_serial *serial, speed_t value
  */
 
 #endif /* __LINUX_USB_SERIAL_MCT_U232_H */
-

@@ -56,6 +56,4 @@
 
 #define NR_IRQS                      		96
 
-
 #define IRQ_GPP_MASK      				(BIT24 | BIT25 | BIT26)
-

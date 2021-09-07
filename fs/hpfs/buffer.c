@@ -151,7 +151,6 @@ void *hpfs_get_4sectors(struct super_block *s, unsigned secno,
 	return NULL;
 }
 	
-
 void hpfs_brelse4(struct quad_buffer_head *qbh)
 {
 	brelse(qbh->bh[3]);

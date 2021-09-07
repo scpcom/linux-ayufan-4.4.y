@@ -24,7 +24,6 @@
  *	   Paul E. McKenney <paulmck@linux.vnet.ibm.com>
  */
 
-
 #ifdef CONFIG_TREE_PREEMPT_RCU
 
 struct rcu_state rcu_preempt_state = RCU_STATE_INITIALIZER(rcu_preempt_state);

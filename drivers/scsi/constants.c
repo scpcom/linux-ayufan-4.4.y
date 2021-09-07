@@ -18,8 +18,6 @@
 #include <scsi/scsi_eh.h>
 #include <scsi/scsi_dbg.h>
 
-
-
 /* Commands with service actions that change the command name */
 #define MAINTENANCE_IN 0xa3
 #define MAINTENANCE_OUT 0xa4
@@ -27,8 +25,6 @@
 #define SERVICE_ACTION_OUT_12 0xa9
 #define SERVICE_ACTION_IN_16 0x9e
 #define SERVICE_ACTION_OUT_16 0x9f
-
-
 
 #ifdef CONFIG_SCSI_CONSTANTS
 static const char * cdb_byte0_names[] = {
@@ -1449,12 +1445,9 @@ void scsi_show_result(int result)
 #endif
 EXPORT_SYMBOL(scsi_show_result);
 
-
 void scsi_print_result(struct scsi_cmnd *cmd)
 {
 	scmd_printk(KERN_INFO, cmd, "");
 	scsi_show_result(cmd->result);
 }
 EXPORT_SYMBOL(scsi_print_result);
-
-

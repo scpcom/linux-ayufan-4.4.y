@@ -42,12 +42,10 @@
 #include <scsi/scsi_device.h>
 #include <asm/io.h>
 
-
 #include <mach/hardware.h>
 #include <mach/desc_alloc.h>
 #include <mach/memory.h>
 #include <mach/ox820sata.h>
-
 
 /***************************************************************************
 * DEBUG CONTROL
@@ -92,7 +90,6 @@
     //static inline u32 myreadl(u32 a) {u32 v =(*((volatile u32*)(a)));regarray[regindex].a=a; regarray[regindex].d=v; regarray[regindex].w=0; ++regindex; regindex &= 1023;return v;}
     #define readl(a) (myreadl(a))
 #endif
-
 
 #include <linux/libata.h>
 #include "libata.h"
@@ -718,7 +715,6 @@ static void release_hw(unsigned int port_no)
 #endif    
 }
 
-
 /**
  * Gets the base address of the ata core from the ata_port structure. The value
  * returned will remain the same when hardware raid is active.
@@ -765,7 +761,6 @@ static inline u32 ox820sata_hostdmabusy(struct ata_port* ap) {
     /* idle */
     return 0;
 }
-
 
 /**
  * Turns on the cores clock and resets it
@@ -1091,8 +1086,6 @@ static bool ox820sata_qc_fill_rtf(struct ata_queued_cmd *qc)
 	return true;
 }
 
-
-
 /** 
  * Called to read the hardware registers / DMA buffers, to
  * obtain the current set of taskfile register values.
@@ -1201,7 +1194,6 @@ static int ox820sata_qc_defer(struct ata_queued_cmd *qc)
 	DPRINTK("\n");
 	return ata_std_qc_defer(qc);
 }
-
 
 /**
  * releases the lock on the port the command used
@@ -1684,7 +1676,6 @@ static void ox820sata_irq_clear(struct ata_port* ap)
     writel(OX820SATA_COREINT_END, OX820SATA_CORE_INT_CLEAR);
 }
 
-
 /**
  * allows access to the link layer registers
  * @param link_reg the link layer register to access (oxsemi indexing ie 
@@ -2102,7 +2093,6 @@ void ox820sata_set_mode(u32 mode, u32 force) {
 }
 EXPORT_SYMBOL( ox820sata_set_mode );
 
-
 static void ox820sata_post_reset_init(struct ata_port* ap)
 {
     uint dev;
@@ -2372,7 +2362,6 @@ void ox820sata_thaw_host(int port_no)
     smp_wmb();
 }
 
-
 #define ERROR_HW_ACQUIRE_TIMEOUT_JIFFIES (10 * HZ)
 static void ox820sata_error_handler(struct ata_port *ap)
 {
@@ -2412,7 +2401,6 @@ static void ox820sata_post_internal_cmd(struct ata_queued_cmd *qc) {
         ox820sata_cleanup();       
     }
 }
-
 
 /** 
  * turn on the interrupts
@@ -2531,7 +2519,6 @@ static int ox820sata_softreset(struct ata_link *link, unsigned int *class,
 	return 0;
 }
     
-
 /**
  *	ata_std_postreset - standard postreset callback
  *	@link: the target ata_link
@@ -2923,8 +2910,6 @@ struct ata_port* ox820sata_get_ap(int port_no)
 module_init(ox820sata_device_init);
 module_exit(ox820sata_device_exit);
 
-
-
 /** @debug: proc filing system stuff for cache processing time */
 static struct proc_dir_entry* debug_proc;
 static int debugproc_read(char *buf, char **start, off_t offset, int count,
@@ -2946,4 +2931,3 @@ static int __init debugproc(void) {
     return 0;
 }
 module_init(debugproc);
-

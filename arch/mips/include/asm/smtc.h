@@ -47,7 +47,6 @@ extern void smtc_smp_finish(void);
 extern void smtc_boot_secondary(int cpu, struct task_struct *t);
 extern void smtc_cpus_done(void);
 
-
 /*
  * Sharing the TLB between multiple VPEs means that the
  * "random" index selection function is not allowed to

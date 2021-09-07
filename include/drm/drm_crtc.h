@@ -36,7 +36,6 @@ struct drm_device;
 struct drm_mode_set;
 struct drm_framebuffer;
 
-
 #define DRM_MODE_OBJECT_CRTC 0xcccccccc
 #define DRM_MODE_OBJECT_CONNECTOR 0xc0c0c0c0
 #define DRM_MODE_OBJECT_ENCODER 0xe0e0e0e0
@@ -182,7 +181,6 @@ enum subpixel_order {
 	SubPixelVerticalBGR,
 	SubPixelNone,
 };
-
 
 /*
  * Describes a given display (e.g. CRT or flat panel) and its limitations.
@@ -373,7 +371,6 @@ struct drm_crtc {
 	/* if you are using the helper */
 	void *helper_private;
 };
-
 
 /**
  * drm_connector_funcs - control connectors on a given device
@@ -605,7 +602,6 @@ struct drm_mode_config {
 #define obj_to_fb(x) container_of(x, struct drm_framebuffer, base)
 #define obj_to_property(x) container_of(x, struct drm_property, base)
 #define obj_to_blob(x) container_of(x, struct drm_property_blob, base)
-
 
 extern void drm_crtc_init(struct drm_device *dev,
 			  struct drm_crtc *crtc,

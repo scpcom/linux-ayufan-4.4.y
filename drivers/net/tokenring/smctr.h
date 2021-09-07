@@ -110,7 +110,6 @@
 #define R_CHG_PARM                              0x00
 #define R_TX_FORWARD                            F_FRAME_FORWARD
 
-
 #define      UPSTREAM_NEIGHBOR_ADDRESS       0x02
 #define      ADDRESS_MODIFER                 0x21
 #define      RING_STATION_VERSION_NUMBER     0x23
@@ -239,15 +238,12 @@
 #define IDR_DCS_MASK	0x007
 #define IDR_RWS		0x008
 
-
 #define r587_BIO	0x003
 #define BIO_ENB		0x080
 #define BIO_MASK	0x03F
 
 #define r587_PCR	0x005
 #define PCR_RAMS	0x040
-
-
 
 #define NUM_ADDR_BITS	8
 
@@ -1248,7 +1244,6 @@ routine */
 #define IO_MAPPED               0x4000  	/* IOmapped bus interface 795 */
 #define ETX_DISABLED            0x8000
 
-
 /*
  * Definitions for adapter_flags1
  */
@@ -1348,7 +1343,6 @@ routine */
 #define MEDIA_STP100_UTP100     0x0020  /* Ethernet STP-100Mbps/UTP-100Mbps */
 #define MEDIA_UTP100FD          0x0021  /* Ethernet UTP-100Mbps, full duplex */
 #define MEDIA_UTP100            0x0022  /* Ethernet UTP-100Mbps */
-
 
 #define MEDIA_UNKNOWN           0xFFFF  /* Unknown adapter/media type   */
 

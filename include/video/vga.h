@@ -44,7 +44,6 @@
 #endif
 #include <asm/byteorder.h>
 
-
 /* Some of the code below is taken from SVGAlib.  The original,
    unmodified copyright notice for that code is below. */
 /* VGAlib version 1.2 - (c) 1993 Tommy Frandsen                    */
@@ -269,7 +268,6 @@ static inline void vga_w (void __iomem *regbase, unsigned short port, unsigned c
 		vga_io_w (port, val);
 }
 
-
 static inline void vga_w_fast (void __iomem *regbase, unsigned short port,
 			       unsigned char reg, unsigned char val)
 {
@@ -278,7 +276,6 @@ static inline void vga_w_fast (void __iomem *regbase, unsigned short port,
 	else
 		vga_io_w_fast (port, reg, val);
 }
-
 
 /*
  * VGA CRTC register read/write
@@ -331,7 +328,6 @@ static inline void vga_mm_wcrt (void __iomem *regbase, unsigned char reg, unsign
         vga_mm_w (regbase, VGA_CRT_DC, val);
 #endif /* VGA_OUTW_WRITE */
 }
-
 
 /*
  * VGA sequencer register read/write
@@ -436,7 +432,6 @@ static inline void vga_mm_wgfx (void __iomem *regbase, unsigned char reg, unsign
         vga_mm_w (regbase, VGA_GFX_D, val);
 #endif /* VGA_OUTW_WRITE */
 }
-
 
 /*
  * VGA attribute controller register read/write

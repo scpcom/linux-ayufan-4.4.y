@@ -120,7 +120,6 @@ full_search:
 	}
 }
 
-
 unsigned long
 arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
 			  const unsigned long len, const unsigned long pgoff,
@@ -210,7 +209,6 @@ bottomup:
 	return addr;
 }
 
-
 SYSCALL_DEFINE1(uname, struct new_utsname __user *, name)
 {
 	int err;
@@ -221,4 +219,3 @@ SYSCALL_DEFINE1(uname, struct new_utsname __user *, name)
 		err |= copy_to_user(&name->machine, "i686", 5);
 	return err ? -EFAULT : 0;
 }
-

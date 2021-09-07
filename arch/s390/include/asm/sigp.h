@@ -51,7 +51,6 @@ typedef enum
 	sigp_not_operational
 } sigp_ccode;
 
-
 /*
  * Definitions for the external call
  */

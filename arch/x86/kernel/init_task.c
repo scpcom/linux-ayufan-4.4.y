@@ -39,4 +39,3 @@ EXPORT_SYMBOL(init_task);
  * on exact cacheline boundaries, to eliminate cacheline ping-pong.
  */
 DEFINE_PER_CPU_SHARED_ALIGNED(struct tss_struct, init_tss) = INIT_TSS;
-

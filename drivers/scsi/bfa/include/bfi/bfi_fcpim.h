@@ -298,4 +298,3 @@ struct bfi_tskim_rsp_s {
 #pragma pack()
 
 #endif /* __BFI_FCPIM_H__ */
-

@@ -51,8 +51,6 @@ PIPEnsControlOut(
     IN PBYTE        pbyBuffer
     );
 
-
-
 NTSTATUS
 PIPEnsControlOutAsyn(
     IN PSDevice     pDevice,
@@ -73,9 +71,6 @@ PIPEnsControlIn(
     IN OUT  PBYTE   pbyBuffer
     );
 
-
-
-
 NTSTATUS
 PIPEnsInterruptRead(
     IN PSDevice pDevice
@@ -94,6 +89,3 @@ PIPEnsSendBulkOut(
     );
 
 #endif // __USBPIPE_H__
-
-
-

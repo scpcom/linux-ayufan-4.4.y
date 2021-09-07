@@ -11,7 +11,6 @@
 #include "scsi_logging.h"
 #include "scsi_priv.h"
 
-
 static ctl_table scsi_table[] = {
 	{ .ctl_name	= DEV_SCSI_LOGGING_LEVEL,
 	  .procname	= "logging_level",

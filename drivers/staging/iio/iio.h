@@ -232,8 +232,6 @@ int iio_register_interrupt_line(unsigned int			irq,
 void iio_unregister_interrupt_line(struct iio_dev *dev_info,
 				   int line_number);
 
-
-
 /**
  * iio_push_event() - try to add event to the list for userspace reading
  * @dev_info:		IIO device structure

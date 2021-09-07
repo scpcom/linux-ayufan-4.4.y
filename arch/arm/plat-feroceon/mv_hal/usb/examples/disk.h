@@ -77,7 +77,6 @@ typedef struct mass_storage_device_info {
    uint_8   PRODUCT_REVISION_LEVEL[4];
 } DISK_DEVICE_INFO, _PTR_ DISK_DEVICE_INFO_PTR;
 
-
 extern _usb_device_handle  usbDiskLoad(int devNo, int diskSize);
 extern void                usbDiskUnload(_usb_device_handle  handle);
 

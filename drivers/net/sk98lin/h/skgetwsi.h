@@ -240,4 +240,3 @@
 
 extern	int SkLm80ReadSensor(SK_AC *pAC, SK_IOC IoC, SK_SENSOR *pSen);
 #endif	/* n_INC_SKGETWSI_H */
-

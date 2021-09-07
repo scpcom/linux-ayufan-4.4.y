@@ -43,7 +43,6 @@ struct prefix_info {
 	struct in6_addr		prefix;
 };
 
-
 #ifdef __KERNEL__
 
 #include <linux/netdevice.h>
@@ -169,7 +168,6 @@ extern int __ipv6_dev_ac_dec(struct inet6_dev *idev, struct in6_addr *addr);
 extern int ipv6_chk_acast_addr(struct net *net, struct net_device *dev,
 			       struct in6_addr *addr);
 
-
 /* Device notifier */
 extern int register_inet6addr_notifier(struct notifier_block *nb);
 extern int unregister_inet6addr_notifier(struct notifier_block *nb);
@@ -204,7 +202,6 @@ in6_dev_put(struct inet6_dev *idev)
 #define __in6_dev_put(idev)  atomic_dec(&(idev)->refcnt)
 #define in6_dev_hold(idev)   atomic_inc(&(idev)->refcnt)
 
-
 extern void inet6_ifa_finish_destroy(struct inet6_ifaddr *ifp);
 
 static inline void in6_ifa_put(struct inet6_ifaddr *ifp)
@@ -215,8 +212,6 @@ static inline void in6_ifa_put(struct inet6_ifaddr *ifp)
 
 #define __in6_ifa_put(ifp)	atomic_dec(&(ifp)->refcnt)
 #define in6_ifa_hold(ifp)	atomic_inc(&(ifp)->refcnt)
-
-
 
 /*
  *	compute link-local solicited-node multicast address

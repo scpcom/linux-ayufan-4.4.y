@@ -258,7 +258,6 @@ ctl_table epoll_table[] = {
 };
 #endif /* CONFIG_SYSCTL */
 
-
 /* Setup the structure that is used as key for the RB tree */
 static inline void ep_set_ffd(struct epoll_filefd *ffd,
 			      struct file *file, int fd)

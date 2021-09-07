@@ -95,7 +95,6 @@ enum dev_status {
 	MVS_DEV_EH	= 0x1,
 };
 
-
 struct mvs_info;
 
 struct mvs_dispatch {
@@ -363,7 +362,6 @@ struct mvs_task_exec_info {
 	int n_elem;
 };
 
-
 /******************** function prototype *********************/
 void mvs_get_sas_addr(void *buf, u32 buflen);
 void mvs_tag_clear(struct mvs_info *mvi, u32 tag);
@@ -403,4 +401,3 @@ void mvs_update_phyinfo(struct mvs_info *mvi, int i, int get_st);
 int mvs_int_rx(struct mvs_info *mvi, bool self_clear);
 void mvs_hexdump(u32 size, u8 *data, u32 baseaddr);
 #endif
-

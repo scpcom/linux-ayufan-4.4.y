@@ -34,7 +34,6 @@
 #include <mach/edma.h>
 #include <mach/mux.h>
 
-
 /* Offsets matching "struct edmacc_param" */
 #define PARM_OPT		0x00
 #define PARM_SRC		0x04
@@ -108,7 +107,6 @@
 #define EDMA_MAX_DMACH           64
 #define EDMA_MAX_PARAMENTRY     512
 #define EDMA_MAX_CC               2
-
 
 /*****************************************************************************/
 
@@ -639,7 +637,6 @@ int edma_alloc_channel(int channel,
 }
 EXPORT_SYMBOL(edma_alloc_channel);
 
-
 /**
  * edma_free_channel - deallocate DMA channel
  * @channel: dma channel returned from edma_alloc_channel()
@@ -738,7 +735,6 @@ void edma_free_slot(unsigned slot)
 	clear_bit(slot, edma_info[ctlr]->edma_inuse);
 }
 EXPORT_SYMBOL(edma_free_slot);
-
 
 /**
  * edma_alloc_cont_slots- alloc contiguous parameter RAM slots
@@ -1497,7 +1493,6 @@ fail1:
 	return status;
 }
 
-
 static struct platform_driver edma_driver = {
 	.driver.name	= "edma",
 };
@@ -1507,4 +1502,3 @@ static int __init edma_init(void)
 	return platform_driver_probe(&edma_driver, edma_probe);
 }
 arch_initcall(edma_init);
-

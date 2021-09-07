@@ -65,8 +65,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __MVSYSUART_H__
 #define __MVSYSUART_H__
 
-
-
 /* APIs */
 MV_VOID mvUartDmaInit(MV_U32 port, MV_U32 baudDivisor, MV_UART_PORT* base,
                       MV_U32 idmaWinNum, MV_U32 srcBurstSize);

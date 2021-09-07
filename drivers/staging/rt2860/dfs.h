@@ -42,7 +42,6 @@
 #define WIDTH_RD_IDLE 0
 #define WIDTH_RD_CHECK 1
 
-
 VOID BbpRadarDetectionStart(
 	IN PRTMP_ADAPTER pAd);
 
@@ -59,7 +58,6 @@ VOID RadarDetectionStop(
 
 VOID RadarDetectPeriodic(
 	IN PRTMP_ADAPTER	pAd);
-
 
 BOOLEAN RadarChannelCheck(
 	IN PRTMP_ADAPTER	pAd,
@@ -84,5 +82,3 @@ INT Set_ChMovingTime_Proc(
 INT Set_LongPulseRadarTh_Proc(
 	IN PRTMP_ADAPTER pAd,
 	IN PUCHAR arg);
-
-

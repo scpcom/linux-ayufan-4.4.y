@@ -26,7 +26,6 @@
  * and DTEST_COMMAND are zero when exiting these functions.
  */
 
-
 /*
  * On the Blackfin, L1 instruction sram (which operates at core speeds) can not
  * be accessed by a normal core load, so we need to go through a few hoops to

@@ -37,7 +37,6 @@
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
 
-
 struct usb_configuration;
 
 /**
@@ -282,7 +281,6 @@ struct usb_composite_driver {
 
 extern int usb_composite_register(struct usb_composite_driver *);
 extern void usb_composite_unregister(struct usb_composite_driver *);
-
 
 /**
  * struct usb_composite_device - represents one composite usb gadget

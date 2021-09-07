@@ -12,7 +12,6 @@
 #define qcm_free_int(...)
 #endif
 
-
 #define CHECK_RET(ret, expr) \
 	if ((ret = expr) < 0) return ret
 

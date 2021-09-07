@@ -78,7 +78,6 @@
 	LDREG	PT_GR18(\regs),%r18
 	.endm
 
-
 	.import sys_fork
 
 ENTRY(hpux_fork_wrapper)
@@ -192,7 +191,6 @@ ENTRY(hpux_pipe_wrapper)
 	ldo 64(%r30),%r30
 	bl hpux_pipe,%r2
 	ldo -56(%r30),%r26 /* pass local array to hpux_pipe */
-
 
 	ldo -1024(%r0),%r1
 	comb,>>= %r28,%r1,pipe_exit /* let syscall exit handle it */

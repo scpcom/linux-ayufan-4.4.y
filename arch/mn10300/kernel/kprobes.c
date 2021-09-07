@@ -41,7 +41,6 @@ static unsigned long current_kprobe_bp_addr;
 
 DEFINE_PER_CPU(struct kprobe *, current_kprobe) = NULL;
 
-
 /* singlestep flag bits */
 #define SINGLESTEP_BRANCH 1
 #define SINGLESTEP_PCREL  2
@@ -62,7 +61,6 @@ DEFINE_PER_CPU(struct kprobe *, current_kprobe) = NULL;
 		READ_BYTE((u8 *)(p) + 2, (u8 *)(valp) + 2);	\
 		READ_BYTE((u8 *)(p) + 3, (u8 *)(valp) + 3);	\
 	} while (0)
-
 
 static const u8 mn10300_insn_sizes[256] =
 {

@@ -2,7 +2,6 @@
  * Copyright (C) 2008-2009 QUALCOMM Incorporated.
  */
 
-
 #ifndef MT9T012_H
 #define MT9T012_H
 
@@ -30,12 +29,10 @@ struct reg_struct {
 	uint16_t fine_int_time;      /* 0x3014 */
 };
 
-
 struct mt9p012_i2c_reg_conf {
 	unsigned short waddr;
 	unsigned short wdata;
 };
-
 
 struct mt9p012_reg {
 	struct reg_struct *reg_pat;

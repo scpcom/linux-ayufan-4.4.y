@@ -67,11 +67,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "mvFlashCom.h"
 
-
 /* Mt Flash IDs */
 #define MT_FID_28F400_T	0x4470	/* 28F400B3 ID ( 4 M, top boot sector)		*/
 #define MT_FID_28F400_B	0x4471	/* 28F400B3 ID ( 4 M, bottom boot sect) 	*/
-
 
 /* Intel Flash IDs */
 #define INTEL_FID_28F016S    0x66a0	/* 28F016S[VS] ID (16M = 512k x 16)	*/
@@ -113,7 +111,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INTEL_FID_28F256P30B 0x891C	/*  32M = 128K x  255 (32kB x 4) bottom boot sector */
 #endif
 
-
 /* Intel Flash APIs timeouts*/
 #define INTEL_EARASE_MILI_TIMEOUT		(8000*10) 	/* mili Sec 		*/
 #define INTEL_PROG_TIMEOUT				(0xA0000*10)	/* number of loops 	*/
@@ -135,8 +132,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INTEL_CHIP_CMD_SET_LOCK_BLK	 0x01	/* 2nd wrd set block lock bit 	*/
 #define INTEL_CHIP_CMD_SET_LOCK_MSTR 0xF1	/* 2nd wrd set master lck bit 	*/
 #define INTEL_CHIP_CMD_CLR_LOCK_BLK	0xD0	/* 2nd wrd clear blk lck bit 	*/
-
-
 
 /* status register bits */
 #define INTEL_CHIP_STAT_DPS		0x02		/* Device Protect Status 		*/

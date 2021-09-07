@@ -26,7 +26,6 @@
  *
  ******************************************************************************/
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/delay.h>
@@ -410,7 +409,6 @@ static void scsi_tgt_dev_seq_stop(struct seq_file *seq, void *v)
 {
 	locate_hba_stop(seq, v);
 }
-
 
 #define LU_COUNT	1  /* for now */
 static int scsi_tgt_dev_seq_show(struct seq_file *seq, void *v)

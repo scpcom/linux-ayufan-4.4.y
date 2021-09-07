@@ -2,7 +2,6 @@
 
 /* Written 1995-2000 by Werner Almesberger, EPFL LRC/ICA */
 
-
 #include <linux/module.h>
 #include <linux/kmod.h>
 #include <linux/net.h>		/* struct socket, struct proto_ops */
@@ -22,7 +21,6 @@
 #include <asm/uaccess.h>
 #include <asm/atomic.h>
 #include <asm/poll.h>
-
 
 #include "resources.h"		/* atm_find_dev */
 #include "common.h"		/* prototypes */
@@ -56,7 +54,6 @@ static void vcc_remove_socket(struct sock *sk)
 	write_unlock_irq(&vcc_sklist_lock);
 }
 
-
 static struct sk_buff *alloc_tx(struct atm_vcc *vcc,unsigned int size)
 {
 	struct sk_buff *skb;
@@ -74,7 +71,6 @@ static struct sk_buff *alloc_tx(struct atm_vcc *vcc,unsigned int size)
 	atomic_add(skb->truesize, &sk->sk_wmem_alloc);
 	return skb;
 }
-
 
 EXPORT_SYMBOL(vcc_hash);
 EXPORT_SYMBOL(vcc_sklist_lock);
@@ -156,7 +152,6 @@ int vcc_create(struct net *net, struct socket *sock, int protocol, int family)
 	return 0;
 }
 
-
 static void vcc_destroy_socket(struct sock *sk)
 {
 	struct atm_vcc *vcc = atm_sk(sk);
@@ -182,7 +177,6 @@ static void vcc_destroy_socket(struct sock *sk)
 	vcc_remove_socket(sk);
 }
 
-
 int vcc_release(struct socket *sock)
 {
 	struct sock *sk = sock->sk;
@@ -197,7 +191,6 @@ int vcc_release(struct socket *sock)
 	return 0;
 }
 
-
 void vcc_release_async(struct atm_vcc *vcc, int reply)
 {
 	struct sock *sk = sk_atm(vcc);
@@ -209,9 +202,7 @@ void vcc_release_async(struct atm_vcc *vcc, int reply)
 	sk->sk_state_change(sk);
 }
 
-
 EXPORT_SYMBOL(vcc_release_async);
-
 
 void atm_dev_release_vccs(struct atm_dev *dev)
 {
@@ -234,7 +225,6 @@ void atm_dev_release_vccs(struct atm_dev *dev)
 	}
 	write_unlock_irq(&vcc_sklist_lock);
 }
-
 
 static int adjust_tp(struct atm_trafprm *tp,unsigned char aal)
 {
@@ -260,7 +250,6 @@ static int adjust_tp(struct atm_trafprm *tp,unsigned char aal)
 	if (!tp->max_cdv) tp->max_cdv = ATM_MAX_CDV;
 	return 0;
 }
-
 
 static int check_ci(const struct atm_vcc *vcc, short vpi, int vci)
 {
@@ -288,7 +277,6 @@ static int check_ci(const struct atm_vcc *vcc, short vpi, int vci)
 
 	return 0;
 }
-
 
 static int find_ci(const struct atm_vcc *vcc, short *vpi, int *vci)
 {
@@ -333,7 +321,6 @@ static int find_ci(const struct atm_vcc *vcc, short *vpi, int *vci)
 	while (old_p != p || old_c != c);
 	return -EADDRINUSE;
 }
-
 
 static int __vcc_connect(struct atm_vcc *vcc, struct atm_dev *dev, short vpi,
 			 int vci)
@@ -406,7 +393,6 @@ fail_module_put:
 	return error;
 }
 
-
 int vcc_connect(struct socket *sock, int itf, short vpi, int vci)
 {
 	struct atm_dev *dev;
@@ -464,7 +450,6 @@ int vcc_connect(struct socket *sock, int itf, short vpi, int vci)
 	return 0;
 }
 
-
 int vcc_recvmsg(struct kiocb *iocb, struct socket *sock, struct msghdr *msg,
 		size_t size, int flags)
 {
@@ -502,7 +487,6 @@ int vcc_recvmsg(struct kiocb *iocb, struct socket *sock, struct msghdr *msg,
 	skb_free_datagram(sk, skb);
 	return copied;
 }
-
 
 int vcc_sendmsg(struct kiocb *iocb, struct socket *sock, struct msghdr *m,
 		size_t total_len)
@@ -587,7 +571,6 @@ out:
 	return error;
 }
 
-
 unsigned int vcc_poll(struct file *file, struct socket *sock, poll_table *wait)
 {
 	struct sock *sk = sock->sk;
@@ -623,7 +606,6 @@ unsigned int vcc_poll(struct file *file, struct socket *sock, poll_table *wait)
 	return mask;
 }
 
-
 static int atm_change_qos(struct atm_vcc *vcc,struct atm_qos *qos)
 {
 	int error;
@@ -645,7 +627,6 @@ static int atm_change_qos(struct atm_vcc *vcc,struct atm_qos *qos)
 	return svc_change_qos(vcc,qos);
 }
 
-
 static int check_tp(const struct atm_trafprm *tp)
 {
 	/* @@@ Should be merged with adjust_tp */
@@ -661,7 +642,6 @@ static int check_tp(const struct atm_trafprm *tp)
 	 */
 	return 0;
 }
-
 
 static int check_qos(const struct atm_qos *qos)
 {
@@ -719,7 +699,6 @@ int vcc_setsockopt(struct socket *sock, int level, int optname,
 	if (!vcc->dev || !vcc->dev->ops->setsockopt) return -EINVAL;
 	return vcc->dev->ops->setsockopt(vcc,level,optname,optval,optlen);
 }
-
 
 int vcc_getsockopt(struct socket *sock, int level, int optname,
 		   char __user *optval, int __user *optlen)

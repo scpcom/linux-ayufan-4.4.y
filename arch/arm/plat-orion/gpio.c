@@ -206,7 +206,6 @@ void orion_gpio_set_blink(unsigned pin, int blink)
 }
 EXPORT_SYMBOL(orion_gpio_set_blink);
 
-
 /*****************************************************************************
  * Orion GPIO IRQ
  *

@@ -13,7 +13,6 @@
 #define SETS(var, reg, field, val) var = (var & ~IO_MASK_(reg##_, field##_)) | \
 					  IO_STATE_(reg##_, field##_, _##val)
 
-
 static char used_dma_channels[MAX_DMA_CHANNELS];
 static const char * used_dma_channels_users[MAX_DMA_CHANNELS];
 

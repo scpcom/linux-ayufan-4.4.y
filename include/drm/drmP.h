@@ -549,7 +549,6 @@ struct drm_sigdata {
 	struct drm_hw_lock *lock;
 };
 
-
 /**
  * Kernel side of a mapping
  */
@@ -837,7 +836,6 @@ struct drm_driver {
 #define DRM_MINOR_LEGACY 1
 #define DRM_MINOR_CONTROL 2
 #define DRM_MINOR_RENDER 3
-
 
 /**
  * debugfs node list. This structure represents a debugfs file to
@@ -1516,7 +1514,6 @@ static __inline__ int drm_device_is_pcie(struct drm_device *dev)
 static __inline__ void drm_core_dropmap(struct drm_local_map *map)
 {
 }
-
 
 static __inline__ void *drm_calloc_large(size_t nmemb, size_t size)
 {

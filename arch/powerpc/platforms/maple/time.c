@@ -174,4 +174,3 @@ unsigned long __init maple_get_boot_time(void)
 	return mktime(tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday,
 		      tm.tm_hour, tm.tm_min, tm.tm_sec);
 }
-

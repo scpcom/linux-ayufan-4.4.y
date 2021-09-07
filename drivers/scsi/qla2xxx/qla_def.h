@@ -766,7 +766,6 @@ typedef struct {
 #define PD_STATE_PORT_LOGOUT			10
 #define PD_STATE_WAIT_PORT_LOGOUT_ACK		11
 
-
 #define QLA_ZIO_MODE_6		(BIT_2 | BIT_1)
 #define QLA_ZIO_DISABLED	0
 #define QLA_ZIO_DEFAULT_TIMER	2
@@ -1447,7 +1446,6 @@ typedef struct {
 	uint32_t dseg_rsp_length;	/* Data segment 1 length. */
 } ms_iocb_entry_t;
 
-
 /*
  * ISP queue - Mailbox Command entry structure definition.
  */
@@ -1494,7 +1492,6 @@ struct mbx_entry {
  */
 #define RESPONSE_ENTRY_SIZE	(sizeof(response_t))
 #define REQUEST_ENTRY_SIZE	(sizeof(request_t))
-
 
 /*
  * 24 bit port ID type definition.
@@ -1655,7 +1652,6 @@ typedef struct fc_port {
 #define	GPSC_CMD	0x127
 #define	GPSC_REQ_SIZE	(16 + 8)
 #define	GPSC_RSP_SIZE	(16 + 2 + 2)
-
 
 /*
  * HBA attribute types.
@@ -2124,7 +2120,6 @@ enum qla_work_type {
 	QLA_EVT_ASYNC_LOGOUT,
 	QLA_EVT_ASYNC_LOGOUT_DONE,
 };
-
 
 struct qla_work_evt {
 	struct list_head	list;
@@ -2652,8 +2647,6 @@ typedef struct scsi_qla_host {
 	port_id_t	d_id;			/* Host adapter port id */
 	uint8_t		marker_needed;
 	uint16_t	mgmt_svr_loop_id;
-
-
 
 	/* RSCN queue. */
 	uint32_t rscn_queue[MAX_RSCN_COUNT];

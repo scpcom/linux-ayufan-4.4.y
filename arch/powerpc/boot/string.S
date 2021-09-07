@@ -247,7 +247,6 @@ memcmp:
 2:	li	r3,0
 	blr
 
-
 /*
  * Flush the dcache and invalidate the icache for a range of addresses.
  *
@@ -266,4 +265,3 @@ flush_cache:
 	sync
 	isync
 	blr
-

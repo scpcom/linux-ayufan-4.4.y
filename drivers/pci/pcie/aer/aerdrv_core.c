@@ -167,7 +167,6 @@ static int add_error_device(struct aer_err_info *e_info, struct pci_dev *dev)
 	return 0;
 }
 
-
 #define	PCI_BUS(x)	(((x) >> 8) & 0xff)
 
 static int find_device_iter(struct pci_dev *dev, void *data)

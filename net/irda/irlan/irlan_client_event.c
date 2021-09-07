@@ -518,16 +518,3 @@ static int irlan_client_state_sync(struct irlan_cb *self, IRLAN_EVENT event,
 
 	return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

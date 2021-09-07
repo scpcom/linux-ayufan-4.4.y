@@ -375,7 +375,6 @@ static void wrb_fill_hdr(struct be_eth_hdr_wrb *hdr, struct sk_buff *skb,
 	AMAP_SET_BITS(struct amap_eth_hdr_wrb, len, hdr, len);
 }
 
-
 static int make_tx_wrbs(struct be_adapter *adapter,
 		struct sk_buff *skb, u32 wrb_cnt, bool dummy_wrb)
 {
@@ -1974,7 +1973,6 @@ pci_map_err:
 	be_unmap_pci_bars(adapter);
 	return -ENOMEM;
 }
-
 
 static void be_ctrl_cleanup(struct be_adapter *adapter)
 {

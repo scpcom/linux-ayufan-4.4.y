@@ -142,7 +142,6 @@ static int ttusb2_power_ctrl(struct dvb_usb_device *d, int onoff)
 	return ttusb2_msg(d, CMD_POWER, &b, 1, NULL, 0);
 }
 
-
 static struct tda10086_config tda10086_config = {
 	.demod_address = 0x0e,
 	.invert = 0,

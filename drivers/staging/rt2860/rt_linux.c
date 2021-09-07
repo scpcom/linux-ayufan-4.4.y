@@ -123,7 +123,6 @@ VOID RTMP_OS_Init_Timer(
     pTimer->function = function;
 }
 
-
 VOID RTMP_OS_Add_Timer(
 	IN	NDIS_MINIPORT_TIMER		*pTimer,
 	IN	unsigned long timeout)
@@ -208,7 +207,6 @@ NDIS_STATUS os_free_mem(
 	return (NDIS_STATUS_SUCCESS);
 }
 
-
 PNDIS_PACKET RTMP_AllocateFragPacketBuffer(
 	IN	PRTMP_ADAPTER pAd,
 	IN	ULONG	Length)
@@ -229,7 +227,6 @@ PNDIS_PACKET RTMP_AllocateFragPacketBuffer(
 
 	return (PNDIS_PACKET) pkt;
 }
-
 
 PNDIS_PACKET RTMP_AllocateTxPacketBuffer(
 	IN	PRTMP_ADAPTER pAd,
@@ -259,7 +256,6 @@ PNDIS_PACKET RTMP_AllocateTxPacketBuffer(
 	return (PNDIS_PACKET) pkt;
 }
 
-
 VOID build_tx_packet(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket,
@@ -285,7 +281,6 @@ VOID	RTMPFreeAdapter(
 
 	kfree(pAd->BeaconBuf);
 
-
 	NdisFreeSpinLock(&pAd->MgmtRingLock);
 #ifdef RT2860
 	NdisFreeSpinLock(&pAd->RxRingLock);
@@ -307,8 +302,6 @@ BOOLEAN OS_Need_Clone_Packet(void)
 {
 	return (FALSE);
 }
-
-
 
 /*
 	========================================================================
@@ -356,14 +349,12 @@ NDIS_STATUS RTMPCloneNdisPacket(
 	NdisMoveMemory(pkt->data, GET_OS_PKT_DATAPTR(pInPacket), GET_OS_PKT_LEN(pInPacket));
 	*ppOutPacket = OSPKT_TO_RTPKT(pkt);
 
-
 	RTMP_SET_PACKET_SOURCE(OSPKT_TO_RTPKT(pkt), PKTSRC_NDIS);
 
 	printk("###Clone###\n");
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 // the allocated NDIS PACKET must be freed via RTMPFreeNdisPacket()
 NDIS_STATUS RTMPAllocateNdisPacket(
@@ -418,7 +409,6 @@ VOID RTMPFreeNdisPacket(
 	dev_kfree_skb_any(RTPKT_TO_OSPKT(pPacket));
 }
 
-
 // IRQL = DISPATCH_LEVEL
 // NOTE: we do have an assumption here, that Byte0 and Byte1 always reasid at the same
 //			 scatter gather buffer
@@ -433,7 +423,6 @@ NDIS_STATUS Sniff2BytesFromNdisBuffer(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 void RTMP_QueryPacketInfo(
 	IN  PNDIS_PACKET pPacket,
@@ -511,7 +500,6 @@ PNDIS_PACKET DuplicatePacket(
 	DataSize = (USHORT) GET_OS_PKT_LEN(pPacket);
 	pData = (PUCHAR) GET_OS_PKT_DATAPTR(pPacket);
 
-
 	skb = skb_clone(RTPKT_TO_OSPKT(pPacket), MEM_ALLOC_FLAG);
 	if (skb)
 	{
@@ -534,7 +522,6 @@ PNDIS_PACKET duplicate_pkt(
 	struct sk_buff	*skb;
 	PNDIS_PACKET	pPacket = NULL;
 
-
 	if ((skb = __dev_alloc_skb(HdrLen + DataSize + 2, MEM_ALLOC_FLAG)) != NULL)
 	{
 		skb_reserve(skb, 2);
@@ -549,14 +536,12 @@ PNDIS_PACKET duplicate_pkt(
 	return pPacket;
 }
 
-
 #define TKIP_TX_MIC_SIZE		8
 PNDIS_PACKET duplicate_pkt_with_TKIP_MIC(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket)
 {
 	struct sk_buff	*skb, *newskb;
-
 
 	skb = RTPKT_TO_OSPKT(pPacket);
 	if (skb_tailroom(skb) < TKIP_TX_MIC_SIZE)
@@ -574,9 +559,6 @@ PNDIS_PACKET duplicate_pkt_with_TKIP_MIC(
 
 	return OSPKT_TO_RTPKT(skb);
 }
-
-
-
 
 PNDIS_PACKET ClonePacket(
 	IN	PRTMP_ADAPTER	pAd,
@@ -624,7 +606,6 @@ void  update_os_packet_info(
 	pOSPkt->tail = pOSPkt->data + pOSPkt->len;
 }
 
-
 void wlan_802_11_to_802_3_packet(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	RX_BLK			*pRxBlk,
@@ -667,7 +648,6 @@ void announce_802_3_packet(
 
 	netif_rx(pRxPkt);
 }
-
 
 PRTMP_SCATTER_GATHER_LIST
 rt_get_sg_list_from_packet(PNDIS_PACKET pPacket, RTMP_SCATTER_GATHER_LIST *sg)
@@ -817,7 +797,6 @@ void send_monitor_packets(
 	54, 108, 162, 216, 324, 432, 486, 540,  14, 29, 43, 57, 87, 115, 130, 144, 29, 59,87,115, 173, 230,260, 288, 30, 60,90,120,180,240,270,300,60,120,180,240,360,480,540,600, 0,1,2,3,4,5,6,7,8,9,10,
 	11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80};
 
-
     ASSERT(pRxBlk->pRxPacket);
     if (pRxBlk->DataSize < 10)
     {
@@ -868,7 +847,6 @@ void send_monitor_packets(
         else
             pRxBlk->pData += header_len;
     } //end if
-
 
 	if (pRxBlk->DataSize < pOSPkt->len) {
         skb_trim(pOSPkt,pRxBlk->DataSize);
@@ -958,7 +936,6 @@ void send_monitor_packets(
 	ph->frmlen.len = 4;
 	ph->frmlen.data	= (u_int32_t)pRxBlk->DataSize;
 
-
     pOSPkt->pkt_type = PACKET_OTHERHOST;
     pOSPkt->protocol = eth_type_trans(pOSPkt, pOSPkt->dev);
     pOSPkt->ip_summed = CHECKSUM_NONE;
@@ -999,4 +976,3 @@ void RTMP_IndicateMediaState(
 		}
 	}
 }
-

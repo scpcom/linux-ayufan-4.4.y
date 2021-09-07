@@ -116,4 +116,3 @@ extern u32 get_phy_capabilies(gmac_priv_t* priv);
 
 extern u32 get_phy_capabilies(gmac_priv_t* priv);
 #endif        //  #if !defined(__GMAC_PHY_H__)
-

@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #include "mvTypes.h"
 #include "mvCommon.h"
 #include "mvOs.h"
@@ -91,7 +90,6 @@ MV_TARGET sdmmcAddrDecPrioTab[] =
 #endif
 	TBL_TERM
 };
-
 
 /*******************************************************************************
 * sdmmcWinOverlapDetect - Detect SDMMC address windows overlapping
@@ -150,7 +148,6 @@ static MV_STATUS sdmmcWinOverlapDetect(int dev, MV_U32 winNum,
     }
     return MV_FALSE;
 }
-
 
 /*******************************************************************************
 * mvSdmmcWinSet - Set SDMMC target address window
@@ -318,8 +315,6 @@ MV_VOID mvSdmmcAddrDecShow(MV_VOID)
 	MV_SDMMC_DEC_WIN win;
 	int i,j=0;
 
-
-
 	if (MV_FALSE == mvCtrlPwrClckGet(SDIO_UNIT_ID, 0)) 
 		return;
 
@@ -350,7 +345,6 @@ MV_VOID mvSdmmcAddrDecShow(MV_VOID)
 	    }
 	}
 }
-
 
 /*******************************************************************************
 * mvSdmmcWinInit - Initialize the integrated SDMMC target address window.
@@ -422,6 +416,3 @@ MV_STATUS mvSdmmcWinInit(MV_VOID)
     }
     return MV_OK;
 }
-
-
-

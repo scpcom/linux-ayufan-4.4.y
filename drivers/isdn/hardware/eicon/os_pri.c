@@ -173,7 +173,6 @@ int diva_pri_init_card(diva_os_xdi_adapter_t * a)
 			 a->controller, a->xdi_adapter.serialNo))
 	}
 
-
 	/*
 	   Initialize os objects
 	 */
@@ -310,7 +309,6 @@ static int diva_pri_cleanup_adapter(diva_os_xdi_adapter_t * a)
 	a->xdi_adapter.Channels = 0;
 	a->xdi_adapter.e_max = 0;
 
-
 	/*
 	   Free adapter DMA map
 	 */
@@ -318,7 +316,6 @@ static int diva_pri_cleanup_adapter(diva_os_xdi_adapter_t * a)
 			  (struct _diva_dma_map_entry *) a->xdi_adapter.
 			  dma_map);
 	a->xdi_adapter.dma_map = NULL;
-
 
 	/*
 	   Detach this adapter from debug driver
@@ -941,7 +938,6 @@ dsp_check_presence(volatile byte __iomem * addr, volatile byte __iomem * data, i
 
 	return (0);
 }
-
 
 /*
 **  Check if DSP's are present and operating

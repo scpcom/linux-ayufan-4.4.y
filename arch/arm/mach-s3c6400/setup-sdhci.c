@@ -60,4 +60,3 @@ void s3c6400_setup_sdhci_cfg_card(struct platform_device *dev,
 	writel(ctrl2, r + S3C_SDHCI_CONTROL2);
 	writel(ctrl3, r + S3C_SDHCI_CONTROL3);
 }
-

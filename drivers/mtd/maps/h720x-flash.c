@@ -132,7 +132,6 @@ static void __exit h720x_mtd_cleanup(void)
 	}
 }
 
-
 module_init(h720x_mtd_init);
 module_exit(h720x_mtd_cleanup);
 

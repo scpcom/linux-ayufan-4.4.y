@@ -121,7 +121,6 @@ __init void plat_time_init(void)
 	configPR |= 0x00000020;
 	write_c0_config7(configPR);
 
-
         /* PLL0 sets MIPS clock (PLL1 <=> TM1, PLL6 <=> TM2, PLL5 <=> mem) */
         /* (but only if CLK_MIPS_CTL select value [bits 3:1] is 1:  FIXME) */
 

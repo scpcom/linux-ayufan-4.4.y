@@ -35,7 +35,6 @@
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/compatmac.h>
 
-
 static int cfi_staa_read(struct mtd_info *, loff_t, size_t, size_t *, u_char *);
 static int cfi_staa_write_buffers(struct mtd_info *, loff_t, size_t, size_t *, const u_char *);
 static int cfi_staa_writev(struct mtd_info *mtd, const struct kvec *vecs,
@@ -244,7 +243,6 @@ static struct mtd_info *cfi_staa_setup(struct map_info *map)
 	mtd->name = map->name;
 	return mtd;
 }
-
 
 static inline int do_read_onechip(struct map_info *map, struct flchip *chip, loff_t adr, size_t len, u_char *buf)
 {
@@ -731,7 +729,6 @@ write_error:
 	kfree(buffer);
 	return ret;
 }
-
 
 static inline int do_erase_oneblock(struct map_info *map, struct flchip *chip, unsigned long adr)
 {

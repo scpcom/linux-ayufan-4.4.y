@@ -226,7 +226,6 @@ proc_file_write(struct file *file, const char __user *buffer,
 	return rv;
 }
 
-
 static loff_t
 proc_file_lseek(struct file *file, loff_t offset, int orig)
 {

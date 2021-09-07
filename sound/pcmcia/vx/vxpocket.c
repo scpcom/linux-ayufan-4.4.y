@@ -18,7 +18,6 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-
 #include <linux/init.h>
 #include <linux/moduleparam.h>
 #include <sound/core.h>
@@ -50,12 +49,10 @@ MODULE_PARM_DESC(enable, "Enable VXPocket soundcard.");
 module_param_array(ibl, int, NULL, 0444);
 MODULE_PARM_DESC(ibl, "Capture IBL size for VXPocket soundcard.");
  
-
 /*
  */
 
 static unsigned int card_alloc;
-
 
 /*
  */
@@ -75,7 +72,6 @@ static int snd_vxpocket_dev_free(struct snd_device *device)
 	kfree(chip);
 	return 0;
 }
-
 
 /*
  * Hardware information
@@ -126,7 +122,6 @@ static struct snd_vx_hardware vxp440_hw = {
 	.output_level_db_scale = db_scale_old_vol,
 };	
 
-
 /*
  * create vxpocket instance
  */
@@ -176,7 +171,6 @@ static int snd_vxpocket_new(struct snd_card *card, int ibl,
 	return 0;
 }
 
-
 /**
  * snd_vxpocket_assign_resources - initialize the hardware and card instance.
  * @port: i/o port for the card
@@ -207,7 +201,6 @@ static int snd_vxpocket_assign_resources(struct vx_core *chip, int port, int irq
 
 	return 0;
 }
-
 
 /*
  * configuration callback
@@ -291,7 +284,6 @@ static int vxp_resume(struct pcmcia_device *link)
 }
 
 #endif
-
 
 /*
  */

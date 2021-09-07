@@ -261,4 +261,3 @@ int tipc_reg_remove_port(struct user_port *up_ptr)
 	spin_unlock_bh(&reg_lock);
 	return 0;
 }
-

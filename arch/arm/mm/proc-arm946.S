@@ -303,7 +303,6 @@ ENTRY(arm946_cache_fns)
 	.long	arm946_dma_clean_range
 	.long	arm946_dma_flush_range
 
-
 ENTRY(cpu_arm946_dcache_clean_area)
 #ifndef CONFIG_CPU_DCACHE_WRITETHROUGH
 1:	mcr	p15, 0, r0, c7, c10, 1		@ clean D entry
@@ -441,4 +440,3 @@ __arm946_proc_info:
 	.long	0
 	.long	arm940_cache_fns
 	.size	__arm946_proc_info, . - __arm946_proc_info
-

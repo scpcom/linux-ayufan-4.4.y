@@ -213,7 +213,6 @@ static void irlap_backoff_timer_expired(void *data)
 	irlap_do_event(self, BACKOFF_TIMER_EXPIRED, NULL, NULL);
 }
 
-
 /*
  * Function irtty_media_busy_expired (data)
  *

@@ -46,7 +46,6 @@
 
 #include <asm/uaccess.h>
 
-
 #include "cluster/nodemanager.h"
 #include "cluster/heartbeat.h"
 #include "cluster/tcp.h"

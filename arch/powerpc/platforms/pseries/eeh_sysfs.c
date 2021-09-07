@@ -52,7 +52,6 @@ static ssize_t eeh_show_##_name(struct device *dev,      \
 }                                                        \
 static DEVICE_ATTR(_name, S_IRUGO, eeh_show_##_name, NULL);
 
-
 EEH_SHOW_ATTR(eeh_mode, eeh_mode, "0x%x");
 EEH_SHOW_ATTR(eeh_config_addr, eeh_config_addr, "0x%x");
 EEH_SHOW_ATTR(eeh_pe_config_addr, eeh_pe_config_addr, "0x%x");
@@ -84,4 +83,3 @@ void eeh_sysfs_remove_device(struct pci_dev *pdev)
 	device_remove_file(&pdev->dev, &dev_attr_eeh_false_positives);
 	device_remove_file(&pdev->dev, &dev_attr_eeh_freeze_count);
 }
-

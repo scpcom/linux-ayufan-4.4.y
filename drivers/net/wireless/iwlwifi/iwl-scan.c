@@ -54,8 +54,6 @@
 #define IWL_PASSIVE_DWELL_BASE      (100)
 #define IWL_CHANNEL_TUNE_TIME       5
 
-
-
 /**
  * iwl_scan_cancel - Cancel any currently executing HW scan
  *
@@ -693,7 +691,6 @@ static void iwl_bg_request_scan(struct work_struct *data)
 	scan->tx_cmd.sta_id = priv->hw_params.bcast_sta_id;
 	scan->tx_cmd.stop_time.life_time = TX_CMD_LIFE_TIME_INFINITE;
 
-
 	if (priv->scan_bands & BIT(IEEE80211_BAND_2GHZ)) {
 		band = IEEE80211_BAND_2GHZ;
 		scan->flags = RXON_FLG_BAND_24G_MSK | RXON_FLG_AUTO_DETECT_MSK;
@@ -836,4 +833,3 @@ void iwl_setup_scan_deferred_work(struct iwl_priv *priv)
 	INIT_DELAYED_WORK(&priv->scan_check, iwl_bg_scan_check);
 }
 EXPORT_SYMBOL(iwl_setup_scan_deferred_work);
-

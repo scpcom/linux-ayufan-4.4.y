@@ -57,8 +57,6 @@ static const t_env_var * prom_env;
 static void prom_halt(void) __attribute__((noreturn));
 static void prom_exit(void) __attribute__((noreturn));
 
-
-
 const char *get_system_type(void)
 {
 	return "Basler eXcite";

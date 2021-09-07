@@ -164,7 +164,6 @@ label##_pSeries:					\
 	mtspr	SPRN_SPRG_SCRATCH0,r13;		/* save r13 */	\
 	EXCEPTION_PROLOG_PSERIES(PACA_EXGEN, label##_common)
 
-
 #define MASKABLE_EXCEPTION_PSERIES(n, label)				\
 	. = n;								\
 	.globl label##_pSeries;						\

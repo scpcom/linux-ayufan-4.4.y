@@ -12,7 +12,6 @@
 #ifndef LINE6_CONTROL_H
 #define LINE6_CONTROL_H
 
-
 /**
    List of PODxt Pro controls.
    See Appendix C of the "PODxt (Pro) Pilot's Handbook" by Line6.
@@ -177,11 +176,9 @@ enum {
 	VARIAXMIDI_tone                    =  79,
 };
 
-
 extern int pod_create_files(int firmware, int type, struct device *dev);
 extern void pod_remove_files(int firmware, int type, struct device *dev);
 extern int variax_create_files(int firmware, int type, struct device *dev);
 extern void variax_remove_files(int firmware, int type, struct device *dev);
-
 
 #endif

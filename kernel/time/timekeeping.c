@@ -137,7 +137,6 @@ static inline s64 timekeeping_get_ns_raw(void)
  */
 __cacheline_aligned_in_smp DEFINE_SEQLOCK(xtime_lock);
 
-
 /*
  * The current time
  * wall_to_monotonic is what we need to add to xtime (or xtime corrected
@@ -467,7 +466,6 @@ void getrawmonotonic(struct timespec *ts)
 	timespec_add_ns(ts, nsecs);
 }
 EXPORT_SYMBOL(getrawmonotonic);
-
 
 /**
  * timekeeping_valid_for_hres - Check if timekeeping is suitable for hres

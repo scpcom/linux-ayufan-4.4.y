@@ -478,7 +478,6 @@ static struct platform_device *sh7786_devices[] __initdata = {
 	&usb_ohci_device,
 };
 
-
 /*
  * Please call this function if your platform board
  * use external clock for USB

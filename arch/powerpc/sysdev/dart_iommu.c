@@ -187,7 +187,6 @@ static int dart_build(struct iommu_table *tbl, long index,
 	return 0;
 }
 
-
 static void dart_free(struct iommu_table *tbl, long index, long npages)
 {
 	unsigned int *dp;
@@ -204,7 +203,6 @@ static void dart_free(struct iommu_table *tbl, long index, long npages)
 	while (npages--)
 		*(dp++) = dart_emptyval;
 }
-
 
 static int __init dart_init(struct device_node *dart_node)
 {

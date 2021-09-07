@@ -101,8 +101,6 @@ module_param (lk201_compose_is_alt, int, 0);
 MODULE_PARM_DESC (lk201_compose_is_alt, "If set non-zero, LK201' Compose key "
 		"will act as an Alt key");
 
-
-
 #undef LKKBD_DEBUG
 #ifdef LKKBD_DEBUG
 #define DBG(x...) printk (x)
@@ -153,8 +151,6 @@ MODULE_PARM_DESC (lk201_compose_is_alt, "If set non-zero, LK201' Compose key "
 #define LK_NUM_KEYCODES		256
 #define LK_NUM_IGNORE_BYTES	6
 typedef u_int16_t lk_keycode_t;
-
-
 
 static lk_keycode_t lkkbd_keycode[LK_NUM_KEYCODES] = {
 	[0x56] = KEY_F1,
@@ -766,4 +762,3 @@ lkkbd_exit (void)
 
 module_init (lkkbd_init);
 module_exit (lkkbd_exit);
-

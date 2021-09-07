@@ -467,7 +467,6 @@ static int file_ioctl(struct file *filp, unsigned int cmd,
 	return vfs_ioctl(filp, cmd, arg);
 }
 
-
 #ifdef MY_ABC_HERE
 static int archive_check_capable(struct inode *inode)
 {

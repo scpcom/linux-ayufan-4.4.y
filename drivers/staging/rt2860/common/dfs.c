@@ -45,7 +45,6 @@ typedef struct _RADAR_DURATION_TABLE
 	ULONG Tolerance;
 } RADAR_DURATION_TABLE, *PRADAR_DURATION_TABLE;
 
-
 static UCHAR RdIdleTimeTable[MAX_RD_REGION][4] =
 {
 	{9, 250, 250, 250},		// CE
@@ -152,7 +151,6 @@ VOID RadarDetectionStart(
 	}
 	else
 		CtsProtect = 0x01;
-
 
 	// send start-RD with CTS protection command to MCU
 	// highbyte [7]		reserve
@@ -372,13 +370,11 @@ VOID RadarDetectPeriodic(
 		AsicEnableBssSync(pAd);
 		pAd->CommonCfg.RadarDetect.RDMode = RD_NORMAL_MODE;
 
-
 		return;
 	}
 
 	return;
 }
-
 
 /*
     ==========================================================================
@@ -428,5 +424,3 @@ INT Set_LongPulseRadarTh_Proc(
 
 	return TRUE;
 }
-
-

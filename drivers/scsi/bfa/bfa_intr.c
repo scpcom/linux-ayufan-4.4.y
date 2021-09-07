@@ -214,5 +214,3 @@ bfa_isr_bind(enum bfi_mclass mc, bfa_isr_func_t isr_func)
 {
 	bfa_isrs[mc] = isr_func;
 }
-
-

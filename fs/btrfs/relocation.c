@@ -3254,7 +3254,6 @@ static int check_extent_flags(u64 flags)
 	return 0;
 }
 
-
 static noinline_for_stack int relocate_block_group(struct reloc_control *rc)
 {
 	struct rb_root blocks = RB_ROOT;

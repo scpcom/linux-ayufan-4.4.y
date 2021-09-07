@@ -1224,4 +1224,3 @@ void __init early_platform_cleanup(void)
 		memset(&pd->dev.devres_head, 0, sizeof(pd->dev.devres_head));
 	}
 }
-

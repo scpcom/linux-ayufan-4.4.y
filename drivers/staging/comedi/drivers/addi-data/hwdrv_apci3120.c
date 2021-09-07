@@ -1663,7 +1663,6 @@ void v_APCI3120_Interrupt(int irq, void *d)
 +----------------------------------------------------------------------------+
 */
 
-
 int i_APCI3120_InterruptHandleEos(struct comedi_device *dev)
 {
 	int n_chan, i;

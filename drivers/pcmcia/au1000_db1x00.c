@@ -58,7 +58,6 @@
 #define debug(x,args...)
 #endif
 
-
 struct au1000_pcmcia_socket au1000_pcmcia_socket[PCMCIA_NUM_SOCKS];
 extern int au1x00_pcmcia_socket_probe(struct device *, struct pcmcia_low_level *, int, int);
 

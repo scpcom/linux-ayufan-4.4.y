@@ -34,7 +34,6 @@
 #include "pci_impl.h"
 #include "machvec_impl.h"
 
-
 /* Note that this interrupt code is identical to TAKARA.  */
 
 /* Note mask bit is true for DISABLED irqs.  */

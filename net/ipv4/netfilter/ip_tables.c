@@ -415,7 +415,6 @@ ipt_do_table(struct sk_buff *skb,
 		tgpar.target   = t->u.kernel.target;
 		tgpar.targinfo = t->data;
 
-
 #ifdef CONFIG_NETFILTER_DEBUG
 		tb_comefrom = 0xeeeeeeec;
 #endif

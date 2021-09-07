@@ -429,7 +429,6 @@ static struct resource wm831x_dcdc1_resources[] = {
 	},
 };
 
-
 static struct resource wm831x_dcdc2_resources[] = {
 	{
 		.start = WM831X_DC2_CONTROL_1,
@@ -667,7 +666,6 @@ static struct resource wm831x_on_resources[] = {
 		.flags = IORESOURCE_IRQ,
 	},
 };
-
 
 static struct resource wm831x_power_resources[] = {
 	{
@@ -1514,7 +1512,6 @@ static const struct i2c_device_id wm831x_i2c_id[] = {
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, wm831x_i2c_id);
-
 
 static struct i2c_driver wm831x_i2c_driver = {
 	.driver = {

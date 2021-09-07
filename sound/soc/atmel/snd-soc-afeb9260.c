@@ -200,4 +200,3 @@ module_exit(afeb9260_soc_exit);
 MODULE_AUTHOR("Sergey Lapin <slapin@ossfans.org>");
 MODULE_DESCRIPTION("ALSA SoC for AFEB9260");
 MODULE_LICENSE("GPL");
-

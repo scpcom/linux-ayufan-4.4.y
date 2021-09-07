@@ -76,7 +76,6 @@ void to_tm(int tim, MV_RTC_TIME *tm)
         tm->day = (gday + 4) % 7;
 }
 
-
 static int mv_set_rtc(void)
 {
 	MV_RTC_TIME time;
@@ -86,7 +85,6 @@ static int mv_set_rtc(void)
 
 	return 1;
 }
-
 
 extern int (*set_rtc)(void);
 

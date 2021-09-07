@@ -149,7 +149,6 @@ static __inline__ int valid_user_regs(struct pt_regs *regs)
 	return 0;
 }
 
-
 #endif /* __KERNEL__ */
 
 #endif /* ! __ASSEMBLY__ */

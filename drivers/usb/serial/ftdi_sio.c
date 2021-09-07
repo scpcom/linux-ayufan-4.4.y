@@ -143,8 +143,6 @@ static struct ftdi_sio_quirk ftdi_HE_TIRA1_quirk = {
  * but I don't know if those ever went into mass production. [Ian Abbott]
  */
 
-
-
 /*
  * Device ID not listed? Test via module params product/vendor or
  * /sys/bus/usb/ftdi_sio/new_id, then send patch/report!
@@ -767,7 +765,6 @@ static const char *ftdi_chip_name[] = {
 	[FT4232H] = "FT4232H"
 };
 
-
 /* Constants for read urb and write urb */
 #define BUFSZ 512
 
@@ -840,7 +837,6 @@ static struct usb_serial_driver ftdi_sio_device = {
 	.set_termios =		ftdi_set_termios,
 	.break_ctl =		ftdi_break_ctl,
 };
-
 
 #define WDR_TIMEOUT 5000 /* default urb timeout */
 #define WDR_SHORT_TIMEOUT 1000	/* shorter urb timeout */
@@ -990,7 +986,6 @@ static int update_mctrl(struct usb_serial_port *port, unsigned int set,
 	}
 	return rv;
 }
-
 
 static __u32 get_ftdi_divisor(struct tty_struct *tty,
 						struct usb_serial_port *port)
@@ -1190,7 +1185,6 @@ static int read_latency_timer(struct usb_serial_port *port)
 	unsigned short latency = 0;
 	int rv = 0;
 
-
 	dbg("%s", __func__);
 
 	rv = usb_control_msg(udev,
@@ -1223,7 +1217,6 @@ static int get_serial_info(struct usb_serial_port *port,
 		return -EFAULT;
 	return 0;
 } /* get_serial_info */
-
 
 static int set_serial_info(struct tty_struct *tty,
 	struct usb_serial_port *port, struct serial_struct __user *newinfo)
@@ -1292,7 +1285,6 @@ check_and_exit:
 	return 0;
 
 } /* set_serial_info */
-
 
 /* Determine type of FTDI chip based on USB config and descriptor. */
 static void ftdi_determine_type(struct usb_serial_port *port)
@@ -1363,7 +1355,6 @@ static void ftdi_determine_type(struct usb_serial_port *port)
 	dev_info(&udev->dev, "Detected %s\n", ftdi_chip_name[priv->chip_type]);
 }
 
-
 /* Determine the maximum packet size for the device.  This depends on the chip
  * type and the USB host capabilities.  The value should be obtained from the
  * device descriptor as the chip will use the appropriate values for the host.*/
@@ -1402,7 +1393,6 @@ static void ftdi_set_max_packet_size(struct usb_serial_port *port)
 	dev_info(&udev->dev, "Setting MaxPacketSize %d\n", priv->max_packet_size);
 }
 
-
 /*
  * ***************************************************************************
  * Sysfs Attribute
@@ -1419,7 +1409,6 @@ static ssize_t show_latency_timer(struct device *dev,
 	else
 		return sprintf(buf, "%i\n", priv->latency);
 }
-
 
 /* Write a new value of the latency timer, in units of milliseconds. */
 static ssize_t store_latency_timer(struct device *dev,
@@ -1544,7 +1533,6 @@ static int ftdi_sio_port_probe(struct usb_serial_port *port)
 {
 	struct ftdi_private *priv;
 	struct ftdi_sio_quirk *quirk = usb_get_serial_data(port->serial);
-
 
 	dbg("%s", __func__);
 
@@ -1779,7 +1767,6 @@ static int ftdi_open(struct tty_struct *tty, struct usb_serial_port *port)
 	return result;
 } /* ftdi_open */
 
-
 static void ftdi_dtr_rts(struct usb_serial_port *port, int on)
 {
 	struct ftdi_private *priv = usb_get_serial_port_data(port);
@@ -1821,8 +1808,6 @@ static void ftdi_close(struct usb_serial_port *port)
 	usb_kill_urb(port->read_urb);
 	kref_put(&priv->kref, ftdi_sio_priv_release);
 } /* ftdi_close */
-
-
 
 /* The SIO requires the first byte to have:
  *  B0 1
@@ -1952,7 +1937,6 @@ error_no_buffer:
 	return count;
 } /* ftdi_write */
 
-
 /* This function may get called when the device is closed */
 
 static void ftdi_write_bulk_callback(struct urb *urb)
@@ -1992,7 +1976,6 @@ static void ftdi_write_bulk_callback(struct urb *urb)
 
 	usb_serial_port_softint(port);
 } /* ftdi_write_bulk_callback */
-
 
 static int ftdi_write_room(struct tty_struct *tty)
 {
@@ -2184,7 +2167,6 @@ static void ftdi_break_ctl(struct tty_struct *tty, int break_state)
 						break_state, urb_value);
 
 }
-
 
 /* old_termios contains the original termios settings and tty->termios contains
  * the new setting to be used
@@ -2539,7 +2521,6 @@ failed_sio_register:
 	return retval;
 }
 
-
 static void __exit ftdi_exit(void)
 {
 
@@ -2549,7 +2530,6 @@ static void __exit ftdi_exit(void)
 	usb_serial_deregister(&ftdi_sio_device);
 
 }
-
 
 module_init(ftdi_init);
 module_exit(ftdi_exit);

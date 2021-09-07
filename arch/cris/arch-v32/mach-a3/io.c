@@ -146,4 +146,3 @@ int crisv32_io_get_name(struct crisv32_iopin *iopin, const char *name)
 struct cris_io_operations *cris_iops = NULL;
 EXPORT_SYMBOL(cris_iops);
 #endif
-

@@ -209,7 +209,6 @@ typedef struct {
 } reg_bif_slave_r_masked_intr;
 #define REG_RD_ADDR_bif_slave_r_masked_intr 76
 
-
 /* Constants */
 enum {
   regk_bif_slave_active_hi                 = 0x00000003,

@@ -907,7 +907,6 @@ static int nfs_check_inode_attributes(struct inode *inode, struct nfs_fattr *fat
 	loff_t cur_size, new_isize;
 	unsigned long invalid = 0;
 
-
 	/* Has the inode gone and changed behind our back? */
 	if ((fattr->valid & NFS_ATTR_FATTR_FILEID) && nfsi->fileid != fattr->fileid)
 		return -EIO;
@@ -1252,7 +1251,6 @@ static int nfs_update_inode(struct inode *inode, struct nfs_fattr *fattr)
 				| NFS_INO_REVAL_PAGECACHE
 				| NFS_INO_REVAL_FORCED);
 
-
 	if (fattr->valid & NFS_ATTR_FATTR_ATIME)
 		memcpy(&inode->i_atime, &fattr->atime, sizeof(inode->i_atime));
 	else if (server->caps & NFS_CAP_ATIME)
@@ -1357,7 +1355,6 @@ static int nfs_update_inode(struct inode *inode, struct nfs_fattr *fattr)
 		(long long)nfsi->fileid, (long long)fattr->fileid);
 	goto out_err;
 }
-
 
 #ifdef CONFIG_NFS_V4
 

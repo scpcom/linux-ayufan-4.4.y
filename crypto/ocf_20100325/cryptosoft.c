@@ -612,7 +612,6 @@ done:
 }
 #endif /* defined(HAVE_ABLKCIPHER) || defined(HAVE_AHASH) */
 
-
 static void swcr_process_req(struct swcr_req *req)
 {
 	struct swcr_data *sw;
@@ -1045,7 +1044,6 @@ static void swcr_process_req(struct swcr_req *req)
 			crp->crp_olen = olen;
 		}
 
-
 		} break;
 
 	default:
@@ -1059,7 +1057,6 @@ done:
 	crypto_done(crp);
 	kmem_cache_free(swcr_req_cache, req);
 }
-
 
 /*
  * Process a crypto request.
@@ -1137,7 +1134,6 @@ done:
 		kmem_cache_free(swcr_req_cache, req);
 	return 0;
 }
-
 
 static int
 cryptosoft_init(void)

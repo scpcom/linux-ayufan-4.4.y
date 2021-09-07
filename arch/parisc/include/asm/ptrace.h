@@ -63,7 +63,6 @@ void user_enable_block_step(struct task_struct *task);
 unsigned long profile_pc(struct pt_regs *);
 extern void show_regs(struct pt_regs *);
 
-
 #endif /* __KERNEL__ */
 
 #endif

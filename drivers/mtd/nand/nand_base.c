@@ -1588,7 +1588,6 @@ static int nand_read_oob(struct mtd_info *mtd, loff_t from,
 	return ret;
 }
 
-
 /**
  * nand_write_page_raw - [Intern] raw page write function
  * @mtd:	mtd info structure
@@ -2671,7 +2670,6 @@ int nand_scan_ident(struct mtd_info *mtd, int maxchips)
 
 	return 0;
 }
-
 
 /**
  * nand_scan_tail - [NAND Interface] Scan for the NAND device

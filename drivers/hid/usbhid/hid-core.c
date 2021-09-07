@@ -1273,7 +1273,6 @@ void usbhid_put_power(struct hid_device *hid)
 	usb_autopm_put_interface(usbhid->intf);
 }
 
-
 #ifdef CONFIG_PM
 static int hid_suspend(struct usb_interface *intf, pm_message_t message)
 {

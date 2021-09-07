@@ -418,7 +418,6 @@ fp_e2e_large:
 4:	clrl	%d0
 	jra	2b
 
-
 /*
  * Normalization functions.  Call these on the output of general
  * FP operators, and before any conversion into the destination

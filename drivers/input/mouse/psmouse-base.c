@@ -222,7 +222,6 @@ static inline void __psmouse_set_state(struct psmouse *psmouse, enum psmouse_sta
 	psmouse->last = jiffies;
 }
 
-
 /*
  * psmouse_set_state() sets new psmouse state and resets all flags and
  * counters while holding serio lock so fighting with interrupt handler
@@ -364,7 +363,6 @@ static irqreturn_t psmouse_interrupt(struct serio *serio,
 	return IRQ_HANDLED;
 }
 
-
 /*
  * psmouse_sliced_command() sends an extended PS/2 command to the mouse
  * using sliced syntax, understood by advanced devices, such as Logitech
@@ -388,7 +386,6 @@ int psmouse_sliced_command(struct psmouse *psmouse, unsigned char command)
 	return 0;
 }
 
-
 /*
  * psmouse_reset() resets the mouse into power-on state.
  */
@@ -404,7 +401,6 @@ int psmouse_reset(struct psmouse *psmouse)
 
 	return 0;
 }
-
 
 /*
  * Genius NetMouse magic init.
@@ -667,7 +663,6 @@ static int psmouse_extensions(struct psmouse *psmouse,
 		max_proto = PSMOUSE_IMEX;
 	}
 
-
 	if (max_proto > PSMOUSE_IMEX) {
 		if (genius_detect(psmouse, set_properties) == 0)
 			return PSMOUSE_GENPS;
@@ -882,7 +877,6 @@ static const struct psmouse_protocol *psmouse_protocol_by_name(const char *name,
 	return NULL;
 }
 
-
 /*
  * psmouse_probe() probes for a PS/2 mouse.
  */
@@ -980,7 +974,6 @@ static void psmouse_activate(struct psmouse *psmouse)
 	psmouse_set_state(psmouse, PSMOUSE_ACTIVATED);
 }
 
-
 /*
  * psmouse_deactivate() puts the mouse into poll mode so that we don't get motion
  * reports from it unless we explicitly request it.
@@ -1004,7 +997,6 @@ static int psmouse_poll(struct psmouse *psmouse)
 	return ps2_command(&psmouse->ps2dev, psmouse->packet,
 			   PSMOUSE_CMD_POLL | (psmouse->pktsize << 8));
 }
-
 
 /*
  * psmouse_resync() attempts to re-validate current protocol.
@@ -1343,7 +1335,6 @@ static int psmouse_connect(struct serio *serio, struct serio_driver *drv)
 	goto out;
 }
 
-
 static int psmouse_reconnect(struct serio *serio)
 {
 	struct psmouse *psmouse = serio_get_drvdata(serio);
@@ -1652,7 +1643,6 @@ static ssize_t psmouse_attr_set_resolution(struct psmouse *psmouse, void *data, 
 	psmouse->set_resolution(psmouse, value);
 	return count;
 }
-
 
 static int psmouse_set_maxproto(const char *val, struct kernel_param *kp)
 {

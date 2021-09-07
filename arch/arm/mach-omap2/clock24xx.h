@@ -1304,7 +1304,6 @@ static struct clk ssi_l4_ick = {
 	.recalc		= &followparent_recalc,
 };
 
-
 /*
  * GFX clock domain
  *	Clocks:
@@ -2654,4 +2653,3 @@ static struct clk virt_prcm_set = {
 };
 
 #endif
-

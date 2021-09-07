@@ -26,7 +26,6 @@
 
 *******************************************************************************/
 
-
 #include "ixgbe.h"
 #include "ixgbe_type.h"
 #include "ixgbe_dcb.h"
@@ -346,4 +345,3 @@ s32 ixgbe_dcb_hw_config(struct ixgbe_hw *hw,
 		ret = ixgbe_dcb_hw_config_82599(hw, dcb_config);
 	return ret;
 }
-

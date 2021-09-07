@@ -94,8 +94,6 @@ struct of_device* of_platform_device_create(struct device_node *np,
 }
 EXPORT_SYMBOL(of_platform_device_create);
 
-
-
 /**
  * of_platform_bus_create - Create an OF device for a bus node and all its
  * children. Optionally recursively instanciate matching busses.
@@ -228,7 +226,6 @@ struct of_device *of_find_device_by_phandle(phandle ph)
 	return NULL;
 }
 EXPORT_SYMBOL(of_find_device_by_phandle);
-
 
 #ifdef CONFIG_PPC_OF_PLATFORM_PCI
 

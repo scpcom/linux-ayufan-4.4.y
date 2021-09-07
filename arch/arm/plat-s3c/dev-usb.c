@@ -20,7 +20,6 @@
 
 #include <plat/devs.h>
 
-
 static struct resource s3c_usb_resource[] = {
 	[0] = {
 		.start = S3C_PA_USBHOST,

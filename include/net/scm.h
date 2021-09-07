@@ -107,6 +107,4 @@ static __inline__ void scm_recv(struct socket *sock, struct msghdr *msg,
 	scm_detach_fds(msg, scm);
 }
 
-
 #endif /* __LINUX_NET_SCM_H */
-

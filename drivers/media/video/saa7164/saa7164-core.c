@@ -622,7 +622,6 @@ static int __devinit saa7164_initdev(struct pci_dev *pci_dev,
 		saa7164_gpio_setup(dev);
 		saa7164_card_setup(dev);
 
-
 		/* Parse the dynamic device configuration, find various
 		 * media endpoints (MPEG, WMV, PS, TS) and cache their
 		 * configuration details into the driver, so we can
@@ -737,4 +736,3 @@ static void saa7164_fini(void)
 
 module_init(saa7164_init);
 module_exit(saa7164_fini);
-

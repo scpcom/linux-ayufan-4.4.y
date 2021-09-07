@@ -56,7 +56,6 @@
 
 #endif
 
-
 /* These routines should handle the standard chip-specific modes
  * for usb0/1/2 ports, covering basic mux and transceiver setup.
  *
@@ -655,7 +654,6 @@ static inline void omap_otg_init(struct omap_usb_config *config) {}
 /* ULPD_APLL_CTRL */
 #define APLL_NDPLL_SWITCH	(1 << 0)
 
-
 static void __init omap_1510_usb_init(struct omap_usb_config *config)
 {
 	unsigned int val;
@@ -738,4 +736,3 @@ void __init omap_usb_init(struct omap_usb_config *pdata)
 	else
 		printk(KERN_ERR "USB: No init for your chip yet\n");
 }
-

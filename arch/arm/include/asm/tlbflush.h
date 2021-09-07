@@ -10,7 +10,6 @@
 #ifndef _ASMARM_TLBFLUSH_H
 #define _ASMARM_TLBFLUSH_H
 
-
 #ifndef CONFIG_MMU
 
 #define tlb_flush(tlb)	((void) tlb)

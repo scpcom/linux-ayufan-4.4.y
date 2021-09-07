@@ -110,7 +110,6 @@ MV_U16 tdmSlotInfo[MV_TDM_TOTAL_CHANNELS][2] = {
 	{CH1_RX_SLOT, CH1_TX_SLOT}
 };
 
-
 MV_STATUS mvTdmInit(mv_tdm_params_t* tdmParams)
 {
 	MV_U8 ch, sample;
@@ -741,7 +740,6 @@ static MV_VOID mvTdmSetCurrentUnit(MV_32 cs)
 			MV_REG_WRITE(PCM_CTRL_REG, (MV_REG_READ(PCM_CTRL_REG) & ~CS_CTRL));
 }
 
-
 static MV_VOID mvTdmDaisyChainModeSet(MV_VOID)
 {
 	mvOsPrintf("Setting Daisy Chain Mode\n");
@@ -752,7 +750,6 @@ static MV_VOID mvTdmDaisyChainModeSet(MV_VOID)
 	/* Poll for ready indication */
 	while( (MV_REG_READ(SPI_CTRL_REG) & SPI_STAT_MASK) == SPI_ACTIVE);
 }
-
 
 MV_STATUS mvTdmSpiWrite(MV_U32 val1, MV_U32 val2, MV_U32 cmd, MV_U8 cs)
 {
@@ -860,7 +857,6 @@ static MV_VOID mvTdmShowProperties(MV_VOID)
 {
 	mvOsPrintf("TDM dual channel device rev 0x%x\n", MV_REG_READ(TDM_REV_REG));
 }
-
 
 MV_U8 currRxSampleGet(MV_U8 ch)
 {

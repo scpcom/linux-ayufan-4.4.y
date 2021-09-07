@@ -364,7 +364,6 @@ static inline void set_dma_addr1(unsigned int dmanr, unsigned int a)
 	au_writel(a, chan->io + DMA_BUFFER1_START);
 }
 
-
 /*
  * Set Buffer 0 transfer size (max 64k) for a specific DMA channel.
  */
@@ -417,7 +416,6 @@ static inline unsigned int get_dma_buffer_done(unsigned int dmanr)
 		return 0;
 	return au_readl(chan->io + DMA_MODE_READ) & (DMA_D0 | DMA_D1);
 }
-
 
 /*
  * Returns the DMA channel's Buffer Done IRQ number.

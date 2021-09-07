@@ -24,4 +24,3 @@
 
 #define TMIO_SD_IRQ     IRQ_TMIO(1)
 #define TMIO_USB_IRQ    IRQ_TMIO(2)
-

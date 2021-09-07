@@ -362,7 +362,6 @@ void __cpuinit smp_store_cpu_info(int id)
 		identify_secondary_cpu(c);
 }
 
-
 void __cpuinit set_cpu_sibling_map(int cpu)
 {
 	int i;
@@ -1160,7 +1159,6 @@ static int __init _setup_possible_cpus(char *str)
 	return 0;
 }
 early_param("possible_cpus", _setup_possible_cpus);
-
 
 /*
  * cpu_possible_mask should be static, it cannot change as cpu's

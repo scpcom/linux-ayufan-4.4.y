@@ -45,14 +45,12 @@
  *	- automatically disable double buffering (e.g. on RDI precisionbook laptop)
  */
 
-
 /* on supported graphic devices you may:
  * #define FALLBACK_TO_1BPP to fall back to 1 bpp, or
  * #undef  FALLBACK_TO_1BPP to reject support for unsupported cards */
 #undef FALLBACK_TO_1BPP
 
 #undef DEBUG_STIFB_REGS		/* debug sti register accesses */
-
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -152,7 +150,6 @@ static int __initdata stifb_bpp_pref[MAX_STI_ROMS];
 #define READ_BYTE(fb,reg)		gsc_readb((fb)->info.fix.mmio_start + (reg))
 #define READ_WORD(fb,reg)		gsc_readl((fb)->info.fix.mmio_start + (reg))
 
-
 #ifndef DEBUG_STIFB_REGS
 # define  DEBUG_OFF()
 # define  DEBUG_ON()
@@ -172,7 +169,6 @@ static int __initdata stifb_bpp_pref[MAX_STI_ROMS];
 					gsc_writel((value),(fb)->info.fix.mmio_start + (reg)); } while (0)
 #endif /* DEBUG_STIFB_REGS */
 
-
 #define ENABLE	1	/* for enabling/disabling screen */	
 #define DISABLE 0
 
@@ -190,7 +186,6 @@ SETUP_HW(struct stifb_info *fb)
 	    		stat = READ_BYTE(fb, REG_15b0);
 	} while (stat);
 }
-
 
 static void
 SETUP_FB(struct stifb_info *fb)
@@ -443,7 +438,6 @@ HYPER_ENABLE_DISABLE_DISPLAY(struct stifb_info *fb, int enable)
 	WRITE_WORD(value, fb, DregsHypMiscVideo);
 }
 
-
 /* BufferNumbers used by SETUP_ATTR_ACCESS() */
 #define BUFF0_CMAP0	0x00001e02
 #define BUFF1_CMAP0	0x02001e02
@@ -501,7 +495,6 @@ ngleSetupAttrPlanes(struct stifb_info *fb, int BufferNumber)
 	SETUP_FB(fb);
 }
 
-
 static void
 rattlerSetupPlanes(struct stifb_info *fb)
 {
@@ -527,7 +520,6 @@ rattlerSetupPlanes(struct stifb_info *fb)
 	SETUP_FB(fb);
 }
 
-
 #define HYPER_CMAP_TYPE				0
 #define NGLE_CMAP_INDEXED0_TYPE			0
 #define NGLE_CMAP_OVERLAY_TYPE			3
@@ -546,7 +538,6 @@ typedef union	/* Note assumption that fields are packed left-to-right */
 		unsigned length              : 10;
 	} fields;
 } NgleLutBltCtl;
-
 
 #if 0
 static NgleLutBltCtl
@@ -610,7 +601,6 @@ setHyperLutBltCtl(struct stifb_info *fb, int offsetWithinLut, int length)
 
 	return lutBltCtl;
 }
-
 
 static void hyperUndoITE(struct stifb_info *fb)
 {
@@ -863,7 +853,6 @@ XXX: FIXME: !!!
 #endif
 }
 
-
 #define HYPERBOWL_MODE_FOR_8_OVER_88_LUT0_NO_TRANSPARENCIES	4
 #define HYPERBOWL_MODE01_8_24_LUT0_TRANSPARENT_LUT1_OPAQUE	8
 #define HYPERBOWL_MODE01_8_24_LUT0_OPAQUE_LUT1_OPAQUE		10
@@ -910,7 +899,6 @@ SETUP_HCRX(struct stifb_info *fb)
 		WRITE_WORD(0x444c4048, fb, REG_45);
 	}
 }
-
 
 /* ------------------- driver specific functions --------------------------- */
 
@@ -1073,7 +1061,6 @@ static struct fb_ops stifb_ops = {
 	.fb_imageblit	= cfb_imageblit,
 };
 
-
 /*
  *  Initialization
  */
@@ -1211,7 +1198,6 @@ static int __init stifb_init_fb(struct sti_struct *sti, int bpp_pref)
 #endif
 	}
 
-
 	/* get framebuffer physical and virtual base addr & len (64bit ready) */
 	fix->smem_start = F_EXTEND(fb->sti->regions_phys[1]);
 	fix->smem_len = fb->sti->regions[1].region_desc.length * 4096;
@@ -1295,7 +1281,6 @@ static int __init stifb_init_fb(struct sti_struct *sti, int bpp_pref)
 		fix->mmio_start);
 
 	return 0;
-
 
 out_err4:
 	release_mem_region(fix->mmio_start, fix->mmio_len);

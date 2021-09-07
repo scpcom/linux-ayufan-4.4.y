@@ -1429,4 +1429,3 @@ const struct e1000_info e1000_82575_info = {
 	.phy_ops = &e1000_phy_ops_82575,
 	.nvm_ops = &e1000_nvm_ops_82575,
 };
-

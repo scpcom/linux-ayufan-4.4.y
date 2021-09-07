@@ -553,7 +553,6 @@ static int __init valkyrie_init_info(struct fb_info *info,
 	return fb_alloc_cmap(&info->cmap, 256, 0);
 }
 
-
 /*
  * Parse user speficied options (`video=valkyriefb:')
  */

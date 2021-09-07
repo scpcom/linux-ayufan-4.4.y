@@ -174,7 +174,6 @@ extern void prom_free(char *virt_addr, unsigned int size);
 extern void prom_putsegment(int context, unsigned long virt_addr,
 			    int physical_segment);
 
-
 /* PROM device tree traversal functions... */
 
 /* Get the child node of the given node, or zero if no child exists. */

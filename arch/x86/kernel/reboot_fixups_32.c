@@ -82,4 +82,3 @@ void mach_reboot_fixups(void)
 		cur->reboot_fixup(dev);
 	}
 }
-

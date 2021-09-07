@@ -88,7 +88,6 @@ static inline int cfi_interleave_supported(int i)
 	}
 }
 
-
 /* NB: these values must represents the number of bytes needed to meet the
  *     device type (x8, x16, x32).  Eg. a 32 bit device is 4 x 8 bytes.
  *     These numbers are used in calculations.
@@ -97,7 +96,6 @@ static inline int cfi_interleave_supported(int i)
 #define CFI_DEVICETYPE_X16 (16 / 8)
 #define CFI_DEVICETYPE_X32 (32 / 8)
 #define CFI_DEVICETYPE_X64 (64 / 8)
-
 
 /* Device Interface Code Assignments from the "Common Flash Memory Interface
  * Publication 100" dated December 1, 2001.
@@ -108,7 +106,6 @@ static inline int cfi_interleave_supported(int i)
 #define CFI_INTERFACE_X32_ASYNC		0x0003
 #define CFI_INTERFACE_X16_BY_X32_ASYNC	0x0005
 #define CFI_INTERFACE_NOT_ALLOWED	0xffff
-
 
 /* NB: We keep these structures in memory in HOST byteorder, except
  * where individually noted.
@@ -257,7 +254,6 @@ struct cfi_bri_query {
 #define P_ID_INTEL_DATA         0x0210
 #define P_ID_RESERVED           0xffff
 
-
 #define CFI_MODE_CFI	1
 #define CFI_MODE_JEDEC	0
 
@@ -371,7 +367,6 @@ static inline map_word cfi_build_cmd(u_long cmd, struct map_info *map, struct cf
 }
 #define CMD(x)  cfi_build_cmd((x), map, cfi)
 
-
 static inline unsigned long cfi_merge_status(map_word val, struct map_info *map,
 					   struct cfi_private *cfi)
 {
@@ -432,7 +427,6 @@ static inline unsigned long cfi_merge_status(map_word val, struct map_info *map,
 }
 
 #define MERGESTATUS(x) cfi_merge_status((x), map, cfi)
-
 
 /*
  * Sends a CFI command to a bank of flash for the given geometry.
@@ -530,6 +524,5 @@ typedef int (*varsize_frob_t)(struct map_info *map, struct flchip *chip,
 
 int cfi_varsize_frob(struct mtd_info *mtd, varsize_frob_t frob,
 	loff_t ofs, size_t len, void *thunk);
-
 
 #endif /* __MTD_CFI_H__ */

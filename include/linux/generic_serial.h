@@ -29,8 +29,6 @@ struct real_driver {
   void                    (*getserial) (void*, struct serial_struct *sp);
 };
 
-
-
 struct gs_port {
   int                     magic;
   struct tty_port	  port;
@@ -59,8 +57,6 @@ struct gs_port {
 #define GS_TX_INTEN      0x00800000
 #define GS_RX_INTEN      0x00400000
 #define GS_ACTIVE        0x00200000
-
-
 
 #define GS_TYPE_NORMAL   1
 

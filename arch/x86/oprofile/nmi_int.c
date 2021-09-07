@@ -55,7 +55,6 @@ u64 op_x86_get_ctrl(struct op_x86_model_spec const *model,
 	return val;
 }
 
-
 static int profile_exceptions_notify(struct notifier_block *self,
 				     unsigned long val, void *data)
 {
@@ -233,7 +232,6 @@ static void nmi_cpu_switch(void *dummy)
 
 	nmi_cpu_start(NULL);
 }
-
 
 /*
  * Quick check to see if multiplexing is necessary.

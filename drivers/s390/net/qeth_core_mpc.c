@@ -157,7 +157,6 @@ unsigned char READ_CCW[] = {
 	0, 0, 0, 0
 };
 
-
 struct ipa_rc_msg {
 	enum qeth_ipa_return_codes rc;
 	char *msg;
@@ -210,8 +209,6 @@ static struct ipa_rc_msg qeth_ipa_rc_msg[] = {
 	{IPA_RC_FFFF,			"Unknown Error"}
 };
 
-
-
 char *qeth_get_ipa_msg(enum qeth_ipa_return_codes rc)
 {
 	int x = 0;
@@ -221,7 +218,6 @@ char *qeth_get_ipa_msg(enum qeth_ipa_return_codes rc)
 		x++;
 	return qeth_ipa_rc_msg[x].msg;
 }
-
 
 struct ipa_cmd_names {
 	enum qeth_ipa_cmds cmd;

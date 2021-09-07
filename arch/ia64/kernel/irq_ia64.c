@@ -387,7 +387,6 @@ static cpumask_t vector_allocation_domain(int cpu)
 }
 #endif
 
-
 void destroy_and_reserve_irq(unsigned int irq)
 {
 	unsigned long flags;
@@ -595,7 +594,6 @@ void ia64_process_pending_intr(void)
 	irq_exit();
 }
 #endif
-
 
 #ifdef CONFIG_SMP
 

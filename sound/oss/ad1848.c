@@ -183,8 +183,6 @@ static int audio_activated;
 static int isapnp;
 #endif
 
-
-
 static int      ad1848_open(int dev, int mode);
 static void     ad1848_close(int dev);
 static void     ad1848_output_block(int dev, unsigned long buf, int count, int intrflag);
@@ -1475,7 +1473,6 @@ static void ad1848_init_hw(ad1848_info * devc)
 	for (i = 0; i < 16; i++)
 		ad_write(devc, i, init_values[i]);
 
-
 	ad_mute(devc);		/* Initialize some variables */
 	ad_unmute(devc);	/* Leave it unmuted now */
 
@@ -1721,7 +1718,6 @@ int ad1848_detect(struct resource *ports, int *ad_flags, int *osp)
 	else
 		ad_write(devc, 12, 0x40);	/* Set mode2, clear 0x80 */
 
-
 	if (ad_flags)
 		*ad_flags = 0;
 
@@ -1934,7 +1930,6 @@ int ad1848_detect(struct resource *ports, int *ad_flags, int *osp)
 
 	if (devc->model == MD_1848 && ad1847_flag)
 		devc->chip_name = "AD1847";
-
 
 	if (sscape_flag == 1)
 		devc->model = MD_1845_SSCAPE;
@@ -2426,7 +2421,6 @@ static int init_deskpro(struct address_info *hw_config)
 	outb((tmp | 0x04), 0xc44);	/* Select bank=1 */
 	printk("%02x\n", inb(0xc45));
 #endif
-
 
 	/*
 	 * I/O port 0xc46 FM Address Decode/Address ASIC Revision Register.
@@ -2980,7 +2974,6 @@ static int __init ad1848_isapnp_probe(struct address_info *hw_config)
 	return -ENODEV;
 }
 #endif
-
 
 static int __init init_ad1848(void)
 {

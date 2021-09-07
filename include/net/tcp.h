@@ -109,11 +109,9 @@ extern void tcp_time_wait(struct sock *sk, int state, int timeo);
 #define TCP_SYNACK_RETRIES 5	/* number of times to retry passive opening a
 				 * connection: ~180sec is RFC minimum	*/
 
-
 #define TCP_ORPHAN_RETRIES 7	/* number of times to retry on an orphaned
 				 * socket. 7 is ~50sec-16min.
 				 */
-
 
 #define TCP_TIMEWAIT_LEN (60*HZ) /* how long to wait to destroy TIME-WAIT
 				  * state, about 60 seconds	*/
@@ -380,7 +378,6 @@ enum tcp_tw_status
 	TCP_TW_SYN = 3
 };
 
-
 extern enum tcp_tw_status	tcp_timewait_state_process(struct inet_timewait_sock *tw,
 							   struct sk_buff *skb,
 							   const struct tcphdr *th);
@@ -459,7 +456,6 @@ extern struct sk_buff *		tcp_make_synack(struct sock *sk,
 						struct request_sock *req);
 
 extern int			tcp_disconnect(struct sock *sk, int flags);
-
 
 /* From syncookies.c */
 extern __u32 syncookie_secret[2][16-4+SHA_DIGEST_WORDS];
@@ -987,7 +983,6 @@ static inline int tcp_prequeue(struct sock *sk, struct sk_buff *skb)
 	}
 	return 1;
 }
-
 
 #undef STATE_TRACE
 

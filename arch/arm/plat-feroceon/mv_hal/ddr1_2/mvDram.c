@@ -382,7 +382,6 @@ MV_STATUS dimmSpdGet(MV_U32 dimmNum, MV_DIMM_INFO *pDimmInfo)
             return MV_ERROR;
     }
 
-    
     /* Number Of Row Addresses */
     pDimmInfo->numOfRowAddr = data[DIMM_ROW_NUM];
     DB(mvOsPrintf("DRAM numOfRowAddr[3]         %d\n",pDimmInfo->numOfRowAddr));
@@ -1427,7 +1426,6 @@ MV_VOID dimmSpdPrint(MV_U32 dimmNum)
     
 }
 
-
 /*
  * translate ns.ns/10 coding of SPD timing values
  * into ps unit values
@@ -1476,4 +1474,3 @@ static MV_U32  cas2ps(MV_U8 spd_byte)
     
     return (ns*1000 + ns10*10);
 }
-

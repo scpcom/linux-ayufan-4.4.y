@@ -117,7 +117,6 @@ static int ath_rx_prepare(struct sk_buff *skb, struct ath_desc *ds,
 	struct ath_node *an;
 	int last_rssi = ATH_RSSI_DUMMY_MARKER;
 
-
 	hdr = (struct ieee80211_hdr *)skb->data;
 	fc = hdr->frame_control;
 	memset(rx_status, 0, sizeof(struct ieee80211_rx_status));

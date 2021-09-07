@@ -74,7 +74,6 @@
 #define reg_strcop_rw_cfg___en___bit 5
 #define reg_strcop_rw_cfg_offset 0
 
-
 /* Constants */
 #define regk_strcop_big                           0x00000001
 #define regk_strcop_d                             0x00000001

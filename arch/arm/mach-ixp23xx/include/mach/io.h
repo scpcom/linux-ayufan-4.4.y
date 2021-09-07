@@ -48,5 +48,4 @@ ixp23xx_iounmap(void __iomem *addr)
 #define __arch_ioremap(a,s,f)	ixp23xx_ioremap(a,s,f)
 #define __arch_iounmap(a)	ixp23xx_iounmap(a)
 
-
 #endif

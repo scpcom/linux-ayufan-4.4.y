@@ -36,7 +36,6 @@
 
 #include "rt_config.h"
 
-
 NDIS_STATUS	RTMPReadParametersHook(
 	IN	PRTMP_ADAPTER pAd)
 {

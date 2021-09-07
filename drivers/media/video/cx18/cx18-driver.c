@@ -97,7 +97,6 @@ static int enc_yuv_bufs = -1;
 static int enc_vbi_bufs = -1;
 static int enc_pcm_bufs = -1;
 
-
 static int cx18_pci_latency = 1;
 
 static int mmio_ndelay;

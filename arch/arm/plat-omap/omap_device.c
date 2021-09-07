@@ -234,7 +234,6 @@ static inline struct omap_device *_find_by_pdev(struct platform_device *pdev)
 	return container_of(pdev, struct omap_device, pdev);
 }
 
-
 /* Public functions for use by core code */
 
 /**
@@ -434,7 +433,6 @@ int omap_device_register(struct omap_device *od)
 
 	return platform_device_register(&od->pdev);
 }
-
 
 /* Public functions for use by device drivers through struct platform_data */
 

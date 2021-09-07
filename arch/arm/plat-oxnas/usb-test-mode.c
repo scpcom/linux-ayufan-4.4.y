@@ -48,7 +48,6 @@
 
 #include <asm/hardware.h>
 
-
 /* usb test masks and offsets */
 #define TEST_MASK    0xF
 #define TEST_OFFSET  16
@@ -59,9 +58,7 @@ MODULE_AUTHOR(		"John Larkworthy"					);
 MODULE_DESCRIPTION(	"Driver to put usb ports in test modes"		);
 MODULE_LICENSE(		"GPL"						);
 
-
 static struct proc_dir_entry *proc_dir_usb_test_read, *usb_test_dir;
-
 
 /* create proc filing system entries to accept configuration data */
 static int usb_test_write_entries(const char *name, write_proc_t *w, int data)
@@ -78,8 +75,6 @@ static int usb_test_write_entries(const char *name, write_proc_t *w, int data)
 		return -ENOMEM;
 	}
 }
-
-
 
 #if 0
 static int
@@ -155,7 +150,6 @@ oxsemi_usb_test_write(struct file *file, const char *buf, unsigned long count, v
 	return len;
 }
 
-
 static int __init oxsemi_usb_test_init(void)
 {
 	int rv;
@@ -207,7 +201,6 @@ static int __init oxsemi_usb_test_init(void)
 		return rv;
 }
 
-
 static void __exit oxsemi_usb_test_exit(void)
 {
 	char name[] =  "usb-test/write0";
@@ -226,28 +219,5 @@ static void __exit oxsemi_usb_test_exit(void)
 	
 }
 
-
 module_init(oxsemi_usb_test_init);
 module_exit(oxsemi_usb_test_exit);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

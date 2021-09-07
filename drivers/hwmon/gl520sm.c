@@ -675,7 +675,6 @@ static const struct attribute_group gl520_group_opt = {
 	.attrs = gl520_attributes_opt,
 };
 
-
 /*
  * Real code
  */
@@ -753,7 +752,6 @@ static int gl520_probe(struct i2c_client *client,
 			goto exit_remove_files;
 	}
 
-
 	data->hwmon_dev = hwmon_device_register(&client->dev);
 	if (IS_ERR(data->hwmon_dev)) {
 		err = PTR_ERR(data->hwmon_dev);
@@ -770,7 +768,6 @@ exit_free:
 exit:
 	return err;
 }
-
 
 /* Called when we have found a new GL520SM. */
 static void gl520_init_client(struct i2c_client *client)
@@ -822,7 +819,6 @@ static int gl520_remove(struct i2c_client *client)
 	return 0;
 }
 
-
 /* Registers 0x07 to 0x0c are word-sized, others are byte-sized
    GL520 uses a high-byte first convention */
 static int gl520_read_value(struct i2c_client *client, u8 reg)
@@ -840,7 +836,6 @@ static int gl520_write_value(struct i2c_client *client, u8 reg, u16 value)
 	else
 		return i2c_smbus_write_byte_data(client, reg, value);
 }
-
 
 static struct gl520_data *gl520_update_device(struct device *dev)
 {
@@ -917,7 +912,6 @@ static struct gl520_data *gl520_update_device(struct device *dev)
 	return data;
 }
 
-
 static int __init sensors_gl520sm_init(void)
 {
 	return i2c_add_driver(&gl520_driver);
@@ -927,7 +921,6 @@ static void __exit sensors_gl520sm_exit(void)
 {
 	i2c_del_driver(&gl520_driver);
 }
-
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>, "
 	"Kyösti Mälkki <kmalkki@cc.hut.fi>, "

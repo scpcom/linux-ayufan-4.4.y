@@ -100,7 +100,6 @@ static void wl1251_rx_status(struct wl1251 *wl,
 	if (unlikely(!(desc->flags & RX_DESC_VALID_FCS)))
 		status->flag |= RX_FLAG_FAILED_FCS_CRC;
 
-
 	/* FIXME: set status->rate_idx */
 }
 
@@ -173,7 +172,6 @@ static void wl1251_rx_ack(struct wl1251 *wl)
 	/* Toggle buffer ring */
 	wl->rx_current_buffer = !wl->rx_current_buffer;
 }
-
 
 void wl1251_rx(struct wl1251 *wl)
 {

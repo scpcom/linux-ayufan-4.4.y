@@ -44,4 +44,3 @@ void bfa_tin_get_stats(struct bfa_tin_s *tin, struct bfa_tin_stats_s *stats);
 void bfa_tin_clear_stats(struct bfa_tin_s *tin);
 
 #endif /* __BFA_FCPTM_H__ */
-

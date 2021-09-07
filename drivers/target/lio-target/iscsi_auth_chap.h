@@ -14,7 +14,6 @@
  * SBE, Inc.  San Ramon, California  U.S.A.
  ******************************************************************************/
 
-
 #ifndef _ISCSI_CHAP_H_
 #define _ISCSI_CHAP_H_
 

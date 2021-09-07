@@ -67,7 +67,6 @@ acpi_set_firmware_waking_vector(u32 physical_address)
 {
 	ACPI_FUNCTION_TRACE(acpi_set_firmware_waking_vector);
 
-
 	/*
 	 * According to the ACPI specification 2.0c and later, the 64-bit
 	 * waking vector should be cleared and the 32-bit waking vector should
@@ -110,7 +109,6 @@ acpi_status
 acpi_set_firmware_waking_vector64(u64 physical_address)
 {
 	ACPI_FUNCTION_TRACE(acpi_set_firmware_waking_vector64);
-
 
 	/* Determine if the 64-bit vector actually exists */
 

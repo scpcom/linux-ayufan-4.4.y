@@ -14,7 +14,6 @@
 #include <asm/blackfin.h>
 #include <asm/time.h>
 
-
 /* this is the table of CCLK frequencies, in Hz */
 /* .index is the entry in the auxillary dpm_state_table[] */
 static struct cpufreq_frequency_table bfin_freq_table[] = {
@@ -59,7 +58,6 @@ static unsigned int bfin_getfreq_khz(unsigned int cpu)
 
 	return get_cclk() / 1000;
 }
-
 
 static int bfin_target(struct cpufreq_policy *policy,
 			unsigned int target_freq, unsigned int relation)

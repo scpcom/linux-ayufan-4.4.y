@@ -166,7 +166,6 @@ int jffs2_reserve_space_gc(struct jffs2_sb_info *c, uint32_t minsize,
 	return ret;
 }
 
-
 /* Classify nextblock (clean, dirty of verydirty) and force to select an other one */
 
 static void jffs2_close_nextblock(struct jffs2_sb_info *c, struct jffs2_eraseblock *jeb)
@@ -465,7 +464,6 @@ struct jffs2_raw_node_ref *jffs2_add_physical_node_ref(struct jffs2_sb_info *c,
 
 	return new;
 }
-
 
 void jffs2_complete_reservation(struct jffs2_sb_info *c)
 {

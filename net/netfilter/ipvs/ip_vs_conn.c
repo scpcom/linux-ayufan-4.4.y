@@ -39,7 +39,6 @@
 #include <net/net_namespace.h>
 #include <net/ip_vs.h>
 
-
 /*
  *  Connection hash table: for input and output packets lookups of IPVS
  */
@@ -113,7 +112,6 @@ static inline void ct_write_unlock_bh(unsigned key)
 	write_unlock_bh(&__ip_vs_conntbl_lock_array[key&CT_LOCKARRAY_MASK].l);
 }
 
-
 /*
  *	Returns hash value for IPVS connection entry
  */
@@ -131,7 +129,6 @@ static unsigned int ip_vs_conn_hashkey(int af, unsigned proto,
 			    ip_vs_conn_rnd)
 		& IP_VS_CONN_TAB_MASK;
 }
-
 
 /*
  *	Hashes ip_vs_conn in ip_vs_conn_tab by proto,addr,port.
@@ -163,7 +160,6 @@ static inline int ip_vs_conn_hash(struct ip_vs_conn *cp)
 	return ret;
 }
 
-
 /*
  *	UNhashes ip_vs_conn from ip_vs_conn_tab.
  *	returns bool success.
@@ -190,7 +186,6 @@ static inline int ip_vs_conn_unhash(struct ip_vs_conn *cp)
 
 	return ret;
 }
-
 
 /*
  *  Gets ip_vs_conn associated with supplied parameters in the ip_vs_conn_tab.
@@ -333,7 +328,6 @@ struct ip_vs_conn *ip_vs_conn_out_get
 	return ret;
 }
 
-
 /*
  *      Put back the conn and restart its timer with its timeout
  */
@@ -344,7 +338,6 @@ void ip_vs_conn_put(struct ip_vs_conn *cp)
 
 	__ip_vs_conn_put(cp);
 }
-
 
 /*
  *	Fill a no_client_port connection with a client port number
@@ -364,7 +357,6 @@ void ip_vs_conn_fill_cport(struct ip_vs_conn *cp, __be16 cport)
 		ip_vs_conn_hash(cp);
 	}
 }
-
 
 /*
  *	Bind a connection entry with the corresponding packet_xmit.
@@ -421,7 +413,6 @@ static inline void ip_vs_bind_xmit_v6(struct ip_vs_conn *cp)
 	}
 }
 #endif
-
 
 static inline int ip_vs_dest_totalconns(struct ip_vs_dest *dest)
 {
@@ -487,7 +478,6 @@ ip_vs_bind_dest(struct ip_vs_conn *cp, struct ip_vs_dest *dest)
 		dest->flags |= IP_VS_DEST_F_OVERLOAD;
 }
 
-
 /*
  * Check if there is a destination for the connection, if so
  * bind the connection to the destination.
@@ -505,7 +495,6 @@ struct ip_vs_dest *ip_vs_try_bind_dest(struct ip_vs_conn *cp)
 	} else
 		return NULL;
 }
-
 
 /*
  *	Unbind a connection entry with its VS destination
@@ -562,7 +551,6 @@ static inline void ip_vs_unbind_dest(struct ip_vs_conn *cp)
 	 */
 	atomic_dec(&dest->refcnt);
 }
-
 
 /*
  *	Checking if the destination of a connection template is available.
@@ -670,13 +658,11 @@ static void ip_vs_conn_expire(unsigned long data)
 	ip_vs_conn_put(cp);
 }
 
-
 void ip_vs_conn_expire_now(struct ip_vs_conn *cp)
 {
 	if (del_timer(&cp->timer))
 		mod_timer(&cp->timer, jiffies);
 }
-
 
 /*
  *	Create a new connection entry and hash it into the ip_vs_conn_tab
@@ -748,7 +734,6 @@ ip_vs_conn_new(int af, int proto, const union nf_inet_addr *caddr, __be16 cport,
 
 	return cp;
 }
-
 
 /*
  *	/proc/net/ip_vs_conn entries
@@ -935,7 +920,6 @@ static const struct file_operations ip_vs_conn_sync_fops = {
 
 #endif
 
-
 /*
  *      Randomly drop connection entries before running out of memory
  */
@@ -1019,7 +1003,6 @@ void ip_vs_random_dropentry(void)
 	}
 }
 
-
 /*
  *      Flush all the connection entries in the ip_vs_conn_tab
  */
@@ -1054,7 +1037,6 @@ static void ip_vs_conn_flush(void)
 		goto flush_again;
 	}
 }
-
 
 int __init ip_vs_conn_init(void)
 {
@@ -1099,7 +1081,6 @@ int __init ip_vs_conn_init(void)
 
 	return 0;
 }
-
 
 void ip_vs_conn_cleanup(void)
 {

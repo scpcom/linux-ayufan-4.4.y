@@ -43,14 +43,9 @@
  *
  */
 
-
-
-
 /** @file
  * Test module meant to exercise a resource manager's functionality
  */
-
-
 
 #include <linux/slab.h>
 
@@ -59,23 +54,17 @@
 #include "../t23xrm/t23xrmInternal.h"
 #include "rmtest.h"
 
-
-
-
 int (*dbgmsg)(const char *fmt, ...);
 RMinterfaceCtx *ifctx;
-
 
 int32_t execTestSeries(void)
 {
     RMstatus        rmstatus;
     int32_t         teststatus;
 
-
     dbgmsg = printk;
 
     dbgmsg("Extensible Crypto Driver - t23x RM testing module - pkg rev %s\n", T23X_PACKAGE_VERSION);
-
 
     /*
      * Step #1 - Register thyself as an interface
@@ -102,7 +91,6 @@ int32_t execTestSeries(void)
     if (testMultiDPD_withInterrupt(ifctx))
         teststatus++;
 
-
     /*
      * Step #3 - Deregister and exit
      */
@@ -115,7 +103,6 @@ int32_t execTestSeries(void)
 
     return 0;
 }
-
 
 /* Helper functions for all tests to use */
 
@@ -164,7 +151,6 @@ uint8_t *getOutBuffer(int32_t size)
     return (uint8_t *)buf;
 }
 
-
 linkEntry *getSGlist(int32_t entries)
 {
     linkEntry *list;
@@ -174,8 +160,6 @@ linkEntry *getSGlist(int32_t entries)
     memset(list, 0, sizeof(linkEntry) * entries);
     return list;
 }
-
-
 
 /* Write a DPD "pointer field" with content */
 void setDPDfield(   T2DPD           *desc,
@@ -193,13 +177,11 @@ void setDPDfield(   T2DPD           *desc,
         desc->pair[field].extent |= JUMPTABLE;
 }
 
-
 /* Get a physical address from a buffer */
 void *physAddr(void *vaddr)
 {
     return (void *)__pa(vaddr);
 }
-
 
 #define DUMP_LINE_SIZE (8)
 
@@ -245,8 +227,5 @@ void bufferDump(uint8_t *buf, int32_t size)
         remain -= linesz;
 
     }
-
-
-
 
 }

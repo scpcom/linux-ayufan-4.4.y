@@ -673,7 +673,6 @@ wavefront_get_sample_status (snd_wavefront_t *dev, int assume_rom)
 		    "%d empty\n", dev->samples_used, sc_real, sc_alias, sc_multi,
 		    WF_MAX_SAMPLE - dev->samples_used);
 
-
 	return (0);
 
 }
@@ -1292,7 +1291,6 @@ wavefront_fetch_multisample (snd_wavefront_t *dev,
 	return (0);
 }
 
-
 static int
 wavefront_send_drum (snd_wavefront_t *dev, wavefront_patch_info *header)
 
@@ -1684,7 +1682,6 @@ snd_wavefront_synth_ioctl (struct snd_hwdep *hw, struct file *file,
 	return 0;
 }
 
-
 /***********************************************************************/
 /*  WaveFront: interface for card-level wavefront module               */
 /***********************************************************************/
@@ -1930,7 +1927,6 @@ wavefront_reset_to_cleanliness (snd_wavefront_t *dev)
 
 	return 0;
 
-
      gone_bad:
 	return (1);
 }
@@ -2006,7 +2002,6 @@ wavefront_download_firmware (snd_wavefront_t *dev, char *path)
 	snd_printk(KERN_ERR "firmware download failed!!!\n");
 	return 1;
 }
-
 
 static int __devinit
 wavefront_do_reset (snd_wavefront_t *dev)
@@ -2085,7 +2080,6 @@ wavefront_do_reset (snd_wavefront_t *dev)
 		snd_printk ("cannot set number of voices to 32.\n");
 		goto gone_bad;
 	}
-
 
 	return 0;
 

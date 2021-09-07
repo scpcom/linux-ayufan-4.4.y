@@ -140,7 +140,6 @@ static int imx_dma_hw_chain(struct imx_dma_channel *imxdma)
 		return 0;
 }
 
-
 /*
  * imx_dma_sg_next - prepare next chunk for scatter-gather DMA emulation
  */

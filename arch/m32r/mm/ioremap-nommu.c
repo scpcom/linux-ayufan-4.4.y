@@ -25,7 +25,6 @@
 #include <asm/cacheflush.h>
 #include <asm/tlbflush.h>
 
-
 /*
  * Remap an arbitrary physical address space into the kernel virtual
  * address space. Needed when the kernel wants to access high addresses
@@ -49,4 +48,3 @@ __ioremap(unsigned long phys_addr, unsigned long size, unsigned long flags)
 void iounmap(volatile void __iomem *addr)
 {
 }
-

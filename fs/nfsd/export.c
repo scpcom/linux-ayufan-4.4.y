@@ -313,7 +313,6 @@ svc_expkey_update(struct svc_expkey *new, struct svc_expkey *old)
 		return NULL;
 }
 
-
 #define	EXPORT_HASHBITS		8
 #define	EXPORT_HASHMAX		(1<< EXPORT_HASHBITS)
 #define	EXPORT_HASHMASK		(EXPORT_HASHMAX -1)
@@ -787,7 +786,6 @@ svc_export_update(struct svc_export *new, struct svc_export *old)
 		return NULL;
 }
 
-
 static struct svc_expkey *
 exp_find_key(svc_client *clp, int fsid_type, u32 *fsidv, struct cache_req *reqp)
 {
@@ -1018,7 +1016,6 @@ exp_export(struct nfsctl_export *nxp)
 	if (!(clp = auth_domain_find(nxp->ex_client)))
 		goto out_unlock;
 
-
 	/* Look up the dentry */
 	err = kern_path(nxp->ex_path, 0, &path);
 	if (err)
@@ -1110,7 +1107,6 @@ exp_do_unexport(svc_export *unexp)
 	exp_unhash(unexp);
 	exp_fsid_unhash(unexp);
 }
-
 
 /*
  * unexport syscall.
@@ -1373,7 +1369,6 @@ static void *e_start(struct seq_file *m, loff_t *pos)
 	hash = n >> 32;
 	export = n & ((1LL<<32) - 1);
 
-	
 	for (ch=export_table[hash]; ch; ch=ch->next)
 		if (!export--)
 			return ch;

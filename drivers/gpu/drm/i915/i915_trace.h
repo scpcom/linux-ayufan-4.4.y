@@ -197,7 +197,6 @@ TRACE_EVENT(i915_gem_request_flush,
 		      __entry->flush_domains, __entry->invalidate_domains)
 );
 
-
 TRACE_EVENT(i915_gem_request_complete,
 
 	    TP_PROTO(struct drm_device *dev, u32 seqno),

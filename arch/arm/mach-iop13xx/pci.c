@@ -1006,7 +1006,6 @@ int iop13xx_pci_setup(int nr, struct pci_sys_data *sys)
 	if (!res)
 		panic("PCI: unable to alloc resources");
 
-
 	/* 'nr' assumptions:
 	 * ATUX is always 0
 	 * ATUE is 1 when ATUX is also enabled

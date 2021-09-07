@@ -15,7 +15,6 @@
 #include "edac_core.h"
 #include "edac_module.h"
 
-
 /* MC EDAC Controls, setable by module parameter, and sysfs */
 static int edac_mc_log_ue = 1;
 static int edac_mc_log_ce = 1;
@@ -123,8 +122,6 @@ static const char *edac_caps[] = {
 	[EDAC_S16ECD16ED] = "S16ECD16ED"
 };
 
-
-
 static ssize_t memctrl_int_store(void *ptr, const char *buffer, size_t count)
 {
 	int *value = (int *)ptr;
@@ -134,7 +131,6 @@ static ssize_t memctrl_int_store(void *ptr, const char *buffer, size_t count)
 
 	return count;
 }
-
 
 /* EDAC sysfs CSROW data structures and methods
  */
@@ -616,7 +612,6 @@ static struct mcidev_sysfs_attribute *mci_attr[] = {
 	NULL
 };
 
-
 /*
  * Release of a MC controlling instance
  *
@@ -775,7 +770,6 @@ static void edac_remove_mci_instance_attributes(struct mem_ctl_info *mci)
 	}
 }
 
-
 /*
  * Create a new Memory Controller kobject instance,
  *	mc<id> under the 'mc' directory
@@ -882,9 +876,6 @@ void edac_remove_sysfs_mci_device(struct mem_ctl_info *mci)
 	kobject_put(&mci->edac_mci_kobj);
 }
 
-
-
-
 /*
  * edac_setup_sysfs_mc_kset(void)
  *
@@ -923,7 +914,6 @@ int edac_sysfs_setup_mc_kset(void)
 
 	return 0;
 
-
 	/* error unwind stack */
 fail_out:
 	return err;
@@ -938,4 +928,3 @@ void edac_sysfs_teardown_mc_kset(void)
 {
 	kset_unregister(mc_kset);
 }
-

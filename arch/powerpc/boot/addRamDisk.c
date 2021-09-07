@@ -109,7 +109,6 @@ int main(int argc, char **argv)
 	unsigned long xRamDiskSize;
 	long padPages;
   
-  
 	if (argc < 2) {
 		fprintf(stderr, "Name of RAM disk file missing.\n");
 		exit(1);
@@ -127,7 +126,6 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 	out_name = argv[3];
-
 
 	ramDisk = fopen(rd_name, "r");
 	if ( ! ramDisk ) {
@@ -195,8 +193,6 @@ int main(int argc, char **argv)
 		printf("will insert %lx pages between the vmlinux and the start of the ram disk \n", padPages);
 	}
 
-
-
 	/* Input Ram Disk file */
 	// Set the offset that the ram disk will be started at.
 	ramStartOffs = offset_end;  /* determined from the input vmlinux file and the system map */
@@ -218,8 +214,6 @@ int main(int argc, char **argv)
 	printf("Rounded RAM disk size is %ld/0x%lx \n", ramLen, ramLen);
 	ramPages = ramLen / 4096;
 	printf("RAM disk pages to copy = %ld/0x%lx\n", ramPages, ramPages);
-
-
 
   // Copy 64K ELF header
 	for (i=0; i<(ElfPages); ++i) {
@@ -252,8 +246,6 @@ int main(int argc, char **argv)
 	fclose(inputVmlinux);
 	/* And flush the written output file */
 	fflush(outputVmlinux);
-
-
 
 	/* Fixup the new vmlinux to contain the ram disk starting offset (xRamDisk) and the ram disk size (xRamDiskSize) */
 	/* fseek to the hvReleaseData pointer */
@@ -308,4 +300,3 @@ int main(int argc, char **argv)
 
 	return 0;
 }
-

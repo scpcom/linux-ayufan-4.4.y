@@ -27,7 +27,6 @@
 #ifndef __iwl_leds_h__
 #define __iwl_leds_h__
 
-
 struct iwl_priv;
 
 #ifdef CONFIG_IWLWIFI_LEDS

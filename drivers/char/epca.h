@@ -24,7 +24,6 @@
 
 /* End code defines used for epca_setup */
 
-
 #define FEPCLR      0x00
 #define FEPMEM      0x02
 #define FEPRST      0x04
@@ -44,7 +43,6 @@
 #define PCIXRJ  10
 #define EPCA_NUM_TYPES 6
 
-
 static char *board_desc[] = 
 {
 	"PC/Xe",
@@ -63,7 +61,6 @@ static char *board_desc[] =
 #define STARTC      021
 #define STOPC       023
 #define IAIXON      0x2000
-
 
 #define TXSTOPPED  0x1
 #define LOWWAIT    0x2
@@ -155,4 +152,3 @@ struct board_info
 	void ( * assertmemoff )	(struct channel *) ;
 	unsigned char poller_inhibited ;
 };
-

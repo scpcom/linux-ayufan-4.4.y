@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #include "mvOs.h"
 #include "mvDebug.h"
 #include "mvDeviceId.h"
@@ -73,7 +72,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ctrlEnv/sys/mvCpuIf.h"
 #include "boardEnv/mvBoardEnvLib.h"
 #include "gpp/mvGpp.h"
-
 
 MV_U32  mvUsbGetCapRegAddr(int devNo)
 {
@@ -98,7 +96,6 @@ MV_U8  mvUsbGppInit(int dev)
         regVal = MV_REG_READ(mvCtrlMppRegGet((unsigned int)(gppNo/8)));
         regVal &= ~(0xf << ((gppNo%8)*4));
         MV_REG_WRITE(mvCtrlMppRegGet((unsigned int)(gppNo/8)), regVal);
-
 
         if(gppNo < 32)
 	{
@@ -440,7 +437,6 @@ static void    mvUsbPhy90nmInit(int dev)
     if( (mvCtrlModelGet() == MV_6183_DEV_ID))
     	regVal &= ~(0x1 << 21);
 
-
     /* Force Auto calibration */
     /* Bit[13] = 0x1, (REG_EXT_RCAL_EN = 0x1) */
     regVal |= (0x1<<13);
@@ -652,7 +648,6 @@ static void    mvUsbPhyInit(int dev)
     regVal &= ~(0x3 << 4);
     regVal |= (0x3 << 4);
 
-
     /* <VPLLCAL> bits[17:16] = 0x1 */
     if( (mvCtrlModelGet() == MV64560_DEV_ID) ||
         (mvCtrlModelGet() == MV64660_DEV_ID))
@@ -827,7 +822,6 @@ MV_STATUS   mvUsbHalInit(int dev, MV_BOOL isHost)
     return MV_OK;
 }
 
-
 void        mvUsbPowerDown(int dev)
 {
     MV_U32  regVal;
@@ -870,7 +864,6 @@ void        mvUsbPowerUp(int dev)
         MV_REG_WRITE(MV_USB_CORE_CMD_REG(dev), regVal);
     }
 }
-
 
 void        mvUsbRegs(int dev)
 {
@@ -1063,5 +1056,3 @@ void        mvUsbCoreRegs(int dev, MV_BOOL isHost)
                 MV_USB_CORE_PORTSC_REG(dev),
                MV_REG_READ(MV_USB_CORE_PORTSC_REG(dev)) );
 }
-
-

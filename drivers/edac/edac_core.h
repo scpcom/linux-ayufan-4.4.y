@@ -382,7 +382,6 @@ struct mem_ctl_info {
 	 */
 	int (*get_sdram_scrub_rate) (struct mem_ctl_info * mci, u32 * bw);
 
-
 	/* pointer to edac checking routine */
 	void (*edac_check) (struct mem_ctl_info * mci);
 
@@ -552,7 +551,6 @@ struct edac_device_instance {
 	/* edac sysfs device control */
 	struct kobject kobj;
 };
-
 
 /*
  * Abstract edac_device control info structure

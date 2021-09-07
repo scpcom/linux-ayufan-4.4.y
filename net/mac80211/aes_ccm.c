@@ -48,7 +48,6 @@ static void aes_ccm_prepare(struct crypto_cipher *tfm, u8 *scratch, u8 *a)
 	crypto_cipher_encrypt_one(tfm, s_0, b_0);
 }
 
-
 void ieee80211_aes_ccm_encrypt(struct crypto_cipher *tfm, u8 *scratch,
 			       u8 *data, size_t data_len,
 			       u8 *cdata, u8 *mic)
@@ -88,7 +87,6 @@ void ieee80211_aes_ccm_encrypt(struct crypto_cipher *tfm, u8 *scratch,
 	for (i = 0; i < CCMP_MIC_LEN; i++)
 		mic[i] = b[i] ^ s_0[i];
 }
-
 
 int ieee80211_aes_ccm_decrypt(struct crypto_cipher *tfm, u8 *scratch,
 			      u8 *cdata, size_t data_len, u8 *mic, u8 *data)
@@ -132,7 +130,6 @@ int ieee80211_aes_ccm_decrypt(struct crypto_cipher *tfm, u8 *scratch,
 	return 0;
 }
 
-
 struct crypto_cipher *ieee80211_aes_key_setup_encrypt(const u8 key[])
 {
 	struct crypto_cipher *tfm;
@@ -145,7 +142,6 @@ struct crypto_cipher *ieee80211_aes_key_setup_encrypt(const u8 key[])
 
 	return tfm;
 }
-
 
 void ieee80211_aes_key_free(struct crypto_cipher *tfm)
 {

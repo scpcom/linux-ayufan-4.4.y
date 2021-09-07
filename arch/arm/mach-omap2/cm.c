@@ -67,4 +67,3 @@ int omap2_cm_wait_module_ready(s16 prcm_mod, u8 idlest_id, u8 idlest_shift)
 
 	return (i < MAX_MODULE_READY_TIME) ? 0 : -EBUSY;
 }
-

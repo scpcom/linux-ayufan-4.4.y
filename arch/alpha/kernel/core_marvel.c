@@ -30,7 +30,6 @@
 #include "proto.h"
 #include "pci_impl.h"
 
-
 /*
  * Debug helpers
  */
@@ -42,13 +41,11 @@
 # define DBG_CFG(args)
 #endif
 
-
 /*
  * Private data
  */
 static struct io7 *io7_head = NULL;
 
-
 /*
  * Helper functions
  */
@@ -169,7 +166,6 @@ io7_clear_errors(struct io7 *io7)
 	io7_ioport_csrs *csrs;
 	int port;
 
-
 	/*
 	 * First the IO ports.
 	 */
@@ -192,7 +188,6 @@ io7_clear_errors(struct io7 *io7)
 	p7csrs->PO7_CRRCT_SYM.csr = -1UL;
 }
 
-
 /*
  * IO7 PCI, PCI/X, AGP configuration.
  */
@@ -466,7 +461,6 @@ marvel_kill_arch(int mode)
 {
 }
 
-
 /*
  * PCI Configuration Space access functions
  *
@@ -594,7 +588,6 @@ struct pci_ops marvel_pci_ops =
 	.write = 	marvel_write_config,
 };
 
-
 /*
  * Other PCI helper functions.
  */
@@ -609,8 +602,6 @@ marvel_pci_tbi(struct pci_controller *hose, dma_addr_t start, dma_addr_t end)
 	csrs->POx_SG_TBIA.csr;
 }
 
-
-
 /*
  * RTC Support
  */
@@ -671,7 +662,6 @@ __marvel_rtc_io(u8 b, unsigned long addr, int write)
 	return ret;
 }
 
-
 /*
  * IO map support.
  */
@@ -881,7 +871,6 @@ marvel_node_mem_size(int nid)
 	return 16UL * 1024 * 1024 * 1024; /* 16GB */
 }
 
-
 /* 
  * AGP GART Support.
  */

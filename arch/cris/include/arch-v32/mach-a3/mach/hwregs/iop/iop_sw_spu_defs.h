@@ -418,7 +418,6 @@ typedef struct {
 } reg_iop_sw_spu_r_mpu_intr;
 #define REG_RD_ADDR_iop_sw_spu_r_mpu_intr 132
 
-
 /* Constants */
 enum {
   regk_iop_sw_spu_copy                     = 0x00000000,

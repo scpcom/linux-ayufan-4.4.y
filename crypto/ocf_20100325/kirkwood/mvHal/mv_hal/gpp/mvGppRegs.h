@@ -98,7 +98,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define    MV_GPP30 BIT30
 #define    MV_GPP31 BIT31
 
-
 /* registers offsets */
    
 #define GPP_DATA_OUT_REG(grp)			((grp == 0) ? 0x10100 : 0x10140)

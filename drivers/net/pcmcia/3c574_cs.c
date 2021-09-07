@@ -13,7 +13,6 @@
 	Copyright 1993 United States Government as represented by the
 	Director, National Security Agency.
 	
-
 */
 
 /*

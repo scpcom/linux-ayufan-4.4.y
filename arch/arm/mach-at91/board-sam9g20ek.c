@@ -44,7 +44,6 @@
 #include "sam9_smc.h"
 #include "generic.h"
 
-
 static void __init ek_map_io(void)
 {
 	/* Initialize processor: 18.432 MHz crystal */
@@ -70,7 +69,6 @@ static void __init ek_init_irq(void)
 	at91sam9260_init_interrupts(NULL);
 }
 
-
 /*
  * USB Host port
  */
@@ -85,7 +83,6 @@ static struct at91_udc_data __initdata ek_udc_data = {
 	.vbus_pin	= AT91_PIN_PC5,
 	.pullup_pin	= 0,		/* pull-up driven by UDC */
 };
-
 
 /*
  * SPI devices.
@@ -109,7 +106,6 @@ static struct spi_board_info ek_spi_devices[] = {
 #endif
 };
 
-
 /*
  * MACB Ethernet device
  */
@@ -117,7 +113,6 @@ static struct at91_eth_data __initdata ek_macb_data = {
 	.phy_irq_pin	= AT91_PIN_PA7,
 	.is_rmii	= 1,
 };
-
 
 /*
  * NAND flash
@@ -192,7 +187,6 @@ static void __init ek_add_device_nand(void)
 	at91_add_device_nand(&ek_nand_data);
 }
 
-
 /*
  * MCI (SD/MMC)
  * det_pin, wp_pin and vcc_pin are not connected
@@ -201,7 +195,6 @@ static struct at91_mmc_data __initdata ek_mmc_data = {
 	.slot_b		= 1,
 	.wire4		= 1,
 };
-
 
 /*
  * LEDs
@@ -219,7 +212,6 @@ static struct gpio_led ek_leds[] = {
 		.default_trigger	= "heartbeat",
 	}
 };
-
 
 /*
  * GPIO Buttons
@@ -269,14 +261,12 @@ static void __init ek_add_device_buttons(void)
 static void __init ek_add_device_buttons(void) {}
 #endif
 
-
 static struct i2c_board_info __initdata ek_i2c_devices[] = {
 	{
 		I2C_BOARD_INFO("24c512", 0x50),
 		I2C_BOARD_INFO("wm8731", 0x1b),
 	},
 };
-
 
 static void __init ek_board_init(void)
 {

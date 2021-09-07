@@ -62,7 +62,6 @@ static void __used ____ftrace_check_##name(void)		\
 
 #include "trace_entries.h"
 
-
 #undef __field
 #define __field(type, item)						\
 	ret = trace_seq_printf(s, "\tfield:" #type " " #item ";\t"	\
@@ -131,7 +130,6 @@ ftrace_format_##name(struct ftrace_event_call *unused,			\
 
 #include "trace_entries.h"
 
-
 #undef __field
 #define __field(type, item)						\
 	ret = trace_define_field(event_call, #type, #item,		\
@@ -192,7 +190,6 @@ ftrace_define_fields_##name(struct ftrace_event_call *event_call)	\
 }
 
 #include "trace_entries.h"
-
 
 #undef __field
 #define __field(type, item)

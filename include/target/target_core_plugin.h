@@ -26,7 +26,6 @@
  *
  ******************************************************************************/
 
-
 #ifndef TARGET_CORE_PLUGIN_H
 #define TARGET_CORE_PLUGIN_H
 

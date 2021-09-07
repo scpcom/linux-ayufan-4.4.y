@@ -110,7 +110,6 @@ typedef enum
 	TSU_SIGNAL_EN_ACT_HIGH
 }MV_TSU_SIGNAL_MODE;
 
-
 typedef enum
 {
 	TSU_SIGNAL_EDGE_KEEP_DEF,	/* Keep default.	*/
@@ -118,13 +117,11 @@ typedef enum
 	TSU_SIGNAL_EDGE_RISE
 }MV_TSU_SIGNAL_EDGE;
 
-
 typedef enum
 {
 	TSU_PORT_INPUT,
 	TSU_PORT_OUTPUT
 }MV_TSU_PORT_DIRECTION;
-
 
 typedef struct
 {
@@ -134,13 +131,11 @@ typedef struct
 	MV_TSU_SIGNAL_EDGE	tsDataEdge;
 }MV_TSU_SIGNAL_CONFIG;
 
-
 /* Serial data bits order, only one option can be selected.	*/
 #define MV_TSU_SER_DATA_ORDER_MSB	(0x0001)
 #define MV_TSU_SER_DATA_ORDER_LSB	(0x0002)
 #define MV_TSU_SER_DATA_ORDER_MASK				\
 	(MV_TSU_SER_DATA_ORDER_MSB | MV_TSU_SER_DATA_ORDER_LSB)
-
 
 /* Serial sync signal active length in bits, only one option	*/
 /* can be selected.						*/
@@ -156,13 +151,11 @@ typedef struct
 #define MV_TSU_SER_TX_CLK_MODE_MASK			\
 	(MV_TSU_SER_TX_CLK_MODE_CONT | MV_TSU_SER_TX_CLK_MODE_GAPPED)
 
-
 typedef struct
 {
 	MV_TSU_PORT_DIRECTION	portDir;
 	MV_U16			pktSize;	/* 188 to 256 		   */
 }MV_TSU_PORT_CONFIG;
-
 
 #define MV_TSU_AGGR_MODE_DISABLED	(1)
 #define MV_TSU_AGGR_MODE_1		(2)
@@ -217,12 +210,10 @@ typedef struct
 	MV_U32		dataBlockSize;
 }MV_TSU_BUFF_INFO;
 
-
 /********************************/
 /* Macros 			*/
 /********************************/
 #define MV_TSU_STATUS_ENTRY_TMS_GET(stat)	(MV_U32)(stat & 0xFFFFFFF)
-
 
 /********************************/
 /* Functions API 		*/
@@ -247,7 +238,6 @@ typedef struct
 MV_STATUS mvTsuHalInit(MV_TSU_CORE_CLOCK coreClock, MV_TSU_PORTS_MODE mode,
 		       void *osHandle);
 
-
 /*******************************************************************************
 * mvTsuShutdown
 *
@@ -263,7 +253,6 @@ MV_STATUS mvTsuHalInit(MV_TSU_CORE_CLOCK coreClock, MV_TSU_PORTS_MODE mode,
 *
 *******************************************************************************/
 MV_STATUS mvTsuShutdown(void);
-
 
 /*******************************************************************************
 * mvTsuPortReset
@@ -283,7 +272,6 @@ MV_STATUS mvTsuShutdown(void);
 *******************************************************************************/
 MV_STATUS mvTsuPortReset(MV_U8 port);
 
-
 /*******************************************************************************
 * mvTsuWinInit
 *
@@ -299,7 +287,6 @@ MV_STATUS mvTsuPortReset(MV_U8 port);
 *
 *******************************************************************************/
 MV_STATUS mvTsuWinInit(void);
-
 
 /*******************************************************************************
 * mvTsuPortInit
@@ -319,7 +306,6 @@ MV_STATUS mvTsuWinInit(void);
 *
 *******************************************************************************/
 MV_STATUS mvTsuPortInit(MV_U8 port, MV_TSU_PORT_CONFIG *portCfg);
-
 
 /*******************************************************************************
 * mvTsuPortSignalCfgSet
@@ -343,7 +329,6 @@ MV_STATUS mvTsuPortInit(MV_U8 port, MV_TSU_PORT_CONFIG *portCfg);
 MV_STATUS mvTsuPortSignalCfgSet(MV_U8 port, MV_TSU_SIGNAL_CONFIG *signalCfg,
 				MV_U32 serialFlags);
 
-
 /*******************************************************************************
 * mvTsuPortSignalCfgGet
 *
@@ -365,7 +350,6 @@ MV_STATUS mvTsuPortSignalCfgSet(MV_U8 port, MV_TSU_SIGNAL_CONFIG *signalCfg,
 MV_STATUS mvTsuPortSignalCfgGet(MV_U8 port, MV_TSU_SIGNAL_CONFIG *signalCfg,
 				MV_U32* serialFlags);
 
-
 /*******************************************************************************
 * mvTsuStatusGet
 *
@@ -383,7 +367,6 @@ MV_STATUS mvTsuPortSignalCfgGet(MV_U8 port, MV_TSU_SIGNAL_CONFIG *signalCfg,
 *
 *******************************************************************************/
 MV_STATUS mvTsuStatusGet(MV_U8 port, MV_U32 *status);
-
 
 /*******************************************************************************
 * mvTsuBuffersInit
@@ -407,7 +390,6 @@ MV_STATUS mvTsuStatusGet(MV_U8 port, MV_U32 *status);
 *******************************************************************************/
 MV_STATUS mvTsuBuffersInit(MV_U8 port, MV_TSU_BUFF_INFO *buffInfo);
 
-
 /*******************************************************************************
 * mvTsuPortShutdown
 *
@@ -426,7 +408,6 @@ MV_STATUS mvTsuBuffersInit(MV_U8 port, MV_TSU_BUFF_INFO *buffInfo);
 *
 *******************************************************************************/
 MV_STATUS mvTsuPortShutdown(MV_U8 port);
-
 
 /*******************************************************************************
 * mvTsuDmaWatermarkSet
@@ -450,7 +431,6 @@ MV_STATUS mvTsuPortShutdown(MV_U8 port);
 *******************************************************************************/
 MV_STATUS mvTsuDmaWatermarkSet(MV_U8 port, MV_U32 watermark);
 
-
 /*******************************************************************************
 * mvTsuAggrMode1TmsOnPcktEn
 *
@@ -472,11 +452,9 @@ MV_STATUS mvTsuDmaWatermarkSet(MV_U8 port, MV_U32 watermark);
 *******************************************************************************/
 MV_STATUS mvTsuAggrMode1TmsOnPcktEn(MV_U8 port, MV_BOOL enable);
 
-
 /********************************/
 /* Rx related APIs		*/
 /********************************/
-
 
 /*******************************************************************************
 * mvTsuRxSyncDetectionSet
@@ -498,7 +476,6 @@ MV_STATUS mvTsuAggrMode1TmsOnPcktEn(MV_U8 port, MV_BOOL enable);
 *******************************************************************************/
 MV_STATUS mvTsuRxSyncDetectionSet(MV_U8 port, MV_U8 syncDetect, MV_U8 syncLoss);
 
-
 /*******************************************************************************
 * mvTsuRxSyncDetectionGet
 *
@@ -517,7 +494,6 @@ MV_STATUS mvTsuRxSyncDetectionSet(MV_U8 port, MV_U8 syncDetect, MV_U8 syncLoss);
 *
 *******************************************************************************/
 MV_STATUS mvTsuRxSyncDetectionGet(MV_U8 port, MV_U8 *syncDetect, MV_U8 *syncLoss);
-
 
 /*******************************************************************************
 * mvTsuRxFullBuffCountGet
@@ -541,7 +517,6 @@ MV_STATUS mvTsuRxSyncDetectionGet(MV_U8 port, MV_U8 *syncDetect, MV_U8 *syncLoss
 *******************************************************************************/
 MV_STATUS mvTsuRxFullBuffCountGet(MV_U8 port, MV_U32 *numBlocks,
 				  MV_U32 *numBuffers);
-
 
 /*******************************************************************************
 * mvTsuRxNextBuffGet
@@ -572,7 +547,6 @@ MV_STATUS mvTsuRxFullBuffCountGet(MV_U8 port, MV_U32 *numBlocks,
 MV_STATUS mvTsuRxNextBuffGet(MV_U8 port,MV_U32 **dataBuff, MV_U32 **statBuff,
 			     MV_U32 *buffsHandle);
 
-
 /*******************************************************************************
 * mvTsuRxTimestampCntEn
 *
@@ -592,7 +566,6 @@ MV_STATUS mvTsuRxNextBuffGet(MV_U8 port,MV_U32 **dataBuff, MV_U32 **statBuff,
 *
 *******************************************************************************/
 MV_STATUS mvTsuRxTimestampCntEn(MV_U8 port,MV_BOOL enable);
-
 
 /*******************************************************************************
 * mvTsuRxBuffFree
@@ -625,7 +598,6 @@ MV_STATUS mvTsuRxTimestampCntEn(MV_U8 port,MV_BOOL enable);
 MV_STATUS mvTsuRxBuffFree(MV_U8 port,MV_U32 *dataBuff, MV_U32 *statBuff,
 			  MV_U32 buffsHandle);
 
-
 /*******************************************************************************
 * mvTsuRxFlushErrorPackets
 *
@@ -645,11 +617,9 @@ MV_STATUS mvTsuRxBuffFree(MV_U8 port,MV_U32 *dataBuff, MV_U32 *statBuff,
 *******************************************************************************/
 MV_STATUS mvTsuRxFlushErrorPackets(MV_U8 port, MV_BOOL enableFlush);
 
-
 /********************************/
 /* Tx related APIs		*/
 /********************************/
-
 
 /*******************************************************************************
 * mvTsuTxClockFreqSet
@@ -672,7 +642,6 @@ MV_STATUS mvTsuRxFlushErrorPackets(MV_U8 port, MV_BOOL enableFlush);
 *
 *******************************************************************************/
 MV_STATUS mvTsuTxClockFreqSet(MV_U8 port, MV_U32 freq, MV_BOOL autoAdjust);
-
 
 /*******************************************************************************
 * mvTsuTxFreeBuffCountGet
@@ -697,7 +666,6 @@ MV_STATUS mvTsuTxClockFreqSet(MV_U8 port, MV_U32 freq, MV_BOOL autoAdjust);
 *******************************************************************************/
 MV_STATUS mvTsuTxFreeBuffCountGet(MV_U8 port, MV_U32 *numBlocks,
 				  MV_U32 *numBuffers);
-
 
 /*******************************************************************************
 * mvTsuRxNextBuffGet
@@ -727,7 +695,6 @@ MV_STATUS mvTsuTxFreeBuffCountGet(MV_U8 port, MV_U32 *numBlocks,
 *
 *******************************************************************************/
 MV_STATUS mvTsuTxNextBuffGet(MV_U8 port,MV_U32 **dataBuff,MV_U32 *buffsHandle);
-
 
 /*******************************************************************************
 * mvTsuTxBuffPut
@@ -759,7 +726,6 @@ MV_STATUS mvTsuTxNextBuffGet(MV_U8 port,MV_U32 **dataBuff,MV_U32 *buffsHandle);
 MV_STATUS mvTsuTxBuffPut(MV_U8 port, MV_U32 *dataBuff, MV_U32 tmsValue,
 			 MV_BOOL tsErr, MV_U32 buffsHandle);
 
-
 /*******************************************************************************
 * mvTsuTxStatusGet
 *
@@ -780,7 +746,6 @@ MV_STATUS mvTsuTxBuffPut(MV_U8 port, MV_U32 *dataBuff, MV_U32 tmsValue,
 *
 *******************************************************************************/
 MV_STATUS mvTsuTxStatusGet(MV_U8 port, MV_U32 **doneBuff, MV_U32 buffsHandle);
-
 
 /*******************************************************************************
 * mvTsuTxInitTimeStampSet
@@ -806,7 +771,6 @@ MV_STATUS mvTsuTxStatusGet(MV_U8 port, MV_U32 **doneBuff, MV_U32 buffsHandle);
 MV_STATUS mvTsuTxInitTimeStampSet(MV_U8 port, MV_BOOL enableTmstmp, 
 				  MV_U32 initTimestamp);
 
-
 /*******************************************************************************
 * mvTsuTxDone
 *
@@ -825,6 +789,4 @@ MV_STATUS mvTsuTxInitTimeStampSet(MV_U8 port, MV_BOOL enableTmstmp,
 *******************************************************************************/
 MV_STATUS mvTsuTxDone(MV_U8 port);
 
-
 #endif /* __INC_MV_TSU__H__ */
-

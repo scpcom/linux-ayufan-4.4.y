@@ -118,7 +118,6 @@ typedef struct mdp_device_descriptor_s {
  *   old value and "raid_disks+delta_disks" is the new (smaller) value.
  */
 
-
 typedef struct mdp_superblock_s {
 	/*
 	 * Constant generic information
@@ -280,4 +279,3 @@ struct mdp_superblock_1 {
 #define	MD_FEATURE_ALL			(1|2|4)
 
 #endif 
-

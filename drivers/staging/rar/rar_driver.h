@@ -21,7 +21,6 @@ struct RAR_address_struct {
  */
 int get_rar_address(int rar_index,struct RAR_address_struct *addresses);
 
-
 /* The lock_rar function is ued by other device drivers to lock an RAR.
  * once an RAR is locked, it stays locked until the next system reboot.
  * The function takes one parameter:
@@ -34,7 +33,6 @@ int get_rar_address(int rar_index,struct RAR_address_struct *addresses);
  * facility on this system.
  */
 int lock_rar(int rar_index);
-
 
 /* DEBUG LEVEL MASKS */
 #define RAR_DEBUG_LEVEL_BASIC       0x1
@@ -96,4 +94,3 @@ do \
     printk(KERN_WARNING info , param1, param2 , param3 , param4); \
   } \
 }while(0)
-

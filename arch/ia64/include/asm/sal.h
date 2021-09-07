@@ -221,7 +221,6 @@ typedef struct ia64_sal_ptc_domain_proc_entry {
 	u64 eid : 8;		/* eid of processor */
 } ia64_sal_ptc_domain_proc_entry_t;
 
-
 #define IA64_SAL_AP_EXTERNAL_INT 0
 
 typedef struct ia64_sal_desc_ap_wakeup {
@@ -690,7 +689,6 @@ ia64_sal_clear_state_info (u64 sal_info_type)
 	              0, 0, 0, 0, 0);
 	return isrv.status;
 }
-
 
 /* Get the processor and platform information logged by SAL with respect to the machine
  * state at the time of the MCAs, INITs, CMCs, or CPEs.

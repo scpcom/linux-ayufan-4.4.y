@@ -289,7 +289,6 @@ struct sdhci_host {
 	unsigned long		private[0] ____cacheline_aligned;
 };
 
-
 struct sdhci_ops {
 #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 	u32		(*readl)(struct sdhci_host *host, int reg);

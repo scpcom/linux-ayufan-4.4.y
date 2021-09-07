@@ -145,4 +145,3 @@ VOID PeerDeauthAction(
         DBGPRINT(RT_DEBUG_TRACE,("AUTH_RSP - PeerDeauthAction() sanity check fail\n"));
     }
 }
-

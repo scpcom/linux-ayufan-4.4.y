@@ -21,14 +21,12 @@
 
 #include "zorro.h"
 
-
     /*
      *  Zorro Expansion Devices
      */
 
 u_int zorro_num_autocon = 0;
 struct zorro_dev zorro_autocon[ZORRO_NUM_AUTO];
-
 
     /*
      *  Single Zorro bus
@@ -45,7 +43,6 @@ struct zorro_bus zorro_bus = {\
     },
     .name = "Zorro bus"
 };
-
 
     /*
      *  Find Zorro Devices
@@ -66,7 +63,6 @@ struct zorro_dev *zorro_find_device(zorro_id id, struct zorro_dev *from)
     return NULL;
 }
 
-
     /*
      *  Bitmask indicating portions of available Zorro II RAM that are unused
      *  by the system. Every bit represents a 64K chunk, for a maximum of 8MB
@@ -83,7 +79,6 @@ struct zorro_dev *zorro_find_device(zorro_id id, struct zorro_dev *from)
      */
 
 DECLARE_BITMAP(zorro_unused_z2ram, 128);
-
 
 static void __init mark_region(unsigned long start, unsigned long end,
 			       int flag)
@@ -109,7 +104,6 @@ static void __init mark_region(unsigned long start, unsigned long end,
     }
 }
 
-
 static struct resource __init *zorro_find_parent_resource(struct zorro_dev *z)
 {
     int i;
@@ -120,7 +114,6 @@ static struct resource __init *zorro_find_parent_resource(struct zorro_dev *z)
 		return &zorro_bus.resources[i];
     return &iomem_resource;
 }
-
 
     /*
      *  Initialization

@@ -209,4 +209,3 @@ void __init nuc900_init_clocks(void)
 {
 	clks_register(nuc900_clkregs, ARRAY_SIZE(nuc900_clkregs));
 }
-

@@ -22,7 +22,6 @@
 
 #include <net/ip_vs.h>
 
-
 /* TODO:
 
 struct isakmp_hdr {
@@ -39,7 +38,6 @@ struct isakmp_hdr {
 */
 
 #define PORT_ISAKMP	500
-
 
 static struct ip_vs_conn *
 ah_esp_conn_in_get(int af, const struct sk_buff *skb, struct ip_vs_protocol *pp,
@@ -78,7 +76,6 @@ ah_esp_conn_in_get(int af, const struct sk_buff *skb, struct ip_vs_protocol *pp,
 	return cp;
 }
 
-
 static struct ip_vs_conn *
 ah_esp_conn_out_get(int af, const struct sk_buff *skb,
 		    struct ip_vs_protocol *pp,
@@ -114,7 +111,6 @@ ah_esp_conn_out_get(int af, const struct sk_buff *skb,
 	return cp;
 }
 
-
 static int
 ah_esp_conn_schedule(int af, struct sk_buff *skb, struct ip_vs_protocol *pp,
 		     int *verdict, struct ip_vs_conn **cpp)
@@ -125,7 +121,6 @@ ah_esp_conn_schedule(int af, struct sk_buff *skb, struct ip_vs_protocol *pp,
 	*verdict = NF_ACCEPT;
 	return 0;
 }
-
 
 static void
 ah_esp_debug_packet_v4(struct ip_vs_protocol *pp, const struct sk_buff *skb,
@@ -175,18 +170,15 @@ ah_esp_debug_packet(struct ip_vs_protocol *pp, const struct sk_buff *skb,
 		ah_esp_debug_packet_v4(pp, skb, offset, msg);
 }
 
-
 static void ah_esp_init(struct ip_vs_protocol *pp)
 {
 	/* nothing to do now */
 }
 
-
 static void ah_esp_exit(struct ip_vs_protocol *pp)
 {
 	/* nothing to do now */
 }
-
 
 #ifdef CONFIG_IP_VS_PROTO_AH
 struct ip_vs_protocol ip_vs_protocol_ah = {

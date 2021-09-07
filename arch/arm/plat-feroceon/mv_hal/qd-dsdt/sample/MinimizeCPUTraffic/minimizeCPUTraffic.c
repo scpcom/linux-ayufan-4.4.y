@@ -103,10 +103,8 @@ GT_STATUS sampleMinimizeCPUTraffic1(GT_QD_DEV *dev, GT_U8* macAddr)
 		return status;
 	}
 
-	
 	return GT_OK;
 }
-
 
 /*
 	For the devices that support gprtSetARPtoCPU API:
@@ -150,7 +148,6 @@ GT_STATUS sampleMinimizeCPUTraffic2(GT_QD_DEV *dev, GT_U8* macAddr)
 		return status;
 	}
 
-
 	/*
 	 *	Add CPU's MAC into address table.
 	 *  This sample assumes that DBNum is not used. If DBNum is used,
@@ -182,5 +179,3 @@ GT_STATUS sampleMinimizeCPUTraffic2(GT_QD_DEV *dev, GT_U8* macAddr)
 	
 	return GT_OK;
 }
-
-

@@ -73,4 +73,3 @@ static inline void arch_reset(char mode, const char* command)
 }
 
 #endif // __ASM_ARCH_SYSTEM_H
-

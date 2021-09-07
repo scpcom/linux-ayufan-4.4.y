@@ -55,7 +55,6 @@ static int dump_printf_color(const char *fmt, const char *color, ...)
 	return ret;
 }
 
-
 void trace_event(event_t *event)
 {
 	unsigned char *raw_event = (void *)event;

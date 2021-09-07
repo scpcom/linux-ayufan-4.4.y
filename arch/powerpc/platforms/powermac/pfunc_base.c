@@ -287,7 +287,6 @@ static int unin_do_write_reg32(PMF_STD_ARGS, u32 offset, u32 value, u32 mask)
 	return 0;
 }
 
-
 static struct pmf_handlers unin_mmio_handlers = {
 	.write_reg32		= unin_do_write_reg32,
 	.delay			= macio_do_delay,
@@ -305,7 +304,6 @@ static void uninorth_install_pfunc(void)
 	 */
 	pmf_register_driver(uninorth_node, &unin_mmio_handlers, NULL);
 	pmf_do_functions(uninorth_node, NULL, 0, PMF_FLAGS_ON_INIT, NULL);
-
 
 	/*
 	 * Install handlers for the hwclock child if any

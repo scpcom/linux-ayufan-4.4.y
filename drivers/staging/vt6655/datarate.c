@@ -45,11 +45,7 @@
 
 /*---------------------  Static Definitions -------------------------*/
 
-
-
-
 /*---------------------  Static Classes  ----------------------------*/
-
 
  extern WORD TxRate_iwconfig; //2008-5-8 <add> by chester
 /*---------------------  Static Variables  --------------------------*/
@@ -68,8 +64,6 @@ VOID s_vResetCounter (
     IN PKnownNodeDB psNodeDBTable
     );
 
-
-
 VOID
 s_vResetCounter (
     IN PKnownNodeDB psNodeDBTable
@@ -86,9 +80,7 @@ s_vResetCounter (
 
 /*---------------------  Export Variables  --------------------------*/
 
-
 /*---------------------  Export Functions  --------------------------*/
-
 
 /*+
  *
@@ -121,8 +113,6 @@ DATARATEbyGetRateIdx (
     return 0;
 }
 
-
-
 /*+
  *
  * Routine Description:
@@ -140,9 +130,6 @@ DATARATEbyGetRateIdx (
 -*/
 #define AUTORATE_TXCNT_THRESHOLD        20
 #define AUTORATE_INC_THRESHOLD          30
-
-
-
 
 /*+
  *
@@ -213,7 +200,6 @@ BYTE  byHighSuppRate = 0;
 BYTE  byRate = 0;
 WORD  wOldBasicRate = pDevice->wBasicRate;
 UINT  uRateLen;
-
 
     if (pItemRates == NULL)
         return;
@@ -288,7 +274,6 @@ UINT  uRateLen;
      DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO"Exit ParseMaxRate\n");
 }
 
-
 /*+
  *
  * Routine Description:
@@ -342,7 +327,6 @@ DWORD           dwTxDiff = 0;
     if (psNodeDBTable->uTimeCount >= AUTORATE_TIMEOUT) {
         psNodeDBTable->uTimeCount = 0;
     }
-
 
     for(ii=0;ii<MAX_RATE;ii++) {
         if (psNodeDBTable->wSuppRate & (0x0001<<ii)) {
@@ -434,4 +418,3 @@ RATEuSetIE (
     }
     return (BYTE)uRateCnt;
 }
-

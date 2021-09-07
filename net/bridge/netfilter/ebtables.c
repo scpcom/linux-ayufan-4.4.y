@@ -15,7 +15,6 @@
  *  2 of the License, or (at your option) any later version.
  */
 
-
 #include <linux/kmod.h>
 #include <linux/module.h>
 #include <linux/vmalloc.h>
@@ -37,8 +36,6 @@
 					 ": out of memory: "format, ## args)
 /* #define MEMPRINT(format, args...) */
 
-
-
 /*
  * Each cpu has its own set of counters, so there is no need for write_lock in
  * the softirq
@@ -51,8 +48,6 @@
 #define COUNTER_OFFSET(n) (SMP_ALIGN(n * sizeof(struct ebt_counter)))
 #define COUNTER_BASE(c, n, cpu) ((struct ebt_counter *)(((char *)c) + \
    COUNTER_OFFSET(n) * cpu))
-
-
 
 static DEFINE_MUTEX(ebt_mutex);
 

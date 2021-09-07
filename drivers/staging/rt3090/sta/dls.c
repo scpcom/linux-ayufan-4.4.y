@@ -39,7 +39,6 @@
 
 #include "../rt_config.h"
 
-
 /*
     ==========================================================================
     Description:
@@ -400,7 +399,6 @@ VOID PeerDlsReqAction(
 							if (ii==0)
 								break;
 						}
-
 
 						if (pAd->StaCfg.DesiredTransmitSetting.field.MCS != MCS_AUTO)
 						{
@@ -1268,7 +1266,6 @@ BOOLEAN RTMPRcvFrameDLSCheck(
 	BOOLEAN			TimerCancelled;
 	CIPHER_KEY		PairwiseKey;
 
-
 	if (! pAd->CommonCfg.bDLSCapable)
 		return bSTAKeyFrame;
 
@@ -1523,7 +1520,6 @@ BOOLEAN RTMPRcvFrameDLSCheck(
 			bFindEntry = TRUE;
 		}
 	}
-
 
 	return bSTAKeyFrame;
 }
@@ -1973,7 +1969,6 @@ MAC_TABLE_ENTRY *MacTableInsertDlsEntry(
 
 	return pEntry;
 }
-
 
 /*
 	==========================================================================

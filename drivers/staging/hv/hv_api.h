@@ -23,7 +23,6 @@
 #ifndef __HV_API_H
 #define __HV_API_H
 
-
 /* Status codes for hypervisor operations. */
 
 /*
@@ -506,7 +505,6 @@
  * in use.
  */
 #define HV_STATUS_CONTROLLER_IN_USE			((u16)0x2005)
-
 
 /*
  * The below CPUID leaves are present if VersionAndFeatures.HypervisorPresent

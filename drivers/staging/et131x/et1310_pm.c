@@ -182,4 +182,3 @@ void DisablePhyComa(struct et131x_adapter *etdev)
 	/* Need to re-enable Rx. */
 	et131x_rx_dma_enable(etdev);
 }
-

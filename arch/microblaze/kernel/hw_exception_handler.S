@@ -657,7 +657,6 @@ ex_handler_done:
 		RESTORE_STATE;
 		bri	page_fault_data_trap
 
-
 	/* 0x11 - Instruction Storage Exception
 	 * This is caused by a fetch from non-execute or guarded pages. */
 	handle_instruction_storage_exception:

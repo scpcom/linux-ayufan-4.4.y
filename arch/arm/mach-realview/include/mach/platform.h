@@ -42,7 +42,6 @@
  * 
  */
 
-
 /* ------------------------------------------------------------------------
  *  RealView Registers
  * ------------------------------------------------------------------------
@@ -247,7 +246,6 @@
 #define REALVIEW_TIMER2_EnSel	17
 #define REALVIEW_TIMER3_EnSel	19
 #define REALVIEW_TIMER4_EnSel	21
-
 
 #define MAX_TIMER                       2
 #define MAX_PERIOD                      699050

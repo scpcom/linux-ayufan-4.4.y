@@ -379,7 +379,6 @@ struct iwl_device_cmd {
 
 #define TFD_MAX_PAYLOAD_SIZE (sizeof(struct iwl_device_cmd))
 
-
 struct iwl_host_cmd {
 	const void *data;
 	struct sk_buff *reply_skb;
@@ -468,7 +467,6 @@ struct iwl_ht_agg {
 	u8 state;
 };
 
-
 struct iwl_tid_data {
 	u16 seq_number;
 	u16 tfds_in_queue;
@@ -543,7 +541,6 @@ struct iwl_qos_info {
 
 #define STA_PS_STATUS_WAKE             0
 #define STA_PS_STATUS_SLEEP            1
-
 
 struct iwl3945_station_entry {
 	struct iwl3945_addsta_cmd sta;
@@ -624,10 +621,8 @@ struct iwl_sensitivity_ranges {
 	u16 auto_corr_min_cck_mrc;
 };
 
-
 #define KELVIN_TO_CELSIUS(x) ((x)-273)
 #define CELSIUS_TO_KELVIN(x) ((x)+273)
-
 
 /**
  * struct iwl_hw_params
@@ -679,7 +674,6 @@ struct iwl_hw_params {
 	const struct iwl_sensitivity_ranges *sens;
 };
 
-
 /******************************************************************************
  *
  * Functions implemented in core module which are forward declared here
@@ -708,7 +702,6 @@ static inline int iwl_queue_used(const struct iwl_queue *q, int i)
 		!(i < q->read_ptr && i >= q->write_ptr);
 }
 
-
 static inline u8 get_cmd_index(struct iwl_queue *q, u32 index, int is_huge)
 {
 	/* This is for scan command, the big buffer at end of command array */
@@ -718,7 +711,6 @@ static inline u8 get_cmd_index(struct iwl_queue *q, u32 index, int is_huge)
 	/* Otherwise, use normal size buffers */
 	return index & (q->n_window - 1);
 }
-
 
 struct iwl_dma_ptr {
 	dma_addr_t dma;
@@ -791,7 +783,6 @@ enum iwl4965_calib_enabled_state {
 	IWL_CALIB_DISABLED = 0,  /* must be 0 */
 	IWL_CALIB_ENABLED = 1,
 };
-
 
 /*
  * enum iwl_calib
@@ -1046,7 +1037,6 @@ struct iwl_priv {
 	enum ucode_type ucode_type;
 	u8 ucode_write_complete;	/* the image write is complete */
 
-
 	struct iwl_rxon_time_cmd rxon_timing;
 
 	/* We declare this const so it can only be
@@ -1217,7 +1207,6 @@ struct iwl_priv {
 	s8 tx_power_user_lmt;
 	s8 tx_power_device_lmt;
 
-
 #ifdef CONFIG_IWLWIFI_DEBUG
 	/* debugging info */
 	u32 debug_level; /* per device debugging will override global
@@ -1285,7 +1274,6 @@ static inline u32 iwl_get_debug_level(struct iwl_priv *priv)
 }
 #endif
 
-
 static inline struct ieee80211_hdr *iwl_tx_queue_get_hdr(struct iwl_priv *priv,
 							 int txq_id, int idx)
 {
@@ -1294,7 +1282,6 @@ static inline struct ieee80211_hdr *iwl_tx_queue_get_hdr(struct iwl_priv *priv,
 				txb[idx].skb[0]->data;
 	return NULL;
 }
-
 
 static inline int iwl_is_associated(struct iwl_priv *priv)
 {

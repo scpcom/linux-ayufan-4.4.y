@@ -163,7 +163,6 @@ struct execute_work {
 #define work_clear_pending(work) \
 	clear_bit(WORK_STRUCT_PENDING, work_data_bits(work))
 
-
 extern struct workqueue_struct *
 __create_workqueue_key(const char *name, int singlethread,
 		       int freezeable, int rt, struct lock_class_key *key,

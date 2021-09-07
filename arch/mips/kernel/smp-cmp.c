@@ -48,7 +48,6 @@ static void ipi_call_function(unsigned int cpu)
 	gic_send_ipi(plat_ipi_call_int_xlate(cpu));
 }
 
-
 static void ipi_resched(unsigned int cpu)
 {
 	pr_debug("CPU%d: %s cpu %d status %08x\n",

@@ -576,7 +576,6 @@ struct omap_dma_channel_params {
 #endif
 };
 
-
 extern void omap_set_dma_priority(int lch, int dst_port, int priority);
 extern int omap_request_dma(int dev_id, const char *dev_name,
 			void (*callback)(int lch, u16 ch_status, void *data),

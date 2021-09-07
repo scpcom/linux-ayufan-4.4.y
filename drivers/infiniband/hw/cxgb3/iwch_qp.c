@@ -290,7 +290,6 @@ static int build_zero_stag_recv(struct iwch_qp *qhp, union t3_wr *wqe,
 	u32 pbl_addr;
 	u32 pbl_offset;
 
-
 	/*
 	 * The T3 HW requires the PBL in the HW recv descriptor to reference
 	 * a PBL entry.  So we allocate the max needed PBL memory here and pass
@@ -840,7 +839,6 @@ static void flush_qp(struct iwch_qp *qhp, unsigned long *flag)
 	else
 		__flush_qp(qhp, flag);
 }
-
 
 /*
  * Return count of RECV WRs posted

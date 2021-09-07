@@ -63,7 +63,6 @@ I2C_CLIENT_INSMOD_1(lm80);
 #define LM80_REG_FANDIV			0x05
 #define LM80_REG_RES			0x06
 
-
 /* Conversions. Rounding and limit checking is only done on the TO_REG
    variants. Note that you should be a bit careful with which arguments
    these macros are called: arguments may be evaluated more than once.

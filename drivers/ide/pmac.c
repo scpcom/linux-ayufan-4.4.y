@@ -146,7 +146,6 @@ static const char* model_name[] = {
 #define TR_100_UDMAREG_UDMA_MASK	0x0000ffff
 #define TR_100_UDMAREG_UDMA_EN		0x00000001
 
-
 /* 66Mhz cell, found in KeyLargo. Can do ultra mode 0 to 2 on
  * 40 connector cable and to 4 on 80 connector one.
  * Clock unit is 15ns (66Mhz)
@@ -372,7 +371,6 @@ static struct kauai_timing	shasta_udma133_timings[] =
 	{ 15    , 0x00033021, },
 	{ 0	, 0 },
 };
-
 
 static inline u32
 kauai_lookup_timing(struct kauai_timing* table, int cycle_time)

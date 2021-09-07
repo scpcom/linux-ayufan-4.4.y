@@ -30,7 +30,6 @@
  *
  ******************************************************************************/
 
-
 #define TARGET_CORE_DEVICE_C
 
 #include <linux/net.h>
@@ -1798,7 +1797,6 @@ out:
 	}
 	return ret;
 }
-
 
 void core_dev_release_virtual_lun0(void)
 {

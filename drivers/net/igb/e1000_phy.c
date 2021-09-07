@@ -1714,4 +1714,3 @@ s32 igb_phy_init_script_igp3(struct e1000_hw *hw)
 
 	return 0;
 }
-

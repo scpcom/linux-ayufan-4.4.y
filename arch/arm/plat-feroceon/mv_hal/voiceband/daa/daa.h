@@ -74,7 +74,6 @@ typedef enum {
 	CID_ON
 } cid_state_t;
 
-
 /* APIs */
 MV_STATUS mvDaaInit(unsigned short first, unsigned short last, unsigned short pSlotInfo[][2],
 		    unsigned short lines, mv_band_mode_t bandMode, mv_pcm_format_t pcmFormat);
@@ -86,6 +85,5 @@ void mvDaaRelease(void);
 unsigned int mvDaaIntGet(unsigned short lineId);
 void mvDaaReversePolaritySet(long enable, unsigned int lineId);
 int mvDaaLineVoltageGet(unsigned int lineId);
-
 
 #endif /*_DAA_H_*/

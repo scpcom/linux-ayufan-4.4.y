@@ -340,7 +340,6 @@ static void __exit i7300_idle_ioat_exit(void)
  */
 #define DURATION_THRESHOLD_US 100
 
-
 /* Store DIMM thermal throttle configuration */
 static int i7300_idle_thrt_save(void)
 {
@@ -421,7 +420,6 @@ static void i7300_idle_stop(void)
 	pci_read_config_byte(fbd_dev, DIMM_THRTCTL, &got_ctl);
 	WARN_ON_ONCE(got_ctl != i7300_idle_thrtctl_saved);
 }
-
 
 /*
  * i7300_avg_duration_check()

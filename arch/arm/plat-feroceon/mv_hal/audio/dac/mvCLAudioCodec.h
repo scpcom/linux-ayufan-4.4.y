@@ -94,7 +94,6 @@ typedef enum _mvADCMode
     MV_I2S_MODE
 } MV_ADC_MODE;
 
-
 /* Cirrus Logic device structure */
 typedef struct _mvAudioCodecDev
 {
@@ -134,6 +133,4 @@ MV_U8   mvCLAudioCodecRegGet(MV_AUDIO_CODEC_DEV *pCodecDev, MV_U8  nOffset);
 MV_VOID mvCLAudioCodecRegBitsSet(MV_AUDIO_CODEC_DEV *pCodecDev, MV_U8  nOffset, MV_U8 nBits);
 MV_VOID mvCLAudioCodecRegBitsReset(MV_AUDIO_CODEC_DEV *pCodecDev, MV_U8  nOffset, MV_U8 nBits);
 
-
 #endif  /* __INCmvCLAudioCodech */
-

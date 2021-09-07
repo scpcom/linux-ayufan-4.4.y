@@ -23,7 +23,6 @@ static void hwblk_area_mod_cnt(struct hwblk_info *info,
 		hwblk_area_mod_cnt(info, hap->parent, counter, value, goal);
 }
 
-
 static int __hwblk_mod_cnt(struct hwblk_info *info, int hwblk,
 			  int counter, int value, int goal)
 {

@@ -15,7 +15,6 @@ PPC64_CACHES:
         .tc             ppc64_caches[TC],ppc64_caches
         .section        ".text"
 
-
 _GLOBAL(copy_4K_page)
 	li	r5,4096		/* 4K page size */
 BEGIN_FTR_SECTION

@@ -40,4 +40,3 @@ enum matroxfb_ctrl_id {
 #define FBIO_WAITFORVSYNC	_IOW('F', 0x20, __u32)
 
 #endif
-

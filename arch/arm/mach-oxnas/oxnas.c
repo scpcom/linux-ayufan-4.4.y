@@ -1051,4 +1051,3 @@ MACHINE_START(OXNAS, "Oxsemi NAS")
     .timer = &oxnas_timer,
     .init_machine = oxnas_init_machine,
 MACHINE_END
-

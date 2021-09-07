@@ -273,7 +273,6 @@ handle_store_error:
 	return o_len * 4 - d->fault_addr + o_dst;
 }
 
-
 /* Returns 0 for success, otherwise, returns number of bytes not transferred. */
 static unsigned long pa_memcpy(void *dstp, const void *srcp, unsigned long len)
 {
@@ -488,7 +487,6 @@ unsigned long copy_in_user(void __user *dst, const void __user *src, unsigned lo
 	mtsp(get_user_space(), 2);
 	return pa_memcpy((void __force *)dst, (void __force *)src, len);
 }
-
 
 void * memcpy(void * dst,const void *src, size_t count)
 {

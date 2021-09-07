@@ -148,7 +148,6 @@ static int mpc52xx_fec_mdio_remove(struct of_device *of)
 	return 0;
 }
 
-
 static struct of_device_id mpc52xx_fec_mdio_match[] = {
 	{ .compatible = "fsl,mpc5200b-mdio", },
 	{ .compatible = "fsl,mpc5200-mdio", },
@@ -166,6 +165,5 @@ struct of_platform_driver mpc52xx_fec_mdio_driver = {
 
 /* let fec driver call it, since this has to be registered before it */
 EXPORT_SYMBOL_GPL(mpc52xx_fec_mdio_driver);
-
 
 MODULE_LICENSE("Dual BSD/GPL");

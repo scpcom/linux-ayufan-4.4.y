@@ -30,7 +30,6 @@
 
 #include <net/ip_vs.h>
 
-
 /*
  * IPVS protocols can only be registered/unregistered when the ipvs
  * module is loaded/unloaded, so no lock is needed in accessing the
@@ -41,7 +40,6 @@
 #define IP_VS_PROTO_HASH(proto)		((proto) & (IP_VS_PROTO_TAB_SIZE-1))
 
 static struct ip_vs_protocol *ip_vs_proto_table[IP_VS_PROTO_TAB_SIZE];
-
 
 /*
  *	register an ipvs protocol
@@ -58,7 +56,6 @@ static int __used __init register_ip_vs_protocol(struct ip_vs_protocol *pp)
 
 	return 0;
 }
-
 
 /*
  *	unregister an ipvs protocol
@@ -81,7 +78,6 @@ static int unregister_ip_vs_protocol(struct ip_vs_protocol *pp)
 	return -ESRCH;
 }
 
-
 /*
  *	get ip_vs_protocol object by its proto.
  */
@@ -97,7 +93,6 @@ struct ip_vs_protocol * ip_vs_proto_get(unsigned short proto)
 
 	return NULL;
 }
-
 
 /*
  *	Propagate event for state change to all protocols
@@ -115,13 +110,11 @@ void ip_vs_protocol_timeout_change(int flags)
 	}
 }
 
-
 int *
 ip_vs_create_timeout_table(int *table, int size)
 {
 	return kmemdup(table, size, GFP_ATOMIC);
 }
-
 
 /*
  *	Set timeout value for state specified by name
@@ -144,7 +137,6 @@ ip_vs_set_state_timeout(int *table, int num, const char *const *names,
 	return -ENOENT;
 }
 
-
 const char * ip_vs_state_name(__u16 proto, int state)
 {
 	struct ip_vs_protocol *pp = ip_vs_proto_get(proto);
@@ -153,7 +145,6 @@ const char * ip_vs_state_name(__u16 proto, int state)
 		return (IPPROTO_IP == proto) ? "NONE" : "ERR!";
 	return pp->state_name(state);
 }
-
 
 static void
 ip_vs_tcpudp_debug_packet_v4(struct ip_vs_protocol *pp,
@@ -223,7 +214,6 @@ ip_vs_tcpudp_debug_packet_v6(struct ip_vs_protocol *pp,
 }
 #endif
 
-
 void
 ip_vs_tcpudp_debug_packet(struct ip_vs_protocol *pp,
 			  const struct sk_buff *skb,
@@ -237,7 +227,6 @@ ip_vs_tcpudp_debug_packet(struct ip_vs_protocol *pp,
 #endif
 		ip_vs_tcpudp_debug_packet_v4(pp, skb, offset, msg);
 }
-
 
 int __init ip_vs_protocol_init(void)
 {
@@ -267,7 +256,6 @@ int __init ip_vs_protocol_init(void)
 
 	return 0;
 }
-
 
 void ip_vs_protocol_cleanup(void)
 {

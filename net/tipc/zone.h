@@ -40,7 +40,6 @@
 #include "node_subscr.h"
 #include "net.h"
 
-
 /**
  * struct _zone - TIPC zone structure
  * @addr: network address of zone

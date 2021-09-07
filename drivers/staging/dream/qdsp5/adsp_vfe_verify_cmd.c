@@ -142,7 +142,6 @@ static int verify_vfe_command_scale(struct msm_adsp_module *module,
 	return 0;
 }
 
-
 static uint32_t get_size(uint32_t hw)
 {
 	uint32_t height, width;

@@ -528,7 +528,6 @@ static u16 get_pci_parity_status(struct pci_dev *dev, int secondary)
 	return status;
 }
 
-
 /* Clear any PCI parity errors logged by this device. */
 static void edac_pci_dev_parity_clear(struct pci_dev *dev)
 {
@@ -598,7 +597,6 @@ static void edac_pci_dev_parity_test(struct pci_dev *dev)
 			atomic_inc(&pci_parity_count);
 		}
 	}
-
 
 	debugf4("PCI HEADER TYPE= 0x%02x %s\n", header_type, dev_name(&dev->dev));
 
@@ -728,7 +726,6 @@ void edac_pci_handle_pe(struct edac_pci_ctl_info *pci, const char *msg)
 	edac_pci_do_parity_check();
 }
 EXPORT_SYMBOL_GPL(edac_pci_handle_pe);
-
 
 /*
  * edac_pci_handle_npe

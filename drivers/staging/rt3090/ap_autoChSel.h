@@ -46,7 +46,6 @@
 #define AP_AUTO_CH_SEL(__P, __O)	APAutoSelectChannel((__P), (__O))
 #endif
 
-
 ULONG AutoChBssInsertEntry(
 	IN PRTMP_ADAPTER pAd,
 	IN PUCHAR pBssid,

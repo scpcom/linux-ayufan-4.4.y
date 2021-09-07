@@ -117,7 +117,6 @@ static inline struct thread_info *current_thread_info(void)
 	xor   reg, sp, reg
 #endif
 
-
 /*
  * thread information flags
  * - these are process state flags that various assembly files may need to access

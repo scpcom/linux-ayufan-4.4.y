@@ -55,7 +55,6 @@
 #define SSI1_STMSK  (*((volatile u32 *)(SSI1_IO_BASE_ADDR + STMSK)))
 #define SSI1_SRMSK  (*((volatile u32 *)(SSI1_IO_BASE_ADDR + SRMSK)))
 
-
 #define SSI2_STX0	(*((volatile u32 *)(SSI2_IO_BASE_ADDR + STX0)))
 #define SSI2_STX1   (*((volatile u32 *)(SSI2_IO_BASE_ADDR + STX1)))
 #define SSI2_SRX0   (*((volatile u32 *)(SSI2_IO_BASE_ADDR + SRX0)))
@@ -173,7 +172,6 @@
 #define SSI_SRCCR_DC_MASK        (0x1f << 8)
 #define SSI_SRCCR_PM_MASK        (0xff << 0)
 
-
 #define SSI_SFCSR_RFCNT1(x)   (((x) & 0xf) << 28)
 #define SSI_SFCSR_TFCNT1(x)   (((x) & 0xf) << 24)
 #define SSI_SFCSR_RFWM1(x)    (((x) & 0xf) << 20)
@@ -226,7 +224,6 @@
 #define IMX_SSI_RX_DIV_2			3
 #define IMX_SSI_RX_DIV_PSR			4
 #define IMX_SSI_RX_DIV_PM			5
-
 
 /* SSI Div 2 */
 #define IMX_SSI_DIV_2_OFF		(~SSI_STCCR_DIV2)

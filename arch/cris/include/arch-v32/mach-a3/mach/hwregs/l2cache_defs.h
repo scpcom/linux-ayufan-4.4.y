@@ -127,7 +127,6 @@ typedef struct {
 #define REG_RD_ADDR_l2cache_rw_addrop_ctrl 16
 #define REG_WR_ADDR_l2cache_rw_addrop_ctrl 16
 
-
 /* Constants */
 enum {
   regk_l2cache_flush                       = 0x00000001,

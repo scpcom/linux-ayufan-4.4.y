@@ -194,7 +194,6 @@ VOID	RTMPEncryptData(
 	ARCFOUR_ENCRYPT(&pAd->PrivateInfo.WEPCONTEXT, pDest, pSrc, Len);
 }
 
-
 /*
 	========================================================================
 
@@ -417,7 +416,6 @@ VOID	ARCFOUR_ENCRYPT(
 		pSrc        Pointer to the Source data
 		Len         Indicate the length of the Source dta
 
-
 	========================================================================
 */
 
@@ -435,7 +433,6 @@ VOID	WPAARCFOUR_ENCRYPT(
 	for (i = 0; i < Len; i++)
 		pDest[i] = pSrc[i] ^ ARCFOUR_BYTE(Ctx);
 }
-
 
 /*
 	========================================================================
@@ -468,7 +465,6 @@ UINT	RTMP_CALC_FCS32(
 	return (Fcs);
 }
 
-
 /*
 	========================================================================
 
@@ -494,4 +490,3 @@ VOID	RTMPSetICV(
 
 	ARCFOUR_ENCRYPT(&pAd->PrivateInfo.WEPCONTEXT, pDest, (PUCHAR) &pAd->PrivateInfo.FCSCRC32, 4);
 }
-

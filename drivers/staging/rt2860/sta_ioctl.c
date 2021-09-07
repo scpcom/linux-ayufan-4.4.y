@@ -143,7 +143,6 @@ INT Set_WPAPSK_Proc(
     IN  PRTMP_ADAPTER   pAdapter,
     IN  PUCHAR          arg);
 
-
 INT Set_PSMode_Proc(
     IN  PRTMP_ADAPTER   pAdapter,
     IN  PUCHAR          arg);
@@ -236,7 +235,6 @@ static struct {
 #endif
 	{NULL,}
 };
-
 
 VOID RTMPAddKey(
 	IN	PRTMP_ADAPTER	    pAd,
@@ -496,7 +494,6 @@ int rt_ioctl_siwfreq(struct net_device *dev,
         DBGPRINT(RT_DEBUG_TRACE, ("INFO::Network is down!\n"));
         return -ENETDOWN;
     }
-
 
 	if (freq->e > 1)
 		return -EINVAL;
@@ -986,7 +983,6 @@ int rt_ioctl_giwscan(struct net_device *dev,
 		memset(&iwe, 0, sizeof(iwe));
 		iwe.cmd = SIOCGIWNAME;
 
-
 	{
 		PBSS_ENTRY pBssEntry=&pAdapter->ScanTab.BssEntry[i];
 		BOOLEAN isGonly=FALSE;
@@ -1018,7 +1014,6 @@ int rt_ioctl_giwscan(struct net_device *dev,
 				if (pBssEntry->ExtRate[rateCnt]==140 || pBssEntry->ExtRate[rateCnt]==146 || pBssEntry->ExtRate[rateCnt]>=152)
 					isGonly=TRUE;
 			}
-
 
 			if (pBssEntry->HtCapabilityLen!=0)
 			{
@@ -1284,7 +1279,6 @@ int rt_ioctl_siwnickn(struct net_device *dev,
 
 	memset(pAdapter->nickname, 0, IW_ESSID_MAX_SIZE + 1);
 	memcpy(pAdapter->nickname, nickname, data->length);
-
 
 	return 0;
 }
@@ -1615,7 +1609,6 @@ rt_ioctl_setparam(struct net_device *dev, struct iw_request_info *info,
 
     return Status;
 }
-
 
 static int
 rt_private_get_statistics(struct net_device *dev, struct iw_request_info *info,
@@ -3636,8 +3629,6 @@ INT Set_WPAPSK_Proc(
         NdisMoveMemory(pAdapter->StaCfg.PMK, keyMaterial, 32);
     }
 
-
-
     if(pAdapter->StaCfg.BssType == BSS_ADHOC &&
        pAdapter->StaCfg.AuthMode == Ndis802_11AuthModeWPANone)
     {
@@ -3718,7 +3709,6 @@ INT Set_PSMode_Proc(
     }
     else
         return FALSE;
-
 
     return TRUE;
 }

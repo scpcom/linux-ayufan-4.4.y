@@ -11,7 +11,6 @@
 #include "linux_iface.h"
 #include "linux_main.h"
 
-
 #define MV_DEVFS_NAME "mv"
 
 #ifdef RAID_DRIVER
@@ -123,7 +122,6 @@ static int mv_proc_ld_info(struct Scsi_Host *host)
 
 	return 0;/*SUCCESS.*/
 }
-
 
 static char* mv_ld_status(int status)
 {
@@ -557,7 +555,6 @@ static int mv_ioctl(struct inode *inode, struct file *file, unsigned int cmd,
 		return 0;
 	}
 	
-
 	psptdwb = kmalloc(sptdwb_size, GFP_ATOMIC);
 	
 	if ( NULL == psptdwb ) 

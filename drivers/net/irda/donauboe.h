@@ -58,7 +58,6 @@
 /* The mapping between the registers in that document and the    */
 /* Registers in the 701 oboe chip are as follows    */
 
-
 /* 3922 reg     701 regs, by bit numbers                        */
 /*               7- 0  15- 8  24-16  31-25                      */
 /* $28            0x0    0x1                                    */
@@ -123,7 +122,6 @@
 /* 7. While the core obviously expects 32 bit accesses all the  */
 /*    M$ drivers do 8 bit accesses, infact the Miniport ones    */
 /*    write and read back the byte serveral times (why?)        */
-
 
 #ifndef TOSHOBOE_H
 #define TOSHOBOE_H
@@ -194,7 +192,6 @@
 #define OBOE_STATUS_FIRRX	0x04
 #define OBOE_STATUS_MIRRX	0x02
 #define OBOE_STATUS_SIRRX	0x01
-
 
 /*Speed control registers */
 #define OBOE_CONFIG0L	OBOE_REG(0x10)
@@ -285,7 +282,6 @@ struct OboeRing
 
 #define OBOE_RING_LEN (sizeof(struct OboeRing))
 
-
 #define OBOE_CTL_TX_HW_OWNS	0x80 /*W/R This slot owned by the hardware */
 #define OBOE_CTL_TX_DISTX_CRC	0x40 /*W Disable CRC generation for [FM]IR */
 #define OBOE_CTL_TX_BAD_CRC     0x20 /*W Generate bad CRC */
@@ -295,7 +291,6 @@ struct OboeRing
      /*  After this slot is processed        */
 #define OBOE_CTL_TX_UNDER	0x01  /*R Set by hardware to indicate underrun */
 
-
 #define OBOE_CTL_RX_HW_OWNS	0x80 /*W/R This slot owned by hardware */
 #define OBOE_CTL_RX_PHYERR	0x40 /*R Decoder error on receiption */
 #define OBOE_CTL_RX_CRCERR	0x20 /*R CRC error only set for [FM]IR */
@@ -303,7 +298,6 @@ struct OboeRing
 #define OBOE_CTL_RX_OVER	0x08   /*R set to indicate an overflow */
 #define OBOE_CTL_RX_SIRBAD	0x04 /*R SIR had BOF in packet or ABORT sequence */
 #define OBOE_CTL_RX_RXEOF	0x02  /*R Finished receiving on this slot */
-
 
 struct toshoboe_cb
 {
@@ -320,13 +314,11 @@ struct toshoboe_cb
   struct pci_dev *pdev;         /*PCI device */
   int base;                     /*IO base */
 
-
   int txpending;                /*how many tx's are pending */
   int txs, rxs;                 /*Which slots are we at  */
 
   int irdad;                    /*Driver under control of netdev end  */
   int async;                    /*Driver under control of async end   */
-
 
   int stopped;                  /*Stopped by some or other APM stuff */
 
@@ -338,7 +330,6 @@ struct toshoboe_cb
 
   void *tx_bufs[OBOE_RING_MAX_SIZE]; /*The buffers   */
   void *rx_bufs[OBOE_RING_MAX_SIZE];
-
 
   int speed;                    /*Current setting of the speed */
   int new_speed;                /*Set to request a speed change */
@@ -357,6 +348,5 @@ struct toshoboe_cb
   int int_rxover;
   int int_sip;
 };
-
 
 #endif

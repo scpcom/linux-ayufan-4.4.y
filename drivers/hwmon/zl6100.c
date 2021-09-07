@@ -218,7 +218,6 @@ static int zl6100_probe(struct i2c_client *client,
 			I2C_FUNC_SMBUS_I2C_BLOCK))
 		return -EIO;
 
-
 	data = kzalloc(sizeof(*data), GFP_KERNEL);
 	if (!data)
 		return -ENOMEM;
@@ -234,7 +233,6 @@ static int zl6100_probe(struct i2c_client *client,
 		err = PTR_ERR(data->hwmon_dev);
 		goto exit_remove;
 	}
-
 
 	/* dummy read, wait for the parameters can be monitored */
 	mdelay(2);

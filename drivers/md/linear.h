@@ -15,7 +15,6 @@ struct linear_private_data
 	struct rcu_head		rcu;
 };
 
-
 typedef struct linear_private_data linear_conf_t;
 
 #endif

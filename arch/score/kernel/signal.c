@@ -51,7 +51,6 @@ static int setup_sigcontext(struct pt_regs *regs, struct sigcontext __user *sc)
 	err |= __put_user(regs->cp0_psr, &sc->sc_psr);
 	err |= __put_user(regs->cp0_condition, &sc->sc_condition);
 
-
 #define save_gp_reg(i) {				\
 	reg = regs->regs[i];				\
 	err |= __put_user(reg, &sc->sc_regs[i]);	\

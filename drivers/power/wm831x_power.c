@@ -452,7 +452,6 @@ static irqreturn_t wm831x_bat_irq(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
-
 /*********************************************************************
  *		Backup supply properties
  *********************************************************************/

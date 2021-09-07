@@ -3,7 +3,6 @@
 
 #include <linux/types.h>
 
-
 struct b43_nphy_channeltab_entry {
 	/* The channel number */
 	u8 channel;
@@ -43,7 +42,6 @@ struct b43_nphy_channeltab_entry {
 	u16 unk2;
 };
 
-
 struct b43_wldev;
 
 /* Upload the default register value table.
@@ -53,12 +51,10 @@ struct b43_wldev;
 void b2055_upload_inittab(struct b43_wldev *dev,
 			  bool ghz5, bool ignore_uploadflag);
 
-
 /* Get the NPHY Channel Switch Table entry for a channel number.
  * Returns NULL on failure to find an entry. */
 const struct b43_nphy_channeltab_entry *
 b43_nphy_get_chantabent(struct b43_wldev *dev, u8 channel);
-
 
 /* The N-PHY tables. */
 
@@ -154,6 +150,5 @@ extern const u32 b43_ntab_tdi40a0[];
 extern const u32 b43_ntab_tdi40a1[];
 extern const u32 b43_ntab_tdtrn[];
 extern const u32 b43_ntab_tmap[];
-
 
 #endif /* B43_TABLES_NPHY_H_ */

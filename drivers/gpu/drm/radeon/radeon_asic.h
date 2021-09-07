@@ -109,7 +109,6 @@ static struct radeon_asic r100_asic = {
 	.bandwidth_update = &r100_bandwidth_update,
 };
 
-
 /*
  * r300,r350,rv350,rv380
  */
@@ -203,7 +202,6 @@ static struct radeon_asic r420_asic = {
 	.bandwidth_update = &r100_bandwidth_update,
 };
 
-
 /*
  * rs400,rs480
  */
@@ -246,7 +244,6 @@ static struct radeon_asic rs400_asic = {
 	.clear_surface_reg = r100_clear_surface_reg,
 	.bandwidth_update = &r100_bandwidth_update,
 };
-
 
 /*
  * rs600.
@@ -293,7 +290,6 @@ static struct radeon_asic rs600_asic = {
 	.bandwidth_update = &rs600_bandwidth_update,
 };
 
-
 /*
  * rs690,rs740
  */
@@ -335,7 +331,6 @@ static struct radeon_asic rs690_asic = {
 	.clear_surface_reg = r100_clear_surface_reg,
 	.bandwidth_update = &rs690_bandwidth_update,
 };
-
 
 /*
  * rv515
@@ -382,7 +377,6 @@ static struct radeon_asic rv515_asic = {
 	.clear_surface_reg = r100_clear_surface_reg,
 	.bandwidth_update = &rv515_bandwidth_update,
 };
-
 
 /*
  * r520,rv530,rv560,rv570,r580

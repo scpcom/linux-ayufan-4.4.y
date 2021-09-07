@@ -744,4 +744,3 @@ int alps_detect(struct psmouse *psmouse, bool set_properties)
 	}
 	return 0;
 }
-

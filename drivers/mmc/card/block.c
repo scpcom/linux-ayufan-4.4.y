@@ -469,7 +469,6 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
 	return 0;
 }
 
-
 static inline int mmc_blk_readonly(struct mmc_card *card)
 {
 	return mmc_card_readonly(card) ||
@@ -491,7 +490,6 @@ static struct mmc_blk_data *mmc_blk_alloc(struct mmc_card *card)
 		ret = -ENOMEM;
 		goto out;
 	}
-
 
 	/*
 	 * Set the read-only status based on the supported commands
@@ -708,4 +706,3 @@ module_exit(mmc_blk_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Multimedia Card (MMC) block device driver");
-

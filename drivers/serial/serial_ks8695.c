@@ -35,7 +35,6 @@
 
 #include <linux/serial_core.h>
 
-
 #define SERIAL_KS8695_MAJOR	204
 #define SERIAL_KS8695_MINOR	16
 #define SERIAL_KS8695_DEVNAME	"ttyAM"
@@ -101,7 +100,6 @@ static inline void tx_enable(struct uart_port *port, int enabled)
 	else
 		port->unused[0] &= ~1;
 }
-
 
 #ifdef SUPPORT_SYSRQ
 static struct console ks8695_console;
@@ -205,7 +203,6 @@ ignore_char:
 
 	return IRQ_HANDLED;
 }
-
 
 static irqreturn_t ks8695uart_tx_chars(int irq, void *dev_id)
 {

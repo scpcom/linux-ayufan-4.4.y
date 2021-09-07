@@ -458,7 +458,6 @@ struct xhci_ep_ctx *etxhci_get_ep_ctx(struct xhci_hcd *xhci,
 		(ctx->bytes + (ep_index * CTX_SIZE(xhci->hcc_params)));
 }
 
-
 /***************** Streams structures manipulation *************************/
 
 static void xhci_free_stream_ctx(struct xhci_hcd *xhci,
@@ -834,7 +833,6 @@ void etxhci_free_stream_info(struct xhci_hcd *xhci,
 		kfree(stream_info->stream_rings);
 	kfree(stream_info);
 }
-
 
 /***************** Device context manipulation *************************/
 

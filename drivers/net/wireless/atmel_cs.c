@@ -329,7 +329,6 @@ static int atmel_config(struct pcmcia_device *link)
 	if (!((local_info_t*)link->priv)->eth_dev)
 			goto cs_failed;
 
-
 	/*
 	  At this point, the dev_node_t structure(s) need to be
 	  initialized and arranged in a linked list at link->dev_node.

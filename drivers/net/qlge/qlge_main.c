@@ -190,7 +190,6 @@ static int ql_wait_cfg(struct ql_adapter *qdev, u32 bit)
 	return -ETIMEDOUT;
 }
 
-
 /* Used to issue init control blocks to hw. Maps control block,
  * sets address, triggers download, waits for completion.
  */
@@ -3978,7 +3977,6 @@ err_out:
 	pci_disable_device(pdev);
 	return err;
 }
-
 
 static const struct net_device_ops qlge_netdev_ops = {
 	.ndo_open		= qlge_open,

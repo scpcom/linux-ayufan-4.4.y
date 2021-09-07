@@ -39,13 +39,11 @@
 
 #define CSR1212_SUCCESS (0)
 
-
 /* CSR 1212 key types */
 #define CSR1212_KV_TYPE_IMMEDIATE		0
 #define CSR1212_KV_TYPE_CSR_OFFSET		1
 #define CSR1212_KV_TYPE_LEAF			2
 #define CSR1212_KV_TYPE_DIRECTORY		3
-
 
 /* CSR 1212 key ids */
 #define CSR1212_KV_ID_DESCRIPTOR		0x01
@@ -71,7 +69,6 @@
 #define CSR1212_KV_ID_MODIFIABLE_DESCRIPTOR	0x1F
 #define CSR1212_KV_ID_DIRECTORY_ID		0x20
 #define CSR1212_KV_ID_REVISION			0x21
-
 
 /* IEEE 1212 Address space map */
 #define CSR1212_ALL_SPACE_BASE			(0x000000000000ULL)
@@ -111,7 +108,6 @@
 #define  CSR1212_UNITS_SPACE_OFFSET		(CSR1212_UNITS_SPACE_BASE - CSR1212_REGISTER_SPACE_BASE)
 
 #define  CSR1212_INVALID_ADDR_SPACE		-1
-
 
 /* Config ROM image structures */
 struct csr1212_bus_info_block_img {
@@ -157,7 +153,6 @@ struct csr1212_keyval {
 	u32 offset;	/* position in CSR from 0xffff f000 0000 */
 	u8 valid;	/* flag indicating keyval has valid data*/
 };
-
 
 struct csr1212_cache_region {
 	struct csr1212_cache_region *next, *prev;
@@ -213,7 +208,6 @@ struct csr1212_bus_ops {
 	void (*release_addr) (u64 addr, void *private);
 };
 
-
 /* Descriptor Leaf manipulation macros */
 #define CSR1212_DESCRIPTOR_LEAF_TYPE_SHIFT 24
 #define CSR1212_DESCRIPTOR_LEAF_SPECIFIER_ID_MASK 0xffffff
@@ -225,7 +219,6 @@ struct csr1212_bus_ops {
 #define CSR1212_DESCRIPTOR_LEAF_SPECIFIER_ID(kv) \
 	(be32_to_cpu((kv)->value.leaf.data[0]) & \
 	 CSR1212_DESCRIPTOR_LEAF_SPECIFIER_ID_MASK)
-
 
 /* Text Descriptor Leaf manipulation macros */
 #define CSR1212_TEXTUAL_DESCRIPTOR_LEAF_WIDTH_SHIFT 28
@@ -248,7 +241,6 @@ struct csr1212_bus_ops {
 #define CSR1212_TEXTUAL_DESCRIPTOR_LEAF_DATA(kv) \
 	(&((kv)->value.leaf.data[2]))
 
-
 /* The following 2 function are for creating new Configuration ROM trees.  The
  * first function is used for both creating local trees and parsing remote
  * trees.  The second function adds pertinent information to local Configuration
@@ -259,10 +251,8 @@ extern struct csr1212_csr *csr1212_create_csr(struct csr1212_bus_ops *ops,
 extern void csr1212_init_local_csr(struct csr1212_csr *csr,
 				   const u32 *bus_info_data, int max_rom);
 
-
 /* Destroy a Configuration ROM tree and release all memory taken by the tree. */
 extern void csr1212_destroy_csr(struct csr1212_csr *csr);
-
 
 /* The following set of functions are fore creating new keyvals for placement in
  * a Configuration ROM tree.  Code that creates new keyvals with these functions
@@ -271,7 +261,6 @@ extern void csr1212_destroy_csr(struct csr1212_csr *csr);
 extern struct csr1212_keyval *csr1212_new_immediate(u8 key, u32 value);
 extern struct csr1212_keyval *csr1212_new_directory(u8 key);
 extern struct csr1212_keyval *csr1212_new_string_descriptor_leaf(const char *s);
-
 
 /* The following function manages association between keyvals.  Typically,
  * Descriptor Leaves and Directories will be associated with another keyval and
@@ -283,7 +272,6 @@ extern struct csr1212_keyval *csr1212_new_string_descriptor_leaf(const char *s);
 extern void csr1212_associate_keyval(struct csr1212_keyval *kv,
 				     struct csr1212_keyval *associate);
 
-
 /* The following functions manage the association of a keyval and directories.
  * A keyval may be attached to more than one directory. */
 extern int csr1212_attach_keyval_to_directory(struct csr1212_keyval *dir,
@@ -291,17 +279,14 @@ extern int csr1212_attach_keyval_to_directory(struct csr1212_keyval *dir,
 extern void csr1212_detach_keyval_from_directory(struct csr1212_keyval *dir,
 						 struct csr1212_keyval *kv);
 
-
 /* Creates a complete Configuration ROM image in the list of caches available
  * via csr->cache_head. */
 extern int csr1212_generate_csr_image(struct csr1212_csr *csr);
-
 
 /* This is a convience function for reading a block of data out of one of the
  * caches in the csr->cache_head list. */
 extern int csr1212_read(struct csr1212_csr *csr, u32 offset, void *buffer,
 			u32 len);
-
 
 /* The following functions are in place for parsing Configuration ROM images.
  * csr1212_parse_keyval() is used should there be a need to directly parse a
@@ -309,7 +294,6 @@ extern int csr1212_read(struct csr1212_csr *csr, u32 offset, void *buffer,
 extern int csr1212_parse_keyval(struct csr1212_keyval *kv,
 				struct csr1212_csr_rom_cache *cache);
 extern int csr1212_parse_csr(struct csr1212_csr *csr);
-
 
 /* This function allocates a new cache which may be used for either parsing or
  * generating sub-sets of Configuration ROM images. */
@@ -335,12 +319,10 @@ csr1212_rom_cache_malloc(u32 offset, size_t size)
 	return cache;
 }
 
-
 /* This function ensures that a keyval contains data when referencing a keyval
  * created by parsing a Configuration ROM. */
 extern struct csr1212_keyval *
 csr1212_get_keyval(struct csr1212_csr *csr, struct csr1212_keyval *kv);
-
 
 /* This function increments the reference count for a keyval should there be a
  * need for code to retain a keyval that has been parsed. */
@@ -350,13 +332,11 @@ static inline void csr1212_keep_keyval(struct csr1212_keyval *kv)
 	smp_mb__after_atomic_inc();
 }
 
-
 /* This function decrements a keyval's reference count and will destroy the
  * keyval when there are no more users of the keyval.  This should be called by
  * any code that calls csr1212_keep_keyval() or any of the keyval creation
  * routines csr1212_new_*(). */
 extern void csr1212_release_keyval(struct csr1212_keyval *kv);
-
 
 /*
  * This macro allows for looping over the keyval entries in a directory and it

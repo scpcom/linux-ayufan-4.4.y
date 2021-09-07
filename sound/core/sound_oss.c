@@ -251,7 +251,6 @@ static void snd_minor_info_oss_read(struct snd_info_entry *entry,
 	mutex_unlock(&sound_oss_mutex);
 }
 
-
 int __init snd_minor_info_oss_init(void)
 {
 	struct snd_info_entry *entry;

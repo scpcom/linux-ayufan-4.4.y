@@ -271,7 +271,6 @@ static void mm_start_io(struct cardinfo *card)
 	desc->control_bits &= ~cpu_to_le32(DMASCR_CHAIN_EN);
 	desc->sem_control_bits = desc->control_bits;
 
-
 	if (debug & DEBUG_LED_ON_TRANSFER)
 		set_led(card, LED_REMOVE, LED_ON);
 

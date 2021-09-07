@@ -255,7 +255,6 @@ static void octeon_restart(char *command)
 		cvmx_write_csr(CVMX_CIU_SOFT_RST, 1);
 }
 
-
 /**
  * Permanently stop a core.
  *
@@ -271,7 +270,6 @@ static void octeon_kill_core(void *arg)
 		asm volatile ("sync\nbreak");
 	}
 }
-
 
 /**
  * Halt the system
@@ -427,7 +425,6 @@ void octeon_user_io_init(void)
 	 * is max legal value. */
 	cvmmemctl.s.lmemsz = CONFIG_CAVIUM_OCTEON_CVMSEG_SIZE;
 
-
 	if (smp_processor_id() == 0)
 		pr_notice("CVMSEG size: %d cache lines (%d bytes)\n",
 			  CONFIG_CAVIUM_OCTEON_CVMSEG_SIZE,
@@ -579,7 +576,6 @@ void __init prom_init(void)
 	sysinfo->led_display_base_addr = octeon_bootinfo->led_display_base_addr;
 	sysinfo->dfa_ref_clock_hz = octeon_bootinfo->dfa_ref_clock_hz;
 	sysinfo->bootloader_config_flags = octeon_bootinfo->config_flags;
-
 
 	octeon_check_cpu_bist();
 
@@ -790,7 +786,6 @@ void __init plat_mem_setup(void)
 		panic("Unable to allocate memory from "
 		      "cvmx_bootmem_phy_alloc\n");
 }
-
 
 int prom_putchar(char c)
 {

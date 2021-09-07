@@ -291,7 +291,6 @@ static inline void tmio_mmc_cmd_irq(struct tmio_mmc_host *host,
 	return;
 }
 
-
 static irqreturn_t tmio_mmc_irq(int irq, void *devid)
 {
 	struct tmio_mmc_host *host = devid;
@@ -645,7 +644,6 @@ static struct platform_driver tmio_mmc_driver = {
 	.suspend = tmio_mmc_suspend,
 	.resume = tmio_mmc_resume,
 };
-
 
 static int __init tmio_mmc_init(void)
 {

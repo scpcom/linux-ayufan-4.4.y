@@ -250,7 +250,6 @@ void sta_info_destroy(struct sta_info *sta)
 	__sta_info_free(local, sta);
 }
 
-
 /* Caller must hold local->sta_lock */
 static void sta_info_hash_add(struct ieee80211_local *local,
 			      struct sta_info *sta)
@@ -577,7 +576,6 @@ static int sta_info_buffer_expired(struct sta_info *sta,
 	return time_after(jiffies, info->control.jiffies + timeout);
 }
 
-
 static void sta_info_cleanup_expire_buffered(struct ieee80211_local *local,
 					     struct sta_info *sta)
 {
@@ -612,7 +610,6 @@ static void sta_info_cleanup_expire_buffered(struct ieee80211_local *local,
 			sta_info_clear_tim_bit(sta);
 	}
 }
-
 
 static void sta_info_cleanup(unsigned long data)
 {

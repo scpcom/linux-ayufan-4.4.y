@@ -175,7 +175,6 @@ MV_STATUS intelFlashProg(MV_FLASH_INFO *pFlash,MV_U32 offset, MV_U32 data)
 	return MV_TIMEOUT;
 }
 
-
 MV_U32 intelFlashGetHwBuffSize(MV_FLASH_INFO *pFlash)
 {
 	MV_U32 buffSize;
@@ -225,8 +224,6 @@ MV_STATUS intelFlashHwBufferProg(MV_FLASH_INFO *pFlash,MV_U32 offset,
 		return MV_BAD_PARAM;
 	}
 
-
-	
 	/* has to be aligned */
 	if ((offset % buffSize) != 0)
 	{
@@ -270,7 +267,6 @@ MV_STATUS intelFlashHwBufferProg(MV_FLASH_INFO *pFlash,MV_U32 offset,
 		
 		}while (status != MV_OK);
 
-        
 		/* write num of words to write minus 1 */
 		flashCmdSet(pFlash, 0, sec, wordCount - 1);
 		
@@ -320,7 +316,6 @@ MV_STATUS intelFlashHwBufferProg(MV_FLASH_INFO *pFlash,MV_U32 offset,
 		byteCount -= buffSize;
 	}while(byteCount);
 
-
 	if ( status != MV_OK )
 	{
 
@@ -330,10 +325,8 @@ MV_STATUS intelFlashHwBufferProg(MV_FLASH_INFO *pFlash,MV_U32 offset,
 		return status;
 	}
 
-		
 	return MV_OK;
 }
-
 
 /*******************************************************************************
 * intelSecLockGet - Return a sector Lock Bit status.
@@ -383,7 +376,6 @@ MV_BOOL intelFlashSecLockGet(MV_FLASH_INFO *pFlash,MV_U32 secNum)
 			status = flashBusWidthRd(pFlash, flashAddrExt(pFlash, 4, secNum));
 
 		} else status = flashBusWidthRd(pFlash, flashAddrExt(pFlash, 2, secNum));
-
 
 	if((status & flashDataExt(pFlash,INTEL_CHIP_RD_ID_LOCK)) != 0)
 	{
@@ -515,4 +507,3 @@ static MV_VOID intelFlashStatusClr(MV_FLASH_INFO *pFlash)
 	flashCmdSet(pFlash, 0, 0, INTEL_CHIP_CMD_CLR_STAT);
 	return;
 }
-

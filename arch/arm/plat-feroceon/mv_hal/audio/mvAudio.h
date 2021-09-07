@@ -67,7 +67,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mvCommon.h"
 #include "audio/mvAudioRegs.h"
 
-
 /*********************************/
 /* General enums and structures */
 /*********************************/
@@ -86,11 +85,9 @@ typedef struct _mvAudioFreqData
 
 } MV_AUDIO_FREQ_DATA;
 
-
 /*********************************/
 /* Play Back related structures */
 /*********************************/
-
 
 typedef struct _mvAudioPlaybackCtrl
 {
@@ -115,7 +112,6 @@ typedef struct _mvAudioPlaypackStatus
 
 }MV_AUDIO_PLAYBACK_STATUS;
 
-
 typedef struct _mvSpdifPlaybackCtrl
 {
 	MV_BOOL 	nonPcm;				 	/* PCM or non-PCM mode*/
@@ -137,7 +133,6 @@ typedef struct _mvI2SPlaybackCtrl
 												otherwise send 64 binary*/
 }MV_I2S_PLAYBACK_CTRL;
 
-
 /*********************************/
 /* Recording  related structures */
 /*********************************/
@@ -154,7 +149,6 @@ typedef struct _mvAudioRecordCtrl
     MV_U32                  intByteCount;   /* Number of bytes after which an
                                             interrupt will be issued.*/
 
-
 }MV_AUDIO_RECORD_CTRL;
 
 typedef struct _mvAudioRecordStatus
@@ -165,7 +159,6 @@ typedef struct _mvAudioRecordStatus
 	MV_BOOL	I2SEnable;
 
 }MV_AUDIO_RECORD_STATUS;
-
 
 typedef struct _mvSPDIFRecordStatus
 {
@@ -180,8 +173,6 @@ typedef struct _mvI2SRecordCntrl
 	MV_AUDIO_SAMPLE_SIZE		sample;		/* I2S Recording Sample Size*/
 	MV_AUDIO_I2S_JUSTIFICATION	justf;
 }MV_I2S_RECORD_CTRL;
-
-
 
 /*********************************/
 /* Usefull Macros 				*/
@@ -215,9 +206,6 @@ mvAudioRecordMute(mute)
 mvAudioRecordPause(pause)
 
 ********************************/
-
-
-
 
 /* Clocks Control and Status related*/
 #define mvAudioIsDcoLocked()	\
@@ -281,7 +269,6 @@ mvAudioRecordPause(pause)
 	 (void)((enable)?(MV_REG_BIT_SET(MV_AUDIO_PLAYBACK_CTRL_REG(0),APCR_LOOPBACK_MASK)):	\
 			  MV_REG_BIT_RESET(MV_AUDIO_PLAYBACK_CTRL_REG(0),APCR_LOOPBACK_MASK))
 
-
 /* Audio Recording*/
 #define	mvAudioSPDIFRecordingEnable(enable)	\
 	 (void)((enable)?(MV_REG_BIT_SET(MV_AUDIO_RECORD_CTRL_REG(0),ARCR_RECORD_SPDIF_EN_MASK)):	\
@@ -298,8 +285,6 @@ mvAudioRecordPause(pause)
 #define mvAudioRecordPause(pause)	\
 	 (void)((pause)?(MV_REG_BIT_SET(MV_AUDIO_RECORD_CTRL_REG(0),ARCR_RECORD_PAUSE_MASK)):	\
 			  MV_REG_BIT_RESET(MV_AUDIO_RECORD_CTRL_REG(0),ARCR_RECORD_PAUSE_MASK))
-
-
 
 /*********************************/
 /* Functions API 				*/

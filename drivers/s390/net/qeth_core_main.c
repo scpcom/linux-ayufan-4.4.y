@@ -63,7 +63,6 @@ static void qeth_setup_ccw(struct qeth_channel *, unsigned char *, __u32);
 static void qeth_free_buffer_pool(struct qeth_card *);
 static int qeth_qdio_establish(struct qeth_card *);
 
-
 static inline void __qeth_fill_buffer_frag(struct sk_buff *skb,
 		struct qdio_buffer *buffer, int is_tso,
 		int *next_element_to_fill)

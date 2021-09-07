@@ -71,7 +71,6 @@ typedef struct {
         int     val[2];
 } __kernel_fsid_t;
 
-
 #ifdef __KERNEL__
 
 #undef __FD_SET

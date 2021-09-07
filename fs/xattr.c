@@ -347,7 +347,6 @@ vfs_removexattr(struct dentry *dentry, const char *name)
 }
 EXPORT_SYMBOL_GPL(vfs_removexattr);
 
-
 /*
  * Extended attribute SET operations
  */
@@ -666,7 +665,6 @@ SYSCALL_DEFINE2(fremovexattr, int, fd, const char __user *, name)
 	fput(f);
 	return error;
 }
-
 
 static const char *
 strcmp_prefix(const char *a, const char *a_prefix)

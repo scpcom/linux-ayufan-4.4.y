@@ -61,5 +61,4 @@ bfad_im_issue_fc_host_lip(struct Scsi_Host *shost);
 struct Scsi_Host*
 bfad_os_starget_to_shost(struct scsi_target *starget);
 
-
 #endif /*  __BFAD_ATTR_H__ */

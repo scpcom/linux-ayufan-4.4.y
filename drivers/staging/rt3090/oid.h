@@ -86,7 +86,6 @@
 #define MAX_LENGTH_OF_SUPPORT_RATES		12    // 1, 2, 5.5, 11, 6, 9, 12, 18, 24, 36, 48, 54
 #define MAX_NUMBER_OF_DLS_ENTRY			4
 
-
 #define RT_QUERY_SIGNAL_CONTEXT				0x0402
 #define RT_SET_IAPP_PID				0x0404
 #define RT_SET_APD_PID						0x0405
@@ -114,7 +113,6 @@
 #define	OID_802_11_PRIVACY_FILTER					0x0118
 #define	OID_802_11_ASSOCIATION_INFORMATION			0x011E
 #define	OID_802_11_TEST								0x011F
-
 
 #define	RT_OID_802_11_COUNTRY_REGION				0x0507
 #define	OID_802_11_BSSID_LIST_SCAN					0x0508
@@ -233,8 +231,6 @@
 #define RT_OID_802_11_SET_PSPXLINK_MODE		  (OID_GET_SET_TOGGLE |	OID_802_11_SET_PSPXLINK_MODE)
 #define RT_OID_802_11_EAP_METHOD			  (OID_GET_SET_TOGGLE | OID_802_11_EAP_METHOD)
 #define RT_OID_802_11_SET_PASSPHRASE		  (OID_GET_SET_TOGGLE | OID_802_11_SET_PASSPHRASE)
-
-
 
 typedef enum _NDIS_802_11_STATUS_TYPE
 {
@@ -397,8 +393,6 @@ typedef struct PACKED _RADIUS_CONF
 	RADIUS_KEY_INFO	RadiusInfo[8];
 } RADIUS_CONF, *PRADIUS_CONF;
 
-
-
 #ifdef CONFIG_STA_SUPPORT
 // Key mapping keys require a BSSID
 typedef struct _NDIS_802_11_KEY
@@ -435,7 +429,6 @@ typedef struct _NDIS_802_11_WEP
    UCHAR     KeyMaterial[1];// variable length depending on above field
 } NDIS_802_11_WEP, *PNDIS_802_11_WEP;
 
-
 typedef enum _NDIS_802_11_NETWORK_INFRASTRUCTURE
 {
    Ndis802_11IBSS,
@@ -470,7 +463,6 @@ typedef struct PACKED _NDIS_802_11_SSID
                                 // this can be zero.
     UCHAR   Ssid[NDIS_802_11_LENGTH_SSID];           // SSID information field
 } NDIS_802_11_SSID, *PNDIS_802_11_SSID;
-
 
 typedef struct PACKED _NDIS_WLAN_BSSID
 {
@@ -649,7 +641,6 @@ typedef struct _NDIS_802_11_PMKID
 } NDIS_802_11_PMKID, *PNDIS_802_11_PMKID;
 #endif // CONFIG_STA_SUPPORT //
 
-
 typedef struct _NDIS_802_11_AUTHENTICATION_ENCRYPTION
 {
     NDIS_802_11_AUTHENTICATION_MODE AuthModeSupported;
@@ -673,7 +664,6 @@ typedef struct _NDIS_802_11_CAPABILITY
 #define SIOCIWFIRSTPRIV								SIOCDEVPRIVATE
 #endif
 #endif // LINUX //
-
 
 #ifdef CONFIG_STA_SUPPORT
 #define RT_PRIV_IOCTL							(SIOCIWFIRSTPRIV + 0x01) // Sync. with AP for wsc upnp daemon
@@ -719,10 +709,7 @@ enum {
 	SHOW_ADHOC_ENTRY_INFO = 21,
 };
 
-
 #endif // CONFIG_STA_SUPPORT //
-
-
 
 #ifdef SNMP_SUPPORT
 //SNMP ieee 802dot11, kathy , 2008_0220
@@ -794,7 +781,6 @@ enum {
 #define RT_OID_802_11_NINTENDO_CAPABLE				0x0773 //((RT_OID_NINTENDO + 0x03) & 0xffff)
 #endif // NINTENDO_AP //
 
-
 // New for MeetingHouse Api support
 #define OID_MH_802_1X_SUPPORTED               0xFFEDC100
 
@@ -848,7 +834,6 @@ typedef enum _RT_802_11_PHY_MODE {
 	PHY_11N_5G,			// 11n-only with 5G band		11
 #endif // DOT11_N_SUPPORT //
 } RT_802_11_PHY_MODE;
-
 
 // put all proprietery for-query objects here to reduce # of Query_OID
 typedef struct _RT_802_11_LINK_STATUS {
@@ -969,7 +954,6 @@ typedef struct _RT_802_11_TX_RATES_ {
     UCHAR       ExtRateLen;
     UCHAR       ExtRate[MAX_LENGTH_OF_SUPPORT_RATES];
 } RT_802_11_TX_RATES, *PRT_802_11_TX_RATES;
-
 
 // Definition of extra information code
 #define	GENERAL_LINK_UP			0x0			// Link is Up
@@ -1098,9 +1082,6 @@ typedef enum _RT_802_11_DLS_MODE {
 #endif // WPA_SUPPLICANT_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
 
-
-
-
 #define MAX_CUSTOM_LEN 128
 
 #ifdef CONFIG_STA_SUPPORT
@@ -1138,7 +1119,5 @@ typedef	struct	_WSC_PROFILE
 	UINT			ApplyProfileIdx;  // add by johnli, fix WPS test plan 5.1.1
 	WSC_CREDENTIAL	Profile[8];				// Support up to 8 profiles
 }	WSC_PROFILE, *PWSC_PROFILE;
-
-
 
 #endif // _OID_H_

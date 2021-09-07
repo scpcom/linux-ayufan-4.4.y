@@ -40,8 +40,6 @@
  * 2.1.0   2009_05_04 sec - remove overflow handler
  */
 
-
-
 /** @file
  * Handles interrupt processing for the Talitos 2/3 resource manager,
  * including definition of the deferred-service tasklet, and it's
@@ -53,20 +51,15 @@
 #include "../common/t23.h"
 #include "t23xrmInternal.h"
 
-
-
 /**
  * deferred Interrupt routine
  * @param unused
  */
 void t23RMdeferredInterruptResponder(unsigned long unused);
 
-
-
 DECLARE_TASKLET(t23xrmPostInt0,
                 t23RMdeferredInterruptResponder,
 		0);
-
 
 /* Extract EU status registeres from a selector derived from a */
 /* descriptor header                                           */
@@ -106,7 +99,6 @@ static u64 euGetState(u32              selector,
             return 0;
     }
 }
-
 
 /**
  * Interrupt Handler
@@ -199,7 +191,6 @@ irqreturn_t t23RMintDoneHandler(int32_t         irq,
         }
 
     }
-
 
     tasklet_schedule(&t23xrmPostInt0); /* kick off deferred service  */
 

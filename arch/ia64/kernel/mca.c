@@ -848,7 +848,6 @@ ia64_unreg_MCA_extension(void)
 EXPORT_SYMBOL(ia64_reg_MCA_extension);
 EXPORT_SYMBOL(ia64_unreg_MCA_extension);
 
-
 static inline void
 copy_reg(const u64 *fr, u64 fnat, unsigned long *tr, unsigned long *tnat)
 {

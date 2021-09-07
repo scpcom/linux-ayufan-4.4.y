@@ -111,7 +111,6 @@ static long gta02_panic_blink(long count)
 	return delay;
 }
 
-
 static struct map_desc gta02_iodesc[] __initdata = {
 	{
 		.virtual	= 0xe0000000,
@@ -249,7 +248,6 @@ static void gta02_udc_vbus_draw(unsigned int ma)
 
 static void gta02_pmu_attach_child_devices(struct pcf50633 *pcf);
 
-
 static char *gta02_batteries[] = {
 	"battery",
 };
@@ -380,7 +378,6 @@ struct pcf50633_platform_data gta02_pcf_pdata = {
 	.mbc_event_callback = gta02_pmu_event_callback,
 };
 
-
 /* NOR Flash. */
 
 #define GTA02_FLASH_BASE	0x18000000 /* GCS3 */
@@ -405,7 +402,6 @@ static struct platform_device gta02_nor_flash = {
 	.resource	= &gta02_nor_flash_resource,
 	.num_resources	= 1,
 };
-
 
 struct platform_device s3c24xx_pwm_device = {
 	.name		= "s3c24xx_pwm",
@@ -450,7 +446,6 @@ static struct s3c2410_platform_nand gta02_nand_info = {
 	.sets		= gta02_nand_sets,
 };
 
-
 static void gta02_udc_command(enum s3c2410_udc_cmd_e cmd)
 {
 	switch (cmd) {
@@ -474,8 +469,6 @@ static struct s3c2410_udc_mach_info gta02_udc_cfg = {
 	.udc_command	= gta02_udc_command,
 
 };
-
-
 
 static void gta02_bl_set_intensity(int intensity)
 {
@@ -538,8 +531,6 @@ static struct platform_device gta02_bl_dev = {
 	},
 };
 
-
-
 /* USB */
 static struct s3c2410_hcd_info gta02_usb_info = {
 	.port[0]	= {
@@ -550,14 +541,12 @@ static struct s3c2410_hcd_info gta02_usb_info = {
 	},
 };
 
-
 static void __init gta02_map_io(void)
 {
 	s3c24xx_init_io(gta02_iodesc, ARRAY_SIZE(gta02_iodesc));
 	s3c24xx_init_clocks(12000000);
 	s3c24xx_init_uarts(gta02_uartcfgs, ARRAY_SIZE(gta02_uartcfgs));
 }
-
 
 /* These are the guys that don't need to be children of PMU. */
 
@@ -578,7 +567,6 @@ static struct platform_device *gta02_devices[] __initdata = {
 static struct platform_device *gta02_devices_pmu_children[] = {
 	&gta02_bl_dev,
 };
-
 
 /*
  * This is called when pc50633 is probed, quite late in the day since it is an
@@ -631,7 +619,6 @@ static void __init gta02_machine_init(void)
 	platform_add_devices(gta02_devices, ARRAY_SIZE(gta02_devices));
 	pm_power_off = gta02_poweroff;
 }
-
 
 MACHINE_START(NEO1973_GTA02, "GTA02")
 	/* Maintainer: Nelson Castillo <arhuaco@freaks-unidos.net> */

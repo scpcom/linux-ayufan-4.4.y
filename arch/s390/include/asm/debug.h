@@ -30,7 +30,6 @@ struct __debug_entry{
         void* caller;
 } __attribute__((packed));
 
-
 #define __DEBUG_FEATURE_VERSION      2  /* version of debug feature */
 
 #ifdef __KERNEL__
@@ -174,7 +173,6 @@ debug_text_event(debug_info_t* id, int level, const char* txt)
 extern debug_entry_t *
 debug_sprintf_event(debug_info_t* id,int level,char *string,...)
 	__attribute__ ((format(printf, 3, 4)));
-
 
 static inline debug_entry_t*
 debug_exception(debug_info_t* id, int level, void* data, int length)

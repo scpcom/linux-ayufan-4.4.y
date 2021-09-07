@@ -414,7 +414,6 @@ static void ipath_pe_txe_recover(struct ipath_devdata *dd)
 	}
 }
 
-
 /**
  * ipath_pe_handle_hwerrors - display hardware errors.
  * @dd: the infinipath device
@@ -1434,7 +1433,6 @@ static void ipath_pe_put_tid_2(struct ipath_devdata *dd, u64 __iomem *tidptr,
 	mmiowb();
 }
 
-
 /**
  * ipath_pe_clear_tid - clear all TID entries for a port, expected and eager
  * @dd: the infinipath device
@@ -1593,7 +1591,6 @@ static void ipath_pe_free_irq(struct ipath_devdata *dd)
 	dd->ipath_irq = 0;
 }
 
-
 static struct ipath_message_header *
 ipath_pe_get_msgheader(struct ipath_devdata *dd, __le32 *rhf_addr)
 {
@@ -1708,13 +1705,11 @@ static void ipath_pe_read_counters(struct ipath_devdata *dd,
 	cntrs->RxDlidFltrCnt = 0;
 }
 
-
 /* no interrupt fallback for these chips */
 static int ipath_pe_nointr_fallback(struct ipath_devdata *dd)
 {
 	return 0;
 }
-
 
 /*
  * reset the XGXS (between serdes and IBC).  Slightly less intrusive
@@ -1737,7 +1732,6 @@ static void ipath_pe_xgxs_reset(struct ipath_devdata *dd)
 	ipath_write_kreg(dd, dd->ipath_kregs->kr_control,
 			 dd->ipath_control);
 }
-
 
 static int ipath_pe_get_ib_cfg(struct ipath_devdata *dd, int which)
 {
@@ -1763,7 +1757,6 @@ static int ipath_pe_get_ib_cfg(struct ipath_devdata *dd, int which)
 	return ret;
 }
 
-
 /* we assume range checking is already done, if needed */
 static int ipath_pe_set_ib_cfg(struct ipath_devdata *dd, int which, u32 val)
 {
@@ -1781,7 +1774,6 @@ static int ipath_pe_set_ib_cfg(struct ipath_devdata *dd, int which, u32 val)
 static void ipath_pe_config_jint(struct ipath_devdata *dd, u16 a, u16 b)
 {
 }
-
 
 static int ipath_pe_ib_updown(struct ipath_devdata *dd, int ibup, u64 ibcs)
 {
@@ -1814,7 +1806,6 @@ static int ipath_pe_ib_updown(struct ipath_devdata *dd, int ibup, u64 ibcs)
 		ipath_ib_linktrstate(dd, ibcs));
 	return 0;
 }
-
 
 /**
  * ipath_init_iba6120_funcs - set up the chip-specific function pointers
@@ -1855,8 +1846,6 @@ void ipath_init_iba6120_funcs(struct ipath_devdata *dd)
 	dd->ipath_f_config_jint = ipath_pe_config_jint;
 	dd->ipath_f_ib_updown = ipath_pe_ib_updown;
 
-
 	/* initialize chip-specific variables */
 	ipath_init_pe_variables(dd);
 }
-

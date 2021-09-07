@@ -48,7 +48,6 @@ struct network {
 	struct _zone **zones;
 };
 
-
 extern struct network tipc_net;
 extern rwlock_t tipc_net_lock;
 

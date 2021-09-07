@@ -210,7 +210,6 @@ static u32 ath9k_hw_AR9287_get_eeprom(struct ath_hw *ah,
 	}
 }
 
-
 static void ath9k_hw_get_AR9287_gain_boundaries_pdadcs(struct ath_hw *ah,
 				   struct ath9k_channel *chan,
 				   struct cal_data_per_freq_ar9287 *pRawDataSet,
@@ -306,7 +305,6 @@ static void ath9k_hw_get_AR9287_gain_boundaries_pdadcs(struct ath_hw *ah,
 
 		pPdGainBoundaries[i] = min((u16)AR5416_MAX_RATE_POWER,
 					    pPdGainBoundaries[i]);
-
 
 		if ((i == 0) && !AR_SREV_5416_20_OR_LATER(ah)) {
 			minDelta = pPdGainBoundaries[0] - 23;
@@ -1044,7 +1042,6 @@ static void ath9k_hw_AR9287_set_board_values(struct ath_hw *ah,
 			      AR9280_PHY_RXGAIN_TXRX_MARGIN,
 			      pModal->rxTxMarginCh[i]);
 	}
-
 
 	if (IS_CHAN_HT40(chan))
 		REG_RMW_FIELD(ah, AR_PHY_SETTLING,

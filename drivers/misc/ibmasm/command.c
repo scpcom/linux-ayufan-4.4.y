@@ -41,7 +41,6 @@ struct command *ibmasm_new_command(struct service_processor *sp, size_t buffer_s
 	if (cmd == NULL)
 		return NULL;
 
-
 	cmd->buffer = kzalloc(buffer_size, GFP_KERNEL);
 	if (cmd->buffer == NULL) {
 		kfree(cmd);

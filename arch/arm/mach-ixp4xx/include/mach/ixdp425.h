@@ -25,7 +25,6 @@
 #define IXDP425_PCI_MAX_DEV	4
 #define IXDP425_PCI_IRQ_LINES	4
 
-
 /* PCI controller GPIO to IRQ pin mappings */
 #define IXDP425_PCI_INTA_PIN	11
 #define IXDP425_PCI_INTB_PIN	10

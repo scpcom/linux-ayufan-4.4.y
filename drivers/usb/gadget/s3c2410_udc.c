@@ -55,7 +55,6 @@
 #include <plat/regs-udc.h>
 #include <plat/udc.h>
 
-
 #include "s3c2410_udc.h"
 
 #define DRIVER_DESC	"S3C2410 USB Device Controller Gadget"

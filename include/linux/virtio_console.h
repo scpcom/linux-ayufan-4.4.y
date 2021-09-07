@@ -16,7 +16,6 @@ struct virtio_console_config {
 	__u16 rows;
 } __attribute__((packed));
 
-
 #ifdef __KERNEL__
 int __init virtio_cons_early_init(int (*put_chars)(u32, const char *, int));
 #endif /* __KERNEL__ */

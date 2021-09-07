@@ -296,7 +296,6 @@
 #include <linux/delay.h>
 #include <linux/jiffies.h>
 
-
 #ifdef LM_INTERFACE
 #include <asm/sizes.h>
 #include <linux/platform_device.h>
@@ -1022,7 +1021,6 @@ static ssize_t sleepstatus_show(struct device *_dev,
 #elif PCI_INTERFACE
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #endif
-
 
 	return sprintf(buf, "Sleep Status = %d\n",
 		       dwc_otg_get_lpm_portsleepstatus(otg_dev->core_if));

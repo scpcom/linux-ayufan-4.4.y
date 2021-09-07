@@ -24,7 +24,6 @@
  * ########################################################################
  */
 
-
 #include "ieee754sp.h"
 
 ieee754sp ieee754sp_fint(int x)
@@ -69,7 +68,6 @@ ieee754sp ieee754sp_fint(int x)
 	}
 	SPNORMRET1(xs, xe, xm, "fint", x);
 }
-
 
 ieee754sp ieee754sp_funs(unsigned int u)
 {

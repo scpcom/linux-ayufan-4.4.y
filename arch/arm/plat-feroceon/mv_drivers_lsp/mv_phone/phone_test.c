@@ -80,7 +80,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TOTAL_LINES_BUFF_SIZE		(MV_TDM_TOTAL_CHANNELS * LINE_BUFF_SIZE)
 #define BUFF_ADDR(buff, line)		((unsigned char*)buff + (line*LINE_BUFF_SIZE))
 
-
 /* sin table, 256 points */
 static short sinTbl[] = {0,402,804,1205,1606,2005,2404,2801,3196,3590,3981,4370,4756,
 5139,5519,5896,6270,6639,7005,7366,7723,8075,8423,8765,9102,9433,9759,10079,10393,
@@ -136,7 +135,6 @@ static void phone_test_pcm_rx_callback(unsigned char* rx_buff);
 static void phone_test_event_callback(tal_event* event);
 static void phone_test_gen_tone(unsigned char* tx_buff);
 
-
 static int __init phone_test_init(void)
 {
 	printk("Marvell phone test module started(params: line0_id(%d), line1_id(%d), test_id(%d))\n",
@@ -152,12 +150,10 @@ static int __init phone_test_init(void)
 	phone_test_params.pcm_format[0] = phone_test_params.pcm_format[1] = PCM_FORMAT;
 	phone_test_params.sample_period = SAMPLE_PERIOD;
 
-
 	/* Assign phone operations */
 	phone_test_ops.tal_mmp_event_callback = phone_test_event_callback;
 	phone_test_ops.tal_mmp_rx_callback = phone_test_pcm_rx_callback;
 	phone_test_ops.tal_mmp_tx_callback = phone_test_pcm_tx_callback;
-
 
 	if(tal_init(&phone_test_params, &phone_test_ops) != MV_OK) {
 		printk("%s: Error, could not init phone driver !!!\n",__FUNCTION__);
@@ -327,5 +323,3 @@ module_exit(phone_test_exit);
 MODULE_DESCRIPTION("Marvell Telephony Test Module - www.marvell.com");
 MODULE_AUTHOR("Eran Ben-Avi <benavi@marvell.com>");
 MODULE_LICENSE("GPL");
-
-

@@ -129,7 +129,6 @@ static struct platform_device rpcrouter_pdev = {
 	.id		= -1,
 };
 
-
 static int rpcrouter_send_control_msg(union rr_control_msg *msg)
 {
 	struct rr_header hdr;
@@ -1001,7 +1000,6 @@ int msm_rpc_call_reply(struct msm_rpc_endpoint *ept, uint32_t proc,
 	return rc;
 }
 EXPORT_SYMBOL(msm_rpc_call_reply);
-
 
 static inline int ept_packet_available(struct msm_rpc_endpoint *ept)
 {

@@ -154,7 +154,6 @@ MV_STATUS mvNfpSecDbClear(MV_VOID)
 	return MV_OK;
 }
 
-
 static INLINE MV_VOID mvNfpSecClearRange(MV_U8* addr, MV_U32 size)
 {
 	MV_U32 i;
@@ -176,7 +175,6 @@ static INLINE MV_VOID mvNfpSecInvRange(MV_U8* addr, MV_U32 size)
 	for(i = 0; align <= (addr+size); align += CPU_D_CACHE_LINE_SIZE)
 		mvOsCacheLineInv(NULL, align);
 }
-
 
 /****************************************************/
 /* warning: need to replace DB list with hash table */
@@ -239,13 +237,11 @@ MV_NFP_SEC_SA_ENTRY* mvNfpSecSAEntrySet(MV_NFP_SEC_SA_ENTRY* pSAEntry, MV_NFP_SE
 		pCurrSAEntery++;
 	}
 
-	
 	pCurrSAEntery = (inOut ? (saOutDb+saEntryCount) : (saInDb+saEntryCount));
 	memcpy(pCurrSAEntery, pSAEntry, sizeof(struct _mv_nfp_sec_sa_entry));
 	inOut ? saOutEntryCount++ : saInEntryCount++ ;
 
 	return pCurrSAEntery;
-
 
 }
 
@@ -292,7 +288,6 @@ MV_NFP_SEC_SPD_RULE* mvNfpSecSPDRuleFind(MV_U32 dstIp, MV_U32 srcIp,
 		pCurrSpdRule++;
 	}
 
-		
 		return NULL;
 
 }

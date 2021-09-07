@@ -559,7 +559,6 @@ static void hdmi_write_eld_info(struct snd_info_entry *entry,
 	}
 }
 
-
 int snd_hda_eld_proc_new(struct hda_codec *codec, struct hdmi_eld *eld)
 {
 	char name[32];

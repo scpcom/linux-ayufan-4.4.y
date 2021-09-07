@@ -170,7 +170,6 @@ extern void native_load_gs_index(unsigned);
 		     _ASM_EXTABLE(1b,3b)	\
 		     : :"r" (value), "r" (0) : "memory")
 
-
 /*
  * Save a segment register away
  */

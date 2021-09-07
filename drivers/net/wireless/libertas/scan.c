@@ -83,7 +83,6 @@ static void lbs_unset_basic_rate_flags(u8 *rates, size_t len)
 		rates[i] &= 0x7f;
 }
 
-
 static inline void clear_bss_descriptor(struct bss_descriptor *bss)
 {
 	/* Don't blow away ->list, just BSS data */
@@ -118,9 +117,6 @@ static inline int is_same_network(struct bss_descriptor *src,
 		!compare_ether_addr(src->bssid, dst->bssid) &&
 		!memcmp(src->ssid, dst->ssid, src->ssid_len));
 }
-
-
-
 
 /*********************************************************************/
 /*                                                                   */
@@ -487,7 +483,6 @@ void lbs_scan_worker(struct work_struct *work)
 	lbs_deb_leave(LBS_DEB_SCAN);
 }
 
-
 /*********************************************************************/
 /*                                                                   */
 /*  Result interpretation                                            */
@@ -762,15 +757,11 @@ out:
 	return ret;
 }
 
-
-
-
 /*********************************************************************/
 /*                                                                   */
 /*  Support for Wireless Extensions                                  */
 /*                                                                   */
 /*********************************************************************/
-
 
 #define MAX_CUSTOM_LEN 64
 
@@ -924,7 +915,6 @@ out:
 	return start;
 }
 
-
 /**
  *  @brief Handle Scan Network ioctl
  *
@@ -986,7 +976,6 @@ out:
 	lbs_deb_leave_args(LBS_DEB_WEXT, "ret %d", ret);
 	return ret;
 }
-
 
 /**
  *  @brief  Handle Retrieve scan table ioctl
@@ -1057,15 +1046,11 @@ int lbs_get_scan(struct net_device *dev, struct iw_request_info *info,
 	return err;
 }
 
-
-
-
 /*********************************************************************/
 /*                                                                   */
 /*  Command execution                                                */
 /*                                                                   */
 /*********************************************************************/
-
 
 /**
  *  @brief This function handles the command response of scan

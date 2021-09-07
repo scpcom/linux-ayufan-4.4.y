@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 extern UCHAR	CISCO_OUI[];
 
 extern UCHAR	WPA_OUI[];
@@ -150,7 +149,6 @@ BOOLEAN PeerAssocRspSanity(
     else
         NdisMoveMemory(SupRate, &pFrame->Octet[8], *pSupRateLen);
 
-
     Length = Length + 2 + *pSupRateLen;
 
     // many AP implement proprietary IEs in non-standard order, we'd better
@@ -255,7 +253,6 @@ BOOLEAN PeerAssocRspSanity(
         Length = Length + 2 + pEid->Len;
         pEid = (PEID_STRUCT)((UCHAR*)pEid + 2 + pEid->Len);
     }
-
 
     return TRUE;
 }

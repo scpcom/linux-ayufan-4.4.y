@@ -107,4 +107,3 @@ static inline void skcipher_givcrypt_set_giv(
 }
 
 #endif	/* _CRYPTO_SKCIPHER_H */
-

@@ -7,7 +7,6 @@
 #include <asm/asmmacro.h>
 #include "asm-offsets.h"
 
-
 #define CTX(name)    VMM_CTX_##name##_OFFSET
 
 	/*
@@ -61,7 +60,6 @@
 	mov	b5=r17;				\
 	;;
 
-
 	/*
 	 *	r32: context_t base address
 	 *	bsw == 1
@@ -105,9 +103,6 @@
 	ld8.fill    r13 =[r3];			\
 	;;
 
-
-
-
 	/*
 	 *	r32:		context_t base address
 	 */
@@ -138,8 +133,6 @@
 	st8	[r2] = r16;     		\
 	st8	[r3] = r17;			\
 	;;
-
-
 
 	/*
 	 *	r33:		context_t base address
@@ -172,8 +165,6 @@
 	mov	ar.k6=r16;  			\
 	mov	ar.k7=r17;	    		\
 	;;
-
-
 
 	/*
 	 *	r32:		context_t base address
@@ -302,7 +293,6 @@
 	dv_serialize_data;				\
 	;;
 
-
 	/*
 	 *	r32:		context_t base address
 	 */
@@ -381,8 +371,6 @@
 	srlz.i;			\
 	;;
 
-
-
 	/*
 	 *	r32:	context_t base address
 	 *	r36~r39:scratch registers
@@ -453,7 +441,6 @@
 	st8	[r3]=r17,8;			\
 	;;
 
-
 /*
  *      r33:    point to context_t structure
  *      ar.lc are corrupted.
@@ -478,7 +465,6 @@
 	add r17=1,r17;				\
 	br.cloop.sptk 1b;			\
 	;;
-
 
 	/*
 	 *	r32:		context_t base address
@@ -738,8 +724,6 @@
     ldf.fill.nta f31 = [r3], 32;		\
     ;;
 
-
-
     /*
      *      r33:    point to context_t structure
      */
@@ -936,7 +920,6 @@
     ;;                     			\
     br.cloop.sptk 1b;				\
     ;;
-
 
 /*
  * void vmm_trampoline( context_t * from,

@@ -333,7 +333,6 @@ static void __init mpc85xx_mds_setup_arch(void)
 #endif
 }
 
-
 static int __init board_fixups(void)
 {
 	char phy_id[20];

@@ -3,7 +3,6 @@
 
 #ifdef __KERNEL__
 
-
 /* bytes per L1 cache line */
 #if defined(CONFIG_8xx) || defined(CONFIG_403GCX)
 #define L1_CACHE_SHIFT		4

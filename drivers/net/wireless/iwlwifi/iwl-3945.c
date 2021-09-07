@@ -255,7 +255,6 @@ int iwl3945_rs_next_rate(struct iwl_priv *priv, int rate)
 	return next_rate;
 }
 
-
 /**
  * iwl3945_tx_queue_reclaim - Reclaim Tx queue entries already Tx'd
  *
@@ -339,8 +338,6 @@ static void iwl3945_rx_reply_tx(struct iwl_priv *priv,
 	if (iwl_check_bits(status, TX_ABORT_REQUIRED_MSK))
 		IWL_ERR(priv, "TODO:  Implement Tx ABORT REQUIRED!!!\n");
 }
-
-
 
 /*****************************************************************************
  *
@@ -630,8 +627,6 @@ static void iwl3945_rx_reply_rx(struct iwl_priv *priv,
 		return;
 	}
 
-
-
 	/* Convert 3945's rssi indicator to dBm */
 	rx_status.signal = rx_stats->rssi - IWL39_RSSI_OFFSET;
 
@@ -663,7 +658,6 @@ static void iwl3945_rx_reply_rx(struct iwl_priv *priv,
 		rx_status.noise = priv->last_rx_noise;
 		rx_status.qual = iwl3945_calc_sig_qual(rx_status.signal, 0);
 	}
-
 
 	IWL_DEBUG_STATS(priv, "Rssi %d noise %d qual %d sig_avg %d noise_diff %d\n",
 			rx_status.signal, rx_status.noise, rx_status.qual,
@@ -946,7 +940,6 @@ static int iwl3945_tx_reset(struct iwl_priv *priv)
 		FH39_TSSR_TX_MSG_CONFIG_REG_VAL_ORDER_RSP_WAIT_TH |
 		FH39_TSSR_TX_MSG_CONFIG_REG_VAL_RSP_WAIT_TH);
 
-
 	return 0;
 }
 
@@ -1118,7 +1111,6 @@ int iwl3945_hw_nic_init(struct iwl_priv *priv)
 
 	iwl3945_rx_init(priv, rxq);
 
-
 	/* Look at using this instead:
 	rxq->need_update = 1;
 	iwl_rx_queue_update_write_ptr(priv, rxq);
@@ -1213,7 +1205,6 @@ static void iwl3945_apm_stop(struct iwl_priv *priv)
 static int iwl3945_apm_reset(struct iwl_priv *priv)
 {
 	iwl3945_apm_stop_master(priv);
-
 
 	iwl_set_bit(priv, CSR_RESET, CSR_RESET_REG_FLAG_SW_RESET);
 	udelay(10);
@@ -2441,7 +2432,6 @@ static u16 iwl3945_get_hcmd_size(u8 cmd_id, u16 len)
 	}
 }
 
-
 static u16 iwl3945_build_addsta_hcmd(const struct iwl_addsta_cmd *cmd, u8 *data)
 {
 	struct iwl3945_addsta_cmd *addsta = (struct iwl3945_addsta_cmd *)data;
@@ -2458,7 +2448,6 @@ static u16 iwl3945_build_addsta_hcmd(const struct iwl_addsta_cmd *cmd, u8 *data)
 
 	return (u16)sizeof(struct iwl3945_addsta_cmd);
 }
-
 
 /**
  * iwl3945_init_hw_rate_table - Initialize the hardware rate fallback table
@@ -2652,7 +2641,6 @@ static int iwl3945_verify_bsm(struct iwl_priv *priv)
 	return 0;
 }
 
-
 /******************************************************************************
  *
  * EEPROM related functions
@@ -2672,7 +2660,6 @@ static int iwl3945_eeprom_acquire_semaphore(struct iwl_priv *priv)
 	_iwl_clear_bit(priv, CSR_EEPROM_GP, CSR_EEPROM_GP_IF_OWNER_MSK);
 	return 0;
 }
-
 
 static void iwl3945_eeprom_release_semaphore(struct iwl_priv *priv)
 {

@@ -113,7 +113,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define     MV_M25P128_MAX_FAST_SPI_FREQ        50000000    /* 50MHz */
 #define     MV_M25P128_FAST_READ_DUMMY_BYTES    1
 
-
 /* Sector Sizes and population per device model*/
 #define     MV_M25P32_SECTOR_SIZE               0x10000 /* 64K */
 #define     MV_M25P64_SECTOR_SIZE               0x10000 /* 64K */
@@ -218,7 +217,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define     MV_MX25L3206_MAX_FAST_SPI_FREQ      50000000 /*50MHz*/
 #define     MV_MX25L3206_FAST_READ_DUMMY_BYTES  1
 
-
 #define		MV_N25Q_WREN_CMND_OPCD				0x06    /* Write Enable */
 #define		MV_N25Q_WRDI_CMND_OPCD				0x04    /* Write Disable */
 #define		MV_N25Q_RDID_CMND_OPCD				0x9F    /* Read ID */
@@ -321,4 +319,3 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #endif /* __INCmvSFlashSpecH */
-

@@ -180,7 +180,6 @@ static void rs_rate_scale_perform(struct iwl_priv *priv,
 static void rs_fill_link_cmd(struct iwl_priv *priv,
 			     struct iwl_lq_sta *lq_sta, u32 rate_n_flags);
 
-
 #ifdef CONFIG_MAC80211_DEBUGFS
 static void rs_dbgfs_set_mcs(struct iwl_lq_sta *lq_sta,
 			     u32 *rate_n_flags, int index);
@@ -2440,7 +2439,6 @@ out:
 	return;
 }
 
-
 static void rs_initialize_lq(struct iwl_priv *priv,
 			     struct ieee80211_conf *conf,
 			     struct ieee80211_sta *sta,
@@ -2595,7 +2593,6 @@ static void *rs_alloc_sta(void *priv_rate, struct ieee80211_sta *sta,
 	if (lq_sta == NULL)
 		return NULL;
 	lq_sta->lq.sta_id = 0xff;
-
 
 	for (j = 0; j < LQ_SIZE; j++)
 		for (i = 0; i < IWL_RATE_COUNT; i++)
@@ -2834,7 +2831,6 @@ static void rs_free_sta(void *priv_r, struct ieee80211_sta *sta,
 	kfree(lq_sta);
 	IWL_DEBUG_RATE(priv, "leave\n");
 }
-
 
 #ifdef CONFIG_MAC80211_DEBUGFS
 static int open_file_generic(struct inode *inode, struct file *file)
@@ -3125,4 +3121,3 @@ void iwlagn_rate_control_unregister(void)
 {
 	ieee80211_rate_control_unregister(&rs_ops);
 }
-

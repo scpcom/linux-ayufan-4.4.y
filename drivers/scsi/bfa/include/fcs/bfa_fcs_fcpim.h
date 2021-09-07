@@ -50,13 +50,11 @@ struct bfa_fcs_itnim_s {
 	struct bfa_itnim_stats_s 	stats;	/*  itn statistics       */
 };
 
-
 static inline struct bfad_port_s *
 bfa_fcs_itnim_get_drvport(struct bfa_fcs_itnim_s *itnim)
 {
 	return itnim->rport->port->bfad_port;
 }
-
 
 static inline struct bfa_fcs_port_s *
 bfa_fcs_itnim_get_port(struct bfa_fcs_itnim_s *itnim)
@@ -64,13 +62,11 @@ bfa_fcs_itnim_get_port(struct bfa_fcs_itnim_s *itnim)
 	return itnim->rport->port;
 }
 
-
 static inline wwn_t
 bfa_fcs_itnim_get_nwwn(struct bfa_fcs_itnim_s *itnim)
 {
 	return itnim->rport->nwwn;
 }
-
 
 static inline wwn_t
 bfa_fcs_itnim_get_pwwn(struct bfa_fcs_itnim_s *itnim)
@@ -78,13 +74,11 @@ bfa_fcs_itnim_get_pwwn(struct bfa_fcs_itnim_s *itnim)
 	return itnim->rport->pwwn;
 }
 
-
 static inline u32
 bfa_fcs_itnim_get_fcid(struct bfa_fcs_itnim_s *itnim)
 {
 	return itnim->rport->pid;
 }
-
 
 static inline   u32
 bfa_fcs_itnim_get_maxfrsize(struct bfa_fcs_itnim_s *itnim)
@@ -92,20 +86,17 @@ bfa_fcs_itnim_get_maxfrsize(struct bfa_fcs_itnim_s *itnim)
 	return itnim->rport->maxfrsize;
 }
 
-
 static inline   enum fc_cos
 bfa_fcs_itnim_get_cos(struct bfa_fcs_itnim_s *itnim)
 {
 	return itnim->rport->fc_cos;
 }
 
-
 static inline struct bfad_itnim_s *
 bfa_fcs_itnim_get_drvitn(struct bfa_fcs_itnim_s *itnim)
 {
 	return itnim->itnim_drv;
 }
-
 
 static inline struct bfa_itnim_s *
 bfa_fcs_itnim_get_halitn(struct bfa_fcs_itnim_s *itnim)

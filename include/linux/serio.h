@@ -154,7 +154,6 @@ static inline void serio_unpin_driver(struct serio *serio)
 	mutex_unlock(&serio->drv_mutex);
 }
 
-
 #endif
 
 /*

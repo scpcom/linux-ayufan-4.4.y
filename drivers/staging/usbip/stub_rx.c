@@ -24,7 +24,6 @@
 #include "stub.h"
 #include "../../usb/core/hcd.h"
 
-
 static int is_clear_halt_cmd(struct urb *urb)
 {
 	struct usb_ctrlrequest *req;
@@ -244,7 +243,6 @@ static int stub_recv_cmd_unlink(struct stub_device *sdev,
 
 	struct stub_priv *priv;
 
-
 	spin_lock_irqsave(&sdev->priv_lock, flags);
 
 	list_for_each_entry(priv, &sdev->priv_init, list) {
@@ -311,7 +309,6 @@ static int stub_recv_cmd_unlink(struct stub_device *sdev,
 
 	spin_unlock_irqrestore(&sdev->priv_lock, flags);
 
-
 	return 0;
 }
 
@@ -363,7 +360,6 @@ static struct stub_priv *stub_priv_alloc(struct stub_device *sdev,
 	return priv;
 }
 
-
 static struct usb_host_endpoint *get_ep_from_epnum(struct usb_device *udev,
 		int epnum0)
 {
@@ -404,7 +400,6 @@ static struct usb_host_endpoint *get_ep_from_epnum(struct usb_device *udev,
 		return NULL;
 }
 
-
 static int get_pipe(struct stub_device *sdev, int epnum, int dir)
 {
 	struct usb_device *udev = interface_to_usbdev(sdev->interface);
@@ -426,7 +421,6 @@ static int get_pipe(struct stub_device *sdev, int epnum, int dir)
 	}
 
 	epd = &ep->desc;
-
 
 #if 0
 	/* epnum 0 is always control */
@@ -532,7 +526,6 @@ static void masking_bogus_flags(struct urb *urb)
 }
 #endif
 
-
 static void stub_recv_cmd_submit(struct stub_device *sdev,
 				 struct usbip_header *pdu)
 {
@@ -542,7 +535,6 @@ static void stub_recv_cmd_submit(struct stub_device *sdev,
 	struct usb_device *udev = interface_to_usbdev(sdev->interface);
 	int pipe = get_pipe(sdev, pdu->base.ep, pdu->base.direction);		
 	
-
 	priv = stub_priv_alloc(sdev, pdu);
 	if (!priv)
 		return;
@@ -588,7 +580,6 @@ static void stub_recv_cmd_submit(struct stub_device *sdev,
 	priv->urb->complete               = stub_complete;
 
 	usbip_pack_pdu(pdu, priv->urb, USBIP_CMD_SUBMIT, 0);
-
 
 	if (usbip_recv_xbuff(ud, priv->urb) < 0)
 		return;

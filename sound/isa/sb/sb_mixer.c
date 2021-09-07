@@ -348,7 +348,6 @@ static int snd_sb8mixer_info_mux(struct snd_kcontrol *kcontrol, struct snd_ctl_e
 	return 0;
 }
 
-
 static int snd_sb8mixer_get_mux(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_sb *sb = snd_kcontrol_chip(kcontrol);
@@ -464,7 +463,6 @@ static int snd_sb16mixer_put_input_sw(struct snd_kcontrol *kcontrol, struct snd_
 	spin_unlock_irqrestore(&sb->mixer_lock, flags);
 	return change;
 }
-
 
 /*
  */
@@ -828,7 +826,6 @@ static unsigned char snd_als4000_init_values[][2] = {
 	{ SB_DT019X_OUTPUT_SW2, 0 },
 	{ SB_ALS4000_MIC_IN_GAIN, 0 },
 };
-
 
 /*
  */

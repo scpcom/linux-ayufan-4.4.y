@@ -138,7 +138,6 @@ struct smsc47m1_sio_data {
 	enum chips type;
 };
 
-
 static int smsc47m1_probe(struct platform_device *pdev);
 static int __devexit smsc47m1_remove(struct platform_device *pdev);
 static struct smsc47m1_data *smsc47m1_update_device(struct device *dev,

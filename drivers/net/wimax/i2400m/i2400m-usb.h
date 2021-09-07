@@ -67,7 +67,6 @@
 #include "i2400m.h"
 #include <linux/kthread.h>
 
-
 /*
  * Error Density Count: cheapo error density (over time) counter
  *
@@ -147,7 +146,6 @@ enum {
 	I2400MU_EP_RESET_COLD,
 	I2400MU_EP_BULK_IN,
 };
-
 
 /**
  * struct i2400mu - descriptor for a USB connected i2400m
@@ -229,7 +227,6 @@ struct i2400mu {
 
 	struct dentry *debugfs_dentry;
 };
-
 
 static inline
 void i2400mu_init(struct i2400mu *i2400mu)

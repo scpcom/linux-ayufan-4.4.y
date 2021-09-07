@@ -80,8 +80,6 @@ branch_irq_lh7a400: b 1000f
 1009:
                .endm
 
-
-
 #elif defined (CONFIG_ARCH_LH7A400)
 		.macro	disable_fiq
 		.endm
@@ -145,5 +143,3 @@ branch_irq_lh7a400: b 1000f
 1009:
                .endm
 #endif
-
-

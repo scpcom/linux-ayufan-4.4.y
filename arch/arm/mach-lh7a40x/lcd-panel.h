@@ -305,7 +305,6 @@ static struct clcd_panel lcd_panel = {
 
 #endif
 
-
 #if defined CONFIG_FB_ARMCLCD_AUO_A070VW01_WIDE
 
 	/* AU Optotronics  A070VW01 7.0 Wide Screen color Display*/

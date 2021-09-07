@@ -479,7 +479,6 @@ int r300_gpu_reset(struct radeon_device *rdev)
 	return 0;
 }
 
-
 /*
  * r300,r350,rv350,rv380 VRAM info
  */

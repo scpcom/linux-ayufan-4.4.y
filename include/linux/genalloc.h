@@ -8,7 +8,6 @@
  * Version 2.  See the file COPYING for more details.
  */
 
-
 /*
  *  General purpose special memory pool descriptor.
  */

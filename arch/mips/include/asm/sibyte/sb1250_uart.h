@@ -29,7 +29,6 @@
     *  MA 02111-1307 USA
     ********************************************************************* */
 
-
 #ifndef _SB1250_UART_H
 #define _SB1250_UART_H
 
@@ -58,7 +57,6 @@
 #define V_DUART_BITS_PER_CHAR_RSV1  V_DUART_BITS_PER_CHAR(K_DUART_BITS_PER_CHAR_RSV1)
 #define V_DUART_BITS_PER_CHAR_7     V_DUART_BITS_PER_CHAR(K_DUART_BITS_PER_CHAR_7)
 #define V_DUART_BITS_PER_CHAR_8     V_DUART_BITS_PER_CHAR(K_DUART_BITS_PER_CHAR_8)
-
 
 #define M_DUART_PARITY_TYPE_EVEN    0x00
 #define M_DUART_PARITY_TYPE_ODD     _SB_MAKEMASK1(2)
@@ -95,7 +93,6 @@
 #define M_DUART_STOP_BIT_LEN_1      0
 
 #define M_DUART_TX_CTS_ENA          _SB_MAKEMASK1(4)
-
 
 #define M_DUART_MODE_RESERVED2      _SB_MAKEMASK1(5)    /* must be zero */
 
@@ -207,7 +204,6 @@
 #define S_DUART_IN_PIN_CHNG         4
 #define M_DUART_IN_PIN_CHNG         _SB_MAKEMASK(4, S_DUART_IN_PIN_CHNG)
 
-
 /*
  * DUART Output port control register (Table 10-14)
  * Register: DUART_OPCR
@@ -300,7 +296,6 @@
 #define M_DUART_IMR_ALL		    _SB_MAKEMASK(4, 0)
 #define M_DUART_IMR_RESERVED        _SB_MAKEMASK(4, 4)
 
-
 /*
  * DUART Output Port Set Register (Table 10-22)
  * Register: DUART_SET_OPR
@@ -355,8 +350,6 @@
 #define G_DUART_INT_TIME(x)        _SB_GETVALUE(x, S_DUART_INT_TIME, M_DUART_INT_TIME)
 #endif /* 1250 PASS2 || 112x PASS1 || 1480 */
 
-
 /* ********************************************************************** */
-
 
 #endif

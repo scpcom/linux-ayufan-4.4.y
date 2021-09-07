@@ -21,7 +21,6 @@
 ******************************************************************************/
 /* Check to see if the file has been included already.  */
 
-
 /*--------------------------Define Parameters-------------------------------*/
 
 //
@@ -32,11 +31,9 @@
 #define	RF6052_MAX_PATH		4
 /*--------------------------Define Parameters-------------------------------*/
 
-
 /*------------------------------Define structure----------------------------*/
 
 /*------------------------------Define structure----------------------------*/
-
 
 /*------------------------Export global variable----------------------------*/
 /*------------------------Export global variable----------------------------*/
@@ -44,7 +41,6 @@
 /*------------------------Export Marco Definition---------------------------*/
 
 /*------------------------Export Marco Definition---------------------------*/
-
 
 /*--------------------------Exported Function prototype---------------------*/
 //======================================================
@@ -82,6 +78,5 @@ extern	RT_STATUS	PHY_RF6052_Config(struct net_device  * dev);
 extern void PHY_RFShadowRefresh( struct net_device  		* dev);
 extern void PHY_RFShadowWrite( struct net_device* dev, u32 eRFPath, u32 Offset, u32 Data);
 /*--------------------------Exported Function prototype---------------------*/
-
 
 /* End of HalRf.h */

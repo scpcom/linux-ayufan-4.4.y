@@ -81,7 +81,6 @@ static DEFINE_SPINLOCK(idr_lock);
 #error "SIGEV_THREAD_ID must not share bit with other SIGEV values!"
 #endif
 
-
 /*
  * The timer ID is turned into a timer address by idr_find().
  * Verifying a valid ID consists of:
@@ -241,7 +240,6 @@ static int posix_get_monotonic_raw(clockid_t which_clock, struct timespec *tp)
 	getrawmonotonic(tp);
 	return 0;
 }
-
 
 static int posix_get_realtime_coarse(clockid_t which_clock, struct timespec *tp)
 {

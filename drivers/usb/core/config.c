@@ -13,7 +13,6 @@
 
 #define USB_MAXCONFIG			8	/* Arbitrary limit */
 
-
 static inline const char *plural(int n)
 {
 	return (n == 1 ? "" : "s");
@@ -272,7 +271,6 @@ static int usb_parse_endpoint(struct device *ddev, int cfgno, int inum,
 									USB_DT_INTERFACE, &n);
 	endpoint->extralen = i;
 	retval = buffer - buffer0 + i;
-
 
 	if (n > 0)
 		dev_dbg(ddev, "skipped %d descriptor%s after %s\n",
@@ -632,7 +630,6 @@ void usb_destroy_configuration(struct usb_device *dev)
 	kfree(dev->config);
 	dev->config = NULL;
 }
-
 
 /*
  * Get the USB config descriptors, cache and parse'em

@@ -141,7 +141,6 @@ void omap_pm_set_max_sdma_lat(struct device *dev, long t)
 
 }
 
-
 /*
  * DSP Bridge-specific constraints
  */
@@ -181,7 +180,6 @@ void omap_pm_dsp_set_min_opp(u8 opp_id)
 	 *
 	 */
 }
-
 
 u8 omap_pm_dsp_get_opp(void)
 {
@@ -271,7 +269,6 @@ int omap_pm_get_dev_context_loss_count(struct device *dev)
 	return 0;
 }
 
-
 /* Should be called before clk framework init */
 int __init omap_pm_if_early_init(struct omap_opp *mpu_opp_table,
 				 struct omap_opp *dsp_opp_table,
@@ -293,4 +290,3 @@ void omap_pm_if_exit(void)
 {
 	/* Deallocate CPUFreq frequency table here */
 }
-

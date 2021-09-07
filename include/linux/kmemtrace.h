@@ -22,4 +22,3 @@ static inline void kmemtrace_init(void)
 #endif /* __KERNEL__ */
 
 #endif /* _LINUX_KMEMTRACE_H */
-

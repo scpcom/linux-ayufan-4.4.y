@@ -48,14 +48,6 @@ extern const u8_t zg11gRateTbl[8];
 
 #define ZM_MAX_BUF_DISCRETE_NUMBER          5
 
-
-
-
-
-
-
-
-
 /**********************************************************************************/
 /* IBSS macros                                                     */
 /**********************************************************************************/
@@ -97,7 +89,6 @@ extern const u8_t zg11gRateTbl[8];
 #define ZM_BIT_29      0x20000000   //WPA support
 #define ZM_BIT_30      0x40000000
 #define ZM_BIT_31      0x80000000
-
 
 /**********************************************************************************/
 /* MAC address related macros                                                     */
@@ -340,7 +331,6 @@ struct zsDefragList
 #define ZM_TX_RATE_DOWN_CRITERIA   80
 #define ZM_TX_RATE_UP_CRITERIA    200
 
-
 #define ZM_MAX_PROBE_HIDDEN_SSID_SIZE 2
 struct zsSsidList
 {
@@ -383,7 +373,6 @@ struct zsWrapperSetting
     u8_t            staWmeEnabled;
     u8_t            staWmeQosInfo;
     u8_t            apWmeEnabled;
-
 
     /* rate information: added in the future */
 };
@@ -482,7 +471,6 @@ struct ieee80211_cwm {
     enum ieee80211_cwm_width        cw_width;           /* CWM channel width */
 };
 
-
 /* AP : STA database structure */
 struct zsStaTable
 {
@@ -570,8 +558,6 @@ struct zdStructWds
 #define HTCAP_RxASCap                   0x20
 #define HTCAP_TxSoundPPDUsCap           0x40
 
-
-
 struct zsHTCapability
 {
     u8_t ElementID;
@@ -609,7 +595,6 @@ union zuHTCapability
 #define ExtHtCap_LSIGTXOPProtectFullSup 0x0200
 #define ExtHtCap_PCOActive              0x0400
 #define ExtHtCap_PCOPhase               0x0800
-
 
 struct zsExtHTCapability
 {
@@ -664,8 +649,6 @@ struct zsWlanDevAp
     u8_t    nStaAssociated;   /* 11n STA associated */
     u16_t   protectionMode;   /* AP protection mode flag */
     u16_t   staPowerSaving;   /* Set associated power saving STA count */
-
-
 
     zbuf_t*  uniArray[ZM_UNI_ARRAY_SIZE]; /* array to store unicast frames */
     u16_t   uniHead;
@@ -727,7 +710,6 @@ struct zsWlanDevAp
     u8_t                    challengeText[128];
 
     struct InformationElementAp ie[ZM_MAX_STA_SUPPORT];
-
 
 };
 
@@ -1072,7 +1054,6 @@ struct zsWlanDevSta
 #define ZM_CMD_FW_DL_INIT   0xB5
 #define ZM_CMD_MEM_WREEPROM 0xBB
 
-
 /* duplicate filter table column */
 #define ZM_FILTER_TABLE_COL                 2 /* 2^n */
 /* duplicate filter table Row */
@@ -1191,8 +1172,6 @@ struct zsWlanDev
     u8_t SignalStrength; //CWYang(+)
     u8_t SignalQuality;  //CWYang(+)
 
-
-
     /* QoS */
     zbuf_t* vtxq[4][ZM_VTXQ_SIZE];
     u16_t vtxqHead[4];
@@ -1291,12 +1270,10 @@ struct zsWlanDev
     void (*zfcbHwWatchDogNotify)(zdev_t* dev);
 };
 
-
 struct zsWlanKey
 {
     u8_t key;
 };
-
 
 /* These macros are defined here for backward compatibility */
 /* Please leave them alone */

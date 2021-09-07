@@ -86,7 +86,6 @@ struct musb_hdrc_platform_data {
 	struct musb_hdrc_config	*config;
 };
 
-
 /* TUSB 6010 support */
 
 #define	TUSB6010_OSCCLK_60	16667	/* psec/clk @ 60.0 MHz */

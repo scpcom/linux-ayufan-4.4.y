@@ -1807,7 +1807,6 @@ static int patch_ad1886(struct snd_ac97 * ac97)
 #define AC97_AD1986_OMS_MLC	0x0700  /* MIX of MIC, LINE_IN, C/LFE pins */
 					/*   are MIC sources */
 
-
 static int snd_ac97_ad198x_spdif_source_info(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *uinfo)
 {
 	static char *texts[2] = { "AC-Link", "A/D Converter" };
@@ -2862,7 +2861,6 @@ static int patch_alc655(struct snd_ac97 * ac97)
 	return 0;
 }
 
-
 #define AC97_ALC850_JACK_SELECT	0x76
 #define AC97_ALC850_MISC1	0x7a
 #define AC97_ALC850_MULTICH    0x6a
@@ -2954,7 +2952,6 @@ static int patch_alc850(struct snd_ac97 *ac97)
 	snd_ac97_write_cache(ac97, AC97_ALC650_LFE_DAC_VOL, 0x0808);
 	return 0;
 }
-
 
 /*
  * C-Media CM97xx codecs

@@ -376,7 +376,6 @@ static void handlefc(struct net_device *dev)
 	int base = dev->base_addr;
 	unsigned long flags;
 
-
 	flags=claim_dma_lock();
 	disable_dma(dma);
 	clear_dma_ff(dma);
@@ -451,7 +450,6 @@ static void handleread(struct net_device *dev)
 	int base = dev->base_addr;
 	unsigned long flags;
 
-	
 	flags=claim_dma_lock();
 	disable_dma(dma);
 	clear_dma_ff(dma);
@@ -647,7 +645,6 @@ done:
 	return;
 }
 
-
 static int do_write(struct net_device *dev, void *cbuf, int cbuflen,
 	void *dbuf, int dbuflen)
 {
@@ -751,7 +748,6 @@ static int sendup_buffer (struct net_device *dev)
 		printk(KERN_INFO "%s: unknown LLAP type: %d\n",dev->name,llaptype);
 		return -1;
 	}
-
 
 	skb = dev_alloc_skb(3+sklen);
 	if (skb == NULL) 
@@ -1240,7 +1236,6 @@ module_param(debug, int, 0);
 module_param(io, int, 0);
 module_param(irq, int, 0);
 module_param(dma, int, 0);
-
 
 static int __init ltpc_module_init(void)
 {

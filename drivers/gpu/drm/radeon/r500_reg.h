@@ -231,8 +231,6 @@
 #	define RS600_MSI_REARM		        (1 << 20)
 /* see RS400_MSI_REARM in AIC_CNTL for rs480 */
 
-
-
 #define RV515_MC_FB_LOCATION		0x01
 #define		RV515_MC_FB_START_MASK		0x0000FFFF
 #define		RV515_MC_FB_START_SHIFT		0
@@ -258,7 +256,6 @@
 #define		R520_MC_AGP_TOP_SHIFT		16
 #define R520_MC_AGP_BASE		0x06
 #define R520_MC_AGP_BASE_2		0x07
-
 
 #define AVIVO_MC_INDEX						0x0070
 #define R520_MC_STATUS 0x00
@@ -376,7 +373,6 @@
 #       define AVIVO_D1GRPH_CONTROL_32BPP_ARGB2101010           (1 << 8)
 #       define AVIVO_D1GRPH_CONTROL_32BPP_DIGITAL               (2 << 8)
 #       define AVIVO_D1GRPH_CONTROL_32BPP_8B_ARGB2101010        (3 << 8)
-
 
 #       define AVIVO_D1GRPH_CONTROL_64BPP_ARGB16161616          (0 << 8)
 
@@ -638,8 +634,6 @@
 #   define AVIVO_LVTMA_BIT_DEPTH_CONTROL_TEMPORAL_DITHER_DEPTH (1 << 20)
 #   define AVIVO_LVTMA_BIT_DEPTH_CONTROL_TEMPORAL_LEVEL        (1 << 24)
 #   define AVIVO_LVTMA_BIT_DEPTH_CONTROL_TEMPORAL_DITHER_RESET (1 << 26)
-
-
 
 #define AVIVO_LVTMA_DCBALANCER_CONTROL                  0x7ad0
 #   define AVIVO_LVTMA_DCBALANCER_CONTROL_EN                  (1 << 0)

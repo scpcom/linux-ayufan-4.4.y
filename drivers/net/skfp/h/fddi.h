@@ -56,7 +56,6 @@ struct fddi_mac {
 #define BEACON_INFO	0		/* beacon type */
 #define DBEACON_INFO	1		/* beacon type DIRECTED */
 
-
 /*
  * indicator bits
  */

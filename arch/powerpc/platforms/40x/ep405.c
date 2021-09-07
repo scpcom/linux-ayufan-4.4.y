@@ -48,7 +48,6 @@ static void __iomem *bcsr_regs;
 #define BCSR_GPIO_IRQ_PAR_CTRL	10
 /* there's more, can't be bothered typing them tho */
 
-
 static __initdata struct of_device_id ep405_of_bus[] = {
 	{ .compatible = "ibm,plb3", },
 	{ .compatible = "ibm,opb", },

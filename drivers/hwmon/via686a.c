@@ -44,7 +44,6 @@
 #include <linux/acpi.h>
 #include <linux/io.h>
 
-
 /* If force_addr is set to anything different from 0, we forcibly enable
    the device at the given address. */
 static unsigned short force_addr;
@@ -235,7 +234,6 @@ static const s16 tempLUT[] =
 45,46,46,47,48,48,49,49,50,51,51,52,52,53,53,54,55,55,56,57,57,58,59,59,60,
 61,62,62,63,64,65,66,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,83,84,
 85,86,88,89,91,92,94,96,97,99,101,103,105,107,109,110};
-
 
  Here's the reverse LUT.  I got it by doing a 6-th order poly fit (needed
  an extra term for a good fit to these inverse data!) and then
@@ -621,7 +619,6 @@ static struct platform_driver via686a_driver = {
 	.probe		= via686a_probe,
 	.remove		= __devexit_p(via686a_remove),
 };
-
 
 /* This is called when the module is loaded */
 static int __devinit via686a_probe(struct platform_device *pdev)

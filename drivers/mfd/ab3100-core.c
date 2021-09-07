@@ -108,7 +108,6 @@ int ab3100_set_register_interruptible(struct ab3100 *ab3100, u8 reg, u8 regval)
 }
 EXPORT_SYMBOL(ab3100_set_register_interruptible);
 
-
 /*
  * The test registers exist at an I2C bus address up one
  * from the ordinary base. They are not supposed to be used
@@ -145,7 +144,6 @@ static int ab3100_set_test_register_interruptible(struct ab3100 *ab3100,
 
 	return err;
 }
-
 
 int ab3100_get_register_interruptible(struct ab3100 *ab3100, u8 reg, u8 *regval)
 {
@@ -203,7 +201,6 @@ int ab3100_get_register_interruptible(struct ab3100 *ab3100, u8 reg, u8 *regval)
 }
 EXPORT_SYMBOL(ab3100_get_register_interruptible);
 
-
 int ab3100_get_register_page_interruptible(struct ab3100 *ab3100,
 			     u8 first_reg, u8 *regvals, u8 numregs)
 {
@@ -259,7 +256,6 @@ int ab3100_get_register_page_interruptible(struct ab3100 *ab3100,
 	return err;
 }
 EXPORT_SYMBOL(ab3100_get_register_page_interruptible);
-
 
 int ab3100_mask_and_set_register_interruptible(struct ab3100 *ab3100,
 				 u8 reg, u8 andmask, u8 ormask)
@@ -331,7 +327,6 @@ int ab3100_mask_and_set_register_interruptible(struct ab3100 *ab3100,
 }
 EXPORT_SYMBOL(ab3100_mask_and_set_register_interruptible);
 
-
 /*
  * Register a simple callback for handling any AB3100 events.
  */
@@ -353,7 +348,6 @@ int ab3100_event_unregister(struct ab3100 *ab3100,
 					    nb);
 }
 EXPORT_SYMBOL(ab3100_event_unregister);
-
 
 int ab3100_event_registers_startup_state_get(struct ab3100 *ab3100,
 					     u32 *fatevent)

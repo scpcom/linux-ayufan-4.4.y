@@ -8,7 +8,6 @@
 #include <asm/rtas.h>
 #include <asm/time.h>
 
-
 #define MAX_RTC_WAIT 5000	/* 5 sec */
 #define RTAS_CLOCK_BUSY (-2)
 unsigned long __init rtas_get_boot_time(void)

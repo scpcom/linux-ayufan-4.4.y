@@ -69,7 +69,6 @@
 #define IRQ_AMIGA_CIAB_SP	(IRQ_USER+22)
 #define IRQ_AMIGA_CIAB_FLG	(IRQ_USER+23)
 
-
 /* INTREQR masks */
 #define IF_SETCLR   0x8000      /* set/clr bit */
 #define IF_INTEN    0x4000	/* master interrupt bit in INT* registers */

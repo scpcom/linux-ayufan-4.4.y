@@ -29,7 +29,6 @@
     *  MA 02111-1307 USA
     ********************************************************************* */
 
-
 #ifndef _SB1250_INT_H
 #define _SB1250_INT_H
 
@@ -243,6 +242,5 @@
 
 #define M_LDTVECT_RAISEINT		0x00
 #define M_LDTVECT_RAISEMBOX             0x40
-
 
 #endif	/* 1250/112x */

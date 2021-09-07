@@ -200,7 +200,6 @@ MV_BOOLEAN waitWhileStorageDevIsBusy(MV_SATA_ADAPTER* pAdapter,
     return MV_FALSE;
 }
 
-
 MV_BOOLEAN waitWhileStorageDevIsBusy_88SX60X1(MV_SATA_ADAPTER* pAdapter,
                                                                     MV_BUS_ADDR_T ioBaseAddr,
                                                                     MV_U32 eDmaRegsOffset, MV_U8 channelIndex,
@@ -210,7 +209,6 @@ MV_BOOLEAN waitWhileStorageDevIsBusy_88SX60X1(MV_SATA_ADAPTER* pAdapter,
     MV_U8   ATAstatus = 0;
     MV_U32  i,intReg;
     MV_U8   sataUnit = channelIndex >> 2, portNum = (channelIndex & 0x3);
-
 
     for (i = 0;i < loops; i++)
     {
@@ -324,7 +322,6 @@ void enableStorageDevInterrupt(MV_SATA_CHANNEL *pSataChannel)
 *******************************************************************************/
 void disableStorageDevInterrupt(MV_SATA_CHANNEL *pSataChannel)
 {
-
 
     MV_REG_WRITE_BYTE(pSataChannel->mvSataAdapter->adapterIoBaseAddress,
                       pSataChannel->eDmaRegsOffset +
@@ -625,8 +622,6 @@ MV_BOOLEAN mvStorageDevATASoftResetDevice(MV_SATA_ADAPTER *pAdapter,
     return result;
 }
 
-
-
 void _startSoftResetDevice(MV_SATA_CHANNEL *pSataChannel)
 {
     MV_BUS_ADDR_T   ioBaseAddr =
@@ -679,7 +674,6 @@ MV_BOOLEAN _isDeviceBsyBitOff(MV_SATA_CHANNEL *pSataChannel)
         return MV_FALSE;
     }
 }
-
 
 /*******************************************************************************
 * mvStorageDevATAStartSoftResetDevice -
@@ -797,7 +791,6 @@ MV_BOOLEAN mvStorageIsDeviceBsyBitOff(MV_SATA_ADAPTER *pAdapter,
     return result;
 }
 
-
 /*******************************************************************************
 * mvStorageDevATASetFeatures - Perform ATA SET FEATURES command.
 *
@@ -854,7 +847,6 @@ MV_BOOLEAN mvStorageDevATASetFeatures(MV_SATA_ADAPTER *pAdapter,
                                                 /* command */
                                                 MV_ATA_COMMAND_SET_FEATURES);
 }
-
 
 /*******************************************************************************
 * mvStorageDevATAExecuteNonUdmaCommand - perform ATA non udma command.
@@ -979,17 +971,14 @@ MV_BOOLEAN executePacketCommand(MV_SATA_ADAPTER *pAdapter,
         disableStorageDevInterrupt(pSataChannel);
     }
 
-
     MV_REG_WRITE_BYTE(ioBaseAddr, eDmaRegsOffset +
                       MV_ATA_DEVICE_FEATURES_REG_OFFSET, 0);
 
     MV_REG_WRITE_BYTE(ioBaseAddr, eDmaRegsOffset +
                       MV_ATA_DEVICE_SECTOR_COUNT_REG_OFFSET, 0);
 
-
     MV_REG_WRITE_BYTE(ioBaseAddr, eDmaRegsOffset +
                       MV_ATA_DEVICE_LBA_LOW_REG_OFFSET, 0);
-
 
     MV_REG_WRITE_BYTE(ioBaseAddr, eDmaRegsOffset +
                       MV_ATA_DEVICE_LBA_MID_REG_OFFSET,  0);
@@ -1024,7 +1013,6 @@ MV_BOOLEAN executePacketCommand(MV_SATA_ADAPTER *pAdapter,
         return MV_TRUE;
     }
     
-
     /* Check the status register on DATA request commands */
     ATAstatus = MV_REG_READ_BYTE(ioBaseAddr, eDmaRegsOffset +
                                  MV_ATA_DEVICE_STATUS_REG_OFFSET);
@@ -1235,10 +1223,8 @@ MV_BOOLEAN executeNonUDMACommand(MV_SATA_ADAPTER *pAdapter,
     MV_REG_WRITE_BYTE(ioBaseAddr, eDmaRegsOffset +
                       MV_ATA_DEVICE_SECTOR_COUNT_REG_OFFSET, sectorCount & 0xff);
 
-
     MV_REG_WRITE_BYTE(ioBaseAddr, eDmaRegsOffset +
                       MV_ATA_DEVICE_LBA_LOW_REG_OFFSET, lbaLow & 0xff);
-
 
     MV_REG_WRITE_BYTE(ioBaseAddr, eDmaRegsOffset +
                       MV_ATA_DEVICE_LBA_MID_REG_OFFSET, lbaMid & 0xff);
@@ -1378,7 +1364,6 @@ MV_BOOLEAN executeNonUDMACommand(MV_SATA_ADAPTER *pAdapter,
             MV_CPU_WRITE_BUFFER_FLUSH();
         }
     }
-
 
     /* Wait for the storage device to be available */
     mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG, " %d %d: on non-UDMA sequence - checking if"
@@ -1578,9 +1563,7 @@ void dumpAtaDeviceRegisters(MV_SATA_ADAPTER *pAdapter,
     pRegisters->statusRegister = MV_REG_READ_BYTE(ioBaseAddr,
                                                   eDmaRegsOffset + MV_ATA_DEVICE_STATUS_REG_OFFSET);
 
-
 }
-
 
 MV_BOOLEAN _doSoftReset(MV_SATA_CHANNEL *pSataChannel)
 {
@@ -1697,8 +1680,6 @@ MV_BOOLEAN  mvPMDevReadReg(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex,
     mvOsSemRelease( &pSataChannel->semaphore);
     return result;
 }
-
-
 
 /*******************************************************************************
 * mvPMDevWriteReg - Writes to port multiplier's internal register
@@ -1839,7 +1820,6 @@ MV_BOOLEAN  mvPMDevEnableStaggeredSpinUp(MV_SATA_ADAPTER *pAdapter,
 {
     return mvPMLinkUp(pAdapter, channelIndex, PMPort, MV_FALSE);
 }
-
 
 /*******************************************************************************
 * mvPMDevEnableStaggeredSpinUpAll -
@@ -2180,4 +2160,3 @@ MV_SATA_DEVICE_TYPE mvStorageDevGetDeviceType(MV_SATA_ADAPTER *pAdapter,
 
     return pSataChannel->deviceType;
 }
-

@@ -58,7 +58,6 @@
 #define R3B    %dl
 #define R3H    %dh
 
-
 /* performs input whitening */
 #define input_whitening(src,context,offset)\
 	xor	w+offset(context),	src;
@@ -66,7 +65,6 @@
 /* performs input whitening */
 #define output_whitening(src,context,offset)\
 	xor	w+16+offset(context),	src;
-
 
 /*
  * a input register containing a (rotated 16)
@@ -256,7 +254,6 @@ twofish_enc_blk:
 	encrypt_round(R2,R3,R0,R1,13*8);
 	encrypt_round(R0,R1,R2,R3,14*8);
 	encrypt_last_round(R2,R3,R0,R1,15*8);
-
 
 	output_whitening(%r10,%r11,a_offset)
 	movq	%r10,	(%rsi)

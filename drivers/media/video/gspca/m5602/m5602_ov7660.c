@@ -301,7 +301,6 @@ static int ov7660_set_gain(struct gspca_dev *gspca_dev, __s32 val)
 	return err;
 }
 
-
 static int ov7660_get_auto_white_balance(struct gspca_dev *gspca_dev,
 					 __s32 *val)
 {

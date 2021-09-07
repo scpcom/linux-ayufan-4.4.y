@@ -1841,7 +1841,6 @@ static int qt2_box_set_register(struct usb_serial *serial,
 	return result;
 }
 
-
 /** @brief Request the Tx or Rx buffers on the USB side be flushed
  *
  * Tx flush: When all the currently buffered data has been sent, send an escape
@@ -1946,7 +1945,6 @@ static int qt2_boxstoprx(struct usb_serial *serial, unsigned short uart_number,
 	return usb_control_msg(serial->dev, usb_sndctrlpipe(serial->dev, 0),
 		QT2_STOP_RECEIVE, 0x40, stop, uart_number, NULL, 0, 300);
 }
-
 
 /*
  * last things in file: stuff to register this driver into the generic

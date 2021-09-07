@@ -22,7 +22,6 @@
 #define NR_MIXIN	0x10
 #define NR_MIXOUT 	0x10
 
-
 /* ADBDMA */
 #define VORTEX_ADBDMA_STAT 0x105c0	/* read only, subbuffer, DMA pos */
 #define		POS_MASK 0x00000fff

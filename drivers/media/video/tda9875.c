@@ -35,7 +35,6 @@ static int debug; /* insmod parameter */
 module_param(debug, int, S_IRUGO | S_IWUSR);
 MODULE_LICENSE("GPL");
 
-
 /* This is a superset of the TDA9875 */
 struct tda9875 {
 	struct v4l2_subdev sd;
@@ -95,8 +94,6 @@ static inline struct tda9875 *to_state(struct v4l2_subdev *sd)
 #define TDA9875_MUTE_ON	    0xff /* general mute */
 #define TDA9875_MUTE_OFF    0xcc /* general no mute */
 
-
-
 /* Begin code */
 
 static int tda9875_write(struct v4l2_subdev *sd, int subaddr, unsigned char val)
@@ -114,7 +111,6 @@ static int tda9875_write(struct v4l2_subdev *sd, int subaddr, unsigned char val)
 	}
 	return 0;
 }
-
 
 static int i2c_read_register(struct i2c_client *client, int addr, int reg)
 {
@@ -196,7 +192,6 @@ static void do_tda9875_init(struct v4l2_subdev *sd)
 	t->treble = 0;  		/* 0dB */
 	tda9875_set(sd);
 }
-
 
 static int tda9875_g_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl)
 {
@@ -327,7 +322,6 @@ static const struct v4l2_subdev_ops tda9875_ops = {
 };
 
 /* ----------------------------------------------------------------------- */
-
 
 /* *********************** *
  * i2c interface functions *

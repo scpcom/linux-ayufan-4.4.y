@@ -142,8 +142,6 @@ enum bfa_pport_linkstate_rsn {
 	BFA_PPORT_LINKSTATE_RSN_REMOTE_FAULT 	= 10,
 	BFA_PPORT_LINKSTATE_RSN_TIMEOUT 	= 11,
 
-
-
 	/* CEE related reason codes/errors */
 	CEE_LLDP_INFO_AGED_OUT       = 20,
 	CEE_LLDP_SHUTDOWN_TLV_RCVD   = 21,

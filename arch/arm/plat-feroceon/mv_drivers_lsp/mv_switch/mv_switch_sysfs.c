@@ -9,7 +9,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -37,7 +36,6 @@ disclaimer.
 #include "qd-dsdt/Include/msApi.h"
 
 #include "mv_switch.h"
-
 
 static ssize_t mv_switch_help(char *buf)
 {
@@ -101,7 +99,6 @@ static ssize_t mv_switch_store(struct device *dev, struct device_attribute *attr
 	return err ? -EINVAL : len;
 }
 
-
 static DEVICE_ATTR(reg_r,       S_IWUSR, mv_switch_show, mv_switch_store);
 static DEVICE_ATTR(reg_w,       S_IWUSR, mv_switch_show, mv_switch_store);
 static DEVICE_ATTR(status,      S_IRUSR, mv_switch_show, mv_switch_store);
@@ -121,7 +118,6 @@ static struct attribute_group mv_eth_group = {
 	.name = "switch",
 	.attrs = mv_switch_attrs,
 };
-
 
 int __devinit mv_eth_sysfs_init(void)
 {
@@ -154,4 +150,3 @@ module_init(mv_eth_sysfs_init);
 MODULE_AUTHOR("Rami Rosen");
 MODULE_DESCRIPTION("sysfs for marvell GbE");
 MODULE_LICENSE("GPL");
-

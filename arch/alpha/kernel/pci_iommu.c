@@ -18,7 +18,6 @@
 #include "proto.h"
 #include "pci_impl.h"
 
-
 #define DEBUG_ALLOC 0
 #if DEBUG_ALLOC > 0
 # define DBGA(args...)		printk(KERN_DEBUG args)
@@ -68,7 +67,6 @@ iommu_arena_new_node(int nid, struct pci_controller *hose, dma_addr_t base,
 	   particular systems can over-align the arena.  */
 	if (align < mem_size)
 		align = mem_size;
-
 
 #ifdef CONFIG_DISCONTIGMEM
 
@@ -785,7 +783,6 @@ pci_unmap_sg(struct pci_dev *pdev, struct scatterlist *sg, int nents,
 }
 EXPORT_SYMBOL(pci_unmap_sg);
 
-
 /* Return whether the given PCI device DMA address mask can be
    supported properly.  */
 
@@ -820,7 +817,6 @@ pci_dma_supported(struct pci_dev *pdev, u64 mask)
 }
 EXPORT_SYMBOL(pci_dma_supported);
 
-
 /*
  * AGP GART extensions to the IOMMU
  */

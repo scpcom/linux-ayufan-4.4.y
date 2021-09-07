@@ -49,7 +49,6 @@
 #define BFAD_DRIVER_VERSION    "2.0.0.0"
 #endif
 
-
 #define BFAD_IRQ_FLAGS IRQF_SHARED
 
 /*
@@ -250,7 +249,6 @@ do {                                            	\
 	(*x)++;                  	        	\
 	(*x) = (*x) >> 1;                       	\
 } while (0)
-
 
 bfa_status_t    bfad_vport_create(struct bfad_s *bfad, u16 vf_id,
 				  struct bfa_port_cfg_s *port_cfg);

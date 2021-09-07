@@ -61,7 +61,6 @@ struct cryptocop_dma_desc {
 	struct cryptocop_dma_desc *next;
 };
 
-
 struct cryptocop_int_operation{
 	void                        *alloc_ptr;
 	cryptocop_session_id        sid;
@@ -81,7 +80,6 @@ struct cryptocop_int_operation{
 	dma_descr_data              *ddesc_out;
 	dma_descr_data              *ddesc_in;
 };
-
 
 struct cryptocop_tfrm_ctx {
 	cryptocop_tfrm_id tid;
@@ -120,7 +118,6 @@ struct cryptocop_tfrm_ctx {
 	unsigned char unit_no;
 };
 
-
 struct cryptocop_private{
 	cryptocop_session_id sid;
 	struct cryptocop_private *next;
@@ -135,7 +132,6 @@ struct cryptocop_transform_ctx{
 
 	struct cryptocop_transform_ctx *next;
 };
-
 
 struct cryptocop_session{
 	cryptocop_session_id sid;
@@ -171,7 +167,6 @@ struct cryptocop_prio_job{
 struct ioctl_job_cb_ctx {
 	unsigned int processed:1;
 };
-
 
 static struct cryptocop_session *cryptocop_sessions = NULL;
 spinlock_t cryptocop_sessions_lock;
@@ -209,7 +204,6 @@ static struct list_head cryptocop_completed_jobs;
 static spinlock_t cryptocop_completed_jobs_lock;
 
 DECLARE_WAIT_QUEUE_HEAD(cryptocop_ioc_process_wq);
-
 
 /** Local functions. **/
 
@@ -262,7 +256,6 @@ static void print_user_dma_lists(struct cryptocop_dma_list_operation *dma_op);
 #define assert(s)
 #endif
 
-
 /* Transform constants. */
 #define DES_BLOCK_LENGTH   (8)
 #define AES_BLOCK_LENGTH   (16)
@@ -276,15 +269,12 @@ static void print_user_dma_lists(struct cryptocop_dma_list_operation *dma_op);
 #define CRYPTOCOP_MAJOR    (254)
 #define CRYPTOCOP_MINOR    (0)
 
-
-
 const struct file_operations cryptocop_fops = {
 	.owner =	THIS_MODULE,
 	.open =		cryptocop_open,
 	.release =	cryptocop_release,
 	.ioctl =	cryptocop_ioctl
 };
-
 
 static void free_cdesc(struct cryptocop_dma_desc *cdesc)
 {
@@ -302,7 +292,6 @@ static void free_cdesc(struct cryptocop_dma_desc *cdesc)
 		kfree(cdesc);
 	}
 }
-
 
 static struct cryptocop_dma_desc *alloc_cdesc(int alloc_flag)
 {
@@ -347,7 +336,6 @@ static struct cryptocop_dma_desc *alloc_cdesc(int alloc_flag)
 	return cdesc;
 }
 
-
 static void setup_descr_chain(struct cryptocop_dma_desc *cd)
 {
 	DEBUG(printk("setup_descr_chain: entering\n"));
@@ -361,7 +349,6 @@ static void setup_descr_chain(struct cryptocop_dma_desc *cd)
 	}
 	DEBUG(printk("setup_descr_chain: exit\n"));
 }
-
 
 /* Create a pad descriptor for the transform.
  * Return -1 for error, 0 if pad created. */
@@ -434,7 +421,6 @@ static int create_pad_descriptor(struct cryptocop_tfrm_ctx *tc, struct cryptocop
 	if (cdesc) free_cdesc(cdesc);
 	return -1;
 }
-
 
 static int setup_key_dl_desc(struct cryptocop_tfrm_ctx *tc, struct cryptocop_dma_desc **kd, int alloc_flag)
 {
@@ -607,7 +593,6 @@ static int create_input_descriptors(struct cryptocop_operation *operation, struc
 	return err;
 }
 
-
 static int create_output_descriptors(struct cryptocop_operation *operation, int *iniov_ix, int *iniov_offset, size_t desc_len, struct cryptocop_dma_desc **current_out_cdesc, struct strcop_meta_out *meta_out, int alloc_flag)
 {
 	while (desc_len != 0) {
@@ -646,7 +631,6 @@ static int create_output_descriptors(struct cryptocop_operation *operation, int 
 
 	return 0;
 }
-
 
 static int append_input_descriptors(struct cryptocop_operation *operation, struct cryptocop_dma_desc **current_in_cdesc, struct cryptocop_dma_desc **current_out_cdesc, struct cryptocop_tfrm_ctx *tc, int alloc_flag)
 {
@@ -702,8 +686,6 @@ static int append_input_descriptors(struct cryptocop_operation *operation, struc
 	}
 	return 0;
 }
-
-
 
 static int cryptocop_setup_dma_list(struct cryptocop_operation *operation, struct cryptocop_int_operation **int_op, int alloc_flag)
 {
@@ -1359,7 +1341,6 @@ error_cleanup:
 	return failed;
 }
 
-
 static void delete_internal_operation(struct cryptocop_int_operation *iop)
 {
 	void                      *ptr = iop->alloc_ptr;
@@ -1446,7 +1427,6 @@ static int create_sha1_pad(int alloc_flag, unsigned long long hashed_length, cha
 	return 0;
 }
 
-
 static int transform_ok(struct cryptocop_transform_init *tinit)
 {
 	switch (tinit->alg){
@@ -1501,7 +1481,6 @@ static int transform_ok(struct cryptocop_transform_init *tinit)
 	}
 	return 0;
 }
-
 
 int cryptocop_new_session(cryptocop_session_id *sid, struct cryptocop_transform_init *tinit, int alloc_flag)
 {
@@ -1575,7 +1554,6 @@ int cryptocop_new_session(cryptocop_session_id *sid, struct cryptocop_transform_
 	*sid = sess->sid;
 	return 0;
 }
-
 
 int cryptocop_free_session(cryptocop_session_id sid)
 {
@@ -1674,8 +1652,6 @@ static struct cryptocop_transform_ctx *get_transform_ctx(struct cryptocop_sessio
 	DEBUG(printk("get_transform_ctx, returning tc=0x%p\n", tc));
 	return tc;
 }
-
-
 
 /* The AES s-transform matrix (s-box). */
 static const u8 aes_sbox[256] = {
@@ -1814,7 +1790,6 @@ static void get_aes_decrypt_key(unsigned char *dec_key, const unsigned  char *ke
 	}
 }
 
-
 /**** Job/operation management. ****/
 
 int cryptocop_job_queue_insert_csum(struct cryptocop_operation *operation)
@@ -1944,7 +1919,6 @@ dma_done_interrupt(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-
 /* Setup interrupts and DMA channels. */
 static int init_cryptocop(void)
 {
@@ -2025,7 +1999,6 @@ static void release_cryptocop(void)
 	(void)crisv32_free_dma(IN_DMA);
 }
 
-
 /* Init job queue. */
 static int cryptocop_job_queue_init(void)
 {
@@ -2039,7 +2012,6 @@ static int cryptocop_job_queue_init(void)
 	}
 	return 0;
 }
-
 
 static void cryptocop_job_queue_close(void)
 {
@@ -2122,7 +2094,6 @@ static void cryptocop_job_queue_close(void)
 	}
 	spin_unlock_irqrestore(&cryptocop_completed_jobs_lock, flags);
 }
-
 
 static void cryptocop_start_job(void)
 {
@@ -2240,7 +2211,6 @@ static void cryptocop_start_job(void)
 	DEBUG(printk("cryptocop_start_job: exiting\n"));
 }
 
-
 static int cryptocop_job_setup(struct cryptocop_prio_job **pj, struct cryptocop_operation *operation)
 {
 	int  err;
@@ -2314,7 +2284,6 @@ static int cryptocop_open(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-
 static int cryptocop_release(struct inode *inode, struct file *filp)
 {
 	struct cryptocop_private *dev = filp->private_data;
@@ -2331,7 +2300,6 @@ static int cryptocop_release(struct inode *inode, struct file *filp)
 
 	return 0;
 }
-
 
 static int cryptocop_ioctl_close_session(struct inode *inode, struct file *filp,
 					 unsigned int cmd, unsigned long arg)
@@ -2368,7 +2336,6 @@ static int cryptocop_ioctl_close_session(struct inode *inode, struct file *filp,
 	return 0;
 }
 
-
 static void ioctl_process_job_callback(struct cryptocop_operation *op, void*cb_data)
 {
 	struct ioctl_job_cb_ctx *jc = (struct ioctl_job_cb_ctx *)cb_data;
@@ -2378,7 +2345,6 @@ static void ioctl_process_job_callback(struct cryptocop_operation *op, void*cb_d
 	jc->processed = 1;
 	wake_up(&cryptocop_ioc_process_wq);
 }
-
 
 #define CRYPTOCOP_IOCTL_CIPHER_TID  (1)
 #define CRYPTOCOP_IOCTL_DIGEST_TID  (2)
@@ -2395,7 +2361,6 @@ static size_t first_cfg_change_ix(struct strcop_crypto_op *crp_op)
 	DEBUG(printk("first_cfg_change_ix: ix=%d\n", ch_ix));
 	return ch_ix;
 }
-
 
 static size_t next_cfg_change_ix(struct strcop_crypto_op *crp_op, size_t ix)
 {
@@ -2429,7 +2394,6 @@ static size_t next_cfg_change_ix(struct strcop_crypto_op *crp_op, size_t ix)
 	DEBUG(printk("next_cfg_change_ix prev ix=%d, next ix=%d\n", ix, ch_ix));
 	return ch_ix;
 }
-
 
 /* Map map_length bytes from the pages starting on *pageix and *pageoffset to iovecs starting on *iovix.
  * Return -1 for ok, 0 for fail. */
@@ -2472,8 +2436,6 @@ static int map_pages_to_iovec(struct iovec *iov, int iovlen, int *iovix, struct 
 	DEBUG(printk("map_page_to_iovec, exit, *iovix=%d\n", *iovix));
 	return -1;
 }
-
-
 
 static int cryptocop_ioctl_process(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg)
 {
@@ -2969,7 +2931,6 @@ static int cryptocop_ioctl_process(struct inode *inode, struct file *filp, unsig
 	return err;
 }
 
-
 static int cryptocop_ioctl_create_session(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	cryptocop_session_id             sid;
@@ -3134,7 +3095,6 @@ static int cryptocop_ioctl(struct inode *inode, struct file *filp, unsigned int 
 	return 0;
 }
 
-
 #ifdef LDEBUG
 static void print_dma_descriptors(struct cryptocop_int_operation *iop)
 {
@@ -3227,7 +3187,6 @@ static void print_dma_descriptors(struct cryptocop_int_operation *iop)
 
 	printk("print_dma_descriptors end\n");
 }
-
 
 static void print_strcop_crypto_op(struct strcop_crypto_op *cop)
 {
@@ -3369,7 +3328,6 @@ static void print_cryptocop_operation(struct cryptocop_operation *cop)
 	printk("------------end print_cryptocop_operation\n");
 }
 
-
 static void print_user_dma_lists(struct cryptocop_dma_list_operation *dma_op)
 {
 	dma_descr_data *dd;
@@ -3443,7 +3401,6 @@ static void print_user_dma_lists(struct cryptocop_dma_list_operation *dma_op)
 	}
 }
 
-
 static void print_lock_status(void)
 {
 	printk("**********************print_lock_status\n");
@@ -3455,7 +3412,6 @@ static void print_lock_status(void)
 	printk("cryptocop_process_lock %d\n", spin_is_locked(cryptocop_process_lock));
 }
 #endif /* LDEBUG */
-
 
 static const char cryptocop_name[] = "ETRAX FS stream co-processor";
 
@@ -3523,4 +3479,3 @@ static void __exit exit_stream_coprocessor(void)
 
 module_init(init_stream_coprocessor);
 module_exit(exit_stream_coprocessor);
-

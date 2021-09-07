@@ -61,7 +61,6 @@ static inline void __pte_free_tlb(struct mmu_gather *tlb, pgtable_t page,
 	__free_page(page);
 }
 
-
 static inline pmd_t *pmd_alloc_one(struct mm_struct *mm, unsigned long address)
 {
 	return get_pointer_table();
@@ -78,7 +77,6 @@ static inline int __pmd_free_tlb(struct mmu_gather *tlb, pmd_t *pmd,
 	return free_pointer_table(pmd);
 }
 
-
 static inline void pgd_free(struct mm_struct *mm, pgd_t *pgd)
 {
 	pmd_free(mm, (pmd_t *)pgd);
@@ -88,7 +86,6 @@ static inline pgd_t *pgd_alloc(struct mm_struct *mm)
 {
 	return (pgd_t *)get_pointer_table();
 }
-
 
 static inline void pmd_populate_kernel(struct mm_struct *mm, pmd_t *pmd, pte_t *pte)
 {

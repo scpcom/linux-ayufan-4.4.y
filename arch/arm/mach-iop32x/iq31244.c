@@ -61,7 +61,6 @@ static int is_ep80219(void)
 		return 0;
 }
 
-
 /*
  * EP80219/IQ31244 timer tick configuration.
  */
@@ -81,7 +80,6 @@ static struct sys_timer iq31244_timer = {
 	.offset		= iop_gettimeoffset,
 };
 
-
 /*
  * IQ31244 I/O.
  */
@@ -99,7 +97,6 @@ void __init iq31244_map_io(void)
 	iop3xx_map_io();
 	iotable_init(iq31244_io_desc, ARRAY_SIZE(iq31244_io_desc));
 }
-
 
 /*
  * EP80219/IQ31244 PCI.
@@ -196,7 +193,6 @@ static int __init iq31244_pci_init(void)
 }
 
 subsys_initcall(iq31244_pci_init);
-
 
 /*
  * IQ31244 machine initialisation.

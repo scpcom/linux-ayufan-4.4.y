@@ -281,7 +281,6 @@ struct usbvideo {
 	struct module *md_module;	/* Minidriver module */
 };
 
-
 /*
  * This macro retrieves callback address from the struct uvd object.
  * No validity checks are done here, so be sure to check the

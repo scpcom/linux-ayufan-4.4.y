@@ -139,7 +139,6 @@
 #      define CDB_CORE_ATA_STANDBY_IMMEDIATE                    0x1A
 #      define CDB_CORE_ATA_CHECK_POWER_MODE                     0x1B
 
-
 #      define    CDB_CORE_ATA_IDENTIFY_DEVICE   0x1C
 #      define    CDB_CORE_ATA_IDENTIFY_PACKET_DEVICE    0x1D
 #      define   CDB_CORE_ATA_SMART_READ_VALUES     0x1E
@@ -150,7 +149,6 @@
 #      define   CDB_CORE_ATA_SMART_AUTOSAVE          0x23
 #      define   CDB_CORE_ATA_SMART_IMMEDIATE_OFFLINE    0x24
 #      define   CDB_CORE_ATA_IDENTIFY                 0x25
-
 
 #      define SMP_CDB_USE_ADDRESS               0x01
 

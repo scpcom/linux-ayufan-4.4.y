@@ -18,7 +18,6 @@
 #include "ctrlEnv/mvCtrlEnvLib.h"
 #include "cpu/mvCpu.h"
 
-
 enum kw_cpufreq_range {
 	KW_CPUFREQ_LOW 		= 0,
 	KW_CPUFREQ_HIGH 	= 1
@@ -29,7 +28,6 @@ static struct cpufreq_frequency_table kw_freqs[] = {
 	{ KW_CPUFREQ_HIGH, 0                  },
 	{ 0, CPUFREQ_TABLE_END  }
 };
-
 
 /*
  * Power management function: set or unset powersave mode
@@ -95,7 +93,6 @@ static int kw_cpufreq_target(struct cpufreq_policy *policy,
 	if (unlikely(cpufreq_frequency_table_target(policy,
 		kw_freqs, target_freq, relation, &index)))
 		return -EINVAL;
-
 
 	freqs.old = policy->cur;
 	freqs.new = kw_freqs[index].frequency;
@@ -165,7 +162,6 @@ static int kw_cpufreq_cpu_init(struct cpufreq_policy *policy)
 	return cpufreq_frequency_table_cpuinfo(policy, kw_freqs);
 }
 
-
 static int kw_cpufreq_cpu_exit(struct cpufreq_policy *policy)
 {
 	cpufreq_frequency_table_put_attr(policy->cpu);
@@ -177,7 +173,6 @@ static struct freq_attr *kw_freq_attr[] = {
 	NULL,
 };
 
-
 static struct cpufreq_driver kw_freq_driver = {
 	.owner          = THIS_MODULE,
 	.name           = "kw_cpufreq",
@@ -188,7 +183,6 @@ static struct cpufreq_driver kw_freq_driver = {
 	.get            = kw_cpufreq_get,
 	.attr           = kw_freq_attr,
 };
-
 
 static int __init kw_cpufreq_init(void)
 {
@@ -202,10 +196,8 @@ static void __exit kw_cpufreq_exit(void)
 	cpufreq_unregister_driver(&kw_freq_driver);
 }
 
-
 MODULE_AUTHOR("Marvell Semiconductors ltd.");
 MODULE_DESCRIPTION("CPU frequency scaling for Kirkwood SoC");
 MODULE_LICENSE("GPL");
 module_init(kw_cpufreq_init);
 module_exit(kw_cpufreq_exit);
-

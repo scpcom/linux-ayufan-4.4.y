@@ -52,7 +52,6 @@ udp_conn_in_get(int af, const struct sk_buff *skb, struct ip_vs_protocol *pp,
 	return cp;
 }
 
-
 static struct ip_vs_conn *
 udp_conn_out_get(int af, const struct sk_buff *skb, struct ip_vs_protocol *pp,
 		 const struct ip_vs_iphdr *iph, unsigned int proto_off,
@@ -77,7 +76,6 @@ udp_conn_out_get(int af, const struct sk_buff *skb, struct ip_vs_protocol *pp,
 
 	return cp;
 }
-
 
 static int
 udp_conn_schedule(int af, struct sk_buff *skb, struct ip_vs_protocol *pp,
@@ -122,7 +120,6 @@ udp_conn_schedule(int af, struct sk_buff *skb, struct ip_vs_protocol *pp,
 	return 1;
 }
 
-
 static inline void
 udp_fast_csum_update(int af, struct udphdr *uhdr,
 		     const union nf_inet_addr *oldip,
@@ -164,7 +161,6 @@ udp_partial_csum_update(int af, struct udphdr *uhdr,
 				ip_vs_check_diff2(oldlen, newlen,
 						~csum_unfold(uhdr->check))));
 }
-
 
 static int
 udp_snat_handler(struct sk_buff *skb,
@@ -240,7 +236,6 @@ udp_snat_handler(struct sk_buff *skb,
 	return 1;
 }
 
-
 static int
 udp_dnat_handler(struct sk_buff *skb,
 		 struct ip_vs_protocol *pp, struct ip_vs_conn *cp)
@@ -314,7 +309,6 @@ udp_dnat_handler(struct sk_buff *skb,
 	return 1;
 }
 
-
 static int
 udp_csum_check(int af, struct sk_buff *skb, struct ip_vs_protocol *pp)
 {
@@ -369,7 +363,6 @@ udp_csum_check(int af, struct sk_buff *skb, struct ip_vs_protocol *pp)
 	return 1;
 }
 
-
 /*
  *	Note: the caller guarantees that only one of register_app,
  *	unregister_app or app_conn_bind is called each time.
@@ -388,7 +381,6 @@ static inline __u16 udp_app_hashkey(__be16 port)
 		& UDP_APP_TAB_MASK;
 }
 
-
 static int udp_register_app(struct ip_vs_app *inc)
 {
 	struct ip_vs_app *i;
@@ -397,7 +389,6 @@ static int udp_register_app(struct ip_vs_app *inc)
 	int ret = 0;
 
 	hash = udp_app_hashkey(port);
-
 
 	spin_lock_bh(&udp_app_lock);
 	list_for_each_entry(i, &udp_apps[hash], p_list) {
@@ -414,7 +405,6 @@ static int udp_register_app(struct ip_vs_app *inc)
 	return ret;
 }
 
-
 static void
 udp_unregister_app(struct ip_vs_app *inc)
 {
@@ -423,7 +413,6 @@ udp_unregister_app(struct ip_vs_app *inc)
 	list_del(&inc->p_list);
 	spin_unlock_bh(&udp_app_lock);
 }
-
 
 static int udp_app_conn_bind(struct ip_vs_conn *cp)
 {
@@ -466,7 +455,6 @@ static int udp_app_conn_bind(struct ip_vs_conn *cp)
 	return result;
 }
 
-
 static int udp_timeouts[IP_VS_UDP_S_LAST+1] = {
 	[IP_VS_UDP_S_NORMAL]		=	5*60*HZ,
 	[IP_VS_UDP_S_LAST]		=	2*HZ,
@@ -476,7 +464,6 @@ static const char *const udp_state_name_table[IP_VS_UDP_S_LAST+1] = {
 	[IP_VS_UDP_S_NORMAL]		=	"UDP",
 	[IP_VS_UDP_S_LAST]		=	"BUG!",
 };
-
 
 static int
 udp_set_state_timeout(struct ip_vs_protocol *pp, char *sname, int to)
@@ -510,7 +497,6 @@ static void udp_init(struct ip_vs_protocol *pp)
 static void udp_exit(struct ip_vs_protocol *pp)
 {
 }
-
 
 struct ip_vs_protocol ip_vs_protocol_udp = {
 	.name =			"UDP",

@@ -29,7 +29,6 @@
 
 #define	NR_RESERVED_BUFS	32
 
-
 static int multipath_map (multipath_conf_t *conf)
 {
 	int i, disks = conf->raid_disks;
@@ -65,7 +64,6 @@ static void multipath_reschedule_retry (struct multipath_bh *mp_bh)
 	spin_unlock_irqrestore(&conf->device_lock, flags);
 	md_wakeup_thread(mddev->thread);
 }
-
 
 /*
  * multipath_end_bh_io() is called when we have finished servicing a multipathed
@@ -133,7 +131,6 @@ static void multipath_unplug(struct request_queue *q)
 {
 	unplug_slaves(q->queuedata);
 }
-
 
 static int multipath_make_request (struct request_queue *q, struct bio * bio)
 {
@@ -278,7 +275,6 @@ static void print_multipath_conf (multipath_conf_t *conf)
 	}
 }
 
-
 static int multipath_add_disk(mddev_t *mddev, mdk_rdev_t *rdev)
 {
 	multipath_conf_t *conf = mddev->private;
@@ -360,8 +356,6 @@ abort:
 	print_multipath_conf(conf);
 	return err;
 }
-
-
 
 /*
  * This is a kernel thread which:
@@ -541,7 +535,6 @@ out_free_conf:
 out:
 	return -EIO;
 }
-
 
 static int multipath_stop (mddev_t *mddev)
 {

@@ -23,7 +23,6 @@
 #include <linux/dvb/frontend.h>
 #include "dvb_frontend.h"
 
-
 static int debug;
 module_param(debug, int, 0644);
 MODULE_PARM_DESC(debug, "enable verbose debug messages");

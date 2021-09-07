@@ -173,8 +173,6 @@ static void mac_debug_console_write(struct console *co, const char *str,
 	mac_serial_print(str);
 }
 
-
-
 /* Mac: loops_per_jiffy min. 19000 ^= .5 us; MFPDELAY was 0.6 us*/
 
 #define uSEC 1
@@ -224,7 +222,6 @@ static void mac_scca_console_write(struct console *co, const char *str,
 		mac_scca_out(*str++);
 	}
 }
-
 
 /* The following two functions do a quick'n'dirty initialization of the MFP or
  * SCC serial ports. They're used by the debugging interface, kgdb, and the

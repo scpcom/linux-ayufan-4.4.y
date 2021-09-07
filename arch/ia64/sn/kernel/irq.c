@@ -202,7 +202,6 @@ struct sn_irq_info *sn_retarget_vector(struct sn_irq_info *sn_irq_info,
 	spin_unlock(&sn_irq_info_lock);
 	call_rcu(&sn_irq_info->rcu, sn_irq_info_free);
 
-
 finish_up:
 	/* Update kernels new_irq_info with new target info */
 	cpuid = nasid_slice_to_cpuid(new_irq_info->irq_nasid,

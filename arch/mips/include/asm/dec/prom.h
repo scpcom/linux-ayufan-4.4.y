@@ -40,7 +40,6 @@
 #define PMAX_PROM_PRINTF	PMAX_PROM_ENTRY(17)
 #define PMAX_PROM_GETENV	PMAX_PROM_ENTRY(33)	/* valid on MIPSen */
 
-
 /*
  * Magic number indicating REX PROM available on DECstation.  Found in
  * register a2 on transfer of control to program from PROM.
@@ -57,7 +56,6 @@
 
 #endif /* !CONFIG_64BIT */
 
-
 /*
  * 3MIN/MAXINE PROM entry points for DS5000/1xx's, DS5000/xx's and
  * DS5000/2x0.
@@ -73,7 +71,6 @@
 #define REX_PROM_BOOTREAD	0x58/4	/* read() */
 #define REX_PROM_CLEARCACHE	0x7c/4
 
-
 /*
  * Used by rex_getbitmap().
  */
@@ -81,7 +78,6 @@ typedef struct {
 	int pagesize;
 	unsigned char bitmap[0];
 } memmap;
-
 
 /*
  * Function pointers as read from a PROM's callback vector.
@@ -102,7 +98,6 @@ extern int (*__pmax_open)(char*, int);
 extern int (*__pmax_lseek)(int, long, int);
 extern int (*__pmax_read)(int, void *, int);
 extern int (*__pmax_close)(int);
-
 
 #ifdef CONFIG_64BIT
 
@@ -125,7 +120,6 @@ void __DEC_PROM_O32(_rex_clear_cache, (void (*)(void)));
 int __DEC_PROM_O32(_prom_getchar, (int (*)(void)));
 char *__DEC_PROM_O32(_prom_getenv, (char *(*)(char *), char *));
 int __DEC_PROM_O32(_prom_printf, (int (*)(char *, ...), char *, ...));
-
 
 #define rex_bootinit()		_rex_bootinit(__rex_bootinit)
 #define rex_bootread()		_rex_bootread(__rex_bootread)
@@ -162,7 +156,6 @@ int __DEC_PROM_O32(_prom_printf, (int (*)(char *, ...), char *, ...));
 #define pmax_close		__pmax_close
 
 #endif /* !CONFIG_64BIT */
-
 
 extern void prom_meminit(u32);
 extern void prom_identify_arch(u32);

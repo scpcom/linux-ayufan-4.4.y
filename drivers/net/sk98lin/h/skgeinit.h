@@ -309,7 +309,6 @@ extern "C" {
 /* Max. Auto-neg. timeouts before link detection in sense mode is reset */
 #define SK_MAX_ANEG_TO	10	/* Max. 10 times the sense mode is reset */
 
-
 /******************************************************************************
  *
  * HW_FEATURE() macro
@@ -325,7 +324,6 @@ extern "C" {
 #define HWF_TX_IP_ID_INCR_ON	0x00200000UL	/* Enable Tx IP ID Increment */
 #define HWF_ADV_CSUM_SUPPORT	0x00100000UL	/* Sel Csum of IP and TCP/UDP */
 #define HWF_PSM_SUPPORTED		0x00080000UL	/* Power State Manager support*/
-
 
 /*-RMV- DWORD 1: Deviations (all in use) */
 #define HWF_WA_DEV_4222			0x18000000UL	/*-RMV- 4.222 (Done Idx rep.) */
@@ -399,7 +397,6 @@ extern "C" {
 #endif
 
 /* DWORD 3: still unused */
-
 
 /*
  * HW_FEATURE()	-	returns whether the feature is serviced or not
@@ -1175,4 +1172,3 @@ extern void	SkXmSendCont();
 #endif /* __cplusplus */
 
 #endif /* __INC_SKGEINIT_H_ */
-

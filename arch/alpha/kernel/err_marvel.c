@@ -127,7 +127,6 @@ marvel_print_po7_crrct_sym(u64 crrct_sym)
 #define IO7__PO7_CRRCT_SYM__ERR_CYC__S	(7)   /* ERR_CYC + ODD_FLT + EVN_FLT */
 #define IO7__PO7_CRRCT_SYM__ERR_CYC__M	(0x1ff)
 
-
 	printk("%s      Correctable Error Symptoms:\n"
 	       "%s        Syndrome: 0x%llx\n",
 	       err_print_prefix,
@@ -998,7 +997,6 @@ marvel_process_io_error(struct ev7_lf_subpackets *lf_subpackets, int print)
 				     &io->ports[i]);
 
 	}
-
 
 #endif /* CONFIG_VERBOSE_MCHECK */
 

@@ -8,7 +8,6 @@
 #ifndef _ASM_ELF_H
 #define _ASM_ELF_H
 
-
 /* ELF header e_flags defines. */
 /* MIPS architecture level. */
 #define EF_MIPS_ARCH_1		0x00000000	/* -mips1 code.  */

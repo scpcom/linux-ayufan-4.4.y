@@ -138,7 +138,6 @@
 	mov     8 sched,%a3;			\
 	xor     table+2*tlen(,%tmp,4),%a3;
 
-
 // original Gladman had conditional saves to MMX regs.
 #define save(a1, a2)		\
 	mov     %a2,4*a1(%esp)

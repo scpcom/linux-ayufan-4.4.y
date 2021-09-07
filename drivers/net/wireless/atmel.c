@@ -2015,7 +2015,6 @@ static int atmel_get_auth(struct net_device *dev,
 	return 0;
 }
 
-
 static int atmel_get_name(struct net_device *dev,
 			  struct iw_request_info *info,
 			  char *cwrq,
@@ -2384,7 +2383,6 @@ static int atmel_get_scan(struct net_device *dev,
 		current_ev = iwe_stream_add_event(info, current_ev,
 						  extra + IW_SCAN_MAX_DATA,
 						  &iwe, IW_EV_QUAL_LEN);
-
 
 		iwe.cmd = SIOCGIWENCODE;
 		if (priv->BSSinfo[i].UsingWEP)

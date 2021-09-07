@@ -72,7 +72,6 @@ unsigned short coda_flags_to_cflags(unsigned short flags)
 	return coda_flags;
 }
 
-
 /* utility functions below */
 void coda_vattr_to_iattr(struct inode *inode, struct coda_vattr *attr)
 {
@@ -117,7 +116,6 @@ void coda_vattr_to_iattr(struct inode *inode, struct coda_vattr *attr)
         if (attr->va_ctime.tv_sec != -1)
 	        inode->i_ctime = attr->va_ctime;
 }
-
 
 /* 
  * BSD sets attributes that need not be modified to -1. 
@@ -190,4 +188,3 @@ void coda_iattr_to_vattr(struct iattr *iattr, struct coda_vattr *vattr)
                 vattr->va_ctime = iattr->ia_ctime;
 	}
 }
-

@@ -112,7 +112,6 @@ struct auth_ops {
 #define	SVC_PENDING	8
 #define	SVC_COMPLETE	9
 
-
 extern int	svc_authenticate(struct svc_rqst *rqstp, __be32 *authp);
 extern int	svc_authorise(struct svc_rqst *rqstp);
 extern int	svc_set_client(struct svc_rqst *rqstp);

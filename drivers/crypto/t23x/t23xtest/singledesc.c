@@ -39,13 +39,9 @@
  * 2.1.0   2009_05_04 sec - updated from simplified registration
  */
 
-
-
-
 /** @file
  *  Test using single descriptor
  */
-
 
 #include <linux/mm.h>
 #include <linux/vmalloc.h>
@@ -65,14 +61,10 @@ static const uint8_t sha1paddigest1[] =
     0x6c, 0x9c, 0xd0, 0xd8, 0x9d
 };
 
-
-
 static void intRelease(struct semaphore *lock)
 {
     up(lock);
 }
-
-
 
 int32_t testOneDPD_withInterruptSHA(RMinterfaceCtx *ifCtx)
 {
@@ -112,7 +104,6 @@ int32_t testOneDPD_withInterruptSHA(RMinterfaceCtx *ifCtx)
     setDPDfield(thisdpd, 3, plaintext, 3, 0, 0);
     setDPDfield(thisdpd, 5, digest,   20, 0, 0);
 
-
     /*
      * Step #2 - Pass the DPD to the RM for handling
      */
@@ -137,7 +128,6 @@ int32_t testOneDPD_withInterruptSHA(RMinterfaceCtx *ifCtx)
         return -1;
     }
 
-
     /*
      * Step #3 - Verify the result
      */
@@ -150,13 +140,11 @@ int32_t testOneDPD_withInterruptSHA(RMinterfaceCtx *ifCtx)
         bufferDump(digest, 20);
     }
 
-
     freeBuf(thisdpd);
     freeBuf(plaintext);
     freeBuf(digest);
     return 0;
 }
-
 
 #define BITSINABYTE (8)
 
@@ -219,7 +207,6 @@ int32_t testOneDPD_withInterruptRND(RMinterfaceCtx *ifCtx)
 
     setDPDfield(thisdpd, 4, (uint8_t *)sglist, RNDSIZE, 0, 1);
 
-
     rmstatus = xwcRMqueueRequest(ifCtx, &execMsg, &entryID);
 
     if (rmstatus != RM_OK)
@@ -253,7 +240,6 @@ int32_t testOneDPD_withInterruptRND(RMinterfaceCtx *ifCtx)
     }
     else
         dbgmsg("testOneDPD_withInterruptRND(): OK\n");
-
 
     freeBuf(thisdpd);
     kfree(databuf);

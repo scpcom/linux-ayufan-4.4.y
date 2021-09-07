@@ -264,4 +264,3 @@ out:
 	kfree(spkm3_ctx_id.data);
 	return ret;
 }
-

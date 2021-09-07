@@ -124,7 +124,6 @@ static inline void stmp3xxx_dma_reset_channel(int ch)
 	stmp3xxx_arch_dma_reset_channel(ch);
 }
 
-
 static inline void stmp3xxx_dma_freeze(int ch)
 {
 	stmp3xxx_arch_dma_freeze(ch);

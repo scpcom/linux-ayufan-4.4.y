@@ -45,4 +45,3 @@ extern struct clk msm_clocks[];
 extern unsigned msm_num_clocks;
 
 #endif
-

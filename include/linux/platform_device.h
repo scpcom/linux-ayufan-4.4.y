@@ -102,7 +102,6 @@ extern int early_platform_driver_probe(char *class_str,
 				       int nr_probe, int user_only);
 extern void early_platform_cleanup(void);
 
-
 #ifndef MODULE
 #define early_platform_init(class_string, platform_driver)		\
 static __initdata struct early_platform_driver early_driver = {		\

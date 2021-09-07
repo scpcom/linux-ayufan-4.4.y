@@ -96,7 +96,6 @@
 #define ASI_M_SBUS         0x2E   /* Direct SBus access */
 #define ASI_M_CTL          0x2F   /* Control Space (ECC and MXCC are here) */
 
-
 /* This is ROSS HyperSparc only. */
 #define ASI_M_FLUSH_IWHOLE 0x31   /* Flush entire ICACHE; wo, ss */
 

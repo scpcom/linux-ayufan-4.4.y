@@ -70,13 +70,11 @@ struct rndis_request {
 	struct rndis_message RequestMessage;
 };
 
-
 struct rndis_filter_packet {
 	void *CompletionContext;
 	void (*OnCompletion)(void *context);
 	struct rndis_message Message;
 };
-
 
 static int RndisFilterOnDeviceAdd(struct hv_device *Device,
 				  void *AdditionalInfo);
@@ -95,7 +93,6 @@ static int RndisFilterOnSend(struct hv_device *Device,
 static void RndisFilterOnSendCompletion(void *Context);
 
 static void RndisFilterOnSendRequestCompletion(void *Context);
-
 
 /* The one and only */
 static struct rndis_filter_driver_object gRndisFilter;
@@ -812,7 +809,6 @@ static int RndisFilterOnDeviceAdd(struct hv_device *Device,
 		return ret;
 	}
 
-
 	/* Initialize the rndis device */
 	netDevice = Device->Extension;
 	ASSERT(netDevice);
@@ -989,7 +985,6 @@ static void RndisFilterOnSendCompletion(void *Context)
 
 	DPRINT_EXIT(NETVSC);
 }
-
 
 static void RndisFilterOnSendRequestCompletion(void *Context)
 {

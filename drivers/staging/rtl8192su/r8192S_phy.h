@@ -21,7 +21,6 @@
 #ifndef _R8192S_PHY_H
 #define _R8192S_PHY_H
 
-
 /*--------------------------Define Parameters-------------------------------*/
 #define LOOP_LIMIT				5
 #define MAX_STALL_TIME			50		//us
@@ -36,7 +35,6 @@
 #define MAX_RFDEPENDCMD_CNT 	16
 #define MAX_POSTCMD_CNT 		16
 
-
 /*------------------------------Define structure----------------------------*/
 typedef enum _SwChnlCmdID{
 	CmdID_End,
@@ -47,7 +45,6 @@ typedef enum _SwChnlCmdID{
 	CmdID_WritePortUchar,
 	CmdID_RF_WriteReg,
 }SwChnlCmdID;
-
 
 /* 1. Switch channel related */
 typedef struct _SwChnlCmd{
@@ -106,7 +103,6 @@ extern	void	rtl8192_phy_SetRFReg(struct net_device* dev,RF90_RADIO_PATH_E eRFPat
 
 bool rtl8192_phy_checkBBAndRF(struct net_device* dev, HW90_BLOCK_E CheckBlock, RF90_RADIO_PATH_E eRFPath);
 
-
 /* MAC/BB/RF HAL config */
 extern	bool 	PHY_MACConfig8192S(struct net_device* dev);
 extern	bool 	PHY_BBConfig8192S(struct net_device* dev);
@@ -132,4 +128,3 @@ extern void PHY_SetBeaconHwReg( struct net_device* dev, u16 BeaconInterval);
 void ChkFwCmdIoDone(struct net_device* dev);
 
 #endif	// __INC_HAL8192SPHYCFG_H
-

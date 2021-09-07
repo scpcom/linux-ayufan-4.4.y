@@ -29,7 +29,6 @@
 #define to_sysdev(k) container_of(k, struct sys_device, kobj)
 #define to_sysdev_attr(a) container_of(a, struct sysdev_attribute, attr)
 
-
 static ssize_t
 sysdev_show(struct kobject *kobj, struct attribute *attr, char *buffer)
 {
@@ -40,7 +39,6 @@ sysdev_show(struct kobject *kobj, struct attribute *attr, char *buffer)
 		return sysdev_attr->show(sysdev, sysdev_attr, buffer);
 	return -EIO;
 }
-
 
 static ssize_t
 sysdev_store(struct kobject *kobj, struct attribute *attr,
@@ -63,12 +61,10 @@ static struct kobj_type ktype_sysdev = {
 	.sysfs_ops	= &sysfs_ops,
 };
 
-
 int sysdev_create_file(struct sys_device *s, struct sysdev_attribute *a)
 {
 	return sysfs_create_file(&s->kobj, &a->attr);
 }
-
 
 void sysdev_remove_file(struct sys_device *s, struct sysdev_attribute *a)
 {
@@ -204,7 +200,6 @@ int sysdev_driver_register(struct sysdev_class *cls, struct sysdev_driver *drv)
 	return err;
 }
 
-
 /**
  *	sysdev_driver_unregister - Remove an auxillary driver.
  *	@cls:	Class driver belongs to.
@@ -228,8 +223,6 @@ void sysdev_driver_unregister(struct sysdev_class *cls,
 
 EXPORT_SYMBOL_GPL(sysdev_driver_register);
 EXPORT_SYMBOL_GPL(sysdev_driver_unregister);
-
-
 
 /**
  *	sysdev_register - add a system device to the tree
@@ -294,8 +287,6 @@ void sysdev_unregister(struct sys_device *sysdev)
 
 	kobject_put(&sysdev->kobj);
 }
-
-
 
 /**
  *	sysdev_shutdown - Shut down all system devices.
@@ -552,4 +543,3 @@ ssize_t sysdev_show_int(struct sys_device *sysdev,
 	return snprintf(buf, PAGE_SIZE, "%d\n", *(int *)(ea->var));
 }
 EXPORT_SYMBOL_GPL(sysdev_show_int);
-

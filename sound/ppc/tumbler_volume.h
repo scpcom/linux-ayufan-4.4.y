@@ -187,7 +187,6 @@ static unsigned int mixer_volume_table[] = {
 	0x714575, 0x77fbaa, 0x7f17af,
 };
 
-
 /* treble table for TAS3004 */
 /* 0 = -18 dB, 72 = 18 dB in 0.5 dB step */
 static unsigned int snapper_treble_volume_table[] = {
@@ -247,4 +246,3 @@ static unsigned int snapper_bass_volume_table[] = {
 	0x18, 0x11, 0x0a,
 	0x01,
 };
-

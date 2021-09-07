@@ -230,7 +230,6 @@ _startup:
 should_never_return:
 	j	should_never_return
 
-
 /*
  * BSS section
  */

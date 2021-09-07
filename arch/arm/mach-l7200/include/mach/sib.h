@@ -53,7 +53,6 @@ typedef struct
 #define MCCR_ADM        (1 << 18)             /* A/D Data Sampling */
 #define MCCR_PMC        (1 << 26)             /* PIN Multiplexer Control */
 
-
 #define GET_ASD ((SIB->MCCR >>  0) & 0x3f) /* Audio Sample Rate Div. */
 #define GET_TSD ((SIB->MCCR >>  8) & 0x3f) /* Telcom Sample Rate Div. */
 #define GET_MCE ((SIB->MCCR >> 16) & 0x01) /* SIB Enable */
@@ -79,7 +78,6 @@ typedef struct
 #define TELECOM_RECV     ((SIB->MCDR1 >> 2) & 032fff)
 #define TELECOM_WRITE(v) ((SIB->MCDR1 = (v & 0x3fff) << 2))
 
-
 /* MCSR */
 
 #define MCSR_ATU (1 << 4)  /* Audio Transmit FIFO Underrun */
@@ -88,7 +86,6 @@ typedef struct
 #define MCSR_TRO (1 << 7)  /* TELECOM Receive  FIFO Underrun */
 
 #define MCSR_CLEAR_UNDERUN_BITS (MCSR_ATU | MCSR_ARO | MCSR_TTU | MCSR_TRO)
-
 
 #define GET_ATS ((SIB->MCSR >>  0) & 0x01) /* Audio Transmit FIFO Service Req*/
 #define GET_ARS ((SIB->MCSR >>  1) & 0x01) /* Audio Recv FIFO Service Request*/

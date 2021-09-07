@@ -17,13 +17,10 @@
 #define HFCPCI_BTRANS_THRESHOLD 128
 #define HFCPCI_BTRANS_THRESMASK 0x00
 
-
-
 /* defines for PCI config */
 
 #define PCI_ENA_MEMIO    0x02
 #define PCI_ENA_MASTER   0x04
-
 
 /* GCI/IOM bus monitor registers */
 
@@ -31,7 +28,6 @@
 #define HFCPCI_TRxR      0x0C
 #define HFCPCI_MON1_D    0x28
 #define HFCPCI_MON2_D    0x2C
-
 
 /* GCI/IOM bus timeslot registers */
 
@@ -56,7 +52,6 @@
 #define HFCPCI_MST_EMOD  0xB4
 #define HFCPCI_MST_MODE	 0xB8
 #define HFCPCI_CONNECT 	 0xBC
-
 
 /* Interrupt and status registers */
 
@@ -87,7 +82,6 @@
 #define HFCPCI_D_REC     0xF8
 #define HFCPCI_D_SEND    0xF8
 #define HFCPCI_E_REC     0xFC
-
 
 /* bits in status register (READ) */
 #define HFCPCI_PCI_PROC   0x02
@@ -171,7 +165,6 @@
 #define HFCPCI_FIFOEN_B2TX   0x04
 #define HFCPCI_FIFOEN_B2RX   0x08
 
-
 /***********************************/
 /* definitions of fifo memory area */
 /***********************************/
@@ -202,7 +195,6 @@ typedef struct {
     u_char fill[0x2100-0x2082]; /* alignment */
   } bzfifo_type;
 
-
 typedef union {
     struct { 
       dfifo_type d_tx; /* D-send channel */
@@ -226,7 +218,6 @@ typedef union {
     } b_chans;  
     u_char fill[32768]; 
   } fifo_area;
-
 
 #define Write_hfc(a,b,c) (*(((u_char *)a->hw.hfcpci.pci_io)+b) = c) 
 #define Read_hfc(a,b) (*(((u_char *)a->hw.hfcpci.pci_io)+b))

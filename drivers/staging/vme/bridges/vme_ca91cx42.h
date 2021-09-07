@@ -291,7 +291,6 @@ static const int CA91CX42_VSI_TO[] = { VSI0_TO, VSI1_TO, VSI2_TO, VSI3_TO,
 #define CA91CX42_BM_PCI_MISC0_LTIMER        0x0000FF00
 #define CA91CX42_OF_PCI_MISC0_LTIMER        8
 
-
 /*
  * LSI Control Register
  * offset  100
@@ -325,7 +324,6 @@ static const int CA91CX42_VSI_TO[] = { VSI0_TO, VSI1_TO, VSI2_TO, VSI3_TO,
 #define CA91CX42_LSI_CTL_VCT_BLT	(1<<8)
 #define CA91CX42_LSI_CTL_VCT_MBLT	(1<<8)
 #define CA91CX42_LSI_CTL_LAS		(1<<0)
-
 
 /*
  * LMISC Register

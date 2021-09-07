@@ -40,7 +40,6 @@
 #ifndef __AP_H__
 #define __AP_H__
 
-
 // =============================================================
 //      Function Prototypes
 // =============================================================
@@ -55,7 +54,6 @@ BOOLEAN APBridgeToWirelessSta(
     IN  UINT            DataLen,
     IN  ULONG           fromwdsidx);
 
-
 VOID	APSendPackets(
 	IN	NDIS_HANDLE		MiniportAdapterContext,
 	IN	PPNDIS_PACKET	ppPacketArray,
@@ -64,7 +62,6 @@ VOID	APSendPackets(
 NDIS_STATUS APSendPacket(
     IN  PRTMP_ADAPTER   pAd,
     IN  PNDIS_PACKET    pPacket);
-
 
 NDIS_STATUS APHardTransmit(
 	IN	PRTMP_ADAPTER	pAd,
@@ -142,7 +139,6 @@ VOID  APCls3errAction(
 	IN	ULONG Wcid,
     IN	PHEADER_802_11	pHeader);
 
-
 USHORT APBuildAssociation(
     IN PRTMP_ADAPTER pAd,
     IN MAC_TABLE_ENTRY *pEntry,
@@ -185,7 +181,6 @@ VOID APCls2errAction(
 
 // ap_connect.c
 
-
 VOID APMakeBssBeacon(
     IN  PRTMP_ADAPTER   pAd,
 	IN	INT				apidx);
@@ -199,7 +194,6 @@ VOID APMakeAllBssBeacon(
 
 VOID  APUpdateAllBeaconFrame(
     IN  PRTMP_ADAPTER   pAd);
-
 
 // ap_sync.c
 
@@ -256,7 +250,6 @@ VOID SupportRate(
 	OUT PUCHAR RatesLen,
 	OUT PUCHAR pMaxSupportRate);
 
-
 BOOLEAN ApScanRunning(
 	IN PRTMP_ADAPTER pAd);
 
@@ -307,7 +300,6 @@ VOID APQuickResponeForRateUpExec(
     IN PVOID FunctionContext,
     IN PVOID SystemSpecific2,
     IN PVOID SystemSpecific3);
-
 
 VOID RTMPSetPiggyBack(
 	IN PRTMP_ADAPTER	pAd,
@@ -426,7 +418,6 @@ VOID ApEnqueueAckFrame(
 
 // ap_sanity.c
 
-
 BOOLEAN PeerAssocReqCmmSanity(
     IN PRTMP_ADAPTER pAd,
 	IN BOOLEAN isRessoc,
@@ -449,7 +440,6 @@ BOOLEAN PeerAssocReqCmmSanity(
 #endif // DOT11N_DRAFT3 //
     OUT UCHAR		 *pHtCapabilityLen,
     OUT HT_CAPABILITY_IE *pHtCapability);
-
 
 BOOLEAN PeerDisassocReqSanity(
     IN PRTMP_ADAPTER pAd,

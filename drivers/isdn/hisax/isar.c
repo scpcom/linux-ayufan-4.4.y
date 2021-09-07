@@ -44,7 +44,6 @@ waitforHIA(struct IsdnCardState *cs, int timeout)
 	return(timeout);
 }
 
-
 static int
 sendmsg(struct IsdnCardState *cs, u_char his, u_char creg, u_char len,
 	u_char *msg)
@@ -133,7 +132,6 @@ waitrecmsg(struct IsdnCardState *cs, u_char *len,
 {
 	int timeout = 0;
 	struct isar_reg *ir = cs->bcs[0].hw.isar.reg;
-	
 	
 	while((!(cs->BC_Read_Reg(cs, 0, ISAR_IRQBIT) & ISAR_IRQSTA)) &&
 		(timeout++ < maxdelay))

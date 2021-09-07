@@ -37,7 +37,6 @@
 #include <linux/init.h>
 #include <linux/mbcache.h>
 
-
 #ifdef MB_CACHE_DEBUG
 # define mb_debug(f...) do { \
 		printk(KERN_DEBUG f); \
@@ -90,7 +89,6 @@ struct mb_cache {
 	struct list_head		*c_indexes_hash[0];
 };
 
-
 /*
  * Global data: list of all mbcache's, lru list, and a spinlock for
  * accessing cache data structures on SMP machines. The lru list is
@@ -128,7 +126,6 @@ __mb_cache_entry_is_hashed(struct mb_cache_entry *ce)
 	return !list_empty(&ce->e_block_list);
 }
 
-
 static void
 __mb_cache_entry_unhash(struct mb_cache_entry *ce)
 {
@@ -140,7 +137,6 @@ __mb_cache_entry_unhash(struct mb_cache_entry *ce)
 			list_del(&ce->e_indexes[n].o_list);
 	}
 }
-
 
 static void
 __mb_cache_entry_forget(struct mb_cache_entry *ce, gfp_t gfp_mask)
@@ -159,7 +155,6 @@ __mb_cache_entry_forget(struct mb_cache_entry *ce, gfp_t gfp_mask)
 		atomic_dec(&cache->c_entry_count);
 	}
 }
-
 
 static void
 __mb_cache_entry_release_unlock(struct mb_cache_entry *ce)
@@ -183,7 +178,6 @@ forget:
 	spin_unlock(&mb_cache_spinlock);
 	__mb_cache_entry_forget(ce, GFP_KERNEL);
 }
-
 
 /*
  * mb_cache_shrink_fn()  memory pressure callback
@@ -231,7 +225,6 @@ mb_cache_shrink_fn(int nr_to_scan, gfp_t gfp_mask)
 out:
 	return (count / 100) * sysctl_vfs_cache_pressure;
 }
-
 
 /*
  * mb_cache_create()  create a new cache
@@ -311,7 +304,6 @@ fail:
 	return NULL;
 }
 
-
 /*
  * mb_cache_shrink()
  *
@@ -342,7 +334,6 @@ mb_cache_shrink(struct block_device *bdev)
 						   e_lru_list), GFP_KERNEL);
 	}
 }
-
 
 /*
  * mb_cache_destroy()
@@ -389,7 +380,6 @@ mb_cache_destroy(struct mb_cache *cache)
 	kfree(cache);
 }
 
-
 /*
  * mb_cache_entry_alloc()
  *
@@ -414,7 +404,6 @@ mb_cache_entry_alloc(struct mb_cache *cache, gfp_t gfp_flags)
 	}
 	return ce;
 }
-
 
 /*
  * mb_cache_entry_insert()
@@ -465,7 +454,6 @@ out:
 	return error;
 }
 
-
 /*
  * mb_cache_entry_release()
  *
@@ -479,7 +467,6 @@ mb_cache_entry_release(struct mb_cache_entry *ce)
 	spin_lock(&mb_cache_spinlock);
 	__mb_cache_entry_release_unlock(ce);
 }
-
 
 /*
  * mb_cache_entry_free()
@@ -495,7 +482,6 @@ mb_cache_entry_free(struct mb_cache_entry *ce)
 	__mb_cache_entry_unhash(ce);
 	__mb_cache_entry_release_unlock(ce);
 }
-
 
 /*
  * mb_cache_entry_get()
@@ -592,7 +578,6 @@ __mb_cache_entry_find(struct list_head *l, struct list_head *head,
 	return NULL;
 }
 
-
 /*
  * mb_cache_entry_find_first()
  *
@@ -622,7 +607,6 @@ mb_cache_entry_find_first(struct mb_cache *cache, int index,
 	spin_unlock(&mb_cache_spinlock);
 	return ce;
 }
-
 
 /*
  * mb_cache_entry_find_next()
@@ -676,4 +660,3 @@ static void __exit exit_mbcache(void)
 
 module_init(init_mbcache)
 module_exit(exit_mbcache)
-

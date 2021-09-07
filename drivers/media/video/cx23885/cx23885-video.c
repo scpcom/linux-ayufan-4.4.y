@@ -442,7 +442,6 @@ static int cx23885_start_video_dma(struct cx23885_dev *dev,
 	return 0;
 }
 
-
 static int cx23885_restart_video_queue(struct cx23885_dev *dev,
 			       struct cx23885_dmaqueue *q)
 {
@@ -1472,7 +1471,6 @@ static const struct v4l2_file_operations radio_fops = {
 	.ioctl         = video_ioctl2,
 };
 
-
 void cx23885_video_unregister(struct cx23885_dev *dev)
 {
 	dprintk(1, "%s()\n", __func__);
@@ -1537,7 +1535,6 @@ int cx23885_video_register(struct cx23885_dev *dev)
 		}
 	}
 
-
 	/* register v4l devices */
 	dev->video_dev = cx23885_vdev_init(dev, dev->pci,
 		&cx23885_video_template, "video");
@@ -1563,4 +1560,3 @@ fail_unreg:
 	cx23885_video_unregister(dev);
 	return err;
 }
-

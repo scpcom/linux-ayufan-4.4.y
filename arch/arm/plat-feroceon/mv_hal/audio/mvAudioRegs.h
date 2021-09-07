@@ -85,7 +85,6 @@ typedef enum _mvAudioFreq
 	AUDIO_FREQ_OTHER = 7,		/*Other frequency*/
 }MV_AUDIO_FREQ;
 
-
 typedef enum _mvAudioSampleFreq
 {
 	SMAPLE_8KHZ = 0,
@@ -145,7 +144,6 @@ typedef enum _mvAudioI2SJustification
 
 }MV_AUDIO_I2S_JUSTIFICATION;
 
-
 #define APBBCR_SIZE_MAX						0x3FFFFF
 #define APBBCR_SIZE_SHIFT					0x2
 
@@ -159,7 +157,6 @@ typedef enum _mvAudioI2SJustification
 /*******************/
 #define MV_AUDIO_PLL_CTRL1_REG(unit)			(AUDIO_REG_BASE(unit) + 0x1200)
 
-
 #define MV_AUDIO_DCO_CTRL_REG(unit)		(AUDIO_REG_BASE(unit) + 0x1204)
 #define MV_AUDIO_SPCR_DCO_STATUS_REG(unit)	(AUDIO_REG_BASE(unit) + 0x120c)
 #define MV_AUDIO_SAMPLE_CNTR_CTRL_REG(unit)	(AUDIO_REG_BASE(unit) + 0x1220)
@@ -167,14 +164,12 @@ typedef enum _mvAudioI2SJustification
 #define MV_AUDIO_RECORD_SAMPLE_CNTR_REG(unit)	(AUDIO_REG_BASE(unit) + 0x1228)
 #define MV_AUDIO_CLOCK_CTRL_REG(unit)		(AUDIO_REG_BASE(unit) + 0x1230)
 
-
 /* MV_AUDIO_DCO_CTRL_REG */
 #define ADCR_DCO_CTRL_FS_OFFS		0
 #define ADCR_DCO_CTRL_FS_MASK		(0x3 << ADCR_DCO_CTRL_FS_OFFS)
 #define ADCR_DCO_CTRL_FS_44_1KHZ	(0x0 << ADCR_DCO_CTRL_FS_OFFS)
 #define ADCR_DCO_CTRL_FS_48KHZ		(0x1 << ADCR_DCO_CTRL_FS_OFFS)
 #define ADCR_DCO_CTRL_FS_96KHZ		(0x2 << ADCR_DCO_CTRL_FS_OFFS)
-
 
 #define ADCR_DCO_CTRL_OFFSET_OFFS	2
 #define ADCR_DCO_CTRL_OFFSET_MASK	(0xfff << ADCR_DCO_CTRL_OFFSET_OFFS)
@@ -188,7 +183,6 @@ typedef enum _mvAudioI2SJustification
 #define ASDSR_SPCR_CTRLFS_44_1KHZ_LESS	(0x3 << ASDSR_SPCR_CTRLFS_OFFS)
 #define ASDSR_SPCR_CTRLFS_96KHZ_MORE	(0x4 << ASDSR_SPCR_CTRLFS_OFFS)
 #define ASDSR_SPCR_CTRLFS_OTHER			(0x7 << ASDSR_SPCR_CTRLFS_OFFS)
-
 
 #define ASDSR_SPCR_CTRLOFFSET_OFFS	3
 #define ASDSR_SPCR_CTRLOFFSET_MASK	(0xfff << ASDSR_SPCR_CTRLOFFSET_OFFS)
@@ -222,8 +216,6 @@ typedef enum _mvAudioI2SJustification
 #define ACCR_MCLK_SOURCE_DCO		(0x0 << ACCR_MCLK_SOURCE_OFFS)
 #define ACCR_MCLK_SOURCE_SPCR		(0x2 << ACCR_MCLK_SOURCE_OFFS)
 #define ACCR_MCLK_SOURCE_EXT		(0x3 << ACCR_MCLK_SOURCE_OFFS)
-
-
 
 /********************/
 /* Interrupts		*/
@@ -264,7 +256,6 @@ typedef enum _mvAudioI2SJustification
 /*I2S*/
 #define MV_AUDIO_I2S_PLAY_CTRL_REG(unit)		(AUDIO_REG_BASE(unit) + 0x2508)
 
-
 /* MV_AUDIO_PLAYBACK_CTRL_REG */
 #define APCR_PLAY_SAMPLE_SIZE_OFFS			0
 #define APCR_PLAY_SAMPLE_SIZE_MASK			(0x7 << APCR_PLAY_SAMPLE_SIZE_OFFS)
@@ -300,7 +291,6 @@ typedef enum _mvAudioI2SJustification
 #define APBBCR_SIZE_MAX						0x3FFFFF
 #define APBBCR_SIZE_SHIFT					0x2
 
-
 /* MV_AUDIO_SPDIF_PLAY_CTRL_REG */
 #define ASPCR_SPDIF_BLOCK_START_OFFS		0x0
 #define ASPCR_SPDIF_BLOCK_START_MASK		(0x1 << ASPCR_SPDIF_BLOCK_START_OFFS)
@@ -319,8 +309,6 @@ typedef enum _mvAudioI2SJustification
 
 #define ASPCR_SPDIF_PB_NONPCM_OFFS				17
 #define ASPCR_SPDIF_PB_NONPCM_MASK				(0x1 << ASPCR_SPDIF_PB_NONPCM_OFFS)
-
-
 
 /* MV_AUDIO_I2S_PLAY_CTRL_REG */
 #define AIPCR_I2S_SEND_LAST_FRM_OFFS		23
@@ -356,7 +344,6 @@ typedef enum _mvAudioI2SJustification
 /*I2S*/
 #define MV_AUDIO_I2S_REC_CTRL_REG(unit)			(AUDIO_REG_BASE(unit) + 0x2408)
 
-
 /* MV_AUDIO_RECORD_CTRL_REG*/
 #define ARCR_RECORD_SAMPLE_SIZE_OFFS   	  	0
 #define ARCR_RECORD_SAMPLE_SIZE_MASK   	  	(0x7 << ARCR_RECORD_SAMPLE_SIZE_OFFS)
@@ -381,7 +368,6 @@ typedef enum _mvAudioI2SJustification
 
 #define ARCR_RECORD_SPDIF_EN_OFFS	   		11
 #define ARCR_RECORD_SPDIF_EN_MASK	   		(0x1 << ARCR_RECORD_SPDIF_EN_OFFS)
-
 
 /* MV_AUDIO_SPDIF_REC_GEN_REG*/
 #define ASRGR_CORE_CLK_FREQ_OFFS			1
@@ -408,4 +394,3 @@ typedef enum _mvAudioI2SJustification
 #define AIRCR_I2S_SAMPLE_SIZE_MASK			(0x3 << AIRCR_I2S_SAMPLE_SIZE_OFFS)
 
 #endif /* __INCMVAudioRegsH */
-

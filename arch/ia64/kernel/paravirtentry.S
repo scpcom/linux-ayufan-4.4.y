@@ -58,12 +58,10 @@
 		BRANCH(paravirt_ ## sym ## _targ, reg, breg, type) ;	\
 	END(paravirt_ ## sym)
 
-
 BRANCH_PROC(switch_to, r22, b7, SWITCH_TO)
 BRANCH_PROC_UNWINFO(leave_syscall, r22, b7, LEAVE_SYSCALL)
 BRANCH_PROC(work_processed_syscall, r2, b7, WORK_PROCESSED_SYSCALL)
 BRANCH_PROC_UNWINFO(leave_kernel, r22, b7, LEAVE_KERNEL)
-
 
 #ifdef CONFIG_MODULES
 #define __INIT_OR_MODULE	.text

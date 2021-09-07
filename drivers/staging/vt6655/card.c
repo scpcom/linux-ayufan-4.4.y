@@ -67,7 +67,6 @@ static int          msglevel                =MSG_LEVEL_INFO;
 
 #define C_EIFS          80      // micro sec.
 
-
 #define C_SLOT_SHORT    9       // micro sec.
 #define C_SLOT_LONG     20
 
@@ -96,12 +95,9 @@ static BYTE abyDefaultSuppRatesA[] = {WLAN_EID_SUPP_RATES, 8, 0x0C, 0x12, 0x18, 
                                                               //1M,   2M,   5M,  11M,
 static BYTE abyDefaultSuppRatesB[] = {WLAN_EID_SUPP_RATES, 4, 0x02, 0x04, 0x0B, 0x16};
 
-
-
 /*---------------------  Static Classes  ----------------------------*/
 
 /*---------------------  Static Variables  --------------------------*/
-
 
 const WORD cwRXBCNTSFOff[MAX_RATE] =
 {17, 17, 17, 17, 34, 23, 17, 11, 8, 5, 4, 3};
@@ -166,7 +162,6 @@ static SChannelTblElement sChannelTbl[CARD_MAX_CHANNEL_TBL+1] =
   {161, 5805, TRUE,     0},
   {165, 5825, TRUE,     0}
 };
-
 
 /************************************************************************
  * The Radar regulation rules for each country
@@ -419,7 +414,6 @@ SCountryTable ChannelRuleTab[CCODE_MAX+1] =
 /*                                              1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40  41  42  43  44  45  46  47  48  49  50  51  52  53  54  55  56  */
 };
 
-
 /*---------------------  Static Functions  --------------------------*/
 
 static
@@ -431,11 +425,9 @@ s_vCaculateOFDMRParameter(
     OUT PBYTE pbyRsvTime
     );
 
-
 /*---------------------  Export Variables  --------------------------*/
 
 /*---------------------  Export Functions  --------------------------*/
-
 
 /*---------------------  Export function  -------------------------*/
 /************************************************************************
@@ -479,7 +471,6 @@ exit:
     return (bValid);
 
 } /* end ChannelValid */
-
 
 /*
  * Description: Caculate TxRate and RsvTime fields for RSPINF in OFDM mode.
@@ -595,8 +586,6 @@ s_vCaculateOFDMRParameter (
         break;
     }
 }
-
-
 
 /*
  * Description: Set RSPINF
@@ -722,9 +711,6 @@ s_vSetRSPINF (PSDevice pDevice, CARD_PHY_TYPE ePHYType, PVOID pvSupportRateIEs, 
     MACvSelectPage0(pDevice->PortOffset);
 }
 
-
-
-
 /*---------------------  Export Variables  --------------------------*/
 
 /*---------------------  Export Functions  --------------------------*/
@@ -744,7 +730,6 @@ BYTE CARDbyGetChannelMapping (PVOID pDeviceHandler, BYTE byChannelNumber, CARD_P
     }
     return (0);
 }
-
 
 BYTE CARDbyGetChannelNumber (PVOID pDeviceHandler, BYTE byChannelIndex)
 {
@@ -769,7 +754,6 @@ BOOL CARDbSetChannel (PVOID pDeviceHandler, UINT uConnectionChannel)
 {
     PSDevice    pDevice = (PSDevice) pDeviceHandler;
     BOOL        bResult = TRUE;
-
 
     if (pDevice->byCurrentCh == uConnectionChannel) {
         return bResult;
@@ -798,14 +782,12 @@ BOOL CARDbSetChannel (PVOID pDeviceHandler, UINT uConnectionChannel)
     }
     //}} RobertYu
 
-
     pDevice->byCurrentCh = (BYTE)uConnectionChannel;
     bResult &= RFbSelectChannel(pDevice->PortOffset, pDevice->byRFType, (BYTE)uConnectionChannel);
 
     // Init Synthesizer Table
     if (pDevice->bEnablePSMode == TRUE)
         RFvWriteWakeProgSyn(pDevice->PortOffset, pDevice->byRFType, uConnectionChannel);
-
 
     //DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO"CARDbSetMediaChannel: %d\n", (BYTE)uConnectionChannel);
     BBvSoftwareReset(pDevice->PortOffset);
@@ -834,8 +816,6 @@ BOOL CARDbSetChannel (PVOID pDeviceHandler, UINT uConnectionChannel)
 
     return(bResult);
 }
-
-
 
 /*
  * Description: Card Send packet function
@@ -867,7 +847,6 @@ BOOL CARDbSendPacket (PVOID pDeviceHandler, PVOID pPacket, CARD_PKT_TYPE ePktTyp
     return (TRUE);
 }
 */
-
 
 /*
  * Description: Get Card short preamble option value
@@ -908,7 +887,6 @@ BOOL CARDbIsShorSlotTime (PVOID pDeviceHandler)
     return(pDevice->bShortSlotTime);
 }
 
-
 /*
  * Description: Update IFS
  *
@@ -932,7 +910,6 @@ BOOL CARDbSetPhyParameter (PVOID pDeviceHandler, CARD_PHY_TYPE ePHYType, WORD wC
 //    PWLAN_IE_SUPP_RATES pRates = NULL;
     PWLAN_IE_SUPP_RATES pSupportRates = (PWLAN_IE_SUPP_RATES) pvSupportRateIEs;
     PWLAN_IE_SUPP_RATES pExtSupportRates = (PWLAN_IE_SUPP_RATES) pvExtSupportRateIEs;
-
 
     //Set SIFS, DIFS, EIFS, SlotTime, CwMin
     if (ePHYType == PHY_TYPE_11A) {
@@ -1128,7 +1105,6 @@ BOOL CARDbUpdateTSF (PVOID pDeviceHandler, BYTE byRxRate, QWORD qwBSSTimestamp, 
     return(TRUE);
 }
 
-
 /*
  * Description: Set NIC TSF counter for first Beacon time
  *              Get NEXTTBTT from adjusted TSF and Beacon Interval
@@ -1182,8 +1158,6 @@ BOOL CARDbSetBeaconPeriod (PVOID pDeviceHandler, WORD wBeaconInterval)
     return(TRUE);
 }
 
-
-
 /*
  * Description: Card Stop Hardware Tx
  *
@@ -1200,7 +1174,6 @@ BOOL CARDbSetBeaconPeriod (PVOID pDeviceHandler, WORD wBeaconInterval)
 BOOL CARDbStopTxPacket (PVOID pDeviceHandler, CARD_PKT_TYPE ePktType)
 {
     PSDevice    pDevice = (PSDevice) pDeviceHandler;
-
 
     if (ePktType == PKT_TYPE_802_11_ALL) {
         pDevice->bStopBeacon = TRUE;
@@ -1241,7 +1214,6 @@ BOOL CARDbStopTxPacket (PVOID pDeviceHandler, CARD_PKT_TYPE ePktType)
     return(TRUE);
 }
 
-
 /*
  * Description: Card Start Hardware Tx
  *
@@ -1258,7 +1230,6 @@ BOOL CARDbStopTxPacket (PVOID pDeviceHandler, CARD_PKT_TYPE ePktType)
 BOOL CARDbStartTxPacket (PVOID pDeviceHandler, CARD_PKT_TYPE ePktType)
 {
     PSDevice    pDevice = (PSDevice) pDeviceHandler;
-
 
     if (ePktType == PKT_TYPE_802_11_ALL) {
         pDevice->bStopBeacon = FALSE;
@@ -1280,8 +1251,6 @@ BOOL CARDbStartTxPacket (PVOID pDeviceHandler, CARD_PKT_TYPE ePktType)
 
     return(TRUE);
 }
-
-
 
 /*
  * Description: Card Set BSSID value
@@ -1331,7 +1300,6 @@ BOOL CARDbSetBSSID(PVOID pDeviceHandler, PBYTE pbyBSSID, CARD_OP_MODE eOPMode)
     return(TRUE);
 }
 
-
 /*
  * Description: Card indicate status
  *
@@ -1345,9 +1313,6 @@ BOOL CARDbSetBSSID(PVOID pDeviceHandler, PBYTE pbyBSSID, CARD_OP_MODE eOPMode)
  * Return Value: TRUE if success; FALSE if failed.
  *
  */
-
-
-
 
 /*
  * Description: Save Assoc info. contain in assoc. response frame
@@ -1438,7 +1403,6 @@ BOOL CARDbRadioPowerOff (PVOID pDeviceHandler)
     if (pDevice->bRadioOff == TRUE)
         return TRUE;
 
-
     switch (pDevice->byRFType) {
 
         case RF_RFMD2959:
@@ -1465,7 +1429,6 @@ printk("chester power off\n");
 MACvRegBitsOn(pDevice->PortOffset, MAC_REG_GPIOCTL0, LED_ACTSET);  //LED issue
     return bResult;
 }
-
 
 /*
  * Description: Turn on Radio power
@@ -1521,8 +1484,6 @@ MACvRegBitsOff(pDevice->PortOffset, MAC_REG_GPIOCTL0, LED_ACTSET); //LED issue
     return bResult;
 }
 
-
-
 BOOL CARDbRemoveKey (PVOID pDeviceHandler, PBYTE pbyBSSID)
 {
     PSDevice    pDevice = (PSDevice) pDeviceHandler;
@@ -1530,7 +1491,6 @@ BOOL CARDbRemoveKey (PVOID pDeviceHandler, PBYTE pbyBSSID)
     KeybRemoveAllKey(&(pDevice->sKey), pbyBSSID, pDevice->PortOffset);
     return (TRUE);
 }
-
 
 /*
  *
@@ -1572,7 +1532,6 @@ CARDbAdd_PMKID_Candidate (
     }
     DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO"\n");
 
-
     // Update Old Candidate
     for (ii = 0; ii < pDevice->gsPMKIDCandidate.NumCandidates; ii++) {
         pCandidateList = &pDevice->gsPMKIDCandidate.CandidateList[ii];
@@ -1608,8 +1567,6 @@ CARDpGetCurrentAddress (
 
     return (pDevice->abyCurrentNetAddr);
 }
-
-
 
 VOID CARDvInitChannelTable (PVOID pDeviceHandler)
 {
@@ -1689,8 +1646,6 @@ VOID CARDvInitChannelTable (PVOID pDeviceHandler)
         }
     }
 }
-
-
 
 /*
  *
@@ -1818,7 +1773,6 @@ CARDbStartMeasure (
     return (TRUE);
 }
 
-
 /*
  *
  * Description:
@@ -1860,7 +1814,6 @@ CARDbChannelSwitch (
     }
     return (bResult);
 }
-
 
 /*
  *
@@ -1916,7 +1869,6 @@ CARDbSetQuiet (
     }
     return (TRUE);
 }
-
 
 /*
  *
@@ -2018,7 +1970,6 @@ CARDbStartQuiet (
     return (TRUE);
 }
 
-
 /*
  *
  * Description:
@@ -2047,7 +1998,6 @@ CARDvSetCountryInfo (
     UINT                uNumOfCountryInfo = 0;
     BYTE                byCh = 0;
     PWLAN_IE_COUNTRY    pIE_Country = (PWLAN_IE_COUNTRY) pIE;
-
 
     uNumOfCountryInfo = (pIE_Country->len - 3);
     uNumOfCountryInfo /= 3;
@@ -2112,7 +2062,6 @@ CARDvSetPowerConstraint (
     }
 }
 
-
 /*
  *
  * Description:
@@ -2148,7 +2097,6 @@ CARDvGetPowerCapability (
     *pbyMinPower = pDevice->abyOFDMDefaultPwr[pDevice->byCurrentCh] - byDec;
 }
 
-
 /*
  *
  * Description:
@@ -2175,7 +2123,6 @@ CARDbySetSupportChannels (
     PWLAN_IE_SUPP_CH    pIE = (PWLAN_IE_SUPP_CH) pbyIEs;
     PBYTE               pbyChTupple;
     BYTE                byLen = 0;
-
 
     pIE->byElementID = WLAN_EID_SUPP_CH;
     pIE->len = 0;
@@ -2239,7 +2186,6 @@ CARDbySetSupportChannels (
     return (byLen);
 }
 
-
 /*
  *
  * Description:
@@ -2264,7 +2210,6 @@ CARDbyGetTransmitPower (
     return (pDevice->byCurPwrdBm);
 }
 
-
 BOOL
 CARDbChannelGetList (
     IN  UINT       uCountryCodeIdx,
@@ -2277,7 +2222,6 @@ CARDbChannelGetList (
     memcpy(pbyChannelTable, ChannelRuleTab[uCountryCodeIdx].bChannelIdxList, CB_MAX_CHANNEL);
     return (TRUE);
 }
-
 
 VOID
 CARDvSetCountryIE(
@@ -2304,7 +2248,6 @@ CARDvSetCountryIE(
     pIECountry->len += 3;
 }
 
-
 BOOL
 CARDbGetChannelMapInfo(
     IN PVOID        pDeviceHandler,
@@ -2323,7 +2266,6 @@ CARDbGetChannelMapInfo(
     return sChannelTbl[uChannelIndex].bValid;
 }
 
-
 VOID
 CARDvSetChannelMapInfo(
     IN PVOID        pDeviceHandler,
@@ -2339,7 +2281,6 @@ CARDvSetChannelMapInfo(
     sChannelTbl[uChannelIndex].byMAP |= byMap;
 }
 
-
 VOID
 CARDvClearChannelMapInfo(
     IN PVOID        pDeviceHandler
@@ -2352,7 +2293,6 @@ CARDvClearChannelMapInfo(
         sChannelTbl[ii].byMAP = 0;
     }
 }
-
 
 BYTE
 CARDbyAutoChannelSelect(
@@ -2417,8 +2357,6 @@ CARDbyAutoChannelSelect(
     return (byOptionChannel);
 }
 
-
-
 //xxx
 VOID
 CARDvSafeResetTx (
@@ -2460,8 +2398,6 @@ CARDvSafeResetTx (
 
 }
 
-
-
 /*+
  *
  * Description:
@@ -2484,8 +2420,6 @@ CARDvSafeResetRx (
     PSDevice    pDevice = (PSDevice) pDeviceHandler;
     UINT        uu;
     PSRxDesc    pDesc;
-
-
 
     // initialize RD index
     pDevice->pCurrRD[0]=&(pDevice->aRD0Ring[0]);
@@ -2520,9 +2454,6 @@ CARDvSafeResetRx (
     MACvSetCurrRx1DescAddr(pDevice->PortOffset,
                             pDevice->rd1_pool_dma);
 }
-
-
-
 
 /*
  * Description: Get response Control frame rate in CCK mode
@@ -2587,7 +2518,6 @@ WORD CARDwGetOFDMControlRate (PVOID pDeviceHandler, WORD wRateIdx)
     DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO"CARDwGetOFDMControlRate: 6M\n");
     return (WORD)RATE_24M;
 }
-
 
 /*
  * Description: Set RSPINF
@@ -2804,7 +2734,6 @@ void CARDvUpdateBasicTopRate (PVOID pDeviceHandler)
      pDevice->byTopCCKBasicRate = byTopCCK;
 }
 
-
 /*
  * Description: Set NIC Tx Basic Rate
  *
@@ -2887,7 +2816,6 @@ void CARDvSetLoopbackMode (DWORD_PTR dwIoBase, WORD wLoopbackMode)
     // set Baseband loopback
 }
 
-
 /*
  * Description: Software Reset NIC
  *
@@ -2910,7 +2838,6 @@ BOOL CARDbSoftwareReset (PVOID pDeviceHandler)
 
     return TRUE;
 }
-
 
 /*
  * Description: Caculate TSF offset of two TSF input
@@ -2950,7 +2877,6 @@ QWORD CARDqGetTSFOffset (BYTE byRxRate, QWORD qwTSF1, QWORD qwTSF2)
     return (qwTSFOffset);
 }
 
-
 /*
  * Description: Read NIC TSF counter
  *              Get local TSF counter
@@ -2982,7 +2908,6 @@ BOOL CARDbGetCurrentTSF (DWORD_PTR dwIoBase, PQWORD pqwCurrTSF)
 
     return(TRUE);
 }
-
 
 /*
  * Description: Read NIC TSF counter
@@ -3027,7 +2952,6 @@ QWORD CARDqGetNextTBTT (QWORD qwTSF, WORD wBeaconInterval)
     return (qwTSF);
 }
 
-
 /*
  * Description: Set NIC TSF counter for first Beacon time
  *              Get NEXTTBTT from adjusted TSF and Beacon Interval
@@ -3059,7 +2983,6 @@ void CARDvSetFirstNextTBTT (DWORD_PTR dwIoBase, WORD wBeaconInterval)
     return;
 }
 
-
 /*
  * Description: Sync NIC TSF counter for Beacon time
  *              Get NEXTTBTT and write to HW
@@ -3087,10 +3010,3 @@ void CARDvUpdateNextTBTT (DWORD_PTR dwIoBase, QWORD qwTSF, WORD wBeaconInterval)
 
     return;
 }
-
-
-
-
-
-
-

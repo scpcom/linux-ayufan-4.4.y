@@ -620,7 +620,6 @@ static s32 stv0900_get_timing_offst(struct stv0900_internal *i_params,
 
 	timingoffset = ge2comp(timingoffset, 24);
 
-
 	if (timingoffset == 0)
 		timingoffset = 1;
 
@@ -2059,7 +2058,6 @@ static u32 stv0900_search_srate_coarse(struct dvb_frontend *fe)
 		else
 			currier_step = 5000;
 
-
 		nb_steps = -1 + ((i_params->dmd2_srch_range / 1000) / currier_step);
 		nb_steps /= 2;
 		nb_steps = (2 * nb_steps) + 1;
@@ -2844,4 +2842,3 @@ enum fe_stv0900_signal_type stv0900_algo(struct dvb_frontend *fe)
 
 	return signal_type;
 }
-

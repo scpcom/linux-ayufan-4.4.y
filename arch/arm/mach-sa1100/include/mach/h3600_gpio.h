@@ -73,5 +73,4 @@
 #define EGPIO_H3600_LCD_5V_ON		(1 << 14)  /* enable 5V to LCD. active high. */
 #define EGPIO_H3600_LVDD_ON		(1 << 15)  /* enable 9V and -6.5V to LCD. */
 
-
 #endif /* _INCLUDE_H3600_GPIO_H_ */

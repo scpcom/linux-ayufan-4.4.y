@@ -240,7 +240,6 @@ extern "C" {
 #define AUTONEG_FAILED	SK_FALSE
 #define AUTONEG_SUCCESS	SK_TRUE
 
-
 /* typedefs *******************************************************************/
 
 /* RLMT packet.  Length: SK_RLMT_MAX_PACKET_SIZE (60) bytes. */
@@ -474,7 +473,6 @@ int		Level)	/* Initialization Level */
 	return;
 }	/* SkRlmtInit */
 
-
 /******************************************************************************
  *
  *	SkRlmtBuildCheckChain - build the check chain
@@ -568,7 +566,6 @@ SK_U32	NetIdx)	/* Net Number */
 	return;
 }	/* SkRlmtBuildCheckChain */
 
-
 /******************************************************************************
  *
  *	SkRlmtBuildPacket - build an RLMT packet
@@ -660,7 +657,6 @@ SK_MAC_ADDR	*DestAddr)	/* Destination address */
 	return (pMb);
 }	/* SkRlmtBuildPacket */
 
-
 /******************************************************************************
  *
  *	SkRlmtBuildSpanningTreePacket - build spanning tree check packet
@@ -747,7 +743,6 @@ SK_U32	PortNumber)	/* Sending port */
 	return (pMb);
 }	/* SkRlmtBuildSpanningTreePacket */
 
-
 /******************************************************************************
  *
  *	SkRlmtSend - build and send check packets
@@ -815,7 +810,6 @@ SK_U32	PortNumber)	/* Sending port */
 	return;
 }	/* SkRlmtSend */
 
-
 /******************************************************************************
  *
  *	SkRlmtPortReceives - check if port is (going) down and bring it up
@@ -871,7 +865,6 @@ SK_U32	PortNumber)		/* Port to check */
 
 	return;
 }	/* SkRlmtPortReceives */
-
 
 /******************************************************************************
  *
@@ -1175,7 +1168,6 @@ SK_MBUF	*pMb)	/* Received packet */
 	return;
 }	/* SkRlmtPacketReceive */
 
-
 /******************************************************************************
  *
  *	SkRlmtCheckPort - check if a port works
@@ -1325,7 +1317,6 @@ SK_U32	PortNumber)	/* Port to check */
 	return (NewTimeout);
 }	/* SkRlmtCheckPort */
 
-
 /******************************************************************************
  *
  *	SkRlmtSelectBcRx - select new active port, criteria 1 (CLP)
@@ -1409,7 +1400,6 @@ SK_U32	*pSelect)	/* New active port */
 	return (PortFound);
 }	/* SkRlmtSelectBcRx */
 
-
 /******************************************************************************
  *
  *	SkRlmtSelectNotSuspect - select new active port, criteria 2 (CLP)
@@ -1458,7 +1448,6 @@ SK_U32	*pSelect)	/* New active port */
 	return (PortFound);
 }	/* SkRlmtSelectNotSuspect */
 
-
 /******************************************************************************
  *
  *	SkRlmtSelectUp - select new active port, criteria 3, 4 (CLP)
@@ -1506,7 +1495,6 @@ SK_BOOL	AutoNegDone)	/* Successfully auto-negotiated? */
 	}
 	return (PortFound);
 }	/* SkRlmtSelectUp */
-
 
 /******************************************************************************
  *
@@ -1565,7 +1553,6 @@ SK_BOOL	AutoNegDone)	/* Successfully auto-negotiated? */
 	return (SK_TRUE);
 }	/* SkRlmtSelectGoingUp */
 
-
 /******************************************************************************
  *
  *	SkRlmtSelectDown - select new active port, criteria 7, 8 (CLP)
@@ -1613,7 +1600,6 @@ SK_BOOL	AutoNegDone)	/* Successfully auto-negotiated? */
 	}
 	return (PortFound);
 }	/* SkRlmtSelectDown */
-
 
 /******************************************************************************
  *
@@ -1849,7 +1835,6 @@ SK_U32	NetIdx)	/* Net index */
 	return;
 }	/* SkRlmtCheckSwitch */
 
-
 /******************************************************************************
  *
  *	SkRlmtCheckSeg - Report if segmentation is detected
@@ -1926,7 +1911,6 @@ SK_U32	NetIdx)	/* Net number */
 
 }	/* SkRlmtCheckSeg */
 
-
 /******************************************************************************
  *
  *	SkRlmtPortStart - initialize port variables and start port
@@ -1959,7 +1943,6 @@ SK_U32	PortNumber)	/* Port number */
 	Para.Para32[1] = (SK_U32)-1;
 	SkEventQueue(pAC, SKGE_HWAC, SK_HWEV_PORT_START, Para);
 }	/* SkRlmtPortStart */
-
 
 /******************************************************************************
  *
@@ -2012,7 +1995,6 @@ SK_EVPARA	Para)	/* SK_U32 PortNumber; SK_U32 -1 */
 	SK_DBG_MSG(pAC, SK_DBGMOD_RLMT, SK_DBGCAT_CTRL,
 		("SK_RLMT_PORTSTART_TIMEOUT Event END.\n"));
 }	/* SkRlmtEvtPortStartTim */
-
 
 /******************************************************************************
  *
@@ -2136,7 +2118,6 @@ SK_EVPARA	Para)	/* SK_U32 PortNumber; SK_U32 Undefined */
 		("SK_RLMT_LINK_UP Event END.\n"));
 }	/* SkRlmtEvtLinkUp */
 
-
 /******************************************************************************
  *
  *	SkRlmtEvtPortUpTim - PORT_UP_TIM
@@ -2189,7 +2170,6 @@ SK_EVPARA	Para)	/* SK_U32 PortNumber; SK_U32 -1 */
 	SK_DBG_MSG(pAC, SK_DBGMOD_RLMT, SK_DBGCAT_CTRL,
 		("SK_RLMT_PORTUP_TIM Event END.\n"));
 }	/* SkRlmtEvtPortUpTim */
-
 
 /******************************************************************************
  *
@@ -2269,7 +2249,6 @@ SK_EVPARA	Para)	/* SK_U32 PortNumber; SK_U32 -1 */
 		("SK_RLMT_PORTDOWN* Event (%d) END.\n", Event));
 }	/* SkRlmtEvtPortDownX */
 
-
 /******************************************************************************
  *
  *	SkRlmtEvtLinkDown - LINK_DOWN
@@ -2314,7 +2293,6 @@ SK_EVPARA	Para)	/* SK_U32 PortNumber; SK_U32 Undefined */
 	SK_DBG_MSG(pAC, SK_DBGMOD_RLMT, SK_DBGCAT_CTRL,
 		("SK_RLMT_LINK_DOWN Event END.\n"));
 }	/* SkRlmtEvtLinkDown */
-
 
 /******************************************************************************
  *
@@ -2373,7 +2351,6 @@ SK_EVPARA	Para)	/* SK_U32 PortNumber; SK_U32 -1 */
 	SK_DBG_MSG(pAC, SK_DBGMOD_RLMT, SK_DBGCAT_CTRL,
 			("SK_RLMT_PORT_ADDR Event END.\n"));
 }	/* SkRlmtEvtPortAddr */
-
 
 /******************************************************************************
  *
@@ -2464,7 +2441,6 @@ SK_EVPARA	Para)	/* SK_U32 NetNumber; SK_U32 -1 */
 			("SK_RLMT_START Event END.\n"));
 }	/* SkRlmtEvtStart */
 
-
 /******************************************************************************
  *
  *	SkRlmtEvtStop - STOP
@@ -2554,7 +2530,6 @@ SK_EVPARA	Para)	/* SK_U32 NetNumber; SK_U32 -1 */
 	SK_DBG_MSG(pAC, SK_DBGMOD_RLMT, SK_DBGCAT_CTRL,
 		("SK_RLMT_STOP Event END.\n"));
 }	/* SkRlmtEvtStop */
-
 
 /******************************************************************************
  *
@@ -2663,7 +2638,6 @@ SK_EVPARA	Para)	/* SK_U32 NetNumber; SK_U32 -1 */
 			("SK_RLMT_TIM Event END.\n"));
 }	/* SkRlmtEvtTim */
 
-
 /******************************************************************************
  *
  *	SkRlmtEvtSegTim - SEG_TIM
@@ -2729,7 +2703,6 @@ SK_EVPARA	Para)	/* SK_U32 NetNumber; SK_U32 -1 */
 			("SK_RLMT_SEG_TIM Event END.\n"));
 }	/* SkRlmtEvtSegTim */
 
-
 /******************************************************************************
  *
  *	SkRlmtEvtPacketRx - PACKET_RECEIVED
@@ -2753,7 +2726,6 @@ SK_EVPARA	Para)	/* SK_MBUF *pMb */
 	SK_MBUF	*pNextMb;
 	SK_U32	NetNumber;
 
-	
 	SK_DBG_MSG(pAC, SK_DBGMOD_RLMT, SK_DBGCAT_CTRL,
 		("SK_RLMT_PACKET_RECEIVED Event BEGIN.\n"));
 
@@ -2786,7 +2758,6 @@ SK_EVPARA	Para)	/* SK_MBUF *pMb */
 	SK_DBG_MSG(pAC, SK_DBGMOD_RLMT, SK_DBGCAT_CTRL,
 		("SK_RLMT_PACKET_RECEIVED Event END.\n"));
 }	/* SkRlmtEvtPacketRx */
-
 
 /******************************************************************************
  *
@@ -2843,7 +2814,6 @@ SK_EVPARA	Para)	/* SK_U32 NetNumber; SK_U32 -1 */
 		("SK_RLMT_STATS_CLEAR Event END.\n"));
 }	/* SkRlmtEvtStatsClear */
 
-
 /******************************************************************************
  *
  *	SkRlmtEvtStatsUpdate - STATS_UPDATE
@@ -2887,7 +2857,6 @@ SK_EVPARA	Para)	/* SK_U32 NetNumber; SK_U32 -1 */
 	SK_DBG_MSG(pAC, SK_DBGMOD_RLMT, SK_DBGCAT_CTRL,
 		("SK_RLMT_STATS_UPDATE Event END.\n"));
 }	/* SkRlmtEvtStatsUpdate */
-
 
 /******************************************************************************
  *
@@ -2944,7 +2913,6 @@ SK_EVPARA	Para)	/* SK_U32 PortIndex; SK_U32 NetNumber */
 	SK_DBG_MSG(pAC, SK_DBGMOD_RLMT, SK_DBGCAT_CTRL,
 		("SK_RLMT_PREFPORT_CHANGE Event END.\n"));
 }	/* SkRlmtEvtPrefportChange */
-
 
 /******************************************************************************
  *
@@ -3075,7 +3043,6 @@ SK_EVPARA	Para)	/* SK_U32 NumNets; SK_U32 -1 */
 		("SK_RLMT_SET_NETS Event END.\n"));
 }	/* SkRlmtSetNets */
 
-
 /******************************************************************************
  *
  *	SkRlmtEvtModeChange - MODE_CHANGE
@@ -3186,7 +3153,6 @@ SK_EVPARA	Para)	/* SK_U32 NewMode; SK_U32 NetNumber */
 	SK_DBG_MSG(pAC, SK_DBGMOD_RLMT, SK_DBGCAT_CTRL,
 			("SK_RLMT_MODE_CHANGE Event END.\n"));
 }	/* SkRlmtEvtModeChange */
-
 
 /******************************************************************************
  *

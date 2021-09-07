@@ -305,8 +305,6 @@ static int dock_present(struct dock_station *ds)
 	return 0;
 }
 
-
-
 /**
  * dock_create_acpi_device - add new devices to acpi
  * @handle - handle of the device to add
@@ -363,7 +361,6 @@ static void dock_remove_acpi_device(acpi_handle handle)
 			pr_debug("error removing bus, %x\n", -ret);
 	}
 }
-
 
 /**
  * hotplug_dock_devices - insert or remove devices on the dock station

@@ -132,7 +132,6 @@ static void get_current_temps(struct bbc_cpu_temperature *tp)
 #endif
 }
 
-
 static void do_envctrl_shutdown(struct bbc_cpu_temperature *tp)
 {
 	static int shutting_down = 0;
@@ -456,7 +455,6 @@ static void attach_one_temp(struct bbc_i2c_bus *bp, struct of_device *op,
 		kfree(tp);
 		return;
 	}
-
 
 	tp->index = temp_idx;
 

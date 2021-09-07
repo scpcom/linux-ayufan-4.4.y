@@ -383,7 +383,6 @@ octo_des_cbc_encrypt(
     return 0;
 }
 
-
 int
 octo_des_cbc_decrypt(
     struct octo_sess *od,
@@ -523,7 +522,6 @@ octo_aes_cbc_encrypt(
     octeon_crypto_disable(&state, flags);
     return 0;
 }
-
 
 int
 octo_aes_cbc_decrypt(
@@ -1538,7 +1536,6 @@ octo_aes_cbc_md5_encrypt(
 
 	mydata[1].data32[1] = *data32;
 
-
     	if (crypt_off <= 0) {
 	    if (crypt_len > 0) {
 		CVMX_MT_AES_ENC_CBC0(*pdata);
@@ -1900,7 +1897,6 @@ octo_aes_cbc_sha1_encrypt(
 	mydata[1].data32[0] = *data32;
 	SG_CONSUME(sg, data32, data_i, data_l);
 	mydata[1].data32[1] = *data32;
-
 
     	if (crypt_off <= 0) {
 	    if (crypt_len > 0) {

@@ -66,7 +66,6 @@ V_FUNCTION_BEGIN(__kernel_get_syscall_map)
   .cfi_endproc
 V_FUNCTION_END(__kernel_get_syscall_map)
 
-
 /*
  * void unsigned long  __kernel_get_tbfreq(void);
  *

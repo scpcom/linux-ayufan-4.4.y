@@ -61,7 +61,6 @@ static unsigned char corgikbd_keycode[NR_SCANCODES] = {
 	CORGI_KEY_OFF, CORGI_KEY_EXOK, CORGI_KEY_EXCANCEL, CORGI_KEY_EXJOGDOWN, CORGI_KEY_EXJOGUP, 0, 0, 0, 0, 0, 0, 0,   /* 113-124 */
 };
 
-
 struct corgikbd {
 	unsigned char keycode[ARRAY_SIZE(corgikbd_keycode)];
 	struct input_dev *input;

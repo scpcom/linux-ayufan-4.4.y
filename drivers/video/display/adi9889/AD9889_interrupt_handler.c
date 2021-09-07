@@ -38,7 +38,6 @@
 #include "AD9889_interrupt_handler.h"
 #include "ad9889_macros.h"
 
-
 //unsigned char edid_dat[256];
 //unsigned char revocation_list[64];
 static DEPLINT next_segment = 0;

@@ -575,7 +575,6 @@ int cxgb3i_setup_conn_digest(struct t3cdev *tdev, unsigned int tid,
 	return 0;
 }
 
-
 /**
  * cxgb3i_adapter_ddp_info - read the adapter's ddp information
  * @tdev: t3cdev adapter

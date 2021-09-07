@@ -391,7 +391,6 @@ static struct platform_device tmu2_device = {
 	},
 };
 
-
 static struct sh_timer_config tmu3_platform_data = {
 	.name = "TMU3",
 	.channel_offset = 0x04,

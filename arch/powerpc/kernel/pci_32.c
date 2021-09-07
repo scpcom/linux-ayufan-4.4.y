@@ -232,7 +232,6 @@ static struct device_node *scan_OF_for_pci_dev(struct device_node *parent,
 	return NULL;
 }
 
-
 static struct device_node *scan_OF_for_pci_bus(struct pci_bus *bus)
 {
 	struct device_node *parent, *np;
@@ -454,5 +453,3 @@ long sys_pciconfig_iobase(long which, unsigned long bus, unsigned long devfn)
 
 	return result;
 }
-
-

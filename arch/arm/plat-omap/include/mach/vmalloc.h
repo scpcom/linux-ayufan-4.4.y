@@ -18,4 +18,3 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 #define VMALLOC_END	  (PAGE_OFFSET + 0x18000000)
-

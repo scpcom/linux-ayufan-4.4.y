@@ -9,7 +9,6 @@
 /* registers */ /* Really needed, since both are listed in sw.list? */
 #include "dma_defs.h"
 
-
 /* descriptors */
 
 // ------------------------------------------------------------ dma_descr_group

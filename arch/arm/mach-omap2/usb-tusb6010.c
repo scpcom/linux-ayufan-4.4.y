@@ -19,10 +19,8 @@
 #include <mach/gpmc.h>
 #include <mach/mux.h>
 
-
 static u8		async_cs, sync_cs;
 static unsigned		refclk_psec;
-
 
 /* t2_ps, when quantized to fclk units, must happen no earlier than
  * the clock after after t1_NS.
@@ -233,7 +231,6 @@ static struct platform_device tusb_device = {
 	.resource	= tusb_resources,
 };
 
-
 /* this may be called only from board-*.c setup code */
 int __init
 tusb6010_setup_interface(struct musb_hdrc_platform_data *data,
@@ -264,7 +261,6 @@ tusb6010_setup_interface(struct musb_hdrc_platform_data *data,
 			| GPMC_CONFIG1_DEVICESIZE_16
 			| GPMC_CONFIG1_DEVICETYPE_NOR
 			| GPMC_CONFIG1_MUXADDDATA);
-
 
 	/* SYNC region, primarily for DMA */
 	status = gpmc_cs_request(sync, SZ_16M, (unsigned long *)

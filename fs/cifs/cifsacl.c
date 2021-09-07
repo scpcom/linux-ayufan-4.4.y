@@ -28,7 +28,6 @@
 #include "cifsproto.h"
 #include "cifs_debug.h"
 
-
 #ifdef CONFIG_CIFS_EXPERIMENTAL
 
 static struct cifs_wksid wksidarr[NUM_WK_SIDS] = {
@@ -41,13 +40,11 @@ static struct cifs_wksid wksidarr[NUM_WK_SIDS] = {
 	{{1, 2, {0, 0, 0, 0, 0, 5}, {__constant_cpu_to_le32(32), __constant_cpu_to_le32(546), 0, 0, 0} }, "guest"} }
 ;
 
-
 /* security id for everyone */
 static const struct cifs_sid sid_everyone = {
 	1, 1, {0, 0, 0, 0, 0, 1}, {0} };
 /* group users */
 static const struct cifs_sid sid_user = {1, 2 , {0, 0, 0, 0, 0, 5}, {} };
-
 
 int match_sid(struct cifs_sid *ctsid)
 {
@@ -128,7 +125,6 @@ int compare_sids(const struct cifs_sid *ctsid, const struct cifs_sid *cwsid)
 	return 1; /* sids compare/match */
 }
 
-
 /* copy ntsd, owner sid, and group sid from a security descriptor to another */
 static void copy_sec_desc(const struct cifs_ntsd *pntsd,
 				struct cifs_ntsd *pnntsd, __u32 sidsoffset)
@@ -173,7 +169,6 @@ static void copy_sec_desc(const struct cifs_ntsd *pntsd,
 
 	return;
 }
-
 
 /*
    change posix mode to reflect permissions
@@ -287,7 +282,6 @@ static __u16 fill_ace_for_sid(struct cifs_ace *pntace,
 	return size;
 }
 
-
 #ifdef CONFIG_CIFS_DEBUG2
 static void dump_ace(struct cifs_ace *pace, char *end_of_acl)
 {
@@ -323,7 +317,6 @@ static void dump_ace(struct cifs_ace *pace, char *end_of_acl)
 	return;
 }
 #endif
-
 
 static void parse_dacl(struct cifs_acl *pdacl, char *end_of_acl,
 		       struct cifs_sid *pownersid, struct cifs_sid *pgrpsid,
@@ -406,7 +399,6 @@ static void parse_dacl(struct cifs_acl *pdacl, char *end_of_acl,
 	return;
 }
 
-
 static int set_chmod_dacl(struct cifs_acl *pndacl, struct cifs_sid *pownersid,
 			struct cifs_sid *pgrpsid, __u64 nmode)
 {
@@ -427,7 +419,6 @@ static int set_chmod_dacl(struct cifs_acl *pndacl, struct cifs_sid *pownersid,
 
 	return 0;
 }
-
 
 static int parse_sid(struct cifs_sid *psid, char *end_of_acl)
 {
@@ -460,7 +451,6 @@ static int parse_sid(struct cifs_sid *psid, char *end_of_acl)
 
 	return 0;
 }
-
 
 /* Convert CIFS ACL to POSIX form */
 static int parse_sec_desc(struct cifs_ntsd *pntsd, int acl_len,
@@ -511,7 +501,6 @@ static int parse_sec_desc(struct cifs_ntsd *pntsd, int acl_len,
 	return 0;
 }
 
-
 /* Convert permission bits from mode to equivalent CIFS ACL */
 static int build_sec_desc(struct cifs_ntsd *pntsd, struct cifs_ntsd *pnntsd,
 				struct inode *inode, __u64 nmode)
@@ -560,7 +549,6 @@ static struct cifs_ntsd *get_cifs_acl_by_fid(struct cifs_sb_info *cifs_sb,
 	xid = GetXid();
 	rc = CIFSSMBGetCIFSACL(xid, cifs_sb->tcon, fid, &pntsd, pacllen);
 	FreeXid(xid);
-
 
 	cFYI(1, ("GetCIFSACL rc = %d ACL len %d", rc, *pacllen));
 	return pntsd;

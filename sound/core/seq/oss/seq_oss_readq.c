@@ -32,11 +32,9 @@
 //#define SNDRV_SEQ_OSS_MAX_TIMEOUT	(unsigned long)(-1)
 #define SNDRV_SEQ_OSS_MAX_TIMEOUT	(HZ * 3600)
 
-
 /*
  * prototypes
  */
-
 
 /*
  * create a read queue
@@ -146,7 +144,6 @@ snd_seq_oss_readq_put_event(struct seq_oss_readq *q, union evrec *ev)
 	return 0;
 }
 
-
 /*
  * pop queue
  * caller must hold lock
@@ -220,7 +217,6 @@ snd_seq_oss_readq_put_timestamp(struct seq_oss_readq *q, unsigned long curt, int
 	}
 	return 0;
 }
-
 
 #ifdef CONFIG_PROC_FS
 /*

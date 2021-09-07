@@ -21,4 +21,3 @@ endless:
 	nop
 	ba	endless
 	nop
-

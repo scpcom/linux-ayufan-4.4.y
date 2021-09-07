@@ -8,7 +8,6 @@
 #ifndef _ASM_IA64_SN_RW_MMR_H
 #define _ASM_IA64_SN_RW_MMR_H
 
-
 /*
  * This file that access MMRs via uncached physical addresses.
  * 	pio_phys_read_mmr  - read an MMR
@@ -19,7 +18,6 @@
  * Addresses passed to these routines should be uncached physical addresses
  * ie., 0x80000....
  */
-
 
 extern long pio_phys_read_mmr(volatile long *mmr); 
 extern void pio_phys_write_mmr(volatile long *mmr, long val);

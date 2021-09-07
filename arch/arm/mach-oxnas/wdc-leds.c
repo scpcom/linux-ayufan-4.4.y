@@ -146,7 +146,6 @@
 #define readl(addr)           (*(volatile u32*)addr)
 #define CLEAR(addr, mask)     writel(readl(addr) & ~mask, addr)
 
-
 /* Variables to hold the number of LED classes created */
 static int leds_created;
 
@@ -196,7 +195,6 @@ enum {
     TRANS__4_DN                 /* 4th cycle  - down 12 & 6 - down 9 & 3 o'clock */
 };
 
-
 /* Pattern for the activity behavior */
 const u16 activity_pattern[NUM_ACTIVITY_LEDS] = {
     LED100,
@@ -204,7 +202,6 @@ const u16 activity_pattern[NUM_ACTIVITY_LEDS] = {
     0,
     0
 };
-
 
 /* Various LED state machine constants */
 #define TRANS_STEP           (1)
@@ -242,7 +239,6 @@ const u16 activity_pattern[NUM_ACTIVITY_LEDS] = {
 #   error TPS calculation(s) resulted in zero!
 #endif
 
-
 /* Variables for main LED behavior state machine */
 static int state;
 static int next_state;
@@ -258,7 +254,6 @@ static s8 ramp2;
 static s8 activity_led[NUM_ACTIVITY_LEDS];
 static u16 rebuild_percentage;  /* 0=not rebuilding */
 
-
 /*
  * Declare tasklet for the LED behavior state machine.  The interrupt will
  * only handle the pulse width modulation which can be performed quickly.
@@ -268,7 +263,6 @@ static u16 rebuild_percentage;  /* 0=not rebuilding */
  */
 void wdc_leds_behavior(unsigned long);
 DECLARE_TASKLET(wdc_leds_behavior_tasklet, wdc_leds_behavior, 0);
-
 
 /***************************************************************************/
 /* FUNCTION: wdc_leds_interrupt                                            */
@@ -280,12 +274,10 @@ static irqreturn_t wdc_leds_interrupt
     (int irq, void *dev_id) {
     ox_writel(0, TIMER2_CLEAR);
 
-
     tasklet_schedule(&wdc_leds_behavior_tasklet);
 
     return IRQ_HANDLED;
 }
-
 
 /***************************************************************************/
 /* FUNCTION: get_inner_ring_bits                                           */
@@ -313,7 +305,6 @@ static u32 get_inner_ring_bits(u16 value)
 
     return pattern;
 }
-
 
 /***************************************************************************/
 /* FUNCTION: get_percentage_pattern                                        */
@@ -347,7 +338,6 @@ static u16 get_percentage_pattern(u16 percentage)
     }
 }
 
-
 /***************************************************************************/
 /* FUNCTION: set_led                                                       */
 /*                                                                         */
@@ -368,7 +358,6 @@ static void set_led(u32 led_bits, s8 value)
     }
 }
 
-
 /***************************************************************************/
 /* FUNCTION: display_inner_ring                                            */
 /*                                                                         */
@@ -380,7 +369,6 @@ static void display_inner_ring(u32 inner_ring_bits)
     set_led(~inner_ring_bits & LED_MASK_FUEL_GAUGE, 0);
     set_led(inner_ring_bits, LED100);
 }
-
 
 /***************************************************************************/
 /* FUNCTION: display_current_fuel_gauge                                    */
@@ -395,7 +383,6 @@ static void display_current_fuel_gauge(void)
         need_to_display_current_fuel_gauge = 0;
     }
 }
-
 
 /***************************************************************************/
 /* FUNCTION: handle_inner_ring                                             */
@@ -430,7 +417,6 @@ static void handle_inner_ring(void)
         display_current_fuel_gauge();
     }
 }
-
 
 /***************************************************************************/
 /* FUNCTION: get_next_state_from_fully_on                                  */
@@ -790,7 +776,6 @@ void wdc_leds_behavior(unsigned long unused)
     set_led(LED_MASK_ACT3, activity_led[3] + ramp2);
 }
 
-
 /***************************************************************************/
 /* FUNCTION: wdc_leds_set_power                                            */
 /*                                                                         */
@@ -808,7 +793,6 @@ static void wdc_leds_set_power
     }
 }
 
-
 /***************************************************************************/
 /* FUNCTION: wdc_leds_set_activity                                         */
 /*                                                                         */
@@ -822,7 +806,6 @@ static void wdc_leds_set_activity
     }
 }
 
-
 /***************************************************************************/
 /* FUNCTION: wdc_leds_set_ignore_activity                                  */
 /*                                                                         */
@@ -834,7 +817,6 @@ static void wdc_leds_set_ignore_activity
     ignore_activity = value;
 }
 
-
 /***************************************************************************/
 /* FUNCTION: wdc_leds_set_transition                                       */
 /*                                                                         */
@@ -845,7 +827,6 @@ static void wdc_leds_set_transition
     (struct led_classdev *led_cdev, enum led_brightness value) {
     next_state = ((value > 0) ? TRANS__ENTRY : FULLY_ON__ENTRY);
 }
-
 
 /***************************************************************************/
 /* FUNCTION: wdc_leds_set_fuel_gauge                                       */
@@ -859,7 +840,6 @@ static void wdc_leds_set_fuel_gauge
     need_to_display_current_fuel_gauge = 1;
 }
 
-
 /***************************************************************************/
 /* FUNCTION: wdc_leds_set_fg_bitmap                                        */
 /*                                                                         */
@@ -872,7 +852,6 @@ static void wdc_leds_set_fg_bitmap
     need_to_display_current_fuel_gauge = 1;
 }
 
-
 /***************************************************************************/
 /* FUNCTION: wdc_leds_set_rebuilding                                       */
 /*                                                                         */
@@ -883,7 +862,6 @@ static void wdc_leds_set_rebuilding
     (struct led_classdev *led_cdev, enum led_brightness value) {
     rebuild_percentage = value;
 }
-
 
 /***************************************************************************/
 /* FUNCTION: wdc_leds_set_degraded                                         */
@@ -896,7 +874,6 @@ static void wdc_leds_set_degraded
     next_state = ((value > 0) ? DEGRADED__ENTRY : FULLY_ON__ENTRY);
 }
 
-
 /***************************************************************************/
 /* FUNCTION: wdc_leds_set_over_temp                                        */
 /*                                                                         */
@@ -907,7 +884,6 @@ static void wdc_leds_set_over_temp
     (struct led_classdev *led_cdev, enum led_brightness value) {
     next_state = ((value > 0) ? OVERTEMP__ENTRY : FULLY_ON__ENTRY);
 }
-
 
 /***************************************************************************/
 /* DATA STRUCTURE: wdc_leds_power                                          */
@@ -1060,7 +1036,6 @@ static void remove_debug_files(struct platform_device *pdev)
 }
 #endif
 
-
 #ifdef CONFIG_PM
 /***************************************************************************/
 /* FUNCTION: wdc_leds_suspend                                              */
@@ -1200,7 +1175,6 @@ static int wdc_leds_probe(struct platform_device *pdev)
     return rc;
 }
 
-
 /***************************************************************************/
 /* FUNCTION: wdc_leds_remove                                               */
 /*                                                                         */
@@ -1235,7 +1209,6 @@ static int wdc_leds_remove(struct platform_device *pdev)
 #endif
     return 0;
 }
-
 
 /***************************************************************************/
 /* DATA STRUCTURE: wdc_leds_driver                                         */
@@ -1275,7 +1248,6 @@ static int __init wdc_leds_init(void)
     return ret;
 }
 
-
 /***************************************************************************/
 /* FUNCTION: wdc_leds_exit                                                 */
 /*                                                                         */
@@ -1289,7 +1261,6 @@ static void __exit wdc_leds_exit(void)
     }
     platform_driver_unregister(&wdc_leds_driver);
 }
-
 
 module_init(wdc_leds_init);
 module_exit(wdc_leds_exit);

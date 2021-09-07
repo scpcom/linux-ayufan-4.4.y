@@ -18,7 +18,6 @@
 #define __CONFIG_ETRAX_VMEM_SIZE 0
 #endif
 
-
 jiffies = jiffies_64;
 SECTIONS
 {

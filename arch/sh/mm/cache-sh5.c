@@ -306,7 +306,6 @@ static void sh64_dcache_purge_all(void)
 	sh64_dcache_purge_sets(0, cpu_data->dcache.sets);
 }
 
-
 /* Assumes this address (+ (2**n_synbits) pages up from it) aren't used for
    anything else in the kernel */
 #define MAGIC_PAGE0_START 0xffffffffec000000ULL

@@ -11,7 +11,6 @@ struct scsi_host_template;
 struct Scsi_Host;
 struct scsi_nl_hdr;
 
-
 /*
  * Scsi Error Handler Flags
  */
@@ -143,7 +142,6 @@ extern struct sock *scsi_nl_sock;
 static inline void scsi_netlink_init(void) {}
 static inline void scsi_netlink_exit(void) {}
 #endif
-
 
 #ifdef CONFIG_MV_SCATTERED_SPINUP
 /* scsi_spinup.c */

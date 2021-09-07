@@ -82,5 +82,4 @@ static inline __sum16 csum_tcpudp_magic(unsigned long saddr,
 extern __wsum csum_and_copy_to_user(const void *src, void *dst, int len,
 				    __wsum sum, int *err_ptr);
 
-
 #endif /* _ASM_CHECKSUM_H */

@@ -38,7 +38,6 @@
 __sleep_save_area:
 	.space		16
 
-
 	.text
 	.balign		4
 

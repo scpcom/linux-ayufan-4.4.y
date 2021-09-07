@@ -345,7 +345,6 @@ struct mddev_s
 #endif
 };
 
-
 static inline void rdev_dec_pending(mdk_rdev_t *rdev, mddev_t *mddev)
 {
 	int faulty = test_bit(Faulty, &rdev->flags);
@@ -410,13 +409,11 @@ struct mdk_personality
 #endif
 };
 
-
 struct md_sysfs_entry {
 	struct attribute attr;
 	ssize_t (*show)(mddev_t *, char *);
 	ssize_t (*store)(mddev_t *, const char *, size_t);
 };
-
 
 static inline char * mdname (mddev_t * mddev)
 {

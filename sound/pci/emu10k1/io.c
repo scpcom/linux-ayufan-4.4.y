@@ -579,4 +579,3 @@ unsigned int snd_emu10k1_rate_to_pitch(unsigned int rate)
 
 	return 0;		/* Should never reach this point */
 }
-

@@ -151,7 +151,6 @@ IEEE80211_IF_FILE(min_discovery_timeout,
 		u.mesh.mshcfg.min_discovery_timeout, DEC);
 #endif
 
-
 #define DEBUGFS_ADD(name, type)\
 	sdata->debugfs.type.name = debugfs_create_file(#name, 0400,\
 		sdata->debugfsdir, sdata, &name##_ops);

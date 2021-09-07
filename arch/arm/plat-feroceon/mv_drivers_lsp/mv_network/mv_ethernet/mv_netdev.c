@@ -12,7 +12,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -112,7 +111,6 @@ static int mv_eth_probe(struct platform_device *pdev)
 	return 0;
 }
 
-
 #ifdef MY_ABC_HERE
 extern int mv_eth_tool_read_phy_reg(int phy_addr, u16 page, u16 reg, u16 *val);
 #endif
@@ -134,7 +132,6 @@ int     mv_eth_skb_reuse_enable = CONFIG_MV_ETH_SKB_REUSE_DEF;
 #else
 #define mv_eth_is_skb_reuse()     0
 #endif /* CONFIG_MV_ETH_SKB_REUSE */
-
 
 /***********************************************************************************
  ***  get device by index
@@ -175,7 +172,6 @@ static INLINE mv_eth_priv*     eth_priv_by_port(unsigned int port)
     }
     return mv_eth_ports[port];
 }
-
 
 static void eth_print_link_status( struct net_device *dev ) 
 {
@@ -551,7 +547,6 @@ static INLINE void  eth_skb_reuse_reset(struct sk_buff *skb)
 }
 #endif /* LINUX_VERSION_CODE < 2.6.24 */
 
-
 static INLINE mv_eth_priv* eth_skb_reusable(struct sk_buff *skb)
 {
     int         i, skb_size;
@@ -606,7 +601,6 @@ static INLINE MV_PKT_INFO* eth_pkt_info_get(mv_eth_priv  *priv)
     } 
     return pkt;
 }
-
 
 static INLINE void  eth_skb_free(mv_eth_priv *priv, MV_PKT_INFO* pPktInfo)
 {
@@ -685,7 +679,6 @@ static INLINE void  eth_skb_free(mv_eth_priv *priv, MV_PKT_INFO* pPktInfo)
 
 /**************************************************************************************************************/
 
-
 #ifdef ETH_MV_TX_EN
 void    eth_tx_en_config(int port, int value)
 {
@@ -745,8 +738,6 @@ static INLINE void  eth_tx_enable(mv_eth_priv *priv, int queue)
 }
 #endif /* ETH_MV_TX_EN */
 /**************************************************************************************************************/
-
-
 
 /***********************************************************
  * mv_eth_down_internals --                                 *
@@ -840,7 +831,6 @@ static INLINE int   eth_rx_policy(mv_eth_priv *priv)
     return (fls(rxq_map) - 1);
 }
 
-
 static INLINE int   eth_tx_policy(mv_eth_priv *priv, struct sk_buff *skb)
 {
     int     queue;
@@ -860,8 +850,6 @@ static INLINE int   eth_tx_policy(mv_eth_priv *priv, struct sk_buff *skb)
     return queue;
 }
 /**************************************************************************************************************/
-
-
 
 /*********************************************************** 
  * eth_tx_done --                                             *
@@ -1092,7 +1080,6 @@ static INLINE int eth_rx(struct net_device *dev, unsigned int work_to_do, int qu
 	skb->tail += pPktInfo->pFrags->dataSize - ETH_MV_HEADER_SIZE;
 	skb->len  += pPktInfo->pFrags->dataSize - ETH_MV_HEADER_SIZE;
 	/* skb_put(skb, pPktInfo->pFrags->dataSize - ETH_MV_HEADER_SIZE); */
-
 
         if(out_dev != NULL)
         {
@@ -1518,7 +1505,6 @@ static int eth_poll( struct napi_struct *napi, int budget )
 #endif
 }
 
-
 /* Show network driver configuration */
 void	mv_eth_config_show(void)
 {
@@ -1672,7 +1658,6 @@ void    mv_netdev_set_features(struct net_device *dev)
 #endif /* ETH_INCLUDE_UFO */
 }
 
-
 static int mv_force_port_link_speed_fc(mv_eth_priv *priv, MV_ETH_PORT_SPEED port_speed, int en_force)
 {
 	if (en_force) {
@@ -1709,7 +1694,6 @@ static int mv_force_port_link_speed_fc(mv_eth_priv *priv, MV_ETH_PORT_SPEED port
 	}
 	return 0;
 }
-
 
 /*********************************************************** 
  * mv_eth_start_internals --                                *
@@ -1778,7 +1762,6 @@ int     mv_eth_start_internals(mv_eth_priv *priv, int mtu)
     /* set tx/rx coalescing mechanism */
     mvEthTxCoalSet( priv->hal_priv, priv->tx_coal_usec );
     mvEthRxCoalSet( priv->hal_priv, priv->rx_coal_usec );
-
 
 out:
     spin_unlock_irqrestore(priv->lock, flags);
@@ -1853,7 +1836,6 @@ int     mv_eth_stop_internals(mv_eth_priv *priv)
     return -1;
 }
 
-
 /*********************************************************** 
  * mv_eth_change_mtu_internals --                                     *
  *   stop port activity. release skb from rings. set new   *
@@ -1888,7 +1870,6 @@ int     mv_eth_change_mtu_internals( struct net_device *dev, int mtu )
 
     return 0;
 }
-
 
 /*********************************************************** 
  * mv_netdev_timer_callback --                                *
@@ -2205,7 +2186,6 @@ void    mv_eth_priv_cleanup(mv_eth_priv *priv)
         mvStackDelete(priv->txPktInfoPool);
     }
 }
-
 
 #ifdef ETH_INCLUDE_TSO
 /*********************************************************** 
@@ -2772,7 +2752,6 @@ tx_end:
 #ifdef ETH_TX_DONE_ISR
 #else
 
-
 #ifdef ETH_MV_TX_EN
         if(priv->tx_en)
             eth_tx_enable(priv, queue);
@@ -3047,7 +3026,6 @@ void    mv_eth_netdev_print(unsigned int idx)
             dev->ifindex, (unsigned int)(dev->features), (unsigned int)(dev->flags), 
             dev->mtu, MV_RX_BUF_SIZE(dev->mtu));
 }
-
 
 /***********************************************************************************
  ***  noqueue net device
@@ -3414,7 +3392,6 @@ void print_tcph(struct tcphdr* hdr)
             hdr->fin, hdr->syn, hdr->rst, hdr->psh, hdr->ack, hdr->urg, hdr->ece, hdr->cwr);
 }
 
-
 void print_skb(struct sk_buff* skb)
 {
     int i;
@@ -3707,7 +3684,6 @@ static int __init mv_eth_init_module( void )
 
         priv->isGtw = mvBoardIsSwitchConnected(port);
 		
-		
 	printk("  o Loading Gateway interface(s):\n");
         if( mv_gtw_net_setup(port) < 0)
         {
@@ -3813,7 +3789,3 @@ static void __exit mv_eth_exit_module(void)
 {
     printk( "EXIT Marvell Ethernet Driver\n");
 }
-
-
- 
-

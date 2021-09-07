@@ -96,7 +96,6 @@ void i1480u_tx_unlink_urbs(struct i1480u *i1480u)
 	spin_unlock_irqrestore(&i1480u->tx_list_lock, flags);
 }
 
-
 /*
  * Callback for a completed tx USB URB.
  *
@@ -152,7 +151,6 @@ void i1480u_tx_cb(struct urb *urb)
 	}
 	return;
 }
-
 
 /*
  * Given a buffer that doesn't fit in a single fragment, create an
@@ -293,7 +291,6 @@ error_buf_alloc:
 	return result;
 }
 
-
 /*
  * Given a buffer that fits in a single fragment, fill out a @wtx
  * struct for transmitting it down the USB pipe.
@@ -330,7 +327,6 @@ int i1480u_tx_create_1(struct i1480u_tx *wtx, struct sk_buff *skb,
 	untd_hdr_cmp->padding = 0;
 	return 0;
 }
-
 
 /*
  * Given a skb to transmit, massage it to become palatable for the TX pipe
@@ -486,7 +482,6 @@ out:
 	return result;
 }
 
-
 /*
  * Transmit an skb  Called when an skbuf has to be transmitted
  *
@@ -536,7 +531,6 @@ out:
 	return NETDEV_TX_OK;
 }
 
-
 /*
  * Called when a pkt transmission doesn't complete in a reasonable period
  * Device reset may sleep - do it outside of interrupt context (delayed)
@@ -547,7 +541,6 @@ void i1480u_tx_timeout(struct net_device *net_dev)
 
 	wlp_reset_all(&i1480u->wlp);
 }
-
 
 void i1480u_tx_release(struct i1480u *i1480u)
 {

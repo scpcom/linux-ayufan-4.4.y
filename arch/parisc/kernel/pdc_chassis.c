@@ -46,7 +46,6 @@
 #ifdef CONFIG_PDC_CHASSIS
 static unsigned int pdc_chassis_enabled __read_mostly = 1;
 
-
 /**
  * pdc_chassis_setup() - Enable/disable pdc_chassis code at boot time.
  * @str configuration param: 0 to disable chassis log
@@ -60,7 +59,6 @@ static int __init pdc_chassis_setup(char *str)
 	return 1;
 }
 __setup("pdcchassis=", pdc_chassis_setup);
-
 
 /** 
  * pdc_chassis_checkold() - Checks for old PDC_CHASSIS compatibility
@@ -100,12 +98,10 @@ static int pdc_chassis_panic_event(struct notifier_block *this,
 		return NOTIFY_DONE;
 }   
 
-
 static struct notifier_block pdc_chassis_panic_block = {
 	.notifier_call = pdc_chassis_panic_event,
 	.priority = INT_MAX,
 };
-
 
 /**
  * parisc_reboot_event() - Called by the reboot handler.
@@ -120,13 +116,11 @@ static int pdc_chassis_reboot_event(struct notifier_block *this,
 		return NOTIFY_DONE;
 }   
 
-
 static struct notifier_block pdc_chassis_reboot_block = {
 	.notifier_call = pdc_chassis_reboot_event,
 	.priority = INT_MAX,
 };
 #endif /* CONFIG_PDC_CHASSIS */
-
 
 /**
  * parisc_pdc_chassis_init() - Called at boot time.
@@ -152,7 +146,6 @@ void __init parisc_pdc_chassis_init(void)
 	}
 #endif /* CONFIG_PDC_CHASSIS */
 }
-
 
 /** 
  * pdc_chassis_send_status() - Sends a predefined message to the chassis,

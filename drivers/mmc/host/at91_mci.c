@@ -88,7 +88,6 @@
 #define at91_mci_read(host, reg)	__raw_readl((host)->baseaddr + (reg))
 #define at91_mci_write(host, reg, val)	__raw_writel((val), (host)->baseaddr + (reg))
 
-
 /*
  * Low level type for this driver
  */
@@ -427,7 +426,6 @@ static void at91_mci_update_bytes_xfered(struct at91mci_host *host)
 	}
 }
 
-
 /*Handle after command sent ready*/
 static int at91_mci_handle_cmdrdy(struct at91mci_host *host)
 {
@@ -447,7 +445,6 @@ static int at91_mci_handle_cmdrdy(struct at91mci_host *host)
 	/* command not completed, have to wait */
 	return 0;
 }
-
 
 /*
  * Enable the controller

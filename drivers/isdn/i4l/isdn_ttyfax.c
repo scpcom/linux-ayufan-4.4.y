@@ -19,7 +19,6 @@
 #include "isdn_tty.h"
 #include "isdn_ttyfax.h"
 
-
 static char *isdn_tty_fax_revision = "$Revision: 1.1 $";
 
 #define PARSE_ERROR1 { isdn_tty_fax_modem_result(1, info); return 1; }
@@ -57,7 +56,6 @@ isdn_tty_fax_modem_result(int code, modem_info * info)
 	{"OK", "ERROR", "+FCON", "+FCSI:", "+FDIS:",
 	 "+FHNG:", "+FDCS:", "CONNECT", "+FTSI:",
 	 "+FCFR", "+FPTS:", "+FET:"};
-
 
 	isdn_tty_at_cout("\r\n", info);
 	isdn_tty_at_cout(msg[code], info);
@@ -277,7 +275,6 @@ isdn_tty_fax_command(modem_info * info, isdn_ctrl * c)
 	}
 	return (-1);
 }
-
 
 void
 isdn_tty_fax_bitorder(modem_info * info, struct sk_buff *skb)

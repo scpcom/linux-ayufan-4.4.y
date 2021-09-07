@@ -101,5 +101,3 @@ bfa_fcs_port_n2n_offline(struct bfa_fcs_port_s *port)
 	n2n_port->rem_port_wwn = 0;
 	n2n_port->reply_oxid = 0;
 }
-
-

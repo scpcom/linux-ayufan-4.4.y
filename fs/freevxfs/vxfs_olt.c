@@ -38,7 +38,6 @@
 #include "vxfs_olt.h"
 #include "vxfs_extern.h"
 
-
 static inline void
 vxfs_get_fshead(struct vxfs_oltfshead *fshp, struct vxfs_sb_info *infp)
 {
@@ -60,7 +59,6 @@ vxfs_oblock(struct super_block *sbp, daddr_t block, u_long bsize)
 	return (block * (sbp->s_blocksize / bsize));
 }
 
-
 /**
  * vxfs_read_olt - read olt
  * @sbp:	superblock of the filesystem
@@ -80,7 +78,6 @@ vxfs_read_olt(struct super_block *sbp, u_long bsize)
 	struct buffer_head	*bp;
 	struct vxfs_olt		*op;
 	char			*oaddr, *eaddr;
-
 
 	bp = sb_bread(sbp, vxfs_oblock(sbp, infp->vsi_oltext, bsize));
 	if (!bp || !bp->b_data)

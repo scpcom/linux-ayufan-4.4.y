@@ -184,7 +184,6 @@ static ssize_t store_attach(struct device *dev, struct device_attribute *attr,
 	usbip_dbg_vhci_sysfs("rhport(%u) sockfd(%u) devid(%u) speed(%u)\n",
 				rhport, sockfd, devid, speed);
 
-
 	/* check received parameters */
 	if (valid_args(rhport, speed) < 0)
 		return -EINVAL;

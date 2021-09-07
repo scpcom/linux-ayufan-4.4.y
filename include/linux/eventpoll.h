@@ -54,7 +54,6 @@ struct epoll_event {
 /* Forward declarations to avoid compiler errors */
 struct file;
 
-
 #ifdef CONFIG_EPOLL
 
 /* Used to initialize the epoll bits inside the "struct file" */
@@ -62,7 +61,6 @@ static inline void eventpoll_init_file(struct file *file)
 {
 	INIT_LIST_HEAD(&file->f_ep_links);
 }
-
 
 /* Used to release the epoll bits inside the "struct file" */
 void eventpoll_release_file(struct file *file);
@@ -105,4 +103,3 @@ static inline void eventpoll_release(struct file *file) {}
 #endif /* #ifdef __KERNEL__ */
 
 #endif /* #ifndef _LINUX_EVENTPOLL_H */
-

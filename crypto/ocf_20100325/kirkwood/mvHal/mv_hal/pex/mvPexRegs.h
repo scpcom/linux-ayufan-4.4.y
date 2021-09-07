@@ -74,8 +74,6 @@ extern "C" {
 #define MAX_PEX_FUNCS           8
 #define MAX_PEX_BUSSES          256
 
-
-
 /*********************************************************/
 /* PCI Express Configuration Cycles Generation Registers */
 /*********************************************************/
@@ -141,7 +139,6 @@ Mask bit per cause bit. If a bit is set to 1, the corresponding event is
 enabled. Mask does not affect setting of the Interrupt Cause register bits;
 it only affects the assertion of the interrupt .*/
                                           
-
 #define PXICR_MDIS_CAUSE			BIT1  /* Attempt to generate PCI transaction 
                                              while master is disabled */
 #define PXICR_ERR_WRTO_REG_CAUSE	BIT3  /* Erroneous write attempt to
@@ -171,7 +168,6 @@ it only affects the assertion of the interrupt .*/
 #define PXICR_RCV_INTD				BIT27 /* IntD status.*/
 #define PXICR_RCV_PM_PME            BIT28 /* Received PM_PME message. */
 
-
 /********************************************/
 /* PCI Express Control and Status Registers */
 /********************************************/
@@ -183,7 +179,6 @@ it only affects the assertion of the interrupt .*/
 #define PEX_ACK_TMR_4X_REG(pexIf)			((PEX_IF_BASE(pexIf)) + 0x1A30)
 #define PEX_ACK_TMR_1X_REG(pexIf)			((PEX_IF_BASE(pexIf)) + 0x1A40)
 #define PEX_TL_CTRL_REG(pexIf)				((PEX_IF_BASE(pexIf)) + 0x1AB0)
-
 
 #define PEX_RAM_PARITY_CTRL_REG(pexIf)  		((PEX_IF_BASE(pexIf)) + 0x1A50)
 /* PCI Express Control Register */
@@ -210,7 +205,6 @@ it only affects the assertion of the interrupt .*/
 #define PXCR_CONF_MAX_OUTSTND_OFFS		8 /*Maximum outstanding NP requests as a master*/
 #define PXCR_CONF_MAX_OUTSTND_MASK		(0x3 << PXCR_CONF_MAX_OUTSTND_OFFS)
 
-
 #define PXCR_CONF_NFTS_OFFS				16 /*number of FTS Ordered-Sets*/
 #define PXCR_CONF_NFTS_MASK				(0xff << PXCR_CONF_NFTS_OFFS)
 
@@ -235,7 +229,6 @@ it only affects the assertion of the interrupt .*/
 #define PXSR_PEX_SLV_LB					BIT26 /* Slave Loopback Indication*/
 #define PXSR_PEX_SLV_DIS_SCRMB			BIT27 /* Slave Disable Scrambling Indication*/
 
-
 /* PCI Express Completion Timeout Register */
 /* PEX_COMPLT_TMEOUT_REG (PXCTR)*/
 
@@ -254,7 +247,6 @@ it only affects the assertion of the interrupt .*/
 #define PXFCR_PH_INIT_FC_OFFS			0 /*Posted Headers Flow Control Credit
 										    Initial Value.*/
 #define PXFCR_PH_INIT_FC_MASK			(0xff << PXFCR_PH_INIT_FC_OFFS)
-
 
 #define PXFCR_NPH_INIT_FC_OFFS			8 /* Classified Non-Posted Headers
 											 Flow Control Credit Initial Value*/
@@ -286,7 +278,6 @@ it only affects the assertion of the interrupt .*/
 											  Value for 1X*/
 #define PXAT1R_ACK_RPLY_TOX1_MASK		(0xffff << PXAT1R_ACK_RPLY_TOX1_OFFS)
 
-
 /* PCI Express TL Control Register */
 /* PEX_TL_CTRL_REG (PXTCR) */
 
@@ -297,8 +288,6 @@ it only affects the assertion of the interrupt .*/
 /* PEX_DEBUG_MAC_CTRL_REG (PXDMCR) */
 
 #define PXDMCR_LINKUP					BIT4
-
-
 
 /**********************************************/
 /* PCI Express Configuration Header Registers */
@@ -351,8 +340,6 @@ it only affects the assertion of the interrupt .*/
 #define PEX_HDR_LOG_THIRD_DWORD_REG					0x124
 #define PEX_HDR_LOG_FOURTH_DWORD_REG				0x128
 
-
-
 /* PCI Express Device and Vendor ID Register*/
 /*PEX_DEVICE_AND_VENDOR_ID (PXDAVI)*/
 
@@ -361,7 +348,6 @@ it only affects the assertion of the interrupt .*/
 
 #define PXDAVI_DEV_ID_OFFS			16	/* Device ID */
 #define PXDAVI_DEV_ID_MASK  		(0xffff << PXDAVI_DEV_ID_OFFS)
-
 
 /* PCI Express Command and Status Register*/
 /*PEX_STATUS_AND_COMMAND (PXSAC)*/
@@ -381,7 +367,6 @@ it only affects the assertion of the interrupt .*/
 #define PXSAC_SYSERR			BIT30	/* Signalled system error 	*/
 #define PXSAC_DET_PARERR		BIT31	/* Detect Parity Error 		*/
 
-
 /* PCI Express Class Code and Revision ID Register*/
 /*PEX_CLASS_CODE_AND_REVISION_ID (PXCCARI)*/       
 
@@ -400,7 +385,6 @@ it only affects the assertion of the interrupt .*/
 #define PXCCARI_BASE_CLASS_OFFS	24		/* Base Class*/
 #define PXCCARI_BASE_CLASS_MASK	(0xff << PXCCARI_BASE_CLASS_OFFS)
 
-
 /* PCI Express BIST, Header Type and Cache Line Size Register*/
 /*PEX_BIST_HDR_TYPE_LAT_TMR_CACHE_LINE (PXBHTLTCL)*/ 
 
@@ -417,7 +401,6 @@ it only affects the assertion of the interrupt .*/
 #define PXBHTLTCL_HEADER_STANDARD		(0x0 << PXBHTLTCL_HEADER_OFFS)
 #define PXBHTLTCL_HEADER_PCI2PCI_BRIDGE	(0x1 << PXBHTLTCL_HEADER_OFFS)
 
-
 #define PXBHTLTCL_BISTCOMP_OFFS		24	/* BIST Completion Code */
 #define PXBHTLTCL_BISTCOMP_MASK		(0xf << PXBHTLTCL_BISTCOMP_OFFS)
 
@@ -427,7 +410,6 @@ it only affects the assertion of the interrupt .*/
 #define PXBHTLTCL_BISTCAP_MASK		BIT31	
 #define PXBHTLTCL_BISTCAP_VAL		0
 
-
 /* PCI Express Subsystem Device and Vendor ID */
 /*PEX_SUBSYS_ID_AND_SUBSYS_VENDOR_ID (PXSIASVI)*/
 
@@ -436,7 +418,6 @@ it only affects the assertion of the interrupt .*/
 
 #define PXSIASVI_DEVID_OFFS	16	/* Subsystem Device ID Number */
 #define PXSIASVI_DEVID_MASK	(0xffff << PXSIASVI_DEVID_OFFS)
-
 
 /* PCI Express Capability List Pointer Register*/
 /*PEX_CAPABILTY_LIST_POINTER (PXCLP)*/
@@ -452,7 +433,6 @@ it only affects the assertion of the interrupt .*/
 
 #define PXIPAL_INTPIN_OFFS	8	/* interrupt pin (A,B,C,D) */
 #define PXIPAL_INTPIN_MASK	(0xff << PXIPAL_INTPIN_OFFS)
-
 
 /* PCI Express Power Management Capability Header Register*/
 /*PEX_POWER_MNG_CAPABILITY (PXPMC)*/
@@ -501,7 +481,6 @@ it only affects the assertion of the interrupt .*/
 #define PXPMSC_PM_DATA_OFFS			24		/* State Data */
 #define PXPMSC_PM_DATA_MASK			(0xff << PXPMSC_PM_DATA_OFFS)
 
-
 /* PCI Express MSI Message Control Register*/								 
 /*PEX_MSI_MESSAGE_CONTROL (PXMMC)*/
 
@@ -521,14 +500,12 @@ it only affects the assertion of the interrupt .*/
 
 #define PXMMC_ADDR64				BIT23	/* 64-bit Addressing Capable */
 
-
 /* PCI Express MSI Message Address Register*/
 /*PEX_MSI_MESSAGE_ADDR (PXMMA)*/
 
 #define PXMMA_MSI_ADDR_OFFS			2 /* Message Address  corresponds to 
 										Address[31:2] of the MSI MWr TLP*/
 #define PXMMA_MSI_ADDR_MASK			(0x3fffffff << PXMMA_MSI_ADDR_OFFS)
-
 
 /* PCI Express MSI Message Address (High) Register */
 /*PEX_MSI_MESSAGE_HIGH_ADDR (PXMMHA)*/
@@ -537,13 +514,11 @@ it only affects the assertion of the interrupt .*/
 											Address[63:32] of the MSI MWr TLP*/
 #define PXMMA_MSI_ADDR_H_MASK		(0xffffffff << PXMMA_MSI_ADDR_H_OFFS )
 
-
 /* PCI Express MSI Message Data Register*/
 /*PEX_MSI_MESSAGE_DATA (PXMMD)*/
 
 #define PXMMD_MSI_DATA_OFFS 		0 /* Message Data */
 #define PXMMD_MSI_DATA_MASK 		(0xffff << PXMMD_MSI_DATA_OFFS )
-
 
 /* PCI Express Capability Register*/								 
 /*PEX_CAPABILITY_REG (PXCR)*/
@@ -564,7 +539,6 @@ it only affects the assertion of the interrupt .*/
 
 #define PXCR_INT_MSG_NUM_OFFS		25 /* Interrupt Message Number*/
 #define PXCR_INT_MSG_NUM_MASK		(0x1f << PXCR_INT_MSG_NUM_OFFS)
-
 
 /* PCI Express Device Capabilities Register */
 /*PEX_DEV_CAPABILITY_REG (PXDCR)*/
@@ -593,7 +567,6 @@ it only affects the assertion of the interrupt .*/
 #define PXDCR_EP_L1_ACC_LAT_1US_2US         (0x5 << PXDCR_EP_L1_ACC_LAT_OFFS) 
 #define PXDCR_EP_L1_ACC_LAT_2US_4US         (0x6 << PXDCR_EP_L1_ACC_LAT_OFFS) 
 #define PXDCR_EP_L1_ACC_LAT_4US_MORE        (0x7 << PXDCR_EP_L1_ACC_LAT_OFFS) 
-
 
 #define PXDCR_ATT_BUT_PRS_OFFS				12 /* Attention Button Present*/
 #define PXDCR_ATT_BUT_PRS_MASK				BIT12
@@ -648,7 +621,6 @@ it only affects the assertion of the interrupt .*/
 #define PXDCSR_TRANS_PEND_OFFS 			21 /* Transactions Pending*/
 #define PXDCSR_TRANS_PEND_MASK 			BIT21
 #define PXDCSR_TRANS_PEND_NOT_COMPLETED (0x1 << PXDCSR_TRANS_PEND_OFFS)
-
 
 /* PCI Express Link Capabilities Register*/
 /*PEX_LINK_CAPABILITY_REG (PXLCR)*/
@@ -747,5 +719,3 @@ it only affects the assertion of the interrupt .*/
 #endif /* __cplusplus */
 
 #endif /* #ifndef __INCPEXREGSH */
-
-

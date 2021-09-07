@@ -80,7 +80,6 @@ void __init ixp4xx_map_io(void)
   	iotable_init(ixp4xx_io_desc, ARRAY_SIZE(ixp4xx_io_desc));
 }
 
-
 /*************************************************************************
  * IXP4xx chipset IRQ handling
  *
@@ -257,7 +256,6 @@ void __init ixp4xx_init_irq(void)
 		set_irq_flags(i, IRQF_VALID);
 	}
 }
-
 
 /*************************************************************************
  * IXP4xx timer tick

@@ -80,7 +80,6 @@
 #define cmRspMiscEngineUp	1			/* 5,0,1 */
 #define cmRspInvalid		0			/* 0,0,0 */
 
-
 /*
  * Firmware Request and Response Messages
  */
@@ -184,7 +183,6 @@ typedef struct {
 	unsigned long buff_offset;
 	unsigned short msg_len;
 } LLData;
-
 
 /* 
  * Message payload template for an HWConfig message

@@ -25,7 +25,6 @@
 #include "seq_timer.h"
 #include "seq_prioq.h"
 
-
 /* Implementation is a simple linked list for now...
 
    This priority queue orders the events on timestamp. For events with an
@@ -50,8 +49,6 @@
    *
 
  */
-
-
 
 /* create new prioq (constructor) */
 struct snd_seq_prioq *snd_seq_prioq_new(void)
@@ -94,9 +91,6 @@ void snd_seq_prioq_delete(struct snd_seq_prioq **fifo)
 	
 	kfree(f);
 }
-
-
-
 
 /* compare timestamp between events */
 /* return 1 if a >= b; 0 */
@@ -254,7 +248,6 @@ int snd_seq_prioq_avail(struct snd_seq_prioq * f)
 	return f->cells;
 }
 
-
 /* peek at cell at the head of the prioq */
 struct snd_seq_event_cell *snd_seq_prioq_cell_peek(struct snd_seq_prioq * f)
 {
@@ -264,7 +257,6 @@ struct snd_seq_event_cell *snd_seq_prioq_cell_peek(struct snd_seq_prioq * f)
 	}
 	return f->head;
 }
-
 
 static inline int prioq_match(struct snd_seq_event_cell *cell,
 			      int client, int timestamp)
@@ -449,5 +441,3 @@ void snd_seq_prioq_remove_events(struct snd_seq_prioq * f, int client,
 		freefirst = freenext;
 	}
 }
-
-

@@ -219,7 +219,6 @@ extern void perf_intrigue_disable_perf_counters (void);
  * Function Definitions
  *****************************************************************************/
 
-
 /*
  * configure:
  *
@@ -406,7 +405,6 @@ static void perf_patch_images(void)
 	 	onyx_images[PANIC][15] |= (0x000000ff&((IVAaddress) >> 24)); /* set 2 bytes */
 		onyx_images[PANIC][16] = (IVAaddress << 8)&0xffffff00;
 
-
 	} else if (perf_processor_interface == CUDA_INTF) {
 		/* Cuda interface */
 		cuda_images[TLBMISS][16] =  
@@ -434,7 +432,6 @@ static void perf_patch_images(void)
 	}
 #endif
 }
-
 
 /*
  * ioctl routine
@@ -744,7 +741,6 @@ static int perf_rdr_clear(uint32_t	rdr_num)
 
 	return 0;
 }
-
 
 /*
  * perf_write_image

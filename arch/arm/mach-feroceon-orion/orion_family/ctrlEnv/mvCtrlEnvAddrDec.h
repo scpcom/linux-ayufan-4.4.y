@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvCtrlEnvAddrDech
 #define __INCmvCtrlEnvAddrDech
 
@@ -110,7 +109,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ATMWCR_WIN_LUNIT_BYTE_SWP			(0 << ATMWCR_WIN_LUNIT_BYTE_SWP_OFFS)
 #define ATMWCR_WIN_LUNIT_BYTE_NO_SWP		(1 << ATMWCR_WIN_LUNIT_BYTE_SWP_OFFS)
 
-
 #define ATMWCR_WIN_LUNIT_WORD_SWP_OFFS		1
 #define ATMWCR_WIN_LUNIT_WORD_SWP_MASK		BIT1
 #define ATMWCR_WIN_LUNIT_WORD_SWP			(0 << ATMWCR_WIN_LUNIT_WORD_SWP_OFFS)
@@ -157,7 +155,6 @@ typedef struct _mvTargetAttrib
 
 }MV_TARGET_ATTRIB;
 
-
 /* This structure describes address decode window                           */
 typedef struct _mvDecWin 
 {
@@ -174,7 +171,6 @@ typedef struct _mvDecWinParams
     MV_U32          size;       /* Size in register format */
 }MV_DEC_WIN_PARAMS;
 
-
 /* mvCtrlEnvAddrDec API list */
 
 MV_STATUS mvCtrlAddrDecToReg(MV_ADDR_WIN *pAddrDecWin,
@@ -188,14 +184,10 @@ MV_STATUS mvCtrlAttribGet(MV_TARGET target,
 
 MV_TARGET mvCtrlTargetGet(MV_TARGET_ATTRIB *targetAttrib);
 
-
 MV_STATUS mvCtrlAddrDecToParams(MV_DEC_WIN *pAddrDecWin, 
                                 MV_DEC_WIN_PARAMS *pWinParam);
 
 MV_STATUS mvCtrlParamsToAddrDec(MV_DEC_WIN_PARAMS *pWinParam, 
                                 MV_DEC_WIN *pAddrDecWin);
-
-
-
 
 #endif /* __INCmvCtrlEnvAddrDech */

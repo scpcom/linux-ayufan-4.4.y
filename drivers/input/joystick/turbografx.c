@@ -149,8 +149,6 @@ static void tgfx_close(struct input_dev *dev)
 	mutex_unlock(&tgfx->sem);
 }
 
-
-
 /*
  * tgfx_probe() probes for tg gamepads.
  */

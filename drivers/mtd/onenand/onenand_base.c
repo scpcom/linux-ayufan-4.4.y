@@ -1943,7 +1943,6 @@ static int onenand_write_ops_nolock(struct mtd_info *mtd, loff_t to,
 	return ret;
 }
 
-
 /**
  * onenand_write_oob_nolock - [Internal] OneNAND write out-of-band
  * @param mtd		MTD device structure

@@ -181,7 +181,6 @@ static void cpc_tty_signal_on(pc300dev_t *pc300dev, unsigned char signal)
 	CPC_TTY_UNLOCK(card,flags); 
 }
 
-
 static const struct tty_operations pc300_ops = {
 	.open = cpc_tty_open,
 	.close = cpc_tty_close,
@@ -193,7 +192,6 @@ static const struct tty_operations pc300_ops = {
 	.flush_buffer = cpc_tty_flush_buffer,
 	.hangup = cpc_tty_hangup,
 };
-
 
 /*
  * PC300 TTY initialization routine

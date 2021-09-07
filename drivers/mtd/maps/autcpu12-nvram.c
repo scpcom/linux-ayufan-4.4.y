@@ -31,7 +31,6 @@
 #include <linux/mtd/map.h>
 #include <linux/mtd/partitions.h>
 
-
 static struct mtd_info *sram_mtd;
 
 struct map_info autcpu12_sram_map = {

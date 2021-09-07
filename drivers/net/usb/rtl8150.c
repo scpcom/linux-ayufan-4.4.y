@@ -58,7 +58,6 @@
 #define	RTL8150_REQ_GET_REGS	0x05
 #define	RTL8150_REQ_SET_REGS	0x05
 
-
 /* Transmit status register errors */
 #define TSR_ECOL		(1<<5)
 #define TSR_LCOL		(1<<4)
@@ -110,7 +109,6 @@
 #define INT_RXLOST_CNT		0x05
 #define INT_CRERR_CNT		0x06
 #define INT_COL_CNT		0x07
-
 
 #define	RTL8150_MTU		1540
 #define	RTL8150_TX_TIMEOUT	(HZ)
@@ -756,7 +754,6 @@ static netdev_tx_t rtl8150_start_xmit(struct sk_buff *skb,
 
 	return NETDEV_TX_OK;
 }
-
 
 static void set_carrier(struct net_device *netdev)
 {

@@ -194,7 +194,6 @@ SYSCALL_DEFINE6(osf_mmap, unsigned long, addr, unsigned long, len,
 	return ret;
 }
 
-
 /*
  * The OSF/1 statfs structure is much larger, but this should
  * match the beginning, at least.
@@ -1100,7 +1099,6 @@ SYSCALL_DEFINE2(osf_usleep_thread, struct timeval32 __user *, sleep,
  fault:
 	return -EFAULT;
 }
-
 
 struct timex32 {
 	unsigned int modes;	/* mode selector */

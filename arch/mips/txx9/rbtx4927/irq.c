@@ -173,7 +173,6 @@ static void toshiba_rbtx4927_irq_ioc_disable(unsigned int irq)
 	mmiowb();
 }
 
-
 static int rbtx4927_irq_dispatch(int pending)
 {
 	int irq;

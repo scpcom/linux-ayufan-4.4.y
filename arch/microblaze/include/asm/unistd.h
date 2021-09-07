@@ -353,7 +353,6 @@
 #define __NR_shmdt		337 /* ok */
 #define __NR_shmget		338 /* ok */
 
-
 #define __NR_signalfd4		339 /* new */
 #define __NR_eventfd2		340 /* new */
 #define __NR_epoll_create1	341 /* new */

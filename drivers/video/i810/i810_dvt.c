@@ -262,7 +262,6 @@ void i810fb_fill_var_timings(struct fb_var_screeninfo *var)
 	if (~(par.regs.msr & (1 << 7)))
 		var->sync |= FB_SYNC_VERT_HIGH_ACT;
 
-
 	total = ((par.regs.cr06 | (par.regs.cr30 & 0x0F)  << 8)) + 2;
 	var->lower_margin = (par.regs.cr10 | 
 			     (par.regs.cr32 & 0x0F) << 8) - yres;
@@ -304,4 +303,3 @@ u32 i810_get_watermark(struct fb_var_screeninfo *var,
 	}
 	return wmark;
 }	
-

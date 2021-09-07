@@ -99,7 +99,6 @@ GT_STATUS gstuGetEntryCount
 
 }
 
-
 /*******************************************************************************
 * gstuGetEntryFirst
 *
@@ -168,7 +167,6 @@ GT_STATUS gstuGetEntryFirst
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gstuGetEntryNext
@@ -246,8 +244,6 @@ GT_STATUS gstuGetEntryNext
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gstuFindSidEntry
@@ -329,7 +325,6 @@ GT_STATUS gstuFindSidEntry
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gstuAddEntry
@@ -683,7 +678,6 @@ static GT_STATUS stuGetSTUData
 
 	return GT_OK;
 }
-
 
 /*******************************************************************************
 * stuOperationPerform

@@ -94,7 +94,6 @@
     if ((Dallp2(dbl_valuep2)--) == 0) Dallp1(dbl_valuep1)-- 
 #endif
 
-
 #define update_trap_counts(Fpu_register, aflags, bflags, trap_counts) {	\
 	aflags=(Fpu_register[0])>>27;	/* assumes zero fill. 32 bit */	\
 	Fpu_register[0] |= bflags;					\
@@ -109,7 +108,6 @@ decode_fpu(unsigned int Fpu_register[], unsigned int trap_counts[])
     unsigned int aflags;
     unsigned int bflags;
     unsigned int excptype;
-
 
     /* Keep stats on how many floating point exceptions (based on type)
      * that happen.  Want to keep this overhead low, but still provide

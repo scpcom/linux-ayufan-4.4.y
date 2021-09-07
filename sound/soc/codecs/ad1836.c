@@ -171,7 +171,6 @@ static int ad1836_hw_params(struct snd_pcm_substream *substream,
 	return 0;
 }
 
-
 /*
  * interface to read/write ad1836 register
  */

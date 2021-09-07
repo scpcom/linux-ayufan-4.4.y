@@ -35,11 +35,8 @@
 
 /*---------------------  Export Definitions -------------------------*/
 
-
-
 #define AUTHENTICATE_TIMEOUT   1000 //ms
 #define ASSOCIATE_TIMEOUT      1000 //ms
-
 
 // Command code
 typedef enum tagCMD_CODE {
@@ -105,15 +102,11 @@ typedef enum tagCMD_STATE {
     WLAN_CMD_IDLE
 } CMD_STATE, *PCMD_STATE;
 
-
-
 /*---------------------  Export Classes  ----------------------------*/
 
 /*---------------------  Export Variables  --------------------------*/
 
-
 /*---------------------  Export Types  ------------------------------*/
-
 
 /*---------------------  Export Functions  --------------------------*/
 VOID

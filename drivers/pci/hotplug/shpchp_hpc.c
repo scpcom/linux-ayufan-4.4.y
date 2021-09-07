@@ -381,7 +381,6 @@ static int hpc_check_cmd_status(struct controller *ctrl)
 	return retval;
 }
 
-
 static int hpc_get_attention_status(struct slot *slot, u8 *status)
 {
 	struct controller *ctrl = slot->ctrl;
@@ -429,7 +428,6 @@ static int hpc_get_power_status(struct slot * slot, u8 *status)
 
 	return 0;
 }
-
 
 static int hpc_get_latch_status(struct slot *slot, u8 *status)
 {
@@ -559,7 +557,6 @@ static int hpc_set_attention_status(struct slot *slot, u8 value)
 
 	return shpc_write_cmd(slot, slot->hp_slot, slot_cmd);
 }
-
 
 static void hpc_set_green_led_on(struct slot *slot)
 {

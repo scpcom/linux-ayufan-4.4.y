@@ -24,7 +24,6 @@
 
 #define CPUFREQ_NAME_LEN 16
 
-
 /*********************************************************************
  *                     CPUFREQ NOTIFIER INTERFACE                    *
  *********************************************************************/
@@ -130,7 +129,6 @@ struct cpufreq_freqs {
 	u8 flags;		/* flags of cpufreq_driver, see below. */
 };
 
-
 /**
  * cpufreq_scale - "old * mult / div" calculation for large values (32-bit-arch safe)
  * @old:   old value
@@ -189,7 +187,6 @@ extern int __cpufreq_driver_target(struct cpufreq_policy *policy,
 				   unsigned int target_freq,
 				   unsigned int relation);
 
-
 extern int __cpufreq_driver_getavg(struct cpufreq_policy *policy,
 				   unsigned int cpu);
 
@@ -200,7 +197,6 @@ int lock_policy_rwsem_read(int cpu);
 int lock_policy_rwsem_write(int cpu);
 void unlock_policy_rwsem_read(int cpu);
 void unlock_policy_rwsem_write(int cpu);
-
 
 /*********************************************************************
  *                      CPUFREQ DRIVER INTERFACE                     *
@@ -252,9 +248,7 @@ struct cpufreq_driver {
 int cpufreq_register_driver(struct cpufreq_driver *driver_data);
 int cpufreq_unregister_driver(struct cpufreq_driver *driver_data);
 
-
 void cpufreq_notify_transition(struct cpufreq_freqs *freqs, unsigned int state);
-
 
 static inline void cpufreq_verify_within_limits(struct cpufreq_policy *policy, unsigned int min, unsigned int max) 
 {
@@ -311,11 +305,9 @@ static inline unsigned int cpufreq_quick_get(unsigned int cpu)
 }
 #endif
 
-
 /*********************************************************************
  *                       CPUFREQ DEFAULT GOVERNOR                    *
  *********************************************************************/
-
 
 /*
   Performance governor is fallback governor if any other gov failed to
@@ -339,7 +331,6 @@ extern struct cpufreq_governor cpufreq_gov_ondemand;
 extern struct cpufreq_governor cpufreq_gov_conservative;
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_conservative)
 #endif
-
 
 /*********************************************************************
  *                     FREQUENCY TABLE HELPERS                       *
@@ -378,7 +369,6 @@ void cpufreq_frequency_table_get_attr(struct cpufreq_frequency_table *table,
 				      unsigned int cpu);
 
 void cpufreq_frequency_table_put_attr(unsigned int cpu);
-
 
 /*********************************************************************
  *                     UNIFIED DEBUG HELPERS                         *

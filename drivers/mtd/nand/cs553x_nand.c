@@ -277,11 +277,9 @@ static int is_geode(void)
 	return 0;
 }
 
-
 #ifdef CONFIG_MTD_PARTITIONS
 static const char *part_probes[] = { "cmdlinepart", NULL };
 #endif
-
 
 static int __init cs553x_init(void)
 {

@@ -48,7 +48,6 @@
 #include <linux/kthread.h>
 #include <linux/freezer.h>
 
-
 STATIC xfs_inode_t *
 xfs_inode_ag_lookup(
 	struct xfs_mount	*mp,
@@ -388,7 +387,6 @@ xfs_sync_fsdata(
 		if (XFS_BUF_ISPINNED(bp))
 			xfs_log_force(mp, 0, XFS_LOG_FORCE);
 	}
-
 
 	if (flags & SYNC_WAIT)
 		XFS_BUF_UNASYNC(bp);

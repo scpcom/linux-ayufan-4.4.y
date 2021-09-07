@@ -274,8 +274,6 @@ enum mxc_card_no {
 #define PBC_INTR_MS_EN          0x4000
 #define PBC_INTR_SD1_EN         0x8000
 
-
-
 /* For interrupts like xuart, enet etc */
 #define EXPIO_PARENT_INT        IOMUX_TO_IRQ(MX27_PIN_TIN)
 #define MXC_MAX_EXP_IO_LINES    16

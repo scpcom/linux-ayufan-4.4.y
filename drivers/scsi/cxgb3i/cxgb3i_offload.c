@@ -647,7 +647,6 @@ static int c3cn_push_tx_frames(struct s3_conn *c3cn, int req_completion)
 				c3cn, skb->len, skb->data_len, frags,
 				wrs_needed, c3cn->wr_avail, c3cn->wr_unacked);
 
-
 		if (likely(skb_flags(skb) & C3CB_FLAG_NEED_HDR)) {
 			if ((req_completion &&
 				c3cn->wr_unacked == wrs_needed) ||
@@ -1565,7 +1564,6 @@ free_tid:
 out_err:
 	return -1;
 }
-
 
 /**
  * cxgb3i_c3cn_connect - initiates an iscsi tcp connection to a given address

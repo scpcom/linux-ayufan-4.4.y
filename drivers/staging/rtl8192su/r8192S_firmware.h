@@ -1,7 +1,6 @@
 #ifndef __INC_FIRMWARE_H
 #define __INC_FIRMWARE_H
 
-
 //#define RTL8190_CPU_START_OFFSET	0x80
 /* TODO: this definition is TBD */
 //#define USB_HWDESC_HEADER_LEN	0
@@ -24,7 +23,6 @@
 //	DESC_PACKET_TYPE_NORMAL = 1,
 //}DESC_PACKET_TYPE;
 #define	RTL8192S_FW_PKT_FRAG_SIZE		0xFF00	// 64K
-
 
 #define 	RTL8190_MAX_FIRMWARE_CODE_SIZE	64000	//64k
 #define	MAX_FIRMWARE_CODE_SIZE	0xFF00 // Firmware Local buffer size.
@@ -63,7 +61,6 @@ typedef enum _firmware_source{
 	FW_SOURCE_IMG_FILE = 0,
 	FW_SOURCE_HEADER_FILE = 1,
 }firmware_source_e, *pfirmware_source_e;
-
 
 typedef enum _opt_rst_type{
 	OPT_SYSTEM_RESET = 0,
@@ -104,7 +101,6 @@ typedef  struct _RT_8192S_FIRMWARE_PRIV { //8-bytes alignment required
 	u8		rsvd010;
 	u8		rsvd011;
 
-
 	//--- long word 2 ----
 	u8		lbk_mode;	//0x00: normal, 0x03: MACLBK, 0x01: PHYLBK
 	u8		mp_mode;	// 1: for MP use, 0: for normal driver (to be discussed)
@@ -124,7 +120,6 @@ typedef  struct _RT_8192S_FIRMWARE_PRIV { //8-bytes alignment required
 	u8		aggregation_offload;	// FW offloads, 0: driver handles
 	u8		rsvd030;
 	u8		rsvd031;
-
 
 	//--- long word 4 ----
 	unsigned char		beacon_offload;			// 1. FW offloads, 0: driver handles
@@ -153,7 +148,6 @@ typedef struct _RT_8192S_FIRMWARE_HDR {//8-byte alinment required
 	u16		Signature;
 	u16		Version;		  //0x8000 ~ 0x8FFF for FPGA version, 0x0000 ~ 0x7FFF for ASIC version,
 	u32		DMEMSize;    //define the size of boot loader
-
 
 	//--- LONG WORD 1 ----
 	u32		IMG_IMEM_SIZE;    //define the size of FW in IMEM
@@ -204,4 +198,3 @@ typedef struct _rt_firmware{
 bool FirmwareDownload92S(struct net_device *dev);
 
 #endif
-

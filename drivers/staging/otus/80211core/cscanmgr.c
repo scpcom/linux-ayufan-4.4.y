@@ -286,7 +286,6 @@ static void zfScanMgrEventSetFreqCompleteCb(zdev_t* dev)
     zfScanSendProbeRequest(dev);
 }
 
-
 static void zfScanMgrEventScanCompleteCb(zdev_t* dev)
 {
     zmw_get_wlan_dev(dev);
@@ -297,7 +296,6 @@ static void zfScanMgrEventScanCompleteCb(zdev_t* dev)
     }
     return;
 }
-
 
 void zfScanMgrScanEventRetry(zdev_t* dev)
 {
@@ -360,7 +358,6 @@ u8_t zfScanMgrScanEventTimeout(zdev_t* dev)
             zmw_leave_critical_section(dev);
             goto report_scan_result;
         }
-
 
         currScanType = wd->sta.scanMgr.currScanType;
         switch(currScanType)

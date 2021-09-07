@@ -27,7 +27,6 @@
 #define UL(x) (x)
 #endif
 
-
 #define PHYS_OFFSET	UL(0x00000000)
 
 /*

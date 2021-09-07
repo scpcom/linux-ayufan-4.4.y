@@ -378,7 +378,6 @@ retry_tsb_alloc:
 	old_size = (mm->context.tsb_block[tsb_index].tsb_nentries *
 		    sizeof(struct tsb));
 
-
 	/* Handle multiple threads trying to grow the TSB at the same time.
 	 * One will get in here first, and bump the size and the RSS limit.
 	 * The others will get in here next and hit this check.

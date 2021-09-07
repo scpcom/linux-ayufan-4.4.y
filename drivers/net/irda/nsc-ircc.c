@@ -362,7 +362,6 @@ static int __init nsc_ircc_open(chipio_t *info)
 
 	IRDA_DEBUG(2, "%s()\n", __func__);
 
-
  	for (chip_index = 0; chip_index < ARRAY_SIZE(dev_self); chip_index++) {
 		if (!dev_self[chip_index])
 			break;
@@ -807,7 +806,6 @@ static int nsc_ircc_probe_338(nsc_chip_t *chip, chipio_t *info)
 
 	return 0;
 }
-
 
 /*
  * Function nsc_ircc_init_39x (chip, info)
@@ -2403,7 +2401,6 @@ MODULE_AUTHOR("Dag Brattli <dagb@cs.uit.no>");
 MODULE_DESCRIPTION("NSC IrDA Device Driver");
 MODULE_LICENSE("GPL");
 
-
 module_param(qos_mtt_bits, int, 0);
 MODULE_PARM_DESC(qos_mtt_bits, "Minimum Turn Time");
 module_param_array(io, int, NULL, 0);
@@ -2417,4 +2414,3 @@ MODULE_PARM_DESC(dongle_id, "Type-id of used dongle");
 
 module_init(nsc_ircc_init);
 module_exit(nsc_ircc_cleanup);
-

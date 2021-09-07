@@ -47,7 +47,6 @@
  * 2.1.0   2009_05_04 sec - add SNOW-3G CHA support
  */
 
-
 /** @file
  * Handles device version detection for Talitos 2/3 devices, and
  * sets up "capability information" for an initialized device
@@ -58,9 +57,6 @@
 #include "t23xrmInternal.h"
 
 extern T2CoreInstance t2blk[];
-
-
-
 
 static const uint8_t devname_unknown[] = { "unknown" };
 static const uint8_t devname_2_0_0[]   = { "2.0.0" }; /* 8541/8555 */
@@ -182,7 +178,6 @@ static const uint8_t devname_3_3_2[]   = { "3.3.2" }; /* p1021/p1022 */
 #define HAS_HMAC_SNOOP_AESU_CTR    0x01000000
 #define HAS_DBL_CRC                0x02000000
 
-
 /**
  * Core ID and capabilty map builder.
  * This needs to be made table-driven
@@ -209,7 +204,6 @@ void t23xrmCoreID(T2CoreInstance *inst, uint8_t fdt)
         thisInst->euPresent     = HAS_NULL;
         thisInst->validTypes    = 0;
     }
-
 
     /* 2.0.0 - 8541/8555 */
     if (thisInst->regs->ctrl.ID == 0x0000000000000040ull)
@@ -629,7 +623,6 @@ void t23xrmCoreID(T2CoreInstance *inst, uint8_t fdt)
                                       HAS_HMAC_SNOOP_AESU_CTR | HAS_DBL_CRC;
         }
     }
-
 
 	/* 3.3.2 - p1021, p1022 */
 	if ((thisInst->regs->ctrl.ID == 0x0030030300020000ull) &&

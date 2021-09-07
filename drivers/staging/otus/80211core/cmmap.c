@@ -92,7 +92,6 @@ void zfApInitStaTbl(zdev_t* dev)
     return;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfApFindSta                 */
@@ -151,7 +150,6 @@ u16_t zfApGetSTAInfo(zdev_t* dev, u16_t* addr, u16_t* state, u8_t* vap)
 
     return id;
 }
-
 
 void zfApGetStaQosType(zdev_t* dev, u16_t* addr, u8_t* qosType)
 {
@@ -345,7 +343,6 @@ void zfApGetStaCencIvAndKeyIdx(zdev_t* dev, u16_t* addr, u32_t *iv, u8_t *keyIdx
     zmw_get_wlan_dev(dev);
     zmw_declare_for_critical_section();
 
-
     zmw_enter_critical_section(dev);
 
     if ((id = zfApFindSta(dev, addr)) != 0xffff)
@@ -376,7 +373,6 @@ void zfApSetStaCencIv(zdev_t* dev, u16_t* addr, u32_t *iv)
     zmw_get_wlan_dev(dev);
     zmw_declare_for_critical_section();
 
-
     zmw_enter_critical_section(dev);
 
     if ((id = zfApFindSta(dev, addr)) != 0xffff)
@@ -392,7 +388,6 @@ void zfApSetStaCencIv(zdev_t* dev, u16_t* addr, u32_t *iv)
     return;
 }
 #endif //ZM_ENABLE_CENC
-
 
 /************************************************************************/
 /*                                                                      */
@@ -481,7 +476,6 @@ void zfApFlushBufferedPsFrame(zdev_t* dev)
     }
     return;
 }
-
 
 u16_t zfApBufferPsFrame(zdev_t* dev, zbuf_t* buf, u16_t port)
 {
@@ -695,7 +689,6 @@ u16_t zfApGetNewSta(zdev_t* dev)
     return 0xffff;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfApAddSta                  */
@@ -803,7 +796,6 @@ u16_t zfApAddSta(zdev_t* dev, u16_t* addr, u16_t state, u16_t apId, u8_t type,
     return index;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfApAgingSta                */
@@ -893,7 +885,6 @@ void zfApAgingSta(zdev_t* dev)
                 }
             }
 
-
         }
         zmw_leave_critical_section(dev);
 
@@ -952,7 +943,6 @@ void zfApProtctionMonitor(zdev_t* dev)
     wd->ap.protectedObss = 0;
 }
 
-
 void zfApProcessBeacon(zdev_t* dev, zbuf_t* buf)
 {
     u16_t offset;
@@ -979,7 +969,6 @@ void zfApProcessBeacon(zdev_t* dev, zbuf_t* buf)
 
     return;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -1013,7 +1002,6 @@ void zfApProcessAuth(zdev_t* dev, zbuf_t* buf, u16_t* src, u16_t apId)
     u32_t retStatus;
     zmw_get_wlan_dev(dev);
     zmw_declare_for_critical_section();
-
 
     frameCtrl = zmw_rx_buf_readb(dev, buf, 1);
     /* AP : Auth share 3 */
@@ -1275,7 +1263,6 @@ void zfApProcessAsocReq(zdev_t* dev, zbuf_t* buf, u16_t* src, u16_t apId)
                 wd->ap.stawpaLen[apId] = length+2;
                 encMode = 1;
 
-
                 zm_msg1_mm(ZM_LV_0, "WPA Mode zfwAsocNotify, apId=", apId);
 
                 /* AP : Call zfwAsocNotify() */
@@ -1452,7 +1439,6 @@ void zfApStoreAsocReqIe(zdev_t* dev, zbuf_t* buf, u16_t aid)
         return;
     }
 
-
     /* supported regulatory classes */
     offset = offset + length;
     //length = zmw_rx_buf_readb(dev, buf, offset + 1);
@@ -1513,7 +1499,6 @@ void zfApProcessDisasoc(zdev_t* dev, zbuf_t* buf, u16_t* src, u16_t apId)
     zmw_leave_critical_section(dev);
 
 }
-
 
 void zfApProcessProbeRsp(zdev_t* dev, zbuf_t* buf, struct zsAdditionInfo* AddInfo)
 {
@@ -1581,7 +1566,6 @@ u16_t zfApAddIeSsid(zdev_t* dev, zbuf_t* buf, u16_t offset, u16_t vap)
 
     return offset;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -1739,8 +1723,6 @@ u16_t zfApAddIeTim(zdev_t* dev, zbuf_t* buf, u16_t offset, u16_t vap)
     return offset;
 }
 
-
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfApRemoveFromPsQueue       */
@@ -1858,7 +1840,6 @@ u16_t zfApAddIeWmePara(zdev_t* dev, zbuf_t* buf, u16_t offset, u16_t vap)
     return offset;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfApSendBeacon              */
@@ -1891,7 +1872,6 @@ void zfApSendBeacon(zdev_t* dev)
         wd->ap.beaconCounter = 0;
     }
     vap = wd->ap.beaconCounter;
-
 
     zm_msg1_mm(ZM_LV_2, "Send beacon, vap=", vap);
 
@@ -2037,7 +2017,6 @@ void zfApSendBeacon(zdev_t* dev)
 
     //zfwBufFree(dev, buf, 0);
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -2341,7 +2320,6 @@ void zfApSetProtectionMode(zdev_t* dev, u16_t mode)
     return;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfApSendFailure             */
@@ -2377,7 +2355,6 @@ void zfApSendFailure(zdev_t* dev, u8_t* addr)
     }
     zmw_leave_critical_section(dev);
 }
-
 
 void zfApProcessAction(zdev_t* dev, zbuf_t* buf)
 {

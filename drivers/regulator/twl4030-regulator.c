@@ -17,7 +17,6 @@
 #include <linux/regulator/machine.h>
 #include <linux/i2c/twl4030.h>
 
-
 /*
  * The TWL4030/TW5030/TPS659x0 family chips include power management, a
  * USB OTG transceiver, an RTC, ADC, PWM, and lots more.  Some versions
@@ -47,7 +46,6 @@ struct twlreg_info {
 	struct regulator_desc	desc;
 };
 
-
 /* LDO control registers ... offset is from the base of its register bank.
  * The first three registers of all power resource banks help hardware to
  * manage the various resource groups.
@@ -56,7 +54,6 @@ struct twlreg_info {
 #define VREG_TYPE		1
 #define VREG_REMAP		2
 #define VREG_DEDICATED		3	/* LDO control */
-
 
 static inline int
 twl4030reg_read(struct twlreg_info *info, unsigned offset)
@@ -207,7 +204,6 @@ static int twl4030reg_set_mode(struct regulator_dev *rdev, unsigned mode)
 #define IS_UNSUP(x)	(UNSUP_MASK & (x))
 #define LDO_MV(x)	(~UNSUP_MASK & (x))
 
-
 static const u16 VAUX1_VSEL_table[] = {
 	UNSUP(1500), UNSUP(1800), 2500, 2800,
 	3000, 3000, 3000, 3000,
@@ -260,7 +256,6 @@ static const u16 VSIM_VSEL_table[] = {
 static const u16 VDAC_VSEL_table[] = {
 	1200, 1300, 1800, 1800,
 };
-
 
 static int twl4030ldo_list_voltage(struct regulator_dev *rdev, unsigned index)
 {

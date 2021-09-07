@@ -1840,11 +1840,9 @@ void gdbstub(int sigval)
 		case 'k' :
 			goto done;	/* just continue */
 
-
 			/* reset the whole machine (FIXME: system dependent) */
 		case 'r':
 			break;
-
 
 			/* step to next instruction */
 		case 's':

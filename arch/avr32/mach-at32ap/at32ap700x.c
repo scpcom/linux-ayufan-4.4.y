@@ -35,7 +35,6 @@
 #include "pio.h"
 #include "pm.h"
 
-
 #define PBMEM(base)					\
 	{						\
 		.start		= base,			\

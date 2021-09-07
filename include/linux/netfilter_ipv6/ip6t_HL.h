@@ -18,5 +18,4 @@ struct ip6t_HL_info {
 	u_int8_t	hop_limit;
 };
 
-
 #endif

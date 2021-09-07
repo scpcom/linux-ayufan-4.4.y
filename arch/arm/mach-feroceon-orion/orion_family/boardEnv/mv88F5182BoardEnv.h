@@ -62,10 +62,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvBoard88F5182EnvSpech
 #define __INCmvBoard88F5182EnvSpech
-
 
 /* 88F5182 based boards ID numbers */
 /* =============================== */
@@ -83,8 +81,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DB_88F5182_DDR2_A			(BOARD_ID_88F5182_BASE+0x3)
 
 #define BOARD_ID_88F5182_MAX			(BOARD_ID_88F5182_BASE+0x4)
-
-
 
 #define DB_88F5182_DDR2_MPP0_7			0x55222203
 #define DB_88F5182_DDR2_MPP8_15			0x44550000

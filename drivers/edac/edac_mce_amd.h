@@ -60,7 +60,6 @@ struct err_regs {
 	u32 nbeal;
 };
 
-
 void amd_report_gart_errors(bool);
 void amd_register_ecc_decoder(void (*f)(int, struct err_regs *));
 void amd_unregister_ecc_decoder(void (*f)(int, struct err_regs *));

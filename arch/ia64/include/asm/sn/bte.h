@@ -6,7 +6,6 @@
  * Copyright (c) 2000-2007 Silicon Graphics, Inc.  All Rights Reserved.
  */
 
-
 #ifndef _ASM_IA64_SN_BTE_H
 #define _ASM_IA64_SN_BTE_H
 
@@ -35,12 +34,10 @@
 #  define BTE_PRINTKV(x)
 #endif	/* BTE_DEBUG */
 
-
 /* BTE status register only supports 16 bits for length field */
 #define BTE_LEN_BITS (16)
 #define BTE_LEN_MASK ((1 << BTE_LEN_BITS) - 1)
 #define BTE_MAX_XFER (BTE_LEN_MASK << L1_CACHE_SHIFT)
-
 
 /* Define hardware */
 #define BTES_PER_NODE (is_shub2() ? 4 : 2)
@@ -204,7 +201,6 @@ struct bteinfo_s {
 	struct bteinfo_s *btes_to_try[MAX_BTES_PER_NODE];
 };
 
-
 /*
  * Function prototypes (functions defined in bte.c, used elsewhere)
  */
@@ -229,6 +225,5 @@ extern void bte_error_handler(unsigned long);
 	  (dest & (L1_CACHE_BYTES - 1))) ?				\
 	 bte_unaligned_copy(src, dest, len, mode) :			\
 	 bte_copy(src, dest, len, mode, NULL))
-
 
 #endif	/* _ASM_IA64_SN_BTE_H */

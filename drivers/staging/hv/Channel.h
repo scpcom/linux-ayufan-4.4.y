@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef _CHANNEL_H_
 #define _CHANNEL_H_
 
@@ -50,7 +49,6 @@ struct VMBUS_CHANNEL_PACKET_MULITPAGE_BUFFER {
 	u32 RangeCount;		/* Always 1 in this case */
 	struct hv_multipage_buffer Range;
 } __attribute__((packed));
-
 
 extern int VmbusChannelOpen(struct vmbus_channel *channel,
 			    u32 SendRingBufferSize,

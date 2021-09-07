@@ -315,7 +315,6 @@ static int dlci_add(struct dlci_add *dlci)
 	struct frad_local	*flp;
 	int			err = -EINVAL;
 
-
 	/* validate slave device */
 	slave = dev_get_by_name(&init_net, dlci->devname);
 	if (!slave)

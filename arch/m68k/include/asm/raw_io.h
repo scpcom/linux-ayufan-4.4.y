@@ -12,7 +12,6 @@
 
 #include <asm/types.h>
 
-
 /* Values for nocacheflag and cmode */
 #define IOMAP_FULL_CACHING		0
 #define IOMAP_NOCACHE_SER		1
@@ -24,7 +23,6 @@ extern void iounmap(void __iomem *addr);
 extern void __iomem *__ioremap(unsigned long physaddr, unsigned long size,
 		       int cacheflag);
 extern void __iounmap(void *addr, unsigned long size);
-
 
 /* ++roman: The assignments to temp. vars avoid that gcc sometimes generates
  * two accesses to memory, which may be undesirable for some devices.
@@ -234,7 +232,6 @@ static inline void raw_outsl(volatile u32 __iomem *port, const u32 *buf,
 			  "1" (tmp));
 	}
 }
-
 
 static inline void raw_insw_swapw(volatile u16 __iomem *port, u16 *buf,
 				  unsigned int nr)

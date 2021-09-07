@@ -179,7 +179,6 @@
 #define FPC_PAD_SIZE	4 /* gcc insists on aligning the fpregs */
 #define ACR_SIZE	4
 
-
 #define PTRACE_OLDSETOPTIONS         21
 
 #ifndef __ASSEMBLY__

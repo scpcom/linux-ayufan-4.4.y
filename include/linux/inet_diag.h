@@ -101,7 +101,6 @@ enum {
 
 #define INET_DIAG_MAX INET_DIAG_CONG
 
-
 /* INET_DIAG_MEM */
 
 struct inet_diag_meminfo {

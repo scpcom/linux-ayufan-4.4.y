@@ -154,4 +154,3 @@ extern void sdio_f0_writeb(struct sdio_func *func, unsigned char b,
 	unsigned int addr, int *err_ret);
 
 #endif
-

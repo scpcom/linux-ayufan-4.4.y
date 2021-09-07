@@ -263,7 +263,6 @@ int scsi_execute(struct scsi_device *sdev, const unsigned char *cmd,
 }
 EXPORT_SYMBOL(scsi_execute);
 
-
 int scsi_execute_req(struct scsi_device *sdev, const unsigned char *cmd,
 		     int data_direction, void *buffer, unsigned bufflen,
 		     struct scsi_sense_hdr *sshdr, int timeout, int retries,
@@ -1306,7 +1305,6 @@ static inline int scsi_dev_queue_ready(struct request_queue *q,
 	return 1;
 }
 
-
 /*
  * scsi_target_queue_ready: checks if there we can send commands to target
  * @sdev: scsi device on starget to check.
@@ -1558,7 +1556,6 @@ static void scsi_request_fn(struct request_queue *q)
 			scsi_kill_request(req, q);
 			continue;
 		}
-
 
 		/*
 		 * Remove the request from the request list.
@@ -2015,7 +2012,6 @@ scsi_mode_select(struct scsi_device *sdev, int pf, int sp, int modepage,
 		real_buffer[2] = data->device_specific;
 		real_buffer[3] = data->block_descriptor_length;
 		
-
 		cmd[0] = MODE_SELECT;
 		cmd[4] = len;
 	}

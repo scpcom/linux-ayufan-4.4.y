@@ -21,7 +21,6 @@
 struct xfs_btree_cur;
 struct xfs_buf;
 
-
 /*
  * Trace hooks.
  * i,j = integer (32 bit)
@@ -71,7 +70,6 @@ void xfs_btree_trace_argr(const char *, struct xfs_btree_cur *,
 		union xfs_btree_rec *, int);
 void xfs_btree_trace_cursor(const char *, struct xfs_btree_cur *, int, int);
 
-
 #define XFS_ALLOCBT_TRACE_SIZE	4096	/* size of global trace buffer */
 extern ktrace_t	*xfs_allocbt_trace_buf;
 
@@ -81,7 +79,6 @@ extern ktrace_t	*xfs_inobt_trace_buf;
 #define XFS_BMBT_TRACE_SIZE	4096	/* size of global trace buffer */
 #define XFS_BMBT_KTRACE_SIZE	32	/* size of per-inode trace buffer */
 extern ktrace_t	*xfs_bmbt_trace_buf;
-
 
 #define	XFS_BTREE_TRACE_ARGBI(c, b, i)	\
 	xfs_btree_trace_argbi(__func__, c, b, i, __LINE__)

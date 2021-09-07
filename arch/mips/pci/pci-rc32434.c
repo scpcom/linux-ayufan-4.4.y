@@ -147,14 +147,12 @@ static int __init rc32434_pcibridge_init(void)
 	rc32434_pci_msg->pciioic = 0;
 	rc32434_pci_msg->pciioim = 0;
 
-
 	/* Setup PCILB0 as Memory Window */
 	rc32434_pci->pcilba[0].address = (unsigned int) (PCI_ADDR_START);
 
 	/* setup the PCI map address as same as the local address */
 
 	rc32434_pci->pcilba[0].mapping = (unsigned int) (PCI_ADDR_START);
-
 
 	/* Setup PCILBA1 as MEM */
 	rc32434_pci->pcilba[0].control =

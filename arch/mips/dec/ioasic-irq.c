@@ -17,9 +17,7 @@
 #include <asm/dec/ioasic_addrs.h>
 #include <asm/dec/ioasic_ints.h>
 
-
 static int ioasic_irq_base;
-
 
 static inline void unmask_ioasic_irq(unsigned int irq)
 {
@@ -67,7 +65,6 @@ static struct irq_chip ioasic_irq_type = {
 	.unmask = unmask_ioasic_irq,
 };
 
-
 #define unmask_ioasic_dma_irq unmask_ioasic_irq
 
 #define mask_ioasic_dma_irq mask_ioasic_irq
@@ -89,7 +86,6 @@ static struct irq_chip ioasic_dma_irq_type = {
 	.unmask = unmask_ioasic_dma_irq,
 	.end = end_ioasic_dma_irq,
 };
-
 
 void __init init_ioasic_irqs(int base)
 {

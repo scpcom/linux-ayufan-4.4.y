@@ -86,7 +86,6 @@ struct uvc_xu_control {
 	(UVC_ENTITY_IS_TERM(entity) && \
 	((entity)->type & 0x8000) == UVC_TERM_OUTPUT)
 
-
 /* ------------------------------------------------------------------------
  * GUIDs
  */
@@ -130,7 +129,6 @@ struct uvc_xu_control {
 #define UVC_GUID_FORMAT_BY8 \
 	{ 'B',  'Y',  '8',  ' ', 0x00, 0x00, 0x10, 0x00, \
 	 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}
-
 
 /* ------------------------------------------------------------------------
  * Driver specific constants.
@@ -667,4 +665,3 @@ void uvc_video_decode_isight(struct urb *urb, struct uvc_streaming *stream,
 #endif /* __KERNEL__ */
 
 #endif
-

@@ -44,4 +44,3 @@
 #		tst		\rd, #1 << 6			@ THR and Tx FIFO empty
 #		beq		1001b
 		.endm
-

@@ -13,7 +13,6 @@
 #include <linux/module.h>
 #include <linux/genalloc.h>
 
-
 /**
  * gen_pool_create - create a new special memory pool
  * @min_alloc_order: log base 2 of number of bytes each bitmap bit represents
@@ -83,7 +82,6 @@ void gen_pool_destroy(struct gen_pool *pool)
 	struct gen_pool_chunk *chunk;
 	int order = pool->min_alloc_order;
 	int bit, end_bit;
-
 
 	list_for_each_safe(_chunk, _next_chunk, &pool->chunks) {
 		chunk = list_entry(_chunk, struct gen_pool_chunk, next_chunk);

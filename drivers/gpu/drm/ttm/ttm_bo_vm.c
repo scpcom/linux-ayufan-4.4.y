@@ -121,7 +121,6 @@ static int ttm_bo_vm_fault(struct vm_area_struct *vma, struct vm_fault *vmf)
 	} else
 		spin_unlock(&bo->lock);
 
-
 	ret = ttm_bo_pci_offset(bdev, &bo->mem, &bus_base, &bus_offset,
 				&bus_size);
 	if (unlikely(ret != 0)) {
@@ -290,7 +289,6 @@ int ttm_fbdev_mmap(struct vm_area_struct *vma, struct ttm_buffer_object *bo)
 	return 0;
 }
 EXPORT_SYMBOL(ttm_fbdev_mmap);
-
 
 ssize_t ttm_bo_io(struct ttm_bo_device *bdev, struct file *filp,
 		  const char __user *wbuf, char __user *rbuf, size_t count,

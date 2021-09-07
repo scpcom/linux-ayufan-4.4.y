@@ -335,7 +335,6 @@ struct dasd_rssd_features {
 	char feature[256];
 } __attribute__((packed));
 
-
 /*
  * Perform Subsystem Function - Prepare for Read Subsystem Data
  */
@@ -358,7 +357,6 @@ struct dasd_psf_ssc_data {
 	unsigned char reserved[59];
 } __attribute__((packed));
 
-
 /*
  * some structures and definitions for alias handling
  */
@@ -369,7 +367,6 @@ struct dasd_unit_address_configuration {
 	} unit[256];
 } __attribute__((packed));
 
-
 #define MAX_DEVICES_PER_LCU 256
 
 /* flags on the LCU  */
@@ -377,7 +374,6 @@ struct dasd_unit_address_configuration {
 #define UPDATE_PENDING	0x02
 
 enum pavtype {NO_PAV, BASE_PAV, HYPER_PAV};
-
 
 struct alias_root {
 	struct list_head serverlist;
@@ -425,7 +421,6 @@ struct alias_pav_group {
 	struct dasd_device *next;
 };
 
-
 struct dasd_eckd_private {
 	struct dasd_eckd_characteristics rdc_data;
 	u8 *conf_data;
@@ -450,8 +445,6 @@ struct dasd_eckd_private {
 	struct alias_lcu *lcu;
 	int count;
 };
-
-
 
 int dasd_alias_make_device_known_to_lcu(struct dasd_device *);
 void dasd_alias_disconnect_device_from_lcu(struct dasd_device *);

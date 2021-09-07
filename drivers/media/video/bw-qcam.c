@@ -31,11 +31,9 @@
  * See the included documentation for usage instructions and details
  * of the protocol involved. */
 
-
 /* Version 0.5, August 4, 1996 */
 /* Version 0.7, August 27, 1996 */
 /* Version 0.9, November 17, 1996 */
-
 
 /******************************************************************
 
@@ -203,7 +201,6 @@ static struct qcam_device *qcam_init(struct parport *port)
 	return q;
 }
 
-
 /* qc_command is probably a bit of a misnomer -- it's used to send
  * bytes *to* the camera.  Generally, these bytes are either commands
  * or arguments to commands, so the name fits, but it still bugs me a
@@ -323,7 +320,6 @@ static unsigned int qc_waithand2(struct qcam_device *q, int val)
 	return status;
 }
 
-
 /* Try to detect a QuickCam.  It appears to flash the upper 4 bits of
    the status register at 5-10 Hz.  This is only used in the autoprobe
    code.  Be aware that this isn't the way Connectix detects the
@@ -351,7 +347,6 @@ static int qc_detect(struct qcam_device *q)
 		mdelay(2);
 	}
 
-
 #if 0
 	/* Force camera detection during testing. Sometimes the camera
 	   won't be flashing these bits. Possibly unloading the module
@@ -372,7 +367,6 @@ static int qc_detect(struct qcam_device *q)
 		return 0;	/* not found */
 	}
 }
-
 
 /* Reset the QuickCam.  This uses the same sequence the Windows
  * QuickPic program uses.  Someone with a bi-directional port should
@@ -408,7 +402,6 @@ static void qc_reset(struct qcam_device *q)
 	write_lpcontrol(q, 0xe);
 	qc_setscanmode(q);		/* in case port_mode changed */
 }
-
 
 /* Decide which scan mode to use.  There's no real requirement that
  * the scanmode match the resolution in q->height and q-> width -- the
@@ -460,7 +453,6 @@ static int qc_setscanmode(struct qcam_device *q)
 
 	return 0;
 }
-
 
 /* Reset the QuickCam and program for brightness, contrast,
  * white-balance, and resolution. */

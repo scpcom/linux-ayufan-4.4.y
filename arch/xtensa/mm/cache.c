@@ -113,7 +113,6 @@ void flush_dcache_page(struct page *page)
 	/* There shouldn't be an entry in the cache for this page anymore. */
 }
 
-
 /*
  * For now, flush the whole cache. FIXME??
  */

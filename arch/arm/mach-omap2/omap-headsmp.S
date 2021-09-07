@@ -43,4 +43,3 @@ hold:	ldr	r1, =OMAP4_AUX_CORE_BOOT1_PA	@ read from AuxCoreBoot1
 	 * should now contain the SVC stack for this core
 	 */
 	b	secondary_startup
-

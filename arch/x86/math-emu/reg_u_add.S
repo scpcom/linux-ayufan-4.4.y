@@ -147,8 +147,6 @@ L_no_bit_lost:
 L_round_the_result:
 	jmp	fpu_reg_round	/* Round the result */
 
-
-
 #ifdef PARANOID
 /* If we ever get here then we have problems! */
 L_bugged:

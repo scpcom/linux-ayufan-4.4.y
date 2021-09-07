@@ -205,8 +205,6 @@ cmpk_count_txstatistic(
 
 }	/* cmpk_CountTxStatistic */
 
-
-
 /*-----------------------------------------------------------------------------
  * Function:    cmpk_handle_tx_feedback()
  *
@@ -287,9 +285,6 @@ cmdpkt_beacontimerinterrupt_819xusb(
 
 }
 
-
-
-
 /*-----------------------------------------------------------------------------
  * Function:    cmpk_handle_interrupt_status()
  *
@@ -336,7 +331,6 @@ cmpk_handle_interrupt_status(
 		return;
 	}
 
-
 	// Statistics of beacon for ad-hoc mode.
 	if(	priv->ieee80211->iw_mode == IW_MODE_ADHOC)
 	{
@@ -366,11 +360,9 @@ cmpk_handle_interrupt_status(
 
 	 // Other informations in interrupt status we need?
 
-
 	DMESG("<---- cmpk_handle_interrupt_status()\n");
 
 }	/* cmpk_handle_interrupt_status */
-
 
 /*-----------------------------------------------------------------------------
  * Function:    cmpk_handle_query_config_rx()
@@ -418,7 +410,6 @@ cmpk_handle_query_config_rx(
 								  (pmsg[14] << 8) | (pmsg[15] << 0);
 
 }	/* cmpk_Handle_Query_Config_Rx */
-
 
 /*-----------------------------------------------------------------------------
  * Function:	cmpk_count_tx_status()
@@ -485,8 +476,6 @@ static	void	cmpk_count_tx_status(	struct net_device *dev,
 	priv->stats.last_packet_rate		= pstx_status->rate;
 }	/* cmpk_CountTxStatus */
 
-
-
 /*-----------------------------------------------------------------------------
  * Function:	cmpk_handle_tx_status()
  *
@@ -517,7 +506,6 @@ cmpk_handle_tx_status(
 
 }	/* cmpk_Handle_Tx_Status */
 
-
 /*-----------------------------------------------------------------------------
  * Function:	cmpk_handle_tx_rate_history()
  *
@@ -545,7 +533,6 @@ cmpk_handle_tx_rate_history(
 	u16				length = sizeof(cmpk_tx_rahis_t);
 	u32				*ptemp;
 	struct r8192_priv *priv = ieee80211_priv(dev);
-
 
 #ifdef ENABLE_PS
 	pAdapter->HalFunc.GetHwRegHandler(pAdapter, HW_VAR_RF_STATE, (pu1Byte)(&rtState));
@@ -596,7 +583,6 @@ cmpk_handle_tx_rate_history(
 	}
 
 }	/* cmpk_Handle_Tx_Rate_History */
-
 
 /*-----------------------------------------------------------------------------
  * Function:    cmpk_message_handle_rx()

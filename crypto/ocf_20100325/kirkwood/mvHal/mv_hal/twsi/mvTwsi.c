@@ -62,11 +62,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #include "mvTwsi.h"
 #include "mvTwsiSpec.h"
 #include "cpu/mvCpu.h"
-
 
 /*#define MV_DEBUG*/
 #ifdef MV_DEBUG
@@ -85,7 +83,6 @@ static MV_STATUS twsiAddr10BitSet(MV_U8 chanNum, MV_U32 deviceAddress,MV_TWSI_CM
 static MV_STATUS twsiDataTransmit(MV_U8 chanNum, MV_U8 *pBlock, MV_U32 blockSize);
 static MV_STATUS twsiDataReceive(MV_U8 chanNum, MV_U8 *pBlock, MV_U32 blockSize);
 static MV_STATUS twsiTargetOffsSet(MV_U8 chanNum, MV_U32 offset,MV_BOOL moreThen256);
-
 
 static MV_BOOL twsiTimeoutChk(MV_U32 timeout, const MV_8 *pString)
 {
@@ -147,7 +144,6 @@ MV_STATUS mvTwsiStartBitSet(MV_U8 chanNum)
 	/* check for timeout */	
 	if(MV_TRUE == twsiTimeoutChk(timeout,"TWSI: mvTwsiStartBitSet ERROR - Start Clear bit TimeOut .\n"))
 		return MV_TIMEOUT;
-
 
 	/* check that start bit went down */
 	if((MV_REG_READ(TWSI_CONTROL_REG(chanNum)) & TWSI_CONTROL_START_BIT) != 0)
@@ -283,7 +279,6 @@ static MV_VOID twsiIntFlgClr(MV_U8 chanNum)
 	return;
 }
 
-
 /*******************************************************************************
 * twsiAckBitSet - Set acknowledge bit on the bus
 *
@@ -312,7 +307,6 @@ static MV_VOID twsiAckBitSet(MV_U8 chanNum)
 	mvOsDelay(1);
 	return;
 }
-
 
 /*******************************************************************************
 * twsiInit - Initialize TWSI interface
@@ -411,7 +405,6 @@ MV_U32 mvTwsiInit(MV_U8 chanNum, MV_HZ frequancy, MV_U32 Tclk, MV_TWSI_ADDR *pTw
    return actualFreq;
 } 
 
-
 /*******************************************************************************
 * twsiStsGet - Get the TWSI status value.
 *
@@ -461,12 +454,7 @@ static MV_VOID twsiReset(MV_U8 chanNum)
 	return;
 }
 
-
-
-
 /******************************* POLICY ****************************************/
-
-
 
 /*******************************************************************************
 * mvTwsiAddrSet - Set address on TWSI bus.
@@ -812,8 +800,6 @@ static MV_STATUS twsiDataReceive(MV_U8 chanNum, MV_U8 *pBlock, MV_U32 blockSize)
 
 	return MV_OK;
 }
-
-
 
 /*******************************************************************************
 * twsiTargetOffsSet - Set TWST target offset on TWSI bus.

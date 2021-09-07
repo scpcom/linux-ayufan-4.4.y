@@ -38,7 +38,6 @@
 #include "ad9889_macros.h"
 #include "AD9889A_i2c_handler.h"
 
-
 #if defined(HDCP_OPTION)
 //static DEPLINT bksv_flag_count = 0;
 static DEPLINT hdcp_status = 0;
@@ -62,7 +61,6 @@ DEPLINT next_segment_number;
 BOOL edid_ready = FALSE;
 
 BOOL csc_444_422;
-
 
 void av_mute_on()
 {

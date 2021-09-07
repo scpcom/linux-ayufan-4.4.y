@@ -239,4 +239,3 @@ void s3c_pm_check_cleanup(void)
 	kfree(crcs);
 	crcs = NULL;
 }
-

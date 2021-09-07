@@ -120,4 +120,3 @@ void k8_flush_garts(void)
 		printk("nothing to flush?\n");
 }
 EXPORT_SYMBOL_GPL(k8_flush_garts);
-

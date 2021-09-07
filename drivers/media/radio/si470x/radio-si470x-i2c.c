@@ -21,12 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-
 /*
  * ToDo:
  * - RDS support
  */
-
 
 /* driver definitions */
 #define DRIVER_AUTHOR "Joonyoung Shim <jy0922.shim@samsung.com>";
@@ -41,7 +39,6 @@
 
 #include "radio-si470x.h"
 
-
 /* I2C Device ID List */
 static const struct i2c_device_id si470x_i2c_id[] = {
 	/* Generic Entry */
@@ -51,8 +48,6 @@ static const struct i2c_device_id si470x_i2c_id[] = {
 };
 MODULE_DEVICE_TABLE(i2c, si470x_i2c_id);
 
-
-
 /**************************************************************************
  * Module Parameters
  **************************************************************************/
@@ -61,8 +56,6 @@ MODULE_DEVICE_TABLE(i2c, si470x_i2c_id);
 static int radio_nr = -1;
 module_param(radio_nr, int, 0444);
 MODULE_PARM_DESC(radio_nr, "Radio Nr");
-
-
 
 /**************************************************************************
  * I2C Definitions
@@ -75,8 +68,6 @@ MODULE_PARM_DESC(radio_nr, "Radio Nr");
 /* Read starts with the upper byte of register 0x0a */
 #define READ_REG_NUM		RADIO_REGISTER_NUM
 #define READ_INDEX(i)		((i + RADIO_REGISTER_NUM - 0x0a) % READ_REG_NUM)
-
-
 
 /**************************************************************************
  * General Driver Functions - REGISTERs
@@ -101,7 +92,6 @@ int si470x_get_register(struct si470x_device *radio, int regnr)
 	return 0;
 }
 
-
 /*
  * si470x_set_register - write register
  */
@@ -122,8 +112,6 @@ int si470x_set_register(struct si470x_device *radio, int regnr)
 
 	return 0;
 }
-
-
 
 /**************************************************************************
  * General Driver Functions - ENTIRE REGISTERS
@@ -150,8 +138,6 @@ static int si470x_get_all_registers(struct si470x_device *radio)
 	return 0;
 }
 
-
-
 /**************************************************************************
  * General Driver Functions - DISCONNECT_CHECK
  **************************************************************************/
@@ -163,8 +149,6 @@ int si470x_disconnect_check(struct si470x_device *radio)
 {
 	return 0;
 }
-
-
 
 /**************************************************************************
  * File Operations Interface
@@ -190,7 +174,6 @@ static int si470x_fops_open(struct file *file)
 	return retval;
 }
 
-
 /*
  * si470x_fops_release - file release
  */
@@ -214,7 +197,6 @@ static int si470x_fops_release(struct file *file)
 	return retval;
 }
 
-
 /*
  * si470x_fops - file operations interface
  */
@@ -224,8 +206,6 @@ const struct v4l2_file_operations si470x_fops = {
 	.open		= si470x_fops_open,
 	.release	= si470x_fops_release,
 };
-
-
 
 /**************************************************************************
  * Video4Linux Interface
@@ -245,8 +225,6 @@ int si470x_vidioc_querycap(struct file *file, void *priv,
 
 	return 0;
 }
-
-
 
 /**************************************************************************
  * I2C Interface
@@ -338,7 +316,6 @@ err_initial:
 	return retval;
 }
 
-
 /*
  * si470x_i2c_remove - remove the device
  */
@@ -353,7 +330,6 @@ static __devexit int si470x_i2c_remove(struct i2c_client *client)
 	return 0;
 }
 
-
 /*
  * si470x_i2c_driver - i2c driver interface
  */
@@ -366,8 +342,6 @@ static struct i2c_driver si470x_i2c_driver = {
 	.remove			= __devexit_p(si470x_i2c_remove),
 	.id_table		= si470x_i2c_id,
 };
-
-
 
 /**************************************************************************
  * Module Interface
@@ -382,7 +356,6 @@ static int __init si470x_i2c_init(void)
 	return i2c_add_driver(&si470x_i2c_driver);
 }
 
-
 /*
  * si470x_i2c_exit - module exit
  */
@@ -390,7 +363,6 @@ static void __exit si470x_i2c_exit(void)
 {
 	i2c_del_driver(&si470x_i2c_driver);
 }
-
 
 module_init(si470x_i2c_init);
 module_exit(si470x_i2c_exit);

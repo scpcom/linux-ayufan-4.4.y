@@ -197,7 +197,6 @@ static int girbil_change_speed(struct sir_dev *dev, unsigned speed)
  *        1. clear RTS
  */
 
-
 #define GIRBIL_STATE_WAIT1_RESET	(SIRDEV_STATE_DONGLE_RESET + 1)
 #define GIRBIL_STATE_WAIT2_RESET	(SIRDEV_STATE_DONGLE_RESET + 2)
 #define GIRBIL_STATE_WAIT3_RESET	(SIRDEV_STATE_DONGLE_RESET + 3)

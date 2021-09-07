@@ -328,7 +328,6 @@ static void __exit rcuclassic_trace_cleanup(void)
 	debugfs_remove_recursive(rcudir);
 }
 
-
 module_init(rcuclassic_trace_init);
 module_exit(rcuclassic_trace_cleanup);
 

@@ -32,7 +32,6 @@
 #ifndef __SEP_DRIVER_CONFIG_H__
 #define __SEP_DRIVER_CONFIG_H__
 
-
 /*--------------------------------------
   DRIVER CONFIGURATION FLAGS
   -------------------------------------*/
@@ -61,7 +60,6 @@
 /* maximum number of entries in one LLI tables */
 #define SEP_DRIVER_ENTRIES_PER_TABLE_IN_SEP             8
 
-
 /*--------------------------------------------------------
 	SHARED AREA  memory total size is 36K
 	it is divided is following:
@@ -84,8 +82,6 @@
 	TIME_MEMORY_AREA                     8B
 -----------------------------------------------------------*/
 
-
-
 /*
 	the maximum length of the message - the rest of the message shared
 	area will be dedicated to the dma lli tables
@@ -104,18 +100,15 @@
 /* the size of the message shared area in pages */
 #define SEP_DRIVER_SYNCHRONIC_DMA_TABLES_AREA_SIZE_IN_BYTES   (1024 * 5)
 
-
 /* the size of the data pool shared area size in pages */
 #define SEP_DRIVER_FLOW_DMA_TABLES_AREA_SIZE_IN_BYTES         (1024 * 4)
 
 /* system data (time, caller id etc') pool */
 #define SEP_DRIVER_SYSTEM_DATA_MEMORY_SIZE_IN_BYTES           100
 
-
 /* area size that is mapped  - we map the MESSAGE AREA, STATIC POOL and
 	DATA POOL areas. area must be module 4k */
 #define SEP_DRIVER_MMMAP_AREA_SIZE                            (1024 * 24)
-
 
 /*-----------------------------------------------
 	offsets of the areas starting from the shared area start address
@@ -151,8 +144,6 @@
 /* offset of the time area */
 #define SEP_DRIVER_SYSTEM_TIME_MEMORY_OFFSET_IN_BYTES \
 	(SEP_DRIVER_SYSTEM_DATA_MEMORY_OFFSET_IN_BYTES)
-
-
 
 /* start physical address of the SEP registers memory in HOST */
 #define SEP_IO_MEM_REGION_START_ADDRESS                       0x80000000
@@ -205,7 +196,6 @@
 
 #define SEP_DEBUG_LEVEL_EXTENDED    0x4
 
-
 /* Debug helpers */
 
 #define dbg(fmt, args...) \
@@ -219,7 +209,5 @@ do { \
 	if (debug & SEP_DEBUG_LEVEL_EXTENDED) \
 		printk(KERN_DEBUG fmt, ##args); \
 } while(0);
-
-
 
 #endif

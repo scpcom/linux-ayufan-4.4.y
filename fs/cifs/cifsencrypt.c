@@ -121,7 +121,6 @@ static int cifs_calc_signature2(const struct kvec *iov, int n_vec,
 	return 0;
 }
 
-
 int cifs_sign_smb2(struct kvec *iov, int n_vec, struct TCP_Server_Info *server,
 		   __u32 *pexpected_response_sequence_number)
 {

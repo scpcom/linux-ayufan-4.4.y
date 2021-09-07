@@ -85,7 +85,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_AUDIO_PLAYBACK_WIN_CTRL_REG		MV_AUDIO_WIN_CTRL_REG(MV_AUDIO_PLAYBACK_WIN_NUM)
 #define MV_AUDIO_PLAYBACK_WIN_BASE_REG		MV_AUDIO_WIN_BASE_REG(MV_AUDIO_PLAYBACK_WIN_NUM)
 
-
 /* BITs in Windows 0-3 Control and Base Registers */
 #define MV_AUDIO_WIN_ENABLE_BIT               0
 #define MV_AUDIO_WIN_ENABLE_MASK              (1<<MV_AUDIO_WIN_ENABLE_BIT)
@@ -102,7 +101,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_AUDIO_WIN_BASE_OFFSET              16
 #define MV_AUDIO_WIN_BASE_MASK                (0xFFFF<<MV_AUDIO_WIN_BASE_OFFSET)
 
-
 typedef struct _mvAudioDecWin
 {
     MV_TARGET     target;
@@ -111,13 +109,10 @@ typedef struct _mvAudioDecWin
  
 } MV_AUDIO_DEC_WIN;
 
-
 MV_STATUS mvAudioInit(MV_VOID);
 MV_STATUS mvAudioWinGet(MV_U32 winNum, MV_AUDIO_DEC_WIN *pAddrDecWin);
 MV_STATUS mvAudioWinSet(MV_U32 winNum, MV_AUDIO_DEC_WIN *pAddrDecWin);
 MV_STATUS mvAudioWinInit(MV_VOID);
 MV_VOID   mvAudioAddrDecShow(MV_VOID);
 
-
 #endif
-

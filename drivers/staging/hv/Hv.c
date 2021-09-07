@@ -364,7 +364,6 @@ u16 HvPostMessage(union hv_connection_id connectionId,
 	return status;
 }
 
-
 /**
  * HvSignalEvent - Signal an event on the specified connection using the hypervisor event IPC.
  *

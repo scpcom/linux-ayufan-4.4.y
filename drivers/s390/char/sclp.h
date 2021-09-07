@@ -92,7 +92,6 @@ extern u64 sclp_facilities;
 #define SCLP_HAS_CPU_INFO	(sclp_facilities & 0x0800000000000000ULL)
 #define SCLP_HAS_CPU_RECONFIG	(sclp_facilities & 0x0400000000000000ULL)
 
-
 struct gds_subvector {
 	u8	length;
 	u8	key;

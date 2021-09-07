@@ -37,7 +37,6 @@
 #define KN01_CSR	(14*KN01_SLOT_SIZE)	/* system ctrl & status reg */
 #define KN01_SYS_ROM	(15*KN01_SLOT_SIZE)	/* system board ROM */
 
-
 /*
  * Frame buffer memory address.
  */
@@ -52,7 +51,6 @@
 #define KN01_CPU_INR_DZ11	4	/* DZ11 (DC7085) serial */
 #define KN01_CPU_INR_LANCE	3	/* LANCE (Am7990) Ethernet */
 #define KN01_CPU_INR_SII	2	/* SII (DC7061) SCSI */
-
 
 /*
  * System Control & Status Register bits.
@@ -69,7 +67,6 @@
 #define KN01_CSR_VRGTRG		(1<<1)	/* red DAC voltage over green (r/o) */
 #define KN01_CSR_VRGTRB		(1<<0)	/* red DAC voltage over blue (r/o) */
 #define KN01_CSR_LEDS		(0xff<<0) /* ~diagnostic LEDs (w/o) */
-
 
 #ifndef __ASSEMBLY__
 

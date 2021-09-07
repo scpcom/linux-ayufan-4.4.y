@@ -1742,7 +1742,6 @@
 #define reg_iop_sw_mpu_r_masked_intr_grp3___dmc_in1___bit 31
 #define reg_iop_sw_mpu_r_masked_intr_grp3_offset 156
 
-
 /* Constants */
 #define regk_iop_sw_mpu_copy                      0x00000000
 #define regk_iop_sw_mpu_cpu                       0x00000000

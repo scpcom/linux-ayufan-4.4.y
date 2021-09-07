@@ -74,7 +74,6 @@ struct ops_list {
 	struct list_head list;	/* next driver */
 };
 
-
 static LIST_HEAD(opslist);
 static int num_ops;
 static DEFINE_MUTEX(ops_mutex);
@@ -348,7 +347,6 @@ int snd_seq_device_register_driver(char *id, struct snd_seq_dev_ops *entry,
 	return 0;
 }
 
-
 /*
  * create driver record
  */
@@ -382,7 +380,6 @@ static struct ops_list * create_driver(char *id)
 
 	return ops;
 }
-
 
 /*
  * unregister the specified driver
@@ -423,7 +420,6 @@ int snd_seq_device_unregister_driver(char *id)
 
 	return 0;
 }
-
 
 /*
  * remove empty driver entries
@@ -528,7 +524,6 @@ static void unlock_driver(struct ops_list *ops)
 	ops->used--;
 	mutex_unlock(&ops_mutex);
 }
-
 
 /*
  * module part

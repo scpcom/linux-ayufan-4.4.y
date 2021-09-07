@@ -37,4 +37,3 @@ MV_CPU_DEC_WIN SYSMAP_RD_78XX0_AMC[] = {
     	/* Table terminator */
    	{{TBL_TERM, TBL_TERM, TBL_TERM}, TBL_TERM, TBL_TERM}
 };
-

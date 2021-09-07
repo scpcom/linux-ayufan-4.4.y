@@ -97,7 +97,6 @@
 #define GPIO_BOUT_0    (2 << GPIO_BOUT_SHIFT)
 #define GPIO_BOUT_1    (3 << GPIO_BOUT_SHIFT)
 
-
 #ifdef CONFIG_ARCH_MX1
 #include <mach/iomux-mx1.h>
 #endif
@@ -114,7 +113,6 @@
 #include <mach/iomux-mx25.h>
 #endif
 
-
 /* decode irq number to use with IMR(x), ISR(x) and friends */
 #define IRQ_TO_REG(irq) ((irq - MXC_INTERNAL_IRQS) >> 5)
 
@@ -123,7 +121,6 @@
 #define IRQ_GPIOC(x)  (IRQ_GPIOB(32) + x)
 #define IRQ_GPIOD(x)  (IRQ_GPIOC(32) + x)
 #define IRQ_GPIOE(x)  (IRQ_GPIOD(32) + x)
-
 
 extern void mxc_gpio_mode(int gpio_mode);
 extern int mxc_gpio_setup_multiple_pins(const int *pin_list, unsigned count,

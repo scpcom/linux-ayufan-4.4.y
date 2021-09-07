@@ -142,7 +142,6 @@ typedef enum {
 	(1 << DM_EVENT_ATTRIBUTE)	| \
 	(1 << DM_EVENT_DESTROY)		)
 
-
 /*
  *	Definitions used for the flags field on dm_send_*_event().
  */

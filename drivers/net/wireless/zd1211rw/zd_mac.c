@@ -276,7 +276,6 @@ static void zd_op_stop(struct ieee80211_hw *hw)
 	zd_chip_switch_radio_off(chip);
 	zd_chip_disable_int(chip);
 
-
 	while ((skb = skb_dequeue(ack_wait_queue)))
 		dev_kfree_skb_any(skb);
 }
@@ -769,7 +768,6 @@ static void zd_process_intr(struct work_struct *work)
 
 	zd_chip_enable_hwint(&mac->chip);
 }
-
 
 static void set_multicast_hash_handler(struct work_struct *work)
 {

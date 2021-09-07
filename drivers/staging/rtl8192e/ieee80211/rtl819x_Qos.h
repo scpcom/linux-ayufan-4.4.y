@@ -148,7 +148,6 @@ typedef	enum _ACK_POLICY{
 #define GET_WMM_QOS_INFO_FIELD_STA_MAX_SP_LEN(_pStart)	LE_BITS_TO_1BYTE(_pStart, 5, 2)
 #define SET_WMM_QOS_INFO_FIELD_STA_MAX_SP_LEN(_pStart, _val)	SET_BITS_TO_LE_1BYTE(_pStart, 5, 2, _val)
 
-
 #define WMM_INFO_ELEMENT_SIZE	7
 
 #define GET_WMM_INFO_ELE_OUI(_pStart)	((u8 *)(_pStart))
@@ -165,8 +164,6 @@ typedef	enum _ACK_POLICY{
 
 #define GET_WMM_INFO_ELE_QOS_INFO_FIELD(_pStart)	( EF1Byte( *((u8 *)(_pStart)+6) ) )
 #define SET_WMM_INFO_ELE_QOS_INFO_FIELD(_pStart, _val)	( *((u8 *)(_pStart)+6) = EF1Byte(_val) )
-
-
 
 #define GET_WMM_AC_PARAM_AIFSN(_pStart)	( (u8)LE_BITS_TO_4BYTE(_pStart, 0, 4) )
 #define SET_WMM_AC_PARAM_AIFSN(_pStart, _val)	SET_BITS_TO_LE_4BYTE(_pStart, 0, 4, _val)
@@ -188,9 +185,6 @@ typedef	enum _ACK_POLICY{
 
 #define GET_WMM_AC_PARAM_TXOP_LIMIT(_pStart)		( (u16)LE_BITS_TO_4BYTE(_pStart, 16, 16) )
 #define SET_WMM_AC_PARAM_TXOP_LIMIT(_pStart, _val)	SET_BITS_TO_LE_4BYTE(_pStart, 16, 16, _val)
-
-
-
 
 #define GET_WMM_PARAM_ELE_OUI(_pStart)	((u8 *)(_pStart))
 #define SET_WMM_PARAM_ELE_OUI(_pStart, _pVal)	PlatformMoveMemory(_pStart, _pVal, 3)
@@ -263,7 +257,6 @@ typedef	union _QOS_CTRL_FIELD{
 	}ByHc_CFP;
 
 }QOS_CTRL_FIELD, *PQOS_CTRL_FIELD;
-
 
 //
 // QoS Info Field
@@ -441,8 +434,6 @@ typedef	union _AC_PARAM{
 	}f;	// Field
 }AC_PARAM, *PAC_PARAM;
 
-
-
 //
 // QoS element subtype
 //
@@ -450,7 +441,6 @@ typedef	enum _QOS_ELE_SUBTYPE{
 	QOSELE_TYPE_INFO	= 0x00,		// 0x00: Information element
 	QOSELE_TYPE_PARAM	= 0x01,		// 0x01: parameter element
 }QOS_ELE_SUBTYPE,*PQOS_ELE_SUBTYPE;
-
 
 //
 // Direction Field Values.
@@ -462,7 +452,6 @@ typedef	enum _DIRECTION_VALUE{
 	DIR_DIRECT		= 2,		// 0x10	// DirectLink
 	DIR_BI_DIR		= 3,		// 0x11	// Bi-Direction
 }DIRECTION_VALUE,*PDIRECTION_VALUE;
-
 
 //
 // TS Info field in WMM TSPEC Element.
@@ -514,7 +503,6 @@ typedef union _TSPEC_BODY{
 	} f;	// Field
 }TSPEC_BODY, *PTSPEC_BODY;
 
-
 //
 // WMM TSPEC Element.
 // Ref: WMM spec 2.2.11: WME TSPEC Element, p.16.
@@ -539,7 +527,6 @@ typedef	enum _ACM_METHOD{
 	eAcmWay2_SW			= 2,		// By SW.
 }ACM_METHOD,*PACM_METHOD;
 
-
 typedef struct _ACM{
 //	u8		RegEnableACM;
 	u64		UsedTime;
@@ -560,7 +547,6 @@ typedef	u8		AC_UAPSD, *PAC_UAPSD;
 
 #define	GET_BE_UAPSD(_apsd) ((_apsd) & BIT3)
 #define	SET_BE_UAPSD(_apsd) ((_apsd) |= BIT3)
-
 
 //typedef struct _TCLASS{
 // TODO
@@ -731,14 +717,12 @@ typedef struct _BSS_QOS{
 	AC_PARAM		AcParameter[4];
 }BSS_QOS, *PBSS_QOS;
 
-
 //
 // Ref: sQoSCtlLng and QoSCtl definition in 8185 QoS code.
 //#define QoSCtl   ((	(Adapter->bRegQoS) && (Adapter->dot11QoS.QoSMode &(QOS_EDCA|QOS_HCCA))	  )  ?sQoSCtlLng:0)
 //
 #define sQoSCtlLng			2
 #define	QOS_CTRL_LEN(_QosMode)		((_QosMode > QOS_DISABLE)? sQoSCtlLng : 0)
-
 
 //Added by joseph
 //UP Mapping to AC, using in MgntQuery_SequenceNumber() and maybe for DSCP

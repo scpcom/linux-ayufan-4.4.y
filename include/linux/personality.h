@@ -108,7 +108,6 @@ struct exec_domain {
  */
 #define personality(pers)	(pers & PER_MASK)
 
-
 /*
  * Change personality of the currently running process.
  */

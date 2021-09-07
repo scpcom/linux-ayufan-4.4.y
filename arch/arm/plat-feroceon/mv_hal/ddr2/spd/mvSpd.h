@@ -125,7 +125,6 @@ typedef enum _mvDimmVoltageIf
     VOLTAGE_UNKNOWN, 
 } MV_DIMM_VOLTAGE_IF;
 
-
 /* enumaration for SDRAM CAS Latencies. */
 typedef enum _mvDimmSdramCas
 {
@@ -138,7 +137,6 @@ typedef enum _mvDimmSdramCas
     SD_CL_7, 
     SD_FAULT
 }MV_DIMM_SDRAM_CAS;
-
 
 /* DIMM information structure */                                                    
 typedef struct _mvDimmInfo
@@ -182,7 +180,6 @@ typedef struct _mvDimmInfo
     MV_U32  numberOfDevices;
 
 } MV_DIMM_INFO;
-
 
 MV_STATUS mvDramBankInfoGet(MV_U32 bankNum, MV_DRAM_BANK_INFO *pBankInfo);
 MV_STATUS dimmSpdGet(MV_U32 dimmNum, MV_DIMM_INFO *pDimmInfo);

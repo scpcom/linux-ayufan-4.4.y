@@ -115,7 +115,6 @@ disclaimer.
 #define MV_INCLUDE_SDIO
 #endif
 
-
 /* NAND flash stuff */
 #ifdef CONFIG_MV_NAND_BOOT
 #define MV_NAND_BOOT
@@ -128,7 +127,6 @@ disclaimer.
 #ifdef CONFIG_MV_SPI_BOOT
 #define MV_SPI_BOOT
 #endif
-
 
 /****************************************************************/
 /************* General    configuration ********************/
@@ -148,8 +146,6 @@ disclaimer.
 /****************************************************************/
 #define MV_NFP_SEC_Q_SIZE		64
 #define MV_NFP_SEC_REQ_Q_SIZE		1000
-
-
 
 /****************************************************************/
 /************* CESA configuration ********************/
@@ -224,7 +220,6 @@ disclaimer.
 /* DRAM cache coherency configuration */
 #define MV_CACHE_COHERENCY  MV_CACHE_COHER_SW
 
-
 #define ETHER_DRAM_COHER    MV_CACHE_COHER_SW   /* No HW coherency in 88Fxx81 devices */
 
 #if (ETHER_DRAM_COHER == MV_CACHE_COHER_HW_WB)
@@ -238,7 +233,6 @@ disclaimer.
 #else
  #error "Ethernet-DRAM undefined"
 #endif /* ETHER_DRAM_COHER */
-
 
 /****************************************************************/
 /************* Ethernet driver configuration ********************/
@@ -325,7 +319,6 @@ disclaimer.
 #define PEX1_IO_BASE 0xf2100000
 #define PEX1_IO_SIZE _1M
 
-
 /* Device Chip Selects */
 #define NFLASH_CS_BASE 0xfa000000
 #define NFLASH_CS_SIZE _2M
@@ -359,7 +352,6 @@ otherwise the following defines will be ignored */
 /* Internal registers: size is defined in Controllerenvironment */
 #define INTER_REGS_BASE	0xF1000000
 
-
 #define DDR_OPERATION_BASE	(INTER_REGS_BASE | 0x1418)
 
 /* DRAM detection stuff */
@@ -374,7 +366,4 @@ otherwise the following defines will be ignored */
 /* PEX-PCI\PCI-PCI Bridge*/
 #define PCI0_IF_PTP		0		/* Bridge exist on pciIf0*/
 
- 
-
 #endif /* __INCmvSysHwConfigh */
-

@@ -185,4 +185,3 @@ void xfrm6_state_fini(void)
 {
 	xfrm_state_unregister_afinfo(&xfrm6_state_afinfo);
 }
-

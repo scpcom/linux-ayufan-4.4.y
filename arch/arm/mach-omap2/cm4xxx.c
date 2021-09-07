@@ -52,4 +52,3 @@ int omap4_cm_wait_idlest_ready(u32 prcm_mod, u8 prcm_dev_offs)
 	/* FIXME: Add clock manager related code */
 	return 0;
 }
-

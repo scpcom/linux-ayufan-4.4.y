@@ -401,7 +401,6 @@ static void mux_poll(unsigned long unused)
 	mod_timer(&mux_timer, jiffies + MUX_POLL_DELAY);
 }
 
-
 #ifdef CONFIG_SERIAL_MUX_CONSOLE
 static void mux_console_write(struct console *co, const char *s, unsigned count)
 {

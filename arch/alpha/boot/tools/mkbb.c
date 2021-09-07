@@ -65,7 +65,6 @@ struct disklabel {
     } d_partitions[MAXPARTITIONS];
 };
 
-
 typedef union __bootblock {
     struct {
         char			__pad1[64];
@@ -148,5 +147,3 @@ int main(int argc, char ** argv)
     close(dev);
     exit(0);
 }
-
-

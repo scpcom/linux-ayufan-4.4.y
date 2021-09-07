@@ -134,7 +134,6 @@ typedef enum
 #define MV_CESA_MAC_DIGEST_SIZE_BIT     7
 #define MV_CESA_MAC_DIGEST_SIZE_MASK    (1 << MV_CESA_MAC_DIGEST_SIZE_BIT)
 
-
 typedef enum 
 {
     MV_CESA_CRYPTO_NULL = 0,
@@ -146,7 +145,6 @@ typedef enum
 
 #define MV_CESA_CRYPTO_ALG_OFFSET       8
 #define MV_CESA_CRYPTO_ALG_MASK         (0x3 << MV_CESA_CRYPTO_ALG_OFFSET)
-
 
 /* direction */
 typedef enum 
@@ -183,7 +181,6 @@ typedef enum
 
 #define MV_CESA_CRYPTO_3DES_MODE_BIT    20
 #define MV_CESA_CRYPTO_3DES_MODE_MASK   (1 << MV_CESA_CRYPTO_3DES_MODE_BIT)
-
 
 /* AES Key Length */
 typedef enum 
@@ -247,7 +244,6 @@ typedef enum
 #define MV_CESA_STATUS_DIGEST_ERR_BIT       8
 #define MV_CESA_STATUS_DIGEST_ERR_MASK      (1 << MV_CESA_STATUS_DIGEST_ERR_BIT)
 
-
 /* Cryptographic Engines and Security Accelerator Interrupt Cause Register */
 #define MV_CESA_ISR_CAUSE_REG               (MV_CESA_REG_BASE + 0xE20)
 
@@ -276,7 +272,6 @@ typedef enum
 #define MV_CESA_CAUSE_DMA_CHAIN_PKT_BIT     11
 #define MV_CESA_CAUSE_DMA_CHAIN_PKT_MASK    (1 < MV_CESA_CAUSE_DMA_CHAIN_PKT_BIT)
 
-
 #define MV_CESA_AUTH_DATA_IN_REG            (MV_CESA_REG_BASE + 0xd38)
 #define MV_CESA_AUTH_BIT_COUNT_LOW_REG      (MV_CESA_REG_BASE + 0xd20)
 #define MV_CESA_AUTH_BIT_COUNT_HIGH_REG     (MV_CESA_REG_BASE + 0xd24)
@@ -301,13 +296,11 @@ typedef enum
 #define MV_CESA_AUTH_DATA_BYTE_SWAP_BIT     2
 #define MV_CESA_AUTH_DATA_BYTE_SWAP_MASK    (1<<AUTH_DATA_BYTE_SWAP_BIT)
 
-
 #define MV_CESA_AUTH_IV_BYTE_SWAP_BIT       4
 #define MV_CESA_AUTH_IV_BYTE_SWAP_MASK      (1<<AUTH_IV_BYTE_SWAP_BIT)
 
 #define MV_CESA_AUTH_TERMINATION_BIT        31
 #define MV_CESA_AUTH_TERMINATION_MASK       (1<<AUTH_TERMINATION_BIT)
-
 
 /*************** TDMA Control Register ************************************************/
 #define MV_CESA_TDMA_CTRL_REG               (MV_CESA_TDMA_REG_BASE + 0x840)
@@ -352,6 +345,4 @@ typedef enum
 #define MV_CESA_TDMA_ERROR_CAUSE_REG        (MV_CESA_TDMA_REG_BASE + 0x8C0)
 #define MV_CESA_TDMA_ERROR_MASK_REG         (MV_CESA_TDMA_REG_BASE + 0x8C4)
 
-
 #endif /* __mvCesaRegs_h__ */ 
-

@@ -117,7 +117,6 @@
 
 #define MPC52xx_IRQ_HIGHTESTHWIRQ (0xd0)
 
-
 /* MPC5200 device tree match tables */
 static struct of_device_id mpc52xx_pic_ids[] __initdata = {
 	{ .compatible = "fsl,mpc5200-pic", },

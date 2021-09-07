@@ -677,7 +677,6 @@
 #define reg_gio_r_pwm_in_cnt___data___width 32
 #define reg_gio_r_pwm_in_cnt_offset 240
 
-
 /* Constants */
 #define regk_gio_anyedge                          0x00000007
 #define regk_gio_f100k                            0x00000000

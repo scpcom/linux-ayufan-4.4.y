@@ -7,7 +7,6 @@
 #include "usb.h"
 #include "hcd.h"
 
-
 /**
  * usb_hcd_alloc_bandwidth - check whether a new bandwidth setting exceeds
  *				the bus bandwidth

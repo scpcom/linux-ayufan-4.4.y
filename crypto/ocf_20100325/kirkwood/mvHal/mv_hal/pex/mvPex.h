@@ -70,11 +70,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pex/mvPexRegs.h"
 #include "ctrlEnv/mvCtrlEnvSpec.h"
 
-
-
 /* NOTE not supported in this driver:*/
   
-
 /* defines */
 /* The number of supported PEX interfaces depend on Marvell controller 		*/
 /* device number. This device number ID is located on the PEX unit 			*/
@@ -83,7 +80,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* information etc. This macro defines a default PEX interface. This PEX	*/
 /* interface is sure to exist.												*/
 #define PEX_DEFAULT_IF	0
-
 
 /* typedefs */
 /* The Marvell controller supports both root complex and end point devices */
@@ -110,8 +106,6 @@ typedef struct _mvPexMode
 	MV_PEX_WIDTH    pexWidth;
 	MV_BOOL         pexLinkUp;
 }MV_PEX_MODE;
-
-
 
 /* Global Functions prototypes */
 /* mvPexInit - Initialize PEX interfaces*/

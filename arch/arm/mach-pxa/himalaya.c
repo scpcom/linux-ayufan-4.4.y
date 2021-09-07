@@ -154,7 +154,6 @@ static void __init himalaya_init(void)
 	platform_add_devices(devices, ARRAY_SIZE(devices));
 }
 
-
 MACHINE_START(HIMALAYA, "HTC Himalaya")
 	.phys_io = 0x40000000,
 	.io_pg_offst = (io_p2v(0x40000000) >> 18) & 0xfffc,

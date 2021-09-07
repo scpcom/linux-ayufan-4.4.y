@@ -348,7 +348,6 @@ value of I9	operation
 
 */
 
-
 /* new multiprecision add/sub */
 APUOP(M_ADDX,		RR,	0x340,	"addx",		_A3(A_T,A_A,A_B),		00113,		FX2)	/* Add_eXtended  RT<-RA+RB+RT */
 APUOP(M_CG,		RR,	0x0c2,	"cg",		_A3(A_T,A_A,A_B),		00112,		FX2)	/* CarryGenerate RT<-cout(RA+RB) */

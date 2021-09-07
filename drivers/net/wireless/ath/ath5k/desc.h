@@ -329,4 +329,3 @@ struct ath5k_desc {
 #define AR5K_TXDESC_CTSENA	0x0008
 #define AR5K_TXDESC_INTREQ	0x0010
 #define AR5K_TXDESC_VEOL	0x0020	/*[5211+]*/
-

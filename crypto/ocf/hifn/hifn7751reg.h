@@ -105,7 +105,6 @@ typedef struct hifn_desc {
 #define	HIFN_D_JUMP		0x40000000	/* jump descriptor */
 #define	HIFN_D_VALID		0x80000000	/* valid bit */
 
-
 /*
  * Processing Unit Registers (offset from BASEREG0)
  */
@@ -433,7 +432,6 @@ typedef struct hifn_desc {
  */
 #define	HIFN_PKMODE_HOSTINVERT	(1 << 0)	/* HOST INVERT */
 #define	HIFN_PKMODE_ENHANCED	(1 << 1)	/* Enable enhanced mode */
-
 
 /*********************************************************************
  * Structs for board commands 

@@ -15,7 +15,5 @@
  *
  */
 
-
 #define MV_ORION1 0x1
 #define MV_ORION2 0x2
-

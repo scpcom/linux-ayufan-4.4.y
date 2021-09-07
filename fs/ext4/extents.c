@@ -44,7 +44,6 @@
 #include "ext4_jbd2.h"
 #include "ext4_extents.h"
 
-
 /*
  * ext_pblock:
  * combine low and high parts of physical block number into ext4_fsblk_t
@@ -527,7 +526,6 @@ ext4_ext_binsearch_idx(struct inode *inode,
 {
 	struct ext4_extent_header *eh = path->p_hdr;
 	struct ext4_extent_idx *r, *l, *m;
-
 
 	ext_debug("binsearch for %u(idx):  ", block);
 
@@ -2462,7 +2460,6 @@ static int ext4_ext_zeroout(struct inode *inode, struct ext4_extent *ex)
 	sector_t ee_pblock;
 	struct completion event;
 	unsigned int ee_len, len, done, offset;
-
 
 	blkbits   = inode->i_blkbits;
 	blocksize = inode->i_sb->s_blocksize;

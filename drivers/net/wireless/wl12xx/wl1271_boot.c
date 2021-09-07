@@ -103,7 +103,6 @@ static int wl1271_boot_upload_firmware_chunk(struct wl1271 *wl, void *buf,
 	wl1271_debug(DEBUG_BOOT, "fw_data_len %zd chunk_size %d",
 		     fw_data_len, CHUNK_SIZE);
 
-
 	if ((fw_data_len % 4) != 0) {
 		wl1271_error("firmware length not multiple of four");
 		return -EIO;

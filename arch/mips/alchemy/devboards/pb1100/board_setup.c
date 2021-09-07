@@ -33,14 +33,12 @@
 
 #include <prom.h>
 
-
 struct au1xxx_irqmap __initdata au1xxx_irq_map[] = {
 	{ AU1000_GPIO_9,  IRQF_TRIGGER_LOW, 0 }, /* PCMCIA Card Fully_Inserted# */
 	{ AU1000_GPIO_10, IRQF_TRIGGER_LOW, 0 }, /* PCMCIA Card STSCHG# */
 	{ AU1000_GPIO_11, IRQF_TRIGGER_LOW, 0 }, /* PCMCIA Card IRQ# */
 	{ AU1000_GPIO_13, IRQF_TRIGGER_LOW, 0 }, /* DC_IRQ# */
 };
-
 
 const char *get_system_type(void)
 {

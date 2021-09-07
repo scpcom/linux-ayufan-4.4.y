@@ -14,10 +14,8 @@
  * Thus, it is OK to ifdef machine/board specific IRQ assignments.
  */
 
-
 #ifndef __ASM_ARCH_IRQS_H
 #define __ASM_ARCH_IRQS_H
-
 
 #define FIQ_START	80
 

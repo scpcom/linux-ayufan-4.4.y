@@ -111,7 +111,6 @@ MAC_TABLE_ENTRY *ApCliTableLookUpByWcid(
 	IN UCHAR wcid,
 	IN PUCHAR pAddrs);
 
-
 BOOLEAN ApCliAllowToSendPacket(
 	IN RTMP_ADAPTER *pAd,
 	IN PNDIS_PACKET pPacket,
@@ -132,7 +131,6 @@ VOID RT28xx_ApCli_Close(
 
 VOID RT28xx_ApCli_Remove(
 	IN PRTMP_ADAPTER	pAd);
-
 
 VOID RT28xx_ApCli_Remove(
 	IN PRTMP_ADAPTER ad_p);
@@ -155,7 +153,6 @@ INT ApCli_VirtualIF_Ioctl(
 	IN PNET_DEV				dev_p,
 	IN OUT struct ifreq	*rq_p,
 	IN INT cmd);
-
 
 VOID ApCliMgtMacHeaderInit(
     IN	PRTMP_ADAPTER	pAd,

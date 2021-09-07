@@ -133,7 +133,6 @@ static struct sysdev_driver s3c2442_irq_driver = {
 	.resume		= s3c24xx_irq_resume,
 };
 
-
 static int s3c2442_irq_init(void)
 {
 	return sysdev_driver_register(&s3c2442_sysclass, &s3c2442_irq_driver);

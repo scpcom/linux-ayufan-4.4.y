@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvCpuh
 #define __INCmvCpuh
 
@@ -83,7 +82,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 MV_U32    mvCpuPclkGet(MV_VOID);
 MV_VOID   mvCpuNameGet(char *pNameBuff);
 MV_U32 mvCpuIfPrintSystemConfig(MV_8 *buffer, MV_U32 index);
-
-
 
 #endif /* __INCmvCpuh */

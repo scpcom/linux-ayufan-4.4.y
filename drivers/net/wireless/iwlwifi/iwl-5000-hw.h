@@ -116,6 +116,4 @@ struct iwl5000_scd_bc_tbl {
 	__le16 tfd_offset[TFD_QUEUE_BC_SIZE];
 } __attribute__ ((packed));
 
-
 #endif /* __iwl_5000_hw_h__ */
-

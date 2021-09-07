@@ -88,8 +88,6 @@ extern "C" /*{*/
 /* Definitions */
 #define MV_CORE_DRIVER_LOG_ID                   0
 
-
-
 /* MV88SX50XX specific defines */
 #define MV_SATA_VENDOR_ID                       0x11AB
 #define MV_SATA_DEVICE_ID_5080                  0x5080
@@ -506,7 +504,6 @@ typedef struct mvQueuedCommandEntry
 #endif
 } MV_QUEUED_COMMAND_ENTRY;
 
-
 typedef enum mvErrorHandlingState
 {
     MV_ERROR_HANDLING_STATE_IDLE,
@@ -706,7 +703,6 @@ typedef struct mvSataAdapter
     MV_U32            pciSerrMask;
     MV_U32            pciInterruptMask;
 
-
     /* Fields set by CORE driver */
     MV_SATA_GEN       sataAdapterGeneration;
     MV_BOOLEAN        staggaredSpinup[MV_SATA_CHANNELS_NUM]; /* For 60x1 only */
@@ -858,7 +854,6 @@ MV_BOOLEAN mvSataDisableStaggeredSpinUpAll (MV_SATA_ADAPTER *pAdapter);
 MV_BOOLEAN mvSataDisableStaggeredSpinUp (MV_SATA_ADAPTER *pAdapter,
                                          MV_U8 channelIndex);
 
-
 MV_BOOLEAN mvSataSetInterfaceSpeed (MV_SATA_ADAPTER *pAdapter,
                                     MV_U8 channelIndex,
                                     MV_SATA_IF_SPEED ifSpeed);
@@ -885,7 +880,6 @@ MV_BOOLEAN mvSataC2CInit (MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex,
                           C2CCallBack_t mvSataC2CCallBack);
 
 MV_BOOLEAN mvSataC2CStop (MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex);
-
 
 MV_BOOLEAN  mvSataC2CSendRegisterDeviceToHostFIS(
                                                 MV_SATA_ADAPTER *pAdapter,

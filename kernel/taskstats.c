@@ -269,7 +269,6 @@ out:
 	return rc;
 }
 
-
 static void fill_tgid_exit(struct task_struct *tsk)
 {
 	unsigned long flags;

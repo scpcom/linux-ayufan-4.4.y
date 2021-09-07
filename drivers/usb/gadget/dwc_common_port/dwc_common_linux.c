@@ -71,7 +71,6 @@ EXPORT_SYMBOL(dwc_wusb_gen_nonce);
 EXPORT_SYMBOL(dwc_wusb_gen_key);
 EXPORT_SYMBOL(dwc_wusb_gen_mic);
 
-
 /* Notification */
 EXPORT_SYMBOL(dwc_alloc_notification_manager);
 EXPORT_SYMBOL(dwc_free_notification_manager);
@@ -206,7 +205,6 @@ int DWC_ATOUI(char *str, uint32_t *value)
 	return -1;
 }
 EXPORT_SYMBOL(DWC_ATOUI);
-
 
 /* From usbstring.c */
 int DWC_UTF8_TO_UTF16LE(uint8_t const *s, uint16_t *cp, unsigned len)
@@ -371,8 +369,6 @@ void __DWC_DEBUG(char *format, ...)
 }
 EXPORT_SYMBOL(__DWC_DEBUG);
 #endif
-
-
 
 /* dwc_mem.h */
 
@@ -625,7 +621,6 @@ uint16_t DWC_BE16_TO_CPU(void *p)
 }
 EXPORT_SYMBOL(DWC_BE16_TO_CPU);
 
-
 /* Registers */
 
 uint32_t DWC_READ_REG32(uint32_t volatile *reg)
@@ -663,8 +658,6 @@ void DWC_MODIFY_REG64(uint64_t volatile *reg, uint64_t value)
 {
 }
 #endif
-
-
 
 /* Threading */
 
@@ -834,7 +827,6 @@ void DWC_WORKQ_SCHEDULE_DELAYED(dwc_workq_t *wq, dwc_work_callback_t work_cb, vo
 
 }
 EXPORT_SYMBOL(DWC_WORKQ_SCHEDULE_DELAYED);
-
 
 int DWC_WORKQ_PENDING(dwc_workq_t *wq)
 {
@@ -1143,7 +1135,6 @@ uint32_t DWC_TIME(void)
 	return jiffies_to_msecs(jiffies);
 }
 EXPORT_SYMBOL(DWC_TIME);
-
 
 /* Wait Queues */
 

@@ -77,7 +77,6 @@ static struct kobj_attribute baz_attribute =
 static struct kobj_attribute bar_attribute =
 	__ATTR(bar, 0666, b_show, b_store);
 
-
 /*
  * Create a group of attributes so that we can create and destory them all
  * at once.

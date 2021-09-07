@@ -146,7 +146,6 @@ struct css_id {
 	unsigned short stack[0]; /* Array of Length (depth+1) */
 };
 
-
 /* The list of hierarchy roots */
 
 static LIST_HEAD(roots);
@@ -869,7 +868,6 @@ void cgroup_release_and_wakeup_rmdir(struct cgroup_subsys_state *css)
 	css_put(css);
 }
 
-
 static int rebind_subsystems(struct cgroupfs_root *root,
 			      unsigned long final_bits)
 {
@@ -1059,7 +1057,6 @@ static int parse_cgroupfs_options(char *data,
 	if (test_bit(ROOT_NOPREFIX, &opts->flags) &&
 	    (opts->subsys_bits & mask))
 		return -EINVAL;
-
 
 	/* Can't specify "none" and some subsystems */
 	if (opts->subsys_bits && opts->none)
@@ -2600,7 +2597,6 @@ int cgroupstats_build(struct cgroupstats *stats, struct dentry *dentry)
 err:
 	return ret;
 }
-
 
 /*
  * seq_file methods for the tasks/procs files. The seq_file position is the

@@ -29,7 +29,6 @@
 #define	PLX_SUBVEN		0x2C	/* Offset SubVendor */
 #define	PLX_SUBSYS		0x2E	/* Offset SubSystem */
 
-
 /* Application specific registers I20 (Siemens SZB6120H) */
 typedef	struct {
 		/* Video front end horizontal configuration register */

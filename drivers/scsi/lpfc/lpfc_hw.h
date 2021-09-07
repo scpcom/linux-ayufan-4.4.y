@@ -64,7 +64,6 @@
 #define SLI3_IOCB_CMD_SIZE	128
 #define SLI3_IOCB_RSP_SIZE	64
 
-
 /* vendor ID used in SCSI netlink calls */
 #define LPFC_NL_VENDOR_ID (SCSI_NL_VID_TYPE_PCI | PCI_VENDOR_ID_EMULEX)
 
@@ -992,7 +991,6 @@ union AttributesDef {
 	uint32_t word;
 };
 
-
 /*
  * HBA Attribute Entry (8 - 260 bytes)
  */
@@ -1098,7 +1096,6 @@ typedef struct {
 typedef struct {
 	ATTRIBUTE_BLOCK pab;
 } GPAT_ACC_PAYLOAD;
-
 
 /*
  *  Begin HBA configuration parameters.
@@ -1666,7 +1663,6 @@ lpfc_pde_set_dif_parms(struct lpfc_pde *p, u16 apptagmask, u16 apptagval,
 	wp = &p->reftag;
 	*wp = le32_to_cpu(reftag);
 }
-
 
 /* Structure for MB Command LOAD_SM and DOWN_LOAD */
 
@@ -2583,7 +2579,6 @@ struct hbq_mask {
 #endif
 };
 
-
 /* Structure for MB Command CONFIG_HBQ (7c) */
 
 struct config_hbq_var {
@@ -2637,7 +2632,6 @@ struct config_hbq_var {
 	uint32_t rsvd8;    /* w9 */
 
 	struct hbq_mask hbqMasks[6];
-
 
 	union {
 		uint32_t allprofiles[12];
@@ -2707,8 +2701,6 @@ struct config_hbq_var {
 	} profiles;
 
 };
-
-
 
 /* Structure for MB Command CONFIG_PORT (0x88) */
 typedef struct {
@@ -3649,7 +3641,6 @@ typedef struct _IOCB {	/* IOCB structure */
 #define IOSTAT_CNT             0x11
 
 } IOCB_t;
-
 
 #define SLI1_SLIM_SIZE   (4 * 1024)
 

@@ -9,14 +9,12 @@ typedef struct _Timer_Module
 	MV_VOID (*routine) (MV_PVOID);
 } Timer_Module, *PTimer_Module;
 
-
 struct hba_extension {
 /* Must be the first */
 /* self-descriptor */
 	struct mv_mod_desc *desc;
 	/* Device extention */
 	MV_PVOID host_data;
-	
 	
 	struct list_head        next;
 	struct pci_dev          *dev;

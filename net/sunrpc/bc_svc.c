@@ -56,7 +56,6 @@ void bc_release_request(struct rpc_task *task)
 static const struct rpc_call_ops nfs41_callback_ops = {
 };
 
-
 /*
  * Send the callback reply
  */

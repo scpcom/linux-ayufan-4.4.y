@@ -71,7 +71,6 @@ static void lh7a40x_cpld_handler (unsigned int irq, struct irq_desc *desc)
 	desc->chip->unmask (irq); /* Level-triggered need this */
 }
 
-
   /* IRQ initialization */
 
 void __init lh7a40x_init_board_irq (void)

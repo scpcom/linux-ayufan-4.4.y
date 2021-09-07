@@ -17,7 +17,6 @@
  * General Public License for more details.
  */
 
-
 #ifndef STACKGLUE_H
 #define STACKGLUE_H
 
@@ -45,7 +44,6 @@ struct file_lock;
  */
 #define GROUP_NAME_MAX		64
 
-
 /*
  * ocfs2_protocol_version changes when ocfs2 does something different in
  * its inter-node behavior.  See dlmglue.c for more information.
@@ -64,7 +62,6 @@ struct ocfs2_locking_protocol {
 	void (*lp_blocking_ast)(void *astarg, int level);
 	void (*lp_unlock_ast)(void *astarg, int error);
 };
-
 
 /*
  * The dlm_lockstatus struct includes lvb space, but the dlm_lksb struct only
@@ -229,7 +226,6 @@ struct ocfs2_stack_plugin {
 	struct ocfs2_locking_protocol *sp_proto;
 };
 
-
 /* Used by the filesystem */
 int ocfs2_cluster_connect(const char *stack_name,
 			  const char *group,
@@ -266,7 +262,6 @@ int ocfs2_plock(struct ocfs2_cluster_connection *conn, u64 ino,
 		struct file *file, int cmd, struct file_lock *fl);
 
 void ocfs2_stack_glue_set_locking_protocol(struct ocfs2_locking_protocol *proto);
-
 
 /* Used by stack plugins */
 int ocfs2_stack_glue_register(struct ocfs2_stack_plugin *plugin);

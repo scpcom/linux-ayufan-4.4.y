@@ -106,5 +106,3 @@ void TRC_RELEASE(void)
         kfree(trc_arr);
         trc_index = 0;
 }
-
-

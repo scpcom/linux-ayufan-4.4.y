@@ -2627,7 +2627,6 @@ static void usb_exchange(struct gspca_dev *gspca_dev,
 	/*not reached*/
 }
 
-
 /* this function is called at probe time */
 static int sd_config(struct gspca_dev *gspca_dev,
 			const struct usb_device_id *id)

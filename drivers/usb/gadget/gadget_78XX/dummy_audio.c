@@ -35,7 +35,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 /*
  * Gadget Zero only needs two bulk endpoints, and is an example of how you
  * can write a hardware-agnostic gadget driver running inside a USB device.
@@ -92,10 +91,8 @@
 
 #include <linux/usb_gadget.h>
 
-
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-
 
 static int utf8_to_utf16le(const char *s, u16 *cp, unsigned len)
 {
@@ -160,7 +157,6 @@ fail:
 	return -1;
 }
 
-
 /**
  * usb_gadget_get_string - fill out a string descriptor 
  * @table: of c strings encoded using UTF-8
@@ -211,10 +207,8 @@ usb_gadget_get_string (struct usb_gadget_strings *table, int id, u8 *buf)
 	return buf [0];
 }
 
-
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-
 
 /**
  * usb_descriptor_fillbuf - fill buffer with descriptors
@@ -249,7 +243,6 @@ usb_descriptor_fillbuf(void *buf, unsigned buflen,
 	}
 	return dest - (u8 *)buf;
 }
-
 
 /**
  * usb_gadget_config_buf - builts a complete configuration descriptor
@@ -305,7 +298,6 @@ int usb_gadget_config_buf(
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-
 
 #define RBUF_LEN (1024*1024)
 static int rbuf_start;
@@ -496,7 +488,6 @@ z_config = {
 	.bMaxPower =		0,	/* self-powered */
 };
 
-
 static struct usb_otg_descriptor
 otg_descriptor = {
 	.bLength =		sizeof otg_descriptor,
@@ -527,7 +518,6 @@ dev_qualifier = {
 
 	.bNumConfigurations =	2,
 };
-
 
 struct usb_cs_as_general_descriptor {
 	__u8  bLength;
@@ -602,7 +592,6 @@ z_audio_cs_as_if_desc = {
 	.bDelay = 0x0,
 	.wFormatTag = __constant_cpu_to_le16 (0x0001)
 };
-
 
 static const struct usb_cs_as_format_descriptor 
 z_audio_cs_as_format_desc = {
@@ -711,8 +700,6 @@ static char za_23[] = {0x09, 0x05, 0x04, 0x09, 0x50, 0x01, 0x01, 0x00,
 		       0x00};
 
 static char za_24[] = {0x07, 0x25, 0x01, 0x00, 0x02, 0x00, 0x02};
-
-
 
 static const struct usb_descriptor_header *z_function [] = {
 	(struct usb_descriptor_header *) &z_audio_control_if_desc,
@@ -1283,7 +1270,6 @@ zero_setup (struct usb_gadget *gadget, const struct usb_ctrlrequest *ctrl)
 		value = ctrl->wLength;
 		break;
 
-	
 	default:
 unknown:
 		printk("unknown control req%02x.%02x v%04x i%04x l%d\n",
@@ -1375,7 +1361,6 @@ zero_bind (struct usb_gadget *gadget)
 	 */
 	//device_desc.bcdDevice = __constant_cpu_to_le16 (0x0201);
 
-
 	/* ok, we made sense of the hardware ... */
 	dev = kmalloc (sizeof *dev, SLAB_KERNEL);
 	if (!dev)
@@ -1456,7 +1441,6 @@ zero_resume (struct usb_gadget *gadget)
 	del_timer (&dev->resume);
 }
 
-
 /*-------------------------------------------------------------------------*/
 
 static struct usb_gadget_driver zero_driver = {
@@ -1526,7 +1510,6 @@ static int isoc_read_data (char *page, char **start,
 		*eof = 1;
 		done = 1;
 	}
-
 
 	return i;
 }

@@ -40,7 +40,6 @@ void __init loki_map_io(void)
 	iotable_init(loki_io_desc, ARRAY_SIZE(loki_io_desc));
 }
 
-
 /*****************************************************************************
  * GE0
  ****************************************************************************/
@@ -96,7 +95,6 @@ void __init loki_ge0_init(struct mv643xx_eth_platform_data *eth_data)
 	platform_device_register(&loki_ge0_shared);
 	platform_device_register(&loki_ge0);
 }
-
 
 /*****************************************************************************
  * GE1
@@ -154,7 +152,6 @@ void __init loki_ge1_init(struct mv643xx_eth_platform_data *eth_data)
 	platform_device_register(&loki_ge1);
 }
 
-
 /*****************************************************************************
  * SAS/SATA
  ****************************************************************************/
@@ -197,7 +194,6 @@ void __init loki_sas_init(void)
 	writel(0x8300f707, DDR_REG(0x1424));
 	platform_device_register(&loki_sas);
 }
-
 
 /*****************************************************************************
  * UART0
@@ -242,7 +238,6 @@ void __init loki_uart0_init(void)
 	platform_device_register(&loki_uart0);
 }
 
-
 /*****************************************************************************
  * UART1
  ****************************************************************************/
@@ -286,7 +281,6 @@ void __init loki_uart1_init(void)
 	platform_device_register(&loki_uart1);
 }
 
-
 /*****************************************************************************
  * Time handling
  ****************************************************************************/
@@ -298,7 +292,6 @@ static void loki_timer_init(void)
 struct sys_timer loki_timer = {
 	.init = loki_timer_init,
 };
-
 
 /*****************************************************************************
  * General

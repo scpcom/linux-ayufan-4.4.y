@@ -617,5 +617,3 @@ VOID MgtProbReqMacHeaderInit(
 	COPY_MAC_ADDR(pHdr80211->Addr2, pAd->CurrentAddress);
 	COPY_MAC_ADDR(pHdr80211->Addr3, pBssid);
 }
-
-

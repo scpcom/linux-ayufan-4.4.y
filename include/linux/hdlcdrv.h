@@ -117,7 +117,6 @@ struct hdlcdrv_ioctl {
 /* maximum packet length, excluding CRC */
 #define HDLCDRV_MAXFLEN             400	
 
-
 struct hdlcdrv_hdlcbuffer {
 	spinlock_t lock;
 	unsigned rd, wr;
@@ -247,7 +246,6 @@ struct hdlcdrv_state {
 	struct sk_buff *skb;
 };
 
-
 /* -------------------------------------------------------------------- */
 
 static inline int hdlcdrv_hbuf_full(struct hdlcdrv_hdlcbuffer *hb) 
@@ -365,8 +363,6 @@ struct net_device *hdlcdrv_register(const struct hdlcdrv_ops *ops,
 void hdlcdrv_unregister(struct net_device *dev);
 
 /* -------------------------------------------------------------------- */
-
-
 
 #endif /* __KERNEL__ */
 

@@ -431,7 +431,6 @@ connect_layer1(struct mISDNdevice *dev, struct mISDNchannel *ch,
 	struct channel_req	rq;
 	int			err;
 
-
 	if (*debug &  DEBUG_CORE_FUNC)
 		printk(KERN_DEBUG "%s: %s proto(%x) adr(%d %d %d %d)\n",
 			__func__, dev_name(&dev->dev), protocol, adr->dev,

@@ -48,7 +48,6 @@ extern void alpha_write_fp_reg (unsigned long reg, unsigned long val);
 extern unsigned long alpha_read_fp_reg_s (unsigned long reg);
 extern void alpha_write_fp_reg_s (unsigned long reg, unsigned long val);
 
-
 #ifdef MODULE
 
 MODULE_DESCRIPTION("FP Software completion module");
@@ -83,7 +82,6 @@ void cleanup_module(void)
 #define alpha_fp_emul			do_alpha_fp_emul
 
 #endif /* MODULE */
-
 
 /*
  * Emulate the floating point instruction at address PC.  Returns -1 if the

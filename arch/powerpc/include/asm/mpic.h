@@ -223,7 +223,6 @@ enum {
 	MPIC_IDX_END
 };
 
-
 #ifdef CONFIG_MPIC_U3_HT_IRQS
 /* Fixup table entry */
 struct mpic_irq_fixup
@@ -234,7 +233,6 @@ struct mpic_irq_fixup
 	unsigned int	index;
 };
 #endif /* CONFIG_MPIC_U3_HT_IRQS */
-
 
 enum mpic_reg_type {
 	mpic_access_mmio_le,
@@ -445,7 +443,6 @@ extern void mpic_assign_isu(struct mpic *mpic, unsigned int isu_num,
  */
 extern void mpic_set_default_senses(struct mpic *mpic, u8 *senses, int count);
 
-
 /* Initialize the controller. After this has been called, none of the above
  * should be called again for this mpic
  */
@@ -456,7 +453,6 @@ extern void mpic_init(struct mpic *mpic);
  * ISUs have been assigned and the controller fully initialized
  * with mpic_init()
  */
-
 
 /* Change the priority of an interrupt. Default is 8 for irqs and
  * 10 for IPIs. You can call this on both IPIs and IRQ numbers, but the

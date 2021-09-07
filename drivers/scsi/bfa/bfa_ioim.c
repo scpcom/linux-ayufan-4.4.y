@@ -609,8 +609,6 @@ bfa_ioim_sm_resfree(struct bfa_ioim_s *ioim, enum bfa_ioim_event event)
 	}
 }
 
-
-
 /**
  *  bfa_ioim_private
  */
@@ -960,7 +958,6 @@ bfa_ioim_qresume(void *cbarg)
 	bfa_sm_send_event(ioim, BFA_IOIM_SM_QRESUME);
 }
 
-
 static void
 bfa_ioim_notify_cleanup(struct bfa_ioim_s *ioim)
 {
@@ -1009,8 +1006,6 @@ bfa_ioim_delayed_comp(struct bfa_ioim_s *ioim, bfa_boolean_t iotov)
     list_del(&ioim->qe);
     list_add_tail(&ioim->qe, &ioim->fcpim->ioim_comp_q);
 }
-
-
 
 /**
  *  bfa_ioim_friend
@@ -1229,8 +1224,6 @@ bfa_ioim_tov(struct bfa_ioim_s *ioim)
 	bfa_sm_send_event(ioim, BFA_IOIM_SM_IOTOV);
 }
 
-
-
 /**
  *  bfa_ioim_api
  */
@@ -1307,5 +1300,3 @@ bfa_ioim_abort(struct bfa_ioim_s *ioim)
 	bfa_fcpim_stats(ioim->fcpim, io_aborts);
 	bfa_sm_send_event(ioim, BFA_IOIM_SM_ABORT);
 }
-
-

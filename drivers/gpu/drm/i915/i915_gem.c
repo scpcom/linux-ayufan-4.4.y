@@ -107,7 +107,6 @@ i915_gem_get_aperture_ioctl(struct drm_device *dev, void *data,
 	return 0;
 }
 
-
 /**
  * Creates a new mm object and returns a handle to it.
  */
@@ -594,7 +593,6 @@ i915_gem_gtt_pwrite_fast(struct drm_device *dev, struct drm_gem_object *obj,
 	remain = args->size;
 	if (!access_ok(VERIFY_READ, user_data, remain))
 		return -EFAULT;
-
 
 	mutex_lock(&dev->struct_mutex);
 	ret = i915_gem_object_pin(obj, 0);
@@ -1417,7 +1415,6 @@ i915_gem_mmap_gtt_ioctl(struct drm_device *dev, void *data,
 		mutex_unlock(&dev->struct_mutex);
 		return -EINVAL;
 	}
-
 
 	if (!obj_priv->mmap_offset) {
 		ret = i915_gem_create_mmap_offset(obj);
@@ -4375,7 +4372,6 @@ i915_gem_idle(struct drm_device *dev)
 						    old_write_domain);
 	}
 
-
 	/* Move all inactive buffers out of the GTT. */
 	ret = i915_gem_evict_from_inactive_list(dev);
 	WARN_ON(!list_empty(&dev_priv->mm.inactive_list));
@@ -4815,7 +4811,6 @@ i915_gem_attach_phys_object(struct drm_device *dev,
 			return 0;
 		i915_gem_detach_phys_object(dev, obj);
 	}
-
 
 	/* create a new object */
 	if (!dev_priv->mm.phys_objs[id - 1]) {

@@ -166,7 +166,6 @@ void sas_deform_port(struct asd_sas_phy *phy)
 	} else
 		sas_port_delete_phy(port->port, phy->phy);
 
-
 	if (si->dft->lldd_port_deformed)
 		si->dft->lldd_port_deformed(phy);
 

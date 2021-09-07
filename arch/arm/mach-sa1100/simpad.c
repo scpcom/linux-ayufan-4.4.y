@@ -72,7 +72,6 @@ static struct map_desc simpad_io_desc[] __initdata = {
 	},
 };
 
-
 static void simpad_uart_pm(struct uart_port *port, u_int state, u_int oldstate)
 {
 	if (port->mapbase == (u_int)&Ser1UTCR0) {
@@ -91,7 +90,6 @@ static void simpad_uart_pm(struct uart_port *port, u_int state, u_int oldstate)
 static struct sa1100_port_fns simpad_port_fns __initdata = {
 	.pm	   = simpad_uart_pm,
 };
-
 
 static struct mtd_partition simpad_partitions[] = {
 	{
@@ -116,7 +114,6 @@ static struct flash_platform_data simpad_flash_data = {
 	.nr_parts    = ARRAY_SIZE(simpad_partitions),
 };
 
-
 static struct resource simpad_flash_resources [] = {
 	{
 		.start     = SA1100_CS0_PHYS,
@@ -134,8 +131,6 @@ static struct mcp_plat_data simpad_mcp_data = {
 	.sclk_rate	= 11981000,
 };
 
-
-
 static void __init simpad_map_io(void)
 {
 	sa1100_map_io();
@@ -144,7 +139,6 @@ static void __init simpad_map_io(void)
 
 	set_cs3_bit (EN1 | EN0 | LED2_ON | DISPLAY_ON | RS232_ON |
 		      ENABLE_5V | RESET_SIMCARD | DECT_POWER_ON);
-
 
         sa1100_register_uart_fns(&simpad_port_fns);
 	sa1100_register_uart(0, 3);  /* serial interface */
@@ -159,7 +153,6 @@ static void __init simpad_map_io(void)
 	/*
 	 * Set up registers for sleep mode.
 	 */
-
 
 	PWER = PWER_GPIO0| PWER_RTC;
 	PGSR = 0x818;
@@ -192,9 +185,7 @@ static void simpad_power_off(void)
 
 	local_irq_enable(); /* we won't ever call it */
 
-
 }
-
 
 /*
  * MediaQ Video Device
@@ -207,8 +198,6 @@ static struct platform_device simpad_mq200fb = {
 static struct platform_device *devices[] __initdata = {
 	&simpad_mq200fb
 };
-
-
 
 static int __init simpad_init(void)
 {
@@ -224,7 +213,6 @@ static int __init simpad_init(void)
 }
 
 arch_initcall(simpad_init);
-
 
 MACHINE_START(SIMPAD, "Simpad")
 	/* Maintainer: Holger Freyther */

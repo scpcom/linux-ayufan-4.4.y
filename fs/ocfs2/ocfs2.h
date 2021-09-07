@@ -46,7 +46,6 @@
 /* For struct ocfs2_blockcheck_stats */
 #include "blockcheck.h"
 
-
 /* Caching of metadata buffers */
 
 /* Most user visible OCFS2 inodes will have very few pieces of
@@ -530,7 +529,6 @@ static inline void ocfs2_set_osb_flag(struct ocfs2_super *osb,
 	spin_unlock(&osb->osb_lock);
 }
 
-
 static inline unsigned long  ocfs2_test_osb_flag(struct ocfs2_super *osb,
 						 unsigned long flag)
 {
@@ -593,7 +591,6 @@ static inline int ocfs2_uses_extended_slot_map(struct ocfs2_super *osb)
 		OCFS2_FEATURE_INCOMPAT_EXTENDED_SLOT_MAP);
 }
 
-
 #define OCFS2_IS_VALID_DINODE(ptr)					\
 	(!strcmp((ptr)->i_signature, OCFS2_INODE_SIGNATURE))
 
@@ -602,7 +599,6 @@ static inline int ocfs2_uses_extended_slot_map(struct ocfs2_super *osb)
 
 #define OCFS2_IS_VALID_GROUP_DESC(ptr)					\
 	(!strcmp((ptr)->bg_signature, OCFS2_GROUP_DESC_SIGNATURE))
-
 
 #define OCFS2_IS_VALID_XATTR_BLOCK(ptr)					\
 	(!strcmp((ptr)->xb_signature, OCFS2_XATTR_BLOCK_SIGNATURE))
@@ -787,4 +783,3 @@ static inline s16 ocfs2_get_inode_steal_slot(struct ocfs2_super *osb)
 #define ocfs2_find_next_zero_bit ext2_find_next_zero_bit
 #define ocfs2_find_next_bit ext2_find_next_bit
 #endif  /* OCFS2_H */
-

@@ -276,7 +276,6 @@ static void __exit parport_amiga_exit(void)
 	release_mem_region(CIAA_PHYSADDR-1+0x100, 0x100);
 }
 
-
 MODULE_AUTHOR("Joerg Dorchain <joerg@dorchain.net>");
 MODULE_DESCRIPTION("Parport Driver for Amiga builtin Port");
 MODULE_SUPPORTED_DEVICE("Amiga builtin Parallel Port");

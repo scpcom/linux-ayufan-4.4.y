@@ -19,7 +19,6 @@
  *  bfad_trcmod.h Linux driver trace modules
  */
 
-
 #ifndef __BFAD_TRCMOD_H__
 #define __BFAD_TRCMOD_H__
 

@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 /*
     ==========================================================================
     Description:
@@ -108,11 +107,9 @@ VOID AuthTimeout(
 	if (pAd->Mlme.AuthMachine.CurrState == AUTH_WAIT_SEQ2)
 		Cls2errAction(pAd, pAd->MlmeAux.Bssid);
 
-
     MlmeEnqueue(pAd, AUTH_STATE_MACHINE, MT2_AUTH_TIMEOUT, 0, NULL);
     RTMP_MLME_HANDLER(pAd);
 }
-
 
 /*
     ==========================================================================
@@ -313,7 +310,6 @@ VOID MlmeDeauthReqAction(
         MlmeEnqueue(pAd, MLME_CNTL_STATE_MACHINE, MT2_DEAUTH_CONF, 2, &Status);
         return;
     }
-
 
     DBGPRINT(RT_DEBUG_TRACE, ("AUTH - Send DE-AUTH request (Reason=%d)...\n", pInfo->Reason));
     MgtMacHeaderInit(pAd, &DeauthHdr, SUBTYPE_DEAUTH, 0, pInfo->Addr, pAd->MlmeAux.Bssid);

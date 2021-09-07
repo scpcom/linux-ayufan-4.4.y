@@ -36,7 +36,6 @@
 
 #include "../rt_config.h"
 
-
 #define ETH_MAC_ADDR_STR_LEN 17  // in format of xx:xx:xx:xx:xx:xx
 
 // We assume the s1 is a sting, s2 is a memory space with 6 bytes. and content of s1 will be changed.
@@ -63,7 +62,6 @@ BOOLEAN rtstrmactohex(PSTRING s1, PSTRING s2)
 	return ( i == 6 ? TRUE : FALSE);
 
 }
-
 
 // we assume the s1 and s2 both are strings.
 BOOLEAN rtstrcasecmp(PSTRING s1, PSTRING s2)
@@ -383,7 +381,6 @@ INT RTMPGetKeyParameter(
 	PSTRING offset = NULL;
 	INT  len, keyLen;
 
-
 	keyLen = strlen(key);
 	os_alloc_mem(NULL, (PUCHAR *)&pMemBuf, MAX_PARAM_BUFFER_SIZE  * 2);
 	if (pMemBuf == NULL)
@@ -392,7 +389,6 @@ INT RTMPGetKeyParameter(
 	memset(pMemBuf, 0, MAX_PARAM_BUFFER_SIZE * 2);
 	temp_buf1 = pMemBuf;
 	temp_buf2 = (PSTRING)(pMemBuf + MAX_PARAM_BUFFER_SIZE);
-
 
 	//find section
 	if((offset = RTMPFindSection(buffer)) == NULL)
@@ -447,7 +443,6 @@ INT RTMPGetKeyParameter(
 
 	return TRUE;
 }
-
 
 /*
     ========================================================================
@@ -569,7 +564,6 @@ INT RTMPGetKeyParameterWithOffset(
     return TRUE;
 }
 
-
 static int rtmp_parse_key_buffer_from_file(IN  PRTMP_ADAPTER pAd,IN  PSTRING buffer,IN  ULONG KeyType,IN  INT BSSIdx,IN  INT KeyIdx)
 {
 	PSTRING		keybuff;
@@ -596,7 +590,6 @@ static int rtmp_parse_key_buffer_from_file(IN  PRTMP_ADAPTER pAd,IN  PSTRING buf
 	}
 
 }
-
 
 static void rtmp_read_key_parms_from_file(IN  PRTMP_ADAPTER pAd, PSTRING tmpbuf, PSTRING buffer)
 {
@@ -625,7 +618,6 @@ static void rtmp_read_key_parms_from_file(IN  PRTMP_ADAPTER pAd, PSTRING tmpbuf,
 		}
 #endif // CONFIG_STA_SUPPORT //
 	}
-
 
 	for (idx = 0; idx < 4; idx++)
 	{
@@ -658,8 +650,6 @@ static void rtmp_read_key_parms_from_file(IN  PRTMP_ADAPTER pAd, PSTRING tmpbuf,
 		}
 	}
 }
-
-
 
 #ifdef CONFIG_STA_SUPPORT
 static void rtmp_read_sta_wmm_parms_from_file(IN  PRTMP_ADAPTER pAd, char *tmpbuf, char *buffer)
@@ -760,7 +750,6 @@ static void rtmp_read_sta_wmm_parms_from_file(IN  PRTMP_ADAPTER pAd, char *tmpbu
 }
 #endif // CONFIG_STA_SUPPORT //
 
-
 #ifdef DOT11_N_SUPPORT
 static void HTParametersHook(
 	IN	PRTMP_ADAPTER pAd,
@@ -798,7 +787,6 @@ static void HTParametersHook(
         DBGPRINT(RT_DEBUG_TRACE, ("HT: MIMOPSEnable  = %s\n", (Value==0) ? "Disable" : "Enable"));
     }
 
-
     if (RTMPGetKeyParameter("HT_MIMOPSMode", pValueStr, 25, pInput, TRUE))
     {
         Value = simple_strtol(pValueStr, 0, 10);
@@ -828,7 +816,6 @@ static void HTParametersHook(
         }
         DBGPRINT(RT_DEBUG_TRACE, ("HT: BA Decline  = %s\n", (Value==0) ? "Disable" : "Enable"));
     }
-
 
     if (RTMPGetKeyParameter("HT_DisableReordering", pValueStr, 25, pInput, TRUE))
     {
@@ -907,9 +894,6 @@ static void HTParametersHook(
 		}
 		DBGPRINT(RT_DEBUG_TRACE, ("HT: RDG = %s\n", (Value==0) ? "Disable" : "Enable(+HTC)"));
 	}
-
-
-
 
 	// Tx A-MSUD ?
     if (RTMPGetKeyParameter("HT_AMSDU", pValueStr, 25, pInput, TRUE))
@@ -1037,7 +1021,6 @@ static void HTParametersHook(
 		}
 #endif // CONFIG_STA_SUPPORT //
 	}
-
 
 	// Channel Width
 	if (RTMPGetKeyParameter("HT_BW", pValueStr, 25, pInput, TRUE))
@@ -1207,11 +1190,9 @@ static void HTParametersHook(
 		DBGPRINT(RT_DEBUG_TRACE, ("HT: Disallow TKIP mode = %s\n", (pAd->CommonCfg.HT_DisallowTKIP == TRUE) ? "ON" : "OFF" ));
 	}
 
-
 	//2008/11/05:KH add to support Antenna power-saving of AP-->
 }
 #endif // DOT11_N_SUPPORT //
-
 
 NDIS_STATUS	RTMPSetProfileParameters(
 	IN RTMP_ADAPTER *pAd,
@@ -1290,7 +1271,6 @@ NDIS_STATUS	RTMPSetProfileParameters(
 			pAd->CommonCfg.Geography = BOTH;
 			pAd->CommonCfg.CountryCode[2] = ' ';
 		}
-
 
 #ifdef CONFIG_STA_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -1744,7 +1724,6 @@ NDIS_STATUS	RTMPSetProfileParameters(
 #endif // CONFIG_STA_SUPPORT //
 		}
 
-
 #ifdef CONFIG_STA_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 		{
@@ -1791,7 +1770,6 @@ NDIS_STATUS	RTMPSetProfileParameters(
 		//DefaultKeyID, KeyType, KeyStr
 		rtmp_read_key_parms_from_file(pAd, tmpbuf, pBuffer);
 
-
 		//HSCounter
 		/*if(RTMPGetKeyParameter("HSCounter", tmpbuf, 10, pBuffer, TRUE))
 		{
@@ -1811,7 +1789,6 @@ NDIS_STATUS	RTMPSetProfileParameters(
 #ifdef DOT11_N_SUPPORT
 		HTParametersHook(pAd, tmpbuf, pBuffer);
 #endif // DOT11_N_SUPPORT //
-
 
 #ifdef CARRIER_DETECTION_SUPPORT
 			//CarrierDetect
@@ -1927,11 +1904,8 @@ NDIS_STATUS	RTMPSetProfileParameters(
 				DBGPRINT(RT_DEBUG_TRACE, ("BeaconLostTime=%ld \n", pAd->StaCfg.BeaconLostTime));
 			}
 
-
 		}
 #endif // CONFIG_STA_SUPPORT //
-
-
 
 #ifdef RT30xx
 #ifdef ANT_DIVERSITY_SUPPORT
@@ -1956,13 +1930,11 @@ NDIS_STATUS	RTMPSetProfileParameters(
 
 	}while(0);
 
-
 	kfree(tmpbuf);
 
 	return NDIS_STATUS_SUCCESS;
 
 }
-
 
 #ifdef MULTIPLE_CARD_SUPPORT
 // record whether the card in the card list is used in the card file
@@ -2306,7 +2278,6 @@ BOOLEAN RTMP_CardInfoRead(
 			}
 		} // if (card_match_id >= 0)
 	}
-
 
 	// close file
 	retval = RtmpOSFileClose(srcf);

@@ -228,7 +228,6 @@ static void s3c_pm_show_resume_irqs(int start, unsigned long which,
 	}
 }
 
-
 void (*pm_cpu_prep)(void);
 void (*pm_cpu_sleep)(void);
 

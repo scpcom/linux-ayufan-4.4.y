@@ -76,7 +76,6 @@ static struct platform_device m528x_fec = {
 	.resource		= m528x_fec_resources,
 };
 
-
 static struct platform_device *m528x_devices[] __initdata = {
 	&m528x_uart,
 	&m528x_fec,

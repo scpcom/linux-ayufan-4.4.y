@@ -957,7 +957,6 @@ KW_6281_212j_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 	global_gpio->hdd_pm.hdd1_pm = 29;
 }
 
-
 /*
 Pin             Mode    Signal definition       Input/output    Pull-up/pull-down
 MPP[0:3]        0x2     SPI signal

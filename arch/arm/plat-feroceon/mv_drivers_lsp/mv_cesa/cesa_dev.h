@@ -52,7 +52,6 @@ typedef struct {
 	unsigned int 	size;  /* size of buffer */
 } CESA_DEBUG;
 
-
 /*
  * done against open of /dev/cesa, to get a cloned descriptor.
  */

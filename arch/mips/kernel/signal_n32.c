@@ -51,7 +51,6 @@
 extern int setup_sigcontext(struct pt_regs *, struct sigcontext __user *);
 extern int restore_sigcontext(struct pt_regs *, struct sigcontext __user *);
 
-
 /* IRIX compatible stack_t  */
 typedef struct sigaltstack32 {
 	s32 ss_sp;

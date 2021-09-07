@@ -73,4 +73,3 @@ MACHINE_START(E350, "Toshiba e350")
 	.init_machine	= e350_init,
 	.timer		= &pxa_timer,
 MACHINE_END
-

@@ -142,7 +142,6 @@ static int __init tcp_congestion_default(void)
 }
 late_initcall(tcp_congestion_default);
 
-
 /* Build string with list of available congestion control values */
 void tcp_get_available_congestion_control(char *buf, size_t maxlen)
 {
@@ -228,7 +227,6 @@ out:
 
 	return ret;
 }
-
 
 /* Change congestion control for socket */
 int tcp_set_congestion_control(struct sock *sk, const char *name)

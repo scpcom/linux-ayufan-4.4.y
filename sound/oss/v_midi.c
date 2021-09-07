@@ -38,7 +38,6 @@ static void *midi_mem = NULL;
  * future version of this driver.
  */
 
-
 static int v_midi_open (int dev, int mode,
 	      void            (*input) (int dev, unsigned char data),
 	      void            (*output) (int dev)
@@ -124,7 +123,6 @@ static inline int v_midi_ioctl (int dev, unsigned cmd, void __user *arg)
 	return -EPERM;
 }
 
-
 #define MIDI_SYNTH_NAME	"Loopback MIDI"
 #define MIDI_SYNTH_CAPS	SYNTH_CAP_INPUT
 
@@ -195,7 +193,6 @@ static void __init attach_v_midi (struct address_info *hw_config)
 	
 	midi_devs[midi1] = &m->m_ops[0];
 	
-
 	midi2 = sound_alloc_mididev();
 	if (midi2 == -1)
 	{
@@ -258,7 +255,6 @@ static inline int __init probe_v_midi(struct address_info *hw_config)
 {
 	return(1);	/* always OK */
 }
-
 
 static void __exit unload_v_midi(struct address_info *hw_config)
 {

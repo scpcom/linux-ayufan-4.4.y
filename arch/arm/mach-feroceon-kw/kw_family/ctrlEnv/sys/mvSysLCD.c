@@ -72,7 +72,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	#define DB(x)
 #endif	
 
-
 static MV_STATUS lcdWinOverlapDetect(MV_U32 winNum, MV_ADDR_WIN *pAddrWin);
 
 MV_TARGET lcdAddrDecPrioTap[] = 
@@ -139,7 +138,6 @@ static MV_STATUS mvLcdInitWinsUnit (void)
 			return MV_ERROR;
 		}
 
-	
         if (cpuAddrDecWin.enable == MV_TRUE)
 		{
 
@@ -162,7 +160,6 @@ static MV_STATUS mvLcdInitWinsUnit (void)
     
 	return MV_OK;
 }
-
 
 /*******************************************************************************
 * mvLcdInit - Initialize Lcd engine
@@ -250,7 +247,6 @@ MV_STATUS mvLcdTargetWinSet(MV_U32 winNum, MV_LCD_DEC_WIN *pAddrDecWin)
         return MV_BAD_PARAM;
 	}
     
-
 	mvCtrlAttribGet(pAddrDecWin->target,&targetAttribs);
 
 	/* set attributes */
@@ -259,7 +255,6 @@ MV_STATUS mvLcdTargetWinSet(MV_U32 winNum, MV_LCD_DEC_WIN *pAddrDecWin)
 	/* set target ID */
 	lcdDecRegs.sizeReg &= ~LCDWCR_TARGET_MASK;
 	lcdDecRegs.sizeReg |= targetAttribs.targetId << LCDWCR_TARGET_OFFS;
-
 
     /* Write to address decode Base Address Register */
 	MV_REG_WRITE(LCD_BASE_ADDR_REG(winNum), lcdDecRegs.baseReg);
@@ -327,8 +322,6 @@ MV_STATUS mvLcdTargetWinGet(MV_U32 winNum, MV_LCD_DEC_WIN *pAddrDecWin)
             return MV_ERROR;
     }
 
-
-
 	lcdDecRegs.baseReg  = MV_REG_READ(LCD_BASE_ADDR_REG(winNum));
 	lcdDecRegs.sizeReg  = MV_REG_READ(LCD_WINDOW_CTRL_REG(winNum));
 
@@ -343,7 +336,6 @@ MV_STATUS mvLcdTargetWinGet(MV_U32 winNum, MV_LCD_DEC_WIN *pAddrDecWin)
 		(lcdDecRegs.sizeReg & LCDWCR_ATTR_MASK) >> LCDWCR_ATTR_OFFS;
 	targetAttrib.targetId = 
 		(lcdDecRegs.sizeReg & LCDWCR_TARGET_MASK) >> LCDWCR_TARGET_OFFS;
-
 
 	pAddrDecWin->target = mvCtrlTargetGet(&targetAttrib);
 
@@ -481,7 +473,6 @@ static MV_STATUS lcdWinOverlapDetect(MV_U32 winNum, MV_ADDR_WIN *pAddrWin)
 		return MV_BAD_PTR;
 	}
     
-
 		for (winNumIndex = 0; winNumIndex < LCD_MAX_ADDR_DEC_WIN; winNumIndex++)
 		{
 			/* Do not check window itself */

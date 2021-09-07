@@ -208,7 +208,6 @@ int posix_cpu_clock_set(const clockid_t which_clock, const struct timespec *tp)
 	return error;
 }
 
-
 /*
  * Sample a per-thread clock for the given task.
  */
@@ -324,7 +323,6 @@ static int cpu_clock_sample_group(const clockid_t which_clock,
 	return 0;
 }
 
-
 int posix_cpu_clock_get(const clockid_t which_clock, struct timespec *tp)
 {
 	const pid_t pid = CPUCLOCK_PID(which_clock);
@@ -380,7 +378,6 @@ int posix_cpu_clock_get(const clockid_t which_clock, struct timespec *tp)
 	sample_to_timespec(which_clock, rtn, tp);
 	return 0;
 }
-
 
 /*
  * Validate the clockid_t for a new CPU-clock timer, and initialize the timer.
@@ -1640,7 +1637,6 @@ long posix_cpu_nsleep_restart(struct restart_block *restart_block)
 	return error;
 
 }
-
 
 #define PROCESS_CLOCK	MAKE_PROCESS_CPUCLOCK(0, CPUCLOCK_SCHED)
 #define THREAD_CLOCK	MAKE_THREAD_CPUCLOCK(0, CPUCLOCK_SCHED)

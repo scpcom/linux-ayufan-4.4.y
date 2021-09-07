@@ -20,7 +20,6 @@ static struct sysdev_class node_class = {
 	.name = "node",
 };
 
-
 static ssize_t node_read_cpumap(struct sys_device *dev, int type, char *buf)
 {
 	struct node *node_dev = to_node(dev);
@@ -172,7 +171,6 @@ static ssize_t node_read_distance(struct sys_device * dev,
 	return len;
 }
 static SYSDEV_ATTR(distance, S_IRUGO, node_read_distance, NULL);
-
 
 /*
  * register_node - Setup a sysfs device for a node.

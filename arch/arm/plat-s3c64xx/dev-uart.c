@@ -126,7 +126,6 @@ static struct resource s3c64xx_uart3_resource[] = {
 	},
 };
 
-
 struct s3c24xx_uart_resources s3c64xx_uart_resources[] __initdata = {
 	[0] = {
 		.resources	= s3c64xx_uart0_resource,
@@ -173,4 +172,3 @@ struct platform_device *s3c24xx_uart_src[4] = {
 
 struct platform_device *s3c24xx_uart_devs[4] = {
 };
-

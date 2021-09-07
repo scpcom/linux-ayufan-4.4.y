@@ -43,7 +43,6 @@
 #ifndef IPHASE_H  
 #define IPHASE_H  
 
-
 /************************ IADBG DEFINE *********************************/
 /* IADebugFlag Bit Map */ 
 #define IF_IADBG_INIT_ADAPTER   0x00000001        // init adapter info
@@ -261,7 +260,6 @@ struct main_vc
   
 };  
   
-  
 /* 8 byte entries */  
 struct ext_vc 
 {  
@@ -270,7 +268,6 @@ struct ext_vc
 	u_short 	last_desc;  
       	u_short 	out_of_rate_link;   /* reserved for UBR and CBR */  
 };  
-  
   
 #define DLE_ENTRIES 256  
 #define DMA_INT_ENABLE 0x0002	/* use for both Tx and Rx */  
@@ -311,7 +308,6 @@ struct tx_buf_desc {
 	unsigned short res2[10];	/* reserved field */  
 };  
 	  
-  
 struct rx_buf_desc { 
 	unsigned short desc_mode;
 	unsigned short vc_index;
@@ -390,7 +386,6 @@ struct rx_buf_desc {
 #define STAT_FEINT	0x00000004  
 #define STAT_SEGINT	0x00000002  
 #define STAT_REASSINT	0x00000001  
-  
   
 /*--------------- Segmentation control registers -----------------*/  
 /* The segmentation registers are 16 bits access and the addresses  
@@ -476,7 +471,6 @@ struct rx_buf_desc {
 #define ABRNEXTLINK	0x78  
 #define UBRNEXTLINK	0x79  
   
-  
 /*----------------- Reassembly control registers ---------------------*/  
 /* The reassembly registers are 16 bits access and the addresses  
 	are defined as such so the addresses are the actual "offsets" */  
@@ -551,7 +545,6 @@ struct rx_buf_desc {
 #define EXCPQ_EMPTY	0x0040  
 #define PCQ_EMPTY	0x0010  
 #define FREEQ_EMPTY	0x0004  
-  
   
 /*----------------- Front End registers/ DMA control --------------*/  
 /* There is a lot of documentation error regarding these offsets ???   
@@ -962,7 +955,6 @@ typedef struct {
         u32   suni_reserved_test;     /* SUNI Reserved for Test             */
 } IA_SUNI;
 
-
 typedef struct _SUNI_STATS_
 {
    u32 valid;                       // 1 = oc3 PHY card
@@ -1065,7 +1057,6 @@ typedef struct iadev_t {
 	dma_addr_t tx_dle_dma;
 	dma_addr_t rx_dle_dma;
 } IADEV;
-  
   
 #define INPH_IA_DEV(d) ((IADEV *) (d)->dev_data)  
 #define INPH_IA_VCC(v) ((struct ia_vcc *) (v)->dev_data)  
@@ -1459,6 +1450,5 @@ typedef struct _suni_pm7345_t
 		_t = readl(iadev->reg+IPHASE5575_EEPROM_ACCESS); \
 		value = (_t & NVDO) ? 1 : 0; \
 	}
-
 
 #endif /* IPHASE_H */

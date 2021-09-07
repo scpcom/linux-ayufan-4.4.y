@@ -288,7 +288,6 @@ static void hdmi_parse_eld(struct hda_codec *codec)
 		snd_hdmi_show_eld(eld);
 }
 
-
 /*
  * Audio InfoFrame routines
  */
@@ -460,7 +459,6 @@ static void hdmi_setup_channel_mapping(struct hda_codec *codec,
 	hdmi_debug_channel_mapping(codec);
 }
 
-
 static void hdmi_setup_audio_infoframe(struct hda_codec *codec,
 					struct snd_pcm_substream *substream)
 {
@@ -477,7 +475,6 @@ static void hdmi_setup_audio_infoframe(struct hda_codec *codec,
 	hdmi_fill_audio_infoframe(codec, &ai);
 	hdmi_start_infoframe_trans(codec);
 }
-
 
 /*
  * Unsolicited events
@@ -516,7 +513,6 @@ static void hdmi_non_intrinsic_event(struct hda_codec *codec, unsigned int res)
 	if (cp_ready)
 		;
 }
-
 
 static void intel_hdmi_unsol_event(struct hda_codec *codec, unsigned int res)
 {

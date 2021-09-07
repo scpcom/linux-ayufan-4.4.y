@@ -68,7 +68,6 @@ void macio_dev_put(struct macio_dev *dev)
 		put_device(&dev->ofdev.dev);
 }
 
-
 static int macio_device_probe(struct device *dev)
 {
 	int error = -ENODEV;
@@ -154,7 +153,6 @@ static int __init macio_bus_driver_init(void)
 }
 
 postcore_initcall(macio_bus_driver_init);
-
 
 /**
  * macio_release_dev - free a macio device structure when all users of it are
@@ -514,7 +512,6 @@ static void macio_pci_add_devices(struct macio_chip *chip)
 	}
 }
 
-
 /**
  * macio_register_driver - Registers a new MacIO device driver
  * @drv: pointer to the driver definition structure
@@ -628,7 +625,6 @@ void macio_release_resources(struct macio_dev *dev)
 	for (i = 0; i < dev->n_resources; i++)
 		macio_release_resource(dev, i);
 }
-
 
 #ifdef CONFIG_PCI
 

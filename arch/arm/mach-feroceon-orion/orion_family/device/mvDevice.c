@@ -71,8 +71,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	#define DB(x)    
 #endif	             
 
-
-
 /*******************************************************************************
 * mvDevPramSet - Set device interface bank parameters
 *
@@ -144,9 +142,7 @@ MV_STATUS mvDevIfPramSet(MV_DEVICE device, MV_DEVICE_PARAM *pDevParams)
 		return MV_ERROR;
 	}
 
-
 		devParam = MV_REG_READ(DEV_BANK_PARAM_REG(device));
-
 
 	/* setting values */
 	devParam |= (pDevParams->turnOff << DBP_TURNOFF_OFFS);
@@ -156,7 +152,6 @@ MV_STATUS mvDevIfPramSet(MV_DEVICE device, MV_DEVICE_PARAM *pDevParams)
 	devParam |= (pDevParams->wrLow << DBP_WRLOW_OFFS);
 	devParam |= (pDevParams->wrHigh << DBP_WRHIGH_OFFS);
 	devParam |= (pDevParams->badrSkew << DBP_BADRSKEW_OFFS);
-	
 	
 	switch (pDevParams->deviceWidth)
 	{
@@ -218,8 +213,6 @@ MV_STATUS mvDevPramGet(MV_DEVICE device, MV_DEVICE_PARAM *pDevParams)
 	pDevParams->wrHigh = (devParam & DBP_WRHIGH_MASK) >> DBP_WRHIGH_OFFS;
 	pDevParams->badrSkew = (devParam & DBP_BADRSKEW_MASK) >> DBP_BADRSKEW_OFFS;
 
-
-
 	switch (devParam & DBP_DEVWIDTH_MASK)
 	{
 	case DBP_DEVWIDTH_8BIT:
@@ -236,7 +229,6 @@ MV_STATUS mvDevPramGet(MV_DEVICE device, MV_DEVICE_PARAM *pDevParams)
 		return MV_ERROR;
 		break;
 	}
-
 
 	return MV_OK;
 }
@@ -310,9 +302,6 @@ MV_VOID mvDevNandSet(MV_DEVICE devNum, MV_BOOL careMode)
     else
     	nfCtrlReg &= ~(DINFCR_NF_ACT_CE_MASK(devNum));
 	
-    
     MV_REG_WRITE(DEV_NAND_CTRL_REG, nfCtrlReg);
 
 }
-
-

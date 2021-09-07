@@ -33,4 +33,3 @@ extern void s3c6400_init_clocks(int xtal);
 #define s3c6400_map_io NULL
 #define s3c6400_init NULL
 #endif
-

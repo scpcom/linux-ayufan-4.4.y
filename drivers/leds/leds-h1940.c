@@ -140,7 +140,6 @@ static int h1940leds_remove(struct platform_device *pdev)
 	return 0;
 }
 
-
 static struct platform_driver h1940leds_driver = {
 	.driver		= {
 		.name	= "h1940-leds",
@@ -149,7 +148,6 @@ static struct platform_driver h1940leds_driver = {
 	.probe		= h1940leds_probe,
 	.remove		= h1940leds_remove,
 };
-
 
 static int __init h1940leds_init(void)
 {

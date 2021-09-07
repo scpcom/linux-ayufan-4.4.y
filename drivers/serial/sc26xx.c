@@ -708,7 +708,6 @@ out_free_port:
 	return err;
 }
 
-
 static int __exit sc26xx_driver_remove(struct platform_device *dev)
 {
 	struct uart_sc26xx_port *up = dev_get_drvdata(&dev->dev);
@@ -748,7 +747,6 @@ static void __exit sc26xx_exit(void)
 
 module_init(sc26xx_init);
 module_exit(sc26xx_exit);
-
 
 MODULE_AUTHOR("Thomas Bogendörfer");
 MODULE_DESCRIPTION("SC681/SC2692 serial driver");

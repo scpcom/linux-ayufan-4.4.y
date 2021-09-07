@@ -221,5 +221,4 @@
 #define S3C6400_CLKSRC_UHOST_MASK	(0x3 << 5)
 #define S3C6400_CLKSRC_UHOST_SHIFT	(5)
 
-
 #endif /* _PLAT_REGS_CLOCK_H */

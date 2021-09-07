@@ -74,7 +74,6 @@
 
 #endif
 
-
 struct map_desc  MEM_TABLE[] =	{	
   { PCI_IF0_MEM0_BASE,  	__phys_to_pfn(PCI_IF0_MEM0_BASE),   	PCI_IF0_MEM0_SIZE,  	MT_DEVICE},
   { PCI_IF1_MEM0_BASE,  	__phys_to_pfn(PCI_IF1_MEM0_BASE),   	PCI_IF1_MEM0_SIZE, 	MT_DEVICE},
@@ -127,4 +126,3 @@ MV_CPU_DEC_WIN SYSMAP_DB_88F5182_DDR2_BP[] = {
     	/* Table terminator */						
     	{{TBL_TERM, TBL_TERM, TBL_TERM}, TBL_TERM,TBL_TERM}
 };
-

@@ -102,7 +102,6 @@ typedef struct {
 	u32 mdcas2;
 } sa1100_dram_regs_t;
 
-
 static struct cpufreq_driver sa1100_driver;
 
 static sa1100_dram_regs_t sa1100_dram_settings[] =

@@ -37,7 +37,6 @@
 #include "../perf.h"
 #include "trace-event.h"
 
-
 #define VERSION "0.5"
 
 #define _STR(x) #x
@@ -67,8 +66,6 @@ struct events {
 	struct events *next;
 	char *name;
 };
-
-
 
 static void die(const char *fmt, ...)
 {

@@ -58,7 +58,6 @@
 //static int          msglevel                =MSG_LEVEL_DEBUG;
 static int          msglevel                =MSG_LEVEL_INFO;
 
-
 #define USB_CTL_WAIT   500 //ms
 
 #ifndef URB_ASYNC_UNLINK
@@ -76,20 +75,17 @@ s_nsInterruptUsbIoCompleteRead(
     IN struct urb *urb
     );
 
-
 static
 VOID
 s_nsBulkInUsbIoCompleteRead(
     IN struct urb *urb
     );
 
-
 static
 VOID
 s_nsBulkOutIoCompleteWrite(
     IN struct urb *urb
     );
-
 
 static
 VOID
@@ -107,8 +103,6 @@ s_nsControlInUsbIoCompleteWrite(
 
 /*---------------------  Export Functions  --------------------------*/
 
-
-
 NTSTATUS
 PIPEnsControlOutAsyn(
     IN PSDevice     pDevice,
@@ -121,10 +115,8 @@ PIPEnsControlOutAsyn(
 {
     NTSTATUS                ntStatus;
 
-
     if (MP_TEST_FLAG(pDevice, fMP_DISCONNECTED))
         return STATUS_FAILURE;
-
 
     if (MP_TEST_FLAG(pDevice, fMP_CONTROL_WRITES)) {
         return STATUS_FAILURE;
@@ -156,10 +148,6 @@ PIPEnsControlOutAsyn(
     return ntStatus;
 }
 
-
-
-
-
 NTSTATUS
 PIPEnsControlOut(
     IN PSDevice     pDevice,
@@ -172,7 +160,6 @@ PIPEnsControlOut(
 {
     NTSTATUS            ntStatus = 0;
     int ii;
-
 
     if (MP_TEST_FLAG(pDevice, fMP_DISCONNECTED))
         return STATUS_FAILURE;
@@ -217,9 +204,6 @@ PIPEnsControlOut(
 
     return STATUS_SUCCESS;
 }
-
-
-
 
 NTSTATUS
 PIPEnsControlIn(
@@ -301,8 +285,6 @@ s_nsControlInUsbIoCompleteWrite(
     MP_CLEAR_FLAG(pDevice, fMP_CONTROL_WRITES);
 }
 
-
-
 /*
  * Description:
  *      Complete function of usb Control callback
@@ -342,9 +324,6 @@ s_nsControlInUsbIoCompleteRead(
     MP_CLEAR_FLAG(pDevice, fMP_CONTROL_READS);
 }
 
-
-
-
 /*
  * Description:
  *      Allocates an usb interrupt in irp and calls USBD.
@@ -364,7 +343,6 @@ PIPEnsInterruptRead(
     )
 {
     NTSTATUS            ntStatus = STATUS_FAILURE;
-
 
     DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO"---->s_nsStartInterruptUsbRead()\n");
 
@@ -422,7 +400,6 @@ usb_fill_bulk_urb(pDevice->pInterruptURB,
     return ntStatus;
 }
 
-
 /*
  * Description:
  *      Complete function of usb interrupt in irp.
@@ -446,7 +423,6 @@ s_nsInterruptUsbIoCompleteRead(
 {
     PSDevice        pDevice;
     NTSTATUS        ntStatus;
-
 
     DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO"---->s_nsInterruptUsbIoCompleteRead\n");
     //
@@ -490,7 +466,6 @@ s_nsInterruptUsbIoCompleteRead(
     }
 
     STAvUpdateUSBCounter(&pDevice->scStatistic.USB_InterruptStat, ntStatus);
-
 
     if (pDevice->fKillEventPollingThread != TRUE) {
    #if 0               //reserve int URB submit
@@ -545,14 +520,12 @@ PIPEnsBulkInUsbRead(
     NTSTATUS            ntStatus= 0;
     struct urb          *pUrb;
 
-
     DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO"---->s_nsStartBulkInUsbRead\n");
 
     if (MP_TEST_FLAG(pDevice, fMP_DISCONNECTED))
         return STATUS_FAILURE;
 
     pDevice->ulBulkInPosted++;
-
 
 	pUrb = pRCB->pUrb;
     //
@@ -582,9 +555,6 @@ PIPEnsBulkInUsbRead(
     return ntStatus;
 }
 
-
-
-
 /*
  * Description:
  *      Complete function of usb BulkIn irp.
@@ -612,8 +582,6 @@ s_nsBulkInUsbIoCompleteRead(
     BOOL    bIndicateReceive = FALSE;
     BOOL    bReAllocSkb = FALSE;
     NTSTATUS    status;
-
-
 
     DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO"---->s_nsBulkInUsbIoCompleteRead\n");
     status = urb->status;
@@ -644,7 +612,6 @@ s_nsBulkInUsbIoCompleteRead(
 	#endif
     }
 
-
     STAvUpdateUSBCounter(&pDevice->scStatistic.USB_BulkInStat, status);
 
     if (bIndicateReceive) {
@@ -661,7 +628,6 @@ s_nsBulkInUsbIoCompleteRead(
         RXvFreeRCB(pRCB, bReAllocSkb);
         spin_unlock(&pDevice->lock);
     }
-
 
     return;
 }
@@ -687,8 +653,6 @@ PIPEnsSendBulkOut(
 {
     NTSTATUS            status;
     struct urb          *pUrb;
-
-
 
     pDevice->bPWBitOn = FALSE;
 
@@ -770,7 +734,6 @@ s_nsBulkOutIoCompleteWrite(
     ULONG               ulBufLen;
     PUSB_SEND_CONTEXT   pContext;
 
-
     DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO"---->s_nsBulkOutIoCompleteWrite\n");
     //
     // The context given to IoSetCompletionRoutine is an USB_CONTEXT struct
@@ -820,7 +783,6 @@ s_nsBulkOutIoCompleteWrite(
 	    }
 
         pDevice->dev->trans_start = jiffies;
-
 
         if (status == STATUS_SUCCESS) {
             pDevice->packetsSent++;

@@ -72,4 +72,3 @@ MACHINE_START(E330, "Toshiba e330")
 	.init_machine	= e330_init,
 	.timer		= &pxa_timer,
 MACHINE_END
-

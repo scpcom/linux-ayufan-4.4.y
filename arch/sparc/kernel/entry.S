@@ -1334,7 +1334,6 @@ linux_syscall_trace2:
 	b	ret_trap_entry
 	 st	%l2, [%sp + STACKFRAME_SZ + PT_NPC]
 
-
 /* Saving and restoring the FPU state is best done from lowlevel code.
  *
  * void fpsave(unsigned long *fpregs, unsigned long *fsr,

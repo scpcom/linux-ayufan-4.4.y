@@ -193,7 +193,6 @@ void ext4_itable_unused_set(struct super_block *sb,
 		bg->bg_itable_unused_hi = cpu_to_le16(count >> 16);
 }
 
-
 /* Just increment the non-pointer handle value */
 static handle_t *ext4_get_nojournal(void)
 {
@@ -208,7 +207,6 @@ static handle_t *ext4_get_nojournal(void)
 	current->journal_info = handle;
 	return handle;
 }
-
 
 /* Decrement the non-pointer handle value */
 static void ext4_put_nojournal(handle_t *handle)
@@ -1014,7 +1012,6 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 		seq_puts(seq, ",i_version");
 	if (!test_opt(sb, DELALLOC))
 		seq_puts(seq, ",nodelalloc");
-
 
 	if (sbi->s_stripe)
 		seq_printf(seq, ",stripe=%lu", sbi->s_stripe);
@@ -2511,7 +2508,6 @@ static void ext4_sb_release(struct kobject *kobj)
 						s_kobj);
 	complete(&sbi->s_kobj_unregister);
 }
-
 
 static struct sysfs_ops ext4_attr_ops = {
 	.show	= ext4_attr_show,

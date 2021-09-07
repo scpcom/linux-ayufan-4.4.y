@@ -405,7 +405,6 @@ console_setup(struct console *co, char *options)
 	return 0;
 }
 
-
 /* This is a dummy serial device that throws away anything written to it.
  * This is used when no debug output is wanted.
  */

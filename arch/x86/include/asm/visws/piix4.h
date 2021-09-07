@@ -56,8 +56,6 @@
 
 #define	SIO_PM_GP_EN		0x80
 
-
-
 /*
  * This is the dev/reg where generating a config cycle will
  * result in a PCI special cycle.

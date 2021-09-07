@@ -7,7 +7,6 @@
 #include <linux/sched.h>
 #include <asm/mmu_context.h>
 
-
 /* This is for the serialisation of PxTLB broadcasts.  At least on the
  * N class systems, only one PxTLB inter processor broadcast can be
  * active at any one time on the Merced bus.  This tlb purge

@@ -188,7 +188,6 @@ static int zoom2_twl_gpio_setup(struct device *dev,
 	return 0;
 }
 
-
 static int zoom2_batt_table[] = {
 /* 0 C*/
 30800, 29500, 28300, 27100,

@@ -51,7 +51,6 @@ typedef u16	HvBusNumber;	/* Hypervisor Bus Number */
 typedef u8	HvSubBusNumber;	/* Hypervisor SubBus Number */
 typedef u8	HvAgentId;	/* Hypervisor DevFn */
 
-
 #define HVMAXARCHITECTEDLPS		32
 #define HVMAXARCHITECTEDVIRTUALLANS	16
 #define HVMAXARCHITECTEDVIRTUALDISKS	32

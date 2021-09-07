@@ -37,7 +37,6 @@ static const char SysKonnectFileId[] =
 #include "h/skdrv2nd.h"
 #include "h/skgespi.h"
 
-
 SK_AC *lpAC;
 static  SK_U32 timebuf;
 
@@ -47,7 +46,6 @@ int fl_type;
  */
 long max_pages = 0;
 long max_faddr = 0;
-
 
 /* low level SPI programming interface */
 
@@ -104,4 +102,3 @@ unsigned char *spi_malloc( unsigned short size )  {
 void spi_free( unsigned char *buf )  {
 	kfree(buf);
 }
-

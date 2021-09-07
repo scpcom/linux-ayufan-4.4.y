@@ -16,7 +16,6 @@
 
 #include "cprecomp.h"
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfGetAmsduSubFrame          */
@@ -83,7 +82,6 @@ zbuf_t *zfGetAmsduSubFrame(zdev_t *dev, zbuf_t *buf, u16_t *offset)
 	return NULL;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfDeAmsdu                   */
@@ -113,7 +111,6 @@ void zfDeAmsdu(zdev_t *dev, zbuf_t *buf, u16_t vap, u8_t encryMode)
 		offset += (ZM_SIZE_OF_IV + ZM_SIZE_OF_EXT_IV);
 	else if (encryMode == ZM_WEP64 || encryMode == ZM_WEP128)
 		offset += ZM_SIZE_OF_IV;
-
 
 	/* Repeatly calling zfGetAmsduSubFrame() until NULL returned */
 	while ((subframeBuf = zfGetAmsduSubFrame(dev, buf, &offset)) != NULL) {

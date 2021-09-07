@@ -12,7 +12,6 @@
  *      2 of the License, or (at your option) any later version.
  */
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/sched.h>
@@ -48,7 +47,6 @@
 #include "plpar_wrappers.h"
 #include "pseries.h"
 #include "xics.h"
-
 
 /*
  * The Primary thread of each non-boot processor was started from the OF client

@@ -51,7 +51,6 @@ void machine_kexec(struct kimage *image)
 	unsigned long reboot_code_buffer_phys;
 	void *reboot_code_buffer;
 
-
 	page_list = image->head & PAGE_MASK;
 
 	/* we need both effective and real address here */
@@ -68,7 +67,6 @@ void machine_kexec(struct kimage *image)
 	/* copy our kernel relocation code to the control code page */
 	memcpy(reboot_code_buffer,
 	       relocate_new_kernel, relocate_new_kernel_size);
-
 
 	flush_icache_range((unsigned long) reboot_code_buffer,
 			   (unsigned long) reboot_code_buffer + KEXEC_CONTROL_PAGE_SIZE);

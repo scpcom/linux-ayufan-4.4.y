@@ -363,7 +363,6 @@ static int bcm_enet_receive_queue(struct net_device *dev, int budget)
 	return processed;
 }
 
-
 /*
  * try to or force reclaim of transmitted buffers
  */
@@ -1237,7 +1236,6 @@ static const u32 unused_mib_regs[] = {
 	ETH_MIB_RX_ALL_PKTS,
 };
 
-
 static void bcm_enet_get_drvinfo(struct net_device *netdev,
 				 struct ethtool_drvinfo *drvinfo)
 {
@@ -1839,7 +1837,6 @@ out:
 	return ret;
 }
 
-
 /*
  * exit func, stops hardware and unregisters netdevice
  */
@@ -1967,7 +1964,6 @@ static void __exit bcm_enet_exit(void)
 	platform_driver_unregister(&bcm63xx_enet_driver);
 	platform_driver_unregister(&bcm63xx_enet_shared_driver);
 }
-
 
 module_init(bcm_enet_init);
 module_exit(bcm_enet_exit);

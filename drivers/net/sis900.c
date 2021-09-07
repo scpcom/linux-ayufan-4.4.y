@@ -302,7 +302,6 @@ static int __devinit sis630e_get_mac_addr(struct pci_dev * pci_dev,
 	return 1;
 }
 
-
 /**
  *	sis635_get_mac_addr - Get MAC address for SIS635 model
  *	@pci_dev: the sis900 pci device
@@ -755,7 +754,6 @@ static u16 sis900_default_phy(struct net_device * net_dev)
 	return status;
 }
 
-
 /**
  * 	sis900_set_capability - set the media capability of network adapter.
  *	@net_dev : the net device to probe for
@@ -781,7 +779,6 @@ static void sis900_set_capability(struct net_device *net_dev, struct mii_phy *ph
 
 	mdio_write(net_dev, phy->phy_addr, MII_ANADV, cap);
 }
-
 
 /* Delay between EEPROM clock transitions. */
 #define eeprom_delay()  inl(ee_addr)
@@ -956,7 +953,6 @@ static void mdio_write(struct net_device *net_dev, int phy_id, int location,
 
 	return;
 }
-
 
 /**
  *	sis900_reset_phy - reset sis900 mii phy.
@@ -1447,7 +1443,6 @@ static void sis900_auto_negotiate(struct net_device *net_dev, int phy_addr)
 		   MII_CNTL_AUTO | MII_CNTL_RST_AUTO);
 	sis_priv->autong_complete = 0;
 }
-
 
 /**
  *	sis900_read_mode - read media mode for sis900 internal phy
@@ -2483,4 +2478,3 @@ static void __exit sis900_cleanup_module(void)
 
 module_init(sis900_init_module);
 module_exit(sis900_cleanup_module);
-

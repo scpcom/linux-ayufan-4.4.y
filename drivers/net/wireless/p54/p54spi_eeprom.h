@@ -675,4 +675,3 @@ static unsigned char p54spi_eeprom[] = {
 };
 
 #endif /* P54SPI_EEPROM_H */
-

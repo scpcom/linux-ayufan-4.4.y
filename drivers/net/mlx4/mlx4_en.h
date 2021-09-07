@@ -52,7 +52,6 @@
 #define DRV_VERSION	"1.4.1.1"
 #define DRV_RELDATE	"June 2009"
 
-
 #define MLX4_EN_MSG_LEVEL	(NETIF_MSG_LINK | NETIF_MSG_IFDOWN)
 
 #define en_print(level, priv, format, arg...)			\
@@ -89,7 +88,6 @@
 /*
  * Device constants
  */
-
 
 #define MLX4_EN_PAGE_SHIFT	12
 #define MLX4_EN_PAGE_SIZE	(1 << MLX4_EN_PAGE_SHIFT)
@@ -207,14 +205,12 @@ enum cq_type {
 	TX = 1,
 };
 
-
 /*
  * Useful macros
  */
 #define ROUNDUP_LOG2(x)		ilog2(roundup_pow_of_two(x))
 #define XNOR(x, y)		(!(x) == !(y))
 #define ILLEGAL_MAC(addr)	(addr == 0xffffffffffffULL || addr == 0x0)
-
 
 struct mlx4_en_tx_info {
 	struct sk_buff *skb;
@@ -224,12 +220,10 @@ struct mlx4_en_tx_info {
 	u8 inl;
 };
 
-
 #define MLX4_EN_BIT_DESC_OWN	0x80000000
 #define CTRL_SIZE	sizeof(struct mlx4_wqe_ctrl_seg)
 #define MLX4_EN_MEMTYPE_PAD	0x100
 #define DS_SIZE		sizeof(struct mlx4_wqe_data_seg)
-
 
 struct mlx4_en_tx_desc {
 	struct mlx4_wqe_ctrl_seg ctrl;
@@ -296,7 +290,6 @@ struct mlx4_en_rx_ring {
 	unsigned long bytes;
 	unsigned long packets;
 };
-
 
 static inline int mlx4_en_can_lro(__be16 status)
 {
@@ -370,7 +363,6 @@ struct mlx4_en_dev {
 	u32                     priv_pdn;
 	spinlock_t              uar_lock;
 };
-
 
 struct mlx4_en_rss_map {
 	int base_qpn;
@@ -495,7 +487,6 @@ struct mlx4_en_priv {
 	struct dev_mc_list *mc_list;
 	struct mlx4_en_stat_out_mbox hw_stats;
 };
-
 
 void mlx4_en_destroy_netdev(struct net_device *dev);
 int mlx4_en_init_netdev(struct mlx4_en_dev *mdev, int port,

@@ -3,8 +3,6 @@
 
 #include <asm/scatterlist.h>
 
-
-
 /*
 ** HP PCI platforms generally support multiple bus adapters.
 **    (workstations 1-~4, servers 2-~32)
@@ -17,7 +15,6 @@
 */
 #define PCI_MAX_BUSSES	256
 
-
 /* To be used as: mdelay(pci_post_reset_delay);
  *
  * post_reset is the time the kernel should stall to prevent anyone from
@@ -27,7 +24,6 @@
  * 20ms seems to work for all the HP PCI implementations to date.
  */
 #define pci_post_reset_delay 50
-
 
 /*
 ** pci_hba_data (aka H2P_OBJECT in HP/UX)
@@ -145,7 +141,6 @@ extern int parisc_bus_is_phys; 	/* in arch/parisc/kernel/setup.c */
 
 #endif	/* !CONFIG_PA20 */
 
-
 /*
 ** Most PCI devices (eg Tulip, NCR720) also export the same registers
 ** to both MMIO and I/O port space.  Due to poor performance of I/O Port
@@ -176,7 +171,6 @@ struct pci_port_ops {
 	void (*outw) (struct pci_hba_data *hba, u16 port, u16 data);
 	void (*outl) (struct pci_hba_data *hba, u16 port, u32 data);
 };
-
 
 struct pci_bios_ops {
 	void (*init)(void);

@@ -392,4 +392,3 @@ extern void tx_que_new_job(
 
 extern void post_phy_reset_action(struct net_device *dev);
 #endif        //  #if !defined(__GMAC_H__)
-

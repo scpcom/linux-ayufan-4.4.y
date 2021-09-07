@@ -113,7 +113,6 @@ SECTIONS
 		_edata = .;
 	}
 
-
 	. = ALIGN(8);
 	.bss    	: AT(ADDR(.bss) - LOAD_OFFSET) {
 		__bss_start = .;

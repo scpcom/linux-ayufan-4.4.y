@@ -25,7 +25,6 @@
 #include <asm/mach-pnx8550/pci.h>
 #include <asm/mach-pnx8550/int.h>
 
-
 #undef	DEBUG
 #ifdef 	DEBUG
 #define	DBG(x...)	printk(x)

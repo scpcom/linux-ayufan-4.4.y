@@ -38,7 +38,6 @@
 
 #include "i2c-core.h"
 
-
 /* core_lock protects i2c_adapter_idr, userspace_devices, and guarantees
    that device detection, deletion of detected devices, and attach_adapter
    and detach_adapter calls are serialized */
@@ -236,7 +235,6 @@ static struct device_type i2c_client_type = {
 	.release	= i2c_client_dev_release,
 };
 
-
 /**
  * i2c_verify_client - return parameter as i2c_client, or NULL
  * @dev: device, probably from some driver model iterator
@@ -253,7 +251,6 @@ struct i2c_client *i2c_verify_client(struct device *dev)
 			: NULL;
 }
 EXPORT_SYMBOL(i2c_verify_client);
-
 
 /**
  * i2c_new_device - instantiate an i2c device
@@ -322,7 +319,6 @@ out_err:
 }
 EXPORT_SYMBOL_GPL(i2c_new_device);
 
-
 /**
  * i2c_unregister_device - reverse effect of i2c_new_device()
  * @client: value returned from i2c_new_device()
@@ -333,7 +329,6 @@ void i2c_unregister_device(struct i2c_client *client)
 	device_unregister(&client->dev);
 }
 EXPORT_SYMBOL_GPL(i2c_unregister_device);
-
 
 static const struct i2c_device_id dummy_id[] = {
 	{ "dummy", 0 },
@@ -823,7 +818,6 @@ int i2c_del_adapter(struct i2c_adapter *adap)
 	return 0;
 }
 EXPORT_SYMBOL(i2c_del_adapter);
-
 
 /* ------------------------------------------------------------------------- */
 

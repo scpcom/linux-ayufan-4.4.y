@@ -72,7 +72,6 @@ struct smb_nls_codepage {
 	char remote_name[SMB_NLS_MAXNAMELEN];
 };
 
-
 #define SMB_MAXNAMELEN 255
 #define SMB_MAXPATHLEN 1024
 

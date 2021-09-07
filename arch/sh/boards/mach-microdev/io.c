@@ -30,7 +30,6 @@
 	 */
 #define	PVR	0xff000030	/* Processor Version Register */
 
-
 #define	IO_IDE2_BASE		0x170ul	/* I/O base for SMSC FDC37C93xAPM IDE #2 */
 #define	IO_IDE1_BASE		0x1f0ul	/* I/O base for SMSC FDC37C93xAPM IDE #1 */
 #define IO_ISP1161_BASE		0x290ul /* I/O port for Philips ISP1161x USB chip */

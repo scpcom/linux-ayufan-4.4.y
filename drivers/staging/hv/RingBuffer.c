@@ -27,13 +27,10 @@
 #include "logging.h"
 #include "RingBuffer.h"
 
-
 /* #defines */
-
 
 /* Amount of space to write to */
 #define BYTES_AVAIL_TO_WRITE(r, w, z) ((w) >= (r))?((z) - ((w) - (r))):((r) - (w))
-
 
 /*++
 
@@ -148,7 +145,6 @@ SetNextReadLocation(RING_BUFFER_INFO* RingInfo, u32 NextReadLocation)
 	RingInfo->RingBuffer->ReadIndex = NextReadLocation;
 }
 
-
 /*++
 
 Name:
@@ -163,7 +159,6 @@ GetRingBuffer(RING_BUFFER_INFO* RingInfo)
 {
 	return (void *)RingInfo->RingBuffer->Buffer;
 }
-
 
 /*++
 
@@ -195,7 +190,6 @@ GetRingBufferIndices(RING_BUFFER_INFO* RingInfo)
 	return ((u64)RingInfo->RingBuffer->WriteIndex << 32) || RingInfo->RingBuffer->ReadIndex;
 }
 
-
 /*++
 
 Name:
@@ -222,7 +216,6 @@ void DumpRingInfo(RING_BUFFER_INFO *RingInfo, char *Prefix)
 		RingInfo->RingBuffer->WriteIndex);
 }
 
-
 /* Internal routines */
 
 static u32
@@ -238,8 +231,6 @@ CopyFromRingBuffer(
 	void *				Dest,
 	u32				DestLen,
 	u32				StartReadOffset);
-
-
 
 /*++
 
@@ -268,7 +259,6 @@ void RingBufferGetDebugInfo(RING_BUFFER_INFO *RingInfo,
 		DebugInfo->CurrentInterruptMask = RingInfo->RingBuffer->InterruptMask;
 	}
 }
-
 
 /*++
 
@@ -409,7 +399,6 @@ int RingBufferWrite(RING_BUFFER_INFO *OutRingInfo,
 	return 0;
 }
 
-
 /*++
 
 Name:
@@ -452,7 +441,6 @@ int RingBufferPeek(RING_BUFFER_INFO *InRingInfo, void *Buffer, u32 BufferLen)
 
 	return 0;
 }
-
 
 /*++
 
@@ -518,7 +506,6 @@ int RingBufferRead(RING_BUFFER_INFO *InRingInfo, void *Buffer,
 	return 0;
 }
 
-
 /*++
 
 Name:
@@ -558,7 +545,6 @@ CopyToRingBuffer(
 
 	return StartWriteOffset;
 }
-
 
 /*++
 
@@ -601,6 +587,5 @@ CopyFromRingBuffer(
 
 	return StartReadOffset;
 }
-
 
 /* eof */

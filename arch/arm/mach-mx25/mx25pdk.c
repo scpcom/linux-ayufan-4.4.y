@@ -66,4 +66,3 @@ MACHINE_START(MX25_3DS, "Freescale MX25PDK (3DS)")
 	.init_machine   = mx25pdk_init,
 	.timer          = &mx25pdk_timer,
 MACHINE_END
-

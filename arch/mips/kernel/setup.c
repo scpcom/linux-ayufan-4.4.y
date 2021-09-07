@@ -341,7 +341,6 @@ static void __init bootmem_init(void)
 	bootmap_size = init_bootmem_node(NODE_DATA(0), mapstart,
 					 min_low_pfn, max_low_pfn);
 
-
 	for (i = 0; i < boot_mem_map.nr_map; i++) {
 		unsigned long start, end;
 

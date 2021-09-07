@@ -28,7 +28,6 @@
 const struct inet6_protocol *inet6_protos[MAX_INET_PROTOS];
 static DEFINE_SPINLOCK(inet6_proto_lock);
 
-
 int inet6_add_protocol(const struct inet6_protocol *prot, unsigned char protocol)
 {
 	int ret, hash = protocol & (MAX_INET_PROTOS - 1);

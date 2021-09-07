@@ -1,7 +1,6 @@
 #ifndef _ALPHA_DMA_MAPPING_H
 #define _ALPHA_DMA_MAPPING_H
 
-
 #ifdef CONFIG_PCI
 
 #include <linux/pci.h>

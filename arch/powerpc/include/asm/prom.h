@@ -70,8 +70,6 @@ struct boot_param_header
 	u32	dt_struct_size;		/* size of the DT structure block */
 };
 
-
-
 typedef u32 phandle;
 typedef u32 ihandle;
 
@@ -114,14 +112,12 @@ static inline void of_node_set_flag(struct device_node *n, unsigned long flag)
 	set_bit(flag, &n->_flags);
 }
 
-
 #define HAVE_ARCH_DEVTREE_FIXUPS
 
 static inline void set_node_proc_entry(struct device_node *dn, struct proc_dir_entry *de)
 {
 	dn->pde = de;
 }
-
 
 extern struct device_node *of_find_all_nodes(struct device_node *prev);
 extern struct device_node *of_node_get(struct device_node *node);
@@ -173,11 +169,9 @@ extern struct resource *request_OF_resource(struct device_node* node,
 				int index, const char* name_postfix);
 extern int release_OF_resource(struct device_node* node, int index);
 
-
 /*
  * OF address retreival & translation
  */
-
 
 /* Helper to read a big number; size is in cells (not bytes) */
 static inline u64 of_read_number(const u32 *cell, int size)
@@ -308,7 +302,6 @@ extern void of_irq_map_init(unsigned int flags);
 extern int of_irq_map_raw(struct device_node *parent, const u32 *intspec,
 			  u32 ointsize, const u32 *addr,
 			  struct of_irq *out_irq);
-
 
 /**
  * of_irq_map_one - Resolve an interrupt for a device

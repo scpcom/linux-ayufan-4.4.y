@@ -312,7 +312,6 @@ static void fc_fcp_ddp_done(struct fc_fcp_pkt *fsp)
 	}
 }
 
-
 /*
  * Receive SCSI data from target.
  * Called after receiving solicited data.

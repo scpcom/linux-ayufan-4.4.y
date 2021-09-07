@@ -8,5 +8,3 @@ MV_BOOLEAN HandleXORQueue(MV_PVOID This);
 #endif /* RAID_DRIVER */
 
 #endif
-
-

@@ -17,7 +17,6 @@
 #include "hpani.h"
 #include "hpusb.h"
 
-
 extern u16_t zfDelayWriteInternalReg(zdev_t* dev, u32_t addr, u32_t val);
 extern u16_t zfFlushDelayWrite(zdev_t* dev);
 

@@ -515,7 +515,6 @@ static void __init offb_init_fb(const char *name, const char *full_name,
 	       info->node, full_name);
 }
 
-
 static void __init offb_init_nodriver(struct device_node *dp, int no_real_node)
 {
 	unsigned int len;
@@ -656,7 +655,6 @@ static int __init offb_init(void)
 
 	return 0;
 }
-
 
 module_init(offb_init);
 MODULE_LICENSE("GPL");

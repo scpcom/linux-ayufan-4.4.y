@@ -115,9 +115,7 @@ u8_t zfCompareWithBssid(zdev_t* dev, u16_t* bssid);
 /* chb.c */
 void zfDumpBssList(zdev_t* dev);
 
-
 u16_t zfIssueCmd(zdev_t* dev, u32_t* cmd, u16_t cmdLen, u16_t src, u8_t* buf);
-
 
 /* cic.c */
 void zfUpdateBssid(zdev_t* dev, u8_t* bssid);
@@ -444,6 +442,5 @@ u16_t zfStaAddIeSupportCh(zdev_t* dev, zbuf_t* buf, u16_t offset);
 void zfHpEnableRifs(zdev_t* dev, u8_t mode24g, u8_t modeHt, u8_t modeHt2040);
 void zfHpDisableRifs(zdev_t* dev);
 u16_t zfHpUsbReset(zdev_t* dev);
-
 
 #endif /* #ifndef _CFUNC_H */

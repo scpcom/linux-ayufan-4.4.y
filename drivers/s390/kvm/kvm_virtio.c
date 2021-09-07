@@ -411,7 +411,6 @@ static int __init s390_virtio_console_init(void)
 }
 console_initcall(s390_virtio_console_init);
 
-
 /*
  * We do this after core stuff, but before the drivers.
  */

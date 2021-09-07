@@ -694,7 +694,6 @@ enum iomux_pins {
 #define MX31_PIN_STXD5__GPIO1_21       IOMUX_MODE(MX31_PIN_STXD5, IOMUX_CONFIG_GPIO)
 #define MX31_PIN_SRXD5__GPIO1_22       IOMUX_MODE(MX31_PIN_SRXD5, IOMUX_CONFIG_GPIO)
 
-
 /*XXX: The SS0, SS1, SS2, SS3 lines of spi3 are multiplexed by cspi2_ss0, cspi2_ss1, cspi1_ss0
  * cspi1_ss1*/
 
@@ -704,4 +703,3 @@ enum iomux_pins {
 void mxc_iomux_set_pad(enum iomux_pins, u32);
 
 #endif
-

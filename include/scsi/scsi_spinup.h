@@ -40,4 +40,3 @@ enum scsi_device_power_state {
 };
 
 #endif /* SCSI_SPINUP_H */
-

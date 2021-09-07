@@ -71,12 +71,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ctrlEnv/mvCtrlEnvAddrDec.h"
 #include "pex/mvPex.h"
 
-
 #define MV_PEX_WIN_DEFAULT		6
 #define MV_PEX_WIN_EXP_ROM		7
 #define PEX_GRNERAL_WIN_NUM	    	6
 #define PEX_MAX_TARGET_WIN		8
-
 
 #define PEX_MAX_BARS			3
 #define PEX_INTER_REGS_BAR		0
@@ -171,7 +169,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PXWERRR_REMAP_MASK				(0xffff << PXWERRR_REMAP_OFFS)
 #define PXWERRR_REMAP_ALIGNMENT			0x10000
 
-
 /* PCI Express BAR Control Register */
 /* PEX_BAR_CTRL_REG (PXBCR) */
 #define PXBCR_BAR_EN				BIT0
@@ -188,7 +185,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PXERBCR_EXPROMSZ_1024KB		(0x1 << PXERBCR_EXPROMSZ_OFFS)
 #define PXERBCR_EXPROMSZ_2048KB		(0x3 << PXERBCR_EXPROMSZ_OFFS)
 #define PXERBCR_EXPROMSZ_4096KB		(0x7 << PXERBCR_EXPROMSZ_OFFS)
-
 
 /* PCI Express BAR0 Internal Register*/
 /* PEX BAR0_INTER_REG (PXBIR)*/
@@ -242,11 +238,9 @@ typedef struct _mvPexDecWin
     MV_BOOL         slvWrSpltCnt;
 } MV_PEX_DEC_WIN;
 
-
 /* Global Functions prototypes */
 /* mvPexHalInit - Initialize PEX interfaces*/
 MV_STATUS mvPexInit(MV_U32 pexIf, MV_PEX_TYPE pexType);
-
 
 /* mvPexTargetWinSet - Set PEX to peripheral target address window BAR*/
 MV_STATUS mvPexTargetWinSet(MV_U32 pexIf, 

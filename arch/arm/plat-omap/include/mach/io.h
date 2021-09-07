@@ -184,7 +184,6 @@
 #define L4_44XX_VIRT		0xda000000
 #define L4_44XX_SIZE		SZ_4M
 
-
 #define L4_WK_44XX_PHYS		L4_WK_44XX_BASE
 #define L4_WK_44XX_VIRT		0xda300000
 #define L4_WK_44XX_SIZE		SZ_1M
@@ -200,7 +199,6 @@
 #define OMAP44XX_GPMC_PHYS	OMAP44XX_GPMC_BASE
 #define OMAP44XX_GPMC_VIRT	0xe0000000
 #define OMAP44XX_GPMC_SIZE	SZ_1M
-
 
 /*
  * ----------------------------------------------------------------------------

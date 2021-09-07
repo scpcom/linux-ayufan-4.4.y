@@ -30,12 +30,10 @@
 #define ASCII_DISPLAY_WORD_BASE    0x1f000410
 #define ASCII_DISPLAY_POS_BASE     0x1f000418
 
-
 /*
  * Yamon Prom print address.
  */
 #define YAMON_PROM_PRINT_ADDR      0x1fc00504
-
 
 /*
  * Reset register.

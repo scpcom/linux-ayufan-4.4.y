@@ -73,7 +73,6 @@ typedef volatile struct
 
 } BCSR;
 
-
 /*
  * Register/mask bit definitions for the BCSRs
  */

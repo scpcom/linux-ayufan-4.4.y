@@ -70,7 +70,6 @@ static void com20020_copy_from_card(struct net_device *dev, int bufnum,
 	TIME("insb", count, insb(_MEMDATA, buf, count));
 }
 
-
 static void com20020_copy_to_card(struct net_device *dev, int bufnum,
 				  int offset, void *buf, int count)
 {
@@ -83,7 +82,6 @@ static void com20020_copy_to_card(struct net_device *dev, int bufnum,
 	/* copy the data */
 	TIME("outsb", count, outsb(_MEMDATA, buf, count));
 }
-
 
 /* Reset the card and check some basic stuff during the detection stage. */
 int com20020_check(struct net_device *dev)
@@ -228,7 +226,6 @@ int com20020_found(struct net_device *dev, int shared)
 	return 0;
 }
 
-
 /* 
  * Do a hardware reset on the card, and set up necessary registers.
  * 
@@ -281,7 +278,6 @@ static int com20020_reset(struct net_device *dev, int really_reset)
 	return 0;
 }
 
-
 static void com20020_setmask(struct net_device *dev, int mask)
 {
 	u_int ioaddr = dev->base_addr;
@@ -289,13 +285,11 @@ static void com20020_setmask(struct net_device *dev, int mask)
 	AINTMASK(mask);
 }
 
-
 static void com20020_command(struct net_device *dev, int cmd)
 {
 	u_int ioaddr = dev->base_addr;
 	ACOMMAND(cmd);
 }
-
 
 static int com20020_status(struct net_device *dev)
 {

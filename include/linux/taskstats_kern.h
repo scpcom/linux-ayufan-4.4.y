@@ -39,4 +39,3 @@ static inline void taskstats_init_early(void)
 #endif /* CONFIG_TASKSTATS */
 
 #endif
-

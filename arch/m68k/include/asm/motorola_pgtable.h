@@ -1,7 +1,6 @@
 #ifndef _MOTOROLA_PGTABLE_H
 #define _MOTOROLA_PGTABLE_H
 
-
 /*
  * Definitions for MMU descriptors
  */
@@ -125,7 +124,6 @@ static inline void pgd_set(pgd_t *pgdp, pmd_t *pmdp)
 #define __pmd_page(pmd) ((unsigned long)__va(pmd_val(pmd) & _TABLE_MASK))
 #define __pgd_page(pgd) ((unsigned long)__va(pgd_val(pgd) & _TABLE_MASK))
 
-
 #define pte_none(pte)		(!pte_val(pte))
 #define pte_present(pte)	(pte_val(pte) & (_PAGE_PRESENT | _PAGE_PROTNONE))
 #define pte_clear(mm,addr,ptep)		({ pte_val(*(ptep)) = 0; })
@@ -145,7 +143,6 @@ static inline void pgd_set(pgd_t *pgdp, pmd_t *pmdp)
 })
 #define pmd_page(pmd)		virt_to_page(__va(pmd_val(pmd)))
 
-
 #define pgd_none(pgd)		(!pgd_val(pgd))
 #define pgd_bad(pgd)		((pgd_val(pgd) & _DESCTYPE_MASK) != _PAGE_TABLE)
 #define pgd_present(pgd)	(pgd_val(pgd) & _PAGE_TABLE)
@@ -158,7 +155,6 @@ static inline void pgd_set(pgd_t *pgdp, pmd_t *pmdp)
 	printk("%s:%d: bad pmd %08lx.\n", __FILE__, __LINE__, pmd_val(e))
 #define pgd_ERROR(e) \
 	printk("%s:%d: bad pgd %08lx.\n", __FILE__, __LINE__, pgd_val(e))
-
 
 /*
  * The following only work if pte_present() is true.
@@ -206,7 +202,6 @@ static inline pgd_t *pgd_offset_k(unsigned long address)
 {
 	return kernel_pg_dir + (address >> PGDIR_SHIFT);
 }
-
 
 /* Find an entry in the second-level page table.. */
 static inline pmd_t *pmd_offset(pgd_t *dir, unsigned long address)

@@ -746,7 +746,6 @@ static void ath9k_olc_temp_compensation(struct ath_hw *ah)
 	rddata = REG_READ(ah, AR_PHY_TX_PWRCTRL4);
 	currPDADC = MS(rddata, AR_PHY_TX_PWRCTRL_PD_AVG_OUT);
 
-
 	if (OLC_FOR_AR9287_10_LATER) {
 		if (ah->initPDADC == 0 || currPDADC == 0) {
 			return;

@@ -54,7 +54,6 @@ int rodata_test(void)
 		: [rodata_test] "r" (&rodata_test_data), [zero] "r" (0UL)
 	);
 
-
 	if (!result) {
 		printk(KERN_ERR "rodata_test: test data was not read only\n");
 		return -ENODEV;

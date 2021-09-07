@@ -28,9 +28,7 @@
 
 ****************************************************************************/
 
-
 /* These functions are common for Gina24, Layla24 and Mona cards */
-
 
 /* ASIC status check - some cards have one or two ASICs that need to be
 loaded.  Once that load is complete, this function is called to see if
@@ -54,8 +52,6 @@ static int check_asic_status(struct echoaudio *chip)
 	chip->asic_loaded = (asic_status == ASIC_ALREADY_LOADED);
 	return chip->asic_loaded ? 0 : -EIO;
 }
-
-
 
 /* Most configuration of Gina24, Layla24, or Mona is accomplished by writing
 the control register.  write_control_reg sends the new control register
@@ -82,8 +78,6 @@ static int write_control_reg(struct echoaudio *chip, u32 value, char force)
 	return 0;
 }
 
-
-
 /* Gina24, Layla24, and Mona support digital input auto-mute.  If the digital
 input auto-mute is enabled, the DSP will only enable the digital inputs if
 the card is syncing to a valid clock on the ADAT or S/PDIF inputs.
@@ -99,8 +93,6 @@ static int set_input_auto_mute(struct echoaudio *chip, int automute)
 	the auto-mute flag to be sent to the DSP */
 	return set_input_clock(chip, chip->input_clock);
 }
-
-
 
 /* S/PDIF coax / S/PDIF optical / ADAT - switch */
 static int set_digital_mode(struct echoaudio *chip, u8 mode)
@@ -146,8 +138,6 @@ static int set_digital_mode(struct echoaudio *chip, u8 mode)
 
 	return err;
 }
-
-
 
 /* Set the S/PDIF output format */
 static int set_professional_spdif(struct echoaudio *chip, char prof)

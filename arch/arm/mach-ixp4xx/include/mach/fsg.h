@@ -28,7 +28,6 @@
 #define FSG_PCI_MAX_DEV		3
 #define FSG_PCI_IRQ_LINES	3
 
-
 /* PCI controller GPIO to IRQ pin mappings */
 #define FSG_PCI_INTA_PIN	6
 #define FSG_PCI_INTB_PIN	7

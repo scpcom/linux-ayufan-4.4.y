@@ -394,7 +394,6 @@ long init_new_ldt(struct mm_context *new_mm, struct mm_context *from_mm)
 	void *addr = NULL;
 	struct proc_mm_op copy;
 
-
 	if (!ptrace_ldt)
 		mutex_init(&new_mm->ldt.lock);
 
@@ -481,7 +480,6 @@ long init_new_ldt(struct mm_context *new_mm, struct mm_context *from_mm)
     out:
 	return err;
 }
-
 
 void free_ldt(struct mm_context *mm)
 {

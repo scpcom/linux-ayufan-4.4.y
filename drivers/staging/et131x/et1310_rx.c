@@ -92,7 +92,6 @@
 
 #include "et1310_rx.h"
 
-
 void nic_return_rfd(struct et131x_adapter *etdev, PMP_RFD pMpRfd);
 
 /**

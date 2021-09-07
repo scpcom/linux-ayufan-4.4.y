@@ -41,7 +41,6 @@
 
 #define WDS_ENTRY_RETRY_INTERVAL	(100 * OS_HZ / 1000)
 
-
 static inline BOOLEAN WDS_IF_UP_CHECK(
 	IN  PRTMP_ADAPTER   pAd,
 	IN  ULONG ifidx)
@@ -75,7 +74,6 @@ BOOLEAN MacTableDeleteWDSEntry(
 	IN PRTMP_ADAPTER pAd,
 	IN USHORT wcid,
 	IN PUCHAR pAddr);
-
 
 BOOLEAN ApWdsAllowToSendPacket(
 	IN RTMP_ADAPTER *pAd,

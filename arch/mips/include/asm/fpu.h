@@ -65,7 +65,6 @@ do {									\
 		__disable_fpu();					\
 } while (0)
 
-
 #define clear_fpu_owner()	clear_thread_flag(TIF_USEDFPU)
 
 static inline int __is_fpu_owner(void)

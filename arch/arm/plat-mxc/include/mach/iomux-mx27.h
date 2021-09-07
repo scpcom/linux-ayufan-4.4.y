@@ -24,7 +24,6 @@
 #error Please include mach/iomux.h
 #endif
 
-
 /* Primary GPIO pin functions */
 
 #define PA0_PF_USBH2_CLK        (GPIO_PORTA | GPIO_PF | 0)
@@ -202,6 +201,5 @@
 #define PC29_BOUT_PC_VS1        (GPIO_PORTC | GPIO_BOUT | GPIO_IN | 29)
 #define PC30_BOUT_PC_READY      (GPIO_PORTC | GPIO_BOUT | GPIO_IN | 30)
 #define PC31_BOUT_PC_WAIT       (GPIO_PORTC | GPIO_BOUT | GPIO_IN | 31)
-
 
 #endif /* _MXC_GPIO_MX1_MX2_H */

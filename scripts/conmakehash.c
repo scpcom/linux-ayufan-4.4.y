@@ -239,7 +239,6 @@ int main(int argc, char *argv[])
   
   fclose(ctbl);
   
-
   /* Compute total size of Unicode list */
   nuni = 0;
   for ( i = 0 ; i < fontlen ; i++ )

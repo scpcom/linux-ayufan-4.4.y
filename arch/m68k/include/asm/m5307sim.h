@@ -100,7 +100,6 @@
 #define MCFGPIO_IRQ_MAX			-1
 #define MCFGPIO_IRQ_VECBASE		-1
 
-
 /* Definition offset address for CS2-7  -- old mask 5307 */
 
 #define	MCF5307_CS2		(0x400000)
@@ -109,7 +108,6 @@
 #define	MCF5307_CS5		(0xA00000)
 #define	MCF5307_CS6		(0xC00000)
 #define	MCF5307_CS7		(0xE00000)
-
 
 /*
  *	Some symbol defines for the above...
@@ -123,7 +121,6 @@
 #define	MCFSIM_DMA1ICR		MCFSIM_ICR7	/* DMA 1 ICR */
 #define	MCFSIM_DMA2ICR		MCFSIM_ICR8	/* DMA 2 ICR */
 #define	MCFSIM_DMA3ICR		MCFSIM_ICR9	/* DMA 3 ICR */
-
 
 /*
  *	Some symbol defines for the Parallel Port Pin Assignment Register

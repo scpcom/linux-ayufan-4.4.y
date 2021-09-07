@@ -139,7 +139,6 @@ megasas_return_cmd(struct megasas_instance *instance, struct megasas_cmd *cmd)
 	spin_unlock_irqrestore(&instance->cmd_pool_lock, flags);
 }
 
-
 /**
 *	The following functions are defined for xscale 
 *	(deviceid : 1064R, PERC5) controllers
@@ -989,7 +988,6 @@ megasas_queue_command(struct scsi_cmnd *scmd, void (*done) (struct scsi_cmnd *))
 	 */
 	if (poll_mode_io && atomic_read(&instance->fw_outstanding))
 		tasklet_schedule(&instance->isr_tasklet);
-
 
 	return 0;
 
@@ -1841,7 +1839,6 @@ static int megasas_alloc_cmds(struct megasas_instance *instance)
 		printk(KERN_DEBUG "megasas: out of memory\n");
 		return -ENOMEM;
 	}
-
 
 	for (i = 0; i < max_cmd; i++) {
 		instance->cmd_list[i] = kmalloc(sizeof(struct megasas_cmd),

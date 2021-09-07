@@ -39,7 +39,6 @@
 
 #define nilfs_bmap_keydiff_abs(diff)	((diff) < 0 ? -(diff) : (diff))
 
-
 struct nilfs_bmap;
 
 /**
@@ -88,7 +87,6 @@ struct nilfs_bmap_operations {
 	int (*bop_gather_data)(struct nilfs_bmap *, __u64 *, __u64 *, int);
 };
 
-
 #define NILFS_BMAP_SIZE		(NILFS_INODE_BMAP_SIZE * sizeof(__le64))
 #define NILFS_BMAP_KEY_BIT	(sizeof(unsigned long) * 8 /* CHAR_BIT */)
 #define NILFS_BMAP_NEW_PTR_INIT	\
@@ -98,7 +96,6 @@ static inline int nilfs_bmap_is_new_ptr(unsigned long ptr)
 {
 	return !!(ptr & NILFS_BMAP_NEW_PTR_INIT);
 }
-
 
 /**
  * struct nilfs_bmap - bmap structure
@@ -138,7 +135,6 @@ struct nilfs_bmap {
 /* state */
 #define NILFS_BMAP_DIRTY	0x00000001
 
-
 int nilfs_bmap_test_and_clear_dirty(struct nilfs_bmap *);
 int nilfs_bmap_read(struct nilfs_bmap *, struct nilfs_inode *);
 void nilfs_bmap_write(struct nilfs_bmap *, struct nilfs_inode *);
@@ -158,7 +154,6 @@ int nilfs_bmap_mark(struct nilfs_bmap *, __u64, int);
 void nilfs_bmap_init_gc(struct nilfs_bmap *);
 void nilfs_bmap_init_gcdat(struct nilfs_bmap *, struct nilfs_bmap *);
 void nilfs_bmap_commit_gcdat(struct nilfs_bmap *, struct nilfs_bmap *);
-
 
 static inline int nilfs_bmap_lookup(struct nilfs_bmap *bmap, __u64 key,
 				    __u64 *ptr)
@@ -233,7 +228,6 @@ __u64 nilfs_bmap_find_target_in_group(const struct nilfs_bmap *);
 void nilfs_bmap_add_blocks(const struct nilfs_bmap *, int);
 void nilfs_bmap_sub_blocks(const struct nilfs_bmap *, int);
 
-
 /* Assume that bmap semaphore is locked. */
 static inline int nilfs_bmap_dirty(const struct nilfs_bmap *bmap)
 {
@@ -251,7 +245,6 @@ static inline void nilfs_bmap_clear_dirty(struct nilfs_bmap *bmap)
 {
 	bmap->b_state &= ~NILFS_BMAP_DIRTY;
 }
-
 
 #define NILFS_BMAP_LARGE	0x1
 

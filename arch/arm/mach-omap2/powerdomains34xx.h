@@ -108,7 +108,6 @@ static struct pwrdm_dep iva2_wkdeps[] = {
 	{ NULL },
 };
 
-
 /* 3430 PM_WKDEP_{CAM,DSS}: IVA2, MPU, WKUP */
 static struct pwrdm_dep cam_dss_wkdeps[] = {
 	{
@@ -135,7 +134,6 @@ static struct pwrdm_dep neon_wkdeps[] = {
 	{ NULL },
 };
 
-
 /* Sleep dependency source arrays for 34xx-specific pwrdms - 34XX only */
 
 /*
@@ -153,7 +151,6 @@ static struct pwrdm_dep dss_per_usbhost_sleepdeps[] = {
 	},
 	{ NULL },
 };
-
 
 /*
  * Powerdomains
@@ -378,8 +375,6 @@ static struct powerdomain dpll5_pwrdm = {
 	.omap_chip	= OMAP_CHIP_INIT(CHIP_GE_OMAP3430ES2),
 };
 
-
 #endif    /* CONFIG_ARCH_OMAP34XX */
-
 
 #endif

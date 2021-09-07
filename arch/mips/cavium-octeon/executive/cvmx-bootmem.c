@@ -39,7 +39,6 @@
 
 /*#define DEBUG */
 
-
 static struct cvmx_bootmem_desc *cvmx_bootmem_desc;
 
 /* See header file for descriptions of functions */
@@ -238,7 +237,6 @@ int64_t cvmx_bootmem_phy_alloc(uint64_t req_size, uint64_t address_min,
 		address_max = address_min + req_size;
 	else if (!address_min && !address_max)
 		address_max = ~0ull;  /* If no limits given, use max limits */
-
 
 	/*
 	 * Enforce minimum alignment (this also keeps the minimum free block
@@ -663,7 +661,6 @@ int64_t cvmx_bootmem_phy_named_block_alloc(uint64_t size, uint64_t min_addr,
 			cvmx_spinlock_unlock((cvmx_spinlock_t *)&(cvmx_bootmem_desc->lock));
 		return -1;
 	}
-
 
 	/*
 	 * Round size up to mult of minimum alignment bytes We need

@@ -113,7 +113,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define     MV_M25P128_MAX_FAST_SPI_FREQ        50000000    /* 50MHz */
 #define     MV_M25P128_FAST_READ_DUMMY_BYTES    1
 
-
 /* Sector Sizes and population per device model*/
 #define     MV_M25P32_SECTOR_SIZE               0x10000 /* 64K */
 #define     MV_M25P64_SECTOR_SIZE               0x10000 /* 64K */
@@ -230,4 +229,3 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define     	MV_S25FL_STATUS_BP_ALL              	(0x0F << MV_SFLASH_STATUS_REG_WP_OFFSET)
 
 #endif /* __INCmvSFlashSpecH */
-

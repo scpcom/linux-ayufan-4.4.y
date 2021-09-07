@@ -170,7 +170,6 @@ static isdnloop_stat isdnloop_stat_table[] =
 };
 /* *INDENT-ON* */
 
-
 /*
  * Parse Status message-strings from virtual card.
  * Depending on status, call statcallb for sending messages to upper
@@ -507,7 +506,6 @@ static isdnloop_stat isdnloop_cmd_table[] =
 	{NULL, 0, -1}
 };
 /* *INDENT-ON* */
-
 
 /*
  * Simulate an error-response from a card.

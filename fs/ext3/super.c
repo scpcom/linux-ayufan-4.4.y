@@ -703,7 +703,6 @@ static int ext3_show_options(struct seq_file *seq, struct vfsmount *vfs)
 	return 0;
 }
 
-
 static struct inode *ext3_nfs_get_inode(struct super_block *sb,
 		u64 ino, u32 generation)
 {
@@ -1475,7 +1474,6 @@ static int ext3_check_descriptors(struct super_block *sb)
 	return 1;
 }
 
-
 /* ext3_orphan_cleanup() walks a singly-linked list of inodes (starting at
  * the superblock) which were deleted from all directories, but held open by
  * a process at the time of a crash.  We walk the list and try to delete these
@@ -1612,7 +1610,6 @@ static loff_t ext3_max_size(int bits)
 	/* total blocks in file system block size */
 	upper_limit >>= (bits - 9);
 
-
 	/* indirect blocks */
 	meta_blocks = 1;
 	/* double indirect blocks */
@@ -1654,7 +1651,6 @@ static ext3_fsblk_t descriptor_loc(struct super_block *sb,
 		has_super = 1;
 	return (has_super + ext3_group_first_block_no(sb, bg));
 }
-
 
 static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 {
@@ -2467,7 +2463,6 @@ static int ext3_commit_super(struct super_block *sb,
 		error = sync_dirty_buffer(sbh);
 	return error;
 }
-
 
 /*
  * Have we just finished recovery?  If so, and if we are mounting (or

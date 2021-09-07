@@ -254,7 +254,6 @@ find_matching_se(struct sched_entity **se, struct sched_entity **pse)
 
 #endif	/* CONFIG_FAIR_GROUP_SCHED */
 
-
 /**************************************************************
  * Scheduling class tree data structure manipulation methods:
  */

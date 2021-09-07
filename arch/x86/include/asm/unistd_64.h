@@ -736,7 +736,6 @@ __SYSCALL(__NR_SYNOACLIsSupport, sys_SYNOACLIsSupport)
 __SYSCALL(__NR_SYNOACLGetPerm, sys_SYNOACLGetPerm)
 #endif
 
-
 #ifdef MY_ABC_HERE
 #define __NR_SYNOStat              416
 #define __NR_SYNOFStat              417
@@ -892,7 +891,6 @@ __syscall_return(type,__res); \
 #define __ARCH_WANT_SYS_TIME
 #define __ARCH_WANT_COMPAT_SYS_TIME
 #endif	/* __NO_STUBS */
-
 
 #ifdef __KERNEL__
 

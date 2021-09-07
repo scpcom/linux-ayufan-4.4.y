@@ -50,7 +50,6 @@ enum {
 
 #define DC_ENTRIES	8
 
-
 static int has_N44_O17_errata[NR_CPUS];
 static unsigned int stock_freq;
 static struct cpufreq_driver p4clockmod_driver;
@@ -93,7 +92,6 @@ static int cpufreq_p4_setdc(unsigned int cpu, unsigned int newstate)
 	return 0;
 }
 
-
 static struct cpufreq_frequency_table p4clockmod_table[] = {
 	{DC_RESV, CPUFREQ_ENTRY_INVALID},
 	{DC_DFLT, 0},
@@ -106,7 +104,6 @@ static struct cpufreq_frequency_table p4clockmod_table[] = {
 	{DC_DISABLE, 0},
 	{DC_RESV, CPUFREQ_TABLE_END},
 };
-
 
 static int cpufreq_p4_target(struct cpufreq_policy *policy,
 			     unsigned int target_freq,
@@ -148,12 +145,10 @@ static int cpufreq_p4_target(struct cpufreq_policy *policy,
 	return 0;
 }
 
-
 static int cpufreq_p4_verify(struct cpufreq_policy *policy)
 {
 	return cpufreq_frequency_table_verify(policy, &p4clockmod_table[0]);
 }
-
 
 static unsigned int cpufreq_p4_get_frequency(struct cpuinfo_x86 *c)
 {
@@ -202,8 +197,6 @@ static unsigned int cpufreq_p4_get_frequency(struct cpuinfo_x86 *c)
 
 	return speedstep_get_frequency(SPEEDSTEP_CPU_P4D);
 }
-
-
 
 static int cpufreq_p4_cpu_init(struct cpufreq_policy *policy)
 {
@@ -256,7 +249,6 @@ static int cpufreq_p4_cpu_init(struct cpufreq_policy *policy)
 	return cpufreq_frequency_table_cpuinfo(policy, &p4clockmod_table[0]);
 }
 
-
 static int cpufreq_p4_cpu_exit(struct cpufreq_policy *policy)
 {
 	cpufreq_frequency_table_put_attr(policy->cpu);
@@ -297,7 +289,6 @@ static struct cpufreq_driver p4clockmod_driver = {
 	.attr		= p4clockmod_attr,
 };
 
-
 static int __init cpufreq_p4_init(void)
 {
 	struct cpuinfo_x86 *c = &cpu_data(0);
@@ -322,12 +313,10 @@ static int __init cpufreq_p4_init(void)
 	return ret;
 }
 
-
 static void __exit cpufreq_p4_exit(void)
 {
 	cpufreq_unregister_driver(&p4clockmod_driver);
 }
-
 
 MODULE_AUTHOR("Zwane Mwaikambo <zwane@commfireservices.com>");
 MODULE_DESCRIPTION("cpufreq driver for Pentium(TM) 4/Xeon(TM)");

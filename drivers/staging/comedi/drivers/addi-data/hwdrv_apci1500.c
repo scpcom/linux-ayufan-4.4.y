@@ -2361,7 +2361,6 @@ int i_APCI1500_ReadCounterTimerWatchdog(struct comedi_device *dev,
 |                      struct comedi_insn *insn      :pointer to insn structure      |
 |                     unsigned int *data          : Data Pointer to read status  |
 
-
 +----------------------------------------------------------------------------+
 | Output Parameters :	--	data[0]:The interrupt mask value												                           data[1]:Channel no
 +----------------------------------------------------------------------------+

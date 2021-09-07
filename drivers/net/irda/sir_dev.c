@@ -22,7 +22,6 @@
 
 #include "sir-dev.h"
 
-
 static struct workqueue_struct *irda_sir_wq;
 
 /* STATE MACHINE */
@@ -313,7 +312,6 @@ int sirdev_schedule_request(struct sir_dev *dev, int initial_state, unsigned par
 	queue_delayed_work(irda_sir_wq, &fsm->work, 0);
 	return 0;
 }
-
 
 /***************************************************************************/
 

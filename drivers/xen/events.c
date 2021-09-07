@@ -275,7 +275,6 @@ static inline int test_evtchn(int port)
 	return sync_test_bit(port, &s->evtchn_pending[0]);
 }
 
-
 /**
  * notify_remote_via_irq - send event to remote end of event channel via irq
  * @irq: irq of event channel to send event to
@@ -408,7 +407,6 @@ static int bind_ipi_to_irq(unsigned int ipi, unsigned int cpu)
 	spin_unlock(&irq_mapping_update_lock);
 	return irq;
 }
-
 
 static int bind_virq_to_irq(unsigned int virq, unsigned int cpu)
 {

@@ -110,7 +110,6 @@ END:
 	return iRet;
 }
 
-
 static int syno_hddmon_unplug_monitor(void *args)
 {
 	int iRet = -1;

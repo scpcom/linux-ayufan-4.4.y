@@ -206,7 +206,6 @@ void __uses_jump_to_uncached clear_pmb_entry(struct pmb_entry *pmbe)
 	clear_bit(entry, &pmb_map);
 }
 
-
 static struct {
 	unsigned long size;
 	int flag;

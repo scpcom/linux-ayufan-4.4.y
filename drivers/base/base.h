@@ -36,7 +36,6 @@ struct driver_private {
 };
 #define to_driver(obj) container_of(obj, struct driver_private, kobj)
 
-
 /**
  * struct class_private - structure to hold the private to the driver core portions of the class structure.
  *

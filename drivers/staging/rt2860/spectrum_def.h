@@ -92,4 +92,3 @@ typedef struct _TPC_REQ_TAB
 } TPC_REQ_TAB, *PTPC_REQ_TAB;
 
 #endif // __SPECTRUM_DEF_H__ //
-

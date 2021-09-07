@@ -33,8 +33,6 @@
 #define __get_RSTR()	({ __reg(0xfeff0500); })
 #define __set_RSTR(V)	do { __reg(0xfeff0500) = (V); mb(); } while(0)
 
-
-
 /* PDR definitions */
 #define PDR_GPIO_DATA(X)	(1 << (X))
 

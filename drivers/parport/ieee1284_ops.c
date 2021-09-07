@@ -13,7 +13,6 @@
  * Software emulated EPP fixes, Fred Barnes, 04/2001.
  */
 
-
 #include <linux/module.h>
 #include <linux/parport.h>
 #include <linux/delay.h>
@@ -183,7 +182,6 @@ size_t parport_ieee1284_read_nibble (struct parport *port,
 			parport_frob_control (port, PARPORT_CONTROL_AUTOFD, 0);
 			break;
 		}
-
 
 		/* Read a nibble. */
 		nibble = parport_read_status (port) >> 3;
@@ -392,7 +390,6 @@ int ecp_reverse_to_forward (struct parport *port)
 			 port->name);
 		port->ieee1284.phase = IEEE1284_PH_ECP_DIR_UNKNOWN;
 	}
-
 
 	return retval;
 }

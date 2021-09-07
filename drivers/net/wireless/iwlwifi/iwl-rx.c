@@ -211,7 +211,6 @@ int iwl_rx_queue_restock(struct iwl_priv *priv)
 	if (rxq->free_count <= RX_LOW_WATERMARK)
 		queue_work(priv->workqueue, &priv->rx_replenish);
 
-
 	/* If we've added more space for the firmware to place data, tell it.
 	 * Increment device's write pointer in multiples of 8. */
 	if (rxq->write_actual != (rxq->write & ~0x7)) {
@@ -224,7 +223,6 @@ int iwl_rx_queue_restock(struct iwl_priv *priv)
 	return ret;
 }
 EXPORT_SYMBOL(iwl_rx_queue_restock);
-
 
 /**
  * iwl_rx_replenish - Move all used packet from rx_used to rx_free
@@ -325,7 +323,6 @@ void iwl_rx_replenish_now(struct iwl_priv *priv)
 	iwl_rx_queue_restock(priv);
 }
 EXPORT_SYMBOL(iwl_rx_replenish_now);
-
 
 /* Assumes that the skb field of the buffers in 'pool' is kept accurate.
  * If an SKB has been detached, the POOL needs to have its SKB set to NULL
@@ -507,7 +504,6 @@ void iwl_rx_missed_beacon_notif(struct iwl_priv *priv,
 	}
 }
 EXPORT_SYMBOL(iwl_rx_missed_beacon_notif);
-
 
 /* Calculate noise level, based on measurements during network silence just
  *   before arriving beacon.  This measurement can be done only if we know

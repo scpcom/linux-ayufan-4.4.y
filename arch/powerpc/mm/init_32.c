@@ -241,4 +241,3 @@ void free_initrd_mem(unsigned long start, unsigned long end)
 	}
 }
 #endif
-

@@ -93,7 +93,6 @@ static inline unsigned int kstat_irqs(unsigned int irq)
 	return sum;
 }
 
-
 /*
  * Lock/unlock the current runqueue - to extract task statistics:
  */

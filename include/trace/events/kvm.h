@@ -109,8 +109,6 @@ TRACE_EVENT(kvm_ack_irq,
 		 __entry->pin)
 );
 
-
-
 #endif /* defined(__KVM_HAVE_IOAPIC) */
 
 #define KVM_TRACE_MMIO_READ_UNSATISFIED 0

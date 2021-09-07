@@ -33,7 +33,6 @@ struct phram_mtd_list {
 
 static LIST_HEAD(phram_list);
 
-
 static int phram_erase(struct mtd_info *mtd, struct erase_info *instr)
 {
 	u_char *start = mtd->priv;
@@ -108,8 +107,6 @@ static int phram_write(struct mtd_info *mtd, loff_t to, size_t len,
 	return 0;
 }
 
-
-
 static void unregister_devices(void)
 {
 	struct phram_mtd_list *this, *safe;
@@ -136,7 +133,6 @@ static int register_device(char *name, unsigned long start, unsigned long len)
 		pr_err("ioremap failed\n");
 		goto out1;
 	}
-
 
 	new->mtd.name = name;
 	new->mtd.size = len;
@@ -218,14 +214,12 @@ static int parse_name(char **pname, const char *token)
 	return 0;
 }
 
-
 static inline void kill_final_newline(char *str)
 {
 	char *newline = strrchr(str, '\n');
 	if (newline && !newline[1])
 		*newline = 0;
 }
-
 
 #define parse_err(fmt, args...) do {	\
 	pr_err(fmt , ## args);	\
@@ -281,7 +275,6 @@ static int phram_setup(const char *val, struct kernel_param *kp)
 
 module_param_call(phram, phram_setup, NULL, NULL, 000);
 MODULE_PARM_DESC(phram, "Memory region to map. \"phram=<name>,<start>,<length>\"");
-
 
 static int __init init_phram(void)
 {

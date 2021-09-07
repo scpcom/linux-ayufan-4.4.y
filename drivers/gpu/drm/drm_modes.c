@@ -651,7 +651,6 @@ void drm_mode_set_crtcinfo(struct drm_display_mode *p, int adjust_flags)
 }
 EXPORT_SYMBOL(drm_mode_set_crtcinfo);
 
-
 /**
  * drm_mode_duplicate - allocate and duplicate an existing mode
  * @m: mode to duplicate

@@ -28,7 +28,6 @@
  *
  ******************************************************************************/
 
-
 #include <linux/slab.h>
 #include <iscsi_linux_defs.h>
 
@@ -2162,4 +2161,3 @@ void iscsi_set_session_parameters(
 #endif
 
 }
-

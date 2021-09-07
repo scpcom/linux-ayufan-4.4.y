@@ -213,7 +213,6 @@ void *__symbol_get_gpl(const char *symbol);
 #define EXPORT_SYMBOL_GPL_FUTURE(sym)				\
 	__EXPORT_SYMBOL(sym, "_gpl_future")
 
-
 #ifdef CONFIG_UNUSED_SYMBOLS
 #define EXPORT_UNUSED_SYMBOL(sym) __EXPORT_SYMBOL(sym, "_unused")
 #define EXPORT_UNUSED_SYMBOL_GPL(sym) __EXPORT_SYMBOL(sym, "_unused_gpl")
@@ -710,7 +709,6 @@ static inline void module_remove_modinfo_attrs(struct module *mod)
 /* BELOW HERE ALL THESE ARE OBSOLETE AND WILL VANISH */
 
 #define __MODULE_STRING(x) __stringify(x)
-
 
 #ifdef CONFIG_GENERIC_BUG
 int  module_bug_finalize(const Elf_Ehdr *, const Elf_Shdr *,

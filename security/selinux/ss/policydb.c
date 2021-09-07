@@ -1315,7 +1315,6 @@ bad:
 	goto out;
 }
 
-
 /*
  * Read a MLS level structure from a policydb binary
  * representation file.

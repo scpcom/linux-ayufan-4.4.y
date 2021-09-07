@@ -123,7 +123,6 @@ static struct snd_gf1_dma_block *snd_gf1_dma_next_block(struct snd_gus_card * gu
 	return block;
 }
 
-
 static void snd_gf1_dma_interrupt(struct snd_gus_card * gus)
 {
 	struct snd_gf1_dma_block *block;

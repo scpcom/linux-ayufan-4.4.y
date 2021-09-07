@@ -381,7 +381,6 @@ GT_BOOL qdSimATUAdd(QDSIM_ATU_ENTRY* entry)
 	return GT_TRUE;
 }
 
-
 /*
 	Return 1, if added successfully.
 	Return 0, otherwise.
@@ -425,7 +424,6 @@ GT_BOOL qdSimATUDel(QDSIM_ATU_ENTRY* entry)
 
 	return GT_TRUE;
 }
-
 
 GT_BOOL qdSimATUFlushUnlockedEntry()
 {
@@ -474,7 +472,6 @@ GT_BOOL qdSimATUFlushUnlockedInDB(int dbNum)
 	}
 	return GT_TRUE;
 }
-
 
 void qdSimATUInit()
 {
@@ -678,7 +675,6 @@ GT_BOOL qdSimVTUAdd(QDSIM_VTU_ENTRY* entry)
 	return GT_TRUE;
 }
 
-
 /*
 	Return 1, if added successfully.
 	Return 0, otherwise.
@@ -719,7 +715,6 @@ GT_BOOL qdSimVTUDel(QDSIM_VTU_ENTRY* entry)
 
 	return GT_TRUE;
 }
-
 
 /*
 	Return 1, if added successfully.
@@ -1328,7 +1323,6 @@ GT_BOOL qdSimRead_6063(unsigned int portNumber , unsigned int miiReg, unsigned i
 	return GT_TRUE;
 }
 
-
 GT_BOOL qdSimRead_6083(unsigned int portNumber , unsigned int miiReg, unsigned int* value)
 {
 	*value = (unsigned int) qdSimRegs[portNumber][miiReg];
@@ -1893,7 +1887,6 @@ GT_BOOL qdSimWrite_6083 (unsigned int portNumber , unsigned int miiReg, unsigned
 	return GT_TRUE;
 }
 
-
 GT_BOOL qdSimWrite (GT_QD_DEV *dev,unsigned int portNumber , unsigned int miiReg, unsigned int value)
 {
 	if (portNumber >= MAX_SMI_ADDRESS)
@@ -1947,7 +1940,6 @@ GT_STATUS qdSimSetGlobalInt(unsigned short u16Data)
 	qdSimRegs[MAX_SMI_ADDRESS-1][QD_REG_GLOBAL_STATUS] |= (u16Data & 0xF);
 	return GT_OK;
 }
-
 
 void qdSimInit(GT_DEVICE devId, int baseAddr)
 {

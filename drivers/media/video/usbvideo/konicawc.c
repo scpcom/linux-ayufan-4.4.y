@@ -26,7 +26,6 @@
 #define MAX_WHITEBAL	372
 #define MAX_SPEED	6
 
-
 #define MAX_CAMERAS	1
 
 #define DRIVER_VERSION	"v1.4"
@@ -39,7 +38,6 @@ enum ctrl_req {
 	SetContrast	= 0x04,
 	SetSaturation	= 0x05,
 };
-
 
 enum frame_sizes {
 	SIZE_160X120	= 0,
@@ -63,7 +61,6 @@ static int debug;
 #define DEBUG(n, arg...)
 static const int debug;
 #endif
-
 
 /* Some default values for initial camera settings,
    can be set by modprobe */
@@ -123,11 +120,9 @@ struct konicawc {
 #endif
 };
 
-
 #define konicawc_set_misc(uvd, req, value, index)		konicawc_ctrl_msg(uvd, USB_DIR_OUT, req, value, index, NULL, 0)
 #define konicawc_get_misc(uvd, req, value, index, buf, sz)	konicawc_ctrl_msg(uvd, USB_DIR_IN, req, value, index, buf, sz)
 #define konicawc_set_value(uvd, value, index)			konicawc_ctrl_msg(uvd, USB_DIR_OUT, 2, value, index, NULL, 0)
-
 
 static int konicawc_ctrl_msg(struct uvd *uvd, u8 dir, u8 request, u16 value, u16 index, void *buf, int len)
 {
@@ -137,20 +132,17 @@ static int konicawc_ctrl_msg(struct uvd *uvd, u8 dir, u8 request, u16 value, u16
 	return retval < 0 ? retval : 0;
 }
 
-
 static inline void konicawc_camera_on(struct uvd *uvd)
 {
 	DEBUG(0, "camera on");
 	konicawc_set_misc(uvd, 0x2, 1, 0x0b);
 }
 
-
 static inline void konicawc_camera_off(struct uvd *uvd)
 {
 	DEBUG(0, "camera off");
 	konicawc_set_misc(uvd, 0x2, 0, 0x0b);
 }
-
 
 static void konicawc_set_camera_size(struct uvd *uvd)
 {
@@ -164,7 +156,6 @@ static void konicawc_set_camera_size(struct uvd *uvd)
 	cam->maxline = cam->yplanesz / 256;
 	uvd->videosize = VIDEOSIZE(cam->width, cam->height);
 }
-
 
 static int konicawc_setup_on_open(struct uvd *uvd)
 {
@@ -190,7 +181,6 @@ static int konicawc_setup_on_open(struct uvd *uvd)
 	cam->buttonsts = 0;
 	return 0;
 }
-
 
 static void konicawc_adjust_picture(struct uvd *uvd)
 {
@@ -371,7 +361,6 @@ static int konicawc_compress_iso(struct uvd *uvd, struct urb *dataurb, struct ur
 	return totlen;
 }
 
-
 static void resubmit_urb(struct uvd *uvd, struct urb *urb)
 {
 	int i, ret;
@@ -386,7 +375,6 @@ static void resubmit_urb(struct uvd *uvd, struct urb *urb)
 		err("usb_submit_urb error (%d)", ret);
 
 }
-
 
 static void konicawc_isoc_irq(struct urb *urb)
 {
@@ -429,7 +417,6 @@ static void konicawc_isoc_irq(struct urb *urb)
 	}
 	return;
 }
-
 
 static int konicawc_start_data(struct uvd *uvd)
 {
@@ -514,7 +501,6 @@ static int konicawc_start_data(struct uvd *uvd)
 	return 0;
 }
 
-
 static void konicawc_stop_data(struct uvd *uvd)
 {
 	int i, j;
@@ -543,7 +529,6 @@ static void konicawc_stop_data(struct uvd *uvd)
 		}
 	}
 }
-
 
 static void konicawc_process_isoc(struct uvd *uvd, struct usbvideo_frame *frame)
 {
@@ -622,7 +607,6 @@ static void konicawc_process_isoc(struct uvd *uvd, struct usbvideo_frame *frame)
 	}
 }
 
-
 static int konicawc_find_fps(int size, int fps)
 {
 	int i;
@@ -646,7 +630,6 @@ static int konicawc_find_fps(int size, int fps)
 	}
 	return MAX_SPEED+1;
 }
-
 
 static int konicawc_set_video_mode(struct uvd *uvd, struct video_window *vw)
 {
@@ -713,13 +696,11 @@ static int konicawc_set_video_mode(struct uvd *uvd, struct video_window *vw)
 	return 0;
 }
 
-
 static int konicawc_calculate_fps(struct uvd *uvd)
 {
 	struct konicawc *cam = uvd->user_data;
 	return spd_to_fps[cam->size][cam->speed]/3;
 }
-
 
 static void konicawc_configure_video(struct uvd *uvd)
 {
@@ -909,7 +890,6 @@ static int konicawc_probe(struct usb_interface *intf, const struct usb_device_id
 	return -EIO;
 }
 
-
 static void konicawc_free_uvd(struct uvd *uvd)
 {
 	int i;
@@ -923,12 +903,10 @@ static void konicawc_free_uvd(struct uvd *uvd)
 	}
 }
 
-
 static struct usb_device_id id_table[] = {
 	{ USB_DEVICE(0x04c8, 0x0720) }, /* Intel YC 76 */
 	{ }  /* Terminating entry */
 };
-
 
 static int __init konicawc_init(void)
 {
@@ -955,12 +933,10 @@ static int __init konicawc_init(void)
 		id_table);
 }
 
-
 static void __exit konicawc_cleanup(void)
 {
 	usbvideo_Deregister(&cams);
 }
-
 
 MODULE_DEVICE_TABLE(usb, id_table);
 

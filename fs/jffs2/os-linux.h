@@ -24,7 +24,6 @@ struct kvec;
 #define JFFS2_SB_INFO(sb) (sb->s_fs_info)
 #define OFNI_BS_2SFFJ(c)  ((struct super_block *)c->os_priv)
 
-
 #define JFFS2_F_I_SIZE(f) (OFNI_EDONI_2SFFJ(f)->i_size)
 #define JFFS2_F_I_MODE(f) (OFNI_EDONI_2SFFJ(f)->i_mode)
 #define JFFS2_F_I_UID(f) (OFNI_EDONI_2SFFJ(f)->i_uid)
@@ -58,12 +57,10 @@ static inline void jffs2_init_inode_info(struct jffs2_inode_info *f)
 	f->usercompr = 0;
 }
 
-
 #define jffs2_is_readonly(c) (OFNI_BS_2SFFJ(c)->s_flags & MS_RDONLY)
 
 #define SECTOR_ADDR(x) ( (((unsigned long)(x) / c->sector_size) * c->sector_size) )
 #ifndef CONFIG_JFFS2_FS_WRITEBUFFER
-
 
 #ifdef CONFIG_JFFS2_SUMMARY
 #define jffs2_can_mark_obsolete(c) (0)
@@ -193,7 +190,6 @@ void jffs2_gc_release_page(struct jffs2_sb_info *c,
 			   unsigned long *priv);
 void jffs2_flash_cleanup(struct jffs2_sb_info *c);
 
-
 /* writev.c */
 int jffs2_flash_direct_writev(struct jffs2_sb_info *c, const struct kvec *vecs,
 		       unsigned long count, loff_t to, size_t *retlen);
@@ -201,5 +197,3 @@ int jffs2_flash_direct_write(struct jffs2_sb_info *c, loff_t ofs, size_t len,
 			size_t *retlen, const u_char *buf);
 
 #endif /* __JFFS2_OS_LINUX_H__ */
-
-

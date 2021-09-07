@@ -15,7 +15,6 @@
 
 #define USE_32BIT		1
 
-
 /* These options are mutually eclusive */
 #define USE_PLATFORM_DELAY	1
 #define USE_NDELAY		0
@@ -82,7 +81,6 @@ static inline void delayed_insw(unsigned int addr, void *buf, int len)
 #define DUMMY_DELAY_ACCESS do {} while (0)
 
 #endif
-
 
 /* ------------------------------------------------------------------------- */
 
@@ -262,7 +260,6 @@ ISP1362_REG(HCATLCURR,	0x1e,	REG_WIDTH_16,	REG_ACCESS_R);
 ISP1362_REG(HCATLDTC,	0x51,	REG_WIDTH_16,	REG_ACCESS_RW);
 ISP1362_REG(HCATLDTCTO,	0x52,	REG_WIDTH_16,	REG_ACCESS_RW);
 
-
 ISP1362_REG(OTGCONTROL,	0x62,	REG_WIDTH_16,	REG_ACCESS_RW);
 ISP1362_REG(OTGSTATUS,	0x67,	REG_WIDTH_16,	REG_ACCESS_R);
 ISP1362_REG(OTGINT,	0x68,	REG_WIDTH_16,	REG_ACCESS_RW);
@@ -318,7 +315,6 @@ struct ptd {
     /* 0x0E, 0x0F reserved for HCD */
 #define PTD_NOTACCESSED     0x0F
 
-
 /* map OHCI TD status codes (CC) to errno values */
 static const int cc_to_error[16] = {
 	/* No  Error  */               0,
@@ -338,7 +334,6 @@ static const int cc_to_error[16] = {
 	/* (for HCD)  */               -EALREADY,
 	/* (for HCD)  */               -EALREADY
 };
-
 
 /*
  * HcControl (control) register masks
@@ -642,7 +637,6 @@ static inline struct usb_hcd *isp1362_hcd_to_hcd(struct isp1362_hcd *isp1362_hcd
 #else
 #define URB_DBG(fmt...)		do {} while (0)
 #endif
-
 
 #if USE_PLATFORM_DELAY
 #if USE_NDELAY

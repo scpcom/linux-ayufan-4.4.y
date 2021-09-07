@@ -19,7 +19,6 @@
 #include <linux/sched.h>
 #include <asm/olpc.h>
 
-
 #define EC_BAT_VOLTAGE	0x10	/* uint16_t,	*9.76/32,    mV   */
 #define EC_BAT_CURRENT	0x11	/* int16_t,	*15.625/120, mA   */
 #define EC_BAT_ACR	0x12	/* int16_t,	*6250/15,    µAh  */

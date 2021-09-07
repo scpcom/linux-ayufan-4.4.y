@@ -163,7 +163,6 @@ typedef struct {
 #define ELF_ET_DYN_BASE		0x0000010000000000UL
 #define COMPAT_ELF_ET_DYN_BASE	0x0000000070000000UL
 
-
 /* This yields a mask that user programs can use to figure out what
    instruction set this cpu supports.  */
 

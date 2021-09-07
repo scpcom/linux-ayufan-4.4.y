@@ -59,4 +59,3 @@ static inline void pmd_free(struct mm_struct *mm, pmd_t *pmd)
 #define check_pgt_cache()	do { } while (0)
 
 #endif
-

@@ -463,7 +463,6 @@ static int intel_crt_get_modes(struct drm_connector *connector)
 	struct i2c_adapter *ddcbus;
 	struct drm_device *dev = connector->dev;
 
-
 	ret = intel_ddc_get_modes(intel_output);
 	if (ret || !IS_G4X(dev))
 		goto end;

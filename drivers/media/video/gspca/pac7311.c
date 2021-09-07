@@ -408,7 +408,6 @@ static void reg_w_buf(struct gspca_dev *gspca_dev,
 			500);
 }
 
-
 static void reg_w(struct gspca_dev *gspca_dev,
 		  __u8 index,
 		  __u8 value)

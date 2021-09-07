@@ -93,7 +93,6 @@
 #define FLAG_C		(1 << 31)
 #define	FLAG_MASK	0x8000000f	/* Mask for writable bits */
 
-
 int armv7_setup_pmu(void);
 int armv7_start_pmu(void);
 int armv7_stop_pmu(void);

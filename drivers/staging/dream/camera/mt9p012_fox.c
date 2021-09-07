@@ -48,7 +48,6 @@
 
 #define MT9P012_REV_7
 
-
 enum mt9p012_test_mode {
 	TEST_OFF,
 	TEST_1,
@@ -119,7 +118,6 @@ struct mt9p012_ctrl {
 	enum mt9p012_test_mode  set_test;
 };
 
-
 static struct mt9p012_ctrl *mt9p012_ctrl;
 static DECLARE_WAIT_QUEUE_HEAD(mt9p012_wait_queue);
 DECLARE_MUTEX(mt9p012_sem);
@@ -128,8 +126,6 @@ DECLARE_MUTEX(mt9p012_sem);
 	EXTERNAL DECLARATIONS
 ==============================================================*/
 extern struct mt9p012_reg mt9p012_regs;	/* from mt9p012_reg.c */
-
-
 
 /*=============================================================*/
 

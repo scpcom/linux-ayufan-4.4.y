@@ -16,7 +16,6 @@
 
 #include <asm/system.h>
 
-
 /*
  * (Note: the *_driver.minor_start values 1, 64, 128, 192 are
  * hardcoded at present.)
@@ -77,7 +76,6 @@ struct tty_buffer {
  */
 
 #define TTY_BUFFER_PAGE	(((PAGE_SIZE - sizeof(struct tty_buffer)) / 2) & ~0xFF)
-
 
 struct tty_bufhead {
 	struct delayed_work work;
@@ -492,7 +490,6 @@ extern void tty_ldisc_init(struct tty_struct *tty);
 extern void tty_ldisc_begin(void);
 /* This last one is just for the tty layer internals and shouldn't be used elsewhere */
 extern void tty_ldisc_enable(struct tty_struct *tty);
-
 
 /* n_tty.c */
 extern struct tty_ldisc_ops tty_ldisc_N_TTY;

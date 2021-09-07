@@ -109,5 +109,4 @@ void bfa_fcb_port_online(struct bfad_s *bfad, enum bfa_port_role roles,
 void bfa_fcb_port_offline(struct bfad_s *bfad, enum bfa_port_role roles,
 			struct bfad_vf_s *vf_drv, struct bfad_vport_s *vp_drv);
 
-
 #endif /* __BFA_FCB_PORT_H__ */

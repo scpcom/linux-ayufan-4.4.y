@@ -46,7 +46,6 @@ typedef struct xfs_bmdr_block {
 #define BMBT_STARTBLOCK_BITLEN	52
 #define BMBT_BLOCKCOUNT_BITLEN	21
 
-
 #define BMBT_USE_64	1
 
 typedef struct xfs_bmbt_rec_32
@@ -244,6 +243,5 @@ extern int xfs_bmbt_maxrecs(struct xfs_mount *, int blocklen, int leaf);
 
 extern struct xfs_btree_cur *xfs_bmbt_init_cursor(struct xfs_mount *,
 		struct xfs_trans *, struct xfs_inode *, int);
-
 
 #endif	/* __XFS_BMAP_BTREE_H__ */

@@ -382,7 +382,6 @@ out:
 	return result;
 }
 
-
 /**
  * int jbd2_journal_restart() - restart a handle .
  * @handle:  handle to restart
@@ -434,7 +433,6 @@ int jbd2_journal_restart(handle_t *handle, int nblocks)
 	ret = start_this_handle(journal, handle);
 	return ret;
 }
-
 
 /**
  * void jbd2_journal_lock_updates () - establish a transaction barrier.
@@ -701,7 +699,6 @@ repeat:
 		jh->b_next_transaction = transaction;
 	}
 
-
 	/*
 	 * Finally, if the buffer is not journaled right now, we need to make
 	 * sure it doesn't get written to disk before the caller actually
@@ -777,7 +774,6 @@ int jbd2_journal_get_write_access(handle_t *handle, struct buffer_head *bh)
 	jbd2_journal_put_journal_head(jh);
 	return rc;
 }
-
 
 /*
  * When the user wants to journal a newly created buffer_head
@@ -985,8 +981,6 @@ void jbd2_buffer_abort_trigger(struct journal_head *jh,
 
 	triggers->t_abort(triggers, jh2bh(jh));
 }
-
-
 
 /**
  * int jbd2_journal_dirty_metadata() -  mark a buffer as containing dirty metadata

@@ -33,7 +33,6 @@ struct scatterlist {
 #define sg_dma_address(sg)      ((sg)->dma_address)
 #define sg_dma_len(sg)          ((sg)->length)
 
-
 #define ISA_DMA_THRESHOLD (~0UL)
 
 #endif	/* _XTENSA_SCATTERLIST_H */

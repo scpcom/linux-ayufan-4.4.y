@@ -11,4 +11,3 @@ extern void iscsi_target_nego_release(
 extern struct iscsi_global_s *iscsi_global;
 
 #endif /* ISCSI_TARGET_NEGO_H */
-

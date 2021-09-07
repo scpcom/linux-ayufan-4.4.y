@@ -222,7 +222,6 @@ MV_VOID mvAudioAddrDecShow(MV_VOID)
 	MV_AUDIO_DEC_WIN win;
 	int i;
 
-
 	mvOsOutput( "\n" );
 	mvOsOutput( "AUDIO:\n" );
 	mvOsOutput( "----\n" );
@@ -250,7 +249,6 @@ MV_VOID mvAudioAddrDecShow(MV_VOID)
 	    }
 	}
 }
-
 
 /*******************************************************************************
 * mvAudioWinInit - Initialize the integrated AUDIO target address window.
@@ -318,4 +316,3 @@ MV_STATUS mvAudioInit(MV_VOID)
 
     return MV_OK;
 }
-

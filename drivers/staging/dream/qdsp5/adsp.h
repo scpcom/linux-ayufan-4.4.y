@@ -45,7 +45,6 @@ int adsp_videoenc_verify_cmd(struct msm_adsp_module *module,
 			  unsigned int queue_id, void *cmd_data,
 			  size_t cmd_size);
 
-
 struct adsp_event;
 
 int adsp_vfe_patch_event(struct msm_adsp_module *module,
@@ -53,7 +52,6 @@ int adsp_vfe_patch_event(struct msm_adsp_module *module,
 
 int adsp_jpeg_patch_event(struct msm_adsp_module *module,
 			struct adsp_event *event);
-
 
 struct adsp_module_info {
 	const char *name;

@@ -58,7 +58,6 @@
 #define ASUS_HOTK_FILE          KBUILD_MODNAME
 #define ASUS_HOTK_PREFIX        "\\_SB.ATKD."
 
-
 /*
  * Some events we use, same for all Asus
  */

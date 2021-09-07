@@ -95,7 +95,6 @@ static loff_t vcs_lseek(struct file *file, loff_t offset, int orig)
 	return file->f_pos;
 }
 
-
 static ssize_t
 vcs_read(struct file *file, char __user *buf, size_t count, loff_t *ppos)
 {

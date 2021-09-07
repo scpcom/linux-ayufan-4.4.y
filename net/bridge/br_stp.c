@@ -146,7 +146,6 @@ void br_transmit_config(struct net_bridge_port *p)
 	struct br_config_bpdu bpdu;
 	struct net_bridge *br;
 
-
 	if (timer_pending(&p->hold_timer)) {
 		p->config_pending = 1;
 		return;
@@ -351,7 +350,6 @@ void br_become_designated_port(struct net_bridge_port *p)
 	p->designated_bridge = br->bridge_id;
 	p->designated_port = p->port_id;
 }
-
 
 /* called under bridge lock */
 static void br_make_blocking(struct net_bridge_port *p)

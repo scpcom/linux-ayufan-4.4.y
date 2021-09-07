@@ -19,7 +19,6 @@
 
 #include "../oal_dt.h"
 
-
 /* Buffer management */
 #ifdef ZM_ENABLE_BUFFER_DEBUG
 extern zbuf_t* zfwBufAllocateWithContext(zdev_t* dev, u16_t len, u8_t *functionName, ULONG line);

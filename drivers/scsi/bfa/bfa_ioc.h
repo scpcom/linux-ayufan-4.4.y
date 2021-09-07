@@ -46,8 +46,6 @@ struct bfa_dma_s {
 #define BFA_DMA_ALIGN_SZ	256
 #define BFA_ROUNDUP(_l, _s)	(((_l) + ((_s) - 1)) & ~((_s) - 1))
 
-
-
 #define bfa_dma_addr_set(dma_addr, pa)	\
 		__bfa_dma_addr_set(&dma_addr, (u64)pa)
 
@@ -57,7 +55,6 @@ __bfa_dma_addr_set(union bfi_addr_u *dma_addr, u64 pa)
 	dma_addr->a32.addr_lo = (u32) pa;
 	dma_addr->a32.addr_hi = (u32) (bfa_os_u32(pa));
 }
-
 
 #define bfa_dma_be_addr_set(dma_addr, pa)	\
 		__bfa_dma_be_addr_set(&dma_addr, (u64)pa)
@@ -256,4 +253,3 @@ mac_t bfa_ioc_get_mac(struct bfa_ioc_s *ioc);
 u64 bfa_ioc_get_adid(struct bfa_ioc_s *ioc);
 
 #endif /* __BFA_IOC_H__ */
-

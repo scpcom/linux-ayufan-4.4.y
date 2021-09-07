@@ -363,7 +363,6 @@
 #define			SQ_TEX_VTX_VALID_TEXTURE			0x2
 #define			SQ_TEX_VTX_VALID_BUFFER				0x3
 
-
 #define	SX_MISC						0x28350
 #define	SX_MEMORY_EXPORT_BASE				0x9010
 #define	SX_DEBUG_1					0x9054
@@ -382,7 +381,6 @@
 #define	TC_CNTL						0x9608
 #define		TC_L2_SIZE(x)					((x)<<5)
 #define		L2_DISABLE_LATE_HIT				(1<<9)
-
 
 #define	VGT_CACHE_INVALIDATION				0x88C4
 #define		CACHE_INVALIDATION(x)				((x)<<0)
@@ -455,8 +453,6 @@
 #define         WAIT_3D_IDLE_bit                                (1 << 15)
 #define         WAIT_2D_IDLECLEAN_bit                           (1 << 16)
 #define         WAIT_3D_IDLECLEAN_bit                           (1 << 17)
-
-
 
 /*
  * PM4
@@ -540,7 +536,6 @@
 #define		PACKET3_SET_CTL_CONST_OFFSET			0x0003cff0
 #define		PACKET3_SET_CTL_CONST_END			0x0003e200
 #define	PACKET3_SURFACE_BASE_UPDATE			0x73
-
 
 #define	R_008020_GRBM_SOFT_RESET		0x8020
 #define		S_008020_SOFT_RESET_CP(x)		(((x) & 1) << 0)
@@ -698,6 +693,5 @@
 #define R_0280D4_CB_COLOR5_TILE                      0x0280D4
 #define R_0280D8_CB_COLOR6_TILE                      0x0280D8
 #define R_0280DC_CB_COLOR7_TILE                      0x0280DC
-
 
 #endif

@@ -13,7 +13,6 @@
 
 #include <linux/decompress/generic.h>
 
-
 int __initdata rd_prompt = 1;/* 1 = prompt for RAM disk, 0 = don't prompt */
 
 static int __init prompt_ramdisk(char *str)

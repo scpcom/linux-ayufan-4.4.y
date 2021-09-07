@@ -89,7 +89,6 @@ int hfsplus_strcmp(const struct hfsplus_unistr *s1,
 	       len1 > len2 ? 1 : 0;
 }
 
-
 #define Hangul_SBase	0xac00
 #define Hangul_LBase	0x1100
 #define Hangul_VBase	0x1161
@@ -99,7 +98,6 @@ int hfsplus_strcmp(const struct hfsplus_unistr *s1,
 #define Hangul_VCount	21
 #define Hangul_TCount	28
 #define Hangul_NCount	(Hangul_VCount * Hangul_TCount)
-
 
 static u16 *hfsplus_compose_lookup(u16 *p, u16 cc)
 {

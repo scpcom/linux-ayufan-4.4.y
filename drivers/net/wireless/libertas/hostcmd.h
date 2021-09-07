@@ -131,7 +131,6 @@ struct cmd_ds_gen {
 
 #define S_DS_GEN sizeof(struct cmd_ds_gen)
 
-
 /*
  * Define data structure for CMD_GET_HW_SPEC
  * This structure defines the response for the GET_HW_SPEC command
@@ -643,8 +642,6 @@ struct cmd_ds_host_sleep {
 	struct wol_config wol_conf;
 } __attribute__ ((packed));
 
-
-
 struct cmd_ds_802_11_key_material {
 	struct cmd_header hdr;
 
@@ -673,7 +670,6 @@ struct cmd_ds_802_11_tpc_cfg {
 	uint8_t usesnr;
 } __attribute__ ((packed));
 
-
 struct cmd_ds_802_11_pa_cfg {
 	struct cmd_header hdr;
 
@@ -683,7 +679,6 @@ struct cmd_ds_802_11_pa_cfg {
 	int8_t P1;
 	int8_t P2;
 } __attribute__ ((packed));
-
 
 struct cmd_ds_802_11_led_ctrl {
 	__le16 action;
@@ -740,7 +735,6 @@ struct cmd_ds_fwt_access {
 	u8 prec[ETH_ALEN];
 } __attribute__ ((packed));
 
-
 struct cmd_ds_mesh_config {
 	struct cmd_header hdr;
 
@@ -750,7 +744,6 @@ struct cmd_ds_mesh_config {
         __le16 length;
         u8 data[128];   /* last position reserved */
 } __attribute__ ((packed));
-
 
 struct cmd_ds_mesh_access {
 	struct cmd_header hdr;

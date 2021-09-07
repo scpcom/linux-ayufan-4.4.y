@@ -43,7 +43,6 @@ MODULE_LICENSE("GPL");
 #define dprintk(level, fmt, arg...)	if (debug >= level) \
 	printk(KERN_DEBUG "vbuf-vmalloc: " fmt , ## arg)
 
-
 /***************************************************************************/
 
 static void

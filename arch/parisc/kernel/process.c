@@ -77,7 +77,6 @@ void cpu_idle(void)
 	}
 }
 
-
 #define COMMAND_GLOBAL  F_EXTEND(0xfffe0030)
 #define CMD_RESET       5       /* reset any module */
 

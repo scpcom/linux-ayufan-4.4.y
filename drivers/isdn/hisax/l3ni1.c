@@ -38,7 +38,6 @@ static const char *ni1_revision = "$Revision: 1.1 $";
 	} \
 	*ptr++ = mty
 
-
 /**********************************************/
 /* get a new invoke id for remote operations. */
 /* Only a return value != 0 is valid          */
@@ -75,7 +74,6 @@ static void free_invoke_id(struct PStack *p, unsigned char id)
 
   p->prot.ni1.invoke_used[id >> 3] &= ~(1 << (id & 7));
 } /* free_invoke_id */  
-
 
 /**********************************************************/
 /* create a new l3 process and fill in ni1 specific data */
@@ -1037,7 +1035,6 @@ EncodeSyncParams(u_char si2, u_char ai)
 	return ai;
 }
 
-
 static u_char
 DecodeASyncParams(u_char si2, u_char * p)
 {
@@ -1093,7 +1090,6 @@ DecodeASyncParams(u_char si2, u_char * p)
 
 	return si2;
 }
-
 
 static u_char
 DecodeSyncParams(u_char si2, u_char info)
@@ -1163,7 +1159,6 @@ DecodeSI2(struct sk_buff *skb)
 }
 
 #endif
-
 
 static void
 l3ni1_setup_req(struct l3_process *pc, u_char pr,
@@ -1799,7 +1794,6 @@ l3ni1_deliver_display(struct l3_process *pc, int pr, u_char *infp)
 	cs->iif.statcallb(&ic);
 } /* l3ni1_deliver_display */
 
-
 static void
 l3ni1_progress(struct l3_process *pc, u_char pr, void *arg)
 {
@@ -1945,7 +1939,6 @@ static void l3ni1_redir_req(struct l3_process *pc, u_char pr, void *arg)
         u_char len_phone = 0;
         u_char len_sub = 0;
 	int l; 
-
 
         strcpy(pc->prot.ni1.uus1_data,pc->chan->setup.eazmsn); /* copy uus element if available */
         if (!pc->chan->setup.phone[0])
@@ -2833,7 +2826,6 @@ static struct stateentry manstatelist[] =
 };
 
 /* *INDENT-ON* */
-
 
 static void
 global_handler(struct PStack *st, int mt, struct sk_buff *skb)

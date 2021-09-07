@@ -1701,7 +1701,6 @@ int compat_set_fd_set(unsigned long nr, compat_ulong_t __user *ufdset,
 	return 0;
 }
 
-
 /*
  * This is a virtual copy of sys_select from fs/select.c and probably
  * should be compared to it from time to time
@@ -2408,4 +2407,3 @@ out:
 	return error;
 }
 #endif
-

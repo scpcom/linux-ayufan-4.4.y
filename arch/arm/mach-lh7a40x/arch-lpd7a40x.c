@@ -45,7 +45,6 @@
 #define CPLD_CONTROL_LCD_ENABLE		(1<<1) /* LCD Vee enable */
 #define CPLD_CONTROL_WRLAN_NENABLE	(1<<0) /* SMC91x power disable */
 
-
 static struct resource smc91x_resources[] = {
 	[0] = {
 		.start	= CPLD00_PHYS,
@@ -223,7 +222,6 @@ static void lpd7a40x_cpld_handler (unsigned int irq, struct irq_desc *desc)
 
 	desc->chip->unmask (irq); /* Level-triggered need this */
 }
-
 
 void __init lh7a40x_init_board_irq (void)
 {

@@ -223,4 +223,3 @@ struct snd_soc_dai *fsl_ssi_create_dai(struct fsl_ssi_info *ssi_info);
 void fsl_ssi_destroy_dai(struct snd_soc_dai *fsl_ssi_dai);
 
 #endif
-

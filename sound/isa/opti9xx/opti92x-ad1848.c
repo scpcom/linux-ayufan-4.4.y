@@ -22,7 +22,6 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
 
-
 #include <linux/init.h>
 #include <linux/err.h>
 #include <linux/isa.h>
@@ -191,7 +190,6 @@ static char * snd_opti9xx_names[] = {
 	"82C930",	"82C931",	"82C933"
 };
 
-
 static long __devinit snd_legacy_find_free_ioport(long *port_table, long size)
 {
 	while (*port_table != -1) {
@@ -342,11 +340,9 @@ static void snd_opti9xx_write(struct snd_opti9xx *chip, unsigned char reg,
 	spin_unlock_irqrestore(&chip->lock, flags);
 }
 
-
 #define snd_opti9xx_write_mask(chip, reg, value, mask)	\
 	snd_opti9xx_write(chip, reg,			\
 		(snd_opti9xx_read(chip, reg) & ~(mask)) | ((value) & (mask)))
-
 
 static int __devinit snd_opti9xx_configure(struct snd_opti9xx *chip)
 {

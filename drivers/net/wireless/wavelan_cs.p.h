@@ -763,4 +763,3 @@ module_param(do_roaming, bool, 0);
 MODULE_LICENSE("GPL");
 
 #endif	/* WAVELAN_CS_P_H */
-

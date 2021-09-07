@@ -33,7 +33,6 @@
 #include "proto.h"
 #include "request.h"
 
-
 /* Features. Undefine if they cause problems, this should perhaps be a
    config option. */
 #define SMBFS_POSIX_UNLINK 1
@@ -78,7 +77,6 @@ static int
 smb_proc_query_cifsunix(struct smb_sb_info *server);
 static void
 install_ops(struct smb_ops *dst, struct smb_ops *src);
-
 
 static void
 str_upper(char *name, int len)
@@ -274,7 +272,6 @@ out:
 	return n;
 }
 
-
 /*****************************************************************************/
 /*                                                                           */
 /*  Encoding/Decoding section                                                */
@@ -450,7 +447,6 @@ static int day_n[] =
 {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 0, 0, 0, 0};
 		  /* JanFebMarApr May Jun Jul Aug Sep Oct Nov Dec */
 
-
 static time_t
 utc2local(struct smb_sb_info *server, time_t time)
 {
@@ -481,7 +477,6 @@ date_dos2unix(struct smb_sb_info *server, __u16 date, __u16 time)
 	/* days since 1.1.70 plus 80's leap day */
 	return local2utc(server, secs);
 }
-
 
 /* Convert linear UNIX date to a MS-DOS time/date pair. */
 
@@ -577,7 +572,6 @@ static u32 smb_filetype_from_mode(int mode)
 		return UNIX_TYPE_SOCKET;
 	return UNIX_TYPE_UNKNOWN;
 }
-
 
 /*****************************************************************************/
 /*                                                                           */
@@ -2024,7 +2018,6 @@ smb_proc_readdir_short(struct file *filp, void *dirent, filldir_t filldir,
 			goto out_free;
 		p = req->rq_buffer + 3;
 
-
 		/* Make sure the response fits in the buffer. Fixed sized 
 		   entries means we don't have to check in the decode loop. */
 
@@ -2041,7 +2034,6 @@ smb_proc_readdir_short(struct file *filp, void *dirent, filldir_t filldir,
 
 		/* Read the last entry into the status field. */
 		memcpy(status, last_status, SMB_STATUS_SIZE);
-
 
 		/* Now we are ready to parse smb directory entries. */
 
@@ -2879,7 +2871,6 @@ smb_proc_getattr(struct dentry *dir, struct smb_fattr *fattr)
 	return result;
 }
 
-
 /*
  * Because of bugs in the core protocol, we use this only to set
  * attributes. See smb_proc_settime() below for timestamp handling.
@@ -3168,7 +3159,6 @@ out:
 	return result;
 }
 
-
 /*
  * Set the modify and access timestamps for a file.
  *
@@ -3297,7 +3287,6 @@ out_free:
 out:
 	return result;
 }
-
 
 /*
  * Create a symlink object called dentry which points to oldpath.
@@ -3434,7 +3423,6 @@ out_free:
 out:
 	return result;
 }
-
 
 static void
 install_ops(struct smb_ops *dst, struct smb_ops *src)

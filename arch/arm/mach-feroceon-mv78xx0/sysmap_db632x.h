@@ -16,4 +16,3 @@ struct map_desc DB_632X_MEM_TABLE[] __initdata = {
  { DEVICE_CS2_BASE, __phys_to_pfn(DEVICE_CS2_SIZE), DEVICE_CS2_SIZE, MT_DEVICE},
  { CRYPTO_ENG_BASE,__phys_to_pfn(CRYPTO_ENG_BASE), CRYPTO_SIZE, MT_DEVICE  },					
 };
-

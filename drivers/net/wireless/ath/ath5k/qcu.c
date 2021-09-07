@@ -546,4 +546,3 @@ int ath5k_hw_set_slot_time(struct ath5k_hw *ah, unsigned int slot_time)
 
 	return 0;
 }
-

@@ -100,4 +100,3 @@ clear_page_common:
 
 out:	retl
 	 nop
-

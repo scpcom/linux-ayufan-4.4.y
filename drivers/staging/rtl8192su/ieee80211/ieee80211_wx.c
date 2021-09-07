@@ -336,8 +336,6 @@ int ieee80211_wx_set_encode(struct ieee80211_device *ieee,
 		goto done;
 	}
 
-
-
 	sec.enabled = 1;
 	sec.flags |= SEC_ENABLED;
 
@@ -759,7 +757,6 @@ int ieee80211_wx_set_gen_ie(struct ieee80211_device *ieee, u8 *ie, size_t len)
 	//	printk("return error out, len:%d\n", len);
 	return -EINVAL;
 	}
-
 
 	if (len)
 	{

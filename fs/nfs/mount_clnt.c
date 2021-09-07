@@ -500,7 +500,6 @@ static struct rpc_procinfo mnt3_procedures[] = {
 	},
 };
 
-
 static struct rpc_version mnt_version1 = {
 	.number		= 1,
 	.nrprocs	= 2,

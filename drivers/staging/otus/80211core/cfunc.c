@@ -150,7 +150,6 @@ void zfRxBufferCopy(zdev_t*dev, zbuf_t* dst, zbuf_t* src,
     }
 }
 
-
 void zfCollectHWTally(zdev_t*dev, u32_t* rsp, u8_t id)
 {
     zmw_get_wlan_dev(dev);
@@ -259,7 +258,6 @@ void zfTimerInit(zdev_t* dev)
 
     wd->bTimerReady = TRUE;
 }
-
 
 u16_t zfTimerSchedule(zdev_t* dev, u16_t event, u32_t tick)
 {
@@ -503,7 +501,6 @@ void zfCoreMacAddressNotify(zdev_t* dev, u8_t* addr)
     wd->macAddr[1] = addr[2] | ((u16_t)addr[3]<<8);
     wd->macAddr[2] = addr[4] | ((u16_t)addr[5]<<8);
 
-
     //zfHpSetMacAddress(dev, wd->macAddr, 0);
     if (wd->zfcbMacAddressNotify != NULL)
     {
@@ -519,7 +516,6 @@ void zfCoreSetIsoName(zdev_t* dev, u8_t* isoName)
     wd->ws.countryIsoName[1] = isoName[1];
     wd->ws.countryIsoName[2] = '\0';
  }
-
 
 extern void zfScanMgrScanEventStart(zdev_t* dev);
 extern u8_t zfScanMgrScanEventTimeout(zdev_t* dev);

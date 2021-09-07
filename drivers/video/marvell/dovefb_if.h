@@ -10,7 +10,6 @@
  *
  */
 
-
 int dovefb_gfx_handle_irq(u32 isr, struct dovefb_layer_info *dfli);
 int dovefb_gfx_init(struct dovefb_info *info, struct dovefb_mach_info *dmi);
 int dovefb_gfx_suspend(struct dovefb_layer_info *dfli, pm_message_t mesg);
@@ -32,8 +31,5 @@ void dovefb_set_mode(struct dovefb_layer_info *dfli,
 		struct fb_var_screeninfo *var, struct fb_videomode *mode,
 		int pix_fmt, int ystretch);
 
-
 extern struct fb_ops dovefb_gfx_ops;
 extern struct fb_ops dovefb_ovly_ops;
-
-

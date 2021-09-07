@@ -45,7 +45,6 @@ static __inline__ __attribute_const__ int get_iommu_order(unsigned long size)
 	return __ilog2((size - 1) >> IOMMU_PAGE_SHIFT) + 1;
 }
 
-
 /*
  * IOMAP_MAX_ORDER defines the largest contiguous block
  * of dma space we can get.  IOMAP_MAX_ORDER = 13

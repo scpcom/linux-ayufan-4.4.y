@@ -76,7 +76,6 @@
 	remap_pfn_range((vma), (addr), (pfn), PAGE_SIZE,		\
 			__pgprot(pgprot_val((prot)) | _PAGE_4K_PFN))
 
-
 #ifdef CONFIG_PPC_SUBPAGE_PROT
 /*
  * For the sub-page protection option, we extend the PGD with one of

@@ -78,7 +78,6 @@ __setup("mfgptfix", mfgpt_fix);
  * leaves timers available for us to use.
  */
 
-
 static int timers = -1;
 
 static void geode_mfgpt_detect(void)
@@ -245,7 +244,6 @@ int geode_mfgpt_alloc_timer(int timer, int domain)
 	return -1;
 }
 EXPORT_SYMBOL_GPL(geode_mfgpt_alloc_timer);
-
 
 #ifdef CONFIG_GEODE_MFGPT_TIMER
 

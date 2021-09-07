@@ -110,7 +110,6 @@ static int emu10k1_playback_constraints(struct snd_pcm_runtime *runtime)
 #define USE_PERIODS_MAX		8
 #endif
 
-
 /* defaults */
 #ifndef MAX_BUFFER_SIZE
 #define MAX_BUFFER_SIZE		(64*1024)

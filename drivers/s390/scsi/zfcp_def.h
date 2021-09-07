@@ -124,7 +124,6 @@ struct fcp_rsp_iu {
 	u32 fcp_rsp_len;
 } __attribute__((packed));
 
-
 #define RSP_CODE_GOOD		 0
 #define RSP_CODE_LENGTH_MISMATCH 1
 #define RSP_CODE_FIELD_INVALID	 2
@@ -307,7 +306,6 @@ struct ct_iu_gpn_ft_req {
 	u8 area_id_scope;
 	u8 fc4_type;
 } __attribute__ ((packed));
-
 
 /**
  * struct zfcp_send_ct - used to pass parameters to function zfcp_fsf_send_ct

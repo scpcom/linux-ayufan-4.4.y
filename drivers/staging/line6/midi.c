@@ -21,18 +21,14 @@
 #include "pod.h"
 #include "usbdefs.h"
 
-
 #define USE_MIDIBUF      1
 #define OUTPUT_DUMP_ONLY 0
-
 
 #define line6_rawmidi_substream_midi(substream) \
 	((struct snd_line6_midi *)((substream)->rmidi->private_data))
 
-
 static int send_midi_async(struct usb_line6 *line6, unsigned char *data,
 			   int length);
-
 
 /*
 	Pass data received via USB to MIDI.

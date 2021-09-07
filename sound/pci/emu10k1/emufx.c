@@ -1406,7 +1406,6 @@ A_OP(icode, &ptr, iMAC0, A_GPR(var), A_GPR(var), A_GPR(vol), A_EXTIN(input))
 #define A_SWITCH_NEG(icode, ptr, dst, src) \
 		_A_SWITCH_NEG(icode, ptr, A_GPR(dst), A_GPR(src))
 
-
 	/*
 	 *  Process tone control
 	 */
@@ -1421,7 +1420,6 @@ A_OP(icode, &ptr, iMAC0, A_GPR(var), A_GPR(var), A_GPR(vol), A_EXTIN(input))
 		A_OP(icode, &ptr, iACC3, A_GPR(playback + SND_EMU10K1_PLAYBACK_CHANNELS + 7), A_GPR(playback + 7), A_C_00000000, A_C_00000000); /* side right */
 	}
 	
-
 	ctl = &controls[nctl + 0];
 	ctl->id.iface = SNDRV_CTL_ELEM_IFACE_MIXER;
 	strcpy(ctl->id.name, "Tone Control - Bass");
@@ -1727,7 +1725,6 @@ A_OP(icode, &ptr, iMAC0, A_GPR(var), A_GPR(var), A_GPR(vol), A_EXTIN(input))
 	return err;
 }
 
-
 /*
  * initial DSP configuration for Emu10k1
  */
@@ -1778,7 +1775,6 @@ static void __devinit _volume_out(struct snd_emu10k1_fx8010_code *icode, u32 *pt
 	OP((icode), ptr, iANDXOR, dst, src, C_00000001, C_00000001);
 #define SWITCH_NEG(icode, ptr, dst, src) \
 		_SWITCH_NEG(icode, ptr, GPR(dst), GPR(src))
-
 
 static int __devinit _snd_emu10k1_init_efx(struct snd_emu10k1 *emu)
 {
@@ -2311,7 +2307,6 @@ static int __devinit _snd_emu10k1_init_efx(struct snd_emu10k1 *emu)
 			OP(icode, &ptr, iACC3, FXBUS2(z), C_00000000, C_00000000, EXTIN(z));
 	}
 	    
-
 	if (gpr > tmp) {
 		snd_BUG();
 		err = -EIO;

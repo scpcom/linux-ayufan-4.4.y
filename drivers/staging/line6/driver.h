@@ -12,7 +12,6 @@
 #ifndef DRIVER_H
 #define DRIVER_H
 
-
 #include "config.h"
 
 #include <linux/spinlock.h>
@@ -28,7 +27,6 @@
 #define LINE6_MAX_DEVICES 8
 #define LINE6_BUFSIZE_LISTEN 32
 #define LINE6_MESSAGE_MAXLEN 256
-
 
 /*
 	Line6 MIDI control commands
@@ -54,11 +52,9 @@
 
 #define LINE6_CHANNEL_MASK 0x0f
 
-
 #define MISSING_CASE	\
 	printk(KERN_ERR "line6usb driver bug: missing case in %s:%d\n", \
 		__FILE__, __LINE__)
-
 
 #define CHECK_RETURN(x)		\
 do {				\
@@ -67,14 +63,12 @@ do {				\
 		return err;	\
 } while (0)
 
-
 extern const unsigned char line6_midi_id[3];
 extern struct usb_line6 *line6_devices[LINE6_MAX_DEVICES];
 extern struct workqueue_struct *line6_workqueue;
 
 static const int SYSEX_DATA_OFS = sizeof(line6_midi_id) + 3;
 static const int SYSEX_EXTRA_SIZE = sizeof(line6_midi_id) + 4;
-
 
 /**
 	 Common properties of Line6 devices.
@@ -172,7 +166,6 @@ struct usb_line6 {
 	int message_length;
 };
 
-
 extern char *line6_alloc_sysex_buffer(struct usb_line6 *line6, int code1,
 				      int code2, int size);
 extern ssize_t line6_nop_read(struct device *dev,
@@ -199,6 +192,5 @@ extern int line6_write_data(struct usb_line6 *line6, int address, void *data,
 			    size_t datalen);
 extern void line6_write_hexdump(struct usb_line6 *line6, char dir,
 				const unsigned char *buffer, int size);
-
 
 #endif

@@ -655,8 +655,6 @@ static struct uart_ops bcm_uart_ops = {
 	.verify_port	= bcm_uart_verify_port,
 };
 
-
-
 #ifdef CONFIG_SERIAL_BCM63XX_CONSOLE
 static inline void wait_for_xmitr(struct uart_port *port)
 {

@@ -282,7 +282,6 @@ struct sym_reg {
 	#define   DBLEN   0x08	/* clock doubler running		*/
 	#define   DBLSEL  0x04	/* clock doubler selected		*/
   
-
 /*4e*/  u8	nc_stest2;
 	#define   ROF     0x40	/* reset scsi offset (after gross error!) */
 	#define   EXT     0x02  /* extended filtering                     */
@@ -528,7 +527,6 @@ struct sym_tblsel {
 #define	SCR_ACK		0x00000040
 #define	SCR_ATN		0x00000008
 
-
 /*-----------------------------------------------------------
  *
  *	Memory to memory move
@@ -589,7 +587,6 @@ struct sym_tblsel {
 
 #define SCR_REG_REG(reg,op,data) \
         (0x78000000 | (SCR_REG_OFS(REG(reg))) | (op) | (((data)&0xff)<<8ul))
-
 
 #define      SCR_LOAD   0x00000000
 #define      SCR_SHL    0x01000000
@@ -668,7 +665,6 @@ struct sym_tblsel {
 #define SCR_STORE_REL(reg, n)	SCR_STORE_R(reg, SCR_NO_FLUSH2|SCR_DSA_REL2,n)
 #define SCR_STORE_ABS_F(reg, n)	SCR_STORE_R(reg, 0, n)
 #define SCR_STORE_REL_F(reg, n)	SCR_STORE_R(reg, SCR_DSA_REL2, n)
-
 
 /*-----------------------------------------------------------
  *

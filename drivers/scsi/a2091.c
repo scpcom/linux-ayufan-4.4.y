@@ -232,7 +232,6 @@ static struct scsi_host_template driver_template = {
 	.use_clustering		= DISABLE_CLUSTERING
 };
 
-
 #include "scsi_module.c"
 
 static int a2091_release(struct Scsi_Host *instance)

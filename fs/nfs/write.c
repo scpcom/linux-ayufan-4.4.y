@@ -1149,7 +1149,6 @@ static const struct rpc_call_ops nfs_write_full_ops = {
 	.rpc_release = nfs_writeback_release_full,
 };
 
-
 /*
  * This function is called when the WRITE call is complete.
  */
@@ -1231,7 +1230,6 @@ int nfs_writeback_done(struct rpc_task *task, struct nfs_write_data *data)
 	nfs4_sequence_free_slot(server->nfs_client, &data->res.seq_res);
 	return 0;
 }
-
 
 #if defined(CONFIG_NFS_V3) || defined(CONFIG_NFS_V4)
 void nfs_commitdata_release(void *data)
@@ -1676,4 +1674,3 @@ void nfs_destroy_writepagecache(void)
 	mempool_destroy(nfs_wdata_mempool);
 	kmem_cache_destroy(nfs_wdata_cachep);
 }
-

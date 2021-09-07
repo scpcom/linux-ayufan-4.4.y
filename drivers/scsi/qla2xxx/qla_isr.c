@@ -2338,7 +2338,6 @@ qla2x00_free_irqs(scsi_qla_host_t *vha)
 	}
 }
 
-
 int qla25xx_request_irq(struct rsp_que *rsp)
 {
 	struct qla_hw_data *ha = rsp->hw;

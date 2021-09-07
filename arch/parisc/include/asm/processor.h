@@ -86,7 +86,6 @@ struct system_cpuinfo_parisc {
 	const char	*family_name;	/* e.g. "1.1e" */
 };
 
-
 /* Per CPU data structure - ie varies per CPU.  */
 struct cpuinfo_parisc {
 	unsigned long it_value;     /* Interval Timer at last timer Intr */

@@ -41,7 +41,6 @@
  * END_DESC
 */
 
-
 #include "float.h"
 #include "sgl_float.h"
 #include "dbl_float.h"
@@ -533,4 +532,3 @@ dbl_to_dbl_fcnvfu (dbl_floating_point * srcptr, unsigned int *nullptr,
 	}
 	return(NOEXCEPTION);
 }
-

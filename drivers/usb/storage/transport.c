@@ -63,7 +63,6 @@
 #include <linux/blkdev.h>
 #include "../../scsi/sd.h"
 
-
 /***********************************************************************
  * Data transfer routines
  ***********************************************************************/
@@ -257,7 +256,6 @@ int usb_stor_clear_halt(struct us_data *us, unsigned int pipe)
 	return result;
 }
 EXPORT_SYMBOL_GPL(usb_stor_clear_halt);
-
 
 /*
  * Interpret the results of a URB transfer

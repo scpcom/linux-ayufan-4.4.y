@@ -45,7 +45,6 @@
  * for interrupt lines
  */
 
-
 static void end_bcm1480_irq(unsigned int irq);
 static void enable_bcm1480_irq(unsigned int irq);
 static void disable_bcm1480_irq(unsigned int irq);
@@ -154,7 +153,6 @@ static int bcm1480_set_affinity(unsigned int irq, const struct cpumask *mask)
 }
 #endif
 
-
 /*****************************************************************************/
 
 static void disable_bcm1480_irq(unsigned int irq)
@@ -166,7 +164,6 @@ static void enable_bcm1480_irq(unsigned int irq)
 {
 	bcm1480_unmask_irq(bcm1480_irq_owner[irq], irq);
 }
-
 
 static void ack_bcm1480_irq(unsigned int irq)
 {
@@ -218,14 +215,12 @@ static void ack_bcm1480_irq(unsigned int irq)
 	bcm1480_mask_irq(bcm1480_irq_owner[irq], irq);
 }
 
-
 static void end_bcm1480_irq(unsigned int irq)
 {
 	if (!(irq_desc[irq].status & (IRQ_DISABLED | IRQ_INPROGRESS))) {
 		bcm1480_unmask_irq(bcm1480_irq_owner[irq], irq);
 	}
 }
-
 
 void __init init_bcm1480_irqs(void)
 {
@@ -301,7 +296,6 @@ void __init arch_init_irq(void)
 						 (K_BCM1480_INT_MBOX_0_0 << 3)));
         }
 
-
 	/* Clear the mailboxes.  The firmware may leave them dirty */
 	for (cpu = 0; cpu < 4; cpu++) {
 		__raw_writeq(0xffffffffffffffffULL,
@@ -309,7 +303,6 @@ void __init arch_init_irq(void)
 		__raw_writeq(0xffffffffffffffffULL,
 			     IOADDR(A_BCM1480_IMR_REGISTER(cpu, R_BCM1480_IMR_MAILBOX_1_CLR_CPU)));
 	}
-
 
 	/* Mask everything except the high 16 bit of mailbox_0 registers for all cpus */
 	tmp = ~((u64) 0) ^ ( (((u64) 1) << K_BCM1480_INT_MBOX_0_0));

@@ -180,7 +180,6 @@ unsigned ext4_init_block_bitmap(struct super_block *sb, struct buffer_head *bh,
 	return free_blocks - ext4_group_used_meta_blocks(sb, block_group, gdp);
 }
 
-
 /*
  * The free blocks are managed by bitmaps.  A file system contains several
  * blocks groups.  Each group contains 1 bitmap block for blocks, 1 bitmap
@@ -191,7 +190,6 @@ unsigned ext4_init_block_bitmap(struct super_block *sb, struct buffer_head *bh,
  * the free blocks count in the block.  The descriptors are loaded in memory
  * when a file system is mounted (see ext4_fill_super).
  */
-
 
 #define in_range(b, first, len)	((b) >= (first) && (b) <= (first) + (len) - 1)
 
@@ -803,4 +801,3 @@ unsigned long ext4_bg_num_gdb(struct super_block *sb, ext4_group_t group)
 	return ext4_bg_num_gdb_meta(sb,group);
 
 }
-

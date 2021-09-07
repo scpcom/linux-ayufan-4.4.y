@@ -385,7 +385,6 @@ MODULE_LICENSE("GPL");
 #define MINUTE_MAX 0x59
 #define PAGE_MAX   0x8FF
 
-
 struct saa5246a_device
 {
 	struct v4l2_subdev sd;
@@ -1053,7 +1052,6 @@ static const struct v4l2_subdev_core_ops saa5246a_core_ops = {
 static const struct v4l2_subdev_ops saa5246a_ops = {
 	.core = &saa5246a_core_ops,
 };
-
 
 static int saa5246a_probe(struct i2c_client *client,
 			const struct i2c_device_id *id)

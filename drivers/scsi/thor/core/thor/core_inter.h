@@ -75,4 +75,3 @@ typedef struct _Core_Driver_Extension
 }Core_Driver_Extension, *PCore_Driver_Extension;
 
 #endif /* CORE_MAIN_H */
-

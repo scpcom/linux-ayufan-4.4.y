@@ -192,7 +192,6 @@ static struct drm_mm_node *drm_mm_split_at_start(struct drm_mm_node *parent,
 	return child;
 }
 
-
 struct drm_mm_node *drm_mm_get_block_generic(struct drm_mm_node *node,
 					     unsigned long size,
 					     unsigned alignment,

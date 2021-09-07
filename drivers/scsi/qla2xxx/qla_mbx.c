@@ -8,7 +8,6 @@
 
 #include <linux/delay.h>
 
-
 /*
  * qla2x00_mailbox_command
  *	Issue mailbox command and waits for completion.
@@ -505,7 +504,6 @@ qla2x00_get_fw_options(scsi_qla_host_t *vha, uint16_t *fwopts)
 
 	return rval;
 }
-
 
 /*
  * qla2x00_set_fw_options

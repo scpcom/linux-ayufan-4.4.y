@@ -38,7 +38,6 @@
 #ifndef __RTMP_PHY_H__
 #define __RTMP_PHY_H__
 
-
 /*
 	RF sections
 */
@@ -74,7 +73,6 @@
 #define RF_R29			29
 #define RF_R30			30
 #define RF_R31			31
-
 
 // value domain of pAd->RfIcType
 #define RFIC_2820                   1       // 2.4G 2T3R
@@ -154,9 +152,7 @@
 #define BBP_R138		138 // add by johnli, RF power sequence setup, ADC dynamic on/off control
 #endif // RT30xx //
 
-
 #define BBPR94_DEFAULT	0x06 // Add 1 value will gain 1db
-
 
 #ifdef MERGE_ARCH_TEAM
 	#define MAX_BBP_ID	200
@@ -171,7 +167,6 @@
 #endif // RT30xx //
 	#define MAX_BBP_MSG_SIZE	2048
 #endif // MERGE_ARCH_TEAM //
-
 
 //
 // BBP & RF are using indirect access. Before write any value into it.
@@ -215,13 +210,10 @@
 }
 #endif // RTMP_MAC_PCI //
 
-
-
 #ifdef RT30xx
 #define RTMP_RF_IO_READ8_BY_REG_ID(_A, _I, _pV)    RT30xxReadRFRegister(_A, _I, _pV)
 #define RTMP_RF_IO_WRITE8_BY_REG_ID(_A, _I, _V)    RT30xxWriteRFRegister(_A, _I, _V)
 #endif // RT30xx //
-
 
 /*****************************************************************************
 	BBP register Read/Write marco definitions.
@@ -447,7 +439,6 @@
 		}														\
 	}while(0)
 
-
 /*
 	This marco used for the BBP write operation which didn't need via MCU.
 */
@@ -560,8 +551,6 @@
 #endif // CONFIG_STA_SUPPORT //
 #endif // RTMP_MAC_PCI //
 
-
-
 #ifdef RT30xx
 //Need to collect each ant's rssi concurrently
 //rssi1 is report to pair2 Ant and rss2 is reprot to pair1 Ant when 4 Ant
@@ -609,7 +598,6 @@
 		_macData &= ~(0x09);	/*bit 0, 3*/							\
 		RTMP_IO_WRITE32(_pAd, 0x1210, _macData);				\
 	}while(0)
-
 
 #define RTMP_ASIC_MMPS_ENABLE(_pAd)							\
 	do{															\

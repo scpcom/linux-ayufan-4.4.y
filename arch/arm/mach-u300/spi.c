@@ -94,7 +94,6 @@ static struct pl022_ssp_controller ssp_platform_data = {
 	.num_chipselect = 3,
 };
 
-
 void __init u300_spi_init(struct amba_device *adev)
 {
 	struct pmx *pmx;

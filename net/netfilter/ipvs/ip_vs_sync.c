@@ -43,7 +43,6 @@
 #define IP_VS_SYNC_GROUP 0xe0000051    /* multicast addr - 224.0.0.81 */
 #define IP_VS_SYNC_PORT  8848          /* multicast port */
 
-
 /*
  *	IPVS sync connection entry
  */
@@ -79,7 +78,6 @@ struct ip_vs_sync_thread_data {
 #define SIMPLE_CONN_SIZE  (sizeof(struct ip_vs_sync_conn))
 #define FULL_CONN_SIZE  \
 (sizeof(struct ip_vs_sync_conn) + sizeof(struct ip_vs_sync_conn_options))
-
 
 /*
   The master mulitcasts messages to the backup load balancers in the
@@ -127,7 +125,6 @@ struct ip_vs_sync_buff {
 	unsigned char           *end;
 };
 
-
 /* the sync_buff list head and the lock */
 static LIST_HEAD(ip_vs_sync_queue);
 static DEFINE_SPINLOCK(ip_vs_sync_lock);
@@ -155,7 +152,6 @@ static struct sockaddr_in mcast_addr = {
 	.sin_port		= cpu_to_be16(IP_VS_SYNC_PORT),
 	.sin_addr.s_addr	= cpu_to_be32(IP_VS_SYNC_GROUP),
 };
-
 
 static inline struct ip_vs_sync_buff *sb_dequeue(void)
 {
@@ -231,7 +227,6 @@ get_curr_sync_buff(unsigned long time)
 	return sb;
 }
 
-
 /*
  *      Add an ip_vs_conn information into the current sync_buff.
  *      Called by ip_vs_in.
@@ -287,7 +282,6 @@ void ip_vs_sync_conn(struct ip_vs_conn *cp)
 	if (cp->control)
 		ip_vs_sync_conn(cp->control);
 }
-
 
 /*
  *      Process received multicast message and create the corresponding
@@ -455,7 +449,6 @@ static void ip_vs_process_message(const char *buffer, const size_t buflen)
 	}
 }
 
-
 /*
  *      Setup loopback of outgoing multicasts on a sending socket
  */
@@ -504,7 +497,6 @@ static int set_mcast_if(struct sock *sk, char *ifname)
 	return 0;
 }
 
-
 /*
  *	Set the maximum length of sync message according to the
  *	specified interface's MTU.
@@ -538,7 +530,6 @@ static int set_sync_mesg_maxlen(int sync_state)
 	return 0;
 }
 
-
 /*
  *      Join a multicast group.
  *      the group is specified by a class D multicast address 224.0.0.0/8
@@ -567,7 +558,6 @@ join_mcast_group(struct sock *sk, struct in_addr *addr, char *ifname)
 
 	return ret;
 }
-
 
 static int bind_mcastif_addr(struct socket *sock, char *ifname)
 {
@@ -638,7 +628,6 @@ static struct socket * make_send_sock(void)
 	return ERR_PTR(result);
 }
 
-
 /*
  *      Set up receiving multicast socket over UDP
  */
@@ -679,7 +668,6 @@ static struct socket * make_receive_sock(void)
 	sock_release(sock);
 	return ERR_PTR(result);
 }
-
 
 static int
 ip_vs_send_async(struct socket *sock, const char *buffer, const size_t length)
@@ -734,7 +722,6 @@ ip_vs_receive(struct socket *sock, char *buffer, const size_t buflen)
 	return len;
 }
 
-
 static int sync_thread_master(void *data)
 {
 	struct ip_vs_sync_thread_data *tinfo = data;
@@ -777,7 +764,6 @@ static int sync_thread_master(void *data)
 	return 0;
 }
 
-
 static int sync_thread_backup(void *data)
 {
 	struct ip_vs_sync_thread_data *tinfo = data;
@@ -816,7 +802,6 @@ static int sync_thread_backup(void *data)
 
 	return 0;
 }
-
 
 int start_sync_thread(int state, char *mcast_ifn, __u8 syncid)
 {
@@ -900,7 +885,6 @@ outsocket:
 out:
 	return result;
 }
-
 
 int stop_sync_thread(int state)
 {

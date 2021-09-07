@@ -226,7 +226,6 @@ static struct property property_av_multi_out = {
 	.value = &saved_params.av_multi_out,
 };
 
-
 static DEFINE_MUTEX(os_area_flash_mutex);
 
 static const struct ps3_os_area_flash_ops *os_area_flash_ops;
@@ -262,7 +261,6 @@ static ssize_t os_area_flash_write(const void *buf, size_t count, loff_t pos)
 
 	return res;
 }
-
 
 /**
  * os_area_set_property - Add or overwrite a saved_params value to the device tree.

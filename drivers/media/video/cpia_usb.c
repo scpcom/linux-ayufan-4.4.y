@@ -572,7 +572,6 @@ static struct usb_device_id cpia_id_table [] = {
 MODULE_DEVICE_TABLE (usb, cpia_id_table);
 MODULE_LICENSE("GPL");
 
-
 static struct usb_driver cpia_driver = {
 	.name		= "cpia",
 	.probe		= cpia_probe,
@@ -637,7 +636,5 @@ static void __exit usb_cpia_cleanup(void)
 	usb_deregister(&cpia_driver);
 }
 
-
 module_init (usb_cpia_init);
 module_exit (usb_cpia_cleanup);
-

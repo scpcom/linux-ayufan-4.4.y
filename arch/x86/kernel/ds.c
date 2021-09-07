@@ -52,7 +52,6 @@ struct ds_configuration {
 };
 static struct ds_configuration ds_cfg __read_mostly;
 
-
 /* Maximal size of a DS configuration: */
 #define MAX_SIZEOF_DS		0x80
 
@@ -178,7 +177,6 @@ ds_set(unsigned char *base, enum ds_qualifier qual, enum ds_field field,
 	(*(unsigned long *)base) = value;
 }
 
-
 /*
  * Locking is done only for allocating BTS or PEBS resources.
  */
@@ -266,7 +264,6 @@ struct ds_context {
 };
 
 static DEFINE_PER_CPU(struct ds_context *, cpu_context);
-
 
 static struct ds_context *ds_get_context(struct task_struct *task, int cpu)
 {
@@ -393,7 +390,6 @@ static void ds_overflow(struct ds_context *context, enum ds_qualifier qual)
 	}
 }
 
-
 /*
  * Write raw data into the BTS or PEBS buffer.
  *
@@ -469,7 +465,6 @@ static int ds_write(struct ds_context *context, enum ds_qualifier qual,
 	return bytes_written;
 }
 
-
 /*
  * Branch Trace Store (BTS) uses the following format. Different
  * architectures vary in the size of those fields.
@@ -520,7 +515,6 @@ static inline void bts_set(char *base, unsigned long field, unsigned long val)
 	base += (ds_cfg.sizeof_ptr_field * field);
 	(*(unsigned long *)base) = val;
 }
-
 
 /*
  * The raw BTS data is architecture dependent.
@@ -597,7 +591,6 @@ static int bts_write(struct bts_tracer *tracer, const struct bts_struct *in)
 			ds_cfg.sizeof_rec[ds_bts]);
 }
 
-
 static void ds_write_config(struct ds_context *context,
 			    struct ds_trace *cfg, enum ds_qualifier qual)
 {
@@ -657,7 +650,6 @@ static void ds_init_ds_trace(struct ds_trace *trace, enum ds_qualifier qual,
 
 	trace->flags = flags;
 }
-
 
 static int ds_request(struct ds_tracer *tracer, struct ds_trace *trace,
 		      enum ds_qualifier qual, struct task_struct *task,

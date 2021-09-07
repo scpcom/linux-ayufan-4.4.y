@@ -63,7 +63,6 @@
 #define CAPI_FUNCTION_MANUFACTURER	6
 #define CAPI_FUNCTION_LOOPBACK		7
 
-
 #define CMTP_MSGNUM	1
 #define CMTP_APPLID	2
 #define CMTP_MAPPING	3
@@ -542,7 +541,6 @@ static int cmtp_ctr_read_proc(char *page, char **start, off_t off, int count, in
 
 	return ((count < len - off) ? count : len - off);
 }
-
 
 int cmtp_attach_device(struct cmtp_session *session)
 {

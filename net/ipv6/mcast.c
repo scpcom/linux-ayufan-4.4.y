@@ -147,7 +147,6 @@ static int ip6_mc_add_src(struct inet6_dev *idev, struct in6_addr *pmca,
 static int ip6_mc_leave_src(struct sock *sk, struct ipv6_mc_socklist *iml,
 			    struct inet6_dev *idev);
 
-
 #define IGMP6_UNSOLICITED_IVAL	(10*HZ)
 #define MLD_QRV_DEFAULT		2
 
@@ -861,7 +860,6 @@ static void mld_clear_delrec(struct inet6_dev *idev)
 	read_unlock_bh(&idev->lock);
 }
 
-
 /*
  *	device multicast group inc (add if not found)
  */
@@ -1279,7 +1277,6 @@ int igmp6_event_query(struct sk_buff *skb)
 
 	return 0;
 }
-
 
 int igmp6_event_report(struct sk_buff *skb)
 {
@@ -2147,7 +2144,6 @@ static void ip6_mc_clear_src(struct ifmcaddr6 *pmc)
 	pmc->mca_sfcount[MCAST_EXCLUDE] = 1;
 }
 
-
 static void igmp6_join_group(struct ifmcaddr6 *ma)
 {
 	unsigned long delay;
@@ -2232,7 +2228,6 @@ static void mld_ifc_event(struct inet6_dev *idev)
 	mld_ifc_start_timer(idev, 1);
 }
 
-
 static void igmp6_timer_handler(unsigned long data)
 {
 	struct ifmcaddr6 *ma = (struct ifmcaddr6 *) data;
@@ -2290,7 +2285,6 @@ void ipv6_mc_down(struct inet6_dev *idev)
 
 	mld_clear_delrec(idev);
 }
-
 
 /* Device going up */
 

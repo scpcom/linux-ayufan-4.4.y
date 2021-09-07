@@ -28,7 +28,6 @@
  *
  ******************************************************************************/
 
-
 #define ISCSI_TARGET_ERL1_C
 
 #include <linux/net.h>
@@ -1430,4 +1429,3 @@ void iscsi_stop_dataout_timer(iscsi_cmd_t *cmd)
 			cmd->init_task_tag);
 	spin_unlock_bh(&cmd->dataout_timeout_lock);
 }
-

@@ -218,4 +218,3 @@ enum pcf50633_reg_int5 {
 #define PCF50633_REG_LEDDIM 0x2b
 
 #endif
-

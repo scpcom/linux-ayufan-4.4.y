@@ -376,8 +376,5 @@ struct sun3_udc_regs {
 #define NCR_PRINT_STATUS(mask) \
 	((NDEBUG & (mask)) ? NCR5380_print_status(instance) : (void)0)
 
-
-
 #endif /* ndef HOSTS_C */
 #endif /* SUN3_NCR5380_H */
-

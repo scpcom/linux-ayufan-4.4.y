@@ -56,7 +56,6 @@ static inline int qdio_dbf_passes(debug_info_t *dbf_grp, int level)
 		debug_event(qdio_dbf_error, DBF_ERR, (void*)(addr), len); \
 	} while (0)
 
-
 #define DBF_DEV_EVENT(level, device, text...) \
 	do { \
 		char debug_buffer[QDIO_DBF_LEN]; \

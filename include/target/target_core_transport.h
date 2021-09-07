@@ -29,7 +29,6 @@
  *
  ******************************************************************************/
 
-
 #ifndef TARGET_CORE_TRANSPORT_H
 #define TARGET_CORE_TRANSPORT_H
 
@@ -601,4 +600,3 @@ typedef struct se_subsystem_api_s {
 #define HBA_TRANSPORT(hba)	((hba)->transport)
 
 #endif /* TARGET_CORE_TRANSPORT_H */
-

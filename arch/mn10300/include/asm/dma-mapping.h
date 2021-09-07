@@ -160,7 +160,6 @@ dma_sync_single_range_for_device(struct device *dev, dma_addr_t dma_handle,
 	mn10300_dcache_flush_inv();
 }
 
-
 /*
  * Make physical memory consistent for a set of streaming mode DMA translations
  * after a transfer.

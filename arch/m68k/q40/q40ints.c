@@ -96,7 +96,6 @@ void __init q40_init_IRQ(void)
 	master_outb(0, KEY_IRQ_ENABLE_REG);
 }
 
-
 /*
  * this stuff doesn't really belong here..
  */
@@ -157,7 +156,6 @@ void q40_sched_init (irq_handler_t timer_routine)
 	master_outb( 1, FRAME_RATE_REG);
 }
 
-
 /*
  * tables to translate bits into IRQ numbers
  * it is a good idea to order the entries by priority
@@ -198,7 +196,6 @@ static int ccleirq=60;    /* ISA dev IRQs*/
 
 static int mext_disabled=0;  /* ext irq disabled by master chip? */
 static int aliased_irq=0;  /* how many times inside handler ?*/
-
 
 /* got interrupt, dispatch to ISA or keyboard/timer IRQs */
 static void q40_irq_handler(unsigned int irq, struct pt_regs *fp)
@@ -303,7 +300,6 @@ void q40_enable_irq(unsigned int irq)
 			master_outb(1, EXT_ENABLE_REG);
 	}
 }
-
 
 void q40_disable_irq(unsigned int irq)
 {

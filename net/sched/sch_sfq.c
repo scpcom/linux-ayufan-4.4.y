@@ -24,7 +24,6 @@
 #include <net/netlink.h>
 #include <net/pkt_sched.h>
 
-
 /*	Stochastic Fairness Queuing algorithm.
 	=======================================
 
@@ -35,11 +34,9 @@
 	Paul E. McKenney "Stochastic Fairness Queuing",
 	"Interworking: Research and Experience", v.2, 1991, p.113-131.
 
-
 	See also:
 	M. Shreedhar and George Varghese "Efficient Fair
 	Queuing using Deficit Round Robin", Proc. SIGCOMM 95.
-
 
 	This is not the thing that is usually called (W)FQ nowadays.
 	It does not use any timestamp mechanism, but instead

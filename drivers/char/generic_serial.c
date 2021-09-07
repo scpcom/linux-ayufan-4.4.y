@@ -48,7 +48,6 @@ static int gs_debug;
 
 module_param(gs_debug, int, 0644);
 
-
 int gs_put_char(struct tty_struct * tty, unsigned char ch)
 {
 	struct gs_port *port;
@@ -78,7 +77,6 @@ int gs_put_char(struct tty_struct * tty, unsigned char ch)
 	func_exit ();
 	return 1;
 }
-
 
 /*
 > Problems to take into account are:
@@ -151,8 +149,6 @@ int gs_write(struct tty_struct * tty,
 	return total;
 }
 
-
-
 int gs_write_room(struct tty_struct * tty)
 {
 	struct gs_port *port = tty->driver_data;
@@ -166,7 +162,6 @@ int gs_write_room(struct tty_struct * tty)
 	return ret;
 }
 
-
 int gs_chars_in_buffer(struct tty_struct *tty)
 {
 	struct gs_port *port = tty->driver_data;
@@ -175,7 +170,6 @@ int gs_chars_in_buffer(struct tty_struct *tty)
 	func_exit ();
 	return port->xmit_cnt;
 }
-
 
 static int gs_real_chars_in_buffer(struct tty_struct *tty)
 {
@@ -190,7 +184,6 @@ static int gs_real_chars_in_buffer(struct tty_struct *tty)
 	func_exit ();
 	return port->xmit_cnt + port->rd->chars_in_buffer (port);
 }
-
 
 static int gs_wait_tx_flushed (void * ptr, unsigned long timeout) 
 {
@@ -261,8 +254,6 @@ static int gs_wait_tx_flushed (void * ptr, unsigned long timeout)
 	return rv;
 }
 
-
-
 void gs_flush_buffer(struct tty_struct *tty)
 {
 	struct gs_port *port;
@@ -282,7 +273,6 @@ void gs_flush_buffer(struct tty_struct *tty)
 	tty_wakeup(tty);
 	func_exit ();
 }
-
 
 void gs_flush_chars(struct tty_struct * tty)
 {
@@ -306,7 +296,6 @@ void gs_flush_chars(struct tty_struct * tty)
 	func_exit ();
 }
 
-
 void gs_stop(struct tty_struct * tty)
 {
 	struct gs_port *port;
@@ -326,7 +315,6 @@ void gs_stop(struct tty_struct * tty)
 	func_exit ();
 }
 
-
 void gs_start(struct tty_struct * tty)
 {
 	struct gs_port *port;
@@ -343,7 +331,6 @@ void gs_start(struct tty_struct * tty)
 	}
 	func_exit ();
 }
-
 
 static void gs_shutdown_port (struct gs_port *port)
 {
@@ -374,7 +361,6 @@ static void gs_shutdown_port (struct gs_port *port)
 	func_exit();
 }
 
-
 void gs_hangup(struct tty_struct *tty)
 {
 	struct gs_port *port;
@@ -397,7 +383,6 @@ void gs_hangup(struct tty_struct *tty)
 	wake_up_interruptible(&port->port.open_wait);
 	func_exit ();
 }
-
 
 int gs_block_til_ready(void *port_, struct file * filp)
 {
@@ -504,7 +489,6 @@ int gs_block_til_ready(void *port_, struct file * filp)
 	return retval;
 }			 
 
-
 void gs_close(struct tty_struct * tty, struct file * filp)
 {
 	unsigned long flags;
@@ -605,7 +589,6 @@ void gs_close(struct tty_struct * tty, struct file * filp)
 	func_exit ();
 }
 
-
 void gs_set_termios (struct tty_struct * tty, 
                      struct ktermios * old_termios)
 {
@@ -623,7 +606,6 @@ void gs_set_termios (struct tty_struct * tty,
 		gs_dprintk (GS_DEBUG_TERMIOS, "gs: Odd: port->port.tty is NULL\n");
 		port->port.tty = tty;
 	}
-
 
 	tiosp = tty->termios;
 
@@ -698,8 +680,6 @@ void gs_set_termios (struct tty_struct * tty,
 	return /* 0 */;
 }
 
-
-
 /* Must be called with interrupts enabled */
 int gs_init_port(struct gs_port *port)
 {
@@ -744,7 +724,6 @@ int gs_init_port(struct gs_port *port)
 	return 0;
 }
 
-
 int gs_setserial(struct gs_port *port, struct serial_struct __user *sp)
 {
 	struct serial_struct sio;
@@ -772,7 +751,6 @@ int gs_setserial(struct gs_port *port, struct serial_struct __user *sp)
 
 	return 0;
 }
-
 
 /*****************************************************************************/
 
@@ -808,7 +786,6 @@ int gs_getserial(struct gs_port *port, struct serial_struct __user *sp)
 
 }
 
-
 void gs_got_break(struct gs_port *port)
 {
 	func_enter ();
@@ -821,7 +798,6 @@ void gs_got_break(struct gs_port *port)
 
 	func_exit ();
 }
-
 
 EXPORT_SYMBOL(gs_put_char);
 EXPORT_SYMBOL(gs_write);

@@ -117,4 +117,3 @@ int GetMemByte( MEMORY_BYTE *pMemory )
 {
 	return GetFanSpeedBits(34, 32, pMemory);
 }
-

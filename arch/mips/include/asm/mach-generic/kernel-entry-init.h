@@ -21,5 +21,4 @@
 	.macro	smp_slave_setup
 	.endm
 
-
 #endif /* __ASM_MACH_GENERIC_KERNEL_ENTRY_H */

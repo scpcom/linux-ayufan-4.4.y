@@ -287,7 +287,6 @@ static unsigned int __init spider_find_cascade_and_node(struct spider_pic *pic)
 	return virq;
 }
 
-
 static void __init spider_init_one(struct device_node *of_node, int chip,
 				   unsigned long addr)
 {

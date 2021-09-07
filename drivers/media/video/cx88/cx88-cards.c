@@ -53,7 +53,6 @@ MODULE_PARM_DESC(latency,"pci latency timer");
 #define err_printk(core, fmt, arg...) \
 	printk(KERN_ERR "%s: " fmt, core->name , ## arg)
 
-
 /* ------------------------------------------------------------------ */
 /* board config info                                                  */
 
@@ -2707,7 +2706,6 @@ static int cx88_dvico_xc2028_callback(struct cx88_core *core,
 	return 0;
 }
 
-
 /* ----------------------------------------------------------------------- */
 /* some Geniatech specific stuff                                           */
 
@@ -3222,7 +3220,6 @@ static void cx88_card_setup(struct cx88_core *core)
 		msleep(100);
 		break;
 	} /*end switch() */
-
 
 	/* Setup tuners */
 	if ((core->board.radio_type != UNSET)) {

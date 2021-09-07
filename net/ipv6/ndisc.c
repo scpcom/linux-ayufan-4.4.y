@@ -121,7 +121,6 @@ static const struct neigh_ops ndisc_hh_ops = {
 	.queue_xmit =		dev_queue_xmit,
 };
 
-
 static const struct neigh_ops ndisc_direct_ops = {
 	.family =		AF_INET6,
 	.output =		dev_queue_xmit,
@@ -663,7 +662,6 @@ void ndisc_send_rs(struct net_device *dev, const struct in6_addr *saddr,
 		     &icmp6h, NULL,
 		     send_sllao ? ND_OPT_SOURCE_LL_ADDR : 0);
 }
-
 
 static void ndisc_error_report(struct neighbour *neigh, struct sk_buff *skb)
 {

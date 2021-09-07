@@ -290,7 +290,6 @@ static void rp_cleanup_module(void);
 module_init(rp_init);
 module_exit(rp_cleanup_module);
 
-
 MODULE_LICENSE("Dual BSD/GPL");
 
 /*************************************************************************/
@@ -310,7 +309,6 @@ static inline int rocket_paranoia_check(struct r_port *info,
 #endif
 	return 0;
 }
-
 
 /*  Serial port receive data function.  Called (from timer poll) when an AIOPIC signals 
  *  that receive data is present on a serial port.  Pulls data from FIFO, moves it into the 
@@ -2374,7 +2372,6 @@ err_tty:
 err:
 	return ret;
 }
-
 
 static void rp_cleanup_module(void)
 {

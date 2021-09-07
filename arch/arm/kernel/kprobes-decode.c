@@ -1449,7 +1449,6 @@ void __init arm_kprobe_decode_init(void)
 	find_str_pc_offset();
 }
 
-
 /*
  * All ARM instructions listed below.
  *

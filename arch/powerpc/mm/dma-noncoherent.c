@@ -176,7 +176,6 @@ __dma_alloc_coherent(struct device *dev, size_t size, dma_addr_t *handle, gfp_t 
 		}
 	}
 
-
 	size = PAGE_ALIGN(size);
 	limit = (mask + 1) & ~mask;
 	if ((limit && size >= limit) ||

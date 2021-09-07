@@ -868,7 +868,6 @@ void i915_enable_interrupt (struct drm_device *dev)
 	dev_priv->irq_enabled = 1;
 }
 
-
 /* Set the vblank monitor pipe
  */
 int i915_vblank_pipe_set(struct drm_device *dev, void *data,

@@ -35,7 +35,6 @@
 	Name		Date			Modification logs
 */
 
-
 #include "rt_config.h"
 #include <linux/pci.h>
 
@@ -57,11 +56,9 @@ static INT __devinit rt2860_probe(struct pci_dev *pci_dev, const struct pci_devi
 static void __exit rt2860_cleanup_module(void);
 static int __init rt2860_init_module(void);
 
-
  static VOID RTMPInitPCIeDevice(
     IN  struct pci_dev   *pci_dev,
     IN PRTMP_ADAPTER     pAd);
-
 
 #ifdef CONFIG_PM
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
@@ -100,7 +97,6 @@ MODULE_VERSION(STA_DRIVER_VERSION);
 #endif
 #endif // CONFIG_STA_SUPPORT //
 
-
 //
 // Our PCI driver structure
 //
@@ -122,7 +118,6 @@ static struct pci_driver rt2860_driver =
 #endif
 #endif
 };
-
 
 /***************************************************************************
  *
@@ -146,7 +141,6 @@ static int rt2860_suspend(
 	struct net_device *net_dev = pci_get_drvdata(pci_dev);
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER)NULL;
 	INT32 retval = 0;
-
 
 	DBGPRINT(RT_DEBUG_TRACE, ("===> rt2860_suspend()\n"));
 
@@ -208,7 +202,6 @@ static int rt2860_resume(
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,10)
 	INT32 retval;
-
 
 	// set the power state of a PCI device
 	// PCI has 4 power states, DO (normal) ~ D3(less power)
@@ -277,7 +270,6 @@ static int rt2860_resume(
 #endif // CONFIG_PM //
 #endif
 
-
 static INT __init rt2860_init_module(VOID)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
@@ -286,7 +278,6 @@ static INT __init rt2860_init_module(VOID)
     return pci_module_init(&rt2860_driver);
 #endif
 }
-
 
 //
 // Driver module unload function
@@ -298,7 +289,6 @@ static VOID __exit rt2860_cleanup_module(VOID)
 
 module_init(rt2860_init_module);
 module_exit(rt2860_cleanup_module);
-
 
 //
 // PCI device probe & initialization function
@@ -354,7 +344,6 @@ static INT __devinit   rt2860_probe(
 	// Set DMA master
 	pci_set_master(pci_dev);
 
-
 //RtmpDevInit==============================================
 	// Allocate RTMP_ADAPTER adapter structure
 	handle = kmalloc(sizeof(struct os_cookie), GFP_KERNEL);
@@ -373,7 +362,6 @@ static INT __devinit   rt2860_probe(
 	pAd->CSRBaseAddress = (PUCHAR)csr_addr;
 	DBGPRINT(RT_DEBUG_ERROR, ("pAd->CSRBaseAddress =0x%lx, csr_addr=0x%lx!\n", (ULONG)pAd->CSRBaseAddress, csr_addr));
 	RtmpRaDevCtrlInit(pAd, RTMP_DEV_INF_PCI);
-
 
 //NetDevInit==============================================
 	net_dev = RtmpPhyNetDevInit(pAd, &netDevHook);
@@ -395,7 +383,6 @@ static INT __devinit   rt2860_probe(
 #endif
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
 
-
 //All done, it's time to register the net device to linux kernel.
 	// Register this device
 	rv = RtmpOSNetDevAttach(net_dev, &netDevHook);
@@ -410,7 +397,6 @@ RTMPInitPCIeDevice(pci_dev, pAd);
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt2860_probe\n"));
 
 	return 0; // probe ok
-
 
 	/* --------------------------- ERROR HANDLE --------------------------- */
 err_out_free_netdev:
@@ -434,7 +420,6 @@ err_out:
 
 	return -ENODEV; /* probe fail */
 }
-
 
 static VOID __devexit rt2860_remove_one(
     IN  struct pci_dev  *pci_dev)
@@ -477,7 +462,6 @@ static VOID __devexit rt2860_remove_one(
 
 }
 
-
 /*
 ========================================================================
 Routine Description:
@@ -499,8 +483,6 @@ BOOLEAN RT28XXChipsetCheck(
 	/* always TRUE */
 	return TRUE;
 }
-
-
 
 /***************************************************************************
  *
@@ -642,8 +624,6 @@ VOID RTMPInitPCIeLinkCtrlValue(
 		MacValue |= 0x402;
 		RTMP_IO_WRITE32(pAd, AUX_CTRL, MacValue);
 		DBGPRINT_RAW(RT_DEBUG_ERROR,(" AUX_CTRL = 0x%32x\n", MacValue));
-
-
 
 		// for RT30xx F and after, PCIe infterface, and for power solution 3
 		if ((IS_VERSION_AFTER_F(pAd))

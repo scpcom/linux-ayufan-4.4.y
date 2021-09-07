@@ -45,4 +45,3 @@
 
 #define S3C64XX_GPA7_UART_nRTS1		(0x02 << 28)
 #define S3C64XX_GPA7_EINT_G1_7		(0x07 << 28)
-

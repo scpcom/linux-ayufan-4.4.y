@@ -168,7 +168,6 @@ enum {
 };
 #define QUOTA_NL_A_MAX (__QUOTA_NL_A_MAX - 1)
 
-
 #ifdef __KERNEL__
 #include <linux/list.h>
 #include <linux/mutex.h>

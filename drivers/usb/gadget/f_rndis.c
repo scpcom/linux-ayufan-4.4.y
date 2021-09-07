@@ -31,7 +31,6 @@
 #include "u_ether.h"
 #include "rndis.h"
 
-
 /*
  * This function is an RNDIS Ethernet port -- a Microsoft protocol that's
  * been promoted instead of the standard CDC Ethernet.  The published RNDIS
@@ -115,7 +114,6 @@ static unsigned int bitrate(struct usb_gadget *g)
 
 #define LOG2_STATUS_INTERVAL_MSEC	5	/* 1 << 5 == 32 msec */
 #define STATUS_BYTECOUNT		8	/* 8 bytes data */
-
 
 /* interface descriptor: */
 
@@ -452,7 +450,6 @@ invalid:
 	/* device either stalls (value < 0) or reports success */
 	return value;
 }
-
 
 static int rndis_set_alt(struct usb_function *f, unsigned intf, unsigned alt)
 {

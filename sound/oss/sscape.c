@@ -281,7 +281,6 @@ static int host_command1(struct sscape_info *devc, int cmd)
 }
 #endif /* unused */
 
-
 static int host_command2(struct sscape_info *devc, int cmd, int parm1)
 {
 	unsigned char buf[10];
@@ -1340,7 +1339,6 @@ static int __init init_ss_ms_sound(struct address_info *hw_config)
 			devc->osp,
 			THIS_MODULE);
 
- 					  
 	if (hw_config->slots[0] != -1)	/* The AD1848 driver installed itself */
 	{
 		audio_devs[hw_config->slots[0]]->coproc = &sscape_coproc_operations;

@@ -398,7 +398,6 @@ struct snd_pcm_substream {
 
 #define SUBSTREAM_BUSY(substream) ((substream)->ref_count > 0)
 
-
 struct snd_pcm_str {
 	int stream;				/* stream (direction) */
 	struct snd_pcm *pcm;
@@ -740,7 +739,6 @@ static inline const struct snd_interval *hw_param_interval_c(const struct snd_pc
 #define params_periods(p) hw_param_interval((p), SNDRV_PCM_HW_PARAM_PERIODS)->min
 #define params_buffer_size(p) hw_param_interval((p), SNDRV_PCM_HW_PARAM_BUFFER_SIZE)->min
 #define params_buffer_bytes(p) hw_param_interval((p), SNDRV_PCM_HW_PARAM_BUFFER_BYTES)->min
-
 
 int snd_interval_refine(struct snd_interval *i, const struct snd_interval *v);
 void snd_interval_mul(const struct snd_interval *a, const struct snd_interval *b, struct snd_interval *c);

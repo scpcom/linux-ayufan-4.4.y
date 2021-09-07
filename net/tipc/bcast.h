@@ -51,7 +51,6 @@ struct tipc_node_map {
 	u32 map[MAX_NODES / WSIZE];
 };
 
-
 #define PLSIZE 32
 
 /**
@@ -67,11 +66,9 @@ struct port_list {
 	u32 ports[PLSIZE];
 };
 
-
 struct tipc_node;
 
 extern const char tipc_bclink_name[];
-
 
 /**
  * nmap_add - add a node to a node map
@@ -191,7 +188,6 @@ static inline void tipc_port_list_free(struct port_list *pl_ptr)
 		kfree(item);
 	}
 }
-
 
 int  tipc_bclink_init(void);
 void tipc_bclink_stop(void);

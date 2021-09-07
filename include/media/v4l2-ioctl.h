@@ -109,7 +109,6 @@ struct v4l2_ioctl_ops {
 	int (*vidioc_qbuf)    (struct file *file, void *fh, struct v4l2_buffer *b);
 	int (*vidioc_dqbuf)   (struct file *file, void *fh, struct v4l2_buffer *b);
 
-
 	int (*vidioc_overlay) (struct file *file, void *fh, unsigned int i);
 #ifdef CONFIG_VIDEO_V4L1_COMPAT
 			/* buffer type is struct vidio_mbuf * */
@@ -243,7 +242,6 @@ struct v4l2_ioctl_ops {
 	long (*vidioc_default)	       (struct file *file, void *fh,
 					int cmd, void *arg);
 };
-
 
 /* v4l debugging and diagnostics */
 

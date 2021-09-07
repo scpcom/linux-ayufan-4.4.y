@@ -154,7 +154,6 @@
 #define	SC2RXICR		GxICR(SC2RXIRQ)	/* serial 2 receive intr ctrl reg */
 #define	SC2TXICR		GxICR(SC2TXIRQ)	/* serial 2 transmit intr ctrl reg */
 
-
 #endif /* __KERNEL__ */
 
 #endif /* _ASM_SERIAL_REGS_H */

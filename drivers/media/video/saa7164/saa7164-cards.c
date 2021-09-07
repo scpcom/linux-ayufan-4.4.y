@@ -438,7 +438,6 @@ void saa7164_card_list(struct saa7164_dev *dev)
 void saa7164_gpio_setup(struct saa7164_dev *dev)
 {
 
-
 	switch (dev->board) {
 	case SAA7164_BOARD_HAUPPAUGE_HVR2200:
 	case SAA7164_BOARD_HAUPPAUGE_HVR2200_2:
@@ -621,4 +620,3 @@ char *saa7164_unitid_name(struct saa7164_dev *dev, u8 unitid)
 
 	return undefed;
 }
-

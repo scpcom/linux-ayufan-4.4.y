@@ -327,8 +327,6 @@ extern unsigned long long cmpxchg_486_u64(volatile void *, u64, u64);
 		       : "memory");				\
 	__ret; })
 
-
-
 #define cmpxchg64_local(ptr, o, n)					\
 ({									\
 	__typeof__(*(ptr)) __ret;					\

@@ -12,7 +12,6 @@
  * warranty of any kind, whether express or implied.
  */
 
-
 #ifndef __ASSEMBLY__
 
 static inline unsigned long ixp2000_reg_read(volatile void *reg)
@@ -77,7 +76,6 @@ struct slowport_cfg {
 	unsigned long PCR;	/* Protocol Control Register */
 	unsigned long ADC;	/* Address/Data Width Control */
 };
-
 
 void ixp2000_acquire_slowport(struct slowport_cfg *, struct slowport_cfg *);
 void ixp2000_release_slowport(struct slowport_cfg *);
@@ -147,6 +145,5 @@ struct ixp2000_i2c_pins {
 	unsigned long sda_pin;
 	unsigned long scl_pin;
 };
-
 
 #endif /*  !__ASSEMBLY__ */

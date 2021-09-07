@@ -233,7 +233,6 @@ static inline void octeon_npi_write32(uint64_t address, uint32_t val)
 	cvmx_read64_uint32(address ^ 4);
 }
 
-
 /**
  * Read a 32bit value from the Octeon NPI register space
  *

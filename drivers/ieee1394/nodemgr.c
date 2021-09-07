@@ -46,7 +46,6 @@ struct nodemgr_csr_info {
 	kmemcheck_bitfield_end(flags);
 };
 
-
 /*
  * Correct the speed map entry.  This is necessary
  *  - for nodes with link speed < phy speed,
@@ -123,7 +122,6 @@ static struct csr1212_bus_ops nodemgr_csr_ops = {
 	.bus_read =	nodemgr_bus_read,
 };
 
-
 /*
  * Basically what we do here is start off retrieving the bus_info block.
  * From there will fill in some info about the node, verify it is of IEEE
@@ -194,7 +192,6 @@ static struct class nodemgr_ud_class = {
 
 static struct hpsb_highlevel nodemgr_highlevel;
 
-
 static void nodemgr_release_ud(struct device *dev)
 {
 	struct unit_directory *ud = container_of(dev, struct unit_directory, device);
@@ -216,7 +213,6 @@ static void nodemgr_release_ne(struct device *dev)
 
 	kfree(ne);
 }
-
 
 static void nodemgr_release_host(struct device *dev)
 {
@@ -255,7 +251,6 @@ struct device nodemgr_dev_template_host = {
 	.release	= nodemgr_release_host,
 };
 
-
 #define fw_attr(class, class_type, field, type, format_string)		\
 static ssize_t fw_show_##class##_##field (struct device *dev, struct device_attribute *attr, char *buf)\
 {									\
@@ -288,7 +283,6 @@ static struct device_attribute dev_attr_##class##_##td_kv = {		\
 	.show   = fw_show_##class##_##td_kv,				\
 };
 
-
 #define fw_drv_attr(field, type, format_string)			\
 static ssize_t fw_drv_show_##field (struct device_driver *drv, char *buf) \
 {								\
@@ -300,7 +294,6 @@ static struct driver_attribute driver_attr_drv_##field = {	\
 	.attr = {.name = __stringify(field), .mode = S_IRUGO },	\
 	.show   = fw_drv_show_##field,				\
 };
-
 
 static ssize_t fw_show_ne_bus_options(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -316,7 +309,6 @@ static ssize_t fw_show_ne_bus_options(struct device *dev, struct device_attribut
 		       ne->busopt.cyc_clk_acc);
 }
 static DEVICE_ATTR(bus_options,S_IRUGO,fw_show_ne_bus_options,NULL);
-
 
 #ifdef HPSB_DEBUG_TLABELS
 static ssize_t fw_show_ne_tlabels_free(struct device *dev,
@@ -334,7 +326,6 @@ static ssize_t fw_show_ne_tlabels_free(struct device *dev,
 	return sprintf(buf, "%d\n", tf);
 }
 static DEVICE_ATTR(tlabels_free,S_IRUGO,fw_show_ne_tlabels_free,NULL);
-
 
 static ssize_t fw_show_ne_tlabels_mask(struct device *dev,
 				       struct device_attribute *attr, char *buf)
@@ -357,7 +348,6 @@ static ssize_t fw_show_ne_tlabels_mask(struct device *dev,
 static DEVICE_ATTR(tlabels_mask, S_IRUGO, fw_show_ne_tlabels_mask, NULL);
 #endif /* HPSB_DEBUG_TLABELS */
 
-
 static ssize_t fw_set_ignore_driver(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct unit_directory *ud = container_of(dev, struct unit_directory, device);
@@ -379,7 +369,6 @@ static ssize_t fw_get_ignore_driver(struct device *dev, struct device_attribute 
 }
 static DEVICE_ATTR(ignore_driver, S_IWUSR | S_IRUGO, fw_get_ignore_driver, fw_set_ignore_driver);
 
-
 static ssize_t fw_set_rescan(struct bus_type *bus, const char *buf,
 			     size_t count)
 {
@@ -395,7 +384,6 @@ static ssize_t fw_get_rescan(struct bus_type *bus, char *buf)
 			"drivers by writing a 1 to this file\n");
 }
 static BUS_ATTR(rescan, S_IWUSR | S_IRUGO, fw_get_rescan, fw_set_rescan);
-
 
 static ssize_t fw_set_ignore_drivers(struct bus_type *bus, const char *buf, size_t count)
 {
@@ -414,13 +402,11 @@ static ssize_t fw_get_ignore_drivers(struct bus_type *bus, char *buf)
 }
 static BUS_ATTR(ignore_drivers, S_IWUSR | S_IRUGO, fw_get_ignore_drivers, fw_set_ignore_drivers);
 
-
 struct bus_attribute *const fw_bus_attrs[] = {
 	&bus_attr_rescan,
 	&bus_attr_ignore_drivers,
 	NULL
 };
-
 
 fw_attr(ne, struct node_entry, capabilities, unsigned int, "0x%06x\n")
 fw_attr(ne, struct node_entry, nodeid, unsigned int, "0x%04x\n")
@@ -445,8 +431,6 @@ static struct device_attribute *const fw_ne_attrs[] = {
 #endif
 };
 
-
-
 fw_attr(ud, struct unit_directory, address, unsigned long long, "0x%016Lx\n")
 fw_attr(ud, struct unit_directory, length, int, "%d\n")
 /* These are all dependent on the value being provided */
@@ -462,7 +446,6 @@ static struct device_attribute *const fw_ud_attrs[] = {
 	&dev_attr_ud_length,
 	&dev_attr_ignore_driver,
 };
-
 
 fw_attr(host, struct hpsb_host, node_count, int, "%d\n")
 fw_attr(host, struct hpsb_host, selfid_count, int, "%d\n")
@@ -483,7 +466,6 @@ static struct device_attribute *const fw_host_attrs[] = {
 	&dev_attr_host_is_irm,
 	&dev_attr_host_is_busmgr,
 };
-
 
 static ssize_t fw_show_drv_device_ids(struct device_driver *drv, char *buf)
 {
@@ -537,14 +519,12 @@ static ssize_t fw_show_drv_device_ids(struct device_driver *drv, char *buf)
 }
 static DRIVER_ATTR(device_ids,S_IRUGO,fw_show_drv_device_ids,NULL);
 
-
 fw_drv_attr(name, const char *, "%s\n")
 
 static struct driver_attribute *const fw_drv_attrs[] = {
 	&driver_attr_drv_name,
 	&driver_attr_device_ids,
 };
-
 
 static void nodemgr_create_drv_files(struct hpsb_protocol_driver *driver)
 {
@@ -559,7 +539,6 @@ fail:
 	HPSB_ERR("Failed to add sysfs attribute");
 }
 
-
 static void nodemgr_remove_drv_files(struct hpsb_protocol_driver *driver)
 {
 	struct device_driver *drv = &driver->driver;
@@ -568,7 +547,6 @@ static void nodemgr_remove_drv_files(struct hpsb_protocol_driver *driver)
 	for (i = 0; i < ARRAY_SIZE(fw_drv_attrs); i++)
 		driver_remove_file(drv, fw_drv_attrs[i]);
 }
-
 
 static void nodemgr_create_ne_dev_files(struct node_entry *ne)
 {
@@ -583,7 +561,6 @@ fail:
 	HPSB_ERR("Failed to add sysfs attribute");
 }
 
-
 static void nodemgr_create_host_dev_files(struct hpsb_host *host)
 {
 	struct device *dev = &host->device;
@@ -596,7 +573,6 @@ static void nodemgr_create_host_dev_files(struct hpsb_host *host)
 fail:
 	HPSB_ERR("Failed to add sysfs attribute");
 }
-
 
 static struct node_entry *find_entry_by_nodeid(struct hpsb_host *host,
 					       nodeid_t nodeid);
@@ -657,7 +633,6 @@ fail:
 	HPSB_ERR("Failed to add sysfs attribute");
 }
 
-
 static int nodemgr_bus_match(struct device * dev, struct device_driver * drv)
 {
 	struct hpsb_protocol_driver *driver;
@@ -704,7 +679,6 @@ static int nodemgr_bus_match(struct device * dev, struct device_driver * drv)
 	return 0;
 }
 
-
 static DEFINE_MUTEX(nodemgr_serialize_remove_uds);
 
 static int match_ne(struct device *dev, void *data)
@@ -737,7 +711,6 @@ static void nodemgr_remove_uds(struct node_entry *ne)
 	}
 	mutex_unlock(&nodemgr_serialize_remove_uds);
 }
-
 
 static void nodemgr_remove_ne(struct node_entry *ne)
 {
@@ -773,7 +746,6 @@ static void nodemgr_remove_host_dev(struct device *dev)
 	sysfs_remove_link(&dev->kobj, "host_id");
 }
 
-
 static void nodemgr_update_bus_options(struct node_entry *ne)
 {
 #ifdef CONFIG_IEEE1394_VERBOSEDEBUG
@@ -800,7 +772,6 @@ static void nodemgr_update_bus_options(struct node_entry *ne)
 		     mr[ne->busopt.max_rom],
 		     ne->busopt.generation, ne->busopt.lnkspd);
 }
-
 
 static struct node_entry *nodemgr_create_node(octlet_t guid,
 				struct csr1212_csr *csr, struct hpsb_host *host,
@@ -919,7 +890,6 @@ static struct node_entry *find_entry_by_nodeid(struct hpsb_host *host,
 	return ne;
 }
 
-
 static void nodemgr_register_device(struct node_entry *ne, 
 	struct unit_directory *ud, struct device *parent)
 {
@@ -949,7 +919,6 @@ fail_classdevreg:
 fail_devreg:
 	HPSB_ERR("Failed to create unit %s", dev_name(&ud->device));
 }	
-
 
 /* This implementation currently only scans the config rom and its
  * immediate unit directories looking for software_id and
@@ -1104,7 +1073,6 @@ unit_directory_error:
 	return NULL;
 }
 
-
 static void nodemgr_process_root_directory(struct node_entry *ne)
 {
 	unsigned int ud_id = 0;
@@ -1207,7 +1175,6 @@ static int nodemgr_uevent(struct device *dev, struct kobj_uevent_env *env)
 
 #endif /* CONFIG_HOTPLUG */
 
-
 int __hpsb_register_protocol(struct hpsb_protocol_driver *drv,
 			     struct module *owner)
 {
@@ -1231,7 +1198,6 @@ void hpsb_unregister_protocol(struct hpsb_protocol_driver *driver)
 	 * is attached to. */
 	driver_unregister(&driver->driver);
 }
-
 
 /*
  * This function updates nodes that were present on the bus before the
@@ -1351,7 +1317,6 @@ static void nodemgr_node_scan_one(struct hpsb_host *host,
 		nodemgr_update_node(ne, csr, nodeid, generation);
 }
 
-
 static void nodemgr_node_scan(struct hpsb_host *host, int generation)
 {
 	int count;
@@ -1440,7 +1405,6 @@ static void nodemgr_irm_write_bc(struct node_entry *ne, int generation)
 	    bc_remote != bc_local)
 		hpsb_node_write(ne, bc_addr, &bc_local, sizeof(bc_local));
 }
-
 
 static void nodemgr_probe_ne(struct hpsb_host *host, struct node_entry *ne,
 			     int generation)

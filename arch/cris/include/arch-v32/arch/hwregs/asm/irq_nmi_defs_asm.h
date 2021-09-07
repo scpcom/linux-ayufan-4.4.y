@@ -60,7 +60,6 @@
 #define reg_irq_nmi_rw_cmd___op___width 2
 #define reg_irq_nmi_rw_cmd_offset 0
 
-
 /* Constants */
 #define regk_irq_nmi_ack_irq                      0x00000002
 #define regk_irq_nmi_ack_nmi                      0x00000003

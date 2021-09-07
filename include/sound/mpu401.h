@@ -117,7 +117,6 @@ struct snd_mpu401 {
 /* read MPU401D() */
 #define MPU401_ACK		0xfe
 
-
 /*
 
  */

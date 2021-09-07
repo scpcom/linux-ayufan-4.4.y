@@ -92,8 +92,6 @@ static void lock_adapter_irq(spinlock_t *lock, unsigned long *smp_flags)
 static void unlock_adapter_irq(spinlock_t *lock, unsigned long *smp_flags)
 	__releases(lock);
 
-
-
 /*
  *	Global Data
  */
@@ -161,7 +159,6 @@ module_exit(wanrouter_cleanup);
  * 	Context:	process
  */
 
-
 int register_wan_device(struct wan_device *wandev)
 {
 	int err, namelen;
@@ -217,7 +214,6 @@ int register_wan_device(struct wan_device *wandev)
  *	Context:	process
  */
 
-
 int unregister_wan_device(char *name)
 {
 	struct wan_device *wandev, *prev;
@@ -261,7 +257,6 @@ int unregister_wan_device(char *name)
  *	1. This function may be called on interrupt context.
  */
 
-
 int wanrouter_encapsulate(struct sk_buff *skb, struct net_device *dev,
 			  unsigned short type)
 {
@@ -294,7 +289,6 @@ int wanrouter_encapsulate(struct sk_buff *skb, struct net_device *dev,
 	return hdr_len;
 }
 
-
 /*
  *	Decapsulate packet.
  *
@@ -304,7 +298,6 @@ int wanrouter_encapsulate(struct sk_buff *skb, struct net_device *dev,
  *	Notes:
  *	1. This function may be called on interrupt context.
  */
-
 
 __be16 wanrouter_type_trans(struct sk_buff *skb, struct net_device *dev)
 {
@@ -644,7 +637,6 @@ out:
 	return err;
 }
 
-
 /*
  *	Delete WAN logical channel.
  *	 o verify user address space
@@ -770,7 +762,6 @@ static void lock_adapter_irq(spinlock_t *lock, unsigned long *smp_flags)
 {
 	spin_lock_irqsave(lock, *smp_flags);
 }
-
 
 static void unlock_adapter_irq(spinlock_t *lock, unsigned long *smp_flags)
 	__releases(lock)

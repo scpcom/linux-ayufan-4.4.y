@@ -42,8 +42,6 @@
  *
  */
 
-
-
 /** @file
  * Handles registration of extensible "interfaces" with the resource
  * manager, so that the RM can organize requests from differing sources
@@ -51,7 +49,6 @@
 
 #include "../common/xwcRMinterface.h"
 #include "t23xrmInternal.h"
-
 
 extern RMinterfaceCtx ifCtx;
 
@@ -85,8 +82,6 @@ RMstatus xwcRMregisterInterface(uint8_t         *intname,
     return RM_OK;
 }
 
-
-
 /**
  * Deregister an interface from the resource manager
  * @param *regdesc
@@ -106,7 +101,6 @@ RMstatus xwcRMderegisterInterface(RMinterfaceCtx *regdesc)
     /* Is pointer mis-specified? */
     if (regdesc == NULL)
         return RM_BAD_DEREGISTRATION_RQ;
-
 
     /*
      * As of this release, this does nothing. If cancellation

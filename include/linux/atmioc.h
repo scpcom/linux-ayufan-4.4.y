@@ -2,12 +2,10 @@
  
 /* Written 1995-1999 by Werner Almesberger, EPFL LRC/ICA */
 
-
 /*
  * See http://icawww1.epfl.ch/linux-atm/magic.html for the complete list of
  * "magic" ioctl numbers.
  */
-
 
 #ifndef _LINUX_ATMIOC_H
 #define _LINUX_ATMIOC_H

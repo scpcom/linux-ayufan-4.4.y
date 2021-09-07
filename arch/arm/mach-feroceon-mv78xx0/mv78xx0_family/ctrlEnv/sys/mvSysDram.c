@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 /* includes */
 
 #include "ddr2/mvDramIf.h"
@@ -219,7 +218,6 @@ MV_STATUS mvDramIfWinGet(MV_U32 cpu, MV_TARGET target, MV_DRAM_DEC_WIN *pAddrDec
 	pAddrDecWin->addrWin.baseLow = baseReg & SCBAR_BASE_MASK;
 
 	pAddrDecWin->addrWin.baseHigh =  0;
-
 
 	if (sizeReg & SCSR_WIN_EN)
 	{
@@ -395,4 +393,3 @@ MV_VOID mvDramIfSlaveCpuWinInit(MV_VOID)
 	MV_REG_WRITE(SDRAM_SIZE_REG(0, SDRAM_CS3), 0);
 }
 #endif
-

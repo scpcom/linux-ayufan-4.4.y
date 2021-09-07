@@ -93,7 +93,6 @@ void show_mem(void)
 	printk(KERN_INFO "%d free buffer pages\n", nr_free_buffer_pages());
 }
 
-
 /* physical address where the bootmem map is located */
 unsigned long bootmap_start;
 

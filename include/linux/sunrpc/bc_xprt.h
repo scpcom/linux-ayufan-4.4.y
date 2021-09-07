@@ -46,4 +46,3 @@ static inline int xprt_setup_backchannel(struct rpc_xprt *xprt,
 }
 #endif /* CONFIG_NFS_V4_1 */
 #endif /* _LINUX_SUNRPC_BC_XPRT_H */
-

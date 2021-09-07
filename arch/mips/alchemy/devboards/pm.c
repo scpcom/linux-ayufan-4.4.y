@@ -19,7 +19,6 @@
  * is to trigger a wakeup.
  */
 
-
 static unsigned long db1x_pm_sleep_secs;
 static unsigned long db1x_pm_wakemsk;
 static unsigned long db1x_pm_last_wakesrc;

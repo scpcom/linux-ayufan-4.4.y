@@ -49,7 +49,6 @@ static void ac3_dma_done_tasklet(unsigned long data);
 static void hcca_dma_done_tasklet(unsigned long data);
 static void fifo_statistic_full_tasklet(unsigned long data);
 
-
 /*---------------------------------------------------------------------*/
 /* Symbol & Macro Definitions                                          */
 /*---------------------------------------------------------------------*/
@@ -87,7 +86,6 @@ static int __init rt2860_init_module(void);
 static int rt2860_suspend(struct pci_dev *pci_dev, pm_message_t state);
 static int rt2860_resume(struct pci_dev *pci_dev);
 #endif // CONFIG_PM //
-
 
 //
 // Ralink PCI device table, include all supported chipsets
@@ -131,7 +129,6 @@ static struct pci_driver rt2860_driver =
 #endif
 };
 
-
 #ifdef CONFIG_PM
 
 VOID RT2860RejectPendingPackets(
@@ -148,7 +145,6 @@ static int rt2860_suspend(
 	struct net_device *net_dev = pci_get_drvdata(pci_dev);
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER)NULL;
 	INT32 retval;
-
 
 	DBGPRINT(RT_DEBUG_TRACE, ("===> rt2860_suspend()\n"));
 
@@ -206,7 +202,6 @@ static int rt2860_resume(
 	struct net_device *net_dev = pci_get_drvdata(pci_dev);
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER)NULL;
 	INT32 retval;
-
 
 	// set the power state of a PCI device
 	// PCI has 4 power states, DO (normal) ~ D3(less power)
@@ -273,12 +268,10 @@ static int rt2860_resume(
 }
 #endif // CONFIG_PM //
 
-
 static INT __init rt2860_init_module(VOID)
 {
 	return pci_register_driver(&rt2860_driver);
 }
-
 
 //
 // Driver module unload function
@@ -290,7 +283,6 @@ static VOID __exit rt2860_cleanup_module(VOID)
 
 module_init(rt2860_init_module);
 module_exit(rt2860_cleanup_module);
-
 
 static INT __devinit rt2860_init_one (
     IN  struct pci_dev              *pci_dev,
@@ -313,7 +305,6 @@ static INT __devinit rt2860_init_one (
     DBGPRINT(RT_DEBUG_TRACE, ("<=== rt2860_init_one\n"));
     return rc;
 }
-
 
 static VOID __devexit rt2860_remove_one(
     IN  struct pci_dev  *pci_dev)
@@ -367,7 +358,6 @@ static INT __devinit   rt2860_probe(
 	return rv;
 }
 
-
 void init_thread_task(IN PRTMP_ADAPTER pAd)
 {
 	POS_COOKIE pObj;
@@ -402,7 +392,6 @@ void kill_thread_task(IN PRTMP_ADAPTER pAd)
 	tasklet_kill(&pObj->fifo_statistic_full_task);
 }
 
-
 static void rt2860_int_enable(PRTMP_ADAPTER pAd, unsigned int mode)
 {
 	u32 regValue;
@@ -414,7 +403,6 @@ static void rt2860_int_enable(PRTMP_ADAPTER pAd, unsigned int mode)
 	if (regValue != 0)
 		RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_ACTIVE);
 }
-
 
 static void rt2860_int_disable(PRTMP_ADAPTER pAd, unsigned int mode)
 {
@@ -550,7 +538,6 @@ static void hcca_dma_done_tasklet(unsigned long data)
 		return;
 
     pObj = (POS_COOKIE) pAd->OS_Cookie;
-
 
 	IntSource.word = 0;
 	IntSource.field.HccaDmaDone = 1;
@@ -723,7 +710,6 @@ static void ac0_dma_done_tasklet(unsigned long data)
 	RTMP_INT_UNLOCK(&pAd->irq_lock, flags);
 }
 
-
 int print_int_count;
 
 IRQ_HANDLE_TYPE
@@ -737,12 +723,10 @@ rt2860_interrupt(int irq, void *dev_instance)
 
 	pObj = (POS_COOKIE) pAd->OS_Cookie;
 
-
 	/* Note 03312008: we can not return here before
 		RTMP_IO_READ32(pAd, INT_SOURCE_CSR, &IntSource.word);
 		RTMP_IO_WRITE32(pAd, INT_SOURCE_CSR, IntSource.word);
 		Or kernel will panic after ifconfig ra0 down sometimes */
-
 
 	//
 	// Inital the Interrupt source.
@@ -948,7 +932,6 @@ BOOLEAN RT28XXChipsetCheck(
 	return TRUE;
 }
 
-
 /*
 ========================================================================
 Routine Description:
@@ -974,7 +957,6 @@ BOOLEAN RT28XXNetDevInit(
 	struct pci_dev *pci_dev = (struct pci_dev *)_dev_p;
     const CHAR	*print_name;
     ULONG	csr_addr;
-
 
 	print_name = pci_dev ? pci_name(pci_dev) : "rt2860";
 
@@ -1014,7 +996,6 @@ BOOLEAN RT28XXNetDevInit(
 			(ULONG)csr_addr, pci_dev->irq));
 	return TRUE;
 
-
 	/* --------------------------- ERROR HANDLE --------------------------- */
 err_out_free_res:
     pci_release_regions(pci_dev);
@@ -1022,7 +1003,6 @@ err_out_free_netdev:
 	/* free netdev in caller, not here */
 	return FALSE;
 }
-
 
 /*
 ========================================================================
@@ -1049,7 +1029,6 @@ BOOLEAN RT28XXProbePostConfig(
 	return TRUE;
 }
 
-
 /*
 ========================================================================
 Routine Description:
@@ -1069,13 +1048,11 @@ VOID RT28XXDMADisable(
 {
 	WPDMA_GLO_CFG_STRUC     GloCfg;
 
-
 	RTMP_IO_READ32(pAd, WPDMA_GLO_CFG, &GloCfg.word);
 	GloCfg.word &= 0xff0;
 	GloCfg.field.EnTXWriteBackDDONE =1;
 	RTMP_IO_WRITE32(pAd, WPDMA_GLO_CFG, GloCfg.word);
 }
-
 
 /*
 ========================================================================
@@ -1316,4 +1293,3 @@ void linux_pci_unmap_single(void *handle, dma_addr_t dma_addr, size_t size, int 
 	pci_unmap_single(pObj->pci_dev, dma_addr, size, direction);
 
 }
-

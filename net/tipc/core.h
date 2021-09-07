@@ -164,7 +164,6 @@ void tipc_dump_dbg(struct print_buf *, const char *fmt, ...);
 
 #endif
 
-
 /*
  * TIPC-specific error codes
  */
@@ -195,7 +194,6 @@ extern int tipc_random;
 extern const char tipc_alphabet[];
 extern atomic_t tipc_user_count;
 
-
 /*
  * Routines available to privileged subsystems
  */
@@ -219,7 +217,6 @@ static inline int delimit(int val, int min, int max)
 		return min;
 	return val;
 }
-
 
 /*
  * TIPC timer and signal code
@@ -299,7 +296,6 @@ static inline void k_term_timer(struct timer_list *timer)
 	dbg("terminating timer %p\n", timer);
 }
 
-
 /*
  * TIPC message buffer code
  *
@@ -317,7 +313,6 @@ struct tipc_skb_cb {
 };
 
 #define TIPC_SKB_CB(__skb) ((struct tipc_skb_cb *)&((__skb)->cb[0]))
-
 
 static inline struct tipc_msg *buf_msg(struct sk_buff *skb)
 {

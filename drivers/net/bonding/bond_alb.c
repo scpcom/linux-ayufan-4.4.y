@@ -44,7 +44,6 @@
 #include "bonding.h"
 #include "bond_alb.h"
 
-
 #define ALB_TIMER_TICKS_PER_SEC	    10	/* should be a divisor of HZ */
 #define BOND_TLB_REBALANCE_INTERVAL 10	/* In seconds, periodic re-balancing.
 					 * Used for division - never set
@@ -64,7 +63,6 @@
 				 * Note that this value MUST NOT be smaller
 				 * because the key hash table is BYTE wide !
 				 */
-
 
 #define TLB_NULL_INDEX		0xffffffff
 #define MAX_LP_BURST		3

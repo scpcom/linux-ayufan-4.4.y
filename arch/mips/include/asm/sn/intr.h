@@ -61,7 +61,6 @@ do {								\
  *	L7 = Count/Compare (T5 counters)
  */
 
-
 /*
  * INT_PEND0 hard-coded bits.
  */

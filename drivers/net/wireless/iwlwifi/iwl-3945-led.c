@@ -105,8 +105,6 @@ static int iwl_send_led_cmd(struct iwl_priv *priv,
 	return iwl_send_cmd(priv, &cmd);
 }
 
-
-
 /* Set led on command */
 static int iwl3945_led_pattern(struct iwl_priv *priv, int led_id,
 			       unsigned int idx)
@@ -123,7 +121,6 @@ static int iwl3945_led_pattern(struct iwl_priv *priv, int led_id,
 
 	return iwl_send_led_cmd(priv, &led_cmd);
 }
-
 
 /* Set led on command */
 static int iwl3945_led_on(struct iwl_priv *priv, int led_id)
@@ -178,7 +175,6 @@ static int iwl3945_led_associated(struct iwl_priv *priv, int led_id)
 	if (test_bit(STATUS_EXIT_PENDING, &priv->status) ||
 	    !test_bit(STATUS_READY, &priv->status))
 		return 0;
-
 
 	/* start counting Tx/Rx bytes */
 	if (!priv->last_blink_time && priv->allow_blinking)
@@ -251,7 +247,6 @@ static int iwl3945_led_register_led(struct iwl_priv *priv,
 	return 0;
 }
 
-
 /*
  * calculate blink rate according to last 2 sec Tx/Rx activities
  */
@@ -318,7 +313,6 @@ void iwl3945_led_background(struct iwl_priv *priv)
 	priv->last_blink_rate = blink_idx;
 	priv->rxtxpackets = 0;
 }
-
 
 /* Register all led handler */
 int iwl3945_led_register(struct iwl_priv *priv)
@@ -403,7 +397,6 @@ exit_fail:
 	iwl3945_led_unregister(priv);
 	return ret;
 }
-
 
 /* unregister led class */
 static void iwl3945_led_unregister_led(struct iwl_led *led, u8 set_led)

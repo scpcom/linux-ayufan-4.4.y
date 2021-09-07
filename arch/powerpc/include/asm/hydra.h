@@ -53,7 +53,6 @@ struct Hydra {
 
 extern volatile struct Hydra __iomem *Hydra;
 
-
     /*
      *  Feature Control Register
      */
@@ -67,7 +66,6 @@ extern volatile struct Hydra __iomem *Hydra;
 #define HYDRA_FC_MPIC_ENABLE	0x00000040	/* Enable OpenPIC */
 #define HYDRA_FC_SLOW_SCC_PCLK	0x00000080	/* 1=15.6672, 0=25 MHz */
 #define HYDRA_FC_MPIC_IS_MASTER	0x00000100	/* OpenPIC Master Mode */
-
 
     /*
      *  OpenPIC Interrupt Sources

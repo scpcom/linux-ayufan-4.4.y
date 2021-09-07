@@ -176,5 +176,3 @@ bfa_fcs_rport_set_speed(struct bfa_fcs_rport_s *rport,
 	if (rport->rpf.rpsc_speed == BFA_PPORT_SPEED_UNKNOWN)
 		bfa_rport_speed(rport->bfa_rport, speed);
 }
-
-

@@ -340,7 +340,6 @@ iser_check_xmit(struct iscsi_conn *conn, void *task)
 	return 0;
 }
 
-
 /**
  * iser_send_command - send command PDU
  */
@@ -483,7 +482,6 @@ int iser_send_data_out(struct iscsi_conn *conn,
 	}
 	iser_dbg("data-out itt: %d, offset: %ld, sz: %ld\n",
 		 itt, buf_offset, data_seg_len);
-
 
 	err = iser_post_send(tx_desc);
 	if (!err)
@@ -738,4 +736,3 @@ void iser_dto_buffs_release(struct iser_dto *dto)
 	for (i = 0; i < dto->regd_vector_len; i++)
 		iser_regd_buff_release(dto->regd[i]);
 }
-

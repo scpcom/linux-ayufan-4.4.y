@@ -124,8 +124,6 @@ static inline int radeon_apply_workarounds(struct radeonfb_info *rinfo)
 }
 #endif /* defined(CONFIG_PM) && defined(CONFIG_X86) */
 
-
-
 static void radeon_pm_disable_dynamic_mode(struct radeonfb_info *rinfo)
 {
 	u32 tmp;
@@ -495,7 +493,6 @@ static void radeon_pm_enable_dynamic_mode(struct radeonfb_info *rinfo)
 		radeon_msleep(15);
 	}
 	
-
 	/* RV200::A11 A12, RV250::A11 A12 */
 	if (((rinfo->family == CHIP_FAMILY_RV200) ||
 	     (rinfo->family == CHIP_FAMILY_RV250)) &&
@@ -877,7 +874,6 @@ static void radeon_pm_setup_for_suspend(struct radeonfb_info *rinfo)
 
 	OUTPLL(pllSCLK_MORE_CNTL, sclk_more_cntl);		
 
-	
 	mclk_cntl = INPLL( pllMCLK_CNTL);
 	mclk_cntl &= ~(	MCLK_CNTL__FORCE_MCLKA |
 			MCLK_CNTL__FORCE_MCLKB |
@@ -893,7 +889,6 @@ static void radeon_pm_setup_for_suspend(struct radeonfb_info *rinfo)
 			   | VCLK_ECP_CNTL__PIXCLK_DAC_ALWAYS_ONb);
 	vclk_ecp_cntl |= VCLK_ECP_CNTL__ECP_FORCE_ON;
 	OUTPLL( pllVCLK_ECP_CNTL, vclk_ecp_cntl);
-	
 	
 	pixclks_cntl = INPLL( pllPIXCLKS_CNTL);
 	pixclks_cntl &= ~(	PIXCLKS_CNTL__PIXCLK_GV_ALWAYS_ONb | 
@@ -988,7 +983,6 @@ static void radeon_pm_setup_for_suspend(struct radeonfb_info *rinfo)
 	tmp = INPLL( pllPLL_PWRMGT_CNTL) & ~PLL_PWRMGT_CNTL__PM_MODE_SEL;
 	OUTPLL( pllPLL_PWRMGT_CNTL, tmp);
 
-
 	disp_mis_cntl = INREG(DISP_MISC_CNTL);
 	
 	disp_mis_cntl &= ~(	DISP_MISC_CNTL__SOFT_RESET_GRPH_PP | 
@@ -1033,7 +1027,6 @@ static void radeon_pm_setup_for_suspend(struct radeonfb_info *rinfo)
 	clk_pin_cntl 	= INPLL( pllCLK_PIN_CNTL);
 	disp_pwr_man	= INREG(DISP_PWR_MAN);
 		
-	
 	/* D2 */
 	clk_pwrmgt_cntl |= CLK_PWRMGT_CNTL__DISP_PM;
 	pll_pwrmgt_cntl |= PLL_PWRMGT_CNTL__MOBILE_SU | PLL_PWRMGT_CNTL__SU_SCLK_USE_BCLK;
@@ -1142,7 +1135,6 @@ static void radeon_pm_m10_program_mode_wait(struct radeonfb_info *rinfo)
 	}
 }
 
-
 static void radeon_pm_enable_dll(struct radeonfb_info *rinfo)
 {  
 #define DLL_RESET_DELAY 	5
@@ -1184,7 +1176,6 @@ static void radeon_pm_enable_dll(struct radeonfb_info *rinfo)
 	ckb &= ~(MDLL_RDCKB__MRDCKB0_RESET | MDLL_RDCKB__MRDCKB1_RESET);
 	OUTPLL(pllMDLL_RDCKB, ckb);
 	mdelay(DLL_RESET_DELAY);
-
 
 #undef DLL_RESET_DELAY
 #undef DLL_SLEEP_DELAY
@@ -1240,7 +1231,6 @@ static void radeon_pm_enable_dll_m10(struct radeonfb_info *rinfo)
 #undef DLL_SLEEP_DELAY
 }
 
-
 static void radeon_pm_full_reset_sdram(struct radeonfb_info *rinfo)
 {
 	u32 crtcGenCntl, crtcGenCntl2, memRefreshCntl, crtc_more_cntl,
@@ -1253,7 +1243,6 @@ static void radeon_pm_full_reset_sdram(struct radeonfb_info *rinfo)
 	fp_gen_cntl 	= INREG( FP_GEN_CNTL);
 	fp2_gen_cntl 	= INREG( FP2_GEN_CNTL);
  
-
 	OUTREG( CRTC_MORE_CNTL, 0);
 	OUTREG( FP_GEN_CNTL, 0);
 	OUTREG( FP2_GEN_CNTL,0);
@@ -2772,7 +2761,6 @@ int radeonfb_pci_resume(struct pci_dev *pdev)
 	 */
 	pmac_resume_agp_for_card(pdev);
 #endif /* CONFIG_PPC_PMAC */
-
 
 	/* Check status of dynclk */
 	if (rinfo->dynclk == 1)

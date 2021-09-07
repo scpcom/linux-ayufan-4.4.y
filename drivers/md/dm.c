@@ -2727,7 +2727,6 @@ int dm_active_set(struct mapped_device *md, int value)
 	md->blActive = value;
 	spin_unlock(&md->ActLock);
 
-
 	map = dm_get_table(md);
 	if (map) {
 		list_for_each_entry (dd, dm_table_get_devices(map), list) {
@@ -2749,7 +2748,6 @@ int dm_active_set(struct mapped_device *md, int value)
 		}
 	}
 	dm_table_put(map);
-
 
 	return 0;
 }

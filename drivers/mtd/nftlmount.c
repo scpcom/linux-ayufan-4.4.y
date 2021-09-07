@@ -145,7 +145,6 @@ static int find_boot_record(struct NFTLrecord *nftl)
 			/* Mark this boot record (NFTL MediaHeader) block as reserved */
 			nftl->ReplUnitTable[block] = BLOCK_RESERVED;
 
-
 			boot_record_count++;
 			continue;
 		}

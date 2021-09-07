@@ -50,7 +50,6 @@
 #include <sound/initval.h>
 #include "hda_codec.h"
 
-
 static int index[SNDRV_CARDS] = SNDRV_DEFAULT_IDX;
 static char *id[SNDRV_CARDS] = SNDRV_DEFAULT_STR;
 static int enable[SNDRV_CARDS] = SNDRV_DEFAULT_ENABLE_PNP;
@@ -882,7 +881,6 @@ static int azx_reset(struct azx *chip)
 	return 0;
 }
 
-
 /*
  * Lowlevel interface
  */  
@@ -968,7 +966,6 @@ static void azx_stream_stop(struct azx *chip, struct azx_dev *azx_dev)
 	azx_writeb(chip, INTCTL,
 		   azx_readb(chip, INTCTL) & ~(1 << azx_dev->index));
 }
-
 
 /*
  * reset and start the controller registers
@@ -1058,7 +1055,6 @@ static void azx_init_pci(struct azx *chip)
         }
 }
 
-
 static int azx_position_ok(struct azx *chip, struct azx_dev *azx_dev);
 
 /*
@@ -1118,7 +1114,6 @@ static irqreturn_t azx_interrupt(int irq, void *dev_id)
 	
 	return IRQ_HANDLED;
 }
-
 
 /*
  * set up a BDL entry
@@ -1427,7 +1422,6 @@ static int __devinit azx_codec_configure(struct azx *chip)
 	}
 	return 0;
 }
-
 
 /*
  * PCM support
@@ -1999,7 +1993,6 @@ static int __devinit azx_mixer_create(struct azx *chip)
 	return snd_hda_build_controls(chip->bus);
 }
 
-
 /*
  * initialize SD streams
  */
@@ -2041,7 +2034,6 @@ static int azx_acquire_irq(struct azx *chip, int do_disconnect)
 	pci_intx(chip->pci, !chip->msi);
 	return 0;
 }
-
 
 static void azx_stop_chip(struct azx *chip)
 {
@@ -2153,7 +2145,6 @@ static int azx_resume(struct pci_dev *pci)
 	return 0;
 }
 #endif /* CONFIG_PM */
-
 
 /*
  * reboot notifier for hang-up problem at power-down
@@ -2350,7 +2341,6 @@ static void __devinit check_msi(struct azx *chip)
 		chip->msi = 0;
 	}
 }
-
 
 /*
  * constructor

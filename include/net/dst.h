@@ -78,7 +78,6 @@ struct dst_entry
 	__u32			__pad2;
 #endif
 
-
 	/*
 	 * Align __refcnt to a 64 bytes alignment
 	 * (L1_CACHE_SIZE would be too much)

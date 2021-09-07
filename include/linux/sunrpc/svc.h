@@ -6,7 +6,6 @@
  * Copyright (C) 1995, 1996 Olaf Kirch <okir@monad.swb.de>
  */
 
-
 #ifndef SUNRPC_SVC_H
 #define SUNRPC_SVC_H
 

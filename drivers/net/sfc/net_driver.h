@@ -302,7 +302,6 @@ struct efx_buffer {
 	unsigned int len;
 };
 
-
 /* Flags for channel->used_flags */
 #define EFX_USED_BY_RX 1
 #define EFX_USED_BY_TX 2
@@ -399,7 +398,6 @@ struct efx_blinker {
 	bool resubmit;
 	struct timer_list timer;
 };
-
 
 /**
  * struct efx_board - board information
@@ -972,7 +970,6 @@ static inline void clear_bit_le(unsigned nr, unsigned char *addr)
 	addr[nr / 8] &= ~(1 << (nr % 8));
 }
 
-
 /**
  * EFX_MAX_FRAME_LEN - calculate maximum frame length
  *
@@ -992,6 +989,5 @@ static inline void clear_bit_le(unsigned nr, unsigned char *addr)
  */
 #define EFX_MAX_FRAME_LEN(mtu) \
 	((((mtu) + ETH_HLEN + VLAN_HLEN + 4/* FCS */ + 7) & ~7) + 16)
-
 
 #endif /* EFX_NET_DRIVER_H */

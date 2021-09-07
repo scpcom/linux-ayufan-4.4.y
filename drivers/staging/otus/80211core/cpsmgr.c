@@ -728,4 +728,3 @@ void zfPowerSavingMgrPreTBTTInterrupt(zdev_t *dev)
 }
 
 /* Leave an empty line below to remove warning message on some compiler */
-

@@ -158,4 +158,3 @@ int wl1251_ps_set_mode(struct wl1251 *wl, enum wl1251_cmd_ps_mode mode)
 
 	return ret;
 }
-

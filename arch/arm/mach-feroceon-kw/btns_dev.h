@@ -34,4 +34,3 @@ struct btns_platform_data {
 };
 
 #endif /* _BTNS_DEV_H_ */
-

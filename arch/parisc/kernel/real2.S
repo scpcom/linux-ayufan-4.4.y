@@ -15,7 +15,6 @@
 
 #include <linux/linkage.h>
 
-
 	.section	.bss
 
 	.export pdc_result
@@ -46,7 +45,6 @@ real64_stack:
 save_cr_space:
 	.block	REG_SZ * N_SAVED_REGS
 save_cr_end:
-
 
 /************************ 32-bit real-mode calls ***********************/
 /* This can be called in both narrow and wide kernels */
@@ -120,7 +118,6 @@ ric_ret:
 	bv	0(%rp)
 	nop
 ENDPROC(real32_call_asm)
-
 
 #  define PUSH_CR(r, where) mfctl r, %r1 ! STREG,ma %r1, REG_SZ(where)
 #  define POP_CR(r, where) LDREG,mb -REG_SZ(where), %r1 ! mtctl %r1, r
@@ -301,4 +298,3 @@ ENTRY(__canonicalize_funcptr_for_compare)
 #endif
 	copy %r26,%r28
 ENDPROC(__canonicalize_funcptr_for_compare)
-

@@ -149,7 +149,6 @@ enum {
 	MAX_COMMAND_STATUS		= 0xff
 };
 
-
 /*
  * CMD_READ_MEMORY
  *
@@ -337,7 +336,6 @@ struct wl1271_cmd_set_keys {
 	u16 ac_seq_num16[NUM_ACCESS_CATEGORIES_COPY];
 	u32 ac_seq_num32[NUM_ACCESS_CATEGORIES_COPY];
 } __attribute__ ((packed));
-
 
 #define WL1271_SCAN_MAX_CHANNELS       24
 #define WL1271_SCAN_DEFAULT_TAG        1

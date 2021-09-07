@@ -1599,7 +1599,6 @@ static inline void emu_store_regd(int reg) {
 		: "1");
 }
 
-
 static inline void emu_store_rege(int reg) {
 	if ((reg&9) != 0)	/* test if reg in {0,2,4,6} */
                 return;

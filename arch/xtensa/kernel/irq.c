@@ -155,7 +155,6 @@ static int xtensa_irq_retrigger(unsigned int irq)
 	return 1;
 }
 
-
 static struct irq_chip xtensa_irq_chip = {
 	.name		= "xtensa",
 	.enable		= xtensa_irq_enable,

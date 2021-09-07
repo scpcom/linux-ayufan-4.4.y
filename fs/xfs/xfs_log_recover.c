@@ -57,7 +57,6 @@ STATIC void	xlog_recover_check_summary(xlog_t *);
 #define	xlog_recover_check_summary(log)
 #endif
 
-
 /*
  * Sector aligned buffer routines for buffer create/read/write/access
  */
@@ -111,7 +110,6 @@ xlog_align(
 		BBTOB(nbblks + (blk_no & log->l_sectbb_mask)));
 	return ptr;
 }
-
 
 /*
  * nbblks should be uint, but oh well.  Just want to catch that 32-bit length.
@@ -2747,7 +2745,6 @@ xlog_recover_do_efi_trans(
 	return 0;
 }
 
-
 /*
  * This routine is called when an efd format structure is found in
  * a committed transaction in the log.  It's purpose is to cancel
@@ -3333,7 +3330,6 @@ xlog_recover_process_iunlinks(
 
 	mp->m_dmevmask = mp_dmevmask;
 }
-
 
 #ifdef DEBUG
 STATIC void
@@ -4002,7 +3998,6 @@ xlog_recover_finish(
 	}
 	return 0;
 }
-
 
 #if defined(DEBUG)
 /*

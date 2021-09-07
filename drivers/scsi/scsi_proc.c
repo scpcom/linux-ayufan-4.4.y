@@ -39,7 +39,6 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
-
 /* 4K page size, but our output routines, use some slack for overruns */
 #define PROC_BLOCK_SIZE (3*1024)
 
@@ -138,7 +137,6 @@ void scsi_proc_hostdir_rm(struct scsi_host_template *sht)
 	}
 	mutex_unlock(&global_host_template_mutex);
 }
-
 
 /**
  * scsi_proc_host_add - Add entry for this host to appropriate /proc dir
@@ -321,7 +319,6 @@ static int scsi_remove_single_device(uint host, uint channel, uint id, uint lun)
  * SATA, Firewire, Fibre Channel, etc) dynamically assign these values to
  * provide a unique identifier and nothing more.
  */
-
 
 static ssize_t proc_scsi_write(struct file *file, const char __user *buf,
 			       size_t length, loff_t *ppos)

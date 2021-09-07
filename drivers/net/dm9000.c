@@ -204,7 +204,6 @@ static void dm9000_inblk_8bit(void __iomem *reg, void *data, int count)
 	readsb(reg, data, count);
 }
 
-
 static void dm9000_inblk_16bit(void __iomem *reg, void *data, int count)
 {
 	readsw(reg, data, (count+1) >> 1);
@@ -266,7 +265,6 @@ static void dm9000_set_io(struct board_info *db, int byte_width)
 		db->outblk  = dm9000_outblk_8bit;
 		db->inblk   = dm9000_inblk_8bit;
 		break;
-
 
 	case 3:
 		dev_dbg(db->dev, ": 3 byte IO, falling back to 16bit\n");

@@ -875,7 +875,6 @@ static int pppoe_sendmsg(struct kiocb *iocb, struct socket *sock,
 	if (total_len > (dev->mtu + dev->hard_header_len))
 		goto end;
 
-
 	skb = sock_wmalloc(sk, total_len + dev->hard_header_len + 32,
 			   0, GFP_KERNEL);
 	if (!skb) {

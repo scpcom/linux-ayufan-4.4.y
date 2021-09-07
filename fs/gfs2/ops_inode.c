@@ -328,7 +328,6 @@ static int gfs2_unlink(struct inode *dir, struct dentry *dentry)
 	rgd = gfs2_blk2rgrpd(sdp, ip->i_no_addr);
 	gfs2_holder_init(rgd->rd_gl, LM_ST_EXCLUSIVE, 0, ghs + 2);
 
-
 	error = gfs2_glock_nq(ghs); /* parent */
 	if (error)
 		goto out_parent;
@@ -757,7 +756,6 @@ static int gfs2_rename(struct inode *odir, struct dentry *odentry,
 		if (ip == nip)
 			return 0;
 	}
-
 
 	if (odip != ndip) {
 		error = gfs2_glock_nq_init(sdp->sd_rename_gl, LM_ST_EXCLUSIVE,
@@ -1434,4 +1432,3 @@ const struct inode_operations gfs2_symlink_iops = {
 	.removexattr = gfs2_removexattr,
 	.fiemap = gfs2_fiemap,
 };
-

@@ -152,7 +152,6 @@ int vfs_lstat(char __user *name, struct kstat *stat)
 }
 EXPORT_SYMBOL(vfs_lstat);
 
-
 #ifdef __ARCH_WANT_OLD_STAT
 
 /*

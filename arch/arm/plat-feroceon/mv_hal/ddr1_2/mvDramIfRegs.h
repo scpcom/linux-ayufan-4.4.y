@@ -65,7 +65,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __INCmvDramIfRegsh
 #define __INCmvDramIfRegsh
 
-
 /* DDR SDRAM Controller Address Decode Registers */
 /* SDRAM CSn Base Address Register (SCBAR) */
 #define SDRAM_BASE_ADDR_REG(csNum)	(0x1500 + (csNum * 8))
@@ -109,7 +108,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SDRAM_SRCLK_GATED		(1 << SDRAM_SRCLK_OFFS)
 #define SDRAM_CATTH_OFFS		26
 #define SDRAM_CATTHR_EN			(1 << SDRAM_CATTH_OFFS)
-
 
 /* dunit control register */
 #define SDRAM_DUNIT_CTRL_REG  	0x1404

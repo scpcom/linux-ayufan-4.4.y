@@ -56,4 +56,3 @@ ENTRY(ubc_wakeup)
 2:	.long	UBC_BBRB
 3:	.long	UBC_BRCR
 4:	.long	STBCR2
-

@@ -165,7 +165,6 @@ STA_OPS(agg_status);
 	debugfs_remove(sta->debugfs.name);\
 	sta->debugfs.name = NULL;
 
-
 void ieee80211_sta_debugfs_add(struct sta_info *sta)
 {
 	struct dentry *stations_dir = sta->local->debugfs.stations;

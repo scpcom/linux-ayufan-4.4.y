@@ -645,18 +645,13 @@ static int clip_inet_event(struct notifier_block *this, unsigned long event,
 	return clip_device_event(this, NETDEV_CHANGE, in_dev->dev);
 }
 
-
 static struct notifier_block clip_dev_notifier = {
 	.notifier_call = clip_device_event,
 };
 
-
-
 static struct notifier_block clip_inet_notifier = {
 	.notifier_call = clip_inet_event,
 };
-
-
 
 static void atmarpd_close(struct atm_vcc *vcc)
 {
@@ -671,11 +666,9 @@ static void atmarpd_close(struct atm_vcc *vcc)
 	module_put(THIS_MODULE);
 }
 
-
 static struct atmdev_ops atmarpd_dev_ops = {
 	.close = atmarpd_close
 };
-
 
 static struct atm_dev atmarpd_dev = {
 	.ops =			&atmarpd_dev_ops,
@@ -683,7 +676,6 @@ static struct atm_dev atmarpd_dev = {
 	.number = 		999,
 	.lock =			__SPIN_LOCK_UNLOCKED(atmarpd_dev.lock)
 };
-
 
 static int atm_init_atmarp(struct atm_vcc *vcc)
 {

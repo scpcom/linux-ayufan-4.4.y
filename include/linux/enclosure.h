@@ -93,7 +93,6 @@ struct enclosure_display_callback {
 };
 #endif
 
-
 struct enclosure_component {
 	void *scratch;
 	struct device cdev;

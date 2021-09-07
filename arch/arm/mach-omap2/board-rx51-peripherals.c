@@ -405,8 +405,6 @@ static struct twl4030_power_data rx51_t2scripts_data __initdata = {
 	.resource_config = twl4030_rconfig,
 };
 
-
-
 static struct twl4030_platform_data rx51_twldata __initdata = {
 	.irq_base		= TWL4030_IRQ_BASE,
 	.irq_end		= TWL4030_IRQ_END,
@@ -542,4 +540,3 @@ void __init rx51_peripherals_init(void)
 	board_onenand_init();
 	board_smc91x_init();
 }
-

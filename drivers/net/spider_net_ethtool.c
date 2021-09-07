@@ -27,7 +27,6 @@
 
 #include "spider_net.h"
 
-
 static struct {
 	const char str[ETH_GSTRING_LEN];
 } ethtool_stats_keys[] = {
@@ -132,7 +131,6 @@ spider_net_ethtool_set_rx_csum(struct net_device *netdev, u32 n)
 	return 0;
 }
 
-
 static void
 spider_net_ethtool_get_ringparam(struct net_device *netdev,
 				 struct ethtool_ringparam *ering)
@@ -197,4 +195,3 @@ const struct ethtool_ops spider_net_ethtool_ops = {
 	.get_sset_count		= spider_net_get_sset_count,
 	.get_ethtool_stats	= spider_net_get_ethtool_stats,
 };
-

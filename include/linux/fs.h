@@ -51,7 +51,6 @@ struct inodes_stat_t {
 	int dummy[5];		/* padding for sysctl ABI compatibility */
 };
 
-
 #define NR_FILE  8192	/* this can well be larger on a larger system */
 
 #ifdef CONFIG_FS_SYNO_ACL 
@@ -416,7 +415,6 @@ struct inodes_stat_t {
 
 #define FS_FL_USER_VISIBLE		0x0003DFFF /* User visible flags */
 #define FS_FL_USER_MODIFIABLE		0x000380FF /* User modifiable flags */
-
 
 #define SYNC_FILE_RANGE_WAIT_BEFORE	1
 #define SYNC_FILE_RANGE_WRITE		2
@@ -1450,7 +1448,6 @@ static inline int lock_may_write(struct inode *inode, loff_t start,
 }
 
 #endif /* !CONFIG_FILE_LOCKING */
-
 
 struct fasync_struct {
 	int	magic;

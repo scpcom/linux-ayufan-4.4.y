@@ -77,7 +77,6 @@ static struct sctp_association *__sctp_lookup_association(
 
 static void sctp_add_backlog(struct sock *sk, struct sk_buff *skb);
 
-
 /* Calculate the SCTP checksum of an SCTP packet.  */
 static inline int sctp_rcv_checksum(struct sk_buff *skb)
 {
@@ -1002,7 +1001,6 @@ static struct sctp_association *__sctp_rcv_asconf_lookup(
 	return __sctp_lookup_association(laddr, &paddr, transportp);
 }
 
-
 /* SCTP-AUTH, Section 6.3:
 *    If the receiver does not find a STCB for a packet containing an AUTH
 *    chunk as the first chunk and not a COOKIE-ECHO chunk as the second
@@ -1104,7 +1102,6 @@ static struct sctp_association *__sctp_rcv_lookup_harder(struct sk_buff *skb,
 		return __sctp_rcv_walk_lookup(skb, laddr, transportp);
 		break;
 	}
-
 
 	return NULL;
 }

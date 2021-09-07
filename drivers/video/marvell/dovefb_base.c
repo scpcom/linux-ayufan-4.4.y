@@ -203,7 +203,6 @@ proc_lcd_read(char *page, char **start, off_t off, int count, int *eof,
 			"0x%08x\n", i, reg);
 	}
 
-
 	p += sprintf(p, "-------<End>-------\n");
 
 	len = (p - page) - off;
@@ -245,8 +244,6 @@ dump_lcd_init_module( int id, struct fb_info *fi)
 
 	return 0;
 }
-
-
 
 int dovefb_determine_best_pix_fmt(struct fb_var_screeninfo *var,
 		struct dovefb_layer_info *dfli)
@@ -342,13 +339,11 @@ int dovefb_determine_best_pix_fmt(struct fb_var_screeninfo *var,
 				return PIX_FMT_BGR888UNPACK;
 		}
 
-
 		/* fall through */
 	}
 
 	return -EINVAL;
 }
-
 
 void dovefb_set_pix_fmt(struct fb_var_screeninfo *var, int pix_fmt)
 {
@@ -562,7 +557,6 @@ static unsigned int chan_to_field(unsigned int chan, struct fb_bitfield *bf)
 	return ((chan & 0xffff) >> (16 - bf->length)) << bf->offset;
 }
 
-
 static u32 to_rgb(u16 red, u16 green, u16 blue)
 {
 	red >>= 8;
@@ -629,7 +623,6 @@ static irqreturn_t dovefb_handle_irq(int irq, void *dev_id)
 	return IRQ_RETVAL(ret);
 }
 
-
 unsigned int dovefb_dump_regs(struct dovefb_info *dfi)
 {
 	u32 i;
@@ -644,7 +637,6 @@ unsigned int dovefb_dump_regs(struct dovefb_info *dfi)
 
 	return 0;
 }
-
 
 #ifndef MODULE
 int __init dovefb_parse_options(char *options, struct dovefb_info *info,
@@ -1111,7 +1103,6 @@ static int __init dovefb_probe(struct platform_device *pdev)
 		goto failed_irq;
 	}
 
-
 	ret = register_framebuffer(info->vid_plane->fb_info);
 	if (ret < 0) {
 		printk(KERN_ERR "doveFB: Failed to register VID FB.\n");
@@ -1122,7 +1113,6 @@ static int __init dovefb_probe(struct platform_device *pdev)
 	printk(KERN_INFO "  o dovefb: frame buffer device was successfully "
 			"loaded.\n");
 	return 0;
-
 
 failed_fb:
 	unregister_framebuffer(info->vid_plane->fb_info);

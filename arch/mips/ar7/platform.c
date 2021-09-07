@@ -46,7 +46,6 @@ struct plat_vlynq_data {
 	int reset_bit;
 };
 
-
 static int vlynq_on(struct vlynq_device *dev)
 {
 	int result;
@@ -291,7 +290,6 @@ static struct platform_device vlynq_high = {
 	.num_resources = ARRAY_SIZE(vlynq_high_res),
 };
 
-
 static struct gpio_led default_leds[] = {
 	{
 		.name = "status",
@@ -520,7 +518,6 @@ static int __init ar7_register_devices(void)
 	res = early_serial_setup(&uart_port[0]);
 	if (res)
 		return res;
-
 
 	/* Only TNETD73xx have a second serial port */
 	if (ar7_has_second_uart()) {

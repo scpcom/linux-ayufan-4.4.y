@@ -327,7 +327,6 @@ ieee80211_rx_monitor(struct ieee80211_local *local, struct sk_buff *origskb,
 	return origskb;
 }
 
-
 static void ieee80211_parse_qos(struct ieee80211_rx_data *rx)
 {
 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)rx->skb->data;
@@ -409,7 +408,6 @@ static void ieee80211_verify_alignment(struct ieee80211_rx_data *rx)
 		  "unaligned IP payload at 0x%p\n", rx->skb->data + hdrlen);
 }
 
-
 /* rx handlers */
 
 static ieee80211_rx_result debug_noinline
@@ -438,7 +436,6 @@ ieee80211_rx_h_passive_scan(struct ieee80211_rx_data *rx)
 	return RX_CONTINUE;
 }
 
-
 static int ieee80211_is_unicast_robust_mgmt_frame(struct sk_buff *skb)
 {
 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *) skb->data;
@@ -449,7 +446,6 @@ static int ieee80211_is_unicast_robust_mgmt_frame(struct sk_buff *skb)
 	return ieee80211_is_robust_mgmt_frame(hdr);
 }
 
-
 static int ieee80211_is_multicast_robust_mgmt_frame(struct sk_buff *skb)
 {
 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *) skb->data;
@@ -459,7 +455,6 @@ static int ieee80211_is_multicast_robust_mgmt_frame(struct sk_buff *skb)
 
 	return ieee80211_is_robust_mgmt_frame(hdr);
 }
-
 
 /* Get the BIP key index from MMIE; return -1 if this is not a BIP frame */
 static int ieee80211_get_mmie_keyidx(struct sk_buff *skb)
@@ -482,7 +477,6 @@ static int ieee80211_get_mmie_keyidx(struct sk_buff *skb)
 
 	return le16_to_cpu(mmie->key_id);
 }
-
 
 static ieee80211_rx_result
 ieee80211_rx_mesh_check(struct ieee80211_rx_data *rx)
@@ -543,7 +537,6 @@ ieee80211_rx_mesh_check(struct ieee80211_rx_data *rx)
 	return RX_CONTINUE;
 }
 
-
 static ieee80211_rx_result debug_noinline
 ieee80211_rx_h_check(struct ieee80211_rx_data *rx)
 {
@@ -598,7 +591,6 @@ ieee80211_rx_h_check(struct ieee80211_rx_data *rx)
 
 	return RX_CONTINUE;
 }
-
 
 static ieee80211_rx_result debug_noinline
 ieee80211_rx_h_decrypt(struct ieee80211_rx_data *rx)
@@ -1979,7 +1971,6 @@ static void ieee80211_rx_cooked_monitor(struct ieee80211_rx_data *rx)
 	dev_kfree_skb(skb);
 }
 
-
 static void ieee80211_invoke_rx_handlers(struct ieee80211_sub_if_data *sdata,
 					 struct ieee80211_rx_data *rx,
 					 struct sk_buff *skb)
@@ -2248,7 +2239,6 @@ static inline u16 seq_sub(u16 sq1, u16 sq2)
 	return (sq1 - sq2) & SEQ_MASK;
 }
 
-
 static void ieee80211_release_reorder_frame(struct ieee80211_hw *hw,
 					    struct tid_ampdu_rx *tid_agg_rx,
 					    int index)
@@ -2276,7 +2266,6 @@ static void ieee80211_release_reorder_frame(struct ieee80211_hw *hw,
 no_frame:
 	tid_agg_rx->head_seq_num = seq_inc(tid_agg_rx->head_seq_num);
 }
-
 
 /*
  * Timeout (in jiffies) for skb's that are waiting in the RX reorder buffer. If

@@ -2,7 +2,6 @@
 
 /* Written 1995-2000 by Werner Almesberger, EPFL LRC/ICA */
 
-
 #include <linux/errno.h>	/* error codes */
 #include <linux/kernel.h>	/* printk */
 #include <linux/skbuff.h>
@@ -17,7 +16,6 @@
 #include "resources.h"
 #include "signaling.h"
 
-
 #undef WAIT_FOR_DEMON		/* #define this if system calls on SVC sockets
 				   should block until the demon runs.
 				   Danger: may cause nasty hangs if the demon
@@ -27,7 +25,6 @@ struct atm_vcc *sigd = NULL;
 #ifdef WAIT_FOR_DEMON
 static DECLARE_WAIT_QUEUE_HEAD(sigd_sleep);
 #endif
-
 
 static void sigd_put_skb(struct sk_buff *skb)
 {
@@ -54,7 +51,6 @@ static void sigd_put_skb(struct sk_buff *skb)
 	sk_atm(sigd)->sk_data_ready(sk_atm(sigd), skb->len);
 }
 
-
 static void modify_qos(struct atm_vcc *vcc,struct atmsvc_msg *msg)
 {
 	struct sk_buff *skb;
@@ -79,7 +75,6 @@ static void modify_qos(struct atm_vcc *vcc,struct atmsvc_msg *msg)
 	*(struct atmsvc_msg *) skb_put(skb,sizeof(struct atmsvc_msg)) = *msg;
 	sigd_put_skb(skb);
 }
-
 
 static int sigd_send(struct atm_vcc *vcc,struct sk_buff *skb)
 {
@@ -160,7 +155,6 @@ out:
 	return 0;
 }
 
-
 void sigd_enq2(struct atm_vcc *vcc,enum atmsvc_msg_type type,
     struct atm_vcc *listen_vcc,const struct sockaddr_atmpvc *pvc,
     const struct sockaddr_atmsvc *svc,const struct atm_qos *qos,int reply)
@@ -192,7 +186,6 @@ void sigd_enq2(struct atm_vcc *vcc,enum atmsvc_msg_type type,
 	if (vcc) set_bit(ATM_VF_REGIS,&vcc->flags);
 }
 
-
 void sigd_enq(struct atm_vcc *vcc,enum atmsvc_msg_type type,
     struct atm_vcc *listen_vcc,const struct sockaddr_atmpvc *pvc,
     const struct sockaddr_atmsvc *svc)
@@ -200,7 +193,6 @@ void sigd_enq(struct atm_vcc *vcc,enum atmsvc_msg_type type,
 	sigd_enq2(vcc,type,listen_vcc,pvc,svc,vcc ? &vcc->qos : NULL,0);
 	/* other ISP applications may use "reply" */
 }
-
 
 static void purge_vcc(struct atm_vcc *vcc)
 {
@@ -211,7 +203,6 @@ static void purge_vcc(struct atm_vcc *vcc)
 		vcc_release_async(vcc, -EUNATCH);
 	}
 }
-
 
 static void sigd_close(struct atm_vcc *vcc)
 {
@@ -238,12 +229,10 @@ static void sigd_close(struct atm_vcc *vcc)
 	read_unlock(&vcc_sklist_lock);
 }
 
-
 static struct atmdev_ops sigd_dev_ops = {
 	.close = sigd_close,
 	.send =	sigd_send
 };
-
 
 static struct atm_dev sigd_dev = {
 	.ops =		&sigd_dev_ops,
@@ -251,7 +240,6 @@ static struct atm_dev sigd_dev = {
 	.number =	999,
 	.lock =		__SPIN_LOCK_UNLOCKED(sigd_dev.lock)
 };
-
 
 int sigd_attach(struct atm_vcc *vcc)
 {

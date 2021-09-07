@@ -23,7 +23,6 @@
 
 #define LSP_VERSION "88F6183_LSP_1.1.4"
 
-
 static inline void arch_idle(void)
 {
 	/*
@@ -33,7 +32,6 @@ static inline void arch_idle(void)
 	cpu_do_idle();
 }
 
-
 #ifdef __BIG_ENDIAN
 #define MV_ARM_32BIT_LE(X) ((((X)&0xff)<<24) |                       \
                                (((X)&0xff00)<<8) |                      \
@@ -42,7 +40,6 @@ static inline void arch_idle(void)
 #else
 #define MV_ARM_32BIT_LE(X) (X)
 #endif
-
 
 void mvBoardReset(void);
 

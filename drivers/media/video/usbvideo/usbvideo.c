@@ -230,7 +230,6 @@ void RingQueue_Flush(struct RingQueue *rq)
 
 EXPORT_SYMBOL(RingQueue_Flush);
 
-
 /*
  * usbvideo_VideosizeToString()
  *
@@ -592,7 +591,6 @@ void usbvideo_TestPattern(struct uvd *uvd, int fullframe, int pmode)
 }
 
 EXPORT_SYMBOL(usbvideo_TestPattern);
-
 
 #ifdef DEBUG
 /*

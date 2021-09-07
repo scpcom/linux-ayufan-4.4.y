@@ -200,4 +200,3 @@ static int __init topology_init(void)
 }
 
 subsys_initcall(topology_init);
-

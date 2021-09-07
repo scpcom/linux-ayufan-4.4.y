@@ -62,13 +62,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvAhbToMbusConfigh
 #define __INCmvAhbToMbusConfigh
 
 #include "mvSysHwConfig.h"
 #include "mvAhbToMbusRegs.h"
-
-
 
 #endif /* __INCmvAhbToMbusConfigh */

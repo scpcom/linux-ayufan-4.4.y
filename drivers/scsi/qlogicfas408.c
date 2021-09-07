@@ -612,4 +612,3 @@ EXPORT_SYMBOL(qlogicfas408_get_chip_type);
 EXPORT_SYMBOL(qlogicfas408_setup);
 EXPORT_SYMBOL(qlogicfas408_detect);
 EXPORT_SYMBOL(qlogicfas408_disable_ints);
-

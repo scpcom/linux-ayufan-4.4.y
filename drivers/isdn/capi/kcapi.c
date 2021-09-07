@@ -158,7 +158,6 @@ static void register_appl(struct capi_ctr *card, u16 applid, capi_register_param
 		printk(KERN_WARNING "%s: cannot get card resources\n", __func__);
 }
 
-
 static void release_appl(struct capi_ctr *card, u16 applid)
 {
 	DBG("applid %#x", applid);
@@ -247,7 +246,6 @@ static int notify_push(unsigned int cmd, u32 controller, u16 applid, u32 ncci)
 	return 0;
 }
 
-	
 /* -------- Receiver ------------------------------------------ */
 
 static void recv_handler(struct work_struct *work)

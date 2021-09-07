@@ -878,7 +878,6 @@ mpt2sas_transport_add_host_phy(struct MPT2SAS_ADAPTER *ioc, struct _sas_phy
 	struct sas_phy *phy;
 	int phy_index = mpt2sas_phy->phy_id;
 
-
 	INIT_LIST_HEAD(&mpt2sas_phy->port_siblings);
 	phy = sas_phy_alloc(parent_dev, phy_index);
 	if (!phy) {
@@ -934,7 +933,6 @@ mpt2sas_transport_add_host_phy(struct MPT2SAS_ADAPTER *ioc, struct _sas_phy
 	mpt2sas_phy->phy = phy;
 	return 0;
 }
-
 
 /**
  * mpt2sas_transport_add_expander_phy - report expander phy to transport

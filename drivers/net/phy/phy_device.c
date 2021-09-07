@@ -498,7 +498,6 @@ void phy_detach(struct phy_device *phydev)
 }
 EXPORT_SYMBOL(phy_detach);
 
-
 /* Generic PHY support and helper functions */
 
 /**
@@ -605,7 +604,6 @@ int genphy_setup_forced(struct phy_device *phydev)
 	return err;
 }
 
-
 /**
  * genphy_restart_aneg - Enable and Restart Autonegotiation
  * @phydev: target phy_device struct
@@ -629,7 +627,6 @@ int genphy_restart_aneg(struct phy_device *phydev)
 	return ctl;
 }
 EXPORT_SYMBOL(genphy_restart_aneg);
-
 
 /**
  * genphy_config_aneg - restart auto-negotiation or write BMCR

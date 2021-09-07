@@ -61,7 +61,6 @@ __secondary_start_page:
 	mtspr	SPRN_L1CSR1,r0
 	isync
 
-
 	mfspr	r0,SPRN_L1CSR0
 	ori	r0,r0,0x0003		/* Enable/invalidate the D-Cache */
 	msync

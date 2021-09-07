@@ -55,7 +55,6 @@ static int max_user_cbrs, max_user_dsr_bytes;
 
 static struct miscdevice gru_miscdev;
 
-
 /*
  * gru_vma_close
  *
@@ -129,7 +128,6 @@ static int gru_create_new_context(unsigned long arg)
 	struct vm_area_struct *vma;
 	struct gru_vma_data *vdata;
 	int ret = -EINVAL;
-
 
 	if (copy_from_user(&req, (void __user *)arg, sizeof(req)))
 		return -EFAULT;
@@ -456,4 +454,3 @@ MODULE_AUTHOR("Silicon Graphics, Inc.");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION(GRU_DRIVER_ID_STR GRU_DRIVER_VERSION_STR);
 MODULE_VERSION(GRU_DRIVER_VERSION_STR);
-

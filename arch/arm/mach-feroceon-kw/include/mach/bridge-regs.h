@@ -11,10 +11,8 @@
 #ifndef __ASM_ARCH_BRIDGE_REGS_H
 #define __ASM_ARCH_BRIDGE_REGS_H
 
-
 #include "ctrlEnv/sys/mvCpuIfRegs.h"
 #include "ctrlEnv/mvCtrlEnvSpec.h"
-
 
 #define FEROCEON_REGS_VIRT_BASE	(INTER_REGS_BASE | MAX_AHB_TO_MBUS_REG_BASE)
 
@@ -25,6 +23,5 @@
 
 #define WDT_RESET_OUT_EN		0x00000002
 #define WDT_INT_REQ			0x0008
-
 
 #endif

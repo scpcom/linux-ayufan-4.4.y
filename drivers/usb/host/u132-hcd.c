@@ -243,7 +243,6 @@ static inline void u132_disable(struct u132 *u132)
 	u132_to_hcd(u132)->state = HC_STATE_HALT;
 }
 
-
 #define kref_to_u132(d) container_of(d, struct u132, kref)
 #define kref_to_u132_endp(d) container_of(d, struct u132_endp, kref)
 #define kref_to_u132_udev(d) container_of(d, struct u132_udev, kref)
@@ -614,7 +613,6 @@ static inline int edset_output(struct u132 *u132, struct u132_ring *ring,
 	return usb_ftdi_elan_edset_output(u132->platform_dev, ring->number,
 		endp, urb, address, endp->usb_endp, toggle_bits, callback);
 }
-
 
 /*
 * must not LOCK sw_lock
@@ -1592,7 +1590,6 @@ static int u132_init(struct u132 *u132)
 
 	return 0;
 }
-
 
 /* Start an OHCI controller, set the BUS operational
 * resets USB and controller
@@ -2640,7 +2637,6 @@ static int u132_roothub_portstatus(struct u132 *u132, __le32 *desc, u16 wIndex)
 	}
 }
 
-
 /* this timer value might be vendor-specific ... */
 #define PORT_RESET_HW_MSEC 10
 #define PORT_RESET_MSEC 10
@@ -2780,7 +2776,6 @@ static int u132_roothub_clearportfeature(struct u132 *u132, u16 wValue,
 		return 0;
 	}
 }
-
 
 /* the virtual root hub timer IRQ checks for hub status*/
 static int u132_hub_status_data(struct usb_hcd *hcd, char *buf)
@@ -2930,7 +2925,6 @@ static int u132_start_port_reset(struct usb_hcd *hcd, unsigned port_num)
 	} else
 		return 0;
 }
-
 
 #ifdef CONFIG_PM
 static int u132_bus_suspend(struct usb_hcd *hcd)
@@ -3139,7 +3133,6 @@ static int __devinit u132_probe(struct platform_device *pdev)
 	}
 }
 
-
 #ifdef CONFIG_PM
 /* for this device there's no useful distinction between the controller
 * and its root hub, except that the root hub only gets direct PM calls
@@ -3236,7 +3229,6 @@ static int __init u132_hcd_init(void)
 	return retval;
 }
 
-
 module_init(u132_hcd_init);
 static void __exit u132_hcd_exit(void)
 {
@@ -3254,7 +3246,6 @@ static void __exit u132_hcd_exit(void)
 	flush_workqueue(workqueue);
 	destroy_workqueue(workqueue);
 }
-
 
 module_exit(u132_hcd_exit);
 MODULE_LICENSE("GPL");

@@ -196,4 +196,3 @@ const struct ethtool_ops lbs_ethtool_ops = {
 	.get_wol = lbs_ethtool_get_wol,
 	.set_wol = lbs_ethtool_set_wol,
 };
-

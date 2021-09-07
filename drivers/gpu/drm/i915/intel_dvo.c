@@ -260,7 +260,6 @@ static int intel_dvo_get_modes(struct drm_connector *connector)
 	if (!list_empty(&connector->probed_modes))
 		return 1;
 
-
 	if (dvo->panel_fixed_mode != NULL) {
 		struct drm_display_mode *mode;
 		mode = drm_mode_duplicate(connector->dev, dvo->panel_fixed_mode);
@@ -338,7 +337,6 @@ static void intel_dvo_enc_destroy(struct drm_encoder *encoder)
 static const struct drm_encoder_funcs intel_dvo_enc_funcs = {
 	.destroy = intel_dvo_enc_destroy,
 };
-
 
 /**
  * Attempts to get a fixed panel timing for LVDS (currently only the i830).

@@ -110,7 +110,6 @@ static __always_inline int read_seqretry(const seqlock_t *sl, unsigned start)
 	return (sl->sequence != start);
 }
 
-
 /*
  * Version using sequence counter only.
  * This can be used when code has its own mutex protecting the
@@ -149,7 +148,6 @@ static inline int read_seqcount_retry(const seqcount_t *s, unsigned start)
 
 	return s->sequence != start;
 }
-
 
 /*
  * Sequence counter only version assumes that callers are using their

@@ -19,7 +19,6 @@ struct venus_comm {
 	struct super_block *vc_sb;
 };
 
-
 static inline struct venus_comm *coda_vcp(struct super_block *sb)
 {
 	return (struct venus_comm *)((sb)->s_fs_info);

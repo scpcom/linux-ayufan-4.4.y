@@ -51,5 +51,4 @@
 #define UART_LCR_WLEN7  0x02	/* Wordlength: 7 bits */
 #define UART_LCR_WLEN8  0x03	/* Wordlength: 8 bits */
 
-
 #endif /* _GDB_IO_H */

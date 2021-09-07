@@ -123,10 +123,8 @@ MV_BOARD_INFO db88f1281ddr2Info = {
 	0x1						/* gppPolarityVal */
 };
 
-
 MV_BOARD_INFO*	boardInfoTbl[1] = 	{&db88f1281ddr2Info, 
 					};
-
 
 #define	BOARD_ID_BASE				BOARD_ID_88F1281_BASE
 #define MV_MAX_BOARD_ID				BOARD_ID_88F1281_MAX

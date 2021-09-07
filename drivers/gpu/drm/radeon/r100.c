@@ -405,7 +405,6 @@ void r100_ring_start(struct radeon_device *rdev)
 	radeon_ring_unlock_commit(rdev);
 }
 
-
 /* Load the microcode for the CP */
 static int r100_cp_init_microcode(struct radeon_device *rdev)
 {
@@ -676,7 +675,6 @@ void r100_cp_commit(struct radeon_device *rdev)
 	WREG32(RADEON_CP_RB_WPTR, rdev->cp.wptr);
 	(void)RREG32(RADEON_CP_RB_WPTR);
 }
-
 
 /*
  * CS functions
@@ -1464,7 +1462,6 @@ int r100_cs_parse(struct radeon_cs_parser *p)
 	return 0;
 }
 
-
 /*
  * Global GPU functions
  */
@@ -1650,7 +1647,6 @@ int r100_gpu_reset(struct radeon_device *rdev)
 	return 0;
 }
 
-
 /*
  * VRAM info
  */
@@ -1799,7 +1795,6 @@ void r100_vram_info(struct radeon_device *rdev)
 	r100_vram_init_sizes(rdev);
 }
 
-
 /*
  * Indirect registers accessor
  */
@@ -1917,7 +1912,6 @@ static int r100_debugfs_cp_ring_info(struct seq_file *m, void *data)
 	}
 	return 0;
 }
-
 
 static int r100_debugfs_cp_csq_fifo(struct seq_file *m, void *data)
 {

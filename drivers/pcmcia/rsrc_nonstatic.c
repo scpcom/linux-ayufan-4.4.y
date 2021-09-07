@@ -63,7 +63,6 @@ static DEFINE_MUTEX(rsrc_mutex);
 #define MEM_PROBE_LOW	(1 << 0)
 #define MEM_PROBE_HIGH	(1 << 1)
 
-
 /*======================================================================
 
     Linux resource management extensions
@@ -490,7 +489,6 @@ static int validate_mem(struct pcmcia_socket *s, unsigned int probe_mask)
 
 #endif /* CONFIG_PCMCIA_PROBE */
 
-
 /*
  * Locking note: Must be called with skt_mutex held!
  */
@@ -703,7 +701,6 @@ static struct resource * nonstatic_find_mem_region(u_long base, u_long num,
 	return res;
 }
 
-
 static int adjust_memory(struct pcmcia_socket *s, unsigned int action, unsigned long start, unsigned long end)
 {
 	struct socket_data *data = s->resource_data;
@@ -735,7 +732,6 @@ static int adjust_memory(struct pcmcia_socket *s, unsigned int action, unsigned 
 
 	return ret;
 }
-
 
 static int adjust_io(struct pcmcia_socket *s, unsigned int action, unsigned long start, unsigned long end)
 {
@@ -772,7 +768,6 @@ static int adjust_io(struct pcmcia_socket *s, unsigned int action, unsigned long
 
 	return ret;
 }
-
 
 #ifdef CONFIG_PCI
 static int nonstatic_autoadd_resources(struct pcmcia_socket *s)
@@ -842,7 +837,6 @@ static inline int nonstatic_autoadd_resources(struct pcmcia_socket *s)
 
 #endif
 
-
 static int nonstatic_init(struct pcmcia_socket *s)
 {
 	struct socket_data *data;
@@ -878,7 +872,6 @@ static void nonstatic_release_resource_db(struct pcmcia_socket *s)
 	mutex_unlock(&rsrc_mutex);
 }
 
-
 struct pccard_resource_ops pccard_nonstatic_ops = {
 	.validate_mem = pcmcia_nonstatic_validate_mem,
 	.adjust_io_region = nonstatic_adjust_io_region,
@@ -890,7 +883,6 @@ struct pccard_resource_ops pccard_nonstatic_ops = {
 	.exit = nonstatic_release_resource_db,
 };
 EXPORT_SYMBOL(pccard_nonstatic_ops);
-
 
 /* sysfs interface to the resource database */
 

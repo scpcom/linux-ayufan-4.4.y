@@ -10,4 +10,3 @@
 #include <asm-generic/bitsperlong.h>
 
 #endif /* __ASM_ALPHA_BITSPERLONG_H */
-

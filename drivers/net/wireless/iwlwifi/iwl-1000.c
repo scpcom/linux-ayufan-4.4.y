@@ -55,7 +55,6 @@
 #define _IWL1000_MODULE_FIRMWARE(api) IWL1000_FW_PRE #api ".ucode"
 #define IWL1000_MODULE_FIRMWARE(api) _IWL1000_MODULE_FIRMWARE(api)
 
-
 /*
  * For 1000, use advance thermal throttling critical temperature threshold,
  * but legacy thermal management implementation for now.
@@ -163,4 +162,3 @@ struct iwl_cfg iwl1000_bgn_cfg = {
 	.ht_greenfield_support = true,
 	.use_rts_for_ht = true, /* use rts/cts protection */
 };
-

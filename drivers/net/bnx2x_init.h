@@ -21,7 +21,6 @@
 #define STORM_INTMEM_SIZE(bp) ((CHIP_IS_E1(bp) ? STORM_INTMEM_SIZE_E1 : \
 						    STORM_INTMEM_SIZE_E1H) / 4)
 
-
 /* Init operation types and structures */
 /* Common for both E1 and E1H */
 #define OP_RD			0x1 /* read single register */
@@ -56,7 +55,6 @@
 
 #define STAGE_START		0
 #define STAGE_END		1
-
 
 /* Indices of blocks */
 #define PRS_BLOCK		0
@@ -98,11 +96,9 @@
 #define PGLUE_B_BLOCK		36
 #define IGU_BLOCK		37
 
-
 /* Returns the index of start or end of a specific block stage in ops array*/
 #define BLOCK_OPS_IDX(block, stage, end) \
 			(2*(((block)*STAGE_IDX_MAX) + (stage)) + (end))
-
 
 struct raw_op {
 	u32 op:8;
@@ -149,4 +145,3 @@ union init_op {
 };
 
 #endif /* BNX2X_INIT_H */
-

@@ -220,7 +220,6 @@ static int tc1100_probe(struct platform_device *device)
 	return result;
 }
 
-
 static int tc1100_remove(struct platform_device *device)
 {
 	remove_fs();

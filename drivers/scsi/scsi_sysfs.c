@@ -511,7 +511,6 @@ sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
 	sdev_show_function(field, format_string)			\
 static DEVICE_ATTR(field, S_IRUGO, sdev_show_##field, NULL);
 
-
 /*
  * sdev_rd_attr: create a function and attribute variable for a
  * read/write field.

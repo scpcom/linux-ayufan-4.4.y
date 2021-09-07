@@ -107,7 +107,6 @@ static struct irq_chip octeon_irq_chip_core = {
 	.eoi = octeon_irq_core_eoi,
 };
 
-
 static void octeon_irq_ciu0_ack(unsigned int irq)
 {
 	/*
@@ -289,7 +288,6 @@ static struct irq_chip octeon_irq_chip_ciu0 = {
 	.set_affinity = octeon_irq_ciu0_set_affinity,
 #endif
 };
-
 
 static void octeon_irq_ciu1_ack(unsigned int irq)
 {

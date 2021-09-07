@@ -68,14 +68,12 @@ static inline void set_silent_ptb(struct snd_emu10k1 *emu, int page)
 }
 #endif /* PAGE_SIZE */
 
-
 /*
  */
 static int synth_alloc_pages(struct snd_emu10k1 *hw, struct snd_emu10k1_memblk *blk);
 static int synth_free_pages(struct snd_emu10k1 *hw, struct snd_emu10k1_memblk *blk);
 
 #define get_emu10k1_memblk(l,member)	list_entry(l, struct snd_emu10k1_memblk, member)
-
 
 /* initialize emu10k1 part */
 static void emu10k1_memblk_init(struct snd_emu10k1_memblk *blk)
@@ -227,7 +225,6 @@ __found_pages:
 	return blk;
 }
 
-
 /*
  * check if the given pointer is valid for pages
  */
@@ -344,7 +341,6 @@ snd_emu10k1_alloc_pages(struct snd_emu10k1 *emu, struct snd_pcm_substream *subst
 	return (struct snd_util_memblk *)blk;
 }
 
-
 /*
  * release DMA buffer from page table
  */
@@ -354,7 +350,6 @@ int snd_emu10k1_free_pages(struct snd_emu10k1 *emu, struct snd_util_memblk *blk)
 		return -EINVAL;
 	return snd_emu10k1_synth_free(emu, blk);
 }
-
 
 /*
  * memory allocation using multiple pages (for synth)

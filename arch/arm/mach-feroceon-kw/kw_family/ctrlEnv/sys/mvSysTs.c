@@ -62,9 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #include "ctrlEnv/sys/mvSysTs.h"
-
 
 typedef struct _mvTsuDecWin
 {
@@ -73,7 +71,6 @@ typedef struct _mvTsuDecWin
         MV_BOOL       enable;  /* Address decode window is enabled/disabled */
  
 }MV_TSU_DEC_WIN;
-
 
 MV_TARGET tsuAddrDecPrioTap[] =
 {
@@ -189,7 +186,6 @@ MV_STATUS mvTsuWinInit(void)
 	return MV_OK;
 }
 
-
 /*******************************************************************************
 * mvTsuWinSet
 *
@@ -278,7 +274,6 @@ MV_STATUS mvTsuWinSet(MV_U32 winNum, MV_TSU_DEC_WIN *pAddrDecWin)
 	return MV_OK;
 }
 
-
 /*******************************************************************************
 * mvTsuWinGet
 *
@@ -336,7 +331,6 @@ MV_STATUS mvTsuWinGet(MV_U32 winNum, MV_TSU_DEC_WIN *pAddrDecWin)
 	
 	return MV_OK;
 }
-
 
 /*******************************************************************************
 * mvTsuWinEnable
@@ -446,7 +440,6 @@ MV_U32  mvTsuWinTargetGet(MV_TARGET target)
 	return 0xFFFFFFFF;
 }
 
-
 /*******************************************************************************
 * tsuWinOverlapDetect
 *
@@ -507,7 +500,6 @@ static MV_STATUS tsuWinOverlapDetect(MV_U32 winNum, MV_ADDR_WIN *pAddrWin)
 	return MV_FALSE;
 }
 
-
 /*******************************************************************************
 * mvTsuAddrDecShow
 *
@@ -560,7 +552,6 @@ void mvTsuAddrDecShow(void)
 	}
 	return;
 }
-
 
 /*******************************************************************************
 * mvTsuInit

@@ -52,7 +52,6 @@ static int dtc_open_one(struct dtc_file *file,
 	return 1;
 }
 
-
 struct dtc_file *dtc_open_file(const char *fname,
                                const struct search_path *search)
 {

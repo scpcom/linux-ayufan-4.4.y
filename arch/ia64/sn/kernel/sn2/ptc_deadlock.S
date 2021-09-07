@@ -13,7 +13,6 @@
 #define WRITECOUNTMASK	SH_PIO_WRITE_STATUS_PENDING_WRITE_COUNT_MASK
 #define ALIAS_OFFSET	8
 
-
 	.global	sn2_ptc_deadlock_recovery_core
 	.proc  	sn2_ptc_deadlock_recovery_core
 
@@ -31,7 +30,6 @@ sn2_ptc_deadlock_recovery_core:
 	scr1	 = r16
 	scr2	 = r17
 	mask	 = r18
-
 
 	extr.u	piowcphy=piowc,0,61;;	// Convert piowc to uncached physical address
 	dep	piowcphy=-1,piowcphy,63,1
@@ -53,8 +51,6 @@ sn2_ptc_deadlock_recovery_core:
 	cmp.ne	p6,p0=zeroval,scr2
 (p6)	br.cond.sptk 5b
 	
-
-
 	////////////// BEGIN PHYSICAL MODE ////////////////////
 	mov psrsave=psr			// Disable IC (no PMIs)
 	rsm psr.i | psr.dt | psr.ic;;

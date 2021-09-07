@@ -40,7 +40,6 @@
 #include <asm/mach-types.h>
 #endif
 
-
 struct mv88fx_i2s_info {
 	int		port;
 	void __iomem	*base;	/* base address of the host */
@@ -50,7 +49,6 @@ struct mv88fx_i2s_info {
 };
 
 static struct mv88fx_i2s_info mv88fx_i2s_info;
-
 
 static int mv88fx_i2_hw_init(void)
 {
@@ -82,7 +80,6 @@ static int mv88fx_i2_hw_init(void)
 	}
 	return 0;
 }
-
 
 static int mv88fx_i2s_snd_hw_playback_set(struct mv88fx_snd_chip *chip,
 					  struct snd_pcm_substream *substream)
@@ -639,9 +636,7 @@ static int mv88fx_i2s_dai_probe(struct platform_device *pdev,
 	mv88fx_i2s_info.base = machine_data->base;
 	mv88fx_i2s_info.port = machine_data->port;
 
-
 	mv88fx_i2_hw_init();
-
 
 	return 0;
 }
@@ -653,7 +648,6 @@ static void mv88fx_i2s_dai_remove(struct platform_device *pdev,
 
 }
 
-
 static int mv88fx_i2s_suspend(struct snd_soc_dai *cpu_dai)
 {
 	struct mv88fx_snd_chip *chip = mv88fx_pcm_get_chip();
@@ -662,7 +656,6 @@ static int mv88fx_i2s_suspend(struct snd_soc_dai *cpu_dai)
 
 	if (!cpu_dai->active)
 		return 0;
-
 
 	spin_lock(&chip->reg_lock);
 
@@ -686,13 +679,10 @@ static int mv88fx_i2s_suspend(struct snd_soc_dai *cpu_dai)
 	mv88fx_snd_bitset(chip->base,
 		MV_AUDIO_PLAYBACK_CTRL_REG(chip->port), APCR_PLAY_PAUSE_MASK);
 
-
 	spin_unlock(&chip->reg_lock);
 
 	return 0;
 }
-
-
 
 static int mv88fx_i2s_resume(struct snd_soc_dai *cpu_dai)
 {
@@ -778,10 +768,6 @@ struct snd_soc_dai mv88fx_i2s_dai = {
 };
 EXPORT_SYMBOL_GPL(mv88fx_i2s_dai);
 
-
-
-
-
 static int mv88fx_i2s_probe(struct platform_device *pdev)
 {
 	mv88fx_snd_debug("");
@@ -819,7 +805,6 @@ static void __exit mv88fx_i2s_exit(void)
 
 module_init(mv88fx_i2s_init);
 module_exit(mv88fx_i2s_exit);
-
 
 /* Module information */
 MODULE_AUTHOR("Yuval Elmaliah <eyuval@marvell.com>");

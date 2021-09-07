@@ -27,7 +27,6 @@
 #ifndef AVIVOD_H
 #define AVIVOD_H
 
-
 #define	D1CRTC_CONTROL					0x6080
 #define		CRTC_EN						(1 << 0)
 #define	D1CRTC_UPDATE_LOCK				0x60E8

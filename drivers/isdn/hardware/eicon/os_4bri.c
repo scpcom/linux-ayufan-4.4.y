@@ -56,7 +56,6 @@ static unsigned long _4bri_v2_bri_bar_length[4] = {
 	0x10000
 };
 
-
 static int diva_4bri_cleanup_adapter(diva_os_xdi_adapter_t * a);
 static int _4bri_get_serial_number(diva_os_xdi_adapter_t * a);
 static int diva_4bri_cmd_card_proc(struct _diva_os_xdi_adapter *a,
@@ -903,7 +902,6 @@ static int diva_4bri_reset_adapter(PISDN_ADAPTER IoAdapter)
 
 	return (0);
 }
-
 
 static int
 diva_4bri_write_sdram_block(PISDN_ADAPTER IoAdapter,

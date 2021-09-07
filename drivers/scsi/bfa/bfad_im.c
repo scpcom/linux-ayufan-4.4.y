@@ -508,8 +508,6 @@ bfa_fcb_itnim_tov_begin(struct bfad_itnim_s *itnim)
 {
 }
 
-
-
 /**
  * Allocate a Scsi_Host for a port.
  */
@@ -690,9 +688,6 @@ bfad_im_probe_undo(struct bfad_s *bfad)
 		bfad->im = NULL;
 	}
 }
-
-
-
 
 int
 bfad_os_scsi_add_host(struct Scsi_Host *shost, struct bfad_im_port_s *im_port,
@@ -891,9 +886,6 @@ bfad_os_handle_qfull(struct bfad_itnim_s *itnim, struct scsi_device *sdev)
 		scsi_track_queue_full(tmp_sdev, tmp_sdev->queue_depth - 1);
 	}
 }
-
-
-
 
 struct bfad_itnim_s *
 bfad_os_get_itnim(struct bfad_im_port_s *im_port, int id)
@@ -1226,5 +1218,3 @@ bfad_os_get_linkup_delay(struct bfad_s *bfad)
 
 	return ldelay;
 }
-
-

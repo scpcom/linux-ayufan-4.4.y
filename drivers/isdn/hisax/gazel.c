@@ -37,7 +37,6 @@ static const char *gazel_revision = "$Revision: 1.1 $";
 #define INT_PCI_EN   0x40	/* 1 = enable IT PCI */
 #define INT_IPAC_EN  0x3	/* enable IT ipac */
 
-
 #define byteout(addr,val) outb(val,addr)
 #define bytein(addr) inb(addr)
 
@@ -52,7 +51,6 @@ writereg(unsigned int adr, u_short off, u_char data)
 {
 	byteout(adr + off, data);
 }
-
 
 static inline void
 read_fifo(unsigned int adr, u_char * data, int size)
@@ -82,7 +80,6 @@ writereg_ipac(unsigned int adr, u_short off, u_char data)
 	byteout(adr, off);
 	byteout(adr + 4, data);
 }
-
 
 static inline void
 read_fifo_ipac(unsigned int adr, u_short off, u_char * data, int size)
@@ -270,7 +267,6 @@ gazel_interrupt(int intno, void *dev_id)
 	spin_unlock_irqrestore(&cs->lock, flags);
 	return IRQ_HANDLED;
 }
-
 
 static irqreturn_t
 gazel_interrupt_ipac(int intno, void *dev_id)

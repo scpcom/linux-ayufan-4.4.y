@@ -25,7 +25,6 @@ struct intmem_allocation {
 	char status;
 };
 
-
 static struct list_head intmem_allocations;
 static void* intmem_virtual;
 
@@ -150,4 +149,3 @@ unsigned long crisv32_intmem_virt_to_phys(void* addr)
 }
 
 module_init(crisv32_intmem_init);
-

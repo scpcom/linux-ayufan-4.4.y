@@ -23,7 +23,6 @@
  */
 char *err_print_prefix = KERN_NOTICE;
 
-
 /*
  * Generic
  */
@@ -76,7 +75,6 @@ mchk_dump_logout_frame(struct el_common *mchk_header)
 	printk("%s  -- End of Frame --\n", err_print_prefix);
 }
 
-
 /*
  * Console Data Log
  */
@@ -317,4 +315,3 @@ cdl_register_subpacket_handler(struct el_subpacket_handler *new)
 
 	return 0;
 }
-

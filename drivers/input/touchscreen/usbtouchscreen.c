@@ -52,7 +52,6 @@
 #include <linux/usb/input.h>
 #include <linux/hid.h>
 
-
 #define DRIVER_VERSION		"v0.6"
 #define DRIVER_AUTHOR		"Daniel Ritz <daniel.ritz@gmx.ch>"
 #define DRIVER_DESC		"USB Touchscreen Driver"
@@ -103,7 +102,6 @@ struct usbtouch_usb {
 	int x, y;
 	int touch, press;
 };
-
 
 /* device types */
 enum {
@@ -204,7 +202,6 @@ static struct usb_device_id usbtouch_devices[] = {
 	{}
 };
 
-
 /*****************************************************************************
  * e2i Part
  */
@@ -236,7 +233,6 @@ static int e2i_read_data(struct usbtouch_usb *dev, unsigned char *pkt)
 	return 1;
 }
 #endif
-
 
 /*****************************************************************************
  * eGalax part
@@ -281,7 +277,6 @@ static int egalax_get_pkt_len(unsigned char *buf, int len)
 }
 #endif
 
-
 /*****************************************************************************
  * PanJit Part
  */
@@ -295,7 +290,6 @@ static int panjit_read_data(struct usbtouch_usb *dev, unsigned char *pkt)
 	return 1;
 }
 #endif
-
 
 /*****************************************************************************
  * 3M/Microtouch Part
@@ -357,7 +351,6 @@ static int mtouch_init(struct usbtouch_usb *usbtouch)
 }
 #endif
 
-
 /*****************************************************************************
  * ITM Part
  */
@@ -391,7 +384,6 @@ static int itm_read_data(struct usbtouch_usb *dev, unsigned char *pkt)
 }
 #endif
 
-
 /*****************************************************************************
  * eTurboTouch part
  */
@@ -424,7 +416,6 @@ static int eturbo_get_pkt_len(unsigned char *buf, int len)
 	return 0;
 }
 #endif
-
 
 /*****************************************************************************
  * Gunze part
@@ -512,7 +503,6 @@ err_nobuf:
 	return ret;
 }
 
-
 static int dmc_tsc10_read_data(struct usbtouch_usb *dev, unsigned char *pkt)
 {
 	dev->x = ((pkt[2] & 0x03) << 8) | pkt[1];
@@ -522,7 +512,6 @@ static int dmc_tsc10_read_data(struct usbtouch_usb *dev, unsigned char *pkt)
 	return 1;
 }
 #endif
-
 
 /*****************************************************************************
  * IRTOUCH Part
@@ -537,7 +526,6 @@ static int irtouch_read_data(struct usbtouch_usb *dev, unsigned char *pkt)
 	return 1;
 }
 #endif
-
 
 /*****************************************************************************
  * IdealTEK URTC1000 Part
@@ -620,7 +608,6 @@ static int jastec_read_data(struct usbtouch_usb *dev, unsigned char *pkt)
 	return 1;
 }
 #endif
-
 
 /*****************************************************************************
  * the different device descriptors
@@ -785,7 +772,6 @@ static struct usbtouch_device_info usbtouch_dev_info[] = {
 #endif
 };
 
-
 /*****************************************************************************
  * Generic Part
  */
@@ -810,7 +796,6 @@ static void usbtouch_process_pkt(struct usbtouch_usb *usbtouch,
 		input_report_abs(usbtouch->input, ABS_PRESSURE, usbtouch->press);
 	input_sync(usbtouch->input);
 }
-
 
 #ifdef MULTI_PACKET
 static void usbtouch_process_multi(struct usbtouch_usb *usbtouch,
@@ -890,7 +875,6 @@ out_flush_buf:
 }
 #endif
 
-
 static void usbtouch_irq(struct urb *urb)
 {
 	struct usbtouch_usb *usbtouch = urb->context;
@@ -946,7 +930,6 @@ static void usbtouch_close(struct input_dev *input)
 	usb_kill_urb(usbtouch->irq);
 }
 
-
 static void usbtouch_free_buffers(struct usb_device *udev,
 				  struct usbtouch_usb *usbtouch)
 {
@@ -954,7 +937,6 @@ static void usbtouch_free_buffers(struct usb_device *udev,
 	                usbtouch->data, usbtouch->data_dma);
 	kfree(usbtouch->buffer);
 }
-
 
 static int usbtouch_probe(struct usb_interface *intf,
 			  const struct usb_device_id *id)

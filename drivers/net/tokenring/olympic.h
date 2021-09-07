@@ -203,7 +203,6 @@
 
 #define ASB_RECEIVE_DATA 0x81
 
-
 /* Olympic defaults for buffers */
  
 #define OLYMPIC_RX_RING_SIZE 16 /* should be a power of 2 */

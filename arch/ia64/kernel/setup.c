@@ -143,7 +143,6 @@ EXPORT_SYMBOL(ia64_max_iommu_merge_mask);
 struct rsvd_region rsvd_region[IA64_MAX_RSVD_REGIONS + 1] __initdata;
 int num_rsvd_regions __initdata;
 
-
 /*
  * Filter incoming memory segments based on the primitive map created from the boot
  * parameters. Segments contained in the map are removed from the memory ranges. A
@@ -245,7 +244,6 @@ static int __init register_memory(void)
 }
 
 __initcall(register_memory);
-
 
 #ifdef CONFIG_KEXEC
 
@@ -381,7 +379,6 @@ reserve_memory (void)
 
 	sort_regions(rsvd_region, num_rsvd_regions);
 }
-
 
 /**
  * find_initrd - get initrd parameters from the boot parameter structure

@@ -271,7 +271,6 @@ out:
 }
 EXPORT_SYMBOL_GPL(wlp_receive_frame);
 
-
 /*
  * Verify frame from network stack, prepare for further transmission
  *

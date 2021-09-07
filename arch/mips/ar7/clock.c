@@ -323,7 +323,6 @@ static int tnetd7200_get_clock_base(int clock_id, u32 *bootcr)
 			return AR7_REF_CLOCK;
 }
 
-
 static void __init tnetd7200_init_clocks(void)
 {
 	u32 *bootcr = (u32 *)ioremap_nocache(AR7_REGS_DCL, 4);

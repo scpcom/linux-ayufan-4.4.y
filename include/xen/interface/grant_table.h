@@ -28,7 +28,6 @@
 #ifndef __XEN_PUBLIC_GRANT_TABLE_H__
 #define __XEN_PUBLIC_GRANT_TABLE_H__
 
-
 /***********************************
  * GRANT TABLE REPRESENTATION
  */
@@ -140,7 +139,6 @@ struct grant_entry {
 #define GTF_transfer_committed  (1U<<_GTF_transfer_committed)
 #define _GTF_transfer_completed (3)
 #define GTF_transfer_completed  (1U<<_GTF_transfer_completed)
-
 
 /***********************************
  * GRANT TABLE QUERIES AND USES

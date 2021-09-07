@@ -999,4 +999,3 @@ struct dlm_config_info dlm_config = {
 	.ci_protocol = DEFAULT_PROTOCOL,
 	.ci_timewarn_cs = DEFAULT_TIMEWARN_CS
 };
-

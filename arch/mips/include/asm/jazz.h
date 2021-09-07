@@ -205,7 +205,6 @@ typedef struct {
 
 #define JAZZ_TIMER_IRQ          (MIPS_CPU_IRQ_BASE+6)
 
-
 /*
  * JAZZ DMA Channels
  * Note: Channels 4...7 are not used with respect to the Acer PICA-61

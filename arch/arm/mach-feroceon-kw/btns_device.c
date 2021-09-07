@@ -131,4 +131,3 @@ static int __init   mv_btns_init(void)
 }
 
 subsys_initcall(mv_btns_init);
-

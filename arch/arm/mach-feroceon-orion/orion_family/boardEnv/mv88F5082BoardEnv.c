@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #define DB_88F5082_BOARD_PCI_IF_NUM		0x0
 #define DB_88F5082_BOARD_TWSI_DEF_NUM		0x1
 #define DB_88F5082_BOARD_MAC_INFO_NUM		0x1
@@ -140,8 +139,6 @@ MV_BOARD_INFO db88f5082ddr2Info = {
 	0x403,						/* gppPolarityVal */
 };
 
-
-
 #define RD_88F5082_2XSATA_BOARD_PCI_IF_NUM		0x0
 #define RD_88F5082_2XSATA_BOARD_TWSI_DEF_NUM		0x1
 #define RD_88F5082_2XSATA_BOARD_MAC_INFO_NUM		0x1
@@ -201,8 +198,6 @@ MV_BOARD_INFO rd88f5082sataX2Info = {
 	RD_88F5082_2XSATA_POL,				/* gppPolarityVal */
 };
 
-
-
 #define RD_88F5082_2XSATA3_BOARD_PCI_IF_NUM		0x0
 #define RD_88F5082_2XSATA3_BOARD_TWSI_DEF_NUM		0x1
 #define RD_88F5082_2XSATA3_BOARD_MAC_INFO_NUM		0x1
@@ -261,7 +256,6 @@ MV_BOARD_INFO rd88f5082sataX23Info = {
 	RD_88F5082_2XSATA3_VAL,				/* gppOutVal */
 	N_A,						/* gppPolarityVal */
 };
-
 
 MV_BOARD_INFO*	boardInfoTbl[3]	=	{&db88f5082ddr2Info,
 				  	&rd88f5082sataX2Info,

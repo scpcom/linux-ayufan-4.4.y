@@ -610,7 +610,6 @@ long omap2_clksel_round_rate(struct clk *clk, unsigned long target_rate)
 	return omap2_clksel_round_rate_div(clk, target_rate, &new_div);
 }
 
-
 /* Given a clock and a rate apply a clock specific rounding function */
 long omap2_clk_round_rate(struct clk *clk, unsigned long rate)
 {
@@ -740,7 +739,6 @@ int omap2_clksel_set_rate(struct clk *clk, unsigned long rate)
 
 	return 0;
 }
-
 
 /* Set the clock rate for a clock source */
 int omap2_clk_set_rate(struct clk *clk, unsigned long rate)

@@ -244,7 +244,6 @@ static struct ess_command ess_i16s[] =		/* input 16 bit stereo */
 static struct ess_command *ess_inp_cmds[] =
 	{ ess_i08m, ess_i16m, ess_i08s, ess_i16s };
 
-
 /*
  * Commands for initializing Audio 1 for output (playback)
  */
@@ -1829,4 +1828,3 @@ int ess_midi_init(sb_devc * devc, struct address_info *hw_config)
 
 	return 1;
 }
-

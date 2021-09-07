@@ -74,7 +74,6 @@ extern "C" {
 
 /* includes */
 
-
 /* defines  */
 /* This define describes the TWSI interrupt bit and location */
 #define TWSI_CPU_MAIN_INT_CAUSE_REG		0x20200
@@ -207,8 +206,6 @@ extern "C" {
 #define MV_XOR_MAX_UNIT         1
 #define MV_XOR_MAX_CHAN         2 /* totol channels for all units together*/
 #define MV_XOR_MAX_CHAN_PER_UNIT        2 /* channels for units */
-
-
 
 #if defined(MV_88F1181)
 #include "mv88F1X81EnvSpec.h"

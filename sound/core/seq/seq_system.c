@@ -55,14 +55,11 @@
  *							-- iwai
  */
 
-
 /* client id of our system client */
 static int sysclient = -1;
 
 /* port id numbers for this client */
 static int announce_port = -1;
-
-
 
 /* fill standard header data, source port & channel are filled in */
 static int setheader(struct snd_seq_event * ev, int client, int port)
@@ -86,7 +83,6 @@ static int setheader(struct snd_seq_event * ev, int client, int port)
 
 	return 0;
 }
-
 
 /* entry points for broadcasting system events */
 void snd_seq_system_broadcast(int client, int port, int type)
@@ -158,7 +154,6 @@ int __init snd_seq_system_client_init(void)
 	kfree(port);
 	return 0;
 }
-
 
 /* unregister our internal client */
 void __exit snd_seq_system_client_done(void)

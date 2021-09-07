@@ -300,7 +300,6 @@ static UCHAR cc02[];
 #define COX_NONE  0  // Don't send Xon/Xoff
 #define COX_XON   1  // Send xon/xoff to start/stop incoming data
 
-
 #define CMD_CTS_REP  (cmdSyntaxPtr)(ct18) // Enable  CTS reporting
 #define CMD_CTS_NREP (cmdSyntaxPtr)(ct19) // Disable CTS reporting
 
@@ -374,7 +373,6 @@ static UCHAR cc02[];
 								// replacement character defined here AND
 								// report the error as a status packet (as in
 								// CSE_ESTAT).
-
 
 // COMMAND 37, to send flow control packets, is handled only by low-level
 // library code in response to data movement and shouldn't ever be sent by the
@@ -463,7 +461,6 @@ static UCHAR cc02[];
 
 #define CMD_BMARK_REQ   (cmdSyntaxPtr)(ct60) // Bookmark request
 
-
 // Enable/Disable internal loopback mode
 //
 #define CMD_INLOOP(arg) \
@@ -478,7 +475,6 @@ static UCHAR cc02[];
 //
 #define CMD_HOT_TIME(arg) \
 	(((cmdSyntaxPtr)(ct62))->cmd[1] = (arg),(cmdSyntaxPtr)(ct62))
-
 
 // Define (outgoing) xon for receive flow control
 //
@@ -624,7 +620,5 @@ static UCHAR cc02[];
 //
 #define CMD_LBREAK(ds) \
 	(((cmdSyntaxPtr)(ct91))->cmd[1] = (ds),(cmdSyntaxPtr)(ct66))
-
-
 
 #endif // I2CMD_H

@@ -558,4 +558,3 @@ unsigned int kstat_irqs_cpu(unsigned int irq, int cpu)
 	return desc ? desc->kstat_irqs[cpu] : 0;
 }
 EXPORT_SYMBOL(kstat_irqs_cpu);
-

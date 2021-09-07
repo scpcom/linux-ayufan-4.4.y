@@ -69,7 +69,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ctrlEnv/mvCtrlEnvLib.h"
 #include "ctrlEnv/sys/mvCpuIf.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -81,7 +80,6 @@ typedef struct _mvSataDecWin
     MV_BOOL       enable;     /* Address decode window is enabled/disabled    */
  
 } MV_SATA_DEC_WIN;
-
 
 #define MV_SATA_MAX_ADDR_DECODE_WIN 4
 
@@ -114,15 +112,8 @@ MV_STATUS mvSataWinByTargetGet(MV_TARGET target, MV_SATA_DEC_WIN *pAddrDecWin);
 MV_STATUS mvSataWinInit(MV_VOID);
 MV_VOID   mvSataAddrDecShow(MV_VOID);
 
-
 #ifdef __cplusplus
 }
 #endif
 
-
 #endif
-
-
-
-
-

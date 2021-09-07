@@ -949,7 +949,6 @@ static int mvs_task_exec(struct sas_task *task, const int num, gfp_t gfp_flags,
 
 		slot = &mvi->slot_info[tag];
 
-
 		t->lldd_task = NULL;
 		slot->n_elem = n_elem;
 		slot->slot_tag = tag;
@@ -1259,7 +1258,6 @@ static void mvs_port_notify_deformed(struct asd_sas_phy *sas_phy, int lock)
 	/*Nothing*/
 }
 
-
 void mvs_port_formed(struct asd_sas_phy *sas_phy)
 {
 	mvs_port_notify_formed(sas_phy, 1);
@@ -1373,7 +1371,6 @@ void mvs_dev_gone_notify(struct domain_device *dev, int lock)
 	if (lock)
 		spin_unlock_irqrestore(&mvi->lock, flags);
 }
-
 
 void mvs_dev_gone(struct domain_device *dev)
 {
@@ -1509,7 +1506,6 @@ static int mvs_debug_issue_ssp_tmf(struct domain_device *dev,
 	return mvs_exec_internal_tmf_task(dev, &ssp_task,
 				sizeof(ssp_task), tmf);
 }
-
 
 /*  Standard mandates link reset for ATA  (type 0)
     and hard reset for SSP (type 1) , only for RECOVERY */
@@ -1710,7 +1706,6 @@ static int mvs_sata_done(struct mvs_info *mvi, struct sas_task *task,
 	struct task_status_struct *tstat = &task->task_status;
 	struct ata_task_resp *resp = (struct ata_task_resp *)tstat->buf;
 	int stat = SAM_GOOD;
-
 
 	resp->frame_len = sizeof(struct dev_to_host_fis);
 	memcpy(&resp->ending_fis[0],
@@ -2151,4 +2146,3 @@ int mvs_int_rx(struct mvs_info *mvi, bool self_clear)
 		MVS_CHIP_DISP->int_full(mvi);
 	return 0;
 }
-

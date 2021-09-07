@@ -34,7 +34,6 @@
 #include "vmbus.h"
 #include "StorVscApi.h"
 
-
 #define BLKVSC_MINORS	64
 
 enum blkvsc_device_type {
@@ -147,7 +146,6 @@ static int blkvsc_do_flush(struct block_device_context *blkdev);
 static int blkvsc_cancel_pending_reqs(struct block_device_context *blkdev);
 static int blkvsc_do_pending_reqs(struct block_device_context *blkdev);
 
-
 static int blkvsc_ringbuffer_size = BLKVSC_RING_BUFFER_SIZE;
 
 /* The one and only one */
@@ -225,7 +223,6 @@ static void blkvsc_drv_exit(void)
 			DPRINT_WARN(BLKVSC_DRV,
 				    "driver_for_each_device returned %d", ret);
 
-
 		if (current_dev == NULL)
 			break;
 
@@ -297,7 +294,6 @@ static int blkvsc_probe(struct device *device)
 		ret = -ENOMEM;
 		goto Cleanup;
 	}
-
 
 	/* Call to the vsc driver to add the device */
 	ret = storvsc_drv_obj->Base.OnDeviceAdd(device_obj, &device_info);
@@ -1411,7 +1407,6 @@ static int blkvsc_getgeo(struct block_device *bd, struct hd_geometry *hg)
 
 		if (heads < 4)
 			heads = 4;
-
 
 		if (cylinder_times_heads >= (heads * 1024) || (heads > 16)) {
 			sectors_per_track = 31;

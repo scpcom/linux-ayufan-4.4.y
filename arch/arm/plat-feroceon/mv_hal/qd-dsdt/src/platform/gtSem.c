@@ -15,7 +15,6 @@
 #include <msApi.h>
 #include <gtSem.h>
 
-
 /*******************************************************************************
 * gtSemCreate
 *
@@ -78,7 +77,6 @@ GT_STATUS gtSemDelete
 
 	return GT_OK;
 }
-
 
 /*******************************************************************************
 * gtSemTake
@@ -146,4 +144,3 @@ GT_STATUS gtSemGive
 
 	return GT_OK;
 }
-

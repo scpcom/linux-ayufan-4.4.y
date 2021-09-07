@@ -11,7 +11,6 @@
 #ifndef _ASM_SN_SN0_ARCH_H
 #define _ASM_SN_SN0_ARCH_H
 
-
 #ifndef SN0XXL  /* 128 cpu SMP max */
 /*
  * This is the maximum number of nodes that can be part of a kernel.

@@ -104,7 +104,6 @@ static cycle_t ox820_get_cycles(struct clocksource *cs)
 	return ~time;
 }
 
-
 static struct clocksource clocksource_ox820 = {
 	.name	= "rps-timer2",
 	.rating	= 200,
@@ -119,7 +118,6 @@ static void __init ox820_clocksource_init(void)
 //      printk("820:start timer 2 init\n");
 	
 	*((volatile unsigned long*)TIMER2_LOAD) = (0xffffff);
-	
 	
 	/* setup timer 2 as free-running clocksource */
 	*((volatile unsigned long*)TIMER2_CONTROL) = 0;

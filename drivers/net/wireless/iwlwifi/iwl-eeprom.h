@@ -78,7 +78,6 @@ struct iwl_priv;
 #define IWL_EEPROM_SEM_TIMEOUT 		10   /* microseconds */
 #define IWL_EEPROM_SEM_RETRY_LIMIT	1000 /* number of attempts (not time) */
 
-
 /*
  * Regulatory channel usage flags in EEPROM struct iwl4965_eeprom_channel.flags.
  *
@@ -251,7 +250,6 @@ struct iwl_eeprom_enhanced_txpwr {
 #define EEPROM_HB_OFDM_HT40_BAND_1       ((0x1B0)\
 		| INDIRECT_ADDRESS | INDIRECT_REGULATORY)   /* 16 bytes */
 
-
 /* 5050 Specific */
 #define EEPROM_5050_TX_POWER_VERSION    (4)
 #define EEPROM_5050_EEPROM_VERSION	(0x21E)
@@ -290,7 +288,6 @@ struct iwl_eeprom_calib_measure {
 	s8 pa_det;		/* Power amp detector level (not used) */
 } __attribute__ ((packed));
 
-
 /*
  * measurement set for one channel.  EEPROM contains:
  *
@@ -323,7 +320,6 @@ struct iwl_eeprom_calib_subband_info {
 	struct iwl_eeprom_calib_ch_info ch2;
 } __attribute__ ((packed));
 
-
 /*
  * txpower calibration info.  EEPROM contains:
  *
@@ -351,7 +347,6 @@ struct iwl_eeprom_calib_info {
 	struct iwl_eeprom_calib_subband_info
 		band_info[EEPROM_TX_POWER_BANDS];
 } __attribute__ ((packed));
-
 
 #define ADDRESS_MSK                 0x0000FFFF
 #define INDIRECT_TYPE_MSK           0x000F0000
@@ -468,7 +463,6 @@ struct iwl_eeprom_ops {
 	const u8* (*query_addr) (const struct iwl_priv *priv, size_t offset);
 	void (*update_enhanced_txpower) (struct iwl_priv *priv);
 };
-
 
 void iwl_eeprom_get_mac(const struct iwl_priv *priv, u8 *mac);
 int iwl_eeprom_init(struct iwl_priv *priv);

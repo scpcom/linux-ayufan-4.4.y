@@ -69,7 +69,6 @@ struct em28xx_dvb {
 	struct dvb_net             net;
 };
 
-
 static inline void print_err_status(struct em28xx *dev,
 				     int packet, int status)
 {
@@ -209,8 +208,6 @@ static int stop_feed(struct dvb_demux_feed *feed)
 	mutex_unlock(&dvb->lock);
 	return err;
 }
-
-
 
 /* ------------------------------------------------------------------ */
 static int em28xx_dvb_bus_ctrl(struct dvb_frontend *fe, int acquire)
@@ -448,7 +445,6 @@ static void unregister_dvb(struct em28xx_dvb *dvb)
 	dvb_frontend_detach(dvb->frontend);
 	dvb_unregister_adapter(&dvb->adapter);
 }
-
 
 static int dvb_init(struct em28xx *dev)
 {

@@ -60,8 +60,6 @@
 
 #include "i1480u-wlp.h"
 
-
-
 static inline
 void i1480u_init(struct i1480u *i1480u)
 {
@@ -355,7 +353,6 @@ error_alloc_netdev:
 	return result;
 }
 
-
 /**
  * Disconect a i1480u from the system.
  *
@@ -410,7 +407,6 @@ static int __init i1480u_driver_init(void)
 	return usb_register(&i1480u_driver);
 }
 module_init(i1480u_driver_init);
-
 
 static void __exit i1480u_driver_exit(void)
 {

@@ -244,7 +244,6 @@ rdcodec(struct ac97_codec *codec, u8 addr)
 	return data;
 }
 
-
 static void
 wrcodec(struct ac97_codec *codec, u8 addr, u16 data)
 {
@@ -506,7 +505,6 @@ stop_adc(struct au1550_state *s)
 	spin_unlock_irqrestore(&s->lock, flags);
 }
 
-
 static void
 set_xmit_slots(int num_channels)
 {
@@ -717,7 +715,6 @@ prog_dmabuf_dac(struct au1550_state *s)
 	return prog_dmabuf(s, &s->dma_dac);
 }
 
-
 static void dac_dma_interrupt(int irq, void *dev_id)
 {
 	struct au1550_state *s = (struct au1550_state *) dev_id;
@@ -750,7 +747,6 @@ static void dac_dma_interrupt(int irq, void *dev_id)
 
 	spin_unlock(&s->lock);
 }
-
 
 static void adc_dma_interrupt(int irq, void *dev_id)
 {
@@ -799,7 +795,6 @@ au1550_llseek(struct file *file, loff_t offset, int origin)
 {
 	return -ESPIPE;
 }
-
 
 static int
 au1550_open_mixdev(struct inode *inode, struct file *file)
@@ -1027,7 +1022,6 @@ copy_dmabuf_user(struct dmabuf *db, char* userbuf, int count, int to_user)
 	return ret;
 }
 
-
 static ssize_t
 au1550_read(struct file *file, char *buffer, size_t count, loff_t *ppos)
 {
@@ -1205,7 +1199,6 @@ out2:
 	return ret;
 }
 
-
 /* No kernel lock - we have our own spinlock */
 static unsigned int
 au1550_poll(struct file *file, struct poll_table_struct *wait)
@@ -1336,7 +1329,6 @@ dma_count_done(struct dmabuf *db)
 
 	return db->dma_fragsize - au1xxx_get_dma_residue(db->dmanr);
 }
-
 
 static int
 au1550_ioctl(struct inode *inode, struct file *file, unsigned int cmd,
@@ -1776,7 +1768,6 @@ au1550_ioctl(struct inode *inode, struct file *file, unsigned int cmd,
 	return mixdev_ioctl(s->codec, cmd, arg);
 }
 
-
 static int
 au1550_open(struct inode *inode, struct file *file)
 {
@@ -1895,7 +1886,6 @@ static /*const */ struct file_operations au1550_audio_fops = {
 MODULE_AUTHOR("Advanced Micro Devices (AMD), dan@embeddededge.com");
 MODULE_DESCRIPTION("Au1550 AC97 Audio Driver");
 MODULE_LICENSE("GPL");
-
 
 static int __devinit
 au1550_probe(void)

@@ -99,7 +99,6 @@ enum {UPVALUE, DOWNVALUE, MOVEVALUE};
 
 #define isvalidtxsize(n)	((n) > 0 && (n) <= MIMIO_MAXPAYLOAD)
 
-
 struct pktbuf {
 	unsigned char instr;
 	unsigned char buf[16];

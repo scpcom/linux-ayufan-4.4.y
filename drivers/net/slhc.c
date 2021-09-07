@@ -144,7 +144,6 @@ out_fail:
 	return NULL;
 }
 
-
 /* Free a compression data structure */
 void
 slhc_free(struct slcompress *comp)
@@ -161,7 +160,6 @@ slhc_free(struct slcompress *comp)
 	kfree( comp );
 }
 
-
 /* Put a short in host order into a char array in network order */
 static inline unsigned char *
 put16(unsigned char *cp, unsigned short x)
@@ -171,7 +169,6 @@ put16(unsigned char *cp, unsigned short x)
 
 	return cp;
 }
-
 
 /* Encode a number */
 static unsigned char *
@@ -234,7 +231,6 @@ slhc_compress(struct slcompress *comp, unsigned char *icp, int isize,
 	struct iphdr *ip;
 	struct tcphdr *th, *oth;
 	__sum16 csum;
-
 
 	/*
 	 *	Don't play with runt packets.
@@ -479,7 +475,6 @@ uncompressed:
 	return isize;
 }
 
-
 int
 slhc_uncompress(struct slcompress *comp, unsigned char *icp, int isize)
 {
@@ -626,7 +621,6 @@ bad:
 	return slhc_toss( comp );
 }
 
-
 int
 slhc_remember(struct slcompress *comp, unsigned char *icp, int isize)
 {
@@ -687,7 +681,6 @@ slhc_toss(struct slcompress *comp)
 	return 0;
 }
 
-
 /* VJ header compression */
 EXPORT_SYMBOL(slhc_init);
 EXPORT_SYMBOL(slhc_free);
@@ -697,7 +690,6 @@ EXPORT_SYMBOL(slhc_uncompress);
 EXPORT_SYMBOL(slhc_toss);
 
 #else /* CONFIG_INET */
-
 
 int
 slhc_toss(struct slcompress *comp)

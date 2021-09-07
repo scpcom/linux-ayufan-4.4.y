@@ -40,7 +40,6 @@
 #error SiByte headers require ANSI C89 support
 #endif
 
-
 /*  *********************************************************************
     *  Macros for feature tests, used to enable include file features
     *  for chip features only present in certain chip revisions.
@@ -129,7 +128,6 @@
 #define	SIBYTE_HDR_FEATURES			SIBYTE_HDR_FMASK_ALL
 #endif
 
-
 /* Bit mask for revisions of chip exclusively before the named revision.  */
 #define	SIBYTE_HDR_FMASK_BEFORE(chip, pass)				\
     ((SIBYTE_HDR_FMASK(chip, pass) - 1) & SIBYTE_HDR_FMASK_ALLREVS(chip))
@@ -138,7 +136,6 @@
 #define	SIBYTE_HDR_FMASK_AFTER(chip, pass)				\
     (~(SIBYTE_HDR_FMASK(chip, pass)					\
      | (SIBYTE_HDR_FMASK(chip, pass) - 1)) & SIBYTE_HDR_FMASK_ALLREVS(chip))
-
 
 /* True if header features enabled for (any revision of) that chip type.  */
 #define SIBYTE_HDR_FEATURE_CHIP(chip)					\
@@ -163,7 +160,6 @@
 #define SIBYTE_HDR_FEATURE_UP_TO(chip, pass)				\
     (!! ((SIBYTE_HDR_FMASK(chip, pass)					\
 	 | SIBYTE_HDR_FMASK_BEFORE(chip, pass)) & SIBYTE_HDR_FEATURES))
-
 
 /*  *********************************************************************
     *  Naming schemes for constants in these files:
@@ -202,9 +198,6 @@
     *                  in the register.
     ********************************************************************* */
 
-
-
-
 /*
  * Cast to 64-bit number.  Presumably the syntax is different in
  * assembly language.
@@ -219,7 +212,6 @@
 #define _SB_MAKE64(x) (x)
 #define _SB_MAKE32(x) (x)
 #endif
-
 
 /*
  * Make a mask for 1 bit at position 'n'
@@ -249,7 +241,6 @@
  * Macros to read/write on-chip registers
  * XXX should we do the PHYS_TO_K1 here?
  */
-
 
 #if defined(__mips64) && !defined(__ASSEMBLY__)
 #define SBWRITECSR(csr, val) *((volatile uint64_t *) PHYS_TO_K1(csr)) = (val)

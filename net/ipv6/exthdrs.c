@@ -872,4 +872,3 @@ struct ipv6_txoptions *ipv6_fixup_options(struct ipv6_txoptions *opt_space,
 
 	return opt;
 }
-

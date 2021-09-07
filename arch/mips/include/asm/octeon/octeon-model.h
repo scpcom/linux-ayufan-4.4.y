@@ -182,8 +182,6 @@
 #define OCTEON_CN3020           (OCTEON_CN3020_PASS1 | OM_IGNORE_REVISION \
 				 | OM_CHECK_SUBMODEL)
 
-
-
 /* This matches the complete family of CN3xxx CPUs, and not subsequent models */
 #define OCTEON_CN3XXX           (OCTEON_CN58XX_PASS1_0 \
 				 | OM_MATCH_PREVIOUS_MODELS \

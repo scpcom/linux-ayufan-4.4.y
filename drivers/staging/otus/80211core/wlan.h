@@ -27,7 +27,6 @@
 #ifndef _WLAN_H
 #define _WLAN_H
 
-
 #define ZM_EXTERNAL_ALLOC_BUF               0
 #define ZM_INTERNAL_ALLOC_BUF               1
 
@@ -183,7 +182,6 @@
 #define ZM_CH_A_157                        5785
 #define ZM_CH_A_161                        5805
 #define ZM_CH_A_165                        5825
-
 
 /* AP : STA table => STA Type */
 #define ZM_11B_STA                          0x0
@@ -486,7 +484,6 @@ struct zsFrag
 #define ZM_MAC_REG_TX_RETRY			            (ZM_MAC_REG_BASE + 0x6CC)
 #define ZM_MAC_REG_TX_TOTAL			            (ZM_MAC_REG_BASE + 0x6F4)
 
-
 #define ZM_MAC_REG_ACK_EXTENSION                (ZM_MAC_REG_BASE + 0x690)
 #define ZM_MAC_REG_EIFS_AND_SIFS                (ZM_MAC_REG_BASE + 0x698)
 
@@ -521,7 +518,6 @@ struct zsFrag
 #define ZM_MAC_REG_BCN_HT1                      (ZM_MAC_REG_BASE + 0xDA0)
 #define ZM_MAC_REG_BCN_HT2                      (ZM_MAC_REG_BASE + 0xDA4)
 
-
 #define ZM_RX_STATUS_IS_MIC_FAIL(rxStatus) rxStatus->Tail.Data.ErrorIndication & ZM_BIT_6
 
 //================================
@@ -540,10 +536,6 @@ struct zsFrag
 #define ZM_BSS_INFO_VALID_BIT      0x01
 #define ZM_BSS_INFO_UPDATED_BIT    0x02
 
-
-
-
-
 #define ZM_ERROR_INDICATION_RX_TIMEOUT      0x01
 #define ZM_ERROR_INDICATION_OVERRUN         0x02
 #define ZM_ERROR_INDICATION_DECRYPT_ERROR   0x04
@@ -557,10 +549,6 @@ struct zsFrag
 #define ZM_RXMAC_STATUS_MOD_TYPE_HT_OFDM    0x02
 #define ZM_RXMAC_STATUS_MOD_TYPE_DL_OFDM    0x03
 #define ZM_RXMAC_STATUS_TOTAL_ERROR         0x80
-
-
-
-
 
 #define ZM_MAX_LED_NUMBER       2
 
@@ -584,7 +572,6 @@ struct zsLedStruct
     u8_t    LEDCtrlFlag;         // Control Flag for vendors
     u8_t    LEDCtrlFlagFromReg;  // Control Flag for vendors in registry
 };
-
 
 //HAL+ capability bits definition
 #define ZM_HP_CAP_11N                   0x1

@@ -638,7 +638,6 @@ void __init init_cpu_to_node(void)
 }
 #endif
 
-
 void __cpuinit numa_set_node(int cpu, int node)
 {
 	int *cpu_to_node_map = early_per_cpu_ptr(x86_cpu_to_node_map);

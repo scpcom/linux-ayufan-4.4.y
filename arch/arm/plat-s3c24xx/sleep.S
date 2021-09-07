@@ -89,7 +89,6 @@ resume_with_mmu:
 s3c_sleep_save_phys:
 	.word	0
 
-
 	/* sleep magic, to allow the bootloader to check for an valid
 	 * image to resume to. Must be the first word before the
 	 * s3c_cpu_resume entry.

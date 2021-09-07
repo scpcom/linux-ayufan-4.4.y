@@ -139,5 +139,3 @@ static __initdata struct omap_hwmod *omap2430_hwmods[] = {
 #endif
 
 #endif
-
-

@@ -81,7 +81,6 @@ static void __init fixup_bus_range(struct device_node *bridge)
 	bus_range[1] = fixup_one_level_bus_range(bridge->child, bus_range[1]);
 }
 
-
 static unsigned long u3_agp_cfa0(u8 devfn, u8 off)
 {
 	return (1 << (unsigned long)PCI_SLOT(devfn)) |
@@ -486,7 +485,6 @@ static int __init maple_add_bridge(struct device_node *dev)
 
 	return 0;
 }
-
 
 void __devinit maple_pci_irq_fixup(struct pci_dev *dev)
 {

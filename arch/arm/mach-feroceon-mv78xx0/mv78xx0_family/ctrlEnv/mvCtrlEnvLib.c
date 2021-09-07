@@ -99,15 +99,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PCCRIR_REVID_OFFS		0		/* Revision ID */
 #define PCCRIR_REVID_MASK		(0xff << PCCRIR_REVID_OFFS)
 
-
-
 /* defines  */
 #ifdef MV_DEBUG
 	#define DB(x)	x
 #else
 	#define DB(x)
 #endif	
-
 
 /* Global paramters initial value '-1' to indicate they are uninitialized.	*/
 /* In case of data section is located in ROM, this value will not be able 	*/
@@ -326,7 +323,6 @@ MV_U32 mvCtrlUsbMaxGet(void)
 	}	
 }
 
-
 #if defined(MV_INCLUDE_PEX)
 
 /*******************************************************************************
@@ -427,7 +423,6 @@ MV_U8 mvCtrlRevGet(MV_VOID)
 
 	return (MV_U8)tmpCtrlDevRev;
 }
-
 
 #else
 /*******************************************************************************
@@ -585,7 +580,6 @@ MV_U32	mvCtrlModelRevGet(MV_VOID)
 #endif
 }
  
-
 /*******************************************************************************
 * mvCtrlNameGet - Get Marvell controller name
 *
@@ -699,7 +693,6 @@ MV_STATUS mvCtrlModelRevNameGet(char *pNameBuff)
 		mvCtrlNameGet(pNameBuff);
 		break;
 	}
-
 
 	return MV_OK;
 }
@@ -1037,7 +1030,6 @@ MV_U32	ctrlRegToSize(MV_U32 regSize, MV_U32 alignment)
 	   	return -1;
 	}
 	
-
 	/* Check that aligment is a power of two								*/
 	temp = alignment - 1;/* Now the alignmet is a sequance of '1' (0xffff) 	*/
 					
@@ -1068,7 +1060,6 @@ MV_U32	ctrlRegToSize(MV_U32 regSize, MV_U32 alignment)
 		
 	return regSize;	
 }
-
 
 /*******************************************************************************
 * ctrlSizeRegRoundUp - Round up given size 
@@ -1115,7 +1106,6 @@ MV_U32	ctrlSizeRegRoundUp(MV_U32 size, MV_U32 alignment)
         return retSize;
     }
 }
-
 
 #if defined(MV_INCLUDE_CLK_PWR_CNTRL) 
 /*******************************************************************************
@@ -1323,7 +1313,6 @@ MV_VOID   mvMPPConfigToSPI(MV_VOID)
 {
 }
 
-
 /*******************************************************************************
 * mvMPPConfigToDefault - Change MPP[7:0] configuration to default configuration
 *
@@ -1338,5 +1327,3 @@ MV_VOID   mvMPPConfigToSPI(MV_VOID)
 MV_VOID   mvMPPConfigToDefault(MV_VOID)
 {
 }
-
-

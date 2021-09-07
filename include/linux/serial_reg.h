@@ -221,9 +221,6 @@
 #define UART_FCR_PXAR16	0x80	/* receive FIFO treshold = 16 */
 #define UART_FCR_PXAR32	0xc0	/* receive FIFO treshold = 32 */
 
-
-
-
 /*
  * These register definitions are for the 16C950
  */
@@ -258,8 +255,6 @@
 #define UART_ACR_TLENB	0x20	/* 950 trigger levels enable */
 #define UART_ACR_ICRRD	0x40	/* ICR Read enable */
 #define UART_ACR_ASREN	0x80	/* Additional status enable */
-
-
 
 /*
  * These definitions are for the RSA-DV II/S card, from
@@ -326,4 +321,3 @@
 #define UART_OMAP_WER		0x17	/* Wake-up enable register */
 
 #endif /* _LINUX_SERIAL_REG_H */
-

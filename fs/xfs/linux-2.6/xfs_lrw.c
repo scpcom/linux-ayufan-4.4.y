@@ -52,7 +52,6 @@
 #include <linux/capability.h>
 #include <linux/writeback.h>
 
-
 #if defined(XFS_RW_TRACE)
 void
 xfs_rw_enter_trace(
@@ -180,7 +179,6 @@ xfs_read(
 	ssize_t			ret = 0;
 	xfs_fsize_t		n;
 	unsigned long		seg;
-
 
 	XFS_STATS_INC(xs_read_calls);
 
@@ -1100,7 +1098,6 @@ write_retry:
 #else
 		error2 = sync_page_range(inode, mapping, pos, ret);
 #endif
-
 
 		if (!error)
 			error = error2;

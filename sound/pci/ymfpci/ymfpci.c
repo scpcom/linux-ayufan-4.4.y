@@ -133,7 +133,6 @@ static int __devinit snd_ymfpci_create_gameport(struct snd_ymfpci *chip, int dev
 		return -ENOMEM;
 	}
 
-
 	gameport_set_name(gp, "Yamaha YMF Gameport");
 	gameport_set_phys(gp, "pci%s/gameport0", pci_name(chip->pci));
 	gameport_set_dev_parent(gp, &chip->pci->dev);

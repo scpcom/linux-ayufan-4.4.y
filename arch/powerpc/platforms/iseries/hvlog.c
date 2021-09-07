@@ -13,7 +13,6 @@
 #include <asm/iseries/hv_call_sc.h>
 #include <asm/iseries/hv_types.h>
 
-
 void HvCall_writeLogBuffer(const void *buffer, u64 len)
 {
 	struct HvLpBufferList hv_buf;

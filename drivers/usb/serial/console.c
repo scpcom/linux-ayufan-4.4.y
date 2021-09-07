@@ -47,7 +47,6 @@ static struct console usbcons;
  * ------------------------------------------------------------
  */
 
-
 /*
  * The parsing of the command line works exactly like the
  * serial.c code, except that the specifier is "ttyUSB" instead
@@ -316,4 +315,3 @@ void usb_serial_console_exit(void)
 		usbcons_info.port = NULL;
 	}
 }
-

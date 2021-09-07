@@ -675,7 +675,6 @@ static void omap3_noncore_dpll_disable(struct clk *clk)
 	_omap3_noncore_dpll_stop(clk);
 }
 
-
 /* Non-CORE DPLL rate set code */
 
 /*
@@ -815,7 +814,6 @@ static int omap3_dpll4_set_rate(struct clk *clk, unsigned long rate)
 	return omap3_noncore_dpll_set_rate(clk, rate);
 }
 
-
 /*
  * CORE DPLL (DPLL3) rate programming functions
  *
@@ -906,14 +904,12 @@ static int omap3_core_dpll_m2_set_rate(struct clk *clk, unsigned long rate)
 	return 0;
 }
 
-
 static const struct clkops clkops_noncore_dpll_ops = {
 	.enable		= &omap3_noncore_dpll_enable,
 	.disable	= &omap3_noncore_dpll_disable,
 };
 
 /* DPLL autoidle read/set code */
-
 
 /**
  * omap3_dpll_autoidle_read - read a DPLL's autoidle bits

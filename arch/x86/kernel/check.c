@@ -21,7 +21,6 @@ static unsigned __read_mostly corruption_check_period = 60; /* seconds */
 static struct e820entry scan_areas[MAX_SCAN_AREAS];
 static int num_scan_areas;
 
-
 static __init int set_corruption_check(char *arg)
 {
 	char *end;
@@ -55,7 +54,6 @@ static __init int set_corruption_check_size(char *arg)
 	return (size == corruption_check_size) ? 0 : -EINVAL;
 }
 early_param("memory_corruption_check_size", set_corruption_check_size);
-
 
 void __init setup_bios_corruption_check(void)
 {
@@ -108,7 +106,6 @@ void __init setup_bios_corruption_check(void)
 	update_e820();
 }
 
-
 void check_for_bios_corruption(void)
 {
 	int i;
@@ -158,4 +155,3 @@ static int start_periodic_check_for_corruption(void)
 }
 
 module_init(start_periodic_check_for_corruption);
-

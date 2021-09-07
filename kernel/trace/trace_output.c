@@ -849,7 +849,6 @@ static enum print_line_t trace_ctxwake_print(struct trace_iterator *iter,
 	char comm[TASK_COMM_LEN];
 	int S, T;
 
-
 	trace_assign_type(field, iter->ent);
 
 	T = task_state_char(field->next_state);
@@ -912,7 +911,6 @@ static enum print_line_t trace_wake_raw(struct trace_iterator *iter, int flags)
 {
 	return trace_ctxwake_raw(iter, '+');
 }
-
 
 static int trace_ctxwake_hex(struct trace_iterator *iter, char S)
 {
@@ -1129,7 +1127,6 @@ trace_bprint_print(struct trace_iterator *iter, int flags)
 	return TRACE_TYPE_PARTIAL_LINE;
 }
 
-
 static enum print_line_t
 trace_bprint_raw(struct trace_iterator *iter, int flags)
 {
@@ -1149,7 +1146,6 @@ trace_bprint_raw(struct trace_iterator *iter, int flags)
  partial:
 	return TRACE_TYPE_PARTIAL_LINE;
 }
-
 
 static struct trace_event trace_bprint_event = {
 	.type		= TRACE_BPRINT,
@@ -1198,7 +1194,6 @@ static struct trace_event trace_print_event = {
 	.trace		= trace_print_print,
 	.raw		= trace_print_raw,
 };
-
 
 static struct trace_event *events[] __initdata = {
 	&trace_fn_event,

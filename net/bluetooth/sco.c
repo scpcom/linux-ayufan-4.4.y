@@ -493,7 +493,6 @@ static int sco_sock_connect(struct socket *sock, struct sockaddr *addr, int alen
 	struct sock *sk = sock->sk;
 	int err = 0;
 
-
 	BT_DBG("sk %p", sk);
 
 	if (addr->sa_family != AF_BLUETOOTH || alen < sizeof(struct sockaddr_sco))

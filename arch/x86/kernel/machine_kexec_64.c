@@ -98,7 +98,6 @@ out:
 	return result;
 }
 
-
 static int init_level4_page(struct kimage *image, pgd_t *level4p,
 				unsigned long addr, unsigned long last_addr)
 {
@@ -182,7 +181,6 @@ err:
 	return result;
 }
 
-
 static int init_pgtable(struct kimage *image, unsigned long start_pgtable)
 {
 	pgd_t *level4p;
@@ -214,7 +212,6 @@ static void set_idt(void *newidt, u16 limit)
 		: : "m" (curidt)
 		);
 };
-
 
 static void set_gdt(void *newgdt, u16 limit)
 {
@@ -350,4 +347,3 @@ void arch_crash_save_vmcoreinfo(void)
 	VMCOREINFO_LENGTH(node_data, MAX_NUMNODES);
 #endif
 }
-

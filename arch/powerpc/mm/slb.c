@@ -25,7 +25,6 @@
 #include <linux/compiler.h>
 #include <asm/udbg.h>
 
-
 extern void slb_allocate_realmode(unsigned long ea);
 extern void slb_allocate_user(unsigned long ea);
 

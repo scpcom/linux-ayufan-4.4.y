@@ -2,7 +2,6 @@
 #define _ASM_POWERPC_ABS_ADDR_H
 #ifdef __KERNEL__
 
-
 /*
  * c 2001 PPC 64 Team, IBM Corp
  *

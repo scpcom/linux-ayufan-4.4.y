@@ -913,7 +913,6 @@ static int sd_ioctl(struct block_device *bdev, fmode_t mode,
 			return 0;
 		}
 #endif /* MY_ABC_HERE */
-
 		default:
 			error = scsi_cmd_ioctl(disk->queue, disk, mode, cmd, p);
 			if (error != -ENOTTY)
@@ -1018,7 +1017,6 @@ static int sd_sync_cache(struct scsi_disk *sdkp)
 	if (!scsi_device_online(sdp))
 		return -ENODEV;
 
-
 	for (retries = 3; retries > 0; --retries) {
 		unsigned char cmd[10] = { 0 };
 
@@ -1064,7 +1062,6 @@ static void sd_rescan(struct device *dev)
 		scsi_disk_put(sdkp);
 	}
 }
-
 
 #ifdef CONFIG_COMPAT
 /* 
@@ -1376,7 +1373,6 @@ sd_spinup_disk(struct scsi_disk *sdkp)
 			printk("not responding...\n");
 	}
 }
-
 
 /*
  * Determine whether disk supports Data Integrity Field.
@@ -2343,7 +2339,6 @@ static int sd_probe(struct device *dev)
 	u32 synoidx;
 #endif
 
-
 	error = -ENODEV;
 	if (sdp->type != TYPE_DISK && sdp->type != TYPE_MOD && sdp->type != TYPE_RBC)
 		goto out;
@@ -2759,7 +2754,7 @@ static void sd_shutdown(struct device *dev)
 
 static int sd_suspend(struct device *dev, pm_message_t mesg)
 {
-	struct scsi_disk *sdkp = scsi_disk_get_from_dev(dev);
+ 	struct scsi_disk *sdkp = scsi_disk_get_from_dev(dev);
 	int ret = 0;
 
 	if (!sdkp)
@@ -2780,7 +2775,7 @@ static int sd_suspend(struct device *dev, pm_message_t mesg)
 done:
 	scsi_disk_put(sdkp);
 	return ret;
-}
+ }
 
 static int sd_resume(struct device *dev)
 {
@@ -3141,7 +3136,6 @@ blSectorNeedAutoRemap(struct scsi_cmnd *scsi_cmd,
 	sector_t start, end;
 	u8 ret = 0;
 	int i = 0;
-
 
 	if (!scsi_cmd) {
 		WARN_ON(1);

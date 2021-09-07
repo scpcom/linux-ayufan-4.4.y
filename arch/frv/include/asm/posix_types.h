@@ -59,4 +59,3 @@ typedef struct {
 #endif /* defined(__KERNEL__) */
 
 #endif
-

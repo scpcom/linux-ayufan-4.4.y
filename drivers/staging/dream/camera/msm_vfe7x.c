@@ -150,7 +150,6 @@ static void vfe_7x_ops(void *driver_data, unsigned id, size_t len,
 			wake_up(&stopevent.wait);
 			break;
 
-
 		default:
 			rp->type = VFE_MSG_GENERAL;
 			break;

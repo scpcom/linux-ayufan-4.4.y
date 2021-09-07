@@ -107,7 +107,6 @@ struct atari_hw_present {
 
 extern struct atari_hw_present atari_hw_present;
 
-
 /* Reading the MFP port register gives a machine independent delay, since the
  * MFP always has a 8 MHz clock. This avoids problems with the varying length
  * of nops on various machines. Somebody claimed that the tstb takes 600 ns.
@@ -122,14 +121,11 @@ extern struct atari_hw_present atari_hw_present;
  * DMA reads (i.e., writes to memory).
  */
 
-
 #define atari_readb   raw_inb
 #define atari_writeb  raw_outb
 
 #define atari_inb_p   raw_inb
 #define atari_outb_p  raw_outb
-
-
 
 #include <linux/mm.h>
 #include <asm/cacheflush.h>
@@ -148,7 +144,6 @@ static inline void dma_cache_maintenance( unsigned long paddr,
 			cache_clear( paddr, len );
 	}
 }
-
 
 /*
 ** Shifter
@@ -188,7 +183,6 @@ struct SHIFTER_F030
  };
 # define shifter_f030 ((*(volatile struct SHIFTER_F030 *)SHF_FBAS))
 
-
 #define	SHF_TBAS (0xffff8200)
 struct SHIFTER_TT {
 	u_char	char_dummy0;
@@ -210,7 +204,6 @@ struct SHIFTER_TT {
 	u_char	st_shiftmode;	/* ST compatible shift mode register, unused */
 	u_char  char_dummy7;
 	u_short tt_shiftmode;	/* TT shift mode register */
-
 
 };
 #define	shifter_tt	((*(volatile struct SHIFTER_TT *)SHF_TBAS))
@@ -362,7 +355,6 @@ struct TT_5380 {
 #define	tt_scsi			((*(volatile struct TT_5380 *)TT_5380_BAS))
 #define	tt_scsi_regp	((volatile char *)TT_5380_BAS)
 
-
 /*
 ** Falcon DMA Sound Subsystem
  */
@@ -433,7 +425,6 @@ struct BLITTER
  };
 # define blitter ((*(volatile struct BLITTER *)BLT_BAS))
 
-
 /*
 ** SCC Z8530
  */
@@ -470,7 +461,6 @@ struct VIDEL_PALETTE
   u_long reg[256];
  };
 # define videl_palette ((*(volatile struct VIDEL_PALETTE*)FPL_BAS))
-
 
 /*
 ** Falcon DSP Host Interface
@@ -572,7 +562,6 @@ struct MFP
 #define	TT_MFP_BAS	(0xfffffa81)
 # define tt_mfp ((*(volatile struct MFP*)TT_MFP_BAS))
 
-
 /* TT System Control Unit */
 
 #define	TT_SCU_BAS	(0xffff8e01)
@@ -604,7 +593,6 @@ struct TT_RTC {
 	u_char	data;
 };
 #define	tt_rtc	((*(volatile struct TT_RTC *)TT_RTC_BAS))
-
 
 /*
 ** ACIA 6850
@@ -721,7 +709,6 @@ struct TT_DMASND {
 #define	DMASND_MODE_25KHZ	  0x02
 #define	DMASND_MODE_50KHZ	  0x03
 
-
 #define DMASNDSetBase(bufstart)						\
     do {								\
 	tt_dmasnd.bas_hi  = (unsigned char)(((bufstart) & 0xff0000) >> 16); \
@@ -739,7 +726,6 @@ struct TT_DMASND {
 	tt_dmasnd.end_mid = (unsigned char)(((bufend) & 0x00ff00) >> 8); \
 	tt_dmasnd.end_low = (unsigned char) ((bufend) & 0x0000ff); \
     } while( 0 )
-
 
 #define	TT_MICROWIRE_BAS	(0xffff8922)
 struct TT_MICROWIRE {
@@ -804,4 +790,3 @@ struct MSTE_RTC {
 #define mste_rtc ((*(volatile struct MSTE_RTC *)MSTE_RTC_BAS))
 
 #endif /* linux/atarihw.h */
-

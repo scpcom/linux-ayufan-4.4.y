@@ -560,7 +560,6 @@ VOID MlmeAssocReqAction(
 			// End Add by James
 		}
 
-
 		MiniportMMRequest(pAd, 0, pOutBuffer, FrameLen);
 		MlmeFreeMemory(pAd, pOutBuffer);
 
@@ -815,8 +814,6 @@ VOID MlmeDisassocReqAction(
 		MlmeEnqueue(pAd, MLME_CNTL_STATE_MACHINE, MT2_DISASSOC_CONF, 2, &Status);
 		return;
 	}
-
-
 
 	RTMPCancelTimer(&pAd->MlmeAux.DisassocTimer, &TimerCancelled);
 
@@ -1634,7 +1631,6 @@ BOOLEAN StaAddMacTableEntry(
 			if (i==0)
 				break;
 		}
-
 
 		if (pAd->StaCfg.DesiredTransmitSetting.field.MCS != MCS_AUTO)
 		{

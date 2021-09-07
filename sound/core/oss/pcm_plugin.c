@@ -134,7 +134,6 @@ int snd_pcm_plug_alloc(struct snd_pcm_substream *plug, snd_pcm_uframes_t frames)
 	return 0;
 }
 
-
 snd_pcm_sframes_t snd_pcm_plugin_client_channels(struct snd_pcm_plugin *plugin,
 				       snd_pcm_uframes_t frames,
 				       struct snd_pcm_plugin_channel **channels)

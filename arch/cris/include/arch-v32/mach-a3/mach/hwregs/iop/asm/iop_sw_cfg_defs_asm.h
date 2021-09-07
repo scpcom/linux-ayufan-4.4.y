@@ -545,7 +545,6 @@
 #define reg_iop_sw_cfg_rw_sdp_cfg___sdp_in_strb___width 3
 #define reg_iop_sw_cfg_rw_sdp_cfg_offset 164
 
-
 /* Constants */
 #define regk_iop_sw_cfg_a                         0x00000001
 #define regk_iop_sw_cfg_b                         0x00000002

@@ -409,7 +409,6 @@ static void fee_read(unsigned long ioaddr,	/* I/O port of the card */
 	}
 }
 
-
 /*------------------------------------------------------------------*/
 /*
  * Write bytes from the Frequency EEPROM (frequency select cards).
@@ -1346,7 +1345,6 @@ static void wv_init_info(struct net_device * dev)
  * or wireless extensions
  */
 
-
 /*------------------------------------------------------------------*/
 /*
  * Set or clear the multicast filter for this adaptor.
@@ -1438,7 +1436,6 @@ static int wavelan_set_mac_address(struct net_device * dev, void *addr)
 	return 0;
 }
 #endif				/* SET_MAC_ADDRESS */
-
 
 /*------------------------------------------------------------------*/
 /*
@@ -2886,7 +2883,6 @@ static netdev_tx_t wavelan_packet_xmit(struct sk_buff *skb,
 	else if(wv_packet_write(dev, skb->data, skb->len))
 		return NETDEV_TX_BUSY;	/* We failed */
 
-
 	dev_kfree_skb(skb);
 
 #ifdef DEBUG_TX_TRACE
@@ -4036,7 +4032,6 @@ static const struct net_device_ops wavelan_netdev_ops = {
 #endif
 };
 
-
 /*------------------------------------------------------------------*/
 /*
  * Probe an I/O address, and if the WaveLAN is there configure the
@@ -4268,7 +4263,6 @@ int __init init_module(void)
 		for (i = 0; i < ARRAY_SIZE(iobase); i++)
 			io[i] = iobase[i];
 	}
-
 
 	/* Loop on all possible base addresses. */
 	for (i = 0; i < ARRAY_SIZE(io) && io[i] != 0; i++) {

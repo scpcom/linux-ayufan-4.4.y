@@ -475,7 +475,6 @@ static int axnet_resume(struct pcmcia_device *link)
 	return 0;
 }
 
-
 /*======================================================================
 
     MII interface support

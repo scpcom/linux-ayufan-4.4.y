@@ -38,7 +38,6 @@
 
 #include "../rt_config.h"
 
-
 void inc_byte_array(UCHAR *counter, int len);
 
 /*
@@ -121,7 +120,6 @@ VOID	RTMPReportMicError(
         RTMPSetTimer(&pAd->StaCfg.WpaDisassocAndBlockAssocTimer, 100);
     }
 }
-
 
 #ifdef WPA_SUPPLICANT_SUPPORT
 #define	LENGTH_EAP_H    4
@@ -219,7 +217,6 @@ VOID	WpaMicFailureReportFrame(
 
 	// Convert to little-endian format.
 	*((USHORT *)&Packet.KeyDesc.KeyInfo) = cpu2le16(*((USHORT *)&Packet.KeyDesc.KeyInfo));
-
 
 	MlmeAllocateMemory(pAd, (PUCHAR *)&pOutBuffer);  // allocate memory
 	if(pOutBuffer == NULL)

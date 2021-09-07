@@ -1232,7 +1232,6 @@ lpfc_config_port(struct lpfc_hba *phba, LPFC_MBOXQ_t *pmb)
 	 * for ioremap/iomap.
 	 */
 
-
 	pci_read_config_dword(phba->pcidev, PCI_BASE_ADDRESS_0, &bar_low);
 	pci_read_config_dword(phba->pcidev, PCI_BASE_ADDRESS_1, &bar_high);
 

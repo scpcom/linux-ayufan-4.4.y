@@ -71,7 +71,6 @@ struct sm501_devdata {
 	struct resource			*regs_claim;
 	struct sm501_platdata		*platdata;
 
-
 	unsigned int			 in_suspend;
 	unsigned long			 pm_misc;
 
@@ -81,7 +80,6 @@ struct sm501_devdata {
 	void __iomem			*regs;
 	unsigned int			 rev;
 };
-
 
 #define MHZ (1000 * 1000)
 
@@ -385,7 +383,6 @@ int sm501_unit_power(struct device *dev, unsigned int unit, unsigned int to)
 }
 
 EXPORT_SYMBOL_GPL(sm501_unit_power);
-
 
 /* Perform a rounded division. */
 static long sm501fb_round_div(long num, long denom)
@@ -1239,7 +1236,6 @@ static ssize_t sm501_dbg_regs(struct device *dev,
 
 	return ptr - buff;
 }
-
 
 static DEVICE_ATTR(dbg_regs, 0666, sm501_dbg_regs, NULL);
 

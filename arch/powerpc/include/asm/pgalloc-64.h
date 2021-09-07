@@ -59,7 +59,6 @@ static inline void pud_populate(struct mm_struct *mm, pud_t *pud, pmd_t *pmd)
 #define pmd_populate_kernel(mm, pmd, pte) pmd_set(pmd, (unsigned long)(pte))
 #define pmd_pgtable(pmd) pmd_page(pmd)
 
-
 #else /* CONFIG_PPC_64K_PAGES */
 
 #define pud_populate(mm, pud, pmd)	pud_set(pud, (unsigned long)pmd)

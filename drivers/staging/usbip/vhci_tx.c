@@ -20,7 +20,6 @@
 #include "usbip_common.h"
 #include "vhci.h"
 
-
 static void setup_cmd_submit_pdu(struct usbip_header *pdup,  struct urb *urb)
 {
 	struct vhci_priv *priv = ((struct vhci_priv *)urb->hcpriv);
@@ -62,8 +61,6 @@ static struct vhci_priv *dequeue_from_priv_tx(struct vhci_device *vdev)
 	return NULL;
 }
 
-
-
 static int vhci_send_cmd_submit(struct vhci_device *vdev)
 {
 	struct vhci_priv *priv = NULL;
@@ -86,7 +83,6 @@ static int vhci_send_cmd_submit(struct vhci_device *vdev)
 		memset(&iov, 0, sizeof(iov));
 
 		usbip_dbg_vhci_tx("setup txdata urb %p\n", urb);
-
 
 		/* 1. setup usbip_header */
 		setup_cmd_submit_pdu(&pdu_header, urb);
@@ -137,7 +133,6 @@ static int vhci_send_cmd_submit(struct vhci_device *vdev)
 	return total_size;
 }
 
-
 /*-------------------------------------------------------------------------*/
 
 static struct vhci_unlink *dequeue_from_unlink_tx(struct vhci_device *vdev)
@@ -179,7 +174,6 @@ static int vhci_send_cmd_unlink(struct vhci_device *vdev)
 
 		usbip_dbg_vhci_tx("setup cmd unlink, %lu \n", unlink->seqnum);
 
-
 		/* 1. setup usbip_header */
 		pdu_header.base.command = USBIP_CMD_UNLINK;
 		pdu_header.base.seqnum  = unlink->seqnum;
@@ -201,7 +195,6 @@ static int vhci_send_cmd_unlink(struct vhci_device *vdev)
 			return -1;
 		}
 
-
 		usbip_dbg_vhci_tx("send txdata\n");
 
 		total_size += txsize;
@@ -209,7 +202,6 @@ static int vhci_send_cmd_unlink(struct vhci_device *vdev)
 
 	return total_size;
 }
-
 
 /*-------------------------------------------------------------------------*/
 

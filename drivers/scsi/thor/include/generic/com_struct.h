@@ -190,8 +190,6 @@
 #define DT_EXPANDER				0x20
 #define DT_PM					0x21
 
-
-
 #define HD_FEATURE_NCQ                          MV_BIT(0)	/* Capability */
 #define HD_FEATURE_TCQ                          MV_BIT(1)
 #define HD_FEATURE_1_5G                         MV_BIT(2)
@@ -401,7 +399,6 @@ typedef struct _HD_MBR_Info
 	MV_U16          HDIDs[MAX_HD_SUPPORTED_API];    
 	MV_BOOLEAN      hasMBR[MAX_HD_SUPPORTED_API];
 } HD_MBR_Info, *PHD_MBR_Info;
-
 
 typedef struct _HD_FreeSpaceInfo
 {
@@ -675,7 +672,6 @@ typedef struct {
 	MV_U32			lba;
 	MV_U8			Reserved3[64];
 } PassThrough_Config, * PPassThorugh_Config;
-
 
 #ifndef _OS_BIOS
 #pragma pack()

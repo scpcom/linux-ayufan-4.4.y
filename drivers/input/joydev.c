@@ -522,7 +522,6 @@ static int joydev_handle_JSIOCSBTNMAP(struct joydev *joydev,
 	return retval;
 }
 
-
 static int joydev_ioctl_common(struct joydev *joydev,
 				unsigned int cmd, void __user *argp)
 {

@@ -1450,8 +1450,7 @@ int tcp_read_sock(struct sock *sk, read_descriptor_t *desc,
  *	tricks with *seq access order and skb->users are not required.
  *	Probably, code can be easily improved even more.
  */
-
-
+ 
 int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		size_t len, int nonblock, int flags, int *addr_len)
 {
@@ -1871,8 +1870,7 @@ skip_copy:
 		tp->ucopy.pinned_list = NULL;
 	}
 #endif
-
-
+ 
 	/* According to UNIX98, msg_name/msg_namelen are ignored
 	 * on connected socket. I was just happy when found this 8) --ANK
 	 */
@@ -2071,7 +2069,6 @@ adjudge_to_death:
 
 	/* It is the last release_sock in its life. It will remove backlog. */
 	release_sock(sk);
-
 
 	/* Now socket is owned by kernel and we acquire BH lock
 	   to finish close. No need to check for user refs.

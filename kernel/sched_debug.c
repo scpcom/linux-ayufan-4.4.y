@@ -231,7 +231,6 @@ void print_rt_rq(struct seq_file *m, int cpu, struct rt_rq *rt_rq)
 	SEQ_printf(m, "\nrt_rq[%d]:\n", cpu);
 #endif
 
-
 #define P(x) \
 	SEQ_printf(m, "  .%-30s: %Ld\n", #x, (long long)(rt_rq->x))
 #define PN(x) \

@@ -25,9 +25,7 @@
 #include <linux/delay.h>
 #include "zc0301_sensor.h"
 
-
 static struct zc0301_sensor pb0330;
-
 
 static int pb0330_init(struct zc0301_device* cam)
 {
@@ -134,7 +132,6 @@ static int pb0330_init(struct zc0301_device* cam)
 	return err;
 }
 
-
 static struct zc0301_sensor pb0330 = {
 	.name = "PB-0330",
 	.init = &pb0330_init,
@@ -160,7 +157,6 @@ static struct zc0301_sensor pb0330 = {
 		.colorspace = V4L2_COLORSPACE_JPEG,
 	},
 };
-
 
 int zc0301_probe_pb0330(struct zc0301_device* cam)
 {

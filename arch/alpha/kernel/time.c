@@ -83,7 +83,6 @@ static struct {
 
 unsigned long est_cycle_freq;
 
-
 static inline __u32 rpcc(void)
 {
     __u32 result;
@@ -245,7 +244,6 @@ validate_cc_value(unsigned long cc)
 
 	return cc;
 }
-
 
 /*
  * Calibrate CPU clock using legacy 8254 timer/counter. Stolen from
@@ -449,7 +447,6 @@ u32 arch_gettimeoffset(void)
  * BUG: This routine does not handle hour overflow properly; it just
  *      sets the minutes. Usually you won't notice until after reboot!
  */
-
 
 static int
 set_rtc_mmss(unsigned long nowtime)

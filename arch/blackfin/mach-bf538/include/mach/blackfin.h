@@ -13,7 +13,6 @@
 #include "defBF539.h"
 #include "anomaly.h"
 
-
 #if !defined(__ASSEMBLY__)
 #include "cdefBF538.h"
 

@@ -48,4 +48,3 @@ typedef struct _SATA_FIS_REG_H2D
 #define SATA_FIS_TYPE_SET_DEVICE_BITS	0xA1	/* Set Device Bits FIS - Device to Host */
 
 #endif /* FIS_H */
-

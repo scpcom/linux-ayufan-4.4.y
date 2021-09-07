@@ -66,7 +66,6 @@ s64 uv_bios_call_reentrant(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3,
 	return ret;
 }
 
-
 long sn_partition_id;
 EXPORT_SYMBOL_GPL(sn_partition_id);
 long sn_coherency_id;
@@ -74,7 +73,6 @@ EXPORT_SYMBOL_GPL(sn_coherency_id);
 long sn_region_size;
 EXPORT_SYMBOL_GPL(sn_region_size);
 int uv_type;
-
 
 s64 uv_bios_get_sn_info(int fc, int *uvtype, long *partid, long *coher,
 		long *region)
@@ -158,7 +156,6 @@ s64 uv_bios_freq_base(u64 clock_type, u64 *ticks_per_second)
 }
 EXPORT_SYMBOL_GPL(uv_bios_freq_base);
 
-
 #ifdef CONFIG_EFI
 void uv_bios_init(void)
 {
@@ -189,4 +186,3 @@ void uv_bios_init(void)
 
 void uv_bios_init(void) { }
 #endif
-

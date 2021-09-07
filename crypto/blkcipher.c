@@ -410,7 +410,6 @@ static int async_encrypt(struct ablkcipher_request *req)
 		.flags = req->base.flags,
 	};
 
-
 	return alg->encrypt(&desc, req->dst, req->src, req->nbytes);
 }
 

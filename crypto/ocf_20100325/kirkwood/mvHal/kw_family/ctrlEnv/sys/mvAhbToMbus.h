@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvAhbToMbush
 #define __INCmvAhbToMbush
 
@@ -123,8 +122,6 @@ MV_STATUS mvMbusArbCtrlGet(MV_MBUS_ARB_CTRL *ctrl);
 
 #endif /* #if defined(MV_88F1181) */
 
-
 MV_VOID   mvAhbToMbusAddDecShow(MV_VOID);
-
 
 #endif /* __INCmvAhbToMbush */

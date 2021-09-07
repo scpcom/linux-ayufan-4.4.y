@@ -129,7 +129,6 @@
 	jump	in_cache	; enter cached area instead
 in_cache:
 
-
 	;; First put a jump test to give a possibility of upgrading the
 	;; rescue code without erasing/reflashing the sector.
 	;; We put a longword of -1 here and if it is not -1, we jump using
@@ -319,7 +318,6 @@ flash_ok:
 	move.d	RAM_INIT_MAGIC, $r8	; Tell next product that DRAM is
 					; initialized
 	jump	$r7		; boot!
-
 
 	;; Helper subroutines
 

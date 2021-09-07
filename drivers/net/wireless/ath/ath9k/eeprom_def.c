@@ -498,7 +498,6 @@ static void ath9k_hw_def_set_board_values(struct ath_hw *ah,
 			      AR_PHY_CCK_TX_CTRL_TX_DAC_SCALE_CCK,
 			      pModal->miscBits);
 
-
 	if (AR_SREV_9280_20(ah) && AR5416_VER_MASK >= AR5416_EEP_MINOR_VER_20) {
 		if (IS_CHAN_2GHZ(chan))
 			REG_RMW_FIELD(ah, AR_AN_TOP1, AR_AN_TOP1_DACIPMODE,
@@ -635,7 +634,6 @@ static void ath9k_hw_get_def_gain_boundaries_pdadcs(struct ath_hw *ah,
 			maxPwrT4[i] =
 				min(pPwrL[AR5416_PD_GAIN_ICEPTS - 1],
 				    pPwrR[AR5416_PD_GAIN_ICEPTS - 1]);
-
 
 			ath9k_hw_fill_vpd_table(minPwrT4[i], maxPwrT4[i],
 						pPwrL, pVpdL,
@@ -820,7 +818,6 @@ static void ath9k_hw_set_def_power_cal_table(struct ath_hw *ah,
 				pRawDataset = pEepData->calPierData2G[i];
 			else
 				pRawDataset = pEepData->calPierData5G[i];
-
 
 			if (OLC_FOR_AR9280_20_LATER) {
 				u8 pcdacIdx;

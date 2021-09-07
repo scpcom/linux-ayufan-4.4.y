@@ -69,7 +69,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ctrlEnv/sys/mvSysPci.h"
 #endif
 
-
 /* defines  */       
 #ifdef MV_DEBUG         
 	#define DB(x)	x
@@ -77,7 +76,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	#define DB(x)    
 #endif	             
 					 
-
 /*******************************************************************************
 * mvPciInit - Initialize PCI interfaces
 *
@@ -93,7 +91,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *       MV_OK if function success otherwise MV_ERROR or MV_BAD_PARAM
 *
 *******************************************************************************/
-
 
 MV_STATUS mvPciIfInit(MV_U32 pciIf, PCI_IF_MODE pciIfmode)
 {
@@ -344,7 +341,6 @@ MV_STATUS mvPciIfMasterEnable(MV_U32 pciIf, MV_BOOL enable)
 
 }
 
-
 /*******************************************************************************
 * mvPciSlaveEnable - Enable/disale PCI interface slave transactions.
 *
@@ -494,7 +490,6 @@ MV_U32 mvPciIfLocalBusNumGet(MV_U32 pciIf)
 	return 0;
 
 }
-
 
 /*******************************************************************************
 * mvPciLocalDevNumSet - Set PCI interface local device number.
@@ -664,6 +659,3 @@ MV_U32  mvPciRealIfNumGet(MV_U32 pciIf)
 	return 0xffffffff;
 
 }
-
-
-

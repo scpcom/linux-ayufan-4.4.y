@@ -46,4 +46,3 @@ static __inline__ void udelay (unsigned long usecs)
 }
 
 #endif
-

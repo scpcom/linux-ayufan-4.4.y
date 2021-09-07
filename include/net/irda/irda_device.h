@@ -283,5 +283,3 @@ static inline __u16 irda_get_next_xbofs(const struct sk_buff *skb)
 	return (cb->magic == LAP_MAGIC) ? cb->next_xbofs : -1;
 }
 #endif /* IRDA_DEVICE_H */
-
-

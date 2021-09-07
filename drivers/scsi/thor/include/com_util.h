@@ -228,7 +228,6 @@ static inline MV_VOID mv_swap_bytes(MV_PVOID buf, MV_U32 len)
 	}
 }
 
-
 #ifdef _OS_LINUX
 void List_Add(List_Head *new_one, List_Head *head);
 void List_AddTail(List_Head *new_one, List_Head *head);

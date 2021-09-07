@@ -21,7 +21,6 @@
 
 #include <mach/hardware.h>
 
-
 extern int usb_disabled(void);
 
 /*-------------------------------------------------------------------------*/
@@ -51,12 +50,10 @@ static void lh7a404_stop_hc(struct platform_device *dev)
 	CSC_PWRCNT &= ~CSC_PWRCNT_USBH_EN; /* Disable clock */
 }
 
-
 /*-------------------------------------------------------------------------*/
 
 /* configure so an HC device and id are always provided */
 /* always called with process context; sleeping is OK */
-
 
 /**
  * usb_hcd_lh7a404_probe - initialize LH7A404-based HCDs
@@ -112,7 +109,6 @@ int usb_hcd_lh7a404_probe (const struct hc_driver *driver,
 	usb_put_hcd(hcd);
 	return retval;
 }
-
 
 /* may be called without controller electrically present */
 /* may be called with controller, bus, and devices active */
@@ -232,7 +228,6 @@ static int ohci_hcd_lh7a404_drv_remove(struct platform_device *pdev)
 static int ohci_hcd_lh7a404_drv_resume(struct platform_device *dev)
 {
 	struct usb_hcd *hcd = platform_get_drvdata(dev);
-
 
 	return 0;
 }

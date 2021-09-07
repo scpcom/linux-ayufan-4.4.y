@@ -739,7 +739,6 @@ int iwm_set_key(struct iwm_priv *iwm, bool remove, struct iwm_key *key)
 	return ret;
 }
 
-
 int iwm_send_mlme_profile(struct iwm_priv *iwm)
 {
 	int ret;

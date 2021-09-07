@@ -35,7 +35,6 @@
 
 #include "evlog.h"
 
-
 enum {
 	EV_NULL,
 	EV_ENABLE,

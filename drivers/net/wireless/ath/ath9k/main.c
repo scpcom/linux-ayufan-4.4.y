@@ -541,7 +541,6 @@ irqreturn_t ath_isr(int irq, void *dev)
 	if (sc->sc_flags & SC_OP_INVALID)
 		return IRQ_NONE;
 
-
 	/* shared irq, not for us */
 
 	if (!ath9k_hw_intrpend(ah))

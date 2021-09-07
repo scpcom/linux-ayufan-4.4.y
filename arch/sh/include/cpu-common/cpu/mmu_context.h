@@ -13,4 +13,3 @@
 /* No MMU */
 
 #endif /* __ASM_CPU_SH2_MMU_CONTEXT_H */
-

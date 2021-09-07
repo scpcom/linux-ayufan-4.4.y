@@ -27,7 +27,6 @@
 #include <linux/usb.h>
 #include <linux/usb/serial.h>
 
-
 /* Version Information */
 #define DRIVER_VERSION 	"v0.04"
 #define DRIVER_DESC 	"SPCP8x5 USB to serial adaptor driver"
@@ -68,7 +67,6 @@ struct spcp8x5_usb_ctrl_arg {
 #define SPCP8x5_CLOSING_WAIT	(30*HZ)
 
 #define SPCP8x5_BUF_SIZE	1024
-
 
 /* spcp8x5 spec register define */
 #define MCR_CONTROL_LINE_RTS		0x02
@@ -289,7 +287,6 @@ static struct usb_driver spcp8x5_driver = {
 	.id_table =		id_table,
 	.no_dynamic_id =	1,
 };
-
 
 struct spcp8x5_private {
 	spinlock_t 	lock;
@@ -521,7 +518,6 @@ static void spcp8x5_set_termios(struct tty_struct *tty,
 	int baud;
 	int i;
 	u8 control;
-
 
 	/* check that they really want us to change something */
 	if (!tty_termios_hw_change(tty->termios, old_termios))
@@ -778,7 +774,6 @@ static void spcp8x5_send(struct usb_serial_port *port)
 		priv->write_urb_in_use = 0;
 		/* TODO: reschedule spcp8x5_send */
 	}
-
 
 	schedule_work(&port->work);
 }

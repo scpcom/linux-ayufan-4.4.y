@@ -96,7 +96,6 @@ struct ioc3 {
 #define UARTA_BASE		0x178
 #define UARTB_BASE		0x170
 
-
 /* bitmasks for serial RX status byte */
 #define RXSB_OVERRUN		0x01	/* char(s) lost */
 #define RXSB_PAR_ERR		0x02	/* parity error */

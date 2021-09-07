@@ -29,7 +29,6 @@
 #define KERNEL_RAM_VADDR	(PAGE_OFFSET + TEXT_OFFSET)
 #define KERNEL_RAM_PADDR	(PHYS_OFFSET + TEXT_OFFSET)
 
-
 /*
  * swapper_pg_dir is the virtual address of the initial page table.
  * We place the page tables 16K below KERNEL_RAM_VADDR.  Therefore, we must
@@ -156,8 +155,6 @@ __secondary_data:
 	.long	__secondary_switched
 #endif /* defined(CONFIG_SMP) */
 
-
-
 /*
  * Setup common bits before finally enabling the MMU.  Essentially
  * this is just loading the page table pointer and domain access
@@ -207,7 +204,6 @@ __turn_mmu_on:
 	mov	r3, r13
 	mov	pc, r3
 ENDPROC(__turn_mmu_on)
-
 
 /*
  * Setup the initial page tables.  We only setup the barest

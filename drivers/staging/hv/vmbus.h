@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef _VMBUS_H_
 #define _VMBUS_H_
 
@@ -66,7 +65,6 @@ static inline struct driver_context *driver_to_driver_context(struct device_driv
 {
 	return container_of(d, struct driver_context, driver);
 }
-
 
 /* Vmbus interface */
 

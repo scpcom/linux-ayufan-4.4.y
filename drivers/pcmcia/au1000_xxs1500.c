@@ -77,7 +77,6 @@ static int xxs1500_pcmcia_shutdown(void)
 	return 0;
 }
 
-
 static int
 xxs1500_pcmcia_socket_state(unsigned sock, struct pcmcia_state *state)
 {
@@ -124,7 +123,6 @@ xxs1500_pcmcia_socket_state(unsigned sock, struct pcmcia_state *state)
 	return 1;
 }
 
-
 static int xxs1500_pcmcia_get_irq_info(struct pcmcia_irq_info *info)
 {
 
@@ -132,7 +130,6 @@ static int xxs1500_pcmcia_get_irq_info(struct pcmcia_irq_info *info)
 	info->irq = PCMCIA_IRQ;
 	return 0;
 }
-
 
 static int
 xxs1500_pcmcia_configure_socket(const struct pcmcia_configure *configure)

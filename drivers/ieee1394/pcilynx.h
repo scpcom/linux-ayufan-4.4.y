@@ -1,7 +1,6 @@
 #ifndef __PCILYNX_H__
 #define __PCILYNX_H__
 
-
 #define PCILYNX_DRIVER_NAME      "pcilynx"
 #define PCILYNX_MAJOR            177
 
@@ -115,8 +114,6 @@ struct memdata {
         enum { rom = 0x10000, aux = 0x20000, ram = 0 } type;
 };
 
-
-
 /*
  * Register read and write helper functions.
  */
@@ -141,8 +138,6 @@ static inline void reg_clear_bits(const struct ti_lynx *lynx, int offset,
 {
         reg_write(lynx, offset, (reg_read(lynx, offset) & ~mask));
 }
-
-
 
 /* chip register definitions follow */
 
@@ -222,7 +217,6 @@ static inline void reg_clear_bits(const struct ti_lynx *lynx, int offset,
 #define DMA_CHAN_STAT_PKTERR              (1<<28)
 #define DMA_CHAN_STAT_PKTCMPL             (1<<27)
 #define DMA_CHAN_STAT_SPECIALACK          (1<<14)
-
 
 #define DMA0_CHAN_CTRL                    0x110
 #define DMA1_CHAN_CTRL                    0x130
@@ -316,7 +310,6 @@ static inline void reg_clear_bits(const struct ti_lynx *lynx, int offset,
 #define LINK_PHY_WDATA(data)              (data<<16)
 #define LINK_PHY_RADDR(addr)              (addr<<8)
 
-
 #define LINK_INT_STATUS                   0xf14
 #define LINK_INT_ENABLE                   0xf18
 /* status and enable have identical bit numbers */
@@ -346,7 +339,6 @@ static inline void reg_clear_bits(const struct ti_lynx *lynx, int offset,
 #define PHY_VENDORID_TI                 0x800028
 #define PHY_PRODUCTID_TSB41LV03         0x000000
 
-
 /* this is the physical layout of a PCL, its size is 128 bytes */
 struct ti_pcl {
         u32 next;
@@ -363,7 +355,6 @@ struct ti_pcl {
 
 #include <linux/stddef.h>
 #define pcloffs(MEMBER) (offsetof(struct ti_pcl, MEMBER))
-
 
 static inline void put_pcl(const struct ti_lynx *lynx, pcl_t pclid,
                            const struct ti_pcl *pcl)
@@ -384,7 +375,6 @@ static inline u32 pcl_bus(const struct ti_lynx *lynx, pcl_t pclid)
 {
         return lynx->pcl_mem_dma + pclid * sizeof(struct ti_pcl);
 }
-
 
 #if defined (__BIG_ENDIAN)
 typedef struct ti_pcl pcltmp_t;
@@ -416,7 +406,6 @@ static inline void commit_pcl(const struct ti_lynx *lynx, pcl_t pclid,
 {
 }
 #endif
-
 
 static inline void run_sub_pcl(const struct ti_lynx *lynx, pcl_t pclid, int idx,
                                int dmachan)

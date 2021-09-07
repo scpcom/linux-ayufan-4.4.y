@@ -25,7 +25,6 @@ typedef void (*bfa_isr_func_t) (struct bfa_s *bfa, struct bfi_msg_s *m);
 void bfa_isr_unhandled(struct bfa_s *bfa, struct bfi_msg_s *m);
 void bfa_isr_bind(enum bfi_mclass mc, bfa_isr_func_t isr_func);
 
-
 #define bfa_reqq_pi(__bfa, __reqq)	(__bfa)->iocfc.req_cq_pi[__reqq]
 #define bfa_reqq_ci(__bfa, __reqq)					\
 	*(u32 *)((__bfa)->iocfc.req_cq_shadow_ci[__reqq].kva)

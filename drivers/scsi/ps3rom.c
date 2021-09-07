@@ -31,19 +31,16 @@
 #include <asm/lv1call.h>
 #include <asm/ps3stor.h>
 
-
 #define DEVICE_NAME			"ps3rom"
 
 #define BOUNCE_SIZE			(64*1024)
 
 #define PS3ROM_MAX_SECTORS		(BOUNCE_SIZE >> 9)
 
-
 struct ps3rom_private {
 	struct ps3_storage_device *dev;
 	struct scsi_cmnd *curr_cmd;
 };
-
 
 #define LV1_STORAGE_SEND_ATAPI_COMMAND	(1)
 
@@ -69,7 +66,6 @@ enum lv1_atapi_in_out {
 	DIR_WRITE = 0,		/* memory -> device */
 	DIR_READ = 1		/* device -> memory */
 };
-
 
 static int ps3rom_slave_configure(struct scsi_device *scsi_dev)
 {
@@ -354,7 +350,6 @@ static struct scsi_host_template ps3rom_host_template = {
 	.module =		THIS_MODULE,
 };
 
-
 static int __devinit ps3rom_probe(struct ps3_system_bus_device *_dev)
 {
 	struct ps3_storage_device *dev = to_ps3_storage_device(&_dev->core);
@@ -435,7 +430,6 @@ static struct ps3_system_bus_driver ps3rom = {
 	.probe		= ps3rom_probe,
 	.remove		= ps3rom_remove
 };
-
 
 static int __init ps3rom_init(void)
 {

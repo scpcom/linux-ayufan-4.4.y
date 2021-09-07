@@ -965,7 +965,6 @@ static int cx25821_dev_setup(struct cx25821_dev *dev)
 	dev->i2c_bus[0].reg_wdata = I2C1_WDATA;
 	dev->i2c_bus[0].i2c_period = (0x07 << 24);	/* 1.95MHz */
 
-
 	if (get_resources(dev) < 0) {
 		printk(KERN_ERR "%s No more PCIe resources for "
 		       "subsystem: %04x:%04x\n",

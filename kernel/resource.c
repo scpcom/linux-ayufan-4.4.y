@@ -20,7 +20,6 @@
 #include <linux/pfn.h>
 #include <asm/io.h>
 
-
 struct resource ioport_resource = {
 	.name	= "PCI IO",
 	.start	= 0,

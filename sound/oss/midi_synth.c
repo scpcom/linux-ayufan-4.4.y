@@ -711,4 +711,3 @@ midi_synth_send_sysex(int dev, unsigned char *bytes, int len)
 	return 0;
 }
 EXPORT_SYMBOL(midi_synth_send_sysex);
-

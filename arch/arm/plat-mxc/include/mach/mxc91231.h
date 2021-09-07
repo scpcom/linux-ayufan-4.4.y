@@ -211,7 +211,6 @@
 	 MXC91231_IS_MODULE(x, X_MEMC) ? MXC91231_X_MEMC_IO_ADDRESS(x) : \
 	 0xDEADBEEF)
 
-
 /*
  * define the address mapping macros: in physical address order
  */

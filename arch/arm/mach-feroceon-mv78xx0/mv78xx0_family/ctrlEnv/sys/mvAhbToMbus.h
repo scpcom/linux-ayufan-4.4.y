@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvAhbToMbush
 #define __INCmvAhbToMbush
 
@@ -72,7 +71,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ctrlEnv/mvCtrlEnvAddrDec.h"
 
 /* defines  */
-
 
 typedef struct _mvAhbtoMbusDecWin
 {

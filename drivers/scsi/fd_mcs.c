@@ -327,7 +327,6 @@ static void print_banner(struct Scsi_Host *shpnt)
 	printk(", HostID %d, %s Chip, IRQ %d, IO 0x%lX\n", shpnt->this_id, chip == tmc18c50 ? "TMC-18C50" : (chip == tmc18c30 ? "TMC-18C30" : (chip == tmc1800 ? "TMC-1800" : "Unknown")), shpnt->irq, shpnt->io_port);
 }
 
-
 static void do_pause(unsigned amount)
 {				/* Pause for amount*10 milliseconds */
 	do {
@@ -420,7 +419,6 @@ static int fd_mcs_detect(struct scsi_host_template * tpnt)
 					continue;
 				}
 
-
 				/* save name */
 				strcpy(adapter_name, fd_mcs_adapters[loop].name);
 
@@ -464,7 +462,6 @@ static int fd_mcs_detect(struct scsi_host_template * tpnt)
 				/* IBM/ANSI scsi scan ordering */
 				/* Stick this back in when the scsi.c changes are there */
 				shpnt->reverse_ordering = 1;
-
 
 				/* saving info */
 				hosts[found++] = shpnt;
@@ -1102,7 +1099,6 @@ static int fd_mcs_queue(Scsi_Cmnd * SCpnt, void (*done) (Scsi_Cmnd *))
 		current_SC->SCp.buffer = NULL;
 		current_SC->SCp.buffers_residual = 0;
 	}
-
 
 	current_SC->SCp.Status = 0;
 	current_SC->SCp.Message = 0;

@@ -34,7 +34,6 @@
 #include "dat.h"
 #include "segbuf.h"
 
-
 static LIST_HEAD(nilfs_objects);
 static DEFINE_SPINLOCK(nilfs_lock);
 

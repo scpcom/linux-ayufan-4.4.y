@@ -109,7 +109,6 @@ struct bfa_ioc_stats_s {
 	struct bfa_fw_ioc_stats_s 	fw_stats;  /*  firmware IOC stats */
 };
 
-
 enum bfa_ioc_type_e {
 	BFA_IOC_TYPE_FC	  = 1,
 	BFA_IOC_TYPE_FCoE = 2,
@@ -149,4 +148,3 @@ struct bfa_ioc_aen_data_s {
 };
 
 #endif /* __BFA_DEFS_IOC_H__ */
-

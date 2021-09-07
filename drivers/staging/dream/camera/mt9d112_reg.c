@@ -302,6 +302,3 @@ struct mt9d112_reg mt9d112_regs = {
 	.rftbl = lens_roll_off_tbl,
 	.rftbl_size = ARRAY_SIZE(lens_roll_off_tbl)
 };
-
-
-

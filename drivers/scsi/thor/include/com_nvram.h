@@ -18,7 +18,6 @@ typedef struct _PHY_TUNING {
     MV_U8	Reserved[2];					/* 2 bytes, reserved space */
 } PHY_TUNING, *PPHY_TUNING;
 
-
 /* HBA_FLAG_XX */
 #define HBA_FLAG_INT13_ENABLE				MV_BIT(0)	//int 13h enable/disable
 #define HBA_FLAG_SILENT_MODE_ENABLE			MV_BIT(1)	//silent mode enable/disable
@@ -104,5 +103,3 @@ MV_U8 mvui_init_param(MV_PVOID This, pHBA_Info_Page pHBAInfo);//get initial data
 
 MV_U8	mvCaculateChecksum(MV_PU8	Address, MV_U32 Size);
 MV_U8	mvVerifyChecksum(MV_PU8	Address, MV_U32 Size);
-
-

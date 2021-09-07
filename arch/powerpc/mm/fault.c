@@ -41,7 +41,6 @@
 #include <asm/tlbflush.h>
 #include <asm/siginfo.h>
 
-
 #ifdef CONFIG_KPROBES
 static inline int notify_page_fault(struct pt_regs *regs)
 {

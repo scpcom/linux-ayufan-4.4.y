@@ -25,7 +25,6 @@
  * ########################################################################
  */
 
-
 #include "ieee754int.h"
 
 #define assert(expr) ((void)0)
@@ -75,7 +74,6 @@ extern ieee754sp ieee754sp_xcpt(ieee754sp, const char *, ...);
 extern ieee754sp ieee754sp_nanxcpt(ieee754sp, const char *, ...);
 extern ieee754sp ieee754sp_bestnan(ieee754sp, ieee754sp);
 extern ieee754sp ieee754sp_format(int, int, unsigned);
-
 
 #define SPNORMRET2(s, e, m, name, a0, a1) \
 { \

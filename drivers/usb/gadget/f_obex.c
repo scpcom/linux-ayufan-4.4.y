@@ -29,7 +29,6 @@
 #include "u_serial.h"
 #include "gadget_chips.h"
 
-
 /*
  * This CDC OBEX function support just packages a TTY-ish byte stream.
  * A user mode server will put it into "raw" mode and handle all the
@@ -379,7 +378,6 @@ obex_bind(struct usb_configuration *c, struct usb_function *f)
 			obex->port_num, status);
 	else
 		obex->can_activate = true;
-
 
 	DBG(cdev, "obex ttyGS%d: %s speed IN/%s OUT/%s\n",
 			obex->port_num,

@@ -198,7 +198,3 @@ asmlinkage long sys_SYNOACLGetPerm(const char *szPath, int __user *pOutPerm)
 	}
 	return -EOPNOTSUPP;
 }
-
-
-
-

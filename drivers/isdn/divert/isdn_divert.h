@@ -110,7 +110,6 @@ struct divert_info
     char info_start[2]; /* info string start */ 
   }; 
 
-
 /**************/
 /* Prototypes */
 /**************/

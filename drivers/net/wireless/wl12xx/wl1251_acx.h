@@ -161,7 +161,6 @@ struct acx_data_path_params {
 	u32 tx_complete_timeout;
 } __attribute__ ((packed));
 
-
 struct acx_data_path_params_resp {
 	struct acx_header header;
 
@@ -333,7 +332,6 @@ struct acx_packet_detection {
 	u32 threshold;
 } __attribute__ ((packed));
 
-
 enum acx_slot_type {
 	SLOT_TIME_LONG = 0,
 	SLOT_TIME_SHORT = 1,
@@ -351,7 +349,6 @@ struct acx_slot {
 	u8 reserved[6];
 } __attribute__ ((packed));
 
-
 #define ADDRESS_GROUP_MAX	(8)
 #define ADDRESS_GROUP_MAX_LEN	(ETH_ALEN * ADDRESS_GROUP_MAX)
 
@@ -363,7 +360,6 @@ struct acx_dot11_grp_addr_tbl {
 	u8 pad[2];
 	u8 mac_table[ADDRESS_GROUP_MAX_LEN];
 } __attribute__ ((packed));
-
 
 #define  RX_TIMEOUT_PS_POLL_MIN    0
 #define  RX_TIMEOUT_PS_POLL_MAX    (200000)
@@ -1069,7 +1065,6 @@ struct wl1251_acx_memory {
 	__le16 debug_buffer_size;
 } __attribute__ ((packed));
 
-
 #define ACX_RX_DESC_MIN                1
 #define ACX_RX_DESC_MAX                127
 #define ACX_RX_DESC_DEF                32
@@ -1250,7 +1245,6 @@ enum {
 
 	MAX_IE = 0xFFFF
 };
-
 
 int wl1251_acx_frame_rates(struct wl1251 *wl, u8 ctrl_rate, u8 ctrl_mod,
 			   u8 mgt_rate, u8 mgt_mod);

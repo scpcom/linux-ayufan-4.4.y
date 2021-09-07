@@ -199,7 +199,6 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 
 #define pgprot_noncached(prot) __pgprot((pgprot_val(prot) | _PAGE_NO_CACHE))
 
-
 /* pte_val refers to a page in the 0x4xxxxxxx physical DRAM interval
  * __pte_page(pte_val) refers to the "virtual" DRAM interval
  * pte_pagenr refers to the page-number counted starting from the virtual DRAM start
@@ -259,7 +258,6 @@ static inline pgd_t * pgd_offset(const struct mm_struct *mm, unsigned long addre
         printk("%s:%d: bad pte %p(%08lx).\n", __FILE__, __LINE__, &(e), pte_val(e))
 #define pgd_ERROR(e) \
         printk("%s:%d: bad pgd %p(%08lx).\n", __FILE__, __LINE__, &(e), pgd_val(e))
-
 
 extern pgd_t swapper_pg_dir[PTRS_PER_PGD]; /* defined in head.S */
 

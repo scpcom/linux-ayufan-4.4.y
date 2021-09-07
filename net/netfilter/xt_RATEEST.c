@@ -173,7 +173,6 @@ static void __exit xt_rateest_tg_fini(void)
 	xt_unregister_target(&xt_rateest_tg_reg);
 }
 
-
 MODULE_AUTHOR("Patrick McHardy <kaber@trash.net>");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Xtables: packet rate estimator");

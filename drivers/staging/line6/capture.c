@@ -20,7 +20,6 @@
 #include "pod.h"
 #include "capture.h"
 
-
 /*
 	Find a free URB and submit it.
 */

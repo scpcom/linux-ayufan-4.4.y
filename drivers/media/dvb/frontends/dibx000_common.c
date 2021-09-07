@@ -20,7 +20,6 @@ static int dibx000_write_word(struct dibx000_i2c_master *mst, u16 reg, u16 val)
 	return i2c_transfer(mst->i2c_adap, &msg, 1) != 1 ? -EREMOTEIO : 0;
 }
 
-
 static int dibx000_i2c_select_interface(struct dibx000_i2c_master *mst,
 					enum dibx000_i2c_interface intf)
 {
@@ -36,7 +35,6 @@ static int dibx000_i2c_gate_ctrl(struct dibx000_i2c_master *mst, u8 tx[4],
 				 u8 addr, int onoff)
 {
 	u16 val;
-
 
 	if (onoff)
 		val = addr << 8;	// bit 7 = use master or not, if 0, the gate is open

@@ -108,7 +108,6 @@ int atl1c_restart_autoneg(struct atl1c_hw *hw);
 #define TWSI_CTRL_WRITE_FREQ_SEL_MASK   0x3
 #define TWSI_CTRL_WRITE_FREQ_SEL_SHIFT  24
 
-
 #define REG_PCIE_DEV_MISC_CTRL      	0x21C
 #define PCIE_DEV_MISC_EXT_PIPE     	0x2
 #define PCIE_DEV_MISC_RETRY_BUFDIS 	0x1

@@ -507,7 +507,6 @@ int parse_options_usage(const char * const *usagestr,
 	return usage_with_options_internal(usagestr, opts, 0);
 }
 
-
 int parse_opt_verbosity_cb(const struct option *opt, const char *arg __used,
 			   int unset)
 {

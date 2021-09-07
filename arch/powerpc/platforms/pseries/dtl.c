@@ -64,12 +64,10 @@ static DEFINE_PER_CPU(struct dtl, dtl);
  */
 static u8 dtl_event_mask = 0x7;
 
-
 /*
  * Size of per-cpu log buffers. Default is just under 16 pages worth.
  */
 static int dtl_buf_entries = (16 * 85);
-
 
 static int dtl_enable(struct dtl *dtl)
 {

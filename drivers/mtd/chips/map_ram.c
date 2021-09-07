@@ -15,7 +15,6 @@
 #include <linux/mtd/map.h>
 #include <linux/mtd/compatmac.h>
 
-
 static int mapram_read (struct mtd_info *, loff_t, size_t, size_t *, u_char *);
 static int mapram_write (struct mtd_info *, loff_t, size_t, size_t *, const u_char *);
 static int mapram_erase (struct mtd_info *, struct erase_info *);
@@ -23,7 +22,6 @@ static void mapram_nop (struct mtd_info *);
 static struct mtd_info *map_ram_probe(struct map_info *map);
 static unsigned long mapram_unmapped_area(struct mtd_info *, unsigned long,
 					  unsigned long, unsigned long);
-
 
 static struct mtd_chip_driver mapram_chipdrv = {
 	.probe	= map_ram_probe,
@@ -80,7 +78,6 @@ static struct mtd_info *map_ram_probe(struct map_info *map)
 	__module_get(THIS_MODULE);
 	return mtd;
 }
-
 
 /*
  * Allow NOMMU mmap() to directly map the device (if not NULL)

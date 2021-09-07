@@ -73,7 +73,6 @@
 
 #include "cdc-acm.h"
 
-
 #define ACM_CLOSE_TIMEOUT	15	/* seconds to let writes drain */
 
 /*
@@ -1113,14 +1112,12 @@ skip_normal_probe:
 		return -EBUSY;
 	}
 
-
 	if (data_interface->cur_altsetting->desc.bNumEndpoints < 2)
 		return -EINVAL;
 
 	epctrl = &control_interface->cur_altsetting->endpoint[0].desc;
 	epread = &data_interface->cur_altsetting->endpoint[0].desc;
 	epwrite = &data_interface->cur_altsetting->endpoint[1].desc;
-
 
 	/* workaround for switched endpoints */
 	if (!usb_endpoint_dir_in(epread)) {

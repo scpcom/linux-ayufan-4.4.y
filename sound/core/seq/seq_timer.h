@@ -57,7 +57,6 @@ struct snd_seq_timer {
 	spinlock_t lock;
 };
 
-
 /* create new timer (constructor) */
 struct snd_seq_timer *snd_seq_timer_new(void);
 
@@ -74,7 +73,6 @@ static inline void snd_seq_timer_update_tick(struct snd_seq_timer_tick *tick,
 		tick->fraction %= tick->resolution;
 	}
 }
-
 
 /* compare timestamp between events */
 /* return 1 if a >= b; otherwise return 0 */
@@ -94,7 +92,6 @@ static inline int snd_seq_compare_real_time(snd_seq_real_time_t *a, snd_seq_real
 	return 0;
 }
 
-
 static inline void snd_seq_sanity_real_time(snd_seq_real_time_t *tm)
 {
 	while (tm->tv_nsec >= 1000000000) {
@@ -103,7 +100,6 @@ static inline void snd_seq_sanity_real_time(snd_seq_real_time_t *tm)
                 tm->tv_sec++;
         }
 }
-
 
 /* increment timestamp */
 static inline void snd_seq_inc_real_time(snd_seq_real_time_t *tm, snd_seq_real_time_t *inc)

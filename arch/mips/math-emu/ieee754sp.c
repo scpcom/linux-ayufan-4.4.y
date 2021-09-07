@@ -24,7 +24,6 @@
  * ########################################################################
  */
 
-
 #include "ieee754sp.h"
 
 int ieee754sp_class(ieee754sp x)
@@ -44,7 +43,6 @@ int ieee754sp_issnan(ieee754sp x)
 	assert(ieee754sp_isnan(x));
 	return (SPMANT(x) & SP_MBIT(SP_MBITS-1));
 }
-
 
 ieee754sp ieee754sp_xcpt(ieee754sp r, const char *op, ...)
 {
@@ -100,7 +98,6 @@ ieee754sp ieee754sp_bestnan(ieee754sp x, ieee754sp y)
 		return y;
 }
 
-
 static unsigned get_rounding(int sn, unsigned xm)
 {
 	/* inexact must round of 3 bits
@@ -125,7 +122,6 @@ static unsigned get_rounding(int sn, unsigned xm)
 	}
 	return xm;
 }
-
 
 /* generate a normal/denormal number with over,under handling
  * sn is sign

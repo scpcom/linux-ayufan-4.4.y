@@ -376,7 +376,6 @@ static void vfp_pm_init(void)
 	sysdev_register(&vfp_pm_sysdev);
 }
 
-
 #else
 static inline void vfp_pm_init(void) { }
 #endif /* CONFIG_PM */

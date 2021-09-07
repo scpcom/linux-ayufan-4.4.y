@@ -148,7 +148,6 @@ struct pneigh_entry
  *	neighbour table manipulation
  */
 
-
 struct neigh_table
 {
 	struct neigh_table	*next;

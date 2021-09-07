@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 /* includes */
 #include "ddr2/mvDramIf.h"
 #include "ctrlEnv/sys/mvCpuIf.h"
@@ -499,7 +498,6 @@ MV_STATUS mvDramIfDetect(MV_U32 forcedCl, MV_BOOL eccDisable)
  	return MV_OK;
 }
 
-
 /*******************************************************************************
 * mvDramIfBankBaseGet - Get DRAM interface bank base.
 *
@@ -547,7 +545,6 @@ MV_U32 mvDramIfBankSizeGet(MV_U32 bankNum)
 				  bankNum, mvCpuIfTargetWinSizeGet(SDRAM_CS0 + bankNum)));
 	return mvCpuIfTargetWinSizeGet(SDRAM_CS0 + bankNum);
 }
-
 
 /*******************************************************************************
 * mvDramIfSizeGet - Get DRAM interface total size.
@@ -641,7 +638,6 @@ static MV_U32 minCasCalc(MV_DRAM_BANK_INFO *pBankInfo,MV_DRAM_BANK_INFO *pBankIn
 	MV_U32 startBit, stopBit;
 	MV_U32 minCas0 = 0, minCas2 = 0;
 	
-	
 	/*     DDR 2:
 			*******-******-******-******-******-******-******-******* 
 			* bit7 | bit6 | bit5 | bit4 | bit3 | bit2 | bit1 | bit0 * 
@@ -650,7 +646,6 @@ static MV_U32 minCasCalc(MV_DRAM_BANK_INFO *pBankInfo,MV_DRAM_BANK_INFO *pBankIn
 	Disco VI=	* TBD  | TBD  |  5   |  4   |  3   |  TBD   | TBD | TBD * 
 	Disco Duo=	* TBD  |   6  |  5   |  4   |  3   |  TBD   | TBD | TBD * 
 			*********************************************************/
-	
 	
 	/* If we are asked to use the forced CAL  we change the suported CAL to be forcedCl only */
 	if (forcedCl)
@@ -1656,7 +1651,6 @@ MV_U32 mvDramIfCalGet(void)
     return sdramCasLat;
 }
 
-
 /*******************************************************************************
 * mvDramIfSelfRefreshSet - Put the dram in self refresh mode - 
 *
@@ -1852,4 +1846,3 @@ MV_U32 mvDramIfGetCSorder(MV_U32 csOrder )
 {
 	return DRAM_CS_Order[csOrder];
 }
-

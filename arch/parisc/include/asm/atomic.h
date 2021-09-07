@@ -43,7 +43,6 @@ extern raw_spinlock_t __atomic_hash[ATOMIC_HASH_SIZE] __lock_aligned;
 	local_irq_restore(f);				\
 } while(0)
 
-
 #else
 #  define _atomic_spin_lock_irqsave(l,f) do { local_irq_save(f); } while (0)
 #  define _atomic_spin_unlock_irqrestore(l,f) do { local_irq_restore(f); } while (0)
@@ -53,7 +52,6 @@ extern raw_spinlock_t __atomic_hash[ATOMIC_HASH_SIZE] __lock_aligned;
 ** Or get a link error if xchg is used "wrong".
 */
 extern void __xchg_called_with_bad_pointer(void);
-
 
 /* __xchg32/64 defined in arch/parisc/lib/bitops.c */
 extern unsigned long __xchg8(char, char *);
@@ -77,7 +75,6 @@ __xchg(unsigned long x, __volatile__ void * ptr, int size)
 	return x;
 }
 
-
 /*
 ** REVISIT - Abandoned use of LDCW in xchg() for now:
 ** o need to test sizeof(*ptr) to avoid clearing adjacent bytes
@@ -89,7 +86,6 @@ __xchg(unsigned long x, __volatile__ void * ptr, int size)
 */
 #define xchg(ptr,x) \
 	((__typeof__(*(ptr)))__xchg((unsigned long)(x),(ptr),sizeof(*(ptr))))
-
 
 #define __HAVE_ARCH_CMPXCHG	1
 

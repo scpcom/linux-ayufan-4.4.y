@@ -1043,7 +1043,6 @@ static int svc_deferred_recv(struct svc_rqst *rqstp)
 	return (dr->argslen<<2) - dr->xprt_hlen;
 }
 
-
 static struct svc_deferred_req *svc_deferred_dequeue(struct svc_xprt *xprt)
 {
 	struct svc_deferred_req *dr = NULL;
@@ -1161,7 +1160,6 @@ int svc_xprt_names(struct svc_serv *serv, char *buf, const int buflen)
 	return totlen;
 }
 EXPORT_SYMBOL_GPL(svc_xprt_names);
-
 
 /*----------------------------------------------------------------------------*/
 

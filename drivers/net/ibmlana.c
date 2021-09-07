@@ -203,7 +203,6 @@ static int wait_timeout(struct net_device *dev, int regoffs, u16 mask,
 	return 0;
 }
 
-
 /* reset the whole board */
 
 static void ResetBoard(struct net_device *dev)
@@ -903,7 +902,6 @@ static char *ibmlana_adapter_names[] __devinitdata = {
 	"IBM LAN Adapter/A",
 	NULL
 };
-
 
 static const struct net_device_ops ibmlana_netdev_ops = {
 	.ndo_open 		= ibmlana_open,

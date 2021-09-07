@@ -91,7 +91,6 @@ static struct pm_qos_object network_lat_pm_qos = {
 	.comparitor = min_compare
 };
 
-
 static BLOCKING_NOTIFIER_HEAD(network_throughput_notifier);
 static struct pm_qos_object network_throughput_pm_qos = {
 	.requirements =
@@ -102,7 +101,6 @@ static struct pm_qos_object network_throughput_pm_qos = {
 	.target_value = ATOMIC_INIT(0),
 	.comparitor = max_compare
 };
-
 
 static struct pm_qos_object *pm_qos_array[] = {
 	&null_pm_qos,
@@ -134,7 +132,6 @@ static s32 min_compare(s32 v1, s32 v2)
 {
 	return min(v1, v2);
 }
-
 
 static void update_target(int target)
 {
@@ -396,7 +393,6 @@ static ssize_t pm_qos_power_write(struct file *filp, const char __user *buf,
 
 	return  sizeof(s32);
 }
-
 
 static int __init pm_qos_power_init(void)
 {

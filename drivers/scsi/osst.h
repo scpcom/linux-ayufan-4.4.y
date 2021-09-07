@@ -80,7 +80,6 @@ typedef struct {
 
 #define MODE_HEADER_LENGTH         4
 
-
 /*
  *	REQUEST SENSE packet command result - Data Format.
  */
@@ -497,7 +496,6 @@ typedef struct os_header_s {
 	os_fm_tab_t	qfa_fm_tab;
 	__u8		reserved25960_32767[6808];
 } os_header_t;
-
 
 /*
  * OnStream ADRL frame

@@ -50,14 +50,12 @@
 #define info(format, arg...) printk(KERN_INFO "%s: " format , MY_NAME , ## arg)
 #define warn(format, arg...) printk(KERN_WARNING "%s: " format , MY_NAME , ## arg)
 
-
 /* local variables */
 static int debug;
 
 #define DRIVER_VERSION	"0.5"
 #define DRIVER_AUTHOR	"Greg Kroah-Hartman <greg@kroah.com>, Scott Murray <scottm@somanetworks.com>"
 #define DRIVER_DESC	"PCI Hot Plug PCI Core"
-
 
 //////////////////////////////////////////////////////////////////
 

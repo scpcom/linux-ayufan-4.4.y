@@ -18,8 +18,6 @@
 #define PROC_ENTRY_FILENAME 	"i2s"
 #define PROCFS_MAX_SIZE 	2048
 
-
-
 MODULE_AUTHOR("Chris Ford");
 MODULE_DESCRIPTION("I2S Test module");
 MODULE_LICENSE("GPL");
@@ -42,7 +40,6 @@ static unsigned long procfs_buffer_size = 0;
  *
  */
 static struct proc_dir_entry *Our_Proc_File;
-
 
 void RefreshI2SRegisters(void)
 {
@@ -121,14 +118,12 @@ void RefreshI2SRegisters(void)
 		(u32) __raw_readl( RX_CPU_DATA_READS          ) );
 }
 
-
 void DumpI2SRegisters(void)
 {
 	RefreshI2SRegisters();
 	printk( KERN_INFO "%s", procfs_buffer );  
 	return;
 }
-
 
 /**
  * This funtion is called when the /proc file is read
@@ -348,5 +343,3 @@ static void __exit oxnas_i2s_cleanup_module(void)
 
 module_init(oxnas_i2s_init_module);
 module_exit(oxnas_i2s_cleanup_module);
-
-

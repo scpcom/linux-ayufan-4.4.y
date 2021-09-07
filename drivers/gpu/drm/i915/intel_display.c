@@ -736,7 +736,6 @@ intel_find_best_PLL(const intel_limit_t *limit, struct drm_crtc *crtc,
 	return (err != target);
 }
 
-
 static bool
 intel_find_best_reduced_PLL(const intel_limit_t *limit, struct drm_crtc *crtc,
 			    int target, int refclk, intel_clock_t *best_clock)
@@ -1404,7 +1403,6 @@ static void igdng_enable_pll_edp (struct drm_crtc *crtc)
 	I915_WRITE(DP_A, dpa_ctl);
 	udelay(200);
 }
-
 
 static void igdng_set_pll_edp (struct drm_crtc *crtc, int clock)
 {
@@ -2153,7 +2151,6 @@ igdng_compute_m_n(int bits_per_pixel, int nlanes,
 	fdi_reduce_ratio(&m_n->link_m, &m_n->link_n);
 }
 
-
 struct intel_watermark_params {
 	unsigned long fifo_size;
 	unsigned long max_wm;
@@ -2873,7 +2870,6 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
 		refclk = 48000;
 	}
 	
-
 	/*
 	 * Returns a set of divisors for the desired target clock with the given
 	 * refclk, or FALSE.  The returned values represent the clock equation:
@@ -3128,7 +3124,6 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
 	dspcntr |= DISPLAY_PLANE_ENABLE;
 	pipeconf |= PIPEACONF_ENABLE;
 	dpll |= DPLL_VCO_ENABLE;
-
 
 	/* Disable the panel fitter if it was on our pipe */
 	if (!IS_IGDNG(dev) && intel_panel_fitter_pipe(dev) == pipe)
@@ -3969,7 +3964,6 @@ static const struct drm_crtc_funcs intel_crtc_funcs = {
 	.destroy = intel_crtc_destroy,
 };
 
-
 static void intel_crtc_init(struct drm_device *dev, int pipe)
 {
 	struct intel_crtc *intel_crtc;
@@ -4061,7 +4055,6 @@ static int intel_connector_clones(struct drm_device *dev, int type_mask)
 	}
 	return index_mask;
 }
-
 
 static void intel_setup_outputs(struct drm_device *dev)
 {
@@ -4216,7 +4209,6 @@ int intel_framebuffer_create(struct drm_device *dev,
 
 	return 0;
 }
-
 
 static struct drm_framebuffer *
 intel_user_framebuffer_create(struct drm_device *dev,
@@ -4449,7 +4441,6 @@ void intel_modeset_cleanup(struct drm_device *dev)
 
 	drm_mode_config_cleanup(dev);
 }
-
 
 /* current intel driver doesn't take advantage of encoders
    always give back the encoder for the connector

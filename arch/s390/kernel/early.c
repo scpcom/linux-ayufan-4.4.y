@@ -412,7 +412,6 @@ static void __init setup_boot_command_line(void)
 	append_to_cmdline(append_ipl_scpdata);
 }
 
-
 /*
  * Save ipl parameters, clear bss memory, initialize storage keys
  * and create a kernel NSS at startup if the SAVESYS= parm is defined

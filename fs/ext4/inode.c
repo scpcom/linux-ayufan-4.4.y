@@ -411,7 +411,6 @@ static int __ext4_check_blockref(const char *function, struct inode *inode,
 	return 0;
 }
 
-
 #define ext4_check_indirect_blockref(inode, bh)                         \
 	__ext4_check_blockref(__func__, inode, (__le32 *)(bh)->b_data,  \
 			      EXT4_ADDR_PER_BLOCK((inode)->i_sb))
@@ -1817,7 +1816,6 @@ static int ext4_ordered_write_end(struct file *file,
 			ext4_orphan_del(NULL, inode);
 	}
 
-
 	return ret ? ret : copied;
 }
 
@@ -2226,7 +2224,6 @@ static void mpage_put_bnr_to_bhs(struct mpage_da_data *mpd, sector_t logical,
 		pagevec_release(&pvec);
 	}
 }
-
 
 /*
  * __unmap_underlying_blocks - just a helper function to unmap

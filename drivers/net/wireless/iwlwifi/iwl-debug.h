@@ -125,8 +125,6 @@ static inline void iwl_print_hex_dump(struct iwl_priv *priv, int level,
 {}
 #endif				/* CONFIG_IWLWIFI_DEBUG */
 
-
-
 #ifndef CONFIG_IWLWIFI_DEBUGFS
 static inline int iwl_dbgfs_register(struct iwl_priv *priv, const char *name)
 {

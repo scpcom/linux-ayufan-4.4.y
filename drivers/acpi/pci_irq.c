@@ -26,7 +26,6 @@
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
-
 #include <linux/dmi.h>
 #include <linux/kernel.h>
 #include <linux/module.h>

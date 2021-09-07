@@ -27,4 +27,3 @@ static inline int mcf_pinmux_is_valid(unsigned pinmux)
 }
 
 #endif
-

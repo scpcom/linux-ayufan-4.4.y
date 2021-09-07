@@ -6,7 +6,6 @@
 
 #include "cciss_cmd.h"
 
-
 #define NWD_SHIFT	4
 #define MAX_PART	(1 << NWD_SHIFT)
 
@@ -272,7 +271,6 @@ static unsigned long SA5B_intr_pending(ctlr_info_t *h)
         return 0 ;
 }
 
-
 static struct access_method SA5_access = {
 	SA5_submit_command,
 	SA5_intr_mask,
@@ -299,4 +297,3 @@ struct board_type {
 #define CCISS_LOCK(i)	(&hba[i]->lock)
 
 #endif /* CCISS_H */
-

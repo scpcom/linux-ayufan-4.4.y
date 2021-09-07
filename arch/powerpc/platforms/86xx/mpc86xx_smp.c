@@ -55,7 +55,6 @@ smp_86xx_release_core(int nr)
 	iounmap(mcm_vaddr);
 }
 
-
 static void __init
 smp_86xx_kick_cpu(int nr)
 {
@@ -94,13 +93,11 @@ smp_86xx_kick_cpu(int nr)
 	pr_debug("wait CPU #%d for %d msecs.\n", nr, n);
 }
 
-
 static void __init
 smp_86xx_setup_cpu(int cpu_nr)
 {
 	mpic_setup_this_cpu();
 }
-
 
 struct smp_ops_t smp_86xx_ops = {
 	.message_pass = smp_mpic_message_pass,
@@ -110,7 +107,6 @@ struct smp_ops_t smp_86xx_ops = {
 	.take_timebase = smp_generic_take_timebase,
 	.give_timebase = smp_generic_give_timebase,
 };
-
 
 void __init
 mpc86xx_smp_init(void)

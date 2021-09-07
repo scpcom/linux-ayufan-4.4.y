@@ -1606,8 +1606,6 @@ static struct clk ssi_sst_fck_3430es2 = {
 	.recalc		= &omap2_fixed_divisor_recalc,
 };
 
-
-
 /* CORE_L3_ICK based clocks */
 
 /*
@@ -2357,8 +2355,6 @@ static struct clk gpt1_ick = {
 	.clkdm_name	= "wkup_clkdm",
 	.recalc		= &followparent_recalc,
 };
-
-
 
 /* PER clock domain */
 

@@ -15,7 +15,6 @@
 
 /* Sychronization Services */
 
-
 /* delay in milliseconds */
 MV_U8 ossw_add_timer(struct timer_list *timer,
 		    u32 msec, 
@@ -99,8 +98,6 @@ void HBA_SleepMillisecond(MV_PVOID ext, MV_U32 msec);
 			     _millsec ,                           \
 			     (OSSW_TIMER_FUNCTION) (_func),         \
 			     (OSSW_TIMER_DATA) (_data))
-
-
 
 #   define Timer_AddRequest(_ext, _sec, _func, _data, _bogus)    \
              ossw_add_timer(&_ext->timer,                               \

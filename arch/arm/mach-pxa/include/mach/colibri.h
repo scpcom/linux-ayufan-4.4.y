@@ -41,4 +41,3 @@ static inline void colibri_pxa3xx_init_nand(void) {}
 	gpio_to_irq(mfp_to_gpio(COLIBRI_PXA270_ETH_IRQ_GPIO))
 
 #endif /* _COLIBRI_H_ */
-

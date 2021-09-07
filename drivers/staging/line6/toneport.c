@@ -17,9 +17,7 @@
 #include "playback.h"
 #include "toneport.h"
 
-
 static int toneport_send_cmd(struct usb_device *usbdev, int cmd1, int cmd2);
-
 
 static struct snd_ratden toneport_ratden = {
 	.num_min = 44100,
@@ -119,7 +117,6 @@ static ssize_t toneport_set_led_green(struct device *dev,
 
 static DEVICE_ATTR(led_red, S_IWUGO | S_IRUGO, line6_nop_read, toneport_set_led_red);
 static DEVICE_ATTR(led_green, S_IWUGO | S_IRUGO, line6_nop_read, toneport_set_led_green);
-
 
 static int toneport_send_cmd(struct usb_device *usbdev, int cmd1, int cmd2)
 {

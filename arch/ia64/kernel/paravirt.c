@@ -674,7 +674,6 @@ struct pv_time_ops pv_time_ops = {
 #define IA64_NATIVE_PATCH_DEFINE_CR(name, reg)			\
 	IA64_NATIVE_PATCH_DEFINE_REG(cr_ ## name, cr.reg)
 
-
 IA64_NATIVE_PATCH_DEFINE_GET_REG(psr, psr);
 IA64_NATIVE_PATCH_DEFINE_GET_REG(tp, tp);
 

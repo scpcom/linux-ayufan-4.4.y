@@ -17,7 +17,6 @@
 
 #include <plat/map-base.h>
 
-
 /* Chip ID */
 #define S5PC100_PA_CHIPID	(0xE0000000)
 #define S5PC1XX_PA_CHIPID	S5PC100_PA_CHIPID

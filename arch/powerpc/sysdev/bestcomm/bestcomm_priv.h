@@ -26,7 +26,6 @@
 
 #include "sram.h"
 
-
 /* ======================================================================== */
 /* Engine related stuff                                                     */
 /* ======================================================================== */
@@ -79,7 +78,6 @@ struct bcom_engine {
 };
 
 extern struct bcom_engine *bcom_eng;
-
 
 /* ======================================================================== */
 /* Tasks related stuff                                                      */
@@ -228,7 +226,6 @@ struct bcom_task_header {
 #define BCOM_IPR_SCTMR_6	2
 #define BCOM_IPR_SCTMR_7	2
 
-
 /* ======================================================================== */
 /* API                                                                      */
 /* ======================================================================== */
@@ -237,7 +234,6 @@ extern struct bcom_task *bcom_task_alloc(int bd_count, int bd_size, int priv_siz
 extern void bcom_task_free(struct bcom_task *tsk);
 extern int bcom_load_image(int task, u32 *task_image);
 extern void bcom_set_initiator(int task, int initiator);
-
 
 #define TASK_ENABLE             0x8000
 
@@ -272,7 +268,6 @@ bcom_disable_task(int task)
         out_be16(&bcom_eng->regs->tcr[task], reg & ~TASK_ENABLE);
 }
 
-
 static inline u32 *
 bcom_task_desc(int task)
 {
@@ -296,7 +291,6 @@ bcom_task_inc(int task)
 {
 	return &bcom_task_var(task)[BCOM_MAX_VAR];
 }
-
 
 static inline int
 bcom_drd_is_extended(u32 desc)
@@ -323,7 +317,6 @@ bcom_set_desc_initiator(u32 *desc, int initiator)
 			((initiator & 0x1f) << BCOM_DRD_INITIATOR_SHIFT);
 }
 
-
 static inline void
 bcom_set_task_pragma(int task, int pragma)
 {
@@ -345,6 +338,4 @@ bcom_set_tcr_initiator(int task, int initiator)
 	out_be16(tcr, (in_be16(tcr) & ~0x1f00) | ((initiator & 0x1f) << 8));
 }
 
-
 #endif /* __BESTCOMM_PRIV_H__ */
-

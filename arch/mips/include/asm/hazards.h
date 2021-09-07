@@ -238,7 +238,6 @@ ASMMACRO(back_to_back_c0_hazard,
 
 #endif
 
-
 /* FPU hazards */
 
 #if defined(CONFIG_CPU_SB1)

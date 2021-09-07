@@ -63,7 +63,6 @@ GT_STATUS sampleAddCPUMac(GT_QD_DEV *dev)
 	return GT_OK;
 }
 
-
 /*
  *	Delete the CPU MAC address from the QuaterDeck MAC Address database.
  *	Input - None
@@ -95,7 +94,6 @@ GT_STATUS sampleDelCPUMac(GT_QD_DEV *dev)
 
 	return GT_OK;
 }
-
 
 /*
  *	Add a multicast MAC address into the QuaterDeck MAC Address database,
@@ -156,7 +154,6 @@ GT_STATUS sampleAddMulticastAddr(GT_QD_DEV *dev)
 	return GT_OK;
 }
 
-
 /*
  *	Delete the Multicast MAC address of 01-00-18-1a-00-00.
  *	Input - None
@@ -188,7 +185,6 @@ GT_STATUS sampleDelMulticastAddr(GT_QD_DEV *dev)
 
 	return GT_OK;
 }
-
 
 /*
  *	This sample function will show how to display all the MAC address

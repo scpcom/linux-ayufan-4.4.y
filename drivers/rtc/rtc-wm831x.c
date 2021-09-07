@@ -24,7 +24,6 @@
 #include <linux/delay.h>
 #include <linux/platform_device.h>
 
-
 /*
  * R16416 (0x4020) - RTC Write Counter
  */

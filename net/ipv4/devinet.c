@@ -25,7 +25,6 @@
  *					if no match found.
  */
 
-
 #include <asm/uaccess.h>
 #include <asm/system.h>
 #include <linux/bitops.h>
@@ -576,7 +575,6 @@ static __inline__ int inet_abc_len(__be32 addr)
 
 	return rc;
 }
-
 
 int devinet_ioctl(struct net *net, unsigned int cmd, void __user *arg)
 {
@@ -1407,7 +1405,6 @@ int ipv4_doint_and_flush_strategy(ctl_table *table,
 
 	return ret;
 }
-
 
 #define DEVINET_SYSCTL_ENTRY(attr, name, mval, proc, sysctl) \
 	{ \

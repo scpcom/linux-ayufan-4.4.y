@@ -42,9 +42,7 @@
 #include <linux/mmc/sdio_func.h>
 #include <linux/mmc/sdio_ids.h>
 
-
 #define UART_NR		8	/* Number of UARTs this driver can handle */
-
 
 #define UART_XMIT_SIZE	PAGE_SIZE
 #define WAKEUP_CHARS	256
@@ -57,7 +55,6 @@
 
 #define circ_chars_free(circ) \
 		(CIRC_SPACE((circ)->head, (circ)->tail, UART_XMIT_SIZE))
-
 
 struct uart_icount {
 	__u32	cts;

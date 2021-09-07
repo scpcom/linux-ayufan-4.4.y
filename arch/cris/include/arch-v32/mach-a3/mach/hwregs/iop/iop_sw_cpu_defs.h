@@ -499,7 +499,6 @@ typedef struct {
 } reg_iop_sw_cpu_r_masked_intr1;
 #define REG_RD_ADDR_iop_sw_cpu_r_masked_intr1 104
 
-
 /* Constants */
 enum {
   regk_iop_sw_cpu_copy                     = 0x00000000,

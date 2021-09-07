@@ -83,7 +83,6 @@ void dma_unmap_page(struct device *dev, dma_addr_t dma_address, size_t size,
 	BUG_ON(direction == DMA_NONE);
 }
 
-
 static inline
 void dma_sync_single_for_cpu(struct device *dev, dma_addr_t dma_handle, size_t size,
 			     enum dma_data_direction direction)

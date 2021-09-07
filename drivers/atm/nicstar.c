@@ -20,7 +20,6 @@
  *
  ******************************************************************************/
 
-
 /**** IMPORTANT INFORMATION ***************************************************
  *
  * There are currently three types of spinlocks:
@@ -68,7 +67,6 @@
 
 #include "nicstarmac.c"
 
-
 /* Configurable parameters ****************************************************/
 
 #undef PHY_LOOPBACK
@@ -79,7 +77,6 @@
 
 #undef NS_USE_DESTRUCTORS /* For now keep this undefined unless you know
                              you're going to use only raw ATM */
-
 
 /* Do not touch these *********************************************************/
 
@@ -107,7 +104,6 @@
 #define XPRINTK(args...)
 #endif /* EXTRA_DEBUG */
 
-
 /* Macros *********************************************************************/
 
 #define CMD_BUSY(card) (readl((card)->membase + STAT) & NS_STAT_CMDBZ)
@@ -124,7 +120,6 @@
 #ifndef ATM_SKB
 #define ATM_SKB(s) (&(s)->atm)
 #endif
-
 
 /* Function declarations ******************************************************/
 
@@ -166,8 +161,6 @@ static void ns_phy_put(struct atm_dev *dev, unsigned char value,
                        unsigned long addr);
 static unsigned char ns_phy_get(struct atm_dev *dev, unsigned long addr);
 
-
-
 /* Global variables ***********************************************************/
 
 static struct ns_dev *cards[NS_MAX_CARDS];
@@ -187,7 +180,6 @@ static struct timer_list ns_timer;
 static char *mac[NS_MAX_CARDS];
 module_param_array(mac, charp, NULL, 0);
 MODULE_LICENSE("GPL");
-
 
 /* Functions*******************************************************************/
 
@@ -210,8 +202,6 @@ static int __devinit nicstar_init_one(struct pci_dev *pcidev,
 err_out:
    return -ENODEV;
 }
-
-
 
 static void __devexit nicstar_remove_one(struct pci_dev *pcidev)
 {
@@ -273,8 +263,6 @@ static void __devexit nicstar_remove_one(struct pci_dev *pcidev)
    kfree(card);
 }
 
-
-
 static struct pci_device_id nicstar_pci_tbl[] __devinitdata =
 {
 	{PCI_VENDOR_ID_IDT, PCI_DEVICE_ID_IDT_IDT77201,
@@ -283,16 +271,12 @@ static struct pci_device_id nicstar_pci_tbl[] __devinitdata =
 };
 MODULE_DEVICE_TABLE(pci, nicstar_pci_tbl);
 
-
-
 static struct pci_driver nicstar_driver = {
 	.name		= "nicstar",
 	.id_table	= nicstar_pci_tbl,
 	.probe		= nicstar_init_one,
 	.remove		= __devexit_p(nicstar_remove_one),
 };
-
-
 
 static int __init nicstar_init(void)
 {
@@ -321,8 +305,6 @@ static int __init nicstar_init(void)
    return error;
 }
 
-
-
 static void __exit nicstar_cleanup(void)
 {
    XPRINTK("nicstar: nicstar_cleanup() called.\n");
@@ -333,8 +315,6 @@ static void __exit nicstar_cleanup(void)
 
    XPRINTK("nicstar: nicstar_cleanup() returned.\n");
 }
-
-
 
 static u32 ns_read_sram(ns_dev *card, u32 sram_address)
 {
@@ -352,8 +332,6 @@ static u32 ns_read_sram(ns_dev *card, u32 sram_address)
    return data;
 }
 
-
-   
 static void ns_write_sram(ns_dev *card, u32 sram_address, u32 *value, int count)
 {
    unsigned long flags;
@@ -373,7 +351,6 @@ static void ns_write_sram(ns_dev *card, u32 sram_address, u32 *value, int count)
    writel(sram_address, card->membase + CMD);
    spin_unlock_irqrestore(&card->res_lock, flags);
 }
-
 
 static int __devinit ns_init_card(int i, struct pci_dev *pcidev)
 {
@@ -623,7 +600,6 @@ static int __devinit ns_init_card(int i, struct pci_dev *pcidev)
       card->tste2vc[j] = NULL;
    writel(NS_TST0 << 2, card->membase + TSTB);
 
-
    /* Initialize RCT. AAL type is set on opening the VC. */
 #ifdef RCQ_SUPPORT
    u32d[0] = NS_RCTE_RAWCELLINTEN;
@@ -682,7 +658,6 @@ static int __devinit ns_init_card(int i, struct pci_dev *pcidev)
       card->hbpool.count++;
    }
 
-
    /* Allocate large buffers */
    skb_queue_head_init(&card->lbpool.queue);
    card->lbpool.count = 0;			/* Not used */
@@ -719,7 +694,6 @@ static int __devinit ns_init_card(int i, struct pci_dev *pcidev)
       return error;
    }
       
-
    /* Allocate small buffers */
    skb_queue_head_init(&card->sbpool.queue);
    card->sbpool.count = 0;			/* Not used */
@@ -750,7 +724,6 @@ static int __devinit ns_init_card(int i, struct pci_dev *pcidev)
       return error;
    }
       
-
    /* Allocate iovec buffers */
    skb_queue_head_init(&card->iovpool.queue);
    card->iovpool.count = 0;
@@ -851,8 +824,6 @@ static int __devinit ns_init_card(int i, struct pci_dev *pcidev)
    return error;
 }
 
-
-
 static void __devinit ns_init_card_error(ns_dev *card, int error)
 {
    if (error >= 17)
@@ -907,8 +878,6 @@ static void __devinit ns_init_card_error(ns_dev *card, int error)
    }
 }
 
-
-
 static scq_info *get_scq(int size, u32 scd)
 {
    scq_info *scq;
@@ -952,8 +921,6 @@ static scq_info *get_scq(int size, u32 scd)
    return scq;
 }
 
-
-
 /* For variable rate SCQ vcc must be NULL */
 static void free_scq(scq_info *scq, struct atm_vcc *vcc)
 {
@@ -995,8 +962,6 @@ static void free_scq(scq_info *scq, struct atm_vcc *vcc)
    kfree(scq->org);
    kfree(scq);
 }
-
-
 
 /* The handles passed must be pointers to the sk_buff containing the small
    or large buffer(s) cast to u32. */
@@ -1111,8 +1076,6 @@ static void push_rxbufs(ns_dev *card, struct sk_buff *skb)
 
    return;
 }
-
-
 
 static irqreturn_t ns_irq_handler(int irq, void *dev_id)
 {
@@ -1299,8 +1262,6 @@ static irqreturn_t ns_irq_handler(int irq, void *dev_id)
    return IRQ_HANDLED;
 }
 
-
-
 static int ns_open(struct atm_vcc *vcc)
 {
    ns_dev *card;
@@ -1484,8 +1445,6 @@ static int ns_open(struct atm_vcc *vcc)
    return 0;
 }
 
-
-
 static void ns_close(struct atm_vcc *vcc)
 {
    vc_map *vc;
@@ -1652,8 +1611,6 @@ static void ns_close(struct atm_vcc *vcc)
 #endif /* RX_DEBUG */
 }
 
-
-
 static void fill_tst(ns_dev *card, int n, vc_map *vc)
 {
    u32 new_tst;
@@ -1706,8 +1663,6 @@ static void fill_tst(ns_dev *card, int n, vc_map *vc)
    ns_write_sram(card, card->tst_addr + NS_TST_NUM_ENTRIES, &data, 1);
    card->tst_addr = new_tst;
 }
-
-
 
 static int ns_send(struct atm_vcc *vcc, struct sk_buff *skb)
 {
@@ -1800,8 +1755,6 @@ static int ns_send(struct atm_vcc *vcc, struct sk_buff *skb)
 
    return 0;
 }
-
-
 
 static int push_scqe(ns_dev *card, vc_map *vc, scq_info *scq, ns_scqe *tbd,
                      struct sk_buff *skb)
@@ -1914,8 +1867,6 @@ static int push_scqe(ns_dev *card, vc_map *vc, scq_info *scq, ns_scqe *tbd,
    return 0;
 }
 
-
-
 static void process_tsq(ns_dev *card)
 {
    u32 scdi;
@@ -1994,8 +1945,6 @@ static void process_tsq(ns_dev *card)
    }
 }
 
-
-
 static void drain_scq(ns_dev *card, scq_info *scq, int pos)
 {
    struct atm_vcc *vcc;
@@ -2037,8 +1986,6 @@ static void drain_scq(ns_dev *card, scq_info *scq, int pos)
    spin_unlock_irqrestore(&scq->lock, flags);
 }
 
-
-
 static void process_rsq(ns_dev *card)
 {
    ns_rsqe *previous;
@@ -2057,8 +2004,6 @@ static void process_rsq(ns_dev *card)
    writel((((u32) previous) - ((u32) card->rsq.base)),
           card->membase + RSQH);
 }
-
-
 
 static void dequeue_rx(ns_dev *card, ns_rsqe *rsqe)
 {
@@ -2437,8 +2382,6 @@ static void dequeue_rx(ns_dev *card, ns_rsqe *rsqe)
 
 }
 
-
-
 #ifdef NS_USE_DESTRUCTORS
 
 static void ns_sb_destructor(struct sk_buff *sb)
@@ -2463,8 +2406,6 @@ static void ns_sb_destructor(struct sk_buff *sb)
    } while (card->sbfqc < card->sbnr.min);
 }
 
-
-
 static void ns_lb_destructor(struct sk_buff *lb)
 {
    ns_dev *card;
@@ -2487,8 +2428,6 @@ static void ns_lb_destructor(struct sk_buff *lb)
    } while (card->lbfqc < card->lbnr.min);
 }
 
-
-
 static void ns_hb_destructor(struct sk_buff *hb)
 {
    ns_dev *card;
@@ -2508,7 +2447,6 @@ static void ns_hb_destructor(struct sk_buff *hb)
 
 #endif /* NS_USE_DESTRUCTORS */
 
-
 static void recycle_rx_buf(ns_dev *card, struct sk_buff *skb)
 {
 	struct ns_skb_cb *cb = NS_SKB_CB(skb);
@@ -2520,13 +2458,11 @@ static void recycle_rx_buf(ns_dev *card, struct sk_buff *skb)
 		push_rxbufs(card, skb);
 }
 
-
 static void recycle_iovec_rx_bufs(ns_dev *card, struct iovec *iov, int count)
 {
 	while (count-- > 0)
 		recycle_rx_buf(card, (struct sk_buff *) (iov++)->iov_base);
 }
-
 
 static void recycle_iov_buf(ns_dev *card, struct sk_buff *iovb)
 {
@@ -2538,8 +2474,6 @@ static void recycle_iov_buf(ns_dev *card, struct sk_buff *iovb)
    else
       dev_kfree_skb_any(iovb);
 }
-
-
 
 static void dequeue_sm_buf(ns_dev *card, struct sk_buff *sb)
 {
@@ -2572,8 +2506,6 @@ static void dequeue_sm_buf(ns_dev *card, struct sk_buff *sb)
    }
 }
 
-
-
 static void dequeue_lg_buf(ns_dev *card, struct sk_buff *lb)
 {
    skb_unlink(lb, &card->lbpool.queue);
@@ -2604,8 +2536,6 @@ static void dequeue_lg_buf(ns_dev *card, struct sk_buff *lb)
       }
    }
 }
-
-
 
 static int ns_proc_read(struct atm_dev *dev, loff_t *pos, char *page)
 {
@@ -2674,8 +2604,6 @@ static int ns_proc_read(struct atm_dev *dev, loff_t *pos, char *page)
 #endif /* 0 */
    return 0;
 }
-
-
 
 static int ns_ioctl(struct atm_dev *dev, unsigned int cmd, void __user *arg)
 {
@@ -2894,12 +2822,10 @@ static int ns_ioctl(struct atm_dev *dev, unsigned int cmd, void __user *arg)
    }
 }
 
-
 static void which_list(ns_dev *card, struct sk_buff *skb)
 {
 	printk("skb buf_type: 0x%08x\n", NS_SKB_CB(skb)->buf_type);
 }
-
 
 static void ns_poll(unsigned long arg)
 {
@@ -2935,8 +2861,6 @@ static void ns_poll(unsigned long arg)
    PRINTK("nicstar: Leaving ns_poll().\n");
 }
 
-
-
 static int ns_parse_mac(char *mac, unsigned char *esi)
 {
    int i, j;
@@ -2961,8 +2885,6 @@ static int ns_parse_mac(char *mac, unsigned char *esi)
    return 0;
 }
 
-
-
 static short ns_h2i(char c)
 {
    if (c >= '0' && c <= '9')
@@ -2973,8 +2895,6 @@ static short ns_h2i(char c)
       return (short) (c - 'a' + 10);
    return -1;
 }
-
-
 
 static void ns_phy_put(struct atm_dev *dev, unsigned char value,
                     unsigned long addr)
@@ -2990,8 +2910,6 @@ static void ns_phy_put(struct atm_dev *dev, unsigned char value,
           card->membase + CMD);
    spin_unlock_irqrestore(&card->res_lock, flags);
 }
-
-
 
 static unsigned char ns_phy_get(struct atm_dev *dev, unsigned long addr)
 {
@@ -3009,8 +2927,6 @@ static unsigned char ns_phy_get(struct atm_dev *dev, unsigned long addr)
    spin_unlock_irqrestore(&card->res_lock, flags);
    return (unsigned char) data;
 }
-
-
 
 module_init(nicstar_init);
 module_exit(nicstar_cleanup);

@@ -88,7 +88,6 @@ static int get_fc_##title##_match(const char *table_key,		\
 	return 1; /* failure */						\
 }
 
-
 /* Convert fc_port_type values to ascii string name */
 static struct {
 	enum fc_port_type	value;
@@ -108,7 +107,6 @@ fc_enum_name_search(port_type, fc_port_type, fc_port_type_names)
 
 /* Reuse fc_port_type enum function for vport_type */
 #define get_fc_vport_type_name get_fc_port_type_name
-
 
 /* Convert fc_host_event_code values to ascii string name */
 static const struct {
@@ -132,7 +130,6 @@ fc_enum_name_search(host_event_code, fc_host_event_code,
 		fc_host_event_code_names)
 #define FC_HOST_EVENT_CODE_MAX_NAMELEN	30
 
-
 /* Convert fc_port_state values to ascii string name */
 static struct {
 	enum fc_port_state	value;
@@ -152,7 +149,6 @@ static struct {
 };
 fc_enum_name_search(port_state, fc_port_state, fc_port_state_names)
 #define FC_PORTSTATE_MAX_NAMELEN	20
-
 
 /* Convert fc_vport_state values to ascii string name */
 static struct {
@@ -176,7 +172,6 @@ fc_enum_name_search(vport_state, fc_vport_state, fc_vport_state_names)
 /* Reuse fc_vport_state enum function for vport_last_state */
 #define get_fc_vport_last_state_name get_fc_vport_state_name
 
-
 /* Convert fc_tgtid_binding_type values to ascii string name */
 static const struct {
 	enum fc_tgtid_binding_type	value;
@@ -193,7 +188,6 @@ fc_enum_name_search(tgtid_bind_type, fc_tgtid_binding_type,
 fc_enum_name_match(tgtid_bind_type, fc_tgtid_binding_type,
 		fc_tgtid_binding_type_names)
 #define FC_BINDTYPE_MAX_NAMELEN	30
-
 
 #define fc_bitfield_name_search(title, table)			\
 static ssize_t							\
@@ -214,7 +208,6 @@ get_fc_##title##_names(u32 table_key, char *buf)		\
 	return len;						\
 }
 
-
 /* Convert FC_COS bit values to ascii string name */
 static const struct {
 	u32 			value;
@@ -227,7 +220,6 @@ static const struct {
 	{ FC_COS_CLASS6,	"Class 6" },
 };
 fc_bitfield_name_search(cos, fc_cos_names)
-
 
 /* Convert FC_PORTSPEED bit values to ascii string name */
 static const struct {
@@ -244,7 +236,6 @@ static const struct {
 };
 fc_bitfield_name_search(port_speed, fc_port_speed_names)
 
-
 static int
 show_fc_fc4s (char *buf, u8 *fc4_list)
 {
@@ -255,7 +246,6 @@ show_fc_fc4s (char *buf, u8 *fc4_list)
 	len += sprintf(buf + len, "\n");
 	return len;
 }
-
 
 /* Convert FC_PORT_ROLE bit values to ascii string name */
 static const struct {
@@ -278,7 +268,6 @@ fc_bitfield_name_search(port_roles, fc_port_role_names)
 #define FC_DIRSRVR_PORTID		0x00000c
 #define FC_TIMESRVR_PORTID		0x00000b
 #define FC_MGMTSRVR_PORTID		0x00000a
-
 
 static void fc_timeout_deleted_rport(struct work_struct *work);
 static void fc_timeout_fail_rport_io(struct work_struct *work);
@@ -497,7 +486,6 @@ fc_get_event_number(void)
 }
 EXPORT_SYMBOL(fc_get_event_number);
 
-
 /**
  * fc_host_post_event - called to post an even on an fc_host.
  * @shost:		host the event occurred on
@@ -567,7 +555,6 @@ send_fail:
 }
 EXPORT_SYMBOL(fc_host_post_event);
 
-
 /**
  * fc_host_post_vendor_event - called to post a vendor unique event on an fc_host
  * @shost:		host the event occurred on
@@ -634,8 +621,6 @@ send_vendor_fail:
 	return;
 }
 EXPORT_SYMBOL(fc_host_post_vendor_event);
-
-
 
 static __init int fc_transport_init(void)
 {
@@ -733,7 +718,6 @@ static FC_DEVICE_ATTR(rport, field, S_IRUGO | S_IWUSR,		\
 			show_fc_rport_##field,				\
 			store_fc_rport_##field)
 
-
 #define fc_private_rport_show_function(field, format_string, sz, cast)	\
 static ssize_t								\
 show_fc_rport_##field (struct device *dev, 				\
@@ -753,7 +737,6 @@ static FC_DEVICE_ATTR(rport, field, S_IRUGO,			\
 static FC_DEVICE_ATTR(rport, field, S_IRUGO,			\
 			  show_fc_rport_##field, NULL)
 
-
 #define fc_private_rport_rd_enum_attr(title, maxlen)			\
 static ssize_t								\
 show_fc_rport_##title (struct device *dev,				\
@@ -768,7 +751,6 @@ show_fc_rport_##title (struct device *dev,				\
 }									\
 static FC_DEVICE_ATTR(rport, title, S_IRUGO,			\
 			show_fc_rport_##title, NULL)
-
 
 #define SETUP_RPORT_ATTRIBUTE_RD(field)					\
 	i->private_rport_attrs[count] = device_attr_rport_##field; \
@@ -801,7 +783,6 @@ static FC_DEVICE_ATTR(rport, title, S_IRUGO,			\
 	i->rport_attrs[count] = &i->private_rport_attrs[count];		\
 	count++;							\
 }
-
 
 /* The FC Transport Remote Port Attributes: */
 
@@ -849,7 +830,6 @@ store_fc_rport_dev_loss_tmo(struct device *dev, struct device_attribute *attr,
 }
 static FC_DEVICE_ATTR(rport, dev_loss_tmo, S_IRUGO | S_IWUSR,
 		show_fc_rport_dev_loss_tmo, store_fc_rport_dev_loss_tmo);
-
 
 /* Private Remote Port Attributes */
 
@@ -934,7 +914,6 @@ store_fc_rport_fast_io_fail_tmo(struct device *dev,
 static FC_DEVICE_ATTR(rport, fast_io_fail_tmo, S_IRUGO | S_IWUSR,
 	show_fc_rport_fast_io_fail_tmo, store_fc_rport_fast_io_fail_tmo);
 
-
 /*
  * FC SCSI Target Attribute Management
  */
@@ -994,7 +973,6 @@ static FC_DEVICE_ATTR(starget, field, S_IRUGO,			\
 fc_starget_rd_attr_cast(node_name, "0x%llx\n", 20, unsigned long long);
 fc_starget_rd_attr_cast(port_name, "0x%llx\n", 20, unsigned long long);
 fc_starget_rd_attr(port_id, "0x%06x\n", 20);
-
 
 /*
  * FC Virtual Port Attribute Management
@@ -1099,7 +1077,6 @@ store_fc_vport_##field(struct device *dev,				\
 	return count;							\
 }
 
-
 #define fc_private_vport_rd_attr(field, format_string, sz)		\
 	fc_private_vport_show_function(field, format_string, sz, )	\
 static FC_DEVICE_ATTR(vport, field, S_IRUGO,			\
@@ -1117,7 +1094,6 @@ static FC_DEVICE_ATTR(vport, field, S_IRUGO | S_IWUSR,		\
 			show_fc_vport_##field,				\
 			store_fc_vport_##field)
 
-
 #define fc_private_vport_rd_enum_attr(title, maxlen)			\
 static ssize_t								\
 show_fc_vport_##title (struct device *dev,				\
@@ -1133,7 +1109,6 @@ show_fc_vport_##title (struct device *dev,				\
 }									\
 static FC_DEVICE_ATTR(vport, title, S_IRUGO,			\
 			show_fc_vport_##title, NULL)
-
 
 #define SETUP_VPORT_ATTRIBUTE_RD(field)					\
 	i->private_vport_attrs[count] = device_attr_vport_##field; \
@@ -1174,7 +1149,6 @@ static FC_DEVICE_ATTR(vport, title, S_IRUGO,			\
 	i->vport_attrs[count] = &i->private_vport_attrs[count];		\
 	count++;							\
 }
-
 
 /* The FC Transport Virtual Port Attributes: */
 
@@ -1231,7 +1205,6 @@ store_fc_vport_delete(struct device *dev, struct device_attribute *attr,
 static FC_DEVICE_ATTR(vport, vport_delete, S_IWUSR,
 			NULL, store_fc_vport_delete);
 
-
 /*
  * Enable/Disable vport
  *  Write "1" to disable, write "0" to enable
@@ -1263,7 +1236,6 @@ store_fc_vport_disable(struct device *dev, struct device_attribute *attr,
 }
 static FC_DEVICE_ATTR(vport, vport_disable, S_IWUSR,
 			NULL, store_fc_vport_disable);
-
 
 /*
  * Host Attribute Management
@@ -1378,7 +1350,6 @@ static FC_DEVICE_ATTR(host, title, S_IRUGO, show_fc_host_##title, NULL)
 	if (i->f->show_host_##field)					\
 		count++
 
-
 #define fc_private_host_show_function(field, format_string, sz, cast)	\
 static ssize_t								\
 show_fc_host_##field (struct device *dev,				\
@@ -1411,7 +1382,6 @@ static FC_DEVICE_ATTR(host, field, S_IRUGO,			\
 	i->host_attrs[count] = &i->private_host_attrs[count];		\
 	count++;							\
 }
-
 
 /* Fixed Host Attributes */
 
@@ -1453,7 +1423,6 @@ show_fc_host_supported_speeds (struct device *dev,
 static FC_DEVICE_ATTR(host, supported_speeds, S_IRUGO,
 		show_fc_host_supported_speeds, NULL);
 
-
 fc_private_host_rd_attr_cast(node_name, "0x%llx\n", 20, unsigned long long);
 fc_private_host_rd_attr_cast(port_name, "0x%llx\n", 20, unsigned long long);
 fc_private_host_rd_attr_cast(permanent_port_name, "0x%llx\n", 20,
@@ -1461,7 +1430,6 @@ fc_private_host_rd_attr_cast(permanent_port_name, "0x%llx\n", 20,
 fc_private_host_rd_attr(maxframe_size, "%u bytes\n", 20);
 fc_private_host_rd_attr(max_npiv_vports, "%u\n", 20);
 fc_private_host_rd_attr(serial_number, "%s\n", (FC_SERIAL_NUMBER_SIZE +1));
-
 
 /* Dynamic Host Attributes */
 
@@ -1498,7 +1466,6 @@ show_fc_host_speed (struct device *dev,
 static FC_DEVICE_ATTR(host, speed, S_IRUGO,
 		show_fc_host_speed, NULL);
 
-
 fc_host_rd_attr(port_id, "0x%06x\n", 20);
 fc_host_rd_enum_attr(port_type, FC_PORTTYPE_MAX_NAMELEN);
 fc_host_rd_enum_attr(port_state, FC_PORTSTATE_MAX_NAMELEN);
@@ -1510,7 +1477,6 @@ fc_private_host_show_function(system_hostname, "%s\n",
 fc_host_store_str_function(system_hostname, FC_SYMBOLIC_NAME_SIZE)
 static FC_DEVICE_ATTR(host, system_hostname, S_IRUGO | S_IWUSR,
 		show_fc_host_system_hostname, store_fc_host_system_hostname);
-
 
 /* Private Host Attributes */
 
@@ -1585,7 +1551,6 @@ static FC_DEVICE_ATTR(host, issue_lip, S_IWUSR, NULL,
 
 fc_private_host_rd_attr(npiv_vports_inuse, "%u\n", 20);
 
-
 /*
  * Host Statistics Management
  */
@@ -1611,7 +1576,6 @@ fc_stat_show(const struct device *dev, char *buf, unsigned long offset)
 	}
 	return ret;
 }
-
 
 /* generate a read-only statistics attribute */
 #define fc_host_statistic(name)						\
@@ -1693,7 +1657,6 @@ static struct attribute_group fc_statistics_group = {
 	.attrs = fc_statistics_attrs,
 };
 
-
 /* Host Vport Attributes */
 
 static int
@@ -1724,7 +1687,6 @@ fc_parse_wwn(const char *ns, u64 *nm)
 
 	return 0;
 }
-
 
 /*
  * "Short-cut" sysfs variable to create a new vport on a FC Host.
@@ -1771,7 +1733,6 @@ store_fc_host_vport_create(struct device *dev, struct device_attribute *attr,
 }
 static FC_DEVICE_ATTR(host, vport_create, S_IWUSR, NULL,
 			store_fc_host_vport_create);
-
 
 /*
  * "Short-cut" sysfs variable to delete a vport on a FC Host.
@@ -1830,7 +1791,6 @@ store_fc_host_vport_delete(struct device *dev, struct device_attribute *attr,
 }
 static FC_DEVICE_ATTR(host, vport_delete, S_IWUSR, NULL,
 			store_fc_host_vport_delete);
-
 
 static int fc_host_match(struct attribute_container *cont,
 			  struct device *dev)
@@ -1902,7 +1862,6 @@ static int fc_rport_match(struct attribute_container *cont,
 	return &i->rport_attr_cont.ac == cont;
 }
 
-
 static void fc_vport_dev_release(struct device *dev)
 {
 	struct fc_vport *vport = dev_to_vport(dev);
@@ -1935,7 +1894,6 @@ static int fc_vport_match(struct attribute_container *cont,
 	i = to_fc_internal(shost->transportt);
 	return &i->vport_attr_cont.ac == cont;
 }
-
 
 /**
  * fc_timed_out - FC Transport I/O timeout intercept handler
@@ -2112,7 +2070,6 @@ fc_attach_transport(struct fc_function_template *ft)
 	BUG_ON(count > FC_STARGET_NUM_ATTRS);
 
 	i->starget_attrs[count] = NULL;
-
 
 	/*
 	 * Setup SCSI Host Attributes.
@@ -2293,7 +2250,6 @@ fc_flush_devloss(struct Scsi_Host *shost)
 	flush_workqueue(fc_host_devloss_work_q(shost));
 }
 
-
 /**
  * fc_remove_host - called to terminate any fc_transport-related elements for a scsi host.
  * @shost:	Which &Scsi_Host
@@ -2393,7 +2349,6 @@ fc_starget_delete(struct work_struct *work)
 	scsi_remove_target(&rport->dev);
 }
 
-
 /**
  * fc_rport_final_delete - finish rport termination and delete it.
  * @work:	remote port to be deleted.
@@ -2465,7 +2420,6 @@ fc_rport_final_delete(struct work_struct *work)
 	put_device(&shost->shost_gendev);	/* for fc_host->rport list */
 	put_device(dev);			/* for self-reference */
 }
-
 
 /**
  * fc_rport_create - allocates and creates a remote FC port.
@@ -2791,7 +2745,6 @@ fc_remote_port_add(struct Scsi_Host *shost, int channel,
 	return rport;
 }
 EXPORT_SYMBOL(fc_remote_port_add);
-
 
 /**
  * fc_remote_port_delete - notifies the fc transport that a remote port is no longer in existence.
@@ -3121,7 +3074,6 @@ fc_timeout_deleted_rport(struct work_struct *work)
 		i->f->dev_loss_tmo_callbk(rport);
 }
 
-
 /**
  * fc_timeout_fail_rport_io - Timeout handler for a fast io failing on a disconnected SCSI target.
  * @work:	rport to terminate io on.
@@ -3166,7 +3118,6 @@ fc_scsi_scan_rport(struct work_struct *work)
 	rport->flags &= ~FC_RPORT_SCAN_PENDING;
 	spin_unlock_irqrestore(shost->host_lock, flags);
 }
-
 
 /**
  * fc_vport_setup - allocates and creates a FC virtual port.
@@ -3395,11 +3346,9 @@ fc_vport_sched_delete(struct work_struct *work)
 			vport->channel, stat);
 }
 
-
 /*
  * BSG support
  */
-
 
 /**
  * fc_destroy_bsgjob - routine to teardown/delete a fc bsg job
@@ -3529,7 +3478,6 @@ fc_bsg_map_buffer(struct fc_bsg_buffer *buf, struct request *req)
 	return 0;
 }
 
-
 /**
  * fc_req_to_bsgjob - Allocate/create the fc_bsg_job structure for the
  *                   bsg request
@@ -3595,7 +3543,6 @@ fc_req_to_bsgjob(struct Scsi_Host *shost, struct fc_rport *rport,
 
 	return 0;
 
-
 failjob_rls_rqst_payload:
 	kfree(job->request_payload.sg_list);
 failjob_rls_job:
@@ -3603,13 +3550,11 @@ failjob_rls_job:
 	return -ENOMEM;
 }
 
-
 enum fc_dispatch_result {
 	FC_DISPATCH_BREAK,	/* on return, q is locked, break from q loop */
 	FC_DISPATCH_LOCKED,	/* on return, q is locked, continue on */
 	FC_DISPATCH_UNLOCKED,	/* on return, q is unlocked, continue on */
 };
-
 
 /**
  * fc_bsg_host_dispatch - process fc host bsg requests and dispatch to LLDD
@@ -3690,7 +3635,6 @@ fail_host_msg:
 	return FC_DISPATCH_UNLOCKED;
 }
 
-
 /*
  * fc_bsg_goose_queue - restart rport queue in case it was stopped
  * @rport:	rport to be restarted
@@ -3718,7 +3662,6 @@ fc_bsg_goose_queue(struct fc_rport *rport)
 
 	put_device(&rport->dev);
 }
-
 
 /**
  * fc_bsg_rport_dispatch - process rport bsg requests and dispatch to LLDD
@@ -3775,7 +3718,6 @@ fail_rport_msg:
 	fc_bsg_jobdone(job);
 	return FC_DISPATCH_UNLOCKED;
 }
-
 
 /**
  * fc_bsg_request_handler - generic handler for bsg requests
@@ -3855,7 +3797,6 @@ fc_bsg_request_handler(struct request_queue *q, struct Scsi_Host *shost,
 	spin_lock_irq(q->queue_lock);
 }
 
-
 /**
  * fc_bsg_host_handler - handler for bsg requests for a fc host
  * @q:		fc host request queue
@@ -3867,7 +3808,6 @@ fc_bsg_host_handler(struct request_queue *q)
 
 	fc_bsg_request_handler(q, shost, NULL, &shost->shost_gendev);
 }
-
 
 /**
  * fc_bsg_rport_handler - handler for bsg requests for a fc rport
@@ -3881,7 +3821,6 @@ fc_bsg_rport_handler(struct request_queue *q)
 
 	fc_bsg_request_handler(q, shost, rport, &rport->dev);
 }
-
 
 /**
  * fc_bsg_hostadd - Create and add the bsg hooks so we can receive requests
@@ -3932,7 +3871,6 @@ fc_bsg_hostadd(struct Scsi_Host *shost, struct fc_host_attrs *fc_host)
 	return 0;
 }
 
-
 /**
  * fc_bsg_rportadd - Create and add the bsg hooks so we can receive requests
  * @shost:	shost that rport is attached to
@@ -3978,7 +3916,6 @@ fc_bsg_rportadd(struct Scsi_Host *shost, struct fc_rport *rport)
 	return 0;
 }
 
-
 /**
  * fc_bsg_remove - Deletes the bsg hooks on fchosts/rports
  * @q:	the request_queue that is to be torn down.
@@ -3991,7 +3928,6 @@ fc_bsg_remove(struct request_queue *q)
 		blk_cleanup_queue(q);
 	}
 }
-
 
 /* Original Author:  Martin Hicks */
 MODULE_AUTHOR("James Smart");

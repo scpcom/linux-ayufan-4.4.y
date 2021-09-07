@@ -57,7 +57,6 @@ NOTE: The bytes are handled as they are law-encoded.
 static u8 *table_com;
 static u16 *table_dec;
 
-
 /* alaw -> ulaw */
 static u8 alaw_to_ulaw[256] =
 {
@@ -216,7 +215,6 @@ static u8 _4bit_to_ulaw[16] = {
 	0xfe, 0xef, 0xe7, 0xdb, 0xcd, 0xbf, 0xaf, 0x9f,
 };
 
-
 /*
  * Compresses data to the result buffer
  * The result size must be at least half of the input buffer.
@@ -275,7 +273,6 @@ l1oip_4bit_to_law(u8 *data, int len, u8 *result)
 	return len << 1;
 }
 
-
 /*
  * law conversion
  */
@@ -304,7 +301,6 @@ l1oip_ulaw_to_alaw(u8 *data, int len, u8 *result)
 
 	return len;
 }
-
 
 /*
  * generate/free compression and decompression table
@@ -372,5 +368,3 @@ l1oip_4bit_alloc(int ulaw)
 
 	return 0;
 }
-
-

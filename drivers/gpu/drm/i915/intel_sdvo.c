@@ -1101,7 +1101,6 @@ static bool intel_sdvo_mode_fixup(struct drm_encoder *encoder,
 		 * the sequence to do it. Oh well.
 		 */
 
-
 		/* Set output timings */
 		intel_sdvo_get_dtd_from_mode(&output_dtd, mode);
 		intel_sdvo_set_target_output(output,
@@ -1110,7 +1109,6 @@ static bool intel_sdvo_mode_fixup(struct drm_encoder *encoder,
 
 		/* Set the input timing to the screen. Assume always input 0. */
 		intel_sdvo_set_target_input(output, true, false);
-
 
 		success = intel_sdvo_create_preferred_input_timing(output,
 								   mode->clock / 10,
@@ -1148,7 +1146,6 @@ static bool intel_sdvo_mode_fixup(struct drm_encoder *encoder,
 
 		/* Set the input timing to the screen. Assume always input 0. */
 		intel_sdvo_set_target_input(output, true, false);
-
 
 		success = intel_sdvo_create_preferred_input_timing(
 				output,
@@ -1343,7 +1340,6 @@ static void intel_sdvo_dpms(struct drm_encoder *encoder, int mode)
 
 		status = intel_sdvo_get_trained_inputs(intel_output, &input1,
 						       &input2);
-
 
 		/* Warn if the device reported failure to sync.
 		 * A lot of SDVO devices fail to notify of sync, but it's
@@ -1828,7 +1824,6 @@ static void intel_sdvo_get_tv_modes(struct drm_connector *connector)
 	int i;
 	uint8_t status;
 
-
 	/* Read the list of supported input resolutions for the selected TV
 	 * format.
 	 */
@@ -2150,7 +2145,6 @@ static const struct drm_encoder_funcs intel_sdvo_enc_funcs = {
 	.destroy = intel_sdvo_enc_destroy,
 };
 
-
 /**
  * Choose the appropriate DDC bus for control bus switch command for this
  * SDVO output based on the controlled output.
@@ -2404,7 +2398,6 @@ intel_sdvo_output_setup(struct intel_output *intel_output, uint16_t flags)
 	if (ret && registered)
 		ret = drm_sysfs_connector_add(connector) == 0 ? true : false;
 
-
 	return ret;
 
 }
@@ -2440,7 +2433,6 @@ static void intel_sdvo_tv_create_property(struct drm_connector *connector)
 			[sdvo_priv->format_supported_num++] =
 			tv_format_names[i];
 		}
-
 
 	sdvo_priv->tv_format_property =
 			drm_property_create(
@@ -2835,7 +2827,6 @@ bool intel_sdvo_init(struct drm_device *dev, int output_device)
 		goto err_i2c;
 	}
 
-
 	connector = &intel_output->base;
 	drm_connector_init(dev, connector, &intel_sdvo_connector_funcs,
 			   connector->connector_type);
@@ -2867,7 +2858,6 @@ bool intel_sdvo_init(struct drm_device *dev, int output_device)
 	intel_sdvo_get_input_pixel_clock_range(intel_output,
 					       &sdvo_priv->pixel_clock_min,
 					       &sdvo_priv->pixel_clock_max);
-
 
 	DRM_DEBUG_KMS("%s device VID/DID: %02X:%02X.%02X, "
 			"clock range %dMHz - %dMHz, "

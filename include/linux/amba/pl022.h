@@ -200,7 +200,6 @@ enum ssp_chip_select {
 	SSP_CHIP_DESELECT
 };
 
-
 /**
  * struct pl022_ssp_master - device.platform_data for SPI controller devices.
  * @num_chipselect: chipselects are used to distinguish individual

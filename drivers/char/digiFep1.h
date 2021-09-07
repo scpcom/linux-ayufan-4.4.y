@@ -10,7 +10,6 @@
 #define CHANSTRUCT   0x1000L
 #define RXTXBUF      0x4000L
 
-
 struct global_data 
 {
 	u16 cin;
@@ -22,7 +21,6 @@ struct global_data
 	u16 istart;
 	u16 imax;
 };
-
 
 struct board_chan 
 {
@@ -97,7 +95,6 @@ struct board_chan
 	u8 filler8[28];
 }; 
 
-
 #define SRXLWATER      0xE0
 #define SRXHWATER      0xE1
 #define STOUT          0xE2
@@ -116,8 +113,6 @@ struct board_chan
 #define SETHFLOW       0xF4
 #define SETCTRLFLAGS   0xF5
 #define SETVNEXT       0xF6
-
-
 
 #define BREAK_IND        0x01
 #define LOWTX_IND        0x02

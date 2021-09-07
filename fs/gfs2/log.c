@@ -232,7 +232,6 @@ static int gfs2_ail1_empty(struct gfs2_sbd *sdp, int flags)
 	return ret;
 }
 
-
 /**
  * gfs2_ail2_empty_one - Check whether or not a trans in the AIL has been synced
  * @sdp: the filesystem
@@ -870,7 +869,6 @@ void gfs2_log_shutdown(struct gfs2_sbd *sdp)
 	up_write(&sdp->sd_log_flush_lock);
 }
 
-
 /**
  * gfs2_meta_syncfs - sync all the buffers in a filesystem
  * @sdp: the filesystem
@@ -887,7 +885,6 @@ void gfs2_meta_syncfs(struct gfs2_sbd *sdp)
 		msleep(10);
 	}
 }
-
 
 /**
  * gfs2_logd - Update log tail as Active Items get flushed to in-place blocks
@@ -926,4 +923,3 @@ int gfs2_logd(void *data)
 
 	return 0;
 }
-

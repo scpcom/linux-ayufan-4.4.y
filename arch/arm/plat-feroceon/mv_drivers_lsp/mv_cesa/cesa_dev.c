@@ -23,7 +23,6 @@
 #include "ctrlEnv/sys/mvSysCesa.h"
 #include "cesa/mvCesa.h" 
 
-
 static int debug = 1;
 module_param(debug, int, 0);
 MODULE_PARM_DESC(debug,
@@ -150,7 +149,6 @@ int run_cesa_debug(CESA_DEBUG *cesa_debug)
 	return(-error);
 }
 
-
 static int
 cesadev_ioctl(
 	struct inode *inode,
@@ -196,7 +194,6 @@ cesadev_ioctl(
 	return(-error);
 }
 
-
 static int
 cesadev_open(struct inode *inode, struct file *filp)
 {
@@ -210,7 +207,6 @@ cesadev_release(struct inode *inode, struct file *filp)
 	dprintk("%s()\n", __FUNCTION__);
 	return(0);
 }
-
 
 static struct file_operations cesadev_fops = {
 	.owner = THIS_MODULE,

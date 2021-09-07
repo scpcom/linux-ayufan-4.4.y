@@ -332,7 +332,6 @@ int drm_control(struct drm_device *dev, void *data,
 
 	/* if we haven't irq we fallback for compatibility reasons - this used to be a separate function in drm_dma.h */
 
-
 	switch (ctl->func) {
 	case DRM_INST_HANDLER:
 		if (!drm_core_check_feature(dev, DRIVER_HAVE_IRQ))

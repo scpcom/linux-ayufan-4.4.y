@@ -172,7 +172,6 @@ GT_STATUS gvtuGetEntryCount
 
 }
 
-
 /*******************************************************************************
 * gvtuGetEntryFirst
 *
@@ -254,7 +253,6 @@ GT_STATUS gvtuGetEntryFirst
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gvtuGetEntryNext
@@ -338,8 +336,6 @@ GT_STATUS gvtuGetEntryNext
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gvtuFindVidEntry
@@ -432,8 +428,6 @@ GT_STATUS gvtuFindVidEntry
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gvtuFlush
@@ -954,7 +948,6 @@ GT_STATUS gvtuGetViolation3
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * vtuOperationPerform
 *
@@ -1089,7 +1082,6 @@ static GT_STATUS vtuOperationPerform
 			}
 		}
 
-
 		/****************** VTU DATA 3 REG *******************/
 
 		/* get data and wirte to QD_REG_VTU_DATA3_REG (ports 8 to 10) */
@@ -1188,7 +1180,6 @@ static GT_STATUS vtuOperationPerform
 	    	}		
 		}
 
-
 	}
 
 	/* Start the VTU Operation by defining the DBNum, vtuOp and VTUBusy    */
@@ -1284,7 +1275,6 @@ static GT_STATUS vtuOperationPerform
 
 		/* Get the vid - bits 0-11 */
 		entry->vid   = data & 0xFFF;
-
 
 	} /* end of service violations */
 
@@ -1399,7 +1389,6 @@ static GT_STATUS vtuOperationPerform
 				entry->DBNum |= ((data & 0x3) << 4);
 			}
 		}
-
 
 		/****************** get the MemberTagP *******************/
 		retVal = hwReadGlobalReg(dev,QD_REG_VTU_DATA1_REG,&data);

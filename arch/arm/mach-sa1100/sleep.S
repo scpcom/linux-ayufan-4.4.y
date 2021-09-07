@@ -20,11 +20,7 @@
 #include <asm/assembler.h>
 #include <mach/hardware.h>
 
-
-
 		.text
-
-
 
 /*
  * sa1100_cpu_suspend()
@@ -211,5 +207,3 @@ sleep_save_sp:
 resume_after_mmu:
 	mcr	p15, 0, r1, c15, c1, 2		@ enable clock switching
 	ldmfd	sp!, {r4 - r12, pc}		@ return to caller
-
-

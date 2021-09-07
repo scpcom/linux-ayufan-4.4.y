@@ -160,7 +160,6 @@ void readTaskFiles(IN PDomain_Port pPort, PDomain_Device pDevice, PATA_TaskFile 
 }
 #endif
 
-
 void mv_core_set_running_slot(PDomain_Port pPort, MV_U32 slot_num, PMV_Request pReq)
 {
 
@@ -198,8 +197,6 @@ void mv_core_reset_running_slot(PDomain_Port pPort, MV_U32 slot_num)
 	pPort->Running_Slot &= ~(1L<<slot_num);
 	Tag_ReleaseOne(&pPort->Tag_Pool, slot_num);
 }
-
-
 
 MV_U32 Core_ModuleGetResourceQuota(enum Resource_Type type, MV_U16 maxIo)
 {
@@ -309,7 +306,6 @@ void Core_ModuleInitialize(MV_PVOID ModulePointer, MV_U32 extensionSize, MV_U16 
 	PCore_Driver_Extension pCore = (PCore_Driver_Extension)ModulePointer;
 	Controller_Infor controller;
 #endif	/* NEW_LINUX_DRIVER*/
-
 
 	PMV_Request pReq;
 	Assigned_Uncached_Memory dmaResource;
@@ -704,7 +700,6 @@ void Core_ModuleStart(MV_PVOID This)
 	mvAdapterStateMachine(pCore,NULL);
 }
 
-
 void Core_ModuleShutdown(MV_PVOID This)
 {
 	/* 
@@ -853,7 +848,6 @@ void SATA_PrepareCommandHeader(PDomain_Port pPort, PMV_Request pReq, MV_U8 tag)
 		MV_DPRINT(("Cross 4G boundary.\n"));
 		table_addr.parts.high++;
 	}
-
 
 	header->Table_Address = CPU_TO_LE_32(table_addr.parts.low);
 	header->Table_Address_High = CPU_TO_LE_32(table_addr.parts.high);
@@ -1201,7 +1195,6 @@ void PATA_LegacyPollSenseData(PCore_Driver_Extension pCore, PMV_Request pReq)
 
 }
 
-
 void Core_FillSenseData(PMV_Request pReq, MV_U8 senseKey, MV_U8 adSenseCode)
 {
 	if (pReq->Sense_Info_Buffer != NULL) {
@@ -1211,7 +1204,6 @@ void Core_FillSenseData(PMV_Request pReq, MV_U8 senseKey, MV_U8 adSenseCode)
 		((MV_PU8)pReq->Sense_Info_Buffer)[12] = adSenseCode;	/* additional sense code */
 	}
 }
-
 
 void mvScsiInquiry(PCore_Driver_Extension pCore, PMV_Request pReq)
 {
@@ -1950,7 +1942,6 @@ PrepareAndSendCommand(
 			return MV_QUEUE_COMMAND_RESULT_FULL;
 		}
 
-		
 		/* In order for request sense to immediately follow the error request. */
 		if ( pDevice->Device_Type&DEVICE_TYPE_ATAPI )
 			return MV_QUEUE_COMMAND_RESULT_FULL;
@@ -1997,7 +1988,6 @@ PrepareAndSendCommand(
 		SATA_PrepareCommandHeader(pPort, pReq, tag);
 	else
 		PATA_PrepareCommandHeader(pPort, pReq, tag);
-
 
 	if ( !isPATA )
 		SATA_PrepareCommandTable(pPort, pReq, tag, &taskFile);
@@ -2360,7 +2350,6 @@ void mvHandleDevicePlugin_BH(MV_PVOID ext);
 #define CORE_ERROR_HANDLE_RESET_PORT			2
 #define CORE_ERROR_HANDLE_RESET_HBA			3
 
-
 MV_U8 mv_core_reset_port(PDomain_Port pPort)
 {
 	PCore_Driver_Extension pCore = (PCore_Driver_Extension)pPort->Core_Extension;
@@ -2479,7 +2468,6 @@ MV_U8 mv_core_reset_port(PDomain_Port pPort)
 	return ret;
 }
 
-
 MV_U8 mv_core_reset_hba(PDomain_Port pPort)
 {
 
@@ -2505,7 +2493,6 @@ MV_U8 mv_core_reset_hba(PDomain_Port pPort)
 	}
 	InitChip(pCore);
 
-
 	MV_DPRINT(("Finished reset hba for port[%d], CMD=0x%x.\n",pPort->Id, MV_REG_READ_DWORD(portMmio, PORT_CMD)));
 	//mv_core_dump_reg(pPort);
 	return MV_TRUE;
@@ -2527,7 +2514,6 @@ MV_U8 mv_core_check_is_reseeting(MV_PVOID core_ext)
 	PCore_Driver_Extension pCore = (PCore_Driver_Extension)core_ext;
 	return	pCore->resetting_command;
 }
-
 
 void mv_core_init_reset_para(PDomain_Port pPort)
 {
@@ -2619,7 +2605,6 @@ void mv_core_put_back_request(PDomain_Port pPort)
 	}
 }
 
-
 #define MAX_WAIT_TIMES	3
 void  mv_core_reset_command(PDomain_Port pPort)
 {
@@ -2654,7 +2639,6 @@ void  mv_core_reset_command(PDomain_Port pPort)
 			}
 		}
 	}
-
 
 	if(pPort->Hot_Plug_Timer > MAX_WAIT_TIMES){
 		MV_DPRINT(("ERROR: Wait too long time for command running bit, failed detecting port[%d].\n",pPort->Id));
@@ -2954,9 +2938,6 @@ void sendDummyFIS( PDomain_Port pPort )
 //		MV_DPRINT(("DummyFIS:CI can not be clean[0x%x] on port[%d].\n",MV_REG_READ_DWORD( portMmio, PORT_CMD_ISSUE), pPort->Id));
 	}	
 }
-
-
-
 
 void mvHandleDevicePlugin (PCore_Driver_Extension pCore, PDomain_Port pPort)
 {
@@ -3486,7 +3467,6 @@ void mvHandleDeviceUnplugReset (MV_PVOID pport, MV_PVOID ptemp)
 	MV_U32 temp, temp2;
 	PDomain_Device pDevice = &pPort->Device[0];
 
-
 	MV_U32 SControl = MV_REG_READ_DWORD(portMmio, PORT_SCR_CTL);
 	SControl &= ~0x0000000F;    //Enable PHY
 	mvEnableIntr(portMmio, pPort->old_stat);
@@ -3668,7 +3648,6 @@ void SATA_PortHandleInterrupt(
 	readTaskFiles(pPort, pDevice, &taskFiles);
 #endif
 
-
 	/* Read port interrupt status register */
 	orgIntStatus = MV_REG_READ_DWORD(port_mmio, PORT_IRQ_STAT);
 	intStatus = orgIntStatus;
@@ -3818,7 +3797,6 @@ void SATA_PortHandleInterrupt(
 		MV_REG_WRITE_DWORD(mmio, HOST_IRQ_STAT, (1L<<pPort->Id));
 		MV_REG_WRITE_DWORD(port_mmio, PORT_IRQ_STAT, orgIntStatus);
 
-
 		/* This is the failed request. */
 		pReq = pPort->Running_Req[errorSlot];
 		if((!errorSlot)&&(!pReq)&&(pPort->Setting&PORT_SETTING_DURING_RETRY)){
@@ -3883,7 +3861,6 @@ void SATA_PortHandleInterrupt(
 
 		return;
 	}
-
 
 	/* The Second time to hit the error.  */
 	if ( reset_port){
@@ -4054,7 +4031,6 @@ void SATA_PortHandleInterrupt(
 		
 	}
 
-
 	/* clear global before channel */
 	MV_REG_WRITE_DWORD(mmio, HOST_IRQ_STAT, (1L<<pPort->Id));
 	MV_REG_WRITE_DWORD(port_mmio, PORT_IRQ_STAT, orgIntStatus);
@@ -4184,7 +4160,6 @@ if ( (pCore->Device_Id!=DEVICE_ID_THOR_4S1P_NEW) && (pCore->Revision_Id<0xB0) )
 		else
 			taskFile = MV_REG_READ_DWORD(port_mmio, PORT_SLAVE_TF0);
 
-
 		if ( taskFile&MV_BIT(0) )
 		{
 			hasError = MV_TRUE;
@@ -4307,7 +4282,6 @@ if ( (pCore->Device_Id!=DEVICE_ID_THOR_4S1P_NEW) && (pCore->Revision_Id<0xB0) )
 	MV_REG_WRITE_DWORD(mmio, HOST_IRQ_STAT, (1L<<pPort->Id));
 	MV_REG_WRITE_DWORD(port_mmio, PORT_IRQ_STAT, orgIntStatus);
 
-	
 	/* If there is more requests on the slot, we have to push back there request. */
 	if ( needReset )
 	{
@@ -4425,7 +4399,6 @@ void CompleteRequest(
 		return;
 	}
 
-
 #ifdef SUPPORT_SCSI_PASSTHROUGH
 	if (pTaskFile != NULL)
 	{
@@ -4460,7 +4433,6 @@ void CompleteRequest(
 					}
 				}
 			}
-
 
 			if (pReq->Cdb[0] == SCSI_CMD_MARVELL_SPECIFIC && pReq->Cdb[1] == CDB_CORE_MODULE
 			    && pReq->Cdb[2] == CDB_CORE_OS_SMART_CMD)
@@ -4621,4 +4593,3 @@ struct mv_module_ops *mv_core_register_module(void)
 }
 
 #endif /* _OS_LINUX */
-

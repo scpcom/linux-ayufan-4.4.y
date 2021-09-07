@@ -35,12 +35,10 @@
     --------    ----------    ----------------------------------------------
 */
 
-
 #ifndef __AUTOCHSELECT_CMM_H__
 #define __AUTOCHSELECT_CMM_H__
 
 #define RSSI_TO_DBM_OFFSET 120 // RSSI-115 = dBm
-
 
 typedef struct {
 	ULONG dirtyness[MAX_NUM_OF_CHANNELS+1];

@@ -106,7 +106,6 @@ static struct notifier_block bpq_dev_notifier = {
 	.notifier_call =bpq_device_event,
 };
 
-
 struct bpqdev {
 	struct list_head bpq_list;	/* list of bpq devices chain */
 	struct net_device *ethdev;	/* link to ethernet device */
@@ -139,7 +138,6 @@ static void bpq_set_lockdep_class(struct net_device *dev)
 }
 
 /* ------------------------------------------------------------------------ */
-
 
 /*
  *	Get the ethernet device for a BPQ device
@@ -174,7 +172,6 @@ static inline int dev_is_ethdev(struct net_device *dev)
 }
 
 /* ------------------------------------------------------------------------ */
-
 
 /*
  *	Receive an AX.25 frame via an ethernet interface.
@@ -372,9 +369,7 @@ static int bpq_close(struct net_device *dev)
 	return 0;
 }
 
-
 /* ------------------------------------------------------------------------ */
-
 
 /*
  *	Proc filesystem
@@ -418,7 +413,6 @@ static void bpq_seq_stop(struct seq_file *seq, void *v)
 	rcu_read_unlock();
 }
 
-
 static int bpq_seq_show(struct seq_file *seq, void *v)
 {
 	if (v == SEQ_START_TOKEN)
@@ -459,7 +453,6 @@ static const struct file_operations bpq_info_fops = {
 	.llseek = seq_lseek,
 	.release = seq_release,
 };
-
 
 /* ------------------------------------------------------------------------ */
 
@@ -506,7 +499,6 @@ static int bpq_new_device(struct net_device *edev)
 	if (!ndev)
 		return -ENOMEM;
 
-		
 	bpq = netdev_priv(ndev);
 	dev_hold(edev);
 	bpq->ethdev = edev;
@@ -579,7 +571,6 @@ static int bpq_device_event(struct notifier_block *this,unsigned long event, voi
 
 	return NOTIFY_DONE;
 }
-
 
 /* ------------------------------------------------------------------------ */
 

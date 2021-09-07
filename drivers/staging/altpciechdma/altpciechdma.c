@@ -53,7 +53,6 @@
 #include <linux/module.h>
 #include <linux/pci.h>
 
-
 /* by default do not build the character device interface */
 /* XXX It is non-functional yet */
 #ifndef ALTPCIECHDMA_CDEV
@@ -1179,4 +1178,3 @@ MODULE_LICENSE("GPL");
 
 module_init(alterapciechdma_init);
 module_exit(alterapciechdma_exit);
-

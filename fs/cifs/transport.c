@@ -133,7 +133,6 @@ smb_sendv(struct TCP_Server_Info *server, struct kvec *iov, int n_vec)
 	   cifssmb.c and RFC1001 len is converted to bigendian in smb_send
 	   Flags2 is converted in SendReceive */
 
-
 	total_len = 0;
 	for (i = 0; i < n_vec; i++)
 		total_len += iov[i].iov_len;
@@ -355,7 +354,6 @@ static int wait_for_response(struct cifsSesInfo *ses,
 		}
 	}
 }
-
 
 /*
  *

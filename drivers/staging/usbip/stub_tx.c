@@ -23,7 +23,6 @@
 #include "usbip_common.h"
 #include "stub.h"
 
-
 static void stub_free_priv_and_urb(struct stub_priv *priv)
 {
 	struct urb *urb = priv->urb;
@@ -71,7 +70,6 @@ void stub_complete(struct urb *urb)
 
 	usbip_dbg_stub_tx("complete! status %d\n", urb->status);
 
-
 	switch (urb->status) {
 	case 0:
 		/* OK */
@@ -104,13 +102,11 @@ void stub_complete(struct urb *urb)
 	} else
 		list_move_tail(&priv->list, &sdev->priv_tx);
 
-
 	spin_unlock_irqrestore(&sdev->priv_lock, flags);
 
 	/* wake up tx_thread */
 	wake_up(&sdev->tx_waitq);
 }
-
 
 /*-------------------------------------------------------------------------*/
 /* fill PDU */
@@ -141,7 +137,6 @@ static void setup_ret_unlink_pdu(struct usbip_header *rpdu,
 
 	rpdu->u.ret_unlink.status = unlink->status;
 }
-
 
 /*-------------------------------------------------------------------------*/
 /* send RET_SUBMIT */
@@ -187,7 +182,6 @@ static int stub_send_ret_submit(struct stub_device *sdev)
 		memset(&iov, 0, sizeof(iov));
 
 		usbip_dbg_stub_tx("setup txdata urb %p\n", urb);
-
 
 		/* 1. setup usbip_header */
 		setup_ret_submit_pdu(&pdu_header, urb);
@@ -237,7 +231,6 @@ static int stub_send_ret_submit(struct stub_device *sdev)
 		total_size += txsize;
 	}
 
-
 	spin_lock_irqsave(&sdev->priv_lock, flags);
 
 	list_for_each_entry_safe(priv, tmp, &sdev->priv_free, list) {
@@ -248,7 +241,6 @@ static int stub_send_ret_submit(struct stub_device *sdev)
 
 	return total_size;
 }
-
 
 /*-------------------------------------------------------------------------*/
 /* send RET_UNLINK */
@@ -270,7 +262,6 @@ static struct stub_unlink *dequeue_from_unlink_tx(struct stub_device *sdev)
 
 	return NULL;
 }
-
 
 static int stub_send_ret_unlink(struct stub_device *sdev)
 {
@@ -312,12 +303,10 @@ static int stub_send_ret_unlink(struct stub_device *sdev)
 			return -1;
 		}
 
-
 		usbip_dbg_stub_tx("send txdata\n");
 
 		total_size += txsize;
 	}
-
 
 	spin_lock_irqsave(&sdev->priv_lock, flags);
 
@@ -330,7 +319,6 @@ static int stub_send_ret_unlink(struct stub_device *sdev)
 
 	return total_size;
 }
-
 
 /*-------------------------------------------------------------------------*/
 

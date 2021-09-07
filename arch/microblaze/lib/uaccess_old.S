@@ -51,7 +51,6 @@ __strncpy_user:
 	rtsd	r15,8
 	nop
 
-
 	.section	.fixup, "ax"
 	.align	2
 4:
@@ -91,7 +90,6 @@ __strnlen_user:
 	rtsd	r15,8
 	nop
 
-
 	.section	.fixup,"ax"
 4:
 	brid	3b
@@ -129,7 +127,6 @@ __copy_tofrom_user:
 3:
 	rtsd	r15,8
 	nop
-
 
 	.section	__ex_table,"a"
 	.word	1b,3b,2b,3b

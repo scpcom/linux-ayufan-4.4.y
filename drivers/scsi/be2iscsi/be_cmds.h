@@ -382,7 +382,6 @@ struct be_cmd_req_modify_eq_delay {
 
 #define ETH_ALEN	6
 
-
 struct be_cmd_req_get_mac_addr {
 	struct be_cmd_req_hdr hdr;
 	u32 nic_port_count;
@@ -530,7 +529,6 @@ struct amap_sol_cqe {
 	u8 i_res_cnt[31];	/* dword 3 */
 	u8 valid;		/* dword 3 */
 } __packed;
-
 
 /**
  * Post WRB Queue Doorbell Register used by the host Storage

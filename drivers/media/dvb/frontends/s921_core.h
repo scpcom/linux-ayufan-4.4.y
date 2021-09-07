@@ -3,8 +3,6 @@
 //#define u8 unsigned int
 //#define u32 unsigned int
 
-
-
 //#define EINVAL -1
 #define E_OK 0
 

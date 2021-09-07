@@ -20,7 +20,6 @@
 #include "usbip_common.h"
 #include "vhci.h"
 
-
 /* get URB from transmitted urb queue */
 static struct urb *pickup_urb_and_free_priv(struct vhci_device *vdev,
 					    __u32 seqnum)
@@ -72,9 +71,7 @@ static void vhci_recv_ret_submit(struct vhci_device *vdev,
 	struct usbip_device *ud = &vdev->ud;
 	struct urb *urb;
 
-
 	urb = pickup_urb_and_free_priv(vdev, pdu->base.seqnum);
-
 
 	if (!urb) {
 		usbip_uerr("cannot find a urb of seqnum %u\n",
@@ -85,24 +82,19 @@ static void vhci_recv_ret_submit(struct vhci_device *vdev,
 		return;
 	}
 
-
 	/* unpack the pdu to a urb */
 	usbip_pack_pdu(pdu, urb, USBIP_RET_SUBMIT, 0);
-
 
 	/* recv transfer buffer */
 	if (usbip_recv_xbuff(ud, urb) < 0)
 		return;
 
-
 	/* recv iso_packet_descriptor */
 	if (usbip_recv_iso(ud, urb) < 0)
 		return;
 
-
 	if (usbip_dbg_flag_vhci_rx)
 		usbip_dump_urb(urb);
-
 
 	usbip_dbg_vhci_rx("now giveback urb %p\n", urb);
 
@@ -112,12 +104,10 @@ static void vhci_recv_ret_submit(struct vhci_device *vdev,
 
 	usb_hcd_giveback_urb(vhci_to_hcd(the_controller), urb, urb->status);
 
-
 	usbip_dbg_vhci_rx("Leave\n");
 
 	return;
 }
-
 
 static struct vhci_unlink *dequeue_pending_unlink(struct vhci_device *vdev,
 		struct usbip_header *pdu)
@@ -142,7 +132,6 @@ static struct vhci_unlink *dequeue_pending_unlink(struct vhci_device *vdev,
 
 	return NULL;
 }
-
 
 static void vhci_recv_ret_unlink(struct vhci_device *vdev,
 						struct usbip_header *pdu)
@@ -195,11 +184,9 @@ static void vhci_rx_pdu(struct usbip_device *ud)
 	struct usbip_header pdu;
 	struct vhci_device *vdev = container_of(ud, struct vhci_device, ud);
 
-
 	usbip_dbg_vhci_rx("Enter\n");
 
 	memset(&pdu, 0, sizeof(pdu));
-
 
 	/* 1. receive a pdu header */
 	ret = usbip_xmit(0, ud->tcp_socket, (char *) &pdu, sizeof(pdu), 0);
@@ -230,13 +217,11 @@ static void vhci_rx_pdu(struct usbip_device *ud)
 	}
 }
 
-
 /*-------------------------------------------------------------------------*/
 
 void vhci_rx_loop(struct usbip_task *ut)
 {
 	struct usbip_device *ud = container_of(ut, struct usbip_device, tcp_rx);
-
 
 	while (1) {
 		if (signal_pending(current)) {
@@ -244,11 +229,9 @@ void vhci_rx_loop(struct usbip_task *ut)
 			break;
 		}
 
-
 		if (usbip_event_happened(ud))
 			break;
 
 		vhci_rx_pdu(ud);
 	}
 }
-

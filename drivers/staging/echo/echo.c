@@ -113,7 +113,6 @@
 #define DTD_HANGOVER			600	/* 600 samples, or 75ms     */
 #define DC_LOG2BETA			3	/* log2() of DC filter Beta */
 
-
 /* adapting coeffs using the traditional stochastic descent (N)LMS algorithm */
 
 #ifdef __bfin__

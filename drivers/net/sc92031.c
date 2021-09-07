@@ -1396,7 +1396,6 @@ static const struct ethtool_ops sc92031_ethtool_ops = {
 	.get_ethtool_stats	= sc92031_ethtool_get_ethtool_stats,
 };
 
-
 static const struct net_device_ops sc92031_netdev_ops = {
 	.ndo_get_stats		= sc92031_get_stats,
 	.ndo_start_xmit		= sc92031_start_xmit,

@@ -43,7 +43,6 @@
 #include "rtmp_iface.h"
 #include "rtmp_dot11.h"
 
-
 //
 // Device ID & Vendor ID related definitions,
 // NOTE: you should not add the new VendorID/DeviceID here unless you not sure it belongs to what chip.
@@ -60,10 +59,6 @@
 #if !defined(PCI_CLASS_BRIDGE_PCI)
 #define PCI_CLASS_BRIDGE_PCI		0x0604
 #endif
-
-
-
-
 
 #define TXINFO_SIZE						0
 #define RTMP_PKT_TAIL_PADDING			0
@@ -119,7 +114,6 @@ typedef	struct	PACKED _TXD_STRUC {
 	UINT32		ICO:1;	//
 }	TXD_STRUC, *PTXD_STRUC;
 #endif
-
 
 //
 // Rx descriptor format, Rx Ring
@@ -227,7 +221,6 @@ typedef union _TX_ATTENUATION_CTRL_STRUC {
 #define FIRMWARE_IMAGE_BASE     0x2000
 #define MAX_FIRMWARE_IMAGE_SIZE 0x2000    // 8kbyte
 
-
 /* ----------------- Frimware Related MACRO ----------------- */
 #define RTMP_WRITE_FIRMWARE(_pAd, _pFwImage, _FwLen)			\
 	do{								\
@@ -250,11 +243,9 @@ typedef union _TX_ATTENUATION_CTRL_STRUC {
 		RTMP_IO_WRITE32(_pAd, H2M_MAILBOX_CSR, 0);		\
 	}while(0)
 
-
 /* ----------------- TX Related MACRO ----------------- */
 #define RTMP_START_DEQUEUE(pAd, QueIdx, irqFlags)		do{}while(0)
 #define RTMP_STOP_DEQUEUE(pAd, QueIdx, irqFlags)		do{}while(0)
-
 
 #define RTMP_HAS_ENOUGH_FREE_DESC(pAd, pTxBlk, freeNum, pPacket) \
 		((freeNum) >= (ULONG)(pTxBlk->TotalFragNum + RTMP_GET_PACKET_FRAGMENTS(pPacket) + 3)) /* rough estimate we will use 3 more descriptor. */
@@ -264,7 +255,6 @@ typedef union _TX_ATTENUATION_CTRL_STRUC {
 #define NEED_QUEUE_BACK_FOR_AGG(pAd, QueIdx, freeNum, _TxFrameType) \
 		(((freeNum != (TX_RING_SIZE-1)) && (pAd->TxSwQueue[QueIdx].Number == 0)) || (freeNum<3))
 		//(((freeNum) != (TX_RING_SIZE-1)) && (pAd->TxSwQueue[QueIdx].Number == 1 /*0*/))
-
 
 #define HAL_KickOutMgmtTx(_pAd, _QueIdx, _pPacket, _pSrcBufVA, _SrcBufLen)	\
 			RtmpPCIMgmtKickOut(_pAd, _QueIdx, _pPacket, _pSrcBufVA, _SrcBufLen)
@@ -300,16 +290,13 @@ typedef union _TX_ATTENUATION_CTRL_STRUC {
 			 :	\
 			(_pAd->TxRing[_QueIdx].TxSwFreeIdx + TX_RING_SIZE - _pAd->TxRing[_QueIdx].TxCpuIdx - 1);
 
-
 #define GET_MGMTRING_FREENO(_pAd) \
 	(_pAd->MgmtRing.TxSwFreeIdx > _pAd->MgmtRing.TxCpuIdx)	? \
 			(_pAd->MgmtRing.TxSwFreeIdx - _pAd->MgmtRing.TxCpuIdx - 1) \
 			 :	\
 			(_pAd->MgmtRing.TxSwFreeIdx + MGMT_RING_SIZE - _pAd->MgmtRing.TxCpuIdx - 1);
 
-
 /* ----------------- RX Related MACRO ----------------- */
-
 
 /* ----------------- ASIC Related MACRO ----------------- */
 // reset MAC of a station entry to 0x000000000000
@@ -347,7 +334,6 @@ typedef union _TX_ATTENUATION_CTRL_STRUC {
 						  pAd->SharedKey[apidx][KeyID].CipherAlg,		\
 						  pEntry); }
 
-
 // Insert the BA bitmap to ASIC for the Wcid entry
 #define RTMP_ADD_BA_SESSION_TO_ASIC(_pAd, _Aid, _TID)	\
 		do{					\
@@ -357,7 +343,6 @@ typedef union _TX_ATTENUATION_CTRL_STRUC {
 			_Value |= (0x10000<<(_TID));	\
 			RTMP_IO_WRITE32((_pAd), _Offset, _Value);\
 		}while(0)
-
 
 // Remove the BA bitmap from ASIC for the Wcid entry
 //		bitmap field starts at 0x10000 in ASIC WCID table
@@ -369,7 +354,6 @@ typedef union _TX_ATTENUATION_CTRL_STRUC {
 			_Value &= (~(0x10000 << (_TID)));				\
 			RTMP_IO_WRITE32((_pAd), _Offset, _Value);			\
 		}while(0)
-
 
 /* ----------------- Interface Related MACRO ----------------- */
 
@@ -389,7 +373,6 @@ typedef union _TX_ATTENUATION_CTRL_STRUC {
 		RTMP_SET_FLAG((_pAd), fRTMP_ADAPTER_INTERRUPT_ACTIVE);	\
 	}while(0)
 
-
 #define RTMP_IRQ_INIT(pAd)	\
 	{	pAd->int_enable_reg = ((DELAYINTMASK) |		\
 					(RxINT|TxDataInt|TxMgmtInt)) & ~(0x03);	\
@@ -400,7 +383,6 @@ typedef union _TX_ATTENUATION_CTRL_STRUC {
 	{	/* clear garbage ints */			\
 		RTMP_IO_WRITE32(pAd, INT_SOURCE_CSR, 0xffffffff);\
 		RTMP_ASIC_INTERRUPT_ENABLE(pAd); }
-
 
 /* ----------------- MLME Related MACRO ----------------- */
 #define RTMP_MLME_HANDLER(pAd)			MlmeHandler(pAd)
@@ -419,7 +401,6 @@ typedef union _TX_ATTENUATION_CTRL_STRUC {
 /* ----------------- Power Save Related MACRO ----------------- */
 #define RTMP_PS_POLL_ENQUEUE(pAd)				EnqueuePsPoll(pAd)
 
-
 // For RTMPPCIePowerLinkCtrlRestore () function
 #define RESTORE_HALT		1
 #define RESTORE_WAKEUP		2
@@ -432,7 +413,6 @@ typedef union _TX_ATTENUATION_CTRL_STRUC {
 #define CID1MASK		0x0000ff00
 #define CID2MASK		0x00ff0000
 #define CID3MASK		0xff000000
-
 
 #ifdef CONFIG_STA_SUPPORT
 #define RTMP_STA_FORCE_WAKEUP(pAd, bFromTx) \

@@ -23,7 +23,6 @@
 #ifndef __VHCI_COMMON_H
 #define __VHCI_COMMON_H
 
-
 #include <linux/version.h>
 #include <linux/usb.h>
 #include <asm/byteorder.h>
@@ -55,7 +54,6 @@
 #define usbip_udbg(fmt, args...)		do { } while (0)
 
 #endif /* CONFIG_USB_DEBUG */
-
 
 enum {
 	usbip_debug_xmit	= (1 << 0),
@@ -120,7 +118,6 @@ extern struct device_attribute dev_attr_usbip_debug;
 #define usbip_dbg_stub_tx(fmt, args...)	\
 	usbip_dbg_with_flag(usbip_debug_stub_tx, fmt , ##args)
 
-
 /**
  * usbip_uerr - print error messages
  * @fmt:
@@ -142,7 +139,6 @@ extern struct device_attribute dev_attr_usbip_debug;
 	do {							\
 		printk(KERN_INFO "usbip: " fmt , ## args);	\
 	} while (0)
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -239,14 +235,12 @@ struct usbip_header_cmd_unlink {
 	__u32 seqnum; /* URB's seqnum which will be unlinked */
 } __attribute__ ((packed));
 
-
 /*
  * An additional header for a RET_UNLINK packet.
  */
 struct usbip_header_ret_unlink {
 	__s32 status;
 } __attribute__ ((packed));
-
 
 /* the same as usb_iso_packet_descriptor but packed for pdu */
 struct usbip_iso_packet_descriptor {
@@ -255,7 +249,6 @@ struct usbip_iso_packet_descriptor {
 	__u32 actual_length;
 	__u32 status;
 } __attribute__ ((packed));
-
 
 /*
  * All usbip packets use a common header to keep code simple.
@@ -271,15 +264,10 @@ struct usbip_header {
 	} u;
 } __attribute__ ((packed));
 
-
-
-
 /*-------------------------------------------------------------------------*/
-
 
 int usbip_xmit(int, struct socket *, char *, int, int);
 int usbip_sendmsg(struct socket *, struct msghdr *, int);
-
 
 static inline int interface_to_busnum(struct usb_interface *interface)
 {
@@ -310,7 +298,6 @@ int set_sockaddr(struct socket *socket, struct sockaddr_storage *ss);
 
 void usbip_dump_urb(struct urb *purb);
 void usbip_dump_header(struct usbip_header *pdu);
-
 
 struct usbip_device;
 
@@ -401,7 +388,6 @@ struct usbip_device {
 	} eh_ops;
 };
 
-
 void usbip_task_init(struct usbip_task *ut, char *,
 				void (*loop_ops)(struct usbip_task *));
 
@@ -424,7 +410,6 @@ void syno_usbip_timer_timeout(unsigned long param);
 
 #define SYNO_USBIP_CONNECTION_IDEALCHECK	5*HZ; // 30 second
 #endif
-
 
 /* usbip_event.c */
 int usbip_start_eh(struct usbip_device *ud);

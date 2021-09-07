@@ -19,7 +19,6 @@
  *
  */
 
-
 struct usbmix_name_map {
 	int id;
 	const char *name;
@@ -339,4 +338,3 @@ static struct usbmix_ctl_map usbmix_ctl_maps[] = {
 	},
 	{ 0 } /* terminator */
 };
-

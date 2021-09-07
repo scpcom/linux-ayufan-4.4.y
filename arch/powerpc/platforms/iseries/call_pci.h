@@ -59,7 +59,6 @@ enum HvCallPci_DeviceType {
 	HvCallPci_IoaDevice	= 6
 };
 
-
 struct HvCallPci_DeviceInfo {
 	u32	deviceType;		/* See DeviceType enum for values */
 };
@@ -76,7 +75,6 @@ struct HvCallPci_BridgeInfo {
         u8              maxSubBusNumber; /* Max Sub Bus */
 	u8		logicalSlotNumber; /* Logical Slot Number for IOA */
 };
-
 
 /*
  * Maximum BusUnitInfo buffer size.  Provided for clients so

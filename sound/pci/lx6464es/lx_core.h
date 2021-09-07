@@ -110,14 +110,12 @@ struct lx_rmh {
 	u32	stat[REG_CRM_NUMBER];
 };
 
-
 /* low-level dsp access */
 int __devinit lx_dsp_get_version(struct lx6464es *chip, u32 *rdsp_version);
 int lx_dsp_get_clock_frequency(struct lx6464es *chip, u32 *rfreq);
 int lx_dsp_set_granularity(struct lx6464es *chip, u32 gran);
 int lx_dsp_read_async_events(struct lx6464es *chip, u32 *data);
 int lx_dsp_get_mac(struct lx6464es *chip, u8 *mac_address);
-
 
 /* low-level pipe handling */
 int lx_pipe_allocate(struct lx6464es *chip, u32 pipe, int is_capture,
@@ -181,7 +179,6 @@ int lx_level_unmute(struct lx6464es *chip, int is_capture, int unmute);
 int lx_level_peaks(struct lx6464es *chip, int is_capture, int channels,
 		   u32 *r_levels);
 
-
 /* interrupt handling */
 irqreturn_t lx_interrupt(int irq, void *dev_id);
 void lx_irq_enable(struct lx6464es *chip);
@@ -189,7 +186,6 @@ void lx_irq_disable(struct lx6464es *chip);
 
 void lx_tasklet_capture(unsigned long data);
 void lx_tasklet_playback(unsigned long data);
-
 
 /* Stream Format Header Defines (for LIN and IEEE754) */
 #define HEADER_FMT_BASE		HEADER_FMT_BASE_LIN
@@ -206,7 +202,6 @@ void lx_tasklet_playback(unsigned long data);
 #define HEADER_FMT_UPTO32	0x00000100 /* frequency is over 11k and less
 					    * then 32k.*/
 
-
 #define BIT_FMP_HEADER          23
 #define BIT_FMP_SD              22
 #define BIT_FMP_MULTICHANNEL    19
@@ -214,16 +209,11 @@ void lx_tasklet_playback(unsigned long data);
 #define START_STATE             1
 #define PAUSE_STATE             0
 
-
-
-
-
 /* from PcxAll_e.h */
 /* Start/Pause condition for pipes (PCXStartPipe, PCXPausePipe) */
 #define START_PAUSE_IMMEDIATE           0
 #define START_PAUSE_ON_SYNCHRO          1
 #define START_PAUSE_ON_TIME_CODE        2
-
 
 /* Pipe / Stream state */
 #define START_STATE             1

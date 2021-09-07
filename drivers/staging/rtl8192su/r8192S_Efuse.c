@@ -42,7 +42,6 @@
 #define		EFUSE_REPEAT_THRESHOLD_		3
 #define		EFUSE_ERROE_HANDLE		1
 
-
 // From 8712!!!!!
 typedef struct _EFUSE_MAP_A{
 	u8 offset;		//0~15
@@ -93,12 +92,10 @@ struct efuse_priv
 
 /*---------------------------Define Local Constant---------------------------*/
 
-
 /*------------------------Define global variable-----------------------------*/
 const u8 MAX_PGPKT_SIZE = 9; //header+ 2* 4 words (BYTES)
 const u8 PGPKT_DATA_SIZE = 8; //BYTES sizeof(u8)*8
 const u32 EFUSE_MAX_SIZE = 512;
-
 
 const EFUSE_MAP RTL8712_SDIO_EFUSE_TABLE[]={
 				//offset	word_s	byte_start	byte_cnts
@@ -119,11 +116,9 @@ const EFUSE_MAP RTL8712_SDIO_EFUSE_TABLE[]={
 
 /*------------------------Define global variable-----------------------------*/
 
-
 /*------------------------Define local variable------------------------------*/
 
 /*------------------------Define local variable------------------------------*/
-
 
 /*--------------------Define function prototype-----------------------*/
 //
@@ -196,8 +191,6 @@ static void efuse_reg_ctrl(struct net_device* dev, u8 bPowerOn);
 #endif
 /*--------------------Define function prototype-----------------------*/
 
-
-
 /*-----------------------------------------------------------------------------
  * Function:	EFUSE_Initialize
  *
@@ -230,7 +223,6 @@ EFUSE_Initialize(struct net_device* dev)
 	temp = Bytetemp & 0xFE;
 	write_nic_byte(dev, SYS_ISO_CTRL+1, temp);
 
-
 	//Enable E-fuse use 2.5V LDO : 0x37[7]=1
 	Bytetemp = read_nic_byte(dev, EFUSE_TEST+3);
 	temp = Bytetemp | 0x80;
@@ -243,7 +235,6 @@ EFUSE_Initialize(struct net_device* dev)
 	write_nic_byte(dev, EFUSE_CTRL+3, 0x72);
 
 }	/* EFUSE_Initialize */
-
 
 /*-----------------------------------------------------------------------------
  * Function:	EFUSE_Read1Byte
@@ -303,7 +294,6 @@ EFUSE_Read1Byte(struct net_device* dev, u16	Address)
 		return 0xFF;
 
 }	/* EFUSE_Read1Byte */
-
 
 /*-----------------------------------------------------------------------------
  * Function:	EFUSE_Write1Byte
@@ -365,7 +355,6 @@ EFUSE_Write1Byte(struct net_device* dev, u16 Address,u8 Value)
 
 }	/* EFUSE_Write1Byte */
 
-
 #ifdef EFUSE_FOR_92SU
 //
 //	Description:
@@ -404,7 +393,6 @@ void do_93c46(struct net_device* dev,  u8 addorvalue)
 	}
 }
 
-
 //
 //	Description:
 //		Process CR93C46 Data read polling cycle.
@@ -431,7 +419,6 @@ u16 Read93C46(struct net_device*	dev,	u16	Reg	)
 	u16   	storedataF[1] = {0x0};   //93c46 data packet for 16bits
 	u8   	t,data[1],storedata[1];
 
-
 	address = (u8)Reg;
 
 	// Suggested by SD1 Alex, 2008.10.20. Revised by Roger.
@@ -445,7 +432,6 @@ u16 Read93C46(struct net_device*	dev,	u16	Reg	)
 		write_nic_byte(dev, EPROM_CMD, csskdi[0]);
    		do_93c46(dev, address);
 	}
-
 
 	for(t=0 ; t<16 ; t++)      //if read 93c46 , t=16
 	{
@@ -471,7 +457,6 @@ u16 Read93C46(struct net_device*	dev,	u16	Reg	)
 	return *storedataF;
 }
 
-
 //
 //	Description:
 //		Execute E-Fuse read byte operation.
@@ -491,7 +476,6 @@ ReadEFuseByte(struct net_device* dev,u16 _offset, u8 *pbuf)
 	u32  value32;
 	u8 	readbyte;
 	u16 	retry;
-
 
 	//Write Address
 	write_nic_byte(dev, EFUSE_CTRL+1, (_offset & 0xff));
@@ -513,7 +497,6 @@ ReadEFuseByte(struct net_device* dev,u16 _offset, u8 *pbuf)
 	}
 	*pbuf = (u8)(value32 & 0xff);
 }
-
 
 #define		EFUSE_READ_SWITCH		1
 //
@@ -604,7 +587,6 @@ ReadEFuse(struct net_device* dev, u16	 _offset, u16 _size_byte, u8 *pbuf)
 }
 #endif	// #if (EFUSE_FOR_92SU == 1)
 
-
 /*-----------------------------------------------------------------------------
  * Function:	EFUSE_ShadowRead
  *
@@ -634,7 +616,6 @@ EFUSE_ShadowRead(	struct net_device*	dev,	u8 Type, u16 Offset, u32 *Value)
 		efuse_ShadowRead4Byte(dev, Offset, (u32 *)Value);
 
 }	// EFUSE_ShadowRead
-
 
 /*-----------------------------------------------------------------------------
  * Function:	EFUSE_ShadowWrite
@@ -668,7 +649,6 @@ EFUSE_ShadowWrite(	struct net_device*	dev,	u8 Type, u16 Offset,u32	Value)
 		efuse_ShadowWrite4Byte(dev, Offset, (u32)Value);
 
 }	// EFUSE_ShadowWrite
-
 
 /*-----------------------------------------------------------------------------
  * Function:	EFUSE_ShadowUpdate
@@ -758,14 +738,12 @@ EFUSE_ShadowUpdate(struct net_device* dev)
 	// We will force write 0x10EC into address 10&11 after all Efuse content.
 	//
 
-
 	// For warm reboot, we must resume Efuse clock to 500K.
 	efuse_PowerSwitch(dev, FALSE);
 	// 2008/12/01 MH We update shadow content again!!!!
 	EFUSE_ShadowMapUpdate(dev);
 
 }	// EFUSE_ShadowUpdate
-
 
 /*-----------------------------------------------------------------------------
  * Function:	EFUSE_ShadowMapUpdate
@@ -863,8 +841,6 @@ efuse_ShadowRead4Byte(struct net_device*	dev,	u16 Offset,	u32 *Value)
 
 }	// efuse_ShadowRead4Byte
 
-
-
 /*-----------------------------------------------------------------------------
  * Function:	efuse_ShadowWrite1Byte
  *			efuse_ShadowWrite2Byte
@@ -915,7 +891,6 @@ efuse_ShadowWrite4Byte(struct net_device*	dev,	u16 Offset,	u32 Value)
 	priv->EfuseMap[EFUSE_MODIFY_MAP][Offset+3] = (u8)((Value>>24)&0xFF);
 
 }	// efuse_ShadowWrite1Byte
-
 
 /*  11/16/2008 MH Read one byte from real Efuse. */
 static	u8
@@ -985,7 +960,6 @@ efuse_OneByteWrite(struct net_device* dev,  u16 addr, u8 data)
 	return bResult;
 }	// efuse_OneByteWrite
 
-
 /*-----------------------------------------------------------------------------
  * Function:	efuse_ReadAllMap
  *
@@ -1017,7 +991,6 @@ efuse_ReadAllMap(struct net_device*	dev, u8	*Efuse)
 	ReadEFuse(dev, 0, 128, Efuse);
 	efuse_PowerSwitch(dev, FALSE);
 }	// efuse_ReadAllMap
-
 
 /*-----------------------------------------------------------------------------
  * Function:	efuse_WriteAllMap
@@ -1070,7 +1043,6 @@ efuse_WriteAllMap(struct net_device* dev,u8 *eeprom, u32 eeprom_size)
 		//RT_PRINT_DATA(COMP_INIT, DBG_LOUD, ("EFUSE\t"), tmpdata, 8);
 
 		efuse_PgPacketWrite(dev,offset,word_en,tmpdata);
-
 
 	}
 
@@ -1180,7 +1152,6 @@ efuse_PgPacketRead(	struct net_device*	dev,	u8 offset, u8	*data)
 		return TRUE;
 
 }	// efuse_PgPacketRead
-
 
 /*-----------------------------------------------------------------------------
  * Function:	efuse_PgPacketWrite
@@ -1482,7 +1453,6 @@ static u8 efuse_PgPacketWrite(struct net_device* dev, u8 offset, u8 word_en,u8 *
 	return TRUE;
 }	// efuse_PgPacketWrite
 
-
 /*-----------------------------------------------------------------------------
  * Function:	efuse_WordEnableDataRead
  *
@@ -1531,7 +1501,6 @@ efuse_WordEnableDataRead(	u8 word_en,u8 *sourdata,u8 *targetdata)
 		targetdata[7] = sourdata[7];//sourdata[tmpindex++];
 	}
 }	// efuse_WordEnableDataRead
-
 
 /*-----------------------------------------------------------------------------
  * Function:	efuse_WordEnableDataWrite
@@ -1616,7 +1585,6 @@ efuse_WordEnableDataWrite(	struct net_device*	dev,	u16 efuse_addr, u8 word_en, u
 	return badworden;
 }	// efuse_WordEnableDataWrite
 
-
 /*-----------------------------------------------------------------------------
  * Function:	efuse_PowerSwitch
  *
@@ -1659,7 +1627,6 @@ efuse_PowerSwitch(struct net_device* dev, u8 PwrState)
 	}
 
 }	/* efuse_PowerSwitch */
-
 
 /*-----------------------------------------------------------------------------
  * Function:	efuse_GetCurrentSize
@@ -1711,7 +1678,6 @@ efuse_GetCurrentSize(struct net_device*	dev)
 	return efuse_addr;
 
 }	// efuse_GetCurrentSize}
-
 
 /*  11/16/2008 MH Add description. Get current efuse area enabled word!!. */
 static u8
@@ -1807,7 +1773,6 @@ EFUSE_ProgramMap(struct net_device* dev, char* pFileName,u8	TableType)
 		printk("szEepromFile(): Fail read%s\n", pFileName);
 		return	RT_STATUS_FAILURE;
 	}
-
 
 	//RT_PRINT_DATA(COMP_EFUSE, DBG_LOUD, ("EFUSE "), eeprom, HWSET_MAX_SIZE_92S);
 
@@ -2063,7 +2028,6 @@ static	void efuse_reg_ctrl(struct net_device* dev, u8 bPowerOn)
 		//write_nic_byte(pAdapter, SYS_FUNC_EN+1,  read_nic_byte(pAdapter,SYS_FUNC_EN+1)&0xDF);
 	}
 
-
 }
 #endif
 //------------------------------------------------------------------------------
@@ -2313,17 +2277,4 @@ void efuset_test_func_write(struct net_device* dev)
 }
 //------------------------------------------------------------------------------
 
-
-
-
-
-
-
-
-
-
 /* End of Efuse.c */
-
-
-
-

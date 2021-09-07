@@ -194,7 +194,6 @@ do {									\
 #define __addr_FPGA_SWR		((volatile void __iomem *)(__region_CS2 + 0x28UL))
 #define __get_FPGA_PUSHSW1_5()	(__builtin_read32(__addr_FPGA_SWR) & MB93093_FPGA_SWR_PUSHSWMASK)
 
-
 #endif
 
 #endif /* _ASM_MB_REGS_H */

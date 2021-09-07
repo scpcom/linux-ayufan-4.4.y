@@ -479,8 +479,6 @@ static int do_pcmcia_entry(const char *filename,
        return 1;
 }
 
-
-
 static int do_of_entry (const char *filename, struct of_device_id *of, char *alias)
 {
     int len;
@@ -697,7 +695,6 @@ static void dmi_ascii_filter(char *d, const char *s)
 
 	*d = 0;
 }
-
 
 static int do_dmi_entry(const char *filename, struct dmi_system_id *id,
 			char *alias)

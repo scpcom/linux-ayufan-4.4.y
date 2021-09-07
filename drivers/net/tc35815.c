@@ -286,7 +286,6 @@ struct tc35815_regs {
 #define MD_CA_Busy	       0x00000800 /* 1:Busy (Start Operation)	     */
 #define MD_CA_Wr	       0x00000400 /* 1:Write 0:Read		     */
 
-
 /*
  * Descriptors
  */
@@ -327,7 +326,6 @@ struct BDesc {
 #define BD_CownsBD	       0x80000000 /* BD Controller owner bit	     */
 #define BD_RxBDID_SHIFT	       16
 #define BD_RxBDSeqN_SHIFT      24
-
 
 /* Some useful constants. */
 #undef NO_CHECK_CARRIER	/* Does not check No-Carrier with TP */
@@ -400,7 +398,6 @@ struct FrFD {
 	struct FDesc fd;
 	struct BDesc bd[RX_BUF_NUM];
 };
-
 
 #define tc_readl(addr)	ioread32(addr)
 #define tc_writel(d, addr)	iowrite32(d, addr)
@@ -971,7 +968,6 @@ err_out:
 	free_netdev(dev);
 	return rc;
 }
-
 
 static void __devexit tc35815_remove_one(struct pci_dev *pdev)
 {
@@ -2080,7 +2076,6 @@ tc35815_txdone(struct net_device *dev)
 				if (lp->lstats.max_tx_qlen < qlen)
 					lp->lstats.max_tx_qlen = qlen;
 
-
 				/* start DMA Transmitter again */
 				txhead->fd.FDNext |= cpu_to_le32(FD_Next_EOL);
 #ifdef GATHER_TXINT
@@ -2182,7 +2177,6 @@ static void tc35815_set_cam_entry(struct net_device *dev, int index, unsigned ch
 
 	tc_writel(saved_addr, &tr->CAM_Adr);
 }
-
 
 /*
  * Set or clear the multicast filter for this adaptor.

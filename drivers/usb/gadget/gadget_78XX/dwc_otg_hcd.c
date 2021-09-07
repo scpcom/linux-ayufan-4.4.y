@@ -1042,7 +1042,6 @@ static void assign_and_init_hc(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 	hc->qh = qh;
 }
 
-
 /**
  * This function selects transactions from the HCD transfer schedule and
  * assigns them to available host channels. It is called from HCD interrupt
@@ -1577,7 +1576,6 @@ static void do_setup(void)
 		gintsts.d32 = dwc_read_reg32(&global_regs->gintsts);
 	} while (gintsts.b.hcintr == 0);
 
-
 	/* Disable HCINTs */
 	dwc_write_reg32(&hc_regs->hcintmsk, 0x0000);
 
@@ -1705,7 +1703,6 @@ static void do_in_ack(void)
 		gintsts.d32 = dwc_read_reg32(&global_regs->gintsts);
 	} while (gintsts.b.rxstsqlvl == 0);
 
-
 	/* Read RXSTS */
 	grxsts.d32 = dwc_read_reg32(&global_regs->grxstsp);
 
@@ -1740,7 +1737,6 @@ static void do_in_ack(void)
 		gintsts.d32 = dwc_read_reg32(&global_regs->gintsts);
 	} while (gintsts.b.rxstsqlvl == 0);
 
-
 	/* Read RXSTS */
 	grxsts.d32 = dwc_read_reg32(&global_regs->grxstsp);
 
@@ -1763,7 +1759,6 @@ static void do_in_ack(void)
 	do {
 		gintsts.d32 = dwc_read_reg32(&global_regs->gintsts);
 	} while (gintsts.b.hcintr == 0);
-
 
 	/* Read HAINT */
 	haint.d32 = dwc_read_reg32(&hc_global_regs->haint);
@@ -1870,7 +1865,6 @@ static void do_in_ack(void)
 	do {
 		gintsts.d32 = dwc_read_reg32(&global_regs->gintsts);
 	} while (gintsts.b.hcintr == 0);
-
 
 	/* Disable HCINTs */
 	dwc_write_reg32(&hc_regs->hcintmsk, 0x0000);

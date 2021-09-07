@@ -394,10 +394,8 @@ static ssize_t proc_dev_atm_read(struct file *file, char __user *buf,
 	return length;
 }
 
-
 struct proc_dir_entry *atm_proc_root;
 EXPORT_SYMBOL(atm_proc_root);
-
 
 int atm_proc_dev_register(struct atm_dev *dev)
 {
@@ -428,7 +426,6 @@ err_free_name:
 err_out:
 	return error;
 }
-
 
 void atm_proc_dev_deregister(struct atm_dev *dev)
 {

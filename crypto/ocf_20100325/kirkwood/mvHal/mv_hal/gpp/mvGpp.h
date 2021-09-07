@@ -75,7 +75,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define	MV_GPP_IN	0xFFFFFFFF      			/* GPP input   */
 #define MV_GPP_OUT  0    						/* GPP output  */
 
-
 /* These macros describes the GPP Out Enable. */
 #define	MV_GPP_OUT_DIS	0xFFFFFFFF         	/* Out pin disabled*/
 #define MV_GPP_OUT_EN   0    			 	/* Out pin enabled*/
@@ -86,7 +85,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* 2^24 TCLK clocks).														*/
 #define	MV_GPP_OUT_BLINK	0xFFFFFFFF         	/* Out pin blinking*/
 #define MV_GPP_OUT_STATIC   0    			 	/* Out pin static*/
-
 
 /* These macros describes the GPP Polarity. */
 /* When set to 1 GPIO Data In Register reflects the inverted value of the	*/
@@ -110,9 +108,7 @@ MV_U32  mvGppPolarityGet(MV_U32 group, MV_U32 mask);
 /* mvGppValueGet - Get a GPP Pin list value.*/
 MV_U32 mvGppValueGet(MV_U32 group, MV_U32 mask);
 
-
 /* mvGppValueSet - Set a GPP Pin list value. */
 MV_STATUS mvGppValueSet (MV_U32 group, MV_U32 mask, MV_U32 value);
 
 #endif /* #ifndef __INCmvGppH */ 
-

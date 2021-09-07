@@ -333,11 +333,9 @@ static void audio_dsp_event(void *private, unsigned id, uint16_t *msg)
 
 }
 
-
 struct msm_adsp_ops audplay_adsp_ops = {
 	.event = audplay_dsp_event,
 };
-
 
 #define audplay_send_queue0(audio, cmd, len) \
 	msm_adsp_write(audio->audplay, QDSP_uPAudPlay0BitStreamCtrlQueue, \

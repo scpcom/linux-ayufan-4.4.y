@@ -19,7 +19,6 @@
 #ifndef __GRU_KSERVICES_H_
 #define __GRU_KSERVICES_H_
 
-
 /*
  * Message queues using the GRU to send/receive messages.
  *
@@ -128,7 +127,6 @@ extern void gru_free_message(struct gru_message_queue_desc *mqd,
  *	NULL	no message available
  */
 extern void *gru_get_next_message(struct gru_message_queue_desc *mqd);
-
 
 /*
  * Copy data using the GRU. Source or destination can be located in a remote

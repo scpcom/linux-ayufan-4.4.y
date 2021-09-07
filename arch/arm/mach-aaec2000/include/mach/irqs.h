@@ -11,7 +11,6 @@
 #ifndef __ASM_ARCH_IRQS_H
 #define __ASM_ARCH_IRQS_H
 
-
 #define INT_GPIOF0_FIQ	0  /* External GPIO Port F O Fast Interrupt Input */
 #define INT_BL_FIQ	1  /* Battery Low Fast Interrupt */
 #define INT_WE_FIQ	2  /* Watchdog Expired Fast Interrupt */

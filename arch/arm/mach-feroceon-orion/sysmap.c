@@ -1,5 +1,4 @@
 
-
 #include "mvSysHwConfig.h"
 #include "ctrlEnv/sys/mvCpuIf.h"
 #include <asm/mach/map.h>
@@ -18,7 +17,6 @@ u32 mv_crypto_base_get(void);
 #if defined(CONFIG_MV_INCLUDE_DEVICE_CS1)
 u32 mv_device_cs1_base_get(void);
 #endif
-
 
 #if defined(CONFIG_MV88F5182)
 #include "sysmap_5182.h"
@@ -175,4 +173,3 @@ u32 mv_device_cs1_base_get(void)
 	return DEVICE_CS1_BASE;
 }
 #endif
-

@@ -1111,7 +1111,6 @@ static struct dma_ops_domain *dma_ops_domain_alloc(struct amd_iommu *iommu)
 	dma_dom->aperture[0]->bitmap[0] = 1;
 	dma_dom->next_address = 0;
 
-
 	return dma_dom;
 
 free_dma_dom:

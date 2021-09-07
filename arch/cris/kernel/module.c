@@ -43,7 +43,6 @@ void *module_alloc(unsigned long size)
 	return MALLOC_MODULE(size);
 }
 
-
 /* Free memory returned from module_alloc */
 void module_free(struct module *mod, void *module_region)
 {

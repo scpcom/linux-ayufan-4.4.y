@@ -192,7 +192,6 @@ static int kgdb_dabr_match(struct pt_regs *regs)
 	ptr = (unsigned long *)ptr32; \
 	} while (0)
 
-
 void pt_regs_to_gdb_regs(unsigned long *gdb_regs, struct pt_regs *regs)
 {
 	unsigned long *ptr = gdb_regs;

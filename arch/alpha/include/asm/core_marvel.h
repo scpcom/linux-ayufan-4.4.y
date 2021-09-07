@@ -272,7 +272,6 @@ union IO7_IID {
 #define IO7_MEM_SPACE		(2UL * 1024 * 1024 * 1024)	/* 2GB MEM */
 #define IO7_IO_SPACE		(8UL * 1024 * 1024)		/* 8MB I/O */
 
- 
 /* 
  * Offset between ram physical addresses and pci64 DAC addresses
  */

@@ -69,7 +69,6 @@ static void request_modules(struct cx8802_dev *dev)
 #define request_modules(dev)
 #endif /* CONFIG_MODULES */
 
-
 static LIST_HEAD(cx8802_devlist);
 /* ------------------------------------------------------------------ */
 

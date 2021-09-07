@@ -16,7 +16,6 @@
 #include <asm/unaligned.h>
 #include "ieee80211_i.h"
 
-
 /* Data structures */
 
 /**
@@ -160,7 +159,6 @@ struct mesh_rmc {
 	struct rmc_entry bucket[RMC_BUCKETS];
 	u32 idx_mask;
 };
-
 
 /*
  * MESH_CFG_COMP_LEN Includes:

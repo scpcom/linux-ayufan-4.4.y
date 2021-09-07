@@ -54,7 +54,6 @@ DEPLINT dtd_count = 0;
 DEPLINT sad_count = 0;
 DEPLINT svd_count = 0;
 
-
 void *chkmalloc(size_t);
 VendorProductId init_vendor_product_id(VendorProductId vpi);
 EdidVerRev init_edid_ver_rev(EdidVerRev evr);
@@ -93,7 +92,6 @@ void parse_block_map(BYTE *d, DEPLINT block_number);
 struct MyDetailedTimingBlockList parse_dtb(DEPLINT i, BYTE *d);
 
 DEPLINT segment_number_counter;
-
 
 void parse_block_map(BYTE *d, DEPLINT block_number)
 {
@@ -403,7 +401,6 @@ void parse_0_block(EdidInfo e,BYTE *d)
 	//msb
 	e->vpi->serial[0] = (WORD)d[0xE]|(WORD)(d[0xF]<<8);
 
-
 	e->vpi->week = (int)d[0x10];
 	e->vpi->year = 1990 + (int)d[0x11];
 
@@ -418,7 +415,6 @@ void parse_0_block(EdidInfo e,BYTE *d)
 	if(e->bdp->anadig)
 	{
 		e->bdp->dfp1x = get_bits(d[0x14],0,0);
-
 
 	}
 	else
@@ -445,7 +441,6 @@ void parse_0_block(EdidInfo e,BYTE *d)
 /*
  *colorimetry bits are converted into binary fractions
  */
-
 
 	e->cc->rx = get_bits(d[0x19],7,6)|(d[0x1B]<<2);
 	e->cc->ry = get_bits(d[0x19],5,4)|(d[0x1C]<<2);
@@ -554,7 +549,6 @@ void parse_0_block(EdidInfo e,BYTE *d)
 				else
 					e->mdb->mrl_gtf_support=FALSE;
 
-
 			}
 
 /*
@@ -645,7 +639,6 @@ void parse_0_block(EdidInfo e,BYTE *d)
 		}
 	}
 }
-
 
 VendorProductId init_vendor_product_id(VendorProductId vpi)
 {

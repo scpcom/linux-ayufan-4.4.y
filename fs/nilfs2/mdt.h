@@ -82,7 +82,6 @@ void nilfs_mdt_clear(struct inode *);
 void nilfs_mdt_set_entry_size(struct inode *, unsigned, unsigned);
 void nilfs_mdt_set_shadow(struct inode *, struct inode *);
 
-
 #define nilfs_mdt_mark_buffer_dirty(bh)	nilfs_mark_buffer_dirty(bh)
 
 static inline void nilfs_mdt_mark_dirty(struct inode *inode)
@@ -103,7 +102,6 @@ static inline __u64 nilfs_mdt_cno(struct inode *inode)
 
 #define nilfs_mdt_bgl_lock(inode, bg) \
 	(&NILFS_MDT(inode)->mi_bgl->locks[(bg) & (NR_BG_LOCKS-1)].lock)
-
 
 static inline int
 nilfs_mdt_read_inode_direct(struct inode *inode, struct buffer_head *bh,

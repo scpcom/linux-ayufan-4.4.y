@@ -1,7 +1,6 @@
 #ifndef ASMARM_ARCH_SMP_H
 #define ASMARM_ARCH_SMP_H
 
-
 #include <asm/hardware/gic.h>
 
 #define hard_smp_processor_id()			\

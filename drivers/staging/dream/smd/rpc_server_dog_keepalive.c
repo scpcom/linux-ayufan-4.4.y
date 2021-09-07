@@ -35,7 +35,6 @@
 #endif
 #define RPC_DOG_KEEPALIVE_NULL 0
 
-
 /* TODO: Remove server registration with _VERS when modem is upated with _COMP*/
 
 static int handle_rpc_call(struct msm_rpc_server *server,
@@ -63,6 +62,5 @@ static int __init rpc_server_init(void)
 	/* Dual server registration to support backwards compatibility vers */
 	return msm_rpc_create_server(&rpc_server);
 }
-
 
 module_init(rpc_server_init);

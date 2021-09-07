@@ -115,7 +115,6 @@ struct hbq_dmabuf {
 /* Priority bit.  Set value to exceed low water mark in lpfc_mem. */
 #define MEM_PRI		0x100
 
-
 /****************************************************************************/
 /*      Device VPD save area                                                */
 /****************************************************************************/
@@ -173,7 +172,6 @@ typedef struct lpfc_vpd {
 } lpfc_vpd_t;
 
 struct lpfc_scsi_buf;
-
 
 /*
  * lpfc stat counters
@@ -247,7 +245,6 @@ struct lpfc_sysfs_mbox {
 };
 
 struct lpfc_hba;
-
 
 enum discovery_state {
 	LPFC_VPORT_UNKNOWN     =  0,    /* vport state is unknown */
@@ -472,7 +469,6 @@ struct lpfc_hba {
 			 struct lpfc_iocbq *);
 	int (*lpfc_hba_down_post)(struct lpfc_hba *phba);
 
-
 	IOCB_t * (*lpfc_get_iocb_from_iocbq)
 		(struct lpfc_iocbq *);
 	void (*lpfc_scsi_cmd_iocb_cmpl)
@@ -496,7 +492,6 @@ struct lpfc_hba {
 		(struct lpfc_hba *);
 	void (*lpfc_stop_port)
 		(struct lpfc_hba *);
-
 
 	/* SLI4 specific HBA data structure */
 	struct lpfc_sli4_hba sli4_hba;

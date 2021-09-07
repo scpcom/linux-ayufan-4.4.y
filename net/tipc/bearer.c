@@ -399,7 +399,6 @@ void tipc_bearer_lock_push(struct bearer *b_ptr)
 		tipc_bcbearer_push();
 }
 
-
 /*
  * Interrupt enabling new requests after bearer congestion or blocking:
  * See bearer_send().
@@ -444,7 +443,6 @@ void tipc_bearer_schedule(struct bearer *b_ptr, struct link *l_ptr)
 	spin_unlock_bh(&b_ptr->publ.lock);
 }
 
-
 /*
  * tipc_bearer_resolve_congestion(): Check if there is bearer congestion,
  * and if there is, try to resolve it before returning.
@@ -464,7 +462,6 @@ int tipc_bearer_resolve_congestion(struct bearer *b_ptr, struct link *l_ptr)
 	spin_unlock_bh(&b_ptr->publ.lock);
 	return res;
 }
-
 
 /**
  * tipc_enable_bearer - enable bearer with the given name
@@ -658,8 +655,6 @@ int tipc_disable_bearer(const char *name)
 	return res;
 }
 
-
-
 int tipc_bearer_init(void)
 {
 	int res;
@@ -701,5 +696,3 @@ void tipc_bearer_stop(void)
 	media_list = NULL;
 	media_count = 0;
 }
-
-

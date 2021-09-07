@@ -26,8 +26,6 @@
 
 #include "cprecomp.h"
 
-
-
 void zfCwmInit(zdev_t* dev) {
     //u16_t i;
     zmw_get_wlan_dev(dev);
@@ -48,7 +46,6 @@ void zfCwmInit(zdev_t* dev) {
         break;
     }
 }
-
 
 void zfCoreCwmBusy(zdev_t* dev, u16_t busy)
 {
@@ -72,7 +69,6 @@ void zfCoreCwmBusy(zdev_t* dev, u16_t busy)
         return;
     }
 
-
     if((wd->wlanMode == ZM_MODE_INFRASTRUCTURE || wd->wlanMode == ZM_MODE_PSEUDO ||
         wd->wlanMode == ZM_MODE_IBSS)) {
         if ((wd->sta.ie.HtCap.HtCapInfo & HTCAP_SupChannelWidthSet) &&
@@ -93,9 +89,6 @@ void zfCoreCwmBusy(zdev_t* dev, u16_t busy)
     }
 
 }
-
-
-
 
 u16_t zfCwmIsExtChanBusy(u32_t ctlBusy, u32_t extBusy)
 {

@@ -143,7 +143,6 @@ dwc_notifier_t *dwc_register_notifier(void *object)
 	notifier = alloc_notifier(object);
 	DWC_CIRCLEQ_INSERT_TAIL(&manager->notifiers, notifier, list_entry);
 
-
 	DWC_INFO("Notifier %p registered", object);
 	dump_manager();
 
@@ -253,4 +252,3 @@ void dwc_notify(dwc_notifier_t *notifier, char *notification, void *notification
 		}
 	}
 }
-

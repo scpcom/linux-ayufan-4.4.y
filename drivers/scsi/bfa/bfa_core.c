@@ -84,7 +84,6 @@ bfa_cfg_get_meminfo(struct bfa_iocfc_cfg_s *cfg, struct bfa_meminfo_s *meminfo)
 	for (i = 0; hal_mods[i]; i++)
 		hal_mods[i]->meminfo(cfg, &km_len, &dm_len);
 
-
 	meminfo->meminfo[BFA_MEM_TYPE_KVA - 1].mem_len = km_len;
 	meminfo->meminfo[BFA_MEM_TYPE_DMA - 1].mem_len = dm_len;
 }
@@ -166,20 +165,17 @@ bfa_detach(struct bfa_s *bfa)
 	bfa_iocfc_detach(bfa);
 }
 
-
 void
 bfa_init_trc(struct bfa_s *bfa, struct bfa_trc_mod_s *trcmod)
 {
 	bfa->trcmod = trcmod;
 }
 
-
 void
 bfa_init_log(struct bfa_s *bfa, struct bfa_log_mod_s *logmod)
 {
 	bfa->logm = logmod;
 }
-
 
 void
 bfa_init_aen(struct bfa_s *bfa, struct bfa_aen_s *aen)

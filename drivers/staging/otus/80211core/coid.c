@@ -422,7 +422,6 @@ void zfiWlanSetBeaconInterval(zdev_t* dev,
     }
 }
 
-
 void zfiWlanSetDtimCount(zdev_t* dev, u8_t  dtim)
 {
     zmw_get_wlan_dev(dev);
@@ -436,7 +435,6 @@ void zfiWlanSetDtimCount(zdev_t* dev, u8_t  dtim)
     }
     zmw_leave_critical_section(dev);
 }
-
 
 void zfiWlanSetAtimWindow(zdev_t* dev, u16_t atimWindow, u8_t bImmediate)
 {
@@ -459,7 +457,6 @@ void zfiWlanSetAtimWindow(zdev_t* dev, u16_t atimWindow, u8_t bImmediate)
         zmw_leave_critical_section(dev);
     }
 }
-
 
 void zfiWlanSetEncryMode(zdev_t* dev, u8_t encryMode)
 {
@@ -1095,8 +1092,6 @@ u8_t zfiWlanSetKey(zdev_t* dev, struct zsKeyInfo keyInfo)
 				wd->TKIP_Group_KeyChanging = 0x1;
 				zfTimerSchedule(dev, ZM_EVENT_SKIP_COUNTERMEASURE, 150);
 			}
-
-
 
 			//------------------------------------------------------------------------
 
@@ -1881,7 +1876,6 @@ void zfiWlanRemoveKey(zdev_t* dev, u8_t keyType, u8_t keyId)
     }
 }
 
-
 void zfiWlanQueryRegulationTable(zdev_t* dev, struct zsRegulationTable* pEntry)
 {
     zmw_get_wlan_dev(dev);
@@ -1942,7 +1936,6 @@ void zfiWlanSetProbingHiddenSsid(zdev_t* dev, u8_t* ssid, u8_t ssidLen,
 {
     zmw_get_wlan_dev(dev);
     zmw_declare_for_critical_section();
-
 
     if ((ssidLen <= 32) && (entry < ZM_MAX_PROBE_HIDDEN_SSID_SIZE))
     {
@@ -2095,7 +2088,6 @@ u32_t zfiDebugCmd(zdev_t* dev, u32_t cmd, u32_t value)
 
     zmw_declare_for_critical_section();
 
-
     zmw_enter_critical_section(dev);
 
     if ( cmd == 0 )
@@ -2166,7 +2158,6 @@ u32_t zfiDebugCmd(zdev_t* dev, u32_t cmd, u32_t value)
             wd->rxPacketDump = 0;
         }
 	}
-
 
     zmw_leave_critical_section(dev);
 
@@ -2461,7 +2452,6 @@ u32_t zfiWlanQueryAdhocMode(zdev_t* dev, u8_t bWrapper)
     return adhocMode;
 }
 
-
 u8_t zfiWlanSetCountryIsoName(zdev_t* dev, u8_t *countryIsoName, u8_t length)
 {
     u8_t buf[5];
@@ -2487,15 +2477,12 @@ u8_t zfiWlanSetCountryIsoName(zdev_t* dev, u8_t *countryIsoName, u8_t length)
     return zfHpGetRegulationTablefromISO(dev, buf, length);
 }
 
-
 const char* zfiWlanQueryCountryIsoName(zdev_t* dev)
 {
     zmw_get_wlan_dev(dev);
 
     return wd->ws.countryIsoName;
 }
-
-
 
 void zfiWlanSetRegulatory(zdev_t* dev, u8_t CCS, u16_t Code, u8_t bfirstChannel)
 {
@@ -2521,7 +2508,6 @@ void zfiWlanSetRegulatory(zdev_t* dev, u8_t CCS, u16_t Code, u8_t bfirstChannel)
         zfCoreSetFrequency(dev, wd->frequency);
     }
 }
-
 
 const char* zfiHpGetisoNamefromregionCode(zdev_t* dev, u16_t regionCode)
 {

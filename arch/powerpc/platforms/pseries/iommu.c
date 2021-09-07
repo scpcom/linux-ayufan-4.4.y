@@ -48,7 +48,6 @@
 
 #include "plpar_wrappers.h"
 
-
 static int tce_build_pSeries(struct iommu_table *tbl, long index,
 			      long npages, unsigned long uaddr,
 			      enum dma_data_direction direction,
@@ -75,7 +74,6 @@ static int tce_build_pSeries(struct iommu_table *tbl, long index,
 	}
 	return 0;
 }
-
 
 static void tce_free_pSeries(struct iommu_table *tbl, long index, long npages)
 {
@@ -236,7 +234,6 @@ static void tce_free_pSeriesLP(struct iommu_table *tbl, long tcenum, long npages
 		tcenum++;
 	}
 }
-
 
 static void tce_freemulti_pSeriesLP(struct iommu_table *tbl, long tcenum, long npages)
 {
@@ -417,7 +414,6 @@ static void pci_dma_bus_setup_pSeries(struct pci_bus *bus)
 	pr_debug("ISA/IDE, window size is 0x%llx\n", pci->phb->dma_window_size);
 }
 
-
 static void pci_dma_bus_setup_pSeriesLP(struct pci_bus *bus)
 {
 	struct iommu_table *tbl;
@@ -459,7 +455,6 @@ static void pci_dma_bus_setup_pSeriesLP(struct pci_bus *bus)
 	if (pdn != dn)
 		PCI_DN(dn)->iommu_table = ppci->iommu_table;
 }
-
 
 static void pci_dma_dev_setup_pSeries(struct pci_dev *dev)
 {
@@ -616,9 +611,7 @@ void iommu_init_early_pSeries(void)
 		ppc_md.pci_dma_dev_setup = pci_dma_dev_setup_pSeries;
 	}
 
-
 	pSeries_reconfig_notifier_register(&iommu_reconfig_nb);
 
 	set_pci_dma_ops(&dma_iommu_ops);
 }
-

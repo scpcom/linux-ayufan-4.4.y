@@ -55,7 +55,6 @@
 #include "r500_reg.h"
 #include "r600_reg.h"
 
-
 #define RADEON_MC_AGP_LOCATION		0x014c
 #define		RADEON_MC_AGP_START_MASK	0x0000FFFF
 #define		RADEON_MC_AGP_START_SHIFT	0
@@ -1782,7 +1781,6 @@
 #define RADEON_VIPH_REG_DATA                0x0084
 #define RADEON_VIPH_REG_ADDR                0x0080
 
-
 #define RADEON_WAIT_UNTIL                   0x1720
 #       define RADEON_WAIT_CRTC_PFLIP       (1 << 0)
 #       define RADEON_WAIT_RE_CRTC_VLINE    (1 << 1)
@@ -1809,8 +1807,6 @@
 #define RADEON_XCLK_CNTL                    0x000d /* PLL */
 #define RADEON_XDLL_CNTL                    0x000c /* PLL */
 #define RADEON_XPLL_CNTL                    0x000b /* PLL */
-
-
 
 				/* Registers for 3D/TCL */
 #define RADEON_PP_BORDER_COLOR_0            0x1d40
@@ -2483,7 +2479,6 @@
 #       define RADEON_TEXMAT_1_SHIFT           20
 #       define RADEON_TEXMAT_2_SHIFT           24
 #       define RADEON_TEXMAT_3_SHIFT           28
-
 
 #define RADEON_SE_TCL_OUTPUT_VTX_FMT        0x2254
 #       define RADEON_TCL_VTX_W0                 (1 <<  0)
@@ -3321,13 +3316,9 @@
 #define RADEON_AIC_PT_BASE		0x01d8
 #define RADEON_AIC_HI_ADDR		0x01e0
 
-
-
 				/* Constants */
 /* #define RADEON_LAST_FRAME_REG               RADEON_GUI_SCRATCH_REG0 */
 /* efine RADEON_LAST_CLEAR_REG               RADEON_GUI_SCRATCH_REG2 */
-
-
 
 				/* CP packet types */
 #define RADEON_CP_PACKET0                           0x00000000
@@ -3367,7 +3358,6 @@
 #define RADEON_CP_PACKET3_CNTL_PAINT_MULTI          0xC0009A00
 #define RADEON_CP_PACKET3_CNTL_BITBLT_MULTI         0xC0009B00
 #define RADEON_CP_PACKET3_CNTL_TRANS_BITBLT         0xC0009C00
-
 
 #define RADEON_CP_VC_FRMT_XY                        0x00000000
 #define RADEON_CP_VC_FRMT_W0                        0x00000001

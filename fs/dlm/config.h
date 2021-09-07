@@ -43,4 +43,3 @@ int dlm_our_nodeid(void);
 int dlm_our_addr(struct sockaddr_storage *addr, int num);
 
 #endif				/* __CONFIG_DOT_H__ */
-

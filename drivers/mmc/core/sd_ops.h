@@ -21,4 +21,3 @@ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
 	u8 value, u8 *resp);
 
 #endif
-

@@ -31,7 +31,6 @@
 #include "page.h"
 #include "mdt.h"
 
-
 #define NILFS_MDT_MAX_RA_BLOCKS		(16 - 1)
 
 #define INIT_UNUSED_INODE_FIELDS
@@ -425,7 +424,6 @@ nilfs_mdt_write_page(struct page *page, struct writeback_control *wbc)
 		up_read(&nilfs->ns_writer_sem);
 	return err;
 }
-
 
 static const struct address_space_operations def_mdt_aops = {
 	.writepage		= nilfs_mdt_write_page,

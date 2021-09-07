@@ -220,7 +220,6 @@
 #define MPT2SAS_HP_EMBEDDED_2_4_INTERNAL_SSDID		0x0044
 #define MPT2SAS_HP_DAUGHTER_2_4_INTERNAL_SSDID		0x0046
 
-
 /*
  *  End to End Data Protection Support
  */
@@ -301,7 +300,6 @@ struct MPT2SAS_TARGET {
 	u8	tm_busy;
 };
 
-
 /*
  * per device private data
  */
@@ -369,7 +367,6 @@ struct _internal_cmd {
 #define MFG_PAGE10_HIDE_ALL_DISKS	(0x00)
 #define MFG_PAGE10_EXPOSE_ALL_DISKS	(0x01)
 #define MFG_PAGE10_HIDE_IF_VOL_PRESENT	(0x02)
-
 
 /**
  * struct _sas_device - attached device information

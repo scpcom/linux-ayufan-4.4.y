@@ -75,7 +75,6 @@ static u32 calculate_input_freq(struct platform_device *pdev)
 	return HCLK_MHZ;
 }
 
-
 static struct i2c_pnx_algo_data pnx_algo_data0 = {
 	.base = PNX4008_I2C1_BASE,
 	.irq = I2C_1_INT,

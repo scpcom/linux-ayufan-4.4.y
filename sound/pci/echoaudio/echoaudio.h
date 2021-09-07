@@ -28,7 +28,6 @@
 
  ****************************************************************************
 
-
    Here's a block diagram of how most of the cards work:
 
                   +-----------+
@@ -56,9 +55,7 @@
    Cards that work this way are Darla20, Gina20, Layla20, Darla24, Gina24,
    Layla24, Mona, and Indigo.
 
-
    Mia has a feature called "virtual outputs."
-
 
                   +-----------+
            record |           |<----------------------------- Inputs
@@ -70,7 +67,6 @@
                   +-----------+   +------+   | mixer |
                                              +-------+
 
-
    Obviously, the difference here is the box labeled "vmixer."  Vmixer is
    short for "virtual output mixer."  For Mia, pipes are *not* hard-wired
    to a single bus; the vmixer lets you mix any pipe to any bus in any
@@ -79,10 +75,7 @@
    Note, however, that the left-hand side of the diagram is unchanged.
    Transport works exactly the same way - the difference is in the mixer stage.
 
-
    Pipes and busses are numbered starting at zero.
-
-
 
    Pipe index
    ==========
@@ -101,16 +94,12 @@
    16-17          Analog inputs
    18-25          Digital inputs
 
-
    You get the pipe index by calling CEchoGals::OpenAudio; the other transport
    functions take the pipe index as a parameter.  If you need a pipe index for
    some other reason, use the handy Makepipe_index method.
 
-
    Some calls take a CChannelMask parameter; CChannelMask is a handy way to
    group pipe indices.
-
-
 
    Digital mode switch
    ===================
@@ -129,8 +118,6 @@
    only available if you have the card configured for S/PDIF optical or S/PDIF
    RCA.
 
-
-
    Double speed mode
    =================
 
@@ -148,17 +135,13 @@
    The generic code takes care of all this for you.
 */
 
-
 #ifndef _ECHOAUDIO_H_
 #define _ECHOAUDIO_H_
-
 
 #define TRUE 1
 #define FALSE 0
 
 #include "echoaudio_dsp.h"
-
-
 
 /***********************************************************************
 
@@ -173,7 +156,6 @@
 #define DEVICE_ID_56301		0x1801
 #define DEVICE_ID_56361		0x3410
 #define SUBVENDOR_ID		0xECC0
-
 
 /*
  * Valid Echo PCI subsystem card IDs
@@ -193,7 +175,6 @@
 #define INDIGO_IOX		0x00d0
 #define INDIGO_DJX		0x00e0
 #define ECHO3G			0x0100
-
 
 /************************************************************************
 
@@ -218,7 +199,6 @@
  * MIDI activity indicator timeout
  */
 #define MIDI_ACTIVITY_TIMEOUT_USEC	200000
-
 
 /****************************************************************************
  
@@ -253,7 +233,6 @@
 #define ECHO_CLOCK_BIT_ESYNC96		(1 << ECHO_CLOCK_ESYNC96)
 #define ECHO_CLOCK_BIT_MTC		(1<<ECHO_CLOCK_MTC)
 
-
 /***************************************************************************
 
    Digital modes
@@ -278,10 +257,8 @@
 #define ECHOCAPS_HAS_DIGITAL_MODE_ADAT		(1 << DIGITAL_MODE_ADAT)
 #define ECHOCAPS_HAS_DIGITAL_MODE_SPDIF_CDROM	(1 << DIGITAL_MODE_SPDIF_CDROM)
 
-
 #define EXT_3GBOX_NC			0x01	/* 3G box not connected */
 #define EXT_3GBOX_NOT_SET		0x02	/* 3G box not detected yet */
-
 
 #define ECHOGAIN_MUTED		(-128)	/* Minimum possible gain */
 #define ECHOGAIN_MINOUT		(-128)	/* Min output gain (dB) */
@@ -293,7 +270,6 @@
 #define PIPE_STATE_PAUSED	1	/* Pipe has been stopped */
 #define PIPE_STATE_STARTED	2	/* Pipe has been started */
 #define PIPE_STATE_PENDING	3	/* Pipe has pending start */
-
 
 /* Debug initialization */
 #ifdef CONFIG_SND_DEBUG
@@ -323,7 +299,6 @@
 #define DE_MID(x)
 #endif
 
-
 struct audiopipe {
 	volatile u32 *dma_counter;	/* Commpage register that contains
 					 * the current dma position
@@ -347,7 +322,6 @@ struct audiopipe {
 	char state;			/* pipe state */
 };
 
-
 struct audioformat {
 	u8 interleave;			/* How the data is arranged in memory:
 					 * mono = 1, stereo = 2, ...
@@ -358,7 +332,6 @@ struct audioformat {
 					 */
 	char data_are_bigendian;	/* 1 = big endian, 0 = little endian */
 };
-
 
 struct echoaudio {
 	spinlock_t lock;
@@ -456,7 +429,6 @@ struct echoaudio {
 #endif
 };
 
-
 static int init_dsp_comm_page(struct echoaudio *chip);
 static int init_line_levels(struct echoaudio *chip);
 static int free_pipes(struct echoaudio *chip, struct audiopipe *pipe);
@@ -474,7 +446,6 @@ static int __devinit snd_echo_midi_create(struct snd_card *card,
 					  struct echoaudio *chip);
 #endif
 
-
 static inline void clear_handshake(struct echoaudio *chip)
 {
 	chip->comm_page->handshake = 0;
@@ -490,7 +461,6 @@ static inline void set_dsp_register(struct echoaudio *chip, u32 index,
 {
 	writel(value, &chip->dsp_registers[index]);
 }
-
 
 /* Pipe and bus indexes. PX_* and BX_* are defined as chip->px_* and chip->bx_*
 for 3G cards because they depend on the external box. They are integer
@@ -584,10 +554,8 @@ static inline int monitor_index(const struct echoaudio *chip, int out, int in)
 	return out * num_busses_in(chip) + in;
 }
 
-
 #ifndef pci_device
 #define pci_device(chip) (&chip->pci->dev)
 #endif
-
 
 #endif /* _ECHOAUDIO_H_ */

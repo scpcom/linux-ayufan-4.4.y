@@ -52,7 +52,6 @@
 #define HIL_TIMEOUT_DEVS_DATA	16	/* ms */
 #define HIL_TIMEOUT_SELFTEST	200	/* ms */
 
-
 /* Actual wire line coding.  These will only be useful if someone is 
  * implementing a software MLC to run HIL devices on a non-parisc machine.
  */
@@ -132,7 +131,6 @@ enum hil_control_bitpos {
  */
 typedef u32 hil_packet;
 
-
 /* HIL Loop commands 
  */
 enum hil_command {
@@ -189,7 +187,6 @@ enum hil_command {
 
 	/* 0xff is prohibited from use. */
 };
-
 
 /* 
  * Response "records" to HIL commands
@@ -389,7 +386,6 @@ enum hil_command {
 "spanish",		/* 0x1e Latin American/Spanish*/\
 "english.us"		/* 0x1f United States */	\
 
-
 /* HIL keycodes */
 #define HIL_KEYCODES_SET1_TBLSIZE 128
 #define HIL_KEYCODES_SET1 	\
@@ -426,7 +422,6 @@ enum hil_command {
    KEY_N,		KEY_SPACE,	KEY_NEXT,	KEY_RESERVED,	\
    KEY_LEFT,		KEY_DOWN,	KEY_UP,		KEY_RIGHT
 
-
 #define HIL_KEYCODES_SET3_TBLSIZE 128
 #define HIL_KEYCODES_SET3 	\
   KEY_RESERVED,	KEY_ESC,	KEY_1,		KEY_2,			\
@@ -462,7 +457,6 @@ enum hil_command {
   KEY_RESERVED,	KEY_RESERVED,	KEY_RESERVED,	KEY_RESERVED,		\
   KEY_RESERVED,	KEY_RESERVED,	KEY_RESERVED,	KEY_RESERVED
 
-
 /* Response to POL command, the "poll record header" */
 
 #define HIL_POL_NUM_AXES_MASK	0x03	/* Number of axis reported */
@@ -478,6 +472,5 @@ enum hil_command {
 #define HIL_POL_CHARTYPE_SET2	0x60	/* Keycode Set 2 */
 #define HIL_POL_CHARTYPE_SET3	0x70	/* Keycode Set 3 */
 #define HIL_POL_AXIS_ALT	0x80	/* Data is from axis set 2 */
-
 
 #endif /* _HIL_H_ */

@@ -23,5 +23,4 @@
 #define ASC_VOLUME	0x806
 #define ASC_CHAN	0x807	/* ??? */
 
-
 #endif

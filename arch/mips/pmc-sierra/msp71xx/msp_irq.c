@@ -101,7 +101,6 @@ static struct irqaction cascade_msp = {
 	.name	 = "MSP cascade"
 };
 
-
 void __init arch_init_irq(void)
 {
 	/* initialize the 1st-level CPU based interrupt controller */

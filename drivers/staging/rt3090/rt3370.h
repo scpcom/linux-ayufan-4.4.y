@@ -39,7 +39,6 @@
 
 #ifdef RT3370
 
-
 #error "For RT3070, you should define the compile flag -DRTMP_USB_SUPPORT"
 
 #error "For RT3070, you should define the compile flag -DRTMP_MAC_USB"

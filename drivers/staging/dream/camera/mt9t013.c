@@ -47,7 +47,6 @@
 #define REG_GLOBAL_GAIN              0x305E
 #define REG_TEST_PATTERN_MODE        0x3070
 
-
 enum mt9t013_test_mode {
 	TEST_OFF,
 	TEST_1,
@@ -90,7 +89,6 @@ enum mt9t013_setting {
 #define MT9T013_DEFAULT_CLOCK_RATE  24000000
 #define MT9T013_DEFAULT_MAX_FPS     26
 
-
 /* FIXME: Changes from here */
 struct mt9t013_work {
 	struct work_struct work;
@@ -118,7 +116,6 @@ struct mt9t013_ctrl {
 
 	unsigned short imgaddr;
 };
-
 
 static struct mt9t013_ctrl *mt9t013_ctrl;
 static DECLARE_WAIT_QUEUE_HEAD(mt9t013_wait_queue);
@@ -631,7 +628,6 @@ static int32_t mt9t013_setting(enum mt9t013_reg_update rupdate,
 				mt9t013_regs.reg_pat[rt].scale_m);
 		if (rc < 0)
 			return rc;
-
 
 		rc =
 			mt9t013_i2c_write_w(mt9t013_client->addr,
@@ -1225,7 +1221,6 @@ static int mt9t013_init_client(struct i2c_client *client)
 	init_waitqueue_head(&mt9t013_wait_queue);
 	return 0;
 }
-
 
 static int32_t mt9t013_set_sensor_mode(int mode, int res)
 {

@@ -38,7 +38,6 @@
 #include <mach/mmc.h>
 #include <mach/nand.h>
 
-
 static inline int have_imager(void)
 {
 	/* REVISIT when it's supported, trigger via Kconfig */
@@ -50,7 +49,6 @@ static inline int have_tvp7002(void)
 	/* REVISIT when it's supported, trigger via Kconfig */
 	return 0;
 }
-
 
 #define DM365_ASYNC_EMIF_CONTROL_BASE	0x01d10000
 #define DM365_ASYNC_EMIF_DATA_CE0_BASE	0x02000000
@@ -96,7 +94,6 @@ static inline int have_tvp7002(void)
 #define CPLD_CCD_IO3	CPLD_OFFSET(0x3f,1)
 
 static void __iomem *cpld;
-
 
 /* NOTE:  this is geared for the standard config, with a socketed
  * 2 GByte Micron NAND (MT29F16G08FAA) using 128KB sectors.  If you
@@ -357,7 +354,6 @@ static int __init cpld_leds_init(void)
 /* run after subsys_initcall() for LEDs */
 fs_initcall(cpld_leds_init);
 
-
 static void __init evm_init_cpld(void)
 {
 	u8 mux, resets;
@@ -488,4 +484,3 @@ MACHINE_START(DAVINCI_DM365_EVM, "DaVinci DM365 EVM")
 	.timer		= &davinci_timer,
 	.init_machine	= dm365_evm_init,
 MACHINE_END
-

@@ -109,7 +109,6 @@ static struct edid_quirk {
 	{ "SAM", 638, EDID_QUIRK_PREFER_LARGE_60 },
 };
 
-
 /* Valid EDID header has these bytes */
 static const u8 edid_header[] = {
 	0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00
@@ -199,7 +198,6 @@ static u32 edid_get_quirks(struct edid *edid)
 
 #define MODE_SIZE(m) ((m)->hdisplay * (m)->vdisplay)
 #define MODE_REFRESH_DIFF(m,r) (abs((m)->vrefresh - target_refresh))
-
 
 /**
  * edid_fixup_preferred - set preferred modes based on quirk list

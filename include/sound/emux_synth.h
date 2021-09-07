@@ -71,7 +71,6 @@ struct snd_emux_operators {
 #endif
 };
 
-
 /*
  * constant values
  */
@@ -133,7 +132,6 @@ struct snd_emux {
 	struct snd_seq_device *oss_synth;
 #endif
 };
-
 
 /*
  * sequencer port information
@@ -214,7 +212,6 @@ struct snd_emux_voice {
 #define SNDRV_EMUX_UPDATE_FM2FRQ2		(1<<5)
 #define SNDRV_EMUX_UPDATE_Q		(1<<6)
 
-
 #ifdef SNDRV_EMUX_USE_RAW_EFFECT
 /*
  * effect table
@@ -225,7 +222,6 @@ struct snd_emux_effect_table {
 	unsigned char flag[EMUX_NUM_EFFECTS];
 };
 #endif /* SNDRV_EMUX_USE_RAW_EFFECT */
-
 
 /*
  * prototypes - interface to Emu10k1 and Emu8k routines

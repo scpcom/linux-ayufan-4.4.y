@@ -93,7 +93,6 @@ null_newsession(device_t arg, u_int32_t *sid, struct cryptoini *cri)
 	return 0;
 }
 
-
 /*
  * Free a session.
  */
@@ -113,7 +112,6 @@ null_freesession(device_t arg, u_int64_t tid)
 		return 0;
 	return 0;
 }
-
 
 /*
  * Process a request.
@@ -154,7 +152,6 @@ done:
 	crypto_done(crp);
 	return 0;
 }
-
 
 /*
  * our driver startup and shutdown routines

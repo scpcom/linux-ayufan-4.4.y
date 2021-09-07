@@ -55,4 +55,3 @@ int peek_user(struct task_struct *child, long addr, long data)
 	}
 	return put_user(tmp, (unsigned long *) data);
 }
-

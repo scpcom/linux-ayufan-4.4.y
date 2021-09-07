@@ -1073,7 +1073,6 @@ static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 #endif
 	int rc = 0;
 
-
 	/* Consider doing this once, when the file is opened */
 	mutex_lock(&crypt_stat->cs_tfm_mutex);
 #ifdef MY_DEF_HERE

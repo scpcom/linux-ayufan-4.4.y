@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __IN88F6183LCtrlEnvSpech
 #define __IN88F6183LCtrlEnvSpech
 
@@ -73,7 +72,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AUDIO_REG_BASE  	0xB0000
 
 #define INTER_REGS_SIZE	 	 	_1M
-
 
 /* This define describes the maximum controller supported DRAM chip select 	*/
 /* also known as banks                                                     	*/
@@ -88,12 +86,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_INCLUDE_DEVICE_CS1
 #define MV_BOOTDEVICE_INDEX   0
 
-
 #define MV_INCLUDE_CLK_PWR_CNTRL
 
 /* This define describes maximum of GPP groups supported by controller. 	*/
 #define MV_GPP_MAX_GROUP    1
-
 
 /* This define describes the maximum number of available Timer/counters.  	*/
 #define MV_CNTMR_MAX_COUNTER 2
@@ -235,7 +231,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define	MV_TARGET_IS_AS_BOOT(target) ((target) == (sampleAtResetTargetArray[((MV_REG_READ(MPP_SAMPLE_AT_RESET)\
 						 & MSAR_BOOT_MODE_MASK) >> MSAR_BOOT_MODE_OFFS)]))
 
-
 #define MV_CHANGE_BOOT_CS(target)	((target) == DEV_BOOCS)?\
 					sampleAtResetTargetArray[((MV_REG_READ(MPP_SAMPLE_AT_RESET)\
 						 & MSAR_BOOT_MODE_MASK) >> MSAR_BOOT_MODE_OFFS)]\
@@ -244,7 +239,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_CPU_ADDRESS_DECODE_WA
 #define TCLK_TO_COUNTER_RATIO   1   /* counters running in Tclk */
 /* typedefs */
-
 
 #ifndef MV_ASMLANGUAGE
 /* This enumerator described the possible Controller paripheral targets.    */
@@ -266,10 +260,8 @@ typedef enum _mvTarget
 
 }MV_TARGET;
 
-
 /* CV Support */
 #define PEX0_MEM0	PEX0_MEM
-
 
 #define BOOT_TARGETS_NAME_ARRAY {	\
     NFLASH_CS,    	\
@@ -290,12 +282,10 @@ typedef enum _mvTarget
 #define DINFCR_NF_CS_MASK(csNum)         (0x1)
 #define DINFCR_NF_ACT_CE_MASK(csNum)     (0x2)
 
-
 #define PCI_IF0_MEM0		PEX0_MEM
 #define PCI_IF0_IO		PEX0_IO
 #define PCI_IF1_MEM0		PEX1_MEM
 #define PCI_IF1_IO		PEX1_IO
-
 
 /* This enumerator defines the Marvell controller target ID      */ 
 typedef enum _mvTargetId
@@ -306,8 +296,6 @@ typedef enum _mvTargetId
     CRYPT_TARGET_ID =3 ,	/* Port 3 --> Crypto Engine       */
     MAX_TARGETS_ID
 }MV_TARGET_ID;
-
-
 
 #define TARGETS_DEF_ARRAY	{			\
     {0x0E,DRAM_TARGET_ID}, /* SDRAM_CS0 */		\
@@ -321,7 +309,6 @@ typedef enum _mvTargetId
     {0x00,CRYPT_TARGET_ID} /* CRYPT_ENG */		\
 }
 
-
 #define TARGETS_NAME_ARRAY	{	\
     "SDRAM_CS0",    /* SDRAM_CS0 */	\
     "SDRAM_CS1",    /* SDRAM_CS1 */	\
@@ -334,8 +321,6 @@ typedef enum _mvTargetId
     "CRYPT_ENG"	    /* CRYPT_ENG */	\
 }
 
-
 #endif /* MV_ASMLANGUAGE */
-
 
 #endif /* __IN88F6183LCtrlEnvSpech */

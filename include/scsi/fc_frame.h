@@ -69,7 +69,6 @@ struct fcoe_rcv_info {
 	u8		fr_flags;	/* flags - see below */
 };
 
-
 /*
  * Get fc_frame pointer for an skb that's already been imported.
  */

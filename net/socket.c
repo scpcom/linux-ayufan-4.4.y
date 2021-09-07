@@ -656,7 +656,6 @@ void __sock_recv_timestamp(struct msghdr *msg, struct sock *sk,
 		}
 	}
 
-
 	memset(ts, 0, sizeof(ts));
 	if (skb->tstamp.tv64 &&
 	    sock_flag(sk, SOCK_TIMESTAMPING_SOFTWARE)) {
@@ -825,7 +824,6 @@ static ssize_t sock_aio_read(struct kiocb *iocb, const struct iovec *iov,
 
 	if (iocb->ki_left == 0)	/* Match SYS5 behaviour */
 		return 0;
-
 
 	x = alloc_sock_iocb(iocb, &siocb);
 	if (!x)

@@ -67,7 +67,6 @@ volatile void __iomem * const titan_base = (void *) (EXCITE_ADDR_TITAN);
 DEFINE_SPINLOCK(titan_lock);
 int titan_irqflags;
 
-
 /*
  * The eXcite platform uses the alternate timer interrupt
  *
@@ -289,8 +288,6 @@ void __init plat_mem_setup(void)
 	ocd_writel((EXCITE_PHYS_NAND >> 4) | 0x1, LKB12);
 	ocd_writel(((EXCITE_SIZE_NAND >> 4) - 0x100) & 0x03ffff00, LKM12);
 }
-
-
 
 console_initcall(excite_init_console);
 arch_initcall(excite_platform_init);

@@ -99,4 +99,3 @@ out:
 #ifndef CONFIG_UACCESS_WITH_MEMCPY
 EXPORT_SYMBOL(___copy_to_user);
 #endif
-

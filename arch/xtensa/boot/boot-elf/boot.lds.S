@@ -50,7 +50,6 @@ SECTIONS
 		_image_end = .	;
 	}
 
-
 	.bss ((LOADADDR(.image) + SIZEOF(.image) + 3) & ~ 3):
 	{
 		__bss_start = .;
@@ -67,7 +66,6 @@ SECTIONS
 	{
 		*(.ResetVector.text)
 	}
-
 
 	PROVIDE (end = .);
 }

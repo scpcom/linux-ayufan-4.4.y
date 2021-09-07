@@ -257,7 +257,6 @@
 #define SMBfclose        0x84   /* find close */
 #define SMBinvalid       0xFE   /* invalid command */
 
-
 /* Extended 2.0 protocol */
 #define SMBtrans2        0x32   /* TRANS2 protocol set */
 #define SMBtranss2       0x33   /* TRANS2 protocol set, secondary command */
@@ -327,7 +326,6 @@
 #define SMB_FLAGS2_READ_PERMIT_NO_EXECUTE	0x2000
 #define SMB_FLAGS2_32_BIT_ERROR_CODES		0x4000 
 #define SMB_FLAGS2_UNICODE_STRINGS		0x8000
-
 
 /*
  * UNIX stuff  (from samba trans2.h)

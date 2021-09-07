@@ -96,7 +96,6 @@ MODULE_PARM_DESC(ide, "enable ide port");
 
 #define OPTi9XX_MC_REG(n)	n
 
-
 struct snd_miro {
 	unsigned short hardware;
 	unsigned char password;
@@ -839,7 +838,6 @@ static void snd_miro_write(struct snd_miro *chip, unsigned char reg,
 
 	spin_unlock_irqrestore(&chip->lock, flags);
 }
-
 
 #define snd_miro_write_mask(chip, reg, value, mask)	\
 	snd_miro_write(chip, reg,			\

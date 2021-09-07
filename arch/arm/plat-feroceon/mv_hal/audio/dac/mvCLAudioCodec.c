@@ -109,7 +109,6 @@ MV_BOOL mvCLAudioCodecInit(MV_AUDIO_CODEC_DEV *pCodecDev)
     else
         mvCLAudioCodecRegBitsSet(pCodecDev,CL_AUDIO_CODEC_IF_CTRL_REG,BIT2);
 
-
     return MV_TRUE;
 }
 

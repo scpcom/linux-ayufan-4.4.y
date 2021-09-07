@@ -232,7 +232,6 @@ static void sa1100_rtc_release(struct device *dev)
 	free_irq(IRQ_RTC1Hz, dev);
 }
 
-
 static int sa1100_rtc_ioctl(struct device *dev, unsigned int cmd,
 		unsigned long arg)
 {

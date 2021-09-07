@@ -185,7 +185,6 @@ typedef struct {
     gdth_evt_data   event_data;
 } PACKED gdth_evt_str;
 
-
 #ifdef GDTH_IOCTL_PROC
 /* IOCTL structure (write) */
 typedef struct {

@@ -36,7 +36,6 @@ enum {
 	IRQ_FPGA_NMI,
 };
 
-
 #endif /* !__ASSEMBLY__ */
 
 #endif /* _ASM_MB93091_FPGA_IRQS_H */

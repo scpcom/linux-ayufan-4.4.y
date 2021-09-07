@@ -90,4 +90,3 @@ extern void shove_aux_table(unsigned long sp);
 #undef UML_HAVE_SETFPREGS
 
 #endif
-

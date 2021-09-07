@@ -301,7 +301,6 @@ static int __devinit pca953x_probe(struct i2c_client *client,
 	if (ret)
 		goto out_failed;
 
-
 	ret = gpiochip_add(&chip->gpio_chip);
 	if (ret)
 		goto out_failed;

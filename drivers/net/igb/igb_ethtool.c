@@ -1937,7 +1937,6 @@ static int igb_get_coalesce(struct net_device *netdev,
 	return 0;
 }
 
-
 static int igb_nway_reset(struct net_device *netdev)
 {
 	struct igb_adapter *adapter = netdev_priv(netdev);

@@ -76,8 +76,6 @@ void dwc_otg_hcd_qh_free(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 		dwc_dma_free(buf_size, qh->dw_align_buf, qh->dw_align_buf_dma);
 	}
 	
-	
-	
 	dwc_free(qh);
 	return;
 }

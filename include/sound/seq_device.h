@@ -45,7 +45,6 @@ struct snd_seq_device {
 	struct list_head list;	/* link to next device */
 };
 
-
 /* driver operators
  * init_device:
  *	Initialize the device with given parameters.
@@ -73,7 +72,6 @@ int snd_seq_device_register_driver(char *id, struct snd_seq_dev_ops *entry, int 
 int snd_seq_device_unregister_driver(char *id);
 
 #define SNDRV_SEQ_DEVICE_ARGPTR(dev) (void *)((char *)(dev) + sizeof(struct snd_seq_device))
-
 
 /*
  * id strings for generic devices

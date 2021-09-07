@@ -213,7 +213,6 @@ struct hfsplus_cat_key {
 	struct hfsplus_unistr name;
 } __packed;
 
-
 /* Structs from hfs.h */
 struct hfsp_point {
 	__be16 v;
@@ -226,7 +225,6 @@ struct hfsp_rect {
 	__be16 bottom;
 	__be16 right;
 } __packed;
-
 
 /* HFS directory info (stolen from hfs.h */
 struct DInfo {

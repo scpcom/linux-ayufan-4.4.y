@@ -70,7 +70,6 @@
 #include <linux/unistd.h>
 #include <asm/uaccess.h>
 
-
 #define MEM_ALLOC_FLAG      (GFP_ATOMIC) //(GFP_DMA | GFP_ATOMIC)
 
 #ifndef IFNAMSIZ
@@ -163,7 +162,6 @@ struct os_lock  {
 	unsigned long  	flags;
 };
 
-
 struct os_cookie {
 #ifdef RT2860
 	struct pci_dev 			*pci_dev;
@@ -216,13 +214,10 @@ typedef struct timer_list	NDIS_MINIPORT_TIMER;
 typedef void				* NDIS_HANDLE;
 typedef char 				* PNDIS_BUFFER;
 
-
-
 void hex_dump(char *str, unsigned char *pSrcBufVA, unsigned int SrcBufLen);
 
 dma_addr_t linux_pci_map_single(void *handle, void *ptr, size_t size, int sd_idx, int direction);
 void linux_pci_unmap_single(void *handle, dma_addr_t dma_addr, size_t size, int direction);
-
 
 ////////////////////////////////////////
 // MOVE TO rtmp.h ?
@@ -231,7 +226,6 @@ void linux_pci_unmap_single(void *handle, dma_addr_t dma_addr, size_t size, int 
 #define PKTSRC_DRIVER           0x0f
 #define PRINT_MAC(addr)	\
 	addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]
-
 
 #define RT2860_PCI_DEVICE_ID		0x0601
 
@@ -257,15 +251,12 @@ void linux_pci_unmap_single(void *handle, dma_addr_t dma_addr, size_t size, int 
 #define PCI_UNMAP_SINGLE(_handle, _ptr, _size, _dir)
 #endif // RT2870 //
 
-
 #define BEACON_FRAME_DMA_CACHE_WBACK(_ptr, _size)	\
 	dma_cache_wback(_ptr, _size)
-
 
 //////////////////////////////////////////
 //
 //////////////////////////////////////////
-
 
 #define NdisMIndicateStatus(_w, _x, _y, _z)
 
@@ -284,7 +275,6 @@ typedef VOID (*RT2870_TIMER_HANDLE)(
 	IN  PVOID   SystemSpecific3);
 #endif // RT2870 //
 
-
 typedef struct  _RALINK_TIMER_STRUCT    {
     RTMP_OS_TIMER		TimerObj;       // Ndis Timer object
 	BOOLEAN				Valid;			// Set to True when call RTMPInitTimer
@@ -298,7 +288,6 @@ typedef struct  _RALINK_TIMER_STRUCT    {
 	void				*pAd;
 #endif // RT2870 //
 }   RALINK_TIMER_STRUCT, *PRALINK_TIMER_STRUCT;
-
 
 #ifdef RT2870
 
@@ -318,7 +307,6 @@ typedef struct _RT2870_TIMER_ENTRY_
 	struct _RT2870_TIMER_ENTRY_ 	*pNext;
 }RT2870_TIMER_ENTRY;
 
-
 #define TIMER_QUEUE_SIZE_MAX	128
 typedef struct _RT2870_TIMER_QUEUE_
 {
@@ -329,7 +317,6 @@ typedef struct _RT2870_TIMER_QUEUE_
 	RT2870_TIMER_ENTRY 	*pQTail;
 }RT2870_TIMER_QUEUE;
 #endif // RT2870 //
-
 
 //#define DBG	1
 
@@ -350,7 +337,6 @@ extern ULONG    RTDebugLevel;
 
 #define DBGPRINT(Level, Fmt)    DBGPRINT_RAW(Level, Fmt)
 
-
 #define DBGPRINT_ERR(Fmt)           \
 {                                   \
     printk("ERROR!!! ");          \
@@ -362,14 +348,12 @@ extern ULONG    RTDebugLevel;
 	printk Fmt;					\
 }
 
-
 #else
 #define DBGPRINT(Level, Fmt)
 #define DBGPRINT_RAW(Level, Fmt)
 #define DBGPRINT_S(Status, Fmt)
 #define DBGPRINT_ERR(Fmt)
 #endif
-
 
 //
 //  spin_lock enhanced for Nested spin lock
@@ -382,7 +366,6 @@ extern ULONG    RTDebugLevel;
 #define NdisFreeSpinLock(lock)          \
 {                                       \
 }
-
 
 #define RTMP_SEM_LOCK(__lock)					\
 {												\
@@ -474,13 +457,11 @@ extern ULONG    RTDebugLevel;
 #define RTMP_IO_WRITE32(_A, _R, _V)								\
 	RTUSBWriteMACRegister(_A, _R, _V)
 
-
 #define RTMP_IO_WRITE8(_A, _R, _V)								\
 {																\
 	USHORT	_Val = _V;											\
 	RTUSBSingleWrite(_A, _R, _Val);								\
 }
-
 
 #define RTMP_IO_WRITE16(_A, _R, _V)								\
 {																\
@@ -528,7 +509,6 @@ do { \
 	for (_i=0; _i<(_loop); _i++) \
 		wait_event_interruptible_timeout(_wait, 0, ONE_TICK); }
 
-
 typedef void (*TIMER_FUNCTION)(unsigned long);
 
 #define COPY_MAC_ADDR(Addr1, Addr2)             memcpy((Addr1), (Addr2), MAC_ADDR_LEN)
@@ -563,7 +543,6 @@ void linux_##_func(unsigned long data)												\
 }
 #endif // RT2870 //
 
-
 #define DECLARE_TIMER_FUNCTION(_func)			\
 void linux_##_func(unsigned long data)
 
@@ -592,7 +571,6 @@ DECLARE_TIMER_FUNCTION(PsPollWakeExec);
 DECLARE_TIMER_FUNCTION(RadioOnExec);
 
 void RTMP_GetCurrentSystemTime(LARGE_INTEGER *time);
-
 
 /*
  * packet helper
@@ -626,7 +604,6 @@ void RTMP_GetCurrentSystemTime(LARGE_INTEGER *time);
 #define GET_OS_PKT_NEXT(_pkt) \
 		(RTPKT_TO_OSPKT(_pkt)->next)
 
-
 #define OS_NTOHS(_Val) \
 		(ntohs(_Val))
 #define OS_HTONS(_Val) \
@@ -649,9 +626,7 @@ void RTMP_GetCurrentSystemTime(LARGE_INTEGER *time);
 #define STATS_INC_RX_DROPPED(_pAd, _dev)
 #define STATS_INC_TX_DROPPED(_pAd, _dev)
 
-
 #define CB_OFF  10
-
 
 //   check DDK NDIS_PACKET data structure and find out only MiniportReservedEx[0..7] can be used by our driver without
 //   ambiguity. Fields after pPacket->MiniportReservedEx[8] may be used by other wrapper layer thus crashes the driver
@@ -696,7 +671,6 @@ void RTMP_GetCurrentSystemTime(LARGE_INTEGER *time);
 
 #define RTMP_SET_PACKET_MOREDATA(_p, _morebit)		(RTPKT_TO_OSPKT(_p)->cb[CB_OFF+7] = _morebit)
 #define RTMP_GET_PACKET_MOREDATA(_p)				(RTPKT_TO_OSPKT(_p)->cb[CB_OFF+7])
-
 
 //
 //	Sepcific Pakcet Type definition
@@ -777,7 +751,6 @@ void RTMP_GetCurrentSystemTime(LARGE_INTEGER *time);
 
 #define RTMP_GET_PACKET_IPV4(_p)		(RTPKT_TO_OSPKT(_p)->cb[CB_OFF+11] & RTMP_PACKET_SPECIFIC_IPV4)
 
-
 // If this flag is set, it indicates that this EAPoL frame MUST be clear.
 #define RTMP_SET_PACKET_CLEAR_EAP_FRAME(_p, _flg)   (RTPKT_TO_OSPKT(_p)->cb[CB_OFF+12] = _flg)
 #define RTMP_GET_PACKET_CLEAR_EAP_FRAME(_p)         (RTPKT_TO_OSPKT(_p)->cb[CB_OFF+12])
@@ -789,9 +762,7 @@ void RTMP_GetCurrentSystemTime(LARGE_INTEGER *time);
 #define BRIDGE_TAG 0x35564252    // depends on 5VT define in br_input.c
 #endif
 
-
 #define NDIS_SET_PACKET_STATUS(_p, _status)
-
 
 #define GET_SG_LIST_FROM_PACKET(_p, _sc)	\
     rt_get_sg_list_from_packet(_p, _sc)
@@ -802,12 +773,9 @@ void RTMP_GetCurrentSystemTime(LARGE_INTEGER *time);
 #define NdisEqualMemory(Source1, Source2, Length)   (!memcmp(Source1, Source2, Length))
 #define RTMPEqualMemory(Source1, Source2, Length)	(!memcmp(Source1, Source2, Length))
 
-
 #define RTMP_INC_REF(_A)		0
 #define RTMP_DEC_REF(_A)		0
 #define RTMP_GET_REF(_A)		0
-
-
 
 /*
  * ULONG
@@ -840,7 +808,6 @@ void RTMP_GetCurrentSystemTime(LARGE_INTEGER *time);
  */
 #define RTMP_SetPhysicalAddressHigh(PhysicalAddress, Value)
 
-
 //CONTAINING_RECORD(pEntry, NDIS_PACKET, MiniportReservedEx);
 #define QUEUE_ENTRY_TO_PACKET(pEntry) \
 	(PNDIS_PACKET)(pEntry)
@@ -848,18 +815,15 @@ void RTMP_GetCurrentSystemTime(LARGE_INTEGER *time);
 #define PACKET_TO_QUEUE_ENTRY(pPacket) \
 	(PQUEUE_ENTRY)(pPacket)
 
-
 #ifndef CONTAINING_RECORD
 #define CONTAINING_RECORD(address, type, field)			\
 ((type *)((PCHAR)(address) - offsetof(type, field)))
 #endif
 
-
 #define RELEASE_NDIS_PACKET(_pAd, _pPacket, _Status)                    \
 {                                                                       \
         RTMPFreeNdisPacket(_pAd, _pPacket);                             \
 }
-
 
 #define SWITCH_PhyAB(_pAA, _pBB)    \
 {                                                                           \
@@ -877,10 +841,8 @@ void RTMP_GetCurrentSystemTime(LARGE_INTEGER *time);
     RTMP_SetPhysicalAddressLow(_pBB, AABasePaLow);                                                 \
 }
 
-
 #define NdisWriteErrorLogEntry(_a, _b, _c, _d)
 #define NdisMAllocateMapRegisters(_a, _b, _c, _d, _e)		NDIS_STATUS_SUCCESS
-
 
 #define NdisAcquireSpinLock		RTMP_SEM_LOCK
 #define NdisReleaseSpinLock		RTMP_SEM_UNLOCK
@@ -895,8 +857,6 @@ static inline void NdisGetSystemUpTime(ULONG *time)
 		((PNDIS_PACKET) (pEntry))
 
 int rt28xx_packet_xmit(struct sk_buff *skb);
-
-
 
 void rtmp_os_thread_init(PUCHAR pThreadName, PVOID pNotify);
 
@@ -915,4 +875,3 @@ void rtmp_os_thread_init(PUCHAR pThreadName, PVOID pNotify);
 
 #define PCIBUS_INTEL_VENDOR         0x8086
 #endif
-

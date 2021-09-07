@@ -83,7 +83,6 @@ riscix_partition(struct parsed_partitions *state, struct block_device *bdev,
 
 	printk(" [RISCiX]");
 
-
 	if (rr->magic == RISCIX_MAGIC) {
 		unsigned long size = nr_sects > 2 ? 2 : nr_sects;
 		int part;

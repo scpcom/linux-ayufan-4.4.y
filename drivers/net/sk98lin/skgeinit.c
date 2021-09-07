@@ -98,7 +98,6 @@ SK_BOOL	Enable)	/* Flag */
 	}
 }	/* SkGePortVlan */
 
-
 /******************************************************************************
  *
  *	SkGeRxRss() - Enable / Disable RSS Hash Calculation
@@ -123,7 +122,6 @@ SK_BOOL	Enable)	/* Flag */
 			Enable ? BMU_ENA_RX_RSS_HASH : BMU_DIS_RX_RSS_HASH);
 	}
 }	/* SkGeRxRss */
-
 
 /******************************************************************************
  *
@@ -177,7 +175,6 @@ SK_BOOL PollRxD)	/* SK_TRUE (enable pol.), SK_FALSE (disable pol.) */
 	SK_OUT32(IoC, Q_ADDR(pPrt->PRxQOff, Q_CSR), (SK_U32)((PollRxD) ?
 		CSR_ENA_POL : CSR_DIS_POL));
 }	/* SkGePollRxD */
-
 
 /******************************************************************************
  *
@@ -311,7 +308,6 @@ int		Mode)		/* Mode may be SK_LED_DIS, SK_LED_ENA, SK_LED_TST */
 }	/* SkGeXmitLED */
 #endif /* !SK_SLIM || GENESIS */
 
-
 /******************************************************************************
  *
  *	DoCalcAddr() - Calculates the start and the end address of a queue.
@@ -386,7 +382,6 @@ int	QueueSizeKB)	/* Queue size in kB */
 
 	return((QueueSizeKB + QueueSizeSteps - 1) & ~(QueueSizeSteps - 1));
 }	/* SkGeRoundQueueSize */
-
 
 /******************************************************************************
  *
@@ -547,7 +542,6 @@ SK_BOOL	DualNet)		/* Dual Net active */
 	return(0);
 }	/* SkGeInitAssignRamToQueues */
 
-
 /******************************************************************************
  *
  *	SkGeCheckQSize() - Checks the Adapters Queue Size Configuration
@@ -670,7 +664,6 @@ int		 Port)		/* port index */
 	return(0);
 }	/* SkGeCheckQSize */
 
-
 #ifdef GENESIS
 /******************************************************************************
  *
@@ -710,7 +703,6 @@ SK_IOC	IoC)		/* I/O Context */
 	 * the MAC arbiter is configured and enabled now.
 	 */
 }	/* SkGeInitMacArb */
-
 
 /******************************************************************************
  *
@@ -753,7 +745,6 @@ SK_IOC	IoC)		/* I/O Context */
 	}
 }	/* SkGeInitPktArb */
 #endif /* GENESIS */
-
 
 /******************************************************************************
  *
@@ -1067,7 +1058,6 @@ int		SyncMode)	/* Sync Mode: TXA_ENA_ALLOC | TXA_DIS_ALLOC | 0 */
 }	/* SkGeCfgSync */
 #endif /* SK_DIAG || SK_CFG_SYNC*/
 
-
 /******************************************************************************
  *
  *	DoInitRamQueue() - Initialize the RAM Buffer Address of a single Queue
@@ -1147,7 +1137,6 @@ int		QuType)			/* Queue Type (SK_RX_SRAM_Q|SK_RX_BRAM_Q|SK_TX_RAM_Q) */
 	}
 }	/* DoInitRamQueue */
 
-
 /******************************************************************************
  *
  *	SkGeInitRamBufs() - Initialize the RAM Buffer Queues
@@ -1189,7 +1178,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 		pPrt->PXaQRamEnd, SK_TX_RAM_Q);
 
 }	/* SkGeInitRamBufs */
-
 
 /******************************************************************************
  *
@@ -1241,7 +1229,6 @@ SK_IOC	IoC)		/* I/O Context */
 		SK_OUT8(IoC, SELECT_RAM_BUFFER(i, B3_RI_RTO_XS2), SK_RI_TO_53);
 	}
 }	/* SkGeInitRamIface */
-
 
 /******************************************************************************
  *
@@ -1353,7 +1340,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 	 */
 }	/* SkGeInitBmu */
 
-
 /******************************************************************************
  *
  *	TestStopBit() -	Test the stop bit of the queue
@@ -1394,7 +1380,6 @@ int		QuIoOffs)	/* Queue I/O Address Offset */
 	}
 	return(QuCsr);
 }	/* TestStopBit */
-
 
 /******************************************************************************
  *
@@ -1819,7 +1804,6 @@ int		RstMode)/* Reset Mode (SK_SOFT_RST, SK_HARD_RST) */
 	}
 }	/* SkGeStopPort */
 
-
 /******************************************************************************
  *
  *	SkGeInit0() - Level 0 Initialization
@@ -1990,7 +1974,6 @@ SK_IOC	IoC)		/* I/O Context */
 }	/* SkGePciReset */
 #endif /* SK_PCI_RESET */
 
-
 /******************************************************************************
  *
  *	SkGeSetUpSupFeatures() - Collect Feature List for HW_FEATURE Macro
@@ -2141,7 +2124,6 @@ SK_IOC	IoC)		/* I/O Context */
 				~pAC->GIni.HwF.OffMask[i];
 	}
 }	/* SkGeSetUpSupFeatures */
-
 
 /******************************************************************************
  *
@@ -2898,7 +2880,6 @@ SK_IOC	IoC)		/* I/O Context */
 	return(RetVal);
 }	/* SkGeInit1 */
 
-
 /******************************************************************************
  *
  *	SkGeInit2() - Level 2 Initialization
@@ -3035,7 +3016,6 @@ SK_IOC	IoC)		/* I/O Context */
 #endif /* YUKON */
 }	/* SkGeInit2 */
 
-
 /******************************************************************************
  *
  *	SkGeInit() - Initialize the GE Adapter with the specified level.
@@ -3144,7 +3124,6 @@ int		Level)		/* Initialization Level */
 
 	return(RetVal);
 }	/* SkGeInit */
-
 
 /******************************************************************************
  *
@@ -3324,7 +3303,6 @@ SK_IOC	IoC)		/* I/O Context */
 
 }	/* SkGeDeInit */
 
-
 #ifdef XXX
 /******************************************************************************
  *
@@ -3451,7 +3429,6 @@ int		Port)		/* Port to configure */
 
 	return(0);
 }	/* SkGeInitPort */
-
 
 #if (defined(YUK2) && !defined(SK_SLIM))
 /******************************************************************************
@@ -3728,7 +3705,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 
 }	/* SkYuk2RestartRxBmu */
 
-
 /******************************************************************************
  *
  *	SkYuk2StopTx() - Stop Tx Path on Yukon-2 device family
@@ -3930,4 +3906,3 @@ int		Port)		/* Port Index 0 or 1 */
 #endif /* YUK2 && !SK_SLIM */
 
 /* End of File */
-

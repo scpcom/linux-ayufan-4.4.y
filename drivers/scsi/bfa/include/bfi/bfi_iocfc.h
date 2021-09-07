@@ -174,4 +174,3 @@ union bfi_iocfc_i2h_msg_u {
 #pragma pack()
 
 #endif /* __BFI_IOCFC_H__ */
-

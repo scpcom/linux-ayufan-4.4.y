@@ -30,7 +30,6 @@
 
 #include <linux/i2c/twl4030.h>
 
-
 /*
  * RTC block register offsets (use TWL_MODULE_RTC)
  */
@@ -78,7 +77,6 @@
 #define BIT_RTC_INTERRUPTS_REG_EVERY_M           0x03
 #define BIT_RTC_INTERRUPTS_REG_IT_TIMER_M        0x04
 #define BIT_RTC_INTERRUPTS_REG_IT_ALARM_M        0x08
-
 
 /* REG_SECONDS_REG through REG_YEARS_REG is how many registers? */
 #define ALL_TIME_REGS		6

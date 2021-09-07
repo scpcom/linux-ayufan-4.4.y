@@ -20,7 +20,6 @@
 
 #include "sound_config.h"
 
-
 /*
  * Don't make MAX_QUEUE_SIZE larger than 4000
  */
@@ -48,7 +47,6 @@ static struct midi_buf *midi_in_buf[MAX_MIDI_DEV] = {NULL};
 static struct midi_parms parms[MAX_MIDI_DEV];
 
 static void midi_poll(unsigned long dummy);
-
 
 static DEFINE_TIMER(poll_timer, midi_poll, 0, 0);
 
@@ -310,7 +308,6 @@ out:
 	return c;
 }
 
-
 int MIDIbuf_read(int dev, struct file *file, char __user *buf, int count)
 {
 	int n, c = 0;
@@ -414,7 +411,6 @@ unsigned int MIDIbuf_poll(int dev, struct file *file, poll_table * wait)
 	return mask;
 }
 
-
 int MIDIbuf_avail(int dev)
 {
 	if (midi_in_buf[dev])
@@ -422,4 +418,3 @@ int MIDIbuf_avail(int dev)
 	return 0;
 }
 EXPORT_SYMBOL(MIDIbuf_avail);
-

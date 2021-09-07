@@ -154,7 +154,6 @@ device_initcall(collie_uart_init);
 
 #endif
 
-
 static struct resource locomo_resources[] = {
 	[0] = {
 		.start		= 0x40000000,
@@ -263,7 +262,6 @@ static void __init collie_init(void)
 	PSDR = PPC_RXD1 | PPC_RXD2 | PPC_RXD3 | PPC_RXD4;
 
 	PCFR = PCFR_OPDE;
-
 
 	platform_scoop_config = &collie_pcmcia_config;
 

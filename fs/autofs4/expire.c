@@ -523,4 +523,3 @@ int autofs4_expire_multi(struct super_block *sb, struct vfsmount *mnt,
 
 	return autofs4_do_expire_multi(sb, mnt, sbi, do_now);
 }
-

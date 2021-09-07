@@ -9,7 +9,6 @@
  *
  */
 
-
 #include <linux/delay.h>
 #include <linux/platform_device.h>
 #include <linux/init.h>
@@ -22,7 +21,6 @@
 #include <mach/sharpsl.h>
 #include <mach/hardware.h>
 #include <mach/pxa2xx-gpio.h>
-
 
 #define PWR_MODE_ACTIVE		0
 #define PWR_MODE_SUSPEND	1

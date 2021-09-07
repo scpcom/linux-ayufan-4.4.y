@@ -19,7 +19,6 @@
 #include <linux/types.h>
 #include <linux/if_ether.h>
 
-
 /*
  *    These are the defined ARCnet Protocol ID's.
  */
@@ -65,7 +64,6 @@ struct arc_rfc1201
 };
 #define RFC1201_HDR_SIZE 4
 
-
 /*
  * The RFC1051-specific components.
  */
@@ -75,7 +73,6 @@ struct arc_rfc1051
     __u8 payload[0];		/* 507 bytes			*/
 };
 #define RFC1051_HDR_SIZE 1
-
 
 /*
  * The ethernet-encap-specific components.  We have a real ethernet header
@@ -88,7 +85,6 @@ struct arc_eth_encap
     __u8 payload[0];		/* 493 bytes				*/
 };
 #define ETH_ENCAP_HDR_SIZE 14
-
 
 struct arc_cap
 {

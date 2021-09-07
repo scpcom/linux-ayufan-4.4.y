@@ -25,13 +25,11 @@
  *************************************************************************
 */
 
-
 #ifndef __RTMP_PCI_H__
 #define __RTMP_PCI_H__
 
 #define RT28XX_HANDLE_DEV_ASSIGN(handle, dev_p)				\
 	((POS_COOKIE)handle)->pci_dev = dev_p;
-
 
 #ifdef LINUX
 // set driver data
@@ -58,14 +56,12 @@
 #define RTMP_MSI_DISABLE(_pAd)
 #endif // PCI_MSI_SUPPORT //
 
-
 #define RTMP_PCI_DEV_UNMAP()										\
 {	if (net_dev->base_addr)	{								\
 		iounmap((void *)(net_dev->base_addr));				\
 		release_mem_region(pci_resource_start(dev_p, 0),	\
 							pci_resource_len(dev_p, 0)); }	\
 	if (net_dev->irq) pci_release_regions(dev_p); }
-
 
 #define RTMP_IRQ_REQUEST(net_dev)							\
 {	PRTMP_ADAPTER _pAd = (PRTMP_ADAPTER)(RTMP_OS_NETDEV_GET_PRIV(net_dev));	\
@@ -103,8 +99,5 @@
     pci_write_config_word(pci_dev, offset, reg16);          \
 
 #endif // LINUX //
-
-
-
 
 #endif // __RTMP_PCI_H__ //

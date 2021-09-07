@@ -238,8 +238,6 @@ bfa_fcs_port_sm_deleting(struct bfa_fcs_port_s *port,
 	}
 }
 
-
-
 /**
  *  fcs_port_pvt
  */
@@ -619,8 +617,6 @@ bfa_fcs_port_deleted(struct bfa_fcs_port_s *port)
 	}
 }
 
-
-
 /**
  *  fcs_lport_api BFA FCS port API
  */
@@ -902,8 +898,6 @@ bfa_fcs_lport_init(struct bfa_fcs_port_s *lport, struct bfa_fcs_s *fcs,
 	bfa_sm_send_event(lport, BFA_FCS_PORT_SM_CREATE);
 }
 
-
-
 /**
  *  fcs_lport_api
  */
@@ -936,5 +930,3 @@ bfa_fcs_port_get_attr(struct bfa_fcs_port_s *port,
 	}
 
 }
-
-

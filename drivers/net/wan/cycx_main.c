@@ -117,7 +117,6 @@ static int __init cycx_init(void)
 	if (!cycx_card_array)
 		goto out;
 
-
 	/* Register adapters with WAN router */
 	for (cnt = 0; cnt < cycx_ncards; ++cnt) {
 		struct cycx_device *card = &cycx_card_array[cnt];

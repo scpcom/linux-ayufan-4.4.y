@@ -24,7 +24,6 @@
 #ifndef __BFI_CTREG_H__
 #define __BFI_CTREG_H__
 
-
 #define HOSTFN0_LPU_MBOX0_0              0x00019200
 #define HOSTFN1_LPU_MBOX0_8              0x00019260
 #define LPU_HOSTFN0_MBOX0_0              0x00019280
@@ -471,7 +470,6 @@ enum {
 #define HQM_QSET0_IB_DRBL_2_P1           0x0003c060
 #define HQM_QSET1_IB_DRBL_2_P1           0x0003c0e0
 
-
 /*
  * These definitions are either in error/missing in spec. Its auto-generated
  * from hard coded values in regparse.pl.
@@ -482,12 +480,10 @@ enum {
 #define __SFP_TXRATE_EN_FIX              0x00000100
 #define __SFP_RXRATE_EN_FIX              0x00000080
 
-
 /*
  * These register definitions are auto-generated from hard coded values
  * in regparse.pl.
  */
-
 
 /*
  * These register mapping definitions are auto-generated from mapping tables
@@ -545,7 +541,6 @@ enum {
 #define CPE_Q_MASK(__q)  ((__q) & 0x3)
 #define RME_Q_MASK(__q)  ((__q) & 0x3)
 
-
 /*
  * PCI MSI-X vector defines
  */
@@ -592,7 +587,6 @@ enum {
 #define __HFN_INT_CPE_MASK                 0x000000ffU
 #define __HFN_INT_RME_MASK                 0x0000ff00U
 
-
 /*
  * catapult memory map.
  */
@@ -606,6 +600,4 @@ enum {
  * End of catapult memory map
  */
 
-
 #endif /* __BFI_CTREG_H__ */
-

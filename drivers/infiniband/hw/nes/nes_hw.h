@@ -379,7 +379,6 @@ enum nes_cqe_opcode_bits {
 	NES_CQE_VALID = (1<<31),
 };
 
-
 enum nes_cqe_word_idx {
 	NES_CQE_PAYLOAD_LENGTH_IDX = 0,
 	NES_CQE_COMP_COMP_CTX_LOW_IDX = 2,
@@ -549,7 +548,6 @@ enum nes_iwarp_sq_fmr_wqe_word_idx {
 enum nes_iwarp_sq_locinv_wqe_word_idx {
 	NES_IWARP_SQ_LOCINV_WQE_INV_STAG_IDX = 6,
 };
-
 
 enum nes_iwarp_rq_wqe_word_idx {
 	NES_IWARP_RQ_WQE_TOTAL_PAYLOAD_IDX = 1,

@@ -181,4 +181,3 @@ struct ppc_pci_io spiderpci_ops = {
 	.readsl = spiderpci_readsl,
 	.memcpy_fromio = spiderpci_memcpy_fromio,
 };
-

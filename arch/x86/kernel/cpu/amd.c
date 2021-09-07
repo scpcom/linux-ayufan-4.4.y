@@ -50,7 +50,6 @@ static void __cpuinit init_amd_k5(struct cpuinfo_x86 *c)
 	}
 }
 
-
 static void __cpuinit init_amd_k6(struct cpuinfo_x86 *c)
 {
 	u32 l, h;

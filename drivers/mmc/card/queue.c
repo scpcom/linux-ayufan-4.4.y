@@ -362,4 +362,3 @@ void mmc_queue_bounce_post(struct mmc_queue *mq)
 		mq->bounce_buf, mq->sg[0].length);
 	local_irq_restore(flags);
 }
-

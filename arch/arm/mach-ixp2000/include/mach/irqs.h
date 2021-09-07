@@ -113,7 +113,6 @@
 #define	IXP2000_BOARD_IRQS		32
 #define NR_IRQS				(NR_IXP2000_IRQS + IXP2000_BOARD_IRQS)
 
-
 /* 
  * IXDP2400 specific IRQs
  */

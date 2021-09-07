@@ -912,7 +912,6 @@ static void mark_reserved_regions_for_nid(int nid)
 	}
 }
 
-
 void __init do_init_bootmem(void)
 {
 	int nid;

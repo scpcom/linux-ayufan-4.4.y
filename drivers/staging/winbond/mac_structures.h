@@ -49,10 +49,8 @@
 #define DOT_3_TYPE_IPX				0x8137
 #define DOT_3_TYPE_OFFSET			12
 
-
 #define ETHERNET_HEADER_SIZE			14
 #define MAX_ETHERNET_PACKET_SIZE		1514
-
 
 //-----  management : Type of Bits (2, 3) and Subtype of Bits (4, 5, 6, 7)
 #define MAC_SUBTYPE_MNGMNT_ASSOC_REQUEST    0x00
@@ -199,7 +197,6 @@ typedef enum enum_TxRate
     TXRATE_AUTO             = 255           // PD43 20021108
 } WB_TXRATE, *PWB_TXRATE;
 
-
 #define	RATE_BITMAP_1M				1
 #define	RATE_BITMAP_2M				2
 #define	RATE_BITMAP_5dot5M			5
@@ -243,7 +240,6 @@ typedef enum enum_TxRate
 #define CAPABILITY_CHAN_AGILITY_BIT		0x0080
 #define CAPABILITY_SHORT_SLOT_TIME_BIT	0x0400
 #define CAPABILITY_DSSS_OFDM_BIT		0x2000
-
 
 struct Capability_Information_Element
 {
@@ -527,7 +523,6 @@ struct WPA2_RSN_Auth_Sub_Information_Element
 	SUITE_SELECTOR	AuthKeyMngtSuite[1];
 }__attribute__ ((packed));
 
-
 struct PMKID_Information_Element
 {
 	u16				PMKID_Count;
@@ -639,7 +634,6 @@ struct Deauthentication_Frame_Body
     u16    reasonCode;
 }__attribute__ ((packed));
 
-
 struct Probe_Response_Frame_Body
 {
     u16    Timestamp;
@@ -661,7 +655,4 @@ struct Authentication_Frame_Body
 	// struct Challenge_Text_Element sChallengeTextElement; // wkchen added
 }__attribute__ ((packed));
 
-
 #endif // _MAC_Structure_H_
-
-

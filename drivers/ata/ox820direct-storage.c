@@ -146,7 +146,6 @@ typedef struct single_disk_context {
     int port;
 } single_disk_context_t;
 
-
 static irqreturn_t direct_isr(int irq_status, unsigned long arg);
 static void direct_analyse(int timed_out);
 
@@ -549,7 +548,6 @@ static void cleanup(direct_command_t* cmd)
 	ox820sata_thaw_host(0);
 }
 
-
 static void direct_eh_work(struct work_struct *work) 
 {
     direct_command_t* cmd = container_of(work, direct_command_t, eh_work);
@@ -570,7 +568,6 @@ static void direct_eh_work(struct work_struct *work)
         reset_faults();
     }
 }
-
 
 /**
  * Called for reads or writes that were sent to one physical disk.

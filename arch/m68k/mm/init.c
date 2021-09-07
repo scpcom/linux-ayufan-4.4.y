@@ -61,7 +61,6 @@ void __init m68k_setup_node(int node)
 	node_set_online(node);
 }
 
-
 /*
  * ZERO_PAGE is a special page that is used for zero-initialized
  * data and COW.

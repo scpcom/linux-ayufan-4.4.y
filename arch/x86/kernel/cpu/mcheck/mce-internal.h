@@ -27,4 +27,3 @@ struct dentry *mce_get_debugfs_dir(void);
 extern int mce_ser;
 
 extern struct mce_bank *mce_banks;
-

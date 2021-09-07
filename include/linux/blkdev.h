@@ -675,7 +675,6 @@ static inline void blk_clear_queue_full(struct request_queue *q, int sync)
 		queue_flag_clear(QUEUE_FLAG_ASYNCFULL, q);
 }
 
-
 /*
  * mergeable request must not have _NOMERGE or _BARRIER bit set, nor may
  * it already be started by driver.

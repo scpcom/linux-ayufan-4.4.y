@@ -32,4 +32,3 @@
 		beq     1001b
 		teq     \irqnr, #32
 		.endm
-

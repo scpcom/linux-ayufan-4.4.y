@@ -89,10 +89,8 @@
    frames are clear (ready to be filled with new DV data). Finally, use
    DV1394_SUBMIT_FRAMES again to send the new data to the DV output.
 
-
    Example: here is what a four-frame ringbuffer might look like
             during DV transmission:
-
 
          frame 0   frame 1   frame 2   frame 3
 
@@ -103,13 +101,11 @@
 
 	transmission goes in this direction --->>>
 
-
    The DV hardware is currently transmitting the data in frame 1.
    Once frame 1 is finished, it will automatically transmit frame 2.
    (if frame 2 finishes before frame 3 is submitted, the device
    will continue to transmit frame 2, and will increase the dropped_frames
    counter each time it repeats the transmission).
-
 
    If you called DV1394_GET_STATUS at this instant, you would
    receive the following values:
@@ -186,7 +182,6 @@
 
 */
 
-
 /* maximum number of frames in the ringbuffer */
 #define DV1394_MAX_FRAMES 32
 
@@ -198,18 +193,13 @@
 #define DV1394_NTSC_FRAME_SIZE (480 * DV1394_NTSC_PACKETS_PER_FRAME)
 #define DV1394_PAL_FRAME_SIZE  (480 * DV1394_PAL_PACKETS_PER_FRAME)
 
-
 /* ioctl() commands */
 #include "ieee1394-ioctl.h"
-
 
 enum pal_or_ntsc {
 	DV1394_NTSC = 0,
 	DV1394_PAL
 };
-
-
-
 
 /* this is the argument to DV1394_INIT */
 struct dv1394_init {
@@ -270,8 +260,6 @@ struct dv1394_init {
 
  */
 
-
-
 struct dv1394_status {
 	/* this embedded init struct returns the current dv1394
 	   parameters in use */
@@ -300,6 +288,5 @@ struct dv1394_status {
 	   since the last call to DV1394_GET_STATUS.
 	*/
 };
-
 
 #endif /* _DV_1394_H */

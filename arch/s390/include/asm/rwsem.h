@@ -114,7 +114,6 @@ do {						\
 	__init_rwsem((sem), #sem, &__key);	\
 } while (0)
 
-
 /*
  * lock for reading
  */

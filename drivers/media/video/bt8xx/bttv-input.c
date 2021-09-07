@@ -27,7 +27,6 @@
 #include "bttv.h"
 #include "bttvp.h"
 
-
 static int ir_debug;
 module_param(ir_debug, int, 0644);
 static int repeat_delay = 500;
@@ -415,7 +414,6 @@ void bttv_input_fini(struct bttv *btv)
 	kfree(btv->remote);
 	btv->remote = NULL;
 }
-
 
 /*
  * Local variables:

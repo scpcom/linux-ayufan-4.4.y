@@ -113,7 +113,6 @@ static ssize_t ox820_gpio_read(struct file *file, char __user *buf, size_t count
 	char contents[300];
 	char *p = contents, *p_tail = contents + 300;
 	
-
 //	db_print("%s():\n", __FUNCTION__);
 
 	if (mutex_lock_interruptible(&ox820_gpio_lock))
@@ -289,4 +288,3 @@ module_exit(ox820_gpio_exit);
 
 MODULE_DESCRIPTION("OX820 GPIO Test driver");
 MODULE_LICENSE("GPL");
-

@@ -196,7 +196,6 @@ _GLOBAL(flush_inval_dcache_range)
 	isync
 	blr
 
-
 /*
  * Flush a particular page from the data cache to RAM.
  * Note: this is necessary because the instruction cache does *not*
@@ -233,7 +232,6 @@ _GLOBAL(__flush_dcache_icache)
 	bdnz	1b
 	isync
 	blr
-
 
 #if defined(CONFIG_PPC_PMAC) || defined(CONFIG_PPC_MAPLE)
 /*
@@ -305,7 +303,6 @@ _GLOBAL(real_writeb)
 #define LBZCIX(RT,RA,RB)  .long (0x7c0006aa|(RT<<21)|(RA<<16)|(RB << 11))
 #define STBCIX(RS,RA,RB)  .long (0x7c0007aa|(RS<<21)|(RA<<16)|(RB << 11))
 
-
 _GLOBAL(real_205_readb)
 	mfmsr	r7
 	ori	r0,r7,MSR_DR
@@ -337,7 +334,6 @@ _GLOBAL(real_205_writeb)
 	blr
 
 #endif /* CONFIG_PPC_PASEMI */
-
 
 #ifdef CONFIG_CPU_FREQ_PMAC64
 /*
@@ -383,7 +379,6 @@ _GLOBAL(scom970_read)
 	mtmsrd	r4,1
 	blr
 
-
 _GLOBAL(scom970_write)
 	/* interrupts off */
 	mfmsr	r5
@@ -409,7 +404,6 @@ _GLOBAL(scom970_write)
 	mtmsrd	r5,1
 	blr
 #endif /* CONFIG_CPU_FREQ_PMAC64 */
-
 
 /*
  * Create a kernel thread
@@ -485,7 +479,6 @@ _GLOBAL(kexec_wait)
 kexec_flag:
 	.long	0
 
-
 #ifdef CONFIG_KEXEC
 
 /* kexec_smp_wait(void)
@@ -524,7 +517,6 @@ real_mode:	/* assume normal blr return */
 	mtspr	SPRN_SRR1,r10
 	mtspr	SPRN_SRR0,r11
 	rfid
-
 
 /*
  * kexec_sequence(newstack, start, image, control, clear_all())

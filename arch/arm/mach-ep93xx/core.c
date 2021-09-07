@@ -38,7 +38,6 @@
 
 #include <asm/hardware/vic.h>
 
-
 /*************************************************************************
  * Static I/O mappings that are needed for all EP93xx platforms
  *************************************************************************/
@@ -60,7 +59,6 @@ void __init ep93xx_map_io(void)
 {
 	iotable_init(ep93xx_io_desc, ARRAY_SIZE(ep93xx_io_desc));
 }
-
 
 /*************************************************************************
  * Timer handling for EP93xx
@@ -131,7 +129,6 @@ struct sys_timer ep93xx_timer = {
 	.init		= ep93xx_timer_init,
 	.offset		= ep93xx_gettimeoffset,
 };
-
 
 /*************************************************************************
  * GPIO handling for EP93xx
@@ -271,7 +268,6 @@ static void ep93xx_gpio_irq_unmask(unsigned int irq)
 	ep93xx_gpio_update_int_params(port);
 }
 
-
 /*
  * gpio_int_type1 controls whether the interrupt is level (0) or
  * edge (1) triggered, while gpio_int_type2 controls whether it
@@ -341,7 +337,6 @@ static struct irq_chip ep93xx_gpio_irq_chip = {
 	.set_type	= ep93xx_gpio_irq_type,
 };
 
-
 void __init ep93xx_init_irq(void)
 {
 	int gpio_irq;
@@ -366,7 +361,6 @@ void __init ep93xx_init_irq(void)
 	set_irq_chained_handler(IRQ_EP93XX_GPIO6MUX, ep93xx_gpio_f_irq_handler);
 	set_irq_chained_handler(IRQ_EP93XX_GPIO7MUX, ep93xx_gpio_f_irq_handler);
 }
-
 
 /*************************************************************************
  * EP93xx System Controller Software Locked register handling
@@ -407,7 +401,6 @@ void ep93xx_devcfg_set_clear(unsigned int set_bits, unsigned int clear_bits)
 	spin_unlock_irqrestore(&syscon_swlock, flags);
 }
 EXPORT_SYMBOL(ep93xx_devcfg_set_clear);
-
 
 /*************************************************************************
  * EP93xx peripheral handling
@@ -474,7 +467,6 @@ static struct amba_device uart3_device = {
 	.periphid	= 0x00041010,
 };
 
-
 static struct resource ep93xx_rtc_resource[] = {
 	{
 		.start		= EP93XX_RTC_PHYS_BASE,
@@ -490,7 +482,6 @@ static struct platform_device ep93xx_rtc_device = {
 	.resource	= ep93xx_rtc_resource,
 };
 
-
 static struct resource ep93xx_ohci_resources[] = {
 	[0] = {
 		.start	= EP93XX_USB_PHYS_BASE,
@@ -503,7 +494,6 @@ static struct resource ep93xx_ohci_resources[] = {
 		.flags	= IORESOURCE_IRQ,
 	},
 };
-
 
 static struct platform_device ep93xx_ohci_device = {
 	.name		= "ep93xx-ohci",
@@ -549,7 +539,6 @@ void __init ep93xx_register_eth(struct ep93xx_eth_data *data, int copy_addr)
 	platform_device_register(&ep93xx_eth_device);
 }
 
-
 /*************************************************************************
  * EP93xx i2c peripheral handling
  *************************************************************************/
@@ -584,7 +573,6 @@ void __init ep93xx_register_i2c(struct i2c_gpio_platform_data *data,
 	platform_device_register(&ep93xx_i2c_device);
 }
 
-
 /*************************************************************************
  * EP93xx LEDs
  *************************************************************************/
@@ -610,7 +598,6 @@ static struct platform_device ep93xx_leds = {
 		.platform_data	= &ep93xx_led_data,
 	},
 };
-
 
 /*************************************************************************
  * EP93xx pwm peripheral handling
@@ -695,7 +682,6 @@ void ep93xx_pwm_release_gpio(struct platform_device *pdev)
 	}
 }
 EXPORT_SYMBOL(ep93xx_pwm_release_gpio);
-
 
 /*************************************************************************
  * EP93xx video peripheral handling

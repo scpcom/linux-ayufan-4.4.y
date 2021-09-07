@@ -153,7 +153,6 @@ typedef struct mvUartPort
 /* useful defaults for LCR*/
 #define LCR_8N1     LCR_WLS_8 | LCR_1_STB 
 
-
 /* APIs */
 MV_VOID	mvUartPutc(MV_U32 port, MV_U8 c);
 MV_U8	mvUartGetc(MV_U32 port);
@@ -161,4 +160,3 @@ MV_BOOL mvUartTstc(MV_U32 port);
 MV_VOID mvUartInit(MV_U32 port, MV_U32 baudDivisor, MV_UART_PORT* base);
 
 #endif
-

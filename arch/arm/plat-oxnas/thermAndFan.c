@@ -9,7 +9,6 @@
  *
  */
  
-
 #include <linux/types.h>
 #include <linux/module.h>
 #include <linux/errno.h>
@@ -150,7 +149,6 @@ struct thermostat {
 
 static struct thermostat* 	thermostat   = NULL;
 static struct task_struct*	thread_therm = NULL;
-
 
 static int write_reg( int reg, u32 data )
 {
@@ -521,7 +519,6 @@ oxsemi_therm_read(char *buf, char **start, off_t offset,
 
 static struct proc_dir_entry *proc_oxsemi_therm;
 
-
 static struct file_operations oxsemi_therm_fops = {
 	.owner		= THIS_MODULE,
 	.open		= nonseekable_open,
@@ -643,7 +640,6 @@ static int __init oxsemi_therm_init(void)
 	return 0;
 }
 
-
 static void __exit oxsemi_therm_exit(void)
 {
 	if ( thread_therm )
@@ -664,9 +660,7 @@ static void __exit oxsemi_therm_exit(void)
 	
 }
 
-
 module_init(oxsemi_therm_init);
 module_exit(oxsemi_therm_exit);
-
 
 /* End of File */

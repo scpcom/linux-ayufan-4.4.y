@@ -18,4 +18,3 @@ extern int iscsi_connection_recovery_transport_reset(iscsi_conn_t *);
 extern int iscsi_close_connection(iscsi_conn_t *);
 
 #endif /*** ISCSI_TARGET_ERL2_H ***/
-

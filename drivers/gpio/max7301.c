@@ -50,7 +50,6 @@
 
 #define PIN_NUMBER 28
 
-
 /*
  * Some registers must be read back to modify.
  * To save time we cache them here in memory

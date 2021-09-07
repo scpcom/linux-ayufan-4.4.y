@@ -155,7 +155,6 @@ static unsigned int qnap_ts219_mpp_config[] __initdata = {
 	0
 };
 
-
 /*****************************************************************************
  * QNAP TS-x19 specific power off method via UART1-attached PIC
  ****************************************************************************/

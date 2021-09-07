@@ -69,7 +69,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MV_MD5_MAC_LEN 16
  
- 
 typedef struct 
 {
     MV_U32 buf[4];
@@ -89,5 +88,4 @@ void mvHmacMd5(unsigned char const* text, int text_len,
                   unsigned char const* key, int key_len,
                   unsigned char* digest);
   
-
 #endif /* __mvMD5_h__ */

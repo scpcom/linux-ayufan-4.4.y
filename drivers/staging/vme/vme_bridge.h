@@ -226,7 +226,6 @@ struct vmeArbiterCfg {
 };
 typedef struct vmeArbiterCfg vmeArbiterCfg_t;
 
-
 /*
  *  VMEbus RMW Configuration Data
  */

@@ -133,7 +133,6 @@ xfs_imap_to_bmap(
 	int		pbm;
 	xfs_fsblock_t	start_block;
 
-
 	for (pbm = 0; imaps && pbm < iomaps; imaps--, iomapp++, imap++, pbm++) {
 		iomapp->iomap_offset = XFS_FSB_TO_B(mp, imap->br_startoff);
 		iomapp->iomap_delta = offset - iomapp->iomap_offset;
@@ -283,7 +282,6 @@ out:
 		xfs_iunlock(ip, lockmode);
 	return XFS_ERROR(error);
 }
-
 
 STATIC int
 xfs_iomap_eof_align_last_fsb(

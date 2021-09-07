@@ -106,7 +106,6 @@ int coda_cnode_make(struct inode **inode, struct CodaFid *fid, struct super_bloc
 	return 0;
 }
 
-
 void coda_replace_fid(struct inode *inode, struct CodaFid *oldfid, 
 		      struct CodaFid *newfid)
 {
@@ -163,4 +162,3 @@ int coda_cnode_makectl(struct inode **inode, struct super_block *sb)
 
 	return error;
 }
-

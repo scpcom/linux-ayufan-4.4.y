@@ -40,7 +40,6 @@ static void emi26_disconnect(struct usb_interface *intf);
 static int __init emi26_init (void);
 static void __exit emi26_exit (void);
 
-
 /* thanks to drivers/usb/serial/keyspan_pda.c code */
 static int emi26_writememory (struct usb_device *dev, int address,
 			      const unsigned char *data, int length,

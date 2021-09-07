@@ -101,7 +101,6 @@ static int lgdt3304_i2c_write_reg(struct dvb_frontend *fe, int reg, int val)
 	return 0;
 }
 
-
 static int lgdt3304_soft_Reset(struct dvb_frontend *fe)
 {
 	lgdt3304_i2c_write_reg(fe, 0x0002, 0x9a);
@@ -156,7 +155,6 @@ static int lgdt3304_set_parameters(struct dvb_frontend *fe, struct dvb_frontend_
 		0x03, 0x0b, 0x9b,
 		0x05, 0x0e, 0x5b,
 	};
-
 
 	/* tested with KWorld a340 */
 	static __u8 lgdt3304_qam256_data[] = {
@@ -247,7 +245,6 @@ static int lgdt3304_set_parameters(struct dvb_frontend *fe, struct dvb_frontend_
 
 	lgdt3304_soft_Reset(fe);
 
-
 	if (fe->ops.tuner_ops.set_params)
 		fe->ops.tuner_ops.set_params(fe, param);
 
@@ -261,7 +258,6 @@ static int lgdt3304_init(struct dvb_frontend *fe) {
 static int lgdt3304_sleep(struct dvb_frontend *fe) {
 	return 0;
 }
-
 
 static int lgdt3304_read_status(struct dvb_frontend *fe, fe_status_t *status)
 {
@@ -307,7 +303,6 @@ static int lgdt3304_read_status(struct dvb_frontend *fe, fe_status_t *status)
 	default:
 		printk("%s unhandled modulation\n", __func__);
 	}
-
 
 	return 0;
 }

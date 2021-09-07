@@ -140,7 +140,6 @@ struct pcmcia_device {
 /* deprecated -- don't use! */
 #define handle_to_dev(handle) (handle->dev)
 
-
 /* (deprecated) error reporting by PCMCIA devices. Use dev_printk()
  * or dev_dbg() directly in the driver, without referring to pcmcia_error_func()
  * and/or pcmcia_error_ret() for those functions will go away soon.
@@ -195,7 +194,6 @@ int pccard_get_tuple_data(struct pcmcia_socket *s, tuple_t *tuple);
 #define pcmcia_get_tuple_data(p_dev, tuple) \
 		pccard_get_tuple_data(p_dev->socket, tuple)
 
-
 /* loop CIS entries for valid configuration */
 int pcmcia_loop_config(struct pcmcia_device *p_dev,
 		       int	(*conf_check)	(struct pcmcia_device *p_dev,
@@ -232,8 +230,6 @@ int pcmcia_modify_configuration(struct pcmcia_device *p_dev, modconf_t *mod);
 void pcmcia_disable_device(struct pcmcia_device *p_dev);
 
 #endif /* __KERNEL__ */
-
-
 
 /* Below, there are only definitions which are used by
  * - the PCMCIA ioctl
@@ -292,7 +288,6 @@ typedef struct adjust_t {
 #define RES_RESERVED			0x10
 #define RES_ALLOCATED			0x20
 #define RES_REMOVED			0x40
-
 
 typedef struct tuple_parse_t {
 	tuple_t			tuple;
@@ -421,7 +416,6 @@ typedef union ds_ioctl_arg_t {
 #define DS_UNBIND_REQUEST			_IOW ('d', 63, bind_info_t)
 #define DS_BIND_MTD				_IOWR('d', 64, mtd_info_t)
 
-
 /* used in userspace only */
 #define CS_IN_USE			0x1e
 
@@ -433,7 +427,6 @@ typedef union ds_ioctl_arg_t {
 
 #define INFO_CARD_SHARE		0x10
 #define INFO_CARD_EXCL		0x20
-
 
 #endif /* !defined(__KERNEL__) || defined(CONFIG_PCMCIA_IOCTL) */
 

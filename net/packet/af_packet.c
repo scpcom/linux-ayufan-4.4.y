@@ -119,7 +119,6 @@ Outgoing, dev->hard_header==NULL
 Resume
   If dev->hard_header==NULL we are unlikely to restore sensible ll header.
 
-
 On transmit:
 ------------
 
@@ -332,7 +331,6 @@ static void packet_sock_destruct(struct sock *sk)
 	sk_refcnt_debug_dec(sk);
 }
 
-
 static const struct proto_ops packet_ops;
 
 static const struct proto_ops packet_ops_spkt;
@@ -402,7 +400,6 @@ out:
 oom:
 	return 0;
 }
-
 
 /*
  *	Output a raw packet to a device layer. This bypasses all the other
@@ -1094,7 +1091,6 @@ static int packet_snd(struct socket *sock,
 		addr	= saddr->sll_addr;
 	}
 
-
 	dev = dev_get_by_index(sock_net(sk), ifindex);
 	err = -ENXIO;
 	if (dev == NULL)
@@ -1315,7 +1311,6 @@ static int packet_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len
 	struct sock *sk = sock->sk;
 	struct net_device *dev = NULL;
 	int err;
-
 
 	/*
 	 *	Check legality
@@ -1930,7 +1925,6 @@ static int packet_getsockopt(struct socket *sock, int level, int optname,
 	return 0;
 }
 
-
 static int packet_notifier(struct notifier_block *this, unsigned long msg, void *data)
 {
 	struct sock *sk;
@@ -1981,7 +1975,6 @@ static int packet_notifier(struct notifier_block *this, unsigned long msg, void 
 	read_unlock(&net->packet.sklist_lock);
 	return NOTIFY_DONE;
 }
-
 
 static int packet_ioctl(struct socket *sock, unsigned int cmd,
 			unsigned long arg)
@@ -2064,7 +2057,6 @@ static unsigned int packet_poll(struct file *file, struct socket *sock,
 	spin_unlock_bh(&sk->sk_write_queue.lock);
 	return mask;
 }
-
 
 /* Dirty? Well, I still did not learn better way to account
  * for user mmaps.
@@ -2326,7 +2318,6 @@ out:
 }
 #endif
 
-
 static const struct proto_ops packet_ops_spkt = {
 	.family =	PF_PACKET,
 	.owner =	THIS_MODULE,
@@ -2483,7 +2474,6 @@ static struct pernet_operations packet_net_ops = {
 	.init = packet_net_init,
 	.exit = packet_net_exit,
 };
-
 
 static void __exit packet_exit(void)
 {

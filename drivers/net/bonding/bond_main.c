@@ -163,7 +163,6 @@ static int bond_mode	= BOND_MODE_ROUNDROBIN;
 static int xmit_hashtype = BOND_XMIT_POLICY_LAYER2;
 static int lacp_fast;
 
-
 const struct bond_parm_tbl bond_lacp_tbl[] = {
 {	"slow",		AD_LACP_SLOW},
 {	"fast",		AD_LACP_FAST},
@@ -878,7 +877,6 @@ static void bond_mc_delete(struct bonding *bond, void *addr, int alen)
 	}
 }
 
-
 /*
  * Retrieve the list of registered multicast addresses for the bonding
  * device and retransmit an IGMP JOIN request to the current active
@@ -1086,7 +1084,6 @@ out:
 	}
 
 }
-
 
 /**
  * find_best_interface - select the best available slave to be the active one
@@ -2258,7 +2255,6 @@ static int bond_slave_info_query(struct net_device *bond_dev, struct ifslave *in
 
 /*-------------------------------- Monitoring -------------------------------*/
 
-
 static int bond_miimon_inspect(struct bonding *bond)
 {
 	struct slave *slave;
@@ -2586,7 +2582,6 @@ static void bond_arp_send(struct net_device *slave_dev, int arp_op, __be32 dest_
 	}
 	arp_xmit(skb);
 }
-
 
 static void bond_arp_send_all(struct bonding *bond, struct slave *slave)
 {
@@ -3267,7 +3262,6 @@ static void bond_info_show_master(struct seq_file *seq)
 	seq_printf(seq, "Down Delay (ms): %d\n",
 		   bond->params.downdelay * bond->params.miimon);
 
-
 	/* ARP information */
 	if (bond->params.arp_interval > 0) {
 		int printed = 0;
@@ -3465,7 +3459,6 @@ static void bond_destroy_proc_dir(void)
 }
 
 #endif /* CONFIG_PROC_FS */
-
 
 /*-------------------------- netdev event handling --------------------------*/
 
@@ -3860,7 +3853,6 @@ static int bond_close(struct net_device *bond_dev)
 		break;
 	}
 
-
 	if (bond_is_lb(bond)) {
 		/* Must be called only after all
 		 * slaves have been released
@@ -3949,7 +3941,6 @@ static int bond_do_ioctl(struct net_device *bond_dev, struct ifreq *ifr, int cmd
 		mii = if_mii(ifr);
 		if (!mii)
 			return -EINVAL;
-
 
 		if (mii->reg_num == 1) {
 			struct bonding *bond = netdev_priv(bond_dev);
@@ -4048,10 +4039,8 @@ static void bond_set_multicast_list(struct net_device *bond_dev)
 		 */
 		bond_set_promiscuity(bond, 1);
 
-
 	if (!(bond_dev->flags & IFF_PROMISC) && (bond->flags & IFF_PROMISC))
 		bond_set_promiscuity(bond, -1);
-
 
 	/* set allmulti flag to slaves */
 	if ((bond_dev->flags & IFF_ALLMULTI) && !(bond->flags & IFF_ALLMULTI))
@@ -4061,10 +4050,8 @@ static void bond_set_multicast_list(struct net_device *bond_dev)
 		 */
 		bond_set_allmulti(bond, 1);
 
-
 	if (!(bond_dev->flags & IFF_ALLMULTI) && (bond->flags & IFF_ALLMULTI))
 		bond_set_allmulti(bond, -1);
-
 
 	read_lock(&bond->lock);
 
@@ -4189,7 +4176,6 @@ static int bond_set_mac_address(struct net_device *bond_dev, void *addr)
 	if (bond->params.mode == BOND_MODE_ALB)
 		return bond_alb_set_mac_address(bond_dev, addr);
 
-
 	pr_debug("bond=%p, name=%s\n", bond, (bond_dev ? bond_dev->name : "None"));
 
 	/*
@@ -4304,7 +4290,6 @@ out:
 	read_unlock(&bond->lock);
 	return NETDEV_TX_OK;
 }
-
 
 /*
  * in active-backup mode, we know that bond->curr_active_slave is always valid if
@@ -4497,7 +4482,6 @@ static netdev_tx_t bond_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		return NETDEV_TX_OK;
 	}
 }
-
 
 /*
  * set bond mode specific net device operations

@@ -207,8 +207,6 @@ typedef struct xfs_icdinode {
 		((ip)->i_d.di_nextents = (n)) : \
 		((ip)->i_d.di_anextents = (n)))
 
-
-
 #ifdef __KERNEL__
 
 struct bhv_desc;

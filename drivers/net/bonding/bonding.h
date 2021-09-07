@@ -56,7 +56,6 @@ extern struct list_head bond_dev_list;
 		     ((slave)->link == BOND_LINK_UP) && \
 		     ((slave)->state == BOND_STATE_ACTIVE))
 
-
 #define USES_PRIMARY(mode)				\
 		(((mode) == BOND_MODE_ACTIVEBACKUP) ||	\
 		 ((mode) == BOND_MODE_TLB)          ||	\
@@ -114,7 +113,6 @@ extern struct list_head bond_dev_list;
  */
 #define bond_for_each_slave(bond, pos, cnt)	\
 		bond_for_each_slave_from(bond, pos, cnt, (bond)->first_slave)
-
 
 struct bond_params {
 	int mode;
@@ -370,4 +368,3 @@ static inline void bond_unregister_ipv6_notifier(void)
 #endif
 
 #endif /* _LINUX_BONDING_H */
-

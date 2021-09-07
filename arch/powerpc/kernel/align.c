@@ -200,7 +200,6 @@ static inline unsigned make_dsisr(unsigned instr)
 {
 	unsigned dsisr;
 
-
 	/* bits  6:15 --> 22:31 */
 	dsisr = (instr & 0x03ff0000) >> 16;
 

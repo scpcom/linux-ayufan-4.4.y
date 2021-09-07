@@ -11,7 +11,6 @@
 #ifndef _XTENSA_CORE_CONFIGURATION_H
 #define _XTENSA_CORE_CONFIGURATION_H
 
-
 /****************************************************************************
 	    Parameters Useful for Any Code, USER or PRIVILEGED
  ****************************************************************************/
@@ -20,7 +19,6 @@
  *  Note:  Macros of the form XCHAL_HAVE_*** have a value of 1 if the option is
  *  configured, and a value of 0 otherwise.  These macros are always defined.
  */
-
 
 /*----------------------------------------------------------------------
 				ISA
@@ -71,7 +69,6 @@
 #define XCHAL_HAVE_VECTRALX		0	/* Vectra LX pkg */
 #define XCHAL_HAVE_HIFI2		0	/* HiFi2 Audio Engine pkg */
 
-
 /*----------------------------------------------------------------------
 				MISC
   ----------------------------------------------------------------------*/
@@ -113,7 +110,6 @@
 #define XCHAL_HW_MAX_VERSION_MINOR	1	/* minor v of latest tgt hw */
 #define XCHAL_HW_MAX_VERSION		221001	/* latest targeted hw */
 
-
 /*----------------------------------------------------------------------
 				CACHE
   ----------------------------------------------------------------------*/
@@ -128,13 +124,9 @@
 
 #define XCHAL_DCACHE_IS_WRITEBACK	1	/* writeback feature */
 
-
-
-
 /****************************************************************************
     Parameters Useful for PRIVILEGED (Supervisory or Non-Virtualized) Code
  ****************************************************************************/
-
 
 #ifndef XTENSA_HAL_NON_PRIVILEGED_ONLY
 
@@ -163,7 +155,6 @@
 /*  Number of encoded cache attr bits (see <xtensa/hal.h> for decoded bits):  */
 #define XCHAL_CA_BITS			4
 
-
 /*----------------------------------------------------------------------
 			INTERNAL I/D RAM/ROMs and XLMI
   ----------------------------------------------------------------------*/
@@ -174,7 +165,6 @@
 #define XCHAL_NUM_DATARAM		0	/* number of core data RAMs */
 #define XCHAL_NUM_URAM			0	/* number of core unified RAMs*/
 #define XCHAL_NUM_XLMI			0	/* number of core XLMI ports */
-
 
 /*----------------------------------------------------------------------
 			INTERRUPTS and TIMERS
@@ -286,7 +276,6 @@
 #define XCHAL_INTLEVEL7_NUM		14
 /*  (There are many interrupts each at level(s) 1, 3.)  */
 
-
 /*
  *  External interrupt vectors/levels.
  *  These macros describe how Xtensa processor interrupt numbers
@@ -314,7 +303,6 @@
 #define XCHAL_EXTINT14_NUM		19	/* (intlevel 1) */
 #define XCHAL_EXTINT15_NUM		20	/* (intlevel 1) */
 #define XCHAL_EXTINT16_NUM		21	/* (intlevel 3) */
-
 
 /*----------------------------------------------------------------------
 			EXCEPTIONS and VECTORS
@@ -383,7 +371,6 @@
 #define XCHAL_INTLEVEL7_VECTOR_VADDR	XCHAL_NMI_VECTOR_VADDR
 #define XCHAL_INTLEVEL7_VECTOR_PADDR	XCHAL_NMI_VECTOR_PADDR
 
-
 /*----------------------------------------------------------------------
 				DEBUG
   ----------------------------------------------------------------------*/
@@ -392,7 +379,6 @@
 #define XCHAL_NUM_IBREAK		2	/* number of IBREAKn regs */
 #define XCHAL_NUM_DBREAK		2	/* number of DBREAKn regs */
 #define XCHAL_HAVE_OCD_DIR_ARRAY	1	/* faster OCD option */
-
 
 /*----------------------------------------------------------------------
 				MMU
@@ -419,6 +405,4 @@
 
 #endif /* !XTENSA_HAL_NON_PRIVILEGED_ONLY */
 
-
 #endif /* _XTENSA_CORE_CONFIGURATION_H */
-

@@ -219,7 +219,6 @@ struct iwm_umac_cmd_get_channel_list {
 	struct iwm_umac_channel_info ch[0];
 } __attribute__ ((packed));
 
-
 /* UMAC WiFi interface commands */
 
 /* Coexistence mode */

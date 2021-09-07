@@ -110,7 +110,6 @@ static int post_dock_fixups(struct notifier_block *nb, unsigned long val,
 	return NOTIFY_OK;
 }
 
-
 static struct acpi_dock_ops acpiphp_dock_ops = {
 	.handler = handle_hotplug_event_func,
 };
@@ -259,7 +258,6 @@ register_slot(acpi_handle handle, u32 lvl, void *context, void **rv)
 	return AE_OK;
 }
 
-
 /* see if it's worth looking at this bridge */
 static int detect_ejectable_slots(acpi_handle handle)
 {
@@ -307,7 +305,6 @@ static void init_bridge_misc(struct acpiphp_bridge *bridge)
 	}
 }
 
-
 /* find acpiphp_func from acpiphp_bridge */
 static struct acpiphp_func *acpiphp_bridge_handle_to_function(acpi_handle handle)
 {
@@ -330,7 +327,6 @@ static struct acpiphp_func *acpiphp_bridge_handle_to_function(acpi_handle handle
 
 	return NULL;
 }
-
 
 static inline void config_p2p_bridge_flags(struct acpiphp_bridge *bridge)
 {
@@ -367,7 +363,6 @@ static inline void config_p2p_bridge_flags(struct acpiphp_bridge *bridge)
 	}
 }
 
-
 /* allocate and initialize host bridge data structure */
 static void add_host_bridge(acpi_handle *handle)
 {
@@ -387,7 +382,6 @@ static void add_host_bridge(acpi_handle *handle)
 
 	init_bridge_misc(bridge);
 }
-
 
 /* allocate and initialize PCI-to-PCI bridge data structure */
 static void add_p2p_bridge(acpi_handle *handle)
@@ -427,7 +421,6 @@ static void add_p2p_bridge(acpi_handle *handle)
 	return;
 }
 
-
 /* callback routine to find P2P bridges */
 static acpi_status
 find_p2p_bridge(acpi_handle handle, u32 lvl, void *context, void **rv)
@@ -455,7 +448,6 @@ find_p2p_bridge(acpi_handle handle, u32 lvl, void *context, void **rv)
 	pci_dev_put(dev);
 	return AE_OK;
 }
-
 
 /* find hot-pluggable slots, and then find P2P bridge */
 static int add_bridge(acpi_handle handle)
@@ -824,7 +816,6 @@ static int power_on_slot(struct acpiphp_slot *slot)
 	return retval;
 }
 
-
 static int power_off_slot(struct acpiphp_slot *slot)
 {
 	acpi_status status;
@@ -859,8 +850,6 @@ static int power_off_slot(struct acpiphp_slot *slot)
 	return retval;
 }
 
-
-
 /**
  * acpiphp_max_busnr - return the highest reserved bus number under the given bus.
  * @bus: bus to start search with
@@ -887,7 +876,6 @@ static unsigned char acpiphp_max_busnr(struct pci_bus *bus)
 	}
 	return max;
 }
-
 
 /**
  * acpiphp_bus_add - add a new bus to acpi subsystem
@@ -931,7 +919,6 @@ static int acpiphp_bus_add(struct acpiphp_func *func)
 acpiphp_bus_add_out:
 	return ret_val;
 }
-
 
 /**
  * acpiphp_bus_trim - trim a bus from acpi subsystem
@@ -1100,7 +1087,6 @@ static int disable_device(struct acpiphp_slot *slot)
 err_exit:
 	return 0;
 }
-
 
 /**
  * get_slot_status - get ACPI slot status
@@ -1485,7 +1471,6 @@ static void handle_hotplug_event_func(acpi_handle handle, u32 type, void *contex
 	}
 }
 
-
 static acpi_status
 find_root_bridges(acpi_handle handle, u32 lvl, void *context, void **rv)
 {
@@ -1522,7 +1507,6 @@ int __init acpiphp_glue_init(void)
 	return 0;
 }
 
-
 /**
  * acpiphp_glue_exit - terminates all PCI hotplug - ACPI glue data structures
  *
@@ -1532,7 +1516,6 @@ void  acpiphp_glue_exit(void)
 {
 	acpi_pci_unregister_driver(&acpi_pci_hp_driver);
 }
-
 
 /**
  * acpiphp_get_num_slots - count number of slots in a system
@@ -1553,7 +1536,6 @@ int __init acpiphp_get_num_slots(void)
 	dbg("Total %d slots\n", num_slots);
 	return num_slots;
 }
-
 
 #if 0
 /**
@@ -1581,7 +1563,6 @@ static int acpiphp_for_each_slot(acpiphp_callback fn, void *data)
 	return retval;
 }
 #endif
-
 
 /**
  * acpiphp_enable_slot - power on slot
@@ -1638,7 +1619,6 @@ int acpiphp_disable_slot(struct acpiphp_slot *slot)
 	return retval;
 }
 
-
 /*
  * slot enabled:  1
  * slot disabled: 0
@@ -1647,7 +1627,6 @@ u8 acpiphp_get_power_status(struct acpiphp_slot *slot)
 {
 	return (slot->flags & SLOT_POWEREDON);
 }
-
 
 /*
  * latch   open:  1
@@ -1661,7 +1640,6 @@ u8 acpiphp_get_latch_status(struct acpiphp_slot *slot)
 
 	return (sta & ACPI_STA_SHOW_IN_UI) ? 0 : 1;
 }
-
 
 /*
  * adapter presence : 1

@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 /* includes */
 #include "ctrlEnv/sys/mvCpuIf.h"
 #include "ctrlEnv/sys/mvAhbToMbusRegs.h"
@@ -111,7 +110,6 @@ MV_U32 *mvUncachedParam = NULL;
 /* target enumerator. For example, table entry '4' must describe Deivce CS0 */
 /* target which is represent by DEVICE_CS0 enumerator (4).                  */
 
-
 /* locals   */
 /* static functions */
 static MV_BOOL cpuTargetWinOverlap(MV_U32 cpu, MV_TARGET target, MV_ADDR_WIN *pAddrWin);
@@ -158,7 +156,6 @@ MV_STATUS mvCpuIfInitForCpu(MV_U32 cpu, MV_CPU_DEC_WIN *cpuAddrWinMap)
 	regVal &= ~CPU_CONFIG_DEFAULT_MASK;
 	regVal |= CPU_CONFIG_DEFAULT;
 
-
 	MV_REG_WRITE(CPU_CONFIG_REG(cpu),regVal);
 
 	/* Set ARM Control and Status register */
@@ -166,7 +163,6 @@ MV_STATUS mvCpuIfInitForCpu(MV_U32 cpu, MV_CPU_DEC_WIN *cpuAddrWinMap)
 	regVal &= ~CPU_CTRL_STAT_DEFAULT_MASK;
 	regVal |= CPU_CTRL_STAT_DEFAULT;
 	MV_REG_WRITE(CPU_CTRL_STAT_REG(cpu),regVal);
-
 
 	/* First disable all CPU target windows  */
 	for (target = 0; winMap[target].enable != TBL_TERM; target++)
@@ -238,7 +234,6 @@ MV_STATUS mvCpuIfInitForCpu(MV_U32 cpu, MV_CPU_DEC_WIN *cpuAddrWinMap)
 			{
 				DB(mvOsPrintf("mvCpuIfInit:ERR. mvCpuIfTargetWinSet fail\n"));
 
-
 				return MV_ERROR;
 			}
 
@@ -258,7 +253,6 @@ MV_STATUS mvCpuIfInit(MV_CPU_DEC_WIN *cpuAddrWinMap)
 {
 	return mvCpuIfInitForCpu(whoAmI(), cpuAddrWinMap);
 }
-
 
 #if defined (MV_BRIDGE_SYNC_REORDER)
 MV_STATUS mvCpuIfBridgeReorderWAInit(void)
@@ -469,7 +463,6 @@ MV_STATUS mvCpuIfTargetWinGetForCpu(MV_U32 cpu, MV_TARGET target, MV_CPU_DEC_WIN
 	return MV_OK;
 }
 
-
 /*******************************************************************************
 * mvCpuIfTargetWinGet - Get CPU-to-peripheral target address window
 *
@@ -546,7 +539,6 @@ MV_STATUS mvCpuIfTargetWinEnableForCpu(MV_U32 cpu, MV_TARGET target,MV_BOOL enab
 		return MV_ERROR;
 	}
 
-
 	/* check overlap */
 
 	if (MV_TRUE == enable)
@@ -558,7 +550,6 @@ MV_STATUS mvCpuIfTargetWinEnableForCpu(MV_U32 cpu, MV_TARGET target,MV_BOOL enab
 		}
 		
 	}
-
 
 	if (MV_TARGET_IS_DRAM(target))
 	{
@@ -869,7 +860,6 @@ MV_U32 mvCpuIfPexRemap(MV_TARGET pexTarget, MV_ADDR_WIN *pAddrDecWin)
 
 #endif
 
-
 /*******************************************************************************
 * cpuTargetWinOverlap - Detect CPU address decode windows overlapping
 *
@@ -899,7 +889,6 @@ static MV_BOOL cpuTargetWinOverlap(MV_U32 cpu, MV_TARGET target, MV_ADDR_WIN *pA
     MV_CPU_DEC_WIN 	addrDecWin;
 	MV_STATUS		status;
 
-	
 	for(targetNum = 0; targetNum < MAX_TARGETS; targetNum++)
     {
 
@@ -936,8 +925,6 @@ static MV_BOOL cpuTargetWinOverlap(MV_U32 cpu, MV_TARGET target, MV_ADDR_WIN *pA
     }
 	return MV_FALSE;
 }
-
-
 
 /*******************************************************************************
 * mvCpuIfAddDecShow - Print the CPU address decode map.
@@ -999,7 +986,6 @@ MV_VOID mvCpuIfAddrDecShow(MV_U32 cpu)
 	}
 
 }
-
 
 /*******************************************************************************/
 
@@ -1098,8 +1084,6 @@ void mvCpuIfGetBranchPredictionMode(MV_8 *buf)
 	mvOsSPrintf(buf, "Branch prediction Disabled");
 }
 
-
-
 MV_U32 mvCpuIfPrintSystemConfig(MV_8 *buffer, MV_U32 index)
 {
   MV_U32 count = 0;
@@ -1130,4 +1114,3 @@ MV_U32 mvCpuIfPrintSystemConfig(MV_8 *buffer, MV_U32 index)
 #endif
   return count;
 }
-

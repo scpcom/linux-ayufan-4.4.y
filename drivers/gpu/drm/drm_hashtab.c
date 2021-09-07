@@ -100,7 +100,6 @@ static struct hlist_node *drm_ht_find_key(struct drm_open_hash *ht,
 	return NULL;
 }
 
-
 int drm_ht_insert_item(struct drm_open_hash *ht, struct drm_hash_item *item)
 {
 	struct drm_hash_item *entry;

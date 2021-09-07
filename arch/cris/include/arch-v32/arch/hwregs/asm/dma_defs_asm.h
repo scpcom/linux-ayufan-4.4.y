@@ -317,7 +317,6 @@
 #define reg_dma_rw_stream_cmd___busy___bit 31
 #define reg_dma_rw_stream_cmd_offset 156
 
-
 /* Constants */
 #define regk_dma_ack_pkt                          0x00000100
 #define regk_dma_anytime                          0x00000001

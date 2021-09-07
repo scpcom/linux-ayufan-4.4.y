@@ -12,7 +12,6 @@
 #ifndef __ASM_CACHE_H
 #define __ASM_CACHE_H
 
-
 /* bytes per L1 cache line */
 #define L1_CACHE_SHIFT		(CONFIG_FRV_L1_CACHE_SHIFT)
 #define L1_CACHE_BYTES		(1 << L1_CACHE_SHIFT)

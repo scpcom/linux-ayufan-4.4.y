@@ -258,7 +258,6 @@ out:
 	return result;
 }
 
-
 /**
  * Get value of attribute from fixed size attribute field.
  *
@@ -1498,7 +1497,6 @@ error_alloc:
 	return result;
 }
 
-
 static
 int wlp_build_assoc_c1(struct wlp *wlp, struct wlp_wss *wss,
 		       struct sk_buff **skb)
@@ -1512,7 +1510,6 @@ int wlp_build_assoc_c2(struct wlp *wlp, struct wlp_wss *wss,
 {
 	return wlp_build_assoc_c1c2(wlp, wss, skb, WLP_ASSOC_C2);
 }
-
 
 /**
  * Allocate memory for and populate fields of C3 or C4 association frame
@@ -1568,7 +1565,6 @@ int wlp_build_assoc_c4(struct wlp *wlp, struct wlp_wss *wss,
 {
 	return wlp_build_assoc_c3c4(wlp, wss, skb, WLP_ASSOC_C4);
 }
-
 
 #define wlp_send_assoc(type, id)					\
 static int wlp_send_assoc_##type(struct wlp *wlp, struct wlp_wss *wss,	\
@@ -1777,5 +1773,3 @@ out:
 	kfree(frame_ctx);
 	mutex_unlock(&wss->mutex);
 }
-
-

@@ -222,7 +222,6 @@ static void __init dmar_register_rmrr_unit(struct dmar_rmrr_unit *rmrr)
 	list_add(&rmrr->list, &dmar_rmrr_units);
 }
 
-
 static int __init
 dmar_parse_one_rmrr(struct acpi_dmar_header *header)
 {
@@ -548,7 +547,6 @@ int __init dmar_dev_scope_init(void)
 	return ret;
 }
 
-
 int __init dmar_table_init(void)
 {
 	static int dmar_table_initialized;
@@ -681,7 +679,6 @@ void __init detect_intel_iommu(void)
 	early_acpi_os_unmap_memory(dmar_tbl, dmar_tbl_size);
 	dmar_tbl = NULL;
 }
-
 
 int alloc_iommu(struct dmar_drhd_unit *drhd)
 {

@@ -53,7 +53,6 @@ struct v4l2_i2c_driver_data {
 static struct v4l2_i2c_driver_data v4l2_i2c_data;
 static struct i2c_driver v4l2_i2c_driver;
 
-
 /* Bus-based I2C implementation for kernels >= 2.6.26 */
 
 static int __init v4l2_i2c_drv_init(void)
@@ -67,7 +66,6 @@ static int __init v4l2_i2c_drv_init(void)
 	v4l2_i2c_driver.id_table = v4l2_i2c_data.id_table;
 	return i2c_add_driver(&v4l2_i2c_driver);
 }
-
 
 static void __exit v4l2_i2c_drv_cleanup(void)
 {

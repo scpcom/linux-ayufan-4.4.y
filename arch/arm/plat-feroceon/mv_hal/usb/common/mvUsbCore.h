@@ -171,7 +171,6 @@ disclaimer.
 #define  EHCI_SITD_T_BIT                           (0x01)
 #define  EHCI_QUEUE_HEAD_POINTER_T_BIT             (0x01)
 
-
 /************************************************************
 Split transatcions specific defines
 ************************************************************/
@@ -188,7 +187,6 @@ Split transatcions specific defines
 #define  EHCI_FRAME_LIST_ELEMENT_TYPE_SITD         (0x02)
 #define  EHCI_FRAME_LIST_ELEMENT_TYPE_FSTN         (0x03)
 #define  EHCI_FRAME_LIST_ELEMENT_TYPE_BIT_POS      (1)
-
 
 #define  EHCI_QH_ELEMENT_TYPE_ITD                  (0x00)
 #define  EHCI_QH_ELEMENT_TYPE_QH                   (0x01)
@@ -242,8 +240,6 @@ Split transatcions specific defines
 #define  EHCI_ITD_BUFFER_POINTER                   (0xFFFFF000)
 #define  EHCI_ITD_MULTI_TRANSACTION_BITS           (0x00000003)
 
-          
-
 /* SITD position bits */
 #define  EHCI_SITD_DIRECTION_BIT_POS                (31)
 #define  EHCI_SITD_PORT_NUMBER_BIT_POS              (24)
@@ -263,16 +259,12 @@ Split transatcions specific defines
 #define  EHCI_SITD_PAGE_NUMBER                      (0x40000000)
 #define  EHCI_SITD_BUFFER_POINTER                   (0xFFFFF000)
 
-
-
 #define  EHCI_SITD_BUFFER_PTR_BIT_POS              (12)
 #define  EHCI_SITD_TP_BIT_POS                      (3)
 #define  EHCI_SITD_TP_ALL                          (0)
 #define  EHCI_SITD_TP_BEGIN                        (1)
 #define  EHCI_SITD_TP_MID                          (2)
 #define  EHCI_SITD_TP_END                          (3)
-
-
 
 /* Interrupt enable bit masks */
 #define  EHCI_IER_ASYNCH_ADVANCE                   (0x00000020)
@@ -716,5 +708,3 @@ typedef uint_32   EHCI_FRAME_LIST_ELEMENT_POINTER;
 
 #endif /* __mvUsbCore_h__ */
 /* EOF */
-
-

@@ -266,7 +266,6 @@ static const struct iomap_ops *iomap_ops[8] = {
 	[7] = &iomem_ops
 };
 
-
 unsigned int ioread8(void __iomem *addr)
 {
 	if (unlikely(INDIRECT_ADDR(addr)))

@@ -726,7 +726,6 @@ static int __init devices_setup(void)
 }
 device_initcall(devices_setup);
 
-
 static struct sh_machine_vector mv_ecovec __initmv = {
 	.mv_name	= "R0P7724 (EcoVec)",
 };

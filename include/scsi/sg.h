@@ -70,7 +70,6 @@ Major new features in SG 3.x driver (cf SG 2.x drivers)
  (for the lk 2.2 series).
 */
 
-
 /* New interface introduced in the 3.x SG drivers follows */
 
 typedef struct sg_iovec /* same structure as used by readv() Linux system */
@@ -78,7 +77,6 @@ typedef struct sg_iovec /* same structure as used by readv() Linux system */
     void __user *iov_base;      /* Starting address  */
     size_t iov_len;             /* Length in bytes  */
 } sg_iovec_t;
-
 
 typedef struct sg_io_hdr
 {
@@ -137,7 +135,6 @@ typedef struct sg_io_hdr
 #define SG_INFO_DIRECT_IO 0x2   /* direct IO requested and performed */
 #define SG_INFO_MIXED_IO 0x4    /* part direct, part indirect IO */
 
-
 typedef struct sg_scsi_id { /* used by SG_GET_SCSI_ID ioctl() */
     int host_no;        /* as in "scsi<n>" where 'n' is one of 0, 1, 2 etc */
     int channel;
@@ -160,7 +157,6 @@ typedef struct sg_req_info { /* used by SG_GET_REQUEST_TABLE ioctl() */
 			      or request duration (req_state==2) */
     int unused;
 } sg_req_info_t; /* 20 bytes long on i386 */
-
 
 /* IOCTLs: Those ioctls that are relevant to the SG 3.x drivers follow.
  [Those that only apply to the SG 2.x drivers are at the end of the file.]
@@ -220,7 +216,6 @@ typedef struct sg_req_info { /* used by SG_GET_REQUEST_TABLE ioctl() */
 /* yields scsi midlevel's access_count for this SCSI device */
 #define SG_GET_ACCESS_COUNT 0x2289  
 
-
 #define SG_SCATTER_SZ (8 * 4096)
 /* Largest size (in bytes) a single scatter-gather list element can have.
    The value used by the driver is 'max(SG_SCATTER_SZ, PAGE_SIZE)'.
@@ -247,7 +242,6 @@ typedef struct sg_io_vec Sg_io_vec;
 typedef struct sg_scsi_id Sg_scsi_id;
 typedef struct sg_req_info Sg_req_info;
 
-
 /* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
 /*   The older SG interface based on the 'sg_header' structure follows.   */
 /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
@@ -272,7 +266,6 @@ struct sg_header
 	   when (driver_status & DRIVER_SENSE) is true. */
 };      /* This structure is 36 bytes long on i386 */
 
-
 /* IOCTLs: The following are not required (or ignored) when the sg_io_hdr_t
 	   interface is used. They are kept for backward compatibility with
 	   the original and version 2 drivers. */
@@ -292,7 +285,6 @@ struct sg_header
 
 #define SG_NEXT_CMD_LEN 0x2283  /* override SCSI command length with given
 		   number on the next write() on this file descriptor */
-
 
 /* Defaults, commented if they differ from original sg driver */
 #ifdef __KERNEL__

@@ -119,5 +119,4 @@ tal_stat_t tal_pcm_start(void);
 tal_stat_t tal_pcm_stop(void);
 tal_stat_t tal_exit(void);
 
-
 #endif /* _TAL_H */

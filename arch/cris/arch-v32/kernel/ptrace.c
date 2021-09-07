@@ -97,7 +97,6 @@ ptrace_disable(struct task_struct *child)
 	deconfigure_bp(child->pid);
 }
 
-
 long arch_ptrace(struct task_struct *child, long request, long addr, long data)
 {
 	int ret;

@@ -50,4 +50,3 @@
 #define S3C64XX_GPC7_SPI_nCS1		(0x02 << 28)
 #define S3C64XX_GPC7_I2S2_V40_DO	(0x05 << 28)
 #define S3C64XX_GPC7_EINT_G2_7		(0x07 << 28)
-

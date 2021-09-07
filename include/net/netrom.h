@@ -165,7 +165,6 @@ static __inline__ void nr_node_unlock(struct nr_node *nr_node)
 #define nr_node_for_each_safe(__nr_node, node, node2, list) \
 	hlist_for_each_entry_safe(__nr_node, node, node2, list, node_node)
 
-
 /*********************************************************************/
 
 /* af_netrom.c */

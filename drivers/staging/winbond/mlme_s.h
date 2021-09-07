@@ -36,20 +36,15 @@
 #define IBSS_AUTH_IND		0xc
 #define IBSS_STATE_2		0xd
 
-
-
 //=========================================
 //depend on D5C(MAC timing control 03 register): MaxTxMSDULifeTime default 0x80000us
 #define AUTH_FAIL_TIMEOUT		550
 #define ASSOC_FAIL_TIMEOUT		550
 #define REASSOC_FAIL_TIMEOUT	550
 
-
-
 //
 // MLME task global CONSTANTS, STRUCTURE, variables
 //
-
 
 /////////////////////////////////////////////////////////////
 //  enum_ResultCode --
@@ -69,7 +64,6 @@
 #define	NO_BSS_FOUND						8
 #define RETRY								9
 #define GIVE_UP								10
-
 
 #define OPEN_AUTH							0
 #define SHARE_AUTH							1
@@ -105,7 +99,6 @@
 #define MLMEMSG_RCV_AUTH				0x2c
 #define MLMEMSG_RCV_DEAUTH				0x2d
 
-
 //from TX callback
 #define MLMEMSG_TX_CALLBACK				0x40
 #define MLMEMSG_ASSOCREQ_CALLBACK		0x41
@@ -123,7 +116,6 @@
 #define MAX_NUM_TX_MMPDU	2
 #define MAX_MMPDU_SIZE		1512
 #define MAX_NUM_RX_MMPDU	6
-
 
 ///////////////////////////////////////////////////////////////////////////
 //MACRO

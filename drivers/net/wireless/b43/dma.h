@@ -5,7 +5,6 @@
 
 #include "b43.h"
 
-
 /* DMA-Interrupt reasons. */
 #define B43_DMAIRQ_FATALMASK	((1 << 10) | (1 << 11) | (1 << 12) \
 					 | (1 << 14) | (1 << 15))
@@ -164,7 +163,6 @@ struct b43_dmadesc_generic {
 #define B43_TXRING_SLOTS		256
 #define B43_RXRING_SLOTS		64
 #define B43_DMA0_RX_BUFFERSIZE		IEEE80211_MAX_FRAME_LEN
-
 
 struct sk_buff;
 struct b43_private;

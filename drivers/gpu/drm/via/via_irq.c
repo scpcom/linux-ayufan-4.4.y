@@ -59,7 +59,6 @@
 #define VIA_IRQ_DMA1_DD_PENDING (1 << 6)
 #define VIA_IRQ_DMA1_TD_PENDING (1 << 7)
 
-
 /*
  * Device-specific IRQs go here. This type might need to be extended with
  * the register if there are multiple IRQ control registers.
@@ -87,7 +86,6 @@ static maskarray_t via_unichrome_irqs[] = {
 };
 static int via_num_unichrome = ARRAY_SIZE(via_unichrome_irqs);
 static int via_irqmap_unichrome[] = {-1, -1, -1, 0, -1, 1};
-
 
 static unsigned time_diff(struct timeval *now, struct timeval *then)
 {
@@ -152,7 +150,6 @@ irqreturn_t via_driver_irq_handler(DRM_IRQ_ARGS)
 
 	/* Acknowlege interrupts */
 	VIA_WRITE(VIA_REG_INTERRUPT, status);
-
 
 	if (handled)
 		return IRQ_HANDLED;
@@ -254,7 +251,6 @@ via_driver_irq_wait(struct drm_device * dev, unsigned int irq, int force_sequenc
 	*sequence = cur_irq_sequence;
 	return ret;
 }
-
 
 /*
  * drm_dma.h hooks

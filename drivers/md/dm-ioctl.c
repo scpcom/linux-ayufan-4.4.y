@@ -46,7 +46,6 @@ struct vers_iter {
     uint32_t flags;
 };
 
-
 #define NUM_BUCKETS 64
 #define MASK_BUCKETS (NUM_BUCKETS - 1)
 static struct list_head _name_buckets[NUM_BUCKETS];
@@ -526,8 +525,6 @@ static int list_versions(struct dm_ioctl *param, size_t param_size)
 	return 0;
 }
 
-
-
 static int check_name(const char *name)
 {
 	if (strchr(name, '/')) {
@@ -858,7 +855,6 @@ static int do_resume(struct dm_ioctl *param)
 
 	if (dm_suspended(md))
 		r = dm_resume(md);
-
 
 	if (!r) {
 		dm_kobject_uevent(md, KOBJ_CHANGE, param->event_nr);

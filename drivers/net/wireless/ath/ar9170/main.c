@@ -2124,7 +2124,6 @@ static void ar9170_op_configure_filter(struct ieee80211_hw *hw,
 	mutex_unlock(&ar->mutex);
 }
 
-
 static void ar9170_op_bss_info_changed(struct ieee80211_hw *hw,
 				       struct ieee80211_vif *vif,
 				       struct ieee80211_bss_conf *bss_conf,

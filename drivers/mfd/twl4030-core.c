@@ -162,7 +162,6 @@
 
 /* Triton Core internal information (END) */
 
-
 /* Few power values */
 #define R_CFG_BOOT			0x05
 #define R_PROTECT_KEY			0x0E
@@ -177,7 +176,6 @@
 #define HFCLK_FREQ_26_MHZ		(2 << 0)
 #define HFCLK_FREQ_38p4_MHZ		(3 << 0)
 #define HIGH_PERF_SQ			(1 << 3)
-
 
 /* chip-specific feature flags, for i2c_device_id.driver_data */
 #define TWL4030_VAUX2		BIT(0)	/* pre-5030 voltage ranges */
@@ -201,7 +199,6 @@ struct twl4030_client {
 };
 
 static struct twl4030_client twl4030_modules[TWL4030_NUM_SLAVES];
-
 
 /* mapping the module id to slave id and base address */
 struct twl4030mapping {

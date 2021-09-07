@@ -4,7 +4,6 @@
 /* (C) 1999 Machine Vision Holdings, Inc.			*/
 /* (C) 1999-2003 David Woodhouse <dwmw2@infradead.org>		*/
 
-
 /* DOC_PASSIVE_PROBE:
    In order to ensure that the BIOS checksum is correct at boot time, and
    hence that the onboard BIOS extension gets executed, the DiskOnChip
@@ -23,7 +22,6 @@
    If you have this problem, uncomment the following line:
 #define DOC_PASSIVE_PROBE
 */
-
 
 /* DOC_SINGLE_DRIVER:
    Millennium driver has been merged into DOC2000 driver.
@@ -55,7 +53,6 @@
 #ifndef CONFIG_MTD_DOCPROBE_ADDRESS
 #define CONFIG_MTD_DOCPROBE_ADDRESS 0
 #endif
-
 
 static unsigned long doc_config_location = CONFIG_MTD_DOCPROBE_ADDRESS;
 module_param(doc_config_location, ulong, 0);
@@ -304,7 +301,6 @@ static void __init DoC_Probe(unsigned long physadr)
 	iounmap(docptr);
 }
 
-
 /****************************************************************************
  *
  * Module stuff
@@ -335,4 +331,3 @@ module_init(init_doc);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("David Woodhouse <dwmw2@infradead.org>");
 MODULE_DESCRIPTION("Probe code for DiskOnChip 2000 and Millennium devices");
-

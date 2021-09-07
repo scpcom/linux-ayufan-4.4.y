@@ -7,7 +7,6 @@
  * Copyright (C) 2003, 2004  Renesas Technology Corp.
  */
 
-
 /* Chip type */
 #if defined(CONFIG_CHIP_XNUX_MP) || defined(CONFIG_CHIP_XNUX2_MP)
 #include <asm/m32r_mp_fpga.h>

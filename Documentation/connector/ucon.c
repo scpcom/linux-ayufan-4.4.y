@@ -198,7 +198,6 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-
 	pfd.fd = s;
 
 	while (!need_exit) {

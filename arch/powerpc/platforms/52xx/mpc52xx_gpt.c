@@ -240,7 +240,6 @@ mpc52xx_gpt_irq_setup(struct mpc52xx_gpt_priv *gpt, struct device_node *node)
 	dev_dbg(gpt->dev, "%s() complete. virq=%i\n", __func__, cascade_virq);
 }
 
-
 /* ---------------------------------------------------------------------
  * GPIOLIB hooks
  */

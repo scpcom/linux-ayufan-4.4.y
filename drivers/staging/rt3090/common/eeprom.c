@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 INT RtmpChipOpsEepromHook(
 	IN RTMP_ADAPTER *pAd,
 	IN INT			infType)
@@ -87,7 +86,6 @@ INT RtmpChipOpsEepromHook(
 			pChipOps->eewrite = rtmp_ee_prom_write16;
 			break;
 #endif // RTMP_PCI_SUPPORT //
-
 
 		default:
 			DBGPRINT(RT_DEBUG_ERROR, ("RtmpChipOpsEepromHook() failed!\n"));

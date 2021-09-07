@@ -290,7 +290,6 @@ void __init setup_arch(char **cmdline_p)
 
 	platform_setup(cmdline_p);
 
-
 	paging_init();
 	zones_init();
 
@@ -406,7 +405,6 @@ c_show(struct seq_file *f, void *slot)
 		     XCHAL_NUM_IBREAK,
 		     XCHAL_NUM_DBREAK);
 
-
 	/* Interrupt. */
 	seq_printf(f,"num ints\t: %d\n"
 		     "ext ints\t: %d\n"
@@ -478,4 +476,3 @@ const struct seq_operations cpuinfo_op =
 };
 
 #endif /* CONFIG_PROC_FS */
-

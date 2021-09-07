@@ -43,7 +43,6 @@
 #define SIGP_STAT_INVALID_ORDER     0x00000002UL
 #define SIGP_STAT_RECEIVER_CHECK    0x00000001UL
 
-
 static int __sigp_sense(struct kvm_vcpu *vcpu, u16 cpu_addr,
 			unsigned long *reg)
 {

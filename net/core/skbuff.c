@@ -100,7 +100,6 @@ static int sock_pipe_buf_steal(struct pipe_inode_info *pipe,
 	return 1;
 }
 
-
 /* Pipe buffer operations for a socket. */
 static struct pipe_buf_operations sock_pipe_buf_ops = {
 	.can_merge = 0,
@@ -471,8 +470,7 @@ void __kfree_skb(struct sk_buff *skb)
 	kfree_skbmem(skb);
 }
 EXPORT_SYMBOL(__kfree_skb);
-
-
+ 
 /**
  *	kfree_skb - free an sk_buff
  *	@skb: buffer to free
@@ -3071,7 +3069,6 @@ void skb_tstamp_tx(struct sk_buff *orig_skb,
 		kfree_skb(skb);
 }
 EXPORT_SYMBOL_GPL(skb_tstamp_tx);
-
 
 /**
  * skb_partial_csum_set - set up and verify partial csum values for packet

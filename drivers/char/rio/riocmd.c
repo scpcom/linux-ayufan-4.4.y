@@ -72,7 +72,6 @@
 #include "route.h"
 #include "cirrus.h"
 
-
 static struct IdentifyRta IdRta;
 static struct KillNeighbour KillUnit;
 
@@ -176,7 +175,6 @@ int RIOCommandRta(struct rio_info *p, unsigned long RtaUnique, int (*func) (stru
 	return -ENXIO;
 }
 
-
 int RIOIdentifyRta(struct rio_info *p, void __user * arg)
 {
 	unsigned int Host;
@@ -240,7 +238,6 @@ int RIOIdentifyRta(struct rio_info *p, void __user * arg)
 	}
 	return -ENOENT;
 }
-
 
 int RIOKillNeighbour(struct rio_info *p, void __user * arg)
 {
@@ -654,7 +651,6 @@ void RIOPollHostCommands(struct rio_info *p, struct Host *HostP)
 	struct PKT __iomem *PacketP;
 	unsigned short Rup;
 	unsigned long flags;
-
 
 	Rup = MAX_RUP + LINKS_PER_UNIT;
 

@@ -383,7 +383,6 @@ static void pio_bank_show(struct seq_file *s, struct gpio_chip *chip)
 #define pio_bank_show	NULL
 #endif
 
-
 /*--------------------------------------------------------------------------*/
 
 static int __init pio_probe(struct platform_device *pdev)

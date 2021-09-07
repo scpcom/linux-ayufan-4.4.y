@@ -523,7 +523,6 @@ lc_release_cnf(struct FsmInst *fi, int event, void *arg)
 	l3ml3p(st, DL_RELEASE | CONFIRM);
 }
 
-
 /* *INDENT-OFF* */
 static struct FsmNode L3FnList[] __initdata =
 {

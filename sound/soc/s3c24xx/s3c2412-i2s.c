@@ -97,13 +97,11 @@ static int s3c2412_i2s_set_sysclk(struct snd_soc_dai *cpu_dai,
 	return 0;
 }
 
-
 struct clk *s3c2412_get_iisclk(void)
 {
 	return s3c2412_i2s.iis_clk;
 }
 EXPORT_SYMBOL_GPL(s3c2412_get_iisclk);
-
 
 static int s3c2412_i2s_probe(struct platform_device *pdev,
 			     struct snd_soc_dai *dai)

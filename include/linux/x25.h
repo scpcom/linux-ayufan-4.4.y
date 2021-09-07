@@ -84,7 +84,6 @@ struct x25_subscrip_struct {
 #define X25_MASK_CALLING_AE 0x10
 #define X25_MASK_CALLED_AE 0x20
 
-
 /*
  *	Routing table control structure.
  */

@@ -83,7 +83,6 @@ void memcpy_fromshmem(int card, void *dest, const void *src, size_t n)
 	ch = (unsigned long) src / SRAM_PAGESIZE;
 	pr_debug("%s: loaded page %d\n", sc_adapter[card]->devicename,ch);
 	
-	
 	/*
 	 * Block interrupts and load the page
 	 */

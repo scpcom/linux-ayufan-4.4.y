@@ -97,6 +97,5 @@
 /* ERPN in a PTE never gets cleared, ignore it */
 #define _PTE_NONE_MASK	0xffffffff00000000ULL
 
-
 #endif /* __KERNEL__ */
 #endif /*  _ASM_POWERPC_PTE_44x_H */

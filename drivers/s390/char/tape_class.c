@@ -109,7 +109,6 @@ void unregister_tape_dev(struct device *device, struct tape_class_device *tcd)
 }
 EXPORT_SYMBOL(unregister_tape_dev);
 
-
 static int __init tape_init(void)
 {
 	tape_class = class_create(THIS_MODULE, "tape390");

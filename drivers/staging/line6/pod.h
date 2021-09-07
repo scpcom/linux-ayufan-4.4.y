@@ -12,7 +12,6 @@
 #ifndef POD_H
 #define POD_H
 
-
 #include "driver.h"
 
 #include <linux/spinlock.h>
@@ -23,7 +22,6 @@
 #include <sound/core.h>
 
 #include "dumprequest.h"
-
 
 /*
 	PODxt Live interfaces
@@ -43,7 +41,6 @@
 #define POD_CONTROL_SIZE 0x80
 #define POD_BUFSIZE_DUMPREQ 7
 #define POD_STARTUP_DELAY 3
-
 
 /**
 	 Data structure for values that need to be requested explicitly.
@@ -190,7 +187,6 @@ struct usb_line6_pod {
 	char midi_postprocess;
 };
 
-
 extern void pod_disconnect(struct usb_interface *interface);
 extern int pod_init(struct usb_interface *interface, struct usb_line6_pod *pod);
 extern void pod_midi_postprocess(struct usb_line6_pod *pod,
@@ -199,6 +195,5 @@ extern void pod_process_message(struct usb_line6_pod *pod);
 extern void pod_receive_parameter(struct usb_line6_pod *pod, int param);
 extern void pod_transmit_parameter(struct usb_line6_pod *pod, int param,
 				   int value);
-
 
 #endif

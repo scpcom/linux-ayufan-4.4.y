@@ -296,7 +296,6 @@ static void snd_ac97_proc_read_main(struct snd_ac97 *ac97, struct snd_info_buffe
 				     AC97_PAGE_MASK, val & AC97_PAGE_MASK);
 	}
 
-
       __modem:
 	mext = snd_ac97_read(ac97, AC97_EXTENDED_MID);
 	if (mext == 0)

@@ -26,7 +26,6 @@
  *  fcs_rport_fcb Remote port driver interfaces
  */
 
-
 struct bfad_rport_s;
 
 /*
@@ -74,7 +73,5 @@ bfa_status_t bfa_fcb_rport_alloc(struct bfad_s *bfad,
  * @return None
  */
 void bfa_fcb_rport_free(struct bfad_s *bfad, struct bfad_rport_s **rport_drv);
-
-
 
 #endif /* __BFA_FCB_RPORT_H__ */

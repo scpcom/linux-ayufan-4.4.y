@@ -194,14 +194,12 @@ static void init_memory(struct isp1760_hcd *priv)
 		payload += priv->memory_pool[i].size;
 	}
 
-
 	for (i = BLOCK_1_NUM; i < BLOCK_1_NUM + BLOCK_2_NUM; i++) {
 		priv->memory_pool[i].start = payload;
 		priv->memory_pool[i].size = BLOCK_2_SIZE;
 		priv->memory_pool[i].free = 1;
 		payload += priv->memory_pool[i].size;
 	}
-
 
 	for (i = BLOCK_1_NUM + BLOCK_2_NUM; i < BLOCKS; i++) {
 		priv->memory_pool[i].start = payload;
@@ -604,7 +602,6 @@ static void transform_into_atl(struct isp1760_hcd *priv, struct isp1760_qh *qh,
 		dw3 |= PTD_DATA_TOGGLE(qtd->toggle);
 	else
 		dw3 |= qh->toggle;
-
 
 	dw3 |= PTD_ACTIVE;
 	/* Cerr */
@@ -1978,7 +1975,6 @@ static int isp1760_hub_control(struct usb_hcd *hcd, u16 typeReq,
 		/* wPortChange bits */
 		if (temp & PORT_CSC)
 			status |= 1 << USB_PORT_FEAT_C_CONNECTION;
-
 
 		/* whoever resumes must GetPortStatus to complete it!! */
 		if (temp & PORT_RESUME) {

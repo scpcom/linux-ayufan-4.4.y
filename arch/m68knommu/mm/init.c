@@ -150,7 +150,6 @@ void __init mem_init(void)
 	       );
 }
 
-
 #ifdef CONFIG_BLK_DEV_INITRD
 void free_initrd_mem(unsigned long start, unsigned long end)
 {
@@ -190,4 +189,3 @@ free_initmem()
 			(int)(addr - PAGE_SIZE));
 #endif
 }
-

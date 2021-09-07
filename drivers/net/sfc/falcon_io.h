@@ -50,7 +50,6 @@
 #define BUF_TBL_KER_A1 0x18000
 #define BUF_TBL_KER_B0 0x800000
 
-
 #if BITS_PER_LONG == 64
 #define FALCON_USE_QWORD_IO 1
 #endif

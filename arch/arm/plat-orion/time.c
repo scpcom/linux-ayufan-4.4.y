@@ -27,7 +27,6 @@
  */
 static u32 ticks_per_jiffy;
 
-
 /*
  * Timer block registers.
  */
@@ -40,7 +39,6 @@ static u32 ticks_per_jiffy;
 #define TIMER0_VAL		(TIMER_VIRT_BASE + 0x0014)
 #define TIMER1_RELOAD		(TIMER_VIRT_BASE + 0x0018)
 #define TIMER1_VAL		(TIMER_VIRT_BASE + 0x001c)
-
 
 /*
  * Orion's sched_clock implementation. It has a resolution of
@@ -108,8 +106,6 @@ static struct clocksource orion_clksrc = {
 	.mask		= CLOCKSOURCE_MASK(32),
 	.flags		= CLOCK_SOURCE_IS_CONTINUOUS,
 };
-
-
 
 /*
  * Clockevent handling.

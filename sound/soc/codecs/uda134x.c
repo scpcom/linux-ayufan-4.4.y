@@ -26,7 +26,6 @@
 
 #include "uda134x.h"
 
-
 #define POWER_OFF_ON_STANDBY 1
 /*
   ALSA SOC usually puts the device in standby mode when it's not used
@@ -462,7 +461,6 @@ struct snd_soc_dai uda134x_dai = {
 	.ops = &uda134x_dai_ops,
 };
 EXPORT_SYMBOL(uda134x_dai);
-
 
 static int uda134x_soc_probe(struct platform_device *pdev)
 {

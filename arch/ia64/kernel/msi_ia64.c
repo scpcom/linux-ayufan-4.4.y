@@ -113,7 +113,6 @@ static struct irq_chip ia64_msi_chip = {
 	.retrigger	= ia64_msi_retrigger_irq,
 };
 
-
 int arch_setup_msi_irq(struct pci_dev *pdev, struct msi_desc *desc)
 {
 	if (platform_setup_msi_irq)
@@ -208,4 +207,3 @@ int arch_setup_dmar_msi(unsigned int irq)
 	return 0;
 }
 #endif /* CONFIG_DMAR */
-

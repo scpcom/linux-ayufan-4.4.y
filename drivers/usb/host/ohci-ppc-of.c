@@ -18,7 +18,6 @@
 
 #include <asm/prom.h>
 
-
 static int __devinit
 ohci_ppc_of_start(struct usb_hcd *hcd)
 {
@@ -78,7 +77,6 @@ static const struct hc_driver ohci_ppc_of_hc_driver = {
 #endif
 	.start_port_reset =	ohci_start_port_reset,
 };
-
 
 static int __devinit
 ohci_hcd_ppc_of_probe(struct of_device *op, const struct of_device_id *match)
@@ -211,7 +209,6 @@ static int ohci_hcd_ppc_of_shutdown(struct of_device *op)
 	return 0;
 }
 
-
 static struct of_device_id ohci_hcd_ppc_of_match[] = {
 #ifdef CONFIG_USB_OHCI_HCD_PPC_OF_BE
 	{
@@ -242,7 +239,6 @@ MODULE_DEVICE_TABLE(of, ohci_hcd_ppc_of_match);
 #error "No endianess selected for ppc-of-ohci"
 #endif
 
-
 static struct of_platform_driver ohci_hcd_ppc_of_driver = {
 	.name		= "ppc-of-ohci",
 	.match_table	= ohci_hcd_ppc_of_match,
@@ -258,4 +254,3 @@ static struct of_platform_driver ohci_hcd_ppc_of_driver = {
 		.owner	= THIS_MODULE,
 	},
 };
-

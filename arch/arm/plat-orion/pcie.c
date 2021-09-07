@@ -47,7 +47,6 @@
 #define  PCIE_STAT_BUS_MASK		0xff
 #define  PCIE_STAT_LINK_DOWN		1
 
-
 u32 __init orion_pcie_dev_id(void __iomem *base)
 {
 	return readl(base + PCIE_DEV_ID_OFF) >> 16;

@@ -92,7 +92,6 @@ typedef struct rt_ipv6_addr_
 #define ipv6_addr32			addr.ipv6Addr32
 }RT_IPV6_ADDR, *PRT_IPV6_ADDR;
 
-
 #define PRINT_IPV6_ADDR(ipv6Addr)	\
 	OS_NTOHS((ipv6Addr).ipv6_addr16[0]), \
 	OS_NTOHS((ipv6Addr).ipv6_addr16[1]), \
@@ -102,7 +101,6 @@ typedef struct rt_ipv6_addr_
 	OS_NTOHS((ipv6Addr).ipv6_addr16[5]), \
 	OS_NTOHS((ipv6Addr).ipv6_addr16[6]), \
 	OS_NTOHS((ipv6Addr).ipv6_addr16[7])
-
 
 /*IPv6 Header related structures */
 typedef struct PACKED _rt_ipv6_hdr_
@@ -117,14 +115,12 @@ typedef struct PACKED _rt_ipv6_hdr_
 	RT_IPV6_ADDR	dstAddr;
 }RT_IPV6_HDR, *PRT_IPV6_HDR;
 
-
 typedef struct PACKED _rt_ipv6_ext_hdr_
 {
 	UCHAR	nextProto; // Indicate the protocol type of next extension header.
 	UCHAR	extHdrLen; // optional field for msg length of this extension header which didn't include the first "nextProto" field.
 	UCHAR	octets[1]; // hook to extend header message body.
 }RT_IPV6_EXT_HDR, *PRT_IPV6_EXT_HDR;
-
 
 /* ICMPv6 related structures */
 typedef struct PACKED _rt_ipv6_icmpv6_hdr_
@@ -134,7 +130,6 @@ typedef struct PACKED _rt_ipv6_icmpv6_hdr_
 	USHORT	chksum;
 	UCHAR	octets[1]; //hook to extend header message body.
 }RT_ICMPV6_HDR, *PRT_ICMPV6_HDR;
-
 
 typedef struct PACKED _rt_icmp6_option_hdr_
 {
@@ -151,7 +146,6 @@ typedef enum{
 	TYPE_REDIRECTED_HDR			= 4,
 	TYPE_MTU					= 5,
 }ICMPV6_OPTIONS_TYPE_DEF;
-
 
 static inline BOOLEAN IPv6ExtHdrHandle(
 	RT_IPV6_EXT_HDR		*pExtHdr,

@@ -89,7 +89,6 @@ static unsigned int debug;
 			__func__, __LINE__ , ## args);	\
 	} while (0)
 
-
 /*
  * Version Information
  */
@@ -160,7 +159,6 @@ static void rvfree (void *mem, unsigned long size)
 	}
 	vfree (mem);
 }
-
 
 /*********************************************************************
  * pencam read/write functions

@@ -162,7 +162,6 @@ GLOBAL(return_to_handler)
 	retq
 #endif
 
-
 #ifndef CONFIG_PREEMPT
 #define retint_kernel retint_restore_args
 #endif
@@ -173,7 +172,6 @@ ENTRY(native_usergs_sysret64)
 	sysretq
 ENDPROC(native_usergs_sysret64)
 #endif /* CONFIG_PARAVIRT */
-
 
 .macro TRACE_IRQS_IRETQ offset=ARGOFFSET
 #ifdef CONFIG_TRACE_IRQFLAGS
@@ -1499,7 +1497,6 @@ error_kernelspace:
 	jmp error_sti
 END(error_entry)
 
-
 /* ebx:	no swapgs flag (1: don't need swapgs, 0: need it) */
 ENTRY(error_exit)
 	DEFAULT_FRAME
@@ -1518,7 +1515,6 @@ ENTRY(error_exit)
 	jmp retint_swapgs
 	CFI_ENDPROC
 END(error_exit)
-
 
 	/* runs on exception stack */
 ENTRY(nmi)

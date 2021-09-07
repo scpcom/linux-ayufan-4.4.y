@@ -2,15 +2,12 @@
  
 /* Written 1995-2000 by Werner Almesberger, EPFL LRC/ICA */
  
-
 #ifndef LINUX_ATMDEV_H
 #define LINUX_ATMDEV_H
-
 
 #include <linux/atmapi.h>
 #include <linux/atm.h>
 #include <linux/atmioc.h>
-
 
 #define ESI_LEN		6
 
@@ -29,7 +26,6 @@
 #define ATM_DS3_PCR	(8000*12)
 			/* DS3: 12 cells in a 125 usec time slot */
 
-
 #define __AAL_STAT_ITEMS \
     __HANDLE_ITEM(tx);			/* TX okay */ \
     __HANDLE_ITEM(tx_err);		/* TX errors */ \
@@ -43,13 +39,11 @@ struct atm_aal_stats {
 #undef __HANDLE_ITEM
 };
 
-
 struct atm_dev_stats {
 	struct atm_aal_stats aal0;
 	struct atm_aal_stats aal34;
 	struct atm_aal_stats aal5;
 } __ATM_API_ALIGN;
-
 
 #define ATM_GETLINKRATE	_IOW('a',ATMIOC_ITF+1,struct atmif_sioc)
 					/* get link rate */
@@ -155,7 +149,6 @@ struct atm_dev_stats {
  * __ATM_LM_XTLOC(x) <= __ATM_LM_XTRMT(x)
  */
 
-
 struct atm_iobuf {
 	int length;
 	void __user *buffer;
@@ -210,7 +203,6 @@ struct atm_cirange {
     "256",	"512",		"1024",		"2048", \
     "SESSION",	"HASSAP",	"BOUND",	"CLOSE"
 
-
 #ifdef __KERNEL__
 
 #include <linux/device.h>
@@ -242,13 +234,11 @@ struct k_atm_aal_stats {
 #undef __HANDLE_ITEM
 };
 
-
 struct k_atm_dev_stats {
 	struct k_atm_aal_stats aal0;
 	struct k_atm_aal_stats aal34;
 	struct k_atm_aal_stats aal5;
 };
-
 
 enum {
 	ATM_VF_ADDR,		/* Address is in use. Set by anybody, cleared
@@ -275,7 +265,6 @@ enum {
 	ATM_VF_IS_CLIP,		/* in use by CLIP protocol */
 };
 
-
 #define ATM_VF2VS(flags) \
     (test_bit(ATM_VF_READY,&(flags)) ? ATM_VS_CONNECTED : \
      test_bit(ATM_VF_RELEASED,&(flags)) ? ATM_VS_CLOSING : \
@@ -283,11 +272,9 @@ enum {
      test_bit(ATM_VF_REGIS,&(flags)) ? ATM_VS_INUSE : \
      test_bit(ATM_VF_BOUND,&(flags)) ? ATM_VS_BOUND : ATM_VS_IDLE)
 
-
 enum {
 	ATM_DF_REMOVED,		/* device was removed from atm_devs list */
 };
-
 
 #define ATM_PHY_SIG_LOST    0	/* no carrier/light */
 #define ATM_PHY_SIG_UNKNOWN 1	/* carrier/light status is unknown */
@@ -374,12 +361,10 @@ struct atm_dev {
 	struct list_head dev_list;	/* linkage */
 };
 
- 
 /* OF: send_Oam Flags */
 
 #define ATM_OF_IMMED  1		/* Attempt immediate delivery */
 #define ATM_OF_INRATE 2		/* Attempt in-rate delivery */
-
 
 /*
  * ioctl, getsockopt, and setsockopt are optional and can be set to NULL.
@@ -433,7 +418,6 @@ struct atm_dev *atm_dev_lookup(int number);
 void atm_dev_deregister(struct atm_dev *dev);
 void vcc_insert_socket(struct sock *sk);
 
-
 /*
  * This is approximately the algorithm used by alloc_skb.
  *
@@ -444,18 +428,15 @@ static inline int atm_guess_pdu2truesize(int size)
 	return (SKB_DATA_ALIGN(size) + sizeof(struct skb_shared_info));
 }
 
-
 static inline void atm_force_charge(struct atm_vcc *vcc,int truesize)
 {
 	atomic_add(truesize, &sk_atm(vcc)->sk_rmem_alloc);
 }
 
-
 static inline void atm_return(struct atm_vcc *vcc,int truesize)
 {
 	atomic_sub(truesize, &sk_atm(vcc)->sk_rmem_alloc);
 }
-
 
 static inline int atm_may_send(struct atm_vcc *vcc,unsigned int size)
 {
@@ -463,12 +444,10 @@ static inline int atm_may_send(struct atm_vcc *vcc,unsigned int size)
 	       sk_atm(vcc)->sk_sndbuf;
 }
 
-
 static inline void atm_dev_hold(struct atm_dev *dev)
 {
 	atomic_inc(&dev->refcnt);
 }
-
 
 static inline void atm_dev_put(struct atm_dev *dev)
 {
@@ -479,7 +458,6 @@ static inline void atm_dev_put(struct atm_dev *dev)
 		put_device(&dev->class_dev);
 	}
 }
-
 
 int atm_charge(struct atm_vcc *vcc,int truesize);
 struct sk_buff *atm_alloc_charge(struct atm_vcc *vcc,int pdu_size,

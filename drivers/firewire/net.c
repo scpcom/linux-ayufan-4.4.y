@@ -431,7 +431,6 @@ static struct fwnet_partial_datagram *fwnet_pd_find(struct fwnet_peer *peer,
 	return NULL;
 }
 
-
 static void fwnet_pd_delete(struct fwnet_partial_datagram *old)
 {
 	struct fwnet_fragment_info *fi, *n;
@@ -510,7 +509,6 @@ static unsigned fwnet_max_payload(unsigned max_rec, unsigned speed)
 
 	return (1 << (max_rec + 1)) - RFC2374_FRAG_HDR_SIZE;
 }
-
 
 static int fwnet_finish_incoming_packet(struct net_device *net,
 					struct sk_buff *skb, u16 source_node_id,

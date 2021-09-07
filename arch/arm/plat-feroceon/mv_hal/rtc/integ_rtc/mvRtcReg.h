@@ -62,17 +62,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvRtcRegh
 #define __INCmvRtcRegh
-
 
 /* RTC Time Register */
 #define RTC_TIME_REG				0x10300
 
 /* RTC Date Register */
 #define RTC_DATE_REG				0x10304
-
 
 /* RTC Time Bit Definitions */
 #define RTC_TIME_SECONDS_SHF			0
@@ -89,7 +86,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RTC_TIME_HOUR_MSK			(0xF << RTC_TIME_HOUR_SHF)
 #define RTC_TIME_10HOUR_SHF			20
 #define RTC_TIME_10HOUR_MSK			(0x3 << RTC_TIME_10HOUR_SHF)
-
 
 #define RTC_TIME_HOUR_FORMAT_SHF		22
 #define RTC_TIME_HOUR_FORMAT_12_MSK		(1 << RTC_TIME_HOUR_FORMAT_SHF)
@@ -115,4 +111,3 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RTC_DATE_10YEAR_MSK			(0xF << RTC_DATE_10YEAR_SHF)
 
 #endif /* __INCmvRtcRegh */
-

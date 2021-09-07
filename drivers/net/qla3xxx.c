@@ -93,7 +93,6 @@ static const PHY_DEVICE_INFO_t PHY_DEVICES[] =
 	 {PHY_AGERE_ET1011C,   0x00a0bc, 0x1, "PHY_AGERE_ET1011C"},
 };
 
-
 /*
  * Caller must take hw_lock.
  */
@@ -1812,7 +1811,6 @@ static int ql_get_full_dup(struct ql3_adapter *qdev)
 	return status;
 }
 
-
 static int ql_get_settings(struct net_device *ndev, struct ethtool_cmd *ecmd)
 {
 	struct ql3_adapter *qdev = netdev_priv(ndev);
@@ -1918,7 +1916,6 @@ static int ql_populate_free_queue(struct ql3_adapter *qdev)
 					lrg_buf_cb->skb = NULL;
 					break;
 				}
-
 
 				lrg_buf_cb->buf_phy_addr_low =
 				    cpu_to_le32(LS_64BITS(map));
@@ -3380,7 +3377,6 @@ static int ql_adapter_initialize(struct ql3_adapter *qdev)
 		ql_write_page0_reg(qdev, &port_regs->portControl,
 				   ((value << 16) | value));
 	}
-
 
 out:
 	return status;

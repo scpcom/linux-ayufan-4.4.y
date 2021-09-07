@@ -67,10 +67,8 @@
 #include <linux/wimax/i2400m.h>
 #include <linux/debugfs.h>
 
-
 #define D_SUBMODULE usb
 #include "usb-debug-levels.h"
-
 
 /* Our firmware file name */
 static const char *i2400mu_bus_fw_names[] = {
@@ -80,7 +78,6 @@ static const char *i2400mu_bus_fw_names[] = {
 	I2400MU_FW_FILE_NAME_v1_3,
 	NULL,
 };
-
 
 static
 int i2400mu_bus_dev_start(struct i2400m *i2400m)
@@ -111,7 +108,6 @@ error_usb_tx_setup:
 	return result;
 }
 
-
 static
 void i2400mu_bus_dev_stop(struct i2400m *i2400m)
 {
@@ -124,7 +120,6 @@ void i2400mu_bus_dev_stop(struct i2400m *i2400m)
 	i2400mu_tx_release(i2400mu);
 	d_fnend(3, dev, "(i2400m %p) = void\n", i2400m);
 }
-
 
 /*
  * Sends a barker buffer to the device
@@ -175,7 +170,6 @@ error_kzalloc:
 		usb_autopm_put_interface(i2400mu->usb_iface);
 	return ret;
 }
-
 
 /*
  * Reset a device at different levels (warm, cold or bus)
@@ -270,7 +264,6 @@ do_bus_reset:
 	return result;
 }
 
-
 static
 void i2400mu_netdev_setup(struct net_device *net_dev)
 {
@@ -279,7 +272,6 @@ void i2400mu_netdev_setup(struct net_device *net_dev)
 	i2400mu_init(i2400mu);
 	i2400m_netdev_setup(net_dev);
 }
-
 
 /*
  * Debug levels control; see debug.h
@@ -293,14 +285,12 @@ struct d_level D_LEVEL[] = {
 };
 size_t D_LEVEL_SIZE = ARRAY_SIZE(D_LEVEL);
 
-
 #define __debugfs_register(prefix, name, parent)			\
 do {									\
 	result = d_level_register_debugfs(prefix, name, parent);	\
 	if (result < 0)							\
 		goto error;						\
 } while (0)
-
 
 static
 int i2400mu_debugfs_add(struct i2400mu *i2400mu)
@@ -349,7 +339,6 @@ error:
 	debugfs_remove_recursive(i2400mu->debugfs_dentry);
 	return result;
 }
-
 
 static struct device_type i2400mu_type = {
 	.name	= "wimax",
@@ -442,7 +431,6 @@ error_alloc_netdev:
 	return result;
 }
 
-
 /*
  * Disconect a i2400m from the system.
  *
@@ -467,7 +455,6 @@ void i2400mu_disconnect(struct usb_interface *iface)
 	free_netdev(net_dev);
 	d_fnend(3, dev, "(iface %p i2400m %p) = void\n", iface, i2400m);
 }
-
 
 /*
  * Get the device ready for USB port or system standby and hibernation
@@ -565,7 +552,6 @@ no_firmware:
 	return result;
 }
 
-
 static
 int i2400mu_resume(struct usb_interface *iface)
 {
@@ -589,7 +575,6 @@ out:
 	return ret;
 }
 
-
 static
 struct usb_device_id i2400mu_id_table[] = {
 	{ USB_DEVICE(0x8086, 0x0181) },
@@ -602,7 +587,6 @@ struct usb_device_id i2400mu_id_table[] = {
 	{ },
 };
 MODULE_DEVICE_TABLE(usb, i2400mu_id_table);
-
 
 static
 struct usb_driver i2400mu_driver = {
@@ -621,7 +605,6 @@ int __init i2400mu_driver_init(void)
 	return usb_register(&i2400mu_driver);
 }
 module_init(i2400mu_driver_init);
-
 
 static
 void __exit i2400mu_driver_exit(void)

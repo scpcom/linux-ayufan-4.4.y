@@ -163,7 +163,6 @@ static int free_wq_copy_descs(struct fnic *fnic, struct vnic_wq_copy *wq)
 	return 0;
 }
 
-
 /*
  * fnic_fw_reset_handler
  * Routine to send reset msg to fw
@@ -194,7 +193,6 @@ int fnic_fw_reset_handler(struct fnic *fnic)
 			      "Failed to issue fw reset\n");
 	return ret;
 }
-
 
 /*
  * fnic_flogi_reg_handler
@@ -609,7 +607,6 @@ static inline int is_ack_index_in_range(struct vnic_wq_copy *wq,
 	/* request_out index is in range */
 	return 1;
 }
-
 
 /*
  * Mark that ack received and store the Ack index. If there are multiple
@@ -1552,7 +1549,6 @@ int fnic_device_reset(struct scsi_cmnd *sc)
 		      "Device reset called FCID 0x%x, LUN 0x%x\n",
 		      (starget_to_rport(scsi_target(sc->device)))->port_id,
 		      sc->device->lun);
-
 
 	if (lp->state != LPORT_ST_READY || !(lp->link_up))
 		goto fnic_device_reset_end;

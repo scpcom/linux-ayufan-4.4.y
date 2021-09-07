@@ -98,7 +98,6 @@ static void rackmeter_setup_i2s(struct rackmeter *rm)
 	/* First whack magic GPIO */
 	pmac_call_feature(PMAC_FTR_WRITE_GPIO, NULL, RACKMETER_MAGIC_GPIO, 5);
 
-
 	/* Call feature code to enable the sound channel and the proper
 	 * clock sources
 	 */
@@ -359,7 +358,6 @@ static irqreturn_t rackmeter_irq(int irq, void *arg)
 	for (i = 0; i < SAMPLE_COUNT; i++)
 		buf[i] = rackmeter_calc_sample(rm, i);
 
-
 	return IRQ_HANDLED;
 }
 
@@ -591,7 +589,6 @@ static struct macio_driver rackmeter_driver = {
 	.shutdown = rackmeter_shutdown,
 };
 
-
 static int __init rackmeter_init(void)
 {
 	pr_debug("rackmeter_init()\n");
@@ -608,7 +605,6 @@ static void __exit rackmeter_exit(void)
 
 module_init(rackmeter_init);
 module_exit(rackmeter_exit);
-
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Benjamin Herrenschmidt <benh@kernel.crashing.org>");

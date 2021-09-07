@@ -39,7 +39,6 @@
 #ifndef __RTMP_TYPE_H__
 #define __RTMP_TYPE_H__
 
-
 #define PACKED  __attribute__ ((packed))
 
 #ifdef LINUX
@@ -68,7 +67,6 @@ typedef signed short			SHORT;
 typedef signed int				INT;
 typedef signed long			LONG;
 typedef signed long long		LONGLONG;
-
 
 #ifdef LINUX
 typedef unsigned char			UCHAR;
@@ -101,7 +99,6 @@ typedef union _LARGE_INTEGER {
     } u;
     INT64 QuadPart;
 } LARGE_INTEGER;
-
 
 //
 // Register set pair for initialzation register set definition
@@ -137,9 +134,7 @@ typedef struct _FREQUENCY_ITEM {
 	UCHAR	K;
 } FREQUENCY_ITEM, *PFREQUENCY_ITEM;
 
-
 typedef int				NTSTATUS;
-
 
 #define STATUS_SUCCESS				0x00
 #define STATUS_UNSUCCESSFUL		0x01

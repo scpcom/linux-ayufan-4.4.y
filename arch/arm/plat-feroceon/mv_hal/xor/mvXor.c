@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #include "xor/mvXor.h"
 /* defines  */
 #ifdef MV_DEBUG
@@ -637,5 +636,3 @@ MV_STATUS mvXorOverrideSet(MV_U32 chan, MV_XOR_OVERRIDE_TARGET target,
     MV_REG_WRITE(XOR_OVERRIDE_CTRL_REG(chan), temp);
 	return MV_OK;
 }
-
-

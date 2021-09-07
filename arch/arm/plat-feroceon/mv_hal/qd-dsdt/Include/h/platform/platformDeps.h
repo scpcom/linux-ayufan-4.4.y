@@ -28,4 +28,3 @@ GT_BOOL defaultMiiWrite (unsigned int portNumber , unsigned int miiReg, unsigned
 #endif
 
 #endif   /* platformDepsh */
-

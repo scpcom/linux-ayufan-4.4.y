@@ -54,7 +54,6 @@ static inline struct mmu_gather *tlb_gather_mmu(struct mm_struct *mm, unsigned i
 	return mp;
 }
 
-
 static inline void tlb_flush_mmu(struct mmu_gather *mp)
 {
 	if (!mp->fullmm)

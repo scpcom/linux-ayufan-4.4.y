@@ -270,7 +270,6 @@ static int i2c_xfer(struct i2c_adapter *i2c_adap, struct i2c_msg *msgs, int num)
 	return retval;
 }
 
-
 static u32 cx25821_functionality(struct i2c_adapter *adap)
 {
 	return I2C_FUNC_SMBUS_EMUL |

@@ -107,4 +107,3 @@ static int __init setup_vcpu_hotplug_event(void)
 }
 
 arch_initcall(setup_vcpu_hotplug_event);
-

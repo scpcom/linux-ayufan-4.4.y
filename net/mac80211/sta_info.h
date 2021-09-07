@@ -153,7 +153,6 @@ struct sta_ampdu_mlme {
 	u8 dialog_token_allocator;
 };
 
-
 /* see __sta_info_unlink */
 #define STA_INFO_PIN_STAT_NORMAL	0
 #define STA_INFO_PIN_STAT_PINNED	1
@@ -395,11 +394,8 @@ static inline u32 get_sta_flags(struct sta_info *sta)
 	return ret;
 }
 
-
-
 #define STA_HASH_SIZE 256
 #define STA_HASH(sta) (sta[5])
-
 
 /* Maximum number of frames to buffer per power saving station */
 #define STA_MAX_TX_BUFFER 128

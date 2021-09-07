@@ -13,7 +13,6 @@
 *******************************************************************************/
 #include "msSample.h"
 
-
 /*
  * Start Packet Generator.
  * Input:
@@ -56,7 +55,6 @@ GT_STATUS startPktGenerator
 
     return GT_OK;
 }
-
 
 /*
  * Stop Packet Generator.

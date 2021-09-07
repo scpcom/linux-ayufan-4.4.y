@@ -130,7 +130,6 @@ static inline void fnic_import_rq_fc_frame(struct sk_buff *skb,
 	fr_sof(fp) = sof;
 }
 
-
 static inline int fnic_import_rq_eth_pkt(struct sk_buff *skb, u32 len)
 {
 	struct fc_frame *fp;
@@ -727,7 +726,6 @@ int fnic_wq_cmpl_handler(struct fnic *fnic, int work_to_do)
 
 	return wq_work_done;
 }
-
 
 void fnic_free_wq_buf(struct vnic_wq *wq, struct vnic_wq_buf *buf)
 {

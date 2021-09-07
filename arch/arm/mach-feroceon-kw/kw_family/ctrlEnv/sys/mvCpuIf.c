@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 /* includes */
 #include "ctrlEnv/sys/mvCpuIf.h"
 #include "ctrlEnv/sys/mvAhbToMbusRegs.h"
@@ -262,15 +261,12 @@ MV_STATUS mvCpuIfInit(MV_CPU_DEC_WIN *cpuAddrWinMap)
 							  cpuAddrWinMap[target].winNum));
 			}
 
-
 		}
     }
 
 	return MV_OK;
 
-
 }
-
 
 /*******************************************************************************
 * mvCpuIfTargetWinSet - Set CPU-to-peripheral target address window
@@ -326,7 +322,6 @@ MV_STATUS mvCpuIfTargetWinSet(MV_TARGET target, MV_CPU_DEC_WIN *pAddrDecWin)
 		addrDecWin.addrWin.baseLow = pAddrDecWin->addrWin.baseLow;
 		addrDecWin.addrWin.size = pAddrDecWin->addrWin.size;
 		addrDecWin.enable = pAddrDecWin->enable;
-
 
 		if (mvDramIfWinSet(target,&addrDecWin) != MV_OK);
 		{
@@ -408,7 +403,6 @@ MV_STATUS mvCpuIfTargetWinGet(MV_TARGET target, MV_CPU_DEC_WIN *pAddrDecWin)
 	if((mvCtrlModelGet() != MV_6282_DEV_ID) && MV_TARGET_IS_PEX1(target))
 	    return MV_NO_SUCH;
 
-
 	if (MV_TARGET_IS_DRAM(target))
 	{
 		if (mvDramIfWinGet(target,&addrDecWin) != MV_OK)
@@ -454,12 +448,8 @@ MV_STATUS mvCpuIfTargetWinGet(MV_TARGET target, MV_CPU_DEC_WIN *pAddrDecWin)
 
 	}
 
-
-
-
 	return MV_OK;
 }
-
 
 /*******************************************************************************
 * mvCpuIfTargetWinEnable - Enable/disable a CPU address decode window
@@ -508,7 +498,6 @@ MV_STATUS mvCpuIfTargetWinEnable(MV_TARGET target,MV_BOOL enable)
 		return MV_ERROR;
 	}
 
-
 	/* check overlap */
 
 	if (MV_TRUE == enable)
@@ -520,7 +509,6 @@ MV_STATUS mvCpuIfTargetWinEnable(MV_TARGET target,MV_BOOL enable)
 		}
 
 	}
-
 
 	if (MV_TARGET_IS_DRAM(target))
 	{
@@ -555,7 +543,6 @@ MV_STATUS mvCpuIfTargetWinEnable(MV_TARGET target,MV_BOOL enable)
 
 	return MV_OK;
 }
-
 
 /*******************************************************************************
 * mvCpuIfTargetWinSizeGet - Get CPU target address window size
@@ -802,7 +789,6 @@ MV_U32 mvCpuIfPciRemap(MV_TARGET pciTarget, MV_ADDR_WIN *pAddrDecWin)
 }
 #endif /* MV_INCLUDE_PCI */
 
-
 /*******************************************************************************
 * mvCpuIfPciIfRemap - Set CPU remap register for address windows.
 *
@@ -838,8 +824,6 @@ MV_U32 mvCpuIfPciIfRemap(MV_TARGET pciIfTarget, MV_ADDR_WIN *pAddrDecWin)
 #endif
 	return 0;
 }
-
-
 
 /*******************************************************************************
 * mvCpuIfTargetOfBaseAddressGet - Get the target according to base address
@@ -906,7 +890,6 @@ static MV_BOOL cpuTargetWinOverlap(MV_TARGET target, MV_ADDR_WIN *pAddrWin)
     MV_U32 			targetNum;
     MV_CPU_DEC_WIN 	addrDecWin;
 	MV_STATUS		status;
-
 
 	for(targetNum = 0; targetNum < MAX_TARGETS; targetNum++)
     {
@@ -1044,5 +1027,3 @@ MV_VOID mvCpuIfEnablePex(MV_U32 pexIf, MV_PEX_TYPE pexType)
 	MV_REG_BIT_SET(CPU_CTRL_STAT_REG,(CCSR_PCI_ACCESS_MASK(pexIf)));
 }
 #endif
-
-

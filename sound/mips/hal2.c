@@ -48,7 +48,6 @@ MODULE_DESCRIPTION("ALSA driver for SGI HAL2 audio");
 MODULE_AUTHOR("Thomas Bogendoerfer");
 MODULE_LICENSE("GPL");
 
-
 #define H2_BLOCK_SIZE	1024
 #define H2_BUF_SIZE	16384
 
@@ -109,7 +108,6 @@ static inline void hal2_write(u32 val, u32 *reg)
 {
 	__raw_writel(val, reg);
 }
-
 
 static u32 hal2_i_read32(struct snd_hal2 *hal2, u16 addr)
 {
@@ -787,7 +785,6 @@ static int hal2_detect(struct snd_hal2 *hal2)
 	/* release reset */
 	hal2_write(H2_ISR_GLOBAL_RESET_N | H2_ISR_CODEC_RESET_N,
 		   &hal2->ctl_regs->isr);
-
 
 	hal2_i_write16(hal2, H2I_RELAY_C, H2I_RELAY_C_STATE);
 	rev = hal2_read(&hal2->ctl_regs->rev);

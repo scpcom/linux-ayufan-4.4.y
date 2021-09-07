@@ -35,7 +35,6 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/types.h>
@@ -1443,7 +1442,6 @@ gss_unwrap_resp_priv(struct rpc_cred *cred, struct gss_cl_ctx *ctx,
 
 	return 0;
 }
-
 
 static int
 gss_unwrap_resp(struct rpc_task *task,

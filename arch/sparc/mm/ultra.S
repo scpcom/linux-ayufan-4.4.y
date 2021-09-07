@@ -685,7 +685,6 @@ xcall_kgdb_capture:
 
 #endif /* CONFIG_SMP */
 
-
 	.globl		hypervisor_patch_cachetlbops
 hypervisor_patch_cachetlbops:
 	save		%sp, -128, %sp

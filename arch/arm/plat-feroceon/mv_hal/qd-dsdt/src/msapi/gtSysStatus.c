@@ -17,7 +17,6 @@
 #include <gtHwCntl.h>
 #include <gtDrvSwRegs.h>
 
-
 /*******************************************************************************
 * gsysGetPPUState
 *
@@ -260,5 +259,3 @@ GT_STATUS gsysGetFreeQSize
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-

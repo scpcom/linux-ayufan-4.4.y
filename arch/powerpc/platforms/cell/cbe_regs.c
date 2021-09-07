@@ -230,7 +230,6 @@ void __init cbe_fill_regs_map(struct cbe_regs_map *map)
 	}
 }
 
-
 void __init cbe_regs_init(void)
 {
 	int i;
@@ -277,4 +276,3 @@ void __init cbe_regs_init(void)
 		cbe_fill_regs_map(map);
 	}
 }
-

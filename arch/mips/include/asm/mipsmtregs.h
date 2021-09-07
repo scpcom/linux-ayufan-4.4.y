@@ -74,7 +74,6 @@
 #define MVPCONTROL_STLB_SHIFT	2
 #define MVPCONTROL_STLB		(_ULCAST_(1) << MVPCONTROL_STLB_SHIFT)
 
-
 /* MVPConf0 fields */
 #define MVPCONF0_PTC_SHIFT	0
 #define MVPCONF0_PTC		( _ULCAST_(0xff))
@@ -89,11 +88,9 @@
 #define MVPCONF0_M_SHIFT	31
 #define MVPCONF0_M		(_ULCAST_(0x1) << MVPCONF0_M_SHIFT)
 
-
 /* config3 fields */
 #define CONFIG3_MT_SHIFT	2
 #define CONFIG3_MT		(_ULCAST_(1) << CONFIG3_MT_SHIFT)
-
 
 /* VPEControl fields (per VPE) */
 #define VPECONTROL_TARGTC	(_ULCAST_(0xff))
@@ -329,7 +326,6 @@ do {									\
 	: "r" (v));							\
 })
 
-
 #define mttr(rd, u, sel, v)						\
 ({									\
 	__asm__ __volatile__(						\
@@ -337,13 +333,11 @@ do {									\
 	: : "r" (v));							\
 })
 
-
 #define settc(tc)							\
 do {									\
 	write_c0_vpecontrol((read_c0_vpecontrol()&~VPECONTROL_TARGTC) | (tc)); \
 	ehb();								\
 } while (0)
-
 
 /* you *must* set the target tc (settc) before trying to use these */
 #define read_vpe_c0_vpecontrol()	mftc0(1, 1)
@@ -368,7 +362,6 @@ do {									\
 #define read_vpe_c0_badvaddr()		mftc0(8, 0)
 #define read_vpe_c0_epc()		mftc0(14, 0)
 #define write_vpe_c0_epc(val)		mttc0(14, 0, val)
-
 
 /* TC */
 #define read_tc_c0_tcstatus()		mftc0(2, 1)

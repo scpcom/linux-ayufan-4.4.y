@@ -53,7 +53,6 @@
 #define HYPERSPARC_NFAULT     0x00000002
 #define HYPERSPARC_MENABLE    0x00000001
 
-
 /* The ICCR instruction cache register on the HyperSparc.
  *
  * -----------------------------------------------

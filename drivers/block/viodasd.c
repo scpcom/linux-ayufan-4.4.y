@@ -200,7 +200,6 @@ static int viodasd_release(struct gendisk *disk, fmode_t mode)
 	return 0;
 }
 
-
 /* External ioctl entry point.
  */
 static int viodasd_getgeo(struct block_device *bdev, struct hd_geometry *geo)

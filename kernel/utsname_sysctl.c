@@ -57,7 +57,6 @@ static int proc_do_uts_string(ctl_table *table, int write,
 #define proc_do_uts_string NULL
 #endif
 
-
 #ifdef CONFIG_SYSCTL_SYSCALL
 /* The generic string strategy routine: */
 static int sysctl_uts_string(ctl_table *table,

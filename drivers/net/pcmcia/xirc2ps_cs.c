@@ -1090,7 +1090,6 @@ xirc2ps_release(struct pcmcia_device *link)
 
 /*====================================================================*/
 
-
 static int xirc2ps_suspend(struct pcmcia_device *link)
 {
 	struct net_device *dev = link->priv;
@@ -1114,7 +1113,6 @@ static int xirc2ps_resume(struct pcmcia_device *link)
 
 	return 0;
 }
-
 
 /*====================================================================*/
 
@@ -1374,7 +1372,6 @@ do_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
     DEBUG(1, "do_start_xmit(skb=%p, dev=%p) len=%u\n",
 	  skb, dev, pktlen);
-
 
     /* adjust the packet length to min. required
      * and hope that the buffer is large enough
@@ -1902,7 +1899,6 @@ static struct pcmcia_device_id xirc2ps_ids[] = {
 	PCMCIA_DEVICE_NULL,
 };
 MODULE_DEVICE_TABLE(pcmcia, xirc2ps_ids);
-
 
 static struct pcmcia_driver xirc2ps_cs_driver = {
 	.owner		= THIS_MODULE,

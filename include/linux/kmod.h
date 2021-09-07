@@ -41,7 +41,6 @@ static inline int request_module_nowait(const char *name, ...) { return -ENOSYS;
 #define try_then_request_module(x, mod...) (x)
 #endif
 
-
 struct key;
 struct file;
 struct subprocess_info;

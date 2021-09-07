@@ -51,7 +51,6 @@
 
 #define MAX_INTERRUPT_SIZE              32
 
-
 #define RX_BLOCKS           64          // form 0x60 to 0xA0
 #define TX_BLOCKS           32          // from 0xA0 to 0xC0
 
@@ -62,8 +61,6 @@
 
 #define CB_RD_NUM           64          // default # of RD
 #define CB_TD_NUM           64          // default # of TD
-
-
 
 //
 // Bits in the RSR register
@@ -87,7 +84,6 @@
 #define NEWRSR_BCNHITAID    0x02        // 0000 0010
 #define NEWRSR_BCNHITAID0   0x01        // 0000 0001
 
-
 //
 // Bits in the TSR register
 //
@@ -96,16 +92,12 @@
 #define TSR_ACKDATA         0x02        // 0000 0010
 #define TSR_VALID           0x01        // 0000 0001
 
-
 #define CB_PROTOCOL_RESERVED_SECTION    16
-
-
 
 // if retrys excess 15 times , tx will abort, and
 // if tx fifo underflow, tx will fail
 // we should try to resend it
 #define CB_MAX_TX_ABORT_RETRY   3
-
 
 #define FIFOCTL_AUTO_FB_1   0x1000 // 0001 0000 0000 0000
 #define FIFOCTL_AUTO_FB_0   0x0800 // 0000 1000 0000 0000
@@ -137,7 +129,6 @@
 #define FRAGCTL_STAFRAG     0x0001 // 0000 0000 0000 0001
 #define FRAGCTL_NONFRAG     0x0000 // 0000 0000 0000 0000
 
-
 //#define TYPE_AC0DMA     0
 //#define TYPE_TXDMA0     1
 #define TYPE_TXDMA0     0
@@ -152,8 +143,6 @@
 #define TYPE_RXDMA1     1
 #define TYPE_MAXRD      2
 
-
-
 // TD_INFO flags control bit
 #define TD_FLAGS_NETIF_SKB               0x01       // check if need release skb
 #define TD_FLAGS_PRIV_SKB                0x02       // check if called from private skb(hostap)
@@ -161,7 +150,6 @@
 //#define TD_FLAGS_NETIF_SKB                0x04
 
 /*---------------------  Export Types  ------------------------------*/
-
 
 //
 // RsvTime buffer header
@@ -228,7 +216,6 @@ typedef struct tagSRTS_g {
 SRTS_g, *PSRTS_g;
 typedef const SRTS_g *PCSRTS_g;
 
-
 typedef struct tagSRTS_g_FB {
     BYTE        bySignalField_b;
     BYTE        byServiceField_b;
@@ -249,7 +236,6 @@ typedef struct tagSRTS_g_FB {
 SRTS_g_FB, *PSRTS_g_FB;
 typedef const SRTS_g_FB *PCSRTS_g_FB;
 
-
 typedef struct tagSRTS_ab {
     BYTE        bySignalField;
     BYTE        byServiceField;
@@ -260,7 +246,6 @@ typedef struct tagSRTS_ab {
 }__attribute__ ((__packed__))
 SRTS_ab, *PSRTS_ab;
 typedef const SRTS_ab *PCSRTS_ab;
-
 
 typedef struct tagSRTS_a_FB {
     BYTE        bySignalField;
@@ -274,7 +259,6 @@ typedef struct tagSRTS_a_FB {
 }__attribute__ ((__packed__))
 SRTS_a_FB, *PSRTS_a_FB;
 typedef const SRTS_a_FB *PCSRTS_a_FB;
-
 
 //
 // CTS buffer header
@@ -310,7 +294,6 @@ typedef struct tagSCTS_FB {
 }__attribute__ ((__packed__))
 SCTS_FB, *PSCTS_FB;
 typedef const SCTS_FB *PCSCTS_FB;
-
 
 //
 // Tx FIFO header
@@ -367,7 +350,6 @@ typedef struct tagSTxDataHead_g_FB {
 STxDataHead_g_FB, *PSTxDataHead_g_FB;
 typedef const STxDataHead_g_FB *PCSTxDataHead_g_FB;
 
-
 typedef struct tagSTxDataHead_ab {
     BYTE    bySignalField;
     BYTE    byServiceField;
@@ -377,7 +359,6 @@ typedef struct tagSTxDataHead_ab {
 }__attribute__ ((__packed__))
 STxDataHead_ab, *PSTxDataHead_ab;
 typedef const STxDataHead_ab *PCSTxDataHead_ab;
-
 
 typedef struct tagSTxDataHead_a_FB {
     BYTE    bySignalField;
@@ -410,7 +391,6 @@ typedef struct tagSBEACONCtl {
 }__attribute__ ((__packed__))
 SBEACONCtl;
 
-
 typedef struct tagSSecretKey {
     DWORD   dwLowDword;
     BYTE    byHighByte;
@@ -436,8 +416,4 @@ SKeyEntry;
 
 /*---------------------  Export Functions  --------------------------*/
 
-
-
-
 #endif // __DESC_H__
-

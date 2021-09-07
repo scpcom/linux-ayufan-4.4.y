@@ -134,7 +134,6 @@ static const match_table_t tokens = {
 	{Opt_err, NULL}
 };
 
-
 STATIC unsigned long
 suffix_strtoul(char *s, char **endp, unsigned int base)
 {
@@ -913,7 +912,6 @@ xfsaild_stop(
 {
 	kthread_stop(ailp->xa_task);
 }
-
 
 /* Catch misguided souls that try to use this interface on XFS */
 STATIC struct inode *

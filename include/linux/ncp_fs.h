@@ -174,7 +174,6 @@ struct ncp_nls_ioctl
 
 #define NCP_MAX_RPC_TIMEOUT (6*HZ)
 
-
 struct ncp_entry_info {
 	struct nw_info_struct	i;
 	ino_t			ino;

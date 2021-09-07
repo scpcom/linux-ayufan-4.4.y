@@ -5,7 +5,6 @@
  * Originally from swsusp.
  */
 
-
 #undef DEBUG
 
 #include <linux/interrupt.h>
@@ -157,4 +156,3 @@ void thaw_processes(void)
 	schedule();
 	printk("done.\n");
 }
-

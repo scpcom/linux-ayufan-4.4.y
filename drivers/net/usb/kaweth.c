@@ -101,7 +101,6 @@
 
 #define IS_BLOCKED(s) (s & KAWETH_STATUS_BLOCKED)
 
-
 MODULE_AUTHOR("Michael Zappe <zapman@interlan.net>, Stephane Alnet <stephane@u-picardie.fr>, Brad Hards <bhards@bigpond.net.au> and Oliver Neukum <oliver@neukum.org>");
 MODULE_DESCRIPTION("KL5USB101 USB Ethernet driver");
 MODULE_LICENSE("GPL");
@@ -238,7 +237,6 @@ struct kaweth_device
 	dma_addr_t rxbufferhandle;
 	__u8 *rx_buf;
 
-	
 	struct sk_buff *tx_skb;
 
 	__u8 *firmware_buf;
@@ -559,7 +557,6 @@ static void kaweth_resubmit_tl(struct work_struct *work)
 	if (kaweth->suspend_lowmem_ctrl)
 		kaweth_resubmit_int_urb(kaweth, GFP_NOIO);
 }
-
 
 /****************************************************************
  *     kaweth_resubmit_rx_urb
@@ -997,7 +994,6 @@ static int kaweth_resume(struct usb_interface *intf)
  *     kaweth_probe
  ****************************************************************/
 
-
 static const struct net_device_ops kaweth_netdev_ops = {
 	.ndo_open =			kaweth_open,
 	.ndo_stop =			kaweth_close,
@@ -1091,7 +1087,6 @@ static int kaweth_probe(
 			err("Error downloading trigger code fix (%d)", result);
 			goto err_fw;
 		}
-
 
 		if ((result = kaweth_trigger_firmware(kaweth, 126)) < 0) {
 			err("Error triggering firmware (%d)", result);
@@ -1257,7 +1252,6 @@ static void kaweth_disconnect(struct usb_interface *intf)
 	free_netdev(netdev);
 }
 
-
 // FIXME this completion stuff is a modified clone of
 // an OLD version of some stuff in usb.c ...
 struct usb_api_data {
@@ -1342,7 +1336,6 @@ static int kaweth_internal_control_msg(struct usb_device *usb_dev,
 	}
 }
 
-
 /****************************************************************
  *     kaweth_init
  ****************************************************************/
@@ -1362,12 +1355,3 @@ static void __exit kaweth_exit(void)
 
 module_init(kaweth_init);
 module_exit(kaweth_exit);
-
-
-
-
-
-
-
-
-

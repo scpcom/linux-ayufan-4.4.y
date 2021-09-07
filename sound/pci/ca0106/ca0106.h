@@ -553,7 +553,6 @@
 #define CONTROL_CENTER_LFE_CHANNEL 1
 #define CONTROL_UNKNOWN_CHANNEL 2
 
-
 /* Based on WM8768 Datasheet Rev 4.2 page 32 */
 #define SPI_REG_MASK	0x1ff	/* 16-bit SPI writes have a 7-bit address */
 #define SPI_REG_SHIFT	9	/* followed by 9 bits of data */

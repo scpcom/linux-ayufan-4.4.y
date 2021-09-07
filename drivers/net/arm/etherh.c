@@ -144,9 +144,6 @@ static inline unsigned int etherh_get_stat(struct etherh_priv *eh)
 	return readb(eh->ctrl_port);
 }
 
-
-
-
 static void etherh_irq_enable(ecard_t *ec, int irqnr)
 {
 	struct etherh_priv *eh = ec->irq_data;
@@ -165,9 +162,6 @@ static expansioncard_ops_t etherh_ops = {
 	.irqenable	= etherh_irq_enable,
 	.irqdisable	= etherh_irq_disable,
 };
-
-
-
 
 static void
 etherh_setif(struct net_device *dev)

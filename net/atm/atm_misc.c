@@ -2,7 +2,6 @@
 
 /* Written 1995-2000 by Werner Almesberger, EPFL ICA */
 
-
 #include <linux/module.h>
 #include <linux/atm.h>
 #include <linux/atmdev.h>
@@ -11,7 +10,6 @@
 #include <linux/bitops.h>
 #include <asm/atomic.h>
 #include <asm/errno.h>
-
 
 int atm_charge(struct atm_vcc *vcc,int truesize)
 {
@@ -22,7 +20,6 @@ int atm_charge(struct atm_vcc *vcc,int truesize)
 	atomic_inc(&vcc->stats->rx_drop);
 	return 0;
 }
-
 
 struct sk_buff *atm_alloc_charge(struct atm_vcc *vcc,int pdu_size,
     gfp_t gfp_flags)
@@ -44,7 +41,6 @@ struct sk_buff *atm_alloc_charge(struct atm_vcc *vcc,int pdu_size,
 	atomic_inc(&vcc->stats->rx_drop);
 	return NULL;
 }
-
 
 /*
  * atm_pcr_goal returns the positive PCR if it should be rounded up, the
@@ -73,7 +69,6 @@ struct sk_buff *atm_alloc_charge(struct atm_vcc *vcc,int pdu_size,
  *	 else *
  */
 
-
 int atm_pcr_goal(const struct atm_trafprm *tp)
 {
 	if (tp->pcr && tp->pcr != ATM_MAX_PCR)
@@ -85,7 +80,6 @@ int atm_pcr_goal(const struct atm_trafprm *tp)
 	return 0;
 }
 
-
 void sonet_copy_stats(struct k_sonet_stats *from,struct sonet_stats *to)
 {
 #define __HANDLE_ITEM(i) to->i = atomic_read(&from->i)
@@ -93,14 +87,12 @@ void sonet_copy_stats(struct k_sonet_stats *from,struct sonet_stats *to)
 #undef __HANDLE_ITEM
 }
 
-
 void sonet_subtract_stats(struct k_sonet_stats *from,struct sonet_stats *to)
 {
 #define __HANDLE_ITEM(i) atomic_sub(to->i,&from->i)
 	__SONET_ITEMS
 #undef __HANDLE_ITEM
 }
-
 
 EXPORT_SYMBOL(atm_charge);
 EXPORT_SYMBOL(atm_alloc_charge);

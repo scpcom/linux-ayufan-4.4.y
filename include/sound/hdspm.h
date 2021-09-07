@@ -83,7 +83,6 @@ struct hdspm_config_info {
 #define SNDRV_HDSPM_IOCTL_GET_CONFIG_INFO \
 	_IOR('H', 0x41, struct hdspm_config_info)
 
-
 /* get Soundcard Version */
 
 struct hdspm_version {
@@ -91,7 +90,6 @@ struct hdspm_version {
 };
 
 #define SNDRV_HDSPM_IOCTL_GET_VERSION _IOR('H', 0x43, struct hdspm_version)
-
 
 /* ------------- get Matrix Mixer IOCTL --------------- */
 

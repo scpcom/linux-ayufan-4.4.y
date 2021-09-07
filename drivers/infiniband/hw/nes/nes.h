@@ -268,7 +268,6 @@ struct nes_device {
 	u8                     disable_tx_flow_control;
 };
 
-
 static inline __le32 get_crc_value(struct nes_v4_quad *nes_quad)
 {
 	u32 crc_value;
@@ -381,8 +380,6 @@ static inline void nes_write8(void __iomem *addr, u8 val)
 	writeb(val, addr);
 }
 
-
-
 static inline int nes_alloc_resource(struct nes_adapter *nesadapter,
 		unsigned long *resource_array, u32 max_resources,
 		u32 *req_resource_num, u32 *next)
@@ -483,13 +480,10 @@ static inline struct nes_qp *to_nesqp(struct ib_qp *ibqp)
 	return container_of(ibqp, struct nes_qp, ibqp);
 }
 
-
-
 /* nes.c */
 void nes_add_ref(struct ib_qp *);
 void nes_rem_ref(struct ib_qp *);
 struct ib_qp *nes_get_qp(struct ib_device *, int);
-
 
 /* nes_hw.c */
 struct nes_adapter *nes_init_adapter(struct nes_device *, u8);

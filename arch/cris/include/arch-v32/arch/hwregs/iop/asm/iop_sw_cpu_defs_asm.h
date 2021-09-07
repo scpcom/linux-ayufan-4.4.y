@@ -1731,7 +1731,6 @@
 #define reg_iop_sw_cpu_r_masked_intr3___timer_grp3___bit 31
 #define reg_iop_sw_cpu_r_masked_intr3_offset 144
 
-
 /* Constants */
 #define regk_iop_sw_cpu_copy                      0x00000000
 #define regk_iop_sw_cpu_no                        0x00000000

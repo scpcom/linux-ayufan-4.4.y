@@ -42,16 +42,11 @@
  *
  */
 
-
-
-
 /** @file
  * Manages buffer mapping for constructed descriptors to be executed
  * by the xwc driver subsystem for Talitos 2/3, including virtual buffer
  * page mapping for both kernel and user application handling
  */
-
-
 
 #include <linux/kernel.h>
 #include <linux/types.h>
@@ -66,7 +61,6 @@
 #include "../common/xwcRMinterface.h"
 #include "t23xrmInternal.h"
 #include "../common/t23.h"
-
 
 /**
  * All functions here in t23xrmMemUtil.c are designed to handle the
@@ -161,9 +155,6 @@ RMstatus xwcMemTranslateLogical(uint32_t    entity,
 
     return RM_OK;
 }
-
-
-
 
 /**
  * RMstatus xwcMemTranslateUserVirtual(uint32_t    entity,
@@ -287,9 +278,6 @@ RMstatus xwcMemTranslateUserVirtual(uint32_t    entity,
     return RM_OK;
 }
 
-
-
-
 /**
  * RMstatus xwcMemTranslateKernelVirtual(uint32_t    entity,
  *                                       void       *desc,
@@ -320,11 +308,6 @@ RMstatus xwcMemTranslateKernelVirtual(uint32_t    entity,
     return RM_UNIMPLEMENTED;
 }
 
-
-
-
-
-
 /**
  * RMstatus xwcMemReleaseLogical(uint32_t    entity,
  *                               void       *desc,
@@ -348,8 +331,6 @@ RMstatus xwcMemReleaseLogical(uint32_t    entity,
 {
     return RM_OK;
 }
-
-
 
 /**
  * RMstatus xwcMemReleaseUserVirtual(uint32_t    entity,
@@ -392,8 +373,6 @@ RMstatus xwcMemReleaseUserVirtual(uint32_t    entity,
 
     return RM_OK;
 }
-
-
 
 /**
  * RMstatus xwcMemReleaseKernelVirtual(uint32_t    entity,

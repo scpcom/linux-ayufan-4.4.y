@@ -599,7 +599,6 @@ static void ipath_7220_txe_recover(struct ipath_devdata *dd)
 	ipath_disarm_senderrbufs(dd);
 }
 
-
 /**
  * ipath_7220_handle_hwerrors - display hardware errors.
  * @dd: the infinipath device
@@ -1278,7 +1277,6 @@ static void ipath_setup_7220_cleanup(struct ipath_devdata *dd)
 	ipath_7220_nomsi(dd);
 }
 
-
 static void ipath_7220_pcie_params(struct ipath_devdata *dd, u32 boardrev)
 {
 	u16 linkstat, minwidth, speed;
@@ -1345,7 +1343,6 @@ bail:
 		dd->ipath_lbus_width);
 	return;
 }
-
 
 /**
  * ipath_setup_7220_config - setup PCIe config related stuff
@@ -1594,7 +1591,6 @@ static void ipath_init_7220_variables(struct ipath_devdata *dd)
 	dd->ipath_link_speed_active = IPATH_IB_SDR;
 	dd->delay_mult = rate_to_delay[0][1];
 }
-
 
 /*
  * Setup the MSI stuff again after a reset.  I'd like to just call
@@ -2000,7 +1996,6 @@ static void ipath_7220_config_ports(struct ipath_devdata *dd, ushort cfgports)
 		dd->ipath_pioreserved = 3; /* kpiobufs used for PIO */
 }
 
-
 static int ipath_7220_get_ib_cfg(struct ipath_devdata *dd, int which)
 {
 	int lsb, ret = 0;
@@ -2221,7 +2216,6 @@ static void ipath_7220_xgxs_reset(struct ipath_devdata *dd)
 			 dd->ipath_control);
 }
 
-
 /* Still needs cleanup, too much hardwired stuff */
 static void autoneg_send(struct ipath_devdata *dd,
 	u32 *hdr, u32 dcnt, u32 *data)
@@ -2295,8 +2289,6 @@ static void ipath_autoneg_send(struct ipath_devdata *dd, int which)
 	udelay(2);
 }
 
-
-
 /*
  * Do the absolute minimum to cause an IB speed change, and make it
  * ready, but don't actually trigger the change.   The caller will
@@ -2335,7 +2327,6 @@ static void set_speed_fast(struct ipath_devdata *dd, u32 speed)
 	ipath_cdbg(VERBOSE, "setup for IB speed (%x) done\n", speed);
 }
 
-
 /*
  * this routine is only used when we are not talking to another
  * IB 1.2-compliant device that we think can do DDR.
@@ -2359,7 +2350,6 @@ static void try_auto_neg(struct ipath_devdata *dd)
 	schedule_delayed_work(&dd->ipath_autoneg_work,
 		msecs_to_jiffies(2));
 }
-
 
 static int ipath_7220_ib_updown(struct ipath_devdata *dd, int ibup, u64 ibcs)
 {
@@ -2518,7 +2508,6 @@ static int ipath_7220_ib_updown(struct ipath_devdata *dd, int ibup, u64 ibcs)
 	return ret;
 }
 
-
 /*
  * Handle the empirically determined mechanism for auto-negotiation
  * of DDR speed with switches.
@@ -2589,7 +2578,6 @@ done:
 		set_speed_fast(dd, dd->ipath_link_speed_enabled);
 	}
 }
-
 
 /**
  * ipath_init_iba7220_funcs - set up the chip-specific function pointers

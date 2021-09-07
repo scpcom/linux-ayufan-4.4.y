@@ -511,7 +511,6 @@ typedef unsigned long space_t;
 #define HINT_UDPATE_ENB 0x08UL  /* not used/supported by U2 */
 #define HINT_PREFETCH   0x10UL	/* for outbound pages which are not SAFE */
 
-
 /*
 ** Use direction (ie PCI_DMA_TODEVICE) to pick hint.
 ** ccio_alloc_consistent() depends on this to get SAFE_DMA
@@ -599,7 +598,6 @@ ccio_io_pdir_entry(u64 *pdir_ptr, space_t sid, unsigned long vba,
 	asm volatile ("depw  %1,15,12,%0" : "+r" (pa) : "r" (ci));
 
 	((u32 *)pdir_ptr)[0] = (u32) pa;
-
 
 	/* FIXME: PCX_W platforms don't need FDC/SYNC. (eg C360)
 	**        PCX-U/U+ do. (eg C200/C240)
@@ -1591,4 +1589,3 @@ void __init ccio_init(void)
 {
 	register_parisc_driver(&ccio_driver);
 }
-

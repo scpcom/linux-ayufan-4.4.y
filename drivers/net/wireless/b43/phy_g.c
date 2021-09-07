@@ -34,7 +34,6 @@
 
 #include <linux/bitrev.h>
 
-
 static const s8 b43_tssi2dbm_g_table[] = {
 	77, 77, 77, 76,
 	76, 76, 75, 75,
@@ -61,12 +60,9 @@ static const u8 b43_radio_channel_codes_bg[] = {
 	72, 84,
 };
 
-
 static void b43_calc_nrssi_threshold(struct b43_wldev *dev);
 
-
 #define bitrev4(tmp) (bitrev8(tmp) >> 4)
-
 
 /* Get the freq, as it has to be written to the device. */
 static inline u16 channel2freq_bg(u8 channel)

@@ -167,7 +167,6 @@
 #define	TxUIE	0x40	/* Tx Underrun/EOM IE */
 #define	BRKIE	0x80	/* Break/Abort IE */
 
-
 /* Read Register 0 */
 #define	Rx_CH_AV	0x1	/* Rx Character Available */
 #define	ZCOUNT		0x2	/* Zero count */

@@ -37,4 +37,3 @@ extern int sched_yield(void);
 extern int ptrace(int op, int pid, long addr, long data);
 
 #endif
-

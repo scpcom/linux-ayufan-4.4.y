@@ -81,7 +81,6 @@ static struct mtd_partition partition_info128[] = {
 };
 #endif
 
-
 /*
  *	hardware specific access to control-lines
  *

@@ -41,7 +41,6 @@ static u64 perf_event_mask __read_mostly;
 /* The BTS overflow threshold in bytes from the end of the buffer: */
 #define BTS_OVFL_TH		(BTS_RECORD_SIZE * 128)
 
-
 /*
  * Bits in the debugctlmsr controlling branch tracing.
  */
@@ -154,7 +153,6 @@ static u64 p6_pmu_raw_event(u64 hw_event)
 
 	return hw_event & P6_EVNTSEL_MASK;
 }
-
 
 /*
  * Intel PerfMon v3. Used on Core2 and later.
@@ -1398,7 +1396,6 @@ static void p6_pmu_enable_event(struct hw_perf_event *hwc, int idx)
 	(void)checking_wrmsrl(hwc->config_base + idx, val);
 }
 
-
 static void intel_pmu_enable_event(struct hw_perf_event *hwc, int idx)
 {
 	if (unlikely(idx == X86_PMC_IDX_FIXED_BTS)) {
@@ -1607,7 +1604,6 @@ static void intel_pmu_drain_bts_buffer(struct cpu_hw_events *cpuc)
 		return;
 
 	ds->bts_index = ds->bts_buffer_base;
-
 
 	data.period	= event->hw.last_period;
 	data.addr	= 0;
@@ -2235,7 +2231,6 @@ void callchain_store(struct perf_callchain_entry *entry, u64 ip)
 static DEFINE_PER_CPU(struct perf_callchain_entry, pmc_irq_entry);
 static DEFINE_PER_CPU(struct perf_callchain_entry, pmc_nmi_entry);
 static DEFINE_PER_CPU(int, in_nmi_frame);
-
 
 static void
 backtrace_warning_symbol(void *data, char *msg, unsigned long symbol)

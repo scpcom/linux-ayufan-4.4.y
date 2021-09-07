@@ -55,7 +55,6 @@ struct stub_device {
 	struct list_head unlink_tx;
 	struct list_head unlink_free;
 
-
 	wait_queue_head_t tx_waitq;
 #ifdef MY_ABC_HERE
 	wait_queue_head_t rx_waitq;
@@ -78,9 +77,7 @@ struct stub_unlink {
 	__u32 status;
 };
 
-
 extern struct kmem_cache *stub_priv_cache;
-
 
 /*-------------------------------------------------------------------------*/
 /* prototype declarations */

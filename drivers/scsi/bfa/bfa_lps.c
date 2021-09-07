@@ -50,7 +50,6 @@ static void bfa_lps_send_logout(struct bfa_lps_s *lps);
 static void bfa_lps_login_comp(struct bfa_lps_s *lps);
 static void bfa_lps_logout_comp(struct bfa_lps_s *lps);
 
-
 /**
  *  lps_pvt BFA LPS private functions
  */
@@ -245,8 +244,6 @@ bfa_lps_sm_logowait(struct bfa_lps_s *lps, enum bfa_lps_event event)
 		bfa_assert(0);
 	}
 }
-
-
 
 /**
  *  lps_pvt BFA LPS private functions
@@ -531,8 +528,6 @@ bfa_lps_logout_comp(struct bfa_lps_s *lps)
 		bfa_cb_lps_flogo_comp(lps->bfa->bfad, lps->uarg);
 }
 
-
-
 /**
  *  lps_public BFA LPS public functions
  */
@@ -752,7 +747,6 @@ bfa_lps_get_lsrjt_expl(struct bfa_lps_s *lps)
 	return lps->lsrjt_expl;
 }
 
-
 /**
  * LPS firmware message class handler.
  */
@@ -778,5 +772,3 @@ bfa_lps_isr(struct bfa_s *bfa, struct bfi_msg_s *m)
 		bfa_assert(0);
 	}
 }
-
-

@@ -695,7 +695,6 @@ qla24xx_build_scsi_iocbs(srb_t *sp, struct cmd_type_7 *cmd_pkt,
 	}
 }
 
-
 /**
  * qla24xx_start_scsi() - Send a SCSI command to the ISP
  * @sp: command to send to the ISP

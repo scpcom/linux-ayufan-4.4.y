@@ -193,7 +193,6 @@ int wl1271_cmd_join(struct wl1271 *wl, u8 bss_type, u8 dtim_interval,
 			do_cal = false;
 	}
 
-
 	join = kzalloc(sizeof(*join), GFP_KERNEL);
 	if (!join) {
 		ret = -ENOMEM;
@@ -227,7 +226,6 @@ int wl1271_cmd_join(struct wl1271 *wl, u8 bss_type, u8 dtim_interval,
 		wl->session_counter = 0;
 
 	join->ctrl |= wl->session_counter << WL1271_JOIN_CMD_TX_SESSION_OFFSET;
-
 
 	ret = wl1271_cmd_send(wl, CMD_START_JOIN, join, sizeof(*join));
 	if (ret < 0) {

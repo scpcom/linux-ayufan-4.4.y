@@ -21,7 +21,6 @@
 #define PMPCON_START (IO_START_2 + PMPCON_OFF)  /* Physical address of reg. */
 #define PMPCON_BASE  (IO_BASE_2  + PMPCON_OFF)  /* Virtual address of reg. */
 
-
 #define PMPCON (*(volatile unsigned int *)(PMPCON_BASE))
 
 #define PWM2_50CYCLE 0x800

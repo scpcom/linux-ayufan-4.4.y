@@ -54,7 +54,6 @@
 
 /*---------------------  Export Functions  --------------------------*/
 
-
 void ControlvWriteByte(PSDevice pDevice, BYTE byRegType, BYTE byRegOfs, BYTE byData)
 {
 BYTE            byData1;
@@ -71,12 +70,10 @@ BYTE            byData1;
 
 }
 
-
 void ControlvReadByte(PSDevice pDevice, BYTE byRegType, BYTE byRegOfs, PBYTE pbyData)
 {
 NTSTATUS        ntStatus;
 BYTE            byData1;
-
 
     ntStatus = CONTROLnsRequestIn(pDevice,
                                     MESSAGE_TYPE_READ,
@@ -88,8 +85,6 @@ BYTE            byData1;
     *pbyData = byData1;
 
 }
-
-
 
 void ControlvMaskByte(PSDevice pDevice, BYTE byRegType, BYTE byRegOfs, BYTE byMask, BYTE byData)
 {

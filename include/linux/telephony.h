@@ -316,6 +316,4 @@ union telephony_exception {
 	unsigned int bytes;
 };
 
-
 #endif		/* TELEPHONY_H */
-

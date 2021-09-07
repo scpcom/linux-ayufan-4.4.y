@@ -28,4 +28,3 @@ int mmc_spi_set_crc(struct mmc_host *host, int use_crc);
 int mmc_card_sleepawake(struct mmc_host *host, int sleep);
 
 #endif
-

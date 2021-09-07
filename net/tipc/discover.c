@@ -61,7 +61,6 @@
  * rewritten, and be made conformant with specification.
  */
 
-
 /**
  * struct link_req - information about an ongoing link setup request
  * @bearer: bearer issuing requests
@@ -77,7 +76,6 @@ struct link_req {
 	struct timer_list timer;
 	unsigned int timer_intv;
 };
-
 
 #if 0
 int disc_create_link(const struct tipc_link_create *argv)
@@ -341,4 +339,3 @@ struct link_req *tipc_disc_init_link_req(struct bearer *b_ptr,
 	k_start_timer(&req->timer, req->timer_intv);
 	return req;
 }
-

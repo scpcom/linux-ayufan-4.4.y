@@ -42,8 +42,6 @@
 #define WIDTH_RD_IDLE 0
 #define WIDTH_RD_CHECK 1
 
-
-
 /*************************************************************************
   *
   *	DFS Radar related definitions.
@@ -70,8 +68,6 @@
 #define RADAR_DETECTION			1
 #define CARRIER_DETECTION		2
 
-
-
 #ifdef TONE_RADAR_DETECT_SUPPORT
 INT Set_CarrierCriteria_Proc(IN PRTMP_ADAPTER pAd, IN PSTRING arg);
 int Set_CarrierReCheck_Proc(IN PRTMP_ADAPTER pAd, IN PSTRING arg);
@@ -80,7 +76,6 @@ void NewCarrierDetectionStart(PRTMP_ADAPTER pAd);
 void RTMPHandleRadarInterrupt(PRTMP_ADAPTER  pAd);
 VOID CSAsicDisableSync(IN PRTMP_ADAPTER pAd);
 #endif // TONE_RADAR_DETECT_SUPPORT //
-
 
 VOID BbpRadarDetectionStart(
 	IN PRTMP_ADAPTER pAd);
@@ -98,7 +93,6 @@ VOID RadarDetectionStop(
 
 VOID RadarDetectPeriodic(
 	IN PRTMP_ADAPTER	pAd);
-
 
 BOOLEAN RadarChannelCheck(
 	IN PRTMP_ADAPTER	pAd,
@@ -126,7 +120,6 @@ VOID RTMPPrepareRDCTSFrame(
 
 VOID RTMPPrepareRadarDetectParams(
 	IN PRTMP_ADAPTER	pAd);
-
 
 INT Set_ChMovingTime_Proc(
 	IN PRTMP_ADAPTER pAd,

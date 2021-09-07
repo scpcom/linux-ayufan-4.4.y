@@ -178,7 +178,6 @@ static dbdev_tab_t dbdev_tab[] = {
 static u32 au1xxx_dbdma_pm_regs[NUM_DBDMA_CHANS + 1][6];
 #endif
 
-
 static chan_tab_t *chan_tab_ptr[NUM_DBDMA_CHANS];
 
 static dbdev_tab_t *find_dbdev_id(u32 id)

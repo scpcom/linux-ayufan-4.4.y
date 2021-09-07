@@ -53,7 +53,6 @@ typedef enum _lpfc_iocb_type {
 	LPFC_ABORT_IOCB
 } lpfc_iocb_type;
 
-
 /* Provide function prototypes local to this module. */
 static int lpfc_sli_issue_mbox_s4(struct lpfc_hba *, LPFC_MBOXQ_t *,
 				  uint32_t);
@@ -585,7 +584,6 @@ __lpfc_sli_release_iocbq_s4(struct lpfc_hba *phba, struct lpfc_iocbq *iocbq)
 			list_add(&sglq->list, &phba->sli4_hba.lpfc_sgl_list);
 	}
 
-
 	/*
 	 * Clean all volatile data fields, preserve iotag and node struct.
 	 */
@@ -875,7 +873,6 @@ lpfc_sli_ringtxcmpl_put(struct lpfc_hba *phba, struct lpfc_sli_ring *pring,
 				  jiffies + HZ * (phba->fc_ratov << 1));
 	}
 
-
 	return 0;
 }
 
@@ -1051,7 +1048,6 @@ lpfc_sli_submit_iocb(struct lpfc_hba *phba, struct lpfc_sli_ring *pring,
 	 * Set up an iotag
 	 */
 	nextiocb->iocb.ulpIoTag = (nextiocb->iocb_cmpl) ? nextiocb->iotag : 0;
-
 
 	if (pring->ringno == LPFC_ELS_RING) {
 		lpfc_debugfs_slow_ring_trc(phba,
@@ -1682,7 +1678,6 @@ lpfc_sli_wake_mbox_wait(struct lpfc_hba *phba, LPFC_MBOXQ_t *pmboxq)
 	spin_unlock_irqrestore(&phba->hbalock, drvr_flag);
 	return;
 }
-
 
 /**
  * lpfc_sli_def_mbox_cmpl - Default mailbox completion handler
@@ -3592,7 +3587,6 @@ lpfc_sli_brdrestart_s4(struct lpfc_hba *phba)
 {
 	struct lpfc_sli *psli = &phba->sli;
 
-
 	/* Restart HBA */
 	lpfc_printf_log(phba, KERN_INFO, LOG_SLI,
 			"0296 Restart HBA Data: x%x x%x\n",
@@ -3988,7 +3982,6 @@ do_prep_failed:
 	mempool_free(pmb, phba->mbox_mem_pool);
 	return rc;
 }
-
 
 /**
  * lpfc_sli_hba_setup - SLI intialization function
@@ -4595,7 +4588,6 @@ lpfc_mbox_timeout(unsigned long ptr)
 		lpfc_worker_wake_up(phba);
 	return;
 }
-
 
 /**
  * lpfc_mbox_timeout_handler - Worker thread function to handle mailbox timeout
@@ -5637,7 +5629,6 @@ __lpfc_sli_issue_iocb_s3(struct lpfc_hba *phba, uint32_t ring_number,
 		return IOCB_ERROR;
 	}
 
-
 	/* If the PCI channel is in offline state, do not post iocbs. */
 	if (unlikely(pci_channel_offline(phba->pcidev)))
 		return IOCB_ERROR;
@@ -6369,7 +6360,6 @@ lpfc_sli_async_event_handler(struct lpfc_hba * phba,
 
 }
 
-
 /**
  * lpfc_sli_setup - SLI ring setup function
  * @phba: Pointer to HBA context object.
@@ -6786,7 +6776,6 @@ lpfc_sli_pcimem_bcopy(void *srcp, void *destp, uint32_t cnt)
 		dest++;
 	}
 }
-
 
 /**
  * lpfc_sli_bemem_bcopy - SLI memory copy function
@@ -9371,7 +9360,6 @@ lpfc_sli4_queue_alloc(struct lpfc_hba *phba, uint32_t entry_size,
 	struct lpfc_dmabuf *dmabuf;
 	int x, total_qe_count;
 	void *dma_pointer;
-
 
 	queue = kzalloc(sizeof(struct lpfc_queue) +
 			(sizeof(union sli4_qe) * entry_count), GFP_KERNEL);

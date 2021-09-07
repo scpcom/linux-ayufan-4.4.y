@@ -265,7 +265,6 @@ static int snd_p16v_pcm_open_capture_channel(struct snd_pcm_substream *substream
 	return 0;
 }
 
-
 /* close callback */
 static int snd_p16v_pcm_close_playback(struct snd_pcm_substream *substream)
 {
@@ -319,7 +318,6 @@ static int snd_p16v_pcm_hw_params_capture(struct snd_pcm_substream *substream,
 	return result;
 }
 
-
 /* hw_free callback */
 static int snd_p16v_pcm_hw_free_playback(struct snd_pcm_substream *substream)
 {
@@ -335,7 +333,6 @@ static int snd_p16v_pcm_hw_free_capture(struct snd_pcm_substream *substream)
 	result = snd_pcm_lib_free_pages(substream);
 	return result;
 }
-
 
 /* prepare playback callback */
 static int snd_p16v_pcm_prepare_playback(struct snd_pcm_substream *substream)
@@ -623,7 +620,6 @@ static struct snd_pcm_ops snd_p16v_capture_ops = {
 	.pointer =     snd_p16v_pcm_pointer_capture,
 };
 
-
 int snd_p16v_free(struct snd_emu10k1 *chip)
 {
 	// release the data
@@ -878,7 +874,6 @@ static struct snd_kcontrol_new p16v_mixer_controls[] __devinitdata = {
 		.put =		snd_p16v_capture_channel_put
 	},
 };
-
 
 int __devinit snd_p16v_mixer(struct snd_emu10k1 *emu)
 {

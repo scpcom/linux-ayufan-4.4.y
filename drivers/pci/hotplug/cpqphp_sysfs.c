@@ -236,4 +236,3 @@ void cpqhp_remove_debugfs_files(struct controller *ctrl)
 		debugfs_remove(ctrl->dentry);
 	ctrl->dentry = NULL;
 }
-

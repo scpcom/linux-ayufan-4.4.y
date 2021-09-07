@@ -28,7 +28,6 @@ typedef union rfixed {
 	u32 full;
 } fixed20_12;
 
-
 #define rfixed_const(A) (u32)(((A) << 12))/*  + ((B + 0.000122)*4096)) */
 #define rfixed_const_half(A) (u32)(((A) << 12) + 2048)
 #define rfixed_const_666(A) (u32)(((A) << 12) + 2731)

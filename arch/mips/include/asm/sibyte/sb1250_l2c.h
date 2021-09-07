@@ -29,7 +29,6 @@
     *  MA 02111-1307 USA
     ********************************************************************* */
 
-
 #ifndef _SB1250_L2C_H
 #define _SB1250_L2C_H
 
@@ -105,7 +104,6 @@
 #define L2C_ENTRIES_PER_WAY       4096
 #define L2C_NUM_WAYS              4
 
-
 #if SIBYTE_HDR_FEATURE(1250, PASS3) || SIBYTE_HDR_FEATURE(112x, PASS1)
 /*
  * L2 Read Misc. register (A_L2_READ_MISC)
@@ -126,6 +124,5 @@
 #define M_L2C_MISC_SCACHE_DISABLE_R	_SB_MAKEMASK1(1)
 #define M_L2C_MISC_SCACHE_DISABLE_L	_SB_MAKEMASK1(0)
 #endif /* 1250 PASS3 || 112x PASS1 */
-
 
 #endif

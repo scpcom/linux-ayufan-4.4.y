@@ -21,7 +21,6 @@
 #include <sound/soc.h>
 #include <sound/soc-dapm.h>
 
-
 #include "../codecs/wm8974.h"
 #include "mx1_mx2-pcm.h"
 #include "mxc-ssi.h"
@@ -29,7 +28,6 @@
 #include <mach/iomux.h>
 
 #define IGNORED_ARG 0
-
 
 static struct snd_soc_card mx27vis;
 
@@ -50,7 +48,6 @@ void audmux_connect_1_4(void)
 	/* set to synchronous */
 	DAM_HPCR1 |= AUDMUX_HPCR_SYN;
 	DAM_PPCR1 |= AUDMUX_PPCR_SYN;
-
 
 	/* set Rx sources 1 <--> 4 */
 	DAM_HPCR1 |= AUDMUX_HPCR_RXDSEL(3); /* port 4 */
@@ -155,7 +152,6 @@ static int mx27vis_hifi_hw_params(struct snd_pcm_substream *substream,
 		return ret;
 	}
 
-
 	/* codec PLL input is 25 MHz */
 	ret = codec_dai->ops->set_pll(codec_dai, IGNORED_ARG,
 					25000000, pll_out);
@@ -191,7 +187,6 @@ static struct snd_soc_ops mx27vis_hifi_ops = {
 	.hw_free = mx27vis_hifi_hw_free,
 };
 
-
 static int mx27vis_suspend(struct platform_device *pdev, pm_message_t state)
 {
 	return 0;
@@ -212,7 +207,6 @@ static int mx27vis_probe(struct platform_device *pdev)
 		printk(KERN_ERR "%s: cant get ssi clock\n", __func__);
 		return ret;
 	}
-
 
 	return 0;
 }
@@ -278,7 +272,6 @@ void gpio_ssi_active(int ssi_num)
 		printk(KERN_ERR "Error requesting ssi %x pins\n", ssi_num);
 }
 
-
 static int __init mx27vis_init(void)
 {
 	int ret;
@@ -310,7 +303,6 @@ static void __exit mx27vis_exit(void)
 
 module_init(mx27vis_init);
 module_exit(mx27vis_exit);
-
 
 MODULE_AUTHOR("Javier Martin, javier.martin@vista-silicon.com");
 MODULE_DESCRIPTION("ALSA SoC WM8974 mx27vis");

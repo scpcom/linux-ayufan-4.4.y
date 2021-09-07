@@ -262,5 +262,3 @@ struct mt9t013_reg mt9t013_regs = {
 	.rftbl = &mt9t013_lc_tbl[0],	/* &mt9t013_rolloff_tbl[0], */
 	.rftbl_size = ARRAY_SIZE(mt9t013_lc_tbl)
 };
-
-

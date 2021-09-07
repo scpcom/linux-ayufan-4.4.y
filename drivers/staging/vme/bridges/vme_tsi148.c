@@ -39,7 +39,6 @@ static int tsi148_probe(struct pci_dev *, const struct pci_device_id *);
 static void tsi148_remove(struct pci_dev *);
 static void __exit tsi148_exit(void);
 
-
 int tsi148_slave_set(struct vme_slave_resource *, int, unsigned long long,
 	unsigned long long, dma_addr_t, vme_address_t, vme_cycle_t);
 int tsi148_slave_get(struct vme_slave_resource *, int *, unsigned long long *,
@@ -79,7 +78,6 @@ struct mutex vme_int;	/*
 				 * generated at a time, provide locking
 				 */
 struct mutex vme_irq;	/* Locking for VME irq callback configuration */
-
 
 static char driver_name[] = "vme_tsi148";
 
@@ -449,7 +447,6 @@ int tsi148_request_irq(int level, int statid,
 		return -EBUSY;
 	}
 
-
 	tsi148_bridge->irq[level - 1].count++;
 	tsi148_bridge->irq[level - 1].callback[statid].priv_data = priv_data;
 	tsi148_bridge->irq[level - 1].callback[statid].func = callback;
@@ -785,7 +782,6 @@ int tsi148_slave_get(struct vme_slave_resource *image, int *enabled,
 	unsigned int pci_offset_low, pci_offset_high;
 	unsigned long long vme_bound, pci_offset;
 
-
 	i = image->number;
 
 	/* Read registers */
@@ -838,7 +834,6 @@ int tsi148_slave_get(struct vme_slave_resource *image, int *enabled,
 
 	/* Need granularity before we set the size */
 	*size = (unsigned long long)((vme_bound - *vme_base) + granularity);
-
 
 	if ((ctl & TSI148_LCSR_ITAT_2eSSTM_M) == TSI148_LCSR_ITAT_2eSSTM_160)
 		*cycle |= VME_2eSST160;
@@ -1006,7 +1001,6 @@ int tsi148_master_set( struct vme_master_resource *image, int enabled,
 	}
 
 	pci_base = (unsigned long long)image->pci_resource.start;
-
 
 	/*
 	 * Bound address is a valid address for the window, adjust
@@ -1313,7 +1307,6 @@ int __tsi148_master_get( struct vme_master_resource *image, int *enabled,
 	return 0;
 }
 
-
 int tsi148_master_get( struct vme_master_resource *image, int *enabled,
 	unsigned long long *vme_base, unsigned long long *size,
 	vme_address_t *aspace, vme_cycle_t *cycle, vme_width_t *dwidth)
@@ -1365,7 +1358,6 @@ skip_chk:
 
 	return retval;
 }
-
 
 /* XXX We need to change vme_master_resource->mtx to a spinlock so that read
  *     and write functions can be used in an interrupt context
@@ -1437,7 +1429,6 @@ unsigned int tsi148_master_rmw(struct vme_master_resource *image,
 	unsigned int pci_addr_high, pci_addr_low;
 	u32 tmp, result;
 	int i;
-
 
 	/* Find the PCI address that maps to the desired VME address */
 	i = image->number;
@@ -1758,7 +1749,6 @@ int tsi148_dma_list_add (struct vme_dma_list *list, struct vme_dma_attr *src,
 	/* Assume last link - this will be over-written by adding another */
 	entry->descriptor.dnlau = 0;
 	entry->descriptor.dnlal = TSI148_LCSR_DNLAL_LLA;
-
 
 	/* Fill out destination part */
 	switch (dest->type) {
@@ -2847,7 +2837,6 @@ int tempe_get_arbiter(vmeArbiterCfg_t * vmeArb)
 	int temp_ctl = 0;
 	int gto = 0;
 
-
 	temp_ctl = ioread32be(tsi148_bridge->base + TSI148_LCSR_VCTRL);
 
 	gto = temp_ctl & 0xF;
@@ -2921,6 +2910,5 @@ int tempe_get_requestor(vmeRequesterCfg_t * vmeReq)
 
 	return (0);
 }
-
 
 #endif

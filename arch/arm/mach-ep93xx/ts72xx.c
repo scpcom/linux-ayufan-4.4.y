@@ -24,7 +24,6 @@
 #include <asm/mach/map.h>
 #include <asm/mach/arch.h>
 
-
 static struct map_desc ts72xx_io_desc[] __initdata = {
 	{
 		.virtual	= TS72XX_MODEL_VIRT_BASE,

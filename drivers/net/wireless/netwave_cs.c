@@ -866,7 +866,6 @@ static int netwave_resume(struct pcmcia_device *link)
 	return 0;
 }
 
-
 /*
  * Function netwave_doreset (ioBase, ramBase)
  *

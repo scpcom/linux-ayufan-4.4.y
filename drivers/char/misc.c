@@ -90,7 +90,6 @@ static int misc_seq_show(struct seq_file *seq, void *v)
 	return 0;
 }
 
-
 static const struct seq_operations misc_seq_ops = {
 	.start = misc_seq_start,
 	.next  = misc_seq_next,

@@ -328,7 +328,6 @@ static void ds2760_battery_external_power_changed(struct power_supply *psy)
 	queue_delayed_work(di->monitor_wqueue, &di->monitor_work, HZ/10);
 }
 
-
 static void ds2760_battery_set_charged_work(struct work_struct *work)
 {
 	char bias;

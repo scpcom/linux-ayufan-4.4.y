@@ -57,7 +57,6 @@ static void __bfa_cb_rport_offline(void *cbarg, bfa_boolean_t complete);
  *  bfa_rport_sm BFA rport state machine
  */
 
-
 enum bfa_rport_event {
 	BFA_RPORT_SM_CREATE	= 1,	/*  rport create event		*/
 	BFA_RPORT_SM_DELETE	= 2,	/*  deleting an existing rport */
@@ -554,8 +553,6 @@ bfa_rport_sm_iocdisable(struct bfa_rport_s *rp, enum bfa_rport_event event)
 	}
 }
 
-
-
 /**
  *  bfa_rport_private BFA rport private functions
  */
@@ -774,8 +771,6 @@ bfa_rport_send_fwspeed(struct bfa_rport_s *rp)
 	return BFA_TRUE;
 }
 
-
-
 /**
  *  bfa_rport_public
  */
@@ -819,8 +814,6 @@ bfa_rport_isr(struct bfa_s *bfa, struct bfi_msg_s *m)
 		bfa_assert(0);
 	}
 }
-
-
 
 /**
  *  bfa_rport_api
@@ -907,5 +900,3 @@ bfa_rport_clear_stats(struct bfa_rport_s *rport)
 {
 	bfa_os_memset(&rport->stats, 0, sizeof(rport->stats));
 }
-
-

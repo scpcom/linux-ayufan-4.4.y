@@ -264,7 +264,6 @@ int diva_bri_init_card(diva_os_xdi_adapter_t * a)
 	return (0);
 }
 
-
 static int diva_bri_cleanup_adapter(diva_os_xdi_adapter_t * a)
 {
 	int i;

@@ -54,5 +54,4 @@
 #define K_INT_GB_IDE    (K_INT_GPIO_0 + K_GPIO_GB_IDE)
 #endif
 
-
 #endif /* __ASM_SIBYTE_CARMEL_H */

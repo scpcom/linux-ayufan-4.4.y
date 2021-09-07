@@ -61,7 +61,6 @@
 #define DBG(fmt...)
 #endif
 
-
 static int __initdata dt_root_addr_cells;
 static int __initdata dt_root_size_cells;
 
@@ -285,7 +284,6 @@ static unsigned long __init unflatten_dt_node(unsigned long mem,
 			allocl = fpsize;
 		}
 	}
-
 
 	np = unflatten_dt_alloc(&mem, sizeof(struct device_node) + allocl,
 				__alignof__(struct device_node));
@@ -1157,7 +1155,6 @@ static void __init phyp_dump_reserve_mem(void)
 static inline void __init phyp_dump_reserve_mem(void) {}
 #endif /* CONFIG_PHYP_DUMP  && CONFIG_PPC_RTAS */
 
-
 void __init early_init_devtree(void *params)
 {
 	phys_addr_t limit;
@@ -1233,7 +1230,6 @@ void __init early_init_devtree(void *params)
 
 	DBG(" <- early_init_devtree()\n");
 }
-
 
 /**
  * Indicates whether the root node has a given value in its
@@ -1655,7 +1651,6 @@ int prom_update_property(struct device_node *np,
 
 	return 0;
 }
-
 
 /* Find the device node for a given logical cpu number, also returns the cpu
  * local thread number (index in ibm,interrupt-server#s) if relevant and

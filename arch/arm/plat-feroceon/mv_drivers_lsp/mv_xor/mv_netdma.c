@@ -9,7 +9,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -68,7 +67,6 @@ disclaimer.
  */
 #define XOR_BENCH
 #undef XOR_BENCH
-
 
 #define XOR_STATS
 #undef XOR_STATS
@@ -196,8 +194,6 @@ struct xor_chain* xor_chains;
 struct xor_net_stats* xor_stats;
 
 static unsigned int xor_enabled __read_mostly;
-
-
 
 /*
  * channel busy test
@@ -858,7 +854,6 @@ int __init mv_xor_init(void)
 			
 		}
 	
-
 #if defined(CONFIG_MV78200) || defined(CONFIG_MV632X)
 		if (MV_FALSE == mvSocUnitIsMappedToThisCpu(XOR)) {
 			printk(KERN_INFO"XOR engine is not mapped to this CPU\n");
@@ -933,7 +928,6 @@ int __init mv_xor_init(void)
 
 		}
     
-
 #ifdef CONFIG_PROC_FS
 		/* FIXME: /proc/sys/dev/ */
 		proc_e = create_proc_entry("mvxor", 0666, 0);
@@ -992,7 +986,6 @@ void __exit mv_xor_exit(void)
 module_init(mv_xor_init);
 module_exit(mv_xor_exit);
 MODULE_LICENSE(GPL);
-
 
 /* = ====================================================================== */
 #ifdef CONFIG_MV_XOR_MEMCOPY
@@ -1249,7 +1242,6 @@ out:
 #endif
 EXPORT_SYMBOL(xor_memxor);
 #endif /* CONFIG_MV_XOR_MEMXOR */
-
 
 #if defined(CONFIG_MV_XOR_COPY_TO_USER) || defined(CONFIG_MV_XOR_COPY_FROM_USER)
 /*
@@ -1526,7 +1518,6 @@ EXPORT_SYMBOL(xor_copy_from_user);
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,26) */
 #endif /* CONFIG_MV_XOR_COPY_FROM_USER */
 
-
 #ifdef XOR_BENCH
 void xor_bench(void *to, void *from, unsigned long n)
 {
@@ -1604,4 +1595,3 @@ void xor_bench(void *to, void *from, unsigned long n)
 		}
 }
 #endif
-

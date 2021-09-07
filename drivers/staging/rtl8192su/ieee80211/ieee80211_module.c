@@ -98,7 +98,6 @@ static inline void ieee80211_networks_initialize(struct ieee80211_device *ieee)
 		list_add_tail(&ieee->networks[i].list, &ieee->network_free_list);
 }
 
-
 struct net_device *alloc_ieee80211(int sizeof_priv)
 {
 	struct ieee80211_device *ieee;
@@ -124,7 +123,6 @@ struct net_device *alloc_ieee80211(int sizeof_priv)
 		goto failed;
 	}
 	ieee80211_networks_initialize(ieee);
-
 
 	/* Default fragmentation threshold is maximum payload size */
 	ieee->fts = DEFAULT_FTS;
@@ -193,7 +191,6 @@ struct net_device *alloc_ieee80211(int sizeof_priv)
 
 	return NULL;
 }
-
 
 void free_ieee80211(struct net_device *dev)
 {

@@ -159,7 +159,6 @@ static struct rb_root		atom_root, sorted_atom_root;
 static u64			all_runtime;
 static u64			all_count;
 
-
 static u64 get_nsecs(void)
 {
 	struct timespec ts;
@@ -345,7 +344,6 @@ static struct task_desc *register_pid(unsigned long pid, const char *comm)
 
 	return task;
 }
-
 
 static void print_task_traces(void)
 {
@@ -654,7 +652,6 @@ process_comm_event(event_t *event, unsigned long offset, unsigned long head)
 	return 0;
 }
 
-
 struct raw_event_sample {
 	u32 size;
 	char data[0];
@@ -677,8 +674,6 @@ do {								\
 	FILL_FIELD(ptr, common_pid, event, data);		\
 	FILL_FIELD(ptr, common_tgid, event, data);		\
 } while (0)
-
-
 
 struct trace_switch_event {
 	u32 size;
@@ -771,7 +766,6 @@ struct trace_sched_handler {
 			   struct thread *thread);
 };
 
-
 static void
 replay_wakeup_event(struct trace_wakeup_event *wakeup_event,
 		    struct event *event,
@@ -839,7 +833,6 @@ replay_switch_event(struct trace_switch_event *switch_event,
 	add_sched_event_run(prev, timestamp, delta);
 	add_sched_event_sleep(prev, timestamp, switch_event->prev_state);
 }
-
 
 static void
 replay_fork_event(struct trace_fork_event *fork_event,
@@ -1056,7 +1049,6 @@ latency_switch_event(struct trace_switch_event *switch_event,
 
 	if (delta < 0)
 		die("hm, delta: %Ld < 0 ?\n", delta);
-
 
 	sched_out = threads__findnew(switch_event->prev_pid, &threads, &last_match);
 	sched_in = threads__findnew(switch_event->next_pid, &threads, &last_match);
@@ -1384,7 +1376,6 @@ map_switch_event(struct trace_switch_event *switch_event,
 	if (delta < 0)
 		die("hm, delta: %Ld < 0 ?\n", delta);
 
-
 	sched_out = threads__findnew(switch_event->prev_pid, &threads, &last_match);
 	sched_in = threads__findnew(switch_event->next_pid, &threads, &last_match);
 
@@ -1433,7 +1424,6 @@ map_switch_event(struct trace_switch_event *switch_event,
 		printf("\n");
 	}
 }
-
 
 static void
 process_sched_switch_event(struct raw_event_sample *raw,
@@ -1721,7 +1711,6 @@ more:
 
 	size = event->header.size;
 
-
 	if (!size || process_event(event, offset, head) < 0) {
 
 		/*
@@ -1856,7 +1845,6 @@ static void __cmd_replay(void)
 	for (i = 0; i < replay_repeat; i++)
 		run_one_test();
 }
-
 
 static const char * const sched_usage[] = {
 	"perf sched [<options>] {record|latency|map|replay|trace}",

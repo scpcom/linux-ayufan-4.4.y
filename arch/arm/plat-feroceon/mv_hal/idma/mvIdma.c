@@ -153,7 +153,6 @@ MV_STATUS mvDmaCtrlLowSet(MV_U32 chan, MV_U32 ctrlWord)
 	return MV_OK;
 }
 
-
 /*******************************************************************************
 * mvDmaCtrlHighSet - Set IDMA channel control high register
 *
@@ -413,7 +412,6 @@ MV_STATUS mvDmaCommandSet(MV_U32 chan, MV_COMMAND command)
     return  MV_OK;
 }
 
-
 /************ DEBUG ***********/
 MV_VOID    mvIdmaRegs(MV_U32 chan)
 {
@@ -455,4 +453,3 @@ MV_VOID    mvIdmaRegs(MV_U32 chan)
                 IDMA_MASK_REG, 
                 MV_REG_READ( IDMA_MASK_REG ) );    
 }
-

@@ -30,7 +30,6 @@
 #include "ibmasm.h"
 #include "lowlevel.h"
 
-
 void ibmasm_register_uart(struct service_processor *sp)
 {
 	struct uart_port uport;

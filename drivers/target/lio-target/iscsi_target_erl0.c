@@ -26,7 +26,6 @@
  *
  ******************************************************************************/
 
-
 #define ISCSI_TARGET_ERL0_C
 
 #include <linux/net.h>
@@ -1099,4 +1098,3 @@ int iscsi_recover_from_unknown_opcode(iscsi_conn_t *conn)
 
 	return 0;
 }
-

@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvCpuIfconfigh
 #define __INCmvCpuIfConfigh
 
@@ -76,13 +75,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CPU_CONFIG_DEFAULT_MASK		(CCR_VEC_INIT_LOC_MASK	|	\
 									CCR_AHB_ERROR_PROP_MASK)
 									
-
 #define CPU_CONFIG_DEFAULT			(CCR_VEC_INIT_LOC_FF00	)
 		 
 /* CPU Control and status defaults */
 #define CPU_CTRL_STAT_DEFAULT_MASK		(CCSR_PCI_ACCESS_MASK)
 									
-
 #define CPU_CTRL_STAT_DEFAULT			(CCSR_PCI_ACCESS_ENABLE)
 		 
 #else
@@ -92,13 +89,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CPU_CONFIG_DEFAULT_MASK		(CCR_VEC_INIT_LOC_MASK	|	\
 									CCR_AHB_ERROR_PROP_MASK)
 									
-
 #define CPU_CONFIG_DEFAULT			(CCR_VEC_INIT_LOC_FF00	)
 		 
 /* CPU Control and status defaults */
 #define CPU_CTRL_STAT_DEFAULT_MASK		(CCSR_PCI_ACCESS_MASK)
 									
-
 #define CPU_CTRL_STAT_DEFAULT			(CCSR_PCI_ACCESS_ENABLE)
 
 /* Ratio options for CPU to DDR */
@@ -129,10 +124,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		 ((TICK_DRV_1x4  << CCR_CPU_2_MBUSL_TICK_DRV_OFFS) | 	\
 		  (TICK_SMPL_1x4 << CCR_CPU_2_MBUSL_TICK_SMPL_OFFS))
 		 
-
 #define CPU_FTDLL_IC_CONFIG_DEFAULT        0x1b
 #define CPU_FTDLL_DC_CONFIG_DEFAULT        0x2
 #endif /* #if defined(MV_88F1181) */
-
 
 #endif /* __INCmvCpuIfConfigh */

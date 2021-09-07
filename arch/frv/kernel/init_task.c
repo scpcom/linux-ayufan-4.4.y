@@ -9,7 +9,6 @@
 #include <asm/uaccess.h>
 #include <asm/pgtable.h>
 
-
 static struct signal_struct init_signals = INIT_SIGNALS(init_signals);
 static struct sighand_struct init_sighand = INIT_SIGHAND(init_sighand);
 /*

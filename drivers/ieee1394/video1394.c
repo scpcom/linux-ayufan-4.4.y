@@ -110,7 +110,6 @@ struct dma_iso_ctx {
 	struct list_head link;
 };
 
-
 struct file_ctx {
 	struct ti_ohci *ohci;
 	struct list_head context_list;
@@ -1321,7 +1320,6 @@ static struct hpsb_protocol_driver video1394_driver = {
 	.name = VIDEO1394_DRIVER_NAME,
 };
 
-
 static void video1394_add_host (struct hpsb_host *host)
 {
 	struct ti_ohci *ohci;
@@ -1346,7 +1344,6 @@ static void video1394_add_host (struct hpsb_host *host)
 		      NULL, "%s-%d", VIDEO1394_DRIVER_NAME, ohci->host->id);
 }
 
-
 static void video1394_remove_host (struct hpsb_host *host)
 {
 	struct ti_ohci *ohci = hpsb_get_hostinfo(&video1394_highlevel, host);
@@ -1356,7 +1353,6 @@ static void video1394_remove_host (struct hpsb_host *host)
 			       IEEE1394_MINOR_BLOCK_VIDEO1394 * 16 + ohci->host->id));
 	return;
 }
-
 
 static struct hpsb_highlevel video1394_highlevel = {
 	.name =		VIDEO1394_DRIVER_NAME,
@@ -1526,7 +1522,6 @@ static int __init video1394_init_module (void)
 	PRINT_G(KERN_INFO, "Installed " VIDEO1394_DRIVER_NAME " module");
 	return 0;
 }
-
 
 module_init(video1394_init_module);
 module_exit(video1394_exit_module);

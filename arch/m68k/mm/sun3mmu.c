@@ -97,7 +97,4 @@ void __init paging_init(void)
 	free_area_init_node(0, zones_size,
 			    (__pa(PAGE_OFFSET) >> PAGE_SHIFT) + 1, NULL);
 
-
 }
-
-

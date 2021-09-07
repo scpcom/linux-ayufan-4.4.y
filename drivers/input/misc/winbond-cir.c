@@ -285,8 +285,6 @@ module_param(wake_rc6mode, uint, 0644);
 MODULE_PARM_DESC(wake_rc6mode, "RC6 mode for the power-on command "
 		 "(0 = 0, 6 = 6A, default)");
 
-
-
 /*****************************************************************************
  *
  * UTILITY FUNCTIONS
@@ -355,8 +353,6 @@ wbcir_to_rc6cells(u8 val)
 
 	return coded;
 }
-
-
 
 /*****************************************************************************
  *
@@ -521,8 +517,6 @@ set_timer:
 	data->keyup_jiffies = jiffies + msecs_to_jiffies(IR_KEYPRESS_TIMEOUT);
 	mod_timer(&data->timer_keyup, data->keyup_jiffies);
 }
-
-
 
 /*****************************************************************************
  *
@@ -928,8 +922,6 @@ wbcir_parse_nec(struct device *dev, struct wbcir_data *data)
 	wbcir_keydown(data, scancode, !data->last_toggle);
 }
 
-
-
 /*****************************************************************************
  *
  * INTERRUPT FUNCTIONS
@@ -1013,8 +1005,6 @@ out:
 	spin_unlock_irqrestore(&wbcir_lock, flags);
 	return IRQ_HANDLED;
 }
-
-
 
 /*****************************************************************************
  *
@@ -1224,8 +1214,6 @@ wbcir_resume(struct pnp_dev *device)
 
 	return 0;
 }
-
-
 
 /*****************************************************************************
  *
@@ -1610,5 +1598,3 @@ MODULE_LICENSE("GPL");
 
 module_init(wbcir_init);
 module_exit(wbcir_exit);
-
-

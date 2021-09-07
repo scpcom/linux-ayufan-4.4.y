@@ -39,9 +39,6 @@
  * 2.1.0   2009_05_04 sec - updated from simplified registration
  */
 
-
-
-
 /** @file
  *  Test using multiple descriptors
  */
@@ -102,13 +99,10 @@ static const uint8_t DEScipher[] = {
     0x81, 0xf0, 0x5f, 0x4a, 0x56, 0x8e, 0xcc, 0x48
 };
 
-
 static void testMultiIntRelease(struct semaphore *lock)
 {
     up(lock);
 }
-
-
 
 int32_t testMultiDPD_withInterrupt(RMinterfaceCtx *ifCtx)
 {
@@ -157,7 +151,6 @@ int32_t testMultiDPD_withInterrupt(RMinterfaceCtx *ifCtx)
                           DESCTYPE_COMMON | HDR_OUTBOUND; /* no DONE */
     setDPDfield(&dpdlist[0], 3, hashplain, 56, 0, 0);
     setDPDfield(&dpdlist[0], 5, digest,    20, 0, 0);
-
 
     /* Set up DES request */
     desplain  = getInBuffer((uint8_t *)DESdata, 32);
@@ -216,7 +209,6 @@ int32_t testMultiDPD_withInterrupt(RMinterfaceCtx *ifCtx)
     setDPDfield(&dpdlist[2], 3, aesplain,  32, 0, 0);
     setDPDfield(&dpdlist[2], 4, aescipher, 32, 0, 0);
 
-
     /*
      * Step #2 - Pass the DPD to the RM for handling
      */
@@ -251,8 +243,6 @@ int32_t testMultiDPD_withInterrupt(RMinterfaceCtx *ifCtx)
         freeBuf(aescipher);
         return -1;
     }
-
-
 
     /*
      * Step #3 - Verify the result

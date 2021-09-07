@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 // IRQL = PASSIVE_LEVEL
 static inline VOID RaiseClock(
     IN	PRTMP_ADAPTER	pAd,
@@ -85,7 +84,6 @@ static inline USHORT ShiftInBits(
 	return data;
 }
 
-
 // IRQL = PASSIVE_LEVEL
 static inline VOID ShiftOutBits(
 	IN PRTMP_ADAPTER	pAd,
@@ -116,7 +114,6 @@ static inline VOID ShiftOutBits(
 	RTMP_IO_WRITE32(pAd, E2PROM_CSR, x);
 }
 
-
 // IRQL = PASSIVE_LEVEL
 static inline VOID EEpromCleanup(
 	IN PRTMP_ADAPTER	pAd)
@@ -131,7 +128,6 @@ static inline VOID EEpromCleanup(
 	RaiseClock(pAd, &x);
 	LowerClock(pAd, &x);
 }
-
 
 static inline VOID EWEN(
 	IN PRTMP_ADAPTER	pAd)
@@ -155,7 +151,6 @@ static inline VOID EWEN(
 	EEpromCleanup(pAd);
 }
 
-
 static inline VOID EWDS(
 	IN PRTMP_ADAPTER	pAd)
 {
@@ -177,7 +172,6 @@ static inline VOID EWDS(
 
 	EEpromCleanup(pAd);
 }
-
 
 // IRQL = PASSIVE_LEVEL
 int rtmp_ee_prom_read16(
@@ -238,7 +232,6 @@ int rtmp_ee_prom_read16(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 int rtmp_ee_prom_write16(
     IN  PRTMP_ADAPTER	pAd,

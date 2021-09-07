@@ -467,7 +467,6 @@ error:
 	return -EINVAL;
 }
 
-
 /*
  *	Undo all the changes done by ip_options_compile().
  */

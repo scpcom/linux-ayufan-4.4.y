@@ -254,4 +254,3 @@ module_exit(md4_mod_fini);
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("MD4 Message Digest Algorithm");
-

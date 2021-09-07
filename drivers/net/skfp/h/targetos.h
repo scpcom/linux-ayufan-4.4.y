@@ -20,13 +20,10 @@
 #ifndef	TARGETOS_H
 #define TARGETOS_H
 
-
 //-------- those should go into include/linux/pci.h
 #define PCI_VENDOR_ID_SK		0x1148
 #define PCI_DEVICE_ID_SK_FP		0x4000
 //--------
-
-
 
 //-------- those should go into include/linux/if_fddi.h
 #define FDDI_MAC_HDR_LEN 13
@@ -39,7 +36,6 @@
 #define FDDI_RCF_FRAME2K 0x20
 #define FDDI_RCF_FRAME4K 0x30
 //--------
-
 
 #undef ADDR
 
@@ -72,13 +68,11 @@
 #define SMT_PAGESIZE	PAGE_SIZE	// Size of a memory page (power of 2).
 // -----------------------
 
-
 // SMT Definitions
 // -----------------------
 #define	TICKS_PER_SECOND	HZ
 #define SMC_VERSION    		1
 // -----------------------
-
 
 // OS-Driver Definitions
 // -----------------------

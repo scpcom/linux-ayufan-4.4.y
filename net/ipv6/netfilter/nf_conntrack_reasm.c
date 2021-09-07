@@ -197,7 +197,6 @@ oom:
 	return NULL;
 }
 
-
 static int nf_ct_frag6_queue(struct nf_ct_frag6_queue *fq, struct sk_buff *skb,
 			     const struct frag_hdr *fhdr, int nhoff)
 {

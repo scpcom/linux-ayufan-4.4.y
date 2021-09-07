@@ -18,7 +18,6 @@
 #define dprintk(msg...) \
 	cpufreq_debug_printk(CPUFREQ_DEBUG_GOVERNOR, "performance", msg)
 
-
 static int cpufreq_governor_performance(struct cpufreq_policy *policy,
 					unsigned int event)
 {
@@ -45,18 +44,15 @@ struct cpufreq_governor cpufreq_gov_performance = {
 	.owner		= THIS_MODULE,
 };
 
-
 static int __init cpufreq_gov_performance_init(void)
 {
 	return cpufreq_register_governor(&cpufreq_gov_performance);
 }
 
-
 static void __exit cpufreq_gov_performance_exit(void)
 {
 	cpufreq_unregister_governor(&cpufreq_gov_performance);
 }
-
 
 MODULE_AUTHOR("Dominik Brodowski <linux@brodo.de>");
 MODULE_DESCRIPTION("CPUfreq policy governor 'performance'");

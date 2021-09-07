@@ -28,7 +28,6 @@
  *
  ******************************************************************************/
 
-
 #define ISCSI_TARGET_UTIL_C
 
 #include <linux/string.h>
@@ -126,7 +125,6 @@ inline void iscsi_remove_cmd_from_conn_list(
 	list_del(&cmd->i_list);
 	atomic_dec(&conn->active_cmds);
 }
-
 
 /*	iscsi_ack_from_expstatsn():
  *

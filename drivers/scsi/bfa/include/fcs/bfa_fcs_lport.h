@@ -46,7 +46,6 @@ struct bfa_fcs_fabric_s;
  */
 #define BFA_FCS_MAX_RPORTS_SUPP  256	/* @todo : tentative value */
 
-
 struct bfa_fcs_port_ns_s {
 	bfa_sm_t        sm;		/*  state machine */
 	struct bfa_timer_s timer;
@@ -55,7 +54,6 @@ struct bfa_fcs_port_ns_s {
 	struct bfa_fcxp_wqe_s fcxp_wqe;
 };
 
-
 struct bfa_fcs_port_scn_s {
 	bfa_sm_t        sm;		/*  state machine */
 	struct bfa_timer_s timer;
@@ -63,7 +61,6 @@ struct bfa_fcs_port_scn_s {
 	struct bfa_fcxp_s *fcxp;
 	struct bfa_fcxp_wqe_s fcxp_wqe;
 };
-
 
 struct bfa_fcs_port_fdmi_s {
 	bfa_sm_t        sm;		/*  state machine */
@@ -74,7 +71,6 @@ struct bfa_fcs_port_fdmi_s {
 	u8         retry_cnt;	/*  retry count */
 	u8	 	   rsvd[3];
 };
-
 
 struct bfa_fcs_port_ms_s {
 	bfa_sm_t        sm;		/*  state machine */
@@ -87,14 +83,11 @@ struct bfa_fcs_port_ms_s {
 	u8	 	   rsvd[3];
 };
 
-
 struct bfa_fcs_port_fab_s {
 	struct bfa_fcs_port_ns_s ns;	/*  NS component of port */
 	struct bfa_fcs_port_scn_s scn;	/*  scn component of port */
 	struct bfa_fcs_port_ms_s ms;	/*  MS component of port */
 };
-
-
 
 #define 	MAX_ALPA_COUNT 		127
 
@@ -105,8 +98,6 @@ struct bfa_fcs_port_loop_s {
 	struct bfa_fcs_port_s *port;	/*  parent port */
 };
 
-
-
 struct bfa_fcs_port_n2n_s {
 	u32        rsvd;
 	u16        reply_oxid;	/*  ox_id from the req flogi to be
@@ -114,13 +105,11 @@ struct bfa_fcs_port_n2n_s {
 	wwn_t           rem_port_wwn;	/*  Attached port's wwn */
 };
 
-
 union bfa_fcs_port_topo_u {
 	struct bfa_fcs_port_fab_s pfab;
 	struct bfa_fcs_port_loop_s ploop;
 	struct bfa_fcs_port_n2n_s pn2n;
 };
-
 
 struct bfa_fcs_port_s {
 	struct list_head         qe;	/*  used by port/vport */
@@ -187,12 +176,9 @@ bfa_fcs_port_get_drvport(struct bfa_fcs_port_s *port)
 	return port->bfad_port;
 }
 
-
 #define bfa_fcs_port_get_opertype(_lport)	(_lport)->fabric->oper_type
 
-
 #define bfa_fcs_port_get_fabric_name(_lport)	(_lport)->fabric->fabric_name
-
 
 #define bfa_fcs_port_get_fabric_ipaddr(_lport)	(_lport)->fabric->fabric_ip_addr
 

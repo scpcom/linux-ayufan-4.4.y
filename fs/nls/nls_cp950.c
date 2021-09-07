@@ -9405,7 +9405,6 @@ static int uni2char(const wchar_t uni,
 	if (boundlen <= 0)
 		return -ENAMETOOLONG;
 
-
 	uni2charset = page_uni2charset[ch];
 	if (uni2charset) {
 		if (boundlen <= 1)

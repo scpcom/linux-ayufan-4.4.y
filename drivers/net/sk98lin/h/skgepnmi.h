@@ -415,10 +415,8 @@
 #define OID_SKGE_ASF_CHECK_SPI			0xFF02023b
 #endif /* SK_ASF */
 
-
 /* Defined for Yukon-2 path only */
 #define OID_SKGE_UPPER_MINIPORT			0xFF02023D
-
 
 #ifdef SK_ASF
 /* Defines for ASF */
@@ -435,7 +433,6 @@ typedef struct s_PnmiVct {
 	SK_U8			MdiPairSts[4];
 } SK_PNMI_VCT;
 
-
 /* VCT status values (to be given to CPA via OID_SKGE_VCT_STATUS). */
 #define SK_PNMI_VCT_NONE			0x00
 #define SK_PNMI_VCT_OLD_VCT_DATA	0x01
@@ -443,7 +440,6 @@ typedef struct s_PnmiVct {
 #define SK_PNMI_VCT_OLD_DSP_DATA	0x04
 #define SK_PNMI_VCT_NEW_DSP_DATA	0x08
 #define SK_PNMI_VCT_RUNNING			0x10
-
 
 /* VCT cable test status. */
 #define SK_PNMI_VCT_NORMAL_CABLE		0
@@ -932,7 +928,6 @@ typedef struct s_PnmiEstimate {
 	SK_TIMER		EstTimer;
 } SK_PNMI_ESTIMATE;
 
-
 /*
  * PNMI specific adapter context structure
  */
@@ -963,7 +958,6 @@ typedef struct s_PnmiPort {
 	SK_BOOL			ActiveFlag;
 	SK_U8			Align[3];
 } SK_PNMI_PORT;
-
 
 typedef struct s_PnmiData {
 	SK_PNMI_PORT	Port	[SK_MAX_MACS];
@@ -1011,7 +1005,6 @@ typedef struct s_PnmiData {
 #endif /* SK_DIAG_SUPPORT */
 	SK_BOOL         VpdKeyReadError;
 } SK_PNMI;
-
 
 /*
  * Function prototypes

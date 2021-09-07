@@ -276,4 +276,3 @@ add_string_memory(struct list_head *free_list, void *mem, unsigned long size)
 	cs->size = size - sizeof(struct string);
 	free_string(free_list, cs);
 }
-

@@ -34,7 +34,6 @@ typedef enum {
 	AH_TRUE  = 1,
 } HAL_BOOL;
 
-
 /*
  * Country/Region Codes from MS WINNLS.H
  * Numbering from ISO 3166

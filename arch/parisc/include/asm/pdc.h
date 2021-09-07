@@ -98,7 +98,6 @@
 #define PDC_TOD_READ		0	/* read TOD			*/
 #define PDC_TOD_WRITE		1	/* write TOD			*/
 
-
 #define PDC_STABLE	10		/* stable storage (sprockets)	*/
 #define PDC_STABLE_READ		0
 #define PDC_STABLE_WRITE	1
@@ -164,7 +163,6 @@
 #define PDC_SOFT_POWER	23		/* soft power switch		*/
 #define PDC_SOFT_POWER_INFO	0	/* return info about the soft power switch */
 #define PDC_SOFT_POWER_ENABLE	1	/* enable/disable soft power switch */
-
 
 /* HVERSION dependent */
 
@@ -258,7 +256,6 @@
 #define PDC_PCI_READ_MON_TYPE		15
 #define PDC_PCI_WRITE_MON_TYPE		16
 
-
 /* Get SCSI Interface Card info:  SDTR, SCSI ID, mode (SE vs LVD) */
 #define PDC_INITIATOR	163
 #define PDC_GET_INITIATOR	0
@@ -317,7 +314,6 @@
 #define OS_ID_HPRT		4	/* HP-RT OS		*/
 #define OS_ID_NOVEL		5	/* NOVELL OS		*/
 #define OS_ID_LINUX		6	/* Linux		*/
-
 
 /* constants for PDC_CHASSIS */
 #define OSTAT_OFF		0

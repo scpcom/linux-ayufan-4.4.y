@@ -397,7 +397,6 @@ __arm926_setup:
 	mcr	p15, 0, r0, c8, c7		@ invalidate I,D TLBs on v4
 #endif
 
-
 #ifdef CONFIG_CPU_DCACHE_WRITETHROUGH
 	mov	r0, #4				@ disable write-back on caches explicitly
 	mcr	p15, 7, r0, c15, c0, 0

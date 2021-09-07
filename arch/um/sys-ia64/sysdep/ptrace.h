@@ -13,4 +13,3 @@ struct sys_pt_regs {
 #define EMPTY_REGS { 0 }
 
 #endif
-

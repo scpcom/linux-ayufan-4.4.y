@@ -44,7 +44,6 @@
 #define PERCPU_PAGE_SHIFT	16	/* log2() of max. size of per-CPU area */
 #define PERCPU_PAGE_SIZE	(__IA64_UL_CONST(1) << PERCPU_PAGE_SHIFT)
 
-
 #ifdef CONFIG_HUGETLB_PAGE
 # define HPAGE_REGION_BASE	RGN_BASE(RGN_HPAGE)
 # define HPAGE_SHIFT		hpage_shift
@@ -79,7 +78,6 @@ do {						\
 	copy_page((to), (from));		\
 	flush_dcache_page(page);		\
 } while (0)
-
 
 #define __alloc_zeroed_user_highpage(movableflags, vma, vaddr)		\
 ({									\

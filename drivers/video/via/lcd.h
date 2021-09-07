@@ -61,7 +61,6 @@
 /* Resolution: 480x640,  Channel: single, Dithering: Enable */
 #define     LCD_PANEL_IDC_480X640      0x0C
 
-
 extern int viafb_LCD2_ON;
 extern int viafb_LCD_ON;
 extern int viafb_DVI_ON;

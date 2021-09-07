@@ -907,7 +907,6 @@ static void pci_restore_pcie_state(struct pci_dev *dev)
 		pci_write_config_word(dev, pos + PCI_EXP_SLTCTL2, cap[i++]);
 }
 
-
 static int pci_save_pcix_state(struct pci_dev *dev)
 {
 	int pos;
@@ -942,7 +941,6 @@ static void pci_restore_pcix_state(struct pci_dev *dev)
 
 	pci_write_config_word(dev, pos + PCI_X_CMD, cap[i++]);
 }
-
 
 /**
  * pci_save_state - save the PCI configuration space of a device before suspending
@@ -1879,7 +1877,6 @@ err_out:
 
 	return -EBUSY;
 }
-
 
 /**
  * pci_request_selected_regions - Reserve selected PCI I/O and memory resources

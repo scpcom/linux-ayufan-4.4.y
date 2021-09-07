@@ -36,7 +36,6 @@ hashbin_t *irias_objects;
  */
 struct ias_value irias_missing = { IAS_MISSING, 0, 0, 0, {0}};
 
-
 /*
  * Function ias_new_object (name, id)
  *

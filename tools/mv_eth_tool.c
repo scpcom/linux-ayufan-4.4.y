@@ -123,7 +123,6 @@ static void parse_port(char *src)
         return;
 }
 
-
 static void parse_q(char *src)
 {
 	int count;
@@ -512,4 +511,3 @@ int main(int argc, char **argp, char **envp)
         parse_cmdline(argc, argp);
         return procit();
 }
-

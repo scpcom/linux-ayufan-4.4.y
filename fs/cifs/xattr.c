@@ -38,8 +38,6 @@
 #define XATTR_SECURITY_PREFIX_LEN 9
 /* BB need to add server (Samba e.g) support for security and trusted prefix */
 
-
-
 int cifs_removexattr(struct dentry *direntry, const char *ea_name)
 {
 	int rc = -EOPNOTSUPP;

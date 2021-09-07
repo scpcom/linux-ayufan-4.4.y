@@ -41,9 +41,6 @@
 #include <asm/io.h>
 #include "ieee80211.h"
 
-
-
-
 #define RTL819xE_MODULE_NAME "rtl819xE"
 //added for HW security, john.0629
 #define FALSE 0
@@ -111,7 +108,6 @@ do { if(rt_global_debug_component & component) \
 #define COMP_DBG				BIT1		// Only for temporary debug message.
 #define COMP_INIT				BIT2		// during driver initialization / halt / reset.
 
-
 #define COMP_RECV				BIT3		// Reveive part data path.
 #define COMP_SEND				BIT4		// Send part path.
 #define COMP_IO					BIT5		// I/O Related. Added by Annie, 2006-03-02.
@@ -119,7 +115,6 @@ do { if(rt_global_debug_component & component) \
 #define COMP_EPROM				BIT7		// 802.11 link related: join/start BSS, leave BSS.
 #define COMP_SWBW				BIT8	// For bandwidth switch.
 #define COMP_SEC				BIT9// For Security.
-
 
 #define COMP_TURBO				BIT10	// For Turbo Mode related. By Annie, 2005-10-21.
 #define COMP_QOS				BIT11	// For QoS.
@@ -177,7 +172,6 @@ do { if(rt_global_debug_component & component) \
 #define assert(expr) do {} while (0)
 #define RT_DEBUG_DATA(level, data, datalen) do {} while(0)
 #endif /* RTL8169_DEBUG */
-
 
 //
 // Queue Select Value in TxDesc
@@ -270,7 +264,6 @@ typedef struct _tx_desc_819x_pci {
         u32	Reserved7;
 }tx_desc_819x_pci, *ptx_desc_819x_pci;
 
-
 typedef struct _tx_desc_cmd_819x_pci {
         //DWORD 0
 	u16	PktSize;
@@ -297,7 +290,6 @@ typedef struct _tx_desc_cmd_819x_pci {
 	u32	Reserved5;
 	u32	Reserved6;
 }tx_desc_cmd_819x_pci, *ptx_desc_cmd_819x_pci;
-
 
 typedef struct _tx_fwinfo_819x_pci {
         //DOWRD 0
@@ -466,7 +458,6 @@ typedef struct _rt_firmware{
 #define DCAM                    0xAC                    // Debug CAM Interface
 #define AESMSK_FC               0xB2    // AES Mask register for frame control (0xB2~0xB3). Added by Annie, 2006-03-06.
 
-
 #define CAM_CONTENT_COUNT       8
 //#define CFG_DEFAULT_KEY         BIT5
 #define CFG_VALID               BIT15
@@ -484,7 +475,6 @@ typedef struct _rt_firmware{
 #define CAM_VALID                               0x8000
 #define CAM_NOTVALID                    0x0000
 #define CAM_USEDK                               0x0020
-
 
 #define CAM_NONE                                0x0
 #define CAM_WEP40                               0x01
@@ -522,7 +512,6 @@ typedef struct _rt_firmware{
 #define PRISM_HDR_SIZE 64
 
 #define		PHY_RSSI_SLID_WIN_MAX				100
-
 
 typedef enum _WIRELESS_MODE {
 	WIRELESS_MODE_UNKNOWN = 0x00,
@@ -696,9 +685,7 @@ typedef struct Stats
 	RT_SMOOTH_DATA_4RF		cck_adc_pwdb;
 	u32	CurrentShowTxate;
 
-
 } Stats;
-
 
 // Bandwidth Offset
 #define HAL_PRIME_CHNL_OFFSET_DONT_CARE		0
@@ -744,7 +731,6 @@ typedef enum _RT_RF_TYPE_819xU{
         RF_PSEUDO_11N = 4,
 }RT_RF_TYPE_819xU, *PRT_RF_TYPE_819xU;
 
-
 typedef struct _rate_adaptive
 {
 	u8				rate_adaptive_disabled;
@@ -781,7 +767,6 @@ typedef struct _ccktxbbgain_struct
 	//The Value is from a22 to a29 one Byte one time is much Safer
 	u8	ccktxbb_valuearray[8];
 } ccktxbbgain_struct,*pccktxbbgain_struct;
-
 
 typedef struct _init_gain
 {
@@ -875,7 +860,6 @@ typedef struct _TX_FWINFO_STRUCUTRE{
 	u32			PacketID:13;
 }TX_FWINFO_T;
 
-
 typedef struct _TX_FWINFO_8190PCI{
 	//DOWRD 0
 	u8			TxRate:7;
@@ -950,7 +934,6 @@ typedef enum _RT_OP_MODE{
 	RT_OP_MODE_IBSS,
 	RT_OP_MODE_NO_LINK,
 }RT_OP_MODE, *PRT_OP_MODE;
-
 
 /* 2007/11/02 MH Define RF mode temporarily for test. */
 typedef enum tag_Rf_OpType
@@ -1035,7 +1018,6 @@ typedef struct r8192_priv
         struct sk_buff *rx_buf[MAX_RX_COUNT];
 	int rxringcount;
 	u16 rxbuffersize;
-
 
 	struct sk_buff *rx_skb;
 	u32 *rxring;
@@ -1170,7 +1152,6 @@ typedef struct r8192_priv
 
 	u32     LastRxDescTSFHigh;
 	u32     LastRxDescTSFLow;
-
 
 	//2 Rx Related variables
 	u16	EarlyRxThreshold;
@@ -1406,7 +1387,6 @@ typedef enum{
 typedef enum{
 	NIC_8192E = 1,
 	} nic_t;
-
 
 #if 0 //defined in Qos.h
 //typedef u32 AC_CODING;

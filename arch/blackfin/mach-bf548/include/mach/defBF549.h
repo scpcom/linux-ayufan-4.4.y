@@ -10,7 +10,6 @@
 /* Include all Core registers and bit definitions */
 #include <asm/def_LPBlackfin.h>
 
-
 /* SYSTEM & MMR ADDRESS DEFINITIONS FOR ADSP-BF549 */
 
 /* Include defBF54x_base.h for the set of #defines that are common to all ADSP-BF54x processors */
@@ -1039,7 +1038,6 @@
 #define                    HMDMA1_ECOUNT  0xffc04554   /* Handshake MDMA1 Current Edge Count Register */
 #define                    HMDMA1_BCOUNT  0xffc04558   /* Handshake MDMA1 Current Block Count Register */
 
-
 /* ********************************************************** */
 /*     SINGLE BIT MACRO PAIRS (bit mask and negated one)      */
 /*     and MULTI BIT READ MACROS                              */
@@ -1564,7 +1562,6 @@
 #define LCHANPC6     0x0F000000lu
 #define LCHANPC7     0xF0000000lu
 
-
 /* MXVR_SYNC_LCHAN_1 Masks */
 
 #define LCHANPC8     0x0000000Flu
@@ -1575,7 +1572,6 @@
 #define LCHANPC13    0x00F00000lu
 #define LCHANPC14    0x0F000000lu
 #define LCHANPC15    0xF0000000lu
-
 
 /* MXVR_SYNC_LCHAN_2 Masks */
 
@@ -1588,7 +1584,6 @@
 #define LCHANPC22    0x0F000000lu
 #define LCHANPC23    0xF0000000lu
 
-
 /* MXVR_SYNC_LCHAN_3 Masks */
 
 #define LCHANPC24    0x0000000Flu
@@ -1599,7 +1594,6 @@
 #define LCHANPC29    0x00F00000lu
 #define LCHANPC30    0x0F000000lu
 #define LCHANPC31    0xF0000000lu
-
 
 /* MXVR_SYNC_LCHAN_4 Masks */
 
@@ -1612,7 +1606,6 @@
 #define LCHANPC38    0x0F000000lu
 #define LCHANPC39    0xF0000000lu
 
-
 /* MXVR_SYNC_LCHAN_5 Masks */
 
 #define LCHANPC40    0x0000000Flu
@@ -1624,7 +1617,6 @@
 #define LCHANPC46    0x0F000000lu
 #define LCHANPC47    0xF0000000lu
 
-
 /* MXVR_SYNC_LCHAN_6 Masks */
 
 #define LCHANPC48    0x0000000Flu
@@ -1635,7 +1627,6 @@
 #define LCHANPC53    0x00F00000lu
 #define LCHANPC54    0x0F000000lu
 #define LCHANPC55    0xF0000000lu
-
 
 /* MXVR_SYNC_LCHAN_7 Masks */
 

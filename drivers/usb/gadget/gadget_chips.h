@@ -185,7 +185,6 @@
 #define	gadget_is_r8a66597(g)	0
 #endif
 
-
 /**
  * usb_gadget_controller_number - support bcdDevice id convention
  * @gadget: the controller being driven
@@ -259,7 +258,6 @@ static inline int usb_gadget_controller_number(struct usb_gadget *gadget)
 		return 0x25;
 	return -ENOENT;
 }
-
 
 /**
  * gadget_supports_altsettings - return true if altsettings work

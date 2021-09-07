@@ -21,7 +21,6 @@
  */
 extern void DumpTachoRegisters(void);
 
-
 /**
  * GetTemperature will read the thermistor register and convert the value to 
  * kelvin.
@@ -29,7 +28,6 @@ extern void DumpTachoRegisters(void);
  * negative value in the case of error.
  */
 extern int GetTemperature(void);
-
 
 /**
  * GetFanRPM will read the fan tacho register and convert the value to 
@@ -77,7 +75,6 @@ extern int GetFanRPM(void);
 
 	#define TACHO_THERMISTOR_RC_COUNTER_MASK 	1023
 
-
 /* Thermistor Control ---------------------------------- */
 #define TACHO_THERMISTOR_CONTROL                   (FAN_MON_BASE + 0x08)
     // 31:2  - RO - Unused (0x00)
@@ -85,7 +82,6 @@ extern int GetFanRPM(void);
     //  0:0  - RW - Set to 1 to enable thermistor PWM output
     #define TACHO_THERMISTOR_CONTROL_THERM_VALID    1
     #define TACHO_THERMISTOR_CONTROL_THERM_ENABLE   0 
-
 
 /* Clock divider ---------------------------- */
 #define TACHO_CLOCK_DIVIDER                        (FAN_MON_BASE + 0x0C)
@@ -98,7 +94,6 @@ extern int GetFanRPM(void);
     #define TACHO_CLOCK_DIVIDER_PWM_DIVIDER         0 
 	#define TACHO_CLOCK_DIVIDER_MASK 	65535//1023 
 
-
 /* New hardware registers added for 810 */
 /* Fan Speed Control ..........................*/
 #define TACHO_FAN_SPEED_CONTROL 					(FAN_MON_BASE + 0x10)
@@ -109,7 +104,6 @@ extern int GetFanRPM(void);
 	#define TACHO_FAN_SPEED_CONTROL_PWM_ENABLE_BASE 	16
 	#define TACHO_FAN_SPEED_CONTROL_PWM_USED 			8
 	#define TACHO_FAN_SPEED_CONTROL_FAN_COUNT_MODE 		0
-
 
 /* Fan One Shot Control .........................*/
 #define TACHO_FAN_ONE_SHOT_CONTROL 					(FAN_MON_BASE + 0x14)
@@ -126,4 +120,3 @@ extern int GetFanRPM(void);
 #endif // __ASM_ARM_ARCH_TACHO_H
 
 /* End oF File */
-

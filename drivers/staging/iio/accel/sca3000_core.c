@@ -80,7 +80,6 @@ static const struct sca3000_chip_info sca3000_spi_chip_info_tbl[] = {
 	},
 };
 
-
 int sca3000_write_reg(struct sca3000_state *st, u8 address, u8 val)
 {
 	struct spi_transfer xfer = {
@@ -326,7 +325,6 @@ error_ret:
 	return ret ? ret : len;
 }
 
-
 static ssize_t sca3000_show_name(struct device *dev,
 				 struct device_attribute *attr,
 				 char *buf)
@@ -490,7 +488,6 @@ error_ret:
 	return ret;
 }
 
-
 /* Not even vaguely standard attributes so defined here rather than
  * in the relevant IIO core headers
  */
@@ -514,7 +511,6 @@ static IIO_DEV_ATTR_ACCEL_Y(sca3000_read_13bit_signed,
 			    SCA3000_REG_ADDR_Y_MSB);
 static IIO_DEV_ATTR_ACCEL_Z(sca3000_read_13bit_signed,
 			    SCA3000_REG_ADDR_Z_MSB);
-
 
 /**
  * sca3000_read_av_freq() sysfs function to get available frequencies
@@ -687,7 +683,6 @@ static IIO_DEV_ATTR_AVAIL_SAMP_FREQ(sca3000_read_av_freq);
 static IIO_DEV_ATTR_SAMP_FREQ(S_IWUSR | S_IRUGO,
 			      sca3000_read_frequency,
 			      sca3000_set_frequency);
-
 
 /**
  * sca3000_read_temp() sysfs interface to get the temperature when available

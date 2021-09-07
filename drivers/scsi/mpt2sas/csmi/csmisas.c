@@ -758,7 +758,6 @@ _csmisas_get_phy_info(struct MPT2SAS_ADAPTER *ioc,
 		    "DiscoveryStatus = 0x%X\n",
 		    le32_to_cpu(sas_iounit_pg0->PhyData[i].DiscoveryStatus)));
 
-
 		/* Fill in data from SAS IO Unit page 0 */
 
 		/* Port identifier */
@@ -861,7 +860,6 @@ _csmisas_get_phy_info(struct MPT2SAS_ADAPTER *ioc,
 			    CSMI_SAS_FANOUT_EXPANDER_DEVICE;
 			break;
 		}
-
 
 		/*
 		 * Get SAS PHY page 0
@@ -1019,8 +1017,6 @@ _csmisas_get_phy_info(struct MPT2SAS_ADAPTER *ioc,
 			break;
 		}
 
-
-
 		/* Get attached SAS Device page 0 */
 		if (sas_phy_pg0.AttachedDevHandle) {
 			if ((mpt2sas_config_get_sas_device_pg0(ioc, &mpi_reply,
@@ -1054,7 +1050,6 @@ _csmisas_get_phy_info(struct MPT2SAS_ADAPTER *ioc,
 			dcsmisasprintk(ioc, printk(KERN_DEBUG
 			   "Device Info = 0x%X\n",
 			   le32_to_cpu(sas_device_pg0.DeviceInfo)));
-
 
 			/* Fill in data from SAS PHY page 0 and attached SAS
 			 * Device page 0 */
@@ -1141,7 +1136,6 @@ _csmisas_get_phy_info(struct MPT2SAS_ADAPTER *ioc,
 				sas_phy_pg0.AttachedPhyIdentifier;
 		}
 
-
 		/* Get parent SAS Device page 0 */
 		if (sas_iounit_pg0->PhyData[i].ControllerDevHandle) {
 			if ((mpt2sas_config_get_sas_device_pg0(ioc, &mpi_reply,
@@ -1176,7 +1170,6 @@ _csmisas_get_phy_info(struct MPT2SAS_ADAPTER *ioc,
 			dcsmisasprintk(ioc, printk(KERN_DEBUG
 			   "Device Info = 0x%X\n",
 			   le32_to_cpu(sas_device_pg0.DeviceInfo)));
-
 
 			/* Fill in data from parent SAS Device page 0 */
 
@@ -1397,7 +1390,6 @@ _csmisas_set_phy_info(struct MPT2SAS_ADAPTER *ioc,
 		goto out;
 	}
 
-
 	if (mpt2sas_config_set_sas_iounit_pg1(ioc, &mpi_reply, sas_iounit_pg1,
 	    sz)) {
 		printk(MPT2SAS_ERR_FMT "failure at %s:%d/%s()!\n",
@@ -1405,7 +1397,6 @@ _csmisas_set_phy_info(struct MPT2SAS_ADAPTER *ioc,
 		rc = -ENXIO;
 		goto out;
 	}
-
 
  out:
 	dcsmisasprintk(ioc, printk(MPT2SAS_INFO_FMT "%s(): exit\n", ioc->name,
@@ -2560,7 +2551,6 @@ _csmisas_get_raid_config(struct MPT2SAS_ADAPTER *ioc,
 	dcsmisasprintk(ioc, printk(MPT2SAS_INFO_FMT "%s(): enter\n", ioc->name,
 	   __func__));
 
-
 	dcsmisasprintk(ioc, printk(MPT2SAS_INFO_FMT "%s(): exit\n", ioc->name,
 	   __func__));
 	return rc;
@@ -2585,7 +2575,6 @@ _csmisas_get_raid_features(struct MPT2SAS_ADAPTER *ioc,
 	dcsmisasprintk(ioc, printk(MPT2SAS_INFO_FMT "%s(): enter\n", ioc->name,
 	   __func__));
 
-
 	dcsmisasprintk(ioc, printk(MPT2SAS_INFO_FMT "%s(): exit\n", ioc->name,
 	   __func__));
 	return rc;
@@ -2609,7 +2598,6 @@ _csmisas_set_raid_control(struct MPT2SAS_ADAPTER *ioc,
 
 	dcsmisasprintk(ioc, printk(MPT2SAS_INFO_FMT "%s(): enter\n", ioc->name,
 	   __func__));
-
 
 	dcsmisasprintk(ioc, printk(MPT2SAS_INFO_FMT "%s(): exit\n", ioc->name,
 	   __func__));
@@ -2659,12 +2647,10 @@ _csmisas_set_raid_operation(struct MPT2SAS_ADAPTER *ioc,
 	dcsmisasprintk(ioc, printk(MPT2SAS_INFO_FMT "%s(): enter\n", ioc->name,
 	   __func__));
 
-
 	dcsmisasprintk(ioc, printk(MPT2SAS_INFO_FMT "%s(): exit\n", ioc->name,
 	   __func__));
 	return rc;
 }
-
 
 /**
  * Prototype Routine for the CSMI SAS Task Managment Config command.

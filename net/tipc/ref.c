@@ -310,4 +310,3 @@ void *tipc_ref_deref(u32 ref)
 	}
 	return NULL;
 }
-

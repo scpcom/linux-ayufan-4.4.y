@@ -113,7 +113,6 @@ static int bcm63xx_gpio_direction_output(struct gpio_chip *chip,
 	return bcm63xx_gpio_set_direction(chip, gpio, GPIO_DIR_OUT);
 }
 
-
 static struct gpio_chip bcm63xx_gpio_chip = {
 	.label			= "bcm63xx-gpio",
 	.direction_input	= bcm63xx_gpio_direction_input,

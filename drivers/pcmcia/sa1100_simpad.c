@@ -96,7 +96,6 @@ simpad_pcmcia_configure_socket(struct soc_pcmcia_socket *skt,
 		return -1;
 	}
 
-
 	local_irq_restore(flags);
 
 	return 0;

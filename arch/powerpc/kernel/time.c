@@ -749,7 +749,6 @@ void start_cpu_decrementer(void)
 #endif /* defined(CONFIG_BOOKE) || defined(CONFIG_40x) */
 }
 
-
 #if defined(CONFIG_SYNO_MPC8533_TIMEBASE_FREQ) && (0 != CONFIG_SYNO_MPC8533_TIMEBASE_FREQ)
 static inline void SYNOChangeMPC853xTimebaseFreq(void)
 {
@@ -1082,7 +1081,6 @@ void __init time_init(void)
 
 	init_decrementer_clockevent();
 }
-
 
 #define FEBRUARY	2
 #define	STARTOFTIME	1970

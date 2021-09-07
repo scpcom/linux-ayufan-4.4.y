@@ -33,4 +33,3 @@ int __init detect_cpu_and_cache_system(void)
 
 	return 0;
 }
-

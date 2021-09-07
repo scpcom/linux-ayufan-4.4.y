@@ -156,7 +156,6 @@ zc0301_request_buffers(struct zc0301_device* cam, u32 count,
 	return cam->nbuffers;
 }
 
-
 static void zc0301_release_buffers(struct zc0301_device* cam)
 {
 	if (cam->nbuffers) {
@@ -165,7 +164,6 @@ static void zc0301_release_buffers(struct zc0301_device* cam)
 	}
 	cam->frame_current = NULL;
 }
-
 
 static void zc0301_empty_framequeues(struct zc0301_device* cam)
 {
@@ -180,7 +178,6 @@ static void zc0301_empty_framequeues(struct zc0301_device* cam)
 	}
 }
 
-
 static void zc0301_requeue_outqueue(struct zc0301_device* cam)
 {
 	struct zc0301_frame_t *i;
@@ -192,7 +189,6 @@ static void zc0301_requeue_outqueue(struct zc0301_device* cam)
 
 	INIT_LIST_HEAD(&cam->outqueue);
 }
-
 
 static void zc0301_queue_unusedframes(struct zc0301_device* cam)
 {
@@ -226,7 +222,6 @@ int zc0301_write_reg(struct zc0301_device* cam, u16 index, u16 value)
 	return 0;
 }
 
-
 int zc0301_read_reg(struct zc0301_device* cam, u16 index)
 {
 	struct usb_device* udev = cam->usbdev;
@@ -243,7 +238,6 @@ int zc0301_read_reg(struct zc0301_device* cam, u16 index)
 
 	return (res >= 0) ? (int)(*buff) : -1;
 }
-
 
 int zc0301_i2c_read(struct zc0301_device* cam, u16 address, u8 length)
 {
@@ -270,12 +264,10 @@ int zc0301_i2c_read(struct zc0301_device* cam, u16 address, u8 length)
 		DBG(3, "I2C read failed at address 0x%04X, value: 0x%04X",
 		    address, res);
 
-
 	PDBGG("I2C read: address 0x%04X, value: 0x%04X", address, res);
 
 	return err ? -1 : res;
 }
-
 
 int zc0301_i2c_write(struct zc0301_device* cam, u16 address, u16 value)
 {
@@ -423,7 +415,6 @@ resubmit_urb:
 	wake_up_interruptible(&cam->wait_frame);
 }
 
-
 static int zc0301_start_transfer(struct zc0301_device* cam)
 {
 	struct usb_device *udev = cam->usbdev;
@@ -500,7 +491,6 @@ free_buffers:
 	return err;
 }
 
-
 static int zc0301_stop_transfer(struct zc0301_device* cam)
 {
 	struct usb_device *udev = cam->usbdev;
@@ -522,7 +512,6 @@ static int zc0301_stop_transfer(struct zc0301_device* cam)
 
 	return err;
 }
-
 
 static int zc0301_stream_interrupt(struct zc0301_device* cam)
 {
@@ -560,7 +549,6 @@ zc0301_set_compression(struct zc0301_device* cam,
 
 	return err ? -EIO : 0;
 }
-
 
 static int zc0301_init(struct zc0301_device* cam)
 {
@@ -648,7 +636,6 @@ static void zc0301_release_resources(struct kref *kref)
 	kfree(cam);
 }
 
-
 static int zc0301_open(struct file *filp)
 {
 	struct zc0301_device* cam;
@@ -732,7 +719,6 @@ out:
 	return err;
 }
 
-
 static int zc0301_release(struct file *filp)
 {
 	struct zc0301_device* cam;
@@ -754,7 +740,6 @@ static int zc0301_release(struct file *filp)
 
 	return 0;
 }
-
 
 static ssize_t
 zc0301_read(struct file* filp, char __user * buf, size_t count, loff_t* f_pos)
@@ -865,7 +850,6 @@ exit:
 	return err ? err : count;
 }
 
-
 static unsigned int zc0301_poll(struct file *filp, poll_table *wait)
 {
 	struct zc0301_device *cam = video_drvdata(filp);
@@ -919,13 +903,11 @@ error:
 	return POLLERR;
 }
 
-
 static void zc0301_vm_open(struct vm_area_struct* vma)
 {
 	struct zc0301_frame_t* f = vma->vm_private_data;
 	f->vma_use_count++;
 }
-
 
 static void zc0301_vm_close(struct vm_area_struct* vma)
 {
@@ -934,12 +916,10 @@ static void zc0301_vm_close(struct vm_area_struct* vma)
 	f->vma_use_count--;
 }
 
-
 static const struct vm_operations_struct zc0301_vm_ops = {
 	.open = zc0301_vm_open,
 	.close = zc0301_vm_close,
 };
-
 
 static int zc0301_mmap(struct file* filp, struct vm_area_struct *vma)
 {
@@ -1031,7 +1011,6 @@ zc0301_vidioc_querycap(struct zc0301_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 zc0301_vidioc_enuminput(struct zc0301_device* cam, void __user * arg)
 {
@@ -1053,7 +1032,6 @@ zc0301_vidioc_enuminput(struct zc0301_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 zc0301_vidioc_g_input(struct zc0301_device* cam, void __user * arg)
 {
@@ -1064,7 +1042,6 @@ zc0301_vidioc_g_input(struct zc0301_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 zc0301_vidioc_s_input(struct zc0301_device* cam, void __user * arg)
@@ -1079,7 +1056,6 @@ zc0301_vidioc_s_input(struct zc0301_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 zc0301_vidioc_query_ctrl(struct zc0301_device* cam, void __user * arg)
@@ -1101,7 +1077,6 @@ zc0301_vidioc_query_ctrl(struct zc0301_device* cam, void __user * arg)
 
 	return -EINVAL;
 }
-
 
 static int
 zc0301_vidioc_g_ctrl(struct zc0301_device* cam, void __user * arg)
@@ -1133,7 +1108,6 @@ exit:
 
 	return err;
 }
-
 
 static int
 zc0301_vidioc_s_ctrl(struct zc0301_device* cam, void __user * arg)
@@ -1168,7 +1142,6 @@ zc0301_vidioc_s_ctrl(struct zc0301_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 zc0301_vidioc_cropcap(struct zc0301_device* cam, void __user * arg)
 {
@@ -1183,7 +1156,6 @@ zc0301_vidioc_cropcap(struct zc0301_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 zc0301_vidioc_g_crop(struct zc0301_device* cam, void __user * arg)
@@ -1200,7 +1172,6 @@ zc0301_vidioc_g_crop(struct zc0301_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 zc0301_vidioc_s_crop(struct zc0301_device* cam, void __user * arg)
@@ -1304,7 +1275,6 @@ zc0301_vidioc_s_crop(struct zc0301_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 zc0301_vidioc_enum_framesizes(struct zc0301_device* cam, void __user * arg)
 {
@@ -1333,7 +1303,6 @@ zc0301_vidioc_enum_framesizes(struct zc0301_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 zc0301_vidioc_enum_fmt(struct zc0301_device* cam, void __user * arg)
 {
@@ -1361,7 +1330,6 @@ zc0301_vidioc_enum_fmt(struct zc0301_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 zc0301_vidioc_g_fmt(struct zc0301_device* cam, void __user * arg)
 {
@@ -1384,7 +1352,6 @@ zc0301_vidioc_g_fmt(struct zc0301_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 zc0301_vidioc_try_s_fmt(struct zc0301_device* cam, unsigned int cmd,
@@ -1498,7 +1465,6 @@ zc0301_vidioc_try_s_fmt(struct zc0301_device* cam, unsigned int cmd,
 	return 0;
 }
 
-
 static int
 zc0301_vidioc_g_jpegcomp(struct zc0301_device* cam, void __user * arg)
 {
@@ -1507,7 +1473,6 @@ zc0301_vidioc_g_jpegcomp(struct zc0301_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 zc0301_vidioc_s_jpegcomp(struct zc0301_device* cam, void __user * arg)
@@ -1541,7 +1506,6 @@ zc0301_vidioc_s_jpegcomp(struct zc0301_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 zc0301_vidioc_reqbufs(struct zc0301_device* cam, void __user * arg)
@@ -1591,7 +1555,6 @@ zc0301_vidioc_reqbufs(struct zc0301_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 zc0301_vidioc_querybuf(struct zc0301_device* cam, void __user * arg)
 {
@@ -1620,7 +1583,6 @@ zc0301_vidioc_querybuf(struct zc0301_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 zc0301_vidioc_qbuf(struct zc0301_device* cam, void __user * arg)
 {
@@ -1647,7 +1609,6 @@ zc0301_vidioc_qbuf(struct zc0301_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 zc0301_vidioc_dqbuf(struct zc0301_device* cam, struct file* filp,
@@ -1703,7 +1664,6 @@ zc0301_vidioc_dqbuf(struct zc0301_device* cam, struct file* filp,
 	return 0;
 }
 
-
 static int
 zc0301_vidioc_streamon(struct zc0301_device* cam, void __user * arg)
 {
@@ -1721,7 +1681,6 @@ zc0301_vidioc_streamon(struct zc0301_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 zc0301_vidioc_streamoff(struct zc0301_device* cam, void __user * arg)
@@ -1745,7 +1704,6 @@ zc0301_vidioc_streamoff(struct zc0301_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 zc0301_vidioc_g_parm(struct zc0301_device* cam, void __user * arg)
 {
@@ -1765,7 +1723,6 @@ zc0301_vidioc_g_parm(struct zc0301_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 zc0301_vidioc_s_parm(struct zc0301_device* cam, void __user * arg)
@@ -1793,7 +1750,6 @@ zc0301_vidioc_s_parm(struct zc0301_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static long zc0301_ioctl_v4l2(struct file *filp,
 			     unsigned int cmd, void __user *arg)
@@ -1889,7 +1845,6 @@ static long zc0301_ioctl_v4l2(struct file *filp,
 	}
 }
 
-
 static long zc0301_ioctl(struct file *filp,
 			unsigned int cmd, unsigned long arg)
 {
@@ -1920,7 +1875,6 @@ static long zc0301_ioctl(struct file *filp,
 
 	return err;
 }
-
 
 static const struct v4l2_file_operations zc0301_fops = {
 	.owner =   THIS_MODULE,
@@ -2028,7 +1982,6 @@ fail:
 	return err;
 }
 
-
 static void zc0301_usb_disconnect(struct usb_interface* intf)
 {
 	struct zc0301_device* cam;
@@ -2058,7 +2011,6 @@ static void zc0301_usb_disconnect(struct usb_interface* intf)
 	up_write(&zc0301_dev_lock);
 }
 
-
 static struct usb_driver zc0301_usb_driver = {
 	.name =       "zc0301",
 	.id_table =   zc0301_id_table,
@@ -2081,12 +2033,10 @@ static int __init zc0301_module_init(void)
 	return err;
 }
 
-
 static void __exit zc0301_module_exit(void)
 {
 	usb_deregister(&zc0301_usb_driver);
 }
-
 
 module_init(zc0301_module_init);
 module_exit(zc0301_module_exit);

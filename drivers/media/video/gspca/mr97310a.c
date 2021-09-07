@@ -600,10 +600,7 @@ static int start_vga_cam(struct gspca_dev *gspca_dev)
 	sd->sensor_type = data[0] & 1;
 	sd->do_lcd_stop = (~data[0]) & 1;
 
-
-
 	/* Streaming setup begins here. */
-
 
 	data[0] = 0x01;
 	data[1] = 0x01;

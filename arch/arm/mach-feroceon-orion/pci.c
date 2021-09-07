@@ -50,7 +50,6 @@ extern u32 mv_pci_io_base_get(int ifNum);
 extern u32 mv_pci_io_size_get(int ifNum);
 extern u32 mv_pci_mem_base_get(int ifNum);
 
-
 #define IF_NR MV_PCI_IF_MAX_IF
 
 #if (MV_PCI_IF_MAX_IF == 2)
@@ -108,7 +107,6 @@ void __init mv_pci_preinit(void)
 #endif
 }
 
-
 /* Currentlly the PCI config read/write are implemented as read modify write
    to 32 bit.
    TBD: adjust it to realy use 1/2/4 byte(partial) read/write, after the pex
@@ -128,7 +126,6 @@ static int mv_pci0_read_config(struct pci_bus *bus, unsigned int devfn, int wher
 	{
 		if (MV_FALSE == mvCtrlPwrClckGet(PEX_UNIT_ID, 0))	return 0;
 	}
-
 
         bus_num = bus->number;
         dev_no = PCI_SLOT(devfn);
@@ -157,7 +154,6 @@ static int mv_pci0_read_config(struct pci_bus *bus, unsigned int devfn, int wher
 		DB(printk("PCI 0 read: bus = %x dev = %x func = %x regOff = %x ",bus_num,dev_no,func,regOff));
 	}
 	
-
         temp = (u32) mvPciIfConfigRead(0, bus_num, dev_no, func, regOff);
 
         switch (size) {
@@ -172,7 +168,6 @@ static int mv_pci0_read_config(struct pci_bus *bus, unsigned int devfn, int wher
         default:
                 break;
         }
-	
 	
 	*val = temp;
 
@@ -246,7 +241,6 @@ static int mv_pci1_read_config(struct pci_bus *bus, unsigned int devfn, int wher
         bus_num = bus->number;
         dev_no = PCI_SLOT(devfn); 
 
-	
 	/* don't return for our device */
 	localBus = mvPciIfLocalBusNumGet(1);
 	if((dev_no == 0) && ( bus_num == localBus))
@@ -306,7 +300,6 @@ static int mv_pci1_read_config(struct pci_bus *bus, unsigned int devfn, int wher
 
 	DB(printk(" got %x \n",temp));
 		
-
         return 0;
 }
 
@@ -352,9 +345,7 @@ static int mv_pci1_write_config(struct pci_bus *bus, unsigned int devfn, int whe
 
         return 0;
 
-
 }
-
 
 static struct pci_ops mv_primary_ops = {
         .read   = mv_pci0_read_config,
@@ -365,8 +356,6 @@ static struct pci_ops mv_secondary_ops = {
         .read   = mv_pci1_read_config,
         .write  = mv_pci1_write_config,
 };
-
-
 
 int __init mv_pci_setup(int nr, struct pci_sys_data *sys)
 {
@@ -448,7 +437,6 @@ struct pci_bus *mv_pci_scan_bus(int nr, struct pci_sys_data *sys)
 
 	bus = pci_scan_bus(sys->busnr, ops, sys);
 
-
 	if (nr < IF_NR -1)
 	{
 		if ( ((PCI_IF_TYPE_PEX == mvPciIfTypeGet(nr+1)) && (MV_TRUE == mvCtrlPwrClckGet(PEX_UNIT_ID, nr+1))) || 
@@ -460,9 +448,6 @@ struct pci_bus *mv_pci_scan_bus(int nr, struct pci_sys_data *sys)
 
 	return bus;
 }
-
-
-
 
 static int __init mv_pri_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 {
@@ -481,8 +466,6 @@ static int __init mv_pri_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 	return -1;	 
      
 }
-
-
 
 static int __init mv_sec_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 {
@@ -504,7 +487,6 @@ static int __init mv_sec_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 
 }
 
-
 static struct hw_pci mv_pci __initdata = {
 	.swizzle        	= pci_std_swizzle,
         .map_irq                = mv_pri_map_irq,
@@ -521,6 +503,4 @@ static int __init mv_pci_init(void)
     return 0;
 }
 
-
 subsys_initcall(mv_pci_init);
-

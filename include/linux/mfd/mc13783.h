@@ -81,4 +81,3 @@ void mc13783_adc_set_ts_status(struct mc13783 *mc13783, unsigned int status);
 #define	MC13783_REGU_V4		30
 
 #endif /* __INCLUDE_LINUX_MFD_MC13783_H */
-

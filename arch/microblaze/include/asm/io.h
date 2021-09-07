@@ -16,7 +16,6 @@
 #include <linux/types.h>
 #include <linux/mm.h>          /* Get struct page {...} */
 
-
 #define IO_SPACE_LIMIT (0xFFFFFFFF)
 
 static inline unsigned char __raw_readb(const volatile void __iomem *addr)

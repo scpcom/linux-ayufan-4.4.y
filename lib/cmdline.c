@@ -153,7 +153,6 @@ unsigned long long memparse(const char *ptr, char **retptr)
 	return ret;
 }
 
-
 EXPORT_SYMBOL(memparse);
 EXPORT_SYMBOL(get_option);
 EXPORT_SYMBOL(get_options);

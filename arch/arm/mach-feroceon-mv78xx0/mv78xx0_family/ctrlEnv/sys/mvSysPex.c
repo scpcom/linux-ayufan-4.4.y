@@ -275,7 +275,6 @@ MV_STATUS mvPexInit(MV_U32 pexIf, MV_PEX_TYPE pexType)
 			/* Accumulate bar size */
 			pexBar.addrWin.size += addrDecWin.addrWin.size;
 
-
 			/* set a Pex window for this target ! 
 			DRAM CS always will have a Pex Window , and is not a 
 			part of the priority table */
@@ -333,7 +332,6 @@ MV_STATUS mvPexInit(MV_U32 pexIf, MV_PEX_TYPE pexType)
 	
 		}
 	}
-
 
 /******************************************************************************/
 /*                              DEVICE bar                                    */
@@ -663,7 +661,6 @@ MV_STATUS mvPexTargetWinGet(MV_U32 pexIf, MV_U32 winNum, MV_PEX_DEC_WIN *pPexAdd
 		return MV_BAD_PARAM;
 	}
 
-
 	if (winNum >= PEX_MAX_TARGET_WIN)
 	{
 		mvOsPrintf("mvPexTargetWinGet: ERR. Invalid PEX winNum %d\n", winNum);
@@ -860,7 +857,6 @@ MV_STATUS mvPexTargetWinRemap(MV_U32 pexIf, MV_U32 winNum,
 		MV_REG_WRITE(winRegOffs.winRemapHighRegOffs, pAddrWin->addrWin.baseHigh);
 	}
 
-
 	if (pAddrWin->enable == MV_TRUE)
 	{
 		MV_REG_BIT_SET(winRegOffs.winRemapLowRegOffs,PXWRR_REMAP_EN);
@@ -944,7 +940,6 @@ MV_STATUS mvPexBarSet(MV_U32 pexIf,
 	MV_U32 regBaseLow;
 	MV_U32 regSize,sizeToReg;
 
-
 	/* check parameters */
 	if(pexIf >= mvCtrlPexMaxIfGet())
 	{
@@ -958,13 +953,11 @@ MV_STATUS mvPexBarSet(MV_U32 pexIf,
 		return MV_BAD_PARAM;
 	}
 	
-
 	if (pAddrWin->addrWin.size == 0)
 	{
 		mvOsPrintf("mvPexBarSet: Size zero is Illegal\n" );
 		return MV_BAD_PARAM;
 	}
-
 
 	/* Check if the window complies with PEX spec							*/
 	if (MV_TRUE != pexBarIsValid(pAddrWin->addrWin.baseLow,
@@ -1004,8 +997,6 @@ MV_STATUS mvPexBarSet(MV_U32 pexIf,
 	}
 
 	/* set size */
-
-
 
 	/* Read base address low */
 	regBaseLow = MV_REG_READ(PEX_CFG_DIRECT_ACCESS(pexIf, PEX_MV_BAR_BASE(barNum)));
@@ -1057,11 +1048,8 @@ MV_STATUS mvPexBarSet(MV_U32 pexIf,
 
 	}
 
-
-
 	return MV_OK;
 }
-
 
 /*******************************************************************************
 *  mvPexBarGet - Get PEX bar address and size
@@ -1098,7 +1086,6 @@ MV_STATUS mvPexBarGet(MV_U32 pexIf,
 	pAddrWin->addrWin.baseLow = 
 		MV_REG_READ(PEX_CFG_DIRECT_ACCESS(pexIf,PEX_MV_BAR_BASE(barNum)));
 
-
 	if (PEX_INTER_REGS_BAR == barNum)
 	{
 		pAddrWin->addrWin.baseLow &= PXBIR_BASE_MASK;
@@ -1108,11 +1095,9 @@ MV_STATUS mvPexBarGet(MV_U32 pexIf,
 		pAddrWin->addrWin.baseLow &= PXBR_BASE_MASK;
 	}
 
-
 	/* read base high */
 	pAddrWin->addrWin.baseHigh = 
 		MV_REG_READ(PEX_CFG_DIRECT_ACCESS(pexIf,PEX_MV_BAR_BASE_HIGH(barNum)));
-
 
 	/* Read bar size */
 	if (PEX_INTER_REGS_BAR != barNum) /* internal registers have no size */
@@ -1142,7 +1127,6 @@ MV_STATUS mvPexBarGet(MV_U32 pexIf,
 		pAddrWin->addrWin.size = INTER_REGS_SIZE;
 		pAddrWin->enable = MV_TRUE;
 	}
-
 
 	return MV_OK;
 }
@@ -1191,7 +1175,6 @@ MV_STATUS mvPexBarEnable(MV_U32 pexIf, MV_U32 barNum, MV_BOOL enable)
 		}
 	}
 
-
 	if (MV_FALSE == enable)
 	{
 			/* disable bar and quit */
@@ -1227,7 +1210,6 @@ MV_STATUS mvPexBarEnable(MV_U32 pexIf, MV_U32 barNum, MV_BOOL enable)
 
 	return MV_OK;
 }
-
 
 /*******************************************************************************
 * pexWinOverlapDetect - Detect address windows overlapping
@@ -1358,7 +1340,6 @@ static MV_BOOL pexBarOverlapDetect(MV_U32 pexIf,
     MV_U32 		   bar;
 	MV_PEX_BAR barDecWin;
 
-	
 	for(bar = 0; bar < PEX_MAX_BARS; bar++)
     	{
         	/* don't check our target or illegal targets */
@@ -1471,7 +1452,6 @@ static MV_STATUS pexWinRegInfoGet(MV_U32 pexIf,
         pWinRegInfo->winRemapHighRegOffs = PEX_WIN_REMAP_HIGH_REG(pexIf,winNum);
     }
 
-
 	return MV_OK;
 }
 
@@ -1552,7 +1532,6 @@ MV_VOID mvPexAddrDecShow(MV_VOID)
 
 			mvOsOutput( "%s ", pexBarNameGet(bar) );
 			
-
 			if( mvPexBarGet( pexIf, bar, &pexBar ) == MV_OK )
 			{
 				if( pexBar.enable )
@@ -1569,7 +1548,6 @@ MV_VOID mvPexAddrDecShow(MV_VOID)
         mvPexDecWinShow(pexIf);
 	}
 }
-
 
 /*******************************************************************************
 * mvPexDecWinShow - Print the PEX address decode windows.
@@ -1635,4 +1613,3 @@ static MV_VOID mvPexDecWinShow(MV_U32 pexIf)
         mvOsOutput( "\n" );
     }
 }
-

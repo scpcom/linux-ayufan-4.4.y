@@ -32,7 +32,6 @@ extern void microdev_print_fpga_intc_status(void);
 #define	MICRODEV_FPGA_INTSRC_REG	(MICRODEV_FPGA_INTC_BASE+0x30ul)	/* Interrupt Source Register on INTC on CPU-board FPGA */
 #define	MICRODEV_FPGA_INTREQ_REG	(MICRODEV_FPGA_INTC_BASE+0x38ul)	/* Interrupt Request Register on INTC on CPU-board FPGA */
 
-
 /*
  * The following are the IRQ numbers for the Linux Kernel for external
  * interrupts.  i.e. the numbers seen by 'cat /proc/interrupt'.

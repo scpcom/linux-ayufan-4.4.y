@@ -40,7 +40,6 @@ struct smd_tty_info {
 
 static struct smd_tty_info smd_tty[MAX_SMD_TTYS];
 
-
 static void smd_tty_notify(void *priv, unsigned event)
 {
 	unsigned char *ptr;

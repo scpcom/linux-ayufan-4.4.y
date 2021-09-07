@@ -91,7 +91,6 @@ static void fit2_write_block( PIA *pi, char * buf, int count )
 
 {	int k;
 
-
 	w2(0xc); w0(0); 
 	for (k=0;k<count/2;k++) {
 		w2(4); w0(buf[2*k]); 

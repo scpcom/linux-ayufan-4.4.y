@@ -59,7 +59,6 @@ BOOLEAN rtstrmactohex(char *s1, char *s2)
 
 }
 
-
 // we assume the s1 and s2 both are strings.
 BOOLEAN rtstrcasecmp(char *s1, char *s2)
 {
@@ -687,7 +686,6 @@ INT RTMPGetKeyParameterWithOffset(
     return TRUE;
 }
 
-
 static int rtmp_parse_key_buffer_from_file(IN  PRTMP_ADAPTER pAd,IN  char *buffer,IN  ULONG KeyType,IN  INT BSSIdx,IN  INT KeyIdx)
 {
 	PUCHAR		keybuff;
@@ -764,7 +762,6 @@ static void rtmp_read_key_parms_from_file(IN  PRTMP_ADAPTER pAd, char *tmpbuf, c
 			DBGPRINT(RT_DEBUG_TRACE, ("DefaultKeyID(0~3)=%d\n", pAd->StaCfg.DefaultKeyId));
 		}
 	}
-
 
 	for (idx = 0; idx < 4; idx++)
 	{
@@ -1489,7 +1486,6 @@ static void	HTParametersHook(
         DBGPRINT(RT_DEBUG_TRACE, ("HT: MIMOPSEnable  = %s\n", (Value==0) ? "Disable" : "Enable"));
     }
 
-
     if (RTMPGetKeyParameter("HT_MIMOPSMode", pValueStr, 25, pInput))
     {
         Value = simple_strtol(pValueStr, 0, 10);
@@ -1519,7 +1515,6 @@ static void	HTParametersHook(
         }
         DBGPRINT(RT_DEBUG_TRACE, ("HT: BA Decline  = %s\n", (Value==0) ? "Disable" : "Enable"));
     }
-
 
     if (RTMPGetKeyParameter("HT_DisableReordering", pValueStr, 25, pInput))
     {
@@ -1599,9 +1594,6 @@ static void	HTParametersHook(
 		}
 		DBGPRINT(RT_DEBUG_TRACE, ("HT: RDG = %s\n", (Value==0) ? "Disable" : "Enable(+HTC)"));
 	}
-
-
-
 
 	// Tx A-MSUD ?
     if (RTMPGetKeyParameter("HT_AMSDU", pValueStr, 25, pInput))
@@ -1726,7 +1718,6 @@ static void	HTParametersHook(
 
 		}
 	}
-
 
 	// Channel Width
 	if (RTMPGetKeyParameter("HT_BW", pValueStr, 25, pInput))

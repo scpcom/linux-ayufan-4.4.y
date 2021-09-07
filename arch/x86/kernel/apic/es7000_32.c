@@ -424,7 +424,6 @@ static void es7000_vector_allocation_domain(int cpu, struct cpumask *retmask)
 	cpumask_bits(retmask)[0] = APIC_ALL_CPUS;
 }
 
-
 static void es7000_wait_for_init_deassert(atomic_t *deassert)
 {
 	while (!atomic_read(deassert))
@@ -525,7 +524,6 @@ static int es7000_apicid_to_node(int logical_apicid)
 {
 	return 0;
 }
-
 
 static int es7000_cpu_present_to_apicid(int mps_cpu)
 {

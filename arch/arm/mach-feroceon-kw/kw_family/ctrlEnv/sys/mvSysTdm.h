@@ -82,7 +82,6 @@ MV_STATUS mvTdmWinGet(MV_U32 winNum, MV_TDM_DEC_WIN *pAddrDecWin);
 MV_STATUS mvTdmWinEnable(int winNum, MV_BOOL enable);
 MV_VOID mvTdmAddrDecShow(MV_VOID);
 
-
 #define TDM_MBUS_MAX_WIN	4
 #define TDM_WIN_CTRL_REG(win)	((TDM_REG_BASE + 0x4030) + (win<<4))
 #define TDM_WIN_BASE_REG(win)	((TDM_REG_BASE +0x4034) + (win<<4))
@@ -103,4 +102,3 @@ MV_VOID mvTdmAddrDecShow(MV_VOID);
 #define TDM_BASE_MASK		(0xffff<<TDM_BASE_OFFS)
 
 #endif /*__INCmvSysTdmh*/
-

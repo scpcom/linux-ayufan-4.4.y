@@ -62,12 +62,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 /* includes */
 #include "ddr1_2/mvDramIf.h"
 #include "ctrlEnv/sys/mvCpuIf.h"
-
-
 
 #ifdef MV_DEBUG
 #define DB(x) x
@@ -378,7 +375,6 @@ static MV_U32 minCasCalc(MV_DRAM_BANK_INFO *pBankInfo, MV_U32 busClk,
 	CAS	=	* TBD  | TBD  |  5   |  4   |  3   |  2   | TBD  | TBD  * 
 			*********************************************************/
 	
-	
 	/* If we are asked to use the forced CAL */
 	if (forcedCl)
 	{
@@ -423,7 +419,6 @@ static MV_U32 minCasCalc(MV_DRAM_BANK_INFO *pBankInfo, MV_U32 busClk,
 	
 	/* go over the supported cas mask from Max Cas down and check if the 	*/
 	/* SysClk stands in its time requirments.								*/
-	
 	
 	DB(mvOsPrintf("Dram: minCasCalc supported mask = %x busClkPs = %x \n",
 								pBankInfo->suportedCasLatencies,busClkPs ));
@@ -1092,7 +1087,6 @@ static MV_U32 sdramTimeCtrlHighRegCalc(MV_DRAM_BANK_INFO *pBankInfo,
 	
 	DB(mvOsPrintf("Dram  Timing High: tRfc = %d\n", tRfc));
 
-	
 	/* Represent the populate banks in binary form */
 	for(bankNum = 0; bankNum < MV_DRAM_MAX_CS; bankNum++)
 	{
@@ -1340,7 +1334,6 @@ MV_STATUS mvDramIfWinGet(MV_TARGET target, MV_DRAM_DEC_WIN *pAddrDecWin)
 
 	pAddrDecWin->addrWin.baseHigh =  0;
 
-
 	if (sizeReg & SCSR_WIN_EN)
 	{
 		pAddrDecWin->enable = MV_TRUE;
@@ -1510,7 +1503,6 @@ MV_32 mvDramIfBankSizeGet(MV_U32 bankNum)
 	}
 }
 
-
 /*******************************************************************************
 * mvDramIfSizeGet - Get DRAM interface total size.
 *
@@ -1595,5 +1587,3 @@ MV_32 mvDramIfBankBaseGet(MV_U32 bankNum)
 		return -1;
 	}
 }
-
-

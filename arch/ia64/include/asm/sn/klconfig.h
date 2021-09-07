@@ -19,7 +19,6 @@
 
 typedef s32 klconf_off_t;
 
-
 /* Functions/macros needed to use this structure */
 
 typedef struct kl_config_hdr {
@@ -27,7 +26,6 @@ typedef struct kl_config_hdr {
 	klconf_off_t	ch_board_info;	/* the link list of boards */
 	char		pad0[88];
 } kl_config_hdr_t;
-
 
 #define NODE_OFFSET_TO_LBOARD(nasid,off)        (lboard_t*)(GLOBAL_CAC_ADDR((nasid), (off)))
 
@@ -66,7 +64,6 @@ typedef struct kl_config_hdr {
  +------------+  |   +------------+  |   +------------+  |   +------------+
  | offset     |--+   |  offset    |--+   |  offset    |--+   |offset=NULL |
  +------------+      +------------+      +------------+      +------------+
-
 
  +------------+
  | board info |
@@ -123,7 +120,6 @@ typedef struct kl_config_hdr {
  * The data structures below define the above concepts.
  */
 
-
 /*
  * BOARD classes
  */
@@ -141,7 +137,6 @@ typedef struct kl_config_hdr {
 #define KLCLASS_MAX	8		/* Bump this if a new CLASS is added */
 
 #define KLCLASS(_x) ((_x) & KLCLASS_MASK)
-
 
 /*
  * board types
@@ -169,7 +164,6 @@ typedef struct kl_config_hdr {
 #define KLTYPE_IABRICK		(KLCLASS_IOBRICK | 0xb)
 #define KLTYPE_PABRICK          (KLCLASS_IOBRICK | 0xc)
 #define KLTYPE_GABRICK		(KLCLASS_IOBRICK | 0xd)
-
 
 /* 
  * board structures
@@ -234,7 +228,6 @@ typedef struct klinfo_s {                  /* Generic info */
         unsigned short  pad3;             /* pci fields have moved over to */
         unsigned short  pad4;             /* klbri_t */
 } klinfo_t ;
-
 
 static inline lboard_t *find_lboard_next(lboard_t * brd)
 {

@@ -149,4 +149,3 @@ MACHINE_START(E400, "Toshiba e400")
 	.init_machine	= e400_init,
 	.timer		= &pxa_timer,
 MACHINE_END
-

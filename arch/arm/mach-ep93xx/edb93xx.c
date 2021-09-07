@@ -37,7 +37,6 @@
 #include <asm/mach-types.h>
 #include <asm/mach/arch.h>
 
-
 static struct physmap_flash_data edb93xx_flash_data;
 
 static struct resource edb93xx_flash_resource = {
@@ -77,7 +76,6 @@ static void __init edb93xx_register_flash(void)
 static struct ep93xx_eth_data edb93xx_eth_data = {
 	.phy_id		= 1,
 };
-
 
 /*************************************************************************
  * EDB93xx i2c peripheral handling
@@ -125,7 +123,6 @@ static void __init edb93xx_init_machine(void)
 	ep93xx_register_eth(&edb93xx_eth_data, 1);
 	edb93xx_register_i2c();
 }
-
 
 #ifdef CONFIG_MACH_EDB9301
 MACHINE_START(EDB9301, "Cirrus Logic EDB9301 Evaluation Board")

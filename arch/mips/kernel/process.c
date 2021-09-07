@@ -368,7 +368,6 @@ unsigned long thread_saved_pc(struct task_struct *tsk)
 	return ((unsigned long *)t->reg29)[schedule_mfi.pc_offset];
 }
 
-
 #ifdef CONFIG_KALLSYMS
 /* used by show_backtrace() */
 unsigned long unwind_stack(struct task_struct *task, unsigned long *sp,

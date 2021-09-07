@@ -600,7 +600,6 @@ void zfcp_scsi_rport_work(struct work_struct *work)
 	zfcp_port_put(port);
 }
 
-
 void zfcp_scsi_scan(struct work_struct *work)
 {
 	struct zfcp_unit *unit = container_of(work, struct zfcp_unit,

@@ -41,7 +41,6 @@ struct fw_hdr {
 	struct fw_hdr *next;
 };
 
-
 /* Free a chain of firmware headers */
 static
 void fw_hdrs_free(struct fw_hdr *hdr)
@@ -54,7 +53,6 @@ void fw_hdrs_free(struct fw_hdr *hdr)
 		hdr = next;
 	}
 }
-
 
 /* Fill a firmware header descriptor from a memory buffer */
 static
@@ -83,7 +81,6 @@ int fw_hdr_load(struct i1480 *i1480, struct fw_hdr *hdr, unsigned hdr_cnt,
 	}
 	return 0;
 }
-
 
 /**
  * Get a buffer where the firmware is supposed to be and create a
@@ -149,7 +146,6 @@ error:
 	return result;
 }
 
-
 /**
  * Compares a chunk of fw with one in the devices's memory
  *
@@ -199,7 +195,6 @@ error:
 cmp_failed:
 	return result;
 }
-
 
 /**
  * Writes firmware headers to the device.
@@ -259,7 +254,6 @@ retry:
 	return result;
 }
 
-
 /** Puts the device in firmware upload mode.*/
 static
 int mac_fw_upload_enable(struct i1480 *i1480)
@@ -283,7 +277,6 @@ error_cmd:
 	return result;
 }
 
-
 /** Gets the device out of firmware upload mode. */
 static
 int mac_fw_upload_disable(struct i1480 *i1480)
@@ -306,8 +299,6 @@ error_cmd:
 	dev_err(i1480->dev, "can't disable fw upload mode: %d\n", result);
 	return result;
 }
-
-
 
 /**
  * Generic function for uploading a MAC firmware.
@@ -355,7 +346,6 @@ out:
 	return result;
 }
 
-
 /**
  * Upload a pre-PHY firmware
  *
@@ -368,7 +358,6 @@ int i1480_pre_fw_upload(struct i1480 *i1480)
 		msleep(400);
 	return result;
 }
-
 
 /**
  * Reset a the MAC and PHY
@@ -411,7 +400,6 @@ out:
 
 }
 
-
 /* Wait for the MAC FW to start running */
 static
 int i1480_fw_is_running_q(struct i1480 *i1480)
@@ -436,7 +424,6 @@ out:
 	return result;
 
 }
-
 
 /**
  * Upload MAC firmware, wait for it to start

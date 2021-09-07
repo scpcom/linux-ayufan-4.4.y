@@ -658,7 +658,6 @@ static void __exit cpufreq_gov_dbs_exit(void)
 	destroy_workqueue(kconservative_wq);
 }
 
-
 MODULE_AUTHOR("Alexander Clouter <alex@digriz.org.uk>");
 MODULE_DESCRIPTION("'cpufreq_conservative' - A dynamic cpufreq governor for "
 		"Low Latency Frequency Transition capable processors "

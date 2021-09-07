@@ -172,7 +172,6 @@ static const struct stv090x_tab stv090x_rf_tab[] = {
 	{ -70, 0x07aa }	 /* -70dBm */
 };
 
-
 static struct stv090x_reg stv0900_initval[] = {
 
 	{ STV090x_OUTCFG,		0x00 },
@@ -3036,7 +3035,6 @@ err:
 	return -1;
 }
 
-
 static enum stv090x_signal_state stv090x_algo(struct stv090x_state *state)
 {
 	struct dvb_frontend *fe = &state->frontend;
@@ -3200,8 +3198,6 @@ static enum stv090x_signal_state stv090x_algo(struct stv090x_state *state)
 	}
 
 	/* need to check for AGC1 state */
-
-
 
 	if (state->algo == STV090x_BLIND_SEARCH)
 		lock = stv090x_blind_search(state);
@@ -3538,7 +3534,6 @@ err:
 	dprintk(FE_ERROR, 1, "I/O error");
 	return -1;
 }
-
 
 static enum dvbfe_algo stv090x_frontend_algo(struct dvb_frontend *fe)
 {
@@ -4245,7 +4240,6 @@ static struct dvb_frontend_ops stv090x_ops = {
 	.read_signal_strength		= stv090x_read_signal_strength,
 	.read_snr			= stv090x_read_cnr
 };
-
 
 struct dvb_frontend *stv090x_attach(const struct stv090x_config *config,
 				    struct i2c_adapter *i2c,

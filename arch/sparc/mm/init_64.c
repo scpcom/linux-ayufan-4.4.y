@@ -563,7 +563,6 @@ static void __init remap_kernel(void)
 	}
 }
 
-
 static void __init inherit_prom_mappings(void)
 {
 	/* Now fixup OBP's idea about where we really are mapped. */
@@ -2188,7 +2187,6 @@ static void __init sun4u_pgprot_init(void)
 	_PAGE_ALL_SZ_BITS =  (_PAGE_SZ4MB_4U | _PAGE_SZ512K_4U |
 			      _PAGE_SZ64K_4U | _PAGE_SZ8K_4U |
 			      _PAGE_SZ32MB_4U | _PAGE_SZ256MB_4U);
-
 
 	page_none = _PAGE_PRESENT_4U | _PAGE_ACCESSED_4U | _PAGE_CACHE_4U;
 	page_shared = (_PAGE_VALID | _PAGE_PRESENT_4U | _PAGE_CACHE_4U |

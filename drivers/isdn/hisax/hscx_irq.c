@@ -12,7 +12,6 @@
  *
  */
 
-
 static inline void
 waitforCEC(struct IsdnCardState *cs, int hscx)
 {
@@ -25,7 +24,6 @@ waitforCEC(struct IsdnCardState *cs, int hscx)
 	if (!to)
 		printk(KERN_WARNING "HiSax: waitforCEC timeout\n");
 }
-
 
 static inline void
 waitforXFW(struct IsdnCardState *cs, int hscx)
@@ -46,8 +44,6 @@ WriteHSCXCMDR(struct IsdnCardState *cs, int hscx, u_char data)
 	waitforCEC(cs, hscx);
 	WRITEHSCX(cs, hscx, HSCX_CMDR, data);
 }
-
-
 
 static void
 hscx_empty_fifo(struct BCState *bcs, int count)

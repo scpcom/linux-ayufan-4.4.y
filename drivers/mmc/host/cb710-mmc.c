@@ -179,7 +179,6 @@ static int cb710_wait_for_event(struct cb710_slot *slot, u8 what)
 	return err < 0 ? err : 0;
 }
 
-
 static int cb710_wait_while_busy(struct cb710_slot *slot, uint8_t mask)
 {
 	unsigned limit = 500000;	/* FIXME: real timeout */

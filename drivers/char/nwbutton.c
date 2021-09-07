@@ -235,7 +235,6 @@ static void __exit nwbutton_exit (void)
 	misc_deregister (&button_misc_device);
 }
 
-
 MODULE_AUTHOR("Alex Holden");
 MODULE_LICENSE("GPL");
 

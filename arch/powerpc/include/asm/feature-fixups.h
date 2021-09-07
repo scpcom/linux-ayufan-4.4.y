@@ -51,7 +51,6 @@ label##5:					       	\
 	FTR_ENTRY_OFFSET label##4b-label##5b;	 	\
 	.popsection;
 
-
 /* CPU feature dependent sections */
 #define BEGIN_FTR_SECTION_NESTED(label)	START_FTR_SECTION(label)
 #define BEGIN_FTR_SECTION		START_FTR_SECTION(97)

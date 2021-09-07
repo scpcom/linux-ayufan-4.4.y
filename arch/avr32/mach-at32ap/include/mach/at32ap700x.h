@@ -30,7 +30,6 @@
 #define GPIO_PIN_PD(N)	(GPIO_PIOD_BASE + (N))
 #define GPIO_PIN_PE(N)	(GPIO_PIOE_BASE + (N))
 
-
 /*
  * DMAC peripheral hardware handshaking interfaces, used with dw_dmac
  */
@@ -139,9 +138,7 @@
 #define ATMEL_LCDC_PE_DATA20	(1ULL << (32 + 17))
 #define ATMEL_LCDC_PE_DATA21	(1ULL << (32 + 18))
 
-
 #define ATMEL_LCDC(PORT, PIN)	(ATMEL_LCDC_##PORT##_##PIN)
-
 
 #define ATMEL_LCDC_PRI_24B_DATA	(					\
 		ATMEL_LCDC(PC, DATA0)  | ATMEL_LCDC(PC, DATA1)  |	\

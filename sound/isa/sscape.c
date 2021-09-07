@@ -37,7 +37,6 @@
 
 #include <sound/sscape_ioctl.h>
 
-
 MODULE_AUTHOR("Chris Rankin");
 MODULE_DESCRIPTION("ENSONIQ SoundScape PnP driver");
 MODULE_LICENSE("GPL");
@@ -88,7 +87,6 @@ static struct pnp_card_device_id sscape_pnpids[] = {
 MODULE_DEVICE_TABLE(pnp_card, sscape_pnpids);
 #endif
 
-
 #define HOST_CTRL_IO(i)  ((i) + 2)
 #define HOST_DATA_IO(i)  ((i) + 3)
 #define ODIE_ADDR_IO(i)  ((i) + 4)
@@ -125,7 +123,6 @@ enum GA_REG {
 
 #define DMA_8BIT  0x80
 
-
 enum card_type {
 	SSCAPE,
 	SSCAPE_PNP,
@@ -155,7 +152,6 @@ struct soundscape {
 
 #define INVALID_IRQ  ((unsigned)-1)
 
-
 static inline struct soundscape *get_card_soundscape(struct snd_card *c)
 {
 	return (struct soundscape *) (c->private_data);
@@ -170,7 +166,6 @@ static inline struct soundscape *get_hwdep_soundscape(struct snd_hwdep * hw)
 {
 	return (struct soundscape *) (hw->private_data);
 }
-
 
 /*
  * Allocates some kernel memory that we can use for DMA.
@@ -198,7 +193,6 @@ static void free_dmabuf(struct snd_dma_buffer *buf)
 	if (buf && buf->area)
 		snd_dma_free_pages(buf);
 }
-
 
 /*
  * This function writes to the SoundScape's control registers,
@@ -312,7 +306,6 @@ static int host_write_ctrl_unsafe(unsigned io_base, unsigned char data,
 
 	return err;
 }
-
 
 /*
  * Check that the MIDI subsystem is operational. If it isn't,
@@ -701,7 +694,6 @@ static int sscape_hw_ioctl(struct snd_hwdep * hw, struct file *file,
 	return err;
 }
 
-
 /*
  * Mixer control for the SoundScape's MIDI device.
  */
@@ -796,7 +788,6 @@ static unsigned __devinit get_irq_config(int irq)
 
 	return INVALID_IRQ;
 }
-
 
 /*
  * Perform certain arcane port-checks to see whether there
@@ -937,7 +928,6 @@ static int __devinit create_mpu401(struct snd_card *card, int devnum, unsigned l
 	return err;
 }
 
-
 /*
  * Create an AD1845 PCM subdevice on the SoundScape. The AD1845
  * is very much like a CS4231, with a few extra bits. We will
@@ -1035,7 +1025,6 @@ static int __devinit create_ad1845(struct snd_card *card, unsigned port,
 	_error:
 	return err;
 }
-
 
 /*
  * Create an ALSA soundcard entry for the SoundScape, using
@@ -1218,7 +1207,6 @@ _release_region:
 	return err;
 }
 
-
 static int __devinit snd_sscape_match(struct device *pdev, unsigned int i)
 {
 	/*
@@ -1296,7 +1284,6 @@ static inline int __devinit get_next_autoindex(int i)
 		++i;
 	return i;
 }
-
 
 static int __devinit sscape_pnp_detect(struct pnp_card_link *pcard,
 				       const struct pnp_card_device_id *pid)

@@ -57,7 +57,6 @@
 #define CYCLE_DELAY	10
 #define TIMEOUT		(HZ / 2)
 
-
 static void __iomem *ioaddr;
 
 /* The voo GPIO registers don't have individual masks for each bit
@@ -235,7 +234,6 @@ static void __exit i2c_voodoo3_exit(void)
 {
 	pci_unregister_driver(&voodoo3_driver);
 }
-
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>, "
 		"Philip Edelbrock <phil@netroedge.com>, "

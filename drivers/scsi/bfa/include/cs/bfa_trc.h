@@ -45,7 +45,6 @@ struct bfa_trc_s {
 	} data;
 };
 
-
 struct bfa_trc_mod_s {
 	u32	head;
 	u32	tail;
@@ -55,7 +54,6 @@ struct bfa_trc_mod_s {
 	u32	rsvd[3];
 	struct bfa_trc_s trc[BFA_TRC_MAX];
 };
-
 
 enum {
 	BFA_TRC_FW   = 1,	/*  firmware modules */
@@ -86,10 +84,8 @@ enum {
 	static int __trc_fileno = ((BFA_TRC_ ## __mod ## _ ## __submod) | \
 						 BFA_TRC_MOD(__mod))
 
-
 #define bfa_trc32(_trcp, _data)	\
 	__bfa_trc((_trcp)->trcmod, __trc_fileno, __LINE__, (u32)_data)
-
 
 #ifndef BFA_BOOT_BUILD
 #define bfa_trc(_trcp, _data)	\
@@ -101,14 +97,12 @@ void bfa_boot_trc(struct bfa_trc_mod_s *trcmod, u16 fileno,
 	bfa_boot_trc((_trcp)->trcmod, __trc_fileno, __LINE__, (u32)_data)
 #endif
 
-
 static inline void
 bfa_trc_init(struct bfa_trc_mod_s *trcm)
 {
 	trcm->head = trcm->tail = trcm->stopped = 0;
 	trcm->ntrc = BFA_TRC_MAX;
 }
-
 
 static inline void
 bfa_trc_stop(struct bfa_trc_mod_s *trcm)
@@ -121,7 +115,6 @@ extern void dc_flush(void *data);
 #else
 #define dc_flush(data)
 #endif
-
 
 static inline void
 __bfa_trc(struct bfa_trc_mod_s *trcm, int fileno, int line, u64 data)
@@ -143,7 +136,6 @@ __bfa_trc(struct bfa_trc_mod_s *trcm, int fileno, int line, u64 data)
 		trcm->head = (trcm->head + 1) & (BFA_TRC_MAX - 1);
 	dc_flush(trcm);
 }
-
 
 static inline void
 __bfa_trc32(struct bfa_trc_mod_s *trcm, int fileno, int line, u32 data)
@@ -173,4 +165,3 @@ __bfa_trc32(struct bfa_trc_mod_s *trcm, int fileno, int line, u32 data)
 #endif
 
 #endif /* __BFA_TRC_H__ */
-

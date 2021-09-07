@@ -127,7 +127,6 @@ static struct clk vpss_slave_clk = {
 	.lpsc = DAVINCI_LPSC_VPSSSLV,
 };
 
-
 static struct clk clkout1_clk = {
 	.name = "clkout1",
 	.parent = &pll1_aux_clk,

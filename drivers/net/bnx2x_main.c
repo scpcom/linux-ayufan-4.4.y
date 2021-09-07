@@ -50,7 +50,6 @@
 #include <linux/zlib.h>
 #include <linux/io.h>
 
-
 #include "bnx2x.h"
 #include "bnx2x_init.h"
 #include "bnx2x_init_ops.h"
@@ -135,7 +134,6 @@ static struct {
 	{ "Broadcom NetXtreme II BCM57711 XGb" },
 	{ "Broadcom NetXtreme II BCM57711E XGb" }
 };
-
 
 static const struct pci_device_id bnx2x_pci_tbl[] = {
 	{ PCI_VDEVICE(BROADCOM, PCI_DEVICE_ID_NX2_57710), BCM57710 },
@@ -810,7 +808,6 @@ static u16 bnx2x_ack_int(struct bnx2x *bp)
 	return result;
 }
 
-
 /*
  * fast path service functions
  */
@@ -966,7 +963,6 @@ static void bnx2x_tx_int(struct bnx2x_fastpath *fp)
 	}
 }
 
-
 static void bnx2x_sp_event(struct bnx2x_fastpath *fp,
 			   union eth_rx_cqe *rr_cqe)
 {
@@ -1021,7 +1017,6 @@ static void bnx2x_sp_event(struct bnx2x_fastpath *fp,
 		DP(NETIF_MSG_IFDOWN, "got delete ramrod for MULTI[%d]\n", cid);
 		bnx2x_fp(bp, cid, state) = BNX2X_FP_STATE_CLOSED;
 		break;
-
 
 	case (RAMROD_CMD_ID_ETH_SET_MAC | BNX2X_STATE_OPEN):
 	case (RAMROD_CMD_ID_ETH_SET_MAC | BNX2X_STATE_DIAG):
@@ -1420,7 +1415,6 @@ static void bnx2x_tpa_stop(struct bnx2x *bp, struct bnx2x_fastpath *fp,
 			dev_kfree_skb(skb);
 		}
 
-
 		/* put new skb in bin */
 		fp->tpa_pool[queue].skb = new_skb;
 
@@ -1670,7 +1664,6 @@ reuse_rx:
 #endif
 			netif_receive_skb(skb);
 
-
 next_rx:
 		rx_buf->skb = NULL;
 
@@ -1803,7 +1796,6 @@ static irqreturn_t bnx2x_interrupt(int irq, void *dev_instance)
 			status &= ~mask;
 		}
 	}
-
 
 	if (unlikely(status & 0x1)) {
 		queue_delayed_work(bnx2x_wq, &bp->sp_task, 0);
@@ -2372,7 +2364,6 @@ static void bnx2x_init_vn_minmax(struct bnx2x *bp, int func)
 		       XSTORM_FAIRNESS_PER_VN_VARS_OFFSET(func) + i * 4,
 		       ((u32 *)(&m_fair_vn))[i]);
 }
-
 
 /* This function is called upon link interrupt */
 static void bnx2x_link_attn(struct bnx2x *bp)
@@ -3178,7 +3169,6 @@ static void bnx2x_sp_task(struct work_struct *work)
 {
 	struct bnx2x *bp = container_of(work, struct bnx2x, sp_task.work);
 	u16 status;
-
 
 	/* Return here if interrupt is disabled */
 	if (unlikely(atomic_read(&bp->intr_sem) != 0)) {
@@ -5481,7 +5471,6 @@ static void bnx2x_init_internal_func(struct bnx2x *bp)
 				rx_pause.sge_thr_high = 250;
 			}
 
-
 			offset = BAR_USTRORM_INTMEM +
 				 USTORM_ETH_RING_PAUSE_DATA_OFFSET(port,
 								   fp->cl_id);
@@ -5523,7 +5512,6 @@ static void bnx2x_init_internal_func(struct bnx2x *bp)
 		DP(NETIF_MSG_IFUP,
 		   "single function mode  minmax will be disabled\n");
 	}
-
 
 	/* Store it to internal memory */
 	if (bp->port.pmf)
@@ -5579,7 +5567,6 @@ static void bnx2x_nic_init(struct bnx2x *bp, u32 load_code)
 
 	/* ensure status block indices were read */
 	rmb();
-
 
 	bnx2x_init_def_sb(bp, bp->def_status_blk, bp->def_status_blk_mapping,
 			  DEF_SB_ID);
@@ -5921,7 +5908,6 @@ static void enable_blocks_attention(struct bnx2x *bp)
 /*	REG_WR(bp, MISC_REG_MISC_INT_MASK, 0); */
 	REG_WR(bp, PBF_REG_PBF_INT_MASK, 0X18);		/* bit 3,4 masked */
 }
-
 
 static void bnx2x_reset_common(struct bnx2x *bp)
 {
@@ -6319,7 +6305,6 @@ static int bnx2x_init_port(struct bnx2x *bp)
 	REG_WR(bp, BRB1_REG_PAUSE_LOW_THRESHOLD_0 + port*4, low);
 	REG_WR(bp, BRB1_REG_PAUSE_HIGH_THRESHOLD_0 + port*4, high);
 
-
 	bnx2x_init_block(bp, PRS_BLOCK, init_stage);
 
 	bnx2x_init_block(bp, TSDM_BLOCK, init_stage);
@@ -6508,7 +6493,6 @@ static int bnx2x_init_func(struct bnx2x *bp)
 	} else /* E1 */
 		REG_WR(bp, PXP2_REG_PSWRQ_CDU0_L2P + func*4,
 		       PXP_ILT_RANGE(i, i + CNIC_ILT_LINES));
-
 
 	if (CHIP_IS_E1H(bp)) {
 		bnx2x_init_block(bp, MISC_BLOCK, FUNC0_STAGE + func);
@@ -7236,7 +7220,6 @@ static void bnx2x_set_int_mode_msix(struct bnx2x *bp, int *num_rx_queues_out,
 		}
 		break;
 
-
 	default:
 		_num_rx_queues = 1;
 		_num_tx_queues = 1;
@@ -7288,7 +7271,6 @@ static int bnx2x_set_int_mode(struct bnx2x *bp)
 	bp->dev->real_num_tx_queues = bp->num_tx_queues;
 	return rc;
 }
-
 
 /* must be called with rtnl_lock */
 static int bnx2x_nic_load(struct bnx2x *bp, int load_mode)
@@ -7480,7 +7462,6 @@ static int bnx2x_nic_load(struct bnx2x *bp, int load_mode)
 
 	/* start the timer */
 	mod_timer(&bp->timer, jiffies + bp->current_interval);
-
 
 	return 0;
 
@@ -8715,7 +8696,6 @@ static int __devinit bnx2x_init_bp(struct bnx2x *bp)
 		multi_mode = ETH_RSS_MODE_DISABLED;
 	}
 	bp->multi_mode = multi_mode;
-
 
 	/* Set TPA flags */
 	if (disable_tpa) {
@@ -10758,7 +10738,6 @@ poll_again:
 	return work_done;
 }
 
-
 /* we split the first BD into headers and data BDs
  * to ease the pain of our fellow microcode engineers
  * we use one mapping for both BDs
@@ -11904,7 +11883,6 @@ request_firmware_exit:
 	return rc;
 }
 
-
 static int __devinit bnx2x_init_one(struct pci_dev *pdev,
 				    const struct pci_device_id *ent)
 {
@@ -12275,5 +12253,3 @@ static void __exit bnx2x_cleanup(void)
 
 module_init(bnx2x_init);
 module_exit(bnx2x_cleanup);
-
-

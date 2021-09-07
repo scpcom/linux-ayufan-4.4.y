@@ -32,7 +32,6 @@
 
 #ifdef CONFIG_ARCH_OMAP24XX
 
-
 /* Wakeup dependency source arrays */
 
 /*
@@ -107,7 +106,6 @@ static struct pwrdm_dep core_24xx_wkdeps[] = {
 	{ NULL },
 };
 
-
 /* Powerdomains */
 
 static struct powerdomain dsp_pwrdm = {
@@ -166,8 +164,6 @@ static struct powerdomain core_24xx_pwrdm = {
 
 #endif	   /* CONFIG_ARCH_OMAP24XX */
 
-
-
 /*
  * 2430-specific powerdomains
  */
@@ -195,6 +191,5 @@ static struct powerdomain mdm_pwrdm = {
 };
 
 #endif     /* CONFIG_ARCH_OMAP2430 */
-
 
 #endif

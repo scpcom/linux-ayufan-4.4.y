@@ -119,7 +119,6 @@ static void mdiobb_cmd(struct mdiobb_ctrl *ctrl, int read, u8 phy, u8 reg)
 	mdiobb_send_num(ctrl, reg, 5);
 }
 
-
 static int mdiobb_read(struct mii_bus *bus, int phy, int reg)
 {
 	struct mdiobb_ctrl *ctrl = bus->priv;

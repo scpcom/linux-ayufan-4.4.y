@@ -29,7 +29,6 @@
 
 #define MIXART_DRIVER_VERSION	0x000100	/* 0.1.0 */
 
-
 /*
  */
 
@@ -44,13 +43,11 @@ struct mem_area {
 	struct resource *res;
 };
 
-
 struct mixart_route {
 	unsigned char connected;
 	unsigned char phase_inv;
 	int volume;
 };
-
 
 /* firmware status codes  */
 #define MIXART_MOTHERBOARD_XLX_INDEX  0
@@ -112,7 +109,6 @@ struct mixart_mgr {
 
 };
 
-
 #define MIXART_STREAM_STATUS_FREE	0
 #define MIXART_STREAM_STATUS_OPEN	1
 #define MIXART_STREAM_STATUS_RUNNING	2
@@ -128,14 +124,12 @@ struct mixart_mgr {
 
 #define MIXART_MAX_STREAM_PER_CARD  (MIXART_PCM_TOTAL * (MIXART_PLAYBACK_STREAMS + MIXART_CAPTURE_STREAMS) )
 
-
 #define MIXART_NOTIFY_CARD_MASK		0xF000
 #define MIXART_NOTIFY_CARD_OFFSET	12
 #define MIXART_NOTIFY_PCM_MASK		0x0F00
 #define MIXART_NOTIFY_PCM_OFFSET	8
 #define MIXART_NOTIFY_CAPT_MASK		0x0080
 #define MIXART_NOTIFY_SUBS_MASK		0x007F
-
 
 struct mixart_stream {
 	struct snd_pcm_substream *substream;
@@ -150,7 +144,6 @@ struct mixart_stream {
 
 	int channels;
 };
-
 
 enum mixart_pipe_status {
 	PIPE_UNDEFINED,
@@ -168,7 +161,6 @@ struct mixart_pipe {
 	int references;             /* number of subs openned */
 	int monitoring;             /* pipe used for monitoring issue */
 };
-
 
 struct snd_mixart {
 	struct snd_card *card;

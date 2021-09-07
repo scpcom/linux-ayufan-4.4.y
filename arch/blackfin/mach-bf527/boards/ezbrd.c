@@ -184,7 +184,6 @@ static struct platform_device rtc_device = {
 };
 #endif
 
-
 #if defined(CONFIG_BFIN_MAC) || defined(CONFIG_BFIN_MAC_MODULE)
 static struct platform_device bfin_mii_bus = {
 	.name = "bfin_mii_bus",

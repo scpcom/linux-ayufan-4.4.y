@@ -968,9 +968,7 @@ static int cvmx_pcie_rc_initialize(int pcie_port)
 	return 0;
 }
 
-
 /* Above was cvmx-pcie.c, below original pcie.c */
-
 
 /**
  * Map a PCI device to the appropriate interrupt line
@@ -1160,8 +1158,6 @@ static int octeon_pcie1_read_config(struct pci_bus *bus, unsigned int devfn,
 	return octeon_pcie_read_config(1, bus, devfn, reg, size, val);
 }
 
-
-
 /**
  * Write a value to PCI configuration space
  *
@@ -1251,7 +1247,6 @@ static struct pci_controller octeon_pcie1_controller = {
 	.mem_resource = &octeon_pcie1_mem_resource,
 	.io_resource = &octeon_pcie1_io_resource,
 };
-
 
 /**
  * Initialize the Octeon PCIe controllers

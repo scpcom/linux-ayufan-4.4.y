@@ -11,7 +11,6 @@
 #define	mcfdma_h
 /****************************************************************************/
 
-
 /*
  *	Get address specific defines for this Coldfire member.
  */
@@ -32,7 +31,6 @@
 #define	MCFDMA_BASE2		0x380		/* Base address of DMA 2 */
 #define	MCFDMA_BASE3		0x3C0		/* Base address of DMA 3 */
 #endif
-
 
 #if !defined(CONFIG_M5272)
 

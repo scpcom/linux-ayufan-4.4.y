@@ -101,7 +101,6 @@ static inline void set_eiem(unsigned long val)
 		: /* no outputs */ \
 		: "r" (gr), "i" (cr) : "memory")
 
-
 /*
 ** This is simply the barrier() macro from linux/kernel.h but when serial.c
 ** uses tqueue.h uses smp_mb() defined using barrier(), linux/kernel.h

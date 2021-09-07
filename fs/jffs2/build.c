@@ -44,7 +44,6 @@ next_inode(int *i, struct jffs2_inode_cache *ic, struct jffs2_sb_info *c)
 	     ic;					\
 	     ic = next_inode(&i, ic, (c)))
 
-
 static void jffs2_build_inode_pass1(struct jffs2_sb_info *c,
 				    struct jffs2_inode_cache *ic)
 {

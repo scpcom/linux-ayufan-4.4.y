@@ -230,7 +230,6 @@ static struct ata_port_operations efar_ops = {
 	.prereset		= efar_pre_reset,
 };
 
-
 /**
  *	efar_init_one - Register EFAR ATA PCI device with kernel services
  *	@pdev: PCI device to register
@@ -299,4 +298,3 @@ MODULE_DESCRIPTION("SCSI low-level driver for EFAR PIIX clones");
 MODULE_LICENSE("GPL");
 MODULE_DEVICE_TABLE(pci, efar_pci_tbl);
 MODULE_VERSION(DRV_VERSION);
-

@@ -43,10 +43,8 @@
 #include <asm/uaccess.h>
 #include "internal.h"
 
-
 LIST_HEAD(super_blocks);
 DEFINE_SPINLOCK(sb_lock);
-
 
 /**
  *	alloc_super	-	create new superblock
@@ -182,7 +180,6 @@ void put_super(struct super_block *sb)
 	__put_super(sb);
 	spin_unlock(&sb_lock);
 }
-
 
 /**
  *	deactivate_super	-	drop an active reference to superblock
@@ -332,7 +329,6 @@ EXPORT_SYMBOL(unlock_super);
 void generic_shutdown_super(struct super_block *sb)
 {
 	const struct super_operations *sop = sb->s_op;
-
 
 	if (sb->s_root) {
 		shrink_dcache_for_umount(sb);

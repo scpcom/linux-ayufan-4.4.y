@@ -64,7 +64,6 @@
 * PHY.)
 *******************************************************************************/
 
-
 GT_STATUS gprtPhyIntEnable
 (
 IN GT_QD_DEV    *dev,
@@ -276,4 +275,3 @@ OUT GT_U16     *intPortMask
 	return retVal;
 
 }
-

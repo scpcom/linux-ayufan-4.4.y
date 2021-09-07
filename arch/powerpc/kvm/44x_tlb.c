@@ -174,7 +174,6 @@ void kvmppc_44x_tlb_put(struct kvm_vcpu *vcpu)
 	}
 }
 
-
 /* Search the guest TLB for a matching entry. */
 int kvmppc_44x_tlb_index(struct kvm_vcpu *vcpu, gva_t eaddr, unsigned int pid,
                          unsigned int as)

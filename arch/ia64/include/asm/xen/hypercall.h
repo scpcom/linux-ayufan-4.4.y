@@ -103,7 +103,6 @@ extern unsigned long __hypercall(unsigned long a1, unsigned long a2,
 	(type)__res;						\
 })
 
-
 static inline int
 xencomm_arch_hypercall_sched_op(int cmd, struct xencomm_handle *arg)
 {

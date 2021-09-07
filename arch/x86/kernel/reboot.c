@@ -114,7 +114,6 @@ static int __init reboot_setup(char *str)
 
 __setup("reboot=", reboot_setup);
 
-
 #ifdef CONFIG_X86_32
 /*
  * Reboot options and system auto-detection code provided by
@@ -531,7 +530,6 @@ static void emergency_vmx_disable_all(void)
 	}
 }
 
-
 void __attribute__((weak)) mach_reboot_fixups(void)
 {
 }
@@ -730,7 +728,6 @@ void machine_crash_shutdown(struct pt_regs *regs)
 	machine_ops.crash_shutdown(regs);
 }
 #endif
-
 
 #if defined(CONFIG_SMP)
 

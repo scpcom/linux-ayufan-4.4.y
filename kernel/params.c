@@ -684,7 +684,6 @@ static void __init param_sysfs_builtin(void)
 	}
 }
 
-
 /* module-related sysfs stuff */
 
 static ssize_t module_attr_show(struct kobject *kobj,

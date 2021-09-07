@@ -102,7 +102,6 @@ endgrow:
 	return NULL;
 }
 
-
 /* This lock will have the grow table function as writer and add / delete nodes
  * as readers. When reading the table (i.e. doing lookups) we are well protected
  * by RCU
@@ -140,7 +139,6 @@ void mesh_path_assign_nexthop(struct mesh_path *mpath, struct sta_info *sta)
 	skb_queue_splice(&tmpq, &mpath->frame_queue);
 	spin_unlock_irqrestore(&mpath->frame_queue.lock, flags);
 }
-
 
 /**
  * mesh_path_lookup - look up a path in the mesh path table
@@ -204,7 +202,6 @@ struct mesh_path *mpp_path_lookup(u8 *dst, struct ieee80211_sub_if_data *sdata)
 	}
 	return NULL;
 }
-
 
 /**
  * mesh_path_lookup_by_idx - look up a path in the mesh path table by its index
@@ -437,7 +434,6 @@ err_node_alloc:
 err_path_alloc:
 	return err;
 }
-
 
 /**
  * mesh_plink_broken - deactivates paths and sends perr when a link breaks

@@ -43,12 +43,10 @@
 #include <asm/hardware.h>
 #include "parport_gsc.h"
 
-
 MODULE_AUTHOR("Helge Deller <deller@gmx.de>");
 MODULE_DESCRIPTION("HP-PARISC PC-style parallel port driver");
 MODULE_SUPPORTED_DEVICE("integrated PC-style parallel port");
 MODULE_LICENSE("GPL");
-
 
 /*
  * Clear TIMEOUT BIT in EPP MODE
@@ -229,7 +227,6 @@ static int __devinit parport_PS2_supported(struct parport *pb)
 	return ok;
 }
 
-
 /* --- Initialisation code -------------------------------- */
 
 struct parport *__devinit parport_gsc_probe_port (unsigned long base,
@@ -340,7 +337,6 @@ struct parport *__devinit parport_gsc_probe_port (unsigned long base,
 
 	return p;
 }
-
 
 #define PARPORT_GSC_OFFSET 0x800
 

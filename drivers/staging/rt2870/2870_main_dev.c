@@ -40,7 +40,6 @@
 
 #include "rt_config.h"
 
-
 // Following information will be show when you run 'modinfo'
 // *** If you have a solution for the bug in current version of driver, please mail to me.
 // Otherwise post to forum in ralinktech's web site(www.ralinktech.com) and let all users help you. ***
@@ -152,7 +151,6 @@ MODULE_DEVICE_TABLE(usb, rtusb_usb_id);
 #define PF_NOFREEZE  0
 #endif
 
-
 #ifdef CONFIG_PM
 static int rt2870_suspend(struct usb_interface *intf, pm_message_t state);
 static int rt2870_resume(struct usb_interface *intf);
@@ -195,7 +193,6 @@ static int rt2870_suspend(
 	struct net_device *net_dev;
 	PRTMP_ADAPTER pAd = usb_get_intfdata(intf);
 
-
 	DBGPRINT(RT_DEBUG_TRACE, ("===> rt2870_suspend()\n"));
 	net_dev = pAd->net_dev;
 	netif_device_detach (net_dev);
@@ -215,7 +212,6 @@ static int rt2870_resume(
 	struct net_device *net_dev;
 	PRTMP_ADAPTER pAd = usb_get_intfdata(intf);
 
-
 	DBGPRINT(RT_DEBUG_TRACE, ("===> rt2870_resume()\n"));
 
 	pAd->PM_FlgSuspend = 0;
@@ -229,7 +225,6 @@ static int rt2870_resume(
 	return 0;
 }
 #endif // CONFIG_PM //
-
 
 // Init driver module
 INT __init rtusb_init(void)
@@ -247,9 +242,6 @@ VOID __exit rtusb_exit(void)
 
 module_init(rtusb_init);
 module_exit(rtusb_exit);
-
-
-
 
 /*---------------------------------------------------------------------	*/
 /* function declarations												*/
@@ -323,7 +315,6 @@ INT MlmeThread(
 	return 0;
 
 }
-
 
 /*
 ========================================================================
@@ -432,7 +423,6 @@ INT RTUSBCmdThread(
 
 }
 
-
 static void RT2870_TimerQ_Handle(RTMP_ADAPTER *pAd)
 {
 	int status;
@@ -489,7 +479,6 @@ static void RT2870_TimerQ_Handle(RTMP_ADAPTER *pAd)
 	}
 }
 
-
 INT TimerQThread(
 	IN OUT PVOID Context)
 {
@@ -526,14 +515,12 @@ INT TimerQThread(
 
 }
 
-
 RT2870_TIMER_ENTRY *RT2870_TimerQ_Insert(
 	IN RTMP_ADAPTER *pAd,
 	IN RALINK_TIMER_STRUCT *pTimer)
 {
 	RT2870_TIMER_ENTRY *pQNode = NULL, *pQTail;
 	unsigned long irqFlags;
-
 
 	RTMP_IRQ_LOCK(&pAd->TimerQLock, irqFlags);
 	if (pAd->TimerQ.status & RT2870_THREAD_CAN_DO_INSERT)
@@ -565,7 +552,6 @@ RT2870_TIMER_ENTRY *RT2870_TimerQ_Insert(
 	}
 	return pQNode;
 }
-
 
 BOOLEAN RT2870_TimerQ_Remove(
 	IN RTMP_ADAPTER *pAd,
@@ -606,7 +592,6 @@ BOOLEAN RT2870_TimerQ_Remove(
 	return TRUE;
 }
 
-
 void RT2870_TimerQ_Exit(RTMP_ADAPTER *pAd)
 {
 	RT2870_TIMER_ENTRY *pTimerQ;
@@ -627,7 +612,6 @@ void RT2870_TimerQ_Exit(RTMP_ADAPTER *pAd)
 	RTMP_IRQ_UNLOCK(&pAd->TimerQLock, irqFlags);
 
 }
-
 
 void RT2870_TimerQ_Init(RTMP_ADAPTER *pAd)
 {
@@ -663,7 +647,6 @@ void RT2870_TimerQ_Init(RTMP_ADAPTER *pAd)
 	RTMP_IRQ_UNLOCK(&pAd->TimerQLock, irqFlags);
 }
 
-
 VOID RT2870_WatchDog(IN RTMP_ADAPTER *pAd)
 {
 	PHT_TX_CONTEXT		pHTTXContext;
@@ -672,7 +655,6 @@ VOID RT2870_WatchDog(IN RTMP_ADAPTER *pAd)
 	PURB		   		pUrb;
 	BOOLEAN				needDumpSeq = FALSE;
 	UINT32          	MACValue;
-
 
 	idx = 0;
 	RTMP_IO_READ32(pAd, TXRXQ_PCNT, &MACValue);
@@ -717,7 +699,6 @@ VOID RT2870_WatchDog(IN RTMP_ADAPTER *pAd)
 		}
 		pAd->watchDogRxOverFlowCnt = 0;
 	}
-
 
 	for (idx = 0; idx < NUM_OF_TX_RING; idx++)
 	{
@@ -840,7 +821,6 @@ static void _rtusb_disconnect(struct usb_device *dev, PRTMP_ADAPTER pAd)
 {
 	struct net_device	*net_dev = NULL;
 
-
 	DBGPRINT(RT_DEBUG_ERROR, ("rtusb_disconnect: unregister usbnet usb-%s-%s\n",
 				dev->bus->bus_name, dev->devpath));
 	if (!pAd)
@@ -852,13 +832,8 @@ static void _rtusb_disconnect(struct usb_device *dev, PRTMP_ADAPTER pAd)
 	}
 	RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST);
 
-
-
 	// for debug, wait to show some messages to /proc system
 	udelay(1);
-
-
-
 
 	net_dev = pAd->net_dev;
 	if (pAd->net_dev != NULL)
@@ -883,7 +858,6 @@ static void _rtusb_disconnect(struct usb_device *dev, PRTMP_ADAPTER pAd)
 	DBGPRINT(RT_DEBUG_ERROR, (" RTUSB disconnect successfully\n"));
 }
 
-
 /*
 ========================================================================
 Routine Description:
@@ -907,19 +881,16 @@ static int rtusb_probe (struct usb_interface *intf,
 	return (int)rt28xx_probe((void *)intf, (void *)id, 0, &pAd);
 }
 
-
 static void rtusb_disconnect(struct usb_interface *intf)
 {
 	struct usb_device   *dev = interface_to_usbdev(intf);
 	PRTMP_ADAPTER       pAd;
-
 
 	pAd = usb_get_intfdata(intf);
 	usb_set_intfdata(intf, NULL);
 
 	_rtusb_disconnect(dev, pAd);
 }
-
 
 /*
 ========================================================================
@@ -940,7 +911,6 @@ VOID RT28xxThreadTerminate(
 {
 	POS_COOKIE	pObj = (POS_COOKIE) pAd->OS_Cookie;
 	INT			ret;
-
 
 	// Sleep 50 milliseconds so pending io might finish normally
 	RTMPusecDelay(50000);
@@ -1023,7 +993,6 @@ VOID RT28xxThreadTerminate(
 	pAd->TimerFunc_kill = 0;
 }
 
-
 void kill_thread_task(IN PRTMP_ADAPTER pAd)
 {
 	POS_COOKIE pObj;
@@ -1040,7 +1009,6 @@ void kill_thread_task(IN PRTMP_ADAPTER pAd)
 	tasklet_kill(&pObj->tbtt_task);
 
 }
-
 
 /*
 ========================================================================
@@ -1064,7 +1032,6 @@ BOOLEAN RT28XXChipsetCheck(
 	struct usb_device *dev_p = interface_to_usbdev(intf);
 	UINT32 i;
 
-
 	for(i=0; i<rtusb_usb_id_len; i++)
 	{
 		if (dev_p->descriptor.idVendor == rtusb_usb_id[i].idVendor &&
@@ -1084,7 +1051,6 @@ BOOLEAN RT28XXChipsetCheck(
 
 	return TRUE;
 }
-
 
 /*
 ========================================================================
@@ -1111,11 +1077,9 @@ BOOLEAN RT28XXNetDevInit(
 	struct usb_interface *intf = (struct usb_interface *)_dev_p;
 	struct usb_device *dev_p = interface_to_usbdev(intf);
 
-
 	pAd->config = &dev_p->config->desc;
 	return TRUE;
 }
-
 
 /*
 ========================================================================
@@ -1142,7 +1106,6 @@ BOOLEAN RT28XXProbePostConfig(
 	struct usb_host_interface *iface_desc;
 	ULONG BulkOutIdx;
 	UINT32 i;
-
 
 	/* get the active interface descriptor */
 	iface_desc = intf->cur_altsetting;
@@ -1196,7 +1159,6 @@ BOOLEAN RT28XXProbePostConfig(
 	return TRUE;
 }
 
-
 /*
 ========================================================================
 Routine Description:
@@ -1216,8 +1178,6 @@ VOID RT28XXDMADisable(
 {
 	// no use
 }
-
-
 
 /*
 ========================================================================
@@ -1240,7 +1200,6 @@ VOID RT28XXDMAEnable(
 	USB_DMA_CFG_STRUC	UsbCfg;
 	int					i = 0;
 
-
 	RTMP_IO_WRITE32(pAd, MAC_SYS_CTRL, 0x4);
 	do
 	{
@@ -1252,7 +1211,6 @@ VOID RT28XXDMAEnable(
 		RTMPusecDelay(1000);
 		i++;
 	}while ( i <200);
-
 
 	RTMPusecDelay(50);
 	GloCfg.field.EnTXWriteBackDDONE = 1;
@@ -1303,7 +1261,6 @@ VOID RT28xx_UpdateBeaconToAsic(
 	UINT32			longValue;
 	BOOLEAN			bBcnReq = FALSE;
 	UCHAR			bcn_idx = 0;
-
 
 	if (pBeaconFrame == NULL)
 	{
@@ -1374,7 +1331,6 @@ VOID RT28xx_UpdateBeaconToAsic(
 
 }
 
-
 VOID RT2870_BssBeaconStop(
 	IN RTMP_ADAPTER *pAd)
 {
@@ -1406,7 +1362,6 @@ VOID RT2870_BssBeaconStop(
 		pBeaconSync->DtimBitOn = 0;
 	}
 }
-
 
 VOID RT2870_BssBeaconStart(
 	IN RTMP_ADAPTER *pAd)
@@ -1445,7 +1400,6 @@ VOID RT2870_BssBeaconStart(
 	}
 }
 
-
 VOID RT2870_BssBeaconInit(
 	IN RTMP_ADAPTER *pAd)
 {
@@ -1470,7 +1424,6 @@ VOID RT2870_BssBeaconInit(
 		pBeaconSync->EnableBeacon = TRUE;
 	}
 }
-
 
 VOID RT2870_BssBeaconExit(
 	IN RTMP_ADAPTER *pAd)
@@ -1512,11 +1465,8 @@ VOID BeaconUpdateExec(
 
 	ReSyncBeaconTime(pAd);
 
-
-
 	RTMP_IO_READ32(pAd, TSF_TIMER_DW0, &tsfTime_a.u.LowPart);
 	RTMP_IO_READ32(pAd, TSF_TIMER_DW1, &tsfTime_a.u.HighPart);
-
 
 	//positive=getDeltaTime(tsfTime_a, expectedTime, &deltaTime_exp);
 	remain_high = pAd->CommonCfg.BeaconRemain * tsfTime_a.u.HighPart;
@@ -1527,4 +1477,3 @@ VOID BeaconUpdateExec(
 	pAd->CommonCfg.BeaconUpdateTimer.TimerValue = (delta >> 10) + 10;
 
 }
-

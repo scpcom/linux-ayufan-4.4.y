@@ -80,7 +80,6 @@ invalid:
 	return false;
 }
 
-
 static inline bool
 match_types(const struct dccp_hdr *dh, u_int16_t typemask)
 {

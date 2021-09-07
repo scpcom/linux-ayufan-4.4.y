@@ -66,14 +66,10 @@
 #include "../common/xwcRMinterface.h"
 #include "t23xrmInternal.h"
 
-
-
 /* FIXME: This should be picked up from a header... */
 irqreturn_t t23RMintDoneHandler(int32_t, void *);
 
 extern RMinterfaceCtx ifCtx;
-
-
 
 /**
  * Basic initializer, called from RM module installation
@@ -99,7 +95,6 @@ static int t23x_probe(struct of_device *ofdev,
     T2CoreInstance *devinst;
     struct device_node *dn;
     struct device *dev;
-
 
     devinst = kzalloc(sizeof(T2CoreInstance), GFP_KERNEL);
     if (!devinst)
@@ -152,7 +147,6 @@ static int t23x_probe(struct of_device *ofdev,
         return stat;
     }
 
-
     /* connect the primary "done" handler. All Talitos devs use this */
     stat = request_irq(devinst->doneIRQid,
                        t23RMintDoneHandler,
@@ -166,14 +160,11 @@ static int t23x_probe(struct of_device *ofdev,
         return -1;
     }
 
-
-
     ifCtx.dev    = dev;
     ifCtx.devctx = devinst;
 
     return stat;
 }
-
 
 /**
  * Device shutdown and removed, from RM module removal
@@ -181,7 +172,6 @@ static int t23x_probe(struct of_device *ofdev,
 static int t23x_remove(struct of_device *ofdev)
 {
     T2CoreInstance *devinst;
-
 
     devinst = dev_get_drvdata(&ofdev->dev);
 
@@ -202,7 +192,6 @@ static int t23x_remove(struct of_device *ofdev)
 
     return 0;
 }
-
 
 static struct of_device_id t23x_match[] = {
 	{
@@ -240,7 +229,6 @@ EXPORT_SYMBOL (xwcMemTranslateKernelVirtual);
 EXPORT_SYMBOL (xwcMemReleaseLogical);
 EXPORT_SYMBOL (xwcMemReleaseUserVirtual);
 EXPORT_SYMBOL (xwcMemReleaseKernelVirtual);
-
 
 module_init(t23x_init);
 module_exit(t23x_exit);

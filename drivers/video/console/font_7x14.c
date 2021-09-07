@@ -4107,7 +4107,6 @@ static const unsigned char fontdata_7x14[FONTDATAMAX] = {
 
 };
 
-
 const struct font_desc font_7x14 = {
 	.idx	= FONT7x14_IDX,
 	.name	= "7x14",

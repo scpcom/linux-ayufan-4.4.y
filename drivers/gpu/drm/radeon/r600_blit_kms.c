@@ -501,7 +501,6 @@ int r600_blit_init(struct radeon_device *rdev)
 		memcpy_toio(ptr + rdev->r600_blit.state_offset + (rdev->r600_blit.state_len * 4),
 			    packet2s, num_packet2s * 4);
 
-
 	memcpy(ptr + rdev->r600_blit.vs_offset, r6xx_vs, r6xx_vs_size * 4);
 	memcpy(ptr + rdev->r600_blit.ps_offset, r6xx_ps, r6xx_ps_size * 4);
 
@@ -802,4 +801,3 @@ void r600_kms_blit_copy(struct radeon_device *rdev,
 		}
 	}
 }
-

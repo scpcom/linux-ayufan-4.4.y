@@ -83,9 +83,6 @@ static int ide_config(struct pcmcia_device *);
 
 static void ide_detach(struct pcmcia_device *p_dev);
 
-
-
-
 /*======================================================================
 
     ide_attach() creates an "instance" of the driver, allocating
@@ -374,7 +371,6 @@ static void ide_release(struct pcmcia_device *link)
 
     pcmcia_disable_device(link);
 } /* ide_release */
-
 
 /*======================================================================
 

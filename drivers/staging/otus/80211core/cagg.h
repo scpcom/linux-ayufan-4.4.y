@@ -34,7 +34,6 @@
 #ifndef _CAGG_H
 #define _CAGG_H
 
-
 /*
  * the aggregation functions flag, 0 if don't do aggregate
  */
@@ -48,7 +47,6 @@
 /*
  * Aggregate control
  */
-
 
 #define ZM_AGG_POOL_SIZE                    20
 #define ZM_BAW_POOL_SIZE                    32
@@ -191,7 +189,6 @@ struct aggElement
     //struct baw_header  baw_header;
 };
 
-
 #ifndef ZM_ENABLE_FW_BA_RETRANSMISSION //disable BAW
 struct baw_buf
 {
@@ -315,7 +312,6 @@ struct aggTally
     u16_t       time;
 };
 
-
 struct destQ {
     struct dest{
         u16_t   Qtype : 1; /* 0 aggr, 1 vtxq */
@@ -432,4 +428,3 @@ void zfAggTxRetransmit(zdev_t* dev, struct bufInfo *buf_info, struct aggControl 
 extern zbuf_t* zfGetVtxq(zdev_t* dev, u8_t ac);
 
 #endif /* #ifndef _CAGG_H */
-

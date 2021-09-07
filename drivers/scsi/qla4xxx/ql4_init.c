@@ -577,7 +577,6 @@ static int qla4xxx_build_ddb_list(struct scsi_qla_host *ha)
 			ha->fw_ddb_index_map[fw_ddb_index] =
 				(struct ddb_entry *)INVALID_ENTRY;
 
-
 			DEBUG2(printk("scsi%ld: %s: update_ddb_entry failed "
 				      "for fw_ddb_index %d.\n",
 				      ha->host_no, __func__, fw_ddb_index));
@@ -1126,7 +1125,6 @@ static int qla4xxx_start_firmware(struct scsi_qla_host *ha)
 	return status;
 }
 
-
 /**
  * qla4xxx_initialize_adapter - initiailizes hba
  * @ha: Pointer to host adapter structure.
@@ -1354,4 +1352,3 @@ int qla4xxx_process_ddb_changed(struct scsi_qla_host *ha,
 
 	return QLA_SUCCESS;
 }
-

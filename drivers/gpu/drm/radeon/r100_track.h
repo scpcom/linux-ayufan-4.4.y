@@ -84,8 +84,6 @@ int r200_packet0_check(struct radeon_cs_parser *p,
 		       struct radeon_cs_packet *pkt,
 		       unsigned idx, unsigned reg);
 
-
-
 static inline int r100_reloc_pitch_offset(struct radeon_cs_parser *p,
 					  struct radeon_cs_packet *pkt,
 					  unsigned idx,

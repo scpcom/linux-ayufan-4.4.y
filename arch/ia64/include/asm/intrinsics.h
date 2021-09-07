@@ -225,7 +225,6 @@ extern long ia64_cmpxchg_called_with_bad_pointer (void);
 #define ia64_get_cpuid			IA64_INTRINSIC_API(get_cpuid)
 #define ia64_get_pmd			IA64_INTRINSIC_API(get_pmd)
 
-
 /************************************************/
 /* Instructions paravirtualized for performance */
 /************************************************/

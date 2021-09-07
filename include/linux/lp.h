@@ -161,7 +161,6 @@ struct lp_struct {
  * gets inverted, but it is also active low.
  */
 
-
 /* 
  * defines for 8255 control port
  * base + 2 

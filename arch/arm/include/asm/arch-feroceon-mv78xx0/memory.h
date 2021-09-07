@@ -27,7 +27,6 @@
 #define UL(x) (x)
 #endif
 
-
 #define PHYS_OFFSET	UL(0x00000000)
 #ifdef CONFIG_MV78XX0_SUPPORT_2GB_RAM
 #define TASK_SIZE			UL(0x3f000000)

@@ -47,8 +47,6 @@
 #define ddprintk(format,args...)
 #endif
 
-
-
 #define MPOA_TAG_LEN 4
 
 /* mpc_daemon -> kernel */
@@ -104,7 +102,6 @@ static struct notifier_block mpoa_notifier = {
 struct mpoa_client *mpcs = NULL; /* FIXME */
 static struct atm_mpoa_qos *qos_head = NULL;
 static DEFINE_TIMER(mpc_timer, NULL, 0, 0);
-
 
 static struct mpoa_client *find_mpc_by_itfnum(int itf)
 {
@@ -1042,7 +1039,6 @@ static int mpoa_event_listener(struct notifier_block *mpoa_notifier, unsigned lo
  * Msg is reused on purpose.
  */
 
-
 static void MPOA_trigger_rcvd(struct k_message *msg, struct mpoa_client *mpc)
 {
 	__be32 dst_ip = msg->content.in_info.in_dst_ip;
@@ -1359,7 +1355,6 @@ static void clean_up(struct k_message *msg, struct mpoa_client *mpc, int action)
 	eg_cache_entry *entry;
 	msg->type = SND_EGRESS_PURGE;
 
-
 	/* FIXME: This knows too much of the cache structure */
 	read_lock_irq(&mpc->egress_lock);
 	entry = mpc->eg_cache;
@@ -1435,7 +1430,6 @@ static int atm_mpoa_ioctl(struct socket *sock, unsigned int cmd, unsigned long a
 	}
 	return err;
 }
-
 
 static struct atm_ioctl atm_ioctl_ops = {
 	.owner	= THIS_MODULE,

@@ -98,9 +98,7 @@ extern "C" {
 /* XOR Engine Debug Register Map */
 #define XOR_DEBUG_REG(unit)                 (XOR_UNIT_BASE(unit)+(0x70))
 
-
 /* XOR register fileds */
-
 
 /* XOR Engine Channel Arbiter Register */
 #define XECAR_SLICE_OFFS(sliceNum)          (sliceNum)
@@ -127,7 +125,6 @@ extern "C" {
 #define XEXCR_DES_SWP_MASK                  (1 << XEXCR_DES_SWP_OFFS)
 #define XEXCR_REG_ACC_PROTECT_OFFS          (15)
 #define XEXCR_REG_ACC_PROTECT_MASK          (1 << XEXCR_REG_ACC_PROTECT_OFFS)
-
 
 /* XOR Engine [0..1] Activation Registers (XExACTR) */
 #define XEXACTR_XESTART_OFFS                (0)
@@ -216,7 +213,6 @@ extern "C" {
 #define XEDBR_PARITY_ERR_INSR_MASK          (1 << XEDBR_PARITY_ERR_INSR_OFFS)
 #define XEDBR_XBAR_ERR_INSR_OFFS            (1)
 #define XEDBR_XBAR_ERR_INSR_MASK            (1 << XEDBR_XBAR_ERR_INSR_OFFS)
-
 
 #ifdef __cplusplus
 }

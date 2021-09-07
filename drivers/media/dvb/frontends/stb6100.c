@@ -30,7 +30,6 @@
 static unsigned int verbose;
 module_param(verbose, int, 0644);
 
-
 #define FE_ERROR		0
 #define FE_NOTICE		1
 #define FE_INFO			2
@@ -298,7 +297,6 @@ static int stb6100_get_frequency(struct dvb_frontend *fe, u32 *frequency)
 		state->frequency, odiv, psd2, state->reference,	fvco, nint, nfrac);
 	return 0;
 }
-
 
 static int stb6100_set_frequency(struct dvb_frontend *fe, u32 frequency)
 {

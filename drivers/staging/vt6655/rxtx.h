@@ -41,7 +41,6 @@
 
 /*---------------------  Export Functions  --------------------------*/
 
-
 #ifdef __cplusplus
 extern "C" {                            /* Assume C declarations for C++ */
 #endif /* __cplusplus */
@@ -66,7 +65,6 @@ VOID vProcessRxMACHeader (
     );
 */
 
-
 VOID
 vGenerateMACHeader (
     IN PSDevice         pDevice,
@@ -79,7 +77,6 @@ vGenerateMACHeader (
     IN UINT             uFragIdx
     );
 
-
 UINT
 cbGetFragCount(
     IN  PSDevice         pDevice,
@@ -87,7 +84,6 @@ cbGetFragCount(
     IN  UINT             cbFrameBodySize,
     IN  PSEthernetHeader psEthHeader
     );
-
 
 VOID
 vGenerateFIFOHeader (
@@ -106,7 +102,6 @@ vGenerateFIFOHeader (
     OUT PUINT            pcbHeaderSize
     );
 
-
 VOID vDMA0_tx_80211(PSDevice  pDevice, struct sk_buff *skb, PBYTE pbMPDU, UINT cbMPDULen);
 CMD_STATUS csMgmt_xmit(PSDevice pDevice, PSTxMgmtPacket pPacket);
 CMD_STATUS csBeacon_xmit(PSDevice pDevice, PSTxMgmtPacket pPacket);
@@ -115,10 +110,4 @@ CMD_STATUS csBeacon_xmit(PSDevice pDevice, PSTxMgmtPacket pPacket);
 }                                       /* End of extern "C" { */
 #endif /* __cplusplus */
 
-
-
-
 #endif // __RXTX_H__
-
-
-

@@ -36,7 +36,6 @@
 
 static DEFINE_SPINLOCK(slice_convert_lock);
 
-
 #ifdef DEBUG
 int _slice_debug = 1;
 
@@ -369,7 +368,6 @@ static unsigned long slice_find_area_topdown(struct mm_struct *mm,
 
 	return addr;
 }
-
 
 static unsigned long slice_find_area(struct mm_struct *mm, unsigned long len,
 				     struct slice_mask mask, int psize,
@@ -731,4 +729,3 @@ int is_hugepage_only_range(struct mm_struct *mm, unsigned long addr,
 #endif
 	return !slice_check_fit(mask, available);
 }
-

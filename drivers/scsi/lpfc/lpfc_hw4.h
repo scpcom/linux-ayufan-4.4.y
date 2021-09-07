@@ -2164,7 +2164,6 @@ struct fcp_icmnd64_wqe {
 	uint32_t rsvd_12_15[4];         /* word 12-15 */
 };
 
-
 union lpfc_wqe {
 	uint32_t words[16];
 	struct lpfc_wqe_generic generic;
@@ -2186,4 +2185,3 @@ union lpfc_wqe {
 #define ELS_COMMAND_NON_FIP 0xC
 #define ELS_COMMAND_FIP 0xD
 #define OTHER_COMMAND 0x8
-

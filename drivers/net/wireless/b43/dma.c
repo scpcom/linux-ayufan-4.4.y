@@ -40,12 +40,10 @@
 #include <linux/etherdevice.h>
 #include <asm/div64.h>
 
-
 /* Required number of TX DMA slots per TX frame.
  * This currently is 2, because we put the header and the ieee80211 frame
  * into separate slots. */
 #define TX_SLOTS_PER_FRAME	2
-
 
 /* 32bit DMA ops. */
 static

@@ -59,7 +59,6 @@ struct cluster {
 	u32 highest_slave;
 };
 
-
 extern struct tipc_node **tipc_local_nodes;
 extern u32 tipc_highest_allowed_slave;
 extern struct tipc_node_map tipc_cltr_bcast_nodes;

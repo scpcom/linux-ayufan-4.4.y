@@ -115,4 +115,3 @@ int  GetFanNum(int *pFanNum);
 int  GetHwCapability(CAPABILITY *pCapability);
 int  FanStatusMappingType1(FAN_STATUS status, FAN_SPEED speed, char *pSpeed_value);
 int  FanStatusMappingType2(FAN_STATUS status, FAN_SPEED speed, char *pSpeed_value);
-

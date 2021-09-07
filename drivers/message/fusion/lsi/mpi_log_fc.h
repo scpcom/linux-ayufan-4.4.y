@@ -10,7 +10,6 @@
  *  ID:             $Id: mpi_log_fc.h,v 1.1 2010-04-15 12:27:58 khchen Exp $
  */
 
-
 /*
  * MpiIocLogInfo_t enum
  *

@@ -925,7 +925,6 @@ void rpc_killall_tasks(struct rpc_clnt *clnt)
 {
 	struct rpc_task	*rovr;
 
-
 	if (list_empty(&clnt->cl_tasks))
 		return;
 	dprintk("RPC:       killing all tasks for client %p\n", clnt);

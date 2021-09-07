@@ -85,7 +85,6 @@ struct scsi_cmnd {
 	/* These elements define the operation we are about to perform */
 	unsigned char *cmnd;
 
-
 	/* These elements define the operation we ultimately want to perform */
 	struct scsi_data_buffer sdb;
 	struct scsi_data_buffer *prot_sdb;

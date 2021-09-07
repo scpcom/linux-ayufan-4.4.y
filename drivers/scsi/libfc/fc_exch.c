@@ -273,7 +273,6 @@ static void fc_exch_setup_hdr(struct fc_exch *ep, struct fc_frame *fp,
 	fh->fh_seq_cnt = htons(ep->seq.cnt);
 }
 
-
 /*
  * Release a reference to an exchange.
  * If the refcnt goes to zero and the exchange is complete, it is freed.
@@ -1713,7 +1712,6 @@ retry:
 	spin_unlock_bh(&ep->ex_lock);
 }
 
-
 /*
  * Handle incoming ELS RRQ - Reset Recovery Qualifier.
  */
@@ -1902,7 +1900,6 @@ void fc_exch_mgr_free(struct fc_lport *lport)
 		fc_exch_mgr_del(ema);
 }
 EXPORT_SYMBOL(fc_exch_mgr_free);
-
 
 struct fc_seq *fc_exch_seq_send(struct fc_lport *lp,
 				struct fc_frame *fp,

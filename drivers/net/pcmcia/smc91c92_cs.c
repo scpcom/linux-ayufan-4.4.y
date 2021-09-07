@@ -897,7 +897,6 @@ static int smc91c92_resume(struct pcmcia_device *link)
 	return 0;
 }
 
-
 /*======================================================================
 
     This verifies that the chip is some SMC91cXX variant, and returns

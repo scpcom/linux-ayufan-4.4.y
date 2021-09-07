@@ -69,7 +69,6 @@ void __init bus_error_init(void)
 	/* Do nothing */
 }
 
-
 void read_persistent_clock(struct timespec *ts)
 {
 	unsigned int year, month, day, hour, min, sec;

@@ -216,7 +216,6 @@ int usbdrv_ioctl_getessid(struct net_device *dev, struct iw_point *erq)
 	u8_t len;
 	u8_t i;
 
-
 	/* len = macp->wd.ws.ssidLen; */
 	/* memcpy(essidbuf, macp->wd.ws.ssid, macp->wd.ws.ssidLen); */
 	zfiWlanQuerySSID(dev, essidbuf, &len);

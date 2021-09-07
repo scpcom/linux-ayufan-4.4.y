@@ -237,4 +237,3 @@ void eeprom_93cx6_multiread(struct eeprom_93cx6 *eeprom, const u8 word,
 	}
 }
 EXPORT_SYMBOL_GPL(eeprom_93cx6_multiread);
-

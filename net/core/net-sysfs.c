@@ -59,7 +59,6 @@ static ssize_t show_##field(struct device *dev,				\
 	return netdev_show(dev, attr, buf, format_##field);		\
 }
 
-
 /* use same locking and permission rules as SIF* ioctl's */
 static ssize_t netdev_store(struct device *dev, struct device_attribute *attr,
 			    const char *buf, size_t len,
@@ -349,7 +348,6 @@ static struct attribute *netstat_attrs[] = {
 	&dev_attr_tx_compressed.attr,
 	NULL
 };
-
 
 static struct attribute_group netstat_group = {
 	.name  = "statistics",

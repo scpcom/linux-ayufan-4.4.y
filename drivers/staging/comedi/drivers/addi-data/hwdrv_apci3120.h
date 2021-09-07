@@ -176,7 +176,6 @@ struct str_AnalogReadInformation {
 
 };
 
-
 /* Function Declaration For APCI-3120 */
 
 /* Internal functions */

@@ -51,7 +51,6 @@ static LIST_HEAD(pwrdm_list);
  */
 static DEFINE_RWLOCK(pwrdm_rwlock);
 
-
 /* Private functions */
 
 static u32 prm_read_mod_bits_shift(s16 domain, s16 idx, u32 mask)
@@ -455,7 +454,6 @@ int pwrdm_for_each_clkdm(struct powerdomain *pwrdm,
 
 	return ret;
 }
-
 
 /**
  * pwrdm_add_wkdep - add a wakeup dependency from pwrdm2 to pwrdm1
@@ -1227,4 +1225,3 @@ int pwrdm_post_transition(void)
 	pwrdm_for_each(_pwrdm_post_transition_cb, NULL);
 	return 0;
 }
-

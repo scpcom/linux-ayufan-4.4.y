@@ -25,7 +25,6 @@
 /* define _CPIA_DEBUG_ for verbose debug output (see cpia.h) */
 /* #define _CPIA_DEBUG_  1 */
 
-
 #include <linux/module.h>
 #include <linux/init.h>
 
@@ -49,7 +48,6 @@ static int cpia_pp_streamStart(void *privdata);
 static int cpia_pp_streamStop(void *privdata);
 static int cpia_pp_streamRead(void *privdata, u8 *buffer, int noblock);
 static int cpia_pp_close(void *privdata);
-
 
 #define ABOUT "Parallel port driver for Vision CPiA based cameras"
 
@@ -124,7 +122,6 @@ static void cpia_parport_disable_irq( struct parport *port ) {
 
 #define PARPORT_CHUNK_SIZE	PAGE_SIZE
 
-
 static void cpia_pp_run_callback(struct work_struct *work)
 {
 	void (*cb_func)(void *cbdata);
@@ -197,7 +194,6 @@ static size_t cpia_read_nibble (struct parport *port,
 			parport_frob_control (port, PARPORT_CONTROL_AUTOFD, 0);
 			break;
 		}
-
 
 		/* Read a nibble. */
 		nibble = parport_read_status (port) >> 3;

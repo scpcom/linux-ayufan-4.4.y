@@ -56,7 +56,6 @@ struct flat_hdr {
 #define FLAT_FLAG_GZDATA 0x0008 /* only data/relocs are compressed (for XIP) */
 #define FLAT_FLAG_KTRACE 0x0010 /* output useful kernel trace for debugging */
 
-
 #ifdef __KERNEL__ /* so systems without linux headers can compile the apps */
 /*
  * While it would be nice to keep this header clean,  users of older

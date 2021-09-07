@@ -17,7 +17,6 @@
 #include <gtHwCntl.h>
 #include <gtDrvSwRegs.h>
 
-
 static GT_STATUS convertLED2APP
 (
 	IN  GT_QD_DEV 	*dev,
@@ -27,7 +26,6 @@ static GT_STATUS convertLED2APP
 	OUT GT_U32		*data
 );
 
-
 static GT_STATUS convertAPP2LED
 (
 	IN  GT_QD_DEV 	*dev,
@@ -36,7 +34,6 @@ static GT_STATUS convertAPP2LED
 	IN  GT_U32		value,
 	OUT GT_U32		*data
 );
-
 
 /*******************************************************************************
 * gprtSetLED
@@ -176,7 +173,6 @@ GT_STATUS gprtSetLED
 	return GT_OK;
 }
 
-
 /*******************************************************************************
 * gprtGetLED
 *
@@ -291,12 +287,10 @@ GT_STATUS gprtGetLED
 		return retVal;
 	}
 
-
 	gtSemGive(dev,dev->tblRegsSem);
 
 	return GT_OK;
 }
-
 
 static GT_STATUS convertAPP2LED
 (
@@ -530,7 +524,6 @@ static GT_STATUS convertAPP2LED
 	return retVal;
 
 }
-
 
 static GT_STATUS convertLED2APP
 (

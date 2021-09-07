@@ -81,7 +81,6 @@
 # define TIOCPKT_NOSTOP		16
 # define TIOCPKT_DOSTOP		32
 
-
 #define TIOCNOTTY	0x5422
 #define TIOCSETD	0x5423
 #define TIOCGETD	0x5424

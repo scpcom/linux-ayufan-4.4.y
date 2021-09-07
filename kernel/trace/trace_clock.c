@@ -56,7 +56,6 @@ u64 notrace trace_clock(void)
 	return cpu_clock(raw_smp_processor_id());
 }
 
-
 /*
  * trace_clock_global(): special globally coherent trace clock
  *

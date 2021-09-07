@@ -301,7 +301,6 @@ static int ps3_ioc0_free_mmio_region(struct ps3_mmio_region *r)
 	return 0;
 }
 
-
 int ps3_free_mmio_region(struct ps3_mmio_region *r)
 {
 	return r->mmio_ops->free(r);

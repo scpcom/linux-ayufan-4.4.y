@@ -62,6 +62,4 @@ struct gru_chiplet_info {
 #define GRU_OPT_MISS_FMM_POLL	0x0003	/* Use system polling thread */
 #define GRU_OPT_MISS_MASK	0x0003	/* Mask for TLB MISS option */
 
-
-
 #endif		/* __GRU_H__ */

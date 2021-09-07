@@ -36,7 +36,6 @@
 #error "Unsupported AT91 processor"
 #endif
 
-
 #ifdef CONFIG_MMU
 /*
  * Remap the peripherals from address 0xFFF78000 .. 0xFFFFFFFF
@@ -89,6 +88,5 @@
 
 /* Clocks */
 #define AT91_SLOW_CLOCK		32768		/* slow clock */
-
 
 #endif

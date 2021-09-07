@@ -42,4 +42,3 @@ struct omap_kp_platform_data {
 						KEY_PERSISTENT)
 
 #endif
-

@@ -1179,7 +1179,6 @@ static CLASS_DEVICE_ATTR(info, S_IRUGO, show_info, NULL);
 	return retval; \
 } while (0)
 	
-
 static int pcic_get_status(struct pcmcia_socket *s, u_int *value)
 {
 	unsigned int sock = container_of(s, struct i82365_socket, socket)->number;

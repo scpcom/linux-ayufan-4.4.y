@@ -91,7 +91,6 @@ static void winbond_set_piomode(struct ata_port *ap, struct ata_device *adev)
 	winbond_writecfg(winbond->config, timing + 1, reg);
 }
 
-
 static unsigned int winbond_data_xfer(struct ata_device *dev,
 			unsigned char *buf, unsigned int buflen, int rw)
 {
@@ -279,4 +278,3 @@ module_init(winbond_init);
 module_exit(winbond_exit);
 
 module_param(probe_winbond, int, 0);
-

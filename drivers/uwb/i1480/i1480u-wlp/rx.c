@@ -124,7 +124,6 @@ error:
 	return result;
 }
 
-
 /* Release resources associated to the rx context */
 void i1480u_rx_release(struct i1480u *i1480u)
 {
@@ -161,7 +160,6 @@ do {							\
 	i1480u->rx_untd_pkt_size = 0;			\
 } while (0)
 
-
 /* Drop an out-of-sequence packet */
 #define i1480u_drop(i1480u, msg...)			\
 do {							\
@@ -169,9 +167,6 @@ do {							\
 		dev_err(&i1480u->usb_iface->dev, msg);	\
 	i1480u->net_dev->stats.rx_dropped++;			\
 } while (0)
-
-
-
 
 /* Finalizes setting up the SKB and delivers it
  *
@@ -201,7 +196,6 @@ out:
 	i1480u->rx_skb = NULL;
 	i1480u->rx_untd_pkt_size = 0;
 }
-
 
 /*
  * Process a buffer of data received from the USB RX endpoint
@@ -390,7 +384,6 @@ out:
 	return;
 }
 
-
 /*
  * Called when an RX URB has finished receiving or has found some kind
  * of error condition.
@@ -470,4 +463,3 @@ void i1480u_rx_cb(struct urb *urb)
 error:
 	return;
 }
-

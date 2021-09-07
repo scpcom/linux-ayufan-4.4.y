@@ -99,7 +99,6 @@ static inline int gpio_export_link(struct device *dev, const char *name,
 	return -EINVAL;
 }
 
-
 static inline void gpio_unexport(unsigned gpio)
 {
 	/* GPIO can never have been exported */

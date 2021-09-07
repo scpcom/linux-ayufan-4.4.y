@@ -425,7 +425,6 @@ static int clean_journal(struct gfs2_jdesc *jd, struct gfs2_log_header_host *hea
 	return error;
 }
 
-
 static void gfs2_recovery_done(struct gfs2_sbd *sdp, unsigned int jid,
                                unsigned int message)
 {
@@ -600,7 +599,6 @@ struct slow_work_ops gfs2_recover_ops = {
 	.execute = gfs2_recover_work,
 };
 
-
 static int gfs2_recovery_wait(void *word)
 {
 	schedule();
@@ -616,4 +614,3 @@ int gfs2_recover_journal(struct gfs2_jdesc *jd)
 	wait_on_bit(&jd->jd_flags, JDF_RECOVERY, gfs2_recovery_wait, TASK_UNINTERRUPTIBLE);
 	return 0;
 }
-

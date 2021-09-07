@@ -68,7 +68,6 @@ typedef struct {
 	unsigned long eventNumber;
 } chipStruct;
 
-
 typedef struct {
 	unsigned short coeff;
 	unsigned short x;
@@ -86,7 +85,6 @@ typedef struct {
 
 	}  ringStruct;
 
-
 typedef struct {
 	unsigned short coeff;
 	unsigned short x;
@@ -96,9 +94,6 @@ typedef struct {
 	unsigned char off_hi_byte;
 	unsigned char off_low_byte;
 } Oscillator;
-
-
-
 
 typedef struct {
 	Oscillator osc1;
@@ -300,7 +295,6 @@ typedef unsigned char DRDATA;
 
 #ifdef REALNAMES
 
-
 /*      OPTIONAL CONSTANTS */
 
 /**********************SETUP*****************************************/													
@@ -321,8 +315,6 @@ typedef unsigned char DRDATA;
 #define	PDN1		14	/*		b010000			pm_on	dc_off	mon_off	pll_off	bias_off	slic_off	*/
 #define	PDN2		15	/*		0		 	adc_man	a_on_offb	dac_man	d_on_offb	gm_man	g_on_offb	*/
 
-
-
 /***********************INTERRUPTS***********************************/
 #define	IRQ_VEC1	18	/*		0	pulse_t2	pulse_t1	ring_t2	ring_t1	osc2_t2	osc2_t1	osc1_t2	osc1_t1	*/
 #define	IRQ_VEC2	19	/*		0	pq6	pq5	pq4	pq3	pq2	pq1	loop_stat	ring_trip	*/
@@ -339,7 +331,6 @@ typedef unsigned char DRDATA;
 #define	IND_DATA_HI	29	/*		0			ind_data[15:8]						*/
 #define	IND_ADDR	30	/*		0			ind_add[7:0]						*/
 #define	IND_STAT	31	/*		0	ind_add[8]							ind_stat	*/
-
 
 /**************************OSCILLATORS**********************************/
 #define	OSC1_CNTL	32	/*		0	en_sync	reload	zero_en	t1_en	t2_en	enable	routing[1:0]		*/
@@ -414,9 +405,7 @@ typedef unsigned char DRDATA;
 #define	CAL_CM_BAL		106	/*		h20					cm_bal[5:0]				*/
 #define	CAL_DCPK		107	/*		8					 	cal_dcpk[3:0]			*/
 
-
 #define	REVC	108	/*		0	ilim_max	fsk_revc	dc_err_en	zs_ext	batsel_pd	lcr_sense	en_subtr	hyst_en	*/
-
 
 /*	INDIRECT REGISTERS																				*/
 																					
@@ -481,12 +470,7 @@ typedef unsigned char DRDATA;
 #define	FSK_X_01	103	/*	x	sign				fsk_x_01[15:0]												*/
 #define	FSK_X_10	104	/*	x	sign				fsk_x_10[15:0]												*/
 
-
-
-
-
 #endif  /* REAL NAMES */
-
 
 enum exceptions {
 	PROSLICiNSANE,
@@ -501,8 +485,6 @@ enum exceptions {
 	POWERaLARMQ5,
 	POWERaLARMQ6
 };
-
-
 
 #define	SI3210_DIALTONE_IR13	0x7b30	//tone_struct DialTone = {  /* OSC1= 350 Hz OSC2= 440 Hz .0975 Volts -18 dBm */
 #define	SI3210_DIALTONE_IR14	0x0063	
@@ -525,8 +507,6 @@ enum exceptions {
 #define	DIALTONE_DR42	0	
 #define	DIALTONE_DR43	0
 
-
-
 #define	SI3210_REORDERTONE_IR13	0x7700	//"//tone_struct ReorderTone = {	/* OSC1= 480 Hz OSC2 = 620 .0975 Volts -18 dBm */"
 #define	SI3210_REORDERTONE_IR14	0x0089	
 #define	SI3210_REORDERTONE_IR16	0x7120	
@@ -537,7 +517,6 @@ enum exceptions {
 #define	SI3215_REORDERTONE_IR16	0x7C39	
 #define	SI3215_REORDERTONE_IR17	0x0058
 
-	
 #define	REORDERTONE_DR32	0x1E	
 #define	REORDERTONE_DR33	0x1E	
 #define	REORDERTONE_DR36	0x60	
@@ -548,7 +527,6 @@ enum exceptions {
 #define	REORDERTONE_DR41	0x09	
 #define	REORDERTONE_DR42	0x40	
 #define	REORDERTONE_DR43	0x06	
-
 
 //one_struct BusySignal = { /* OSC1= 480  OSC2 = 620 .0975 Voltz -18 dBm 8*/
 //	{0x7700,0x0089,0,0x0f,0xa0,0x0f,0xa0},{0x7120,0x00b2,0,0x0f,0xa0,0x0f,0xa0}
@@ -638,7 +616,6 @@ enum exceptions {
 #define	CONGESTIONTONE_DR42	0x60	
 #define	CONGESTIONTONE_DR43	0x09	
 			
-			
 #define	HZ350_IR13	0x7b30	//350    /* HERTZ */, 0x7b30, 0x0063,
 #define	HZ350_IR14	0x0063	
 			
@@ -660,7 +637,6 @@ enum exceptions {
 #define	HZ400_IR13	0x79c0	//400    /* HERTZ */, 0x79c0, 0x0071
 #define	HZ400_IR14	0x0071	
 			
-
 #define	DTMF0_IR13	0x5ea0	"//	{{0x5ea0,0x08a5,0,0x03,0x20,0,0}, {0x3fc0,0x0cec,0,0x03,0x20,0,0}}, // DTMF 0"
 #define	DTMF0_IR14	0x08a5	
 #define	DTMF0_IR16	0x3fc0	
@@ -901,7 +877,6 @@ enum exceptions {
 #define	DTMFhash_DR42	0	
 #define	DTMFhash_DR43	0	
 
-
 #define	PULSE_METERING_IR24	0x3190	
 #define	PULSE_METERING_IR25	0x4FF	
 #define	PULSE_METERING_DR35	0x10	
@@ -918,11 +893,6 @@ enum exceptions {
 #define	RINGING_20HZ_DR49	0x3e	
 #define	RINGING_20HZ_DR50	0x7d	
 #define	RINGING_20HZ_DR51	0	
-
-
-
-
-
 
 //tone_struct DialTone = {  /* OSC1= 350 Hz OSC2= 440 Hz .0975 Volts -18 dBm */
 //	{0x7ed0,0x0031,0,0,0,0,0},{0x7e20,0x003d,0,0,0,0,0}
@@ -966,7 +936,6 @@ enum exceptions {
 //	{0x7dc0,0x0043,0,0x06,0x40,0x09,0x60},{0x7c40,0x0057,0,0x06,0x40,0x09,0x60}
 //};
 	
-
 #define	BUSYTONE_SI3216_IR13	0x7dc0	
 #define	BUSYTONE_SI3216_IR14	0x0043	
 #define	BUSYTONE_SI3216_IR16	0x7c40	
@@ -981,7 +950,6 @@ enum exceptions {
 #define	BUSYTONE_SI3216_DR41	0x0f	
 #define	BUSYTONE_SI3216_DR42	0xa0	
 #define	BUSYTONE_SI3216_DR43	0x0f
-
 
 //tone_struct RingbackPBX = {	/* OSC1 = 440 Hz OSC2= 480 .0975 Volts -18 dBM */
 //	{0x7e20,0x003d,0,0x1f,0x40,0x5d,0xc0},{0x7dc0,0x0043,0,0x1f,0x40,0x5d,0xc0}	
@@ -1001,12 +969,10 @@ enum exceptions {
 #define	RINGBACKTONE_SI3216_DR42	0x0	
 #define	RINGBACKTONE_SI3216_DR43	0x7d	
 
-
 //tone_struct RingbackPBX = {	/* OSC1 = 440 Hz OSC2= 480 .0975 Volts -18 dBM */
 //	{0x7e20,0x003d,0,0x1f,0x40,0x5d,0xc0},{0x7dc0,0x0043,0,0x1f,0x40,0x5d,0xc0}
 //};
 
-			
 #define	RINGBACKPBXTONE_SI3216_IR13	0x7e20	
 #define	RINGBACKPBXTONE_SI3216_IR14	0x003d	
 #define	RINGBACKPBXTONE_SI3216_IR16	0x7dc0	
@@ -1022,11 +988,9 @@ enum exceptions {
 #define	RINGBACKPBXTONE_SI3216_DR42	0xc0	
 #define	RINGBACKPBXTONE_SI3216_DR43	0x5d	
 
-
 //tone_struct CongestionTone = { /* OSC1= 480 Hz OSC2 = 620 .0975 Volts -18 dBM */
 //	{0x7dc0,0x0043,0,0x06,0x40,0x09,0x60},{0x7c40,0x0057,0,0x06,0x40,0x09,0x60}
 //};
-
 
 #define	CONGESTIONTONE_SI3216_IR13	0x7dc0
 #define	CONGESTIONTONE_SI3216_IR14	0x0043	
@@ -1042,7 +1006,6 @@ enum exceptions {
 #define	CONGESTIONTONE_SI3216_DR41	0x06	
 #define	CONGESTIONTONE_SI3216_DR42	0x60	
 #define	CONGESTIONTONE_SI3216_DR43	0x09
-
 
 //tone_struct RingbackJapan = { /* OSC1 = 400 Hz OSC2 = 435 .0975 Volts -18 dBm */
 //	{0x79c0,0x00e9,0,0x1f,0x40,0x3e,0x80},{0x7940,0x00f2,0,0x1f,0x40,0x3e,0x80}
@@ -1070,8 +1033,6 @@ enum exceptions {
 #define	RINGBACKJAPANTONE_DR42	0x80
 #define	RINGBACKJAPANTONE_DR43	0x3e	
 
-
-
 //tone_struct BusyJapan = { /* OSC1 = 400 Hz OSC2 = 435 .0975 Volts -18 dBm */
 //	{0x79c0,0x00e9,0,0x0f,0xa0,0x0f,0xa0},{0,0,0,0,0,0,0}
 
@@ -1098,13 +1059,6 @@ enum exceptions {
 #define	BUSYJAPANTONE_DR42	0
 #define	BUSYJAPANTONE_DR43	0	
 
-
-
-
-
-
-
-
 #define	FLUSH_USING_IR34	0x8000	//	By seting this value to 0x8000 it accelearates data through Filter
 #define	FLUSH_USING_IR35	0x8000	//	By seting this value to 0x8000 it accelearates data through Filter
 #define	FLUSH_USING_IR36	0x8000	//	By seting this value to 0x8000 it accelearates data through Filter
@@ -1119,9 +1073,6 @@ enum exceptions {
 #define	FLUSH_IR93	0x0000	//	Clear value in power accumulator for Q5
 #define	FLUSH_IR94	0x0000	//	Clear value in power accumulator for Q6
 
-
-
-				
 #define	BIT_CALM1_DR97	0x10	//	CALM1 Monitor ADC Calibration 1.
 #define	BIT_CALM2_DR97	0x08	//	CALM2 Monitor ADC Calibration 2.
 #define	BIT_CALDAC_DR97	0x04	//	CALDAC DAC Calibration.
@@ -1152,10 +1103,7 @@ enum exceptions {
 #define	GROUND_THRESHOLD_DR80	2	//	.75 volts 
 #define	GROUND_THRESHOLD_DR81	2	//	.75 volts
 				
-
 #define ENB2_DR23  1<<2 // enable interrupt for the balance Cal
-
-
 
 #define	RESET_VALUE_DR8	2	//	This is the value at reset of DR8
 #define	RESET_VALUE_DR64	0	//	This is the value at reset of DR64
@@ -1166,7 +1114,6 @@ enum exceptions {
 #define	FLUSHING_DR37	0x8000		
 #define	FLUSHING_DR38	0x8000		
 #define	FLUSHING_DR39	0x8000		
-
 
 #define DISABLE_ALL_DR21 0
 #define DISABLE_ALL_DR22 0
@@ -1189,8 +1136,6 @@ enum exceptions {
 #define	RINGING_20HZ_DR50	0x7d	
 #define	RINGING_20HZ_DR51	0	
 
-			
-			
 #define	INIT_IR0		0x55C2	// DTMF_ROW_0_PEAK	
 #define	INIT_IR1		0x51E6  //	DTMF_ROW_0_PEAK,	
 #define	INIT_IR2		0x4B85	//	DTMF_ROW_1_PEAK,	
@@ -1243,8 +1188,6 @@ enum exceptions {
 #define	INIT_IR104		0x3BE0	// FSK 1to0 SCALER
 #define	INIT_IR97		0x0000	// TRASMIT_FILTER
 
-
-
 #define STARDARD_IR_INIT_ARRAY  unsigned short ir[] =\
 {\
 \
@@ -1294,11 +1237,7 @@ INIT_IR42	,\
 INIT_IR43	\
 };
 
-
-
-
 #define ERRORCODE_LONGBALCAL -2;
-
 
 #define	INIT_DR0_DC	0x80	//	Serial Interface
 #define	INIT_DR0	0x00	//	Serial Interface

@@ -208,7 +208,6 @@ out_err:
 	return ret;
 }
 
-
 /************************ device handling **************************/
 
 /*
@@ -903,7 +902,6 @@ static void sch_create_and_recog_new_device(struct subchannel *sch)
 		put_device(&cdev->dev);
 	}
 }
-
 
 void ccw_device_move_to_orphanage(struct work_struct *work)
 {
@@ -1815,7 +1813,6 @@ __ccwdev_check_busid(struct device *dev, void *id)
 
 	return (strcmp(bus_id, dev_name(dev)) == 0);
 }
-
 
 /**
  * get_ccwdev_by_busid() - obtain device from a bus id

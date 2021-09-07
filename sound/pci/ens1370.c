@@ -59,7 +59,6 @@
 #define DRIVER_NAME "ENS1371"
 #endif
 
-
 MODULE_AUTHOR("Jaroslav Kysela <perex@perex.cz>, Thomas Sailer <sailer@ife.ee.ethz.ch>");
 MODULE_LICENSE("GPL");
 #ifdef CHIP1370
@@ -330,7 +329,6 @@ MODULE_PARM_DESC(lineio, "Line In to Rear Out (0 = auto, 1 = force).");
 #define   ES_REG_UF_BYTEO(o)	 (((o)&0xff)<<0)
 #define   ES_REG_UF_BYTEM	 (0xff<<0)
 #define   ES_REG_UF_BYTEI(i)	 (((i)>>0)&0xff)
-
 
 /*
  *  Pages
@@ -1453,7 +1451,6 @@ static int snd_es1371_spdif_put(struct snd_kcontrol *kcontrol,
 	return change;
 }
 
-
 /* spdif controls */
 static struct snd_kcontrol_new snd_es1371_mixer_spdif[] __devinitdata = {
 	ES1371_SPDIF(SNDRV_CTL_NAME_IEC958("",PLAYBACK,SWITCH)),
@@ -1479,7 +1476,6 @@ static struct snd_kcontrol_new snd_es1371_mixer_spdif[] __devinitdata = {
 		.put =		snd_ens1373_spdif_stream_put
 	},
 };
-
 
 #define snd_es1373_rear_info		snd_ctl_boolean_mono_info
 
@@ -2073,7 +2069,6 @@ static int snd_ensoniq_resume(struct pci_dev *pci)
 	return 0;
 }
 #endif /* CONFIG_PM */
-
 
 static int __devinit snd_ensoniq_create(struct snd_card *card,
 				     struct pci_dev *pci,

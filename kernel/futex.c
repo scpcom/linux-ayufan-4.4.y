@@ -354,7 +354,6 @@ static int get_futex_value_locked(u32 *dest, u32 __user *from)
 	return ret ? -EFAULT : 0;
 }
 
-
 /*
  * PI code:
  */
@@ -1887,7 +1886,6 @@ out:
 	return ret;
 }
 
-
 static long futex_wait_restart(struct restart_block *restart)
 {
 	u32 __user *uaddr = (u32 __user *)restart->futex.uaddr;
@@ -1905,7 +1903,6 @@ static long futex_wait_restart(struct restart_block *restart)
 				restart->futex.bitset,
 				restart->futex.flags & FLAGS_CLOCKRT);
 }
-
 
 /*
  * Userspace tried a 0 -> TID atomic transition of the futex value
@@ -2070,7 +2067,6 @@ retry:
 	 */
 	if (!(uval & FUTEX_OWNER_DIED))
 		uval = cmpxchg_futex_value_locked(uaddr, task_pid_vnr(current), 0);
-
 
 	if (unlikely(uval == -EFAULT))
 		goto pi_faulted;
@@ -2635,7 +2631,6 @@ long do_futex(u32 __user *uaddr, int op, u32 val, ktime_t *timeout,
 	}
 	return ret;
 }
-
 
 SYSCALL_DEFINE6(futex, u32 __user *, uaddr, int, op, u32, val,
 		struct timespec __user *, utime, u32 __user *, uaddr2,

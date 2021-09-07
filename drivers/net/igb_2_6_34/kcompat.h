@@ -123,7 +123,6 @@ struct msix_entry {
 #define false 0
 #endif
 
-
 /* kernels less than 2.4.14 don't have this */
 #ifndef ETH_P_8021Q
 #define ETH_P_8021Q 0x8100
@@ -296,7 +295,6 @@ enum {
 #ifndef numa_node_id
 #define numa_node_id() 0
 #endif
-
 
 #ifndef _LINUX_RANDOM_H
 #include <linux/random.h>
@@ -907,7 +905,6 @@ extern int vsnprintf(char *buf, size_t size, const char *fmt, va_list args);
 #endif
 #endif /* 2.4.10 -> 2.4.6 */
 
-
 /*****************************************************************************/
 /* 2.4.13 => 2.4.10 */
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,4,13) )
@@ -1281,7 +1278,6 @@ extern unsigned long _kc_find_next_bit(const unsigned long *addr,
                                        unsigned long size,
                                        unsigned long offset);
 #define find_first_bit(addr, size) find_next_bit((addr), (size), 0)
-
 
 #ifndef netdev_name
 static inline const char *_kc_netdev_name(const struct net_device *dev)

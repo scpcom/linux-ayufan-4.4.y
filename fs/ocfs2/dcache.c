@@ -40,7 +40,6 @@
 #include "inode.h"
 #include "super.h"
 
-
 static int ocfs2_dentry_revalidate(struct dentry *dentry,
 				   struct nameidata *nd)
 {

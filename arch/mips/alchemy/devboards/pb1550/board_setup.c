@@ -35,7 +35,6 @@
 
 #include <prom.h>
 
-
 char irq_tab_alchemy[][5] __initdata = {
 	[12] = { -1, INTB, INTC, INTD, INTA }, /* IDSEL 12 - PCI slot 2 (left)  */
 	[13] = { -1, INTA, INTB, INTC, INTD }, /* IDSEL 13 - PCI slot 1 (right) */

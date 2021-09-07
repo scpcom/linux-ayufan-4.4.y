@@ -821,7 +821,6 @@ static int wm8940_register(struct wm8940_priv *wm8940,
 			return ret;
 	}
 
-
 	wm8940_codec = codec;
 
 	ret = snd_soc_register_codec(codec);

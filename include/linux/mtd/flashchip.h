@@ -41,8 +41,6 @@ typedef enum {
 	FL_UNKNOWN
 } flstate_t;
 
-
-
 /* NOTE: confusingly, this can be used to refer to more than one chip at a time,
    if they're interleaved.  This can even refer to individual partitions on
    the same physical chip when present. */
@@ -87,6 +85,5 @@ struct flchip_shared {
 	struct flchip *writing;
 	struct flchip *erasing;
 };
-
 
 #endif /* __MTD_FLASHCHIP_H__ */

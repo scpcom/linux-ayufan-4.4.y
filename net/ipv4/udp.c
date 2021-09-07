@@ -841,7 +841,6 @@ out:
 	return ret;
 }
 
-
 /**
  *	first_packet_length	- return length of first packet in receive queue
  *	@sk: socket
@@ -1013,7 +1012,6 @@ csum_copy_err:
 		return -EAGAIN;
 	goto try_again;
 }
-
 
 int udp_disconnect(struct sock *sk, int flags)
 {
@@ -1914,4 +1912,3 @@ struct sk_buff *udp4_ufo_fragment(struct sk_buff *skb, int features)
 out:
 	return segs;
 }
-

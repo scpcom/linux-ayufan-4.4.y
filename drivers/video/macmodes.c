@@ -128,7 +128,6 @@ static const struct fb_videomode mac_modedb[] = {
 #endif
 };
 
-
     /*
      *  Mapping between MacOS video mode numbers and video mode definitions
      *
@@ -168,7 +167,6 @@ static const struct mode_map {
     { VMODE_1600_1024_60, &mac_modedb[15] },
     { -1, NULL }
 };
-
 
     /*
      *  Mapping between monitor sense values and MacOS video mode numbers

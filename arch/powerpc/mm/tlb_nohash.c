@@ -179,7 +179,6 @@ static void do_flush_tlb_page_ipi(void *param)
 	_tlbil_va(p->addr, p->pid, p->tsize, p->ind);
 }
 
-
 /* Note on invalidations and PID:
  *
  * We snapshot the PID with preempt disabled. At this point, it can still

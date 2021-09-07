@@ -441,7 +441,6 @@ static struct rds_rdma_op *rds_rdma_prepare(struct rds_sock *rs,
 	unsigned int i, j;
 	int ret;
 
-
 	if (rs->rs_bound_addr == 0) {
 		ret = -ENOTCONN; /* XXX not a great errno */
 		goto out;
@@ -576,7 +575,6 @@ static struct rds_rdma_op *rds_rdma_prepare(struct rds_sock *rs,
 
 		op->r_nents += nr;
 	}
-
 
 	if (nr_bytes > args->remote_vec.bytes) {
 		rdsdebug("RDS nr_bytes %u remote_bytes %u do not match\n",

@@ -51,7 +51,6 @@ uint_32		    dma_index = 0;
 uint_32		    sent_index = 0;
 uint_32		    sram_parts[USB_SRAM_MAX_PARTS];
 
-
 void    _usb_reset_send_queue(void)
 {
     int     i;
@@ -137,7 +136,6 @@ uint_8 _usb_prepare_to_send(void*   handle)
                 dma_index = 0;
 	    }
         
-
 	    /* Get a transfer descriptor */
 	    USB_XD_QGET(usb_dev_ptr->XD_HEAD, usb_dev_ptr->XD_TAIL, xd_ptr);
 
@@ -160,7 +158,6 @@ uint_8 _usb_prepare_to_send(void*   handle)
 
     return error;    
 }
-
 
 /*FUNCTION*-------------------------------------------------------------
 *
@@ -240,7 +237,6 @@ void    usbSendComplete(void* handle, uint_8 type, boolean setup, uint_8 dir,
     }
 }
 #endif /* USB_UNDERRUN_WA */
-
 
 /*FUNCTION*-------------------------------------------------------------
 *
@@ -370,4 +366,3 @@ uint_8 _usb_device_send_data
     return error;
 
 } /* EndBody */
-

@@ -352,7 +352,6 @@ static const struct maven_gamma* maven_compute_gamma (const struct maven_data* m
  	return maven_gamma + md->primary_head->altout.tvo_params.gamma;
 }
 
-
 static void maven_init_TVdata(const struct maven_data* md, struct mavenregs* data) {
 	static struct mavenregs palregs = { {
 		0x2A, 0x09, 0x8A, 0xCB,	/* 00: chroma subcarrier */
@@ -508,7 +507,6 @@ static void maven_init_TVdata(const struct maven_data* md, struct mavenregs* dat
 #define LRP(x) maven_set_reg_pair(c, (x), m->regs[(x)] | (m->regs[(x)+1] << 8))
 static void maven_init_TV(struct i2c_client* c, const struct mavenregs* m) {
 	int val;
-
 
 	maven_set_reg(c, 0x3E, 0x01);
 	maven_get_reg(c, 0x82);	/* fetch oscillator state? */
@@ -1113,7 +1111,6 @@ static int maven_set_control (struct maven_data* md,
 		break;
 	}
 	
-
 	return 0;
 }
 

@@ -98,7 +98,6 @@ get_fit_entry(unsigned long nasid, int index, unsigned long *fentry,
 	return ia64_sn_get_fit_compt(nasid, index, fentry, banner, banlen);
 }
 
-
 /*
  * These two routines display the FIT table for each node.
  */
@@ -115,7 +114,6 @@ static int dump_fit_entry(char *page, unsigned long *fentry)
 		       /* mult by sixteen to get size in bytes */
 		       (unsigned)(fentry[1] & 0xffffff) * 16);
 }
-
 
 /*
  * We assume that the fit table will be small enough that we can print

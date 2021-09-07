@@ -58,7 +58,6 @@ bool radeon_ddc_probe(struct radeon_connector *radeon_connector)
 	return false;
 }
 
-
 void radeon_i2c_do_lock(struct radeon_connector *radeon_connector, int lock_state)
 {
 	struct radeon_device *rdev = radeon_connector->base.dev->dev_private;
@@ -117,7 +116,6 @@ static int get_clock(void *i2c_priv)
 
 	return (val != 0);
 }
-
 
 static int get_data(void *i2c_priv)
 {

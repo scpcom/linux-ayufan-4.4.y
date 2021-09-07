@@ -213,4 +213,3 @@ int __devinit aty_init_cursor(struct fb_info *info)
 
 	return 0;
 }
-

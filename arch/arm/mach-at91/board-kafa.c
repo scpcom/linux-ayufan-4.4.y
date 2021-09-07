@@ -38,7 +38,6 @@
 
 #include "generic.h"
 
-
 /*
  * Serial port configuration.
  *    0 .. 3 = USART0 .. USART3

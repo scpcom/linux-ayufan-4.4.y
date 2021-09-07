@@ -634,7 +634,6 @@
  */
 #define PIXEL_CMD                  0x81
 
-
 /* KW specific registers. */
 #define LCD_CLK_CFG0_REG		0xF0A0
 #define LCD_PLL_NDIV_MASK		(0x1FF << 4)
@@ -645,7 +644,6 @@
 #define LCD_PLL_KDIV(x)			((x) << 26)
 #define LCD_PLL_PWR_DOWN_MASK		(1 << 31)
 #define LCD_PLL_PWR_DOWN(en)		((en) << 31)
-
 
 #define LCD_CLK_CFG1_REG		0xF0A4
 #define LCD_FULL_DIV_MASK		(0x7F)

@@ -1057,7 +1057,6 @@
 #define reg_iop_sw_mpu_r_masked_intr_grp3___fifo_in___bit 15
 #define reg_iop_sw_mpu_r_masked_intr_grp3_offset 144
 
-
 /* Constants */
 #define regk_iop_sw_mpu_copy                      0x00000000
 #define regk_iop_sw_mpu_cpu                       0x00000000

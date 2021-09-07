@@ -267,9 +267,7 @@ static const struct serial_quirk quirks[] = {
 	}
 };
 
-
 static int serial_config(struct pcmcia_device * link);
-
 
 /*======================================================================
 

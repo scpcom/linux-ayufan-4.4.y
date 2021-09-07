@@ -593,7 +593,6 @@ static int cm109_input_ev(struct input_dev *idev, unsigned int type,
 	}
 }
 
-
 /******************************************************************************
  * Linux interface and usb initialisation
  *****************************************************************************/

@@ -38,7 +38,6 @@
  * END_DESC
 */
 
-
 #include "float.h"
 #include "sgl_float.h"
 
@@ -54,7 +53,6 @@ sgl_fadd(
     {
     register unsigned int left, right, result, extent;
     register unsigned int signless_upper_left, signless_upper_right, save;
-    
     
     register int result_exponent, right_exponent, diff_exponent;
     register int sign_save, jumpsize;

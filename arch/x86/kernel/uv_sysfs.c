@@ -43,7 +43,6 @@ static struct kobj_attribute partition_id_attr =
 static struct kobj_attribute coherence_id_attr =
 	__ATTR(coherence_id, S_IRUGO, coherence_id_show, NULL);
 
-
 static int __init sgi_uv_sysfs_init(void)
 {
 	unsigned long ret;

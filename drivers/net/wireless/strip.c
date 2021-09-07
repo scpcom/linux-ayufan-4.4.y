@@ -77,7 +77,6 @@ static const char StripVersion[] = "1.3A-STUART.CHESHIRE";
 #define TICKLE_TIMERS 0
 #define EXT_COUNTERS 1
 
-
 /************************************************************************/
 /* Header files								*/
 
@@ -362,7 +361,6 @@ struct strip {
  * they are really going through.
  */
 
-
 /************************************************************************/
 /* Constants								*/
 
@@ -460,7 +458,6 @@ static DEFINE_SPINLOCK(strip_lock);
 
 #define JIFFIE_TO_SEC(X) ((X) / HZ)
 
-
 /************************************************************************/
 /* Utility routines							*/
 
@@ -512,7 +509,6 @@ static void DumpData(char *msg, struct strip *strip_info, __u8 * ptr,
 
 	printk(KERN_INFO "%s: %-13s%s\n", strip_info->dev->name, msg, pkt_text);
 }
-
 
 /************************************************************************/
 /* Byte stuffing/unstuffing routines					*/
@@ -763,7 +759,6 @@ static __u8 *UnStuffData(__u8 * src, __u8 * end, __u8 * dst,
 		return (src);
 }
 
-
 /************************************************************************/
 /* General routines for STRIP						*/
 
@@ -912,8 +907,6 @@ static void strip_unlock(struct strip *strip_info)
 	add_timer(&strip_info->idle_timer);
 	netif_wake_queue(strip_info->dev);
 }
-
-
 
 /*
  * If the time is in the near future, time_delta prints the number of
@@ -1126,7 +1119,6 @@ static int strip_seq_show(struct seq_file *seq, void *v)
 	return 0;
 }
 
-
 static const struct seq_operations strip_seq_ops = {
 	.start = strip_seq_start,
 	.next  = strip_seq_next,
@@ -1147,8 +1139,6 @@ static const struct file_operations strip_seq_fops = {
 	.release = seq_release,
 };
 #endif
-
-
 
 /************************************************************************/
 /* Sending routines							*/
@@ -1490,7 +1480,6 @@ static void strip_send(struct strip *strip_info, struct sk_buff *skb)
 		rcu_read_unlock();
 	}
 
-
 	/*
 	 * 6. If it is time for a periodic ARP, queue one up to be sent.
 	 * We only do this if:
@@ -1546,7 +1535,6 @@ static netdev_tx_t strip_xmit(struct sk_buff *skb, struct net_device *dev)
 	netif_stop_queue(dev);
 
 	del_timer(&strip_info->idle_timer);
-
 
 	if (time_after(jiffies, strip_info->pps_timer + HZ)) {
 		unsigned long t = jiffies - strip_info->pps_timer;
@@ -1652,7 +1640,6 @@ static int strip_rebuild_header(struct sk_buff *skb)
 	return 0;
 #endif
 }
-
 
 /************************************************************************/
 /* Receiving routines							*/
@@ -2341,7 +2328,6 @@ static void strip_receive_buf(struct tty_struct *tty, const unsigned char *cp,
 	spin_unlock_bh(&strip_lock);
 }
 
-
 /************************************************************************/
 /* General control routines						*/
 
@@ -2390,7 +2376,6 @@ static struct net_device_stats *strip_get_stats(struct net_device *dev)
 	stats.rx_over_errors = strip_info->rx_over_errors;
 	return (&stats);
 }
-
 
 /************************************************************************/
 /* Opening and closing							*/
@@ -2447,7 +2432,6 @@ static int strip_open_low(struct net_device *dev)
 	return (0);
 }
 
-
 /*
  * Close the low-level part of the STRIP channel. Easy!
  */
@@ -2479,7 +2463,6 @@ static const struct header_ops strip_header_ops = {
 	.create = strip_header,
 	.rebuild = strip_rebuild_header,
 };
-
 
 static const struct net_device_ops strip_netdev_ops = {
 	.ndo_open 	= strip_open_low,
@@ -2535,7 +2518,6 @@ static void strip_free(struct strip *strip_info)
 	free_netdev(strip_info->dev);
 }
 
-
 /*
  * Allocate a new free STRIP channel
  */
@@ -2551,7 +2533,6 @@ static struct strip *strip_alloc(void)
 	if (!dev)
 		return NULL;	/* If no more memory, return */
 
-
 	strip_info = netdev_priv(dev);
 	strip_info->dev = dev;
 
@@ -2563,7 +2544,6 @@ static struct strip *strip_alloc(void)
 	init_timer(&strip_info->idle_timer);
 	strip_info->idle_timer.data = (long) dev;
 	strip_info->idle_timer.function = strip_IdleTask;
-
 
 	spin_lock_bh(&strip_lock);
  rescan:
@@ -2689,7 +2669,6 @@ static void strip_close(struct tty_struct *tty)
 	tty->disc_data = NULL;
 }
 
-
 /************************************************************************/
 /* Perform I/O control calls on an active STRIP channel.		*/
 
@@ -2725,7 +2704,6 @@ static int strip_ioctl(struct tty_struct *tty, struct file *file,
 	return 0;
 }
 
-
 /************************************************************************/
 /* Initialization							*/
 
@@ -2755,7 +2733,6 @@ static int __init strip_init_driver(void)
 
 	printk(signon, StripVersion);
 
-	
 	/*
 	 * Fill in our line protocol discipline, and register it
 	 */

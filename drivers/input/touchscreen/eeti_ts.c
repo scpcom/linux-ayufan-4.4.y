@@ -299,4 +299,3 @@ MODULE_LICENSE("GPL");
 
 module_init(eeti_ts_init);
 module_exit(eeti_ts_exit);
-

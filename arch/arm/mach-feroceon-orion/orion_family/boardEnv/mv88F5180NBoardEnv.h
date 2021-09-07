@@ -62,11 +62,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvBoard88F5180NEnvSpech
 #define __INCmvBoard88F5180NEnvSpech
-
-
 
 /* 88F5180N boards ID numbers */
 /* =========================================== */

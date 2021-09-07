@@ -38,26 +38,19 @@
  *
  */
 
-
-
-
 #ifndef RMTEST_H
 #define RMTEST_H
-
 
 /** @file
  * Helper functions for all tests to use
  */
 
-
 #ifdef _cplusplus
 extern "C" {
 #endif
 
-
     extern int (*dbgmsg)(const char *fmt, ...);
     extern RMinterfaceCtx *ifctx;
-
 
     /* Helper functions for all tests to use */
     T2DPD *getDPD(int32_t);

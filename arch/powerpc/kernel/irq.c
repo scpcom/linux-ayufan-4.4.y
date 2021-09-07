@@ -447,7 +447,6 @@ void do_softirq(void)
 	local_irq_restore(flags);
 }
 
-
 /*
  * IRQ controller and virtual interrupts
  */
@@ -842,7 +841,6 @@ unsigned int irq_find_mapping(struct irq_host *host,
 	return NO_IRQ;
 }
 EXPORT_SYMBOL_GPL(irq_find_mapping);
-
 
 unsigned int irq_radix_revmap_lookup(struct irq_host *host,
 				     irq_hw_number_t hwirq)

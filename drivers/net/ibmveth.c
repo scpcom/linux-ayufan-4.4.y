@@ -100,7 +100,6 @@ static void ibmveth_rxq_harvest_buffer(struct ibmveth_adapter *adapter);
 static unsigned long ibmveth_get_desired_dma(struct vio_dev *vdev);
 static struct kobj_type ktype_veth_pool;
 
-
 #ifdef CONFIG_PROC_FS
 #define IBMVETH_PROC_DIR "ibmveth"
 static struct proc_dir_entry *ibmveth_proc_dir;
@@ -1229,7 +1228,6 @@ static int __devinit ibmveth_probe(struct vio_dev *dev, const struct vio_device_
 	unsigned char *mac_addr_p;
 	unsigned int *mcastFilterSize_p;
 
-
 	ibmveth_debug_printk_no_adapter("entering ibmveth_probe for UA 0x%x\n",
 					dev->unit_address);
 
@@ -1560,7 +1558,6 @@ const char * buf, size_t count)
 	return count;
 }
 
-
 #define ATTR(_name, _mode)      \
         struct attribute veth_##_name##_attr = {               \
         .name = __stringify(_name), .mode = _mode, \
@@ -1587,7 +1584,6 @@ static struct kobj_type ktype_veth_pool = {
 	.sysfs_ops      = &veth_pool_ops,
 	.default_attrs  = veth_pool_attrs,
 };
-
 
 static struct vio_device_id ibmveth_device_table[] __devinitdata= {
 	{ "network", "IBM,l-lan"},

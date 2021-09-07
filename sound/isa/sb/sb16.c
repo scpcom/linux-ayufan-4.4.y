@@ -516,7 +516,6 @@ static int __devinit snd_sb16_isa_probe1(int dev, struct device *pdev)
 	return 0;
 }
 
-
 static int __devinit snd_sb16_isa_match(struct device *pdev, unsigned int dev)
 {
 	return enable[dev] && !is_isapnp_selected(dev);
@@ -601,7 +600,6 @@ static struct isa_driver snd_sb16_isa_driver = {
 		.name	= DEV_NAME
 	},
 };
-
 
 #ifdef CONFIG_PNP
 static int __devinit snd_sb16_pnp_detect(struct pnp_card_link *pcard,

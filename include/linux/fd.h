@@ -41,7 +41,6 @@ struct floppy_struct {
 	const char	* name; /* used only for predefined formats */
 };
 
-
 /* commands needing write access have 0x40 set */
 /* commands needing super user access have 0x80 set */
 
@@ -58,11 +57,9 @@ struct floppy_struct {
 #define FDGETMEDIAPRM FDGETPRM
 /* set/get disk parameters */
 
-
 #define	FDMSGON  _IO(2,0x45)
 #define	FDMSGOFF _IO(2,0x46)
 /* issue/don't issue kernel messages on media type change */
-
 
 /* 
  * Formatting (obsolete)
@@ -79,7 +76,6 @@ struct format_descr {
 /* format the specified track */
 #define FDFMTEND _IO(2,0x49)
 /* end formatting a disk */
-
 
 /*
  * Error thresholds
@@ -114,11 +110,9 @@ struct floppy_max_errors {
 /* set/get abortion and read_track threshold. See also floppy_drive_params
  * structure */
 
-
 typedef char floppy_drive_name[16];
 #define FDGETDRVTYP _IOR(2, 0x0f, floppy_drive_name)
 /* get drive type: 5 1/4 or 3 1/2 */
-
 
 /*
  * Drive parameters (user modifiable)
@@ -192,7 +186,6 @@ enum {
 #define FDGETDRVPRM _IOR(2, 0x11, struct floppy_drive_params)
 /* set/get drive parameters */
 
-
 /*
  * Current drive state (not directly modifiable by user, readonly)
  */
@@ -235,7 +228,6 @@ struct floppy_drive_struct {
 #define FDPOLLDRVSTAT _IOR(2, 0x13, struct floppy_drive_struct)
 /* get drive state: GET returns the cached state, POLL polls for new state */
 
-
 /*
  * reset FDC
  */
@@ -245,7 +237,6 @@ enum reset_mode {
 	FD_RESET_ALWAYS		/* reset always */
 };
 #define FDRESET _IO(2, 0x54)
-
 
 /*
  * FDC state
@@ -284,7 +275,6 @@ struct floppy_fdc_state {
 
 #define FDGETFDCSTAT _IOR(2, 0x15, struct floppy_fdc_state)
 
-
 /*
  * Asynchronous Write error tracking
  */
@@ -314,7 +304,6 @@ struct floppy_write_errors {
 /* clear write error and badness information */
 #define FDWERRORGET  _IOR(2, 0x17, struct floppy_write_errors)
 /* get write error and badness information */
-
 
 /*
  * Raw commands
@@ -372,7 +361,6 @@ struct floppy_raw_cmd {
 
 #define FDTWADDLE _IO(2, 0x59)
 /* flicker motor-on bit before reading a sector. Experimental */
-
 
 #define FDEJECT _IO(2, 0x5a)
 /* eject the disk */

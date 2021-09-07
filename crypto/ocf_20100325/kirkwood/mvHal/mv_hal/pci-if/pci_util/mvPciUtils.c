@@ -81,7 +81,6 @@ This module only support scanning of Header type 00h of pci devices
 There is no suppotr for Header type 01h of pci devices  ( PCI bridges )
 */
 
-
 static MV_STATUS pciDetectDevice(MV_U32 pciIf,
    								 MV_U32 bus,
    								 MV_U32 dev,
@@ -93,11 +92,6 @@ static MV_U32 pciDetectDeviceBars(MV_U32 pciIf,
 									MV_U32 dev,
 									MV_U32 func,
 									MV_PCI_DEVICE *pPciAgent);
-
-
-
-
-
 
 /*******************************************************************************
 * mvPciScan - Scan a PCI interface bus
@@ -148,7 +142,6 @@ MV_STATUS mvPciScan(MV_U32 pciIf,
 		return MV_BAD_PARAM;
 	}
 
-
 	DB(mvOsPrintf("mvPciScan: PCI interface num %d mvPciMasterEnable\n", pciIf));
 	/* Master enable the MV PCI master */
 	if (MV_OK != mvPciIfMasterEnable(pciIf,MV_TRUE))
@@ -187,10 +180,8 @@ MV_STATUS mvPciScan(MV_U32 pciIf,
 			pMainDevice = pPciDevice;
 			pPciDevice->funtionsNum = 1;
 
-
 			/* move on */
 			detectedDevNum++;
-
 
 			/* check if we have no more room for a new device */
 			if (detectedDevNum == *pPciAgentsNum)
@@ -231,7 +222,6 @@ MV_STATUS mvPciScan(MV_U32 pciIf,
 						return MV_ERROR;
 					}
 
-
 				}
 			}
 
@@ -245,7 +235,6 @@ MV_STATUS mvPciScan(MV_U32 pciIf,
 	return MV_OK;
 
 }
-
 
 /*******************************************************************************
 * pciDetectDevice - Detect a pci device parameters
@@ -281,7 +270,6 @@ static MV_STATUS pciDetectDevice(MV_U32 pciIf,
 
 	/* no Parameters checking ! because it is static function and it is assumed
 	that all parameters were checked in the calling function */
-
 
 	/* Try read the PCI Vendor ID and Device ID */
 
@@ -330,7 +318,6 @@ static MV_STATUS pciDetectDevice(MV_U32 pciIf,
 							  bus,dev,func,
 							  PCI_STATUS_AND_COMMAND);
 
-
 	/* Fill related Status and Command information*/
 
 	if (pciData & PSCR_TAR_FAST_BB)
@@ -365,7 +352,6 @@ static MV_STATUS pciDetectDevice(MV_U32 pciIf,
 							  bus,dev,func,
 							  PCI_CLASS_CODE_AND_REVISION_ID);
 
-
 	pPciAgent->baseClassCode =
 		(pciData & PCCRIR_BASE_CLASS_MASK) >> PCCRIR_BASE_CLASS_OFFS;
 
@@ -382,8 +368,6 @@ static MV_STATUS pciDetectDevice(MV_U32 pciIf,
 	pciData = mvPciIfConfigRead(pciIf,
 							  bus,dev,func,
 							  PCI_BIST_HDR_TYPE_LAT_TMR_CACHE_LINE);
-
-
 
 	pPciAgent->pciCacheLine=
 		(pciData & PBHTLTCLR_CACHELINE_MASK ) >> PBHTLTCLR_CACHELINE_OFFS;
@@ -421,13 +405,11 @@ static MV_STATUS pciDetectDevice(MV_U32 pciIf,
 		pPciAgent->isBISTCapable=MV_FALSE;
 	}
 
-
 	/* read this device pci bars */
 
 	pciDetectDeviceBars(pciIf,
 					  bus,dev,func,
 	 				 pPciAgent);
-
 
 	/* check if we are bridge*/
 	if ((pPciAgent->baseClassCode == PCI_BRIDGE_CLASS)&&
@@ -459,7 +441,6 @@ static MV_STATUS pciDetectDevice(MV_U32 pciIf,
 		pPciAgent->p2pSecStatus =
 			(pciData & PIBLSS_SEC_STATUS_MASK) >> PIBLSS_SEC_STATUS_OFFS;
 
-
 		pPciAgent->p2pIObase =
 			(pciData & PIBLSS_IO_BASE_MASK) << PIBLSS_IO_LIMIT_OFFS;
 
@@ -471,7 +452,6 @@ static MV_STATUS pciDetectDevice(MV_U32 pciIf,
 
 		/* fill low address with 0xfff */
 		pPciAgent->p2pIOLimit |= PIBLSS_LOW_ADDR_MASK;
-
 
 		switch ((pciData & PIBLSS_ADD_CAP_MASK) >> PIBLSS_ADD_CAP_OFFS)
 		{
@@ -492,14 +472,12 @@ static MV_STATUS pciDetectDevice(MV_U32 pciIf,
 			pPciAgent->p2pIObase |=
 				(pciData & PRBU_IO_UPP_BASE_MASK) << PRBU_IO_UPP_LIMIT_OFFS;
 
-
 			pPciAgent->p2pIOLimit |=
 				(pciData & PRBU_IO_UPP_LIMIT_MASK);
 
 			break;
 
 		}
-
 
 		/* Read  P2P_MEM_BASE_LIMIT */
 		pciData = mvPciIfConfigRead(pciIf,
@@ -518,20 +496,16 @@ static MV_STATUS pciDetectDevice(MV_U32 pciIf,
 		/* add 0xfffff */
 		pPciAgent->p2pMemLimit |= PMBL_LOW_ADDR_MASK;
 
-
 		/* Read  P2P_PREF_MEM_BASE_LIMIT */
 		pciData = mvPciIfConfigRead(pciIf,
 								  bus,dev,func,
 								  P2P_PREF_MEM_BASE_LIMIT);
-
 
 		pPciAgent->p2pPrefMemBase =
 			(pciData & PRMBL_PREF_MEM_BASE_MASK) << PRMBL_PREF_MEM_LIMIT_OFFS;
 
 		/* get high address only */
 		pPciAgent->p2pPrefMemBase &= PRMBL_HIGH_ADDR_MASK;
-
-
 
 		pPciAgent->p2pPrefMemLimit =
 			(pciData & PRMBL_PREF_MEM_LIMIT_MASK);
@@ -578,18 +552,15 @@ static MV_STATUS pciDetectDevice(MV_U32 pciIf,
 								  bus,dev,func,
 								  PCI_SUBSYS_ID_AND_SUBSYS_VENDOR_ID);
 
-
 		pPciAgent->subSysVenID =
 			(pciData & PSISVIR_VENID_MASK) >> PSISVIR_VENID_OFFS;
 		pPciAgent->subSysID =
 			(pciData & PSISVIR_DEVID_MASK) >> PSISVIR_DEVID_OFFS;
 
-
 		/* Read  PCI_EXPANSION_ROM_BASE_ADDR_REG */
 		pciData = mvPciIfConfigRead(pciIf,
 								  bus,dev,func,
 								  PCI_EXPANSION_ROM_BASE_ADDR_REG);
-
 
 		if (pciData & PERBAR_EXPROMEN)
 		{
@@ -604,7 +575,6 @@ static MV_STATUS pciDetectDevice(MV_U32 pciIf,
 			(pciData & PERBAR_BASE_MASK) >> PERBAR_BASE_OFFS;
 
 	}
-
 
 	if (MV_TRUE == pPciAgent->isCapListSupport)
 	{
@@ -623,7 +593,6 @@ static MV_STATUS pciDetectDevice(MV_U32 pciIf,
 							  bus,dev,func,
 							  PCI_INTERRUPT_PIN_AND_LINE);
 
-
 	pPciAgent->irqLine=
 		(pciData & PIPLR_INTLINE_MASK) >> PIPLR_INTLINE_OFFS;
 
@@ -639,7 +608,6 @@ static MV_STATUS pciDetectDevice(MV_U32 pciIf,
 					  (MV_8 *)pPciAgent->type);
 
 	return MV_OK;
-
 
 }
 
@@ -735,7 +703,6 @@ static MV_U32 pciDetectDeviceBars(MV_U32 pciIf,
             pPciAgent->pciBar[detectedBar].barBaseLow =
 				pciData & PBBLR_MEM_BASE_MASK;
 
-
 		}
 		else /* IO Bar */
 		{
@@ -755,7 +722,6 @@ static MV_U32 pciDetectDeviceBars(MV_U32 pciIf,
 								bus,dev,func,
 								PCI_MEMORY_BAR_BASE_ADDR(barIndex));
 
-
 		}
 
 		/* calculating full base address (64bit) */
@@ -766,8 +732,6 @@ static MV_U32 pciDetectDeviceBars(MV_U32 pciIf,
 
 		pPciAgent->pciBar[detectedBar].barBaseAddr |=
 			(MV_U64)pPciAgent->pciBar[detectedBar].barBaseLow;
-
-
 
 		/* get the sizes of the the bar */
 
@@ -790,14 +754,11 @@ static MV_U32 pciDetectDeviceBars(MV_U32 pciIf,
 								bus,dev,func,
 								PCI_MEMORY_BAR_BASE_ADDR(barIndex-1));
 
-
-
 			/* restore original value */
 			mvPciIfConfigWrite(pciIf,
 							bus,dev,func,
 							PCI_MEMORY_BAR_BASE_ADDR(barIndex-1),
 							tmpBaseLow);
-
 
 			/* now do the same for BaseHigh */
 
@@ -855,8 +816,6 @@ static MV_U32 pciDetectDeviceBars(MV_U32 pciIf,
 
 			}
 
-
-
 		}
 		else /* 32bit bar */
 		{
@@ -878,7 +837,6 @@ static MV_U32 pciDetectDeviceBars(MV_U32 pciIf,
 				   ignore all previous settings and check the next bar*/
 				continue;
 			}
-
 
 			/* restore original value */
 			mvPciIfConfigWrite(pciIf,
@@ -904,7 +862,6 @@ static MV_U32 pciDetectDeviceBars(MV_U32 pciIf,
 			pPciAgent->pciBar[detectedBar].barSize =
 				(MV_U64)pPciAgent->pciBar[detectedBar].barSizeLow;
 
-
 		}
 
 		/* we are here ! this means we have already detected a bar for
@@ -916,7 +873,6 @@ static MV_U32 pciDetectDeviceBars(MV_U32 pciIf,
 
 	return detectedBar;
 }
-
 
 /*******************************************************************************
 * mvPciClassNameGet - get PCI  class name
@@ -1001,6 +957,3 @@ MV_STATUS mvPciClassNameGet(MV_U32 baseClassCode, MV_8 *pType)
 	return MV_OK;
 
 }
-
-
-

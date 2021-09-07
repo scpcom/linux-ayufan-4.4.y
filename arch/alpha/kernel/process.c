@@ -61,7 +61,6 @@ cpu_idle(void)
 	}
 }
 
-
 struct halt_info {
 	int mode;
 	char *restart_cmd;
@@ -170,20 +169,17 @@ machine_restart(char *restart_cmd)
 	common_shutdown(LINUX_REBOOT_CMD_RESTART, restart_cmd);
 }
 
-
 void
 machine_halt(void)
 {
 	common_shutdown(LINUX_REBOOT_CMD_HALT, NULL);
 }
 
-
 void
 machine_power_off(void)
 {
 	common_shutdown(LINUX_REBOOT_CMD_POWER_OFF, NULL);
 }
-
 
 /* Used by sysrq-p, among others.  I don't believe r9-r15 are ever
    saved in the context it's used.  */

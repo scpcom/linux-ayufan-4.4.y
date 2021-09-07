@@ -16,7 +16,6 @@
 #include <asm/pci/bridge.h>
 #include <asm/xtalk/xtalk.h>
 
-
 #define XBOW_WIDGET_PART_NUM    0x0
 #define XXBOW_WIDGET_PART_NUM   0xd000  /* Xbow in Xbridge */
 #define BASE_XBOW_PORT  	8     /* Lowest external port */

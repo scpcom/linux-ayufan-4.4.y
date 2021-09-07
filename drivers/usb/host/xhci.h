@@ -130,7 +130,6 @@ struct xhci_cap_regs {
 /* run_regs_off bitmask - bits 0:4 reserved */
 #define	RTSOFF_MASK	(~0x1f)
 
-
 /* Number of registers per port */
 #define	NUM_PORT_REGS	4
 
@@ -362,7 +361,6 @@ struct xhci_op_regs {
 #define PORT_U2_TIMEOUT(p)	(((p) & 0xff) << 8)
 /* Bits 24:31 for port testing */
 
-
 /**
  * struct xhci_intr_reg - Interrupt Register Set
  * @irq_pending:	IMAN - Interrupt Management Register.  Used to enable
@@ -454,7 +452,6 @@ struct xhci_doorbell_array {
 /* Endpoint Target - bits 0:7 */
 #define EPI_TO_DB(p)		(((p) + 1) & 0xff)
 #define STREAM_ID_TO_DB(p)	(((p) & 0xffff) << 16)
-
 
 /**
  * struct xhci_container_ctx
@@ -753,7 +750,6 @@ struct xhci_virt_ep {
 	struct xhci_segment		 *queued_deq_seg;
 	union xhci_trb 				 *queued_deq_ptr;
 
-
  /*
   * Sometimes the xHC can not process isochronous endpoint ring quickly
   * enough, and it will miss some isoc tds on the ring and generate
@@ -762,7 +758,6 @@ struct xhci_virt_ep {
   * process the missed tds on the endpoint ring.
   */
  bool      skip;
-
 
 };
 
@@ -794,7 +789,6 @@ struct xhci_virt_device {
 	struct list_head		cmd_list;
 };
 
-
 /**
  * struct xhci_device_context_array
  * @dev_context_ptr	array of 64-bit DMA addresses for device contexts
@@ -810,7 +804,6 @@ struct xhci_device_context_array {
  * TODO: change this to be dynamically sized at HC mem init time since the HC
  * might not be able to handle the maximum number of devices possible.
  */
-
 
 struct xhci_transfer_event {
 	/* 64-bit buffer address, or immediate data */
@@ -926,7 +919,6 @@ struct xhci_event_cmd {
 #define TRB_TO_STREAM_ID(p)		((((p) & (0xffff << 16)) >> 16))
 #define STREAM_ID_FOR_TRB(p)		((((p)) & 0xffff) << 16)
 
-
 /* Port Status Change Event TRB fields */
 /* Port ID - bits 31:24 */
 #define GET_PORT_ID(p)		(((p) & (0xff << 24)) >> 24)
@@ -955,7 +947,6 @@ struct xhci_event_cmd {
 #define TRB_IOC			(1<<5)
 /* The buffer pointer contains immediate data */
 #define TRB_IDT			(1<<6)
-
 
 /* Control transfer TRB specific fields */
 #define TRB_DIR_IN		(1<<16)
@@ -1183,7 +1174,6 @@ struct urb_priv {
 
 /* XXX: Make these module parameters */
 
-
 /* There is one ehci_hci structure per controller */
 struct xhci_hcd {
 	/* glue to PCI and HCD framework */
@@ -1260,7 +1250,6 @@ struct xhci_hcd {
  * There are no reports of xHCI host controllers that display this issue.
  */
 #define XHCI_STATE_DYING (1 << 0)
-
 
 	/* Statistics */
 	int			noops_submitted;

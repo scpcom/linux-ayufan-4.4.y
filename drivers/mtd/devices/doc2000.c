@@ -272,7 +272,6 @@ static void DoC_WriteBuf(struct DiskOnChip *doc, const u_char * buf, int len)
 	}
 }
 
-
 /* DoC_SelectChip: Select a given flash chip within the current floor */
 
 static inline int DoC_SelectChip(struct DiskOnChip *doc, int chip)
@@ -328,7 +327,6 @@ static int DoC_IdentChip(struct DiskOnChip *doc, int floor, int chip)
 		      floor, chip);
 		return 0;
 	}
-
 
 	/* Read the NAND chip ID: 1. Send ReadID command */
 	if (DoC_Command(doc, NAND_CMD_READID, CDSN_CTRL_WP)) {
@@ -406,7 +404,6 @@ static int DoC_IdentChip(struct DiskOnChip *doc, int floor, int chip)
 			return 0;
 		}
 	}
-
 
 	/* We haven't fully identified the chip. Print as much as we know. */
 	printk(KERN_WARNING "Unknown flash chip found: %2.2X %2.2X\n",
@@ -534,7 +531,6 @@ void DoC2k_init(struct mtd_info *mtd)
 			old = NULL;
 	}
 
-
 	switch (this->ChipID) {
 	case DOC_ChipID_Doc2kTSOP:
 		mtd->name = "DiskOnChip 2000 TSOP";
@@ -635,7 +631,6 @@ static int doc_read(struct mtd_info *mtd, loff_t from, size_t len,
 			       (long) from, (long) len);
 
 		/* printk("DoC_Read (adr: %lx size %lx)\n", (long) from, (long) len); */
-
 
 		/* Find the chip which is to be used and select it */
 		mychip = &this->chips[from >> (this->chipshift)];
@@ -1169,7 +1164,6 @@ static int doc_erase(struct mtd_info *mtd, struct erase_info *instr)
 	return 0;
 }
 
-
 /****************************************************************************
  *
  * Module stuff
@@ -1198,4 +1192,3 @@ module_exit(cleanup_doc2000);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("David Woodhouse <dwmw2@infradead.org> et al.");
 MODULE_DESCRIPTION("MTD driver for DiskOnChip 2000 and Millennium");
-

@@ -19,7 +19,6 @@ disclaimer.
 #include "gpp/mvGpp.h"
 #include "btns_driver.h"
 
-
 /* MACROS */
 #define GPP_GROUP(gpp) 	gpp/32
 #define GPP_ID(gpp)   	gpp%32
@@ -57,7 +56,6 @@ u32		is_opend = 0;
 u32		gpp_changed = 0;
 u32		gpp_changed_id = -1;
 
-
 /*
  * Get GPP real value....
  * When Gpp is input:
@@ -83,7 +81,6 @@ mv_gpp_value_real_get(unsigned int gpp_group, unsigned int mask)
 
         return temp;
 }
-
 
 static irqreturn_t
 mv_btns_handler(int irq , void *dev_id)
@@ -270,7 +267,6 @@ btnsdev_release(struct inode *inode, struct file *filp)
         return(0);
 }
 
-
 static struct file_operations btnsdev_fops = {
         .open = btnsdev_open,
         .release = btnsdev_release,
@@ -282,7 +278,6 @@ static struct miscdevice btnsdev = {
         .name = "btns",
         .fops = &btnsdev_fops,
 };
-
 
 static int 
 btns_probe(struct platform_device *pdev)
@@ -305,14 +300,12 @@ btns_probe(struct platform_device *pdev)
         return 0;
 }
 
-
 static struct platform_driver btns_driver = {
 	.probe          = btns_probe,
 	.driver  = {
         	.name		= MV_BTNS_NAME,
 	},
 };
-
 
 static int __init
 btnsdev_init(void)
@@ -353,5 +346,3 @@ module_exit(btnsdev_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Ronen Shitrit & Haim Boot");
 MODULE_DESCRIPTION("PH: Buttons press handling.");
-
-

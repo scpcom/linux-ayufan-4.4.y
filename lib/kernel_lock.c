@@ -22,7 +22,6 @@
  */
 static  __cacheline_aligned_in_smp DEFINE_SPINLOCK(kernel_flag);
 
-
 /*
  * Acquire/release the underlying lock from the scheduler.
  *
@@ -130,4 +129,3 @@ void __lockfunc unlock_kernel(void)
 
 EXPORT_SYMBOL(lock_kernel);
 EXPORT_SYMBOL(unlock_kernel);
-

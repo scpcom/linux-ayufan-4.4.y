@@ -515,4 +515,3 @@ int nfs_map_gid_to_group(struct nfs_client *clp, __u32 uid, char *buf)
 
 	return nfs_idmap_name(idmap, &idmap->idmap_group_hash, uid, buf);
 }
-

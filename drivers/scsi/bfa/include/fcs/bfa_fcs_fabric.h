@@ -41,7 +41,6 @@ enum bfa_fcs_fabric_type {
 	BFA_FCS_FABRIC_N2N = 3,
 };
 
-
 struct bfa_fcs_fabric_s {
 	struct list_head   qe;		/*  queue element */
 	bfa_sm_t	 sm;		/*  state machine */

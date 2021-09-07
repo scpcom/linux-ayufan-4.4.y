@@ -189,7 +189,6 @@ struct hfsc_sched
 
 #define	HT_INFINITY	0xffffffffffffffffULL	/* infinite time value */
 
-
 /*
  * eligible tree holds backlogged classes being sorted by their eligible times.
  * there is one eligible tree per hfsc instance.
@@ -1381,8 +1380,6 @@ hfsc_dump_class_stats(struct Qdisc *sch, unsigned long arg,
 
 	return gnet_stats_copy_app(d, &xstats, sizeof(xstats));
 }
-
-
 
 static void
 hfsc_walk(struct Qdisc *sch, struct qdisc_walker *arg)

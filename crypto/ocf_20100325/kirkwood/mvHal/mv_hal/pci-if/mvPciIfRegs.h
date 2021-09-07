@@ -65,7 +65,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __INCPCIIFREGSH
 #define __INCPCIIFREGSH
 
-
 /* defines */
 #define MAX_PCI_DEVICES         32
 #define MAX_PCI_FUNCS           8
@@ -79,7 +78,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* PCI Configuration, Function 0, Registers  */
 /*********************************************/
 
-
 /* Standard registers */
 #define PCI_DEVICE_AND_VENDOR_ID					0x000
 #define PCI_STATUS_AND_COMMAND						0x004
@@ -90,7 +88,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PCI_EXPANSION_ROM_BASE_ADDR_REG			    0x030
 #define PCI_CAPABILTY_LIST_POINTER			        0x034
 #define PCI_INTERRUPT_PIN_AND_LINE					0x03C
-
 
 /* PCI Device and Vendor ID Register (PDVIR) */
 #define PDVIR_VEN_ID_OFFS			0 	/* Vendor ID */
@@ -165,13 +162,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PBHTLTCLR_HEADER_STANDARD		(0x0 << PBHTLTCLR_HEADER_OFFS)
 #define PBHTLTCLR_HEADER_PCI2PCI_BRIDGE	(0x1 << PBHTLTCLR_HEADER_OFFS)
 
-
 #define PBHTLTCLR_BISTCOMP_OFFS		24	/* BIST Completion Code */
 #define PBHTLTCLR_BISTCOMP_MASK		(0xf << PBHTLTCLR_BISTCOMP_OFFS)
 
 #define PBHTLTCLR_BISTACT			BIT30	/* BIST Activate bit */
 #define PBHTLTCLR_BISTCAP			BIT31	/* BIST Capable Bit */
-
 
 /* PCI Bar Base Low Register (PBBLR) */
 #define PBBLR_IOSPACE			BIT0	/* Memory Space Indicator */
@@ -183,7 +178,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define PBBLR_PREFETCH_EN		BIT3 	/* Prefetch Enable */
 
-				
 #define PBBLR_MEM_BASE_OFFS		4	/* Memory Bar Base address. Corresponds to
 									address bits [31:4] */
 #define PBBLR_MEM_BASE_MASK		(0xfffffff << PBBLR_MEM_BASE_OFFS)
@@ -192,16 +186,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 										address bits [31:2] */
 #define PBBLR_IO_BASE_MASK		(0x3fffffff << PBBLR_IO_BASE_OFFS)
 
-
 #define PBBLR_BASE_OFFS			12		/* Base address. Address bits [31:12] */
 #define PBBLR_BASE_MASK			(0xfffff << PBBLR_BASE_OFFS)
 #define PBBLR_BASE_ALIGNMET		(1 << PBBLR_BASE_OFFS)
 
-
 /* PCI Bar Base High Fegister (PBBHR) */
 #define PBBHR_BASE_OFFS			0		/* Base address. Address bits [31:12] */
 #define PBBHR_BASE_MASK			(0xffffffff << PBBHR_BASE_OFFS)
-
 
 /* 	PCI configuration register offset=0x2C fields 
 	(PCI_SUBSYSTEM_ID_AND_SUBSYSTEM_VENDOR_ID)(PSISVI) 				*/
@@ -242,4 +233,3 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PIPLR_MAXLATEN_MASK	(0xff << PIPLR_MAXLATEN_OFFS)
 
 #endif /* #ifndef __INCPCIIFREGSH */
-

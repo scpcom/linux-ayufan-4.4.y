@@ -197,7 +197,6 @@ struct pci_controller bcm1480_controller = {
 	.io_offset      = A_BCM1480_PHYS_PCI_IO_MATCH_BYTES,
 };
 
-
 static int __init bcm1480_pcibios_init(void)
 {
 	uint32_t cmdreg;

@@ -239,9 +239,6 @@ static void frame_delete(struct frame *f)
 	kfree(f);
 }
 
-
-
-
 /*
    frame_prepare() - build the DMA program for transmitting
 
@@ -275,8 +272,6 @@ static void frame_prepare(struct video_card *video, unsigned int this_frame)
 
 	full_packets = 0;
 
-
-
 	if (video->pal_or_ntsc == DV1394_PAL)
 		packets_per_frame = DV1394_PAL_PACKETS_PER_FRAME;
 	else
@@ -306,7 +301,6 @@ static void frame_prepare(struct video_card *video, unsigned int this_frame)
 		    to the kernel base address of the descriptor pool
 		    + DMA base address of the descriptor pool */
 		block_dma = ((unsigned long) block - (unsigned long) f->descriptor_pool) + f->descriptor_pool_dma;
-
 
 		/* the whole CIP pool fits on one page, so no worries about boundaries */
 		if ( ((unsigned long) &(f->header_pool[f->n_packets]) - (unsigned long) f->header_pool)
@@ -364,7 +358,6 @@ static void frame_prepare(struct video_card *video, unsigned int this_frame)
 		} else if (f->n_packets == packets_per_frame) {
 			mid_packet = 1;
 		}
-
 
 		/********************/
 		/* setup CIP header */
@@ -439,7 +432,6 @@ static void frame_prepare(struct video_card *video, unsigned int this_frame)
 					  sizeof(struct CIP_header), /* data size */
 					  cip_dma);
 
-
 			/* third (and possibly fourth) descriptor - for DV data */
 			/* the 480-byte payload can cross a page boundary; if so,
 			   we need to split it into two DMA descriptors */
@@ -502,7 +494,6 @@ static void frame_prepare(struct video_card *video, unsigned int this_frame)
 
 						  480, /* data size (480 bytes of DV data) */
 
-
 						  /* DMA address of data_p */
 						  dma_region_offset_to_bus(&video->dv_buf,
 									   data_p - (unsigned long) video->dv_buf.kvirt));
@@ -536,7 +527,6 @@ static void frame_prepare(struct video_card *video, unsigned int this_frame)
 		}
 
 		last_branch_address = branch_address;
-
 
 		f->n_packets++;
 
@@ -599,7 +589,6 @@ static void frame_prepare(struct video_card *video, unsigned int this_frame)
 			   dropped frame. Hopefully this window is too
 			   small to really matter, and the consequence
 			   is rather harmless. */
-
 
 			irq_printk("     new frame %d linked onto DMA chain\n", this_frame);
 
@@ -724,11 +713,8 @@ static void frame_prepare(struct video_card *video, unsigned int this_frame)
 
 	}
 
-
 	spin_unlock_irqrestore(&video->spinlock, irq_flags);
 }
-
-
 
 /*** RECEIVE FUNCTIONS *****************************************************/
 
@@ -774,7 +760,6 @@ frame_put_packet (struct frame *f, struct packet *p)
 	        break;
 	}
 }
-
 
 static void start_dma_receive(struct video_card *video)
 {
@@ -837,7 +822,6 @@ static void start_dma_receive(struct video_card *video)
 	}
 }
 
-
 /*
    receive_packets() - build the DMA program for receiving
 */
@@ -891,8 +875,6 @@ static void receive_packets(struct video_card *video)
 	spin_unlock_irqrestore(&video->spinlock, irq_flags);
 
 }
-
-
 
 /*** MANAGEMENT FUNCTIONS **************************************************/
 
@@ -1162,8 +1144,6 @@ out:
 	spin_unlock_irqrestore(&video->spinlock, flags);
 }
 
-
-
 static void do_dv1394_shutdown(struct video_card *video, int free_dv_buf)
 {
 	int i;
@@ -1424,7 +1404,6 @@ static ssize_t dv1394_write(struct file *file, const char __user *buffer, size_t
 	return ret;
 }
 
-
 static ssize_t dv1394_read(struct file *file,  char __user *buffer, size_t count, loff_t *ppos)
 {
 	struct video_card *video = file_to_video_card(file);
@@ -1531,7 +1510,6 @@ static ssize_t dv1394_read(struct file *file,  char __user *buffer, size_t count
 	mutex_unlock(&video->mtx);
 	return ret;
 }
-
 
 /*** DEVICE IOCTL INTERFACE ************************************************/
 
@@ -1727,7 +1705,6 @@ static long dv1394_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		ret = 0;
 		break;
 
-
         case DV1394_IOC_GET_STATUS: {
 		struct dv1394_status status;
 
@@ -1827,7 +1804,6 @@ static int dv1394_open(struct inode *inode, struct file *file)
 	return 0;
 }
 
-
 static int dv1394_release(struct inode *inode, struct file *file)
 {
 	struct video_card *video = file_to_video_card(file);
@@ -1840,7 +1816,6 @@ static int dv1394_release(struct inode *inode, struct file *file)
 
 	return 0;
 }
-
 
 /*** DEVICE DRIVER HANDLERS ************************************************/
 
@@ -1859,13 +1834,11 @@ static void it_tasklet_func(unsigned long data)
 	       reg_read(video->ohci, video->ohci_IsoXmitCommandPtr)
 	       );
 
-
 	if ( (video->ohci_it_ctx != -1) &&
 	    (reg_read(video->ohci, video->ohci_IsoXmitContextControlSet) & (1 << 10)) ) {
 
 		struct frame *f;
 		unsigned int frame, i;
-
 
 		if (video->active_frame == -1)
 			frame = 0;
@@ -1889,8 +1862,6 @@ static void it_tasklet_func(unsigned long data)
 			if ( *(f->frame_begin_timestamp) ) {
 				int prev_frame;
 				struct frame *prev_f;
-
-
 
 				/* don't reset, need this later *(f->frame_begin_timestamp) = 0; */
 				irq_printk("  BEGIN\n");
@@ -1917,7 +1888,6 @@ static void it_tasklet_func(unsigned long data)
 
 				f->done = 1;
 			}
-
 
 			/* see if we need to set the timestamp for the next frame */
 			if ( *(f->mid_frame_timestamp) ) {
@@ -2166,7 +2136,6 @@ static const struct file_operations dv1394_fops=
 	.fasync =       dv1394_fasync,
 };
 
-
 /*** HOTPLUG STUFF **********************************************************/
 /*
  * Export information about protocols/devices supported by this driver.
@@ -2187,7 +2156,6 @@ MODULE_DEVICE_TABLE(ieee1394, dv1394_id_table);
 static struct hpsb_protocol_driver dv1394_driver = {
 	.name = "dv1394",
 };
-
 
 /*** IEEE1394 HPSB CALLBACKS ***********************************************/
 
@@ -2311,7 +2279,6 @@ static void dv1394_add_host(struct hpsb_host *host)
 	dv1394_init(ohci, DV1394_PAL, MODE_TRANSMIT);
 }
 
-
 /* Bus reset handler. In the event of a bus reset, we may need to
    re-start the DMA contexts - otherwise the user program would
    end up waiting forever.
@@ -2329,7 +2296,6 @@ static void dv1394_host_reset(struct hpsb_host *host)
 
 	ohci = (struct ti_ohci *)host->hostdata;
 
-
 	/* find the corresponding video_cards */
 	spin_lock_irqsave(&dv1394_cards_lock, flags);
 	list_for_each_entry(tmp_vid, &dv1394_cards, list) {
@@ -2342,7 +2308,6 @@ static void dv1394_host_reset(struct hpsb_host *host)
 
 	if (!video)
 		return;
-
 
 	spin_lock_irqsave(&video->spinlock, flags);
 
@@ -2525,8 +2490,6 @@ static int handle_dv1394_get_status(struct file *file, unsigned int cmd, unsigne
 	return ret;
 }
 
-
-
 static long dv1394_compat_ioctl(struct file *file, unsigned int cmd,
 			       unsigned long arg)
 {
@@ -2548,7 +2511,6 @@ static long dv1394_compat_ioctl(struct file *file, unsigned int cmd,
 }
 
 #endif /* CONFIG_COMPAT */
-
 
 /*** KERNEL MODULE HANDLERS ************************************************/
 

@@ -95,7 +95,6 @@ static int eeprom_read_buf(loff_t addr, char * buf, int count);
 
 static void eeprom_disable_write_protect(void);
 
-
 static const char eeprom_name[] = "eeprom";
 
 /* chip description */
@@ -368,8 +367,6 @@ int __init eeprom_init(void)
      break;
   }
 
-  
-
   eeprom_disable_write_protect();
 
   return 0;
@@ -445,8 +442,6 @@ static int eeprom_read_buf(loff_t addr, char * buf, int count)
   return eeprom_read(&f, buf, count, &addr);
 }
 
-
-
 /* Reads data from eeprom. */
 
 static ssize_t eeprom_read(struct file * file, char * buf, size_t count, loff_t *off)
@@ -520,7 +515,6 @@ static int eeprom_write_buf(loff_t addr, const char * buf, int count)
   return eeprom_write(&f, buf, count, &addr);
 }
 
-
 /* Writes data to eeprom. */
 
 static ssize_t eeprom_write(struct file * file, const char * buf, size_t count,
@@ -545,7 +539,6 @@ static ssize_t eeprom_write(struct file * file, const char * buf, size_t count,
     written = 0;
     p = file->f_pos;
    
-    
     while( (written < count) && (p < eeprom.size))
     {
       /* address the eeprom */
@@ -734,7 +727,6 @@ static int eeprom_address(unsigned long addr)
     }
   }    
 
-  
   eeprom.retry_cnt_addr = i;
   D(printk("%i\n", eeprom.retry_cnt_addr));
   if(eeprom.retry_cnt_addr == EEPROM_RETRIES)

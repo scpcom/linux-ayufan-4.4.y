@@ -2496,7 +2496,6 @@ static int __init omap_init_dma(void)
 		dma_write(v , OCP_SYSCONFIG);
 	}
 
-
 	/* FIXME: Update LCD DMA to work on 24xx */
 	if (cpu_class_is_omap1()) {
 		r = request_irq(INT_DMA_LCD, lcd_dma_irq_handler, 0,
@@ -2529,5 +2528,3 @@ static int __init omap_dma_cmdline_reserve_ch(char *str)
 }
 
 __setup("omap_dma_reserve_ch=", omap_dma_cmdline_reserve_ch);
-
-

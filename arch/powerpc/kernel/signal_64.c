@@ -343,7 +343,6 @@ int sys_swapcontext(struct ucontext __user *old_ctx,
 	return 0;
 }
 
-
 /*
  * Do a signal return; undo the signal stack.
  */

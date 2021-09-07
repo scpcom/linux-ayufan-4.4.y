@@ -998,7 +998,6 @@ static struct snd_kcontrol_new stac92hd73xx_10ch_loopback[] = {
 	{}
 };
 
-
 static struct snd_kcontrol_new stac92hd71bxx_loopback[] = {
 	STAC_ANALOG_LOOPBACK(0xFA0, 0x7A0, 2)
 };
@@ -1232,7 +1231,6 @@ static unsigned int dell9200_d23_pin_configs[8] = {
 	0x01813020, 0x01a19021, 0x90100140, 0x400001f2, 
 };
 
-
 /* 
     STAC 9200-32 pin configs for
     102801B5 (Dell Inspiron 630m)
@@ -1312,7 +1310,6 @@ static unsigned int oqo9200_pin_configs[8] = {
 	0x40c000f0, 0x404000f1, 0x0221121f, 0x02211210,
 	0x90170111, 0x90a70120, 0x400000f2, 0x400000f3,
 };
-
 
 static unsigned int *stac9200_brd_tbl[STAC_9200_MODELS] = {
 	[STAC_REF] = ref9200_pin_configs,
@@ -2267,7 +2264,6 @@ static int stac92xx_dig_playback_pcm_cleanup(struct hda_pcm_stream *hinfo,
 	return snd_hda_multi_out_dig_cleanup(codec, &spec->multiout);
 }
 
-
 /*
  * Analog capture callbacks
  */
@@ -2709,7 +2705,6 @@ static inline int stac92xx_add_control_idx(struct sigmatel_spec *spec,
 					 &stac92xx_control_templates[type],
 					 idx, name, val);
 }
-
 
 /* add dynamic controls */
 static inline int stac92xx_add_control(struct sigmatel_spec *spec, int type,
@@ -5964,7 +5959,6 @@ static int patch_stac9872(struct hda_codec *codec)
 	codec->patch_ops = stac92xx_patch_ops;
 	return 0;
 }
-
 
 /*
  * patch entries

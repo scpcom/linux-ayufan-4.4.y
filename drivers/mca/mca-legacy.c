@@ -201,7 +201,6 @@ unsigned char mca_read_stored_pos(int slot, int reg)
 }
 EXPORT_SYMBOL(mca_read_stored_pos);
 
-
 /**
  *	mca_read_pos - read POS register from card
  *	@slot: slot number to read from
@@ -224,7 +223,6 @@ unsigned char mca_read_pos(int slot, int reg)
 }
 EXPORT_SYMBOL(mca_read_pos);
 
-		
 /**
  *	mca_write_pos - read POS register from card
  *	@slot: slot number to read from
@@ -326,4 +324,3 @@ void mca_mark_as_unused(int slot)
 	mca_device_set_claim(mca_dev, 0);
 }
 EXPORT_SYMBOL(mca_mark_as_unused);
-

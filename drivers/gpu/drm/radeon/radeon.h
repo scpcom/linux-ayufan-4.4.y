@@ -105,15 +105,12 @@ enum radeon_pll_errata {
 	CHIP_ERRATA_PLL_DELAY           = 0x00000004
 };
 
-
 struct radeon_device;
-
 
 /*
  * BIOS.
  */
 bool radeon_get_bios(struct radeon_device *rdev);
-
 
 /*
  * Dummy page
@@ -124,7 +121,6 @@ struct radeon_dummy_page {
 };
 int radeon_dummy_page_init(struct radeon_device *rdev);
 void radeon_dummy_page_fini(struct radeon_device *rdev);
-
 
 /*
  * Clocks
@@ -260,7 +256,6 @@ int radeon_gem_object_pin(struct drm_gem_object *obj, uint32_t pin_domain,
 			  uint64_t *gpu_addr);
 void radeon_gem_object_unpin(struct drm_gem_object *obj);
 
-
 /*
  * GART structures, functions & helpers
  */
@@ -304,7 +299,6 @@ void radeon_gart_unbind(struct radeon_device *rdev, unsigned offset,
 int radeon_gart_bind(struct radeon_device *rdev, unsigned offset,
 		     int pages, struct page **pagelist);
 
-
 /*
  * GPU MC structures, functions & helpers
  */
@@ -330,7 +324,6 @@ struct radeon_mc {
 
 int radeon_mc_setup(struct radeon_device *rdev);
 
-
 /*
  * GPU scratch registers structures, functions & helpers
  */
@@ -342,7 +335,6 @@ struct radeon_scratch {
 
 int radeon_scratch_get(struct radeon_device *rdev, uint32_t *reg);
 void radeon_scratch_free(struct radeon_device *rdev, uint32_t reg);
-
 
 /*
  * IRQS.
@@ -356,7 +348,6 @@ struct radeon_irq {
 
 int radeon_irq_kms_init(struct radeon_device *rdev);
 void radeon_irq_kms_fini(struct radeon_device *rdev);
-
 
 /*
  * CP & ring.
@@ -424,7 +415,6 @@ int radeon_ring_test(struct radeon_device *rdev);
 int radeon_ring_init(struct radeon_device *rdev, unsigned ring_size);
 void radeon_ring_fini(struct radeon_device *rdev);
 
-
 /*
  * CS.
  */
@@ -474,7 +464,6 @@ struct radeon_cs_parser {
 extern int radeon_cs_update_pages(struct radeon_cs_parser *p, int pg_idx);
 extern int radeon_cs_finish_pages(struct radeon_cs_parser *p);
 
-
 static inline u32 radeon_get_ib_value(struct radeon_cs_parser *p, int idx)
 {
 	struct radeon_cs_chunk *ibc = &p->chunks[p->chunk_ib_idx];
@@ -515,14 +504,12 @@ typedef int (*radeon_packet0_check_t)(struct radeon_cs_parser *p,
 typedef int (*radeon_packet3_check_t)(struct radeon_cs_parser *p,
 				      struct radeon_cs_packet *pkt);
 
-
 /*
  * AGP
  */
 int radeon_agp_init(struct radeon_device *rdev);
 void radeon_agp_resume(struct radeon_device *rdev);
 void radeon_agp_fini(struct radeon_device *rdev);
-
 
 /*
  * Writeback
@@ -566,18 +553,15 @@ struct radeon_pm {
 	fixed20_12		needed_bandwidth;
 };
 
-
 /*
  * Benchmarking
  */
 void radeon_benchmark(struct radeon_device *rdev);
 
-
 /*
  * Testing
  */
 void radeon_test_moves(struct radeon_device *rdev);
-
 
 /*
  * Debugfs
@@ -588,7 +572,6 @@ int radeon_debugfs_add_files(struct radeon_device *rdev,
 int radeon_debugfs_fence_init(struct radeon_device *rdev);
 int r100_debugfs_rbbm_init(struct radeon_device *rdev);
 int r100_debugfs_cp_init(struct radeon_device *rdev);
-
 
 /*
  * ASIC specific functions.
@@ -698,7 +681,6 @@ union radeon_asic_config {
 	struct rv770_asic	rv770;
 };
 
-
 /*
  * IOCTL.
  */
@@ -727,7 +709,6 @@ int radeon_gem_set_tiling_ioctl(struct drm_device *dev, void *data,
 				struct drm_file *filp);
 int radeon_gem_get_tiling_ioctl(struct drm_device *dev, void *data,
 				struct drm_file *filp);
-
 
 /*
  * Core structure, functions and helpers.
@@ -830,7 +811,6 @@ static inline void r100_mm_wreg(struct radeon_device *rdev, uint32_t reg, uint32
 	}
 }
 
-
 /*
  * Registers read & write functions.
  */
@@ -883,7 +863,6 @@ static inline void rv370_pcie_wreg(struct radeon_device *rdev, uint32_t reg, uin
 
 void r100_pll_errata_after_index(struct radeon_device *rdev);
 
-
 /*
  * ASICs helpers.
  */
@@ -909,7 +888,6 @@ void r100_pll_errata_after_index(struct radeon_device *rdev);
 #define ASIC_IS_DCE3(rdev) ((rdev->family >= CHIP_RV620))
 #define ASIC_IS_DCE32(rdev) ((rdev->family >= CHIP_RV730))
 
-
 /*
  * BIOS helpers.
  */
@@ -921,7 +899,6 @@ int radeon_combios_init(struct radeon_device *rdev);
 void radeon_combios_fini(struct radeon_device *rdev);
 int radeon_atombios_init(struct radeon_device *rdev);
 void radeon_atombios_fini(struct radeon_device *rdev);
-
 
 /*
  * RING helpers.
@@ -938,7 +915,6 @@ static inline void radeon_ring_write(struct radeon_device *rdev, uint32_t v)
 	rdev->cp.count_dw--;
 	rdev->cp.ring_free_dw--;
 }
-
 
 /*
  * ASICs macro.

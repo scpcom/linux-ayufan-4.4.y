@@ -95,7 +95,6 @@ MV_U32 sysClkRate = -1;
 MV_U32 tClkRate = -1;
 MV_U32 gBoardId = 0;
 
-
 MV_DEV_CS_INFO dbBoardCsInfoNor8Boot[] = 
 		/*{deviceCS, params, devType, devWidth}*/			   
 		 {
@@ -122,7 +121,6 @@ MV_DEV_CS_INFO dbBoardCsInfoNor32Boot[] =
 		 {MAX_TARGETS, 0, 0, 0}
 		 };
 
-
 MV_DEV_CS_INFO dbBoardCsBootFromSpiInfo[] = 
 		/*{deviceCS, params, devType, devWidth}*/			   
 		 {
@@ -145,7 +143,6 @@ MV_DEV_CS_INFO dbBoard632XCsInfo[] =
 		 {MAX_TARGETS, 0, 0, 0}
 		 };
 
-
 MV_DEV_CS_INFO db78200BoardCsInfo[] = 
 	 /*{deviceCS, params, devType, devWidth}*/			   
 	  {
@@ -157,7 +154,6 @@ MV_DEV_CS_INFO db78200BoardCsInfo[] =
 #endif
 	  {MAX_TARGETS, 0, 0, 0}
 	  };
-
 
 MV_DEV_CS_INFO dbBoardCsInfoBootFromNand[] = 
 		/*{deviceCS, params, devType, devWidth}*/			   
@@ -610,7 +606,6 @@ MV_U32 mvBoardPhyAddrGet(MV_U32 ethPortNum)
     return ethPortPhyAddr[ethPortNum - BOARD_ETH_START_PORT_NUM];
 }
 
-
 /*******************************************************************************
 * mvBoardMacSpeedGet - Get the Mac speed
 *
@@ -724,7 +719,6 @@ MV_32 mvBoardTclkGet(MV_VOID)
 	{
 		tmpTClkRate = tClkRate;
 	}
-
 
 	return tmpTClkRate;
 }
@@ -842,7 +836,6 @@ MV_VOID mvBoardDebugLed(MV_U32 binNum)
 	    }
 	}
 }
-
 
 /*******************************************************************************
 * mvBoardDebug7Seg - Set the board debug 7Seg
@@ -1238,7 +1231,6 @@ MV_U32 mvBoardGetDeviceBaseAddr(MV_32 devNum, MV_BOARD_DEV_CLASS devClass)
 	return 0xFFFFFFFF;
 }
 
-
 /*******************************************************************************
 * mvBoardGetDeviceBusWidth - Get Bus width of a device existing on the board
 *
@@ -1292,7 +1284,6 @@ MV_U32 mvBoardGetDeviceBusWidth(MV_32 devNum, MV_BOARD_DEV_CLASS devClass)
 	return 0xFFFFFFFF;
 }
 
-
 /*******************************************************************************
 * mvBoardGetDeviceWinSize - Get the window size of a device existing on the board
 *
@@ -1320,8 +1311,6 @@ MV_U32 mvBoardGetDeviceWinSize(MV_32 devNum, MV_BOARD_DEV_CLASS devClass)
 	}
 	return 0xFFFFFFFF;
 }
-
-
 
 /*******************************************************************************
 * mvBoardRtcTwsiAddrTypeGet - 
@@ -1360,7 +1349,6 @@ MV_U8 mvBoardRtcTwsiAddrGet()
 {
 	return MV_BOARD_RTC_I2C_ADDR;
 }
-
 
 /*******************************************************************************
 * boardGetDevEntry - returns the entry pointer of a device on the board
@@ -1401,7 +1389,6 @@ static MV_DEV_CS_INFO*  boardGetDevEntry(MV_32 devNum, MV_BOARD_DEV_CLASS devCla
 	return NULL;
 }
 
-
 /*******************************************************************************
 * mvBoardGetDevCS - 
 *
@@ -1427,8 +1414,6 @@ MV_TARGET mvBoardGetDevCSNum(MV_32 devNum, MV_BOARD_DEV_CLASS devClass)
 	return MAX_TARGETS;	
 }
 
-
-
 MV_32 mvBoardGetDeviceWidth(MV_32 devNum, MV_BOARD_DEV_CLASS devClass)
 {
 	MV_DEV_CS_INFO* devEntry = boardGetDevEntry(devNum,devClass);
@@ -1438,7 +1423,6 @@ MV_32 mvBoardGetDeviceWidth(MV_32 devNum, MV_BOARD_DEV_CLASS devClass)
 	return 0xFFFFFFFF;
 
 }
-
 
 MV_U32 mvBoardFlashParamGet(MV_VOID)
 {
@@ -1462,7 +1446,6 @@ MV_U32 mvBoardGetMaxUsbIf(MV_VOID)
 		return 3;
 }
 
-
 /*********************************************************** 
 * Init the PHY or Switch of the board 			   *
  ***********************************************************/
@@ -1470,7 +1453,6 @@ MV_VOID mvBoardEgigaPhySwitchInit(void)
 {
     MV_U16 port;
     MV_U32 boardID = mvBoardIdGet();
-
 
 	/* First init the SGMII to copper on the test board */
 	if (boardID == RD_78XX0_H3C_ID)
@@ -1670,7 +1652,6 @@ MV_VOID refClkDevStart(MV_U32 refClkDevBits)
     
     cntmrCtrl.enable  = MV_TRUE;
     
-	    
     if (MV_OK != mvCntmrStart(REF_TIMER, refClkDevBits, &cntmrCtrl))
     {
 	    DB(mvOsPrintf("refClkDevStart - Can't start counter %d\n", REF_TIMER));		
@@ -1757,4 +1738,3 @@ MV_32 mvBoardSlicGpioPinGet(MV_U32 slicNum)
 			return MV_ERROR;		
 	}
 }
-

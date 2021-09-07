@@ -94,7 +94,6 @@ struct intel_framebuffer {
 	struct drm_gem_object *obj;
 };
 
-
 struct intel_output {
 	struct drm_connector base;
 
@@ -148,7 +147,6 @@ void
 intel_dp_set_m_n(struct drm_crtc *crtc, struct drm_display_mode *mode,
 		 struct drm_display_mode *adjusted_mode);
 extern void intel_edp_link_config (struct intel_output *, int *, int *);
-
 
 extern void intel_crtc_load_lut(struct drm_crtc *crtc);
 extern void intel_encoder_prepare (struct drm_encoder *encoder);

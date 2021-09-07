@@ -93,4 +93,3 @@ extern void viper_cf_rst(int state);
 #define VIPER_ICR_CF_RST	(1 << 3)
 
 #endif
-

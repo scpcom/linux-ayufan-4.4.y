@@ -75,7 +75,6 @@ static char *version =
 #define DEBUG(n, args...)
 #endif
 
-
 /*====================================================================*/
 
 /* Parameters that can be set with 'insmod' */
@@ -303,8 +302,6 @@ static int sedlbauer_config_check(struct pcmcia_device *p_dev,
 	return 0;
 }
 
-
-
 static int sedlbauer_config(struct pcmcia_device *link)
 {
     local_info_t *dev = link->priv;
@@ -439,7 +436,6 @@ static int sedlbauer_resume(struct pcmcia_device *link)
 
 	return 0;
 }
-
 
 static struct pcmcia_device_id sedlbauer_ids[] = {
 	PCMCIA_DEVICE_PROD_ID123("SEDLBAUER", "speed star II", "V 3.1", 0x81fb79f5, 0xf3612e1d, 0x6b95c78a),

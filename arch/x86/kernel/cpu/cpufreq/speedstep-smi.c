@@ -7,7 +7,6 @@
  *
  */
 
-
 /*********************************************************************
  *                        SPEEDSTEP - DEFINITIONS                    *
  *********************************************************************/
@@ -174,7 +173,6 @@ static int speedstep_get_state(void)
 	return state & 1;
 }
 
-
 /**
  * speedstep_set_state - set the SpeedStep state
  * @state: new processor frequency state (SPEEDSTEP_LOW or SPEEDSTEP_HIGH)
@@ -234,7 +232,6 @@ static void speedstep_set_state(unsigned int state)
 	return;
 }
 
-
 /**
  * speedstep_target - set a new CPUFreq policy
  * @policy: new policy
@@ -267,7 +264,6 @@ static int speedstep_target(struct cpufreq_policy *policy,
 	return 0;
 }
 
-
 /**
  * speedstep_verify - verifies a new CPUFreq policy
  * @policy: new policy
@@ -279,7 +275,6 @@ static int speedstep_verify(struct cpufreq_policy *policy)
 {
 	return cpufreq_frequency_table_verify(policy, &speedstep_freqs[0]);
 }
-
 
 static int speedstep_cpu_init(struct cpufreq_policy *policy)
 {
@@ -354,7 +349,6 @@ static unsigned int speedstep_get(unsigned int cpu)
 		return -ENODEV;
 	return speedstep_get_frequency(speedstep_processor);
 }
-
 
 static int speedstep_resume(struct cpufreq_policy *policy)
 {
@@ -437,7 +431,6 @@ static int __init speedstep_init(void)
 
 	return cpufreq_register_driver(&speedstep_driver);
 }
-
 
 /**
  * speedstep_exit - unregisters SpeedStep support

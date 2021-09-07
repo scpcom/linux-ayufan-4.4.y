@@ -172,7 +172,6 @@ int radeon_mc_setup(struct radeon_device *rdev)
 	return 0;
 }
 
-
 /*
  * GPU helpers function.
  */
@@ -232,7 +231,6 @@ void radeon_dummy_page_fini(struct radeon_device *rdev)
 	__free_page(rdev->dummy_page.page);
 	rdev->dummy_page.page = NULL;
 }
-
 
 /*
  * Registers accessors functions.
@@ -296,7 +294,6 @@ void radeon_register_accessor_init(struct radeon_device *rdev)
 		rdev->pciep_wreg = &r600_pciep_wreg;
 	}
 }
-
 
 /*
  * ASIC
@@ -374,7 +371,6 @@ int radeon_asic_init(struct radeon_device *rdev)
 	}
 	return 0;
 }
-
 
 /*
  * Wrapper around modesetting bits.
@@ -625,7 +621,6 @@ void radeon_device_fini(struct radeon_device *rdev)
 	rdev->rmmio = NULL;
 }
 
-
 /*
  * Suspend & resume.
  */
@@ -699,7 +694,6 @@ int radeon_resume_kms(struct drm_device *dev)
 	drm_helper_resume_force_mode(dev);
 	return 0;
 }
-
 
 /*
  * Debugfs

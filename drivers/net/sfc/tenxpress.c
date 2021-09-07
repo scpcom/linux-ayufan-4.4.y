@@ -603,7 +603,6 @@ static void tenxpress_phy_fini(struct efx_nic *efx)
 	efx->phy_data = NULL;
 }
 
-
 /* Set the RX and TX LEDs and Link LED flashing. The other LEDs
  * (which probably aren't wired anyway) are left in AUTO mode */
 void tenxpress_phy_blink(struct efx_nic *efx, bool blink)

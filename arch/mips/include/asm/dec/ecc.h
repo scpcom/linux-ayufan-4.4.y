@@ -40,7 +40,6 @@
 #define KN0X_ESR_SNGLO		(1<<7)		/* single/double bit error */
 #define KN0X_ESR_SYNLO		(0x7f<<0)	/* syndrome from ECC logic */
 
-
 #ifndef __ASSEMBLY__
 
 #include <linux/interrupt.h>

@@ -9,7 +9,6 @@
  *
  */
  
-
 #include <linux/types.h>
 #include <linux/module.h>
 #include <linux/errno.h>
@@ -151,7 +150,6 @@ struct thermostat {
 static struct thermostat* 	thermostat   = NULL;
 static struct task_struct*	thread_therm = NULL;
 
-
 static int write_reg( int reg, u32 data )
 {
 	writel( data, reg );
@@ -241,8 +239,6 @@ int GetTemperature(void)
 	tempCount = GetTemperatureCounter();
 	return 	ConverttoKelvin(tempCount);
 }
-
-
 
 /**
  * GetFanRPM will read the fan tacho register and convert the value to 
@@ -557,7 +553,6 @@ oxsemi_therm_read(char *buf, char **start, off_t offset,
 
 static struct proc_dir_entry *proc_oxsemi_therm;
 
-
 static struct file_operations oxsemi_therm_fops = {
 	.owner		= THIS_MODULE,
 	.open		= nonseekable_open,
@@ -628,7 +623,6 @@ static int __init oxsemi_therm_init(void)
 	write_reg( PWM_CLOCK_DIVIDER, PWM_CORE_CLK_DIVIDER_VALUE );
 #endif
 
-	
 	printk(KERN_INFO "thermAndFan: initializing - NAS7820\n");
 	
 #ifdef DEBUG
@@ -679,7 +673,6 @@ write_reg( TACHO_FAN_SPEED_CONTROL,(1 << TACHO_FAN_SPEED_CONTROL_FAN_COUNT_MODE)
 	return 0;
 }
 
-
 static void __exit oxsemi_therm_exit(void)
 {
 	if ( thread_therm )
@@ -704,9 +697,7 @@ static void __exit oxsemi_therm_exit(void)
 	
 }
 
-
 module_init(oxsemi_therm_init);
 module_exit(oxsemi_therm_exit);
-
 
 /* End of File */

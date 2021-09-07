@@ -41,4 +41,3 @@
 #define S3C64XX_GPE4_PCM1_SOUT		(0x02 << 16)
 #define S3C64XX_GPE4_I2S1_D0		(0x03 << 16)
 #define S3C64XX_GPE4_AC97_SDO		(0x04 << 16)
-

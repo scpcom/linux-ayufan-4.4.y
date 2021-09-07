@@ -39,7 +39,6 @@
 
 #include "generic.h"
 
-
 static void __init carmeva_map_io(void)
 {
 	/* Initialize processor: 20.000 MHz crystal */

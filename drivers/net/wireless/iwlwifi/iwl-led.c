@@ -24,7 +24,6 @@
  *
  *****************************************************************************/
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
@@ -51,7 +50,6 @@ static const char *led_type_str[] = {
 	NULL
 };
 #endif /* CONFIG_IWLWIFI_DEBUG */
-
 
 static const struct {
 	u16 tpt;	/* Mb/s */
@@ -155,7 +153,6 @@ int iwl_led_off(struct iwl_priv *priv, int led_id)
 }
 #endif
 
-
 /* Set led register off */
 static int iwl_led_off_reg(struct iwl_priv *priv, int led_id)
 {
@@ -189,7 +186,6 @@ static int iwl_led_associated(struct iwl_priv *priv, int led_id)
 	    !test_bit(STATUS_READY, &priv->status))
 		return 0;
 
-
 	/* start counting Tx/Rx bytes */
 	if (!priv->last_blink_time && priv->allow_blinking)
 		priv->last_blink_time = jiffies;
@@ -207,7 +203,6 @@ static void iwl_led_brightness_set(struct led_classdev *led_cdev,
 
 	if (test_bit(STATUS_EXIT_PENDING, &priv->status))
 		return;
-
 
 	IWL_DEBUG_LED(priv, "Led type = %s brightness = %d\n",
 			led_type_str[led->type], brightness);
@@ -228,8 +223,6 @@ static void iwl_led_brightness_set(struct led_classdev *led_cdev,
 		break;
 	}
 }
-
-
 
 /*
  * Register led class with the system
@@ -261,7 +254,6 @@ static int iwl_leds_register_led(struct iwl_priv *priv, struct iwl_led *led,
 
 	return 0;
 }
-
 
 /*
  * calculate blink rate according to last second Tx/Rx activities
@@ -438,4 +430,3 @@ void iwl_leds_unregister(struct iwl_priv *priv)
 	iwl_leds_unregister_led(&priv->led[IWL_LED_TRG_RADIO], 1);
 }
 EXPORT_SYMBOL(iwl_leds_unregister);
-

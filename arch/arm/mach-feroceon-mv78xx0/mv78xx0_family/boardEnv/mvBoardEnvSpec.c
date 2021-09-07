@@ -74,7 +74,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	#define DB(x)
 #endif	
 
-
 /*******************************************************************************
 * mvBoardPciGpioPinGet - Get board PCI interrupt level.
 *
@@ -181,4 +180,3 @@ MV_32 mvBoardDbgLedGpioMaskGet(MV_VOID)
 
 	return intPin;
 }
-

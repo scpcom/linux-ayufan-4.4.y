@@ -20,7 +20,6 @@
 
 #include <asm/atomic.h>
 
-
 #ifdef CONFIG_PPC_EMULATED_STATS
 
 struct ppc_emulated_entry {

@@ -253,7 +253,6 @@ static inline int sca3000_13bit_convert(uint8_t msb, uint8_t lsb)
 	return val;
 };
 
-
 #ifdef CONFIG_IIO_RING_BUFFER
 /**
  * sca3000_register_ring_funcs() setup the ring state change functions
@@ -295,4 +294,3 @@ int sca3000_register_ring_access_and_init(struct iio_dev *indio_dev)
 static inline void sca3000_ring_int_process(u8 val, void *ring) {};
 
 #endif
-

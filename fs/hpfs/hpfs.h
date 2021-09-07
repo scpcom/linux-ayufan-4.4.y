@@ -62,7 +62,6 @@ struct hpfs_boot_block
   unsigned short magic;			/* aa55 */
 };
 
-
 /* sector 16 */
 
 /* The super block has the pointer to the root directory. */
@@ -97,7 +96,6 @@ struct hpfs_super_block
   secno user_id_table;			/* 8 preallocated sectors - user id */
   unsigned zero6[103];			/* 0 */
 };
-
 
 /* sector 17 */
 
@@ -163,10 +161,8 @@ struct hpfs_spare_block
    which have been remapped to corresponding sectors in the to[] list.
    n_spares_used gives the length of the from[] list. */
 
-
 /* Sectors 18 and 19 are preallocated and unused.
    Maybe they're spares for 16 and 17, but simple substitution fails. */
-
 
 /* The code page info pointed to by the spare block consists of an index
    block and blocks containing uppercasing tables.  I don't know what
@@ -218,7 +214,6 @@ struct code_page_data
   unsigned char incognita[78];
 };
 
-
 /* Free space bitmaps are 4 sectors long, which is 16384 bits.
    16384 sectors is 8 meg, and each 8 meg band has a 4-sector bitmap.
    Bit order in the maps is little-endian.  0 means taken, 1 means free.
@@ -243,7 +238,6 @@ struct code_page_data
    allocated in the main bitmap.   The super block gives the locations
    of the directory band and its bitmap.  ("band" doesn't mean it is
    8 meg long; it isn't.)  */
-
 
 /* dnode: directory.  4 sectors long */
 
@@ -303,7 +297,6 @@ struct hpfs_dirent {
      			  follows name on next word boundary, or maybe it
 			  precedes next dirent, which is on a word boundary. */
 };
-
 
 /* B+ tree: allocation info in fnodes and anodes */
 
@@ -423,7 +416,6 @@ struct fnode
 					   via fnode + ea_offs. I think.) */
 };
 
-
 /* anode: 99.44% pure allocation tree */
 
 #define ANODE_MAGIC 0x37e40aae
@@ -442,7 +434,6 @@ struct anode
 
   unsigned fill[3];			/* unused */
 };
-
 
 /* extended attributes.
 

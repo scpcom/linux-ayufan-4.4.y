@@ -4,4 +4,3 @@
 #include <asm-generic/resource.h>
 
 #endif /* _ASM_RESOURCE_H */
-

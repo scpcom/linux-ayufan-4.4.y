@@ -30,18 +30,15 @@
 
 #include "cs_internal.h"
 
-
 /* Access speed for IO windows */
 static int io_speed = 0;
 module_param(io_speed, int, 0444);
-
 
 #ifdef CONFIG_PCMCIA_PROBE
 #include <asm/irq.h>
 /* mask of IRQs already reserved by other cards, we should avoid using them */
 static u8 pcmcia_used_irq[NR_IRQS];
 #endif
-
 
 #ifdef CONFIG_PCMCIA_DEBUG
 extern int ds_pc_debug;
@@ -55,8 +52,6 @@ extern int ds_pc_debug;
 #else
 #define ds_dbg(skt, lvl, fmt, arg...) do { } while (0)
 #endif
-
-
 
 /** alloc_io_space
  *
@@ -129,7 +124,6 @@ static int alloc_io_space(struct pcmcia_socket *s, u_int attr,
 	return (i == MAX_IO_WIN);
 } /* alloc_io_space */
 
-
 static void release_io_space(struct pcmcia_socket *s, unsigned int base,
 			     unsigned int num)
 {
@@ -150,7 +144,6 @@ static void release_io_space(struct pcmcia_socket *s, unsigned int base,
 		}
 	}
 } /* release_io_space */
-
 
 /** pccard_access_configuration_register
  *
@@ -195,7 +188,6 @@ int pcmcia_access_configuration_register(struct pcmcia_device *p_dev,
 } /* pcmcia_access_configuration_register */
 EXPORT_SYMBOL(pcmcia_access_configuration_register);
 
-
 /** pcmcia_get_window
  */
 int pcmcia_get_window(struct pcmcia_socket *s, window_handle_t *handle,
@@ -229,7 +221,6 @@ int pcmcia_get_window(struct pcmcia_socket *s, window_handle_t *handle,
 } /* pcmcia_get_window */
 EXPORT_SYMBOL(pcmcia_get_window);
 
-
 /** pcmcia_get_mem_page
  *
  * Change the card address of an already open memory window.
@@ -243,7 +234,6 @@ int pcmcia_get_mem_page(window_handle_t win, memreq_t *req)
 	return 0;
 } /* pcmcia_get_mem_page */
 EXPORT_SYMBOL(pcmcia_get_mem_page);
-
 
 int pcmcia_map_mem_page(window_handle_t win, memreq_t *req)
 {
@@ -263,7 +253,6 @@ int pcmcia_map_mem_page(window_handle_t win, memreq_t *req)
 	return 0;
 } /* pcmcia_map_mem_page */
 EXPORT_SYMBOL(pcmcia_map_mem_page);
-
 
 /** pcmcia_modify_configuration
  *
@@ -344,7 +333,6 @@ int pcmcia_modify_configuration(struct pcmcia_device *p_dev,
 } /* modify_configuration */
 EXPORT_SYMBOL(pcmcia_modify_configuration);
 
-
 int pcmcia_release_configuration(struct pcmcia_device *p_dev)
 {
 	pccard_io_map io = { 0, 0, 0, 0, 1 };
@@ -378,7 +366,6 @@ int pcmcia_release_configuration(struct pcmcia_device *p_dev)
 	return 0;
 } /* pcmcia_release_configuration */
 
-
 /** pcmcia_release_io
  *
  * Release_io() releases the I/O ranges allocated by a client.  This
@@ -411,7 +398,6 @@ static int pcmcia_release_io(struct pcmcia_device *p_dev, io_req_t *req)
 
 	return 0;
 } /* pcmcia_release_io */
-
 
 static int pcmcia_release_irq(struct pcmcia_device *p_dev, irq_req_t *req)
 {
@@ -448,7 +434,6 @@ static int pcmcia_release_irq(struct pcmcia_device *p_dev, irq_req_t *req)
 	return 0;
 } /* pcmcia_release_irq */
 
-
 int pcmcia_release_window(window_handle_t win)
 {
 	struct pcmcia_socket *s;
@@ -477,7 +462,6 @@ int pcmcia_release_window(window_handle_t win)
 	return 0;
 } /* pcmcia_release_window */
 EXPORT_SYMBOL(pcmcia_release_window);
-
 
 int pcmcia_request_configuration(struct pcmcia_device *p_dev,
 				 config_req_t *req)
@@ -598,7 +582,6 @@ int pcmcia_request_configuration(struct pcmcia_device *p_dev,
 } /* pcmcia_request_configuration */
 EXPORT_SYMBOL(pcmcia_request_configuration);
 
-
 /** pcmcia_request_io
  *
  * Request_io() reserves ranges of port addresses for a socket.
@@ -654,7 +637,6 @@ int pcmcia_request_io(struct pcmcia_device *p_dev, io_req_t *req)
 	return 0;
 } /* pcmcia_request_io */
 EXPORT_SYMBOL(pcmcia_request_io);
-
 
 /** pcmcia_request_irq
  *
@@ -781,7 +763,6 @@ int pcmcia_request_irq(struct pcmcia_device *p_dev, irq_req_t *req)
 } /* pcmcia_request_irq */
 EXPORT_SYMBOL(pcmcia_request_irq);
 
-
 /** pcmcia_request_window
  *
  * Request_window() establishes a mapping between card memory space
@@ -882,7 +863,6 @@ void pcmcia_disable_device(struct pcmcia_device *p_dev) {
 		pcmcia_release_window(p_dev->win);
 }
 EXPORT_SYMBOL(pcmcia_disable_device);
-
 
 struct pcmcia_cfg_mem {
 	tuple_t tuple;

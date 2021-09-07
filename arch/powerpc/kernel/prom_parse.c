@@ -31,7 +31,6 @@ static int __of_address_to_resource(struct device_node *dev,
 		const u32 *addrp, u64 size, unsigned int flags,
 		struct resource *r);
 
-
 /* Debug utility */
 #ifdef DEBUG
 static void of_dump_addr(const char *s, const u32 *addr, int na)
@@ -45,7 +44,6 @@ static void of_dump_addr(const char *s, const u32 *addr, int na)
 static void of_dump_addr(const char *s, const u32 *addr, int na) { }
 #endif
 
-
 /* Callbacks for bus specific translators */
 struct of_bus {
 	const char	*name;
@@ -58,7 +56,6 @@ struct of_bus {
 	int		(*translate)(u32 *addr, u64 offset, int na);
 	unsigned int	(*get_flags)(const u32 *addr);
 };
-
 
 /*
  * Default translator (generic bus)
@@ -106,7 +103,6 @@ static unsigned int of_bus_default_get_flags(const u32 *addr)
 {
 	return IORESOURCE_MEM;
 }
-
 
 #ifdef CONFIG_PCI
 /*
@@ -368,7 +364,6 @@ static unsigned int of_bus_isa_get_flags(const u32 *addr)
 	return flags;
 }
 
-
 /*
  * Array of bus specific translators
  */
@@ -471,7 +466,6 @@ static int of_translate_one(struct device_node *parent, struct of_bus *bus,
 	/* Translate it into parent bus space */
 	return pbus->translate(addr, offset, pna);
 }
-
 
 /*
  * Translate an address from the device-tree into a CPU physical address,

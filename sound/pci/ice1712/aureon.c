@@ -245,7 +245,6 @@ static int aureon_universe_inmux_put(struct snd_kcontrol *kcontrol,
 	return change;
 }
 
-
 static void aureon_ac97_write(struct snd_ice1712 *ice, unsigned short reg,
 			      unsigned short val)
 {
@@ -1363,7 +1362,6 @@ static int aureon_hpamp_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_v
 	return 0;
 }
 
-
 static int aureon_hpamp_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ice1712 *ice = snd_kcontrol_chip(kcontrol);
@@ -1971,7 +1969,6 @@ static int __devinit aureon_add_controls(struct snd_ice1712 *ice)
 	return 0;
 }
 
-
 /*
  * initialize the chip
  */
@@ -2143,7 +2140,6 @@ static int __devinit aureon_init(struct snd_ice1712 *ice)
 
 	return 0;
 }
-
 
 /*
  * Aureon boards don't provide the EEPROM data except for the vendor IDs.

@@ -49,7 +49,6 @@ static void board_hwcontrol(struct mtd_info *mtd, int cmd, unsigned int ctrl)
 	}	
 }
 
-
 int __init mv_nand_init(void)
 {
 	struct nand_chip *this;
@@ -144,4 +143,3 @@ static void __exit board_cleanup(void)
 }
 module_exit(board_cleanup);
 #endif
-

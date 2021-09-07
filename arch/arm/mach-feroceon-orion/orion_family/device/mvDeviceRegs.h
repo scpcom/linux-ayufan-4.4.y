@@ -89,9 +89,7 @@ typedef enum _mvDevice
 	MV_DEV_MAX_CS = MV_DEVICE_MAX_CS
 }MV_DEVICE;
 
- 
 #endif /* MV_ASMLANGUAGE */
-
 
 /* registers offsets */
 
@@ -103,13 +101,11 @@ typedef enum _mvDevice
 #define DEV_RGMII_AC_TIMING_REG			0x104E8
 #endif
 
-
 #define DEV_INTERF_CTRL_REG				0x104C0
 #define DEV_INTERF_XBAR_TIMEOUT_REG		0x104C4
 
 #define DEV_INTR_CAUSE_REG				0x104D0
 #define DEV_INTR_MASK_REG				0x104D4
-
 
 /* Device Bank Parameters register fields (DBP_REG)*/
 /* Boot Device Bank Parameters (DBP) register fields (DEV_BOOT_BANK_PARAM_REG)*/
@@ -126,28 +122,23 @@ typedef enum _mvDevice
 #define DBP_ACC2NEXT_MASK		(0xf << DBP_ACC2NEXT_OFFS)
 #define MAX_DBP_ACC2NEXT			0xf
 
-
 #define DBP_ALE2WR_OFFS			11
 #define DBP_ALE2WR_MASK			(0x7 << DBP_ALE2WR_OFFS)
 #define MAX_DBP_ALE2WR			0x7
-
 
 #define DBP_WRLOW_OFFS			14
 #define DBP_WRLOW_MASK			(0x7 << DBP_WRLOW_OFFS)
 #define MAX_DBP_WRLOW			0x7
 
-
 #define DBP_WRHIGH_OFFS			17
 #define DBP_WRHIGH_MASK			(0x7 << DBP_WRHIGH_OFFS)
 #define MAX_DBP_WRHIGH			0x7
-
 
 #define DBP_DEVWIDTH_OFFS		20 /* Device Width */
 #define DBP_DEVWIDTH_MASK		(0x3 << DBP_DEVWIDTH_OFFS)
 #define DBP_DEVWIDTH_8BIT		(0x0 << DBP_DEVWIDTH_OFFS)
 #define DBP_DEVWIDTH_16BIT		(0x1 << DBP_DEVWIDTH_OFFS)
 #define DBP_DEVWIDTH_32BIT		(0x2 << DBP_DEVWIDTH_OFFS)
-
 
 #define DBP_TURNOFFEXT			BIT22 /* TurnOff Extension */
 #define DBP_ACC2FIRSTEXT		BIT23 /* Acc2First Extension */
@@ -171,8 +162,6 @@ typedef enum _mvDevice
 #define DBP_RESRV_OFFS			30
 #define DBP_RESRV_MASK			(0x3 << DBP_RESRV_OFFS)
 #define DBP_RESRV_VAL			(0x2 << DBP_RESRV_OFFS)
-
-
 
 /* Device Interface Control register fields (DIC) (DIC_REG)*/
 
@@ -218,6 +207,5 @@ typedef enum _mvDevice
 #define DICC_MPSC	0x5
 #define DICC_IDMA	0x6
 #define DICC_GETH	0x7
-
 
 #endif /* #ifndef __INCmvDeviceRegsH */

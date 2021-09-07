@@ -40,7 +40,6 @@
 #define INTERFACE_C		3
 #define INTERFACE_D		4
 
-
 /*
  *   BmRequestType:  1100 0000b
  *   bRequest:       FTDI_E2_READ
@@ -215,8 +214,6 @@ typedef enum {
  *
  */
 
-
-
 /* FTDI_SIO_MODEM_CTRL */
 #define FTDI_SIO_SET_MODEM_CTRL_REQUEST_TYPE 0x40
 #define FTDI_SIO_SET_MODEM_CTRL_REQUEST FTDI_SIO_MODEM_CTRL
@@ -349,10 +346,8 @@ typedef enum {
  * which is what normally happens.
  */
 
-
 #define  FTDI_SIO_SET_EVENT_CHAR_REQUEST FTDI_SIO_SET_EVENT_CHAR
 #define  FTDI_SIO_SET_EVENT_CHAR_REQUEST_TYPE 0x40
-
 
 /*
  *  BmRequestType:   0100 0000b
@@ -424,8 +419,6 @@ typedef enum {
  *         0 = inactive
  *         1 = active
  */
-
-
 
 /* Descriptors returned by the device
  *

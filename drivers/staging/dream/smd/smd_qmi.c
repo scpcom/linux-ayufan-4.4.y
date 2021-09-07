@@ -105,7 +105,6 @@ static int verbose = 0;
 /* anyone waiting for a state change waits here */
 static DECLARE_WAIT_QUEUE_HEAD(qmi_wait_queue);
 
-
 static void qmi_dump_msg(struct qmi_msg *msg, const char *prefix)
 {
 	unsigned sz, n;
@@ -700,7 +699,6 @@ static ssize_t qmi_read(struct file *fp, char __user *buf,
 
 	return len;
 }
-
 
 static ssize_t qmi_write(struct file *fp, const char __user *buf,
 			 size_t count, loff_t *pos)

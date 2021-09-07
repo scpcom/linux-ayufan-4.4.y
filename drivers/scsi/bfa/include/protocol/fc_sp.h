@@ -92,7 +92,6 @@ struct auth_name_s{
 	wwn_t		name;  		/*! Name. TODO - is this PWWN */
 };
 
-
 enum auth_hash_func{
 	FC_AUTH_HASH_FUNC_MD5 		= 0x00000005,
 	FC_AUTH_HASH_FUNC_SHA_1 	= 0x00000006,
@@ -121,12 +120,10 @@ struct auth_els_msg_s {
 	/* Msg payload follows... */
 };
 
-
 enum auth_neg_param_tags {
 	FC_AUTH_NEG_DHCHAP_HASHLIST 	= 0x0001,
 	FC_AUTH_NEG_DHCHAP_DHG_ID_LIST 	= 0x0002,
 };
-
 
 struct dhchap_param_format_s {
 	u16	tag;		/*! Parameter Tag. See
@@ -173,7 +170,6 @@ struct auth_dhchap_chal_msg_s {
 	/* ...followed by variable Challenge length/value and DH length/value */
 };
 
-
 enum auth_rjt_codes {
 	FC_AUTH_RJT_CODE_AUTH_FAILURE 	= 0x01,
 	FC_AUTH_RJT_CODE_LOGICAL_ERR	= 0x02,
@@ -204,7 +200,6 @@ struct auth_rjt_msg_s {
 	u8		reason_code_exp;
 	u8		rsvd[2];
 };
-
 
 struct auth_dhchap_neg_msg_s {
 	struct auth_els_msg_s hdr;

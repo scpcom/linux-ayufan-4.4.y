@@ -198,7 +198,6 @@ static void __cfg80211_send_deauth(struct net_device *dev,
 	}
 }
 
-
 void cfg80211_send_deauth(struct net_device *dev, const u8 *buf, size_t len,
 			  void *cookie)
 {
@@ -251,7 +250,6 @@ static void __cfg80211_send_disassoc(struct net_device *dev,
 		WARN_ON(!done);
 	} else
 		WARN_ON(1);
-
 
 	reason_code = le16_to_cpu(mgmt->u.disassoc.reason_code);
 

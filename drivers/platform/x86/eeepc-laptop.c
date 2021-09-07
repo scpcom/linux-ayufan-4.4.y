@@ -44,7 +44,6 @@
 #define EEEPC_HOTK_DEVICE_NAME	"Hotkey"
 #define EEEPC_HOTK_HID		"ASUS010"
 
-
 /*
  * Definitions for Asus EeePC
  */
@@ -522,7 +521,6 @@ static ssize_t store_cpufv_disabled(struct device *dev,
 	}
 }
 
-
 static struct device_attribute dev_attr_cpufv = {
 	.attr = {
 		.name = "cpufv",
@@ -545,7 +543,6 @@ static struct device_attribute dev_attr_cpufv_disabled = {
 	.show   = show_cpufv_disabled,
 	.store  = store_cpufv_disabled
 };
-
 
 static struct attribute *platform_attributes[] = {
 	&dev_attr_camera.attr,
@@ -1162,7 +1159,6 @@ static int eeepc_new_rfkill(struct rfkill **rfkill,
 	}
 	return 0;
 }
-
 
 static int eeepc_rfkill_init(struct device *dev)
 {

@@ -57,7 +57,6 @@ static inline int udf_match(int len1, const char *name1, int len2,
 #endif
 	return !memcmp(name1, name2, len1);
 
-
 }
 
 int udf_write_fi(struct inode *inode, struct fileIdentDesc *cfi,
@@ -1293,7 +1292,6 @@ out_unlock:
 	unlock_kernel();
 	return ERR_PTR(-EACCES);
 }
-
 
 static struct dentry *udf_nfs_get_inode(struct super_block *sb, u32 block,
 					u16 partref, __u32 generation)

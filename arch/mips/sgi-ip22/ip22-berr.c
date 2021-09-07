@@ -18,7 +18,6 @@
 #include <asm/sgi/ioc.h>
 #include <asm/sgi/ip22.h>
 
-
 static unsigned int cpu_err_stat;	/* Status reg for CPU */
 static unsigned int gio_err_stat;	/* Status reg for GIO */
 static unsigned int cpu_err_addr;	/* Error address reg for CPU */

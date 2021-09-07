@@ -30,7 +30,6 @@
 #ifndef DRIVER_ATM_HORIZON_H
 #define DRIVER_ATM_HORIZON_H
 
-
 #ifdef CONFIG_ATM_HORIZON_DEBUG
 #define DEBUG_HORIZON
 #endif

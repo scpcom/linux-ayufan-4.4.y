@@ -36,7 +36,6 @@
 #define SFDIAG(dr)      .word 0x14000BA0 + dr*0x200000
 #define DR2_SLOW_RET    53
 
-
 ;
 ; Enable the performance counters
 ;
@@ -553,7 +552,6 @@ perf_rdr_shift_in_W_leave:
 	.procend
 ENDPROC(perf_rdr_shift_in_W)
 
-
 ;***********************************************************************
 ;*
 ;* Name: perf_rdr_shift_out_W
@@ -985,7 +983,6 @@ perf_rdr_shift_out_W_leave:
 	MTDIAG_2	(23)			; restore DR2
 	.procend
 ENDPROC(perf_rdr_shift_out_W)
-
 
 ;***********************************************************************
 ;*
@@ -1689,4 +1686,3 @@ perf_rdr_shift_out_U_leave:
 	MTDIAG_2	(23)			; restore DR2
 	.procend
 ENDPROC(perf_rdr_shift_out_U)
-

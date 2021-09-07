@@ -35,5 +35,4 @@ struct tw9910_video_info {
 	struct soc_camera_link link;
 };
 
-
 #endif /* __TW9910_H__ */

@@ -40,7 +40,6 @@
 #include "xfs_alloc.h"
 #include "xfs_error.h"
 
-
 STATIC struct xfs_btree_cur *
 xfs_allocbt_dup_cursor(
 	struct xfs_btree_cur	*cur)

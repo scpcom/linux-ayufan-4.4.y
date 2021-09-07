@@ -1556,7 +1556,6 @@ static int ov7xx0_configure(struct sd *sd)
 {
 	int rc, high, low;
 
-
 	PDEBUG(D_PROBE, "starting OV7xx0 configuration");
 
 	/* Detect sensor (sub)type */
@@ -2398,7 +2397,6 @@ static int ov518_mode_init_regs(struct sd *sd)
 
 	return 0;
 }
-
 
 /* Sets up the OV519 with the given image parameters
  *

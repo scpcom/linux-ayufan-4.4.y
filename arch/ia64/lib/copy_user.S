@@ -409,7 +409,6 @@ GLOBAL_ENTRY(__copy_user)
 	EX(.failure_out, (p9)	st1 [dst1]=val2[1])
 	br.ret.sptk.many rp
 
-
 	//
 	// Here we handle the case where the byte by byte copy fails
 	// on the load.

@@ -38,7 +38,6 @@
 #ifndef __RTMP_MCU_H__
 #define __RTMP_MCU_H__
 
-
 INT RtmpAsicEraseFirmware(
 	IN PRTMP_ADAPTER pAd);
 

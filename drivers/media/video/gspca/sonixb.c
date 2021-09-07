@@ -1220,7 +1220,6 @@ static const struct sd_desc sd_desc = {
 #define SB(sensor, bridge) \
 	.driver_info = (SENSOR_ ## sensor << 8) | BRIDGE_ ## bridge
 
-
 static __devinitdata struct usb_device_id device_table[] = {
 	{USB_DEVICE(0x0c45, 0x6001), SB(TAS5110, 102)}, /* TAS5110C1B */
 	{USB_DEVICE(0x0c45, 0x6005), SB(TAS5110, 101)}, /* TAS5110C1B */

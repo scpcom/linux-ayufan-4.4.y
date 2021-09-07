@@ -31,7 +31,6 @@
 #include "rtmp_type.h"
 #include "spectrum_def.h"
 
-
 CHAR RTMP_GetTxPwr(
 	IN PRTMP_ADAPTER pAd,
 	IN HTTRANSMIT_SETTING HTTxMode);
@@ -174,7 +173,6 @@ INT Set_TpcReq_Proc(
 INT Set_PwrConstraint(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg);
-
 
 VOID MeasureReqTabInit(
 	IN PRTMP_ADAPTER pAd);

@@ -275,7 +275,6 @@
 #define reg_marb_rw_no_snoop_rq___cpud___bit 11
 #define reg_marb_rw_no_snoop_rq_offset 836
 
-
 /* Constants */
 #define regk_marb_cpud                            0x0000000b
 #define regk_marb_cpui                            0x0000000a
@@ -569,7 +568,6 @@
 
 /* Register rw_ack, scope marb_bp, type rw */
 #define reg_marb_bp_rw_ack_offset 40
-
 
 /* Constants */
 #define regk_marb_bp_no                           0x00000000

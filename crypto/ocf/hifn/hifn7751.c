@@ -707,7 +707,6 @@ hifn_remove(struct pci_dev *dev)
                 sc->sc_dma, sc->sc_dma_physaddr);
 }
 
-
 static int
 hifn_init_pubrng(struct hifn_softc *sc)
 {
@@ -958,7 +957,6 @@ hifn_next_signature(u_int32_t a, u_int cnt)
 	return a;
 }
 
-
 /*
  * Checks to see if crypto is already enabled.  If crypto isn't enable,
  * "hifn_enable_crypto" is called to enable it.  The check is important,
@@ -1104,7 +1102,6 @@ hifn_init_pci_registers(struct hifn_softc *sc)
 		HIFN_DMAIER_ILLW | HIFN_DMAIER_ILLR : 0);
 	sc->sc_dmaier &= ~HIFN_DMAIER_C_WAIT;
 	WRITE_REG_1(sc, HIFN_1_DMA_IER, sc->sc_dmaier);
-
 
 	if (sc->sc_flags & HIFN_IS_7956) {
 		u_int32_t pll;
@@ -1730,7 +1727,6 @@ hifn_dmamap_load_src(struct hifn_softc *sc, struct hifn_command *cmd)
 	dma->srcu += src->nsegs;
 	return (idx);
 } 
-
 
 static int 
 hifn_crypto(
@@ -2916,7 +2912,6 @@ hifn_write_reg_1(struct hifn_softc *sc, bus_size_t reg, u_int32_t val)
 	}
 	writel(val, sc->sc_bar1 + reg);
 }
-
 
 static struct pci_device_id hifn_pci_tbl[] = {
 	{ PCI_VENDOR_HIFN, PCI_PRODUCT_HIFN_7951,

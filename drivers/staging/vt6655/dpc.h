@@ -50,6 +50,3 @@ device_receive_frame (
 VOID	MngWorkItem(PVOID Context);
 
 #endif // __RXTX_H__
-
-
-

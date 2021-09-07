@@ -97,4 +97,3 @@ MACHINE_START(L7200, "LinkUp Systems L7200")
 	.map_io		= l7200_map_io,
 	.init_irq	= l7200_init_irq,
 MACHINE_END
-

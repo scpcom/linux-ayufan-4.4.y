@@ -30,7 +30,6 @@
 #include "mdt.h"
 #include "sufile.h"
 
-
 static inline unsigned long
 nilfs_sufile_segment_usages_per_block(const struct inode *sufile)
 {

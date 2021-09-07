@@ -57,7 +57,6 @@
 
 #include <sound/hwdep.h>
 
-
 static int usX2Y_usbpcm_urb_capt_retire(struct snd_usX2Y_substream *subs)
 {
 	struct urb	*urb = subs->completed_urb;
@@ -144,7 +143,6 @@ static int usX2Y_hwdep_urb_play_prepare(struct snd_usX2Y_substream *subs,
 	return 0;
 }
 
-
 static inline void usX2Y_usbpcm_urb_capt_iso_advance(struct snd_usX2Y_substream *subs,
 						     struct urb *urb)
 {
@@ -225,7 +223,6 @@ static inline int usX2Y_usbpcm_usbframe_complete(struct snd_usX2Y_substream *cap
 	return 0;
 }
 
-
 static void i_usX2Y_usbpcm_urb_complete(struct urb *urb)
 {
 	struct snd_usX2Y_substream *subs = urb->context;
@@ -264,7 +261,6 @@ static void i_usX2Y_usbpcm_urb_complete(struct urb *urb)
 		}
 	}
 }
-
 
 static void usX2Y_hwdep_urb_release(struct urb **urb)
 {
@@ -562,8 +558,6 @@ static struct snd_pcm_hardware snd_usX2Y_4c =
 	.fifo_size =              0
 };
 
-
-
 static int snd_usX2Y_usbpcm_open(struct snd_pcm_substream *substream)
 {
 	struct snd_usX2Y_substream	*subs = ((struct snd_usX2Y_substream **)
@@ -581,7 +575,6 @@ static int snd_usX2Y_usbpcm_open(struct snd_pcm_substream *substream)
 	return 0;
 }
 
-
 static int snd_usX2Y_usbpcm_close(struct snd_pcm_substream *substream)
 {
 	struct snd_pcm_runtime *runtime = substream->runtime;
@@ -590,7 +583,6 @@ static int snd_usX2Y_usbpcm_close(struct snd_pcm_substream *substream)
 	subs->pcm_substream = NULL;
 	return 0;
 }
-
 
 static struct snd_pcm_ops snd_usX2Y_usbpcm_ops = 
 {
@@ -603,7 +595,6 @@ static struct snd_pcm_ops snd_usX2Y_usbpcm_ops =
 	.trigger =	snd_usX2Y_pcm_trigger,
 	.pointer =	snd_usX2Y_pcm_pointer,
 };
-
 
 static int usX2Y_pcms_lock_check(struct snd_card *card)
 {
@@ -634,7 +625,6 @@ static int usX2Y_pcms_lock_check(struct snd_card *card)
 	return err;
 }
 
-
 static void usX2Y_pcms_unlock(struct snd_card *card)
 {
 	struct list_head *list;
@@ -649,7 +639,6 @@ static void usX2Y_pcms_unlock(struct snd_card *card)
 	}
 }
 
-
 static int snd_usX2Y_hwdep_pcm_open(struct snd_hwdep *hw, struct file *file)
 {
 	// we need to be the first 
@@ -661,7 +650,6 @@ static int snd_usX2Y_hwdep_pcm_open(struct snd_hwdep *hw, struct file *file)
 	return err;
 }
 
-
 static int snd_usX2Y_hwdep_pcm_release(struct snd_hwdep *hw, struct file *file)
 {
 	struct snd_card *card = hw->card;
@@ -672,16 +660,13 @@ static int snd_usX2Y_hwdep_pcm_release(struct snd_hwdep *hw, struct file *file)
 	return err;
 }
 
-
 static void snd_usX2Y_hwdep_pcm_vm_open(struct vm_area_struct *area)
 {
 }
 
-
 static void snd_usX2Y_hwdep_pcm_vm_close(struct vm_area_struct *area)
 {
 }
-
 
 static int snd_usX2Y_hwdep_pcm_vm_fault(struct vm_area_struct *area,
 					struct vm_fault *vmf)
@@ -696,13 +681,11 @@ static int snd_usX2Y_hwdep_pcm_vm_fault(struct vm_area_struct *area,
 	return 0;
 }
 
-
 static const struct vm_operations_struct snd_usX2Y_hwdep_pcm_vm_ops = {
 	.open = snd_usX2Y_hwdep_pcm_vm_open,
 	.close = snd_usX2Y_hwdep_pcm_vm_close,
 	.fault = snd_usX2Y_hwdep_pcm_vm_fault,
 };
-
 
 static int snd_usX2Y_hwdep_pcm_mmap(struct snd_hwdep * hw, struct file *filp, struct vm_area_struct *area)
 {
@@ -727,14 +710,12 @@ static int snd_usX2Y_hwdep_pcm_mmap(struct snd_hwdep * hw, struct file *filp, st
 	return 0;
 }
 
-
 static void snd_usX2Y_hwdep_pcm_private_free(struct snd_hwdep *hwdep)
 {
 	struct usX2Ydev *usX2Y = hwdep->private_data;
 	if (NULL != usX2Y->hwdep_pcm_shm)
 		snd_free_pages(usX2Y->hwdep_pcm_shm, sizeof(struct snd_usX2Y_hwdep_pcm_shm));
 }
-
 
 int usX2Y_hwdep_pcm_new(struct snd_card *card)
 {
@@ -778,7 +759,6 @@ int usX2Y_hwdep_pcm_new(struct snd_card *card)
 						     64*1024, 128*1024))) {
 		return err;
 	}
-
 
 	return 0;
 }

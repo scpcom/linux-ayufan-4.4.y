@@ -288,7 +288,6 @@ asmlinkage void plat_irq_dispatch(void)
 
 #ifdef CONFIG_MIPS_MT_SMP
 
-
 #define GIC_MIPS_CPU_IPI_RESCHED_IRQ	3
 #define GIC_MIPS_CPU_IPI_CALL_IRQ	4
 
@@ -621,7 +620,6 @@ void malta_be_init(void)
 		/* Could change CM error mask register */
 	}
 }
-
 
 static char *tr[8] = {
 	"mem",	"gcr",	"gic",	"mmio",

@@ -47,7 +47,6 @@ xfs_trans_inode_broot_debug(
 #define	xfs_trans_inode_broot_debug(ip)
 #endif
 
-
 /*
  * Get an inode and join it to the transaction.
  */
@@ -113,8 +112,6 @@ xfs_trans_ijoin(
 	ip->i_transp = tp;
 }
 
-
-
 /*
  * Mark the inode as not needing to be unlocked when the inode item's
  * IOP_UNLOCK() routine is called.  The inode must already be locked
@@ -132,7 +129,6 @@ xfs_trans_ihold(
 
 	ip->i_itemp->ili_flags |= XFS_ILI_HOLD;
 }
-
 
 /*
  * This is called to mark the fields indicated in fieldmask as needing

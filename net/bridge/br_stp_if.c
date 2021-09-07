@@ -18,7 +18,6 @@
 #include "br_private.h"
 #include "br_private_stp.h"
 
-
 /* Port id is composed of priority and port number.
  * NB: least significant bits of priority are dropped to
  *     make room for more ports.
@@ -149,7 +148,6 @@ static void br_stp_stop(struct net_bridge *br)
 		r = call_usermodehelper(BR_STP_PROG, argv, envp, 1);
 		printk(KERN_INFO "%s: userspace STP stopped, return code %d\n",
 			br->dev->name, r);
-
 
 		/* To start timers on any ports left in blocking */
 		spin_lock_bh(&br->lock);

@@ -72,7 +72,6 @@ typedef struct __HTTX_BUFFER{
 	UCHAR			Aggregation[4];  //Buffer for save Aggregation size.
 } HTTX_BUFFER, *PHTTX_BUFFER;
 
-
 // used to track driver-generated write irps
 typedef struct _TX_CONTEXT
 {
@@ -97,7 +96,6 @@ typedef struct _TX_CONTEXT
 	dma_addr_t		data_dma;		// urb dma on linux
 
 }	TX_CONTEXT, *PTX_CONTEXT, **PPTX_CONTEXT;
-
 
 // used to track driver-generated write irps
 typedef struct _HT_TX_CONTEXT
@@ -124,7 +122,6 @@ typedef struct _HT_TX_CONTEXT
 	dma_addr_t		data_dma;		// urb dma on linux
 }	HT_TX_CONTEXT, *PHT_TX_CONTEXT, **PPHT_TX_CONTEXT;
 
-
 //
 // Structure to keep track of receive packets and buffers to indicate
 // receive data to the protocol.
@@ -146,7 +143,6 @@ typedef struct _RX_CONTEXT
 	dma_addr_t			data_dma;		// urb dma on linux
 }	RX_CONTEXT, *PRX_CONTEXT;
 #endif // RT2870 //
-
 
 //
 //  NDIS Version definitions
@@ -240,7 +236,6 @@ extern UCHAR  Ccx2QosInfo[];
 extern UCHAR  Ccx2IeInfo[];
 extern UCHAR  RALINK_OUI[];
 extern UCHAR  PowerConstraintIE[];
-
 
 extern UCHAR  RateSwitchTable[];
 extern UCHAR  RateSwitchTable11B[];
@@ -384,7 +379,6 @@ typedef struct  _QUEUE_HEADER   {
 
 #define CKIP_KP_ON(_p)				((((_p)->StaCfg.CkipFlag) & 0x10) && ((_p)->StaCfg.bCkipCmicOn == TRUE))
 #define CKIP_CMIC_ON(_p)			((((_p)->StaCfg.CkipFlag) & 0x08) && ((_p)->StaCfg.bCkipCmicOn == TRUE))
-
 
 #define INC_RING_INDEX(_idx, _RingSize)    \
 {                                          \
@@ -778,7 +772,6 @@ typedef struct _RTMP_SCATTER_GATHER_ELEMENT {
     PULONG		Reserved;
 } RTMP_SCATTER_GATHER_ELEMENT, *PRTMP_SCATTER_GATHER_ELEMENT;
 
-
 typedef struct _RTMP_SCATTER_GATHER_LIST {
     ULONG  NumberOfElements;
     PULONG Reserved;
@@ -844,7 +837,6 @@ typedef struct _RTMP_SCATTER_GATHER_LIST {
 		_pExtraLlcSnapEncap = NULL;								\
 	}															\
 }
-
 
 #define MAKE_802_3_HEADER(_p, _pMac1, _pMac2, _pType)                   \
 {                                                                       \
@@ -1028,7 +1020,6 @@ typedef struct  _RTMP_DMABUF
 	PVOID                   AllocVa;            // TxBuf virtual address
 	NDIS_PHYSICAL_ADDRESS   AllocPa;            // TxBuf physical address
 } RTMP_DMABUF, *PRTMP_DMABUF;
-
 
 typedef	union	_HEADER_802_11_SEQ{
     struct {
@@ -1362,7 +1353,6 @@ typedef struct  _FRAGMENT_FRAME {
 	ULONG       Flags;          // Some extra frame information. bit 0: LLC presented
 } FRAGMENT_FRAME, *PFRAGMENT_FRAME;
 
-
 //
 // Packet information for NdisQueryPacket
 //
@@ -1557,7 +1547,6 @@ typedef struct _BA_REC_ENTRY {
 	struct reordering_list	list;
 } BA_REC_ENTRY, *PBA_REC_ENTRY;
 
-
 typedef struct {
 	ULONG		numAsRecipient;		// I am recipient of numAsRecipient clients. These client are in the BARecEntry[]
 	ULONG		numAsOriginator;	// I am originator of 	numAsOriginator clients. These clients are in the BAOriEntry[]
@@ -1751,7 +1740,6 @@ typedef struct _MULTISSID_STRUCT {
     UCHAR                               RSNIE_Len[2];
     UCHAR                               RSN_IE[2][MAX_LEN_OF_RSNIE];
 
-
     UCHAR                   			TimIELocationInBeacon;
     UCHAR                   			CapabilityInfoLocationInBeacon;
     // outgoing BEACON frame buffer and corresponding TXWI
@@ -1779,7 +1767,6 @@ typedef struct _MULTISSID_STRUCT {
 #ifdef RTL865X_SOC
 	unsigned int						mylinkid;
 #endif
-
 
 	UINT32					RcvdConflictSsidCount;
 	UINT32					RcvdSpoofedAssocRespCount;
@@ -1955,7 +1942,6 @@ typedef struct _COMMON_CONFIG {
 	UINT32				BeaconRemain;
 #endif // RT2870 //
 
-
  	NDIS_SPIN_LOCK			MeasureReqTabLock;
 	PMEASURE_REQ_TAB		pMeasureReqTab;
 
@@ -2023,7 +2009,6 @@ typedef struct _STA_ADMIN_CONFIG {
 	UINT		SavedPMKNum;			// Saved PMKID number
 
 	UCHAR		DefaultKeyId;
-
 
 	// WPA 802.1x port control, WPA_802_1X_PORT_SECURED, WPA_802_1X_PORT_NOT_SECURED
 	UCHAR       PortSecured;
@@ -2259,7 +2244,6 @@ typedef struct _MAC_TABLE_ENTRY {
     INT				PMKID_CacheIdx;
     UCHAR			PMKID[LEN_PMKID];
 
-
 	UCHAR           Addr[MAC_ADDR_LEN];
 	UCHAR           PsMode;
 	SST             Sst;
@@ -2284,7 +2268,6 @@ typedef struct _MAC_TABLE_ENTRY {
 	UINT			DebugFIFOCount;
 	UINT			DebugTxCount;
     BOOLEAN			bDlsInit;
-
 
 //====================================================
 //WDS entry needs these
@@ -2497,9 +2480,6 @@ struct wificonf
 	BOOLEAN bGreenField;
 };
 
-
-
-
 typedef struct _INF_PCI_CONFIG
 {
 	PUCHAR                  CSRBaseAddress;     // PCI MMIO Base Address, all access will use
@@ -2511,8 +2491,6 @@ typedef struct _INF_USB_CONFIG
 	UINT                BulkOutEpAddr[6];	// bulk-out endpoint address
 
 }INF_USB_CONFIG;
-
-
 
 //
 //  The miniport adapter structure
@@ -2535,7 +2513,6 @@ typedef struct _RTMP_ADAPTER
    	USHORT					ThisTbttNumToNextWakeUp;
 	ULONG					SameRxByteCount;
 
-
 /*****************************************************************************************/
 /*      PCI related parameters                                                           */
 /*****************************************************************************************/
@@ -2544,7 +2521,6 @@ typedef struct _RTMP_ADAPTER
 	UINT					int_enable_reg;
 	UINT					int_disable_mask;
 	UINT					int_pending;
-
 
 	RTMP_DMABUF             TxBufSpace[NUM_OF_TX_RING]; // Shared memory of all 1st pre-allocated TxBuf associated with each TXD
 	RTMP_DMABUF             RxDescRing;                 // Shared memory for RX descriptors
@@ -2572,11 +2548,9 @@ typedef struct _RTMP_ADAPTER
 	ULONG						BulkFlags;
 	BOOLEAN                     bUsbTxBulkAggre;	// Flags for bulk out data priority
 
-
 	//======Timer Thread
 	RT2870_TIMER_QUEUE		TimerQ;
 	NDIS_SPIN_LOCK			TimerQLock;
-
 
 	//======Cmd Thread
 	CmdQ					CmdQ;
@@ -2584,7 +2558,6 @@ typedef struct _RTMP_ADAPTER
 
 	BOOLEAN					TimerFunc_kill;
 	BOOLEAN					mlme_kill;
-
 
 	//======Semaphores (event)
 	struct semaphore			mlme_semaphore;			/* to sleep thread on	*/
@@ -2596,11 +2569,9 @@ typedef struct _RTMP_ADAPTER
 	wait_queue_head_t			*wait;
 #endif // RT2870 //
 
-
 /*****************************************************************************************/
 	/*      Both PCI/USB related parameters                                                  */
 /*****************************************************************************************/
-
 
 /*****************************************************************************************/
 /*      Tx related parameters                                                           */
@@ -2633,7 +2604,6 @@ typedef struct _RTMP_ADAPTER
 	RTMP_MGMT_RING          MgmtRing;
 	NDIS_SPIN_LOCK          MgmtRingLock;               	// Prio Ring spinlock
 
-
 /*****************************************************************************************/
 /*      Rx related parameters                                                           */
 /*****************************************************************************************/
@@ -2651,7 +2621,6 @@ typedef struct _RTMP_ADAPTER
 	ULONG					TransferBufferLength;	// current length of the packet buffer
 	ULONG					ReadPosition;			// current read position in a packet buffer
 #endif // RT2870 //
-
 
 /*****************************************************************************************/
 /*      ASIC related parameters                                                          */
@@ -2766,10 +2735,7 @@ typedef struct _RTMP_ADAPTER
 	TX_CONTEXT				RTSContext;
 #endif // RT2870 //
 
-
-
 //=========AP===========
-
 
 //=======STA===========
 /* Modified by Wu Xi-Kun 4/21/2006 */
@@ -2787,7 +2753,6 @@ typedef struct _RTMP_ADAPTER
 	UCHAR                   OpMode;                     // OPMODE_STA, OPMODE_AP
 
 	NDIS_MEDIA_STATE        IndicateMediaState;			// Base on Indication state, default is NdisMediaStateDisConnected
-
 
 	// configuration: read from Registry & E2PROM
 	BOOLEAN                 bLocalAdminMAC;             // Use user changed MAC
@@ -2857,7 +2822,6 @@ typedef struct _RTMP_ADAPTER
 	// ---------------------------
 	RT_802_11_EVENT_TABLE   EventTab;
 
-
 	BOOLEAN		HTCEnable;
 
 	/*****************************************************************************************/
@@ -2923,15 +2887,12 @@ typedef struct _RTMP_ADAPTER
 	BOOLEAN					HaveMsi;
 #endif // PCI_MSI_SUPPORT //
 
-
 	UCHAR					is_on;
 
 #define TIME_BASE			(1000000/OS_HZ)
 #define TIME_ONE_SECOND		(1000000/TIME_BASE)
 	UCHAR					flg_be_adjust;
 	ULONG					be_adjust_last_time;
-
-
 
 	UINT8					PM_FlgSuspend;
 
@@ -2975,7 +2936,6 @@ typedef struct  _CISCO_IAPP_CONTENT_
 #define AutoWakeupInt		0x00004000		// AutoWakeupInt interrupt
 #define FifoStaFullInt			0x00002000	//  fifo statistics full interrupt
 
-
 typedef struct _RX_BLK_
 {
 	RT28XX_RXD_STRUC	RxD;
@@ -2988,11 +2948,9 @@ typedef struct _RX_BLK_
 	UCHAR				UserPriority;	// for calculate TKIP MIC using
 } RX_BLK;
 
-
 #define RX_BLK_SET_FLAG(_pRxBlk, _flag)		(_pRxBlk->Flags |= _flag)
 #define RX_BLK_TEST_FLAG(_pRxBlk, _flag)	(_pRxBlk->Flags & _flag)
 #define RX_BLK_CLEAR_FLAG(_pRxBlk, _flag)	(_pRxBlk->Flags &= ~(_flag))
-
 
 #define fRX_WDS			0x0001
 #define fRX_AMSDU       0x0002
@@ -3019,7 +2977,6 @@ typedef struct _RX_BLK_
 #define TX_AMSDU_FRAME			0x08
 #define TX_RALINK_FRAME			0x10
 #define TX_FRAG_FRAME			0x20
-
 
 //	Currently the sizeof(TX_BLK) is 148 bytes.
 typedef struct _TX_BLK_
@@ -3052,14 +3009,11 @@ typedef struct _TX_BLK_
 	UCHAR				CipherAlg;					// cipher alogrithm
 	PCIPHER_KEY			pKey;
 
-
-
 	USHORT				Flags;						//See following definitions for detail.
 
 	//YOU SHOULD NOT TOUCH IT! Following parameters are used for hardware-depended layer.
 	ULONG				Priv;						// Hardware specific value saved in here.
 } TX_BLK, *PTX_BLK;
-
 
 #define fTX_bRtsRequired		0x0001	// Indicate if need send RTS frame for protection. Not used in RT2860/RT2870.
 #define fTX_bAckRequired       	0x0002	// the packet need ack response
@@ -3083,10 +3037,6 @@ typedef struct _TX_BLK_
 #define TX_BLK_SET_FLAG(_pTxBlk, _flag)		(_pTxBlk->Flags |= _flag)
 #define TX_BLK_TEST_FLAG(_pTxBlk, _flag)	(((_pTxBlk->Flags & _flag) == _flag) ? 1 : 0)
 #define TX_BLK_CLEAR_FLAG(_pTxBlk, _flag)	(_pTxBlk->Flags &= ~(_flag))
-
-
-
-
 
 //------------------------------------------------------------------------------------------
 
@@ -3284,7 +3234,6 @@ VOID RTMPInitTimer(
 VOID RTMPSetTimer(
 	IN  PRALINK_TIMER_STRUCT    pTimer,
 	IN  ULONG                   Value);
-
 
 VOID RTMPModTimer(
 	IN	PRALINK_TIMER_STRUCT	pTimer,
@@ -3527,12 +3476,10 @@ VOID RTMPWriteTxWI(
 	IN	BOOLEAN			CfAck,
 	IN	HTTRANSMIT_SETTING	*pTransmit);
 
-
 VOID RTMPWriteTxWI_Data(
 	IN	PRTMP_ADAPTER		pAd,
 	IN	OUT PTXWI_STRUC		pTxWI,
 	IN	TX_BLK				*pTxBlk);
-
 
 VOID RTMPWriteTxWI_Cache(
 	IN	PRTMP_ADAPTER		pAd,
@@ -3619,11 +3566,9 @@ BOOLEAN RTMPCheckDHCPFrame(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket);
 
-
 BOOLEAN RTMPCheckEtherType(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket);
-
 
 //
 // Private routines in rtmp_wep.c
@@ -3844,7 +3789,6 @@ VOID MlmeRadioOff(
 VOID MlmeRadioOn(
 	IN PRTMP_ADAPTER pAd);
 
-
 VOID BssTableInit(
 	IN BSS_TABLE *Tab);
 
@@ -3986,7 +3930,6 @@ BOOLEAN MlmeEnqueueForRecv(
 	IN ULONG MsgLen,
 	IN PVOID Msg,
 	IN UCHAR Signal);
-
 
 BOOLEAN MlmeDequeue(
 	IN MLME_QUEUE *Queue,
@@ -5102,11 +5045,9 @@ VOID RTMP_OS_Mod_Timer(
 	IN	NDIS_MINIPORT_TIMER	*pTimer,
 	IN	unsigned long timeout);
 
-
 VOID RTMP_OS_Del_Timer(
 	IN	NDIS_MINIPORT_TIMER	*pTimer,
 	OUT	BOOLEAN				 *pCancelled);
-
 
 VOID RTMP_OS_Release_Packet(
 	IN	PRTMP_ADAPTER pAd,
@@ -5123,7 +5064,6 @@ NDIS_STATUS os_alloc_mem(
 NDIS_STATUS os_free_mem(
 	IN	PRTMP_ADAPTER pAd,
 	IN	PUCHAR mem);
-
 
 void RTMP_AllocateSharedMemory(
 	IN	PRTMP_ADAPTER pAd,
@@ -5198,20 +5138,16 @@ void RTMP_QueryNextPacketInfo(
 	OUT PUCHAR		 *pSrcBufVA,
 	OUT	UINT		 *pSrcBufLen);
 
-
 BOOLEAN RTMP_FillTxBlkInfo(
 	IN RTMP_ADAPTER *pAd,
 	IN TX_BLK *pTxBlk);
 
-
 PRTMP_SCATTER_GATHER_LIST
 rt_get_sg_list_from_packet(PNDIS_PACKET pPacket, RTMP_SCATTER_GATHER_LIST *sg);
-
 
  void announce_802_3_packet(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket);
-
 
 UINT BA_Reorder_AMSDU_Annnounce(
 	IN	PRTMP_ADAPTER	pAd,
@@ -5221,7 +5157,6 @@ PNET_DEV get_netdev_from_bssid(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	UCHAR			FromWhichBSSID);
 
-
 PNDIS_PACKET duplicate_pkt(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PUCHAR			pHeader802_3,
@@ -5229,7 +5164,6 @@ PNDIS_PACKET duplicate_pkt(
 	IN	PUCHAR			pData,
 	IN	ULONG			DataSize,
 	IN	UCHAR			FromWhichBSSID);
-
 
 PNDIS_PACKET duplicate_pkt_with_TKIP_MIC(
 	IN	PRTMP_ADAPTER	pAd,
@@ -5239,7 +5173,6 @@ void ba_flush_reordering_timeout_mpdus(
 	IN PRTMP_ADAPTER	pAd,
 	IN PBA_REC_ENTRY	pBAEntry,
 	IN ULONG			Now32);
-
 
 VOID BAOriSessionSetUp(
 			IN PRTMP_ADAPTER    pAd,
@@ -5255,13 +5188,11 @@ VOID BASessionTearDownALL(
 
 BOOLEAN OS_Need_Clone_Packet(void);
 
-
 VOID build_tx_packet(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket,
 	IN	PUCHAR	pFrame,
 	IN	ULONG	FrameLen);
-
 
 VOID BAOriSessionTearDown(
 	IN OUT	PRTMP_ADAPTER	pAd,
@@ -5452,7 +5383,6 @@ INT	Set_HtMimoPs_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PUCHAR			arg);
 
-
 INT	Set_ForceShortGI_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PUCHAR			arg);
@@ -5471,7 +5401,6 @@ INT	Set_SendPSMPAction_Proc(
 INT	Set_HtMIMOPSmode_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PUCHAR			arg);
-
 
 INT	Set_HtTxBASize_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -5579,13 +5508,11 @@ PNDIS_PACKET DuplicatePacket(
 	IN	PNDIS_PACKET	pPacket,
 	IN	UCHAR			FromWhichBSSID);
 
-
 PNDIS_PACKET ClonePacket(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PNDIS_PACKET	pPacket,
 	IN	PUCHAR			pData,
 	IN	ULONG			DataSize);
-
 
 // Normal, AMPDU or AMSDU
 VOID CmmRxnonRalinkFrameIndicate(
@@ -5744,7 +5671,6 @@ static inline char* GetPhyMode(
 	}
 }
 
-
 static inline char* GetBW(
 	int BW)
 {
@@ -5761,7 +5687,6 @@ static inline char* GetBW(
 			return "N/A";
 	}
 }
-
 
 VOID RT28xxThreadTerminate(
 	IN RTMP_ADAPTER *pAd);
@@ -5802,7 +5727,6 @@ PNDIS_PACKET GetPacketFromRxRing(
 	OUT		PRT28XX_RXD_STRUC	pSaveRxD,
 	OUT		BOOLEAN			*pbReschedule,
 	IN OUT	UINT32			*pRxPending);
-
 
 void kill_thread_task(PRTMP_ADAPTER pAd);
 
@@ -5858,14 +5782,12 @@ VOID RtmpPCIDataKickOut(
 	IN	TX_BLK			*pTxBlk,
 	IN	UCHAR			QueIdx);
 
-
 int RtmpPCIMgmtKickOut(
 	IN RTMP_ADAPTER 	*pAd,
 	IN UCHAR 			QueIdx,
 	IN PNDIS_PACKET		pPacket,
 	IN PUCHAR			pSrcBufVA,
 	IN UINT 			SrcBufLen);
-
 
 NDIS_STATUS RTMPCheckRxError(
 	IN  PRTMP_ADAPTER   pAd,
@@ -6233,10 +6155,8 @@ NTSTATUS	RTUSBVenderReset(
 VOID CMDHandler(
     IN PRTMP_ADAPTER pAd);
 
-
 NDIS_STATUS	 CreateThreads(
 	IN	struct net_device *net_dev );
-
 
 VOID MacTableInitialize(
 	IN  PRTMP_ADAPTER   pAd);
@@ -6269,11 +6189,9 @@ NDIS_STATUS	RTUSBFreeDescriptorRequest(
 	IN	UCHAR			BulkOutPipeId,
 	IN	UINT32			NumberRequired);
 
-
 BOOLEAN	RTUSBNeedQueueBackForAgg(
 	IN RTMP_ADAPTER *pAd,
 	IN UCHAR		BulkOutPipeId);
-
 
 VOID RTMPWriteTxInfo(
 	IN	PRTMP_ADAPTER	pAd,
@@ -6329,7 +6247,6 @@ VOID RtmpUSBDataKickOut(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	TX_BLK			*pTxBlk,
 	IN	UCHAR			QueIdx);
-
 
 int RtmpUSBMgmtKickOut(
 	IN RTMP_ADAPTER 	*pAd,
@@ -6431,6 +6348,4 @@ __inline VOID VIRTUAL_IF_DOWN(PRTMP_ADAPTER pAd)
 	return;
 }
 
-
 #endif  // __RTMP_H__
-

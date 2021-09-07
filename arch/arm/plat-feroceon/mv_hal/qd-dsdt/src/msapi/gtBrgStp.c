@@ -73,7 +73,6 @@ static GT_STATUS enhancedBPDUSet(GT_QD_DEV *dev,GT_BOOL en)
 	return retVal;
 }
 
-
 /*******************************************************************************
 * gstpSetMode
 *
@@ -224,11 +223,8 @@ GT_STATUS gstpSetMode
         DBG_INFO(("Failed.\n"));
 	}
 
-
     return retVal;
 }
-
-
 
 /*******************************************************************************
 * gstpSetPortState
@@ -279,8 +275,6 @@ GT_STATUS gstpSetPortState
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gstpGetPortState

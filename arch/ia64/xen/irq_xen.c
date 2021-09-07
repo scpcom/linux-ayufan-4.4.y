@@ -62,7 +62,6 @@ xen_free_irq_vector(int vector)
 		       __func__, vector);
 }
 
-
 static DEFINE_PER_CPU(int, timer_irq) = -1;
 static DEFINE_PER_CPU(int, ipi_irq) = -1;
 static DEFINE_PER_CPU(int, resched_irq) = -1;

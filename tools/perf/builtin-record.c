@@ -566,7 +566,6 @@ static int __cmd_record(int argc, const char **argv)
 	else
 		header = perf_header__new();
 
-
 	if (raw_samples) {
 		read_tracing_data(attrs, nr_counters);
 	} else {

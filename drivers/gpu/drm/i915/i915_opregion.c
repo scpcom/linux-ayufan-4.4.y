@@ -404,7 +404,6 @@ int intel_opregion_init(struct drm_device *dev, int resume)
 	if (!resume)
 		acpi_video_register();
 
-
 	/* Notify BIOS we are ready to handle ACPI video ext notifs.
 	 * Right now, all the events are handled by the ACPI video module.
 	 * We don't actually need to do anything with them. */

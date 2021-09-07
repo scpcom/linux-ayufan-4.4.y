@@ -2066,7 +2066,6 @@ task_hot(struct task_struct *p, u64 now, struct sched_domain *sd)
 	return delta < (s64)sysctl_sched_migration_cost;
 }
 
-
 void set_task_cpu(struct task_struct *p, unsigned int new_cpu)
 {
 	int old_cpu = task_cpu(p);
@@ -2968,7 +2967,6 @@ unsigned long this_cpu_load(void)
 	return this->cpu_load[0];
 }
 
-
 /* Variables and functions for calc_load */
 static atomic_long_t calc_load_tasks;
 static unsigned long calc_load_update;
@@ -3467,7 +3465,6 @@ static inline int get_sd_load_idx(struct sched_domain *sd,
 	return load_idx;
 }
 
-
 #if defined(CONFIG_SCHED_MC) || defined(CONFIG_SCHED_SMT)
 /**
  * init_sd_power_savings_stats - Initialize power savings statistics for
@@ -3607,7 +3604,6 @@ static inline int check_power_save_busiest_group(struct sd_lb_stats *sds,
 	return 0;
 }
 #endif /* CONFIG_SCHED_MC || CONFIG_SCHED_SMT */
-
 
 unsigned long default_scale_freq_power(struct sched_domain *sd, int cpu)
 {

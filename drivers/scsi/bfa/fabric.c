@@ -273,7 +273,6 @@ bfa_fcs_fabric_sm_flogi(struct bfa_fcs_fabric_s *fabric,
 	}
 }
 
-
 static void
 bfa_fcs_fabric_sm_flogi_retry(struct bfa_fcs_fabric_s *fabric,
 			      enum bfa_fcs_fabric_event event)
@@ -540,8 +539,6 @@ bfa_fcs_fabric_sm_deleting(struct bfa_fcs_fabric_s *fabric,
 	}
 }
 
-
-
 /**
  *  fcs_fabric_private fabric private functions
  */
@@ -807,8 +804,6 @@ bfa_fcs_fabric_delete_comp(void *cbarg)
 	bfa_sm_send_event(fabric, BFA_FCS_FABRIC_SM_DELCOMP);
 }
 
-
-
 /**
  *  fcs_fabric_public fabric public functions
  */
@@ -976,7 +971,6 @@ bfa_fcs_fabric_is_online(struct bfa_fcs_fabric_s *fabric)
 {
 	return (bfa_sm_cmp_state(fabric, bfa_fcs_fabric_sm_online));
 }
-
 
 bfa_status_t
 bfa_fcs_fabric_addvf(struct bfa_fcs_fabric_s *vf, struct bfa_fcs_s *fcs,
@@ -1274,5 +1268,3 @@ void
 bfa_cb_lps_flogo_comp(void *bfad, void *uarg)
 {
 }
-
-

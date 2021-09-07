@@ -22,7 +22,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-
 #include <linux/init.h>
 #include <linux/types.h>
 #include <linux/slab.h>
@@ -420,7 +419,6 @@ int iommu_map_sg(struct device *dev, struct iommu_table *tbl,
 	spin_unlock_irqrestore(&(tbl->it_lock), flags);
 	return 0;
 }
-
 
 void iommu_unmap_sg(struct iommu_table *tbl, struct scatterlist *sglist,
 		int nelems, enum dma_data_direction direction,

@@ -1165,7 +1165,6 @@ dasd_set_feature(struct ccw_device *cdev, int feature, int flag)
 	return 0;
 }
 
-
 int
 dasd_add_sysfs_files(struct ccw_device *cdev)
 {
@@ -1177,7 +1176,6 @@ dasd_remove_sysfs_files(struct ccw_device *cdev)
 {
 	sysfs_remove_group(&cdev->dev.kobj, &dasd_attr_group);
 }
-
 
 int
 dasd_devmap_init(void)

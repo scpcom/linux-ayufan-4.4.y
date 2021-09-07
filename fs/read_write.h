@@ -31,7 +31,6 @@ struct write_sock_to_file_stat {
 #define INC_WRITE_FROM_SOCK_ERR_CNT
 #endif /* COLLECT_WRITE_SOCK_TO_FILE_STAT */
 
-
 #ifdef DEBUG
 #define dprintk(fmt, args...) printk(KERN_ERR "%s: " fmt, __func__, ##args)
 #else
@@ -55,5 +54,3 @@ ssize_t write_from_socket_to_file(struct socket *sock, struct file *file,
 		loff_t __user *ppos, size_t len);
 #endif /* _READ_WRITE_H_ */
 #endif /* CONFIG_ARCH_FEROCEON */
-
-

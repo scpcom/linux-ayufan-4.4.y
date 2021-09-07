@@ -57,7 +57,6 @@ struct xenbus_watch
 			 const char **vec, unsigned int len);
 };
 
-
 /* A xenbus device. */
 struct xenbus_device {
 	const char *devicetype;

@@ -705,7 +705,6 @@ kernel_execve:
 	ret
 .end kernel_execve
 
-
 /*
  * Special system calls.  Most of these are special in that they either
  * have to play switch_stack games or in some way use the pt_regs struct.

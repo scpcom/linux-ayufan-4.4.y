@@ -318,7 +318,6 @@ static int __ccw_device_do_nop(struct ccw_device *cdev)
 	return ret;
 }
 
-
 /*
  * Called from interrupt context to check if a valid answer
  * to Set Path Group ID was received.

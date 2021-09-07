@@ -15,9 +15,7 @@
 
 #include <linux/ctype.h>
 
-
 static const struct ssb_sprom *fallback_sprom;
-
 
 static int sprom2hex(const u16 *sprom, char *buf, size_t buf_len,
 		     size_t sprom_size_words)

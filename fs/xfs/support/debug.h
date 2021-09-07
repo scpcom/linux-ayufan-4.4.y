@@ -68,5 +68,4 @@ extern void assfail(char *expr, char *f, int l);
 
 #endif /* DEBUG */
 
-
 #endif  /* __XFS_SUPPORT_DEBUG_H__ */

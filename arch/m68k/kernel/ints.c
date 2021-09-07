@@ -347,7 +347,6 @@ void m68k_irq_shutdown(unsigned int irq)
 		vectors[m68k_first_user_vec + irq - IRQ_USER] = bad_inthandler;
 }
 
-
 /*
  * Do we need these probe functions on the m68k?
  *

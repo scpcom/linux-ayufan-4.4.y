@@ -260,7 +260,6 @@ static struct gpio_bank gpio_bank_850[7] = {
 };
 #endif
 
-
 #ifdef CONFIG_ARCH_OMAP24XX
 
 static struct gpio_bank gpio_bank_242x[4] = {
@@ -1410,9 +1409,7 @@ static struct irq_chip mpuio_irq_chip = {
 #endif
 };
 
-
 #define bank_is_mpuio(bank)	((bank)->method == METHOD_MPUIO)
-
 
 #ifdef CONFIG_ARCH_OMAP16XX
 
@@ -1675,7 +1672,6 @@ static int __init _omap_gpio_init(void)
 		}
 	}
 #endif
-
 
 #ifdef CONFIG_ARCH_OMAP15XX
 	if (cpu_is_omap15xx()) {
@@ -2142,7 +2138,6 @@ static int __init omap_gpio_sysinit(void)
 }
 
 arch_initcall(omap_gpio_sysinit);
-
 
 #ifdef	CONFIG_DEBUG_FS
 

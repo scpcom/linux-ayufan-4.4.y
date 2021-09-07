@@ -62,27 +62,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvCpuIfconfigh
 #define __INCmvCpuIfConfigh
 
 #include "mvSysHwConfig.h"
 #include "ctrlEnv/sys/mvCpuIfRegs.h"
 
-
 /* CPU control register map */
 /* Set bits means value is about to change according to new value */
 #define CPU_CONFIG_DEFAULT_MASK		(CCR_VEC_INIT_LOC_MASK	|	\
 					 CCR_AHB_ERROR_PROP_MASK)
 									
-
 #define CPU_CONFIG_DEFAULT			(CCR_VEC_INIT_LOC_FF00)
 		 
 /* CPU Control and status defaults */
 #define CPU_CTRL_STAT_DEFAULT_MASK		(CCSR_PEX0_ENABLE | \
 						CCSR_PEX1_ENABLE)
 									
-
 #define CPU_CTRL_STAT_DEFAULT			(CCSR_PEX0_ENABLE | \
 						CCSR_PEX1_ENABLE | \
 						CCSR_L2_PARITY_PROTECTION)
@@ -115,9 +111,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		 ((TICK_DRV_1x4  << CCR_CPU_2_AHB_TICK_DRV_OFFS) | 	\
 		  (TICK_SMPL_1x4 << CCR_CPU_2_AHB_TICK_SMPL_OFFS))
 		 
-
 #define CPU_FTDLL_IC_CONFIG_DEFAULT        0x1b
 #define CPU_FTDLL_DC_CONFIG_DEFAULT        0x2
-
 
 #endif /* __INCmvCpuIfConfigh */

@@ -174,7 +174,6 @@ xfs_qm_dquot_logitem_committed(
 	return (lsn);
 }
 
-
 /*
  * This is called to wait for the given dquot to be unpinned.
  * Most of these pin/unpin routines are plagiarized from inode code.
@@ -337,7 +336,6 @@ xfs_qm_dquot_logitem_trylock(
 	return (retval);
 }
 
-
 /*
  * Unlock the dquot associated with the log item.
  * Clear the fields of the dquot and dquot log item that
@@ -368,7 +366,6 @@ xfs_qm_dquot_logitem_unlock(
 	xfs_dqunlock(dqp);
 }
 
-
 /*
  * this needs to stamp an lsn into the dquot, I think.
  * rpc's that look at user dquot's would then have to
@@ -382,7 +379,6 @@ xfs_qm_dquot_logitem_committing(
 {
 	return;
 }
-
 
 /*
  * This is the ops vector for dquots
@@ -471,7 +467,6 @@ xfs_qm_qoff_logitem_format(xfs_qoff_logitem_t	*qf,
 	qf->qql_format.qf_size = 1;
 }
 
-
 /*
  * Pinning has no meaning for an quotaoff item, so just return.
  */
@@ -481,7 +476,6 @@ xfs_qm_qoff_logitem_pin(xfs_qoff_logitem_t *qf)
 {
 	return;
 }
-
 
 /*
  * Since pinning has no meaning for an quotaoff item, unpinning does
@@ -543,7 +537,6 @@ xfs_qm_qoff_logitem_push(xfs_qoff_logitem_t *qf)
 {
 	return;
 }
-
 
 /*ARGSUSED*/
 STATIC xfs_lsn_t

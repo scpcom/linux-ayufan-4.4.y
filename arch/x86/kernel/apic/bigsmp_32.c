@@ -172,7 +172,6 @@ static int hp_ht_bigsmp(const struct dmi_system_id *d)
 	return 0;
 }
 
-
 static const struct dmi_system_id bigsmp_dmi_table[] = {
 	{ hp_ht_bigsmp, "HP ProLiant DL760 G2",
 		{	DMI_MATCH(DMI_BIOS_VENDOR, "HP"),

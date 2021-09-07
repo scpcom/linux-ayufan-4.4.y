@@ -215,7 +215,6 @@ enum {
  */
 #define NILFS_SC_DEFAULT_WATERMARK  3600
 
-
 /* segment.c */
 extern int nilfs_init_transaction_cache(void);
 extern void nilfs_destroy_transaction_cache(void);

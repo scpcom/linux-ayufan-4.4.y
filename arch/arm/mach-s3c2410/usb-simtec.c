@@ -103,7 +103,6 @@ static struct s3c2410_hcd_info usb_simtec_info = {
 	.enable_oc	= usb_simtec_enableoc,
 };
 
-
 int usb_simtec_init(void)
 {
 	int ret;

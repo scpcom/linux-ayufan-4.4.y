@@ -155,7 +155,6 @@
 
 #define IS_PRED_CLOB(pred)	IS_PRED_OUT(pred)
 
-
 #define DO_SAVE_MIN(__COVER, SAVE_IFS, EXTRA, WORKAROUND)	\
 	nop 0
 #define MOV_FROM_IFA(reg)			\

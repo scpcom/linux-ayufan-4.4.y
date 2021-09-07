@@ -2059,7 +2059,6 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 		}
 #endif /* CONFIG_ARCH_FEROCEON */
 
-
 #ifdef CONFIG_ARCH_FEROCEON
 #ifdef WRITE_SKT_TO_FILE
     /* check fd_in is socket fd */
@@ -2191,7 +2190,6 @@ static int splice_pipe_to_pipe(struct pipe_inode_info *ipipe,
 	struct pipe_buffer *ibuf, *obuf;
 	int ret = 0, nbuf;
 	bool input_wakeup = false;
-
 
 retry:
 	ret = ipipe_prep(ipipe, flags);

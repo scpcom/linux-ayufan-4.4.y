@@ -115,7 +115,6 @@ static MV_DEV_CS_INFO*  boardGetDevEntry(MV_32 devNum, MV_BOARD_DEV_CLASS devCla
 
 MV_U32 tClkRate   = -1;
 
-
 /*******************************************************************************
 * mvBoardEnvInit - Init board
 *
@@ -144,8 +143,6 @@ MV_VOID mvBoardEnvInit(MV_VOID)
 	MV_U32	regVal;
 #endif
 
-
-
 	if (!((boardId >= BOARD_ID_BASE)&&(boardId < MV_MAX_BOARD_ID)))
 	{
 		mvOsPrintf("mvBoardEnvInit:Board unknown.\n");
@@ -161,7 +158,6 @@ MV_VOID mvBoardEnvInit(MV_VOID)
 
 	/* Set GPP Out Enable*/
 	mvGppTypeSet(0, 0xFFFFFFFF, BOARD_INFO(boardId)->gppOutEnVal);
-
 
 	for (devNum = START_DEV_CS; devNum < BOARD_INFO(boardId)->numBoardDeviceIf; devNum++)
 	{
@@ -635,7 +631,6 @@ MV_U32 mvBoardTclkGet(MV_VOID)
 		if ( MV_REG_READ(GPP_INT_CAUSE_REG(0)) & (1 << MV_REF_CLK_INPUT_GPP)) break;
 	}while (1);
 
-
 	/* set control for timer \ cunter and enable */
 	mvCntmrEnable(countNum);
 
@@ -745,7 +740,6 @@ MV_U32  mvBoardSysClkGet(MV_VOID)
 #endif /* DB_FPGA */
 		return tmpSysClkRate;
 }
-
 
 /*******************************************************************************
 * mvBoardPexBridgeIntPinGet - Get PEX to PCI bridge interrupt pin number
@@ -892,7 +886,6 @@ MV_32 mvBoardPciGpioPinGet(MV_U32 pciIf, MV_U32 devNum, MV_U32 intPin)
 
 	boardId = mvBoardIdGet();
 
-
 	if (!((boardId >= BOARD_ID_BASE)&&(boardId < MV_MAX_BOARD_ID)))
 	{
 		mvOsPrintf("mvBoardPciGpioPinGet:Board ID %d unknown.\n", boardId);
@@ -922,7 +915,6 @@ MV_32 mvBoardPciGpioPinGet(MV_U32 pciIf, MV_U32 devNum, MV_U32 intPin)
                    pciIf, devNum, intPin);
 		return N_A;
 	}
-
 
         for (i = 0; i < BOARD_INFO(boardId)->numBoardPciIf; i++)
 		if (BOARD_INFO(boardId)->pBoardPciIf[i].pciDevNum == devNum)
@@ -1002,7 +994,6 @@ MV_32 mvBoarGpioPinNumGet(MV_BOARD_DEV_CLASS class)
 
 	return MV_ERROR;
 }
-
 
 /*******************************************************************************
 * mvBoardReset - mvBoardReset
@@ -1191,7 +1182,6 @@ MV_32 mvBoardUSBVbusEnGpioPinGet(MV_32 devId)
 	return MV_ERROR;
 }
 
-
 /*******************************************************************************
 * mvBoardGpioIntMaskGet - Get GPIO mask for interrupt pins
 *
@@ -1262,7 +1252,6 @@ MV_32 mvBoardMppGet(MV_U32 mppGroupNum)
 
 	return BOARD_INFO(boardId)->pBoardMppConfigValue[0].mppGroup[mppGroupNum];
 }
-
 
 /* Board devices API managments */
 
@@ -1402,7 +1391,6 @@ MV_32 mvBoardGetDeviceWidth(MV_32 devNum, MV_BOARD_DEV_CLASS devClass)
 
 	}
 
-
 	devEntry = boardGetDevEntry(devNum,devClass);
 	if (devEntry != NULL)
 		return devEntry->devWidth;
@@ -1448,7 +1436,6 @@ MV_32 mvBoardGetDeviceWinSize(MV_32 devNum, MV_BOARD_DEV_CLASS devClass)
 
 	return 0xFFFFFFFF;
 }
-
 
 /*******************************************************************************
 * boardGetDevEntry - returns the entry pointer of a device on the board
@@ -1496,7 +1483,6 @@ static MV_DEV_CS_INFO*  boardGetDevEntry(MV_32 devNum, MV_BOARD_DEV_CLASS devCla
 	    }
 	}
 
-
 	for (devIndex = START_DEV_CS; devIndex < BOARD_INFO(boardId)->numBoardDeviceIf; devIndex++)
 	{
 
@@ -1517,7 +1503,6 @@ static MV_DEV_CS_INFO*  boardGetDevEntry(MV_32 devNum, MV_BOARD_DEV_CLASS devCla
 	return NULL;
 }
 
-
 MV_U32 boardGetDevCSNum(MV_32 devNum, MV_BOARD_DEV_CLASS devClass)
 {
 	MV_DEV_CS_INFO* devEntry;
@@ -1529,7 +1514,6 @@ MV_U32 boardGetDevCSNum(MV_32 devNum, MV_BOARD_DEV_CLASS devClass)
 		return 0xFFFFFFFF;
 
 	}
-
 
 	devEntry = boardGetDevEntry(devNum,devClass);
 	if (devEntry != NULL)
@@ -1638,7 +1622,6 @@ MV_U8 mvBoardA2DTwsiAddrGet()
 			return BOARD_INFO(boardId)->pBoardTwsiDev[i].twsiDevAddr;
 	return (0xFF);
 }
-
 
 #if defined(MV_INCLUDE_PCI)
 
@@ -1946,7 +1929,6 @@ MV_U8	    mvBoardLedNumGet(MV_VOID)
 	return BOARD_INFO(boardId)->activeLedsNumber;
 }
 
-
 /*******************************************************************************
 * mvBoardStatusLed -
 *
@@ -1995,7 +1977,6 @@ MV_STATUS	    mvBoardStatusLed(MV_BOOL status)
 
 }
 
-
 /*******************************************************************************
 * mvBoardNandWidthGet -
 *
@@ -2027,4 +2008,3 @@ MV_32 mvBoardNandWidthGet(void)
 	/* NAND wasn't found */
 	return MV_ERROR;
 }
-

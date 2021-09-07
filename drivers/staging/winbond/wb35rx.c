@@ -370,4 +370,3 @@ void Wb35Rx_destroy(struct hw_data * pHwData)
 	printk("Wb35Rx_destroy OK\n");
 	#endif
 }
-

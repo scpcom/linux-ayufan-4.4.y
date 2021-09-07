@@ -61,7 +61,6 @@ static int mcast_open(void *data)
 	struct ip_mreq mreq;
 	int fd, yes = 1, err = -EINVAL;
 
-
 	if ((sin->sin_addr.s_addr == 0) || (sin->sin_port == 0))
 		goto out;
 

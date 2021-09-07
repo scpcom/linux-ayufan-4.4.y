@@ -144,7 +144,6 @@ void iommu_table_getparms_iSeries(unsigned long busno,
 	kfree(parms);
 }
 
-
 #ifdef CONFIG_PCI
 /*
  * This function compares the known tables to find an iommu_table
@@ -172,7 +171,6 @@ static struct iommu_table *iommu_table_find(struct iommu_table * tbl)
 	}
 	return NULL;
 }
-
 
 static void pci_dma_dev_setup_iseries(struct pci_dev *pdev)
 {

@@ -45,7 +45,6 @@
 #include "xfs_btree_trace.h"
 #include "xfs_dir2_trace.h"
 
-
 /*
  * Allocate and initialise an xfs_inode.
  */
@@ -286,7 +285,6 @@ out_error:
 	read_unlock(&pag->pag_ici_lock);
 	return error;
 }
-
 
 static int
 xfs_iget_cache_miss(

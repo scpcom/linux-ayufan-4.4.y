@@ -29,7 +29,6 @@
  *
  ******************************************************************************/
 
-
 #define ISCSI_TARGET_NEGOTIATE_C
 
 #include <linux/string.h>

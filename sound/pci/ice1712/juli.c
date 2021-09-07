@@ -282,7 +282,6 @@ static const struct snd_akm4xxx_dac_channel juli_dac[] = {
 	AK_DAC(MONITOR_DIG_IN_VOLUME, 2),
 };
 
-
 static struct snd_akm4xxx akm_juli_dac __devinitdata = {
 	.type = SND_AK4358,
 	.num_dacs = 8,	/* DAC1 - analog out
@@ -411,7 +410,6 @@ static struct snd_kcontrol_new juli_mute_controls[] __devinitdata = {
 		.private_value = GPIO_DIGIN_MONITOR,
 	},
 };
-
 
 static void ak4358_proc_regs_read(struct snd_info_entry *entry,
 		struct snd_info_buffer *buffer)
@@ -680,7 +678,6 @@ static int __devinit juli_init(struct snd_ice1712 *ice)
 
 	return 0;
 }
-
 
 /*
  * Juli@ boards don't provide the EEPROM data except for the vendor IDs.

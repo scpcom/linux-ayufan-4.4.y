@@ -127,7 +127,6 @@ struct reg_struct mt9p012_reg_pat[2] = {
 	}
 };
 
-
 struct mt9p012_i2c_reg_conf mt9p012_test_tbl[] = {
 	{0x3044, 0x0544 & 0xFBFF},
 	{0x30CA, 0x0004 | 0x0001},
@@ -138,7 +137,6 @@ struct mt9p012_i2c_reg_conf mt9p012_test_tbl[] = {
 	{0x301E, 0x0000},
 	{0x3780, 0x0000},
 };
-
 
 struct mt9p012_i2c_reg_conf mt9p012_lc_tbl[] = {
 	/* [Lens shading 85 Percent TL84] */
@@ -558,7 +556,6 @@ struct mt9p012_i2c_reg_conf mt9p012_rolloff_tbl[] = {
 	{0x3780, 0x8000},
 };
 
-
 struct mt9p012_reg mt9p012_regs = {
 	.reg_pat = &mt9p012_reg_pat[0],
 	.reg_pat_size = ARRAY_SIZE(mt9p012_reg_pat),
@@ -569,5 +566,3 @@ struct mt9p012_reg mt9p012_regs = {
 	.rftbl = &mt9p012_rolloff_tbl[0],
 	.rftbl_size = ARRAY_SIZE(mt9p012_rolloff_tbl)
 };
-
-

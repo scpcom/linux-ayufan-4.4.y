@@ -109,7 +109,6 @@ int jffs2_do_readpage_unlock(struct inode *inode, struct page *pg)
 	return ret;
 }
 
-
 static int jffs2_readpage (struct file *filp, struct page *pg)
 {
 	struct jffs2_inode_info *f = JFFS2_INODE_INFO(pg->mapping->host);

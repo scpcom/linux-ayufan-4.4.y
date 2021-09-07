@@ -41,9 +41,6 @@
  *
  */
 
-
-
-
 /** @file
  * Processes inbound requests for the resource manager, and also
  * handles the cancellation of a queued request
@@ -51,8 +48,6 @@
 
 #include <linux/mm.h>
 #include "t23xrmInternal.h"
-
-
 
 /**
  * Starts processing an array of descriptors from an exec message.
@@ -82,8 +77,6 @@ void rmStartDesc(T2CoreInstance *t2blk, RMexecMessage *rq, int32_t ch)
         t2blk->chnDescCt[ch]++;
     }
 }
-
-
 
 /**
  * Queue a new request message
@@ -277,7 +270,6 @@ RMstatus xwcRMqueueRequest(RMinterfaceCtx *intfc,
         secEU    = ((thisDPD->hdr >> EU_SHIFT_SECONDARY) & EU_SEL_MASK) >> EU_SEL_SHIFT;
         descType = (thisDPD->hdr & DESCTYPE_MASK) & DESCTYPE_SHIFT;
 
-
         /* Check primary and secondary EUs against those in the capability mask */
         if (!((1 << priEU) & t2blk->euPresent))
             return RM_NO_CAPABILITY;
@@ -342,9 +334,6 @@ RMstatus xwcRMqueueRequest(RMinterfaceCtx *intfc,
 
     return RM_OK;
 }
-
-
-
 
 /**
  * Cancel a queued request

@@ -297,7 +297,6 @@ int selinux_xfrm_policy_alloc(struct xfrm_sec_ctx **ctxp,
 	return err;
 }
 
-
 /*
  * LSM hook implementation that copies security data structure from old to
  * new for policy cloning.

@@ -662,7 +662,6 @@
 #define   G_000E40_GUI_ACTIVE(x)                       (((x) >> 31) & 0x1)
 #define   C_000E40_GUI_ACTIVE                          0x7FFFFFFF
 
-
 #define R_00000D_SCLK_CNTL                           0x00000D
 #define   S_00000D_SCLK_SRC_SEL(x)                     (((x) & 0x7) << 0)
 #define   G_00000D_SCLK_SRC_SEL(x)                     (((x) >> 0) & 0x7)
@@ -709,6 +708,5 @@
 #define   S_00000D_FORCE_RB(x)                         (((x) & 0x1) << 28)
 #define   G_00000D_FORCE_RB(x)                         (((x) >> 28) & 0x1)
 #define   C_00000D_FORCE_RB                            0xEFFFFFFF
-
 
 #endif

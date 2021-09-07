@@ -31,5 +31,3 @@ extern void fast_close_filter(struct file* file);
 extern loff_t get_prealloc_length(struct inode *inode);
 
 #endif        //  #ifndef FAST_OPEN_FILTER_H
-
-

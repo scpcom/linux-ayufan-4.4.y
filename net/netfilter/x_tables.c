@@ -27,7 +27,6 @@
 #include <linux/netfilter/x_tables.h>
 #include <linux/netfilter_arp.h>
 
-
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Harald Welte <laforge@netfilter.org>");
 MODULE_DESCRIPTION("{ip,ip6,arp,eb}_tables backend module");
@@ -180,7 +179,6 @@ xt_unregister_matches(struct xt_match *match, unsigned int n)
 		xt_unregister_match(&match[i]);
 }
 EXPORT_SYMBOL(xt_unregister_matches);
-
 
 /*
  * These are weird, but module loading must not be done with mutex
@@ -699,7 +697,6 @@ EXPORT_SYMBOL_GPL(xt_compat_unlock);
 DEFINE_PER_CPU(struct xt_info_lock, xt_info_locks);
 EXPORT_PER_CPU_SYMBOL_GPL(xt_info_locks);
 
-
 struct xt_table_info *
 xt_replace_table(struct xt_table *table,
 	      unsigned int num_counters,
@@ -1101,7 +1098,6 @@ int xt_proto_init(struct net *net, u_int8_t af)
 	if (af >= ARRAY_SIZE(xt_prefix))
 		return -EINVAL;
 
-
 #ifdef CONFIG_PROC_FS
 	strlcpy(buf, xt_prefix[af], sizeof(buf));
 	strlcat(buf, FORMAT_TABLES, sizeof(buf));
@@ -1214,4 +1210,3 @@ static void __exit xt_fini(void)
 
 module_init(xt_init);
 module_exit(xt_fini);
-

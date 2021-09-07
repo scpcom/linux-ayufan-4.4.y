@@ -154,7 +154,6 @@ static void serial_out(struct uart_sunsu_port *up, int offset, int value)
 #define serial_inp(up, offset)		serial_in(up, offset)
 #define serial_outp(up, offset, value)	serial_out(up, offset, value)
 
-
 /*
  * For the 16C950
  */

@@ -585,7 +585,6 @@ static void __exit amd8111_edac_exit(void)
 	pci_unregister_driver(&amd8111_edac_dev_driver);
 }
 
-
 module_init(amd8111_edac_init);
 module_exit(amd8111_edac_exit);
 

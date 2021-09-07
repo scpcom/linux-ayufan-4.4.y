@@ -1,9 +1,7 @@
 /* $Id: applicom.h,v 1.1 2010-04-15 12:27:55 khchen Exp $ */
 
-
 #ifndef __LINUX_APPLICOM_H__
 #define __LINUX_APPLICOM_H__
-
 
 #define DATA_TO_PC_READY      0x00
 #define TIC_OWNER_TO_PC       0x01
@@ -80,6 +78,5 @@ struct st_ram_io
 	unsigned char num_card;
 	unsigned char reserv1[32];
 };
-
 
 #endif /* __LINUX_APPLICOM_H__ */

@@ -19,7 +19,6 @@
 #include <asm/asm-offsets.h>
 #include "lg.h"
 
-
 static struct vm_struct *switcher_vma;
 static struct page **switcher_page;
 

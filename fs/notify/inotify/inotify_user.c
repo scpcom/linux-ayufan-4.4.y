@@ -349,7 +349,6 @@ static const struct file_operations inotify_fops = {
 	.compat_ioctl	= inotify_ioctl,
 };
 
-
 /*
  * find_inode - resolve a user-given path to a specific inode
  */
@@ -644,7 +643,6 @@ static struct fsnotify_group *inotify_new_group(struct user_struct *user, unsign
 
 	return group;
 }
-
 
 /* inotify syscalls */
 SYSCALL_DEFINE1(inotify_init1, int, flags)

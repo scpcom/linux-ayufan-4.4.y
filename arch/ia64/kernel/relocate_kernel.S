@@ -321,5 +321,3 @@ GLOBAL_ENTRY(ia64_dump_cpu_regs)
         ;;
         br.ret.sptk.many rp
 END(ia64_dump_cpu_regs)
-
-

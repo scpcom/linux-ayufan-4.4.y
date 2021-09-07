@@ -12,4 +12,3 @@
 #define __ASM_ARCH_MXC_BOARD_MX31LITE_H__
 
 #endif /* __ASM_ARCH_MXC_BOARD_MX31LITE_H__ */
-

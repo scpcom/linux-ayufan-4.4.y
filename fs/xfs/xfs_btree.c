@@ -52,7 +52,6 @@ const __uint32_t xfs_magics[XFS_BTNUM_MAX] = {
 	XFS_ABTB_MAGIC, XFS_ABTC_MAGIC, XFS_BMAP_MAGIC, XFS_IBT_MAGIC
 };
 
-
 STATIC int				/* error (0 or EFSCORRUPTED) */
 xfs_btree_check_lblock(
 	struct xfs_btree_cur	*cur,	/* btree cursor */
@@ -715,7 +714,6 @@ xfs_btree_readahead_sblock(
 	int			rval = 0;
 	xfs_agblock_t		left = be32_to_cpu(block->bb_u.s.bb_leftsib);
 	xfs_agblock_t		right = be32_to_cpu(block->bb_u.s.bb_rightsib);
-
 
 	if ((lr & XFS_BTCUR_LEFTRA) && left != NULLAGBLOCK) {
 		xfs_btree_reada_bufs(cur->bc_mp, cur->bc_private.a.agno,
@@ -2260,7 +2258,6 @@ xfs_btree_split(
 			xfs_btree_rec_addr(cur, 1, right));
 	}
 
-
 	/*
 	 * Find the left block number by looking in the buffer.
 	 * Adjust numrecs, sibling pointers.
@@ -2613,7 +2610,6 @@ xfs_btree_make_block_unfull(
 	error = xfs_btree_split(cur, level, nptr, &key, ncur, stat);
 	if (error || *stat == 0)
 		return error;
-
 
 	*index = cur->bc_ptrs[level];
 	cur->bc_ops->init_rec_from_key(&key, nrec);

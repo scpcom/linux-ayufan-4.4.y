@@ -139,7 +139,6 @@ static int s3c64xx_i2s_probe(struct platform_device *pdev,
 	return 0;
 }
 
-
 #define S3C64XX_I2S_RATES \
 	(SNDRV_PCM_RATE_8000 | SNDRV_PCM_RATE_11025 | SNDRV_PCM_RATE_16000 | \
 	SNDRV_PCM_RATE_22050 | SNDRV_PCM_RATE_32000 | SNDRV_PCM_RATE_44100 | \

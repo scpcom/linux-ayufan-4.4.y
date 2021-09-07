@@ -675,7 +675,6 @@ static void qla4xxx_timer(struct scsi_qla_host *ha)
 			set_bit(DPC_RESET_HA, &ha->dpc_flags);
 	}
 
-
 	/* Wakeup the dpc routine for this adapter, if needed. */
 	if ((start_dpc ||
 	     test_bit(DPC_RESET_HA, &ha->dpc_flags) ||
@@ -1681,7 +1680,6 @@ static int qla4xxx_eh_host_reset(struct scsi_cmnd *cmd)
 
 	return return_status;
 }
-
 
 static struct pci_device_id qla4xxx_pci_tbl[] = {
 	{

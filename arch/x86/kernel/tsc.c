@@ -182,7 +182,6 @@ static unsigned long calc_pmtimer_ref(u64 deltatsc, u64 pm1, u64 pm2)
 #define CAL2_LATCH	(CLOCK_TICK_RATE / (1000 / CAL2_MS))
 #define CAL2_PIT_LOOPS	5000
 
-
 /*
  * Try to calibrate the TSC against the Programmable
  * Interrupt Timer and return the frequency of the TSC
@@ -577,7 +576,6 @@ int recalibrate_cpu_khz(void)
 
 EXPORT_SYMBOL(recalibrate_cpu_khz);
 
-
 /* Accelerators for sched_clock()
  * convert from cycles(64bits) => nanoseconds (64bits)
  *  basic equation:
@@ -966,4 +964,3 @@ void __init tsc_init(void)
 	check_system_tsc_reliable();
 	init_tsc_clocksource();
 }
-

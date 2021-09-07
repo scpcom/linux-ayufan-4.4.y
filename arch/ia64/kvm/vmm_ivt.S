@@ -54,7 +54,6 @@
  * Table is based upon EAS2.6 (Oct 1999)
  */
 
-
 #include <asm/asmmacro.h>
 #include <asm/cache.h>
 #include <asm/pgtable.h>
@@ -806,7 +805,6 @@ END(kvm_ia32_intercept)
 // fault ever gets "unreserved", simply moved the following code to a more
 // suitable spot...
 
-
 ENTRY(kvm_dtlb_miss_dispatch)
 	mov r19 = 2
 	KVM_SAVE_MIN_WITH_COVER_R19
@@ -908,7 +906,6 @@ ENTRY(kvm_dispatch_virtualization_fault)
 	adds out1=16,sp         //regs
 	br.call.sptk.many b6=kvm_emulate
 END(kvm_dispatch_virtualization_fault)
-
 
 ENTRY(kvm_dispatch_interrupt)
 	KVM_SAVE_MIN_WITH_COVER_R19	// uses r31; defines r2 and r3

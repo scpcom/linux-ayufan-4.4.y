@@ -21,7 +21,6 @@
 
 #include "cx20442.h"
 
-
 struct cx20442_priv {
 	struct snd_soc_codec codec;
 	u8 reg_cache[1];
@@ -208,10 +207,8 @@ static int cx20442_write(struct snd_soc_codec *codec, unsigned int reg,
 	return 0;
 }
 
-
 /* Moved up here as line discipline referres it during initialization */
 static struct snd_soc_codec *cx20442_codec;
-
 
 /*
  * Line discpline related code
@@ -307,7 +304,6 @@ struct tty_ldisc_ops v253_ops = {
 	.write_wakeup = v253_wakeup,
 };
 EXPORT_SYMBOL_GPL(v253_ops);
-
 
 /*
  * Codec DAI

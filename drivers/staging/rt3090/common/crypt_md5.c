@@ -26,7 +26,6 @@
 
 #include "../crypt_md5.h"
 
-
 #ifdef MD5_SUPPORT
 /*
  * F, G, H and I are basic MD5 functions.
@@ -64,7 +63,6 @@ static const UINT32 MD5_DefaultHashValue[4] = {
 };
 #endif /* MD5_SUPPORT */
 
-
 #ifdef MD5_SUPPORT
 /*
 ========================================================================
@@ -90,7 +88,6 @@ VOID MD5_Init (
     pMD5_CTX->BlockLen   = 0;
     pMD5_CTX->MessageLen = 0;
 } /* End of MD5_Init */
-
 
 /*
 ========================================================================
@@ -225,7 +222,6 @@ VOID MD5_Hash (
     pMD5_CTX->BlockLen = 0;
 } /* End of MD5_Hash */
 
-
 /*
 ========================================================================
 Routine Description:
@@ -272,7 +268,6 @@ VOID MD5_Append (
     pMD5_CTX->MessageLen += MessageLen;
 } /* End of MD5_Append */
 
-
 /*
 ========================================================================
 Routine Description:
@@ -317,7 +312,6 @@ VOID MD5_End (
         /* End of for */
     NdisMoveMemory(DigestMessage, pMD5_CTX->HashValue, MD5_DIGEST_SIZE);
 } /* End of MD5_End */
-
 
 /*
 ========================================================================

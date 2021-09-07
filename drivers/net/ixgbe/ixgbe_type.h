@@ -385,7 +385,6 @@
 #define IXGBE_TDPT2TCCR(_i)     (0x0CD20 + ((_i) * 4)) /* 8 of these (0-7) */
 #define IXGBE_TDPT2TCSR(_i)     (0x0CD40 + ((_i) * 4)) /* 8 of these (0-7) */
 
-
 /* Security Control Registers */
 #define IXGBE_SECTXCTRL         0x08800
 #define IXGBE_SECTXSTAT         0x08804
@@ -2471,7 +2470,6 @@ struct ixgbe_info {
 	struct ixgbe_eeprom_operations	*eeprom_ops;
 	struct ixgbe_phy_operations	*phy_ops;
 };
-
 
 /* Error Codes */
 #define IXGBE_ERR_EEPROM                        -1

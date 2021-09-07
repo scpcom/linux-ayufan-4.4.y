@@ -153,7 +153,6 @@ static int flashInfoFill(void)
 	}
 #endif
 
-	
 	DB(printk("\nINFO: %s - Found %d Flash Devices", __FUNCTION__, expectedDevs));
 	return expectedDevs;
 }

@@ -93,7 +93,6 @@
 
 #include "et1310_tx.h"
 
-
 static void et131x_update_tcb_list(struct et131x_adapter *etdev);
 static void et131x_check_send_wait_list(struct et131x_adapter *etdev);
 static inline void et131x_free_send_packet(struct et131x_adapter *etdev,
@@ -693,7 +692,6 @@ static int nic_send_packet(struct et131x_adapter *etdev, PMP_TCB pMpTcb)
 
 	return 0;
 }
-
 
 /**
  * et131x_free_send_packet - Recycle a MP_TCB, complete the packet if necessary

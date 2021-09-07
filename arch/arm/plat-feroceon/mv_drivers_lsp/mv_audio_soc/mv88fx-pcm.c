@@ -92,8 +92,6 @@ static void mv88fx_pcm_init_stream(struct mv88fx_snd_chip *chip,
 	}
 }
 
-
-
 static int mv88fx_find_dram_cs(struct mbus_dram_target_info *dram,
 			       u32 base, u32 size)
 {
@@ -144,7 +142,6 @@ static int mv88fx_config_dma_window(struct mv88fx_snd_chip *chip,
 	writel(cs->base,
 	       chip->base + AUDIO_REG_BASE(chip->port) + WINDOW_BASE(dma));
 
-
 #undef WINDOW_CTRL
 #undef WINDOW_BASE
 
@@ -164,7 +161,6 @@ static int mv88fx_conf_mbus_windows(struct mv88fx_snd_chip *chip,
 		return -1;
 	return 0;
 }
-
 
 static irqreturn_t mv88fx_pcm_dma_interrupt(int irq, void *dev_id)
 {
@@ -480,7 +476,6 @@ static struct mv88fx_snd_chip *mv88fx_pcm_init(struct snd_pcm *pcm,
 
 		}
 
-
 	mv88fx_pcm_init_stream(chip, &chip->stream[SNDRV_PCM_STREAM_PLAYBACK],
 			       SNDRV_PCM_STREAM_PLAYBACK);
 	mv88fx_pcm_init_stream(chip, &chip->stream[SNDRV_PCM_STREAM_CAPTURE],
@@ -565,26 +560,19 @@ static void mv88fx_pcm_free(struct snd_pcm *pcm)
 	mv88fx_pcm_snd_chip = NULL;
 }
 
-
 static int mv88fx_pcm_suspend(struct snd_soc_dai *cpu_dai)
 {
 	mv88fx_snd_debug("");
 
-
 	return 0;
 }
-
-
 
 static int mv88fx_pcm_resume(struct snd_soc_dai *cpu_dai)
 {
 	mv88fx_snd_debug("");
 
-
 	return 0;
 }
-
-
 
 struct snd_soc_platform mv88fx_soc_platform = {
 	.name = DRIVER_NAME,
@@ -595,7 +583,6 @@ struct snd_soc_platform mv88fx_soc_platform = {
 	.pcm_ops = &mv88fx_pcm_ops,
 };
 EXPORT_SYMBOL_GPL(mv88fx_soc_platform);
-
 
 static int __init mv88fx_soc_platform_init(void)
 {
@@ -608,9 +595,6 @@ static void __exit mv88fx_soc_platform_exit(void)
 	snd_soc_unregister_platform(&mv88fx_soc_platform);
 }
 module_exit(mv88fx_soc_platform_exit);
-
-
-
 
 MODULE_AUTHOR("Yuval Elmaliah <eyuval@marvell.com>");
 MODULE_DESCRIPTION("mv88fx ASoc Platform driver");

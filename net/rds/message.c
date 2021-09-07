@@ -44,7 +44,6 @@ static unsigned int	rds_exthdr_size[__RDS_EXTHDR_MAX] = {
 [RDS_EXTHDR_RDMA_DEST]	= sizeof(struct rds_ext_header_rdma_dest),
 };
 
-
 void rds_message_addref(struct rds_message *rm)
 {
 	rdsdebug("addref rm %p ref %d\n", rm, atomic_read(&rm->m_refcount));
@@ -405,4 +404,3 @@ void rds_message_unmapped(struct rds_message *rm)
 		wake_up(&rds_message_flush_waitq);
 }
 EXPORT_SYMBOL_GPL(rds_message_unmapped);
-

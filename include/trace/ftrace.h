@@ -57,7 +57,6 @@
 
 #include TRACE_INCLUDE(TRACE_INCLUDE_FILE)
 
-
 /*
  * Stage 2 of the trace events.
  *
@@ -767,4 +766,3 @@ end:									\
 #endif /* CONFIG_EVENT_PROFILE */
 
 #undef _TRACE_PROFILE_INIT
-

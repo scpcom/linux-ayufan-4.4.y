@@ -53,7 +53,6 @@ static void retrieve_device_setting(struct viafb_ioctl_setting
 
 static struct fb_ops viafb_ops;
 
-
 static void viafb_update_fix(struct fb_info *info)
 {
 	u32 bpp = info->var.bits_per_pixel;

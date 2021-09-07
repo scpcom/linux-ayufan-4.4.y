@@ -1255,7 +1255,6 @@ int ldc_bind(struct ldc_channel *lp, const char *name)
 		return err;
 	}
 
-
 	spin_lock_irqsave(&lp->lock, flags);
 
 	enable_irq(lp->cfg.rx_irq);

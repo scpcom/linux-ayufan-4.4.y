@@ -35,7 +35,6 @@
 #include "vmbus.h"
 #include "StorVscApi.h"
 
-
 struct host_device_context {
 	/* must be 1st field
 	 * FIXME this is a bug */
@@ -99,7 +98,6 @@ static int storvsc_report_luns(struct scsi_device *sdev, unsigned int luns[],
 static int storvsc_get_chs(struct scsi_device *sdev, struct block_device *bdev,
 			   sector_t capacity, int *info);
 
-
 static int storvsc_ringbuffer_size = STORVSC_RING_BUFFER_SIZE;
 
 /* The one and only one */
@@ -132,7 +130,6 @@ static struct scsi_host_template scsi_driver = {
 	/* Make sure we dont get a sg segment crosses a page boundary */
 	.dma_boundary =		PAGE_SIZE-1,
 };
-
 
 /**
  * storvsc_drv_init - StorVsc driver initialization.
@@ -344,7 +341,6 @@ static int storvsc_remove(struct device *device)
 	struct Scsi_Host *host = dev_get_drvdata(device);
 	struct host_device_context *host_device_ctx =
 			(struct host_device_context *)host->hostdata;
-
 
 	DPRINT_ENTER(STORVSC_DRV);
 
@@ -731,7 +727,6 @@ static int storvsc_queuecommand(struct scsi_cmnd *scmnd,
 
 	request->SenseBuffer = scmnd->sense_buffer;
 	request->SenseBufferSize = SCSI_SENSE_BUFFERSIZE;
-
 
 	request->DataBuffer.Length = scsi_bufflen(scmnd);
 	if (scsi_sg_count(scmnd)) {

@@ -25,13 +25,11 @@
  *************************************************************************
  */
 
-
 #ifdef IGMP_SNOOP_SUPPORT
 
 #include "../rt_config.h"
 #include "../ipv6.h"
 #include "../igmp_snoop.h"
-
 
 static inline void initFreeEntryList(
 	IN PMULTICAST_FILTER_TABLE pMulticastFilterTable,
@@ -89,7 +87,6 @@ static VOID DeleteIgmpMember(
 static VOID DeleteIgmpMemberList(
 	IN PMULTICAST_FILTER_TABLE pMulticastFilterTable,
 	IN PLIST_HEADER pList);
-
 
 /*
     ==========================================================================
@@ -602,7 +599,6 @@ VOID IGMPSnooping(
 	return;
 }
 
-
 static BOOLEAN isIgmpMacAddr(
 	IN PUCHAR pMacAddr)
 {
@@ -723,7 +719,6 @@ static VOID DeleteIgmpMemberList(
 	initList(pList);
 	return;
 }
-
 
 UCHAR IgmpMemberCnt(
 	IN PLIST_HEADER pList)
@@ -1217,7 +1212,6 @@ BOOLEAN isMldPkt(
 	|                                                               |
 	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-
 	where each Group Record has the following internal format:
 	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	|  Record Type  |  Aux Data Len |     Number of Sources (N)     |
@@ -1360,6 +1354,5 @@ VOID MLDSnooping(
 
 	return;
 }
-
 
 #endif // IGMP_SNOOP_SUPPORT //

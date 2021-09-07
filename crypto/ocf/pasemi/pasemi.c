@@ -705,7 +705,6 @@ static irqreturn_t pasemi_intr(int irq, void *arg, struct pt_regs *regs)
 
 	out_le32(sc->iob_regs + PAS_IOB_DMA_TXCH_RESET(chan_index), reg);
 
-
 	return IRQ_HANDLED;
 }
 

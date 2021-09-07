@@ -85,7 +85,6 @@ static long iSeries_hpte_insert(unsigned long hpte_group, unsigned long va,
 		slot &= 0x7fffffffffffffff;
 	}
 
-
 	lhpte.v = hpte_encode_v(va, MMU_PAGE_4K, MMU_SEGSIZE_256M) |
 		vflags | HPTE_V_VALID;
 	lhpte.r = hpte_encode_r(phys_to_abs(pa), MMU_PAGE_4K) | rflags;

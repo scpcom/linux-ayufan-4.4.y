@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvDramIfConfigh
 #define __INCmvDramIfConfigh
 
@@ -118,13 +117,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DDR2_DUNIT_ODT_CTRL_CS0_CS2_DV	0x0000740F
 #define DDR_SDRAM_EXT_MODE_CS0_CS2_DV	0x00000404
 
-
 /* DDR SDRAM Adderss/Control and Data Pads Calibration default values */
 #define DDR1_ADDR_CTRL_PAD_STRENGTH_TYPICAL_DV	\
 		(1 << SDRAM_PRE_DRIVER_STRENGTH_OFFS)
 #define DDR2_ADDR_CTRL_PAD_STRENGTH_TYPICAL_DV	\
 		(3 << SDRAM_PRE_DRIVER_STRENGTH_OFFS)
-		
 		
 #define DDR1_DATA_PAD_STRENGTH_TYPICAL_DV		\
 		(1 << SDRAM_PRE_DRIVER_STRENGTH_OFFS)
@@ -154,7 +151,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                      (0x3 << 14)   | \
                                      (0x1 << 18)   | \
                                      (0x1 << 22))
-
 
 #define FTDLL_DDR2_166MHZ           ((0x1 << 0)    | \
                                      (0x1 << 12)   | \

@@ -27,7 +27,6 @@
 #include <asm/io.h>
 #include "vxpocket.h"
 
-
 static int vxp_reg_offset[VX_REG_MAX] = {
 	[VX_ICR]	= 0x00,		// ICR
 	[VX_CVR]	= 0x01,		// CVR
@@ -46,7 +45,6 @@ static int vxp_reg_offset[VX_REG_MAX] = {
 	[VX_CSUER]	= 0x0e,		// CSUER
 	[VX_RUER]	= 0x0f,		// RUER
 };
-
 
 static inline unsigned long vxp_reg_addr(struct vx_core *_chip, int reg)
 {
@@ -81,7 +79,6 @@ static void vxp_outb(struct vx_core *chip, int offset, unsigned char val)
 #undef vx_outb
 #define vx_outb(chip,reg,val)	vxp_outb((struct vx_core *)(chip), VX_##reg,val)
 
-
 /*
  * vx_check_magic - check the magic word on xilinx
  *
@@ -100,7 +97,6 @@ static int vx_check_magic(struct vx_core *chip)
 	snd_printk(KERN_ERR "cannot find xilinx magic word (%x)\n", c);
 	return -EIO;
 }
-
 
 /*
  * vx_reset_dsp - reset the DSP
@@ -239,7 +235,6 @@ static int vxp_load_xilinx_binary(struct vx_core *_chip, const struct firmware *
 	return -EIO;
 }
 
-
 /*
  * vxp_load_dsp - load_dsp callback
  */
@@ -270,7 +265,6 @@ static int vxp_load_dsp(struct vx_core *vx, int index, const struct firmware *fw
 	}
 }
 		
-
 /*
  * vx_test_and_ack - test and acknowledge interrupt
  *
@@ -300,7 +294,6 @@ static int vxp_test_and_ack(struct vx_core *_chip)
 
 	return 0;
 }
-
 
 /*
  * vx_validate_irq - enable/disable IRQ
@@ -391,7 +384,6 @@ static void vxp_dma_write(struct vx_core *chip, struct snd_pcm_runtime *runtime,
 	vx_release_pseudo_dma(chip);
 }
 
-
 /*
  * vx_pseudo_dma_read - read bulk data on pseudo DMA mode
  * @offset: buffer offset in bytes
@@ -438,7 +430,6 @@ static void vxp_dma_read(struct vx_core *chip, struct snd_pcm_runtime *runtime,
 	vx_outb(chip, ICR, 0);
 }
 
-
 /*
  * write a codec data (24bit)
  */
@@ -459,7 +450,6 @@ static void vxp_write_codec_reg(struct vx_core *chip, int codec, unsigned int da
 	/* Terminate access to codec registers */
 	vx_inb(chip, HIFREQ);
 }
-
 
 /*
  * vx_set_mic_boost - set mic boost level (on vxp440 only)
@@ -524,7 +514,6 @@ void vx_set_mic_level(struct vx_core *chip, int level)
 	spin_unlock_irqrestore(&chip->lock, flags);
 }
 
-
 /*
  * change the input audio source
  */
@@ -579,7 +568,6 @@ static void vxp_set_clock_source(struct vx_core *_chip, int source)
 	vx_outb(chip, CDSP, chip->regCDSP);
 }
 
-
 /*
  * reset the board
  */
@@ -590,7 +578,6 @@ static void vxp_reset_board(struct vx_core *_chip, int cold_reset)
 	chip->regCDSP = 0;
 	chip->regDIALOG = 0;
 }
-
 
 /*
  * callbacks

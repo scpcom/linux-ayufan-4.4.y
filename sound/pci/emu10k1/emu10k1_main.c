@@ -41,14 +41,12 @@
 #include <linux/vmalloc.h>
 #include <linux/mutex.h>
 
-
 #include <sound/core.h>
 #include <sound/emu10k1.h>
 #include <linux/firmware.h>
 #include "p16v.h"
 #include "tina2.h"
 #include "p17v.h"
-
 
 #define HANA_FILENAME "emu/hana.fw"
 #define DOCK_FILENAME "emu/audio_dock.fw"
@@ -63,7 +61,6 @@ MODULE_FIRMWARE(EMU1010B_FILENAME);
 MODULE_FIRMWARE(MICRO_DOCK_FILENAME);
 MODULE_FIRMWARE(EMU0404_FILENAME);
 MODULE_FIRMWARE(EMU1010_NOTEBOOK_FILENAME);
-
 
 /*************************************************************************
  * EMU10K1 init / done
@@ -275,7 +272,6 @@ static int snd_emu10k1_init(struct snd_emu10k1 *emu, int enable_ir, int resume)
 			emu->i2c_capture_volume[n][1] = 0xcf;
 		}
 	}
-
 
 	snd_emu10k1_ptr_write(emu, PTB, 0, emu->ptb_pages.addr);
 	snd_emu10k1_ptr_write(emu, TCB, 0, 0);	/* taken from original driver */
@@ -502,14 +498,12 @@ int snd_emu10k1_done(struct snd_emu10k1 *emu)
 					 * filled with zeros */
 #define EC_CHECKSUM_ADDR	0x3f	/* Location at which checksum is stored */
 
-
 /* Most of this stuff is pretty self-evident.  According to the hardware
  * dudes, we need to leave the ADCCAL bit low in order to avoid a DC
  * offset problem.  Weird.
  */
 #define EC_RAW_RUN_MODE		(EC_DACMUTEN | EC_ADCRSTN | EC_TRIM_MUTEN | \
 				 EC_TRIM_CSN)
-
 
 #define EC_DEFAULT_ADC_GAIN	0xC4C4
 #define EC_DEFAULT_SPDIF0_SEL	0x0

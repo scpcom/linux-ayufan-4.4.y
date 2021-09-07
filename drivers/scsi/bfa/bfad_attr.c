@@ -120,10 +120,6 @@ bfad_im_get_host_port_id(struct Scsi_Host *shost)
 			bfa_os_hton3b(bfa_fcs_port_get_fcid(port->fcs_port));
 }
 
-
-
-
-
 struct Scsi_Host *
 bfad_os_starget_to_shost(struct scsi_target *starget)
 {
@@ -645,5 +641,3 @@ struct device_attribute *bfad_im_vport_attrs[] = {
     &dev_attr_number_of_discovered_ports,
     NULL,
 };
-
-

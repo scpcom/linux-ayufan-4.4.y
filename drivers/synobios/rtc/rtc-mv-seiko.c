@@ -270,7 +270,6 @@ End:
 	return iRet;
 }
 
-
 /*
  * Check rtc time if later equal than alarm(interrupt) time
  * Need to make HOUR from Ricoh format(in BCD) sequential(in BCD)

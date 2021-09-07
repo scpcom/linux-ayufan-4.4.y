@@ -13,5 +13,4 @@
 
 void orion_time_init(unsigned int irq, unsigned int tclk);
 
-
 #endif

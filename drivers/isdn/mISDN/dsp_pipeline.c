@@ -358,5 +358,3 @@ void dsp_pipeline_process_rx(struct dsp_pipeline *pipeline, u8 *data, int len,
 		if (entry->elem->process_rx)
 			entry->elem->process_rx(entry->p, data, len, txlen);
 }
-
-

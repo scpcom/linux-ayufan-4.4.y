@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvAhbToMbusRegsh
 #define __INCmvAhbToMbusRegsh
 
@@ -73,7 +72,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAX_AHB_TO_MBUS_WINS					15
 #define MAX_AHB_TO_MBUS_REMAP_WINS				8
 #define MV_AHB_TO_MBUS_INTREG_WIN				14
-
 
 #define AHB_TO_MBUS_WIN_CTRL_REG(cpu, winNum)			(((winNum) < 8)? \
 								(AHB_TO_MBUS_BASE(cpu) + (winNum)*0x10): \
@@ -105,7 +103,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 											 Associated with this window */
 #define ATMWCR_WIN_ATTR_MASK				(0xff << ATMWCR_WIN_ATTR_OFFS)
 
-											 
 /*
 Used with the Base register to set the address window size and location
 Must be programed from LSB to MSB as sequence of 1’s followed
@@ -151,6 +148,4 @@ target_addr[63:32] = (RemapHigh[31:0]
 #define ATMWRHR_REMAP_HIGH_OFFS			0 /* Remap Address */
 #define ATMWRHR_REMAP_HIGH_MASK			(0xffffffff << ATMWRHR_REMAP_HIGH_OFFS)
 
-
 #endif /* __INCmvAhbToMbusRegsh */
-

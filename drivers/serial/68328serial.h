@@ -11,7 +11,6 @@
 #ifndef _MC683XX_SERIAL_H
 #define _MC683XX_SERIAL_H
 
-
 struct serial_struct {
 	int	type;
 	int	line;
@@ -163,7 +162,6 @@ struct m68k_serial {
 	wait_queue_head_t	open_wait;
 	wait_queue_head_t	close_wait;
 };
-
 
 #define SERIAL_MAGIC 0x5301
 

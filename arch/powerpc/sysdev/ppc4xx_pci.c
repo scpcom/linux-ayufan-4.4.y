@@ -138,7 +138,6 @@ static int __init ppc4xx_parse_dma_ranges(struct pci_controller *hose,
 		if (!(pci_space & 0x40000000))
 			res->flags &= ~IORESOURCE_PREFETCH;
 
-
 		/* Use that */
 		res->start = pci_addr;
 		/* Beware of 32 bits resources */
@@ -1068,7 +1067,6 @@ static struct ppc4xx_pciex_hwops ppc405ex_pcie_hwops __initdata =
 
 #endif /* CONFIG_40x */
 
-
 /* Check that the core has been initied and if not, do it */
 static int __init ppc4xx_pciex_check_core_init(struct device_node *np)
 {
@@ -1853,4 +1851,3 @@ static int __init ppc4xx_pci_find_bridges(void)
 	return 0;
 }
 arch_initcall(ppc4xx_pci_find_bridges);
-

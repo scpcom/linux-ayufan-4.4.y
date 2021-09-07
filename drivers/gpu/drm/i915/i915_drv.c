@@ -253,7 +253,6 @@ int i965_reset(struct drm_device *dev, u8 flags)
 	return 0;
 }
 
-
 static int __devinit
 i915_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 {

@@ -61,7 +61,6 @@ static inline int ppc_pci_has_flag(int flag)
 }
 #endif
 
-
 /*
  * Structure of a PCI controller (host bridge)
  */
@@ -267,7 +266,6 @@ static inline struct pci_controller *pci_bus_to_host(const struct pci_bus *bus)
 	BUG_ON(busdn == NULL);
 	return PCI_DN(busdn)->phb;
 }
-
 
 extern void isa_bridge_find_early(struct pci_controller *hose);
 

@@ -266,7 +266,6 @@ static void at91rm9200_reset(void)
 	at91_sys_write(AT91_ST_CR, AT91_ST_WDRST);
 }
 
-
 /* --------------------------------------------------------------------
  *  AT91RM9200 processor initialization
  * -------------------------------------------------------------------- */
@@ -290,7 +289,6 @@ void __init at91rm9200_initialize(unsigned long main_clock, unsigned short banks
 	/* Initialize GPIO subsystem */
 	at91_gpio_init(at91rm9200_gpio, banks);
 }
-
 
 /* --------------------------------------------------------------------
  *  Interrupt initialization

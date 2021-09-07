@@ -16,14 +16,12 @@
 
 #include "proto.h"
 
-
 /*
  * The PCI controller list.
  */
 
 struct pci_controller *hose_head, **hose_tail = &hose_head;
 struct pci_controller *pci_isa_hose;
-
 
 struct pci_controller * __init
 alloc_pci_controller(void)

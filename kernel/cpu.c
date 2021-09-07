@@ -475,7 +475,6 @@ void cpu_hotplug_disable_before_freeze(void)
 	cpu_maps_update_done();
 }
 
-
 /*
  * When tasks have been thawed, re-enable regular CPU hotplug (which had been
  * disabled while beginning to freeze tasks).
@@ -520,7 +519,6 @@ cpu_hotplug_pm_callback(struct notifier_block *nb,
 
 	return NOTIFY_OK;
 }
-
 
 int cpu_hotplug_pm_sync_init(void)
 {

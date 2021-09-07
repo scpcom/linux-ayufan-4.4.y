@@ -702,7 +702,6 @@ MV_STATUS mvPMFlashInfErase (MV_MFLASH_INFO *pFlash)
 	return mvPMFlashEraseSeq(pFlash, MV_PMFLASH_OPCD_IPAGE_ERASE);
 }
 
-
 /*******************************************************************************
 * mvPMFlashSecErase - Erase the single sector of the main flash region 
 *
@@ -736,7 +735,6 @@ MV_STATUS mvPMFlashSecErase (MV_MFLASH_INFO *pFlash, MV_U32 secNumber)
 	/* Perform the erase sequence*/
 	return mvPMFlashEraseSeq(pFlash, MV_PMFLASH_OPCD_PAGE_ERASE);
 }
-
 
 /*******************************************************************************
 * mvPMFlashBlockRd - Read a block of Memory from the Main Flash 
@@ -1278,7 +1276,6 @@ MV_STATUS mvPMFlashSectorSizeSet (MV_MFLASH_INFO *pFlash, MV_U32 secSize)
 	return MV_OK;
 }
 
-
 /*******************************************************************************
 * mvPMFlashPrefetchSet - Set the Prefetch mode enable/disable
 *
@@ -1422,5 +1419,3 @@ MV_STATUS mvPMFlashIdGet (MV_MFLASH_INFO *pFlash, MV_U32 * pManfCode, MV_U16 * p
 
 	return MV_OK;
 }
-
-

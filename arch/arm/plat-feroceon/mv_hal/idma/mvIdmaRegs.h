@@ -65,9 +65,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __INCmvIdmaSpech
 #define __INCmvIdmaSpech
 
-
 /* defines */
-
 
 /* IDMA channel rgisters       												*/
 #define IDMA_BYTE_COUNT_REG(chan)          	(IDMA_UNIT_BASE + 0x0 + ((chan) * 4))
@@ -86,9 +84,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define IDMA_ERROR_ADDR_REG             (IDMA_UNIT_BASE + 0xc8)
 #define IDMA_ERROR_SELECT_REG           (IDMA_UNIT_BASE + 0xcc)
 
-
 /* DMA register fileds */
-
 
 /* IDMA Channel Byte Count Register (ICBCR) */
 #define ICBCR_BYTECNT_OFFS			0		/* Byte count field offset		*/
@@ -101,7 +97,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ICBCR_DESC_OWNER_BY_DMA		(0 << ICBCR_DESC_OWNER_OFFS)
 #define ICBCR_DESC_OWNED_BY_CPU		(1 << ICBCR_DESC_OWNER_OFFS)
 
-               
 /* IDMA Channel Control Low Register (ICCLR)								*/
 /* Data Transfer Limit Note: If an IDMA accesses a cache coherent DRAM 		*/
 /* region, the burst limit must not exceed 32 bytes.						*/
@@ -204,7 +199,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define IESR_ERR_TYPE_OFFS			0
 #define IESR_ERR_TYPE_MASK			(0x1f << IESR_ERR_TYPE_OFFS)
 
-
-
 #endif	/* __INCmvIdmaSpech */
-

@@ -170,7 +170,6 @@ static void gemtek_pci_setfrequency(struct gemtek_pci *card, unsigned long frequ
 	mutex_unlock(&card->lock);
 }
 
-
 static void gemtek_pci_mute(struct gemtek_pci *card)
 {
 	mutex_lock(&card->lock);

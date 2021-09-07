@@ -116,4 +116,3 @@ void videobuf_queue_sg_init(struct videobuf_queue* q,
 	 */
 int videobuf_sg_dma_map(struct device *dev, struct videobuf_dmabuf *dma);
 int videobuf_sg_dma_unmap(struct device *dev, struct videobuf_dmabuf *dma);
-

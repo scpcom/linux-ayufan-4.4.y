@@ -62,14 +62,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
  
- 
 /* includes */
 #include "rtc/ext_rtc/mvDS1339.h"
 #include "rtc/ext_rtc/mvDS1339Reg.h"
 
 static MV_VOID mvRtcCharWrite(MV_U32 offset, MV_U8 data);
 static MV_VOID mvRtcCharRead(MV_U32 offset, MV_U8 *data);
-
 
 /*******************************************************************************
 * mvRtcDS1339TimeSet - Set the Alarm of the Real time clock
@@ -259,7 +257,6 @@ MV_VOID mvRtcDS1339Init(MV_VOID)
 
 	return;
 }
-
 
 /* assumption twsi is initialized !!! */
 /*******************************************************************************

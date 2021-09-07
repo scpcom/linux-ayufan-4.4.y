@@ -27,7 +27,6 @@
 #define DLOG(x...) do {} while (0)
 #endif
 
-
 #include <mach/qdsp5/qdsp5vdeccmdi.h>
 #include "adsp.h"
 
@@ -160,4 +159,3 @@ int adsp_video_verify_cmd(struct msm_adsp_module *module,
 		return 0;
 	}
 }
-

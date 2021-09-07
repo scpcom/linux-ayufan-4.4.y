@@ -40,7 +40,6 @@
 
 #include "cm4040_cs.h"
 
-
 #ifdef PCMCIA_DEBUG
 #define reader_to_dev(x)	(&handle_to_dev(x->p_dev))
 static int pc_debug = PCMCIA_DEBUG;
@@ -551,7 +550,6 @@ static int cm4040_config_check(struct pcmcia_device *p_dev,
 		   "pcmcia_request_io returned 0x%x\n", rc);
 	return rc;
 }
-
 
 static int reader_config(struct pcmcia_device *link, int devno)
 {

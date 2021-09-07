@@ -25,7 +25,6 @@
 #define HFCSX_MON1_D    0x0A
 #define HFCSX_MON2_D    0x0B
 
-
 /* GCI/IOM bus timeslot registers */
 
 #define HFCSX_B1_SSL    0x20
@@ -49,7 +48,6 @@
 #define HFCSX_MST_EMOD  0x2D
 #define HFCSX_MST_MODE	0x2E
 #define HFCSX_CONNECT 	0x2F
-
 
 /* Interrupt and status registers */
 
@@ -119,7 +117,6 @@
 #define HFCSX_IRQ_SELDIS 0x00
 #define HFCSX_RESET  	 0x08
 #define HFCSX_FIFO_RESET 0x80
-
 
 /* bits in INT_M1 and INT_S1 */
 #define HFCSX_INTS_B1TRANS  0x01

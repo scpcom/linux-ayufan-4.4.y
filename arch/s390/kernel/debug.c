@@ -62,7 +62,6 @@ typedef struct
 	long args[0];
 } debug_sprintf_entry_t;
 
-
 /* internal function prototyes */
 
 static int debug_init(void);
@@ -227,7 +226,6 @@ fail_malloc_areas:
 	return NULL;
 
 }
-
 
 /*
  * debug_info_alloc
@@ -808,7 +806,6 @@ debug_set_level(debug_info_t* id, int new_level)
 	spin_unlock_irqrestore(&id->lock,flags);
 }
 
-
 /*
  * proceed_active_entry:
  * - set active entry to next in the ring buffer
@@ -890,7 +887,6 @@ s390dbf_procactive(ctl_table *table, int write,
 		return 0;
 }
 
-
 static struct ctl_table s390dbf_table[] = {
 	{
 		.ctl_name       = CTL_S390DBF_STOPPABLE,
@@ -932,7 +928,6 @@ debug_stop_all(void)
 	if (debug_stoppable)
 		debug_active = 0;
 }
-
 
 /*
  * debug_event_common:
@@ -1310,7 +1305,6 @@ out:
 	*offset += user_len;
 	return rc;		/* number of input characters */
 }
-
 
 /*
  * flushes debug areas

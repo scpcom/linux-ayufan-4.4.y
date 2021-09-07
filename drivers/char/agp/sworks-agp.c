@@ -27,7 +27,6 @@
 #define SVWRKS_POSTFLUSH	0x14
 #define SVWRKS_DIRFLUSH		0x0c
 
-
 struct serverworks_page_map {
 	unsigned long *real;
 	unsigned long __iomem *remapped;
@@ -566,4 +565,3 @@ module_init(agp_serverworks_init);
 module_exit(agp_serverworks_cleanup);
 
 MODULE_LICENSE("GPL and additional rights");
-

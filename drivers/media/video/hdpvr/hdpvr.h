@@ -110,7 +110,6 @@ struct hdpvr_device {
 	u8			*usbc_buf;
 };
 
-
 /* buffer one bulk urb of data */
 struct hdpvr_buffer {
 	struct list_head	buff_list;
@@ -170,7 +169,6 @@ enum {
 
 #define CTRL_DEFAULT_INDEX		0x0003
 
-
 	/* :0 s 38 01 1000 0003 0004 4 = 0a00ca00
 	 * BITRATE SETTING
 	 *   1st and 2nd byte (little endian): average bitrate in 100 000 bit/s
@@ -203,10 +201,7 @@ enum {
 	 *   4th byte n
 	 */
 
-
 	/* :0 s 38 b9 0001 0000 0000 0 */
-
-
 
 /* :0 s 38 d3 0000 0000 0001 1 = 00 */
 /* 		ret = usb_control_msg(dev->udev, */
@@ -218,7 +213,6 @@ enum {
 
 /* 		info("control request returned %d", ret); */
 /* 		msleep(5000); */
-
 
 	/* :0 s b8 81 1400 0003 0005 5 <
 	 * :0 0 5 = d0024002 19
@@ -284,7 +278,6 @@ struct hdpvr_video_info *get_video_info(struct hdpvr_device *dev);
 /* :0 s b8 81 1800 0003 0003 3 < */
 /* :0 0 3 = 0301ff */
 int get_input_lines_info(struct hdpvr_device *dev);
-
 
 /*========================================================================*/
 /* v4l2 registration */

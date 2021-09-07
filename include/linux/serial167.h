@@ -149,7 +149,6 @@ struct cyclades_port {
 #define CySCRH		(0x22)
 #define CyTFTC		(0x80)
 
-
 /* max number of chars in the FIFO */
 
 #define CyMAX_CHAR_FIFO	12

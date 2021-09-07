@@ -43,7 +43,6 @@ void __init dec_ioasic_clocksource_init(void)
 	u32 start, end;
 	int i = HZ / 10;
 
-
 	while (!ds1287_timer_state())
 		;
 

@@ -187,7 +187,6 @@ struct iwl3945_ibss_seq {
 #define IWL_RX_STATS(x) (&x->u.rx_frame.stats)
 #define IWL_RX_DATA(x) (IWL_RX_HDR(x)->payload)
 
-
 /******************************************************************************
  *
  * Functions implemented in iwl-base.c which are forward declared here

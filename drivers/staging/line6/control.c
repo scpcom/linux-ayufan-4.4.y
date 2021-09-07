@@ -41,7 +41,6 @@ static ssize_t prefix ## _set_ ## param(struct device *dev, \
 #define VARIAX_PARAM_R(type, param) LINE6_PARAM_R(VARIAX, variax, type, param)
 #define VARIAX_PARAM_RW(type, param) LINE6_PARAM_RW(VARIAX, variax, type, param)
 
-
 static ssize_t pod_get_param_int(struct device *dev, char *buf, int param)
 {
 	struct usb_interface *interface = to_usb_interface(dev);

@@ -208,7 +208,6 @@ void fsnotify_destroy_mark_by_entry(struct fsnotify_mark_entry *entry)
 	 * is just a lazy update (and could be a perf win...)
 	 */
 
-
 	iput(inode);
 
 	/*

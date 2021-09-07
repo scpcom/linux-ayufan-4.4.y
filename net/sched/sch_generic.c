@@ -396,7 +396,6 @@ static struct Qdisc noqueue_qdisc = {
 	.dev_queue	=	&noqueue_netdev_queue,
 };
 
-
 static const u8 prio2band[TC_PRIO_MAX+1] =
 	{ 1, 2, 2, 2, 1, 2, 0, 0 , 1, 1, 1, 1, 1, 1, 1, 1 };
 

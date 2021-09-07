@@ -42,7 +42,6 @@
 #include <linux/pagevec.h>
 #include <linux/writeback.h>
 
-
 /*
  * Prime number of hash buckets since address is used as the key.
  */
@@ -1330,7 +1329,6 @@ xfs_vm_writepage(
 	 */
 	if (!page_has_buffers(page))
 		create_empty_buffers(page, 1 << inode->i_blkbits, 0);
-
 
 	/*
 	 *  VM calculation for nr_to_write seems off.  Bump it way

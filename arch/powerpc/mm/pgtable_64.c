@@ -57,7 +57,6 @@
 
 unsigned long ioremap_bot = IOREMAP_BASE;
 
-
 #ifdef CONFIG_PPC_MMU_NOHASH
 static void *early_alloc_pgtable(unsigned long size)
 {
@@ -145,7 +144,6 @@ int map_kernel_page(unsigned long ea, unsigned long pa, int flags)
 	}
 	return 0;
 }
-
 
 /**
  * __ioremap_at - Low level function to establish the page tables
@@ -268,7 +266,6 @@ void __iomem * ioremap_flags(phys_addr_t addr, unsigned long size,
 		return ppc_md.ioremap(addr, size, flags, caller);
 	return __ioremap_caller(addr, size, flags, caller);
 }
-
 
 /*  
  * Unmap an IO region and remove it from imalloc'd list.

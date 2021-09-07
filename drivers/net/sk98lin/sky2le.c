@@ -217,7 +217,6 @@ SK_LE_TABLE	*pLETab)	/* pointer to list element table to be initialized */
 		("<== SkGeY2InitPrefetchUnit()\n"));
 }	/* SkGeY2InitPrefetchUnit */
 
-
 /*****************************************************************************
  *
  * SkGeY2InitStatBmu() -	Initialize the Status BMU
@@ -406,7 +405,6 @@ SK_LE_TABLE	*pLETab)	/* pointer to polling LE table */
 }	/* SkGeY2InitPollUnit */
 #endif	/* USE_POLLING_UNIT */
 
-
 /******************************************************************************
  *
  * SkGeY2SetPutIndex
@@ -498,4 +496,3 @@ SK_LE_TABLE	*pLETab)			/* list element table to work with */
 #endif
 	}
 }	/* SkGeY2SetPutIndex */
-

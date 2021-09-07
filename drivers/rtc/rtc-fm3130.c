@@ -153,7 +153,6 @@ static int fm3130_get_time(struct device *dev, struct rtc_time *t)
 	return rtc_valid_tm(t);
 }
 
-
 static int fm3130_set_time(struct device *dev, struct rtc_time *t)
 {
 	struct fm3130 *fm3130 = dev_get_drvdata(dev);
@@ -220,7 +219,6 @@ static int fm3130_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 			fm3130->regs[FM3130_ALARM_HOURS],
 			fm3130->regs[FM3130_ALARM_DATE],
 			fm3130->regs[FM3130_ALARM_MONTHS]);
-
 
 	tm->tm_sec	= bcd2bin(fm3130->regs[FM3130_ALARM_SECONDS] & 0x7F);
 	tm->tm_min	= bcd2bin(fm3130->regs[FM3130_ALARM_MINUTES] & 0x7F);
@@ -500,4 +498,3 @@ module_exit(fm3130_exit);
 MODULE_DESCRIPTION("RTC driver for FM3130");
 MODULE_AUTHOR("Sergey Lapin <slapin@ossfans.org>");
 MODULE_LICENSE("GPL");
-

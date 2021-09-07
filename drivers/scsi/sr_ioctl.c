@@ -34,7 +34,6 @@ module_param(xa_test, int, S_IRUGO | S_IWUSR);
  * the status of the unchecked_isa_dma flag in the host structure */
 #define SR_GFP_DMA(cd) (((cd)->device->host->unchecked_isa_dma) ? GFP_DMA : 0)
 
-
 static int sr_read_tochdr(struct cdrom_device_info *cdi,
 		struct cdrom_tochdr *tochdr)
 {

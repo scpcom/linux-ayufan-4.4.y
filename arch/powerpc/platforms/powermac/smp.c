@@ -448,7 +448,6 @@ struct smp_ops_t psurge_smp_ops = {
  * Core 99 and later support
  */
 
-
 static void smp_core99_give_timebase(void)
 {
 	unsigned long flags;
@@ -470,7 +469,6 @@ static void smp_core99_give_timebase(void)
 
 	local_irq_restore(flags);
 }
-
 
 static void __devinit smp_core99_take_timebase(void)
 {
@@ -527,7 +525,6 @@ static void smp_core99_cypress_tb_freeze(int freeze)
 		panic("Timebase freeze failed !\n");
 	}
 }
-
 
 static void smp_core99_pulsar_tb_freeze(int freeze)
 {
@@ -614,8 +611,6 @@ static void __init smp_core99_setup_i2c_hwsync(int ncpus)
 	pmac_tb_clock_chip_host = NULL;
 }
 
-
-
 /*
  * Newer G5s uses a platform function
  */
@@ -649,7 +644,6 @@ static void smp_core99_gpio_tb_freeze(int freeze)
 		pmac_call_feature(PMAC_FTR_WRITE_GPIO, NULL, core99_tb_gpio, 0);
 	pmac_call_feature(PMAC_FTR_READ_GPIO, NULL, core99_tb_gpio, 0);
 }
-
 
 #endif /* !CONFIG_PPC64 */
 
@@ -862,7 +856,6 @@ static void __devinit smp_core99_setup_cpu(int cpu_nr)
 	}
 }
 
-
 #if defined(CONFIG_HOTPLUG_CPU) && defined(CONFIG_PPC32)
 
 int smp_core99_cpu_disable(void)
@@ -957,4 +950,3 @@ void __init pmac_setup_smp(void)
 	}
 #endif /* CONFIG_PPC32 */
 }
-

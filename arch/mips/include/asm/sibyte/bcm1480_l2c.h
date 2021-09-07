@@ -29,7 +29,6 @@
     *  MA 02111-1307 USA
     ********************************************************************* */
 
-
 #ifndef _BCM1480_L2C_H
 #define _BCM1480_L2C_H
 
@@ -61,7 +60,6 @@
 
 #define BCM1480_L2C_ENTRIES_PER_WAY         4096
 #define BCM1480_L2C_NUM_WAYS                8
-
 
 /*
  * Level 2 Cache Tag register (Table 59)
@@ -99,7 +97,6 @@
 #define V_BCM1480_L2C_DATA_ECC(x)           _SB_MAKEVALUE(x, S_BCM1480_L2C_DATA_ECC)
 #define G_BCM1480_L2C_DATA_ECC(x)           _SB_GETVALUE(x, S_BCM1480_L2C_DATA_ECC, M_BCM1480_L2C_DATA_ECC)
 
-
 /*
  * L2 Misc0 Value Register (Table 60)
  */
@@ -130,7 +127,6 @@
 #define S_BCM1480_L2C_MISC0_ECC_CLEANUP      31
 #define M_BCM1480_L2C_MISC0_ECC_CLEANUP      _SB_MAKEMASK1(S_BCM1480_L2C_MISC0_ECC_CLEANUP)
 
-
 /*
  * L2 Misc1 Value Register (Table 60)
  */
@@ -155,7 +151,6 @@
 #define M_BCM1480_L2C_MISC1_WAY_AGENT_4      _SB_MAKEMASK(8, S_BCM1480_L2C_MISC1_WAY_AGENT_4)
 #define G_BCM1480_L2C_MISC1_WAY_AGENT_4(x)   _SB_GETVALUE(x, S_BCM1480_L2C_MISC1_WAY_AGENT_4, M_BCM1480_L2C_MISC1_WAY_AGENT_4)
 
-
 /*
  * L2 Misc2 Value Register (Table 60)
  */
@@ -171,6 +166,5 @@
 #define S_BCM1480_L2C_MISC2_WAY_AGENT_A      16
 #define M_BCM1480_L2C_MISC2_WAY_AGENT_A      _SB_MAKEMASK(8, S_BCM1480_L2C_MISC2_WAY_AGENT_A)
 #define G_BCM1480_L2C_MISC2_WAY_AGENT_A(x)   _SB_GETVALUE(x, S_BCM1480_L2C_MISC2_WAY_AGENT_A, M_BCM1480_L2C_MISC2_WAY_AGENT_A)
-
 
 #endif /* _BCM1480_L2C_H */

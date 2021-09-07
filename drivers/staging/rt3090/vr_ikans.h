@@ -55,7 +55,6 @@
 	};
 #endif // IKANOS_VX_1X0 //
 
-
 IKANOS_EXTERN void VR_IKANOS_FP_Init(UINT8 BssNum, UINT8 *pApMac);
 
 IKANOS_EXTERN INT32 IKANOS_DataFramesTx(struct sk_buff *pSkb,

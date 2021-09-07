@@ -623,7 +623,6 @@ err_out:
 	return err;
 }
 
-
 /*---------- network device ---------- */
 
 static int cosa_net_attach(struct net_device *dev, unsigned short encoding,
@@ -858,7 +857,6 @@ static int chrdev_rx_done(struct channel_data *chan)
 	return 1;
 }
 
-
 static ssize_t cosa_write(struct file *file,
 	const char __user *buf, size_t count, loff_t *ppos)
 {
@@ -1006,7 +1004,6 @@ static int cosa_fasync(struct inode *inode, struct file *file, int on)
 }
 #endif
 
-
 /* ---------- Ioctls ---------- */
 
 /*
@@ -1052,7 +1049,6 @@ static inline int cosa_download(struct cosa_data *cosa, void __user *arg)
 		return -EINVAL;
 	if (d.len < 0 || d.len > COSA_MAX_FIRMWARE_SIZE)
 		return -EINVAL;
-
 
 	/* If something fails, force the user to reset the card */
 	cosa->firmware_status &= ~(COSA_FW_RESET|COSA_FW_DOWNLOAD);
@@ -1213,7 +1209,6 @@ static int cosa_chardev_ioctl(struct inode *inode, struct file *file,
 	return cosa_ioctl_common(cosa, channel, cmd, arg);
 }
 
-
 /*---------- HW layer interface ---------- */
 
 /*
@@ -1388,7 +1383,6 @@ static int cosa_dma_able(struct channel_data *chan, char *buf, int len)
 	return 1;
 }
 
-
 /* ---------- The SRP/COSA ROM monitor functions ---------- */
 
 /*
@@ -1437,7 +1431,6 @@ static int download(struct cosa_data *cosa, const char __user *microcode, int le
 #endif
 	return 0;
 }
-
 
 /*
  * Starting microcode is done via the "g" command of the SRP monitor.
@@ -1558,7 +1551,6 @@ static int cosa_reset_and_read_id(struct cosa_data *cosa, char *idstring)
 	return id;
 }
 
-
 /* ---------- Auxiliary routines for COSA/SRP monitor ---------- */
 
 /*
@@ -1643,7 +1635,6 @@ static int puthexnumber(struct cosa_data *cosa, int number)
 	return 0;
 }
 
-
 /* ---------- Interrupt routines ---------- */
 
 /*
@@ -1992,7 +1983,6 @@ again:
 	return IRQ_HANDLED;
 }
 
-
 /* ---------- I/O debugging routines ---------- */
 /*
  * These routines can be used to monitor COSA/SRP I/O and to printk()

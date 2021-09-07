@@ -123,7 +123,6 @@ disclaimer.
 #define MV_INCLUDE_SDIO
 #endif
 
-
 /* NAND flash stuff */
 #ifdef CONFIG_MV_NAND_BOOT
 #define MV_NAND_BOOT
@@ -267,7 +266,6 @@ disclaimer.
 /* DRAM cache coherency configuration */
 #define MV_CACHE_COHERENCY  MV_CACHE_COHER_SW
 
-
 #define ETHER_DRAM_COHER    MV_CACHE_COHER_SW   /* No HW coherency in 88Fxx81 devices */
 
 #if (ETHER_DRAM_COHER == MV_CACHE_COHER_HW_WB)
@@ -281,7 +279,6 @@ disclaimer.
 #else
  #error "Ethernet-DRAM undefined"
 #endif /* ETHER_DRAM_COHER */
-
 
 /****************************************************************/
 /************* Ethernet driver configuration ********************/
@@ -382,8 +379,6 @@ disclaimer.
  #define MV_TDM_ULAW_MODE
 #endif
 
-
-
 /* We use the following registers to store DRAM interface pre configuration   */
 /* auto-detection results													  */
 /* IMPORTANT: We are using mask register for that purpose. Before writing     */
@@ -424,6 +419,4 @@ disclaimer.
 #define DRAM_BUF_REG9_DV	0           /* PCI Express Spare Register         */
 #define DRAM_BUF_REG10_DV	0x012C0004  /* PCI Exp Acknowledge Timers (x4) Reg*/
  
-
 #endif /* __INCmvSysHwConfigh */
-

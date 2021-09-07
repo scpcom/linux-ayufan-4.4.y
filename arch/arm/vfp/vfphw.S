@@ -58,7 +58,6 @@
 #endif
 	.endm
 
-
 @ VFP hardware support entry point.
 @
 @  r0  = faulted instruction
@@ -148,7 +147,6 @@ check_for_exception:
 	str	r11, [r10, #TI_PREEMPT]
 #endif
 	mov	pc, r9			@ we think we have handled things
-
 
 look_for_VFP_exceptions:
 	@ Check for synchronous or asynchronous exception

@@ -10,7 +10,6 @@ struct cpustate_t {
 	unsigned long *clr_addr;
 };
 
-
 #define HDPU_CPUSTATE_NAME "hdpu cpustate"
 #define HDPU_NEXUS_NAME "hdpu nexus"
 

@@ -83,4 +83,3 @@ void gtDbgPrint(char* format, ...)
 	GT_UNUSED_PARAM(format);
 }
 #endif /* DEBUG_QD */
-

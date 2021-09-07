@@ -26,7 +26,6 @@ enum bfa_qos_state {
 	BFA_QOS_OFFLINE = 2,		/*  QoS is offline */
 };
 
-
 /**
  * QoS  Priority levels.
  */
@@ -36,7 +35,6 @@ enum bfa_qos_priority {
 	BFA_QOS_MED  =  2,	/*  QoS Priority Level Medium */
 	BFA_QOS_LOW  =  3,	/*  QoS Priority Level Low */
 };
-
 
 /**
  * QoS  bandwidth allocation for each priority level

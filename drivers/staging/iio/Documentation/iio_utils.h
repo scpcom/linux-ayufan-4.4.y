@@ -16,7 +16,6 @@ struct iio_event_data {
 	__s64 timestamp;
 };
 
-
 inline char *find_ring_subelement(const char *directory, const char *subelement)
 {
 	DIR *dp;
@@ -43,7 +42,6 @@ inline char *find_ring_subelement(const char *directory, const char *subelement)
 	}
 	return 0;
 }
-
 
 char *find_type_by_name(const char *name, const char *type)
 {

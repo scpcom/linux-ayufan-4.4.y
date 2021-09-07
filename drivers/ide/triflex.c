@@ -138,5 +138,3 @@ module_exit(triflex_ide_exit);
 MODULE_AUTHOR("Torben Mathiasen");
 MODULE_DESCRIPTION("PCI driver module for Compaq Triflex IDE");
 MODULE_LICENSE("GPL");
-
-

@@ -49,7 +49,6 @@ enum {
 	INTERCEPT_MWAIT_COND,
 };
 
-
 struct __attribute__ ((__packed__)) vmcb_control_area {
 	u16 intercept_cr_read;
 	u16 intercept_cr_write;
@@ -82,7 +81,6 @@ struct __attribute__ ((__packed__)) vmcb_control_area {
 	u64 lbr_ctl;
 	u8 reserved_5[832];
 };
-
 
 #define TLB_CONTROL_DO_NOTHING 0
 #define TLB_CONTROL_FLUSH_ALL_ASID 1
@@ -322,4 +320,3 @@ struct __attribute__ ((__packed__)) vmcb {
 #define SVM_INVLPGA ".byte 0x0f, 0x01, 0xdf"
 
 #endif
-

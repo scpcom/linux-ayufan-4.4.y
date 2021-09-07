@@ -14,7 +14,6 @@
  * published by the Free Software Foundation.
  */
 
-
 /* Module offsets from both CM_BASE & PRM_BASE */
 
 /*
@@ -29,7 +28,6 @@
 #define GFX_MOD						0x300
 #define WKUP_MOD					0x400
 #define PLL_MOD						0x500
-
 
 /* Chip-specific module offsets */
 #define OMAP24XX_GR_MOD					OCP_MOD
@@ -48,7 +46,6 @@
 #define OMAP3430_GR_MOD					0xa00
 #define OMAP3430_NEON_MOD				0xb00
 #define OMAP3430ES2_USBHOST_MOD				0xc00
-
 
 /* 24XX register bits shared between CM & PRM registers */
 
@@ -180,7 +177,6 @@
 
 /* CM_IDLEST_MDM and PM_WKST_MDM shared bits */
 #define OMAP2430_ST_MDM_SHIFT				(1 << 0)
-
 
 /* 3430 register bits shared between CM & PRM registers */
 
@@ -386,4 +382,3 @@
 #define OMAP3430_EN_CORE_MASK				(1 << 0)
 
 #endif
-

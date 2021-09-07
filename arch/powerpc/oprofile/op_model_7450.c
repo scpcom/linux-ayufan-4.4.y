@@ -168,7 +168,6 @@ static void fsl7450_stop(void)
 	mb();
 }
 
-
 /* Handle the interrupt on this CPU, and log a sample for each
  * event that triggered the interrupt */
 static void fsl7450_handle_interrupt(struct pt_regs *regs,

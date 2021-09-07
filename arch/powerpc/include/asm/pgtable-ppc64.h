@@ -20,7 +20,6 @@
                 	    PUD_INDEX_SIZE + PGD_INDEX_SIZE + PAGE_SHIFT)
 #define PGTABLE_RANGE (ASM_CONST(1) << PGTABLE_EADDR_SIZE)
 
-
 /* Some sanity checking */
 #if TASK_SIZE_USER64 > PGTABLE_RANGE
 #error TASK_SIZE_USER64 exceeds pagetable range
@@ -74,7 +73,6 @@
 #define IOREMAP_BASE	(PHB_IO_END)
 #define IOREMAP_END	(KERN_VIRT_START + KERN_VIRT_SIZE)
 
-
 /*
  * Region IDs
  */
@@ -98,7 +96,6 @@
 #define VMEMMAP_BASE		(VMEMMAP_REGION_ID << REGION_SHIFT)
 #endif
 #define vmemmap			((struct page *)VMEMMAP_BASE)
-
 
 /*
  * Include the PTE bits definitions
@@ -151,7 +148,6 @@
 
 #endif /* __real_pte */
 
-
 /* pte_clear moved to later in this file */
 
 #define PMD_BAD_BITS		(PTE_TABLE_SIZE-1)
@@ -200,7 +196,6 @@
 /* to find an entry in a kernel page-table-directory */
 /* This now only contains the vmalloc pages */
 #define pgd_offset_k(address) pgd_offset(&init_mm, address)
-
 
 /* Atomic PTE updates */
 static inline unsigned long pte_update(struct mm_struct *mm,
@@ -305,7 +300,6 @@ static inline void pte_clear(struct mm_struct *mm, unsigned long addr,
 {
 	pte_update(mm, addr, ptep, ~0UL, 0);
 }
-
 
 /* Set the dirty and/or accessed bits atomically in a linux PTE, this
  * function doesn't need to flush the hash entry

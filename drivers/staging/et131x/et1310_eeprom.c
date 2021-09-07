@@ -94,7 +94,6 @@
 
 #include "et1310_tx.h"
 
-
 /*
  * EEPROM Defines
  */

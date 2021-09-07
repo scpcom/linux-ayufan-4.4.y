@@ -101,7 +101,6 @@ struct max1363_mode {
 			.numvals = _num + 1,				\
 			}
 
-
 /* note not available for max1363 hence naming */
 #define MAX1236_MODE_SCAN_MID_TO_CHANNEL(_mid, _num) {			\
 		.name = #_mid"..."#_num,				\
@@ -203,7 +202,6 @@ struct max1363_chip_info {
 	enum max1363_modes		default_mode;
 };
 
-
 /**
  * struct max1363_state - driver instance specific data
  * @indio_dev:		the industrial I/O device
@@ -249,7 +247,6 @@ static inline int max1363_initialize_ring(struct iio_ring_buffer *ring)
 {
 	return 0;
 };
-
 
 static inline ssize_t max1363_scan_from_ring(struct device *dev,
 					     struct device_attribute *attr,

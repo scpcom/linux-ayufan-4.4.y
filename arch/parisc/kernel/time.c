@@ -171,7 +171,6 @@ irqreturn_t __irq_entry timer_interrupt(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-
 unsigned long profile_pc(struct pt_regs *regs)
 {
 	unsigned long pc = instruction_pointer(regs);
@@ -187,7 +186,6 @@ unsigned long profile_pc(struct pt_regs *regs)
 	return pc;
 }
 EXPORT_SYMBOL(profile_pc);
-
 
 /* clock source code */
 

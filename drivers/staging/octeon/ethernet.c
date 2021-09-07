@@ -45,7 +45,6 @@
 #include "ethernet-util.h"
 #include "ethernet-proc.h"
 
-
 #include "cvmx-pip.h"
 #include "cvmx-pko.h"
 #include "cvmx-fau.h"
@@ -110,7 +109,6 @@ MODULE_PARM_DESC(disable_core_queueing, "\n"
 	"\tWhen set the networking core's tx_queue_len is set to zero.  This\n"
 	"\tallows packets to be sent without lock contention in the packet\n"
 	"\tscheduler resulting in some cases in improved throughput.\n");
-
 
 /*
  * The offset from mac_addr_base that should be used for the next port

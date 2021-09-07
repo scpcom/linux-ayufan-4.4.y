@@ -103,7 +103,6 @@
 
 extern int agp_memory_reserved;
 
-
 /* Intel 815 register */
 #define INTEL_815_APCONT	0x51
 #define INTEL_815_ATTBASE_MASK	~0x1FFFFFFF
@@ -449,7 +448,6 @@ static int intel_i810_insert_entries(struct agp_memory *mem, off_t pg_start,
 
 	if ((pg_start + mem->page_count) > num_entries)
 		goto out_err;
-
 
 	for (j = pg_start; j < (pg_start + mem->page_count); j++) {
 		if (!PGE_EMPTY(agp_bridge, readl(agp_bridge->gatt_table+j))) {
@@ -1412,7 +1410,6 @@ static int intel_i965_create_gatt_table(struct agp_bridge_data *bridge)
 	return 0;
 }
 
-
 static int intel_fetch_size(void)
 {
 	int i;
@@ -1477,7 +1474,6 @@ static void intel_tlbflush(struct agp_memory *mem)
 	pci_write_config_dword(agp_bridge->dev, INTEL_AGPCTRL, 0x2280);
 }
 
-
 static void intel_8xx_tlbflush(struct agp_memory *mem)
 {
 	u32 temp;
@@ -1486,7 +1482,6 @@ static void intel_8xx_tlbflush(struct agp_memory *mem)
 	pci_read_config_dword(agp_bridge->dev, INTEL_AGPCTRL, &temp);
 	pci_write_config_dword(agp_bridge->dev, INTEL_AGPCTRL, temp | (1 << 7));
 }
-
 
 static void intel_cleanup(void)
 {
@@ -1499,7 +1494,6 @@ static void intel_cleanup(void)
 	pci_write_config_word(agp_bridge->dev, INTEL_APSIZE, previous_size->size_value);
 }
 
-
 static void intel_8xx_cleanup(void)
 {
 	u16 temp;
@@ -1510,7 +1504,6 @@ static void intel_8xx_cleanup(void)
 	pci_write_config_word(agp_bridge->dev, INTEL_NBXCFG, temp & ~(1 << 9));
 	pci_write_config_byte(agp_bridge->dev, INTEL_APSIZE, previous_size->size_value);
 }
-
 
 static int intel_configure(void)
 {
@@ -1600,7 +1593,6 @@ static void intel_820_cleanup(void)
 	pci_write_config_byte(agp_bridge->dev, INTEL_APSIZE,
 			previous_size->size_value);
 }
-
 
 static int intel_820_configure(void)
 {

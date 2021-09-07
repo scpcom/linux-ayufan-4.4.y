@@ -71,7 +71,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cntmr/mvCntmrRegs.h"
 #include "ctrlEnv/mvCtrlEnvSpec.h"
 
-
 /* This enumerator describe counters\watchdog numbers       */
 typedef enum _mvCntmrID
 {
@@ -82,14 +81,12 @@ typedef enum _mvCntmrID
 	TIMER3,
 }MV_CNTMR_ID;
 
-
 /* Counter / Timer control structure */
 typedef struct _mvCntmrCtrl
 {
 	MV_BOOL 				enable;		/* enable */
 	MV_BOOL					autoEnable;	/* counter/Timer                    */
 }MV_CNTMR_CTRL;
-
 
 /* Functions */
 

@@ -131,7 +131,6 @@ unsigned long badness(struct task_struct *p, unsigned long uptime)
 	stime = cputime_to_jiffies(task_time.stime);
 	cpu_time = (utime + stime) >> (SHIFT_HZ + 3);
 
-
 	if (uptime >= p->start_time.tv_sec)
 		run_time = (uptime - p->start_time.tv_sec) >> 10;
 	else

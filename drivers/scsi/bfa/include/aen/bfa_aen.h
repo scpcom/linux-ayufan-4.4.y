@@ -35,7 +35,6 @@ struct bfa_aen_s {
 	struct bfa_aen_entry_s	list[BFA_AEN_MAX_ENTRY]; /* Must be the last */
 };
 
-
 /**
  * Public APIs
  */

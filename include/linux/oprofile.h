@@ -110,7 +110,6 @@ void oprofile_add_pc(unsigned long pc, int is_kernel, unsigned long event);
 /* add a backtrace entry, to be called from the ->backtrace callback */
 void oprofile_add_trace(unsigned long eip);
 
-
 /**
  * Create a file of the given name as a child of the given root, with
  * the specified file operations.

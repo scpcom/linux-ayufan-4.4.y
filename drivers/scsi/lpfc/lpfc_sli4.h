@@ -241,7 +241,6 @@ struct lpfc_bmbx {
 #define LPFC_QUEUE_NOARM	false
 #define LPFC_QUEUE_REARM	true
 
-
 /*
  * SLI4 CT field defines
  */
@@ -469,4 +468,3 @@ int lpfc_sli4_read_fcf_record(struct lpfc_hba *, uint16_t);
 void lpfc_mbx_cmpl_read_fcf_record(struct lpfc_hba *, LPFC_MBOXQ_t *);
 int lpfc_sli4_post_status_check(struct lpfc_hba *);
 uint8_t lpfc_sli4_mbox_opcode_get(struct lpfc_hba *, struct lpfcMboxq *);
-

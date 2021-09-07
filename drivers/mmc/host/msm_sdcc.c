@@ -417,7 +417,6 @@ msmsdcc_data_err(struct msmsdcc_host *host, struct mmc_data *data,
 	}
 }
 
-
 static int
 msmsdcc_pio_read(struct msmsdcc_host *host, char *buffer, unsigned int remain)
 {

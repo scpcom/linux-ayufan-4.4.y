@@ -334,7 +334,6 @@ static int sc_seq_show(struct seq_file *seq, void *v)
 			   sc->sc_msg_type);
 	}
 
-
 	spin_unlock(&o2net_debug_lock);
 
 	return 0;

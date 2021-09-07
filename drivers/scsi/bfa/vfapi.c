@@ -288,5 +288,3 @@ bfa_fcs_vf_get_ports(bfa_fcs_vf_t *vf, wwn_t lpwwn[], int *nlports)
 	*nlports = i;
 	return;
 }
-
-

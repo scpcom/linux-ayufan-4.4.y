@@ -12,7 +12,6 @@
 #define CODE_LENGTH 784
 #define TIMEOUT_VALUE 1000
 
-
 #ifdef CONFIG_ETRAX_RESCUE_SER0
 #define SERXOFF R_SERIAL0_XOFF
 #define SERBAUD R_SERIAL0_BAUD
@@ -85,7 +84,6 @@
 
 	move.b	0x40, $r0		; rec enable
 	move.b	$r0, [SERRECC]
-
 
 	moveq	0, $r1			; "timer" to clock out a LED red flash
 	move.d	CODE_START, $r3		; destination counter

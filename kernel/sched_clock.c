@@ -263,7 +263,6 @@ u64 sched_clock_cpu(int cpu)
 	return sched_clock();
 }
 
-
 unsigned long long cpu_clock(int cpu)
 {
 	return sched_clock_cpu(cpu);

@@ -245,7 +245,6 @@ asmlinkage long hpux_fstatfs(unsigned int fd, struct hpux_statfs __user * buf)
 	return error;
 }
 
-
 /*  This function is called from hpux_utssys(); HP-UX implements
  *  uname() as an option to utssys().
  *
@@ -505,10 +504,8 @@ int hpux_sysfs(int opcode, unsigned long arg1, unsigned long arg2)
 		return fstype; /* something other than default */
 	}
 
-
 	return 0;
 }
-
 
 /* Table of syscall names and handle for unimplemented routines */
 static const char * const syscall_names[] = {

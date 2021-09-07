@@ -30,7 +30,6 @@
  *
  ******************************************************************************/
 
-
 #define TARGET_CORE_RD_C
 
 #include <linux/version.h>
@@ -156,7 +155,6 @@ void rd_release_device_space(rd_dev_t *rd_dev)
 	rd_dev->sg_table_array = NULL;
 	rd_dev->sg_table_count = 0;
 }
-
 
 /*	rd_build_device_space():
  *

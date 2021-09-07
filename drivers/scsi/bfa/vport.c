@@ -423,8 +423,6 @@ bfa_fcs_vport_sm_logo(struct bfa_fcs_vport_s *vport,
 	}
 }
 
-
-
 /**
  *  fcs_vport_private FCS virtual port private functions
  */
@@ -572,8 +570,6 @@ bfa_fcs_vport_free(struct bfa_fcs_vport_s *vport)
 	bfa_lps_delete(vport->lps);
 }
 
-
-
 /**
  *  fcs_vport_public FCS virtual port public interfaces
  */
@@ -645,8 +641,6 @@ bfa_fcs_vport_get_max(struct bfa_fcs_s *fcs)
 	else
 		return (BFA_FCS_MAX_VPORTS_SUPP_CB);
 }
-
-
 
 /**
  *  fcs_vport_api Virtual port API
@@ -887,5 +881,3 @@ bfa_cb_lps_fdisclogo_comp(void *bfad, void *uarg)
 	struct bfa_fcs_vport_s *vport = uarg;
 	bfa_sm_send_event(vport, BFA_FCS_VPORT_SM_RSP_OK);
 }
-
-

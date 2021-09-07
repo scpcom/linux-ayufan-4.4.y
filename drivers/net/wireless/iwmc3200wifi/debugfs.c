@@ -104,7 +104,6 @@ static int iwm_generic_open(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-
 static ssize_t iwm_debugfs_txq_read(struct file *filp, char __user *buffer,
 				   size_t count, loff_t *ppos)
 {
@@ -456,7 +455,6 @@ int iwm_debugfs_init(struct iwm_priv *iwm)
 		}
 	}
 
-
 	iwm->dbg.dbg_level = IWM_DL_NONE;
 	iwm->dbg.dbg_level_dentry =
 		debugfs_create_file("level", 0200, iwm->dbg.dbgdir, iwm,
@@ -466,7 +464,6 @@ int iwm_debugfs_init(struct iwm_priv *iwm)
 		IWM_ERR(iwm, "Couldn't create dbg_level: %d\n", result);
 		goto error;
 	}
-
 
 	iwm->dbg.dbg_modules = IWM_DM_DEFAULT;
 	iwm->dbg.dbg_modules_dentry =
@@ -517,7 +514,6 @@ int iwm_debugfs_init(struct iwm_priv *iwm)
 		IWM_ERR(iwm, "Couldn't create last FW err: %d\n", result);
 		goto error;
 	}
-
 
 	return 0;
 

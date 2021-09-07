@@ -64,7 +64,6 @@ static int __init octeon_cf_device_init(void)
 	cf_resources[num_resources].end	= region_base + region_size - 1;
 	num_resources++;
 
-
 	if (!(base_ptr & 0xfffful)) {
 		/*
 		 * Boot loader signals availability of DMA (true_ide

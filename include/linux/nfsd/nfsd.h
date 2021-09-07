@@ -29,7 +29,6 @@ struct readdir_cd {
 	__be32			err;	/* 0, nfserr, or nfserr_eof */
 };
 
-
 extern struct svc_program	nfsd_program;
 extern struct svc_version	nfsd_version2, nfsd_version3,
 				nfsd_version4;
@@ -106,7 +105,6 @@ static inline int nfs4_reset_recoverydir(char *recdir) { return 0; }
  */
 void		nfsd_lockd_init(void);
 void		nfsd_lockd_shutdown(void);
-
 
 /*
  * These macros provide pre-xdr'ed values for faster operation.

@@ -15,7 +15,6 @@
 #include <linux/module.h>
 #include <linux/kbd_kern.h>
 
-
 static struct input_dev *emumousebtn;
 static int emumousebtn_input_register(void);
 static int mouse_emulate_buttons;

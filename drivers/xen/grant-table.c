@@ -45,7 +45,6 @@
 #include <asm/pgtable.h>
 #include <asm/sync_bitops.h>
 
-
 /* External tools reserve first few grant table entries. */
 #define NR_RESERVED_ENTRIES 8
 #define GNTTAB_LIST_END 0xffffffff
@@ -395,7 +394,6 @@ static int grow_gnttab_list(unsigned int more_frames)
 		if (!gnttab_list[i])
 			goto grow_nomem;
 	}
-
 
 	for (i = GREFS_PER_GRANT_FRAME * nr_grant_frames;
 	     i < GREFS_PER_GRANT_FRAME * new_nr_grant_frames - 1; i++)

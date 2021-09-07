@@ -35,7 +35,6 @@ DISCLAIMED.  The GPL License provides additional details about this warranty
 disclaimer.
 ********************************************************************************/
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/types.h>
@@ -223,7 +222,6 @@ static int sflash_read(struct mtd_info *mtd, loff_t from, size_t len,
 	MV_U32 offset = ((MV_U32)from);
 	MV_ULONG flags = 0, sflash_in_irq = 0;
 
-	
 	*retlen = 0;
 
 	DB(printk("\nINFO: %s  - offset %08x, len %d",__FUNCTION__, offset, (int)len));
@@ -271,7 +269,6 @@ static int sflash_write(struct mtd_info *mtd, loff_t to, size_t len,
 	return 0;	
 
 }
-
 
 static int sflash_erase(struct mtd_info *mtd, struct erase_info *instr)
 {
@@ -452,4 +449,3 @@ module_exit(sflash_probe_exit);
 
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_DESCRIPTION("MTD chip driver for the SPI serial flash device");
-

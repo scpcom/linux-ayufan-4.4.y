@@ -711,7 +711,6 @@ static ssize_t pagemap_read(struct file *file, char __user *buf,
 	if (!mm)
 		goto out_task;
 
-
 	uaddr = (unsigned long)buf & PAGE_MASK;
 	uend = (unsigned long)(buf + count);
 	pagecount = (PAGE_ALIGN(uend) - uaddr) / PAGE_SIZE;

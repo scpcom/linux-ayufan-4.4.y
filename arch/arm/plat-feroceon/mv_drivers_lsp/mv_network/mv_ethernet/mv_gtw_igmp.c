@@ -9,7 +9,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -424,8 +423,6 @@ int mv_gtw_igmp_snoop_process(struct sk_buff* skb, unsigned char port, unsigned 
 out:
     return 0; 
 }
-
-
 
 /* Initialization function */
 int __init mv_gtw_igmp_snoop_init(void)

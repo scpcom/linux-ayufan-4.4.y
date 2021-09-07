@@ -89,7 +89,6 @@ static void acpi_processor_notify(struct acpi_device *device, u32 event);
 static acpi_status acpi_processor_hotadd_init(acpi_handle handle, int *p_cpu);
 static int acpi_processor_handle_eject(struct acpi_processor *pr);
 
-
 static const struct acpi_device_id processor_device_ids[] = {
 	{ACPI_PROCESSOR_OBJECT_HID, 0},
 	{"ACPI0007", 0},
@@ -156,7 +155,6 @@ static int acpi_processor_errata_piix4(struct pci_dev *dev)
 {
 	u8 value1 = 0;
 	u8 value2 = 0;
-
 
 	if (!dev)
 		return -EINVAL;
@@ -258,7 +256,6 @@ static int acpi_processor_errata(struct acpi_processor *pr)
 	int result = 0;
 	struct pci_dev *dev = NULL;
 
-
 	if (!pr)
 		return -EINVAL;
 
@@ -288,7 +285,6 @@ static int acpi_processor_set_pdc(struct acpi_processor *pr)
 {
 	struct acpi_object_list *pdc_in = pr->pdc;
 	acpi_status status = AE_OK;
-
 
 	if (!pdc_in)
 		return status;
@@ -326,7 +322,6 @@ static int acpi_processor_info_seq_show(struct seq_file *seq, void *offset)
 {
 	struct acpi_processor *pr = seq->private;
 
-
 	if (!pr)
 		goto end;
 
@@ -356,7 +351,6 @@ static int acpi_processor_info_open_fs(struct inode *inode, struct file *file)
 static int acpi_processor_add_fs(struct acpi_device *device)
 {
 	struct proc_dir_entry *entry = NULL;
-
 
 	if (!acpi_device_dir(device)) {
 		acpi_device_dir(device) = proc_mkdir(acpi_device_bid(device),
@@ -835,7 +829,6 @@ static int __cpuinit acpi_processor_add(struct acpi_device *device)
 	acpi_processor_get_throttling_info(pr);
 	acpi_processor_get_limit_info(pr);
 
-
 	acpi_processor_power_init(pr, device);
 
 	pr->cdev = thermal_cooling_device_register("Processor", device,
@@ -883,7 +876,6 @@ static int acpi_processor_remove(struct acpi_device *device, int type)
 {
 	struct acpi_processor *pr = NULL;
 
-
 	if (!device || !acpi_driver_data(device))
 		return -EINVAL;
 
@@ -930,7 +922,6 @@ static int is_processor_present(acpi_handle handle)
 	acpi_status status;
 	unsigned long long sta = 0;
 
-
 	status = acpi_evaluate_integer(handle, "_STA", NULL, &sta);
 
 	if (ACPI_SUCCESS(status) && (sta & ACPI_STA_DEVICE_PRESENT))
@@ -954,7 +945,6 @@ int acpi_processor_device_add(acpi_handle handle, struct acpi_device **device)
 	acpi_handle phandle;
 	struct acpi_device *pdev;
 
-
 	if (acpi_get_parent(handle, &phandle)) {
 		return -ENODEV;
 	}
@@ -976,7 +966,6 @@ static void __ref acpi_processor_hotplug_notify(acpi_handle handle,
 	struct acpi_processor *pr;
 	struct acpi_device *device = NULL;
 	int result;
-
 
 	switch (event) {
 	case ACPI_NOTIFY_BUS_CHECK:

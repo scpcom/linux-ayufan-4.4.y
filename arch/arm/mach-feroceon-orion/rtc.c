@@ -76,7 +76,6 @@ void to_tm(int tim, MV_RTC_TIME *tm)
         tm->day = (gday + 4) % 7;
 }
 
-
 static int mv_set_rtc(void)
 {
 	MV_RTC_TIME time;
@@ -86,7 +85,6 @@ static int mv_set_rtc(void)
 
 	return 1;
 }
-
 
 extern int (*set_rtc)(void);
 
@@ -124,7 +122,6 @@ static struct rtc_ops rtc_ops = {
         .read_time      = mv_rtc_read_time,
         .set_time       = mv_rtc_set_time,
 };
-
 
 static int mv_rtc_init(void)
 {

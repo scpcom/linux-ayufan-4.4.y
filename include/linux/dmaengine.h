@@ -68,7 +68,6 @@ enum dma_transaction_type {
 /* last transaction type for creation of the capabilities mask */
 #define DMA_TX_TYPE_END (DMA_SLAVE + 1)
 
-
 /**
  * enum dma_ctrl_flags - DMA flags to augment operation preparation,
  *  control completion, and communicate status.
@@ -121,7 +120,6 @@ enum sum_check_flags {
 	SUM_CHECK_P_RESULT = (1 << SUM_CHECK_P),
 	SUM_CHECK_Q_RESULT = (1 << SUM_CHECK_Q),
 };
-
 
 /**
  * dma_cap_mask_t - capabilities bitmap modeled after cpumask_t.

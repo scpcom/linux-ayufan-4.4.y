@@ -54,7 +54,6 @@ EXPORT_SYMBOL(node_data);
 unsigned long node_start_pfn[MAX_NUMNODES] __read_mostly;
 unsigned long node_end_pfn[MAX_NUMNODES] __read_mostly;
 
-
 #ifdef CONFIG_DISCONTIGMEM
 /*
  * 4) physnode_map     - the mapping between a pfn and owning node
@@ -451,4 +450,3 @@ int memory_add_physaddr_to_nid(u64 addr)
 
 EXPORT_SYMBOL_GPL(memory_add_physaddr_to_nid);
 #endif
-

@@ -520,7 +520,6 @@ static int mpc8xxx_spi_transfer(struct spi_device *spi,
 	return 0;
 }
 
-
 static void mpc8xxx_spi_cleanup(struct spi_device *spi)
 {
 	kfree(spi->controller_state);

@@ -22,9 +22,7 @@
 #include <linux/init.h>
 #include <linux/leds.h>
 
-
 DEFINE_LED_TRIGGER(wdc_ledtrig_sata);
-
 
 /***************************************************************************/
 /* FUNCTION: wdc_ledtrig_sata_activity                                     */
@@ -37,7 +35,6 @@ void wdc_ledtrig_sata_activity(void)
    led_trigger_event(wdc_ledtrig_sata, LED_FULL);
 }
 EXPORT_SYMBOL(wdc_ledtrig_sata_activity);
-
 
 /***************************************************************************/
 /* FUNCTION: wdc_ledtrig_sata_init                                         */
@@ -53,7 +50,6 @@ static int __init wdc_ledtrig_sata_init(void)
    return 0;
 }
 
-
 /***************************************************************************/
 /* FUNCTION: wdc_ledtrig_sata_exit                                         */
 /*                                                                         */
@@ -66,7 +62,6 @@ static void __exit wdc_ledtrig_sata_exit(void)
 
    printk("<1>Goodbye LED trigger\n");
 }
-
 
 module_init(wdc_ledtrig_sata_init);
 module_exit(wdc_ledtrig_sata_exit);

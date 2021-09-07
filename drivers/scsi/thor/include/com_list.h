@@ -54,7 +54,6 @@ static MV_INLINE void List_Del(List_Head *entry)
 	entry->prev = NULL;
 }
 
-
 static inline struct list_head *List_GetFirst(struct list_head *head)
 {
         struct list_head * one = NULL;
@@ -90,7 +89,6 @@ typedef struct _List_Head {
 	struct _List_Head *prev, *next;
 } List_Head, * PList_Head;
 
-
 /*
  *
  *
@@ -120,7 +118,6 @@ static MV_INLINE void List_MoveTail(List_Head *list,
 				  List_Head *head);
 
 static MV_INLINE int List_Empty(const List_Head *head);
-
 
 #define CONTAINER_OF(ptr, type, member) 			\
         ( (type *)( (char *)(ptr) - OFFSET_OF(type,member) ) )

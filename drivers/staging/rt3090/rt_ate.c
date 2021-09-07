@@ -44,9 +44,6 @@ extern UCHAR NUM_OF_2850_CHNL;
 extern FREQUENCY_ITEM FreqItems3020[];
 extern UCHAR NUM_OF_3020_CHNL;
 
-
-
-
 static CHAR CCKRateTable[] = {0, 1, 2, 3, 8, 9, 10, 11, -1}; /* CCK Mode. */
 static CHAR OFDMRateTable[] = {0, 1, 2, 3, 4, 5, 6, 7, -1}; /* OFDM Mode. */
 static CHAR HTMIXRateTable[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, -1}; /* HT Mix Mode. */
@@ -113,10 +110,8 @@ static VOID ATEWriteTxWI(
 	IN	HTTRANSMIT_SETTING	*pTransmit);
 #endif // RTMP_MAC_PCI //
 
-
 static VOID SetJapanFilter(
 	IN	PRTMP_ADAPTER	pAd);
-
 
 #ifdef RALINK_28xx_QA
 static inline INT	DO_RACFG_CMD_ATE_START(
@@ -404,7 +399,6 @@ static inline INT DO_RACFG_CMD_ATE_BBP_WRITE_BULK(
 
 #endif // RALINK_28xx_QA //
 
-
 #ifdef RTMP_MAC_PCI
 static INT TxDmaBusy(
 	IN PRTMP_ADAPTER pAd)
@@ -421,7 +415,6 @@ static INT TxDmaBusy(
 	return result;
 }
 
-
 static INT RxDmaBusy(
 	IN PRTMP_ADAPTER pAd)
 {
@@ -436,7 +429,6 @@ static INT RxDmaBusy(
 
 	return result;
 }
-
 
 static VOID RtmpDmaEnable(
 	IN PRTMP_ADAPTER pAd,
@@ -468,9 +460,6 @@ static VOID RtmpDmaEnable(
 }
 #endif // RTMP_MAC_PCI //
 
-
-
-
 static VOID BbpSoftReset(
 	IN PRTMP_ADAPTER pAd)
 {
@@ -487,7 +476,6 @@ static VOID BbpSoftReset(
 
 	return;
 }
-
 
 static VOID RtmpRfIoWrite(
 	IN PRTMP_ADAPTER pAd)
@@ -516,7 +504,6 @@ static VOID RtmpRfIoWrite(
 
 	return;
 }
-
 
 #ifdef RT30xx
 static int CheckMCSValid(
@@ -566,7 +553,6 @@ static int CheckMCSValid(
 
 	return -1;
 }
-
 
 static INT ATETxPwrHandler(
 	IN PRTMP_ADAPTER pAd,
@@ -723,7 +709,6 @@ static INT ATETxPwrHandler(
 		return 0;
 	}
 }
-
 
 /*
 ==========================================================================
@@ -925,7 +910,6 @@ static INT	ATECmdHandler(
 		// Soft reset BBP.
 		BbpSoftReset(pAd);
 
-
 #ifdef CONFIG_STA_SUPPORT
 		/* LinkDown() has "AsicDisableSync();" and "RTMP_BBP_IO_R/W8_BY_REG_ID();" inside. */
 //      LinkDown(pAd, FALSE);
@@ -1037,7 +1021,6 @@ static INT	ATECmdHandler(
 		RTMP_IO_READ32(pAd, MAC_SYS_CTRL, &Value);
 		Value |= (1 << 3);
 		RTMP_IO_WRITE32(pAd, MAC_SYS_CTRL, Value);
-
 
 #ifdef CONFIG_STA_SUPPORT
 		RTMPStationStart(pAd);
@@ -1195,7 +1178,6 @@ static INT	ATECmdHandler(
 		RTMP_IO_WRITE32(pAd, TX_CTX_IDX0 + QID_AC_BE * RINGREG_DIFF, pAd->TxRing[QID_AC_BE].TxCpuIdx);
 
 		RTMPusecDelay(5000);
-
 
 		// Step 2: send more 50 packets then start continue mode.
 		// Abort Tx, RX DMA.
@@ -1582,9 +1564,6 @@ static INT	ATECmdHandler(
 /*=======================End of RTMP_MAC_PCI =======================*/
 #endif // RTMP_MAC_PCI //
 
-
-
-
 INT	Set_ATE_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg)
@@ -1592,7 +1571,6 @@ INT	Set_ATE_Proc(
 	if (ATECmdHandler(pAd, arg))
 	{
 		ATEDBGPRINT(RT_DEBUG_TRACE, ("Ralink: Set_ATE_Proc Success\n"));
-
 
 		return TRUE;
 	}
@@ -1602,7 +1580,6 @@ INT	Set_ATE_Proc(
 		return FALSE;
 	}
 }
-
 
 /*
 ==========================================================================
@@ -1655,7 +1632,6 @@ INT	Set_ATE_DA_Proc(
 	return TRUE;
 }
 
-
 /*
 ==========================================================================
     Description:
@@ -1706,7 +1682,6 @@ INT	Set_ATE_SA_Proc(
 
 	return TRUE;
 }
-
 
 /*
 ==========================================================================
@@ -1759,7 +1734,6 @@ INT	Set_ATE_BSSID_Proc(
 	return TRUE;
 }
 
-
 /*
 ==========================================================================
     Description:
@@ -1788,10 +1762,8 @@ INT	Set_ATE_CHANNEL_Proc(
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Set_ATE_CHANNEL_Proc (ATE Channel = %d)\n", pAd->ate.Channel));
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Ralink: Set_ATE_CHANNEL_Proc Success\n"));
 
-
 	return TRUE;
 }
-
 
 /*
 ==========================================================================
@@ -1831,10 +1803,8 @@ INT	Set_ATE_TX_POWER0_Proc(
 	ATETxPwrHandler(pAd, 0);
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Ralink: Set_ATE_TX_POWER0_Proc Success\n"));
 
-
 	return TRUE;
 }
-
 
 /*
 ==========================================================================
@@ -1874,10 +1844,8 @@ INT	Set_ATE_TX_POWER1_Proc(
 	ATETxPwrHandler(pAd, 1);
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Ralink: Set_ATE_TX_POWER1_Proc Success\n"));
 
-
 	return TRUE;
 }
-
 
 /*
 ==========================================================================
@@ -1910,10 +1878,8 @@ INT	Set_ATE_TX_Antenna_Proc(
 	// calibration power unbalance issues, merged from Arch Team
 	ATEAsicSwitchChannel(pAd);
 
-
 	return TRUE;
 }
-
 
 /*
 ==========================================================================
@@ -1946,10 +1912,8 @@ INT	Set_ATE_RX_Antenna_Proc(
 	// calibration power unbalance issues, merged from Arch Team
 	ATEAsicSwitchChannel(pAd);
 
-
 	return TRUE;
 }
-
 
 /*
 ==========================================================================
@@ -2006,10 +1970,8 @@ INT	Set_ATE_TX_FREQOFFSET_Proc(
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Set_ATE_TX_FREQOFFSET_Proc (RFFreqOffset = %d)\n", pAd->ate.RFFreqOffset));
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Ralink: Set_ATE_TX_FREQOFFSET_Proc Success\n"));
 
-
 	return TRUE;
 }
-
 
 /*
 ==========================================================================
@@ -2081,7 +2043,6 @@ INT	Set_ATE_TX_BW_Proc(
 		ATE_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R4, &value);
 		value &= (~0x18);
 		ATE_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R4, value);
-
 
 		// Set BBP R66=0x3C
 		value = 0x3C;
@@ -2172,7 +2133,6 @@ INT	Set_ATE_TX_BW_Proc(
 		value |= 0x10;
 		ATE_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R4, value);
 
-
 		// Set BBP R66=0x3C
 		value = 0x3C;
 		ATE_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R66, value);
@@ -2208,10 +2168,8 @@ INT	Set_ATE_TX_BW_Proc(
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Set_ATE_TX_BW_Proc (BBPCurrentBW = %d)\n", pAd->ate.TxWI.BW));
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Ralink: Set_ATE_TX_BW_Proc Success\n"));
 
-
 	return TRUE;
 }
-
 
 /*
 ==========================================================================
@@ -2238,10 +2196,8 @@ INT	Set_ATE_TX_LENGTH_Proc(
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Set_ATE_TX_LENGTH_Proc (TxLength = %d)\n", pAd->ate.TxLength));
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Ralink: Set_ATE_TX_LENGTH_Proc Success\n"));
 
-
 	return TRUE;
 }
-
 
 /*
 ==========================================================================
@@ -2261,10 +2217,8 @@ INT	Set_ATE_TX_COUNT_Proc(
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Set_ATE_TX_COUNT_Proc (TxCount = %d)\n", pAd->ate.TxCount));
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Ralink: Set_ATE_TX_COUNT_Proc Success\n"));
 
-
 	return TRUE;
 }
-
 
 /*
 ==========================================================================
@@ -2292,7 +2246,6 @@ INT	Set_ATE_TX_MCS_Proc(
 	result = CheckMCSValid(pAd->ate.TxWI.PHYMODE, MCS, IS_RT2070(pAd));
 #endif // RT30xx //
 
-
 	if (result != -1)
 	{
 		pAd->ate.TxWI.MCS = (UCHAR)MCS;
@@ -2306,10 +2259,8 @@ INT	Set_ATE_TX_MCS_Proc(
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Set_ATE_TX_MCS_Proc (MCS = %d)\n", pAd->ate.TxWI.MCS));
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Ralink: Set_ATE_TX_MCS_Proc Success\n"));
 
-
 	return TRUE;
 }
-
 
 /*
 ==========================================================================
@@ -2353,10 +2304,8 @@ INT	Set_ATE_TX_MODE_Proc(
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Set_ATE_TX_MODE_Proc (TxMode = %d)\n", pAd->ate.TxWI.PHYMODE));
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Ralink: Set_ATE_TX_MODE_Proc Success\n"));
 
-
 	return TRUE;
 }
-
 
 /*
 ==========================================================================
@@ -2383,10 +2332,8 @@ INT	Set_ATE_TX_GI_Proc(
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Set_ATE_TX_GI_Proc (GI = %d)\n", pAd->ate.TxWI.ShortGI));
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Ralink: Set_ATE_TX_GI_Proc Success\n"));
 
-
 	return TRUE;
 }
-
 
 INT	Set_ATE_RX_FER_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -2403,10 +2350,8 @@ INT	Set_ATE_RX_FER_Proc(
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Set_ATE_RX_FER_Proc (bRxFER = %d)\n", pAd->ate.bRxFER));
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("Ralink: Set_ATE_RX_FER_Proc Success\n"));
 
-
 	return TRUE;
 }
-
 
 INT Set_ATE_Read_RF_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -2438,7 +2383,6 @@ INT Set_ATE_Read_RF_Proc(
 	return TRUE;
 }
 
-
 INT Set_ATE_Write_RF1_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg)
@@ -2462,7 +2406,6 @@ INT Set_ATE_Write_RF1_Proc(
 	}
 	return TRUE;
 }
-
 
 INT Set_ATE_Write_RF2_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -2488,7 +2431,6 @@ INT Set_ATE_Write_RF2_Proc(
 	return TRUE;
 }
 
-
 INT Set_ATE_Write_RF3_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg)
@@ -2513,7 +2455,6 @@ INT Set_ATE_Write_RF3_Proc(
 	return TRUE;
 }
 
-
 INT Set_ATE_Write_RF4_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg)
@@ -2537,7 +2478,6 @@ INT Set_ATE_Write_RF4_Proc(
 	}
 	return TRUE;
 }
-
 
 /*
 ==========================================================================
@@ -2627,9 +2567,6 @@ INT Set_ATE_Load_E2P_Proc(
 }
 #endif // defined(LINUX) || defined(VXWORKS) //
 
-
-
-
 INT Set_ATE_Read_E2P_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg)
@@ -2649,9 +2586,6 @@ INT Set_ATE_Read_E2P_Proc(
 	}
 	return TRUE;
 }
-
-
-
 
 INT	Set_ATE_Show_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -2679,7 +2613,6 @@ INT	Set_ATE_Show_Proc(
 	ate_print(KERN_EMERG "Set_ATE_Show_Proc Success\n");
 	return TRUE;
 }
-
 
 INT	Set_ATE_Help_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -2714,9 +2647,6 @@ INT	Set_ATE_Help_Proc(
 
 	return TRUE;
 }
-
-
-
 
 /*
 ==========================================================================
@@ -3126,7 +3056,6 @@ VOID ATEAsicSwitchChannel(
 		RTMP_IO_WRITE32(pAd, TX_PIN_CFG, TxPinCfg);
 	}
 
-
     // R66 should be set according to Channel and use 20MHz when scanning
 	if (Channel <= 14)
 	{
@@ -3185,8 +3114,6 @@ VOID ATEAsicSwitchChannel(
     }
 #endif // RTMP_RF_RW_SUPPORT //
 }
-
-
 
 /* In fact, no one will call this routine so far ! */
 
@@ -3427,12 +3354,10 @@ VOID ATEAsicAdjustTxPower(
 			/* TX_PWR_CFG_1 ~ TX_PWR_CFG_4 */
 			RTMP_IO_WRITE32(pAd, TX_PWR_CFG_0 + i*4, TxPwr[i]);
 
-
 		}
 	}
 
 }
-
 
 /*
 ========================================================================
@@ -3510,9 +3435,6 @@ static VOID ATEWriteTxWI(
     return;
 }
 #endif // RTMP_MAC_PCI //
-
-
-
 
 /*
 ========================================================================
@@ -3601,9 +3523,6 @@ VOID ATEDisableAsicProtect(
 
 }
 
-
-
-
 /* There are two ways to convert Rssi */
 /* the way used with GET_LNA_GAIN() */
 CHAR ATEConvertToRssi(
@@ -3639,7 +3558,6 @@ CHAR ATEConvertToRssi(
 
 	return (-12 - RssiOffset - LNAGain - Rssi);
 }
-
 
 /*
 ========================================================================
@@ -3677,7 +3595,6 @@ static VOID SetJapanFilter(
 	ATE_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R4, BbpData);
 }
 
-
 VOID ATESampleRssi(
 	IN PRTMP_ADAPTER	pAd,
 	IN PRXWI_STRUC		pRxWI)
@@ -3709,7 +3626,6 @@ VOID ATESampleRssi(
 	pAd->ate.NumOfAvgRssiSample ++;
 }
 
-
 #ifdef CONFIG_STA_SUPPORT
 VOID RTMPStationStop(
     IN  PRTMP_ADAPTER   pAd)
@@ -3723,7 +3639,6 @@ VOID RTMPStationStop(
 
     ATEDBGPRINT(RT_DEBUG_TRACE, ("<== RTMPStationStop\n"));
 }
-
 
 VOID RTMPStationStart(
     IN  PRTMP_ADAPTER   pAd)
@@ -3740,7 +3655,6 @@ VOID RTMPStationStart(
 	ATEDBGPRINT(RT_DEBUG_TRACE, ("<== RTMPStationStart\n"));
 }
 #endif // CONFIG_STA_SUPPORT //
-
 
 /*
 ==========================================================================
@@ -3939,14 +3853,10 @@ static INT ATESetUpFrame(
 /*=======================End of RTMP_MAC_PCI =======================*/
 #endif // RTMP_MAC_PCI //
 
-
-
-
 VOID rt_ee_read_all(PRTMP_ADAPTER pAd, USHORT *Data)
 {
 	USHORT i;
 	USHORT value;
-
 
 	for (i = 0 ; i < EEPROM_SIZE/2 ; )
 	{
@@ -3957,12 +3867,10 @@ VOID rt_ee_read_all(PRTMP_ADAPTER pAd, USHORT *Data)
 	}
 }
 
-
 VOID rt_ee_write_all(PRTMP_ADAPTER pAd, USHORT *Data)
 {
 	USHORT i;
 	USHORT value;
-
 
 	for (i = 0 ; i < EEPROM_SIZE/2 ; )
 	{
@@ -3972,7 +3880,6 @@ VOID rt_ee_write_all(PRTMP_ADAPTER pAd, USHORT *Data)
 		i++;
 	}
 }
-
 
 #ifdef RALINK_28xx_QA
 VOID ATE_QA_Statistics(
@@ -4009,7 +3916,6 @@ VOID ATE_QA_Statistics(
 	pAd->ate.SNR0 = pRxWI->SNR0;
 	pAd->ate.SNR1 = pRxWI->SNR1;
 }
-
 
 /* command id with Cmd Type == 0x0008(for 28xx)/0x0005(for iNIC) */
 #define RACFG_CMD_RF_WRITE_ALL		0x0000
@@ -4068,12 +3974,9 @@ VOID ATE_QA_Statistics(
 #define RACFG_CMD_ATE_RF_READ_BULK		0x0119
 #define RACFG_CMD_ATE_RF_WRITE_BULK		0x011a
 
-
 static VOID memcpy_exl(PRTMP_ADAPTER pAd, UCHAR *dst, UCHAR *src, ULONG len);
 static VOID memcpy_exs(PRTMP_ADAPTER pAd, UCHAR *dst, UCHAR *src, ULONG len);
 static VOID RTMP_IO_READ_BULK(PRTMP_ADAPTER pAd, UCHAR *dst, UCHAR *src, UINT32 len);
-
-
 
 VOID RtmpDoAte(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -4082,7 +3985,6 @@ VOID RtmpDoAte(
 	USHORT Command_Id;
 	INT	Status = NDIS_STATUS_SUCCESS;
 	struct ate_racfghdr *pRaCfg;
-
 
 	if ((pRaCfg = kmalloc(sizeof(struct ate_racfghdr), GFP_KERNEL)) == NULL)
 	{
@@ -4177,7 +4079,6 @@ VOID RtmpDoAte(
 		case RACFG_CMD_ATE_BBP_WRITE_BULK:
 			Status=DO_RACFG_CMD_ATE_BBP_WRITE_BULK(pAdapter,wrq,pRaCfg);
 			break;
-
 
 		case RACFG_CMD_GET_NOISE_LEVEL:
 			Status=DO_RACFG_CMD_GET_NOISE_LEVEL(pAdapter,wrq,pRaCfg);
@@ -4304,7 +4205,6 @@ VOID RtmpDoAte(
 	return;
 }
 
-
 VOID BubbleSort(INT32 n, INT32 a[])
 {
 	INT32 k, j, temp;
@@ -4322,7 +4222,6 @@ VOID BubbleSort(INT32 n, INT32 a[])
 		}
 	}
 }
-
 
 VOID CalNoiseLevel(PRTMP_ADAPTER pAd, UCHAR channel, INT32 RSSI[3][10])
 {
@@ -4459,7 +4358,6 @@ VOID CalNoiseLevel(PRTMP_ADAPTER pAd, UCHAR channel, INT32 RSSI[3][10])
 	return;
 }
 
-
 BOOLEAN SyncTxRxConfig(PRTMP_ADAPTER pAd, USHORT offset, UCHAR value)
 {
 	UCHAR tmp = 0, bbp_data = 0;
@@ -4552,7 +4450,6 @@ BOOLEAN SyncTxRxConfig(PRTMP_ADAPTER pAd, USHORT offset, UCHAR value)
 	return TRUE;
 }
 
-
 static VOID memcpy_exl(PRTMP_ADAPTER pAd, UCHAR *dst, UCHAR *src, ULONG len)
 {
 	ULONG i, Value = 0;
@@ -4581,7 +4478,6 @@ static VOID memcpy_exl(PRTMP_ADAPTER pAd, UCHAR *dst, UCHAR *src, ULONG len)
 	}
 }
 
-
 static VOID memcpy_exs(PRTMP_ADAPTER pAd, UCHAR *dst, UCHAR *src, ULONG len)
 {
 	ULONG i;
@@ -4604,7 +4500,6 @@ static VOID memcpy_exs(PRTMP_ADAPTER pAd, UCHAR *dst, UCHAR *src, ULONG len)
 	}
 }
 
-
 static VOID RTMP_IO_READ_BULK(PRTMP_ADAPTER pAd, UCHAR *dst, UCHAR *src, UINT32 len)
 {
 	UINT32 i, Value;
@@ -4624,7 +4519,6 @@ static VOID RTMP_IO_READ_BULK(PRTMP_ADAPTER pAd, UCHAR *dst, UCHAR *src, UINT32 
 	return;
 }
 
-
 INT Set_TxStop_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg)
@@ -4641,7 +4535,6 @@ INT Set_TxStop_Proc(
 	}
 }
 
-
 INT Set_RxStop_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg)
@@ -4657,7 +4550,6 @@ INT Set_RxStop_Proc(
 		return FALSE;
 	}
 }
-
 
 #ifdef DBG
 INT Set_EERead_Proc(
@@ -4681,7 +4573,6 @@ INT Set_EERead_Proc(
 
 	return TRUE;
 }
-
 
 INT Set_EEWrite_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -4716,7 +4607,6 @@ INT Set_EEWrite_Proc(
 	return TRUE;
 }
 
-
 INT Set_BBPRead_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg)
@@ -4738,7 +4628,6 @@ INT Set_BBPRead_Proc(
 
 	return TRUE;
 }
-
 
 INT Set_BBPWrite_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -4774,7 +4663,6 @@ INT Set_BBPWrite_Proc(
 
 	return TRUE;
 }
-
 
 INT Set_RFWrite_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -4813,7 +4701,6 @@ INT Set_RFWrite_Proc(
 	if (*p4 != ':')
 		return FALSE;
 
-
 	A2Hex(R1, arg);
 	A2Hex(R2, p2 + 1);
 	A2Hex(R3, p3 + 1);
@@ -4828,9 +4715,6 @@ INT Set_RFWrite_Proc(
 }
 #endif // DBG //
 #endif // RALINK_28xx_QA //
-
-
-
 
 #ifdef RALINK_28xx_QA
 #define	LEN_OF_ARG 16
@@ -4865,7 +4749,6 @@ static inline INT	DO_RACFG_CMD_ATE_START(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_ATE_STOP(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -4912,7 +4795,6 @@ static inline INT DO_RACFG_CMD_ATE_STOP(
 		}
 	}
 
-
 	/* AP/STA might have in ATE_STOP mode due to cmd from QA. */
 	if (ATE_ON(pAdapter))
 	{
@@ -4923,7 +4805,6 @@ static inline INT DO_RACFG_CMD_ATE_STOP(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_RF_WRITE_ALL(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -4955,7 +4836,6 @@ static inline INT DO_RACFG_CMD_RF_WRITE_ALL(
 	return  NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_E2PROM_READ16(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -4979,7 +4859,6 @@ static inline INT DO_RACFG_CMD_E2PROM_READ16(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_E2PROM_WRITE16(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -4997,7 +4876,6 @@ static inline INT DO_RACFG_CMD_E2PROM_WRITE16(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_E2PROM_READ_ALL(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5012,7 +4890,6 @@ static inline INT DO_RACFG_CMD_E2PROM_READ_ALL(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_E2PROM_WRITE_ALL(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5029,7 +4906,6 @@ static inline INT DO_RACFG_CMD_E2PROM_WRITE_ALL(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_IO_READ(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5056,7 +4932,6 @@ static inline INT DO_RACFG_CMD_IO_READ(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_IO_WRITE(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5082,7 +4957,6 @@ static inline INT DO_RACFG_CMD_IO_WRITE(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_IO_READ_BULK(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5118,7 +4992,6 @@ static inline INT DO_RACFG_CMD_IO_READ_BULK(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_BBP_READ8(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5145,7 +5018,6 @@ static inline INT DO_RACFG_CMD_BBP_READ8(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_BBP_WRITE8(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5177,7 +5049,6 @@ static inline INT DO_RACFG_CMD_BBP_WRITE8(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_BBP_READ_ALL(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5204,7 +5075,6 @@ static inline INT DO_RACFG_CMD_BBP_READ_ALL(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_GET_NOISE_LEVEL(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5221,7 +5091,6 @@ static inline INT DO_RACFG_CMD_GET_NOISE_LEVEL(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_GET_COUNTER(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5249,7 +5118,6 @@ static inline INT DO_RACFG_CMD_GET_COUNTER(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_CLEAR_COUNTER(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5271,7 +5139,6 @@ static inline INT DO_RACFG_CMD_CLEAR_COUNTER(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_TX_START(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5426,7 +5293,6 @@ TX_START_ERROR:
 	return err;
 }
 
-
 static inline INT DO_RACFG_CMD_GET_TX_STATUS(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5442,7 +5308,6 @@ static inline INT DO_RACFG_CMD_GET_TX_STATUS(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_TX_STOP(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5456,7 +5321,6 @@ static inline INT DO_RACFG_CMD_TX_STOP(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_RX_START(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5473,7 +5337,6 @@ static inline INT DO_RACFG_CMD_RX_START(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_RX_STOP(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5487,7 +5350,6 @@ static inline INT DO_RACFG_CMD_RX_STOP(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_ATE_START_TX_CARRIER(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5503,7 +5365,6 @@ static inline INT DO_RACFG_CMD_ATE_START_TX_CARRIER(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_ATE_START_TX_CONT(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5518,7 +5379,6 @@ static inline INT DO_RACFG_CMD_ATE_START_TX_CONT(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_ATE_START_TX_FRAME(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5532,7 +5392,6 @@ static inline INT DO_RACFG_CMD_ATE_START_TX_FRAME(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_ATE_SET_BW(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5557,7 +5416,6 @@ static inline INT DO_RACFG_CMD_ATE_SET_BW(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_ATE_SET_TX_POWER0(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5579,7 +5437,6 @@ static inline INT DO_RACFG_CMD_ATE_SET_TX_POWER0(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_ATE_SET_TX_POWER1(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5603,7 +5460,6 @@ static inline INT DO_RACFG_CMD_ATE_SET_TX_POWER1(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_ATE_SET_FREQ_OFFSET(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5625,7 +5481,6 @@ static inline INT DO_RACFG_CMD_ATE_SET_FREQ_OFFSET(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_ATE_GET_STATISTICS(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5671,7 +5526,6 @@ static inline INT DO_RACFG_CMD_ATE_GET_STATISTICS(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_ATE_RESET_COUNTER(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5693,7 +5547,6 @@ static inline INT DO_RACFG_CMD_ATE_RESET_COUNTER(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_ATE_SEL_TX_ANTENNA(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5717,7 +5570,6 @@ static inline INT DO_RACFG_CMD_ATE_SEL_TX_ANTENNA(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_ATE_SEL_RX_ANTENNA(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5739,7 +5591,6 @@ static inline INT DO_RACFG_CMD_ATE_SEL_RX_ANTENNA(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_ATE_SET_PREAMBLE(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5763,7 +5614,6 @@ static inline INT DO_RACFG_CMD_ATE_SET_PREAMBLE(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_ATE_SET_CHANNEL(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5786,7 +5636,6 @@ static inline INT DO_RACFG_CMD_ATE_SET_CHANNEL(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_ATE_SET_ADDR1(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5804,7 +5653,6 @@ static inline INT DO_RACFG_CMD_ATE_SET_ADDR1(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_ATE_SET_ADDR2(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5824,7 +5672,6 @@ static inline INT DO_RACFG_CMD_ATE_SET_ADDR2(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_ATE_SET_ADDR3(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5842,7 +5689,6 @@ static inline INT DO_RACFG_CMD_ATE_SET_ADDR3(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_ATE_SET_RATE(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5866,7 +5712,6 @@ static inline INT DO_RACFG_CMD_ATE_SET_RATE(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_ATE_SET_TX_FRAME_LEN(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5888,7 +5733,6 @@ static inline INT DO_RACFG_CMD_ATE_SET_TX_FRAME_LEN(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_ATE_SET_TX_FRAME_COUNT(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5914,7 +5758,6 @@ static inline INT DO_RACFG_CMD_ATE_SET_TX_FRAME_COUNT(
 		ATEDBGPRINT(RT_DEBUG_TRACE, ("Set_ATE_TX_COUNT_Proc (TxCount = %d)\n", pAdapter->ate.TxCount));
 		ATEDBGPRINT(RT_DEBUG_TRACE, ("Ralink: Set_ATE_TX_COUNT_Proc Success\n"));
 
-
 	}
 	else
 #endif // RTMP_MAC_PCI //
@@ -5927,7 +5770,6 @@ static inline INT DO_RACFG_CMD_ATE_SET_TX_FRAME_COUNT(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_ATE_START_RX_FRAME(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5942,7 +5784,6 @@ static inline INT DO_RACFG_CMD_ATE_START_RX_FRAME(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_ATE_E2PROM_READ_BULK(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -5969,7 +5810,6 @@ static inline INT DO_RACFG_CMD_ATE_E2PROM_READ_BULK(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_ATE_E2PROM_WRITE_BULK(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -5991,7 +5831,6 @@ static inline INT DO_RACFG_CMD_ATE_E2PROM_WRITE_BULK(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_ATE_IO_WRITE_BULK(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -6017,7 +5856,6 @@ static inline INT DO_RACFG_CMD_ATE_IO_WRITE_BULK(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 static inline INT DO_RACFG_CMD_ATE_BBP_READ_BULK(
 	IN	PRTMP_ADAPTER	pAdapter,
@@ -6051,7 +5889,6 @@ static inline INT DO_RACFG_CMD_ATE_BBP_READ_BULK(
 	return NDIS_STATUS_SUCCESS;
 }
 
-
 static inline INT DO_RACFG_CMD_ATE_BBP_WRITE_BULK(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq,
@@ -6083,7 +5920,6 @@ static inline INT DO_RACFG_CMD_ATE_BBP_WRITE_BULK(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 #endif // RALINK_28xx_QA //
 #endif	// RALINK_ATE //

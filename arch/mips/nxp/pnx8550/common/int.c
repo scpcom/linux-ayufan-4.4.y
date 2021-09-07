@@ -62,7 +62,6 @@ static void hw0_irqdispatch(int irq)
 	do_IRQ(PNX8550_INT_GIC_MIN + irq);
 }
 
-
 static void timer_irqdispatch(int irq)
 {
 	irq = (0x01c0 & read_c0_config7()) >> 6;

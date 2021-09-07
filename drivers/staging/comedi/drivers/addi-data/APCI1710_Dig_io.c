@@ -255,7 +255,6 @@ int i_APCI1710_InsnConfigDigitalIO(struct comedi_device *dev, struct comedi_subd
 |                     (b_InputChannel)                                       |
 +----------------------------------------------------------------------------|
 
-
 |
 |  unsigned char_ b_ModulNbr  CR_AREF(chanspec)          : Selected module number   |
 |                                                   (0 to 3)                 |
@@ -268,7 +267,6 @@ int i_APCI1710_InsnConfigDigitalIO(struct comedi_device *dev, struct comedi_subd
 |                                                      4 : Channel G         |
 |                                                      5 : Channel A         |
 |                                                      6 : Channel B
-
 
 	|
 +----------------------------------------------------------------------------+

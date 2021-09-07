@@ -158,16 +158,13 @@ typedef struct s_MacAddr {
 	SK_U8	a[SK_MAC_ADDR_LEN];
 } SK_MAC_ADDR;
 
-
 /* SK_FILTER is used to ensure alignment of the filter. */
 typedef union s_InexactFilter {
 	SK_U8	Bytes[8];
 	SK_U64	Val;	/* Dummy entry for alignment only. */
 } SK_FILTER64;
 
-
 typedef struct s_AddrNet SK_ADDR_NET;
-
 
 typedef struct s_AddrPort {
 
@@ -193,7 +190,6 @@ typedef struct s_AddrPort {
 	SK_FILTER64	InexactDrvFilter;		/* For 64-bit hash register. */
 } SK_ADDR_PORT;
 
-
 struct s_AddrNet {
 /* ----- Public part (read-only) ----- */
 
@@ -207,7 +203,6 @@ struct s_AddrNet {
 	SK_U8			Align01;
 	SK_U16			Align02;
 };
-
 
 typedef struct s_Addr {
 
@@ -332,7 +327,6 @@ extern	int	SkAddrSwap(
 #error KR-style prototypes are not yet provided.
 
 #endif	/* defined(SK_KR_PROTO)) */
-
 
 #ifdef __cplusplus
 }

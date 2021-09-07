@@ -47,7 +47,6 @@ MODULE_PARM_DESC(enable_beep, "Enable beep using PCM.");
 
 static struct platform_device *device;
 
-
 /*
  */
 
@@ -134,7 +133,6 @@ __error:
 	snd_card_free(card);
 	return err;
 }
-
 
 static int __devexit snd_pmac_remove(struct platform_device *devptr)
 {

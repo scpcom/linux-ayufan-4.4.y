@@ -377,7 +377,6 @@ struct ahc_platform_data {
 
 void ahc_delay(long);
 
-
 /***************************** Low Level I/O **********************************/
 uint8_t ahc_inb(struct ahc_softc * ahc, long port);
 void ahc_outb(struct ahc_softc * ahc, long port, uint8_t val);

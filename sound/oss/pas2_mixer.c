@@ -84,7 +84,6 @@ mixer_output(int right_vol, int left_vol, int div, int bits,
 	int             left = left_vol * div / 100;
 	int             right = right_vol * div / 100;
 
-
 	if (bits & 0x10)
 	  {
 		  left |= mixer;
@@ -177,7 +176,6 @@ pas_mixer_set(int whichDev, unsigned int level)
 	  case SOUND_MIXER_RECLEV:	/* Recording level (0-15) */
 		  levels[whichDev] = mixer_output(right, left, 15, 0x02, 0);
 		  break;
-
 
 	  case SOUND_MIXER_RECSRC:
 		  devmask = level & POSSIBLE_RECORDING_DEVICES;

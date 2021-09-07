@@ -166,7 +166,6 @@ struct sfi_gpe_table_entry {
 	u16	phys_id;	/* physical GPE id */
 } __packed;
 
-
 typedef int (*sfi_table_handler) (struct sfi_table_header *table);
 
 #ifdef CONFIG_SFI

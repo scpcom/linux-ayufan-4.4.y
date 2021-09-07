@@ -1219,7 +1219,6 @@ static struct cfb_info __devinit *cyberpro_alloc_fb_info(unsigned int id,
 	if (!cfb)
 		return NULL;
 
-
 	cfb->id			= id;
 
 	if (id == ID_CYBERPRO_5000)

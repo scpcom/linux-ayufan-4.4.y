@@ -329,7 +329,6 @@
 #define                        KPAD_STAT  0xffc04110   /* Holds and clears the status of the keypad interface interrupt */
 #define                    KPAD_SOFTEVAL  0xffc04114   /* Lets software force keypad interface to check for keys being pressed */
 
-
 /* ********************************************************** */
 /*     SINGLE BIT MACRO PAIRS (bit mask and negated one)      */
 /*     and MULTI BIT READ MACROS                              */
@@ -892,10 +891,8 @@
 
 #define             DMA_COUNT_LOW  0xffff     /* Lower 16-bits of byte count of DMA transfer for DMA master channel */
 
-
 /* ******************************************* */
 /*     MULTI BIT MACRO ENUMERATIONS            */
 /* ******************************************* */
-
 
 #endif /* _DEF_BF542_H */

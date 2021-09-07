@@ -1577,4 +1577,3 @@ module_param(edac_op_state, int, 0444);
 MODULE_PARM_DESC(edac_op_state, "EDAC Error Reporting state: 0=Poll,1=NMI");
 module_param(misc_messages, int, 0444);
 MODULE_PARM_DESC(misc_messages, "Log miscellaneous non fatal messages");
-

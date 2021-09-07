@@ -178,7 +178,6 @@
  * AUDIT_UNUSED_BITS is updated if need be. */
 #define AUDIT_UNUSED_BITS	0x07FFFC00
 
-
 /* Rule fields */
 				/* These are useful when checking the
 				 * task structure at task creation time

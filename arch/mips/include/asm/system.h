@@ -24,7 +24,6 @@
 #include <asm/watch.h>
 #include <asm/war.h>
 
-
 /*
  * switch_to(n) should switch tasks to task nr n, first
  * checking that n isn't the current task, in which case it does nothing.

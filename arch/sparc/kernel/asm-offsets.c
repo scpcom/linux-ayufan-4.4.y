@@ -38,4 +38,3 @@ int foo(void)
 	/* DEFINE(NUM_USER_SEGMENTS, TASK_SIZE>>28); */
 	return 0;
 }
-

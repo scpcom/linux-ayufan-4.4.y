@@ -55,7 +55,6 @@ struct xfs_mount;
 	BTOBB(XLOG_MAX_ICLOGS << (xfs_sb_version_haslogv2(&log->l_mp->m_sb) ? \
 	 XLOG_MAX_RECORD_BSHIFT : XLOG_BIG_RECORD_BSHIFT))
 
-
 static inline xfs_lsn_t xlog_assign_lsn(uint cycle, uint block)
 {
 	return ((xfs_lsn_t)cycle << 32) | block;
@@ -149,7 +148,6 @@ static inline uint xlog_get_client_id(__be32 i)
 					   shutdown */
 typedef __uint32_t xlog_tid_t;
 
-
 #ifdef __KERNEL__
 /*
  * Below are states for covering allocation transactions.
@@ -226,7 +224,6 @@ typedef __uint32_t xlog_tid_t;
 
 #define XLOG_COVER_OPS		5
 
-
 /* Ticket reservation region accounting */ 
 #define XLOG_TIC_LEN_MAX	15
 
@@ -264,7 +261,6 @@ typedef struct xlog_ticket {
 
 #endif
 
-
 typedef struct xlog_op_header {
 	__be32	   oh_tid;	/* transaction id of operation	:  4 b */
 	__be32	   oh_len;	/* bytes in data region		:  4 b */
@@ -272,7 +268,6 @@ typedef struct xlog_op_header {
 	__u8	   oh_flags;	/*				:  1 b */
 	__u16	   oh_res2;	/* 32 bit align			:  2 b */
 } xlog_op_header_t;
-
 
 /* valid values for h_fmt */
 #define XLOG_FMT_UNKNOWN  0
@@ -441,7 +436,6 @@ typedef struct log {
 } xlog_t;
 
 #define XLOG_FORCED_SHUTDOWN(log)	((log)->l_flags & XLOG_IO_ERROR)
-
 
 /* common routines */
 extern xfs_lsn_t xlog_assign_tail_lsn(struct xfs_mount *mp);

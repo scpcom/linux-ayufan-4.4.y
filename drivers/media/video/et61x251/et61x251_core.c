@@ -154,7 +154,6 @@ et61x251_request_buffers(struct et61x251_device* cam, u32 count,
 	return cam->nbuffers;
 }
 
-
 static void et61x251_release_buffers(struct et61x251_device* cam)
 {
 	if (cam->nbuffers) {
@@ -163,7 +162,6 @@ static void et61x251_release_buffers(struct et61x251_device* cam)
 	}
 	cam->frame_current = NULL;
 }
-
 
 static void et61x251_empty_framequeues(struct et61x251_device* cam)
 {
@@ -178,7 +176,6 @@ static void et61x251_empty_framequeues(struct et61x251_device* cam)
 	}
 }
 
-
 static void et61x251_requeue_outqueue(struct et61x251_device* cam)
 {
 	struct et61x251_frame_t *i;
@@ -190,7 +187,6 @@ static void et61x251_requeue_outqueue(struct et61x251_device* cam)
 
 	INIT_LIST_HEAD(&cam->outqueue);
 }
-
 
 static void et61x251_queue_unusedframes(struct et61x251_device* cam)
 {
@@ -227,7 +223,6 @@ int et61x251_write_reg(struct et61x251_device* cam, u8 value, u16 index)
 	return 0;
 }
 
-
 static int et61x251_read_reg(struct et61x251_device* cam, u16 index)
 {
 	struct usb_device* udev = cam->usbdev;
@@ -242,7 +237,6 @@ static int et61x251_read_reg(struct et61x251_device* cam, u16 index)
 
 	return (res >= 0) ? (int)(*buff) : -1;
 }
-
 
 static int
 et61x251_i2c_wait(struct et61x251_device* cam,
@@ -267,7 +261,6 @@ et61x251_i2c_wait(struct et61x251_device* cam,
 
 	return -EBUSY;
 }
-
 
 int
 et61x251_i2c_raw_write(struct et61x251_device* cam, u8 n, u8 data1, u8 data2,
@@ -319,7 +312,6 @@ et61x251_i2c_raw_write(struct et61x251_device* cam, u8 n, u8 data1, u8 data2,
 	return err ? -1 : 0;
 
 }
-
 
 /*****************************************************************************/
 
@@ -463,7 +455,6 @@ resubmit_urb:
 	wake_up_interruptible(&cam->wait_frame);
 }
 
-
 static int et61x251_start_transfer(struct et61x251_device* cam)
 {
 	struct usb_device *udev = cam->usbdev;
@@ -549,7 +540,6 @@ free_buffers:
 	return err;
 }
 
-
 static int et61x251_stop_transfer(struct et61x251_device* cam)
 {
 	struct usb_device *udev = cam->usbdev;
@@ -571,7 +561,6 @@ static int et61x251_stop_transfer(struct et61x251_device* cam)
 
 	return err;
 }
-
 
 static int et61x251_stream_interrupt(struct et61x251_device* cam)
 {
@@ -630,7 +619,6 @@ static int et61x251_i2c_try_read(struct et61x251_device* cam,
 
 	return err ? -1 : (int)data[0];
 }
-
 
 static int et61x251_i2c_try_write(struct et61x251_device* cam,
 				  const struct et61x251_sensor* sensor,
@@ -728,7 +716,6 @@ static ssize_t et61x251_show_reg(struct device* cd,
 	return count;
 }
 
-
 static ssize_t
 et61x251_store_reg(struct device* cd,
 		   struct device_attribute *attr, const char* buf, size_t len)
@@ -762,7 +749,6 @@ et61x251_store_reg(struct device* cd,
 	return count;
 }
 
-
 static ssize_t et61x251_show_val(struct device* cd,
 				 struct device_attribute *attr, char* buf)
 {
@@ -792,7 +778,6 @@ static ssize_t et61x251_show_val(struct device* cd,
 
 	return count;
 }
-
 
 static ssize_t
 et61x251_store_val(struct device* cd, struct device_attribute *attr,
@@ -833,7 +818,6 @@ et61x251_store_val(struct device* cd, struct device_attribute *attr,
 	return count;
 }
 
-
 static ssize_t et61x251_show_i2c_reg(struct device* cd,
 				     struct device_attribute *attr, char* buf)
 {
@@ -857,7 +841,6 @@ static ssize_t et61x251_show_i2c_reg(struct device* cd,
 
 	return count;
 }
-
 
 static ssize_t
 et61x251_store_i2c_reg(struct device* cd, struct device_attribute *attr,
@@ -891,7 +874,6 @@ et61x251_store_i2c_reg(struct device* cd, struct device_attribute *attr,
 
 	return count;
 }
-
 
 static ssize_t et61x251_show_i2c_val(struct device* cd,
 				     struct device_attribute *attr, char* buf)
@@ -927,7 +909,6 @@ static ssize_t et61x251_show_i2c_val(struct device* cd,
 
 	return count;
 }
-
 
 static ssize_t
 et61x251_store_i2c_val(struct device* cd, struct device_attribute *attr,
@@ -973,7 +954,6 @@ et61x251_store_i2c_val(struct device* cd, struct device_attribute *attr,
 	return count;
 }
 
-
 static DEVICE_ATTR(reg, S_IRUGO | S_IWUSR,
 		   et61x251_show_reg, et61x251_store_reg);
 static DEVICE_ATTR(val, S_IRUGO | S_IWUSR,
@@ -982,7 +962,6 @@ static DEVICE_ATTR(i2c_reg, S_IRUGO | S_IWUSR,
 		   et61x251_show_i2c_reg, et61x251_store_i2c_reg);
 static DEVICE_ATTR(i2c_val, S_IRUGO | S_IWUSR,
 		   et61x251_show_i2c_val, et61x251_store_i2c_val);
-
 
 static int et61x251_create_sysfs(struct et61x251_device* cam)
 {
@@ -1031,7 +1010,6 @@ et61x251_set_pix_format(struct et61x251_device* cam,
 	return err ? -EIO : 0;
 }
 
-
 static int
 et61x251_set_compression(struct et61x251_device* cam,
 			 struct v4l2_jpegcompression* compression)
@@ -1047,7 +1025,6 @@ et61x251_set_compression(struct et61x251_device* cam,
 
 	return err ? -EIO : 0;
 }
-
 
 static int et61x251_set_scale(struct et61x251_device* cam, u8 scale)
 {
@@ -1069,7 +1046,6 @@ static int et61x251_set_scale(struct et61x251_device* cam, u8 scale)
 
 	return 0;
 }
-
 
 static int
 et61x251_set_crop(struct et61x251_device* cam, struct v4l2_rect* rect)
@@ -1098,7 +1074,6 @@ et61x251_set_crop(struct et61x251_device* cam, struct v4l2_rect* rect)
 
 	return 0;
 }
-
 
 static int et61x251_init(struct et61x251_device* cam)
 {
@@ -1205,7 +1180,6 @@ static void et61x251_release_resources(struct kref *kref)
 	mutex_unlock(&et61x251_sysfs_lock);
 }
 
-
 static int et61x251_open(struct file *filp)
 {
 	struct et61x251_device* cam;
@@ -1290,7 +1264,6 @@ out:
 	return err;
 }
 
-
 static int et61x251_release(struct file *filp)
 {
 	struct et61x251_device* cam;
@@ -1312,7 +1285,6 @@ static int et61x251_release(struct file *filp)
 
 	return 0;
 }
-
 
 static ssize_t
 et61x251_read(struct file* filp, char __user * buf,
@@ -1425,7 +1397,6 @@ exit:
 	return err ? err : count;
 }
 
-
 static unsigned int et61x251_poll(struct file *filp, poll_table *wait)
 {
 	struct et61x251_device *cam = video_drvdata(filp);
@@ -1480,13 +1451,11 @@ error:
 	return POLLERR;
 }
 
-
 static void et61x251_vm_open(struct vm_area_struct* vma)
 {
 	struct et61x251_frame_t* f = vma->vm_private_data;
 	f->vma_use_count++;
 }
-
 
 static void et61x251_vm_close(struct vm_area_struct* vma)
 {
@@ -1495,12 +1464,10 @@ static void et61x251_vm_close(struct vm_area_struct* vma)
 	f->vma_use_count--;
 }
 
-
 static const struct vm_operations_struct et61x251_vm_ops = {
 	.open = et61x251_vm_open,
 	.close = et61x251_vm_close,
 };
-
 
 static int et61x251_mmap(struct file* filp, struct vm_area_struct *vma)
 {
@@ -1592,7 +1559,6 @@ et61x251_vidioc_querycap(struct et61x251_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 et61x251_vidioc_enuminput(struct et61x251_device* cam, void __user * arg)
 {
@@ -1614,7 +1580,6 @@ et61x251_vidioc_enuminput(struct et61x251_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 et61x251_vidioc_g_input(struct et61x251_device* cam, void __user * arg)
 {
@@ -1625,7 +1590,6 @@ et61x251_vidioc_g_input(struct et61x251_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 et61x251_vidioc_s_input(struct et61x251_device* cam, void __user * arg)
@@ -1640,7 +1604,6 @@ et61x251_vidioc_s_input(struct et61x251_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 et61x251_vidioc_query_ctrl(struct et61x251_device* cam, void __user * arg)
@@ -1662,7 +1625,6 @@ et61x251_vidioc_query_ctrl(struct et61x251_device* cam, void __user * arg)
 
 	return -EINVAL;
 }
-
 
 static int
 et61x251_vidioc_g_ctrl(struct et61x251_device* cam, void __user * arg)
@@ -1694,7 +1656,6 @@ exit:
 
 	return err;
 }
-
 
 static int
 et61x251_vidioc_s_ctrl(struct et61x251_device* cam, void __user * arg)
@@ -1729,7 +1690,6 @@ et61x251_vidioc_s_ctrl(struct et61x251_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 et61x251_vidioc_cropcap(struct et61x251_device* cam, void __user * arg)
 {
@@ -1744,7 +1704,6 @@ et61x251_vidioc_cropcap(struct et61x251_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 et61x251_vidioc_g_crop(struct et61x251_device* cam, void __user * arg)
@@ -1761,7 +1720,6 @@ et61x251_vidioc_g_crop(struct et61x251_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 et61x251_vidioc_s_crop(struct et61x251_device* cam, void __user * arg)
@@ -1874,7 +1832,6 @@ et61x251_vidioc_s_crop(struct et61x251_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 et61x251_vidioc_enum_framesizes(struct et61x251_device* cam, void __user * arg)
 {
@@ -1902,7 +1859,6 @@ et61x251_vidioc_enum_framesizes(struct et61x251_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 et61x251_vidioc_enum_fmt(struct et61x251_device* cam, void __user * arg)
@@ -1934,7 +1890,6 @@ et61x251_vidioc_enum_fmt(struct et61x251_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 et61x251_vidioc_g_fmt(struct et61x251_device* cam, void __user * arg)
 {
@@ -1960,7 +1915,6 @@ et61x251_vidioc_g_fmt(struct et61x251_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 et61x251_vidioc_try_s_fmt(struct et61x251_device* cam, unsigned int cmd,
@@ -2096,7 +2050,6 @@ et61x251_vidioc_try_s_fmt(struct et61x251_device* cam, unsigned int cmd,
 	return 0;
 }
 
-
 static int
 et61x251_vidioc_g_jpegcomp(struct et61x251_device* cam, void __user * arg)
 {
@@ -2106,7 +2059,6 @@ et61x251_vidioc_g_jpegcomp(struct et61x251_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 et61x251_vidioc_s_jpegcomp(struct et61x251_device* cam, void __user * arg)
@@ -2140,7 +2092,6 @@ et61x251_vidioc_s_jpegcomp(struct et61x251_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 et61x251_vidioc_reqbufs(struct et61x251_device* cam, void __user * arg)
@@ -2190,7 +2141,6 @@ et61x251_vidioc_reqbufs(struct et61x251_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 et61x251_vidioc_querybuf(struct et61x251_device* cam, void __user * arg)
 {
@@ -2219,7 +2169,6 @@ et61x251_vidioc_querybuf(struct et61x251_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 et61x251_vidioc_qbuf(struct et61x251_device* cam, void __user * arg)
 {
@@ -2246,7 +2195,6 @@ et61x251_vidioc_qbuf(struct et61x251_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 et61x251_vidioc_dqbuf(struct et61x251_device* cam, struct file* filp,
@@ -2302,7 +2250,6 @@ et61x251_vidioc_dqbuf(struct et61x251_device* cam, struct file* filp,
 	return 0;
 }
 
-
 static int
 et61x251_vidioc_streamon(struct et61x251_device* cam, void __user * arg)
 {
@@ -2320,7 +2267,6 @@ et61x251_vidioc_streamon(struct et61x251_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 et61x251_vidioc_streamoff(struct et61x251_device* cam, void __user * arg)
@@ -2344,7 +2290,6 @@ et61x251_vidioc_streamoff(struct et61x251_device* cam, void __user * arg)
 	return 0;
 }
 
-
 static int
 et61x251_vidioc_g_parm(struct et61x251_device* cam, void __user * arg)
 {
@@ -2364,7 +2309,6 @@ et61x251_vidioc_g_parm(struct et61x251_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static int
 et61x251_vidioc_s_parm(struct et61x251_device* cam, void __user * arg)
@@ -2392,7 +2336,6 @@ et61x251_vidioc_s_parm(struct et61x251_device* cam, void __user * arg)
 
 	return 0;
 }
-
 
 static long et61x251_ioctl_v4l2(struct file *filp,
 			       unsigned int cmd, void __user *arg)
@@ -2488,7 +2431,6 @@ static long et61x251_ioctl_v4l2(struct file *filp,
 	}
 }
 
-
 static long et61x251_ioctl(struct file *filp,
 			 unsigned int cmd, unsigned long arg)
 {
@@ -2519,7 +2461,6 @@ static long et61x251_ioctl(struct file *filp,
 
 	return err;
 }
-
 
 static const struct v4l2_file_operations et61x251_fops = {
 	.owner = THIS_MODULE,
@@ -2642,7 +2583,6 @@ fail:
 	return err;
 }
 
-
 static void et61x251_usb_disconnect(struct usb_interface* intf)
 {
 	struct et61x251_device* cam;
@@ -2672,7 +2612,6 @@ static void et61x251_usb_disconnect(struct usb_interface* intf)
 	up_write(&et61x251_dev_lock);
 }
 
-
 static struct usb_driver et61x251_usb_driver = {
 	.name =       "et61x251",
 	.id_table =   et61x251_id_table,
@@ -2695,12 +2634,10 @@ static int __init et61x251_module_init(void)
 	return err;
 }
 
-
 static void __exit et61x251_module_exit(void)
 {
 	usb_deregister(&et61x251_usb_driver);
 }
-
 
 module_init(et61x251_module_init);
 module_exit(et61x251_module_exit);

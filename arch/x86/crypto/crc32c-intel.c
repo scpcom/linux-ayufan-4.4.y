@@ -173,7 +173,6 @@ static struct shash_alg alg = {
 	}
 };
 
-
 static int __init crc32c_intel_mod_init(void)
 {
 	if (cpu_has_xmm4_2)

@@ -74,7 +74,4 @@
 #define S3C2412_IISFIC_TXCOUNT(x)	(((x) >>  8) & 0xf)
 #define S3C2412_IISFIC_RXCOUNT(x)	(((x) >>  0) & 0xf)
 
-
-
 #endif /* __ASM_ARCH_REGS_S3C2412_IIS_H */
-

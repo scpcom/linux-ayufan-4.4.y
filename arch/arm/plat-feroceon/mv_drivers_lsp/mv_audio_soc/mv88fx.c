@@ -210,7 +210,6 @@ static int mv88fx_snd_spdif_default_put(struct snd_kcontrol *kcontrol,
 	if (pbstream->spdif_status[0] & IEC958_AES0_NONAUDIO)
 		chip->pcm_mode = NON_PCM;
 
-
 	spin_unlock_irq(&chip->reg_lock);
 	return change;
 }
@@ -440,7 +439,6 @@ static int mv88fx_snd_ctrl_new(struct snd_card *card)
 
 	return err;
 }
-
 
 static int mv88fx_cs42l51_init(struct snd_soc_codec *codec)
 {

@@ -308,7 +308,6 @@ int ieee80211_init_rate_ctrl_alg(struct ieee80211_local *local,
 	       "algorithm '%s'\n", wiphy_name(local->hw.wiphy),
 	       ref->ops->name);
 
-
 	return 0;
 }
 
@@ -320,4 +319,3 @@ void rate_control_deinitialize(struct ieee80211_local *local)
 	local->rate_ctrl = NULL;
 	rate_control_put(ref);
 }
-

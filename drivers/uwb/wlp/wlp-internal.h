@@ -91,7 +91,6 @@ extern int wlp_eda_for_virtual(struct wlp_eda *,
 			       struct uwb_dev_addr *,
 			       wlp_eda_for_each_f , void *);
 
-
 extern void wlp_remove_neighbor_tmp_info(struct wlp_neighbor_e *);
 
 extern size_t wlp_wss_key_print(char *, size_t, u8 *);
@@ -118,10 +117,8 @@ struct wlp_assoc_conn_ctx {
 	struct wlp_eda_node eda_entry;
 };
 
-
 extern int wlp_wss_connect_prep(struct wlp *, struct wlp_eda_node *, void *);
 extern int wlp_wss_send_copy(struct wlp *, struct wlp_eda_node *, void *);
-
 
 /* Message handling */
 struct wlp_assoc_frame_ctx {
@@ -199,7 +196,6 @@ size_t wlp_wss_nonce_print(char *buf, size_t bufsize, struct wlp_nonce *nonce)
 			  nonce->data[14], nonce->data[15]);
 	return result;
 }
-
 
 static inline
 void wlp_session_cb(struct wlp *wlp)

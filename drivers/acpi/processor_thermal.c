@@ -55,7 +55,6 @@ static int acpi_processor_apply_limit(struct acpi_processor *pr)
 	u16 px = 0;
 	u16 tx = 0;
 
-
 	if (!pr)
 		return -EINVAL;
 
@@ -246,7 +245,6 @@ int acpi_processor_set_thermal_limit(acpi_handle handle, int type)
 	struct acpi_processor *pr = NULL;
 	struct acpi_device *device = NULL;
 	int tx = 0, max_tx_px = 0;
-
 
 	if ((type < ACPI_PROCESSOR_LIMIT_NONE)
 	    || (type > ACPI_PROCESSOR_LIMIT_DECREMENT))
@@ -445,7 +443,6 @@ static int acpi_processor_limit_seq_show(struct seq_file *seq, void *offset)
 {
 	struct acpi_processor *pr = (struct acpi_processor *)seq->private;
 
-
 	if (!pr)
 		goto end;
 
@@ -481,7 +478,6 @@ static ssize_t acpi_processor_write_limit(struct file * file,
 	char limit_string[25] = { '\0' };
 	int px = 0;
 	int tx = 0;
-
 
 	if (!pr || (count > sizeof(limit_string) - 1)) {
 		return -EINVAL;

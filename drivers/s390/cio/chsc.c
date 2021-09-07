@@ -974,4 +974,3 @@ int chsc_sstpi(void *page, void *result, size_t size)
 	memcpy(result, &rr->data, size);
 	return (rr->response.code == 0x0001) ? 0 : -EIO;
 }
-

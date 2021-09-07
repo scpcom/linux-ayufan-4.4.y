@@ -25,7 +25,6 @@ s64_to_loff_t(__s64 offset)
 	return (loff_t)offset;
 }
 
-
 static inline s64
 loff_t_to_s64(loff_t offset)
 {
@@ -220,7 +219,6 @@ nlm4_encode_testres(__be32 *p, struct nlm_res *resp)
 	dprintk("xdr: after encode_testres (p %p resp %p)\n", p, resp);
 	return p;
 }
-
 
 /*
  * First, the server side XDR functions
@@ -439,7 +437,6 @@ nlm4clt_decode_testres(struct rpc_rqst *req, __be32 *p, struct nlm_res *resp)
 	}
 	return 0;
 }
-
 
 static int
 nlm4clt_encode_lockargs(struct rpc_rqst *req, __be32 *p, nlm_args *argp)

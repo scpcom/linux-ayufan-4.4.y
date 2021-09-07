@@ -245,7 +245,6 @@ static const struct i2c_device_id tsl2561_id[] = {
 };
 MODULE_DEVICE_TABLE(i2c, tsl2561_id);
 
-
 static struct i2c_driver tsl2561_driver = {
 	.driver = {
 		.name = "tsl2561",

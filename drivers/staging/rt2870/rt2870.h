@@ -51,7 +51,6 @@
 #define	TX_RING					0xa
 #define	PRIO_RING				0xc
 
-
 // Flags for Bulkflags control for bulk out data
 //
 #define	fRTUSB_BULK_OUT_DATA_NULL				0x00000001
@@ -133,7 +132,6 @@ typedef	struct	_MGMT_STRUC	{
 	ULONG		Length;
 }	MGMT_STRUC, *PMGMT_STRUC;
 
-
 /* ----------------- EEPROM Related MACRO ----------------- */
 #define RT28xx_EEPROM_READ16(pAd, offset, var)					\
 	do {														\
@@ -153,7 +151,6 @@ typedef	struct	_MGMT_STRUC	{
 /* ----------------- TASK/THREAD Related MACRO ----------------- */
 #define RT28XX_TASK_THREAD_INIT(pAd, Status)		\
 	Status = CreateThreads(net_dev);
-
 
 /* ----------------- Frimware Related MACRO ----------------- */
 #define RT28XX_WRITE_FIRMWARE(_pAd, _pFwImage, _FwLen)		\
@@ -182,7 +179,6 @@ typedef	struct	_MGMT_STRUC	{
 				RTMP_IRQ_UNLOCK(&pAd->DeQueueLock[QueIdx], irqFlags);	\
 			}while(0)
 
-
 #define	RT28XX_HAS_ENOUGH_FREE_DESC(pAd, pTxBlk, freeNum, pPacket) \
 		(RTUSBFreeDescriptorRequest(pAd, pTxBlk->QueIdx, (pTxBlk->TotalFrameLen + GET_OS_PKT_LEN(pPacket))) == NDIS_STATUS_SUCCESS)
 
@@ -192,13 +188,10 @@ typedef	struct	_MGMT_STRUC	{
 #define NEED_QUEUE_BACK_FOR_AGG(_pAd, _QueIdx, _freeNum, _TxFrameType) 		\
 		((_TxFrameType == TX_RALINK_FRAME) && (RTUSBNeedQueueBackForAgg(_pAd, _QueIdx)))
 
-
-
 #define fRTMP_ADAPTER_NEED_STOP_TX		\
 		(fRTMP_ADAPTER_NIC_NOT_EXIST | fRTMP_ADAPTER_HALT_IN_PROGRESS |	\
 		 fRTMP_ADAPTER_RESET_IN_PROGRESS | fRTMP_ADAPTER_BULKOUT_RESET | \
 		 fRTMP_ADAPTER_RADIO_OFF | fRTMP_ADAPTER_REMOVE_IN_PROGRESS)
-
 
 #define HAL_WriteSubTxResource(pAd, pTxBlk, bIsLast, pFreeNumber)	\
 			RtmpUSB_WriteSubTxResource(pAd, pTxBlk, bIsLast, pFreeNumber)
@@ -221,7 +214,6 @@ typedef	struct	_MGMT_STRUC	{
 #define HAL_KickOutTx(pAd, pTxBlk, QueIdx)	\
 			RtmpUSBDataKickOut(pAd, pTxBlk, QueIdx)
 
-
 #define HAL_KickOutMgmtTx(pAd, QueIdx, pPacket, pSrcBufVA, SrcBufLen)	\
 			RtmpUSBMgmtKickOut(pAd, QueIdx, pPacket, pSrcBufVA, SrcBufLen)
 
@@ -232,12 +224,10 @@ typedef	struct	_MGMT_STRUC	{
 
 extern UCHAR EpToQueue[6];
 
-
 #ifdef RT2870
 #define GET_TXRING_FREENO(_pAd, _QueIdx) 	(_QueIdx) //(_pAd->TxRing[_QueIdx].TxSwFreeIdx)
 #define GET_MGMTRING_FREENO(_pAd) 			(_pAd->MgmtRing.TxSwFreeIdx)
 #endif // RT2870 //
-
 
 /* ----------------- RX Related MACRO ----------------- */
 //#define RT28XX_RX_ERROR_CHECK				RTMPCheckRxWI
@@ -246,7 +236,6 @@ extern UCHAR EpToQueue[6];
 	/* We return STATUS_MORE_PROCESSING_REQUIRED so that the completion */	\
 	/* routine (IofCompleteRequest) will stop working on the irp. */		\
 	if (bBulkReceive == TRUE)	RTUSBBulkReceive(pAd);
-
 
 /* ----------------- ASIC Related MACRO ----------------- */
 
@@ -308,7 +297,6 @@ extern UCHAR EpToQueue[6];
 			RTUSBEnqueueInternalCmd((_pAd), CMDTHREAD_SET_ASIC_WCID, &SetAsicWcid, sizeof(RT_SET_ASIC_WCID));	\
 		}while(0)
 
-
 /* ----------------- PCI/USB Related MACRO ----------------- */
 #define RT28XX_HANDLE_DEV_ASSIGN(handle, dev_p)			\
 	((POS_COOKIE)handle)->pUsb_Dev = dev_p;
@@ -319,7 +307,6 @@ extern UCHAR EpToQueue[6];
 #define RT28XX_IRQ_RELEASE(net_dev)
 #define RT28XX_IRQ_INIT(pAd)
 #define RT28XX_IRQ_ENABLE(pAd)
-
 
 /* ----------------- MLME Related MACRO ----------------- */
 #define RT28XX_MLME_HANDLER(pAd)			RTUSBMlmeUp(pAd)
@@ -343,7 +330,6 @@ extern UCHAR EpToQueue[6];
 		RTUSBMlmeUp(_pAd);									\
 	}
 
-
 /* ----------------- Power Save Related MACRO ----------------- */
 #define RT28XX_PS_POLL_ENQUEUE(pAd)						\
 	{	RTUSB_SET_BULK_FLAG(pAd, fRTUSB_BULK_OUT_PSPOLL);	\
@@ -366,7 +352,6 @@ extern UCHAR EpToQueue[6];
 									do{_ptr = kmalloc((_size),(_flag));}while(0)
 #define NdisFreeMemory(a, b, c) 	kfree((a))
 #define NdisMSleep					RTMPusecDelay		/* unit: microsecond */
-
 
 #define USBD_TRANSFER_DIRECTION_OUT		0
 #define USBD_TRANSFER_DIRECTION_IN		0
@@ -566,7 +551,6 @@ typedef	struct	_CMDHandler_TLV	{
 #define WPA2PSKAKMBIT   0x08
 #define TKIPBIT         0x01
 #define CCMPBIT         0x02
-
 
 #define RT28XX_STA_FORCE_WAKEUP(pAd, bFromTx) \
     RT28xxUsbStaAsicForceWakeup(pAd, bFromTx);

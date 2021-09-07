@@ -656,7 +656,6 @@ static void via_cmdbuf_jump(drm_via_private_t * dev_priv)
 	via_hook_segment(dev_priv, pause_addr_hi, pause_addr_lo, 0);
 }
 
-
 static void via_cmdbuf_rewind(drm_via_private_t * dev_priv)
 {
 	via_cmdbuf_jump(dev_priv);

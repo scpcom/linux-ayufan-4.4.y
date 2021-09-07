@@ -1,7 +1,6 @@
 #ifndef _ASM_IA64_KEXEC_H
 #define _ASM_IA64_KEXEC_H
 
-
 /* Maximum physical address we can use pages from */
 #define KEXEC_SOURCE_MEMORY_LIMIT (-1UL)
 /* Maximum address we can reach in physical address mode */

@@ -147,7 +147,6 @@ void radeon_gem_fini(struct radeon_device *rdev)
 	radeon_object_force_delete(rdev);
 }
 
-
 /*
  * GEM ioctls.
  */

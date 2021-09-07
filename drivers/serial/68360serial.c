@@ -41,13 +41,11 @@
 #include <asm/m68360.h>
 #include <asm/commproc.h>
 
- 
 #ifdef CONFIG_KGDB
 extern void breakpoint(void);
 extern void set_debug_traps(void);
 extern int  kgdb_output_string (const char* s, unsigned int count);
 #endif
-
 
 /* #ifdef CONFIG_SERIAL_CONSOLE */ /* This seems to be a post 2.0 thing - mles */
 #include <linux/console.h>
@@ -66,7 +64,6 @@ extern int  kgdb_output_string (const char* s, unsigned int count);
 #undef CONFIG_SERIAL_CONSOLE_PORT
 #define CONFIG_SERIAL_CONSOLE_PORT	2
 #endif
-
 
 #define TX_WAKEUP	ASYNC_SHARE_IRQ
 
@@ -108,7 +105,6 @@ int serial_console_setup(struct console *co, char *options);
 #define smc_scc_num	hub6
 #define NUM_IS_SCC	((int)0x00010000)
 #define PORT_NUM(P)	((P) & 0x0000ffff)
-
 
 #if defined (CONFIG_UCQUICC)
 
@@ -169,8 +165,6 @@ struct serial_state {
 
 #define SSTATE_MAGIC 0x5302
 
-
-
 /* SMC2 is sometimes used for low performance TDM interfaces.  Define
  * this as 1 if you want SMC2 as a serial port UART managed by this driver.
  * Define this as 0 if you wish to use SMC2 for something else.
@@ -189,7 +183,6 @@ struct serial_state {
  */
 #define SCC_IDX_BASE	1	/* table index */
 #endif
-
 
 /* Processors other than the 860 only get SMCs configured by default.
  * Either they don't have SCCs or they are allocated somewhere else.
@@ -254,7 +247,6 @@ typedef struct serial_info {
  	wait_queue_head_t	open_wait; 
  	wait_queue_head_t	close_wait; 
 
-	
 /* CPM Buffer Descriptor pointers.
 	*/
 	QUICC_BD			*rx_bd_base;
@@ -262,7 +254,6 @@ typedef struct serial_info {
 	QUICC_BD			*tx_bd_base;
 	QUICC_BD			*tx_cur;
 } ser_info_t;
-
 
 /* since kmalloc_init() does not get called until much after this initialization: */
 static ser_info_t  quicc_ser_info[NR_PORTS];
@@ -345,7 +336,6 @@ static void rs_360_stop(struct tty_struct *tty)
 	}
 	local_irq_restore(flags);
 }
-
 
 static void rs_360_start(struct tty_struct *tty)
 {
@@ -657,13 +647,11 @@ static void rs_360_interrupt(int vec, void *dev_id)
 #endif
 }
 
-
 /*
  * -------------------------------------------------------------------
  * Here ends the serial interrupt routines.
  * -------------------------------------------------------------------
  */
-
 
 static void do_softint(void *private_)
 {
@@ -677,7 +665,6 @@ static void do_softint(void *private_)
 	if (test_and_clear_bit(RS_EVENT_WRITE_WAKEUP, &info->event))
 		tty_wakeup(tty);
 }
-
 
 /*
  * This routine is called from the scheduler tqueue when the interrupt
@@ -700,7 +687,6 @@ static void do_serial_hangup(void *private_)
 	tty_hangup(tty);
 }
 
-
 static int startup(ser_info_t *info)
 {
 	unsigned long flags;
@@ -711,7 +697,6 @@ static int startup(ser_info_t *info)
 	volatile struct scc_regs *sccp;
 	volatile struct smc_uart_pram	*up;
 	volatile struct uart_pram	    *scup;
-
 
 	local_irq_save(flags);
 
@@ -730,7 +715,6 @@ static int startup(ser_info_t *info)
 #ifdef SERIAL_DEBUG_OPEN
 	printk("starting up ttys%d (irq %d)...", info->line, state->irq);
 #endif
-
 
 #ifdef modem_control
 	info->MCR = 0;
@@ -1379,7 +1363,6 @@ static void send_break(ser_info_t *info, unsigned int duration)
 	printk("done jiffies=%lu\n", jiffies);
 #endif
 }
-
 
 static int rs_360_ioctl(struct tty_struct *tty, struct file * file,
 		    unsigned int cmd, unsigned long arg)
@@ -2068,7 +2051,6 @@ static _INLINE_ void show_serial_version(void)
  	printk(KERN_INFO "%s version %s\n", serial_name, serial_version);
 }
 
-
 /*
  * The serial console driver used during boot.  Note that these names
  * clash with those found in "serial.c", so we currently can't support
@@ -2093,7 +2075,6 @@ static void my_console_write(int idx, const char *s,
 	volatile	u_char		*cp;
 
 	ser = rs_table + idx;
-
 
 	/* If the port has been initialized for general use, we have
 	 * to use the buffer descriptors allocated there.  Otherwise,
@@ -2184,8 +2165,6 @@ static void serial_console_write(struct console *c, const char *s,
 	my_console_write(c->index, s, count);
 }
 
-
-
 /*void console_print_68360(const char *p)
 {
 	const char *cp = p;
@@ -2200,11 +2179,6 @@ static void serial_console_write(struct console *c, const char *s,
 
 	return;
 }*/
-
-
-
-
-
 
 #ifdef CONFIG_XMON
 int
@@ -2378,7 +2352,6 @@ static struct tty_struct *serial_console_device(struct console *c, int *index)
 	return serial_driver;
 }
 
-
 struct console sercons = {
  	.name		= "ttyS",
  	.write		= serial_console_write,
@@ -2388,8 +2361,6 @@ struct console sercons = {
  	.flags		= CON_PRINTBUFFER,
  	.index		= CONFIG_SERIAL_CONSOLE_PORT, 
 };
-
-
 
 /*
  *	Register console.
@@ -2470,7 +2441,6 @@ static int __init rs_360_init(void)
 	cp = pquicc;	/* Get pointer to Communication Processor */
 	/* immap = (immap_t *)IMAP_ADDR; */	/* and to internal registers */
 
-
 	/* Configure SCC2, SCC3, and SCC4 instead of port A parallel I/O.
 	 */
 	/* The "standard" configuration through the 860.
@@ -2481,7 +2451,6 @@ static int __init rs_360_init(void)
 	cp->pio_papar |= 0x00fc;
 	cp->pio_padir &= ~0x00fc;
 	/* cp->pio_paodr &= ~0x00fc; */
-
 
 	/* Since we don't yet do modem control, connect the port C pins
 	 * as general purpose I/O.  This will assert CTS and CD for the
@@ -2494,8 +2463,6 @@ static int __init rs_360_init(void)
 
 /* 	cp->pio_pcdir |= 0x03c6; */
 /* 	cp->pio_pcpar &= ~0x03c6; */
-
-
 
 	/* Connect SCC2 and SCC3 to NMSI.  Connect BRG3 to SCC2 and
 	 * BRG4 to SCC3.
@@ -2541,7 +2508,6 @@ static int __init rs_360_init(void)
 		 */
 		if (i == CONFIG_SERIAL_CONSOLE_PORT)
 			mdelay(8);
-
 
 /* 		idx = PORT_NUM(info->state->smc_scc_num); */
 /* 		if (info->state->smc_scc_num & NUM_IS_SCC) */
@@ -2596,7 +2562,6 @@ static int __init rs_360_init(void)
 			}
 			bdp->buf = &rx_buf_pool[(i * RX_NUM_FIFO + j ) * RX_BUF_SIZE];
 			bdp->status = BD_SC_WRAP | BD_SC_EMPTY | BD_SC_INTRPT;
-
 
 			idx = PORT_NUM(info->state->smc_scc_num);
 			if (info->state->smc_scc_num & NUM_IS_SCC) {
@@ -2710,7 +2675,6 @@ static int __init rs_360_init(void)
 				cp->pip_pbpar |= iobits;
 				cp->pip_pbdir &= ~iobits;
 				cp->pip_pbodr &= ~iobits;
-
 
 				/* Connect the baud rate generator to the
 				 * SMC based upon index in rs_table.  Also
@@ -2853,7 +2817,6 @@ int serial_console_setup( struct console *co, char *options)
 	 */
 	/* mem_addr = m360_cpm_hostalloc(8); */
 	mem_addr = (uint)console_fifos;
-
 
 	/* Set the physical address of the host memory buffers in
 	 * the buffer descriptors.

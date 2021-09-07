@@ -135,7 +135,6 @@
 	P_MDC, \
 	P_MDIO, 0}
 
-
 #define P_RMII0 {\
 	P_MII0_ETxD0, \
 	P_MII0_ETxD1, \

@@ -358,7 +358,6 @@ static irqreturn_t wdtpci_interrupt(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-
 /**
  *	wdtpci_write:
  *	@file: file handle to the watchdog
@@ -580,7 +579,6 @@ static int wdtpci_notify_sys(struct notifier_block *this, unsigned long code,
  *	Kernel Interfaces
  */
 
-
 static const struct file_operations wdtpci_fops = {
 	.owner		= THIS_MODULE,
 	.llseek		= no_llseek,
@@ -618,7 +616,6 @@ static struct miscdevice temp_miscdev = {
 static struct notifier_block wdtpci_notifier = {
 	.notifier_call = wdtpci_notify_sys,
 };
-
 
 static int __devinit wdtpci_init_one(struct pci_dev *dev,
 					const struct pci_device_id *ent)
@@ -724,7 +721,6 @@ out_pci:
 	goto out;
 }
 
-
 static void __devexit wdtpci_remove_one(struct pci_dev *pdev)
 {
 	/* here we assume only one device will ever have
@@ -739,7 +735,6 @@ static void __devexit wdtpci_remove_one(struct pci_dev *pdev)
 	dev_count--;
 }
 
-
 static struct pci_device_id wdtpci_pci_tbl[] = {
 	{
 		.vendor	   = PCI_VENDOR_ID_ACCESSIO,
@@ -751,14 +746,12 @@ static struct pci_device_id wdtpci_pci_tbl[] = {
 };
 MODULE_DEVICE_TABLE(pci, wdtpci_pci_tbl);
 
-
 static struct pci_driver wdtpci_driver = {
 	.name		= "wdt_pci",
 	.id_table	= wdtpci_pci_tbl,
 	.probe		= wdtpci_init_one,
 	.remove		= __devexit_p(wdtpci_remove_one),
 };
-
 
 /**
  *	wdtpci_cleanup:
@@ -775,7 +768,6 @@ static void __exit wdtpci_cleanup(void)
 	pci_unregister_driver(&wdtpci_driver);
 }
 
-
 /**
  * 	wdtpci_init:
  *
@@ -788,7 +780,6 @@ static int __init wdtpci_init(void)
 {
 	return pci_register_driver(&wdtpci_driver);
 }
-
 
 module_init(wdtpci_init);
 module_exit(wdtpci_cleanup);

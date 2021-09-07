@@ -67,7 +67,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ctrlEnv/mvCtrlEnvLib.h"
 
-
 /* Vendor Ids */
 #define AMD_MANUF	0x01	/* AMD	   manuf. ID in D23..D16, D7..D0 */
 #define FUJ_MANUF	0x04	/* FUJITSU manuf. ID in D23..D16, D7..D0 */
@@ -79,7 +78,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INTEL_ALT_MANUF	0xB0	/* alternate INTEL namufacturer ID	*/
 #define MX_MANUF	0xC2	/* MXIC	   manuf. ID in D23..D16, D7..D0 */
 #define TOSH_MANUF	0x98	/* TOSHIBA manuf. ID in D23..D16, D7..D0 */
-
 
 #define MAX_SECTOR_NUM  300
 
@@ -131,9 +129,6 @@ typedef struct _mvFlashInfo
     MV_U32    	    devWidth;               /* Width of single Flash device */
 
 } MV_FLASH_INFO;
-
-
-
 
 /* get info */
 MV_U32      mvFlashNumOfDevGet   (MV_FLASH_INFO *pFlash);

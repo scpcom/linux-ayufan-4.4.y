@@ -246,7 +246,6 @@ label:
 	EXC_XFER_TEMPLATE(hdlr, n+1, MSR_KERNEL, COPY_EE, transfer_to_handler, \
 			  ret_from_except)
 
-
 /*
  * 0x0100 - Critical Interrupt Exception
  */

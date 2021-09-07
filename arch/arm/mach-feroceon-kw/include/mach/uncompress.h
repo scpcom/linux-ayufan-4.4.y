@@ -43,7 +43,6 @@ static void putstr(const char *s)
 	else
 		model = (DEV_REG >> 16) & 0xffff;
 	
-	
 	/* DB 6280 is using UART 1 by default */	
 	if(model == 0x6280) {
         while (*s) {

@@ -54,7 +54,6 @@
 #include <mach/mux.h>
 #include <mach/omap730.h>	/* OMAP730_IO_CONF registers */
 
-
 /* FIXME address is now a platform device resource,
  * and irqs should show there too...
  */
@@ -89,7 +88,6 @@
 #define UWIRE_FREQ_DIV_8		0x0010
 #define UWIRE_CHK_READY			0x0020
 #define UWIRE_CLK_INVERTED		0x0040
-
 
 struct uwire_spi {
 	struct spi_bitbang	bitbang;
@@ -180,7 +178,6 @@ static void uwire_chipselect(struct spi_device *spi, int value)
 	struct	uwire_state *ust = spi->controller_state;
 	u16	w;
 	int	old_cs;
-
 
 	BUG_ON(wait_uwire_csr_flag(CSRB, 0, 0));
 
@@ -589,4 +586,3 @@ subsys_initcall(omap_uwire_init);
 module_exit(omap_uwire_exit);
 
 MODULE_LICENSE("GPL");
-

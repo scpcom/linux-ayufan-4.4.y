@@ -34,7 +34,6 @@ size_t strlcpy(char *dest, const char *src, size_t size)
 	return ret;
 }
 
-
 static char *get_pathname(void)
 {
 	static char pathname_array[4][PATH_MAX];
@@ -143,7 +142,6 @@ char *perf_path(const char *fmt, ...)
 	return cleanup_path(pathname);
 }
 
-
 /* perf_mkstemp() - create tmp file honoring TMPDIR variable */
 int perf_mkstemp(char *path, size_t len, const char *template)
 {
@@ -160,7 +158,6 @@ int perf_mkstemp(char *path, size_t len, const char *template)
 	}
 	return mkstemp(path);
 }
-
 
 const char *make_relative_path(const char *abs_path, const char *base)
 {

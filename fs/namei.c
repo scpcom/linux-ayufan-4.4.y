@@ -50,7 +50,6 @@ int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen);
 u_int16_t *SYNOUnicodeGenerateDefaultUpcaseTable(void);
 u_int16_t *DefUpcaseTable(void);
 
-
 /*
  * Sample implementation from Unicode home page.
  * http://www.stonehand.com/unicode/standard/fss-utf.html
@@ -129,7 +128,6 @@ int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen)
 	}
 	return -1;
 }
-
 
 /*
  * upcase.c - Generate the full NTFS Unicode upcase table in little endian.
@@ -248,7 +246,6 @@ u_int16_t *SYNOUnicodeGenerateDefaultUpcaseTable(void)
 #endif /* MY_ABC_HERE */
 	return uc;
 }
-
 
 static u_int16_t *UpcaseTable = NULL;
 

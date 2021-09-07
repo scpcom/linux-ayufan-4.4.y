@@ -500,7 +500,6 @@ parse_subsystem_tracepoint_event(char *sys_name, char *flags)
 	return EVT_HANDLED_ALL;
 }
 
-
 static enum event_result parse_tracepoint_event(const char **strp,
 				    struct perf_event_attr *attr)
 {
@@ -707,7 +706,6 @@ static void store_event_type(const char *orgname)
 	fclose(file);
 	perf_header__push_event(id, orgname);
 }
-
 
 int parse_events(const struct option *opt __used, const char *str, int unset __used)
 {

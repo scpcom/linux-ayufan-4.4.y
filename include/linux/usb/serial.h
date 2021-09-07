@@ -327,7 +327,6 @@ extern int usb_serial_handle_sysrq_char(struct tty_struct *tty,
 					unsigned int ch);
 extern int usb_serial_handle_break(struct usb_serial_port *port);
 
-
 extern int usb_serial_bus_register(struct usb_serial_driver *device);
 extern void usb_serial_bus_deregister(struct usb_serial_driver *device);
 
@@ -360,7 +359,4 @@ static inline void usb_serial_debug_data(int debug,
 				## arg); \
 	} while (0)
 
-
-
 #endif /* __LINUX_USB_SERIAL_H */
-

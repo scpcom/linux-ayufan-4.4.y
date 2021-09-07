@@ -36,7 +36,6 @@
 
 /*---------------------  Export Definitions -------------------------*/
 
-
 #define CONTROLnsRequestOut( Device,Request,Value,Index,Length,Buffer) \
         PIPEnsControlOut( Device,Request,Value,Index,Length,Buffer)
 
@@ -45,7 +44,6 @@
 
 #define CONTROLnsRequestIn( Device,Request,Value,Index,Length,Buffer) \
         PIPEnsControlIn( Device,Request,Value,Index,Length,Buffer)
-
 
 /*---------------------  Export Classes  ----------------------------*/
 
@@ -60,14 +58,12 @@ void ControlvWriteByte(
     IN BYTE byData
     );
 
-
 void ControlvReadByte(
     IN PSDevice pDevice,
     IN BYTE byRegType,
     IN BYTE byRegOfs,
     IN PBYTE pbyData
     );
-
 
 void ControlvMaskByte(
     IN PSDevice pDevice,
@@ -78,6 +74,3 @@ void ControlvMaskByte(
     );
 
 #endif // __RCV_H__
-
-
-

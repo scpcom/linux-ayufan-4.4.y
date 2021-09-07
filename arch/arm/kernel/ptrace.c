@@ -231,7 +231,6 @@ get_branch_address(struct task_struct *child, unsigned long pc, unsigned long in
 			break;
 		}
 
-
 		if ((insn & 0xf000) != 0xf000)
 			break;
 

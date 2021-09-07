@@ -295,7 +295,6 @@ bfa_ioc_sm_semwait(struct bfa_ioc_s *ioc, enum ioc_event event)
 	}
 }
 
-
 static void
 bfa_ioc_sm_hwinit_entry(struct bfa_ioc_s *ioc)
 {
@@ -346,7 +345,6 @@ bfa_ioc_sm_hwinit(struct bfa_ioc_s *ioc, enum ioc_event event)
 		bfa_sm_fault(ioc, event);
 	}
 }
-
 
 static void
 bfa_ioc_sm_enabling_entry(struct bfa_ioc_s *ioc)
@@ -405,7 +403,6 @@ bfa_ioc_sm_enabling(struct bfa_ioc_s *ioc, enum ioc_event event)
 	}
 }
 
-
 static void
 bfa_ioc_sm_getattr_entry(struct bfa_ioc_s *ioc)
 {
@@ -446,7 +443,6 @@ bfa_ioc_sm_getattr(struct bfa_ioc_s *ioc, enum ioc_event event)
 		bfa_sm_fault(ioc, event);
 	}
 }
-
 
 static void
 bfa_ioc_sm_op_entry(struct bfa_ioc_s *ioc)
@@ -489,7 +485,6 @@ bfa_ioc_sm_op(struct bfa_ioc_s *ioc, enum ioc_event event)
 		bfa_sm_fault(ioc, event);
 	}
 }
-
 
 static void
 bfa_ioc_sm_disabling_entry(struct bfa_ioc_s *ioc)
@@ -560,7 +555,6 @@ bfa_ioc_sm_disabled(struct bfa_ioc_s *ioc, enum ioc_event event)
 	}
 }
 
-
 static void
 bfa_ioc_sm_initfail_entry(struct bfa_ioc_s *ioc)
 {
@@ -596,7 +590,6 @@ bfa_ioc_sm_initfail(struct bfa_ioc_s *ioc, enum ioc_event event)
 		bfa_sm_fault(ioc, event);
 	}
 }
-
 
 static void
 bfa_ioc_sm_hbfail_entry(struct bfa_ioc_s *ioc)
@@ -676,8 +669,6 @@ bfa_ioc_sm_hbfail(struct bfa_ioc_s *ioc, enum ioc_event event)
 		bfa_sm_fault(ioc, event);
 	}
 }
-
-
 
 /**
  *  bfa_ioc_pvt BFA IOC private functions
@@ -1021,7 +1012,6 @@ bfa_ioc_msgflush(struct bfa_ioc_s *ioc)
 	if (r32)
 		bfa_reg_write(ioc->ioc_regs.lpu_mbox_cmd, 1);
 }
-
 
 static void
 bfa_ioc_hwinit(struct bfa_ioc_s *ioc, bfa_boolean_t force)
@@ -1469,8 +1459,6 @@ bfa_ioc_map_port(struct bfa_ioc_s *ioc)
 	bfa_trc(ioc, ioc->port_id);
 }
 
-
-
 /**
  *  bfa_ioc_public
  */
@@ -1644,7 +1632,6 @@ bfa_ioc_auto_recover(bfa_boolean_t auto_recover)
 {
 	bfa_auto_recover = BFA_FALSE;
 }
-
 
 bfa_boolean_t
 bfa_ioc_is_operational(struct bfa_ioc_s *ioc)
@@ -2378,5 +2365,3 @@ bfa_ioc_recover(struct bfa_ioc_s *ioc)
 }
 
 #endif
-
-

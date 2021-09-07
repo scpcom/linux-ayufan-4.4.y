@@ -35,7 +35,6 @@
 #include <linux/usb/serial.h>
 #include <linux/uaccess.h>
 
-
 /*
  * Version Information
  */
@@ -90,7 +89,6 @@ static const struct usb_device_id moschip_port_id_table[] = {
 	{ } /* terminating entry */
 };
 MODULE_DEVICE_TABLE(usb, moschip_port_id_table);
-
 
 /*
  * mos7720_interrupt_callback
@@ -831,7 +829,6 @@ static int set_higher_rates(struct moschip_port *mos7720_port,
 	data = 0x000;
 	send_mos_cmd(serial, MOS_WRITE, MOS_MAX_PORT, 0x08, &data);
 
-
 	/***********************************************
 	 *              Set for higher rates           *
 	 ***********************************************/
@@ -909,7 +906,6 @@ static int calc_baud_rate_divisor(int baudrate, int *divisor)
 	__u16 custom;
 	__u16 round1;
 	__u16 round;
-
 
 	dbg("%s - %d", __func__, baudrate);
 
@@ -1095,7 +1091,6 @@ static void change_port_settings(struct tty_struct *tty,
 	mos7720_port->shadowLCR &=
 			~(LCR_BITS_MASK | LCR_STOP_MASK | LCR_PAR_MASK);
 	mos7720_port->shadowLCR |= (lData | lParity | lStop);
-
 
 	/* Disable Interrupts */
 	data = 0x00;
@@ -1534,7 +1529,6 @@ static int mos7720_startup(struct usb_serial *serial)
 		dbg("port number is %d", serial->port[i]->number);
 		dbg("serial number is %d", serial->minor);
 	}
-
 
 	/* setting configuration feature to one */
 	usb_control_msg(serial->dev, usb_sndctrlpipe(serial->dev, 0),

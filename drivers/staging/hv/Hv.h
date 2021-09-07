@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef __HV_H__
 #define __HV_H__
 
@@ -57,9 +56,7 @@ enum {
 #define HV_X64_MAX			5
 #define HV_CAPS_MAX			8
 
-
 #define HV_HYPERCALL_PARAM_ALIGN	sizeof(u64)
-
 
 /* Service definitions */
 
@@ -95,7 +92,6 @@ static const struct hv_guid VMBUS_SERVICE_ID = {
 
 #define MAX_NUM_CPUS	32
 
-
 struct hv_input_signal_event_buffer {
 	u64 Align8;
 	struct hv_input_signal_event Event;
@@ -123,7 +119,6 @@ struct hv_context {
 };
 
 extern struct hv_context gHvContext;
-
 
 /* Hv Interface */
 

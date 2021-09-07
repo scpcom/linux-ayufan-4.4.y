@@ -166,7 +166,6 @@ gss_wrap_kerberos(struct gss_ctx *ctx, int offset,
 	g_make_token_header(&kctx->mech_used,
 				GSS_KRB5_TOK_HDR_LEN + 8 + plainlen, &ptr);
 
-
 	/* ptr now at header described in rfc 1964, section 1.2.1: */
 	ptr[0] = (unsigned char) ((KG_TOK_WRAP_MSG >> 8) & 0xff);
 	ptr[1] = (unsigned char) (KG_TOK_WRAP_MSG & 0xff);

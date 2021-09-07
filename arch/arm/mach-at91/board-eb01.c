@@ -41,4 +41,3 @@ MACHINE_START(AT91EB01, "Atmel AT91 EB01")
 	.init_irq	= at91x40_init_interrupts,
 	.map_io		= at91eb01_map_io,
 MACHINE_END
-

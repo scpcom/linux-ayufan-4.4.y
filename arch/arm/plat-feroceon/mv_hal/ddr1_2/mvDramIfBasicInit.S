@@ -134,7 +134,6 @@ dramBoot1:
 #define STATIC_SDRAM_DUNIT_ODT_CTRL    		0x00000601
 #define STATIC_SDRAM_EXT_MODE          		0x00000440
 
-
 #elif  defined(RD_88F6183AP)
 
 /* DDR2 1 devices 512Mbit by 16 bit */
@@ -208,7 +207,6 @@ dramBoot1:
 
 #else /* NAS */
 
-
 #if defined(RD_88F5182)
 
 #if defined(MV_88F5082)
@@ -267,7 +265,6 @@ _mvDramIfStaticInit:
         ldr     r6, dramBoot1
         cmp     r6, #0
         bne     1f
-
 
 	/* set all dram windows to 0 */
 	mov	r6, #0
@@ -369,14 +366,11 @@ _mvDramIfBasicInit:
         cmp     r8, #0
         movne   pc, r11
 
-
-
         bl      _i2cInit                /* Initialize TWSI master             */
 
         /* Get default SDRAM Config values */
         MV_REG_READ_ASM (r8, r5, SDRAM_CONFIG_REG)
         bic     r8, r8, #SDRAM_DCFG_MASK
-
 
         /* Read device ID  */
 	MV_CTRL_MODEL_GET_ASM(r4, r5);
@@ -411,7 +405,6 @@ cat_through:
         orr     r8, r8, #SDRAM_CATTHR_EN
 
 cat_through_end:
-
 
         /* Get registered/non registered info from DIMM */
 	bl  	_is_Registered
@@ -546,7 +539,6 @@ setDunitReg:
         orr	r6, r6, r7, LSL #SDRAM_ST_BURST_DEL_OFFS
         MV_REG_WRITE_ASM (r6, r5, SDRAM_DUNIT_CTRL_REG)
 
-
         /* DIMM density configuration*/
         /* Density = (1 << (rowNum + colNum)) * dramWidth * dramBankNum       */
 Density:
@@ -577,7 +569,6 @@ densCont:
         MV_REG_READ_ASM (r8, r5, SDRAM_CONFIG_REG)
         tst     r8, #SDRAM_DTYPE_DDR2
         beq     _extModeODTEnd
-
 
 	/* Set DDR Extended Mode register for working with CS[0]	      */
         /* write 'nop' to SDRAM operation */
@@ -614,7 +605,6 @@ _sdramOpPoll4:
 
         ldr     r6, =DDR2_DUNIT_ODT_CTRL_CS0_DV
         MV_REG_WRITE_ASM (r6, r5, DDR2_DUNIT_ODT_CONTROL_REG)
-
 
         /* we will check what device we are running and perform
         Initialization according to device value */
@@ -685,7 +675,6 @@ glMem2Start:
 
         MV_REG_WRITE_ASM (r6, r5, SDRAM_ADDR_CTRL_PADS_CAL_REG)
 
-
         /* DDR SDRAM Data Pads Calibration                              */
         MV_REG_READ_ASM (r6, r5, SDRAM_DATA_PADS_CAL_REG)
 
@@ -744,7 +733,6 @@ setDrvStrength:
 
         MV_REG_WRITE_ASM (r6, r5, SDRAM_ADDR_CTRL_PADS_CAL_REG)
 
-
         /* DDR SDRAM Data Pads Calibration                              */
         MV_REG_READ_ASM (r6, r5, SDRAM_DATA_PADS_CAL_REG)
 
@@ -758,7 +746,6 @@ setDrvStrength:
         orr   r6, r8, r6                /* Set default value for DDR    */
 
         MV_REG_WRITE_ASM (r6, r5, SDRAM_DATA_PADS_CAL_REG)
-
 
         /* Implement Guideline (GL# MEM-4) DQS Reference Delay Tuning   */
         /* Relevant for: 88F5181-A1/B0/B1 and 88F5281-A0/B0             */
@@ -864,7 +851,6 @@ setFtdllReg:
         MV_REG_WRITE_ASM (r8, r5, SDRAM_FTDLL_CONFIG_REG)
 #endif /* !defined(MV_88W8660) && !defined(MV_88F6183) && !defined(MV_88F6183L)*/
 
-
 setTimingReg:
         /* Set default Timing parameters */
         MV_REG_READ_ASM (r8, r5, SDRAM_CONFIG_REG)
@@ -899,7 +885,6 @@ timeParamDone:
 
 exit_ddrAutoConfig:
         mov     PC, r11         /* r11 is saved link register */
-
 
 /***************************************************************************************/
 /*       r4 holds I2C EEPROM address
@@ -983,6 +968,5 @@ regDdr2:
                                         /* or Mini-RDIMM (0x10)               */
 exit:
         mov     PC, r13
-
 
 #endif

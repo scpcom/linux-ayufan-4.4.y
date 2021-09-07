@@ -33,7 +33,6 @@ static int VmbusChannelCreateGpadlHeader(
 static void DumpVmbusChannel(struct vmbus_channel *channel);
 static void VmbusChannelSetEvent(struct vmbus_channel *channel);
 
-
 #if 0
 static void DumpMonitorPage(struct hv_monitor_page *MonitorPage)
 {

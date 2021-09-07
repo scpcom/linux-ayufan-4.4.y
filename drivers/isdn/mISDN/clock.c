@@ -213,4 +213,3 @@ mISDN_clock_get(void)
 	return count;
 }
 EXPORT_SYMBOL(mISDN_clock_get);
-

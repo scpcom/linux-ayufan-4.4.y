@@ -48,7 +48,6 @@ static int ipv6_dev_ac_dec(struct net_device *dev, struct in6_addr *addr);
 /* Big ac list lock for all the sockets */
 static DEFINE_RWLOCK(ipv6_sk_ac_lock);
 
-
 /*
  *	socket join an anycast group
  */
@@ -414,7 +413,6 @@ int ipv6_chk_acast_addr(struct net *net, struct net_device *dev,
 	return found;
 }
 
-
 #ifdef CONFIG_PROC_FS
 struct ac6_iter_state {
 	struct seq_net_private p;
@@ -552,4 +550,3 @@ void ac6_proc_exit(struct net *net)
 	proc_net_remove(net, "anycast6");
 }
 #endif
-

@@ -127,7 +127,6 @@ extern int vga_tryget(struct pci_dev *pdev, unsigned int rsrc);
 
 extern void vga_put(struct pci_dev *pdev, unsigned int rsrc);
 
-
 /**
  *     vga_default_device
  *

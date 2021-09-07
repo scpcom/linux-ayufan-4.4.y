@@ -883,7 +883,6 @@ hwi_update_async_writables(struct hwi_async_pdu_context *pasync_ctx,
 	unsigned int num_entries, writables = 0;
 	unsigned int *pep_read_ptr, *pwritables;
 
-
 	if (is_header) {
 		pep_read_ptr = &pasync_ctx->async_header.ep_read_ptr;
 		pwritables = &pasync_ctx->async_header.writables;
@@ -2446,7 +2445,6 @@ error:
 	hwi_cleanup(phba);
 	return -ENOMEM;
 }
-
 
 static int hwi_init_controller(struct beiscsi_hba *phba)
 {

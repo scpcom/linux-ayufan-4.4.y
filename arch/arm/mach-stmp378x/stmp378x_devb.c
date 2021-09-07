@@ -201,7 +201,6 @@ static struct stmp3xxxmmc_platform_data mmc_data = {
 	.setclock	= stmp3xxxmmc_setclock_ssp1,
 };
 
-
 static struct pin_group appuart_pins[] = {
 	[0] = {
 		.pins		= appuart_pins_0,

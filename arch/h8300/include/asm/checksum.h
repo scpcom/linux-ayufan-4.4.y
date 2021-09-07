@@ -25,7 +25,6 @@ __wsum csum_partial(const void *buff, int len, __wsum sum);
 
 __wsum csum_partial_copy_nocheck(const void *src, void *dst, int len, __wsum sum);
 
-
 /*
  * the same as csum_partial_copy, but copies from user space.
  *
@@ -37,7 +36,6 @@ extern __wsum csum_partial_copy_from_user(const void __user *src, void *dst,
 						int len, __wsum sum, int *csum_err);
 
 __sum16 ip_fast_csum(const void *iph, unsigned int ihl);
-
 
 /*
  *	Fold a partial checksum
@@ -57,7 +55,6 @@ static inline __sum16 csum_fold(__wsum sum)
 		: "er0");
 	return (__force __sum16)~sum;
 }
-
 
 /*
  * computes the checksum of the TCP/UDP pseudo-header

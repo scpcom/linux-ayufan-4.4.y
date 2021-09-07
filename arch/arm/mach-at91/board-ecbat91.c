@@ -41,7 +41,6 @@
 
 #include "generic.h"
 
-
 static void __init ecb_at91map_io(void)
 {
 	/* Initialize processor: 18.432 MHz crystal */
@@ -78,7 +77,6 @@ static struct at91_mmc_data __initdata ecb_at91mmc_data = {
 	.slot_b		= 0,
 	.wire4		= 1,
 };
-
 
 #if defined(CONFIG_MTD_DATAFLASH)
 static struct mtd_partition __initdata my_flash0_partitions[] =

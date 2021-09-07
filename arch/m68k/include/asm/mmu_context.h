@@ -159,7 +159,6 @@ static inline int init_new_context(struct task_struct *tsk, struct mm_struct *mm
 	return 0;
 }
 
-
 static inline void switch_mm(struct mm_struct *prev, struct mm_struct *next, struct task_struct *tsk)
 {
 }

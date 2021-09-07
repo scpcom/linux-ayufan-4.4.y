@@ -146,7 +146,6 @@ MV_STATUS mvDmaInit (MV_VOID)
 	/* First disable all address decode windows */
 	MV_REG_WRITE(IDMA_BASE_ADDR_ENABLE_REG, IBAER_ENABLE_MASK);
 	
-	
 	/* Go through all windows in user table until table terminator			*/
 	for (winNum = 0; ((dmaAddrDecPrioTap[winPrioIndex] != TBL_TERM) && 
 					  (winNum < IDMA_MAX_ADDR_DEC_WIN)); )
@@ -239,7 +238,6 @@ MV_STATUS mvDmaWinSet(MV_U32 winNum, MV_DMA_DEC_WIN *pAddrDecWin)
 				   pAddrDecWin->addrWin.size);
 		return MV_ERROR;
 	}
-
 
 	decRegs.baseReg = MV_REG_READ(IDMA_BASE_ADDR_REG(winNum));
 	decRegs.sizeReg = MV_REG_READ(IDMA_SIZE_REG(winNum));
@@ -706,4 +704,3 @@ MV_VOID mvDmaAddrDecShow(MV_VOID)
 		}
 	}
 }
-

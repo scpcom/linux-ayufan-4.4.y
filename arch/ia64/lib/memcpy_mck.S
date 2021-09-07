@@ -449,7 +449,6 @@ EX(.ex_handler_short, (p10)	ld1	t7=[src0],2)
 EX(.ex_handler_short, (p10)	st1	[dst0]=t7,2)
 	br.ret.dptk rp		// done all cases
 
-
 /* Align dest to nearest 8-byte boundary. We know we have at
  * least 7 bytes to copy, enough to crawl to 8-byte boundary.
  * Actual number of byte to crawl depend on the dest alignment.

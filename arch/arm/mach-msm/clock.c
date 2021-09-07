@@ -177,7 +177,6 @@ int clk_set_flags(struct clk *clk, unsigned long flags)
 }
 EXPORT_SYMBOL(clk_set_flags);
 
-
 void __init msm_clock_init(void)
 {
 	unsigned n;

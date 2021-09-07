@@ -13,7 +13,6 @@
 #ifndef _HFC4S8S_L1_H_
 #define _HFC4S8S_L1_H_
 
-
 /*
 *  include Genero generated HFC-4S/8S header file hfc48scu.h
 *  for complete register description. This will define _HFC48SCU_H_

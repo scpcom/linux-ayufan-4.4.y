@@ -20,7 +20,6 @@
  * Try not to change the actual algorithm if possible for consistency.
  */
 
-
 	.text
 
 	.align 4

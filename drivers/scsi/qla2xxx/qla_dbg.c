@@ -1667,7 +1667,6 @@ qla2x00_dump_regs(scsi_qla_host_t *vha)
 		    RD_REG_WORD(mbx_reg++));
 }
 
-
 void
 qla2x00_dump_buffer(uint8_t * b, uint32_t size)
 {
@@ -1691,5 +1690,3 @@ qla2x00_dump_buffer(uint8_t * b, uint32_t size)
 	if (cnt % 16)
 		printk("\n");
 }
-
-

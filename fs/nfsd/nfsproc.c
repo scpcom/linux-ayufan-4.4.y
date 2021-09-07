@@ -31,7 +31,6 @@ typedef struct svc_buf	svc_buf;
 
 #define NFSDDBG_FACILITY		NFSDDBG_PROC
 
-
 static __be32
 nfsd_proc_null(struct svc_rqst *rqstp, void *argp, void *resp)
 {
@@ -426,7 +425,6 @@ nfsd_proc_symlink(struct svc_rqst *rqstp, struct nfsd_symlinkargs *argp,
 						 argp->tname, argp->tlen,
 				 		 &newfh, &argp->attrs);
 
-
 	fh_put(&argp->ffh);
 	fh_put(&newfh);
 	return nfserr;
@@ -709,7 +707,6 @@ static struct svc_procedure		nfsd_procedures2[18] = {
 	},
 };
 
-
 struct svc_version	nfsd_version2 = {
 		.vs_vers	= 2,
 		.vs_nproc	= 18,
@@ -769,4 +766,3 @@ nfserrno (int errno)
 	printk (KERN_INFO "nfsd: non-standard errno: %d\n", errno);
 	return nfserr_io;
 }
-

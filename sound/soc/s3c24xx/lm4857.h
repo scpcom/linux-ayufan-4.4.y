@@ -29,4 +29,3 @@
 #define LM4857_EPGAIN 4
 
 #endif /*LM4857_H_*/
-

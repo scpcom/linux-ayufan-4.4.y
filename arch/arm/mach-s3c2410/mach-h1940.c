@@ -131,7 +131,6 @@ static struct s3c2410_udc_mach_info h1940_udc_cfg __initdata = {
 	.vbus_pin_inverted	= 1,
 };
 
-
 /**
  * Set lcd on or off
  **/

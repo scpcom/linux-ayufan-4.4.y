@@ -781,7 +781,6 @@ void sysfs_remove_subdir(struct sysfs_dirent *sd)
 	remove_dir(sd);
 }
 
-
 static void __sysfs_remove_dir(struct sysfs_dirent *dir_sd)
 {
 	struct sysfs_addrm_cxt acxt;
@@ -1015,7 +1014,6 @@ static int sysfs_readdir(struct file * filp, void * dirent, filldir_t filldir)
 	}
 	return 0;
 }
-
 
 const struct file_operations sysfs_dir_operations = {
 	.read		= generic_read_dir,

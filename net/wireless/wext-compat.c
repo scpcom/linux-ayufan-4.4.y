@@ -137,7 +137,6 @@ int cfg80211_wext_giwmode(struct net_device *dev, struct iw_request_info *info,
 }
 EXPORT_SYMBOL_GPL(cfg80211_wext_giwmode);
 
-
 int cfg80211_wext_giwrange(struct net_device *dev,
 			   struct iw_request_info *info,
 			   struct iw_point *data, char *extra)
@@ -250,7 +249,6 @@ int cfg80211_wext_giwrange(struct net_device *dev,
 	return 0;
 }
 EXPORT_SYMBOL_GPL(cfg80211_wext_giwrange);
-
 
 /**
  * cfg80211_wext_freq - get wext frequency for non-"auto"
@@ -992,7 +990,6 @@ static int cfg80211_set_cipher_pairwise(struct wireless_dev *wdev, u32 cipher)
 
 	return 0;
 }
-
 
 static int cfg80211_set_key_mgt(struct wireless_dev *wdev, u32 key_mgt)
 {

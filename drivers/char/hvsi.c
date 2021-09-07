@@ -169,8 +169,6 @@ struct hvsi_query_response {
 	} u;
 } __attribute__((packed));
 
-
-
 static inline int is_console(struct hvsi_struct *hp)
 {
 	return hp->flags & HVSI_CONSOLE;
@@ -1128,7 +1126,6 @@ static int hvsi_tiocmset(struct tty_struct *tty, struct file *file,
 
 	return 0;
 }
-
 
 static const struct tty_operations hvsi_ops = {
 	.open = hvsi_open,

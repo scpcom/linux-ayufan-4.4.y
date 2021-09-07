@@ -7,7 +7,6 @@
 #include <asm/io.h>
 #include "ctrlEnv/sys/mvCpuIf.h"
 
-
 static struct mtd_info *mv_mtd;
 static unsigned long baseaddr;
 
@@ -161,4 +160,3 @@ static void __exit board_cleanup(void)
 }
 module_exit(board_cleanup);
 #endif
-

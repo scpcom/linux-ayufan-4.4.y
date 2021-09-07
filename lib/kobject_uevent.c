@@ -24,7 +24,6 @@
 #include <linux/netlink.h>
 #include <net/sock.h>
 
-
 u64 uevent_seqnum;
 char uevent_helper[UEVENT_HELPER_PATH_LEN] = CONFIG_UEVENT_HELPER_PATH;
 static DEFINE_SPINLOCK(sequence_lock);

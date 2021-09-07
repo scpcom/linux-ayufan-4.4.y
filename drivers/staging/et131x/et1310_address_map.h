@@ -58,7 +58,6 @@
 #ifndef _ET1310_ADDRESS_MAP_H_
 #define _ET1310_ADDRESS_MAP_H_
 
-
 /* START OF GLOBAL REGISTER ADDRESS MAP */
 
 /*
@@ -169,7 +168,6 @@ typedef struct _GLOBAL_t {			/* Location: */
 
 /* END OF GLOBAL REGISTER ADDRESS MAP */
 
-
 /* START OF TXDMA REGISTER ADDRESS MAP */
 
 /*
@@ -211,7 +209,6 @@ typedef union _TXDMA_PR_NUM_DES_t {
 #endif
 	} bits;
 } TXDMA_PR_NUM_DES_t, *PTXDMA_PR_NUM_DES_t;
-
 
 #define ET_DMA10_MASK		0x3FF	/* 10 bit mask for DMA10W types */
 #define ET_DMA10_WRAP		0x400
@@ -287,7 +284,6 @@ typedef struct _TXDMA_t {		/* Location: */
 } TXDMA_t, *PTXDMA_t;
 
 /* END OF TXDMA REGISTER ADDRESS MAP */
-
 
 /* START OF RXDMA REGISTER ADDRESS MAP */
 
@@ -647,7 +643,6 @@ typedef struct _RXDMA_t {				/* Location: */
 } RXDMA_t, *PRXDMA_t;
 
 /* END OF RXDMA REGISTER ADDRESS MAP */
-
 
 /* START OF TXMAC REGISTER ADDRESS MAP */
 
@@ -1301,7 +1296,6 @@ typedef struct _RXMAC_t {				/* Location: */
 } RXMAC_t, *PRXMAC_t;
 
 /* END OF TXMAC REGISTER ADDRESS MAP */
-
 
 /* START OF MAC REGISTER ADDRESS MAP */
 
@@ -2024,7 +2018,6 @@ typedef struct _MAC_STAT_t {		/* Location: */
 
 /* END OF MAC STAT REGISTER ADDRESS MAP */
 
-
 /* START OF MMC REGISTER ADDRESS MAP */
 
 /*
@@ -2069,7 +2062,6 @@ typedef struct _MMC_t {			/* Location: */
 
 /* END OF MMC REGISTER ADDRESS MAP */
 
-
 /* START OF EXP ROM REGISTER ADDRESS MAP */
 
 /*
@@ -2084,7 +2076,6 @@ typedef struct _EXP_ROM_t {
 #endif
 
 /* END OF EXP ROM REGISTER ADDRESS MAP */
-
 
 /*
  * JAGCore Address Mapping

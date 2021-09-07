@@ -115,7 +115,6 @@ void stmp3xxx_set_pin_type(unsigned id, enum pin_fun fun);
 #define HW_DRIVE_PINDRV_NUM	5	/* five possible strength values */
 #define HW_DRIVE_PINV_MASK	0x4	/* pin voltage mask - 1 bit */
 
-
 struct stmp3xxx_pinmux_bank {
 	struct gpio_chip chip;
 

@@ -32,7 +32,6 @@ struct ht_irq_cfg {
 	struct ht_irq_msg msg;
 };
 
-
 void write_ht_irq_msg(unsigned int irq, struct ht_irq_msg *msg)
 {
 	struct ht_irq_cfg *cfg = get_irq_data(irq);

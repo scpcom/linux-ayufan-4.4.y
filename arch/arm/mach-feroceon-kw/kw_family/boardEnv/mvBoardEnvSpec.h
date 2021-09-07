@@ -62,12 +62,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvBoardEnvSpech
 #define __INCmvBoardEnvSpech
 
 #include "mvSysHwConfig.h"
-
 
 /* For future use */
 #define BD_ID_DATA_START_OFFS		0x0
@@ -180,7 +178,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #define DB_88F6281A_OE_VAL_LOW                   0x0
 #define DB_88F6281A_OE_VAL_HIGH                  0x0
-
 
 /* DB-88F6282A-BP */
 #if defined(MV_NAND)
@@ -304,7 +301,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DB_88F6280A_OE_HIGH                     0x0
 #define DB_88F6280A_OE_VAL_LOW                  0x0
 #define DB_88F6280A_OE_VAL_HIGH                 0x0
-
 
 /* SHEEVA PLUG */
 #define RD_SHEEVA_PLUG_MPP0_7                   0x01111111

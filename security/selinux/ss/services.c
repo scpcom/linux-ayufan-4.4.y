@@ -791,7 +791,6 @@ out:
 	return rc;
 }
 
-
 /**
  * security_compute_av - Compute access vector decisions.
  * @ssid: source security identifier
@@ -2263,7 +2262,6 @@ err:
 	kfree(*values);
 	goto out;
 }
-
 
 int security_set_bools(int len, int *values)
 {

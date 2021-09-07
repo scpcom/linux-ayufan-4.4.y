@@ -75,4 +75,3 @@ MAC_TABLE_ENTRY *MacTableLookup(
     IN  PUCHAR          pAddr);
 
 #endif  // __AP_H__
-

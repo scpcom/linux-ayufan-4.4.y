@@ -61,7 +61,6 @@ int diva_mnt_shutdown_xdi_adapters (void);
 int diva_set_trace_filter (int filter_length, const char* filter);
 int diva_get_trace_filter (int max_length,    char*       filter);
 
-
 #define DITRACE_CMD_GET_DRIVER_INFO   1
 #define DITRACE_READ_DRIVER_DBG_MASK  2
 #define DITRACE_WRITE_DRIVER_DBG_MASK 3
@@ -86,5 +85,3 @@ int diva_get_trace_filter (int max_length,    char*       filter);
 #define DIVA_MGT_DBG_IFC_AUDIO      0x00000400 /* Audio Tap trace for all channels */
 
 # endif /* DEBUG_IF___H */
-
-

@@ -48,7 +48,6 @@
  *
  */
 
-
 /** @file t23xrmBase.c
  * Device initialization and shutdown
  */
@@ -57,12 +56,9 @@
 #include "../common/xwcRMinterface.h"
 #include "t23xrmInternal.h"
 
-
 void t23xrmCoreID(T2CoreInstance *inst, uint8_t fdt);
 
-
 RMinterfaceCtx ifCtx;
-
 
 /**
  * t23RMdevInit() - portable part of device initialization
@@ -111,7 +107,6 @@ int32_t t23RMdevInit(T2CoreInstance *t2blk,
         t2blk->chnDescCt[i]    = 0;
     }
 
-
     /* Initialize the device geometry with the stuff passed in from */
     /* the OS-dependent part of initialization. Ports of the driver */
     /* that don't work with the device tree need to ignore this,    */
@@ -124,7 +119,6 @@ int32_t t23RMdevInit(T2CoreInstance *t2blk,
     /* Now go ID the core so we know what we're working with */
     t23xrmCoreID(t2blk, HAS_FDT);
 
-
 #ifdef RM_DBG_DEVID
     printk("Extensible Crypto Driver - SEC 2/3 Resource Manager - pkg rev %s\n", T23X_PACKAGE_VERSION);
     printk("core ID = %s (0x%016llx/0x%016llx)\n",
@@ -133,10 +127,8 @@ int32_t t23RMdevInit(T2CoreInstance *t2blk,
            t2blk->regs->ipID.id);
 #endif
 
-
     /* All configured, reset the device */
     t2blk->regs->ctrl.masterControl = T2_MCR_SOFTWARE_RESET;
-
 
     /* Enable all channel interrupts. May throw this out in favor */
     /* of individual channel enable/disable functions */
@@ -148,8 +140,6 @@ int32_t t23RMdevInit(T2CoreInstance *t2blk,
                                  T2_IMR_DONE_CH1 |
                                  T2_IMR_DONE_CH2 |
                                  T2_IMR_DONE_CH3);
-
-
 
     /* ...and configure channels to taste. This is just a generic      */
     /* setting, protocol plugins may choose a different configuration. */
@@ -174,8 +164,6 @@ int32_t t23RMdevInit(T2CoreInstance *t2blk,
     /* All done, return to OS-level initialization */
     return stat;
 }
-
-
 
 /**
  * Remove device

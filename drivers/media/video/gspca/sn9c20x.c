@@ -1447,7 +1447,6 @@ static int input_kthread(void *data)
 	return 0;
 }
 
-
 static int sn9c20x_input_init(struct gspca_dev *gspca_dev)
 {
 	struct sd *sd = (struct sd *) gspca_dev;
@@ -1544,7 +1543,6 @@ static int set_gamma(struct gspca_dev *gspca_dev)
 	struct sd *sd = (struct sd *) gspca_dev;
 	u8 gamma[17];
 	u8 gval = sd->gamma * 0xb8 / 0x100;
-
 
 	gamma[0] = 0x0a;
 	gamma[1] = 0x13 + (gval * (0xcb - 0x13) / 0xb8);
@@ -1724,7 +1722,6 @@ static int sd_getbrightness(struct gspca_dev *gspca_dev, s32 *val)
 	*val = sd->brightness;
 	return 0;
 }
-
 
 static int sd_setcontrast(struct gspca_dev *gspca_dev, s32 val)
 {

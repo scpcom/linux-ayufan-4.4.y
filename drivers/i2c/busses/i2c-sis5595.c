@@ -337,7 +337,6 @@ static s32 sis5595_access(struct i2c_adapter *adap, u16 addr,
 	    ((read_write == I2C_SMBUS_WRITE) || (size == SIS5595_QUICK)))
 		return 0;
 
-
 	switch (size) {
 	case SIS5595_BYTE:
 	case SIS5595_BYTE_DATA:

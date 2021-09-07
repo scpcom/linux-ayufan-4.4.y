@@ -19,7 +19,6 @@
  *  fcs_pport.h FCS physical port interfaces
  */
 
-
 #ifndef __FCS_PPORT_H__
 #define __FCS_PPORT_H__
 

@@ -132,7 +132,6 @@ acpi_numa_memory_affinity_init(struct acpi_srat_mem_affinity *memory_affinity)
 	start_pfn = paddr >> PAGE_SHIFT;
 	end_pfn = (paddr + size) >> PAGE_SHIFT;
 
-
 	if (num_memory_chunks >= MAXCHUNKS) {
 		printk(KERN_WARNING "Too many mem chunks in SRAT."
 			" Ignoring %lld MBytes at %llx\n",
@@ -209,7 +208,6 @@ static __init int node_read_chunk(int nid, struct node_memory_chunk_s *memory_ch
 int __init get_memcfg_from_srat(void)
 {
 	int i, j, nid;
-
 
 	if (srat_disabled())
 		goto out_fail;

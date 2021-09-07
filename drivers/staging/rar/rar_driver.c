@@ -46,7 +46,6 @@
 #define LNC_BRAR2L  0x14
 #define LNC_BRAR2H  0x15
 
-
 /* This structure is only used during module initialization. */
 struct RAR_offsets {
 	int low; /* Register offset for low RAR physical address. */
@@ -380,7 +379,6 @@ module_exit(rar_exit_handler);
 
 MODULE_LICENSE("GPL");
 
-
 /* The get_rar_address function is used by other device drivers
  * to obtain RAR address information on a RAR. It takes two
  * parameter:
@@ -410,7 +408,6 @@ int get_rar_address(int rar_index,struct RAR_address_struct *addresses)
 		return -ENODEV;
 		}
 }
-
 
 EXPORT_SYMBOL(get_rar_address);
 

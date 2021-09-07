@@ -102,7 +102,6 @@ static inline struct tuner *to_tuner(struct v4l2_subdev *sd)
 	return container_of(sd, struct tuner, sd);
 }
 
-
 /* insmod options used at init time => read/only */
 static unsigned int addr;
 static unsigned int no_autodetect;
@@ -144,7 +143,6 @@ static unsigned int radio_range[2] = { 65, 108 };
 static char pal[] = "--";
 static char secam[] = "--";
 static char ntsc[] = "-";
-
 
 module_param(addr, int, 0444);
 module_param(no_autodetect, int, 0444);

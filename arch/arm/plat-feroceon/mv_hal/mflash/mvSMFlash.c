@@ -386,8 +386,6 @@ MV_STATUS mvSMFlashSecErase (MV_MFLASH_INFO *pFlash, MV_U32 secAddr)
 	return ret;
 }
 
-
-
 /*******************************************************************************
 * mvSMFlash64bWr - Program 64 bytes of Data alligned to 64 boundaries
 *
@@ -944,7 +942,6 @@ MV_STATUS mvSMFlashWriteProtectSet(MV_MFLASH_INFO *pFlash, MV_BOOL wp)
 	return MV_OK;
 }
 
-
 /*******************************************************************************
 * mvSMFlashSectorSizeSet - Set the sector size
 *
@@ -1071,6 +1068,3 @@ MV_STATUS mvSMFlashIdGet(MV_MFLASH_INFO *pFlash, MV_U32 * pManfCode, MV_U16 * pD
 
 	return ret;
 }
-
-
-

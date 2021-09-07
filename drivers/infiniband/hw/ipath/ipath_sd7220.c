@@ -587,7 +587,6 @@ static int epb_trans(struct ipath_devdata *dd, u16 reg, u64 i_val, u64 *o_vp)
 	int tries;
 	u64 transval;
 
-
 	ipath_write_kreg(dd, reg, i_val);
 	/* Throw away first read, as RDY bit may be stale */
 	transval = ipath_read_kreg64(dd, reg);
@@ -1459,4 +1458,3 @@ void ipath_set_relock_poll(struct ipath_devdata *dd, int ibup)
 		}
 	}
 }
-

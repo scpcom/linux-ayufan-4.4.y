@@ -235,7 +235,6 @@ static struct map_desc stmp378x_io_desc[] __initdata = {
 	},
 };
 
-
 static u64 common_dmamask = DMA_BIT_MASK(32);
 
 /*

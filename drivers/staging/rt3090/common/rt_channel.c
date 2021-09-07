@@ -27,7 +27,6 @@
 
 #include "../rt_config.h"
 
-
 CH_FREQ_MAP CH_HZ_ID_MAP[]=
 		{
 			{1, 2412},
@@ -961,7 +960,6 @@ CH_REGION ChRegion[] =
 		},
 };
 
-
 static PCH_REGION GetChRegion(
 	IN PUCHAR CntryCode)
 {
@@ -1044,7 +1042,6 @@ static UCHAR FillChList(
 	return j;
 }
 
-
 static inline VOID CreateChList(
 	IN PRTMP_ADAPTER pAd,
 	IN PCH_REGION pChRegion,
@@ -1090,7 +1087,6 @@ static inline VOID CreateChList(
 	}
 }
 
-
 VOID BuildChannelListEx(
 	IN PRTMP_ADAPTER pAd)
 {
@@ -1099,7 +1095,6 @@ VOID BuildChannelListEx(
 	pChReg = GetChRegion(pAd->CommonCfg.CountryCode);
 	CreateChList(pAd, pChReg, pAd->CommonCfg.Geography);
 }
-
 
 VOID BuildBeaconChList(
 	IN PRTMP_ADAPTER pAd,
@@ -1150,7 +1145,6 @@ VOID BuildBeaconChList(
 	}
 }
 
-
 #ifdef DOT11_N_SUPPORT
 static BOOLEAN IsValidChannel(
 	IN PRTMP_ADAPTER pAd,
@@ -1171,7 +1165,6 @@ static BOOLEAN IsValidChannel(
 		return TRUE;
 }
 
-
 static UCHAR GetExtCh(
 	IN UCHAR Channel,
 	IN UCHAR Direction)
@@ -1185,7 +1178,6 @@ static UCHAR GetExtCh(
 
 	return ExtCh;
 }
-
 
 VOID N_ChannelCheck(
 	IN PRTMP_ADAPTER pAd)
@@ -1240,9 +1232,7 @@ VOID N_ChannelCheck(
 		}
 	}
 
-
 }
-
 
 VOID N_SetCenCh(
 	IN PRTMP_ADAPTER pAd)
@@ -1267,7 +1257,6 @@ VOID N_SetCenCh(
 	}
 }
 #endif // DOT11_N_SUPPORT //
-
 
 UINT8 GetCuntryMaxTxPwr(
 	IN PRTMP_ADAPTER pAd,

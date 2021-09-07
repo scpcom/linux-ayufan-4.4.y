@@ -169,14 +169,12 @@ void perf_header__write(struct perf_header *self, int fd)
 
 	lseek(fd, sizeof(f_header), SEEK_SET);
 
-
 	for (i = 0; i < self->attrs; i++) {
 		attr = self->attr[i];
 
 		attr->id_offset = lseek(fd, 0, SEEK_CUR);
 		do_write(fd, attr->id, attr->ids * sizeof(u64));
 	}
-
 
 	self->attr_offset = lseek(fd, 0, SEEK_CUR);
 
@@ -197,7 +195,6 @@ void perf_header__write(struct perf_header *self, int fd)
 	self->event_size = event_count * sizeof(struct perf_trace_event_type);
 	if (events)
 		do_write(fd, events, self->event_size);
-
 
 	self->data_offset = lseek(fd, 0, SEEK_CUR);
 

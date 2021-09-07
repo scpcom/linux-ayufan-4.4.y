@@ -46,7 +46,6 @@
 #define PNX8330_REGFIELD(reg, field)	PNX8330_FIELD(PNX8330_##reg, reg, field)
 #define PNX8335_REGFIELD(reg, field)	PNX8335_FIELD(PNX8335_##reg, reg, field)
 
-
 #define PNX_WRITEFIELD(cpu, val, reg, field) \
 	(PNX##cpu##_##reg = (PNX##cpu##_##reg & ~(PNX##cpu##_##reg##_##field##_MASK)) | \
 						((val) << PNX##cpu##_##reg##_##field##_SHIFT))
@@ -56,7 +55,6 @@
 					PNX_WRITEFIELD(8330, val, reg, field)
 #define PNX8335_WRITEFIELD(val, reg, field) \
 					PNX_WRITEFIELD(8335, val, reg, field)
-
 
 /* Macros to detect CPU type */
 
@@ -69,8 +67,6 @@
 					PNX8330_CONFIG_MODULE_MAJREV)
 #define CPU_IS_PNX8335	(PNX833X_REGFIELD(CONFIG_MODULE_ID, MAJREV) == \
 					PNX8335_CONFIG_MODULE_MAJREV)
-
-
 
 #define PNX833X_RESET_CONTROL		PNX833X_REG(0x8004)
 #define PNX833X_RESET_CONTROL_2 	PNX833X_REG(0x8014)
@@ -135,7 +131,6 @@
 #define PNX833X_IDE_MODULE_ID_MODULE_ID_MASK	0xFFFF0000
 #define PNX833X_IDE_MODULE_ID_MODULE_ID_SHIFT	16
 #define PNX833X_IDE_MODULE_ID_VALUE		0xA009
-
 
 #define PNX833X_MIU_SEL0			PNX833X_REG(0x2004)
 #define PNX833X_MIU_SEL0_TIMING		PNX833X_REG(0x2008)

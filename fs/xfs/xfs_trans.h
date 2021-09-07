@@ -135,7 +135,6 @@ typedef struct xfs_log_item_chunk {
 #define	XFS_LIC_MAX_SLOT	(XFS_LIC_NUM_SLOTS - 1)
 #define	XFS_LIC_FREEMASK	((1 << XFS_LIC_NUM_SLOTS) - 1)
 
-
 /*
  * Initialize the given chunk.  Set the chunk's free descriptor mask
  * to indicate that all descriptors are free.  The caller gets to set
@@ -244,7 +243,6 @@ xfs_lic_desc_to_chunk(xfs_log_item_desc_t *dp)
 #define	XFS_TRANS_SB_RBLOCKS		0x00000800
 #define	XFS_TRANS_SB_REXTENTS		0x00001000
 #define	XFS_TRANS_SB_REXTSLOG		0x00002000
-
 
 /*
  * Various log reservation values.
@@ -516,7 +514,6 @@ xfs_lic_desc_to_chunk(xfs_log_item_desc_t *dp)
 	  (128 * (2 + XFS_IALLOC_BLOCKS(mp) + (mp)->m_in_maxlevels + \
 	   XFS_ALLOCFREE_LOG_COUNT(mp, 1))))
 
-
 #define	XFS_IFREE_LOG_RES(mp)	((mp)->m_reservations.tr_ifree)
 
 /*
@@ -712,7 +709,6 @@ xfs_lic_desc_to_chunk(xfs_log_item_desc_t *dp)
 	((mp)->m_sb.sb_sectsize + 128)
 
 #define	XFS_CLEAR_AGI_BUCKET_LOG_RES(mp)  ((mp)->m_reservations.tr_clearagi)
-
 
 /*
  * Various log count values.

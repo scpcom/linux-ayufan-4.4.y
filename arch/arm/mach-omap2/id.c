@@ -28,7 +28,6 @@
 static struct omap_chip_id omap_chip;
 static unsigned int omap_revision;
 
-
 unsigned int omap_rev(void)
 {
 	return omap_revision;
@@ -68,7 +67,6 @@ out:
 	return val;
 }
 EXPORT_SYMBOL(omap_type);
-
 
 /*----------------------------------------------------------------------------*/
 

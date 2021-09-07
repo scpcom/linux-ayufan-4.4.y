@@ -5,7 +5,6 @@
 extern DEPLINT (*i2c_write_bytes)(DEPLINT dev_addr_in, DEPLINT reg_addr_in, BYTE *data_in, DEPLINT count_in);
 extern DEPLINT (*i2c_read_bytes)(DEPLINT dev_addr_in, DEPLINT reg_addr_in, BYTE *data_out, DEPLINT count_in);
 
-
 DEPLINT adi_get_i2c_reg(BYTE dev_add, DEPLINT reg_add, BYTE mask_reg0, DEPLINT bit2shift)
 {
 	BYTE x;
@@ -14,7 +13,6 @@ DEPLINT adi_get_i2c_reg(BYTE dev_add, DEPLINT reg_add, BYTE mask_reg0, DEPLINT b
 	
 	return ((DEPLINT) x & mask_reg0) >> bit2shift;
 }
-
 
 void adi_set_i2c_reg(BYTE dev_add, DEPLINT reg_add, BYTE mask_reg0, DEPLINT bit2shift, DEPLINT val)
 {
@@ -26,7 +24,6 @@ void adi_set_i2c_reg(BYTE dev_add, DEPLINT reg_add, BYTE mask_reg0, DEPLINT bit2
          
 	i2c_write_bytes(dev_add, reg_add, &x, 1);
 }
-
 
 DEPLINT adi_get_i2c_reg_mult(BYTE dev_add, DEPLINT reg_add, BYTE mask_reg0, BYTE mask_reg1, DEPLINT bit2shift, DEPLINT bytes)
 {
@@ -54,7 +51,6 @@ DEPLINT adi_get_i2c_reg_mult(BYTE dev_add, DEPLINT reg_add, BYTE mask_reg0, BYTE
 	}
 	return val;
 }
-
 
 void adi_set_i2c_reg_mult(BYTE dev_add, DEPLINT reg_add, BYTE mask_reg0, BYTE mask_reg1, DEPLINT bit2shift, DEPLINT bytes, DEPLINT val)
 {

@@ -118,7 +118,6 @@ spkm3_read_token(struct spkm3_ctx *ctx,
 		goto out;
 	}
 
-
 	/* XXX: need to add expiration and sequencing */
 	ret = GSS_S_COMPLETE;
 out:

@@ -82,7 +82,6 @@ void omap_pm_if_exit(void);
  * Device-driver-originated constraints (via board-*.c files, platform_data)
  */
 
-
 /**
  * omap_pm_set_max_mpu_wakeup_lat - set the maximum MPU wakeup latency
  * @dev: struct device * requesting the constraint
@@ -115,7 +114,6 @@ void omap_pm_if_exit(void);
  */
 void omap_pm_set_max_mpu_wakeup_lat(struct device *dev, long t);
 
-
 /**
  * omap_pm_set_min_bus_tput - set minimum bus throughput needed by device
  * @dev: struct device * requesting the constraint
@@ -146,7 +144,6 @@ void omap_pm_set_max_mpu_wakeup_lat(struct device *dev, long t);
  */
 void omap_pm_set_min_bus_tput(struct device *dev, u8 agent_id, unsigned long r);
 
-
 /**
  * omap_pm_set_max_dev_wakeup_lat - set the maximum device enable latency
  * @dev: struct device *
@@ -172,7 +169,6 @@ void omap_pm_set_min_bus_tput(struct device *dev, u8 agent_id, unsigned long r);
  * No return value.
  */
 void omap_pm_set_max_dev_wakeup_lat(struct device *dev, long t);
-
 
 /**
  * omap_pm_set_max_sdma_lat - set the maximum system DMA transfer start latency
@@ -201,7 +197,6 @@ void omap_pm_set_max_dev_wakeup_lat(struct device *dev, long t);
  * No return value.
  */
 void omap_pm_set_max_sdma_lat(struct device *dev, long t);
-
 
 /*
  * DSP Bridge-specific constraints
@@ -239,7 +234,6 @@ void omap_pm_dsp_set_min_opp(u8 opp_id);
  */
 u8 omap_pm_dsp_get_opp(void);
 
-
 /*
  * CPUFreq-originated constraint
  *
@@ -274,7 +268,6 @@ void omap_pm_cpu_set_freq(unsigned long f);
  */
 unsigned long omap_pm_cpu_get_freq(void);
 
-
 /*
  * Device context loss tracking
  */
@@ -296,6 +289,5 @@ unsigned long omap_pm_cpu_get_freq(void);
  * or -EINVAL upon error.
  */
 int omap_pm_get_dev_context_loss_count(struct device *dev);
-
 
 #endif

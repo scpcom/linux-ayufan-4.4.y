@@ -165,4 +165,3 @@ void bfa_com_attach(struct bfa_s *bfa, struct bfa_meminfo_s *mi,
 void bfa_iocfc_get_bootwwns(struct bfa_s *bfa, u8 *nwwns, wwn_t **wwns);
 
 #endif /* __BFA_IOCFC_H__ */
-

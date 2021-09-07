@@ -31,7 +31,6 @@
 
 #include <net/ip_vs.h>
 
-
 /*
  *      Destination cache to speed up outgoing route lookup
  */
@@ -178,7 +177,6 @@ __ip_vs_get_out_rt_v6(struct ip_vs_conn *cp)
 }
 #endif
 
-
 /*
  *	Release dest->dst_cache before a dest is removed
  */
@@ -200,7 +198,6 @@ do {							\
 		(rt)->u.dst.dev, dst_output);		\
 } while (0)
 
-
 /*
  *      NULL transmitter (do nothing except return NF_ACCEPT)
  */
@@ -211,7 +208,6 @@ ip_vs_null_xmit(struct sk_buff *skb, struct ip_vs_conn *cp,
 	/* we do not touch skb and do not need pskb ptr */
 	return NF_ACCEPT;
 }
-
 
 /*
  *      Bypass transmitter
@@ -502,7 +498,6 @@ tx_error_put:
 }
 #endif
 
-
 /*
  *   IP Tunneling transmitter
  *
@@ -740,7 +735,6 @@ tx_error:
 }
 #endif
 
-
 /*
  *      Direct Routing transmitter
  *      Used for ANY protocol
@@ -850,7 +844,6 @@ tx_error:
 	return NF_STOLEN;
 }
 #endif
-
 
 /*
  *	ICMP packet transmitter

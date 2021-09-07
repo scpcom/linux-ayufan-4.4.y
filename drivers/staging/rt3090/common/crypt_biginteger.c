@@ -165,7 +165,6 @@ static UINT8 Value_1[1] = {0x01};
 static PBIG_INTEGER pBI_U = NULL, pBI_S = NULL, pBI_O = NULL;
 static UINT Bits_Of_R = 0;
 
-
 VOID BigInteger_Print (
     IN PBIG_INTEGER pBI)
 {
@@ -185,7 +184,6 @@ VOID BigInteger_Print (
     DEBUGPRINT("\n\n");
 } /* End of BigInteger_Print */
 
-
 VOID BigInteger_Init (
     INOUT PBIG_INTEGER *pBI)
 {
@@ -202,7 +200,6 @@ VOID BigInteger_Init (
     (*pBI)->Signed = 1;
 } /* End of BigInteger_Init */
 
-
 VOID BigInteger_Free_AllocSize (
     IN PBIG_INTEGER *pBI)
 {
@@ -214,7 +211,6 @@ VOID BigInteger_Free_AllocSize (
     } /* End of if */
 } /* End of BigInteger_Free_AllocSize */
 
-
 VOID BigInteger_Free (
     IN PBIG_INTEGER *pBI)
 {
@@ -225,7 +221,6 @@ VOID BigInteger_Free (
 
     *pBI = NULL;
 } /* End of BigInteger_Free */
-
 
 VOID BigInteger_AllocSize (
     IN PBIG_INTEGER *pBI,
@@ -260,7 +255,6 @@ VOID BigInteger_AllocSize (
     (*pBI)->IntegerLength = Length;
 } /* End of BigInteger_AllocSize */
 
-
 VOID BigInteger_ClearHighBits (
     IN PBIG_INTEGER pBI)
 {
@@ -292,7 +286,6 @@ VOID BigInteger_ClearHighBits (
         pBI->ArrayLength = BIArrayIndex + 1;
     } /* End of if */
 } /* End of BigInteger_ClearHighBits */
-
 
 VOID BigInteger_BI2Bin (
     IN PBIG_INTEGER pBI,
@@ -338,7 +331,6 @@ VOID BigInteger_BI2Bin (
     *Length = pBI->IntegerLength;
 } /* End of BigInteger_BI2Bin */
 
-
 VOID BigInteger_Bin2BI (
     IN UINT8 *pValue,
     IN UINT Length,
@@ -368,7 +360,6 @@ VOID BigInteger_Bin2BI (
     } /* End of if */
 } /* End of BigInteger_Bin2BI */
 
-
 /* Calculate the bits of BigInteger, the highest bit is 1 */
 VOID BigInteger_BitsOfBI (
     IN PBIG_INTEGER pBI,
@@ -384,7 +375,6 @@ VOID BigInteger_BitsOfBI (
     } /* End of while */
     *Bits_Of_P = (pBI->ArrayLength*sizeof(UINT32)) - Index;
 } /* End of BigInteger_BitsOfBN */
-
 
 INT BigInteger_GetBitValue (
     IN PBIG_INTEGER pBI,
@@ -403,7 +393,6 @@ INT BigInteger_GetBitValue (
     return ((pBI->pIntegerArray[Array] >> Shift) & 0x1);
 } /* End of BigInteger_GetBitValue */
 
-
 UINT8 BigInteger_GetByteValue (
     IN PBIG_INTEGER pBI,
     IN UINT Index)
@@ -418,10 +407,8 @@ UINT8 BigInteger_GetByteValue (
     if ((Array > pBI->ArrayLength) || (Index > pBI->IntegerLength))
         return 0;
 
-
     return (UINT8) UINT32_GETBYTE(pBI->pIntegerArray[Array], Shift - 1);
 } /* End of BigInteger_GetByteValue */
-
 
 VOID BigInteger_Copy (
     IN PBIG_INTEGER pBI_Copied,
@@ -433,7 +420,6 @@ VOID BigInteger_Copy (
     (*pBI_Result)->IntegerLength = pBI_Copied->IntegerLength;
     (*pBI_Result)->Signed = pBI_Copied->Signed;
 } /* End of BigInteger_Copy */
-
 
 INT BigInteger_UnsignedCompare (
     IN PBIG_INTEGER pFirstOperand,
@@ -459,7 +445,6 @@ INT BigInteger_UnsignedCompare (
 
     return 0;
 } /* End of BigInteger_Compare */
-
 
 VOID BigInteger_Add (
     IN PBIG_INTEGER pFirstOperand,
@@ -533,7 +518,6 @@ VOID BigInteger_Add (
 
     BigInteger_Free(&pTempBI);
 } /* End of BigInteger_Add */
-
 
 VOID BigInteger_Sub (
     IN PBIG_INTEGER pFirstOperand,
@@ -625,7 +609,6 @@ VOID BigInteger_Sub (
     BigInteger_Free(&pTempBI2);
 } /* End of BigInteger_Sub */
 
-
 VOID BigInteger_Mul (
     IN PBIG_INTEGER pFirstOperand,
     IN PBIG_INTEGER pSecondOperand,
@@ -689,7 +672,6 @@ output:
     (*pBI_Result)->Signed = pFirstOperand->Signed * pSecondOperand->Signed;
     BigInteger_ClearHighBits(*pBI_Result);
 } /* End of BigInteger_Mul */
-
 
 VOID BigInteger_Square (
     IN PBIG_INTEGER pBI,
@@ -806,7 +788,6 @@ output:
     (*pBI_Result)->Signed = 1;
     BigInteger_ClearHighBits(*pBI_Result);
 } /* End of BigInteger_Square */
-
 
 VOID BigInteger_Div (
     IN PBIG_INTEGER pFirstOperand,
@@ -930,7 +911,6 @@ output:
     BigInteger_ClearHighBits(*pBI_Remainder);
 } /* End of BigInteger_Div */
 
-
 VOID BigInteger_Montgomery_Reduction (
     IN PBIG_INTEGER pBI_A,
     IN PBIG_INTEGER pBI_P,
@@ -987,7 +967,6 @@ VOID BigInteger_Montgomery_Reduction (
     } /* End of if */
     BigInteger_ClearHighBits(*pBI_Result);
 } /* End of BigInteger_Montgomery_Reduction */
-
 
 VOID BigInteger_Montgomery_ExpMod (
     IN PBIG_INTEGER pBI_G,

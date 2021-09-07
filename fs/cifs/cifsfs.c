@@ -443,7 +443,6 @@ int cifs_xquota_set(struct super_block *sb, int quota_type, qid_t qid,
 	else
 		return -EIO;
 
-
 	xid = GetXid();
 	if (pTcon) {
 		cFYI(1, ("set type: 0x%x id: %d", quota_type, qid));

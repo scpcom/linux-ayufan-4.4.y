@@ -2514,7 +2514,6 @@ static ssize_t ipr_show_write_caching(struct device *dev,
 	return len;
 }
 
-
 /**
  * ipr_store_write_caching - Enable/disable adapter write cache
  * @dev:	device struct

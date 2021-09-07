@@ -876,7 +876,6 @@ SiS_GetModeID_VGA2(int VGAEngine, unsigned int VBFlags, int HDisplay, int VDispl
    return SiS_GetModeID(VGAEngine, 0, HDisplay, VDisplay, Depth, false, 0, 0);
 }
 
-
 /*********************************************/
 /*          HELPER: SetReg, GetReg           */
 /*********************************************/
@@ -976,7 +975,6 @@ SiS_DisplayOff(struct SiS_Private *SiS_Pr)
 {
    SiS_SetRegOR(SiS_Pr->SiS_P3c4,0x01,0x20);
 }
-
 
 /*********************************************/
 /*        HELPER: Init Port Addresses        */
@@ -3899,7 +3897,6 @@ SiS_CalcCRRegisters(struct SiS_Private *SiS_Pr, int depth)
 			GETBITSTR((SiS_Pr->CHBlankStart >> 3) - 1, 9:8, 5:4) |
 			GETBITSTR((SiS_Pr->CHSyncStart  >> 3) + 3, 9:8, 7:6) ;
 
-
    SiS_Pr->CCRT1CRTC[15] =							/* SRC */
 			GETBITSTR((SiS_Pr->CHBlankEnd >> 3) - 1, 7:6, 1:0) |
 			GETBITSTR((SiS_Pr->CHSyncEnd  >> 3) + 3, 5:5, 2:2) ;
@@ -4239,7 +4236,3 @@ SiS_Generic_ConvertCRData(struct SiS_Private *SiS_Pr, unsigned char *crdata,
    }
 
 }
-
-
-
-

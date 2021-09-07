@@ -259,7 +259,6 @@ int lis3l02dq_read_all(struct lis3l02dq_state *st, u8 *rx_array)
 	return ret;
 }
 
-
 /* Whilst this makes a lot of calls to iio_sw_ring functions - it is to device
  * specific to be rolled into the core.
  */
@@ -354,7 +353,6 @@ static int lis3l02dq_data_rdy_ring_predisable(struct iio_dev *indio_dev)
 						indio_dev->pollfunc)
 		: 0;
 }
-
 
 /* Caller responsible for locking as necessary. */
 static int __lis3l02dq_write_data_ready_config(struct device *dev,
@@ -588,7 +586,6 @@ void lis3l02dq_uninitialize_ring(struct iio_ring_buffer *ring)
 	iio_ring_buffer_unregister(ring);
 }
 
-
 int lis3l02dq_set_ring_length(struct iio_dev *indio_dev, int length)
 {
 	/* Set sensible defaults for the ring buffer */
@@ -596,5 +593,3 @@ int lis3l02dq_set_ring_length(struct iio_dev *indio_dev, int length)
 		return indio_dev->ring->access.set_length(indio_dev->ring, 500);
 	return 0;
 }
-
-

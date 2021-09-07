@@ -228,7 +228,6 @@ int nilfs_near_disk_full(struct the_nilfs *);
 void nilfs_fall_back_super_block(struct the_nilfs *);
 void nilfs_swap_super_block(struct the_nilfs *);
 
-
 static inline void get_nilfs(struct the_nilfs *nilfs)
 {
 	/* Caller must have at least one reference of the_nilfs. */

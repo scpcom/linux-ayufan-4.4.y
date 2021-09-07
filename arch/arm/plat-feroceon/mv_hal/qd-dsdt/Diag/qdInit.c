@@ -22,7 +22,6 @@
 
 void qdStatus(void);
 
-
 /*
  * A system configuration structure
  * It used to configure the QD driver with configuration data
@@ -42,7 +41,6 @@ GT_QD_DEV       	qddev[4] = {{0}};
  */
 GT_QD_DEV       	*qd_dev = &qddev[0];
 GT_QD_DEV       	*qd_ext = &qddev[1];
-
 
 /*
  * read mii register - see qdFFmii.c
@@ -158,13 +156,11 @@ GT_STATUS qdStart(void) /* devId is used for simulator only */
 	return GT_OK;    
 }
 
-
 void qdClose(void) 
 {
 	if (qd_dev->devEnabled)
 		qdUnloadDriver(qd_dev);
 }
-
 
 GT_STATUS qdInit(void)
 {

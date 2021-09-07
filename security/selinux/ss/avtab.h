@@ -88,4 +88,3 @@ void avtab_cache_destroy(void);
 #define MAX_AVTAB_SIZE MAX_AVTAB_HASH_BUCKETS
 
 #endif	/* _SS_AVTAB_H_ */
-

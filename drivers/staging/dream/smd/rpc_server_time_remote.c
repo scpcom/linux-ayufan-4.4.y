@@ -73,5 +73,4 @@ static int __init rpc_server_init(void)
 	return msm_rpc_create_server(&rpc_server);
 }
 
-
 module_init(rpc_server_init);

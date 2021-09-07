@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCSysPCIH
 #define __INCSysPCIH
 
@@ -132,7 +131,6 @@ typedef enum _mvPCIBars
 #define MV_PCI_BAR_IS_DRAM_BAR(bar)   \
                             ((bar == CS0_BAR))
 #endif
-
 
 /****************************************/
 /* PCI Slave Address Decoding registers */

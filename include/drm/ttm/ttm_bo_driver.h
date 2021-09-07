@@ -422,7 +422,6 @@ struct ttm_bo_global {
 	atomic_t bo_count;
 };
 
-
 #define TTM_NUM_MEM_TYPES 8
 
 #define TTM_BO_PRIV_FLAG_MOVING  0	/* Buffer object is moving and needs

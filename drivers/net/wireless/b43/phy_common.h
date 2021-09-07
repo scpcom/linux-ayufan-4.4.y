@@ -5,7 +5,6 @@
 
 struct b43_wldev;
 
-
 /* PHY register routing bits */
 #define B43_PHYROUTE			0x0C00 /* PHY register routing bits mask */
 #define  B43_PHYROUTE_BASE		0x0000 /* Base registers */
@@ -23,7 +22,6 @@ struct b43_wldev;
 #define B43_PHY_OFDM(reg)		((reg) | B43_PHYROUTE_OFDM_GPHY)
 /* Extended G-PHY registers. */
 #define B43_PHY_EXTG(reg)		((reg) | B43_PHYROUTE_EXT_GPHY)
-
 
 /* Masks for the PHY versioning registers. */
 #define B43_PHYVER_ANALOG		0xF000
@@ -255,7 +253,6 @@ struct b43_phy {
 #endif /* B43_DEBUG */
 };
 
-
 /**
  * b43_phy_allocate - Allocate PHY structs
  * Allocate the PHY data structures, based on the current dev->phy.type
@@ -417,6 +414,5 @@ int b43_phy_shm_tssi_read(struct b43_wldev *dev, u16 shm_offset);
  * for struct b43_phy_operations.
  */
 void b43_phyop_switch_analog_generic(struct b43_wldev *dev, bool on);
-
 
 #endif /* LINUX_B43_PHY_COMMON_H_ */

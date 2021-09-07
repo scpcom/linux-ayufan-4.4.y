@@ -412,7 +412,6 @@ static inline int __snd_bug_on(int cond)
 #define snd_printdd(format, args...)	do { } while (0)
 #endif
 
-
 #define SNDRV_OSS_VERSION         ((3<<16)|(8<<8)|(1<<4)|(0))	/* 3.8.1a */
 
 /* for easier backward-porting */
@@ -457,6 +456,5 @@ struct snd_pci_quirk {
 
 const struct snd_pci_quirk *
 snd_pci_quirk_lookup(struct pci_dev *pci, const struct snd_pci_quirk *list);
-
 
 #endif /* __SOUND_CORE_H */

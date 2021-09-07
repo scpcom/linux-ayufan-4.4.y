@@ -127,7 +127,6 @@ void __cpuinit detect_extended_topology(struct cpuinfo_x86 *c)
 
 	c->x86_max_cores = (core_level_siblings / smp_num_siblings);
 
-
 	printk(KERN_INFO  "CPU: Physical Processor ID: %d\n",
 	       c->phys_proc_id);
 	if (c->x86_max_cores > 1)

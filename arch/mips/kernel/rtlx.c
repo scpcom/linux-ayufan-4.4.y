@@ -66,7 +66,6 @@ static void rtlx_dispatch(void)
 	do_IRQ(MIPS_CPU_IRQ_BASE + MIPS_CPU_RTLX_IRQ);
 }
 
-
 /* Interrupt handler may be called before rtlx_init has otherwise had
    a chance to run.
 */
@@ -151,7 +150,6 @@ static void stopping(int vpe)
 	for (i = 0; i < RTLX_CHANNELS; i++)
 		wake_up_interruptible(&channel_wqs[i].lx_queue);
 }
-
 
 int rtlx_open(int index, int can_sleep)
 {
@@ -389,7 +387,6 @@ out:
 
 	return count;
 }
-
 
 static int file_open(struct inode *inode, struct file *filp)
 {

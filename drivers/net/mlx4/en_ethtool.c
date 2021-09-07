@@ -38,7 +38,6 @@
 #include "mlx4_en.h"
 #include "en_port.h"
 
-
 static void mlx4_en_update_lro_stats(struct mlx4_en_priv *priv)
 {
 	int i;
@@ -419,8 +418,3 @@ const struct ethtool_ops mlx4_en_ethtool_ops = {
 	.get_flags = ethtool_op_get_flags,
 	.set_flags = ethtool_op_set_flags,
 };
-
-
-
-
-

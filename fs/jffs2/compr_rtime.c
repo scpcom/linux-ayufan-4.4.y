@@ -69,7 +69,6 @@ static int jffs2_rtime_compress(unsigned char *data_in,
 	return 0;
 }
 
-
 static int jffs2_rtime_decompress(unsigned char *data_in,
 				  unsigned char *cpage_out,
 				  uint32_t srclen, uint32_t destlen,

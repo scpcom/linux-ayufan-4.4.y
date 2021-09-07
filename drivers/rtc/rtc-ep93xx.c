@@ -115,7 +115,6 @@ static ssize_t ep93xx_rtc_show_comp_delete(struct device *dev,
 }
 static DEVICE_ATTR(comp_delete, S_IRUGO, ep93xx_rtc_show_comp_delete, NULL);
 
-
 static int __init ep93xx_rtc_probe(struct platform_device *pdev)
 {
 	struct ep93xx_rtc *ep93xx_rtc;

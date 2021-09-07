@@ -437,7 +437,6 @@ nextbyte:
 }
 EXPORT_SYMBOL_GPL(gigaset_m10x_input);
 
-
 /* == data output ========================================================== */
 
 /* Encoding of a PPP packet into an octet stuffed HDLC frame

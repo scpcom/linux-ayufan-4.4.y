@@ -40,4 +40,3 @@
 #define HW_EVENT_IRQ_MAX (HW_EVENT_IRQ_BASE + 95)
 
 #endif /* __ASM_SH_DREAMCAST_SYSASIC_H */
-

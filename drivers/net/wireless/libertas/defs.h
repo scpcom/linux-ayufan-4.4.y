@@ -16,7 +16,6 @@
 #define DRV_NAME "libertas"
 #endif
 
-
 #define LBS_DEB_ENTER	0x00000001
 #define LBS_DEB_LEAVE	0x00000002
 #define LBS_DEB_MAIN	0x00000004
@@ -118,8 +117,6 @@ static inline void lbs_deb_hex(unsigned int grp, const char *prompt, u8 *buf, in
 #else
 #define lbs_deb_hex(grp,prompt,buf,len)	do {} while (0)
 #endif
-
-
 
 /** Buffer Constants */
 

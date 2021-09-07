@@ -671,7 +671,6 @@ static void ath_beacon_config_adhoc(struct ath_softc *sc,
 
 	intval = conf->beacon_interval & ATH9K_BEACON_PERIOD;
 
-
 	/* Pull nexttbtt forward to reflect the current TSF */
 
 	nexttbtt = TSF_TO_TU(sc->beacon.bc_tstamp >> 32, sc->beacon.bc_tstamp);

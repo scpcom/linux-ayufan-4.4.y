@@ -270,7 +270,6 @@ free:
 	return ret;
 }
 
-
 /*
  * Download the firmware into the card, this also does a PCMCIA soft
  * reset on the card, to make sure it's in a sane state.

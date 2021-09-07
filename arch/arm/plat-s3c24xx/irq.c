@@ -67,7 +67,6 @@ s3c_irq_maskack(unsigned int irqno)
 	__raw_writel(bitval, S3C2410_INTPND);
 }
 
-
 static void
 s3c_irq_unmask(unsigned int irqno)
 {
@@ -256,7 +255,6 @@ static struct irq_chip s3c_irq_eint0t4 = {
 #define INTMSK_UART1	 (1UL << (IRQ_UART1 - IRQ_EINT0))
 #define INTMSK_UART2	 (1UL << (IRQ_UART2 - IRQ_EINT0))
 #define INTMSK_ADCPARENT (1UL << (IRQ_ADCPARENT - IRQ_EINT0))
-
 
 /* UART0 */
 
@@ -523,7 +521,6 @@ int s3c24xx_set_fiq(unsigned int irq, bool on)
 	return 0;
 }
 #endif
-
 
 /* s3c24xx_init_irq
  *

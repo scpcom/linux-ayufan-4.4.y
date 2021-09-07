@@ -318,7 +318,6 @@ static void compute_areas(struct synaptics_ts_data *ts,
 	fuzz_x = fuzz_x * max_x / 0x10000;
 	fuzz_y = fuzz_y * max_y / 0x10000;
 
-
 	ts->snap_down[swapped] = -inactive_area_left;
 	ts->snap_up[swapped] = max_x + inactive_area_right;
 	ts->snap_down[!swapped] = -inactive_area_top;
@@ -485,7 +484,6 @@ static int __devinit synaptics_ts_probe(
 
 	compute_areas(ts, pdata, max_x, max_y);
 
-
 	ret = input_register_device(ts->input_dev);
 	if (ret) {
 		pr_err("synaptics: Unable to register %s input device\n",
@@ -614,8 +612,6 @@ static void synaptics_ts_late_resume(struct early_suspend *h)
 #define synaptics_ts_suspend NULL
 #define synaptics_ts_resume NULL
 #endif
-
-
 
 static const struct i2c_device_id synaptics_ts_id[] = {
 	{ SYNAPTICS_I2C_RMI_NAME, 0 },

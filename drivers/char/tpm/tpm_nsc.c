@@ -116,7 +116,6 @@ static int nsc_wait_for_ready(struct tpm_chip *chip)
 	return -EBUSY;
 }
 
-
 static int tpm_nsc_recv(struct tpm_chip *chip, u8 * buf, size_t count)
 {
 	u8 *buffer = buf;

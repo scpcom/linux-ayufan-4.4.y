@@ -67,12 +67,10 @@
 #define SK_PNMI_VPD_CREATE	1
 #define SK_PNMI_VPD_DELETE	2
 
-
 /*
  * RLMT related defines
  */
 #define SK_PNMI_DEF_RLMT_CHG_THRES	240	/* 4 changes per minute */
-
 
 /*
  * VCT internal status values
@@ -104,7 +102,6 @@ typedef struct s_OidTabEntry {
 							 SK_U32 NetNumber);
 	SK_U16			Param;
 } SK_PNMI_TAB_ENTRY;
-
 
 /*
  * Trap lengths
@@ -205,7 +202,6 @@ typedef struct s_PnmiStatAddr {
 	SK_U16		Reg;		/* MAC register containing the value */
 	SK_BOOL		GetOffset;	/* TRUE: Offset managed by PNMI (GetStatVal()) */
 } SK_PNMI_STATADDR;
-
 
 /*
  * SK_PNMI_STRUCT_DATA copy offset evaluation macros

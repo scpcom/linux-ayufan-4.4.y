@@ -18,7 +18,6 @@
 
 static struct cmd_ctrl_node *lbs_get_cmd_ctrl_node(struct lbs_private *priv);
 
-
 /**
  *  @brief Simple callback that copies response back into command
  *
@@ -57,7 +56,6 @@ static int lbs_cmd_async_callback(struct lbs_private *priv, unsigned long extra,
 {
 	return 0;
 }
-
 
 /**
  *  @brief Checks whether a command is allowed in Power Save mode
@@ -1959,7 +1957,6 @@ void lbs_ps_confirm_sleep(struct lbs_private *priv)
 	lbs_deb_leave(LBS_DEB_HOST);
 }
 
-
 /**
  * @brief Configures the transmission power control functionality.
  *
@@ -2022,7 +2019,6 @@ int lbs_set_power_adapt_cfg(struct lbs_private *priv, int enable, int8_t p0,
 
 	return ret;
 }
-
 
 static struct cmd_ctrl_node *__lbs_cmd_async(struct lbs_private *priv,
 	uint16_t command, struct cmd_header *in_cmd, int in_cmd_size,
@@ -2117,5 +2113,3 @@ done:
 	return ret;
 }
 EXPORT_SYMBOL_GPL(__lbs_cmd);
-
-

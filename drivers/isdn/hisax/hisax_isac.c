@@ -508,7 +508,6 @@ static void isac_retransmit(struct isac *isac)
 	isac->tx_cnt = 0;
 }
 
-
 static inline void isac_cisq_interrupt(struct isac *isac)
 {
 	unsigned char val;

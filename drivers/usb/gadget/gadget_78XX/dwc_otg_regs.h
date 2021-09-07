@@ -1643,7 +1643,6 @@ typedef struct dwc_otg_host_global_regs {
 	volatile uint32_t hflbaddr;
 } dwc_otg_host_global_regs_t;
 
-
 /**
  * This union represents the bit fields in the Host Configuration Register.
  * Read the register into the <i>d32</i> member then set/clear the bits using
@@ -2077,7 +2076,6 @@ typedef union hctsiz_data
 		unsigned dopng : 1;
 	} b_ddma;
 } hctsiz_data_t;
-
 
 /**
  * This union represents the bit fields in the Host DMA Address  

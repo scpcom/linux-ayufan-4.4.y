@@ -180,7 +180,6 @@ struct bfa_fw_port_fpg_stats_s {
     u32    rsvd;
 };
 
-
 struct bfa_fw_port_lksm_stats_s {
     u32    hwsm_success;       /*  hwsm state machine success          */
     u32    hwsm_fails;         /*  hwsm fails                          */
@@ -200,7 +199,6 @@ struct bfa_fw_port_lksm_stats_s {
     u32    nos_tx;             /*  No. of times NOS tx started         */
 };
 
-
 struct bfa_fw_port_snsm_stats_s {
     u32    hwsm_success;       /*  Successful hwsm terminations        */
     u32    hwsm_fails;         /*  hwsm fail count                     */
@@ -212,7 +210,6 @@ struct bfa_fw_port_snsm_stats_s {
     u32    sig_lost;           /*  Signal loss count                   */
 };
 
-
 struct bfa_fw_port_physm_stats_s {
     u32    module_inserts;     /*  Module insert count                 */
     u32    module_xtracts;     /*  Module extracts count               */
@@ -221,7 +218,6 @@ struct bfa_fw_port_physm_stats_s {
     u32    laser_faults;       /*  Laser fault count                   */
     u32    rsvd;
 };
-
 
 struct bfa_fw_fip_stats_s {
     u32    disc_req;           /*  Discovery solicit requests          */
@@ -238,12 +234,10 @@ struct bfa_fw_fip_stats_s {
     u32    rsvd;
 };
 
-
 struct bfa_fw_lps_stats_s {
     u32    mac_invalids;       /*  Invalid mac assigned                */
     u32    rsvd;
 };
-
 
 struct bfa_fw_fcoe_stats_s {
     u32    cee_linkups;        /*  CEE link up count                   */

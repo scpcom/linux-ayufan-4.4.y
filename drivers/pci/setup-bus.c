@@ -612,7 +612,6 @@ static void pci_bus_dump_resources(struct pci_bus *bus)
 	struct pci_bus *b;
 	struct pci_dev *dev;
 
-
 	pci_bus_dump_res(bus);
 
 	list_for_each_entry(dev, &bus->devices, bus_list) {

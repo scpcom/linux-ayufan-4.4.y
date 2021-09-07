@@ -119,7 +119,6 @@ struct lppaca {
 	u8	idle;			// Indicate OS is idle          x7E
 	u8	vmxregs_in_use;		// VMX registers in use         x7F
 
-
 //=============================================================================
 // CACHE_LINE_3 0x0100 - 0x017F: This line is shared with other processors
 //=============================================================================

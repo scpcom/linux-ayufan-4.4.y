@@ -12,18 +12,15 @@
 #ifndef DUMPREQUEST_H
 #define DUMPREQUEST_H
 
-
 #include <linux/usb.h>
 #include <linux/wait.h>
 
 #include <sound/core.h>
 
-
 enum {
 	LINE6_DUMP_NONE,
 	LINE6_DUMP_CURRENT
 };
-
 
 struct line6_dump_reqbuf {
 	/**
@@ -85,6 +82,5 @@ extern void line6_invalidate_current(struct line6_dump_request *l6dr);
 extern void line6_startup_delayed(struct line6_dump_request *l6dr, int seconds,
 				  void (*function)(unsigned long), void *data);
 extern int line6_wait_dump(struct line6_dump_request *l6dr, int nonblock);
-
 
 #endif

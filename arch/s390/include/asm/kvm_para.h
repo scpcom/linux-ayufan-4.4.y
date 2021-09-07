@@ -80,7 +80,6 @@ static inline long kvm_hypercall3(unsigned long nr, unsigned long p1,
 	return __rc;
 }
 
-
 static inline long kvm_hypercall4(unsigned long nr, unsigned long p1,
 			       unsigned long p2, unsigned long p3,
 			       unsigned long p4)

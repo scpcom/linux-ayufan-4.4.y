@@ -255,5 +255,3 @@ void __init s5pc1xx_init_irq(u32 *vic_valid, int num)
 	for (uart = 0; uart < ARRAY_SIZE(uart_irqs); uart++)
 		s5pc1xx_uart_irq(&uart_irqs[uart]);
 }
-
-

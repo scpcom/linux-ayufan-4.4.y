@@ -157,8 +157,6 @@ static void grow_config(int len)
 	}
 }
 
-
-
 /*
  * Lookup a value in the configuration string.
  */

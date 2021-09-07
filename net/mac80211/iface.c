@@ -40,7 +40,6 @@
  * by either the RTNL, the iflist_mtx or RCU.
  */
 
-
 static int ieee80211_change_mtu(struct net_device *dev, int new_mtu)
 {
 	int meshhdrlen;

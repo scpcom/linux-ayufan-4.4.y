@@ -46,4 +46,3 @@ void xhci_init_ejxxx(struct xhci_hcd *xhci)
 		break;
 	}
 }
-

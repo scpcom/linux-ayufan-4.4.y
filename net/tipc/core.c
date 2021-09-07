@@ -48,7 +48,6 @@
 #include "subscr.h"
 #include "config.h"
 
-
 #define TIPC_MOD_VER "1.6.4"
 
 #ifndef CONFIG_TIPC_ZONES
@@ -96,7 +95,6 @@ int tipc_max_subscriptions;
 int tipc_max_publications;
 int tipc_net_id;
 int tipc_remote_management;
-
 
 int tipc_get_mode(void)
 {
@@ -175,7 +173,6 @@ int tipc_core_start(void)
 	}
 	return res;
 }
-
 
 static int __init tipc_init(void)
 {
@@ -273,4 +270,3 @@ EXPORT_SYMBOL(tipc_send_buf_fast);
 EXPORT_SYMBOL(tipc_acknowledge);
 EXPORT_SYMBOL(tipc_get_port);
 EXPORT_SYMBOL(tipc_get_handle);
-

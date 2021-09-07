@@ -8,7 +8,6 @@
  * Copyright (C) 2003 - 2007 Tensilica Inc.
  */
 
-
 #ifndef _XTENSA_COPROCESSOR_H
 #define _XTENSA_COPROCESSOR_H
 
@@ -67,8 +66,6 @@
 .endm
 #undef _SELECT
 
-
-
 #endif	/* __ASSEMBLY__ */
 
 /*
@@ -89,7 +86,6 @@
 
 #ifndef __ASSEMBLY__
 
-
 #if XCHAL_HAVE_CP
 
 #define RSR_CPENABLE(x)	do {						  \
@@ -101,7 +97,6 @@
 	} while(0);
 
 #endif /* XCHAL_HAVE_CP */
-
 
 /*
  * Additional registers.

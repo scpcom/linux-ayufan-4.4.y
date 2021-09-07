@@ -17,7 +17,6 @@
 #include <asm/page.h>
 #include <asm/sections.h>
 
-
 volatile unsigned long mem_err;		/* So we know an error occurred */
 
 /*

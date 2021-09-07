@@ -14,7 +14,6 @@
 .text
 #endif
 
-
 ENTRY(___udivsi3)
 
   CC = R0 < R1 (IU);    /* If X < Y, always return 0 */
@@ -116,7 +115,6 @@ ENTRY(___udivsi3)
   [--SP] = (R7:5);                /* Push registers R5-R7 */
 
   /* Idents don't match. Go for the full operation. */
-
 
   R6 = 2;                         /* assume we'll shift two */
   R3 = 1;

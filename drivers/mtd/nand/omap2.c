@@ -884,7 +884,6 @@ static int __devinit omap_nand_probe(struct platform_device *pdev)
 	int				err;
 	unsigned long 			val;
 
-
 	pdata = pdev->dev.platform_data;
 	if (pdata == NULL) {
 		dev_err(&pdev->dev, "platform data missing\n");

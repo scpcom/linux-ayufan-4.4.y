@@ -34,7 +34,6 @@ static int smb_request_send_req(struct smb_request *req);
   name, active, num, objsize, active_slabs, num_slaps, #pages
 */
 
-
 int smb_init_request_cache(void)
 {
 	req_cachep = kmem_cache_create("smb_request",

@@ -19,4 +19,3 @@ int __mv_get_adapter_count(void);
 struct hba_extension *__mv_get_ext_from_adp_id(int id);
  void raid_capability( MV_PVOID This, PAdapter_Info pAdInfo);
 #endif /* __MODULE_MANAGE_H__ */
-

@@ -214,7 +214,6 @@ static int gpio_mdio_reset(struct mii_bus *bus)
 	return 0;
 }
 
-
 static int __devinit gpio_mdio_probe(struct of_device *ofdev,
 				     const struct of_device_id *match)
 {
@@ -272,7 +271,6 @@ out_free_priv:
 out:
 	return err;
 }
-
 
 static int gpio_mdio_remove(struct of_device *dev)
 {

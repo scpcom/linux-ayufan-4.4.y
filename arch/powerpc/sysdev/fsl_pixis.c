@@ -228,7 +228,6 @@ static int gmsa_send_message(int addr)
 	u8	v;
 	int i;
 
-
 	/* 1. set bit 0 of PX_OCMD to start CMD */
 	pixis_setreg(&pixis->base->omsg, addr);
 	pixis_setreg(&pixis->base->ocmd, PXOC_MSG);

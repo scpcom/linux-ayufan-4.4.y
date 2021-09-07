@@ -461,7 +461,6 @@ bfa_fcxp_queue(struct bfa_fcxp_s *fcxp, struct bfi_fcxp_send_req_s *send_req)
 	bfa_trc(bfa, bfa_reqq_ci(bfa, BFA_REQQ_FCXP));
 }
 
-
 /**
  *  hal_fcxp_api BFA FCXP API
  */
@@ -751,8 +750,6 @@ bfa_fcxp_discard(struct bfa_fcxp_s *fcxp)
 	fcxp->send_cbfn = bfa_fcxp_null_comp;
 }
 
-
-
 /**
  *  hal_fcxp_public BFA FCXP public functions
  */
@@ -778,5 +775,3 @@ bfa_fcxp_get_maxrsp(struct bfa_s *bfa)
 
 	return mod->rsp_pld_sz;
 }
-
-

@@ -51,7 +51,6 @@ struct pv_patchdata pv_patchdata __initdata = {
 	.gate_section = (void*)__start_gate_section,
 };
 
-
 unsigned long __init
 paravirt_get_gate_patchlist(enum pv_gate_patchlist type)
 {

@@ -10,7 +10,6 @@
 #include <asm/pgalloc.h>
 #include <asm/traps.h>
 
-
 static unsigned long virt_to_phys_slow(unsigned long vaddr)
 {
 	if (CPU_IS_060) {
@@ -115,4 +114,3 @@ void flush_icache_user_range(struct vm_area_struct *vma, struct page *page,
 			      : "di" (FLUSH_I));
 	}
 }
-

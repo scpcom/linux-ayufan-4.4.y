@@ -46,7 +46,6 @@ struct procdata {
 	wait_queue_head_t rd_queue;
 };
 
-
 /**********************************************/
 /* log function for cards error log interface */
 /**********************************************/
@@ -140,7 +139,6 @@ put_log_buffer(hysdn_card * card, char *cp)
 	pd->del_lock--;		/* release lock level */
 	wake_up_interruptible(&(pd->rd_queue));		/* announce new entry */
 }				/* put_log_buffer */
-
 
 /******************************/
 /* file operations and tables */
@@ -389,7 +387,6 @@ static const struct file_operations log_fops =
 	.open           = hysdn_log_open,
 	.release        = hysdn_log_close,                                        
 };
-
 
 /***********************************************************************************/
 /* hysdn_proclog_init is called when the module is loaded after creating the cards */

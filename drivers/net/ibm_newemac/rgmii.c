@@ -226,7 +226,6 @@ void *rgmii_dump_regs(struct of_device *ofdev, void *buf)
 	return regs + 1;
 }
 
-
 static int __devinit rgmii_probe(struct of_device *ofdev,
 				 const struct of_device_id *match)
 {

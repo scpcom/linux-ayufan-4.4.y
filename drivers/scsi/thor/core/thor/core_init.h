@@ -128,8 +128,6 @@ void ReleaseInternalReqToPool(
 
 #define mvEnableGlobalIntr(mmio, old_stat)	MV_REG_WRITE_DWORD(mmio, HOST_CTL, old_stat)
 
-
 #define CORE_MAX_RESET_COUNT		0xffff	
 #define CORE_MAX_PATA_RESET_COUNT	0xffff
 #endif
-

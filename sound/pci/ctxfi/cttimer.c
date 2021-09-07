@@ -58,7 +58,6 @@ struct ct_timer {
 	unsigned int running:1;		/* global timer running */
 };
 
-
 /*
  * system-timer-based updates
  */
@@ -135,7 +134,6 @@ static struct ct_timer_ops ct_systimer_ops = {
 	.start = ct_systimer_start,
 	.stop = ct_systimer_stop,
 };
-
 
 /*
  * Handling multiple streams using a global emu20k1 timer irq
@@ -270,7 +268,6 @@ static void ct_xfitimer_prepare(struct ct_timer_instance *ti)
 	ti->running = 0;
 	ti->need_update = 0;
 }
-
 
 /* start/stop the timer */
 static void ct_xfitimer_update(struct ct_timer *atimer)
@@ -440,4 +437,3 @@ void ct_timer_free(struct ct_timer *atimer)
 		atimer->ops->free_global(atimer);
 	kfree(atimer);
 }
-

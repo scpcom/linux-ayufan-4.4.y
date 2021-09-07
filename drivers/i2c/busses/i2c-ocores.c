@@ -191,7 +191,6 @@ static void ocores_init(struct ocores_i2c *i2c)
 	oc_setreg(i2c, OCI2C_CONTROL, ctrl | OCI2C_CTRL_IEN | OCI2C_CTRL_EN);
 }
 
-
 static u32 ocores_func(struct i2c_adapter *adap)
 {
 	return I2C_FUNC_I2C | I2C_FUNC_SMBUS_EMUL;
@@ -208,7 +207,6 @@ static struct i2c_adapter ocores_adapter = {
 	.class		= I2C_CLASS_HWMON | I2C_CLASS_SPD,
 	.algo		= &ocores_algorithm,
 };
-
 
 static int __devinit ocores_i2c_probe(struct platform_device *pdev)
 {

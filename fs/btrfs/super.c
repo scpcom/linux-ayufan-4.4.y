@@ -140,7 +140,6 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 	if (!options)
 		return -ENOMEM;
 
-
 	while ((p = strsep(&options, ",")) != NULL) {
 		int token;
 		if (!*p)

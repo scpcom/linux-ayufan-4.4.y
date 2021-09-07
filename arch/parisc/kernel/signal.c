@@ -49,7 +49,6 @@
 #define DBG(LEVEL, ...)
 #endif
 	
-
 #define _BLOCKABLE (~(sigmask(SIGKILL) | sigmask(SIGSTOP)))
 
 /* gcc will complain if a pointer is cast to an integer of different
@@ -111,7 +110,6 @@ sys_rt_sigreturn(struct pt_regs *regs, int in_syscall)
 		sigframe_size = PARISC_RT_SIGFRAME_SIZE32;
 #endif
 
-
 	/* Unwind the user stack to get the rt_sigframe structure. */
 	frame = (struct rt_sigframe __user *)
 		(usp - sigframe_size);
@@ -164,8 +162,6 @@ sys_rt_sigreturn(struct pt_regs *regs, int in_syscall)
 			goto give_sigsegv;
 	}
 		
-
-
 	/* If we are on the syscall path IAOQ will not be restored, and
 	 * if we are on the interrupt path we must not corrupt gr31.
 	 */
@@ -264,7 +260,6 @@ setup_rt_frame(int sig, struct k_sigaction *ka, siginfo_t *info,
 	DBG(1,"SETUP_RT_FRAME: START\n");
 	DBG(1,"setup_rt_frame: frame %p info %p\n", frame, info);
 
-	
 #ifdef CONFIG_64BIT
 
 	compat_frame = (struct compat_rt_sigframe __user *)frame;
@@ -434,7 +429,6 @@ setup_rt_frame(int sig, struct k_sigaction *ka, siginfo_t *info,
 	/* Raise the user stack pointer to make a proper call frame. */
 	regs->gr[30] = (A(frame) + sigframe_size);
 
-
 	DBG(1,"setup_rt_frame: sig deliver (%s,%d) frame=0x%p sp=%#lx iaoq=%#lx/%#lx rp=%#lx\n",
 	       current->comm, current->pid, frame, regs->gr[30],
 	       regs->iaoq[0], regs->iaoq[1], rp);
@@ -600,7 +594,6 @@ do_signal(struct pt_regs *regs, long in_syscall)
 
 	DBG(1,"do_signal: oldset %08lx / %08lx\n", 
 		oldset->sig[0], oldset->sig[1]);
-
 
 	/* May need to force signal if handle_signal failed to deliver */
 	while (1) {

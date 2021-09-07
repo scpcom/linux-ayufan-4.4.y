@@ -970,7 +970,6 @@
 #define UMISC_FORCE_PERR 0x2000	/* Force Parity Error */
 #define UMISC_CLKSRC	 0x4000	/* Clock Source */
 
-
 /* generalization of uart control registers to support multiple ports: */
 typedef volatile struct {
   volatile unsigned short int ustcnt;
@@ -994,7 +993,6 @@ typedef volatile struct {
   volatile unsigned short int pad2;
   volatile unsigned short int pad3;
 } __attribute__((packed)) m68328_uart;
-
 
 /**********
  *

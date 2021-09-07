@@ -233,7 +233,6 @@ dbcmdcnt_data1:	.long	4
 7:	.long   0xfe400018 /* RTCNT */
 8:	.long   0xa55a0000
 
-
 /* interrupt vector @ 0x600 */
 	.balign 	0x400,0,0x400
 	.long	0xdeadbeef

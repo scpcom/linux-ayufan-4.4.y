@@ -43,11 +43,9 @@ unsigned long usbip_debug_flag;
 #endif
 EXPORT_SYMBOL_GPL(usbip_debug_flag);
 
-
 /* FIXME */
 struct device_attribute dev_attr_usbip_debug;
 EXPORT_SYMBOL_GPL(dev_attr_usbip_debug);
-
 
 static ssize_t show_flag(struct device *dev, struct device_attribute *attr,
 								char *buf)
@@ -172,7 +170,6 @@ static void usbip_dump_usb_device(struct usb_device *udev)
 	for (i = 0; i < 16; i++)
 		printk(KERN_DEBUG " %2u", (udev->toggle[1] & (1 << i)) ? 1 : 0);
 	printk(KERN_DEBUG "\n");
-
 
 	dev_dbg(dev, "       epmaxp_in   :");
 	for (i = 0; i < 16; i++) {
@@ -379,7 +376,6 @@ void usbip_dump_header(struct usbip_header *pdu)
 }
 EXPORT_SYMBOL_GPL(usbip_dump_header);
 
-
 /*-------------------------------------------------------------------------*/
 /* thread routines */
 
@@ -462,7 +458,6 @@ void usbip_task_init(struct usbip_task *ut, char *name,
 }
 EXPORT_SYMBOL_GPL(usbip_task_init);
 
-
 /*-------------------------------------------------------------------------*/
 /* socket routines */
 
@@ -487,7 +482,6 @@ int usbip_xmit(int send, struct socket *sock, char *buf,
 		return -EINVAL;
 	}
 
-
 	if (usbip_dbg_flag_xmit) {
 		if (send) {
 			if (!in_interrupt())
@@ -501,7 +495,6 @@ int usbip_xmit(int send, struct socket *sock, char *buf,
 			usbip_dump_buffer(buf, size);
 		}
 	}
-
 
 	do {
 		sock->sk->sk_allocation = GFP_NOIO;
@@ -534,7 +527,6 @@ int usbip_xmit(int send, struct socket *sock, char *buf,
 
 	} while (size > 0);
 
-
 	if (usbip_dbg_flag_xmit) {
 		if (!send) {
 			if (!in_interrupt())
@@ -560,7 +552,6 @@ err:
 	return result;
 }
 EXPORT_SYMBOL_GPL(usbip_xmit);
-
 
 /* now a usrland utility should set options. */
 #if 0
@@ -638,8 +629,6 @@ struct socket *sockfd_to_socket(unsigned int sockfd)
 }
 EXPORT_SYMBOL_GPL(sockfd_to_socket);
 
-
-
 /*-------------------------------------------------------------------------*/
 /* pdu routines */
 
@@ -704,7 +693,6 @@ static void usbip_pack_ret_submit(struct usbip_header *pdu, struct urb *urb,
 	}
 }
 
-
 void usbip_pack_pdu(struct usbip_header *pdu, struct urb *urb, int cmd,
 								int pack)
 {
@@ -722,7 +710,6 @@ void usbip_pack_pdu(struct usbip_header *pdu, struct urb *urb, int cmd,
 	}
 }
 EXPORT_SYMBOL_GPL(usbip_pack_pdu);
-
 
 static void correct_endian_basic(struct usbip_header_basic *base, int send)
 {
@@ -871,7 +858,6 @@ static void usbip_pack_iso(struct usbip_iso_packet_descriptor *iso,
 	}
 }
 
-
 /* must free buffer */
 void *usbip_alloc_iso_desc_pdu(struct urb *urb, ssize_t *bufflen)
 {
@@ -948,7 +934,6 @@ int usbip_recv_iso(struct usbip_device *ud, struct urb *urb)
 	return ret;
 }
 EXPORT_SYMBOL_GPL(usbip_recv_iso);
-
 
 /* some members of urb must be substituted before. */
 int usbip_recv_xbuff(struct usbip_device *ud, struct urb *urb)
@@ -1043,9 +1028,6 @@ static void __exit usbip_common_exit(void)
 {
 	return;
 }
-
-
-
 
 module_init(usbip_common_init);
 module_exit(usbip_common_exit);

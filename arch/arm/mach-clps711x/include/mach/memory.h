@@ -20,7 +20,6 @@
 #ifndef __ASM_ARCH_MEMORY_H
 #define __ASM_ARCH_MEMORY_H
 
-
 /*
  * Physical DRAM offset.
  */
@@ -32,7 +31,6 @@
 #define __bus_to_virt(x)	((x) + PAGE_OFFSET)
 
 #endif
-
 
 /*
  * Like the SA1100, the EDB7211 has a large gap between physical RAM
@@ -75,4 +73,3 @@
 #define MAX_PHYSMEM_BITS	32
 
 #endif
-

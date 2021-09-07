@@ -81,7 +81,6 @@ struct map_desc MEM_TABLE[] = 	{
   { DEVICE_CS2_BASE, 	__phys_to_pfn(DEVICE_CS2_BASE), 	DEVICE_CS2_SIZE, 	MT_DEVICE}
 };
 
-
 MV_CPU_DEC_WIN SYSMAP_RD_88F5181_GTW_FE_GE[] = {
   	 /* base low        base high    size       	WinNum     enable */
 	{{SDRAM_CS0_BASE ,    0,      SDRAM_CS0_SIZE } ,0xFFFFFFFF,DIS},
@@ -171,4 +170,3 @@ MV_CPU_DEC_WIN SYSMAP_DB_88F5x81_BP[] = {
 	{{BOOTDEV_CS_BASE,    0,      BOOTDEV_CS_SIZE} ,0x4       ,EN},
 	{{TBL_TERM,TBL_TERM, TBL_TERM} ,TBL_TERM  ,TBL_TERM}		
 };
-

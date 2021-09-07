@@ -23,7 +23,6 @@
 #include <linux/usb.h>
 #include <linux/mutex.h>
 
-
 /* Define these values to match your devices */
 #define USB_SKEL_VENDOR_ID	0xfff0
 #define USB_SKEL_PRODUCT_ID	0xfff0
@@ -34,7 +33,6 @@ static struct usb_device_id skel_table[] = {
 	{ }					/* Terminating entry */
 };
 MODULE_DEVICE_TABLE(usb, skel_table);
-
 
 /* Get a minor range for your devices from the usb maintainer */
 #define USB_SKEL_MINOR_BASE	192
@@ -486,7 +484,6 @@ static ssize_t skel_write(struct file *file, const char *user_buffer,
 	 * it entirely
 	 */
 	usb_free_urb(urb);
-
 
 	return writesize;
 

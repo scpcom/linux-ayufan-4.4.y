@@ -119,12 +119,10 @@ ssize_t wlp_wss_neighborhood_print_remove(struct wlp *wlp, char *buf,
 		wlp_remove_neighbor_tmp_info(neighb);
 	}
 
-
 out:
 	mutex_unlock(&wlp->nbmutex);
 	return used;
 }
-
 
 /**
  * Show properties of all WSS in neighborhood.
@@ -487,7 +485,6 @@ out:
 }
 EXPORT_SYMBOL_GPL(wlp_dev_prim_OUI_store);
 
-
 ssize_t wlp_dev_prim_OUI_sub_show(struct wlp *wlp, char *buf)
 {
 	ssize_t result = 0;
@@ -626,7 +623,6 @@ struct kobj_type wss_ktype = {
 	.sysfs_ops	= &wss_sysfs_ops,
 };
 
-
 /**
  * Sysfs files for individual WSS
  */
@@ -693,7 +689,6 @@ out:
 	return result;
 }
 WSS_ATTR(state, S_IRUGO, wlp_wss_state_show, NULL);
-
 
 static
 struct attribute *wss_attrs[] = {

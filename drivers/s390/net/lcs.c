@@ -49,7 +49,6 @@
 #include "lcs.h"
 #include "cu3088.h"
 
-
 #if !defined(CONFIG_NET_ETHERNET) && \
     !defined(CONFIG_TR) && !defined(CONFIG_FDDI)
 #error Cannot compile lcs.c without some net devices switched on.
@@ -532,7 +531,6 @@ lcs_clear_channel(struct lcs_channel *channel)
 	return rc;
 }
 
-
 /**
  * Stop channel.
  */
@@ -768,7 +766,6 @@ lcs_get_lancmd(struct lcs_card *card, int count)
 	cmd->slot = 0;
 	return buffer;
 }
-
 
 static void
 lcs_get_reply(struct lcs_reply *reply)
@@ -2407,7 +2404,6 @@ __init lcs_init_module(void)
 	return 0;
 }
 
-
 /**
  *  LCS module cleanup function
  */
@@ -2425,4 +2421,3 @@ module_exit(lcs_cleanup_module);
 
 MODULE_AUTHOR("Frank Pavlic <fpavlic@de.ibm.com>");
 MODULE_LICENSE("GPL");
-

@@ -74,7 +74,6 @@ typedef int __bitwise pm_request_t;
 #define IRQ_GPIO_H3600_OPT_IRQ		IRQ_GPIO24
 #define IRQ_GPIO_H3600_COM_CTS		IRQ_GPIO25
 
-
 #ifndef __ASSEMBLY__
 
 enum ipaq_egpio_type {

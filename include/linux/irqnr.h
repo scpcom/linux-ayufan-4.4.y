@@ -33,7 +33,6 @@ extern struct irq_desc *irq_to_desc(unsigned int irq);
 			;						\
 		else
 
-
 # define for_each_irq_desc_reverse(irq, desc)				\
 	for (irq = nr_irqs - 1, desc = irq_to_desc(irq); irq >= 0;	\
 	     irq--, desc = irq_to_desc(irq))				\

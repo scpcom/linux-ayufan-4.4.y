@@ -124,7 +124,6 @@
 #define reg_clkgen_rw_clk_ctrl___sclr_h264___bit 19
 #define reg_clkgen_rw_clk_ctrl_offset 4
 
-
 /* Constants */
 #define regk_clkgen_eth1000_rx                    0x0000000c
 #define regk_clkgen_eth1000_tx                    0x0000000e

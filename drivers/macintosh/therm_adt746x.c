@@ -565,7 +565,6 @@ static DEVICE_ATTR(sensor2_fan_speed,	S_IRUGO,
 static DEVICE_ATTR(limit_adjust,	S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH,
 		   show_limit_adjust,	store_limit_adjust);
 
-
 static int __init
 thermostat_init(void)
 {

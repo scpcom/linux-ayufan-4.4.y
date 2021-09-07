@@ -115,7 +115,6 @@ struct efi_variable {
 	__u32         Attributes;
 } __attribute__((packed));
 
-
 struct efivar_entry {
 	struct efi_variable var;
 	struct list_head list;
@@ -127,7 +126,6 @@ struct efivar_attribute {
 	ssize_t (*show) (struct efivar_entry *entry, char *buf);
 	ssize_t (*store)(struct efivar_entry *entry, const char *buf, size_t count);
 };
-
 
 #define EFIVAR_ATTR(_name, _mode, _show, _store) \
 struct efivar_attribute efivar_attr_##_name = { \
@@ -400,7 +398,6 @@ efivar_unregister(struct efivar_entry *var)
 	kobject_put(&var->kobj);
 }
 
-
 static ssize_t efivar_create(struct kobject *kobj,
 			     struct bin_attribute *bin_attr,
 			     char *buf, loff_t pos, size_t count)
@@ -570,7 +567,6 @@ static struct attribute *efi_subsys_attrs[] = {
 static struct attribute_group efi_subsys_attr_group = {
 	.attrs = efi_subsys_attrs,
 };
-
 
 static struct kset *vars_kset;
 static struct kobject *efi_kobj;
@@ -758,4 +754,3 @@ efivars_exit(void)
 
 module_init(efivars_init);
 module_exit(efivars_exit);
-

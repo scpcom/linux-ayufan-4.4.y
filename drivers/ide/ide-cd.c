@@ -236,7 +236,6 @@ static void ide_cd_complete_failed_rq(ide_drive_t *drive, struct request *rq)
 		cdrom_analyze_sense_data(drive, NULL);
 }
 
-
 /*
  * Allow the drive 5 seconds to recover; some devices will return NOT_READY
  * while flushing data from cache.

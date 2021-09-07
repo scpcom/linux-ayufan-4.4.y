@@ -26,10 +26,8 @@
  *
  */
 
-
 #ifndef __TTYPE_H__
 #define __TTYPE_H__
-
 
 /******* Common definitions and typedefs ***********************************/
 
@@ -52,7 +50,6 @@
 
 //DavidWang
 
-
 //2007-0814-01<Add>by MikeLiu
 #ifndef Safe_Close
 #define Safe_Close
@@ -71,7 +68,6 @@ typedef int             BOOL;
 #if !defined(FALSE)
 #define FALSE           0
 #endif
-
 
 #if !defined(SUCCESS)
 #define SUCCESS         0
@@ -103,7 +99,6 @@ typedef unsigned char           U8;     /* 8-bit unsigned integer */
 typedef unsigned short          U16;    /* 16-bit unsigned integer */
 typedef unsigned long           U32;    /* 32-bit unsigned integer */
 
-
 typedef char            CHAR;
 typedef signed short    SHORT;
 typedef signed int      INT;
@@ -114,8 +109,6 @@ typedef unsigned short  USHORT;
 typedef unsigned int    UINT;
 typedef unsigned long   ULONG;
 typedef unsigned long long	ULONGLONG; //64 bit
-
-
 
 typedef unsigned char   BYTE;           //  8-bit
 typedef unsigned short  WORD;           // 16-bit
@@ -132,7 +125,6 @@ typedef union tagUQuadWord {
     double      DoNotUseThisField;
 } UQuadWord;
 typedef UQuadWord       QWORD;          // 64-bit
-
 
 /****** Common pointer types ***********************************************/
 

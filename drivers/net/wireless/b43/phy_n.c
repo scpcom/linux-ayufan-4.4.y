@@ -29,7 +29,6 @@
 #include "phy_n.h"
 #include "tables_nphy.h"
 
-
 void b43_nphy_set_rxantenna(struct b43_wldev *dev, int antenna)
 {//TODO
 }

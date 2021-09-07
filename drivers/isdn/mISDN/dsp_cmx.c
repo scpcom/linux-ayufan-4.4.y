@@ -211,7 +211,6 @@ dsp_cmx_search_conf(u32 id)
 	return NULL;
 }
 
-
 /*
  * add member to conference
  */
@@ -256,7 +255,6 @@ dsp_cmx_add_conf_member(struct dsp *dsp, struct dsp_conf *conf)
 	return 0;
 }
 
-
 /*
  * del member from conference
  */
@@ -300,7 +298,6 @@ dsp_cmx_del_conf_member(struct dsp *dsp)
 	return -EINVAL;
 }
 
-
 /*
  * new conference
  */
@@ -328,7 +325,6 @@ static struct dsp_conf
 	return conf;
 }
 
-
 /*
  * del conference
  */
@@ -352,7 +348,6 @@ dsp_cmx_del_conf(struct dsp_conf *conf)
 	return 0;
 }
 
-
 /*
  * send HW message to hfc card
  */
@@ -369,7 +364,6 @@ dsp_cmx_hw_message(struct dsp *dsp, u32 message, u32 param1, u32 param2,
 	if (dsp->ch.peer)
 		dsp->ch.peer->ctrl(dsp->ch.peer, CONTROL_CHANNEL, &cq);
 }
-
 
 /*
  * do hardware update and set the software/hardware flag
@@ -1049,7 +1043,6 @@ join_members:
 	goto join_members;
 }
 
-
 /*
  * conf_id != 0: join or change conference
  * conf_id == 0: split from conference if not already
@@ -1293,7 +1286,6 @@ dsp_cmx_receive(struct dsp *dsp, struct sk_buff *skb)
 	showdelay(dsp, len, (dsp->rx_W-dsp->rx_R) & CMX_BUFF_MASK);
 #endif
 }
-
 
 /*
  * send (mixed) audio data to card and control jitter
@@ -1956,5 +1948,3 @@ dsp_cmx_hdlc(struct dsp *dsp, struct sk_buff *skb)
 		}
 	}
 }
-
-

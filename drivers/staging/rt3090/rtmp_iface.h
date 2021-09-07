@@ -41,13 +41,11 @@
 #include "rtmp_pci.h"
 #endif // RTMP_PCI_SUPPORT //
 
-
 typedef struct _INF_PCI_CONFIG_
 {
 	unsigned long	CSRBaseAddress;     // PCI MMIO Base Address, all access will use
 	unsigned int	irq_num;
 }INF_PCI_CONFIG;
-
 
 typedef struct _INF_USB_CONFIG_
 {
@@ -55,13 +53,11 @@ typedef struct _INF_USB_CONFIG_
 	UINT8                BulkOutEpAddr[6];	// bulk-out endpoint address
 }INF_USB_CONFIG;
 
-
 typedef struct _INF_RBUS_CONFIG_
 {
 	unsigned long		csr_addr;
 	unsigned int		irq;
 }INF_RBUS_CONFIG;
-
 
 typedef enum _RTMP_INF_TYPE_
 {
@@ -70,7 +66,6 @@ typedef enum _RTMP_INF_TYPE_
 	RTMP_DEV_INF_USB = 2,
 	RTMP_DEV_INF_RBUS = 4,
 }RTMP_INF_TYPE;
-
 
 typedef union _RTMP_INF_CONFIG_{
 	struct _INF_PCI_CONFIG_			pciConfig;

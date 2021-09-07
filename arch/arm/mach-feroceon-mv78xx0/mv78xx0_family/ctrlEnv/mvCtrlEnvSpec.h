@@ -83,7 +83,6 @@ extern "C" {
 
 #define INTERNAL_REG_BASE_DEFAULT   0xD0000000
 
-
 /* Define Register base adress for each unit */
 
 #if defined(MV78200)
@@ -129,7 +128,6 @@ extern "C" {
 #define MV_ETH_REG_BASE2			(0x32000)
 #define MV_ETH_REG_BASE3			(0x36000)
 
-
 #define INT_CTRL_BASE               (0x20200+(whoAmI()*0x4000))
 #define CNTMR_BASE		    		(0x20300+(whoAmI()*0x4000))
 #define USB_REG_BASE(dev)           (0x50000 + (0x1000*(dev)))
@@ -141,7 +139,6 @@ extern "C" {
 #define IDMA_UNIT_BASE		    	0x60800
 #define XOR_UNIT_BASE(unit)         0x60900
 #define MV_XOR_REG_BASE				0x60000
-
 
 #define WD_BASE                     0x10000
 #define TWSI_SLAVE_BASE(chanNum)    (0x11000 + (0x100 * (chanNum)))
@@ -234,7 +231,6 @@ extern "C" {
 #define TWSI0_CPU_MAIN_INT_BIT	     	0x4
 #define TWSI1_CPU_MAIN_INT_BIT	     	0x8
 
-
 /* These macros help units to identify a target Xbar group */
 #define MV_TARGET_IS_DRAM(target)   \
                             ((target >= SDRAM_CS0) && (target <= SDRAM_CS3))
@@ -298,15 +294,12 @@ extern "C" {
 	#define PCI_IF0_IO		PEX0_IO
 #endif
 
-
-                    
 #define TCLK_TO_COUNTER_RATIO   1   /* counters running in Tclk */
 /* MV78XX0 Register Map Table for the Miscellaneous Registers  registers offsets */
 #define GENERAL_USAGE_REGISTER_0		(0x000100E0)
 #define GENERAL_USAGE_REGISTER_1		(0x000100E4)
 #define GENERAL_USAGE_REGISTER_2		(0x000100E8)
 #define GENERAL_USAGE_REGISTER_3		(0x000100Ec)
-
 
 /* MV78XX0 sample @ reset registers offsets */
 /*******************************************/
@@ -386,12 +379,10 @@ extern "C" {
 #define CPU_SOFT_RESET_OUT_OFF			0
 #define CPU_SOFT_RESET_OUT				(0x1 << CPU_SOFT_RESET_OUT_OFF)
 
-
 #define POWER_MNG_CTRL_REG				(CPU_IF_BASE(whoAmI())+0x11C)
 
 #define POWER_MNG_CTRL_REG0				(CPU_IF_BASE(0)+0x11C)
 #define POWER_MNG_CTRL_REG1				(CPU_IF_BASE(1)+0x11C)
-
 
 #define PMC_GE_OFFS(port)				((port)+1)
 #define PMC_GE_MASK(port)				(1 << PMC_GE_OFFS(port))
@@ -428,8 +419,6 @@ extern "C" {
 #define PMC_TDM_OFFS					24
 #define PMC_TDM_MASK					(1 << PMC_TDM_OFFS)
 #define PMC_TDM_UP						(1 << PMC_TDM_OFFS)
-
-
 
 /* typedefs */
 
@@ -493,7 +482,6 @@ typedef enum _mvTargetId
     CRYPT_TARGET_ID =9,
     MAX_TARGET_ID
 }MV_TARGET_ID;
-
 
 /* This enumerator describes the Marvell controller possible devices that   */
 /* can be connected to its device interface.                                */

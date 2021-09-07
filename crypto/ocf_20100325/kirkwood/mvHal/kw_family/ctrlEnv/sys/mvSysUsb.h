@@ -106,9 +106,7 @@ extern "C" {
 #define MV_USB_WIN_BASE_OFFSET              16
 #define MV_USB_WIN_BASE_MASK                (0xFFFF << MV_USB_WIN_BASE_OFFSET)
 
-
 #define MV_USB_BRIDGE_IPG_REG(dev)          (USB_REG_BASE(dev) + 0x360)
-
 
 MV_STATUS   mvUsbInit(int dev, MV_BOOL isHost);
 

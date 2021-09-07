@@ -178,7 +178,6 @@ static inline const char *ip_vs_dbg_addr(int af, char *buf, size_t buf_len,
 
 #define	IP_VS_WAIT_WHILE(expr)	while (expr) { cpu_relax(); }
 
-
 /*
  *      The port number of FTP service (in network order).
  */
@@ -230,7 +229,6 @@ struct ip_vs_seq {
 	__u32			previous_delta;	/* Delta in sequence numbers
 						   before last resized pkt */
 };
-
 
 /*
  *	IPVS statistics objects
@@ -383,7 +381,6 @@ struct ip_vs_conn {
 	struct ip_vs_seq        out_seq;        /* outgoing seq. struct */
 };
 
-
 /*
  *	Extended internal versions of struct ip_vs_service_user and
  *	ip_vs_dest_user for IPv6 support.
@@ -407,7 +404,6 @@ struct ip_vs_service_user_kern {
 	u32			netmask;	/* persistent netmask */
 };
 
-
 struct ip_vs_dest_user_kern {
 	/* destination server address */
 	union nf_inet_addr	addr;
@@ -421,7 +417,6 @@ struct ip_vs_dest_user_kern {
 	u32			u_threshold;	/* upper threshold */
 	u32			l_threshold;	/* lower threshold */
 };
-
 
 /*
  *	The information about the virtual service offered to the net
@@ -452,7 +447,6 @@ struct ip_vs_service {
 	rwlock_t		sched_lock;    /* lock sched_data */
 	void			*sched_data;   /* scheduler application data */
 };
-
 
 /*
  *	The real server destination forwarding entry
@@ -492,7 +486,6 @@ struct ip_vs_dest {
 	__u32			vfwmark;	/* firewall mark of service */
 };
 
-
 /*
  *	The scheduler object
  */
@@ -513,7 +506,6 @@ struct ip_vs_scheduler {
 	struct ip_vs_dest* (*schedule)(struct ip_vs_service *svc,
 				       const struct sk_buff *skb);
 };
-
 
 /*
  *	The application module object (a.k.a. app incarnation)
@@ -547,7 +539,6 @@ struct ip_vs_app
 	/* ip_vs_app finish */
 	int (*done_conn)(struct ip_vs_app *, struct ip_vs_conn *);
 
-
 	/* not used now */
 	int (*bind_conn)(struct ip_vs_app *, struct ip_vs_conn *,
 			 struct ip_vs_protocol *);
@@ -577,7 +568,6 @@ struct ip_vs_app
 
 	void (*timeout_change)(struct ip_vs_app *app, int flags);
 };
-
 
 /*
  *      IPVS core functions
@@ -707,7 +697,6 @@ ip_vs_control_add(struct ip_vs_conn *cp, struct ip_vs_conn *ctl_cp)
 	atomic_inc(&ctl_cp->n_control);
 }
 
-
 /*
  *      IPVS application functions
  *      (from ip_vs_app.c)
@@ -729,7 +718,6 @@ extern int ip_vs_skb_replace(struct sk_buff *skb, gfp_t pri,
 extern int ip_vs_app_init(void);
 extern void ip_vs_app_cleanup(void);
 
-
 /*
  *	IPVS protocol functions (from ip_vs_proto.c)
  */
@@ -750,7 +738,6 @@ extern struct ip_vs_protocol ip_vs_protocol_icmp;
 extern struct ip_vs_protocol ip_vs_protocol_esp;
 extern struct ip_vs_protocol ip_vs_protocol_ah;
 
-
 /*
  *      Registering/unregistering scheduler functions
  *      (from ip_vs_sched.c)
@@ -766,7 +753,6 @@ extern struct ip_vs_conn *
 ip_vs_schedule(struct ip_vs_service *svc, const struct sk_buff *skb);
 extern int ip_vs_leave(struct ip_vs_service *svc, struct sk_buff *skb,
 			struct ip_vs_protocol *pp);
-
 
 /*
  *      IPVS control data and functions (from ip_vs_ctl.c)
@@ -801,7 +787,6 @@ ip_vs_find_dest(int af, const union nf_inet_addr *daddr, __be16 dport,
 		const union nf_inet_addr *vaddr, __be16 vport, __u16 protocol);
 extern struct ip_vs_dest *ip_vs_try_bind_dest(struct ip_vs_conn *cp);
 
-
 /*
  *      IPVS sync daemon data and function prototypes
  *      (from ip_vs_sync.c)
@@ -814,7 +799,6 @@ extern char ip_vs_backup_mcast_ifn[IP_VS_IFNAME_MAXLEN];
 extern int start_sync_thread(int state, char *mcast_ifn, __u8 syncid);
 extern int stop_sync_thread(int state);
 extern void ip_vs_sync_conn(struct ip_vs_conn *cp);
-
 
 /*
  *      IPVS rate estimator prototypes (from ip_vs_est.c)

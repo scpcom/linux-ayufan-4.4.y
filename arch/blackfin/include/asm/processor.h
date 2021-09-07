@@ -104,7 +104,6 @@ unsigned long get_wchan(struct task_struct *p);
 
 #define cpu_relax()    	smp_mb()
 
-
 /* Get the Silicon Revision of the chip */
 static inline uint32_t __pure bfin_revid(void)
 {

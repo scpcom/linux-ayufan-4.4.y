@@ -17,5 +17,4 @@ struct ipt_TTL_info {
 	u_int8_t	ttl;
 };
 
-
 #endif

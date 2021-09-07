@@ -70,7 +70,6 @@ static const char *avm_pci_rev = "$Revision: 1.1 $";
 #define  HDLC_CMD_RRS		0x20
 #define  HDLC_CMD_XML_MASK	0x3f00
 
-
 /* Interface functions */
 
 static u_char

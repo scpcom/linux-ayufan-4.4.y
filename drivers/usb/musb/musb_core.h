@@ -52,7 +52,6 @@ struct musb;
 struct musb_hw_ep;
 struct musb_ep;
 
-
 #include "musb_debug.h"
 #include "musb_dma.h"
 
@@ -62,8 +61,6 @@ struct musb_ep;
 #include "musb_gadget.h"
 #include "../core/hcd.h"
 #include "musb_host.h"
-
-
 
 #ifdef CONFIG_USB_MUSB_OTG
 
@@ -156,7 +153,6 @@ static inline void musb_host_rx(struct musb *m, u8 e) {}
 
 #endif
 
-
 /****************************** CONSTANTS ********************************/
 
 #ifndef MUSB_C_NUM_EPS
@@ -195,7 +191,6 @@ enum musb_g_ep0_state {
 #define OTG_TIME_A_WAIT_BCON	1100		/* min 1 second */
 #define OTG_TIME_A_AIDL_BDIS	200		/* min 200 msec */
 #define OTG_TIME_B_ASE0_BRST	100		/* min 3.125 ms */
-
 
 /*************************** REGISTER ACCESS ********************************/
 
@@ -530,7 +525,6 @@ static inline void musb_configure_ep0(struct musb *musb)
 	musb->endpoints[0].is_shared_fifo = true;
 }
 #endif /* CONFIG_BLACKFIN */
-
 
 /***************************** Glue it together *****************************/
 

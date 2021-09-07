@@ -112,7 +112,6 @@
 #ifndef	__USA26MSG__
 #define	__USA26MSG__
 
-
 struct keyspan_usa26_portControlMessage
 {
 	/*
@@ -129,7 +128,6 @@ struct keyspan_usa26_portControlMessage
 					// USA26: 0=internal, other=external
 					// USA17: 0=internal, other=external/RI
 		rxClocking,		// USA17: 0=internal, 1=external/RI, other=external/DSR
-
 
 		setLcr,			// BOTH: host requests lcr be set
 		lcr,			// BOTH: use PARITY, STOPBITS, DATABITS below
@@ -256,5 +254,3 @@ struct keyspan_usa26_globalDebugMessage
 #define	STATUS_RATION	10
 
 #endif
-
-

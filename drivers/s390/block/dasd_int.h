@@ -220,7 +220,6 @@ struct dasd_ccw_req {
 #define DASD_CQR_CLEARED	0x84	/* request was cleared */
 #define DASD_CQR_SUCCESS	0x85	/* request was successful */
 
-
 /* per dasd_ccw_req flags */
 #define DASD_CQR_FLAGS_USE_ERP   0	/* use ERP for this request */
 #define DASD_CQR_FLAGS_FAILFAST  1	/* FAILFAST */
@@ -419,8 +418,6 @@ struct dasd_block {
 	struct dasd_profile_info_t profile;
 #endif
 };
-
-
 
 /* reasons why device (ccw_device_start) was stopped */
 #define DASD_STOPPED_NOT_ACC 1         /* not accessible */

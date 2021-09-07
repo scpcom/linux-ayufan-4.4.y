@@ -38,7 +38,6 @@
 
 #include "vxfs_extern.h"
 
-
 static int		vxfs_readpage(struct file *, struct page *);
 static sector_t		vxfs_bmap(struct address_space *, sector_t);
 

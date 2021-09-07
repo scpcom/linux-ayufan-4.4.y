@@ -10,7 +10,6 @@ relocate_new_kernel:
 	ldr	r0,kexec_indirection_page
 	ldr	r1,kexec_start_address
 
-
 0:	/* top, read another word for the indirection page */
 	ldr	r3, [r0],#4
 
@@ -75,5 +74,3 @@ relocate_new_kernel_end:
 	.globl relocate_new_kernel_size
 relocate_new_kernel_size:
 	.long relocate_new_kernel_end - relocate_new_kernel
-
-

@@ -53,7 +53,6 @@
 #define KPROBE_HASH_BITS 6
 #define KPROBE_TABLE_SIZE (1 << KPROBE_HASH_BITS)
 
-
 /*
  * Some oddball architectures like 64bit powerpc have function descriptors
  * so this must be overridable.

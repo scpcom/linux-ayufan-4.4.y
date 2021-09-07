@@ -301,7 +301,6 @@ mptctl_timeout_expired(MPT_ADAPTER *ioc, MPT_FRAME_HDR *mf)
 	}
 	spin_unlock_irqrestore(&ioc->taskmgmt_lock, flags);
 
-
 	if (!mptctl_bus_reset(ioc, mf->u.hdr.Function))
 		return;
 
@@ -485,13 +484,11 @@ static int mptctl_bus_reset(MPT_ADAPTER *ioc, u8 function)
 		retval = -1; /* return failure */
 	}
 
-
  mptctl_bus_reset_done:
 	mutex_unlock(&ioc->taskmgmt_cmds.mutex);
 	CLEAR_MGMT_STATUS(ioc->taskmgmt_cmds.status)
 	return retval;
 }
-
 
 /*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 /* mptctl_ioc_reset
@@ -825,7 +822,6 @@ mptctl_do_fw_download(int ioc, char __user *ufwbuf, size_t fwlen)
 		dlmsg->MsgFlags = MPI_FW_DOWNLOAD_MSGFLGS_LAST_SEGMENT;
 	else
 		dlmsg->MsgFlags = 0;
-
 
 	/* Set up the Transaction SGE.
 	 */
@@ -1662,7 +1658,6 @@ mptctl_eventreport (unsigned long arg)
 	numBytes = karg.hdr.maxDataSize - sizeof(mpt_ioctl_header);
 	maxEvents = numBytes/sizeof(MPT_IOCTL_EVENTS);
 
-
 	max = MPTCTL_EVENT_LOG_SIZE < maxEvents ? MPTCTL_EVENT_LOG_SIZE : maxEvents;
 
 	/* If fewer than 1 event is requested, there must have
@@ -1769,7 +1764,6 @@ mptctl_mpt_command (unsigned long arg)
 	MPT_ADAPTER	*ioc;
 	int		iocnum;
 	int		rc;
-
 
 	if (copy_from_user(&karg, uarg, sizeof(struct mpt_ioctl_command))) {
 		printk(KERN_ERR MYNAM "%s@%d::mptctl_mpt_command - "
@@ -1884,7 +1878,6 @@ mptctl_do_mpt_command (struct mpt_ioctl_command karg, void __user *mfPtr)
 	hdr->MsgContext = cpu_to_le32(msgContext);
 	function = hdr->Function;
 
-
 	/* Verify that this request is allowed.
 	 */
 	dctlprintk(ioc, printk(MYIOC_s_DEBUG_FMT "sending mpi function (0x%02X), req=%p\n",
@@ -1947,7 +1940,6 @@ mptctl_do_mpt_command (struct mpt_ioctl_command karg, void __user *mfPtr)
 			pScsiReq->MsgFlags &= ~MPI_SCSIIO_MSGFLGS_SENSE_WIDTH;
 			pScsiReq->MsgFlags |= mpt_msg_flags(ioc);
 
-
 			/* verify that app has not requested
 			 *	more sense data than driver
 			 *	can provide, if so, reset this parameter
@@ -1986,7 +1978,6 @@ mptctl_do_mpt_command (struct mpt_ioctl_command karg, void __user *mfPtr)
 
 			pScsiReq->Control = cpu_to_le32(scsidir | qtag);
 			pScsiReq->DataLength = cpu_to_le32(dataSize);
-
 
 		} else {
 			printk(MYIOC_s_ERR_FMT "%s@%d::mptctl_do_mpt_command - "
@@ -2030,7 +2021,6 @@ mptctl_do_mpt_command (struct mpt_ioctl_command karg, void __user *mfPtr)
 
 			pScsiReq->MsgFlags &= ~MPI_SCSIIO_MSGFLGS_SENSE_WIDTH;
 			pScsiReq->MsgFlags |= mpt_msg_flags(ioc);
-
 
 			/* verify that app has not requested
 			 *	more sense data than driver
@@ -2286,7 +2276,6 @@ retry_wait:
 
 	if (function == MPI_FUNCTION_SCSI_TASK_MGMT)
 		mutex_unlock(&ioc->taskmgmt_cmds.mutex);
-
 
 	mf = NULL;
 
@@ -2804,7 +2793,6 @@ compat_mptfwxfer_ioctl(struct file *filp, unsigned int cmd,
 	int nonblock = (filp->f_flags & O_NONBLOCK);
 	int ret;
 
-
 	if (copy_from_user(&kfw32, (char __user *)arg, sizeof(kfw32)))
 		return -EFAULT;
 
@@ -2920,7 +2908,6 @@ static long compat_mpctl_ioctl(struct file *f, unsigned int cmd, unsigned long a
 }
 
 #endif
-
 
 /*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 /*

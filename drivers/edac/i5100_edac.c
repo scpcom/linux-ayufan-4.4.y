@@ -183,7 +183,6 @@ static inline u16 i5100_mtr_numcol(u16 a)
 	return a & ((1 << 2) - 1);
 }
 
-
 static inline u32 i5100_validlog_redmemvalid(u32 a)
 {
 	return a >> 2 & 1;
@@ -516,7 +515,6 @@ static void i5100_check_error(struct mem_ctl_info *mci)
 {
 	struct i5100_priv *priv = mci->pvt_info;
 	u32 dw;
-
 
 	pci_read_config_dword(priv->mc, I5100_FERR_NF_MEM, &dw);
 	if (i5100_ferr_nf_mem_any(dw)) {

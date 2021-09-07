@@ -40,13 +40,11 @@
 
 #include "../rt_config.h"
 
-
 BUILD_TIMER_FUNCTION(MlmePeriodicExec);
 //BUILD_TIMER_FUNCTION(MlmeRssiReportExec);
 BUILD_TIMER_FUNCTION(AsicRxAntEvalTimeout);
 BUILD_TIMER_FUNCTION(APSDPeriodicExec);
 BUILD_TIMER_FUNCTION(AsicRfTuningExec);
-
 
 #ifdef CONFIG_STA_SUPPORT
 BUILD_TIMER_FUNCTION(BeaconTimeout);
@@ -66,10 +64,7 @@ BUILD_TIMER_FUNCTION(RadioOnExec);
 BUILD_TIMER_FUNCTION(DlsTimeoutAction);
 #endif // QOS_DLS_SUPPORT //
 
-
 #endif // CONFIG_STA_SUPPORT //
-
-
 
 #if defined(AP_LED) || defined(STA_LED)
 extern void LedCtrlMain(
@@ -79,7 +74,6 @@ extern void LedCtrlMain(
 	IN PVOID SystemSpecific3);
 BUILD_TIMER_FUNCTION(LedCtrlMain);
 #endif
-
 
 #ifdef RTMP_TIMER_TASK_SUPPORT
 static void RtmpTimerQHandle(RTMP_ADAPTER *pAd)
@@ -91,7 +85,6 @@ static void RtmpTimerQHandle(RTMP_ADAPTER *pAd)
 	RTMP_TIMER_TASK_ENTRY	*pEntry;
 	unsigned long	irqFlag;
 	RTMP_OS_TASK *pTask;
-
 
 	pTask = &pAd->timerTask;
 	while(!pTask->task_killed)
@@ -147,13 +140,11 @@ static void RtmpTimerQHandle(RTMP_ADAPTER *pAd)
 	}
 }
 
-
 INT RtmpTimerQThread(
 	IN OUT PVOID Context)
 {
 	RTMP_OS_TASK	*pTask;
 	PRTMP_ADAPTER	pAd;
-
 
 	pTask = (RTMP_OS_TASK *)Context;
 	pAd = (PRTMP_ADAPTER)pTask->priv;
@@ -185,7 +176,6 @@ INT RtmpTimerQThread(
 	return 0;
 
 }
-
 
 RTMP_TIMER_TASK_ENTRY *RtmpTimerQInsert(
 	IN RTMP_ADAPTER *pAd,
@@ -228,7 +218,6 @@ RTMP_TIMER_TASK_ENTRY *RtmpTimerQInsert(
 	return pQNode;
 }
 
-
 BOOLEAN RtmpTimerQRemove(
 	IN RTMP_ADAPTER *pAd,
 	IN RALINK_TIMER_STRUCT *pTimer)
@@ -268,7 +257,6 @@ BOOLEAN RtmpTimerQRemove(
 	return TRUE;
 }
 
-
 void RtmpTimerQExit(RTMP_ADAPTER *pAd)
 {
 	RTMP_TIMER_TASK_ENTRY *pTimerQ;
@@ -291,7 +279,6 @@ void RtmpTimerQExit(RTMP_ADAPTER *pAd)
 	RTMP_INT_UNLOCK(&pAd->TimerQLock, irqFlags);
 
 }
-
 
 void RtmpTimerQInit(RTMP_ADAPTER *pAd)
 {

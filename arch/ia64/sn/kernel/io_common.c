@@ -32,7 +32,6 @@ extern void register_sn_procfs(void);
 extern void sn_io_acpi_init(void);
 extern void sn_io_init(void);
 
-
 static struct list_head sn_sysdata_list;
 
 /* sysdata list struct */
@@ -562,4 +561,3 @@ EXPORT_SYMBOL(sn_pci_unfixup_slot);
 EXPORT_SYMBOL(sn_bus_store_sysdata);
 EXPORT_SYMBOL(sn_bus_free_sysdata);
 EXPORT_SYMBOL(sn_generate_path);
-

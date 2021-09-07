@@ -201,7 +201,6 @@ void __init config_mac(void)
 #endif
 }
 
-
 /*
  *	Macintosh Table: hardcoded model configuration data.
  *

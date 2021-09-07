@@ -213,4 +213,3 @@ void __init mx31lilly_db_init(void)
 	mxc_register_device(&mxcsdhc_device0, &mmc_pdata);
 	mx31lilly_init_fb();
 }
-

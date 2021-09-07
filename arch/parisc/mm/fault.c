@@ -22,7 +22,6 @@
 #define PRINT_USER_FAULTS /* (turn this on if you want user faults to be */
 			 /*  dumped to the console via printk)          */
 
-
 /* Various important other fields */
 #define bit22set(x)		(x & 0x00000200)
 #define bits23_25set(x)		(x & 0x000001c0)
@@ -30,7 +29,6 @@
 				/* extended opcode is 0x6a */
 
 #define BITSSET		0x1c0	/* for identifying LDCW */
-
 
 DEFINE_PER_CPU(struct exception_data, exception_data);
 
@@ -116,7 +114,6 @@ parisc_acctyp(unsigned long code, unsigned int inst)
 #undef bits23_25set
 #undef isGraphicsFlushRead
 #undef BITSSET
-
 
 #if 0
 /* This is the treewalk to find a vma which is the highest that has

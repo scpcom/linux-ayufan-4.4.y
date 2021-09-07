@@ -17,7 +17,6 @@
  * or there...
  */
 
-
 /*
  * Partition info commands
  *
@@ -38,7 +37,6 @@
 #define   SMU_CMD_PARTITION_LATEST		0x01
 #define   SMU_CMD_PARTITION_BASE		0x02
 #define   SMU_CMD_PARTITION_UPDATE		0x03
-
 
 /*
  * Fan control
@@ -69,7 +67,6 @@
  * setpoint value for selected fans in the mask (or 0 if mask value is 0)
  */
 #define SMU_CMD_FAN_COMMAND			0x4a
-
 
 /*
  * Battery access
@@ -201,7 +198,6 @@
  */
 #define SMU_CMD_READ_ADC			0xd8
 
-
 /* Misc commands
  *
  * This command seem to be a grab bag of various things
@@ -252,7 +248,6 @@
  */
 #define   SMU_CMD_MISC_df_DIMM_OFFSET		0x99
 
-
 /*
  * Version info commands
  *
@@ -266,7 +261,6 @@
 #define   SMU_VERSION_RUNNING			0x00
 #define   SMU_VERSION_BASE			0x01
 #define   SMU_VERSION_UPDATE			0x02
-
 
 /*
  * Switches
@@ -285,7 +279,6 @@
 #define SMU_SWITCH_CASE_CLOSED			0x01
 #define SMU_SWITCH_AC_POWER			0x04
 #define SMU_SWITCH_POWER_SWITCH			0x08
-
 
 /*
  * Misc commands
@@ -323,7 +316,6 @@
 
 #define   SMU_CMD_MISC_ee_LEDS_CTRL		0x04 /* i: 00 (00,01) [00] */
 #define   SMU_CMD_MISC_ee_GET_DATA		0x05 /* i: 00 , o: ?? */
-
 
 /*
  * Power related commands
@@ -370,7 +362,6 @@ enum {
 	SMU_PWR_WAKEUP_LID_OPEN         = 0x08,
 	SMU_PWR_WAKEUP_RING             = 0x10,
 };
-
 
 /*
  * - Kernel side interface -
@@ -451,7 +442,6 @@ static inline void smu_spinwait_simple(struct smu_simple_cmd *scmd)
  */
 extern void smu_poll(void);
 
-
 /*
  * Init routine, presence check....
  */
@@ -459,7 +449,6 @@ extern int smu_init(void);
 extern int smu_present(void);
 struct of_device;
 extern struct of_device *smu_get_ofdev(void);
-
 
 /*
  * Common command wrappers
@@ -475,7 +464,6 @@ extern int smu_set_rtc_time(struct rtc_time *time, int spinwait);
  * this is allocated very early during boot.
  */
 extern unsigned long smu_cmdbuf_abs;
-
 
 /*
  * Kenrel asynchronous i2c interface
@@ -522,14 +510,11 @@ struct smu_i2c_cmd
  */
 extern int smu_queue_i2c(struct smu_i2c_cmd *cmd);
 
-
 #endif /* __KERNEL__ */
-
 
 /*
  * - SMU "sdb" partitions informations -
  */
-
 
 /*
  * Partition header format
@@ -541,7 +526,6 @@ struct smu_sdbp_header {
 	__u8	flags;
 };
 
-
  /*
  * demangle 16 and 32 bits integer in some SMU partitions
  * (currently, afaik, this concerns only the FVT partition
@@ -549,7 +533,6 @@ struct smu_sdbp_header {
  */
 #define SMU_U16_MIX(x)	le16_to_cpu(x);
 #define SMU_U32_MIX(x)  ((((x) & 0xff00ff00u) >> 8)|(((x) & 0x00ff00ffu) << 8))
-
 
 /* This is the definition of the SMU sdb-partition-0x12 table (called
  * CPU F/V/T operating points in Darwin). The definition for all those
@@ -632,7 +615,6 @@ struct smu_sdbp_cpupiddata {
 	__s32	gp,gr,gd;
 };
 
-
 /* Other partitions without known structures */
 #define SMU_SDB_DEBUG_SWITCHES_ID	0x05
 
@@ -648,9 +630,7 @@ extern const struct smu_sdbp_header *smu_get_sdb_partition(int id,
 extern struct smu_sdbp_header *smu_sat_get_sdb_partition(unsigned int sat_id,
 					int id, unsigned int *size);
 
-
 #endif /* __KERNEL__ */
-
 
 /*
  * - Userland interface -

@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __IN88F1X81CtrlEnvSpech
 #define __IN88F1X81CtrlEnvSpech
 
@@ -71,22 +70,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define INTER_REGS_SIZE	 	 	_1M
 
-
 /* This define describes the maximum controller supported DRAM chip select 	*/
 /* also known as banks                                                     	*/
 #define MV_DRAM_MAX_CS      4
 
-
 /* This define describes maximum of GPP groups supported by controller. 	*/
 #define MV_GPP_MAX_GROUP    1
-
 
 /* This define describes the maximum number of available Timer/counters.  	*/
 #define MV_CNTMR_MAX_COUNTER 2
 
 /* This define describes the maximum number of available UART channels.  	*/
 #define MV_UART_MAX_CHAN	 2
-
 
 /* This define describes maximum number of MPP groups.                      */
 /* Each group describes an MPP register.  	                                */
@@ -113,7 +108,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PCI_HOST_BUS_NUM(pciIf)		MV_PEX_MAX_IF + (pciIf)
 #define PCI_HOST_DEV_NUM(pciIf)		0
 
-
 /* This define describes the maximum number of supported Ethernet ports 	*/
 #define MV_ETH_MAX_PORTS	0
 #define MV_ETH_PORT_SGMII   {}
@@ -126,7 +120,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* This define describes the support of the NAND -Flash */
 #define MV_NAND_MAX		0
-
 
 #define SATA_REG_BASE           0x80000
 
@@ -144,9 +137,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MSAR_TCLCK_150					(0x1 << MSAR_TCLCK_OFFS)
 #define MSAR_TCLCK_166					(0x2 << MSAR_TCLCK_OFFS)
 
-
 #define MSAR_ARMDDRCLCK_OFFS		   	6
-
 
 #define MSAR_ARMDDRCLCK_MASK			(0xf << MSAR_ARMDDRCLCK_OFFS)
 #define MSAR_ARMDDRCLCK_H_MASK			BIT23
@@ -178,7 +169,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MSAR_ARMDDRCLCK_500_100         (0x1D << MSAR_ARMDDRCLCK_OFFS)
 #define MSAR_ARMDDRCLCK_600_150       	(0x1E << MSAR_ARMDDRCLCK_OFFS)
 
-
 #define MSAR_GIGA_PORT_MODE_OFFS		15
 #define MSAR_GIGA_PORT_MODE_MASK		(0x7 <<  MSAR_GIGA_PORT_MODE_OFFS)
    	
@@ -197,8 +187,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_TARGET_IS_PEX0(target)   \
                             ((target >= PEX0_MEM) && (target <= PEX0_IO))
 
-
-						
 #define MV_TARGET_IS_PEX1(target)   \
                             ((target >= PEX1_MEM) && (target <= PEX1_IO))
 
@@ -207,10 +195,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_TARGET_IS_DEVICE(target) \
                             ((target >= FLASH_CS) && (target <= DEV_BOOCS))
 
-
 #define TCLK_TO_COUNTER_RATIO   1   /* counters running in Tclk */
 /* typedefs */
-
 
 #ifndef MV_ASMLANGUAGE
 /* This enumerator described the possible Controller paripheral targets.    */
@@ -243,7 +229,6 @@ typedef enum _mvTarget
 #define PCI_IF1_MEM0		PEX1_MEM
 #define PCI_IF1_IO			PEX1_IO
 
-
 /* This enumerator defines the Marvell controller target ID      */ 
 typedef enum _mvTargetId
 {
@@ -253,7 +238,6 @@ typedef enum _mvTargetId
 	PEX0_TARGET_ID  = 4 ,    /* Port 4 -> PCI Express0 		    */
 	MAX_TARGETS_ID
 }MV_TARGET_ID;
-
 
 #define TARGETS_DEF_ARRAY	{					\
     {0x0E,DRAM_TARGET_ID}, /* SDRAM_CS0 */		\
@@ -269,7 +253,6 @@ typedef enum _mvTargetId
      {0x0F,DEV_TARGET_ID} /* DEV_BOOCS*/         \
 }
 
-
 #define TARGETS_NAME_ARRAY	{					\
     "SDRAM_CS0", /* SDRAM_CS0 */		\
     "SDRAM_CS1", /* SDRAM_CS1 */		\
@@ -284,8 +267,6 @@ typedef enum _mvTargetId
     "DEV_BOOCS" /* DEV_BOOCS*/       \
 }
 
-
 #endif /* MV_ASMLANGUAGE */
-
 
 #endif /* __IN88F1X81CtrlEnvSpech */

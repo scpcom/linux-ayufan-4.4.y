@@ -2052,7 +2052,6 @@ static const struct rf_channel rf_vals_5225_2527[] = {
 	{ 46, 0x00002ccc, 0x000049a6, 0x0009be55, 0x000ffa23 },
 };
 
-
 static int rt73usb_probe_hw_mode(struct rt2x00_dev *rt2x00dev)
 {
 	struct hw_mode_spec *spec = &rt2x00dev->spec;

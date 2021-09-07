@@ -27,7 +27,6 @@ static void platform_fixups(void)
 	int div;
 	u32 sysfreq;
 
-
 	dt_fixup_memory(bd.bi_memstart, bd.bi_memsize);
 	dt_fixup_mac_addresses(bd.bi_enetaddr);
 	dt_fixup_cpu_clocks(bd.bi_intfreq, bd.bi_busfreq / 4, bd.bi_busfreq);

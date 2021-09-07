@@ -32,7 +32,6 @@ struct eps_cpu_data {
 
 static struct eps_cpu_data *eps_cpu[NR_CPUS];
 
-
 static unsigned int eps_get(unsigned int cpu)
 {
 	struct eps_cpu_data *centaur;

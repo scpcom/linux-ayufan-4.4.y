@@ -91,7 +91,6 @@ struct rw_semaphore {
 # define __RWSEM_DEP_MAP_INIT(lockname)
 #endif
 
-
 #define __RWSEM_INITIALIZER(name)				\
 {								\
 	RWSEM_UNLOCKED_VALUE, __SPIN_LOCK_UNLOCKED((name).wait_lock), \

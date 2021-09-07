@@ -1612,7 +1612,6 @@ int dasd_cancel_req(struct dasd_ccw_req *cqr)
 	return rc;
 }
 
-
 /*
  * SECTION: Operations of the dasd_block layer.
  */
@@ -1980,7 +1979,6 @@ void dasd_schedule_block_bh(struct dasd_block *block)
 	dasd_get_device(block->base);
 	tasklet_hi_schedule(&block->tasklet);
 }
-
 
 /*
  * SECTION: external block device operations
@@ -2567,7 +2565,6 @@ static struct dasd_ccw_req *dasd_generic_build_rdc(struct dasd_device *device,
 	cqr->status = DASD_CQR_FILLED;
 	return cqr;
 }
-
 
 int dasd_generic_read_dev_chars(struct dasd_device *device, int magic,
 				void *rdc_buffer, int rdc_buffer_size)

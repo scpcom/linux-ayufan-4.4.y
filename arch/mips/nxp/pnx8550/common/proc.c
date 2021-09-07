@@ -25,7 +25,6 @@
 #include <int.h>
 #include <uart.h>
 
-
 static int pnx8550_timers_read(char* page, char** start, off_t offset, int count, int* eof, void* data)
 {
         int len = 0;

@@ -46,7 +46,6 @@
 
 #include <linux/generic_serial.h>
 
-
 #include "linux_compat.h"
 #include "rio_linux.h"
 #include "pkt.h"
@@ -588,7 +587,6 @@ int RIOAssignRta(struct rio_info *p, struct Map *MapP)
 	char *sptr;
 	int link;
 
-
 	rio_dprintk(RIO_DEBUG_TABLE, "Assign entry on host %x, rta %x, ID %d, Sysport %d\n", MapP->HostUniqueNum, MapP->RtaUniqueNum, MapP->ID, (int) MapP->SysPort);
 
 	if ((MapP->ID != (u16) - 1) && ((int) MapP->ID < (int) 1 || (int) MapP->ID > MAX_RUP)) {
@@ -729,7 +727,6 @@ int RIOAssignRta(struct rio_info *p, struct Map *MapP)
 	rio_dprintk(RIO_DEBUG_TABLE, "Unknown host %x\n", MapP->HostUniqueNum);
 	return -ENXIO;
 }
-
 
 int RIOReMapPorts(struct rio_info *p, struct Host *HostP, struct Map *HostMapP)
 {

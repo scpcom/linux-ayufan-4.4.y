@@ -43,4 +43,3 @@
 
 #define S3C64XX_GPQ8_MEM0_ADDR16_APDMC	(0x02 << 16)
 #define S3C64XX_GPQ8_EINT_G9_8		(0x03 << 16)
-

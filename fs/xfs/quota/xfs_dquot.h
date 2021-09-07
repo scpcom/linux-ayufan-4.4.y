@@ -90,7 +90,6 @@ typedef struct xfs_dquot {
 #endif
 } xfs_dquot_t;
 
-
 #define dq_flnext	q_lists.dqm_flnext
 #define dq_flprev	q_lists.dqm_flprev
 #define dq_mplist	q_lists.dqm_mplist

@@ -324,7 +324,6 @@ struct base_eep_header_4k {
 	u8 txGainType;
 } __packed;
 
-
 struct spur_chan {
 	u16 spurChan;
 	u8 spurRangeLow;
@@ -522,7 +521,6 @@ struct cal_target_power_ht {
 	u8 bChannel;
 	u8 tPow2x[8];
 } __packed;
-
 
 #ifdef __BIG_ENDIAN_BITFIELD
 struct cal_ctl_edges {

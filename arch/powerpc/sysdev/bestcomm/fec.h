@@ -14,7 +14,6 @@
 #ifndef __BESTCOMM_FEC_H__
 #define __BESTCOMM_FEC_H__
 
-
 struct bcom_fec_bd {
 	u32	status;
 	u32	skb_pa;
@@ -36,7 +35,6 @@ struct bcom_fec_bd {
 #define BCOM_FEC_RX_BD_ERRORS	(BCOM_FEC_RX_BD_LG | BCOM_FEC_RX_BD_NO | \
 		BCOM_FEC_RX_BD_CR | BCOM_FEC_RX_BD_OV | BCOM_FEC_RX_BD_TR)
 
-
 extern struct bcom_task *
 bcom_fec_rx_init(int queue_len, phys_addr_t fifo, int maxbufsize);
 
@@ -45,7 +43,6 @@ bcom_fec_rx_reset(struct bcom_task *tsk);
 
 extern void
 bcom_fec_rx_release(struct bcom_task *tsk);
-
 
 extern struct bcom_task *
 bcom_fec_tx_init(int queue_len, phys_addr_t fifo);
@@ -56,6 +53,4 @@ bcom_fec_tx_reset(struct bcom_task *tsk);
 extern void
 bcom_fec_tx_release(struct bcom_task *tsk);
 
-
 #endif /* __BESTCOMM_FEC_H__ */
-

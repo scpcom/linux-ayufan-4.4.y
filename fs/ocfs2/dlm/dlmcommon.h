@@ -86,7 +86,6 @@ enum dlm_ast_type {
 	DLM_ASTUNLOCK
 };
 
-
 #define LKM_VALID_FLAGS (LKM_VALBLK | LKM_CONVERT | LKM_UNLOCK | \
 			 LKM_CANCEL | LKM_INVVALBLK | LKM_FORCE | \
 			 LKM_RECOVERY | LKM_LOCAL | LKM_NOQUEUE)
@@ -262,8 +261,6 @@ static inline void dlm_init_work_item(struct dlm_ctxt *dlm,
 	i->dlm = dlm;  /* must have already done a dlm_grab on this! */
 }
 
-
-
 static inline void __dlm_set_joining_node(struct dlm_ctxt *dlm,
 					  u8 node)
 {
@@ -375,7 +372,6 @@ struct dlm_lock
 		 lksb_kernel_allocated:1;
 };
 
-
 #define DLM_LKSB_UNUSED1           0x01
 #define DLM_LKSB_PUT_LVB           0x02
 #define DLM_LKSB_GET_LVB           0x04
@@ -384,7 +380,6 @@ struct dlm_lock
 #define DLM_LKSB_UNUSED4           0x20
 #define DLM_LKSB_UNUSED5           0x40
 #define DLM_LKSB_UNUSED6           0x80
-
 
 enum dlm_lockres_list {
 	DLM_GRANTED_LIST = 0,
@@ -416,15 +411,11 @@ dlm_list_idx_to_ptr(struct dlm_lock_resource *res, enum dlm_lockres_list idx)
 	return ret;
 }
 
-
-
-
 struct dlm_node_iter
 {
 	unsigned long node_map[BITS_TO_LONGS(O2NM_MAX_NODES)];
 	int curnode;
 };
-
 
 enum {
 	DLM_MASTER_REQUEST_MSG    = 500,
@@ -465,14 +456,12 @@ enum {
 	DLM_RECO_NODE_DATA_FINALIZE_SENT,
 };
 
-
 enum {
 	DLM_MASTER_RESP_NO = 0,
 	DLM_MASTER_RESP_YES,
 	DLM_MASTER_RESP_MAYBE,
 	DLM_MASTER_RESP_ERROR
 };
-
 
 struct dlm_master_request
 {
@@ -695,7 +684,6 @@ struct dlm_begin_reco
 	__be16 pad1;
 	__be32 pad2;
 };
-
 
 #define BITS_PER_BYTE 8
 #define BITS_TO_BYTES(bits) (((bits)+BITS_PER_BYTE-1)/BITS_PER_BYTE)
@@ -944,7 +932,6 @@ u8 dlm_nm_this_node(struct dlm_ctxt *dlm);
 void dlm_kick_thread(struct dlm_ctxt *dlm, struct dlm_lock_resource *res);
 void __dlm_dirty_lockres(struct dlm_ctxt *dlm, struct dlm_lock_resource *res);
 
-
 int dlm_nm_init(struct dlm_ctxt *dlm);
 int dlm_heartbeat_init(struct dlm_ctxt *dlm);
 void dlm_hb_node_down_cb(struct o2nm_node *node, int idx, void *data);
@@ -982,13 +969,11 @@ int dlm_finalize_reco_handler(struct o2net_msg *msg, u32 len, void *data,
 int dlm_do_master_requery(struct dlm_ctxt *dlm, struct dlm_lock_resource *res,
 			  u8 nodenum, u8 *real_master);
 
-
 int dlm_dispatch_assert_master(struct dlm_ctxt *dlm,
 			       struct dlm_lock_resource *res,
 			       int ignore_higher,
 			       u8 request_from,
 			       u32 flags);
-
 
 int dlm_send_one_lockres(struct dlm_ctxt *dlm,
 			 struct dlm_lock_resource *res,
@@ -1045,7 +1030,6 @@ static inline const char * dlm_lock_mode_name(int mode)
 	return "UNKNOWN";
 }
 
-
 static inline int dlm_lock_compatible(int existing, int request)
 {
 	/* NO_LOCK compatible with all */
@@ -1078,7 +1062,6 @@ static inline int dlm_lock_on_list(struct list_head *head,
 	return 0;
 }
 
-
 static inline enum dlm_status dlm_err_to_dlm_status(int err)
 {
 	enum dlm_status ret;
@@ -1094,7 +1077,6 @@ static inline enum dlm_status dlm_err_to_dlm_status(int err)
 		ret = DLM_BADARGS;
 	return ret;
 }
-
 
 static inline void dlm_node_iter_init(unsigned long *map,
 				      struct dlm_node_iter *iter)

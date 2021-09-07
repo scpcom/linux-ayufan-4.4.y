@@ -60,16 +60,11 @@
 //#define	PLICE_DEBUG
 /*---------------------  Static Definitions -------------------------*/
 
-
-
-
 /*---------------------  Static Classes  ----------------------------*/
 
 /*---------------------  Static Variables  --------------------------*/
 static int          msglevel                =MSG_LEVEL_INFO;
 //static int          msglevel                =MSG_LEVEL_DEBUG;
-
-
 
 const WORD             awHWRetry0[5][5] = {
                                             {RATE_18M, RATE_18M, RATE_12M, RATE_12M, RATE_12M},
@@ -86,8 +81,6 @@ const WORD             awHWRetry1[5][5] = {
                                             {RATE_54M, RATE_54M, RATE_36M, RATE_18M, RATE_18M}
                                            };
 
-
-
 /*---------------------  Static Functions  --------------------------*/
 
 VOID s_vCheckSensitivity(
@@ -100,18 +93,12 @@ VOID s_uCalculateLinkQual(
     );
 #endif
 
-
 VOID s_vCheckPreEDThreshold(
     IN HANDLE hDeviceContext
     );
 /*---------------------  Export Variables  --------------------------*/
 
-
 /*---------------------  Export Functions  --------------------------*/
-
-
-
-
 
 /*+
  *
@@ -268,7 +255,6 @@ if(pDevice->bLinkPass==FALSE) pCurrBSS->bSelected = FALSE;
 
 }
 
-
 /*+
  *
  * Routine Description:
@@ -278,7 +264,6 @@ if(pDevice->bLinkPass==FALSE) pCurrBSS->bSelected = FALSE;
  *    None.
  *
 -*/
-
 
 VOID
 BSSvClearBSSList(
@@ -311,8 +296,6 @@ BSSvClearBSSList(
 
     return;
 }
-
-
 
 /*+
  *
@@ -354,8 +337,6 @@ BSSpAddrIsInBSSList(
     return NULL;
 };
 
-
-
 /*+
  *
  * Routine Description:
@@ -395,8 +376,6 @@ BSSbInsertToBSSList (
     UINT            ii;
     BOOL            bParsingQuiet = FALSE;
     PWLAN_IE_QUIET  pQuiet = NULL;
-
-
 
     pBSSList = (PKnownBSS)&(pMgmt->sBSSList[0]);
 
@@ -571,7 +550,6 @@ BSSbInsertToBSSList (
     return TRUE;
 }
 
-
 /*+
  *
  * Routine Description:
@@ -613,11 +591,8 @@ BSSbUpdateToBSSList (
     BOOL            bParsingQuiet = FALSE;
     PWLAN_IE_QUIET  pQuiet = NULL;
 
-
-
     if (pBSSList == NULL)
         return FALSE;
-
 
     HIDWORD(pBSSList->qwBSSTimestamp) = cpu_to_le32(HIDWORD(qwTimestamp));
     LODWORD(pBSSList->qwBSSTimestamp) = cpu_to_le32(LODWORD(qwTimestamp));
@@ -748,10 +723,6 @@ BSSbUpdateToBSSList (
     return TRUE;
 }
 
-
-
-
-
 /*+
  *
  * Routine Description:
@@ -784,8 +755,6 @@ BSSDBbIsSTAInNodeDB(
 
    return FALSE;
 };
-
-
 
 /*+
  *
@@ -850,8 +819,6 @@ BSSvCreateOneNode(
     return;
 };
 
-
-
 /*+
  *
  * Routine Description:
@@ -873,7 +840,6 @@ BSSvRemoveOneNode(
     PSMgmtObject    pMgmt = pDevice->pMgmt;
     BYTE            byMask[8] = {1, 2, 4, 8, 0x10, 0x20, 0x40, 0x80};
     struct sk_buff  *skb;
-
 
     while ((skb = skb_dequeue(&pMgmt->sNodeDBTable[uNodeIndex].sTxPSQueue)) != NULL)
             dev_kfree_skb(skb);
@@ -942,10 +908,6 @@ BSSvUpdateAPNode(
 
 };
 
-
-
-
-
 /*+
  *
  * Routine Description:
@@ -956,7 +918,6 @@ BSSvUpdateAPNode(
  *    None
  *
 -*/
-
 
 VOID
 BSSvAddMulticastNode(
@@ -989,10 +950,6 @@ BSSvAddMulticastNode(
     pMgmt->sNodeDBTable[0].uRatePollTimeout = FALLBACK_POLL_SECOND;
 
 };
-
-
-
-
 
 /*+
  *
@@ -1081,7 +1038,6 @@ CARDbRadioPowerOn(pDevice);
 start:
 #endif
 
-
     if (pDevice->wUseProtectCntDown > 0) {
         pDevice->wUseProtectCntDown --;
     }
@@ -1151,7 +1107,6 @@ start:
                 if (pMgmt->sNodeDBTable[ii].bPSEnable)
                     uSleepySTACnt++;
 
-
             }
 
             // Rate fallback check
@@ -1192,7 +1147,6 @@ start:
         }
 
     }
-
 
     if ((pMgmt->eCurrMode == WMAC_MODE_ESS_AP) && (pDevice->eCurrentPHYType == PHY_TYPE_11G)) {
 
@@ -1242,7 +1196,6 @@ start:
         }
 
     }
-
 
     // Check if any STA in PS mode, enable DTIM multicast deliver
     if (pMgmt->eCurrMode == WMAC_MODE_ESS_AP) {
@@ -1370,9 +1323,6 @@ start:
     return;
 }
 
-
-
-
 /*+
  *
  * Routine Description:
@@ -1385,8 +1335,6 @@ start:
  *    none.
  *
 -*/
-
-
 
 VOID
 BSSvUpdateNodeTxCounter(
@@ -1556,11 +1504,7 @@ BSSvUpdateNodeTxCounter(
 
     return;
 
-
 }
-
-
-
 
 /*+
  *
@@ -1579,7 +1523,6 @@ BSSvUpdateNodeTxCounter(
  *    None.
  *
 -*/
-
 
 VOID
 BSSvClearNodeDBTable(
@@ -1608,7 +1551,6 @@ BSSvClearNodeDBTable(
 
     return;
 };
-
 
 VOID s_vCheckSensitivity(
     IN HANDLE hDeviceContext
@@ -1657,7 +1599,6 @@ VOID s_vCheckSensitivity(
         }
     }
 }
-
 
 VOID
 BSSvClearAnyBSSJoinRecord (
@@ -1741,4 +1682,3 @@ VOID s_vCheckPreEDThreshold(
     }
     return;
 }
-

@@ -61,4 +61,3 @@
 #endif	/* CONFIG_CPU_SH4 */
 
 #endif /* __ASM_CPU_SH4_UBC_H */
-

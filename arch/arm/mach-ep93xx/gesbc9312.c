@@ -20,7 +20,6 @@
 #include <asm/mach-types.h>
 #include <asm/mach/arch.h>
 
-
 static struct physmap_flash_data gesbc9312_flash_data = {
 	.width		= 4,
 };

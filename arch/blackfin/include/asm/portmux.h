@@ -17,7 +17,6 @@
 #define P_MAYSHARE	0x2000
 #define P_DONTCARE	0x1000
 
-
 int peripheral_request(unsigned short per, const char *label);
 void peripheral_free(unsigned short per);
 int peripheral_request_list(const unsigned short per[], const char *label);
@@ -781,7 +780,6 @@ void peripheral_free_list(const unsigned short per[]);
 #ifndef P_SPI1_SSEL3
 #define P_SPI1_SSEL3 P_UNDEF
 #endif
-
 
 #ifndef P_SPI1_SSEL4
 #define P_SPI1_SSEL4 P_UNDEF

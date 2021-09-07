@@ -143,7 +143,6 @@ struct tag_memclk {
 	__u32 fmemclk;
 };
 
-
 #if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_ARCH_FEROCEON)
 /* Marvell uboot parameters */
 #define ATAG_MV_UBOOT 0x41000403

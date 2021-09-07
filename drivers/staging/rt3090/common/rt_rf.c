@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 #ifdef RTMP_RF_RW_SUPPORT
 /*
 	========================================================================
@@ -87,7 +86,6 @@ NDIS_STATUS RT30xxWriteRFRegister(
 
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 /*
 	========================================================================
@@ -148,14 +146,12 @@ NDIS_STATUS RT30xxReadRFRegister(
 	return STATUS_SUCCESS;
 }
 
-
 VOID NICInitRFRegisters(
 	IN RTMP_ADAPTER *pAd)
 {
 	if (pAd->chipOps.AsicRfInit)
 		pAd->chipOps.AsicRfInit(pAd);
 }
-
 
 VOID RtmpChipOpsRFHook(
 	IN RTMP_ADAPTER *pAd)

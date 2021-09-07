@@ -25,7 +25,6 @@ Possible options for midisynth module:
 	  (close will be performed when client leaves)
 */
 
-
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/errno.h>
@@ -161,7 +160,6 @@ static int event_process_midi(struct snd_seq_event *ev, int direct,
 	}
 	return 0;
 }
-
 
 static int snd_seq_midisynth_new(struct seq_midisynth *msynth,
 				 struct snd_card *card,
@@ -457,7 +455,6 @@ snd_seq_midisynth_unregister_port(struct snd_seq_device *dev)
 	mutex_unlock(&register_mutex);
 	return 0;
 }
-
 
 static int __init alsa_seq_midi_init(void)
 {

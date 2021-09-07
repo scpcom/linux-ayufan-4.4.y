@@ -18,7 +18,6 @@ MODULE_DESCRIPTION("Micron mt9v011 sensor driver");
 MODULE_AUTHOR("Mauro Carvalho Chehab <mchehab@redhat.com>");
 MODULE_LICENSE("GPL");
 
-
 static int debug;
 module_param(debug, int, 0);
 MODULE_PARM_DESC(debug, "Debug level (0-2)");
@@ -132,7 +131,6 @@ static void mt9v011_write(struct v4l2_subdev *sd, unsigned char addr,
 		v4l2_dbg(0, debug, sd,
 			 "i2c i/o error: rc == %d (should be 3)\n", rc);
 }
-
 
 struct i2c_reg_value {
 	unsigned char reg;
@@ -346,7 +344,6 @@ static int mt9v011_queryctrl(struct v4l2_subdev *sd, struct v4l2_queryctrl *qc)
 	return -EINVAL;
 }
 
-
 static int mt9v011_s_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl)
 {
 	struct mt9v011 *core = to_mt9v011(sd);
@@ -488,7 +485,6 @@ static int mt9v011_s_config(struct v4l2_subdev *sd, int dumb, void *data)
 	return 0;
 }
 
-
 #ifdef CONFIG_VIDEO_ADV_DEBUG
 static int mt9v011_g_register(struct v4l2_subdev *sd,
 			      struct v4l2_dbg_register *reg)
@@ -559,7 +555,6 @@ static const struct v4l2_subdev_ops mt9v011_ops = {
 	.core  = &mt9v011_core_ops,
 	.video = &mt9v011_video_ops,
 };
-
 
 /****************************************************************************
 			I2C Client & Driver

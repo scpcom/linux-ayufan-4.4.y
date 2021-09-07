@@ -45,7 +45,6 @@
  *
  */
 
-
 #include <linux/module.h>
 #include <linux/fs.h>
 
@@ -66,10 +65,7 @@ extern int SEC2_ioctl(struct inode  *nd,
 extern int SEC2xDrvInit(void);
 extern int SEC2xShutdown(void);
 
-
 dev_t           sec2x_devmajor;
-
-
 
 /** fopts struct from device registration */
 struct file_operations SEC2x_fopts = {
@@ -81,7 +77,6 @@ struct file_operations SEC2x_fopts = {
 static int __init SEC2xInit(void)
 {
     int rtstat;
-
 
     /* Notice that this registers a device major number dynamically, but it */
     /* leaves the node to the user to create...                             */
@@ -105,7 +100,6 @@ static int __init SEC2xInit(void)
     return rtstat;
 }
 
-
 static void __exit SEC2xExit(void)
 {
 
@@ -113,7 +107,6 @@ static void __exit SEC2xExit(void)
 
     unregister_chrdev(sec2x_devmajor, SEC2X_DEVNAME);
 }
-
 
 EXPORT_SYMBOL (SEC2xIoctl);
 EXPORT_SYMBOL (SEC2_ioctl);

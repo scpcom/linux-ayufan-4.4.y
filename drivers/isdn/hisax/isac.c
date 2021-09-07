@@ -43,7 +43,6 @@ ph_command(struct IsdnCardState *cs, unsigned int command)
 	cs->writeisac(cs, ISAC_CIX0, (command << 2) | 3);
 }
 
-
 static void
 isac_new_ph(struct IsdnCardState *cs)
 {

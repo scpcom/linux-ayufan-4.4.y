@@ -113,14 +113,12 @@ struct bclink {
 	struct tipc_node node;
 };
 
-
 static struct bcbearer *bcbearer = NULL;
 static struct bclink *bclink = NULL;
 static struct link *bcl = NULL;
 static DEFINE_SPINLOCK(bc_lock);
 
 const char tipc_bclink_name[] = "multicast-link";
-
 
 static u32 buf_seqno(struct sk_buff *buf)
 {
@@ -141,7 +139,6 @@ static void bcbuf_decr_acks(struct sk_buff *buf)
 {
 	bcbuf_set_acks(buf, bcbuf_acks(buf) - 1);
 }
-
 
 /**
  * bclink_set_gap - set gap according to contents of current deferred pkt queue
@@ -173,7 +170,6 @@ static int bclink_ack_allowed(u32 n)
 {
 	return((n % TIPC_MIN_LINK_WIN) == tipc_own_tag);
 }
-
 
 /**
  * bclink_retransmit_pkt - retransmit broadcast packets
@@ -544,7 +540,6 @@ u32 tipc_bclink_acks_missing(struct tipc_node *n_ptr)
 		(tipc_bclink_get_last_sent() != n_ptr->bclink.acked));
 }
 
-
 /**
  * tipc_bcbearer_send - send a packet through the broadcast pseudo-bearer
  *
@@ -701,7 +696,6 @@ void tipc_bcbearer_push(void)
 	spin_unlock_bh(&bc_lock);
 }
 
-
 int tipc_bclink_stats(char *buf, const u32 buf_size)
 {
 	struct print_buf pb;
@@ -828,4 +822,3 @@ void tipc_bclink_stop(void)
 	}
 	spin_unlock_bh(&bc_lock);
 }
-

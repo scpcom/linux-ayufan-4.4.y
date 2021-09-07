@@ -30,7 +30,6 @@
 #include <linux/netlink.h>
 #include <net/iw_handler.h>
 
-
 /***** Management *****/
 u16_t zfLnxAuthNotify(zdev_t* dev, u16_t* macAddr)
 {
@@ -95,7 +94,6 @@ u16_t zfLnxAsocNotify(zdev_t* dev, u16_t* macAddr, u8_t* body, u16_t bodySize, u
     return 0;
 }
 
-
 /* Notification that a STA is disassociated from AP */
 /* AP mode only */
 u16_t zfLnxDisAsocNotify(zdev_t* dev, u8_t* macAddr, u16_t port)
@@ -108,7 +106,6 @@ u16_t zfLnxDisAsocNotify(zdev_t* dev, u8_t* macAddr, u16_t port)
     wreq.addr.sa_family = ARPHRD_ETHER;
     printk(KERN_DEBUG "zfwDisAsocNotify(), MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
             addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
-
 
     return 0;
 }
@@ -126,11 +123,8 @@ u16_t zfLnxApConnectNotify(zdev_t* dev, u8_t* macAddr, u16_t port)
     printk(KERN_DEBUG "zfwApConnectNotify(), MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
             addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
 
-
     return 0;
 }
-
-
 
 void zfLnxConnectNotify(zdev_t* dev, u16_t status, u16_t* bssid)
 {
@@ -234,7 +228,6 @@ void zfLnxMicFailureNotify(zdev_t* dev, u16_t* addr, u16_t status)
 	wireless_send_event(dev, IWEVCUSTOM, &wrqu, buf);
 }
 
-
 void zfLnxApMicFailureNotify(zdev_t* dev, u8_t* addr, zbuf_t* buf)
 {
     union iwreq_data wreq;
@@ -268,7 +261,6 @@ void zfLnxMacAddressNotify(zdev_t* dev, u8_t* addr)
 void zfLnxSendCompleteIndication(zdev_t* dev, zbuf_t* buf)
 {
 }
-
 
 void zfLnxRestoreBufData(zdev_t* dev, zbuf_t* buf) {
 

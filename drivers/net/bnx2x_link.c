@@ -143,7 +143,6 @@
 	#define SFP_EEPROM_CON_TYPE_VAL_LC 		0x7
 	#define SFP_EEPROM_CON_TYPE_VAL_COPPER	0x21
 
-
 #define SFP_EEPROM_COMP_CODE_ADDR		0x3
 	#define SFP_EEPROM_COMP_CODE_SR_MASK	(1<<4)
 	#define SFP_EEPROM_COMP_CODE_LR_MASK	(1<<5)
@@ -160,8 +159,6 @@
 #define EDC_MODE_LINEAR	 			0x0022
 #define EDC_MODE_LIMITING	 			0x0044
 #define EDC_MODE_PASSIVE_DAC 			0x0055
-
-
 
 /**********************************************************/
 /*                     INTERFACE                          */
@@ -405,8 +402,6 @@ static u8 bnx2x_emac_enable(struct link_params *params,
 	vars->mac_type = MAC_TYPE_EMAC;
 	return 0;
 }
-
-
 
 static u8 bnx2x_bmac_enable(struct link_params *params, struct link_vars *vars,
 			  u8 is_lb)
@@ -1108,9 +1103,7 @@ static void bnx2x_set_parallel_detection(struct link_params *params,
 			      MDIO_SERDES_DIGITAL_A_1000X_CONTROL2,
 			      &control2);
 
-
 	control2 |= MDIO_SERDES_DIGITAL_A_1000X_CONTROL2_PRL_DT_EN;
-
 
 	CL45_WR_OVER_CL22(bp, params->port,
 			      params->phy_addr,
@@ -1132,7 +1125,6 @@ static void bnx2x_set_parallel_detection(struct link_params *params,
 				MDIO_REG_BANK_10G_PARALLEL_DETECT,
 				MDIO_10G_PARALLEL_DETECT_PAR_DET_10G_CONTROL,
 				&control2);
-
 
 		control2 |=
 		    MDIO_10G_PARALLEL_DETECT_PAR_DET_10G_CONTROL_PARDET10G_EN;
@@ -1509,7 +1501,6 @@ static void bnx2x_initialize_sgmii_process(struct link_params *params,
 	}
 }
 
-
 /*
  * link management
  */
@@ -1608,7 +1599,6 @@ static u8 bnx2x_ext_phy_resolve_fc(struct link_params *params,
 	}
 	return ret;
 }
-
 
 static void bnx2x_flow_ctrl_resolve(struct link_params *params,
 				  struct link_vars *vars,
@@ -2177,7 +2167,6 @@ static void bnx2x_save_bcm_spirom_ver(struct bnx2x *bp, u8 port,
 				(u32)(fw_ver1<<16 | fw_ver2));
 }
 
-
 static void bnx2x_save_8481_spirom_version(struct bnx2x *bp, u8 port,
 					 u8 ext_phy_addr, u32 shmem_base)
 {
@@ -2230,7 +2219,6 @@ static void bnx2x_save_8481_spirom_version(struct bnx2x *bp, u8 port,
 					shmem_base, 0);
 		return;
 	}
-
 
 	/* 2) read register 0xc200_0000 (SPI_FW_STATUS) */
 	bnx2x_cl45_write(bp, port,
@@ -3035,7 +3023,6 @@ static u8 bnx2x_bcm8727_set_limiting_mode(struct link_params *params,
 	return 0;
 }
 
-
 static u8 bnx2x_wait_for_sfp_module_initialized(struct link_params *params)
 {
 	u8 val;
@@ -3406,7 +3393,6 @@ static void bnx2x_set_preemphasis(struct link_params *params)
 	}
 }
 
-
 static void bnx2x_8481_set_led4(struct link_params *params,
 			      u32 ext_phy_type, u8 ext_phy_addr)
 {
@@ -3528,7 +3514,6 @@ static void bnx2x_8481_set_10G_led_mode(struct link_params *params,
 		       MDIO_PMA_REG_8481_LED3_MASK,
 		       val1);
 }
-
 
 static void bnx2x_init_internal_phy(struct link_params *params,
 				  struct link_vars *vars,
@@ -4586,7 +4571,6 @@ static void bnx2x_8727_handle_mod_abs(struct link_params *params)
 			      MDIO_PMA_DEVAD,
 			      MDIO_PMA_REG_RX_ALARM, &rx_alarm_status);
 
-
 		if ((val & PORT_FEAT_CFG_OPT_MDL_ENFRCMNT_MASK) ==
 		    PORT_FEAT_CFG_OPT_MDL_ENFRCMNT_DISABLE_TX_LASER)
 			bnx2x_sfp_set_transmitter(bp, params->port,
@@ -4605,7 +4589,6 @@ static void bnx2x_8727_handle_mod_abs(struct link_params *params)
 	/* No need to check link status in case of
 	module plugged in/out */
 }
-
 
 static u8 bnx2x_ext_phy_is_link_up(struct link_params *params,
 				 struct link_vars *vars,
@@ -5103,7 +5086,6 @@ static u8 bnx2x_ext_phy_is_link_up(struct link_params *params,
 				}
 			}
 
-
 			break;
 		}
 		case PORT_HW_CFG_XGXS_EXT_PHY_TYPE_SFX7101:
@@ -5557,7 +5539,6 @@ static void bnx2x_set_xgxs_loopback(struct link_params *params,
 	}
 }
 
-
 static void bnx2x_ext_phy_loopback(struct link_params *params)
 {
 	struct bnx2x *bp = params->bp;
@@ -5610,7 +5591,6 @@ static void bnx2x_ext_phy_loopback(struct link_params *params)
 		>> PORT_HW_CFG_SERDES_EXT_PHY_ADDR_SHIFT;
 	}
 }
-
 
 /*
  *------------------------------------------------------------------------
@@ -5726,7 +5706,6 @@ u8 bnx2x_override_led_value(struct bnx2x *bp, u8 port,
 
 	return 0;
 }
-
 
 u8 bnx2x_set_led(struct bnx2x *bp, u8 port, u8 mode, u32 speed,
 	       u16 hw_led_mode, u32 chip_id)
@@ -5882,7 +5861,6 @@ static u8 bnx2x_link_initialize(struct link_params *params,
 	return rc;
 
 }
-
 
 u8 bnx2x_phy_init(struct link_params *params, struct link_vars *vars)
 {
@@ -6540,7 +6518,6 @@ static u8 bnx2x_8727_common_init_phy(struct bnx2x *bp, u32 shmem_base)
 
 	return 0;
 }
-
 
 static u8 bnx2x_8726_common_init_phy(struct bnx2x *bp, u32 shmem_base)
 {

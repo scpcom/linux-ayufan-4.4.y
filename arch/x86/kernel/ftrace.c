@@ -25,7 +25,6 @@
 #include <asm/nops.h>
 #include <asm/nmi.h>
 
-
 #ifdef CONFIG_DYNAMIC_FTRACE
 
 int ftrace_arch_code_modify_prepare(void)
@@ -211,9 +210,6 @@ do_ftrace_mod_code(unsigned long ip, void *new_code)
 
 	return mod_code_status;
 }
-
-
-
 
 static unsigned char ftrace_nop[MCOUNT_INSN_SIZE];
 
@@ -479,7 +475,6 @@ static struct syscall_metadata *find_syscall_meta(unsigned long *syscall)
 	struct syscall_metadata *start;
 	struct syscall_metadata *stop;
 	char str[KSYM_SYMBOL_LEN];
-
 
 	start = (struct syscall_metadata *)__start_syscalls_metadata;
 	stop = (struct syscall_metadata *)__stop_syscalls_metadata;

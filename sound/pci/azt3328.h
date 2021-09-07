@@ -85,7 +85,6 @@
   #define SOUNDFORMAT_FLAG_16BIT	0x0010
   #define SOUNDFORMAT_FLAG_2CHANNELS	0x0020
 
-
 /* define frequency helpers, for maximum value safety */
 enum azf_freq_t {
 #define AZF_FREQ(rate) AZF_FREQ_##rate = rate
@@ -190,7 +189,6 @@ enum azf_freq_t {
 
 /* further I/O indices not saved/restored and not readable after writing,
  * so probably not used */
-
 
 /*** Gameport area port indices ***/
 /* (only 0x06 of 0x08 bytes saved/restored by Windows driver) */ 

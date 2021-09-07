@@ -198,7 +198,6 @@
 #define OPEN_ADAPTER_INHIBIT_ETR (1<<4)
 #define OPEN_ADAPTER_INTERNAL_WRAP (1<<3)
 
-
 /* Defines for SRB Commands */
 #define SRB_CLOSE_ADAPTER 0x04
 #define SRB_CONFIGURE_BRIDGE 0x0c
@@ -227,7 +226,6 @@
 
 /* ASB Response commands */
 #define ASB_RECEIVE_DATA 0x81
-
 
 /* Streamer defaults for buffers */
 

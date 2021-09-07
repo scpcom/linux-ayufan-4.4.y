@@ -72,7 +72,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *
 *******************************************************************************/
 
-
 /* includes */
 #include "mvTypes.h"
 #include "mvOs.h"
@@ -86,7 +85,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 MV_FP_PPP_RULE pppOpen[ETH_FP_IFINDEX_MAX];	/* connected pppoe sessions */
 MV_FP_PPP_RULE pppHalf[ETH_FP_IFINDEX_MAX]; /* half-open pppoe connections */
-
 
 MV_STATUS mvFpPppInit(void)
 {
@@ -320,4 +318,3 @@ int mvFpPPPoE(MV_U32 ifIndex, MV_PKT_INFO* pPkt, MV_FP_STATS* pFpStats)
 
 	return MV_OK;
 }
-

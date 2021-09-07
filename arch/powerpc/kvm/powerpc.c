@@ -44,7 +44,6 @@ int kvm_arch_vcpu_runnable(struct kvm_vcpu *v)
 	return !(v->arch.msr & MSR_WE) || !!(v->arch.pending_exceptions);
 }
 
-
 int kvmppc_emulate_mmio(struct kvm_run *run, struct kvm_vcpu *vcpu)
 {
 	enum emulation_result er;

@@ -17,8 +17,6 @@
 #include "mvOs.h"
 #include "mvCpuL2Cntrs.h"
 
-
-
 MV_CPU_L2_CNTRS_ENTRY   mvCpuL2CntrsTbl[MV_CPU_L2_CNTRS_NUM];
 
 MV_CPU_L2_CNTRS_EVENT*  mvCpuL2CntrsEventTbl[128];
@@ -64,7 +62,6 @@ void mvCpuL2CntrsEventClear(MV_CPU_L2_CNTRS_EVENT* pEvent)
     pEvent->num_of_measurements = 0;
 }
 
-                                                                                                              
 MV_CPU_L2_CNTRS_EVENT* mvCpuL2CntrsEventCreate(char* name, MV_U32 print_threshold)
 {
     int                     i;
@@ -91,7 +88,6 @@ void    mvCpuL2CntrsEventDelete(MV_CPU_L2_CNTRS_EVENT* event)
         mvOsFree(event);
 }
 
-                                                                                     
 MV_STATUS   mvCpuL2CntrsProgram(int counter, MV_CPU_L2_CNTRS_OPS op, 
                                  char* name, MV_U32 overhead)
 {

@@ -37,7 +37,6 @@
  */
 #define SIMETH_FRAME_SIZE	ETH_FRAME_LEN
 
-
 #define NETWORK_INTR			8
 
 struct simeth_local {
@@ -74,8 +73,6 @@ static char *simeth_version="0.3";
  */
 static char *simeth_device="eth0";	 /* default host interface to use */
 
-
-
 static volatile unsigned int card_count; /* how many cards "found" so far */
 static int simeth_debug;		/* set to 1 to get debug information */
 
@@ -86,7 +83,6 @@ static struct notifier_block simeth_dev_notifier = {
 	simeth_device_event,
 	NULL
 };
-
 
 /*
  * Function used when using a kernel command line option.
@@ -127,7 +123,6 @@ netdev_probe(char *name, unsigned char *ether)
 	return ia64_ssc(__pa(name), __pa(ether), 0,0, SSC_NETDEV_PROBE);
 }
 
-
 static inline int
 netdev_connect(int irq)
 {
@@ -145,7 +140,6 @@ netdev_attach(int fd, int irq, unsigned int ipaddr)
 	/* this puts the host interface in the right mode (start interrupting) */
 	return ia64_ssc(fd, ipaddr, 0,0, SSC_NETDEV_ATTACH);
 }
-
 
 static inline int
 netdev_detach(int fd)
@@ -268,7 +262,6 @@ static __inline__ int dev_is_ethdev(struct net_device *dev)
        return ( dev->type == ARPHRD_ETHER && strncmp(dev->name, "dummy", 5));
 }
 
-
 /*
  * Handler for IFF_UP or IFF_DOWN
  *
@@ -292,7 +285,6 @@ simeth_device_event(struct notifier_block *this,unsigned long event, void *ptr)
 	struct in_ifaddr **ifap = NULL;
 	struct in_ifaddr *ifa = NULL;
 	int r;
-
 
 	if ( ! dev ) {
 		printk(KERN_WARNING "simeth_device_event dev=0\n");
@@ -377,7 +369,6 @@ frame_print(unsigned char *from, unsigned char *frame, int len)
 	printk("\n");
 }
 
-
 /*
  * Function used to transmit of frame, very last one on the path before
  * going to the simulator.
@@ -400,7 +391,6 @@ simeth_tx(struct sk_buff *skb, struct net_device *dev)
 
 	local->stats.tx_bytes += skb->len;
 	local->stats.tx_packets++;
-
 
 	if (simeth_debug > 5) frame_print("simeth_tx", skb->data, length);
 

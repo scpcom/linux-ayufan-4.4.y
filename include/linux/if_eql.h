@@ -79,5 +79,4 @@ typedef struct slaving_request {
 	long	priority;
 } slaving_request_t;
 
-
 #endif /* _LINUX_EQL_H */

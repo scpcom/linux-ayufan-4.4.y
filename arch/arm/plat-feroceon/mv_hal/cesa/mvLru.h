@@ -73,7 +73,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __mvLru_h__
 #define __mvLru_h__
 
-
 typedef struct
 {
     int next;
@@ -88,7 +87,6 @@ typedef struct
     int             tableSize;
 
 }MV_LRU_CACHE;
-
 
 /* Find Cache index for replacement LRU */
 static INLINE int     mvLruCacheIdxFind(MV_LRU_CACHE* pLruHndl)
@@ -107,6 +105,5 @@ void    mvLruCacheIdxUpdate(MV_LRU_CACHE* pLruHndl, int cacheIdx);
 
 /* Delete LRU cache entry */
 void    mvLruCacheIdxDelete(MV_LRU_CACHE* pLruHndl, int cacheIdx);
-
 
 #endif /* __mvLru_h__ */

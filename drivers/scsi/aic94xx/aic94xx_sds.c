@@ -657,7 +657,6 @@ static u16 asd_calc_flash_chksum(u16 *p, int size)
 	return chksum;
 }
 
-
 static int asd_find_flash_de(struct asd_flash_dir *flash_dir, u32 entry_type,
 			     u32 *offs, u32 *size)
 {
@@ -857,7 +856,6 @@ static int asd_ms_get_connector_map(struct asd_ha_struct *asd_ha,
 
 	return 0;
 }
-
 
 /**
  * asd_process_ms - find and extract information from the manufacturing sector

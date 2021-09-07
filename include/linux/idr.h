@@ -113,7 +113,6 @@ void idr_remove_all(struct idr *idp);
 void idr_destroy(struct idr *idp);
 void idr_init(struct idr *idp);
 
-
 /*
  * IDA - IDR based id allocator, use when translation from id to
  * pointer isn't necessary.

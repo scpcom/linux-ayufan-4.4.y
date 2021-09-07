@@ -200,7 +200,6 @@ int main(int argc, char *argv[])
 	fill_fullpaths(bi->dt, "");
 	process_checks(force, bi);
 
-
 	if (streq(outname, "-")) {
 		outf = stdout;
 	} else {

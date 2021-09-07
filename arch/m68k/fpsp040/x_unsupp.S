@@ -46,7 +46,6 @@ fpsp_unsupp:
 	fmovemx	%fp0-%fp3,USER_FP0(%a6)
 	fmoveml	%fpcr/%fpsr/%fpiar,USER_FPCR(%a6)
 
-
 	moveb		(%a7),VER_TMP(%a6) |save version number
 	moveb		(%a7),%d0		|test for valid version num
 	andib		#0xf0,%d0		|test for $4x

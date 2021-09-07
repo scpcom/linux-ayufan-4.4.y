@@ -101,4 +101,3 @@ union bfi_rport_i2h_msg_u {
 #pragma pack()
 
 #endif /* __BFI_RPORT_H__ */
-

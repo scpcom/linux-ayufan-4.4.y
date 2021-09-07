@@ -61,7 +61,6 @@ static DEFINE_RWLOCK(ip6_fl_lock);
 
 static DEFINE_RWLOCK(ip6_sk_fl_lock);
 
-
 static inline struct ip6_flowlabel *__fl_lookup(struct net *net, __be32 label)
 {
 	struct ip6_flowlabel *fl;
@@ -84,7 +83,6 @@ static struct ip6_flowlabel *fl_lookup(struct net *net, __be32 label)
 	read_unlock_bh(&ip6_fl_lock);
 	return fl;
 }
-
 
 static void fl_free(struct ip6_flowlabel *fl)
 {
@@ -217,8 +215,6 @@ static struct ip6_flowlabel *fl_intern(struct net *net,
 	return NULL;
 }
 
-
-
 /* Socket flowlabel lists */
 
 struct ip6_flowlabel * fl6_sock_lookup(struct sock *sk, __be32 label)
@@ -257,7 +253,6 @@ void fl6_free_socklist(struct sock *sk)
 }
 
 /* Service routines */
-
 
 /*
    It is the only difficult place. flowlabel enforces equal headers
@@ -475,7 +470,6 @@ int ipv6_flowlabel_opt(struct sock *sk, char __user *optval, int optlen)
 	struct ipv6_fl_socklist *sfl1=NULL;
 	struct ipv6_fl_socklist *sfl, **sflp;
 	struct ip6_flowlabel *fl, *fl1 = NULL;
-
 
 	if (optlen < sizeof(freq))
 		return -EINVAL;

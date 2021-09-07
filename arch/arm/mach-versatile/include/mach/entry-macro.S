@@ -41,4 +41,3 @@
 @		clz	\irqnr, \irqstat
 @1003:		/* EQ will be set if we reach MAXIRQNUM */
 		.endm
-

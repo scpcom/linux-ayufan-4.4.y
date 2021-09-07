@@ -240,7 +240,6 @@ out:
 	sock_put(sk);
 }
 
-
 static int dccp_v6_send_response(struct sock *sk, struct request_sock *req)
 {
 	struct inet6_request_sock *ireq6 = inet6_rsk(req);

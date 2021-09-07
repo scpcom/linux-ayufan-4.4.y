@@ -739,7 +739,6 @@ done_battery_state_smart(struct adb_request* req)
 	else
 		pmu_power_flags &= ~PMU_PWR_AC_PRESENT;
 
-
 	capa = max = amperage = voltage = 0;
 	
 	if (req->reply[1] & 0x04) {
@@ -1623,7 +1622,6 @@ pmu_unlock(void)
 	spin_unlock_irqrestore(&pmu_lock, flags);
 }
 
-
 static irqreturn_t
 gpio1_interrupt(int irq, void *arg)
 {
@@ -2338,7 +2336,6 @@ static int pmu_device_init(void)
 }
 device_initcall(pmu_device_init);
 
-
 #ifdef DEBUG_SLEEP
 static inline void 
 polled_handshake(volatile unsigned char __iomem *via)
@@ -2543,4 +2540,3 @@ EXPORT_SYMBOL(pmu_battery_count);
 EXPORT_SYMBOL(pmu_batteries);
 EXPORT_SYMBOL(pmu_power_flags);
 #endif /* CONFIG_SUSPEND && CONFIG_PPC32 */
-

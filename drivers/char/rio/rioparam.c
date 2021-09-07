@@ -44,7 +44,6 @@
 
 #include <linux/generic_serial.h>
 
-
 #include "linux_compat.h"
 #include "rio_linux.h"
 #include "pkt.h"
@@ -72,8 +71,6 @@
 #include "cirrus.h"
 #include "rioioctl.h"
 #include "param.h"
-
-
 
 /*
 ** The Scam, based on email from jeremyr@bugs.specialix.co.uk....
@@ -232,7 +229,6 @@ int RIOParam(struct Port *PortP, int cmd, int Modem, int SleepFlag)
 
 	phb_param_ptr = (struct phb_param __iomem *) PacketP->data;
 
-
 	switch (TtyP->termios->c_cflag & CSIZE) {
 	case CS5:
 		{
@@ -324,7 +320,6 @@ int RIOParam(struct Port *PortP, int cmd, int Modem, int SleepFlag)
 		Cor2 &= ~RIOC_COR2_CTSFLOW;
 		Cor2 &= ~RIOC_COR2_RTSFLOW;
 	}
-
 
 	if (TtyP->termios->c_cflag & CLOCAL) {
 		rio_dprintk(RIO_DEBUG_PARAM, "Local line\n");
@@ -457,7 +452,6 @@ int RIOParam(struct Port *PortP, int cmd, int Modem, int SleepFlag)
 
 	rio_dprintk(RIO_DEBUG_PARAM, "tx baud 0x%x, rx baud 0x%x\n", TxBaud, RxBaud);
 
-
 	/*
 	 ** Leftovers
 	 */
@@ -569,7 +563,6 @@ int RIOParam(struct Port *PortP, int cmd, int Modem, int SleepFlag)
 
 	return 0;
 }
-
 
 /*
 ** We can add another packet to a transmit queue if the packet pointer pointed

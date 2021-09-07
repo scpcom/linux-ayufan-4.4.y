@@ -166,7 +166,6 @@ _start:
 	 */
 	CACHE_ENABLE				/* enable CPU cache */
 
-
 #ifdef CONFIG_ROMFS_FS
 	/*
 	 *	Move ROM filesystem above bss :-)
@@ -193,7 +192,6 @@ _copy_romfs:
 	lea	_ebss,%a1
 	movel	%a1,_ramstart
 #endif /* CONFIG_ROMFS_FS */
-
 
 	/*
 	 *	Zero out the bss region.

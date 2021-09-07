@@ -67,7 +67,6 @@
 
 #include "ci13xxx_udc.h"
 
-
 /******************************************************************************
  * DEFINE
  *****************************************************************************/
@@ -1827,7 +1826,6 @@ __acquires(udc->lock)
 		struct ci13xxx_ep *mEp  = &udc->ci13xxx_ep[i];
 		int type, num, err = -EINVAL;
 		struct usb_ctrlrequest req;
-
 
 		if (mEp->desc == NULL)
 			continue;   /* not configured */

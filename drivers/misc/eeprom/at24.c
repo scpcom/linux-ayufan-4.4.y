@@ -283,7 +283,6 @@ static ssize_t at24_bin_read(struct kobject *kobj, struct bin_attribute *attr,
 	return at24_read(at24, buf, off, count);
 }
 
-
 /*
  * Note that if the hardware write-protect pin is pulled high, the whole
  * chip is normally write protected. But there are plenty of product

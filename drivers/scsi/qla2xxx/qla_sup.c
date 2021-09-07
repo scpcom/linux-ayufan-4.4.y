@@ -139,7 +139,6 @@ qla2x00_nvram_request(struct qla_hw_data *ha, uint32_t nv_cmd)
 	return data;
 }
 
-
 /**
  * qla2x00_get_nvram_word() - Calculates word position in NVRAM and calls the
  *	request routine to get the word from NVRAM.
@@ -416,7 +415,6 @@ qla2x00_set_nvram_protection(struct qla_hw_data *ha, int stat)
 		word = RD_REG_WORD(&reg->nvram);
 	} while ((word & NVR_DATA_IN) == 0);
 }
-
 
 /*****************************************************************************/
 /* Flash Manipulation Routines                                               */
@@ -1466,7 +1464,6 @@ qla2x00_beacon_off(struct scsi_qla_host *vha)
 	return rval;
 }
 
-
 static inline void
 qla24xx_flip_colors(struct qla_hw_data *ha, uint16_t *pflags)
 {
@@ -1597,7 +1594,6 @@ qla24xx_beacon_off(struct scsi_qla_host *vha)
 
 	return QLA_SUCCESS;
 }
-
 
 /*
  * Flash support routines

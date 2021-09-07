@@ -67,7 +67,6 @@
 		__Time = jiffies
 #endif // LINUX //
 
-
 #ifdef UAPSD_TIMING_RECORD_FUNC
 #define UAPSD_TIMING_RECORD_START()				\
 	UAPSD_TimingRecordCtrl(UAPSD_TIMING_CTRL_START);
@@ -84,7 +83,6 @@
 #define UAPSD_TIMING_RECORD(__pAd, __type)
 #define UAPSD_TIMING_RECORD_INDEX(__LoopIndex)
 #endif // UAPSD_TIMING_RECORD_FUNC //
-
 
 #ifndef MODULE_WMM_UAPSD
 
@@ -215,7 +213,6 @@
 		}
 #endif // RTMP_MAC_PCI //
 
-
 #else
 
 #define UAPSD_EXTERN
@@ -267,10 +264,8 @@
 
 #endif // MODULE_WMM_UAPSD //
 
-
 /* max UAPSD buffer queue size */
 #define MAX_PACKETS_IN_UAPSD_QUEUE	16	/* for each AC = 16*4 = 64 */
-
 
 /* Public function list */
 /*
@@ -290,7 +285,6 @@ Note:
 UAPSD_EXTERN VOID UAPSD_Init(
 	IN	PRTMP_ADAPTER		pAd);
 
-
 /*
 ========================================================================
 Routine Description:
@@ -308,7 +302,6 @@ Note:
 UAPSD_EXTERN VOID UAPSD_Release(
 	IN	PRTMP_ADAPTER		pAd);
 
-
 /*
 ========================================================================
 Routine Description:
@@ -325,7 +318,6 @@ Note:
 */
 UAPSD_EXTERN VOID UAPSD_FreeAll(
 	IN	PRTMP_ADAPTER		pAd);
-
 
 /*
 ========================================================================
@@ -346,7 +338,6 @@ UAPSD_EXTERN VOID UAPSD_SP_Close(
     IN  PRTMP_ADAPTER       pAd,
 	IN	MAC_TABLE_ENTRY		*pEntry);
 
-
 /*
 ========================================================================
 Routine Description:
@@ -366,7 +357,6 @@ Note:
 UAPSD_EXTERN VOID UAPSD_AllPacketDeliver(
 	IN	PRTMP_ADAPTER		pAd,
 	IN	MAC_TABLE_ENTRY		*pEntry);
-
 
 /*
 ========================================================================
@@ -402,7 +392,6 @@ UAPSD_EXTERN VOID UAPSD_AssocParse(
 	IN	MAC_TABLE_ENTRY		*pEntry,
 	IN	UCHAR				*pElm);
 
-
 /*
 ========================================================================
 Routine Description:
@@ -426,7 +415,6 @@ UAPSD_EXTERN VOID UAPSD_PacketEnqueue(
 	IN	PNDIS_PACKET		pPacket,
 	IN	UINT32				IdAc);
 
-
 /*
 ========================================================================
 Routine Description:
@@ -448,7 +436,6 @@ UAPSD_EXTERN VOID UAPSD_QoSNullTxMgmtTxDoneHandle(
 	IN	PNDIS_PACKET		pPacket,
 	IN	UCHAR				*pDstMac);
 
-
 /*
 ========================================================================
 Routine Description:
@@ -468,7 +455,6 @@ Note:
 UAPSD_EXTERN VOID UAPSD_QueueMaintenance(
 	IN	PRTMP_ADAPTER		pAd,
 	IN	MAC_TABLE_ENTRY		*pEntry);
-
 
 /*
 ========================================================================
@@ -498,7 +484,6 @@ UAPSD_EXTERN VOID UAPSD_SP_AUE_Handle(
     IN MAC_TABLE_ENTRY	*pEntry,
 	IN UCHAR			FlgSuccess);
 
-
 /*
 ========================================================================
 Routine Description:
@@ -522,7 +507,6 @@ Note:
 UAPSD_EXTERN VOID UAPSD_SP_CloseInRVDone(
 	IN	PRTMP_ADAPTER		pAd);
 
-
 /*
 ========================================================================
 Routine Description:
@@ -545,7 +529,6 @@ UAPSD_EXTERN VOID UAPSD_SP_PacketCheck(
 	IN	PRTMP_ADAPTER		pAd,
 	IN	PNDIS_PACKET		pPacket,
 	IN	UCHAR				*pDstMac);
-
 
 #ifdef UAPSD_TIMING_RECORD_FUNC
 /*
@@ -609,7 +592,6 @@ UAPSD_EXTERN VOID UAPSD_TimeingRecordLoopIndex(
 	IN	UINT32				LoopIndex);
 #endif // UAPSD_TIMING_RECORD_FUNC //
 
-
 /*
 ========================================================================
 Routine Description:
@@ -630,7 +612,5 @@ UAPSD_EXTERN VOID UAPSD_TriggerFrameHandle(
 	IN	PRTMP_ADAPTER		pAd,
 	IN	MAC_TABLE_ENTRY		*pEntry,
 	IN	UCHAR				UpOfFrame);
-
-
 
 /* End of ap_uapsd.h */

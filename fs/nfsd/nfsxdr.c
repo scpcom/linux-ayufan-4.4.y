@@ -29,7 +29,6 @@ static u32	nfs_ftypes[] = {
 	NFSOCK, NFBAD,  NFLNK, NFBAD,
 };
 
-
 /*
  * XDR functions for basic NFS types
  */

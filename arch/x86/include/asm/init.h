@@ -10,7 +10,6 @@ kernel_physical_mapping_init(unsigned long start,
 			     unsigned long end,
 			     unsigned long page_size_mask);
 
-
 extern unsigned long __initdata e820_table_start;
 extern unsigned long __meminitdata e820_table_end;
 extern unsigned long __meminitdata e820_table_top;

@@ -28,4 +28,3 @@ static inline int pci_cleanup_aer_uncorrect_error_status(struct pci_dev *dev)
 #endif
 
 #endif //_AER_H_
-

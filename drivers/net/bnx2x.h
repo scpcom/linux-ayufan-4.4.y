@@ -24,12 +24,9 @@
 #define BCM_VLAN			1
 #endif
 
-
 #define BNX2X_MULTI_QUEUE
 
 #define BNX2X_NEW_NAPI
-
-
 
 #include <linux/mdio.h>
 #include "bnx2x_reg.h"
@@ -79,7 +76,6 @@
 		dev_info(&bp->pdev->dev, __fmt, ##__args); \
 	} while (0)
 
-
 #ifdef BNX2X_STOP_ON_ERROR
 #define bnx2x_panic() do { \
 		bp->panic = 1; \
@@ -95,11 +91,9 @@
 	} while (0)
 #endif
 
-
 #define U64_LO(x)			(u32)(((u64)(x)) & 0xffffffff)
 #define U64_HI(x)			(u32)(((u64)(x)) >> 32)
 #define HILO_U64(hi, lo)		((((u64)(hi)) << 32) + (lo))
-
 
 #define REG_ADDR(bp, offset)		(bp->regview + offset)
 
@@ -145,7 +139,6 @@
 #define EMAC_RD(bp, reg)		REG_RD(bp, emac_base + reg)
 #define EMAC_WR(bp, reg, val)		REG_WR(bp, emac_base + reg, val)
 
-
 /* fast path */
 
 struct sw_rx_bd {
@@ -170,7 +163,6 @@ union db_prod {
 	struct doorbell_set_prod data;
 	u32		raw;
 };
-
 
 /* MC hsi */
 #define BCM_PAGE_SHIFT			12
@@ -213,7 +205,6 @@ union db_prod {
 					 RX_SGE_MASK_ELEM_SZ)
 #define RX_SGE_MASK_LEN_MASK		(RX_SGE_MASK_LEN - 1)
 #define NEXT_SGE_MASK_ELEM(el)		(((el) + 1) & RX_SGE_MASK_LEN_MASK)
-
 
 struct bnx2x_eth_q_stats {
 	u32 total_bytes_received_hi;
@@ -314,7 +305,6 @@ struct bnx2x_fastpath {
 	__le16			*rx_cons_sb;
 	__le16			*rx_bd_cons_sb;
 
-
 	unsigned long		tx_pkt,
 				rx_pkt,
 				rx_calls;
@@ -344,7 +334,6 @@ struct bnx2x_fastpath {
 };
 
 #define bnx2x_fp(bp, nr, var)		(bp->fp[nr].var)
-
 
 /* MC hsi */
 #define MAX_FETCH_BD			13	/* HW max BDs per packet */
@@ -386,7 +375,6 @@ struct bnx2x_fastpath {
 				  (MAX_RCQ_DESC_CNT - 1)) ? (x) + 2 : (x) + 1)
 #define RCQ_BD(x)			((x) & MAX_RCQ_BD)
 
-
 /* This is needed for determining of last_max */
 #define SUB_S16(a, b)			(s16)((s16)(a) - (s16)(b))
 
@@ -408,7 +396,6 @@ struct bnx2x_fastpath {
 	__SGE_MASK_CLEAR_BIT(fp->sge_mask[(idx) >> RX_SGE_MASK_ELEM_SHIFT], \
 			     ((idx) & RX_SGE_MASK_ELEM_MASK))
 
-
 /* used on a CID received from the HW */
 #define SW_CID(x)			(le32_to_cpu(x) & \
 					 (COMMON_RAMROD_ETH_RX_CQE_CID >> 7))
@@ -419,14 +406,12 @@ struct bnx2x_fastpath {
 						 le32_to_cpu((bd)->addr_lo))
 #define BD_UNMAP_LEN(bd)		(le16_to_cpu((bd)->nbytes))
 
-
 #define DPM_TRIGER_TYPE			0x40
 #define DOORBELL(bp, cid, val) \
 	do { \
 		writel((u32)(val), bp->doorbells + (BCM_PAGE_SIZE * (cid)) + \
 		       DPM_TRIGER_TYPE); \
 	} while (0)
-
 
 /* TX CSUM helpers */
 #define SKB_CS_OFF(skb)		(offsetof(struct tcphdr, check) - \
@@ -445,7 +430,6 @@ struct bnx2x_fastpath {
 
 #define XMIT_CSUM			(XMIT_CSUM_V4 | XMIT_CSUM_V6)
 #define XMIT_GSO			(XMIT_GSO_V4 | XMIT_GSO_V6)
-
 
 /* stuff added to make the code fit 80Col */
 
@@ -481,7 +465,6 @@ struct bnx2x_fastpath {
 #define BNX2X_RX_SUM_FIX(cqe) \
 	BNX2X_PRS_FLAG_OVERETH_IPV4(cqe->fast_path_cqe.pars_flags.flags)
 
-
 #define FP_USB_FUNC_OFF			(2 + 2*HC_USTORM_SB_NUM_INDICES)
 #define FP_CSB_FUNC_OFF			(2 + 2*HC_CSTORM_SB_NUM_INDICES)
 
@@ -505,7 +488,6 @@ struct bnx2x_fastpath {
 
 #define BNX2X_TX_SB_INDEX \
 	(&fp->status_blk->c_status_block.index_values[C_SB_ETH_TX_CQ_INDEX])
-
 
 /* end of fast path */
 
@@ -558,7 +540,6 @@ struct bnx2x_common {
 	u32			bc_ver;
 };
 
-
 /* end of common */
 
 /* port */
@@ -609,7 +590,6 @@ struct bnx2x_port {
 };
 
 /* end of port */
-
 
 enum bnx2x_stats_event {
 	STATS_EVENT_PMF = 0,
@@ -761,7 +741,6 @@ struct bnx2x_eth_stats {
 #define STATS_OFFSET32(stat_name) \
 			(offsetof(struct bnx2x_eth_stats, stat_name) / 4)
 
-
 #define MAX_CONTEXT			16
 
 union cdu_context {
@@ -795,7 +774,6 @@ struct bnx2x_slowpath {
 #define bnx2x_sp(bp, var)		(&bp->slowpath->var)
 #define bnx2x_sp_mapping(bp, var) \
 		(bp->slowpath_mapping + offsetof(struct bnx2x_slowpath, var))
-
 
 /* attn group wiring */
 #define MAX_DYNAMIC_ATTN_GRPS		8
@@ -1029,7 +1007,6 @@ struct bnx2x {
 	const struct firmware	*firmware;
 };
 
-
 #define BNX2X_MAX_QUEUES(bp)	(IS_E1HMF(bp) ? (MAX_CONTEXT/(2 * E1HVN_MAX)) \
 					      : (MAX_CONTEXT/2))
 #define BNX2X_NUM_QUEUES(bp)	(bp->num_rx_queues + bp->num_tx_queues)
@@ -1044,7 +1021,6 @@ struct bnx2x {
 			for (var = 0; var < BNX2X_NUM_QUEUES(bp); var++)
 #define for_each_nondefault_queue(bp, var) \
 			for (var = 1; var < bp->num_rx_queues; var++)
-
 
 void bnx2x_read_dmae(struct bnx2x *bp, u32 src_addr, u32 len32);
 void bnx2x_write_dmae(struct bnx2x *bp, dma_addr_t dma_addr, u32 dst_addr,
@@ -1074,14 +1050,12 @@ static inline u32 reg_poll(struct bnx2x *bp, u32 reg, u32 expected, int ms,
 	return val;
 }
 
-
 /* load/unload mode */
 #define LOAD_NORMAL			0
 #define LOAD_OPEN			1
 #define LOAD_DIAG			2
 #define UNLOAD_NORMAL			0
 #define UNLOAD_CLOSE			1
-
 
 /* DMAE command defines */
 #define DMAE_CMD_SRC_PCI		0
@@ -1118,13 +1092,11 @@ static inline u32 reg_poll(struct bnx2x *bp, u32 reg, u32 expected, int ms,
 #define PMF_DMAE_C(bp)			(BP_PORT(bp) * MAX_DMAE_C_PER_PORT + \
 					 E1HVN_MAX)
 
-
 /* PCIE link and speed */
 #define PCICFG_LINK_WIDTH		0x1f00000
 #define PCICFG_LINK_WIDTH_SHIFT		20
 #define PCICFG_LINK_SPEED		0xf0000
 #define PCICFG_LINK_SPEED_SHIFT		16
-
 
 #define BNX2X_NUM_TESTS			7
 
@@ -1135,9 +1107,7 @@ static inline u32 reg_poll(struct bnx2x *bp, u32 reg, u32 expected, int ms,
 #define BNX2X_LOOPBACK_FAILED		(BNX2X_MAC_LOOPBACK_FAILED | \
 					 BNX2X_PHY_LOOPBACK_FAILED)
 
-
 #define STROM_ASSERT_ARRAY_SIZE		50
-
 
 /* must be used on a CID before placing it on a HW ring */
 #define HW_CID(bp, x)			((BP_PORT(bp) << 23) | \
@@ -1146,10 +1116,8 @@ static inline u32 reg_poll(struct bnx2x *bp, u32 reg, u32 expected, int ms,
 #define SP_DESC_CNT		(BCM_PAGE_SIZE / sizeof(struct eth_spe))
 #define MAX_SP_DESC_CNT			(SP_DESC_CNT - 1)
 
-
 #define BNX2X_BTR			3
 #define MAX_SPQ_PENDING			8
-
 
 /* CMNG constants
    derived from lab experiments, and not from system spec calculations !!! */
@@ -1163,7 +1131,6 @@ static inline u32 reg_poll(struct bnx2x *bp, u32 reg, u32 expected, int ms,
    coefficient for calculating the fairness timer */
 #define QM_ARB_BYTES			40000
 #define FAIR_MEM			2
-
 
 #define ATTN_NIG_FOR_FUNC		(1L << 8)
 #define ATTN_SW_TIMER_4_FUNC		(1L << 9)
@@ -1179,7 +1146,6 @@ static inline u32 reg_poll(struct bnx2x *bp, u32 reg, u32 expected, int ms,
 
 #define ATTN_HARD_WIRED_MASK		0xff00
 #define ATTENTION_ID			4
-
 
 /* stuff added to make the code fit 80Col */
 
@@ -1250,7 +1216,6 @@ static inline u32 reg_poll(struct bnx2x *bp, u32 reg, u32 expected, int ms,
 				 AEU_INPUTS_ATTN_BITS_IGU_PARITY_ERROR | \
 				 AEU_INPUTS_ATTN_BITS_MISC_PARITY_ERROR)
 
-
 #define MULTI_FLAGS(bp) \
 		(TSTORM_ETH_FUNCTION_COMMON_CONFIG_RSS_IPV4_CAPABILITY | \
 		 TSTORM_ETH_FUNCTION_COMMON_CONFIG_RSS_IPV4_TCP_CAPABILITY | \
@@ -1259,7 +1224,6 @@ static inline u32 reg_poll(struct bnx2x *bp, u32 reg, u32 expected, int ms,
 		 (bp->multi_mode << \
 		  TSTORM_ETH_FUNCTION_COMMON_CONFIG_RSS_MODE_SHIFT))
 #define MULTI_MASK			0x7f
-
 
 #define DEF_USB_FUNC_OFF		(2 + 2*HC_USTORM_DEF_SB_NUM_INDICES)
 #define DEF_CSB_FUNC_OFF		(2 + 2*HC_CSTORM_DEF_SB_NUM_INDICES)
@@ -1271,19 +1235,16 @@ static inline u32 reg_poll(struct bnx2x *bp, u32 reg, u32 expected, int ms,
 #define BNX2X_SP_DSB_INDEX \
 (&bp->def_status_blk->c_def_status_block.index_values[C_DEF_SB_SP_INDEX])
 
-
 #define CAM_IS_INVALID(x) \
 (x.target_table_entry.flags == TSTORM_CAM_TARGET_TABLE_ENTRY_ACTION_TYPE)
 
 #define CAM_INVALIDATE(x) \
 	(x.target_table_entry.flags = TSTORM_CAM_TARGET_TABLE_ENTRY_ACTION_TYPE)
 
-
 /* Number of u32 elements in MC hash array */
 #define MC_HASH_SIZE			8
 #define MC_HASH_OFFSET(bp, i)		(BAR_TSTRORM_INTMEM + \
 	TSTORM_APPROXIMATE_MATCH_MULTICAST_FILTERING_OFFSET(BP_FUNC(bp)) + i*4)
-
 
 #ifndef PXP2_REG_PXP2_INT_STS
 #define PXP2_REG_PXP2_INT_STS		PXP2_REG_PXP2_INT_STS_0

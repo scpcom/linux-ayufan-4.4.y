@@ -99,5 +99,4 @@ void snd_sequencer_memory_done(void);
 /* polling */
 int snd_seq_pool_poll_wait(struct snd_seq_pool *pool, struct file *file, poll_table *wait);
 
-
 #endif

@@ -72,7 +72,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	#define DB(x)
 #endif	
 
-
 static MV_STATUS xorWinOverlapDetect(MV_U32 unit,MV_U32 winNum, MV_ADDR_WIN *pAddrWin);
 
 MV_TARGET xorAddrDecPrioTap[] = 
@@ -138,7 +137,6 @@ static MV_STATUS mvXorInitWinsUnit (MV_U32 unit)
 			return MV_ERROR;
 		}
 
-	
         if (cpuAddrDecWin.enable == MV_TRUE)
 		{
 
@@ -161,7 +159,6 @@ static MV_STATUS mvXorInitWinsUnit (MV_U32 unit)
     
 	return MV_OK;
 }
-
 
 /*******************************************************************************
 * mvXorInit - Initialize XOR engine
@@ -250,7 +247,6 @@ MV_STATUS mvXorTargetWinSet(MV_U32 unit, MV_U32 winNum, MV_XOR_DEC_WIN *pAddrDec
         return MV_BAD_PARAM;
 	}
     
-
 	mvCtrlAttribGet(pAddrDecWin->target,&targetAttribs);
 
 	/* set attributes */
@@ -259,7 +255,6 @@ MV_STATUS mvXorTargetWinSet(MV_U32 unit, MV_U32 winNum, MV_XOR_DEC_WIN *pAddrDec
 	/* set target ID */
 	xorDecRegs.baseReg &= ~XEBARX_TARGET_MASK;
 	xorDecRegs.baseReg |= targetAttribs.targetId << XEBARX_TARGET_OFFS;
-
 
     /* Write to address decode Base Address Register */
 	MV_REG_WRITE(XOR_BASE_ADDR_REG(unit,winNum), xorDecRegs.baseReg);
@@ -334,8 +329,6 @@ MV_STATUS mvXorTargetWinGet(MV_U32 unit,MV_U32 winNum, MV_XOR_DEC_WIN *pAddrDecW
         }
     }
 
-
-
 	xorDecRegs.baseReg  = MV_REG_READ(XOR_BASE_ADDR_REG(unit,winNum));
 	xorDecRegs.sizeReg  = MV_REG_READ(XOR_SIZE_MASK_REG(unit,winNum));
 
@@ -350,7 +343,6 @@ MV_STATUS mvXorTargetWinGet(MV_U32 unit,MV_U32 winNum, MV_XOR_DEC_WIN *pAddrDecW
 		(xorDecRegs.baseReg & XEBARX_ATTR_MASK) >> XEBARX_ATTR_OFFS;
 	targetAttrib.targetId = 
 		(xorDecRegs.baseReg & XEBARX_TARGET_MASK) >> XEBARX_TARGET_OFFS;
-
 
 	pAddrDecWin->target = mvCtrlTargetGet(&targetAttrib);
 

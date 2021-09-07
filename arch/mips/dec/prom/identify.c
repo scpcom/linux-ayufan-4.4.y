@@ -55,7 +55,6 @@ const char *get_system_type(void)
 	return system;
 }
 
-
 /*
  * Setup essential system-specific memory addresses.  We need them
  * early.  Semantically the functions belong to prom/init.c, but they
@@ -109,7 +108,6 @@ static inline void prom_init_kn03(void)
 	ioasic_base = (void *)CKSEG1ADDR(dec_kn_slot_base + IOASIC_IOCTL);
 	dec_rtc_base = (void *)CKSEG1ADDR(dec_kn_slot_base + IOASIC_TOY);
 }
-
 
 void __init prom_identify_arch(u32 magic)
 {

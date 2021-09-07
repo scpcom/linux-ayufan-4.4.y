@@ -2159,7 +2159,6 @@ int swapcache_prepare(swp_entry_t entry)
 	return __swap_duplicate(entry, SWAP_CACHE);
 }
 
-
 struct swap_info_struct *
 get_swap_info_struct(unsigned type)
 {

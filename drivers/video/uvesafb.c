@@ -1565,7 +1565,6 @@ static void __devinit uvesafb_init_mtrr(struct fb_info *info)
 #endif /* CONFIG_MTRR */
 }
 
-
 static ssize_t uvesafb_show_vbe_ver(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
@@ -2036,4 +2035,3 @@ MODULE_PARM_DESC(v86d, "Path to the v86d userspace helper.");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Michal Januszewski <spock@gentoo.org>");
 MODULE_DESCRIPTION("Framebuffer driver for VBE2.0+ compliant graphics boards");
-

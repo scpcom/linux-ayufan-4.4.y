@@ -284,8 +284,6 @@ bfa_uf_start(struct bfa_s *bfa)
 	bfa_uf_post_all(BFA_UF_MOD(bfa));
 }
 
-
-
 /**
  *  bfa_uf_api
  */
@@ -320,8 +318,6 @@ bfa_uf_free(struct bfa_uf_s *uf)
 	bfa_uf_post_all(BFA_UF_MOD(uf->bfa));
 }
 
-
-
 /**
  *  uf_pub BFA uf module public functions
  */
@@ -341,5 +337,3 @@ bfa_uf_isr(struct bfa_s *bfa, struct bfi_msg_s *msg)
 		bfa_assert(0);
 	}
 }
-
-

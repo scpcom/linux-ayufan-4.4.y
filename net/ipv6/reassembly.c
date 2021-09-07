@@ -62,7 +62,6 @@ struct ip6frag_skb_cb
 
 #define FRAG6_CB(skb)	((struct ip6frag_skb_cb*)((skb)->cb))
 
-
 /*
  *	Equivalent of ipv4 struct ipq
  */

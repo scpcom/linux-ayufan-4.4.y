@@ -849,7 +849,6 @@ static int try_to_unmap_one(struct page *page, struct vm_area_struct *vma,
 	} else
 		dec_mm_counter(mm, file_rss);
 
-
 	page_remove_rmap(page);
 	page_cache_release(page);
 
@@ -1242,4 +1241,3 @@ int try_to_munlock(struct page *page)
 	else
 		return try_to_unmap_file(page, TTU_MUNLOCK);
 }
-

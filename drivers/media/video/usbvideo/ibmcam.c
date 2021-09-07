@@ -934,7 +934,6 @@ static enum ParseState ibmcam_model3_parse_lines(
 				v = 128 + ((ccm + color_corr) * (v - 128)) / ccm;
 			}
 
-
 			YUV_TO_RGB_BY_THE_BOOK(y, u, v, rv, gv, bv);
 			RGB24_PUTPIXEL(frame, i, rw, rv, gv, bv);  /* No deinterlacing */
 		}
@@ -3923,7 +3922,6 @@ static int ibmcam_probe(struct usb_interface *intf, const struct usb_device_id *
 	usb_set_intfdata (intf, uvd);
 	return 0;
 }
-
 
 static struct usb_device_id id_table[] = {
 	{ USB_DEVICE_VER(IBMCAM_VENDOR_ID, IBMCAM_PRODUCT_ID, 0x0002, 0x0002) },	/* Model 1 */

@@ -52,7 +52,6 @@
  *
  */
 
-
 #include "hisax.h"
 #include "isdnl1.h"
 #include "isac.h"
@@ -96,7 +95,6 @@ static WORD initAMD[] = {
 	0xFFFF
 };
 
-
 static void /* macro wWordAMD */
 WriteWordAmd7930(struct IsdnCardState *cs, BYTE reg, WORD val)
 {
@@ -123,7 +121,6 @@ ReadWordAmd7930(struct IsdnCardState *cs, BYTE reg)
 	return (res);
 }
 
-
 static void
 Amd7930_ph_command(struct IsdnCardState *cs, u_char command, char *s)
 {
@@ -133,8 +130,6 @@ Amd7930_ph_command(struct IsdnCardState *cs, u_char command, char *s)
         cs->dc.amd7930.lmr1 = command;
         wByteAMD(cs, 0xA3, command);
 }
-
-
 
 static BYTE i430States[] = {
 // to   reset  F3    F4    F5    F6    F7    F8    AR     from
@@ -148,12 +143,8 @@ static BYTE i430States[] = {
         0x01, 0x03, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00,   // F8
         0x01, 0x03, 0x00, 0x00, 0x00, 0x09, 0x00, 0x0A};  // AR
 
-
 /*                    Row     init    -   reset  F3    F4    F5    F6    F7    F8    AR */
 static BYTE stateHelper[] = { 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
-
-
-
 
 static void
 Amd7930_get_state(struct IsdnCardState *cs) {
@@ -161,8 +152,6 @@ Amd7930_get_state(struct IsdnCardState *cs) {
         cs->dc.amd7930.ph_state = (lsr & 0x7) + 2;
         Amd7930_new_ph(cs);
 }
-
-
 
 static void
 Amd7930_new_ph(struct IsdnCardState *cs)
@@ -229,8 +218,6 @@ Amd7930_new_ph(struct IsdnCardState *cs)
 	}
 }
 
-
-
 static void
 Amd7930_bh(struct work_struct *work)
 {
@@ -274,10 +261,8 @@ Amd7930_empty_Dfifo(struct IsdnCardState *cs, int flag)
 	BYTE *ptr;
 	struct sk_buff *skb;
 
-
 	if ((cs->debug & L1_DEB_ISAC) && !(cs->debug & L1_DEB_ISAC_FIFO))
 		debugl1(cs, "Amd7930: empty_Dfifo");
-
 
 	ptr = cs->rcvbuf + cs->rcvidx;
 
@@ -339,7 +324,6 @@ Amd7930_empty_Dfifo(struct IsdnCardState *cs, int flag)
 	AmdIrqOn(cs);
 }
 
-
 static void
 Amd7930_fill_Dfifo(struct IsdnCardState *cs)
 {
@@ -361,7 +345,6 @@ Amd7930_fill_Dfifo(struct IsdnCardState *cs)
         /* continue frame */
         else len = cs->dc.amd7930.tx_xmtlen;
 
-
 	/* AMD interrupts off */
 	AmdIrqOff(cs);
 
@@ -377,7 +360,6 @@ Amd7930_fill_Dfifo(struct IsdnCardState *cs)
         }
         count = ptr - cs->tx_skb->data;
 	skb_pull(cs->tx_skb, count);
-
 
         dtcrr = rWordAMD(cs, 0x85); // DTCR
         dmr3  = rByteAMD(cs, 0x8E);
@@ -410,7 +392,6 @@ Amd7930_fill_Dfifo(struct IsdnCardState *cs)
 	/* AMD interrupts on */
         AmdIrqOn(cs);
 }
-
 
 void Amd7930_interrupt(struct IsdnCardState *cs, BYTE irflags)
 {
@@ -489,14 +470,12 @@ void Amd7930_interrupt(struct IsdnCardState *cs, BYTE irflags)
                 AmdIrqOn(cs);
 	}
 
-
         /* D RX FIFO full or tiny packet in Fifo -> empty */
 	if ((irflags & 2) || (dsr1 & 2)) {
                 if (cs->debug & L1_DEB_ISAC)
 			debugl1(cs, "Amd7930: interrupt: empty D-FIFO");
                 Amd7930_empty_Dfifo(cs, 0);
 	}
-
 
         /* D-Frame transmit complete */
 	if (dsr1 & 64) {
@@ -675,13 +654,11 @@ setstack_Amd7930(struct PStack *st, struct IsdnCardState *cs)
         st->l1.l1hw = Amd7930_l1hw;
 }
 
-
 static void
 DC_Close_Amd7930(struct IsdnCardState *cs) {
         if (cs->debug & L1_DEB_ISAC)
 		debugl1(cs, "Amd7930: DC_Close called");
 }
-
 
 static void
 dbusy_timer_handler(struct IsdnCardState *cs)
@@ -690,7 +667,6 @@ dbusy_timer_handler(struct IsdnCardState *cs)
 	struct PStack *stptr;
         WORD dtcr, der;
         BYTE dsr1, dsr2;
-
 
         if (cs->debug & L1_DEB_ISAC)
 		debugl1(cs, "Amd7930: dbusy_timer expired!");
@@ -740,8 +716,6 @@ dbusy_timer_handler(struct IsdnCardState *cs)
 		}
 	}
 }
-
-
 
 void Amd7930_init(struct IsdnCardState *cs)
 {

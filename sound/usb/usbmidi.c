@@ -51,7 +51,6 @@
 #include <sound/asequencer.h>
 #include "usbaudio.h"
 
-
 /*
  * define this to log all USB packets
  */
@@ -66,11 +65,9 @@
 #define OUTPUT_URBS 7
 #define INPUT_URBS 7
 
-
 MODULE_AUTHOR("Clemens Ladisch <clemens@ladisch.de>");
 MODULE_DESCRIPTION("USB Audio/MIDI helper module");
 MODULE_LICENSE("Dual BSD/GPL");
-
 
 struct usb_ms_header_descriptor {
 	__u8  bLength;
@@ -877,7 +874,6 @@ static struct usb_protocol_ops snd_usbmidi_emagic_ops = {
 	.init_out_endpoint = snd_usbmidi_emagic_init_out,
 	.finish_out_endpoint = snd_usbmidi_emagic_finish_out,
 };
-
 
 static int snd_usbmidi_output_open(struct snd_rawmidi_substream *substream)
 {

@@ -37,7 +37,6 @@
 #include "drm_pciids.h"
 #include <linux/console.h>
 
-
 /*
  * KMS wrapper.
  */
@@ -73,7 +72,6 @@ int radeon_mmap(struct file *filp, struct vm_area_struct *vma);
 int radeon_debugfs_init(struct drm_minor *minor);
 void radeon_debugfs_cleanup(struct drm_minor *minor);
 #endif
-
 
 int radeon_no_wb;
 int radeon_modeset = -1;

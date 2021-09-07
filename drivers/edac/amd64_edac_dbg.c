@@ -131,14 +131,12 @@ static ssize_t amd64_nbcfg_show(struct mem_ctl_info *mci, char *data)
 	return sprintf(data, "%x\n", pvt->ctl_error_info.nbcfg);
 }
 
-
 static ssize_t amd64_dhar_show(struct mem_ctl_info *mci, char *data)
 {
 	struct amd64_pvt *pvt = mci->pvt_info;
 
 	return sprintf(data, "%x\n", pvt->dhar);
 }
-
 
 static ssize_t amd64_dbam_show(struct mem_ctl_info *mci, char *data)
 {
@@ -147,14 +145,12 @@ static ssize_t amd64_dbam_show(struct mem_ctl_info *mci, char *data)
 	return sprintf(data, "%x\n", pvt->dbam0);
 }
 
-
 static ssize_t amd64_topmem_show(struct mem_ctl_info *mci, char *data)
 {
 	struct amd64_pvt *pvt = mci->pvt_info;
 
 	return sprintf(data, "%llx\n", pvt->top_mem);
 }
-
 
 static ssize_t amd64_topmem2_show(struct mem_ctl_info *mci, char *data)
 {

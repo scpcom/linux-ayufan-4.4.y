@@ -31,7 +31,6 @@ do {									\
 		: : "r" (__ts2));					\
 } while (0)
 
-
 #define __save_dsp(tsk)							\
 do {									\
 	register u32 *__ts2 __asm__ ("r2") =				\

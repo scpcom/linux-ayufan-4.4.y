@@ -17,7 +17,6 @@
  * This file will go away soon.
  */
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
@@ -42,7 +41,6 @@
 
 static int major_dev = -1;
 
-
 /* Device user information */
 #define MAX_EVENTS	32
 #define USER_MAGIC	0x7ea4
@@ -56,7 +54,6 @@ typedef struct user_info_t {
 	struct user_info_t	*next;
 	struct pcmcia_socket	*socket;
 } user_info_t;
-
 
 #ifdef CONFIG_PCMCIA_DEBUG
 extern int ds_pc_debug;
@@ -102,7 +99,6 @@ static struct pcmcia_driver *get_pcmcia_driver(dev_info_t *dev_info)
 	return (p_drv);
 }
 
-
 #ifdef CONFIG_PROC_FS
 static struct proc_dir_entry *proc_pccard = NULL;
 
@@ -141,7 +137,6 @@ static const struct file_operations pccard_drivers_proc_fops = {
 	.release	= single_release,
 };
 #endif
-
 
 #ifdef CONFIG_PCMCIA_PROBE
 
@@ -299,7 +294,6 @@ static int pccard_get_configuration_info(struct pcmcia_socket *s,
 	if (!(s->state & SOCKET_PRESENT))
 		return -ENODEV;
 
-
 #ifdef CONFIG_CARDBUS
 	if (s->state & SOCKET_CARDBUS) {
 		memset(config, 0, sizeof(config_info_t));
@@ -361,13 +355,11 @@ static int pccard_get_configuration_info(struct pcmcia_socket *s,
 	return 0;
 } /* pccard_get_configuration_info */
 
-
 /*======================================================================
 
     These manage a ring buffer of events pending for one user process
 
 ======================================================================*/
-
 
 static int queue_empty(user_info_t *user)
 {
@@ -395,7 +387,6 @@ void handle_event(struct pcmcia_socket *s, event_t event)
 	queue_event(user, event);
     wake_up_interruptible(&s->queue);
 }
-
 
 /*======================================================================
 
@@ -613,7 +604,6 @@ static int get_device_info(struct pcmcia_socket *s, bind_info_t *bind_info, int 
 	pcmcia_put_dev(p_dev);
 	return (ret);
 } /* get_device_info */
-
 
 static int ds_open(struct inode *inode, struct file *file)
 {
@@ -1018,7 +1008,6 @@ void __init pcmcia_setup_ioctl(void) {
 		proc_create("drivers", 0, proc_pccard, &pccard_drivers_proc_fops);
 #endif
 }
-
 
 void __exit pcmcia_cleanup_ioctl(void) {
 #ifdef CONFIG_PROC_FS

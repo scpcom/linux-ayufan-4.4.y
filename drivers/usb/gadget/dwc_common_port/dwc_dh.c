@@ -132,7 +132,6 @@ int dwc_dh_modpow(void *num, uint32_t num_len,
 	return retval;
 }
 
-
 int dwc_dh_pk(uint8_t nd, uint8_t *exp, uint8_t *pk, uint8_t *hash)
 {
 	int retval;
@@ -233,7 +232,6 @@ int dwc_dh_derive_keys(uint8_t nd, uint8_t *pkh, uint8_t *pkd,
 
 	return 0;
 }
-
 
 #ifdef DH_TEST_VECTORS
 

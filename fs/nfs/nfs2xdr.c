@@ -294,7 +294,6 @@ nfs_xdr_readres(struct rpc_rqst *req, __be32 *p, struct nfs_readres *res)
 	return count;
 }
 
-
 /*
  * Write arguments. Splice the buffer to be written into the iovec.
  */

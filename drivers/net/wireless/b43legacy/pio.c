@@ -30,7 +30,6 @@
 
 #include <linux/delay.h>
 
-
 static void tx_start(struct b43legacy_pioqueue *queue)
 {
 	b43legacy_pio_write(queue, B43legacy_PIO_TXCTL,

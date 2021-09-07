@@ -123,7 +123,6 @@
 #define Y2_RESYNC_WATERMARK     1000000L
 #endif
 
-
 /******************************************************************************
  *
  * Generic ISR defines
@@ -261,7 +260,6 @@ struct s_IOCTL {
 #define SK_DRIVER_SET_MTU(pAc,IoC,i,v)	0
 #define SK_DRIVER_PRESET_MTU(pAc,IoC,i,v)	0
 
-
 /******************************************************************************
  *
  * Various offsets and sizes
@@ -336,7 +334,6 @@ struct s_TxD {
  * Generic Yukon-II defines
  *
  ******************************************************************************/
-
 
 /* Number of Status LE which will be allocated at init time. */
 #define NUMBER_OF_ST_LE 4096L
@@ -604,7 +601,6 @@ struct s_queue {
 
 #endif
 
-
 /*******************************************************************************
  *
  * Used interrupt bits in the interrupts source register
@@ -784,7 +780,6 @@ struct s_RxPort {                       /* the receive descriptor rings  */
 
 #define C_TX_INT_MOD_UPPER_RANGE	4095     /* in IRQs/second */
 
-
 typedef struct s_DynIrqModInfo {
 	SK_U64     PrevPort0RxIntrCts;
 	SK_U64     PrevPort1RxIntrCts;
@@ -915,8 +910,6 @@ struct s_AC  {
 #endif
 };
 
-
-
 #endif
 
 /*******************************************************************************
@@ -924,4 +917,3 @@ struct s_AC  {
  * End of file
  *
  ******************************************************************************/
-

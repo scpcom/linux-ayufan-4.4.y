@@ -52,7 +52,6 @@
 #define DM_RX_OVERHEAD	7	/* 3 byte header + 4 byte crc tail */
 #define DM_TIMEOUT	1000
 
-
 static int dm_read(struct usbnet *dev, u8 reg, u16 length, void *data)
 {
 	void *buf;
@@ -270,8 +269,6 @@ static int dm_read_eeprom_word(struct usbnet *dev, u8 offset, void *value)
 {
 	return dm_read_shared_word(dev, 0, offset, value);
 }
-
-
 
 static int dm9601_get_eeprom_len(struct net_device *dev)
 {

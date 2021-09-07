@@ -125,7 +125,6 @@ extern e_vector vectors[];
 #define MMU_T	     (0x0040)    /* transparent translation */
 #define MMU_NUM      (0x0007)    /* number of levels traversed */
 
-
 /* bits for 68040 special status word */
 #define CP_040	(0x8000)
 #define CU_040	(0x4000)

@@ -27,7 +27,6 @@
 #include "seq_oss_readq.h"
 #include "seq_oss_writeq.h"
 
-
 /*
  * prototypes
  */
@@ -42,7 +41,6 @@ static int note_off_event(struct seq_oss_devinfo *dp, int dev, int ch, int note,
 static int set_note_event(struct seq_oss_devinfo *dp, int dev, int type, int ch, int note, int vel, struct snd_seq_event *ev);
 static int set_control_event(struct seq_oss_devinfo *dp, int dev, int type, int ch, int param, int val, struct snd_seq_event *ev);
 static int set_echo_event(struct seq_oss_devinfo *dp, union evrec *rec, struct snd_seq_event *ev);
-
 
 /*
  * convert an OSS event to ALSA event
@@ -444,4 +442,3 @@ snd_seq_oss_event_input(struct snd_seq_event *ev, int direct, void *private_data
 	}
 	return 0;
 }
-

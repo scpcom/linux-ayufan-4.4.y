@@ -105,7 +105,6 @@ static unsigned short amd756_ioport;
 #define GE_HOST_STC		(1 << 3)
 #define GE_ABORT		(1 << 5)
 
-
 static int amd756_transaction(struct i2c_adapter *adap)
 {
 	int temp;
@@ -259,7 +258,6 @@ static s32 amd756_access(struct i2c_adapter * adap, u16 addr,
 
 	if ((read_write == I2C_SMBUS_WRITE) || (size == AMD756_QUICK))
 		return 0;
-
 
 	switch (size) {
 	case AMD756_BYTE:

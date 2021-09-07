@@ -12,7 +12,6 @@
 
 #include "leds.h"
 
-
 #define LED_STATE_ENABLED	1
 #define LED_STATE_CLAIMED	2
 
@@ -97,4 +96,3 @@ void simpad_leds_event(led_event_t evt)
 	else 
 	        clear_cs3_bit(LED2_ON);
 }
-

@@ -39,7 +39,6 @@
 	__raw_writel(__raw_readl(ptr) | EEPROM_CSEL, ptr);	\
 	__raw_writel(__raw_readl(ptr) | EEPROM_ECLK, ptr); })
 
-
 #define eeprom_cs_off(ptr) ({	\
 	__raw_writel(__raw_readl(ptr) & ~EEPROM_ECLK, ptr);	\
 	__raw_writel(__raw_readl(ptr) & ~EEPROM_CSEL, ptr);	\

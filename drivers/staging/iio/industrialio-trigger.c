@@ -29,7 +29,6 @@
  * Any other suggestions?
  */
 
-
 static DEFINE_IDR(iio_trigger_idr);
 static DEFINE_SPINLOCK(iio_trigger_idr_lock);
 
@@ -60,7 +59,6 @@ static void iio_trigger_unregister_sysfs(struct iio_trigger *trig_info)
 		sysfs_remove_group(&trig_info->dev.kobj,
 				   trig_info->control_attrs);
 }
-
 
 /**
  * iio_trigger_register_id() - get a unique id for this trigger
@@ -396,4 +394,3 @@ int iio_device_unregister_trigger_consumer(struct iio_dev *dev_info)
 	return 0;
 }
 EXPORT_SYMBOL(iio_device_unregister_trigger_consumer);
-

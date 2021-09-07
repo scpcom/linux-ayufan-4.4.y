@@ -80,7 +80,6 @@ struct phase28_spec {
 #define WM_OUT_MUX2		0x1e	/* output MUX */
 #define WM_RESET		0x1f	/* software reset */
 
-
 /*
  * Logarithmic volume values for WM8770
  * Computed as 20 * Log10(255 / x)

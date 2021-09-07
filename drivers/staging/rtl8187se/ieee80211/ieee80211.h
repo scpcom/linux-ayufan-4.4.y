@@ -42,7 +42,6 @@
 
 #define MGMT_QUEUE_NUM 5
 
-
 #define IEEE_CMD_SET_WPA_PARAM			1
 #define	IEEE_CMD_SET_WPA_IE			2
 #define IEEE_CMD_SET_ENCRYPTION			3
@@ -73,11 +72,8 @@
 #define IEEE_KEY_MGMT_IEEE8021X			1
 #define IEEE_KEY_MGMT_PSK			2
 
-
-
 #define IEEE_MLME_STA_DEAUTH			1
 #define IEEE_MLME_STA_DISASSOC			2
-
 
 #define IEEE_CRYPT_ERR_UNKNOWN_ALG		2
 #define IEEE_CRYPT_ERR_UNKNOWN_ADDR		3
@@ -85,7 +81,6 @@
 #define IEEE_CRYPT_ERR_KEY_SET_FAILED		5
 #define IEEE_CRYPT_ERR_TX_KEY_SET_FAILED		6
 #define IEEE_CRYPT_ERR_CARD_CONF_FAILED		7
-
 
 #define	IEEE_CRYPT_ALG_NAME_LEN			16
 
@@ -119,7 +114,6 @@ typedef struct ieee_param {
 
 	} u;
 }ieee_param;
-
 
 #define MSECS(t) msecs_to_jiffies(t)
 #define msleep_interruptible_rtl  msleep_interruptible
@@ -265,7 +259,6 @@ struct ieee80211_snap_hdr {
 #define IEEE80211_STATMASK_NOISE (1<<2)
 #define IEEE80211_STATMASK_RATE (1<<3)
 #define IEEE80211_STATMASK_WEMASK 0x7
-
 
 #define IEEE80211_CCK_MODULATION    (1<<0)
 #define IEEE80211_OFDM_MODULATION   (1<<1)
@@ -439,7 +432,6 @@ struct ieee80211_security {
 	u8 level;
 	u16 flags;
 } __attribute__ ((packed));
-
 
 /*
 
@@ -962,7 +954,6 @@ struct ieee80211_device {
 	 */
 	struct ieee80211_network current_network;
 
-
 	enum ieee80211_state state;
 
 	int short_slot;
@@ -1046,7 +1037,6 @@ struct ieee80211_device {
 	struct sk_buff *mgmt_queue_ring[MGMT_QUEUE_NUM];
 	int mgmt_queue_head;
 	int mgmt_queue_tail;
-
 
 	/* used if IEEE_SOFTMAC_TX_QUEUE is set */
 	struct  tx_pending_t tx_pending;
@@ -1227,8 +1217,6 @@ struct ieee80211_device {
  */
 #define IEEE_SOFTMAC_BEACONS (1<<6)
 
-
-
 static inline void *ieee80211_priv(struct net_device *dev)
 {
 	return ((struct ieee80211_device *)netdev_priv(dev))->priv;
@@ -1303,8 +1291,6 @@ extern inline int ieee80211_get_hdrlen(u16 fc)
 	return hdrlen;
 }
 
-
-
 /* ieee80211.c */
 extern void free_ieee80211(struct net_device *dev);
 extern struct net_device *alloc_ieee80211(int sizeof_priv);
@@ -1321,7 +1307,6 @@ extern int ieee80211_encrypt_fragment(
 extern int ieee80211_rtl_xmit(struct sk_buff *skb,
 			  struct net_device *dev);
 extern void ieee80211_txb_free(struct ieee80211_txb *);
-
 
 /* ieee80211_rx.c */
 extern int ieee80211_rtl_rx(struct ieee80211_device *ieee, struct sk_buff *skb,

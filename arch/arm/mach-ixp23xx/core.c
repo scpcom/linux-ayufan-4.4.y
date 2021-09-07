@@ -43,7 +43,6 @@
 #include <asm/mach/irq.h>
 #include <asm/mach/arch.h>
 
-
 /*************************************************************************
  * Chip specific mappings shared by all IXP23xx systems
  *************************************************************************/
@@ -100,7 +99,6 @@ void __init ixp23xx_map_io(void)
 {
 	iotable_init(ixp23xx_io_desc, ARRAY_SIZE(ixp23xx_io_desc));
 }
-
 
 /***************************************************************************
  * IXP23xx Interrupt Handling
@@ -325,7 +323,6 @@ void __init ixp23xx_init_irq(void)
 	set_irq_chained_handler(IRQ_IXP23XX_PCI_INT_RPH, pci_handler);
 }
 
-
 /*************************************************************************
  * Timer-tick functions for IXP23xx
  *************************************************************************/
@@ -382,7 +379,6 @@ struct sys_timer ixp23xx_timer = {
 	.init		= ixp23xx_init_timer,
 	.offset		= ixp23xx_gettimeoffset,
 };
-
 
 /*************************************************************************
  * IXP23xx Platform Initialization

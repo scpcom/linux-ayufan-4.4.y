@@ -27,7 +27,6 @@
  * 	- Add module support
  */
 
-
 #include <linux/smp_lock.h>
 #include <linux/types.h>
 #include <linux/errno.h>
@@ -132,7 +131,6 @@ convert_from_efi_time(efi_time_t *eft, struct rtc_time *wtime)
 
 	/* day in the year [1-365]*/
 	wtime->tm_yday = compute_yday(eft);
-
 
 	switch (eft->daylight & EFI_ISDST) {
 		case EFI_ISDST:
@@ -340,7 +338,6 @@ efi_rtc_get_status(char *buf)
 		/* XXX fixme: convert to string? */
 		p += sprintf(p, "Timezone       : %u\n", eft.timezone);
 		
-
 	p += sprintf(p,
 		     "Alarm Time     : %u:%u:%u.%09u\n"
 		     "Alarm Date     : %u-%u-%u\n"

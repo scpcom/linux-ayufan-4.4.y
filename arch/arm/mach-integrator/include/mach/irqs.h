@@ -79,4 +79,3 @@
 #define IRQ_SIC_END			46
 
 #define NR_IRQS                         47
-

@@ -130,7 +130,6 @@ xfs_errortag_clearall(xfs_mount_t *mp, int loud)
 
 	memcpy(&fsid, mp->m_fixedfsid, sizeof(xfs_fsid_t));
 
-
 	for (i = 0; i < XFS_NUM_INJECT_ERROR; i++) {
 		if ((fsid == 0LL || xfs_etest_fsid[i] == fsid) &&
 		     xfs_etest[i] != 0) {
@@ -152,7 +151,6 @@ xfs_errortag_clearall(xfs_mount_t *mp, int loud)
 	return 0;
 }
 #endif /* DEBUG */
-
 
 void
 xfs_fs_cmn_err(int level, xfs_mount_t *mp, char *fmt, ...)

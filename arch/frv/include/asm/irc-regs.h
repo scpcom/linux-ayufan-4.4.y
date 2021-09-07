@@ -49,5 +49,4 @@ do {						\
 #define __get_IITMR(N)	({ __reg(0xfeff9880 + (N) * 8); })
 #define __set_IITMR(N,V) do { __reg(0xfeff9880 + (N) * 8) = (V); } while(0)
 
-
 #endif /* _ASM_IRC_REGS */

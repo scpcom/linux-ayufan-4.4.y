@@ -602,7 +602,6 @@ static inline bool ata_id_has_dipm(const u16 *id)
 	return val & (1 << 3);
 }
 
-
 static inline int ata_id_has_fua(const u16 *id)
 {
 	if ((id[ATA_ID_CFSSE] & 0xC000) != 0x4000)

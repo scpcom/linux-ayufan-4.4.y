@@ -249,7 +249,6 @@ static const struct usb_device_id *usb_match_dynamic_id(struct usb_interface *in
 	return NULL;
 }
 
-
 /* called from driver core with dev locked */
 static int usb_probe_device(struct device *dev)
 {

@@ -524,7 +524,6 @@ static ssize_t dabusb_read (struct file *file, char __user *buf, size_t count, l
 	if (s->remove_pending)
 		return -EIO;
 
-
 	if (!s->usbdev)
 		return -EIO;
 
@@ -766,7 +765,6 @@ static struct usb_class_driver dabusb_class = {
 	.minor_base =	DABUSB_MINOR,
 };
 
-
 /* --------------------------------------------------------------------- */
 static int dabusb_probe (struct usb_interface *intf,
 			 const struct usb_device_id *id)
@@ -787,8 +785,6 @@ static int dabusb_probe (struct usb_interface *intf,
 	if (intf->altsetting->desc.bInterfaceNumber != _DABUSB_IF &&
 	    le16_to_cpu(usbdev->descriptor.idProduct) == 0x9999)
 		return -ENODEV;
-
-
 
 	s = &dabusb[intf->minor];
 

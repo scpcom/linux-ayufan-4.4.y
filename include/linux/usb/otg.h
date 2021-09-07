@@ -77,14 +77,12 @@ struct otg_transceiver {
 
 };
 
-
 /* for board-specific init logic */
 extern int otg_set_transceiver(struct otg_transceiver *);
 
 /* sometimes transceivers are accessed only through e.g. ULPI */
 extern void usb_nop_xceiv_register(void);
 extern void usb_nop_xceiv_unregister(void);
-
 
 /* for usb host and peripheral controller drivers */
 extern struct otg_transceiver *otg_get_transceiver(void);
@@ -97,14 +95,12 @@ otg_start_hnp(struct otg_transceiver *otg)
 	return otg->start_hnp(otg);
 }
 
-
 /* for HCDs */
 static inline int
 otg_set_host(struct otg_transceiver *otg, struct usb_bus *host)
 {
 	return otg->set_host(otg, host);
 }
-
 
 /* for usb peripheral controller drivers */
 
@@ -136,7 +132,6 @@ otg_start_srp(struct otg_transceiver *otg)
 {
 	return otg->start_srp(otg);
 }
-
 
 /* for OTG controller drivers (and maybe other stuff) */
 extern int usb_bus_start_enum(struct usb_bus *bus, unsigned port_num);

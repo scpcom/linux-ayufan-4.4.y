@@ -90,7 +90,6 @@ struct fib_info {
 #define fib_dev		fib_nh[0].nh_dev
 };
 
-
 #ifdef CONFIG_IP_MULTIPLE_TABLES
 struct fib_rule;
 #endif

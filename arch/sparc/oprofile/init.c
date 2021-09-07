@@ -48,7 +48,6 @@ static int timer_start(void)
 	return 0;
 }
 
-
 static void timer_stop(void)
 {
 	nmi_adjust_hz(1);

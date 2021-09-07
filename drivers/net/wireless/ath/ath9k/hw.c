@@ -708,7 +708,6 @@ static void ath9k_hw_init_mode_regs(struct ath_hw *ah)
 				  2);
 	} else if (AR_SREV_9285_12_OR_LATER(ah)) {
 
-
 		INIT_INI_ARRAY(&ah->iniModes, ar9285Modes_9285_1_2,
 			       ARRAY_SIZE(ar9285Modes_9285_1_2), 6);
 		INIT_INI_ARRAY(&ah->iniCommon, ar9285Common_9285_1_2,
@@ -1052,7 +1051,6 @@ static void ath9k_hw_init_pll(struct ath_hw *ah,
 
 			if (chan && IS_CHAN_5GHZ(chan)) {
 				pll |= SM(0x28, AR_RTC_9160_PLL_DIV);
-
 
 				if (AR_SREV_9280_20(ah)) {
 					if (((chan->channel % 20) == 0)
@@ -3426,7 +3424,6 @@ enum ath9k_int ath9k_hw_set_interrupts(struct ath_hw *ah, enum ath9k_int ints)
 			REG_WRITE(ah, AR_INTR_ASYNC_ENABLE,
 				  AR_INTR_MAC_IRQ);
 			REG_WRITE(ah, AR_INTR_ASYNC_MASK, AR_INTR_MAC_IRQ);
-
 
 			REG_WRITE(ah, AR_INTR_SYNC_ENABLE,
 				  AR_INTR_SYNC_DEFAULT);

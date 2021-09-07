@@ -547,7 +547,6 @@ qc24_fail_command:
 	return 0;
 }
 
-
 /*
  * qla2x00_eh_wait_on_command
  *    Waits for the command to be returned by the Firmware for some
@@ -1906,7 +1905,6 @@ qla2x00_probe_one(struct pci_dev *pdev, const struct pci_device_id *id)
 	if (ql2xmaxqdepth != 0 && ql2xmaxqdepth <= 0xffffU)
 		req->max_q_depth = ql2xmaxqdepth;
 
-
 	base_vha = qla2x00_create_host(sht, ha);
 	if (!base_vha) {
 		qla_printk(KERN_WARNING, ha,
@@ -3024,7 +3022,6 @@ qla2x00_timer(scsi_qla_host_t *vha)
 		}
 		t++;
 	} /* End of for fcport  */
-
 
 	/* Loop down handler. */
 	if (atomic_read(&vha->loop_down_timer) > 0 &&

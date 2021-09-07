@@ -209,7 +209,6 @@ __strncpy_user:
 	sub	a2, a11, a2		# compute strlen
 	retw
 
-
 	.section .fixup, "ax"
 	.align	4
 
@@ -222,4 +221,3 @@ fixup_s:
 fixup_l:
 	movi	a2, -EFAULT
 	retw
-

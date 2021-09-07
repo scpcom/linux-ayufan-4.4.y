@@ -29,4 +29,3 @@
 #define UBC_BASRB		0x00000000
 
 #endif /* __ASM_CPU_SH2_UBC_H */
-

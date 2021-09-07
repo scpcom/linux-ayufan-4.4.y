@@ -10,7 +10,6 @@
 #include <signal.h>
 #include <inttypes.h>
 
-
 #include <sys/prctl.h>
 #include <linux/prctl.h>
 
@@ -91,4 +90,3 @@ int main(int argc, char **argv)
 
 	exit(EXIT_SUCCESS);
 }
-

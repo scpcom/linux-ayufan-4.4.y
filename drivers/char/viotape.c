@@ -734,7 +734,6 @@ free_op:
 	return ret;
 }
 
-
 static int viotap_release(struct inode *inode, struct file *file)
 {
 	HvLpEvent_Rc hvrc;
@@ -925,7 +924,6 @@ static struct vio_driver viotape_driver = {
 		.owner = THIS_MODULE,
 	}
 };
-
 
 int __init viotap_init(void)
 {

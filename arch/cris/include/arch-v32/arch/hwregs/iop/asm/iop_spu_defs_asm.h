@@ -495,7 +495,6 @@
 #define reg_iop_spu_rw_brp___en___bit 13
 #define reg_iop_spu_rw_brp_offset 204
 
-
 /* Constants */
 #define regk_iop_spu_attn_hi                      0x00000005
 #define regk_iop_spu_attn_lo                      0x00000005

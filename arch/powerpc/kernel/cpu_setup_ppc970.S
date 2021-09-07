@@ -71,7 +71,6 @@ cpu_state_storage:
 	.balign	L1_CACHE_BYTES,0
 	.text
 
-
 _GLOBAL(__setup_cpu_ppc970)
 	/* Do nothing if not running in HV mode */
 	mfmsr	r0
@@ -84,7 +83,6 @@ _GLOBAL(__setup_cpu_ppc970)
 	li	r11,0
 	rldimi	r0,r11,32,31		/* clear EN_ATTN */
 	b	load_hids		/* Jump to shared code */
-
 
 _GLOBAL(__setup_cpu_ppc970MP)
 	/* Do nothing if not running in HV mode */
@@ -189,4 +187,3 @@ _GLOBAL(__restore_cpu_ppc970)
 	sync
 	isync
 	blr
-

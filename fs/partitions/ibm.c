@@ -247,7 +247,6 @@ ibm_partition(struct parsed_partitions *state, struct block_device *bdev)
 	printk("\n");
 	goto out_freeall;
 
-
 out_readerr:
 	res = -1;
 out_freeall:

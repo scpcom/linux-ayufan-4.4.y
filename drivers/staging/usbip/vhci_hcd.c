@@ -17,7 +17,6 @@
  * USA.
  */
 
-
 #include "usbip_common.h"
 #include "vhci.h"
 
@@ -29,8 +28,6 @@ MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_LICENSE(DRIVER_LICENCE);
 
-
-
 /*
  * TODO
  *	- update root hub emulation
@@ -41,9 +38,7 @@ MODULE_LICENSE(DRIVER_LICENCE);
  *	- clean up everything
  */
 
-
 /* See usb gadget dummy hcd */
-
 
 static int vhci_hub_status(struct usb_hcd *hcd, char *buff);
 static int vhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
@@ -95,7 +90,6 @@ static const char *bit_desc[] = {
 	"R31",		/*31*/
 };
 
-
 static void dump_port_status(u32 status)
 {
 	int i = 0;
@@ -108,8 +102,6 @@ static void dump_port_status(u32 status)
 
 	printk("\n");
 }
-
-
 
 void rh_port_connect(int rhport, enum usb_device_speed speed)
 {
@@ -156,7 +148,6 @@ void rh_port_disconnect(int rhport)
 	the_controller->port_status[rhport] |=
 					(1 << USB_PORT_FEAT_C_CONNECTION);
 
-
 	/* not yet complete the disconnection
 	 * spin_lock(&vdev->ud.lock);
 	 * vdev->ud.status = VHC_ST_DISCONNECT;
@@ -164,8 +155,6 @@ void rh_port_disconnect(int rhport)
 
 	spin_unlock_irqrestore(&the_controller->lock, flags);
 }
-
-
 
 /*----------------------------------------------------------------------*/
 
@@ -207,7 +196,6 @@ static int vhci_hub_status(struct usb_hcd *hcd, char *buf)
 	unsigned long	*event_bits = (unsigned long *) buf;
 	int		rhport;
 	int		changed = 0;
-
 
 	*event_bits = 0;
 
@@ -493,8 +481,6 @@ static int vhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	return retval;
 }
 
-
-
 /*----------------------------------------------------------------------*/
 
 static struct vhci_device *get_vdev(struct usb_device *udev)
@@ -542,7 +528,6 @@ static void vhci_tx_urb(struct urb *urb)
 	priv->urb = urb;
 
 	urb->hcpriv = (void *) priv;
-
 
 	list_add_tail(&priv->list, &vdev->priv_tx);
 
@@ -710,7 +695,6 @@ static int vhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 
 	usbip_uinfo("vhci_hcd: dequeue a urb %p\n", urb);
 
-
 	spin_lock_irqsave(&the_controller->lock, flags);
 
 	priv = urb->hcpriv;
@@ -796,7 +780,6 @@ static int vhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 		spin_unlock_irqrestore(&vdev->priv_lock, flags2);
 	}
 
-
 	if (!vdev->ud.tcp_socket) {
 		/* tcp connection is closed */
 		usbip_uinfo("vhci_hcd: vhci_urb_dequeue() gives back urb %p\n",
@@ -815,7 +798,6 @@ static int vhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 	usbip_dbg_vhci_hc("leave\n");
 	return 0;
 }
-
 
 static void vhci_device_unlink_cleanup(struct vhci_device *vdev)
 {
@@ -888,7 +870,6 @@ static void vhci_shutdown_connection(struct usbip_device *ud)
 	usbip_uinfo("disconnect device\n");
 }
 
-
 static void vhci_device_reset(struct usbip_device *ud)
 {
 	struct vhci_device *vdev = container_of(ud, struct vhci_device, ud);
@@ -942,7 +923,6 @@ static void vhci_device_init(struct vhci_device *vdev)
 	usbip_start_eh(&vdev->ud);
 }
 
-
 /*----------------------------------------------------------------------*/
 
 static int vhci_start(struct usb_hcd *hcd)
@@ -952,7 +932,6 @@ static int vhci_start(struct usb_hcd *hcd)
 	int err = 0;
 
 	usbip_dbg_vhci_hc("enter vhci_start\n");
-
 
 	/* initialize private data of usb_hcd */
 
@@ -965,12 +944,9 @@ static int vhci_start(struct usb_hcd *hcd)
 	atomic_set(&vhci->seqnum, 0);
 	spin_lock_init(&vhci->lock);
 
-
-
 	hcd->power_budget = 0; /* no limit */
 	hcd->state  = HC_STATE_RUNNING;
 	hcd->uses_new_polling = 1;
-
 
 	/* vhci_hcd is now ready to be controlled through sysfs */
 	err = sysfs_create_group(&vhci_dev(vhci)->kobj, &dev_attr_group);
@@ -989,7 +965,6 @@ static void vhci_stop(struct usb_hcd *hcd)
 
 	usbip_dbg_vhci_hc("stop VHCI controller\n");
 
-
 	/* 1. remove the userland interface of vhci_hcd */
 	sysfs_remove_group(&vhci_dev(vhci)->kobj, &dev_attr_group);
 
@@ -1001,7 +976,6 @@ static void vhci_stop(struct usb_hcd *hcd)
 		usbip_stop_eh(&vdev->ud);
 	}
 
-
 	usbip_uinfo("vhci_stop done\n");
 }
 
@@ -1012,7 +986,6 @@ static int vhci_get_frame_number(struct usb_hcd *hcd)
 	usbip_uerr("Not yet implemented\n");
 	return 0;
 }
-
 
 #ifdef CONFIG_PM
 
@@ -1061,8 +1034,6 @@ static int vhci_bus_resume(struct usb_hcd *hcd)
 #define vhci_bus_resume       NULL
 #endif
 
-
-
 static struct hc_driver vhci_hc_driver = {
 	.description	= driver_name,
 	.product_desc	= driver_desc,
@@ -1109,7 +1080,6 @@ static int vhci_hcd_probe(struct platform_device *pdev)
 		return -ENOMEM;
 	}
 
-
 	/* this is private data for vhci_hcd */
 	the_controller = hcd_to_vhci(hcd);
 
@@ -1125,11 +1095,9 @@ static int vhci_hcd_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-
 	usbip_dbg_vhci_hc("bye\n");
 	return 0;
 }
-
 
 static int vhci_hcd_remove(struct platform_device *pdev)
 {
@@ -1148,11 +1116,8 @@ static int vhci_hcd_remove(struct platform_device *pdev)
 	usb_put_hcd(hcd);
 	the_controller = NULL;
 
-
 	return 0;
 }
-
-
 
 #ifdef CONFIG_PM
 
@@ -1208,7 +1173,6 @@ static int vhci_hcd_resume(struct platform_device *pdev)
 #define vhci_hcd_resume		NULL
 
 #endif
-
 
 static struct platform_driver vhci_driver = {
 	.probe	= vhci_hcd_probe,

@@ -115,7 +115,6 @@ struct acct_v3
 
 #ifdef __KERNEL__
 
-
 #ifdef CONFIG_BSD_PROCESS_ACCT
 struct vfsmount;
 struct super_block;

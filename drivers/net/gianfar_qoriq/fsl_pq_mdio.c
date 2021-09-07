@@ -187,7 +187,6 @@ static int fsl_pq_mdio_find_free(struct mii_bus *new_bus)
 	return i;
 }
 
-
 #if defined(CONFIG_GIANFAR) || defined(CONFIG_GIANFAR_MODULE)
 static u32 __iomem *get_gfar_tbipa(struct fsl_pq_mdio __iomem *regs, struct device_node *np)
 {
@@ -214,7 +213,6 @@ static u32 __iomem *get_gfar_tbipa(struct fsl_pq_mdio __iomem *regs, struct devi
 		return NULL;
 }
 #endif
-
 
 #if defined(CONFIG_UCC_GETH) || defined(CONFIG_UCC_GETH_MODULE)
 static int get_ucc_id_for_range(u64 start, u64 end, u32 *ucc_id)
@@ -253,7 +251,6 @@ static int get_ucc_id_for_range(u64 start, u64 end, u32 *ucc_id)
 		return -EINVAL;
 }
 #endif
-
 
 static int fsl_pq_mdio_probe(struct of_device *ofdev,
 		const struct of_device_id *match)
@@ -393,7 +390,6 @@ err_free_bus:
 
 	return err;
 }
-
 
 static int fsl_pq_mdio_remove(struct of_device *ofdev)
 {

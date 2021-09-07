@@ -161,7 +161,6 @@ static int transport_add_class_device(struct attribute_container *cont,
 	return error;
 }
 
-
 /**
  * transport_add_device - declare a new dev for transport class association
  *
@@ -230,7 +229,6 @@ static int transport_remove_classdev(struct attribute_container *cont,
 	return 0;
 }
 
-
 /**
  * transport_remove_device - remove the visibility of a device
  *
@@ -258,7 +256,6 @@ static void transport_destroy_classdev(struct attribute_container *cont,
 	if (tclass->remove != anon_transport_dummy_function)
 		put_device(classdev);
 }
-
 
 /**
  * transport_destroy_device - destroy a removed device

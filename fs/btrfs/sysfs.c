@@ -266,4 +266,3 @@ void btrfs_exit_sysfs(void)
 {
 	kset_unregister(btrfs_kset);
 }
-

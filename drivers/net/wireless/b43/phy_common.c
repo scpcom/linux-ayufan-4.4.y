@@ -34,7 +34,6 @@
 #include "b43.h"
 #include "main.h"
 
-
 int b43_phy_allocate(struct b43_wldev *dev)
 {
 	struct b43_phy *phy = &(dev->phy);

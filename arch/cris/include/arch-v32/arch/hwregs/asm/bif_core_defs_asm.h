@@ -265,7 +265,6 @@
 #define reg_bif_core_r_sdram_ref_stat___ok___bit 0
 #define reg_bif_core_r_sdram_ref_stat_offset 36
 
-
 /* Constants */
 #define regk_bif_core_bank2                       0x00000000
 #define regk_bif_core_bank4                       0x00000001

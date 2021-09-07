@@ -263,7 +263,6 @@ real_operr:
 	addql	#4,%sp
 	bral	ret_from_exception
 
-
 |
 |	BSUN exception
 |

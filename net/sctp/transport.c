@@ -171,7 +171,6 @@ void sctp_transport_free(struct sctp_transport *transport)
 	    del_timer(&transport->T3_rtx_timer))
 		sctp_transport_put(transport);
 
-
 	sctp_transport_put(transport);
 }
 

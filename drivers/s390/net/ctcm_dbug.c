@@ -77,4 +77,3 @@ void ctcm_dbf_longtext(enum ctcm_dbf_names dbf_nix, int level, char *fmt, ...)
 
 	debug_text_event(ctcm_dbf[dbf_nix].id, level, dbf_txt_buf);
 }
-

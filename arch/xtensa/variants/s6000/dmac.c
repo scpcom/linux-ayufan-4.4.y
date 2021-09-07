@@ -21,7 +21,6 @@
 
 struct s6dmac_ctrl s6dmac_ctrl[S6_DMAC_NB];
 
-
 /* DMA control, per engine */
 
 void s6dmac_put_fifo_cache(u32 dmac, int chan, u32 src, u32 dst, u32 size)
@@ -134,7 +133,6 @@ void s6dmac_release_chan(u32 dmac, int chan)
 	if (chan >= 0)
 		s6dmac_disable_chan(dmac, chan);
 }
-
 
 /* global init */
 

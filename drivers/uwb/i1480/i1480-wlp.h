@@ -125,7 +125,6 @@ static inline void wlp_tx_hdr_set_tx_power(struct wlp_tx_hdr *hdr, int pwr)
 	hdr->phy_params = (hdr->phy_params & ~0xf0) | (pwr << 4);
 }
 
-
 /**
  * WLP RX header
  *
@@ -148,7 +147,6 @@ struct wlp_rx_hdr {
 #endif
 } __attribute__((packed));
 
-
 /** User configurable options for WLP */
 struct wlp_options {
 	struct mutex mutex; /* access to user configurable options*/
@@ -156,7 +154,6 @@ struct wlp_options {
 	u8 pca_base_priority;
 	u8 bw_alloc; /*index into bw_allocs[] for PCA/DRP reservations*/
 };
-
 
 static inline
 void wlp_options_init(struct wlp_options *options)
@@ -170,7 +167,6 @@ void wlp_options_init(struct wlp_options *options)
 	options->def_tx_hdr.prid = cpu_to_le16(0x0000);
 #endif
 }
-
 
 /* sysfs helpers */
 
@@ -187,7 +183,6 @@ extern ssize_t uwb_rts_cts_show(const struct wlp_options *, char *);
 extern ssize_t uwb_phy_rate_store(struct wlp_options *, const char *, size_t);
 extern ssize_t uwb_phy_rate_show(const struct wlp_options *, char *);
 
-
 /** Simple bandwidth allocation (temporary and too simple) */
 struct wlp_bw_allocs {
 	const char *name;
@@ -195,6 +190,5 @@ struct wlp_bw_allocs {
 		u8 mask, stream;
 	} tx, rx;
 };
-
 
 #endif /* #ifndef __i1480_wlp_h__ */

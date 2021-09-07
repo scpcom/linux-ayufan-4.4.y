@@ -60,7 +60,6 @@ extern void dsp_audio_generate_ulaw_samples(void);
 extern void dsp_audio_generate_volume_changes(void);
 extern u8 dsp_silence;
 
-
 /*************
  * cmx stuff *
  *************/
@@ -105,7 +104,6 @@ struct dsp_conf {
 				/* note: if both unset, has only one member */
 };
 
-
 /**************
  * DTMF stuff *
  **************/
@@ -127,7 +125,6 @@ struct dsp_dtmf {
 	int		count;
 	u8		digits[16]; /* dtmf result */
 };
-
 
 /******************
  * pipeline stuff *
@@ -273,4 +270,3 @@ extern void dsp_pipeline_process_tx(struct dsp_pipeline *pipeline, u8 *data,
 		int len);
 extern void dsp_pipeline_process_rx(struct dsp_pipeline *pipeline, u8 *data,
 		int len, unsigned int txlen);
-

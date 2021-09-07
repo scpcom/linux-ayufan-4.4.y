@@ -145,7 +145,6 @@
 #define AKM_SUITE					2
 #define PMKID_LIST					3
 
-
 #define EAPOL_START_DISABLE					0
 #define EAPOL_START_PSK						1
 #define EAPOL_START_1X						2
@@ -178,7 +177,6 @@
 }
 
 #define	CONV_ARRARY_TO_UINT16(_V)	((_V[0]<<8) | (_V[1]))
-
 
 #define	ADD_ONE_To_64BIT_VAR(_V)		\
 {										\
@@ -401,7 +399,6 @@ typedef struct	PACKED _RSN_CAPABILITY	{
 	USHORT		PreAuth:1;
 }	RSN_CAPABILITY, *PRSN_CAPABILITY;
 
-
 /*========================================
 	The prototype is defined in cmm_wpa.c
   ========================================*/
@@ -442,6 +439,5 @@ VOID RTMPInsertRSNIE(
 	IN UINT8  rsnie_len,
 	IN PUINT8 pmkid_ptr,
 	IN UINT8  pmkid_len);
-
 
 #endif

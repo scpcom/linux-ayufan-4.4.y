@@ -29,7 +29,6 @@
 #include <asm/atomic.h>
 #include <asm/machdep.h>
 
-
 static DEFINE_SPINLOCK(rtasd_log_lock);
 
 static DECLARE_WAIT_QUEUE_HEAD(rtas_log_wait);
@@ -263,7 +262,6 @@ void pSeries_log_error(char *buf, unsigned int err_type, int fatal)
 	}
 
 }
-
 
 static int rtas_log_open(struct inode * inode, struct file * file)
 {

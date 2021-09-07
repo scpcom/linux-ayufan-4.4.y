@@ -48,7 +48,6 @@ static int si2bit[8] =
 
 char *isdn_tty_revision = "$Revision: 1.1 $";
 
-
 /* isdn_tty_try_read() is called from within isdn_tty_rcv_skb()
  * to stuff incoming data directly into a tty's flip-buffer. This
  * is done to speed up tty-receiving if the receive-queue is empty.
@@ -1341,7 +1340,6 @@ isdn_tty_get_lsr_info(modem_info * info, uint __user * value)
 	return put_user(result, value);
 }
 
-
 static int
 isdn_tty_tiocmget(struct tty_struct *tty, struct file *file)
 {
@@ -1975,7 +1973,6 @@ isdn_tty_exit(void)
 	put_tty_driver(dev->mdm.tty_modem);
 	dev->mdm.tty_modem = NULL;
 }
-
 
 /*
  * isdn_tty_match_icall(char *MSN, atemu *tty_emulator, int dev_idx)
@@ -2648,7 +2645,6 @@ isdn_tty_modem_result(int code, modem_info * info)
 		}
 	}
 }
-
 
 /*
  * Display a modem-register-value.

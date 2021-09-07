@@ -82,7 +82,6 @@ strncpy_from_user(char *dst, const char *src, long count)
 	return res;
 }
 
-
 /*
  * Clear a userspace memory
  */

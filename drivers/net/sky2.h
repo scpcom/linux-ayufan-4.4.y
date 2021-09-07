@@ -145,7 +145,6 @@ enum pci_cfg_reg1 {
 					P_CF1_ENA_TXBMU_WR_IDLE,
 };
 
-
 #define PCI_STATUS_ERROR_BITS (PCI_STATUS_DETECTED_PARITY | \
 			       PCI_STATUS_SIG_SYSTEM_ERROR | \
 			       PCI_STATUS_REC_MASTER_ABORT | \
@@ -461,7 +460,6 @@ enum yukon_supr_rev {
 	CHIP_REV_YU_SU_A0    = 0,
 };
 
-
 /*	B2_Y2_CLK_GATE	 8 bit	Clock Gating (Yukon-2 only) */
 enum {
 	Y2_STATUS_LNK2_INAC	= 1<<7, /* Status Link 2 inactive (0 = active) */
@@ -482,7 +480,6 @@ enum {
 };
 #define CFG_LED_MODE(x)		(((x) & CFG_LED_MODE_MSK) >> 2)
 #define CFG_DUAL_MAC_MSK	(CFG_LINK_2_AVAIL | CFG_LINK_1_AVAIL)
-
 
 /* B2_Y2_CLK_CTRL	32 bit	Clock Frequency Control Register (Yukon-2/EC) */
 enum {
@@ -529,7 +526,6 @@ enum {
 
 #define SK_RI_TO_53	36		/* RAM interface timeout */
 
-
 /* Port related registers FIFO, and Arbiter */
 #define SK_REG(port,reg)	(((port)<<7)+(reg))
 
@@ -566,7 +562,6 @@ enum {
 	TXA_TEST	= 0x0211,/*  8 bit	Tx Arbiter Test Register */
 	TXA_STAT	= 0x0212,/*  8 bit	Tx Arbiter Status Register */
 };
-
 
 enum {
 	B6_EXT_REG	= 0x0300,/* External registers (GENESIS only) */
@@ -673,7 +668,6 @@ enum {
 
 #define RB_ADDR(offs, queue) ((u16) B16_RAM_REGS + (queue) + (offs))
 
-
 enum {
 	LNK_SYNC_INI	= 0x0c30,/* 32 bit	Link Sync Cnt Init Value */
 	LNK_SYNC_VAL	= 0x0c34,/* 32 bit	Link Sync Cnt Current Value */
@@ -701,7 +695,6 @@ enum {
 
 	RX_GMF_RLEV	= 0x0c78,/* 32 bit	Rx GMAC FIFO Read Level */
 };
-
 
 /*	Q_BC			32 bit	Current Byte Counter */
 
@@ -788,7 +781,6 @@ enum {
 	RB_RST_CLR	= 1<<1,	/* Clear RAM Buf STM Reset */
 	RB_RST_SET	= 1<<0,	/* Set   RAM Buf STM Reset */
 };
-
 
 /* Transmit GMAC FIFO (YUKON only) */
 enum {
@@ -1221,7 +1213,6 @@ enum {
 	PHY_M_AN_MSK	       = PHY_M_IS_AN_ERROR | PHY_M_IS_AN_COMPL,
 };
 
-
 /*****  PHY_MARV_EXT_CTRL	16 bit r/w	Ext. PHY Specific Ctrl *****/
 enum {
 	PHY_M_EC_ENA_BC_EXT = 1<<15, /* Enable Block Carr. Ext. (88E1111 only) */
@@ -1486,7 +1477,6 @@ enum {
 	GM_MIB_CNT_END	= 0x025C,	/* Last MIB counter */
 };
 
-
 /*
  * MIB Counters base address definitions (low word) -
  * use offset 4 for access to high word	(32 bit r/o)
@@ -1613,7 +1603,6 @@ enum {
 #define TX_JAM_IPG_VAL(x)	(((x)<<9)  & GM_TXPA_JAMIPG_MSK)
 #define TX_IPG_JAM_DATA(x)	(((x)<<4)  & GM_TXPA_JAMDAT_MSK)
 #define TX_BACK_OFF_LIM(x)	((x) & GM_TXPA_BO_LIM_MSK)
-
 
 /*	GM_SERIAL_MODE			16 bit r/w	Serial Mode Register */
 enum {
@@ -1871,7 +1860,6 @@ enum {						/* Bits 15.. 2:	reserved */
 	GMLC_RST_SET	= 1<<0,	/* Set   GMAC Link Reset */
 };
 
-
 /*	WOL_CTRL_STAT	16 bit	WOL Control/Status Reg */
 enum {
 	WOL_CTL_LINK_CHG_OCC		= 1<<15,
@@ -1891,7 +1879,6 @@ enum {
 	WOL_CTL_ENA_PATTERN_UNIT	= 1<<1,
 	WOL_CTL_DIS_PATTERN_UNIT	= 1<<0,
 };
-
 
 /* Control flags */
 enum {

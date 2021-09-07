@@ -45,7 +45,6 @@ struct slice {
 	__be32	blkoff;			/* block offset of slice */
 };
 
-
 int sysv68_partition(struct parsed_partitions *state, struct block_device *bdev)
 {
 	int i, slices;

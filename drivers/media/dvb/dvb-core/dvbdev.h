@@ -71,7 +71,6 @@ struct dvb_adapter {
 	struct mutex mfe_lock;		/* access lock for thread creation */
 };
 
-
 struct dvb_device {
 	struct list_head list_head;
 	const struct file_operations *fops;
@@ -93,7 +92,6 @@ struct dvb_device {
 
 	void *priv;
 };
-
 
 extern int dvb_register_adapter(struct dvb_adapter *adap, const char *name,
 				struct module *module, struct device *device,

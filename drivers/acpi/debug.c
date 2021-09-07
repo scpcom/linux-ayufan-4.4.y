@@ -253,7 +253,6 @@ static ssize_t acpi_system_debug_proc_write(struct file *file,
 {
 	char debug_string[12] = { '\0' };
 
-
 	if (count > sizeof(debug_string) - 1)
 		return -EINVAL;
 

@@ -5315,7 +5315,6 @@ static void nv_mgmt_release_sema(struct net_device *dev)
 	}
 }
 
-
 static int nv_mgmt_get_version(struct net_device *dev)
 {
 	struct fe_priv *np = netdev_priv(dev);
@@ -5721,7 +5720,6 @@ static int __devinit nv_probe(struct pci_dev *pci_dev, const struct pci_device_i
 	    (id->driver_data & DEV_HAS_PAUSEFRAME_TX_V3)) {
 		np->pause_flags |= NV_PAUSEFRAME_TX_CAPABLE | NV_PAUSEFRAME_TX_REQ;
 	}
-
 
 	err = -ENOMEM;
 	np->base = ioremap(addr, np->register_size);

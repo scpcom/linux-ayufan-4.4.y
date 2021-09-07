@@ -74,7 +74,6 @@ static int dbguart_pins_control(int id, int request)
 	return r;
 }
 
-
 static void __init stmp37xx_devb_init(void)
 {
 	stmp3xxx_pinmux_init(NR_REAL_IRQS);

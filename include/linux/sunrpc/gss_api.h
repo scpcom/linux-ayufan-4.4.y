@@ -131,4 +131,3 @@ void gss_mech_put(struct gss_api_mech *);
 
 #endif /* __KERNEL__ */
 #endif /* _LINUX_SUNRPC_GSS_API_H */
-

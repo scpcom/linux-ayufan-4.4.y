@@ -213,7 +213,6 @@ typedef	struct	PACKED _IV_CONTROL_
 	ULONG	IV32;
 }	TKIP_IV, *PTKIP_IV;
 
-
 /*
 	========================================================================
 
@@ -571,7 +570,6 @@ BOOLEAN	RTMPTkipCompareMICValue(
 	{
 		DBGPRINT_RAW(RT_DEBUG_ERROR, ("RTMPTkipCompareMICValue(): TKIP MIC Error !\n"));  //MIC error.
 
-
 		return (FALSE);
 	}
 	return (TRUE);
@@ -641,7 +639,6 @@ BOOLEAN	RTMPTkipCompareMICValueWithLLC(
 	{
 		DBGPRINT_RAW(RT_DEBUG_ERROR, ("RTMPTkipCompareMICValueWithLLC(): TKIP MIC Error !\n"));  //MIC error.
 
-
 		return (FALSE);
 	}
 	return (TRUE);
@@ -701,7 +698,6 @@ VOID	RTMPCalculateMICValue(
 			pKey->TxMic);
 	}
 
-
 	if (pEncap != NULL)
 	{
 		// LLC encapsulation
@@ -725,7 +721,6 @@ VOID	RTMPCalculateMICValue(
 	// Compute the final MIC Value
 	RTMPTkipGetMIC(&pAd->PrivateInfo.Tx);
 }
-
 
 /************************************************************/
 /* tkip_sbox()																*/
@@ -864,7 +859,6 @@ VOID RTMPTkipMixKey(
 	rc4key[15] = (ppk5 >> 8) % 256;
 }
 
-
 /************************************************/
 /* construct_mic_header1()                      */
 /* Builds the first MIC header block from       */
@@ -942,7 +936,6 @@ void construct_mic_header2(
 	}
 }
 
-
 /************************************************/
 /* construct_mic_iv()                           */
 /* Builds the MIC IV from header fields and PN  */
@@ -981,8 +974,6 @@ void construct_mic_iv(
 
 }
 
-
-
 /************************************/
 /* bitwise_xor()                    */
 /* A 128 bit, bitwise exclusive or  */
@@ -996,7 +987,6 @@ void bitwise_xor(unsigned char *ina, unsigned char *inb, unsigned char *out)
 		out[i] = ina[i] ^ inb[i];
 	}
 }
-
 
 void aes128k128d(unsigned char *key, unsigned char *data, unsigned char *ciphertext)
 {
@@ -1066,7 +1056,6 @@ void construct_ctr_preload(
 	ctr_preload[15] =  (unsigned char) (c % 256);
 
 }
-
 
 //
 // TRUE: Success!
@@ -1217,9 +1206,6 @@ BOOLEAN RTMPSoftDecryptTKIP(
 	return TRUE;
 }
 
-
-
-
 BOOLEAN RTMPSoftDecryptAES(
 	IN PRTMP_ADAPTER pAd,
 	IN PUCHAR	pData,
@@ -1294,8 +1280,6 @@ BOOLEAN RTMPSoftDecryptAES(
 	payload_len = DataByteCnt - HeaderLen - 8 - 8;	// 8 bytes for CCMP header , 8 bytes for MIC
 	payload_remainder = (payload_len) % 16;
 	num_blocks = (payload_len) / 16;
-
-
 
 	// Find start of payload
 	payload_index = HeaderLen + 8; //IV+EIV
@@ -1583,4 +1567,3 @@ VOID mix_column(
 	xor_32(swap_halfs, rotl,tempb);
 	xor_32(temp, tempb, out);
 }
-

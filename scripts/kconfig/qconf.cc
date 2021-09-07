@@ -80,7 +80,6 @@ bool ConfigSettings::writeSizes(const QString& key, const QValueList<int>& value
 	return writeEntry(key, stringList);
 }
 
-
 #if QT_VERSION >= 300
 /*
  * set the new data

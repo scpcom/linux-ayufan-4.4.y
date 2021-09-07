@@ -819,7 +819,6 @@ struct extent_buffer *btrfs_find_create_tree_block(struct btrfs_root *root,
 	return eb;
 }
 
-
 int btrfs_write_tree_block(struct extent_buffer *buf)
 {
 	return filemap_fdatawrite_range(buf->first_page->mapping, buf->start,
@@ -1680,7 +1679,6 @@ struct btrfs_root *open_ctree(struct super_block *sb,
 	fs_info->pinned_extents = &fs_info->freed_extents[0];
 	fs_info->do_barriers = 1;
 
-
 	mutex_init(&fs_info->trans_mutex);
 	mutex_init(&fs_info->ordered_operations_mutex);
 	mutex_init(&fs_info->tree_log_mutex);
@@ -1700,7 +1698,6 @@ struct btrfs_root *open_ctree(struct super_block *sb,
 
 	__setup_root(4096, 4096, 4096, 4096, tree_root,
 		     fs_info, BTRFS_ROOT_TREE_OBJECTID);
-
 
 	bh = btrfs_read_dev_super(fs_devices->latest_bdev);
 	if (!bh)

@@ -13,7 +13,6 @@
 #include <asm/sn/arch.h>
 #include <asm/sn/hub.h>
 
-
 static int force_fire_and_forget = 1;
 
 /**
@@ -74,7 +73,6 @@ unsigned long hub_pio_map(cnodeid_t cnode, xwidgetnum_t widget,
 			nasid, widget, xtalk_addr);
 	return 0;
 }
-
 
 /*
  * hub_setup_prb(nasid, prbnum, credits, conveyor)

@@ -500,5 +500,4 @@ struct nodemask_scratch {
 #define NODEMASK_SCRATCH(x) NODEMASK_ALLOC(nodemask_scratch, x)
 #define NODEMASK_SCRATCH_FREE(x)  NODEMASK_FREE(x)
 
-
 #endif /* __LINUX_NODEMASK_H */

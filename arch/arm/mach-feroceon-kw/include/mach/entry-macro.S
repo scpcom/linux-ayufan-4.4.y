@@ -10,7 +10,6 @@
 #include <mach/hardware.h>
 #include <mach/irqs.h>
 
-
         .macro  disable_fiq
         .endm
         

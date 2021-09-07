@@ -35,7 +35,6 @@
 
 #include <asm/uaccess.h>
 
-
 #define MOTOROLA	1
 #define PHILIPS2	2
 #define PHILIPS1	3
@@ -74,8 +73,6 @@ static int data_port		=	0x251;
 static int mem_base		=	0xC8000;
 static void __iomem *mem;
 static int video_nr             =       -1;
-
-
 
 static inline void mvv_write(u8 index, u8 value)
 {
@@ -188,7 +185,6 @@ static int pms_i2c_read(int slave, int sub)
 	return 0;
 }
 
-
 static void pms_i2c_andor(int slave, int sub, int and, int or)
 {
 	u8 tmp;
@@ -201,7 +197,6 @@ static void pms_i2c_andor(int slave, int sub, int and, int or)
 /*
  *	Control functions
  */
-
 
 static void pms_videosource(short source)
 {
@@ -237,7 +232,6 @@ static void pms_colour(short colour)
 	}
 }
 
-
 static void pms_contrast(short contrast)
 {
 	switch(decoder)
@@ -265,7 +259,6 @@ static void pms_brightness(short brightness)
 			break;
 	}
 }
-
 
 static void pms_format(short format)
 {
@@ -433,7 +426,6 @@ static void pms_chromagain(short chroma)
 	}
 }
 
-
 static void pms_spacialcompl(short data)
 {
 	mvv_write(0x3B, data);
@@ -460,7 +452,6 @@ static void pms_secamcross(short cross)
 		pms_i2c_andor(0x42, 0x0F, 0xDF, (cross&1)<<5);
 }
 
-
 static void pms_swsense(short sense)
 {
 	if(decoder==PHILIPS2)
@@ -474,7 +465,6 @@ static void pms_swsense(short sense)
 		pms_i2c_write(0x42, 0x0B, sense);
 	}
 }
-
 
 static void pms_framerate(short frr)
 {
@@ -616,7 +606,6 @@ static void pms_resolution(short width, short height)
 	mvv_write(0x33, MVVMEMORYWIDTH);
 }
 
-
 /*
  *	Set Input
  */
@@ -628,7 +617,6 @@ static void pms_vcrinput(short input)
 	else if(decoder==PHILIPS1)
 		pms_i2c_andor(0x42,0x0D,0x7F,(input&1)<<7);
 }
-
 
 static int pms_capture(struct pms_device *dev, char __user *buf, int rgb555, int count)
 {
@@ -674,7 +662,6 @@ static int pms_capture(struct pms_device *dev, char __user *buf, int rgb555, int
 	}
 	return len;
 }
-
 
 /*
  *	Video4linux interfacing
@@ -915,7 +902,6 @@ static struct video_device pms_template=
 
 static struct pms_device pms_device;
 
-
 /*
  *	Probe for and initialise the Mediavision PMS
  */
@@ -955,7 +941,6 @@ static int init_mediavision(void)
 	}
 	outb(0xB8, 0x9A01);		/* Unlock */
 	outb(io_port>>4, 0x9A01);	/* Set IO port */
-
 
 	id=mvv_read(3);
 	decst=pms_i2c_stat(0x43);
@@ -1071,7 +1056,6 @@ module_param(mem_base, int, 0);
 module_param(video_nr, int, 0);
 MODULE_LICENSE("GPL");
 
-
 static void __exit shutdown_mediavision(void)
 {
 	release_region(io_port,3);
@@ -1087,4 +1071,3 @@ static void __exit cleanup_pms_module(void)
 
 module_init(init_pms_cards);
 module_exit(cleanup_pms_module);
-

@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __IN88W8660CtrlEnvSpech
 #define __IN88W8660CtrlEnvSpech
 
@@ -70,16 +69,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SOC_NAME_PREFIX	"MV88W"
 /* includes */
 
-
 /* defines  */
-
 
 #define MV_ETH_REG_BASE(port)   0x72000
 #define USB_REG_BASE(dev)       (((dev) == 0) ? 0x50000 : 0xA0000)
 
-
 #define INTER_REGS_SIZE	 	 	_1M
-
 
 /* This define describes the maximum controller supported DRAM chip select 	*/
 /* also known as banks                                                     	*/
@@ -96,19 +91,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_INCLUDE_DEVICE_CS3
 #define MV_BOOTDEVICE_INDEX   3
 
-
-
 /* This define describes maximum of GPP groups supported by controller. 	*/
 #define MV_GPP_MAX_GROUP    1
-
 
 /* This define describes the maximum number of available Timer/counters.  	*/
 #define MV_CNTMR_MAX_COUNTER 2
 
 /* This define describes the maximum number of available UART channels.  	*/
 #define MV_UART_MAX_CHAN	 2
-
-
 
 /* This define describes maximum number of MPP groups.                      */
 /* Each group describes an MPP register.  	                                */
@@ -130,17 +120,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #define MV_PCI_START_IF		MV_PEX_MAX_IF
 
-
 /* This define describes the maximum number of supported PCI Interfaces 	*/
 #define MV_PCI_IF_MAX_IF		(MV_PEX_MAX_IF+MV_PCI_MAX_IF)
-
 
 #define PEX_HOST_BUS_NUM(pciIf)		(pciIf)
 #define PEX_HOST_DEV_NUM(pciIf)		0
 
 #define PCI_HOST_BUS_NUM(pciIf)		MV_PEX_MAX_IF + (pciIf)
 #define PCI_HOST_DEV_NUM(pciIf)		0
-
 
 /* This define describes the maximum number of supported Ethernet ports 	*/
 #define MV_ETH_MAX_PORTS	1
@@ -156,10 +143,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* This define describes the support of the NAND -Flash */
 #define MV_NAND_MAX		1
 
-
 #define SATA_REG_BASE           0x80000
-
-
 
 /* Controler environment registers offsets */
 #define MPP_CONTROL_REG0				0x10000
@@ -234,7 +218,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_TARGET_IS_PEX0(target)   \
                             ((target >= PEX0_MEM) && (target <= PEX0_IO))
 
-
 #define MV_TARGET_IS_PEX1(target)   0
 
 #define MV_TARGET_IS_PEX(target) (MV_TARGET_IS_PEX0(target) || MV_TARGET_IS_PEX1(target))
@@ -248,14 +231,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_PCI_DRAM_BAR_TO_DRAM_TARGET(bar)   \
                             ((MV_TARGET)((MV_U32)(bar - CS0_BAR) + (MV_U32)SDRAM_CS0))
 
-
 #define MV_TARGET_IS_AS_BOOT(target)	0
 
 #define MV_CHANGE_BOOT_CS(target)	(target)
 
 #define TCLK_TO_COUNTER_RATIO   1   /* counters running in Tclk */
 /* typedefs */
-
 
 #ifndef MV_ASMLANGUAGE
 /* This enumerator described the possible Controller paripheral targets.    */
@@ -283,7 +264,6 @@ typedef enum _mvTarget
 #define PEX0_MEM0	PEX0_MEM
 #define PCI0_MEM0	PCI0_MEM
 
-
 #define BOOT_TARGETS_NAME_ARRAY {}
 
 /* For old competability */
@@ -298,7 +278,6 @@ typedef enum _mvTarget
 /* Device Interface NAND Flash Control Register (DINFCR) */
 #define DINFCR_NF_CS_MASK(csNum)         (0x1 << ((((csNum)+1) % MV_DEVICE_MAX_CS) * 2))
 #define DINFCR_NF_ACT_CE_MASK(csNum)     (0x2 << ((((csNum)+1) % MV_DEVICE_MAX_CS) * 2))
-
 
 #if defined (MV_INCLUDE_PCI) && defined (MV_INCLUDE_PEX)
 
@@ -319,8 +298,6 @@ typedef enum _mvTarget
 
 #endif
 
-
-
 /* This enumerator defines the Marvell controller target ID      */ 
 typedef enum _mvTargetId
 {
@@ -330,7 +307,6 @@ typedef enum _mvTargetId
 	PEX0_TARGET_ID  = 4 ,    /* Port 4 -> PCI Express0 		    */
 	MAX_TARGETS_ID
 }MV_TARGET_ID;
-
 
 #define TARGETS_DEF_ARRAY	{					\
     {0x0E,DRAM_TARGET_ID}, /* SDRAM_CS0 */		\
@@ -360,8 +336,6 @@ typedef enum _mvTargetId
     "DEV_BOOCS" /* DEV_BOOCS*/         \
 }
 
-
 #endif /* MV_ASMLANGUAGE */
-
 
 #endif /* __IN88W8660CtrlEnvSpech */

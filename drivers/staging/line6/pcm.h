@@ -16,12 +16,10 @@
 #ifndef PCM_H
 #define PCM_H
 
-
 #include <sound/pcm.h>
 
 #include "driver.h"
 #include "usbdefs.h"
-
 
 /* number of URBs */
 #define LINE6_ISO_BUFFERS	8
@@ -35,13 +33,11 @@
 /* this should be queried dynamically from the USB interface! */
 #define LINE6_ISO_PACKET_SIZE_MAX	252
 
-
 /*
 	Extract the messaging device from the substream instance
 */
 #define s2m(s)	(((struct snd_line6_pcm *) \
 		   snd_pcm_substream_chip(s))->line6->ifcdev)
-
 
 enum {
 	BIT_RUNNING_PLAYBACK,
@@ -212,11 +208,9 @@ struct snd_line6_pcm {
 	unsigned long flags;
 };
 
-
 extern int line6_init_pcm(struct usb_line6 *line6,
 			  struct line6_pcm_properties *properties);
 extern int snd_line6_trigger(struct snd_pcm_substream *substream, int cmd);
 extern int snd_line6_prepare(struct snd_pcm_substream *substream);
-
 
 #endif

@@ -43,7 +43,6 @@ static char *MInit_speed28800 = "AT%G0%B28800\r\0";
 static char *MInit_dialout = "ATs7=60 x1 d\r\0";
 static char *MInit_dialin = "ATs7=60 x1 a\r\0";
 
-
 static inline unsigned int serial_in(struct IsdnCardState *cs, int offset)
 {
 #ifdef SERIAL_DEBUG_REG
@@ -109,7 +108,6 @@ static void change_speed(struct IsdnCardState *cs, int baud)
 	int	quot = 0, baud_base;
 	unsigned cval, fcr = 0;
 	int	bits;
-
 
 	/* byte size and parity */
 	cval = 0x03; bits = 10;
@@ -382,7 +380,6 @@ static inline void transmit_chars(struct IsdnCardState *cs, int *intr_done)
 		serial_outp(cs, UART_IER, cs->hw.elsa.IER);
 	}
 }
-
 
 static void rs_interrupt_elsa(struct IsdnCardState *cs)
 {

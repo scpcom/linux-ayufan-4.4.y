@@ -17,7 +17,6 @@
 
 #include <mach/pm.h>
 
-
 static cycle_t read_cycle_count(struct clocksource *cs)
 {
 	return (cycle_t)sysreg_read(COUNT);

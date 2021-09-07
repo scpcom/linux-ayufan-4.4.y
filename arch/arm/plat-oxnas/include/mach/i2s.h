@@ -18,13 +18,10 @@
 
 extern void DumpI2SRegisters(void);
 
-
-
 /* Registers ---------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
-
 
 #define    TX_CONTROL                      (0x0000 + I2S_BASE)
 #define    TX_SETUP                        (0x0004 + I2S_BASE)
@@ -59,8 +56,6 @@ extern void DumpI2SRegisters(void);
 #define    RX_CPU_DATA_READS_ALT           (0x08FF + I2S_BASE)
 #define    TX_CPU_DATA_WRITES              (0x1FFF + I2S_BASE)
 #define    RX_CPU_DATA_READS               (0x2FFF + I2S_BASE)
-
-
 
 /* TX_CONTROL ------------ */
 #define    TX_CONTROL_ENABLE                0
@@ -110,7 +105,6 @@ extern void DumpI2SRegisters(void);
      * 0 - DMA transfers up to Single Quads 
      * 1 - DMA transfers up to Bursts of 4 Quads 
      */
-    
     
 /* TX_SETUP ------------ */ 
 /**
@@ -172,7 +166,6 @@ extern void DumpI2SRegisters(void);
      * 1 - SPDIF on Channel 0 (enables the biphase coding even when Tx disabled) 
      */
 
- 
 /* TX_SETUP1 ------------ */
 #define    TX_SETUP1_INPUT                  0    
     /**
@@ -254,7 +247,6 @@ extern void DumpI2SRegisters(void);
      * 1 - Fill level of FIFO matches BUFFER_INTERRUPT_LEVEL 
      */
 
- 
 /* RX_CONTROL ------------ */
 #define    RX_CONTROL_ENABLE                0
     /**
@@ -300,7 +292,6 @@ extern void DumpI2SRegisters(void);
      * 1 - DMA transfers up to Bursts of 4 Quads 
      */
 
-    
 /* RX_SETUP ------------ */ 
 /**
  * In order for the changes made to the fields in bold to propagate to the Rx 
@@ -345,7 +336,6 @@ extern void DumpI2SRegisters(void);
      * Provides direct control over RX_SPDIF_OE  Output signal 
      */
 
- 
 /* RX_SETUP1 ------------ */
 #define    RX_SETUP1_INPUT                  0       
     /**
@@ -380,7 +370,6 @@ extern void DumpI2SRegisters(void);
      * 1 - I2S Master word clock uses 32 bit samples 
      */
 
-    
 /* RX_STATUS ------------ */
 #define    RX_STATUS_UNDERRUN               0
     /**
@@ -447,7 +436,6 @@ extern void DumpI2SRegisters(void);
      * 1 - Rx S/PDIF timing is locked. 
      */
 
- 
 /* TX_DEBUG ------------ */
 #define TX_DEBUG_TX_DMA_STATE               0
     /**
@@ -466,7 +454,6 @@ extern void DumpI2SRegisters(void);
      * Set if DMA request for Tx is set 
      */
     
-
 /* TX_DEBUG2 ------------ */
 #define TX_DEBUG2_TX_CTRL_STATE             0
     /**
@@ -514,7 +501,6 @@ extern void DumpI2SRegisters(void);
      * State of internal safe TX_WORD_CLK 
      */
 
- 
 /* TX_DEBUG3 ------------ */ 
 /**
  * This register is a read back of status directly from the TX_CLK  domain.   
@@ -540,8 +526,6 @@ extern void DumpI2SRegisters(void);
      * 1 - Tx domain is in reset 
      */
 
-
- 
 /* RX_DEBUG ------------ */
 #define    RX_DEBUG_RX_DMA_STATE            0
     /**
@@ -560,7 +544,6 @@ extern void DumpI2SRegisters(void);
      * Set if DMA request for Rx is set 
      */
 
-    
 /* RX_DEBUG2 ------------ */
 #define    RX_DEBUG2_RX_CTRL_STATE          0
     /**
@@ -607,7 +590,6 @@ extern void DumpI2SRegisters(void);
      * State of internal safe RX_WORD_CLK     
      */
 
- 
 /* RX_DEBUG3 ------------ */ 
 /**
  * This register is a read back of status directly from the RX_CLK  domain.   
@@ -633,13 +615,11 @@ extern void DumpI2SRegisters(void);
      * 1 - Rx domain is in reset 
      */
 
-
 /**
  * VERSION* ------------ 
  * Refer to VERSION. ?? 
  */
 
- 
 /* TX_BUFFER_LEVEL ------------ */ 
 /**
  * When this register is read it returns the current fill level of the buffer  
@@ -658,7 +638,6 @@ extern void DumpI2SRegisters(void);
  * FT - 0    Interrupt Level    Programmable Buffer Level to initiate Interrupt 
  */
 
-
 /* RX_BUFFER_LEVEL ------------ */ 
 /**
  * When this register is read it returns the current fill level of the buffer 
@@ -667,13 +646,11 @@ extern void DumpI2SRegisters(void);
  * FR - 0    Buffer Level    Fill level of Rx buffer 
  */
 
-
 /* RX_BUFFER_INTERRUPT_LEVEL ------------ */ 
 /**
  * FR - 0    Interrupt Level    Programmable Buffer Level to initiate Interrupt 
  */
 
- 
 /* RX_SPDIF_DEBUG ------------ */
 #define    RX_SPDIF_DEBUG_MAX_PULSE         0
     /**
@@ -711,7 +688,6 @@ extern void DumpI2SRegisters(void);
      * 1 - Current subframe is A 
      */
 
-    
 /* RX_SPDIF_DEBUG2 ------------ */
 #define    RX_SPDIF_DEBUG2_FRAME            0
     /**
@@ -723,7 +699,6 @@ extern void DumpI2SRegisters(void);
      * 1 - Block sync has been achieved (i.e. received a start of block) 
      */
 
- 
 /* INTERRUPT_CONTROL_STATUS ------------ */
 #define    INTERRUPT_CONTROL_STATUS_AUDIO_IRQ 0
     /**
@@ -760,7 +735,6 @@ extern void DumpI2SRegisters(void);
     * be set) 
     */
    
-
 /* INTERRUPT_MASK ------------ */
 #define    INTERRUPT_MASK_TX_READ_IRQ_ENABLE 0    
     /**
@@ -843,7 +817,6 @@ extern void DumpI2SRegisters(void);
      * 1 - Error Interrupt generated by Rx S/PDIF Lock event 
      */
 
-    
 /* VERSION ------------ */ 
 /**
  * Returns a 32 bit value that indicates the version and build options of the  
@@ -888,8 +861,6 @@ extern void DumpI2SRegisters(void);
      * 28 - 31    G_TX_CHANNELS  generic 
      */
 
-
- 
 /* TX_DATA_IN_FORMAT ------------ */
 #define    TX_DATA_IN_FORMAT_SAMPLE_ORDER   0
     /**
@@ -913,7 +884,6 @@ extern void DumpI2SRegisters(void);
      * 1 - Hardware waits for half the number of writes before progressing 
      */
 
-    
 /* TX_CHANNELS_ENABLE ------------ */ 
 /**
  * If a channel is disabled, then no new data is presented to the data line of  
@@ -921,7 +891,6 @@ extern void DumpI2SRegisters(void);
  *   0 - Tx Channel N disabled 
  *   1 - Tx Channel N enabled 
  */
-
 
 /* TX_WRITES_TO ------------ */ 
 /**
@@ -934,7 +903,6 @@ extern void DumpI2SRegisters(void);
  *   1 - Tx Channel N included in data 
  */
 
- 
 /* RX_DATA_OUT_FORMAT ------------ */
 #define    RX_DATA_OUT_FORMAT_SAMPLE_ORDER  0
     /**
@@ -958,7 +926,6 @@ extern void DumpI2SRegisters(void);
      * 1 - Hardware waits for half the number of reads before progressing 
      */
 
-    
 /* RX_CHANNELS_ENABLE ------------ */ 
 /**
  * If a channel is disabled, then no new data is presented to the data line of 
@@ -966,7 +933,6 @@ extern void DumpI2SRegisters(void);
  *   0 - Rx Channel N disabled 
  *   1 - Rx Channel N enabled 
  */
-
 
 /* RX_READS_FROM ------------ */ 
 /**
@@ -979,8 +945,6 @@ extern void DumpI2SRegisters(void);
  *    1 - Rx Channel N included in data 
  */
 
-
- 
 /* TX_CPU_DATA_WRITES_ALT ------------ */ 
 /**
  * See TX_CPU_DATA_WRITES.   
@@ -989,7 +953,6 @@ extern void DumpI2SRegisters(void);
  * CPU with only a 13 bit immediate offset such as the LEON2 IU). 
  * 0x0400-0x04FF    TX_CPU_DATA_WRITES_ALT 
  */
-
 
 /* RX_CPU_DATA_READS_ALT ------------ */ 
 /**
@@ -1000,7 +963,6 @@ extern void DumpI2SRegisters(void);
  * 0x0800-0x08FF    RX_CPU_DATA_READS_ALT 
  */
 
-
 /* TX_CPU_DATA_WRITES ------------ */ 
 /**
  * Any writes to this location writes a valid sample into the internal buffer  
@@ -1009,7 +971,6 @@ extern void DumpI2SRegisters(void);
  * on the bus. 
  * 0x1000-0x1FFF    TX_CPU_DATA_WRITES 
  */
-
 
 /* RX_CPU_DATA_READS ------------ */ 
 /**
@@ -1020,4 +981,3 @@ extern void DumpI2SRegisters(void);
  */
 
 #endif /* __ASM_ARM_ARCH_I2S_H */
-

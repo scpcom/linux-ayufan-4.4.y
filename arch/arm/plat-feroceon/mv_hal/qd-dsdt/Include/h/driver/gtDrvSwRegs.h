@@ -94,7 +94,6 @@
 #define QD_REG_QOS_WEIGHT		0x1C
 #define QD_REG_SDET_POLARITY	0x1D
 
-
 /* Definition for STU,VTU,RMON,and ATU Registers */
 #define QD_REG_ATU_FID_REG		0x1
 #define QD_REG_VTU_FID_REG		0x2
@@ -114,7 +113,6 @@
 #define QD_REG_ATU_MAC_BASE		0xD
 #define QD_REG_IP_PRI_BASE		0x10
 #define QD_REG_IEEE_PRI			0x18
-
 
 /* Definitions for MIB Counter */
 #define GT_STATS_NO_OP			0x0
@@ -141,7 +139,6 @@
 #define QD_REG_ADV_VCT_CONTROL_8	20
 #define QD_REG_PAIR_SKEW_STATUS    20
 #define QD_REG_PAIR_SWAP_STATUS    21
-
 
 /* Bit Definition for QD_PHY_CONTROL_REG */
 #define QD_PHY_RESET			0x8000
@@ -204,7 +201,6 @@
 #define QD_PHY_INT_CROSSOVER_CHANGED		0x40
 #define QD_PHY_INT_POLARITY_CHANGED		0x2
 #define QD_PHY_INT_JABBER			0x1
-
 
 /* Bit definition for DEVICE Interrupt */
 #define QD_DEV_INT_WATCHDOG			0x8000

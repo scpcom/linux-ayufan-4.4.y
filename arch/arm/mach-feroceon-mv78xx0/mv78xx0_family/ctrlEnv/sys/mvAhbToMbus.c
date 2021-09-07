@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 /* includes */
 #include "ctrlEnv/sys/mvAhbToMbus.h"
 #include "ctrlEnv/mvCtrlEnvAddrDec.h"
@@ -76,7 +75,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif	
 
 /* typedefs */
-
 
 /* CPU address remap registers offsets are inconsecutive. This struct 		*/
 /* describes address remap register offsets									*/
@@ -149,7 +147,6 @@ MV_STATUS mvAhbToMbusWinSet(MV_U32 cpu, MV_U32 winNum, MV_AHB_TO_MBUS_DEC_WIN *p
 		return MV_NOT_SUPPORTED;
 	}
 
-
 	/* Parameter checking   */
 	if (winNum >= MAX_AHB_TO_MBUS_WINS)
 	{
@@ -157,7 +154,6 @@ MV_STATUS mvAhbToMbusWinSet(MV_U32 cpu, MV_U32 winNum, MV_AHB_TO_MBUS_DEC_WIN *p
 		return MV_NOT_SUPPORTED;
 	}
 	
-
 	/* read base register*/
 	if (winNum != MV_AHB_TO_MBUS_INTREG_WIN)
 	{
@@ -227,7 +223,6 @@ MV_STATUS mvAhbToMbusWinSet(MV_U32 cpu, MV_U32 winNum, MV_AHB_TO_MBUS_DEC_WIN *p
 	{
 		MV_REG_WRITE(AHB_TO_MBUS_WIN_INTEREG_REG(cpu), decRegs.baseReg);
 	}
-
 
 	/* Internal register space have no size	*/
 	/* register. Do not perform size register assigment for those targets 	*/
@@ -437,7 +432,6 @@ MV_U32    mvAhbToMbusWinAvailGet(MV_U32 cpu)
         return 0xFFFFFFFF;
 }
 
-
 /*******************************************************************************
 * mvAhbToMbusWinEnable - Enable/disable a CPU address decode window
 *
@@ -495,7 +489,6 @@ MV_STATUS mvAhbToMbusWinEnable(MV_U32 cpu, MV_U32 winNum, MV_BOOL enable)
 	return MV_OK;
 }
 
-
 /*******************************************************************************
 * mvAhbToMbusWinRemap - Set CPU remap register for address windows.
 *
@@ -526,7 +519,6 @@ MV_U32 mvAhbToMbusWinRemap(MV_U32 cpu, MV_U32 winNum, MV_ADDR_WIN *pAddrWin)
     AHB_TO_MBUS_REMAP_REG_OFFS remapRegOffs;
 
     MV_U32 effectiveBaseAddress=0,baseAddrValue=0,windowSizeValue=0;
-
 
 	/* Parameter checking   */
 	if (cpu >= MV_MAX_CPU)
@@ -559,7 +551,6 @@ MV_U32 mvAhbToMbusWinRemap(MV_U32 cpu, MV_U32 winNum, MV_ADDR_WIN *pAddrWin)
 	MV_REG_WRITE(remapRegOffs.lowRegOffs, baseAddr);
     
 	MV_REG_WRITE(remapRegOffs.highRegOffs, pAddrWin->baseHigh);
-
 
 	baseAddrValue = MV_REG_READ(AHB_TO_MBUS_WIN_BASE_REG(cpu, winNum));
 	windowSizeValue = MV_REG_READ(AHB_TO_MBUS_WIN_CTRL_REG(cpu, winNum));
@@ -604,7 +595,6 @@ MV_U32 mvAhbToMbusWinRemap(MV_U32 cpu, MV_U32 winNum, MV_ADDR_WIN *pAddrWin)
 *       MV_OK otherwise.
 *
 *******************************************************************************/
-
 
 MV_STATUS mvAhbToMbusWinTargetSwap(MV_U32 cpu, MV_TARGET target1,MV_TARGET target2)
 {
@@ -664,7 +654,6 @@ MV_STATUS mvAhbToMbusWinTargetSwap(MV_U32 cpu, MV_TARGET target1,MV_TARGET targe
 					winNum2);
 		return MV_ERROR;
 	}
-
 
 	/* disable both windows */
 	if (MV_OK != mvAhbToMbusWinEnable(cpu, winNum1,MV_FALSE))
@@ -755,9 +744,6 @@ MV_STATUS mvAhbToMbusWinTargetSwap(MV_U32 cpu, MV_TARGET target1,MV_TARGET targe
 
 	return MV_OK;
 }
-
-
-
 
 /*******************************************************************************
 * ahbToMbusRemapRegOffsGet - Get CPU address remap register offsets
@@ -891,4 +877,3 @@ MV_VOID mvAhbToMbusAddDecShow(MV_U32 cpu)
 		}
 	}
 }
-

@@ -90,7 +90,6 @@ static inline void _tlbivax_bcast(unsigned long address, unsigned int pid,
 extern void hash_preload(struct mm_struct *mm, unsigned long ea,
 			 unsigned long access, unsigned long trap);
 
-
 extern void _tlbie(unsigned long address);
 extern void _tlbia(void);
 

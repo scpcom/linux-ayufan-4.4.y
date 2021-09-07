@@ -26,7 +26,6 @@
 
 /*  Status codes */
 
-
 #ifndef STATUS_SUCCESS
 #define STATUS_SUCCESS				(0x00000000L)
 #endif
@@ -208,7 +207,6 @@
 #define RNDIS_OID_GEN_CO_RCV_PDUS_ERROR		0x00020104
 #define RNDIS_OID_GEN_CO_RCV_PDUS_NO_BUFFER	0x00020105
 
-
 #define RNDIS_OID_GEN_CO_RCV_CRC_ERROR		0x00020201
 #define RNDIS_OID_GEN_CO_TRANSMIT_QUEUE_LENGTH	0x00020202
 #define RNDIS_OID_GEN_CO_BYTES_XMIT		0x00020203
@@ -302,7 +300,6 @@
 /* Not a real medium, defined as an upper-bound */
 #define RNdisMediumMax				0x0000000d
 
-
 /* Remote NDIS medium connection states. */
 #define RNdisMediaStateConnected		0x00000000
 #define RNdisMediaStateDisconnected		0x00000001
@@ -310,7 +307,6 @@
 /*  Remote NDIS version numbers */
 #define RNDIS_MAJOR_VERSION			0x00000001
 #define RNDIS_MINOR_VERSION			0x00000000
-
 
 /* NdisInitialize message */
 struct rndis_initialize_request {
@@ -577,7 +573,6 @@ struct rcondis_mp_deactivate_vc_complete {
 	u32 RequestId;
 	u32 Status;
 };
-
 
 /* union with all of the RNDIS messages */
 union rndis_message_container {

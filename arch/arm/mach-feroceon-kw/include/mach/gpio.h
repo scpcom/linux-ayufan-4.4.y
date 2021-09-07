@@ -23,4 +23,3 @@ static inline int irq_to_gpio(int irq)
 	return irq - IRQ_GPP_START;
 }
 #endif
-

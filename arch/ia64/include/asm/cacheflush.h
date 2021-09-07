@@ -36,7 +36,6 @@ do {						\
 extern void flush_icache_range (unsigned long start, unsigned long end);
 extern void clflush_cache_range(void *addr, int size);
 
-
 #define flush_icache_user_range(vma, page, user_addr, len)					\
 do {												\
 	unsigned long _addr = (unsigned long) page_address(page) + ((user_addr) & ~PAGE_MASK);	\

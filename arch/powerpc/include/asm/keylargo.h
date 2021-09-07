@@ -223,7 +223,6 @@
 #define KL5_CLK3_68_EN			0x00000010
 #define KL5_CLK32_EN			0x00000020
 
-
 /* K2 definitions */
 #define K2_FCR0_USB0_SWRESET		0x00200000
 #define K2_FCR0_USB1_SWRESET		0x02000000

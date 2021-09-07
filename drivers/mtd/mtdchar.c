@@ -27,7 +27,6 @@
 #include <linux/semaphore.h>
 #endif /* MY_ABC_HERE */
 
-
 /*
  * Data structure to hold the pointer to the mtd device as well
  * as mode information ofr various use cases.
@@ -60,8 +59,6 @@ static loff_t mtd_lseek (struct file *file, loff_t offset, int orig)
 
 	return -EINVAL;
 }
-
-
 
 static int mtd_open(struct inode *inode, struct file *file)
 {
@@ -324,7 +321,6 @@ End:
     return retval;
 } /* sys_SYNOMTDAlloc() */
 #endif /* MY_ABC_HERE */
-
 
 static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count,loff_t *ppos)
 {
@@ -908,7 +904,7 @@ static int mtd_ioctl(struct inode *inode, struct file *file,
 	}
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 	case MEMMODIFYPARTINFO:
 	{
 		unsigned long adrs[2];
@@ -1134,7 +1130,6 @@ static int __init init_mtdchar(void)
 		printk(KERN_NOTICE "Can't allocate major number %d for Memory Technology Devices.\n",
 		       MTD_CHAR_MAJOR);
 	}
-
 
 #ifdef MY_ABC_HERE
 	/* XXX

@@ -11,7 +11,6 @@
 #ifndef _ASM_WBFLUSH_H
 #define _ASM_WBFLUSH_H
 
-
 #ifdef CONFIG_CPU_HAS_WB
 
 extern void (*__wbflush)(void);

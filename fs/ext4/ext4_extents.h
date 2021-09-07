@@ -58,7 +58,6 @@
  */
 #define EXT_STATS_
 
-
 /*
  * ext4_inode has i_block array (60 bytes total).
  * The first 12 bytes store ext4_extent_header;
@@ -160,7 +159,6 @@ typedef int (*ext_prepare_callback)(struct inode *, struct ext4_ext_path *,
 #define EXT_INIT_MAX_LEN	(1UL << 15)
 #define EXT_UNINIT_MAX_LEN	(EXT_INIT_MAX_LEN - 1)
 
-
 #define EXT_FIRST_EXTENT(__hdr__) \
 	((struct ext4_extent *) (((char *) (__hdr__)) +		\
 				 sizeof(struct ext4_extent_header)))
@@ -253,4 +251,3 @@ extern int ext4_ext_search_right(struct inode *, struct ext4_ext_path *,
 extern void ext4_ext_drop_refs(struct ext4_ext_path *);
 extern int ext4_ext_check_inode(struct inode *inode);
 #endif /* _EXT4_EXTENTS */
-

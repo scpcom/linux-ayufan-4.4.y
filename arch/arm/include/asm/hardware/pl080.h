@@ -135,4 +135,3 @@ struct pl080s_lli {
 	u32	control0;
 	u32	control1;
 };
-

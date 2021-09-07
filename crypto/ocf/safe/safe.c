@@ -247,7 +247,6 @@ pci_map_skb(struct safe_softc *sc,struct safe_operand *buf,struct sk_buff *skb)
 	return(0);
 }
 
-
 #if 0 /* not needed at this time */
 static void
 pci_sync_operand(struct safe_softc *sc, struct safe_operand *buf)
@@ -281,7 +280,6 @@ pci_unmap_operand(struct safe_softc *sc, struct safe_operand *buf)
 	buf->mapsize = 0;
 	buf->map = 0;
 }
-
 
 /*
  * SafeXcel Interrupt routine
@@ -411,7 +409,6 @@ safe_setup_mackey(struct safe_session *ses, int algo, caddr_t key, int klen)
 	MD5_CTX md5ctx;
 	SHA1_CTX sha1ctx;
 	int i;
-
 
 	for (i = 0; i < klen; i++)
 		key[i] ^= HMAC_IPAD_VAL;
@@ -612,7 +609,6 @@ safe_freesession(device_t dev, u_int64_t tid)
 		ret = EINVAL;
 	return (ret);
 }
-
 
 static int
 safe_process(device_t dev, struct cryptop *crp, int hint)
@@ -1187,7 +1183,6 @@ safe_callback(struct safe_softc *sc, struct safe_ringentry *re)
 	crypto_done(crp);
 }
 
-
 #if defined(CONFIG_OCF_RANDOMHARVEST) && !defined(SAFE_NO_RNG)
 #define	SAFE_RNG_MAXWAIT	1000
 
@@ -1330,7 +1325,6 @@ retry:
 }
 #endif /* defined(CONFIG_OCF_RANDOMHARVEST) && !defined(SAFE_NO_RNG) */
 
-
 /*
  * Resets the board.  Values in the regesters are left as is
  * from the reset (i.e. initial values are assigned elsewhere).
@@ -1447,7 +1441,6 @@ safe_init_board(struct safe_softc *sc)
 	WRITE_REG(sc, SAFE_HI_DESC_CNT, 1);
 	WRITE_REG(sc, SAFE_HI_MASK, SAFE_INT_PE_DDONE | SAFE_INT_PE_ERROR);
 }
-
 
 /*
  * Clean up after a chip crash.
@@ -1981,7 +1974,6 @@ safe_dump_ring(struct safe_softc *sc, const char *tag)
 	spin_unlock_irqrestore(&sc->sc_ringmtx, flags);
 }
 #endif /* SAFE_DEBUG */
-
 
 static int safe_probe(struct pci_dev *dev, const struct pci_device_id *ent)
 {

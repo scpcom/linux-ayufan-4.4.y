@@ -45,7 +45,6 @@ void fpu_emulator_init_fpu(void)
 	}
 }
 
-
 /*
  * Emulator context save/restore to/from a signal context
  * presumed to be on the user stack, and therefore accessed

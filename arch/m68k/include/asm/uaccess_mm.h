@@ -111,7 +111,6 @@ asm volatile ("\n"					\
 })
 #define put_user(x, ptr)	__put_user(x, ptr)
 
-
 #define __get_user_asm(res, x, ptr, type, bwl, reg, err) ({	\
 	type __gu_val;						\
 	asm volatile ("\n"					\

@@ -31,7 +31,6 @@ struct mn10300_serial_port *const gdbstub_port = &mn10300_serial_port_sif1;
 struct mn10300_serial_port *const gdbstub_port = &mn10300_serial_port_sif2;
 #endif
 
-
 /*
  * initialise the GDB stub I/O routines
  */

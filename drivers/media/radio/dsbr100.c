@@ -366,7 +366,6 @@ static void usb_dsbr100_disconnect(struct usb_interface *intf)
 	v4l2_device_disconnect(&radio->v4l2_dev);
 }
 
-
 static int vidioc_querycap(struct file *file, void *priv,
 					struct v4l2_capability *v)
 {

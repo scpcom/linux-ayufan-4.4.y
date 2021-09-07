@@ -63,8 +63,6 @@ extern void flush_dcache_phys_range(unsigned long start, unsigned long stop);
 #define copy_from_user_page(vma, page, vaddr, dst, src, len) \
 	memcpy(dst, src, len)
 
-
-
 #ifdef CONFIG_DEBUG_PAGEALLOC
 /* internal debugging function */
 void kernel_map_pages(struct page *page, int numpages, int enable);

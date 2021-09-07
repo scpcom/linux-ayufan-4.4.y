@@ -65,7 +65,6 @@ unsigned int fnic_log_level;
 module_param(fnic_log_level, int, S_IRUGO|S_IWUSR);
 MODULE_PARM_DESC(fnic_log_level, "bit mask of fnic logging levels");
 
-
 static struct libfc_function_template fnic_transport_template = {
 	.frame_send = fnic_send,
 	.fcp_abort_io = fnic_empty_scsi_cleanup,
@@ -586,7 +585,6 @@ static int __devinit fnic_probe(struct pci_dev *pdev,
 		goto err_out_free_intr;
 	}
 
-
 	/* initialize all fnic locks */
 	spin_lock_init(&fnic->fnic_lock);
 
@@ -938,4 +936,3 @@ static void __exit fnic_cleanup_module(void)
 
 module_init(fnic_init_module);
 module_exit(fnic_cleanup_module);
-

@@ -70,5 +70,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ctrlEnv/mvCtrlEnvSpec.h"
 #include "device/mvDeviceRegs.h"
 
-
 #endif /* #ifndef __INCmvDeviceH */

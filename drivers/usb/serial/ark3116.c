@@ -26,7 +26,6 @@
 #include <linux/serial.h>
 #include <linux/uaccess.h>
 
-
 static int debug;
 
 static const struct usb_device_id id_table[] = {
@@ -182,7 +181,6 @@ static void ark3116_set_termios(struct tty_struct *tty,
 	config = 0;
 
 	dbg("%s - port %d", __func__, port->number);
-
 
 	cflag = termios->c_cflag;
 	termios->c_cflag &= ~(CMSPAR|CRTSCTS);
@@ -482,4 +480,3 @@ MODULE_LICENSE("GPL");
 
 module_param(debug, bool, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(debug, "Debug enabled or not");
-

@@ -20,7 +20,6 @@ MODULE_DESCRIPTION("Xtables: Bridge physical device match");
 MODULE_ALIAS("ipt_physdev");
 MODULE_ALIAS("ip6t_physdev");
 
-
 static bool
 physdev_mt(const struct sk_buff *skb, const struct xt_match_param *par)
 {

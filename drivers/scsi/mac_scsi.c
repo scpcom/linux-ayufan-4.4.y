@@ -102,7 +102,6 @@ static volatile unsigned char *mac_scsi_regp = NULL;
 static volatile unsigned char *mac_scsi_drq  = NULL;
 static volatile unsigned char *mac_scsi_nodrq = NULL;
 
-
 /*
  * NCR 5380 register access functions
  */
@@ -146,7 +145,6 @@ static __inline__ void macscsi_write(struct Scsi_Host *instance, int reg, int va
   out_8(instance->io_port + (reg<<4), value);
 }
 #endif
-
 
 /*
  * Function : mac_scsi_setup(char *str)
@@ -451,7 +449,6 @@ __asm__ __volatile__					\
      : "0"(s), "1"(d), "2"(len)				\
      : "d0")
 
-
 static int macscsi_pread (struct Scsi_Host *instance,
 			  unsigned char *dst, int len)
 {
@@ -484,7 +481,6 @@ static int macscsi_pread (struct Scsi_Host *instance,
    
    return 0;
 }
-
 
 #define CP_MEM_TO_IO(s,d,len)				\
 __asm__ __volatile__					\
@@ -577,7 +573,6 @@ static int macscsi_pwrite (struct Scsi_Host *instance,
    return 0;
 }
 
-
 #include "NCR5380.c"
 
 static struct scsi_host_template driver_template = {
@@ -596,6 +591,5 @@ static struct scsi_host_template driver_template = {
 	.cmd_per_lun			= CMD_PER_LUN,
 	.use_clustering			= DISABLE_CLUSTERING
 };
-
 
 #include "scsi_module.c"

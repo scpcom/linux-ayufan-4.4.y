@@ -561,7 +561,6 @@ static const struct file_operations zcore_reipl_fops = {
 	.release	= zcore_reipl_release,
 };
 
-
 static void __init set_s390_lc_mask(union save_area *map)
 {
 	memset(&map->s390.ext_save, 0xff, sizeof(map->s390.ext_save));

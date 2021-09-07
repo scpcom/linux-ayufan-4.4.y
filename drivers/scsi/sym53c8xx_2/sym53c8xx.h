@@ -40,7 +40,6 @@
 #ifndef SYM53C8XX_H
 #define SYM53C8XX_H
 
-
 /*
  *  DMA addressing mode.
  *

@@ -28,7 +28,6 @@
 #include <mach/h3600.h>
 #include <asm/io.h>
 
-
 #ifndef CONFIG_IPAQ_HANDHELD
 #error This is for iPAQ Handhelds only
 #endif
@@ -64,7 +63,6 @@ static void jornada720_set_vpp(struct map_info *map, int vpp)
 	{ \
 		name:		"IPAQ flash " X, \
 	}
-
 
 static struct map_info ipaq_map[MAX_IPAQ_CS] = {
 	IPAQ_MAP_INIT("bank 1"),
@@ -175,7 +173,6 @@ static struct mtd_partition jornada_partitions[] = {
 	}
 };
 #endif
-
 
 static struct mtd_partition *parsed_parts;
 static struct mtd_info *mymtd;
@@ -289,7 +286,6 @@ static int __init ipaq_mtd_init(void)
 	}
 #endif
 
-
 	if (machine_is_ipaq()) { /* for iPAQs only */
 		for(i=0; i<MAX_IPAQ_CS; i++) {
 			printk(KERN_NOTICE "iPAQ flash: probing %d-bit flash bus, window=%lx with CFI.\n", ipaq_map[i].bankwidth*8, ipaq_map[i].virt);
@@ -375,7 +371,6 @@ static int __init ipaq_mtd_init(void)
 			return -ENXIO;
 		mymtd->owner = THIS_MODULE;
 	}
-
 
 	/*
 	 * Dynamic partition selection stuff (might override the static ones)

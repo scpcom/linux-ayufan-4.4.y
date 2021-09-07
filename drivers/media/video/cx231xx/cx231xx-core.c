@@ -248,7 +248,6 @@ int cx231xx_send_usb_command(struct cx231xx_i2c *i2c_bus,
 	/* set the buffer for read / write */
 	ven_req.pBuff = req_data->p_buffer;
 
-
 	/* call common vendor command request */
 	status = cx231xx_send_vendor_cmd(dev, &ven_req);
 	if (status < 0) {
@@ -1009,7 +1008,6 @@ int cx231xx_send_gpio_cmd(struct cx231xx *dev, u32 gpio_bit, u8 * gpio_val,
 		memset(ven_req.pBuff, 0x00, ven_req.wLength);
 	} else
 		ven_req.direction = USB_DIR_OUT;
-
 
 	/* call common vendor command request */
 	status = cx231xx_send_vendor_cmd(dev, &ven_req);

@@ -1337,14 +1337,12 @@ no_link_interrupt:
 	return IRQ_HANDLED;
 }
 
-
 static irqreturn_t e1000_intr_msix_tx(int irq, void *data)
 {
 	struct net_device *netdev = data;
 	struct e1000_adapter *adapter = netdev_priv(netdev);
 	struct e1000_hw *hw = &adapter->hw;
 	struct e1000_ring *tx_ring = adapter->tx_ring;
-
 
 	adapter->total_tx_bytes = 0;
 	adapter->total_tx_packets = 0;
@@ -1473,7 +1471,6 @@ void e1000e_set_interrupt_capability(struct e1000_adapter *adapter)
 {
 	int err;
 	int numvecs, i;
-
 
 	switch (adapter->int_mode) {
 	case E1000E_INT_MODE_MSIX:
@@ -2152,7 +2149,6 @@ static void e1000_update_mng_vlan(struct e1000_adapter *adapter)
 	}
 }
 
-
 static void e1000_vlan_rx_register(struct net_device *netdev,
 				   struct vlan_group *grp)
 {
@@ -2803,7 +2799,6 @@ void e1000e_reset(struct e1000_adapter *adapter)
 
 		ew32(PBA, pba);
 	}
-
 
 	/*
 	 * flow control settings
@@ -5490,7 +5485,6 @@ static void __exit e1000_exit_module(void)
 	pm_qos_remove_requirement(PM_QOS_CPU_DMA_LATENCY, e1000e_driver_name);
 }
 module_exit(e1000_exit_module);
-
 
 MODULE_AUTHOR("Intel Corporation, <linux.nics@intel.com>");
 MODULE_DESCRIPTION("Intel(R) PRO/1000 Network Driver");

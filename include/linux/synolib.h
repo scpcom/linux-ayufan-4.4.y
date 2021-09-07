@@ -11,8 +11,7 @@
 #include <linux/jiffies.h>
 #include <linux/module.h>
 
-
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 extern int syno_temperature_debug;
 #endif
 
@@ -38,7 +37,6 @@ typedef struct _tag_SynoAsyncOperation{
 		
 	spinlock_t	syno_async_lock;	
 }SYNOASYNCOPERATION;
-
 
 int SynoAsyncOperationInit(SYNOASYNCOPERATION *pSynoAsyncOp, struct workqueue_struct *pWorkQueue,
 							 void (*period_func)(void *data), void *user_data, unsigned long period_in_sec);

@@ -248,7 +248,6 @@ struct ath5k_hw *ath5k_hw_attach(struct ath5k_softc *sc)
 		}
 	}
 
-
 	/* Return on unsuported chips (unsupported eeprom etc) */
 	if ((srev >= AR5K_SREV_AR5416) &&
 	(srev < AR5K_SREV_AR2425)) {

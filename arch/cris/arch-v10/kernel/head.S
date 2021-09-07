@@ -450,7 +450,6 @@ no_command_line:
 		| IO_STATE (R_GEN_CONFIG, dma8, usb) \
 		| IO_STATE (R_GEN_CONFIG, dma9, usb),$r0
 
-
 #if defined(CONFIG_ETRAX_DEF_R_PORT_G0_DIR_OUT)
         or.d      IO_STATE (R_GEN_CONFIG, g0dir, out),$r0
 #endif

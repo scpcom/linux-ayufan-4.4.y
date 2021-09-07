@@ -31,7 +31,6 @@
 */
 #include "../rt_config.h"
 
-
 /*
 	We can do copy the frame into pTxContext when match following conditions.
 		=>
@@ -64,10 +63,8 @@ static inline NDIS_STATUS RtmpUSBCanDoWrite(
 		canWrite = NDIS_STATUS_SUCCESS;
 	}
 
-
 	return canWrite;
 }
-
 
 USHORT RtmpUSB_WriteSubTxResource(
 	IN	PRTMP_ADAPTER	pAd,
@@ -210,7 +207,6 @@ USHORT	RtmpUSB_WriteFragTxResource(
 			pHTTXContext->CurWritePosition = 8;
 		pHTTXContext->CurWriteRealPos = pHTTXContext->CurWritePosition;
 
-
 		// Finally, set bCurWriting as FALSE
 	pHTTXContext->bCurWriting = FALSE;
 
@@ -220,11 +216,9 @@ USHORT	RtmpUSB_WriteFragTxResource(
 		RELEASE_NDIS_PACKET(pAd, pTxBlk->pPacket, NDIS_STATUS_SUCCESS);
 	}
 
-
 	return(Status);
 
 }
-
 
 USHORT RtmpUSB_WriteSingleTxResource(
 	IN	PRTMP_ADAPTER	pAd,
@@ -247,7 +241,6 @@ USHORT RtmpUSB_WriteSingleTxResource(
 	// For USB, didn't need PCI_MAP_SINGLE()
 	//SrcBufPA = PCI_MAP_SINGLE(pAd, (char *) pTxBlk->pSrcBufData, pTxBlk->SrcBufLen, PCI_DMA_TODEVICE);
 
-
 	//
 	// get Tx Ring Resource & Dma Buffer address
 	//
@@ -256,8 +249,6 @@ USHORT RtmpUSB_WriteSingleTxResource(
 	RTMP_IRQ_LOCK(&pAd->TxContextQueueLock[QueIdx], IrqFlags);
 	pHTTXContext  = &pAd->TxContext[QueIdx];
 	fillOffset = pHTTXContext->CurWritePosition;
-
-
 
 	// Check ring full.
 	Status = RtmpUSBCanDoWrite(pAd, QueIdx, pHTTXContext);
@@ -330,9 +321,7 @@ USHORT RtmpUSB_WriteSingleTxResource(
 	pHTTXContext->bCurWriting = FALSE;
 	}
 
-
 	RTMP_IRQ_UNLOCK(&pAd->TxContextQueueLock[QueIdx], IrqFlags);
-
 
 	// succeed and release the skb buffer
 	RELEASE_NDIS_PACKET(pAd, pTxBlk->pPacket, NDIS_STATUS_SUCCESS);
@@ -340,7 +329,6 @@ USHORT RtmpUSB_WriteSingleTxResource(
 	return(Status);
 
 }
-
 
 USHORT RtmpUSB_WriteMultiTxResource(
 	IN	PRTMP_ADAPTER	pAd,
@@ -377,7 +365,6 @@ USHORT RtmpUSB_WriteMultiTxResource(
 
 			pTxInfo = (PTXINFO_STRUC)(&pTxBlk->HeaderBuf[0]);
 			pTxWI= (PTXWI_STRUC)(&pTxBlk->HeaderBuf[TXINFO_SIZE]);
-
 
 			// Reserve space for 8 bytes padding.
 			if ((pHTTXContext->ENextBulkOutPosition == pHTTXContext->CurWritePosition))
@@ -437,7 +424,6 @@ USHORT RtmpUSB_WriteMultiTxResource(
 		}
 	}
 
-
 	// We unlock it here to prevent the first 8 bytes maybe over-write issue.
 	//	1. First we got CurWritePosition but the first 8 bytes still not write to the pTxContext.
 	//	2. An interrupt break our routine and handle bulk-out complete.
@@ -468,7 +454,6 @@ done:
 	return(Status);
 
 }
-
 
 VOID RtmpUSB_FinalWriteTxResource(
 	IN	PRTMP_ADAPTER	pAd,
@@ -529,7 +514,6 @@ VOID RtmpUSB_FinalWriteTxResource(
 		}
 		pHTTXContext->CurWriteRealPos = pHTTXContext->CurWritePosition;
 
-
 		//
 		//	Zero the last padding.
 		//
@@ -549,7 +533,6 @@ VOID RtmpUSB_FinalWriteTxResource(
 
 }
 
-
 VOID RtmpUSBDataLastTxIdx(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	UCHAR			QueIdx,
@@ -557,7 +540,6 @@ VOID RtmpUSBDataLastTxIdx(
 {
 	// DO nothing for USB.
 }
-
 
 /*
 	When can do bulk-out:
@@ -577,7 +559,6 @@ VOID RtmpUSBDataKickOut(
 
 }
 
-
 /*
 	Must be run in Interrupt context
 	This function handle RT2870 specific TxDesc and cpu index update and kick the packet out.
@@ -596,7 +577,6 @@ int RtmpUSBMgmtKickOut(
 	ULONG			SwIdx = pAd->MgmtRing.TxCpuIdx;
 	PTX_CONTEXT		pMLMEContext = (PTX_CONTEXT)pAd->MgmtRing.Cell[SwIdx].AllocVa;
 	unsigned long	IrqFlags;
-
 
 	pTxInfo = (PTXINFO_STRUC)(pSrcBufVA);
 
@@ -629,7 +609,6 @@ int RtmpUSBMgmtKickOut(
 	pMLMEContext->InUse = TRUE;
 	pMLMEContext->bWaitingBulkOut = TRUE;
 
-
 	//for debug
 	//hex_dump("RtmpUSBMgmtKickOut", &pMLMEContext->TransferBuffer->field.WirelessPacket[0], (pMLMEContext->BulkOutSize > 16 ? 16 : pMLMEContext->BulkOutSize));
 
@@ -651,7 +630,6 @@ int RtmpUSBMgmtKickOut(
 
 	return 0;
 }
-
 
 VOID RtmpUSBNullFrameKickOut(
 	IN RTMP_ADAPTER *pAd,
@@ -933,4 +911,3 @@ VOID RT28xxUsbMlmeRadioOFF(
 
 	AsicSendCommandToMcu(pAd, 0x30, 0xff, 0xff, 0x02);
 }
-

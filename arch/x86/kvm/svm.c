@@ -564,7 +564,6 @@ static void init_vmcb(struct vcpu_svm *svm)
 					(1 << UD_VECTOR) |
 					(1 << MC_VECTOR);
 
-
 	control->intercept = 	(1ULL << INTERCEPT_INTR) |
 				(1ULL << INTERCEPT_NMI) |
 				(1ULL << INTERCEPT_SMI) |
@@ -2365,7 +2364,6 @@ static int handle_exit(struct kvm_run *kvm_run, struct kvm_vcpu *vcpu)
 			kvm_mmu_load(vcpu);
 		}
 	}
-
 
 	if (svm->vmcb->control.exit_code == SVM_EXIT_ERR) {
 		kvm_run->exit_reason = KVM_EXIT_FAIL_ENTRY;

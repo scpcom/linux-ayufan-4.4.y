@@ -21,7 +21,6 @@
  * Date: Jan 24, 2003
  */
 
-
 #ifndef VELOCITY_H
 #define VELOCITY_H
 
@@ -61,7 +60,6 @@
 /*
  * Purpose: Structures for MAX RX/TX descriptors.
  */
-
 
 #define B_OWNED_BY_CHIP     1
 #define B_OWNED_BY_HOST     0
@@ -140,7 +138,6 @@
 #define TCPLS_END           1
 #define TCPLS_MED           0
 
-
 // max transmit or receive buffer size
 #define CB_RX_BUF_SIZE     2048UL	// max buffer size
 					// NOTE: must be multiple of 4
@@ -157,7 +154,6 @@
 // for 3119
 #define CB_TD_RING_NUM      4	// # of TD rings.
 #define CB_MAX_SEG_PER_PKT  7	// max data seg per packet (Tx)
-
 
 /*
  *	If collisions excess 15 times , tx will abort, and
@@ -245,11 +241,9 @@ enum  velocity_owner {
 	OWNED_BY_NIC = cpu_to_le16(0x8000)
 };
 
-
 /*
  *	MAC registers and macros.
  */
-
 
 #define MCAM_SIZE           64
 #define VCAM_SIZE           64
@@ -806,7 +800,6 @@ enum  velocity_owner {
 #define EERSV_BOOT_LOCAL    ((u8) 0x04)
 #define EERSV_BOOT_BEV      ((u8) 0x06)
 
-
 /*
  *	Bits in BPCMD
  */
@@ -878,7 +871,6 @@ enum  velocity_owner {
 #define WOLCR_LINKON_EN       0x0400	/* link on detected enable */
 #define WOLCR_MAGIC_EN        0x0200	/* magic packet filter enable */
 #define WOLCR_UNICAST_EN      0x0100	/* unicast filter enable */
-
 
 /*
  *	Bits in PWCFG
@@ -966,7 +958,6 @@ enum  velocity_owner {
  */
 
 #define W_MAX_TIMEOUT       0x0FFFU
-
 
 /*
  *	MAC registers as a structure. Cannot be directly accessed this
@@ -1068,7 +1059,6 @@ struct mac_regs {
 	volatile u8 EADDR;
 	volatile u8 EMBCMD;
 
-
 	volatile u8 JMPSR0;		/* 0x98 */
 	volatile u8 JMPSR1;
 	volatile u8 JMPSR2;
@@ -1095,7 +1085,6 @@ struct mac_regs {
 	volatile __le16 PatternCRC[8];	/* 0xB0 */
 	volatile __le32 ByteMask[4][4];	/* 0xC0 */
 } __attribute__ ((__packed__));
-
 
 enum hw_mib {
 	HW_MIB_ifRxAllPkts = 0,
@@ -1238,11 +1227,9 @@ struct velocity_context {
 	u32 pattern[8];
 };
 
-
 /*
  *	MII registers.
  */
-
 
 /*
  *	Registers in the MII (offset unit is WORD)
@@ -1368,7 +1355,6 @@ struct velocity_context {
  * Inline debug routine
  */
 
-
 enum velocity_msg_level {
 	MSG_LEVEL_ERR = 0,	//Errors that will cause abnormal operation.
 	MSG_LEVEL_NOTICE = 1,	//Some errors need users to be notified.
@@ -1405,8 +1391,6 @@ enum velocity_msg_level {
 	}\
 	printk("\n");\
 }
-
-
 
 #define     VELOCITY_WOL_MAGIC             0x00000000UL
 #define     VELOCITY_WOL_PHY               0x00000001UL
@@ -1636,6 +1620,5 @@ static inline void init_flow_control_register(struct velocity_info *vptr)
 	/* Initialize RBRDU to Rx buffer count. */
 	writew(vptr->options.numrx, &regs->RBRDU);
 }
-
 
 #endif

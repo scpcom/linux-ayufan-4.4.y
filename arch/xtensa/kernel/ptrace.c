@@ -104,7 +104,6 @@ int ptrace_setregs(struct task_struct *child, void __user *uregs)
 	return 0;
 }
 
-
 int ptrace_getxregs(struct task_struct *child, void __user *uregs)
 {
 	struct pt_regs *regs = task_pt_regs(child);
@@ -374,4 +373,3 @@ void do_syscall_trace_leave(struct pt_regs *regs)
 			&& (current->ptrace & PT_PTRACED))
 		do_syscall_trace();
 }
-

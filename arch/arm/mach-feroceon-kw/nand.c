@@ -90,8 +90,6 @@ static void mv_nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 	}
 }
 
-
-
 int __init mv_nand_init(void)
 {
 	struct nand_chip *this;
@@ -212,7 +210,6 @@ module_exit(board_cleanup);
 #define tt 4      /* number of errors that can be corrected */
 #define kk 1015   /* kk = number of information symbols  kk = nn-2*tt  */
 
-
 static char rs_initialized = 0;
 
 //typedef unsigned int gf;
@@ -220,7 +217,6 @@ typedef u_short tgf;  /* data type of Galois Functions */
 
 /* Primitive polynomials -  irriducibile polynomial  [ 1+x^3+x^10 ]*/
 short pp[mm+1] = { 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1 };
-
 
 /* index->polynomial form conversion table */
 tgf alpha_to[nn + 1];
@@ -230,7 +226,6 @@ tgf index_of[nn + 1];
 
 /* Generator polynomial g(x) = 2*tt with roots @, @^2, .. ,@^(2*tt) */
 tgf Gg[nn - kk + 1];
-
 
 #define	minimum(a,b)	((a) < (b) ? (a) : (b))
 
@@ -250,7 +245,6 @@ tgf Gg[nn - kk + 1];
 	for(ci=(n)-1;ci >=0;ci--)\
 		(a)[ci] = (b)[ci];\
 	}
-
 
 /* generate GF(2^m) from the irreducible polynomial p(X) in p[0]..p[mm]
    lookup tables:  index->polynomial form   alpha_to[] contains j=alpha^i;
@@ -285,7 +279,6 @@ void generate_gf(void)
 	alpha_to[nn] = 0;
 }
 
-
 /*
  * Obtain the generator polynomial of the tt-error correcting, 
  * length nn = (2^mm -1) 
@@ -314,7 +307,6 @@ void gen_poly(void)
 	for (i = 0; i <= nn - kk; i++)
 		Gg[i] = index_of[Gg[i]];
 }
-
 
 /*
  * take the string of symbols in data[i], i=0..(k-1) and encode
@@ -350,9 +342,6 @@ static inline char encode_rs(dtype data[kk], dtype bb[nn-kk])
 	return 0;
 }
 
-
-
-
 /* assume we have received bits grouped into mm-bit symbols in data[i],
    i=0..(nn-1), We first compute the 2*tt syndromes, then we use the 
    Berlekamp iteration to find the error location polynomial  elp[i].   
@@ -376,8 +365,6 @@ static inline int decode_rs(dtype data[nn])
 	tgf b[nn-kk + 1], t[nn-kk + 1], omega[nn-kk + 1];
 	tgf root[nn-kk], reg[nn-kk + 1], loc[nn-kk];
 	int syn_error, count;
-
-	
 
 	/* data[] is in polynomial form, copy and convert to index form */
 	for (i = nn-1; i >= 0; i--){
@@ -438,7 +425,6 @@ static inline int decode_rs(dtype data[nn])
 			}
 		}
 		
-
 		discr_r = index_of[discr_r];	/* Index form */
 		if (discr_r == nn) {
 			/* 2 lines below: B(x) <-- x*B(x) */
@@ -510,8 +496,6 @@ static inline int decode_rs(dtype data[nn])
 */
 #endif
 	
-	
-	
 	if (deg_lambda != count) {
 		/*
 		 * deg(lambda) unequal to number of roots => uncorrectable
@@ -538,9 +522,6 @@ static inline int decode_rs(dtype data[nn])
 		omega[i] = index_of[tmp];
 	}
 	omega[nn-kk] = nn;
-
-
-
 
 	/*
 	 * Compute error values in poly-form. num1 = omega(inv(X(l))), num2 =
@@ -701,4 +682,3 @@ static void mv_nand_enable_hwecc(struct mtd_info *mtd, int mode)
 }
 
 #endif	/* CONFIG_NAND_RS_ECC_SUPPORT */
-

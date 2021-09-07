@@ -97,13 +97,11 @@ static int cris_freq_cpu_init(struct cpufreq_policy *policy)
 	return 0;
 }
 
-
 static int cris_freq_cpu_exit(struct cpufreq_policy *policy)
 {
 	cpufreq_frequency_table_put_attr(policy->cpu);
 	return 0;
 }
-
 
 static struct freq_attr *cris_freq_attr[] = {
 	&cpufreq_freq_attr_scaling_available_freqs,
@@ -147,6 +145,5 @@ cris_sdram_freq_notifier(struct notifier_block *nb, unsigned long val,
 	}
 	return 0;
 }
-
 
 module_init(cris_freq_init);

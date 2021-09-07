@@ -188,7 +188,6 @@ struct sbp2_status_block {
 	u8 command_set_dependent[24];
 } __attribute__((packed));
 
-
 /*
  * SBP2 related configuration ROM definitions
  */
@@ -240,7 +239,6 @@ struct sbp2_status_block {
 #define SBP2_SCSI_STATUS_RESERVATION_CONFLICT	0x18
 #define SBP2_SCSI_STATUS_COMMAND_TERMINATED	0x22
 #define SBP2_SCSI_STATUS_SELECTION_TIMEOUT	0xff
-
 
 /*
  * Representations of commands and devices

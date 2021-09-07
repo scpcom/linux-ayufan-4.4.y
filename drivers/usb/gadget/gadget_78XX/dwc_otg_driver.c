@@ -69,7 +69,6 @@
 
 #include <asm/io.h>
 
-
 #include "dwc_os.h"
 #include "dwc_otg_dbg.h"
 #include "dwc_otg_driver.h"
@@ -537,7 +536,6 @@ static void dwc_otg_driver_remove(
 	dwc_otg_device_t *otg_dev = pci_get_drvdata(_dev);
 #endif
 
-
 	DWC_DEBUGPL(DBG_ANY, "%s(%p)\n", __func__, _dev);
 
 	if (!otg_dev) {
@@ -635,7 +633,6 @@ struct pci_dev *_dev,  const struct pci_device_id *id
 	/* other stuff needed as well? */
 
 #endif
-
 
 	dwc_otg_device = dwc_alloc(sizeof(dwc_otg_device_t));
 
@@ -854,7 +851,6 @@ static struct pci_driver dwc_otg_driver = {
 };
 #endif
 
-
 #define USB_REF_300_DIVIDER     8
 #define USB_REF_300_INV         28
 #define USB_REF_300_WCK_DUTY    29
@@ -863,8 +859,6 @@ static struct pci_driver dwc_otg_driver = {
 #define SEC_CTRL_PLLB_CTRL0             (SEC_CONTROL_BASE + 0x1F0)
 #define SEC_CTRL_PLLB_DIV_CTRL          (SEC_CONTROL_BASE + 0xF8)
 #define HCSL_CTRL_ADDR          (SYS_CONTROL_BASE + 0x114)
-
-
 
 /**
  * This function is called when the dwc_otg_driver is installed with the

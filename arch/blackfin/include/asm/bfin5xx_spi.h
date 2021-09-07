@@ -22,7 +22,6 @@
 #define SPI_BAUD_OFF            0x14
 #define SPI_SHAW_OFF            0x18
 
-
 #define BIT_CTL_ENABLE      0x4000
 #define BIT_CTL_OPENDRAIN   0x2000
 #define BIT_CTL_MASTER      0x1000

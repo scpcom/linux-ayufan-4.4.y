@@ -86,4 +86,3 @@ union bfi_lport_i2h_msg_u {
 #pragma pack()
 
 #endif /* __BFI_LPORT_H__ */
-

@@ -26,7 +26,6 @@
 
 #include <linux/netfilter_ipv4/ip_tables.h>
 
-
 #define IPT_TAB_MASK     15
 static struct tcf_common *tcf_ipt_ht[IPT_TAB_MASK + 1];
 static u32 ipt_idx_gen;

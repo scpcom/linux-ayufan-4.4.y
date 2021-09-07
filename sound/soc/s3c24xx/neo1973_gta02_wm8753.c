@@ -276,7 +276,6 @@ static const struct snd_soc_dapm_widget wm8753_dapm_widgets[] = {
 	SND_SOC_DAPM_SPK("Handset Spk", NULL),
 };
 
-
 /* example machine audio_mapnections */
 static const struct snd_soc_dapm_route audio_map[] = {
 

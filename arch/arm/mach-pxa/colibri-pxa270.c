@@ -142,4 +142,3 @@ MACHINE_START(COLIBRI, "Toradex Colibri PXA270")
 	.init_irq	= pxa27x_init_irq,
 	.timer		= &pxa_timer,
 MACHINE_END
-

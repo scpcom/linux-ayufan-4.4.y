@@ -124,7 +124,6 @@ int msm_dmov_exec_cmd(unsigned id, unsigned int cmdptr)
 	return 0;
 }
 
-
 static irqreturn_t msm_datamover_irq_handler(int irq, void *dev_id)
 {
 	unsigned int int_status, mask, id;
@@ -243,4 +242,3 @@ static int __init msm_init_datamover(void)
 }
 
 arch_initcall(msm_init_datamover);
-

@@ -41,7 +41,6 @@ DEFINE_MUTEX(vme_bus_num_mtx);
 static void __exit vme_exit (void);
 static int __init vme_init (void);
 
-
 /*
  * Find the bridge resource associated with a specific device resource
  */
@@ -799,8 +798,6 @@ struct vme_dma_attr *vme_dma_pci_attribute(dma_addr_t address)
 		goto err_pci;
 	}
 
-
-
 	attributes->type = VME_DMA_PCI;
 	attributes->private = (void *)pci_attr;
 
@@ -1260,7 +1257,6 @@ int vme_slot_get(struct device *bus)
 }
 EXPORT_SYMBOL(vme_slot_get);
 
-
 /* - Bridge Registration --------------------------------------------------- */
 
 static int vme_alloc_bus_num(void)
@@ -1335,7 +1331,6 @@ void vme_unregister_bridge (struct vme_bridge *bridge)
 	int i;
 	struct device *dev;
 
-
 	for (i = 0; i < VME_SLOTS_MAX; i++) {
 		dev = &(bridge->dev[i]);
 		device_unregister(dev);
@@ -1343,7 +1338,6 @@ void vme_unregister_bridge (struct vme_bridge *bridge)
 	vme_free_bus_num(bridge->num);
 }
 EXPORT_SYMBOL(vme_unregister_bridge);
-
 
 /* - Driver Registration --------------------------------------------------- */
 

@@ -111,7 +111,6 @@ force_gpt_fn(char *str)
 }
 __setup("gpt", force_gpt_fn);
 
-
 /**
  * efi_crc32() - EFI version of crc32 function
  * @buf: buffer to calculate crc32 of

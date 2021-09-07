@@ -248,7 +248,6 @@ int dma_map_sg(struct device *dev, struct scatterlist *sg, int nents,
 
 EXPORT_SYMBOL(dma_map_sg);
 
-
 /**
  * High level FIQ handler
  *
@@ -300,7 +299,6 @@ asmlinkage void do_coherency(void)
         chosen_op(comms->message.tlb.tlb_arg);   
     }
     
-    
     /* mark as done by setting the number of entries to 0 */
     comms->nents = 0;
     wmb();
@@ -318,7 +316,6 @@ asmlinkage void do_coherency(void)
 
 #include <linux/thread_info.h>
 #define raw_smp_processor_id() (current_thread_info()->cpu)
-
 
 /*
  * Call a tlb function on the other processors via a FIQ
@@ -361,7 +358,6 @@ static void tlb_on_other_cpu(void (*func) (void *info), void *info, int cpu)
 static void tlb_on_each_cpu_mask(void (*func) (void *info), void *info, int wait, const struct cpumask *mask)
 {
 
-
     unsigned long flags;
 	int next_cpu, this_cpu = smp_processor_id();
     int cpu;
@@ -385,7 +381,6 @@ static void tlb_on_each_cpu_mask(void (*func) (void *info), void *info, int wait
         
     }
     
-
     /* if the local cpu matches the mask, run a local call */
     if (cpumask_test_cpu(smp_processor_id(), mask)) {
 		func(info);
@@ -428,7 +423,6 @@ static void tlb_on_each_cpu(void (*func) (void *info), void *info, int wait)
     local_irq_restore(flags);
 
 }
-
 
 /* all SMP configurations have the extended CPUID registers */
 static inline int tlb_ops_need_broadcast(void)
@@ -475,7 +469,6 @@ static inline void ipi_flush_tlb_kernel_range(void *arg)
 
 	local_flush_tlb_kernel_range(ta->ta_start, ta->ta_end);
 }
-
 
 void flush_tlb_all(void)
 {

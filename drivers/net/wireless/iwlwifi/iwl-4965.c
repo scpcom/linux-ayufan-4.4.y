@@ -59,7 +59,6 @@ static int iwl4965_hw_get_temperature(struct iwl_priv *priv);
 #define _IWL4965_MODULE_FIRMWARE(api) IWL4965_FW_PRE #api ".ucode"
 #define IWL4965_MODULE_FIRMWARE(api) _IWL4965_MODULE_FIRMWARE(api)
 
-
 /* module parameters */
 static struct iwl_mod_params iwl4965_mod_params = {
 	.num_of_queues = IWL49_NUM_QUEUES,
@@ -205,7 +204,6 @@ static int iwl4965_load_bsm(struct iwl_priv *priv)
 	/* Enable future boot loads whenever power management unit triggers it
 	 *   (e.g. when powering back up after power-save shutdown) */
 	iwl_write_prph(priv, BSM_WR_CTRL_REG, BSM_WR_CTRL_REG_BIT_START_EN);
-
 
 	return 0;
 }
@@ -356,7 +354,6 @@ out:
 	return ret;
 }
 
-
 static void iwl4965_nic_config(struct iwl_priv *priv)
 {
 	unsigned long flags;
@@ -435,7 +432,6 @@ static int iwl4965_apm_reset(struct iwl_priv *priv)
 	int ret = 0;
 
 	iwl4965_apm_stop_master(priv);
-
 
 	iwl_set_bit(priv, CSR_RESET, CSR_RESET_REG_FLAG_SW_RESET);
 
@@ -1858,7 +1854,6 @@ static int iwl4965_tx_queue_set_q2ratid(struct iwl_priv *priv, u16 ra_tid,
 	return 0;
 }
 
-
 /**
  * iwl4965_tx_queue_agg_enable - Set up & enable aggregation for selected queue
  *
@@ -1922,7 +1917,6 @@ static int iwl4965_txq_agg_enable(struct iwl_priv *priv, int txq_id,
 
 	return 0;
 }
-
 
 static u16 iwl4965_get_hcmd_size(u8 cmd_id, u16 len)
 {
@@ -2214,7 +2208,6 @@ static int iwl4965_calc_rssi(struct iwl_priv *priv,
 	 * Higher AGC (higher radio gain) means lower signal. */
 	return max_rssi - agc - IWL49_RSSI_OFFSET;
 }
-
 
 /* Set up 4965-specific Rx frame reply handlers */
 static void iwl4965_rx_handler_setup(struct iwl_priv *priv)

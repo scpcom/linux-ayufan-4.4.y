@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef _VMBUS_PRIVATE_H_
 #define _VMBUS_PRIVATE_H_
 
@@ -33,7 +32,6 @@
 #include "RingBuffer.h"
 #include <linux/list.h>
 
-
 /*
  * Maximum channels is determined by the size of the interrupt page
  * which is PAGE_SIZE. 1/2 of PAGE_SIZE is for send endpoint interrupt
@@ -44,7 +42,6 @@
 /* The value here must be in multiple of 32 */
 /* TODO: Need to make this configurable */
 #define MAX_NUM_CHANNELS_SUPPORTED	256
-
 
 enum VMBUS_CONNECT_STATE {
 	Disconnected,
@@ -86,7 +83,6 @@ struct VMBUS_CONNECTION {
 	struct workqueue_struct *WorkQueue;
 };
 
-
 struct VMBUS_MSGINFO {
 	/* Bookkeeping stuff */
 	struct list_head MsgListEntry;
@@ -97,7 +93,6 @@ struct VMBUS_MSGINFO {
 	/* The message itself */
 	unsigned char Msg[0];
 };
-
 
 extern struct VMBUS_CONNECTION gVmbusConnection;
 
@@ -117,7 +112,6 @@ void VmbusChildDeviceRemove(struct hv_device *Device);
 
 struct vmbus_channel *GetChannelFromRelId(u32 relId);
 
-
 /* Connection interface */
 
 int VmbusConnect(void);
@@ -129,6 +123,5 @@ int VmbusPostMessage(void *buffer, size_t bufSize);
 int VmbusSetEvent(u32 childRelId);
 
 void VmbusOnEvents(void);
-
 
 #endif /* _VMBUS_PRIVATE_H_ */

@@ -27,7 +27,6 @@
 #include <cee/bfa_cee.h>
 #include <port/bfa_port.h>
 
-
 struct bfa_modules_s {
 	struct bfa_pport_s	pport;	/*  physical port module	*/
 	struct bfa_fcxp_mod_s fcxp_mod; /*  fcxp module		*/

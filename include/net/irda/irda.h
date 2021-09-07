@@ -57,7 +57,6 @@ typedef __u32 magic_t;
 #  define IRDA_PACK __attribute__((packed))
 #endif
 
-
 #ifdef CONFIG_IRDA_DEBUG
 
 extern unsigned int irda_debug;

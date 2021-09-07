@@ -2106,7 +2106,6 @@ s32 ixgbe_disable_pcie_master(struct ixgbe_hw *hw)
 	return status;
 }
 
-
 /**
  *  ixgbe_acquire_swfw_sync - Acquire SWFW semaphore
  *  @hw: pointer to hardware structure

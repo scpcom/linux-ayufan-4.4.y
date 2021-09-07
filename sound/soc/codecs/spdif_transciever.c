@@ -71,4 +71,3 @@ static void __exit dit_exit(void)
 
 module_init(dit_modinit);
 module_exit(dit_exit);
-

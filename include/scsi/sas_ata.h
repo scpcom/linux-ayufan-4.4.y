@@ -42,7 +42,6 @@ void sas_ata_task_abort(struct sas_task *task);
 
 #else
 
-
 static inline int dev_is_sata(struct domain_device *dev)
 {
 	return 0;

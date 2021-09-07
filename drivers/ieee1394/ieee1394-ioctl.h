@@ -39,7 +39,6 @@
 /* Pass a struct dv1394_status* as the parameter */
 #define DV1394_IOC_GET_STATUS		_IOR('#', 0x0c, struct dv1394_status)
 
-
 /* Video1394 Gets 10 */
 
 #define VIDEO1394_IOC_LISTEN_CHANNEL		\
@@ -65,7 +64,6 @@
 	_IOW ('#', 0x17, struct video1394_wait)
 #define VIDEO1394_IOC_LISTEN_POLL_BUFFER	\
 	_IOWR('#', 0x18, struct video1394_wait)
-
 
 /* Raw1394's ISO interface */
 #define RAW1394_IOC_ISO_XMIT_INIT		\

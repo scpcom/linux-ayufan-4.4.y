@@ -17,7 +17,6 @@
 #include "cprecomp.h"
 #include "ratectrl.h"
 
-
 void zfUpdateBssid(zdev_t* dev, u8_t* bssid)
 {
 
@@ -118,7 +117,6 @@ void zfUpdateSupportRate(zdev_t* dev, u8_t* rateArray)
             }
         }
     }
-
 
     wd->bRate |= bRate;
     wd->bRateBasic |= bRateBasic;
@@ -246,7 +244,6 @@ u8_t zfPhyCtrlToRate(u32_t phyCtrl)
     return rate;
 }
 
-
 void zfCoreEvent(zdev_t* dev, u16_t event, u8_t* rsp)
 {
     u16_t i;
@@ -257,7 +254,6 @@ void zfCoreEvent(zdev_t* dev, u16_t event, u8_t* rsp)
     s8_t res;
     zmw_get_wlan_dev(dev);
     zmw_declare_for_critical_section();
-
 
     if (event == 0) //Beacon Event
     {

@@ -609,7 +609,6 @@ unw_access_pr (struct unw_frame_info *info, unsigned long *val, int write)
 }
 EXPORT_SYMBOL(unw_access_pr);
 
-
 /* Routines to manipulate the state stack.  */
 
 static inline void
@@ -1198,7 +1197,6 @@ desc_spill_sprel_p (unsigned char qp, unw_word t, unsigned char abreg, unw_word 
 
 #include "unwind_decoder.c"
 
-
 /* Unwind scripts. */
 
 static inline unw_hash_index_t
@@ -1759,7 +1757,6 @@ run_script (struct unw_script *script, struct unw_frame_info *state)
 					   __func__, val);
 			}
 			break;
-
 
 		      case UNW_INSN_MOVE_STACKED:
 			s[dst] = (unsigned long) ia64_rse_skip_regs((unsigned long *)state->bsp,

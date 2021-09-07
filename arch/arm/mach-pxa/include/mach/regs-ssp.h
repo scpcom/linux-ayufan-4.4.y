@@ -130,5 +130,4 @@
 #define SSACD_SCDX8		(1 << 7)	/* SYSCLK division ratio select */
 #endif
 
-
 #endif /* __ASM_ARCH_REGS_SSP_H */

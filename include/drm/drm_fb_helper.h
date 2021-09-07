@@ -35,7 +35,6 @@ struct drm_fb_helper_crtc {
 	struct drm_mode_set mode_set;
 };
 
-
 struct drm_fb_helper_funcs {
 	void (*gamma_set)(struct drm_crtc *crtc, u16 red, u16 green,
 			  u16 blue, int regno);

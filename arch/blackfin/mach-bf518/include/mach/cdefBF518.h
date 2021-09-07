@@ -20,7 +20,6 @@
 
 /* The following are the #defines needed by ADSP-BF518 that are not in the common header */
 
-
 /* 10/100 Ethernet Controller	(0xFFC03000 - 0xFFC031FF) */
 
 #define bfin_read_EMAC_OPMODE()			bfin_read32(EMAC_OPMODE)
@@ -293,6 +292,5 @@
 #define bfin_write_RSI_PID6(val)       bfin_write16(RSI_PID6, val)
 #define bfin_read_RSI_PID7()           bfin_read16(RSI_PID7)
 #define bfin_write_RSI_PID7(val)       bfin_write16(RSI_PID7, val)
-
 
 #endif /* _CDEF_BF518_H */

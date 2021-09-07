@@ -61,7 +61,6 @@ extern char *isdn_v110_revision;
 static isdn_divert_if *divert_if; /* = NULL */
 #endif /* CONFIG_ISDN_DIVERSION */
 
-
 static int isdn_writebuf_stub(int, int, const u_char __user *, int);
 static void set_global_features(void);
 static int isdn_wildmat(char *s, char *p);
@@ -980,7 +979,6 @@ isdn_readbchan_tty(int di, int channel, struct tty_struct *tty, int cisco_hack)
 	return count;
 }
 
-
 static inline int
 isdn_minor2drv(int minor)
 {
@@ -1268,7 +1266,6 @@ isdn_poll(struct file *file, poll_table * wait)
 	unlock_kernel();
 	return mask;
 }
-
 
 static int
 isdn_ioctl(struct inode *inode, struct file *file, uint cmd, ulong arg)
@@ -2209,7 +2206,6 @@ int DIVERT_REG_NAME(isdn_divert_if *i_div)
 EXPORT_SYMBOL(DIVERT_REG_NAME);
 
 #endif /* CONFIG_ISDN_DIVERSION */
-
 
 EXPORT_SYMBOL(register_isdn);
 #ifdef CONFIG_ISDN_PPP

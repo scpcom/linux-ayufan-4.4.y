@@ -286,7 +286,6 @@ static void raid10_end_read_request(struct bio *bio, int error)
 	int slot, dev;
 	conf_t *conf = r10_bio->mddev->private;
 
-
 	slot = r10_bio->read_slot;
 	dev = r10_bio->devs[slot].devnum;
 	/*
@@ -408,7 +407,6 @@ static void raid10_end_write_request(struct bio *bio, int error)
 
 	rdev_dec_pending(conf->mirrors[dev].rdev, conf->mddev);
 }
-
 
 /*
  * RAID10 layout manager
@@ -593,7 +591,6 @@ static int read_balance(conf_t *conf, r10bio_t *r10_bio)
 		goto rb_out;
 	}
 
-
 	/* make sure the disk is operational */
 	slot = 0;
 	disk = r10_bio->devs[slot].devnum;
@@ -608,7 +605,6 @@ static int read_balance(conf_t *conf, r10bio_t *r10_bio)
 		disk = r10_bio->devs[slot].devnum;
 	}
 
-
 	current_distance = abs(r10_bio->devs[slot].addr -
 			       conf->mirrors[disk].head_position);
 
@@ -617,7 +613,6 @@ static int read_balance(conf_t *conf, r10bio_t *r10_bio)
 
 	for (nslot = slot; nslot < conf->copies; nslot++) {
 		int ndisk = r10_bio->devs[nslot].devnum;
-
 
 		if ((rdev=rcu_dereference(conf->mirrors[ndisk].rdev)) == NULL ||
 		    r10_bio->devs[nslot].bio == IO_BLOCKED ||
@@ -1428,7 +1423,6 @@ static int raid10_spare_active(mddev_t *mddev)
 	return 0;
 }
 
-
 static int raid10_add_disk(mddev_t *mddev, mdk_rdev_t *rdev)
 {
 	conf_t *conf = mddev->private;
@@ -1534,7 +1528,6 @@ abort:
 	print_conf(conf);
 	return err;
 }
-
 
 static void end_sync_read(struct bio *bio, int error)
 {
@@ -1776,7 +1769,6 @@ static void recovery_request_write(mddev_t *mddev, r10bio_t *r10_bio)
 	int i, d;
 	struct bio *bio, *wbio;
 
-
 	/* move the pages across to the second bio
 	 * and submit the write request
 	 */
@@ -1801,7 +1793,6 @@ static void recovery_request_write(mddev_t *mddev, r10bio_t *r10_bio)
 		bio_endio(wbio, -EIO);
 #endif
 }
-
 
 /*
  * This is a kernel thread which:
@@ -2027,7 +2018,6 @@ static void raid10d(mddev_t *mddev)
 	if (unplug)
 		unplug_slaves(mddev);
 }
-
 
 static int init_resync(conf_t *conf)
 {
@@ -2622,7 +2612,6 @@ static int run(mddev_t *mddev)
 				conf->fullsync = 1;
 		}
 	}
-
 
 	mddev->thread = md_register_thread(raid10d, mddev, NULL);
 	if (!mddev->thread) {

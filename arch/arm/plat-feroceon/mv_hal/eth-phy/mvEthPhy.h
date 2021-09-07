@@ -69,7 +69,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mvOs.h"
 #include "mvEthPhyRegs.h"
 
-
 MV_STATUS	mvEthPhyRegRead(MV_U32 phyAddr, MV_U32 regOffs, MV_U16 *data);
 MV_STATUS 	mvEthPhyRegWrite(MV_U32 phyAddr, MV_U32 regOffs, MV_U16 data);
 MV_STATUS 	mvEthPhyReset(MV_U32 phyAddr, int timeout);

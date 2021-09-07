@@ -3784,4 +3784,3 @@
 #define STV0900_NBFIELDS		1702
 
 #endif
-

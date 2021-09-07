@@ -55,7 +55,6 @@
 
 #define EPROM_PAGE_SIZE		64
 
-
 struct edgeport_uart_buf_desc {
 	__u32 count;		/* Number of bytes currently in buffer */
 };
@@ -79,7 +78,6 @@ struct edgeport_uart_buf_desc {
 #define EDGE_CLOSING_WAIT	4000	/* in .01 sec */
 
 #define EDGE_OUT_BUF_SIZE	1024
-
 
 /* Product information read from the Edgeport */
 struct product_info {
@@ -131,7 +129,6 @@ struct edgeport_serial {
 	int num_ports_open;
 	struct usb_serial *serial;
 };
-
 
 /* Devices that this driver supports */
 static const struct usb_device_id edgeport_1port_id_table[] = {
@@ -224,7 +221,6 @@ static struct usb_driver io_driver = {
 	.no_dynamic_id = 	1,
 };
 
-
 static unsigned char OperationalMajorVersion;
 static unsigned char OperationalMinorVersion;
 static unsigned short OperationalBuildNumber;
@@ -259,7 +255,6 @@ static unsigned int edge_buf_put(struct edge_buf *eb, const char *buf,
 	unsigned int count);
 static unsigned int edge_buf_get(struct edge_buf *eb, char *buf,
 	unsigned int count);
-
 
 static int ti_vread_sync(struct usb_device *dev, __u8 request,
 				__u16 value, __u16 index, u8 *data, int size)
@@ -437,7 +432,6 @@ static int write_boot_mem(struct edgeport_serial *serial,
 
 	return status;
 }
-
 
 /* Write edgeport I2C memory to TI chip	*/
 static int write_i2c_mem(struct edgeport_serial *serial,
@@ -674,8 +668,6 @@ static int write_rom(struct edgeport_serial *serial, int start_address,
 						serial->TI_I2C_Type, buffer);
 	return -EINVAL;
 }
-
-
 
 /* Read a descriptor header from I2C based on type */
 static int get_descriptor_addr(struct edgeport_serial *serial,
@@ -1480,7 +1472,6 @@ stayinbootmode:
 	return 0;
 }
 
-
 static int ti_do_config(struct edgeport_port *port, int feature, int on)
 {
 	int port_number = port->port->number - port->port->serial->minor;
@@ -1489,7 +1480,6 @@ static int ti_do_config(struct edgeport_port *port, int feature, int on)
 			feature, (__u8)(UMPM_UART1_PORT + port_number),
 			on, NULL, 0);
 }
-
 
 static int restore_mcr(struct edgeport_port *port, __u8 mcr)
 {
@@ -1605,7 +1595,6 @@ static void handle_new_lsr(struct edgeport_port *edge_port, int lsr_data,
 	if (new_lsr & LSR_FRM_ERR)
 		icount->frame++;
 }
-
 
 static void edge_interrupt_callback(struct urb *urb)
 {
@@ -2087,7 +2076,6 @@ static void edge_send(struct tty_struct *tty)
 	struct edgeport_port *edge_port = usb_get_serial_port_data(port);
 	unsigned long flags;
 
-
 	dbg("%s - port %d", __func__, port->number);
 
 	spin_lock_irqsave(&edge_port->ep_lock, flags);
@@ -2495,7 +2483,6 @@ static int edge_tiocmget(struct tty_struct *tty, struct file *file)
 		  | ((msr & EDGEPORT_MSR_RI)	? TIOCM_RI:  0)   /* 0x080 */
 		  | ((msr & EDGEPORT_MSR_DSR)	? TIOCM_DSR: 0);  /* 0x100 */
 
-
 	dbg("%s -- %x", __func__, result);
 	spin_unlock_irqrestore(&edge_port->ep_lock, flags);
 
@@ -2685,7 +2672,6 @@ static void edge_release(struct usb_serial *serial)
 	kfree(usb_get_serial_data(serial));
 }
 
-
 /* Sysfs Attributes */
 
 static ssize_t show_uart_mode(struct device *dev,
@@ -2728,7 +2714,6 @@ static int edge_remove_sysfs_attrs(struct usb_serial_port *port)
 	return 0;
 }
 
-
 /* Circular Buffer */
 
 /*
@@ -2740,7 +2725,6 @@ static int edge_remove_sysfs_attrs(struct usb_serial_port *port)
 static struct edge_buf *edge_buf_alloc(unsigned int size)
 {
 	struct edge_buf *eb;
-
 
 	if (size == 0)
 		return NULL;
@@ -2761,7 +2745,6 @@ static struct edge_buf *edge_buf_alloc(unsigned int size)
 	return eb;
 }
 
-
 /*
  * edge_buf_free
  *
@@ -2776,7 +2759,6 @@ static void edge_buf_free(struct edge_buf *eb)
 	}
 }
 
-
 /*
  * edge_buf_clear
  *
@@ -2789,7 +2771,6 @@ static void edge_buf_clear(struct edge_buf *eb)
 		eb->buf_get = eb->buf_put;
 	/* equivalent to a get of all data available */
 }
-
 
 /*
  * edge_buf_data_avail
@@ -2805,7 +2786,6 @@ static unsigned int edge_buf_data_avail(struct edge_buf *eb)
 	return ((eb->buf_size + eb->buf_put - eb->buf_get) % eb->buf_size);
 }
 
-
 /*
  * edge_buf_space_avail
  *
@@ -2820,7 +2800,6 @@ static unsigned int edge_buf_space_avail(struct edge_buf *eb)
 	return ((eb->buf_size + eb->buf_get - eb->buf_put - 1) % eb->buf_size);
 }
 
-
 /*
  * edge_buf_put
  *
@@ -2834,7 +2813,6 @@ static unsigned int edge_buf_put(struct edge_buf *eb, const char *buf,
 	unsigned int count)
 {
 	unsigned int len;
-
 
 	if (eb == NULL)
 		return 0;
@@ -2862,7 +2840,6 @@ static unsigned int edge_buf_put(struct edge_buf *eb, const char *buf,
 	return count;
 }
 
-
 /*
  * edge_buf_get
  *
@@ -2876,7 +2853,6 @@ static unsigned int edge_buf_get(struct edge_buf *eb, char *buf,
 	unsigned int count)
 {
 	unsigned int len;
-
 
 	if (eb == NULL)
 		return 0;
@@ -2903,7 +2879,6 @@ static unsigned int edge_buf_get(struct edge_buf *eb, char *buf,
 
 	return count;
 }
-
 
 static struct usb_serial_driver edgeport_1port_device = {
 	.driver = {
@@ -2964,7 +2939,6 @@ static struct usb_serial_driver edgeport_2port_device = {
 	.read_bulk_callback	= edge_bulk_in_callback,
 	.write_bulk_callback	= edge_bulk_out_callback,
 };
-
 
 static int __init edgeport_init(void)
 {

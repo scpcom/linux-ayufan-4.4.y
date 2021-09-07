@@ -13,7 +13,6 @@
  * 06/16/00	A. Mallick	added csd/ssd/tssd for ia32 support
  */
 
-
 #include <asm/intrinsics.h>
 #include <asm/kregs.h>
 #include <asm/ptrace.h>
@@ -54,7 +53,6 @@
 #define IA64_THREAD_UAC_MASK	(IA64_THREAD_UAC_NOPRINT | IA64_THREAD_UAC_SIGBUS)
 #define IA64_THREAD_FPEMU_SHIFT	6
 #define IA64_THREAD_FPEMU_MASK	(IA64_THREAD_FPEMU_NOPRINT | IA64_THREAD_FPEMU_SIGFPE)
-
 
 /*
  * This shift should be large enough to be able to represent 1000000000/itc_freq with good
@@ -644,7 +642,6 @@ ia64_set_lrr1 (unsigned long val)
 	ia64_setreg(_IA64_REG_CR_LRR1, val);
 	ia64_srlz_d();
 }
-
 
 /*
  * Given the address to which a spill occurred, return the unat bit

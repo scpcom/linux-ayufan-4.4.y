@@ -13,7 +13,6 @@
 #ifndef _XTENSA_SIGNAL_H
 #define _XTENSA_SIGNAL_H
 
-
 #define _NSIG		64
 #define _NSIG_BPW	32
 #define _NSIG_WORDS	(_NSIG / _NSIG_BPW)

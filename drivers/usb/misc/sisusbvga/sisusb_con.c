@@ -379,7 +379,6 @@ sisusbcon_putc(struct vc_data *c, int ch, int y, int x)
 		return;
 	}
 
-
 	sisusb_copy_memory(sisusb, (char *)SISUSB_VADDR(x, y),
 				(long)SISUSB_HADDR(x, y), 2, &written);
 
@@ -468,7 +467,6 @@ sisusbcon_clear(struct vc_data *c, int y, int x, int height, int width)
 
 	length = ((height * cols) - x - (cols - width - x)) * 2;
 
-
 	sisusb_copy_memory(sisusb, (unsigned char *)SISUSB_VADDR(x, y),
 				(long)SISUSB_HADDR(x, y), length, &written);
 
@@ -500,7 +498,6 @@ sisusbcon_bmove(struct vc_data *c, int sy, int sx,
 	}
 
 	length = ((height * cols) - dx - (cols - width - dx)) * 2;
-
 
 	sisusb_copy_memory(sisusb, (unsigned char *)SISUSB_VADDR(dx, dy),
 				(long)SISUSB_HADDR(dx, dy), length, &written);
@@ -1560,6 +1557,3 @@ void __init sisusb_init_concode(void)
 }
 
 #endif /* INCL_CON */
-
-
-

@@ -54,7 +54,6 @@ int page_is_ram(unsigned long pagenr)
 		addr = (e820.map[i].addr + PAGE_SIZE-1) >> PAGE_SHIFT;
 		end = (e820.map[i].addr + e820.map[i].size) >> PAGE_SHIFT;
 
-
 		if ((pagenr >= addr) && (pagenr < end))
 			return 1;
 	}

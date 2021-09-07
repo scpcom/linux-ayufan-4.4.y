@@ -13,7 +13,6 @@
  *
  */
 
-
 #ifdef __KERNEL__
 #ifndef __ASM_FSL_ERRATA_H__
 #define __ASM_FSL_ERRATA_H__
@@ -34,5 +33,3 @@
 
 #endif
 #endif
-
-

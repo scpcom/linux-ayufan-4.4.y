@@ -56,7 +56,6 @@ struct mtd_part {
  */
 #define PART(x)  ((struct mtd_part *)(x))
 
-
 /*
  * MTD methods which simply translate the effective address and pass through
  * to the _real_ device.

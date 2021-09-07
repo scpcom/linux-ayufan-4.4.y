@@ -38,7 +38,6 @@ struct dentry;
 #define FBIOPUT_MODEINFO        0x4617
 #define FBIOGET_DISPINFO        0x4618
 
-
 #define FB_TYPE_PACKED_PIXELS		0	/* Packed Pixels	*/
 #define FB_TYPE_PLANES			1	/* Non interleaved planes */
 #define FB_TYPE_INTERLEAVED_PLANES	2	/* Interleaved planes	*/
@@ -292,7 +291,6 @@ struct fb_con2fbmap {
 #define VESA_VSYNC_SUSPEND      1
 #define VESA_HSYNC_SUSPEND      2
 #define VESA_POWERDOWN          3
-
 
 enum {
 	/* screen: unblanked, hsync: on,  vsync: on */

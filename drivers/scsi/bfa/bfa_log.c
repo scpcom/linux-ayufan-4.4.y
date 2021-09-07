@@ -343,4 +343,3 @@ bfa_log(struct bfa_log_mod_s *log_mod, u32 msg_id, ...)
 
 	return 0;
 }
-

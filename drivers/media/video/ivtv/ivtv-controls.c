@@ -49,7 +49,6 @@ static const u32 *ctrl_classes[] = {
 	NULL
 };
 
-
 int ivtv_queryctrl(struct file *file, void *fh, struct v4l2_queryctrl *qctrl)
 {
 	struct ivtv *itv = ((struct ivtv_open_id *)fh)->itv;

@@ -233,8 +233,6 @@ tei_debug(struct FsmInst *fi, char *fmt, ...)
 	va_end(va);
 }
 
-
-
 static int
 get_free_id(struct manager *mgr)
 {

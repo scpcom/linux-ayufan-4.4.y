@@ -39,7 +39,6 @@
 
 #include "generic.h"
 
-
 static void __init csb637_map_io(void)
 {
 	/* Initialize processor: 3.6864 MHz crystal */

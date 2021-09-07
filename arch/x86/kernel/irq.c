@@ -217,7 +217,6 @@ u64 arch_irq_stat(void)
 	return sum;
 }
 
-
 /*
  * do_IRQ handles all normal device IRQ's (the special
  * SMP cross-CPU interrupts have their own specific

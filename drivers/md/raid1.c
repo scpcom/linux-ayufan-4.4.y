@@ -56,7 +56,6 @@
  */
 #define	NR_RAID1_BIOS 256
 
-
 static void unplug_slaves(mddev_t *mddev);
 
 #ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
@@ -410,7 +409,6 @@ static void raid1_end_write_request(struct bio *bio, int error)
 	conf_t *conf = r1_bio->mddev->private;
 	struct bio *to_put = NULL;
 
-
 	for (mirror = 0; mirror < conf->raid_disks; mirror++)
 		if (r1_bio->bios[mirror] == bio)
 			break;
@@ -510,7 +508,6 @@ static void raid1_end_write_request(struct bio *bio, int error)
 		bio_put(to_put);
 }
 
-
 /*
  * This routine returns the disk from which the requested read should
  * be done. There is a per-array 'next expected sequential IO' sector
@@ -563,7 +560,6 @@ static int read_balance(conf_t *conf, r1bio_t *r1_bio)
 		}
 		goto rb_out;
 	}
-
 
 	/* make sure the disk is operational */
 	for (rdev = rcu_dereference(conf->mirrors[new_disk].rdev);
@@ -627,7 +623,6 @@ static int read_balance(conf_t *conf, r1bio_t *r1_bio)
 	} while (disk != conf->last_used);
 
  rb_out:
-
 
 	if (new_disk >= 0) {
 		rdev = rcu_dereference(conf->mirrors[new_disk].rdev);
@@ -719,7 +714,6 @@ static int raid1_congested(void *data, int bits)
 	rcu_read_unlock();
 	return ret;
 }
-
 
 static int flush_pending_writes(conf_t *conf)
 {
@@ -898,7 +892,6 @@ static void unfreeze_array(conf_t *conf)
 	wake_up(&conf->wait_barrier);
 	spin_unlock_irq(&conf->resync_lock);
 }
-
 
 /* duplicate the data pages for behind I/O */
 static struct page **alloc_behind_pages(struct bio *bio)
@@ -1482,7 +1475,6 @@ static int raid1_spare_active(mddev_t *mddev)
 	return 0;
 }
 
-
 static int raid1_add_disk(mddev_t *mddev, mdk_rdev_t *rdev)
 {
 	conf_t *conf = mddev->private;
@@ -1589,7 +1581,6 @@ abort:
 	print_conf(conf);
 	return err;
 }
-
 
 static void end_sync_read(struct bio *bio, int error)
 {
@@ -1702,7 +1693,6 @@ static void sync_request_write(mddev_t *mddev, r1bio_t *r1_bio)
 	struct bio *bio, *wbio;
 
 	bio = r1_bio->bios[r1_bio->read_disk];
-
 
 	if (test_bit(MD_RECOVERY_REQUESTED, &mddev->recovery)) {
 		/* We have read all readable devices.  If we haven't
@@ -2154,7 +2144,6 @@ static void raid1d(mddev_t *mddev)
 		unplug_slaves(mddev);
 }
 
-
 static int init_resync(conf_t *conf)
 {
 	int buffs;
@@ -2532,7 +2521,6 @@ static int run(mddev_t *mddev)
 	bio_list_init(&conf->pending_bio_list);
 	bio_list_init(&conf->flushing_bio_list);
 
-
 	mddev->degraded = 0;
 	for (i = 0; i < conf->raid_disks; i++) {
 
@@ -2563,7 +2551,6 @@ static int run(mddev_t *mddev)
 		      !test_bit(In_sync, &conf->mirrors[j].rdev->flags)) ; j++)
 		/* nothing */;
 	conf->last_used = j;
-
 
 	mddev->thread = md_register_thread(raid1d, mddev, NULL);
 	if (!mddev->thread) {
@@ -2733,7 +2720,6 @@ static int raid1_reshape(mddev_t *mddev)
 	}
 #endif
 
-
 	err = md_allow_write(mddev);
 	if (err)
 		return err;
@@ -2855,7 +2841,6 @@ static void raid1_quiesce(mddev_t *mddev, int state)
 		break;
 	}
 }
-
 
 static struct mdk_personality raid1_personality =
 {

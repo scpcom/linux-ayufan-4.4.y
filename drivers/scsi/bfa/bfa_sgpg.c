@@ -38,7 +38,6 @@ bfa_sgpg_meminfo(struct bfa_iocfc_cfg_s *cfg, u32 *km_len,
 	*dm_len += (cfg->drvcfg.num_sgpgs + 1) * sizeof(struct bfi_sgpg_s);
 }
 
-
 static void
 bfa_sgpg_attach(struct bfa_s *bfa, void *bfad, struct bfa_iocfc_cfg_s *cfg,
 		    struct bfa_meminfo_s *minfo, struct bfa_pcidev_s *pcidev)
@@ -117,8 +116,6 @@ static void
 bfa_sgpg_iocdisable(struct bfa_s *bfa)
 {
 }
-
-
 
 /**
  *  bfa_sgpg_public BFA SGPG public functions
@@ -227,5 +224,3 @@ bfa_sgpg_winit(struct bfa_sgpg_wqe_s *wqe, void (*cbfn) (void *cbarg),
 	wqe->cbfn = cbfn;
 	wqe->cbarg = cbarg;
 }
-
-

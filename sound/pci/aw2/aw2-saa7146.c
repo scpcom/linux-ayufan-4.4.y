@@ -452,7 +452,6 @@ int snd_aw2_saa7146_is_using_digital_input(struct snd_aw2_saa7146 *chip)
 		return 0;
 }
 
-
 static int snd_aw2_saa7146_get_limit(int size)
 {
 	int limitsize = 32;

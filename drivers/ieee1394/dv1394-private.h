@@ -33,7 +33,6 @@
 /* data structures private to the dv1394 driver */
 /* none of this is exposed to user-space */
 
-
 /*
    the 8-byte CIP (Common Isochronous Packet) header that precedes
    each packet of DV data.
@@ -68,8 +67,6 @@ static inline void fill_cip_header(struct CIP_header *cip,
 	cip->b[6] = timestamp >> 8;
 	cip->b[7] = timestamp & 0xFF;
 }
-
-
 
 /*
    DMA commands used to program the OHCI's DMA engine
@@ -184,8 +181,6 @@ static inline void fill_input_last(struct input_last *il,
 	il->q[3] = cpu_to_le32(data_size); /* xferStatus & resCount, resCount must be initialize to data_size */
 }
 
-
-
 /*
    A "DMA descriptor block" consists of several contiguous DMA commands.
    struct DMA_descriptor_block encapsulates all of the commands necessary
@@ -265,7 +260,6 @@ struct DMA_descriptor_block {
 	u32 __pad__[12];
 };
 
-
 /* struct frame contains all data associated with one frame in the
    ringbuffer these are allocated when the DMA context is initialized
    do_dv1394_init().  They are re-used after the card finishes
@@ -295,7 +289,6 @@ struct frame {
 	   the IRQ handler to determine whether the frame can be reset */
 	int done;
 
-
 	/* kernel virtual pointer to the start of this frame's data in
 	   the user ringbuffer. Use only for CPU access; to get the DMA
 	   bus address you must go through the video->user_dma mapping */
@@ -304,12 +297,10 @@ struct frame {
 	/* Max # of packets per frame */
 #define MAX_PACKETS 500
 
-
 	/* a PAGE_SIZE memory pool for allocating CIP headers
 	   !header_pool must be aligned to PAGE_SIZE! */
 	struct CIP_header *header_pool;
 	dma_addr_t         header_pool_dma;
-
 
 	/* a physically contiguous memory pool for allocating DMA
 	   descriptor blocks; usually around 64KB in size
@@ -318,10 +309,8 @@ struct frame {
 	dma_addr_t                   descriptor_pool_dma;
 	unsigned long                descriptor_pool_size;
 
-
 	/* # of packets allocated for this frame */
 	unsigned int n_packets;
-
 
 	/* below are several pointers (kernel virtual addresses, not
 	   DMA bus addresses) to parts of the DMA program.  These are
@@ -363,7 +352,6 @@ struct frame {
 	int first_n_descriptors;
 };
 
-
 struct packet {
 	__le16	timestamp;
 	u16	invalid;
@@ -374,7 +362,6 @@ struct packet {
 	unsigned char data[480];
 	unsigned char padding[16]; /* force struct size =512 for page alignment */
 };
-
 
 /* allocate/free a frame */
 static struct frame* frame_new(unsigned int frame_num, struct video_card *video);
@@ -421,7 +408,6 @@ struct video_card {
 	u32 ohci_IsoRcvContextControlClear;
 	u32 ohci_IsoRcvCommandPtr;
 	u32 ohci_IsoRcvContextMatch;
-
 
 	/* CONCURRENCY CONTROL */
 
@@ -528,8 +514,6 @@ struct video_card {
 	/* only altered by the interrupt */
 	unsigned int dropped_frames;
 
-
-
 	/* the CIP accumulator and continuity counter are properties
 	   of the DMA stream as a whole (not a single frame), so they
 	   are stored here in the video_card */
@@ -546,7 +530,6 @@ struct video_card {
 
 	/* the isochronous channel to use, -1 if video card is inactive */
 	int channel;
-
 
 	/* physically contiguous packet ringbuffer for receive */
 	struct dma_region packet_buf;
@@ -573,7 +556,6 @@ static int do_dv1394_init(struct video_card *video, struct dv1394_init *init);
 static int do_dv1394_init_default(struct video_card *video);
 static void do_dv1394_shutdown(struct video_card *video, int free_user_buf);
 
-
 /* NTSC empty packet rate accurate to within 0.01%,
    calibrated against a Sony DSR-40 DVCAM deck */
 
@@ -584,4 +566,3 @@ static void do_dv1394_shutdown(struct video_card *video, int free_user_buf);
 #define CIP_D_PAL 16
 
 #endif /* _DV_1394_PRIVATE_H */
-

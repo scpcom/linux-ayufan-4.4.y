@@ -84,7 +84,6 @@ static ssize_t pccard_show_vcc(struct device *dev, struct device_attribute *attr
 }
 static DEVICE_ATTR(card_vcc, 0444, pccard_show_vcc, NULL);
 
-
 static ssize_t pccard_store_insert(struct device *dev, struct device_attribute *attr,
 				   const char *buf, size_t count)
 {
@@ -99,7 +98,6 @@ static ssize_t pccard_store_insert(struct device *dev, struct device_attribute *
 	return ret ? ret : count;
 }
 static DEVICE_ATTR(card_insert, 0200, NULL, pccard_store_insert);
-
 
 static ssize_t pccard_show_card_pm_state(struct device *dev,
 					 struct device_attribute *attr,
@@ -144,7 +142,6 @@ static ssize_t pccard_store_eject(struct device *dev,
 }
 static DEVICE_ATTR(card_eject, 0200, NULL, pccard_store_eject);
 
-
 static ssize_t pccard_show_irq_mask(struct device *dev,
 				    struct device_attribute *attr,
 				    char *buf)
@@ -174,7 +171,6 @@ static ssize_t pccard_store_irq_mask(struct device *dev,
 	return ret ? ret : count;
 }
 static DEVICE_ATTR(card_irq_mask, 0600, pccard_show_irq_mask, pccard_store_irq_mask);
-
 
 static ssize_t pccard_show_resource(struct device *dev,
 				    struct device_attribute *attr, char *buf)
@@ -212,7 +208,6 @@ static ssize_t pccard_store_resource(struct device *dev,
 	return count;
 }
 static DEVICE_ATTR(available_resources_setup_done, 0600, pccard_show_resource, pccard_store_resource);
-
 
 static ssize_t pccard_extract_cis(struct pcmcia_socket *s, char *buf, loff_t off, size_t count)
 {
@@ -343,7 +338,6 @@ static ssize_t pccard_store_cis(struct kobject *kobj,
 
 	return count;
 }
-
 
 static struct attribute *pccard_socket_attributes[] = {
 	&dev_attr_card_type.attr,

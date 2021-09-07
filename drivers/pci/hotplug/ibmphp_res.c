@@ -176,7 +176,6 @@ static int __init alloc_bus_range (struct bus_node **new_bus, struct range_node 
 	return 0;
 }
 
-
 /* Notes:
  * 1. The ranges are ordered.  The buses are not ordered.  (First come)
  *
@@ -1196,7 +1195,6 @@ int ibmphp_check_resource (struct resource_node *res, u8 bridge)
 		else
 			res_cur = res_cur->nextRange;
 	}	/* end of while */
-
 
 	if (!res_prev) {
 		/* 1st device ever */

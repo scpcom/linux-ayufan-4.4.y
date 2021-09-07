@@ -80,7 +80,6 @@ void exception (enum exceptions e)
 	mvOsPrintf( " SLIC Interface Error\n");
 }
 
-
 int Si3215_Flag = 0;
 int TestForSi3215(unsigned int lineId)
 {
@@ -155,7 +154,6 @@ static void mvSlicIndirectRegWrite(unsigned int lineId, unsigned char address, u
 	waitForIndirectReg(lineId);
 }
 
-
 /*
 The following Array contains:
 */
@@ -216,7 +214,6 @@ indirectRegister  indirectRegisters[] =
 {	0,"",0},
 };
 
-
 void mvSlicStopTone(unsigned int lineId) 
 {
   mvSlicDirectRegWrite(lineId, 32, INIT_DR32	);//0x00	Oper. Oscillator 1 Controltone generation
@@ -261,7 +258,6 @@ void genTone(tone_struct tone, unsigned int lineId)
 	//mvOsPrintf("OUt-> 0x%04x\n",tone.osc1.coeff);
 	// Active Timer
 
-
 	if (tone.osc1.on_hi_byte != 0) {
 		mvSlicDirectRegWrite(lineId,  OSC1_ON__LO, tone.osc1.on_low_byte);
 		mvSlicDirectRegWrite(lineId,  OSC1_ON_HI, tone.osc1.on_hi_byte);
@@ -301,7 +297,6 @@ void genTone(tone_struct tone, unsigned int lineId)
 	return;
 }
 
-
 void mvSlicDialTone(unsigned int lineId)
 {
   if (Si3215_Flag)
@@ -331,7 +326,6 @@ void mvSlicDialTone(unsigned int lineId)
   mvSlicDirectRegWrite(lineId, 32,  DIALTONE_DR32);
   mvSlicDirectRegWrite(lineId, 33,  DIALTONE_DR33);
 }
-
 
 void mvSlicBusyTone(unsigned int lineId)
 {
@@ -452,7 +446,6 @@ void mvSlicRingbackPbxTone(unsigned int lineId)
 
 }
 
-
 void mvSlicRingBackTone(unsigned int lineId)
 {
   if (Si3215_Flag)
@@ -503,7 +496,6 @@ void ringBackToneSi3216(unsigned int lineId)
  
 }
 
-
 void mvSlicRingBackJapan(unsigned int lineId)
 {
   if (Si3215_Flag)
@@ -533,7 +525,6 @@ void mvSlicRingBackJapan(unsigned int lineId)
   mvSlicDirectRegWrite(lineId, 33,  RINGBACKJAPANTONE_DR33);
  
 }
-
 
 void mvSlicBusyJapanTone(unsigned int lineId)
 {
@@ -565,12 +556,10 @@ void mvSlicBusyJapanTone(unsigned int lineId)
  
 }
 
-
 static unsigned char mvSlicPowerUp(unsigned int lineId)
 { 
 	unsigned char vBat ; 
 	int i=0;
-
 
 	if (mvSlicChipType(lineId) == 3)  // M version correction
 	{
@@ -618,7 +607,6 @@ void xcalibrate(unsigned int lineId)
 	mvSlicDirectRegWrite(lineId, 97,0x1);
 	mvSlicDirectRegWrite(lineId, 96,0x40);
 
-
 	while (mvSlicDirectRegRead(lineId, 96) != 0 );
 	mvOsPrintf("\nCalibration Vector Registers 98 - 107: ");
 	
@@ -634,7 +622,6 @@ static void mvSlicGoActive(unsigned int lineId)
 				/* Active works for on-hook and off-hook see spec. */
 				/* The phone hook-switch sets the off-hook and on-hook substate*/
 }
-
 
 static unsigned char mvSlicVersion(unsigned int lineId)
 {
@@ -701,7 +688,6 @@ int mvSlicStart(unsigned int lineId)
 	if (v == 5)
 		mvSlicDirectRegWrite (lineId, 108, 0xeb); /* turn on Rev E features. */
 
-	
 	if (   t == 0 ) // Si3210 not the Si3211 or Si3212	
 	{
 		mvSlicDirectRegWrite(lineId, 67,0x17); // Make VBat switch not automatic 
@@ -720,7 +706,6 @@ int mvSlicStart(unsigned int lineId)
 	mvSlicDirectRegWrite (lineId, 2, 0);
 	mvSlicDirectRegWrite (lineId, 4, 0);
 
-
 	/* Do Flush durring powerUp and calibrate */
 	if (t == 0 || t==3) //  Si3210
 	{
@@ -738,7 +723,6 @@ int mvSlicStart(unsigned int lineId)
 		return 0;
 	}
 
-	
 	return 1;
 }
 
@@ -819,7 +803,6 @@ static void mvSlicManualCalibrate(unsigned int lineId)
 		mvSlicDirectRegWrite(line, 99,0x10);
 	}
 
-
 	for ( i=0x16; i>0; i--)
 	{
 		if(sum == totalSLICs)
@@ -845,9 +828,7 @@ static void mvSlicManualCalibrate(unsigned int lineId)
 		}
 	} // for
 
-
 	sum = 0;
-
 
 	for ( i=0x16; i>0; i--)
 	{
@@ -887,7 +868,6 @@ void mvSlicActivateRinging(unsigned int lineId)
 	mvSlicDirectRegWrite(lineId,  LINE_STATE, RING_LINE); // REG 64,4
 }
 
-
 static void mvSlicDisableOscillators(unsigned int lineId) 
 { 
 	// Turns of OSC1 and OSC2
@@ -898,7 +878,6 @@ static void mvSlicDisableOscillators(unsigned int lineId)
 		if (i !=34)  // Don't write to the ringing oscillator control
 		mvSlicDirectRegWrite(lineId, i,0);
 }
-
 
 static unsigned char mvSlicLoopStatus(unsigned int lineId)
 {
@@ -965,7 +944,6 @@ int mvSlicCalibrate(unsigned int lineId)
 	    return 0;
 	}        
 
-    
 /*Initialized DR 98 and 99 to get consistant results.*/
 /* 98 and 99 are the results registers and the search should have same intial conditions.*/
 /*******The following is the manual gain mismatch calibration******/
@@ -979,7 +957,6 @@ int mvSlicCalibrate(unsigned int lineId)
 	mvSlicIndirectRegWrite(lineId, 91,0);
 	mvSlicIndirectRegWrite(lineId, 92,0);
 	mvSlicIndirectRegWrite(lineId, 93,0);
-
 
 	mvSlicGoActive(lineId);
 
@@ -1083,8 +1060,6 @@ if (!Si3215_Flag)
 	mvSlicIndirectRegWrite(lineId, 	97	,	INIT_IR97		);	//	0x0000	TRASMIT_FILTER
 }										
 
-	
-
 static void mvSlicInitializeDirectRegisters(unsigned int lineId)
 {
 
@@ -1146,7 +1121,6 @@ mvSlicDirectRegWrite(lineId, 92,	INIT_DR92	);//0x7f	92 0x5C 0xFF 7F Initializati
 else
 mvSlicDirectRegWrite(lineId, 92,	INIT_SI3210M_DR92	);//0x7f	92 0x5C 0xFF 7F Initialization DCDC Converter PWM Period (61.035 ns/LSB)
 
-
 mvSlicDirectRegWrite(lineId, 93,	INIT_DR93	);//0x14	93 0x5D 0x14 0x19 Initialization DCDC Converter Min. Off Time (61.035 ns/LSB)
 mvSlicDirectRegWrite(lineId, 96,	INIT_DR96	);//0x00	96 0x60 0x1F Initialization Calibration Control Register 1(written second and starts calibration)
 mvSlicDirectRegWrite(lineId, 97,	INIT_DR97	);//0X1F	97 0x61 0x1F Initialization Calibration Control Register 2(written before Register 96)
@@ -1163,7 +1137,6 @@ mvSlicDirectRegWrite(lineId, 107,	INIT_DR107	);//0x08	107 0x6B 0x08 Informative 
 mvSlicDirectRegWrite(lineId, 108,	INIT_DR108	);//0xEB	108 0x63 0x00 0xEB Initialization Feature enhancement register
 }
    
-
 static void mvSlicClearInterrupts(unsigned int lineId)
 {
 	mvSlicDirectRegWrite(lineId, 	18	,	INIT_DR18	);//0xff	Normal Oper. Interrupt Register 1 (clear with 0xFF)
@@ -1264,7 +1237,6 @@ static void mvSlicEnablePCMhighway(unsigned int lineId)
 	mvSlicDirectRegWrite(lineId, 1,0x28); 
 }
 
-
 /* New Functions */
 static MV_STATUS mvSlicPrintInfo(unsigned int lineId)
 {
@@ -1272,7 +1244,6 @@ static MV_STATUS mvSlicPrintInfo(unsigned int lineId)
     unsigned char fm;
     char name[10];
 
-    
     fm = mvSlicFamily(lineId);
     type = mvSlicChipType(lineId);
     
@@ -1428,8 +1399,6 @@ static void mvSlicIntDisable(unsigned int lineId)
 	mvSlicClearInterrupts(lineId);
 }
 
-
-
 static int mvSlicDaisyChainGet(unsigned int lineId)
 {
     int val;
@@ -1473,7 +1442,6 @@ static int mvSlicIntCheck(unsigned int lineId)
 	} u ;
 	u.interrupt_bits=0;
 
-
 	u.reg_data[0] = mvSlicDirectRegRead(lineId, 18);
 	mvSlicDirectRegWrite(lineId, 18, u.reg_data[0]);
 
@@ -1507,7 +1475,6 @@ unsigned char mvSlicIntGet(unsigned int lineId)
 	return	state; 
 	
 } 
-
 
 void mvSlicHookStateGet(unsigned short lineId, unsigned char* hookstate)
 {
@@ -1550,7 +1517,6 @@ void mvSlicLinefeedControlGet(unsigned char lineId, mv_linefeed_t* lfState)
 	*lfState = ((mvSlicDirectRegRead(lineId, LINE_STATE) & 0x70) >> 4);
 	return;
 }
-
 
 void mvSlicRelease(void)
 {

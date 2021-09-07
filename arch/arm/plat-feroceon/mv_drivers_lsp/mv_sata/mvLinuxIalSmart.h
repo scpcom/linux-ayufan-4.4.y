@@ -9,7 +9,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -41,7 +40,6 @@ disclaimer.
 
 /*Proprietary opcode to support smartmontools app*/
 #define SCSI_OPCODE_MVSATA_SMART            0x0C
-
 
 /*S.M.A.R.T ATA commands used*/
 #ifndef WIN_IDENTIFY
@@ -100,10 +98,8 @@ disclaimer.
 #define SMART_BUF_DEVICE_OFFSET                 6
 #define SMART_BUF_ERROR_OFFSET                  7
 
-
 MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSmartCommand
                 (IN  MV_SATA_ADAPTER* pSataAdapter,
                  IN  MV_SATA_SCSI_CMD_BLOCK *pScb);
-
 
 #endif

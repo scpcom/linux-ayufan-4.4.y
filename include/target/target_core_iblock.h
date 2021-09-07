@@ -24,7 +24,6 @@
  *
  ******************************************************************************/
 
-
 #ifndef TARGET_CORE_IBLOCK_H
 #define TARGET_CORE_IBLOCK_H
 

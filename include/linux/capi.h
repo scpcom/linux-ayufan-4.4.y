@@ -99,7 +99,6 @@ typedef struct capi_manufacturer_cmd {
  */
 #define CAPI_INSTALLED		_IOR('C',0x22, __u16)
 
-
 /*
  * member contr is input for
  * CAPI_GET_MANUFACTURER, CAPI_VERSION, CAPI_GET_SERIAL

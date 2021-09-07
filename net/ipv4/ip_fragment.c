@@ -153,7 +153,6 @@ static __inline__ void ip4_frag_free(struct inet_frag_queue *q)
 		inet_putpeer(qp->peer);
 }
 
-
 /* Destruction primitives. */
 
 static __inline__ void ipq_put(struct ipq *ipq)
@@ -456,7 +455,6 @@ err:
 	kfree_skb(skb);
 	return err;
 }
-
 
 /* Build a new IP datagram from all its fragments. */
 

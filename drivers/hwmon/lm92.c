@@ -105,7 +105,6 @@ struct lm92_data {
 	s16 temp1_input, temp1_crit, temp1_min, temp1_max, temp1_hyst;
 };
 
-
 /*
  * Sysfs attributes and callback functions
  */
@@ -232,7 +231,6 @@ static DEVICE_ATTR(alarms, S_IRUGO, show_alarms, NULL);
 static SENSOR_DEVICE_ATTR(temp1_crit_alarm, S_IRUGO, show_alarm, NULL, 2);
 static SENSOR_DEVICE_ATTR(temp1_min_alarm, S_IRUGO, show_alarm, NULL, 0);
 static SENSOR_DEVICE_ATTR(temp1_max_alarm, S_IRUGO, show_alarm, NULL, 1);
-
 
 /*
  * Detection and registration
@@ -403,7 +401,6 @@ static int lm92_remove(struct i2c_client *client)
 	kfree(data);
 	return 0;
 }
-
 
 /*
  * Module and driver stuff

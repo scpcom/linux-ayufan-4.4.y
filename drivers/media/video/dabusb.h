@@ -48,7 +48,6 @@ typedef struct
 	wait_queue_head_t wait;
 } bulk_completion_context_t, *pbulk_completion_context_t;
 
-
 #define _DABUSB_IF 2
 #define _DABUSB_ISOPIPE 0x09
 #define _ISOPIPESIZE	16384

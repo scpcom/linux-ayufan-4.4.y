@@ -43,5 +43,4 @@ struct _MV_Request *get_ioctl_req_from_pool(struct mv_request_pool *pool);
 void free_ioctl_req_to_pool(struct mv_request_pool *pool,struct _MV_Request *req);
 #endif
 
-
 #endif /* __RES_MGMT_H__ */

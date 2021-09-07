@@ -422,7 +422,6 @@ l3_1tr6_disc(struct l3_process *pc, u_char pr, void *arg)
 	} else if (pc->st->l3.debug & L3_DEB_CHARGE)
 		l3_debug(pc->st, "charging info not found");
 
-
 	p = skb->data;
 	if ((p = findie(p, skb->len, WE0_cause, 0))) {
 		if (p[1] > 0) {
@@ -448,7 +447,6 @@ l3_1tr6_disc(struct l3_process *pc, u_char pr, void *arg)
 	newl3state(pc, 12);
 	pc->st->l3.l3l4(pc->st, CC_DISCONNECT | INDICATION, pc);
 }
-
 
 static void
 l3_1tr6_connect_ack(struct l3_process *pc, u_char pr, void *arg)

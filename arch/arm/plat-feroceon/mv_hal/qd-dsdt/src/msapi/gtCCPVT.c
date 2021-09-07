@@ -26,7 +26,6 @@ static GT_STATUS pvtOperationPerform
     INOUT GT_PVT_OP_DATA	*opData
 );
 
-
 /*******************************************************************************
 * gpvtInitialize
 *
@@ -78,7 +77,6 @@ GT_STATUS gpvtInitialize
 	return GT_OK;
 
 }
-
 
 /*******************************************************************************
 * gpvtWritePVTData
@@ -172,7 +170,6 @@ GT_STATUS gpvtWritePVTData
 		return GT_BAD_PARAM;
 	}
 
-
 	retVal = pvtOperationPerform(dev,op,&opData);
 	if(retVal != GT_OK)
 	{
@@ -184,7 +181,6 @@ GT_STATUS gpvtWritePVTData
 	return GT_OK;
 
 }
-
 
 /*******************************************************************************
 * gpvtReadPVTData
@@ -278,11 +274,9 @@ GT_STATUS gpvtReadPVTData
 
 }
 
-
 /****************************************************************************/
 /* Internal functions.                                                  */
 /****************************************************************************/
-
 
 /*******************************************************************************
 * pvtOperationPerform
@@ -398,4 +392,3 @@ static GT_STATUS pvtOperationPerform
     gtSemGive(dev,dev->tblRegsSem);
     return retVal;
 }
-

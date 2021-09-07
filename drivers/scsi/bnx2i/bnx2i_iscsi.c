@@ -25,7 +25,6 @@ static struct scsi_host_template bnx2i_host_template;
  */
 static DEFINE_SPINLOCK(bnx2i_resc_lock); /* protects global resources */
 
-
 static int bnx2i_adapter_ready(struct bnx2i_hba *hba)
 {
 	int retval = 0;
@@ -126,8 +125,6 @@ static void bnx2i_setup_write_cmd_bd_info(struct iscsi_task *task)
 	}
 }
 
-
-
 /**
  * bnx2i_map_scsi_sg - maps IO buffer and prepares the BD table
  * @hba:	adapter instance
@@ -192,7 +189,6 @@ static void bnx2i_iscsi_map_sg_list(struct bnx2i_cmd *cmd)
 	cmd->io_tbl.bd_valid = bd_count;
 }
 
-
 /**
  * bnx2i_iscsi_unmap_sg_list - unmaps SG list
  * @cmd:	iscsi cmd struct pointer
@@ -219,7 +215,6 @@ static void bnx2i_setup_cmd_wqe_template(struct bnx2i_cmd *cmd)
 
 }
 
-
 /**
  * bnx2i_bind_conn_to_iscsi_cid - bind conn structure to 'iscsi_cid'
  * @hba:	pointer to adapter instance
@@ -244,7 +239,6 @@ static int bnx2i_bind_conn_to_iscsi_cid(struct bnx2i_hba *hba,
 	return 0;
 }
 
-
 /**
  * bnx2i_get_conn_from_id - maps an iscsi cid to corresponding conn ptr
  * @hba:	pointer to adapter instance
@@ -263,7 +257,6 @@ struct bnx2i_conn *bnx2i_get_conn_from_id(struct bnx2i_hba *hba,
 	}
 	return hba->cid_que.conn_cid_tbl[iscsi_cid];
 }
-
 
 /**
  * bnx2i_alloc_iscsi_cid - allocates a iscsi_cid from free pool
@@ -284,7 +277,6 @@ static u32 bnx2i_alloc_iscsi_cid(struct bnx2i_hba *hba)
 	hba->cid_que.cid_free_cnt--;
 	return hba->cid_que.cid_que[idx];
 }
-
 
 /**
  * bnx2i_free_iscsi_cid - returns tcp port to free list
@@ -307,7 +299,6 @@ static void bnx2i_free_iscsi_cid(struct bnx2i_hba *hba, u16 iscsi_cid)
 	if (hba->cid_que.cid_q_prod_idx == hba->cid_que.cid_q_max_idx)
 		hba->cid_que.cid_q_prod_idx = 0;
 }
-
 
 /**
  * bnx2i_setup_free_cid_que - sets up free iscsi cid queue
@@ -350,7 +341,6 @@ static int bnx2i_setup_free_cid_que(struct bnx2i_hba *hba)
 	return 0;
 }
 
-
 /**
  * bnx2i_release_free_cid_que - releases 'iscsi_cid' queue resources
  * @hba:	pointer to adapter instance
@@ -363,7 +353,6 @@ static void bnx2i_release_free_cid_que(struct bnx2i_hba *hba)
 	kfree(hba->cid_que.conn_cid_tbl);
 	hba->cid_que.conn_cid_tbl = NULL;
 }
-
 
 /**
  * bnx2i_alloc_ep - allocates ep structure from global pool
@@ -395,7 +384,6 @@ static struct iscsi_endpoint *bnx2i_alloc_ep(struct bnx2i_hba *hba)
 	return ep;
 }
 
-
 /**
  * bnx2i_free_ep - free endpoint
  * @ep:		pointer to iscsi endpoint structure
@@ -419,7 +407,6 @@ static void bnx2i_free_ep(struct iscsi_endpoint *ep)
 	spin_unlock_irqrestore(&bnx2i_resc_lock, flags);
 	iscsi_destroy_endpoint(ep);
 }
-
 
 /**
  * bnx2i_alloc_bdt - allocates buffer descriptor (BD) table for the command
@@ -470,7 +457,6 @@ static void bnx2i_destroy_cmd_pool(struct bnx2i_hba *hba,
 
 }
 
-
 /**
  * bnx2i_setup_cmd_pool - sets up iscsi command pool for the session
  * @hba:	adapter instance pointer
@@ -499,7 +485,6 @@ free_bdts:
 	bnx2i_destroy_cmd_pool(hba, session);
 	return -ENOMEM;
 }
-
 
 /**
  * bnx2i_setup_mp_bdt - allocate BD table resources
@@ -543,7 +528,6 @@ static int bnx2i_setup_mp_bdt(struct bnx2i_hba *hba)
 out:
 	return rc;
 }
-
 
 /**
  * bnx2i_free_mp_bdt - releases ITT back to free pool
@@ -648,7 +632,6 @@ static int bnx2i_ep_ofld_list_del(struct bnx2i_hba *hba,
 	return 0;
 }
 
-
 /**
  * bnx2i_find_ep_in_ofld_list - find iscsi_cid in pending list of endpoints
  *
@@ -677,7 +660,6 @@ bnx2i_find_ep_in_ofld_list(struct bnx2i_hba *hba, u32 iscsi_cid)
 		printk(KERN_ERR "l5 cid %d not found\n", iscsi_cid);
 	return ep;
 }
-
 
 /**
  * bnx2i_find_ep_in_destroy_list - find iscsi_cid in destroy list
@@ -729,7 +711,6 @@ static void bnx2i_setup_host_queue_size(struct bnx2i_hba *hba,
 	else
 		shost->can_queue = ISCSI_MAX_CMDS_PER_HBA_5708;
 }
-
 
 /**
  * bnx2i_alloc_hba - allocate and init adapter instance
@@ -977,7 +958,6 @@ login_req_buf_failure:
 
 }
 
-
 /**
  * bnx2i_iscsi_prep_generic_pdu_bd - prepares BD table.
  * @bnx2i_conn:		iscsi connection pointer
@@ -1008,7 +988,6 @@ static void bnx2i_iscsi_prep_generic_pdu_bd(struct bnx2i_conn *bnx2i_conn)
 	bd_tbl->flags = ISCSI_BD_LAST_IN_BD_CHAIN |
 			ISCSI_BD_FIRST_IN_BD_CHAIN;
 }
-
 
 /**
  * bnx2i_iscsi_send_generic_request - called to send mgmt tasks.
@@ -1055,7 +1034,6 @@ static int bnx2i_iscsi_send_generic_request(struct iscsi_task *task)
 	}
 	return rc;
 }
-
 
 /**********************************************************************
  *		SCSI-ML Interface
@@ -1257,7 +1235,6 @@ session_teardown:
 	return NULL;
 }
 
-
 /**
  * bnx2i_session_destroy - destroys iscsi session
  * @cls_session:	pointer to iscsi cls session
@@ -1274,7 +1251,6 @@ static void bnx2i_session_destroy(struct iscsi_cls_session *cls_session)
 	bnx2i_destroy_cmd_pool(hba, session);
 	iscsi_session_teardown(cls_session);
 }
-
 
 /**
  * bnx2i_conn_create - create iscsi connection instance
@@ -1386,7 +1362,6 @@ static int bnx2i_conn_bind(struct iscsi_cls_session *cls_session,
 	return ret_code;
 }
 
-
 /**
  * bnx2i_conn_destroy - destroy iscsi connection instance & release resources
  * @cls_conn:	pointer to iscsi cls conn
@@ -1407,7 +1382,6 @@ static void bnx2i_conn_destroy(struct iscsi_cls_conn *cls_conn)
 	bnx2i_conn_free_login_resources(hba, bnx2i_conn);
 	iscsi_conn_teardown(cls_conn);
 }
-
 
 /**
  * bnx2i_conn_get_param - return iscsi connection parameter to caller
@@ -1501,7 +1475,6 @@ static int bnx2i_conn_start(struct iscsi_cls_conn *cls_conn)
 	return 0;
 }
 
-
 /**
  * bnx2i_conn_get_stats - returns iSCSI stats
  * @cls_conn:	pointer to iscsi cls conn
@@ -1528,7 +1501,6 @@ static void bnx2i_conn_get_stats(struct iscsi_cls_conn *cls_conn,
 	stats->timeout_err = 0;
 	stats->custom_length = 0;
 }
-
 
 /**
  * bnx2i_check_route - checks if target IP route belongs to one of NX2 devices
@@ -1571,7 +1543,6 @@ static struct bnx2i_hba *bnx2i_check_route(struct sockaddr *dst_addr)
 no_nx2_route:
 	return NULL;
 }
-
 
 /**
  * bnx2i_tear_down_conn - tear down iscsi/tcp connection and free resources
@@ -1623,7 +1594,6 @@ static int bnx2i_tear_down_conn(struct bnx2i_hba *hba,
 
 	return 0;
 }
-
 
 /**
  * bnx2i_ep_connect - establish TCP connection to target portal
@@ -1780,7 +1750,6 @@ check_busy:
 	return ERR_PTR(rc);
 }
 
-
 /**
  * bnx2i_ep_poll - polls for TCP connection establishement
  * @ep:			TCP connection (endpoint) handle
@@ -1819,7 +1788,6 @@ static int bnx2i_ep_poll(struct iscsi_endpoint *ep, int timeout_ms)
 	else
 		return rc;
 }
-
 
 /**
  * bnx2i_ep_tcp_conn_active - check EP state transition
@@ -1864,7 +1832,6 @@ static int bnx2i_ep_tcp_conn_active(struct bnx2i_endpoint *bnx2i_ep)
 
 	return ret;
 }
-
 
 /**
  * bnx2i_ep_disconnect - executes TCP connection teardown process
@@ -1966,7 +1933,6 @@ return_bnx2i_ep:
 		bnx2i_unreg_dev_all();
 }
 
-
 /**
  * bnx2i_nl_set_path - ISCSI_UEVENT_PATH_UPDATE user message handler
  * @buf:	pointer to buffer containing iscsi path message
@@ -1984,7 +1950,6 @@ static int bnx2i_nl_set_path(struct Scsi_Host *shost, struct iscsi_path *params)
 
 	return 0;
 }
-
 
 /*
  * 'Scsi_Host_Template' structure and 'iscsi_tranport' structure template

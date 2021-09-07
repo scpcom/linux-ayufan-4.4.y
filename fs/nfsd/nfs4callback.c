@@ -307,7 +307,6 @@ nfs4_xdr_enc_cb_recall(struct rpc_rqst *req, __be32 *p,
 	return 0;
 }
 
-
 static int
 decode_cb_compound_hdr(struct xdr_stream *xdr, struct nfs4_cb_compound_hdr *hdr){
         __be32 *p;
@@ -392,7 +391,6 @@ decode_cb_sequence(struct xdr_stream *xdr, struct nfsd4_cb_sequence *res,
 out:
 	return status;
 }
-
 
 static int
 nfs4_xdr_dec_cb_null(struct rpc_rqst *req, __be32 *p)
@@ -545,7 +543,6 @@ int set_callback_cred(void)
 		return -ENOMEM;
 	return 0;
 }
-
 
 void do_probe_callback(struct nfs4_client *clp)
 {

@@ -917,7 +917,6 @@ int b1dmactl_read_proc(char *page, char **start, off_t off,
 	}
 	len += sprintf(page+len, "%-16s %s\n", "cardname", cinfo->cardname);
 
-
 	spin_lock_irqsave(&card->lock, flags);
 
 	txoff = (dma_addr_t)b1dma_readl(card, AMCC_TXPTR)-card->dma->sendbuf.dmaaddr;

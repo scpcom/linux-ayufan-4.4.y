@@ -33,12 +33,10 @@ static const char SysKonnectFileId[] =
 extern "C" {
 #endif  /* cplusplus */
 
-
 #include "h/skdrv1st.h"
 #include "h/skdrv2nd.h"
 #include "h/sktypes.h"
 // #include <stdlib.h>     // for string operations
-
 
 SK_I8 AsfMac2Asci( SK_U8 *buf, SK_U32 *len, SK_U8 *mac )  {
 	SK_I8 	RetCode;
@@ -212,8 +210,6 @@ SK_I8 AsfDec2Int( SK_U8 *buf, SK_U8 size, SK_U32 *val )  {
 	return( 1 );
 }
 
-
 #ifdef __cplusplus
 }
 #endif  /* __cplusplus */
-

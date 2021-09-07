@@ -4381,4 +4381,3 @@ mpt2sas_ctl_exit(void)
 #if defined(CPQ_CIM)
 #include "csmi/csmisas.c"
 #endif
-

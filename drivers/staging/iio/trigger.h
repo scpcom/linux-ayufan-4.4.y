@@ -12,7 +12,6 @@
 #define IIO_TRIGGER_ID_PREFIX "iio:trigger"
 #define IIO_TRIGGER_ID_FORMAT IIO_TRIGGER_ID_PREFIX "%d"
 
-
 /**
  * struct iio_trigger - industrial I/O trigger device
  *
@@ -146,6 +145,5 @@ struct iio_poll_func {
 struct iio_trigger *iio_allocate_trigger(void);
 
 void iio_free_trigger(struct iio_trigger *trig);
-
 
 #endif /* _IIO_TRIGGER_H_ */

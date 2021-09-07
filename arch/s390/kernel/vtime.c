@@ -569,4 +569,3 @@ void __init vtime_init(void)
 	/* Enable cpu timer interrupts on the boot cpu. */
 	init_cpu_vtimer();
 }
-

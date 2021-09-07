@@ -40,7 +40,6 @@
 
 //#define BIN_IN_FILE /* use *.bin firmware */
 
-
 // New 8k byte firmware size for RT3071/RT3072
 #define FIRMWAREIMAGE_MAX_LENGTH	0x2000
 #define FIRMWAREIMAGE_LENGTH			(sizeof (FirmwareImage) / sizeof(UCHAR))
@@ -103,7 +102,6 @@ unsigned char BitReverse(unsigned char x)
 	}
 	return Temp;
 }
-
 
 /*
 	========================================================================
@@ -177,7 +175,6 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 	pAd->FirmwareVersion = (FIRMWARE_MAJOR_VERSION << 8) + \
 						   FIRMWARE_MINOR_VERSION;
 
-
 	/* allocate firmware buffer */
 	pFirmwareImage = kmalloc(MAX_FIRMWARE_IMAGE_SIZE, MEM_ALLOC_FLAG);
 	if (pFirmwareImage == NULL)
@@ -191,7 +188,6 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 		/* allocate ok! zero the firmware buffer */
 		memset(pFirmwareImage, 0x00, MAX_FIRMWARE_IMAGE_SIZE);
 	} /* End of if */
-
 
 	/* if ok, read firmware file from *.bin file */
 	if (flg_default_firm_use == FALSE)
@@ -208,7 +204,6 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 				break;
 			}
 
-
 			/* read the firmware from the file *.bin */
 			FileLength = RtmpOSFileRead(srcf, pFirmwareImage, MAX_FIRMWARE_IMAGE_SIZE);
 			if (FileLength != MAX_FIRMWARE_IMAGE_SIZE)
@@ -222,7 +217,6 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 			{
 				PUCHAR ptr = pFirmwareImage;
 				USHORT crc = 0xffff;
-
 
 				/* calculate firmware CRC */
 				for(i=0; i<(MAX_FIRMWARE_IMAGE_SIZE-2); i++, ptr++)
@@ -282,7 +276,6 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 			}
 		}
 	}
-
 
 	/* write firmware to ASIC */
 	if (flg_default_firm_use == TRUE)
@@ -358,7 +351,6 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 		Status = NDIS_STATUS_FAILURE;
 	}
 
-
 	RTMP_WRITE_FIRMWARE(pAd, pFirmwareImage, FileLength);
 
 #endif
@@ -385,7 +377,6 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 
     return Status;
 }
-
 
 INT RtmpAsicSendCommandToMcu(
 	IN PRTMP_ADAPTER pAd,
@@ -462,7 +453,6 @@ INT RtmpAsicSendCommandToMcu(
 		H2MCmd.word			  = 0;
 		H2MCmd.field.HostCommand  = Command;
 		RTMP_IO_FORCE_WRITE32(pAd, HOST_CMD_CSR, H2MCmd.word);
-
 
 	}
 	else

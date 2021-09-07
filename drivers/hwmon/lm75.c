@@ -29,7 +29,6 @@
 #include <linux/mutex.h>
 #include "lm75.h"
 
-
 /*
  * This driver handles the LM75 and compatible digital temperature sensors.
  * Only types which are _not_ listed in I2C_CLIENT_INSMOD_*() need to be
@@ -61,7 +60,6 @@ static const unsigned short normal_i2c[] = { 0x48, 0x49, 0x4a, 0x4b, 0x4c,
 /* Insmod parameters */
 I2C_CLIENT_INSMOD_1(lm75);
 
-
 /* The LM75 registers */
 #define LM75_REG_CONF		0x01
 static const u8 LM75_REG_TEMP[3] = {
@@ -86,7 +84,6 @@ struct lm75_data {
 static int lm75_read_value(struct i2c_client *client, u8 reg);
 static int lm75_write_value(struct i2c_client *client, u8 reg, u16 value);
 static struct lm75_data *lm75_update_device(struct device *dev);
-
 
 /*-----------------------------------------------------------------------*/
 

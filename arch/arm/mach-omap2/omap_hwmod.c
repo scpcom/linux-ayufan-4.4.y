@@ -70,7 +70,6 @@ static struct omap_hwmod *mpu_oh;
 /* inited: 0 if omap_hwmod_init() has not yet been called; 1 otherwise */
 static u8 inited;
 
-
 /* Private functions */
 
 /**
@@ -904,7 +903,6 @@ static int _write_clockact_lock(struct omap_hwmod *oh, u8 clockact)
 	return 0;
 }
 
-
 /**
  * _setup - do initial configuration of omap_hwmod
  * @oh: struct omap_hwmod *
@@ -954,8 +952,6 @@ static int _setup(struct omap_hwmod *oh)
 
 	return 0;
 }
-
-
 
 /* Public functions */
 
@@ -1068,7 +1064,6 @@ int omap_hwmod_for_each(int (*fn)(struct omap_hwmod *oh))
 
 	return ret;
 }
-
 
 /**
  * omap_hwmod_init - init omap_hwmod code and register hwmods

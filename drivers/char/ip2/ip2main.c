@@ -468,7 +468,6 @@ static const struct tty_operations ip2_ops = {
 /* SA_RANDOM   - can be source for cert. random number generators */
 #define IP2_SA_FLAGS	0
 
-
 static const struct firmware *ip2_request_firmware(void)
 {
 	struct platform_device *pdev;
@@ -1148,7 +1147,6 @@ service_all_boards(void)
 	}
 }
 
-
 /******************************************************************************/
 /* Function:   ip2_interrupt_bh(work)                                         */
 /* Parameters: work - pointer to the board structure                          */
@@ -1177,7 +1175,6 @@ ip2_interrupt_bh(struct work_struct *work)
 		}
 	}
 }
-
 
 /******************************************************************************/
 /* Function:   ip2_interrupt(int irq, void *dev_id)    */
@@ -1422,7 +1419,6 @@ open_sanity_check( i2ChanStrPtr pCh, i2eBordStrPtr pBrd )
 }
 #endif
 
-
 /******************************************************************************/
 /* Function:   ip2_open()                                                     */
 /* Parameters: Pointer to tty structure                                       */
@@ -1661,7 +1657,6 @@ ip2_close( PTTY tty, struct file *pFile )
 #ifdef IP2DEBUG_OPEN
 	DBG_CNT("ip2_close: after wakeups--");
 #endif
-
 
 	ip2trace (CHANN, ITRC_CLOSE, ITRC_RETURN, 1, 1 );
 
@@ -3151,7 +3146,6 @@ ip2trace (unsigned short pn, unsigned char cat, unsigned char label, unsigned lo
 	union ip2breadcrumb bc;
 	i2ChanStrPtr  pCh;
 
-
 	tracebuf[tracestuff++] = jiffies;
 	if ( tracestuff == TRACEMAX ) {
 		tracestuff = 0;
@@ -3187,7 +3181,6 @@ ip2trace (unsigned short pn, unsigned char cat, unsigned char label, unsigned lo
 	}
 }
 #endif
-
 
 MODULE_LICENSE("GPL");
 

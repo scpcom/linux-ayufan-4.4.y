@@ -80,7 +80,6 @@ typedef elf_fpreg_t elf_fpregset_t[ELF_NFPREG];
 #define USE_ELF_CORE_DUMP
 #define ELF_EXEC_PAGESIZE	4096
 
-
 #define ELF_CORE_COPY_REGS(_dest, _regs)			\
 	memcpy((char *) &_dest, (char *) _regs,		\
 	sizeof(struct pt_regs));

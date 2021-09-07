@@ -226,7 +226,6 @@ static struct ata_port_operations pacpi_ops = {
 	.port_start		= pacpi_port_start,
 };
 
-
 /**
  *	pacpi_init_one - Register ACPI ATA PCI device with kernel services
  *	@pdev: PCI device to register
@@ -296,4 +295,3 @@ MODULE_DESCRIPTION("SCSI low-level driver for ATA in ACPI mode");
 MODULE_LICENSE("GPL");
 MODULE_DEVICE_TABLE(pci, pacpi_pci_tbl);
 MODULE_VERSION(DRV_VERSION);
-

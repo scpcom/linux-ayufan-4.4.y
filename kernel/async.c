@@ -13,7 +13,6 @@
  * of the License.
  */
 
-
 /*
 
 Goals and Theory of Operation
@@ -87,7 +86,6 @@ static atomic_t entry_count;
 static atomic_t thread_count;
 
 extern int initcall_debug;
-
 
 /*
  * MUST be called with the lock held!
@@ -173,14 +171,12 @@ out:
 	spin_unlock_irqrestore(&async_lock, flags);
 }
 
-
 static async_cookie_t __async_schedule(async_func_ptr *ptr, void *data, struct list_head *running)
 {
 	struct async_entry *entry;
 	unsigned long flags;
 	async_cookie_t newcookie;
 	
-
 	/* allow irq-off callers */
 	entry = kzalloc(sizeof(struct async_entry), GFP_ATOMIC);
 
@@ -352,7 +348,6 @@ void async_synchronize_cookie(async_cookie_t cookie)
 	async_synchronize_cookie_domain(cookie, &async_running);
 }
 EXPORT_SYMBOL_GPL(async_synchronize_cookie);
-
 
 static int async_thread(void *unused)
 {

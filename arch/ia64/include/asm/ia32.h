@@ -1,7 +1,6 @@
 #ifndef _ASM_IA64_IA32_H
 #define _ASM_IA64_IA32_H
 
-
 #include <asm/ptrace.h>
 #include <asm/signal.h>
 

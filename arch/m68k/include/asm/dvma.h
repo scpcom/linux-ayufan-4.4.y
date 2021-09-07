@@ -9,7 +9,6 @@
 #ifndef __M68K_DVMA_H
 #define __M68K_DVMA_H
 
-
 #define DVMA_PAGE_SHIFT	13
 #define DVMA_PAGE_SIZE	(1UL << DVMA_PAGE_SHIFT)
 #define DVMA_PAGE_MASK	(~(DVMA_PAGE_SIZE-1))
@@ -29,7 +28,6 @@ extern void *dvma_malloc_align(unsigned long len, unsigned long align);
 
 extern void dvma_unmap(void *baddr);
 extern void dvma_free(void *vaddr);
-
 
 #ifdef CONFIG_SUN3
 /* sun3 dvma page support */
@@ -78,8 +76,6 @@ static inline int dvma_map_cpu(unsigned long kaddr, unsigned long vaddr,
 #define dvma_btov(x) ((unsigned long)(x) | 0xff000000)
 
 extern int dvma_map_cpu(unsigned long kaddr, unsigned long vaddr, int len);
-
-
 
 /* everything below this line is specific to dma used for the onboard
    ESP scsi on sun3x */
@@ -233,7 +229,6 @@ extern struct Linux_SBus_DMA *dma_chain;
 	if(dma->revision>dvmarev1) regs->cond_reg |= DMA_3CLKS;            \
 	dma->running = 0;                                                  \
 } while(0)
-
 
 #endif /* !CONFIG_SUN3 */
 

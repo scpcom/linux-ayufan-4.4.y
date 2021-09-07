@@ -117,7 +117,6 @@ static int __init celleb_publish_devices(void)
 machine_device_initcall(celleb_beat, celleb_publish_devices);
 machine_device_initcall(celleb_native, celleb_publish_devices);
 
-
 /*
  * functions for Celleb-Beat
  */
@@ -148,7 +147,6 @@ static int __init celleb_probe_beat(void)
 
 	return 1;
 }
-
 
 /*
  * functions for Celleb-native
@@ -196,7 +194,6 @@ static int __init celleb_probe_native(void)
 
 	return 1;
 }
-
 
 /*
  * machine definitions

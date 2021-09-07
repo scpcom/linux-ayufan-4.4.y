@@ -29,7 +29,6 @@
  * ########################################################################
  */
 
-
 #include "ieee754int.h"
 #include "ieee754sp.h"
 #include "ieee754dp.h"
@@ -44,7 +43,6 @@
 
 /* special constants
 */
-
 
 #if (defined(BYTE_ORDER) && BYTE_ORDER == LITTLE_ENDIAN) || defined(__MIPSEL__)
 #define SPSTR(s, b, m) {m, b, s}
@@ -95,7 +93,6 @@ const struct ieee754sp_konst __ieee754sp_spcvals[] = {
 	SPSTR(0, 31 + SP_EBIAS, 0),	/* + 1.0e31 */
 	SPSTR(0, 63 + SP_EBIAS, 0),	/* + 1.0e63 */
 };
-
 
 int ieee754si_xcpt(int r, const char *op, ...)
 {

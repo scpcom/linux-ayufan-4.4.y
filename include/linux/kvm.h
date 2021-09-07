@@ -40,7 +40,6 @@ struct kvm_userspace_memory_region {
 /* for kvm_memory_region::flags */
 #define KVM_MEM_LOG_DIRTY_PAGES  1UL
 
-
 /* for KVM_IRQ_LINE */
 struct kvm_irq_level {
 	/*
@@ -54,7 +53,6 @@ struct kvm_irq_level {
 	};
 	__u32 level;
 };
-
 
 struct kvm_irqchip {
 	__u32 chip_id;
@@ -693,7 +691,6 @@ struct kvm_assigned_irq {
 		__u32 reserved[12];
 	};
 };
-
 
 struct kvm_assigned_msix_nr {
 	__u32 assigned_dev_id;

@@ -24,13 +24,11 @@ struct corgissp_machinfo {
 
 void corgi_ssp_set_machinfo(struct corgissp_machinfo *machinfo);
 
-
 /*
  * SharpSL/Corgi LCD Driver
  */
 void corgi_lcdtg_suspend(void);
 void corgi_lcdtg_hw_init(int mode);
-
 
 /*
  * SharpSL Battery/PM Driver
@@ -45,5 +43,3 @@ void corgi_lcdtg_hw_init(int mode);
 extern struct battery_thresh spitz_battery_levels_acin[];
 extern struct battery_thresh spitz_battery_levels_noac[];
 int sharpsl_pm_pxa_read_max1111(int channel);
-
-

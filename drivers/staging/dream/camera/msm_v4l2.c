@@ -56,7 +56,6 @@ struct msm_v4l2_device {
 
 static struct msm_v4l2_device *g_pmsm_v4l2_dev;
 
-
 static DEFINE_MUTEX(msm_v4l2_opencnt_lock);
 
 static int msm_v4l2_open(struct file *f)
@@ -449,7 +448,6 @@ static int msm_v4l2_streamoff(struct file *f, void *pctx, enum v4l2_buf_type i)
 	ctrlcmd->timeout_ms = 10000;
 	ctrlcmd->length     = 0;
 	ctrlcmd->value      = NULL;
-
 
 	D("%s\n", __func__);
 

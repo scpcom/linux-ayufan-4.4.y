@@ -119,7 +119,6 @@ struct mpt2_ioctl_diag_reset {
 	struct mpt2_ioctl_header hdr;
 };
 
-
 /**
  * struct mpt2_ioctl_pci_info - pci device info
  * @device - pci device id
@@ -138,7 +137,6 @@ struct mpt2_ioctl_pci_info {
 	} u;
 	uint32_t segment_id;
 };
-
 
 #define MPT2_IOCTL_INTERFACE_SCSI	(0x00)
 #define MPT2_IOCTL_INTERFACE_FC		(0x01)
@@ -183,7 +181,6 @@ struct mpt2_ioctl_iocinfo {
 	uint16_t rsvd2;
 	struct mpt2_ioctl_pci_info pci_information;
 };
-
 
 /* number of event log entries */
 #define MPT2SAS_CTL_EVENT_LOG_SIZE (50)
@@ -305,7 +302,6 @@ struct mpt2_ioctl_btdh_mapping {
 	uint16_t handle;
 	uint16_t rsvd;
 };
-
 
 /* status bits for ioc->diag_buffer_status */
 #define MPT2_DIAG_BUFFER_IS_REGISTERED 	(0x01)

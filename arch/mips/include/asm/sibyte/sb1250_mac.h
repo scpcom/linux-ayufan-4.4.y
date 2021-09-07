@@ -29,7 +29,6 @@
     *  MA 02111-1307 USA
     ********************************************************************* */
 
-
 #ifndef _SB1250_MAC_H
 #define _SB1250_MAC_H
 
@@ -45,7 +44,6 @@
  * Register: MAC_CFG_1
  * Register: MAC_CFG_2
  */
-
 
 #define M_MAC_RESERVED0             _SB_MAKEMASK1(0)
 #define M_MAC_TX_HOLD_SOP_EN        _SB_MAKEMASK1(1)
@@ -161,7 +159,6 @@
 #define M_MAC_RX_CH_SEL             _SB_MAKEMASK(7, S_MAC_RX_CH_SEL)
 #define V_MAC_RX_CH_SEL(x)          _SB_MAKEVALUE(x, S_MAC_RX_CH_SEL)
 #define G_MAC_RX_CH_SEL(x)          _SB_GETVALUE(x, S_MAC_RX_CH_SEL, M_MAC_RX_CH_SEL)
-
 
 /*
  * MAC Enable Registers
@@ -453,7 +450,6 @@
 #define M_MAC_STATUS_DZERO(ch, txrx)     _SB_MAKEVALUE(M_MAC_INT_DZERO, S_MAC_STATUS_CH_OFFSET(ch, txrx))
 #define M_MAC_STATUS_DROP(ch, txrx)      _SB_MAKEVALUE(M_MAC_INT_DROP, S_MAC_STATUS_CH_OFFSET(ch, txrx))
 #define M_MAC_STATUS_OTHER_ERR           _SB_MAKEVALUE(_SB_MAKEMASK(7, 0), 40)
-
 
 #define M_MAC_RX_UNDRFL             _SB_MAKEMASK1(40)
 #define M_MAC_RX_OVRFL              _SB_MAKEMASK1(41)

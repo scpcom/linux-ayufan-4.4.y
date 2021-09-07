@@ -917,7 +917,6 @@ static struct device_attribute ecard_dev_attrs[] = {
 	__ATTR_NULL,
 };
 
-
 int ecard_request_resources(struct expansion_card *ec)
 {
 	int i, err = 0;

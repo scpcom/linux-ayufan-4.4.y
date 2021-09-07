@@ -50,4 +50,3 @@ ENDPROC(__clear_user)
 		.align	0
 9001:		ldmfd	sp!, {r0, pc}
 		.previous
-

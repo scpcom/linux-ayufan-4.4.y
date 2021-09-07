@@ -1903,7 +1903,6 @@ out:
 	return ret;
 }
 
-
 /**
  * drm_fb_detachmode - Detach a user specified mode from an connector
  * @inode: inode from the ioctl

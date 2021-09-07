@@ -43,7 +43,6 @@
 #define BX_DIGITAL_IN	18	/* 8 */
 #define BX_NUM		26
 
-
 #include <linux/delay.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>
@@ -130,7 +129,6 @@ static struct snd_pcm_hardware pcm_hardware_skel = {
 	supports lists longer than this. In this case periods_max=220 is a
 	safe limit to make sure the list never exceeds 512 instructions. */
 };
-
 
 #include "mona_dsp.c"
 #include "echoaudio_dsp.c"

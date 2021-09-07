@@ -81,9 +81,6 @@ static const struct ieee80211_channel rtl818x_channels[] = {
 	{ .center_freq = 2484 },
 };
 
-
-
-
 void rtl8180_write_phy(struct ieee80211_hw *dev, u8 addr, u32 data)
 {
 	struct rtl8180_priv *priv = dev->priv;

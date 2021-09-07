@@ -640,7 +640,6 @@ static int ultracam_probe(struct usb_interface *intf, const struct usb_device_id
 	return -EIO;
 }
 
-
 static struct usb_device_id id_table[] = {
 	{ USB_DEVICE(ULTRACAM_VENDOR_ID, ULTRACAM_PRODUCT_ID) },
 	{ }  /* Terminating entry */

@@ -43,7 +43,6 @@ int spi_test(int fd);
 void fxo_dtmf_test(int fd, int pcm);
 void fxs_fxo_dtmf_test(int fd0,int fd1, int pcm);
 
-
 /*#define BLOCKING_RW*/
 
 int main(int argc, char *argv[])
@@ -103,7 +102,6 @@ int main(int argc, char *argv[])
 		fdflags |= O_NONBLOCK;
 		fcntl(pcm,F_SETFL,fdflags);
 #endif
-
 
 	while(1) {
 		char str[32];
@@ -290,7 +288,6 @@ void fxo_dtmf_test(int fd, int pcm)
 	
 		select(pcm+1,&rd_fds,&wr_fds,&ex_fds,NULL);
 
-
                 if(FD_ISSET(pcm,&ex_fds)) {
 				int ex;
 				ex = ioctl(fd,PHONE_EXCEPTION,0);
@@ -340,7 +337,6 @@ void fxs_fxo_dtmf_test(int fd0,int fd1,int pcm)
 	phone_dev_fd[0]=fd0;
 	phone_dev_fd[1]=fd1;
 
-		
 	FD_ZERO(&master);    /*  clear the master and temp sets*/
 	FD_ZERO(&rd_fds);
 	FD_ZERO(&wr_fds);
@@ -608,7 +604,6 @@ multi_session_exit:
 	return;
 
 }
-
 
 void sw_loopback_two_phones(int fd0, int fd1, int pcm)
 {
@@ -1034,7 +1029,6 @@ _exit:
 	return;
 }
 
-
 void sw_loopback(int fd,int pcm)
 {
         char rd_buff[5*BUFSIZE];
@@ -1213,5 +1207,3 @@ void hw_loopback(int fd)
         }
 	exit(2);
 }
-
-

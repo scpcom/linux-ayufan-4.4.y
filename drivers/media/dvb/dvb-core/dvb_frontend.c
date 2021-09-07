@@ -1763,7 +1763,6 @@ static int dvb_frontend_ioctl_legacy(struct inode *inode, struct file *file,
 			err = fe->ops.read_ucblocks(fe, (__u32*) parg);
 		break;
 
-
 	case FE_DISEQC_RESET_OVERLOAD:
 		if (fe->ops.diseqc_reset_overload) {
 			err = fe->ops.diseqc_reset_overload(fe);
@@ -1980,7 +1979,6 @@ static int dvb_frontend_ioctl_legacy(struct inode *inode, struct file *file,
 
 	return err;
 }
-
 
 static unsigned int dvb_frontend_poll(struct file *file, struct poll_table_struct *wait)
 {

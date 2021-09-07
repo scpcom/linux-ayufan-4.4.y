@@ -4,7 +4,6 @@
 #ifndef _ASM_X86_MMZONE_64_H
 #define _ASM_X86_MMZONE_64_H
 
-
 #ifdef CONFIG_NUMA
 
 #include <linux/mmdebug.h>

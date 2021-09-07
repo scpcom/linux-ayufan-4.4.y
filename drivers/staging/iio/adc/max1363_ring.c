@@ -181,7 +181,6 @@ done:
 	atomic_dec(&st->protect_ring);
 }
 
-
 int max1363_register_ring_funcs_and_init(struct iio_dev *indio_dev)
 {
 	struct max1363_state *st = indio_dev->dev_data;

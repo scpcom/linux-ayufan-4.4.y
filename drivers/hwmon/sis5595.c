@@ -65,7 +65,6 @@
 #include <linux/acpi.h>
 #include <linux/io.h>
 
-
 /* If force_addr is set to anything different from 0, we forcibly enable
    the device at the given address. */
 static u16 force_addr;
@@ -616,7 +615,6 @@ static int __devexit sis5595_remove(struct platform_device *pdev)
 
 	return 0;
 }
-
 
 /* ISA access must be locked explicitly. */
 static int sis5595_read_value(struct sis5595_data *data, u8 reg)

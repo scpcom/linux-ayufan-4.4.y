@@ -39,7 +39,6 @@
  *      voice 3 is the second.
  */
 
-
 /*
  *    Register offset table for OPL2/3 voices,
  *    OPL2 / one OPL3 register array side only
@@ -218,7 +217,6 @@ long snd_opl3_write(struct snd_hwdep *hw, const char __user *buf, long count,
 	}
 	return result > 0 ? result : err;
 }
-
 
 /*
  * Patch management
@@ -441,7 +439,6 @@ static int snd_opl3_play_note(struct snd_opl3 * opl3, struct snd_dm_fm_note * no
 	return 0;
 }
 
-
 static int snd_opl3_set_voice(struct snd_opl3 * opl3, struct snd_dm_fm_voice * voice)
 {
 	unsigned short reg_side;
@@ -611,4 +608,3 @@ static int snd_opl3_set_connection(struct snd_opl3 * opl3, int connection)
 
 	return 0;
 }
-

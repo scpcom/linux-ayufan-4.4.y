@@ -89,7 +89,6 @@ USBVISION_DRIVER_VERSION_PATCHLEVEL)
 
 #define	ENABLE_HEXDUMP	0	/* Enable if you need it */
 
-
 #ifdef USBVISION_DEBUG
 	#define PDEBUG(level, fmt, args...) { \
 		if (video_debug & (level)) \
@@ -107,7 +106,6 @@ USBVISION_DRIVER_VERSION_PATCHLEVEL)
 //String operations
 #define rmspace(str)	while(*str==' ') str++;
 #define goto2next(str)	while(*str!=' ') str++; while(*str==' ') str++;
-
 
 /* sequential number of usbvision device */
 static int usbvision_nr;
@@ -157,14 +155,12 @@ MODULE_PARM_DESC(video_nr, "Set video device number (/dev/videoX).  Default: -1 
 MODULE_PARM_DESC(radio_nr, "Set radio device number (/dev/radioX).  Default: -1 (autodetect)");
 MODULE_PARM_DESC(vbi_nr, "Set vbi device number (/dev/vbiX).  Default: -1 (autodetect)");
 
-
 // Misc stuff
 MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_LICENSE(DRIVER_LICENSE);
 MODULE_VERSION(USBVISION_VERSION_STRING);
 MODULE_ALIAS(DRIVER_ALIAS);
-
 
 /*****************************************************************************/
 /* SYSFS Code - Copied from the stv680.c usb module.			     */
@@ -466,7 +462,6 @@ static int usbvision_v4l2_close(struct file *file)
 	PDEBUG(DBG_IO, "success");
 	return 0;
 }
-
 
 /*
  * usbvision_ioctl()
@@ -1153,7 +1148,6 @@ static int usbvision_v4l2_mmap(struct file *file, struct vm_area_struct *vma)
 	return 0;
 }
 
-
 /*
  * Here comes the stuff for radio on usbvision based devices
  *
@@ -1208,7 +1202,6 @@ out:
 	mutex_unlock(&usbvision->lock);
 	return errCode;
 }
-
 
 static int usbvision_radio_close(struct file *file)
 {
@@ -1273,7 +1266,6 @@ static long usbvision_vbi_ioctl(struct file *file,
 	return video_usercopy(file, cmd, arg, usbvision_do_vbi_ioctl);
 }
 
-
 //
 // Video registration stuff
 //
@@ -1333,7 +1325,6 @@ static struct video_device usbvision_video_template = {
 	.current_norm         = V4L2_STD_PAL
 };
 
-
 // Radio template
 static const struct v4l2_file_operations usbvision_radio_fops = {
 	.owner             = THIS_MODULE,
@@ -1384,7 +1375,6 @@ static struct video_device usbvision_vbi_template=
 	.name           = "usbvision-vbi",
 	.minor		= -1,
 };
-
 
 static struct video_device *usbvision_vdev_init(struct usb_usbvision *usbvision,
 					struct video_device *vdev_template,
@@ -1586,7 +1576,6 @@ static void usbvision_release(struct usb_usbvision *usbvision)
 	PDEBUG(DBG_PROBE, "success");
 }
 
-
 /*********************** usb interface **********************************/
 
 static void usbvision_configure_video(struct usb_usbvision *usbvision)
@@ -1709,7 +1698,6 @@ static int __devinit usbvision_probe(struct usb_interface *intf,
 		       usbvision->alt_max_pkt_size[i]);
 	}
 
-
 	usbvision->nr = usbvision_nr++;
 
 	usbvision->have_tuner = usbvision_device_data[model].Tuner;
@@ -1730,14 +1718,12 @@ static int __devinit usbvision_probe(struct usb_interface *intf,
 	usbvision_configure_video(usbvision);
 	mutex_unlock(&usbvision->lock);
 
-
 	usb_set_intfdata (intf, usbvision);
 	usbvision_create_sysfs(usbvision->vdev);
 
 	PDEBUG(DBG_PROBE, "success");
 	return 0;
 }
-
 
 /*
  * usbvision_disconnect()

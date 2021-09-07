@@ -9,7 +9,6 @@
 #ifndef _ASM_X86_XEN_INTERFACE_32_H
 #define _ASM_X86_XEN_INTERFACE_32_H
 
-
 /*
  * These flat segments are in the Xen-private section of every GDT. Since these
  * are also present in the initial GDT, many OSes will be able to avoid
@@ -80,7 +79,6 @@ typedef struct xen_callback xen_callback_t;
 #define XEN_CALLBACK(__cs, __eip)				\
 	((struct xen_callback){ .cs = (__cs), .eip = (unsigned long)(__eip) })
 #endif /* !__ASSEMBLY__ */
-
 
 /*
  * Page-directory addresses above 4GB do not fit into architectural %cr3.

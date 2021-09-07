@@ -128,7 +128,6 @@ MODULE_SUPPORTED_DEVICE("{{RME HDSPM-MADI}}");
 #define HDSPM_midiStatusIn0   392	
 #define HDSPM_midiStatusIn1   396	
 
-
 /* the meters are regular i/o-mapped registers, but offset
    considerably from the rest. the peak registers are reset
    when read; the least-significant 4 bits are full-scale counters; 
@@ -331,7 +330,6 @@ MODULE_SUPPORTED_DEVICE("{{RME HDSPM-MADI}}");
 #define HDSPM_wcFreq88_2  (HDSPM_wc_freq0|HDSPM_wc_freq2)
 #define HDSPM_wcFreq96    (HDSPM_wc_freq1|HDSPM_wc_freq2)
 
-
 #define HDSPM_SelSyncRefMask       (HDSPM_SelSyncRef0|HDSPM_SelSyncRef1|\
 				    HDSPM_SelSyncRef2)
 #define HDSPM_SelSyncRef_WORD      0
@@ -511,7 +509,6 @@ static char channel_map_madi_ss[HDSPM_MAX_CHANNELS] = {
    56, 57, 58, 59, 60, 61, 62, 63
 };
 
-
 static struct pci_device_id snd_hdspm_ids[] __devinitdata = {
 	{
 	 .vendor = PCI_VENDOR_ID_XILINX,
@@ -610,7 +607,6 @@ static int hdspm_write_pb_gain(struct hdspm *hdspm, unsigned int chan,
 		    (hdspm->mixer->ch[chan].pb[pb] = data & 0xFFFF));
 	return 0;
 }
-
 
 /* enable DMA for specific channels, now available for DSP-MADI */
 static inline void snd_hdspm_enable_in(struct hdspm * hdspm, int i, int v)
@@ -775,7 +771,6 @@ static snd_pcm_uframes_t hdspm_hw_pointer(struct hdspm * hdspm)
 
 	return position;
 }
-
 
 static inline void hdspm_start_audio(struct hdspm * s)
 {
@@ -1308,7 +1303,6 @@ static int __devinit snd_hdspm_create_midi (struct snd_card *card,
 	return 0;
 }
 
-
 static void hdspm_midi_tasklet(unsigned long arg)
 {
 	struct hdspm *hdspm = (struct hdspm *)arg;
@@ -1318,7 +1312,6 @@ static void hdspm_midi_tasklet(unsigned long arg)
 	if (hdspm->midi[1].pending)
 		snd_hdspm_midi_input_read (&hdspm->midi[1]);
 } 
-
 
 /*-----------------------------------------------------------------------------
   Status Interface
@@ -1430,8 +1423,6 @@ static int snd_hdspm_get_autosync_sample_rate(struct snd_kcontrol *kcontrol,
   .info = snd_hdspm_info_system_clock_mode, \
   .get = snd_hdspm_get_system_clock_mode, \
 }
-
-
 
 static int hdspm_system_clock_mode(struct hdspm * hdspm)
 {
@@ -1871,7 +1862,6 @@ static int hdspm_line_out(struct hdspm * hdspm)
 {
 	return (hdspm->control_register & HDSPM_LineOut) ? 1 : 0;
 }
-
 
 static int hdspm_set_line_output(struct hdspm * hdspm, int out)
 {
@@ -2728,7 +2718,6 @@ static int snd_hdspm_get_wc_sync_check(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
-
 #define HDSPM_MADI_SYNC_CHECK(xname, xindex) \
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER, \
   .name = xname, \
@@ -2760,7 +2749,6 @@ static int snd_hdspm_get_madisync_sync_check(struct snd_kcontrol *kcontrol,
 	    hdspm_madisync_sync_check(hdspm);
 	return 0;
 }
-
 
 #define HDSPM_AES_SYNC_CHECK(xname, xindex) \
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER, \
@@ -2796,7 +2784,6 @@ static int snd_hdspm_get_aes_sync_check(struct snd_kcontrol *kcontrol,
 		hdspm_aes_sync_check(hdspm, offset);
 	return 0;
 }
-
 
 static struct snd_kcontrol_new snd_hdspm_controls_madi[] = {
 
@@ -2844,7 +2831,6 @@ static struct snd_kcontrol_new snd_hdspm_controls_aes32[] = {
 
 static struct snd_kcontrol_new snd_hdspm_playback_mixer = HDSPM_PLAYBACK_MIXER;
 
-
 static int hdspm_update_simple_mixer_controls(struct hdspm * hdspm)
 {
 	int i;
@@ -2867,7 +2853,6 @@ static int hdspm_update_simple_mixer_controls(struct hdspm * hdspm)
 
 	return 0;
 }
-
 
 static int snd_hdspm_create_controls(struct snd_card *card, struct hdspm * hdspm)
 {
@@ -3091,7 +3076,6 @@ snd_hdspm_proc_read_madi(struct snd_info_entry * entry,
 
 	snd_iprintf(buffer, "System Clock Frequency: %d\n",
 		    hdspm->system_sample_rate);
-
 
 	snd_iprintf(buffer, "--- Status:\n");
 
@@ -3321,8 +3305,6 @@ snd_hdspm_proc_read_debug(struct snd_info_entry * entry,
 }
 #endif
 
-
-
 static void __devinit snd_hdspm_proc_init(struct hdspm * hdspm)
 {
 	struct snd_info_entry *entry;
@@ -3415,7 +3397,6 @@ static int snd_hdspm_set_defaults(struct hdspm * hdspm)
 	return 0;
 }
 
-
 /*------------------------------------------------------------
    interrupt 
  ------------------------------------------------------------*/
@@ -3484,7 +3465,6 @@ static irqreturn_t snd_hdspm_interrupt(int irq, void *dev_id)
    pcm interface 
   ------------------------------------------------------------*/
 
-
 static snd_pcm_uframes_t snd_hdspm_hw_pointer(struct snd_pcm_substream *
 					      substream)
 {
@@ -3511,7 +3491,6 @@ static char *hdspm_channel_buffer_location(struct hdspm * hdspm,
 		return hdspm->playback_buffer +
 		    mapped_channel * HDSPM_CHANNEL_BUFFER_BYTES;
 }
-
 
 /* dont know why need it ??? */
 static int snd_hdspm_playback_copy(struct snd_pcm_substream *substream,
@@ -3903,7 +3882,6 @@ static struct snd_pcm_hw_constraint_list hw_constraints_period_sizes = {
 	.mask = 0
 };
 
-
 static int snd_hdspm_hw_rule_channels_rate(struct snd_pcm_hw_params *params,
 					   struct snd_pcm_hw_rule * rule)
 {
@@ -3978,7 +3956,6 @@ static int snd_hdspm_hw_rule_channels(struct snd_pcm_hw_params *params,
 	}
 }
 
-
 static unsigned int hdspm_aes32_sample_rates[] = {
 	32000, 44100, 48000, 64000, 88200, 96000, 128000, 176400, 192000
 };
@@ -4046,7 +4023,6 @@ static int snd_hdspm_playback_release(struct snd_pcm_substream *substream)
 
 	return 0;
 }
-
 
 static int snd_hdspm_capture_open(struct snd_pcm_substream *substream)
 {
@@ -4124,7 +4100,6 @@ static int snd_hdspm_hwdep_ioctl(struct snd_hwdep * hw, struct file *file,
 
 		break;
 		
-
 	case SNDRV_HDSPM_IOCTL_GET_CONFIG_INFO:
 
 		spin_lock_irq(&hdspm->lock);
@@ -4210,7 +4185,6 @@ static int __devinit snd_hdspm_create_hwdep(struct snd_card *card,
 
 	return 0;
 }
-
 
 /*------------------------------------------------------------
    memory interface 
@@ -4394,7 +4368,6 @@ static int __devinit snd_hdspm_create(struct snd_card *card,
 	snd_printdd("grabbed memory region 0x%lx-0x%lx\n",
 		   hdspm->port, hdspm->port + io_extent - 1);
 
-
 	hdspm->iobase = ioremap_nocache(hdspm->port, io_extent);
 	if (!hdspm->iobase) {
 		snd_printk(KERN_ERR "HDSPM: "
@@ -4541,7 +4514,6 @@ static struct pci_driver driver = {
 	.probe = snd_hdspm_probe,
 	.remove = __devexit_p(snd_hdspm_remove),
 };
-
 
 static int __init alsa_card_hdspm_init(void)
 {

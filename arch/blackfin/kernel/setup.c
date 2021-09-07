@@ -535,7 +535,6 @@ static __init void memory_setup(void)
 # endif				/* CONFIG_DEBUG_HUNT_FOR_ZERO */
 #endif				/* ANOMALY_05000263 */
 
-
 #ifdef CONFIG_MPU
 	/* Round up to multiple of 4MB */
 	memory_start = (_ramstart + 0x3fffff) & ~0x3fffff;

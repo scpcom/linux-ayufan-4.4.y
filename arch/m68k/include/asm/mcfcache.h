@@ -11,7 +11,6 @@
 #define	__M68KNOMMU_MCFCACHE_H
 /****************************************************************************/
 
-
 /*
  *	The different ColdFire families have different cache arrangments.
  *	Everything from a small instruction only cache, to configurable

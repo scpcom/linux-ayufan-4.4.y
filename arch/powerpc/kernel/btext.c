@@ -96,7 +96,6 @@ void __init btext_prepare_BAT(void)
 }
 #endif
 
-
 /* This function can be used to enable the early boot text when doing
  * OF booting or within bootx init. It must be followed by a btext_unmap()
  * call before the logical address becomes unuseable
@@ -345,7 +344,6 @@ void btext_flushline(void)
 	__asm__ __volatile__ ("sync" ::: "memory");
 }
 
-
 #ifndef NO_SCROLL
 static void scrollscreen(void)
 {
@@ -511,7 +509,6 @@ static unsigned int expand_bits_16[4] = {
 	0xffff0000,
 	0xffffffff
 };
-
 
 static void draw_byte_32(unsigned char *font, unsigned int *base, int rb)
 {

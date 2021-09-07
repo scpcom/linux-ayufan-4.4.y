@@ -27,7 +27,6 @@
   system and in the file COPYING in the Linux kernel source.
 */
 
-
 #include <linux/module.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
@@ -100,7 +99,6 @@ static int rx_pool_sizes[NP] = {128,  128,  128, 64,   64,   64,   32,    32};
 /* NP is shorter, so that it fits on a single line. */
 #undef NP
 
-
 /* Small hardware gotcha:
 
    The FS50 CAM (VP/VC match registers) always take the lowest channel
@@ -124,7 +122,6 @@ static int rx_pool_sizes[NP] = {128,  128,  128, 64,   64,   64,   32,    32};
    channel.
 */
 
-
 /* Optimization hints and tips.
 
    The FireStream chips are very capable of reducing the amount of
@@ -142,9 +139,6 @@ static int rx_pool_sizes[NP] = {128,  128,  128, 64,   64,   64,   32,    32};
   
    -- REW
  */
-
-
-
 
 /* The strings that define what the RX queue entry is all about. */
 /* Fujitsu: Please tell me which ones can have a pointer to a 
@@ -242,14 +236,12 @@ static char *irq_bitname[] = {
 	"RXDMA_S"
 };
 
-
 #define PHY_EOF -1
 #define PHY_CLEARALL -2
 
 struct reginit_item {
 	int reg, val;
 };
-
 
 static struct reginit_item PHY_NTC_INIT[] __devinitdata = {
 	{ PHY_CLEARALL, 0x40 }, 
@@ -264,7 +256,6 @@ static struct reginit_item PHY_NTC_INIT[] __devinitdata = {
 	{ 0x00,  0x0003 },
 	{ PHY_EOF, 0},    /* -1 signals end of list */
 };
-
 
 /* Safetyfeature: If the card interrupts more than this number of times
    in a jiffy (1/100th of a second) then we just disable the interrupt and
@@ -294,7 +285,6 @@ static struct reginit_item PHY_NTC_INIT[] __devinitdata = {
 #define fs_dprintk(f, str...) /* nothing */
 #endif
 
-
 static int fs_keystream = 0;
 
 #ifdef DEBUG
@@ -315,7 +305,6 @@ module_param(fs_keystream, int, 0);
 /* XXX Add rx_buf_sizes, and rx_pool_sizes As per request Amar. -- REW */
 #endif
 
-
 #define FS_DEBUG_FLOW    0x00000001
 #define FS_DEBUG_OPEN    0x00000002
 #define FS_DEBUG_QUEUE   0x00000004
@@ -330,10 +319,8 @@ module_param(fs_keystream, int, 0);
 #define FS_DEBUG_TXMEM   0x00000800
 #define FS_DEBUG_QSIZE   0x00001000
 
-
 #define func_enter() fs_dprintk(FS_DEBUG_FLOW, "fs: enter %s\n", __func__)
 #define func_exit()  fs_dprintk(FS_DEBUG_FLOW, "fs: exit  %s\n", __func__)
-
 
 static struct fs_dev *fs_boards = NULL;
 
@@ -377,9 +364,6 @@ static inline void fs_kfree_skb (struct sk_buff * skb)
 	else
 		dev_kfree_skb_any (skb);
 }
-
-
-
 
 /* It seems the ATM forum recommends this horribly complicated 16bit
  * floating point format. Turns out the Ambassador uses the exact same
@@ -436,7 +420,6 @@ static inline void fs_kfree_skb (struct sk_buff * skb)
    manage to lose two lines or more, keep me updated! ;-)
 
    -- REW */
-
 
 #define ROUND_UP      1
 #define ROUND_DOWN    2
@@ -564,9 +547,6 @@ static unsigned int make_rate (unsigned int rate, int r,
 	return 0;
 }
 
-
-
-
 /* FireStream access routines */
 /* For DEEP-DOWN debugging these can be rigged to intercept accesses to
    certain registers or to just log all accesses. */
@@ -576,19 +556,15 @@ static inline void write_fs (struct fs_dev *dev, int offset, u32 val)
 	writel (val, dev->base + offset);
 }
 
-
 static inline u32  read_fs (struct fs_dev *dev, int offset)
 {
 	return readl (dev->base + offset);
 }
 
-
-
 static inline struct FS_QENTRY *get_qentry (struct fs_dev *dev, struct queue *q)
 {
 	return bus_to_virt (read_fs (dev, Q_WP(q->offset)) & Q_ADDR_MASK);
 }
-
 
 static void submit_qentry (struct fs_dev *dev, struct queue *q, struct FS_QENTRY *qe)
 {
@@ -671,8 +647,6 @@ static void submit_command (struct fs_dev *dev, struct queue *q,
 }
 #endif
 
-
-
 static void process_return_queue (struct fs_dev *dev, struct queue *q)
 {
 	long rq;
@@ -698,7 +672,6 @@ static void process_return_queue (struct fs_dev *dev, struct queue *q)
 	}
 }
 
-
 static void process_txdone_queue (struct fs_dev *dev, struct queue *q)
 {
 	long rq;
@@ -717,7 +690,6 @@ static void process_txdone_queue (struct fs_dev *dev, struct queue *q)
 		if (STATUS_CODE (qe) != 2)
 			fs_dprintk (FS_DEBUG_TXMEM, "queue entry: %08x %08x %08x %08x: %d\n", 
 				    qe->cmd, qe->p0, qe->p1, qe->p2, STATUS_CODE (qe));
-
 
 		switch (STATUS_CODE (qe)) {
 		case 0x01: /* This is for AAL0 where we put the chip in streaming mode */
@@ -767,7 +739,6 @@ static void process_txdone_queue (struct fs_dev *dev, struct queue *q)
 		write_fs (dev, Q_RP(q->offset), Q_INCWRAP);
 	}
 }
-
 
 static void process_incoming (struct fs_dev *dev, struct queue *q)
 {
@@ -850,8 +821,6 @@ static void process_incoming (struct fs_dev *dev, struct queue *q)
 		write_fs (dev, Q_RP(q->offset), Q_INCWRAP);
 	}
 }
-
-
 
 #define DO_DIRECTION(tp) ((tp)->traffic_class != ATM_NONE)
 
@@ -1099,7 +1068,6 @@ static int fs_open(struct atm_vcc *atm_vcc)
 	return 0;
 }
 
-
 static void fs_close(struct atm_vcc *atm_vcc)
 {
 	struct fs_dev *dev = FS_DEV (atm_vcc->dev);
@@ -1128,7 +1096,6 @@ static void fs_close(struct atm_vcc *atm_vcc)
 	txtp = &atm_vcc->qos.txtp;
 	rxtp = &atm_vcc->qos.rxtp;
   
-
 	/* See App note XXX (Unpublished as of now) for the reason for the 
 	   removal of the "CMD_IMM_INQ" part of the TX_PURGE_INH... -- REW */
 
@@ -1159,7 +1126,6 @@ static void fs_close(struct atm_vcc *atm_vcc)
 
 	func_exit ();
 }
-
 
 static int fs_send (struct atm_vcc *atm_vcc, struct sk_buff *skb)
 {
@@ -1222,7 +1188,6 @@ static int fs_send (struct atm_vcc *atm_vcc, struct sk_buff *skb)
 	return 0;
 }
 
-
 /* Some function placeholders for functions we don't yet support. */
 
 #if 0
@@ -1233,7 +1198,6 @@ static int fs_ioctl(struct atm_dev *dev,unsigned int cmd,void __user *arg)
 	return -ENOIOCTLCMD;
 }
 
-
 static int fs_getsockopt(struct atm_vcc *vcc,int level,int optname,
 			 void __user *optval,int optlen)
 {
@@ -1241,7 +1205,6 @@ static int fs_getsockopt(struct atm_vcc *vcc,int level,int optname,
 	func_exit ();
 	return 0;
 }
-
 
 static int fs_setsockopt(struct atm_vcc *vcc,int level,int optname,
 			 void __user *optval,unsigned int optlen)
@@ -1251,7 +1214,6 @@ static int fs_setsockopt(struct atm_vcc *vcc,int level,int optname,
 	return 0;
 }
 
-
 static void fs_phy_put(struct atm_dev *dev,unsigned char value,
 		       unsigned long addr)
 {
@@ -1259,14 +1221,12 @@ static void fs_phy_put(struct atm_dev *dev,unsigned char value,
 	func_exit ();
 }
 
-
 static unsigned char fs_phy_get(struct atm_dev *dev,unsigned long addr)
 {
 	func_enter ();
 	func_exit ();
 	return 0;
 }
-
 
 static int fs_change_qos(struct atm_vcc *vcc,struct atm_qos *qos,int flags)
 {
@@ -1276,7 +1236,6 @@ static int fs_change_qos(struct atm_vcc *vcc,struct atm_qos *qos,int flags)
 };
 
 #endif
-
 
 static const struct atmdev_ops ops = {
 	.open =         fs_open,
@@ -1292,7 +1251,6 @@ static const struct atmdev_ops ops = {
 	/* phy_put:        fs_phy_put, */
 	/* phy_get:        fs_phy_get, */
 };
-
 
 static void __devinit undocumented_pci_fix (struct pci_dev *pdev)
 {
@@ -1311,8 +1269,6 @@ static void __devinit undocumented_pci_fix (struct pci_dev *pdev)
 		pci_write_config_dword (pdev, 0x28, tint);
 	}
 }
-
-
 
 /**************************************************************************
  *                              PHY routines                              *
@@ -1432,7 +1388,6 @@ static int __devinit init_q (struct fs_dev *dev,
 	return 1;
 }
 
-
 static int __devinit init_fp (struct fs_dev *dev, 
 			   struct freepool *fp, int queue, int bufsize, int nr_buffers)
 {
@@ -1454,7 +1409,6 @@ static int __devinit init_fp (struct fs_dev *dev,
 	return 1;
 }
 
-
 static inline int nr_buffers_in_freepool (struct fs_dev *dev, struct freepool *fp)
 {
 #if 0
@@ -1464,7 +1418,6 @@ static inline int nr_buffers_in_freepool (struct fs_dev *dev, struct freepool *f
 	return fp->n;
 #endif
 }
-
 
 /* Check if this gets going again if a pool ever runs out.  -- Yes, it
    does. I've seen "receive abort: no buffers" and things started
@@ -1556,8 +1509,6 @@ static void __devexit free_freepool (struct fs_dev *dev, struct freepool *fp)
 	func_exit ();
 }
 
-
-
 static irqreturn_t fs_irq (int irq, void *dev_id) 
 {
 	int i;
@@ -1648,7 +1599,6 @@ static irqreturn_t fs_irq (int irq, void *dev_id)
 	func_exit ();
 	return IRQ_HANDLED;
 }
-
 
 #ifdef FS_POLL_FREQ
 static void fs_poll (unsigned long data)
@@ -1752,7 +1702,6 @@ static int __devinit fs_init (struct fs_dev *dev)
 		  | (1 << 12) /* That's what hang's driver does. Program to 0 */
 		  | (0 * 0xff) /* XXX FS155 */);
 
-
 	/* Cal prescale etc */
 
 	/* AN3: 11 */
@@ -1832,7 +1781,6 @@ static int __devinit fs_init (struct fs_dev *dev)
 			 rx_buf_sizes[i], rx_pool_sizes[i]);
 		top_off_fp (dev, &dev->rx_fp[i], GFP_KERNEL);
 	}
-
 
 	for (i=0;i < FS_NR_RX_QUEUES;i++)
 		init_q (dev, &dev->rx_rq[i], RXB_RQ(i), RXRQ_NENTRIES, 1);
@@ -2061,6 +2009,3 @@ module_init(firestream_init_module);
 module_exit(firestream_cleanup_module);
 
 MODULE_LICENSE("GPL");
-
-
-

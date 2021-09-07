@@ -21,7 +21,6 @@
 
 #include <asm/pci-bridge.h>
 
-
 /*
  *
  * Setting up a PCI
@@ -48,7 +47,6 @@
  * int __init pciauto_bus_scan(struct pci_controller *pci_ctrl, int current_bus)
  *
  */
-
 
 /* define DEBUG to print some debugging messages. */
 
@@ -155,7 +153,6 @@ pciauto_setup_irq(struct pci_controller* pci_ctrl,struct pci_dev *dev,int devfn)
 	pci_write_config_byte(dev, PCI_INTERRUPT_LINE, irq);
 }
 
-
 static void __init
 pciauto_prescan_setup_bridge(struct pci_dev *dev, int current_bus,
 			     int sub_bus, int *iosave, int *memsave)
@@ -233,7 +230,6 @@ pciauto_postscan_setup_bridge(struct pci_dev *dev, int current_bus, int sub_bus,
  * Scan the current PCI bus.
  */
 
-
 int __init pciauto_bus_scan(struct pci_controller *pci_ctrl, int current_bus)
 {
 	int sub_bus, pci_devfn, pci_class, cmdstat, found_multi=0;
@@ -306,7 +302,6 @@ int __init pciauto_bus_scan(struct pci_controller *pci_ctrl, int current_bus)
 
 		}
 
-
 #if 0
 		/* Skip legacy mode IDE controller */
 
@@ -345,8 +340,3 @@ int __init pciauto_bus_scan(struct pci_controller *pci_ctrl, int current_bus)
 	}
 	return sub_bus;
 }
-
-
-
-
-

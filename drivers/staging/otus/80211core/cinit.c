@@ -231,7 +231,6 @@ u16_t zfTxGenWlanHeader(zdev_t* dev, zbuf_t* buf, u16_t* header, u16_t seq,
     /* Sequence Control */
     header[15] = seq;
 
-
     if (wd->wlanMode == ZM_MODE_AP)
     {
         zfApGetStaTxRateAndQosType(dev, da, &phyCtrl, &qosType, &rateProbingFlag);
@@ -1453,7 +1452,6 @@ u16_t zfTxGenWlanHeader(zdev_t* dev, zbuf_t* buf, u16_t* header, u16_t seq,
 
     return (hlen<<1);
 }
-
 
 u16_t zfTxGenMmHeader(zdev_t* dev, u8_t frameType, u16_t* dst,
         u16_t* header, u16_t len, zbuf_t* buf, u16_t vap, u8_t encrypt)

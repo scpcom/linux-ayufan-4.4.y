@@ -15,7 +15,6 @@
 
 #include "ssb_private.h"
 
-
 static inline
 u32 pcicore_read32(struct ssb_pcicore *pc, u16 offset)
 {
@@ -59,7 +58,6 @@ void pcicore_write16(struct ssb_pcicore *pc, u16 offset, u16 value)
 static DEFINE_SPINLOCK(cfgspace_lock);
 /* Core to access the external PCI config space. Can only have one. */
 static struct ssb_pcicore *extpci_core;
-
 
 static u32 get_cfgspace_addr(struct ssb_pcicore *pc,
 			     unsigned int bus, unsigned int dev,
@@ -431,7 +429,6 @@ static int pcicore_is_in_hostmode(struct ssb_pcicore *pc)
 	return !mips_busprobe32(tmp, (bus->mmio + (pc->dev->core_index * SSB_CORE_SIZE)));
 }
 #endif /* CONFIG_SSB_PCICORE_HOSTMODE */
-
 
 /**************************************************
  * Generic and Clientmode operation code.

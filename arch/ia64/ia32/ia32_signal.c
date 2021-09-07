@@ -164,7 +164,6 @@ copy_siginfo_to_user32 (compat_siginfo_t __user *to, siginfo_t *from)
 	return err;
 }
 
-
 /*
  *  SAVE and RESTORE of ia32 fpstate info, from ia64 current state
  *  Used in exception handler to pass the fpstate to the user, and restore
@@ -515,7 +514,6 @@ sys32_rt_sigaction (int sig, struct sigaction32 __user *act,
 	}
 	return ret;
 }
-
 
 asmlinkage long
 sys32_rt_sigprocmask (int how, compat_sigset_t __user *set, compat_sigset_t __user *oset,

@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef _RING_BUFFER_H_
 #define _RING_BUFFER_H_
 
@@ -71,10 +70,7 @@ typedef struct _RING_BUFFER_DEBUG_INFO {
 	u32 BytesAvailToWrite;
 } RING_BUFFER_DEBUG_INFO;
 
-
-
 /* Interface */
-
 
 int RingBufferInit(RING_BUFFER_INFO *RingInfo, void *Buffer, u32 BufferLen);
 

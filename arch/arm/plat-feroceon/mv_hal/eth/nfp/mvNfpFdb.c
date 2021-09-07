@@ -78,7 +78,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "eth/nfp/mvNfp.h"
 #include "eth/mvEth.h"
 
-
 struct fdbRuleHashBucket    *fdbRuleDb;
 MV_U32                      fdbRuleDbSize;
 MV_U32			    fdbMember[ETH_FP_IFINDEX_MAX];
@@ -86,7 +85,6 @@ MV_U32                      fdbRuleUpdateCount = 0;
 MV_U32                      fdbRuleSetCount = 0;
 MV_U32                      fdbRuleDeleteCount = 0;
 MV_U32                      fdbHashMaxDepth;
-
 
 MV_STATUS mvFpFdbInit(MV_U32 dbSize)
 {
@@ -313,5 +311,3 @@ MV_STATUS mvFpFdbPrint(void)
     	}
     	return MV_OK;
 }
-
-

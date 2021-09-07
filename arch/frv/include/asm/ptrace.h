@@ -18,7 +18,6 @@
 #define in_syscall(regs) (((regs)->tbr & TBR_TT) == TBR_TT_TRAP0)
 #endif
 
-
 #define PT_PSR		0
 #define	PT_ISR		1
 #define PT_CCR		2
@@ -50,7 +49,6 @@
 #define PT_FP		PT_GR(2)
 #define PT_PREV_FRAME	PT_GR(28)	/* previous exception frame pointer (old gr28 value) */
 #define PT_CURR_TASK	PT_GR(29)	/* current task */
-
 
 /* Arbitrarily choose the same ptrace numbers as used by the Sparc code. */
 #define PTRACE_GETREGS		12

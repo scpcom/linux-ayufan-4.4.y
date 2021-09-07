@@ -413,7 +413,6 @@ END(ia64_os_init_virtual_begin)
 #define	temp3		r7
 #define	temp4		r14
 
-
 //++
 // Name:
 //	ia64_state_save()
@@ -694,7 +693,6 @@ ia64_state_save:
 
 //EndStub//////////////////////////////////////////////////////////////////////
 
-
 //++
 // Name:
 //	ia64_state_restore()
@@ -893,7 +891,6 @@ ia64_state_restore:
 
 //EndStub//////////////////////////////////////////////////////////////////////
 
-
 //++
 // Name:
 //	ia64_new_stack()
@@ -939,7 +936,6 @@ ia64_new_stack:
 	br.sptk b0
 
 //EndStub//////////////////////////////////////////////////////////////////////
-
 
 //++
 // Name:
@@ -1000,7 +996,6 @@ ia64_old_stack:
 	br.sptk b0
 
 //EndStub//////////////////////////////////////////////////////////////////////
-
 
 //++
 // Name:
@@ -1075,7 +1070,6 @@ ia64_set_kernel_registers:
 #undef	temp3
 #undef	temp4
 
-
 // Support function for mca.c, it is here to avoid using inline asm.  Given the
 // address of an rnat slot, if that address is below the current ar.bspstore
 // then return the contents of that slot, otherwise return the contents of
@@ -1093,7 +1087,6 @@ GLOBAL_ENTRY(ia64_get_rnat)
 	mov ar.rsc=3
 	br.ret.sptk.many rp
 END(ia64_get_rnat)
-
 
 // void ia64_set_psr_mc(void)
 //

@@ -346,7 +346,6 @@ typedef enum {
 	OMAP_MCBSP_CLK_STP_MODE_DELAY,
 } omap_mcbsp_clk_stp_mode;
 
-
 /******* SPI specific mode **********/
 typedef enum {
 	OMAP_MCBSP_SPI_MASTER = 0,
@@ -449,7 +448,6 @@ int omap_mcbsp_xmit_buffer(unsigned int id, dma_addr_t buffer, unsigned int leng
 int omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer, unsigned int length);
 int omap_mcbsp_spi_master_xmit_word_poll(unsigned int id, u32 word);
 int omap_mcbsp_spi_master_recv_word_poll(unsigned int id, u32 * word);
-
 
 /* SPI specific API */
 void omap_mcbsp_set_spi_mode(unsigned int id, const struct omap_mcbsp_spi_cfg * spi_cfg);

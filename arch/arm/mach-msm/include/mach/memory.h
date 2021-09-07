@@ -20,4 +20,3 @@
 #define PHYS_OFFSET		UL(0x10000000)
 
 #endif
-

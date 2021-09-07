@@ -42,13 +42,10 @@
  *
  */
 
-
-
 /** @file
  * Defines internal data structures to be shared between modules of
  * the T2/3 resource manager. Does not expose any "public" interfaces
  */
-
 
 #include <linux/version.h>
 
@@ -58,9 +55,7 @@
 #ifndef T23XRMINTERNAL_H
 #define T23XRMINTERNAL_H
 
-
 #define T23X_PACKAGE_VERSION "2.1.0"
-
 
 /* Limit of registrable interfaces */
 #define MAX_INTERFACES (32)
@@ -71,13 +66,9 @@
 /* Maximum entries in the interrupt message queue */
 #define ISRMSG_QUEUE_DEPTH (32)
 
-
-
 /* Switch for drivers that don't have a device tree, or those that do */
 #define NO_FDT  0
 #define HAS_FDT 1
-
-
 
 /**
  * Current state of a channel
@@ -102,7 +93,6 @@ typedef enum
     RQstateCanceling,    /**< Cancellation request received     */
 } T2rqState;
 
-
 /**
  * Queue entry for all requests. This is what the RM uses to track
  * queued requests
@@ -114,8 +104,6 @@ typedef struct _T2RMqueueEntry
     T2rqState       rqState;
     /* prev/next */
 } T2RMqueueEntry;
-
-
 
 /**
  * Descriptor page mapping info used to track resources used in
@@ -135,8 +123,6 @@ typedef struct _DPD_AUXMAP
     T2PTR_PAIR_MAP pair[TOTAL_PAIRS];
     /* anything for whole of DPD? */
 } T2DESC_AUXMAP;
-
-
 
 /*
  * Interrupt event context - comprises the ISR queue
@@ -160,7 +146,6 @@ struct internal_descinfo
     linkEntry slt[4];
 };
 
-
 typedef struct _T2ISRCtx
 {
     u16 channelsDone;                    /**< bitmask of done channels */
@@ -183,8 +168,6 @@ typedef struct _T2ISRCtx
 #endif
 
 } T2ISRCtx;
-
-
 
 /**
  * Instance state block for each Talitos device in a system
@@ -240,10 +223,6 @@ typedef struct _T2CoreInstance
     u64             chnDescCt[T3_MAX_CHANNELS]; /* total descriptors/channel */
 } T2CoreInstance;
 
-
-
-
-
 /**
  * Portable driver initialization - not exposed
  *
@@ -254,14 +233,10 @@ int32_t t23RMdevInit(T2CoreInstance *t2blk,
                      uint32_t eu_present,
                      uint32_t desc_types);
 
-
 /**
  * Portable driver shutdown/removal function - not exposed
  *
  */
 RMstatus t23RMdevRemove(T2CoreInstance *t2blk);
-
-
-
 
 #endif /* T23XRMINTERNAL_H */

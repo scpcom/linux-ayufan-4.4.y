@@ -41,7 +41,6 @@
 #include "xfs_error.h"
 #include "xfs_bmap.h"
 
-
 /*
  * Allocation group level functions.
  */
@@ -673,7 +672,6 @@ xfs_dialloc(
 	xfs_btree_cur_t	*tcur;		/* temp cursor */
 	xfs_inobt_rec_incore_t trec;	/* temp inode allocation record */
 
-
 	if (*IO_agbp == NULL) {
 		/*
 		 * We do not have an agbp, so select an initial allocation
@@ -830,7 +828,6 @@ nextag:
 			 */
 			goto alloc_inode;
 		}
-
 
 		/*
 		 * In the same AG as parent, but parent's chunk is full.

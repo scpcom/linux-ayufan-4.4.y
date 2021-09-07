@@ -105,7 +105,6 @@ typedef struct
     char            *filters;
 } MV_LOG_FILTER_HEADER;
 
-
 #if defined (MV_LOG_DEBUG) || defined (MV_LOG_ERROR)
     #define MV_LOGGER       1
     #if defined (WIN32)
@@ -125,7 +124,6 @@ DbgPrint(
     #else
         #define MV_LOG_PRINT	printf
     #endif
-
 
 MV_BOOLEAN mvLogRegisterModule(MV_U8 moduleId, MV_U32 filterMask, const char* name);
 MV_BOOLEAN mvLogSetModuleFilter(MV_U8 moduleId, MV_U32 filterMask);
@@ -184,4 +182,3 @@ void mvLogMsg(MV_U8 moduleId, MV_U32 type, const char* format, ...);
 #endif /* __cplusplus */
 
 #endif
-

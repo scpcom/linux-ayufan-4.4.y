@@ -833,4 +833,3 @@ int hid_pidff_init(struct hid_device *hid);
 #endif /* HID_FF */
 
 #endif
-

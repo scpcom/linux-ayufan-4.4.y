@@ -461,7 +461,6 @@ dasd_fba_dump_sense_dbf(struct dasd_device *device, struct irb *irb,
 	}
 }
 
-
 static void
 dasd_fba_dump_sense(struct dasd_device *device, struct dasd_ccw_req * req,
 		    struct irb *irb)
@@ -524,7 +523,6 @@ dasd_fba_dump_sense(struct dasd_device *device, struct dasd_ccw_req * req,
 		act++;
 	}
 	printk(KERN_ERR "%s", page);
-
 
 	/* print failing CCW area */
 	len = 0;

@@ -47,7 +47,6 @@ static int ssl_config(char *str, char **error_out);
 static int ssl_get_config(char *dev, char *str, int size, char **error_out);
 static int ssl_remove(int n, char **error_out);
 
-
 /* Const, except for .mc.list */
 static struct line_driver driver = {
 	.name 			= "UML serial line",

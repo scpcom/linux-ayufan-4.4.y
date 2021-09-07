@@ -26,7 +26,6 @@
  *
  ******************************************************************************/
 
-
 #define TARGET_CORE_SEOBJ_C
 
 #include <linux/string.h>
@@ -706,7 +705,6 @@ out:
 	spin_unlock(&pc->plugin_lock);
 	return NULL;
 }
-
 
 int se_obj_load_plugins(void)
 {

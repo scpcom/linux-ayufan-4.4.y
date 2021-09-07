@@ -59,9 +59,7 @@
 #ifndef _ET1310_MAC_H_
 #define _ET1310_MAC_H_
 
-
 #include "et1310_address_map.h"
-
 
 #define COUNTER_WRAP_28_BIT 0x10000000
 #define COUNTER_WRAP_22_BIT 0x400000

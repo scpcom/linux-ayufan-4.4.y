@@ -62,7 +62,6 @@ static unsigned int sleep_sys_clocks[5];
 static unsigned int sleep_sys_pinfunc;
 static unsigned int sleep_static_memctlr[4][3];
 
-
 static void save_core_regs(void)
 {
 	extern void save_au1xxx_intctl(void);

@@ -27,7 +27,6 @@
 #include <sound/asoundef.h>
 #include "pdaudiocf.h"
 
-
 /*
  * we use a vmalloc'ed (sg-)buffer
  */
@@ -232,7 +231,6 @@ static int pdacf_pcm_prepare(struct snd_pcm_substream *subs)
 	return 0;
 }
 
-
 /*
  * capture hw information
  */
@@ -263,7 +261,6 @@ static struct snd_pcm_hardware pdacf_pcm_capture_hw = {
 	.periods_max =		128,
 	.fifo_size =		0,
 };
-
 
 /*
  * pdacf_pcm_capture_open - open callback for capture
@@ -297,7 +294,6 @@ static int pdacf_pcm_capture_close(struct snd_pcm_substream *subs)
 	return 0;
 }
 
-
 /*
  * pdacf_pcm_capture_pointer - pointer callback for capture
  */
@@ -321,7 +317,6 @@ static struct snd_pcm_ops pdacf_pcm_capture_ops = {
 	.pointer =	pdacf_pcm_capture_pointer,
 	.page =		snd_pcm_get_vmalloc_page,
 };
-
 
 /*
  * snd_pdacf_pcm_new - create and initialize a pcm

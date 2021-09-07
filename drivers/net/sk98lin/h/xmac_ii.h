@@ -173,7 +173,6 @@ extern "C" {
 #define XM_RXF_MAX_SZ	0x037c	/* 32 bit r/o	1024-MaxSize Byte Rx Frame Cnt*/
 	/* 0x02e8 - 0x02fe:	reserved */
 
-
 /*----------------------------------------------------------------------------*/
 /*
  * XMAC Bit Definitions
@@ -201,7 +200,6 @@ extern "C" {
 #define XM_MMU_ENA_RX	(1<<1)	/* Bit  1:	Enable Receiver */
 #define XM_MMU_ENA_TX	(1<<0)	/* Bit  0:	Enable Transmitter */
 
-
 /*	XM_TX_CMD	16 bit r/w	Transmit Command Register */
 								/* Bit 15..7:	reserved */
 #define XM_TX_BK2BK		(1<<6)	/* Bit  6:	Ignor Carrier Sense (Tx Bk2Bk) */
@@ -212,21 +210,17 @@ extern "C" {
 #define XM_TX_NO_CRC	(1<<1)	/* Bit  1:	Disable CRC Generation */
 #define XM_TX_AUTO_PAD	(1<<0)	/* Bit  0:	Enable Automatic Padding */
 
-
 /*	XM_TX_RT_LIM	16 bit r/w	Transmit Retry Limit Register */
 								/* Bit 15..5:	reserved */
 #define XM_RT_LIM_MSK	0x1f	/* Bit  4..0:	Tx Retry Limit */
-
 
 /*	XM_TX_STIME	16 bit r/w	Transmit Slottime Register */
 								/* Bit 15..7:	reserved */
 #define XM_STIME_MSK	0x7f	/* Bit  6..0:	Tx Slottime bits */
 
-
 /*	XM_TX_IPG	16 bit r/w	Transmit Inter Packet Gap */
 								/* Bit 15..8:	reserved */
 #define XM_IPG_MSK		0xff	/* Bit  7..0:	IPG value bits */
-
 
 /*	XM_RX_CMD	16 bit r/w	Receive Command Register */
 								/* Bit 15..9:	reserved */
@@ -242,11 +236,9 @@ extern "C" {
 #define XM_RX_STRIP_PAD	(1<<1)	/* Bit  1:	Strip pad bytes of Rx frames */
 #define XM_RX_DIS_CEXT	(1<<0)	/* Bit  0:	Disable carrier ext. check */
 
-
 /*	XM_PHY_ADDR	16 bit r/w	PHY Address Register */
 								/* Bit 15..5:	reserved */
 #define XM_PHY_ADDR_SZ	0x1f	/* Bit  4..0:	PHY Address bits */
-
 
 /*	XM_GP_PORT	32 bit r/w	General Purpose Port Register */
 								/* Bit 31..7:	reserved */
@@ -257,7 +249,6 @@ extern "C" {
 #define XM_GP_RES_STAT	(1L<<2)	/* Bit  2: (sc)	Reset the statistics module */
 								/* Bit  1:	reserved */
 #define XM_GP_INP_ASS	(1L<<0)	/* Bit  0: (ro) GP Input Pin asserted */
-
 
 /*	XM_IMSK		16 bit r/w	Interrupt Mask Register */
 /*	XM_ISRC		16 bit r/o	Interrupt Status Register */
@@ -281,14 +272,12 @@ extern "C" {
 #define XM_DEF_MSK	(~(XM_IS_INP_ASS | XM_IS_LIPA_RC | XM_IS_RX_PAGE |\
 			XM_IS_AND | XM_IS_RXC_OV | XM_IS_TXC_OV | XM_IS_TXF_UR))
 
-
 /*	XM_HW_CFG	16 bit r/w	Hardware Config Register */
 								/* Bit 15.. 4:	reserved */
 #define XM_HW_GEN_EOP	(1<<3)	/* Bit  3:	generate End of Packet pulse */
 #define XM_HW_COM4SIG	(1<<2)	/* Bit  2:	use Comma Detect for Sig. Det.*/
 								/* Bit  1:	reserved */
 #define XM_HW_GMII_MD	(1<<0)	/* Bit  0:	GMII Interface selected */
-
 
 /*	XM_TX_LO_WM	16 bit r/w	Tx FIFO Low Water Mark */
 /*	XM_TX_HI_WM	16 bit r/w	Tx FIFO High Water Mark */
@@ -300,7 +289,6 @@ extern "C" {
 /*	XM_RX_THR	16 bit r/w	Rx Request Threshold */
 								/* Bit 15..11	reserved */
 #define XM_THR_MSK		0x03ff	/* Bit 10.. 0	Rx/Tx Request Threshold bits */
-
 
 /*	XM_TX_STAT	32 bit r/o	Tx Status LIFO Register */
 #define XM_ST_VALID		(1UL<<31)	/* Bit 31:	Status Valid */
@@ -324,11 +312,9 @@ extern "C" {
 									/* Bit 15..11:	reserved */
 #define XM_RX_WM_MSK	0x03ff		/* Bit 11.. 0:	Rx FIFO Watermark bits */
 
-
 /*	XM_DEV_ID	32 bit r/o	Device ID Register */
 #define XM_DEV_OUI	(0x00ffffffUL<<8)	/* Bit 31..8:	Device OUI */
 #define XM_DEV_REV	(0x07L << 5)		/* Bit  7..5:	Chip Rev Num */
-
 
 /*	XM_MODE		32 bit r/w	Mode Register */
 									/* Bit 31..27:	reserved */
@@ -376,7 +362,6 @@ extern "C" {
 #define XM_SC_CP_TXC	(1<<2)	/* Bit  2:	Copy Tx Counters Continuously */
 #define XM_SC_CLR_RXC	(1<<1)	/* Bit  1: (sc)	Clear Rx Counters */
 #define XM_SC_CLR_TXC	(1<<0)	/* Bit  0: (sc)	Clear Tx Counters */
-
 
 /*	XM_RX_CNT_EV	32 bit r/o	Rx Counter Event Register */
 /*	XM_RX_EV_MSK	32 bit r/w	Rx Counter Event Mask */
@@ -627,7 +612,6 @@ extern "C" {
 	/* 0x15 - 0x18:		reserved */
 #define PHY_NAT_PHY_ADDR	0x19	/* 16 bit r/o	PHY Address Register */
 
-
 /*----------------------------------------------------------------------------*/
 
 /*
@@ -657,7 +641,6 @@ extern "C" {
 #define PHY_CT_SP100	PHY_CT_SPS_LSB	/* enable speed of  100 Mbps */
 #define PHY_CT_SP10		(0)				/* enable speed of   10 Mbps */
 
-
 /*****  PHY_XMAC_STAT	16 bit r/w	PHY Status Register *****/
 /*****  PHY_BCOM_STAT	16 bit r/w	PHY Status Register *****/
 /*****  PHY_MARV_STAT	16 bit r/w	PHY Status Register *****/
@@ -673,7 +656,6 @@ extern "C" {
 #define PHY_ST_LSYNC	(1<<2)	/* Bit  2:	Link Synchronized */
 #define PHY_ST_JAB_DET	(1<<1)	/* Bit  1:	Jabber Detected */
 #define PHY_ST_EXT_REG	(1<<0)	/* Bit  0:	Extended Register available */
-
 
 /*****  PHY_XMAC_ID1		16 bit r/o	PHY ID1 Register */
 /*****  PHY_BCOM_ID1		16 bit r/o	PHY ID1 Register */
@@ -700,7 +682,6 @@ extern "C" {
 #define PHY_MARV_ID1_FEP	0x0E60		/* Yukon-FE+  (PHY 88E3016 Rev.A1?) */
 #define PHY_MARV_ID1_ECU	0x0CB0		/* Yukon-ECU  (PHY 88E1149 Rev.B2?) */
 #define PHY_MARV_ID1_EX		0x0CB1		/* Yukon-Ext. (PHY 88E1149R Rev.?) */
-
 
 /*****  PHY_XMAC_AUNE_ADV	16 bit r/w	Auto-Negotiation Advertisement *****/
 /*****  PHY_XMAC_AUNE_LP	16 bit r/o	Link Partner Ability Reg *****/
@@ -810,7 +791,6 @@ extern "C" {
 #define PHY_X_P_SYM_MD		(1<<7)	/* Bit  8..7:	symmetric Pause Mode */
 #define PHY_X_P_ASYM_MD		(2<<7)	/* Bit  8..7:	asymmetric Pause Mode */
 #define PHY_X_P_BOTH_MD		(3<<7)	/* Bit  8..7:	both Pause Mode */
-
 
 /*
  * Broadcom-Specific
@@ -1791,9 +1771,7 @@ extern "C" {
 #define GMR_IS_SECKEY_MATCH(status, key) (\
 	(status) & GMR_FS_MACSEC_BITS) == (GMR_FS_LKUP_HIT | ((key) << 14)))
 
-
 /* typedefs *******************************************************************/
-
 
 /* function prototypes ********************************************************/
 
@@ -1802,4 +1780,3 @@ extern "C" {
 #endif	/* __cplusplus */
 
 #endif	/* __INC_XMAC_H */
-

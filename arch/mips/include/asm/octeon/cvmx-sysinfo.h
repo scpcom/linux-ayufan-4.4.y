@@ -52,7 +52,6 @@ struct cvmx_sysinfo {
 	/* ptr to memory descriptor block */
 	void *phy_mem_desc_ptr;
 
-
 	/* Application image specific variables */
 	/* stack top address (virtual) */
 	uint64_t stack_top;
@@ -75,7 +74,6 @@ struct cvmx_sysinfo {
 
 	/* dram data rate in hz (data rate = 2 * clock rate */
 	uint32_t dram_data_rate_hz;
-
 
 	uint16_t board_type;
 	uint8_t board_rev_major;

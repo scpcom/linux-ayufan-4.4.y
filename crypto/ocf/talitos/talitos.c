@@ -230,7 +230,6 @@ static void dump_talitos_status(struct talitos_softc *sc)
 	return;
 }
 
-
 #ifdef CONFIG_OCF_RANDOMHARVEST
 /* 
  * pull random numbers off the RNG FIFO, not exceeding amount available

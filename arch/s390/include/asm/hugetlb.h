@@ -11,7 +11,6 @@
 #include <asm/page.h>
 #include <asm/pgtable.h>
 
-
 #define is_hugepage_only_range(mm, addr, len)	0
 #define hugetlb_free_pgd_range			free_pgd_range
 

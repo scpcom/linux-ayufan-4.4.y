@@ -118,7 +118,6 @@ struct inf_hw {
 	struct inf_hw		*sc[3];	/* slave cards */
 };
 
-
 #define PCI_SUBVENDOR_HST_SAPHIR3       0x52
 #define PCI_SUBVENDOR_SEDLBAUER_PCI     0x53
 #define PCI_SUB_ID_SEDLBAUER            0x01
@@ -219,7 +218,6 @@ MODULE_DEVICE_TABLE(pci, infineon_ids);
 #define NICCY_IRQ_DISABLE	0xff0000
 #define NICCY_IRQ_BIT		0x800000
 
-
 /* Scitel PLX */
 #define SCT_PLX_IRQ_ADDR	0x4c
 #define SCT_PLX_RESET_ADDR	0x50
@@ -239,7 +237,6 @@ MODULE_DEVICE_TABLE(pci, infineon_ids);
 #define GAZEL_INT_HSCX		0x04
 #define GAZEL_PCI_EN		0x40
 #define GAZEL_IPAC_EN		0x03
-
 
 static LIST_HEAD(Cards);
 static DEFINE_RWLOCK(card_lock); /* protect Cards */

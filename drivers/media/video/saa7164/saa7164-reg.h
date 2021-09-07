@@ -163,4 +163,3 @@
 #define SAA_DMASTATE_RUN	0x03
 
 /* Hardware registers */
-

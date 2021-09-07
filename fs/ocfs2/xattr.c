@@ -3162,7 +3162,6 @@ static int ocfs2_find_xe_in_bucket(struct inode *inode,
 			break;
 		}
 
-
 		xe_name = bucket_block(bucket, block_off) + new_offset;
 		if (!memcmp(name, xe_name, name_len)) {
 			*xe_index = i;
@@ -6852,7 +6851,6 @@ static int ocfs2_reflink_xattr_in_block(struct ocfs2_xattr_reflink *args,
 	struct buffer_head *new_blk_bh = NULL;
 	struct ocfs2_xattr_block *xb =
 			(struct ocfs2_xattr_block *)blk_bh->b_data;
-
 
 	if (le16_to_cpu(xb->xb_flags) & OCFS2_XATTR_INDEXED)
 		indexed = 1;

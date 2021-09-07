@@ -381,7 +381,6 @@ void radeon_driver_irq_uninstall(struct drm_device * dev)
 	RADEON_WRITE(RADEON_GEN_INT_CNTL, 0);
 }
 
-
 int radeon_vblank_crtc_get(struct drm_device *dev)
 {
 	drm_radeon_private_t *dev_priv = (drm_radeon_private_t *) dev->dev_private;

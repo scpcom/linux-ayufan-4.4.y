@@ -147,7 +147,6 @@ static struct ib_mw *nes_alloc_mw(struct ib_pd *ibpd) {
 	return ibmw;
 }
 
-
 /**
  * nes_dealloc_mw
  */
@@ -198,7 +197,6 @@ static int nes_dealloc_mw(struct ib_mw *ibmw)
 
 	return err;
 }
-
 
 /**
  * nes_bind_mw
@@ -273,7 +271,6 @@ static int nes_bind_mw(struct ib_qp *ibqp, struct ib_mw *ibmw,
 
 	return 0;
 }
-
 
 /**
  * nes_alloc_fmr
@@ -538,7 +535,6 @@ failed_vpbl_avail:
 	return ERR_PTR(ret);
 }
 
-
 /**
  * nes_dealloc_fmr
  */
@@ -590,7 +586,6 @@ static int nes_dealloc_fmr(struct ib_fmr *ibfmr)
 	return rc;
 }
 
-
 /**
  * nes_map_phys_fmr
  */
@@ -600,7 +595,6 @@ static int nes_map_phys_fmr(struct ib_fmr *ibfmr, u64 *page_list,
 	return 0;
 }
 
-
 /**
  * nes_unmap_frm
  */
@@ -608,8 +602,6 @@ static int nes_unmap_fmr(struct list_head *ibfmr_list)
 {
 	return 0;
 }
-
-
 
 /**
  * nes_query_device
@@ -661,7 +653,6 @@ static int nes_query_device(struct ib_device *ibdev, struct ib_device_attr *prop
 	return 0;
 }
 
-
 /**
  * nes_query_port
  */
@@ -706,7 +697,6 @@ static int nes_query_port(struct ib_device *ibdev, u8 port, struct ib_port_attr 
 	return 0;
 }
 
-
 /**
  * nes_modify_port
  */
@@ -716,7 +706,6 @@ static int nes_modify_port(struct ib_device *ibdev, u8 port,
 	return 0;
 }
 
-
 /**
  * nes_query_pkey
  */
@@ -725,7 +714,6 @@ static int nes_query_pkey(struct ib_device *ibdev, u8 port, u16 index, u16 *pkey
 	*pkey = 0;
 	return 0;
 }
-
 
 /**
  * nes_query_gid
@@ -740,7 +728,6 @@ static int nes_query_gid(struct ib_device *ibdev, u8 port,
 
 	return 0;
 }
-
 
 /**
  * nes_alloc_ucontext - Allocate the user context data structure. This keeps track
@@ -757,7 +744,6 @@ static struct ib_ucontext *nes_alloc_ucontext(struct ib_device *ibdev,
 	struct nes_ucontext *nes_ucontext;
 	struct nes_ib_device *nesibdev = nesvnic->nesibdev;
 
-
 	if (ib_copy_from_udata(&req, udata, sizeof(struct nes_alloc_ucontext_req))) {
 		printk(KERN_ERR PFX "Invalid structure size on allocate user context.\n");
 		return ERR_PTR(-EINVAL);
@@ -768,7 +754,6 @@ static struct ib_ucontext *nes_alloc_ucontext(struct ib_device *ibdev,
 			req.userspace_ver, NES_ABI_USERSPACE_VER);
 		return ERR_PTR(-EINVAL);
 	}
-
 
 	memset(&uresp, 0, sizeof uresp);
 
@@ -788,7 +773,6 @@ static struct ib_ucontext *nes_alloc_ucontext(struct ib_device *ibdev,
 			((sizeof(struct nes_hw_qp_wqe) * uresp.max_qps * 2) + PAGE_SIZE-1) /
 			PAGE_SIZE;
 
-
 	if (ib_copy_to_udata(udata, &uresp, sizeof uresp)) {
 		kfree(nes_ucontext);
 		return ERR_PTR(-EFAULT);
@@ -799,7 +783,6 @@ static struct ib_ucontext *nes_alloc_ucontext(struct ib_device *ibdev,
 	atomic_set(&nes_ucontext->usecnt, 1);
 	return &nes_ucontext->ibucontext;
 }
-
 
 /**
  * nes_dealloc_ucontext
@@ -816,7 +799,6 @@ static int nes_dealloc_ucontext(struct ib_ucontext *context)
 	return 0;
 }
 
-
 /**
  * nes_mmap
  */
@@ -830,7 +812,6 @@ static int nes_mmap(struct ib_ucontext *context, struct vm_area_struct *vma)
 	struct nes_qp *nesqp;
 
 	nes_ucontext = to_nesucontext(context);
-
 
 	if (vma->vm_pgoff >= nes_ucontext->mmap_wq_offset) {
 		index = (vma->vm_pgoff - nes_ucontext->mmap_wq_offset) * PAGE_SIZE;
@@ -871,7 +852,6 @@ static int nes_mmap(struct ib_ucontext *context, struct vm_area_struct *vma)
 
 	return -ENOSYS;
 }
-
 
 /**
  * nes_alloc_pd
@@ -939,7 +919,6 @@ static struct ib_pd *nes_alloc_pd(struct ib_device *ibdev,
 	return &nespd->ibpd;
 }
 
-
 /**
  * nes_dealloc_pd
  */
@@ -971,7 +950,6 @@ static int nes_dealloc_pd(struct ib_pd *ibpd)
 	return 0;
 }
 
-
 /**
  * nes_create_ah
  */
@@ -980,7 +958,6 @@ static struct ib_ah *nes_create_ah(struct ib_pd *pd, struct ib_ah_attr *ah_attr)
 	return ERR_PTR(-ENOSYS);
 }
 
-
 /**
  * nes_destroy_ah
  */
@@ -988,7 +965,6 @@ static int nes_destroy_ah(struct ib_ah *ah)
 {
 	return -ENOSYS;
 }
-
 
 /**
  * nes_get_encoded_size
@@ -1008,8 +984,6 @@ static inline u8 nes_get_encoded_size(int *size)
 	}
 	return (encoded_size);
 }
-
-
 
 /**
  * nes_setup_virt_qp
@@ -1131,7 +1105,6 @@ static int nes_setup_virt_qp(struct nes_qp *nesqp, struct nes_pbl *nespbl,
 	return 0;
 }
 
-
 /**
  * nes_setup_mmap_qp
  */
@@ -1179,7 +1152,6 @@ static int nes_setup_mmap_qp(struct nes_qp *nesqp, struct nes_vnic *nesvnic,
 	return 0;
 }
 
-
 /**
  * nes_free_qp_mem() is to free up the qp's pci_alloc_consistent() memory.
  */
@@ -1201,7 +1173,6 @@ static inline void nes_free_qp_mem(struct nes_device *nesdev,
 		kunmap(nesqp->page);
 	}
 }
-
 
 /**
  * nes_create_qp
@@ -1390,7 +1361,6 @@ static struct ib_qp *nes_create_qp(struct ib_pd *ibpd,
 			nesqp->nesqp_context->sq_addr_low = cpu_to_le32((u32)u64temp);
 			nesqp->nesqp_context->sq_addr_high = cpu_to_le32((u32)(u64temp >> 32));
 
-
 			if (!virt_wqs) {
 				u64temp = (u64)nesqp->hwqp.sq_pbase;
 				nesqp->nesqp_context->sq_addr_low = cpu_to_le32((u32)u64temp);
@@ -1431,7 +1401,6 @@ static struct ib_qp *nes_create_qp(struct ib_pd *ibpd,
 				nes_debug(NES_DBG_QP, "Disabling MPA crc checking due to module option.\n");
 				nesqp->nesqp_context->ird_ord_sizes |= cpu_to_le32(NES_QPCONTEXT_ORDIRD_RNMC);
 			}
-
 
 			/* Create the QP */
 			cqp_request = nes_get_cqp_request(nesdev);
@@ -1521,7 +1490,6 @@ static struct ib_qp *nes_create_qp(struct ib_pd *ibpd,
 	return &nesqp->ibqp;
 }
 
-
 /**
  * nes_clean_cq
  */
@@ -1554,7 +1522,6 @@ static void nes_clean_cq(struct nes_qp *nesqp, struct nes_cq *nescq)
 
 	spin_unlock_irqrestore(&nescq->lock, flags);
 }
-
 
 /**
  * nes_destroy_qp
@@ -1622,7 +1589,6 @@ static int nes_destroy_qp(struct ib_qp *ibqp)
 	return 0;
 }
 
-
 /**
  * nes_create_cq
  */
@@ -1665,7 +1631,6 @@ static struct ib_cq *nes_create_cq(struct ib_device *ibdev, int entries,
 	nescq->hw_cq.cq_size = max(entries + 1, 5);
 	nescq->hw_cq.cq_number = cq_num;
 	nescq->ibcq.cqe = nescq->hw_cq.cq_size - 1;
-
 
 	if (context) {
 		nes_ucontext = to_nesucontext(context);
@@ -1876,7 +1841,6 @@ static struct ib_cq *nes_create_cq(struct ib_device *ibdev, int entries,
 	return &nescq->ibcq;
 }
 
-
 /**
  * nes_destroy_cq
  */
@@ -2014,7 +1978,6 @@ static u32 root_256(struct nes_device *nesdev,
 
 	return 1;
 }
-
 
 /**
  * nes_reg_mr
@@ -2181,7 +2144,6 @@ static int nes_reg_mr(struct nes_device *nesdev, struct nes_pd *nespd,
 	*used_4k_pbls = use_4k_pbls;
 	return 0;
 }
-
 
 /**
  * nes_reg_phys_mr
@@ -2373,7 +2335,6 @@ static struct ib_mr *nes_reg_phys_mr(struct ib_pd *ib_pd,
 	return ibmr;
 }
 
-
 /**
  * nes_get_dma_mr
  */
@@ -2388,7 +2349,6 @@ static struct ib_mr *nes_get_dma_mr(struct ib_pd *pd, int acc)
 	bl.addr = 0;
 	return nes_reg_phys_mr(pd, &bl, 1, acc, &kva);
 }
-
 
 /**
  * nes_reg_user_mr
@@ -2741,7 +2701,6 @@ static struct ib_mr *nes_reg_user_mr(struct ib_pd *pd, u64 start, u64 length,
 	return ERR_PTR(-ENOSYS);
 }
 
-
 /**
  * nes_dereg_mr
  */
@@ -2837,7 +2796,6 @@ static int nes_dereg_mr(struct ib_mr *ib_mr)
 	return 0;
 }
 
-
 /**
  * show_rev
  */
@@ -2851,7 +2809,6 @@ static ssize_t show_rev(struct device *dev, struct device_attribute *attr,
 	nes_debug(NES_DBG_INIT, "\n");
 	return sprintf(buf, "%x\n", nesvnic->nesdev->nesadapter->hw_rev);
 }
-
 
 /**
  * show_fw_ver
@@ -2869,7 +2826,6 @@ static ssize_t show_fw_ver(struct device *dev, struct device_attribute *attr,
 		(nesvnic->nesdev->nesadapter->firmware_version & 0x000000ff));
 }
 
-
 /**
  * show_hca
  */
@@ -2880,7 +2836,6 @@ static ssize_t show_hca(struct device *dev, struct device_attribute *attr,
 	return sprintf(buf, "NES020\n");
 }
 
-
 /**
  * show_board
  */
@@ -2890,7 +2845,6 @@ static ssize_t show_board(struct device *dev, struct device_attribute *attr,
 	nes_debug(NES_DBG_INIT, "\n");
 	return sprintf(buf, "%.*s\n", 32, "NES020 Board ID");
 }
-
 
 static DEVICE_ATTR(hw_rev, S_IRUGO, show_rev, NULL);
 static DEVICE_ATTR(fw_ver, S_IRUGO, show_fw_ver, NULL);
@@ -2903,7 +2857,6 @@ static struct device_attribute *nes_dev_attributes[] = {
 	&dev_attr_hca_type,
 	&dev_attr_board_id
 };
-
 
 /**
  * nes_query_qp
@@ -2934,7 +2887,6 @@ static int nes_query_qp(struct ib_qp *ibqp, struct ib_qp_attr *attr,
 
 	return 0;
 }
-
 
 /**
  * nes_hw_modify_qp
@@ -3011,7 +2963,6 @@ int nes_hw_modify_qp(struct nes_device *nesdev, struct nes_qp *nesqp,
 		return 0;
 	}
 }
-
 
 /**
  * nes_modify_qp
@@ -3226,7 +3177,6 @@ int nes_modify_qp(struct ib_qp *ibqp, struct ib_qp_attr *attr,
 
 	ret = 0;
 
-
 	if (issue_modify_qp) {
 		nes_debug(NES_DBG_MOD_QP, "call nes_hw_modify_qp\n");
 		ret = nes_hw_modify_qp(nesdev, nesqp, next_iwarp_state, 0, 1);
@@ -3305,7 +3255,6 @@ int nes_modify_qp(struct ib_qp *ibqp, struct ib_qp_attr *attr,
 	return err;
 }
 
-
 /**
  * nes_muticast_attach
  */
@@ -3315,7 +3264,6 @@ static int nes_multicast_attach(struct ib_qp *ibqp, union ib_gid *gid, u16 lid)
 	return -ENOSYS;
 }
 
-
 /**
  * nes_multicast_detach
  */
@@ -3324,7 +3272,6 @@ static int nes_multicast_detach(struct ib_qp *ibqp, union ib_gid *gid, u16 lid)
 	nes_debug(NES_DBG_INIT, "\n");
 	return -ENOSYS;
 }
-
 
 /**
  * nes_process_mad
@@ -3527,7 +3474,6 @@ static int nes_post_send(struct ib_qp *ibqp, struct ib_send_wr *ib_wr,
 	return err;
 }
 
-
 /**
  * nes_post_recv
  */
@@ -3616,7 +3562,6 @@ static int nes_post_recv(struct ib_qp *ibqp, struct ib_recv_wr *ib_wr,
 		*bad_wr = ib_wr;
 	return err;
 }
-
 
 /**
  * nes_poll_cq
@@ -3786,7 +3731,6 @@ static int nes_poll_cq(struct ib_cq *ibcq, int num_entries, struct ib_wc *entry)
 	return cqe_count;
 }
 
-
 /**
  * nes_req_notify_cq
  */
@@ -3813,7 +3757,6 @@ static int nes_req_notify_cq(struct ib_cq *ibcq, enum ib_cq_notify_flags notify_
 
 	return 0;
 }
-
 
 /**
  * nes_init_ofa_device
@@ -3920,7 +3863,6 @@ struct nes_ib_device *nes_init_ofa_device(struct net_device *netdev)
 	return nesibdev;
 }
 
-
 /**
  * nes_destroy_ofa_device
  */
@@ -3934,7 +3876,6 @@ void nes_destroy_ofa_device(struct nes_ib_device *nesibdev)
 	kfree(nesibdev->ibdev.iwcm);
 	ib_dealloc_device(&nesibdev->ibdev);
 }
-
 
 /**
  * nes_register_ofa_device
@@ -3974,7 +3915,6 @@ int nes_register_ofa_device(struct nes_ib_device *nesibdev)
 
 	return 0;
 }
-
 
 /**
  * nes_unregister_ofa_device

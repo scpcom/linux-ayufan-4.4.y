@@ -46,4 +46,3 @@ static inline int LM75_TEMP_FROM_REG(u16 reg)
 	   guarantee arithmetic shift and preserve the sign */
 	return ((s16)reg / 128) * 500;
 }
-

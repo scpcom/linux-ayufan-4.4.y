@@ -8,4 +8,3 @@
 
 extern void save_console_flags(void);
 #endif
-

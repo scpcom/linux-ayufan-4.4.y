@@ -165,7 +165,6 @@ int tipc_ref_valid(u32 portref);
 
 #define TIPC_PORT_IMPORTANCE 100	/* send using current port setting */
 
-
 int tipc_send(u32 portref,
 	      unsigned int num_sect,
 	      struct iovec const *msg_sect);

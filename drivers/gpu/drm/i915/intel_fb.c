@@ -68,7 +68,6 @@ static struct drm_fb_helper_funcs intel_fb_helper_funcs = {
 	.gamma_get = intel_crtc_fb_gamma_get,
 };
 
-
 /**
  * Curretly it is assumed that the old framebuffer is reused.
  *
@@ -188,7 +187,6 @@ static int intelfb_create(struct drm_device *dev, uint32_t fb_width,
 	info->flags = FBINFO_DEFAULT;
 
 	info->fbops = &intelfb_ops;
-
 
 	/* setup aperture base/size for vesafb takeover */
 	info->aperture_base = dev->mode_config.fb_base;

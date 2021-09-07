@@ -143,7 +143,6 @@ extern unsigned long nr_iowait(void);
 extern unsigned long nr_iowait_cpu(void);
 extern unsigned long this_cpu_load(void);
 
-
 extern void calc_global_load(void);
 extern u64 cpu_nr_migrations(int cpu);
 
@@ -746,7 +745,6 @@ extern struct user_struct *find_user(uid_t);
 extern struct user_struct root_user;
 #define INIT_USER (&root_user)
 
-
 struct backing_dev_info;
 struct reclaim_state;
 
@@ -1042,9 +1040,7 @@ partition_sched_domains(int ndoms_new, struct cpumask *doms_new,
 }
 #endif	/* !CONFIG_SMP */
 
-
 struct io_context;			/* See blkdev.h */
-
 
 #ifdef ARCH_HAS_PREFETCH_SWITCH_STACK
 extern void prefetch_stack(struct task_struct *t);
@@ -1283,7 +1279,6 @@ struct task_struct {
 	unsigned in_execve:1;	/* Tell the LSMs that the process is doing an
 				 * execve */
 	unsigned in_iowait:1;
-
 
 	/* Revert to default priority/policy when forking */
 	unsigned sched_reset_on_fork:1;
@@ -1637,7 +1632,6 @@ static inline pid_t task_pid_vnr(struct task_struct *tsk)
 	return __task_pid_nr_ns(tsk, PIDTYPE_PID, NULL);
 }
 
-
 static inline pid_t task_tgid_nr(struct task_struct *tsk)
 {
 	return tsk->tgid;
@@ -1650,7 +1644,6 @@ static inline pid_t task_tgid_vnr(struct task_struct *tsk)
 	return pid_vnr(task_tgid(tsk));
 }
 
-
 static inline pid_t task_pgrp_nr_ns(struct task_struct *tsk,
 					struct pid_namespace *ns)
 {
@@ -1661,7 +1654,6 @@ static inline pid_t task_pgrp_vnr(struct task_struct *tsk)
 {
 	return __task_pid_nr_ns(tsk, PIDTYPE_PGID, NULL);
 }
-
 
 static inline pid_t task_session_nr_ns(struct task_struct *tsk,
 					struct pid_namespace *ns)
@@ -2572,7 +2564,6 @@ static inline void inc_syscw(struct task_struct *tsk)
  */
 extern void task_oncpu_function_call(struct task_struct *p,
 				     void (*func) (void *info), void *info);
-
 
 #ifdef CONFIG_MM_OWNER
 extern void mm_update_next_owner(struct mm_struct *mm);

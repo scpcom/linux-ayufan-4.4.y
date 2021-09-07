@@ -30,7 +30,6 @@
 #define LOCAL_UNKNOWN_24_CHANNEL_NUM		14
 #define LOCAL_UNKNOWN_5_CHANNEL_NUM			34	//not include 165
 
-
 #define psLOCAL			(&(adapter->sLocalPara))
 
 #define MODE_802_11_BG			0
@@ -58,8 +57,6 @@
 #define LOCAL_11G_OPERATION_RATE_BITMAP			0x130c1240	//6, 9, 12, 18, 24, 36, 48, 54
 #define LOCAL_11A_BASIC_RATE_BITMAP				0x01001040	//6, 12, 24
 #define LOCAL_11A_OPERATION_RATE_BITMAP			0x120c0200	//9, 18, 36, 48, 54
-
-
 
 #define PWR_ACTIVE		0
 #define PWR_SAVE		1

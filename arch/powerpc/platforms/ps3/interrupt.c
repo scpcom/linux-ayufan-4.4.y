@@ -613,7 +613,6 @@ int ps3_spe_irq_destroy(unsigned int virq)
 	return result;
 }
 
-
 #define PS3_INVALID_OUTLET ((irq_hw_number_t)-1)
 #define PS3_PLUG_MAX 63
 

@@ -1664,7 +1664,6 @@ static int get_lsr_info(struct esp_struct *info, unsigned int __user *value)
 	return put_user(result, value);
 }
 
-
 static int esp_tiocmget(struct tty_struct *tty, struct file *file)
 {
 	struct esp_struct *info = tty->driver_data;
@@ -2296,7 +2295,6 @@ static int autoconfig(struct esp_struct *info)
 				else
 					info->irq = 4;
 			}
-
 
 			/* put card in enhanced mode */
 			/* this prevents access through */

@@ -170,7 +170,6 @@ struct aoedev {
 	struct aoetgt **htgt;	/* target needing rexmit assistance */
 };
 
-
 int aoeblk_init(void);
 void aoeblk_exit(void);
 void aoeblk_gdalloc(void *);
@@ -200,4 +199,3 @@ void aoenet_exit(void);
 void aoenet_xmit(struct sk_buff_head *);
 int is_aoe_netif(struct net_device *ifp);
 int set_aoe_iflist(const char __user *str, size_t size);
-

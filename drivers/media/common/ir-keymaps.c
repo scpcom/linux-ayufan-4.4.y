@@ -255,7 +255,6 @@ static struct ir_scancode ir_codes_apac_viewcomp[] = {
 	{ 0x17, KEY_LAST },		/* +100 */
 	{ 0x0a, KEY_LIST },		/* recall */
 
-
 	{ 0x1c, KEY_TUNER },		/* TV/FM */
 	{ 0x15, KEY_SEARCH },		/* scan */
 	{ 0x12, KEY_POWER },		/* power */
@@ -293,7 +292,6 @@ static struct ir_scancode ir_codes_pixelview[] = {
 	{ 0x1e, KEY_POWER },	/* power */
 	{ 0x07, KEY_MEDIA },	/* source */
 	{ 0x1c, KEY_SEARCH },	/* scan */
-
 
 	{ 0x03, KEY_TUNER },		/* TV/FM */
 
@@ -2063,7 +2061,6 @@ struct ir_scancode_table ir_codes_asus_pc39_table = {
 };
 EXPORT_SYMBOL_GPL(ir_codes_asus_pc39_table);
 
-
 /* Encore ENLTV-FM  - black plastic, white front cover with white glowing buttons
     Juan Pablo Sormani <sorman@gmail.com> */
 static struct ir_scancode ir_codes_encore_enltv[] = {
@@ -2129,7 +2126,6 @@ static struct ir_scancode ir_codes_encore_enltv[] = {
 	{ 0x51, KEY_MODE },		/* stereo > main */
 	{ 0x52, KEY_SELECT },		/* stereo > sap */
 	{ 0x53, KEY_PROG1 },		/* teletext */
-
 
 	{ 0x59, KEY_RED },		/* AP1 */
 	{ 0x41, KEY_GREEN },		/* AP2 */

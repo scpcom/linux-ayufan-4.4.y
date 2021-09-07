@@ -31,7 +31,6 @@ disclaimer.
 #ifndef __INCmv88F6082SysHwConfigh
 #define __INCmv88F6082SysHwConfigh
 
-
 /* PEX Work arround */
 /* the target we will use for the workarround */
 #define PEX_CONFIG_RW_WA_TARGET PEX0_MEM
@@ -67,6 +66,5 @@ otherwise the following defines will be ignored */
 /* PEX-PCI\PCI-PCI Bridge*/
 #define PCI0_IF_PTP		0		/* Bridge exist on pciIf0*/
 #define PCI1_IF_PTP		0		/* Bridge exist on pciIf1*/
-
 
 #endif /* __INCmv88F5182SysHwConfigh */

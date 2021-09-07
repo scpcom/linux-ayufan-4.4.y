@@ -404,7 +404,6 @@
 #define SYNOACLSysGetPerm(arg1, arg2)            syscall(__NR_SYNOACLGetPerm, arg1, arg2)
 #endif
 
-
 #ifdef MY_ABC_HERE
 #define __NR_SYNOStat              416
 #define __NR_SYNOFStat              417

@@ -20,7 +20,6 @@
 
 #define IOMAP_DADDR_NULL ((xfs_daddr_t) (-1LL))
 
-
 typedef enum {				/* iomap_flags values */
 	IOMAP_READ =		0,	/* mapping for a read */
 	IOMAP_HOLE =		0x02,	/* mapping covers a hole  */
@@ -42,7 +41,6 @@ typedef enum {
 	BMAPI_MMAP = (1 << 6),		/* allocate for mmap write */
 	BMAPI_TRYLOCK = (1 << 7),	/* non-blocking request */
 } bmapi_flags_t;
-
 
 /*
  * xfs_iomap_t:  File system I/O map

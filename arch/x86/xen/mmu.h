@@ -10,12 +10,10 @@ enum pt_level {
 	PT_PTE
 };
 
-
 bool __set_phys_to_machine(unsigned long pfn, unsigned long mfn);
 bool install_p2mtop_page(unsigned long pfn, unsigned long *p);
 
 void set_pte_mfn(unsigned long vaddr, unsigned long pfn, pgprot_t flags);
-
 
 void xen_activate_mm(struct mm_struct *prev, struct mm_struct *next);
 void xen_dup_mmap(struct mm_struct *oldmm, struct mm_struct *mm);

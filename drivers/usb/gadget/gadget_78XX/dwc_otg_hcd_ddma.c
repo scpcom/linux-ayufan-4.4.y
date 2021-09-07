@@ -39,7 +39,6 @@
 #include "dwc_otg_hcd.h"
 #include "dwc_otg_regs.h"
 		
-		
 static inline uint8_t frame_list_idx(uint16_t frame)
 {
 	return (frame & (MAX_FRLIST_EN_NUM - 1));
@@ -90,7 +89,6 @@ static int desc_list_alloc(dwc_otg_qh_t * qh)
 	
 	dwc_memset(qh->desc_list, 0x00, sizeof(dwc_otg_host_dma_desc_t) * max_desc_num(qh));
 	 
-
 	qh->n_bytes = (uint32_t *) dwc_alloc(sizeof(uint32_t) * max_desc_num(qh));
 	
 	if (!qh->n_bytes) {
@@ -561,7 +559,6 @@ static void init_isoc_dma_desc(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh, uint8_t s
 #endif
 }
 
-
 static void init_non_isoc_dma_desc(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 {
 
@@ -593,7 +590,6 @@ static void init_non_isoc_dma_desc(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 			dma_desc = &qh->desc_list[n_desc];
 			len = hc->xfer_len;
 			
-
 			if (len > MAX_DMA_DESC_SIZE)
 				len = MAX_DMA_DESC_SIZE - hc->max_packet + 1;
 			
@@ -613,7 +609,6 @@ static void init_non_isoc_dma_desc(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 			
 			qh->n_bytes[n_desc] = len;
 			
-
 			if ((qh->ep_type == UE_CONTROL) && (qtd->control_phase == DWC_OTG_CONTROL_SETUP))
 				dma_desc->status.b.sup = 1; /* Setup Packet */
 				
@@ -638,7 +633,6 @@ static void init_non_isoc_dma_desc(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 		}
 		while ((hc->xfer_len > 0) && (n_desc != MAX_DMA_DESC_NUM_GENERIC));
 		
-
 		qtd->in_process = 1;
 		
 		if (n_desc == MAX_DMA_DESC_NUM_GENERIC)
@@ -736,7 +730,6 @@ static void complete_isoc_xfer_ddma(dwc_otg_hcd_t *hcd,
 	qh = hc->qh;
 	idx = qh->td_first;
 	
-
 	if (hc->halt_status == DWC_OTG_HC_XFER_URB_DEQUEUE) {
 		DWC_CIRCLEQ_FOREACH_SAFE(qtd, qtd_tmp, &hc->qh->qtd_list, qtd_list_entry)
 			qtd->in_process = 0;
@@ -767,7 +760,6 @@ static void complete_isoc_xfer_ddma(dwc_otg_hcd_t *hcd,
 		}
 		return;	
 	}
-	
 	
 	DWC_CIRCLEQ_FOREACH_SAFE(qtd, qtd_tmp, &hc->qh->qtd_list, qtd_list_entry) {
 		
@@ -854,7 +846,6 @@ uint8_t update_non_isoc_urb_state_ddma(dwc_otg_hcd_t * hcd,
 	uint16_t remain = hc->ep_is_in ? dma_desc->status.b.n_bytes : 0;
 	dwc_otg_hcd_urb_t *urb = qtd->urb;
 	
-	
 	if (halt_status == DWC_OTG_HC_XFER_AHB_ERR) {
 		urb->status = -DWC_E_IO;
 		return 1;
@@ -930,7 +921,6 @@ static void complete_non_isoc_xfer_ddma(dwc_otg_hcd_t * hcd,
 	
 	qh = hc->qh;
 
-	
 	if (hc->halt_status == DWC_OTG_HC_XFER_URB_DEQUEUE) {
 		DWC_CIRCLEQ_FOREACH_SAFE(qtd, qtd_tmp, &hc->qh->qtd_list, qtd_list_entry) {
 			qtd->in_process = 0;
@@ -949,7 +939,6 @@ static void complete_non_isoc_xfer_ddma(dwc_otg_hcd_t * hcd,
 			dma_desc = &qh->desc_list[n_desc];
 		
 			n_bytes = qh->n_bytes[n_desc];
-			
 			
 			failed = update_non_isoc_urb_state_ddma(hcd, hc, qtd, dma_desc, 
 								halt_status, n_bytes, &xfer_done);
@@ -1088,7 +1077,6 @@ void dwc_otg_hcd_complete_xfer_ddma(dwc_otg_hcd_t *hcd,
 			dwc_otg_hcd_qh_add(hcd, qh);
 		}
 	
-
 	}
 	tr_type = dwc_otg_hcd_select_transactions(hcd);
 	if (tr_type != DWC_OTG_TRANSACTION_NONE || continue_isoc_xfer) {

@@ -93,7 +93,6 @@ struct sharpsl_pm_status {
 
 extern struct sharpsl_pm_status sharpsl_pm;
 
-
 #define SHARPSL_LED_ERROR  2
 #define SHARPSL_LED_ON     1
 #define SHARPSL_LED_OFF    0

@@ -152,4 +152,3 @@ int saa7164_buffer_dealloc(struct saa7164_tsport *port,
 
 	return SAA_OK;
 }
-

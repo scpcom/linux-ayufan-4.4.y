@@ -44,4 +44,3 @@ _F(void, calibrate_ccount, (void),
   ccount_per_jiffy = 100 * (1000000UL/HZ);
 });
 #endif
-

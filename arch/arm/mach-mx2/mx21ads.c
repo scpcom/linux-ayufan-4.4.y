@@ -140,7 +140,6 @@ static struct imxuart_platform_data uart_pdata = {
 static struct imxuart_platform_data uart_norts_pdata = {
 };
 
-
 static int mx21ads_fb_init(struct platform_device *pdev)
 {
 	u16 tmp;

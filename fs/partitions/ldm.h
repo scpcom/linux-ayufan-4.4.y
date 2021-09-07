@@ -212,4 +212,3 @@ struct ldmdb {				/* Cache of the database */
 int ldm_partition (struct parsed_partitions *state, struct block_device *bdev);
 
 #endif /* _FS_PT_LDM_H_ */
-

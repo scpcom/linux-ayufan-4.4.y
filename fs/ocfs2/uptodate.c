@@ -112,7 +112,6 @@ void ocfs2_metadata_cache_io_unlock(struct ocfs2_caching_info *ci)
 	ci->ci_ops->co_io_unlock(ci);
 }
 
-
 static void ocfs2_metadata_cache_reset(struct ocfs2_caching_info *ci,
 				       int clear)
 {
@@ -139,7 +138,6 @@ void ocfs2_metadata_cache_exit(struct ocfs2_caching_info *ci)
 	ocfs2_metadata_cache_purge(ci);
 	ocfs2_metadata_cache_reset(ci, 1);
 }
-
 
 /* No lock taken here as 'root' is not expected to be visible to other
  * processes. */

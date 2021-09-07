@@ -46,7 +46,6 @@ static inline int irqs_disabled(void)
 	return flags & 0xf;
 }
 
-
 #define smp_read_barrier_depends() do { } while(0)
 #define read_barrier_depends() do { } while(0)
 

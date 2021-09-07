@@ -638,7 +638,6 @@ static struct key_entry keymap_prestigio[] __initdata = {
 	{ KE_END,  0 }
 };
 
-
 /*
  * If your machine is not here (which is currently rather likely), please send
  * a list of buttons and their key codes (reported when loading this module
@@ -1050,7 +1049,6 @@ static void report_switch(struct input_dev *dev, unsigned int code, int value)
 	input_report_switch(dev, code, value);
 	input_sync(dev);
 }
-
 
  /* led management */
 static void wistron_mail_led_set(struct led_classdev *led_cdev,

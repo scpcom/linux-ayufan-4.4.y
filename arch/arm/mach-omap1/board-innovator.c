@@ -142,12 +142,10 @@ static struct platform_device innovator_kp_device = {
 	.resource	= innovator_kp_resources,
 };
 
-
 #ifdef CONFIG_ARCH_OMAP15XX
 
 #include <linux/spi/spi.h>
 #include <linux/spi/ads7846.h>
-
 
 /* Only FPGA needs to be mapped here. All others are done with ioremap */
 static struct map_desc innovator1510_io_desc[] __initdata = {

@@ -330,7 +330,6 @@ int uwb_rsv_find_best_allocation(struct uwb_rsv *rsv, struct uwb_mas_bm *availab
 	ai->max_mas = rsv->max_mas;
 	ai->max_interval = rsv->max_interval;
 
-
 	/* fill the not available vector from the available bm */
 	for (bit_index = 0; bit_index < UWB_NUM_MAS; bit_index++) {
 		if (!test_bit(bit_index, available->bm))

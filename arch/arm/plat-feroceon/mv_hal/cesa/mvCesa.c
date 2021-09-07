@@ -67,7 +67,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ctrlEnv/mvCtrlEnvLib.h"
 #undef CESA_DEBUG
 
-
 /********** Global variables **********/
 
 /*  If request size is more than MV_CESA_MAX_BUF_SIZE the
@@ -172,7 +171,6 @@ static INLINE MV_CESA_REQ* MV_CESA_REQ_PREV_PTR(MV_CESA_REQ* pReq)
 
 #endif
 
-
 static INLINE void mvCesaReqProcessStart(MV_CESA_REQ* pReq)
 {
     int frag;
@@ -212,7 +210,6 @@ static INLINE void mvCesaReqProcessStart(MV_CESA_REQ* pReq)
     /* Start Accelerator */
     MV_REG_WRITE(MV_CESA_CMD_REG, MV_CESA_CMD_CHAN_ENABLE_MASK);
 }
-
 
 /*******************************************************************************
 * mvCesaHalInit - Initialize the CESA driver
@@ -610,7 +607,6 @@ MV_STATUS   mvCesaSessionOpen(MV_CESA_OPEN_SESSION *pSession, short* pSid)
     }
     memset(cesaSramSaBuf.bufVirtPtr, 0, cesaSramSaBuf.bufSize);
 
-   
     /* Save allocation parameters */
     pCesaSAD[sid]->sramSABuff = cesaSramSaBuf.bufVirtPtr;
     pCesaSAD[sid]->sramSABuffSize = cesaSramSaBuf.bufSize;
@@ -1618,7 +1614,6 @@ static MV_STATUS   mvCesaMbufCacheUnmap(MV_CESA_MBUF* pMbuf, int offset, int siz
     return MV_FULL;
 }
 
-
 /*************************************** Local Functions ******************************/
 
 /*******************************************************************************
@@ -1896,7 +1891,6 @@ static MV_STATUS   mvCesaFragReqProcess(MV_CESA_REQ* pReq, MV_U8 frag)
     return MV_OK;
 }
 
-
 /*******************************************************************************
 * mvCesaReqProcess - Process regular (Non-fragmented) request
 *
@@ -1985,7 +1979,6 @@ static MV_STATUS   mvCesaReqProcess(MV_CESA_REQ* pReq)
             
     return MV_OK;
 }
-
 
 /*******************************************************************************
 * mvCesaSramDescrBuild - Set CESA descriptor in SRAM
@@ -2375,7 +2368,6 @@ static void    mvCesaHmacIvGet(MV_CESA_MAC_MODE macMode, unsigned char key[], in
     }
 #endif  /* defined(MV_CPU_LE) || defined(MV_PPC) */
 }
-
 
 /*******************************************************************************
 * mvCesaFragSha1Complete - Complete SHA1 authentication started by HW using SW

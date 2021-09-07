@@ -209,7 +209,6 @@ typedef struct {
 #define REG_RD_ADDR_iop_crc_par_rw_strb_rec_dif_in 64
 #define REG_WR_ADDR_iop_crc_par_rw_strb_rec_dif_in 64
 
-
 /* Constants */
 enum {
   regk_iop_crc_par_calc                    = 0x00000001,

@@ -537,7 +537,6 @@ static s32 e1000_write_phy_reg_gg82563_80003es2lan(struct e1000_hw *hw,
 		return ret_val;
 	}
 
-
 	/*
 	 * The "ready" bit in the MDIC register may be incorrectly set
 	 * before the device has completed the "Page Select" MDI
@@ -1430,4 +1429,3 @@ struct e1000_info e1000_es2_info = {
 	.phy_ops		= &es2_phy_ops,
 	.nvm_ops		= &es2_nvm_ops,
 };
-

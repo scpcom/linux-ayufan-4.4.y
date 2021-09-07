@@ -352,5 +352,4 @@ void platform_wd_setup(void)
 	}
 }
 
-
  */

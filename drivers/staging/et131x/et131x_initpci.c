@@ -101,7 +101,6 @@
 #include "et1310_mac.h"
 #include "et1310_eeprom.h"
 
-
 /* Defines for Parameter Default/Min/Max vaules */
 #define PARM_SPEED_DUPLEX_MIN   0
 #define PARM_SPEED_DUPLEX_MAX   5
@@ -438,7 +437,6 @@ void ConfigGlobalRegs(struct et131x_adapter *etdev)
 	writel(0, &regs->watchdog_timer);
 }
 
-
 /**
  * et131x_adapter_setup - Set the adapter up as per cassini+ documentation
  * @adapter: pointer to our private adapter structure
@@ -676,7 +674,6 @@ void et131x_config_parse(struct et131x_adapter *etdev)
 	etdev->AiForceDpx = duplex[etdev->SpeedDuplex];	/* Auto FDX */
 }
 
-
 /**
  * et131x_pci_remove
  * @pdev: a pointer to the device's pci_dev structure
@@ -706,7 +703,6 @@ void __devexit et131x_pci_remove(struct pci_dev *pdev)
 	pci_release_regions(pdev);
 	pci_disable_device(pdev);
 }
-
 
 /**
  * et131x_pci_setup - Perform device initialization
@@ -983,7 +979,6 @@ static struct pci_driver et131x_driver = {
       .resume	= NULL,		/* et131x_pci_resume */
 };
 
-
 /**
  * et131x_init_module - The "main" entry point called on driver initialization
  *
@@ -1009,7 +1004,6 @@ static void et131x_cleanup_module(void)
 
 module_init(et131x_init_module);
 module_exit(et131x_cleanup_module);
-
 
 /* Modinfo parameters (filled out using defines from et131x_version.h) */
 MODULE_AUTHOR(DRIVER_AUTHOR);

@@ -3627,7 +3627,6 @@ no_audio:
 			btv->c.nr);
 }
 
-
 /* initialize the tuner */
 void __devinit bttv_init_tuner(struct bttv *btv)
 {
@@ -3747,7 +3746,6 @@ static int terratec_active_radio_upgrade(struct bttv *btv)
 	}
 	return 0;
 }
-
 
 /* ----------------------------------------------------------------------- */
 
@@ -4010,7 +4008,6 @@ u32 bttv_tda9880_setnorm(struct bttv *btv, u32 gpiobits)
 	return gpiobits;
 }
 
-
 /*
  * reset/enable the MSP on some Hauppauge cards
  * Thanks to Kyösti Mälkki (kmalkki@cc.hut.fi)!
@@ -4080,7 +4077,6 @@ static void __devinit init_PXC200(struct bttv *btv)
 	 *	same chips - but the R/W bit is included in the address
 	 *	argument so the numbers are different */
 
-
 	printk(KERN_INFO "Initialising 12C508 PIC chip ...\n");
 
 	/* First of all, enable the clock line. This is used in the PXC200-F */
@@ -4108,8 +4104,6 @@ static void __devinit init_PXC200(struct bttv *btv)
 
 	printk(KERN_INFO "PXC200 Initialised.\n");
 }
-
-
 
 /* ----------------------------------------------------------------------- */
 /*
@@ -4184,8 +4178,6 @@ init_RTV24 (struct bttv *btv)
 	printk (KERN_INFO
 		"bttv%d: Adlink RTV-24 initialisation complete.\n", btv->c.nr);
 }
-
-
 
 /* ----------------------------------------------------------------------- */
 /* Miro Pro radio stuff -- the tea5757 is connected to some GPIO ports     */
@@ -4656,7 +4648,6 @@ static void ivc120_muxsel(struct bttv *btv, unsigned int input)
 	/* 878's MUX0 is already selected for input via muxsel values */
 }
 
-
 /* PXC200 muxsel helper
  * luke@syseng.anu.edu.au
  * another transplant
@@ -4697,7 +4688,6 @@ static void PXC200_muxsel(struct bttv *btv, unsigned int input)
 	  printk(KERN_DEBUG "bttv%d: PXC200_muxsel: not PXC200F rc:%d \n", btv->c.nr,rc);
 	  return;
 	}
-
 
 	/* The multiplexer in the 200F is handled by the GPIO port */
 	/* get correct mapping between inputs  */
@@ -4882,7 +4872,6 @@ void __init bttv_check_chipset(void)
 		latency = 0x0A;
 #endif
 
-
 	/* print warnings about any quirks found */
 	if (triton1)
 		printk(KERN_INFO "bttv: Host bridge needs ETBF enabled.\n");
@@ -4945,7 +4934,6 @@ int __devinit bttv_handle_chipset(struct bttv *btv)
 		pci_write_config_byte(btv->c.pci, PCI_LATENCY_TIMER, latency);
 	return 0;
 }
-
 
 /*
  * Local variables:

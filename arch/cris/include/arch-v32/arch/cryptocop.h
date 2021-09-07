@@ -8,7 +8,6 @@
 
 #include <linux/uio.h>
 
-
 #define CRYPTOCOP_SESSION_ID_NONE (0)
 
 typedef unsigned long long int cryptocop_session_id;
@@ -116,8 +115,6 @@ struct strcop_crypto_op{
 	unsigned char            csum[CRYPTOCOP_CSUM_LENGTH];
 };
 
-
-
 #ifdef __KERNEL__
 
 /********** The API to use from inside the kernel. ************/
@@ -137,7 +134,6 @@ typedef enum {
 
 typedef u8 cryptocop_tfrm_id;
 
-
 struct cryptocop_operation;
 
 typedef void (cryptocop_callback)(struct cryptocop_operation*, void*);
@@ -155,7 +151,6 @@ struct cryptocop_transform_init {
 	struct cryptocop_transform_init *next;
 };
 
-
 typedef enum {
 	cryptocop_source_dma = 0,
 	cryptocop_source_des,
@@ -166,7 +161,6 @@ typedef enum {
 	cryptocop_source_csum,
 	cryptocop_source_none,
 } cryptocop_source;
-
 
 struct cryptocop_desc_cfg {
 	cryptocop_tfrm_id tid;
@@ -180,7 +174,6 @@ struct cryptocop_desc {
 	struct cryptocop_desc_cfg *cfg;
 	struct cryptocop_desc *next;
 };
-
 
 /* Flags for cryptocop_tfrm_cfg */
 #define CRYPTOCOP_NO_FLAG     (0x00)
@@ -205,8 +198,6 @@ struct cryptocop_tfrm_cfg {
 	struct cryptocop_tfrm_cfg *next;
 };
 
-
-
 struct cryptocop_dma_list_operation{
 	/* The consumer can provide DMA lists to send to the co-processor.  'use_dmalists' in
 	   struct cryptocop_operation must be set for the driver to use them.  outlist,
@@ -221,7 +212,6 @@ struct cryptocop_dma_list_operation{
 	cryptocop_csum_type csum_mode;
 };
 
-
 struct cryptocop_tfrm_operation{
 	/* Operation configuration, if not 'use_dmalists' is set. */
 	struct cryptocop_tfrm_cfg *tfrm_cfg;
@@ -235,7 +225,6 @@ struct cryptocop_tfrm_operation{
 	size_t outcount;
 	size_t outlen; /* Total outlength. */
 };
-
 
 struct cryptocop_operation {
 	cryptocop_callback *cb;
@@ -256,7 +245,6 @@ struct cryptocop_operation {
 		struct cryptocop_tfrm_operation tfrm_op;
 	};
 };
-
 
 int cryptocop_new_session(cryptocop_session_id *sid, struct cryptocop_transform_init *tinit, int alloc_flag);
 int cryptocop_free_session(cryptocop_session_id sid);

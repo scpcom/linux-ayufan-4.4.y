@@ -91,7 +91,6 @@
 /* RSSI to dBm */
 #define IWL49_RSSI_OFFSET	44
 
-
 /* PCI registers */
 #define PCI_CFG_RETRY_TIMEOUT	0x041
 
@@ -102,7 +101,6 @@
 #define IWL_NUM_SCAN_RATES         (2)
 
 #define IWL_DEFAULT_TX_RETRY  15
-
 
 /* Sizes and addresses for instruction and data memory (SRAM) in
  * 4965's embedded processor.  Driver access is via HBUS_TARG_MEM_* regs. */
@@ -682,7 +680,6 @@ static inline int iwl4965_hw_valid_rtc_data_addr(u32 addr)
  *  98         78         0x00
  */
 
-
 /**
  * Sanity checks and default values for EEPROM regulatory levels.
  * If EEPROM values fall outside MIN/MAX range, use default values.
@@ -766,7 +763,6 @@ enum {
 
 /********************* END TXPOWER *****************************************/
 
-
 /**
  * Tx/Rx Queues
  *
@@ -791,7 +787,6 @@ enum {
 #define IWL49_CMD_FIFO_NUM	4
 #define IWL49_NUM_QUEUES	16
 #define IWL49_NUM_AMPDU_QUEUES	8
-
 
 /**
  * struct iwl4965_schedq_bc_tbl

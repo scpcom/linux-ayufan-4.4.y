@@ -759,7 +759,6 @@ struct symbol **sym_re_search(const char *pattern)
 	return sym_arr;
 }
 
-
 static struct symbol *sym_check_expr_deps(struct expr *e)
 {
 	struct symbol *sym;

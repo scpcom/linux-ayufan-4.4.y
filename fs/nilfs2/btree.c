@@ -1330,7 +1330,6 @@ static void nilfs_btree_shrink(struct nilfs_btree *btree,
 	path[level].bp_bh = NULL;
 }
 
-
 static int nilfs_btree_prepare_delete(struct nilfs_btree *btree,
 				      struct nilfs_btree_path *path,
 				      int *levelp,
@@ -1491,7 +1490,6 @@ static int nilfs_btree_delete(struct nilfs_bmap *bmap, __u64 key)
 				    NILFS_BTREE_LEVEL_NODE_MIN);
 	if (ret < 0)
 		goto out;
-
 
 	dat = NILFS_BMAP_USE_VBN(&btree->bt_bmap) ?
 		nilfs_bmap_get_dat(&btree->bt_bmap) : NULL;

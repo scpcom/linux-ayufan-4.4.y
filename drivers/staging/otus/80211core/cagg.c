@@ -29,7 +29,6 @@
 extern u8_t zcUpToAc[8];
 const u8_t pri[] = {3,3,2,3,2,1,3,2,1,0};
 
-
 u16_t aggr_count;
 u32_t success_mpdu;
 u32_t total_mpdu;
@@ -148,8 +147,6 @@ void zfAggInit(zdev_t* dev)
 /*                                                                      */
 /************************************************************************/
 
-
-
 u16_t zfAggGetSta(zdev_t* dev, zbuf_t* buf)
 {
     u16_t id;
@@ -179,7 +176,6 @@ u16_t zfAggGetSta(zdev_t* dev, zbuf_t* buf)
 
     return id;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -292,8 +288,6 @@ TID_TX zfAggTxNewQueue(zdev_t* dev, u16_t aid, u16_t tid, zbuf_t* buf)
     return tid_tx;
 }
 
-
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfAggTxEnqueue              */
@@ -330,7 +324,6 @@ u16_t zfAggTxEnqueue(zdev_t* dev, zbuf_t* buf, u16_t aid, TID_TX tid_tx)
     if (tid_tx->size < (ZM_AGGQ_SIZE - 2))
     {
         /* Queue not full */
-
 
         /*
          * buffer copy
@@ -463,7 +456,6 @@ void    zfAggDestInsert(zdev_t* dev, u16_t Qtype, u16_t ac, TID_TX tid_tx, void*
         zmw_leave_critical_section(dev);
     }
 
-
     //DESTQ.size[ac]++;
     return;
 }
@@ -483,13 +475,11 @@ void    zfAggDestDelete(zdev_t* dev, u16_t Qtype, TID_TX tid_tx, void* vtxq)
         return;
     }
 
-
     //zmw_declare_for_critical_section();
     for (i=0; i<4; i++) {
         if (!DESTQ.Head[i]) continue;
         dest = DESTQ.Head[i];
         if (!dest) continue;
-
 
         while (dest && (dest->next != DESTQ.Head[i])) {
             if (Qtype == 0 && dest->next->tid_tx == tid_tx){
@@ -593,7 +583,6 @@ u16_t   zfAggTidTxInsertHead(zdev_t* dev, struct bufInfo *buf_info,TID_TX tid_tx
 
     zmw_declare_for_critical_section();
 
-
     buf = buf_info->buf;
 
     zmw_enter_critical_section(dev);
@@ -630,7 +619,6 @@ u16_t   zfAggTidTxInsertHead(zdev_t* dev, struct bufInfo *buf_info,TID_TX tid_tx
     if (1 == tid_tx->size) {
         DESTQ.insert(dev, 0, tid_tx->ac, tid_tx, NULL);
     }
-
 
     zm_msg1_agg(ZM_LV_0, "0xC2:insertHead, tid_tx->size=", tid_tx->size);
 
@@ -975,7 +963,6 @@ u16_t zfAggTx(zdev_t* dev, zbuf_t* buf, u16_t tid)
                  * return ZM_ERR_TX_BUFFER_UNAVAILABLE;
                  */
 
-
                 //zfAggSendAddbaRequest(dev, tid_tx->dst, tid_tx->ac, tid_tx->tid);
                 //zmw_enter_critical_section(dev);
 
@@ -1005,10 +992,7 @@ u16_t zfAggTx(zdev_t* dev, zbuf_t* buf, u16_t tid)
         }
     }
 
-
-
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -1102,7 +1086,6 @@ u16_t zfAggTxPartial(zdev_t* dev, u16_t ac, u16_t readycount)
     return partial;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfAggTxSend                 */
@@ -1153,7 +1136,6 @@ u16_t zfAggTxSend(zdev_t* dev, u32_t freeTxd, TID_TX tid_tx)
     if (aggLen <=0 )
         return 0;
 
-
     if (aggLen == 1) {
         buf = zfAggTxGetVtxq(dev, tid_tx);
         if (buf)
@@ -1174,7 +1156,6 @@ u16_t zfAggTxSend(zdev_t* dev, u32_t freeTxd, TID_TX tid_tx)
     }
     wd->aggState = 1;
     zmw_leave_critical_section(dev);
-
 
     zm_msg1_agg(ZM_LV_0, "aggLen=", aggLen);
     tid_tx->aggFrameSize = 0;
@@ -1251,8 +1232,6 @@ u16_t zfAggTxSend(zdev_t* dev, u32_t freeTxd, TID_TX tid_tx)
         //DESTQ.delete(dev, 0, tid_tx, NULL);
     }
 
-
-
     //zfAggInvokeBar(dev, tid_tx);
     if(j>0) {
         aggr_count++;
@@ -1261,7 +1240,6 @@ u16_t zfAggTxSend(zdev_t* dev, u32_t freeTxd, TID_TX tid_tx)
     }
     return j;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -1313,8 +1291,6 @@ TID_TX zfAggTxGetReadyQueue(zdev_t* dev, u16_t ac)
 
     return tid_tx;
 }
-
-
 
 /************************************************************************/
 /*                                                                      */
@@ -1368,7 +1344,6 @@ zbuf_t* zfAggTxGetVtxq(zdev_t* dev, TID_TX tid_tx)
         zm_msg1_agg(ZM_LV_0, "qlen!=tid_tx->size! tid_tx->size=", tid_tx->size);
     return buf;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -1480,8 +1455,6 @@ void    zfBawInit(zdev_t* dev) {
     BAW->disable = zfBawDisable;
     BAW->getQ = zfBawGetQ;
 }
-
-
 
 TID_BAW zfBawGetNewQ(zdev_t* dev, u16_t start_seq, TID_TX tid_tx) {
     TID_BAW tid_baw=NULL;
@@ -1651,7 +1624,6 @@ u16_t zfAggTallyReset(zdev_t* dev)
     return 0;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfAggScanAndClear           */
@@ -1699,7 +1671,6 @@ u16_t   zfAggScanAndClear(zdev_t* dev, u32_t time)
 
             arrivalTime = (u32_t)tid_tx->aggvtxq[tid_tx->aggTail].arrivalTime;
 
-
             if((tick - arrivalTime) <= ZM_AGG_CLEAR_TIME)
             {
 
@@ -1711,7 +1682,6 @@ u16_t   zfAggScanAndClear(zdev_t* dev, u32_t time)
 
                 //zm_msg1_agg(ZM_LV_0, "clear queue    tick =", tick);
                 //zm_msg1_agg(ZM_LV_0, "clear queue arrival =", arrivalTime);
-
 
                 //zmw_leave_critical_section(dev);
                 //zfAggTxScheduler(dev);
@@ -1857,7 +1827,6 @@ struct agg_tid_rx* zfAggRxEnabled(zdev_t* dev, zbuf_t* buf)
     frameCtrl = zmw_rx_buf_readb(dev, buf, 0);
     frameType = frameCtrl & 0xf;
     frameSubtype = frameCtrl & 0xf0;
-
 
     if (frameType != ZM_WLAN_DATA_FRAME) //non-Qos Data? (frameSubtype&0x80)
     {
@@ -2025,7 +1994,6 @@ u16_t zfAggRx(zdev_t* dev, zbuf_t* buf, struct zsAdditionInfo *addInfo, struct a
         tid_rx->baw_tail = (tid_rx->baw_tail + 1) & ZM_AGG_BAW_MASK;
         tid_rx->seq_start = (tid_rx->seq_start + 1) & (4096 - 1);
 
-
         //if(pbuf && tid_rx->baw_size > 0)
         //    tid_rx->baw_size--;
 
@@ -2085,7 +2053,6 @@ struct agg_tid_rx *zfAggRxGetQueue(zdev_t* dev, zbuf_t* buf)
     //zmw_leave_critical_section(dev);
     return tid_rx;
 }
-
 
 u16_t   zfAggRxEnqueue(zdev_t* dev, zbuf_t* buf, struct agg_tid_rx *tid_rx, struct zsAdditionInfo *addInfo)
 {
@@ -2204,7 +2171,6 @@ u16_t   zfAggRxEnqueue(zdev_t* dev, zbuf_t* buf, struct agg_tid_rx *tid_rx, stru
         }
     }
 
-
     q_index = (tid_rx->baw_tail + index) & ZM_AGG_BAW_MASK;
     if (tid_rx->frame[q_index].buf && (((tid_rx->baw_head - tid_rx->baw_tail) & ZM_AGG_BAW_MASK) >
                 (((q_index) - tid_rx->baw_tail) & ZM_AGG_BAW_MASK)))
@@ -2235,7 +2201,6 @@ u16_t   zfAggRxEnqueue(zdev_t* dev, zbuf_t* buf, struct agg_tid_rx *tid_rx, stru
      * should be done in rx of ADDBA Request
      */
     //tid_rx->addInfo = addInfo;
-
 
     if (((tid_rx->baw_head - tid_rx->baw_tail) & ZM_AGG_BAW_MASK) <= index)
     {
@@ -2306,8 +2271,6 @@ u16_t zfAggRxFlush(zdev_t* dev, u16_t seq_no, struct agg_tid_rx *tid_rx)
     zmw_leave_critical_section(dev);
     return 1;
 }
-
-
 
 /************************************************************************/
 /*                                                                      */
@@ -2415,7 +2378,6 @@ u16_t   zfAggRxFreeBuf(zdev_t* dev, u16_t destroy)
     #endif
     return ZM_SUCCESS;
 }
-
 
 void zfAggRecvBAR(zdev_t* dev, zbuf_t *buf) {
     u16_t start_seq, len;
@@ -2720,7 +2682,6 @@ u16_t zfAggTxSendEth(zdev_t* dev, zbuf_t* buf, u16_t port, u16_t bufType, u8_t f
     //tid_tx->baw_buf[tid_tx->baw_head-1].baw_seq=frag.seq[0];
     zmw_leave_critical_section(dev);
 
-
         frag.buf[0] = buf;
         frag.bufType[0] = bufType;
         frag.flag[0] = flag;
@@ -2802,7 +2763,6 @@ u16_t zfAggTxSendEth(zdev_t* dev, zbuf_t* buf, u16_t port, u16_t bufType, u8_t f
             goto zlError;
         }
 
-
         continue;
 
 zlError:
@@ -2843,7 +2803,6 @@ u16_t   zfAggSendAddbaRequest(zdev_t* dev, u16_t *dst, u16_t ac, u16_t up)
 
     //zmw_declare_for_critical_section();
 
-
     /*
      * TBD : Maximum size of management frame
      */
@@ -2862,7 +2821,6 @@ u16_t   zfAggSendAddbaRequest(zdev_t* dev, u16_t *dst, u16_t ac, u16_t up)
      * add addba frame body
      */
     offset = zfAggSetAddbaFrameBody(dev, buf, offset, ac, up);
-
 
     zfwBufSetSize(dev, buf, offset);
 
@@ -3050,10 +3008,8 @@ u16_t zfAggGenAddbaHeader(zdev_t* dev, u16_t* dst,
     header[4+11] = ((wd->mmseq++)<<4);
     zmw_leave_critical_section(dev);
 
-
     return hlen;
 }
-
 
 u16_t   zfAggProcessAction(zdev_t* dev, zbuf_t* buf)
 {
@@ -3075,7 +3031,6 @@ u16_t   zfAggProcessAction(zdev_t* dev, zbuf_t* buf)
 
     return ZM_SUCCESS;
 }
-
 
 u16_t   zfAggBlockAckActionFrame(zdev_t* dev, zbuf_t* buf)
 {
@@ -3220,7 +3175,6 @@ u16_t   zfAggRecvAddbaResponse(zdev_t* dev, zbuf_t* buf)
     if (wd->wlanMode == ZM_MODE_AP)
         aid = zfApFindSta(dev, src);
 
-
     bf.buf = buf;
     bf.dialog = zmw_rx_buf_readb(dev, buf, 26);
     bf.status_code = zmw_rx_buf_readh(dev, buf, 27);
@@ -3284,7 +3238,6 @@ u16_t   zfAggSendAddbaResponse(zdev_t* dev, struct aggBaFrameParameter *bf)
 
     //zmw_declare_for_critical_section();
 
-
     /*
      * TBD : Maximum size of management frame
      */
@@ -3303,7 +3256,6 @@ u16_t   zfAggSendAddbaResponse(zdev_t* dev, struct aggBaFrameParameter *bf)
      * add addba frame body
      */
     offset = zfAggSetAddbaResponseFrameBody(dev, buf, bf, offset);
-
 
     zfwBufSetSize(dev, buf, offset);
 
@@ -3437,7 +3389,6 @@ u16_t   zfAggSendBar(zdev_t* dev, TID_TX tid_tx, struct aggBarControl *aggBarCon
 
     //zmw_declare_for_critical_section();
 
-
     /*
      * TBD : Maximum size of management frame
      */
@@ -3456,7 +3407,6 @@ u16_t   zfAggSendBar(zdev_t* dev, TID_TX tid_tx, struct aggBarControl *aggBarCon
      * add addba frame body
      */
     offset = zfAggSetBarBody(dev, buf, offset, tid_tx, aggBarControl);
-
 
     zfwBufSetSize(dev, buf, offset);
 
@@ -3605,7 +3555,6 @@ u16_t zfAggGenBarHeader(zdev_t* dev, u16_t* dst,
     zmw_enter_critical_section(dev);
     header[4+11] = ((wd->mmseq++)<<4);
     zmw_leave_critical_section(dev);
-
 
     return hlen;
 }

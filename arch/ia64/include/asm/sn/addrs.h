@@ -54,7 +54,6 @@
  * NASID bit indicates if the reference is to the SHUB or TIO MMRs.
  */
 
-
 /*
  * Define basic shift & mask constants for manipulating NASIDs and AS values.
  */
@@ -66,7 +65,6 @@
 #define NASID_MASK              ((u64)NASID_BITMASK << NASID_SHIFT)
 #define AS_MASK			((u64)AS_BITMASK << AS_SHIFT)
 
-
 /*
  * AS values. These are the same on both SHUB1 & SHUB2.
  */
@@ -76,7 +74,6 @@
 #define AS_GET_SPACE		(AS_GET_VAL << AS_SHIFT)
 #define AS_AMO_SPACE		(AS_AMO_VAL << AS_SHIFT)
 #define AS_CAC_SPACE		(AS_CAC_VAL << AS_SHIFT)
-
 
 /* 
  * Virtual Mode Local & Global MMR space.  
@@ -97,12 +94,10 @@
  */
 #define GLOBAL_PHYS_MMR_SPACE	(RGN_BASE(RGN_HPAGE) | GLOBAL_MMR_OFFSET)
 
-
 /*
  * Clear region & AS bits.
  */
 #define TO_PHYS_MASK		(~(RGN_BITS | AS_MASK))
-
 
 /*
  * Misc NASID manipulation.
@@ -118,7 +113,6 @@
 #define GLOBAL_CAC_ADDR(n,a)	(CAC_BASE | REMOTE_ADDR(n,a))
 #define CHANGE_NASID(n,x)	((void *)(((u64)(x) & ~NASID_MASK) | NASID_SPACE(n)))
 #define IS_TIO_NASID(n)		((n) & 1)
-
 
 /* non-II mmr's start at top of big window space (4G) */
 #define BWIN_TOP		0x0000000100000000UL
@@ -174,13 +168,11 @@
 #define PHYS_TO_DMA(x)							\
 	((((u64)(x) & NASID_MASK) >> 2) | NODE_OFFSET(x))
 
-
 /*
  * Macros to test for address type.
  */
 #define IS_AMO_ADDRESS(x)	(((u64)(x) & (RGN_BITS | AS_MASK)) == AMO_BASE)
 #define IS_AMO_PHYS_ADDRESS(x)	(((u64)(x) & (RGN_BITS | AS_MASK)) == AMO_PHYS_BASE)
-
 
 /*
  * The following definitions pertain to the IO special address
@@ -231,7 +223,6 @@
 #define	SWIN_WIDGETNUM(x)		(((x)  >> SWIN_SIZE_BITS) & SWIN_WIDGET_MASK)
 #define TIO_SWIN_WIDGETNUM(x)		(((x)  >> TIO_SWIN_SIZE_BITS) & TIO_SWIN_WIDGET_MASK)
 
-
 /*
  * The following macros produce the correct base virtual address for
  * the hub registers. The REMOTE_HUB_* macro produce
@@ -267,7 +258,6 @@
 #define SH2_REMOTE_MMR(n,x)						\
 	GLOBAL_MMR_ADDR(n,x)
 
-
 /* TIO & MMR addressing macros that work on both shub1 & shub2 */
 #define TIO_IOSPACE_ADDR(n,x)						\
 	((u64 *)(is_shub1() ? SH1_TIO_IOSPACE_ADDR(n,x) :		\
@@ -279,7 +269,6 @@
 #define REMOTE_HUB_ADDR(n,x)						\
 	(IS_TIO_NASID(n) ?  ((volatile u64*)TIO_IOSPACE_ADDR(n,x)) :	\
 	 ((volatile u64*)SH_REMOTE_MMR(n,x)))
-
 
 #define HUB_L(x)			(*((volatile typeof(*x) *)x))
 #define	HUB_S(x,d)			(*((volatile typeof(*x) *)x) = (d))

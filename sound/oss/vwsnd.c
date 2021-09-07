@@ -2444,7 +2444,6 @@ static int vwsnd_audio_do_ioctl(struct inode *inode,
 	unsigned long flags;
 	int ival;
 
-	
 	DBGEV("(inode=0x%p, file=0x%p, cmd=0x%x, arg=0x%lx)\n",
 	      inode, file, cmd, arg);
 	switch (cmd) {

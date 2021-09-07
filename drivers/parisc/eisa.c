@@ -142,7 +142,6 @@ static int slave_mask;
 /* irq 13,8,2,1,0 must be edge */
 static unsigned int eisa_irq_level __read_mostly; /* default to edge triggered */
 
-
 /* called by free irq */
 static void eisa_disable_irq(unsigned int irq)
 {
@@ -406,7 +405,6 @@ void __init eisa_init(void)
 	register_parisc_driver(&eisa_driver);
 }
 
-
 static unsigned int eisa_irq_configured;
 void eisa_make_irq_level(int num)
 {
@@ -460,4 +458,3 @@ static int __init eisa_irq_setup(char *str)
 }
 
 __setup("eisa_irq_edge=", eisa_irq_setup);
-

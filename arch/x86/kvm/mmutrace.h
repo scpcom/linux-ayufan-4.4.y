@@ -74,7 +74,6 @@ TRACE_EVENT(
 		  __print_flags(__entry->pferr, "|", kvm_mmu_trace_pferr_flags))
 );
 
-
 /* We just walked a paging element */
 TRACE_EVENT(
 	kvm_mmu_paging_element,

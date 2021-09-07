@@ -541,7 +541,6 @@ out:
 	return gpn_ft;
 }
 
-
 static int zfcp_fc_send_gpn_ft(struct zfcp_gpn_ft *gpn_ft,
 			       struct zfcp_adapter *adapter, int max_bytes)
 {
@@ -706,7 +705,6 @@ out:
 	zfcp_fc_wka_port_put(&adapter->gs->ds);
 	return ret;
 }
-
 
 void _zfcp_fc_scan_ports_later(struct work_struct *work)
 {
@@ -890,4 +888,3 @@ void zfcp_fc_gs_destroy(struct zfcp_adapter *adapter)
 	kfree(adapter->gs);
 	adapter->gs = NULL;
 }
-

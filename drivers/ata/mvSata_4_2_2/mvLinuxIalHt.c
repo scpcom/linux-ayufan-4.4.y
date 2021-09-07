@@ -12,7 +12,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -68,7 +67,6 @@ disclaimer.
 #include <linux/stat.h>
 #include <linux/kdev_t.h>
 
-
 #ifdef CONFIG_MV_INCLUDE_INTEG_SATA
 #include "ctrlEnv/mvCtrlEnvLib.h"
 #include "ctrlEnv/sys/mvSysSata.h"
@@ -97,7 +95,6 @@ disclaimer.
 #include "mvIALCommon.h"
 #include "mvLinuxIalSmart.h"
 
-
 extern Scsi_Host_Template driver_template;
 
 static void mv_ial_init_log(void);
@@ -120,7 +117,6 @@ static struct pci_device_id mvSata_pci_table[] =
     {0,}
 };
 
-
 int          adapterId = 0;
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 
@@ -129,7 +125,6 @@ int          adapterId = 0;
 #endif
 static void mv_ial_ht_select_queue_depths (struct Scsi_Host* pHost,
                                            struct scsi_device* pDevs);
-
 
 static inline struct Scsi_Host *scsi_host_alloc(Scsi_Host_Template *t, size_t s)
 {
@@ -148,7 +143,6 @@ static inline void scsi_host_put(struct Scsi_Host *h)
 static int mv_ial_ht_slave_configure (struct scsi_device* pDevs);
 static int __devinit  mv_ial_probe_device(struct pci_dev *pci_dev, const struct pci_device_id *ent);
 static void __devexit mv_ial_remove_device(struct pci_dev *pci_dev);
-
 
 MODULE_DEVICE_TABLE(pci, mvSata_pci_table);
 
@@ -227,7 +221,6 @@ module_exit(mv_ial_exit);
 
 #endif
 
-
 static void mv_ial_init_log(void)
 {
 #ifdef MV_LOGGER
@@ -287,7 +280,6 @@ static int set_device_regs(MV_SATA_ADAPTER *pMvSataAdapter,
 
     return 0;
 }
-
 
 static int mv_ial_get_num_of_ports(const struct pci_device_id *id)
 {
@@ -404,8 +396,6 @@ SynoInitChannelEH(MV_VOID_PTR *pIALAdapter, MV_SATA_ADAPTER *pMvSataAdapter)
 }
 #endif
 
-
-
 static int __devinit  mv_ial_probe_device(struct pci_dev *pcidev,
                                           const struct pci_device_id *id)
 {
@@ -447,7 +437,6 @@ static int __devinit  mv_ial_probe_device(struct pci_dev *pcidev,
         return -ENOMEM;
     }
 #endif
-
 
     pAdapter = (IAL_ADAPTER_T*)kmalloc(sizeof(IAL_ADAPTER_T), GFP_ATOMIC);
     if (pAdapter == NULL)
@@ -756,8 +745,6 @@ static int __devinit mv_ial_init_soc_sata(void)
     MV_SATA_ADAPTER     *pMvSataAdapter;
     IAL_ADAPTER_T       *pAdapter;
     MV_U8                 i;
-
-   
 
     mvSataWinInit();
     
@@ -1137,8 +1124,6 @@ int mv_ial_ht_release (struct Scsi_Host *pHost)
     return 0;
 }
 
-
-
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
 static void __devexit mv_ial_remove_device(struct pci_dev *pdev)
 {
@@ -1239,7 +1224,6 @@ int mv_ial_ht_queuecommand (struct scsi_cmnd * SCpnt, void (*done) (struct scsi_
         done(SCpnt);
         return 0;
     }
-
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
     spin_unlock_irq (&io_request_lock);
@@ -1870,7 +1854,6 @@ int mv_ial_ht_proc_info(struct Scsi_Host *pshost,
     return(len);
 }
 
-
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 /****************************************************************
  *  Name:   mv_ial_ht_proc_info (kernel version < 2.6)
@@ -1898,8 +1881,6 @@ int mv_ial_ht_proc_info24(char *buffer, char **start, off_t offset,
     return -EINVAL;
 }
 #endif
-
-
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
 
@@ -1999,7 +1980,6 @@ static void mv_ial_ht_select_queue_depths (struct Scsi_Host* pHost,
             pHost->can_queue = MV_DEFAULT_QUEUE_DEPTH;
         }
         
-
         /*always allocate the max number of commands */
         for (pDevice = pDevs; pDevice; pDevice = pDevice->next)
         {

@@ -20,7 +20,6 @@
 #include "message.h"
 #include "card.h"
 
-
 /*
  * Write the proper values into the I/O ports following a reset
  */
@@ -120,4 +119,3 @@ void check_phystat(unsigned long data)
 	sendmessage(card, CEPID,ceReqTypePhy,ceReqClass2,
 		ceReqPhyStatus,0,0,NULL);
 }
-

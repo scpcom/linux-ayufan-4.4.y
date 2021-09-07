@@ -41,7 +41,6 @@
 
 #define DLL_TIMEOUT	3		/* seconds */
 
-
 #define RINIT(__start__, __end__, __name__, __parent__) {	\
 	.name	= __name__ "_0",				\
 	.start	= (__start__),					\
@@ -58,14 +57,10 @@
 	.parent	= NULL			\
 }
 
-
-
 enum {
 	slice_xicap,
 	slice_eth
 };
-
-
 
 static struct resource
 	excite_ctr_resource __maybe_unused = {
@@ -141,8 +136,6 @@ static struct resource
 		.child		= NULL
 	};
 
-
-
 static void adjust_resources(struct resource *res, unsigned int n)
 {
 	struct resource *p;
@@ -158,8 +151,6 @@ static void adjust_resources(struct resource *res, unsigned int n)
 		}
 	}
 }
-
-
 
 #if defined(CONFIG_EXCITE_FCAP_GPI) || defined(CONFIG_EXCITE_FCAP_GPI_MODULE)
 static struct resource xicap_rsrc[] = {
@@ -226,8 +217,6 @@ static int __init xicap_devinit(void)
 device_initcall(xicap_devinit);
 #endif /* defined(CONFIG_EXCITE_FCAP_GPI) || defined(CONFIG_EXCITE_FCAP_GPI_MODULE) */
 
-
-
 #if defined(CONFIG_WDT_RM9K_GPI) || defined(CONFIG_WDT_RM9K_GPI_MODULE)
 static struct resource wdt_rsrc[] = {
 	RINIT(0, 0, WDT_RESOURCE_COUNTER, &excite_ctr_resource),
@@ -254,8 +243,6 @@ static int __init wdt_devinit(void)
 
 device_initcall(wdt_devinit);
 #endif /* defined(CONFIG_WDT_RM9K_GPI) || defined(CONFIG_WDT_RM9K_GPI_MODULE) */
-
-
 
 static struct resource excite_nandflash_rsrc[] = {
  	RINIT(0x2000, 0x201f, EXCITE_NANDFLASH_RESOURCE_REGS,  &excite_nand_resource)
@@ -284,8 +271,6 @@ static int __init excite_nandflash_devinit(void)
 
 device_initcall(excite_nandflash_devinit);
 
-
-
 static struct resource iodev_rsrc[] = {
 	RINIT_IRQ(FPGA1_IRQ,  IODEV_RESOURCE_IRQ)
 };
@@ -307,9 +292,6 @@ static int __init io_devinit(void)
 }
 
 device_initcall(io_devinit);
-
-
-
 
 #if defined(CONFIG_RM9K_GE) || defined(CONFIG_RM9K_GE_MODULE)
 static struct resource rm9k_ge_rsrc[] = {
@@ -337,8 +319,6 @@ static struct platform_device rm9k_ge_pdev = {
 	.resource	= rm9k_ge_rsrc
 };
 
-
-
 /*
  * Create a platform device for the Ethernet port.
  */
@@ -365,8 +345,6 @@ static int __init rm9k_ge_devinit(void)
 
 device_initcall(rm9k_ge_devinit);
 #endif /* defined(CONFIG_RM9K_GE) || defined(CONFIG_RM9K_GE_MODULE) */
-
-
 
 static int __init excite_setup_devs(void)
 {
@@ -400,4 +378,3 @@ static int __init excite_setup_devs(void)
 }
 
 arch_initcall(excite_setup_devs);
-

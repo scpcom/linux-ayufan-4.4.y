@@ -33,7 +33,6 @@
 
 #define VERSION "arcnet: RFC1051 \"simple standard\" (`s') encapsulation support loaded.\n"
 
-
 static __be16 type_trans(struct sk_buff *skb, struct net_device *dev);
 static void rx(struct net_device *dev, int bufnum,
 	       struct archdr *pkthdr, int length);
@@ -41,7 +40,6 @@ static int build_header(struct sk_buff *skb, struct net_device *dev,
 			unsigned short type, uint8_t daddr);
 static int prepare_tx(struct net_device *dev, struct archdr *pkt, int length,
 		      int bufnum);
-
 
 static struct ArcProto rfc1051_proto =
 {
@@ -54,7 +52,6 @@ static struct ArcProto rfc1051_proto =
 	.continue_tx    = NULL,
 	.ack_tx         = NULL
 };
-
 
 static int __init arcnet_rfc1051_init(void)
 {
@@ -119,7 +116,6 @@ static __be16 type_trans(struct sk_buff *skb, struct net_device *dev)
 	return htons(ETH_P_IP);
 }
 
-
 /* packet receiver */
 static void rx(struct net_device *dev, int bufnum,
 	       struct archdr *pkthdr, int length)
@@ -160,7 +156,6 @@ static void rx(struct net_device *dev, int bufnum,
 	netif_rx(skb);
 }
 
-
 /*
  * Create the ARCnet hard/soft headers for RFC1051.
  */
@@ -187,7 +182,6 @@ static int build_header(struct sk_buff *skb, struct net_device *dev,
 		return 0;
 	}
 
-
 	/*
 	 * Set the source hardware address.
 	 *
@@ -212,7 +206,6 @@ static int build_header(struct sk_buff *skb, struct net_device *dev,
 
 	return hdr_size;	/* success */
 }
-
 
 static int prepare_tx(struct net_device *dev, struct archdr *pkt, int length,
 		      int bufnum)

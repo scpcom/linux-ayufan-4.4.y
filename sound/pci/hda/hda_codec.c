@@ -393,7 +393,6 @@ int snd_hda_get_connections(struct hda_codec *codec, hda_nid_t nid,
 }
 EXPORT_SYMBOL_HDA(snd_hda_get_connections);
 
-
 /**
  * snd_hda_queue_unsol_event - add an unsolicited event to queue
  * @bus: the BUS
@@ -1373,7 +1372,6 @@ int snd_hda_mixer_amp_volume_info(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 EXPORT_SYMBOL_HDA(snd_hda_mixer_amp_volume_info);
-
 
 static inline unsigned int
 read_amp_value(struct hda_codec *codec, hda_nid_t nid,
@@ -2479,7 +2477,6 @@ static void hda_call_codec_resume(struct hda_codec *codec)
 }
 #endif /* SND_HDA_NEEDS_RESUME */
 
-
 /**
  * snd_hda_build_controls - build mixer controls
  * @bus: the BUS
@@ -3384,7 +3381,6 @@ int snd_hda_input_mux_put(struct hda_codec *codec,
 }
 EXPORT_SYMBOL_HDA(snd_hda_input_mux_put);
 
-
 /*
  * Multi-channel / digital-out PCM helper functions
  */
@@ -3617,7 +3613,6 @@ static int is_in_nid_list(hda_nid_t nid, hda_nid_t *list)
 	return 0;
 }
 
-
 /*
  * Sort an associated group of pins according to their sequence numbers.
  */
@@ -3641,7 +3636,6 @@ static void sort_pins_by_sequence(hda_nid_t * pins, short * sequences,
 		}
 	}
 }
-
 
 /*
  * Parse all pin widgets and store the useful pin nids to cfg
@@ -3911,7 +3905,6 @@ const char *auto_pin_cfg_labels[AUTO_PIN_LAST] = {
 	"Mic", "Front Mic", "Line", "Front Line", "CD", "Aux"
 };
 EXPORT_SYMBOL_HDA(auto_pin_cfg_labels);
-
 
 #ifdef CONFIG_PM
 /*

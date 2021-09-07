@@ -78,7 +78,6 @@ void mv_early_printk(char *fmt,...)
 }
 #endif
 
-
 extern void __init mv_map_io(void);
 extern void __init mv_init_irq(void);
 extern struct sys_timer mv_timer;
@@ -91,7 +90,6 @@ unsigned int support_wait_for_interrupt = 0x1;
 u32 mvTclk = 166666667;
 u32 mvSysclk = 200000000;
 u32 mvIsUsbHost = 1;
-
 
 u8	mvMacAddr[CONFIG_MV_ETH_PORTS_NUM][6];
 u16	mvMtu[CONFIG_MV_ETH_PORTS_NUM] = {0};
@@ -139,7 +137,6 @@ unsigned char*  mv_sram_usage_get(int* sram_size_ptr)
 }
 #endif
 
-
 void print_board_info(void)
 {
     char name_buff[50];
@@ -158,7 +155,6 @@ void print_board_info(void)
     printk("\n\n");
     printk(" Detected Tclk %d and SysClk %d \n",mvTclk, mvSysclk);
 }
-
 
 /*****************************************************************************
  * UART
@@ -217,7 +213,6 @@ static struct platform_device mv_uart = {
 	.resource		= mv_uart_resources,
 };
 
-
 static void serial_initialize(void)
 {
 #if defined(CONFIG_MV78200) || defined(CONFIG_MV632X)
@@ -251,7 +246,6 @@ static void __init mv_vfp_init(void)
 #endif
 }
 
-
 static void __init mv_init(void)
 {
         /* init the Board environment */
@@ -262,7 +256,6 @@ static void __init mv_init(void)
             printk( "Controller env initialization failed.\n" );
             return;
         }
-
 
 	/* Init the CPU windows setting and the access protection windows. */
 	if (mvCpuIfInit(mv_sys_map())) {
@@ -309,7 +302,6 @@ static void __init mv_init(void)
 
 #if defined(CONFIG_MV78200) || defined(CONFIG_MV632X)
 
-
 static void __init early_resmap_cpu0(char **p)
 {
 	char* tmp = strchr(*p, ' ');
@@ -333,7 +325,6 @@ __early_param("cpu1=", early_resmap_cpu1);
 
 #endif
 
-
 MACHINE_START(FEROCEON_MV78XX0, "Feroceon-MV78XX0")
     /* MAINTAINER("MARVELL") */
     .phys_io = 0xf1000000,
@@ -344,4 +335,3 @@ MACHINE_START(FEROCEON_MV78XX0, "Feroceon-MV78XX0")
     .timer = &mv_timer,
     .init_machine = mv_init,
 MACHINE_END
-

@@ -746,7 +746,6 @@ vicam_read( struct file *file, char __user *buf, size_t count, loff_t *ppos )
 	return count;
 }
 
-
 static int
 vicam_mmap(struct file *file, struct vm_area_struct *vma)
 {
@@ -855,7 +854,6 @@ vicam_probe( struct usb_interface *intf, const struct usb_device_id *id)
 		       "could not allocate kernel memory for vicam_camera struct\n");
 		return -ENOMEM;
 	}
-
 
 	cam->shutter_speed = 15;
 

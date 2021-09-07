@@ -47,7 +47,6 @@ struct wf_control {
 #define WF_CONTROL_RPM_FAN		1
 #define WF_CONTROL_PWM_FAN		2
 
-
 /* Note about lifetime rules: wf_register_control() will initialize
  * the kref and wf_unregister_control will decrement it, thus the
  * object creating/disposing a given control shouldn't assume it

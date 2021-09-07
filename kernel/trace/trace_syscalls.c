@@ -578,5 +578,3 @@ void unreg_prof_syscall_exit(char *name)
 }
 
 #endif
-
-

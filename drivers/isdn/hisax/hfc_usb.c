@@ -55,7 +55,6 @@ static u_int debug;
 module_param(debug, uint, 0);
 static int hfc_debug;
 
-
 /* private vendor specific data */
 typedef struct {
 	__u8 led_scheme;	// led display scheme
@@ -203,7 +202,6 @@ typedef struct hfcusb_data {
 	struct timer_list t3_timer;	/* timer 3 for activation/deactivation */
 	struct timer_list t4_timer;	/* timer 4 for activation/deactivation */
 } hfcusb_data;
-
 
 static void collect_rx_frame(usb_fifo * fifo, __u8 * data, int len,
 			     int finish);

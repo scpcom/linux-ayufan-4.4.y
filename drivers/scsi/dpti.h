@@ -23,7 +23,6 @@
 #define MAX_TO_IOP_MESSAGES   (255)
 #define MAX_FROM_IOP_MESSAGES (255)
 
-
 /*
  * SCSI interface function Prototypes
  */
@@ -41,7 +40,6 @@ static int adpt_bios_param(struct scsi_device * sdev, struct block_device *dev,
 
 static int adpt_bus_reset(struct scsi_cmnd* cmd);
 static int adpt_device_reset(struct scsi_cmnd* cmd);
-
 
 /*
  * struct scsi_host_template (see scsi/scsi_host.h)
@@ -113,7 +111,6 @@ static int adpt_device_reset(struct scsi_cmnd* cmd);
 #define TMOUT_INITOUTBOUND	(15)
 #define TMOUT_LCT		(360)
 
-
 #define I2O_SCSI_DEVICE_DSC_MASK                0x00FF
 
 #define I2O_DETAIL_STATUS_UNSUPPORTED_FUNCTION  0x000A
@@ -157,7 +154,6 @@ static int adpt_device_reset(struct scsi_cmnd* cmd);
 #define I2O_SCSI_DSC_BUS_BUSY               0x3F00
 #define I2O_SCSI_DSC_QUEUE_FROZEN           0x4000
 
-
 #ifndef TRUE
 #define TRUE                  1
 #define FALSE                 0
@@ -168,13 +164,11 @@ static int adpt_device_reset(struct scsi_cmnd* cmd);
 #define HBA_FLAGS_IN_RESET	0x00000040	/* in reset */
 #define HBA_HOSTRESET_FAILED	0x00000080	/* adpt_resethost failed */
 
-
 // Device state flags
 #define DPTI_DEV_ONLINE    0x00
 #define DPTI_DEV_UNSCANNED 0x01
 #define DPTI_DEV_RESET	   0x02
 #define DPTI_DEV_OFFLINE   0x04
-
 
 struct adpt_device {
 	struct adpt_device* next_lun;
@@ -310,7 +304,6 @@ static int adpt_i2o_systab_send(adpt_hba* pHba);
 static int adpt_ioctl(struct inode *inode, struct file *file, uint cmd, ulong arg);
 static int adpt_open(struct inode *inode, struct file *file);
 static int adpt_close(struct inode *inode, struct file *file);
-
 
 #ifdef UARTDELAY
 static void adpt_delay(int millisec);

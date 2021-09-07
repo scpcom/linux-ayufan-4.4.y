@@ -5092,7 +5092,6 @@ int32_t dwc_otg_get_param_ahb_thr_ratio(dwc_otg_core_if_t * core_if)
 	return core_if->core_params->ahb_thr_ratio;
 }
 
-
 uint32_t dwc_otg_get_hnpstatus(dwc_otg_core_if_t * core_if)
 {
 	gotgctl_data_t otgctl;

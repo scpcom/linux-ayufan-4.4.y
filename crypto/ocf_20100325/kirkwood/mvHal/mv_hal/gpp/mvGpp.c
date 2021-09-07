@@ -358,5 +358,3 @@ static MV_VOID gppRegSet (MV_U32 group, MV_U32 regOffs,MV_U32 mask,MV_U32 value)
 
 	MV_REG_WRITE(regOffs, gppData);
 }
-
-

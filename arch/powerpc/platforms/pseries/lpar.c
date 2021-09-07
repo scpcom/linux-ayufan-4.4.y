@@ -43,14 +43,12 @@
 #include "plpar_wrappers.h"
 #include "pseries.h"
 
-
 /* in hvCall.S */
 EXPORT_SYMBOL(plpar_hcall);
 EXPORT_SYMBOL(plpar_hcall9);
 EXPORT_SYMBOL(plpar_hcall_norets);
 
 extern void pSeries_find_serial_port(void);
-
 
 static int vtermno;	/* virtual terminal# for udbg  */
 

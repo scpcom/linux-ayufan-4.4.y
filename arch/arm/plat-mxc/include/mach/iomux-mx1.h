@@ -27,7 +27,6 @@
 * missing on some (many) pins
 */
 
-
 /* Primary GPIO pin functions */
 
 #define PA0_AIN_SPI2_CLK        (GPIO_PORTA | GPIO_AIN | GPIO_OUT | 0)
@@ -161,6 +160,5 @@
 #define PD30_PF_LD15            (GPIO_PORTD | GPIO_PF | GPIO_OUT | 30)
 #define PD31_PF_TMR2OUT         (GPIO_PORTD | GPIO_PF | 31)
 #define PD31_BIN_SPI2_TXD       (GPIO_PORTD | GPIO_BIN | 31)
-
 
 #endif

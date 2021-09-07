@@ -23,7 +23,6 @@
 #define	cr6	6
 #define	cr7	7
 
-
 /* General Purpose Registers (GPRs) */
 
 #define	r0	0

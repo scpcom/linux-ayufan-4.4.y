@@ -163,7 +163,6 @@ typedef struct
 
 typedef void    (*MV_CESA_CALLBACK) (MV_CESA_RESULT* pResult);
 
-
 typedef struct
 {
     void*               pReqPrv;    /* instead of reqId */
@@ -180,8 +179,6 @@ typedef struct
     MV_U16              macLength;
     MV_BOOL		skipFlush;
 } MV_CESA_COMMAND;
-
-
 
 MV_STATUS   mvCesaHalInit (int numOfSession, int queueDepth, char* pSramBase, MV_U32 cryptEngBase, void *osHandle);
 MV_STATUS   mvCesaFinish (void);
@@ -215,7 +212,6 @@ void        mvCesaDebugStatus(void);
 void        mvCesaDebugQueue(int mode);
 void        mvCesaDebugSram(int mode);
 void        mvCesaDebugSAD(int mode);
-
 
 /********  CESA Private definitions ********/
 #if (MV_CESA_VERSION >= 2)
@@ -261,7 +257,6 @@ typedef enum
 #endif
 } MV_CESA_STATE;
 
-
 /* Session database */
 
 /* Map of Key materials of the session in SRAM.
@@ -301,7 +296,6 @@ typedef struct
 
 } MV_CESA_DMA;
 
-
 typedef struct
 {
     MV_U8               numFrag;
@@ -328,9 +322,7 @@ typedef struct
     MV_CESA_DESC*       pCesaDesc;
     MV_CESA_FRAGS       frags;
 
-
 } MV_CESA_REQ;
-
 
 /* SRAM map */
 /* Total SRAM size calculation */
@@ -355,7 +347,6 @@ typedef struct
 
 } MV_CESA_SRAM_MAP;
 
-
 typedef struct
 {
     MV_U32  openedCount;
@@ -372,7 +363,6 @@ typedef struct
 #endif
 
 } MV_CESA_STATS;
-
 
 /* External variables */
 
@@ -406,7 +396,5 @@ static INLINE MV_ULONG  mvCesaVirtToPhys(MV_BUF_INFO* pBufInfo, void* pVirt)
 void        mvCesaDebugSramSA(MV_CESA_SRAM_SA* pSramSA, int mode);
 void        mvCesaDebugCmd(MV_CESA_COMMAND* pCmd,  int mode);
 void        mvCesaDebugDescriptor(MV_CESA_DESC* pDesc);
-
-
 
 #endif /* __mvCesa_h__ */

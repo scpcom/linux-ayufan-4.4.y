@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 /*
     ==========================================================================
     Description:
@@ -131,11 +130,9 @@ VOID PeerDeauthAction(
         {
             DBGPRINT(RT_DEBUG_TRACE,("AUTH_RSP - receive DE-AUTH from our AP (Reason=%d)\n", Reason));
 
-
 #ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
 		RtmpOSWrielessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
-
 
 			// send wireless event - for deauthentication
 			if (pAd->CommonCfg.bWirelessEvent)

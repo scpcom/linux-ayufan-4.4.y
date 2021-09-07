@@ -114,7 +114,6 @@
 #define CVMX_DCACHE_INVALIDATE \
 	{ CVMX_SYNC; asm volatile ("cache 9, 0($0)" : : ); }
 
-
 #define CVMX_POP(result, input) \
 	asm ("pop %[rd],%[rs]" : [rd] "=d" (result) : [rs] "d" (input))
 #define CVMX_DPOP(result, input) \

@@ -117,7 +117,6 @@ void acpi_restore_state_mem(void)
 {
 }
 
-
 /**
  * acpi_reserve_bootmem - do _very_ early ACPI initialisation
  *
@@ -143,7 +142,6 @@ void __init acpi_reserve_bootmem(void)
 
 	acpi_wakeup_address = virt_to_phys((void *)acpi_realmode);
 }
-
 
 static int __init acpi_sleep_setup(char *str)
 {

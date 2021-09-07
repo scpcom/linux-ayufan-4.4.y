@@ -42,7 +42,6 @@
 #include <asm/dec/kn230.h>
 #include <asm/dec/system.h>
 
-
 extern void dec_machine_restart(char *command);
 extern void dec_machine_halt(void);
 extern void dec_machine_power_off(void);
@@ -115,7 +114,6 @@ static struct irqaction haltirq = {
 	.handler = dec_intr_halt,
 	.name = "halt",
 };
-
 
 /*
  * Bus error (DBE/IBE exceptions and bus interrupts) handling setup.
@@ -236,7 +234,6 @@ static void __init dec_init_kn01(void)
 
 }				/* dec_init_kn01 */
 
-
 /*
  * Machine-specific initialisation for KN230, aka DS5100, aka MIPSmate.
  */
@@ -310,7 +307,6 @@ static void __init dec_init_kn230(void)
 	mips_cpu_irq_init();
 
 }				/* dec_init_kn230 */
-
 
 /*
  * Machine-specific initialisation for KN02, aka DS5000/200, aka 3max.
@@ -405,7 +401,6 @@ static void __init dec_init_kn02(void)
 	init_kn02_irqs(KN02_IRQ_BASE);
 
 }				/* dec_init_kn02 */
-
 
 /*
  * Machine-specific initialisation for KN02-BA, aka DS5000/1xx
@@ -507,7 +502,6 @@ static void __init dec_init_kn02ba(void)
 
 }				/* dec_init_kn02ba */
 
-
 /*
  * Machine-specific initialisation for KN02-CA, aka DS5000/xx,
  * (xx = 20, 25, 33), aka MAXine.  Also applies to KN04(-CA), aka
@@ -603,7 +597,6 @@ static void __init dec_init_kn02ca(void)
 	init_ioasic_irqs(IO_IRQ_BASE);
 
 }				/* dec_init_kn02ca */
-
 
 /*
  * Machine-specific initialisation for KN03, aka DS5000/240,
@@ -704,7 +697,6 @@ static void __init dec_init_kn03(void)
 	init_ioasic_irqs(IO_IRQ_BASE);
 
 }				/* dec_init_kn03 */
-
 
 void __init arch_init_irq(void)
 {

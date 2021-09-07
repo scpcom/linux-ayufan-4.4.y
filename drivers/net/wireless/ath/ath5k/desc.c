@@ -693,4 +693,3 @@ int ath5k_hw_init_desc_functions(struct ath5k_hw *ah)
 
 	return 0;
 }
-

@@ -12,7 +12,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -73,7 +72,6 @@ disclaimer.
 #include "mvRegs.h"
 #include "mvIALCommon.h"
 #include "mvLinuxIalSmart.h"
-
 
 extern MV_VOID handleNoneUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
                                    MV_STORAGE_DEVICE_REGISTERS *registerStruct);
@@ -467,4 +465,3 @@ SmartCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
     pScb->completionCallBack(pSataAdapter, pScb);
     return MV_TRUE;
 }
-

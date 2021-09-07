@@ -57,4 +57,3 @@ void __init mpc512x_declare_of_platform_devices(void)
 		printk(KERN_ERR __FILE__ ": "
 			"Error while probing of_platform bus\n");
 }
-

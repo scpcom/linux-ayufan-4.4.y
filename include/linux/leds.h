@@ -161,5 +161,4 @@ struct gpio_led_platform_data {
 					unsigned long *delay_off);
 };
 
-
 #endif		/* __LINUX_LEDS_H_INCLUDED */

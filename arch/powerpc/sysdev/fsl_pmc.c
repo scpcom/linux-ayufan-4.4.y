@@ -33,12 +33,12 @@ struct pmc_regs {
 	__be32:32;
 	__be32 pmcsr;
 	__be32:32;
-	__be32:32;
-	__be32 pmcdr;
+ 	__be32:32;
+ 	__be32 pmcdr;
 };
 static struct device *pmc_dev;
 static struct pmc_regs __iomem *pmc_regs;
-
+ 
 #define PMCSR_DPSLP	0x00100000
 #define PMCSR_SLP	0x00020000
 #define PMCSR_LOSSLESS	0x00400000
@@ -47,7 +47,7 @@ static int has_deep_sleep, has_lossless;
 
 void mpc85xx_enter_deep_sleep(phys_addr_t ccsrbar, u32 powmgtreq);
 extern void flush_dcache_L1(void);
-
+ 
 /**
  * pmc_enable_wake - enable OF device as wakeup event source
  * @ofdev: OF device affected
@@ -92,7 +92,7 @@ static int pmc_suspend_exit(void)
 	return 0;
 }
 
-int pmc_enable_wake(struct of_device *ofdev, wakeup_event_t func, bool enable)
+ int pmc_enable_wake(struct of_device *ofdev, wakeup_event_t func, bool enable)
 {
 	int ret = 0;
 	struct device_node *clk_np;
@@ -122,7 +122,7 @@ int pmc_enable_wake(struct of_device *ofdev, wakeup_event_t func, bool enable)
 		clrbits32(&pmc_regs->pmcdr, *pmcdr_mask);
 	else
 		setbits32(&pmc_regs->pmcdr, *pmcdr_mask);
-
+ 
 	if (func != NULL) {
 		tmp = kzalloc(sizeof(struct wake_data), GFP_KERNEL);
 		if (!tmp) {
@@ -153,7 +153,7 @@ void pmc_enable_lossless(int enable)
 }
 EXPORT_SYMBOL_GPL(pmc_enable_lossless);
 
-static int pmc_suspend_enter(suspend_state_t state)
+ static int pmc_suspend_enter(suspend_state_t state)
 {
 	int ret;
 	u32 powmgtreq = PMCSR_DPSLP | PMCSR_LOSSLESS | PMCSR_INT_MASK;
@@ -166,14 +166,13 @@ static int pmc_suspend_enter(suspend_state_t state)
 		pr_debug("Entering deep sleep\n");
 
 		local_irq_disable();
-		if (!pmc_suspend_exit()) {
-			setbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK);
-			mpc85xx_enter_deep_sleep(get_immrbase(),
+ 		if (!pmc_suspend_exit()) {
+ 			setbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK);
+ 			mpc85xx_enter_deep_sleep(get_immrbase(),
 					powmgtreq);
-			clrbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK);
-
+ 			clrbits32(&pmc_regs->pmcsr, PMCSR_INT_MASK); 
 		}
-		pr_debug("Resumed from deep sleep\n");
+ 		pr_debug("Resumed from deep sleep\n");
 
 		return 0;
 
@@ -241,8 +240,8 @@ static int pmc_probe(struct of_device *ofdev, const struct of_device_id *id)
 
 		if ((mfspr(SPRN_SVR) & 0xff) == 0x11) {
 			struct device_node *node;
-			struct ccsr_guts __iomem *guts;
-
+ 			struct ccsr_guts __iomem *guts;
+ 
 			/* Map the global utilities registers. */
 			node = of_find_compatible_node(NULL, NULL,
 					"fsl,p1022-guts");
@@ -261,9 +260,9 @@ static int pmc_probe(struct of_device *ofdev, const struct of_device_id *id)
 			}
 
 			/* Enable Power Down for deep sleep mode */
-			setbits32(&guts->dscr, CCSR_GUTS_DSCR_ENB_PWR_DWN);
-
-		}
+ 			setbits32(&guts->dscr, CCSR_GUTS_DSCR_ENB_PWR_DWN);
+ 
+ 		}
 	}
 
 end:

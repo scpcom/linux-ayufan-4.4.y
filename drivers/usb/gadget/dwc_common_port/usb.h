@@ -37,7 +37,6 @@
 
 /* Modified by Synopsys, Inc, 12/12/2007 */
 
-
 #ifndef _USB_H_
 #define _USB_H_
 
@@ -519,7 +518,6 @@ typedef struct {
 
 #define UICLASS_VENDOR		0xff
 
-
 #define USB_HUB_MAX_DEPTH 5
 
 /*
@@ -557,7 +555,6 @@ typedef struct {
 #define USB_MAX_POWER		500 /* mA */
 
 #define USB_BUS_RESET_DELAY	100 /* ms XXX?*/
-
 
 #define USB_UNCONFIG_NO 0
 #define USB_UNCONFIG_INDEX (-1)
@@ -660,9 +657,6 @@ struct usb_device_stats {
 	u_long	uds_requests[4];	/* indexed by transfer type UE_* */
 };
 
-
-
-
 #define WUSB_MIN_IE			0x80
 #define WUSB_WCTA_IE			0x80
 #define WUSB_WCONNECTACK_IE		0x81
@@ -700,7 +694,6 @@ struct usb_device_stats {
 #define WUSB_DN_SLEEP			0x06
 #define WUSB_DN_ALIVE			0x07
 #define WUSB_DN_MAX			0x07
-
 
 /* WUSB Handshake Data.  Used during the SET/GET HANDSHAKE requests */
 typedef struct wusb_hndshk_data {
@@ -761,7 +754,6 @@ typedef struct wusb_bos_desc {
 	uint8_t bNumDeviceCaps;
 } UPACKED wusb_bos_desc_t;
 
-
 /* Device Capability Type Codes */
 #define WUSB_DEVICE_CAPABILITY_WIRELESS_USB 0x01
 
@@ -797,7 +789,6 @@ typedef struct wusb_endpoint_companion_desc {
 	uint8_t bOverTheAirInterval;
 	uint8_t bmCompAttributes;
 } UPACKED wusb_endpoint_companion_desc_t;
-
 
 /* Wireless USB Numeric Association M1 Data Structure */
 typedef struct wusb_m1_data {
@@ -843,8 +834,5 @@ typedef struct wusb_m4_data {
 	uint32_t _attributeTypeIdAndLength_7;
 	uint8_t bandGroups[2];
 } UPACKED wusb_m4_data_t;
-
-
-
 
 #endif /* _USB_H_ */

@@ -52,7 +52,6 @@ void (*mach_reset)(void);
 void (*mach_halt)(void);
 void (*mach_power_off)(void);
 
-
 #ifdef CONFIG_M68000
 	#define CPU "MC68000"
 #endif
@@ -265,4 +264,3 @@ const struct seq_operations cpuinfo_op = {
 	.stop	= c_stop,
 	.show	= show_cpuinfo,
 };
-

@@ -39,7 +39,6 @@
 #include "xfs_alloc.h"
 #include "xfs_error.h"
 
-
 #define XFS_ABSDIFF(a,b)	(((a) <= (b)) ? ((b) - (a)) : ((a) - (b)))
 
 #define	XFSA_FIXUP_BNO_OK	1
@@ -2609,7 +2608,6 @@ error0:
 	return error;
 }
 
-
 /*
  * AG Busy list management
  * The busy list contains block ranges that have been freed but whose
@@ -2688,7 +2686,6 @@ xfs_alloc_clear_busy(xfs_trans_t *tp,
 
 	spin_unlock(&mp->m_perag[agno].pagb_lock);
 }
-
 
 /*
  * If we find the extent in the busy list, force the log out to get the

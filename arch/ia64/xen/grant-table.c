@@ -91,7 +91,6 @@ void xen_free_vm_area(struct vm_struct *area)
 }
 EXPORT_SYMBOL_GPL(xen_free_vm_area);
 
-
 /****************************************************************************
  * grant table hack
  * cmd: GNTTABOP_xxx

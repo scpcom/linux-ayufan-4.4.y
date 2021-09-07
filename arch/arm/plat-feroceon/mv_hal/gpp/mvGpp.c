@@ -362,4 +362,3 @@ static MV_VOID gppRegSet (MV_U32 group, MV_U32 regOffs,MV_U32 mask,MV_U32 value)
 
 EXPORT_SYMBOL(mvGppPolarityGet);
 EXPORT_SYMBOL(mvGppPolaritySet);
-

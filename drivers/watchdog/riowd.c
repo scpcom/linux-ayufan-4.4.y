@@ -17,7 +17,6 @@
 #include <linux/io.h>
 #include <linux/uaccess.h>
 
-
 /* RIO uses the NatSemi Super I/O power management logical device
  * as its' watchdog.
  *

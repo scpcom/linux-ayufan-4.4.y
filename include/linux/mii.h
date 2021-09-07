@@ -195,12 +195,10 @@ extern int generic_mii_ioctl(struct mii_if_info *mii_if,
                       	     struct mii_ioctl_data *mii_data, int cmd,
 			     unsigned int *duplex_changed);
 
-
 static inline struct mii_ioctl_data *if_mii(struct ifreq *rq)
 {
 	return (struct mii_ioctl_data *) &rq->ifr_ifru;
 }
-
 
 /**
  * mii_nway_result

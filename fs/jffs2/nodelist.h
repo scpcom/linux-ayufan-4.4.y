@@ -407,7 +407,6 @@ int jffs2_do_unlink(struct jffs2_sb_info *c, struct jffs2_inode_info *dir_f, con
 int jffs2_do_link(struct jffs2_sb_info *c, struct jffs2_inode_info *dir_f, uint32_t ino,
 		   uint8_t type, const char *name, int namelen, uint32_t time);
 
-
 /* readinode.c */
 int jffs2_do_read_inode(struct jffs2_sb_info *c, struct jffs2_inode_info *f,
 			uint32_t ino, struct jffs2_raw_inode *latest_node);

@@ -11,7 +11,6 @@
 #ifndef	_ASM_SN_SN0_HUBMD_H
 #define	_ASM_SN_SN0_HUBMD_H
 
-
 /*
  * Hub Memory/Directory interface registers
  */
@@ -418,7 +417,6 @@
 #define MD_PROT_MIGMD_PREL	(UINT64_CAST 0x1 << 3)
 #define MD_PROT_MIGMD_OFF	(UINT64_CAST 0x0 << 3)
 
-
 /*
  * Operations on page migration threshold register
  */
@@ -449,7 +447,6 @@
 #define MD_MEMORY_CONFIG_DIR_TYPE_GET(region) (\
 	(REMOTE_HUB_L(region, MD_MEMORY_CONFIG) & MMC_DIR_PREMIUM_MASK) >> \
 	MMC_DIR_PREMIUM_SHFT)
-
 
 /*
  * Operations on page migration count difference and absolute threshold
@@ -559,7 +556,6 @@ typedef union md_dir_error {
 	struct dir_error_reg derr_fmt;	/* the register format		*/
 } md_dir_error_t;
 
-
 struct mem_error_reg {
 	u64	uce_vld:   1,	/*    63: valid memory uce 	*/
 		ce_vld:	   1,	/*    62: valid correctable ECC err*/
@@ -571,12 +567,10 @@ struct mem_error_reg {
 		ce_ovr:	   1;	/*     0: multiple correctable errs */
 };
 
-
 typedef union md_mem_error {
 	u64	merr_reg;	/* the entire register 		*/
 	struct mem_error_reg  merr_fmt; /* format of the mem_error reg  */
 } md_mem_error_t;
-
 
 struct proto_error_reg {
 	u64	valid:	   1,	/*    63: valid protocol error	*/
@@ -598,19 +592,16 @@ typedef union md_proto_error {
 	struct proto_error_reg	perr_fmt; /* format of the register	*/
 } md_proto_error_t;
 
-
 struct md_sdir_high_fmt {
 	unsigned short sd_hi_bvec : 11,
 		       sd_hi_ecc  : 5;
 };
-
 
 typedef union md_sdir_high {
 	/* The 16 bits of standard directory, upper word */
 	unsigned short sd_hi_val;
 	struct	md_sdir_high_fmt sd_hi_fmt;
 }md_sdir_high_t;
-
 
 struct md_sdir_low_shared_fmt {
 	/* The meaning of lower directory, shared */
@@ -631,15 +622,12 @@ struct md_sdir_low_exclusive_fmt {
 			sde_lo_ecc   : 5;
 };
 
-
 typedef union md_sdir_low {
 	/* The 16 bits of standard directory, lower word */
 	unsigned short	sd_lo_val;
 	struct	md_sdir_low_exclusive_fmt sde_lo_fmt;
 	struct	md_sdir_low_shared_fmt sds_lo_fmt;
 }md_sdir_low_t;
-
-
 
 struct md_pdir_high_fmt {
 	u64	pd_hi_unused   : 16,
@@ -648,13 +636,11 @@ struct md_pdir_high_fmt {
 		pd_hi_ecc      : 7;
 };
 
-
 typedef union md_pdir_high {
 	/* The 48 bits of standard directory, upper word */
 	u64	pd_hi_val;
 	struct md_pdir_high_fmt pd_hi_fmt;
 }md_pdir_high_t;
-
 
 struct md_pdir_low_shared_fmt {
 	/* The meaning of lower directory, shared */
@@ -680,14 +666,12 @@ struct md_pdir_low_exclusive_fmt {
 		pde_lo_ecc	:  7;
 };
 
-
 typedef union md_pdir_loent {
 	/* The 48 bits of premium directory, lower word */
 	u64	pd_lo_val;
 	struct md_pdir_low_exclusive_fmt pde_lo_fmt;
 	struct md_pdir_low_shared_fmt	pds_lo_fmt;
 }md_pdir_low_t;
-
 
 /*
  *   the following two "union" definitions and two
@@ -715,8 +699,6 @@ typedef struct	dir_mem_entry	{
         bddir_entry_t	directory_words[MD_PAGE_SIZE/CACHE_SLINE_SIZE];
 } dir_mem_entry_t;
 
-
-
 typedef union md_perf_sel {
 	u64 	perf_sel_reg;
 	struct	{
@@ -734,9 +716,7 @@ typedef union md_perf_cnt {
 	} perf_cnt_bits;
 } md_perf_cnt_t;
 
-
 #endif /* !__ASSEMBLY__ */
-
 
 #define DIR_ERROR_VALID_MASK	0xe000000000000000
 #define DIR_ERROR_VALID_SHFT	61
@@ -778,7 +758,6 @@ typedef union md_perf_cnt {
 #define MMCE_SHORT_PACK_MASK	(UINT64_CAST 0x03 << MMCE_SHORT_PACK_SHFT)
 #define MMCE_BAD_DATA_SHFT	0
 #define MMCE_BAD_DATA_MASK	(UINT64_CAST 0x03 << MMCE_BAD_DATA_SHFT)
-
 
 #define MD_PERF_COUNTERS	6
 #define MD_PERF_SETS		6

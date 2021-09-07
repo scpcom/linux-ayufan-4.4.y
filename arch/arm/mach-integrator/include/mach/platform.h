@@ -179,7 +179,6 @@
 
 #define INTEGRATOR_HDR_SDRAM_SPD_OK     (1 << 5)
 
-
 /* ------------------------------------------------------------------------
  *  Integrator system registers
  * ------------------------------------------------------------------------
@@ -268,7 +267,6 @@
 #define INTEGRATOR_EBI_WS_16            0xE0
 #define INTEGRATOR_EBI_WS_17            0xF0
 
-
 #define INTEGRATOR_CT_BASE              0x13000000	 /*  Counter/Timers */
 #define INTEGRATOR_IC_BASE              0x14000000	 /*  Interrupt Controller */
 #define INTEGRATOR_RTC_BASE             0x15000000	 /*  Real Time Clock */
@@ -289,7 +287,6 @@
 #define INTEGRATOR_DBG_ALPHA            (INTEGRATOR_DBG_BASE + INTEGRATOR_DBG_ALPHA_OFFSET)
 #define INTEGRATOR_DBG_LEDS             (INTEGRATOR_DBG_BASE + INTEGRATOR_DBG_LEDS_OFFSET)
 #define INTEGRATOR_DBG_SWITCH           (INTEGRATOR_DBG_BASE + INTEGRATOR_DBG_SWITCH_OFFSET)
-
 
 #if defined(CONFIG_ARCH_INTEGRATOR_AP)
 #define INTEGRATOR_GPIO_BASE            0x1B000000	 /*  GPIO */
@@ -371,7 +368,6 @@
 #define FIQ_ENABLE                      0x28
 #define FIQ_ENABLE_SET                  0x28
 #define FIQ_ENABLE_CLEAR                0x2C
-
 
 /* ------------------------------------------------------------------------
  *  Interrupts

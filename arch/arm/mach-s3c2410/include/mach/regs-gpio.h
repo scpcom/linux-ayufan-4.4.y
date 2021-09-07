@@ -10,7 +10,6 @@
  * S3C2410 GPIO register definitions
 */
 
-
 #ifndef __ASM_ARCH_REGS_GPIO_H
 #define __ASM_ARCH_REGS_GPIO_H
 
@@ -24,7 +23,6 @@
 #define S3C24XX_MISCCR	      S3C24XX_GPIOREG2(0x80)
 #endif /* CONFIG_CPU_S3C2400 */
 
-
 /* S3C2400 doesn't have a 1:1 mapping to S3C2410 gpio base pins */
 
 #define S3C2400_BANKNUM(pin)     (((pin) & ~31) / 32)
@@ -35,7 +33,6 @@
 #define S3C2400_GPIO_BASE(pin)   (pin < S3C2410_GPIO_BANKC ? \
                                  S3C2400_BASEA2B(pin)+S3C24XX_VA_GPIO : \
                                  S3C2400_BASEC2H(pin)+S3C24XX_VA_GPIO)
-
 
 #define S3C2410_GPIO_BASE(pin)   ((((pin) & ~31) >> 1) + S3C24XX_VA_GPIO)
 #define S3C2410_GPIO_OFFSET(pin) ((pin) & 31)
@@ -55,7 +52,6 @@
 
 #define S3C2410_GPIOREG(x) ((x) + S3C24XX_VA_GPIO)
 #define S3C24XX_GPIOREG2(x) ((x) + S3C24XX_VA_GPIO2)
-
 
 /* configure GPIO ports A..G */
 
@@ -813,4 +809,3 @@
 #define S3C2412_SLPCON_ALL_PULL	(0x33333333)
 
 #endif	/* __ASM_ARCH_REGS_GPIO_H */
-

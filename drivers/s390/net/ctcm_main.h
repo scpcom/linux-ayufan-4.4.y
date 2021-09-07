@@ -236,7 +236,6 @@ static inline void ctcm_clear_busy(struct net_device *dev)
 		ctcm_clear_busy_do(dev);
 }
 
-
 static inline int ctcm_test_and_set_busy(struct net_device *dev)
 {
 	netif_stop_queue(dev);

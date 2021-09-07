@@ -178,7 +178,6 @@ struct nfs_server {
 #define NFS_CAP_MTIME		(1U << 13)
 #define NFS_CAP_POSIX_LOCK	(1U << 14)
 
-
 /* maximum number of slots to use */
 #define NFS4_MAX_SLOT_TABLE RPC_MAX_SLOT_TABLE
 

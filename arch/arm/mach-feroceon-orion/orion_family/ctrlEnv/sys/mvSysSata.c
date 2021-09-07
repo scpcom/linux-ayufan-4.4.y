@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #include "mvTypes.h"
 #include "mvCommon.h"
 #include "mvOs.h"
@@ -94,7 +93,6 @@ MV_TARGET sataAddrDecPrioTab[] =
 #endif
 	TBL_TERM
 };
-
 
 /*******************************************************************************
 * sataWinOverlapDetect - Detect SATA address windows overlapping
@@ -153,7 +151,6 @@ static MV_STATUS sataWinOverlapDetect(int dev, MV_U32 winNum,
     }
     return MV_FALSE;
 }
-
 
 /*******************************************************************************
 * mvSataWinSet - Set SATA target address window
@@ -351,7 +348,6 @@ MV_VOID mvSataAddrDecShow(MV_VOID)
 	}
 }
 
-
 /*******************************************************************************
 * mvSataWinInit - Initialize the integrated SATA target address window.
 *
@@ -422,6 +418,3 @@ MV_STATUS mvSataWinInit(MV_VOID)
     }
     return MV_OK;
 }
-
-
-

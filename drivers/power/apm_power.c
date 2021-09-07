@@ -13,7 +13,6 @@
 #include <linux/power_supply.h>
 #include <linux/apm-emulation.h>
 
-
 #define PSY_PROP(psy, prop, val) psy->get_property(psy, \
 			 POWER_SUPPLY_PROP_##prop, val)
 

@@ -102,7 +102,6 @@
        	"pcm -c 2" doesn't work. "pcm -c 2 -m direct_interleaved" does.
 	KDE3: "Enable full duplex operation" deadlocks.
 
-	
 2002-08-31 Karsten Wiese
 	Version 0.0.3: audio also simplex;
 	simplifying: iso urbs only 1 packet, melted structs.
@@ -144,8 +143,6 @@
 #include "usbusx2y.h"
 #include "usX2Yhwdep.h"
 
-
-
 MODULE_AUTHOR("Karsten Wiese <annabellesgarden@yahoo.de>");
 MODULE_DESCRIPTION("TASCAM "NAME_ALLCAPS" Version 0.8.7.2");
 MODULE_LICENSE("GPL");
@@ -161,7 +158,6 @@ module_param_array(id, charp, NULL, 0444);
 MODULE_PARM_DESC(id, "ID string for "NAME_ALLCAPS".");
 module_param_array(enable, bool, NULL, 0444);
 MODULE_PARM_DESC(enable, "Enable "NAME_ALLCAPS".");
-
 
 static int snd_usX2Y_card_used[SNDRV_CARDS];
 
@@ -223,7 +219,6 @@ static void i_usX2Y_In04Int(struct urb *urb)
 			wake_up(&usX2Y->us428ctls_wait_queue_head);
 		}
 	}
-	
 	
 	if (usX2Y->US04) {
 		if (0 == usX2Y->US04->submitted)
@@ -313,7 +308,6 @@ static void usX2Y_unlinkSeq(struct snd_usX2Y_AsyncSeq *S)
 	kfree(S->buffer);
 }
 
-
 static struct usb_device_id snd_usX2Y_usb_id_table[] = {
 	{
 		.match_flags =	USB_DEVICE_ID_MATCH_DEVICE,
@@ -367,7 +361,6 @@ static int usX2Y_create_card(struct usb_device *device, struct snd_card **cardp)
 	*cardp = card;
 	return 0;
 }
-
 
 static int usX2Y_usb_probe(struct usb_device *device,
 			   struct usb_interface *intf,

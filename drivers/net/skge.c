@@ -67,7 +67,6 @@
 
 #define SKGE_EEPROM_MAGIC	0x9933aabb
 
-
 MODULE_DESCRIPTION("SysKonnect Gigabit Ethernet driver");
 MODULE_AUTHOR("Stephen Hemminger <shemminger@linux-foundation.org>");
 MODULE_LICENSE("GPL");
@@ -197,7 +196,6 @@ static void skge_wol_init(struct skge_port *skge)
 	gm_phy_write(hw, port, PHY_MARV_CTRL,
 		     PHY_CT_RESET | PHY_CT_SPS_LSB | PHY_CT_ANE |
 		     PHY_CT_RE_CFG | PHY_CT_DUP_MD);
-
 
 	/* Set GMAC to no flow control and auto update for speed/duplex */
 	gma_write16(hw, port, GM_GP_CTRL,
@@ -1005,7 +1003,6 @@ static inline void skge_rx_reuse(struct skge_element *e, unsigned int size)
 	rd->control = BMU_OWN | BMU_STF | BMU_IRQ_EOF | BMU_TCP_CHECK | size;
 }
 
-
 /* Free all  buffers in receive ring, assumes receiver stopped */
 static void skge_rx_clean(struct skge_port *skge)
 {
@@ -1027,7 +1024,6 @@ static void skge_rx_clean(struct skge_port *skge)
 		}
 	} while ((e = e->next) != ring->start);
 }
-
 
 /* Allocate buffers for receive ring
  * For receive:  to_clean is next received frame.
@@ -1071,7 +1067,6 @@ static const char *skge_pause(enum pause_status status)
 	}
 }
 
-
 static void skge_link_up(struct skge_port *skge)
 {
 	skge_write8(skge->hw, SK_REG(skge->port, LNK_LED_REG),
@@ -1098,7 +1093,6 @@ static void skge_link_down(struct skge_port *skge)
 	if (netif_msg_link(skge))
 		printk(KERN_INFO PFX "%s: Link is down.\n", skge->netdev->name);
 }
-
 
 static void xm_link_down(struct skge_hw *hw, int port)
 {
@@ -1219,7 +1213,6 @@ static void genesis_reset(struct skge_hw *hw, int port)
 	xm_write32(hw, port, XM_MODE, reg | XM_MD_FRF);
 }
 
-
 /* Convert mode to MII values  */
 static const u16 phy_pause_map[] = {
 	[FLOW_MODE_NONE] =	0,
@@ -1235,7 +1228,6 @@ static const u16 fiber_pause_map[] = {
 	[FLOW_MODE_SYMMETRIC]	= PHY_X_P_SYM_MD,
 	[FLOW_MODE_SYM_OR_REM]	= PHY_X_P_BOTH_MD,
 };
-
 
 /* Check status of Broadcom phy link */
 static void bcom_check_link(struct skge_hw *hw, int port)
@@ -1600,7 +1592,6 @@ static void genesis_mac_init(struct skge_hw *hw, int port)
 		xm_write16(hw, port, XM_HW_CFG, XM_HW_GMII_MD);
 	}
 
-
 	switch(hw->phy_type) {
 	case SK_PHY_XMAC:
 		xm_phy_init(skge);
@@ -1666,7 +1657,6 @@ static void genesis_mac_init(struct skge_hw *hw, int port)
 	 * RX FIFO as soon as the FIFO threshold is reached.
 	 */
 	xm_write32(hw, port, XM_MODE, XM_DEF_MODE);
-
 
 	/*
 	 * Initialize the Receive Counter Event Mask (XM_RX_EV_MSK)
@@ -1762,7 +1752,6 @@ static void genesis_stop(struct skge_port *skge)
 
 	xm_read16(hw, port, XM_MMU_CMD);
 }
-
 
 static void genesis_get_stats(struct skge_port *skge, u64 *data)
 {
@@ -1895,7 +1884,6 @@ static void genesis_link_up(struct skge_port *skge)
 			cmd | XM_MMU_ENA_RX | XM_MMU_ENA_TX);
 	skge_link_up(skge);
 }
-
 
 static inline void bcom_phy_intr(struct skge_port *skge)
 {
@@ -2589,7 +2577,6 @@ static int skge_up(struct net_device *dev)
 	else
 		skge->rx_buf_size = RX_BUF_SIZE;
 
-
 	rx_size = skge->rx_ring.count * sizeof(struct skge_rx_desc);
 	tx_size = skge->tx_ring.count * sizeof(struct skge_tx_desc);
 	skge->mem_size = tx_size + rx_size;
@@ -2706,7 +2693,6 @@ static int skge_down(struct net_device *dev)
 	skge_write8(hw, Q_ADDR(txqaddr[port], Q_CSR), CSR_STOP);
 	skge_write32(hw, RB_ADDR(txqaddr[port], RB_CTRL),
 		     RB_RST_SET|RB_DIS_OP_MD);
-
 
 	/* Disable Force Sync bit and Enable Alloc bit */
 	skge_write8(hw, SK_REG(port, TXA_CTRL),
@@ -2854,7 +2840,6 @@ static netdev_tx_t skge_xmit_frame(struct sk_buff *skb,
 
 	return NETDEV_TX_OK;
 }
-
 
 /* Free resources associated with this reing element */
 static void skge_tx_free(struct skge_port *skge, struct skge_element *e,
@@ -3015,7 +3000,6 @@ static void yukon_set_multicast(struct net_device *dev)
 			yukon_add_filter(filter, list->dmi_addr);
 	}
 
-
 	gma_write16(hw, port, GM_MC_ADDR_H1,
 			 (u16)filter[0] | ((u16)filter[1] << 8));
 	gma_write16(hw, port, GM_MC_ADDR_H2,
@@ -3056,7 +3040,6 @@ static void skge_set_multicast(struct net_device *dev)
 		yukon_set_multicast(dev);
 
 }
-
 
 /* Get receive buffer from descriptor.
  * Handles copy of small buffers and reallocation failures
@@ -3405,7 +3388,6 @@ static irqreturn_t skge_intr(int irq, void *dev_id)
 		skge_write16(hw, B3_PA_CTRL, PA_CLR_TO_RX1);
 	}
 
-
 	if (status & IS_MAC1)
 		skge_mac_intr(hw, 0);
 
@@ -3512,7 +3494,6 @@ static const char *skge_board_name(const struct skge_hw *hw)
 	snprintf(buf, sizeof buf, "chipid 0x%x", hw->chip_id);
 	return buf;
 }
-
 
 /*
  * Setup the board data structure, but don't bring up
@@ -3627,7 +3608,6 @@ static int skge_reset(struct skge_hw *hw)
 		pci_write_config_dword(hw->pdev, PCI_DEV_REG1, reg);
 		skge_write8(hw, B2_TST_CTRL1, TST_CFG_WRITE_OFF);
 
-
 		for (i = 0; i < hw->ports; i++) {
 			skge_write16(hw, SK_REG(i, GMAC_LINK_CTRL), GMLC_RST_SET);
 			skge_write16(hw, SK_REG(i, GMAC_LINK_CTRL), GMLC_RST_CLR);
@@ -3679,7 +3659,6 @@ static int skge_reset(struct skge_hw *hw)
 
 	return 0;
 }
-
 
 #ifdef CONFIG_SKGE_DEBUG
 
@@ -3790,7 +3769,6 @@ static struct notifier_block skge_notifier = {
 	.notifier_call = skge_device_event,
 };
 
-
 static __init void skge_debug_init(void)
 {
 	struct dentry *ent;
@@ -3834,7 +3812,6 @@ static const struct net_device_ops skge_netdev_ops = {
 	.ndo_poll_controller	= skge_netpoll,
 #endif
 };
-
 
 /* Initialize network device */
 static struct net_device *skge_devinit(struct skge_hw *hw, int port,

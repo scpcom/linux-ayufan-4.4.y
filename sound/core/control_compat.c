@@ -167,7 +167,6 @@ struct snd_ctl_elem_value32 {
         unsigned char reserved[128];
 };
 
-
 /* get the value type and count of the control */
 static int get_ctl_type(struct snd_card *card, struct snd_ctl_elem_id *id,
 			int *countp)

@@ -679,4 +679,3 @@ void viafb_dvi_enable(void)
 		viafb_write_reg_mask(CRD2, VIACR, 0, BIT3);
 	}
 }
-

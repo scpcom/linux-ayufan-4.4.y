@@ -77,7 +77,6 @@ struct iwl_priv;
 #define IWL_UCODE_API(ver)	(((ver) & 0x0000FF00) >> 8)
 #define IWL_UCODE_SERIAL(ver)	((ver) & 0x000000FF)
 
-
 /* Tx rates */
 #define IWL_CCK_RATES	4
 #define IWL_OFDM_RATES	8
@@ -228,7 +227,6 @@ struct iwl_cmd_header {
 	/* command or response/notification data follows immediately */
 	u8 data[0];
 } __attribute__ ((packed));
-
 
 /**
  * struct iwl3945_tx_power
@@ -467,7 +465,6 @@ struct iwl_init_alive_resp {
 				 * 2 Tx chains */
 } __attribute__ ((packed));
 
-
 /**
  * REPLY_ALIVE = 0x1 (response only, not a command)
  *
@@ -563,7 +560,6 @@ enum {
 	RXON_DEV_TYPE_SNIFFER = 6,
 };
 
-
 #define RXON_RX_CHAIN_DRIVER_FORCE_MSK		cpu_to_le16(0x1 << 0)
 #define RXON_RX_CHAIN_DRIVER_FORCE_POS		(0)
 #define RXON_RX_CHAIN_VALID_MSK			cpu_to_le16(0x7 << 1)
@@ -601,7 +597,6 @@ enum {
 /* rx response to host with 8-byte TSF
 * (according to ON_AIR deassertion) */
 #define RXON_FLG_TSF2HOST_MSK           cpu_to_le32(1 << 15)
-
 
 /* HT flags */
 #define RXON_FLG_CTRL_CHANNEL_LOC_POS		(22)
@@ -1085,7 +1080,6 @@ struct iwl_addsta_cmd {
 	__le32 reserved2;
 } __attribute__ ((packed));
 
-
 #define ADD_STA_SUCCESS_MSK		0x1
 #define ADD_STA_NO_ROOM_IN_TABLE	0x2
 #define ADD_STA_NO_BLOCK_ACK_RESOURCE	0x4
@@ -1178,7 +1172,6 @@ struct iwl_wep_cmd {
 #define RX_MPDU_RES_STATUS_TTAK_OK	(1 << 7)
 #define RX_MPDU_RES_STATUS_DEC_DONE_MSK	(0x800)
 
-
 struct iwl3945_rx_frame_stats {
 	u8 phy_count;
 	u8 id;
@@ -1234,7 +1227,6 @@ struct iwl4965_rx_non_cfg_phy {
 	u8 pad[0];
 } __attribute__ ((packed));
 
-
 #define IWL50_RX_RES_PHY_CNT 8
 #define IWL50_RX_RES_AGC_IDX     1
 #define IWL50_RX_RES_RSSI_AB_IDX 2
@@ -1251,7 +1243,6 @@ struct iwl4965_rx_non_cfg_phy {
 struct iwl5000_non_cfg_phy {
 	__le32 non_cfg_phy[IWL50_RX_RES_PHY_CNT];  /* up to 8 phy entries */
 } __attribute__ ((packed));
-
 
 /*
  * REPLY_RX = 0xc3 (response only, not a command)
@@ -1276,7 +1267,6 @@ struct iwl4965_rx_mpdu_res_start {
 	__le16 byte_count;
 	__le16 reserved;
 } __attribute__ ((packed));
-
 
 /******************************************************************************
  * (5)
@@ -1380,7 +1370,6 @@ struct iwl4965_rx_mpdu_res_start {
 /* HCCA-AP - disable duration overwriting. */
 #define TX_CMD_FLG_DUR_MSK cpu_to_le32(1 << 25)
 
-
 /*
  * TX command security control
  */
@@ -1475,7 +1464,6 @@ struct iwl3945_tx_resp {
 	__le32 wireless_media_time;
 	__le32 status;		/* TX status */
 } __attribute__ ((packed));
-
 
 /*
  * 4965 uCode updates these Tx attempt count values in host DRAM.
@@ -1640,8 +1628,6 @@ static inline bool iwl_is_tx_success(u32 status)
 	return (status == TX_STATUS_SUCCESS) ||
 	       (status == TX_STATUS_DIRECT_DONE);
 }
-
-
 
 /* *******************************
  * TX aggregation status
@@ -1840,7 +1826,6 @@ struct iwl4965_txpowertable_cmd {
 	struct iwl4965_tx_power_db tx_power;
 } __attribute__ ((packed));
 
-
 /**
  * struct iwl3945_rate_scaling_cmd - Rate Scaling Command & Response
  *
@@ -1868,7 +1853,6 @@ struct iwl3945_rate_scaling_cmd {
 	struct iwl3945_rate_scaling_info table[IWL_MAX_RATES];
 } __attribute__ ((packed));
 
-
 /*RS_NEW_API: only TLC_RTS remains and moved to bit 0 */
 #define  LINK_QUAL_FLAGS_SET_STA_TLC_RTS_MSK	(1 << 0)
 
@@ -1882,7 +1866,6 @@ struct iwl3945_rate_scaling_cmd {
 #define  LINK_QUAL_ANT_A_MSK (1 << 0)
 #define  LINK_QUAL_ANT_B_MSK (1 << 1)
 #define  LINK_QUAL_ANT_MSK   (LINK_QUAL_ANT_A_MSK|LINK_QUAL_ANT_B_MSK)
-
 
 /**
  * struct iwl_link_qual_general_params
@@ -2708,7 +2691,6 @@ struct iwl_scancomplete_notification {
 	__le32 tsf_high;
 } __attribute__ ((packed));
 
-
 /******************************************************************************
  * (9)
  * IBSS/AP Commands and Notifications:
@@ -2976,7 +2958,6 @@ struct statistics_tx {
 	__le32 reserved1;
 } __attribute__ ((packed));
 
-
 struct statistics_div {
 	__le32 tx_on_a;
 	__le32 tx_on_b;
@@ -3054,7 +3035,6 @@ struct iwl_notif_statistics {
 	struct statistics_general general;
 } __attribute__ ((packed));
 
-
 /*
  * MISSED_BEACONS_NOTIFICATION = 0xa2 (notification only, not a command)
  */
@@ -3068,7 +3048,6 @@ struct iwl_missed_beacon_notif {
 	__le32 num_expected_beacons;
 	__le32 num_recvd_beacons;
 } __attribute__ ((packed));
-
 
 /******************************************************************************
  * (11)
@@ -3277,7 +3256,6 @@ struct iwl_sensitivity_cmd {
 	__le16 table[HD_TABLE_SIZE];	/* use HD_* as index */
 } __attribute__ ((packed));
 
-
 /**
  * REPLY_PHY_CALIBRATION_CMD = 0xb0 (command, has simple generic response)
  *
@@ -3350,7 +3328,6 @@ enum {
 	IWL_PHY_CALIBRATE_CHAIN_NOISE_RESET_CMD	= 18,
 	IWL_PHY_CALIBRATE_CHAIN_NOISE_GAIN_CMD	= 19,
 };
-
 
 #define IWL_CALIB_INIT_CFG_ALL	cpu_to_le32(0xffffffff)
 

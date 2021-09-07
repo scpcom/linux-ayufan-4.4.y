@@ -544,7 +544,6 @@ out:
 	return err;
 }
 
-
 static int fn_hash_delete(struct fib_table *tb, struct fib_config *cfg)
 {
 	struct fn_hash *table = (struct fn_hash *)tb->tb_data;
@@ -676,7 +675,6 @@ static int fn_hash_flush(struct fib_table *tb)
 	}
 	return found;
 }
-
 
 static inline int
 fn_hash_dump_bucket(struct sk_buff *skb, struct netlink_callback *cb,

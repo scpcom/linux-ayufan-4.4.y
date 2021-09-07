@@ -31,7 +31,6 @@ disclaimer.
 #ifndef __INCmv88F5082SysHwConfigh
 #define __INCmv88F5082SysHwConfigh
 
-
 /* PEX Work arround */
 /* the target we will use for the workarround */
 #define PEX_CONFIG_RW_WA_TARGET PEX0_MEM

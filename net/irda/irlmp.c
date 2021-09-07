@@ -1878,7 +1878,6 @@ static void *irlmp_seq_hb_idx(struct irlmp_iter_state *iter, loff_t *off)
 	return NULL;
 }
 
-
 static void *irlmp_seq_start(struct seq_file *seq, loff_t *pos)
 {
 	struct irlmp_iter_state *iter = seq->private;

@@ -45,7 +45,6 @@ asmlinkage void resume(void);
   (last) = _last; \
 } while (0)
 
-
 /*
  * Force strict CPU ordering.
  * Not really required on m68k...

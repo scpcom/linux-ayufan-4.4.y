@@ -270,7 +270,6 @@ static int drm_fill_in_dev(struct drm_device * dev, struct pci_dev *pdev,
 		}
 	}
 
-
 	retcode = drm_ctxbitmap_init(dev);
 	if (retcode) {
 		DRM_ERROR("Cannot allocate memory for context bitmap.\n");
@@ -292,7 +291,6 @@ static int drm_fill_in_dev(struct drm_device * dev, struct pci_dev *pdev,
 	drm_lastclose(dev);
 	return retcode;
 }
-
 
 /**
  * Get a secondary minor number.
@@ -358,7 +356,6 @@ static int drm_get_minor(struct drm_device *dev, struct drm_minor **minor, int t
 
 	DRM_DEBUG("new minor assigned %d\n", minor_id);
 	return 0;
-
 
 err_g2:
 	if (new_minor->type == DRM_MINOR_LEGACY)

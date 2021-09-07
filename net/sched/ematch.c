@@ -168,7 +168,6 @@ static inline struct tcf_ematch * tcf_em_get_match(struct tcf_ematch_tree *tree,
 	return &tree->matches[index];
 }
 
-
 static int tcf_em_validate(struct tcf_proto *tp,
 			   struct tcf_ematch_tree_hdr *tree_hdr,
 			   struct tcf_ematch *em, struct nlattr *nla, int idx)
@@ -197,7 +196,6 @@ static int tcf_em_validate(struct tcf_proto *tp,
 		 * to our own position are of course illegal. */
 		if (ref <= idx)
 			goto errout;
-
 
 		em->data = ref;
 	} else {

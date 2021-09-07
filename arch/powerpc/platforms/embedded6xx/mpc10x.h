@@ -91,7 +91,6 @@
 	(hose)->io_base_virt = (void *)MPC10X_MAP##map##_ISA_IO_BASE;	\
 }
 
-
 /* Miscellaneous Configuration register offsets */
 #define	MPC10X_CFG_PIR_REG		0x09
 #define	MPC10X_CFG_PIR_HOST_BRIDGE	0x00

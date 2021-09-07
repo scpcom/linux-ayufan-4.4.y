@@ -18,7 +18,6 @@
  *    of darwin, still need to reverse engineer that
  */
 
-
 #include <linux/module.h>
 
 #include <linux/kernel.h>
@@ -1196,4 +1195,3 @@ fail:
 
 EXPORT_SYMBOL(mii_phy_probe);
 MODULE_LICENSE("GPL");
-

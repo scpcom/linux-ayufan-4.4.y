@@ -630,8 +630,6 @@ bfa_fcs_port_ns_sm_online(struct bfa_fcs_port_ns_s *ns,
 	}
 }
 
-
-
 /**
  *  ns_pvt Nameserver local functions
  */
@@ -1239,5 +1237,3 @@ bfa_fcs_port_ns_boot_target_disc(struct bfa_fcs_port_s *port)
 		bfa_assert(rport);
 	}
 }
-
-

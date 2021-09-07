@@ -35,16 +35,13 @@
 	--------    ----------    ----------------------------------------------
 */
 
-
 #ifdef RT33xx
-
 
 #ifndef RTMP_RF_RW_SUPPORT
 #error "You Should Enable compile flag RTMP_RF_RW_SUPPORT for this chip"
 #endif // RTMP_RF_RW_SUPPORT //
 
 #include "../rt_config.h"
-
 
 //
 // RF register initialization set
@@ -87,8 +84,6 @@ REG_PAIR RFRegTableOverRT3390[] = {
 };
 
 UCHAR NUM_RF_REG_PARMS_OVER_RT3390=(sizeof(RFRegTableOverRT3390) / sizeof(REG_PAIR));
-
-
 
 // Antenna divesity use GPIO3 and EESK pin for control
 // Antenna and EEPROM access are both using EESK pin,
@@ -140,7 +135,6 @@ VOID RT33xxSetRxAnt(
 		DBGPRINT_RAW(RT_DEBUG_TRACE, ("AsicSetRxAnt, switch to aux antenna\n"));
 	}
 }
-
 
 /*
 	========================================================================
@@ -311,7 +305,6 @@ VOID RTMPFilterCalibration(
 	DBGPRINT(RT_DEBUG_TRACE, ("RTMPFilterCalibration - CaliBW20RfR24=0x%x, CaliBW40RfR24=0x%x\n", pAd->Mlme.CaliBW20RfR24, pAd->Mlme.CaliBW40RfR24));
 }
 
-
 // add by johnli, RF power sequence setup
 /*
 	==========================================================================
@@ -393,7 +386,6 @@ VOID RT33xxLoadRFSleepModeSetup(
 {
 	UCHAR RFValue;
 	UINT32 MACValue;
-
 
 	{
 		// RF_BLOCK_en. RF R1 register Bit 0 to 0

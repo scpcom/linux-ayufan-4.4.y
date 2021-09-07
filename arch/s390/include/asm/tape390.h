@@ -46,7 +46,6 @@ struct tape390_crypt_info {
 	char medium_status;
 } __attribute__ ((packed));
 
-
 /* Macros for "capable" field */
 #define TAPE390_CRYPT_SUPPORTED_MASK 0x01
 #define TAPE390_CRYPT_SUPPORTED(x) \

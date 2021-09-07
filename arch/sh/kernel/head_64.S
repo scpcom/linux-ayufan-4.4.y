@@ -112,7 +112,6 @@ empty_bad_pte_table:
 	.global	fpu_in_use
 fpu_in_use:	.quad	0
 
-
 	__HEAD
 	.balign L1_CACHE_BYTES
 /*
@@ -249,7 +248,6 @@ clear_DTLB:
 	movi	OCCR1_INIT_VAL, r23
 	putcfg	r21, OCCR_REG0, r22
 	putcfg	r21, OCCR_REG1, r23
-
 
 	/*
 	 * Enable Caches and MMU. Do the first non-PIC jump.

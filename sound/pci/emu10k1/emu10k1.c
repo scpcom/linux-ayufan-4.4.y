@@ -201,7 +201,6 @@ static void __devexit snd_card_emu10k1_remove(struct pci_dev *pci)
 	pci_set_drvdata(pci, NULL);
 }
 
-
 #ifdef CONFIG_PM
 static int snd_emu10k1_suspend(struct pci_dev *pci, pm_message_t state)
 {

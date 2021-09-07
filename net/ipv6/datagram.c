@@ -404,8 +404,6 @@ out:
 	return err;
 }
 
-
-
 int datagram_recv_ctl(struct sock *sk, struct msghdr *msg, struct sk_buff *skb)
 {
 	struct ipv6_pinfo *np = inet6_sk(sk);

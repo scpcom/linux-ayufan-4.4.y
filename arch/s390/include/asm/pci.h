@@ -7,4 +7,3 @@
 #define PCI_DMA_BUS_IS_PHYS (0)
 
 #endif /* __ASM_S390_PCI_H */
-

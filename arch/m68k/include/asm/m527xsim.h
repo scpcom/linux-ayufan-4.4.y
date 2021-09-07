@@ -11,7 +11,6 @@
 #define	m527xsim_h
 /****************************************************************************/
 
-
 /*
  *	Define the 5270/5271 SIM register set addresses.
  */
@@ -53,7 +52,6 @@
 #define	MCFSIM_DBAR1		0x58		/* SDRAM base address 1 */
 #define	MCFSIM_DMR1		0x5c		/* SDRAM address mask 1 */
 #endif
-
 
 #ifdef CONFIG_M5271
 #define MCFGPIO_PODR_ADDR	(MCF_IPSBAR + 0x100000)
@@ -199,7 +197,6 @@
 #define MCFGPIO_PCLRR_USBL	(MCF_IPSBAR + 0x10006B)
 #define MCFGPIO_PCLRR_UARTH	(MCF_IPSBAR + 0x10006C)
 
-
 /*
  * Generic GPIO support
  */
@@ -221,7 +218,6 @@
 #define MCFEPORT_EPDDR		(MCF_IPSBAR + 0x130002)
 #define MCFEPORT_EPDR		(MCF_IPSBAR + 0x130004)
 #define MCFEPORT_EPPDR		(MCF_IPSBAR + 0x130005)
-
 
 /*
  *	GPIO pins setups to enable the UARTs.

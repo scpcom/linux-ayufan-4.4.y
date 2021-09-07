@@ -781,7 +781,6 @@ void TPAL_SetPhyAutoNeg(struct et131x_adapter *etdev)
 	ET1310_PhyPowerDown(etdev, 0);
 }
 
-
 /*
  * The routines which follow provide low-level access to the PHY, and are used
  * primarily by the routines above (although there are a few places elsewhere

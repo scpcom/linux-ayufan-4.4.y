@@ -404,7 +404,6 @@ static int bus_reset(struct scsi_cmnd *srb)
 	wait_for_hub_EH(us);
 #endif
 
-
 	US_DEBUGP("%s called\n", __func__);
 	result = usb_stor_port_reset(us);
 	return result < 0 ? FAILED : SUCCESS;

@@ -119,7 +119,6 @@ inval_range:
 		     0x10000, _PAGE_NO_CACHE|_PAGE_GUARDED);
 }
 
-
 /**
  * isa_bridge_find_early - Find and map the ISA IO space early before
  *                         main PCI discovery. This is optionally called by

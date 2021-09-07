@@ -63,7 +63,6 @@ MODULE_PARM_DESC(spdif, "Support SPDIF I/O");
 static int enable;
 module_param(enable, bool, 0444);
 
-
 /*
  *  Debug part definitions
  */
@@ -81,7 +80,6 @@ module_param(enable, bool, 0444);
  */
 
 #define DEVICE_ID_ALI5451	((PCI_VENDOR_ID_AL<<16)|PCI_DEVICE_ID_AL_M5451)
-
 
 #define ALI_CHANNELS		32
 
@@ -169,7 +167,6 @@ module_param(enable, bool, 0444);
 
 #define MAX_CODECS 2
 
-
 struct snd_ali;
 struct snd_ali_voice;
 
@@ -217,7 +214,6 @@ struct snd_ali_voice {
 	void (*private_free)(void *private_data);
 };
 
-
 struct snd_alidev {
 
 	struct snd_ali_voice voices[ALI_CHANNELS];	
@@ -228,14 +224,12 @@ struct snd_alidev {
 
 };
 
-
 #define ALI_GLOBAL_REGS		56
 #define ALI_CHANNEL_REGS	8
 struct snd_ali_image {
 	u32 regs[ALI_GLOBAL_REGS];
 	u32 channel_regs[ALI_CHANNELS][ALI_CHANNEL_REGS];
 };
-
 
 struct snd_ali {
 	int		irq;
@@ -426,7 +420,6 @@ static void snd_ali_codec_write(struct snd_ac97 *ac97,
 	snd_ali_codec_poke(codec, ac97->num, reg, val);
 	return ;
 }
-
 
 static unsigned short snd_ali_codec_read(struct snd_ac97 *ac97,
 					 unsigned short reg)
@@ -756,7 +749,6 @@ static void snd_ali_disable_spdif_in(struct snd_ali *codec)
 	snd_ali_disable_special_channel(codec, ALI_SPDIF_IN_CHANNEL);	
 }
 
-
 static void snd_ali_set_spdif_out_rate(struct snd_ali *codec, unsigned int rate)
 {
 	unsigned char  bVal;
@@ -935,7 +927,6 @@ static irqreturn_t snd_ali_card_interrupt(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-
 static struct snd_ali_voice *snd_ali_alloc_voice(struct snd_ali * codec,
 						 int type, int rec, int channel)
 {
@@ -965,7 +956,6 @@ static struct snd_ali_voice *snd_ali_alloc_voice(struct snd_ali * codec,
 	return NULL;
 }
 
-
 static void snd_ali_free_voice(struct snd_ali * codec,
 			       struct snd_ali_voice *pvoice)
 {
@@ -989,7 +979,6 @@ static void snd_ali_free_voice(struct snd_ali * codec,
 	if (private_free)
 		private_free(private_data);
 }
-
 
 static void snd_ali_clear_voices(struct snd_ali *codec,
 				 unsigned int v_min,
@@ -1316,7 +1305,6 @@ static int snd_ali_playback_prepare(struct snd_pcm_substream *substream)
 	return 0;
 }
 
-
 static int snd_ali_prepare(struct snd_pcm_substream *substream)
 {
 	struct snd_ali *codec = snd_pcm_substream_chip(substream);
@@ -1403,7 +1391,6 @@ static int snd_ali_prepare(struct snd_pcm_substream *substream)
 	return 0;
 }
 
-
 static snd_pcm_uframes_t
 snd_ali_playback_pointer(struct snd_pcm_substream *substream)
 {
@@ -1424,7 +1411,6 @@ snd_ali_playback_pointer(struct snd_pcm_substream *substream)
 
 	return cso;
 }
-
 
 static snd_pcm_uframes_t snd_ali_pointer(struct snd_pcm_substream *substream)
 {
@@ -1660,7 +1646,6 @@ static struct snd_pcm_ops snd_ali_modem_capture_ops = {
 	.pointer =	snd_ali_pointer,
 };
 
-
 struct ali_pcm_description {
 	char *name;
 	unsigned int playback_num;
@@ -1670,13 +1655,11 @@ struct ali_pcm_description {
 	unsigned short class;
 };
 
-
 static void snd_ali_pcm_free(struct snd_pcm *pcm)
 {
 	struct snd_ali *codec = pcm->private_data;
 	codec->pcm[pcm->device] = NULL;
 }
-
 
 static int __devinit snd_ali_pcm(struct snd_ali * codec, int device,
 				 struct ali_pcm_description *desc)
@@ -1737,7 +1720,6 @@ static int __devinit snd_ali_build_pcms(struct snd_ali *codec)
 	}
 	return 0;
 }
-
 
 #define ALI5451_SPDIF(xname, xindex, value) \
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, .index = xindex,\

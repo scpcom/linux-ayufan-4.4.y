@@ -29,7 +29,6 @@
 #include "mixart_hwdep.h"
 #include "mixart_core.h"
 
-
 #define MSG_TIMEOUT_JIFFIES         (400 * HZ) / 1000 /* 400 ms */
 
 #define MSG_DESCRIPTOR_SIZE         0x24
@@ -43,7 +42,6 @@
 #define MSG_TYPE_REQUEST            2             /* driver -> embedded (request will get an answer back) */
 #define MSG_TYPE_ANSWER             3             /* embedded -> driver */
 #define MSG_CANCEL_NOTIFY_MASK      0x80000000    /* this bit is set for a notification that has been canceled */
-
 
 static int retrieve_msg_frame(struct mixart_mgr *mgr, u32 *msg_frame)
 {
@@ -135,7 +133,6 @@ static int get_msg(struct mixart_mgr *mgr, struct mixart_msg *resp,
 
 	return err;
 }
-
 
 /*
  * send a message to miXart. return: the msg_frame used for this message
@@ -234,7 +231,6 @@ static int send_msg( struct mixart_mgr *mgr,
 	return 0;
 }
 
-
 int snd_mixart_send_msg(struct mixart_mgr *mgr, struct mixart_msg *request, int max_resp_size, void *resp_data)
 {
 	struct mixart_msg resp;
@@ -284,7 +280,6 @@ int snd_mixart_send_msg(struct mixart_mgr *mgr, struct mixart_msg *request, int 
 	return err;
 }
 
-
 int snd_mixart_send_msg_wait_notif(struct mixart_mgr *mgr,
 				   struct mixart_msg *request, u32 notif_event)
 {
@@ -329,7 +324,6 @@ int snd_mixart_send_msg_wait_notif(struct mixart_mgr *mgr,
 	return 0;
 }
 
-
 int snd_mixart_send_msg_nonblock(struct mixart_mgr *mgr, struct mixart_msg *request)
 {
 	u32 message_frame;
@@ -347,10 +341,8 @@ int snd_mixart_send_msg_nonblock(struct mixart_mgr *mgr, struct mixart_msg *requ
 	return err;
 }
 
-
 /* common buffer of tasklet and interrupt to send/receive messages */
 static u32 mixart_msg_data[MSG_DEFAULT_SIZE / 4];
-
 
 void snd_mixart_msg_tasklet(unsigned long arg)
 {
@@ -411,7 +403,6 @@ void snd_mixart_msg_tasklet(unsigned long arg)
 
 	spin_unlock(&mgr->lock);
 }
-
 
 irqreturn_t snd_mixart_interrupt(int irq, void *dev_id)
 {
@@ -569,7 +560,6 @@ irqreturn_t snd_mixart_interrupt(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
-
 
 void snd_mixart_init_mailbox(struct mixart_mgr *mgr)
 {

@@ -12,7 +12,6 @@
 #ifndef CAPI_H
 #define CAPI_H
 
-
 #define REQ_CAUSE         0x01
 #define REQ_DISPLAY       0x04
 #define REQ_USER_TO_USER  0x08 
@@ -79,9 +78,3 @@ capi_channel(struct pcbit_dev *dev, struct sk_buff *skb)
 }
 
 #endif
-
-
-
-
-
-

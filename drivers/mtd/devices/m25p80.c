@@ -32,7 +32,6 @@
 #include <linux/spi/spi.h>
 #include <linux/spi/flash.h>
 
-
 #define FLASH_PAGESIZE		256
 
 /* Flash opcodes. */
@@ -186,7 +185,6 @@ static int lock_chip(struct mtd_info *mtd, loff_t ofs, size_t len)
         return 0;
 }
 #endif /* MY_ABC_HERE */
-
 
 /*
  * Erase the whole flash memory
@@ -617,7 +615,6 @@ struct flash_info {
 #define	SECT_4K		0x01		/* OPCODE_BE_4K works uniformly */
 };
 
-
 /* NOTE: double check command sets and memory organization when you add
  * more flash chips.  This current list focusses on newer chips, which
  * have been converging on command sets which including JEDEC ID.
@@ -737,7 +734,6 @@ static struct flash_info *__devinit jedec_probe(struct spi_device *spi)
 	dev_err(&spi->dev, "unrecognized JEDEC id %06x\n", jedec);
 	return NULL;
 }
-
 
 /*
  * board specific setup should have ensured the SPI clock used here
@@ -861,7 +857,6 @@ static int __devinit m25p_probe(struct spi_device *spi)
 				flash->mtd.eraseregions[i].erasesize / 1024,
 				flash->mtd.eraseregions[i].numblocks);
 
-
 	/* partitions should match sector boundaries; and it may be good to
 	 * use readonly partitions for writeprotected sectors (BP2..BP0).
 	 */
@@ -902,7 +897,6 @@ static int __devinit m25p_probe(struct spi_device *spi)
 	return add_mtd_device(&flash->mtd) == 1 ? -ENODEV : 0;
 }
 
-
 static int __devexit m25p_remove(struct spi_device *spi)
 {
 	struct m25p	*flash = dev_get_drvdata(&spi->dev);
@@ -917,7 +911,6 @@ static int __devexit m25p_remove(struct spi_device *spi)
 		kfree(flash);
 	return 0;
 }
-
 
 static struct spi_driver m25p80_driver = {
 	.driver = {
@@ -934,18 +927,15 @@ static struct spi_driver m25p80_driver = {
 	 */
 };
 
-
 static int __init m25p80_init(void)
 {
 	return spi_register_driver(&m25p80_driver);
 }
 
-
 static void __exit m25p80_exit(void)
 {
 	spi_unregister_driver(&m25p80_driver);
 }
-
 
 module_init(m25p80_init);
 module_exit(m25p80_exit);

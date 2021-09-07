@@ -37,7 +37,6 @@
 #ifndef _OID_H_
 #define _OID_H_
 
-
 #define TRUE				1
 #define FALSE				0
 //
@@ -305,7 +304,6 @@ typedef struct _NDIS_802_11_WEP
    UCHAR     KeyMaterial[1];// variable length depending on above field
 } NDIS_802_11_WEP, *PNDIS_802_11_WEP;
 
-
 typedef enum _NDIS_802_11_NETWORK_INFRASTRUCTURE
 {
    Ndis802_11IBSS,
@@ -340,7 +338,6 @@ typedef struct PACKED _NDIS_802_11_SSID
                                 // this can be zero.
     UCHAR   Ssid[NDIS_802_11_LENGTH_SSID];           // SSID information field
 } NDIS_802_11_SSID, *PNDIS_802_11_SSID;
-
 
 typedef struct PACKED _NDIS_WLAN_BSSID
 {
@@ -713,7 +710,6 @@ typedef struct _RT_802_11_TX_RATES_ {
     UCHAR       ExtRate[MAX_LENGTH_OF_SUPPORT_RATES];
 } RT_802_11_TX_RATES, *PRT_802_11_TX_RATES;
 
-
 // Definition of extra information code
 #define	GENERAL_LINK_UP			0x0			// Link is Up
 #define	GENERAL_LINK_DOWN		0x1			// Link is Down
@@ -795,4 +791,3 @@ typedef	struct	_WSC_PROFILE
 #endif
 
 #endif // _OID_H_
-

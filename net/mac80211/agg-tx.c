@@ -658,7 +658,6 @@ void ieee80211_stop_tx_ba_cb_irqsafe(struct ieee80211_hw *hw,
 }
 EXPORT_SYMBOL(ieee80211_stop_tx_ba_cb_irqsafe);
 
-
 void ieee80211_process_addba_resp(struct ieee80211_local *local,
 				  struct sta_info *sta,
 				  struct ieee80211_mgmt *mgmt,

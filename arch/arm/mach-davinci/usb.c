@@ -107,4 +107,3 @@ void __init setup_usb(unsigned mA, unsigned potpgt_msec)
 }
 
 #endif  /* CONFIG_USB_MUSB_HDRC */
-

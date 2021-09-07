@@ -37,5 +37,4 @@
 #define __get_DARS(R)	({ *(volatile unsigned long *)(0xfeff0100 + 8*(R)); })
 #define __get_DAMK(R)	({ *(volatile unsigned long *)(0xfeff0110 + 8*(R)); })
 
-
 #endif /* _ASM_BUSCTL_REGS_H */

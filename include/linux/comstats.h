@@ -67,7 +67,6 @@ typedef struct {
 	unsigned long	signals;
 } comstats_t;
 
-
 /*
  *	Board stats structure. Returns useful info about the board.
  */
@@ -95,7 +94,6 @@ typedef struct {
 	companel_t	panels[COM_MAXPANELS];
 } combrd_t;
 
-
 /*
  *	Define the ioctl operations for stats stuff.
  */
@@ -104,7 +102,6 @@ typedef struct {
 #define	COM_GETPORTSTATS	_IO('c',30)
 #define	COM_CLRPORTSTATS	_IO('c',31)
 #define	COM_GETBRDSTATS		_IO('c',32)
-
 
 /*
  *	Define the set of ioctls that give user level access to the

@@ -70,8 +70,6 @@ MV_CPU_DEC_WIN SYSMAP_DB_78XX0_NOR_32BIT[] = {
    	{{TBL_TERM, TBL_TERM, TBL_TERM}, TBL_TERM, TBL_TERM}
 };
 
-
-
 MV_CPU_DEC_WIN SYSMAP_DB_78200[] = {
 /*     	base low      base high      size        	WinNum		enable/disable */
 	{{SDRAM_CS0_BASE ,    0,      SDRAM_CS0_SIZE }, 0xFFFFFFFF,	EN },/*  0 */
@@ -107,4 +105,3 @@ MV_CPU_DEC_WIN SYSMAP_DB_78200[] = {
     	/* Table terminator */
    	{{TBL_TERM, TBL_TERM, TBL_TERM}, TBL_TERM, TBL_TERM}
 };
-

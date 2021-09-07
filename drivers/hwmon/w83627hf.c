@@ -384,7 +384,6 @@ struct w83627hf_sio_data {
 	enum chips type;
 };
 
-
 static int w83627hf_probe(struct platform_device *pdev);
 static int __devexit w83627hf_remove(struct platform_device *pdev);
 
@@ -1464,7 +1463,6 @@ static int __devexit w83627hf_remove(struct platform_device *pdev)
 
 	return 0;
 }
-
 
 /* Registers 0x50-0x5f are banked */
 static inline void w83627hf_set_bank(struct w83627hf_data *data, u16 reg)

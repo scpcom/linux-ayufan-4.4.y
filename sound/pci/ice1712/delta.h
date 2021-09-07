@@ -51,7 +51,6 @@
 /* entry point */
 extern struct snd_ice1712_card_info snd_ice1712_delta_cards[];
 
-
 /*
  *  MidiMan M-Audio Delta GPIO definitions
  */

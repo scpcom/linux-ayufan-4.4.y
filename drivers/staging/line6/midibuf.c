@@ -15,7 +15,6 @@
 
 #include "midibuf.h"
 
-
 static int midibuf_message_length(unsigned char code)
 {
 	if (code < 0x80)

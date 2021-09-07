@@ -29,7 +29,6 @@
 
 #include "i1480u-wlp.h"
 
-
 /**
  *
  * @dev: Class device from the net_device; assumed refcnted.
@@ -43,7 +42,6 @@ ssize_t uwb_phy_rate_show(const struct wlp_options *options, char *buf)
 		       wlp_tx_hdr_phy_rate(&options->def_tx_hdr));
 }
 EXPORT_SYMBOL_GPL(uwb_phy_rate_show);
-
 
 ssize_t uwb_phy_rate_store(struct wlp_options *options,
 			   const char *buf, size_t size)
@@ -66,14 +64,12 @@ out:
 }
 EXPORT_SYMBOL_GPL(uwb_phy_rate_store);
 
-
 ssize_t uwb_rts_cts_show(const struct wlp_options *options, char *buf)
 {
 	return sprintf(buf, "%u\n",
 		       wlp_tx_hdr_rts_cts(&options->def_tx_hdr));
 }
 EXPORT_SYMBOL_GPL(uwb_rts_cts_show);
-
 
 ssize_t uwb_rts_cts_store(struct wlp_options *options,
 			  const char *buf, size_t size)
@@ -94,14 +90,12 @@ out:
 }
 EXPORT_SYMBOL_GPL(uwb_rts_cts_store);
 
-
 ssize_t uwb_ack_policy_show(const struct wlp_options *options, char *buf)
 {
 	return sprintf(buf, "%u\n",
 		       wlp_tx_hdr_ack_policy(&options->def_tx_hdr));
 }
 EXPORT_SYMBOL_GPL(uwb_ack_policy_show);
-
 
 ssize_t uwb_ack_policy_store(struct wlp_options *options,
 			     const char *buf, size_t size)
@@ -121,7 +115,6 @@ out:
 }
 EXPORT_SYMBOL_GPL(uwb_ack_policy_store);
 
-
 /**
  * Show the PCA base priority.
  *
@@ -135,7 +128,6 @@ ssize_t uwb_pca_base_priority_show(const struct wlp_options *options,
 		       options->pca_base_priority);
 }
 EXPORT_SYMBOL_GPL(uwb_pca_base_priority_show);
-
 
 /**
  * Set the PCA base priority.
@@ -254,7 +246,6 @@ static ssize_t i1480u_store_##name(struct device *dev,		\
 					i1480u_show_##name, NULL)
 
 #define i1480u_ATTR_NAME(a) (dev_attr_##a)
-
 
 /*
  * Sysfs adaptors
@@ -398,7 +389,6 @@ int i1480u_sysfs_setup(struct i1480u *i1480u)
 			result);
 	return result;
 }
-
 
 void i1480u_sysfs_release(struct i1480u *i1480u)
 {

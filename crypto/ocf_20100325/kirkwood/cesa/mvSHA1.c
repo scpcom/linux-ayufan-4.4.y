@@ -78,7 +78,6 @@ static void mvSHA1Transform(MV_U32 state[5], const MV_U8 *buffer);
 
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 
- 
 #ifdef MV_CPU_LE
 #define blk0(i) (block->l[i] = (rol(block->l[i], 24) & 0xFF00FF00) | \
         (rol(block->l[i], 8) & 0x00FF00FF))
@@ -166,7 +165,6 @@ void    mvSHA1Init(MV_SHA1_CTX* context)
     context->count[0] = context->count[1] = 0;
 }
 
-
 /* Run your data through this. */
 void    mvSHA1Update(MV_SHA1_CTX *context, MV_U8 const *data, 
                      unsigned int len)
@@ -227,7 +225,6 @@ void    mvSHA1Final(MV_U8* digest, MV_SHA1_CTX* context)
     mvSHA1Transform(context->state, context->buffer);
 #endif 
 }
-
 
 void mvSHA1(MV_U8 const *buf, unsigned int len, MV_U8* digest)
 {

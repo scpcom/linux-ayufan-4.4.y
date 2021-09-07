@@ -1868,7 +1868,6 @@ static irqreturn_t ihdlr(unsigned int j)
             for (k = 0; k < sh[j]->max_id; k++)
                HD(j)->target_redo[k][c] = TRUE;
 
-
       case 0x92:     /* Data over/under-run */
 
          if (SCpnt->device->type != TYPE_TAPE

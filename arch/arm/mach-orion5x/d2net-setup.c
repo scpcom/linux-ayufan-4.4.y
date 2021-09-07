@@ -362,4 +362,3 @@ MACHINE_START(BIGDISK, "LaCie Big Disk Network")
 	.fixup		= tag_fixup_mem32,
 MACHINE_END
 #endif
-

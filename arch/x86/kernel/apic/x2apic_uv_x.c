@@ -540,7 +540,6 @@ void __cpuinit uv_cpu_init(void)
 		set_x2apic_extra_bits(uv_hub_info->pnode);
 }
 
-
 void __init uv_system_init(void)
 {
 	union uvh_si_addr_map_config_u m_n_config;

@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 // 2.4 Ghz channel plan index in the TxPower arrays.
 #define	BG_BAND_REGION_0_START	0			// 1,2,3,4,5,6,7,8,9,10,11
 #define	BG_BAND_REGION_0_SIZE	11
@@ -75,7 +74,6 @@ UCHAR A_BAND_REGION_12_CHANNEL_LIST[]={36, 40, 44, 48, 52, 56, 60, 64, 100, 104,
 UCHAR A_BAND_REGION_13_CHANNEL_LIST[]={52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 149, 153, 157, 161};
 UCHAR A_BAND_REGION_14_CHANNEL_LIST[]={36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116, 136, 140, 149, 153, 157, 161, 165};
 UCHAR A_BAND_REGION_15_CHANNEL_LIST[]={149, 153, 157, 161, 165, 169, 173};
-
 
 //BaSizeArray follows the 802.11n definition as MaxRxFactor.  2^(13+factor) bytes. When factor =0, it's about Ba buffer size =8.
 UCHAR BaSizeArray[4] = {8,16,32,64};
@@ -480,7 +478,6 @@ VOID ScanNextChannel(
 		}
 #endif // CONFIG_STA_SUPPORT //
 
-
 		RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS);
 	}
 	else
@@ -583,7 +580,6 @@ VOID ScanNextChannel(
 			IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 				MgtMacHeaderInit(pAd, &Hdr80211, SUBTYPE_PROBE_REQ, 0, BROADCAST_ADDR, BROADCAST_ADDR);
 #endif // CONFIG_STA_SUPPORT //
-
 
 			MakeOutgoingFrame(pOutBuffer,               &FrameLen,
 							  sizeof(HEADER_802_11),    &Hdr80211,
@@ -697,7 +693,6 @@ VOID ScanNextChannel(
 #endif // DOT11N_DRAFT3 //
 			}
 #endif // DOT11_N_SUPPORT //
-
 
 			MiniportMMRequest(pAd, 0, pOutBuffer, FrameLen);
 			MlmeFreeMemory(pAd, pOutBuffer);

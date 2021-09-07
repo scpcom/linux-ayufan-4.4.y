@@ -59,7 +59,6 @@ Mellon the rights to redistribute these changes without encumbrance.
 #ifndef _CODA_HEADER_
 #define _CODA_HEADER_
 
-
 /* Catch new _KERNEL defn for NetBSD and DJGPP/__CYGWIN32__ */
 #if defined(__NetBSD__) || \
   ((defined(DJGPP) || defined(__CYGWIN32__)) && !defined(KERNEL))
@@ -96,7 +95,6 @@ typedef unsigned long long u_quad_t;
 #endif /* !KERNEL */
 #endif /* !DJGPP */
 
-
 #if defined(__linux__)
 #include <linux/time.h>
 #define cdev_t u_quad_t
@@ -129,7 +127,6 @@ typedef int		     int32_t;
 typedef unsigned int	   u_int32_t;
 #endif
 
-
 /*
  * Cfs constants
  */
@@ -156,8 +153,6 @@ typedef unsigned int	   u_int32_t;
 #define C_A_W_OK    2               /* Test for write permission.  */
 #define C_A_X_OK    1               /* Test for execute permission.  */
 #define C_A_F_OK    0               /* Test for existence.  */
-
-
 
 #ifndef _VENUS_DIRENT_T_
 #define _VENUS_DIRENT_T_ 1
@@ -332,7 +327,6 @@ struct coda_open_out {
     ino_t	inode;
 };
 
-
 /* coda_store: */
 struct coda_store_in {
     struct coda_in_hdr ih;
@@ -382,7 +376,6 @@ struct coda_ioctl_out {
     caddr_t	data;		/* Place holder for data. */
 };
 
-
 /* coda_getattr: */
 struct coda_getattr_in {
     struct coda_in_hdr ih;
@@ -393,7 +386,6 @@ struct coda_getattr_out {
     struct coda_out_hdr oh;
     struct coda_vattr attr;
 };
-
 
 /* coda_setattr: NO_OUT */
 struct coda_setattr_in {
@@ -417,7 +409,6 @@ struct coda_access_out {
     struct coda_out_hdr out;
 };
 
-
 /* lookup flags */
 #define CLU_CASE_SENSITIVE     0x01
 #define CLU_CASE_INSENSITIVE   0x02
@@ -436,7 +427,6 @@ struct coda_lookup_out {
     int	vtype;
 };
 
-
 /* coda_create: */
 struct coda_create_in {
     struct coda_in_hdr ih;
@@ -452,7 +442,6 @@ struct coda_create_out {
     struct CodaFid VFid;
     struct coda_vattr attr;
 };
-
 
 /* coda_remove: NO_OUT */
 struct coda_remove_in {
@@ -476,7 +465,6 @@ struct coda_link_in {
 struct coda_link_out {
     struct coda_out_hdr out;
 };
-
 
 /* coda_rename: NO_OUT */
 struct coda_rename_in {
@@ -504,7 +492,6 @@ struct coda_mkdir_out {
     struct CodaFid VFid;
     struct coda_vattr attr;
 };
-
 
 /* coda_rmdir: NO_OUT */
 struct coda_rmdir_in {
@@ -542,7 +529,6 @@ struct coda_readlink_out {
     caddr_t	data;		/* Place holder for data. */
 };
 
-
 /* coda_fsync: NO_OUT */
 struct coda_fsync_in {
     struct coda_in_hdr ih;
@@ -564,7 +550,6 @@ struct coda_vget_out {
     struct CodaFid VFid;
     int	vtype;
 };
-
 
 /* CODA_SIGNAL is out-of-band, doesn't need data. */
 /* CODA_INVALIDATE is a venus->kernel call */
@@ -708,7 +693,6 @@ union coda_downcalls {
     struct coda_replace_out replace;
 };
 
-
 /*
  * Used for identifying usage of "Control" and pioctls
  */
@@ -741,4 +725,3 @@ struct coda_mount_data {
 };
 
 #endif 
-

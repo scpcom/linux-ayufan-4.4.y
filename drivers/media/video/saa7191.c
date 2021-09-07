@@ -34,7 +34,6 @@ MODULE_VERSION(SAA7191_MODULE_VERSION);
 MODULE_AUTHOR("Mikael Nousiainen <tmnousia@cc.hut.fi>");
 MODULE_LICENSE("GPL");
 
-
 // #define SAA7191_DEBUG
 
 #ifdef SAA7191_DEBUG
@@ -124,7 +123,6 @@ static int saa7191_read_status(struct v4l2_subdev *sd, u8 *value)
 
 	return 0;
 }
-
 
 static int saa7191_write_reg(struct v4l2_subdev *sd, u8 reg, u8 value)
 {
@@ -566,7 +564,6 @@ static int saa7191_g_input_status(struct v4l2_subdev *sd, u32 *status)
 	*status = res;
 	return 0;
 }
-
 
 static int saa7191_g_chip_ident(struct v4l2_subdev *sd,
 		struct v4l2_dbg_chip_ident *chip)

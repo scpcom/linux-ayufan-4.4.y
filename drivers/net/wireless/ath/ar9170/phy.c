@@ -1032,7 +1032,6 @@ ar9170_get_hw_dyn_params(struct ieee80211_channel *channel,
 	return &ar9170_phy_freq_params[chanidx].params[bw];
 }
 
-
 int ar9170_init_rf(struct ar9170 *ar)
 {
 	const struct ar9170_phy_freq_params *freqpar;
@@ -1494,7 +1493,6 @@ static int ar9170_set_power_cal(struct ar9170 *ar, u32 freq, enum ar9170_bw bw)
 					ctph[idx + 1].freq,
 					ctph[idx + 1].power[n]);
 	}
-
 
 	/* calc. conformance test limits and apply to ar->power*[] */
 	ar9170_calc_ctl(ar, freq, bw);

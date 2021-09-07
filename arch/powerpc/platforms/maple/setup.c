@@ -293,7 +293,6 @@ static void __init maple_progress(char *s, unsigned short hex)
 	printk("*** %04x : %s\n", hex, s ? s : "");
 }
 
-
 /*
  * Called very early, MMU is off, device-tree isn't unflattened
  */

@@ -25,7 +25,7 @@
 #define MIIMCFG_INIT_VALUE_RGMII	0x00000006
 #endif /* MY_ABC_HERE */
 
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 #define MIIMCFG_INIT_VALUE     0x00000003
 #else /* MY_ABC_HERE */
 #define MIIMCFG_INIT_VALUE	0x00000007
@@ -45,7 +45,6 @@ struct fsl_pq_mdio {
 	u8 reserved[28];	/* Space holder */
 	u32 utbipar;		/* TBI phy address reg (only on UCC) */
 } __attribute__ ((packed));
-
 
 int fsl_pq_mdio_read(struct mii_bus *bus, int mii_id, int regnum);
 int fsl_pq_mdio_write(struct mii_bus *bus, int mii_id, int regnum, u16 value);

@@ -256,7 +256,6 @@ int __init gvp11_detect(struct scsi_host_template *tpnt)
 	if (*scmd_3393 != q)	/* and so should the image at 0x1f */
 		goto release;
 
-
     /* Ok, we probably have a wd33c93, but let's check a few other places
      * for good measure. Make sure that this works for both 'A and 'B    
      * chip versions.
@@ -305,7 +304,6 @@ int __init gvp11_detect(struct scsi_host_template *tpnt)
 		HDATA(instance)->dma_xfer_mask = gvp11_xfer_mask;
 	else
 		HDATA(instance)->dma_xfer_mask = default_dma_xfer_mask;
-
 
 	DMA(instance)->secret2 = 1;
 	DMA(instance)->secret1 = 0;
@@ -361,7 +359,6 @@ static int gvp11_bus_reset(struct scsi_cmnd *cmd)
 	return SUCCESS;
 }
 
-
 #define HOSTS_C
 
 #include "gvp11.h"
@@ -381,7 +378,6 @@ static struct scsi_host_template driver_template = {
 	.cmd_per_lun		= CMD_PER_LUN,
 	.use_clustering		= DISABLE_CLUSTERING
 };
-
 
 #include "scsi_module.c"
 

@@ -104,7 +104,6 @@ extern "C" {
 #define MV_ATA_READY_STATUS                     MV_BIT6
 #define MV_ATA_BUSY_STATUS                      MV_BIT7
 
-
 #define MV_ATA_COMMAND_READ_SECTORS             0x20
 #define MV_ATA_COMMAND_READ_SECTORS_EXT         0x24
 #define MV_ATA_COMMAND_READ_LOG_EXT				0x2F
@@ -152,13 +151,10 @@ extern "C" {
 #define MV_SATA_GSCR_FEATURES_REG_NUM           64
 #define MV_SATA_GSCR_FEATURES_ENABLE_REG_NUM    96
 
-
 #define MV_SATA_PSCR_SSTATUS_REG_NUM            0
 #define MV_SATA_PSCR_SERROR_REG_NUM             1
 #define MV_SATA_PSCR_SCONTROL_REG_NUM           2
 #define MV_SATA_PSCR_SACTIVE_REG_NUM            3
-
-
 
 #define MV_ATA_SET_FEATURES_DISABLE_8_BIT_PIO   0x01
 #define MV_ATA_SET_FEATURES_ENABLE_WCACHE       0x02  /* Enable write cache */
@@ -330,7 +326,6 @@ extern "C" {
                                       MV_STORAGE_DEVICE_REGISTERS *pInATARegs,
                                       MV_STORAGE_DEVICE_REGISTERS *pOutATARegs);
 
-
     MV_BOOLEAN mvStorageDevATAStartSoftResetDevice(MV_SATA_ADAPTER *pAdapter,
                                                    MV_U8 channelIndex,
                                                    MV_U8 PMPort);
@@ -345,7 +340,6 @@ extern "C" {
 
     MV_SATA_DEVICE_TYPE mvStorageDevGetDeviceType(MV_SATA_ADAPTER *pAdapter,
                                                   MV_U8 channelIndex);
-
 
 #ifdef __cplusplus
 

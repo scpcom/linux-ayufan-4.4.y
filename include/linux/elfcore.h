@@ -150,5 +150,4 @@ static inline int elf_core_copy_task_xfpregs(struct task_struct *t, elf_fpxregse
 
 #endif /* __KERNEL__ */
 
-
 #endif /* _LINUX_ELFCORE_H */

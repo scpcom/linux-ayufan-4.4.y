@@ -241,7 +241,6 @@ static const struct b43legacy_dma_ops dma64_ops = {
 	.set_current_rxslot	= op64_set_current_rxslot,
 };
 
-
 static inline int free_slots(struct b43legacy_dmaring *ring)
 {
 	return (ring->nr_slots - ring->used_slots);
@@ -352,7 +351,6 @@ return 0;
 
 	return idx_to_prio[ring->index];
 }
-
 
 static u16 b43legacy_dmacontroller_base(enum b43legacy_dmatype type,
 					int controller_idx)

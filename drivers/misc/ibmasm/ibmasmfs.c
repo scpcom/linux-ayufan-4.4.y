@@ -26,7 +26,6 @@
  * that appeared in Linux Weekly News.
  */
 
-
 /*
  * The IBMASM file virtual filesystem. It creates the following hierarchy
  * dymamically when mounted from user space:
@@ -88,7 +87,6 @@ static LIST_HEAD(service_processors);
 static struct inode *ibmasmfs_make_inode(struct super_block *sb, int mode);
 static void ibmasmfs_create_files (struct super_block *sb, struct dentry *root);
 static int ibmasmfs_fill_super (struct super_block *sb, void *data, int silent);
-
 
 static int ibmasmfs_get_super(struct file_system_type *fst,
 			int flags, const char *name, void *data,
@@ -565,7 +563,6 @@ static ssize_t remote_settings_file_write(struct file *file, const char __user *
 	if (!buff)
 		return -ENOMEM;
 
-
 	if (copy_from_user(buff, ubuff, count)) {
 		kfree(buff);
 		return -EFAULT;
@@ -605,7 +602,6 @@ static const struct file_operations remote_settings_fops = {
 	.read =		remote_settings_file_read,
 	.write =	remote_settings_file_write,
 };
-
 
 static void ibmasmfs_create_files (struct super_block *sb, struct dentry *root)
 {

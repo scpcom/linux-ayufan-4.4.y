@@ -55,7 +55,6 @@ static void set_multicast_list(struct net_device *dev)
 {
 }
 
-
 static netdev_tx_t dummy_xmit(struct sk_buff *skb, struct net_device *dev)
 {
 	dev->stats.tx_packets++;

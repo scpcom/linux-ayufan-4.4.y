@@ -347,7 +347,6 @@ static struct platform_driver regulator_virtual_consumer_driver = {
 	},
 };
 
-
 static int __init regulator_virtual_consumer_init(void)
 {
 	return platform_driver_register(&regulator_virtual_consumer_driver);

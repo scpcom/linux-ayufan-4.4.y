@@ -38,9 +38,7 @@
 #define IOMMU_DT_VALID             0x00000001
 #define IOMMU_DT_BAD               0x00000002
 
-
 static volatile unsigned long *iommu_pte = (unsigned long *)SUN3X_IOMMU;
-
 
 #define dvma_entry_paddr(index)		(iommu_pte[index] & IOMMU_ADDR_MASK)
 #define dvma_entry_vaddr(index,paddr)	((index << DVMA_PAGE_SHIFT) |  \
@@ -73,10 +71,8 @@ void dvma_print (unsigned long dvma_addr)
         printk("idx %lx dvma_addr %08lx paddr %08lx\n", index, dvma_addr,
                dvma_entry_paddr(index));
 
-
 }
 #endif
-
 
 /* create a virtual mapping for a page assigned within the IOMMU
    so that the cpu can reach it easily */
@@ -148,7 +144,6 @@ inline int dvma_map_cpu(unsigned long kaddr,
 	return ret;
 }
 
-
 inline int dvma_map_iommu(unsigned long kaddr, unsigned long baddr,
 				 int len)
 {
@@ -186,7 +181,6 @@ void dvma_unmap_iommu(unsigned long baddr, int len)
 
 	int index, end;
 
-
 	index = baddr >> DVMA_PAGE_SHIFT;
 	end = (DVMA_PAGE_ALIGN(baddr+len) >> DVMA_PAGE_SHIFT);
 
@@ -205,4 +199,3 @@ void dvma_unmap_iommu(unsigned long baddr, int len)
 	}
 
 }
-

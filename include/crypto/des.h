@@ -13,7 +13,6 @@
 #define DES3_EDE_EXPKEY_WORDS	(3 * DES_EXPKEY_WORDS)
 #define DES3_EDE_BLOCK_SIZE	DES_BLOCK_SIZE
 
-
 extern unsigned long des_ekey(u32 *pe, const u8 *k);
 
 #endif /* __CRYPTO_DES_H */

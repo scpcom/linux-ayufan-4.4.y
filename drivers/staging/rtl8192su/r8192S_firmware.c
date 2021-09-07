@@ -43,7 +43,6 @@ bool FirmwareDownloadCode(struct net_device *dev, u8 *	code_virtual_address,u32 
 	u8                  	    bLastIniPkt = 0;
 	u16 			    ExtraDescOffset = 0;
 
-
 	RT_TRACE(COMP_FIRMWARE, "--->FirmwareDownloadCode()\n" );
 
 	//MAX_TRANSMIT_BUFFER_SIZE
@@ -99,14 +98,12 @@ bool FirmwareDownloadCode(struct net_device *dev, u8 *	code_virtual_address,u32 
 
 	return rt_status ;
 
-
 cmdsend_downloadcode_fail:
 	rt_status = false;
 	RT_TRACE(COMP_ERR, "CmdSendDownloadCode fail !!\n");
 	return rt_status;
 
 }
-
 
 RT_STATUS
 FirmwareEnableCPU(struct net_device *dev)
@@ -290,7 +287,6 @@ FirmwareCheckReady(struct net_device *dev,	u8 LoadFWStatus)
 
 		RT_TRACE(COMP_FIRMWARE, "FirmwareCheckReady(): Current RCR settings(%#x)\n", tmpU4b);
 
-
 		// Set to normal mode.
 		write_nic_byte(dev, LBKMD_SEL, LBK_NORMAL);
 
@@ -321,7 +317,6 @@ u8 FirmwareHeaderMapRfType(struct net_device *dev)
 	return 0x22;
 }
 
-
 //
 // Description:   This routine is to update the private parts in FW header partially.
 //
@@ -337,8 +332,6 @@ void FirmwareHeaderPriveUpdate(struct net_device *dev, PRT_8192S_FIRMWARE_PRIV 	
 	// Update RF types for RATR settings.
 	pFwPriv->rf_config = FirmwareHeaderMapRfType(dev);
 }
-
-
 
 bool FirmwareDownload92S(struct net_device *dev)
 {
@@ -424,7 +417,6 @@ bool FirmwareDownload92S(struct net_device *dev)
 					memcpy(pFirmware->FwEMEM, pucMappedFile, pFwHdr->IMG_SRAM_SIZE);//===>6
 					pFirmware->FwEMEMLen = pFwHdr->IMG_SRAM_SIZE;
 				}
-
 
 			}
 			break;
@@ -537,4 +529,3 @@ bool FirmwareDownload92S(struct net_device *dev)
 	rtStatus = false;
 	return rtStatus;
 }
-

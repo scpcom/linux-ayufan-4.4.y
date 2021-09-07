@@ -70,7 +70,6 @@ int i915_wait_ring(struct drm_device * dev, int n, const char *caller)
 				master_priv->sarea_priv->perf_boxes |= I915_BOX_WAIT;
 		}
 
-
 		if (ring->head != last_head)
 			i = 0;
 		if (acthd != last_acthd)

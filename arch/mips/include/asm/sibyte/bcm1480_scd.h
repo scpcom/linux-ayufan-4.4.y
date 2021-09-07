@@ -165,18 +165,15 @@
  * Same as BCM1250
  */
 
-
 /*
  * Mailbox Registers (Table 17)
  * Registers: SCD_MBOX_{0,1}_CPU_x
  * Same as BCM1250
  */
 
-
 /*
  * See bcm1480_int.h for interrupt mapper registers.
  */
-
 
 /*
  * Watchdog Timer Initial Count Registers (Table 23)
@@ -186,7 +183,6 @@
  * the configuration register has more bits to control the
  * other CPUs.
  */
-
 
 /*
  * Watchdog Timer Configuration Registers (Table 25)
@@ -208,7 +204,6 @@
 #define K_BCM1480_SCD_WDOG_RESET_CPU3       17
 #define K_BCM1480_SCD_WDOG_RESET_ALL_CPUS   31
 
-
 #define M_BCM1480_SCD_WDOG_HAS_RESET        _SB_MAKEMASK1(8)
 
 /*
@@ -217,7 +212,6 @@
  *
  * The timer registers are the same as the BCM1250
  */
-
 
 /*
  * ZBbus Count Register (Table 29)
@@ -232,7 +226,6 @@
  *
  * Same as BCM1250
  */
-
 
 /*
  * System Performance Counter Configuration Register (Table 31)
@@ -287,7 +280,6 @@
 
 #define M_BCM1480_SPC_CNT_OFLOW             _SB_MAKEMASK1(40)
 
-
 /*
  * Bus Watcher Error Status Register (Tables 36, 37)
  * Registers: BUS_ERR_STATUS, BUS_ERR_STATUS_DEBUG
@@ -306,13 +298,11 @@
  * Same as BCM1250.
  */
 
-
 /*
  * Bus Watcher Memory and I/O Error Counter Register (Table 40)
  * Register: BUS_MEM_IO_ERRORS
  * Same as BCM1250.
  */
-
 
 /*
  * Address Trap Registers
@@ -341,7 +331,6 @@
 #define V_BCM1480_ATRAP_CFG_AGENTID(x)  _SB_MAKEVALUE(x, S_BCM1480_ATRAP_CFG_AGENTID)
 #define G_BCM1480_ATRAP_CFG_AGENTID(x)  _SB_GETVALUE(x, S_BCM1480_ATRAP_CFG_AGENTID, M_BCM1480_ATRAP_CFG_AGENTID)
 
-
 #define K_BCM1480_BUS_AGENT_CPU0            0
 #define K_BCM1480_BUS_AGENT_CPU1            1
 #define K_BCM1480_BUS_AGENT_NC              2
@@ -365,7 +354,6 @@
 
 #define M_BCM1480_ATRAP_CFG_CATTRINV        _SB_MAKEMASK1(14)
 
-
 /*
  * Trace Event Registers (Table 47)
  * Same as BCM1250.
@@ -377,7 +365,6 @@
  *
  * Same as BCM1250 except for two new fields.
  */
-
 
 #define M_BCM1480_SCD_TRSEQ_TID_MATCH_EN    _SB_MAKEMASK1(25)
 

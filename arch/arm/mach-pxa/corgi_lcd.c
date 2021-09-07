@@ -285,4 +285,3 @@ void corgi_lcdtg_suspend(void)
 
 	lcd_inited = 0;
 }
-

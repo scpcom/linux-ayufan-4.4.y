@@ -83,7 +83,6 @@ static void     bfa_itnim_iotov_delete(struct bfa_itnim_s *itnim);
  *  bfa_itnim_sm BFA itnim state machine
  */
 
-
 enum bfa_itnim_event {
 	BFA_ITNIM_SM_CREATE = 1,	/*  itnim is created */
 	BFA_ITNIM_SM_ONLINE = 2,	/*  itnim is online */
@@ -587,8 +586,6 @@ bfa_itnim_sm_deleting_qfull(struct bfa_itnim_s *itnim,
 	}
 }
 
-
-
 /**
  *  bfa_itnim_private
  */
@@ -711,9 +708,6 @@ bfa_itnim_qresume(void *cbarg)
 
 	bfa_sm_send_event(itnim, BFA_ITNIM_SM_QRESUME);
 }
-
-
-
 
 /**
  *  bfa_itnim_public
@@ -959,8 +953,6 @@ bfa_itnim_iotov_delete(struct bfa_itnim_s *itnim)
 		bfa_cb_itnim_tov(itnim->ditn);
 }
 
-
-
 /**
  *  bfa_itnim_public
  */
@@ -1008,8 +1000,6 @@ bfa_itnim_isr(struct bfa_s *bfa, struct bfi_msg_s *m)
 		bfa_assert(0);
 	}
 }
-
-
 
 /**
  *  bfa_itnim_api
@@ -1084,5 +1074,3 @@ bfa_itnim_clear_stats(struct bfa_itnim_s *itnim)
 {
 	bfa_os_memset(&itnim->stats, 0, sizeof(itnim->stats));
 }
-
-

@@ -30,7 +30,6 @@
 
 static DEFINE_MUTEX(cbe_switch_mutex);
 
-
 /* the CBE supports an 8 step frequency scaling */
 static struct cpufreq_frequency_table cbe_freqs[] = {
 	{1,	0},

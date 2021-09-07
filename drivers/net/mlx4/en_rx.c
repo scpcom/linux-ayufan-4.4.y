@@ -40,7 +40,6 @@
 
 #include "mlx4_en.h"
 
-
 static int mlx4_en_get_frag_header(struct skb_frag_struct *frags, void **mac_hdr,
 				   void **ip_hdr, void **tcpudp_hdr,
 				   u64 *hdr_flags, void *priv)
@@ -134,7 +133,6 @@ static void mlx4_en_destroy_allocator(struct mlx4_en_priv *priv,
 	}
 }
 
-
 static void mlx4_en_init_rx_desc(struct mlx4_en_priv *priv,
 				 struct mlx4_en_rx_ring *ring, int index)
 {
@@ -162,7 +160,6 @@ static void mlx4_en_init_rx_desc(struct mlx4_en_priv *priv,
 		rx_desc->data[i].addr = 0;
 	}
 }
-
 
 static int mlx4_en_prepare_rx_desc(struct mlx4_en_priv *priv,
 				   struct mlx4_en_rx_ring *ring, int index)
@@ -280,7 +277,6 @@ int mlx4_en_create_rx_ring(struct mlx4_en_priv *priv,
 	struct mlx4_en_dev *mdev = priv->mdev;
 	int err;
 	int tmp;
-
 
 	ring->prod = 0;
 	ring->cons = 0;
@@ -427,7 +423,6 @@ void mlx4_en_deactivate_rx_ring(struct mlx4_en_priv *priv,
 	mlx4_en_destroy_allocator(priv, ring);
 }
 
-
 /* Unmap a completed descriptor and free unused pages */
 static int mlx4_en_complete_rx_desc(struct mlx4_en_priv *priv,
 				    struct mlx4_en_rx_desc *rx_desc,
@@ -476,7 +471,6 @@ fail:
 	}
 	return 0;
 }
-
 
 static struct sk_buff *mlx4_en_rx_skb(struct mlx4_en_priv *priv,
 				      struct mlx4_en_rx_desc *rx_desc,
@@ -539,7 +533,6 @@ static struct sk_buff *mlx4_en_rx_skb(struct mlx4_en_priv *priv,
 	}
 	return skb;
 }
-
 
 int mlx4_en_process_rx_cq(struct net_device *dev, struct mlx4_en_cq *cq, int budget)
 {
@@ -691,7 +684,6 @@ out:
 	return polled;
 }
 
-
 void mlx4_en_rx_irq(struct mlx4_cq *mcq)
 {
 	struct mlx4_en_cq *cq = container_of(mcq, struct mlx4_en_cq, mcq);
@@ -724,7 +716,6 @@ int mlx4_en_poll_rx_cq(struct napi_struct *napi, int budget)
 	return done;
 }
 
-
 /* Calculate the last offset position that accomodates a full fragment
  * (assuming fagment size = stride-align) */
 static int mlx4_en_last_alloc_offset(struct mlx4_en_priv *priv, u16 stride, u16 align)
@@ -736,7 +727,6 @@ static int mlx4_en_last_alloc_offset(struct mlx4_en_priv *priv, u16 stride, u16 
 			    "res:%d offset:%d\n", stride, align, res, offset);
 	return offset;
 }
-
 
 static int frag_sizes[] = {
 	FRAG_SZ0,
@@ -933,8 +923,3 @@ void mlx4_en_release_rss_steer(struct mlx4_en_priv *priv)
 	}
 	mlx4_qp_release_range(mdev->dev, rss_map->base_qpn, priv->rx_ring_num);
 }
-
-
-
-
-

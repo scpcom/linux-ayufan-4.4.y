@@ -85,8 +85,6 @@ extern "C" /*{*/
 /* Definitions */
 #define MV_CORE_DRIVER_LOG_ID                   0
 
-
-
 /* MV88SX50XX specific defines */
 #define MV_SATA_VENDOR_ID                       0x11AB
 #define MV_SATA_DEVICE_ID_5080                  0x5080
@@ -114,7 +112,6 @@ extern "C" /*{*/
 #define MV_SATA_DEVICE_ID_6190                 0x6190 /*88f6190 integrated sata*/
 #define MV_SATA_DEVICE_ID_6701                 0x6701 /*88f6701 integrated sata*/
 #define MV_SATA_DEVICE_ID_6702                 0x6702 /*88f6702 integrated sata*/
-
 
 #define MV_SATA_CHANNELS_NUM                    8
 #define MV_SATA_UNITS_NUM                       2
@@ -455,7 +452,6 @@ typedef struct mvQueuedCommandEntry
 #endif
 } MV_QUEUED_COMMAND_ENTRY;
 
-
 typedef enum mvErrorHandlingState
 {
     MV_ERROR_HANDLING_STATE_IDLE,
@@ -559,8 +555,6 @@ typedef struct mvSataChannel
     MV_ERROR_HANDLING_INFO  ErrorHandlingInfo;
 } MV_SATA_CHANNEL;
 
-
-
 typedef struct mvSataAdapter
 {
     /* Fields set by Intermediate Application Layer */
@@ -578,7 +572,6 @@ typedef struct mvSataAdapter
     MV_U32            pciCommand;
     MV_U32            pciSerrMask;
     MV_U32            pciInterruptMask;
-
 
     /* Fields set by CORE driver */
     MV_SATA_GEN       sataAdapterGeneration;
@@ -693,7 +686,6 @@ MV_QUEUE_COMMAND_RESULT mvSataQueueCommand(MV_SATA_ADAPTER *pAdapter,
                                            MV_U8 channelIndex,
                                            MV_QUEUE_COMMAND_INFO *pCommandParams);
 
-
 /* Interrupt Service Routine */
 MV_BOOLEAN mvSataInterruptServiceRoutine(MV_SATA_ADAPTER *pAdapter);
 
@@ -719,7 +711,6 @@ MV_BOOLEAN mvSataDisableStaggeredSpinUpAll (MV_SATA_ADAPTER *pAdapter);
 
 MV_BOOLEAN mvSataDisableStaggeredSpinUp (MV_SATA_ADAPTER *pAdapter,
                                          MV_U8 channelIndex);
-
 
 MV_BOOLEAN mvSataSetInterfaceSpeed (MV_SATA_ADAPTER *pAdapter,
                                     MV_U8 channelIndex,
@@ -747,7 +738,6 @@ MV_BOOLEAN mvSataC2CInit (MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex,
                           C2CCallBack_t mvSataC2CCallBack);
 
 MV_BOOLEAN mvSataC2CStop (MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex);
-
 
 MV_BOOLEAN  mvSataC2CSendRegisterDeviceToHostFIS(
                                                 MV_SATA_ADAPTER *pAdapter,

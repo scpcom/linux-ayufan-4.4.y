@@ -59,7 +59,6 @@ static struct mce_regs mce_regs[MAX_MCE_REGS];
 static int num_mce_regs;
 static int nmi_virq = NO_IRQ;
 
-
 static void pas_restart(char *cmd)
 {
 	/* Need to put others cpu in hold loop so they're not sleeping */
@@ -251,7 +250,6 @@ static void __init pas_progress(char *s, unsigned short hex)
 	printk("[%04x] : %s\n", hex, s ? s : "");
 }
 
-
 static int pas_machine_check_handler(struct pt_regs *regs)
 {
 	int cpu = smp_processor_id();
@@ -390,7 +388,6 @@ static inline void pasemi_pcmcia_init(void)
 
 #endif
 
-
 static struct of_device_id pasemi_bus_ids[] = {
 	/* Unfortunately needed for legacy firmwares */
 	{ .type = "localbus", },
@@ -411,7 +408,6 @@ static int __init pasemi_publish_devices(void)
 	return 0;
 }
 machine_device_initcall(pasemi, pasemi_publish_devices);
-
 
 /*
  * Called very early, MMU is off, device-tree isn't unflattened

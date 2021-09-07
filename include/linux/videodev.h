@@ -62,7 +62,6 @@ struct video_capability
 	int minheight;	/* And height */
 };
 
-
 struct video_channel
 {
 	int channel;
@@ -291,7 +290,6 @@ struct video_code
 #define VIDIOCSMICROCODE	_IOW('v',27, struct video_code)		/* Load microcode into hardware */
 #define	VIDIOCGVBIFMT		_IOR('v',28, struct vbi_format)		/* Get VBI information */
 #define	VIDIOCSVBIFMT		_IOW('v',29, struct vbi_format)		/* Set VBI information */
-
 
 #define BASE_VIDIOCPRIVATE	192		/* 192-255 are private */
 

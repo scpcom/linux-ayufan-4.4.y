@@ -108,7 +108,6 @@ extern "C" {
 #define MV_5281_D2_ID           	((MV_5281_DEV_ID << 16) | MV_5281_D2_REV)
 #define MV_5281_D2_NAME         "88F5281 D2"
 
-
 #define MV_5181L_A0_REV         	0x8 /* need for PCIE Er */
 #define MV_5181_A1_REV          	0x1 /* for USB Er ..*/
 #define MV_5181_B0_REV          	0x2
@@ -116,8 +115,6 @@ extern "C" {
 #define MV_5182_A1_REV          	0x1
 #define MV_5180N_B1_REV         	0x3
 #define MV_5181L_A0_ID          	((MV_5181_DEV_ID << 16) | MV_5181L_A0_REV)
-
-
 
 /* kw */
 #define MV_6281_DEV_ID          	0x6281
@@ -220,6 +217,5 @@ extern "C" {
 #define MV_6321_A1_NAME		"88F6321 A1"
 #define MV_6322_A1_NAME		"88F6322 A1"
 #define MV_6323_A1_NAME		"88F6323 A1"
-
 
 #endif /* __INCmvDeviceIdh */

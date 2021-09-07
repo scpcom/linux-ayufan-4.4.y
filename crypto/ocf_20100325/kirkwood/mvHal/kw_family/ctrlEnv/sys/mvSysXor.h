@@ -65,7 +65,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __INCMVSysXorh
 #define __INCMVSysXorh
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif

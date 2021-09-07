@@ -89,7 +89,6 @@ static struct crisv32_iopin cris_i2c_data;
 
 /****************** FUNCTION DEFINITION SECTION *************************/
 
-
 /* generate i2c start condition */
 
 void
@@ -717,7 +716,6 @@ static int __init i2c_init(void)
 
 	return res;
 }
-
 
 static int __init i2c_register(void)
 {

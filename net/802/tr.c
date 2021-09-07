@@ -69,7 +69,6 @@ static struct rif_cache *rif_table[RIF_TABLE_SIZE];
 
 static DEFINE_SPINLOCK(rif_lock);
 
-
 /*
  *	Garbage disposal timer.
  */
@@ -567,7 +566,6 @@ static int rif_seq_show(struct seq_file *seq, void *v)
 		}
 	return 0;
 }
-
 
 static const struct seq_operations rif_seq_ops = {
 	.start = rif_seq_start,

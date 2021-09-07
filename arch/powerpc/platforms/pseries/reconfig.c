@@ -22,8 +22,6 @@
 #include <asm/pSeries_reconfig.h>
 #include <asm/mmu.h>
 
-
-
 /*
  * Routines for "runtime" addition and removal of device tree nodes.
  */

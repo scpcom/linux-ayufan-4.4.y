@@ -26,7 +26,6 @@
 #include "radeon_reg.h"
 #include "radeon.h"
 
-
 /* Test BO GTT->VRAM and VRAM->GTT GPU copies across the whole GTT aperture */
 void radeon_test_moves(struct radeon_device *rdev)
 {
@@ -206,4 +205,3 @@ out_cleanup:
 		printk(KERN_WARNING "Error while testing BO move.\n");
 	}
 }
-

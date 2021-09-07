@@ -469,7 +469,6 @@ static void radeon_init_pipes(struct drm_device *dev)
 					       R300_DC_AUTOFLUSH_ENABLE |
 					       R300_DC_DC_DISABLE_IGNORE_PE));
 
-
 }
 
 /* ================================================================
@@ -825,7 +824,6 @@ static void radeon_cp_init_ring_buffer(struct drm_device * dev,
 		     (dev_priv->ring.rptr_update_l2qw << 8) |
 		     dev_priv->ring.size_l2qw);
 #endif
-
 
 	/* Initialize the scratch register pointer.  This will cause
 	 * the scratch register values to be written out to memory
@@ -1298,7 +1296,6 @@ static int radeon_do_init_cp(struct drm_device *dev, drm_radeon_init_t *init,
 					 RADEON_VTX_PIX_CENTER_OGL |
 					 RADEON_ROUND_MODE_TRUNC |
 					 RADEON_ROUND_PREC_8TH_PIX);
-
 
 	dev_priv->ring_offset = init->ring_offset;
 	dev_priv->ring_rptr_offset = init->ring_rptr_offset;

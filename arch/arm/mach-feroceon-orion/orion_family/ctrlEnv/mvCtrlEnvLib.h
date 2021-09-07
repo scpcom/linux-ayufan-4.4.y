@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvCtrlEnvLibh
 #define __INCmvCtrlEnvLibh
 
@@ -74,7 +73,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ctrlEnv/mvCtrlEnvSpec.h"
 #include "ctrlEnv/mvCtrlEnvAddrDec.h"
 
-
 /* typedefs */
 
 /* This enumerator describes the possible HW cache coherency policies the   */
@@ -85,7 +83,6 @@ typedef enum _mvCachePolicy
     WT_COHERENCY,   /* HW cache coherency supported in Write Through policy */
     WB_COHERENCY    /* HW cache coherency supported in Write Back policy    */   
 }MV_CACHE_POLICY;
-
 
 /* The swapping is referred to a 64-bit words (as this is the controller    */
 /* internal data path width). This enumerator describes the possible        */
@@ -122,7 +119,6 @@ typedef enum
 	MV_SPI_CONN_TRI_STATE		/* SPI pins are tri-stated - external flash is managed externally */
 }MV_SPI_CONN_MODE;
 #endif
-
 
 /* mcspLib.h API list */
 

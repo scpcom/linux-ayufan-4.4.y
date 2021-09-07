@@ -762,7 +762,6 @@ static void blk_add_trace_getrq(struct request_queue *q,
 	}
 }
 
-
 static void blk_add_trace_sleeprq(struct request_queue *q,
 				  struct bio *bio, int rw)
 {
@@ -1764,4 +1763,3 @@ void blk_fill_rwbs_rq(char *rwbs, struct request *rq)
 }
 
 #endif /* CONFIG_EVENT_TRACING */
-

@@ -173,7 +173,6 @@ struct s_smt_fp {
 		u_char			mac_info[0x20] ;
 	} mac_sfb ;
 
-
 	/*
 	 * queues
 	 */
@@ -212,7 +211,6 @@ struct s_smt_fp {
 	HW_PTR	fm_st3u ;
 	HW_PTR	fm_st3l ;
 
-
 	/*
 	 * multicast table
 	 */
@@ -241,7 +239,6 @@ struct s_smt_fp {
 #define RX_DISABLE_PROMISC	4	/* disable promiscous */
 #define RX_ENABLE_NSA		5	/* enable reception of NSA frames */
 #define RX_DISABLE_NSA		6	/* disable reception of NSA frames */
-
 
 /*
  * support for byte reversal in AIX

@@ -42,7 +42,6 @@
    middle of the procedure descriptor.  Work around this by putting the
    aligned copy in its own procedure descriptor */
 
-
 	.ent stxcpy_aligned
 	.align 4
 stxcpy_aligned:
@@ -134,7 +133,6 @@ __stxcpy:
 	br	stxcpy_aligned	# L0 : Latency=3
 	nop
 	nop
-
 
 /* The source and destination are not co-aligned.  Align the destination
    and cope.  We have to be very careful about not reading too much and
@@ -318,4 +316,3 @@ $unaligned:
 	nop
 
 	.end __stxcpy
-

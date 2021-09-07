@@ -67,7 +67,6 @@
 		((WL1271_BUSY_WORD_LEN - 4) / sizeof(u32))
 #define HW_ACCESS_WSPI_INIT_CMD_MASK  0
 
-
 /* Raw target IO, address is not translated */
 void wl1271_spi_write(struct wl1271 *wl, int addr, void *buf,
 		      size_t len, bool fixed);

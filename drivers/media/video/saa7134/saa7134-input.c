@@ -218,7 +218,6 @@ static int get_key_hvr1110(struct IR_i2c *ir, u32 *ir_key, u32 *ir_raw)
 	return 1;
 }
 
-
 static int get_key_beholdm6xx(struct IR_i2c *ir, u32 *ir_key, u32 *ir_raw)
 {
 	unsigned char data[12];
@@ -322,7 +321,6 @@ static int get_key_pinnacle_grey(struct IR_i2c *ir, u32 *ir_key, u32 *ir_raw)
 
 	return get_key_pinnacle(ir, ir_key, ir_raw, 1, 0xfe, 0xff);
 }
-
 
 /* The new pinnacle PCTV remote (with the colored buttons)
  *
@@ -833,7 +831,6 @@ static int saa7134_rc5_irq(struct saa7134_dev *dev)
 	return 1;
 }
 
-
 /* On NEC protocol, One has 2.25 ms, and zero has 1.125 ms
    The first pulse (start) has 9 + 4.5 ms
  */
@@ -919,7 +916,6 @@ static void nec_task(unsigned long data)
 			}
 			ngap++;
 		}
-
 
 		ir->base_time = tv;
 

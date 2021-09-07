@@ -29,7 +29,6 @@
 #include "pvrusb2-cx2584x-v4l.h"
 #include "pvrusb2-video-v4l.h"
 
-
 #include "pvrusb2-hdw-internal.h"
 #include "pvrusb2-debug.h"
 #include <media/cx25840.h>
@@ -37,7 +36,6 @@
 #include <media/v4l2-common.h>
 #include <linux/errno.h>
 #include <linux/slab.h>
-
 
 struct routing_scheme_item {
 	int vid;
@@ -135,8 +133,6 @@ void pvr2_cx25840_subdev_update(struct pvr2_hdw *hdw, struct v4l2_subdev *sd)
 		sd->ops->audio->s_routing(sd, (u32)aud_input, 0, 0);
 	}
 }
-
-
 
 /*
   Stuff for Emacs to see, in order to encourage consistent editing style:

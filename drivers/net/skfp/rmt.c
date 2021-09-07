@@ -98,7 +98,6 @@ static const char * const rmt_events[] = {
  * in struct s_rmt
  */
 
-
 /*
  * function declarations
  */
@@ -579,7 +578,6 @@ static void rmt_new_dup_actions(struct s_smc *smc)
 	}
 }
 
-
 /*
  * leave the ring
  */
@@ -651,4 +649,3 @@ static void stop_rmt_timer2(struct s_smc *smc)
 	if (smc->r.rmt_timer2.tm_active)
 		smt_timer_stop(smc,&smc->r.rmt_timer2) ;
 }
-

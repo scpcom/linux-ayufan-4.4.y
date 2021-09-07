@@ -63,7 +63,6 @@ void __init kirkwood_map_io(void)
  */
 unsigned int kirkwood_clk_ctrl = CGC_DUNIT | CGC_RESERVED;
 	
-
 /*****************************************************************************
  * EHCI
  ****************************************************************************/
@@ -73,7 +72,6 @@ static struct orion_ehci_data kirkwood_ehci_data = {
 };
 
 static u64 ehci_dmamask = 0xffffffffUL;
-
 
 /*****************************************************************************
  * EHCI0
@@ -107,7 +105,6 @@ void __init kirkwood_ehci_init(void)
 	kirkwood_clk_ctrl |= CGC_USB0;
 	platform_device_register(&kirkwood_ehci);
 }
-
 
 /*****************************************************************************
  * GE00
@@ -168,7 +165,6 @@ void __init kirkwood_ge00_init(struct mv643xx_eth_platform_data *eth_data)
 	platform_device_register(&kirkwood_ge00_shared);
 	platform_device_register(&kirkwood_ge00);
 }
-
 
 /*****************************************************************************
  * GE01
@@ -231,7 +227,6 @@ void __init kirkwood_ge01_init(struct mv643xx_eth_platform_data *eth_data)
 	platform_device_register(&kirkwood_ge01);
 }
 
-
 /*****************************************************************************
  * Ethernet switch
  ****************************************************************************/
@@ -267,7 +262,6 @@ void __init kirkwood_ge00_switch_init(struct dsa_platform_data *d, int irq)
 
 	platform_device_register(&kirkwood_switch_device);
 }
-
 
 /*****************************************************************************
  * NAND flash
@@ -305,7 +299,6 @@ void __init kirkwood_nand_init(struct mtd_partition *parts, int nr_parts,
 	platform_device_register(&kirkwood_nand_flash);
 }
 
-
 /*****************************************************************************
  * SoC RTC
  ****************************************************************************/
@@ -319,7 +312,6 @@ static void __init kirkwood_rtc_init(void)
 {
 	platform_device_register_simple("rtc-mv", -1, &kirkwood_rtc_resource, 1);
 }
-
 
 /*****************************************************************************
  * SATA
@@ -357,7 +349,6 @@ void __init kirkwood_sata_init(struct mv_sata_platform_data *sata_data)
 	kirkwood_sata.dev.platform_data = sata_data;
 	platform_device_register(&kirkwood_sata);
 }
-
 
 /*****************************************************************************
  * SD/SDIO/MMC
@@ -403,7 +394,6 @@ void __init kirkwood_sdio_init(struct mvsdio_platform_data *mvsdio_data)
 	platform_device_register(&kirkwood_sdio);
 }
 
-
 /*****************************************************************************
  * SPI
  ****************************************************************************/
@@ -433,7 +423,6 @@ void __init kirkwood_spi_init()
 	kirkwood_clk_ctrl |= CGC_RUNIT;
 	platform_device_register(&kirkwood_spi);
 }
-
 
 /*****************************************************************************
  * I2C
@@ -470,7 +459,6 @@ void __init kirkwood_i2c_init(void)
 {
 	platform_device_register(&kirkwood_i2c);
 }
-
 
 /*****************************************************************************
  * UART0
@@ -515,7 +503,6 @@ void __init kirkwood_uart0_init(void)
 	platform_device_register(&kirkwood_uart0);
 }
 
-
 /*****************************************************************************
  * UART1
  ****************************************************************************/
@@ -559,7 +546,6 @@ void __init kirkwood_uart1_init(void)
 	platform_device_register(&kirkwood_uart1);
 }
 
-
 /*****************************************************************************
  * Cryptographic Engines and Security Accelerator (CESA)
  ****************************************************************************/
@@ -596,7 +582,6 @@ void __init kirkwood_crypto_init(void)
 	platform_device_register(&kirkwood_crypto_device);
 }
 
-
 /*****************************************************************************
  * XOR
  ****************************************************************************/
@@ -605,7 +590,6 @@ static struct mv_xor_platform_shared_data kirkwood_xor_shared_data = {
 };
 
 static u64 kirkwood_xor_dmamask = DMA_BIT_MASK(32);
-
 
 /*****************************************************************************
  * XOR0
@@ -705,7 +689,6 @@ static void __init kirkwood_xor0_init(void)
 	platform_device_register(&kirkwood_xor01_channel);
 }
 
-
 /*****************************************************************************
  * XOR1
  ****************************************************************************/
@@ -804,7 +787,6 @@ static void __init kirkwood_xor1_init(void)
 	platform_device_register(&kirkwood_xor11_channel);
 }
 
-
 /*****************************************************************************
  * Watchdog
  ****************************************************************************/
@@ -826,7 +808,6 @@ static void __init kirkwood_wdt_init(void)
 	kirkwood_wdt_data.tclk = kirkwood_tclk;
 	platform_device_register(&kirkwood_wdt_device);
 }
-
 
 /*****************************************************************************
  * Time handling
@@ -854,7 +835,6 @@ static void __init kirkwood_timer_init(void)
 struct sys_timer kirkwood_timer = {
 	.init = kirkwood_timer_init,
 };
-
 
 /*****************************************************************************
  * General

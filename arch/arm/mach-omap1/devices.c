@@ -261,4 +261,3 @@ static int __init omap1_init_devices(void)
 	return 0;
 }
 arch_initcall(omap1_init_devices);
-

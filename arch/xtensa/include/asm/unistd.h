@@ -577,7 +577,6 @@ __SYSCALL(258, sys_keyctl, 5)
 #define __NR_available259			259
 __SYSCALL(259, sys_ni_syscall, 0)
 
-
 #define __NR_readahead				260
 __SYSCALL(260, sys_readahead, 5)
 #define __NR_remap_file_pages			261

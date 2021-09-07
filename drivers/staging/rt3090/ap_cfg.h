@@ -37,7 +37,6 @@
 #ifndef __AP_CFG_H__
 #define __AP_CFG_H__
 
-
 #include "rt_config.h"
 
 INT RTMPAPPrivIoctlSet(
@@ -91,7 +90,6 @@ VOID RT28XX_IOCTL_MaxRateGet(
 	IN	RTMP_ADAPTER			*pAd,
 	IN	PHTTRANSMIT_SETTING	pHtPhyMode,
 	OUT	UINT32					*pRate);
-
 
 #ifdef DOT11_N_SUPPORT
 VOID RTMPIoctlQueryBaTable(

@@ -1352,7 +1352,6 @@ static int snd_fm801_chip_init(struct fm801 *chip, int resume)
 	return 0;
 }
 
-
 static int snd_fm801_free(struct fm801 *chip)
 {
 	unsigned short cmdw;

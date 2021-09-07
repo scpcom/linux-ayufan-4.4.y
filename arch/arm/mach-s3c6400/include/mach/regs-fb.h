@@ -119,7 +119,6 @@
 #define DITHMODE				(0x170)
 #define WINxMAP(_win)				(0x180 + ((_win) * 4))
 
-
 #define DITHMODE_R_POS_MASK			(0x3 << 5)
 #define DITHMODE_R_POS_SHIFT			(5)
 #define DITHMODE_R_POS_8BIT			(0x0 << 5)

@@ -123,7 +123,6 @@ void ibm440spe_fixup_memsize(void)
 	dt_fixup_memory(0, memsize);
 }
 
-
 /* 4xx DDR1/2 Denali memory controller support */
 /* DDR0 registers */
 #define DDR0_02			2
@@ -620,7 +619,6 @@ void ibm405gp_fixup_clocks(unsigned int sys_clk, unsigned int ser_clk)
 	dt_fixup_clock("/plb/opb/serial@ef600300", uart0);
 	dt_fixup_clock("/plb/opb/serial@ef600400", uart1);
 }
-
 
 void ibm405ep_fixup_clocks(unsigned int sys_clk)
 {

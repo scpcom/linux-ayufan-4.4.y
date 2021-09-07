@@ -325,7 +325,6 @@ static struct scsi_host_template ns87415_sht = {
 	ATA_BMDMA_SHT(DRV_NAME),
 };
 
-
 /**
  *	ns87415_init_one - Register 87415 ATA PCI device with kernel services
  *	@pdev: PCI device to register

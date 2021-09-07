@@ -251,7 +251,6 @@ static inline int drv_ampdu_action(struct ieee80211_local *local,
 	return ret;
 }
 
-
 static inline void drv_rfkill_poll(struct ieee80211_local *local)
 {
 	if (local->ops->rfkill_poll)

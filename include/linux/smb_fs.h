@@ -20,7 +20,6 @@
 /* __kernel_uid_t can never change, so we have to use __kernel_uid32_t */
 #define	SMB_IOC_GETMOUNTUID32		_IOR('u', 3, __kernel_uid32_t)
 
-
 #ifdef __KERNEL__
 #include <linux/smb_fs_i.h>
 #include <linux/smb_fs_sb.h>
@@ -59,7 +58,6 @@ static inline struct smb_inode_info *SMB_I(struct inode *inode)
  */
 #define SMB_F_LOCALWRITE	0x02	/* file modified locally */
 
-
 /* NT1 protocol capability bits */
 #define SMB_CAP_RAW_MODE         0x00000001
 #define SMB_CAP_MPX_MODE         0x00000002
@@ -75,7 +73,6 @@ static inline struct smb_inode_info *SMB_I(struct inode *inode)
 #define SMB_CAP_LARGE_READX      0x00004000
 #define SMB_CAP_LARGE_WRITEX     0x00008000
 #define SMB_CAP_UNIX             0x00800000	/* unofficial ... */
-
 
 /*
  * This is the time we allow an inode, dentry or dir cache to live. It is bad
@@ -131,7 +128,6 @@ struct smb_ops {
 	/* int (*setattr)(...); */      /* setattr is really icky! */
 
 	int (*truncate)(struct inode *inode, loff_t length);
-
 
 	/* --- --- --- end of "static" entries --- --- --- */
 

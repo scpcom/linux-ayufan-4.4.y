@@ -125,4 +125,3 @@ typedef struct prd_table_entry {
 #define descriptors_phys_to_virt(x) ((x) - DESCRIPTORS_BASE_PA + DESCRIPTORS_BASE)
 
 #endif        //  #if !defined(__DESC_ALLOC_H__)
-

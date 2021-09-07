@@ -36,5 +36,3 @@ asmlinkage long sys_pselect6(int n, fd_set __user *inp, fd_set __user *outp,
 asmlinkage long sys_ppoll(struct pollfd __user *ufds, unsigned int nfds,
 	struct timespec __user *tsp, const sigset_t __user *sigmask,
 	size_t sigsetsize);
-
-

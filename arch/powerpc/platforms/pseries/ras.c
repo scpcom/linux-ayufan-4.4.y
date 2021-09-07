@@ -67,7 +67,6 @@ static int ras_check_exception_token;
 static irqreturn_t ras_epow_interrupt(int irq, void *dev_id);
 static irqreturn_t ras_error_interrupt(int irq, void *dev_id);
 
-
 static void request_ras_irqs(struct device_node *np,
 			irq_handler_t handler,
 			const char *name)

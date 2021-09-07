@@ -3267,7 +3267,6 @@ static int rtl8169_open(struct net_device *dev)
 	struct pci_dev *pdev = tp->pci_dev;
 	int retval = -ENOMEM;
 
-
 	/*
 	 * Note that we use a magic value here, its wierd I know
 	 * its done because, some subset of rtl8169 hardware suffers from
@@ -3374,7 +3373,6 @@ static void rtl_hw_start(struct net_device *dev)
 
 	netif_start_queue(dev);
 }
-
 
 static void rtl_set_rx_tx_desc_registers(struct rtl8169_private *tp,
 					 void __iomem *ioaddr)

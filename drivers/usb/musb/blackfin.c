@@ -312,7 +312,6 @@ int musb_platform_resume(struct musb *musb)
 	return 0;
 }
 
-
 int musb_platform_exit(struct musb *musb)
 {
 

@@ -25,9 +25,7 @@
 #include <asm/rm9k-ocd.h>
 #include <excite.h>
 
-
 extern struct pci_ops titan_pci_ops;
-
 
 static struct resource
 	mem_resource = 	{
@@ -43,7 +41,6 @@ static struct resource
 		.flags	= IORESOURCE_IO
 	};
 
-
 static struct pci_controller bx_controller = {
 	.pci_ops	= &titan_pci_ops,
 	.mem_resource	= &mem_resource,
@@ -51,7 +48,6 @@ static struct pci_controller bx_controller = {
 	.io_resource	= &io_resource,
 	.io_offset	= 0x00000000UL
 };
-
 
 static char
 	iopage_failed[] __initdata   = "Cannot allocate PCI I/O page",
@@ -69,8 +65,6 @@ static char
 #define PCISC_EMC		0x00000004
 #define PCISC_ERMA		0x00000002
 
-
-
 static int __init basler_excite_pci_setup(void)
 {
 	const unsigned int fullbars = memsize / (256 << 20);
@@ -86,7 +80,6 @@ static int __init basler_excite_pci_setup(void)
 
 	/* Enable PCI 0 as master for config cycles */
 	ocd_writel(PCISC_EMC | PCISC_ERMA, RM9000x2_OCD_HTSC);
-
 
 	/* Set up latency timer */
 	ocd_writel(0x8008, RM9000x2_OCD_HTBHL);
@@ -144,6 +137,5 @@ static int __init basler_excite_pci_setup(void)
 	register_pci_controller(&bx_controller);
 	return 0;
 }
-
 
 arch_initcall(basler_excite_pci_setup);

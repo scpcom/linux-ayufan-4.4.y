@@ -81,7 +81,6 @@ static irqreturn_t macepci_error(int irq, void *dev)
 	return IRQ_HANDLED;
 }
 
-
 extern struct pci_ops mace_pci_ops;
 #ifdef CONFIG_64BIT
 static struct resource mace_pci_mem_resource = {

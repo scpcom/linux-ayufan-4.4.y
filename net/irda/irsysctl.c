@@ -89,7 +89,6 @@ static int do_devname(ctl_table *table, int write,
 	return ret;
 }
 
-
 static int do_discovery(ctl_table *table, int write,
                     void __user *buffer, size_t *lenp, loff_t *ppos)
 {
@@ -293,6 +292,3 @@ void irda_sysctl_unregister(void)
 {
 	unregister_sysctl_table(irda_table_header);
 }
-
-
-

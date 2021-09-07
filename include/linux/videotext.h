@@ -14,7 +14,6 @@
  *
  */
 
-
 /*
  *	Videotext ioctls
  */
@@ -64,7 +63,6 @@ typedef struct {
 }
 vtx_info_t;
 
-
 /*
  *	Definitions for VTXIOC{CLRPAGE,CLRFOUND,PAGEREQ,GETSTAT,GETPAGE,STOPDAU,PUTPAGE,SETDISP}
  */
@@ -93,7 +91,6 @@ typedef struct
 	void __user *buffer;	/* pointer to beginning of destination buffer */
 }
 vtx_pagereq_t;
-
 
 /*
  *	Definitions for VTXIOC{GETSTAT,PUTSTAT}

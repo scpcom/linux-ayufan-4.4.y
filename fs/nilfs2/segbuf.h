@@ -118,7 +118,6 @@ struct nilfs_segment_buffer {
 		    b_assoc_buffers))
 #define NILFS_SEGBUF_BH_IS_LAST(bh, head)  ((bh)->b_assoc_buffers.next == head)
 
-
 int __init nilfs_init_segbuf_cache(void);
 void nilfs_destroy_segbuf_cache(void);
 struct nilfs_segment_buffer *nilfs_segbuf_new(struct super_block *);
@@ -189,7 +188,6 @@ struct nilfs_write_info {
 	struct backing_dev_info *bdi; /* backing dev info */
 	struct buffer_head     *bh_sr;
 };
-
 
 void nilfs_segbuf_prepare_write(struct nilfs_segment_buffer *,
 				struct nilfs_write_info *);

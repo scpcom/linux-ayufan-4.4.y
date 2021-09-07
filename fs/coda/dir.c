@@ -90,7 +90,6 @@ const struct file_operations coda_dir_operations = {
 	.fsync		= coda_fsync,
 };
 
-
 /* inode operations for directories */
 /* access routines: lookup, readlink, permission */
 static struct dentry *coda_lookup(struct inode *dir, struct dentry *entry, struct nameidata *nd)
@@ -136,7 +135,6 @@ exit:
 	return d_splice_alias(inode, entry);
 }
 
-
 int coda_permission(struct inode *inode, int mask)
 {
         int error = 0;
@@ -163,7 +161,6 @@ int coda_permission(struct inode *inode, int mask)
 	unlock_kernel();
 	return error;
 }
-
 
 static inline void coda_dir_update_mtime(struct inode *dir)
 {
@@ -311,7 +308,6 @@ out:
 	return(error);
 }
 
-
 static int coda_symlink(struct inode *dir_inode, struct dentry *de,
 			const char *symname)
 {
@@ -426,7 +422,6 @@ static int coda_rename(struct inode *old_dir, struct dentry *old_dentry,
 
 	return error;
 }
-
 
 /* file operations for directories */
 static int coda_readdir(struct file *coda_file, void *buf, filldir_t filldir)
@@ -643,8 +638,6 @@ static int coda_dentry_delete(struct dentry * dentry)
 	}
 	return 0;
 }
-
-
 
 /*
  * This is called when we want to check if the inode has

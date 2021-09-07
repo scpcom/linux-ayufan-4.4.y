@@ -107,7 +107,6 @@ static inline void flush_cache_page(struct vm_area_struct *vma, unsigned long vm
 	        __flush_cache_030();
 }
 
-
 /* Push the page at kernel virtual address and clear the icache */
 /* RZ: use cpush %bc instead of cpush %dc, cinv %ic */
 static inline void __flush_page_to_ram(void *vaddr)

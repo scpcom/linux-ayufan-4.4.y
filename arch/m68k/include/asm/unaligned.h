@@ -1,7 +1,6 @@
 #ifndef _ASM_M68K_UNALIGNED_H
 #define _ASM_M68K_UNALIGNED_H
 
-
 #ifdef CONFIG_COLDFIRE
 #include <linux/unaligned/be_struct.h>
 #include <linux/unaligned/le_byteshift.h>

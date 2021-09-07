@@ -80,7 +80,6 @@ static __inline__ void release_dma_lock(unsigned long flags)
 {
 }
 
-
 /* Get DMA residue count. After a DMA transfer, this
  * should return zero. Reading this while a DMA transfer is
  * still in progress will return unpredictable results.
@@ -152,14 +151,12 @@ static __inline__ void set_dma_page(unsigned int dmanr, char pagenr)
 {
 }
 
-
 /* Set transfer address & page bits for specific DMA channel.
  * Assumes dma flipflop is clear.
  */
 static __inline__ void set_dma_addr(unsigned int dmanr, unsigned int a)
 {
 }
-
 
 /* Set transfer size (max 64k for DMA1..3, 128k for DMA5..7) for
  * a specific DMA channel.
@@ -172,7 +169,6 @@ static __inline__ void set_dma_addr(unsigned int dmanr, unsigned int a)
 static __inline__ void set_dma_count(unsigned int dmanr, unsigned int count)
 {
 }
-
 
 #define free_dma(dmanr)
 

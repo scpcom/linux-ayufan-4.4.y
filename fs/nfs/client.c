@@ -9,7 +9,6 @@
  * 2 of the License, or (at your option) any later version.
  */
 
-
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/sched.h>
@@ -80,7 +79,6 @@ struct rpc_program nfs_program = {
 struct rpc_stat nfs_rpcstat = {
 	.program		= &nfs_program
 };
-
 
 #ifdef CONFIG_NFS_V3_ACL
 static struct rpc_stat		nfsacl_rpcstat = { &nfsacl_program };
@@ -1250,7 +1248,6 @@ error:
 	dprintk("<-- nfs4_set_client() = xerror %d\n", error);
 	return error;
 }
-
 
 /*
  * Session has been established, and the client marked ready.

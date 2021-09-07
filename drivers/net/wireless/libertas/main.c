@@ -31,17 +31,14 @@ const char lbs_driver_version[] = "COMM-USB8388-" DRIVER_RELEASE_VERSION
 #endif
     "";
 
-
 /* Module parameters */
 unsigned int lbs_debug;
 EXPORT_SYMBOL_GPL(lbs_debug);
 module_param_named(libertas_debug, lbs_debug, int, 0644);
 
-
 /* This global structure is used to send the confirm_sleep command as
  * fast as possible down to the firmware. */
 struct cmd_confirm_sleep confirm_sleep;
-
 
 #define LBS_TX_PWR_DEFAULT		20	/*100mW */
 #define LBS_TX_PWR_US_DEFAULT		20	/*100mW */
@@ -313,7 +310,6 @@ static int lbs_add_rtap(struct lbs_private *priv);
 static void lbs_remove_rtap(struct lbs_private *priv);
 static int lbs_add_mesh(struct lbs_private *priv);
 static void lbs_remove_mesh(struct lbs_private *priv);
-
 
 /**
  * Get function for sysfs attribute rtap
@@ -614,7 +610,6 @@ done:
 	return ret;
 }
 
-
 static inline int mac_in_list(unsigned char *list, int list_len,
 			      unsigned char *mac)
 {
@@ -626,7 +621,6 @@ static inline int mac_in_list(unsigned char *list, int list_len,
 	}
 	return 0;
 }
-
 
 static int lbs_add_mcast_addrs(struct cmd_ds_mac_multicast_adr *cmd,
 			       struct net_device *dev, int nr_addrs)
@@ -1061,7 +1055,6 @@ static void lbs_sync_channel_worker(struct work_struct *work)
 	lbs_deb_leave(LBS_DEB_MAIN);
 }
 
-
 static int lbs_init_adapter(struct lbs_private *priv)
 {
 	size_t bufsize;
@@ -1239,7 +1232,6 @@ done:
 }
 EXPORT_SYMBOL_GPL(lbs_add_card);
 
-
 void lbs_remove_card(struct lbs_private *priv)
 {
 	struct net_device *dev = priv->dev;
@@ -1284,7 +1276,6 @@ void lbs_remove_card(struct lbs_private *priv)
 	lbs_deb_leave(LBS_DEB_MAIN);
 }
 EXPORT_SYMBOL_GPL(lbs_remove_card);
-
 
 int lbs_start_card(struct lbs_private *priv)
 {
@@ -1368,7 +1359,6 @@ done:
 }
 EXPORT_SYMBOL_GPL(lbs_start_card);
 
-
 void lbs_stop_card(struct lbs_private *priv)
 {
 	struct net_device *dev;
@@ -1418,7 +1408,6 @@ out:
 	lbs_deb_leave(LBS_DEB_MAIN);
 }
 EXPORT_SYMBOL_GPL(lbs_stop_card);
-
 
 static const struct net_device_ops mesh_netdev_ops = {
 	.ndo_open		= lbs_dev_open,
@@ -1492,7 +1481,6 @@ done:
 static void lbs_remove_mesh(struct lbs_private *priv)
 {
 	struct net_device *mesh_dev;
-
 
 	mesh_dev = priv->mesh_dev;
 	if (!mesh_dev)

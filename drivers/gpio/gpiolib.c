@@ -10,7 +10,6 @@
 #include <linux/gpio.h>
 #include <linux/idr.h>
 
-
 /* Optional implementation infrastructure for GPIO interfaces.
  *
  * Platforms may want to use this if they tend to use very many GPIOs
@@ -22,7 +21,6 @@
  * cases, so that access to SOC-integrated GPIOs can sometimes cost
  * only an instruction or two per bit.
  */
-
 
 /* When debugging, extend minimal trust to callers and platform code.
  * Also emit diagnostic messages that may help initial bringup, when
@@ -608,7 +606,6 @@ static struct class gpio_class = {
 	.class_attrs =	gpio_class_attrs,
 };
 
-
 /**
  * gpio_export - export a GPIO through sysfs
  * @gpio: gpio to make available, already requested
@@ -878,7 +875,6 @@ static int __init gpiolib_sysfs_init(void)
 	}
 	spin_unlock_irqrestore(&gpio_lock, flags);
 
-
 	return status;
 }
 postcore_initcall(gpiolib_sysfs_init);
@@ -1007,7 +1003,6 @@ int gpiochip_remove(struct gpio_chip *chip)
 }
 EXPORT_SYMBOL_GPL(gpiochip_remove);
 
-
 /* These "optional" allocation calls help prevent drivers from stomping
  * on each other, and help provide better diagnostics in debugfs.
  * They're called even less than the "set direction" calls.
@@ -1102,7 +1097,6 @@ void gpio_free(unsigned gpio)
 }
 EXPORT_SYMBOL_GPL(gpio_free);
 
-
 /**
  * gpiochip_is_requested - return string iff signal was requested
  * @chip: controller managing the signal
@@ -1131,7 +1125,6 @@ const char *gpiochip_is_requested(struct gpio_chip *chip, unsigned offset)
 #endif
 }
 EXPORT_SYMBOL_GPL(gpiochip_is_requested);
-
 
 /* Drivers MUST set GPIO direction before making get/set calls.  In
  * some cases this is done in early boot, before IRQs are enabled.
@@ -1248,7 +1241,6 @@ fail:
 }
 EXPORT_SYMBOL_GPL(gpio_direction_output);
 
-
 /* I/O calls are only valid after configuration completed; the relevant
  * "is this a valid GPIO" error checks should already have been done.
  *
@@ -1345,8 +1337,7 @@ int __gpio_to_irq(unsigned gpio)
 	return chip->to_irq ? chip->to_irq(chip, gpio - chip->base) : -ENXIO;
 }
 EXPORT_SYMBOL_GPL(__gpio_to_irq);
-
-
+  
 /* There's no value in making it easy to inline GPIO calls that may sleep.
  * Common examples include ones connected to I2C or SPI chips.
  */
@@ -1370,7 +1361,6 @@ void gpio_set_value_cansleep(unsigned gpio, int value)
 	chip->set(chip, gpio - chip->base, value);
 }
 EXPORT_SYMBOL_GPL(gpio_set_value_cansleep);
-
 
 #ifdef CONFIG_DEBUG_FS
 

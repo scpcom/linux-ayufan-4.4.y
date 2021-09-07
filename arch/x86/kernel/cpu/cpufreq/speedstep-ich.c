@@ -13,7 +13,6 @@
  *  BIG FAT DISCLAIMER: Work in progress code. Possibly *dangerous*
  */
 
-
 /*********************************************************************
  *                        SPEEDSTEP - DEFINITIONS                    *
  *********************************************************************/
@@ -28,14 +27,12 @@
 
 #include "speedstep-lib.h"
 
-
 /* speedstep_chipset:
  *   It is necessary to know which chipset is used. As accesses to
  * this device occur at various places in this module, we need a
  * static struct pci_dev * pointing to that device.
  */
 static struct pci_dev *speedstep_chipset_dev;
-
 
 /* speedstep_processor
  */
@@ -53,10 +50,8 @@ static struct cpufreq_frequency_table speedstep_freqs[] = {
 	{0,			CPUFREQ_TABLE_END},
 };
 
-
 #define dprintk(msg...) cpufreq_debug_printk(CPUFREQ_DEBUG_DRIVER, \
 		"speedstep-ich", msg)
-
 
 /**
  * speedstep_find_register - read the PMBASE address
@@ -173,7 +168,6 @@ static int speedstep_activate(void)
 	return 0;
 }
 
-
 /**
  * speedstep_detect_chipset - detect the Southbridge which contains SpeedStep logic
  *
@@ -197,7 +191,6 @@ static unsigned int speedstep_detect_chipset(void)
 			      NULL);
 	if (speedstep_chipset_dev)
 		return 3; /* 3-M */
-
 
 	speedstep_chipset_dev = pci_get_subsys(PCI_VENDOR_ID_INTEL,
 			      PCI_DEVICE_ID_INTEL_82801BA_10,
@@ -299,7 +292,6 @@ static int speedstep_target(struct cpufreq_policy *policy,
 	return 0;
 }
 
-
 /**
  * speedstep_verify - verifies a new CPUFreq policy
  * @policy: new policy
@@ -369,7 +361,6 @@ static int speedstep_cpu_init(struct cpufreq_policy *policy)
 	return 0;
 }
 
-
 static int speedstep_cpu_exit(struct cpufreq_policy *policy)
 {
 	cpufreq_frequency_table_put_attr(policy->cpu);
@@ -381,7 +372,6 @@ static struct freq_attr *speedstep_attr[] = {
 	NULL,
 };
 
-
 static struct cpufreq_driver speedstep_driver = {
 	.name	= "speedstep-ich",
 	.verify	= speedstep_verify,
@@ -392,7 +382,6 @@ static struct cpufreq_driver speedstep_driver = {
 	.owner	= THIS_MODULE,
 	.attr	= speedstep_attr,
 };
-
 
 /**
  * speedstep_init - initializes the SpeedStep CPUFreq driver
@@ -430,7 +419,6 @@ static int __init speedstep_init(void)
 	return cpufreq_register_driver(&speedstep_driver);
 }
 
-
 /**
  * speedstep_exit - unregisters SpeedStep support
  *
@@ -441,7 +429,6 @@ static void __exit speedstep_exit(void)
 	pci_dev_put(speedstep_chipset_dev);
 	cpufreq_unregister_driver(&speedstep_driver);
 }
-
 
 MODULE_AUTHOR("Dave Jones <davej@redhat.com>, "
 		"Dominik Brodowski <linux@brodo.de>");

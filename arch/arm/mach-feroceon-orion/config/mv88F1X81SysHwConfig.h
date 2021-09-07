@@ -31,8 +31,6 @@ disclaimer.
 #ifndef __INCmv88F1X81SysHwConfigh
 #define __INCmv88F1X81SysHwConfigh
 
-
-
 /* 
  *  System memory mapping 
  */
@@ -57,8 +55,6 @@ disclaimer.
 #define PEX0_IO_BASE 0xf0000000
 #define PEX0_IO_SIZE _1M
 
-
-
 /* PEX Work arround */
 /* the target we will use for the workarround */
 #define PEX_CONFIG_RW_WA_TARGET PEX0_MEM
@@ -72,23 +68,17 @@ otherwise the following defines will be ignored */
 #define PEX_CONFIG_RW_WA_BASE 0x50000000
 #define PEX_CONFIG_RW_WA_SIZE _16M
 
-
 #define PEX1_MEM_BASE 0x98000000
 #define PEX1_MEM_SIZE _128M
 
 #define PEX1_IO_BASE 0xf0100000
 #define PEX1_IO_SIZE _1M
 
-
-
-
 #define FLASH_CS_BASE 0xf8000000
 #define FLASH_CS_SIZE _16M
 
-
 /* Internal registers: size is defined in Controllerenvironment */
 #define INTER_REGS_BASE	0xF1000000
-
 
 #define PCI_IF0_MEM0_BASE 	PEX0_MEM_BASE
 #define PCI_IF0_MEM0_SIZE 	PEX0_MEM_SIZE
@@ -100,10 +90,8 @@ otherwise the following defines will be ignored */
 #define PCI_IF1_IO_BASE 	PEX1_IO_BASE
 #define PCI_IF1_IO_SIZE 	PEX1_IO_SIZE
 
-
 /* DRAM detection stuff */
 #define MV_DRAM_AUTO_SIZE
-
 
 /* Board clock detection */
 #define TCLK_AUTO_DETECT    /* Use Tclk auto detection 		*/
@@ -113,7 +101,6 @@ otherwise the following defines will be ignored */
 /* PEX-PCI\PCI-PCI Bridge*/
 #define PCI0_IF_PTP		1		/* Bridge exist on pciIf0*/
 #define PCI1_IF_PTP		0		/* no Bridge on pciIf1*/
-
 
 #define MEM_TABLE	{	\
   { PCI_IF0_MEM0_BASE,   PCI_IF0_MEM0_BASE,   PCI_IF0_MEM0_SIZE,  MT_DEVICE }	\
@@ -125,6 +112,5 @@ otherwise the following defines will be ignored */
  ,{ DEVICE_CS0_BASE, DEVICE_CS0_BASE, DEVICE_CS0_SIZE, MT_DEVICE}				\
  ,{ DEVICE_CS2_BASE, DEVICE_CS2_BASE, DEVICE_CS2_SIZE, MT_DEVICE}				\
 }
-
 
 #endif /* __INCmv88F1X81SysHwConfigh */

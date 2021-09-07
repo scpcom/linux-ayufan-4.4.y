@@ -26,7 +26,6 @@
    string.c too.  I just don't think too many people will hack this file
    for the code format to be an issue.  */
 
-
 /* Copy to userspace.  This is based on the memcpy used for
    kernel-to-kernel copying; see "string.c".  */
 
@@ -45,7 +44,6 @@ __copy_user (void __user *pdst, const void *psrc, unsigned long pn)
   register const char *src __asm__ ("r11") = psrc;
   register int n __asm__ ("r12") = pn;
   register int retn __asm__ ("r10") = 0;
-
 
   /* When src is aligned but not dst, this makes a few extra needless
      cycles.  I believe it would take as many to check that the
@@ -386,7 +384,6 @@ __do_clear_user (void __user *pto, unsigned long pn)
   register char *dst __asm__ ("r13") = pto;
   register int n __asm__ ("r12") = pn;
   register int retn __asm__ ("r10") = 0;
-
 
   if (((unsigned long) dst & 3) != 0
      /* Don't align if we wouldn't copy more than a few bytes.  */

@@ -1338,8 +1338,6 @@ bfa_fcs_rport_sm_nsdisc_sent(struct bfa_fcs_rport_s *rport,
 	}
 }
 
-
-
 /**
  *  fcs_rport_private FCS RPORT provate functions
  */
@@ -1992,7 +1990,6 @@ bfa_fcs_rport_alloc(struct bfa_fcs_port_s *port, wwn_t pwwn, u32 rpid)
 	return rport;
 }
 
-
 static void
 bfa_fcs_rport_free(struct bfa_fcs_rport_s *rport)
 {
@@ -2182,8 +2179,6 @@ bfa_fcs_rport_process_logo(struct bfa_fcs_rport_s *rport, struct fchs_s *fchs)
 	rport->stats.logo_rcvd++;
 	bfa_sm_send_event(rport, RPSM_EVENT_LOGO_RCVD);
 }
-
-
 
 /**
  *  fcs_rport_public FCS rport public interfaces

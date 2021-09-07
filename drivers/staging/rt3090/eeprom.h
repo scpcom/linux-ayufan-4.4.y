@@ -37,8 +37,6 @@
 #ifndef __EEPROM_H__
 #define __EEPROM_H__
 
-
-
 #ifdef RTMP_PCI_SUPPORT
 /*************************************************************************
   *	Public function declarations for prom-based chipset
@@ -53,10 +51,6 @@ int rtmp_ee_prom_write16(
 	IN USHORT			Offset,
 	IN USHORT			value);
 #endif // RTMP_PCI_SUPPORT //
-
-
-
-
 
 #ifdef RT30xx
 #ifdef RTMP_EFUSE_SUPPORT

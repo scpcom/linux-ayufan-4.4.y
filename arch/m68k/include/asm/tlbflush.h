@@ -94,7 +94,6 @@ static inline void flush_tlb_kernel_range(unsigned long start, unsigned long end
 
 #else
 
-
 /* Reserved PMEGs. */
 extern char sun3_reserved_pmeg[SUN3_PMEGS_NUM];
 extern unsigned long pmeg_vaddr[SUN3_PMEGS_NUM];

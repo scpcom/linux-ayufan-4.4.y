@@ -45,7 +45,6 @@
 #define PROTO_IPX	0x002b	/* protocol numbers */
 #define PROTO_DNA_RT    0x0027  /* DNA Routing */
 
-
 /*
  * Bit definitions for flags.
  */

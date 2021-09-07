@@ -67,7 +67,6 @@ static void sharpsl_average_clear(void);
 static void sharpsl_charge_toggle(struct work_struct *private_);
 static void sharpsl_battery_thread(struct work_struct *private_);
 
-
 /*
  * Variables
  */
@@ -75,8 +74,6 @@ struct sharpsl_pm_status sharpsl_pm;
 static DECLARE_DELAYED_WORK(toggle_charger, sharpsl_charge_toggle);
 static DECLARE_DELAYED_WORK(sharpsl_bat, sharpsl_battery_thread);
 DEFINE_LED_TRIGGER(sharpsl_charge_led_trigger);
-
-
 
 struct battery_thresh spitz_battery_levels_acin[] = {
 	{ 213, 100},
@@ -235,7 +232,6 @@ void sharpsl_battery_kick(void)
 }
 EXPORT_SYMBOL(sharpsl_battery_kick);
 
-
 static void sharpsl_battery_thread(struct work_struct *private_)
 {
 	int voltage, percent, apm_status, i = 0;
@@ -378,7 +374,6 @@ static void sharpsl_ac_timer(unsigned long data)
 
 	schedule_delayed_work(&sharpsl_bat, 0);
 }
-
 
 static irqreturn_t sharpsl_ac_isr(int irq, void *dev_id)
 {

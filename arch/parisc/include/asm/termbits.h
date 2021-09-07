@@ -58,7 +58,6 @@ struct ktermios {
 #define VLNEXT 15
 #define VEOL2 16
 
-
 /* c_iflag bits */
 #define IGNBRK	0000001
 #define BRKINT	0000002
@@ -162,7 +161,6 @@ struct ktermios {
 #define CRTSCTS   020000000000          /* flow control */
 
 #define IBSHIFT	16		/* Shift from CBAUD to CIBAUD */
-
 
 /* c_lflag bits */
 #define ISIG    0000001

@@ -59,7 +59,6 @@
 
 #include <linux/delay.h>
 
-
 #define VERSION_STRING DRIVER_DESC " 2.1d (build date: " \
 					__DATE__ " " __TIME__ ")"
 
@@ -134,7 +133,6 @@ static int debug;
 /* Size of tmp send buffer to card */
 #define SEND_BUF_MAX		1024
 #define RECEIVE_BUF_MAX		4
-
 
 /* Define all types of vendors and devices to support */
 #define VENDOR1		0x1931	/* Vendor Option */
@@ -1191,7 +1189,6 @@ static irqreturn_t interrupt_handler(int irq, void *dev_id)
 
 	if (read_iir == 0)
 		goto none;
-
 
 	DBG4("%s irq:0x%04X, prev:0x%04X", interrupt2str(read_iir), read_iir,
 		dc->last_ier);

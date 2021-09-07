@@ -41,9 +41,7 @@ struct arkfb_info {
 	u32 pseudo_palette[16];
 };
 
-
 /* ------------------------------------------------------------------------- */
-
 
 static const struct svga_fb_format arkfb_formats[] = {
 	{ 0,  {0, 6, 0},  {0, 6, 0},  {0, 6, 0}, {0, 0, 0}, 0,
@@ -64,7 +62,6 @@ static const struct svga_fb_format arkfb_formats[] = {
 		FB_TYPE_PACKED_PIXELS, 0,		FB_VISUAL_TRUECOLOR, 2, 2},
 	SVGA_FORMAT_END
 };
-
 
 /* CRT timing register sets */
 
@@ -94,9 +91,7 @@ static const struct svga_timing_regs ark_timing_regs     = {
 	ark_v_blank_end_regs, ark_v_sync_start_regs, ark_v_sync_end_regs,
 };
 
-
 /* ------------------------------------------------------------------------- */
-
 
 /* Module parameters */
 
@@ -125,9 +120,7 @@ static int threshold = 4;
 module_param(threshold, int, 0644);
 MODULE_PARM_DESC(threshold, "FIFO threshold");
 
-
 /* ------------------------------------------------------------------------- */
-
 
 static void arkfb_settile(struct fb_info *info, struct fb_tilemap *map)
 {
@@ -167,9 +160,7 @@ static struct fb_tile_ops arkfb_tile_ops = {
 	.fb_get_tilemax = svga_get_tilemax,
 };
 
-
 /* ------------------------------------------------------------------------- */
-
 
 /* image data is MSB-first, fb structure is MSB-first too */
 static inline u32 expand_color(u32 c)
@@ -226,7 +217,6 @@ static void arkfb_iplan_fillrect(struct fb_info *info, const struct fb_fillrect 
 	}
 
 }
-
 
 /* image data is MSB-first, fb structure is high-nibble-in-low-byte-first */
 static inline u32 expand_pixel(u32 c)
@@ -286,9 +276,7 @@ static void arkfb_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
 		cfb_fillrect(info, rect);
 }
 
-
 /* ------------------------------------------------------------------------- */
-
 
 enum
 {
@@ -323,7 +311,6 @@ struct dac_info
 	dac_write_regs_t dac_write_regs;
 	void *data;
 };
-
 
 static inline u8 dac_read_reg(struct dac_info *info, u8 reg)
 {
@@ -363,9 +350,7 @@ static inline void dac_release(struct dac_info *info)
 	info->dacops->dac_release(info);
 }
 
-
 /* ------------------------------------------------------------------------- */
-
 
 /* ICS5342 DAC */
 
@@ -442,7 +427,6 @@ static struct dac_ops ics5342_ops = {
 	.dac_release	= ics5342_release
 };
 
-
 static struct dac_info * ics5342_init(dac_read_regs_t drr, dac_write_regs_t dwr, void *data)
 {
 	struct dac_info *info = kzalloc(sizeof(struct ics5342_info), GFP_KERNEL);
@@ -458,9 +442,7 @@ static struct dac_info * ics5342_init(dac_read_regs_t drr, dac_write_regs_t dwr,
 	return info;
 }
 
-
 /* ------------------------------------------------------------------------- */
-
 
 static unsigned short dac_regs[4] = {0x3c8, 0x3c9, 0x3c6, 0x3c7};
 
@@ -494,7 +476,6 @@ static void ark_dac_write_regs(void *data, u8 *code, int count)
 	vga_wseq(NULL, 0x1C, regval);
 }
 
-
 static void ark_set_pixclock(struct fb_info *info, u32 pixclock)
 {
 	struct arkfb_info *par = info->par;
@@ -510,7 +491,6 @@ static void ark_set_pixclock(struct fb_info *info, u32 pixclock)
 	regval = vga_r(NULL, VGA_MIS_R);
 	vga_w(NULL, VGA_MIS_W, regval | VGA_MIS_ENB_PLL_LOAD);
 }
-
 
 /* Open framebuffer */
 
@@ -580,7 +560,6 @@ static int arkfb_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
 	/* Round up xres_virtual to have proper alignment of lines */
 	step = arkfb_formats[rv].xresstep - 1;
 	var->xres_virtual = (var->xres_virtual+step) & ~step;
-
 
 	/* Check whether have enough memory */
 	mem = ((var->bits_per_pixel * var->xres_virtual) >> 3) * var->yres_virtual;
@@ -879,7 +858,6 @@ static int arkfb_blank(int blank_mode, struct fb_info *info)
 	return 0;
 }
 
-
 /* Pan the display */
 
 static int arkfb_pan_display(struct fb_var_screeninfo *var, struct fb_info *info)
@@ -902,9 +880,7 @@ static int arkfb_pan_display(struct fb_var_screeninfo *var, struct fb_info *info
 	return 0;
 }
 
-
 /* ------------------------------------------------------------------------- */
-
 
 /* Frame buffer operations */
 
@@ -923,9 +899,7 @@ static struct fb_ops arkfb_ops = {
 	.fb_get_caps    = svga_get_caps,
 };
 
-
 /* ------------------------------------------------------------------------- */
-
 
 /* PCI probe */
 static int __devinit ark_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
@@ -1080,7 +1054,6 @@ static void __devexit ark_pci_remove(struct pci_dev *dev)
 	}
 }
 
-
 #ifdef CONFIG_PM
 /* PCI suspend */
 
@@ -1111,7 +1084,6 @@ static int ark_pci_suspend (struct pci_dev* dev, pm_message_t state)
 
 	return 0;
 }
-
 
 /* PCI resume */
 
@@ -1155,7 +1127,6 @@ static struct pci_device_id ark_devices[] __devinitdata = {
 	{PCI_DEVICE(0xEDD8, 0xA099)},
 	{0, 0, 0, 0, 0, 0, 0}
 };
-
 
 MODULE_DEVICE_TABLE(pci, ark_devices);
 

@@ -38,13 +38,11 @@
 
 #include <rm9k_wdt.h>
 
-
 #define CLOCK                  125000000
 #define MAX_TIMEOUT_SECONDS    32
 #define CPCCR                  0x0080
 #define CPGIG1SR               0x0044
 #define CPGIG1ER               0x0054
-
 
 /* Function prototypes */
 static irqreturn_t wdt_gpi_irqhdl(int, void *);
@@ -62,17 +60,14 @@ static const struct resource *wdt_gpi_get_resource(struct platform_device *,
 static int __init wdt_gpi_probe(struct platform_device *);
 static int __exit wdt_gpi_remove(struct platform_device *);
 
-
 static const char wdt_gpi_name[] = "wdt_gpi";
 static atomic_t opencnt;
 static int expect_close;
 static int locked;
 
-
 /* These are set from device resources */
 static void __iomem *wd_regs;
 static unsigned int wd_irq, wd_ctr;
-
 
 /* Module arguments */
 static int timeout = MAX_TIMEOUT_SECONDS;
@@ -95,7 +90,6 @@ static int nowayout = WATCHDOG_NOWAYOUT;
 module_param(nowayout, bool, 0444);
 MODULE_PARM_DESC(nowayout, "Watchdog cannot be disabled once started");
 
-
 /* Kernel interfaces */
 static const struct file_operations fops = {
 	.owner		= THIS_MODULE,
@@ -115,14 +109,12 @@ static struct notifier_block wdt_gpi_shutdown = {
 	.notifier_call	= wdt_gpi_notify,
 };
 
-
 /* Interrupt handler */
 static irqreturn_t wdt_gpi_irqhdl(int irq, void *ctxt)
 {
 	if (!unlikely(__raw_readl(wd_regs + 0x0008) & 0x1))
 		return IRQ_NONE;
 	__raw_writel(0x1, wd_regs + 0x0008);
-
 
 	printk(KERN_CRIT "%s: watchdog expired - resetting system\n",
 		wdt_gpi_name);
@@ -133,7 +125,6 @@ static irqreturn_t wdt_gpi_irqhdl(int irq, void *ctxt)
 	while (1)
 		cpu_relax();
 }
-
 
 /* Watchdog functions */
 static void wdt_gpi_start(void)
@@ -177,7 +168,6 @@ static void wdt_gpi_set_timeout(unsigned int to)
 	iob();
 	unlock_titan_regs();
 }
-
 
 /* /dev/watchdog operations */
 static int wdt_gpi_open(struct inode *inode, struct file *file)
@@ -323,7 +313,6 @@ static long wdt_gpi_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 	return res;
 }
 
-
 /* Shutdown notifier */
 static int wdt_gpi_notify(struct notifier_block *this, unsigned long code,
 			  void *unused)
@@ -333,7 +322,6 @@ static int wdt_gpi_notify(struct notifier_block *this, unsigned long code,
 
 	return NOTIFY_DONE;
 }
-
 
 /* Init & exit procedures */
 static const struct resource *wdt_gpi_get_resource(struct platform_device *pdv,
@@ -384,7 +372,6 @@ static int __devexit wdt_gpi_remove(struct platform_device *dev)
 	return res;
 }
 
-
 /* Device driver init & exit */
 static struct platform_driver wgt_gpi_driver = {
 	.driver = {
@@ -416,4 +403,3 @@ MODULE_DESCRIPTION("Basler eXcite watchdog driver for gpi devices");
 MODULE_VERSION("0.1");
 MODULE_LICENSE("GPL");
 MODULE_ALIAS_MISCDEV(WATCHDOG_MINOR);
-

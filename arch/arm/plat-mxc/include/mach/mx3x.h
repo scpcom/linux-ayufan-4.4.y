@@ -272,4 +272,3 @@ static inline int mx31_revision(void)
 #endif
 
 #endif /*  __ASM_ARCH_MXC_MX31_H__ */
-

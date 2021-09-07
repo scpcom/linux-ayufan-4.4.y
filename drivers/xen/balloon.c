@@ -485,7 +485,6 @@ static ssize_t store_target_kb(struct sys_device *dev,
 static SYSDEV_ATTR(target_kb, S_IRUGO | S_IWUSR,
 		   show_target_kb, store_target_kb);
 
-
 static ssize_t show_target(struct sys_device *dev, struct sysdev_attribute *attr,
 			      char *buf)
 {
@@ -514,7 +513,6 @@ static ssize_t store_target(struct sys_device *dev,
 
 static SYSDEV_ATTR(target, S_IRUGO | S_IWUSR,
 		   show_target, store_target);
-
 
 static struct sysdev_attribute *balloon_attrs[] = {
 	&attr_target_kb,

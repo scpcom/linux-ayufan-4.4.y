@@ -400,7 +400,6 @@ out:
 	return error;
 }
 
-
 /*
  * This function is supposed to answer the question "who called
  * schedule()?"

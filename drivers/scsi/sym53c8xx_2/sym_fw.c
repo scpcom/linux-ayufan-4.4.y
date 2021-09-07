@@ -48,7 +48,6 @@
 #define	PADDR_A(label)		SYM_GEN_PADDR_A(struct SYM_FWA_SCR, label)
 #define	PADDR_B(label)		SYM_GEN_PADDR_B(struct SYM_FWB_SCR, label)
 
-
 #if	SYM_CONF_GENERIC_SUPPORT
 /*
  *  Allocate firmware #1 script area.

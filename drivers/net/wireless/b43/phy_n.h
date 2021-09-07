@@ -3,7 +3,6 @@
 
 #include "phy_common.h"
 
-
 /* N-PHY registers. */
 
 #define B43_NPHY_BBCFG				B43_PHY_N(0x001) /* BB config */
@@ -706,8 +705,6 @@
 #define  B43_NPHY_TXPCTL_INIT_PIDXI1		0x00FF /* Power index init 1 */
 #define  B43_NPHY_TXPCTL_INIT_PIDXI1_SHIFT	0
 
-
-
 /* Broadcom 2055 radio registers */
 
 #define B2055_GEN_SPARE			0x00 /* GEN spare */
@@ -915,14 +912,11 @@
 #define B2055_C2_B0NB_RSSIVCM		0xDE /* Core 2 B0 narrow-band RSSI VCM */
 #define B2055_C2_GENSPARE2		0xE2 /* Core 2 GEN spare 2 */
 
-
-
 struct b43_wldev;
 
 struct b43_phy_n {
 	//TODO lots of missing stuff
 };
-
 
 struct b43_phy_operations;
 extern const struct b43_phy_operations b43_phyops_n;

@@ -21,7 +21,6 @@
 #include "playback.h"
 #include "pod.h"
 
-
 /* trigger callback */
 int snd_line6_trigger(struct snd_pcm_substream *substream, int cmd)
 {

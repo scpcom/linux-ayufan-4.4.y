@@ -314,7 +314,6 @@ init_card(struct sfax_hw *sf)
 	return -EIO;
 }
 
-
 static int __devinit
 setup_speedfax(struct sfax_hw *sf)
 {

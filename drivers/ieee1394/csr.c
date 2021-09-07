@@ -92,7 +92,6 @@ struct csr1212_bus_ops csr_bus_ops = {
 	.release_addr =		release_addr_range,
 };
 
-
 static u16 csr_crc16(unsigned *data, int length)
 {
         int check=0, i;
@@ -162,7 +161,6 @@ static inline void calculate_expire(struct csr_control *csr)
 	csr->expire = usecs_to_jiffies(usecs > 100000 ? usecs : 100000);
 	HPSB_VERBOSE("CSR: setting expire to %lu, HZ=%u", csr->expire, HZ);
 }
-
 
 static void add_host(struct hpsb_host *host)
 {
@@ -271,7 +269,6 @@ static void remove_host(struct hpsb_host *host)
 	host->update_config_rom = 1;
 }
 
-
 int hpsb_update_config_rom(struct hpsb_host *host, const quadlet_t *new_rom,
 	size_t buffersize, unsigned char rom_version)
 {
@@ -304,7 +301,6 @@ int hpsb_update_config_rom(struct hpsb_host *host, const quadlet_t *new_rom,
         return ret;
 }
 
-
 /* Read topology / speed maps and configuration ROM */
 static int read_maps(struct hpsb_host *host, int nodeid, quadlet_t *buffer,
                      u64 addr, size_t length, u16 fl)
@@ -326,7 +322,6 @@ static int read_maps(struct hpsb_host *host, int nodeid, quadlet_t *buffer,
         spin_unlock_irqrestore(&host->csr.lock, flags);
         return RCODE_COMPLETE;
 }
-
 
 #define out if (--length == 0) break
 
@@ -530,7 +525,6 @@ static int write_regs(struct hpsb_host *host, int nodeid, int destid,
 }
 
 #undef out
-
 
 static int lock_regs(struct hpsb_host *host, int nodeid, quadlet_t *store,
                      u64 addr, quadlet_t data, quadlet_t arg, int extcode, u16 fl)
@@ -820,7 +814,6 @@ static void release_addr_range(u64 addr, void *__host)
  	struct hpsb_host *host = (struct hpsb_host*)__host;
 	hpsb_unregister_addrspace(&csr_highlevel, host, addr);
 }
-
 
 int init_csr(void)
 {

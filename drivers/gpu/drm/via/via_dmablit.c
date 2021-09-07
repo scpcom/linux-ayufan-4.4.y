@@ -26,7 +26,6 @@
  *    Partially based on code obtained from Digeo Inc.
  */
 
-
 /*
  * Unmaps the DMA mappings.
  * FIXME: Is this a NoOp on x86? Also
@@ -52,12 +51,9 @@ typedef struct _drm_via_descriptor {
 	uint32_t next;
 } drm_via_descriptor_t;
 
-
 /*
  * Unmap a DMA mapping.
  */
-
-
 
 static void
 via_unmap_blit_from_device(struct pci_dev *pdev, drm_via_sg_info_t *vsg)
@@ -165,7 +161,6 @@ via_map_blit_for_device(struct pci_dev *pdev,
  * blit info has only been partially built as long as the status enum is consistent
  * with the actual status of the used resources.
  */
-
 
 static void
 via_free_sg_info(struct pci_dev *pdev, drm_via_sg_info_t *vsg)
@@ -301,8 +296,6 @@ via_dmablit_engine_off(struct drm_device *dev, int engine)
 	VIA_WRITE(VIA_PCI_DMA_CSR0 + engine*0x04, VIA_DMA_CSR_TD | VIA_DMA_CSR_DD);
 }
 
-
-
 /*
  * The dmablit part of the IRQ handler. Trying to do only reasonably fast things here.
  * The rest, like unmapping and freeing memory for done blits is done in a separate workqueue
@@ -390,8 +383,6 @@ via_dmablit_handler(struct drm_device *dev, int engine, int from_irq)
 	}
 }
 
-
-
 /*
  * Check whether this blit is still active, performing necessary locking.
  */
@@ -448,7 +439,6 @@ via_dmablit_sync(struct drm_device *dev, uint32_t handle, int engine)
 	return ret;
 }
 
-
 /*
  * A timer that regularly polls the blit engine in cases where we don't have interrupts:
  * a) Broken hardware (typically those that don't have any video capture facility).
@@ -456,8 +446,6 @@ via_dmablit_sync(struct drm_device *dev, uint32_t handle, int engine)
  * The timer and hardware IRQ's can and do work in parallel. If the hardware has
  * irqs, it will shorten the latency somewhat.
  */
-
-
 
 static void
 via_dmablit_timer(unsigned long data)
@@ -485,15 +473,11 @@ via_dmablit_timer(unsigned long data)
 	}
 }
 
-
-
-
 /*
  * Workqueue task that frees data and mappings associated with a blit.
  * Also wakes up waiting processes. Each of these tasks handles one
  * blit engine only and may not be called on each interrupt.
  */
-
 
 static void
 via_dmablit_workqueue(struct work_struct *work)
@@ -503,7 +487,6 @@ via_dmablit_workqueue(struct work_struct *work)
 	unsigned long irqsave;
 	drm_via_sg_info_t *cur_sg;
 	int cur_released;
-
 
 	DRM_DEBUG("Workqueue task called for blit engine %ld\n",(unsigned long)
 		  (blitq - ((drm_via_private_t *)dev->dev_private)->blit_queues));
@@ -535,11 +518,9 @@ via_dmablit_workqueue(struct work_struct *work)
 	spin_unlock_irqrestore(&blitq->blit_lock, irqsave);
 }
 
-
 /*
  * Init all blit engines. Currently we use two, but some hardware have 4.
  */
-
 
 void
 via_init_dmablit(struct drm_device *dev)
@@ -576,7 +557,6 @@ via_init_dmablit(struct drm_device *dev)
 /*
  * Build all info and do all mappings required for a blit.
  */
-
 
 static int
 via_build_sg_info(struct drm_device *dev, drm_via_sg_info_t *vsg, drm_via_dmablit_t *xfer)
@@ -675,7 +655,6 @@ via_build_sg_info(struct drm_device *dev, drm_via_sg_info_t *vsg, drm_via_dmabli
 	return 0;
 }
 
-
 /*
  * Reserve one free slot in the blit queue. Will wait for one second for one
  * to become available. Otherwise -EBUSY is returned.
@@ -724,7 +703,6 @@ via_dmablit_release_slot(drm_via_blitq_t *blitq)
 /*
  * Grab a free slot. Build blit info and queue a blit.
  */
-
 
 static int
 via_dmablit(struct drm_device *dev, drm_via_dmablit_t *xfer)
@@ -794,7 +772,6 @@ via_dma_blit_sync( struct drm_device *dev, void *data, struct drm_file *file_pri
 
 	return err;
 }
-
 
 /*
  * Queue a blit and hand back a handle to be used for sync. This IOCTL may be interrupted by a signal

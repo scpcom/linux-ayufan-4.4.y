@@ -468,7 +468,6 @@ static const struct mmc_bus_ops mmc_sdio_ops = {
 	.resume = mmc_sdio_resume,
 };
 
-
 /*
  * Starting point for SDIO card init.
  */
@@ -554,7 +553,6 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
 
 	return 0;
 
-
 remove_added:
 	/* Remove without lock if the device has been added. */
 	mmc_sdio_remove(host);
@@ -572,4 +570,3 @@ err:
 
 	return err;
 }
-

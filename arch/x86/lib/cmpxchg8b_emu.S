@@ -11,7 +11,6 @@
 #include <asm/frame.h>
 #include <asm/dwarf2.h>
 
-
 .text
 
 /*

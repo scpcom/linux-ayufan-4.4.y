@@ -13,7 +13,6 @@
  *
  */
 
-
 #include <linux/kernel.h>
 #include <linux/errno.h>
 #include <linux/init.h>
@@ -40,12 +39,10 @@ struct usb_cytherm {
 	int brightness;
 };
 
-
 /* local function prototypes */
 static int cytherm_probe(struct usb_interface *interface, 
 			 const struct usb_device_id *id);
 static void cytherm_disconnect(struct usb_interface *interface);
-
 
 /* usb specific object needed to register this driver with the usb subsystem */
 static struct usb_driver cytherm_driver = {
@@ -64,7 +61,6 @@ static struct usb_driver cytherm_driver = {
 #define READ_PORT  0x04 /* Reads from port, value = address */
 #define WRITE_PORT 0x05 /* Write to port, value = address, index = data */ 
 
-
 /* Send a vendor command to device */
 static int vendor_command(struct usb_device *dev, unsigned char request, 
 			  unsigned char value, unsigned char index,
@@ -77,8 +73,6 @@ static int vendor_command(struct usb_device *dev, unsigned char request,
 			       index, buf, size,
 			       USB_CTRL_GET_TIMEOUT);
 }
-
-
 
 #define BRIGHTNESS 0x2c     /* RAM location for brightness value */
 #define BRIGHTNESS_SEM 0x2b /* RAM location for brightness semaphore */
@@ -132,7 +126,6 @@ static ssize_t set_brightness(struct device *dev, struct device_attribute *attr,
 static DEVICE_ATTR(brightness, S_IRUGO | S_IWUSR | S_IWGRP, 
 		   show_brightness, set_brightness);
 
-
 #define TEMP 0x33 /* RAM location for temperature */
 #define SIGN 0x34 /* RAM location for temperature sign */
 
@@ -171,14 +164,12 @@ static ssize_t show_temp(struct device *dev, struct device_attribute *attr, char
 		       5*(temp - ((temp >> 1) << 1)));
 }
 
-
 static ssize_t set_temp(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
 	return count;
 }
 
 static DEVICE_ATTR(temp, S_IRUGO, show_temp, set_temp);
-
 
 #define BUTTON 0x7a
 
@@ -212,14 +203,12 @@ static ssize_t show_button(struct device *dev, struct device_attribute *attr, ch
 		return sprintf(buf, "0");
 }
 
-
 static ssize_t set_button(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
 	return count;
 }
 
 static DEVICE_ATTR(button, S_IRUGO, show_button, set_button);
-
 
 static ssize_t show_port0(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -245,7 +234,6 @@ static ssize_t show_port0(struct device *dev, struct device_attribute *attr, cha
 
 	return sprintf(buf, "%d", retval);
 }
-
 
 static ssize_t set_port0(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
@@ -306,7 +294,6 @@ static ssize_t show_port1(struct device *dev, struct device_attribute *attr, cha
 	return sprintf(buf, "%d", retval);
 }
 
-
 static ssize_t set_port1(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct usb_interface *intf = to_usb_interface(dev);
@@ -340,8 +327,6 @@ static ssize_t set_port1(struct device *dev, struct device_attribute *attr, cons
 }
 
 static DEVICE_ATTR(port1, S_IRUGO | S_IWUSR | S_IWGRP, show_port1, set_port1);
-
-
 
 static int cytherm_probe(struct usb_interface *interface, 
 			 const struct usb_device_id *id)
@@ -416,7 +401,6 @@ static void cytherm_disconnect(struct usb_interface *interface)
 	dev_info(&interface->dev, "Cypress thermometer now disconnected\n");
 }
 
-
 static int __init usb_cytherm_init(void)
 {
 	int result;
@@ -437,7 +421,6 @@ static void __exit usb_cytherm_exit(void)
 {
 	usb_deregister(&cytherm_driver);
 }
-
 
 module_init (usb_cytherm_init);
 module_exit (usb_cytherm_exit);

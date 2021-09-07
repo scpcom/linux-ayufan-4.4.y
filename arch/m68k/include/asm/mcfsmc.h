@@ -17,7 +17,6 @@
  *	allow 8 bit accesses. So this code is 16bit access only.
  */
 
-
 #undef	outb
 #undef	inb
 #undef	outw
@@ -53,7 +52,6 @@
 #define	insw	smc_insw
 #define	insl	smc_insl
 
-
 static inline int smc_inb(unsigned int addr)
 {
 	register unsigned short	w;
@@ -84,7 +82,6 @@ static inline void smc_outwd(unsigned int val, unsigned int addr)
 {
 	*((volatile unsigned short *) addr) = val;
 }
-
 
 /*
  *	The rep* functions are used to feed the data port with
@@ -151,7 +148,6 @@ static inline void smc_outsl(unsigned int addr, void *vbuf, unsigned long len)
 	for (ebuf = buf + len; (buf < ebuf); )
 		*rp = *buf++;
 }
-
 
 #ifdef CONFIG_NETtel
 /*

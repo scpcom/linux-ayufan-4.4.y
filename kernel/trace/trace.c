@@ -661,7 +661,6 @@ __acquires(kernel_lock)
 	if (!type->wait_pipe)
 		type->wait_pipe = default_wait_pipe;
 
-
 #ifdef CONFIG_FTRACE_STARTUP_TEST
 	if (type->selftest && !tracing_selftest_disabled) {
 		struct tracer *saved_tracer = current_trace;
@@ -1662,7 +1661,6 @@ static void print_func_help_header(struct seq_file *m)
 	seq_puts(m, "#              | |       |          |         |\n");
 }
 
-
 static void
 print_trace_header(struct seq_file *m, struct trace_iterator *iter)
 {
@@ -1678,7 +1676,6 @@ print_trace_header(struct seq_file *m, struct trace_iterator *iter)
 
 	if (type)
 		name = type->name;
-
 
 	for_each_tracing_cpu(cpu) {
 		count = ring_buffer_entries_cpu(tr->buffer, cpu);
@@ -2317,7 +2314,6 @@ tracing_trace_options_read(struct file *filp, char __user *ubuf,
 	int r = 0;
 	int i;
 
-
 	/* calculate max size */
 	for (i = 0; trace_options[i]; i++) {
 		len += strlen(trace_options[i]);
@@ -2943,7 +2939,6 @@ tracing_poll_pipe(struct file *filp, poll_table *poll_table)
 		return 0;
 	}
 }
-
 
 void default_wait_pipe(struct trace_iterator *iter)
 {
@@ -3976,7 +3971,6 @@ trace_options_write(struct file *filp, const char __user *ubuf, size_t cnt,
 	return cnt;
 }
 
-
 static const struct file_operations trace_options_fops = {
 	.open = tracing_open_generic,
 	.read = trace_options_read,
@@ -4048,7 +4042,6 @@ struct dentry *trace_create_file(const char *name,
 
 	return ret;
 }
-
 
 static struct dentry *trace_options_init_dentry(void)
 {
@@ -4424,7 +4417,6 @@ __init static int tracer_alloc_buffers(void)
 		goto out_free_cpumask;
 	}
 	global_trace.entries = ring_buffer_size(global_trace.buffer);
-
 
 #ifdef CONFIG_TRACER_MAX_TRACE
 	max_tr.buffer = ring_buffer_alloc(ring_buf_size,

@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef _VMBUS_API_H_
 #define _VMBUS_API_H_
 
@@ -51,7 +50,6 @@ struct hv_multipage_buffer {
 					 MAX_PAGE_BUFFER_COUNT))
 #define MAX_MULTIPAGE_BUFFER_PACKET	(0x18 +			\
 					 sizeof(struct hv_multipage_buffer))
-
 
 #pragma pack(pop)
 

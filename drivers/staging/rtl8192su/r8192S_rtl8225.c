@@ -14,13 +14,10 @@ void PHY_SetRF8225OfdmTxPower(struct net_device* dev ,u8	powerlevel)
 
 }
 
-
-
 void PHY_SetRF8225CckTxPower(	struct net_device* dev ,	u8 powerlevel)
 {
 
 }
-
 
 // TODO: The following RF 022D related function should be removed to HalPhy0222D.c.
 void PHY_SetRF0222DOfdmTxPower(struct net_device* dev ,u8 powerlevel)
@@ -28,13 +25,10 @@ void PHY_SetRF0222DOfdmTxPower(struct net_device* dev ,u8 powerlevel)
 	//TODO: We should set RF TxPower for RF 0222D here!!
 }
 
-
-
 void PHY_SetRF0222DCckTxPower(struct net_device* dev ,u8	powerlevel)
 {
 	//TODO: We should set RF TxPower for RF 0222D here!!
 }
-
 
 /*-----------------------------------------------------------------------------
  * Function:    PHY_SetRF0222DBandwidth()
@@ -55,7 +49,6 @@ void PHY_SetRF0222DBandwidth(struct net_device* dev , HT_CHANNEL_WIDTH	 Bandwidt
 {
 	u8			eRFPath;
 	struct r8192_priv *priv = ieee80211_priv(dev);
-
 
 	//if (IS_HARDWARE_TYPE_8192S(dev))
 	if (1)
@@ -243,7 +236,6 @@ bool phy_RF8225_Config_ParaFile(struct net_device* dev)
 		rtl8192_setBBreg(dev, pPhyReg->rfHSSIPara2, b3WireAddressLength, 0x0); 	// Set 1 to 4 bits for 8255
 		rtl8192_setBBreg(dev, pPhyReg->rfHSSIPara2, b3WireDataLength, 0x0);	// Set 0 to 12  bits for 8255
 
-
 		/*----Initialize RF fom connfiguration file----*/
 		switch(eRFPath)
 		{
@@ -288,5 +280,3 @@ phy_RF8225_Config_ParaFile_Fail:
 #endif
 	return rtStatus;
 }
-
-

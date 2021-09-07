@@ -149,7 +149,6 @@ struct he_tpd {
 #define TPD_ADDR(x)	((x) & TPD_MASK)
 #define TPD_INDEX(x)	(TPD_ADDR(x) >> TPD_ADDR_SHIFT)
 
-
 /* table 2.3 transmit buffer return elements */
 
 struct he_tbrq {
@@ -748,7 +747,6 @@ struct he_vcc
 #define CS_ORPTRS	0x0a0
 
 #define RXCON_CLOSE	0x100
-
 
 #define RCM_MEM_SIZE	0x10000		/* 1M of 32-bit registers */
 #define TCM_MEM_SIZE	0x20000		/* 2M of 32-bit registers */

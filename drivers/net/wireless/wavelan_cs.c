@@ -393,7 +393,6 @@ fee_read(u_long		base,	/* i/o port of the card */
     }
 }
 
-
 /*------------------------------------------------------------------*/
 /*
  * Write bytes from the Frequency EEprom (frequency select cards).
@@ -1352,7 +1351,6 @@ wv_init_info(struct net_device *	dev)
  * or wireless extensions
  */
 
-
 /*------------------------------------------------------------------*/
 /*
  * Set or clear the multicast filter for this adaptor.
@@ -1469,7 +1467,6 @@ wavelan_set_mac_address(struct net_device *	dev,
   return 0;
 }
 #endif	/* SET_MAC_ADDRESS */
-
 
 /*------------------------------------------------------------------*/
 /*
@@ -3848,7 +3845,6 @@ wv_pcmcia_config(struct pcmcia_device *	link)
   memreq_t		mem;
   net_local *		lp = netdev_priv(dev);
 
-
 #ifdef DEBUG_CONFIG_TRACE
   printk(KERN_DEBUG "->wv_pcmcia_config(0x%p)\n", link);
 #endif
@@ -4596,7 +4592,6 @@ static int wavelan_resume(struct pcmcia_device *link)
 
 	return 0;
 }
-
 
 static struct pcmcia_device_id wavelan_ids[] = {
 	PCMCIA_DEVICE_PROD_ID12("AT&T","WaveLAN/PCMCIA", 0xe7c5affd, 0x1bc50975),

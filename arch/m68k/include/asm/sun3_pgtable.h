@@ -17,7 +17,6 @@
 #define VTOP(addr)	__pa(addr)
 #define PTOV(addr)	__va(addr)
 
-
 #endif	/* !__ASSEMBLY__ */
 
 /* These need to be defined for compatibility although the sun3 doesn't use them */
@@ -32,7 +31,6 @@
 #define SUN3_PAGE_NOCACHE   (0x10000000)
 #define SUN3_PAGE_ACCESSED  (0x02000000)
 #define SUN3_PAGE_MODIFIED  (0x01000000)
-
 
 /* Externally used page protection values. */
 #define _PAGE_PRESENT	(SUN3_PAGE_VALID)
@@ -135,7 +133,6 @@ static inline void pte_clear (struct mm_struct *mm, unsigned long addr, pte_t *p
 #define pte_page(pte)		virt_to_page(__pte_page(pte))
 #define pmd_page(pmd)		virt_to_page(__pmd_page(pmd))
 
-
 static inline int pmd_none2 (pmd_t *pmd) { return !pmd_val (*pmd); }
 #define pmd_none(pmd) pmd_none2(&(pmd))
 //static inline int pmd_bad (pmd_t pmd) { return (pmd_val (pmd) & SUN3_PMD_MASK) != SUN3_PMD_MAGIC; }
@@ -151,14 +148,12 @@ static inline int pgd_bad (pgd_t pgd) { return 0; }
 static inline int pgd_present (pgd_t pgd) { return 1; }
 static inline void pgd_clear (pgd_t *pgdp) {}
 
-
 #define pte_ERROR(e) \
 	printk("%s:%d: bad pte %08lx.\n", __FILE__, __LINE__, pte_val(e))
 #define pmd_ERROR(e) \
 	printk("%s:%d: bad pmd %08lx.\n", __FILE__, __LINE__, pmd_val(e))
 #define pgd_ERROR(e) \
 	printk("%s:%d: bad pgd %08lx.\n", __FILE__, __LINE__, pgd_val(e))
-
 
 /*
  * The following only work if pte_present() is true.
@@ -212,7 +207,6 @@ static inline pte_t pgoff_to_pte(unsigned off)
 	pte_t pte = { off + SUN3_PAGE_ACCESSED };
 	return pte;
 }
-
 
 /* Find an entry in the third-level pagetable. */
 #define pte_index(address) ((address >> PAGE_SHIFT) & (PTRS_PER_PTE-1))

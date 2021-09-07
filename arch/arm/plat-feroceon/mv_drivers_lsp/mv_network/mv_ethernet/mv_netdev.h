@@ -12,7 +12,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -112,7 +111,6 @@ extern u32 eth_dbg;
 #else
 # define ETH_DBG(FLG, X)
 #endif
-
 
 /****************************************************** 
  * driver statistics control --                       *
@@ -238,12 +236,10 @@ typedef struct _eth_statistics
 
 } eth_statistics;
 
-
 /* Masks used for pp->flags */
 #define MV_ETH_F_TIMER		0x01
 #define MV_ETH_F_LINK_UP	0x02
 #define MV_ETH_F_FORCED_LINK	0x04	/* port is connected to a Switch with forced link */
-
 
 typedef struct _mv_eth_priv
 {
@@ -542,4 +538,3 @@ void                mv_eth_nfp_stats_print(unsigned int port);
 #ifdef ETH_MV_TX_EN
 void                eth_tx_en_config(int port, int value);
 #endif /* ETH_MV_TX_EN */
-

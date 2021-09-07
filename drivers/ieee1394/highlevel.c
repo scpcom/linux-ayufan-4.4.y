@@ -28,7 +28,6 @@
 #include "highlevel.h"
 #include "nodemgr.h"
 
-
 struct hl_host_info {
 	struct list_head list;
 	struct hpsb_host *host;
@@ -37,7 +36,6 @@ struct hl_host_info {
 	void *data;
 };
 
-
 static LIST_HEAD(hl_drivers);
 static DECLARE_RWSEM(hl_drivers_sem);
 
@@ -45,7 +43,6 @@ static LIST_HEAD(hl_irqs);
 static DEFINE_RWLOCK(hl_irqs_lock);
 
 static DEFINE_RWLOCK(addr_space_lock);
-
 
 static struct hl_host_info *hl_get_hostinfo(struct hpsb_highlevel *hl,
 					    struct hpsb_host *host)

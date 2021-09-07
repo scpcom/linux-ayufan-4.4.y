@@ -49,8 +49,6 @@ static int          msglevel                =MSG_LEVEL_INFO;
 
 /*---------------------  Export Variables  --------------------------*/
 
-
-
 /*
  * Description:
  *      Relay packet.  Return TRUE if packet is copy to DMA1
@@ -78,9 +76,6 @@ BOOL ROUTEbRelay (PSDevice pDevice, PBYTE pbySkbData, UINT uDataLen, UINT uNodeI
     UINT            cbHeaderSize;
     UINT            ii;
     PBYTE           pbyBSSID;
-
-
-
 
     if (AVAIL_TD(pDevice, TYPE_AC0DMA)<=0) {
         DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO "Relay can't allocate TD1..\n");
@@ -194,6 +189,3 @@ BOOL ROUTEbRelay (PSDevice pDevice, PBYTE pbySkbData, UINT uDataLen, UINT uNodeI
 
     return TRUE;
 }
-
-
-

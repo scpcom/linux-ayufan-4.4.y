@@ -201,7 +201,6 @@ struct drives_pid_state
 #define SLOTS_FAN_PWM_INDEX		2
 #define	SLOTS_FAN_DEFAULT_PWM		40 /* Do better here ! */
 
-
 /*
  * PID factors for the Xserve DIMM control loop
  */
@@ -226,7 +225,6 @@ struct dimm_pid_state
 	int			output;
 };
 
-
 /*
  * PID factors for the Xserve Slots control loop
  */
@@ -250,8 +248,6 @@ struct slots_pid_state
 	int			first;
 	int			pwm;
 };
-
-
 
 /* Desktops */
 
@@ -283,7 +279,6 @@ struct slots_pid_state
 #define CPU_B1_FAN_RPM_INDEX		12
 #define CPU_B2_FAN_RPM_INDEX		13
 #define CPU_B3_FAN_RPM_INDEX		14
-
 
 struct cpu_pid_state
 {
@@ -321,6 +316,5 @@ enum {
 	state_attached,
 	state_detaching,
 };
-
 
 #endif /* __THERM_PMAC_7_2_H__ */

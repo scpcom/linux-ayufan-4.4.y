@@ -26,7 +26,6 @@
 
 *******************************************************************************/
 
-
 /* glue for the OS independent part of e1000
  * includes register access macros
  */
@@ -53,7 +52,6 @@
 #define DEBUGOUT2 DEBUGOUT1
 #define DEBUGOUT3 DEBUGOUT2
 #define DEBUGOUT7 DEBUGOUT3
-
 
 #define er32(reg)							\
 	(readl(hw->hw_addr + ((hw->mac_type >= e1000_82543)		\

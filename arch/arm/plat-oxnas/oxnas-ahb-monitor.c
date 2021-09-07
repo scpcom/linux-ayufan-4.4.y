@@ -47,7 +47,6 @@
 
 #include <asm/hardware.h>
 
-
 /* usb test masks and offsets */
 #define TEST_MASK    0xF
 #define TEST_OFFSET  16
@@ -58,9 +57,7 @@ MODULE_AUTHOR(		"John Larkworthy"					);
 MODULE_DESCRIPTION(	"Driver to access the test hardware in oxnas units"	);
 MODULE_LICENSE(		"GPL"							);
 
-
 static struct proc_dir_entry *proc_dir_usb_test_read, *oxnas_test_dir;
-
 
 static struct {
 	void * address;
@@ -243,7 +240,6 @@ oxnas_test_control(struct file *file, const char *buf, unsigned long count, void
 
 	return len;
 }
-
 
 /*
  * The write function accepts a line as below:
@@ -478,7 +474,6 @@ static int __init oxnas_test_init(void)
 		}
 	}
 
-
 	printk(KERN_INFO "%s %s initialised\n", MODULE_NAME, MODULE_VERS);
 
 	return 0;
@@ -507,7 +502,6 @@ static int __init oxnas_test_init(void)
 		return rv;
 }
 
-
 static void __exit oxnas_test_exit(void)
 {
 	int i;
@@ -531,28 +525,5 @@ static void __exit oxnas_test_exit(void)
 	
 }
 
-
 module_init(oxnas_test_init);
 module_exit(oxnas_test_exit);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -31,7 +31,6 @@
 #include "xattr.h"
 #include "acl.h"
 
-
 /*
  * Called when an inode is released. Note that this is different
  * from ext4_file_open: open gets called at every open, but release
@@ -277,4 +276,3 @@ const struct inode_operations ext4_file_inode_operations = {
 	.getbmapx 	= ext4_getbmapx,
 #endif
 };
-

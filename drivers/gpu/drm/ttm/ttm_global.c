@@ -109,4 +109,3 @@ void ttm_global_item_unref(struct ttm_global_reference *ref)
 	mutex_unlock(&item->mutex);
 }
 EXPORT_SYMBOL(ttm_global_item_unref);
-

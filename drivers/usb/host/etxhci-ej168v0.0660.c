@@ -113,4 +113,3 @@ void xhci_init_ej168_v00660(struct xhci_hcd *xhci)
 			hcd->regs + mmio_items_v00660[i].offset);
 	}
 }
-

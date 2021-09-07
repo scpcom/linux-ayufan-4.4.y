@@ -96,7 +96,6 @@
 #define FIQ_VICSOURCE30		INT_VICSOURCE30
 #define FIQ_VICSOURCE31		INT_VICSOURCE31
 
-
 /*
  * Secondary interrupt controller
  */

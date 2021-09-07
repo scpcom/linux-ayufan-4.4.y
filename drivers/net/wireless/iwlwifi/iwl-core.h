@@ -69,7 +69,6 @@
 struct iwl_host_cmd;
 struct iwl_cmd;
 
-
 #define IWLWIFI_VERSION "1.3.27k"
 #define DRV_COPYRIGHT	"Copyright(c) 2003-2009 Intel Corporation"
 #define DRV_AUTHOR     "<ilw@linux.intel.com>"
@@ -483,7 +482,6 @@ void iwl_setup_scan_deferred_work(struct iwl_priv *priv);
 #define IWL_ACTIVE_QUIET_TIME       cpu_to_le16(10)  /* msec */
 #define IWL_PLCP_QUIET_THRESH       cpu_to_le16(1)  /* packets */
 
-
 /*******************************************************************************
  * Calibrations - implemented in iwl-calib.c
  ******************************************************************************/
@@ -586,7 +584,6 @@ void iwlcore_free_geos(struct iwl_priv *priv);
 #define STATUS_POWER_PMI	16
 #define STATUS_FW_ERROR		17
 #define STATUS_MODE_PENDING	18
-
 
 static inline int iwl_is_ready(struct iwl_priv *priv)
 {

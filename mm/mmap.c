@@ -2295,7 +2295,6 @@ int may_expand_vm(struct mm_struct *mm, unsigned long npages)
 	return 1;
 }
 
-
 static int special_mapping_fault(struct vm_area_struct *vma,
 				struct vm_fault *vmf)
 {

@@ -60,9 +60,6 @@
 
 /*---------------------  Export Functions  --------------------------*/
 
-
-
-
 /*
  * Description: Read a byte from EEPROM, by MAC I2C
  *
@@ -109,7 +106,6 @@ BYTE SROMbyReadEmbedded(DWORD_PTR dwIoBase, BYTE byContntOffset)
     VNSvOutPortB(dwIoBase + MAC_REG_I2MCFG, byOrg);
     return byData;
 }
-
 
 /*
  * Description: Write a byte to EEPROM, by MAC I2C
@@ -163,7 +159,6 @@ BOOL SROMbWriteEmbedded (DWORD_PTR dwIoBase, BYTE byContntOffset, BYTE byData)
     return TRUE;
 }
 
-
 /*
  * Description: Turn bits on in eeprom
  *
@@ -186,7 +181,6 @@ void SROMvRegBitsOn (DWORD_PTR dwIoBase, BYTE byContntOffset, BYTE byBits)
     SROMbWriteEmbedded(dwIoBase, byContntOffset,(BYTE)(byOrgData | byBits));
 }
 
-
 /*
  * Description: Turn bits off in eeprom
  *
@@ -206,7 +200,6 @@ void SROMvRegBitsOff (DWORD_PTR dwIoBase, BYTE byContntOffset, BYTE byBits)
     byOrgData = SROMbyReadEmbedded(dwIoBase, byContntOffset);
     SROMbWriteEmbedded(dwIoBase, byContntOffset,(BYTE)(byOrgData & (~byBits)));
 }
-
 
 /*
  * Description: Test if bits on in eeprom
@@ -230,7 +223,6 @@ BOOL SROMbIsRegBitsOn (DWORD_PTR dwIoBase, BYTE byContntOffset, BYTE byTestBits)
     return (byOrgData & byTestBits) == byTestBits;
 }
 
-
 /*
  * Description: Test if bits off in eeprom
  *
@@ -252,7 +244,6 @@ BOOL SROMbIsRegBitsOff (DWORD_PTR dwIoBase, BYTE byContntOffset, BYTE byTestBits
     byOrgData = SROMbyReadEmbedded(dwIoBase, byContntOffset);
     return !(byOrgData & byTestBits);
 }
-
 
 /*
  * Description: Read all contents of eeprom to buffer
@@ -276,7 +267,6 @@ void SROMvReadAllContents (DWORD_PTR dwIoBase, PBYTE pbyEepromRegs)
         pbyEepromRegs++;
     }
 }
-
 
 /*
  * Description: Write all contents of buffer to eeprom
@@ -302,7 +292,6 @@ void SROMvWriteAllContents (DWORD_PTR dwIoBase, PBYTE pbyEepromRegs)
     }
 }
 
-
 /*
  * Description: Read Ethernet Address from eeprom to buffer
  *
@@ -325,7 +314,6 @@ void SROMvReadEtherAddress (DWORD_PTR dwIoBase, PBYTE pbyEtherAddress)
         pbyEtherAddress++;
     }
 }
-
 
 /*
  * Description: Write Ethernet Address from buffer to eeprom
@@ -350,7 +338,6 @@ void SROMvWriteEtherAddress (DWORD_PTR dwIoBase, PBYTE pbyEtherAddress)
         pbyEtherAddress++;
     }
 }
-
 
 /*
  * Description: Read Sub_VID and Sub_SysId from eeprom to buffer
@@ -416,5 +403,3 @@ BOOL SROMbAutoLoad (DWORD_PTR dwIoBase)
         return FALSE;
     return TRUE;
 }
-
-

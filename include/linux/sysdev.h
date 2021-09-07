@@ -17,14 +17,12 @@
  * for all system devices, and get notification calls for each device. 
  */
 
-
 #ifndef _SYSDEV_H_
 #define _SYSDEV_H_
 
 #include <linux/kobject.h>
 #include <linux/module.h>
 #include <linux/pm.h>
-
 
 struct sys_device;
 
@@ -56,7 +54,6 @@ struct sysdev_class_attribute {
 	struct sysdev_class_attribute attr_##_name = 		\
 		_SYSDEV_CLASS_ATTR(_name,_mode,_show,_store)
 
-
 extern int sysdev_class_register(struct sysdev_class *);
 extern void sysdev_class_unregister(struct sysdev_class *);
 
@@ -77,10 +74,8 @@ struct sysdev_driver {
 	int	(*resume)(struct sys_device *);
 };
 
-
 extern int sysdev_driver_register(struct sysdev_class *, struct sysdev_driver *);
 extern void sysdev_driver_unregister(struct sysdev_class *, struct sysdev_driver *);
-
 
 /**
  * sys_devices can be simplified a lot from regular devices, because they're
@@ -96,14 +91,12 @@ struct sys_device {
 extern int sysdev_register(struct sys_device *);
 extern void sysdev_unregister(struct sys_device *);
 
-
 struct sysdev_attribute { 
 	struct attribute	attr;
 	ssize_t (*show)(struct sys_device *, struct sysdev_attribute *, char *);
 	ssize_t (*store)(struct sys_device *, struct sysdev_attribute *,
 			 const char *, size_t);
 };
-
 
 #define _SYSDEV_ATTR(_name, _mode, _show, _store)		\
 {								\

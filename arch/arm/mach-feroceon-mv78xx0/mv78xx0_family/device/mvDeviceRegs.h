@@ -103,7 +103,6 @@ static INLINE MV_U32 DEV_BANK_PARAM_REG(int num)
 #define DBP_TURNOFF_MASK_LOW		0x3F
 #define MAX_DBP_TURNOFF				0xf
 
-
 #define DBP_TURNOFF_SET(value)			\
 ((value & DBP_TURNOFF_MASK_LOW) << DBP_TURNOFF_OFFS_LOW)
 
@@ -146,7 +145,6 @@ static INLINE MV_U32 DEV_BANK_PARAM_REG(int num)
 #define DBP_ALE2WR_MASK_LOW			0x3f
 #define MAX_DBP_ALE2WR				0x3F
 
-
 #define DBP_ALE2WR_SET(value)			\
 ((value & DBP_ALE2WR_MASK_LOW) << DBP_ALE2WR_OFFS_LOW) 
 
@@ -172,7 +170,6 @@ static INLINE MV_U32 DEV_BANK_PARAM_REG(int num)
 
 #define DBP_WRHIGH_GET(value)			\
 ((value >> DBP_WRHIGH_OFFS_LOW) & DBP_WRHIGH_MASK_LOW)
-
 
 /* Device Interface Control register fields (DIC) (DIC_REG)*/
 #define DIC_TIMEOUT_OFFS 	0 /* Timeout Timer Preset Value. */
@@ -248,15 +245,12 @@ static INLINE MV_U32 DEV_BANK_PARAM_REG(int num)
 #define NF_CS3_CE_ACT_NCARE			(0 << NF_CS3_CE_ACT_OFFS)
 #define NF_CS3_CE_ACT_CARE			(1 << NF_CS3_CE_ACT_OFFS)
 
-
 /* Device Interface NAND Flash Control Register (DINFCR) */
 #define DINFCR_NF_CS_MASK(csNum)         \
 (csNum == BOOT_CS) ?  0x1 : ((csNum == DEV_CS3) ? (0x1 << 20) : (0x1 << (((csNum+1) % MV_DEV_MAX_CS) * 2)))
 
-
 #define DINFCR_NF_ACT_CE_MASK(csNum)     \
 (csNum == DEV_CS3) ? (0x2 << 20) : (0x2 << (((csNum+1) % MV_DEV_MAX_CS) * 2))
-
 
 #ifdef __cplusplus
 }

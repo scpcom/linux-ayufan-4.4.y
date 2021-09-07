@@ -41,7 +41,6 @@ static GT_STATUS readDiffMAC
     OUT GT_U16		*diffAddr
 );
 
-
 /*******************************************************************************
 * gsysSwReset
 *
@@ -283,8 +282,6 @@ GT_STATUS gsysSetDiscardExcessive
     return GT_OK;
 }
 
-
-
 /*******************************************************************************
 * gsysGetDiscardExcessive
 *
@@ -336,8 +333,6 @@ GT_STATUS gsysGetDiscardExcessive
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gsysSetSchedulingMode
@@ -392,8 +387,6 @@ GT_STATUS gsysSetSchedulingMode
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gsysGetSchedulingMode
@@ -453,8 +446,6 @@ GT_STATUS gsysGetSchedulingMode
     return GT_OK;
 }
 
-
-
 /*******************************************************************************
 * gsysSetMaxFrameSize
 *
@@ -509,8 +500,6 @@ GT_STATUS gsysSetMaxFrameSize
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gsysGetMaxFrameSize
@@ -572,8 +561,6 @@ GT_STATUS gsysGetMaxFrameSize
     return GT_OK;
 }
 
-
-
 /*******************************************************************************
 * gsysReLoad
 *
@@ -617,8 +604,6 @@ GT_STATUS gsysReLoad
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gsysSetWatchDog
@@ -673,8 +658,6 @@ GT_STATUS gsysSetWatchDog
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gsysGetWatchDog
@@ -735,7 +718,6 @@ GT_STATUS gsysGetWatchDog
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetDuplexPauseMac
@@ -812,7 +794,6 @@ GT_STATUS gsysSetDuplexPauseMac
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysGetDuplexPauseMac
@@ -897,8 +878,6 @@ GT_STATUS gsysGetDuplexPauseMac
     return GT_OK;
 }
 
-
-
 /*******************************************************************************
 * gsysSetPerPortDuplexPauseMac
 *
@@ -952,8 +931,6 @@ GT_STATUS gsysSetPerPortDuplexPauseMac
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gsysGetPerPortDuplexPauseMac
@@ -1115,7 +1092,6 @@ GT_STATUS gsysWriteMiiReg
 	return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetRetransmitMode
 *
@@ -1167,8 +1143,6 @@ GT_STATUS gsysSetRetransmitMode
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gsysGetRetransmitMode
@@ -1228,7 +1202,6 @@ GT_STATUS gsysGetRetransmitMode
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetLimitBackoff
 *
@@ -1281,8 +1254,6 @@ GT_STATUS gsysSetLimitBackoff
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gsysGetLimitBackoff
@@ -1343,7 +1314,6 @@ GT_STATUS gsysGetLimitBackoff
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetRsvReqPri
 *
@@ -1396,8 +1366,6 @@ GT_STATUS gsysSetRsvReqPri
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gsysGetRsvReqPri
@@ -2076,7 +2044,6 @@ GT_STATUS gsysGetEgressMonitorDest
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetARPDest
 *
@@ -2223,7 +2190,6 @@ GT_STATUS gsysGetARPDest
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetRsvd2CpuEnables
 *
@@ -2339,7 +2305,6 @@ GT_STATUS gsysGetRsvd2CpuEnables
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetRsvd2Cpu
@@ -2583,7 +2548,6 @@ GT_STATUS gsysGetMGMTPri
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetUseDoubleTagData
 *
@@ -2693,7 +2657,6 @@ GT_STATUS gsysGetUseDoubleTagData
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetPreventLoops
@@ -3155,7 +3118,6 @@ GT_STATUS gsysGetFCPri
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetFlowCtrlDelay
 *
@@ -3351,7 +3313,6 @@ GT_STATUS gsysGetFlowCtrlDelay
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetDevRoutingTable
@@ -4065,7 +4026,6 @@ GT_STATUS gsysGetTrunkRouting
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetRateLimitMode
 *
@@ -4203,7 +4163,6 @@ GT_STATUS gsysGetRateLimitMode
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetAgeInt
@@ -4370,7 +4329,6 @@ GT_STATUS gsysGetAgeInt
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetForceSnoopPri
@@ -4598,7 +4556,6 @@ GT_STATUS gsysGetSnoopPri
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetForceARPPri
 *
@@ -4823,7 +4780,6 @@ GT_STATUS gsysGetARPPri
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetUsePortSchedule
 *
@@ -4876,7 +4832,6 @@ GT_STATUS gsysSetUsePortSchedule
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysGetUsePortSchedule
 *
@@ -4927,7 +4882,6 @@ GT_STATUS gsysGetUsePortSchedule
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetOldHader
@@ -4987,7 +4941,6 @@ GT_STATUS gsysSetOldHader
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysGetOldHader
 *
@@ -5046,7 +4999,6 @@ GT_STATUS gsysGetOldHader
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetRecursiveStrippingDisable
 *
@@ -5101,7 +5053,6 @@ GT_STATUS gsysSetRecursiveStrippingDisable
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysGetRecursiveStrippingDisable
 *
@@ -5154,7 +5105,6 @@ GT_STATUS gsysGetRecursiveStrippingDisable
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetCPUPort
@@ -5268,7 +5218,6 @@ GT_STATUS gsysGetCPUPort
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetCPUDest
@@ -5435,7 +5384,6 @@ GT_STATUS gsysGetCPUDest
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetMirrorDest
@@ -5715,7 +5663,6 @@ GT_STATUS gsysGetRMPort
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetRMDACheck
 *
@@ -5838,7 +5785,6 @@ GT_STATUS gsysGetRMDACheck
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetRMEnable
 *
@@ -5948,7 +5894,6 @@ GT_STATUS gsysGetRMEnable
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetRMUMode
@@ -6169,7 +6114,6 @@ GT_STATUS gsysGetRMUMode
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetRsvd2CpuEnables2X
 *
@@ -6284,7 +6228,6 @@ GT_STATUS gsysGetRsvd2CpuEnables2X
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetLoopbackFilter
 *
@@ -6396,7 +6339,6 @@ GT_STATUS gsysGetLoopbackFilter
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetFloodBC
@@ -6516,7 +6458,6 @@ GT_STATUS gsysGetFloodBC
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetRemove1PTag
 *
@@ -6579,7 +6520,6 @@ GT_STATUS gsysSetRemove1PTag
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysGetRemove1PTag
 *
@@ -6641,7 +6581,6 @@ GT_STATUS gsysGetRemove1PTag
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetTagFlowControl
@@ -6767,7 +6706,6 @@ GT_STATUS gsysGetTagFlowControl
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetAlwaysUseVTU
 *
@@ -6879,7 +6817,6 @@ GT_STATUS gsysGetAlwaysUseVTU
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetQVlansOnly
@@ -7005,7 +6942,6 @@ GT_STATUS gsysGetQVlansOnly
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSet5BitPort
 *
@@ -7123,7 +7059,6 @@ GT_STATUS gsysGet5BitPort
 
 	return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetSDETPolarity
@@ -7269,7 +7204,6 @@ GT_STATUS gsysGetSDETPolarity
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetARPwoBC
 *
@@ -7315,8 +7249,6 @@ GT_STATUS gsysSetARPwoBC
 	DBG_INFO(("OK.\n"));
 	return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gsysGetARPwoBC
@@ -7369,7 +7301,6 @@ GT_STATUS gsysGetARPwoBC
 	DBG_INFO(("OK.\n"));
 	return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysSetCLK125En
@@ -7483,7 +7414,6 @@ GT_STATUS gsysGetCLK125En
 	return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysPort2Lport
 *
@@ -7569,7 +7499,6 @@ GT_STATUS gsysLport2Port
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysPortvec2Lportvec
 *
@@ -7654,8 +7583,6 @@ GT_STATUS gsysLportvec2Portvec
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /****************************************************************************/
 /* Internal functions.                                                  */
@@ -7748,7 +7675,6 @@ static GT_STATUS readSwitchMacReg
 	return GT_OK;
 }
 
-
 /*
  * Write to Different MAC Address per port bit in Switch MAC Register
  */
@@ -7840,4 +7766,3 @@ static GT_STATUS readDiffMAC
 
 	return GT_OK;
 }
-

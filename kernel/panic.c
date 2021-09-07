@@ -142,7 +142,6 @@ NORET_TYPE void panic(const char * fmt, ...)
 
 EXPORT_SYMBOL(panic);
 
-
 struct tnt {
 	u8	bit;
 	char	true;

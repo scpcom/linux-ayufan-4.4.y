@@ -108,4 +108,3 @@ static int __init s3c64xx_irq_pm_init(void)
 }
 
 arch_initcall(s3c64xx_irq_pm_init);
-

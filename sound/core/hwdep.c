@@ -42,7 +42,6 @@ static int snd_hwdep_dev_free(struct snd_device *device);
 static int snd_hwdep_dev_register(struct snd_device *device);
 static int snd_hwdep_dev_disconnect(struct snd_device *device);
 
-
 static struct snd_hwdep *snd_hwdep_search(struct snd_card *card, int device)
 {
 	struct snd_hwdep *hwdep;
@@ -502,7 +501,6 @@ static void __exit snd_hwdep_proc_done(void)
 #define snd_hwdep_proc_init()
 #define snd_hwdep_proc_done()
 #endif /* CONFIG_PROC_FS */
-
 
 /*
  *  ENTRY functions

@@ -66,8 +66,6 @@
 #define CCM_CSCR_SPEN           (1 << 1)
 #define CCM_CSCR_MPEN           1
 
-
-
 #define CCM_MPCTL0_CPLM         (1 << 31)
 #define CCM_MPCTL0_PD_OFFSET    26
 #define CCM_MPCTL0_PD_MASK      (0xf << 26)
@@ -242,7 +240,6 @@
 #define CCM_PCCR_UART4_MASK            	(1 << CCM_PCCR_UART4_OFFSET)
 #define CCM_PCCR_USBOTG_MASK           	(1 << CCM_PCCR_USBOTG_OFFSET)
 #define CCM_PCCR_WDT_MASK              	(1 << CCM_PCCR_WDT_OFFSET)
-
 
 #define CCM_CCSR_32KSR          (1 << 15)
 

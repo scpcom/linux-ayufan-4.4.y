@@ -157,7 +157,6 @@ struct aio_ring {
 	unsigned	incompat_features;
 	unsigned	header_length;	/* size of aio_ring */
 
-
 	struct io_event		io_events[0];
 }; /* 128 bytes + ring size */
 

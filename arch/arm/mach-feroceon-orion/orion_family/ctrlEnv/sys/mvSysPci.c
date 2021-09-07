@@ -317,7 +317,6 @@ MV_STATUS mvPciInit(MV_U32 pciIf, MV_PCI_MOD pciIfmod)
 	pciBarMap[bar].addrWin.size = TBL_TERM;
 	pciBarMap[bar].enable =  TBL_TERM;
 
-
     	/* Memory Mapped Internal Registers BAR can not be disabled.            */
     	/* Relocate its BAR first to avoid colisions with other BARs (e.g DRAM) */
     	if (MV_OK != mvPciTargetWinSet(pciIf, MEM_INTER_REGS_BAR, 
@@ -336,7 +335,6 @@ MV_STATUS mvPciInit(MV_U32 pciIf, MV_PCI_MOD pciIfmod)
             		continue;
 		}
 		
-
 		/* check if the size passed is zero ! */
 		if (0 == pciBarMap[bar].addrWin.size)
 		{
@@ -379,7 +377,6 @@ MV_STATUS mvPciInit(MV_U32 pciIf, MV_PCI_MOD pciIfmod)
 	MV_REG_BIT_SET(PCI_ADDR_DECODE_CONTROL_REG(pciIf),
 				   PADCR_REMAP_REG_WR_DIS);
 		
-
 	/* configure access control unit 0 to DDR to enhance performance */
 	pciProtWin.addrWin.baseLow = 0;
 	pciProtWin.addrWin.baseHigh = 0;
@@ -402,8 +399,6 @@ MV_STATUS mvPciInit(MV_U32 pciIf, MV_PCI_MOD pciIfmod)
 
 	return MV_OK;
 }
-
-
 
 /*******************************************************************************
 * mvPciTargetWinSet - Set PCI to peripheral target address window BAR
@@ -459,7 +454,6 @@ MV_STATUS mvPciTargetWinSet(MV_U32 pciIf,
 		mvOsPrintf("mvPciTargetWinSet: ERR. Illigal PCI BAR %d\n", bar);
 		return MV_BAD_PARAM;
 	}
-
 
 	/* if the address windows is disabled , we only disable the appropriare
 	pci bar and ignore other settings */
@@ -646,7 +640,6 @@ MV_STATUS mvPciTargetWinGet(MV_U32 pciIf, MV_PCI_BAR bar,
 	return MV_OK;
 }
 
-
 /*******************************************************************************
 * mvPciTargetWinEnable - Enable/disable a PCI BAR window
 *
@@ -717,7 +710,6 @@ MV_STATUS mvPciTargetWinEnable(MV_U32 pciIf, MV_PCI_BAR bar, MV_BOOL enable)
 
 	return MV_OK;
 }
-
 
 /*******************************************************************************
 * mvPciProtWinSet - Set PCI protection access window
@@ -790,7 +782,6 @@ MV_STATUS mvPciProtWinSet(MV_U32 pciIf,
 		protBaseLow &= ~PACBLR_EN;
 	}
 
-
 	/* Access protect */
 	if (ALLOWED == pProtWin->attributes.access)
 	{
@@ -814,7 +805,6 @@ MV_STATUS mvPciProtWinSet(MV_U32 pciIf,
 	/* PCI slave Data Swap Control */
 	protBaseLow |= (pProtWin->attributes.swapType << PACBLR_PCISWAP_OFFS);
 
-
 	/* Read Max Burst */
 	if (( pciBurstBytes2Reg(pProtWin->attributes.readMaxBurst) << PACBLR_RDMBURST_OFFS) > PACBLR_RDMBURST_128BYTE)
 	{
@@ -822,7 +812,6 @@ MV_STATUS mvPciProtWinSet(MV_U32 pciIf,
 		return MV_ERROR;
 	}
 	protBaseLow |= (pciBurstBytes2Reg(pProtWin->attributes.readMaxBurst) << PACBLR_RDMBURST_OFFS);
-
 
 	/* Typical PCI read transaction Size. Only valid for PCI conventional */
 	if ((pciBurstBytes2Reg(pProtWin->attributes.readBurst) << PACBLR_RDSIZE_OFFS) > PACBLR_RDSIZE_256BYTE )
@@ -832,14 +821,12 @@ MV_STATUS mvPciProtWinSet(MV_U32 pciIf,
 	}
 	protBaseLow |= (pciBurstBytes2Reg(pProtWin->attributes.readBurst) << PACBLR_RDSIZE_OFFS);
 
-
 	/* 2) Calculate protection window base high register value	*/
 	protBaseHigh =  pProtWin->addrWin.baseHigh;
 
 	/* 3) Calculate protection window size register value	*/
 	protSize     =  ctrlSizeToReg(pProtWin->addrWin.size, PACSR_SIZE_ALIGNMENT) << PACSR_SIZE_OFFS;
     
-
 	/* Write Max Burst */
 	if ((pciBurstBytes2Reg(pProtWin->attributes.writeMaxBurst) << PACSR_WRMBURST_OFFS) > PACSR_WRMBURST_128BYTE )
 	{
@@ -909,7 +896,6 @@ MV_STATUS mvPciProtWinGet(MV_U32 pciIf,
 	protBaseHigh = MV_REG_READ(PCI_ACCESS_CTRL_BASEH_REG(pciIf,winNum));
 	protSize = MV_REG_READ(PCI_ACCESS_CTRL_SIZE_REG(pciIf,winNum));
 
-
 	/* 1) Get Protection Windows base low 	*/
 	pProtWin->addrWin.baseLow = protBaseLow & PACBLR_BASE_L_MASK;
 
@@ -924,7 +910,6 @@ MV_STATUS mvPciProtWinGet(MV_U32 pciIf,
 	{
 		pProtWin->enable = MV_FALSE;
 	}
-
 
 	/* What is access protect ? */
 	if (protBaseLow & PACBLR_ACCPROT)
@@ -946,10 +931,8 @@ MV_STATUS mvPciProtWinGet(MV_U32 pciIf,
 		pProtWin->attributes.write = ALLOWED;
 	}
 
-
     	/* PCI slave Data Swap Control */
 	pProtWin->attributes.swapType = (protBaseLow & PACBLR_PCISWAP_MASK) >> PACBLR_PCISWAP_OFFS;
-
 
 	/* Read Max Burst */
 	pProtWin->attributes.readMaxBurst = pciBurstReg2Bytes((protBaseLow & PACBLR_RDMBURST_MASK) >> PACBLR_RDMBURST_OFFS);
@@ -957,13 +940,11 @@ MV_STATUS mvPciProtWinGet(MV_U32 pciIf,
 	/* Typical PCI read transaction Size. */
 	pProtWin->attributes.readBurst = pciBurstReg2Bytes((protBaseLow & PACBLR_RDSIZE_MASK) >> PACBLR_RDSIZE_OFFS);
 
-
 	/* window base high register value	*/
 	pProtWin->addrWin.baseHigh = protBaseHigh;
 
 	/*Calculate protection window size register value	*/
 	pProtWin->addrWin.size = ctrlRegToSize(((protSize & PACSR_SIZE_MASK) >> PACSR_SIZE_OFFS),PACSR_SIZE_ALIGNMENT);
-
 
 	/* Write Max Burst */
 	pProtWin->attributes.writeMaxBurst = pciBurstReg2Bytes((protSize & PACSR_WRMBURST_MASK) >> PACSR_WRMBURST_OFFS);
@@ -978,10 +959,8 @@ MV_STATUS mvPciProtWinGet(MV_U32 pciIf,
 		pProtWin->attributes.pciOrder = MV_FALSE;
 	}
 
-
 	return MV_OK;
 }
-
 
 /*******************************************************************************
 * mvPciProtWinEnable - Enable/disable a PCI protection access window
@@ -1030,7 +1009,6 @@ MV_STATUS mvPciProtWinEnable(MV_U32 pciIf, MV_U32 winNum, MV_BOOL enable)
 
 	return MV_OK;
 }
-
 
 /*******************************************************************************
 * mvPciTargetRemap - Set PCI to target address window remap.
@@ -1335,7 +1313,6 @@ static MV_STATUS pciBarRegInfoGet(MV_U32 pciIf,
 			pBarRegInfo->remapHighRegOffs = 0;
 			break;
 	
-	
 		default: 
 			mvOsPrintf("mvPciTargetWinGet: ERR.non existing target\n");
 			return MV_ERROR;
@@ -1487,4 +1464,3 @@ static MV_U32 pciBurstReg2Bytes(MV_U32 size)
         }
         return ret;
 }
-

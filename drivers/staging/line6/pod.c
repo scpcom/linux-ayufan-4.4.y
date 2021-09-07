@@ -17,10 +17,8 @@
 #include "playback.h"
 #include "pod.h"
 
-
 #define POD_SYSEX_CODE 3
 #define POD_BYTES_PER_FRAME 6  /* 24bit audio (stereo) */
-
 
 enum {
 	POD_SYSEX_CLIP      = 0x0f,
@@ -57,7 +55,6 @@ enum {
 	POD_SAVE_PRESSED,
 	POD_BUSY_MIDISEND
 };
-
 
 static struct snd_ratden pod_ratden = {
 	.num_min = 78125,
@@ -114,7 +111,6 @@ static struct line6_pcm_properties pod_pcm_properties = {
 static const char pod_request_version[] = { 0xf0, 0x7e, 0x7f, 0x06, 0x01, 0xf7 };
 static const char pod_request_channel[] = { 0xf0, 0x00, 0x01, 0x0c, 0x03, 0x75, 0xf7 };
 static const char pod_version_header[]  = { 0xf2, 0x7e, 0x7f, 0x06, 0x02 };
-
 
 /*
 	Mark all parameters as dirty and notify waiting processes.

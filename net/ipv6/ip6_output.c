@@ -111,7 +111,6 @@ static int ip6_dev_loopback_xmit(struct sk_buff *newskb)
 	return 0;
 }
 
-
 static int ip6_output2(struct sk_buff *skb)
 {
 	struct dst_entry *dst = skb_dst(skb);

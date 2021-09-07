@@ -52,7 +52,6 @@ struct kvm_mmu_op_release_pt {
 
 extern void kvmclock_init(void);
 
-
 /* This instruction is vmcall.  On non-VT architectures, it will generate a
  * trap that we will then rewrite to the appropriate instruction.
  */

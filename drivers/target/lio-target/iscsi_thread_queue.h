@@ -95,4 +95,3 @@ typedef struct se_thread_set_s {
 } ____cacheline_aligned se_thread_set_t;
 
 #endif   /*** ISCSI_THREAD_QUEUE_H ***/
-

@@ -101,7 +101,6 @@ globl(ftr_fixup_test4_alt)
 	or	31,31,31
 	or	31,31,31
 
-
 globl(ftr_fixup_test5)
 	or	1,1,1
 BEGIN_FTR_SECTION
@@ -170,7 +169,6 @@ globl(ftr_fixup_test6_expected)
 2:	or	1,1,1
 	or	2,2,2
 3:	or	3,3,3
-
 
 #define	MAKE_MACRO_TEST(TYPE)						\
 globl(ftr_fixup_test_ ##TYPE##_macros)					\
@@ -739,4 +737,3 @@ globl(lwsync_fixup_test_expected_LWSYNC)
 globl(lwsync_fixup_test_expected_SYNC)
 1:	or	1,1,1
 	sync
-

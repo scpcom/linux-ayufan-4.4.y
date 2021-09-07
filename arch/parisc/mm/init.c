@@ -10,7 +10,6 @@
  *
  */
 
-
 #include <linux/module.h>
 #include <linux/mm.h>
 #include <linux/bootmem.h>
@@ -401,7 +400,6 @@ void free_initmem(void)
 		(init_end - init_begin) >> 10);
 }
 
-
 #ifdef CONFIG_DEBUG_RODATA
 void mark_rodata_ro(void)
 {
@@ -411,7 +409,6 @@ void mark_rodata_ro(void)
 		(unsigned long)(__end_rodata - __start_rodata) >> 10);
 }
 #endif
-
 
 /*
  * Just an arbitrary offset to serve as a "hole" between mapping areas
@@ -592,7 +589,6 @@ void show_mem(void)
 	printk(KERN_INFO "%d pages shared\n", shared);
 	printk(KERN_INFO "%d pages swap cached\n", cached);
 
-
 #ifdef CONFIG_DISCONTIGMEM
 	{
 		struct zonelist *zl;
@@ -614,7 +610,6 @@ void show_mem(void)
 	}
 #endif
 }
-
 
 static void __init map_pages(unsigned long start_vaddr, unsigned long start_paddr, unsigned long size, pgprot_t pgprot)
 {
@@ -964,7 +959,6 @@ void free_sid(unsigned long spaceid)
 
 	spin_unlock(&sid_lock);
 }
-
 
 #ifdef CONFIG_SMP
 static void get_dirty_sids(unsigned long *ndirtyptr,unsigned long *dirty_array)

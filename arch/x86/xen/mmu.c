@@ -118,7 +118,6 @@ static inline void check_zero(void)
 
 #endif /* CONFIG_XEN_DEBUG_FS */
 
-
 /*
  * Identity map, in addition to plain kernel map.  This needs to be
  * large enough to allocate page table pages to allocate the rest.
@@ -148,13 +147,11 @@ static pud_t level3_user_vsyscall[PTRS_PER_PUD] __page_aligned_bss;
 DEFINE_PER_CPU(unsigned long, xen_cr3);	 /* cr3 stored as physaddr */
 DEFINE_PER_CPU(unsigned long, xen_current_cr3);	 /* actual vcpu cr3 */
 
-
 /*
  * Just beyond the highest usermode address.  STACK_TOP_MAX has a
  * redzone above it, so round it up to a PGD boundary.
  */
 #define USER_LIMIT	((STACK_TOP_MAX + PGDIR_SIZE - 1) & PGDIR_MASK)
-
 
 #define P2M_ENTRIES_PER_PAGE	(PAGE_SIZE / sizeof(unsigned long))
 #define TOP_ENTRIES		(MAX_DOMAIN_PAGES / P2M_ENTRIES_PER_PAGE)
@@ -367,7 +364,6 @@ void make_lowmem_page_readwrite(void *vaddr)
 	if (HYPERVISOR_update_va_mapping(address, ptev, 0))
 		BUG();
 }
-
 
 static bool xen_page_pinned(void *ptr)
 {
@@ -1129,7 +1125,6 @@ void xen_dup_mmap(struct mm_struct *oldmm, struct mm_struct *mm)
 	xen_pgd_pin(mm);
 	spin_unlock(&mm->page_table_lock);
 }
-
 
 #ifdef CONFIG_SMP
 /* Another cpu may still have their %cr3 pointing at the pagetable, so

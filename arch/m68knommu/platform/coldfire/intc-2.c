@@ -90,4 +90,3 @@ void __init init_IRQ(void)
 		irq_desc[irq].chip = &intc_irq_chip;
 	}
 }
-

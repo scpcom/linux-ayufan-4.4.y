@@ -813,7 +813,6 @@ static int nl80211_set_wiphy(struct sk_buff *skb, struct genl_info *info)
 	return result;
 }
 
-
 static int nl80211_send_iface(struct sk_buff *msg, u32 pid, u32 seq, int flags,
 			      struct cfg80211_registered_device *rdev,
 			      struct net_device *dev)
@@ -1734,7 +1733,6 @@ static int nl80211_dump_station(struct sk_buff *skb,
 		sta_idx++;
 	}
 
-
  out:
 	cb->args[1] = sta_idx;
 	err = skb->len;
@@ -2200,7 +2198,6 @@ static int nl80211_dump_mpath(struct sk_buff *skb,
 
 		path_idx++;
 	}
-
 
  out:
 	cb->args[1] = path_idx;
@@ -3241,7 +3238,6 @@ static bool nl80211_valid_cipher_suite(u32 cipher)
 		cipher == WLAN_CIPHER_SUITE_CCMP ||
 		cipher == WLAN_CIPHER_SUITE_AES_CMAC;
 }
-
 
 static int nl80211_authenticate(struct sk_buff *skb, struct genl_info *info)
 {

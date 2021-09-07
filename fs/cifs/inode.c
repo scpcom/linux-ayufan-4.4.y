@@ -32,7 +32,6 @@
 #include "cifs_debug.h"
 #include "cifs_fs_sb.h"
 
-
 static void cifs_set_ops(struct inode *inode, const bool is_dfs_referral)
 {
 	struct cifs_sb_info *cifs_sb = CIFS_SB(inode->i_sb);
@@ -50,7 +49,6 @@ static void cifs_set_ops(struct inode *inode, const bool is_dfs_referral)
 		else { /* not direct, send byte range locks */
 			inode->i_fop = &cifs_file_ops;
 		}
-
 
 		/* check if server can support readpages */
 		if (cifs_sb->tcon->ses->server->maxBuf <
@@ -701,7 +699,6 @@ struct inode *cifs_root_iget(struct super_block *sb, unsigned long ino)
 		return ERR_PTR(rc);
 	}
 
-
 	kfree(full_path);
 	/* can not call macro FreeXid here since in a void func
 	 * TODO: This is no longer true
@@ -921,7 +918,6 @@ undo_setattr:
 
 	goto out_close;
 }
-
 
 /*
  * If dentry->d_inode is null (usually meaning the cached dentry

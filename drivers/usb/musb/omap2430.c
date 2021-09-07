@@ -44,7 +44,6 @@
 #define	get_cpu_rev()	2
 #endif
 
-
 static struct timer_list musb_idle_timer;
 
 static void musb_do_idle(unsigned long _musb)
@@ -105,7 +104,6 @@ static void musb_do_idle(unsigned long _musb)
 	}
 	spin_unlock_irqrestore(&musb->lock, flags);
 }
-
 
 void musb_platform_try_idle(struct musb *musb, unsigned long timeout)
 {
@@ -305,7 +303,6 @@ static int musb_platform_resume(struct musb *musb)
 
 	return 0;
 }
-
 
 int musb_platform_exit(struct musb *musb)
 {

@@ -28,8 +28,6 @@
 u16_t zfWlanRxValidate(zdev_t* dev, zbuf_t* buf);
 u16_t zfWlanRxFilter(zdev_t* dev, zbuf_t* buf);
 
-
-
 const u8_t zgSnapBridgeTunnel[6] = { 0xAA, 0xAA, 0x03, 0x00, 0x00, 0xF8 };
 const u8_t zgSnap8021h[6] = { 0xAA, 0xAA, 0x03, 0x00, 0x00, 0x00 };
 /* Table for converting IP DSCP P2-P0 bits to 802.11e Access Category */
@@ -217,7 +215,6 @@ void zfGetRxIvIcvLength(zdev_t* dev, zbuf_t* buf, u8_t vap, u16_t* pIvLen,
     }
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfAgingDefragList           */
@@ -266,7 +263,6 @@ void zfAgingDefragList(zdev_t* dev, u16_t flushFlag)
 
     return;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -330,7 +326,6 @@ void zfAddFirstFragToDefragList(zdev_t* dev, zbuf_t* buf, u8_t* addr, u16_t seqN
 
     return;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -445,7 +440,6 @@ zbuf_t* zfAddFragToDefragList(zdev_t* dev, zbuf_t* buf, u8_t* addr,
     return returnBuf;
 }
 
-
 /* return value = NULL => save or free this frame         */
 zbuf_t* zfDefragment(zdev_t* dev, zbuf_t* buf, u8_t* pbIsDefrag,
                      struct zsAdditionInfo* addInfo)
@@ -503,13 +497,11 @@ zbuf_t* zfDefragment(zdev_t* dev, zbuf_t* buf, u8_t* pbIsDefrag,
     return buf;
 }
 
-
 #if ZM_PROTOCOL_RESPONSE_SIMULATION
 u16_t zfSwap(u16_t num)
 {
     return ((num >> 8) + ((num & 0xff) << 8));
 }
-
 
 void zfProtRspSim(zdev_t* dev, zbuf_t* buf)
 {
@@ -863,7 +855,6 @@ zlError:
     return err;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfTxSendEth                 */
@@ -1020,7 +1011,6 @@ u16_t zfTxSendEth(zdev_t* dev, zbuf_t* buf, u16_t port, u16_t bufType, u16_t fla
     /* Create SNAP */
     removeLen = zfTxGenWlanSnap(dev, buf, snap, &snapLen);
     //zm_msg1_tx(ZM_LV_0, "fragOff=", fragOff);
-
 
 /* ********************************************************************************************** */
 /* Add 20071025 Mxzeng                                                                            */
@@ -1211,7 +1201,6 @@ u16_t zfTxSendEth(zdev_t* dev, zbuf_t* buf, u16_t port, u16_t bufType, u16_t fla
     return ZM_SUCCESS;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfTxPortControl             */
@@ -1243,8 +1232,6 @@ u16_t zfTxPortControl(zdev_t* dev, zbuf_t* buf, u16_t port)
 
     return ZM_PORT_ENABLED;
 }
-
-
 
 /************************************************************************/
 /*                                                                      */
@@ -1324,7 +1311,6 @@ void zfCoreRecv(zdev_t* dev, zbuf_t* buf, struct zsAdditionInfo* addInfo)
         }
     }
 
-
     /* OTUS command-8212 dump rx packet */
     if (wd->rxPacketDump)
     {
@@ -1354,7 +1340,6 @@ zlError:
 
     return;
 }
-
 
 void zfShowRxEAPOL(zdev_t* dev, zbuf_t* buf, u16_t offset)
 {
@@ -2022,7 +2007,6 @@ void zfShowTxEAPOL(zdev_t* dev, zbuf_t* buf, u16_t offset)
         zm_debug_msg0("EAPOL-Encapsulated-ASF-Alert");
     }
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -2947,7 +2931,6 @@ void zfiRecv80211(zdev_t* dev, zbuf_t* buf, struct zsAdditionInfo* addInfo)
     return;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfWlanRxValidate            */
@@ -3052,7 +3035,6 @@ u16_t zfWlanRxValidate(zdev_t* dev, zbuf_t* buf)
 
     return ZM_SUCCESS;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -3171,8 +3153,6 @@ u16_t zfWlanRxFilter(zdev_t* dev, zbuf_t* buf)
     return ZM_SUCCESS;
 }
 
-
-
 u16_t zfTxGenWlanTail(zdev_t* dev, zbuf_t* buf, u16_t* snap, u16_t snaplen,
                       u16_t* mic)
 {
@@ -3284,7 +3264,6 @@ u16_t zfTxGenWlanTail(zdev_t* dev, zbuf_t* buf, u16_t* snap, u16_t snaplen,
 
     return ZM_SIZE_OF_MIC;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -3500,7 +3479,6 @@ u16_t zfPutVtxq(zdev_t* dev, zbuf_t* buf)
             // (infrastructure_mode && connect_to_11n_ap) || (ap_mode && is_11n_ap)
             //ret = zfAggPutVtxq(dev, buf);
 
-
             ret = zfAggTx(dev, buf, tid);
             if (ZM_SUCCESS == ret)
             {
@@ -3593,7 +3571,6 @@ u16_t zfPutVtxq(zdev_t* dev, zbuf_t* buf)
     }
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfGetVtxq                   */
@@ -3672,7 +3649,6 @@ u16_t zfPutVmmq(zdev_t* dev, zbuf_t* buf)
     }
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfGetVmmq                   */
@@ -3735,8 +3711,6 @@ void zfPushVtxq(zdev_t* dev)
     u16_t skipFlag = 0;
     zmw_get_wlan_dev(dev);
     zmw_declare_for_critical_section();
-
-
 
     //zm_debug_msg1("zfHpGetFreeTxdCount = ", zfHpGetFreeTxdCount(dev));
 
@@ -3918,7 +3892,6 @@ void zfPushVtxq(zdev_t* dev)
         }
     } //while (1)
 }
-
 
 /************************************************************************/
 /*                                                                      */

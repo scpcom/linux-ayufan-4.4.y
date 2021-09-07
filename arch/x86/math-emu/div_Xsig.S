@@ -30,11 +30,9 @@
 #include "exception.h"
 #include "fpu_emu.h"
 
-
 #define	XsigLL(x)	(x)
 #define	XsigL(x)	4(x)
 #define	XsigH(x)	8(x)
-
 
 #ifndef NON_REENTRANT_FPU
 /*
@@ -72,7 +70,6 @@ FPU_result_1:
 	.long	0
 #endif /* NON_REENTRANT_FPU */
 
-
 .text
 ENTRY(div_Xsig)
 	pushl	%ebp
@@ -92,7 +89,6 @@ ENTRY(div_Xsig)
 	testl	$0x80000000, XsigH(%ebx)	/* Divisor */
 	je	L_bugged
 #endif /* PARANOID */
-
 
 /*---------------------------------------------------------------------------+
  |  Divide:   Return  arg1/arg2 to arg3.                                     |
@@ -341,7 +337,6 @@ L_exit:
 
 	leave
 	ret
-
 
 #ifdef PARANOID
 /* The logic is wrong if we got here */

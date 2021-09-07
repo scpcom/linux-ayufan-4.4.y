@@ -11,7 +11,6 @@
 
 #include <linux/module.h>
 
-
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/ptrace.h>
@@ -76,7 +75,6 @@ static void avma1cs_release(struct pcmcia_device *link);
 */
 
 static void avma1cs_detach(struct pcmcia_device *p_dev);
-
 
 /*
    A linked list of "instances" of the skeleton device.  Each actual
@@ -192,7 +190,6 @@ static int avma1cs_configcheck(struct pcmcia_device *p_dev,
 	return pcmcia_request_io(p_dev, &p_dev->io);
 }
 
-
 static int avma1cs_config(struct pcmcia_device *link)
 {
     local_info_t *dev;
@@ -288,7 +285,6 @@ static void avma1cs_release(struct pcmcia_device *link)
 
 	pcmcia_disable_device(link);
 } /* avma1cs_release */
-
 
 static struct pcmcia_device_id avma1cs_ids[] = {
 	PCMCIA_DEVICE_PROD_ID12("AVM", "ISDN A", 0x95d42008, 0xadc9d4bb),

@@ -195,7 +195,6 @@ static const struct ac97_codec_id snd_ac97_codec_ids[] = {
 { 0, 	      0,	  NULL,			NULL,		NULL }
 };
 
-
 static void update_power_regs(struct snd_ac97 *ac97);
 #ifdef CONFIG_SND_AC97_POWER_SAVE
 #define ac97_is_power_save_mode(ac97) \
@@ -203,7 +202,6 @@ static void update_power_regs(struct snd_ac97 *ac97);
 #else
 #define ac97_is_power_save_mode(ac97) 0
 #endif
-
 
 /*
  *  I/O routines
@@ -609,7 +607,6 @@ AC97_SINGLE("PC Speaker Playback Volume", AC97_PC_BEEP, 1, 15, 1)
 
 static const struct snd_kcontrol_new snd_ac97_controls_mic_boost =
 	AC97_SINGLE("Mic Boost (+20dB)", AC97_MIC, 6, 1, 0);
-
 
 static const char* std_rec_sel[] = {"Mic", "CD", "Video", "Aux", "Line", "Mix", "Mix Mono", "Phone"};
 static const char* std_3d_path[] = {"pre 3D", "post 3D"};
@@ -2318,7 +2315,6 @@ static void snd_ac97_powerdown(struct snd_ac97 *ac97)
 	}
 }
 
-
 struct ac97_power_reg {
 	unsigned short reg;
 	unsigned short power_reg;
@@ -2430,7 +2426,6 @@ static void update_power_regs(struct snd_ac97 *ac97)
 		}
 	}
 }
-
 
 #ifdef CONFIG_PM
 /**
@@ -2561,7 +2556,6 @@ __reset_ready:
 
 EXPORT_SYMBOL(snd_ac97_resume);
 #endif
-
 
 /*
  * Hardware tuning

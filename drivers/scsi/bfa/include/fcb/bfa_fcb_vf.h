@@ -26,7 +26,6 @@
  *  fcs_vf_fcb Virtual fabric driver intrefaces
  */
 
-
 struct bfad_vf_s;
 
 /*
@@ -41,7 +40,5 @@ struct bfad_vf_s;
  * @return None
  */
 void            bfa_fcb_vf_stop(struct bfad_vf_s *vf_drv);
-
-
 
 #endif /* __BFA_FCB_VF_H__ */

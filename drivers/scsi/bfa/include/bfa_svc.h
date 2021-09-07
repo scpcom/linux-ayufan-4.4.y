@@ -97,7 +97,6 @@ struct bfa_uf_buf_s {
 	u8         d[BFA_UF_BUFSZ];
 };
 
-
 struct bfa_uf_s {
 	struct list_head	qe;		/*  queue element	  */
 	struct bfa_s	*bfa;		/*  bfa instance	  */
@@ -321,4 +320,3 @@ void bfa_cb_lps_fdisc_comp(void *bfad, void *uarg, bfa_status_t status);
 void bfa_cb_lps_fdisclogo_comp(void *bfad, void *uarg);
 
 #endif /* __BFA_SVC_H__ */
-

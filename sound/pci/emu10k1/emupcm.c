@@ -875,7 +875,6 @@ static snd_pcm_uframes_t snd_emu10k1_playback_pointer(struct snd_pcm_substream *
 	return ptr;
 }
 
-
 static int snd_emu10k1_efx_playback_trigger(struct snd_pcm_substream *substream,
 				        int cmd)
 {
@@ -925,7 +924,6 @@ static int snd_emu10k1_efx_playback_trigger(struct snd_pcm_substream *substream,
 	spin_unlock(&emu->reg_lock);
 	return result;
 }
-
 
 static snd_pcm_uframes_t snd_emu10k1_capture_pointer(struct snd_pcm_substream *substream)
 {
@@ -1430,7 +1428,6 @@ int __devinit snd_emu10k1_pcm_multi(struct snd_emu10k1 * emu, int device, struct
 	return 0;
 }
 
-
 static struct snd_pcm_ops snd_emu10k1_capture_mic_ops = {
 	.open =			snd_emu10k1_capture_mic_open,
 	.close =		snd_emu10k1_capture_mic_close,
@@ -1541,7 +1538,6 @@ static struct snd_pcm_ops snd_emu10k1_capture_efx_ops = {
 	.trigger =		snd_emu10k1_capture_trigger,
 	.pointer =		snd_emu10k1_capture_pointer,
 };
-
 
 /* EFX playback */
 

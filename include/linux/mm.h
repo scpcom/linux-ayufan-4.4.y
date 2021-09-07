@@ -443,7 +443,6 @@ static inline void set_compound_order(struct page *page, unsigned long order)
  * sets it, so none of the operations on it need to be atomic.
  */
 
-
 /*
  * page->flags layout:
  *

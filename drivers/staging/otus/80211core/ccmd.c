@@ -26,10 +26,8 @@
 #include "cprecomp.h"
 #include "../hal/hpreg.h"
 
-
 u16_t zfWlanReset(zdev_t *dev);
 u32_t zfUpdateRxRate(zdev_t *dev);
-
 
 extern void zfiUsbRecv(zdev_t *dev, zbuf_t *buf);
 extern void zfiUsbRegIn(zdev_t *dev, u32_t *rsp, u16_t rspLen);
@@ -47,7 +45,6 @@ u16_t zfiGlobalDataSize(zdev_t *dev)
 	zm_assert((ret>>16) == 0);
 	return (u16_t)ret;
 }
-
 
 /* Initialize WLAN hardware and software, resource will be allocated */
 /* for WLAN operation, must be called first before other function.   */
@@ -451,7 +448,6 @@ void zfGetWrapperSetting(zdev_t *dev)
 		else
 			wd->dtim = 1;
 
-
 		wd->ap.qosMode = wd->ws.apWmeEnabled & 0x1;
 		wd->ap.uapsdEnabled = (wd->ws.apWmeEnabled & 0x2) >> 1;
 	} else {
@@ -706,7 +702,6 @@ u16_t zfWlanEnable(zdev_t *dev)
 
 	}
 
-
 	/* if ((wd->wlanMode != ZM_MODE_INFRASTRUCTURE) &&
 		(wd->wlanMode != ZM_MODE_AP))
 	*/
@@ -719,7 +714,6 @@ u16_t zfWlanEnable(zdev_t *dev)
 								wd->sta.bssid);
 		zfChangeAdapterState(dev, ZM_STA_STATE_CONNECTED);
 	}
-
 
 	if (wd->wlanMode == ZM_MODE_AP) {
 		if (wd->zfcbConnectNotify != NULL)
@@ -1037,7 +1031,6 @@ start_scan:
 
 	return ret;
 }
-
 
 /* rate         	*/
 /*    0 : AUTO  	*/
@@ -1463,7 +1456,6 @@ u16_t zfiWlanDeauth(zdev_t *dev, u16_t *macAddr, u16_t reason)
 	return 0;
 }
 
-
 /* XP packet filter feature : */
 /* 1=>enable: All multicast address packets, not just the ones */
 /* enumerated in the multicast address list. */
@@ -1474,7 +1466,6 @@ void zfiWlanSetAllMulticast(zdev_t *dev, u32_t setting)
 	zm_msg1_mm(ZM_LV_0, "sta.bAllMulticast = ", setting);
 	wd->sta.bAllMulticast = (u8_t)setting;
 }
-
 
 /* HT configure API */
 void zfiWlanSetHTCtrl(zdev_t *dev, u32_t *setting, u32_t forceTxTPC)
@@ -1526,7 +1517,6 @@ void zfiWlanSetRxPacketDump(zdev_t *dev, u32_t setting)
 	else
 		wd->rxPacketDump = 0;   /* disable */
 }
-
 
 /* FB50 in OS XP, RD private test code */
 /* Tally */

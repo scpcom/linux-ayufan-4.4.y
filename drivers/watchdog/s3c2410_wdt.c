@@ -266,7 +266,6 @@ static const struct watchdog_info s3c2410_wdt_ident = {
 	.identity         =	"S3C2410 Watchdog",
 };
 
-
 static long s3c2410wdt_ioctl(struct file *file,	unsigned int cmd,
 							unsigned long arg)
 {
@@ -508,7 +507,6 @@ static int s3c2410wdt_resume(struct platform_device *dev)
 #define s3c2410wdt_resume  NULL
 #endif /* CONFIG_PM */
 
-
 static struct platform_driver s3c2410wdt_driver = {
 	.probe		= s3c2410wdt_probe,
 	.remove		= __devexit_p(s3c2410wdt_remove),
@@ -520,7 +518,6 @@ static struct platform_driver s3c2410wdt_driver = {
 		.name	= "s3c2410-wdt",
 	},
 };
-
 
 static char banner[] __initdata =
 	KERN_INFO "S3C2410 Watchdog Timer, (c) 2004 Simtec Electronics\n";

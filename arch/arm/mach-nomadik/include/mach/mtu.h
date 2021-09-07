@@ -42,4 +42,3 @@
 #define MTU_PCELL3	0xffC
 
 #endif /* __ASM_ARCH_MTU_H */
-

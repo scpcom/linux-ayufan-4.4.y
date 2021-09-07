@@ -26,7 +26,6 @@
  *
  */
 
-
 #define MAC_IOSIZE 0x10000
 #define NUM_RX_DMA 4       /* Au1x00 has 4 rx hardware descriptors */
 #define NUM_TX_DMA 4       /* Au1x00 has 4 tx hardware descriptors */
@@ -67,7 +66,6 @@ typedef struct rx_dma {
 	u32 pad[2];
 } rx_dma_t;
 
-
 /*
  * MAC control registers, memory mapped.
  */
@@ -83,7 +81,6 @@ typedef struct mac_reg {
 	u32 vlan1_tag;
 	u32 vlan2_tag;
 } mac_reg_t;
-
 
 struct au1000_private {
 	db_dest_t *pDBfree;

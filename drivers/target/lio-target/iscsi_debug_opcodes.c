@@ -25,7 +25,6 @@
  *
  ******************************************************************************/
 
-
 #include <linux/string.h>
 #include <linux/timer.h>
 #include <linux/slab.h>

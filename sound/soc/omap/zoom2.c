@@ -311,4 +311,3 @@ module_exit(zoom2_soc_exit);
 MODULE_AUTHOR("Misael Lopez Cruz <x0052729@ti.com>");
 MODULE_DESCRIPTION("ALSA SoC Zoom2");
 MODULE_LICENSE("GPL");
-

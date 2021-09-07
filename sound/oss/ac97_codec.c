@@ -85,7 +85,6 @@ static int cmedia_init(struct ac97_codec * codec);
 static int cmedia_digital_control(struct ac97_codec *codec, int slots, int rate, int mode);
 static int generic_digital_control(struct ac97_codec *codec, int slots, int rate, int mode);
 
-
 /*
  *	AC97 operations.
  *
@@ -620,7 +619,6 @@ static int ac97_check_modem(struct ac97_codec *codec)
 	return 0;
 }
 
-
 /**
  *	ac97_alloc_codec - Allocate an AC97 codec
  *
@@ -809,7 +807,6 @@ static int ac97_init_mixer(struct ac97_codec *codec)
 	if (!(cap & 0x10))
 		codec->supported_mixers &= ~SOUND_MASK_ALTPCM;
 
-
 	/* detect bit resolution */
 	codec->codec_write(codec, AC97_MASTER_VOL_STEREO, 0x2020);
 	if(codec->codec_read(codec, AC97_MASTER_VOL_STEREO) == 0x2020)
@@ -858,7 +855,6 @@ static int ac97_init_mixer(struct ac97_codec *codec)
 #define AC97_SIGMATEL_CIC1      0x76
 #define AC97_SIGMATEL_CIC2      0x78
 
-
 static int sigmatel_9708_init(struct ac97_codec * codec)
 {
 	u16 codec72, codec6c;
@@ -881,7 +877,6 @@ static int sigmatel_9708_init(struct ac97_codec * codec)
 	codec->codec_write(codec, AC97_SIGMATEL_MULTICHN, 0x0000);
 	return 0;
 }
-
 
 static int sigmatel_9721_init(struct ac97_codec * codec)
 {
@@ -906,7 +901,6 @@ static int sigmatel_9721_init(struct ac97_codec * codec)
 
 	return 0;
 }
-
 
 static int sigmatel_9744_init(struct ac97_codec * codec)
 {
@@ -1015,7 +1009,6 @@ static int tritech_init(struct ac97_codec * codec)
 	return 0;
 }
 
-
 /* copied from drivers/sound/maestro.c */
 static int tritech_maestro_init(struct ac97_codec * codec)
 {
@@ -1025,8 +1018,6 @@ static int tritech_maestro_init(struct ac97_codec * codec)
 	codec->codec_write(codec, 0x2C, 0XFFFF);
 	return 0;
 }
-
-
 
 /* 
  *	Presario700 workaround 
@@ -1043,9 +1034,6 @@ static int ad1886_init(struct ac97_codec * codec)
 	codec->codec_write(codec, AC97_AD1886_JACK_SENSE, 0x0010);
 	return 0;
 }
-
-
-
 
 /*
  *	This is basically standard AC97. It should work as a default for
@@ -1173,7 +1161,6 @@ static int cmedia_digital_control(struct ac97_codec *codec, int slots, int rate,
 	return 0;
 }
 
-
 /* copied from drivers/sound/maestro.c */
 #if 0  /* there has been 1 person on the planet with a pt101 that we
         know of.  If they care, they can put this back in :) */
@@ -1199,8 +1186,6 @@ static int pt101_init(struct ac97_codec * codec)
 }
 #endif
 	
-
 EXPORT_SYMBOL(ac97_probe_codec);
 
 MODULE_LICENSE("GPL");
-

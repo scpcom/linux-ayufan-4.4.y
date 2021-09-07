@@ -44,7 +44,6 @@ void x25_clear_queues(struct sock *sk)
 	skb_queue_purge(&x25->fragment_queue);
 }
 
-
 /*
  * This routine purges the input queue of those frames that have been
  * acknowledged. This replaces the boxes labelled "V(a) <- N(r)" on the
@@ -368,4 +367,3 @@ void x25_check_rbuf(struct sock *sk)
 		x25_stop_timer(sk);
 	}
 }
-

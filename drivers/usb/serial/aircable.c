@@ -84,7 +84,6 @@ static const struct usb_device_id id_table[] = {
 };
 MODULE_DEVICE_TABLE(usb, id_table);
 
-
 /* Internal Structure */
 struct aircable_private {
 	spinlock_t rx_lock;		/* spinlock for the receive lines */

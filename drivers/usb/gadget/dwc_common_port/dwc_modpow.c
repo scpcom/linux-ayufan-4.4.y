@@ -31,13 +31,11 @@
 
 #ifndef CONFIG_MACH_IPMATE
 
-
 #include "dwc_modpow.h"
 
 #define BIGNUM_INT_MASK  0xFFFFFFFFUL
 #define BIGNUM_TOP_BIT   0x80000000UL
 #define BIGNUM_INT_BITS  32
-
 
 static void *snmalloc(size_t n, size_t size)
 {
@@ -457,7 +455,6 @@ Bignum dwc_modpow(Bignum base_in, Bignum exp, Bignum mod)
 
     return result;
 }
-
 
 #ifdef UNITTEST
 

@@ -12,7 +12,6 @@
 #define	mcftimer_h
 /****************************************************************************/
 
-
 /*
  *	Get address specific defines for this ColdFire member.
  */
@@ -33,7 +32,6 @@
 #define MCFTIMER_BASE3		0xfc078000	/* Base address of TIMER3 */
 #define MCFTIMER_BASE4		0xfc07c000	/* Base address of TIMER4 */
 #endif
-
 
 /*
  *	Define the TIMER register set addresses.

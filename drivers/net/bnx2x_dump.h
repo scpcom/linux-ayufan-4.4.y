@@ -7,7 +7,6 @@
  * the Free Software Foundation.
  */
 
-
 /* This struct holds a signature to ensure the dump returned from the driver
  * match the meta data file inserted to grc_dump.tcl
  * The signature is time stamp, diag version and grc_dump version
@@ -15,7 +14,6 @@
 
 #ifndef BNX2X_DUMP_H
 #define BNX2X_DUMP_H
-
 
 struct dump_sign {
 	u32 time_stamp;
@@ -43,7 +41,6 @@ struct dump_sign {
 #define MAX_TIMER_PENDING		200
 #define TIMER_SCAN_DONT_CARE		0xFF
 
-
 struct dump_hdr {
 	u32		 hdr_size;	/* in dwords, excluding this field */
 	struct dump_sign dump_sign;
@@ -69,7 +66,6 @@ struct wreg_addr {
 	const u32 *read_regs;
 	u16 info;
 };
-
 
 #define REGS_COUNT			558
 static const struct reg_addr reg_addrs[REGS_COUNT] = {
@@ -354,7 +350,6 @@ static const struct reg_addr reg_addrs[REGS_COUNT] = {
 	{ 0x338a80, 1, RI_ALL_ONLINE }, { 0x340000, 2, RI_ALL_ONLINE }
 };
 
-
 #define IDLE_REGS_COUNT			277
 static const struct reg_addr idle_addrs[IDLE_REGS_COUNT] = {
 	{ 0x2114, 1, RI_ALL_ONLINE }, { 0x2120, 1, RI_ALL_ONLINE },
@@ -505,7 +500,6 @@ static const struct wreg_addr wreg_addrs_e1[WREGS_COUNT_E1] = {
 	{ 0x1b0c00, 192, 1, read_reg_e1_0, RI_E1_OFFLINE }
 };
 
-
 #define WREGS_COUNT_E1H			1
 static const u32 read_reg_e1h_0[] = { 0x1b1040, 0x1b1000 };
 
@@ -513,9 +507,7 @@ static const struct wreg_addr wreg_addrs_e1h[WREGS_COUNT_E1H] = {
 	{ 0x1b0c00, 256, 2, read_reg_e1h_0, RI_E1H_OFFLINE }
 };
 
-
 static const struct dump_sign dump_sign_all = { 0x49aa93ee, 0x40835, 0x22 };
-
 
 #define TIMER_REGS_COUNT_E1		2
 static const u32 timer_status_regs_e1[TIMER_REGS_COUNT_E1] =
@@ -523,12 +515,10 @@ static const u32 timer_status_regs_e1[TIMER_REGS_COUNT_E1] =
 static const u32 timer_scan_regs_e1[TIMER_REGS_COUNT_E1] =
 	{ 0x1640d0, 0x1640d4 };
 
-
 #define TIMER_REGS_COUNT_E1H		2
 static const u32 timer_status_regs_e1h[TIMER_REGS_COUNT_E1H] =
 	{ 0x164014, 0x164018 };
 static const u32 timer_scan_regs_e1h[TIMER_REGS_COUNT_E1H] =
 	{ 0x1640d0, 0x1640d4 };
-
 
 #endif /* BNX2X_DUMP_H */

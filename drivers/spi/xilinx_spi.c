@@ -225,7 +225,6 @@ static int xilinx_spi_txrx_bufs(struct spi_device *spi, struct spi_transfer *t)
 	return t->len - xspi->remaining_bytes;
 }
 
-
 /* This driver supports single master mode only. Hence Tx FIFO Empty
  * is the only interrupt we care about.
  * Receive FIFO Overrun, Transmit FIFO Underrun, Mode Fault, and Slave Mode

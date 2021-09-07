@@ -166,7 +166,6 @@
 #define MV64340_CPU_PROTECT_WINDOW_3_BASE_ADDR                      0x1b0
 #define MV64340_CPU_PROTECT_WINDOW_3_SIZE                           0x1b8
 
-
 /****************************************/
 /*          CPU Error Report            */
 /****************************************/
@@ -726,7 +725,6 @@
         
         /*  MPSC0 Registers      */
 
-
 /***************************************/
 /*          SDMA Registers             */
 /***************************************/
@@ -759,7 +757,6 @@
 #define MV64340_DMA_CHANNEL2_CONTROL_HIGH			    0x888
 #define MV64340_DMA_CHANNEL3_CONTROL 				    0x84C
 #define MV64340_DMA_CHANNEL3_CONTROL_HIGH			    0x88C
-
 
 /****************************************/
 /*           IDMA Registers             */

@@ -53,7 +53,6 @@
 #define NETUP_CI_CTL		0x04
 #define NETUP_CI_RD		1
 
-
 static unsigned int ci_dbg;
 module_param(ci_dbg, int, 0644);
 MODULE_PARM_DESC(ci_dbg, "Enable CI debugging");
@@ -74,7 +73,6 @@ struct netup_ci_state {
 	struct work_struct work;
 	void *priv;
 };
-
 
 int netup_read_i2c(struct i2c_adapter *i2c_adap, u8 addr, u8 reg,
 						u8 *buf, int len)

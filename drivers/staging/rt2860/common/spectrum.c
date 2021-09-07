@@ -24,7 +24,6 @@
  *                                                                       *
  *************************************************************************
 
-
     Module Name:
 	action.c
 
@@ -320,7 +319,6 @@ static PTPC_REQ_ENTRY TpcReqLookUp(
 	return pEntry;
 }
 
-
 static PTPC_REQ_ENTRY TpcReqInsert(
 	IN PRTMP_ADAPTER	pAd,
 	IN UINT8			DialogToken)
@@ -608,7 +606,6 @@ static VOID InsertDialogToken(
 
 	*pFrameLen = *pFrameLen + TempLen;
 
-
 	return;
 }
 
@@ -652,7 +649,6 @@ static VOID InsertChSwAnnIE(
 
 	*pFrameLen = *pFrameLen + TempLen;
 
-
 	return;
 }
 
@@ -670,7 +666,6 @@ static VOID InsertChSwAnnIE(
 		6. Measure Channel.
 		7. Measure Start time.
 		8. Measure Duration.
-
 
 	Return	: None.
 	==========================================================================
@@ -1085,7 +1080,6 @@ static VOID StartDFSProcedure(
 		1. MLME message containing the received frame
 		2. message length.
 		3. Channel switch announcement infomation buffer.
-
 
 	Return	: None.
 	==========================================================================
@@ -1514,7 +1508,6 @@ static VOID PeerChSwAnnAction(
 	return;
 }
 
-
 /*
 	==========================================================================
 	Description:
@@ -1826,4 +1819,3 @@ INT Set_TpcReq_Proc(
 
 	return TRUE;
 }
-

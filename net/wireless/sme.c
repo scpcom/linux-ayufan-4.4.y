@@ -34,7 +34,6 @@ struct cfg80211_conn {
 	bool auto_auth, prev_bssid_valid;
 };
 
-
 static int cfg80211_conn_scan(struct wireless_dev *wdev)
 {
 	struct cfg80211_registered_device *rdev = wiphy_to_dev(wdev->wiphy);

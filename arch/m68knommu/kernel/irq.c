@@ -53,4 +53,3 @@ int show_interrupts(struct seq_file *p, void *v)
 
 	return 0;
 }
-

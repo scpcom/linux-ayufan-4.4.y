@@ -339,7 +339,6 @@ struct mesh_table *mesh_table_alloc(int size_order)
 	return newtbl;
 }
 
-
 static void ieee80211_mesh_path_timer(unsigned long data)
 {
 	struct ieee80211_sub_if_data *sdata =

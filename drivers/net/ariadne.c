@@ -55,13 +55,11 @@
 
 #include "ariadne.h"
 
-
 #ifdef ARIADNE_DEBUG
 int ariadne_debug = ARIADNE_DEBUG;
 #else
 int ariadne_debug = 1;
 #endif
-
 
     /*
      *	Macros to Fix Endianness problems
@@ -76,7 +74,6 @@ int ariadne_debug = 1;
 				/* Get the Swapped Low WORD in a LONG */
 #define swloww(x)	((((x)<<8)&0xff00)|(((x)>>8)&0x00ff))
 
-
     /*
      *	Transmit/Receive Ring Definitions
      */
@@ -85,7 +82,6 @@ int ariadne_debug = 1;
 #define RX_RING_SIZE	16
 
 #define PKT_BUF_SIZE	1520
-
 
     /*
      *	Private Device Data
@@ -100,7 +96,6 @@ struct ariadne_private {
     int dirty_tx;			/* The ring entries to be free()ed. */
     char tx_full;
 };
-
 
     /*
      *	Structure Created in the Ariadne's RAM Buffer
@@ -127,7 +122,6 @@ static struct net_device_stats *ariadne_get_stats(struct net_device *dev);
 static void set_multicast_list(struct net_device *dev);
 #endif
 
-
 static void memcpyw(volatile u_short *dest, u_short *src, int len)
 {
     while (len >= 2) {
@@ -138,11 +132,9 @@ static void memcpyw(volatile u_short *dest, u_short *src, int len)
 	*dest = (*(u_char *)src)<<8;
 }
 
-
 static int __devinit ariadne_init_one(struct zorro_dev *z,
 				      const struct zorro_device_id *ent);
 static void __devexit ariadne_remove_one(struct zorro_dev *z);
-
 
 static struct zorro_device_id ariadne_zorro_tbl[] __devinitdata = {
     { ZORRO_PROD_VILLAGE_TRONIC_ARIADNE },
@@ -227,7 +219,6 @@ static int __devinit ariadne_init_one(struct zorro_dev *z,
 
     return 0;
 }
-
 
 static int ariadne_open(struct net_device *dev)
 {
@@ -334,7 +325,6 @@ static int ariadne_open(struct net_device *dev)
     return 0;
 }
 
-
 static void ariadne_init_ring(struct net_device *dev)
 {
     struct ariadne_private *priv = netdev_priv(dev);
@@ -380,7 +370,6 @@ static void ariadne_init_ring(struct net_device *dev)
     }
 }
 
-
 static int ariadne_close(struct net_device *dev)
 {
     volatile struct Am79C960 *lance = (struct Am79C960*)dev->base_addr;
@@ -406,7 +395,6 @@ static int ariadne_close(struct net_device *dev)
     return 0;
 }
 
-
 static inline void ariadne_reset(struct net_device *dev)
 {
     volatile struct Am79C960 *lance = (struct Am79C960*)dev->base_addr;
@@ -417,7 +405,6 @@ static inline void ariadne_reset(struct net_device *dev)
     lance->RDP = INEA|STRT;
     netif_start_queue(dev);
 }
-
 
 static irqreturn_t ariadne_interrupt(int irq, void *data)
 {
@@ -578,7 +565,6 @@ static irqreturn_t ariadne_interrupt(int irq, void *data)
     return IRQ_RETVAL(handled);
 }
 
-
 static void ariadne_tx_timeout(struct net_device *dev)
 {
     volatile struct Am79C960 *lance = (struct Am79C960*)dev->base_addr;
@@ -588,7 +574,6 @@ static void ariadne_tx_timeout(struct net_device *dev)
     ariadne_reset(dev);
     netif_wake_queue(dev);
 }
-
 
 static netdev_tx_t ariadne_start_xmit(struct sk_buff *skb,
 				      struct net_device *dev)
@@ -690,7 +675,6 @@ static netdev_tx_t ariadne_start_xmit(struct sk_buff *skb,
     return NETDEV_TX_OK;
 }
 
-
 static int ariadne_rx(struct net_device *dev)
 {
     struct ariadne_private *priv = netdev_priv(dev);
@@ -739,7 +723,6 @@ static int ariadne_rx(struct net_device *dev)
 		break;
 	    }
 
-
 	    skb_reserve(skb,2);		/* 16 byte align */
 	    skb_put(skb,pkt_len);	/* Make room */
 	    skb_copy_to_linear_data(skb, (char *)priv->rx_buff[entry], pkt_len);
@@ -778,7 +761,6 @@ static int ariadne_rx(struct net_device *dev)
     return 0;
 }
 
-
 static struct net_device_stats *ariadne_get_stats(struct net_device *dev)
 {
     volatile struct Am79C960 *lance = (struct Am79C960*)dev->base_addr;
@@ -794,7 +776,6 @@ static struct net_device_stats *ariadne_get_stats(struct net_device *dev)
 
     return &dev->stats;
 }
-
 
 /* Set or clear the multicast filter for this adaptor.
     num_addrs == -1	Promiscuous mode, receive all packets
@@ -839,7 +820,6 @@ static void set_multicast_list(struct net_device *dev)
 
     netif_wake_queue(dev);
 }
-
 
 static void __devexit ariadne_remove_one(struct zorro_dev *z)
 {

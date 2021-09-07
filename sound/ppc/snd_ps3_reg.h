@@ -71,7 +71,6 @@
 #define PS3_AUDIO_AO_SPDCS(n, y) \
 	(PS3_AUDIO_AO_SPD_REGBASE(n) + 0x34 + 0x04 * (y))
 
-
 /*
   PS3_AUDIO_INTR_0 register tells an interrupt handler which audio
   DMA channel triggered the interrupt.  The interrupt status for a channel
@@ -222,8 +221,6 @@ Indicates current write access buffer ID from bus master.
 #define PS3_AUDIO_AX_AOBP_ASO1BWN_MASK        (0x7 << 24) /* R-IUF */
 #define PS3_AUDIO_AX_AOBP_ASO0BWN_MASK        (0x7 << 28) /* R-IUF */
 
-
-
 /*
 Audio Port Interrupt Condition Register
 For the fields in this register, the following values apply:
@@ -231,7 +228,6 @@ For the fields in this register, the following values apply:
 1 = Interrupt is generated every 2 interrupt events.
 2 = Interrupt is generated every 4 interrupt events.
 3 = Reserved
-
 
  31            24 23           16 15            8 7             0
  +-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+
@@ -266,7 +262,6 @@ conditions of S/PDIF output channels.
 /*
 Audio Port interrupt Enable Register
 Configures whether to enable or disable each Interrupt Generation.
-
 
  31            24 23           16 15            8 7             0
  +-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+
@@ -324,7 +319,6 @@ Field vaules are the following:
 0 - Interrupt hasn't occured.
 1 - Interrupt has occured.
 
-
  31            24 23           16 15            8 7             0
  +-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+
  |0 0 0 0 0 0 0 0|S|S|0 0|A|A|A|A|0 0 0 0|S|S|0 0|S|S|0 0|A|A|A|A| AX_IS
@@ -336,7 +330,6 @@ Field vaules are the following:
 /*
 Audio Output Master Control Register
 Configures Master Clock and other master Audio Output Settings
-
 
  31            24 23           16 15            8 7             0
  +-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+
@@ -400,19 +393,16 @@ rate.
 #define PS3_AUDIO_AO_MCTRL_SCKSEL0_MASK		(0x7 << 28) /* RWIVF */
 #define PS3_AUDIO_AO_MCTRL_SCKSEL0_DEFAULT	(0x2 << 28) /* RWI-V */
 
-
 /*
 3-Wire Audio Output Master Control Register
 Configures clock, 3-Wire Audio Serial Output Enable, and
 other 3-Wire Audio Serial Output Master Settings
-
 
  31            24 23           16 15            8 7             0
  +-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+
  |A|A|A|A|0 0 0|A| ASOSR |0 0 0 0|A|A|A|A|A|A|0|1|0 0 0 0 0 0 0 0| AO_3WMCTRL
  +-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+
 */
-
 
 /*
 LRCKO Polarity
@@ -536,7 +526,6 @@ Bit 3 - Output Channel 3 (SDOUT[3])
 /*
 3-Wire Audio Serial output Channel 0-3 Control Register
 Configures settings for 3-Wire Serial Audio Output Channel 0-3
-
 
  31            24 23           16 15            8 7             0
  +-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+
@@ -684,7 +673,6 @@ S/PDIF Audio Output Channel User Bit Setting
 Configures user bit settings for each block (384 bits).
 Output is performed from the MSB(ao_spdub0 register bit 31).
 
-
  31            24 23           16 15            8 7             0
  +-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+
  |                             SPOUB                             | AO_SPDUB
@@ -776,7 +764,6 @@ source/destination combination.
 /*
 The PS3_AUDIO_SOURCE register specifies the source address for transfers.
 
-
  31            24 23           16 15            8 7             0
  +-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+
  |                      START                      |0 0 0 0 0|TAR| SOURCE
@@ -799,7 +786,6 @@ The TARGET field specifies the memory space containing the source address.
 
 /*
 The PS3_AUDIO_DEST register specifies the destination address for transfers.
-
 
  31            24 23           16 15            8 7             0
  +-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+
@@ -826,13 +812,11 @@ AUDIOFIFO = Audio WriteData FIFO,
 PS3_AUDIO_DMASIZE specifies the number of 128-byte blocks + 1 to transfer.
 So a value of 0 means 128-bytes will get transfered.
 
-
  31            24 23           16 15            8 7             0
  +-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+
  |0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0|   BLOCKS    | DMASIZE
  +-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-|-+-+-+-+-+-+-+-+
 */
-
 
 #define PS3_AUDIO_DMASIZE_BLOCKS_MASK 	(0x7f << 0) /* RWIUF */
 
@@ -843,7 +827,6 @@ So a value of 0 means 128-bytes will get transfered.
 #define PS3_AUDIO_AO_3W_RDATA(n)	(0x1080 + (0x100 * (n)))
 
 #define PS3_AUDIO_AO_SPD_DATA(n)	(0x2000 + (0x400 * (n)))
-
 
 /*
  * field attiribute
@@ -888,4 +871,3 @@ So a value of 0 means 128-bytes will get transfered.
  *	  'V' = Value
  *	  'T' = Task
  */
-

@@ -51,7 +51,6 @@ void kgdb_l2_test(void)
 
 #endif
 
-
 int kgdb_test(char *name, int len, int count, int z)
 {
 	printk(KERN_ALERT "kgdb name(%d): %s, %d, %d\n", len, name, count, z);

@@ -85,14 +85,12 @@
 #define IEEE_MLME_STA_DEAUTH			1
 #define IEEE_MLME_STA_DISASSOC			2
 
-
 #define IEEE_CRYPT_ERR_UNKNOWN_ALG		2
 #define IEEE_CRYPT_ERR_UNKNOWN_ADDR		3
 #define IEEE_CRYPT_ERR_CRYPT_INIT_FAILED	4
 #define IEEE_CRYPT_ERR_KEY_SET_FAILED		5
 #define IEEE_CRYPT_ERR_TX_KEY_SET_FAILED	6
 #define IEEE_CRYPT_ERR_CARD_CONF_FAILED		7
-
 
 #define	IEEE_CRYPT_ALG_NAME_LEN			16
 
@@ -151,7 +149,6 @@ typedef struct ieee_param {
 
 #define MIN_FRAG_THRESHOLD     256U
 #define MAX_FRAG_THRESHOLD     2346U
-
 
 /* Frame control field constants */
 #define IEEE80211_FCTL_FRAMETYPE	0x00fc
@@ -374,7 +371,6 @@ struct ieee80211_snap_hdr {
 #define IEEE80211_NUM_CCK_RATES	            4
 #define IEEE80211_OFDM_SHIFT_MASK_A         4
 
-
 /* this is stolen and modified from the madwifi driver*/
 #define IEEE80211_FC0_TYPE_MASK		0x0c
 #define IEEE80211_FC0_TYPE_DATA		0x08
@@ -538,7 +534,6 @@ struct ieee80211_security {
 	u8 level;
 	u16 flags;
 } __attribute__ ((packed));
-
 
 /*
  802.11 data frame from AP
@@ -1707,7 +1702,6 @@ static inline int ieee80211_is_cck_rate(u8 rate)
         return 0;
 }
 
-
 /* ieee80211.c */
 extern void free_ieee80211(struct net_device *dev);
 extern struct net_device *alloc_ieee80211(int sizeof_priv);
@@ -1724,7 +1718,6 @@ extern int ieee80211_encrypt_fragment(
 extern int rtl8192_ieee80211_xmit(struct sk_buff *skb,
 			  struct net_device *dev);
 extern void ieee80211_txb_free(struct ieee80211_txb *);
-
 
 /* ieee80211_rx.c */
 extern int ieee80211_rx(struct ieee80211_device *ieee, struct sk_buff *skb,

@@ -68,7 +68,6 @@
 #endif
 #define NFSDDBG_FACILITY		NFSDDBG_FILEOP
 
-
 /*
  * This is a cache of readahead params that help us choose the proper
  * readahead strategy. Initially, we set all readahead parameters to 0
@@ -300,7 +299,6 @@ out:
 	exp_put(exp);
 	return err;
 }
-
 
 /*
  * Set various file attributes.
@@ -725,7 +723,6 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 	else
 		map = nfs3_anyaccess;
 
-
 	query = *access;
 	for  (; map->access; map++) {
 		if (map->access & query) {
@@ -772,8 +769,6 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 	return error;
 }
 #endif /* CONFIG_NFSD_V3 */
-
-
 
 /*
  * Open an existing file or directory.
@@ -2331,7 +2326,6 @@ nfsd_racache_init(int cache_size)
 	int	j = 0;
 	int	nperbucket;
 	struct raparms **raparm = NULL;
-
 
 	if (raparm_hash[0].pb_head)
 		return 0;

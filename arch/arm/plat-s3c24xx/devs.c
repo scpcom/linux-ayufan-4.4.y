@@ -220,7 +220,6 @@ void __init s3c24xx_udc_set_platdata(struct s3c2410_udc_mach_info *pd)
 	}
 }
 
-
 /* Watchdog */
 
 static struct resource s3c_wdt_resource[] = {

@@ -310,7 +310,6 @@ static int worker_loop(void *arg)
 again:
 		while (1) {
 
-
 			work = get_next_work(worker, &prio_head, &head);
 			if (!work)
 				break;

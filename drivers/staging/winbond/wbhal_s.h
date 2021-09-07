@@ -27,9 +27,6 @@
 //	User must modify for connection between HAL and upper layer
 //----------------------------------------------------------------
 
-
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //================================================================================================
 // Common define
@@ -370,7 +367,6 @@ struct wb35_descriptor {		// Skip length = 8 DWORD
 
 };
 
-
 #define DEFAULT_NULL_PACKET_COUNT		180000	//20060828.1 Add. 180 seconds
 
 #define MAX_TXVGA_EEPROM	9	//How many word(u16) of EEPROM will be used for TxVGA
@@ -380,7 +376,6 @@ typedef struct _TXVGA_FOR_50 {
 	u8      ChanNo;
 	u8      TxVgaValue;
 } TXVGA_FOR_50;
-
 
 //=====================================================================
 // Device related include
@@ -397,7 +392,6 @@ struct hw_data {
 	u32	revision;
 	u32	BB3c_cal; // The value for Tx calibration comes from EEPROM
 	u32	BB54_cal; // The value for Rx calibration comes from EEPROM
-
 
 	// For surprise remove
 	u32	SurpriseRemove; // 0: Normal 1: Surprise remove

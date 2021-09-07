@@ -57,4 +57,3 @@ GT_STATUS gtVersion
     version->version[gtStrlen(msApiVersion)] = '\0';
     return GT_OK;
 }
-

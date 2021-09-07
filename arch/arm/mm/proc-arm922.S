@@ -59,7 +59,6 @@
  */
 #define CACHE_DLIMIT	8192
 
-
 	.text
 /*
  * cpu_arm922_proc_init()
@@ -115,7 +114,6 @@ ENTRY(cpu_arm922_reset)
 ENTRY(cpu_arm922_do_idle)
 	mcr	p15, 0, r0, c7, c0, 4		@ Wait for interrupt
 	mov	pc, lr
-
 
 #ifndef CONFIG_CPU_DCACHE_WRITETHROUGH
 
@@ -319,7 +317,6 @@ ENTRY(arm922_cache_fns)
 	.long	arm922_dma_flush_range
 
 #endif
-
 
 ENTRY(cpu_arm922_dcache_clean_area)
 #ifndef CONFIG_CPU_DCACHE_WRITETHROUGH

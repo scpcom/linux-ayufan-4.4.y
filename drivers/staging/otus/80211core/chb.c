@@ -121,8 +121,6 @@ void zfiHeartBeat(zdev_t* dev)
 		}
 	}
 
-
-
     /* Maintain management time tick */
     zfMmApTimeTick(dev);
     zfMmStaTimeTick(dev);
@@ -133,7 +131,6 @@ void zfiHeartBeat(zdev_t* dev)
     zfHpHeartBeat(dev);
 
 }
-
 
 void zfDumpBssList(zdev_t* dev)
 {
@@ -197,4 +194,3 @@ void zfDumpBssList(zdev_t* dev)
 
     zm_debug_msg0("***************************");
 }
-

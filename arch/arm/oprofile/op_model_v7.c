@@ -22,7 +22,6 @@
 
 /* #define DEBUG */
 
-
 /*
  * ARM V7 PMNC support
  */
@@ -198,7 +197,6 @@ int armv7_setup_pmnc(void)
 	 */
 	armv7_pmnc_write(PMNC_P | PMNC_C | PMNC_D);
 
-
 	for (cnt = CCNT; cnt < CNTMAX; cnt++) {
 		unsigned long event;
 		u32 cpu_cnt = CPU_COUNTER(smp_processor_id(), cnt);
@@ -259,7 +257,6 @@ static irqreturn_t armv7_pmnc_interrupt(int irq, void *arg)
 	struct pt_regs *regs = get_irq_regs();
 	unsigned int cnt;
 	u32 flags;
-
 
 	/*
 	 * Stop IRQ generation
@@ -365,7 +362,6 @@ static void armv7_pmnc_dump_regs(void)
 	}
 }
 #endif
-
 
 static int irqs[] = {
 #ifdef CONFIG_ARCH_OMAP3

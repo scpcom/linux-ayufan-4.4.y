@@ -345,7 +345,6 @@ static int iwl_sens_energy_cck(struct iwl_priv *priv,
 	return 0;
 }
 
-
 static int iwl_sens_auto_corr_ofdm(struct iwl_priv *priv,
 				       u32 norm_fa,
 				       u32 rx_enable_time)
@@ -856,7 +855,6 @@ void iwl_chain_noise_calibration(struct iwl_priv *priv,
 }
 EXPORT_SYMBOL(iwl_chain_noise_calibration);
 
-
 void iwl_reset_run_time_calib(struct iwl_priv *priv)
 {
 	int i;
@@ -873,4 +871,3 @@ void iwl_reset_run_time_calib(struct iwl_priv *priv)
 	iwl_send_statistics_request(priv, CMD_ASYNC);
 }
 EXPORT_SYMBOL(iwl_reset_run_time_calib);
-

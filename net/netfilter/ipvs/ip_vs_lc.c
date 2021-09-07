@@ -22,7 +22,6 @@
 
 #include <net/ip_vs.h>
 
-
 static inline unsigned int
 ip_vs_lc_dest_overhead(struct ip_vs_dest *dest)
 {
@@ -36,7 +35,6 @@ ip_vs_lc_dest_overhead(struct ip_vs_dest *dest)
 	return (atomic_read(&dest->activeconns) << 8) +
 		atomic_read(&dest->inactconns);
 }
-
 
 /*
  *	Least Connection scheduling
@@ -82,7 +80,6 @@ ip_vs_lc_schedule(struct ip_vs_service *svc, const struct sk_buff *skb)
 	return least;
 }
 
-
 static struct ip_vs_scheduler ip_vs_lc_scheduler = {
 	.name =			"lc",
 	.refcnt =		ATOMIC_INIT(0),
@@ -90,7 +87,6 @@ static struct ip_vs_scheduler ip_vs_lc_scheduler = {
 	.n_list =		LIST_HEAD_INIT(ip_vs_lc_scheduler.n_list),
 	.schedule =		ip_vs_lc_schedule,
 };
-
 
 static int __init ip_vs_lc_init(void)
 {

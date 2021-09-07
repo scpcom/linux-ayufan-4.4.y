@@ -49,10 +49,8 @@ static const char SysKonnectFileId[] =
 extern "C" {
 #endif  /* cplusplus */
 
-
 // #include <ntddk.h>
 // #include <wdm.h>
-
 
 #include "h/sktypes.h"
 #include "h/skdrv1st.h"
@@ -488,7 +486,6 @@ int SkAsfInit(
 			SK_DBG_MSG(pAC, SK_DBGMOD_ASF, SK_DBGCAT_CTRL, ("SkAsfInit: *** ASF binary file _NOT_ found!\n"));
 		}
 
-
 #ifdef USE_ASF_DASH_FW
 		/* try to open ASF DASH binary */
 		if ( fw_file_exists(pAC, DashFileNameS1)  && 
@@ -725,7 +722,6 @@ int SkAsfInit(
 					pAC->AsfData.DriverVersion[1], pAC->AsfData.DriverVersion[2],
 					pAC->AsfData.DriverVersion[3], pAC->AsfData.DriverVersion[4] ));
 
-
 			/* check, whether the FW file version suits the driver version */
 			if( (pAC->AsfData.FileFwVersion[1] == pAC->AsfData.DriverVersion[1]) &&
 				(pAC->AsfData.FileFwVersion[3] == pAC->AsfData.DriverVersion[3]) &&
@@ -742,7 +738,6 @@ int SkAsfInit(
 				  SK_DBG_MSG(pAC, SK_DBGMOD_ASF, SK_DBGCAT_CTRL,("    *** Chip Rev. A1 -> Do reset !!\n"));
 				  				  
 				  AsfResetCpu(pAC, IoC);
-
 
 				  // AsfSmartResetCpu( pAC, IoC, ASF_RESET_HOT );  // fixed in A2
 				} else  {
@@ -808,7 +803,6 @@ int SkAsfInit(
 				}
 #endif
 
-
 #ifdef USE_ASF_DASH_FW
 				if( SpiRetVal == 0 )  {
 				} else {
@@ -843,7 +837,6 @@ int SkAsfInit(
 				  AsfRunCpu( pAC, IoC );
 				}
 #endif
-
 
 				if (( SpiRetVal == 0 ) && (!RetCode)) {
 				/* calculate CS of the FW flash */
@@ -914,7 +907,6 @@ int SkAsfInit(
 						pAC->AsfData.FlashFwRev ));
 #endif
 
-
 #ifdef USE_ASF_DASH_FW
 #ifdef FORCE_FW_FLASH
 					// Flash though Flash Version already the Chip and Flash Version of Driver are the same
@@ -970,8 +962,6 @@ int SkAsfInit(
 						
 					}
 
-
-
 					if (DoUpdate) {
 					        /* This hangs the CPU in case we do NOT flash */
 					        /* So we defer it to this point where we are */
@@ -1011,7 +1001,6 @@ int SkAsfInit(
 									}
 #endif
 									
-
 									if( FlashOk  )  {
 									/* read the GUID from flash */
 #ifdef USE_ASF_DASH_FW
@@ -1037,7 +1026,6 @@ int SkAsfInit(
 								SK_DBG_MSG(pAC, SK_DBGMOD_ASF, SK_DBGCAT_CTRL,("    *** Error: Flash write (Sector1)\n"));
 								SK_ERR_LOG(pAC, SK_ERRCL_SW, SKERR_ASF_E004, SKERR_ASF_E004MSG);
 							}
-
 
 							/*
 							 * Handle sector 2
@@ -1344,7 +1332,6 @@ void AsfSetSMBusRegister(
     SK_DBG_MSG(pAC, SK_DBGMOD_ASF, SK_DBGCAT_CTRL,("    *** ASF cleaning up SMBusRegister 0x%x with 0x%x ***\n", REG_ASF_SMBUS_CFG, TmpVal32));
 }
 
-
 /*****************************************************************************
 *
 * SkAsfDeInit - DeInit function of ASF
@@ -1543,8 +1530,6 @@ int     Level) {    /* Initialization level */
 #endif
     return( 0 );
 }
-
-
 
 /******************************************************************************
 *
@@ -1747,8 +1732,6 @@ SK_IOC IoC ) {   /* IO context handle */
             break;
     }  //  switch( version )  {
 
-
-
     VPD_IN32(pAC, IoC, PCI_OUR_REG_2, &our_reg2);
     pAC->vpd.rom_size = 256 << ((our_reg2 & PCI_VPD_ROM_SZ) >> 14);
 
@@ -1779,7 +1762,6 @@ SK_IOC IoC ) {   /* IO context handle */
 
     return( RetCode );
 }
-
 
 /******************************************************************************
 *
@@ -1815,7 +1797,6 @@ int SkAsfPreSetOid(
             unsigned int *pLen)
 {
     SK_U32 RetCode = SK_ASF_PNMI_ERR_OK;
-
 
     switch( Id )  {
         case OID_SKGE_ASF_ENA:
@@ -2138,10 +2119,8 @@ int SkAsfSetOid(
     else
         pAC->AsfData.Mib.NewParam = 2;  //  Trigger SEPROM Update
 
-
     return(RetCode);
 }
-
 
 /******************************************************************************
 *
@@ -2623,7 +2602,6 @@ int SkAsfGetOid(
     return(RetCode);
 }
 
-
 /******************************************************************************
 *
 *   SkAsfGet -
@@ -2643,7 +2621,6 @@ int SkAsfGet(
 
     return(RetCode) ;
 }
-
 
 /******************************************************************************
 *
@@ -2771,7 +2748,6 @@ SK_I8 SkAsfWriteDeferredFlash( SK_AC *pAC, SK_IOC IoC )  {
 
     return( RetCode );
 }
-
 
 /*****************************************************************************
 *
@@ -3033,7 +3009,6 @@ SK_IOC IoC ) /* IO context handle */  {
                 pAC->AsfData.GlHciState = 255;
             break;
 
-
         /*------------------------------------------------------------------------------------------------------
          *  updates SMBus structure via HCI
          *----------------------------------------------------------------------------------------------------*/
@@ -3061,7 +3036,6 @@ SK_IOC IoC ) /* IO context handle */  {
                 pAC->AsfData.GlHciState = 255;
             }
             break;
-
 
         /*------------------------------------------------------------------------------------------------------
          *  IPMI states 30...36
@@ -3245,7 +3219,6 @@ SK_IOC IoC ) /* IO context handle */  {
 		 ("SkAsfTimer: sending  YASF_HOSTCMD_CFG_SET_ACTIVE_PORT act 0x%x -> 0x%x\n",
 		  pAC->AsfData.ActivePort, pAC->ActivePort));
 
-      
       pAC->AsfData.ActivePort = (SK_U8)(pAC->ActivePort & 0xff);
       // pAC->AsfData.PrefPort   = (SK_U8)(pAC->PrefPort & 0xff);
       
@@ -4141,7 +4114,6 @@ IN NDIS_HANDLE WrapperConfigContext)
 }
 #endif
 
-
 /*****************************************************************************
 *
 * SkAsfShowMib
@@ -4331,7 +4303,6 @@ void AsfRunCpu( SK_AC *pAC, SK_IOC IoC )  {
     SK_OUT32( IoC, REG_ASF_STATUS_CMD, TmpVal32 );
   }
 }
-
 
 /*****************************************************************************
 *
@@ -4623,7 +4594,6 @@ SK_U8   ToEna ) /* IO context handle */  {
     return;
 }
 
-
 /*****************************************************************************
 *
 * AsfHciGetData
@@ -4660,7 +4630,6 @@ SK_U8   AsfHciGetState( SK_AC *pAC )  {
     }
     return( Stat );
 }
-
 
 /*****************************************************************************
 *
@@ -4867,7 +4836,6 @@ SK_U8   Wait )  {
     else
         SK_DBG_MSG(pAC, SK_DBGMOD_ASF, SK_DBGCAT_CTRL,("    Send Message -> Not Idle\n" ));
 
-
     if( !Wait )  {
         // SK_DBG_MSG(pAC, SK_DBGMOD_ASF, SK_DBGCAT_CTRL,("    Send Message -> Start Timer\n" ));
         SK_MEMSET((char *)&EventParam, 0, sizeof(EventParam));
@@ -4878,7 +4846,6 @@ SK_U8   Wait )  {
 
     return( RetCode );
 }
-
 
 void AsfWatchCpu(
 SK_AC   *pAC,
@@ -4898,7 +4865,6 @@ SK_U32  FwAlive, LastFetch;
 
     return;
 }
-
 
 void AsfEnable(
 SK_AC   *pAC,
@@ -4927,8 +4893,6 @@ SK_IOC  IoC )  {
 
     pAC->GIni.GIAsfEnabled = SK_FALSE;  // update asf flag for common modules
 }
-
-
 
 /*****************************************************************************
 *
@@ -5619,7 +5583,6 @@ SK_IOC  IoC,
 SK_U8   port,
 SK_U8   pattno )
 {
-
 
     if (port > 1) {
         return (1);
@@ -6406,7 +6369,6 @@ SK_U32 TableLength )  {
 }
 #endif
 
-
 SK_I8 SkAsfSendRmcpData(
 SK_AC   *pAC,
 SK_IOC  IoC,
@@ -6435,10 +6397,7 @@ SK_U8   Length )  {
     return( RetVal );
 }
 
-
 #ifdef __cplusplus
 }
 #endif  /* __cplusplus */
 /* End of file */
-
-

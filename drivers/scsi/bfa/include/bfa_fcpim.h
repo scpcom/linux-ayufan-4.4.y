@@ -56,7 +56,6 @@ void		bfa_itnim_get_stats(struct bfa_itnim_s *itnim,
 			struct bfa_itnim_hal_stats_s *stats);
 void		bfa_itnim_clear_stats(struct bfa_itnim_s *itnim);
 
-
 /**
  * 		BFA completion callback for bfa_itnim_online().
  *
@@ -103,7 +102,6 @@ void		bfa_ioim_start(struct bfa_ioim_s *ioim);
 void		bfa_ioim_abort(struct bfa_ioim_s *ioim);
 void 		bfa_ioim_delayed_comp(struct bfa_ioim_s *ioim,
 				      bfa_boolean_t iotov);
-
 
 /**
  * 		I/O completion notification.
@@ -156,4 +154,3 @@ void		bfa_cb_tskim_done(void *bfad, struct bfad_tskim_s *dtsk,
 				  enum bfi_tskim_status tsk_status);
 
 #endif /* __BFA_FCPIM_H__ */
-

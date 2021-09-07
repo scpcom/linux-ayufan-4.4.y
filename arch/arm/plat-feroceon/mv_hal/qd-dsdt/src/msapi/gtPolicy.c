@@ -148,7 +148,6 @@ GT_STATUS gprtSetPolicy
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gprtGetPolicy
 *
@@ -271,7 +270,3 @@ GT_STATUS gprtGetPolicy
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
-
-

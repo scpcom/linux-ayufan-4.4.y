@@ -355,4 +355,3 @@ ENTRY(sys_call_table)
 	.rept NR_syscalls-(.-sys_call_table)/4
 		.long sys_ni_syscall
 	.endr
-

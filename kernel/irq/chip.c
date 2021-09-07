@@ -119,7 +119,6 @@ void dynamic_irq_cleanup_keep_chip_data(unsigned int irq)
 	dynamic_irq_cleanup_x(irq, true);
 }
 
-
 /**
  *	set_irq_chip - set the irq chip for an irq
  *	@irq:	irq number

@@ -41,7 +41,6 @@
 #include <linux/pagemap.h>
 #include "nilfs.h"
 
-
 static inline int nilfs_add_nondir(struct dentry *dentry, struct inode *inode)
 {
 	int err = nilfs_add_link(dentry, inode);

@@ -16,7 +16,6 @@
 #define TIMER0_CLKSEL flexible
 #define TIMER0_DIV (TIMER0_FREQ/(HZ))
 
-
 #define GET_JIFFIES_USEC() \
   ( (TIMER0_DIV - *R_TIMER0_DATA) * (1000000/HZ)/TIMER0_DIV )
 

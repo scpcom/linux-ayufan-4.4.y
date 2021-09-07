@@ -336,7 +336,6 @@ typedef struct {
 #define REG_RD_ADDR_extmem_rw_gated_csp 56
 #define REG_WR_ADDR_extmem_rw_gated_csp 56
 
-
 /* Constants */
 enum {
   regk_extmem_b16                          = 0x00000001,

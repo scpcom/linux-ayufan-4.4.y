@@ -29,7 +29,6 @@
 #include "csr.h"
 #include "config_roms.h"
 
-
 static void delayed_reset_bus(struct work_struct *work)
 {
 	struct hpsb_host *host =

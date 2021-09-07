@@ -28,7 +28,6 @@
  *
  ******************************************************************************/
 
-
 #define ISCSI_TARGET_NODEATTRIB_C
 
 #include <linux/string.h>

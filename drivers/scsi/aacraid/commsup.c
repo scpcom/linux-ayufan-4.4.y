@@ -762,7 +762,6 @@ void aac_printf(struct aac_dev *dev, u32 val)
 	memset(cp, 0, 256);
 }
 
-
 /**
  *	aac_handle_aif		-	Handle a message from the firmware
  *	@dev: Which adapter this fib is from
@@ -1494,7 +1493,6 @@ out:
 	aac->in_reset = 0;
 	return BlinkLED;
 }
-
 
 /**
  *	aac_command_thread	-	command processing thread

@@ -26,14 +26,6 @@
 
 #include "platform.h"
 
-
-  
-  
-
-
-
-
-
 #include "capidtmf.h"
 
 /* #define TRACE_ */
@@ -42,10 +34,7 @@
 
 /*---------------------------------------------------------------------------*/
 
-
 #define trace(a)
-
-
 
 /*---------------------------------------------------------------------------*/
 
@@ -121,7 +110,6 @@ static short capidtmf_expand_table_ulaw[0x0100] =
    -8316,   8316,   -396,    396,  -1980,   1980,      0,      0
 };
 
-
 /*---------------------------------------------------------------------------*/
 
 static short capidtmf_recv_window_function[CAPIDTMF_RECV_ACCUMULATE_CYCLES] =
@@ -178,9 +166,7 @@ static byte capidtmf_leading_zeroes_table[0x100] =
 #define capidtmf_word_leading_zeroes(w)  (((w) & 0xff00) ? capidtmf_leading_zeroes_table[(w) >> 8] : 8 + capidtmf_leading_zeroes_table[(w)])
 #define capidtmf_dword_leading_zeroes(d)  (((d) & 0xffff0000L) ?    (((d) & 0xff000000L) ? capidtmf_leading_zeroes_table[(d) >> 24] : 8 + capidtmf_leading_zeroes_table[(d) >> 16]) :    (((d) & 0xff00) ? 16 + capidtmf_leading_zeroes_table[(d) >> 8] : 24 + capidtmf_leading_zeroes_table[(d)]))
 
-
 /*---------------------------------------------------------------------------*/
-
 
 static void capidtmf_goertzel_loop (long *buffer, long *coeffs, short *sample, long count)
 {
@@ -244,7 +230,6 @@ static void capidtmf_goertzel_loop (long *buffer, long *coeffs, short *sample, l
   buffer[i] = q1;
   buffer[i + CAPIDTMF_RECV_TOTAL_FREQUENCY_COUNT] = q2;
 }
-
 
 static void capidtmf_goertzel_result (long *buffer, long *coeffs)
 {
@@ -318,7 +303,6 @@ static void capidtmf_goertzel_result (long *buffer, long *coeffs)
   }
 }
 
-
 /*---------------------------------------------------------------------------*/
 
 #define CAPIDTMF_RECV_GUARD_SNR_INDEX_697     0
@@ -364,7 +348,6 @@ static long capidtmf_recv_goertzel_coef_table[CAPIDTMF_RECV_TOTAL_FREQUENCY_COUN
   0x0000L * 2   /* 100-630 Hz (fundamentals) */
 };
 
-
 static word capidtmf_recv_guard_snr_low_table[CAPIDTMF_RECV_TOTAL_FREQUENCY_COUNT] =
 {
   14,                                    /* Low group peak versus 697 Hz */
@@ -384,7 +367,6 @@ static word capidtmf_recv_guard_snr_low_table[CAPIDTMF_RECV_TOTAL_FREQUENCY_COUN
   DSPDTMF_RX_HARMONICS_SEL_DEFAULT - 4,  /* Low group peak versus 1715 Hz */
   12                                     /* Low group peak versus 100-630 Hz */
 };
-
 
 static word capidtmf_recv_guard_snr_high_table[CAPIDTMF_RECV_TOTAL_FREQUENCY_COUNT] =
 {
@@ -406,7 +388,6 @@ static word capidtmf_recv_guard_snr_high_table[CAPIDTMF_RECV_TOTAL_FREQUENCY_COU
   12                                     /* High group peak versus 100-630 Hz */
 };
 
-
 /*---------------------------------------------------------------------------*/
 
 static void capidtmf_recv_init (t_capidtmf_state   *p_state)
@@ -426,7 +407,6 @@ static void capidtmf_recv_init (t_capidtmf_state   *p_state)
   p_state->recv.state = CAPIDTMF_RECV_STATE_IDLE;
 }
 
-
 void capidtmf_recv_enable (t_capidtmf_state   *p_state, word min_digit_duration, word min_gap_duration)
 {
   p_state->recv.indication_state_ack &= CAPIDTMF_RECV_INDICATION_DIGIT;
@@ -445,7 +425,6 @@ void capidtmf_recv_enable (t_capidtmf_state   *p_state, word min_digit_duration,
   p_state->recv.state |= CAPIDTMF_RECV_STATE_DTMF_ACTIVE;
 }
 
-
 void capidtmf_recv_disable (t_capidtmf_state   *p_state)
 {
   p_state->recv.state &= ~CAPIDTMF_RECV_STATE_DTMF_ACTIVE;
@@ -459,7 +438,6 @@ void capidtmf_recv_disable (t_capidtmf_state   *p_state)
     p_state->recv.current_digit_value = CAPIDTMF_RECV_NO_DIGIT;
   }
 }
-
 
 word capidtmf_recv_indication (t_capidtmf_state   *p_state, byte *buffer)
 {
@@ -484,7 +462,6 @@ word capidtmf_recv_indication (t_capidtmf_state   *p_state, byte *buffer)
   return (0);
 }
 
-
 #define CAPIDTMF_RECV_WINDOWED_SAMPLES  32
 
 void capidtmf_recv_block (t_capidtmf_state   *p_state, byte   *buffer, word length)
@@ -497,7 +474,6 @@ void capidtmf_recv_block (t_capidtmf_state   *p_state, byte   *buffer, word leng
   short *q;
   byte goertzel_result_buffer[CAPIDTMF_RECV_TOTAL_FREQUENCY_COUNT];
     short windowed_sample_buffer[CAPIDTMF_RECV_WINDOWED_SAMPLES];
-
 
   if (p_state->recv.state & CAPIDTMF_RECV_STATE_DTMF_ACTIVE)
   {
@@ -674,12 +650,10 @@ void capidtmf_recv_block (t_capidtmf_state   *p_state, byte   *buffer, word leng
   }
 }
 
-
 void capidtmf_init (t_capidtmf_state   *p_state, byte ulaw)
 {
   p_state->ulaw = ulaw;
   capidtmf_recv_init (p_state);
 }
-
 
 /*---------------------------------------------------------------------------*/

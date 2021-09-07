@@ -395,7 +395,6 @@ static void __perf_event_remove_from_context(void *info)
 	spin_unlock(&ctx->lock);
 }
 
-
 /*
  * Remove the event from a task's (or a CPU's) list of events.
  *
@@ -2313,7 +2312,6 @@ perf_mmap_data_init(struct perf_event *event, struct perf_mmap_data *data)
 
 	if (!data->watermark)
 		data->watermark = max_t(long, PAGE_SIZE, max_size / 2);
-
 
 	rcu_assign_pointer(event->data, data);
 }

@@ -1172,7 +1172,6 @@ out_kfree_skb:
 	goto out;
 }
 
-
 static int x25_recvmsg(struct kiocb *iocb, struct socket *sock,
 		       struct msghdr *msg, size_t size,
 		       int flags)
@@ -1261,7 +1260,6 @@ out_free_dgram:
 out:
 	return rc;
 }
-
 
 static int x25_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {

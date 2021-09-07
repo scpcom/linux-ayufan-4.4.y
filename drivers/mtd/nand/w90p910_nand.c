@@ -240,7 +240,6 @@ static void w90p910_nand_command_lp(struct mtd_info *mtd,
 		;
 }
 
-
 static void w90p910_nand_enable(struct w90p910_nand *nand)
 {
 	unsigned int val;

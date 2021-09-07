@@ -36,7 +36,6 @@
 
 #include "appldata.h"
 
-
 #define APPLDATA_CPU_INTERVAL	10000		/* default (CPU) time for
 						   sampling interval in
 						   milliseconds */
@@ -99,13 +98,11 @@ static struct workqueue_struct *appldata_wq;
 static void appldata_work_fn(struct work_struct *work);
 static DECLARE_WORK(appldata_work, appldata_work_fn);
 
-
 /*
  * Ops list
  */
 static DEFINE_MUTEX(appldata_ops_mutex);
 static LIST_HEAD(appldata_ops_list);
-
 
 /*************************** timer, work, DIAG *******************************/
 /*
@@ -166,7 +163,6 @@ int appldata_diag(char record_nr, u16 function, unsigned long buffer,
 	return appldata_asm(&id, function, (void *) buffer, length);
 }
 /************************ timer, work, DIAG <END> ****************************/
-
 
 /****************************** /proc stuff **********************************/
 
@@ -422,7 +418,6 @@ out:
 
 /*************************** /proc stuff <END> *******************************/
 
-
 /************************* module-ops management *****************************/
 /*
  * appldata_register_ops()
@@ -478,7 +473,6 @@ void appldata_unregister_ops(struct appldata_ops *ops)
 	kfree(ops->ctl_table);
 }
 /********************** module-ops management <END> **************************/
-
 
 /**************************** suspend / resume *******************************/
 static int appldata_freeze(struct device *dev)
@@ -565,7 +559,6 @@ static struct platform_driver appldata_pdrv = {
 	},
 };
 /************************* suspend / resume <END> ****************************/
-
 
 /******************************* init / exit *********************************/
 

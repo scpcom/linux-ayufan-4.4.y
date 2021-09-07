@@ -24,7 +24,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #define OFFSET_TCR1		0x00	/* Transmit Configuration 1 Register */
 #define OFFSET_TCR2		0x04	/* Transmit Configuration 2 Register */
 #define OFFSET_TCLKDIV		0x08	/* Transmit Serial Clock Divider Register */

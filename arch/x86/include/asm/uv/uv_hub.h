@@ -22,7 +22,6 @@
 #include <asm/irq_vectors.h>
 #include <asm/io_apic.h>
 
-
 /*
  * Addressing Terminology
  *
@@ -93,7 +92,6 @@
  *	      the FULL value contained in ACPI tables, not the subset in the
  *	      processor APICID register.
  */
-
 
 /*
  * Maximum number of bricks in all partitions and in all coherency domains.
@@ -225,7 +223,6 @@ static inline unsigned long uv_soc_phys_ram_to_gpa(unsigned long paddr)
 	return paddr | uv_hub_info->gnode_upper;
 }
 
-
 /* socket virtual --> UV global physical address */
 static inline unsigned long uv_gpa(void *v)
 {
@@ -251,7 +248,6 @@ static inline void *uv_pnode_offset_to_vaddr(int pnode, unsigned long offset)
 {
 	return __va(((unsigned long)pnode << uv_hub_info->m_val) | offset);
 }
-
 
 /*
  * Extract a PNODE from an APICID (full apicid, not processor subset)

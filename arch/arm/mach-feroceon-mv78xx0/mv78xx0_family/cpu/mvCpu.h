@@ -62,14 +62,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvCpuArmh
 #define __INCmvCpuArmh
 
 /* defines */
 #define MASTER_CPU	0
 #define SLAVE_CPU	1
-
 
 #define CPU_PART_MRVL131		0x131
 #define CPU_PART_ARM926       		0x926

@@ -137,7 +137,6 @@ int radeon_fence_create(struct radeon_device *rdev, struct radeon_fence **fence)
 	return 0;
 }
 
-
 bool radeon_fence_signaled(struct radeon_fence *fence)
 {
 	struct radeon_device *rdev = fence->rdev;
@@ -197,7 +196,6 @@ int r600_fence_wait(struct radeon_fence *fence,  bool intr, bool lazy)
 	__set_current_state(TASK_RUNNING);
 	return ret;
 }
-
 
 int radeon_fence_wait(struct radeon_fence *fence, bool intr)
 {
@@ -387,7 +385,6 @@ void radeon_fence_driver_fini(struct radeon_device *rdev)
 	write_unlock_irqrestore(&rdev->fence_drv.lock, irq_flags);
 	DRM_INFO("radeon: fence finalized\n");
 }
-
 
 /*
  * Fence debugfs

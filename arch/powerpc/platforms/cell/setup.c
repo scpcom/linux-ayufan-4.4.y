@@ -215,7 +215,6 @@ static void __init mpic_init_IRQ(void)
 	}
 }
 
-
 static void __init cell_init_irq(void)
 {
 	iic_init_IRQ();

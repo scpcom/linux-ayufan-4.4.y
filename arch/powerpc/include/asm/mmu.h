@@ -118,7 +118,6 @@ extern void early_init_mmu_secondary(void);
 #define MMU_PAGE_64G	11
 #define MMU_PAGE_COUNT	12
 
-
 #if defined(CONFIG_PPC_STD_MMU_64)
 /* 64-bit classic hash table MMU */
 #  include <asm/mmu-hash64.h>
@@ -138,7 +137,6 @@ extern void early_init_mmu_secondary(void);
 /* Motorola/Freescale 8xx software loaded TLB */
 #  include <asm/mmu-8xx.h>
 #endif
-
 
 #endif /* __KERNEL__ */
 #endif /* _ASM_POWERPC_MMU_H_ */

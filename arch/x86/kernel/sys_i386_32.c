@@ -58,7 +58,6 @@ out:
 	return err;
 }
 
-
 struct sel_arg_struct {
 	unsigned long n;
 	fd_set __user *inp, *outp, *exp;
@@ -207,7 +206,6 @@ asmlinkage int sys_olduname(struct oldold_utsname __user *name)
 
 	return error;
 }
-
 
 /*
  * Do a system call from kernel instead of calling sys_execve so we

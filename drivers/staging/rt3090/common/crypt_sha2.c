@@ -26,7 +26,6 @@
 
 #include "../crypt_sha2.h"
 
-
 /* Basic operations */
 #define SHR(x,n) (x >> n) /* SHR(x)^n, right shift n bits , x is w-bit word, 0 <= n <= w */
 #define ROTR(x,n,w) ((x >> n) | (x << (w - n))) /* ROTR(x)^n, circular right shift n bits , x is w-bit word, 0 <= n <= w */
@@ -49,7 +48,6 @@ static const UINT32 SHA1_DefaultHashValue[5] = {
     0x67452301UL, 0xefcdab89UL, 0x98badcfeUL, 0x10325476UL, 0xc3d2e1f0UL
 };
 #endif /* SHA1_SUPPORT */
-
 
 #ifdef SHA256_SUPPORT
 /* SHA256 functions */
@@ -82,7 +80,6 @@ static const UINT32 SHA256_DefaultHashValue[8] = {
 };
 #endif /* SHA256_SUPPORT */
 
-
 #ifdef SHA1_SUPPORT
 /*
 ========================================================================
@@ -108,7 +105,6 @@ VOID SHA1_Init (
     pSHA_CTX->MessageLen = 0;
     pSHA_CTX->BlockLen   = 0;
 } /* End of SHA1_Init */
-
 
 /*
 ========================================================================
@@ -186,7 +182,6 @@ VOID SHA1_Hash (
     pSHA_CTX->BlockLen = 0;
 } /* End of SHA1_Hash */
 
-
 /*
 ========================================================================
 Routine Description:
@@ -233,7 +228,6 @@ VOID SHA1_Append (
     pSHA_CTX->MessageLen += MessageLen;
 } /* End of SHA1_Append */
 
-
 /*
 ========================================================================
 Routine Description:
@@ -279,7 +273,6 @@ VOID SHA1_End (
     NdisMoveMemory(DigestMessage, pSHA_CTX->HashValue, SHA1_DIGEST_SIZE);
 } /* End of SHA1_End */
 
-
 /*
 ========================================================================
 Routine Description:
@@ -311,7 +304,6 @@ VOID RT_SHA1 (
 } /* End of RT_SHA1 */
 #endif /* SHA1_SUPPORT */
 
-
 #ifdef SHA256_SUPPORT
 /*
 ========================================================================
@@ -337,7 +329,6 @@ VOID SHA256_Init (
     pSHA_CTX->MessageLen = 0;
     pSHA_CTX->BlockLen   = 0;
 } /* End of SHA256_Init */
-
 
 /*
 ========================================================================
@@ -409,7 +400,6 @@ VOID SHA256_Hash (
     pSHA_CTX->BlockLen = 0;
 } /* End of SHA256_Hash */
 
-
 /*
 ========================================================================
 Routine Description:
@@ -456,7 +446,6 @@ VOID SHA256_Append (
     pSHA_CTX->MessageLen += MessageLen;
 } /* End of SHA256_Append */
 
-
 /*
 ========================================================================
 Routine Description:
@@ -501,7 +490,6 @@ VOID SHA256_End (
         /* End of for */
     NdisMoveMemory(DigestMessage, pSHA_CTX->HashValue, SHA256_DIGEST_SIZE);
 } /* End of SHA256_End */
-
 
 /*
 ========================================================================

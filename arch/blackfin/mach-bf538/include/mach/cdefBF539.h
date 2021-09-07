@@ -9,7 +9,6 @@
 /* Include MMRs Common to BF538 								*/
 #include "cdefBF538.h"
 
-
 #define bfin_read_MXVR_CONFIG()        bfin_read16(MXVR_CONFIG)
 #define bfin_write_MXVR_CONFIG(val)    bfin_write16(MXVR_CONFIG, val)
 #define bfin_read_MXVR_PLL_CTL_0()     bfin_read32(MXVR_PLL_CTL_0)

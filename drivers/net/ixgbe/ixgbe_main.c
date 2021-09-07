@@ -1053,7 +1053,6 @@ static u8 ixgbe_update_itr(struct ixgbe_adapter *adapter,
 	if (packets == 0)
 		goto update_itr_done;
 
-
 	/* simple throttlerate management
 	 *    0-20MB/s lowest (100000 ints/s)
 	 *   20-100MB/s low   (20000 ints/s)

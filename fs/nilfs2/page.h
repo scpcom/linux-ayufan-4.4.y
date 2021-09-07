@@ -40,7 +40,6 @@ BUFFER_FNS(NILFS_Allocated, nilfs_allocated)	/* nilfs private buffers */
 BUFFER_FNS(NILFS_Node, nilfs_node)		/* nilfs node buffers */
 BUFFER_FNS(NILFS_Volatile, nilfs_volatile)
 
-
 void nilfs_mark_buffer_dirty(struct buffer_head *bh);
 int __nilfs_clear_page_dirty(struct page *);
 

@@ -330,7 +330,6 @@ typedef struct {
     char        msg_text[MSGLEN+2];             /* the message text */
 } PACKED gdth_msg_str;
 
-
 /* IOCTL data structures */
 
 /* Status coalescing buffer for returning multiple requests per interrupt */
@@ -682,7 +681,6 @@ typedef struct {
     gdth_hentry_str entry[MAX_HDRIVES];         /* entries */
 } PACKED gdth_hget_str;    
 
-
 /* DPRAM structures */
 
 /* interface area ISA/PCI */
@@ -724,7 +722,6 @@ typedef struct {
     unchar      switch_support;                 /* see need_deinit */
     unchar      padding;
 } PACKED gdt_eisa_sram;
-
 
 /* DPRAM ISA controllers */
 typedef struct {
@@ -833,14 +830,12 @@ typedef struct {
     gdt_pci_sram        gdt6sr;                 /* SRAM structure */
 } PACKED gdt6m_dpram_str;
 
-
 /* PCI resources */
 typedef struct {
     struct pci_dev      *pdev;
     ulong               dpmem;                  /* DPRAM address */
     ulong               io;                     /* IO address */
 } gdth_pci_str;
-
 
 /* controller information structure */
 typedef struct {
@@ -1012,7 +1007,6 @@ typedef struct {
 typedef struct {
     ulong       b[10];                          /* 32/64 bit compiler ! */
 } PACKED gdth_stackframe;
-
 
 /* function prototyping */
 

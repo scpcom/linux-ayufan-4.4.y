@@ -44,7 +44,6 @@ void zfwDumpBuf(zdev_t* dev, zbuf_t* buf)
     printk("\n");
 }
 
-
 void zfwDbgReadRegDone(zdev_t* dev, u32_t addr, u32_t val)
 {
     printk("Read addr:%x = %x\n", addr, val);

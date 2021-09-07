@@ -2,7 +2,6 @@
 
 /* Written 1995-2000 by Werner Almesberger, EPFL LRC/ICA */
 
-
 #include <linux/string.h>
 #include <linux/net.h>		/* struct socket, struct proto_ops */
 #include <linux/errno.h>	/* error codes */
@@ -33,12 +32,10 @@ static int svc_create(struct net *net, struct socket *sock,int protocol);
  *       moved into the kernel, that would change.
  */
 
-
 static int svc_shutdown(struct socket *sock,int how)
 {
 	return 0;
 }
-
 
 static void svc_disconnect(struct atm_vcc *vcc)
 {
@@ -68,7 +65,6 @@ static void svc_disconnect(struct atm_vcc *vcc)
 	/* ... may retry later */
 }
 
-
 static int svc_release(struct socket *sock)
 {
 	struct sock *sk = sock->sk;
@@ -86,7 +82,6 @@ static int svc_release(struct socket *sock)
 	}
 	return 0;
 }
-
 
 static int svc_bind(struct socket *sock,struct sockaddr *sockaddr,
     int sockaddr_len)
@@ -142,7 +137,6 @@ out:
 	release_sock(sk);
 	return error;
 }
-
 
 static int svc_connect(struct socket *sock,struct sockaddr *sockaddr,
     int sockaddr_len,int flags)
@@ -278,7 +272,6 @@ out:
 	return error;
 }
 
-
 static int svc_listen(struct socket *sock,int backlog)
 {
 	DEFINE_WAIT(wait);
@@ -317,7 +310,6 @@ out:
 	release_sock(sk);
 	return error;
 }
-
 
 static int svc_accept(struct socket *sock,struct socket *newsock,int flags)
 {
@@ -412,7 +404,6 @@ out:
 	return error;
 }
 
-
 static int svc_getname(struct socket *sock,struct sockaddr *sockaddr,
     int *sockaddr_len,int peer)
 {
@@ -424,7 +415,6 @@ static int svc_getname(struct socket *sock,struct sockaddr *sockaddr,
 	    sizeof(struct sockaddr_atmsvc));
 	return 0;
 }
-
 
 int svc_change_qos(struct atm_vcc *vcc,struct atm_qos *qos)
 {
@@ -443,7 +433,6 @@ int svc_change_qos(struct atm_vcc *vcc,struct atm_qos *qos)
 	if (!sigd) return -EUNATCH;
 	return -sk->sk_err;
 }
-
 
 static int svc_setsockopt(struct socket *sock, int level, int optname,
 			  char __user *optval, unsigned int optlen)
@@ -492,7 +481,6 @@ out:
 	return error;
 }
 
-
 static int svc_getsockopt(struct socket *sock,int level,int optname,
     char __user *optval,int __user *optlen)
 {
@@ -520,7 +508,6 @@ out:
 	release_sock(sk);
 	return error;
 }
-
 
 static int svc_addparty(struct socket *sock, struct sockaddr *sockaddr,
 			int sockaddr_len, int flags)
@@ -552,7 +539,6 @@ out:
 	return error;
 }
 
-
 static int svc_dropparty(struct socket *sock, int ep_ref)
 {
 	DEFINE_WAIT(wait);
@@ -578,7 +564,6 @@ out:
 	release_sock(sk);
 	return error;
 }
-
 
 static int svc_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {
@@ -649,7 +634,6 @@ static const struct proto_ops svc_proto_ops = {
 	.sendpage =	sock_no_sendpage,
 };
 
-
 static int svc_create(struct net *net, struct socket *sock,int protocol)
 {
 	int error;
@@ -665,13 +649,11 @@ static int svc_create(struct net *net, struct socket *sock,int protocol)
 	return 0;
 }
 
-
 static struct net_proto_family svc_family_ops = {
 	.family = PF_ATMSVC,
 	.create = svc_create,
 	.owner = THIS_MODULE,
 };
-
 
 /*
  *	Initialize the ATM SVC protocol family

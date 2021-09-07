@@ -232,7 +232,6 @@ struct skb_shared_info {
 #define SKB_DATAREF_SHIFT 16
 #define SKB_DATAREF_MASK ((1 << SKB_DATAREF_SHIFT) - 1)
 
-
 enum {
 	SKB_FCLONE_UNAVAILABLE,
 	SKB_FCLONE_ORIG,
@@ -1071,7 +1070,6 @@ static inline struct sk_buff *__skb_dequeue_tail(struct sk_buff_head *list)
 	return skb;
 }
 
-
 static inline int skb_is_nonlinear(const struct sk_buff *skb)
 {
 	return skb->data_len;
@@ -1750,7 +1748,6 @@ static inline int pskb_trim_rcsum(struct sk_buff *skb, unsigned int len)
 		for (skb = (queue)->prev;					\
 		     prefetch(skb->prev), (skb != (struct sk_buff *)(queue));	\
 		     skb = skb->prev)
-
 
 static inline bool skb_has_frags(const struct sk_buff *skb)
 {

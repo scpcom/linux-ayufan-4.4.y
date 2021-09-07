@@ -71,7 +71,6 @@ static int __init sysrq_always_enabled_setup(char *str)
 
 __setup("sysrq_always_enabled", sysrq_always_enabled_setup);
 
-
 static void sysrq_handle_loglevel(int key, struct tty_struct *tty)
 {
 	int i;

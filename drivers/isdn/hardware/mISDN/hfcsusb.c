@@ -43,7 +43,6 @@ static int poll = DEFAULT_TRANSP_BURST_SZ;
 static LIST_HEAD(HFClist);
 static DEFINE_RWLOCK(HFClock);
 
-
 MODULE_AUTHOR("Martin Bachem");
 MODULE_LICENSE("GPL");
 module_param(debug, uint, S_IRUGO | S_IWUSR);
@@ -1717,7 +1716,6 @@ hfcsusb_stop_endpoint(struct hfcsusb *hw, int channel)
 	if (channel != HFC_CHAN_E)
 		stop_iso_gracefull(hw->fifos + channel*2);
 }
-
 
 /* Hardware Initialization */
 static int

@@ -38,7 +38,6 @@
 #include "locking.h"
 #include "compat.h"
 
-
 /* simple helper to fault in pages and copy.  This should go away
  * and be replaced with calls into generic code.
  */
@@ -1138,7 +1137,6 @@ int btrfs_sync_file(struct file *file, struct dentry *dentry, int datasync)
 	struct btrfs_root *root = BTRFS_I(inode)->root;
 	int ret = 0;
 	struct btrfs_trans_handle *trans;
-
 
 	/* we wait first, since the writeback may change the inode */
 	root->log_batch++;

@@ -68,7 +68,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "boardEnv/mvBoardEnvLib.h"
 #include "mv78200/mvSocUnitMap.h"
 
-
 static MV_RES_MAP mv_res_table[] = {
 	{0, MV_FALSE, "uart0"},
 	{1, MV_FALSE, "uart1"},
@@ -96,9 +95,6 @@ static MV_RES_MAP mv_res_table[] = {
 	{-1, MV_FALSE, 0},
 	};
 
-
-
-
 int mvSocUnitMapGet(MV_SOC_UNIT unit)
 {
 	return mv_res_table[unit].cpuId;
@@ -108,7 +104,6 @@ MV_BOOL mvSocUnitIsMappedToThisCpu(MV_SOC_UNIT unit)
 {
 	return (mvSocUnitMapGet(unit) == whoAmI());
 }
-
 
 MV_VOID mvSocUnitMapSet(MV_SOC_UNIT unit, int cpuId)
 {
@@ -122,7 +117,6 @@ MV_VOID mvSocUnitMapSet(MV_SOC_UNIT unit, int cpuId)
 	mv_res_table[unit].cpuId = cpuId;
 	mv_res_table[unit].mapped = MV_TRUE;
 }
-
 
 MV_BOOL mvSocUnitMapFillTable(char* p, int cpuId, STRSTR_FUNCPTR strstr_func)
 {

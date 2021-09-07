@@ -344,7 +344,6 @@ int etxhci_init(struct usb_hcd *hcd)
 
 /*-------------------------------------------------------------------------*/
 
-
 #ifdef CONFIG_USB_ETRON_HCD_DEBUGGING
 static void xhci_event_ring_work(unsigned long arg)
 {

@@ -1025,7 +1025,6 @@ static inline int r300_emit_r500fp(drm_radeon_private_t *dev_priv,
 	return 0;
 }
 
-
 /**
  * Parses and validates a user-supplied command buffer and emits appropriate
  * commands on the DMA ring buffer.

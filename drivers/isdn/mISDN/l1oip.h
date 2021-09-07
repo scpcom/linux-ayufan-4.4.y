@@ -17,15 +17,12 @@
 #define L1OIP_MAX_LEN		2048		/* max packet size form l2 */
 #define L1OIP_MAX_PERFRAME	1400		/* max data size in one frame */
 
-
 /* timers */
 #define L1OIP_KEEPALIVE		15
 #define L1OIP_TIMEOUT		65
 
-
 /* socket */
 #define L1OIP_DEFAULTPORT	931
-
 
 /* channel structure */
 struct l1oip_chan {
@@ -40,7 +37,6 @@ struct l1oip_chan {
 	u32			disorder_cnt;
 #endif
 };
-
 
 /* card structure */
 struct l1oip {
@@ -88,4 +84,3 @@ extern int l1oip_alaw_to_ulaw(u8 *data, int len, u8 *result);
 extern int l1oip_ulaw_to_alaw(u8 *data, int len, u8 *result);
 extern void l1oip_4bit_free(void);
 extern int l1oip_4bit_alloc(int ulaw);
-

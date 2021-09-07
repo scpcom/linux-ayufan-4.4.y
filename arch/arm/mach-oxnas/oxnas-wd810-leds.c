@@ -28,7 +28,6 @@
 #include <asm/hardware.h>
 #include <asm/io.h>
 
-
 /* Timer Values and Pulse Width Modulation */
 #define PWM_RESOLUTION  255
 #define TIMER_LED_MODE  TIMER_MODE_PERIODIC
@@ -63,7 +62,6 @@
 #define PWM_PRESCALE       28	/* Value loaded on PWM clock register > 20  kHz*/
 #define MAX_PWM   255
 #define SLOW_TPS   ((SYS_CLOCK/PRESCALE_VALUE) / FAST_TIMER_INT)	//=~4Hz, 250ms
-
 
 																																												/**** if GPIO31~GPIO16 is used, sift left 16 bits ****//* GPIO bits dedicated to LEDs *///Need to modify if different GPIO used
 #define LED_MASK_CG5   (1 << GPIO_34)	/* Capacity Gauge TOP LED  */
@@ -135,7 +133,6 @@
 
 #define CLEAR(addr, mask)     writel(readl(addr) & ~mask, addr)
 
-
 /* Variables to hold the number of LED classes created */
 static int leds_created;
 
@@ -187,7 +184,6 @@ enum {
 #define ACTIVITY_ALT_STEP	(SLOW_TPS/4)	// 2             //~2Hz, 0.5sec
 #define RESET_ALT_STEP		(SLOW_TPS/2)	// 2             //~2Hz, 0.5sec
 
-
 /* Variables for main LED behavior state machine */
 static int state;
 static u8 start;
@@ -207,14 +203,12 @@ static u16 capacity_gauge_bits;	/* see LED frame buffer design assumption */
 static u8 leds_switch;
 static u8 activity_block = 1;
 
-
 /*
  * Declare tasklet for the LED behavior state machine.
  */
 void oxnas_wd810_leds_behavior(unsigned long);
 DECLARE_TASKLET(oxnas_wd810_leds_behavior_tasklet,
 				oxnas_wd810_leds_behavior, 0);
-
 
 /***************************************************************************/
 /* FUNCTION: oxnas_wd810_leds_interrupt                                            */
@@ -230,7 +224,6 @@ static irqreturn_t oxnas_wd810_leds_interrupt(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
-
 
 /***************************************************************************/
 /* FUNCTION: get_vbar_bits                                           */
@@ -258,7 +251,6 @@ static u16 get_vbar_bits(u16 value)
 
 	return pattern;
 }
-
 
 /***************************************************************************/
 /* FUNCTION: get_percentage_pattern                                        */
@@ -292,7 +284,6 @@ static u16 get_percentage_pattern(u16 percentage)
 	}
 }
 
-
 /***************************************************************************/
 /* FUNCTION: set_led                                                       */
 /*                                                                         */
@@ -323,7 +314,6 @@ static void set_led(u16 led_bits, u8 value, u16 ramp, u16 ramp_div)
 	}
 }
 
-
 /***************************************************************************/
 /* FUNCTION: display_vbar                                            */
 /*                                                                         */
@@ -337,7 +327,6 @@ static void display_vbar(u16 vbar_bits)
 	set_led(LED_MASK_GAUGE, 0, 0, 0);
 	set_led(vbar_bits, LED100, 0, 0);
 }
-
 
 /***************************************************************************/
 /* FUNCTION: oxnas_wd810_leds_behavior_init                                        */
@@ -353,8 +342,6 @@ void oxnas_wd810_leds_behavior_init(void)
 	capacity_gauge_bits = 0;
 	leds_switch = 0xFF;
 }
-
-
 
 /***************************************************************************/
 /* FUNCTION: oxnas_wd810_leds_behavior                                             */
@@ -398,7 +385,6 @@ void oxnas_wd810_leds_behavior(unsigned long unused)
 		}
 		state = STATE_NOP;
 		break;
-
 
 	case ACTIVITY:
 		//LEDs illuminate in a up and down "cylon" motion.      
@@ -620,7 +606,6 @@ void oxnas_wd810_leds_behavior(unsigned long unused)
 	}
 }
 
-
 /***************************************************************************/
 /* FUNCTION: oxnas_wd810_leds_set_switch                                            */
 /*                                                                         */
@@ -653,7 +638,6 @@ static void oxnas_wd810_leds_set_state
 	else
 		activity_block = 0;
 }
-
 
 /***************************************************************************/
 /* FUNCTION: oxnas_wd810_leds_set_activity                                         */
@@ -782,7 +766,6 @@ static void remove_debug_files(struct platform_device *pdev)
 	device_remove_file(dev, &dev_attr_registers);
 }
 #endif
-
 
 #ifdef CONFIG_PM
 /***************************************************************************/
@@ -1022,7 +1005,6 @@ static int __init oxnas_wd810_leds_init(void)
 	return ret;
 }
 
-
 /***************************************************************************/
 /* FUNCTION: oxnas_wd810_leds_exit                                                 */
 /*                                                                         */
@@ -1036,7 +1018,6 @@ static void __exit oxnas_wd810_leds_exit(void)
 	}
 	platform_driver_unregister(&oxnas_wd810_leds_driver);
 }
-
 
 module_init(oxnas_wd810_leds_init);
 module_exit(oxnas_wd810_leds_exit);

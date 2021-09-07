@@ -158,7 +158,6 @@ lpfc_prep_els_iocb(struct lpfc_vport *vport, uint8_t expectRsp,
 	struct ulp_bde64 *bpl;
 	IOCB_t *icmd;
 
-
 	if (!lpfc_is_link_up(phba))
 		return NULL;
 
@@ -2524,7 +2523,6 @@ lpfc_els_retry(struct lpfc_hba *phba, struct lpfc_iocbq *cmdiocb,
 	int logerr = 0;
 	uint32_t cmd = 0;
 	uint32_t did;
-
 
 	/* Note: context2 may be 0 for internal driver abort
 	 * of delays ELS command.
@@ -5348,7 +5346,6 @@ lpfc_send_els_event(struct lpfc_vport *vport,
 
 	return;
 }
-
 
 /**
  * lpfc_els_unsol_buffer - Process an unsolicited event data buffer

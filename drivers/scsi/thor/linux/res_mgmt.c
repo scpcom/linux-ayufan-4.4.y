@@ -43,8 +43,6 @@ struct mv_request_pool *res_reserve_req_pool(MV_U32 mod_id,
 		goto res_err_sg;
 	memset(sg, 0, mem_size);
 
-
-
 	INIT_LIST_HEAD(&pool->free_list);
 	INIT_LIST_HEAD(&pool->use_list);
 	OSSW_INIT_SPIN_LOCK(&pool->lock);

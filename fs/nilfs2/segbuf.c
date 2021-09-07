@@ -27,7 +27,6 @@
 #include "page.h"
 #include "segbuf.h"
 
-
 static struct kmem_cache *nilfs_segbuf_cachep;
 
 static void nilfs_segbuf_init_once(void *obj)

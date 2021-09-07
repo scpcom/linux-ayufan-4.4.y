@@ -511,4 +511,3 @@ ENTRY(sys_vfork)
 	la	r8, score_vfork
 	br	r8
 #endif /* __ARCH_WANT_SYSCALL_DEPRECATED */
-

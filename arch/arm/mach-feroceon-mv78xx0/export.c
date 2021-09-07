@@ -61,7 +61,6 @@ EXPORT_SYMBOL(mvMacStrToHex);
 EXPORT_SYMBOL(mvBoardTclkGet);
 EXPORT_SYMBOL(mvBoardMacSpeedGet);
 
-
 /*************************************************************************************************************
  * USB
  *************************************************************************************************************/
@@ -126,7 +125,6 @@ EXPORT_SYMBOL(mvSFlashPowerSaveEnter);
 EXPORT_SYMBOL(mvSFlashPowerSaveExit);
 EXPORT_SYMBOL(mvSFlashModelGet);
 #endif
-
 
 /*************************************************************************************************************
  * SATA

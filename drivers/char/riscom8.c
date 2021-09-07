@@ -74,7 +74,6 @@
 #undef RC_REPORT_FIFO
 #undef RC_REPORT_OVERRUN
 
-
 #define RISCOM_LEGAL_FLAGS \
 	(ASYNC_HUP_NOTIFY   | ASYNC_SAK          | ASYNC_SPLIT_TERMIOS   | \
 	 ASYNC_SPD_HI       | ASYNC_SPEED_VHI    | ASYNC_SESSION_LOCKOUT | \
@@ -112,7 +111,6 @@ static unsigned short rc_ioport[] =  {
 #endif
 };
 #define RC_NIOPORT	ARRAY_SIZE(rc_ioport)
-
 
 static int rc_paranoia_check(struct riscom_port const *port,
 				    char *name, const char *routine)
@@ -1403,7 +1401,6 @@ static const struct tty_port_operations riscom_port_ops = {
 	.carrier_raised = carrier_raised,
 	.shutdown = rc_close_port,
 };
-
 
 static int __init rc_init_drivers(void)
 {

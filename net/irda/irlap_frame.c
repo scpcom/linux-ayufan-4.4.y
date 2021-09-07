@@ -248,7 +248,6 @@ void irlap_send_ua_response_frame(struct irlap_cb *self, struct qos_info *qos)
 	irlap_queue_xmit(self, tx_skb);
 }
 
-
 /*
  * Function irlap_send_dm_frame (void)
  *

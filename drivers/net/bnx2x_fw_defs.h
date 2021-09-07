@@ -7,7 +7,6 @@
  * the Free Software Foundation.
  */
 
-
 #define CSTORM_ASSERT_LIST_INDEX_OFFSET \
 	(IS_E1H_OFFSET ? 0x7000 : 0x1000)
 #define CSTORM_ASSERT_LIST_OFFSET(idx) \
@@ -380,7 +379,6 @@
 #define E1HOV_PRI_HASH_TYPE 6
 #define DSCP_HASH_TYPE 7
 
-
 /* Ethernet Ring parameters */
 #define X_ETH_LOCAL_RING_SIZE 13
 #define FIRST_BD_IN_PKT 0
@@ -393,7 +391,6 @@
 #define U_ETH_LOCAL_BD_RING_SIZE 8
 #define U_ETH_LOCAL_SGE_RING_SIZE 10
 #define U_ETH_SGL_SIZE 8
-
 
 #define U_ETH_SGES_PER_PAGE_INVERSE_MASK \
 	(0xFFFF - ((PAGE_SIZE/((STRUCT_SIZE(eth_rx_sge))/8))-1))
@@ -419,7 +416,6 @@
 #define RAMROD_CMD_ID_ETH_PORT_DEL 120
 #define RAMROD_CMD_ID_ETH_FORWARD_SETUP 125
 
-
 /* command values for set mac command */
 #define T_ETH_MAC_COMMAND_SET 0
 #define T_ETH_MAC_COMMAND_INVALIDATE 1
@@ -444,7 +440,6 @@
 #define ETH_RSS_MODE_E1HOV_PRI 3
 #define ETH_RSS_MODE_IP_DSCP 4
 
-
 /**
 * This file defines HSI constants common to all microcode flows
 */
@@ -459,7 +454,6 @@
 #define RESERVED_CONNECTION_TYPE_1 6
 #define RESERVED_CONNECTION_TYPE_2 7
 
-
 #define PROTOCOL_STATE_BIT_OFFSET 6
 
 #define ETH_STATE (ETH_CONNECTION_TYPE << PROTOCOL_STATE_BIT_OFFSET)
@@ -468,7 +462,6 @@
 
 /* microcode fixed page page size 4K (chains and ring segments) */
 #define MC_PAGE_SIZE 4096
-
 
 /* Host coalescing constants */
 
@@ -522,7 +515,6 @@
 #define RX_ETH_CQE_TYPE_ETH_FASTPATH 0
 #define RX_ETH_CQE_TYPE_ETH_RAMROD 1
 
-
 /**** DEFINES FOR TIMERS/CLOCKS RESOLUTIONS ****/
 #define EMULATION_FREQUENCY_FACTOR 1600
 #define FPGA_FREQUENCY_FACTOR 100
@@ -561,7 +553,6 @@
 #define SDM_TIMER_TICK_RESUL_FPGA \
  ((SDM_TIMER_TICK_RESUL_CHIP)/(FPGA_FREQUENCY_FACTOR))
 
-
 /**** END DEFINES FOR TIMERS/CLOCKS RESOLUTIONS ****/
 #define XSTORM_IP_ID_ROLL_HALF 0x8000
 #define XSTORM_IP_ID_ROLL_ALL 0
@@ -575,7 +566,6 @@
 #define MAX_X_STAT_COUNTER_ID 18
 #define MAX_U_STAT_COUNTER_ID 18
 
-
 #define UNKNOWN_ADDRESS 0
 #define UNICAST_ADDRESS 1
 #define MULTICAST_ADDRESS 2
@@ -586,4 +576,3 @@
 
 #define IP_V4 0
 #define IP_V6 1
-

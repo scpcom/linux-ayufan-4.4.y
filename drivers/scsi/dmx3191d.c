@@ -54,7 +54,6 @@
 #define DMX3191D_DRIVER_NAME	"dmx3191d"
 #define DMX3191D_REGION_LEN	8
 
-
 static struct scsi_host_template dmx3191d_driver_template = {
 	.proc_name		= DMX3191D_DRIVER_NAME,
 	.name			= "Domex DMX3191D",

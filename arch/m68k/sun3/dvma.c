@@ -16,7 +16,6 @@
 #include <asm/sun3mmu.h>
 #include <asm/dvma.h>
 
-
 static unsigned long ptelist[120];
 
 static unsigned long dvma_page(unsigned long kaddr, unsigned long vaddr)
@@ -66,6 +65,5 @@ void sun3_dvma_init(void)
 {
 
 	memset(ptelist, 0, sizeof(ptelist));
-
 
 }

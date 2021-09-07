@@ -2155,4 +2155,3 @@ const struct font_desc font_mini_4x6 = {
 	.data	= fontdata_mini_4x6,
 	.pref	= 3,
 };
-

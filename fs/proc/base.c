@@ -305,7 +305,6 @@ static int proc_pid_auxv(struct task_struct *task, char *buffer)
 	return res;
 }
 
-
 #ifdef CONFIG_KALLSYMS
 /*
  * Provides a wchan file via kallsyms in a proper one-value-per-file format.
@@ -1206,7 +1205,6 @@ static const struct file_operations proc_fault_inject_operations = {
 };
 #endif
 
-
 #ifdef CONFIG_SCHED_DEBUG
 /*
  * Print out various scheduling related per-task fields:
@@ -1409,7 +1407,6 @@ static const struct inode_operations proc_pid_link_inode_operations = {
 	.setattr	= proc_setattr,
 };
 
-
 /* building an inode */
 
 static int task_dumpable(struct task_struct *task)
@@ -1426,7 +1423,6 @@ static int task_dumpable(struct task_struct *task)
 		return 1;
 	return 0;
 }
-
 
 static struct inode *proc_pid_make_inode(struct super_block * sb, struct task_struct *task)
 {
@@ -1963,7 +1959,6 @@ static const struct inode_operations proc_fdinfo_inode_operations = {
 	.lookup		= proc_lookupfdinfo,
 	.setattr	= proc_setattr,
 };
-
 
 static struct dentry *proc_pident_instantiate(struct inode *dir,
 	struct dentry *dentry, struct task_struct *task, const void *ptr)

@@ -60,7 +60,6 @@ struct omap_device;
 #define HWMOD_IDLEMODE_NO		(1 << 1)
 #define HWMOD_IDLEMODE_SMART		(1 << 2)
 
-
 /**
  * struct omap_hwmod_dma_info - MPU address space handled by the hwmod
  * @name: name of the DMA channel (module local name)
@@ -92,7 +91,6 @@ struct omap_hwmod_opt_clk {
 	struct clk	*_clk;
 };
 
-
 /* omap_hwmod_omap2_firewall.flags bits */
 #define OMAP_FIREWALL_L3		(1 << 0)
 #define OMAP_FIREWALL_L4		(1 << 1)
@@ -110,7 +108,6 @@ struct omap_hwmod_omap2_firewall {
 	u8 l4_prot_group;
 	u8 flags;
 };
-
 
 /*
  * omap_hwmod_addr_space.flags bits
@@ -135,7 +132,6 @@ struct omap_hwmod_addr_space {
 	u32 pa_end;
 	u8 flags;
 };
-
 
 /*
  * omap_hwmod_ocp_if.user bits: these indicate the initiators that use this
@@ -188,7 +184,6 @@ struct omap_hwmod_ocp_if {
 	u8				user;
 	u8				flags;
 };
-
 
 /* Macros for use in struct omap_hwmod_sysconfig */
 
@@ -269,7 +264,6 @@ struct omap_hwmod_omap2_prcm {
 	u8 idlest_stdby_bit;
 };
 
-
 /**
  * struct omap_hwmod_omap4_prcm - OMAP4-specific PRCM data
  * @module_offs: PRCM submodule offset from the start of the PRM/CM1/CM2
@@ -281,7 +275,6 @@ struct omap_hwmod_omap4_prcm {
 	u16 device_offs;
 	u8 submodule_wkdep_bit;
 };
-
 
 /*
  * omap_hwmod.flags definitions

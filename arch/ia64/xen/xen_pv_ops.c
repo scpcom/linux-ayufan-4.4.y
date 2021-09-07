@@ -697,7 +697,6 @@ xen_set_rr0_to_rr4(unsigned long val0, unsigned long val1,
 __DEFINE_FUNC(set_rr0_to_rr4,
 	      "break " __stringify(HYPERPRIVOP_SET_RR0_TO_RR4) "\n");
 
-
 extern unsigned long xen_getreg(int regnum);
 #define __DEFINE_GET_REG(id, privop)					\
 	"mov r2 = " __stringify(_IA64_REG_ ## id) "\n"			\
@@ -1070,7 +1069,6 @@ __initdata_or_module =
 
 	XEN_PATCH_BUNDLE_ELEM_GETREG(itc, AR_ITC),
 	XEN_PATCH_BUNDLE_ELEM_GETREG(itm_with_offset, CR_ITM),
-
 
 #define __XEN_PATCH_BUNDLE_ELEM_SETREG(name, reg)		\
 	{							\

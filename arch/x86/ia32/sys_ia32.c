@@ -52,7 +52,6 @@
 
 #define AA(__x)		((unsigned long)(__x))
 
-
 asmlinkage long sys32_truncate64(char __user *filename,
 				 unsigned long offset_low,
 				 unsigned long offset_high)
@@ -606,7 +605,6 @@ struct sysctl_ia32 {
 	unsigned int	__unused[4];
 };
 
-
 asmlinkage long sys32_sysctl(struct sysctl_ia32 __user *args32)
 {
 	struct sysctl_ia32 a32;
@@ -665,7 +663,6 @@ asmlinkage long sys32_pwrite(unsigned int fd, char __user *ubuf, u32 count,
 	return sys_pwrite64(fd, ubuf, count,
 			  ((loff_t)AA(poshi) << 32) | AA(poslo));
 }
-
 
 asmlinkage long sys32_personality(unsigned long personality)
 {

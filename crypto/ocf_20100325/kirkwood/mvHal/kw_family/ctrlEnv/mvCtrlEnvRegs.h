@@ -170,9 +170,6 @@ extern "C" {
 #define PMC_POWERSAVE_EN			(1 << PMC_POWERSAVE_OFFS)
 #define PMC_POWERSAVE_STOP			(0 << PMC_POWERSAVE_OFFS)
 
-
-
-
 #define PMC_SATASTOPCLOCK_OFFS(port)		(14+(port))
 #define PMC_SATASTOPCLOCK_MASK(port)		(1 << PMC_SATASTOPCLOCK_OFFS(port))
 #define PMC_SATASTOPCLOCK_EN(port)		(1 << PMC_SATASTOPCLOCK_OFFS(port))
@@ -187,7 +184,6 @@ extern "C" {
 #define PMC_TDMSTOPCLOCK_MASK			(1 << PMC_TDMSTOPCLOCK_OFFS)
 #define PMC_TDMSTOPCLOCK_EN			(1 << PMC_TDMSTOPCLOCK_OFFS)
 #define PMC_TDMSTOPCLOCK_STOP			(0 << PMC_TDMSTOPCLOCK_OFFS)
-
 
 /* Controler environment registers offsets */
 #define MPP_CONTROL_REG0			0x10000
@@ -228,7 +224,6 @@ extern "C" {
 #define MSAR_TCLCK_MASK				(0x1 << MSAR_TCLCK_OFFS)
 #define MSAR_TCLCK_166				(0x1 << MSAR_TCLCK_OFFS)
 #define MSAR_TCLCK_200				(0x0 << MSAR_TCLCK_OFFS)
-
 
 #define MSAR_CPUCLCK_EXTRACT(X)     (((X & 0x2) >> 1) | ((X & 0x400000) >> 21) | \
                                     ((X & 0x18) >> 1))
@@ -275,8 +270,6 @@ extern "C" {
 	{0,   		0,   		0		}\
 }
 
-
-
 /* These macros help units to identify a target Mbus Arbiter group */
 #define MV_TARGET_IS_DRAM(target)   \
                             ((target >= SDRAM_CS0) && (target <= SDRAM_CS3))
@@ -297,7 +290,6 @@ extern "C" {
                      (mvCtrlModelGet() == MV_6180_DEV_ID)? MSAR_BOOT_MODE_6180 \
                      (MV_REG_READ(MPP_SAMPLE_AT_RESET)):((MV_REG_READ(MPP_SAMPLE_AT_RESET)\
 						 & MSAR_BOOT_MODE_MASK) >> MSAR_BOOT_MODE_OFFS)]))
-
 
 #define MV_CHANGE_BOOT_CS(target)	(((target) == DEV_BOOCS)?\
 					sampleAtResetTargetArray[(mvCtrlModelGet() == MV_6180_DEV_ID)? \
@@ -329,7 +321,6 @@ extern "C" {
     TBL_TERM           \
 }
 
-
 /* For old competability */
 #define DEVICE_CS0		NFLASH_CS  
 #define DEVICE_CS1  		SPI_CS 
@@ -343,7 +334,6 @@ extern "C" {
 #define PCI_IF0_MEM0		PEX0_MEM
 #define PCI_IF0_IO		PEX0_IO
 
-
 /* This enumerator defines the Marvell controller target ID      */ 
 typedef enum _mvTargetId
 {
@@ -354,7 +344,6 @@ typedef enum _mvTargetId
     SAGE_TARGET_ID = 12 ,    /* Port 12 -> SAGE Unit 	*/
     MAX_TARGETS_ID
 }MV_TARGET_ID;
-
 
 /* This enumerator described the possible Controller paripheral targets.    */
 /* Controller peripherals are designated memory/IO address spaces that the  */
@@ -397,7 +386,6 @@ typedef enum _mvTarget
     {0x00, SAGE_TARGET_ID }  						\
 }
 
-
 #define TARGETS_NAME_ARRAY	{	\
     "SDRAM_CS0",    /* SDRAM_CS0 */	\
     "SDRAM_CS1",    /* SDRAM_CS1 */	\
@@ -414,6 +402,5 @@ typedef enum _mvTarget
     "SAGE_UNIT"	   /* SAGE_UNIT */	\
 }
 #endif /* MV_ASMLANGUAGE */
-
 
 #endif

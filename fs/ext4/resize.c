@@ -11,7 +11,6 @@
  * This could probably be made into a module, because it is not often in use.
  */
 
-
 #define EXT4FS_DEBUG
 
 #include <linux/errno.h>
@@ -788,7 +787,6 @@ int ext4_group_add(struct super_block *sb, struct ext4_new_group_data *input)
 			return PTR_ERR(inode);
 		}
 	}
-
 
 	if ((err = verify_group_input(sb, input)))
 		goto exit_put;

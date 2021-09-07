@@ -33,7 +33,6 @@
 #include "pci_impl.h"
 #include "machvec_impl.h"
 
-
 static void __init
 ruffian_init_irq(void)
 {

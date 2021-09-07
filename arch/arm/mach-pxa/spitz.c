@@ -33,7 +33,6 @@
 #include <asm/mach/sharpsl_param.h>
 #include <asm/hardware/scoop.h>
 
-
 #include <mach/pxa27x.h>
 #include <mach/pxa27x-udc.h>
 #include <mach/reset.h>
@@ -375,7 +374,6 @@ static struct platform_device spitzkbd_device = {
 	},
 };
 
-
 static struct gpio_keys_button spitz_gpio_keys[] = {
 	{
 		.type	= EV_PWR,
@@ -411,7 +409,6 @@ static struct platform_device spitz_gpio_keys_device = {
 		.platform_data	= &spitz_gpio_keys_platform_data,
 	},
 };
-
 
 /*
  * Spitz LEDs
@@ -562,7 +559,6 @@ static struct pxamci_platform_data spitz_mci_platform_data = {
 	.gpio_power		= -1,
 };
 
-
 /*
  * USB Host (OHCI)
  */
@@ -595,7 +591,6 @@ static struct pxaohci_platform_data spitz_ohci_platform_data = {
 	.power_budget	= 150,
 };
 
-
 /*
  * Irda
  */
@@ -604,7 +599,6 @@ static struct pxaficp_platform_data spitz_ficp_platform_data = {
 /* .gpio_pwdown is set in spitz_init() and akita_init() accordingly */
 	.transceiver_cap	= IR_SIRMODE | IR_OFF,
 };
-
 
 /*
  * Spitz PXA Framebuffer
@@ -692,7 +686,6 @@ static struct platform_device sharpsl_nand_device = {
 	.num_resources	= ARRAY_SIZE(sharpsl_nand_resources),
 	.dev.platform_data	= &sharpsl_nand_platform_data,
 };
-
 
 static struct mtd_partition sharpsl_rom_parts[] = {
 	{

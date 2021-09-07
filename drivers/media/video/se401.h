@@ -97,7 +97,6 @@ if (debug >= level) \
 /* se401 registers */
 #define SE401_OPERATINGMODE	0x2000
 
-
 /* size of usb transfers */
 #define SE401_PACKETSIZE	4096
 /* number of queued bulk transfers to use, should be about 8 */
@@ -230,7 +229,4 @@ struct usb_se401 {
 	int nullpackets;
 };
 
-
-
 #endif
-

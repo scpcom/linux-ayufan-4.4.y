@@ -117,7 +117,6 @@ static struct pci_raw_ops pci_direct_conf1_mq = {
 	.write	= pci_conf1_mq_write
 };
 
-
 static void __devinit pci_fixup_i450nx(struct pci_dev *d)
 {
 	/*

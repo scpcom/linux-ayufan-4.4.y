@@ -36,7 +36,6 @@
 #include <net/compat.h>
 #include <net/scm.h>
 
-
 /*
  *	Only allow a user to send credentials, that they could set with
  *	setu(g)id.

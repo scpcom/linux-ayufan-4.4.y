@@ -17,7 +17,6 @@
 
 static int bnx2x_gunzip(struct bnx2x *bp, const u8 *zbuf, int len);
 
-
 static void bnx2x_init_str_wr(struct bnx2x *bp, u32 addr, const u32 *data,
 			      u32 len)
 {
@@ -236,7 +235,6 @@ static void bnx2x_init_block(struct bnx2x *bp, u32 block, u32 stage)
 		}
 	}
 }
-
 
 /****************************************************************************
 * PXP Arbiter

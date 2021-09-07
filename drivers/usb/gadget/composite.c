@@ -27,7 +27,6 @@
 
 #include <linux/usb/composite.h>
 
-
 /*
  * The code in this file is utility code, used to build a gadget driver
  * from one or more "function" drivers, one or more "configuration"

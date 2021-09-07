@@ -11,7 +11,6 @@
 #define	m528xsim_h
 /****************************************************************************/
 
-
 /*
  *	Define the 5280/5282 SIM register set addresses.
  */
@@ -190,7 +189,6 @@
 #define MCFGPIO_IRQ_VECBASE	MCFINT_VECBASE
 #define MCFGPIO_PIN_MAX		180
 
-
 /*
  *	Derek Cheung - 6 Feb 2005
  *		add I2C and QSPI register definition using Freescale's MCF5282
@@ -205,7 +203,6 @@
 #define MCF5282_INTC0_IMRL      (volatile u32 *) (MCF_IPSBAR + 0x0C0C)
 /* Interrupt Control Register 7 */
 #define MCF5282_INTC0_ICR17     (volatile u8 *) (MCF_IPSBAR + 0x0C51)
-
 
 /*
  *  Reset Control Unit (relative to IPSBAR).
@@ -247,8 +244,6 @@
 #define MCF5282_I2C_I2SR_SRW    (0x04)  // slave read/write
 #define MCF5282_I2C_I2SR_IIF    (0x02)  // I2C interrupt
 #define MCF5282_I2C_I2SR_RXAK   (0x01)  // received acknowledge
-
-
 
 /*********************************************************************
 *

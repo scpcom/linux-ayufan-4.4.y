@@ -49,7 +49,6 @@
 #define INPUT_TYPE_MOUSE	0x1
 #define INPUT_TYPE_KEYBOARD	0x2
 
-
 /* mouse button states received from SP */
 #define REMOTE_DOUBLE_CLICK	0xF0
 #define REMOTE_BUTTON_LEFT	0x01
@@ -64,14 +63,11 @@ struct mouse_input {
 	unsigned short	x;
 };
 
-
 struct keyboard_input {
 	unsigned short	key_code;
 	unsigned char	key_flag;
 	unsigned char	key_down;
 };
-
-
 
 struct remote_input {
 	union {

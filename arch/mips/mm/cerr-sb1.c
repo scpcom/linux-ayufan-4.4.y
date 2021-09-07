@@ -268,7 +268,6 @@ asmlinkage void sb1_cache_error(void)
 #endif
 }
 
-
 /* Parity lookup table. */
 static const uint8_t parity[256] = {
 	0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,

@@ -116,7 +116,6 @@ smb_readdir(struct file *filp, void *dirent, filldir_t filldir)
 	if (result)
 		goto out;
 
-
 	page = grab_cache_page(&dir->i_data, 0);
 	if (!page)
 		goto read_really;
@@ -291,7 +290,6 @@ static const struct dentry_operations smbfs_dentry_operations_case =
 	.d_delete	= smb_delete_dentry,
 };
 
-
 /*
  * This is the callback when the dcache has a lookup hit.
  */
@@ -394,7 +392,6 @@ smb_new_dentry(struct dentry *dentry)
 		dentry->d_op = &smbfs_dentry_operations;
 	dentry->d_time = jiffies;
 }
-
 
 /*
  * Whenever a lookup succeeds, we know the parent directories

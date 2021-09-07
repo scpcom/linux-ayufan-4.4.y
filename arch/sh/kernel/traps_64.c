@@ -84,7 +84,6 @@ static void die_if_no_fixup(const char * str, struct pt_regs * regs, long err)
 DO_ERROR(13, SIGILL,  "illegal slot instruction", illegal_slot_inst, current)
 DO_ERROR(87, SIGSEGV, "address error (exec)", address_error_exec, current)
 
-
 /* Implement misaligned load/store handling for kernel (and optionally for user
    mode too).  Limitation : only SHmedia mode code is handled - there is no
    handling at all for misaligned accesses occurring in SHcompact code yet. */
@@ -638,7 +637,6 @@ static int misaligned_fpu_load(struct pt_regs *regs,
 		return -1;
 	}
 
-
 }
 
 static int misaligned_fpu_store(struct pt_regs *regs,
@@ -746,7 +744,6 @@ static int misaligned_fixup(struct pt_regs *regs)
 			       current->comm, task_pid_nr(current), (__u32)regs->pc, opcode);
 		}
 	}
-
 
 	switch (major) {
 		case (0x84>>2): /* LD.W */
@@ -929,7 +926,6 @@ static int __init init_sysctl(void)
 }
 
 __initcall(init_sysctl);
-
 
 asmlinkage void do_debug_interrupt(unsigned long code, struct pt_regs *regs)
 {

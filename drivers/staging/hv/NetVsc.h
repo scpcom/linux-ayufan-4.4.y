@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef _NETVSC_H_
 #define _NETVSC_H_
 
@@ -29,7 +28,6 @@
 #include "VmbusPacketFormat.h"
 #include "VmbusChannelInterface.h"
 #include "NetVscApi.h"
-
 
 #define NVSP_INVALID_PROTOCOL_VERSION	((u32)0xFFFFFFFF)
 
@@ -270,15 +268,11 @@ struct nvsp_message {
 	union nvsp_all_messages Messages;
 } __attribute__((packed));
 
-
-
-
 /* #define NVSC_MIN_PROTOCOL_VERSION		1 */
 /* #define NVSC_MAX_PROTOCOL_VERSION		1 */
 
 #define NETVSC_SEND_BUFFER_SIZE			(64*1024)	/* 64K */
 #define NETVSC_SEND_BUFFER_ID			0xface
-
 
 #define NETVSC_RECEIVE_BUFFER_SIZE		(1024*1024)	/* 1MB */
 
@@ -288,7 +282,6 @@ struct nvsp_message {
 
 /* Preallocated receive packets */
 #define NETVSC_RECEIVE_PACKETLIST_COUNT		256
-
 
 /* Per netvsc channel-specific */
 struct netvsc_device {

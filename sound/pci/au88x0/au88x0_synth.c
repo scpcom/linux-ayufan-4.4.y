@@ -110,7 +110,6 @@ static int vortex_wt_allocroute(vortex_t * vortex, int wt, int nr_ch)
 	return 0;
 }
 
-
 static void vortex_wt_connect(vortex_t * vortex, int en)
 {
 	int i, ii, mix;

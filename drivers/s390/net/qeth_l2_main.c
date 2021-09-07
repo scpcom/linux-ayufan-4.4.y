@@ -814,7 +814,6 @@ static int qeth_l2_open(struct net_device *dev)
 	return 0;
 }
 
-
 static int qeth_l2_stop(struct net_device *dev)
 {
 	struct qeth_card *card = dev->ml_priv;

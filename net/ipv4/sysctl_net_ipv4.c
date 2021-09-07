@@ -90,7 +90,6 @@ static int ipv4_sysctl_local_port_range(ctl_table *table,
 	return ret;
 }
 
-
 static int proc_tcp_congestion_control(ctl_table *ctl, int write,
 				       void __user *buffer, size_t *lenp, loff_t *ppos)
 {

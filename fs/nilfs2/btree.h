@@ -63,7 +63,6 @@ struct nilfs_btree {
 	struct nilfs_bmap bt_bmap;
 };
 
-
 #define NILFS_BTREE_ROOT_SIZE		NILFS_BMAP_SIZE
 #define NILFS_BTREE_ROOT_NCHILDREN_MAX					\
 	((NILFS_BTREE_ROOT_SIZE - sizeof(struct nilfs_btree_node)) /	\
@@ -78,7 +77,6 @@ struct nilfs_btree {
 	((NILFS_BTREE_NODE_NCHILDREN_MAX(nodesize) - 1) / 2 + 1)
 #define NILFS_BTREE_KEY_MIN	((__u64)0)
 #define NILFS_BTREE_KEY_MAX	(~(__u64)0)
-
 
 int nilfs_btree_path_cache_init(void);
 void nilfs_btree_path_cache_destroy(void);

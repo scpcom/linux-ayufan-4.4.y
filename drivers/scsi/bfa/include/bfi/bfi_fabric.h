@@ -89,4 +89,3 @@ union bfi_fabric_i2h_msg_u {
 #pragma pack()
 
 #endif /* __BFI_FABRIC_H__ */
-

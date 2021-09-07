@@ -179,4 +179,3 @@ int adsp_jpeg_verify_cmd(struct msm_adsp_module *module,
 		return -1;
 	}
 }
-

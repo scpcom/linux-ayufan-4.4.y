@@ -11,7 +11,6 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 extern void xor_ia64_2(unsigned long, unsigned long *, unsigned long *);
 extern void xor_ia64_3(unsigned long, unsigned long *, unsigned long *,
 		       unsigned long *);

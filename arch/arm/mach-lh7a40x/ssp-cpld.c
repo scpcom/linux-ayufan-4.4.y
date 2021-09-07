@@ -140,7 +140,6 @@ static void pulse_clock (void)
 	udelay (T_SKL);
 }
 
-
 /* execute_spi_command
 
    sends an spi command to a device.  It first sends cwrite bits from
@@ -259,7 +258,6 @@ static int ssp_init (void)
 	return 0;
 }
 
-
 /* ssp_chip_select
 
    drops the chip select line for the CPLD shift-register controlled
@@ -336,7 +334,6 @@ struct ssp_driver lh7a40x_cpld_ssp_driver = {
 	.write		= ssp_write,
 	.write_read	= ssp_write_read,
 };
-
 
 MODULE_AUTHOR("Marc Singer");
 MODULE_DESCRIPTION("LPD7A40X CPLD SPI driver");

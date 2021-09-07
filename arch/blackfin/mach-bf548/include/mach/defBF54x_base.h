@@ -7,7 +7,6 @@
 #ifndef _DEF_BF54X_H
 #define _DEF_BF54X_H
 
-
 /* ************************************************************** */
 /*   SYSTEM & MMR ADDRESS DEFINITIONS COMMON TO ALL ADSP-BF54x    */
 /* ************************************************************** */
@@ -1679,7 +1678,6 @@
 #define AMBEN_B0_B1_B2	0x0006		/* Enable Async Memory Banks 0, 1, and 2			*/
 #define AMBEN_ALL		0x0008		/* Enable Async Memory Banks (all) 0, 1, 2, and 3	*/
 
-
 /* Bit masks for EBIU_AMBCTL0 */
 
 #define                   B0RDYEN  0x1        /* Bank 0 ARDY Enable */
@@ -2009,7 +2007,6 @@
 #define                     PxM13  0xc000000  /* GPIO Mux 13 */
 #define                     PxM14  0x30000000 /* GPIO Mux 14 */
 #define                     PxM15  0xc0000000 /* GPIO Mux 15 */
-
 
 /* Bit masks for PINTx_MASK_SET/CLEAR, PINTx_REQUEST, PINTx_LATCH, PINTx_EDGE_SET/CLEAR, PINTx_INVERT_SET/CLEAR, PINTx_PINTSTATE */
 
@@ -3112,7 +3109,6 @@
 #define DLEN_18		(5 << 15) /* 101 - 18 bits */
 #define DLEN_24		(6 << 15) /* 110 - 24 bits */
 
-
 /* Bit masks for EPPIx_FS2W_LVB */
 
 #define                   F1VB_BD  0xff       /* Vertical Blanking before Field 1 Active Data */
@@ -3420,7 +3416,6 @@
 #define                      EDBO  0x40       /* Enable Divide-by-One */
 #define                     EGLSI  0x80       /* Enable Global LS Interrupt */
 
-
 /* ******************************************* */
 /*     MULTI BIT MACRO ENUMERATIONS            */
 /* ******************************************* */
@@ -3559,13 +3554,11 @@ PORTB_FER registers
 #define PB13 0x2000
 #define PB14 0x4000
 
-
 /* PORT C Bit Definitions for the registers
 PORTC, PORTC_SET, PORTC_CLEAR,
 PORTC_DIR_SET, PORTC_DIR_CLEAR, PORTC_INEN,
 PORTC_FER registers
 */
-
 
 #define PC0 0x0001
 #define PC1 0x0002
@@ -3581,7 +3574,6 @@ PORTC_FER registers
 #define PC11 0x0800
 #define PC12 0x1000
 #define PC13 0x2000
-
 
 /* PORT D Bit Definitions for the registers
 PORTD, PORTD_SET, PORTD_CLEAR,
@@ -3612,7 +3604,6 @@ PORTE_DIR_SET, PORTE_DIR_CLEAR, PORTE_INEN,
 PORTE_FER registers
 */
 
-
 #define PE0 0x0001
 #define PE1 0x0002
 #define PE2 0x0004
@@ -3635,7 +3626,6 @@ PORTF, PORTF_SET, PORTF_CLEAR,
 PORTF_DIR_SET, PORTF_DIR_CLEAR, PORTF_INEN,
 PORTF_FER registers
 */
-
 
 #define PF0 0x0001
 #define PF1 0x0002
@@ -3660,7 +3650,6 @@ PORTG_DIR_SET, PORTG_DIR_CLEAR, PORTG_INEN,
 PORTG_FER registers
 */
 
-
 #define PG0 0x0001
 #define PG1 0x0002
 #define PG2 0x0004
@@ -3684,7 +3673,6 @@ PORTH_DIR_SET, PORTH_DIR_CLEAR, PORTH_INEN,
 PORTH_FER registers
 */
 
-
 #define PH0 0x0001
 #define PH1 0x0002
 #define PH2 0x0004
@@ -3700,13 +3688,11 @@ PORTH_FER registers
 #define PH12 0x1000
 #define PH13 0x2000
 
-
 /* PORT I Bit Definitions for the registers
 PORTI, PORTI_SET, PORTI_CLEAR,
 PORTI_DIR_SET, PORTI_DIR_CLEAR, PORTI_INEN,
 PORTI_FER registers
 */
-
 
 #define PI0 0x0001
 #define PI1 0x0002
@@ -3731,7 +3717,6 @@ PORTJ_DIR_SET, PORTJ_DIR_CLEAR, PORTJ_INEN,
 PORTJ_FER registers
 */
 
-
 #define PJ0 0x0001
 #define PJ1 0x0002
 #define PJ2 0x0004
@@ -3746,7 +3731,6 @@ PORTJ_FER registers
 #define PJ11 0x0800
 #define PJ12 0x1000
 #define PJ13 0x2000
-
 
 /* Port Muxing Bit Fields for PORTx_MUX Registers */
 
@@ -3916,7 +3900,6 @@ PORTJ_FER registers
 #define B3MAP_PHH 0x05000000 /* Map Port H High to Byte 3 */
 #define B3MAP_PIH 0x06000000 /* Map Port I High to Byte 3 */
 #define B3MAP_PJH 0x07000000 /* Map Port J High to Byte 3 */
-
 
 /* for legacy compatibility */
 

@@ -448,7 +448,6 @@ nfsd_svc(unsigned short port, int nrservs)
 	return error;
 }
 
-
 /*
  * This is the NFS server kernel thread
  */
@@ -512,7 +511,6 @@ nfsd(void *vrqstp)
 			schedule_timeout_uninterruptible(HZ);
 			continue;
 		}
-
 
 		/* Lock the export hash tables for reading. */
 		exp_readlock();

@@ -159,7 +159,6 @@ static void sctp_datamsg_assign(struct sctp_datamsg *msg, struct sctp_chunk *chu
 	msg->msg_size += chunk->skb->len;
 }
 
-
 /* A data chunk can have a maximum payload of (2^16 - 20).  Break
  * down any such message into smaller chunks.  Opportunistically, fragment
  * the chunks down to the current MTU constraints.  We may get refragmented

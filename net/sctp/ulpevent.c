@@ -54,7 +54,6 @@ static void sctp_ulpevent_receive_data(struct sctp_ulpevent *event,
 static void sctp_ulpevent_release_data(struct sctp_ulpevent *event);
 static void sctp_ulpevent_release_frag_data(struct sctp_ulpevent *event);
 
-
 /* Initialize an ULP event from an given skb.  */
 SCTP_STATIC void sctp_ulpevent_init(struct sctp_ulpevent *event,
 				    int msg_flags,
@@ -860,7 +859,6 @@ struct sctp_ulpevent *sctp_ulpevent_make_authkey(
 fail:
 	return NULL;
 }
-
 
 /* Return the notification type, assuming this is a notification
  * event.

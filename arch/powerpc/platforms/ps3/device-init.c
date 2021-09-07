@@ -105,7 +105,6 @@ static int __init ps3_register_lpm_devices(void)
 	pr_debug(" <- %s:%d\n", __func__, __LINE__);
 	return 0;
 
-
 fail_register:
 fail_rights:
 fail_read_repo:

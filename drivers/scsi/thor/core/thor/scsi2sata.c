@@ -760,4 +760,3 @@ MV_BOOLEAN ATAPI_CDB2TaskFile(
 
 	return MV_TRUE;
 }
-

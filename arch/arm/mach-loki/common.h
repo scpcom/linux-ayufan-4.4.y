@@ -32,5 +32,4 @@ void loki_uart1_init(void);
 
 extern struct sys_timer loki_timer;
 
-
 #endif

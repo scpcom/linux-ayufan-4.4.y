@@ -53,7 +53,6 @@ static bool vga_arbiter_used;
 static DEFINE_SPINLOCK(vga_lock);
 static DECLARE_WAIT_QUEUE_HEAD(vga_wait_queue);
 
-
 static const char *vga_iostate_to_str(unsigned int iostate)
 {
 	/* Ignore VGA_RSRC_IO and VGA_RSRC_MEM */
@@ -122,7 +121,6 @@ static inline void vga_irq_set_state(struct vga_device *vgadev, bool state)
 	if (vgadev->irq_set_state)
 		vgadev->irq_set_state(vgadev->cookie, state);
 }
-
 
 /* If we don't ever use VGA arb we should avoid
    turning off anything anywhere due to old X servers getting
@@ -328,7 +326,6 @@ int vga_get(struct pci_dev *pdev, unsigned int rsrc, int interruptible)
 		spin_unlock_irqrestore(&vga_lock, flags);
 		if (conflict == NULL)
 			break;
-
 
 		/* We have a conflict, we wait until somebody kicks the
 		 * work queue. Currently we have one work queue that we
@@ -549,7 +546,6 @@ static inline void vga_update_device_decodes(struct vga_device *vgadev,
 		vga_iostate_to_str(vgadev->decodes),
 		vga_iostate_to_str(vgadev->owns));
 
-
 	/* if we own the decodes we should move them along to
 	   another card */
 	if ((vgadev->owns & old_decodes) && (vga_count > 1)) {
@@ -710,7 +706,6 @@ struct vga_arb_private {
 static LIST_HEAD(vga_user_list);
 static DEFINE_SPINLOCK(vga_user_lock);
 
-
 /*
  * This function gets a string in the format: "PCI:domain:bus:dev.fn" and
  * returns the respective values. If the string is not in this format,
@@ -721,7 +716,6 @@ static int vga_pci_str_to_vars(char *buf, int count, unsigned int *domain,
 {
 	int n;
 	unsigned int slot, func;
-
 
 	n = sscanf(buf, "PCI:%x:%x:%x.%x", domain, bus, &slot, &func);
 	if (n != 4)
@@ -813,7 +807,6 @@ static ssize_t vga_arb_write(struct file *file, const char __user * buf,
 
 	int ret_val;
 	int i;
-
 
 	kbuf = kmalloc(count + 1, GFP_KERNEL);
 	if (!kbuf)
@@ -1024,7 +1017,6 @@ static ssize_t vga_arb_write(struct file *file, const char __user * buf,
 		pci_dev_put(pdev);
 		goto done;
 
-
 	} else if (strncmp(curr_pos, "decodes ", 8) == 0) {
 		curr_pos += 8;
 		remaining -= 8;
@@ -1088,7 +1080,6 @@ static int vga_arb_open(struct inode *inode, struct file *file)
 	priv->cards[0].pdev = priv->target;
 	priv->cards[0].io_cnt = 0;
 	priv->cards[0].mem_cnt = 0;
-
 
 	return 0;
 }

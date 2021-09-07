@@ -164,7 +164,6 @@ extern void release_thread(struct task_struct *);
  */
 extern int kernel_thread(int (*fn)(void *), void * arg, unsigned long flags);
 
-
 /* Copy and release all segment info associated with a VM */
 #define copy_segments(p, mm)	do { } while (0)
 #define release_segments(mm)	do { } while (0)

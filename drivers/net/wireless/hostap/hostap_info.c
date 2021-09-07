@@ -45,7 +45,6 @@ local->comm_tallies.name += le16_to_cpu(tallies->name)
 #undef ADD_COMM_TALLIES
 }
 
-
 /* Called only as a tasklet (software IRQ) */
 static void prism2_info_commtallies32(local_info_t *local, unsigned char *buf,
 				      int left)
@@ -85,7 +84,6 @@ local->comm_tallies.name += le32_to_cpu(tallies->name)
 #undef ADD_COMM_TALLIES
 }
 
-
 /* Called only as a tasklet (software IRQ) */
 static void prism2_info_commtallies(local_info_t *local, unsigned char *buf,
 				    int left)
@@ -95,7 +93,6 @@ static void prism2_info_commtallies(local_info_t *local, unsigned char *buf,
 	else
 		prism2_info_commtallies16(local, buf, left);
 }
-
 
 #ifndef PRISM2_NO_STATION_MODES
 #ifndef PRISM2_NO_DEBUG
@@ -119,7 +116,6 @@ static const char* hfa384x_linkstatus_str(u16 linkstatus)
 	}
 }
 #endif /* PRISM2_NO_DEBUG */
-
 
 /* Called only as a tasklet (software IRQ) */
 static void prism2_info_linkstatus(local_info_t *local, unsigned char *buf,
@@ -159,7 +155,6 @@ static void prism2_info_linkstatus(local_info_t *local, unsigned char *buf,
 	local->prev_link_status = val;
 	schedule_work(&local->info_queue);
 }
-
 
 static void prism2_host_roaming(local_info_t *local)
 {
@@ -228,7 +223,6 @@ static void prism2_host_roaming(local_info_t *local)
 	local->last_join_time = jiffies;
 }
 
-
 static void hostap_report_scan_complete(local_info_t *local)
 {
 	union iwreq_data wrqu;
@@ -243,7 +237,6 @@ static void hostap_report_scan_complete(local_info_t *local)
 	 * scanning result */
 	local->scan_timestamp = 0;
 }
-
 
 /* Called only as a tasklet (software IRQ) */
 static void prism2_info_scanresults(local_info_t *local, unsigned char *buf,
@@ -294,7 +287,6 @@ static void prism2_info_scanresults(local_info_t *local, unsigned char *buf,
 	set_bit(PRISM2_INFO_PENDING_SCANRESULTS, &local->pending_info);
 	schedule_work(&local->info_queue);
 }
-
 
 /* Called only as a tasklet (software IRQ) */
 static void prism2_info_hostscanresults(local_info_t *local,
@@ -358,7 +350,6 @@ static void prism2_info_hostscanresults(local_info_t *local,
 }
 #endif /* PRISM2_NO_STATION_MODES */
 
-
 /* Called only as a tasklet (software IRQ) */
 void hostap_info_process(local_info_t *local, struct sk_buff *skb)
 {
@@ -405,7 +396,6 @@ void hostap_info_process(local_info_t *local, struct sk_buff *skb)
 #endif /* PRISM2_NO_DEBUG */
 	}
 }
-
 
 #ifndef PRISM2_NO_STATION_MODES
 static void handle_info_queue_linkstatus(local_info_t *local)
@@ -454,7 +444,6 @@ static void handle_info_queue_linkstatus(local_info_t *local)
 	local->prev_linkstatus_connected = connected;
 }
 
-
 static void handle_info_queue_scanresults(local_info_t *local)
 {
 	if (local->host_roaming == 1 && local->iw_mode == IW_MODE_INFRA)
@@ -474,7 +463,6 @@ static void handle_info_queue_scanresults(local_info_t *local)
 	}
 }
 
-
 /* Called only as scheduled task after receiving info frames (used to avoid
  * pending too much time in HW IRQ handler). */
 static void handle_info_queue(struct work_struct *work)
@@ -491,7 +479,6 @@ static void handle_info_queue(struct work_struct *work)
 }
 #endif /* PRISM2_NO_STATION_MODES */
 
-
 void hostap_info_init(local_info_t *local)
 {
 	skb_queue_head_init(&local->info_list);
@@ -499,7 +486,6 @@ void hostap_info_init(local_info_t *local)
 	INIT_WORK(&local->info_queue, handle_info_queue);
 #endif /* PRISM2_NO_STATION_MODES */
 }
-
 
 EXPORT_SYMBOL(hostap_info_init);
 EXPORT_SYMBOL(hostap_info_process);

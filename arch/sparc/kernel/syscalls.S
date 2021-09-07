@@ -181,7 +181,6 @@ linux_syscall_trace:
 	b,pt	%xcc, 2f
 	 mov	%i4, %o4
 
-
 	/* Linux 32-bit system calls enter here... */
 	.align	32
 	.globl	linux_sparc_syscall32

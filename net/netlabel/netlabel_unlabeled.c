@@ -1141,7 +1141,6 @@ static int netlbl_unlabel_staticremovedef(struct sk_buff *skb,
 				    &audit_info);
 }
 
-
 /**
  * netlbl_unlabel_staticlist_gen - Generate messages for STATICLIST[DEF]
  * @cmd: command/message

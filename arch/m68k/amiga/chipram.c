@@ -27,7 +27,6 @@ static struct resource chipram_res = {
 };
 static unsigned long chipavail;
 
-
 void __init amiga_chip_init(void)
 {
     if (!AMIGAHW_PRESENT(CHIP_RAM))
@@ -42,7 +41,6 @@ void __init amiga_chip_init(void)
 
     chipavail = amiga_chip_size;
 }
-
 
 void *amiga_chip_alloc(unsigned long size, const char *name)
 {
@@ -70,7 +68,6 @@ void *amiga_chip_alloc(unsigned long size, const char *name)
     return (void *)ZTWO_VADDR(res->start);
 }
 EXPORT_SYMBOL(amiga_chip_alloc);
-
 
     /*
      *  Warning:
@@ -125,7 +122,6 @@ void amiga_chip_free(void *ptr)
 }
 EXPORT_SYMBOL(amiga_chip_free);
 
-
 unsigned long amiga_chip_avail(void)
 {
 #ifdef DEBUG
@@ -134,4 +130,3 @@ unsigned long amiga_chip_avail(void)
 	return chipavail;
 }
 EXPORT_SYMBOL(amiga_chip_avail);
-

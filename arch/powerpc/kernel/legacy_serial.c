@@ -492,7 +492,6 @@ static int __init serial_dev_init(void)
 }
 device_initcall(serial_dev_init);
 
-
 #ifdef CONFIG_SERIAL_8250_CONSOLE
 /*
  * This is called very early, as part of console_init() (typically just after

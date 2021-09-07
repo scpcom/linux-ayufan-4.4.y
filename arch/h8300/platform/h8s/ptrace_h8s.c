@@ -81,4 +81,3 @@ asmlinkage void trace_trap(unsigned long bp)
 	(void)bp;
 	force_sig(SIGTRAP,current);
 }
-

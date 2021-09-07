@@ -524,7 +524,6 @@ static ssize_t size_show(struct kobject *k, struct kobj_attribute *attr, char *b
 static struct kobj_attribute cache_size_attr =
 	__ATTR(size, 0444, size_show, NULL);
 
-
 static ssize_t line_size_show(struct kobject *k, struct kobj_attribute *attr, char *buf)
 {
 	unsigned int line_size;

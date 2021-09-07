@@ -34,7 +34,6 @@
 #include <asm/war.h>
 #include <asm/cacheflush.h> /* for run_uncached() */
 
-
 /*
  * Special Variant of smp_call_function for use by cache functions:
  *
@@ -239,7 +238,6 @@ static void __cpuinit r4k_blast_icache_page_setup(void)
 	else if (ic_lsize == 64)
 		r4k_blast_icache_page = blast_icache64_page;
 }
-
 
 static void (* r4k_blast_icache_page_indexed)(unsigned long addr);
 

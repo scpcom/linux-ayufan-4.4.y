@@ -55,7 +55,6 @@ bfa_fcpim_meminfo(struct bfa_iocfc_cfg_s *cfg, u32 *km_len,
 	*km_len += cfg->fwcfg.num_tskim_reqs * sizeof(struct bfa_tskim_s);
 }
 
-
 static void
 bfa_fcpim_attach(struct bfa_s *bfa, void *bfad, struct bfa_iocfc_cfg_s *cfg,
 		     struct bfa_meminfo_s *meminfo, struct bfa_pcidev_s *pcidev)
@@ -171,5 +170,3 @@ bfa_fcpim_qdepth_get(struct bfa_s *bfa)
 
 	return (fcpim->q_depth);
 }
-
-

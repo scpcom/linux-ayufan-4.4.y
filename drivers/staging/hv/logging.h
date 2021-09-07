@@ -21,13 +21,11 @@
  *
  */
 
-
 #ifndef _LOGGING_H_
 #define _LOGGING_H_
 
 /* #include <linux/init.h> */
 /* #include <linux/module.h> */
-
 
 #define VMBUS				0x0001
 #define STORVSC				0x0002

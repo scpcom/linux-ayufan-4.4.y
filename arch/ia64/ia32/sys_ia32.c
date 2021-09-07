@@ -118,9 +118,7 @@ sys32_execve (char __user *name, compat_uptr_t __user *argv, compat_uptr_t __use
 	return error;
 }
 
-
 #if PAGE_SHIFT > IA32_PAGE_SHIFT
-
 
 static int
 get_page_prot (struct vm_area_struct *vma, unsigned long addr)
@@ -155,7 +153,6 @@ mmap_subpage (struct file *file, unsigned long start, unsigned long end, int pro
 
 	DBG("mmap_subpage(file=%p,start=0x%lx,end=0x%lx,prot=%x,flags=%x,off=0x%llx)\n",
 	    file, start, end, prot, flags, off);
-
 
 	/* Optimize the case where the old mmap and the new mmap are both anonymous */
 	if ((old_prot & PROT_WRITE) && (flags & MAP_ANONYMOUS) && !vma->vm_file) {

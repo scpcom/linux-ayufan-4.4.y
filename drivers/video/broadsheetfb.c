@@ -507,7 +507,6 @@ static int __devinit broadsheetfb_probe(struct platform_device *dev)
 	       "fb%d: Broadsheet frame buffer, using %dK of video memory\n",
 	       info->node, videomemorysize >> 10);
 
-
 	return 0;
 
 err_free_irq:

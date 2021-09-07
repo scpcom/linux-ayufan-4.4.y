@@ -156,7 +156,6 @@
 #include <linux/types.h>
 #include <linux/device.h>
 
-
 /* Backend stuff */
 
 /*
@@ -181,7 +180,6 @@ void __d_head(char *head, size_t head_size,
 			 dev_driver_string(dev), dev_name(dev));
 }
 
-
 /*
  * Debug backend: log some message if debugging is enabled
  *
@@ -204,7 +202,6 @@ do {									\
 	printk(KERN_ERR "%s%s%s: " f, head, __func__, tag, ##a);	\
 } while (0)
 
-
 /*
  * CPP sintatic sugar to generate A_B like symbol names when one of
  * the arguments is a a preprocessor #define.
@@ -213,7 +210,6 @@ do {									\
 #define __D_PASTE(varname, modulename) (__D_PASTE__(varname, modulename))
 #define _D_SUBMODULE_INDEX(_name) (D_SUBMODULE_DECLARE(_name))
 
-
 /*
  * Store a submodule's runtime debug level and name
  */
@@ -221,7 +217,6 @@ struct d_level {
 	u8 level;
 	const char *name;
 };
-
 
 /*
  * List of available submodules and their debug levels
@@ -238,7 +233,6 @@ struct d_level {
 
 extern struct d_level D_LEVEL[];
 extern size_t D_LEVEL_SIZE;
-
 
 /*
  * Frontend stuff
@@ -258,7 +252,6 @@ extern size_t D_LEVEL_SIZE;
  */
 #define D_MODULENAME undefined_modulename
 #endif
-
 
 #ifndef D_MASTER
 #warning D_MASTER not defined, but debug.h included! [see docs]
@@ -296,7 +289,6 @@ extern size_t D_LEVEL_SIZE;
 #define D_SUBMODULE undefined_module
 #endif
 
-
 /**
  * D_SUBMODULE_DECLARE - Declare a submodule for runtime debug level control
  *
@@ -315,7 +307,6 @@ extern size_t D_LEVEL_SIZE;
  * D_SUBMODULE_DEFINE().
  */
 #define D_SUBMODULE_DECLARE(_name) __D_SUBMODULE_##_name
-
 
 /**
  * D_SUBMODULE_DEFINE - Define a submodule for runtime debug level control
@@ -342,10 +333,7 @@ extern size_t D_LEVEL_SIZE;
 	.name = #_name				\
 }
 
-
-
 /* The actual "debug" operations */
-
 
 /**
  * d_test - Returns true if debugging should be enabled
@@ -372,7 +360,6 @@ extern size_t D_LEVEL_SIZE;
 	});								\
 })
 
-
 /**
  * d_fnstart - log message at function start if debugging enabled
  *
@@ -381,7 +368,6 @@ extern size_t D_LEVEL_SIZE;
  * @f: printf-like format and arguments
  */
 #define d_fnstart(l, _dev, f, a...) _d_printf(l, " FNSTART", _dev, f, ## a)
-
 
 /**
  * d_fnend - log message at function end if debugging enabled
@@ -392,7 +378,6 @@ extern size_t D_LEVEL_SIZE;
  */
 #define d_fnend(l, _dev, f, a...) _d_printf(l, " FNEND", _dev, f, ## a)
 
-
 /**
  * d_printf - log message if debugging enabled
  *
@@ -401,7 +386,6 @@ extern size_t D_LEVEL_SIZE;
  * @f: printf-like format and arguments
  */
 #define d_printf(l, _dev, f, a...) _d_printf(l, "", _dev, f, ## a)
-
 
 /**
  * d_dump - log buffer hex dump if debugging enabled
@@ -419,7 +403,6 @@ do {							\
 	print_hex_dump(KERN_ERR, head, 0, 16, 1,	\
 		       ((void *) ptr), (size), 0);	\
 } while (0)
-
 
 /**
  * Export a submodule's debug level over debugfs as PREFIXSUBMODULE
@@ -448,6 +431,5 @@ do {							\
 		rc = 0;							\
 	rc;								\
 })
-
 
 #endif /* #ifndef __debug__h__ */

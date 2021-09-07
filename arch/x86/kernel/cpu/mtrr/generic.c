@@ -568,7 +568,6 @@ static unsigned long set_mtrr_state(void)
 	return change_mask;
 }
 
-
 static unsigned long cr4;
 static DEFINE_SPINLOCK(set_atomicity_lock);
 

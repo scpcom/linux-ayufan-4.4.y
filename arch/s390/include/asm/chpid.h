@@ -48,7 +48,6 @@ static inline int chp_id_is_valid(struct chp_id *chpid)
 	return (chpid->cssid <= __MAX_CSSID);
 }
 
-
 #define chp_id_for_each(c) \
 	for (chp_id_init(c); chp_id_is_valid(c); chp_id_next(c))
 #endif /* __KERNEL */

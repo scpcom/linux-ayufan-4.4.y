@@ -173,7 +173,6 @@ static int __devinit mace_probe(struct macio_dev *mdev, const struct of_device_i
 	mp->chipid = (in_8(&mp->mace->chipid_hi) << 8) |
 			in_8(&mp->mace->chipid_lo);
 
-
 	mp = netdev_priv(dev);
 	mp->maccc = ENXMT | ENRCV;
 
@@ -1002,7 +1001,6 @@ static struct macio_driver mace_driver =
 	.probe		= mace_probe,
 	.remove		= mace_remove,
 };
-
 
 static int __init mace_init(void)
 {

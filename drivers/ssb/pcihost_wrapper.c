@@ -14,7 +14,6 @@
 #include <linux/pci.h>
 #include <linux/ssb/ssb.h>
 
-
 #ifdef CONFIG_PM
 static int ssb_pcihost_suspend(struct pci_dev *dev, pm_message_t state)
 {

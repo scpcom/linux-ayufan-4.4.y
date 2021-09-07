@@ -627,7 +627,6 @@ static int __devexit sht15_remove(struct platform_device *pdev)
 	return 0;
 }
 
-
 /*
  * sht_drivers simultaneously refers to __devinit and __devexit function
  * which causes spurious section mismatch warning. So use __refdata to
@@ -671,7 +670,6 @@ static struct platform_driver __refdata sht_drivers[] = {
 		.remove = __devexit_p(sht15_remove),
 	},
 };
-
 
 static int __init sht15_init(void)
 {

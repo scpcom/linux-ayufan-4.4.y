@@ -12,7 +12,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -55,7 +54,6 @@ struct IALAdapter;
 struct IALHost;
 struct mv_comp_info;
 
-
 /* Adapter Initialization */
 int mv_ial_lib_allocate_edma_queues(struct IALAdapter *pAdapter);
 
@@ -70,19 +68,14 @@ void mv_ial_lib_free_channel(struct IALAdapter *pAdapter, MV_U8 channelNum);
  #define MV_PRD_TABLE_SIZE                  64 /* 64 entries max in PRD table */
 #endif
 
-
 int mv_ial_lib_prd_destroy(struct IALHost *pHost);
 int mv_ial_lib_prd_init(struct IALHost *);
-
-
 
 int mv_ial_lib_generate_prd(MV_SATA_ADAPTER *pMvSataAdapter, struct scsi_cmnd *SCpnt,
                             struct mv_comp_info *);
 
-
 /* Interrupt Service Routine*/
 irqreturn_t mv_ial_lib_int_handler (int irq, void *dev_id);
-
 
 /* Event Notification */
 MV_BOOLEAN mv_ial_lib_udma_command_completion_call_back(MV_SATA_ADAPTER *pMvSataAdapter,

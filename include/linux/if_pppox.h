@@ -16,7 +16,6 @@
 #ifndef __LINUX_IF_PPPOX_H
 #define __LINUX_IF_PPPOX_H
 
-
 #include <linux/types.h>
 #include <asm/byteorder.h>
 

@@ -40,7 +40,6 @@ STATIC void xfs_ail_check(struct xfs_ail *, xfs_log_item_t *);
 #define	xfs_ail_check(a,l)
 #endif /* DEBUG */
 
-
 /*
  * This is called by the log manager code to determine the LSN
  * of the tail of the log.  This is exactly the LSN of the first
@@ -401,7 +400,6 @@ xfsaild_push(
 	return tout;
 }	/* xfsaild_push */
 
-
 /*
  * This is to be called when an item is unlocked that may have
  * been in the AIL.  It will wake up the first member of the AIL
@@ -445,7 +443,6 @@ xfs_trans_unlocked_item(
 	if (min_lip == lip)
 		xfs_log_move_tail(ailp->xa_mount, 1);
 }	/* xfs_trans_unlocked_item */
-
 
 /*
  * Update the position of the item in the AIL with the new
@@ -498,7 +495,6 @@ xfs_trans_ail_update(
 		spin_unlock(&ailp->xa_lock);
 	}
 
-
 }	/* xfs_trans_update_ail */
 
 /*
@@ -530,7 +526,6 @@ xfs_trans_ail_delete(
 		dlip = xfs_ail_delete(ailp, lip);
 		ASSERT(dlip == lip);
 		xfs_trans_ail_cursor_clear(ailp, dlip);
-
 
 		lip->li_flags &= ~XFS_LI_IN_AIL;
 		lip->li_lsn = 0;
@@ -567,8 +562,6 @@ xfs_trans_ail_delete(
 		}
 	}
 }
-
-
 
 /*
  * The active item list (AIL) is a doubly linked list of log
@@ -729,7 +722,6 @@ xfs_ail_check(
 	prev_lip = list_entry(lip->li_ail.next, xfs_log_item_t, li_ail);
 	if (&prev_lip->li_ail != &ailp->xa_ail)
 		ASSERT(XFS_LSN_CMP(prev_lip->li_lsn, lip->li_lsn) >= 0);
-
 
 #ifdef XFS_TRANS_DEBUG
 	/*

@@ -52,7 +52,6 @@
 #define I2SPCR_CLRFIFO(stype)	\
 	((stype) == PCM_TX ? PSC_I2SPCR_TC : PSC_I2SPCR_RC)
 
-
 /* instance data. There can be only one, MacLeod!!!! */
 static struct au1xpsc_audio_data *au1xpsc_i2s_workdata;
 

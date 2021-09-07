@@ -445,4 +445,3 @@ out:
 	mutex_unlock(&bus->lock);
 	return ret;
 }
-

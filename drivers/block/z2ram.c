@@ -40,7 +40,6 @@
 
 #include <linux/zorro.h>
 
-
 extern int m68k_realnum_memory;
 extern struct mem_info m68k_memory[NUM_MEMINFO];
 

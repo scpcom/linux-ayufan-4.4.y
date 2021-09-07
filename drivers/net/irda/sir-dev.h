@@ -61,7 +61,6 @@ struct sir_fsm {
 
 #define SIRDEV_STATE_DEAD		0xffff
 
-
 struct sir_dev;
 
 struct dongle_driver {
@@ -98,7 +97,6 @@ struct sir_driver {
 	int (*start_dev)(struct sir_dev *dev);
 	int (*stop_dev)(struct sir_dev *dev);
 };
-
 
 /* exported */
 
@@ -156,7 +154,6 @@ static inline int sirdev_schedule_mode(struct sir_dev *dev, int mode)
 	return sirdev_schedule_request(dev, SIRDEV_STATE_SET_MODE, mode);
 }
 #endif
-
 
 struct sir_dev {
 	struct net_device *netdev;

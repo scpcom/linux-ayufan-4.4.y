@@ -46,8 +46,6 @@ extern int eth_mac_addr(struct net_device *dev, void *p);
 extern int eth_change_mtu(struct net_device *dev, int new_mtu);
 extern int eth_validate_addr(struct net_device *dev);
 
-
-
 extern struct net_device *alloc_etherdev_mq(int sizeof_priv, unsigned int queue_count);
 #define alloc_etherdev(sizeof_priv) alloc_etherdev_mq(sizeof_priv, 1)
 

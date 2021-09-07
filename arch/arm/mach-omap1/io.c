@@ -165,4 +165,3 @@ void __init omap1_init_common_hw(void)
 
 	omap1_mux_init();
 }
-

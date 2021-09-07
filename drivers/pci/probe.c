@@ -19,7 +19,6 @@
 LIST_HEAD(pci_root_buses);
 EXPORT_SYMBOL(pci_root_buses);
 
-
 static int find_anything(struct device *dev, void *data)
 {
 	return 1;

@@ -110,7 +110,6 @@ static struct net_device * __init ipddp_init(void)
         return dev;
 }
 
-
 /*
  * Transmit LLAP/ELAP frame using aarp_send_ddp.
  */

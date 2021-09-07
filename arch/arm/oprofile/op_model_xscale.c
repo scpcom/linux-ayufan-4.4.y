@@ -438,4 +438,3 @@ struct op_arm_model_spec op_xscale_spec = {
 	.start		= xscale_pmu_start,
 	.stop		= xscale_pmu_stop,
 };
-

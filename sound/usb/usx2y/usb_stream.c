@@ -20,7 +20,6 @@
 
 #include "usb_stream.h"
 
-
 /*                             setup                                  */
 
 static unsigned usb_stream_next_packet_size(struct usb_stream_kernel *sk)
@@ -107,7 +106,6 @@ static void init_urbs(struct usb_stream_kernel *sk, unsigned use_packsize,
 	init_pipe_urbs(sk, use_packsize, sk->outurb, sk->write_page, dev,
 		       out_pipe);
 }
-
 
 /*
  * convert a sampling rate into our full speed format (fs/1000 in Q16.16)
@@ -229,7 +227,6 @@ struct usb_stream *usb_stream_new(struct usb_stream_kernel *sk,
 out:
 	return sk->s;
 }
-
 
 /*                             start                                  */
 
@@ -737,7 +734,6 @@ check_retry:
 
 	return s->state == usb_stream_ready ? 0 : -EFAULT;
 }
-
 
 /*                             stop                                   */
 

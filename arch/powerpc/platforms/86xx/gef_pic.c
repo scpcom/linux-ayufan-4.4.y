@@ -48,7 +48,6 @@
 
 #define gef_irq_to_hw(virq)    ((unsigned int)irq_map[virq].hwirq)
 
-
 static DEFINE_SPINLOCK(gef_pic_lock);
 
 static void __iomem *gef_pic_irq_reg_base;
@@ -155,7 +154,6 @@ static struct irq_chip gef_pic_chip = {
 	.unmask		= gef_pic_unmask,
 };
 
-
 /* When an interrupt is being configured, this call allows some flexibilty
  * in deciding which irq_chip structure is used
  */
@@ -187,7 +185,6 @@ static struct irq_host_ops gef_pic_host_ops = {
 	.map	= gef_pic_host_map,
 	.xlate	= gef_pic_host_xlate,
 };
-
 
 /*
  * Initialisation of PIC, this should be called in BSP
@@ -255,4 +252,3 @@ unsigned int gef_pic_get_irq(void)
 
 	return virq;
 }
-

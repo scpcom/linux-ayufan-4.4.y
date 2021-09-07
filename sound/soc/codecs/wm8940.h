@@ -70,7 +70,6 @@ extern struct snd_soc_codec_device soc_codec_dev_wm8940;
 
 #define WM8940_CACHEREGNUM  0x57
 
-
 /* Clock divider Id's */
 #define WM8940_BCLKDIV 0
 #define WM8940_MCLKDIV 1
@@ -101,4 +100,3 @@ extern struct snd_soc_codec_device soc_codec_dev_wm8940;
 #define WM8940_OPCLKDIV_4 3
 
 #endif /* _WM8940_H */
-

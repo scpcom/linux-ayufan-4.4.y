@@ -359,4 +359,3 @@ int kvm_ioapic_init(struct kvm *kvm)
 
 	return ret;
 }
-

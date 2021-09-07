@@ -319,7 +319,6 @@ ahc_pci_write_config(ahc_dev_softc_t pci, int reg, uint32_t value, int width)
 	}
 }
 
-
 static struct pci_driver aic7xxx_pci_driver = {
 	.name		= "aic7xxx",
 	.probe		= ahc_linux_pci_dev_probe,
@@ -468,4 +467,3 @@ ahc_pci_map_int(struct ahc_softc *ahc)
 	
 	return (-error);
 }
-

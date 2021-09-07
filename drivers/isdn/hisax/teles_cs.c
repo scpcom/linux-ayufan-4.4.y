@@ -330,7 +330,6 @@ static int teles_resume(struct pcmcia_device *link)
 	return 0;
 }
 
-
 static struct pcmcia_device_id teles_ids[] = {
 	PCMCIA_DEVICE_PROD_ID12("TELES", "S0/PC", 0x67b50eae, 0xe9e70119),
 	PCMCIA_DEVICE_NULL,

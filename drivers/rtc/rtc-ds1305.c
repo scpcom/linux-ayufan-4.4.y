@@ -17,13 +17,11 @@
 #include <linux/spi/spi.h>
 #include <linux/spi/ds1305.h>
 
-
 /*
  * Registers ... mask DS1305_WRITE into register address to write,
  * otherwise you're reading it.  All non-bitmask values are BCD.
  */
 #define DS1305_WRITE		0x80
-
 
 /* RTC date/time ... the main special cases are that we:
  *  - Need fancy "hours" encoding in 12hour mode
@@ -42,7 +40,6 @@
 #define DS1305_MON		0x05
 #define DS1305_YEAR		0x06
 
-
 /* The two alarms have only sec/min/hour/wday fields (ALM_LEN).
  * DS1305_ALM_DISABLE disables a match field (some combos are bad).
  *
@@ -60,7 +57,6 @@
 
 #define DS1305_ALM0(r)		(0x07 + (r))	/* register addresses */
 #define DS1305_ALM1(r)		(0x0b + (r))
-
 
 /* three control registers */
 #define DS1305_CONTROL_LEN	3		/* bytes of control regs */
@@ -82,7 +78,6 @@
 
 #define DS1305_NVRAM		0x20		/* register addresses */
 
-
 struct ds1305 {
 	struct spi_device	*spi;
 	struct rtc_device	*rtc;
@@ -95,7 +90,6 @@ struct ds1305 {
 	bool			hr12;
 	u8			ctrl[DS1305_CONTROL_LEN];
 };
-
 
 /*----------------------------------------------------------------------*/
 

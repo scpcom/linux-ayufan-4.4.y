@@ -617,7 +617,6 @@ static struct Qdisc_ops netem_qdisc_ops __read_mostly = {
 	.owner		=	THIS_MODULE,
 };
 
-
 static int __init netem_module_init(void)
 {
 	pr_info("netem: version " VERSION "\n");

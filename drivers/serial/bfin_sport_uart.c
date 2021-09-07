@@ -273,7 +273,6 @@ static int sport_startup(struct uart_port *port)
 
 	return 0;
 
-
 fail3:
 	printk(KERN_ERR DRV_NAME
 		": Requesting Peripherals failed\n");
@@ -598,7 +597,6 @@ static int __init sport_uart_init(void)
 		printk(KERN_ERR "Failed to register sport uart driver:%d\n", ret);
 		uart_unregister_driver(&sport_uart_reg);
 	}
-
 
 	pr_debug("%s exit\n", __func__);
 	return ret;

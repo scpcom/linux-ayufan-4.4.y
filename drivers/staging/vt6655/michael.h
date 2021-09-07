@@ -54,5 +54,3 @@ VOID MIC_vGetMIC(PDWORD pdwL, PDWORD pdwR);
 #define ROR32( A, n ) ROL32( (A), 32-(n) )
 
 #endif //__MICHAEL_H__
-
-

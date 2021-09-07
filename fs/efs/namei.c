@@ -11,7 +11,6 @@
 #include <linux/exportfs.h>
 #include "efs.h"
 
-
 static efs_ino_t efs_find_entry(struct inode *inode, const char *name, int len) {
 	struct buffer_head *bh;
 

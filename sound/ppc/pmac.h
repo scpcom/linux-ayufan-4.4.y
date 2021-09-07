@@ -18,7 +18,6 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-
 #ifndef __PMAC_H
 #define __PMAC_H
 
@@ -42,7 +41,6 @@
 
 /* maximum number of fragments */
 #define PMAC_MAX_FRAGS		32
-
 
 #define PMAC_SUPPORT_AUTOMUTE
 
@@ -78,7 +76,6 @@ struct pmac_stream {
 	unsigned int cur_freqs;		/* currently available frequencies */
 	unsigned int cur_formats;	/* currently available formats */
 };
-
 
 /*
  */
@@ -164,7 +161,6 @@ struct snd_pmac {
 #endif
 
 };
-
 
 /* exported functions */
 int snd_pmac_new(struct snd_card *card, struct snd_pmac **chip_return);

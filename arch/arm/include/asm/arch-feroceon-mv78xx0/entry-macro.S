@@ -21,7 +21,6 @@
          .macro  arch_ret_to_user, tmp1, tmp2
          .endm
 
-
 #if defined(CONFIG_CPU_BIG_ENDIAN)
         	.macro	HTOLL sr, tt		@ sr   = A  ,B  ,C  ,D    
         	eor \tt, \sr, \sr, ror #16 ;    @ temp = A^C,B^	  
@@ -108,4 +107,3 @@
          teq     \irqnr, #96
 1004:
          .endm
-

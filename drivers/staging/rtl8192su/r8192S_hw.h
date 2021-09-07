@@ -84,7 +84,6 @@ typedef enum _BaseBand_Config_Type{
 #define BB_HOST_BANG_RW 	(1<<3)
 #define BB_HOST_BANG_DATA	1
 
-
 //============================================================
 //       8192S Regsiter bit
 //============================================================
@@ -133,7 +132,6 @@ typedef enum _BaseBand_Config_Type{
 #define MSR_LINK_MASTER    	3
 #define MSR_LINK_ENEDCA	   	(1<<4)
 
-
 //#define Cmd9346CR_9356SEL	(1<<4)
 #define EPROM_CMD_RESERVED_MASK 			(1<<5)
 #define EPROM_CMD_OPERATING_MODE_SHIFT 	6
@@ -175,7 +173,6 @@ typedef enum _BaseBand_Config_Type{
 // 13. Test Mode and Debug Control Registers
 // 14. PCIE config register
 //
-
 
 //
 // 1. System Configuration Registers	 (Offset: 0x0000 - 0x003F)
@@ -536,7 +533,6 @@ typedef enum _BaseBand_Config_Type{
 //#define	RPWM		USB_RPWM
 //#endif
 
-
 //============================================================================
 //       8190 Regsiter offset definition
 //============================================================================
@@ -555,7 +551,6 @@ typedef enum _BaseBand_Config_Type{
 #define		BBAddr				UnusedRegister	// Phy register address register
 #define		PhyDataR			UnusedRegister	// Phy register data read
 #define		UFWP				UnusedRegister
-
 
 //============================================================================
 //       8192S Regsiter Bit and Content definition
@@ -595,7 +590,6 @@ typedef enum _BaseBand_Config_Type{
 #define		SYS_SWHW_SEL		BIT14	// Load done, control path seitch.
 #define		SYS_FWHW_SEL		BIT15	// Sleep exit, control path swith.
 
-
 //----------------------------------------------------------------------------
 //       8192S Cmd9346CR bits					(Offset 0xA, 16bit)
 //----------------------------------------------------------------------------
@@ -604,7 +598,6 @@ typedef enum _BaseBand_Config_Type{
 #define		Cmd9346CR_9356SEL					BIT4
 #define		AutoLoadEEPROM						(CmdEEPROM_En|CmdEERPOMSEL)
 #define		AutoLoadEFUSE						CmdEEPROM_En
-
 
 //----------------------------------------------------------------------------
 //       8192S AFE_MISC bits		AFE Misc			(Offset 0x10, 8bits)
@@ -1007,7 +1000,6 @@ Default: 00b.
 #define		Dbg_CAM_TXSecCAMInfo	BIT31		//Retrieve lastest Tx Info
 #define		Dbg_CAM_SecKeyFound		BIT30		//Security KEY Found
 
-
 //----------------------------------------------------------------------------
 //       8192S SECR Security Configuration Register	(offset 0x250, 1 byte)
 //----------------------------------------------------------------------------
@@ -1182,12 +1174,10 @@ Default: 00b.
 #define		CCX_CMD_RESET					0x0
 // Clear all the result of CCX measurement and disable the CCX function.
 
-
 //----------------------------------------------------------------------------
 // 8192S EFUSE
 //----------------------------------------------------------------------------
 //#define		HWSET_MAX_SIZE_92S				128
-
 
 //----------------------------------------------------------------------------
 //       8192S EEPROM/EFUSE share register definition.
@@ -1209,7 +1199,6 @@ Default: 00b.
 #define 		EEPROM_ChannelPlan				0x51 // Map of supported channels.
 #define		EEPROM_CustomID				0x52
 #define 		EEPROM_SubCustomID			0x53 // Reserved  for customer use.
-
 
 	// <Roger_Notes> The followin are for different version of EEPROM contents purpose. 2008.11.22.
 #define 		EEPROM_BoardType				0x54 //0x0: RTL8188SU, 0x1: RTL8191SU, 0x2: RTL8192SU, 0x3: RTL8191GU
@@ -1298,8 +1287,6 @@ Default: 00b.
 //--------------92SU require delete or move to other place later
 //
 
-
-
 //
 //
 // 2008/08/06 MH For share the same 92S source/header files, we copy some
@@ -1324,7 +1311,6 @@ Default: 00b.
 #define RCR_OnlyErlPkt		BIT31				// Rx Early mode is performed for packet size greater than 1536
 #define CWR					0xDC			// Contention window register
 #define RetryCTR				0xDE			// Retry Count register
-
 
 // For backward compatible for 9xUSB
 #define		LED1Cfg				UnusedRegister	// LED1 Configuration Register
@@ -1388,7 +1374,6 @@ Default: 00b.
 //#define EEPROM_CID_Senao				0x3
 //#define EEPROM_CID_TOSHIBA				0x4	// Toshiba setting, Merge by Jacken, 2008/01/31
 //#define EEPROM_CID_NetCore				0x5
-
 
 //
 //--------------92SU require delete or move to other place later
@@ -1461,33 +1446,3 @@ Default: 00b.
 #define		HAL_8192S_HW_GPIO_WPS_BIT	BIT4
 
 #endif  //R8192S_HW
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

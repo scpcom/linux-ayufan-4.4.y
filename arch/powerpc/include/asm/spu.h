@@ -273,7 +273,6 @@ struct spufs_calls {
 
 #define SPU_CREATE_FLAG_ALL		0x003f /* mask of all valid flags */
 
-
 int register_spu_syscalls(struct spufs_calls *calls);
 void unregister_spu_syscalls(struct spufs_calls *calls);
 

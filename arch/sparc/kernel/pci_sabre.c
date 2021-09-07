@@ -350,7 +350,6 @@ static void sabre_register_error_handlers(struct pci_pbm_info *pbm)
 		    SABRE_CEAFSR_SDRD | SABRE_CEAFSR_SDWR),
 		   base + SABRE_CE_AFSR);
 
-
 	err = request_irq(op->irqs[2], sabre_ce_intr, 0, "SABRE_CE", pbm);
 	if (err)
 		printk(KERN_WARNING "%s: Couldn't register CE, err=%d.\n",

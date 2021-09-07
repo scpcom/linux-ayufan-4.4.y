@@ -441,7 +441,6 @@ static u64 rds_ib_get_ack(struct rds_ib_connection *ic)
 }
 #endif
 
-
 static void rds_ib_send_ack(struct rds_ib_connection *ic, unsigned int adv_credits)
 {
 	struct rds_header *hdr = ic->i_ack;

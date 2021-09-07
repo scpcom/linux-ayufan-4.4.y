@@ -174,7 +174,6 @@ static void arch_decomp_setup(void)
 				(i & 2   ? 1 << 16 : 0) |
 				(i & 1   ? 1 << 24 : 0);
 
-
 	palette_setpixel(0);
 	if (bytes_per_char_h == 1) {
 		palette_write (0);

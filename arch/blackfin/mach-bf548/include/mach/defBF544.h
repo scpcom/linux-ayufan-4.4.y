@@ -506,7 +506,6 @@
 #define                    HMDMA1_ECOUNT  0xffc04554   /* Handshake MDMA1 Current Edge Count Register */
 #define                    HMDMA1_BCOUNT  0xffc04558   /* Handshake MDMA1 Current Block Count Register */
 
-
 /* ********************************************************** */
 /*     SINGLE BIT MACRO PAIRS (bit mask and negated one)      */
 /*     and MULTI BIT READ MACROS                              */

@@ -23,7 +23,6 @@
 #define PEX0_IO_BASE 0xf2000000
 #define PEX0_IO_SIZE _1M
 
-
 /* PCI0: IO and memory space */
 #define PCI0_MEM_BASE  0xe8000000
 #define PCI0_MEM_SIZE  _128M
@@ -46,8 +45,6 @@
 #define BOOTDEV_CS_SIZE_RD_88W8860_DDR1		_16M
 #define BOOTDEV_CS_SIZE_RD_88W8860_AP82S 	_8M
 #define BOOTDEV_CS_SIZE_DB_88W8860       	_512K
-
-
 
 #if defined (CONFIG_MV_INCLUDE_PCI) && defined (CONFIG_MV_INCLUDE_PEX)
 
@@ -87,7 +84,6 @@ struct map_desc MEM_TABLE[] = 	{
   { DEVICE_CS0_BASE, __phys_to_pfn(DEVICE_CS0_BASE), DEVICE_CS0_SIZE, MT_DEVICE},
   { DEVICE_CS2_BASE, __phys_to_pfn(DEVICE_CS2_BASE), DEVICE_CS2_SIZE, MT_DEVICE}
 };
-
 
 MV_CPU_DEC_WIN SYSMAP_RD_88W8860_DDR1[] = {
    	/* base low        base high    size       	WinNum     enable */
@@ -136,5 +132,3 @@ MV_CPU_DEC_WIN SYSMAP_DB_88W8660_DDR2[] = {
 	{{BOOTDEV_CS_BASE,    0, BOOTDEV_CS_SIZE_DB_88W8860},		0x4       ,EN},
 	{{TBL_TERM,TBL_TERM, TBL_TERM} ,TBL_TERM  ,TBL_TERM}		
 };
-
-

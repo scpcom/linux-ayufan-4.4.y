@@ -511,7 +511,6 @@ static int __devinit bfin_t350mcqb_probe(struct platform_device *pdev)
 	fbinfo->fix.line_length = fbinfo->var.xres_virtual *
 	    fbinfo->var.bits_per_pixel / 8;
 
-
 	fbinfo->fbops = &bfin_t350mcqb_fb_ops;
 	fbinfo->flags = FBINFO_FLAG_DEFAULT;
 

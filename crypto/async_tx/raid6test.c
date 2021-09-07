@@ -193,7 +193,6 @@ static int test(int disks, int *tests)
 	return err;
 }
 
-
 static int raid6_test(void)
 {
 	int err = 0;

@@ -145,7 +145,6 @@ static void wl1271_irq_work(struct work_struct *work)
 	do {
 		wl1271_fw_status(wl, wl->fw_status);
 
-
 		if (intr & (WL1271_ACX_INTR_EVENT_A |
 			    WL1271_ACX_INTR_EVENT_B)) {
 			wl1271_debug(DEBUG_IRQ,
@@ -468,7 +467,6 @@ out:
 
 	return ret;
 }
-
 
 static int wl1271_op_tx(struct ieee80211_hw *hw, struct sk_buff *skb)
 {
@@ -1043,7 +1041,6 @@ out:
 	mutex_unlock(&wl->mutex);
 }
 
-
 /* can't be const, mac80211 writes to this */
 static struct ieee80211_rate wl1271_rates[] = {
 	{ .bitrate = 10,
@@ -1352,7 +1349,6 @@ static int __devexit wl1271_remove(struct spi_device *spi)
 
 	return 0;
 }
-
 
 static struct spi_driver wl1271_spi_driver = {
 	.driver = {

@@ -46,7 +46,6 @@ __init_iio_chrdev_minor_attr(struct iio_chrdev_minor_attr *minor_attr,
 			   struct module *owner,
 			   int id);
 
-
 #define to_iio_chrdev_minor_attr(_dev_attr) \
 	container_of(_dev_attr, struct iio_chrdev_minor_attr, dev_attr);
 
@@ -94,7 +93,6 @@ struct iio_const_attr {
 #define IIO_DEVICE_ATTR(_name, _mode, _show, _store, _addr)	\
 	struct iio_dev_attr iio_dev_attr_##_name		\
 	= IIO_ATTR(_name, _mode, _show, _store, _addr)
-
 
 #define IIO_DEVICE_ATTR_2(_name, _mode, _show, _store, _addr, _val2)	\
 	struct iio_dev_attr iio_dev_attr_##_name			\
@@ -166,7 +164,6 @@ struct iio_const_attr {
  **/
 #define IIO_DEV_ATTR_INPUT(_number, _show)				\
 	IIO_DEVICE_ATTR(in##_number, S_IRUGO, _show, NULL, _number)
-
 
 /**
  * IIO_DEV_ATTR_SW_RING_ENABLE: enable software ring buffer

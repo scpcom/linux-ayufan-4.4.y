@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 UCHAR	CipherWpaTemplate[] = {
 		0xdd,					// WPA IE
 		0x16,					// Length
@@ -335,7 +334,6 @@ VOID MlmeAssocReqAction(
 			FrameLen += tmp;
 		}
 
-
 #ifdef DOT11_N_SUPPORT
 		// HT
 		if ((pAd->MlmeAux.HtCapabilityLen > 0) && (pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED))
@@ -542,7 +540,6 @@ VOID MlmeAssocReqAction(
 			pAd->StaCfg.ReqVarIELen = VarIesOffset;
 		}
 
-
 		MiniportMMRequest(pAd, 0, pOutBuffer, FrameLen);
 		MlmeFreeMemory(pAd, pOutBuffer);
 
@@ -642,7 +639,6 @@ VOID MlmeReassocReqAction(
 							  END_OF_ARGS);
 			FrameLen += tmp;
 		}
-
 
 		if (pAd->MlmeAux.APEdcaParm.bValid)
 		{
@@ -816,9 +812,6 @@ VOID MlmeDisassocReqAction(
 		return;
 	}
 
-
-
-
 	RTMPCancelTimer(&pAd->MlmeAux.DisassocTimer, &TimerCancelled);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("ASSOC - Send DISASSOC request[BSSID::%02x:%02x:%02x:%02x:%02x:%02x (Reason=%d)\n",
@@ -901,7 +894,6 @@ VOID PeerAssocRspAction(
 			DBGPRINT(RT_DEBUG_TRACE, ("PeerAssocRspAction():MacTable [%d].AMsduSize = %d. ClientStatusFlags = 0x%lx \n",Elem->Wcid, pAd->MacTab.Content[BSSID_WCID].AMsduSize, pAd->MacTab.Content[BSSID_WCID].ClientStatusFlags));
 #endif // DOT11_N_SUPPORT //
 			RTMPCancelTimer(&pAd->MlmeAux.AssocTimer, &TimerCancelled);
-
 
 			if(Status == MLME_SUCCESS)
 			{
@@ -1150,7 +1142,6 @@ VOID AssocPostProc(
 				len  -= (pEid->Len + 2);
 			}
 
-
 		}
 
 		if (pAd->MacTab.Content[BSSID_WCID].RSNIE_Len == 0)
@@ -1193,7 +1184,6 @@ VOID PeerDisassocAction(
 			{
 				RTMPSendWirelessEvent(pAd, IW_DISASSOC_EVENT_FLAG, pAd->MacTab.Content[BSSID_WCID].Addr, BSS0, 0);
 			}
-
 
 			LinkDown(pAd, TRUE);
 			pAd->Mlme.AssocMachine.CurrState = ASSOC_IDLE;
@@ -1425,7 +1415,6 @@ int wext_notify_event_assoc(
 }
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
 
-
 BOOLEAN StaAddMacTableEntry(
 	IN  PRTMP_ADAPTER		pAd,
 	IN  PMAC_TABLE_ENTRY	pEntry,
@@ -1563,7 +1552,6 @@ BOOLEAN StaAddMacTableEntry(
 			if (i==0)
 				break;
 		}
-
 
 		if (pAd->StaCfg.DesiredTransmitSetting.field.MCS != MCS_AUTO)
 		{

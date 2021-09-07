@@ -28,7 +28,6 @@
 #include "phy_common.h"
 #include "phy_lp.h"
 
-
 /* Entry of the 2062/2063 radio init table */
 struct b206x_init_tab_entry {
 	u16 offset;

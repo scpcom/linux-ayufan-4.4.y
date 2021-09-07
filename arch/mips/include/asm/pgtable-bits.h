@@ -10,7 +10,6 @@
 #ifndef _ASM_PGTABLE_BITS_H
 #define _ASM_PGTABLE_BITS_H
 
-
 /*
  * Note that we shift the lower 32bits of each EntryLo[01] entry
  * 6 bits to the left. That way we can convert the PFN into the
@@ -83,7 +82,6 @@
 
 #endif
 #endif /* defined(CONFIG_64BIT_PHYS_ADDR && defined(CONFIG_CPU_MIPS32) */
-
 
 /*
  * Cache attributes

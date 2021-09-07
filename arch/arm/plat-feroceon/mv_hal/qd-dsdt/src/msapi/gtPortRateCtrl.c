@@ -92,7 +92,6 @@ static GT_STATUS cRateLimit(GT_QD_DEV *dev, GT_U32 hwLimit, GT_U32* swLimit)
 	return GT_OK;
 }
 
-
 /*
  Convert given sw defined Burst Rate to meaningful number.
 */
@@ -169,7 +168,6 @@ static GT_STATUS cBurstEnum2Number(GT_QD_DEV *dev, GT_BURST_RATE rate, GT_U32 *r
 	return GT_OK;
 }
 
-
 /*
  Convert given hw Burst Rate Limit to sw defined Burst Rate Limit.
 */
@@ -207,7 +205,6 @@ static GT_STATUS cBurstRateLimit(GT_QD_DEV *dev, GT_U32 burstSize, GT_U32 hwLimi
 
 	return GT_FAIL;
 }
-
 
 /*
  Convert given sw defined Burst Rate to meaningful number.
@@ -354,7 +351,6 @@ static GT_STATUS setEnhancedERate(GT_QD_DEV *dev, GT_LPORT port, GT_ERATE_TYPE *
     return GT_OK;
 }
 
-
 static GT_STATUS getEnhancedERate(GT_QD_DEV *dev, GT_LPORT port, GT_ERATE_TYPE *rateType)
 {
     GT_STATUS	retVal;         /* Functions return value.      */
@@ -396,7 +392,6 @@ static GT_STATUS getEnhancedERate(GT_QD_DEV *dev, GT_LPORT port, GT_ERATE_TYPE *
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * grcSetLimitMode
@@ -456,8 +451,6 @@ GT_STATUS grcSetLimitMode
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * grcGetLimitMode
@@ -590,8 +583,6 @@ GT_STATUS grcSetPri3Rate
     return GT_OK;
 }
 
-
-
 /*******************************************************************************
 * grcGetPri3Rate
 *
@@ -662,7 +653,6 @@ GT_STATUS grcGetPri3Rate
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * grcSetPri2Rate
 *
@@ -729,8 +719,6 @@ GT_STATUS grcSetPri2Rate
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * grcGetPri2Rate
@@ -802,7 +790,6 @@ GT_STATUS grcGetPri2Rate
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * grcSetPri1Rate
 *
@@ -868,8 +855,6 @@ GT_STATUS grcSetPri1Rate
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * grcGetPri1Rate
@@ -939,7 +924,6 @@ GT_STATUS grcGetPri1Rate
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * grcSetPri0Rate
@@ -1081,8 +1065,6 @@ GT_STATUS grcSetPri0Rate
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * grcGetPri0Rate
@@ -1255,8 +1237,6 @@ GT_STATUS grcSetBytesCount
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * grcGetBytesCount
@@ -1527,8 +1507,6 @@ GT_STATUS grcSetEgressRate
     return GT_OK;
 }
 
-
-
 /*******************************************************************************
 * grcGetEgressRate
 *
@@ -1646,11 +1624,9 @@ GT_STATUS grcGetEgressRate
 		rateType->definedRate = (GT_EGRESS_RATE)data;
 	}
 
-
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * grcSetBurstRate
@@ -1757,7 +1733,6 @@ GT_STATUS grcSetBurstRate
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * grcGetBurstRate
 *
@@ -1851,7 +1826,6 @@ GT_STATUS grcGetBurstRate
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * grcSetTCPBurstRate
 *
@@ -1924,8 +1898,6 @@ GT_STATUS grcSetTCPBurstRate
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * grcGetTCPBurstRate
@@ -2018,7 +1990,6 @@ GT_STATUS grcGetTCPBurstRate
     DBG_INFO(("Fail to find TCP Rate.\n"));
     return GT_BAD_VALUE;
 }
-
 
 /*******************************************************************************
 * grcSetVidNrlEn
@@ -2143,7 +2114,6 @@ GT_STATUS grcGetVidNrlEn
 
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * grcSetSaNrlEn
@@ -2395,7 +2365,6 @@ GT_STATUS grcGetDaNrlEn
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * grcSetELimitMode
 *
@@ -2470,7 +2439,6 @@ GT_STATUS grcSetELimitMode
 
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * grcGetELimitMode
@@ -2652,7 +2620,6 @@ GT_STATUS grcGetRsvdNrlEn
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * grcSetFrameOverhead
 *
@@ -2732,8 +2699,6 @@ GT_STATUS grcSetFrameOverhead
     return GT_OK;
 }
 
-
-
 /*******************************************************************************
 * grcGetFrameOverhead
 *
@@ -2804,4 +2769,3 @@ GT_STATUS grcGetFrameOverhead
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-

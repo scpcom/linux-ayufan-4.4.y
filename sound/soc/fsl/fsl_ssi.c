@@ -599,7 +599,6 @@ static struct snd_soc_dai fsl_ssi_dai_template = {
 				ssi_private->stats.name); \
 	} while (0)
 
-
 /**
  * fsl_sysfs_ssi_show: display SSI statistics
  *

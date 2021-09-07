@@ -65,7 +65,6 @@ static uint_8         data_to_send;
 static uint_16        sof_count;
 static SETUP_STRUCT   local_setup_packet;
 
-
 /*************************************************************************
 Device descriptors are always 18 bytes 
 
@@ -159,7 +158,6 @@ static uint_8  DevQualifierDescData[DEVICE_QUALIFIER_DESCRIPTOR_SIZE] =
    0x01,                      /* bNumConfigurations */
    0
 };
-
 
 /*******************************************************************
    CONFIG DESCRIPTOR
@@ -301,7 +299,6 @@ Offset|      Field       | Value |  Description
 
 *******************************************************************/
 
-
 #define CONFIG_DESC_NUM_INTERFACES  (4)
 
 /* This must be counted manually and updated with the descriptor */
@@ -434,7 +431,6 @@ Collection (Application)				A1 01
   End Collection					C0 
 End Collection					C0 
 
-
 ************************************************************************/
 
 #define REPORT_DESC_SIZE            (52)
@@ -511,9 +507,6 @@ The following lines should be changed,
 USB_uint_16_low(0x0038),  //   Changed from USB_uint_16_low(0x0034),
 USB_uint_16_high(0x0038), //   Changed from USB_uint_16_high(0x0034),
   
-
-
-
 uint_8  ReportDesc[56] = {
     0x06, 0x00, 0xff,              		// USAGE_PAGE (Generic Desktop)
     0x09, 0x01,                    		// USAGE (Vendor Usage 1)
@@ -603,7 +596,6 @@ static const uint_8_ptr USB_STRING_DESC[USB_STRING_ARRAY_SIZE] =
    (uint_8_ptr)USB_STR_6,
    (uint_8_ptr)USB_STR_n
 };
-
 
 /*FUNCTION*----------------------------------------------------------------
 * 
@@ -1033,7 +1025,6 @@ void get_report
          
    _usb_device_recv_data(handle, 0, 0, 0);
          
-
 	return;
 } 
 
@@ -1058,7 +1049,6 @@ void set_report
    /* [IN] Direction of the transfer. (1 for USB IN token)*/
    uint_8               direction,
 
-	
 	/* The setup packet pointer */
 	SETUP_STRUCT_PTR setup_ptr
 	)
@@ -1098,7 +1088,6 @@ void set_idle
    /* [IN] Direction of the transfer. (1 for USB IN token)*/
    uint_8               direction,
 
-	
 	/* The setup packet pointer */
 	SETUP_STRUCT_PTR setup_ptr
 	)
@@ -1193,7 +1182,6 @@ static void service_ep0
       
       /* [IN] Error, if any */
       uint_8               error
-            
             
    )
 { /* Body */
@@ -1325,7 +1313,6 @@ static void service_ep1
       /* [IN] Error, if any */
       uint_8               error
             
-            
    )
 { /* Body */
 
@@ -1398,7 +1385,6 @@ static void reset_ep0
 
       /* [IN] Error, if any */
       uint_8               error
-            
             
    )
 { /* Body */
@@ -1596,7 +1582,6 @@ _usb_device_handle  usbMouseLoad(int devNo)
     /* keep a temporary copy of the aligned address */
     temp = Send_Buffer_aligned;
    
-
     /**************************************************************************
     Assign pointers to different descriptors from it and copy descriptors inside.
     ***************************************************************************/
@@ -1613,7 +1598,6 @@ _usb_device_handle  usbMouseLoad(int devNo)
     USB_memcopy(ReportDescData, ReportDesc, REPORT_DESC_SIZE);
     Send_Buffer_aligned += ((REPORT_DESC_SIZE/PSP_CACHE_LINE_SIZE) + 1)* PSP_CACHE_LINE_SIZE; 
 
-   
     DevQualifierDesc =  (uint_8_ptr) Send_Buffer_aligned;
     USB_memcopy(DevQualifierDescData, DevQualifierDesc, DEVICE_QUALIFIER_DESCRIPTOR_SIZE);
     Send_Buffer_aligned += ((DEVICE_QUALIFIER_DESCRIPTOR_SIZE/PSP_CACHE_LINE_SIZE) + \

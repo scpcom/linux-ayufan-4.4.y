@@ -212,7 +212,6 @@ he_readl_internal(struct he_dev *he_dev, unsigned addr, unsigned flags)
 #define he_readl_mbox(dev, reg) \
 			he_readl_internal(dev, reg, CON_CTL_MBOX)
 
-
 /* figure 2.2 connection id */
 
 #define he_mkcid(dev, vpi, vci)		(((vpi << (dev)->vcibits) | vci) & 0x1fff)
@@ -263,7 +262,6 @@ he_readl_internal(struct he_dev *he_dev, unsigned addr, unsigned flags)
 #define he_writel_tsr7(dev, val, cid) \
 		he_writel_tcm(dev, val, CONFIG_TSRA | (cid << 3) | 7)
 
-
 #define he_writel_tsr8(dev, val, cid) \
 		he_writel_tcm(dev, val, CONFIG_TSRB | (cid << 2) | 0)
 
@@ -276,13 +274,11 @@ he_readl_internal(struct he_dev *he_dev, unsigned addr, unsigned flags)
 #define he_writel_tsr11(dev, val, cid) \
 		he_writel_tcm(dev, val, CONFIG_TSRB | (cid << 2) | 3)
 
-
 #define he_writel_tsr12(dev, val, cid) \
 		he_writel_tcm(dev, val, CONFIG_TSRC | (cid << 1) | 0)
 
 #define he_writel_tsr13(dev, val, cid) \
 		he_writel_tcm(dev, val, CONFIG_TSRC | (cid << 1) | 1)
-
 
 #define he_writel_tsr14(dev, val, cid) \
 		he_writel_tcm(dev, val, CONFIG_TSRD | cid)
@@ -422,7 +418,6 @@ he_remove_one (struct pci_dev *pci_dev)
 	pci_set_drvdata(pci_dev, NULL);
 	pci_disable_device(pci_dev);
 }
-
 
 static unsigned
 rate_to_atmf(unsigned rate)		/* cps to atm forum format */
@@ -1230,7 +1225,6 @@ he_start(struct atm_dev *dev)
 		he_dev->vpibits = HE_MAXCIDBITS - nvcibits;
 	}
 
-
 	if (he_is622(he_dev)) {
 		he_dev->cells_per_row = 40;
 		he_dev->bytes_per_row = 2048;
@@ -1351,7 +1345,6 @@ he_start(struct atm_dev *dev)
 	he_writel(he_dev, CONFIG_TSRD, TSRD_BA);
 	he_writel(he_dev, CONFIG_TMABR, TMABR_BA);
 	he_writel(he_dev, CONFIG_TPDBA, TPD_BA);
-
 
 	/*
 	 *	receive connection memory map
@@ -1555,7 +1548,6 @@ he_start(struct atm_dev *dev)
 		he_dev->cs_stper[i].pcr = -1;
 	}
 	he_dev->total_bw = 0;
-
 
 	/* atm linux initialization */
 
@@ -1976,7 +1968,6 @@ next_tbrq_entry:
 						G0_TBRQ_H + (group * 16));
 	}
 }
-
 
 static void
 he_service_rbpl(struct he_dev *he_dev, int group)
@@ -2795,7 +2786,6 @@ he_phy_put(struct atm_dev *atm_dev, unsigned char val, unsigned long addr)
 	spin_unlock_irqrestore(&he_dev->global_lock, flags);
 }
  
-	
 static unsigned char
 he_phy_get(struct atm_dev *atm_dev, unsigned long addr)
 { 
@@ -2823,7 +2813,6 @@ he_proc_read(struct atm_dev *dev, loff_t *pos, char *page)
 	int rbpl_head, rbpl_tail;
 #endif
 	static long mcc = 0, oec = 0, dcc = 0, cec = 0;
-
 
 	left = *pos;
 	if (!left--)
@@ -2862,7 +2851,6 @@ he_proc_read(struct atm_dev *dev, loff_t *pos, char *page)
 	if (!left--)
 		return sprintf(page, "tbrq_size = %d  peak = %d\n",
 					CONFIG_TBRQ_SIZE, he_dev->tbrq_peak);
-
 
 #ifdef notdef
 	rbpl_head = RBPL_MASK(he_readl(he_dev, G0_RBPL_S));

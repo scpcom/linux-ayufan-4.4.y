@@ -556,13 +556,11 @@ incomplete_rcv:
 
 		length += 4; /* account for rfc1002 hdr */
 
-
 		dump_smb(smb_buffer, length);
 		if (checkSMB(smb_buffer, smb_buffer->Mid, total_read+4)) {
 			cifs_dump_mem("Bad SMB: ", smb_buffer, 48);
 			continue;
 		}
-
 
 		task_to_wake = NULL;
 		spin_lock(&GlobalMid_Lock);
@@ -1765,7 +1763,6 @@ static void rfc1002mangle(char *target, char *source, unsigned int length)
 
 }
 
-
 static int
 ipv4_connect(struct TCP_Server_Info *server)
 {
@@ -1833,7 +1830,6 @@ ipv4_connect(struct TCP_Server_Info *server)
 		server->ssocket = NULL;
 		return rc;
 	}
-
 
 	/*
 	 * Eventually check for other socket options to change from
@@ -2077,7 +2073,6 @@ void reset_cifs_unix_caps(int xid, struct cifsTconInfo *tcon,
 					("larger reads not supported by srv"));
 			}
 		}
-
 
 		cFYI(1, ("Negotiate caps 0x%x", (int)cap));
 #ifdef CONFIG_CIFS_DEBUG2
@@ -2339,7 +2334,6 @@ try_mount_again:
 		rc = -EINVAL;
 		goto out;
 	}
-
 
 	/* this is needed for ASCII cp to Unicode converts */
 	if (volume_info->iocharset == NULL) {
@@ -2756,7 +2750,6 @@ CIFSTCon(unsigned int xid, struct cifsSesInfo *ses,
 		else
 			is_unicode = false;
 
-
 		/* skip service field (NB: this field is always ASCII) */
 		if (length == 3) {
 			if ((bcc_ptr[0] == 'I') && (bcc_ptr[1] == 'P') &&
@@ -2869,4 +2862,3 @@ int cifs_setup_session(unsigned int xid, struct cifsSesInfo *pSesInfo,
 ss_err_exit:
 	return rc;
 }
-

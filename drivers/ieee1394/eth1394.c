@@ -157,7 +157,6 @@ MODULE_PARM_DESC(max_partial_datagrams,
 		 "Maximum number of partially received fragmented datagrams "
 		 "(default = 25).");
 
-
 static int ether1394_header(struct sk_buff *skb, struct net_device *dev,
 			    unsigned short type, const void *daddr,
 			    const void *saddr, unsigned len);

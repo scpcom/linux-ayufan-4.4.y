@@ -620,7 +620,6 @@ static const u8 sensor_start_ov965x_2[][2] = {
 	{}
 };
 
-
 static void ov534_reg_write(struct gspca_dev *gspca_dev, u16 reg, u8 val)
 {
 	struct usb_device *udev = gspca_dev->dev;
@@ -1001,7 +1000,6 @@ static void sd_pkt_scan(struct gspca_dev *gspca_dev, struct gspca_frame *frame,
 			gspca_frame_add(gspca_dev, INTER_PACKET, frame,
 						data + 12, len - 12);
 		}
-
 
 		/* Done this payload */
 		goto scan_next;

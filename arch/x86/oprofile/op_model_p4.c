@@ -16,7 +16,6 @@
 #include <asm/fixmap.h>
 #include <asm/apic.h>
 
-
 #include "op_x86_model.h"
 #include "op_counter.h"
 
@@ -59,7 +58,6 @@ static int inline addr_increment(void)
 #endif
 }
 
-
 /* tables to simulate simplified hardware view of p4 registers */
 struct p4_counter_binding {
 	int virt_counter;
@@ -78,7 +76,6 @@ struct p4_event_binding {
 
 /* nb: these CTR_* defines are a duplicate of defines in
    event/i386.p4*events. */
-
 
 #define CTR_BPU_0      (1 << 0)
 #define CTR_MS_0       (1 << 1)
@@ -341,7 +338,6 @@ static struct p4_event_binding p4_events[NUM_EVENTS] = {
 	}
 };
 
-
 #define MISC_PMC_ENABLED_P(x) ((x) & 1 << 7)
 
 #define ESCR_RESERVED_BITS 0x80000003
@@ -364,7 +360,6 @@ static struct p4_event_binding p4_events[NUM_EVENTS] = {
 #define CCCR_OVF_P(cccr) ((cccr) & (1U<<31))
 #define CCCR_CLEAR_OVF(cccr) ((cccr) &= (~(1U<<31)))
 
-
 /* this assigns a "stagger" to the current CPU, which is used throughout
    the code in this module as an extra array offset, to select the "even"
    or "odd" part of all the divided resources. */
@@ -377,14 +372,12 @@ static unsigned int get_stagger(void)
 	return 0;
 }
 
-
 /* finally, mediate access to a real hardware counter
    by passing a "virtual" counter numer to this macro,
    along with your stagger setting. */
 #define VIRT_CTR(stagger, i) ((i) + ((num_counters) * (stagger)))
 
 static unsigned long reset_value[NUM_COUNTERS_NON_HT];
-
 
 static void p4_fill_in_addresses(struct op_msrs * const msrs)
 {
@@ -470,7 +463,6 @@ static void p4_fill_in_addresses(struct op_msrs * const msrs)
 	}
 }
 
-
 static void pmc_setup_one_p4_counter(unsigned int ctr)
 {
 	int i;
@@ -535,7 +527,6 @@ static void pmc_setup_one_p4_counter(unsigned int ctr)
 	       counter_config[ctr].event, stag, ctr);
 }
 
-
 static void p4_setup_ctrs(struct op_x86_model_spec const *model,
 			  struct op_msrs const * const msrs)
 {
@@ -580,7 +571,6 @@ static void p4_setup_ctrs(struct op_x86_model_spec const *model,
 		}
 	}
 }
-
 
 static int p4_check_ctrs(struct pt_regs * const regs,
 			 struct op_msrs const * const msrs)
@@ -634,7 +624,6 @@ static int p4_check_ctrs(struct pt_regs * const regs,
 	return 1;
 }
 
-
 static void p4_start(struct op_msrs const * const msrs)
 {
 	unsigned int low, high, stag;
@@ -650,7 +639,6 @@ static void p4_start(struct op_msrs const * const msrs)
 		wrmsr(p4_counters[VIRT_CTR(stag, i)].cccr_address, low, high);
 	}
 }
-
 
 static void p4_stop(struct op_msrs const * const msrs)
 {
@@ -686,7 +674,6 @@ static void p4_shutdown(struct op_msrs const * const msrs)
 			release_evntsel_nmi(msrs->controls[i].addr);
 	}
 }
-
 
 #ifdef CONFIG_SMP
 struct op_x86_model_spec op_p4_ht2_spec = {

@@ -50,7 +50,6 @@
    middle of the procedure descriptor.  Work around this by putting the
    aligned copy in its own procedure descriptor */
 
-
 	.ent stxncpy_aligned
 	.align 4
 stxncpy_aligned:
@@ -175,8 +174,6 @@ __stxncpy:
 	nop
 	nop
 	nop
-
-
 
 /* The source and destination are not co-aligned.  Align the destination
    and cope.  We have to be very careful about not reading too much and

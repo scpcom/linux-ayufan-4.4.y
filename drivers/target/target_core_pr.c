@@ -3318,7 +3318,6 @@ static int core_scsi3_emulate_pro_preempt(
 	return ret;
 }
 
-
 static int core_scsi3_emulate_pro_register_and_move(
 	se_cmd_t *cmd,
 	u64 res_key,

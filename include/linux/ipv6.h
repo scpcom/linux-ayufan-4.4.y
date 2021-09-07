@@ -15,12 +15,10 @@
  *	*under construction*
  */
 
-
 struct in6_pktinfo {
 	struct in6_addr	ipi6_addr;
 	int		ipi6_ifindex;
 };
-
 
 struct in6_ifreq {
 	struct in6_addr	ifr6_addr;
@@ -46,7 +44,6 @@ struct ipv6_rt_hdr {
 	 *	variable length field
 	 */
 };
-
 
 struct ipv6_opt_hdr {
 	__u8 		nexthdr;

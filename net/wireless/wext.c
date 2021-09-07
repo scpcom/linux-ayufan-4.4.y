@@ -603,7 +603,6 @@ static int iw_handler_get_private(struct net_device *		dev,
 	return 0;
 }
 
-
 /******************** /proc/net/wireless SUPPORT ********************/
 /*
  * The /proc/net/wireless file is a human readable user-space interface
@@ -1342,7 +1341,6 @@ static struct nlmsghdr *rtnetlink_ifinfo_prep(struct net_device *dev,
 	nlmsg_cancel(skb, nlh);
 	return NULL;
 }
-
 
 /*
  * Main event dispatcher. Called from other parts and drivers.

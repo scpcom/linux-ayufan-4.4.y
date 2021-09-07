@@ -179,4 +179,3 @@
 #define NR_IRQS 		(IRQ_EINT(31)+1)
 
 #endif /* __ASM_PLAT_S5PC1XX_IRQS_H */
-

@@ -19,7 +19,6 @@
  *  fcs_fcxp.h FCXP helper macros for FCS
  */
 
-
 #ifndef __FCS_FCXP_H__
 #define __FCS_FCXP_H__
 

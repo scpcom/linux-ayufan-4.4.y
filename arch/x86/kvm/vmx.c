@@ -1178,7 +1178,6 @@ static void vmclear_local_vcpus(void)
 		__vcpu_clear(vmx);
 }
 
-
 /* Just like cpu_vmxoff(), but with the __kvm_handle_fault_on_reboot()
  * tricks.
  */

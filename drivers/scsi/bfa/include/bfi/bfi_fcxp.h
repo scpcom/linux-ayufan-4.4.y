@@ -68,4 +68,3 @@ struct bfi_fcxp_send_rsp_s {
 #pragma pack()
 
 #endif /* __BFI_FCXP_H__ */
-

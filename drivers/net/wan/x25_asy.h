@@ -13,7 +13,6 @@
 #define X25_ESCAPE(x)	((x)^0x20)
 #define X25_UNESCAPE(x)	((x)^0x20)
 
-
 struct x25_asy {
   int			magic;
 
@@ -36,8 +35,6 @@ struct x25_asy {
 #define SLF_ERROR	2               /* Parity, etc. error           */
 #define SLF_OUTWAIT	4		/* Waiting for output		*/
 };
-
-
 
 #define X25_ASY_MAGIC 0x5303
 

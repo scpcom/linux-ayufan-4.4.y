@@ -222,7 +222,6 @@
 #define reg_iop_fifo_out_r_masked_intr___orun___bit 4
 #define reg_iop_fifo_out_r_masked_intr_offset 72
 
-
 /* Constants */
 #define regk_iop_fifo_out_hi                      0x00000000
 #define regk_iop_fifo_out_neg                     0x00000002

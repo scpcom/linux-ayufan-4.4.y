@@ -238,7 +238,6 @@ static int hiddev_fasync(int fd, struct file *file, int on)
 	return fasync_helper(fd, file, on, &list->fasync);
 }
 
-
 /*
  * release file op
  */
@@ -284,7 +283,6 @@ static int hiddev_open(struct inode *inode, struct file *file)
 	mutex_init(&list->thread_lock);
 
 	list->hiddev = hiddev_table[i];
-
 
 	file->private_data = list;
 
@@ -398,7 +396,6 @@ static ssize_t hiddev_read(struct file * file, char __user * buffer, size_t coun
 			mutex_unlock(&list->thread_lock);
 			return retval;
 		}
-
 
 		while (list->head != list->tail &&
 		       retval + event_size <= count) {
@@ -1021,7 +1018,6 @@ void hiddev_disconnect(struct hid_device *hid)
  * At that point the probe routine and hiddev_driver struct below will no
  * longer be useful.
  */
-
 
 /* We never attach in this manner, and rely on HID to connect us.  This
  * is why there is no disconnect routine defined in the usb_driver either.

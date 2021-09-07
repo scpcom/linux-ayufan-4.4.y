@@ -80,7 +80,6 @@ VNTWIFIvSetOPMode (
     pMgmt->eConfigMode = eOPMode;
 }
 
-
 /*+
  *
  * Description:
@@ -184,8 +183,6 @@ VNTWIFIwGetAssocID (
     PSMgmtObject        pMgmt = (PSMgmtObject)pMgmtHandle;
     return(pMgmt->wCurrAID);
 }
-
-
 
 /*+
  *
@@ -356,8 +353,6 @@ VNTWIFIvSetEncryptionMode (
     }
 }
 
-
-
 BOOL
 VNTWIFIbConfigPhyMode (
     IN PVOID pMgmtHandle,
@@ -377,7 +372,6 @@ VNTWIFIbConfigPhyMode (
     pMgmt->eConfigPHYMode = ePhyType;
     return(TRUE);
 }
-
 
 VOID
 VNTWIFIbGetConfigPhyMode (
@@ -406,7 +400,6 @@ VNTWIFIbGetConfigPhyMode (
  * Return Value: None.
  *
 -*/
-
 
 /*+
  *
@@ -451,9 +444,6 @@ VNTWIFIvQueryBSSList (
     *puBSSCount = uCount;
 }
 
-
-
-
 VOID
 VNTWIFIvGetNextBSS (
     IN PVOID            pMgmtHandle,
@@ -477,10 +467,6 @@ VNTWIFIvGetNextBSS (
         }
     }
 }
-
-
-
-
 
 /*+
  *
@@ -528,7 +514,6 @@ VNTWIFIvUpdateNodeTxCounter(
     return;
 }
 
-
 VOID
 VNTWIFIvGetTxRate(
     IN PVOID    pMgmtHandle,
@@ -547,7 +532,6 @@ VNTWIFIvGetTxRate(
     BYTE                byOFDMBasicRate = RATE_24M;
     PWLAN_IE_SUPP_RATES pSupportRateIEs = NULL;
     PWLAN_IE_SUPP_RATES pExtSupportRateIEs = NULL;
-
 
     if ((pMgmt->eCurrMode == WMAC_MODE_IBSS_STA) ||
         (pMgmt->eCurrMode == WMAC_MODE_ESS_AP)) {
@@ -574,7 +558,6 @@ VNTWIFIvGetTxRate(
 				pMgmt->sNodeDBTable[0].abyMACAddr[2],pMgmt->sNodeDBTable[0].abyMACAddr[3],
 				pMgmt->sNodeDBTable[0].abyMACAddr[4],pMgmt->sNodeDBTable[0].abyMACAddr[5],wTxDataRate);
 #endif
-
 
         pSupportRateIEs = (PWLAN_IE_SUPP_RATES) pMgmt->abyCurrSuppRates;
         pExtSupportRateIEs = (PWLAN_IE_SUPP_RATES) pMgmt->abyCurrExtSuppRates;
@@ -616,7 +599,6 @@ VNTWIFIbyGetKeyCypher(
     }
 }
 
-
 /*
 BOOL
 VNTWIFIbInit(
@@ -627,7 +609,6 @@ VNTWIFIbInit(
 
     PSMgmtObject        pMgmt = NULL;
     UINT                ii;
-
 
     pMgmt = (PSMgmtObject)kmalloc(sizeof(SMgmtObject), (int)GFP_ATOMIC);
     if (pMgmt == NULL) {
@@ -660,8 +641,6 @@ VNTWIFIbInit(
 }
 */
 
-
-
 BOOL
 VNTWIFIbSetPMKIDCache (
     IN PVOID pMgmtObject,
@@ -678,8 +657,6 @@ VNTWIFIbSetPMKIDCache (
     memcpy(pMgmt->gsPMKIDCache.BSSIDInfo, pPMKIDInfo, (ulCount*sizeof(PMKIDInfo)));
     return (TRUE);
 }
-
-
 
 WORD
 VNTWIFIwGetMaxSupportRate(
@@ -700,7 +677,6 @@ VNTWIFIwGetMaxSupportRate(
         return (RATE_1M);
     }
 }
-
 
 VOID
 VNTWIFIvSet11h (
@@ -772,7 +748,6 @@ VNTWIFIbMeasureReport(
     return (TRUE);
 }
 
-
 BOOL
 VNTWIFIbChannelSwitch(
     IN PVOID pMgmtObject,
@@ -810,4 +785,3 @@ VNTWIFIbRadarPresent(
     return TRUE;
 }
 */
-

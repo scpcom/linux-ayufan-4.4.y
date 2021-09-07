@@ -19,7 +19,6 @@
  *  fcs.h FCS module functions
  */
 
-
 #ifndef __FCS_H__
 #define __FCS_H__
 

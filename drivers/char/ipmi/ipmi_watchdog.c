@@ -262,7 +262,6 @@ static int get_param_str(char *buffer, struct kernel_param *kp)
 	return strlen(buffer);
 }
 
-
 static int set_param_wdog_ifnum(const char *val, struct kernel_param *kp)
 {
 	int rv = param_set_int(val, kp);
@@ -375,7 +374,6 @@ static int i_ipmi_set_timeout(struct ipmi_smi_msg  *smi_msg,
 	struct ipmi_system_interface_addr addr;
 	int                               hbnow = 0;
 
-
 	/* These can be cleared as we are setting the timeout. */
 	pretimeout_since_last_heartbeat = 0;
 
@@ -437,7 +435,6 @@ static int ipmi_set_timeout(int do_heartbeat)
 {
 	int send_heartbeat_now;
 	int rv;
-
 
 	/* We can only send one of these at a time. */
 	mutex_lock(&set_timeout_lock);
@@ -1163,7 +1160,6 @@ static struct notifier_block wdog_panic_notifier = {
 	.next		= NULL,
 	.priority	= 150	/* priority: INT_MAX >= x >= 0 */
 };
-
 
 static void ipmi_new_smi(int if_num, struct device *device)
 {

@@ -289,7 +289,6 @@ static struct iw_handler_def p80211wext_handler_def = {
 struct zsVapStruct vap[ZM_VAP_PORT_NUMBER];
 void zfLnxInitVapStruct(void);
 
-
 /**
  * usbdrv_intr - interrupt handler
  * @irq: the IRQ number
@@ -307,7 +306,6 @@ irqreturn_t usbdrv_intr(int irq, void *dev_inst, struct pt_regs *regs)
 
     dev = dev_inst;
     macp = dev->ml_priv;
-
 
     /* Read register error, card may be unpluged */
     if (0)//(intr_status == -1)
@@ -460,9 +458,6 @@ exit:
     return rc;
 }
 
-
-
-
 /**
  * usbdrv_get_stats - get driver statistics
  * @dev: adapter's net_device struct
@@ -487,10 +482,8 @@ struct net_device_stats * usbdrv_get_stats(struct net_device *dev)
         macp->drv_stats.net_stats.rx_frame_errors +
         macp->drv_stats.net_stats.rx_length_errors;
 
-
     return &(macp->drv_stats.net_stats);
 }
-
 
 /**
  * usbdrv_set_mac - set the MAC address
@@ -517,13 +510,10 @@ int usbdrv_set_mac(struct net_device *dev, void *addr)
 
     rc = 0;
 
-
 exit:
     read_unlock(&(macp->isolate_lock));
     return rc;
 }
-
-
 
 void
 usbdrv_isolate_driver(struct usbdrv_private *macp)
@@ -607,9 +597,6 @@ extern void zfHpLedCtrl(struct net_device *dev, u16_t ledId, u8_t mode);
     return 0;
 }
 
-
-
-
 int usbdrv_xmit_frame(struct sk_buff *skb, struct net_device *dev)
 {
     int notify_stop = FALSE;
@@ -650,12 +637,8 @@ int usbdrv_xmit_frame(struct sk_buff *skb, struct net_device *dev)
     return NETDEV_TX_OK;
 }
 
-
-
-
 void usbdrv_set_multi(struct net_device *dev)
 {
-
 
     if (!(dev->flags & IFF_UP))
         return;
@@ -663,8 +646,6 @@ void usbdrv_set_multi(struct net_device *dev)
         return;
 
 }
-
-
 
 /**
  * usbdrv_clear_structs - free resources
@@ -676,7 +657,6 @@ void usbdrv_set_multi(struct net_device *dev)
 void usbdrv_clear_structs(struct net_device *dev)
 {
     struct usbdrv_private *macp = dev->ml_priv;
-
 
 #if (WLAN_HOSTIF == WLAN_PCI)
     iounmap(macp->regp);
@@ -705,7 +685,6 @@ void usbdrv_remove1(struct pci_dev *pcid)
 
     usbdrv_clear_structs(dev);
 }
-
 
 void zfLnx10msTimer(struct net_device* dev)
 {
@@ -793,7 +772,6 @@ int zfLnxVapXmitFrame(struct sk_buff *skb, struct net_device *dev)
         return NETDEV_TX_OK;
     }
 #endif
-
 
     zfiTxSendEth(dev, skb, 0x1);
 
@@ -898,8 +876,6 @@ int zfLnxUnregisterVapDev(struct net_device* parentDev, u16_t vapId)
 
     return ret;
 }
-
-
 
 #  define SUBMIT_URB(u,f)       usb_submit_urb(u,f)
 #  define USB_ALLOC_URB(u,f)    usb_alloc_urb(u,f)

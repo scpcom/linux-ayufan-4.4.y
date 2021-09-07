@@ -219,7 +219,6 @@ struct if_irda_req {
 #define ifr_dtr       ifr_ifru.ifru_line.dtr
 #define ifr_rts       ifr_ifru.ifru_line.rts
 
-
 /* IrDA netlink definitions */
 #define IRDA_NL_NAME "irda"
 #define IRDA_NL_VERSION 1
@@ -248,7 +247,3 @@ enum nl80211_attrs {
 #define IRDA_MODE_MONITOR   0x4
 
 #endif /* KERNEL_IRDA_H */
-
-
-
-

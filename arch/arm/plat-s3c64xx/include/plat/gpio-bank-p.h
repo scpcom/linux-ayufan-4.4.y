@@ -66,4 +66,3 @@
 
 #define S3C64XX_GPP14_MEM0_ATA_CD	(0x02 << 28)
 #define S3C64XX_GPP14_EINT_G8_14	(0x03 << 28)
-

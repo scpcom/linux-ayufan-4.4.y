@@ -172,7 +172,6 @@ static inline void dma_sync_single_range_for_device(struct device *dev,
 					       offset, size, direction);
 }
 
-
 static inline void dma_sync_sg_for_cpu(struct device *dev,
 				       struct scatterlist *sg, int nelems,
 				       enum dma_data_direction dir)

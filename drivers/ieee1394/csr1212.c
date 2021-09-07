@@ -27,7 +27,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 /* TODO List:
  * - Verify interface consistency: i.e., public functions that take a size
  *   parameter expect size to be in bytes.
@@ -41,7 +40,6 @@
 #include <asm/byteorder.h>
 
 #include "csr1212.h"
-
 
 /* Permitted key type for each key id */
 #define __I (1 << CSR1212_KV_TYPE_IMMEDIATE)
@@ -82,7 +80,6 @@ static const u8 csr1212_key_id_type_map[0x30] = {
 #undef __C
 #undef __D
 #undef __L
-
 
 #define quads_to_bytes(_q) ((_q) * sizeof(u32))
 #define bytes_to_quads(_b) DIV_ROUND_UP(_b, sizeof(u32))
@@ -157,7 +154,6 @@ csr1212_find_keyval_offset(struct csr1212_keyval *kv_list, u32 offset)
 			return kv;
 	return NULL;
 }
-
 
 /* Creation Routines */
 
@@ -458,7 +454,6 @@ struct csr1212_keyval *csr1212_new_string_descriptor_leaf(const char *s)
 	return kv;
 }
 
-
 /* Destruction Routines */
 
 void csr1212_detach_keyval_from_directory(struct csr1212_keyval *dir,
@@ -567,7 +562,6 @@ void csr1212_destroy_csr(struct csr1212_csr *csr)
 
 	CSR1212_FREE(csr);
 }
-
 
 /* CSR Image Creation */
 

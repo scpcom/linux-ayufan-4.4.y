@@ -159,5 +159,4 @@ extern const struct clkops clkops_null;
 
 #define RATE_IN_24XX		(RATE_IN_242X | RATE_IN_243X)
 
-
 #endif

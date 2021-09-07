@@ -130,7 +130,6 @@ acpi_memory_get_device_resources(struct acpi_memory_device *mem_device)
 	acpi_status status;
 	struct acpi_memory_info *info, *n;
 
-
 	if (!list_empty(&mem_device->res_list))
 		return 0;
 
@@ -155,7 +154,6 @@ acpi_memory_get_device(acpi_handle handle,
 	struct acpi_device *device = NULL;
 	struct acpi_device *pdevice = NULL;
 	int result;
-
 
 	if (!acpi_bus_get_device(handle, &device) && device)
 		goto end;
@@ -219,7 +217,6 @@ static int acpi_memory_enable_device(struct acpi_memory_device *mem_device)
 	struct acpi_memory_info *info;
 	int node;
 
-
 	/* Get the range from the _CRS */
 	result = acpi_memory_get_device_resources(mem_device);
 	if (result) {
@@ -278,7 +275,6 @@ static int acpi_memory_powerdown_device(struct acpi_memory_device *mem_device)
 	union acpi_object arg;
 	unsigned long long current_status;
 
-
 	/* Issue the _EJ0 command */
 	arg_list.count = 1;
 	arg_list.pointer = &arg;
@@ -310,7 +306,6 @@ static int acpi_memory_disable_device(struct acpi_memory_device *mem_device)
 	int result;
 	struct acpi_memory_info *info, *n;
 
-
 	/*
 	 * Ask the VM to offline this memory range.
 	 * Note: Assume that this function returns zero on success
@@ -340,7 +335,6 @@ static void acpi_memory_device_notify(acpi_handle handle, u32 event, void *data)
 {
 	struct acpi_memory_device *mem_device;
 	struct acpi_device *device;
-
 
 	switch (event) {
 	case ACPI_NOTIFY_BUS_CHECK:
@@ -403,7 +397,6 @@ static int acpi_memory_device_add(struct acpi_device *device)
 	int result;
 	struct acpi_memory_device *mem_device = NULL;
 
-
 	if (!device)
 		return -EINVAL;
 
@@ -452,7 +445,6 @@ static int acpi_memory_device_remove(struct acpi_device *device, int type)
 {
 	struct acpi_memory_device *mem_device = NULL;
 
-
 	if (!device || !acpi_driver_data(device))
 		return -EINVAL;
 
@@ -495,7 +487,6 @@ acpi_memory_register_notify_handler(acpi_handle handle,
 {
 	acpi_status status;
 
-
 	status = is_memory_device(handle);
 	if (ACPI_FAILURE(status))
 		return AE_OK;	/* continue */
@@ -512,7 +503,6 @@ acpi_memory_deregister_notify_handler(acpi_handle handle,
 {
 	acpi_status status;
 
-
 	status = is_memory_device(handle);
 	if (ACPI_FAILURE(status))
 		return AE_OK;	/* continue */
@@ -528,7 +518,6 @@ static int __init acpi_memory_device_init(void)
 {
 	int result;
 	acpi_status status;
-
 
 	result = acpi_bus_register_driver(&acpi_memory_device_driver);
 
@@ -553,7 +542,6 @@ static int __init acpi_memory_device_init(void)
 static void __exit acpi_memory_device_exit(void)
 {
 	acpi_status status;
-
 
 	/*
 	 * Adding this to un-install notification handlers for all the device

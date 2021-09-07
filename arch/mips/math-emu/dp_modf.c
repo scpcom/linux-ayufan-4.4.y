@@ -24,7 +24,6 @@
  * ########################################################################
  */
 
-
 #include "ieee754dp.h"
 
 /* modf function is always exact for a finite number

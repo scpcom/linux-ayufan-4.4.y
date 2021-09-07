@@ -211,7 +211,6 @@ static void agp_insert_into_pool(struct agp_memory * temp)
 	agp_fe.current_controller->pool = temp;
 }
 
-
 /* File private list routines */
 
 struct agp_file_private *agp_find_private(pid_t pid)
@@ -715,7 +714,6 @@ err_out:
 	unlock_kernel();
 	return rc;
 }
-
 
 static ssize_t agp_read(struct file *file, char __user *buf,
 			size_t count, loff_t * ppos)

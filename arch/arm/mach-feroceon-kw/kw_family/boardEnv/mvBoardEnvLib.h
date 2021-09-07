@@ -67,12 +67,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* defines */
 /* The below constant macros defines the board I2C EEPROM data offsets */
 
-
-
 #include "ctrlEnv/mvCtrlEnvLib.h"
 #include "mvSysHwConfig.h"
 #include "boardEnv/mvBoardEnvSpec.h"
-
 
 /* DUART stuff for Tclk detection only */
 #define DUART_BAUD_RATE			115200
@@ -83,7 +80,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DUAL_CHIP_SELECT_MODE   0
 #define INTERRUPT_TO_MPP        1
 #define INTERRUPT_TO_TDM	0
-
 
 #define BOARD_ETH_PORT_NUM  MV_ETH_MAX_PORTS
 #define BOARD_ETH_SWITCH_PORT_NUM	5
@@ -143,7 +139,6 @@ typedef struct _boardMppTypeInfo
 	MV_BOARD_MPP_TYPE_CLASS	boardMppGroup2;
 
 }MV_BOARD_MPP_TYPE_INFO;
-
 
 typedef enum _devBoardClass
 {
@@ -207,7 +202,6 @@ typedef enum _devGppBoardClass
 	BOARD_GPP_OTHER
 }MV_BOARD_GPP_CLASS;
 
-
 typedef struct _devCsInfo
 {
     MV_U8		deviceCS;
@@ -216,7 +210,6 @@ typedef struct _devCsInfo
     MV_U8		devWidth;
 
 }MV_DEV_CS_INFO;
-
 
 #define MV_BOARD_PHY_FORCE_10MB		0x0
 #define MV_BOARD_PHY_FORCE_100MB	0x1
@@ -248,7 +241,6 @@ typedef struct _boardGppInfo
 
 }MV_BOARD_GPP_INFO;
 
-
 typedef struct _boardTwsiInfo
 {
 	MV_BOARD_TWSI_CLASS	devClass;
@@ -256,7 +248,6 @@ typedef struct _boardTwsiInfo
 	MV_U8	twsiDevAddrType;
 
 }MV_BOARD_TWSI_INFO;
-
 
 typedef enum _boardMacSpeed
 {
@@ -314,8 +305,6 @@ typedef struct _boardInfo
 	MV_U32				nandFlashWriteParams;
 	MV_U32				nandFlashControl;
 }MV_BOARD_INFO;
-
-
 
 MV_VOID 	mvBoardEnvInit(MV_VOID);
 MV_U32      	mvBoardIdGet(MV_VOID);

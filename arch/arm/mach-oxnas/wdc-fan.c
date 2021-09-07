@@ -35,7 +35,6 @@
 
 #define FAN_MASK              ( FAN_MASK_LOW  | FAN_MASK_HIGH )
 
-
 /* I/O register access (FIXME: why not use the standard linux macros?) */
 #define ox_writel(data, addr) (*(volatile unsigned long*)addr = (data))
 #define ox_readl(addr)        (*(volatile unsigned long*)addr)
@@ -54,7 +53,6 @@ typedef struct s_fan_device_state
    unsigned char speed;       /* Range FAN_OFF .. FAN_SPEED_MAX */
 } fan_device_state;
 
-
 /*
  * Driver-global variables.
  */
@@ -71,7 +69,6 @@ static spinlock_t oxnas_gpio_spinlock;
    Only one fan is supported, so this can be a global variable. */
 static fan_device_state  fan_state;
 
-
 /*
  * Device attribute getter/setters
  */
@@ -85,13 +82,10 @@ static ssize_t fan_speed_store(struct device*, struct device_attribute*,
    Contrary to the macro's name, DEVICE_ATTR declares a dev_attr_...  */
 static DEVICE_ATTR(speed, 0644, fan_speed_show, fan_speed_store);
 
-
 static void set_fan_speed(unsigned char speed);
 
 static int  fan_probe (struct platform_device *pdev);
 static int  fan_remove(struct platform_device *pdev);
-
-
 
 /***************************************************************************/
 /* FUNCTION: fan_probe                                                     */
@@ -127,7 +121,6 @@ int fan_probe(struct platform_device *pdev)
 
       spin_unlock_irqrestore(&oxnas_gpio_spinlock, lock_flags);
 
-
       /* Create an entry in sysfs so user apps can control the fan. */
       rc = device_create_file(&pdev->dev, &dev_attr_speed);
       if (rc < 0)  break;
@@ -138,7 +131,6 @@ int fan_probe(struct platform_device *pdev)
 
    } while(0);
 
-
    /* Cleanup if any errors occured. */
    if(rc < 0)
    {
@@ -147,7 +139,6 @@ int fan_probe(struct platform_device *pdev)
 
    return rc;
 }
-
 
 /***************************************************************************/
 /* FUNCTION: fan_remove                                                    */
@@ -167,7 +158,6 @@ int fan_remove(struct platform_device *pdev)
 
    return 0;
 }
-
 
 /***************************************************************************/
 /*                                                                         */
@@ -251,7 +241,6 @@ int oldSpeed = fan_state.speed;
    }
 }
 
-
 /***************************************************************************/
 /* DATA STRUCTURE: wdc_leds_driver                                         */
 /*                                                                         */
@@ -296,7 +285,6 @@ static int __init wdc_fan_init(void)
       goto quit;
    }
 
-
 quit:
    if (rc)
    {
@@ -309,7 +297,6 @@ quit:
 
    return rc;
 }
-
 
 /***************************************************************************/
 /* FUNCTION: wdc_leds_exit                                                 */
@@ -324,7 +311,6 @@ static void __exit wdc_fan_exit(void)
 
    printk(KERN_INFO DRIVER_NAME " goodbye!\n");
 }
-
 
 module_init(wdc_fan_init);
 module_exit(wdc_fan_exit);

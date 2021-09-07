@@ -947,7 +947,6 @@ xfs_buf_rele(
 	}
 }
 
-
 /*
  *	Mutual exclusion on buffers.  Locking model:
  *
@@ -1026,7 +1025,6 @@ xfs_buf_unlock(
 	up(&bp->b_sema);
 	XB_TRACE(bp, "unlock", 0);
 }
-
 
 /*
  *	Pinning Buffer Storage in Memory
@@ -1682,7 +1680,6 @@ error:
 	kmem_free(btp);
 	return NULL;
 }
-
 
 /*
  *	Delayed write buffer handling

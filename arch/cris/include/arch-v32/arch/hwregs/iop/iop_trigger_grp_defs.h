@@ -148,7 +148,6 @@ typedef struct {
 } reg_iop_trigger_grp_r_masked_intr;
 #define REG_RD_ADDR_iop_trigger_grp_r_masked_intr 32
 
-
 /* Constants */
 enum {
   regk_iop_trigger_grp_fall                = 0x00000002,

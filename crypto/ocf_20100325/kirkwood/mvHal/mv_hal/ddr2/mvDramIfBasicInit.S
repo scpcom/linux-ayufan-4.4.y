@@ -213,7 +213,6 @@ _mvDramIfStaticInit:
 	ldr	r6, = STATIC_SDRAM0_BANK0_SIZE
 	MV_REG_WRITE_ASM(r6, r5, SDRAM_SIZE_REG(0,0))
 
-
 	/* set all dram configuration in temp registers */
 	ldr	r6, = STATIC_SDRAM0_BANK0_SIZE
 	MV_REG_WRITE_ASM(r6, r5, DRAM_BUF_REG0)
@@ -807,7 +806,6 @@ defualt_order:
 exit_ddrAutoConfig:
         mov     PC, r11         /* r11 is saved link register */
 
-
 /***************************************************************************************/
 /*       r4 holds I2C EEPROM address
  *       r7 holds I2C EEPROM offset parameter for i2cRead and its --> returned value
@@ -908,7 +906,6 @@ regDdr2:
                                         /* or Mini-RDIMM (0x10)               */
 exit:
         mov     PC, r13
-
 
 /**************************/
 /* Return value in flag if no-Ecc then Z-flag is set */

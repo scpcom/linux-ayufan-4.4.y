@@ -23,7 +23,6 @@
 #include <scsi/scsi_device.h>
 #include <scsi/scsi_host.h>
 
-
 static void ppa_reset_pulse(unsigned int base);
 
 typedef struct {

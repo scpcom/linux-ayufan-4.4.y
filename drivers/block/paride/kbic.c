@@ -35,7 +35,6 @@
 #define j44(a,b)                ((((a>>4)&0x0f)|(b&0xf0))^0x88)
 #define j53(w)                  (((w>>3)&0x1f)|((w>>4)&0xe0))
 
-
 /* cont = 0 - access the IDE register file 
    cont = 1 - access the IDE command set 
 */
@@ -184,7 +183,6 @@ static void kbic_read_block( PIA *pi, char * buf, int count )
                 for (k=0;k<count/4;k++) ((u32 *)buf)[k] = r4l();
                 w2(4); w2(0); w2(4);
                 break;
-
 
         }
 }

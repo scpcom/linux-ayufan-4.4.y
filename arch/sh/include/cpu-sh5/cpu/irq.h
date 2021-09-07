@@ -11,7 +11,6 @@
  * for more details.
  */
 
-
 /*
  * Encoded IRQs are not considered worth to be supported.
  * Main reason is that there's no per-encoded-interrupt

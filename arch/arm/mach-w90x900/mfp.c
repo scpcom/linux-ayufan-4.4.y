@@ -155,4 +155,3 @@ void mfp_set_groupg(struct device *dev)
 	mutex_unlock(&mfp_mutex);
 }
 EXPORT_SYMBOL(mfp_set_groupg);
-

@@ -279,8 +279,6 @@ int qBri_FPGA_download (PISDN_ADAPTER IoAdapter) {
 	word volatile __iomem *addr = (word volatile __iomem *)DIVA_OS_MEM_ATTACH_PROM(IoAdapter);
 	word           val, baseval = FPGA_CS | FPGA_PROG ;
 
-
-
 	if (DIVA_4BRI_REVISION(IoAdapter))
 	{
 		char* name;

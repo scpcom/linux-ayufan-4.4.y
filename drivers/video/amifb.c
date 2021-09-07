@@ -61,7 +61,6 @@
 
 #include "c2p.h"
 
-
 #define DEBUG
 
 #if !defined(CONFIG_FB_AMIGA_OCS) && !defined(CONFIG_FB_AMIGA_ECS) && !defined(CONFIG_FB_AMIGA_AGA)
@@ -103,7 +102,6 @@
 
 /*******************************************************************************
 
-
    Generic video timings
    ---------------------
 
@@ -144,7 +142,6 @@
    |          |                v                            |          |       |
    +----------+---------------------------------------------+----------+-------+
 
-
    Amiga video timings
    -------------------
 
@@ -170,7 +167,6 @@
    scanlines.
 
    (0, 0) is somewhere in the upper-left corner :-)
-
 
    Amiga visible window definitions
    --------------------------------
@@ -202,7 +198,6 @@
    scanlines.
 
    (0, 0) is somewhere in the upper-left corner :-)
-
 
    Dependencies (AGA, SHRES (35 ns dotclock))
    -------------------------------------------
@@ -275,13 +270,11 @@
    IMHO a hardware cursor is more important for X than horizontal scrolling,
    so that's my motivation.
 
-
    Implementation
    --------------
 
    ami_decode_var() converts the frame buffer values to the Amiga values. It's
    just a `straightforward' implementation of the above rules.
-
 
    Standard VGA timings
    --------------------
@@ -303,7 +296,6 @@
       VGA       640   480      52    112     24     19    112 -      2 +
       VGA70     640   400      52    112     27     21    112 -      2 -
 
-
    Sync polarities
    ---------------
 
@@ -315,7 +307,6 @@
         -        -                480               496
 
    Source: CL-GD542X Technical Reference Manual, Cirrus Logic, Oct 1992
-
 
    Broadcast video timings
    -----------------------
@@ -360,11 +351,9 @@
    encoding of the color part (chrominance) of the video signal and don't say
    anything about horizontal/vertical synchronization nor refresh rates.
 
-
                                                             -- Geert --
 
 *******************************************************************************/
-
 
 	/*
 	 * Custom Chipset Definitions
@@ -473,7 +462,6 @@
 #define BMC0_VSYTRUE	(0x0002) /* VSY polarity */
 #define BMC0_HSYTRUE	(0x0001) /* HSY polarity */
 
-
 	/*
 	 * FMODE -- Fetch Mode Control Register (AGA)
 	 */
@@ -505,7 +493,6 @@ enum { TAG_OCS, TAG_ECS, TAG_AGA };
 
 enum { TAG_FMODE_1, TAG_FMODE_2, TAG_FMODE_4 };
 
-
 	/*
 	 * Clock Definitions, Maximum Display Depth
 	 *
@@ -516,7 +503,6 @@ enum { TAG_FMODE_1, TAG_FMODE_2, TAG_FMODE_4 };
 static u_long pixclock[3];	/* SHRES/HIRES/LORES: index = clk_shift */
 static u_short maxdepth[3];	/* SHRES/HIRES/LORES: index = clk_shift */
 static u_short maxfmode, chipset;
-
 
 	/*
 	 * Broadcast Video Timings
@@ -534,7 +520,6 @@ static u_short maxfmode, chipset;
 #define NTSC_DIWSTRT_V	(40)
 #define NTSC_HTOTAL	(1816)
 #define NTSC_VTOTAL	(525)
-
 
 	/*
 	 * Various macros
@@ -593,7 +578,6 @@ static u_short maxfmode, chipset;
 #define VBlankOn()	custom.intena = IF_SETCLR|IF_COPER
 #define VBlankOff()	custom.intena = IF_COPER
 
-
 	/*
 	 * Chip RAM we reserve for the Frame Buffer
 	 *
@@ -629,7 +613,6 @@ static u_long min_fstrt = 192;
 	ptr += size; \
 }
 
-
 	/*
 	 * Copper Instructions
 	 */
@@ -638,7 +621,6 @@ static u_long min_fstrt = 192;
 #define CMOVE2(val, reg)	((CUSTOM_OFS(reg)+2)<<16 | (val))
 #define CWAIT(x, y)		(((y) & 0x1fe)<<23 | ((x) & 0x7f0)<<13 | 0x0001fffe)
 #define CEND			(0xfffffffe)
-
 
 typedef union {
 	u_long l;
@@ -666,7 +648,6 @@ static u_short currentcop = 0;
 #define FBIOGET_CURSORSTATE     0x460A
 #define FBIOPUT_CURSORSTATE     0x460B
 
-
 struct fb_fix_cursorinfo {
 	__u16 crsr_width;		/* width and height of the cursor in */
 	__u16 crsr_height;		/* pixels (zero if no cursor)	*/
@@ -693,7 +674,6 @@ struct fb_cursorstate {
 #define FB_CURSOR_OFF		0
 #define FB_CURSOR_ON		1
 #define FB_CURSOR_FLASH		2
-
 
 	/*
 	 * Hardware Cursor
@@ -774,7 +754,6 @@ static struct amifb_par {
 	u_short fmode;		/* vmode */
 } currentpar;
 
-
 static struct fb_info fb_info = {
     .fix = {
 	.id		= "Amiga ",
@@ -783,18 +762,15 @@ static struct fb_info fb_info = {
     }
 };
 
-
 	/*
 	 *  Saved color entry 0 so we can restore it when unblanking
 	 */
 
 static u_char red0, green0, blue0;
 
-
 #if defined(CONFIG_FB_AMIGA_ECS)
 static u_short ecs_palette[32];
 #endif
-
 
 	/*
 	 * Latches for Display Changes during VBlank
@@ -804,7 +780,6 @@ static u_short do_vmode_full = 0;	/* Change the Video Mode */
 static u_short do_vmode_pan = 0;	/* Update the Video Mode */
 static short do_blank = 0;		/* (Un)Blank the Screen (±1) */
 static u_short do_cursor = 0;		/* Move the Cursor */
-
 
 	/*
 	 * Various Flags
@@ -942,17 +917,14 @@ static int round_down_bpp = 1;	/* for mode probing */
 	 * Some default modes
 	 */
 
-
 #define DEFMODE_PAL	    2	/* "pal" for PAL OCS/ECS */
 #define DEFMODE_NTSC	    0	/* "ntsc" for NTSC OCS/ECS */
 #define DEFMODE_AMBER_PAL   3	/* "pal-lace" for flicker fixed PAL (A3000) */
 #define DEFMODE_AMBER_NTSC  1	/* "ntsc-lace" for flicker fixed NTSC (A3000) */
 #define DEFMODE_AGA	    19	/* "vga70" for AGA */
 
-
 static int amifb_ilbm = 0;	/* interleaved or normal bitplanes */
 static int amifb_inverse = 0;
-
 
 	/*
 	 * Macros for the conversion from real world values to hardware register
@@ -1107,7 +1079,6 @@ static u_short sprfetchmode[3] = {
 	FMODE_SPAGEM | FMODE_SPR32	/* 4x */
 };
 
-
 	/*
 	 * Interface used by the world
 	 */
@@ -1130,7 +1101,6 @@ static void amifb_copyarea(struct fb_info *info,
 static void amifb_imageblit(struct fb_info *info,
 			    const struct fb_image *image);
 static int amifb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg);
-
 
 	/*
 	 * Interface to the low level console driver
@@ -1170,7 +1140,6 @@ static void ami_init_copper(void);
 static void ami_reinit_copper(void);
 static void ami_build_copper(void);
 static void ami_rebuild_copper(void);
-
 
 static struct fb_ops amifb_ops = {
 	.owner		= THIS_MODULE,
@@ -1251,7 +1220,6 @@ int __init amifb_setup(char *options)
 	return 0;
 }
 
-
 static int amifb_check_var(struct fb_var_screeninfo *var,
 			   struct fb_info *info)
 {
@@ -1266,7 +1234,6 @@ static int amifb_check_var(struct fb_var_screeninfo *var,
 	ami_encode_var(var, &par);
 	return 0;
 }
-
 
 static int amifb_set_par(struct fb_info *info)
 {
@@ -1315,7 +1282,6 @@ static int amifb_set_par(struct fb_info *info)
 	return 0;
 }
 
-
 	/*
 	 * Pan or Wrap the Display
 	 *
@@ -1348,7 +1314,6 @@ static int amifb_pan_display(struct fb_var_screeninfo *var,
 	return 0;
 }
 
-
 #if BITS_PER_LONG == 32
 #define BYTES_PER_LONG	4
 #define SHIFT_PER_LONG	5
@@ -1358,7 +1323,6 @@ static int amifb_pan_display(struct fb_var_screeninfo *var,
 #else
 #define Please update me
 #endif
-
 
     /*
      *  Compose two values, using a bitmask as decision value
@@ -1371,13 +1335,11 @@ static inline unsigned long comp(unsigned long a, unsigned long b,
 	return ((a ^ b) & mask) ^ b;
 }
 
-
 static inline unsigned long xor(unsigned long a, unsigned long b,
 				unsigned long mask)
 {
 	return (a & mask) ^ b;
 }
-
 
     /*
      *  Unaligned forward bit copy using 32-bit or 64-bit memory accesses
@@ -1517,7 +1479,6 @@ static void bitcpy(unsigned long *dst, int dst_idx, const unsigned long *src,
 		}
 	}
 }
-
 
     /*
      *  Unaligned reverse bit copy using 32-bit or 64-bit memory accesses
@@ -1669,7 +1630,6 @@ static void bitcpy_rev(unsigned long *dst, int dst_idx,
 	}
 }
 
-
     /*
      *  Unaligned forward inverting bit copy using 32-bit or 64-bit memory
      *  accesses
@@ -1810,7 +1770,6 @@ static void bitcpy_not(unsigned long *dst, int dst_idx,
 	}
 }
 
-
     /*
      *  Unaligned 32-bit pattern fill using 32/64-bit memory accesses
      */
@@ -1865,7 +1824,6 @@ static void bitfill32(unsigned long *dst, int dst_idx, u32 pat, u32 n)
 			*dst = comp(val, *dst, last);
 	}
 }
-
 
     /*
      *  Unaligned 32-bit pattern xor using 32/64-bit memory accesses
@@ -1948,7 +1906,6 @@ static inline void xor_one_line(int bpp, unsigned long next_plane,
 	}
 }
 
-
 static void amifb_fillrect(struct fb_info *info,
 			   const struct fb_fillrect *rect)
 {
@@ -2026,7 +1983,6 @@ static inline void copy_one_line_rev(int bpp, unsigned long next_plane,
 	}
 }
 
-
 static void amifb_copyarea(struct fb_info *info,
 			   const struct fb_copyarea *area)
 {
@@ -2090,7 +2046,6 @@ static void amifb_copyarea(struct fb_info *info,
 	}
 }
 
-
 static inline void expand_one_line(int bpp, unsigned long next_plane,
 				   unsigned long *dst, int dst_idx, u32 n,
 				   const u8 *data, u32 bgcolor, u32 fgcolor)
@@ -2118,7 +2073,6 @@ static inline void expand_one_line(int bpp, unsigned long next_plane,
 	dst_idx += next_plane*8;
     }
 }
-
 
 static void amifb_imageblit(struct fb_info *info, const struct fb_image *image)
 {
@@ -2164,7 +2118,6 @@ static void amifb_imageblit(struct fb_info *info, const struct fb_image *image)
 			   image->width, info->var.bits_per_pixel);
 	}
 }
-
 
 	/*
 	 * Amiga Frame Buffer Specific ioctls
@@ -2219,7 +2172,6 @@ static int amifb_ioctl(struct fb_info *info,
 	return -EINVAL;
 }
 
-
 	/*
 	 * Allocate, Clear and Align a Block of Chip Memory
 	 */
@@ -2241,7 +2193,6 @@ static inline void chipfree(void)
 	if (unaligned_chipptr)
 		amiga_chip_free((void *)unaligned_chipptr);
 }
-
 
 	/*
 	 * Initialisation
@@ -2466,7 +2417,6 @@ static void amifb_deinit(void)
 	release_mem_region(CUSTOM_PHYSADDR+0xe0, 0x120);
 	custom.dmacon = DMAF_ALL | DMAF_MASTER;
 }
-
 
 	/*
 	 * Blank the display.
@@ -2796,7 +2746,6 @@ static int ami_decode_var(struct fb_var_screeninfo *var,
 	 * than sprite1-7, unless you change min_fstrt
 	 */
 
-
 	fsize = ((maxfmode+clk_shift <= 1) ? fconst : 64);
 	fstrt = downx(fconst, par->diwstrt_h-4) - fsize;
 	if (fstrt < min_fstrt) {
@@ -3003,7 +2952,6 @@ static int ami_encode_var(struct fb_var_screeninfo *var,
 	return 0;
 }
 
-
 	/*
 	 * Pan or Wrap the Display
 	 *
@@ -3091,7 +3039,6 @@ static int ami_update_par(void)
 
 	return 0;
 }
-
 
 	/*
 	 * Set a single color register. The values supplied are already
@@ -3587,7 +3534,6 @@ static void ami_set_sprite(void)
 		cops[cop_spr0ptrl].w[1] = loww(ps);
 	}
 }
-
 
 	/*
 	 * Initialise the Copper Initialisation List

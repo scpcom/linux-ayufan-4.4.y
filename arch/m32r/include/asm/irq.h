@@ -2,7 +2,6 @@
 #ifndef _ASM_M32R_IRQ_H
 #define _ASM_M32R_IRQ_H
 
-
 #if defined(CONFIG_PLAT_USRV)
 /*
  * IRQ definitions for M32700UT

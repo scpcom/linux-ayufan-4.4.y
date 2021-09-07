@@ -87,7 +87,6 @@ bugger_off_msg:
 	.ascii	"Remove disk and press any key to reboot . . .\r\n"
 	.byte	0
 
-
 	# Kernel attributes; used by setup.  This is part 1 of the
 	# header, from the old boot sector.
 

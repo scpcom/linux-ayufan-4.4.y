@@ -902,7 +902,6 @@ static int msm_config_vfe(struct msm_sync *sync, void __user *arg)
 		return -EINVAL;
 	}
 
-
 	if (sync->vfefn.vfe_config)
 		rc = sync->vfefn.vfe_config(&cfgcmd, data);
 
@@ -1501,7 +1500,6 @@ static long msm_ioctl_frame(struct file *filep, unsigned int cmd,
 	void __user *argp = (void __user *)arg;
 	struct msm_device *pmsm = filep->private_data;
 
-
 	switch (cmd) {
 	case MSM_CAM_IOCTL_GETFRAME:
 		/* Coming from frame thread to get frame
@@ -1520,7 +1518,6 @@ static long msm_ioctl_frame(struct file *filep, unsigned int cmd,
 
 	return rc;
 }
-
 
 static long msm_ioctl_control(struct file *filep, unsigned int cmd,
 	unsigned long arg)

@@ -1378,7 +1378,6 @@ static int l2cap_ertm_send(struct sock *sk)
 				| (pi->next_tx_seq << L2CAP_CTRL_TXSEQ_SHIFT);
 		put_unaligned_le16(control, tx_skb->data + L2CAP_HDR_SIZE);
 
-
 		if (l2cap_pi(sk)->fcs == L2CAP_FCS_CRC16) {
 			fcs = crc16(0, (u8 *)skb->data, tx_skb->len - 2);
 			put_unaligned_le16(fcs, skb->data + tx_skb->len - 2);
@@ -2365,7 +2364,6 @@ done:
 		l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC,
 					sizeof(rfc), (unsigned long) &rfc);
 	}
-
 
 	if (result == L2CAP_CONF_SUCCESS) {
 		/* Configure output options and let the other side know

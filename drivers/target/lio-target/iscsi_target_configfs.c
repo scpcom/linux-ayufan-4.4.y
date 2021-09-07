@@ -2526,7 +2526,6 @@ static struct config_item_type lio_target_tpg_cit = {
 	.ct_owner	= THIS_MODULE,
 };
 
-
 /* End items for lio_target_tpg_cit */
 
 /* Start items for lio_target_tiqn_cit */
@@ -3034,7 +3033,6 @@ int iscsi_target_register_configfs(void)
 #endif
 	return 0;
 }
-
 
 void iscsi_target_deregister_configfs(void)
 {

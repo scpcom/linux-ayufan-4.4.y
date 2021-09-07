@@ -42,26 +42,19 @@
  * 2.1.0   2009_05_04 sec - add SNOW-3G CHA support
  */
 
-
 #ifndef T23_H
 #define T23_H
-
 
 /** @file
  * Basic hardware definitions for the Talitos (SEC) 2.x and 3.x
  * family of embeddable cryptographic acceleration cores.
  */
 
-
 #include <linux/types.h>
-
-
 
 #ifdef _cplusplus
 extern "C" {
 #endif
-
-
 
 /*
  * Basic header construction definitions
@@ -87,7 +80,6 @@ extern "C" {
 #define EU_SNOW               (0x09 << EU_SEL_SHIFT) /**< SNOW-3G unit            */
 #define EU_MDPRIME            (0x0b << EU_SEL_SHIFT) /**< SHA256/384/512 -t3 only */
 
-
 /* MDHA Mode Bits                                            */
 /* |  56  |  57  |  58  |  59  |  60  |  61  |  62  |  63  | */
 /* | CONT | CICV | SMAC | INIT | HMAC |  PD  |     ALG     | */
@@ -104,7 +96,6 @@ extern "C" {
 #define MD_SHA384             (0x00)  /* in MDEU-B mode */
 #define MD_SHA512             (0x02)  /* in MDEU-B mode */
 
-
 /* DES Mode Bits                                             */
 /* |  56  |  57  |  58  |  59  |  60  |  61  |  62  |  63  | */
 /*                             |     CM      |  TS  |  ED  | */
@@ -116,7 +107,6 @@ extern "C" {
 #define DES_ECB               (0x00)
 #define DES_CFB_64            (0x08)
 #define DES_OFB_64            (0x0c)
-
 
 /* AES Mode Bits                                                     */
 /* |  56  |  57  |  58  |  59  |  60  |  61  |  62  |  63  |         */
@@ -152,7 +142,6 @@ extern "C" {
 #define AES_CCM_ICV           ((0x03 << 6) | (0x00 << 1))
 #define AES_GCM_ICV           ((0x03 << 6) | (0x01 << 1))
 #define AES_XOR               ((0x03 << 6) | (0x03 << 1))
-
 
 /* PKHA Mode Bits                                             */
 /* |  56  |  57  |  58  |  59  |  60  |  61  |  62  |  63  |  */
@@ -213,7 +202,6 @@ extern "C" {
 #define KEA_ICV               (0x40) /**< inline integrity check      */
 #define KEA_GSM               (0x80) /**< GSM-compatible reads        */
 
-
 /* CRC mode bits                                              */
 /* |  56  |  57  |  58  |  59  |  60  |  61  |  62  |  63  |  */
 /* | RAW  | CICV |                           |     ALG     |  */
@@ -239,7 +227,6 @@ extern "C" {
 #define SNOW_EOM              (0x10) /**< End of message (finalize)  */
 #define SNOW_ICV              (0x40) /**< inline integrity check     */
 
-
 /* Remaining header stuff, shift/mask for EU selection and descriptor type */
 
 #define EU_SHIFT_PRIMARY    (20)
@@ -247,7 +234,6 @@ extern "C" {
 
 #define DESCTYPE_SHIFT      (3)
 #define DESCTYPE_MASK       (0x0000001f << DESCTYPE_SHIFT)
-
 
 /*
  * AES counter-mode nonsnooping       0  b0000_0
@@ -262,7 +248,6 @@ extern "C" {
  */
 #define DESCTYPE_AES_CTR        (0 << DESCTYPE_SHIFT)
 
-
 /*
  * IPSec ESP singlepass               1  b0000_1
  * ipsec_esp
@@ -275,7 +260,6 @@ extern "C" {
  * p6 - Cipher IV Out
  */
 #define DESCTYPE_IPSEC_ESP      (1 << DESCTYPE_SHIFT)
-
 
 /*
  * Common nonsnooping no RC4          2  b0001_0
@@ -308,7 +292,6 @@ extern "C" {
  */
 #define DESCTYPE_COMMON         (2 << DESCTYPE_SHIFT)
 
-
 /*
  * AES CCMP singlepass 802.11i        3  b0001_1
  * 802.11i_AES_ccmp
@@ -322,7 +305,6 @@ extern "C" {
  */
 #define DESCTYPE_AES_CCMP       (3 << DESCTYPE_SHIFT)
 
-
 /*
  * HMAC snooping no RC4               4  b0010_0
  * hmac_snoop_no_afeu
@@ -335,7 +317,6 @@ extern "C" {
  * p6 - ICV Out
  */
 #define DESCTYPE_HMAC           (4 << DESCTYPE_SHIFT)
-
 
 /*
  * SRTP single-pass                   5  b010_1
@@ -359,11 +340,9 @@ extern "C" {
  */
 #define DESCTYPE_SRTP           (5 << DESCTYPE_SHIFT)
 
-
 /*
  * (reserved)                         6  b0011_0
  */
-
 
 /*
  * ECC data assemble                  7  b0011_1
@@ -378,11 +357,9 @@ extern "C" {
  */
 #define DESCTYPE_PK_ECC_ASM     (7 << DESCTYPE_SHIFT)
 
-
 /*
  * (reserved)                         8  b0100_0
  */
-
 
 /*
  * ECC point multiply                 9  b0100_1
@@ -397,7 +374,6 @@ extern "C" {
  */
 #define DESCTYPE_PK_ECC_PTMULT  (9 << DESCTYPE_SHIFT)
 
-
 /*
  * Common nonsnooping RC4            10  b0101_0
  * common_nosnoop_afeu
@@ -410,7 +386,6 @@ extern "C" {
  * p6 - (reserved)
  */
 #define DESCTYPE_ARC4           (10 << DESCTYPE_SHIFT)
-
 
 /*
  * ECC point add-double              11  b0101_1
@@ -425,11 +400,9 @@ extern "C" {
  */
 #define DESCTYPE_PK_ECC_PTADD_D (11 << DESCTYPE_SHIFT)
 
-
 /*
  * (reserved)                        12-15
  */
-
 
 /*
  * Montgomery multiply               16  b1000_0
@@ -443,7 +416,6 @@ extern "C" {
  * p6 - (reserved)
  */
 #define DESCTYPE_PK_MONTY       (16 << DESCTYPE_SHIFT)
-
 
 /*
  * TLS singlepass blockcipher        17  b1000_1
@@ -467,11 +439,9 @@ extern "C" {
  */
 #define DESCTYPE_TLS_BLOCK      (17 << DESCTYPE_SHIFT)
 
-
 /*
  * (reserved)                        18  b1001_0
  */
-
 
 /*
  * TLS singlepass streamcipher       19  b1001_1
@@ -495,11 +465,9 @@ extern "C" {
  */
 #define DESCTYPE_TLS_STREAM     (19 << DESCTYPE_SHIFT)
 
-
 /*
  * (reserved)                        20  b1010_0
  */
-
 
 /*
  * RAID-XOR multiple sources         21  b1010_1
@@ -514,11 +482,9 @@ extern "C" {
  */
 #define DESCTYPE_RAIDXOR        (21 << DESCTYPE_SHIFT)
 
-
 /*
  * (reserved)                        22  b1011_0
  */
-
 
 /*
  * IPSec ESP with AES-ECM            23  b1011_1
@@ -533,7 +499,6 @@ extern "C" {
  */
 #define DESCTYPE_IPSEC_AES_GCM  (23 << DESCTYPE_SHIFT)
 
-
 /*
  * AES CTR snoop (-HMAC)             24  b1100_0
  * hmac_snoop_aesu_ctr
@@ -546,7 +511,6 @@ extern "C" {
  * p6 - ICV Out
  */
 #define DESCTYPE_AES_HMAC       (24 << DESCTYPE_SHIFT)
-
 
 /*
  * Double CRC operation              25  b1100_1
@@ -565,15 +529,10 @@ extern "C" {
  * (reserved)                        26-31
  */
 
-
 /* Remaining Header Bits */
 #define HDR_OUTBOUND        (0x00000000)
 #define HDR_INBOUND         (0x00000002)
 #define HDR_DONE            (0x00000001)
-
-
-
-
 
 /*
  * General register structure of a SEC2 or 3 core
@@ -585,10 +544,8 @@ extern "C" {
 /** Size of register bank space requested from memory manager */
 #define T2_REGISTER_BANK_SIZE         (0x00010000)
 
-
 /** fixed depth of a T2 fetch FIFO */
 #define T2_CHANNEL_FIFO_DEPTH         (24)
-
 
 #ifdef OBSOLETE
 #define T2_TOTAL_CHANNELS             (4)
@@ -600,9 +557,6 @@ extern "C" {
 #define T3_MAX_EUS                    (9)  /* includes MDEU-B */
 
     typedef u8 _resvd;
-
-
-
 
     /*
      * Content of the device controller block
@@ -628,7 +582,6 @@ extern "C" {
 #define T2_EUASR_RNG_SHIFT                 0
 #define T2_EUASR_STEU_MASK                 0x000000000000f000ull
 #define T2_EUASR_STEU_SHIFT                12
-
 
     /* Interrupt Mask/Status/Clear (IMR/ISR/ICR) defs */
     /* IMR - 0x31008 rw */
@@ -678,7 +631,6 @@ extern "C" {
 #define T2_IMR_DONE_STEU                   0x0000000000400000ull
 #define T2_IMR_ERROR_STEU                  0x0000000000800000ull
 
-
 /* Master Control Register (MCR) defs - 0x31030 rw */
 
 #define T2_MCR_BUSPRIORITY_LOW             0x0000000000000000ull
@@ -691,8 +643,6 @@ extern "C" {
 
 #define T2_MCR_SOFTWARE_RESET              0x0000000100000000ull
 
-
-
 /** Register-level view of a controller block, 256 bytes */
 typedef struct _T2controller {
     _resvd       _reserved1[8];                  /**< 0x00 - 0x07 */
@@ -704,8 +654,6 @@ typedef struct _T2controller {
     volatile u64 masterControl;                  /**< 0x30 - 0x37 */
     _resvd       _reserved2[200];                /**< 0x38 - 0xff */
 } T2CONTROLLER;
-
-
 
     /*
      * Content of a channel control block
@@ -780,8 +728,6 @@ typedef struct _T2controller {
 #define T2_CHN_ERROR_S_BOUNDARY            0x0000000000000020ull
 #define T2_CHN_ERROR_S_LENGTH              0x0000000000000010ull
 
-
-
 /** Register view of a channel block - 256 bytes */
 typedef struct _T2channel {
     _resvd       _reserved1[8];                  /**< 0x00 - 0x07 */
@@ -795,7 +741,6 @@ typedef struct _T2channel {
     volatile u64 gatherLinkTbl[4];               /**< 0xc0 - 0xdf */
     volatile u64 scatterLinkTbl[4];              /**< 0xe0 - 0xff */
 } T2CHANNEL;
-
 
 /** Register view of the T3 polychannel status - padded to 256 bytes */
 typedef struct _T2polychn {
@@ -811,7 +756,6 @@ typedef struct _T2IPID {
     _resvd         _reserved0[248];              /**< 0x00 - 0xf7 */
     volatile u64 id;                             /**< 0xf8 = 0xff */
 } T2IPID;
-
 
 /** DES (DEU) block register view 0x---32000 */
 typedef struct _T2EU_DES {
@@ -835,7 +779,6 @@ typedef struct _T2EU_DES {
     volatile u8    FIFO[2048];                   /**< 0x800 - 0xfff RW */
 } T2EU_DES;
 
-
 /** AES (AESU) block register view 0x---34000 */
 typedef struct _T2EU_AES {
     volatile u64   mode;                         /**< 0x000 - 0x007 RW */
@@ -855,7 +798,6 @@ typedef struct _T2EU_AES {
     _resvd         _reserved4[1016];             /**< 0x408 - 0x7ff -- */
     volatile u8    FIFO[2048];                   /**< 0x800 - 0xfff RW */
 } T2EU_AES;
-
 
 /** MD (MDEU) block register view 0x---36000 */
 typedef struct _T2EU_MD {
@@ -878,7 +820,6 @@ typedef struct _T2EU_MD {
     volatile u8    FIFO[2048];                   /**< 0x800 - 0xfff WO */
 } T2EU_MD;
 
-
 /** ARC (AFEU) block register view 0x---38000 */
 typedef struct _T2EU_ARC4 {
     volatile u64   mode;                         /**< 0x000 - 0x007 RW */
@@ -900,7 +841,6 @@ typedef struct _T2EU_ARC4 {
     volatile u8    FIFO[2048];                   /**< 0x800 - 0xfff RW */
 } T2EU_ARC4;
 
-
 /** Random Generator (RNG) block register view 0x---3a000 */
 typedef struct _T2EU_RND {
     volatile u64   mode;                         /**< 0x000 - 0x007 RW */
@@ -916,7 +856,6 @@ typedef struct _T2EU_RND {
     _resvd         _reserved2[1960];             /**< 0x058 - 0x7ff -- */
     volatile u8    FIFO[2048];                   /**< 0x800 - 0xfff RW */
 } T2EU_RND;
-
 
 /** PKHA block register view 0x---3c000 */
 typedef struct _T2EU_PKHA {
@@ -945,7 +884,6 @@ typedef struct _T2EU_PKHA {
     volatile u8    paramN[256];                  /**< 0x800 - 0x8ff RW */
     _resvd         _reserved4[1792];             /**< 0x900 - 0xfff -- */
 } T2EU_PKHA;
-
 
 /** Kasumi (KEU) block register view 0x---3e000 */
 typedef struct _T2EU_KEA {
@@ -1009,7 +947,6 @@ typedef struct _T3EU_SNOW3G {
     volatile u8    FIFO[2048];                   /**< 0x800 - 0xfff RW */
 } T3EU_SNOW3G;
 
-
 /** CRC (CRCU) block register view 0x---3f000 - T3 only */
 typedef struct _T3EU_CRC {
     volatile u64   mode;                         /**< 0x000 - 0x007 RW */
@@ -1029,8 +966,6 @@ typedef struct _T3EU_CRC {
     _resvd         _reserved2[1016];             /**< 0x408 - 0x7ff -- */
     volatile u8    FIFO[2048];                   /**< 0x800 - 0xfff WO */
 } T3EU_CRC;
-
-
 
 /*
  * Top-level view of Talitos, all blocks aggregated into the full core
@@ -1104,8 +1039,6 @@ typedef struct _T2CORE {
     T3EU_CRC     euCRC;
 } T2CORE;
 
-
-
 /*
  * Packet descriptor format for any T2 variant
  */
@@ -1117,7 +1050,6 @@ typedef struct _T2CORE {
 #define NEXT_ENTRY  (0x01)  /**< linkEntry.chainCtrl
                                     - point to next table */
 
-
 /** Describes a single fragment entry in a linktable
     These are referenced by a pointer pair if a virtual buffer is
     "dispersed" (scattered) in memory                             */
@@ -1128,7 +1060,6 @@ typedef struct _linkEntry {
     u8      extAddr;    /**< extended address bits  */
     void   *segAddr;    /**< segment address        */
 } linkEntry;
-
 
 /* Describes a pointer/size pair in a packet descriptor */
 /* There are 7 of these in a single packet descriptor   */
@@ -1145,18 +1076,12 @@ typedef struct _ptrPair {
     void *ptr;
 } ptrPair;
 
-
-
 /** Basic form of a single packet descriptor */
 typedef struct _T2DPD {
     u32       hdr;
     u32       fdbk;
     ptrPair   pair[TOTAL_PAIRS];
 } T2DPD;
-
-
-
-
 
 #ifdef _cplusplus
 }

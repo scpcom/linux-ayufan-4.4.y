@@ -59,7 +59,6 @@
 #ifndef __ET1310_TX_H__
 #define __ET1310_TX_H__
 
-
 /* Typedefs for Tx Descriptor Ring */
 
 /*
@@ -135,7 +134,6 @@ typedef struct _tx_desc_entry_t {
 	TXDESC_WORD2_t word2;	/* control words how to xmit the */
 	TXDESC_WORD3_t word3;	/* data (detailed above) */
 } TX_DESC_ENTRY_t, *PTX_DESC_ENTRY_t;
-
 
 /* Typedefs for Tx DMA engine status writeback */
 

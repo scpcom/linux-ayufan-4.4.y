@@ -113,4 +113,3 @@ void __init uv_setup(char **cmdline_p)
 		printk(KERN_DEBUG "UV cpu %d, nid %d\n", cpu, nid);
 	}
 }
-

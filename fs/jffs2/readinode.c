@@ -195,7 +195,6 @@ static struct jffs2_tmp_dnode_info *jffs2_lookup_tn(struct rb_root *tn_root, uin
 	return tn;
 }
 
-
 static void jffs2_kill_tn(struct jffs2_sb_info *c, struct jffs2_tmp_dnode_info *tn)
 {
 	jffs2_mark_node_obsolete(c, tn->fn->raw);
@@ -1242,7 +1241,6 @@ static int jffs2_do_read_inode_internal(struct jffs2_sb_info *c,
 			latest_node->ctime = latest_node->mtime = cpu_to_je32(rii.latest_mctime);
 		}
 		break;
-
 
 	case S_IFREG:
 		/* If it was a regular file, truncate it to the latest node's isize */

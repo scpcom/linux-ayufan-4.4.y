@@ -81,11 +81,9 @@ extern "C" {
 #define TWSI_SLAVE_ADDR_10BIT_MASK 	0x300
 #define	TWSI_SLAVE_ADDR_10BIT_CONST 	0xF0
 
-
 #define TWSI_EXTENDED_SLAVE_ADDR_REG(chanNum)	(TWSI_SLAVE_BASE(chanNum) + 0x10)
 #define TWSI_EXTENDED_SLAVE_OFFS 	0
 #define TWSI_EXTENDED_SLAVE_MASK	(0xFF << TWSI_EXTENDED_SLAVE_OFFS)
-
 
 #define TWSI_DATA_REG(chanNum)		(TWSI_SLAVE_BASE(chanNum) + 0x04)
 #define TWSI_DATA_COMMAND_OFFS		0x0
@@ -98,7 +96,6 @@ extern "C" {
 #define TWSI_DATA_ADDR_10BIT_MASK	0x300
 #define TWSI_DATA_ADDR_10BIT_CONST	0xF0
 
-
 #define TWSI_CONTROL_REG(chanNum)	(TWSI_SLAVE_BASE(chanNum) + 0x08)
 #define TWSI_CONTROL_ACK            	BIT2
 #define TWSI_CONTROL_INT_FLAG_SET   	BIT3
@@ -106,7 +103,6 @@ extern "C" {
 #define TWSI_CONTROL_START_BIT 		BIT5 
 #define TWSI_CONTROL_ENA     		BIT6
 #define TWSI_CONTROL_INT_ENA    	BIT7
-
 
 #define TWSI_STATUS_BAUDE_RATE_REG(chanNum)	(TWSI_SLAVE_BASE(chanNum) + 0x0c)
 #define TWSI_BAUD_RATE_N_OFFS		0
@@ -151,7 +147,6 @@ extern "C" {
 #define TWSI_SEC_AD_PLS_RD_BIT_TRA_ACK_REC                        0xE0
 #define TWSI_SEC_AD_PLS_RD_BIT_TRA_ACK_NOT_REC                    0xE8
 #define TWSI_NO_REL_STS_INT_FLAG_IS_KEPT_0                        0xF8
-
 
 #ifdef __cplusplus
 }

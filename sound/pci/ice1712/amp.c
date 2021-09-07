@@ -74,7 +74,6 @@ static int __devinit snd_vt1724_amp_add_controls(struct snd_ice1712 *ice)
 	return 0;
 }
 
-
 /* entry point */
 struct snd_ice1712_card_info snd_vt1724_amp_cards[] __devinitdata = {
 	{
@@ -93,4 +92,3 @@ struct snd_ice1712_card_info snd_vt1724_amp_cards[] __devinitdata = {
 	},
 	{ } /* terminator */
 };
-

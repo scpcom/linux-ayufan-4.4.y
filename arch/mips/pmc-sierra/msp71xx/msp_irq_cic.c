@@ -71,7 +71,6 @@ static struct irq_chip msp_cic_irq_controller = {
 	.unmask = unmask_msp_cic_irq,
 };
 
-
 void __init msp_cic_irq_init(void)
 {
 	int i;
@@ -131,4 +130,3 @@ void msp_cic_irq_dispatch(void)
 	else
 		do_IRQ(ffs(pending) + intbase - 1);
 }
-

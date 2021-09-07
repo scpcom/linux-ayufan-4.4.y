@@ -129,4 +129,3 @@ const struct dentry_operations gfs2_dops = {
 	.d_hash = gfs2_dhash,
 	.d_delete = gfs2_dentry_delete,
 };
-

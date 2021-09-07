@@ -37,7 +37,6 @@
  * critical data
  */
 
-
 /* We are out of SPRGs so we save some things in the PACA. The normal
  * exception frame is smaller than the CRIT or MC one though
  */
@@ -185,7 +184,6 @@ exc_##label##_book3e:
 #define TLB_MISS_STATS_SAVE_INFO					    \
 	std	r14,EX_TLB_ESR(r12);	/* save ESR */			    \
 
-
 #else
 #define TLB_MISS_PROLOG_STATS
 #define TLB_MISS_RESTORE_STATS
@@ -202,4 +200,3 @@ exc_##label##_book3e:
 	mtspr	SPRN_IVOR##vector_number,r3;
 
 #endif /* _ASM_POWERPC_EXCEPTION_64E_H */
-

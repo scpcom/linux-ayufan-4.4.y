@@ -45,8 +45,6 @@ static int ibmmca_host_reset (Scsi_Cmnd *);
 static int ibmmca_biosparam (struct scsi_device *, struct block_device *, sector_t, int *);
 static int ibmmca_proc_info(struct Scsi_Host *shpnt, char *buffer, char **start, off_t offset, int length, int inout);
 
-
-
 /* current version of this driver-source: */
 #define IBMMCA_SCSI_DRIVER_VERSION "4.0b-ac"
 
@@ -1588,8 +1586,6 @@ static int ibmmca_probe(struct device *dev)
 		}
 	}
 
-
-
 	/* give detailed information on the subsystem. This helps me
 	 * additionally during debugging and analyzing bug-reports. */
 	printk(KERN_INFO "IBM MCA SCSI: %s found, io=0x%x, scsi id=%d,\n",
@@ -2267,7 +2263,6 @@ static int ibmmca_proc_info(struct Scsi_Host *shpnt, char *buffer, char **start,
 	unsigned long flags;
 	int max_pun;
 
-	
 	spin_lock_irqsave(shpnt->host_lock, flags);	/* Check it */
 
 	max_pun = subsystem_maxid(shpnt);

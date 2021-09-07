@@ -24,7 +24,6 @@
 #include <mach/at91sam9_sdramc.h>
 #endif
 
-
 #ifdef CONFIG_ARCH_AT91SAM9263
 /*
  * FIXME either or both the SDRAM controllers (EB0, EB1) might be in use;
@@ -46,7 +45,6 @@
 #define MOSCRDY_TIMEOUT 	1000
 #define PLLALOCK_TIMEOUT	1000
 #define PLLBLOCK_TIMEOUT	1000
-
 
 /*
  * Wait until master clock is ready (after switching master clock source)
@@ -251,7 +249,6 @@ ENTRY(at91_slow_clock)
 
 	/* Restore registers, and return */
 	ldmfd	sp!, {r0 - r12, pc}
-
 
 .saved_mckr:
 	.word 0

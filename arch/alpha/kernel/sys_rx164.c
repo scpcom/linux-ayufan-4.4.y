@@ -31,7 +31,6 @@
 #include "pci_impl.h"
 #include "machvec_impl.h"
 
-
 /* Note mask bit is true for ENABLED irqs.  */
 static unsigned long cached_irq_mask;
 
@@ -126,7 +125,6 @@ rx164_init_irq(void)
 	setup_irq(16+20, &isa_cascade_irqaction);
 }
 
-
 /*
  * The RX164 changed its interrupt routing between pass1 and pass2...
  *
@@ -190,7 +188,6 @@ rx164_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 	   and use the correct table.  */
 	return COMMON_TABLE_LOOKUP;
 }
-
 
 /*
  * The System Vector

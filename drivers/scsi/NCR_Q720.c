@@ -65,7 +65,6 @@ NCR_Q720_intr(int irq, void *data)
 	if(sir == 0xff)
 		return IRQ_NONE;
 
-
 	while((siop = ffz(sir)) < p->siops) {
 		sir |= 1<<siop;
 		ncr53c8xx_intr(irq, p->hosts[siop]);
@@ -159,7 +158,6 @@ NCR_Q720_probe(struct device *dev)
 
 	io_base = (pos2 & NCR_Q720_POS2_IO_MASK) << NCR_Q720_POS2_IO_SHIFT;
 
-
 	if(banner) {
 		printk(KERN_NOTICE "NCR Q720: Driver Version " NCR_Q720_VERSION "\n"
 		       "NCR Q720:  Copyright (c) 2003 by James.Bottomley@HansenPartnership.com\n"
@@ -249,7 +247,6 @@ NCR_Q720_probe(struct device *dev)
 	}
 
 	irq = readb(mem_base + 5) & 0x0f;
-	
 	
 	/* now do the bus related transforms */
 	irq = mca_device_transform_irq(mca_dev, irq);

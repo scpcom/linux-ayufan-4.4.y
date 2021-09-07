@@ -893,7 +893,6 @@ xfrm_stateonly_find(struct net *net,
 		xfrm_state_hold(rx);
 	spin_unlock(&xfrm_state_lock);
 
-
 	return rx;
 }
 EXPORT_SYMBOL(xfrm_stateonly_find);
@@ -1577,7 +1576,6 @@ void xfrm_state_walk_done(struct xfrm_state_walk *walk)
 	spin_unlock_bh(&xfrm_state_lock);
 }
 EXPORT_SYMBOL(xfrm_state_walk_done);
-
 
 void xfrm_replay_notify(struct xfrm_state *x, int event)
 {

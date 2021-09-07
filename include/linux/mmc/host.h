@@ -257,4 +257,3 @@ static inline void mmc_set_disable_delay(struct mmc_host *host,
 }
 
 #endif
-

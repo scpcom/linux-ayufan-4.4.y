@@ -89,7 +89,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define IDMA_HEADERS_RETARGET_CTRL_REG      0x60a84
 #define IDMA_HEADERS_RETARGET_BASE_REG      0x60a88
 
-
 /* Base Addr reg */
 #define IDMA_WIN_TARGET_OFFS 0 /* The target interface associated with window*/
 #define IDMA_WIN_TARGET_MASK (0xf << IDMA_WIN_TARGET_OFFS)
@@ -116,7 +115,6 @@ typedef enum _mvDmaOverride
     DMA_NEXT_DESC           /* Override next descriptor address             */
 }MV_DMA_OVERRIDE;
 
-
 typedef struct _mvDmaDecWin
 {
         MV_TARGET     target;
@@ -140,4 +138,3 @@ MV_VOID mvDmaAddrDecShow(MV_VOID);
 MV_VOID mvDmaAllStop(MV_VOID);
 
 #endif /* __INCmvSysIdmaBarh */
-

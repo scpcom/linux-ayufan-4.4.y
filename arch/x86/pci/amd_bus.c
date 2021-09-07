@@ -106,7 +106,6 @@ static void __init update_range(struct res_range *range, size_t start,
 			continue;
 		}
 
-
 		if (start > range[j].start && end >= range[j].end && range[j].end > start - 1) {
 			range[j].end = start - 1;
 			continue;

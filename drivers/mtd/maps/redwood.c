@@ -117,7 +117,6 @@ struct map_info redwood_flash_map = {
 	.phys = WINDOW_ADDR,
 };
 
-
 #define NUM_REDWOOD_FLASH_PARTITIONS ARRAY_SIZE(redwood_flash_partitions)
 
 static struct mtd_info *redwood_mtd;

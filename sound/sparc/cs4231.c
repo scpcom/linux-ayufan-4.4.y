@@ -949,7 +949,6 @@ static int snd_cs4231_capture_prepare(struct snd_pcm_substream *substream)
 	chip->image[CS4231_IFACE_CTRL] &= ~(CS4231_RECORD_ENABLE |
 					    CS4231_RECORD_PIO);
 
-
 	chip->c_periods_sent = 0;
 	spin_unlock_irqrestore(&chip->lock, flags);
 

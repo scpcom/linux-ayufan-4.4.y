@@ -20,7 +20,6 @@ static int			sched_ref;
 static DEFINE_MUTEX(sched_register_mutex);
 static int			sched_stopped;
 
-
 void
 tracing_sched_switch_trace(struct trace_array *tr,
 			   struct task_struct *prev,
@@ -295,4 +294,3 @@ __init static int init_sched_switch_trace(void)
 	return register_tracer(&sched_switch_trace);
 }
 device_initcall(init_sched_switch_trace);
-

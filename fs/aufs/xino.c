@@ -739,7 +739,6 @@ int au_xino_br(struct super_block *sb, struct au_branch *br, ino_t h_ino,
 	if (!err)
 		return 0; /* success */
 
-
  out:
 	return err;
 }

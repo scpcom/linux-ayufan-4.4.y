@@ -206,7 +206,6 @@ static void __init idp_map_io(void)
 	iotable_init(idp_io_desc, ARRAY_SIZE(idp_io_desc));
 }
 
-
 MACHINE_START(PXA_IDP, "Vibren PXA255 IDP")
 	/* Maintainer: Vibren Technologies */
 	.phys_io	= 0x40000000,

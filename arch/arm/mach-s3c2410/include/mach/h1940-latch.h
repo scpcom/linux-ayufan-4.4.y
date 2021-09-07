@@ -14,7 +14,6 @@
 #ifndef __ASM_ARCH_H1940_LATCH_H
 #define __ASM_ARCH_H1940_LATCH_H
 
-
 #ifndef __ASSEMBLY__
 #define H1940_LATCH		((void __force __iomem *)0xF8000000)
 #else

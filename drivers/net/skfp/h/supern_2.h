@@ -220,7 +220,6 @@ union tx_pointer {
 #define TD_P_RPXL	0x000000ffL
 #define TD_P_RPX	0x0000ffffL
 
-
 #define TX_PATTERN	0xa0
 #define TX_POINTER_END	0xa0000000L
 #define TX_INT_PATTERN	0xa0000000L
@@ -360,7 +359,6 @@ struct tx_queue {
 /* Supernet 3: Orion (PDX?) Registers */
 #define	FM_ORBIST	0xd0		/* r/w Orion BIST signature */
 #define	FM_ORSTAT	0xd2		/* r/w Orion Status Register */
-
 
 /*
  * Mode Register 1 (MDREG1)
@@ -701,7 +699,6 @@ struct tx_queue {
 					/* SN3: reserved */
 #define	FM_ITR		0x50		/* SN3: Transmit Command */
 
-
 /*
  *	defines for PLC (Am79C864)
  */
@@ -902,7 +899,6 @@ struct tx_queue {
 
 #define	PL_SIGNAL_DET	0x0400		/* 1=that signal detect is deasserted*/
 
-
 /*
  * PLC status register B (PL_STATUS_B: log. addr. 0x11)
  * It contains signals and status from the repeat filter and PCM state machine.
@@ -947,7 +943,6 @@ struct tx_queue {
 #define	PL_RF_IDLE	(1<<14)		/* IDLE */
 #define	PL_RF_HALT1	(2<<14)		/* HALT1 */
 #define	PL_RF_HALT2	(3<<14)		/* HALT2 */
-
 
 /*
  * PLC interrupt event register (PL_INTR_EVENT: log. addr. 0x17)

@@ -57,7 +57,6 @@ struct tosakbd {
 	struct timer_list timer;
 };
 
-
 /* Helper functions for reading the keyboard matrix
  * Note: We should really be using the generic gpio functions to alter
  *       GPDR but it requires a function call per GPIO bit which is

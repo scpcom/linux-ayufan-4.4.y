@@ -31,7 +31,6 @@
 #define R300_SURF_TILE_MICRO (2<<16)
 #define R300_SURF_TILE_BOTH (3<<16)
 
-
 #define R300_MC_INIT_MISC_LAT_TIMER	0x180
 #	define R300_MC_MISC__MC_CPR_INIT_LAT_SHIFT	0
 #	define R300_MC_MISC__MC_VF_INIT_LAT_SHIFT	4
@@ -66,7 +65,6 @@
 #define R300_SE_VPORT_YOFFSET               0x1DA4
 #define R300_SE_VPORT_ZSCALE                0x1DA8
 #define R300_SE_VPORT_ZOFFSET               0x1DAC
-
 
 /*
  * Vertex Array Processing (VAP) Control
@@ -448,7 +446,6 @@
 #	define R300_GB_MSPOS1__MS_Y5_SHIFT	20
 #	define R300_GB_MSPOS1__MSBD1		24
 
-
 #define R300_GB_TILE_CONFIG	0x4018
 #	define R300_GB_TILE_ENABLE	(1<<0)
 #	define R300_GB_TILE_PIPE_COUNT_RV300	0
@@ -618,7 +615,6 @@
 #       define R300_CULL_BACK                    (1 << 1)
 #       define R300_FRONT_FACE_CCW               (0 << 2)
 #       define R300_FRONT_FACE_CW                (1 << 2)
-
 
 /* BEGIN: Rasterization / Interpolators - many guesses */
 
@@ -1496,7 +1492,6 @@
 #	define R500_COVERED_PTR_MASKING_DISABLE              (0 << 18)
 #	define R500_COVERED_PTR_MASKING_ENABLE               (1 << 18)
 
-
 /* gap */
 
 /* Z Buffer Address Offset.
@@ -1743,7 +1738,6 @@
 #define R300_PACKET3_3D_DRAW_INDX_2         0x00003600
 
 /* END: Packet 3 commands */
-
 
 /* Color formats for 2d packets
  */

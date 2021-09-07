@@ -415,4 +415,3 @@ BOOLEAN GetTimBit(
 
     return TRUE;
 }
-

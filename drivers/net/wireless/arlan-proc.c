@@ -7,8 +7,6 @@
 /* void enableReceive(struct net_device* dev);
 */
 
-
-
 #define ARLAN_STR_SIZE 	0x2ff0
 #define DEV_ARLAN_INFO 	1
 #define DEV_ARLAN 	1
@@ -52,7 +50,6 @@
 	memcpy(&tmpVar, (int* )priva->conf->var,4); \
 	pos += sprintf(arlan_drive_info+pos, "%s\t=\t0x%x\n",#var, tmpVar);\
 }
-
 
 static const char *arlan_diagnostic_info_string(struct net_device *dev)
 {
@@ -221,7 +218,6 @@ static void arlan_print_diagnostic_info(struct net_device *dev)
 	READSHM(hardwareType, arlan->hardwareType, u_char);
 	printk(KERN_INFO "%s\n", arlan_hardware_type_string(dev));
 
-
 	DEBUGSHM(1, "arlan: channelNumber=%d\n", arlan->channelNumber, u_char);
 	DEBUGSHM(1, "arlan: channelSet=%d\n", arlan->channelSet, u_char);
 	DEBUGSHM(1, "arlan: spreadingCode=%d\n", arlan->spreadingCode, u_char);
@@ -246,7 +242,6 @@ static void arlan_print_diagnostic_info(struct net_device *dev)
 //   ARLAN_DEBUG_EXIT("arlan_print_diagnostic_info");
 
 }
-
 
 /******************************		TEST 	MEMORY	**************/
 
@@ -360,7 +355,6 @@ static int arlan_setup_card_by_book(struct net_device *dev)
 	if (arlan_command(dev, ARLAN_COMMAND_WAIT_NOW) != 0)
 		return -1;
 
-
 	IFDEBUG(50) printk("2nd Noop successfully executed !!\n");
 
 	READSHM(irqLevel, arlan->irqLevel, u_char)
@@ -373,7 +367,6 @@ static int arlan_setup_card_by_book(struct net_device *dev)
 	}
 	else
 		IFDEBUG(2) printk("irq level is OK\n");
-
 
 	IFDEBUG(3) arlan_print_diagnostic_info(dev);
 
@@ -638,7 +631,6 @@ final:
 	return retv;
 }
 
-
 static int arlan_sysctl_info161719(ctl_table * ctl, int write,
 			    void __user *buffer, size_t * lenp, loff_t *ppos)
 {
@@ -760,9 +752,7 @@ final:
 	return retv;
 }
 
-
 #endif				/* #ifdef ARLAN_PROC_SHM_DUMP */
-
 
 static char conf_reset_result[200];
 
@@ -813,7 +803,6 @@ static int arlan_sysctl_reset(ctl_table * ctl, int write,
 	*lenp = pos + 3;
 	return proc_dostring(ctl, write, buffer, lenp, ppos);
 }
-
 
 /* Place files in /proc/sys/dev/arlan */
 #define CTBLN(num,card,nam) \
@@ -894,8 +883,6 @@ static int arlan_sysctl_reset(ctl_table * ctl, int write,
 	CTBLN(58,cardNo,rx_tweak1),\
 	CTBLN(59,cardNo,rx_tweak2),\
 	CTBLN(60,cardNo,tx_queue_len),\
-
-
 
 static ctl_table arlan_conf_table0[] =
 {
@@ -1160,8 +1147,6 @@ static ctl_table arlan_conf_table3[] =
 	{ .ctl_name = 0 }
 };
 
-
-
 static ctl_table arlan_table[] =
 {
 	{
@@ -1203,7 +1188,6 @@ static ctl_table arlan_table[MAX_ARLANS + 1] =
 };
 #endif
 
-
 // static int mmtu = 1234;
 
 static ctl_table arlan_root_table[] =
@@ -1224,7 +1208,6 @@ static ctl_table arlan_root_table[] =
 //	{CTL_DEV, "dev", NULL, 0, 0555, arlan_root_table},
 //	{0}
 //};
-
 
 static struct ctl_table_header *arlan_device_sysctl_header;
 

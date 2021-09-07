@@ -30,7 +30,6 @@
 #include "pci_impl.h"
 #include "machvec_impl.h"
 
-
 /* Note mask bit is true for DISABLED irqs.  */
 static unsigned long cached_irq_mask[2] = { -1, -1 };
 
@@ -160,7 +159,6 @@ takara_init_irq(void)
 	common_init_isa_dma();
 }
 
-
 /*
  * The Takara has PCI devices 1, 2, and 3 configured to slots 20,
  * 19, and 18 respectively, in the default configuration. They can
@@ -266,7 +264,6 @@ takara_init_pci(void)
 	cia_init_pci();
 	ns87312_enable_ide(0x26e);
 }
-
 
 /*
  * The System Vector

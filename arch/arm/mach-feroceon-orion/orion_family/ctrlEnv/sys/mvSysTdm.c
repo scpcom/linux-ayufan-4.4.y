@@ -65,7 +65,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "voiceband/tdm/mvTdm.h"
 #include "mvSysTdm.h"
 
-
 /* defines  */
 #ifdef MV_DEBUG
 	#define DB(x)	x
@@ -88,8 +87,7 @@ static MV_TARGET tdmAddrDecPrioTap[] =
         PEX0_IO,
         PCI0_IO,
         TBL_TERM
-};
-
+};
 
 static MV_STATUS tdmWinOverlapDetect(MV_U32 winNum, MV_ADDR_WIN *pAddrWin);
 
@@ -362,7 +360,6 @@ MV_STATUS mvTdmWinEnable(int winNum, MV_BOOL enable)
 	return MV_OK;
 }
 
-
 /*******************************************************************************
 * tdmWinOverlapDetect - Detect TDM address windows overlapping
 *
@@ -463,4 +460,3 @@ MV_VOID mvTdmAddrDecShow(MV_VOID)
 		}
 	}
 }
-

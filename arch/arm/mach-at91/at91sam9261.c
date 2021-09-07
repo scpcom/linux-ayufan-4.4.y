@@ -267,7 +267,6 @@ static void at91sam9261_poweroff(void)
 	at91_sys_write(AT91_SHDW_CR, AT91_SHDW_KEY | AT91_SHDW_SHDW);
 }
 
-
 /* --------------------------------------------------------------------
  *  AT91SAM9261 processor initialization
  * -------------------------------------------------------------------- */
@@ -281,7 +280,6 @@ void __init at91sam9261_initialize(unsigned long main_clock)
 		iotable_init(at91sam9g10_sram_desc, ARRAY_SIZE(at91sam9g10_sram_desc));
 	else
 		iotable_init(at91sam9261_sram_desc, ARRAY_SIZE(at91sam9261_sram_desc));
-
 
 	at91_arch_reset = at91sam9261_reset;
 	pm_power_off = at91sam9261_poweroff;

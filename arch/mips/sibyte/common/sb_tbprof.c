@@ -121,7 +121,6 @@ static struct sbprof_tb sbp;
 			: /* inputs */ "r"(val), "r" ((1ULL << 33) | 1ULL) \
 			: /* modifies */ "$8" )
 
-
 /* Reads SCD counter 0 and puts result in value
    unsigned long long val; */
 #define zclk_get(val) \

@@ -98,7 +98,6 @@ typedef struct UsbTxQ
     u16_t offset;
 } UsbTxQ_t;
 
-
 struct zdap_ioctl {
 	u16_t cmd;                /* Command to run */
 	u32_t addr;                /* Length of the data buffer */
@@ -245,4 +244,3 @@ enum devState {
 };
 
 #endif	/* _USBDRV_H */
-

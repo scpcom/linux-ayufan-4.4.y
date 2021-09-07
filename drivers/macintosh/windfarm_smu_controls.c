@@ -254,7 +254,6 @@ static struct smu_fan_control *smu_fan_create(struct device_node *node,
 	return NULL;
 }
 
-
 static int __init smu_controls_init(void)
 {
 	struct device_node *smu, *fans, *fan;
@@ -284,7 +283,6 @@ static int __init smu_controls_init(void)
 		list_add(&fct->link, &smu_fans);
 	}
 	of_node_put(fans);
-
 
 	/* Look for PWM fans */
 	for (fans = NULL; (fans = of_get_next_child(smu, fans)) != NULL;)
@@ -319,11 +317,9 @@ static void __exit smu_controls_exit(void)
 	}
 }
 
-
 module_init(smu_controls_init);
 module_exit(smu_controls_exit);
 
 MODULE_AUTHOR("Benjamin Herrenschmidt <benh@kernel.crashing.org>");
 MODULE_DESCRIPTION("SMU control objects for PowerMacs thermal control");
 MODULE_LICENSE("GPL");
-

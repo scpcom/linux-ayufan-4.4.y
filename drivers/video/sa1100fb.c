@@ -387,8 +387,6 @@ static struct sa1100fb_mach_info shannon_info __initdata = {
 };
 #endif
 
-
-
 static struct sa1100fb_mach_info * __init
 sa1100fb_get_machine_info(struct sa1100fb_info *fbi)
 {
@@ -1350,7 +1348,6 @@ static struct fb_monspecs monspecs __initdata = {
 	.vfmin	= 50,
 	.vfmax	= 65,
 };
-
 
 static struct sa1100fb_info * __init sa1100fb_init_fbinfo(struct device *dev)
 {

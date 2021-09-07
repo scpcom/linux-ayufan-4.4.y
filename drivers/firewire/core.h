@@ -20,7 +20,6 @@ struct fw_iso_packet;
 struct fw_node;
 struct fw_packet;
 
-
 /* -card */
 
 /* bitfields within the PHY registers */
@@ -110,14 +109,12 @@ static inline void fw_card_put(struct fw_card *card)
 	kref_put(&card->kref, fw_card_release);
 }
 
-
 /* -cdev */
 
 extern const struct file_operations fw_device_ops;
 
 void fw_device_cdev_update(struct fw_device *device);
 void fw_device_cdev_remove(struct fw_device *device);
-
 
 /* -device */
 
@@ -129,14 +126,12 @@ struct fw_device *fw_device_get_by_devt(dev_t devt);
 int fw_device_set_broadcast_channel(struct device *dev, void *gen);
 void fw_node_event(struct fw_card *card, struct fw_node *node, int event);
 
-
 /* -iso */
 
 int fw_iso_buffer_map(struct fw_iso_buffer *buffer, struct vm_area_struct *vma);
 void fw_iso_resource_manage(struct fw_card *card, int generation,
 			    u64 channels_mask, int *channel, int *bandwidth,
 			    bool allocate, __be32 buffer[2]);
-
 
 /* -topology */
 
@@ -197,7 +192,6 @@ static inline bool is_next_generation(int new_generation, int old_generation)
 {
 	return (new_generation & 0xff) == ((old_generation + 1) & 0xff);
 }
-
 
 /* -transaction */
 

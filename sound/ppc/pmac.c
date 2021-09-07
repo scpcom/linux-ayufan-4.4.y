@@ -19,7 +19,6 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-
 #include <asm/io.h>
 #include <asm/irq.h>
 #include <linux/init.h>
@@ -34,7 +33,6 @@
 #include <asm/pmac_feature.h>
 #include <asm/pci-bridge.h>
 
-
 /* fixed frequency table for awacs, screamer, burgundy, DACA (44100 max) */
 static int awacs_freqs[8] = {
 	44100, 29400, 22050, 17640, 14700, 11025, 8820, 7350
@@ -43,7 +41,6 @@ static int awacs_freqs[8] = {
 static int tumbler_freqs[1] = {
 	44100
 };
-
 
 /*
  * we will allocate a single 'emergency' dbdma cmd block to use if the
@@ -54,7 +51,6 @@ static int tumbler_freqs[1] = {
  */
 static struct pmac_dbdma emergency_dbdma;
 static int emergency_in_use;
-
 
 /*
  * allocate DBDMA command arrays
@@ -83,7 +79,6 @@ static void snd_pmac_dbdma_free(struct snd_pmac *chip, struct pmac_dbdma *rec)
 		dma_free_coherent(&chip->pdev->dev, rsize, rec->space, rec->dma_base);
 	}
 }
-
 
 /*
  * pcm stuff
@@ -202,7 +197,6 @@ static inline void snd_pmac_dma_run(struct pmac_stream *rec, int status)
 	out_le32(&rec->dma->control, status | (status << 16));
 }
 
-
 /*
  * prepare playback/capture stream
  */
@@ -265,7 +259,6 @@ static int snd_pmac_pcm_prepare(struct snd_pmac *chip, struct pmac_stream *rec, 
 
 	return 0;
 }
-
 
 /*
  * PCM trigger/stop
@@ -361,7 +354,6 @@ static snd_pcm_uframes_t snd_pmac_playback_pointer(struct snd_pcm_substream *sub
 	return snd_pmac_pcm_pointer(chip, &chip->playback, subs);
 }
 
-
 /*
  * capture
  */
@@ -384,7 +376,6 @@ static snd_pcm_uframes_t snd_pmac_capture_pointer(struct snd_pcm_substream *subs
 	struct snd_pmac *chip = snd_pcm_substream_chip(subs);
 	return snd_pmac_pcm_pointer(chip, &chip->capture, subs);
 }
-
 
 /*
  * Handle DEAD DMA transfers:
@@ -503,7 +494,6 @@ static void snd_pmac_pcm_update(struct snd_pmac *chip, struct pmac_stream *rec)
 	spin_unlock(&chip->reg_lock);
 }
 
-
 /*
  * hw info
  */
@@ -545,7 +535,6 @@ static struct snd_pcm_hardware snd_pmac_capture =
 	.periods_min =		3,
 	.periods_max =		PMAC_MAX_FRAGS,
 };
-
 
 #if 0 // NYI
 static int snd_pmac_hw_rule_rate(struct snd_pcm_hw_params *params,
@@ -740,7 +729,6 @@ int __devinit snd_pmac_pcm_new(struct snd_pmac *chip)
 	return 0;
 }
 
-
 static void snd_pmac_dbdma_reset(struct snd_pmac *chip)
 {
 	out_le32(&chip->playback.dma->control, (RUN|PAUSE|FLUSH|WAKE|DEAD) << 16);
@@ -748,7 +736,6 @@ static void snd_pmac_dbdma_reset(struct snd_pmac *chip)
 	out_le32(&chip->capture.dma->control, (RUN|PAUSE|FLUSH|WAKE|DEAD) << 16);
 	snd_pmac_wait_ack(&chip->capture);
 }
-
 
 /*
  * handling beep
@@ -778,7 +765,6 @@ void snd_pmac_beep_dma_stop(struct snd_pmac *chip)
 	snd_pmac_pcm_set_format(chip); /* reset format */
 }
 
-
 /*
  * interrupt handlers
  */
@@ -790,7 +776,6 @@ snd_pmac_tx_intr(int irq, void *devid)
 	return IRQ_HANDLED;
 }
 
-
 static irqreturn_t
 snd_pmac_rx_intr(int irq, void *devid)
 {
@@ -798,7 +783,6 @@ snd_pmac_rx_intr(int irq, void *devid)
 	snd_pmac_pcm_update(chip, &chip->capture);
 	return IRQ_HANDLED;
 }
-
 
 static irqreturn_t
 snd_pmac_ctrl_intr(int irq, void *devid)
@@ -821,7 +805,6 @@ snd_pmac_ctrl_intr(int irq, void *devid)
 	out_le32(&chip->awacs->control, ctrl);
 	return IRQ_HANDLED;
 }
-
 
 /*
  * a wrapper to feature call for compatibility
@@ -893,7 +876,6 @@ static int snd_pmac_free(struct snd_pmac *chip)
 	return 0;
 }
 
-
 /*
  * free the device
  */
@@ -902,7 +884,6 @@ static int snd_pmac_dev_free(struct snd_device *device)
 	struct snd_pmac *chip = device->device_data;
 	return snd_pmac_free(chip);
 }
-
 
 /*
  * check the machine support byteswap (little-endian)
@@ -929,7 +910,6 @@ static void __devinit detect_byte_swap(struct snd_pmac *chip)
 	if (machine_is_compatible("PowerBook2,1"))
 		chip->can_duplex = 0;
 }
-
 
 /*
  * detect a sound chip
@@ -1355,7 +1335,6 @@ int __devinit snd_pmac_new(struct snd_card *card, struct snd_pmac **chip_return)
 	return err;
 }
 
-
 /*
  * sleep notify for powerbook
  */
@@ -1410,4 +1389,3 @@ void snd_pmac_resume(struct snd_pmac *chip)
 }
 
 #endif /* CONFIG_PM */
-

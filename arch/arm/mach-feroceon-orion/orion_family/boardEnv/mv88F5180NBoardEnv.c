@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #define DB_88F5180N_BOARD_PCI_IF_NUM		0x3
 #define DB_88F5180N_BOARD_TWSI_DEF_NUM		0x1
 #define DB_88F5180N_BOARD_MAC_INFO_NUM		0x1
@@ -151,11 +150,9 @@ MV_BOARD_INFO db88f5180Nddr1Info = {
 	N_A						/* gppPolarityVal */
 };
 
-
 MV_BOARD_INFO*	boardInfoTbl[2] = 	{&db88f5180Nddr1Info, 
 				   	&db88f5180Nddr2Info
 					};
 
 #define	BOARD_ID_BASE				BOARD_ID_88F5180N_BASE
 #define MV_MAX_BOARD_ID				BOARD_ID_88F5180N_MAX
-

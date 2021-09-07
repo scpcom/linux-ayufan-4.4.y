@@ -290,7 +290,6 @@ static inline long long atomic64_cmpxchg(atomic64_t *v,
 	return rp_old.pair;
 }
 
-
 static inline long long atomic64_add_return(long long i, atomic64_t *v)
 {
 	long long old, new;

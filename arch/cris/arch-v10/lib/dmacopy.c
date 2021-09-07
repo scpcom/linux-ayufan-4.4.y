@@ -38,6 +38,3 @@ void *dma_memcpy(void *pdst,
 	D(printk("done\n"));
 
 }
-
-
-

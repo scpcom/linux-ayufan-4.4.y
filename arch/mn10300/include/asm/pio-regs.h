@@ -227,7 +227,6 @@
 #define	P5IN			__SYSREG(0xdb000504, u8)	/* in reg */
 #define	P5OUT			__SYSREG(0xdb000508, u8)	/* out reg */
 
-
 #endif /* __KERNEL__ */
 
 #endif /* _ASM_PIO_REGS_H */

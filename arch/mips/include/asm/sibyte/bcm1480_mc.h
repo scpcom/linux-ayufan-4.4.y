@@ -29,7 +29,6 @@
     *  MA 02111-1307 USA
     ********************************************************************* */
 
-
 #ifndef _BCM1480_MC_H
 #define _BCM1480_MC_H
 
@@ -863,8 +862,6 @@
 #define V_BCM1480_MC_tRAP_DEFAULT           V_BCM1480_MC_tRAP(K_BCM1480_MC_tRAP_DEFAULT)
 
 #endif
-
-
 
 /*
  * Global Registers: single instances per BCM1480

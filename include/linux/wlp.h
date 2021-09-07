@@ -73,7 +73,6 @@
  */
 #define WLP_WSS_NONCE_STRSIZE 48
 
-
 /**
  * Size used for WLP name size
  *
@@ -337,7 +336,6 @@ struct wlp_nonce {
 struct wlp_uuid {
 	u8 data[16];
 } __attribute__((packed));
-
 
 /**
  * Primary and secondary device type attributes
@@ -665,7 +663,6 @@ struct wlp {
 
 /* sysfs */
 
-
 struct wlp_wss_attribute {
 	struct attribute attr;
 	ssize_t (*show)(struct wlp_wss *wss, char *buf);
@@ -731,6 +728,5 @@ void wlp_init(struct wlp *wlp)
 	mutex_init(&wlp->nbmutex);
 	wlp_wss_init(&wlp->wss);
 }
-
 
 #endif /* #ifndef __LINUX__WLP_H_ */

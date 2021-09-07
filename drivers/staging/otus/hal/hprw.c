@@ -227,7 +227,6 @@ void zfIdlRsp(zdev_t* dev, u32_t* rsp, u16_t rspLen)
     zmw_get_wlan_dev(dev);
     hpPriv=wd->hpPrivate;
 
-
     zmw_declare_for_critical_section();
 
     zmw_enter_critical_section(dev);
@@ -625,7 +624,6 @@ void zfIdlRsp(zdev_t* dev, u32_t* rsp, u16_t rspLen)
             hpPriv->halCapability |= ZM_HP_CAP_2G;
         }
 
-
         CCS = (u8_t)((rsp[3] & 0x8000) >> 15);
         WWR = (u8_t)((rsp[3] & 0x4000) >> 14);
         CountryDomainCode = (u16_t)(rsp[3] & 0x3FFF);
@@ -778,7 +776,6 @@ void zfIdlRsp(zdev_t* dev, u32_t* rsp, u16_t rspLen)
     return;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfWriteRegInternalReg       */
@@ -809,7 +806,6 @@ u32_t zfWriteRegInternalReg(zdev_t* dev, u32_t addr, u32_t val)
     ret = zfIssueCmd(dev, cmd, 12, ZM_OID_INTERNAL_WRITE, NULL);
     return ret;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -880,7 +876,6 @@ u16_t zfDelayWriteInternalReg(zdev_t* dev, u32_t addr, u32_t val)
     }
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfFlushDelayWrite           */
@@ -942,7 +937,6 @@ u16_t zfFlushDelayWrite(zdev_t* dev)
         return 0;
     }
 }
-
 
 u32_t zfiDbgDelayWriteReg(zdev_t* dev, u32_t addr, u32_t val)
 {
@@ -1099,7 +1093,6 @@ u32_t zfiDbgBlockWriteEeprom(zdev_t* dev, u32_t addr, u32_t* buf)
 
     return ret;
 }
-
 
 /* write EEPROM with wrlen : wrlen must be 4*n */
 /* command format : cmd_info(4) + addr(4) + eeprom(wrlen) */
@@ -1344,7 +1337,6 @@ u32_t zfiDbgReadReg(zdev_t* dev, u32_t addr)
     return ret;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfiDbgReadTally             */
@@ -1382,7 +1374,6 @@ u32_t zfiDbgReadTally(zdev_t* dev)
 
     return ret;
 }
-
 
 u32_t zfiDbgSetIFSynthesizer(zdev_t* dev, u32_t value)
 {
@@ -1430,7 +1421,6 @@ u16_t zfiDbgProgramFlash(zdev_t *dev, u32_t offset, u32_t len, u32_t *data)
     u32_t cmd[(ZM_MAX_CMD_SIZE/4)];
     u16_t ret;
     u16_t i;
-
 
     cmd[0] = (ZM_CMD_FLASH_PROG << 8) | ((len+8) & 0xff);
     cmd[1] = offset;

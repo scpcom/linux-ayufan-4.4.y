@@ -57,7 +57,6 @@ void pcibios_align_resource(void *data, struct resource *res,
 	}
 }
 
-
 /*
  *  Handle resources of PCI devices.  If the world were perfect, we could
  *  just allocate all the resource regions and do nothing more.  It isn't.

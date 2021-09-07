@@ -3,7 +3,6 @@
 
 #include <asm/page.h>
 
-
 void set_huge_pte_at(struct mm_struct *mm, unsigned long addr,
 		     pte_t *ptep, pte_t pte);
 

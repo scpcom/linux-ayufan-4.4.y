@@ -272,4 +272,3 @@ MACHINE_START(FSG, "Freecom FSG-3")
 	.boot_params	= 0x0100,
 	.init_machine	= fsg_init,
 MACHINE_END
-

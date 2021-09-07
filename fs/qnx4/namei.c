@@ -16,7 +16,6 @@
 #include <linux/buffer_head.h>
 #include "qnx4.h"
 
-
 /*
  * check if the filename is correct. For some obscure reason, qnx writes a
  * new file twice in the directory entry, first with all possible options at 0

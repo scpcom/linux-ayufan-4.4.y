@@ -26,7 +26,6 @@
  *  fcs_vport_fcb Virtual port driver interfaces
  */
 
-
 struct bfad_vport_s;
 
 /*
@@ -41,7 +40,5 @@ struct bfad_vport_s;
  * @return None
  */
 void            bfa_fcb_vport_delete(struct bfad_vport_s *vport_drv);
-
-
 
 #endif /* __BFA_FCB_VPORT_H__ */

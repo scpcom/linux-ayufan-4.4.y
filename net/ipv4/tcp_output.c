@@ -2461,7 +2461,6 @@ void tcp_send_delayed_ack(struct sock *sk)
 	sk_reset_timer(sk, &icsk->icsk_delack_timer, timeout);
 }
 
-
 #ifdef CONFIG_SYNO_QORIQ
 #ifdef CONFIG_TCP_FAST_ACK
 static int tcp_fast_ack(struct sock *sk)

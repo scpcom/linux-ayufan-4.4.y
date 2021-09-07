@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvTypesh
 #define __INCmvTypesh
 
@@ -106,17 +105,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_NOT_ALLOWED      (0x21)  /* Operation NOT allowed                 */
 #define MV_WRITE_PROTECT    (0x22)  /* Write protected                       */
 
-
 #define MV_INVALID  (int)(-1)
 
 #define MV_FALSE	0
 #define MV_TRUE     (!(MV_FALSE))
 
-
 #ifndef NULL
 #define NULL ((void*)0)
 #endif
-
 
 #ifndef MV_ASMLANGUAGE
 /* typedefs */
@@ -155,7 +151,6 @@ typedef MV_U32 MV_KHZ;
 typedef MV_U32 MV_MHZ;
 typedef MV_U32 MV_HZ;
 
-
 /* This enumerator describes the set of commands that can be applied on   	*/
 /* an engine (e.g. IDMA, XOR). Appling a comman depends on the current   	*/
 /* status (see MV_STATE enumerator)                      					*/
@@ -180,7 +175,6 @@ typedef enum _mvState
     MV_PAUSED,
     MV_UNDEFINED_STATE
 } MV_STATE;
-
 
 /* This structure describes address space window. Window base can be        */
 /* 64 bit, window size up to 4GB                                            */
@@ -242,4 +236,3 @@ typedef struct
 #endif /* MV_ASMLANGUAGE */
 
 #endif /* __INCmvTypesh */
-

@@ -69,7 +69,6 @@
 #include "eata_generic.h"
 #include "eata_pio.h"
 
-
 static unsigned int ISAbases[MAXISA] =	{
 	 0x1F0, 0x170, 0x330, 0x230
 };

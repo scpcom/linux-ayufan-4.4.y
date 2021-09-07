@@ -68,8 +68,6 @@ static unsigned int get_time_pit(void)
 
 #endif
 
-
-
 /*
  * gameport_measure_speed() measures the gameport i/o speed.
  */
@@ -213,7 +211,6 @@ static void gameport_find_driver(struct gameport *gameport)
 			"gameport: device_attach() failed for %s (%s), error: %d\n",
 			gameport->phys, gameport->name, error);
 }
-
 
 /*
  * Gameport event processing.
@@ -445,7 +442,6 @@ static int gameport_thread(void *nothing)
 	return 0;
 }
 
-
 /*
  * Gameport port operations
  */
@@ -664,7 +660,6 @@ void gameport_unregister_port(struct gameport *gameport)
 	mutex_unlock(&gameport_mutex);
 }
 EXPORT_SYMBOL(gameport_unregister_port);
-
 
 /*
  * Gameport driver operations

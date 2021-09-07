@@ -95,7 +95,6 @@ static void mtx1_wdt_reset(void)
 	ticks = mtx1_wdt_device.default_ticks;
 }
 
-
 static void mtx1_wdt_start(void)
 {
 	unsigned long flags;
@@ -132,7 +131,6 @@ static int mtx1_wdt_open(struct inode *inode, struct file *file)
 		return -EBUSY;
 	return nonseekable_open(inode, file);
 }
-
 
 static int mtx1_wdt_release(struct inode *inode, struct file *file)
 {
@@ -179,7 +177,6 @@ static long mtx1_wdt_ioctl(struct file *file, unsigned int cmd,
 	return 0;
 }
 
-
 static ssize_t mtx1_wdt_write(struct file *file, const char *buf,
 						size_t count, loff_t *ppos)
 {
@@ -198,13 +195,11 @@ static const struct file_operations mtx1_wdt_fops = {
 	.release 	= mtx1_wdt_release,
 };
 
-
 static struct miscdevice mtx1_wdt_misc = {
 	.minor 	= WATCHDOG_MINOR,
 	.name 	= "watchdog",
 	.fops 	= &mtx1_wdt_fops,
 };
-
 
 static int __devinit mtx1_wdt_probe(struct platform_device *pdev)
 {

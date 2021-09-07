@@ -32,18 +32,15 @@ struct mt9d112_ctrl {
 	const struct msm_camera_sensor_info *sensordata;
 };
 
-
 static struct mt9d112_ctrl *mt9d112_ctrl;
 
 static DECLARE_WAIT_QUEUE_HEAD(mt9d112_wait_queue);
 DECLARE_MUTEX(mt9d112_sem);
 
-
 /*=============================================================
 	EXTERNAL DECLARATIONS
 ==============================================================*/
 extern struct mt9d112_reg mt9d112_regs;
-
 
 /*=============================================================*/
 

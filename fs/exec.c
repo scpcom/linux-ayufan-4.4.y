@@ -1770,7 +1770,6 @@ static void wait_for_dump_helpers(struct file *file)
 
 }
 
-
 void do_coredump(long signr, int exit_code, struct pt_regs *regs)
 {
 	struct core_state core_state;

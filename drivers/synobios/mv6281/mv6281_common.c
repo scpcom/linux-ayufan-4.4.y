@@ -308,4 +308,3 @@ int synobios_model_cleanup(struct file_operations *fops, struct synobios_ops **o
 {
 	return 0;
 }
-

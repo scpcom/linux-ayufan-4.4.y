@@ -142,7 +142,6 @@ struct out_endpoint_desc_block
 	__u8 BufferSize;
 } __attribute__((packed));
 
-
 /*
  * TYPE DEFINITIONS
  * Structures for Firmware commands
@@ -160,7 +159,6 @@ struct ump_uart_config		/* UART settings                    */
 				/* interface is defined             */
 } __attribute__((packed));
 
-
 /*
  * TYPE DEFINITIONS
  * Structures for USB interrupts
@@ -170,7 +168,6 @@ struct ump_interrupt			/* Interrupt packet structure       */
 	__u8 bICode;			/* Interrupt code (interrupt num)   */
 	__u8 bIInfo;			/* Interrupt information            */
 }  __attribute__((packed));
-
 
 #define TIUMP_GET_PORT_FROM_CODE(c)	(((c) >> 4) - 3)
 #define TIUMP_GET_FUNC_FROM_CODE(c)	((c) & 0x0f)

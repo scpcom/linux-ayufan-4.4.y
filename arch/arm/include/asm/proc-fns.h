@@ -13,7 +13,6 @@
 
 #ifdef __KERNEL__
 
-
 /*
  * Work out if we need multiple CPU support
  */

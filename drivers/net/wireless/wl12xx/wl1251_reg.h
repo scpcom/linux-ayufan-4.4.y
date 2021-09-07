@@ -280,7 +280,6 @@ enum wl12xx_acx_int_reg {
  ===============================================*/
 #define REG_EVENT_MAILBOX_PTR				(SCR_PAD1)
 
-
 /* Misc */
 
 #define REG_ENABLE_TX_RX				(ENABLE)
@@ -290,7 +289,6 @@ enum wl12xx_acx_int_reg {
  */
 #define REG_RX_CONFIG				(RX_CFG)
 #define REG_RX_FILTER				(RX_FILTER_CFG)
-
 
 #define RX_CFG_ENABLE_PHY_HEADER_PLCP	 0x0002
 
@@ -353,7 +351,6 @@ enum wl12xx_acx_int_reg {
 				      | CFG_RX_BCN_EN | CFG_RX_AUTH_EN\
 				      | CFG_RX_ASSOC_EN | CFG_RX_RCTS_ACK\
 				      | CFG_RX_PRSP_EN)
-
 
 /*===============================================
  EEPROM Read/Write Request 32bit RW
@@ -478,7 +475,6 @@ enum wl12xx_acx_int_reg {
 #define SOFT_RESET_STALL_TIME               1000
 #define NVS_DATA_BUNDARY_ALIGNMENT          4
 
-
 /* Firmware image load chunk size */
 #define CHUNK_SIZE          512
 
@@ -487,13 +483,11 @@ enum wl12xx_acx_int_reg {
 
 #define ECPU_CONTROL_HALT					0x00000101
 
-
 /******************************************************************************
 
     CHANNELS, BAND & REG DOMAINS definitions
 
 ******************************************************************************/
-
 
 enum {
 	RADIO_BAND_2_4GHZ = 0,  /* 2.4 Ghz band */
@@ -581,7 +575,6 @@ b12-b0 - Supported Rate indicator bits as defined below.
 
 ******************************************************************************/
 
-
 /*************************************************************************
 
     Interrupt Trigger Register (Host -> WiLink)
@@ -623,7 +616,6 @@ b12-b0 - Supported Rate indicator bits as defined below.
 #define INTR_TRIG_DEBUG_ACK BIT(4)
 
 #define INTR_TRIG_STATE_CHANGED BIT(5)
-
 
 /* Hardware to Embedded CPU Interrupts - second 32-bit register set */
 

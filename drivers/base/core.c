@@ -111,7 +111,6 @@ static struct sysfs_ops dev_sysfs_ops = {
 	.store	= dev_attr_store,
 };
 
-
 /**
  *	device_release - free device structure.
  *	@kobj:	device's kobject.
@@ -142,7 +141,6 @@ static struct kobj_type device_ktype = {
 	.release	= device_release,
 	.sysfs_ops	= &dev_sysfs_ops,
 };
-
 
 static int dev_uevent_filter(struct kset *kset, struct kobject *kobj)
 {
@@ -441,7 +439,6 @@ static void device_remove_attrs(struct device *dev)
 	if (class)
 		device_remove_attributes(dev, class->dev_attrs);
 }
-
 
 static ssize_t show_dev(struct device *dev, struct device_attribute *attr,
 			char *buf)
@@ -1415,7 +1412,6 @@ void root_device_unregister(struct device *dev)
 	device_unregister(dev);
 }
 EXPORT_SYMBOL_GPL(root_device_unregister);
-
 
 static void device_create_release(struct device *dev)
 {

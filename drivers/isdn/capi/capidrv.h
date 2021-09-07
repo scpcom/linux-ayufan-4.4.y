@@ -20,7 +20,6 @@
 #define ST_LISTEN_ACTIVE		2	/* L-1 */
 #define ST_LISTEN_ACTIVE_WAIT_CONF	3	/* L-1.1 */
 
-
 #define EV_LISTEN_REQ			1	/* L-0 -> L-0.1
 						   L-1 -> L-1.1 */
 #define EV_LISTEN_CONF_ERROR		2	/* L-0.1 -> L-0

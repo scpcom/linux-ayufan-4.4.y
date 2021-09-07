@@ -1034,7 +1034,6 @@ int flag)
 				/* Read and verify dword from SPI flash */
 				spi_data = spi_yuk2_read_dword(addr);
 
-
 				if (spi_data != *(spi_data_ptr)) {
 					fl_print("\n*** SPI data verify error at address 0x%08lx, ",
 						"is %x, should %x\n", addr, spi_data, *(spi_data_ptr));
@@ -1285,7 +1284,6 @@ unsigned long *FlashSize )
 	unsigned long a1,a2;
 	unsigned long opcodes;
 
-	
 	*FlashSize = 0;
 
 	spi_in8(B2_CHIP_ID, &chip_id);

@@ -64,7 +64,6 @@ static struct var_mtrr_range_state __initdata	range_state[RANGE_NUM];
 static int __initdata debug_print;
 #define Dprintk(x...) do { if (debug_print) printk(KERN_DEBUG x); } while (0)
 
-
 static int __init
 add_range(struct res_range *range, int nr_range,
 	  unsigned long start, unsigned long end)
@@ -132,7 +131,6 @@ subtract_range(struct res_range *range, unsigned long start, unsigned long end)
 			range[j].start = end + 1;
 			continue;
 		}
-
 
 		if (start > range[j].start && end >= range[j].end &&
 		    range[j].end > start - 1) {

@@ -188,7 +188,7 @@ asmlinkage int SynoPrintk(u8 direct_print, const char *fmt, ...)
 		va_end(args);
 		goto END;
 	}else{
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 		if(syno_temperature_debug) {
 			va_start(args, fmt);
 			r = vprintk(fmt, args);
@@ -200,7 +200,6 @@ asmlinkage int SynoPrintk(u8 direct_print, const char *fmt, ...)
 END:
 	return r;
 }
-
 
 struct workqueue_struct *SynoCreateWorkqueue(const char *name){
 	return create_workqueue(name);

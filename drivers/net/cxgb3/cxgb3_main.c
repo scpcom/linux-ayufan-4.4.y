@@ -1392,7 +1392,6 @@ static int cxgb_close(struct net_device *dev)
 	struct port_info *pi = netdev_priv(dev);
 	struct adapter *adapter = pi->adapter;
 
-	
 	if (!adapter->open_device_map)
 		return 0;
 
@@ -2664,7 +2663,6 @@ static void check_t3b2_mac(struct adapter *adapter)
 	}
 	rtnl_unlock();
 }
-
 
 static void t3_adap_check_task(struct work_struct *work)
 {

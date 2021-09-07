@@ -33,7 +33,6 @@
 #include "proto.h"
 #include "request.h"
 
-
 static int
 _recvfrom(struct socket *socket, unsigned char *ubuf, int size, unsigned flags)
 {

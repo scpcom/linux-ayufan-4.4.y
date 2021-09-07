@@ -42,4 +42,3 @@ GT_STATUS sampleHeaderEnable(GT_QD_DEV *dev,GT_BOOL en)
 
 	return GT_OK;
 }
-

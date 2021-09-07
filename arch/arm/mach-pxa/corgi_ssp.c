@@ -101,7 +101,6 @@ EXPORT_SYMBOL(corgi_ssp_ads7846_unlock);
 EXPORT_SYMBOL(corgi_ssp_ads7846_put);
 EXPORT_SYMBOL(corgi_ssp_ads7846_get);
 
-
 /*
  *  LCD/Backlight Routines
  */

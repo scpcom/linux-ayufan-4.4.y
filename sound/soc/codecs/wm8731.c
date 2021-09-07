@@ -40,7 +40,6 @@ struct wm8731_priv {
 	unsigned int sysclk;
 };
 
-
 /*
  * wm8731 register cache
  * We can't read the WM8731 register space when we are
@@ -295,7 +294,6 @@ static int wm8731_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 	}
 	return -EINVAL;
 }
-
 
 static int wm8731_set_dai_fmt(struct snd_soc_dai *codec_dai,
 		unsigned int fmt)

@@ -91,7 +91,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ETH_FP_MTU 		 		1518 + ETH_MV_HEADER_SIZE 	/* maximum frame size incluing MH */
 #define ETH_FP_PPPOE_MTU 		(ETH_FP_MTU - ETH_FP_PPPOE_HDR) /* maximum frame size for PPPoE */
 
-
 /* uncomment to open some debug prints on adding and updating NFP rules */
 #define MV_FP_DEBUG
 #undef MV_FP_DEBUG
@@ -285,7 +284,6 @@ extern MV_FP_PPP_RULE pppOpen[];
 
 #endif /* CONFIG_MV_ETH_NFP_PPP */
 
-
 /*
  * 802.1D Support
  */
@@ -368,7 +366,6 @@ typedef struct
 #endif /* CONFIG_MV_ETH_NFP_SEC */
 	
 } MV_FP_STATS;
-
 
 /* Initialize NFP Rule Database (Routing + ARP information table) */
 MV_STATUS   mvFpRuleDbInit(MV_U32 dbSize);
@@ -472,7 +469,6 @@ MV_U8       mvFpNatPortsGet(MV_IP_HEADER* pIpHdr, MV_U16* pDstPort, MV_U16* pSrc
 int         mvFpNatPktUpdate(MV_IP_HEADER* pIpHdr, MV_FP_NAT_RULE* pDnatRule, MV_FP_NAT_RULE* pSnatRule);
 
 #endif /* CONFIG_MV_ETH_NFP_NAT_SUPPORT */
-
 
 #ifdef CONFIG_MV_ETH_NFP_FDB_SUPPORT
 

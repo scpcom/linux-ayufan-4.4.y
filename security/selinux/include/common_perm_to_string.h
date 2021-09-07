@@ -55,4 +55,3 @@ TB_(common_ipc_perm_to_string)
     S_("unix_read")
     S_("unix_write")
 TE_(common_ipc_perm_to_string)
-

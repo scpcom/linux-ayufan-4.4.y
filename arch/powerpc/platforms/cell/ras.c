@@ -26,7 +26,6 @@
 
 #include "ras.h"
 
-
 static void dump_fir(int cpu)
 {
 	struct cbe_pmd_regs __iomem *pregs = cbe_get_cpu_pmd_regs(cpu);

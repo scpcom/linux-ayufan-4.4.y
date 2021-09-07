@@ -152,7 +152,6 @@ extern int usbnet_suspend (struct usb_interface *, pm_message_t );
 extern int usbnet_resume (struct usb_interface *);
 extern void usbnet_disconnect(struct usb_interface *);
 
-
 /* Drivers that reuse some of the standard USB CDC infrastructure
  * (notably, using multiple interfaces according to the CDC
  * union descriptor) get some helper code.
@@ -173,7 +172,6 @@ extern void usbnet_cdc_unbind (struct usbnet *, struct usb_interface *);
 			|USB_CDC_PACKET_TYPE_ALL_MULTICAST \
 			|USB_CDC_PACKET_TYPE_PROMISCUOUS \
 			|USB_CDC_PACKET_TYPE_DIRECTED)
-
 
 /* we record the state for each of our queued skbs */
 enum skb_state {
@@ -233,6 +231,5 @@ extern int usbnet_nway_reset(struct net_device *net);
 
 #define devinfo(usbnet, fmt, arg...) \
 	printk(KERN_INFO "%s: " fmt "\n" , (usbnet)->net->name , ## arg); \
-
 
 #endif /* __LINUX_USB_USBNET_H */

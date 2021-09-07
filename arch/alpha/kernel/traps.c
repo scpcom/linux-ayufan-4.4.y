@@ -422,7 +422,6 @@ do_entDbg(struct pt_regs *regs)
 	force_sig_info(SIGILL, &info, current);
 }
 
-
 /*
  * entUna has a different register layout to be reasonably simple. It
  * needs access to all the integer registers (the kernel doesn't use
@@ -445,10 +444,8 @@ struct unaligned_stat {
 	unsigned long count, va, pc;
 } unaligned[2];
 
-
 /* Macro for exception fixup code to access integer registers.  */
 #define una_reg(r)  (_regs[(r) >= 16 && (r) <= 18 ? (r)+19 : (r)])
-
 
 asmlinkage void
 do_entUna(void * va, unsigned long opcode, unsigned long reg,

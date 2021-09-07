@@ -139,4 +139,3 @@ MV_STATUS mv_phone_init(phone_register_ops_t* register_ops, phone_params_t* phon
 void mv_phone_exit(void);
 
 #endif /*_MP_H_*/
-

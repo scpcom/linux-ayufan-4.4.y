@@ -10,7 +10,6 @@
 		   HBA_ModuleStarted(__ext_to_core(_ext)->desc);          \
 	   }
 
-
 #define core_generate_event(ext, eid, did, slv, pc, ptr)                  \
    {                                                                      \
 	struct mod_notif_param _param = {ptr, 0, 0, eid, did, slv, pc};   \
@@ -19,7 +18,6 @@
 					    EVENT_LOG_GENERATED,          \
 					    &_param);                     \
    }
-
 
 #else /* __MM_SE__ */
 #define core_generate_event(ext, eid, did, slv, pc, ptr)                \
@@ -30,7 +28,6 @@
 
 #define core_start_cmpl_notify(_ext)  	HBA_ModuleStarted(_ext) 
 #endif /* __MM_SE__ */
-
 
 MV_U32 Core_ModuleGetResourceQuota(enum Resource_Type type, MV_U16 maxIo);
 void Core_ModuleInitialize(MV_PVOID, MV_U32, MV_U16);
@@ -65,4 +62,3 @@ void RAID_ModuleNotification(MV_PVOID This,
 
 void sata_hotplug(MV_PVOID data,MV_U32 intStatus);
 #endif /* CORE_EXPOSE_H */
-

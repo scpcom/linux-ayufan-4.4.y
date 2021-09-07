@@ -119,7 +119,6 @@ static void __init ebsa110_map_io(void)
 	iotable_init(ebsa110_io_desc, ARRAY_SIZE(ebsa110_io_desc));
 }
 
-
 #define PIT_CTRL		(PIT_BASE + 0x0d)
 #define PIT_T2			(PIT_BASE + 0x09)
 #define PIT_T1			(PIT_BASE + 0x05)

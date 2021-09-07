@@ -15,7 +15,6 @@
  * General Public License for more details.
  */
 
-
 #include <bfa.h>
 #include <bfa_svc.h>
 #include "fcs_lport.h"
@@ -712,7 +711,6 @@ bfa_fcs_port_ms_timeout(void *arg)
 	ms->port->stats.ms_timeouts++;
 	bfa_sm_send_event(ms, MSSM_EVENT_TIMEOUT);
 }
-
 
 void
 bfa_fcs_port_ms_init(struct bfa_fcs_port_s *port)

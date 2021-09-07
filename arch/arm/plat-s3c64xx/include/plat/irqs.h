@@ -207,4 +207,3 @@
 #define NR_IRQS	(IRQ_BOARD_END + 1)
 
 #endif /* __ASM_PLAT_S3C64XX_IRQS_H */
-

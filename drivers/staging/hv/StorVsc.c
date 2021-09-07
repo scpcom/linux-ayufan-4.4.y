@@ -28,7 +28,6 @@
 #include "VmbusPacketFormat.h"
 #include "vstorage.h"
 
-
 struct storvsc_request_extension {
 	/* LIST_ENTRY ListEntry; */
 
@@ -67,7 +66,6 @@ struct storvsc_device {
 	struct storvsc_request_extension ResetRequest;
 };
 
-
 static const char *gDriverName = "storvsc";
 
 /* {ba6163d9-04a1-4d29-b605-72e2ffb1dc7f} */
@@ -77,7 +75,6 @@ static const struct hv_guid gStorVscDeviceType = {
 		0xb6, 0x05, 0x72, 0xe2, 0xff, 0xb1, 0xdc, 0x7f
 	}
 };
-
 
 static inline struct storvsc_device *AllocStorDevice(struct hv_device *Device)
 {

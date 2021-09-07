@@ -57,4 +57,3 @@ void irlan_next_provider_state(struct irlan_cb *self, IRLAN_STATE state)
 
 	self->provider.state = state;
 }
-

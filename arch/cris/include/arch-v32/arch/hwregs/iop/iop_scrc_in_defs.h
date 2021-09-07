@@ -139,7 +139,6 @@ typedef struct {
 #define REG_RD_ADDR_iop_scrc_in_rw_wr1bit 32
 #define REG_WR_ADDR_iop_scrc_in_rw_wr1bit 32
 
-
 /* Constants */
 enum {
   regk_iop_scrc_in_dif_in                  = 0x00000002,

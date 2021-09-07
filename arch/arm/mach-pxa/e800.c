@@ -93,7 +93,6 @@ static struct w100_mode e800_lcd_mode[2] = {
 	}
 };
 
-
 static struct w100_gpio_regs e800_w100_gpio_info = {
 	.init_data1 = 0xc13fc019,
 	.gpio_dir1  = 0x3e40df7f,
@@ -214,4 +213,3 @@ MACHINE_START(E800, "Toshiba e800")
 	.init_machine	= e800_init,
 	.timer		= &pxa_timer,
 MACHINE_END
-

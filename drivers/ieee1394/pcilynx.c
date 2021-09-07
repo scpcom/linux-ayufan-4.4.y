@@ -73,17 +73,13 @@
 #define PRINTD(level, card, fmt, args...) do {} while (0)
 #endif
 
-
 /* Module Parameters */
 static int skip_eeprom;
 module_param(skip_eeprom, int, 0444);
 MODULE_PARM_DESC(skip_eeprom, "Use generic bus info block instead of serial eeprom (default = 0).");
 
-
 static struct hpsb_host_driver lynx_driver;
 static unsigned int card_id;
-
-
 
 /*
  * I2C stuff
@@ -130,7 +126,6 @@ static struct i2c_algo_bit_data bit_data = {
 	.timeout		= 100,
 };
 
-
 /*
  * PCL handling functions.
  */
@@ -158,7 +153,6 @@ static pcl_t alloc_pcl(struct ti_lynx *lynx)
 
         return -1;
 }
-
 
 #if 0
 static void free_pcl(struct ti_lynx *lynx, pcl_t pclid)
@@ -209,12 +203,9 @@ static void print_pcl(const struct ti_lynx *lynx, pcl_t pclid)
 }
 #endif
 
-
-
 /***********************************
  * IEEE-1394 functionality section *
  ***********************************/
-
 
 static int get_phy_reg(struct ti_lynx *lynx, int addr)
 {
@@ -450,8 +441,6 @@ static void handle_selfid(struct ti_lynx *lynx, struct hpsb_host *host)
                      | LINK_CONTROL_RX_ASYNC_EN | LINK_CONTROL_CYCTIMEREN);
 }
 
-
-
 /* This must be called with the respective queue_lock held. */
 static void send_next(struct ti_lynx *lynx, int what)
 {
@@ -511,7 +500,6 @@ static void send_next(struct ti_lynx *lynx, int what)
         run_pcl(lynx, d->pcl_start, d->channel);
 }
 
-
 /* called from subsystem core */
 static int lynx_transmit(struct hpsb_host *host, struct hpsb_packet *packet)
 {
@@ -556,7 +544,6 @@ static int lynx_transmit(struct hpsb_host *host, struct hpsb_packet *packet)
 
         return 0;
 }
-
 
 /* called from subsystem core */
 static int lynx_devctl(struct hpsb_host *host, enum devctl_cmd cmd, int arg)
@@ -816,16 +803,13 @@ static int lynx_devctl(struct hpsb_host *host, enum devctl_cmd cmd, int arg)
         return retval;
 }
 
-
 /***************************************
  * IEEE-1394 functionality section END *
  ***************************************/
 
-
 /********************************************************
  * Global stuff (interrupt handler, init/shutdown code) *
  ********************************************************/
-
 
 static irqreturn_t lynx_irq_handler(int irq, void *dev_id)
 {
@@ -1046,7 +1030,6 @@ static irqreturn_t lynx_irq_handler(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-
 static void iso_rcv_bh(struct ti_lynx *lynx)
 {
         unsigned int idx;
@@ -1089,7 +1072,6 @@ static void iso_rcv_bh(struct ti_lynx *lynx)
         }
         spin_unlock_irqrestore(&lynx->iso_rcv.lock, flags);
 }
-
 
 static void remove_card(struct pci_dev *dev)
 {
@@ -1150,7 +1132,6 @@ static void remove_card(struct pci_dev *dev)
 	if (lynx_dev)
 		put_device(lynx_dev);
 }
-
 
 static int __devinit add_card(struct pci_dev *dev,
                               const struct pci_device_id *devid_is_unused)
@@ -1498,7 +1479,6 @@ static int __devinit add_card(struct pci_dev *dev,
 #undef FAIL
 }
 
-
 static struct pci_device_id pci_table[] = {
 	{
                 .vendor =    PCI_VENDOR_ID_TI,
@@ -1548,7 +1528,6 @@ static void __exit pcilynx_cleanup(void)
 {
         pci_unregister_driver(&lynx_pci_driver);
 }
-
 
 module_init(pcilynx_init);
 module_exit(pcilynx_cleanup);

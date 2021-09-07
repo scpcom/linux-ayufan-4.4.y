@@ -24,7 +24,6 @@
 #ifndef _M68K_BOOTINFO_H
 #define _M68K_BOOTINFO_H
 
-
     /*
      *  Bootinfo definitions
      *
@@ -47,7 +46,6 @@ struct bi_record {
 };
 
 #endif /* __ASSEMBLY__ */
-
 
     /*
      *  Tag Definitions
@@ -124,7 +122,6 @@ struct bi_record {
  * Motorola VME boards.  Contains board number, Bug version, board
  * configuration options, etc.  See include/asm/mvme16xhw.h for details.
  */
-
 
     /*
      *  Macintosh-specific tags (all u_long)
@@ -373,6 +370,5 @@ struct compat_bootinfo {
 #define bi_mac		bi_un.bi_mac
 
 #endif /* BOOTINFO_COMPAT_1_0 */
-
 
 #endif /* _M68K_BOOTINFO_H */

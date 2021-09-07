@@ -39,7 +39,6 @@
 #ifndef	__RT28XX_H__
 #define	__RT28XX_H__
 
-
 //
 // PCI registers - base address 0x0000
 //
@@ -975,8 +974,6 @@ typedef struct _HW_WCID_ENTRY {  // 8-byte per entry
     UCHAR   Rsv[2];
 } HW_WCID_ENTRY, PHW_WCID_ENTRY;
 
-
-
 //
 // Other on-chip shared memory space, base = 0x2000
 //
@@ -1074,7 +1071,6 @@ typedef struct _HW_WCID_ENTRY {  // 8-byte per entry
 #define QID_RX                  14
 #define QID_OTHER               15
 
-
 // ------------------------------------------------------
 // BBP & RF	definition
 // ------------------------------------------------------
@@ -1171,7 +1167,6 @@ typedef struct _HW_WCID_ENTRY {  // 8-byte per entry
 #define BBP_R122                    122
 #define BBP_R123                    123
 #define BBP_R138                    138 // add by johnli, RF power sequence setup, ADC dynamic on/off control
-
 
 #define BBPR94_DEFAULT              0x06 // Add 1 value will gain 1db
 
@@ -1447,8 +1442,6 @@ typedef union  _MCU_LEDCS_STRUC {
 // Register format
 // =================================================================================
 
-
-
 //NAV_TIME_CFG :NAV
 typedef	union	_NAV_TIME_CFG_STRUC	{
 	struct	{
@@ -1545,8 +1538,6 @@ typedef	union	_HOST_CMD_CSR_STRUC	{
 //
 // AIFSN_CSR: AIFSN for each EDCA AC
 //
-
-
 
 //
 // E2PROM_CSR: EEPROM control register

@@ -398,7 +398,6 @@ int usb_serial_generic_chars_in_buffer(struct tty_struct *tty)
 	return chars;
 }
 
-
 void usb_serial_generic_resubmit_read_urb(struct usb_serial_port *port,
 			gfp_t mem_flags)
 {

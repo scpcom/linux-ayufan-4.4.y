@@ -320,7 +320,6 @@ exit:
 	return result;
 }
 
-
 static void visor_close(struct usb_serial_port *port)
 {
 	struct visor_private *priv = usb_get_serial_port_data(port);
@@ -351,7 +350,6 @@ static void visor_close(struct usb_serial_port *port)
 		dev_info(&port->dev, "Bytes In = %d  Bytes Out = %d\n",
 			 priv->bytes_in, priv->bytes_out);
 }
-
 
 static int visor_write(struct tty_struct *tty, struct usb_serial_port *port,
 					const unsigned char *buf, int count)
@@ -428,7 +426,6 @@ error_no_buffer:
 	return count;
 }
 
-
 static int visor_write_room(struct tty_struct *tty)
 {
 	struct usb_serial_port *port = tty->driver_data;
@@ -454,7 +451,6 @@ static int visor_write_room(struct tty_struct *tty)
 	return 2048;
 }
 
-
 static void visor_write_bulk_callback(struct urb *urb)
 {
 	struct usb_serial_port *port = urb->context;
@@ -477,7 +473,6 @@ static void visor_write_bulk_callback(struct urb *urb)
 
 	usb_serial_port_softint(port);
 }
-
 
 static void visor_read_bulk_callback(struct urb *urb)
 {
@@ -585,7 +580,6 @@ static void visor_throttle(struct tty_struct *tty)
 	priv->throttled = 1;
 	spin_unlock_irq(&priv->lock);
 }
-
 
 static void visor_unthrottle(struct tty_struct *tty)
 {
@@ -742,7 +736,6 @@ static int palm_os_4_probe(struct usb_serial *serial,
 	kfree(transfer_buffer);
 	return 0;
 }
-
 
 static int visor_probe(struct usb_serial *serial,
 					const struct usb_device_id *id)
@@ -989,7 +982,6 @@ failed_handspring_register:
 	return retval;
 }
 
-
 static void __exit visor_exit (void)
 {
 	usb_deregister(&visor_driver);
@@ -997,7 +989,6 @@ static void __exit visor_exit (void)
 	usb_serial_deregister(&clie_3_5_device);
 	usb_serial_deregister(&clie_5_device);
 }
-
 
 module_init(visor_init);
 module_exit(visor_exit);
@@ -1015,4 +1006,3 @@ module_param(vendor, ushort, 0);
 MODULE_PARM_DESC(vendor, "User specified vendor ID");
 module_param(product, ushort, 0);
 MODULE_PARM_DESC(product, "User specified product ID");
-

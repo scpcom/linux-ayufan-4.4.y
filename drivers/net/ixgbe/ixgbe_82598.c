@@ -601,7 +601,6 @@ out:
 	return 0;
 }
 
-
 /**
  *  ixgbe_setup_mac_link_82598 - Set MAC link speed
  *  @hw: pointer to hardware structure
@@ -651,7 +650,6 @@ static s32 ixgbe_setup_mac_link_82598(struct ixgbe_hw *hw,
 
 	return status;
 }
-
 
 /**
  *  ixgbe_setup_copper_link_82598 - Set the PHY autoneg advertised field
@@ -743,7 +741,6 @@ static s32 ixgbe_reset_hw_82598(struct ixgbe_hw *hw)
 			goto reset_hw_out;
 		else if (phy_status == IXGBE_ERR_SFP_NOT_PRESENT)
 			goto no_phy_reset;
-
 
 		hw->phy.ops.reset(hw);
 	}
@@ -1191,4 +1188,3 @@ struct ixgbe_info ixgbe_82598_info = {
 	.eeprom_ops		= &eeprom_ops_82598,
 	.phy_ops		= &phy_ops_82598,
 };
-

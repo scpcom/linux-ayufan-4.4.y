@@ -427,7 +427,6 @@ static void __exit s3c2443_ac97_exit(void)
 }
 module_exit(s3c2443_ac97_exit);
 
-
 MODULE_AUTHOR("Graeme Gregory");
 MODULE_DESCRIPTION("AC97 driver for the Samsung s3c2443 chip");
 MODULE_LICENSE("GPL");

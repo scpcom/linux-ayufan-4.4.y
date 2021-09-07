@@ -279,7 +279,6 @@
 
 #define CLEAR_ALL_INTERRUPTS  0x3
 
-
 /*
  * The type of reading going on on this chip
  */
@@ -559,7 +558,6 @@ static void restore_state(struct pl022 *pl022)
 	GEN_MASK_BITS(SSP_DMA_DISABLED, SSP_DMACR_MASK_TXDMAE, 1) \
 )
 
-
 static void load_ssp_default_config(struct pl022 *pl022)
 {
 	writew(DEFAULT_SSP_REG_CR0, SSP_CR0(pl022->virtbase));
@@ -667,7 +665,6 @@ static void readwriter(struct pl022 *pl022)
 	 * should be empty
 	 */
 }
-
 
 /**
  * next_transfer - Move to the Next transfer in the current spi message
@@ -1084,7 +1081,6 @@ static void pump_messages(struct work_struct *work)
 		do_dma_transfer(pl022);
 }
 
-
 static int __init init_queue(struct pl022 *pl022)
 {
 	INIT_LIST_HEAD(&pl022->queue);
@@ -1104,7 +1100,6 @@ static int __init init_queue(struct pl022 *pl022)
 
 	return 0;
 }
-
 
 static int start_queue(struct pl022 *pl022)
 {
@@ -1127,7 +1122,6 @@ static int start_queue(struct pl022 *pl022)
 
 	return 0;
 }
-
 
 static int stop_queue(struct pl022 *pl022)
 {
@@ -1615,7 +1609,6 @@ static void pl022_cleanup(struct spi_device *spi)
 	kfree(chip);
 }
 
-
 static int __init
 pl022_probe(struct amba_device *adev, struct amba_id *id)
 {
@@ -1804,7 +1797,6 @@ static struct vendor_data vendor_arm = {
 	.unidir = false,
 };
 
-
 static struct vendor_data vendor_st = {
 	.fifodepth = 32,
 	.max_bpw = 32,
@@ -1843,7 +1835,6 @@ static struct amba_driver pl022_driver = {
 	.suspend        = pl022_suspend,
 	.resume         = pl022_resume,
 };
-
 
 static int __init pl022_init(void)
 {

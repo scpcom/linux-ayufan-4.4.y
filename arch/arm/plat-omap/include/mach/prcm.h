@@ -28,8 +28,3 @@ void omap_prcm_arch_reset(char mode);
 int omap2_cm_wait_idlest(void __iomem *reg, u32 mask, const char *name);
 
 #endif
-
-
-
-
-

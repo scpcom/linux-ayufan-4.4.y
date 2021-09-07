@@ -706,7 +706,7 @@ we_slept:
 	clear_dquot_dirty(dquot);
 	if (test_bit(DQ_ACTIVE_B, &dquot->dq_flags)) {
 		spin_unlock(&dq_list_lock);
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 		ret = dquot->dq_sb->dq_op->release_dquot(dquot);
 		if (ret == -EROFS) {
 			printk("%s (%d) Read only filesystem. Skip retry...\n", __FILE__, __LINE__);

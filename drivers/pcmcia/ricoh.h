@@ -30,7 +30,6 @@
 #ifndef _LINUX_RICOH_H
 #define _LINUX_RICOH_H
 
-
 #define RF5C_MODE_CTL		0x1f	/* Mode control */
 #define RF5C_PWR_CTL		0x2f	/* Mixed voltage control */
 #define RF5C_CHIP_ID		0x3a	/* Chip identification */
@@ -173,7 +172,6 @@ static void ricoh_restore_state(struct yenta_socket *socket)
 	config_writew(socket, RL5C4XX_16BIT_MEM_0, rl_mem(socket));
 	config_writew(socket, RL5C4XX_CONFIG, rl_config(socket));
 }
-
 
 /*
  * Magic Ricoh initialization code..

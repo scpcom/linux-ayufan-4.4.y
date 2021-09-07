@@ -214,7 +214,6 @@ struct zsHpPriv
 
 extern u32_t zfHpLoadEEPROMFromFW(zdev_t* dev);
 
-
 typedef u8_t A_UINT8;
 typedef s8_t A_INT8;
 typedef u16_t A_UINT16;
@@ -269,7 +268,6 @@ typedef u32_t A_UINT32;
 #define AR5416_CHAIN_0_IDX              0
 #define AR5416_CHAIN_1_IDX              1
 #define AR5416_CHAIN_2_IDX              2
-
 
 /* Capabilities Enum */
 typedef enum {

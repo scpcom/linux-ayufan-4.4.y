@@ -22,7 +22,6 @@
 #include <asm/sibyte/sb1250_regs.h>
 #include <asm/sibyte/sb1250_smbus.h>
 
-
 /* M41T81 definitions */
 
 /*
@@ -57,7 +56,6 @@
 #define M41T81REG_SQW_RS1	0x20		/* sqw frequency bit 1 */
 #define M41T81REG_SQW_RS2	0x40		/* sqw frequency bit 2 */
 #define M41T81REG_SQW_RS3	0x80		/* sqw frequency bit 3 */
-
 
 /*
  * Register numbers

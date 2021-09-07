@@ -12,7 +12,6 @@
 #ifndef USBDEFS_H
 #define USBDEFS_H
 
-
 #define LINE6_VENDOR_ID  0x0e41
 
 #define USB_INTERVALS_PER_SECOND 1000

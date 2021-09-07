@@ -1,7 +1,6 @@
 #ifndef __EXCITE_XICAP_H__
 #define __EXCITE_XICAP_H__
 
-
 /* Resource names */
 #define XICAP_RESOURCE_FIFO_RX		"xicap_fifo_rx"
 #define XICAP_RESOURCE_FIFO_TX		"xicap_fifo_tx"

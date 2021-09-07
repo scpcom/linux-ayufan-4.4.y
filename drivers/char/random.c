@@ -1733,7 +1733,6 @@ EXPORT_SYMBOL(secure_dccp_sequence_number);
 
 #endif /* CONFIG_INET */
 
-
 /*
  * Get a random word for internal kernel use only. Similar to urandom but
  * with the goal of minimal entropy pool depletion. As a result, the random

@@ -346,7 +346,6 @@ Events         (highest priority)  EMU         0
 #define IRQ_CAN1_ERR  		IRQ_CAN1_ERROR
 #define IRQ_HS_DMA_ERR		IRQ_HS_DMA_ERROR
 
-
 #define IVG7            7
 #define IVG8            8
 #define IVG9            9

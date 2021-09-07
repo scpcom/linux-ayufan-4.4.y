@@ -93,7 +93,6 @@ void tcm_free(void *addr, size_t len)
 }
 EXPORT_SYMBOL(tcm_free);
 
-
 static void __init setup_tcm_bank(u8 type, u32 offset, u32 expected_size)
 {
 	const int tcm_sizes[16] = { 0, -1, -1, 4, 8, 16, 32, 64, 128,

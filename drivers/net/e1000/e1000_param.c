@@ -767,4 +767,3 @@ full_duplex_only:
 			"incompatible. Setting MDI-X to a compatible value.\n");
 	}
 }
-

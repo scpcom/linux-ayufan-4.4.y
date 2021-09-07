@@ -103,7 +103,6 @@ ktrace_alloc(int nentries, unsigned int __nocast sleep)
 	return ktp;
 }
 
-
 /*
  * ktrace_free()
  *
@@ -126,7 +125,6 @@ ktrace_free(ktrace_t *ktp)
 
 	kmem_zone_free(ktrace_hdr_zone, ktp);
 }
-
 
 /*
  * Enter the given values into the "next" entry in the trace buffer.

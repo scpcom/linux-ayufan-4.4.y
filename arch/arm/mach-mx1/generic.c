@@ -50,4 +50,3 @@ void __init mx1_init_irq(void)
 {
 	mxc_init_irq(IO_ADDRESS(AVIC_BASE_ADDR));
 }
-

@@ -625,8 +625,6 @@ static int mtrr_restore(struct sys_device *sysdev)
 	return 0;
 }
 
-
-
 static struct sysdev_driver mtrr_sysdev_driver = {
 	.suspend	= mtrr_save,
 	.resume		= mtrr_restore,

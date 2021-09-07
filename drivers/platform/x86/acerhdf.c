@@ -379,7 +379,6 @@ struct thermal_zone_device_ops acerhdf_dev_ops = {
 	.get_crit_temp = acerhdf_get_crit_temp,
 };
 
-
 /*
  * cooling device callback functions
  * get maximal fan cooling state
@@ -486,7 +485,6 @@ static struct platform_driver acerhdf_driver = {
 	.remove = acerhdf_remove,
 };
 
-
 /* check hardware */
 static int acerhdf_check_hardware(void)
 {
@@ -498,7 +496,6 @@ static int acerhdf_check_hardware(void)
 	vendor  = dmi_get_system_info(DMI_SYS_VENDOR);
 	version = dmi_get_system_info(DMI_BIOS_VERSION);
 	product = dmi_get_system_info(DMI_PRODUCT_NAME);
-
 
 	pr_info("Acer Aspire One Fan driver, v.%s\n", DRV_VER);
 

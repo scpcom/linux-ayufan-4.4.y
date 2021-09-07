@@ -57,4 +57,3 @@
 
 #define S3C64XX_GPB6_I2C_SDA0		(0x02 << 24)
 #define S3C64XX_GPB6_EINT_G1_14		(0x07 << 24)
-

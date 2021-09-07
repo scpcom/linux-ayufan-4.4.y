@@ -50,13 +50,11 @@ struct i1480_usb {
 	struct urb *neep_urb;	/* URB for reading from EP1 */
 };
 
-
 static
 void i1480_usb_init(struct i1480_usb *i1480_usb)
 {
 	i1480_init(&i1480_usb->i1480);
 }
-
 
 static
 int i1480_usb_create(struct i1480_usb *i1480_usb, struct usb_interface *iface)
@@ -79,7 +77,6 @@ error:
 	return result;
 }
 
-
 static
 void i1480_usb_destroy(struct i1480_usb *i1480_usb)
 {
@@ -89,7 +86,6 @@ void i1480_usb_destroy(struct i1480_usb *i1480_usb)
 	usb_put_intf(i1480_usb->usb_iface);
 	usb_put_dev(i1480_usb->usb_dev);
 }
-
 
 /**
  * Write a buffer to a memory address in the i1480 device
@@ -131,7 +127,6 @@ int i1480_usb_write(struct i1480 *i1480, u32 memory_address,
 	}
 	return result;
 }
-
 
 /**
  * Read a block [max size 512] of the device's memory to @i1480's buffer.
@@ -189,7 +184,6 @@ out:
 	return result;
 }
 
-
 /**
  * Callback for reads on the notification/event endpoint
  *
@@ -219,7 +213,6 @@ void i1480_usb_neep_cb(struct urb *urb)
 	complete(&i1480->evt_complete);
 	return;
 }
-
 
 /**
  * Wait for the MAC FW to initialize
@@ -270,7 +263,6 @@ error_submit:
 	i1480->evt_result = result;
 	return result;
 }
-
 
 /**
  * Generic function for issuing commands to the i1480
@@ -332,7 +324,6 @@ error_submit_ep0:
 error_submit_ep1:
 	return result;
 }
-
 
 /*
  * Probe a i1480 device for uploading firmware.
@@ -428,7 +419,6 @@ error:
 	.bInterfaceProtocol = 0xff,			\
 }
 
-
 /** USB device ID's that we handle */
 static struct usb_device_id i1480_usb_id_table[] = {
 	i1480_USB_DEV(0x8086, 0xdf3b),
@@ -440,14 +430,12 @@ static struct usb_device_id i1480_usb_id_table[] = {
 };
 MODULE_DEVICE_TABLE(usb, i1480_usb_id_table);
 
-
 static struct usb_driver i1480_dfu_driver = {
 	.name =		"i1480-dfu-usb",
 	.id_table =	i1480_usb_id_table,
 	.probe =	i1480_usb_probe,
 	.disconnect =	NULL,
 };
-
 
 /*
  * Initialize the i1480 DFU driver.
@@ -460,13 +448,11 @@ static int __init i1480_dfu_driver_init(void)
 }
 module_init(i1480_dfu_driver_init);
 
-
 static void __exit i1480_dfu_driver_exit(void)
 {
 	usb_deregister(&i1480_dfu_driver);
 }
 module_exit(i1480_dfu_driver_exit);
-
 
 MODULE_AUTHOR("Inaky Perez-Gonzalez <inaky.perez-gonzalez@intel.com>");
 MODULE_DESCRIPTION("Intel Wireless UWB Link 1480 firmware uploader for USB");

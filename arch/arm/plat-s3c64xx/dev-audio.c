@@ -18,7 +18,6 @@
 
 #include <plat/devs.h>
 
-
 static struct resource s3c64xx_iis0_resource[] = {
 	[0] = {
 		.start = S3C64XX_PA_IIS0,

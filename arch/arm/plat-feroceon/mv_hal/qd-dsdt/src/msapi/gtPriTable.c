@@ -17,7 +17,6 @@
 #include <gtHwCntl.h>
 #include <gtDrvSwRegs.h>
 
-
 /*******************************************************************************
 * gsysSetQPriOverrideTable
 *
@@ -196,7 +195,6 @@ GT_STATUS gsysSetQPriOverrideTable
 	return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysGetQPriOverrideTable
 *
@@ -363,8 +361,6 @@ GT_STATUS gsysGetQPriOverrideTable
 	return GT_OK;
 }
 
-
-
 /*******************************************************************************
 * gsysSetFPriOverrideTable
 *
@@ -517,7 +513,6 @@ GT_STATUS gsysSetFPriOverrideTable
 	
 	return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysGetQPriOverrideTable
@@ -685,7 +680,6 @@ GT_STATUS gsysGetFPriOverrideTable
 	return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysSetQPriAvbOverrideTable
 *
@@ -846,7 +840,6 @@ GT_STATUS gsysSetQPriAvbOverrideTable
 	
 	return GT_OK;
 }
-
 
 /*******************************************************************************
 * gsysGetQPriOverrideTable
@@ -1013,5 +1006,3 @@ GT_STATUS gsysGetQPriAvbOverrideTable
 
 	return GT_OK;
 }
-
-

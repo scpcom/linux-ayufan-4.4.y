@@ -689,7 +689,6 @@ static void delete_empty_dnode(struct inode *i, dnode_secno dno)
 	hpfs_brelse4(&qbh);
 }
 
-
 /* Delete dirent from directory */
 
 int hpfs_remove_dirent(struct inode *i, dnode_secno dno, struct hpfs_dirent *de,

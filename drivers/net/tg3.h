@@ -1788,7 +1788,6 @@
 #define  TG3_PCIE_EIDLE_DELAY_13_CLKS	 0x0000000c
 /* 0x7e74 --> 0x8000 unused */
 
-
 /* OTP bit definitions */
 #define TG3_OTP_AGCTGT_MASK		0x000000e0
 #define TG3_OTP_AGCTGT_SHIFT		1
@@ -1847,7 +1846,6 @@
 #define TG3_EEPROM_SB_EDH_MIN_MASK	0x000000ff
 #define TG3_EEPROM_SB_EDH_BLD_MASK	0x0000f800
 #define TG3_EEPROM_SB_EDH_BLD_SHFT	11
-
 
 /* 32K Window into NIC internal memory */
 #define NIC_SRAM_WIN_BASE		0x00008000
@@ -2046,7 +2044,6 @@
 #define MII_TG3_TEST1_TRIM_EN		0x0010
 #define MII_TG3_TEST1_CRC_EN		0x8000
 
-
 /* Fast Ethernet Tranceiver definitions */
 #define MII_TG3_FET_PTEST		0x17
 #define MII_TG3_FET_TEST		0x1f
@@ -2057,7 +2054,6 @@
 
 #define MII_TG3_FET_SHDW_AUXSTAT2	0x1b
 #define  MII_TG3_FET_SHDW_AUXSTAT2_APD	0x0020
-
 
 /* APE registers.  Accessible through BAR1 */
 #define TG3_APE_EVENT			0x000c
@@ -2109,7 +2105,6 @@
 #define TG3_APE_LOCK_MEM                4
 
 #define TG3_EEPROM_SB_F1R2_MBA_OFF	0x10
-
 
 /* There are two ways to manage the TX descriptors on the tigon3.
  * Either the descriptors are in host DMA'able memory, or they
@@ -2655,7 +2650,6 @@ struct tg3 {
 #endif
 
 	struct tg3_rx_prodring_set	prodring[1];
-
 
 	/* begin "everything else" cacheline(s) section */
 	struct net_device_stats		net_stats;

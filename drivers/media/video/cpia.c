@@ -26,7 +26,6 @@
 /* define _CPIA_DEBUG_ for verbose debug output (see cpia.h) */
 /* #define _CPIA_DEBUG_  1 */
 
-
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/fs.h>
@@ -192,7 +191,6 @@ static void reset_camera_struct(struct cam_data *cam);
 static int find_over_exposure(int brightness);
 static void set_flicker(struct cam_params *params, volatile u32 *command_flags,
 			int on);
-
 
 /**********************************************************************
  *
@@ -523,7 +521,6 @@ static int cpia_read_proc(char *page, char **start, off_t off,
 	*start = page + off;
 	return len;
 }
-
 
 static int match(char *checkstr, char **buffer, unsigned long *count,
 		 int *find_colon, int *err)
@@ -1614,7 +1611,6 @@ static int free_frame_buf(struct cam_data *cam)
 	return 0;
 }
 
-
 static inline void free_frames(struct cpia_frame frame[FRAME_NUM])
 {
 	int i;
@@ -1904,7 +1900,6 @@ static int convert420(unsigned char *yuv, unsigned char *rgb, int out_fmt,
 	}
 }
 
-
 static int yuvconvert(unsigned char *yuv, unsigned char *rgb, int out_fmt,
 		      int in_uyvy, int mmap_kludge)
 {
@@ -2085,7 +2080,6 @@ static int parse_picture(struct cam_data *cam, int size)
 	cols = 8*(ibuf[25] - ibuf[24]);
 	rows = 4*(ibuf[27] - ibuf[26]);
 
-
 	if ((ibuf[28] != NOT_COMPRESSED) && (ibuf[28] != COMPRESSED)) {
 		LOG("illegal compression %d\n",ibuf[28]);
 		mutex_unlock(&cam->param_lock);
@@ -2216,7 +2210,6 @@ static inline int init_stream_cap(struct cam_data *cam)
 	return do_command(cam, CPIA_COMMAND_InitStreamCap,
 			  0, cam->params.streamStartLine, 0, 0);
 }
-
 
 /*  find_over_exposure
  *    Finds a suitable value of OverExposure for use with SetFlickerCtrl
@@ -2400,8 +2393,6 @@ static void dispatch_commands(struct cam_data *cam)
 	return;
 }
 
-
-
 static void set_flicker(struct cam_params *params, volatile u32 *command_flags,
 			int on)
 {
@@ -2421,7 +2412,6 @@ static void set_flicker(struct cam_params *params, volatile u32 *command_flags,
 #define EXP_FROM_COMP(basecomp, curcomp, curexp) \
      (u16)(((u32)(curexp * (u8)(curcomp + 128)) / (u8)(basecomp - 128)))
 #endif
-
 
 	int currentexp = params->exposure.coarseExpLo +
 			 params->exposure.coarseExpHi*256;
@@ -3442,7 +3432,6 @@ static long cpia_do_ioctl(struct file *file, unsigned int cmd, void *arg)
 		if(cam->params.flickerControl.flickerMode != 0)
 			cam->cmd_queue |= COMMAND_SETFLICKERCTRL;
 
-
 		/* queue command to update camera */
 		cam->cmd_queue |= COMMAND_SETCOLOURPARAMS;
 		mutex_unlock(&cam->param_lock);
@@ -3694,7 +3683,6 @@ static long cpia_do_ioctl(struct file *file, unsigned int cmd, void *arg)
 		break;
 	}
 
-
 	/* pointless to implement overlay with this camera */
 	case VIDIOCCAPTURE:
 	case VIDIOCGFBUF:
@@ -3724,7 +3712,6 @@ static long cpia_ioctl(struct file *file,
 {
 	return video_usercopy(file, cmd, arg, cpia_do_ioctl);
 }
-
 
 /* FIXME */
 static int cpia_mmap(struct file *file, struct vm_area_struct *vma)
@@ -3940,7 +3927,6 @@ struct cam_data *cpia_register_camera(struct cpia_camera_ops *ops, void *lowleve
 
 	if ((camera = kmalloc(sizeof(struct cam_data), GFP_KERNEL)) == NULL)
 		return NULL;
-
 
 	init_camera_struct( camera, ops );
 	camera->lowlevel_data = lowlevel;

@@ -78,7 +78,6 @@ static inline void prepare_to_copy(struct task_struct *tsk)
 {
 }
 
-
 extern unsigned long thread_saved_pc(struct task_struct *t);
 
 static inline void mm_copy_segments(struct mm_struct *from_mm,
@@ -128,7 +127,6 @@ extern struct cpuinfo_um cpu_data[];
 #define cpu_data (&boot_cpu_data)
 #define current_cpu_data boot_cpu_data
 #endif
-
 
 #define KSTK_REG(tsk, reg) get_thread_reg(reg, &tsk->thread.switch_buf)
 extern unsigned long get_wchan(struct task_struct *p);

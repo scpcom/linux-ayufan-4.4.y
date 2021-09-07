@@ -66,7 +66,6 @@ static int          msglevel                =MSG_LEVEL_INFO;
 
 /*---------------------  Static Variables  --------------------------*/
 
-
 BYTE abyVT3184_AGC[] = {
     0x00,   //0
     0x00,   //1
@@ -133,7 +132,6 @@ BYTE abyVT3184_AGC[] = {
     0x3E,   //3E
     0x3E    //3F
 };
-
 
 BYTE abyVT3184_AL2230[] = {
         0x31,//00
@@ -393,8 +391,6 @@ BYTE abyVT3184_AL2230[] = {
         0x00,
         0x00
 };
-
-
 
 //{{RobertYu:20060515, new BB setting for VT3226D0
 BYTE abyVT3184_VT3226D0[] = {
@@ -704,7 +700,6 @@ BBuGetFrameTime (
     UINT uRateIdx = (UINT)wRate;
     UINT uRate = 0;
 
-
     if (uRateIdx > RATE_54M) {
         ASSERT(0);
         return 0;
@@ -916,7 +911,6 @@ BBvCaculateParameter (
     }
 }
 
-
 /*
  * Description: Set Antenna mode
  *
@@ -968,7 +962,6 @@ BBvSetAntennaMode (PSDevice pDevice, BYTE byAntennaMode)
             break;
     }
 
-
     CONTROLnsRequestOut(pDevice,
                     MESSAGE_TYPE_SET_ANTMD,
                     (WORD) byAntennaMode,
@@ -1009,7 +1002,6 @@ BBbVT3184Init (PSDevice pDevice)
     if (ntStatus != STATUS_SUCCESS) {
         return FALSE;
     }
-
 
     //20080215-01,<Add> by Mike Liu
 //    if ((pDevice->abyEEPROM[EEP_OFS_RADIOCTL]&0x06)==0x04)
@@ -1151,7 +1143,6 @@ else {
                     abyArray
                     );
 
-
     if ((pDevice->byRFType == RF_VT3226) || //RobertYu:20051116, 20060111 remove VT3226D0
          (pDevice->byRFType == RF_VT3342A0)  //RobertYu:20060609
          ) {
@@ -1164,14 +1155,12 @@ else {
         MACvRegBitsOn(pDevice,MAC_REG_PAPEDELAY,0x01);
     }
 
-
     ControlvWriteByte(pDevice,MESSAGE_REQUEST_BBREG,0x04,0x7F);
     ControlvWriteByte(pDevice,MESSAGE_REQUEST_BBREG,0x0D,0x01);
 
     RFbRFTableDownload(pDevice);
     return TRUE;//ntStatus;
 }
-
 
 /*
  * Description: Turn on BaseBand Loopback mode
@@ -1262,7 +1251,6 @@ void BBvLoopbackOff (PSDevice pDevice)
 
 }
 
-
 /*
  * Description: Set ShortSlotTime mode
  *
@@ -1295,7 +1283,6 @@ BBvSetShortSlotTime (PSDevice pDevice)
 
 }
 
-
 VOID BBvSetVGAGainOffset(PSDevice pDevice, BYTE byData)
 {
 
@@ -1311,7 +1298,6 @@ VOID BBvSetVGAGainOffset(PSDevice pDevice, BYTE byData)
     }
     ControlvWriteByte(pDevice, MESSAGE_REQUEST_BBREG, 0x0A, pDevice->byBBRxConf);//CR10
 }
-
 
 /*
  * Description: Baseband SoftwareReset
@@ -1360,7 +1346,6 @@ BBvExitDeepSleep (PSDevice pDevice)
     ControlvWriteByte(pDevice, MESSAGE_REQUEST_BBREG, 0x0D, 0x01);//CR13
 }
 
-
 static
 ULONG
 s_ulGetLowSQ3(PSDevice pDevice)
@@ -1382,8 +1367,6 @@ ULONG ulMaxPacket;
 
     return ulSQ3;
 }
-
-
 
 static
 ULONG
@@ -1416,7 +1399,6 @@ ULONG   ulPacketNum;
     return ulRatio;
 }
 
-
 static
 void
 s_vClearSQ3Value (PSDevice pDevice)
@@ -1429,7 +1411,6 @@ s_vClearSQ3Value (PSDevice pDevice)
         pDevice->aulSQ3Val[ii] = 0;
     }
 }
-
 
 /*
  * Description: Antenna Diversity
@@ -1558,7 +1539,6 @@ BBvAntennaDiversity (PSDevice pDevice, BYTE byRxRate, BYTE bySQ3)
     } //byAntennaState
 }
 
-
 /*+
  *
  * Description:
@@ -1595,11 +1575,9 @@ TimerSQ3CallBack (
     add_timer(&pDevice->TimerSQ3Tmax3);
     add_timer(&pDevice->TimerSQ3Tmax2);
 
-
     spin_unlock_irq(&pDevice->lock);
     return;
 }
-
 
 /*+
  *
@@ -1656,7 +1634,6 @@ BBvUpdatePreEDThreshold(
     IN  PSDevice    pDevice,
     IN  BOOL        bScanning)
 {
-
 
     switch(pDevice->byRFType)
     {
@@ -2102,4 +2079,3 @@ BBvUpdatePreEDThreshold(
     }
 
 }
-

@@ -8,11 +8,9 @@
 #include <linux/uaccess.h>
 #include <asm/mpc52xx.h>
 
-
 #define GPT_MODE_WDT		(1 << 15)
 #define GPT_MODE_CE		(1 << 12)
 #define GPT_MODE_MS_TIMER	(0x4)
-
 
 struct mpc5200_wdt {
 	unsigned count;	/* timer ticks before watchdog kicks in */
@@ -31,7 +29,6 @@ static unsigned long is_active;
  */
 static struct mpc5200_wdt *wdt_global;
 
-
 /* helper to calculate timeout in timer counts */
 static void mpc5200_wdt_set_timeout(struct mpc5200_wdt *wdt, int timeout)
 {
@@ -46,7 +43,6 @@ static int mpc5200_wdt_get_timeout(struct mpc5200_wdt *wdt)
 {
 	return wdt->count * 0x10000 / wdt->ipb_freq;
 }
-
 
 /* watchdog operations */
 static int mpc5200_wdt_start(struct mpc5200_wdt *wdt)
@@ -80,7 +76,6 @@ static int mpc5200_wdt_stop(struct mpc5200_wdt *wdt)
 	spin_unlock(&wdt->io_lock);
 	return 0;
 }
-
 
 /* file operations */
 static ssize_t mpc5200_wdt_write(struct file *file, const char __user *data,
@@ -273,7 +268,6 @@ static struct of_platform_driver mpc5200_wdt_driver = {
 	.resume		= mpc5200_wdt_resume,
 	.shutdown	= mpc5200_wdt_shutdown,
 };
-
 
 static int __init mpc5200_wdt_init(void)
 {

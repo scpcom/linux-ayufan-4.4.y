@@ -179,7 +179,6 @@ static const unsigned long sdram_bxcr[] = { SDRAM0_B0CR, SDRAM0_B1CR,
 #define DCRN_SDR0_UART2		0x0122
 #define DCRN_SDR0_UART3		0x0123
 
-
 /* CPRs read/write helper macros - based off include/asm-ppc/ibm44x.h */
 
 #define DCRN_CPR0_CFGADDR				0xc
@@ -191,7 +190,5 @@ static const unsigned long sdram_bxcr[] = { SDRAM0_B0CR, SDRAM0_B1CR,
 #define CPR0_WRITE(offset, data) ({\
 	mtdcr(DCRN_CPR0_CFGADDR, offset); \
 	mtdcr(DCRN_CPR0_CFGDATA, data); })
-
-
 
 #endif	/* _PPC_BOOT_DCR_H_ */

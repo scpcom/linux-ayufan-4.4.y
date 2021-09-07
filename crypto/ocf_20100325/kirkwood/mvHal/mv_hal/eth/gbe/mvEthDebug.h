@@ -115,9 +115,6 @@ void     ethEjpModeSet(int port, int mode)
 #endif
 #endif /* 0 */
 
-
-
-
 void    ethRxCoal(int port, int usec);
 void    ethTxCoal(int port, int usec);
 #if (MV_ETH_VERSION >= 4)

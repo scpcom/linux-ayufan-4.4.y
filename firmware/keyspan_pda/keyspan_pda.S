@@ -211,7 +211,6 @@ USB_Jump_Table:
 	ljmp	ISR_Ep2out
 	.byte	0
 
-
 	.org 0x200
 		
 start:	mov SP,STACK-1 ; set stack
@@ -346,10 +345,7 @@ renum_wait3:
 	movx @dptr, a
 	;; we are back online. the host device will now re-query us
 	
-	
 main:	sjmp main
-
-	
 
 ISR_Sudav:
 	push dps
@@ -464,7 +460,6 @@ setup_ctrl_not_07:
 	
 setup_bmreq_type_not_vendor:
 	ljmp setup_stall
-
 
 setup_bmreq_is_standard:	
 	cjne r2, #0x00, setup_breq_not_00
@@ -620,7 +615,6 @@ setup_breq_not_0a:
 setup_breq_not_0b:
 	ljmp setup_stall
 
-		
 setup_done_ack:	
 	;; now clear HSNAK
 	mov dptr, EP0CS
@@ -901,7 +895,6 @@ start_tx__maybe_unthrottle_tx:
 	;; prod rx, which will actually send the message when in2 becomes free
 	ljmp start_in
 	
-
 serial_int:
 	push dps
 	push dpl
@@ -1016,7 +1009,6 @@ putchar_wait:
 	clr TI
 	ret
 
-	
 baud_table:			; baud_high, then baud_low
 	;; baud[0]: 110
 	.byte BAUD_HIGH(110)
@@ -1118,7 +1110,6 @@ tx_ring:
 	.skip 0x100		; 256 bytes
 rx_ring:
 	.skip 0x100		; 256 bytes
-	
 	
 	.END
 	

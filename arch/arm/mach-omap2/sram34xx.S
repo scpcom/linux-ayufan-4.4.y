@@ -297,4 +297,3 @@ core_m2_mask_val:
 
 ENTRY(omap3_sram_configure_core_dpll_sz)
 	.word	. - omap3_sram_configure_core_dpll
-

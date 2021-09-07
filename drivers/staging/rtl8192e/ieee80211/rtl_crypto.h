@@ -396,4 +396,3 @@ void crypto_hmac(struct crypto_tfm *tfm, u8 *key, unsigned int *keylen,
 #endif	/* CONFIG_CRYPTO_HMAC */
 
 #endif	/* _LINUX_CRYPTO_H */
-

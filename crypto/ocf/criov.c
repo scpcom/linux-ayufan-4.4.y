@@ -142,7 +142,6 @@ EXPORT_SYMBOL(cuio_copyback);
 EXPORT_SYMBOL(cuio_copydata);
 EXPORT_SYMBOL(cuio_getptr);
 
-
 static void
 skb_copy_bits_back(struct sk_buff *skb, int offset, caddr_t cp, int len)
 {
@@ -212,4 +211,3 @@ crypto_apply(int flags, caddr_t buf, int off, int len,
 EXPORT_SYMBOL(crypto_copyback);
 EXPORT_SYMBOL(crypto_copydata);
 EXPORT_SYMBOL(crypto_apply);
-

@@ -167,7 +167,6 @@ struct nfs4_state {
 	atomic_t count;
 };
 
-
 struct nfs4_exception {
 	long timeout;
 	int retry;
@@ -196,7 +195,6 @@ extern const struct inode_operations nfs4_dir_inode_operations;
 extern ssize_t nfs4_getxattr(struct dentry *, const char *, void *, size_t);
 extern int nfs4_setxattr(struct dentry *, const char *, const void *, size_t, int);
 extern ssize_t nfs4_listxattr(struct dentry *, char *, size_t);
-
 
 /* nfs4proc.c */
 extern int nfs4_proc_setclientid(struct nfs_client *, u32, unsigned short, struct rpc_cred *);

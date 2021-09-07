@@ -54,7 +54,6 @@ static int ufs_block_to_path(struct inode *inode, sector_t i_block, sector_t off
 		double_blocks = (1 << (ptrs_bits * 2));
 	int n = 0;
 
-
 	UFSD("ptrs=uspi->s_apb = %d,double_blocks=%ld \n",ptrs,double_blocks);
 	if (i_block < direct_blocks) {
 		offsets[n++] = i_block;
@@ -132,11 +131,9 @@ ufs2:
 	if (!u2_block)
 		goto out;
 
-
 	while (--depth) {
 		struct buffer_head *bh;
 		sector_t n = *p++;
-
 
 		temp = (u64)(uspi->s_sbbase) + fs64_to_cpu(sb, u2_block);
 		bh = sb_bread(sb, temp +(u64) (n>>shift));
@@ -385,7 +382,6 @@ repeat:
 			goto repeat;
 		goto out;
 	}		
-
 
 	if (!phys) {
 		result = sb_getblk(sb, uspi->s_sbbase + tmp + blockoff);
@@ -644,7 +640,6 @@ static int ufs1_read_inode(struct inode *inode, struct ufs_inode *ufs_inode)
 	ufsi->i_shadow = fs32_to_cpu(sb, ufs_inode->ui_u3.ui_sun.ui_shadow);
 	ufsi->i_oeftflag = fs32_to_cpu(sb, ufs_inode->ui_u3.ui_sun.ui_oeftflag);
 
-	
 	if (S_ISCHR(mode) || S_ISBLK(mode) || inode->i_blocks) {
 		memcpy(ufsi->i_u1.i_data, &ufs_inode->ui_u2.ui_addr,
 		       sizeof(ufs_inode->ui_u2.ui_addr));

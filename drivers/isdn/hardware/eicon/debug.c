@@ -71,8 +71,6 @@ static void diva_maint_trace_notify (void* user_context,
                                      void* xlog_buffer,
                                      int length);
 
-
-
 typedef struct MSG_QUEUE {
 	dword	Size;		/* total size of queue (constant)	*/
 	byte	*Base;		/* lowest address (constant)		*/
@@ -142,8 +140,6 @@ alloc:
 
 	Q->Tail	 += need;
 	Q->Count += size;
-
-
 
 	return ((byte*)(Msg + 1));
 }
@@ -245,7 +241,6 @@ int diva_maint_init (byte* base, unsigned long length, int do_init) {
     external_dbg_queue = 1; /* memory was located on the external device */
   }
 
-
 	if (diva_os_initialize_spin_lock (&dbg_q_lock, "dbg_init")) {
     dbg_queue = NULL;
     dbg_base = NULL;
@@ -343,7 +338,6 @@ void diva_maint_ack_message (int do_release,
 	dbg_q_busy = 0;
   diva_os_leave_spin_lock (&dbg_q_lock, old_irql, "read_ack");
 }
-
 
 /*
   INTERFACE:
@@ -593,8 +587,6 @@ static void DI_format (int do_lock,
 		return;
 	}
 
-
-  
   diva_os_get_time (&sec, &usec);
 
   if (do_lock) {
@@ -717,7 +709,6 @@ static void DI_format (int do_lock,
 
   } /* switch type */
 
-
   if (queueCount(dbg_queue)) {
     diva_maint_wakeup_read();
   }
@@ -808,7 +799,6 @@ int diva_set_driver_dbg_mask (dword id, dword mask) {
   diva_os_spin_lock_magic_t old_irql, old_irql1;
   int ret = -1;
   
-
   if (!id || (id >= ARRAY_SIZE(clients))) {
     return (-1);
   }
@@ -824,7 +814,6 @@ int diva_set_driver_dbg_mask (dword id, dword mask) {
     ret = 4;
     diva_change_management_debug_mask (&clients[id], old_mask);
   }
-
 
   diva_os_leave_spin_lock (&dbg_q_lock, &old_irql, "dbg mask");
 
@@ -1363,7 +1352,6 @@ static void diva_maint_xdi_cb (ENTITY* e) {
   diva_maint_client_t* pC;
   diva_os_spin_lock_magic_t old_irql, old_irql1;
 
-
   diva_os_enter_spin_lock (&dbg_adapter_lock, &old_irql1, "xdi_cb");
   diva_os_enter_spin_lock (&dbg_q_lock, &old_irql, "xdi_cb");
 
@@ -1384,7 +1372,6 @@ static void diva_maint_xdi_cb (ENTITY* e) {
 
   diva_os_leave_spin_lock (&dbg_q_lock, &old_irql, "xdi_cb");
 
-
 	if (pC->request_pending) {
     pC->request_pending = 0;
     (*(pC->request))(e);
@@ -1392,7 +1379,6 @@ static void diva_maint_xdi_cb (ENTITY* e) {
 
   diva_os_leave_spin_lock (&dbg_adapter_lock, &old_irql1, "xdi_cb");
 }
-
 
 static void diva_maint_error (void* user_context,
                               diva_strace_library_interface_t* hLib,
@@ -1517,7 +1503,6 @@ static void diva_maint_state_change_notify (void* user_context,
 						break;
 					}
 				}
-
 
         diva_mnt_internal_dprintf(pC->hDbg->id, DLI_STAT, "MDM Ch    = %lu",
                                                                      (int)modem->ChannelNumber);
@@ -1871,7 +1856,6 @@ static void diva_maint_trace_notify (void* user_context,
   }
 }
 
-
 /*
   Convert MAINT trace mask to management interface trace mask/work/facility and
   issue command to management interface
@@ -1907,7 +1891,6 @@ static void diva_change_management_debug_mask (diva_maint_client_t* pC, dword ol
   }
 }
 
-
 void diva_mnt_internal_dprintf (dword drv_id, dword type, char* fmt, ...) {
   va_list ap;
 
@@ -1923,7 +1906,6 @@ int diva_mnt_shutdown_xdi_adapters (void) {
   diva_os_spin_lock_magic_t old_irql, old_irql1;
   int i, fret = 0;
   byte * pmem;
-
 
   for (i = 1; i < ARRAY_SIZE(clients); i++) {
     pmem = NULL;
@@ -2130,4 +2112,3 @@ static void diva_free_dma_descriptor (IDI_CALL request, int nr) {
 
   (*request)((ENTITY*)pReq);
 }
-

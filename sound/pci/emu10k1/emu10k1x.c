@@ -59,7 +59,6 @@ MODULE_PARM_DESC(id, "ID string for the EMU10K1X soundcard.");
 module_param_array(enable, bool, NULL, 0444);
 MODULE_PARM_DESC(enable, "Enable the EMU10K1X soundcard.");
 
-
 // some definitions were borrowed from emu10k1 driver as they seem to be the same
 /************************************************************************************************/
 /* PCI function 0 registers, address = <val> + PCIBASE0						*/
@@ -97,7 +96,6 @@ MODULE_PARM_DESC(enable, "Enable the EMU10K1X soundcard.");
 						/* Should be set to 1 when the EMU10K1 is	*/
 						/* completely initialized.			*/
 #define GPIO			0x18		/* Defaults: 00001080-Analog, 00001000-SPDIF.   */
-
 
 #define AC97DATA		0x1c		/* AC97 register set data register (16 bit)	*/
 

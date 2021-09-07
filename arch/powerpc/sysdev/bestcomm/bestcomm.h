@@ -81,7 +81,6 @@ extern void bcom_enable(struct bcom_task *tsk);
  */
 extern void bcom_disable(struct bcom_task *tsk);
 
-
 /**
  * bcom_get_task_irq - Returns the irq number of a BestComm task
  * @tsk: The BestComm task structure

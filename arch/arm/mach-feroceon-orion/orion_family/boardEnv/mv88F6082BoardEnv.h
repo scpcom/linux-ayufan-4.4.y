@@ -62,10 +62,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvBoard88F6082BoardEnvSpech
 #define __INCmvBoard88F6082BoardEnvSpech
-
 
 /* 88F6082 based boards ID numbers */
 /* =============================== */
@@ -78,7 +76,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RD_88F6082_MICRO_DAS_NAS		(BOARD_ID_88F6082_BASE+0x6)
 #define RD_88F6082_DX243_24G			(BOARD_ID_88F6082_BASE+0x7)
 #define BOARD_ID_88F6082_MAX			(BOARD_ID_88F6082_BASE+0x8)
-
 
 #define RD_88F6082_NAS_MPP0_7       		0x01111300
 #define RD_88F6082_NAS_MPP8_15			0x11110011

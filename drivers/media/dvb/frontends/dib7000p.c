@@ -514,7 +514,6 @@ static int dib7000p_demod_reset(struct dib7000p_state *state)
 
 	dib7000p_set_power_mode(state, DIB7000P_POWER_INTERFACE_ONLY);
 
-
 	return 0;
 }
 
@@ -892,7 +891,6 @@ static void dib7000p_spur_protect(struct dib7000p_state *state, u32 rf_khz, u32 
 
 	dprintk( "relative position of the Spur: %dk (RF: %dk, XTAL: %dk)", f_rel, rf_khz, xtal);
 
-
 	if (f_rel < -bw_khz/2 || f_rel > bw_khz/2)
 		return;
 
@@ -1065,7 +1063,6 @@ static int dib7000p_identify(struct dib7000p_state *st)
 
 	return 0;
 }
-
 
 static int dib7000p_get_frontend(struct dvb_frontend* fe,
 				struct dvb_frontend_parameters *fep)

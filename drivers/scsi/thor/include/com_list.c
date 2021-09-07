@@ -181,4 +181,3 @@ static MV_INLINE void List_Splice_Init(List_Head *list,
 		MV_LIST_HEAD_INIT(list);
 	}
 }
-

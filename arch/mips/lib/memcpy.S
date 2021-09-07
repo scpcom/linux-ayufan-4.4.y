@@ -489,7 +489,6 @@ EXC(	lb	t1, 0(src),	.Ll_exc)
 	jr	ra
 	 nop
 
-
 #define SEXC(n)							\
 	.set	reorder;			/* DADDI_WAR */	\
 .Ls_exc_p ## n ## u:						\

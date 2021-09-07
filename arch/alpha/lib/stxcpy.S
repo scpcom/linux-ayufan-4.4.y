@@ -112,7 +112,6 @@ __stxcpy:
 	ldq_u	t0, 0(a0)	# e0    :
 	br	stxcpy_aligned	# .. e1 :
 
-
 /* The source and destination are not co-aligned.  Align the destination
    and cope.  We have to be very careful about not reading too much and
    causing a SEGV.  */

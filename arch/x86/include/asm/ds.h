@@ -22,11 +22,9 @@
 #ifndef _ASM_X86_DS_H
 #define _ASM_X86_DS_H
 
-
 #include <linux/types.h>
 #include <linux/init.h>
 #include <linux/err.h>
-
 
 #ifdef CONFIG_X86_DS
 
@@ -38,7 +36,6 @@ struct pebs_tracer;
 
 typedef void (*bts_ovfl_callback_t)(struct bts_tracer *);
 typedef void (*pebs_ovfl_callback_t)(struct pebs_tracer *);
-
 
 /*
  * A list of features plus corresponding macros to talk about them in
@@ -69,7 +66,6 @@ enum ds_feature {
 
 #define BTS_USER_FLAGS (BTS_KERNEL | BTS_USER | BTS_TIMESTAMPS)
 };
-
 
 /*
  * Request BTS or PEBS
@@ -148,7 +144,6 @@ extern int ds_release_pebs_noirq(struct pebs_tracer *tracer);
 extern int ds_suspend_pebs_noirq(struct pebs_tracer *tracer);
 extern int ds_resume_pebs_noirq(struct pebs_tracer *tracer);
 
-
 /*
  * The raw DS buffer state as it is used for BTS and PEBS recording.
  *
@@ -209,7 +204,6 @@ struct bts_struct {
 	} variant;
 };
 
-
 /*
  * The BTS state.
  *
@@ -223,7 +217,6 @@ struct bts_trace {
 		    struct bts_struct *out);
 	int (*write)(struct bts_tracer *tracer, const struct bts_struct *in);
 };
-
 
 /*
  * The PEBS state.
@@ -242,7 +235,6 @@ struct pebs_trace {
 	unsigned long long counter_reset[MAX_PEBS_COUNTERS];
 };
 
-
 /*
  * Read the BTS or PEBS trace.
  *
@@ -256,7 +248,6 @@ struct pebs_trace {
  */
 extern const struct bts_trace *ds_read_bts(struct bts_tracer *tracer);
 extern const struct pebs_trace *ds_read_pebs(struct pebs_tracer *tracer);
-
 
 /*
  * Reset the write pointer of the BTS/PEBS buffer.

@@ -96,8 +96,6 @@ static u32 mmc_translate_vdd(struct device *dev, unsigned int voltage)
 	return v << 2;
 }
 
-
-
 static int mmci_callback(void *data)
 {
 	struct mmci_card_event *mmci_card = data;
@@ -108,14 +106,12 @@ static int mmci_callback(void *data)
 	return 0;
 }
 
-
 static ssize_t gpio_show(struct device *dev, struct device_attribute *attr,
 		  char *buf)
 {
 	struct mmci_card_event *mmci_card = container_of(
 		dev->platform_data,
 		struct mmci_card_event, mmc0_plat_data);
-
 
 	return sprintf(buf, "%d\n", !mmci_card->mmc_inserted);
 }

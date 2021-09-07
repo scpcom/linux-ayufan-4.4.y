@@ -63,7 +63,6 @@ static int store_updates_sp(struct pt_regs *regs)
 	return 0;
 }
 
-
 /*
  * bad_page_fault is called when we have a bad access from the kernel.
  * It is called from do_page_fault above and from some of the procedures

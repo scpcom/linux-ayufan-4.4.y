@@ -59,10 +59,8 @@ MODULE_AUTHOR("Michael Geng <linux@MichaelGeng.de>");
 MODULE_DESCRIPTION("Philips SAA5249 Teletext decoder driver");
 MODULE_LICENSE("GPL");
 
-
 #define VTX_VER_MAJ 1
 #define VTX_VER_MIN 8
-
 
 #define NUM_DAUS 4
 #define NUM_BUFS 8
@@ -78,8 +76,6 @@ static const int disp_modes[8][3] =
 	{ 0x44, 0x0f, 0x0f },	/* DISPTRANS, interlaced */
 	{ 0x44, 0xcc, 0x46 }	/* DISPINS, interlaced */
 };
-
-
 
 #define PAGE_WAIT    msecs_to_jiffies(300)	/* Time between requesting page and */
 						/* checking status bits */
@@ -113,7 +109,6 @@ static inline struct saa5249_device *to_dev(struct v4l2_subdev *sd)
 	return container_of(sd, struct saa5249_device, sd);
 }
 
-
 #define CCTWR 34		/* I²C write/read-address of vtx-chip */
 #define CCTRD 35
 #define NOACK_REPEAT 10		/* Retry access this many times on failure */
@@ -146,7 +141,6 @@ static void jdelay(unsigned long delay)
 	recalc_sigpending();
 	spin_unlock_irq(&current->sighand->siglock);
 }
-
 
 /*
  *	I2C interfaces
@@ -194,7 +188,6 @@ static int i2c_getdata(struct saa5249_device *t, int count, u8 *buf)
 		return -1;
 	return 0;
 }
-
 
 /*
  *	Standard character-device-driver functions
@@ -533,8 +526,6 @@ static int saa5249_open(struct file *file)
 	t->virtual_mode = false;
 	return 0;
 }
-
-
 
 static int saa5249_release(struct file *file)
 {

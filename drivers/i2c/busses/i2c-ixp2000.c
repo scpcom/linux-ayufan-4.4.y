@@ -46,7 +46,6 @@ static inline int ixp2000_sda_pin(void *data)
 	return ((struct ixp2000_i2c_pins*)data)->sda_pin;
 }
 
-
 static void ixp2000_bit_setscl(void *data, int val)
 {
 	int i = 5000;
@@ -164,4 +163,3 @@ MODULE_AUTHOR ("Deepak Saxena <dsaxena@plexity.net>");
 MODULE_DESCRIPTION("IXP2000 GPIO-based I2C bus driver");
 MODULE_LICENSE("GPL");
 MODULE_ALIAS("platform:IXP2000-I2C");
-

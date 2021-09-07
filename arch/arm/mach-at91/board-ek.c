@@ -44,7 +44,6 @@
 
 #include "generic.h"
 
-
 static void __init ek_map_io(void)
 {
 	/* Initialize processor: 18.432 MHz crystal */

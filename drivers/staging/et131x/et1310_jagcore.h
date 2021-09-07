@@ -61,7 +61,6 @@
 
 #include "et1310_address_map.h"
 
-
 #define INTERNAL_MEM_SIZE       0x400	/* 1024 of internal memory */
 #define INTERNAL_MEM_RX_OFFSET  0x1FF	/* 50%   Tx, 50%   Rx */
 

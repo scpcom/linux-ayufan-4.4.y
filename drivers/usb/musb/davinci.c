@@ -48,7 +48,6 @@
 #include "davinci.h"
 #include "cppi_dma.h"
 
-
 #define USB_PHY_CTRL	IO_ADDRESS(USBPHY_CTL_PADDR)
 #define DM355_DEEPSLEEP	IO_ADDRESS(DM355_DEEPSLEEP_PADDR)
 
@@ -135,13 +134,11 @@ void musb_platform_disable(struct musb *musb)
 		WARNING("dma still active\n");
 }
 
-
 #ifdef CONFIG_USB_MUSB_HDRC_HCD
 #define	portstate(stmt)		stmt
 #else
 #define	portstate(stmt)
 #endif
-
 
 /*
  * VBUS SWITCHING IS BOARD-SPECIFIC ... at least for the DM6446 EVM,
@@ -196,7 +193,6 @@ static void davinci_set_vbus(struct musb *musb, int is_on)
 	WARN_ON(is_on && is_peripheral_active(musb));
 	davinci_source_power(musb, is_on, 0);
 }
-
 
 #define	POLL_SECONDS	2
 

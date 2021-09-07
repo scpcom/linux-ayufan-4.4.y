@@ -403,5 +403,3 @@ fail:
 
 module_init(cap_init_module);
 module_exit(cap_cleanup_module);
-
-

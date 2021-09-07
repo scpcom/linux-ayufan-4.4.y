@@ -14,7 +14,6 @@
 #include <asm/page.h>
 #include <asm/code-patching.h>
 
-
 void patch_instruction(unsigned int *addr, unsigned int instr)
 {
 	*addr = instr;
@@ -152,7 +151,6 @@ unsigned int translate_branch(const unsigned int *dest, const unsigned int *src)
 
 	return 0;
 }
-
 
 #ifdef CONFIG_CODE_PATCHING_SELFTEST
 
@@ -378,7 +376,6 @@ static void __init test_translate_branch(void)
 	patch_instruction(q, translate_branch(q, p));
 	check(instr_is_branch_to_addr(p, addr));
 	check(instr_is_branch_to_addr(q, addr));
-
 
 	/* Conditional branch tests */
 

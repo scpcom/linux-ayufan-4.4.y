@@ -137,7 +137,6 @@ struct hrtimer_clock_base *lock_hrtimer_base(const struct hrtimer *timer,
 	}
 }
 
-
 /*
  * Get the preferred target CPU for NOHZ
  */
@@ -603,7 +602,6 @@ static int hrtimer_reprogram(struct hrtimer *timer,
 	return res;
 }
 
-
 /*
  * Retrigger next event is called after clock was set
  *
@@ -680,7 +678,6 @@ static inline void hrtimer_init_hres(struct hrtimer_cpu_base *base)
 static inline void hrtimer_init_timer_hres(struct hrtimer *timer)
 {
 }
-
 
 /*
  * When High resolution timers are active, try to reprogram. Note, that in case
@@ -1024,7 +1021,6 @@ hrtimer_start(struct hrtimer *timer, ktime_t tim, const enum hrtimer_mode mode)
 	return __hrtimer_start_range_ns(timer, tim, 0, mode, 1);
 }
 EXPORT_SYMBOL_GPL(hrtimer_start);
-
 
 /**
  * hrtimer_try_to_cancel - try to deactivate a timer

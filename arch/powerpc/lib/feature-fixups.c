@@ -18,7 +18,6 @@
 #include <asm/cputable.h>
 #include <asm/code-patching.h>
 
-
 struct fixup_entry {
 	unsigned long	mask;
 	unsigned long	value;

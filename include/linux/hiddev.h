@@ -208,7 +208,6 @@ struct hiddev_usage_ref_multi {
  * }
  */
 
-
 #ifdef __KERNEL__
 
 /*

@@ -171,4 +171,3 @@ enum bfi_mclass {
 #pragma pack()
 
 #endif /* __BFI_H__ */
-

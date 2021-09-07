@@ -216,7 +216,6 @@ static void capiminor_del_all_ack(struct capiminor *mp)
 	spin_unlock_irqrestore(&mp->ackqlock, flags);
 }
 
-
 /* -------- struct capiminor ---------------------------------------- */
 
 static struct capiminor *capiminor_alloc(struct capi20_appl *ap, u32 ncci)
@@ -642,7 +641,6 @@ static void capi_recv_message(struct capi20_appl *ap, struct sk_buff *skb)
 		spin_unlock_irqrestore(&workaround_lock, flags);
 		return;
 	}
-
 
 	if (CAPIMSG_SUBCOMMAND(skb->data) == CAPI_IND) {
 		
@@ -1518,7 +1516,6 @@ static void __exit proc_exit(void)
 }
 
 /* -------- init function and module interface ---------------------- */
-
 
 static char rev[32];
 

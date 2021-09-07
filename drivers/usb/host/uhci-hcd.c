@@ -198,7 +198,6 @@ static void configure_hc(struct uhci_hcd *uhci)
 			USBLEGSUP_DEFAULT);
 }
 
-
 static int resume_detect_interrupts_are_broken(struct uhci_hcd *uhci)
 {
 	int port;

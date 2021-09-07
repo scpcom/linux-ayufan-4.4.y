@@ -179,8 +179,6 @@ bfa_cb_init(void *drv, bfa_status_t init_status)
 	complete(&bfad->comp);
 }
 
-
-
 /**
  *  BFA_FCS callbacks
  */
@@ -306,8 +304,6 @@ bfa_fcb_rport_alloc(struct bfad_s *bfad, struct bfa_fcs_rport_s **rport,
 ext:
 	return rc;
 }
-
-
 
 void
 bfad_hal_mem_release(struct bfad_s *bfad)
@@ -586,7 +582,6 @@ bfad_pci_init(struct pci_dev *pdev, struct bfad_s *bfad)
 		goto out_disable_device;
 
 	pci_set_master(pdev);
-
 
 	if (pci_set_dma_mask(pdev, DMA_BIT_MASK(64)) != 0)
 		if (pci_set_dma_mask(pdev, DMA_BIT_MASK(32)) != 0) {
@@ -1052,7 +1047,6 @@ remove_sysfs:
 	kfree(bfad);
 }
 
-
 static struct pci_device_id bfad_id_table[] = {
 	{
 	 .vendor = BFA_PCI_VENDOR_ID_BROCADE,
@@ -1178,5 +1172,3 @@ MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Brocade Fibre Channel HBA Driver" BFAD_PROTO_NAME);
 MODULE_AUTHOR("Brocade Communications Systems, Inc.");
 MODULE_VERSION(BFAD_DRIVER_VERSION);
-
-

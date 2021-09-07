@@ -969,9 +969,7 @@ sun4m_init:
 		lda	[%o0] ASI_M_MMUREGS, %g0
 		 nop
 
-
 sun4c_continue_boot:
-
 
 /* Aieee, now set PC and nPC, enable traps, give ourselves a stack and it's
  * show-time!

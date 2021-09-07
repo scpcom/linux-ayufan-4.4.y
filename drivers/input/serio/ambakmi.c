@@ -124,7 +124,6 @@ static int amba_kmi_probe(struct amba_device *dev, struct amba_id *id)
 		goto out;
 	}
 
-
 	io->id.type	= SERIO_8042;
 	io->write	= amba_kmi_write;
 	io->open	= amba_kmi_open;

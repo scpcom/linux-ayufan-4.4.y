@@ -34,5 +34,4 @@
 #define LPD270_INT_ETHERNET	(1 << 3)  /* Ethernet controller IRQ */
 #define LPD270_INT_USBC		(1 << 2)  /* USB client cable detection IRQ */
 
-
 #endif

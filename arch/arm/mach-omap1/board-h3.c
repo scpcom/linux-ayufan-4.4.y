@@ -94,7 +94,6 @@ static int h3_keymap[] = {
 	0
 };
 
-
 static struct mtd_partition nor_partitions[] = {
 	/* bootloader (U-Boot, etc) in first sector */
 	{

@@ -88,7 +88,6 @@ typedef struct s_AC	SK_AC;
 
 #define SK_NET_DEVICE	net_device
 
-
 /* we use gethrtime(), return unit: nanoseconds */
 #define SK_TICKS_PER_SEC	100
 

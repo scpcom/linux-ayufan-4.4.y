@@ -524,7 +524,6 @@ static const struct ov772x_color_format ov772x_cfmts[] = {
 	},
 };
 
-
 /*
  * window size list
  */
@@ -580,7 +579,6 @@ static const struct v4l2_queryctrl ov772x_controls[] = {
 		.default_value	= 0,
 	},
 };
-
 
 /*
  * general function

@@ -112,7 +112,6 @@ typedef enum {
 
 #define        ISA_REGION          8	/* Number of Registers            */
 
-
 /* Macros for accessing ports */
 #define ISA_PORT_COR (card->port+ISA_COR)
 #define ISA_PORT_ISR (card->port+ISA_ISR)

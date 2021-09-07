@@ -115,7 +115,6 @@ static const struct super_operations isofs_sops = {
 	.show_options	= generic_show_options,
 };
 
-
 static const struct dentry_operations isofs_dentry_ops[] = {
 	{
 		.d_hash		= isofs_hash,

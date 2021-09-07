@@ -478,7 +478,6 @@ struct fst_card_info {
 #define dev_to_port(D)  (dev_to_hdlc(D)->priv)
 #define port_to_dev(P)  ((P)->dev)
 
-
 /*
  *      Shared memory window access macros
  *

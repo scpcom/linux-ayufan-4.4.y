@@ -310,4 +310,3 @@ void tipc_net_stop(void)
 	write_unlock_bh(&tipc_net_lock);
 	info("Left network mode \n");
 }
-

@@ -233,7 +233,6 @@ static struct platform_device overo_nand_device = {
 	.resource	= &overo_nand_resource,
 };
 
-
 static void __init overo_flash_init(void)
 {
 	u8 cs = 0;

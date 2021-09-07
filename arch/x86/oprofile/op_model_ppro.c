@@ -45,7 +45,6 @@ static void ppro_fill_in_addresses(struct op_msrs * const msrs)
 	}
 }
 
-
 static void ppro_setup_ctrs(struct op_x86_model_spec const *model,
 			    struct op_msrs const * const msrs)
 {
@@ -107,7 +106,6 @@ static void ppro_setup_ctrs(struct op_x86_model_spec const *model,
 	}
 }
 
-
 static int ppro_check_ctrs(struct pt_regs * const regs,
 			   struct op_msrs const * const msrs)
 {
@@ -146,7 +144,6 @@ out:
 	return 1;
 }
 
-
 static void ppro_start(struct op_msrs const * const msrs)
 {
 	u64 val;
@@ -162,7 +159,6 @@ static void ppro_start(struct op_msrs const * const msrs)
 		}
 	}
 }
-
 
 static void ppro_stop(struct op_msrs const * const msrs)
 {
@@ -197,7 +193,6 @@ static void ppro_shutdown(struct op_msrs const * const msrs)
 		reset_value = NULL;
 	}
 }
-
 
 struct op_x86_model_spec op_ppro_spec = {
 	.num_counters		= 2,

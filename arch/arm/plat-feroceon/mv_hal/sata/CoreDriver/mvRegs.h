@@ -112,7 +112,6 @@ extern "C" {
 #define MV_BIT30                                0x40000000
 #define MV_BIT31                                0x80000000
 
-
 #define MV_PCI_REGS_OFFSET                      0x0
 
 /* PCI registers */
@@ -272,7 +271,6 @@ extern "C" {
 #define MV_SATA_II_IF_STATUS_VUQ_ERR_MASK       MV_BIT13
 #define MV_SATA_II_IF_STATUS_FSM_STATUS_MASK    0x3f000000
 
-
 #define MV_SATA_II_VENDOR_UQ_REG_OFFSET         0x35c
 
 #define MV_SATA_II_S_STATUS_REG_OFFSET          0x300
@@ -316,7 +314,6 @@ extern "C" {
 /*don't enable rcvrbl errors that occur too often*/
 #define MV_EDMA_GEN_II_ERROR_MASK					0xFDDFF198
 
-
 #define MV_EDMA_REQUEST_Q_BAH_REG_OFFSET        0x010
 
 #define MV_EDMA_REQUEST_Q_INP_REG_OFFSET        0x014
@@ -341,7 +338,6 @@ extern "C" {
 
 #define MV_EDMA_RESPONSE_Q_BA_MASK              0xffffff00
 
-
 #define MV_EDMA_COMMAND_REG_OFFSET              0x028
 #define MV_EDMA_COMMAND_ENABLE_MASK             MV_BIT0
 #define MV_EDMA_COMMAND_DISABLE_MASK            MV_BIT1
@@ -355,7 +351,6 @@ extern "C" {
 #define MV_EDMA_STATUS_TAG_OFFSET               0
 #define MV_EDMA_STATUS_ECACHE_EMPTY_BIT			MV_BIT6
 #define MV_EDMA_STATUS_EDMA_IDLE_BIT			MV_BIT7
-
 
 #define MV_EDMA_IORDY_TIMEOUT_REG_OFFSET        0x034
 
@@ -404,7 +399,6 @@ extern "C" {
 #define MV_IOG_TRANS_LOW_REG_OFFSET  0x18088
 #define MV_IOG_TRANS_HIGH_REG_OFFSET 0x1808C
 #define MV_IOG_TRANS_CTRL_REG_OFFSET 0x18048
-
 
 #ifdef __cplusplus
 }

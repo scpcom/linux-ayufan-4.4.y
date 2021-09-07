@@ -48,7 +48,6 @@
 #include <net/sock.h>
 #include <net/arp.h>
 
-
 /*
  *	Device multicast list maintenance.
  *
@@ -129,7 +128,6 @@ int dev_mc_sync(struct net_device *to, struct net_device *from)
 	return err;
 }
 EXPORT_SYMBOL(dev_mc_sync);
-
 
 /**
  * 	dev_mc_unsync	- Remove synchronized addresses from the destination

@@ -15,14 +15,12 @@
 #include "control.h"
 #include "variax.h"
 
-
 #define VARIAX_SYSEX_CODE 7
 #define VARIAX_SYSEX_PARAM 0x3b
 #define VARIAX_SYSEX_ACTIVATE 0x2a
 #define VARIAX_MODEL_HEADER_LENGTH 7
 #define VARIAX_MODEL_MESSAGE_LENGTH 199
 #define VARIAX_OFFSET_ACTIVATE 7
-
 
 static const char variax_activate[] = {
 	0xf0, 0x00, 0x01, 0x0c, 0x07, 0x00, 0x2a, 0x01,
@@ -41,7 +39,6 @@ static const char variax_request_model2[] = {
 	0x02, 0x00, 0x00, 0x00, 0x00, 0x03, 0x07, 0x03,
 	0x00, 0x00, 0x00, 0xf7
 };
-
 
 /*
 	Decode data transmitted by workbench.
@@ -378,7 +375,6 @@ static DEVICE_ATTR(active, S_IWUGO | S_IRUGO, variax_get_active, variax_set_acti
 static DEVICE_ATTR(raw, S_IWUGO, line6_nop_read, line6_set_raw);
 static DEVICE_ATTR(raw2, S_IWUGO, line6_nop_read, variax_set_raw2);
 #endif
-
 
 /*
 	Variax destructor.

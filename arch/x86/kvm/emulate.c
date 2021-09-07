@@ -420,7 +420,6 @@ static u32 group2_table[] = {
 			: _y ((_src).val), "i" (EFLAGS_MASK));		\
 	} while (0)
 
-
 /* Raw emulation: instruction has two explicit operands. */
 #define __emulate_2op_nobyte(_op,_src,_dst,_eflags,_wx,_wy,_lx,_ly,_qx,_qy) \
 	do {								\
@@ -1795,7 +1794,6 @@ x86_emulate_insn(struct x86_emulate_ctxt *ctxt, struct x86_emulate_ops *ops)
 
 	if ((c->d & DstMask) == ImplicitOps)
 		goto special_insn;
-
 
 	if (c->dst.type == OP_MEM) {
 		c->dst.ptr = (unsigned long *)memop;

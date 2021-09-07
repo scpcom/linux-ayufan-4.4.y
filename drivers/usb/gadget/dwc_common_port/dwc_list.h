@@ -35,7 +35,6 @@
 #ifndef	_SYS_QUEUE_H_
 #define	_SYS_QUEUE_H_
 
-
 /** @file
  *
  * This file defines linked list operations.  It is derived from BSD with

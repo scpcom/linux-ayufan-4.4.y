@@ -226,4 +226,3 @@ snd_emu10k1_sample_free(struct snd_emux *rec, struct snd_sf_sample *sp,
 	}
 	return 0;
 }
-

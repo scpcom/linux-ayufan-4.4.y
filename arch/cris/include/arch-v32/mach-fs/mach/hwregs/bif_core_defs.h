@@ -228,7 +228,6 @@ typedef struct {
 } reg_bif_core_r_sdram_ref_stat;
 #define REG_RD_ADDR_bif_core_r_sdram_ref_stat 36
 
-
 /* Constants */
 enum {
   regk_bif_core_bank2                      = 0x00000000,

@@ -12,7 +12,6 @@
 #include "driver.h"
 #include "dumprequest.h"
 
-
 /*
 	Set "dump in progress" flag.
 */

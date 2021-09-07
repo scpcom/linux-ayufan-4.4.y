@@ -11,7 +11,6 @@
 #ifndef _XTENSA_PLATFORM_ISS_SIMCALL_H
 #define _XTENSA_PLATFORM_ISS_SIMCALL_H
 
-
 /*
  *  System call like services offered by the simulator host.
  */
@@ -57,6 +56,4 @@
 #define  XTISS_SELECT_ONE_WRITE   2
 #define  XTISS_SELECT_ONE_EXCEPT  3
 
-
 #endif /* _XTENSA_PLATFORM_ISS_SIMCALL_H */
-

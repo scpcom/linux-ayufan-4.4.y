@@ -28,7 +28,6 @@
 #include <linux/posix_acl_xattr.h>
 #include <linux/xattr.h>
 
-
 static int
 __xfs_xattr_get(struct inode *inode, const char *name,
 		void *value, size_t size, int xflags)
@@ -91,7 +90,6 @@ static struct xattr_handler xfs_xattr_user_handler = {
 	.set	= xfs_xattr_user_set,
 };
 
-
 static int
 xfs_xattr_trusted_get(struct inode *inode, const char *name,
 		void *value, size_t size)
@@ -112,7 +110,6 @@ static struct xattr_handler xfs_xattr_trusted_handler = {
 	.set	= xfs_xattr_trusted_set,
 };
 
-
 static int
 xfs_xattr_secure_get(struct inode *inode, const char *name,
 		void *value, size_t size)
@@ -132,7 +129,6 @@ static struct xattr_handler xfs_xattr_security_handler = {
 	.get	= xfs_xattr_secure_get,
 	.set	= xfs_xattr_secure_set,
 };
-
 
 struct xattr_handler *xfs_xattr_handlers[] = {
 	&xfs_xattr_user_handler,

@@ -472,7 +472,6 @@ int fw_card_add(struct fw_card *card,
 }
 EXPORT_SYMBOL(fw_card_add);
 
-
 /*
  * The next few functions implement a dummy driver that is used once a card
  * driver shuts down an fw_card.  This allows the driver to cleanly unload,

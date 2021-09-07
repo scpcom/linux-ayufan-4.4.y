@@ -5,7 +5,6 @@
 #include <linux/delay.h>
 #include <linux/fb.h>
 
-
 #include <linux/i2c.h>
 #include <linux/i2c-id.h>
 #include <linux/i2c-algo-bit.h>
@@ -162,4 +161,3 @@ int radeon_probe_i2c_connector(struct radeonfb_info *rinfo, int conn,
 	pr_debug("radeonfb: I2C (port %d) ... found CRT display\n", conn);
 	return MT_CRT;
 }
-

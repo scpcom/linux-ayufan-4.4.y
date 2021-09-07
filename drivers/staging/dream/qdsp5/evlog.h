@@ -130,4 +130,3 @@ static int ev_log_init(struct ev_log *log)
 	debugfs_create_file(log->name, 0444, 0, log, &ev_log_ops);
 	return 0;
 }
-

@@ -7,7 +7,6 @@
  * Federico Ulivi <fulivi@lycos.com>
  */
 
-
 /*
  * Limits of h/v positions (hPos & vPos)
  */
@@ -293,7 +292,6 @@ static void radeon_wait_pll_lock(struct drm_encoder *encoder, unsigned n_tests,
 	WREG32_PLL(RADEON_PLL_TEST_CNTL, save_pll_test);
 	WREG32(RADEON_TEST_DEBUG_MUX, RREG32(RADEON_TEST_DEBUG_MUX) & 0xffffe0ff);
 }
-
 
 static void radeon_legacy_tv_write_fifo(struct radeon_encoder *radeon_encoder,
 					uint16_t addr, uint32_t value)
@@ -591,7 +589,6 @@ void radeon_legacy_tv_mode_set(struct drm_encoder *encoder,
 		tv_modulator_cntl2 = (-78 & RADEON_TV_U_BURST_LEVEL_MASK) |
 			((62 & RADEON_TV_V_BURST_LEVEL_MASK) << RADEON_TV_V_BURST_LEVEL_SHIFT);
 	}
-
 
 	tv_rgb_cntl = (RADEON_RGB_DITHER_EN
 		       | RADEON_TVOUT_SCALE_EN
@@ -920,4 +917,3 @@ void radeon_legacy_tv_adjust_pll2(struct drm_encoder *encoder,
 	*pixclks_cntl &= ~RADEON_PIX2CLK_SRC_SEL_MASK;
 	*pixclks_cntl |= RADEON_PIX2CLK_SRC_SEL_P2PLLCLK | RADEON_PIXCLK_TV_SRC_SEL;
 }
-

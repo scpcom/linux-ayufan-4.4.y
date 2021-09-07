@@ -302,7 +302,6 @@ struct mac80211_hwsim_data {
 	struct dentry *debugfs_group;
 };
 
-
 struct hwsim_radiotap_hdr {
 	struct ieee80211_radiotap_header hdr;
 	u8 rt_flags;
@@ -311,7 +310,6 @@ struct hwsim_radiotap_hdr {
 	__le16 rt_chbitmask;
 } __attribute__ ((packed));
 
-
 static netdev_tx_t hwsim_mon_xmit(struct sk_buff *skb,
 					struct net_device *dev)
 {
@@ -319,7 +317,6 @@ static netdev_tx_t hwsim_mon_xmit(struct sk_buff *skb,
 	dev_kfree_skb(skb);
 	return NETDEV_TX_OK;
 }
-
 
 static void mac80211_hwsim_monitor_rx(struct ieee80211_hw *hw,
 				      struct sk_buff *tx_skb)
@@ -364,7 +361,6 @@ static void mac80211_hwsim_monitor_rx(struct ieee80211_hw *hw,
 	netif_rx(skb);
 }
 
-
 static bool hwsim_ps_rx_ok(struct mac80211_hwsim_data *data,
 			   struct sk_buff *skb)
 {
@@ -391,7 +387,6 @@ static bool hwsim_ps_rx_ok(struct mac80211_hwsim_data *data,
 
 	return true;
 }
-
 
 static bool mac80211_hwsim_tx_frame(struct ieee80211_hw *hw,
 				    struct sk_buff *skb)
@@ -449,7 +444,6 @@ static bool mac80211_hwsim_tx_frame(struct ieee80211_hw *hw,
 	return ack;
 }
 
-
 static int mac80211_hwsim_tx(struct ieee80211_hw *hw, struct sk_buff *skb)
 {
 	bool ack;
@@ -479,7 +473,6 @@ static int mac80211_hwsim_tx(struct ieee80211_hw *hw, struct sk_buff *skb)
 	return NETDEV_TX_OK;
 }
 
-
 static int mac80211_hwsim_start(struct ieee80211_hw *hw)
 {
 	struct mac80211_hwsim_data *data = hw->priv;
@@ -488,7 +481,6 @@ static int mac80211_hwsim_start(struct ieee80211_hw *hw)
 	return 0;
 }
 
-
 static void mac80211_hwsim_stop(struct ieee80211_hw *hw)
 {
 	struct mac80211_hwsim_data *data = hw->priv;
@@ -496,7 +488,6 @@ static void mac80211_hwsim_stop(struct ieee80211_hw *hw)
 	del_timer(&data->beacon_timer);
 	printk(KERN_DEBUG "%s:%s\n", wiphy_name(hw->wiphy), __func__);
 }
-
 
 static int mac80211_hwsim_add_interface(struct ieee80211_hw *hw,
 					struct ieee80211_if_init_conf *conf)
@@ -508,7 +499,6 @@ static int mac80211_hwsim_add_interface(struct ieee80211_hw *hw,
 	return 0;
 }
 
-
 static void mac80211_hwsim_remove_interface(
 	struct ieee80211_hw *hw, struct ieee80211_if_init_conf *conf)
 {
@@ -518,7 +508,6 @@ static void mac80211_hwsim_remove_interface(
 	hwsim_check_magic(conf->vif);
 	hwsim_clear_magic(conf->vif);
 }
-
 
 static void mac80211_hwsim_beacon_tx(void *arg, u8 *mac,
 				     struct ieee80211_vif *vif)
@@ -543,7 +532,6 @@ static void mac80211_hwsim_beacon_tx(void *arg, u8 *mac,
 	dev_kfree_skb(skb);
 }
 
-
 static void mac80211_hwsim_beacon(unsigned long arg)
 {
 	struct ieee80211_hw *hw = (struct ieee80211_hw *) arg;
@@ -558,7 +546,6 @@ static void mac80211_hwsim_beacon(unsigned long arg)
 	data->beacon_timer.expires = jiffies + data->beacon_int;
 	add_timer(&data->beacon_timer);
 }
-
 
 static int mac80211_hwsim_config(struct ieee80211_hw *hw, u32 changed)
 {
@@ -579,7 +566,6 @@ static int mac80211_hwsim_config(struct ieee80211_hw *hw, u32 changed)
 
 	return 0;
 }
-
 
 static void mac80211_hwsim_configure_filter(struct ieee80211_hw *hw,
 					    unsigned int changed_flags,
@@ -787,7 +773,6 @@ static const struct ieee80211_ops mac80211_hwsim_ops =
 	CFG80211_TESTMODE_CMD(mac80211_hwsim_testmode_cmd)
 };
 
-
 static void mac80211_hwsim_free(void)
 {
 	struct list_head tmplist, *i, *tmp;
@@ -811,7 +796,6 @@ static void mac80211_hwsim_free(void)
 	class_destroy(hwsim_class);
 }
 
-
 static struct device_driver mac80211_hwsim_driver = {
 	.name = "mac80211_hwsim"
 };
@@ -833,7 +817,6 @@ static void hwsim_mon_setup(struct net_device *dev)
 	memset(dev->dev_addr, 0, ETH_ALEN);
 	dev->dev_addr[0] = 0x12;
 }
-
 
 static void hwsim_send_ps_poll(void *dat, u8 *mac, struct ieee80211_vif *vif)
 {
@@ -862,7 +845,6 @@ static void hwsim_send_ps_poll(void *dat, u8 *mac, struct ieee80211_vif *vif)
 		printk(KERN_DEBUG "%s: PS-Poll frame not ack'ed\n", __func__);
 	dev_kfree_skb(skb);
 }
-
 
 static void hwsim_send_nullfunc(struct mac80211_hwsim_data *data, u8 *mac,
 				struct ieee80211_vif *vif, int ps)
@@ -893,7 +875,6 @@ static void hwsim_send_nullfunc(struct mac80211_hwsim_data *data, u8 *mac,
 	dev_kfree_skb(skb);
 }
 
-
 static void hwsim_send_nullfunc_ps(void *dat, u8 *mac,
 				   struct ieee80211_vif *vif)
 {
@@ -901,14 +882,12 @@ static void hwsim_send_nullfunc_ps(void *dat, u8 *mac,
 	hwsim_send_nullfunc(data, mac, vif, 1);
 }
 
-
 static void hwsim_send_nullfunc_no_ps(void *dat, u8 *mac,
 				      struct ieee80211_vif *vif)
 {
 	struct mac80211_hwsim_data *data = dat;
 	hwsim_send_nullfunc(data, mac, vif, 0);
 }
-
 
 static int hwsim_fops_ps_read(void *dat, u64 *val)
 {
@@ -948,7 +927,6 @@ static int hwsim_fops_ps_write(void *dat, u64 val)
 
 DEFINE_SIMPLE_ATTRIBUTE(hwsim_fops_ps, hwsim_fops_ps_read, hwsim_fops_ps_write,
 			"%llu\n");
-
 
 static int hwsim_fops_group_read(void *dat, u64 *val)
 {
@@ -1219,7 +1197,6 @@ static int __init init_mac80211_hwsim(void)
 	if (err < 0)
 		goto failed_mon;
 
-
 	err = register_netdevice(hwsim_mon);
 	if (err < 0)
 		goto failed_mon;
@@ -1243,7 +1220,6 @@ failed:
 	return err;
 }
 
-
 static void __exit exit_mac80211_hwsim(void)
 {
 	printk(KERN_DEBUG "mac80211_hwsim: unregister radios\n");
@@ -1251,7 +1227,6 @@ static void __exit exit_mac80211_hwsim(void)
 	mac80211_hwsim_free();
 	unregister_netdev(hwsim_mon);
 }
-
 
 module_init(init_mac80211_hwsim);
 module_exit(exit_mac80211_hwsim);

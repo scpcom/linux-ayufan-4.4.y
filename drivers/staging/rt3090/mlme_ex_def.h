@@ -38,7 +38,6 @@
 #ifndef __MLME_EX_DEF_H__
 #define __MLME_EX_DEF_H__
 
-
 typedef VOID (*STATE_MACHINE_FUNC_EX)(VOID *Adaptor, MLME_QUEUE_ELEM *Elem, PULONG pCurrState, USHORT Idx);
 
 typedef struct _STA_STATE_MACHINE_EX

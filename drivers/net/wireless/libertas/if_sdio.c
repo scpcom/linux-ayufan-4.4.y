@@ -862,7 +862,6 @@ static void if_sdio_interrupt(struct sdio_func *func)
 	if (cause & IF_SDIO_H_INT_DNLD)
 		lbs_host_to_card_done(card->priv);
 
-
 	if (cause & IF_SDIO_H_INT_UPLD) {
 		ret = if_sdio_card_to_host(card);
 		if (ret)
@@ -1092,7 +1091,6 @@ static void if_sdio_remove(struct sdio_func *func)
 				(unsigned long) &cmd))
 			lbs_pr_alert("CMD_FUNC_SHUTDOWN cmd failed\n");
 	}
-
 
 	lbs_deb_sdio("call remove card\n");
 	lbs_stop_card(card->priv);

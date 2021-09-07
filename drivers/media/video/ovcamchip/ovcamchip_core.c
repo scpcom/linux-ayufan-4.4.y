@@ -47,7 +47,6 @@ MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_LICENSE("GPL");
 
-
 /* Registers common to all chips, that are needed for detection */
 #define GENERIC_REG_ID_HIGH       0x1C	/* manufacturer ID MSB */
 #define GENERIC_REG_ID_LOW        0x1D	/* manufacturer ID LSB */

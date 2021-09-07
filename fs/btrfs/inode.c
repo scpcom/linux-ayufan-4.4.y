@@ -196,7 +196,6 @@ fail:
 	return err;
 }
 
-
 /*
  * conditionally insert an inline extent into the file.  This
  * does the checks required to make sure the data is small enough
@@ -752,7 +751,6 @@ static noinline int cow_file_range(struct inode *inode,
 
 	BUG_ON(disk_num_bytes >
 	       btrfs_super_total_bytes(&root->fs_info->super_copy));
-
 
 	read_lock(&BTRFS_I(inode)->extent_tree.lock);
 	em = search_extent_mapping(&BTRFS_I(inode)->extent_tree,
@@ -2089,7 +2087,6 @@ void btrfs_orphan_cleanup(struct btrfs_root *root)
 	btrfs_set_key_type(&key, BTRFS_ORPHAN_ITEM_KEY);
 	key.offset = (u64)-1;
 
-
 	while (1) {
 		ret = btrfs_search_slot(NULL, root, &key, path, 0, 0);
 		if (ret < 0) {
@@ -2406,7 +2403,6 @@ failed:
 	btrfs_free_path(path);
 	return ret;
 }
-
 
 /*
  * unlink helper that gets used here in inode.c and in the tree logging
@@ -4830,7 +4826,6 @@ static int btrfs_writepage(struct page *page, struct writeback_control *wbc)
 {
 	struct extent_io_tree *tree;
 
-
 	if (current->flags & PF_MEMALLOC) {
 		redirty_page_for_writepage(wbc, page);
 		unlock_page(page);
@@ -4888,7 +4883,6 @@ static void btrfs_invalidatepage(struct page *page, unsigned long offset)
 	struct btrfs_ordered_extent *ordered;
 	u64 page_start = page_offset(page);
 	u64 page_end = page_start + PAGE_CACHE_SIZE - 1;
-
 
 	/*
 	 * we have the page locked, so new writeback can't start,

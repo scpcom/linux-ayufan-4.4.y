@@ -62,7 +62,6 @@ static s64 extRoundDown(s64 nb);
 #define DPE1(a)		(printk("\nENTERING: %s",(a)))
 #define DPS1(a)		(printk("  %s  ",(a)))
 
-
 /*
  * NAME:	extAlloc()
  *
@@ -205,7 +204,6 @@ extAlloc(struct inode *ip, s64 xlen, s64 pno, xad_t * xp, bool abnr)
 	return (0);
 }
 
-
 #ifdef _NOTYET
 /*
  * NAME:	extRealloc()
@@ -346,7 +344,6 @@ int extRealloc(struct inode *ip, s64 nxlen, xad_t * xp, bool abnr)
 		}
 	}
 
-
 	/* check if we need to also insert a new extent */
 	if (ninsert) {
 		/* perform the insert.  if it fails, free the blocks
@@ -375,7 +372,6 @@ exit:
 	return (rc);
 }
 #endif			/* _NOTYET */
-
 
 /*
  * NAME:	extHint()
@@ -437,7 +433,6 @@ out:
 	return (rc);
 }
 
-
 /*
  * NAME:	extRecord()
  *
@@ -466,7 +461,6 @@ int extRecord(struct inode *ip, xad_t * xp)
 	mutex_unlock(&JFS_IP(ip)->commit_mutex);
 	return rc;
 }
-
 
 #ifdef _NOTYET
 /*
@@ -503,7 +497,6 @@ int extFill(struct inode *ip, xad_t * xp)
 	return (0);
 }
 #endif			/* _NOTYET */
-
 
 /*
  * NAME:	extBalloc()
@@ -594,7 +587,6 @@ extBalloc(struct inode *ip, s64 hint, s64 * nblocks, s64 * blkno)
 	return (0);
 }
 
-
 #ifdef _NOTYET
 /*
  * NAME:	extBrealloc()
@@ -650,7 +642,6 @@ extBrealloc(struct inode *ip,
 	return (extBalloc(ip, blkno, newnblks, newblkno));
 }
 #endif			/* _NOTYET */
-
 
 /*
  * NAME:	extRoundDown()

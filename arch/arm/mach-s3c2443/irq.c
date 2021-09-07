@@ -96,7 +96,6 @@ static struct irq_chip s3c2443_irq_wdtac97 = {
 	.ack	    = s3c2443_irq_wdtac97_ack,
 };
 
-
 /* LCD sub interrupts */
 
 static void s3c2443_irq_demux_lcd(unsigned int irq, struct irq_desc *desc)
@@ -128,7 +127,6 @@ static struct irq_chip s3c2443_irq_lcd = {
 	.ack	    = s3c2443_irq_lcd_ack,
 };
 
-
 /* DMA sub interrupts */
 
 static void s3c2443_irq_demux_dma(unsigned int irq, struct irq_desc *desc)
@@ -138,7 +136,6 @@ static void s3c2443_irq_demux_dma(unsigned int irq, struct irq_desc *desc)
 
 #define INTMSK_DMA	(1UL << (IRQ_S3C2443_DMA - IRQ_EINT0))
 #define SUBMSK_DMA	INTMSK(IRQ_S3C2443_DMA0, IRQ_S3C2443_DMA5)
-
 
 static void s3c2443_irq_dma_mask(unsigned int irqno)
 {
@@ -161,7 +158,6 @@ static struct irq_chip s3c2443_irq_dma = {
 	.ack	    = s3c2443_irq_dma_ack,
 };
 
-
 /* UART3 sub interrupts */
 
 static void s3c2443_irq_demux_uart3(unsigned int irq, struct irq_desc *desc)
@@ -171,7 +167,6 @@ static void s3c2443_irq_demux_uart3(unsigned int irq, struct irq_desc *desc)
 
 #define INTMSK_UART3	(1UL << (IRQ_S3C2443_UART3 - IRQ_EINT0))
 #define SUBMSK_UART3	(0xf << (IRQ_S3C2443_RX3 - S3C2410_IRQSUB(0)))
-
 
 static void s3c2443_irq_uart3_mask(unsigned int irqno)
 {
@@ -193,7 +188,6 @@ static struct irq_chip s3c2443_irq_uart3 = {
 	.unmask	    = s3c2443_irq_uart3_unmask,
 	.ack	    = s3c2443_irq_uart3_ack,
 };
-
 
 /* CAM sub interrupts */
 
@@ -283,4 +277,3 @@ static int __init s3c2443_irq_init(void)
 }
 
 arch_initcall(s3c2443_irq_init);
-

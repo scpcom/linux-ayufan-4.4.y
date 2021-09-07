@@ -230,7 +230,6 @@ c7108_aes_cipher(int op,
 	    c7108_reg_wr16(C7108_AES_KEY7_LO, (u16) key[3]);
 	    c7108_reg_wr16(C7108_AES_KEY7_HI, (u16) (key[3] >> 16));
 	    
-	    
 	    if (192 == klen) { 
 		c7108_reg_wr16(C7108_AES_KEY4_LO, (u16) key[7]);
 		c7108_reg_wr16(C7108_AES_KEY4_HI, (u16) (key[7] >> 16));
@@ -276,7 +275,6 @@ c7108_aes_cipher(int op,
 	    return rv;
 	}
 
-	
 	/* Start AES cipher */
 	c7108_reg_wr16(C7108_AES_CTRL, ctrl | C7108_AES_GO);
 	
@@ -287,7 +285,6 @@ c7108_aes_cipher(int op,
 	    //udelay(100);
 	} while ((cnt++ < 1000000) && 
 		 !((stat=c7108_reg_rd16(C7108_AES_CTRL))&C7108_AES_OP_DONE));
-
 
 	if ((mode == C7108_AES_CTRL_MODE_ECB)||
 	    (mode == C7108_AES_CTRL_MODE_CBC)) { 
@@ -407,7 +404,6 @@ c7108_newsession(void *arg, u_int32_t *sid, struct cryptoini *cri)
 			return -EINVAL;
 			break;
 		}
-
 
 		if (!algo || !*algo) {
 		    printk("cypher_7108_crypto: Unknown algo 0x%x\n", 
@@ -636,7 +632,6 @@ c7108_process(void *arg, struct cryptop *crp, int hint)
 		sg_set_page(&sg[0], virt_to_page(crp->crp_buf + skip), sg_len, offset_in_page(crp->crp_buf + skip));
 		sg_num = 1;
 	    }
-	    
 	    
 	    switch (sw->xfm_type) {
 

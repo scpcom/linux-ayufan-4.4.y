@@ -32,7 +32,6 @@
 #define FPSR_CC_Z	26
 #define FPSR_CC_NEG	27
 
-
 /* Control register bits */
 
 /* rounding mode */
@@ -45,7 +44,6 @@
 #define FPCR_PRECISION_X	0	/* long double */
 #define FPCR_PRECISION_S	1	/* double */
 #define FPCR_PRECISION_D	2	/* float */
-
 
 /* Flags to select the debugging output */
 #define PDECODE		0
@@ -226,7 +224,6 @@ extern unsigned int fp_debugprint;
 	.previous
 .endm
 
-
 .macro	movestack	nr,arg1,arg2,arg3,arg4,arg5
 	.if	\nr
 	movestack	(\nr-1),\arg2,\arg3,\arg4,\arg5
@@ -294,8 +291,6 @@ extern unsigned int fp_debugprint;
 #endif
 .endm
 
-
 #endif	/* __ASSEMBLY__ */
 
 #endif	/* _ASM_FRV_MATH_EMU_H */
-

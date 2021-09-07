@@ -19,5 +19,4 @@ struct orion_i2s_platform_data {
 	int	i2s_play;
 };
 
-
 #endif

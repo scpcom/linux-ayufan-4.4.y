@@ -22,7 +22,6 @@
 #include "msnd.h"
 #include "msnd_pinnacle.h"
 
-
 #define MSND_MIXER_VOLUME	0
 #define MSND_MIXER_PCM		1
 #define MSND_MIXER_AUX		2	/* Input source 1  (aux1) */
@@ -84,7 +83,6 @@ static int snd_msndmix_get_mux(struct snd_kcontrol *kcontrol,
 		ucontrol->value.enumerated.item[0] = 2;
 	}
 
-
 	return 0;
 }
 
@@ -128,7 +126,6 @@ static int snd_msndmix_put_mux(struct snd_kcontrol *kcontrol,
 	struct snd_msnd *msnd = snd_kcontrol_chip(kcontrol);
 	return snd_msndmix_set_mux(msnd, ucontrol->value.enumerated.item[0]);
 }
-
 
 static int snd_msndmix_volume_info(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_info *uinfo)
@@ -187,7 +184,6 @@ static int snd_msndmix_volume_get(struct snd_kcontrol *kcontrol,
 		if (snd_msnd_send_word(dev, 0, 0, ar) == 0)		\
 			snd_msnd_send_dsp_cmd(dev, HDEX_AUX_REQ);	\
 	} while (0);
-
 
 static int snd_msndmix_set(struct snd_msnd *dev, int d, int left, int right)
 {
@@ -276,13 +272,11 @@ static int snd_msndmix_volume_put(struct snd_kcontrol *kcontrol,
 	return change;
 }
 
-
 #define DUMMY_VOLUME(xname, xindex, addr) \
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, .index = xindex, \
   .info = snd_msndmix_volume_info, \
   .get = snd_msndmix_volume_get, .put = snd_msndmix_volume_put, \
   .private_value = addr }
-
 
 static struct snd_kcontrol_new snd_msnd_controls[] = {
 DUMMY_VOLUME("Master Volume", 0, MSND_MIXER_VOLUME),
@@ -299,7 +293,6 @@ DUMMY_VOLUME("Monitor",	0, MSND_MIXER_IMIX),
 	.put = snd_msndmix_put_mux,
 }
 };
-
 
 int __devinit snd_msndmix_new(struct snd_card *card)
 {

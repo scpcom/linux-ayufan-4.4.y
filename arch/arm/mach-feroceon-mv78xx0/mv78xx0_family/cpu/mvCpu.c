@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 /*#include "mvCpu.h"*/
 #include "boardEnv/mvBoardEnvLib.h"
 #include "cpu/mvCpu.h"
@@ -245,7 +244,6 @@ MV_VOID mvCpuNameGet(char *pNameBuff)
     }  /* switch  */
 }
 
-
 /*******************************************************************************
 * whoAmI - Get CPU name
 *
@@ -288,5 +286,3 @@ static int cpuCoreIdGet(MV_VOID)
 		: "=r" (value) :: "memory");
 	return !!(value & (1 << 14));
 }
-
-

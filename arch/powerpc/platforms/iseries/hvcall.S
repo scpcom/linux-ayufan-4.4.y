@@ -35,7 +35,6 @@ _GLOBAL(HvCall5)
 _GLOBAL(HvCall6)
 _GLOBAL(HvCall7)
 
-
 	mfcr	r0
 	std	r0,-8(r1)
 	stdu	r1,-(STACK_FRAME_OVERHEAD+16)(r1)

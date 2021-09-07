@@ -294,7 +294,6 @@ static unsigned int __lock_##name##_##call  parms	\
 	return ret;					\
 }
 
-
 #define SOCKOPS_WRAP(name, fam)					\
 SOCKCALL_WRAP(name, release, (struct socket *sock), (sock))	\
 SOCKCALL_WRAP(name, bind, (struct socket *sock, struct sockaddr *uaddr, int addr_len), \

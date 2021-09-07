@@ -1,7 +1,6 @@
 
 #include <asm/bootparam.h>
 
-
 /* ResetVector
  */
 	.section        .ResetVector.text, "ax"

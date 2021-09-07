@@ -69,12 +69,10 @@ static const void *req_tlv_area;	/* request message TLV area */
 static int req_tlv_space;		/* request message TLV area size */
 static int rep_headroom;		/* reply message headroom to use */
 
-
 void tipc_cfg_link_event(u32 addr, char *name, int up)
 {
 	/* TIPC DOESN'T HANDLE LINK EVENT SUBSCRIPTIONS AT THE MOMENT */
 }
-
 
 struct sk_buff *tipc_cfg_reply_alloc(int payload_size)
 {
@@ -128,9 +126,6 @@ struct sk_buff *tipc_cfg_reply_string_type(u16 tlv_type, char *string)
 		tipc_cfg_append_tlv(buf, tlv_type, string, string_len);
 	return buf;
 }
-
-
-
 
 #if 0
 

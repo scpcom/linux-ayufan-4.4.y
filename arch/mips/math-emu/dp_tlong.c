@@ -24,7 +24,6 @@
  * ########################################################################
  */
 
-
 #include "ieee754dp.h"
 
 s64 ieee754dp_tlong(ieee754dp x)
@@ -112,7 +111,6 @@ s64 ieee754dp_tlong(ieee754dp x)
 	else
 		return xm;
 }
-
 
 u64 ieee754dp_tulong(ieee754dp x)
 {

@@ -22,7 +22,6 @@
 
 #include "internal.h"
 
-
 /* initialization code for the trustees filesystem */
 
 /* File operations
@@ -98,7 +97,6 @@ struct trustee_command_reader {
 	void *arg[TRUSTEE_MAX_ARGS];
 	size_t argsize[TRUSTEE_MAX_ARGS];
 };
-
 
 static struct dentry *toplevel = NULL;
 

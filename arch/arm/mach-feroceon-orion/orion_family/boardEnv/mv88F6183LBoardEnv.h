@@ -62,10 +62,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvBoard88F6183LBoardEnvSpech
 #define __INCmvBoard88F6183LBoardEnvSpech
-
 
 /* 88F6183L based boards ID numbers */
 /* =============================== */

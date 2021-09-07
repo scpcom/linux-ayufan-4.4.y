@@ -301,7 +301,6 @@ bool pxa2xx_ac97_try_cold_reset(struct snd_ac97 *ac97)
 }
 EXPORT_SYMBOL_GPL(pxa2xx_ac97_try_cold_reset);
 
-
 void pxa2xx_ac97_finish_reset(struct snd_ac97 *ac97)
 {
 	GCR &= ~(GCR_PRIRDY_IEN|GCR_SECRDY_IEN);
@@ -453,4 +452,3 @@ EXPORT_SYMBOL_GPL(pxa2xx_ac97_hw_remove);
 MODULE_AUTHOR("Nicolas Pitre");
 MODULE_DESCRIPTION("Intel/Marvell PXA sound library");
 MODULE_LICENSE("GPL");
-

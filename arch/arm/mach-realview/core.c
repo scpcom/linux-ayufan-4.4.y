@@ -92,7 +92,6 @@ unsigned long long sched_clock(void)
 	return v;
 }
 
-
 #define REALVIEW_FLASHCTRL    (__io_address(REALVIEW_SYS_BASE) + REALVIEW_SYS_FLASH_OFFSET)
 
 static int realview_flash_init(void)

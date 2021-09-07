@@ -32,7 +32,6 @@ typedef struct conf_reg_t {
 #define REMOVE_MANAGED_RESOURCE		1
 #define ADD_MANAGED_RESOURCE		2
 
-
 typedef struct event_callback_args_t {
 	struct pcmcia_device	*client_handle;
 	void			*client_data;

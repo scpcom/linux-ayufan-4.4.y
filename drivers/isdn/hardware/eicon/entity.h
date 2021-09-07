@@ -24,5 +24,4 @@ typedef struct _divas_um_idi_entity {
 	byte                      buffer[2048+512];
 } divas_um_idi_entity_t;
 
-
 #endif

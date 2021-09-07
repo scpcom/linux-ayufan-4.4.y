@@ -138,7 +138,6 @@ void __bitmap_shift_right(unsigned long *dst,
 }
 EXPORT_SYMBOL(__bitmap_shift_right);
 
-
 /**
  * __bitmap_shift_left - logical left shift of the bits in a bitmap
  *   @dst : destination bitmap

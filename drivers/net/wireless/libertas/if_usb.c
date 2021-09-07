@@ -826,7 +826,6 @@ static int if_usb_issue_boot_command(struct if_usb_card *cardp, int ivalue)
 	return 0;
 }
 
-
 /**
  *  @brief This function checks the validity of Boot2/FW image.
  *
@@ -873,7 +872,6 @@ static int check_fwfile_format(const uint8_t *data, uint32_t totlen)
 
 	return ret;
 }
-
 
 /**
 *  @brief This function programs the firmware subject to cmd
@@ -1027,7 +1025,6 @@ restart:
 	lbs_deb_leave_args(LBS_DEB_USB, "ret %d", ret);
 	return ret;
 }
-
 
 #ifdef CONFIG_PM
 static int if_usb_suspend(struct usb_interface *intf, pm_message_t message)

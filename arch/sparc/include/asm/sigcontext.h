@@ -31,7 +31,6 @@ struct sigcontext32 {
 	struct reg_window32 sigc_wbuf[__SUNOS_MAXWIN];
 };
 
-
 /* This is what we use for 32bit new non-rt signals. */
 
 typedef struct {
@@ -87,7 +86,6 @@ typedef struct {
 	} si_fpqueue [16];
 } __siginfo_fpu_t;
 #endif /* (CONFIG_SPARC64) */
-
 
 #endif /* !(__ASSEMBLY__) */
 

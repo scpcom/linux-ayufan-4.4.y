@@ -81,7 +81,6 @@ extern int atari_tt_hwclk (int, struct rtc_time *);
 extern int atari_mste_set_clock_mmss (unsigned long);
 extern int atari_tt_set_clock_mmss (unsigned long);
 
-
 /* ++roman: This is a more elaborate test for an SCC chip, since the plain
  * Medusa board generates DTACK at the SCC's standard addresses, but a SCC
  * board in the Medusa is possible. Also, the addresses where the ST_ESCC
@@ -120,7 +119,6 @@ static int __init scc_test(volatile char *ctla)
 	return 1;
 }
 
-
     /*
      *  Parse an Atari-specific record in the bootinfo
      */
@@ -143,7 +141,6 @@ int __init atari_parse_bootinfo(const struct bi_record *record)
 	}
 	return unknown;
 }
-
 
 /* Parse the Atari-specific switches= option. */
 static int __init atari_switches_setup(char *str)
@@ -186,7 +183,6 @@ static int __init atari_switches_setup(char *str)
 }
 
 early_param("switches", atari_switches_setup);
-
 
     /*
      *  Setup the Atari configuration info
@@ -575,7 +571,6 @@ static void atari_reset(void)
 			: "a" (&tc_val), "a" (reset_addr));
 }
 
-
 static void atari_get_model(char *model)
 {
 	strcpy(model, "Atari ");
@@ -610,7 +605,6 @@ static void atari_get_model(char *model)
 		break;
 	}
 }
-
 
 static void atari_get_hardware_list(struct seq_file *m)
 {

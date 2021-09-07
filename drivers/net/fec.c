@@ -140,7 +140,6 @@ typedef struct {
 #define PKT_MINBUF_SIZE		64
 #define PKT_MAXBLR_SIZE		1520
 
-
 /*
  * The 5270/5271/5280/5282/532x RX control register also contains maximum frame
  * size bits. Other FEC hardware does not, so we need to take that into
@@ -219,7 +218,6 @@ static int fec_enet_close(struct net_device *dev);
 static void fec_restart(struct net_device *dev, int duplex);
 static void fec_stop(struct net_device *dev);
 
-
 /* MII processing.  We keep this as simple as possible.  Requests are
  * placed on the list (if there is room).  When the request is finished
  * by the MII, an optional function may be called.
@@ -278,7 +276,6 @@ static int	mii_queue(struct net_device *dev, int request,
 #define PHY_STAT_10FDX	0x2000  /* 10 Mbit full duplex selected	*/
 #define PHY_STAT_100HDX	0x4000  /* 100 Mbit half duplex selected */
 #define PHY_STAT_100FDX	0x8000  /* 100 Mbit full duplex selected */
-
 
 static int
 fec_enet_start_xmit(struct sk_buff *skb, struct net_device *dev)
@@ -417,7 +414,6 @@ fec_enet_interrupt(int irq, void * dev_id)
 	return ret;
 }
 
-
 static void
 fec_enet_tx(struct net_device *dev)
 {
@@ -488,7 +484,6 @@ fec_enet_tx(struct net_device *dev)
 	fep->dirty_tx = bdp;
 	spin_unlock(&fep->hw_lock);
 }
-
 
 /* During a receive, the cur_rx points to the current incoming buffer.
  * When we update through the ring, if the next incoming buffer has
@@ -1027,7 +1022,6 @@ static phy_info_t const phy_info_am79c874 = {
 	.ack_int = phy_cmd_am79c874_ack_int,
 	.shutdown = phy_cmd_am79c874_shutdown
 };
-
 
 /* ------------------------------------------------------------------------- */
 /* Kendin KS8721BL phy                                                       */

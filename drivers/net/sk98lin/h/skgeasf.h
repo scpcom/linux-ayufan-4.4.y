@@ -83,7 +83,6 @@ extern "C" {
 #define ASF_CPU_STATE_RESET         1
 #define ASF_CPU_STATE_RUNNING       2
 
-
 /*  ASF MIB default values */
 #define ASF_DEF_RETRANS_COUNT_MIN   0           // x1
 #define ASF_DEF_RETRANS_COUNT_MAX   255         // x1
@@ -170,7 +169,6 @@ extern "C" {
 #define YASF_HOSTCMD_CFG_GET_ACTIVE_PORT        170
 #define YASF_HOSTCMD_CFG_READ_CONFIG            180
 
-
 /* ASF HCI Master */
 #define ASF_HCI_READ            0x08000000
 #define ASF_HCI_WRITE           0x04000000
@@ -197,7 +195,6 @@ extern "C" {
 #define ASF_HCI_REC_BUF_SIZE    128
 #define ASF_HCI_TRA_BUF_SIZE    128
 
-
 /*  SEPROM  (VPD) */
 #define ASF_VPD_CONFIG_BASE     0x340
 #define ASF_VPD_CONFIG_SIZE     0x80
@@ -222,7 +219,6 @@ extern "C" {
 #define ASF_FLASH_EX_OFFS_CS       0x1cffc
 #define ASF_FLASH_EX_OFFS_GUID     0x1c000
 #define ASF_FLASH_EX_OFFS_ACPI     0x1c010
-
 
 #define ASF_RESET_HOT           0
 #define ASF_RESET_COLD          1
@@ -260,7 +256,6 @@ extern "C" {
 
 #define TABLE_HEADER_LENGTH             36
 #define SEC_COMMIT                      0x08000000
-
 
 // endianess depended macros
 
@@ -435,7 +430,6 @@ struct _STR_EVENT_DATA  {
 };
 typedef struct _STR_EVENT_DATA STR_EVENT_DATA;
 
-
 /* Functions provided by SkGeAsf */
 
 /* ANSI/C++ compliant function prototypes */
@@ -455,7 +449,6 @@ extern int SkAsfSetOid(SK_AC *pAC, SK_IOC IoC, SK_U32 Id, SK_U32 Inst, SK_U8 *pB
 extern int SkAsfPreSetOid(SK_AC *pAC, SK_IOC IoC, SK_U32 Id, SK_U32 Inst, SK_U8 *pBuf, unsigned int *pLen);
 extern int SkAsfGetOid(SK_AC *pAC, SK_IOC IoC, SK_U32 Id, SK_U32 Inst, SK_U8 *pBuf, unsigned int *pLen);
 extern int SkAsfRestorePattern(SK_AC *pAC , SK_IOC IoC);
-
 
 SK_I8 SkAsfReadSpiConfigData( SK_AC *pAC );
 SK_I8 SkAsfWriteSpiConfigData( SK_AC *pAC );
@@ -490,7 +483,6 @@ void AsfSetOsPresentBit( SK_AC *pAC, SK_IOC IoC );
 void AsfResetOsPresentBit( SK_AC *pAC, SK_IOC IoC );
 void AsfEnableFlushFifo( SK_AC *pAC, SK_IOC IoC  );
 void AsfDisableFlushFifo( SK_AC *pAC, SK_IOC IoC);
-
 
 void AsfSetUpPattern(SK_AC *pAC, SK_IOC IoC, SK_U8 port  );
 SK_I8 AsfWritePatternRam( SK_AC *pAC,
@@ -553,7 +545,6 @@ void AsfSetSMBusRegister(SK_IOC IoC);
 #define SKERR_ASF_E009      (SKERR_ASF_E001+8)
 #define SKERR_ASF_E009MSG   "SkAsfInit() updating flash"
 
-
 #define ASF_YEC_YTB_BASE_WOL_CTRL1          ((SK_U32)0x0f20)                    // YTB WOL CTRL register link 1
 #define ASF_YEC_PATTRAM_CLUSTER_BYTES       ((SK_U8)4)    // 4 bytes is a word
 #define ASF_YEC_PATTRAM_CLUSTER_WORDS       ((SK_U8)4)    // 4 words in a cluster
@@ -572,11 +563,9 @@ void AsfSetSMBusRegister(SK_IOC IoC);
 
 #define ASF_YLCI_MACRXFIFOTHRES             8                                       // mac rx threshold in qwords
 
-
 #define ASF_PATTERN_ID_RSP					0
 #define ASF_PATTERN_ID_ARP					1
 #define ASF_PATTERN_ID_RMCP					2
-
 
 //  Yukon Extreme
 #define ASF_YEX_YTB_BASE_WOL_CTRL1          ((SK_U32)0x0f20)                    // YTB WOL CTRL register link 1

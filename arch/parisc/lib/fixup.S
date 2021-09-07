@@ -89,4 +89,3 @@ ENTRY(fixup_put_user_skip_2)
 	bv %r0(%r1)
 	ldi -EFAULT, %r8
 ENDPROC(fixup_put_user_skip_2)
-

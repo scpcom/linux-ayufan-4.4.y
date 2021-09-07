@@ -148,7 +148,6 @@ GT_U32 driverGetPhyID
 *******************************************************************************/
 GT_STATUS driverGetSerdesPort(GT_QD_DEV *dev, GT_U8* hwPort);
 
-
 /*******************************************************************************
 * driverPagedAccessStart
 *
@@ -179,7 +178,6 @@ GT_STATUS driverPagedAccessStart
 	OUT	GT_BOOL		 *autoOn,
 	OUT	GT_U16		 *pageReg
 );
-
 
 /*******************************************************************************
 * driverPagedAccessStop
@@ -213,7 +211,6 @@ GT_STATUS driverPagedAccessStop
 	IN	GT_U16		 pageReg
 );
 
-
 /*******************************************************************************
 * driverFindPhyInformation
 *
@@ -240,7 +237,6 @@ GT_STATUS driverFindPhyInformation
 	IN	GT_U8		 hwPort,
 	OUT	GT_PHY_INFO	 *phyInfo
 );
-
 
 #ifdef __cplusplus
 }

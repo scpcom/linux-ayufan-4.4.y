@@ -83,7 +83,6 @@
  * by Dieter Deyke
  */
 
-
 /*---------------------------------------------------------------------------*/
 
 static inline void append_crc_ccitt(unsigned char *buffer, int len)
@@ -665,7 +664,6 @@ static void hdlcdrv_setup(struct net_device *dev)
 	s->bitbuf_hdlc.rd = s->bitbuf_hdlc.wr = 0;
 	s->bitbuf_hdlc.shreg = 0x80;
 #endif /* HDLCDRV_DEBUG */
-
 
 	/* Fill in the fields of the device structure */
 

@@ -343,7 +343,6 @@ static int mpc8610_hpcd_probe(struct of_device *ofdev,
 	}
 	ssi_info.ssi = machine_data->ssi;
 
-
 	/* Get the IRQ of the SSI */
 	machine_data->ssi_irq = irq_of_parse_and_map(np, 0);
 	if (!machine_data->ssi_irq) {
@@ -470,12 +469,10 @@ static int mpc8610_hpcd_probe(struct of_device *ofdev,
 
 	sound_device->dev.platform_data = machine_data;
 
-
 	/* Set the platform device and ASoC device to point to each other */
 	platform_set_drvdata(sound_device, &machine_data->sound_devdata);
 
 	machine_data->sound_devdata.dev = &sound_device->dev;
-
 
 	/* Tell ASoC to probe us.  This will call mpc8610_hpcd_machine.probe(),
 	   if it exists. */

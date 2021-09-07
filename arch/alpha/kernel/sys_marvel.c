@@ -35,7 +35,6 @@
 # error NR_IRQS < MARVEL_NR_IRQS !!!
 #endif
 
-
 /*
  * Interrupt handling.
  */
@@ -314,7 +313,6 @@ init_io7_irqs(struct io7 *io7,
 
 	init_one_io7_lsi(io7, 0x74, boot_cpuid);
 	init_one_io7_lsi(io7, 0x75, boot_cpuid);
-
 
 	/* Set up the msi irqs.  */
 	for (i = 128; i < (128 + 512); ++i) {

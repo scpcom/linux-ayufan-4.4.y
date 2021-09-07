@@ -130,4 +130,3 @@ void eseries_register_clks(void)
 {
 	clks_register(eseries_clkregs, ARRAY_SIZE(eseries_clkregs));
 }
-

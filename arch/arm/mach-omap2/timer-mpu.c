@@ -31,4 +31,3 @@ void __cpuinit local_timer_setup(struct clock_event_device *evt)
 	evt->irq = INT_44XX_LOCALTIMER_IRQ;
 	twd_timer_setup(evt);
 }
-

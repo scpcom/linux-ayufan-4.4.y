@@ -23,7 +23,3 @@ extern int math_emu_stfpc(__u8 *, struct pt_regs *);
 extern int math_emu_srnm(__u8 *, struct pt_regs *);
 
 #endif                                 /* __MATHEMU__                      */
-
-
-
-

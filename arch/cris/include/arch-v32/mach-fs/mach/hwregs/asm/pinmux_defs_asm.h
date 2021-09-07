@@ -614,7 +614,6 @@
 #define reg_pinmux_rw_usb_phy___en_usb1___bit 1
 #define reg_pinmux_rw_usb_phy_offset 40
 
-
 /* Constants */
 #define regk_pinmux_no                            0x00000000
 #define regk_pinmux_rw_hwprot_default             0x00000000

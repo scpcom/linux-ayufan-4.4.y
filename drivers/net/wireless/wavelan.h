@@ -58,8 +58,6 @@ static const short	channel_bands[] = { 0x30, 0x58, 0x64, 0x7A, 0x80, 0xA8,
  */
 static const int	fixed_bands[] = { 915e6, 2.425e8, 2.46e8, 2.484e8, 2.4305e8 };
 
-
-
 /*************************** PC INTERFACE ****************************/
 
 /*

@@ -1279,7 +1279,6 @@ out:
 	return ret;
 }
 
-
 int ext3_journal_dirty_data(handle_t *handle, struct buffer_head *bh)
 {
 	int err = journal_dirty_data(handle, bh);
@@ -3440,7 +3439,6 @@ err_out:
 		error = rc;
 	return error;
 }
-
 
 #ifdef MY_ABC_HERE
 int syno_ext3_set_archive_ver(struct dentry *dentry, u32 version)

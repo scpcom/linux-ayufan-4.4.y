@@ -32,4 +32,3 @@ struct selinux_class_perm {
 };
 
 #endif /* _SELINUX_AVC_SS_H_ */
-

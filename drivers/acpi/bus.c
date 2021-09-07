@@ -67,7 +67,6 @@ static struct dmi_system_id __cpuinitdata power_nocheck_dmi_table[] = {
 	{},
 };
 
-
 /* --------------------------------------------------------------------------
                                 Device Management
    -------------------------------------------------------------------------- */
@@ -75,7 +74,6 @@ static struct dmi_system_id __cpuinitdata power_nocheck_dmi_table[] = {
 int acpi_bus_get_device(acpi_handle handle, struct acpi_device **device)
 {
 	acpi_status status = AE_OK;
-
 
 	if (!device)
 		return -EINVAL;
@@ -172,7 +170,6 @@ int acpi_bus_get_power(acpi_handle handle, int *state)
 	struct acpi_device *device = NULL;
 	unsigned long long psc = 0;
 
-
 	result = acpi_bus_get_device(handle, &device);
 	if (result)
 		return result;
@@ -219,7 +216,6 @@ int acpi_bus_set_power(acpi_handle handle, int state)
 	acpi_status status = AE_OK;
 	struct acpi_device *device = NULL;
 	char object_name[5] = { '_', 'P', 'S', '0' + state, '\0' };
-
 
 	result = acpi_bus_get_device(handle, &device);
 	if (result)
@@ -564,7 +560,6 @@ int acpi_bus_receive_event(struct acpi_bus_event *event)
 
 	DECLARE_WAITQUEUE(wait, current);
 
-
 	if (!event)
 		return -EINVAL;
 
@@ -757,7 +752,6 @@ static int __init acpi_bus_init_irq(void)
 	struct acpi_object_list arg_list = { 1, &arg };
 	char *message = NULL;
 
-
 	/*
 	 * Let the system know what interrupt model we are using by
 	 * evaluating the \_PIC object, if exists.
@@ -795,7 +789,6 @@ static int __init acpi_bus_init_irq(void)
 }
 
 u8 acpi_gbl_permanent_mmap;
-
 
 void __init acpi_early_init(void)
 {
@@ -951,7 +944,6 @@ struct kobject *acpi_kobj;
 static int __init acpi_init(void)
 {
 	int result = 0;
-
 
 	if (acpi_disabled) {
 		printk(KERN_INFO PREFIX "Interpreter disabled.\n");

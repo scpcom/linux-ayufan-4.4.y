@@ -35,7 +35,6 @@
 #include <asm/cpm2.h>
 #include <sysdev/cpm2_pic.h>
 
-
 #define KSI8560_CPLD_HVR		0x04 /* Hardware Version Register */
 #define KSI8560_CPLD_PVR		0x08 /* PLD Version Register */
 #define KSI8560_CPLD_RCR1		0x30 /* Reset Command Register 1 */

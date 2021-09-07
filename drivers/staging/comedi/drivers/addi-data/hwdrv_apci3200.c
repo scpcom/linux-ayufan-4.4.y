@@ -222,7 +222,6 @@ int i_AddiHeaderRW_ReadEeprom(int i_NbOfWordsToRead,
 			else
 				b_ReadHighByte = pb_ReadByte[0];
 
-
 			/* Sleep */
 			msleep(1);
 

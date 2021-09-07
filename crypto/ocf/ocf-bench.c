@@ -29,7 +29,6 @@
  * and/or fitness for purpose.
  */
 
-
 #ifndef AUTOCONF_INCLUDED
 #include <linux/config.h>
 #endif
@@ -166,7 +165,6 @@ ocf_cb(struct cryptop *crp)
 	schedule_work(&r->work);
 	return 0;
 }
-
 
 static void
 ocf_request(void *arg)

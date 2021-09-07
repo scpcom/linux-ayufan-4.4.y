@@ -1854,7 +1854,6 @@ static int run_delayed_tree_ref(struct btrfs_trans_handle *trans,
 	return ret;
 }
 
-
 /* helper function to actually process a single delayed ref entry */
 static int run_one_delayed_ref(struct btrfs_trans_handle *trans,
 			       struct btrfs_root *root,
@@ -7008,7 +7007,6 @@ static noinline int relocate_one_extent(struct btrfs_root *extent_root,
 	struct btrfs_key first_key;
 	u64 prev_block = 0;
 
-
 	trans = btrfs_start_transaction(extent_root, 1);
 	BUG_ON(!trans);
 
@@ -7212,7 +7210,6 @@ static int __alloc_chunk_for_shrink(struct btrfs_root *root,
 		spin_unlock(&shrink_block_group->lock);
 	return 0;
 }
-
 
 int btrfs_prepare_block_group_relocation(struct btrfs_root *root,
 					 struct btrfs_block_group_cache *group)

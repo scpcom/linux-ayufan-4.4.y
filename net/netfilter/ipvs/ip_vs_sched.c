@@ -37,7 +37,6 @@ static LIST_HEAD(ip_vs_schedulers);
 /* lock for service table */
 static DEFINE_RWLOCK(__ip_vs_sched_lock);
 
-
 /*
  *  Bind a service with a scheduler
  */
@@ -68,7 +67,6 @@ int ip_vs_bind_scheduler(struct ip_vs_service *svc,
 	return 0;
 }
 
-
 /*
  *  Unbind a service with its scheduler
  */
@@ -97,7 +95,6 @@ int ip_vs_unbind_scheduler(struct ip_vs_service *svc)
 	svc->scheduler = NULL;
 	return 0;
 }
-
 
 /*
  *  Get scheduler in the scheduler list by name
@@ -133,7 +130,6 @@ static struct ip_vs_scheduler *ip_vs_sched_getbyname(const char *sched_name)
 	return NULL;
 }
 
-
 /*
  *  Lookup scheduler and try to load it if it doesn't exist
  */
@@ -162,7 +158,6 @@ void ip_vs_scheduler_put(struct ip_vs_scheduler *scheduler)
 	if (scheduler->module)
 		module_put(scheduler->module);
 }
-
 
 /*
  *  Register a scheduler in the scheduler list
@@ -217,7 +212,6 @@ int register_ip_vs_scheduler(struct ip_vs_scheduler *scheduler)
 
 	return 0;
 }
-
 
 /*
  *  Unregister a scheduler from the scheduler list

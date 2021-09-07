@@ -66,4 +66,3 @@ static inline void sh_wdt_write_rstcsr(__u8 val)
 }
 
 #endif /* __ASM_CPU_SH2_WATCHDOG_H */
-

@@ -153,7 +153,6 @@ ia32_gdt_init (void)
 	memcpy(cpu_gdt_table[cpu], ia32_boot_gdt, PAGE_SIZE);
 }
 
-
 /*
  * Setup IA32 GDT and TSS
  */

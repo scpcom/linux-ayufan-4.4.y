@@ -62,10 +62,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmv802_3h
 #define __INCmv802_3h
-
 
 /* includes */
 #include "mvTypes.h"
@@ -80,14 +78,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_NOVELL_IPX_TYPE          0x8137
 #define MV_EAPOL_TYPE				0x888e
 
-
-
 /* Encapsulation header for RFC1042 and Ethernet_tunnel */
 
 #define MV_RFC1042_SNAP_HEADER     {0xAA, 0xAA, 0x03, 0x00, 0x00, 0x00}
 
 #define MV_ETH_SNAP_LSB             0xF8
-
 
 #define	MV_MAC_ADDR_SIZE	(6)
 #define MV_MAC_STR_SIZE		(20)
@@ -95,7 +90,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* This macro checks for a multicast mac address    */
 #define MV_IS_MULTICAST_MAC(mac)  (((mac)[0] & 0x1) == 1)
-
 
 /* This macro checks for an broadcast mac address     */
 #define MV_IS_BROADCAST_MAC(mac)            \
@@ -105,7 +99,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         ((mac)[3] == 0xFF) &&       \
         ((mac)[4] == 0xFF) &&       \
         ((mac)[5] == 0xFF))
-
 
 /* Typedefs */
 typedef struct

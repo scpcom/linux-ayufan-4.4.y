@@ -14,4 +14,3 @@
 int __init omap2_gp_clockevent_set_gptimer(u8 id);
 
 #endif
-

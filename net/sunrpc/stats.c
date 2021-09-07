@@ -277,4 +277,3 @@ rpc_proc_exit(void)
 		remove_proc_entry("rpc", init_net.proc_net);
 	}
 }
-

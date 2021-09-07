@@ -50,7 +50,6 @@
  *					a single port at the same time.
  */
 
-
 #include <linux/bottom_half.h>
 #include <linux/types.h>
 #include <linux/fcntl.h>
@@ -88,7 +87,6 @@ int sysctl_tcp_low_latency __read_mostly;
 #define TCP_HWACCEL_THRESHOLD	(1024*1024) /*1M*/
 extern void gfar_setup_hwaccel_tcp4_receive(struct sock *sk, struct sk_buff *skb);
 #endif
-
 
 #ifdef CONFIG_TCP_MD5SIG
 static struct tcp_md5sig_key *tcp_v4_md5_do_lookup(struct sock *sk,
@@ -1364,7 +1362,6 @@ drop:
 	return 0;
 }
 
-
 /*
  * The three way handshake has completed - we got a valid synack -
  * now create the new socket.
@@ -1503,7 +1500,6 @@ static __sum16 tcp_v4_checksum_init(struct sk_buff *skb)
 	}
 	return 0;
 }
-
 
 /* The socket must have it's spinlock held when we get
  * here.
@@ -2502,7 +2498,6 @@ struct proto tcp_prot = {
 #endif
 };
 
-
 static int __net_init tcp_sk_init(struct net *net)
 {
 	return inet_ctl_sock_create(&net->ipv4.tcp_sock,
@@ -2542,4 +2537,3 @@ EXPORT_SYMBOL(tcp_proc_register);
 EXPORT_SYMBOL(tcp_proc_unregister);
 #endif
 EXPORT_SYMBOL(sysctl_tcp_low_latency);
-

@@ -9,7 +9,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -42,6 +41,5 @@ int mv_switch_reg_write(int port, int reg, int type, MV_U16 value);
 
 void    mv_switch_stats_print(void);
 void    mv_switch_status_print(void);
-
 
 #endif

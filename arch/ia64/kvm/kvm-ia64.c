@@ -1503,7 +1503,6 @@ void kvm_arch_vcpu_uninit(struct kvm_vcpu *vcpu)
 	kfree(vcpu->arch.apic);
 }
 
-
 long kvm_arch_vcpu_ioctl(struct file *filp,
 			 unsigned int ioctl, unsigned long arg)
 {
@@ -1655,7 +1654,6 @@ static int vti_cpu_has_kvm_support(void)
 out:
 	return 0;
 }
-
 
 /*
  * On SN2, the ITC isn't stable, so copy in fast path code to use the

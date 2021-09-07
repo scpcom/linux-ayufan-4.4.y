@@ -272,7 +272,6 @@ typedef struct {
 #define REG_RD_ADDR_gio_rw_pe_oe 88
 #define REG_WR_ADDR_gio_rw_pe_oe 88
 
-
 /* Constants */
 enum {
   regk_gio_anyedge                         = 0x00000007,

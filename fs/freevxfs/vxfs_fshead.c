@@ -41,7 +41,6 @@
 #include "vxfs_extern.h"
 #include "vxfs_fshead.h"
 
-
 #ifdef DIAGNOSTIC
 static void
 vxfs_dumpfsh(struct vxfs_fsh *fhp)
@@ -120,7 +119,6 @@ vxfs_read_fshead(struct super_block *sbp)
 				vip->vii_mode & VXFS_TYPE_MASK); 
 		goto out_free_fship;
 	}
-
 
 #ifdef DIAGNOSTIC
 	printk("vxfs: fsh inode dump:\n");

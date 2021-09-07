@@ -64,7 +64,6 @@
 #define SIM_OR0_MASK                0x20000002
 #define SIM_BR0_MASK                0x00000001
 
-
 /* Defines for chip select one - the RAM */
 #define SIM_OR1_MASK                0x10000000
 #define SIM_BR1_MASK                0x00000001
@@ -89,10 +88,8 @@
 #define MCU_SIM_PICR                0x0000
 #define MCU_SIM_PITR                0x0000
 
-
 #include <asm/m68360_regs.h>
 
-	
 /*
  * By the time this RAM specific code begins to execute, DPRAM
  * and DRAM should already be mapped and accessible.
@@ -204,7 +201,6 @@ copy_vectors:
 	move.l	#_ramvec, %a1
 	movec	%a1, %vbr
 
-
 	/* Copy data segment from ROM to RAM */
 	moveal	#_stext, %a0
 	moveal	#_sdata, %a1
@@ -252,7 +248,6 @@ lp:
 
 _exit:
 	jmp	_exit
-
 
 	.data
 	.align 4

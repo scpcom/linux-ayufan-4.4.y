@@ -178,7 +178,6 @@ static int pcf50633_rtc_set_time(struct device *dev, struct rtc_time *tm)
 		pcf_tm.time[PCF50633_TI_MIN],
 		pcf_tm.time[PCF50633_TI_SEC]);
 
-
 	second_masked = pcf50633_irq_mask_get(rtc->pcf, PCF50633_IRQ_SECOND);
 	alarm_masked = pcf50633_irq_mask_get(rtc->pcf, PCF50633_IRQ_ALARM);
 
@@ -280,7 +279,6 @@ static int __devinit pcf50633_rtc_probe(struct platform_device *pdev)
 	struct pcf50633_subdev_pdata *pdata;
 	struct pcf50633_rtc *rtc;
 
-
 	rtc = kzalloc(sizeof(*rtc), GFP_KERNEL);
 	if (!rtc)
 		return -ENOMEM;
@@ -343,4 +341,3 @@ module_exit(pcf50633_rtc_exit);
 MODULE_DESCRIPTION("PCF50633 RTC driver");
 MODULE_AUTHOR("Balaji Rao <balajirrao@openmoko.org>");
 MODULE_LICENSE("GPL");
-

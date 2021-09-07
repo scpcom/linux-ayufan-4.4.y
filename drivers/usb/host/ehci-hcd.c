@@ -68,7 +68,6 @@
 
 static const char	hcd_name [] = "ehci_hcd";
 
-
 #undef VERBOSE_DEBUG
 #undef EHCI_URB_TRACE
 
@@ -696,7 +695,6 @@ static int ehci_run (struct usb_hcd *hcd)
 #endif
 	}
 
-
 	// Philips, Intel, and maybe others need CMD_RUN before the
 	// root hub will detect new devices (why?); NEC doesn't
 	ehci->command &= ~(CMD_LRESET|CMD_IAAD|CMD_PSE|CMD_ASE|CMD_RESET);
@@ -1312,4 +1310,3 @@ static void __exit ehci_hcd_cleanup(void)
 	clear_bit(USB_EHCI_LOADED, &usb_hcds_loaded);
 }
 module_exit(ehci_hcd_cleanup);
-

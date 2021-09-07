@@ -102,7 +102,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define BAR_TARGET_DRAM			DRAM_TARGET_ID
 #define BAR_TARGET_DEVICE		DEV_TARGET_ID
 
-
 #define BAR_TARGET_PCI0			PCI0_TARGET_ID
 #define BAR_TARGET_PCI1			PCI0_TARGET_ID
 #define BAR_TARGET_PCI2			PCI0_TARGET_ID
@@ -199,7 +198,6 @@ MV_TARGET_ATTRIB	mvTargetDefaultsArray[] =
 
 #define CTRL_DEC_WIN_EN			BIT0
 
-
 /*******************************************************************************
 * mvCtrlAddrDecToReg - Get address decode register format values
 *
@@ -237,11 +235,9 @@ MV_STATUS mvCtrlAddrDecToReg(MV_ADDR_WIN *pAddrDecWin, MV_DEC_REGS *pAddrDecRegs
 	pAddrDecRegs->sizeReg &= ~CTRL_DEC_SIZE_MASK;
 	pAddrDecRegs->sizeReg |= (sizeToReg << CTRL_DEC_SIZE_OFFS);
 	
-
 	return MV_OK;
 
 }
-
 
 /*******************************************************************************
 * mvCtrlRegToAddrDec - Extract address decode struct from registers.
@@ -269,7 +265,6 @@ MV_STATUS mvCtrlRegToAddrDec(MV_DEC_REGS *pAddrDecRegs, MV_ADDR_WIN *pAddrDecWin
 
 	pAddrDecWin->size = ctrlRegToSize(sizeRegVal, CTRL_DEC_SIZE_ALIGNMENT);
 
-
 	/* Extract base address						*/
 	/* Base register [31:16] ==> baseLow[31:16] 		*/
 	pAddrDecWin->baseLow = pAddrDecRegs->baseReg & CTRL_DEC_BASE_MASK;
@@ -279,7 +274,6 @@ MV_STATUS mvCtrlRegToAddrDec(MV_DEC_REGS *pAddrDecRegs, MV_ADDR_WIN *pAddrDecWin
 	return MV_OK;
     
 }
-
 
 /*******************************************************************************
 * mvCtrlAddrDecToParams - Get address decode register format values
@@ -374,7 +368,6 @@ MV_STATUS mvCtrlParamsToAddrDec(MV_DEC_WIN_PARAMS *pWinParam,
 	return MV_OK;
 }
 
-
 /*******************************************************************************
 * mvCtrlAttribGet - 
 *
@@ -424,4 +417,3 @@ MV_TARGET mvCtrlTargetGet(MV_TARGET_ATTRIB *targetAttrib)
 
 	return target;
 }
-

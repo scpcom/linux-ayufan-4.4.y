@@ -458,7 +458,6 @@ extern void cx23885_gpio_clear(struct cx23885_dev *dev, u32 mask);
 extern void cx23885_gpio_enable(struct cx23885_dev *dev, u32 mask,
 	int asoutput);
 
-
 /* ----------------------------------------------------------- */
 /* cx23885-cards.c                                             */
 extern struct cx23885_board cx23885_boards[];
@@ -518,7 +517,6 @@ extern int mc417_memory_write(struct cx23885_dev *dev, u32 address, u32 value);
 extern void mc417_gpio_set(struct cx23885_dev *dev, u32 mask);
 extern void mc417_gpio_clear(struct cx23885_dev *dev, u32 mask);
 extern void mc417_gpio_enable(struct cx23885_dev *dev, u32 mask, int asoutput);
-
 
 /* ----------------------------------------------------------- */
 /* tv norms                                                    */

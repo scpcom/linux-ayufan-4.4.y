@@ -50,8 +50,7 @@
 #include "atags.h"
 #include "tcm.h"
 
-
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 extern char gszSynoHWVersion[];
 #endif
 
@@ -125,8 +124,6 @@ static int __init fpe_setup(char *line)
 __setup("fpe=", fpe_setup);
 #endif
 
-
-
 #ifdef MY_ABC_HERE
 static int __init early_hw_version(char *p)
 {
@@ -160,7 +157,7 @@ static int __init early_internal_hd_num(char *p)
 __setup("ihd_num=", early_internal_hd_num);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 static int __init early_internal_netif_num(char *p)
 {
 	g_internal_netif_num = simple_strtol(p, NULL, 10);
@@ -435,7 +432,6 @@ EXPORT_SYMBOL(system_serial_high);
 
 unsigned int elf_hwcap;
 EXPORT_SYMBOL(elf_hwcap);
-
 
 #ifdef MULTI_CPU
 struct processor processor;
@@ -1181,7 +1177,6 @@ void __init setup_arch(char **cmdline_p)
 #endif
 	early_trap_init();
 }
-
 
 static int __init topology_init(void)
 {

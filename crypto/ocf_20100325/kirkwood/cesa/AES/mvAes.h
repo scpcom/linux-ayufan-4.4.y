@@ -26,7 +26,6 @@ IMPLEMENTATION SPECIFIC INFORMATION.
 
 #include "mvOs.h"
 
-
 /*  Error Codes - CHANGE POSSIBLE: inclusion of additional error codes  */
 
 /*  Key direction is invalid, e.g., unknown value */
@@ -46,7 +45,6 @@ IMPLEMENTATION SPECIFIC INFORMATION.
 
 #define     AES_BAD_CIPHER_INSTANCE   -7 
 
-
 /*  Function protoypes  */
 /*  CHANGED: makeKey(): parameter blockLen added
                         this parameter is absolutely necessary if you want to
@@ -58,5 +56,3 @@ int     aesBlockEncrypt128(MV_U8 mode, MV_U8 *IV, MV_U8 *expandedKey, int  keyLe
                     MV_U32 *plain, int numBlocks, MV_U32 *cipher);
 int     aesBlockDecrypt128(MV_U8 mode, MV_U8 *IV, MV_U8 *expandedKey, int  keyLen, 
                     MV_U32 *plain, int numBlocks, MV_U32 *cipher);
-
-

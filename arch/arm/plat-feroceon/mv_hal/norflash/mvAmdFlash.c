@@ -129,8 +129,6 @@ MV_STATUS amdFlashSecErase(MV_FLASH_INFO *pFlash, MV_U32 secNum)
 
 	}
 
-    
-    
     /* wait for erase to complete */
     for(i = 0; i < AMD_EARASE_MILI_TIMEOUT; i++)
     {
@@ -146,7 +144,6 @@ MV_STATUS amdFlashSecErase(MV_FLASH_INFO *pFlash, MV_U32 secNum)
     
     return MV_TIMEOUT;
 }
-
 
 /*******************************************************************************
 * amdFlashProg - Prog busWidth Bits into the address offest in the flash.
@@ -212,7 +209,6 @@ MV_STATUS amdFlashProg(MV_FLASH_INFO *pFlash,MV_U32 offset, MV_U32 data)
 			return MV_TIMEOUT;
 	}
 
-	
     /* wait for write to complete */
     for(i = 0; i < AMD_PROG_TIMEOUT; i++)
     {
@@ -274,6 +270,3 @@ static MV_VOID amdFlashUnlock(MV_FLASH_INFO *pFlash)
 	}
     return;
 }
-
-
-

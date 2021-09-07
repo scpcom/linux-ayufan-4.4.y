@@ -111,7 +111,6 @@
 #ifndef	__USA49MSG__
 #define	__USA49MSG__
 
-
 /*
 	Host->device messages sent on the global control endpoint:
 
@@ -158,7 +157,6 @@ struct keyspan_usa49_portControlMessage
 
 		setDtr,			// host requests DTR output be set
 		dtr;			// 1=on, 0=off
-
 
 	/*
 		3.	configuration data which is simply used as is (no overhead,

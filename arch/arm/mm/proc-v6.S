@@ -128,9 +128,6 @@ ENTRY(cpu_v6_set_pte_ext)
 #endif
 	mov	pc, lr
 
-
-
-
 cpu_v6_name:
 	.asciz	"ARMv6-compatible processor"
 	.align

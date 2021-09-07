@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 VOID STARxEAPOLFrameIndicate(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	MAC_TABLE_ENTRY	*pEntry,
@@ -47,7 +46,6 @@ VOID STARxEAPOLFrameIndicate(
 	PRT28XX_RXD_STRUC	pRxD = &(pRxBlk->RxD);
 	PRXWI_STRUC		pRxWI = pRxBlk->pRxWI;
 	UCHAR			*pTmpBuf;
-
 
 #ifdef WPA_SUPPLICANT_SUPPORT
 	if (pAd->StaCfg.WpaSupplicantUP)
@@ -161,7 +159,6 @@ VOID STARxDataFrameAnnounce(
 		}
 		RX_BLK_CLEAR_FLAG(pRxBlk, fRX_EAP);
 
-
 		if (!RX_BLK_TEST_FLAG(pRxBlk, fRX_ARALINK))
 		{
 			// Normal legacy, AMPDU or AMSDU
@@ -194,7 +191,6 @@ VOID STARxDataFrameAnnounce(
 		}
 	}
 }
-
 
 // For TKIP frame, calculate the MIC value
 BOOLEAN STACheckTkipMICValue(
@@ -249,7 +245,6 @@ BOOLEAN STACheckTkipMICValue(
 
 	return TRUE;
 }
-
 
 //
 // All Rx routines use RX_BLK structure to hande rx events
@@ -501,7 +496,6 @@ VOID STAHandleRxDataFrame(
 	}
 #endif // DOT11_N_SUPPORT //
 
-
 	//
 	// Case I  Process Broadcast & Multicast data frame
 	//
@@ -532,7 +526,6 @@ VOID STAHandleRxDataFrame(
 	{
 		pAd->LastRxRate = (USHORT)((pRxWI->MCS) + (pRxWI->BW <<7) + (pRxWI->ShortGI <<8)+ (pRxWI->PHYMODE <<14)) ;
 
-
 #ifdef QOS_DLS_SUPPORT
         if (RX_BLK_TEST_FLAG(pRxBlk, fRX_DLS))
 		{
@@ -551,14 +544,12 @@ VOID STAHandleRxDataFrame(
 				Update_Rssi_Sample(pAd, &pEntry->RssiSample, pRxWI);
 		}
 
-
 		Update_Rssi_Sample(pAd, &pAd->StaCfg.RssiSample, pRxWI);
 
 		pAd->StaCfg.LastSNR0 = (UCHAR)(pRxWI->SNR0);
 		pAd->StaCfg.LastSNR1 = (UCHAR)(pRxWI->SNR1);
 
 		pAd->RalinkCounters.OneSecRxOkDataCnt++;
-
 
 	if (!((pHeader->Frag == 0) && (pHeader->FC.MoreFrag == 0)))
 	{
@@ -614,7 +605,6 @@ VOID STAHandleRxMgmtFrame(
 	do
 	{
 
-
 		/* check if need to resend PS Poll when received packet with MoreData = 1 */
 		if ((pAd->StaCfg.Psm == PWR_SAVE) && (pHeader->FC.MoreData == 1))
 		{
@@ -627,7 +617,6 @@ VOID STAHandleRxMgmtFrame(
 		}
 
 		/* TODO: if MoreData == 0, station can go to sleep */
-
 
 		// We should collect RSSI not only U2M data but also my beacon
 		if ((pHeader->FC.SubType == SUBTYPE_BEACON) && (MAC_ADDR_EQUAL(&pAd->CommonCfg.Bssid, &pHeader->Addr2))
@@ -695,7 +684,6 @@ VOID STAHandleRxControlFrame(
 
 	RELEASE_NDIS_PACKET(pAd, pRxPacket, NDIS_STATUS_FAILURE);
 }
-
 
 /*
 	========================================================================
@@ -913,7 +901,6 @@ VOID STASendPackets(
 	PNDIS_PACKET	pPacket;
 	BOOLEAN			allowToSend = FALSE;
 
-
 	for (Index = 0; Index < NumberOfPackets; Index++)
 	{
 		pPacket = ppPacketArray[Index];
@@ -968,7 +955,6 @@ VOID STASendPackets(
 
 }
 
-
 /*
 ========================================================================
 Routine Description:
@@ -1016,7 +1002,6 @@ NDIS_STATUS STASendPacket(
 		RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
 		return NDIS_STATUS_FAILURE;
 	}
-
 
 	if (SrcBufLen < 14)
 	{
@@ -1083,8 +1068,6 @@ NDIS_STATUS STASendPacket(
 	//		Here we set the PACKET_SPECIFIC flags(LLC, VLAN, DHCP/ARP, EAPOL).
 	RTMPCheckEtherType(pAd, pPacket);
 
-
-
 	//
 	// WPA 802.1x secured port control - drop all non-802.1x frame before port secured
 	//
@@ -1106,13 +1089,11 @@ NDIS_STATUS STASendPacket(
 		return (NDIS_STATUS_FAILURE);
 	}
 
-
 	// STEP 1. Decide number of fragments required to deliver this MSDU.
 	//	   The estimation here is not very accurate because difficult to
 	//	   take encryption overhead into consideration here. The result
 	//	   "NumberOfFrag" is then just used to pre-check if enough free
 	//	   TXD are available to hold this MSDU.
-
 
 	if (*pSrcBufVA & 0x01)	// fragmentation not allowed on multicast & broadcast
 		NumberOfFrag = 1;
@@ -1146,7 +1127,6 @@ NDIS_STATUS STASendPacket(
 
 	// Save fragment number to Ndis packet reserved field
 	RTMP_SET_PACKET_FRAGMENTS(pPacket, NumberOfFrag);
-
 
 	// STEP 2. Check the requirement of RTS:
 	//	   If multiple fragment required, RTS is required only for the first fragment
@@ -1219,8 +1199,6 @@ NDIS_STATUS STASendPacket(
 
 	RTMP_SET_PACKET_UP(pPacket, UserPriority);
 
-
-
 	// Make sure SendTxWait queue resource won't be used by other threads
 	RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);
 	if (pAd->TxSwQueue[QueIdx].Number >= MAX_PACKETS_IN_QUEUE)
@@ -1263,7 +1241,6 @@ NDIS_STATUS STASendPacket(
 	pAd->RalinkCounters.OneSecOsTxCount[QueIdx]++; // TODO: for debug only. to be removed
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 /*
 	========================================================================
@@ -1333,8 +1310,6 @@ NDIS_STATUS RTMPFreeTXDRequest(
 }
 #endif // RTMP_MAC_PCI //
 
-
-
 VOID RTMPSendDisassociationFrame(
 	IN	PRTMP_ADAPTER	pAd)
 {
@@ -1348,7 +1323,6 @@ VOID	RTMPSendNullFrame(
 	UCHAR	NullFrame[48];
 	ULONG	Length;
 	PHEADER_802_11	pHeader_802_11;
-
 
 #ifdef RALINK_ATE
 	if(ATE_ON(pAd))
@@ -1423,8 +1397,6 @@ VOID	RTMPSendRTSFrame(
 	IN	UCHAR			FrameGap)
 {
 }
-
-
 
 // --------------------------------------------------------
 //  FIND ENCRYPT KEY AND DECIDE CIPHER ALGORITHM
@@ -1503,7 +1475,6 @@ VOID STAFindCipherAlgorithm(
 	pTxBlk->CipherAlg = CipherAlg;
 	pTxBlk->pKey = pKey;
 }
-
 
 VOID STABuildCommon802_11Header(
 	IN  PRTMP_ADAPTER   pAd,
@@ -1689,7 +1660,6 @@ static inline PUCHAR STA_Build_ARalink_Frame_Header(
 	STAFindCipherAlgorithm(pAd, pTxBlk);
 	STABuildCommon802_11Header(pAd, pTxBlk);
 
-
 	pHeaderBufPtr = &pTxBlk->HeaderBuf[TXINFO_SIZE + TXWI_SIZE];
 	pHeader_802_11 = (HEADER_802_11 *) pHeaderBufPtr;
 
@@ -1742,7 +1712,6 @@ static inline PUCHAR STA_Build_AMSDU_Frame_Header(
 	PUCHAR			pHeaderBufPtr;//, pSaveBufPtr;
 	HEADER_802_11	*pHeader_802_11;
 
-
 	STAFindCipherAlgorithm(pAd, pTxBlk);
 	STABuildCommon802_11Header(pAd, pTxBlk);
 
@@ -1781,7 +1750,6 @@ static inline PUCHAR STA_Build_AMSDU_Frame_Header(
 	return pHeaderBufPtr;
 
 }
-
 
 VOID STA_AMPDU_Frame_Tx(
 	IN	PRTMP_ADAPTER	pAd,
@@ -1823,7 +1791,6 @@ VOID STA_AMPDU_Frame_Tx(
 
 			pHeaderBufPtr = &pTxBlk->HeaderBuf[TXINFO_SIZE + TXWI_SIZE];
 		}
-
 
 		pHeader_802_11 = (HEADER_802_11 *) pHeaderBufPtr;
 
@@ -1933,7 +1900,6 @@ VOID STA_AMPDU_Frame_Tx(
 
 }
 
-
 VOID STA_AMSDU_Frame_Tx(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	TX_BLK			*pTxBlk)
@@ -1948,7 +1914,6 @@ VOID STA_AMSDU_Frame_Tx(
 	BOOLEAN			bVLANPkt;
 	int			frameNum = 0;
 	PQUEUE_ENTRY	pQEntry;
-
 
 	ASSERT(pTxBlk);
 
@@ -2002,10 +1967,8 @@ VOID STA_AMSDU_Frame_Tx(
 
 		NdisMoveMemory(subFrameHeader, pTxBlk->pSrcBufHeader, 12);
 
-
 		pHeaderBufPtr += LENGTH_AMSDU_SUBFRAMEHEAD;
 		pTxBlk->MpduHeaderLen += LENGTH_AMSDU_SUBFRAMEHEAD;
-
 
 		//
 		// Insert LLC-SNAP encapsulation - 8 octets
@@ -2072,7 +2035,6 @@ VOID STA_Legacy_Frame_Tx(
 
 	ASSERT(pTxBlk);
 
-
 	pQEntry = RemoveHeadQueue(&pTxBlk->TxPacketList);
 	pTxBlk->pPacket = QUEUE_ENTRY_TO_PACKET(pQEntry);
 	if (RTMP_FillTxBlkInfo(pAd, pTxBlk) != TRUE)
@@ -2098,7 +2060,6 @@ VOID STA_Legacy_Frame_Tx(
 
 	STAFindCipherAlgorithm(pAd, pTxBlk);
 	STABuildCommon802_11Header(pAd, pTxBlk);
-
 
 	// skip 802.3 header
 	pTxBlk->pSrcBufData = pTxBlk->pSrcBufHeader + LENGTH_802_3;
@@ -2180,7 +2141,6 @@ VOID STA_Legacy_Frame_Tx(
 	HAL_KickOutTx(pAd, pTxBlk, pTxBlk->QueIdx);
 }
 
-
 VOID STA_ARalink_Frame_Tx(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	TX_BLK			*pTxBlk)
@@ -2193,11 +2153,9 @@ VOID STA_ARalink_Frame_Tx(
 	BOOLEAN			bVLANPkt;
 	PQUEUE_ENTRY	pQEntry;
 
-
 	ASSERT(pTxBlk);
 
 	ASSERT((pTxBlk->TxPacketList.Number== 2));
-
 
 	FirstTx = LastTxIdx = 0;  // Is it ok init they as 0?
 	while(pTxBlk->TxPacketList.Head)
@@ -2232,7 +2190,6 @@ VOID STA_ARalink_Frame_Tx(
 			// It's ok write the TxWI here, because the TxWI->MPDUtotalByteCount
 			//	will be updated after final frame was handled.
 			RTMPWriteTxWI_Data(pAd, (PTXWI_STRUC)(&pTxBlk->HeaderBuf[TXINFO_SIZE]), pTxBlk);
-
 
 			//
 			// Insert LLC-SNAP encapsulation - 8 octets
@@ -2292,7 +2249,6 @@ VOID STA_ARalink_Frame_Tx(
 
 }
 
-
 VOID STA_Fragment_Frame_Tx(
 	IN RTMP_ADAPTER *pAd,
 	IN TX_BLK		*pTxBlk)
@@ -2309,7 +2265,6 @@ VOID STA_Fragment_Frame_Tx(
 	BOOLEAN			bVLANPkt;
 	PQUEUE_ENTRY	pQEntry;
 	HTTRANSMIT_SETTING	*pTransmit;
-
 
 	ASSERT(pTxBlk);
 
@@ -2339,7 +2294,6 @@ VOID STA_Fragment_Frame_Tx(
 	pTxBlk->pSrcBufData = pTxBlk->pSrcBufHeader + LENGTH_802_3;
 	pTxBlk->SrcBufLen  -= LENGTH_802_3;
 
-
 	// skip vlan tag
 	if (bVLANPkt)
 	{
@@ -2349,7 +2303,6 @@ VOID STA_Fragment_Frame_Tx(
 
 	pHeaderBufPtr = &pTxBlk->HeaderBuf[TXINFO_SIZE + TXWI_SIZE];
 	pHeader_802_11 = (HEADER_802_11 *)pHeaderBufPtr;
-
 
 	// skip common header
 	pHeaderBufPtr += pTxBlk->MpduHeaderLen;
@@ -2374,8 +2327,6 @@ VOID STA_Fragment_Frame_Tx(
 	pHeaderBufPtr = (PUCHAR) ROUND_UP(pHeaderBufPtr, 4);
 	pTxBlk->HdrPadLen = (ULONG)(pHeaderBufPtr - pTxBlk->HdrPadLen);
 
-
-
 	//
 	// Insert LLC-SNAP encapsulation - 8 octets
 	//
@@ -2397,7 +2348,6 @@ VOID STA_Fragment_Frame_Tx(
 		pHeaderBufPtr += 2;
 		pTxBlk->MpduHeaderLen += LENGTH_802_1_H;
 	}
-
 
 	// If TKIP is used and fragmentation is required. Driver has to
 	//	append TKIP MIC at tail of the scatter buffer
@@ -2510,14 +2460,12 @@ VOID STA_Fragment_Frame_Tx(
 	HAL_KickOutTx(pAd, pTxBlk, pTxBlk->QueIdx);
 }
 
-
 #define RELEASE_FRAMES_OF_TXBLK(_pAd, _pTxBlk, _pQEntry, _Status)										\
 		while(_pTxBlk->TxPacketList.Head)														\
 		{																						\
 			_pQEntry = RemoveHeadQueue(&_pTxBlk->TxPacketList);									\
 			RELEASE_NDIS_PACKET(_pAd, QUEUE_ENTRY_TO_PACKET(_pQEntry), _Status);	\
 		}
-
 
 /*
 	========================================================================
@@ -2561,7 +2509,6 @@ NDIS_STATUS STAHardTransmit(
 	}
 
 	pPacket = QUEUE_ENTRY_TO_PACKET(pTxBlk->TxPacketList.Head);
-
 
 	// ------------------------------------------------------------------
 	// STEP 1. WAKE UP PHY

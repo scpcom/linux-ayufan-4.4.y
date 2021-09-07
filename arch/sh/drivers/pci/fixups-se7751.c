@@ -65,7 +65,6 @@ int pci_fixup_pcic(struct pci_channel *chan)
 	mcr = (mcr & PCIMCR_MRSET_OFF) & PCIMCR_RFSH_OFF;
 	PCIC_WRITE(SH7751_PCIMCR, mcr);      /* PCIC MCR */
 
-
 	/* Enable all interrupts, so we know what to fix */
 	PCIC_WRITE(SH7751_PCIINTM, 0x0000c3ff);
 	PCIC_WRITE(SH7751_PCIAINTM, 0x0000380f);

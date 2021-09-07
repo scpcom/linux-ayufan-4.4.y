@@ -23,7 +23,6 @@
 #define ETH_TX_FIFO_URGENT_THRESH_REG(port) (MV_ETH_REG_BASE(port) + 0x474)
 #define ETH_TX_INTR_COAL_OFFSET             4
 
-
 mv_reg_read(unsigned int reg)
 {
     unsigned int value;
@@ -159,4 +158,3 @@ main(int argc, char **argv)
 
         return 1;
 }
-

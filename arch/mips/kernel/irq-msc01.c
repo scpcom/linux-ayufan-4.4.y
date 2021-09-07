@@ -125,7 +125,6 @@ static struct irq_chip msc_edgeirq_type = {
 	.end = end_msc_irq,
 };
 
-
 void __init init_msc_irqs(unsigned long icubase, unsigned int irqbase, msc_irqmap_t *imp, int nirq)
 {
 	_icctrl_msc = (unsigned long) ioremap(icubase, 0x40000);

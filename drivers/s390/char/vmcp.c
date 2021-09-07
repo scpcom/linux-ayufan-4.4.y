@@ -123,7 +123,6 @@ vmcp_write(struct file *file, const char __user *buff, size_t count,
 	return count;
 }
 
-
 /*
  * These ioctls are available, as the semantics of the diagnose 8 call
  * does not fit very well into a Linux call. Diagnose X'08' is described in

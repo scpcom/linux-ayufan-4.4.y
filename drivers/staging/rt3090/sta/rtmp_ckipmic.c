@@ -38,7 +38,6 @@
 #include "../rt_config.h"
 #include "../rtmp_ckipmic.h"
 
-
 #define MIC_ACCUM(v)            pContext->accum += (ULONGLONG)v * RTMPMicGetCoefficient(pContext)
 #define GB(p,i,s)               ( ((ULONG) *((UCHAR*)(p)+i) ) << (s) )
 #define GETBIG32(p)             GB(p,0,24)|GB(p,1,16)|GB(p,2,8)|GB(p,3,0)

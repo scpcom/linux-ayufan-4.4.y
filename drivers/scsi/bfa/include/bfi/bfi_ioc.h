@@ -199,4 +199,3 @@ union bfi_ioc_i2h_msg_u {
 #pragma pack()
 
 #endif /* __BFI_IOC_H__ */
-

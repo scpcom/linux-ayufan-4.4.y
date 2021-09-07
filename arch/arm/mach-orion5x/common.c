@@ -67,7 +67,6 @@ void __init orion5x_map_io(void)
 	iotable_init(orion5x_io_desc, ARRAY_SIZE(orion5x_io_desc));
 }
 
-
 /*****************************************************************************
  * EHCI
  ****************************************************************************/
@@ -77,7 +76,6 @@ static struct orion_ehci_data orion5x_ehci_data = {
 };
 
 static u64 ehci_dmamask = 0xffffffffUL;
-
 
 /*****************************************************************************
  * EHCI0
@@ -111,7 +109,6 @@ void __init orion5x_ehci0_init(void)
 	platform_device_register(&orion5x_ehci0);
 }
 
-
 /*****************************************************************************
  * EHCI1
  ****************************************************************************/
@@ -143,7 +140,6 @@ void __init orion5x_ehci1_init(void)
 {
 	platform_device_register(&orion5x_ehci1);
 }
-
 
 /*****************************************************************************
  * GigE
@@ -202,7 +198,6 @@ void __init orion5x_eth_init(struct mv643xx_eth_platform_data *eth_data)
 	platform_device_register(&orion5x_eth);
 }
 
-
 /*****************************************************************************
  * Ethernet switch
  ****************************************************************************/
@@ -238,7 +233,6 @@ void __init orion5x_eth_switch_init(struct dsa_platform_data *d, int irq)
 
 	platform_device_register(&orion5x_switch_device);
 }
-
 
 /*****************************************************************************
  * I2C
@@ -276,7 +270,6 @@ void __init orion5x_i2c_init(void)
 	platform_device_register(&orion5x_i2c);
 }
 
-
 /*****************************************************************************
  * SATA
  ****************************************************************************/
@@ -311,7 +304,6 @@ void __init orion5x_sata_init(struct mv_sata_platform_data *sata_data)
 	platform_device_register(&orion5x_sata);
 }
 
-
 /*****************************************************************************
  * SPI
  ****************************************************************************/
@@ -343,7 +335,6 @@ void __init orion5x_spi_init()
 {
 	platform_device_register(&orion5x_spi);
 }
-
 
 /*****************************************************************************
  * UART0
@@ -388,7 +379,6 @@ void __init orion5x_uart0_init(void)
 	platform_device_register(&orion5x_uart0);
 }
 
-
 /*****************************************************************************
  * UART1
  ****************************************************************************/
@@ -431,7 +421,6 @@ void __init orion5x_uart1_init(void)
 {
 	platform_device_register(&orion5x_uart1);
 }
-
 
 /*****************************************************************************
  * XOR engine
@@ -595,7 +584,6 @@ void __init orion5x_wdt_init(void)
 	platform_device_register(&orion5x_wdt_device);
 }
 
-
 /*****************************************************************************
  * Time handling
  ****************************************************************************/
@@ -622,7 +610,6 @@ static void orion5x_timer_init(void)
 struct sys_timer orion5x_timer = {
 	.init = orion5x_timer_init,
 };
-
 
 /*****************************************************************************
  * General

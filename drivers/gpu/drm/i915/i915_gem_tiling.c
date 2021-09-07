@@ -302,7 +302,6 @@ i915_gem_detect_bit_6_swizzle(struct drm_device *dev)
 	dev_priv->mm.bit_6_swizzle_y = swizzle_y;
 }
 
-
 /**
  * Returns the size of the fence for a tiled object of the given size.
  */

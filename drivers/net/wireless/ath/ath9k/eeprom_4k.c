@@ -62,7 +62,6 @@ static int ath9k_hw_4k_check_eeprom(struct ath_hw *ah)
 	bool need_swap = false;
 	int i, addr;
 
-
 	if (!ath9k_hw_use_flash(ah)) {
 		if (!ath9k_hw_nvram_read(ah, AR5416_EEPROM_MAGIC_OFFSET,
 					 &magic)) {
@@ -278,7 +277,6 @@ static void ath9k_hw_get_4k_gain_boundaries_pdadcs(struct ath_hw *ah,
 			maxPwrT4[i] =
 				min(pPwrL[AR5416_EEP4K_PD_GAIN_ICEPTS - 1],
 				    pPwrR[AR5416_EEP4K_PD_GAIN_ICEPTS - 1]);
-
 
 			ath9k_hw_fill_vpd_table(minPwrT4[i], maxPwrT4[i],
 						pPwrL, pVpdL,
@@ -737,7 +735,6 @@ static void ath9k_hw_4k_set_txpower(struct ath_hw *ah,
 			ratesArray[i] = AR5416_MAX_RATE_POWER;
 	}
 
-
 	/* Update regulatory */
 
 	i = rate6mb;
@@ -938,7 +935,6 @@ static void ath9k_hw_4k_set_board_values(struct ath_hw *ah,
 		regVal |= SM((ant_div_control1 >> 2),
 			     AR_PHY_9285_ANT_DIV_MAIN_GAINTB);
 
-
 		REG_WRITE(ah, AR_PHY_MULTICHAIN_GAIN_CTL, regVal);
 		regVal = REG_READ(ah, AR_PHY_MULTICHAIN_GAIN_CTL);
 		regVal = REG_READ(ah, AR_PHY_CCK_DETECT);
@@ -1089,7 +1085,6 @@ static void ath9k_hw_4k_set_board_values(struct ath_hw *ah,
 					  AR9285_AN_RF2G4_DB2_4_S,
 					  db2[4]);
 	}
-
 
 	if (AR_SREV_9285_11(ah))
 		REG_WRITE(ah, AR9285_AN_TOP4, AR9285_AN_TOP4_DEFAULT);

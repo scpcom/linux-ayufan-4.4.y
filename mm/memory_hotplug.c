@@ -376,7 +376,6 @@ static int online_pages_range(unsigned long start_pfn, unsigned long nr_pages,
 	return 0;
 }
 
-
 int online_pages(unsigned long pfn, unsigned long nr_pages)
 {
 	unsigned long onlined_pages = 0;
@@ -476,7 +475,6 @@ static void rollback_node_hotadd(int nid, pg_data_t *pgdat)
 	arch_free_nodedata(pgdat);
 	return;
 }
-
 
 /* we are OK calling __meminit stuff here - we have CONFIG_MEMORY_HOTPLUG */
 int __ref add_memory(int nid, u64 start, u64 size)

@@ -36,5 +36,4 @@
     u64    output_words;
 } bfa_driver_stats_t;
 
-
 #endif /* __BFA_DEFS_DRIVER_H__ */

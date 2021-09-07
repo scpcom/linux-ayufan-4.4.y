@@ -98,7 +98,6 @@ static inline unsigned int efx_rx_buf_size(struct efx_nic *efx)
 	return PAGE_SIZE << efx->rx_buffer_order;
 }
 
-
 /**
  * efx_init_rx_buffer_skb - create new RX buffer using skb-based allocation
  *
@@ -710,11 +709,9 @@ void efx_remove_rx_queue(struct efx_rx_queue *rx_queue)
 	rx_queue->buffer = NULL;
 }
 
-
 module_param(rx_alloc_method, int, 0644);
 MODULE_PARM_DESC(rx_alloc_method, "Allocation method used for RX buffers");
 
 module_param(rx_refill_threshold, uint, 0444);
 MODULE_PARM_DESC(rx_refill_threshold,
 		 "RX descriptor ring fast/slow fill threshold (%)");
-

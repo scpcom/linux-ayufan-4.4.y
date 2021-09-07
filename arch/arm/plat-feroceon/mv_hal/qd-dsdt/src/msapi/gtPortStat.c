@@ -15,7 +15,6 @@
 #include <gtHwCntl.h>
 #include <gtDrvSwRegs.h>
 
-
 /*******************************************************************************
 * gprtSetCtrMode
 *
@@ -64,8 +63,6 @@ GT_STATUS gprtSetCtrMode
     DBG_INFO(("gprtSetCtrMode OK .\n"));
     return retVal;
 }
-
-
 
 /*******************************************************************************
 * gprtClearAllCtr
@@ -123,8 +120,6 @@ GT_STATUS gprtClearAllCtr
     DBG_INFO(("OK.\n"));
     return retVal;
 }
-
-
 
 /*******************************************************************************
 * gprtGetPortCtr
@@ -205,7 +200,6 @@ GT_STATUS gprtGetPortCtr
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * gprtGetPortCtr2
@@ -290,7 +284,6 @@ GT_STATUS gprtGetPortCtr2
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-
 
 #ifdef DEBUG_FEATURE /* this is a debug feature*/
 /*******************************************************************************

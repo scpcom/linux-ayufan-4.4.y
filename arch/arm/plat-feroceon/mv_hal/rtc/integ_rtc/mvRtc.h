@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvRtch
 #define __INCmvRtch
 
@@ -90,4 +89,3 @@ MV_VOID mvRtcTimeGet(MV_RTC_TIME* time);
 MV_VOID mvRtcAlarmSet(MV_RTC_TIME* time);
 
 #endif  /* __INCmvRtch */
-

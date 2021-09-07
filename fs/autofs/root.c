@@ -138,7 +138,6 @@ static int try_to_fill_dentry(struct dentry *dentry, struct super_block *sb, str
 	return 1;
 }
 
-
 /*
  * Revalidate is called on every cache lookup.  Some of those
  * cache lookups may actually happen while the dentry is not

@@ -29,7 +29,6 @@
 
 #include "mx1_mx2-pcm.h"
 
-
 static const struct snd_pcm_hardware mx1_mx2_pcm_hardware = {
 	.info			= (SNDRV_PCM_INFO_INTERLEAVED |
 				   SNDRV_PCM_INFO_BLOCK_TRANSFER |
@@ -53,7 +52,6 @@ struct mx1_mx2_runtime_data {
 	spinlock_t dma_lock;
 	struct mx1_mx2_pcm_dma_params *dma_params;
 };
-
 
 /**
   * This function stops the current dma transfer for playback
@@ -142,7 +140,6 @@ static int dma_new_period(struct snd_pcm_substream *substream)
     }
 	return ret;
 }
-
 
 /**
   * This is a callback which will be called

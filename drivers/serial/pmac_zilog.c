@@ -98,7 +98,6 @@ MODULE_LICENSE("GPL");
 #define PMACZILOG_NAME		"ttyPZ"
 #endif
 
-
 /*
  * For the sake of early serial console, we can do a pre-probe
  * (optional) of the ports at rather early boot time.
@@ -114,7 +113,6 @@ static struct uart_driver pmz_uart_reg = {
 	.major		=	PMACZILOG_MAJOR,
 	.minor		=	PMACZILOG_MINOR,
 };
-
 
 /* 
  * Load all registers to reprogram the port
@@ -897,7 +895,6 @@ static int __pmz_startup(struct uart_pmac_port *uap)
 	/* Remember status for DCD/CTS changes */
 	uap->prev_status = read_zsreg(uap, R0);
 
-
 	return pwr_delay;
 }
 
@@ -1040,7 +1037,6 @@ static void pmz_convert_to_zs(struct uart_pmac_port *uap, unsigned int cflag,
 {
 	int brg;
 
-
 	/* Switch to external clocking for IrDA high clock rates. That
 	 * code could be re-used for Midi interfaces with different
 	 * multipliers
@@ -1134,7 +1130,6 @@ static void pmz_convert_to_zs(struct uart_pmac_port *uap, unsigned int cflag,
 	if ((cflag & CREAD) == 0)
 		uap->port.ignore_status_mask = 0xff;
 }
-
 
 /*
  * Set the irda codec on the imac to the specified baud rate.
@@ -1271,7 +1266,6 @@ static void pmz_irda_setup(struct uart_pmac_port *uap, unsigned long *baud)
 	(void)read_zsdata(uap);
 	(void)read_zsdata(uap);
 }
-
 
 static void __pmz_set_termios(struct uart_port *port, struct ktermios *termios,
 			      struct ktermios *old)
@@ -1625,7 +1619,6 @@ static int pmz_detach(struct macio_dev *mdev)
 	return 0;
 }
 
-
 static int pmz_suspend(struct macio_dev *mdev, pm_message_t pm_state)
 {
 	struct uart_pmac_port *uap = dev_get_drvdata(&mdev->ofdev.dev);
@@ -1685,7 +1678,6 @@ static int pmz_suspend(struct macio_dev *mdev, pm_message_t pm_state)
 
 	return 0;
 }
-
 
 static int pmz_resume(struct macio_dev *mdev)
 {

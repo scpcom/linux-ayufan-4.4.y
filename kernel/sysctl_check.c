@@ -560,7 +560,6 @@ static const struct trans_ctl_table trans_net_tr_table[] = {
 	{}
 };
 
-
 static const struct trans_ctl_table trans_net_decnet_conf_vars[] = {
 	{ NET_DECNET_CONF_DEV_FORWARDING,	"forwarding" },
 	{ NET_DECNET_CONF_DEV_PRIORITY,		"priority" },
@@ -1241,9 +1240,6 @@ static const struct trans_ctl_table trans_root_table[] = {
 	{ CTL_FRV,	"frv",		trans_frv_table },
 	{}
 };
-
-
-
 
 static int sysctl_depth(struct ctl_table *table)
 {

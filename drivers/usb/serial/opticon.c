@@ -303,7 +303,6 @@ static void opticon_throttle(struct tty_struct *tty)
 	spin_unlock_irqrestore(&priv->lock, flags);
 }
 
-
 static void opticon_unthrottle(struct tty_struct *tty)
 {
 	struct usb_serial_port *port = tty->driver_data;

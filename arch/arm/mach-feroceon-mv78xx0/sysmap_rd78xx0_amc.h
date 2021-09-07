@@ -1,5 +1,4 @@
 
-
 struct map_desc RD_78XX0_AMC_MEM_TABLE[] __initdata = {
  { PCI0_MEM0_BASE, 	__phys_to_pfn(PCI0_MEM0_BASE),  PCIx_MEM0_SIZE, MT_DEVICE},
 /*
@@ -22,4 +21,3 @@ struct map_desc RD_78XX0_AMC_MEM_TABLE[] __initdata = {
  { CRYPTO_ENG_BASE, __phys_to_pfn(CRYPTO_ENG_BASE), CRYPTO_SIZE, MT_DEVICE },					
  { BOOTDEV_CS_BASE, __phys_to_pfn(BOOTDEV_CS_BASE), BOOTDEV_CS_SIZE, MT_DEVICE}
 };
-

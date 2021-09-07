@@ -34,5 +34,4 @@ static inline int irq_to_gpio(int irq)
 	return irq - IRQ_KIRKWOOD_GPIO_START;
 }
 
-
 #endif

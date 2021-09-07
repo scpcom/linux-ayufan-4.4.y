@@ -57,7 +57,6 @@ unsigned long long sched_clock(void)
 	return (v * oscr2ns_scale) >> OSCR2NS_SCALE_FACTOR;
 }
 
-
 #define MIN_OSCR_DELTA 16
 
 static irqreturn_t

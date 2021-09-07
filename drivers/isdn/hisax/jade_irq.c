@@ -23,7 +23,6 @@ waitforCEC(struct IsdnCardState *cs, int jade, int reg)
   		printk(KERN_WARNING "HiSax: waitforCEC (jade) timeout\n");
 }
 
-
 static inline void
 waitforXFW(struct IsdnCardState *cs, int jade)
 {
@@ -36,8 +35,6 @@ WriteJADECMDR(struct IsdnCardState *cs, int jade, int reg, u_char data)
 	waitforCEC(cs, jade, reg);
 	WRITEJADE(cs, jade, reg, data);
 }
-
-
 
 static void
 jade_empty_fifo(struct BCState *bcs, int count)
@@ -108,7 +105,6 @@ jade_fill_fifo(struct BCState *bcs)
 		debugl1(cs, bcs->blog);
 	}
 }
-
 
 static void
 jade_interrupt(struct IsdnCardState *cs, u_char val, u_char jade)

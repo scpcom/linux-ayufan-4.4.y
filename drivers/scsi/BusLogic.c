@@ -70,7 +70,6 @@ static struct scsi_host_template Bus_Logic_template;
 
 static int BusLogic_DriverOptionsCount;
 
-
 /*
   BusLogic_DriverOptions is an array of Driver Options structures representing
   BusLogic Driver Options specifications provided via the Linux Kernel Command
@@ -78,7 +77,6 @@ static int BusLogic_DriverOptionsCount;
 */
 
 static struct BusLogic_DriverOptions BusLogic_DriverOptions[BusLogic_MaxHostAdapters];
-
 
 /*
   BusLogic can be assigned a string by insmod.
@@ -90,14 +88,12 @@ static char *BusLogic;
 module_param(BusLogic, charp, 0);
 #endif
 
-
 /*
   BusLogic_ProbeOptions is a set of Probe Options to be applied across
   all BusLogic Host Adapters.
 */
 
 static struct BusLogic_ProbeOptions BusLogic_ProbeOptions;
-
 
 /*
   BusLogic_GlobalOptions is a set of Global Options to be applied across
@@ -114,7 +110,6 @@ static LIST_HEAD(BusLogic_host_list);
 
 static int BusLogic_ProbeInfoCount;
 
-
 /*
   BusLogic_ProbeInfoList is the list of I/O Addresses and Bus Probe Information
   to be checked for potential BusLogic Host Adapters.  It is initialized by
@@ -123,7 +118,6 @@ static int BusLogic_ProbeInfoCount;
 */
 
 static struct BusLogic_ProbeInfo *BusLogic_ProbeInfoList;
-
 
 /*
   BusLogic_CommandFailureReason holds a string identifying the reason why a
@@ -143,7 +137,6 @@ static void BusLogic_AnnounceDriver(struct BusLogic_HostAdapter *HostAdapter)
 	BusLogic_Announce("***** BusLogic SCSI Driver Version " BusLogic_DriverVersion " of " BusLogic_DriverDate " *****\n", HostAdapter);
 	BusLogic_Announce("Copyright 1995-1998 by Leonard N. Zubkoff " "<lnz@dandelion.com>\n", HostAdapter);
 }
-
 
 /*
   BusLogic_DriverInfo returns the Host Adapter Name to identify this SCSI
@@ -187,7 +180,6 @@ static void BusLogic_InitializeCCBs(struct BusLogic_HostAdapter *HostAdapter, vo
 	}
 }
 
-
 /*
   BusLogic_CreateInitialCCBs allocates the initial CCBs for Host Adapter.
 */
@@ -207,7 +199,6 @@ static bool __init BusLogic_CreateInitialCCBs(struct BusLogic_HostAdapter *HostA
 	}
 	return true;
 }
-
 
 /*
   BusLogic_DestroyCCBs deallocates the CCBs for Host Adapter.
@@ -229,7 +220,6 @@ static void BusLogic_DestroyCCBs(struct BusLogic_HostAdapter *HostAdapter)
 	if (Last_CCB)
 		pci_free_consistent(HostAdapter->PCI_Device, Last_CCB->AllocationGroupSize, Last_CCB, Last_CCB->AllocationGroupHead);
 }
-
 
 /*
   BusLogic_CreateAdditionalCCBs allocates Additional CCBs for Host Adapter.  If
@@ -294,7 +284,6 @@ static struct BusLogic_CCB *BusLogic_AllocateCCB(struct BusLogic_HostAdapter
 	return CCB;
 }
 
-
 /*
   BusLogic_DeallocateCCB deallocates a CCB, returning it to the Host Adapter's
   free list.  The Host Adapter's Lock should already have been acquired by the
@@ -314,7 +303,6 @@ static void BusLogic_DeallocateCCB(struct BusLogic_CCB *CCB)
 	CCB->Next = HostAdapter->Free_CCBs;
 	HostAdapter->Free_CCBs = CCB;
 }
-
 
 /*
   BusLogic_Command sends the command OperationCode to HostAdapter, optionally
@@ -533,7 +521,6 @@ static int BusLogic_Command(struct BusLogic_HostAdapter *HostAdapter, enum BusLo
 	return Result;
 }
 
-
 /*
   BusLogic_AppendProbeAddressISA appends a single ISA I/O Address to the list
   of I/O Address and Bus Probe Information to be checked for potential BusLogic
@@ -551,7 +538,6 @@ static void __init BusLogic_AppendProbeAddressISA(unsigned long IO_Address)
 	ProbeInfo->IO_Address = IO_Address;
 	ProbeInfo->PCI_Device = NULL;
 }
-
 
 /*
   BusLogic_InitializeProbeInfoListISA initializes the list of I/O Address and
@@ -585,9 +571,7 @@ static void __init BusLogic_InitializeProbeInfoListISA(struct BusLogic_HostAdapt
 		BusLogic_AppendProbeAddressISA(0x134);
 }
 
-
 #ifdef CONFIG_PCI
-
 
 /*
   BusLogic_SortProbeInfo sorts a section of BusLogic_ProbeInfoList in order
@@ -613,7 +597,6 @@ static void __init BusLogic_SortProbeInfo(struct BusLogic_ProbeInfo *ProbeInfoLi
 		}
 	}
 }
-
 
 /*
   BusLogic_InitializeMultiMasterProbeInfo initializes the list of I/O Address
@@ -860,7 +843,6 @@ static int __init BusLogic_InitializeMultiMasterProbeInfo(struct BusLogic_HostAd
 	return PCIMultiMasterCount;
 }
 
-
 /*
   BusLogic_InitializeFlashPointProbeInfo initializes the list of I/O Address
   and Bus Probe Information to be checked for potential BusLogic FlashPoint
@@ -944,7 +926,6 @@ static int __init BusLogic_InitializeFlashPointProbeInfo(struct BusLogic_HostAda
 	return FlashPointCount;
 }
 
-
 /*
   BusLogic_InitializeProbeInfoList initializes the list of I/O Address and Bus
   Probe Information to be checked for potential BusLogic SCSI Host Adapters by
@@ -1005,12 +986,10 @@ static void __init BusLogic_InitializeProbeInfoList(struct BusLogic_HostAdapter
 		BusLogic_InitializeProbeInfoListISA(PrototypeHostAdapter);
 }
 
-
 #else
 #define BusLogic_InitializeProbeInfoList(adapter) \
 		BusLogic_InitializeProbeInfoListISA(adapter)
 #endif				/* CONFIG_PCI */
-
 
 /*
   BusLogic_Failure prints a standardized error message, and then returns false.
@@ -1029,7 +1008,6 @@ static bool BusLogic_Failure(struct BusLogic_HostAdapter *HostAdapter, char *Err
 		BusLogic_Error("ADDITIONAL FAILURE INFO - %s\n", HostAdapter, BusLogic_CommandFailureReason);
 	return false;
 }
-
 
 /*
   BusLogic_ProbeHostAdapter probes for a BusLogic Host Adapter.
@@ -1096,7 +1074,6 @@ static bool __init BusLogic_ProbeHostAdapter(struct BusLogic_HostAdapter *HostAd
 	 */
 	return true;
 }
-
 
 /*
   BusLogic_HardwareResetHostAdapter issues a Hardware Reset to the Host Adapter
@@ -1204,7 +1181,6 @@ static bool BusLogic_HardwareResetHostAdapter(struct BusLogic_HostAdapter
 	return true;
 }
 
-
 /*
   BusLogic_CheckHostAdapter checks to be sure this really is a BusLogic
   Host Adapter.
@@ -1237,7 +1213,6 @@ static bool __init BusLogic_CheckHostAdapter(struct BusLogic_HostAdapter *HostAd
 		BusLogic_Notice("BusLogic_Check(0x%X): MultiMaster %s\n", HostAdapter, HostAdapter->IO_Address, (Result ? "Found" : "Not Found"));
 	return Result;
 }
-
 
 /*
   BusLogic_ReadHostAdapterConfiguration reads the Configuration Information
@@ -1685,7 +1660,6 @@ static bool __init BusLogic_ReadHostAdapterConfiguration(struct BusLogic_HostAda
 	return true;
 }
 
-
 /*
   BusLogic_ReportHostAdapterConfiguration reports the configuration of
   Host Adapter.
@@ -1834,7 +1808,6 @@ static bool __init BusLogic_ReportHostAdapterConfiguration(struct BusLogic_HostA
 	return true;
 }
 
-
 /*
   BusLogic_AcquireResources acquires the system resources necessary to use
   Host Adapter.
@@ -1872,7 +1845,6 @@ static bool __init BusLogic_AcquireResources(struct BusLogic_HostAdapter *HostAd
 	return true;
 }
 
-
 /*
   BusLogic_ReleaseResources releases any system resources previously acquired
   by BusLogic_AcquireResources.
@@ -1900,7 +1872,6 @@ static void BusLogic_ReleaseResources(struct BusLogic_HostAdapter *HostAdapter)
 	HostAdapter->MailboxSpaceHandle = 0;
 	HostAdapter->MailboxSize = 0;
 }
-
 
 /*
   BusLogic_InitializeHostAdapter initializes Host Adapter.  This is the only
@@ -2000,7 +1971,6 @@ static bool BusLogic_InitializeHostAdapter(struct BusLogic_HostAdapter
 	 */
 	return true;
 }
-
 
 /*
   BusLogic_TargetDeviceInquiry inquires about the Target Devices accessible
@@ -2364,7 +2334,6 @@ static int __init BusLogic_init(void)
 	return ret;
 }
 
-
 /*
   BusLogic_ReleaseHostAdapter releases all resources previously acquired to
   support a specific Host Adapter, including the I/O Address range, and
@@ -2402,7 +2371,6 @@ static int __exit BusLogic_ReleaseHostAdapter(struct BusLogic_HostAdapter *HostA
 	return 0;
 }
 
-
 /*
   BusLogic_QueueCompletedCCB queues CCB for completion processing.
 */
@@ -2421,7 +2389,6 @@ static void BusLogic_QueueCompletedCCB(struct BusLogic_CCB *CCB)
 	}
 	HostAdapter->ActiveCommands[CCB->TargetID]--;
 }
-
 
 /*
   BusLogic_ComputeResultCode computes a SCSI Subsystem Result Code from
@@ -2473,7 +2440,6 @@ static int BusLogic_ComputeResultCode(struct BusLogic_HostAdapter *HostAdapter, 
 	}
 	return (HostStatus << 16) | TargetDeviceStatus;
 }
-
 
 /*
   BusLogic_ScanIncomingMailboxes scans the Incoming Mailboxes saving any
@@ -2528,7 +2494,6 @@ static void BusLogic_ScanIncomingMailboxes(struct BusLogic_HostAdapter *HostAdap
 	}
 	HostAdapter->NextIncomingMailbox = NextIncomingMailbox;
 }
-
 
 /*
   BusLogic_ProcessCompletedCCBs iterates over the completed CCBs for Host
@@ -2662,7 +2627,6 @@ static void BusLogic_ProcessCompletedCCBs(struct BusLogic_HostAdapter *HostAdapt
 	HostAdapter->ProcessCompletedCCBsActive = false;
 }
 
-
 /*
   BusLogic_InterruptHandler handles hardware interrupts from BusLogic Host
   Adapters.
@@ -2746,7 +2710,6 @@ static irqreturn_t BusLogic_InterruptHandler(int IRQ_Channel, void *DeviceIdenti
 	spin_unlock_irqrestore(HostAdapter->SCSI_Host->host_lock, ProcessorFlags);
 	return IRQ_HANDLED;
 }
-
 
 /*
   BusLogic_WriteOutgoingMailbox places CCB and Action Code into an Outgoing
@@ -2993,7 +2956,6 @@ static int BusLogic_QueueCommand(struct scsi_cmnd *Command, void (*CompletionRou
 	return 0;
 }
 
-
 #if 0
 /*
   BusLogic_AbortCommand aborts Command if possible.
@@ -3195,7 +3157,6 @@ static int BusLogic_BIOSDiskParameters(struct scsi_device *sdev, struct block_de
 	return 0;
 }
 
-
 /*
   BugLogic_ProcDirectoryInfo implements /proc/scsi/BusLogic/<N>.
 */
@@ -3314,7 +3275,6 @@ Target	Requested Completed  Requested Completed  Requested Completed\n\
 	return Length;
 }
 
-
 /*
   BusLogic_Message prints Driver Messages.
 */
@@ -3354,7 +3314,6 @@ static void BusLogic_Message(enum BusLogic_MessageLevel MessageLevel, char *Form
 	BeginningOfLine = (Buffer[Length - 1] == '\n');
 }
 
-
 /*
   BusLogic_ParseKeyword parses an individual option keyword.  It returns true
   and updates the pointer if the keyword is recognized and false otherwise.
@@ -3376,7 +3335,6 @@ static bool __init BusLogic_ParseKeyword(char **StringPointer, char *Keyword)
 	*StringPointer = Pointer;
 	return true;
 }
-
 
 /*
   BusLogic_ParseDriverOptions handles processing of BusLogic Driver Options

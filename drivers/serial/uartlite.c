@@ -66,7 +66,6 @@ MODULE_DEVICE_TABLE(of, ulite_of_match);
 #define ULITE_CONTROL_RST_RX	0x02
 #define ULITE_CONTROL_IE	0x10
 
-
 static struct uart_port ulite_ports[ULITE_NR_UARTS];
 
 /* ---------------------------------------------------------------------
@@ -98,7 +97,6 @@ static int ulite_receive(struct uart_port *port, int stat)
 	if (stat & ULITE_STATUS_FRAME)
 		port->icount.frame++;
 
-
 	/* drop byte with parity error if IGNPAR specificed */
 	if (stat & port->ignore_status_mask & ULITE_STATUS_PARITY)
 		stat &= ~ULITE_STATUS_RXVALID;
@@ -107,7 +105,6 @@ static int ulite_receive(struct uart_port *port, int stat)
 
 	if (stat & ULITE_STATUS_PARITY)
 		flag = TTY_PARITY;
-
 
 	stat &= ~port->ignore_status_mask;
 

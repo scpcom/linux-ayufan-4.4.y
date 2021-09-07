@@ -44,7 +44,6 @@ static void internal_container_klist_put(struct klist_node *n)
 	put_device(&ic->classdev);
 }
 
-
 /**
  * attribute_container_classdev_to_container - given a classdev, return the container
  *
@@ -187,7 +186,6 @@ attribute_container_add_device(struct device *dev,
 			({ klist_iter_exit(iter) ; NULL; }); \
 	}) ) != NULL; )
 			
-
 /**
  * attribute_container_remove_device - make device eligible for removal.
  *

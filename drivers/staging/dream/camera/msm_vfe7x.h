@@ -251,5 +251,4 @@ struct stop_event {
   int timeout;
 };
 
-
 #endif /* __MSM_VFE7X_H__ */

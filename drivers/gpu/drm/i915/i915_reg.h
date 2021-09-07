@@ -317,7 +317,6 @@
 #define   CM0_RC_OP_FLUSH_DISABLE (1<<0)
 #define GFX_FLSH_CNTL	0x02170 /* 915+ only */
 
-
 /*
  * Framebuffer compression (915+ only)
  */
@@ -1955,7 +1954,6 @@
 #define PIPEB_FRMCOUNT_GM45	0x71040
 #define PIPEB_FLIPCOUNT_GM45	0x71044
 
-
 /* Display B control */
 #define DSPBCNTR		0x71180
 #define   DISPPLANE_ALPHA_TRANS_ENABLE		(1<<15)
@@ -2005,7 +2003,6 @@
 #define  FDI_PLL_FREQ_CHANGE_REQUEST    (1<<24)
 #define  FDI_PLL_FREQ_LOCK_LIMIT_MASK   0xfff00
 #define  FDI_PLL_FREQ_DISABLE_COUNT_LIMIT_MASK  0xff
-
 
 #define PIPEA_DATA_M1           0x60030
 #define  TU_SIZE(x)             (((x)-1) << 25) /* default size 64 */

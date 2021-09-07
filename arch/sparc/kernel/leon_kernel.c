@@ -147,9 +147,6 @@ void leon_load_profile_irq(int cpu, unsigned int limit)
 	BUG();
 }
 
-
-
-
 void __init leon_trans_init(struct device_node *dp)
 {
 	if (strcmp(dp->type, "cpu") == 0 && strcmp(dp->name, "<NULL>") == 0) {

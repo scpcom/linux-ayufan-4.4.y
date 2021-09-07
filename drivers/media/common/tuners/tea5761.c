@@ -152,7 +152,6 @@ static int set_radio_freq(struct dvb_frontend *fe,
 		buffer[4] |= TEA5761_TNCTRL_PUPD_0;
 	}
 
-
 	if (params->audmode == V4L2_TUNER_MODE_MONO) {
 		tuner_dbg("TEA5761 set to mono\n");
 		buffer[5] |= TEA5761_TNCTRL_MST;
@@ -314,7 +313,6 @@ struct dvb_frontend *tea5761_attach(struct dvb_frontend *fe,
 
 	return fe;
 }
-
 
 EXPORT_SYMBOL_GPL(tea5761_attach);
 EXPORT_SYMBOL_GPL(tea5761_autodetection);

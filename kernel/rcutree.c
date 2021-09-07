@@ -77,7 +77,6 @@ DEFINE_PER_CPU(struct rcu_data, rcu_sched_data);
 struct rcu_state rcu_bh_state = RCU_STATE_INITIALIZER(rcu_bh_state);
 DEFINE_PER_CPU(struct rcu_data, rcu_bh_data);
 
-
 /*
  * Return true if an RCU grace period is in progress.  The ACCESS_ONCE()s
  * permit this function to be invoked without holding the root rcu_node
@@ -699,7 +698,6 @@ rcu_start_gp(struct rcu_state *rsp, unsigned long flags)
 	}
 
 	spin_unlock(&rnp->lock);  /* leave irqs disabled. */
-
 
 	/* Exclude any concurrent CPU-hotplug operations. */
 	spin_lock(&rsp->onofflock);  /* irqs already disabled. */

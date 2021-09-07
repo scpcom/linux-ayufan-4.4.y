@@ -249,7 +249,6 @@ static struct dst_entry *sctp_v6_get_dst(struct sctp_association *asoc,
 	if (ipv6_addr_type(&daddr->v6.sin6_addr) & IPV6_ADDR_LINKLOCAL)
 		fl.oif = daddr->v6.sin6_scope_id;
 
-
 	SCTP_DEBUG_PRINTK("%s: DST=%pI6 ", __func__, &fl.fl6_dst);
 
 	if (saddr) {
@@ -1038,7 +1037,6 @@ void sctp_v6_protosw_exit(void)
 	inet6_unregister_protosw(&sctpv6_stream_protosw);
 	proto_unregister(&sctpv6_prot);
 }
-
 
 /* Register with inet6 layer. */
 int sctp_v6_add_protocol(void)

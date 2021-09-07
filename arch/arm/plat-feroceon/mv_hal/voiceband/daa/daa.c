@@ -133,7 +133,6 @@ static struct MV_DAA_MODE {
 
 };
 
-
 static unsigned char mvDaaDirectRegRead(unsigned int lineId, unsigned char address)
 {
 	unsigned char data;
@@ -299,14 +298,12 @@ MV_STATUS mvDaaInit(unsigned short first, unsigned short last, unsigned short pS
 
 		mvDaaDirectRegWrite(lineId, DAA_RING_VALIDATION_CONTROL_3 , reg24 | DAA_RNGV);
 
-	
 		/* Print DAA info */
 		mvDaaPrintInfo(lineId);
 
 		MV_TRC_REC("ISO-Cap is now up, line side: %02x rev %02x\n", 
 		        	mvDaaDirectRegRead(lineId, 11) >> 4,
 		       		( mvDaaDirectRegRead(lineId, 13) >> 2) & 0xf);
-	
 	
 		/* raise tx gain by 7 dB for NEWZEALAND */
 		if (!strcmp(daaModes[COUNTRY_INDEX].name, "NEWZEALAND")) 
@@ -390,7 +387,6 @@ static int mvDaaIntCheck(unsigned int lineId)
 	/* clear interrupts */
 	mvDaaDirectRegWrite(lineId, DAA_INTERRUPT_SOURCE_REG, (~cause_and_mask));
 
-	
 	if(cause_and_mask)	
 		return 1;
 	else
@@ -525,7 +521,6 @@ void mvDaaEventGet(unsigned char *eventType, unsigned int lineId)
 	return;
 }
 
-
 static void mvDaaDigitalHybridSet(unsigned int index, unsigned int lineId)
 {
 	unsigned char reg16 = 0, reg26 = 0, reg30 = 0, reg31 = 0;
@@ -554,7 +549,6 @@ static void mvDaaDigitalHybridSet(unsigned int index, unsigned int lineId)
 
 }
 
-
 int mvDaaLineVoltageGet(unsigned int lineId)
 {
 	return (int)(mvDaaDirectRegRead(lineId, DAA_LINE_VOLTAGE_STATUS));
@@ -574,4 +568,3 @@ void mvDaaRegsDump(unsigned int lineId)
 	for(i=1; i < NUM_OF_REGS; i++)
 	   MV_TRC_REC("Register %d: 0x%x\n",i, mvDaaDirectRegRead(lineId, i));
 }
-

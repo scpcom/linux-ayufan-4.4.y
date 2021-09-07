@@ -162,7 +162,6 @@ ppp_print_buffer (const char *name, const __u8 *buf, int count)
 	}
 }
 
-
 /*
  * Routines implementing the synchronous PPP line discipline.
  */
@@ -412,7 +411,6 @@ ppp_sync_wakeup(struct tty_struct *tty)
 	tasklet_schedule(&ap->tsk);
 	sp_put(ap);
 }
-
 
 static struct tty_ldisc_ops ppp_sync_ldisc = {
 	.owner	= THIS_MODULE,

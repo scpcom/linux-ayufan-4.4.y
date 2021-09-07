@@ -33,7 +33,6 @@
 #include "pci_impl.h"
 #include "machvec_impl.h"
 
-
 /*
  * Jensen is special: the vector is 0x8X0 for EISA interrupt X, and
  * 0x9X0 for the local motherboard interrupts.

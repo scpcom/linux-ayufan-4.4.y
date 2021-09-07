@@ -101,8 +101,6 @@ MV_VOID mvAudioHalInit(MV_U8 unit)
 
 }
 
-
-
 /* Clocks Control and Status related*/
 /*******************************************************************************
 * mvAudioDCOCtrlSet - Set DCO control register
@@ -188,7 +186,6 @@ MV_VOID mvAudioSpcrCtrlGet(int unit, MV_AUDIO_FREQ_DATA *spcrCtrl)
 	spcrCtrl->offset = (reg & ASDSR_SPCR_CTRLOFFSET_MASK) >>  ASDSR_SPCR_CTRLOFFSET_OFFS;
 }
 
-
 /* Audio PlayBack related*/
 /*******************************************************************************
 * mvAudioPlaybackControlSet - Set Playback general parameters
@@ -252,7 +249,6 @@ MV_STATUS mvAudioPlaybackControlSet(int unit, MV_AUDIO_PLAYBACK_CTRL *ctrl)
 		return MV_FAIL;
 	}
 
-
 	reg = MV_REG_READ(MV_AUDIO_PLAYBACK_CTRL_REG(unit));
 	reg &= ~(APCR_PLAY_BURST_SIZE_MASK|APCR_LOOPBACK_MASK|APCR_PLAY_MONO_MASK |
              APCR_PLAY_SAMPLE_SIZE_MASK);
@@ -315,7 +311,6 @@ MV_STATUS mvAudioPlaybackControlSet(int unit, MV_AUDIO_PLAYBACK_CTRL *ctrl)
 			audioWin.addrWin.size = cpuWin.addrWin.size;
 			audioWin.enable = cpuWin.enable;
 			audioWin.target = target;
-
 
 			if( mvAudioWinSet( MV_AUDIO_PLAYBACK_WIN_NUM, &audioWin ) != MV_OK )
 			{
@@ -502,8 +497,6 @@ MV_VOID mvSPDIFPlaybackCtrlGet(int unit, MV_SPDIF_PLAYBACK_CTRL *ctrl)
 			((MV_REG_READ(MV_AUDIO_SPDIF_PLAY_CTRL_REG(unit))&ASPCR_SPDIF_PB_EN_MEM_VALIDITY_MASK)?
 			 MV_TRUE:MV_FALSE);
 
-
-
 }
 
 /*******************************************************************************
@@ -542,7 +535,6 @@ MV_STATUS mvI2SPlaybackCtrlSet(int unit, MV_I2S_PLAYBACK_CTRL *ctrl)
 	{
 		MV_REG_BIT_RESET(MV_AUDIO_I2S_PLAY_CTRL_REG(unit),AIPCR_I2S_SEND_LAST_FRM_MASK);
 	}
-
 
 	switch (ctrl->justification)
 	{
@@ -651,7 +643,6 @@ MV_STATUS mvAudioRecordControlSet(int unit, MV_AUDIO_RECORD_CTRL *ctrl)
 
 		return MV_FAIL;
 	}
-
 
 	reg = MV_REG_READ(MV_AUDIO_RECORD_CTRL_REG(unit));
 	reg &= ~(ARCR_RECORD_BURST_SIZE_MASK|ARCR_RECORDED_MONO_CHNL_MASK|
@@ -1021,7 +1012,6 @@ MV_VOID	mvI2SRecordCntrlGet(int unit, MV_I2S_RECORD_CTRL *ctrl)
 		 AIRCR_I2S_RECORD_JUSTF_OFFS);
 }
 
-
 /*******************************************************************************
 * audioBurstBytesNumGet - Convert Burst enum to bytes number
 *
@@ -1047,4 +1037,3 @@ static MV_U32 audioBurstBytesNumGet(MV_AUDIO_BURST_SIZE burst)
 		return 0xffffffff;
 	}
 }
-

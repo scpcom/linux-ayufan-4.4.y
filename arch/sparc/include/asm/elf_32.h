@@ -108,7 +108,6 @@ typedef struct {
 
 #define ELF_EXEC_PAGESIZE	4096
 
-
 /* This is the location that an ET_DYN program is loaded if exec'ed.  Typical
    use of this is to invoke "./ld.so someprog" to test out a new version of
    the loader.  We need to make sure that it is out of the way of the program

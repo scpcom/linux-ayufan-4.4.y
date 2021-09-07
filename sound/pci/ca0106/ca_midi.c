@@ -69,7 +69,6 @@ static void ca_midi_interrupt(struct snd_ca_midi *midi, unsigned int status)
 			if(midi->substream_input)
 				snd_rawmidi_receive(midi->substream_input, &byte, 1);
 
-
 		}
 	}
 	spin_unlock(&midi->input_lock);
@@ -313,4 +312,3 @@ int __devinit ca_midi_init(void *dev_id, struct snd_ca_midi *midi, int device, c
 	midi->rmidi = rmidi;
 	return 0;
 }
-

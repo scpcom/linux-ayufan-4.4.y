@@ -78,7 +78,6 @@ struct spu_buffer {
 	unsigned int head, tail;
 };
 
-
 /* The three functions below are for maintaining and accessing
  * the vma-to-fileoffset map.
  */

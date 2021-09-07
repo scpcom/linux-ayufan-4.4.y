@@ -202,4 +202,3 @@ MODULE_VERSION("v2.0");
 
 module_init (i2c_oxnas_bitbash_init);
 module_exit (i2c_oxnas_bitbash_exit);
-

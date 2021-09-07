@@ -126,7 +126,6 @@ static void dump_mb(struct cx18 *cx, struct cx18_mailbox *mb, char *name)
 		       u32arr2hex(mb->args, MAX_MB_ARGUMENTS, argstr));
 }
 
-
 /*
  * Functions that run in a work_queue work handling context
  */
@@ -267,7 +266,6 @@ void cx18_in_work_handler(struct work_struct *work)
 	epu_cmd(cx, order);
 	free_in_work_order(cx, order);
 }
-
 
 /*
  * Functions that run in an interrupt handling context
@@ -465,7 +463,6 @@ void cx18_api_epu_cmd_irq(struct cx18 *cx, int rpu)
 		queue_work(cx->in_work_queue, &order->work);
 	}
 }
-
 
 /*
  * Functions called from a non-interrupt, non work_queue context

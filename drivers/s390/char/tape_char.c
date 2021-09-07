@@ -295,7 +295,6 @@ tapechar_open (struct inode *inode, struct file *filp)
 		goto out;
 	}
 
-
 	rc = tape_open(device);
 	if (rc == 0) {
 		filp->private_data = device;

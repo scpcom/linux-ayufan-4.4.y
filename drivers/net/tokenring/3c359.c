@@ -144,7 +144,6 @@ static void xl_asb_bh(struct net_device *dev) ;
 static void xl_reset(struct net_device *dev) ;  
 static void xl_freemem(struct net_device *dev) ;  
 
-
 /* EEProm Access Functions */
 static u16  xl_ee_read(struct net_device *dev, int ee_addr) ; 
 static void  xl_ee_write(struct net_device *dev, int ee_addr, u16 ee_value) ; 
@@ -403,7 +402,6 @@ static int __devinit xl_init(struct net_device *dev)
 	return err;
 }
 
-
 /* 
  *	Hardware reset.  This needs to be a separate entity as we need to reset the card
  *	when we change the EEProm settings.
@@ -535,7 +533,6 @@ static int xl_hw_reset(struct net_device *dev)
 		result_16 = result_16 & ~PMB_CPHOLD ; 
 		writel( (IO_WORD_WRITE | PMBAR), xl_mmio + MMIO_MAC_ACCESS_CMD) ; 
 		writew(result_16,xl_mmio + MMIO_MACDATA) ; 
-
 
 	} /* If microcode upload required */
 
@@ -1260,7 +1257,6 @@ static void xl_dn_comp(struct net_device *dev)
 	u8 __iomem * xl_mmio = xl_priv->xl_mmio ; 
 	struct xl_tx_desc *txd ; 
 
-
 	if (xl_priv->tx_ring_tail == 255) {/* First time */
 		xl_priv->xl_tx_ring[0].framestartheader = 0 ; 
 		xl_priv->xl_tx_ring[0].dnnextptr = 0 ;  
@@ -1422,7 +1418,6 @@ static void xl_set_rx_mode(struct net_device *dev)
 	}
 	return ; 
 }
-
 
 /*
  *	We issued an srb command and now we must read
@@ -1641,7 +1636,6 @@ static void xl_arb_cmd(struct net_device *dev)
 	return ; 
 }
 
-
 /*
  *	There is only one asb command, but we can get called from different
  *	places.
@@ -1743,7 +1737,6 @@ static void xl_srb_cmd(struct net_device *dev, int srb_cmd)
 		break ;  
 	} /* switch */
 
-
 	xl_wait_misr_flags(dev)  ; 
 
 	/* Write 0xff to the CSRB flag */
@@ -1834,7 +1827,6 @@ static int __init xl_pci_init (void)
 {
 	return pci_register_driver(&xl_3c359_driver);
 }
-
 
 static void __exit xl_pci_cleanup (void)
 {

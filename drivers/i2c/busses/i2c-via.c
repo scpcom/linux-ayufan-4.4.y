@@ -71,7 +71,6 @@ static int bit_via_getsda(void *data)
 	return (0 != (inb(I2C_IN) & I2C_SDA));
 }
 
-
 static struct i2c_algo_bit_data bit_data = {
 	.setsda		= bit_via_setsda,
 	.setscl		= bit_via_setscl,
@@ -87,7 +86,6 @@ static struct i2c_adapter vt586b_adapter = {
 	.name		= "VIA i2c",
 	.algo_data	= &bit_data,
 };
-
 
 static struct pci_device_id vt586b_ids[] __devinitdata = {
 	{ PCI_DEVICE(PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_82C586_3) },
@@ -153,7 +151,6 @@ static void __devexit vt586b_remove(struct pci_dev *dev)
 	pm_io_base = 0;
 }
 
-
 static struct pci_driver vt586b_driver = {
 	.name		= "vt586b_smbus",
 	.id_table	= vt586b_ids,
@@ -170,7 +167,6 @@ static void __exit i2c_vt586b_exit(void)
 {
 	pci_unregister_driver(&vt586b_driver);
 }
-
 
 MODULE_AUTHOR("Kyösti Mälkki <kmalkki@cc.hut.fi>");
 MODULE_DESCRIPTION("i2c for Via vt82c586b southbridge");

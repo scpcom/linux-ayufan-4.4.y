@@ -57,7 +57,6 @@
 
 #undef FBB_SUPPORT	/* Fast Back-Back xfers - NOT READY YET */
 
-
 #ifdef DEBUG_LBA
 #define DBG(x...)	printk(x)
 #else
@@ -81,7 +80,6 @@
 #else
 #define DBG_PAT(x...)
 #endif
-
 
 /*
 ** Config accessor functions only pass in the 8-bit bus number and not
@@ -110,10 +108,8 @@ static u32 lba_t32;
 
 #define LBA_SKIP_PROBE(d) ((d)->flags & LBA_FLAG_SKIP_PROBE)
 
-
 /* Looks nice and keeps the compiler happy */
 #define LBA_DEV(d) ((struct lba_device *) (d))
-
 
 /*
 ** Only allow 8 subsidiary busses per LBA
@@ -142,12 +138,10 @@ static u32 lba_t32;
 #define WRITE_REG16(value, addr) writew(value, addr)
 #define WRITE_REG32(value, addr) writel(value, addr)
 
-
 #define LBA_CFG_TOK(bus,dfn) ((u32) ((bus)<<16 | (dfn)<<8))
 #define LBA_CFG_BUS(tok)  ((u8) ((tok)>>16))
 #define LBA_CFG_DEV(tok)  ((u8) ((tok)>>11) & 0x1f)
 #define LBA_CFG_FUNC(tok) ((u8) ((tok)>>8 ) & 0x7)
-
 
 /*
 ** Extract LBA (Rope) number from HPA
@@ -155,7 +149,6 @@ static u32 lba_t32;
 */
 #define ROPES_PER_IOC	8
 #define LBA_NUM(x)    ((((unsigned long) x) >> 13) & (ROPES_PER_IOC-1))
-
 
 static void
 lba_dump_res(struct resource *r, int d)
@@ -172,7 +165,6 @@ lba_dump_res(struct resource *r, int d)
 	lba_dump_res(r->child, d+2);
 	lba_dump_res(r->sibling, d);
 }
-
 
 /*
 ** LBA rev 2.0, 2.1, 2.2, and 3.0 bus walks require a complex
@@ -202,8 +194,6 @@ static int lba_device_present(u8 bus, u8 dfn, struct lba_device *d)
 	return 1;
 }
 
-
-
 #define LBA_CFG_SETUP(d, tok) {				\
     /* Save contents of error config register.  */			\
     error_config = READ_REG32(d->hba.base_addr + LBA_ERROR_CONFIG);		\
@@ -230,7 +220,6 @@ static int lba_device_present(u8 bus, u8 dfn, struct lba_device *d)
     WRITE_REG32(error_config | LBA_SMART_MODE, d->hba.base_addr + LBA_ERROR_CONFIG);	\
 }
 
-
 #define LBA_CFG_PROBE(d, tok) {				\
     /*									\
      * Setup Vendor ID write and read back the address register		\
@@ -253,7 +242,6 @@ static int lba_device_present(u8 bus, u8 dfn, struct lba_device *d)
      */									\
     lba_t32 = READ_REG32((d)->hba.base_addr + LBA_PCI_CFG_ADDR);	\
 }
-
 
 /*
  * HPREVISIT:
@@ -317,7 +305,6 @@ static int lba_device_present(u8 bus, u8 dfn, struct lba_device *d)
     lba_t32 = READ_REG32((d)->hba.base_addr + LBA_PCI_CFG_ADDR);	\
 }
 
-
 #define LBA_CFG_RESTORE(d, base) {					\
     /*									\
      * Restore status control register (turn off clear enable).		\
@@ -332,8 +319,6 @@ static int lba_device_present(u8 bus, u8 dfn, struct lba_device *d)
 	 */								\
 	WRITE_REG32(arb_mask, base + LBA_ARB_MASK);			\
 }
-
-
 
 static unsigned int
 lba_rd_cfg(struct lba_device *d, u32 tok, u8 reg, u32 size)
@@ -360,7 +345,6 @@ lba_rd_cfg(struct lba_device *d, u32 tok, u8 reg, u32 size)
 	LBA_CFG_RESTORE(d, d->hba.base_addr);
 	return(data);
 }
-
 
 static int elroy_cfg_read(struct pci_bus *bus, unsigned int devfn, int pos, int size, u32 *data)
 {
@@ -402,7 +386,6 @@ static int elroy_cfg_read(struct pci_bus *bus, unsigned int devfn, int pos, int 
 	return 0;
 }
 
-
 static void
 lba_wr_cfg(struct lba_device *d, u32 tok, u8 reg, u32 data, u32 size)
 {
@@ -422,7 +405,6 @@ lba_wr_cfg(struct lba_device *d, u32 tok, u8 reg, u32 data, u32 size)
 	LBA_CFG_MASTER_ABORT_CHECK(d, d->hba.base_addr, tok, error);
 	LBA_CFG_RESTORE(d, d->hba.base_addr);
 }
-
 
 /*
  * LBA 4.0 config write code implements non-postable semantics
@@ -466,7 +448,6 @@ static int elroy_cfg_write(struct pci_bus *bus, unsigned int devfn, int pos, int
 	lba_t32 = READ_REG32(d->hba.base_addr + LBA_PCI_CFG_ADDR);
 	return 0;
 }
-
 
 static struct pci_ops elroy_cfg_ops = {
 	.read =		elroy_cfg_read,
@@ -546,13 +527,11 @@ static struct pci_ops mercury_cfg_ops = {
 	.write =	mercury_cfg_write,
 };
 
-
 static void
 lba_bios_init(void)
 {
 	DBG(MODULE_NAME ": lba_bios_init\n");
 }
-
 
 #ifdef CONFIG_64BIT
 
@@ -689,7 +668,6 @@ lba_fixup_bus(struct pci_bus *bus)
 				bus->resource[i++] = &(ldev->hba.elmmio_space);
 		}
 
-
 		/*   Overlaps with elmmio can (and should) fail here.
 		 *   We will prune (or ignore) the distributed range.
 		 *
@@ -823,14 +801,10 @@ lba_fixup_bus(struct pci_bus *bus)
 #endif
 }
 
-
 static struct pci_bios_ops lba_bios_ops = {
 	.init =		lba_bios_init,
 	.fixup_bus =	lba_fixup_bus,
 };
-
-
-
 
 /*******************************************************
 **
@@ -858,8 +832,6 @@ static u##size lba_astro_in##size (struct pci_hba_data *d, u16 addr) \
 LBA_PORT_IN( 8, 3)
 LBA_PORT_IN(16, 2)
 LBA_PORT_IN(32, 0)
-
-
 
 /*
 ** BUG X4107:  Ordering broken - DMA RD return can bypass PIO WR
@@ -900,7 +872,6 @@ LBA_PORT_OUT( 8, 3)
 LBA_PORT_OUT(16, 2)
 LBA_PORT_OUT(32, 0)
 
-
 static struct pci_port_ops lba_astro_port_ops = {
 	.inb =	lba_astro_in8,
 	.inw =	lba_astro_in16,
@@ -909,7 +880,6 @@ static struct pci_port_ops lba_astro_port_ops = {
 	.outw =	lba_astro_out16,
 	.outl =	lba_astro_out32
 };
-
 
 #ifdef CONFIG_64BIT
 #define PIOP_TO_GMMIO(lba, addr) \
@@ -942,7 +912,6 @@ LBA_PORT_IN( 8, 3)
 LBA_PORT_IN(16, 2)
 LBA_PORT_IN(32, 0)
 
-
 #undef LBA_PORT_OUT
 #define LBA_PORT_OUT(size, mask) \
 static void lba_pat_out##size (struct pci_hba_data *l, u16 addr, u##size val) \
@@ -958,7 +927,6 @@ LBA_PORT_OUT( 8, 3)
 LBA_PORT_OUT(16, 2)
 LBA_PORT_OUT(32, 0)
 
-
 static struct pci_port_ops lba_pat_port_ops = {
 	.inb =	lba_pat_in8,
 	.inw =	lba_pat_in16,
@@ -967,8 +935,6 @@ static struct pci_port_ops lba_pat_port_ops = {
 	.outw =	lba_pat_out16,
 	.outl =	lba_pat_out32
 };
-
-
 
 /*
 ** make range information from PDC available to PCI subsystem.
@@ -1116,10 +1082,8 @@ lba_pat_resources(struct parisc_device *pa_dev, struct lba_device *lba_dev)
 #define lba_pat_resources(pa_dev, lba_dev)
 #endif	/* CONFIG_64BIT */
 
-
 extern void sba_distributed_lmmio(struct parisc_device *, struct resource *);
 extern void sba_directed_lmmio(struct parisc_device *, struct resource *);
-
 
 static void
 lba_legacy_resources(struct parisc_device *pa_dev, struct lba_device *lba_dev)
@@ -1289,7 +1253,6 @@ lba_legacy_resources(struct parisc_device *pa_dev, struct lba_device *lba_dev)
 	r->start |= lba_num;
 	r->end   |= lba_num;
 }
-
 
 /**************************************************************************
 **
@@ -1479,7 +1442,6 @@ lba_driver_probe(struct parisc_device *dev)
 		return(1);
 	}
 
-
 	/* ---------- First : initialize data we already have --------- */
 
 	lba_dev->hw_rev = func_class;
@@ -1602,4 +1564,3 @@ void lba_set_iregs(struct parisc_device *lba, u32 ibase, u32 imask)
 	WRITE_REG32( ibase, base_addr + LBA_IBASE);
 	iounmap(base_addr);
 }
-

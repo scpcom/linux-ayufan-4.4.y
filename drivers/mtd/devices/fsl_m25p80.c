@@ -137,7 +137,6 @@ static int read_sr(struct m25p *flash)
 	return val;
 }
 
-
 /*
  * Set write enable latch with Write Enable command.
  * Returns negative if error occurred.
@@ -148,7 +147,6 @@ static inline int write_enable(struct m25p *flash)
 
 	return spi_write_then_read(flash->spi, &code, 1, NULL, 0);
 }
-
 
 /*
  * Service routine to read status register until ready, or timeout occurs.
@@ -372,7 +370,6 @@ static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 				CMD_SIZE - FAST_READ_DUMMY_BYTE;
 	}
 
-
 	mutex_unlock(&flash->lock);
 
 	kfree(local_buf);
@@ -495,7 +492,6 @@ static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 	return 0;
 }
 
-
 /****************************************************************************/
 
 /*
@@ -522,7 +518,6 @@ struct flash_info {
 	u16		flags;
 #define	SECT_4K		0x01		/* OPCODE_BE_4K works uniformly */
 };
-
 
 /* NOTE: double check command sets and memory organization when you add
  * more flash chips.  This current list focusses on newer chips, which
@@ -816,7 +811,6 @@ static int __devinit m25p_probe(struct spi_device *spi)
 				flash->mtd.eraseregions[i].erasesize / 1024,
 				flash->mtd.eraseregions[i].numblocks);
 
-
 	/* partitions should match sector boundaries; and it may be good to
 	 * use readonly partitions for writeprotected sectors (BP2..BP0).
 	 */
@@ -856,7 +850,6 @@ static int __devinit m25p_probe(struct spi_device *spi)
 	return add_mtd_device(&flash->mtd) == 1 ? -ENODEV : 0;
 }
 
-
 static int __devexit m25p_remove(struct spi_device *spi)
 {
 	struct m25p	*flash = dev_get_drvdata(&spi->dev);
@@ -871,7 +864,6 @@ static int __devexit m25p_remove(struct spi_device *spi)
 		kfree(flash);
 	return 0;
 }
-
 
 static struct spi_driver m25p80_driver = {
 	.driver = {
@@ -888,18 +880,15 @@ static struct spi_driver m25p80_driver = {
 	 */
 };
 
-
 static int m25p80_init(void)
 {
 	return spi_register_driver(&m25p80_driver);
 }
 
-
 static void m25p80_exit(void)
 {
 	spi_unregister_driver(&m25p80_driver);
 }
-
 
 module_init(m25p80_init);
 module_exit(m25p80_exit);

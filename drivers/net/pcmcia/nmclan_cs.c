@@ -114,7 +114,6 @@ Log: nmclan_cs.c,v
 #define DRV_NAME	"nmclan_cs"
 #define DRV_VERSION	"0.16"
 
-
 /* ----------------------------------------------------------------------------
 Conditional Compilation Options
 ---------------------------------------------------------------------------- */
@@ -433,7 +432,6 @@ static int mace_rx(struct net_device *dev, unsigned char RxCnt);
 static void restore_multicast_list(struct net_device *dev);
 static void set_multicast_list(struct net_device *dev);
 static const struct ethtool_ops netdev_ethtool_ops;
-
 
 static void nmclan_detach(struct pcmcia_device *p_dev);
 
@@ -769,7 +767,6 @@ static int nmclan_resume(struct pcmcia_device *link)
 
 	return 0;
 }
-
 
 /* ----------------------------------------------------------------------------
 nmclan_reset

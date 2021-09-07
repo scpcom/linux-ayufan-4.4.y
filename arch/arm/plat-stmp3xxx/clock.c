@@ -301,7 +301,6 @@ out:
 	return ret;
 }
 
-
 static int cpu_set_rate(struct clk *clk, u32 rate)
 {
 	u32 reg_val;
@@ -599,7 +598,6 @@ static long xbus_get_rate(struct clk *clk)
 
 	return rate;
 }
-
 
 /* Clock ops */
 

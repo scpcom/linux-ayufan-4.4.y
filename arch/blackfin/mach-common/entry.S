@@ -88,7 +88,6 @@ ENDPROC(_ex_workaround_261)
 #define _ex_dmult _ex_trap_c
 #endif
 
-
 ENTRY(_ex_dcplb_viol)
 ENTRY(_ex_dcplb_miss)
 ENTRY(_ex_icplb_miss)

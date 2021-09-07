@@ -51,7 +51,6 @@ enum eth1394_bc_states { ETHER1394_BC_ERROR,
 			 ETHER1394_BC_RUNNING,
 			 ETHER1394_BC_STOPPED };
 
-
 /* Private structure for our ethernet driver */
 struct eth1394_priv {
 	struct hpsb_host *host;		/* The card for this dev	 */
@@ -70,7 +69,6 @@ struct eth1394_priv {
 	struct net_device *wake_dev;	/* Stupid backlink for .wake	 */
 	nodeid_t wake_node;		/* Destination of failed xmit	 */
 };
-
 
 /* Define a fake hardware header format for the networking core.  Note that
  * header size cannot exceed 16 bytes as that is the size of the header cache.

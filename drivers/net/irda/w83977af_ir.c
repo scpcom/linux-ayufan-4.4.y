@@ -188,7 +188,6 @@ static int w83977af_open(int i, unsigned int iobase, unsigned int irq,
 	self = netdev_priv(dev);
 	spin_lock_init(&self->lock);
    
-
 	/* Initialize IO */
 	self->io.fir_base   = iobase;
         self->io.irq       = irq;
@@ -713,7 +712,6 @@ static void w83977af_dma_xmit_complete(struct w83977af_ir *self)
 	} else
 		self->netdev->stats.tx_packets++;
 
-	
 	if (self->new_speed) {
 		w83977af_change_speed(self, self->new_speed);
 		self->new_speed = 0;
@@ -1342,7 +1340,6 @@ out:
 MODULE_AUTHOR("Dag Brattli <dagb@cs.uit.no>");
 MODULE_DESCRIPTION("Winbond W83977AF IrDA Device Driver");
 MODULE_LICENSE("GPL");
-
 
 module_param(qos_mtt_bits, int, 0);
 MODULE_PARM_DESC(qos_mtt_bits, "Mimimum Turn Time");

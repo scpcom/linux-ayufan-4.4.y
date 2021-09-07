@@ -43,7 +43,6 @@
 #define IOASIC_SCSI_DMA	(14*IOASIC_SLOT_SIZE)	/* ??? */
 #define IOASIC_RES_15	(15*IOASIC_SLOT_SIZE)	/* unused? */
 
-
 /*
  * Offsets for I/O ASIC registers
  * (relative to (dec_kn_slot_base + IOASIC_IOCTL)).
@@ -102,7 +101,6 @@
 #define IO_REG_SCSI_SDR1	0x1d0	/* SCSI DMA Partial Word 1 */
 #define IO_REG_FCTR		0x1e0	/* Free-Running Counter */
 #define IO_REG_RES_31		0x1f0	/* unused */
-
 
 /*
  * The upper 16 bits of the System Support Register are a part of the

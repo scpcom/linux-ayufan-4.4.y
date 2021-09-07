@@ -49,7 +49,6 @@ struct semaphore gsemI2c;
 //		I2C control for MPC8245
 //*************************************************************************
 
-
 static void writeccr(u32 x)
 {
 	writel(x, i2c_base + MPC_I2C_CR);
@@ -256,5 +255,3 @@ int mpc_i2c_init(void)
 
 	return 0;
 }
-
-

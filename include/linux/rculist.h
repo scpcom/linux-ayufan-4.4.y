@@ -244,7 +244,6 @@ static inline void list_splice_init_rcu(struct list_head *list,
 		prefetch(pos->member.next), &pos->member != (head); \
 		pos = list_entry_rcu(pos->member.next, typeof(*pos), member))
 
-
 /**
  * list_for_each_continue_rcu
  * @pos:	the &struct list_head to use as a loop cursor.

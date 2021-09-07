@@ -48,7 +48,6 @@
 #include "xfs_trans_priv.h"
 #include "xfs_qm.h"
 
-
 /*
    LOCK ORDER
 
@@ -195,7 +194,6 @@ xfs_qm_dqinit_core(
 	d->dd_diskdq.d_flags = type;
 }
 
-
 #ifdef XFS_DQUOT_TRACE
 /*
  * Dquot tracing for debugging.
@@ -236,7 +234,6 @@ __xfs_dqtrace_entry(
 	return;
 }
 #endif
-
 
 /*
  * If default limits are in force, push them into the dquot now.
@@ -401,8 +398,6 @@ xfs_qm_init_dquot_blk(
 			     XFS_BLI_GDQUOT_BUF)));
 	xfs_trans_log_buf(tp, bp, 0, BBTOB(XFS_QI_DQCHUNKLEN(mp)) - 1);
 }
-
-
 
 /*
  * Allocate a block and fill it with dquots.
@@ -649,7 +644,6 @@ xfs_qm_dqtobp(
 	return (0);
 }
 
-
 /*
  * Read in the ondisk dquot using dqtobp() then copy it to an incore version,
  * and release the buffer immediately.
@@ -714,7 +708,6 @@ xfs_qm_dqread(
 
 	return (error);
 }
-
 
 /*
  * allocate an incore dquot from the kernel heap,
@@ -1109,7 +1102,6 @@ xfs_qm_dqget(
 	return (0);
 }
 
-
 /*
  * Release a reference to the dquot (decrement ref-count)
  * and unlock it. If there is a group quota attached to this
@@ -1207,7 +1199,6 @@ xfs_qm_dqrele(
 	 */
 	xfs_qm_dqput(dqp);
 }
-
 
 /*
  * Write a modified dquot to disk.
@@ -1386,7 +1377,6 @@ xfs_dqunlock(
 	}
 }
 
-
 void
 xfs_dqunlock_nonotify(
 	xfs_dquot_t *dqp)
@@ -1421,7 +1411,6 @@ xfs_dqlock2(
 		mutex_lock(&d2->q_qlock);
 	}
 }
-
 
 /*
  * Take a dquot out of the mount's dqlist as well as the hashlist.
@@ -1521,7 +1510,6 @@ xfs_qm_dqpurge(
 	mutex_unlock(&thishash->qh_lock);
 	return (0);
 }
-
 
 #ifdef QUOTADEBUG
 void

@@ -267,7 +267,6 @@ typedef struct _i2eBordStr
 
 	void  (*i2eWriteMask)(struct _i2eBordStr *, unsigned char);
 
-
 	// State information
 
 	// During downloading, indicates the number of blocks remaining to download
@@ -433,7 +432,6 @@ typedef void (*delayFunc_t)(unsigned int);
 //
 #define I2E_MAGIC       0x4251   // Structure is valid.
 #define I2E_INCOMPLETE  0x1122   // Structure failed during init.
-
 
 // i2eError
 //

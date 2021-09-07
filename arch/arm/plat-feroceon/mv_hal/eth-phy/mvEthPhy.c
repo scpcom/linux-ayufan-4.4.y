@@ -69,7 +69,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static 	MV_VOID	mvEthPhyPower(MV_U32 ethPortNum, MV_BOOL enable);
 void    rdPhy(MV_U32 phyAddr, MV_U32 regOffs);
 
-
 void    rdPhy(MV_U32 phyAddr, MV_U32 regOffs)
 {
     MV_U16      data;
@@ -81,7 +80,6 @@ void    rdPhy(MV_U32 phyAddr, MV_U32 regOffs)
     else
         mvOsPrintf("Read failed\n");
 }
-
 
 /*******************************************************************************
 * mvEthPhyRegRead - Read from ethernet phy register.
@@ -220,7 +218,6 @@ MV_STATUS mvEthPhyRegWrite(MV_U32 phyAddr, MV_U32 regOffs, MV_U16 data)
 
 	return MV_OK;
 
-
 }
 
 /*******************************************************************************
@@ -266,7 +263,6 @@ MV_STATUS mvEthPhyReset(MV_U32 phyAddr, int timeout)
    	}
 	return MV_TIMEOUT;
 }
-
 
 /*******************************************************************************
 * mvEthPhyRestartAN - Restart ethernet Phy Auto-Negotiation.
@@ -317,7 +313,6 @@ MV_STATUS mvEthPhyRestartAN(MV_U32 phyAddr, int timeout)
     }
     return MV_TIMEOUT;
 }
-
 
 /*******************************************************************************
 * mvEthPhyDisableAN - Disable Phy Auto-Negotiation and set forced Speed and Duplex
@@ -496,7 +491,6 @@ MV_BOOL mvEthPhyCheckLink( MV_U32 phyAddr )
 	if((val_ctrl == ETH_PHY_SMI_DATA_MASK) && (val_st & ETH_PHY_SMI_DATA_MASK))
 		return MV_FALSE;
 
-
 	if(val_ctrl & ETH_PHY_CTRL_AN_ENABLE_MASK)
 	{
 		if(val_st & ETH_PHY_STATUS_AN_DONE_MASK)
@@ -540,7 +534,6 @@ MV_STATUS	mvEthPhyPrintStatus( MV_U32 phyAddr )
 	else
 		mvOsOutput( "Auto negotiation: Disabled\n" );
 
-
 	/* read specific status reg */ 
 	if( mvEthPhyRegRead( phyAddr, ETH_PHY_SPEC_STATUS_REG, &val) != MV_OK )
 		return MV_ERROR;
@@ -566,7 +559,6 @@ MV_STATUS	mvEthPhyPrintStatus( MV_U32 phyAddr )
 	else
 		mvOsOutput( "Duplex: Half\n" );
  
-
 	if( val & ETH_PHY_SPEC_STATUS_LINK_MASK )
 		mvOsOutput("Link: up\n");
 	else
@@ -695,7 +687,6 @@ MV_VOID		mvEthE1116PhyBasicInit(MV_U32 ethPortNum)
 	mvEthPhyRegWrite(mvBoardPhyAddrGet(ethPortNum),0,reg);
 }
 
-
 /*******************************************************************************
 * mvEthE1310PhyBasicInit - 
 *
@@ -765,7 +756,6 @@ MV_VOID		mvEthE3016PhyBasicInit(MV_U32 ethPortNum)
 	reg |= BIT15;
 	mvEthPhyRegWrite(mvBoardPhyAddrGet(ethPortNum),0,reg);
 }
-
 
 /*******************************************************************************
 * mvEthE1011PhyBasicInit - 
@@ -903,7 +893,6 @@ static MV_VOID	mvEthPhyPower(MV_U32 ethPortNum, MV_BOOL enable)
 	}
 }
 
-
 /*******************************************************************************
 * mvEth1145PhyInit - Initialize MARVELL 1145 Phy 
 *
@@ -985,7 +974,6 @@ MV_VOID mvEth1145PhyBasicInit(MV_U32 port)
     return;
 }
 
-
 /*******************************************************************************
 * mvEthSgmiiToCopperPhyInit - Initialize Test board 1112 Phy 
 *
@@ -1018,7 +1006,6 @@ MV_VOID mvEthSgmiiToCopperPhyBasicInit(MV_U32 port)
     mvEthPhyRegWrite(phyAddr + port,0,value);
 }
 
-
 MV_VOID mvEth1121PhyBasicInit(MV_U32 port)
 {
     	MV_U16 value;
@@ -1048,4 +1035,3 @@ MV_VOID mvEth1121PhyBasicInit(MV_U32 port)
 	mvEthPhyRegWrite(phyAddr, 0, value);
     	mvOsDelay(10);
 }
-

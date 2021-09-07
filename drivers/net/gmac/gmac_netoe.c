@@ -33,7 +33,6 @@
 //#define NETOE_DEBUG_DESC_LIST
 //#define NETOE_DEBUG_QUEUE    
 
-
 typedef enum gmac_mac_regs {
     NETOE_JOB_QUEUE_BASE    =  0,
     NETOE_JOB_QUEUE_FILL    =  1,
@@ -71,7 +70,6 @@ static inline void netoe_reg_write(gmac_priv_t* priv, int reg_num, u32 value)
     writel(value, priv->netoeBase + (reg_num << 2));
 }
 
-
 /**
  *  Notify the h/w queue that a new job is ready
  */
@@ -80,7 +78,6 @@ static inline void netoe_notify_new_job(gmac_priv_t *priv)
     netoe_reg_write(priv, NETOE_JOB_QUEUE_FILL, 1);    
 }
 
-
 /**
  *  get the number of transmit aborts since the last reset 
  */ 
@@ -88,7 +85,6 @@ static inline unsigned netoe_get_count(gmac_priv_t *priv)
 {
     return netoe_reg_read(priv, NETOE_COMPLETE_COUNT);
 }
-
 
 /**
  *  Get the layer-4 (transport) protocol from an SKB. Return -1 if unsuccessful
@@ -145,7 +141,6 @@ static inline void netoe_mac_dump(gmac_priv_t *priv)
     }    
 }
 
-    
 /**
  *  decode the skb contents and report to stdio
  */ 
@@ -214,7 +209,6 @@ static inline void netoe_skb_header_dump(struct sk_buff* skb)
 
     printk("\n");
 }
-
 
 /**
  *  dump the job contents to stdio
@@ -302,7 +296,6 @@ void netoe_start(gmac_priv_t *priv)
 	// Make SMP safe - we could do with making this locking more fine grained
 	spin_unlock(&priv->tx_spinlock_);
  }
-
 
 /**
  *  Halt the netoe and deallocate the job queue
@@ -402,8 +395,6 @@ static inline void skb_pop_ring(struct sk_buff *skb)
 
 }
 
-
-
 /**
  *  Add a new job to the queue
  */ 
@@ -438,7 +429,6 @@ void netoe_send_job(gmac_priv_t *priv, volatile netoe_job_t* job, struct sk_buff
     job->udp_flag_ = 0;
     job->ip_ver_hdr_len_ = 0;
     job->tso_flag_ = 0;
-    
     
 #ifdef NETOE_DEBUG_SKB
     printk("New       job %p ",job);
@@ -497,8 +487,6 @@ void netoe_send_job(gmac_priv_t *priv, volatile netoe_job_t* job, struct sk_buff
         }        
     }
 
-       
-    
     // Allocate storage for remainder of fragments and create DMA mappings
     // Get a DMA mapping for as many fragments as will fit into the first level
     // fragment info. storage within the job structure

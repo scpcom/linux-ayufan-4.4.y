@@ -144,7 +144,6 @@ void hmac_md5(u8 *key, size_t key_len, u8 *data, size_t data_len, u8 *mac)
 #define	MD5Step(f, w, x, y,	z, data, t, s)	\
 	( w	+= f(x,	y, z) +	data + t,  w = (CYCLIC_LEFT_SHIFT(w, s)) & 0xffffffff, w +=	x )
 
-
 /*
  *  Function Description:
  *      Initiate MD5 Context satisfied in RFC 1321
@@ -165,7 +164,6 @@ VOID MD5Init(MD5_CTX *pCtx)
     pCtx->LenInBitCount[0]=0;
     pCtx->LenInBitCount[1]=0;
 }
-
 
 /*
  *  Function Description:
@@ -221,7 +219,6 @@ VOID MD5Update(MD5_CTX *pCtx, UCHAR *pData, UINT32 LenInBytes)
         LenInBytes -= 64-temp;
     } // end of if (temp)
 
-
     TfTimes = (LenInBytes >> 6);
 
     for (i=TfTimes; i>0; i--)
@@ -238,7 +235,6 @@ VOID MD5Update(MD5_CTX *pCtx, UCHAR *pData, UINT32 LenInBytes)
         NdisMoveMemory(pCtx->Input, (UCHAR *)pData, LenInBytes);
 
 }
-
 
 /*
  *  Function Description:
@@ -300,7 +296,6 @@ VOID MD5Final(UCHAR Digest[16], MD5_CTX *pCtx)
         byteReverse(pCtx->Input, 16);
         MD5Transform(pCtx->Buf, (UINT32 *)pCtx->Input);
 
-
         // the second block ===
         NdisZeroMemory((UCHAR *)pCtx->Input, PadLenInBytes);
 
@@ -315,12 +310,10 @@ VOID MD5Final(UCHAR Digest[16], MD5_CTX *pCtx)
         MD5Transform(pCtx->Buf, (UINT32 *)pCtx->Input);
     } // end of else
 
-
     NdisMoveMemory((UCHAR *)Digest, (UINT32 *)pCtx->Buf, 16); // output
     byteReverse((UCHAR *)Digest, 4);
     NdisZeroMemory(pCtx, sizeof(pCtx)); // memory free
 }
-
 
 /*
  *  Function Description:
@@ -350,7 +343,6 @@ VOID MD5Transform(UINT32 Buf[4], UINT32 Mes[16])
  		6, 10, 15, 21,
  	};
 
-
 	// [equal to 4294967296*abs(sin(index))]
     static UINT32 MD5Table[64] =
 	{
@@ -375,10 +367,8 @@ VOID MD5Transform(UINT32 Buf[4], UINT32 Mes[16])
     	0xf7537e82,	0xbd3af235,	0x2ad7d2bb,	0xeb86d391
 	};
 
-
     for (i=0; i<4; i++)
         Reg[i]=Buf[i];
-
 
     // 64 steps in MD5 algorithm
     for (i=0; i<16; i++)
@@ -430,21 +420,17 @@ VOID MD5Transform(UINT32 Buf[4], UINT32 Mes[16])
         Reg[0] = Temp;
     }
 
-
     // (temporary)output
     for (i=0; i<4; i++)
         Buf[i] += Reg[i];
 
 }
 
-
-
 /* =========================  SHA-1 implementation ========================== */
 // four base functions for SHA-1
 #define SHA1_F1(b, c, d)    (((b) & (c)) | ((~b) & (d)))
 #define SHA1_F2(b, c, d)    ((b) ^ (c) ^ (d))
 #define SHA1_F3(b, c, d)    (((b) & (c)) | ((b) & (d)) | ((c) & (d)))
-
 
 #define SHA1Step(f, a, b, c, d, e, w, k)    \
     ( e	+= ( f(b, c, d) + w + k + CYCLIC_LEFT_SHIFT(a, 5)) & 0xffffffff, \
@@ -493,11 +479,9 @@ UCHAR SHAUpdate(SHA_CTX *pCtx, UCHAR *pData, UINT32 LenInBytes)
     if (pCtx->LenInBitCount[0] < temp1)
         pCtx->LenInBitCount[1]++;   //carry in
 
-
     pCtx->LenInBitCount[1] = (UINT32) (pCtx->LenInBitCount[1] +(LenInBytes >> 29));
     if (pCtx->LenInBitCount[1] < temp2)
         return (err);   //check total length of original data
-
 
     // mod 64 bytes
     temp1 = (temp1 >> 3) & 0x3f;
@@ -522,7 +506,6 @@ UCHAR SHAUpdate(SHA_CTX *pCtx, UCHAR *pData, UINT32 LenInBytes)
         pData += 64-temp1;
         LenInBytes -= 64-temp1;
     } // end of if (temp1)
-
 
     TfTimes = (LenInBytes >> 6);
 
@@ -594,7 +577,6 @@ VOID SHAFinal(SHA_CTX *pCtx, UCHAR Digest[20])
         NdisZeroMemory((UCHAR *)pCtx->Input + 64, 16);
         SHATransform(pCtx->Buf, (UINT32 *)pCtx->Input);
 
-
         // the second block ===
         NdisZeroMemory((UCHAR *)pCtx->Input, PadLenInBytes);
 
@@ -610,7 +592,6 @@ VOID SHAFinal(SHA_CTX *pCtx, UCHAR Digest[20])
         SHATransform(pCtx->Buf, (UINT32 *)pCtx->Input);
     } // end of else
 
-
     //Output, bytereverse
     for (i=0; i<20; i++)
     {
@@ -619,7 +600,6 @@ VOID SHAFinal(SHA_CTX *pCtx, UCHAR Digest[20])
 
     NdisZeroMemory(pCtx, sizeof(pCtx)); // memory free
 }
-
 
 // The central algorithm of SHA-1, consists of four rounds and
 // twenty steps per round
@@ -647,10 +627,8 @@ VOID SHATransform(UINT32 Buf[5], UINT32 Mes[20])
         W[i] |= (Mes[i] << 24) & 0xff000000;
     }
 
-
     for	(i = 0; i < 64; i++)
 	    W[16+i] = CYCLIC_LEFT_SHIFT(W[i] ^ W[2+i] ^ W[8+i] ^ W[13+i], 1);
-
 
     // 80 steps in SHA-1 algorithm
     for (i=0; i<80; i++)
@@ -671,7 +649,6 @@ VOID SHATransform(UINT32 Buf[5], UINT32 Mes[20])
             SHA1Step(SHA1_F2, Reg[0], Reg[1], Reg[2], Reg[3], Reg[4],
                      W[i], SHA1Table[3]);
 
-
        // one-word right shift
 		Temp   = Reg[4];
         Reg[4] = Reg[3];
@@ -682,13 +659,11 @@ VOID SHATransform(UINT32 Buf[5], UINT32 Mes[20])
 
     } // end of for-loop
 
-
     // (temporary)output
     for (i=0; i<5; i++)
         Buf[i] += Reg[i];
 
 }
-
 
 /* =========================  AES En/Decryption ========================== */
 
@@ -1411,5 +1386,3 @@ int PasswordHash(char *password, unsigned char *ssid, int ssidlength, unsigned c
     F(password, ssid, ssidlength, 4096, 2, &output[SHA_DIGEST_LEN]);
     return 1;
 }
-
-

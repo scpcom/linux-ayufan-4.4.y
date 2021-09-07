@@ -12,4 +12,3 @@ typedef struct vmidi_devc {
 	   int intr_active;
 	   void (*midi_input_intr) (int dev, unsigned char data);
 	} vmidi_devc;
-

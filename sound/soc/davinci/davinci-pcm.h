@@ -15,7 +15,6 @@
 #include <mach/edma.h>
 #include <mach/asp.h>
 
-
 struct davinci_pcm_dma_params {
 	int channel;			/* sync dma channel ID */
 	unsigned short acnt;
@@ -24,7 +23,6 @@ struct davinci_pcm_dma_params {
 	unsigned char data_type;	/* xfer data type */
 	unsigned char convert_mono_stereo;
 };
-
 
 extern struct snd_soc_platform davinci_soc_platform;
 

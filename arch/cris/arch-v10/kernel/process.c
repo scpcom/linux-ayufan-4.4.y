@@ -266,4 +266,3 @@ void show_regs(struct pt_regs * regs)
 	printk("r12: %08lx r13: %08lx oR10: %08lx\n",
 	       regs->r12, regs->r13, regs->orig_r10);
 }
-

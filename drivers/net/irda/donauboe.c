@@ -85,7 +85,6 @@
 #define TX_SLOTS    8
 #define RX_SLOTS    8
 
-
 /* Less user servicable parts below here */
 
 /* Test, Transmit and receive buffer sizes, adjust at your peril */
@@ -106,7 +105,6 @@
 #define BUF_SAFETY  0x7a
 #define RX_BUF_SZ   (RX_LEN)
 #define TX_BUF_SZ   (TX_LEN+BUF_SAFETY)
-
 
 /* Logic of the netdev part of this driver                             */
 
@@ -198,7 +196,6 @@ static int max_baud = 4000000;
 #ifdef USE_PROBE
 static int do_probe = 0;
 #endif
-
 
 /**********************************************************************/
 static int
@@ -841,7 +838,6 @@ toshoboe_probe (struct toshoboe_cb *self)
       int fir = (j > 1);
       toshoboe_stopchip (self);
 
-
       spin_lock_irqsave(&self->spinlock, flags);
       /*Address is already setup */
       toshoboe_startchip (self);
@@ -1335,7 +1331,6 @@ dumpbufs(self->rx_bufs[self->rxs],len,'<');
   return IRQ_HANDLED;
 }
 
-
 static int
 toshoboe_net_open (struct net_device *dev)
 {
@@ -1652,7 +1647,6 @@ toshoboe_open (struct pci_dev *pci_dev, const struct pci_device_id *pdid)
       err = -ENOMEM;
       goto freebufs;
     }
-
 
 #ifdef USE_PROBE
   if (do_probe)

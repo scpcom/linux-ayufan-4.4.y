@@ -70,7 +70,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ON_HOOK		(1 << MV_ON_HOOK)
 #define OFF_HOOK	(1 << MV_OFF_HOOK)
 
-
 /* Enumerators */
 typedef enum
 {

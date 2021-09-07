@@ -44,7 +44,6 @@
  * for interrupt lines
  */
 
-
 static void end_sb1250_irq(unsigned int irq);
 static void enable_sb1250_irq(unsigned int irq);
 static void disable_sb1250_irq(unsigned int irq);
@@ -155,7 +154,6 @@ static void enable_sb1250_irq(unsigned int irq)
 	sb1250_unmask_irq(sb1250_irq_owner[irq], irq);
 }
 
-
 static void ack_sb1250_irq(unsigned int irq)
 {
 #ifdef CONFIG_SIBYTE_HAS_LDT
@@ -200,14 +198,12 @@ static void ack_sb1250_irq(unsigned int irq)
 	sb1250_mask_irq(sb1250_irq_owner[irq], irq);
 }
 
-
 static void end_sb1250_irq(unsigned int irq)
 {
 	if (!(irq_desc[irq].status & (IRQ_DISABLED | IRQ_INPROGRESS))) {
 		sb1250_unmask_irq(sb1250_irq_owner[irq], irq);
 	}
 }
-
 
 void __init init_sb1250_irqs(void)
 {
@@ -218,7 +214,6 @@ void __init init_sb1250_irqs(void)
 		sb1250_irq_owner[i] = 0;
 	}
 }
-
 
 /*
  *  arch_init_irq is called early in the boot sequence from init/main.c via

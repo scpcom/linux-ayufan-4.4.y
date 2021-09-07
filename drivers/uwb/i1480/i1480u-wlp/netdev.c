@@ -53,7 +53,6 @@ struct i1480u_cmd_set_ip_mas {
 	u8                  baMAS[32];
 } __attribute__((packed));
 
-
 static
 int i1480u_set_ip_mas(
 	struct uwb_rc *rc,
@@ -239,7 +238,6 @@ error_radio_start:
 error_rx_setup:
 	return result;
 }
-
 
 /**
  * Called on 'ifconfig down'

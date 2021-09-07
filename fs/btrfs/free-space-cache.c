@@ -1361,4 +1361,3 @@ void btrfs_init_free_cluster(struct btrfs_free_cluster *cluster)
 	INIT_LIST_HEAD(&cluster->block_group_list);
 	cluster->block_group = NULL;
 }
-

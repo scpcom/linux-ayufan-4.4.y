@@ -10,14 +10,12 @@
  *
  */
 
-
 #include <linux/init.h>
 #include "hisax.h"
 #include "hscx.h"
 #include "jade.h"
 #include "isdnl1.h"
 #include <linux/interrupt.h>
-
 
 int
 JadeVersion(struct IsdnCardState *cs, char *s)
@@ -71,8 +69,6 @@ jade_write_indirect(struct IsdnCardState *cs, u_char reg, u_char value)
 	}
     }
 }
-
-
 
 static void
 modejade(struct BCState *bcs, int mode, int bc)
@@ -238,7 +234,6 @@ open_jadestate(struct IsdnCardState *cs, struct BCState *bcs)
 	return (0);
 }
 
-
 static int
 setstack_jade(struct PStack *st, struct BCState *bcs)
 {
@@ -311,4 +306,3 @@ initjade(struct IsdnCardState *cs)
 	modejade(cs->bcs, 0, 0);
 	modejade(cs->bcs + 1, 0, 0);
 }
-

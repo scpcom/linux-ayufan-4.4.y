@@ -106,7 +106,6 @@
 #define ABIT_UGURU3_STATUS_READY_FOR_READ	0x01
 #define ABIT_UGURU3_STATUS_BUSY			0x02
 
-
 /* Structures */
 struct abituguru3_sensor_info {
 	const char* name;
@@ -163,7 +162,6 @@ struct abituguru3_data {
 	   for convenience we use 3 bytes for all sensors */
 	u8 settings[48][3];
 };
-
 
 /* Constants */
 static const struct abituguru3_motherboard_info abituguru3_motherboards[] = {
@@ -598,7 +596,6 @@ static const struct abituguru3_motherboard_info abituguru3_motherboards[] = {
 	{ 0x0000, { NULL }, { { NULL, 0, 0, 0, 0, 0 } } }
 };
 
-
 /* Insmod parameters */
 static int force;
 module_param(force, bool, 0);
@@ -607,7 +604,6 @@ MODULE_PARM_DESC(force, "Set to one to force detection.");
 static int verbose = 1;
 module_param(verbose, bool, 0644);
 MODULE_PARM_DESC(verbose, "Enable/disable verbose error reporting");
-
 
 /* wait while the uguru is busy (usually after a write) */
 static int abituguru3_wait_while_busy(struct abituguru3_data *data)

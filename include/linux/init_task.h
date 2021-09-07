@@ -186,7 +186,6 @@ extern struct cred init_cred;
 	INIT_TASK_RCU_PREEMPT(tsk)					\
 }
 
-
 #define INIT_CPU_TIMERS(cpu_timers)					\
 {									\
 	LIST_HEAD_INIT(cpu_timers[0]),					\
@@ -196,6 +195,5 @@ extern struct cred init_cred;
 
 /* Attach to the init_task data structure for proper alignment */
 #define __init_task_data __attribute__((__section__(".data.init_task")))
-
 
 #endif

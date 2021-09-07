@@ -89,7 +89,6 @@ struct usb_mixer_interface {
 	u8 xonar_u1_status;
 };
 
-
 struct usb_audio_term {
 	int id;
 	int type;
@@ -127,7 +126,6 @@ struct usb_mixer_elem_info {
 	int cache_val[MAX_CHANNELS];
 	u8 initialized;
 };
-
 
 enum {
 	USB_FEATURE_NONE = 0,
@@ -185,7 +183,6 @@ enum {
 	USB_PROC_DCR_ATTACK = 5,
 	USB_PROC_DCR_RELEASE = 6,
 };
-
 
 /*
  * manual mapping of mixer names
@@ -262,7 +259,6 @@ static void *find_audio_control_unit(struct mixer_build *state, unsigned char un
 	}
 	return NULL;
 }
-
 
 /*
  * copy a string with the given id
@@ -349,7 +345,6 @@ static int get_abs_value(struct usb_mixer_elem_info *cval, int val)
 	return val;
 }
 
-
 /*
  * retrieve a mixer value
  */
@@ -409,7 +404,6 @@ static int get_cur_mix_value(struct usb_mixer_elem_info *cval,
 	cval->cache_val[index] = *value;
 	return 0;
 }
-
 
 /*
  * set a mixer value
@@ -491,7 +485,6 @@ static int mixer_vol_tlv(struct snd_kcontrol *kcontrol, int op_flag,
 
 static int parse_audio_unit(struct mixer_build *state, int unitid);
 
-
 /*
  * check if the input/output channel routing is enabled on the given bitmap.
  * used for mixer unit parser
@@ -501,7 +494,6 @@ static int check_matrix_bitmap(unsigned char *bmap, int ich, int och, int num_ou
 	int idx = ich * num_outs + och;
 	return bmap[idx >> 3] & (0x80 >> (idx & 7));
 }
-
 
 /*
  * add an alsa control element
@@ -526,7 +518,6 @@ static int add_control_to_empty(struct mixer_build *state, struct snd_kcontrol *
 	state->mixer->id_elems[cval->id] = cval;
 	return 0;
 }
-
 
 /*
  * get a terminal name string
@@ -620,7 +611,6 @@ static int get_term_name(struct mixer_build *state, struct usb_audio_term *iterm
 	return 0;
 }
 
-
 /*
  * parse the source unit recursively until it reaches to a terminal
  * or a branched unit.
@@ -674,7 +664,6 @@ static int check_input_term(struct mixer_build *state, int id, struct usb_audio_
 	return -ENODEV;
 }
 
-
 /*
  * Feature Unit
  */
@@ -698,14 +687,12 @@ static struct usb_feature_control_info audio_feature_info[] = {
 	{ "Loudness",		USB_MIXER_BOOLEAN },
 };
 
-
 /* private_free callback */
 static void usb_mixer_elem_free(struct snd_kcontrol *kctl)
 {
 	kfree(kctl->private_data);
 	kctl->private_data = NULL;
 }
-
 
 /*
  * interface to ALSA control for feature/mixer units
@@ -789,7 +776,6 @@ static int get_min_max(struct usb_mixer_elem_info *cval, int default_min)
 	}
 	return 0;
 }
-
 
 /* get a feature/mixer unit info */
 static int mixer_ctl_feature_info(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *uinfo)
@@ -892,7 +878,6 @@ static struct snd_kcontrol_new usb_feature_unit_ctl = {
 	.get = mixer_ctl_feature_get,
 	.put = mixer_ctl_feature_put,
 };
-
 
 /*
  * build a feature control
@@ -1041,8 +1026,6 @@ static void build_feature_ctl(struct mixer_build *state, unsigned char *desc,
 	add_control_to_empty(state, kctl);
 }
 
-
-
 /*
  * parse a feature unit
  *
@@ -1100,7 +1083,6 @@ static int parse_audio_feature_unit(struct mixer_build *state, int unitid, unsig
 
 	return 0;
 }
-
 
 /*
  * Mixer Unit
@@ -1164,7 +1146,6 @@ static void build_mixer_unit_ctl(struct mixer_build *state, unsigned char *desc,
 	add_control_to_empty(state, kctl);
 }
 
-
 /*
  * parse a mixer unit
  */
@@ -1211,7 +1192,6 @@ static int parse_audio_mixer_unit(struct mixer_build *state, int unitid, unsigne
 	}
 	return 0;
 }
-
 
 /*
  * Processing Unit / Extension Unit
@@ -1264,7 +1244,6 @@ static struct snd_kcontrol_new mixer_procunit_ctl = {
 	.get = mixer_ctl_procunit_get,
 	.put = mixer_ctl_procunit_put,
 };
-
 
 /*
  * predefined data for processing units
@@ -1425,7 +1404,6 @@ static int build_audio_procunit(struct mixer_build *state, int unitid, unsigned 
 	return 0;
 }
 
-
 static int parse_audio_processing_unit(struct mixer_build *state, int unitid, unsigned char *desc)
 {
 	return build_audio_procunit(state, unitid, desc, procunits, "Processing Unit");
@@ -1435,7 +1413,6 @@ static int parse_audio_extension_unit(struct mixer_build *state, int unitid, uns
 {
 	return build_audio_procunit(state, unitid, desc, NULL, "Extension Unit");
 }
-
 
 /*
  * Selector Unit
@@ -1508,7 +1485,6 @@ static struct snd_kcontrol_new mixer_selectunit_ctl = {
 	.get = mixer_ctl_selector_get,
 	.put = mixer_ctl_selector_put,
 };
-
 
 /* private free callback.
  * free both private_data and private_value
@@ -1636,7 +1612,6 @@ static int parse_audio_selector_unit(struct mixer_build *state, int unitid, unsi
 
 	return 0;
 }
-
 
 /*
  * parse an audio unit recursively

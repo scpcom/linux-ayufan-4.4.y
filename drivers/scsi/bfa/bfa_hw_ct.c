@@ -158,5 +158,3 @@ bfa_hwct_isr_mode_set(struct bfa_s *bfa, bfa_boolean_t msix)
 	bfa_hwct_msix_lpu_err_set(bfa, msix, BFA_MSIX_LPU_ERR);
 	bfa_ioc_isr_mode_set(&bfa->ioc, msix);
 }
-
-

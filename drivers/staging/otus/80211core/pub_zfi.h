@@ -38,7 +38,6 @@
     //#define ZM_AGGR_BIT_ON
 #endif
 
-
 #ifndef ZM_FB50
 //#define ZM_FB50
 #endif
@@ -50,7 +49,6 @@
 //#define ZM_ENABLE_BA_RATECTRL
 
 /***** End of section 1 *****/
-
 
 /***** Section 2 : Public Definitions, data structures and prototypes *****/
 /* function return status */
@@ -90,7 +88,6 @@
 #define ZM_MODE_INFRASTRUCTURE_MAX          3
 #define ZM_MODE_AP                          4
 #define ZM_MODE_PSEUDO                      5
-
 
 /* Authentication mode */
 #define ZM_AUTH_MODE_OPEN                   0
@@ -149,7 +146,6 @@
 #define ZM_MIC_PAIRWISE_ERROR               0x06
 #define ZM_MIC_GROUP_ERROR                  0x0E
 
-
 /* power save mode */
 #define ZM_STA_PS_NONE                    0
 #define ZM_STA_PS_MAX                     1
@@ -202,7 +198,6 @@ struct zsScanResult
 {
     u32_t reserved;
 };
-
 
 struct zsStastics
 {
@@ -295,8 +290,6 @@ struct zsKeyInfo
     u16_t*   macAddr;
 };
 
-
-
 /*
  * Channels are specified by frequency.
  */
@@ -362,7 +355,6 @@ typedef void (*zfpIBSSIteratePeerStationCb)(
 
 typedef u16_t (*zfpStaRxSecurityCheckCb)(zdev_t* dev, zbuf_t* buf);
 
-
 /* Communication Tally data structure */
 struct zsCommTally
 {
@@ -395,7 +387,6 @@ struct zsCommTally
     u32_t rxBroadcastOctets;	// 25 Receive broadcast frame byte size
     u32_t rx11bDataFrame;		// 26 Measured quality 11b data frame count
     u32_t rxOFDMDataFrame;	    // 27 Measured quality 11g data frame count
-
 
     u32_t Hw_TotalRxFrm;        // 28
     u32_t Hw_CRC16Cnt;		    // 29 rxPLCPCRCErrCnt
@@ -492,7 +483,6 @@ struct zsAdditionInfo
     union zuTail   Tail;
 };
 
-
 struct zsPmkidBssidInfo
 {
     u16_t      bssid[3];
@@ -504,7 +494,6 @@ struct zsPmkidInfo
 	   u32_t		bssidCount;
 	   struct zsPmkidBssidInfo	bssidInfo[ZM_PMKID_MAX_BSS_CNT];
 };
-
 
 struct zsCbFuncTbl
 {

@@ -58,7 +58,6 @@ static inline int gpio_polarity(unsigned gpio, int value)
 	return 0;
 }
 
-
 /* cansleep wrappers */
 #include <asm-generic/gpio.h>
 

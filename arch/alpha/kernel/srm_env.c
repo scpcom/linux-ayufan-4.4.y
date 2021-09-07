@@ -78,7 +78,6 @@ static srm_env_t	srm_named_entries[] = {
 };
 static srm_env_t	srm_numbered_entries[256];
 
-
 static int
 srm_env_read(char *page, char **start, off_t off, int count, int *eof,
 		void *data)

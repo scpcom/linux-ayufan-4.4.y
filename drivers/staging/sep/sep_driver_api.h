@@ -32,8 +32,6 @@
 #ifndef __SEP_DRIVER_API_H__
 #define __SEP_DRIVER_API_H__
 
-
-
 /*----------------------------------------------------------------
   IOCTL command defines
   -----------------------------------------------------------------*/
@@ -110,7 +108,6 @@ struct sep_driver_init_t {
 	unsigned long message_size_in_words;
 
 };
-
 
 /*
   realloc cache resident command
@@ -227,7 +224,6 @@ struct sep_driver_build_flow_table_t {
 	bool isKernelVirtualAddress;
 };
 
-
 struct sep_driver_add_flow_table_t {
 	/* flow id  */
 	unsigned long flow_id;
@@ -262,7 +258,6 @@ struct sep_driver_set_flow_id_t {
 	/* flow id to set */
 	unsigned long flow_id;
 };
-
 
 /* command struct for add tables message */
 struct sep_driver_add_message_t {
@@ -303,7 +298,6 @@ struct sep_driver_get_time_t {
 	/* value of the stored time */
 	unsigned long time_value;
 };
-
 
 /*
   structure that represent one entry in the DMA LLI table
@@ -358,7 +352,6 @@ struct sep_lli_table_t {
 	/* maximum flow entries in table */
 	struct sep_lli_entry_t lli_entries[SEP_DRIVER_MAX_FLOW_NUM_ENTRIES_IN_TABLE];
 };
-
 
 /*
   structure for keeping the mapping of the virtual buffer into physical pages
@@ -420,6 +413,5 @@ struct sep_flow_context_t {
 	/* message */
 	unsigned char message[SEP_MAX_ADD_MESSAGE_LENGTH_IN_BYTES];
 };
-
 
 #endif

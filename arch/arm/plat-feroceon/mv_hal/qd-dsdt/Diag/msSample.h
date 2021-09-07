@@ -153,7 +153,6 @@ GT_BOOL qdSimRead (GT_QD_DEV* dev,unsigned int portNumber , unsigned int miiReg,
 GT_BOOL qdSimWrite (GT_QD_DEV* dev,unsigned int portNumber , unsigned int miiReg, unsigned int value);
 void qdSimInit(GT_DEVICE devId, int baseAddr);
 
-
 #if 1 /* This is for testing */
 
 #define TEST_MASK		0
@@ -178,10 +177,8 @@ void qdSimInit(GT_DEVICE devId, int baseAddr);
 
 #endif
 
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif   /* __pfTesth */
-

@@ -72,7 +72,6 @@ static unsigned long sil680_seldev(struct ata_port *ap, struct ata_device *adev,
 	return base;
 }
 
-
 /**
  *	sil680_cable_detect	-	cable detection
  *	@ap: ATA port

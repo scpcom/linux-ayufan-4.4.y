@@ -11,4 +11,3 @@ extern struct kmem_cache *lio_sess_cache;
 extern struct kmem_cache *lio_conn_cache;
 
 #endif   /*** ISCSI_TARGET_LOGIN_H ***/
-

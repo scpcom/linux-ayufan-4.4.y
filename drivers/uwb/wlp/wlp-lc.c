@@ -49,7 +49,6 @@ int __wlp_alloc_device_info(struct wlp *wlp)
 	return 0;
 }
 
-
 /**
  * Fill in device information using function provided by driver
  *
@@ -198,8 +197,6 @@ void wlp_neighbors_release(struct wlp *wlp)
 	__wlp_neighbors_release(wlp);
 	mutex_unlock(&wlp->nbmutex);
 }
-
-
 
 /**
  * Send D1 message to neighbor, receive D2 message
@@ -363,7 +360,6 @@ int wlp_discover_neighbor(struct wlp *wlp,
 {
 	return wlp_d1d2_exchange(wlp, neighbor, NULL, NULL);
 }
-
 
 /**
  * Each neighbor in the neighborhood cache is discoverable. Discover it.

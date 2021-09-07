@@ -28,12 +28,10 @@ static int timer_start(void)
 	return register_timer_hook(timer_notify);
 }
 
-
 static void timer_stop(void)
 {
 	unregister_timer_hook(timer_notify);
 }
-
 
 void __init oprofile_timer_init(struct oprofile_operations *ops)
 {

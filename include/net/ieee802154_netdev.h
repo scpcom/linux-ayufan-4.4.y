@@ -111,5 +111,3 @@ static inline struct ieee802154_mlme_ops *ieee802154_mlme_ops(
 }
 
 #endif
-
-

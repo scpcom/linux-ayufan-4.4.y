@@ -67,4 +67,3 @@
 
 #define S3C64XX_GPO15_MEM0_ADDR15	(0x02 << 30)
 #define S3C64XX_GPO15_EINT_G7_15	(0x03 << 30)
-

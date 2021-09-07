@@ -3,7 +3,6 @@
 /* Written 1995-2000 by Werner Almesberger, EPFL LRC/ICA */
 /* 2003 John Levon  <levon@movementarian.org> */
 
-
 #include <linux/module.h>
 #include <linux/kmod.h>
 #include <linux/net.h>		/* struct socket, struct proto_ops */
@@ -25,10 +24,8 @@
 #include "signaling.h"		/* for WAITING and sigd_attach */
 #include "common.h"
 
-
 static DEFINE_MUTEX(ioctl_mutex);
 static LIST_HEAD(ioctl_list);
-
 
 void register_atm_ioctl(struct atm_ioctl *ioctl)
 {
@@ -183,7 +180,6 @@ static int do_vcc_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg
 done:
 	return error;
 }
-
 
 int vcc_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {

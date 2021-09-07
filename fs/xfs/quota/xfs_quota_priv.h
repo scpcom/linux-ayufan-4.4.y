@@ -91,7 +91,6 @@
 #define MPL_PREVP	dq_mplist.ql_prevp
 #define MPL_NEXT	dq_mplist.ql_next
 
-
 #define _LIST_REMOVE(h, dqp, PVP, NXT)				\
 	{							\
 		 xfs_dquot_t *d;				\

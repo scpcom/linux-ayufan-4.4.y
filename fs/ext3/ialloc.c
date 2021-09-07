@@ -46,7 +46,6 @@
  * the free blocks count in the block.
  */
 
-
 /*
  * Read the inode allocation bitmap for a given block_group, reading
  * into the specified slot in the superblock's bitmap cache.
@@ -798,4 +797,3 @@ unsigned long ext3_count_dirs (struct super_block * sb)
 	}
 	return count;
 }
-

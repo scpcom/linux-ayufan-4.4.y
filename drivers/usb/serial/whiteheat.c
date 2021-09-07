@@ -206,7 +206,6 @@ static struct usb_serial_driver whiteheat_device = {
 	.write_bulk_callback =	whiteheat_write_callback,
 };
 
-
 struct whiteheat_command_private {
 	struct mutex		mutex;
 	__u8			port_running;
@@ -216,7 +215,6 @@ struct whiteheat_command_private {
 						 finish */
 	__u8			result_buffer[64];
 };
-
 
 #define THROTTLED		0x01
 #define ACTUALLY_THROTTLED	0x02
@@ -242,7 +240,6 @@ struct whiteheat_private {
 	struct mutex		deathwarrant;
 };
 
-
 /* local function prototypes */
 static int start_command_port(struct usb_serial *serial);
 static void stop_command_port(struct usb_serial *serial);
@@ -267,12 +264,10 @@ static int firm_purge(struct usb_serial_port *port, __u8 rxtx);
 static int firm_get_dtr_rts(struct usb_serial_port *port);
 static int firm_report_tx_done(struct usb_serial_port *port);
 
-
 #define COMMAND_PORT		4
 #define COMMAND_TIMEOUT		(2*HZ)	/* 2 second timeout for a command */
 #define	COMMAND_TIMEOUT_MS	2000
 #define CLOSING_DELAY		(30 * HZ)
-
 
 /*****************************************************************************
  * Connect Tech's White Heat prerenumeration driver functions
@@ -376,13 +371,11 @@ static int whiteheat_firmware_download(struct usb_serial *serial,
 	return ret;
 }
 
-
 static int whiteheat_firmware_attach(struct usb_serial *serial)
 {
 	/* We want this device to fail to have a driver assigned to it */
 	return 1;
 }
-
 
 /*****************************************************************************
  * Connect Tech's White Heat serial driver functions
@@ -616,7 +609,6 @@ no_command_buffer:
 	return -ENOMEM;
 }
 
-
 static void whiteheat_release(struct usb_serial *serial)
 {
 	struct usb_serial_port *command_port;
@@ -707,7 +699,6 @@ exit:
 	return retval;
 }
 
-
 static void whiteheat_close(struct usb_serial_port *port)
 {
 	struct whiteheat_private *info = usb_get_serial_port_data(port);
@@ -748,7 +739,6 @@ static void whiteheat_close(struct usb_serial_port *port)
 	mutex_unlock(&info->deathwarrant);
 	stop_command_port(port->serial);
 }
-
 
 static int whiteheat_write(struct tty_struct *tty,
 	struct usb_serial_port *port, const unsigned char *buf, int count)
@@ -873,7 +863,6 @@ static int whiteheat_tiocmset(struct tty_struct *tty, struct file *file,
 	return 0;
 }
 
-
 static int whiteheat_ioctl(struct tty_struct *tty,
 					unsigned int cmd, unsigned long arg)
 {
@@ -906,7 +895,6 @@ static int whiteheat_ioctl(struct tty_struct *tty,
 	return -ENOIOCTLCMD;
 }
 
-
 static void whiteheat_set_termios(struct tty_struct *tty,
 	struct usb_serial_port *port, struct ktermios *old_termios)
 {
@@ -918,7 +906,6 @@ static void whiteheat_break_ctl(struct tty_struct *tty, int break_state)
 	struct usb_serial_port *port = tty->driver_data;
 	firm_set_break(port, break_state);
 }
-
 
 static int whiteheat_chars_in_buffer(struct tty_struct *tty)
 {
@@ -942,7 +929,6 @@ static int whiteheat_chars_in_buffer(struct tty_struct *tty)
 	return chars;
 }
 
-
 static void whiteheat_throttle(struct tty_struct *tty)
 {
 	struct usb_serial_port *port = tty->driver_data;
@@ -954,7 +940,6 @@ static void whiteheat_throttle(struct tty_struct *tty)
 	info->flags |= THROTTLED;
 	spin_unlock_irq(&info->lock);
 }
-
 
 static void whiteheat_unthrottle(struct tty_struct *tty)
 {
@@ -973,7 +958,6 @@ static void whiteheat_unthrottle(struct tty_struct *tty)
 		rx_data_softint(&info->rx_work);
 }
 
-
 /*****************************************************************************
  * Connect Tech's White Heat callback routines
  *****************************************************************************/
@@ -988,7 +972,6 @@ static void command_port_write_callback(struct urb *urb)
 		return;
 	}
 }
-
 
 static void command_port_read_callback(struct urb *urb)
 {
@@ -1042,7 +1025,6 @@ static void command_port_read_callback(struct urb *urb)
 			__func__, result);
 }
 
-
 static void whiteheat_read_callback(struct urb *urb)
 {
 	struct usb_serial_port *port = urb->context;
@@ -1087,7 +1069,6 @@ static void whiteheat_read_callback(struct urb *urb)
 	schedule_work(&info->rx_work);
 }
 
-
 static void whiteheat_write_callback(struct urb *urb)
 {
 	struct usb_serial_port *port = urb->context;
@@ -1115,7 +1096,6 @@ static void whiteheat_write_callback(struct urb *urb)
 
 	usb_serial_port_softint(port);
 }
-
 
 /*****************************************************************************
  * Connect Tech's White Heat firmware interface
@@ -1181,7 +1161,6 @@ exit:
 	return retval;
 }
 
-
 static int firm_open(struct usb_serial_port *port)
 {
 	struct whiteheat_simple open_command;
@@ -1191,7 +1170,6 @@ static int firm_open(struct usb_serial_port *port)
 		(__u8 *)&open_command, sizeof(open_command));
 }
 
-
 static int firm_close(struct usb_serial_port *port)
 {
 	struct whiteheat_simple close_command;
@@ -1200,7 +1178,6 @@ static int firm_close(struct usb_serial_port *port)
 	return firm_send_command(port, WHITEHEAT_CLOSE,
 			(__u8 *)&close_command, sizeof(close_command));
 }
-
 
 static void firm_setup_port(struct tty_struct *tty)
 {
@@ -1281,7 +1258,6 @@ static void firm_setup_port(struct tty_struct *tty)
 			(__u8 *)&port_settings, sizeof(port_settings));
 }
 
-
 static int firm_set_rts(struct usb_serial_port *port, __u8 onoff)
 {
 	struct whiteheat_set_rdb rts_command;
@@ -1291,7 +1267,6 @@ static int firm_set_rts(struct usb_serial_port *port, __u8 onoff)
 	return firm_send_command(port, WHITEHEAT_SET_RTS,
 			(__u8 *)&rts_command, sizeof(rts_command));
 }
-
 
 static int firm_set_dtr(struct usb_serial_port *port, __u8 onoff)
 {
@@ -1303,7 +1278,6 @@ static int firm_set_dtr(struct usb_serial_port *port, __u8 onoff)
 			(__u8 *)&dtr_command, sizeof(dtr_command));
 }
 
-
 static int firm_set_break(struct usb_serial_port *port, __u8 onoff)
 {
 	struct whiteheat_set_rdb break_command;
@@ -1313,7 +1287,6 @@ static int firm_set_break(struct usb_serial_port *port, __u8 onoff)
 	return firm_send_command(port, WHITEHEAT_SET_BREAK,
 			(__u8 *)&break_command, sizeof(break_command));
 }
-
 
 static int firm_purge(struct usb_serial_port *port, __u8 rxtx)
 {
@@ -1325,7 +1298,6 @@ static int firm_purge(struct usb_serial_port *port, __u8 rxtx)
 			(__u8 *)&purge_command, sizeof(purge_command));
 }
 
-
 static int firm_get_dtr_rts(struct usb_serial_port *port)
 {
 	struct whiteheat_simple get_dr_command;
@@ -1335,7 +1307,6 @@ static int firm_get_dtr_rts(struct usb_serial_port *port)
 			(__u8 *)&get_dr_command, sizeof(get_dr_command));
 }
 
-
 static int firm_report_tx_done(struct usb_serial_port *port)
 {
 	struct whiteheat_simple close_command;
@@ -1344,7 +1315,6 @@ static int firm_report_tx_done(struct usb_serial_port *port)
 	return firm_send_command(port, WHITEHEAT_REPORT_TX_DONE,
 			(__u8 *)&close_command, sizeof(close_command));
 }
-
 
 /*****************************************************************************
  * Connect Tech's White Heat utility functions
@@ -1378,7 +1348,6 @@ exit:
 	return retval;
 }
 
-
 static void stop_command_port(struct usb_serial *serial)
 {
 	struct usb_serial_port *command_port;
@@ -1392,7 +1361,6 @@ static void stop_command_port(struct usb_serial *serial)
 		usb_kill_urb(command_port->read_urb);
 	mutex_unlock(&command_info->mutex);
 }
-
 
 static int start_port_read(struct usb_serial_port *port)
 {
@@ -1436,7 +1404,6 @@ static int start_port_read(struct usb_serial_port *port)
 	return retval;
 }
 
-
 static struct whiteheat_urb_wrap *urb_to_wrap(struct urb *urb,
 						struct list_head *head)
 {
@@ -1452,12 +1419,10 @@ static struct whiteheat_urb_wrap *urb_to_wrap(struct urb *urb,
 	return NULL;
 }
 
-
 static struct list_head *list_first(struct list_head *head)
 {
 	return head->next;
 }
-
 
 static void rx_data_softint(struct work_struct *work)
 {
@@ -1524,7 +1489,6 @@ out:
 	tty_kref_put(tty);
 }
 
-
 /*****************************************************************************
  * Connect Tech's White Heat module functions
  *****************************************************************************/
@@ -1551,14 +1515,12 @@ failed_fake_register:
 	return retval;
 }
 
-
 static void __exit whiteheat_exit(void)
 {
 	usb_deregister(&whiteheat_driver);
 	usb_serial_deregister(&whiteheat_fake_device);
 	usb_serial_deregister(&whiteheat_device);
 }
-
 
 module_init(whiteheat_init);
 module_exit(whiteheat_exit);

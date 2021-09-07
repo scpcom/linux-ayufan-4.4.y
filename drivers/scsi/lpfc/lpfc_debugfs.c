@@ -214,7 +214,6 @@ lpfc_debugfs_slow_ring_trc_data(struct lpfc_hba *phba, char *buf, int size)
 	struct lpfc_debugfs_trc *dtp;
 	char buffer[LPFC_DEBUG_TRC_ENTRY_SIZE];
 
-
 	enable = lpfc_debugfs_enable;
 	lpfc_debugfs_enable = 0;
 
@@ -995,8 +994,6 @@ lpfc_debugfs_dumpDataDif_write(struct file *file, const char __user *buf,
 	return nbytes;
 }
 
-
-
 /**
  * lpfc_debugfs_nodelist_open - Open the nodelist debugfs file
  * @inode: The inode pointer that contains a vport pointer.
@@ -1321,8 +1318,6 @@ lpfc_debugfs_initialize(struct lpfc_vport *vport)
 			goto debug_failed;
 		}
 
-
-
 		/* Setup slow ring trace */
 		if (lpfc_debugfs_max_slow_ring_trc) {
 			num = lpfc_debugfs_max_slow_ring_trc - 1;
@@ -1340,7 +1335,6 @@ lpfc_debugfs_initialize(struct lpfc_vport *vport)
 				       "%d\n", lpfc_debugfs_max_disc_trc);
 			}
 		}
-
 
 		snprintf(name, sizeof(name), "slow_ring_trace");
 		phba->debug_slow_ring_trc =

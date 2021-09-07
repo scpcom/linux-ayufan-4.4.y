@@ -11,7 +11,6 @@
 #ifndef _ASM_GCMPREGS_H
 #define _ASM_GCMPREGS_H
 
-
 /* Offsets to major blocks within GCMP from GCMP base */
 #define GCMP_GCB_OFS		0x0000 /* Global Control Block */
 #define GCMP_CLCB_OFS		0x2000 /* Core Local Control Block */
@@ -92,7 +91,6 @@
 #define  GCMP_GCB_CMxMASK_CMREGTGT_MEM1  1
 #define  GCMP_GCB_CMxMASK_CMREGTGT_IOCU1 2
 #define  GCMP_GCB_CMxMASK_CMREGTGT_IOCU2 3
-
 
 /* Core local/Core other control block registers */
 #define GCMP_CCB_RESETR_OFS		0x0000			/* Reset Release */

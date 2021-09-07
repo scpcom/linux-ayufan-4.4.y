@@ -25,7 +25,6 @@
 
 #include "fpu_emu.h"
 
-
 #define	TERM_SIZE	$8
 #define	SUM_MS		-20(%ebp)	/* sum ms long */
 #define SUM_MIDDLE	-24(%ebp)	/* sum middle long */

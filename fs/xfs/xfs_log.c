@@ -98,7 +98,6 @@ STATIC int xlog_regrant_write_log_space(xlog_t		*log,
 STATIC void xlog_ungrant_log_space(xlog_t	 *log,
 				   xlog_ticket_t *ticket);
 
-
 /* local ticket functions */
 STATIC xlog_ticket_t	*xlog_ticket_alloc(xlog_t *log,
 					 int	unit_bytes,
@@ -200,7 +199,6 @@ xlog_trace_iclog(xlog_in_core_t *iclog, uint state)
 #define	xlog_trace_iclog(iclog,state)
 
 #endif /* XFS_LOG_TRACE */
-
 
 static void
 xlog_ins_ticketq(struct xlog_ticket **qp, struct xlog_ticket *tic)
@@ -350,7 +348,6 @@ xfs_log_done(xfs_mount_t	*mp,
 		}
 	}
 
-
 	if ((ticket->t_flags & XLOG_TIC_PERM_RESERV) == 0 ||
 	    (flags & XFS_LOG_REL_PERM_RESERV)) {
 		/*
@@ -372,7 +369,6 @@ xfs_log_done(xfs_mount_t	*mp,
 
 	return lsn;
 }	/* xfs_log_done */
-
 
 /*
  * Force the in-core log to disk.  If flags == XFS_LOG_SYNC,
@@ -430,7 +426,6 @@ xfs_log_force(
 			"error %d returned.", error);
 	}
 }
-
 
 /*
  * Attaches a new iclog I/O completion callback routine during
@@ -531,7 +526,6 @@ xfs_log_reserve(xfs_mount_t	 *mp,
 
 	return retval;
 }	/* xfs_log_reserve */
-
 
 /*
  * Mount a log filesystem
@@ -713,7 +707,6 @@ xfs_log_unmount_write(xfs_mount_t *mp)
 				"xfs_log_unmount: unmount record failed");
 		}
 
-
 		spin_lock(&log->l_icloglock);
 		iclog = log->l_iclog;
 		atomic_inc(&iclog->ic_refcnt);
@@ -812,7 +805,6 @@ xfs_log_write(xfs_mount_t *	mp,
 	}
 	return error;
 }	/* xfs_log_write */
-
 
 void
 xfs_log_move_tail(xfs_mount_t	*mp,
@@ -951,7 +943,6 @@ xlog_assign_tail_lsn(xfs_mount_t *mp)
 	return tail_lsn;
 }	/* xlog_assign_tail_lsn */
 
-
 /*
  * Return the space in the log between the tail and the head.  The head
  * is passed in the cycle/bytes formal parms.  In the special case where
@@ -998,7 +989,6 @@ xlog_space_left(xlog_t *log, int cycle, int bytes)
 	}
 	return free_bytes;
 }	/* xlog_space_left */
-
 
 /*
  * Log function which is called when an io completes.
@@ -1091,7 +1081,6 @@ xlog_bdstrat_cb(struct xfs_buf *bp)
 	xfs_biodone(bp);
 	return XFS_ERROR(EIO);
 
-
 }
 
 /*
@@ -1159,7 +1148,6 @@ done:
 	if (mp->m_logbsize == 0)
 		mp->m_logbsize = log->l_iclog_size;
 }	/* xlog_get_iclog_buffer_size */
-
 
 /*
  * This routine initializes some of the log structure for a given mount point.
@@ -1335,7 +1323,6 @@ out:
 	return ERR_PTR(-error);
 }	/* xlog_alloc_log */
 
-
 /*
  * Write out the commit record of a transaction associated with the given
  * ticket.  Return the lsn of the commit record.
@@ -1360,7 +1347,6 @@ xlog_commit_record(xfs_mount_t  *mp,
 	}
 	return error;
 }	/* xlog_commit_record */
-
 
 /*
  * Push on the buffer cache code if we ever use more than 75% of the on-disk
@@ -1425,7 +1411,6 @@ xlog_grant_push_ail(xfs_mount_t	*mp,
 	!XLOG_FORCED_SHUTDOWN(log))
 	    xfs_trans_ail_push(log->l_ailp, threshold_lsn);
 }	/* xlog_grant_push_ail */
-
 
 /*
  * Flush out the in-core log (iclog) to the on-disk log in an asynchronous 
@@ -1592,7 +1577,6 @@ xlog_sync(xlog_t		*log,
 	return 0;
 }	/* xlog_sync */
 
-
 /*
  * Deallocate a log structure
  */
@@ -1638,9 +1622,6 @@ xlog_state_finish_copy(xlog_t		*log,
 
 	spin_unlock(&log->l_icloglock);
 }	/* xlog_state_finish_copy */
-
-
-
 
 /*
  * print out info relating to regions written which consume
@@ -1995,7 +1976,6 @@ xlog_write(xfs_mount_t *	mp,
     return xlog_state_release_iclog(log, iclog);
 }	/* xlog_write */
 
-
 /*****************************************************************************
  *
  *		State Machine functions
@@ -2111,7 +2091,6 @@ xlog_get_lowest_lsn(
 	} while (lsn_log != log->l_iclog);
 	return lowest_lsn;
 }
-
 
 STATIC void
 xlog_state_do_callback(
@@ -2320,7 +2299,6 @@ xlog_state_do_callback(
 		sv_broadcast(&log->l_flush_wait);
 }
 
-
 /*
  * Finish transitioning this iclog to the dirty state.
  *
@@ -2348,7 +2326,6 @@ xlog_state_done_syncing(
 	ASSERT(atomic_read(&iclog->ic_refcnt) == 0);
 	ASSERT(iclog->ic_bwritecnt == 1 || iclog->ic_bwritecnt == 2);
 
-
 	/*
 	 * If we got an error, either on the first buffer, or in the case of
 	 * split log writes, on the second, we mark ALL iclogs STATE_IOERROR,
@@ -2372,7 +2349,6 @@ xlog_state_done_syncing(
 	spin_unlock(&log->l_icloglock);
 	xlog_state_do_callback(log, aborted, iclog);	/* also cleans log */
 }	/* xlog_state_done_syncing */
-
 
 /*
  * If the head of the in-core log ring is not (ACTIVE or DIRTY), then we must
@@ -2512,7 +2488,6 @@ xlog_grant_log_space(xlog_t	   *log,
 	xfs_lsn_t	 tail_lsn;
 #endif
 
-
 #ifdef DEBUG
 	if (log->l_flags & XLOG_ACTIVE_RECOVERY)
 		panic("grant Recovery problem");
@@ -2611,7 +2586,6 @@ redo:
 	spin_unlock(&log->l_grant_lock);
 	return XFS_ERROR(EIO);
 }	/* xlog_grant_log_space */
-
 
 /*
  * Replenish the byte reservation required by moving the grant write head.
@@ -2732,7 +2706,6 @@ redo:
 	spin_unlock(&log->l_grant_lock);
 	return 0;
 
-
  error_return:
 	if (tic->t_flags & XLOG_TIC_IN_Q)
 		xlog_del_ticketq(&log->l_reserve_headq, tic);
@@ -2747,7 +2720,6 @@ redo:
 	spin_unlock(&log->l_grant_lock);
 	return XFS_ERROR(EIO);
 }	/* xlog_regrant_write_log_space */
-
 
 /* The first cnt-1 times through here we don't need to
  * move the grant write head because the permanent
@@ -2787,7 +2759,6 @@ xlog_regrant_reserve_log_space(xlog_t	     *log,
 	ticket->t_curr_res = ticket->t_unit_res;
 	xlog_tic_reset_res(ticket);
 }	/* xlog_regrant_reserve_log_space */
-
 
 /*
  * Give back the space left from a reservation.
@@ -2830,7 +2801,6 @@ xlog_ungrant_log_space(xlog_t	     *log,
 	spin_unlock(&log->l_grant_lock);
 	xfs_log_move_tail(log->l_mp, 1);
 }	/* xlog_ungrant_log_space */
-
 
 /*
  * Flush iclog to disk if this is the last reference to the given iclog and
@@ -2885,7 +2855,6 @@ xlog_state_release_iclog(
 	return 0;
 }	/* xlog_state_release_iclog */
 
-
 /*
  * This routine will mark the current iclog in the ring as WANT_SYNC
  * and move the current iclog pointer to the next iclog in the ring.
@@ -2926,7 +2895,6 @@ xlog_state_switch_iclogs(xlog_t		*log,
 	ASSERT(iclog == log->l_iclog);
 	log->l_iclog = iclog->ic_next;
 }	/* xlog_state_switch_iclogs */
-
 
 /*
  * Write out all data in the in-core log as of this exact moment in time.
@@ -3059,7 +3027,6 @@ no_sleep:
 	return 0;
 }	/* xlog_state_sync_all */
 
-
 /*
  * Used by code which implements synchronous log forces.
  *
@@ -3172,7 +3139,6 @@ try_again:
     return 0;
 }	/* xlog_state_sync */
 
-
 /*
  * Called when we want to mark the current iclog as being ready to sync to
  * disk.
@@ -3189,7 +3155,6 @@ xlog_state_want_sync(xlog_t *log, xlog_in_core_t *iclog)
 			(XLOG_STATE_WANT_SYNC|XLOG_STATE_IOERROR));
 	}
 }
-
 
 /*****************************************************************************
  *
@@ -3313,7 +3278,6 @@ xlog_ticket_alloc(xlog_t		*log,
 
 	return tic;
 }
-
 
 /******************************************************************************
  *

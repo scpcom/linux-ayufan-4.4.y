@@ -124,7 +124,6 @@ static void efx_tsoh_free(struct efx_tx_queue *tx_queue,
 	}
 }
 
-
 /*
  * Add a socket buffer to a TX queue
  *
@@ -506,7 +505,6 @@ void efx_remove_tx_queue(struct efx_tx_queue *tx_queue)
 	tx_queue->buffer = NULL;
 }
 
-
 /* Efx TCP segmentation acceleration.
  *
  * Why?  Because by doing it here in the driver we can go significantly
@@ -575,7 +573,6 @@ struct tso_state {
 	int full_packet_size;
 };
 
-
 /*
  * Verify that our various assumptions about sk_buffs and the conditions
  * under which TSO will be attempted hold true.
@@ -603,7 +600,6 @@ static void efx_tso_check_safe(struct sk_buff *skb)
 			     + (tcp_hdr(skb)->doff << 2u)) >
 			    skb_headlen(skb));
 }
-
 
 /*
  * Allocate a page worth of efx_tso_header structures, and string them
@@ -636,7 +632,6 @@ static int efx_tsoh_block_alloc(struct efx_tx_queue *tx_queue)
 
 	return 0;
 }
-
 
 /* Free up a TSO header, and all others in the same page. */
 static void efx_tsoh_block_free(struct efx_tx_queue *tx_queue,
@@ -779,7 +774,6 @@ static int efx_tx_queue_insert(struct efx_tx_queue *tx_queue,
 	return 0;
 }
 
-
 /*
  * Put a TSO header into the TX queue.
  *
@@ -806,7 +800,6 @@ static void efx_tso_put_header(struct efx_tx_queue *tx_queue,
 
 	++tx_queue->insert_count;
 }
-
 
 /* Remove descriptors put into a tx_queue. */
 static void efx_enqueue_unwind(struct efx_tx_queue *tx_queue)
@@ -838,7 +831,6 @@ static void efx_enqueue_unwind(struct efx_tx_queue *tx_queue)
 		buffer->continuation = true;
 	}
 }
-
 
 /* Parse the SKB header and initialise state. */
 static void tso_start(struct tso_state *st, const struct sk_buff *skb)
@@ -897,7 +889,6 @@ static int tso_get_head_fragment(struct tso_state *st, struct efx_nic *efx,
 	return -ENOMEM;
 }
 
-
 /**
  * tso_fill_packet_with_fragment - form descriptors for the current fragment
  * @tx_queue:		Efx TX queue
@@ -949,7 +940,6 @@ static int tso_fill_packet_with_fragment(struct efx_tx_queue *tx_queue,
 	st->dma_addr += n;
 	return rc;
 }
-
 
 /**
  * tso_start_new_packet - generate a new header and prepare for the new packet
@@ -1021,7 +1011,6 @@ static int tso_start_new_packet(struct efx_tx_queue *tx_queue,
 
 	return 0;
 }
-
 
 /**
  * efx_enqueue_skb_tso - segment and transmit a TSO socket buffer
@@ -1123,7 +1112,6 @@ static int efx_enqueue_skb_tso(struct efx_tx_queue *tx_queue,
 	efx_enqueue_unwind(tx_queue);
 	return rc2;
 }
-
 
 /*
  * Free up all TSO datastructures associated with tx_queue. This

@@ -120,7 +120,6 @@ EXPORT_SYMBOL(pm_power_off);
 void (*arm_pm_restart)(char str, const char *cmd) = arm_machine_restart;
 EXPORT_SYMBOL_GPL(arm_pm_restart);
 
-
 /*
  * This is our default idle handler.  We need to disable
  * interrupts here to ensure we don't miss a wakeup call.
@@ -193,7 +192,6 @@ __setup("reboot=", reboot_setup);
 void machine_halt(void)
 {
 }
-
 
 void machine_power_off(void)
 {

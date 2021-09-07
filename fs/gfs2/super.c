@@ -650,7 +650,6 @@ void gfs2_unfreeze_fs(struct gfs2_sbd *sdp)
 	mutex_unlock(&sdp->sd_freeze_lock);
 }
 
-
 /**
  * gfs2_write_inode - Make sure the inode is stable on the disk
  * @inode: The inode
@@ -1371,4 +1370,3 @@ const struct super_operations gfs2_super_ops = {
 	.drop_inode		= gfs2_drop_inode,
 	.show_options		= gfs2_show_options,
 };
-

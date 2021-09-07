@@ -156,4 +156,3 @@ void __init mv_gpio_init(void)
 {
 	gpiochip_add(&mv_gpiochip);
 }
-

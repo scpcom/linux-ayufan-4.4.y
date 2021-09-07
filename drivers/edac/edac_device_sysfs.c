@@ -21,7 +21,6 @@
 #define to_edacdev(k) container_of(k, struct edac_device_ctl_info, kobj)
 #define to_edacdev_attr(a) container_of(a, struct edacdev_attribute, attr)
 
-
 /*
  * Set of edac_device_ctl_info attribute store/show functions
  */
@@ -448,7 +447,6 @@ static void edac_device_ctrl_block_release(struct kobject *kobj)
 	kobject_put(&block->instance->ctl->kobj);
 }
 
-
 /* Function to 'show' fields from the edac_dev 'block' structure */
 static ssize_t edac_dev_block_show(struct kobject *kobj,
 				struct attribute *attr, char *buffer)
@@ -842,7 +840,6 @@ int edac_device_create_sysfs(struct edac_device_ctl_info *edac_dev)
 			"returned err= %d\n", __func__, err);
 		goto err_remove_link;
 	}
-
 
 	debugf4("%s() create-instances done, idx=%d\n",
 		__func__, edac_dev->dev_idx);

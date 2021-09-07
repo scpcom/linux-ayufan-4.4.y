@@ -214,7 +214,6 @@ void edac_mc_free(struct mem_ctl_info *mci)
 }
 EXPORT_SYMBOL_GPL(edac_mc_free);
 
-
 /*
  * find_mci_by_dev
  *
@@ -349,7 +348,6 @@ void edac_mc_reset_delay_period(int value)
 
 	mutex_unlock(&mem_ctls_mutex);
 
-
 	/* re-walk the list, and reset the poll delay */
 	mutex_lock(&mem_ctls_mutex);
 
@@ -361,8 +359,6 @@ void edac_mc_reset_delay_period(int value)
 
 	mutex_unlock(&mem_ctls_mutex);
 }
-
-
 
 /* Return 0 on success, 1 on failure.
  * Before calling this function, caller must

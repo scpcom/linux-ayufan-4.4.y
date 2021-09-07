@@ -62,10 +62,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #include "ctrlEnv/sys/mvSysGbe.h"
 #include "cpu/mvCpu.h"
-
 
 typedef struct _mvEthDecWin
 {
@@ -111,7 +109,6 @@ static MV_STATUS   ethWinOverlapDetect(int port, MV_U32 winNum, MV_ADDR_WIN *pAd
 static MV_STATUS   mvEthWinSet(int port, MV_U32 winNum, MV_ETH_DEC_WIN *pAddrDecWin);
 static MV_STATUS   mvEthWinGet(int port, MV_U32 winNum, MV_ETH_DEC_WIN *pAddrDecWin);
 
-                                                                                                                             
 /*******************************************************************************
 * mvEthWinInit - Initialize ETH address decode windows 
 *
@@ -257,7 +254,6 @@ MV_STATUS mvEthWinSet(int port, MV_U32 winNum, MV_ETH_DEC_WIN *pAddrDecWin)
 		return MV_ERROR;
 	}
 
-    
     decRegs.baseReg = MV_REG_READ(ETH_WIN_BASE_REG(port, winNum));
     decRegs.sizeReg = MV_REG_READ(ETH_WIN_SIZE_REG(port, winNum));
     
@@ -648,11 +644,9 @@ void    mvEthAddrDecShow(void)
     }
 }
 
-
 void    mvEthInit(void)
 {
     MV_U32 port;
-
 
     /* Power up all existing ports */
     for(port=0; port<mvCtrlEthMaxPortGet(); port++)

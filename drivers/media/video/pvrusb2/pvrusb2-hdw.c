@@ -130,7 +130,6 @@ static const char *module_names[] = {
 	[PVR2_CLIENT_ID_WM8775] = "wm8775",
 };
 
-
 static const unsigned char *module_i2c_addresses[] = {
 	[PVR2_CLIENT_ID_TUNER] = "\x60\x61\x62\x63",
 	[PVR2_CLIENT_ID_DEMOD] = "\x43",
@@ -141,7 +140,6 @@ static const unsigned char *module_i2c_addresses[] = {
 	[PVR2_CLIENT_ID_CS53L32A] = "\x11",
 };
 
-
 static const char *ir_scheme_names[] = {
 	[PVR2_IR_SCHEME_NONE] = "none",
 	[PVR2_IR_SCHEME_29XXX] = "29xxx",
@@ -149,7 +147,6 @@ static const char *ir_scheme_names[] = {
 	[PVR2_IR_SCHEME_24XXX_MCE] = "24xxx (MCE device)",
 	[PVR2_IR_SCHEME_ZILOG] = "Zilog",
 };
-
 
 /* Define the list of additional controls we'll dynamically construct based
    on query of the cx2341x module. */
@@ -241,14 +238,11 @@ static const struct pvr2_mpeg_ids mpeg_ids[] = {
 };
 #define MPEGDEF_COUNT ARRAY_SIZE(mpeg_ids)
 
-
 static const char *control_values_srate[] = {
 	[V4L2_MPEG_AUDIO_SAMPLING_FREQ_44100]   = "44.1 kHz",
 	[V4L2_MPEG_AUDIO_SAMPLING_FREQ_48000]   = "48 kHz",
 	[V4L2_MPEG_AUDIO_SAMPLING_FREQ_32000]   = "32 kHz",
 };
-
-
 
 static const char *control_values_input[] = {
 	[PVR2_CVAL_INPUT_TV]        = "television",  /*xawtv needs this name*/
@@ -258,7 +252,6 @@ static const char *control_values_input[] = {
 	[PVR2_CVAL_INPUT_COMPOSITE] = "composite",
 };
 
-
 static const char *control_values_audiomode[] = {
 	[V4L2_TUNER_MODE_MONO]   = "Mono",
 	[V4L2_TUNER_MODE_STEREO] = "Stereo",
@@ -267,13 +260,11 @@ static const char *control_values_audiomode[] = {
 	[V4L2_TUNER_MODE_LANG1_LANG2] = "Lang1+Lang2",
 };
 
-
 static const char *control_values_hsm[] = {
 	[PVR2_CVAL_HSM_FAIL] = "Fail",
 	[PVR2_CVAL_HSM_HIGH] = "High",
 	[PVR2_CVAL_HSM_FULL] = "Full",
 };
-
 
 static const char *pvr2_state_names[] = {
 	[PVR2_STATE_NONE] =    "none",
@@ -284,7 +275,6 @@ static const char *pvr2_state_names[] = {
 	[PVR2_STATE_READY] =   "ready",
 	[PVR2_STATE_RUN] =     "run",
 };
-
 
 struct pvr2_fx2cmd_descdef {
 	unsigned char id;
@@ -319,7 +309,6 @@ static const struct pvr2_fx2cmd_descdef pvr2_fx2cmd_desc[] = {
 	{FX2CMD_ONAIR_DTV_POWER_OFF, "onair dtv power off"},
 };
 
-
 static int pvr2_hdw_set_input(struct pvr2_hdw *hdw,int v);
 static void pvr2_hdw_state_sched(struct pvr2_hdw *);
 static int pvr2_hdw_state_eval(struct pvr2_hdw *);
@@ -342,7 +331,6 @@ static int pvr2_send_request_ex(struct pvr2_hdw *hdw,
 				void *write_data,unsigned int write_len,
 				void *read_data,unsigned int read_len);
 static int pvr2_hdw_check_cropcap(struct pvr2_hdw *hdw);
-
 
 static void trace_stbit(const char *name,int val)
 {
@@ -682,7 +670,6 @@ static void ctrl_cleardirty_input(struct pvr2_ctrl *cptr)
 	cptr->hdw->input_dirty = 0;
 }
 
-
 static int ctrl_freq_max_get(struct pvr2_ctrl *cptr, int *vp)
 {
 	unsigned long fv;
@@ -932,7 +919,6 @@ static int ctrl_audio_modes_present_get(struct pvr2_ctrl *cptr,int *vp)
 	return 0;
 }
 
-
 static int ctrl_stdenumcur_set(struct pvr2_ctrl *cptr,int m,int v)
 {
 	struct pvr2_hdw *hdw = cptr->hdw;
@@ -947,25 +933,21 @@ static int ctrl_stdenumcur_set(struct pvr2_ctrl *cptr,int m,int v)
 	return 0;
 }
 
-
 static int ctrl_stdenumcur_get(struct pvr2_ctrl *cptr,int *vp)
 {
 	*vp = cptr->hdw->std_enum_cur;
 	return 0;
 }
 
-
 static int ctrl_stdenumcur_is_dirty(struct pvr2_ctrl *cptr)
 {
 	return cptr->hdw->std_dirty != 0;
 }
 
-
 static void ctrl_stdenumcur_clear_dirty(struct pvr2_ctrl *cptr)
 {
 	cptr->hdw->std_dirty = 0;
 }
-
 
 #define DEFINT(vmin,vmax) \
 	.type = pvr2_ctl_int, \
@@ -990,7 +972,6 @@ static void ctrl_stdenumcur_clear_dirty(struct pvr2_ctrl *cptr)
 	.get_value = ctrl_get_##vname, \
 	.is_dirty = ctrl_isdirty_##vname, \
 	.clear_dirty = ctrl_cleardirty_##vname
-
 
 #define VCREATE_FUNCS(vname) \
 static int ctrl_get_##vname(struct pvr2_ctrl *cptr,int *vp) \
@@ -1297,7 +1278,6 @@ static const struct pvr2_ctl_info control_defs[] = {
 
 #define CTRLDEF_COUNT ARRAY_SIZE(control_defs)
 
-
 const char *pvr2_config_get_name(enum pvr2_config cfg)
 {
 	switch (cfg) {
@@ -1310,30 +1290,25 @@ const char *pvr2_config_get_name(enum pvr2_config cfg)
 	return "<unknown>";
 }
 
-
 struct usb_device *pvr2_hdw_get_dev(struct pvr2_hdw *hdw)
 {
 	return hdw->usb_dev;
 }
-
 
 unsigned long pvr2_hdw_get_sn(struct pvr2_hdw *hdw)
 {
 	return hdw->serial_number;
 }
 
-
 const char *pvr2_hdw_get_bus_info(struct pvr2_hdw *hdw)
 {
 	return hdw->bus_info;
 }
 
-
 const char *pvr2_hdw_get_device_identifier(struct pvr2_hdw *hdw)
 {
 	return hdw->identifier;
 }
-
 
 unsigned long pvr2_hdw_get_cur_freq(struct pvr2_hdw *hdw)
 {
@@ -1373,7 +1348,6 @@ int pvr2_hdw_get_unit_number(struct pvr2_hdw *hdw)
 {
 	return hdw->unit_number;
 }
-
 
 /* Attempt to locate one of the given set of files.  Messages are logged
    appropriate to what has been found.  The return value will be 0 or
@@ -1430,7 +1404,6 @@ static int pvr2_locate_firmware(struct pvr2_hdw *hdw,
 	}
 	return ret;
 }
-
 
 /*
  * pvr2_upload_firmware1().
@@ -1517,7 +1490,6 @@ static int pvr2_upload_firmware1(struct pvr2_hdw *hdw)
 
 	return -EIO;
 }
-
 
 /*
  * pvr2_upload_firmware2()
@@ -1674,7 +1646,6 @@ int pvr2_upload_firmware2(struct pvr2_hdw *hdw)
 	return ret;
 }
 
-
 static const char *pvr2_get_state_name(unsigned int st)
 {
 	if (st < ARRAY_SIZE(pvr2_state_names)) {
@@ -1708,12 +1679,10 @@ static int pvr2_decoder_enable(struct pvr2_hdw *hdw,int enablefl)
 	return -EIO;
 }
 
-
 int pvr2_hdw_get_state(struct pvr2_hdw *hdw)
 {
 	return hdw->master_state;
 }
-
 
 static int pvr2_hdw_untrip_unlocked(struct pvr2_hdw *hdw)
 {
@@ -1723,7 +1692,6 @@ static int pvr2_hdw_untrip_unlocked(struct pvr2_hdw *hdw)
 		   "Clearing driver error statuss");
 	return !0;
 }
-
 
 int pvr2_hdw_untrip(struct pvr2_hdw *hdw)
 {
@@ -1735,14 +1703,10 @@ int pvr2_hdw_untrip(struct pvr2_hdw *hdw)
 	return 0;
 }
 
-
-
-
 int pvr2_hdw_get_streaming(struct pvr2_hdw *hdw)
 {
 	return hdw->state_pipeline_req != 0;
 }
-
 
 int pvr2_hdw_set_streaming(struct pvr2_hdw *hdw,int enable_flag)
 {
@@ -1767,7 +1731,6 @@ int pvr2_hdw_set_streaming(struct pvr2_hdw *hdw,int enable_flag)
 	return 0;
 }
 
-
 int pvr2_hdw_set_stream_type(struct pvr2_hdw *hdw,enum pvr2_config config)
 {
 	int fl;
@@ -1784,7 +1747,6 @@ int pvr2_hdw_set_stream_type(struct pvr2_hdw *hdw,enum pvr2_config config)
 	return pvr2_hdw_wait(hdw,0);
 }
 
-
 static int get_default_tuner_type(struct pvr2_hdw *hdw)
 {
 	int unit_number = hdw->unit_number;
@@ -1798,7 +1760,6 @@ static int get_default_tuner_type(struct pvr2_hdw *hdw)
 	return 0;
 }
 
-
 static v4l2_std_id get_default_standard(struct pvr2_hdw *hdw)
 {
 	int unit_number = hdw->unit_number;
@@ -1810,7 +1771,6 @@ static v4l2_std_id get_default_standard(struct pvr2_hdw *hdw)
 	return 0;
 }
 
-
 static unsigned int get_default_error_tolerance(struct pvr2_hdw *hdw)
 {
 	int unit_number = hdw->unit_number;
@@ -1820,7 +1780,6 @@ static unsigned int get_default_error_tolerance(struct pvr2_hdw *hdw)
 	}
 	return tp;
 }
-
 
 static int pvr2_hdw_check_firmware(struct pvr2_hdw *hdw)
 {
@@ -1971,7 +1930,6 @@ static void pvr2_hdw_setup_std(struct pvr2_hdw *hdw)
 		   "Unable to select a viable initial video standard");
 }
 
-
 static unsigned int pvr2_copy_i2c_addr_list(
 	unsigned short *dst, const unsigned char *src,
 	unsigned int dst_max)
@@ -1985,7 +1943,6 @@ static unsigned int pvr2_copy_i2c_addr_list(
 	dst[cnt] = I2C_CLIENT_END;
 	return cnt;
 }
-
 
 static void pvr2_hdw_cx25840_vbi_hack(struct pvr2_hdw *hdw)
 {
@@ -2013,7 +1970,6 @@ static void pvr2_hdw_cx25840_vbi_hack(struct pvr2_hdw *hdw)
 	v4l2_device_call_all(&hdw->v4l2_dev, hdw->decoder_client_id,
 			     video, s_fmt, &fmt);
 }
-
 
 static int pvr2_hdw_load_subdev(struct pvr2_hdw *hdw,
 				const struct pvr2_device_client_desc *cd)
@@ -2102,7 +2058,6 @@ static int pvr2_hdw_load_subdev(struct pvr2_hdw *hdw,
 
 	pvr2_trace(PVR2_TRACE_INFO, "Attached sub-driver %s", fname);
 
-
 	/* client-specific setup... */
 	switch (mid) {
 	case PVR2_CLIENT_ID_CX25840:
@@ -2114,7 +2069,6 @@ static int pvr2_hdw_load_subdev(struct pvr2_hdw *hdw,
 
 	return 0;
 }
-
 
 static void pvr2_hdw_load_modules(struct pvr2_hdw *hdw)
 {
@@ -2134,7 +2088,6 @@ static void pvr2_hdw_load_modules(struct pvr2_hdw *hdw)
 	}
 	if (!okFl) pvr2_hdw_render_useless(hdw);
 }
-
 
 static void pvr2_hdw_setup_low(struct pvr2_hdw *hdw)
 {
@@ -2259,7 +2212,6 @@ static void pvr2_hdw_setup_low(struct pvr2_hdw *hdw)
 			   hdw->tuner_type);
 	}
 
-
 	if (!pvr2_hdw_dev_ok(hdw)) return;
 
 	if (hdw->hdw_desc->signal_routing_scheme ==
@@ -2293,7 +2245,6 @@ static void pvr2_hdw_setup_low(struct pvr2_hdw *hdw)
 
 	pvr2_hdw_state_sched(hdw);
 }
-
 
 /* Set up the structure and attempt to put the device into a usable state.
    This can be a time-consuming operation, which is why it is not done
@@ -2361,7 +2312,6 @@ static void pvr2_hdw_setup(struct pvr2_hdw *hdw)
 	pvr2_trace(PVR2_TRACE_INIT,"pvr2_hdw_setup(hdw=%p) end",hdw);
 }
 
-
 /* Perform second stage initialization.  Set callback pointer first so that
    we can avoid a possible initialization race (if the kernel thread runs
    before the callback has been set). */
@@ -2385,7 +2335,6 @@ int pvr2_hdw_initialize(struct pvr2_hdw *hdw,
 	} while (0); LOCK_GIVE(hdw->big_lock);
 	return hdw->flag_init_ok;
 }
-
 
 /* Create, set up, and return a structure for interacting with the
    underlying hardware.  */
@@ -2658,7 +2607,6 @@ struct pvr2_hdw *pvr2_hdw_create(struct usb_interface *intf,
 	return NULL;
 }
 
-
 /* Remove _all_ associations between this driver and the underlying USB
    layer. */
 static void pvr2_hdw_remove_usb_stuff(struct pvr2_hdw *hdw)
@@ -2692,7 +2640,6 @@ static void pvr2_hdw_remove_usb_stuff(struct pvr2_hdw *hdw)
 	hdw->usb_intf = NULL;
 	pvr2_hdw_render_useless(hdw);
 }
-
 
 /* Destroy hardware interaction structure */
 void pvr2_hdw_destroy(struct pvr2_hdw *hdw)
@@ -2732,12 +2679,10 @@ void pvr2_hdw_destroy(struct pvr2_hdw *hdw)
 	kfree(hdw);
 }
 
-
 int pvr2_hdw_dev_ok(struct pvr2_hdw *hdw)
 {
 	return (hdw && hdw->flag_ok);
 }
-
 
 /* Called when hardware has been unplugged */
 void pvr2_hdw_disconnect(struct pvr2_hdw *hdw)
@@ -2749,7 +2694,6 @@ void pvr2_hdw_disconnect(struct pvr2_hdw *hdw)
 	LOCK_GIVE(hdw->ctl_lock);
 	LOCK_GIVE(hdw->big_lock);
 }
-
 
 // Attempt to autoselect an appropriate value for std_enum_cur given
 // whatever is currently in std_mask_cur
@@ -2764,7 +2708,6 @@ static void pvr2_hdw_internal_find_stdenum(struct pvr2_hdw *hdw)
 	}
 	hdw->std_enum_cur = 0;
 }
-
 
 // Calculate correct set of enumerated standards based on currently known
 // set of available standards bits.
@@ -2806,7 +2749,6 @@ static void pvr2_hdw_internal_set_std_avail(struct pvr2_hdw *hdw)
 	hdw->std_info_cur.def.type_bitmask.valid_bits = hdw->std_mask_avail;
 }
 
-
 int pvr2_hdw_get_stdenum_value(struct pvr2_hdw *hdw,
 			       struct v4l2_standard *std,
 			       unsigned int idx)
@@ -2822,13 +2764,11 @@ int pvr2_hdw_get_stdenum_value(struct pvr2_hdw *hdw,
 	return ret;
 }
 
-
 /* Get the number of defined controls */
 unsigned int pvr2_hdw_get_ctrl_count(struct pvr2_hdw *hdw)
 {
 	return hdw->control_cnt;
 }
-
 
 /* Retrieve a control handle given its index (0..count-1) */
 struct pvr2_ctrl *pvr2_hdw_get_ctrl_by_index(struct pvr2_hdw *hdw,
@@ -2837,7 +2777,6 @@ struct pvr2_ctrl *pvr2_hdw_get_ctrl_by_index(struct pvr2_hdw *hdw,
 	if (idx >= hdw->control_cnt) return NULL;
 	return hdw->controls + idx;
 }
-
 
 /* Retrieve a control handle given its index (0..count-1) */
 struct pvr2_ctrl *pvr2_hdw_get_ctrl_by_id(struct pvr2_hdw *hdw,
@@ -2856,7 +2795,6 @@ struct pvr2_ctrl *pvr2_hdw_get_ctrl_by_id(struct pvr2_hdw *hdw,
 	return NULL;
 }
 
-
 /* Given a V4L ID, retrieve the control structure associated with it. */
 struct pvr2_ctrl *pvr2_hdw_get_ctrl_v4l(struct pvr2_hdw *hdw,unsigned int ctl_id)
 {
@@ -2872,7 +2810,6 @@ struct pvr2_ctrl *pvr2_hdw_get_ctrl_v4l(struct pvr2_hdw *hdw,unsigned int ctl_id
 	}
 	return NULL;
 }
-
 
 /* Given a V4L ID for its immediate predecessor, retrieve the control
    structure associated with it. */
@@ -2897,7 +2834,6 @@ struct pvr2_ctrl *pvr2_hdw_get_ctrl_nextv4l(struct pvr2_hdw *hdw,
 	return NULL;
 }
 
-
 static const char *get_ctrl_typename(enum pvr2_ctl_type tp)
 {
 	switch (tp) {
@@ -2908,7 +2844,6 @@ static const char *get_ctrl_typename(enum pvr2_ctl_type tp)
 	}
 	return "";
 }
-
 
 static void pvr2_subdev_set_control(struct pvr2_hdw *hdw, int id,
 				    const char *name, int val)
@@ -3055,7 +2990,6 @@ static void pvr2_subdev_update(struct pvr2_hdw *hdw)
 	}
 }
 
-
 /* Figure out if we need to commit control changes.  If so, mark internal
    state flags to indicate this fact and return true.  Otherwise do nothing
    else and return false. */
@@ -3101,7 +3035,6 @@ static int pvr2_hdw_commit_setup(struct pvr2_hdw *hdw)
 
 	return !0;
 }
-
 
 /* Perform all operations needed to commit all control changes.  This must
    be performed in synchronization with the pipeline state and is thus
@@ -3266,7 +3199,6 @@ static int pvr2_hdw_commit_execute(struct pvr2_hdw *hdw)
 	return !0;
 }
 
-
 int pvr2_hdw_commit_ctl(struct pvr2_hdw *hdw)
 {
 	int fl;
@@ -3276,7 +3208,6 @@ int pvr2_hdw_commit_ctl(struct pvr2_hdw *hdw)
 	if (!fl) return 0;
 	return pvr2_hdw_wait(hdw,0);
 }
-
 
 static void pvr2_hdw_worker_poll(struct work_struct *work)
 {
@@ -3290,7 +3221,6 @@ static void pvr2_hdw_worker_poll(struct work_struct *work)
 	}
 }
 
-
 static int pvr2_hdw_wait(struct pvr2_hdw *hdw,int state)
 {
 	return wait_event_interruptible(
@@ -3299,25 +3229,21 @@ static int pvr2_hdw_wait(struct pvr2_hdw *hdw,int state)
 		(!state || (hdw->master_state != state)));
 }
 
-
 /* Return name for this driver instance */
 const char *pvr2_hdw_get_driver_name(struct pvr2_hdw *hdw)
 {
 	return hdw->name;
 }
 
-
 const char *pvr2_hdw_get_desc(struct pvr2_hdw *hdw)
 {
 	return hdw->hdw_desc->description;
 }
 
-
 const char *pvr2_hdw_get_type(struct pvr2_hdw *hdw)
 {
 	return hdw->hdw_desc->shortname;
 }
-
 
 int pvr2_hdw_is_hsm(struct pvr2_hdw *hdw)
 {
@@ -3333,7 +3259,6 @@ int pvr2_hdw_is_hsm(struct pvr2_hdw *hdw)
 	return result;
 }
 
-
 /* Execute poll of tuner status */
 void pvr2_hdw_execute_tuner_poll(struct pvr2_hdw *hdw)
 {
@@ -3341,7 +3266,6 @@ void pvr2_hdw_execute_tuner_poll(struct pvr2_hdw *hdw)
 		pvr2_hdw_status_poll(hdw);
 	} while (0); LOCK_GIVE(hdw->big_lock);
 }
-
 
 static int pvr2_hdw_check_cropcap(struct pvr2_hdw *hdw)
 {
@@ -3354,7 +3278,6 @@ static int pvr2_hdw_check_cropcap(struct pvr2_hdw *hdw)
 	}
 	return 0;
 }
-
 
 /* Return information about cropping capabilities */
 int pvr2_hdw_get_cropcap(struct pvr2_hdw *hdw, struct v4l2_cropcap *pp)
@@ -3369,7 +3292,6 @@ int pvr2_hdw_get_cropcap(struct pvr2_hdw *hdw, struct v4l2_cropcap *pp)
 	return stat;
 }
 
-
 /* Return information about the tuner */
 int pvr2_hdw_get_tuner_status(struct pvr2_hdw *hdw,struct v4l2_tuner *vtp)
 {
@@ -3382,13 +3304,11 @@ int pvr2_hdw_get_tuner_status(struct pvr2_hdw *hdw,struct v4l2_tuner *vtp)
 	return 0;
 }
 
-
 /* Get handle to video output stream */
 struct pvr2_stream *pvr2_hdw_get_video_stream(struct pvr2_hdw *hp)
 {
 	return hp->vid_stream;
 }
-
 
 void pvr2_hdw_trigger_module_log(struct pvr2_hdw *hdw)
 {
@@ -3402,7 +3322,6 @@ void pvr2_hdw_trigger_module_log(struct pvr2_hdw *hdw)
 		printk(KERN_INFO "pvrusb2: ==================  END STATUS CARD #%d  ==================\n", nr);
 	} while (0); LOCK_GIVE(hdw->big_lock);
 }
-
 
 /* Grab EEPROM contents, needed for direct method. */
 #define EEPROM_SIZE 8192
@@ -3478,7 +3397,6 @@ static u8 *pvr2_full_eeprom_fetch(struct pvr2_hdw *hdw)
 	return eeprom;
 }
 
-
 void pvr2_hdw_cpufw_set_enabled(struct pvr2_hdw *hdw,
 				int prom_flag,
 				int enable_flag)
@@ -3552,13 +3470,11 @@ void pvr2_hdw_cpufw_set_enabled(struct pvr2_hdw *hdw,
 	} while (0); LOCK_GIVE(hdw->big_lock);
 }
 
-
 /* Return true if we're in a mode for retrieval CPU firmware */
 int pvr2_hdw_cpufw_get_enabled(struct pvr2_hdw *hdw)
 {
 	return hdw->fw_buffer != NULL;
 }
-
 
 int pvr2_hdw_cpufw_get(struct pvr2_hdw *hdw,unsigned int offs,
 		       char *buf,unsigned int cnt)
@@ -3594,7 +3510,6 @@ int pvr2_hdw_cpufw_get(struct pvr2_hdw *hdw,unsigned int offs,
 	return ret;
 }
 
-
 int pvr2_hdw_v4l_get_minor_number(struct pvr2_hdw *hdw,
 				  enum pvr2_v4l_type index)
 {
@@ -3605,7 +3520,6 @@ int pvr2_hdw_v4l_get_minor_number(struct pvr2_hdw *hdw,
 	default: return -1;
 	}
 }
-
 
 /* Store a v4l minor device number */
 void pvr2_hdw_v4l_store_minor_number(struct pvr2_hdw *hdw,
@@ -3619,7 +3533,6 @@ void pvr2_hdw_v4l_store_minor_number(struct pvr2_hdw *hdw,
 	}
 }
 
-
 static void pvr2_ctl_write_complete(struct urb *urb)
 {
 	struct pvr2_hdw *hdw = urb->context;
@@ -3628,7 +3541,6 @@ static void pvr2_ctl_write_complete(struct urb *urb)
 	complete(&hdw->ctl_done);
 }
 
-
 static void pvr2_ctl_read_complete(struct urb *urb)
 {
 	struct pvr2_hdw *hdw = urb->context;
@@ -3636,7 +3548,6 @@ static void pvr2_ctl_read_complete(struct urb *urb)
 	if (hdw->ctl_write_pend_flag) return;
 	complete(&hdw->ctl_done);
 }
-
 
 static void pvr2_ctl_timeout(unsigned long data)
 {
@@ -3649,7 +3560,6 @@ static void pvr2_ctl_timeout(unsigned long data)
 			usb_unlink_urb(hdw->ctl_read_urb);
 	}
 }
-
 
 /* Issue a command and get a response from the device.  This extended
    version includes a probe flag (which if set means that device errors
@@ -3709,7 +3619,6 @@ static int pvr2_send_request_ex(struct pvr2_hdw *hdw,
 			"Attempted to execute null control transfer?");
 		return -EINVAL;
 	}
-
 
 	hdw->cmd_debug_state = 1;
 	if (write_len) {
@@ -3882,7 +3791,6 @@ static int pvr2_send_request_ex(struct pvr2_hdw *hdw,
 	return status;
 }
 
-
 int pvr2_send_request(struct pvr2_hdw *hdw,
 		      void *write_data,unsigned int write_len,
 		      void *read_data,unsigned int read_len)
@@ -3891,7 +3799,6 @@ int pvr2_send_request(struct pvr2_hdw *hdw,
 				    write_data,write_len,
 				    read_data,read_len);
 }
-
 
 static int pvr2_issue_simple_cmd(struct pvr2_hdw *hdw,u32 cmdcode)
 {
@@ -3952,7 +3859,6 @@ static int pvr2_issue_simple_cmd(struct pvr2_hdw *hdw,u32 cmdcode)
 	return ret;
 }
 
-
 int pvr2_write_register(struct pvr2_hdw *hdw, u16 reg, u32 data)
 {
 	int ret;
@@ -3965,14 +3871,12 @@ int pvr2_write_register(struct pvr2_hdw *hdw, u16 reg, u32 data)
 	hdw->cmd_buffer[6] = (reg >> 8) & 0xff;
 	hdw->cmd_buffer[7] = reg & 0xff;
 
-
 	ret = pvr2_send_request(hdw, hdw->cmd_buffer, 8, hdw->cmd_buffer, 0);
 
 	LOCK_GIVE(hdw->ctl_lock);
 
 	return ret;
 }
-
 
 static int pvr2_read_register(struct pvr2_hdw *hdw, u16 reg, u32 *data)
 {
@@ -3997,7 +3901,6 @@ static int pvr2_read_register(struct pvr2_hdw *hdw, u16 reg, u32 *data)
 	return ret;
 }
 
-
 void pvr2_hdw_render_useless(struct pvr2_hdw *hdw)
 {
 	if (!hdw->flag_ok) return;
@@ -4010,7 +3913,6 @@ void pvr2_hdw_render_useless(struct pvr2_hdw *hdw)
 	trace_stbit("flag_ok",hdw->flag_ok);
 	pvr2_hdw_state_sched(hdw);
 }
-
 
 void pvr2_hdw_device_reset(struct pvr2_hdw *hdw)
 {
@@ -4032,7 +3934,6 @@ void pvr2_hdw_device_reset(struct pvr2_hdw *hdw)
 	}
 
 }
-
 
 void pvr2_hdw_cpureset_assert(struct pvr2_hdw *hdw,int val)
 {
@@ -4057,24 +3958,20 @@ void pvr2_hdw_cpureset_assert(struct pvr2_hdw *hdw,int val)
 	}
 }
 
-
 int pvr2_hdw_cmd_deep_reset(struct pvr2_hdw *hdw)
 {
 	return pvr2_issue_simple_cmd(hdw,FX2CMD_DEEP_RESET);
 }
-
 
 int pvr2_hdw_cmd_powerup(struct pvr2_hdw *hdw)
 {
 	return pvr2_issue_simple_cmd(hdw,FX2CMD_POWER_ON);
 }
 
-
 int pvr2_hdw_cmd_powerdown(struct pvr2_hdw *hdw)
 {
 	return pvr2_issue_simple_cmd(hdw,FX2CMD_POWER_OFF);
 }
-
 
 int pvr2_hdw_cmd_decoder_reset(struct pvr2_hdw *hdw)
 {
@@ -4091,7 +3988,6 @@ int pvr2_hdw_cmd_decoder_reset(struct pvr2_hdw *hdw)
 	return -ENOTTY;
 }
 
-
 static int pvr2_hdw_cmd_hcw_demod_reset(struct pvr2_hdw *hdw, int onoff)
 {
 	hdw->flag_ok = !0;
@@ -4101,7 +3997,6 @@ static int pvr2_hdw_cmd_hcw_demod_reset(struct pvr2_hdw *hdw, int onoff)
 				     ((onoff ? 1 : 0) << 16));
 }
 
-
 static int pvr2_hdw_cmd_onair_fe_power_ctrl(struct pvr2_hdw *hdw, int onoff)
 {
 	hdw->flag_ok = !0;
@@ -4110,7 +4005,6 @@ static int pvr2_hdw_cmd_onair_fe_power_ctrl(struct pvr2_hdw *hdw, int onoff)
 					  FX2CMD_ONAIR_DTV_POWER_OFF));
 }
 
-
 static int pvr2_hdw_cmd_onair_digital_path_ctrl(struct pvr2_hdw *hdw,
 						int onoff)
 {
@@ -4118,7 +4012,6 @@ static int pvr2_hdw_cmd_onair_digital_path_ctrl(struct pvr2_hdw *hdw,
 					  FX2CMD_ONAIR_DTV_STREAMING_ON :
 					  FX2CMD_ONAIR_DTV_STREAMING_OFF));
 }
-
 
 static void pvr2_hdw_cmd_modeswitch(struct pvr2_hdw *hdw,int digitalFl)
 {
@@ -4155,7 +4048,6 @@ static void pvr2_hdw_cmd_modeswitch(struct pvr2_hdw *hdw,int digitalFl)
 	hdw->pathway_state = cmode;
 }
 
-
 static void pvr2_led_ctrl_hauppauge(struct pvr2_hdw *hdw, int onoff)
 {
 	/* change some GPIO data
@@ -4172,13 +4064,11 @@ static void pvr2_led_ctrl_hauppauge(struct pvr2_hdw *hdw, int onoff)
 	pvr2_hdw_gpio_chg_out(hdw, 0xffffffff, 0x00000000);
 }
 
-
 typedef void (*led_method_func)(struct pvr2_hdw *,int);
 
 static led_method_func led_methods[] = {
 	[PVR2_LED_SCHEME_HAUPPAUGE] = pvr2_led_ctrl_hauppauge,
 };
-
 
 /* Toggle LED */
 static void pvr2_led_ctrl(struct pvr2_hdw *hdw,int onoff)
@@ -4199,7 +4089,6 @@ static void pvr2_led_ctrl(struct pvr2_hdw *hdw,int onoff)
 
 	if (fp) (*fp)(hdw,onoff);
 }
-
 
 /* Stop / start video stream transport */
 static int pvr2_hdw_cmd_usbstream(struct pvr2_hdw *hdw,int runFl)
@@ -4243,7 +4132,6 @@ static int pvr2_hdw_cmd_usbstream(struct pvr2_hdw *hdw,int runFl)
 	}
 }
 
-
 /* Evaluate whether or not state_pathway_ok can change */
 static int state_eval_pathway_ok(struct pvr2_hdw *hdw)
 {
@@ -4260,7 +4148,6 @@ static int state_eval_pathway_ok(struct pvr2_hdw *hdw)
 	trace_stbit("state_pathway_ok",hdw->state_pathway_ok);
 	return !0;
 }
-
 
 /* Evaluate whether or not state_encoder_ok can change */
 static int state_eval_encoder_ok(struct pvr2_hdw *hdw)
@@ -4286,7 +4173,6 @@ static int state_eval_encoder_ok(struct pvr2_hdw *hdw)
 	trace_stbit("state_encoder_ok",hdw->state_encoder_ok);
 	return !0;
 }
-
 
 /* Evaluate whether or not state_encoder_config can change */
 static int state_eval_encoder_config(struct pvr2_hdw *hdw)
@@ -4354,7 +4240,6 @@ static int state_eval_encoder_config(struct pvr2_hdw *hdw)
 	return !0;
 }
 
-
 /* Return true if the encoder should not be running. */
 static int state_check_disable_encoder_run(struct pvr2_hdw *hdw)
 {
@@ -4398,7 +4283,6 @@ static int state_check_disable_encoder_run(struct pvr2_hdw *hdw)
 	   encoder. */
 	return 0;
 }
-
 
 /* Return true if the encoder should be running. */
 static int state_check_enable_encoder_run(struct pvr2_hdw *hdw)
@@ -4445,7 +4329,6 @@ static int state_check_enable_encoder_run(struct pvr2_hdw *hdw)
 	return 0;
 }
 
-
 /* Evaluate whether or not state_encoder_run can change */
 static int state_eval_encoder_run(struct pvr2_hdw *hdw)
 {
@@ -4470,7 +4353,6 @@ static int state_eval_encoder_run(struct pvr2_hdw *hdw)
 	return !0;
 }
 
-
 /* Timeout function for quiescent timer. */
 static void pvr2_hdw_quiescent_timeout(unsigned long data)
 {
@@ -4481,7 +4363,6 @@ static void pvr2_hdw_quiescent_timeout(unsigned long data)
 	queue_work(hdw->workqueue,&hdw->workpoll);
 }
 
-
 /* Timeout function for encoder wait timer. */
 static void pvr2_hdw_encoder_wait_timeout(unsigned long data)
 {
@@ -4491,7 +4372,6 @@ static void pvr2_hdw_encoder_wait_timeout(unsigned long data)
 	hdw->state_stale = !0;
 	queue_work(hdw->workqueue,&hdw->workpoll);
 }
-
 
 /* Timeout function for encoder run timer. */
 static void pvr2_hdw_encoder_run_timeout(unsigned long data)
@@ -4504,7 +4384,6 @@ static void pvr2_hdw_encoder_run_timeout(unsigned long data)
 		queue_work(hdw->workqueue,&hdw->workpoll);
 	}
 }
-
 
 /* Evaluate whether or not state_decoder_run can change */
 static int state_eval_decoder_run(struct pvr2_hdw *hdw)
@@ -4566,7 +4445,6 @@ static int state_eval_decoder_run(struct pvr2_hdw *hdw)
 	return !0;
 }
 
-
 /* Evaluate whether or not state_usbstream_run can change */
 static int state_eval_usbstream_run(struct pvr2_hdw *hdw)
 {
@@ -4615,7 +4493,6 @@ static int state_eval_usbstream_run(struct pvr2_hdw *hdw)
 	return !0;
 }
 
-
 /* Attempt to configure pipeline, if needed */
 static int state_eval_pipeline_config(struct pvr2_hdw *hdw)
 {
@@ -4624,7 +4501,6 @@ static int state_eval_pipeline_config(struct pvr2_hdw *hdw)
 	pvr2_hdw_commit_execute(hdw);
 	return !0;
 }
-
 
 /* Update pipeline idle and pipeline pause tracking states based on other
    inputs.  This must be called whenever the other relevant inputs have
@@ -4649,7 +4525,6 @@ static int state_update_pipeline_state(struct pvr2_hdw *hdw)
 	return updatedFl;
 }
 
-
 typedef int (*state_eval_func)(struct pvr2_hdw *);
 
 /* Set of functions to be run to evaluate various states in the driver. */
@@ -4662,7 +4537,6 @@ static const state_eval_func eval_funcs[] = {
 	state_eval_encoder_run,
 	state_eval_usbstream_run,
 };
-
 
 /* Process various states and return true if we did anything interesting. */
 static int pvr2_hdw_state_update(struct pvr2_hdw *hdw)
@@ -4701,7 +4575,6 @@ static int pvr2_hdw_state_update(struct pvr2_hdw *hdw)
 	return state_updated;
 }
 
-
 static unsigned int print_input_mask(unsigned int msk,
 				     char *buf,unsigned int acnt)
 {
@@ -4719,7 +4592,6 @@ static unsigned int print_input_mask(unsigned int msk,
 	return tcnt;
 }
 
-
 static const char *pvr2_pathway_state_name(int id)
 {
 	switch (id) {
@@ -4728,7 +4600,6 @@ static const char *pvr2_pathway_state_name(int id)
 	default: return "unknown";
 	}
 }
-
 
 static unsigned int pvr2_hdw_report_unlocked(struct pvr2_hdw *hdw,int which,
 					     char *buf,unsigned int acnt)
@@ -4838,7 +4709,6 @@ static unsigned int pvr2_hdw_report_unlocked(struct pvr2_hdw *hdw,int which,
 	return 0;
 }
 
-
 /* Generate report containing info about attached sub-devices and attached
    i2c clients, including an indication of which attached i2c clients are
    actually sub-devices. */
@@ -4881,7 +4751,6 @@ static unsigned int pvr2_hdw_report_clients(struct pvr2_hdw *hdw,
 	return tcnt;
 }
 
-
 unsigned int pvr2_hdw_state_report(struct pvr2_hdw *hdw,
 				   char *buf,unsigned int acnt)
 {
@@ -4901,7 +4770,6 @@ unsigned int pvr2_hdw_state_report(struct pvr2_hdw *hdw,
 	LOCK_GIVE(hdw->big_lock);
 	return bcnt;
 }
-
 
 static void pvr2_hdw_state_log_state(struct pvr2_hdw *hdw)
 {
@@ -4925,7 +4793,6 @@ static void pvr2_hdw_state_log_state(struct pvr2_hdw *hdw)
 		ucnt += lcnt + 1;
 	}
 }
-
 
 /* Evaluate and update the driver's current state, taking various actions
    as appropriate for the update. */
@@ -4990,7 +4857,6 @@ static int pvr2_hdw_state_eval(struct pvr2_hdw *hdw)
 	return callback_flag;
 }
 
-
 /* Cause kernel thread to check / update driver state */
 static void pvr2_hdw_state_sched(struct pvr2_hdw *hdw)
 {
@@ -5000,24 +4866,20 @@ static void pvr2_hdw_state_sched(struct pvr2_hdw *hdw)
 	queue_work(hdw->workqueue,&hdw->workpoll);
 }
 
-
 int pvr2_hdw_gpio_get_dir(struct pvr2_hdw *hdw,u32 *dp)
 {
 	return pvr2_read_register(hdw,PVR2_GPIO_DIR,dp);
 }
-
 
 int pvr2_hdw_gpio_get_out(struct pvr2_hdw *hdw,u32 *dp)
 {
 	return pvr2_read_register(hdw,PVR2_GPIO_OUT,dp);
 }
 
-
 int pvr2_hdw_gpio_get_in(struct pvr2_hdw *hdw,u32 *dp)
 {
 	return pvr2_read_register(hdw,PVR2_GPIO_IN,dp);
 }
-
 
 int pvr2_hdw_gpio_chg_dir(struct pvr2_hdw *hdw,u32 msk,u32 val)
 {
@@ -5039,7 +4901,6 @@ int pvr2_hdw_gpio_chg_dir(struct pvr2_hdw *hdw,u32 msk,u32 val)
 	return pvr2_write_register(hdw,PVR2_GPIO_DIR,nval);
 }
 
-
 int pvr2_hdw_gpio_chg_out(struct pvr2_hdw *hdw,u32 msk,u32 val)
 {
 	u32 cval,nval;
@@ -5058,7 +4919,6 @@ int pvr2_hdw_gpio_chg_out(struct pvr2_hdw *hdw,u32 msk,u32 val)
 	}
 	return pvr2_write_register(hdw,PVR2_GPIO_OUT,nval);
 }
-
 
 void pvr2_hdw_status_poll(struct pvr2_hdw *hdw)
 {
@@ -5083,18 +4943,15 @@ void pvr2_hdw_status_poll(struct pvr2_hdw *hdw)
 	hdw->cropcap_stale = 0;
 }
 
-
 unsigned int pvr2_hdw_get_input_available(struct pvr2_hdw *hdw)
 {
 	return hdw->input_avail_mask;
 }
 
-
 unsigned int pvr2_hdw_get_input_allowed(struct pvr2_hdw *hdw)
 {
 	return hdw->input_allowed_mask;
 }
-
 
 static int pvr2_hdw_set_input(struct pvr2_hdw *hdw,int v)
 {
@@ -5116,7 +4973,6 @@ static int pvr2_hdw_set_input(struct pvr2_hdw *hdw,int v)
 	}
 	return 0;
 }
-
 
 int pvr2_hdw_set_input_allowed(struct pvr2_hdw *hdw,
 			       unsigned int change_mask,
@@ -5157,7 +5013,6 @@ int pvr2_hdw_set_input_allowed(struct pvr2_hdw *hdw,
 	return ret;
 }
 
-
 /* Find I2C address of eeprom */
 static int pvr2_hdw_get_eeprom_addr(struct pvr2_hdw *hdw)
 {
@@ -5172,7 +5027,6 @@ static int pvr2_hdw_get_eeprom_addr(struct pvr2_hdw *hdw)
 	} while(0); LOCK_GIVE(hdw->ctl_lock);
 	return result;
 }
-
 
 int pvr2_hdw_register_access(struct pvr2_hdw *hdw,
 			     struct v4l2_dbg_match *match, u64 reg_id,
@@ -5199,7 +5053,6 @@ int pvr2_hdw_register_access(struct pvr2_hdw *hdw,
 	return -ENOSYS;
 #endif
 }
-
 
 /*
   Stuff for Emacs to see, in order to encourage consistent editing style:

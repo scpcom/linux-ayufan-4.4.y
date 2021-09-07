@@ -54,7 +54,6 @@
  *       IS-NIC driver.
  */
 
-
 #define KLUDGE_FOR_4GB_BOUNDARY         1
 #define DEBUG_MICROCODE                 1
 #define DBG                             1
@@ -156,7 +155,6 @@ static int  slic_upr_request(struct adapter *adapter, u32 upr_request,
 			     u32 upr_buffer_h);
 static void slic_mcast_set_list(struct net_device *dev);
 
-
 static uint slic_first_init = 1;
 static char *slic_banner = "Alacritech SLIC Technology(tm) Server "\
 		"and Storage Accelerator (Non-Accelerated)";
@@ -219,7 +217,6 @@ MODULE_DEVICE_TABLE(pci, slic_pci_tbl);
 	}								\
 } while (0)
 #endif
-
 
 #define SLIC_GET_SLIC_HANDLE(_adapter, _pslic_handle)                   \
 {                                                                       \
@@ -412,7 +409,6 @@ static int __devinit slic_entry_probe(struct pci_dev *pcidev,
 
 	mmio_start = pci_resource_start(pcidev, 0);
 	mmio_len = pci_resource_len(pcidev, 0);
-
 
 /*	memmapped_ioaddr =  (u32)ioremap_nocache(mmio_start, mmio_len);*/
 	memmapped_ioaddr = ioremap(mmio_start, mmio_len);

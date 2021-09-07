@@ -76,7 +76,6 @@ struct hubdev_info {
 	struct sn_flush_nasid_entry	hdi_flush_nasid_list;
 	struct xwidget_info		hdi_xwidget_info[HUB_WIDGET_ID_MAX + 1];
 
-
 	void				*hdi_nodepda;
 	void				*hdi_node_vertex;
 	u32				max_segment_number;
@@ -86,6 +85,5 @@ struct hubdev_info {
 extern void hubdev_init_node(nodepda_t *, cnodeid_t);
 extern void hub_error_init(struct hubdev_info *);
 extern void ice_error_init(struct hubdev_info *);
-
 
 #endif /* _ASM_IA64_SN_XTALK_HUBDEV_H */

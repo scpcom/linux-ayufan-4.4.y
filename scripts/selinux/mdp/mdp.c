@@ -211,7 +211,6 @@ int main(int argc, char *argv[])
 		fprintf(fout, "sid %s user_u:base_r:base_t\n", initial_sid_to_string[i]);
 	fprintf(fout, "\n");
 
-
 	fprintf(fout, "fs_use_xattr ext2 user_u:base_r:base_t;\n");
 	fprintf(fout, "fs_use_xattr ext3 user_u:base_r:base_t;\n");
 	fprintf(fout, "fs_use_xattr jfs user_u:base_r:base_t;\n");

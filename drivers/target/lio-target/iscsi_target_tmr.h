@@ -14,4 +14,3 @@ extern int iscsi_check_task_reassign_expdatasn(iscsi_tmr_req_t *,
 extern int iscsi_build_r2ts_for_cmd(iscsi_cmd_t *, iscsi_conn_t *, int);
 
 #endif /* ISCSI_TARGET_TMR_H */
-

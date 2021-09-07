@@ -24,7 +24,6 @@
  *
  */
 
-
 #include <asm/io.h>
 #include <linux/delay.h>
 #include <linux/interrupt.h>
@@ -105,7 +104,6 @@ struct prodigy_hifi_spec {
 #define WM8766_MUTE1	    0x0C
 #define WM8766_MUTE2	    0x0F
 
-
 /*
  * Prodigy HD2
  */
@@ -120,7 +118,6 @@ struct prodigy_hifi_spec {
 #define AK4396_CTRL3	    0x02
 #define AK4396_LCH_ATT	  0x03
 #define AK4396_RCH_ATT	  0x04
-
 
 /*
  * get the current register value of WM codec
@@ -203,7 +200,6 @@ static void wm8766_spi_write(struct snd_ice1712 *ice, unsigned int reg,
 	snd_ice1712_gpio_set_dir(ice, ice->gpio.direction);
 }
 
-
 /*
  * serial interface for ak4396 - only writing supported, no readback
  */
@@ -242,12 +238,9 @@ static void ak4396_write(struct snd_ice1712 *ice, unsigned int reg,
 	snd_ice1712_gpio_set_dir(ice, ice->gpio.direction);
 }
 
-
 /*
  * ak4396 mixers
  */
-
-
 
 /*
  * DAC volume attenuation mixer control (-64dB to 0dB)
@@ -311,7 +304,6 @@ static struct snd_kcontrol_new prodigy_hd2_controls[] __devinitdata = {
     },
 };
 
-
 /* --------------- */
 
 /*
@@ -336,11 +328,9 @@ static const unsigned char wm_vol[256] = {
 #define WM_VOL_MAX	(sizeof(wm_vol) - 1)
 #define WM_VOL_MUTE	0x8000
 
-
 #define DAC_0dB	0xff
 #define DAC_RES	128
 #define DAC_MIN	(DAC_0dB - DAC_RES)
-
 
 static void wm_set_vol(struct snd_ice1712 *ice, unsigned int index,
 		       unsigned short vol, unsigned short master)
@@ -374,7 +364,6 @@ static void wm8766_set_vol(struct snd_ice1712 *ice, unsigned int index,
 
 	wm8766_spi_write(ice, index, (0x0100 | nvol));
 }
-
 
 /*
  * DAC volume attenuation mixer control (-64dB to 0dB)
@@ -422,7 +411,6 @@ static int wm_dac_vol_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_val
 	mutex_unlock(&ice->gpio_mutex);
 	return change;
 }
-
 
 /*
  * WM8766 DAC volume attenuation mixer control
@@ -530,7 +518,6 @@ static int wm_master_vol_put(struct snd_kcontrol *kcontrol,
 	mutex_unlock(&ice->gpio_mutex);	
 	return change;
 }
-
 
 /* KONSTI */
 
@@ -776,7 +763,6 @@ static int wm_chswap_put(struct snd_kcontrol *kcontrol,
 	return change;
 }
 
-
 /*
  * mixers
  */
@@ -972,7 +958,6 @@ static int __devinit prodigy_hd2_add_controls(struct snd_ice1712 *ice)
 	return 0;
 }
 
-
 /*
  * initialize the chip
  */
@@ -1069,10 +1054,8 @@ static int __devinit prodigy_hifi_init(struct snd_ice1712 *ice)
 	for (i = 0; i < ARRAY_SIZE(wm8766_inits); i += 2)
 		wm8766_spi_write(ice, wm8766_inits[i], wm8766_inits[i+1]);
 
-
 	return 0;
 }
-
 
 /*
  * initialize the chip
@@ -1149,7 +1132,6 @@ static int __devinit prodigy_hd2_init(struct snd_ice1712 *ice)
 
 	return 0;
 }
-
 
 static unsigned char prodigy71hifi_eeprom[] __devinitdata = {
 	0x4b,   /* SYSCONF: clock 512, spdif-in/ADC, 4DACs */
@@ -1233,4 +1215,3 @@ struct snd_ice1712_card_info snd_vt1724_prodigy_hifi_cards[] __devinitdata = {
 	},
 	{ } /* terminator */
 };
-

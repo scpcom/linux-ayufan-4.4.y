@@ -31,7 +31,6 @@ disclaimer.
 #ifndef __INCmv88F5X81SysHwConfigh
 #define __INCmv88F5X81SysHwConfigh
 
-
 /* 
  *  System memory mapping 
  */
@@ -69,14 +68,12 @@ otherwise the following defines will be ignored */
 #define PEX_CONFIG_RW_WA_BASE 0x50000000
 #define PEX_CONFIG_RW_WA_SIZE _16M
 
-
 /* PCI0: IO and memory space */
 #define PCI0_MEM_BASE  0x98000000
 #define PCI0_MEM_SIZE  _128M
 
 #define PCI0_IO_BASE    0xf0100000
 #define PCI0_IO_SIZE    _1M
-
 
 /* Device: CS0 - SRAM, CS1 - RTC, CS2 - UART, CS3 - large flash */
 #define DEVICE_CS0_BASE 0xfa000000
@@ -91,12 +88,10 @@ otherwise the following defines will be ignored */
 /* Internal registers: size is defined in Controllerenvironment */
 #define INTER_REGS_BASE	0xF1000000
 
-
 #define PCI_IF0_MEM0_BASE 	PCI0_MEM_BASE
 #define PCI_IF0_MEM0_SIZE 	PCI0_MEM_SIZE
 #define PCI_IF0_IO_BASE 	PCI0_IO_BASE
 #define PCI_IF0_IO_SIZE 	PCI0_IO_SIZE
-
 
 /* DRAM detection stuff */
 #define MV_DRAM_AUTO_SIZE
@@ -109,7 +104,6 @@ otherwise the following defines will be ignored */
 	#error "Please select either integrated PCI arbiter or board arbiter"
 #endif
 
-
 /* Board clock detection */
 #define TCLK_AUTO_DETECT    /* Use Tclk auto detection 		*/
 #define SYSCLK_AUTO_DETECT	/* Use SysClk auto detection 	*/
@@ -118,7 +112,6 @@ otherwise the following defines will be ignored */
 /* PEX-PCI\PCI-PCI Bridge*/
 #define PCI0_IF_PTP		0		/* Bridge exist on pciIf0*/
 #define PCI1_IF_PTP		0		/* Bridge exist on pciIf1*/
-
 
 #define MEM_TABLE	{	\
   { PCI_IF0_MEM0_BASE,   PCI_IF0_MEM0_BASE,   PCI_IF0_MEM0_SIZE,  MT_DEVICE }	\

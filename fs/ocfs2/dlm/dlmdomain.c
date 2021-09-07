@@ -275,7 +275,6 @@ static struct dlm_ctxt * __dlm_lookup_domain(const char *domain)
 	return __dlm_lookup_domain_full(domain, strlen(domain));
 }
 
-
 /* returns true on one of two conditions:
  * 1) the domain does not exist
  * 2) the domain exists and it's state is "joined" */
@@ -570,7 +569,6 @@ static int dlm_send_one_domain_exit(struct dlm_ctxt *dlm,
 
 	return status;
 }
-
 
 static void dlm_leave_domain(struct dlm_ctxt *dlm)
 {

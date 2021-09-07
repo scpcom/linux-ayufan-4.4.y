@@ -19,7 +19,6 @@
  *
  */
 
-
 /* [R 19] Interrupt register #0 read */
 #define BRB1_REG_BRB1_INT_STS					 0x6011c
 /* [RW 4] Parity mask register #0 read/write */
@@ -4547,7 +4546,6 @@
 #define LINK_SYNC_ATTENTION_BIT_FUNC_6	    RESERVED_GENERAL_ATTENTION_BIT_18
 #define LINK_SYNC_ATTENTION_BIT_FUNC_7	    RESERVED_GENERAL_ATTENTION_BIT_19
 
-
 #define LATCHED_ATTN_RBCR			23
 #define LATCHED_ATTN_RBCT			24
 #define LATCHED_ATTN_RBCN			25
@@ -4608,7 +4606,6 @@
 #define GRCBASE_XSEM		0x280000
 #define GRCBASE_USEM		0x300000
 #define GRCBASE_MISC_AEU	GRCBASE_MISC
-
 
 /* offset of configuration space in the pci core register */
 #define PCICFG_OFFSET					0x2000
@@ -4679,7 +4676,6 @@
 #define PCICFG_DEVICE_STATUS_AUX_PWR_DET	(1<<4)
 #define PCICFG_DEVICE_STATUS_NO_PEND		(1<<5)
 #define PCICFG_LINK_CONTROL				0xbc
-
 
 #define BAR_USTRORM_INTMEM				0x400000
 #define BAR_CSTRORM_INTMEM				0x410000
@@ -4770,7 +4766,6 @@
 #define PCI_PM_DATA_B					0x414
 #define PCI_ID_VAL1					0x434
 #define PCI_ID_VAL2					0x438
-
 
 #define MDIO_REG_BANK_CL73_IEEEB0			0x0
 #define MDIO_CL73_IEEEB0_CL73_AN_CONTROL		0x0
@@ -4908,7 +4903,6 @@
 #define MDIO_GP_STATUS_TOP_AN_STATUS1_ACTUAL_SPEED_1G_KX	0x0D00
 #define MDIO_GP_STATUS_TOP_AN_STATUS1_ACTUAL_SPEED_10G_KX4	0x0E00
 
-
 #define MDIO_REG_BANK_10G_PARALLEL_DETECT		0x8130
 #define MDIO_10G_PARALLEL_DETECT_PAR_DET_10G_CONTROL		0x11
 #define MDIO_10G_PARALLEL_DETECT_PAR_DET_10G_CONTROL_PARDET10G_EN	0x1
@@ -5044,7 +5038,6 @@ bit15=link,bit12=duplex,bits11:10=speed,bit14=acknowledge.
 Theotherbitsarereservedandshouldbezero*/
 #define MDIO_COMBO_IEEE0_AUTO_NEG_LINK_PARTNER_ABILITY1_SGMII_MODE	0x0001
 
-
 #define MDIO_PMA_DEVAD			0x1
 /*ieee*/
 #define MDIO_PMA_REG_CTRL		0x0
@@ -5118,7 +5111,6 @@ Theotherbitsarereservedandshouldbezero*/
 #define MDIO_PMA_REG_8481_SIGNAL_MASK	0xa835
 #define MDIO_PMA_REG_8481_LINK_SIGNAL	0xa83b
 
-
 #define MDIO_WIS_DEVAD			0x2
 /*bcm*/
 #define MDIO_WIS_REG_LASI_CNTL		0x9002
@@ -5136,7 +5128,6 @@ Theotherbitsarereservedandshouldbezero*/
 #define MDIO_PCS_REG_7101_SPI_FIFO_ADDR_BULK_ERASE_CMD	 (0xC7)
 #define MDIO_PCS_REG_7101_SPI_FIFO_ADDR_PAGE_PROGRAM_CMD (2)
 #define MDIO_PCS_REG_7101_SPI_BYTES_TO_TRANSFER_ADDR 0xE028
-
 
 #define MDIO_XS_DEVAD			0x4
 #define MDIO_XS_PLL_SEQUENCER		0x8000
@@ -5208,7 +5199,6 @@ Theotherbitsarereservedandshouldbezero*/
 #define COMMAND_REG_SIMD_MASK	    0x18
 #define COMMAND_REG_SIMD_NOMASK     0x1c
 
-
 #define IGU_MEM_BASE						0x0000
 
 #define IGU_MEM_MSIX_BASE					0x0000
@@ -5242,10 +5232,8 @@ Theotherbitsarereservedandshouldbezero*/
 
 #define IGU_REG_RESERVED_UPPER				0x05ff
 
-
 #define CDU_REGION_NUMBER_XCM_AG 2
 #define CDU_REGION_NUMBER_UCM_AG 4
-
 
 /**
  * String-to-compress [31:8] = CID (all 24 bits)
@@ -5320,5 +5308,3 @@ static inline u8 calc_crc8(u32 data, u8 crc)
 
 	return crc_res;
 }
-
-

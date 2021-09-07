@@ -200,6 +200,4 @@ bfa_cb_ioim_get_cdblen(struct bfad_ioim_s *dio)
 	return (cmnd->cmd_len);
 }
 
-
-
 #endif /* __BFA_HCB_IOIM_MACROS_H__ */

@@ -134,4 +134,3 @@ extern void SkGeYuSirqIsr(SK_AC *pAC, SK_IOC IoC, SK_U32 Istatus);
 extern void SkYuk2SirqIsr(SK_AC *pAC, SK_IOC IoC, SK_U32 Istatus);
 
 #endif	/* _INC_SKGESIRQ_H_ */
-

@@ -146,7 +146,6 @@ struct hugetlbfs_sb_info {
 	struct hstate *hstate;
 };
 
-
 struct hugetlbfs_inode_info {
 	struct shared_policy policy;
 	struct inode vfs_inode;

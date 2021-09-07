@@ -199,7 +199,6 @@ void acpi_table_print_madt_entry(struct acpi_subtable_header *header)
 	}
 }
 
-
 int __init
 acpi_table_parse_entries(char *id,
 			     unsigned long table_size,

@@ -42,7 +42,6 @@ static unsigned int stack_maxrandom_size(void)
 	return max;
 }
 
-
 /*
  * Top of mmap area (just below the process stack).
  *

@@ -228,7 +228,6 @@ typedef struct {
 } reg_iop_fifo_in_r_masked_intr;
 #define REG_RD_ADDR_iop_fifo_in_r_masked_intr 64
 
-
 /* Constants */
 enum {
   regk_iop_fifo_in_dif_in                  = 0x00000002,

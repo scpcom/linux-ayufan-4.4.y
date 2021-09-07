@@ -49,7 +49,6 @@
 
 #include <linux/generic_serial.h>
 
-
 #include "linux_compat.h"
 #include "rio_linux.h"
 #include "pkt.h"
@@ -83,9 +82,7 @@ static void RIOClearUp(struct Port *PortP);
 /* Below belongs in func.h */
 int RIOShortCommand(struct rio_info *p, struct Port *PortP, int command, int len, int arg);
 
-
 extern struct rio_info *p;
-
 
 int riotopen(struct tty_struct *tty, struct file *filp)
 {
@@ -246,7 +243,6 @@ int riotopen(struct tty_struct *tty, struct file *filp)
 
 	if (!(PortP->firstOpen)) {	/* First time ? */
 		rio_dprintk(RIO_DEBUG_TTY, "First open for this port\n");
-
 
 		PortP->firstOpen++;
 		PortP->CookMode = 0;	/* XXX RIOCookMode(tp); */
@@ -548,8 +544,6 @@ close_end:
 	return rv;
 }
 
-
-
 static void RIOClearUp(struct Port *PortP)
 {
 	rio_dprintk(RIO_DEBUG_TTY, "RIOHalted set\n");
@@ -651,5 +645,3 @@ int RIOShortCommand(struct rio_info *p, struct Port *PortP, int command, int len
 	rio_spin_unlock_irqrestore(&PortP->portSem, flags);
 	return p->RIOHalted ? RIO_FAIL : ~RIO_FAIL;
 }
-
-

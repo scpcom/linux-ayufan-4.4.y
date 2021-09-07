@@ -715,8 +715,6 @@ static void cap_inet_conn_established(struct sock *sk, struct sk_buff *skb)
 {
 }
 
-
-
 static void cap_req_classify_flow(const struct request_sock *req,
 				  struct flowi *fl)
 {

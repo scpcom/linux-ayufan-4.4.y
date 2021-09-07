@@ -12,7 +12,6 @@
 #include <linux/pci.h>
 #include <asm/pci-direct.h>
 
-
 #include <asm/e820.h>
 #include <asm/mmzone.h>
 #include <asm/setup.h>
@@ -163,4 +162,3 @@ void __init probe_roms(void)
 		start = adapter_rom_resources[i++].end & ~2047UL;
 	}
 }
-

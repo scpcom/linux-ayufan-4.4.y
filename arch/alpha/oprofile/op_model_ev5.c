@@ -15,7 +15,6 @@
 
 #include "op_impl.h"
 
-
 /* Compute all of the registers in preparation for enabling profiling.
 
    The 21164 (EV5) and 21164PC (PCA65) vary in the bit placement and
@@ -188,7 +187,6 @@ ev5_handle_interrupt(unsigned long which, struct pt_regs *regs,
 	/* Record the sample.  */
 	oprofile_add_sample(regs, which);
 }
-
 
 struct op_axp_model op_model_ev5 = {
 	.reg_setup		= ev5_reg_setup,

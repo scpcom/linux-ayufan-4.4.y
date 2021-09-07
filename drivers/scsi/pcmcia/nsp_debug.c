@@ -24,7 +24,6 @@ static const char * group_0_commands[] = {
 /* 1e-1f */ "Prevent/Allow Medium Removal", unknown,
 };
 
-
 static const char *group_1_commands[] = {
 /* 20-22 */  unknown, unknown, unknown,
 /* 23-28 */ unknown, unknown, "Read Capacity", unknown, unknown, "Read (10)",
@@ -35,7 +34,6 @@ static const char *group_1_commands[] = {
 /* 38-3c */ "Medium Scan", "Compare","Copy Verify", "Write Buffer", "Read Buffer",
 /* 3d-3f */ "Update Block", "Read Long",  "Write Long",
 };
-
 
 static const char *group_2_commands[] = {
 /* 40-41 */ "Change Definition", "Write Same", 

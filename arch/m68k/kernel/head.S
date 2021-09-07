@@ -685,7 +685,6 @@ loopx2:
 L(test_notmac):
 #endif /* CONFIG_MAC */
 
-
 /*
  * There are ultimately two pieces of information we want for all kinds of
  * processors CpuType and CacheBits.  The CPUTYPE was passed in from booter
@@ -919,7 +918,6 @@ L(nothp):
 #endif	/* CONSOLE */
 L(nocon):
 #endif	/* CONFIG_MAC */
-
 
 	putc	'\n'
 	putc	'A'
@@ -1564,7 +1562,6 @@ func_start	get_bi_record,%d1
 4:
 func_return	get_bi_record
 
-
 /*
  *	MMU Initialization Begins Here
  *
@@ -1921,7 +1918,6 @@ mmu_print_done:
 
 func_return	mmu_print
 
-
 mmu_030_print_helper:
 	moveml	%d0-%d1,%sp@-
 	movel	%a4,%d0
@@ -1947,7 +1943,6 @@ mmu_print_tuple_invalidate:
 mmu_print_tuple_invalidate_exit:
 	moveml	%sp@+,%a0/%d7
 	rts
-
 
 mmu_print_tuple:
 	moveml	%d0-%d7/%a0,%sp@-
@@ -2607,8 +2602,6 @@ func_start	mmu_get_root_table_entry,%d0/%a1
 
 func_return	mmu_get_root_table_entry
 
-
-
 func_start	mmu_get_ptr_table_entry,%d0/%a1
 
 #if 0
@@ -2667,7 +2660,6 @@ func_start	mmu_get_ptr_table_entry,%d0/%a1
 #endif
 
 func_return	mmu_get_ptr_table_entry
-
 
 func_start	mmu_get_page_table_entry,%d0/%a1
 
@@ -2749,8 +2741,6 @@ func_start	get_new_page,%d0/%a1
 	dputc	'\n'
 
 func_return	get_new_page
-
-
 
 /*
  * Debug output support
@@ -3545,7 +3535,6 @@ L(console_scroll_clear_loop):
 
 1:
 func_return	console_scroll
-
 
 func_start	console_putc,%a0/%a1/%d0-%d7
 

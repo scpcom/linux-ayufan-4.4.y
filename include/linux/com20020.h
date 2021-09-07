@@ -41,7 +41,6 @@ extern const struct net_device_ops com20020_netdev_ops;
 #define BUS_ALIGN  1
 #endif
 
-
 #define _INTMASK  (ioaddr+BUS_ALIGN*0)	/* writable */
 #define _STATUS   (ioaddr+BUS_ALIGN*0)	/* readable */
 #define _COMMAND  (ioaddr+BUS_ALIGN*1)	/* standard arcnet commands */

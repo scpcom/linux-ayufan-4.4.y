@@ -37,7 +37,6 @@ static const char ID_sccs[] = "@(#)drvfbi.c	1.63 99/02/11 (C) SK " ;
 #define	LED_Y_ON	0x11	/* Used for ring up/down indication */
 #define	LED_Y_OFF	0x10
 
-
 #define MS2BCLK(x)	((x)*12500L)
 
 /*
@@ -77,7 +76,6 @@ const struct s_oem_ids oem_ids[] = {
 #ifdef AIX
 extern int AIX_vpdReadByte() ;
 #endif
-
 
 /* Prototype of a local function. */
 static void smt_stop_watchdog(struct s_smc *smc);
@@ -250,7 +248,6 @@ void plc2_irq(struct s_smc *smc)
 	plc_irq(smc,PA,st) ;
 }
 
-
 /*
  * interrupt source= timer
  */
@@ -376,7 +373,6 @@ void plc_clear_irq(struct s_smc *smc, int p)
 	SK_UNUSED(smc) ;
 }
 
-
 /*
  * led_indication called by rmt_indication() and
  * pcm_state_change()
@@ -436,7 +432,6 @@ static void led_indication(struct s_smc *smc, int led_event)
 
 }
 
-
 void pcm_state_change(struct s_smc *smc, int plc, int p_state)
 {
 	/*
@@ -449,7 +444,6 @@ void pcm_state_change(struct s_smc *smc, int plc, int p_state)
 	led_indication(smc,0) ;
 }
 
-
 void rmt_indication(struct s_smc *smc, int i)
 {
 	/* Call a driver special function if defined */
@@ -457,7 +451,6 @@ void rmt_indication(struct s_smc *smc, int i)
 
         led_indication(smc, i ? LED_Y_OFF : LED_Y_ON) ;
 }
-
 
 /*
  * llc_recover_tx called by init_tx (fplus.c)
@@ -487,7 +480,6 @@ static int is_equal_num(char comp1[], char comp2[], int num)
 	}
 		return (1) ;
 }	/* is_equal_num */
-
 
 /*
  * set the OEM ID defaults, and test the contents of the OEM data base
@@ -581,4 +573,3 @@ void mac_do_pci_fix(struct s_smc *smc)
 	SK_UNUSED(smc) ;
 }
 #endif	/* PCI */
-

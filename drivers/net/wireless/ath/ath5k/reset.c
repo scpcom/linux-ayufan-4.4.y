@@ -77,7 +77,6 @@ static inline int ath5k_hw_write_ofdm_timings(struct ath5k_hw *ah,
 	/* Note: we've shifted coef_scaled by 24 */
 	coef_exp = 14 - (coef_exp - 24);
 
-
 	/* Get mantissa (significant digits)
 	 * ALGO: coef_mant = floor(coef_scaled* 2^coef_exp+0.5) */
 	coef_man = coef_scaled +
@@ -95,7 +94,6 @@ static inline int ath5k_hw_write_ofdm_timings(struct ath5k_hw *ah,
 
 	return 0;
 }
-
 
 /*
  * index into rates for control rates, we can set it up like this because
@@ -627,8 +625,6 @@ static void ath5k_hw_tweak_initval_settings(struct ath5k_hw *ah,
 				AR5K_PHY_ADC_CTL_PWD_ADC_OFF),
 				AR5K_PHY_ADC_CTL);
 
-
-
 		/* Disable barker RSSI threshold */
 		AR5K_REG_DISABLE_BITS(ah, AR5K_PHY_DAG_CCK_CTL,
 				AR5K_PHY_DAG_CCK_CTL_EN_RSSI_THR);
@@ -835,7 +831,6 @@ static void ath5k_hw_commit_eeprom_settings(struct ath5k_hw *ah,
 	AR5K_REG_WRITE_BITS(ah, AR5K_PHY_NF,
 			AR5K_PHY_NF_THRESH62,
 			ee->ee_thr_62[ee_mode]);
-
 
 	/* False detect backoff for channels
 	 * that have spur noise. Write the new
@@ -1074,7 +1069,6 @@ int ath5k_hw_reset(struct ath5k_hw *ah, enum nl80211_iftype op_mode,
 		if (ret)
 			return ret;
 
-
 		/* Write OFDM timings on 5212*/
 		if (ah->ah_version == AR5K_AR5212 &&
 			channel->hw_value & CHANNEL_OFDM) {
@@ -1153,7 +1147,6 @@ int ath5k_hw_reset(struct ath5k_hw *ah, enum nl80211_iftype op_mode,
 					AR5K_QUEUE_DCU_SEQNUM(0));
 			}
 
-
 			if (ah->ah_version == AR5K_AR5211) {
 				ath5k_hw_reg_write(ah, tsf_up, AR5K_TSF_U32);
 				ath5k_hw_reg_write(ah, tsf_lo, AR5K_TSF_L32);
@@ -1175,7 +1168,6 @@ int ath5k_hw_reset(struct ath5k_hw *ah, enum nl80211_iftype op_mode,
 						AR5K_STA_ID0);
 	ath5k_hw_reg_write(ah, staid1_flags | AR5K_HIGH_ID(ah->ah_sta_id),
 						AR5K_STA_ID1);
-
 
 	/*
 	 * Configure PCU
@@ -1220,7 +1212,6 @@ int ath5k_hw_reset(struct ath5k_hw *ah, enum nl80211_iftype op_mode,
 			AR5K_REG_SM(0, AR5K_QOS_NOACK_BYTE_OFFSET),
 			AR5K_QOS_NOACK);
 	}
-
 
 	/*
 	 * Configure PHY
@@ -1348,7 +1339,6 @@ int ath5k_hw_reset(struct ath5k_hw *ah, enum nl80211_iftype op_mode,
 			return ret;
 		}
 	}
-
 
 	/*
 	 * Configure DMA/Interrupts

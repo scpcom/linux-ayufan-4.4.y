@@ -178,4 +178,3 @@ void input_unregister_polled_device(struct input_polled_dev *dev)
 	dev->input = NULL;
 }
 EXPORT_SYMBOL(input_unregister_polled_device);
-

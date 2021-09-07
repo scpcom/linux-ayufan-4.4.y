@@ -101,7 +101,6 @@ static struct platform_device dm9000_device2 = {
 #endif
 #endif
 
-
 #if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
 /* all SPI peripherals info goes here */
 
@@ -239,7 +238,6 @@ static struct platform_device isp1362_hcd_device = {
 	.resource = isp1362_hcd_resources,
 };
 #endif
-
 
 static struct platform_device *ip0x_devices[] __initdata = {
 #if defined(CONFIG_BFIN532_IP0X)

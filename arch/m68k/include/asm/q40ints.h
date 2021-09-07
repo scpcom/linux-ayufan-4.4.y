@@ -8,7 +8,6 @@
 #define Q40_IRQ_KEYBOARD (32)
 #define Q40_IRQ_FRAME    (33)
 
-
 /* masks for interrupt regiosters*/
 /* internal, IIRQ_REG */
 #define Q40_IRQ_KEYB_MASK    (2)

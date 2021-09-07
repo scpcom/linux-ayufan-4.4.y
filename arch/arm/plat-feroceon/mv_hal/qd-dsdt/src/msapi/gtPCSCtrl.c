@@ -16,7 +16,6 @@
 #include <gtHwCntl.h>
 #include <gtDrvSwRegs.h>
 
-
 /*******************************************************************************
 * gpcsGetCommaDet
 *
@@ -85,7 +84,6 @@ GT_STATUS gpcsGetCommaDet
     /* return */
     return retVal;
 }
-
 
 /*******************************************************************************
 * gpcsGetPCSLink
@@ -162,7 +160,6 @@ GT_STATUS gpcsGetPCSLink
     /* return */
     return retVal;
 }
-
 
 /*******************************************************************************
 * gpcsGetSyncOK
@@ -376,7 +373,6 @@ GT_STATUS gpcsGetAnBypassed
     return retVal;
 }
 
-
 /*******************************************************************************
 * gpcsGetAnBypassMode
 *
@@ -517,7 +513,6 @@ GT_STATUS gpcsSetAnBypassMode
     /* return */
     return retVal;
 }
-
 
 /*******************************************************************************
 * gpcsGetPCSAnEn
@@ -746,7 +741,6 @@ GT_STATUS gpcsSetRestartPCSAn
     return retVal;
 }
 
-
 /*******************************************************************************
 * gpcsGetPCSAnDone
 *
@@ -818,7 +812,6 @@ GT_STATUS gpcsGetPCSAnDone
     return retVal;
 }
 
-
 /*******************************************************************************
 * gpcsSetFCValue
 *
@@ -881,7 +874,6 @@ GT_STATUS gpcsSetFCValue
     /* return */
     return retVal;
 }
-
 
 /*******************************************************************************
 * gpcsGetFCValue
@@ -948,7 +940,6 @@ GT_STATUS gpcsGetFCValue
     return retVal;
 }
 
-
 /*******************************************************************************
 * gpcsSetForcedFC
 *
@@ -1012,7 +1003,6 @@ GT_STATUS gpcsSetForcedFC
     /* return */
     return retVal;
 }
-
 
 /*******************************************************************************
 * gpcsGetForcedFC
@@ -1078,8 +1068,6 @@ GT_STATUS gpcsGetForcedFC
     return retVal;
 }
 
-
-
 /*******************************************************************************
 * gpcsSetLinkValue
 *
@@ -1142,7 +1130,6 @@ GT_STATUS gpcsSetLinkValue
     /* return */
     return retVal;
 }
-
 
 /*******************************************************************************
 * gpcsGetLinkValue
@@ -1209,7 +1196,6 @@ GT_STATUS gpcsGetLinkValue
     return retVal;
 }
 
-
 /*******************************************************************************
 * gpcsSetForcedLink
 *
@@ -1273,7 +1259,6 @@ GT_STATUS gpcsSetForcedLink
     /* return */
     return retVal;
 }
-
 
 /*******************************************************************************
 * gpcsGetForcedLink
@@ -1339,7 +1324,6 @@ GT_STATUS gpcsGetForcedLink
     return retVal;
 }
 
-
 /*******************************************************************************
 * gpcsSetDpxValue
 *
@@ -1403,7 +1387,6 @@ GT_STATUS gpcsSetDpxValue
     /* return */
     return retVal;
 }
-
 
 /*******************************************************************************
 * gpcsGetDpxValue
@@ -1469,7 +1452,6 @@ GT_STATUS gpcsGetDpxValue
     return retVal;
 }
 
-
 /*******************************************************************************
 * gpcsSetForcedDpx
 *
@@ -1533,7 +1515,6 @@ GT_STATUS gpcsSetForcedDpx
     /* return */
     return retVal;
 }
-
 
 /*******************************************************************************
 * gpcsGetForcedDpx
@@ -1599,7 +1580,6 @@ GT_STATUS gpcsGetForcedDpx
     return retVal;
 }
 
-
 /*******************************************************************************
 * gpcsSetForceSpeed
 *
@@ -1659,7 +1639,6 @@ GT_STATUS gpcsSetForceSpeed
     /* return */
     return retVal;
 }
-
 
 /*******************************************************************************
 * gpcsGetForceSpeed
@@ -1723,7 +1702,6 @@ GT_STATUS gpcsGetForceSpeed
     /* return */
     return retVal;
 }
-
 
 /*******************************************************************************
 * gpcsGetRGMIITimingDelay
@@ -1869,10 +1847,3 @@ GT_STATUS gpcsSetRGMIITimingDelay
 	/* return */
 	return retVal;
 }
-
-
-
-
-
-
-

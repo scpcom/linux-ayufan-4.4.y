@@ -52,7 +52,6 @@
 #define PT_CBR		31
 #define PT_EVB		32
 
-
 /* Control registers.  */
 #define SPR_CR0 PT_PSW
 #define SPR_CR1 PT_CBR		/* read only */

@@ -219,7 +219,6 @@ static void snd_sb16_csp_capture_close(struct snd_sb *chip)
 #define snd_sb16_csp_capture_close(chip)      	 	/*nop*/
 #endif
 
-
 static void snd_sb16_setup_rate(struct snd_sb *chip,
 				unsigned short rate,
 				int channel)

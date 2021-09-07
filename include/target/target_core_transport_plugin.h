@@ -24,7 +24,6 @@
  *
  ******************************************************************************/
 
-
 #ifndef _TARGET_CORE_TRANSPORT_PLUGIN_H_
 #define _TARGET_CORE_TRANSPORT_PLUGIN_H_
 

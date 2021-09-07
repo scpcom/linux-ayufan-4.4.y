@@ -29,11 +29,8 @@
 #define LOFT_PCI_MAX_DEV    6
 #define AVILA_PCI_IRQ_LINES	4
 
-
 /* PCI controller GPIO to IRQ pin mappings */
 #define AVILA_PCI_INTA_PIN	11
 #define AVILA_PCI_INTB_PIN	10
 #define AVILA_PCI_INTC_PIN	9
 #define AVILA_PCI_INTD_PIN	8
-
-

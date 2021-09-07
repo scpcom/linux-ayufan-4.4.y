@@ -578,7 +578,6 @@ static void __init mxc_board_init(void)
 		platform_device_register(&pcm037_eth);
 	}
 
-
 	/* I2C adapters and devices */
 	i2c_register_board_info(1, pcm037_i2c_devices,
 			ARRAY_SIZE(pcm037_i2c_devices));

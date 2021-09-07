@@ -135,7 +135,6 @@ typedef struct _GT_PHY_INFO
 #define GT_PHY_PAGE_DIS_AUTO2	2	/* For 88E1121 type */
 #define GT_PHY_NO_PAGE			3	/* No Pages */
 
-
 /* definition for formula to calculate actual distance */
 #ifdef FP_SUPPORT
 #define FORMULA_PHY100M(_data)	((_data)*0.7861 - 18.862)
@@ -172,7 +171,6 @@ typedef struct _VCT_REGISTER
 	GT_U8	page;
 	GT_U8	regOffset;
 } VCT_REGISTER;
-
 
 #ifdef __cplusplus
 }

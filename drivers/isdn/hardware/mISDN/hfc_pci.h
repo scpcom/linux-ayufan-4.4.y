@@ -60,7 +60,6 @@
 #define HFCPCI_MST_MODE		0xB8
 #define HFCPCI_CONNECT 		0xBC
 
-
 /* Interrupt and status registers */
 #define HFCPCI_FIFO_EN		0x44
 #define HFCPCI_TRM		0x48
@@ -88,7 +87,6 @@
 #define HFCPCI_D_REC		0xF8
 #define HFCPCI_D_SEND		0xF8
 #define HFCPCI_E_REC		0xFC
-
 
 /* bits in status register (READ) */
 #define HFCPCI_PCI_PROC		0x02
@@ -173,7 +171,6 @@
 #define HFCPCI_FIFOEN_B2TX	0x04
 #define HFCPCI_FIFOEN_B2RX	0x08
 
-
 /* definitions of fifo memory area */
 #define MAX_D_FRAMES 15
 #define MAX_B_FRAMES 31
@@ -202,7 +199,6 @@ struct bzfifo {
 	u_char		f1, f2; /* f pointers */
 	u_char		fill[0x2100-0x2082]; /* alignment */
 };
-
 
 union fifo_area {
 	struct {

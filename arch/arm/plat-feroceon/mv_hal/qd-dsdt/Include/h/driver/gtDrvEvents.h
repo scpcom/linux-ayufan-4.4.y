@@ -53,8 +53,6 @@ GT_STATUS drvEventsInit
     IN GT_VOIDFUNCPTR isrFunc
 );
 
-
-
 /*******************************************************************************
 * eventQdSr
 *

@@ -197,7 +197,6 @@ int pcmcia_read_cis_mem(struct pcmcia_socket *s, int attr, u_int addr,
 }
 EXPORT_SYMBOL(pcmcia_read_cis_mem);
 
-
 void pcmcia_write_cis_mem(struct pcmcia_socket *s, int attr, u_int addr,
 		   u_int len, void *ptr)
 {
@@ -255,7 +254,6 @@ void pcmcia_write_cis_mem(struct pcmcia_socket *s, int attr, u_int addr,
     }
 }
 EXPORT_SYMBOL(pcmcia_write_cis_mem);
-
 
 /*======================================================================
 
@@ -618,7 +616,6 @@ int pccard_get_tuple_data(struct pcmcia_socket *s, tuple_t *tuple)
     return 0;
 }
 EXPORT_SYMBOL(pccard_get_tuple_data);
-
 
 /*======================================================================
 

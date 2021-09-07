@@ -936,7 +936,6 @@ static void __exit wm8960_exit(void)
 }
 module_exit(wm8960_exit);
 
-
 MODULE_DESCRIPTION("ASoC WM8960 driver");
 MODULE_AUTHOR("Liam Girdwood");
 MODULE_LICENSE("GPL");

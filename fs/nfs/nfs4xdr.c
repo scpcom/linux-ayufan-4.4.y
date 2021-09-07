@@ -3644,7 +3644,6 @@ static int decode_getfattr(struct xdr_stream *xdr, struct nfs_fattr *fattr,
 	if (status < 0)
 		goto xdr_error;
 
-
 	status = decode_attr_type(xdr, bitmap, &type);
 	if (status < 0)
 		goto xdr_error;
@@ -3744,7 +3743,6 @@ xdr_error:
 	dprintk("%s: xdr returned %d\n", __func__, -status);
 	return status;
 }
-
 
 static int decode_fsinfo(struct xdr_stream *xdr, struct nfs_fsinfo *fsinfo)
 {
@@ -4089,7 +4087,6 @@ static int decode_readdir(struct xdr_stream *xdr, struct rpc_rqst *req, struct n
 			__func__,
 			((u32 *)readdir->verifier.data)[0],
 			((u32 *)readdir->verifier.data)[1]);
-
 
 	hdrlen = (char *) xdr->p - (char *) iov->iov_base;
 	recvd = rcvbuf->len - hdrlen;

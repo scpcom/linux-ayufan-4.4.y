@@ -146,4 +146,3 @@ MV_U64 ZeroU64(MV_U64 v1)
 	return	v1;
 }
 #endif /*  _OS_BIOS */
-

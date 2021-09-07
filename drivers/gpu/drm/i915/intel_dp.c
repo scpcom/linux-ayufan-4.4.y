@@ -718,7 +718,6 @@ intel_get_adjust_request_pre_emphasis(uint8_t link_status[DP_LINK_STATUS_SIZE],
 	return ((l >> s) & 3) << DP_TRAIN_PRE_EMPHASIS_SHIFT;
 }
 
-
 #if 0
 static char	*voltage_names[] = {
 	"0.4V", "0.6V", "0.8V", "1.2V"

@@ -19,7 +19,6 @@
 #ifndef _ISERIES_SPCOMM_AREA_H
 #define _ISERIES_SPCOMM_AREA_H
 
-
 struct SpCommArea {
 	u32	xDesc;			// Descriptor (only in new formats)	000-003
 	u8	xFormat;		// Format (only in new formats)		004-004

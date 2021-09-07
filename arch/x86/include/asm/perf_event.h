@@ -58,7 +58,6 @@ union cpuid10_edx {
 	unsigned int full;
 };
 
-
 /*
  * Fixed-purpose performance events:
  */
@@ -92,7 +91,6 @@ union cpuid10_edx {
  * to indicate other overflow conditions in the PERF_GLOBAL_STATUS msr.
  */
 #define X86_PMC_IDX_FIXED_BTS				(X86_PMC_IDX_FIXED + 16)
-
 
 #ifdef CONFIG_PERF_EVENTS
 extern void init_hw_perf_events(void);

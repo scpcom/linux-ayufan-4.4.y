@@ -53,7 +53,6 @@ static long long INIT read_int(unsigned char *ptr, int size)
 #define ENDIAN_CONVERT(x) \
   x = (typeof(x))read_int((unsigned char *)&x, sizeof(x))
 
-
 /* Small range coder implementation for lzma.
  *Copyright (C) 2006  Aurelien Jacobs < aurel@gnuage.org >
  *
@@ -76,11 +75,9 @@ struct rc {
 	uint32_t bound;
 };
 
-
 #define RC_TOP_BITS 24
 #define RC_MOVE_BITS 5
 #define RC_MODEL_TOTAL_BITS 11
-
 
 static int nofill(void *buffer, unsigned int len)
 {
@@ -125,7 +122,6 @@ static inline void INIT rc_init_code(struct rc *rc)
 		rc->code = (rc->code << 8) | *rc->ptr++;
 	}
 }
-
 
 /* Called once. TODO: bb_maybe_free() */
 static inline void INIT rc_free(struct rc *rc)
@@ -214,7 +210,6 @@ rc_bit_tree_decode(struct rc *rc, uint16_t *p, int num_levels, int *symbol)
 	*symbol -= 1 << num_levels;
 }
 
-
 /*
  * Small lzma deflate implementation.
  * Copyright (C) 2006  Aurelien Jacobs < aurel@gnuage.org >
@@ -223,13 +218,11 @@ rc_bit_tree_decode(struct rc *rc, uint16_t *p, int num_levels, int *symbol)
  * Copyright (C) 1999-2005  Igor Pavlov
  */
 
-
 struct lzma_header {
 	uint8_t pos;
 	uint32_t dict_size;
 	uint64_t dst_size;
 } __attribute__ ((packed)) ;
-
 
 #define LZMA_BASE_SIZE 1846
 #define LZMA_LIT_SIZE 768
@@ -279,7 +272,6 @@ struct lzma_header {
 #define LZMA_REP_LEN_CODER (LZMA_LEN_CODER + LZMA_NUM_LEN_PROBS)
 #define LZMA_LITERAL (LZMA_REP_LEN_CODER + LZMA_NUM_LEN_PROBS)
 
-
 struct writer {
 	uint8_t *buffer;
 	uint8_t previous_byte;
@@ -328,7 +320,6 @@ static inline void INIT write_byte(struct writer *wr, uint8_t byte)
 		wr->flush((char *)wr->buffer, wr->header->dict_size);
 	}
 }
-
 
 static inline void INIT copy_byte(struct writer *wr, uint32_t offs)
 {
@@ -528,8 +519,6 @@ static inline void INIT process_bit1(struct writer *wr, struct rc *rc,
 
 	copy_bytes(wr, cst->rep0, len);
 }
-
-
 
 STATIC inline int INIT unlzma(unsigned char *buf, int in_len,
 			      int(*fill)(void*, unsigned int),

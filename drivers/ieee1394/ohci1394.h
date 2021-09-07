@@ -247,7 +247,6 @@ static inline u32 reg_read(const struct ti_ohci *ohci, int offset)
         return readl(ohci->registers + offset);
 }
 
-
 /* 2 KiloBytes of register space */
 #define OHCI1394_REGISTER_SIZE                0x800
 

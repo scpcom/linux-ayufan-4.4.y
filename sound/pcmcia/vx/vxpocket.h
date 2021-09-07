@@ -89,5 +89,4 @@ int vxp_add_mic_controls(struct vx_core *chip);
 #define VXP_DLG_DMA16_SEL_MASK		0x02	/* W */
 #define VXP_DLG_ACK_MEMIRQ_MASK		0x01	/* R/W */
 
-
 #endif /* __VXPOCKET_H */

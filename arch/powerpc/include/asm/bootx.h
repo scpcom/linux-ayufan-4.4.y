@@ -5,7 +5,6 @@
  * Written by Benjamin Herrenschmidt.
  */
 
-
 #ifndef __ASM_BOOTX_H__
 #define __ASM_BOOTX_H__
 
@@ -57,7 +56,6 @@ typedef struct boot_info_map_entry
     __u32       physAddr;                /* Physical starting address */
     __u32       size;                    /* Size in bytes */
 } boot_info_map_entry_t;
-
 
 /* Here are the boot informations that are passed to the bootstrap
  * Note that the kernel arguments and the device tree are appended
@@ -112,7 +110,6 @@ typedef struct boot_infos
     boot_info_map_entry_t
     	        physMemoryMap[MAX_MEM_MAP_SIZE]; /* Where the phys memory is */
     __u32       physMemoryMapSize;               /* How many entries in map */
-
 
     /* The framebuffer size (optional, currently 0) */
     __u32       frameBufferSize;         /* Represents a max size, can be 0. */

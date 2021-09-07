@@ -4,7 +4,6 @@
 #include <linux/errno.h>
 #include <linux/sched.h>
 
-
 /*
  * The fs value determines whether argument validity checking should be
  * performed or not.  If get_fs() == USER_DS, checking is performed, with
@@ -336,7 +335,6 @@ __asm__ __volatile__("1: stb %r2,%1\n"				\
 }
 #endif
 
-
 /*
  * Complex access routines
  */
@@ -392,7 +390,6 @@ __copy_tofrom_user(void *to, const void *from, long len, const void __user *vali
 
 #define __copy_to_user_inatomic __copy_to_user
 #define __copy_from_user_inatomic __copy_from_user
-
 
 extern inline long
 copy_to_user(void __user *to, const void *from, long n)

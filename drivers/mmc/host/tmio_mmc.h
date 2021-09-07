@@ -83,7 +83,6 @@
 		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
 #define TMIO_MASK_IRQ     (TMIO_MASK_READOP | TMIO_MASK_WRITEOP | TMIO_MASK_CMD)
 
-
 #define enable_mmc_irqs(host, i) \
 	do { \
 		u32 mask;\
@@ -107,7 +106,6 @@
 		mask &= ~((i) & TMIO_MASK_IRQ); \
 		sd_ctrl_write32((host), CTL_STATUS, mask); \
 	} while (0)
-
 
 struct tmio_mmc_host {
 	void __iomem *cnf;

@@ -43,7 +43,6 @@ typedef struct netoe_src_seg
     u16               reserved;    
 }__attribute__ ((packed)) netoe_src_seg_t;
     
-
 typedef struct netoe_job
 {
     unsigned int   tot_len_:16;
@@ -137,4 +136,3 @@ extern unsigned netoe_get_carrier_errors(gmac_priv_t *priv);
 extern unsigned long netoe_get_status(gmac_priv_t *priv);
 
 #endif // __GMAC_NETOE_H
-

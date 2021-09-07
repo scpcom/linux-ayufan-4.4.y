@@ -75,14 +75,12 @@ BIT23 - Link Failure Indication */
 #define GPP_IRQ_TYPE_LEVEL		0
 #define GPP_IRQ_TYPE_CHANGE_LEVEL	1
 
-
 /* 
  *  Interrupt numbers
  */
 #define IRQ_START			0
 #define IRQ_MAIN_HIGH_SUM		0
 #define IRQ_BRIDGE			1
-
 
 #define XOR0_IRQ_NUM			5
 #define XOR1_IRQ_NUM			6
@@ -186,7 +184,6 @@ BIT23 - Link Failure Indication */
 #define IRQ_GPP_47                      111
 #define IRQ_GPP_48                      112
 #define IRQ_GPP_49                      113
-
 
 #define NR_IRQS                         128
 #if 0

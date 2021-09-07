@@ -33,8 +33,6 @@ extern void zfCoreRecv(zdev_t* dev, zbuf_t* buf, struct zsAdditionInfo* addInfo)
 extern void zfIdlChkRsp(zdev_t* dev, u32_t* rsp, u16_t rspLen);
 extern void zfIdlRsp(zdev_t* dev, u32_t *rsp, u16_t rspLen);
 
-
-
 //extern struct zsWdsStruct wds[ZM_WDS_PORT_NUMBER];
 extern struct zsVapStruct vap[ZM_VAP_PORT_NUMBER];
 
@@ -758,8 +756,6 @@ u32_t zfLnxUsbSubmitTxData(zdev_t* dev)
     return ret;
 }
 
-
-
 u32_t zfLnxUsbIn(zdev_t* dev, urb_t *urb, zbuf_t *buf)
 {
     u32_t ret;
@@ -798,7 +794,6 @@ u32_t zfLnxUsbWriteReg(zdev_t* dev, u32_t* cmd, u16_t cmdLen)
 
     return ret;
 }
-
 
 u32_t zfLnxUsbOut(zdev_t* dev, u8_t *hdr, u16_t hdrlen, u8_t *snap, u16_t snapLen,
         u8_t *tail, u16_t tailLen, zbuf_t *buf, u16_t offset)
@@ -869,8 +864,6 @@ void zfLnxInitUsbRxQ(zdev_t* dev)
         zfLnxUsbIn(dev, macp->WlanRxDataUrb[i], macp->UsbRxBufQ[i]);
     }
 }
-
-
 
 u32_t zfLnxUsbSubmitBulkUrb(urb_t *urb, struct usb_device *usb, u16_t epnum, u16_t direction,
         void *transfer_buffer, int buffer_length, usb_complete_t complete, void *context)
@@ -1121,4 +1114,3 @@ void zfwGetShowZeroLengthSSID(zdev_t* dev, u8_t* Dur)
 {
     *Dur = 0;
 }
-

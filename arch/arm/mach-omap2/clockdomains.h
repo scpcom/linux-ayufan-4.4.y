@@ -64,7 +64,6 @@ static struct clockdomain iva1_2420_clkdm = {
 
 #endif  /* CONFIG_ARCH_OMAP2420 */
 
-
 /*
  * 2430-only clockdomains
  */
@@ -88,7 +87,6 @@ static struct clockdomain mdm_clkdm = {
 };
 
 #endif    /* CONFIG_ARCH_OMAP2430 */
-
 
 /*
  * 24XX-only clockdomains
@@ -137,7 +135,6 @@ static struct clockdomain dss_24xx_clkdm = {
 };
 
 #endif   /* CONFIG_ARCH_OMAP24XX */
-
 
 /*
  * 34xx clockdomains

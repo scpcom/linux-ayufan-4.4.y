@@ -452,4 +452,3 @@ int __devinit snd_cs5535audio_pcm(struct cs5535audio *cs5535au)
 
 	return 0;
 }
-

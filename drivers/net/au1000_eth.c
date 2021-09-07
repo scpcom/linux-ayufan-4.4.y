@@ -491,7 +491,6 @@ static int mii_probe (struct net_device *dev)
 	return 0;
 }
 
-
 /*
  * Buffer allocation/deallocation routines. The buffer descriptor returned
  * has the virtual and dma address of a buffer suitable for
@@ -648,7 +647,6 @@ static const struct ethtool_ops au1000_ethtool_ops = {
 	.get_drvinfo = au1000_get_drvinfo,
 	.get_link = ethtool_op_get_link,
 };
-
 
 /*
  * Initialize the interface.

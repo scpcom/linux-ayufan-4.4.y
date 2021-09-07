@@ -22,14 +22,12 @@ GT_STATUS sampleIsolatedCPUPort(GT_QD_DEV *dev, GT_U8* macAddr);
 GT_STATUS setTagMode(int vid, char* tag);
 GT_STATUS crossChipTrunkSetup();
 
-
 GT_STATUS enableTag()
 {
 	char tag[4] = {0xc0,0,0,0x1};
 	setTagMode(2,tag);
 	return GT_OK;
 }
-
 
 GT_STATUS sampleTest()
 {
@@ -124,10 +122,8 @@ GT_STATUS sampleIsolatedCPUPort(GT_QD_DEV *dev, GT_U8* macAddr)
 		return status;
 	}
 
-	
 	return GT_OK;
 }
-
 
 /*
 	Assumption 1: Device ID, Cascading Port, CPU Port, and Interswitch Port are
@@ -189,7 +185,6 @@ GT_STATUS sampleFixedCrossChipTrunk(GT_QD_DEV *dev[])
 		return status;
 	}
 
-
 	/*
 	 *	Set Trunk Route Table for the given Trunk ID.
 	*/ 
@@ -208,7 +203,6 @@ GT_STATUS sampleFixedCrossChipTrunk(GT_QD_DEV *dev[])
 		return status;
 	}
 
-
 	/*
 	 *	Set Trunk Mask Table for load balancing.
 	*/ 
@@ -225,7 +219,6 @@ GT_STATUS sampleFixedCrossChipTrunk(GT_QD_DEV *dev[])
 	   TrunkMask[5]		1	1	1	1	1	1	1	1	0	1	0
 	   TrunkMask[6]		1	1	1	1	1	1	1	1	1	0	0
 	   TrunkMask[7]		1	1	1	1	1	1	1	1	0	0	0
-
 
 	   Trunk Mask Table for Device 1:
  

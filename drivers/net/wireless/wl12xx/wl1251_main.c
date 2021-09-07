@@ -260,7 +260,6 @@ static void wl1251_irq_work(struct work_struct *work)
 
 		wl->rx_handled = wl->rx_counter;
 
-
 		wl1251_debug(DEBUG_IRQ, "RX counter: %d", wl->rx_counter);
 	}
 
@@ -320,7 +319,6 @@ static int wl1251_join(struct wl1251 *wl, u8 bss_type, u8 channel,
 				     wl->tx_mgmt_frm_mod);
 	if (ret < 0)
 		goto out;
-
 
 	ret = wl1251_cmd_join(wl, bss_type, channel, beacon_interval,
 			      dtim_period);
@@ -868,7 +866,6 @@ static int wl1251_build_extended_rates(char *rates)
 	return index;
 }
 
-
 static int wl1251_build_probe_req(struct wl1251 *wl, u8 *ssid, size_t ssid_len)
 {
 	struct wl12xx_probe_req_template template;
@@ -1189,7 +1186,6 @@ out_sleep:
 out:
 	mutex_unlock(&wl->mutex);
 }
-
 
 /* can't be const, mac80211 writes to this */
 static struct ieee80211_rate wl1251_rates[] = {

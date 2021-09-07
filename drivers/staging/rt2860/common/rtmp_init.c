@@ -193,7 +193,6 @@ RTMP_REG_PAIR	STAMACRegTable[] =	{
 #define FIRMWARE_MINOR_VERSION	2
 #endif
 
-
 /*
 	========================================================================
 
@@ -245,7 +244,6 @@ NDIS_STATUS	RTMPAllocAdapterBlock(
 		}
 		pAd->BeaconBuf = pBeaconBuf;
 		printk("\n\n=== pAd = %p, size = %d ===\n\n", pAd, (UINT32)sizeof(RTMP_ADAPTER));
-
 
 		// Init spin locks
 		NdisAllocateSpinLock(&pAd->MgmtRingLock);
@@ -802,7 +800,6 @@ VOID	RTMPReadTxPwrPerRate(
 	}
 }
 
-
 /*
 	========================================================================
 
@@ -1015,7 +1012,6 @@ NDIS_STATUS	NICReadRegParameters(
 	DBGPRINT_S(Status, ("<-- NICReadRegParameters, Status=%x\n", Status));
 	return Status;
 }
-
 
 #ifdef RT2870
 /*
@@ -1277,7 +1273,6 @@ VOID NICInitRT30xxRFRegisters(IN PRTMP_ADAPTER pAd)
 }
 #endif // RT2870 //
 
-
 /*
 	========================================================================
 
@@ -1359,7 +1354,6 @@ VOID	NICReadEEPROMParameters(
 
 		DBGPRINT(RT_DEBUG_TRACE, ("Initialize MAC Address from module parameter \n"));
 	}
-
 
 	{
 		//more conveninet to test mbssid, so ap's bssid &0xf1
@@ -1956,7 +1950,6 @@ retry:
 		return NDIS_STATUS_FAILURE;
 	}
 
-
 #ifdef RT2860
 	// Write AC_BK base address register
 	Value = RTMP_GetPhysicalAddressLow(pAd->TxRing[QID_AC_BK].Cell[0].AllocPa);
@@ -2032,7 +2025,6 @@ retry:
 	RTMP_IO_WRITE32(pAd, RX_MAX_CNT, Value);
 #endif /* RT2860 */
 
-
 	// WMM parameter
 	csr0.word = 0;
 	RTMP_IO_WRITE32(pAd, WMM_TXOP0_CFG, csr0.word);
@@ -2047,7 +2039,6 @@ retry:
 		csr0.field.Ac1Txop = 48;	// AC_VO: 48*32us ~= 1.5ms
 	}
 	RTMP_IO_WRITE32(pAd, WMM_TXOP1_CFG, csr0.word);
-
 
 #ifdef RT2860
 	// 3. Set DMA global configuration except TX_DMA_EN and RX_DMA_EN bits:
@@ -2069,7 +2060,6 @@ retry:
 	IntCfg.word = 0;
 	RTMP_IO_WRITE32(pAd, DELAY_INT_CFG, IntCfg.word);
 #endif
-
 
 	// reset action
 	// Load firmware
@@ -2372,7 +2362,6 @@ NDIS_STATUS	NICInitializeAsic(
 		}
 	}
 
-
 	// It isn't necessary to clear this space when not hard reset.
 	if (bHardReset == TRUE)
 	{
@@ -2420,7 +2409,6 @@ NDIS_STATUS	NICInitializeAsic(
 	DBGPRINT(RT_DEBUG_TRACE, ("<-- NICInitializeAsic\n"));
 	return NDIS_STATUS_SUCCESS;
 }
-
 
 #ifdef RT2860
 VOID NICRestoreBBPValue(
@@ -2626,7 +2614,6 @@ VOID NICUpdateFifoStaCounters(
 
 			wcid = (UCHAR)StaFifo.field.wcid;
 
-
 		/* ignore NoACK and MGMT frame use 0xFF as WCID */
 			if ((StaFifo.field.TxAckRequired == 0) || (wcid >= MAX_LEN_OF_MAC_TABLE))
 			{
@@ -2814,7 +2801,6 @@ VOID NICUpdateRawCounters(
 	}
 #endif // RT2870 //
 
-
 	if (!pAd->bUpdateBcnCntDone)
 	{
 	// Update BEACON sent count
@@ -2889,10 +2875,7 @@ VOID NICUpdateRawCounters(
 		pAd->RalinkCounters.TransmittedAMPDUCount.u.LowPart += (TxAggCnt7.field.AggSize16Count / 16);
 	}
 
-
-
 }
-
 
 /*
 	========================================================================
@@ -3038,7 +3021,6 @@ NDIS_STATUS NICLoadFirmware(
 			 ("<=== %s (status=%d)\n", __func__, Status));
     return Status;
 } /* End of NICLoadFirmware */
-
 
 /*
 	========================================================================
@@ -3504,7 +3486,6 @@ VOID	UserCfgInit(
 	// part III. AP configurations
 	//
 
-
 	//
 	// part IV. others
 	//
@@ -3685,7 +3666,6 @@ VOID	RTMPSetTimer(
 		DBGPRINT_ERR(("RTMPSetTimer failed, Timer hasn't been initialize!\n"));
 	}
 }
-
 
 /*
 	========================================================================
@@ -3957,7 +3937,6 @@ VOID RTMPEnableRxTx(
 	{
 		UINT32 rx_filter_flag = APNORMAL;
 
-
 		RTMP_IO_WRITE32(pAd, RX_FILTR_CFG, rx_filter_flag);     // enable RX of DMA block
 	}
 	else
@@ -3968,5 +3947,3 @@ VOID RTMPEnableRxTx(
 	RTMP_IO_WRITE32(pAd, MAC_SYS_CTRL, 0xc);
 	DBGPRINT(RT_DEBUG_TRACE, ("<== RTMPEnableRxTx\n"));
 }
-
-

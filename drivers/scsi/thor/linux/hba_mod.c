@@ -112,7 +112,6 @@ static void generate_sg_table(struct hba_extension *phba,
 		MV_DBG(DMSG_SCSI_FREQ, "%s : map %d sg entries.\n",
 		       mv_product_name, mv_use_sg(scmd));
 
-
 		sg = (struct scatterlist *) mv_rq_bf(scmd);
 		if (MV_SCp(scmd)->mapped == 0){
 			#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 23)
@@ -310,7 +309,6 @@ static void mv_pm_ata_16_complete_request(struct hba_extension * phba,
 						mv_rq_bf_l(scmd),scsi_to_pci_dma_dir(scmd->sc_data_direction));
 	}
 	
-
 	memset(sb,0,SCSI_SENSE_BUFFERSIZE);
 	scmd->result = (DRIVER_SENSE << 24) | SAM_STAT_CHECK_CONDITION; 
 
@@ -499,7 +497,6 @@ static void hba_req_callback(MV_PVOID This, PMV_Request pReq)
 	phba->Io_Count--;
 	res_free_req_to_pool(phba->req_pool, pReq);
 }
-
 
 static int scsi_cmd_to_req_conv(struct hba_extension *phba, 
 				struct scsi_cmnd *scmd, 
@@ -923,7 +920,6 @@ static int mv_linux_queue_command(struct scsi_cmnd *scmd,
 		return 0;
     	}
 
-
 #if 1
 	MV_DBG(DMSG_SCSI_FREQ,
 	       "mv_linux_queue_command %p (%d/%d/%d/%d \
@@ -1126,7 +1122,6 @@ static int mv_ial_ht_ata_cmd(struct scsi_device *scsidev, void __user *arg)
                                 sensebuf, (10*HZ), 5, 0);
 #endif
 
-  
       	if (driver_byte(cmd_result) == DRIVER_SENSE) {/* sense data available */
          	u8 *desc = sensebuf + 8;
           	cmd_result &= ~(0xFF<<24); /* DRIVER_SENSE is not an error */
@@ -1315,7 +1310,6 @@ u8 mv_do_taskfile_ioctl(struct scsi_device *dev,void __user *arg){
 	taskout = (int) req_task->out_size;
 	taskin  = (int) req_task->in_size;
 
-
 	if (taskout) {
 		int outtotal = tasksize;
 		outbuf = kzalloc(taskout, GFP_KERNEL);
@@ -1484,7 +1478,6 @@ static struct scsi_transport_template mv_transport_template = {
 	.eh_timed_out   =  mv_linux_timed_out,
 };
 #endif /* LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 16) */
-
 
 /* module management & hba module code */
 extern struct mv_module_ops *mv_core_register_module(void);
@@ -1701,7 +1694,6 @@ disaster:
 	return -1;
 }
 
-
 static void __release_consistent_mem(struct mv_mod_res *mod_res,
 				     struct pci_dev *dev)
 {
@@ -1889,8 +1881,6 @@ err_out:
 	return -1;
 }
 
-
-
 static inline struct mv_mod_desc *
 __get_highest_module(struct mv_adp_desc *hba_desc)
 {
@@ -1925,7 +1915,6 @@ static void __map_pci_addr(struct pci_dev *dev, MV_PVOID *addr_array)
 		else if (pci_resource_flags(dev, i) & IORESOURCE_IO)
 			addr_array[i] = (MV_PVOID) ioport_map(addr, range);
 			
-
 		MV_DBG(DMSG_HBA, "BAR %d : %p.\n", 
 		       i, addr_array[i]);
 	}
@@ -2057,7 +2046,6 @@ int mv_hba_init(struct pci_dev *dev, MV_U32 max_io)
 	if (NULL == hba_desc)
 		goto ext_err_init;
 
-
 	hba_desc->max_io = max_io;
 	hba_desc->id     = __mv_get_adapter_count() - 1;
 	
@@ -2094,8 +2082,6 @@ int mv_hba_init(struct pci_dev *dev, MV_U32 max_io)
 		
 	}
 #endif
-
-
 
 	MV_DBG(DMSG_HBA, "HBA ext struct init'ed at %p.\n", 
 	        hba_desc);
@@ -2293,7 +2279,6 @@ static void HBA_ModuleStart(MV_PVOID extension)
 
 	core_desc->ops->module_start(core_desc->extension);
 	
-
 	HBA_ModuleStarted(hba->desc);
 
 	MV_DBG(DMSG_KERN, "wait_for_completion_timeout.....\n");
@@ -2319,7 +2304,6 @@ static void HBA_ModuleStart(MV_PVOID extension)
 	if (mv_register_chdev(hba))
 		printk("Unable to register character device interface.\n");
 
-	
 	MV_DPRINT(("Finished HBA_ModuleStart.\n"));
 
 	return;
@@ -2439,7 +2423,6 @@ static inline MV_BOOLEAN add_event(IN MV_PVOID extension,
 static inline void get_event(MV_PVOID This, PMV_Request pReq) {}
 #endif /* SUPPORT_EVENT */
 
-
 void HBA_ModuleNotification(MV_PVOID This, 
 			     enum Module_Event event, 
 			     struct mod_notif_param *event_param)
@@ -2487,7 +2470,6 @@ static void mvGetAdapterInfo( MV_PVOID This, PMV_Request pReq )
 	/* initialize */
 	pAdInfo = (PAdapter_Info)pReq->Data_Buffer;
 	MV_ZeroMemory(pAdInfo, sizeof(Adapter_Info));
-
 
 	pAdInfo->DriverVersion.VerMajor = VER_MAJOR;
 	pAdInfo->DriverVersion.VerMinor = VER_MINOR;
@@ -2538,7 +2520,6 @@ static void mvGetAdapterInfo( MV_PVOID This, PMV_Request pReq )
 }
 
 #endif
-
 
 static void HBA_ModuleSendRequest(MV_PVOID this, PMV_Request req)
 {

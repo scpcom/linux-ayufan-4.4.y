@@ -12,7 +12,6 @@
 #include <linux/hardirq.h>
 #include <asm-generic/bitops/find.h>
 
-
 static unsigned long _gic_base;
 static unsigned int _irqbase;
 static unsigned int gic_irq_flags[GIC_NUM_INTRS];

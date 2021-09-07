@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef _NETVSC_API_H_
 #define _NETVSC_API_H_
 

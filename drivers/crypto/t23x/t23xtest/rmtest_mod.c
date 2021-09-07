@@ -1,5 +1,4 @@
 
-
 /*
  * rmtest_mod.c
  *
@@ -45,12 +44,9 @@
  *
  */
 
-
 #include <linux/module.h>
 
-
 extern int32_t execTestSeries(void);
-
 
 static int32_t __init rmtest_init(void)
 {
@@ -60,7 +56,6 @@ static int32_t __init rmtest_init(void)
 static void rmtest_exit(void)
 {
 }
-
 
 module_init(rmtest_init);
 module_exit(rmtest_exit);

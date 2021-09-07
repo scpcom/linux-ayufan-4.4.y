@@ -756,7 +756,6 @@ SND_SOC_DAPM_SUPPLY("CLK_DSP", WM9081_CLOCK_CONTROL_3, 1, 0, NULL, 0),
 SND_SOC_DAPM_SUPPLY("TOCLK", WM9081_CLOCK_CONTROL_3, 2, 0, NULL, 0),
 };
 
-
 static const struct snd_soc_dapm_route audio_paths[] = {
 	{ "DAC", NULL, "CLK_SYS" },
 	{ "DAC", NULL, "CLK_DSP" },
@@ -1224,7 +1223,6 @@ struct snd_soc_dai wm9081_dai = {
 };
 EXPORT_SYMBOL_GPL(wm9081_dai);
 
-
 static struct snd_soc_codec *wm9081_codec;
 
 static int wm9081_probe(struct platform_device *pdev)
@@ -1504,7 +1502,6 @@ static void __exit wm9081_exit(void)
 	i2c_del_driver(&wm9081_i2c_driver);
 }
 module_exit(wm9081_exit);
-
 
 MODULE_DESCRIPTION("ASoC WM9081 driver");
 MODULE_AUTHOR("Mark Brown <broonie@opensource.wolfsonmicro.com>");

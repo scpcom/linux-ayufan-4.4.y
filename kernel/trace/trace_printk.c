@@ -93,7 +93,6 @@ module_trace_bprintk_format_notify(struct notifier_block *self,
 }
 #endif /* CONFIG_MODULES */
 
-
 __initdata_or_module static
 struct notifier_block module_trace_bprintk_format_nb = {
 	.notifier_call = module_trace_bprintk_format_notify,

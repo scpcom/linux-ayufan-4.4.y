@@ -4,7 +4,6 @@ Module Name:
 
    CSMISAS.H
 
-
 Abstract:
 
    This file contains constants and data structure definitions used by drivers
@@ -182,7 +181,6 @@ Revision History:
 #define CC_CSMI_SAS_GET_CONNECTOR_INFO 0xCC770024
 #define CC_CSMI_SAS_GET_LOCATION       0xCC770025
 
-
 // Control Codes requiring CSMI_PHY_SIGNATURE
 
 #define CC_CSMI_SAS_PHY_CONTROL        0xCC77003C
@@ -311,7 +309,6 @@ typedef unsigned char BYTE;
 #define __u64   unsigned __int64
 
 #define __i8    char
-
 
 // EDM #pragma CSMI_SAS_BEGIN_PACK(8)
 #pragma pack(8)

@@ -164,7 +164,6 @@ static __inline__ int bad_mask(__be32 mask, __be32 addr)
 #define for_ifa(in_dev)	{ struct in_ifaddr *ifa; \
   for (ifa = (in_dev)->ifa_list; ifa; ifa = ifa->ifa_next)
 
-
 #define endfor_ifa(in_dev) }
 
 static inline struct in_device *__in_dev_get_rcu(const struct net_device *dev)
@@ -221,6 +220,5 @@ static __inline__ int inet_mask_len(__be32 mask)
 		return 0;
 	return 32 - ffz(~hmask);
 }
-
 
 #endif /* _LINUX_INETDEVICE_H */

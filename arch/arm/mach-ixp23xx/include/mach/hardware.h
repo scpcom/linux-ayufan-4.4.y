@@ -33,5 +33,4 @@
  */
 #include "ixdp2351.h"
 
-
 #endif

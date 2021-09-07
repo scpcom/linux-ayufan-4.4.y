@@ -615,7 +615,6 @@ static void detach_rules(struct list_head *rules, struct net_device *dev)
 			rule->ifindex = -1;
 }
 
-
 static int fib_rules_event(struct notifier_block *this, unsigned long event,
 			    void *ptr)
 {

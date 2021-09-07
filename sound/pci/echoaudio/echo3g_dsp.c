@@ -116,8 +116,6 @@ static int init_hw(struct echoaudio *chip, u16 device_id, u16 subdevice_id)
 	return err;
 }
 
-
-
 static int set_phantom_power(struct echoaudio *chip, char on)
 {
 	u32 control_reg = le32_to_cpu(chip->comm_page->control_register);

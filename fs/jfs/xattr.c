@@ -87,7 +87,6 @@ struct ea_buffer {
 #define EA_NEW		0x0004
 #define EA_MALLOC	0x0008
 
-
 /*
  * These three routines are used to recognize on-disk extended attributes
  * that are in a recognized namespace.  If the attribute is not recognized,

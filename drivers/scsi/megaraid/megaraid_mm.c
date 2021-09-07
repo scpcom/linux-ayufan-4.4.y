@@ -18,16 +18,13 @@
 #include <linux/smp_lock.h>
 #include "megaraid_mm.h"
 
-
 // Entry points for char node driver
 static int mraid_mm_open(struct inode *, struct file *);
 static int mraid_mm_ioctl(struct inode *, struct file *, uint, unsigned long);
 
-
 // routines to convert to and from the old the format
 static int mimd_to_kioc(mimd_t __user *, mraid_mmadp_t *, uioc_t *);
 static int kioc_to_mimd(uioc_t *, mimd_t __user *);
-
 
 // Helper functions
 static int handle_drvrcmd(void __user *, uint8_t, int *);
@@ -217,7 +214,6 @@ mraid_mm_ioctl(struct inode *inode, struct file *filep, unsigned int cmd,
 	return rval;
 }
 
-
 /**
  * mraid_mm_get_adapter - Returns corresponding adapters for the mimd packet
  * @umimd	: User space mimd_t ioctl packet
@@ -232,7 +228,6 @@ mraid_mm_get_adapter(mimd_t __user *umimd, int *rval)
 	mimd_t		mimd;
 	uint32_t	adapno;
 	int		iterator;
-
 
 	if (copy_from_user(&mimd, umimd, sizeof(mimd_t))) {
 		*rval = -EFAULT;
@@ -327,7 +322,6 @@ old_packet:
 
 	return 0;
 }
-
 
 /**
  * mimd_to_kioc	- Converter from old to new ioctl format
@@ -708,7 +702,6 @@ lld_ioctl(mraid_mmadp_t *adp, uioc_t *kioc)
 	return kioc->status;
 }
 
-
 /**
  * ioctl_done - callback from the low level driver
  * @kioc	: completed ioctl packet
@@ -760,7 +753,6 @@ ioctl_done(uioc_t *kioc)
 	}
 }
 
-
 /**
  * lld_timedout	- callback from the expired timer
  * @ptr		: ioctl packet that timed out
@@ -777,7 +769,6 @@ lld_timedout(unsigned long ptr)
 
 	wake_up(&wait_q);
 }
-
 
 /**
  * kioc_to_mimd	- Converter from new back to old format
@@ -796,7 +787,6 @@ kioc_to_mimd(uioc_t *kioc, mimd_t __user *mimd)
 	mraid_passthru_t	*kpthru32;
 	mcontroller_t		cinfo;
 	mraid_hba_info_t	*hinfo;
-
 
 	if (copy_from_user(&kmimd, mimd, sizeof(mimd_t)))
 		return (-EFAULT);
@@ -855,7 +845,6 @@ kioc_to_mimd(uioc_t *kioc, mimd_t __user *mimd)
 	return 0;
 }
 
-
 /**
  * hinfo_to_cinfo - Convert new format hba info into old format
  * @hinfo	: New format, more comprehensive adapter info
@@ -879,7 +868,6 @@ hinfo_to_cinfo(mraid_hba_info_t *hinfo, mcontroller_t *cinfo)
 	cinfo->uid		= hinfo->unique_id;
 }
 
-
 /**
  * mraid_mm_register_adp - Registration routine for low level drivers
  * @lld_adp	: Adapter objejct
@@ -893,7 +881,6 @@ mraid_mm_register_adp(mraid_mmadp_t *lld_adp)
 	uint32_t	rval;
 	int		i;
 
-
 	if (lld_adp->drvr_type != DRVRTYPE_MBOX)
 		return (-EINVAL);
 
@@ -901,7 +888,6 @@ mraid_mm_register_adp(mraid_mmadp_t *lld_adp)
 
 	if (!adapter)
 		return -ENOMEM;
-
 
 	adapter->unique_id	= lld_adp->unique_id;
 	adapter->drvr_type	= lld_adp->drvr_type;
@@ -1004,7 +990,6 @@ memalloc_error:
 	return rval;
 }
 
-
 /**
  * mraid_mm_adapter_app_handle - return the application handle for this adapter
  * @unique_id	: adapter unique identifier
@@ -1035,7 +1020,6 @@ mraid_mm_adapter_app_handle(uint32_t unique_id)
 
 	return 0;
 }
-
 
 /**
  * mraid_mm_setup_dma_pools - Set up dma buffer pools per adapter
@@ -1090,7 +1074,6 @@ dma_pool_setup_error:
 	return (-ENOMEM);
 }
 
-
 /**
  * mraid_mm_unregister_adp - Unregister routine for low level drivers
  * @unique_id	: UID of the adpater
@@ -1104,7 +1087,6 @@ mraid_mm_unregister_adp(uint32_t unique_id)
 	mraid_mmadp_t	*tmp;
 
 	list_for_each_entry_safe(adapter, tmp, &adapters_list_g, list) {
-
 
 		if (adapter->unique_id == unique_id) {
 
@@ -1152,10 +1134,8 @@ mraid_mm_free_adp_resources(mraid_mmadp_t *adp)
 
 	pci_pool_destroy(adp->pthru_dma_pool);
 
-
 	return;
 }
-
 
 /**
  * mraid_mm_teardown_dma_pools - Free all per adapter dma buffers
@@ -1209,7 +1189,6 @@ mraid_mm_init(void)
 
 	return 0;
 }
-
 
 #ifdef CONFIG_COMPAT
 /**

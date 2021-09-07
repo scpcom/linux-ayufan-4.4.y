@@ -38,7 +38,6 @@
 
 #include "w9968cf_vpp.h"
 
-
 /****************************************************************************
  * Default values                                                           *
  ****************************************************************************/
@@ -126,7 +125,6 @@ static const struct w9968cf_format w9968cf_formatlist[] = {
 
 #define W9968CF_CLOCKDIV         -1 /* -1 = automatic clock divisor */
 #define W9968CF_DEF_CLOCKDIVISOR  0 /* default sensor clock divisor value */
-
 
 /****************************************************************************
  * Globals                                                                  *
@@ -280,7 +278,6 @@ static inline struct w9968cf_device *to_cam(struct v4l2_device *v4l2_dev)
 {
 	return container_of(v4l2_dev, struct w9968cf_device, v4l2_dev);
 }
-
 
 /****************************************************************************
  * Macros for debugging                                                     *

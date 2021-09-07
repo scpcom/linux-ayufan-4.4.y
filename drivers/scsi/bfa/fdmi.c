@@ -19,7 +19,6 @@
  *  port_api.c BFA FCS port
  */
 
-
 #include <bfa.h>
 #include <bfa_svc.h>
 #include "fcs_lport.h"
@@ -478,7 +477,6 @@ bfa_fcs_port_fdmi_sm_online(struct bfa_fcs_port_fdmi_s *fdmi,
 		bfa_assert(0);
 	}
 }
-
 
 /**
 *   RHBA : Register HBA Attributes.
@@ -1193,7 +1191,6 @@ bfa_fcs_fdmi_get_portattr(struct bfa_fcs_port_fdmi_s *fdmi,
 		sizeof(port_attr->host_name));
 
 }
-
 
 void
 bfa_fcs_port_fdmi_init(struct bfa_fcs_port_ms_s *ms)

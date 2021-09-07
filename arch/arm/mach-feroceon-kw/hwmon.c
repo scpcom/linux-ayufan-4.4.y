@@ -43,13 +43,10 @@
 #define KW_TEMPER_FORMULA(x)		(((322 - x) * 10000)/13625)	/* in Celsius */
 static struct device *hwmon_dev;
 
-
 typedef enum { 
 	SHOW_TEMP, 
 	SHOW_NAME} SHOW;
 
-	
-	
 static int kw_temp_read_temp(void)
 {
 	u32 reg = 0;
@@ -78,7 +75,6 @@ static int kw_temp_read_temp(void)
 		reg >>= THERMAL_SENS_OFFS;	
 		reg &= THERMAL_SENS_MASK;
 
-
 		if (((reg ^ reg1) & 0x1FE) == 0x0) {
 			break;
 		}	
@@ -95,7 +91,6 @@ static int kw_temp_read_temp(void)
 	
 	return temp_cels;
 }
-
 
 /*
  * Sysfs stuff
@@ -161,7 +156,6 @@ static int __devexit kw_temp_remove(struct platform_device *pdev)
 	return 0;
 }
 
-
 static struct platform_driver kw_temp_driver = {
 	.driver = {
 		.owner = THIS_MODULE,
@@ -180,7 +174,6 @@ static void __exit kw_temp_exit(void)
 {
 	platform_driver_unregister(&kw_temp_driver);
 }
-
 
 MODULE_AUTHOR("Marvell Semiconductors");
 MODULE_DESCRIPTION("Marvell Kirkwood SoC hwmon driver");

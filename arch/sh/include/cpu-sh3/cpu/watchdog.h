@@ -22,4 +22,3 @@
 #define WTCSR_IOVF	0x08
 
 #endif /* __ASM_CPU_SH3_WATCHDOG_H */
-

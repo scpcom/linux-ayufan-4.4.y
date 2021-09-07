@@ -37,7 +37,6 @@
 #define BX_DIGITAL_IN	4	/* 0 */
 #define BX_NUM		4
 
-
 #include <linux/delay.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>
@@ -104,4 +103,3 @@ static struct snd_pcm_hardware pcm_hardware_skel = {
 #include "indigodj_dsp.c"
 #include "echoaudio_dsp.c"
 #include "echoaudio.c"
-

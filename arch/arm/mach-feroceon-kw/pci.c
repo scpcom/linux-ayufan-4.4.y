@@ -237,7 +237,6 @@ static int mv_pci_read_config(struct pci_bus *bus, unsigned int devfn, int where
 		DB(printk("PCI %x read: bus = %x dev = %x func = %x regOff = %x ",pciIf, bus_num,dev_no,func,regOff));
 	}
 	
-
         temp = (u32) mvPexConfigRead(pciIf, bus_num, dev_no, func, regOff);
 
         switch (size) {
@@ -252,7 +251,6 @@ static int mv_pci_read_config(struct pci_bus *bus, unsigned int devfn, int where
         default:
                 break;
         }
-	
 	
 	*val = temp;
 
@@ -310,14 +308,10 @@ static int mv_pci_write_config(struct pci_bus *bus, unsigned int devfn, int wher
 
 }
 
-
-
-
 static struct pci_ops mv_pci_ops = {
         .read   = mv_pci_read_config,
         .write  = mv_pci_write_config,
 };
-
 
 int __init mv_pci_setup(int nr, struct pci_sys_data *sys)
 {
@@ -426,7 +420,6 @@ static int __init mv_map_irq_1(struct pci_dev *dev, u8 slot, u8 pin)
         return IRQ_PEX1_INT;
 }
 
-
 static struct hw_pci mv_pci __initdata = {
 	.swizzle        	= pci_std_swizzle,
         .map_irq                = mv_map_irq_0,
@@ -454,6 +447,4 @@ static int __init mv_pci_init(void)
     return 0;
 }
 
-
 subsys_initcall(mv_pci_init);
-

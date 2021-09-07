@@ -47,7 +47,6 @@ __wsum csum_partial_copy_from_user(const void __user *src, void *dst, int len, _
 
 __wsum csum_partial_copy_nocheck(const void *src, void *dst, int len, __wsum sum);
 
-
 /*
  * this routine is used for miscellaneous IP-like checksums, mainly
  * in icmp.c

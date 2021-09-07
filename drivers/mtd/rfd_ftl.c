@@ -390,7 +390,6 @@ static int move_block_contents(struct partition *part, int block_no, u_long *old
 		u16 entry = le16_to_cpu(map[HEADER_MAP_OFFSET + i]);
 		u_long addr;
 
-
 		if (entry == SECTOR_FREE || entry == SECTOR_DELETED)
 			continue;
 
@@ -851,4 +850,3 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Sean Young <sean@mess.org>");
 MODULE_DESCRIPTION("Support code for RFD Flash Translation Layer, "
 		"used by General Software's Embedded BIOS");
-

@@ -2418,8 +2418,7 @@ err_out:
 	talitos_remove(ofdev);
 
 	return err;
-}
-
+} 
 
 static struct of_device_id talitos_match[] = {
 	{
@@ -2438,7 +2437,7 @@ static struct of_platform_driver talitos_driver = {
 	.name = "talitos",
 	.match_table = talitos_match,
 	.probe = talitos_probe,
-	.remove = talitos_remove,
+	.remove = talitos_remove, 
 };
 
 static int __init talitos_init(void)

@@ -247,7 +247,6 @@ struct xl_rx_desc {
 
 struct xl_private {
 	
-
 	/* These two structures must be aligned on 8 byte boundaries */
 
 	/* struct xl_rx_desc xl_rx_ring[XL_RX_RING_SIZE]; */
@@ -288,4 +287,3 @@ struct xl_private {
 	/* firmware section */
 	const struct firmware *fw;
 };
-

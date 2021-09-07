@@ -350,7 +350,6 @@ MODULE_AUTHOR("Greg Ungerer");
 MODULE_DESCRIPTION("Stallion Intelligent Multiport Serial Driver");
 MODULE_LICENSE("GPL");
 
-
 module_param_array(board0, charp, NULL, 0);
 MODULE_PARM_DESC(board0, "Board 0 config -> name[,ioaddr[,memaddr]");
 module_param_array(board1, charp, NULL, 0);
@@ -1151,7 +1150,6 @@ static void stli_dtr_rts(struct tty_port *port, int on)
 		sizeof(asysigs_t), 0) < 0)
 			printk(KERN_WARNING "istallion: dtr set failed.\n");
 }
-
 
 /*****************************************************************************/
 
@@ -3196,7 +3194,6 @@ static int stli_initecp(struct stlibrd *brdp)
 		brdp->nrpanels++;
 	}
 
-
 	brdp->state |= BST_FOUND;
 	return 0;
 err_unmap:
@@ -3352,7 +3349,6 @@ static int stli_initonb(struct stlibrd *brdp)
 		brdp->nrports = i;
 	}
 	brdp->panels[0] = brdp->nrports;
-
 
 	brdp->state |= BST_FOUND;
 	return 0;

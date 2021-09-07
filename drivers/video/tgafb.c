@@ -69,7 +69,6 @@ static const char *mode_option;
 static const char *mode_option_pci = "640x480@60";
 static const char *mode_option_tc = "1280x1024@72";
 
-
 static struct pci_driver tgafb_pci_driver;
 static struct tc_driver tgafb_tc_driver;
 
@@ -88,7 +87,6 @@ static struct fb_ops tgafb_ops = {
 	.fb_copyarea		= tgafb_copyarea,
 	.fb_imageblit		= tgafb_imageblit,
 };
-
 
 #ifdef CONFIG_PCI
 /*
@@ -165,7 +163,6 @@ tgafb_tc_unregister(struct device *dev)
 	return 0;
 }
 #endif /* CONFIG_TC */
-
 
 /**
  *      tgafb_check_var - Optional function.  Validates a var passed in.
@@ -509,7 +506,6 @@ tgafb_set_pll(struct tga_par *par, int f)
 	TGA_WRITE_REG(par, ((vr >> 7) & 1)|2, TGA_CLOCK_REG);
 }
 
-
 /**
  *      tgafb_setcolreg - Optional function. Sets a color register.
  *      @regno: boolean, 0 copy local, 1 get_user() function
@@ -559,7 +555,6 @@ tgafb_setcolreg(unsigned regno, unsigned red, unsigned green, unsigned blue,
 
 	return 0;
 }
-
 
 /**
  *      tgafb_blank - Optional function.  Blanks the display.
@@ -618,7 +613,6 @@ tgafb_blank(int blank, struct fb_info *info)
 	local_irq_restore(flags);
 	return 0;
 }
-
 
 /*
  *  Acceleration.
@@ -1467,7 +1461,6 @@ tgafb_copyarea(struct fb_info *info, const struct fb_copyarea *area)
 		copyarea_foreward_8bpp(info, dx, dy, sx, sy, height,
 				       width, line_length);
 }
-
 
 /*
  *  Initialisation

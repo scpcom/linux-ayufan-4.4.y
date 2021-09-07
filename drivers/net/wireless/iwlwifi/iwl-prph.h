@@ -86,7 +86,6 @@
 #define APMG_CLK_VAL_DMA_CLK_RQT	(0x00000200)
 #define APMG_CLK_VAL_BSM_CLK_RQT	(0x00000800)
 
-
 #define APMG_PS_CTRL_EARLY_PWR_OFF_RESET_DIS	(0x00400000)
 #define APMG_PS_CTRL_VAL_RESET_REQ		(0x04000000)
 #define APMG_PS_CTRL_MSK_PWR_SRC		(0x03000000)
@@ -232,7 +231,6 @@
  */
 #define BSM_SRAM_LOWER_BOUND         (PRPH_BASE + 0x3800)
 #define BSM_SRAM_SIZE			(1024) /* bytes */
-
 
 /* 3945 Tx scheduler registers */
 #define ALM_SCD_BASE                        (PRPH_BASE + 0x2E00)

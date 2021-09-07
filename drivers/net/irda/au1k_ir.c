@@ -82,7 +82,6 @@ u32 read_ir_reg(u32 addr)
 	return readl(addr);
 }
 
-
 /*
  * Buffer allocation/deallocation routines. The buffer descriptor returned
  * has the virtual and dma address of a buffer suitable for 
@@ -107,7 +106,6 @@ static void ReleaseDB(struct au1k_private *aup, db_dest_t *pDB)
 	aup->pDBfree = pDB;
 }
 
-
 /*
   DMA memory allocation, derived from pci_alloc_consistent.
   However, the Au1000 data cache is coherent (when programmed
@@ -128,13 +126,11 @@ static void *dma_alloc(size_t size, dma_addr_t * dma_handle)
 	return ret;
 }
 
-
 static void dma_free(void *vaddr, size_t size)
 {
 	vaddr = (void *)KSEG0ADDR(vaddr);
 	free_pages((unsigned long) vaddr, get_order(size));
 }
-
 
 static void 
 setup_hw_rings(struct au1k_private *aup, u32 rx_base, u32 tx_base)
@@ -299,7 +295,6 @@ out1:
 	return retval;
 }
 
-
 static int au1k_init(struct net_device *dev)
 {
 	struct au1k_private *aup = netdev_priv(dev);
@@ -418,7 +413,6 @@ static void __exit au1k_irda_exit(void)
 	free_netdev(dev);
 }
 
-
 static inline void 
 update_tx_stats(struct net_device *dev, u32 status, u32 pkt_len)
 {
@@ -433,7 +427,6 @@ update_tx_stats(struct net_device *dev, u32 status, u32 pkt_len)
 		ps->tx_aborted_errors++;
 	}
 }
-
 
 static void au1k_tx_ack(struct net_device *dev)
 {
@@ -473,7 +466,6 @@ static void au1k_tx_ack(struct net_device *dev)
 		}
 	}
 }
-
 
 /*
  * Au1000 transmit routine.
@@ -554,7 +546,6 @@ static int au1k_irda_hard_xmit(struct sk_buff *skb, struct net_device *dev)
 	return NETDEV_TX_OK;
 }
 
-
 static inline void 
 update_rx_stats(struct net_device *dev, u32 status, u32 count)
 {
@@ -627,7 +618,6 @@ static int au1k_irda_rx(struct net_device *dev)
 	return 0;
 }
 
-
 static irqreturn_t au1k_irda_interrupt(int dummy, void *dev_id)
 {
 	struct net_device *dev = dev_id;
@@ -639,7 +629,6 @@ static irqreturn_t au1k_irda_interrupt(int dummy, void *dev_id)
 
 	return IRQ_HANDLED;
 }
-
 
 /*
  * The Tx ring has been full longer than the watchdog timeout
@@ -657,7 +646,6 @@ static void au1k_tx_timeout(struct net_device *dev)
 	aup->tx_full = 0;
 	netif_wake_queue(dev);
 }
-
 
 /*
  * Set the IrDA communications speed.

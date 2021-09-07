@@ -79,7 +79,6 @@ NDIS_STATUS	RTUSBFreeDescriptorRequest(
 	unsigned long   IrqFlags;
 	HT_TX_CONTEXT	*pHTTXContext;
 
-
 	pHTTXContext = &pAd->TxContext[BulkOutPipeId];
 	RTMP_IRQ_LOCK(&pAd->TxContextQueueLock[BulkOutPipeId], IrqFlags);
 	if ((pHTTXContext->CurWritePosition < pHTTXContext->NextBulkOutPosition) && ((pHTTXContext->CurWritePosition + NumberRequired + LOCAL_TXBUF_SIZE) > pHTTXContext->NextBulkOutPosition))
@@ -102,7 +101,6 @@ NDIS_STATUS	RTUSBFreeDescriptorRequest(
 	}
 	RTMP_IRQ_UNLOCK(&pAd->TxContextQueueLock[BulkOutPipeId], IrqFlags);
 
-
 	return (Status);
 }
 
@@ -120,7 +118,6 @@ NDIS_STATUS RTUSBFreeDescriptorRelease(
 
 	return (NDIS_STATUS_SUCCESS);
 }
-
 
 BOOLEAN	RTUSBNeedQueueBackForAgg(
 	IN RTMP_ADAPTER *pAd,
@@ -152,7 +149,6 @@ BOOLEAN	RTUSBNeedQueueBackForAgg(
 
 }
 
-
 /*
 	========================================================================
 
@@ -175,7 +171,6 @@ VOID	RTUSBRejectPendingPackets(
 	PQUEUE_ENTRY	pEntry;
 	PNDIS_PACKET	pPacket;
 	PQUEUE_HEADER	pQueue;
-
 
 	for (Index = 0; Index < 4; Index++)
 	{
@@ -213,4 +208,3 @@ VOID RTMPWriteTxInfo(
 	pTxInfo->rsv = 0;
 	pTxInfo->rsv2 = 0;
 }
-

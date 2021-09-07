@@ -134,10 +134,8 @@
 #include <linux/usb.h>
 #include "i2400m.h"
 
-
 #define D_SUBMODULE fw
 #include "debug-levels.h"
-
 
 static const __le32 i2400m_ACK_BARKER[4] = {
 	cpu_to_le32(I2400M_ACK_BARKER),
@@ -145,7 +143,6 @@ static const __le32 i2400m_ACK_BARKER[4] = {
 	cpu_to_le32(I2400M_ACK_BARKER),
 	cpu_to_le32(I2400M_ACK_BARKER)
 };
-
 
 /**
  * Prepare a boot-mode command for delivery
@@ -172,7 +169,6 @@ void i2400m_bm_cmd_prepare(struct i2400m_bootrom_header *cmd)
 	}
 }
 EXPORT_SYMBOL_GPL(i2400m_bm_cmd_prepare);
-
 
 /*
  * Verify the ack data received
@@ -281,7 +277,6 @@ error_ack_short:
 	return result;
 }
 
-
 /**
  * i2400m_bm_cmd - Execute a boot mode command
  *
@@ -381,7 +376,6 @@ error_cmd_send:
 	return result;
 }
 
-
 /**
  * i2400m_download_chunk - write a single chunk of data to the device's memory
  *
@@ -426,7 +420,6 @@ static int i2400m_download_chunk(struct i2400m *i2400m, const void *chunk,
 		addr, direct, do_csum, ret);
 	return ret;
 }
-
 
 /*
  * Download a BCF file's sections to the device
@@ -508,7 +501,6 @@ error_send:
 	return ret;
 }
 
-
 /*
  * Do the final steps of uploading firmware
  *
@@ -558,7 +550,6 @@ int i2400m_dnload_finalize(struct i2400m *i2400m,
 	d_fnend(3, dev, "returning %d\n", ret);
 	return ret;
 }
-
 
 /**
  * i2400m_bootrom_init - Reboots a powered device into boot mode
@@ -701,7 +692,6 @@ error_timeout:
 	goto exit_timeout;
 }
 
-
 /*
  * Read the MAC addr
  *
@@ -758,7 +748,6 @@ error_read_mac:
 	return result;
 }
 
-
 /*
  * Initialize a non signed boot
  *
@@ -788,7 +777,6 @@ int i2400m_dnload_init_nonsigned(struct i2400m *i2400m)
 	d_fnend(5, dev, "(i2400m %p) = %d\n", i2400m, ret);
 	return ret;
 }
-
 
 /*
  * Initialize the signed boot process
@@ -831,7 +819,6 @@ int i2400m_dnload_init_signed(struct i2400m *i2400m,
 	return ret;
 }
 
-
 /*
  * Initialize the firmware download at the device size
  *
@@ -870,7 +857,6 @@ int i2400m_dnload_init(struct i2400m *i2400m, const struct i2400m_bcf_hdr *bcf)
 	}
 	return result;
 }
-
 
 /*
  * Run quick consistency tests on the firmware file
@@ -938,7 +924,6 @@ int i2400m_fw_check(struct i2400m *i2400m,
 error:
 	return result;
 }
-
 
 /*
  * Download the firmware to the device
@@ -1030,7 +1015,6 @@ error_dev_rebooted:
 	flags |= I2400M_BRI_SOFT;
 	goto hw_reboot;
 }
-
 
 /**
  * i2400m_dev_bootstrap - Bring the device to a known state and upload firmware

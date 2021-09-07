@@ -50,7 +50,6 @@ static void edac_device_dump_device(struct edac_device_ctl_info *edac_dev)
 }
 #endif				/* CONFIG_EDAC_DEBUG */
 
-
 /*
  * edac_device_alloc_ctl_info()
  *	Allocate a new edac device control info structure

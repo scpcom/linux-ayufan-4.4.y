@@ -14,12 +14,10 @@
 #include "xtalk/hubdev.h"
 #include <linux/acpi.h>
 
-
 /*
  * The code in this file will only be executed when running with
  * a PROM that has ACPI IO support. (i.e., SN_ACPI_BASE_SUPPORT() == 1)
  */
-
 
 /*
  * This value must match the UUID the PROM uses
@@ -128,7 +126,6 @@ sn_get_bussoft_ptr(struct pci_bus *bus)
 	struct acpi_resource *resource;
 	acpi_status status;
 	struct acpi_resource_vendor_typed *vendor;
-
 
 	handle = PCI_CONTROLLER(bus)->acpi_handle;
 	status = acpi_get_vendor_resource(handle, METHOD_NAME__CRS,
@@ -453,7 +450,6 @@ sn_acpi_slot_fixup(struct pci_dev *dev)
 }
 
 EXPORT_SYMBOL(sn_acpi_slot_fixup);
-
 
 /*
  * sn_acpi_bus_fixup -  Perform SN specific setup of software structs

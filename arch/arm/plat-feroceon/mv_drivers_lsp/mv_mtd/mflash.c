@@ -32,7 +32,6 @@ DISCLAIMED.  The GPL License provides additional details about this warranty
 disclaimer.
 ********************************************************************************/
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/types.h>
@@ -52,7 +51,6 @@ disclaimer.
 #else
 #define DB(x)
 #endif
-
 
 /* Configuration options */
 static struct mtd_info *mflash_probe(struct map_info *map);
@@ -74,7 +72,6 @@ static struct mtd_chip_driver mflash_chipdrv = {
 	.name		= "mflash",
 	.module		= THIS_MODULE
 };
-
 
 static struct mtd_info *mflash_probe(struct map_info *map)
 {
@@ -229,7 +226,6 @@ static int mflash_write(struct mtd_info *mtd, loff_t to, size_t len,
 
 }
 
-
 static int mflash_erase(struct mtd_info *mtd, struct erase_info *instr)
 {
 	struct map_info *map = mtd->priv;
@@ -358,4 +354,3 @@ module_exit(mflash_probe_exit);
 
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_DESCRIPTION("MTD chip driver for the Marvell SUNOL flash device");
-

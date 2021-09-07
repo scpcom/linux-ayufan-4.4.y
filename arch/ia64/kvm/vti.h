@@ -41,7 +41,6 @@
 #define RR6 (6UL<<61)
 #define RR7 (7UL<<61)
 
-
 /* config_options in pal_vp_init_env */
 #define	VP_INITIALIZE	1UL
 #define	VP_FR_PMC	1UL<<1

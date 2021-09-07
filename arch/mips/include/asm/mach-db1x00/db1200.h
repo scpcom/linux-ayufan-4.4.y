@@ -209,7 +209,6 @@ enum external_pb1200_ints {
 	DB1200_INT_END		= DB1200_INT_BEGIN + 15,
 };
 
-
 /*
  * DBAu1200 specific PCMCIA defines for drivers/pcmcia/au1000_db1x00.c
  */

@@ -298,7 +298,6 @@ au1x00_pcmcia_set_io_map(struct pcmcia_socket *sock, struct pccard_io_map *map)
 
 }  /* au1x00_pcmcia_set_io_map() */
 
-
 static int 
 au1x00_pcmcia_set_mem_map(struct pcmcia_socket *sock, struct pccard_mem_map *map)
 {
@@ -440,7 +439,6 @@ int au1x00_pcmcia_socket_probe(struct device *dev, struct pcmcia_low_level *ops,
 	dev_set_drvdata(dev, sinfo);
 	return 0;
 
-
 out_err:
 	flush_scheduled_work();
 	ops->hw_shutdown(skt);
@@ -493,7 +491,6 @@ int au1x00_drv_pcmcia_remove(struct platform_device *dev)
 	return 0;
 }
 
-
 /*
  * PCMCIA "Driver" API
  */
@@ -533,7 +530,6 @@ static struct platform_driver au1x00_pcmcia_driver = {
 	.suspend 	= au1x00_drv_pcmcia_suspend,
 	.resume 	= au1x00_drv_pcmcia_resume,
 };
-
 
 /* au1x00_pcmcia_init()
  *

@@ -98,5 +98,4 @@
 #define		AT91_DDRSDRC_SDVAL	(0xff << 16)		/* Slave Delay value */
 #define		AT91_DDRSDRC_SDCVAL	(0xff << 24)		/* Slave Delay Correction value */
 
-
 #endif

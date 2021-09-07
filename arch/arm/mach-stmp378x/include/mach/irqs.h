@@ -84,7 +84,6 @@
 #define IRQ_VDD5V_DROOP			64
 #define IRQ_DCDC4P2_BO			65
 
-
 #define NR_REAL_IRQS	128
 #define NR_IRQS		(NR_REAL_IRQS + 32 * 3)
 

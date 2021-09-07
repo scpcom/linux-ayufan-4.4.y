@@ -59,7 +59,6 @@
 #  include <stdint.h>
 #endif
 
-
 /** @name Primitive Types and Values */
 
 /** We define a boolean type for consistency.  Can be either YES or NO */
@@ -357,7 +356,6 @@ static inline void dwc_write_##_reg(_container_type *container, uint32_t data) {
 
 /** @endcond */
 
-
 /** @name Crypto Functions
  *
  * These are the low-level cryptographic functions used by the driver. */
@@ -374,7 +372,6 @@ extern int DWC_SHA256(uint8_t *message, uint32_t len, uint8_t *out);
 /** Calculated the HMAC-SHA256 */
 extern int DWC_HMAC_SHA256(uint8_t *message, uint32_t messagelen, uint8_t *key, uint32_t keylen, uint8_t *out);
 #define dwc_hmac_sha256 DWC_HMAC_SHA256
-
 
 /** @name Memory Allocation
  *
@@ -429,7 +426,6 @@ extern void *DWC_DMA_POOL_ALLOC(dwc_pool_t *pool, uint64_t *dma_addr);
 extern void DWC_DMA_POOL_FREE(dwc_pool_t *pool, void *vaddr, void *daddr);
 #endif
 
-
 /** Allocates a DMA capable buffer and zeroes its contents. */
 extern void *__DWC_DMA_ALLOC(uint32_t size, dwc_dma_t *dma_addr);
 
@@ -481,7 +477,6 @@ extern void dwc_memory_debug_report(void);
 #define dwc_free DWC_FREE
 #define dwc_dma_alloc DWC_DMA_ALLOC
 #define dwc_dma_free DWC_DMA_FREE
-
 
 /** @name Memory and String Processing */
 
@@ -646,7 +641,6 @@ extern int DWC_WORKQ_PENDING(dwc_workq_t *workq);
 extern int DWC_WORKQ_WAIT_WORK_DONE(dwc_workq_t *workq, int timeout);
 #define dwc_workq_wait_work_done DWC_WORKQ_WAIT_WORK_DONE
 
-
 /** @name Tasklets
  *
  */
@@ -661,7 +655,6 @@ extern void DWC_TASK_FREE(dwc_tasklet_t *t);
 #define dwc_task_free DWC_TASK_FREE
 extern void DWC_TASK_SCHEDULE(dwc_tasklet_t *task);
 #define dwc_task_schedule DWC_TASK_SCHEDULE
-
 
 /** @name Timer
  *
@@ -688,8 +681,6 @@ extern void DWC_TIMER_SCHEDULE(dwc_timer_t *timer, uint32_t time);
 /** Disables the timer from execution. */
 extern void DWC_TIMER_CANCEL(dwc_timer_t *timer);
 #define dwc_timer_cancel DWC_TIMER_CANCEL
-
-
 
 /** @name Spinlocks
  *
@@ -756,7 +747,6 @@ extern void DWC_SPINUNLOCK(dwc_spinlock_t *lock);
 struct dwc_mutex;
 typedef struct dwc_mutex dwc_mutex_t;
 
-
 /* For Linux Mutex Debugging make it inline because the debugging routines use
  * the symbol to determine recursive locking.  This makes it falsely think
  * recursive locking occurs. */
@@ -788,9 +778,6 @@ extern int DWC_MUTEX_TRYLOCK(dwc_mutex_t *mutex);
 extern void DWC_MUTEX_UNLOCK(dwc_mutex_t *mutex);
 #define dwc_mutex_unlock DWC_MUTEX_UNLOCK
 
-
-
-
 /** @name Time */
 
 /** Microsecond delay.
@@ -819,9 +806,6 @@ extern uint32_t DWC_TIME(void);
 #define dwc_time DWC_TIME
 
 #endif // _DWC_OS_H_
-
-
-
 
 /** @mainpage DWC Portability and Common Library
  *

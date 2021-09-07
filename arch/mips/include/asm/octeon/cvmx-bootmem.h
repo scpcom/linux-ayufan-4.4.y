@@ -184,7 +184,6 @@ extern void *cvmx_bootmem_alloc_range(uint64_t size, uint64_t alignment,
  *         !0 on success
  */
 
-
 /**
  * Allocate a block of memory from the free list that was passed
  * to the application by the bootloader, and assign it a name in the
@@ -199,8 +198,6 @@ extern void *cvmx_bootmem_alloc_range(uint64_t size, uint64_t alignment,
  */
 extern void *cvmx_bootmem_alloc_named(uint64_t size, uint64_t alignment,
 				      char *name);
-
-
 
 /**
  * Allocate a block of memory from the free list that was passed
@@ -218,8 +215,6 @@ extern void *cvmx_bootmem_alloc_named(uint64_t size, uint64_t alignment,
  */
 extern void *cvmx_bootmem_alloc_named_address(uint64_t size, uint64_t address,
 					      char *name);
-
-
 
 /**
  * Allocate a block of memory from a specific range of the free list

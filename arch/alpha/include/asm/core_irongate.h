@@ -87,7 +87,6 @@ typedef struct {
 	igcsr32 agpmode;		/* 0xB0 - AGP/GART mode control */
 } Irongate0;
 
-
 typedef struct {
 
 	igcsr32 dev_vendor;		/* 0x00 - Device and Vendor IDs */
@@ -118,7 +117,6 @@ extern igcsr32 *IronECC;
 #else
 #define IRONGATE_BIAS 0x10000000000UL
 #endif
-
 
 #define IRONGATE_MEM		(IDENT_ADDR | IRONGATE_BIAS | 0x000000000UL)
 #define IRONGATE_IACK_SC	(IDENT_ADDR | IRONGATE_BIAS | 0x1F8000000UL)
@@ -174,7 +172,6 @@ struct el_IRONGATE_sysdata_mcheck {
 	__u64 I_CTL;
 	__u64 PCTX;
 };
-
 
 #ifdef __KERNEL__
 

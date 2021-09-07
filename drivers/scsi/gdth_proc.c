@@ -184,7 +184,6 @@ static int gdth_get_info(char *buffer,char **start,off_t offset,int length,
 
     TRACE2(("gdth_get_info() ha %d\n",ha->hanum));
 
-    
     /* request is i.e. "cat /proc/scsi/gdth/0" */ 
     /* format: %-15s\t%-10s\t%-15s\t%s */
     /* driver parameters */

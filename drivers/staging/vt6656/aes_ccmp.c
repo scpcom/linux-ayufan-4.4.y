@@ -122,7 +122,6 @@ PDWORD dwPtrOut =(PDWORD) out;
     (*dwPtrOut++) = (*dwPtrA++) ^ (*dwPtrB++);
 }
 
-
 void xor_32(BYTE *a, BYTE *b, BYTE *out)
 {
 PDWORD dwPtrA = (PDWORD) a;
@@ -188,7 +187,6 @@ void MixColumns(BYTE *in, BYTE *out)
     out[2] = in[0] ^ in[1] ^ dot2_table[in[2]] ^ dot3_table[in[3]];
     out[3] = dot3_table[in[0]] ^ in[1] ^ in[2] ^ dot2_table[in[3]];
 }
-
 
 void AESv128(BYTE *key, BYTE *data, BYTE *ciphertext)
 {
@@ -264,7 +262,6 @@ BOOL            bA4 = FALSE;
 BYTE            byTmp;
 WORD            wCnt;
 int             ii,jj,kk;
-
 
     pbyIV = pbyFrame + WLAN_HDR_ADDR3_LEN;
     if ( WLAN_GET_FC_TODS(*(PWORD)pbyFrame) &&

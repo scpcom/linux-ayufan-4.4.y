@@ -359,7 +359,6 @@ static int __devinit ibmtr_resume(struct pcmcia_device *link)
 	return 0;
 }
 
-
 /*====================================================================*/
 
 static void ibmtr_hw_setup(struct net_device *dev, u_int mmiobase)

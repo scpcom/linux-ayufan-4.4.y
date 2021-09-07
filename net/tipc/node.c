@@ -139,7 +139,6 @@ void tipc_node_delete(struct tipc_node *n_ptr)
 	kfree(n_ptr);
 }
 
-
 /**
  * tipc_node_link_up - handle addition of link
  *

@@ -98,5 +98,4 @@ extern void complete_all(struct completion *);
  */
 #define INIT_COMPLETION(x)	((x).done = 0)
 
-
 #endif

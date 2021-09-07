@@ -209,7 +209,6 @@ static inline void outsl(unsigned long addr, const void *buffer, int count)
 	outsl((unsigned long) (p), (src), (count))
 #endif /* CONFIG_GENERIC_IOMAP */
 
-
 #define IO_SPACE_LIMIT 0xffffffff
 
 #ifdef __KERNEL__

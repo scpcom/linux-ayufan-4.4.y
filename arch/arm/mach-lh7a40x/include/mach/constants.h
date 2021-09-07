@@ -12,7 +12,6 @@
 #ifndef __ASM_ARCH_CONSTANTS_H
 #define __ASM_ARCH_CONSTANTS_H
 
-
 /* Addressing constants */
 
 	/* SoC CPU IO addressing */

@@ -231,7 +231,6 @@ static int apple_event(struct hid_device *hdev, struct hid_field *field,
 				usage, value))
 		return 1;
 
-
 	return 0;
 }
 

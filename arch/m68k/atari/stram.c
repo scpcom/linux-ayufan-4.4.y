@@ -111,7 +111,6 @@ static int remove_region( BLOCK *block );
 
 /************************* End of Prototypes **************************/
 
-
 /* ------------------------------------------------------------------------ */
 /*							   Public Interface								*/
 /* ------------------------------------------------------------------------ */
@@ -144,7 +143,6 @@ void __init atari_stram_init(void)
 	panic( "atari_stram_init: no ST-RAM found!" );
 }
 
-
 /*
  * This function is called from setup_arch() to reserve the pages needed for
  * ST-RAM management.
@@ -162,7 +160,6 @@ void atari_stram_mem_init_hook (void)
 {
 	mem_init_done = 1;
 }
-
 
 /*
  * This is main public interface: somehow allocate a ST-RAM block
@@ -241,11 +238,9 @@ void atari_stram_free( void *addr )
 }
 EXPORT_SYMBOL(atari_stram_free);
 
-
 /* ------------------------------------------------------------------------ */
 /*							  Region Management								*/
 /* ------------------------------------------------------------------------ */
-
 
 /* insert a region into the alloced list (sorted) */
 static BLOCK *add_region( void *addr, unsigned long size )
@@ -282,7 +277,6 @@ static BLOCK *add_region( void *addr, unsigned long size )
 	return( n );
 }
 
-
 /* find a region (by start addr) in the alloced list */
 static BLOCK *find_region( void *addr )
 {
@@ -296,7 +290,6 @@ static BLOCK *find_region( void *addr )
 	}
 	return( NULL );
 }
-
 
 /* remove a block from the alloced list */
 static int remove_region( BLOCK *block )
@@ -316,8 +309,6 @@ static int remove_region( BLOCK *block )
 	return( 1 );
 }
 
-
-
 /* ------------------------------------------------------------------------ */
 /*						 /proc statistics file stuff						*/
 /* ------------------------------------------------------------------------ */
@@ -366,7 +357,6 @@ static int __init proc_stram_init(void)
 }
 module_init(proc_stram_init);
 #endif
-
 
 /*
  * Local variables:

@@ -82,7 +82,6 @@ typedef struct _mvDeviceParam
     MV_U32		 deviceWidth; /* in Bytes        */
 } MV_DEVICE_PARAM;  
 
-
 /* mvDevPramSet - Set device interface bank parameters */
 MV_STATUS mvDevIfPramSet(MV_DEVICE device, MV_DEVICE_PARAM *pDevParams);
 

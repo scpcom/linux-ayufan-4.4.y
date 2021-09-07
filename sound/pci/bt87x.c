@@ -57,7 +57,6 @@ MODULE_PARM_DESC(digital_rate, "Digital input rate for Bt87x soundcard");
 module_param(load_all, bool, 0444);
 MODULE_PARM_DESC(load_all, "Allow to load the non-whitelisted cards");
 
-
 /* register offsets */
 #define REG_INT_STAT		0x100	/* interrupt status */
 #define REG_INT_MASK		0x104	/* interrupt mask */

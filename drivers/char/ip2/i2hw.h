@@ -114,7 +114,6 @@ Addr  R/W      IntelliPort-II    IntelliPort-IIEX
 7     R        Guaranteed to have no effect
 7     W        Hardware reset of board.
 
-
 Rules:
 All data transfers are performed using the even i/o address. If byte-wide data
 transfers are being used, do INB/OUTB operations on the data port. If word-wide
@@ -573,7 +572,6 @@ includes a magic number which identifies the file as being (purportedly)
 loadware, CRC (for the loader), and version information.
 */
 
-
 //-----------------------------------------------------------------------------
 // Format of loadware block
 //
@@ -649,4 +647,3 @@ typedef union _loadHdrStr
 #define I2_INSB(port, addr, count)	insb((port), (addr), (((count)+1))&-2)
 
 #endif   // I2HW_H
-

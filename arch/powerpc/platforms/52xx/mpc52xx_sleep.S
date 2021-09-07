@@ -2,7 +2,6 @@
 #include <asm/ppc_asm.h>
 #include <asm/processor.h>
 
-
 .text
 
 _GLOBAL(mpc52xx_deep_sleep)
@@ -40,7 +39,6 @@ mpc52xx_deep_sleep: /* args r3-r6: SRAM, SDRAM regs, CDM regs, INTR regs */
 	mtspr	SPRN_HID0, r10
 	sync; isync;
 
-
 	mflr	r9 /* save LR */
 
 	/* jump to sram */
@@ -57,10 +55,8 @@ mpc52xx_deep_sleep: /* args r3-r6: SRAM, SDRAM regs, CDM regs, INTR regs */
 	mtspr	SPRN_HID0, r10
 	sync; isync;
 
-
 	/* return to C code */
 	blr
-
 
 _GLOBAL(mpc52xx_ds_sram)
 mpc52xx_ds_sram:
@@ -92,14 +88,12 @@ mpc52xx_ds_sram:
 	stw	r8, 0x14(r5)
 	sync
 
-
 	/* put mpc5200 to sleep */
 	mfmsr	r10
 	oris	r10, r10, 0x0004	/* POW = 1 */
 	sync; isync;
 	mtmsr	r10
 	sync; isync;
-
 
 	/* enable clock */
 	lwz	r8, 0x14(r5)
@@ -117,7 +111,6 @@ mpc52xx_ds_sram:
 _GLOBAL(mpc52xx_ds_sram_size)
 mpc52xx_ds_sram_size:
 	.long $-mpc52xx_ds_sram
-
 
 /* ### interrupt handler for wakeup from deep-sleep ### */
 _GLOBAL(mpc52xx_ds_cached)

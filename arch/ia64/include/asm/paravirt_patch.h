@@ -57,13 +57,11 @@ struct paravirt_patch_site_bundle {
 	"\t.xdata8 \".paravirt_bundles\", 998b, 999b, "			\
 	__stringify(privop) "\n"
 
-
 struct paravirt_patch_bundle_elem {
 	const void	*sbundle;
 	const void	*ebundle;
 	unsigned long	type;
 };
-
 
 struct paravirt_patch_site_inst {
 	unsigned long	stag;
@@ -101,7 +99,6 @@ paravirt_patch_reloc_br(unsigned long tag, const void *target);
 
 void
 paravirt_patch_reloc_brl(unsigned long tag, const void *target);
-
 
 #if defined(ASM_SUPPORTED) && defined(CONFIG_PARAVIRT)
 unsigned long

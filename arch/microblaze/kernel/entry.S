@@ -369,7 +369,6 @@ C_ENTRY(_user_exception):
 	rtsd	r15,8;		/* looks like a normal subroutine return */
 	or 	r0, r0, r0
 
-
 /* Entry point used to return from a syscall/trap */
 /* We re-enable BIP bit before state restore */
 C_ENTRY(ret_from_trap):
@@ -449,7 +448,6 @@ C_ENTRY(ret_from_trap):
 TRAP_return:		/* Make global symbol for debugging */
 	rtbd	r14, 0;	/* Instructions to return from an IRQ */
 	nop;
-
 
 /* These syscalls need access to the struct pt_regs on the stack, so we
    implement them in assembly (they're basically all wrappers anyway).  */
@@ -982,7 +980,6 @@ dbtrap_call:	rtbd	r11, 0;
 	bralid	r15, do_signal;	/* Handle any signals */
 	nop;
 
-
 /* Finally, return to user state.  */
 1:	swi	r0, r0, PER_CPU(KM);	/* Now officially in user state. */
 	add	r11, r0, CURRENT_TASK; /* Get current task ptr into r11 */
@@ -994,7 +991,6 @@ dbtrap_call:	rtbd	r11, 0;
 	lwi	r4, r1, PTO+PT_R4;
 	RESTORE_REGS
 	addik	r1, r1, STATE_SAVE_SIZE		/* Clean up stack space.  */
-
 
 	lwi	r1, r1, PT_R1 - PT_SIZE;
 					/* Restore user stack pointer. */
@@ -1013,8 +1009,6 @@ dbtrap_call:	rtbd	r11, 0;
 DBTRAP_return:		/* Make global symbol for debugging */
 	rtbd	r14, 0;	/* Instructions to return from an IRQ */
 	nop;
-
-
 
 ENTRY(_switch_to)
 	/* prepare return value */
@@ -1139,4 +1133,3 @@ ENTRY(_break)
 #include "syscall_table.S"
 
 syscall_table_size=(.-sys_call_table)
-

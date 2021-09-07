@@ -132,7 +132,6 @@ struct dsp_generic_scb {
 	   |prio |_|__________|__________|___|_|__|__|__|__|_|_|___|_____|_______|_______|
 	   31 30 29  [28:24]     [23:16] 15 14 13 12 11 10 9 8 7 6  5      4      [3:0]
 
-
 	   Initialized by the host R/O for the DSP task
 	*/
 	u32  strm_rs_config; /* REQUIRED */
@@ -165,7 +164,6 @@ struct dsp_generic_scb {
 	*/
 	u32  strmPhiIncr;
 
-
 	/* Standard stereo volume control
 	   Initialized by the host (host updates target volumes) 
 
@@ -182,7 +180,6 @@ struct dsp_generic_scb {
 	struct dsp_volume_control vol_ctrl_t;   /* Optional */
 };
 
-
 struct dsp_spos_control_block {
 	/* WARNING: Certain items in this structure are modified by the host
 	            Any dword that can be modified by the host, must not be
@@ -192,7 +189,6 @@ struct dsp_spos_control_block {
   
 		    This rule does not apply to one off boot time initialisation prior to starting the SP
 	*/
-
 
 	___DSP_DUAL_16BIT_ALLOC( 
 	/* First element on the Hyper forground task tree */
@@ -214,13 +210,11 @@ struct dsp_spos_control_block {
 	    HFGSPB_ptr
 	)
 
-
 	___DSP_DUAL_16BIT_ALLOC(
 	    xxnum_HFG_ticks_thisInterval,
 	/* Modified by the DSP */
 	    xxnum_tntervals
 	)
-
 
 	/* Set by DSP upon encountering a trap (breakpoint) or a spurious
 	   interrupt.  The host must clear this dword after reading it
@@ -313,7 +307,6 @@ struct dsp_timing_master_scb {
 	    extra_sample_accum
 	)
 
-  
 	/* Initial values are xxxx:0000
 	   hi: Current CODEC output FIFO pointer
 	       (0 to 0x0f)
@@ -403,7 +396,6 @@ struct dsp_codec_output_scb {
 	    right_chan_IO_disp
 	)
 
-
 	/* Init: 0x0080:0004 for non-AC-97
 	   Init: 0x0080:0000 for AC-97
 	   hi: Exponential volume change rate
@@ -480,7 +472,6 @@ struct dsp_codec_input_scb {
 
 	u32  reserved2;
 };
-
 
 struct dsp_pcm_serial_input_scb {
 	/* First 13 dwords from generic_scb_t */
@@ -714,7 +705,6 @@ struct dsp_vari_decimate_scb {
 	struct dsp_volume_control vdec_vol_ctrl;
 };
 
-
 /* SCB for MIX_TO_OSTREAM algorithm family */
 struct dsp_mix2_ostream_scb {
 	/* First 13 dwords from generic_scb_t */
@@ -732,7 +722,6 @@ struct dsp_mix2_ostream_scb {
 
 	u32 strm_rs_config; /* REQUIRED */
 	u32 strm_buf_ptr;   /* REQUIRED */
-
 
 	/* hi: Number of mixed-down input triplets
 	       computed since start of group
@@ -759,7 +748,6 @@ struct dsp_mix2_ostream_scb {
 	    const_zero
 	)
 };
-
 
 /* SCB for S16_MIX algorithm */
 struct dsp_mix_only_scb {
@@ -839,7 +827,6 @@ struct dsp_async_codec_input_scb {
 	u32 i_free;
 };
 
-
 /* SCB for the SP/DIF CODEC input and output */
 struct dsp_spdifiscb {
 	___DSP_DUAL_16BIT_ALLOC(
@@ -897,7 +884,6 @@ struct dsp_spdifiscb {
 	u32  free1;
 };
 
-
 /* SCB for the SP/DIF CODEC input and output  */
 struct dsp_spdifoscb {		 
 
@@ -941,7 +927,6 @@ struct dsp_spdifoscb {
 
 	u32  free1;                                         
 };
-
 
 struct dsp_asynch_fg_rx_scb {
 	___DSP_DUAL_16BIT_ALLOC(
@@ -992,7 +977,6 @@ struct dsp_asynch_fg_rx_scb {
 	    left_vol
 	)
 };
-
 
 struct dsp_asynch_fg_tx_scb {
 	___DSP_DUAL_16BIT_ALLOC(
@@ -1050,7 +1034,6 @@ struct dsp_asynch_fg_tx_scb {
 	    unused_left_vol
 	)
 };
-
 
 struct dsp_output_snoop_scb {
 	/* First 13 dwords from generic_scb_t */
@@ -1154,7 +1137,6 @@ struct dsp_magic_snoop_task {
 
 	struct dsp_volume_control vdec_vol_ctrl;
 };
-
 
 struct dsp_filter_scb {
 	___DSP_DUAL_16BIT_ALLOC(

@@ -462,8 +462,6 @@ static struct platform_device smc91x_device = {
 	},
 };
 
-
-
 static struct pxamci_platform_data stargate2_mci_platform_data;
 
 /*
@@ -618,7 +616,6 @@ static struct at24_platform_data pca9500_eeprom_pdata = {
 	.byte_len = 256,
 	.page_size = 4,
 };
-
 
 static struct i2c_board_info __initdata stargate2_i2c_board_info[] = {
 	/* Techically this a pca9500 - but it's compatible with the 8574

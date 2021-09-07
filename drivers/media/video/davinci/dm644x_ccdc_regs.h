@@ -60,7 +60,6 @@
 #define CCDC_PRGODD_1				0x90
 #define CCDC_VP_OUT				0x94
 
-
 /***************************************************************
 *	Define for various register bit mask and shifts for CCDC
 ****************************************************************/

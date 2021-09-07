@@ -107,13 +107,11 @@
 
 #include "musb_core.h"
 
-
 #ifdef CONFIG_ARCH_DAVINCI
 #include "davinci.h"
 #endif
 
 #define TA_WAIT_BCON(m) max_t(int, (m)->a_wait_bcon, OTG_TIME_A_WAIT_BCON)
-
 
 unsigned musb_debug;
 module_param_named(debug, musb_debug, uint, S_IRUGO | S_IWUSR);
@@ -133,7 +131,6 @@ MODULE_DESCRIPTION(DRIVER_INFO);
 MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_LICENSE("GPL");
 MODULE_ALIAS("platform:" MUSB_DRIVER_NAME);
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -230,7 +227,6 @@ void musb_read_fifo(struct musb_hw_ep *hw_ep, u16 len, u8 *dst)
 }
 
 #endif	/* normal PIO */
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -866,7 +862,6 @@ static irqreturn_t musb_stage2_irq(struct musb *musb, u8 int_usb,
 		schedule_work(&musb->irq_work);
 	}
 
-
 	return handled;
 }
 
@@ -923,7 +918,6 @@ void musb_start(struct musb *musb)
 	musb_platform_enable(musb);
 	musb_writeb(regs, MUSB_DEVCTL, devctl);
 }
-
 
 static void musb_generic_disable(struct musb *musb)
 {
@@ -986,7 +980,6 @@ static void musb_shutdown(struct platform_device *pdev)
 	/* FIXME power down */
 }
 
-
 /*-------------------------------------------------------------------------*/
 
 /*
@@ -1009,7 +1002,6 @@ static ushort __initdata fifo_mode = 2;
 /* "modprobe ... fifo_mode=1" etc */
 module_param(fifo_mode, ushort, 0);
 MODULE_PARM_DESC(fifo_mode, "initial endpoint configuration");
-
 
 enum fifo_style { FIFO_RXTX, FIFO_TX, FIFO_RX } __attribute__ ((packed));
 enum buf_mode { BUF_SINGLE, BUF_DOUBLE } __attribute__ ((packed));
@@ -1094,7 +1086,6 @@ static struct fifo_cfg __initdata mode_4_cfg[] = {
 { .hw_ep_num = 14, .style = FIFO_RXTX, .maxpacket = 1024, },
 { .hw_ep_num = 15, .style = FIFO_RXTX, .maxpacket = 1024, },
 };
-
 
 /*
  * configure a fifo; for non-shared endpoints, this may be called
@@ -1215,7 +1206,6 @@ static int __init ep_config_from_table(struct musb *musb)
 	printk(KERN_DEBUG "%s: setup fifo_mode %d\n",
 			musb_driver_name, fifo_mode);
 
-
 	offset = fifo_setup(musb, hw_ep, &ep0_cfg, 0);
 	/* assert(offset > 0) */
 
@@ -1255,7 +1245,6 @@ static int __init ep_config_from_table(struct musb *musb)
 
 	return 0;
 }
-
 
 /*
  * ep_config_from_hw - when MUSB_C_DYNFIFO_DEF is false
@@ -1588,7 +1577,6 @@ irqreturn_t musb_interrupt(struct musb *musb)
 
 	return retval;
 }
-
 
 #ifndef CONFIG_MUSB_PIO_ONLY
 static int __initdata use_dma = 1;

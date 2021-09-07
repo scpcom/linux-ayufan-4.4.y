@@ -72,7 +72,6 @@
 	} while(0)
 #endif
 
-
 #define WARN_ON(x) ({						\
 	int __ret_warn_on = !!(x);				\
 	if (__builtin_constant_p(__ret_warn_on)) {		\
@@ -89,4 +88,3 @@
 
 #include <asm-generic/bug.h>
 #endif
-

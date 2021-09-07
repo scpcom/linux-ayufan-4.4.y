@@ -27,7 +27,6 @@
 
 static u_int	*debug;
 
-
 struct mISDNtimerdev {
 	int			next_id;
 	struct list_head	pending;
@@ -220,7 +219,6 @@ mISDN_ioctl(struct inode *inode, struct file *filep, unsigned int cmd,
 {
 	struct mISDNtimerdev	*dev = filep->private_data;
 	int			id, tout, ret = 0;
-
 
 	if (*debug & DEBUG_TIMER)
 		printk(KERN_DEBUG "%s(%p, %x, %lx)\n", __func__,

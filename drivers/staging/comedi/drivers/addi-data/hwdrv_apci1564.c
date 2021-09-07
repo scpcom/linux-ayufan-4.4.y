@@ -998,7 +998,6 @@ static void v_APCI1564_Interrupt(int irq, void *d)
 		}
 	}/* if  (ui_Timer == 1) */
 
-
 	if (ui_C1 == 1) {
 		devpriv->b_TimerSelectMode = ADDIDATA_COUNTER;
 		if (devpriv->b_TimerSelectMode) {

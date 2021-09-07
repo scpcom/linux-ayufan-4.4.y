@@ -403,4 +403,3 @@ static void __exit typhoon_exit(void)
 
 module_init(typhoon_init);
 module_exit(typhoon_exit);
-

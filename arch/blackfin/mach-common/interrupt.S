@@ -216,7 +216,6 @@ ENTRY(_evt_evt12)
 ENTRY(_evt_evt13)
 	INTERRUPT_ENTRY(EVT_IVG13_P)
 
-
  /* interrupt routine for system_call - 15 */
 ENTRY(_evt_system_call)
 	SAVE_CONTEXT_SYSCALL

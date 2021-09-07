@@ -139,7 +139,6 @@ struct lib64_elfinfo
 	unsigned long	text;
 };
 
-
 #ifdef __DEBUG
 static void dump_one_vdso_page(struct page *pg, struct page *upg)
 {
@@ -296,8 +295,6 @@ const char *arch_vma_name(struct vm_area_struct *vma)
 	return NULL;
 }
 
-
-
 static void * __init find_section32(Elf32_Ehdr *ehdr, const char *secname,
 				  unsigned long *size)
 {
@@ -385,7 +382,6 @@ static int __init vdso_do_func_patch32(struct lib32_elfinfo *v32,
 
 	return 0;
 }
-
 
 #ifdef CONFIG_PPC64
 
@@ -485,7 +481,6 @@ static int __init vdso_do_func_patch64(struct lib32_elfinfo *v32,
 
 #endif /* CONFIG_PPC64 */
 
-
 static __init int vdso_do_find_sections(struct lib32_elfinfo *v32,
 					struct lib64_elfinfo *v64)
 {
@@ -570,7 +565,6 @@ static __init int vdso_fixup_datapage(struct lib32_elfinfo *v32,
 
 	return 0;
 }
-
 
 static __init int vdso_fixup_features(struct lib32_elfinfo *v32,
 				      struct lib64_elfinfo *v64)
@@ -660,7 +654,6 @@ static __init int vdso_fixup_alt_funcs(struct lib32_elfinfo *v32,
 	return 0;
 }
 
-
 static __init int vdso_setup(void)
 {
 	struct lib32_elfinfo	v32;
@@ -697,7 +690,6 @@ static void __init vdso_setup_syscall_map(void)
 	extern unsigned long *sys_call_table;
 	extern unsigned long sys_ni_syscall;
 
-
 	for (i = 0; i < __NR_syscalls; i++) {
 #ifdef CONFIG_PPC64
 		if (sys_call_table[i*2] != sys_ni_syscall)
@@ -713,7 +705,6 @@ static void __init vdso_setup_syscall_map(void)
 #endif /* CONFIG_PPC64 */
 	}
 }
-
 
 static int __init vdso_init(void)
 {
@@ -758,13 +749,11 @@ static int __init vdso_init(void)
 	vdso_data->icache_log_block_size = L1_CACHE_SHIFT;
 #endif /* CONFIG_PPC64 */
 
-
 	/*
 	 * Calculate the size of the 32 bits vDSO
 	 */
 	vdso32_pages = (&vdso32_end - &vdso32_start) >> PAGE_SHIFT;
 	DBG("vdso32_kbase: %p, 0x%x pages\n", vdso32_kbase, vdso32_pages);
-
 
 	/*
 	 * Setup the syscall map in the vDOS
@@ -834,4 +823,3 @@ struct vm_area_struct *get_gate_vma(struct task_struct *tsk)
 {
 	return NULL;
 }
-

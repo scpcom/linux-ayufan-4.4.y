@@ -23,7 +23,6 @@
 #error Please include mach/iomux.h
 #endif
 
-
 /* Primary GPIO pin functions */
 
 #define PB22_PF_USBH1_BYP       (GPIO_PORTB | GPIO_PF | 22)
@@ -121,6 +120,5 @@
 #define PF12_AOUT_PC_WAIT       (GPIO_PORTF | GPIO_AOUT | GPIO_IN | 12)
 #define PF13_AOUT_PC_CD2        (GPIO_PORTF | GPIO_AOUT | GPIO_IN | 13)
 #define PF14_AOUT_PC_CD1        (GPIO_PORTF | GPIO_AOUT | GPIO_IN | 14)
-
 
 #endif

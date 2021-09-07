@@ -29,5 +29,4 @@
 # define CACHE_WAY_SIZE ICACHE_WAY_SIZE
 #endif
 
-
 #endif	/* _XTENSA_CACHE_H */

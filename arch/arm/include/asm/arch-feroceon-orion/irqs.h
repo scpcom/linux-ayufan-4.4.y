@@ -35,13 +35,11 @@
 #define MV_GPP_IRQ_POLARITY        	0x1010c
 #define MV_AHBTOMBUS_IRQ_CAUSE_REG 	0x20114
 
-
 #define MV_PCI_MASK_REG(pciIf)		(0x41910 - ((pciIf) * 0x10000))
 #define MV_PCI_MASK_ABCD		(BIT24 | BIT25 | BIT26 | BIT27 )
 
 #define GPP_IRQ_TYPE_LEVEL			0
 #define GPP_IRQ_TYPE_CHANGE_LEVEL	1
-
 
 /* 
  *  Interrupt numbers
@@ -148,5 +146,3 @@
 #define BRIDGE_INT_CAUSE_REG	0x20110
 #define BRIDGE_INT_MASK_REG    	0x20114
 #define TIMER_BIT_MASK(x)	(1<<(x+1))
-
-

@@ -1480,7 +1480,6 @@ lpfc_##attr##_store(struct device *dev, struct device_attribute *attr, \
 		return -EINVAL;\
 }
 
-
 #define LPFC_ATTR(name, defval, minval, maxval, desc) \
 static int lpfc_##name = defval;\
 module_param(lpfc_##name, int, 0);\
@@ -1600,7 +1599,6 @@ static DEVICE_ATTR(max_xri, S_IRUGO, lpfc_max_xri_show, NULL);
 static DEVICE_ATTR(used_xri, S_IRUGO, lpfc_used_xri_show, NULL);
 static DEVICE_ATTR(npiv_info, S_IRUGO, lpfc_npiv_info_show, NULL);
 static DEVICE_ATTR(lpfc_temp_sensor, S_IRUGO, lpfc_temp_sensor_show, NULL);
-
 
 static char *lpfc_soft_wwn_key = "C99G71SL8032A";
 
@@ -1835,7 +1833,6 @@ lpfc_soft_wwnn_store(struct device *dev, struct device_attribute *attr,
 }
 static DEVICE_ATTR(lpfc_soft_wwnn, S_IRUGO | S_IWUSR,\
 		   lpfc_soft_wwnn_show, lpfc_soft_wwnn_store);
-
 
 static int lpfc_poll = 0;
 module_param(lpfc_poll, int, 0);
@@ -2476,7 +2473,6 @@ lpfc_stat_data_ctrl_store(struct device *dev, struct device_attribute *attr,
 	return -EINVAL;
 }
 
-
 /**
  * lpfc_stat_data_ctrl_show - Read function for lpfc_stat_data_ctrl sysfs file
  * @dev: Pointer to class device object.
@@ -2552,7 +2548,6 @@ static DEVICE_ATTR(lpfc_stat_data_ctrl, S_IRUGO | S_IWUSR,
 #define STAT_DATA_SIZE_PER_TARGET(NUM_BUCKETS) ((NUM_BUCKETS) * 11 + 18)
 #define MAX_STAT_DATA_SIZE_PER_TARGET \
 	STAT_DATA_SIZE_PER_TARGET(LPFC_MAX_BUCKET_COUNT)
-
 
 /**
  * sysfs_drvr_stat_data_read - Read function for lpfc_drvr_stat_data attribute
@@ -2954,7 +2949,6 @@ LPFC_ATTR_R(enable_bg, 0, 0, 1, "Enable BlockGuard Support");
 */
 LPFC_ATTR_RW(enable_fip, 0, 0, 1, "Enable FIP Discovery");
 
-
 /*
 # lpfc_prot_mask: i
 #	- Bit mask of host protection capabilities used to register with the
@@ -2980,7 +2974,6 @@ MODULE_PARM_DESC(lpfc_prot_mask, "host protection mask");
 unsigned char lpfc_prot_guard = SHOST_DIX_GUARD_IP;
 module_param(lpfc_prot_guard, byte, 0);
 MODULE_PARM_DESC(lpfc_prot_guard, "host protection guard type");
-
 
 /*
  * lpfc_sg_seg_cnt - Initial Maximum DMA Segment Count
@@ -3560,7 +3553,6 @@ lpfc_free_sysfs_attr(struct lpfc_vport *vport)
 	sysfs_remove_bin_file(&shost->shost_dev.kobj, &sysfs_mbox_attr);
 	sysfs_remove_bin_file(&shost->shost_dev.kobj, &sysfs_ctlreg_attr);
 }
-
 
 /*
  * Dynamic FC Host Attributes Support

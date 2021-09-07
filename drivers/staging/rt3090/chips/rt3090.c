@@ -39,11 +39,9 @@
 
 #include "../rt_config.h"
 
-
 #ifndef RTMP_RF_RW_SUPPORT
 #error "You Should Enable compile flag RTMP_RF_RW_SUPPORT for this chip"
 #endif // RTMP_RF_RW_SUPPORT //
-
 
 VOID NICInitRT3090RFRegisters(IN PRTMP_ADAPTER pAd)
 {

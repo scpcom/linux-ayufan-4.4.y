@@ -96,14 +96,12 @@ MODULE_PARM_DESC(nowayout,
 #define WDT_TIMEOUT_VAL		0xf2
 #define WDT_TIMER_CFG		0xf3
 
-
 module_param(io, int, 0);
 MODULE_PARM_DESC(io, "Eurotech WDT io port (default=0x3f0)");
 module_param(irq, int, 0);
 MODULE_PARM_DESC(irq, "Eurotech WDT irq (default=10)");
 module_param(ev, charp, 0);
 MODULE_PARM_DESC(ev, "Eurotech WDT event type (default is `int')");
-
 
 /*
  * Programming support
@@ -157,7 +155,6 @@ static void eurwdt_activate_timer(void)
 	eurwdt_set_timeout(0);	/* the default timeout */
 }
 
-
 /*
  * Kernel methods.
  */
@@ -174,7 +171,6 @@ static irqreturn_t eurwdt_interrupt(int irq, void *dev_id)
 #endif
 	return IRQ_HANDLED;
 }
-
 
 /**
  * eurwdt_ping:
@@ -369,7 +365,6 @@ static int eurwdt_notify_sys(struct notifier_block *this, unsigned long code,
 /*
  * Kernel Interfaces
  */
-
 
 static const struct file_operations eurwdt_fops = {
 	.owner		= THIS_MODULE,

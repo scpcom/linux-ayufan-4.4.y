@@ -57,7 +57,6 @@
 
 #define FOURBYTES	4
 
-
 static char *lpfc_release_version = LPFC_DRIVER_VERSION;
 
 static void
@@ -406,7 +405,6 @@ lpfc_ns_rsp(struct lpfc_vport *vport, struct lpfc_dmabuf *mp, uint32_t Size)
 	vport->num_disc_nodes = 0;
 	vport->fc_ns_retry = 0;
 
-
 	list_add_tail(&head, &mp->list);
 	list_for_each_entry_safe(mp, next_mp, &head, list) {
 		mlast = mp;
@@ -648,7 +646,6 @@ lpfc_cmpl_ct_cmd_gid_ft(struct lpfc_hba *phba, struct lpfc_iocbq *cmdiocb,
 				(uint32_t) CTrsp->Explanation);
 			}
 
-
 		} else {
 			/* NameServer Rsp Error */
 			lpfc_printf_vlog(vport, KERN_ERR, LOG_DISCOVERY,
@@ -812,7 +809,6 @@ out:
 	lpfc_ct_free_iocb(phba, cmdiocb);
 	return;
 }
-
 
 static void
 lpfc_cmpl_ct(struct lpfc_hba *phba, struct lpfc_iocbq *cmdiocb,
@@ -1323,7 +1319,6 @@ lpfc_fdmi_cmd(struct lpfc_vport *vport, struct lpfc_nodelist *ndlp, int cmdcode)
 	ATTRIBUTE_ENTRY *ae;
 	void (*cmpl) (struct lpfc_hba *, struct lpfc_iocbq *,
 		      struct lpfc_iocbq *);
-
 
 	/* fill in BDEs for command */
 	/* Allocate buffer for command payload */

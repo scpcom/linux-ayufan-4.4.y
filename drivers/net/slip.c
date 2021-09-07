@@ -240,7 +240,6 @@ static int sl_realloc_bufs(struct slip *sl, int mtu)
 	cbuff = kmalloc(len + 4, GFP_ATOMIC);
 #endif
 
-
 #ifdef SL_INCLUDE_CSLIP
 	if (xbuff == NULL || rbuff == NULL || cbuff == NULL)  {
 #else
@@ -300,13 +299,11 @@ done:
 	return err;
 }
 
-
 /* Set the "sending" flag.  This must be atomic hence the set_bit. */
 static inline void sl_lock(struct slip *sl)
 {
 	netif_stop_queue(sl->dev);
 }
-
 
 /* Clear the "sending" flag.  This must be atomic, hence the ASM. */
 static inline void sl_unlock(struct slip *sl)
@@ -473,7 +470,6 @@ out:
 	spin_unlock(&sl->lock);
 }
 
-
 /* Encapsulate an IP datagram and kick it into a TTY queue. */
 static netdev_tx_t
 sl_xmit(struct sk_buff *skb, struct net_device *dev)
@@ -501,7 +497,6 @@ sl_xmit(struct sk_buff *skb, struct net_device *dev)
 	dev_kfree_skb(skb);
 	return NETDEV_TX_OK;
 }
-
 
 /******************************************
  *   Routines looking at netdevice side.
@@ -609,7 +604,6 @@ static int sl_init(struct net_device *dev)
 	return 0;
 }
 
-
 static void sl_uninit(struct net_device *dev)
 {
 	struct slip *sl = netdev_priv(dev);
@@ -639,7 +633,6 @@ static const struct net_device_ops sl_netdev_ops = {
 #endif
 };
 
-
 static void sl_setup(struct net_device *dev)
 {
 	dev->netdev_ops		= &sl_netdev_ops;
@@ -656,7 +649,6 @@ static void sl_setup(struct net_device *dev)
 /******************************************
   Routines looking at TTY side.
  ******************************************/
-
 
 /*
  * Handle the 'receiver data ready' interrupt.
@@ -715,7 +707,6 @@ static void sl_sync(void)
 			dev_close(dev);
 	}
 }
-
 
 /* Find a free SLIP channel, and link in this `tty' line. */
 static struct slip *sl_alloc(dev_t line)
@@ -983,7 +974,6 @@ static void slip_unesc(struct slip *sl, unsigned char s)
 		set_bit(SLF_ERROR, &sl->flags);
 	}
 }
-
 
 #ifdef CONFIG_SLIP_MODE_SLIP6
 /************************************************************************

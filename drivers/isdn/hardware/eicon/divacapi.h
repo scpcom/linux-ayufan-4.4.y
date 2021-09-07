@@ -26,16 +26,6 @@
 
 /*#define DEBUG */
 
-
-
-
-  
-  
-
-
-
-
-
 #define IMPLEMENT_DTMF 1
 #define IMPLEMENT_LINE_INTERCONNECT2 1
 #define IMPLEMENT_ECHO_CANCELLER 1
@@ -51,7 +41,6 @@
 #define IMPLEMENT_FAX_NONSTANDARD 1
 #define VSWITCH_SUPPORT 1
 
-
 #define IMPLEMENT_LINE_INTERCONNECT 0
 #define IMPLEMENT_MARKED_OK_AFTER_FC 1
 
@@ -65,7 +54,6 @@
 #define MAX_NCCI           127
 
 #define MSG_IN_QUEUE_SIZE  ((4096 + 3) & 0xfffc)  /* must be multiple of 4 */
-
 
 #define MSG_IN_OVERHEAD    sizeof(APPL   *)
 
@@ -84,7 +72,6 @@
 #define MAX_CIP_TYPES      5  /* kind of CIP types for group optimization */
 #define C_IND_MASK_DWORDS  ((MAX_APPL+32) >> 5)
 
-
 #define FAX_CONNECT_INFO_BUFFER_SIZE  256
 #define NCPI_BUFFER_SIZE              256
 
@@ -98,8 +85,6 @@
 #define ADV_VOICE_COEF_BUFFER_SIZE    50
 
 #define LI_PLCI_B_QUEUE_ENTRIES       256
-
-
 
 typedef struct _APPL APPL;
 typedef struct _PLCI PLCI;
@@ -172,11 +157,6 @@ struct _APPL {
   word          CDEnable;
   dword         S_Handle;
 
-
-
-
-
-
   LIST_ENTRY    s_function;
   dword         s_context;
   word          s_count;
@@ -184,11 +164,6 @@ struct _APPL {
   byte *        xbuffer_used;
   void **       xbuffer_internal;
   void **       xbuffer_ptr;
-
-
-
-
-
 
   byte   *    queue;
   word          queue_size;
@@ -209,7 +184,6 @@ struct _APPL {
   word   *    DataNCCI;
   word   *    DataFlags;
 };
-
 
 struct _PLCI {
   ENTITY        Sig;
@@ -302,9 +276,7 @@ struct _PLCI {
   byte          dtmf_parameter_length;
   byte          dtmf_parameter_buffer[DTMF_PARAMETER_BUFFER_SIZE];
 
-
   t_capidtmf_state capidtmf_state;
-
 
   byte          li_bchannel_id;    /* BRI: 1..2, PRI: 1..32 */
   byte          li_channel_bits;
@@ -317,11 +289,9 @@ struct _PLCI {
   word          li_plci_b_req_pos;
   dword         li_plci_b_queue[LI_PLCI_B_QUEUE_ENTRIES];
 
-
   word          ec_cmd;
   word          ec_idi_options;
   word          ec_tail_length;
-
 
   byte          tone_last_indication_code;
 
@@ -334,7 +304,6 @@ struct _PLCI {
   dword         rx_dma_magic;
 };
 
-
 struct _NCCI {
   byte          data_out;
   byte          data_pending;
@@ -343,7 +312,6 @@ struct _NCCI {
   DATA_B3_DESC  DBuffer[MAX_DATA_B3];
   DATA_ACK_DESC DataAck[MAX_DATA_ACK];
 };
-
 
 struct _DIVA_CAPI_ADAPTER {
   IDI_CALL      request;
@@ -401,14 +369,12 @@ struct _DIVA_CAPI_ADAPTER {
   void* os_card; /* pointer to associated OS dependent adapter structure */
 };
 
-
 /*------------------------------------------------------------------*/
 /* Application flags                                                */
 /*------------------------------------------------------------------*/
 
 #define APPL_FLAG_OLD_LI_SPEC           0x01
 #define APPL_FLAG_PRIV_EC_SPEC          0x02
-
 
 /*------------------------------------------------------------------*/
 /* API parameter definitions                                        */
@@ -436,7 +402,6 @@ struct _DIVA_CAPI_ADAPTER {
 #define TRANSPARENT_NL  4
 #define ISO8208         5
 #define T30             6
-
 
 /*------------------------------------------------------------------*/
 /* FAX interface to IDI                                             */
@@ -476,7 +441,6 @@ struct t30_info_s {
 /* byte          nsf_info_length;   */
 /* byte          nsf_info_field[];  */
 };
-
 
 #define T30_RESOLUTION_R8_0385          0x00
 #define T30_RESOLUTION_R8_0770_OR_200   0x01
@@ -520,7 +484,6 @@ struct t30_info_s {
 #define T30_DATA_FORMAT_NATIVE          2
 #define T30_DATA_FORMAT_COUNT           3
 
-
 #define T30_OPERATING_MODE_STANDARD     0
 #define T30_OPERATING_MODE_CLASS2       1
 #define T30_OPERATING_MODE_CLASS1       2
@@ -543,7 +506,6 @@ struct t30_info_s {
 #define EDATA_T30_DTC         0x86
 #define EDATA_T30_PAGE_END    0x87   /* Indicates end of page data. Reserved, but not implemented ! */
 #define EDATA_T30_EOP_CAPI    0x88
-
 
 #define T30_SUCCESS                        0
 #define T30_ERR_NO_DIS_RECEIVED            1
@@ -593,7 +555,6 @@ struct t30_info_s {
 #define T30_ERR_V34FAX_TURNAROUND_POLLING  45
 #define T30_ERR_V34FAX_V8_INCOMPATIBILITY  46
 
-
 #define T30_CONTROL_BIT_DISABLE_FINE       0x0001
 #define T30_CONTROL_BIT_ENABLE_ECM         0x0002
 #define T30_CONTROL_BIT_ECM_64_BYTES       0x0004
@@ -621,7 +582,6 @@ struct t30_info_s {
 #define T30_FEATURE_BIT_MORE_DOCUMENTS     0x0100
 #define T30_FEATURE_BIT_V34FAX             0x1000
 
-
 #define T30_NSF_CONTROL_BIT_ENABLE_NSF     0x0001
 #define T30_NSF_CONTROL_BIT_RAW_INFO       0x0002
 #define T30_NSF_CONTROL_BIT_NEGOTIATE_IND  0x0004
@@ -631,7 +591,6 @@ struct t30_info_s {
 #define T30_NSF_ELEMENT_NSC_FIF            0x01
 #define T30_NSF_ELEMENT_NSS_FIF            0x02
 #define T30_NSF_ELEMENT_COMPANY_NAME       0x03
-
 
 /*------------------------------------------------------------------*/
 /* Analog modem definitions                                         */
@@ -645,7 +604,6 @@ struct async_s {
   unsigned stp:   1;
   unsigned ch_len:2;   /* 3th octett in CAI */
 };
-
 
 /*------------------------------------------------------------------*/
 /* PLCI/NCCI states                                                 */
@@ -670,7 +628,6 @@ struct async_s {
 #define RESUMING                16
 #define INC_CON_CONNECTED_ALERT 17
 #define OUTG_REJ_PENDING        18
-
 
 /*------------------------------------------------------------------*/
 /* auxilliary states for supplementary services                     */
@@ -842,7 +799,6 @@ struct async_s {
 /* DTMF interface to IDI                                            */
 /*------------------------------------------------------------------*/
 
-
 #define DTMF_DIGIT_TONE_LOW_GROUP_697_HZ        0x00
 #define DTMF_DIGIT_TONE_LOW_GROUP_770_HZ        0x01
 #define DTMF_DIGIT_TONE_LOW_GROUP_852_HZ        0x02
@@ -885,11 +841,9 @@ struct async_s {
 #define DTMF_LISTEN_ACTIVE_FLAG        0x01
 #define DTMF_SEND_DIGIT_FLAG           0x01
 
-
 /*------------------------------------------------------------------*/
 /* Mixer interface to IDI                                           */
 /*------------------------------------------------------------------*/
-
 
 #define LI2_FLAG_PCCONNECT_A_B 0x40000000
 #define LI2_FLAG_PCCONNECT_B_A 0x80000000
@@ -988,11 +942,9 @@ extern word li_total_channels;
 #define XCONNECT_SUCCESS           0x0000
 #define XCONNECT_ERROR             0x0001
 
-
 /*------------------------------------------------------------------*/
 /* Echo canceller interface to IDI                                  */
 /*------------------------------------------------------------------*/
-
 
 #define PRIVATE_ECHO_CANCELLER         0
 
@@ -1033,11 +985,9 @@ extern word li_total_channels;
 #define LEC_DISABLE_TYPE_REVERSED_2100HZ     0x01
 #define LEC_DISABLE_RELEASED                 0x02
 
-
 /*------------------------------------------------------------------*/
 /* RTP interface to IDI                                             */
 /*------------------------------------------------------------------*/
-
 
 #define B1_RTP                  31
 #define B2_RTP                  31
@@ -1089,11 +1039,9 @@ extern word li_total_channels;
 #define RTP_CHANGE_FLAG_PAYLOAD_TYPE_CHANGE       0x00000002L
 #define RTP_CHANGE_FLAG_UNKNOWN_PAYLOAD_TYPE      0x00000004L
 
-
 /*------------------------------------------------------------------*/
 /* T.38 interface to IDI                                            */
 /*------------------------------------------------------------------*/
-
 
 #define B1_T38                  30
 #define B2_T38                  30
@@ -1101,11 +1049,9 @@ extern word li_total_channels;
 
 #define PRIVATE_T38                    2
 
-
 /*------------------------------------------------------------------*/
 /* PIAFS interface to IDI                                            */
 /*------------------------------------------------------------------*/
-
 
 #define B1_PIAFS                29
 #define B2_PIAFS                29
@@ -1144,24 +1090,17 @@ extern word li_total_channels;
 /* FAX SUB/SEP/PWD extension                                        */
 /*------------------------------------------------------------------*/
 
-
 #define PRIVATE_FAX_SUB_SEP_PWD        3
-
-
 
 /*------------------------------------------------------------------*/
 /* V.18 extension                                                   */
 /*------------------------------------------------------------------*/
 
-
 #define PRIVATE_V18                    4
-
-
 
 /*------------------------------------------------------------------*/
 /* DTMF TONE extension                                              */
 /*------------------------------------------------------------------*/
-
 
 #define DTMF_GET_SUPPORTED_DETECT_CODES  0xf8
 #define DTMF_GET_SUPPORTED_SEND_CODES    0xf9
@@ -1243,33 +1182,23 @@ extern word li_total_channels;
 
 #define PRIVATE_DTMF_TONE              5
 
-
 /*------------------------------------------------------------------*/
 /* FAX paper format extension                                       */
 /*------------------------------------------------------------------*/
 
-
 #define PRIVATE_FAX_PAPER_FORMATS      6
-
-
 
 /*------------------------------------------------------------------*/
 /* V.OWN extension                                                  */
 /*------------------------------------------------------------------*/
 
-
 #define PRIVATE_VOWN                   7
-
-
 
 /*------------------------------------------------------------------*/
 /* FAX non-standard facilities extension                            */
 /*------------------------------------------------------------------*/
 
-
 #define PRIVATE_FAX_NONSTANDARD        8
-
-
 
 /*------------------------------------------------------------------*/
 /* Advanced voice                                                   */

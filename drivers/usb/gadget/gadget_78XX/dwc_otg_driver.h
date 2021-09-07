@@ -47,8 +47,6 @@ struct dwc_otg_hcd;
 #include <linux/pci.h>
 #endif
 
-
-
 /**
  * This structure is a wrapper that encapsulates the driver components used to
  * manage a single DWC_otg controller.

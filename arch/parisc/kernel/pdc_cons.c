@@ -43,7 +43,6 @@
  * On production kernels EARLY_BOOTUP_DEBUG should be undefined. */
 #define EARLY_BOOTUP_DEBUG
 
-
 #include <linux/kernel.h>
 #include <linux/console.h>
 #include <linux/string.h>
@@ -130,7 +129,6 @@ void __init pdc_console_init(void)
 	printk(KERN_INFO "Initialized PDC Console for debugging.\n");
 #endif
 }
-
 
 /*
  * Used for emergencies. Currently only used if an HPMC occurs. If an

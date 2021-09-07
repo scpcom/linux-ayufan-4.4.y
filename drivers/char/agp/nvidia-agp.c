@@ -24,7 +24,6 @@
 #define NVIDIA_3_APBASE		0x50
 #define NVIDIA_3_APLIMIT	0x54
 
-
 static struct _nvidia_private {
 	struct pci_dev *dev_1;
 	struct pci_dev *dev_2;
@@ -34,7 +33,6 @@ static struct _nvidia_private {
 	off_t pg_offset;
 	u32 wbc_mask;
 } nvidia_private;
-
 
 static int nvidia_fetch_size(void)
 {
@@ -189,7 +187,6 @@ static void nvidia_cleanup(void)
 		previous_size->size * 1024 * 1024);
 }
 
-
 /*
  * Note we can't use the generic routines, even though they are 99% the same.
  * Aperture sizes <64M still requires a full 64k GART directory, but
@@ -236,7 +233,6 @@ static int nvidia_insert_memory(struct agp_memory *mem, off_t pg_start, int type
 	return 0;
 }
 
-
 static int nvidia_remove_memory(struct agp_memory *mem, off_t pg_start, int type)
 {
 	int i;
@@ -256,7 +252,6 @@ static int nvidia_remove_memory(struct agp_memory *mem, off_t pg_start, int type
 	agp_bridge->driver->tlb_flush(mem);
 	return 0;
 }
-
 
 static void nvidia_tlbflush(struct agp_memory *mem)
 {
@@ -288,7 +283,6 @@ static void nvidia_tlbflush(struct agp_memory *mem)
 		temp = readl(nvidia_private.aperture+(i * PAGE_SIZE / sizeof(u32)));
 }
 
-
 static const struct aper_size_info_8 nvidia_generic_sizes[5] =
 {
 	{512, 131072, 7, 0},
@@ -299,12 +293,10 @@ static const struct aper_size_info_8 nvidia_generic_sizes[5] =
 	{32, 16384, 4, 15}
 };
 
-
 static const struct gatt_mask nvidia_generic_masks[] =
 {
 	{ .mask = 1, .type = 0}
 };
-
 
 static const struct agp_bridge_driver nvidia_driver = {
 	.owner			= THIS_MODULE,
@@ -418,7 +410,6 @@ static int agp_nvidia_resume(struct pci_dev *pdev)
 }
 #endif
 
-
 static struct pci_device_id agp_nvidia_pci_table[] = {
 	{
 	.class		= (PCI_CLASS_BRIDGE_HOST << 8),
@@ -472,4 +463,3 @@ module_exit(agp_nvidia_cleanup);
 
 MODULE_LICENSE("GPL and additional rights");
 MODULE_AUTHOR("NVIDIA Corporation");
-

@@ -62,8 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
-
 #define DB_88F5X81_BOARD_PCI_IF_NUM		0x3
 #define DB_88F5X81_BOARD_TWSI_DEF_NUM		0x1
 #define DB_88F5X81_BOARD_MAC_INFO_NUM		0x1
@@ -370,7 +368,6 @@ MV_BOARD_INFO rd88f5181posNasInfo = {
 	NULL							/* pSwitchInfo */
 };
 
-
 #define RD_88F5181_VOIP_BOARD_PCI_IF_NUM		0x1
 #define RD_88F5181_VOIP_BOARD_TWSI_DEF_NUM		0x1
 #define RD_88F5181_VOIP_BOARD_MAC_INFO_NUM		0x1
@@ -573,9 +570,6 @@ MV_BOARD_INFO rd88f5181GtwGeInfo = {
     	rd88f5181GtwGeInfoBoardSwitchInfo		/* pSwitchInfo */
 };
 
-
-
-
 #define DB_88F5181_5281_DDR1_BOARD_PCI_IF_NUM		0x3
 #define DB_88F5181_5281_DDR1_BOARD_TWSI_DEF_NUM		0x1
 #define DB_88F5181_5281_DDR1_BOARD_MAC_INFO_NUM		0x1
@@ -638,8 +632,6 @@ MV_BOARD_INFO db88f5181_5281ddr1Info = {
 	N_A,						/* gppPolarityVal */
 	NULL						/* pSwitchInfo */
 };
-
-
 
 #define DB_88F5181_5281_DDR2_BOARD_PCI_IF_NUM		0x3
 #define DB_88F5181_5281_DDR2_BOARD_TWSI_DEF_NUM		0x1
@@ -707,7 +699,6 @@ MV_BOARD_INFO db88f5181_5281ddr2Info = {
 	N_A,						/* gppPolarityVal */
 	NULL						/* pSwitchInfo */
 };
-
 
 #define DB_88F5181_DDR1_MNG_BOARD_PCI_IF_NUM		0x1
 #define DB_88F5181_DDR1_MNG_BOARD_TWSI_DEF_NUM		0x1
@@ -855,4 +846,3 @@ MV_BOARD_INFO*	boardInfoTbl[] = 	{NULL,	 			/* DB_88F1181_DDR1 - OBSOLETE */
 
 #define	BOARD_ID_BASE				BOARD_ID_88F5181_5281_BASE
 #define MV_MAX_BOARD_ID				BOARD_ID_88F5181_5281_MAX
-

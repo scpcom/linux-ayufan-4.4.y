@@ -324,7 +324,6 @@ static void __init initialize_cache_info(void)
 	DBG(" <- initialize_cache_info()\n");
 }
 
-
 /*
  * Do some initial setup of the system.  The parameters are those which 
  * were passed in from the bootloader.
@@ -561,7 +560,6 @@ void __init setup_arch(char **cmdline_p)
 	ppc64_boot_msg(0x15, "Setup Done");
 }
 
-
 /* ToDo: do something useful if ppc_md is not yet setup. */
 #define PPC64_LINUX_FUNCTION 0x0f000000
 #define PPC64_IPL_MESSAGE 0xc0000000
@@ -643,9 +641,7 @@ void __init setup_per_cpu_areas(void)
 }
 #endif
 
-
 #ifdef CONFIG_PPC_INDIRECT_IO
 struct ppc_pci_io ppc_pci_io;
 EXPORT_SYMBOL(ppc_pci_io);
 #endif /* CONFIG_PPC_INDIRECT_IO */
-

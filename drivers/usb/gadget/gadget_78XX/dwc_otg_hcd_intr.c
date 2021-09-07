@@ -470,8 +470,6 @@ int32_t dwc_otg_hcd_handle_hc_intr(dwc_otg_hcd_t * dwc_otg_hcd)
 	return retval;
 }
 
-
-
 /**
  * Gets the actual length of a transfer after the transfer halts. _halt_status
  * holds the reason for the halt.
@@ -546,7 +544,6 @@ static int update_urb_state_xfer_comp(dwc_hc_t * hc,
 	xfer_length = get_actual_xfer_length(hc, hc_regs, qtd,						     
 						     DWC_OTG_HC_XFER_COMPLETE,
 						     &short_read);
-
 
 	/* non DWORD-aligned buffer case handling. */
 	if (hc->align_buff && xfer_length && hc->ep_is_in) {
@@ -818,7 +815,6 @@ static void release_channel(dwc_otg_hcd_t * hcd,
 		dwc_otg_hcd_queue_transactions(hcd, tr_type);
 	}
 }
-
 
 /**
  * Halts a host channel. If the channel cannot be halted immediately because
@@ -1527,7 +1523,6 @@ static int32_t handle_hc_ahberr_intr(dwc_otg_hcd_t * hcd,
 		  dwc_otg_hcd_get_ep_num(&urb->pipe_info),
 		  (dwc_otg_hcd_is_pipe_in(&urb->pipe_info) ? "IN" : "OUT"));
 	
-
 	switch (dwc_otg_hcd_get_pipe_type(&urb->pipe_info)) {
 case UE_CONTROL:
 		pipetype = "CONTROL"; 

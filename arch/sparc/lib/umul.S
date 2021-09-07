@@ -3,7 +3,6 @@
  *              by the GNU Library General Public License Version 2.
  */
 
-
 /*
  * Unsigned multiply.  Returns %o0 * %o1 in %o1%o0 (i.e., %o1 holds the
  * upper 32 bits of the 64-bit product).
@@ -67,7 +66,6 @@ _Umul:	/* needed for export */
 	mulscc	%o4, %o1, %o4	! 31
 	mulscc	%o4, %o1, %o4	! 32
 	mulscc	%o4, %g0, %o4	! final shift
-
 
 	/*
 	 * Normally, with the shift-and-add approach, if both numbers are

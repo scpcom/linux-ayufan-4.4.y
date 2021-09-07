@@ -689,7 +689,6 @@ static phy_interface_t gfar_get_interface(struct net_device *dev)
 	return PHY_INTERFACE_MODE_MII;
 }
 
-
 /* Initializes driver's PHY state, and attaches to the PHY.
  * Returns 0 on success.
  */
@@ -829,7 +828,6 @@ static void init_registers(struct net_device *dev)
 	/* Initialize the Minimum Frame Length Register */
 	gfar_write(&priv->regs->minflr, MINFLR_INIT_SETTINGS);
 }
-
 
 /* Halt the receive and transmit queues */
 static void gfar_halt_nodisable(struct net_device *dev)
@@ -1506,7 +1504,6 @@ static int gfar_set_mac_address(struct net_device *dev)
 	return 0;
 }
 
-
 /* Enables and disables VLAN insertion/extraction */
 static void gfar_vlan_rx_register(struct net_device *dev,
 		struct vlan_group *grp)
@@ -1765,7 +1762,6 @@ static void gfar_new_rxbdp(struct net_device *dev, struct rxbd8 *bdp,
 	bdp->lstatus = lstatus;
 }
 
-
 struct sk_buff * gfar_new_skb(struct net_device *dev)
 {
 	unsigned int alignamount;
@@ -1845,7 +1841,6 @@ static inline void gfar_rx_checksum(struct sk_buff *skb, struct rxfcb *fcb)
 	else
 		skb->ip_summed = CHECKSUM_NONE;
 }
-
 
 /* gfar_process_frame() -- handle one incoming packet if skb
  * isn't NULL.  */
@@ -2250,7 +2245,6 @@ static void gfar_set_multi(struct net_device *dev)
 	return;
 }
 
-
 /* Clears each of the exact match registers to zero, so they
  * don't interfere with normal reception */
 static void gfar_clear_exact_match(struct net_device *dev)
@@ -2291,7 +2285,6 @@ static void gfar_set_hash_for_addr(struct net_device *dev, u8 *addr)
 
 	return;
 }
-
 
 /* There are multiple MAC Address register pairs on some controllers
  * This function sets the numth pair to a given address
@@ -2427,4 +2420,3 @@ static void __exit gfar_exit(void)
 
 module_init(gfar_init);
 module_exit(gfar_exit);
-

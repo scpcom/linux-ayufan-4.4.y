@@ -148,7 +148,6 @@ static inline int page_mkclean(struct page *page)
 	return 0;
 }
 
-
 #endif	/* CONFIG_MMU */
 
 /*

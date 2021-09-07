@@ -344,7 +344,6 @@ static int __init cops_probe1(struct net_device *dev, int ioaddr)
 	dev->netdev_ops 	= &cops_netdev_ops;
 	dev->watchdog_timeo	= HZ * 2;
 
-
 	/* Tell the user where the card is and what mode we're in. */
 	if(board==DAYNA)
 		printk("%s: %s at %#3x, using IRQ %d, in Dayna mode.\n", 
@@ -758,7 +757,6 @@ static void cops_rx(struct net_device *dev)
         int boguscount = 0;
         unsigned long flags;
 
-
 	spin_lock_irqsave(&lp->lock, flags);
 	
         if(lp->board==DAYNA)
@@ -870,7 +868,6 @@ static void cops_timeout(struct net_device *dev)
 	dev->trans_start = jiffies;
 	netif_wake_queue(dev);
 }
-
 
 /*
  *	Make the card transmit a LocalTalk packet.
@@ -987,7 +984,6 @@ static int cops_close(struct net_device *dev)
 	netif_stop_queue(dev);
         return 0;
 }
-
 
 #ifdef MODULE
 static struct net_device *cops_dev;

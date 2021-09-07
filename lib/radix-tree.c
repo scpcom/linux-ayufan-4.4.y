@@ -33,7 +33,6 @@
 #include <linux/bitops.h>
 #include <linux/rcupdate.h>
 
-
 #ifdef __KERNEL__
 #define RADIX_TREE_MAP_SHIFT	(CONFIG_BASE_SMALL ? 4 : 6)
 #else
@@ -1052,7 +1051,6 @@ radix_tree_gang_lookup_tag_slot(struct radix_tree_root *root, void ***results,
 	return ret;
 }
 EXPORT_SYMBOL(radix_tree_gang_lookup_tag_slot);
-
 
 /**
  *	radix_tree_shrink    -    shrink height of a radix tree to minimal

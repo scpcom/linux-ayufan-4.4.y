@@ -34,14 +34,12 @@
     ---------    ----------    ----------------------------------------------
  */
 
-
 #ifndef __RTMP_OS_H__
 #define __RTMP_OS_H__
 
 #ifdef LINUX
 #include "rt_linux.h"
 #endif // LINUX //
-
 
 /*
 	This data structure mainly strip some callback function defined in
@@ -59,7 +57,6 @@ typedef struct _RTMP_OS_NETDEV_OP_HOOK_
 	unsigned char	devName[16];
 	unsigned char	needProtcted;
 }RTMP_OS_NETDEV_OP_HOOK, *PRTMP_OS_NETDEV_OP_HOOK;
-
 
 typedef enum _RTMP_TASK_STATUS_
 {

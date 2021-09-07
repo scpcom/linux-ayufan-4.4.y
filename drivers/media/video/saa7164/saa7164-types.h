@@ -284,4 +284,3 @@ typedef struct {
 	u8	bStrideLength;
 	u8	guidStrideFormat[16];
 } __attribute__((packed)) tmComResTSFormatDescrHeader_t;
-

@@ -179,7 +179,6 @@ bail:
 	return inode;
 }
 
-
 /*
  * here's how inodes get read from disk:
  * iget5_locked -> find_actor -> OCFS2_FIND_ACTOR
@@ -267,7 +266,6 @@ void ocfs2_populate_inode(struct inode *inode, struct ocfs2_dinode *fe,
 						that is needed. */
 	BUG_ON(!(fe->i_flags & cpu_to_le32(OCFS2_VALID_FL)));
 	BUG_ON(le32_to_cpu(fe->i_fs_generation) != osb->fs_generation);
-
 
 	OCFS2_I(inode)->ip_clusters = le32_to_cpu(fe->i_clusters);
 	OCFS2_I(inode)->ip_attr = le32_to_cpu(fe->i_attr);
@@ -1402,7 +1400,6 @@ int ocfs2_read_inode_block(struct inode *inode, struct buffer_head **bh)
 	return ocfs2_read_inode_block_full(inode, bh, 0);
 }
 
-
 static u64 ocfs2_inode_cache_owner(struct ocfs2_caching_info *ci)
 {
 	struct ocfs2_inode_info *oi = cache_info_to_inode(ci);
@@ -1453,4 +1450,3 @@ const struct ocfs2_caching_operations ocfs2_inode_caching_ops = {
 	.co_io_lock		= ocfs2_inode_cache_io_lock,
 	.co_io_unlock		= ocfs2_inode_cache_io_unlock,
 };
-

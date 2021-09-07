@@ -77,7 +77,6 @@ static int mv_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	if (ret)
 		goto err_req_region;
 	
-	
 	if ( !pci_set_dma_mask(dev, MV_DMA_BIT_MASK_64) ) {
 		ret = pci_set_consistent_dma_mask(dev, MV_DMA_BIT_MASK_64);
 		if (ret) {
@@ -218,4 +217,3 @@ MODULE_DEVICE_TABLE(pci, mv_pci_ids);
 
 module_init(mv_linux_driver_init);
 module_exit(mv_linux_driver_exit);
-

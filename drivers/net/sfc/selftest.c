@@ -760,4 +760,3 @@ int efx_selftest(struct efx_nic *efx, struct efx_self_tests *tests,
 
 	return rc_test;
 }
-

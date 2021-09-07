@@ -292,7 +292,6 @@ static __inline__ void set_dma_addr(unsigned int dmanr, unsigned int phys)
 	set_dma_page(dmanr, phys >> 16);
 }
 
-
 /* Set transfer size (max 64k for DMA1..3, 128k for DMA5..7) for
  * a specific DMA channel.
  * You must ensure the parameters are valid.
@@ -316,7 +315,6 @@ static __inline__ void set_dma_count(unsigned int dmanr, unsigned int count)
 			 ((dmanr & 3) << 2) + 2 + IO_DMA2_BASE);
 	}
 }
-
 
 /* Get DMA residue count. After a DMA transfer, this
  * should return zero. Reading this while a DMA transfer is

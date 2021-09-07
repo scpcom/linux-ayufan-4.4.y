@@ -344,7 +344,6 @@ static const struct file_operations nfqueue_file_ops = {
 };
 #endif /* PROC_FS */
 
-
 int __init netfilter_queue_init(void)
 {
 #ifdef CONFIG_PROC_FS
@@ -354,4 +353,3 @@ int __init netfilter_queue_init(void)
 #endif
 	return 0;
 }
-

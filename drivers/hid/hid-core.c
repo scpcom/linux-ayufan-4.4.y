@@ -2001,4 +2001,3 @@ module_init(hid_init);
 module_exit(hid_exit);
 
 MODULE_LICENSE(DRIVER_LICENSE);
-

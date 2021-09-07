@@ -243,7 +243,6 @@ void mfc_net_set(struct mfc_cache *mfc, struct net *net)
 
 #endif
 
-
 #define MFC_ASSERT_THRESH (3*HZ)		/* Maximal freq. of asserts */
 
 /*

@@ -29,4 +29,3 @@ void qla4xxx_dump_buffer(void *b, uint32_t size)
 	}
 	printk(KERN_INFO "\n");
 }
-

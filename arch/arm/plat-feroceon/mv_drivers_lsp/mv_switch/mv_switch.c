@@ -9,7 +9,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -37,13 +36,11 @@ disclaimer.
 #include "h/platform/gtMiiSmiIf.h"
 #include "mv_switch.h"
 
-
 static GT_QD_DEV qddev;
 GT_QD_DEV *qd_dev;
 static spinlock_t switch_lock;
 
 static GT_SYS_CONFIG qd_cfg;
-
 
 static char *mv_str_speed_state(int port)
 {
@@ -63,8 +60,6 @@ static char *mv_str_speed_state(int port)
 	}
 	return speed_str;
 }
-
-
 
 static char *mv_str_duplex_state(int port)
 {
@@ -92,7 +87,6 @@ static char *mv_str_port_state(GT_PORT_STP_STATE state)
 		return "Invalid";
 	}
 }
-
 
 static char *mv_str_link_state(int port)
 {
@@ -126,7 +120,6 @@ static char *mv_str_pause_state(int port)
 	}
 	return (pause) ? "Enable" : "Disable";
 }
-
 
 static char *mv_str_egress_mode(GT_EGRESS_MODE mode)
 {
@@ -183,7 +176,6 @@ int mv_switch_get_free_buffers_num(void)
 
 	return regVal;
 }
-
 
 #define QD_FMT "%10lu %10lu %10lu %10lu %10lu %10lu %10lu\n"
 #define QD_CNT(c, f) (GT_U32)c[0].f, (GT_U32)c[1].f, (GT_U32)c[2].f, (GT_U32)c[3].f, (GT_U32)c[4].f, (GT_U32)c[5].f, (GT_U32)c[6].f
@@ -258,7 +250,6 @@ void mv_switch_stats_print(void)
 	gstatsFlushAll(qd_dev);
 }
 
-
 void mv_switch_status_print(void)
 {
 	
@@ -296,7 +287,6 @@ void mv_switch_status_print(void)
 	}
 
 }
-
 
 int mv_switch_reg_read(int port, int reg, int type, MV_U16 *value)
 {
@@ -380,7 +370,6 @@ int mv_switch_reg_write(int port, int reg, int type, MV_U16 value)
 	return 0;
 }
 
-
 GT_BOOL readMiiWrap(GT_QD_DEV* dev, unsigned int portNumber, unsigned int MIIReg, unsigned int* value)
 {
     unsigned long   flags;
@@ -399,7 +388,6 @@ GT_BOOL readMiiWrap(GT_QD_DEV* dev, unsigned int portNumber, unsigned int MIIReg
     return GT_FALSE;
 }
 
-
 GT_BOOL writeMiiWrap(GT_QD_DEV* dev, unsigned int portNumber, unsigned int MIIReg, unsigned int data)
 {
     unsigned long   flags;
@@ -417,8 +405,6 @@ GT_BOOL writeMiiWrap(GT_QD_DEV* dev, unsigned int portNumber, unsigned int MIIRe
 
     return GT_FALSE;
 } 
-
-
 
 int mv_switch_load(unsigned int port)
 {                              

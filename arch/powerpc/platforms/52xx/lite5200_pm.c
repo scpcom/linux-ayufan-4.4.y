@@ -122,7 +122,6 @@ static void lite5200_restore_regs(void)
 	_memcpy_toio(gpw, &sgpw, sizeof(*gpw));
 	_memcpy_toio(gps, &sgps, sizeof(*gps));
 
-
 	/* XLB Arbitrer */
 	out_be32(&xlb->snoop_window, sxlb.snoop_window);
 	out_be32(&xlb->master_priority, sxlb.master_priority);
@@ -131,7 +130,6 @@ static void lite5200_restore_regs(void)
 	/* enable */
 	out_be32(&xlb->int_enable, sxlb.int_enable);
 	out_be32(&xlb->config, sxlb.config);
-
 
 	/* CDM - Clock Distribution Module */
 	out_8(&cdm->ipb_clk_sel, scdm.ipb_clk_sel);
@@ -149,7 +147,6 @@ static void lite5200_restore_regs(void)
 	out_be16(&cdm->mclken_div_psc2, scdm.mclken_div_psc2);
 	out_be16(&cdm->mclken_div_psc3, scdm.mclken_div_psc3);
 	out_be16(&cdm->mclken_div_psc6, scdm.mclken_div_psc6);
-
 
 	/* BESTCOMM */
 	out_be32(&bes->taskBar, sbes.taskBar);
@@ -182,7 +179,6 @@ static void lite5200_restore_regs(void)
 	/* enable interrupts */
 	out_be32(&bes->IntPend, sbes.IntPend);
 	out_be32(&bes->IntMask, sbes.IntMask);
-
 
 	/* PIC */
 	out_be32(&pic->per_pri1, spic.per_pri1);

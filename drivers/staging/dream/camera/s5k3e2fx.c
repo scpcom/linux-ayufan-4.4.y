@@ -1307,4 +1307,3 @@ static int __init s5k3e2fx_init(void)
 }
 
 module_init(s5k3e2fx_init);
-

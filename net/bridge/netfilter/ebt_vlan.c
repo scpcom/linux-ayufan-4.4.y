@@ -35,7 +35,6 @@ MODULE_AUTHOR("Nick Fedchik <nick@fedchik.org.ua>");
 MODULE_DESCRIPTION("Ebtables: 802.1Q VLAN tag match");
 MODULE_LICENSE("GPL");
 
-
 #define DEBUG_MSG(args...) if (debug) printk (KERN_DEBUG "ebt_vlan: " args)
 #define GET_BITMASK(_BIT_MASK_) info->bitmask & _BIT_MASK_
 #define EXIT_ON_MISMATCH(_MATCH_,_MASK_) {if (!((info->_MATCH_ == _MATCH_)^!!(info->invflags & _MASK_))) return false; }

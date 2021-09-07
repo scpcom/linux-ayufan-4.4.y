@@ -45,7 +45,6 @@
 #define BR16M	0xF00F
 #define B16_SET (J16 | B16 | BR16)
 
-
 /*
  * This struct defines the way the registers are stored on the stack during a
  * system call/exception. As usual the registers k0/k1 aren't being saved.

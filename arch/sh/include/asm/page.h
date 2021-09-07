@@ -56,7 +56,6 @@ pages_do_alias(unsigned long addr1, unsigned long addr2)
 	return (addr1 ^ addr2) & shm_align_mask;
 }
 
-
 #define clear_page(page)	memset((void *)(page), 0, PAGE_SIZE)
 extern void copy_page(void *to, void *from);
 

@@ -124,7 +124,6 @@ MODULE_FIRMWARE("digiface_firmware_rev11.bin");
 #define HDSP_playbackRmsLevel   4612  /* 26 * 64 bit values */
 #define HDSP_inputRmsLevel      4868  /* 26 * 64 bit values */
 
-
 /* This is for H9652 cards
    Peak values are read downward from the base
    Rms values are read upward
@@ -584,7 +583,6 @@ static void snd_hammerfall_free_buffer(struct snd_dma_buffer *dmab, struct pci_d
 	}
 }
 
-
 static struct pci_device_id snd_hdsp_ids[] = {
 	{
 		.vendor = PCI_VENDOR_ID_XILINX,
@@ -771,7 +769,6 @@ static int hdsp_get_iobox_version (struct hdsp *hdsp)
 	return 0;
 }
 
-
 #ifdef HDSP_FW_LOADER
 static int hdsp_request_fw_loader(struct hdsp *hdsp);
 #endif
@@ -805,7 +802,6 @@ static int hdsp_check_for_firmware (struct hdsp *hdsp, int load_on_demand)
 	}
 	return 0;
 }
-
 
 static int hdsp_fifo_wait(struct hdsp *hdsp, int count, int timeout)
 {
@@ -868,7 +864,6 @@ static int hdsp_write_gain(struct hdsp *hdsp, unsigned int addr, unsigned short 
 			return 0;
 
 		hdsp->mixer_matrix[addr] = data;
-
 
 		/* `addr' addresses a 16-bit wide address, but
 		   the address space accessed via hdsp_write
@@ -3669,7 +3664,6 @@ static int snd_hdsp_set_defaults(struct hdsp *hdsp)
 		                 hdsp_encode_latency(7) |
 		                 HDSP_LineOut;
 
-
 	hdsp_write(hdsp, HDSP_controlRegister, hdsp->control_register);
 
 #ifdef SNDRV_BIG_ENDIAN
@@ -4382,7 +4376,6 @@ static int snd_hdsp_playback_release(struct snd_pcm_substream *substream)
 	return 0;
 }
 
-
 static int snd_hdsp_capture_open(struct snd_pcm_substream *substream)
 {
 	struct hdsp *hdsp = snd_pcm_substream_chip(substream);
@@ -4864,7 +4857,6 @@ static int snd_hdsp_create_alsa_devices(struct snd_card *card, struct hdsp *hdsp
 		snd_printk(KERN_ERR "Hammerfall-DSP: Error creating pcm interface\n");
 		return err;
 	}
-
 
 	if ((err = snd_hdsp_create_midi(card, hdsp, 0)) < 0) {
 		snd_printk(KERN_ERR "Hammerfall-DSP: Error creating first midi interface\n");

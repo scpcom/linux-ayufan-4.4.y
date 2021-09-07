@@ -286,7 +286,6 @@ static int airo_cs_config_check(struct pcmcia_device *p_dev,
 	return 0;
 }
 
-
 static int airo_config(struct pcmcia_device *link)
 {
 	local_info_t *dev;

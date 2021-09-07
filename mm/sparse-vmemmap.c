@@ -43,7 +43,6 @@ static void * __init_refok __earlyonly_bootmem_alloc(int node,
 	return __alloc_bootmem_node(NODE_DATA(node), size, align, goal);
 }
 
-
 void * __meminit vmemmap_alloc_block(unsigned long size, int node)
 {
 	/* If the main allocator is up use that, fallback to bootmem. */

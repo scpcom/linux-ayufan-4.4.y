@@ -18,7 +18,6 @@ struct tpi_info {
 	__u32 reserved4	 : 12;
 } __attribute__ ((packed));
 
-
 /*
  * Some S390 specific IO instructions as inline
  */

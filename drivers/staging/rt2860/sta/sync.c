@@ -180,7 +180,6 @@ VOID ScanTimeout(
 {
 	RTMP_ADAPTER *pAd = (RTMP_ADAPTER *)FunctionContext;
 
-
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
 	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS))
@@ -455,7 +454,6 @@ VOID MlmeJoinReqAction(
 								  END_OF_ARGS);
 				FrameLen += Tmp;
 			}
-
 
 			MiniportMMRequest(pAd, 0, pOutBuffer, FrameLen);
 			MlmeFreeMemory(pAd, pOutBuffer);
@@ -737,7 +735,6 @@ VOID PeerBeaconAtJoinAction(
 	pVIE->Length = 0;
     RTMPZeroMemory(&HtCapability, sizeof(HtCapability));
 	RTMPZeroMemory(&AddHtInfo, sizeof(ADD_HT_INFO_IE));
-
 
 	if (PeerBeaconAndProbeRspSanity(pAd,
 								Elem->Msg,
@@ -1037,7 +1034,6 @@ VOID PeerBeacon(
 		is_my_bssid = MAC_ADDR_EQUAL(Bssid, pAd->CommonCfg.Bssid)? TRUE : FALSE;
 		is_my_ssid = SSID_EQUAL(Ssid, SsidLen, pAd->CommonCfg.Ssid, pAd->CommonCfg.SsidLen)? TRUE:FALSE;
 
-
 		// ignore BEACON not for my SSID
 		if ((! is_my_ssid) && (! is_my_bssid))
 			return;
@@ -1071,8 +1067,6 @@ VOID PeerBeacon(
 			NdisMoveMemory(pAd->ScanTab.BssEntry[Bssidx].PTSF, &Elem->Msg[24], 4);
 			NdisMoveMemory(&pAd->ScanTab.BssEntry[Bssidx].TTSF[0], &Elem->TimeStamp.u.LowPart, 4);
 			NdisMoveMemory(&pAd->ScanTab.BssEntry[Bssidx].TTSF[4], &Elem->TimeStamp.u.LowPart, 4);
-
-
 
 		}
 
@@ -1141,7 +1135,6 @@ VOID PeerBeacon(
 			}
 		}
 
-
 		NdisGetSystemUpTime(&Now);
 		pBss = &pAd->ScanTab.BssEntry[Bssidx];
 		pBss->Rssi = RealRssi;       // lastest RSSI
@@ -1157,7 +1150,6 @@ VOID PeerBeacon(
 			pAd->StaCfg.DtimCount = DtimCount;
 			pAd->StaCfg.DtimPeriod = DtimPeriod;
 			pAd->StaCfg.LastBeaconRxTime = Now;
-
 
 			RxWI.RSSI0 = Elem->Rssi0;
 			RxWI.RSSI1 = Elem->Rssi1;
@@ -1830,7 +1822,6 @@ VOID EnqueuePsPoll(
 	MiniportMMRequest(pAd, 0, (PUCHAR)&pAd->PsPollFrame, sizeof(PSPOLL_FRAME));
 }
 
-
 /*
 	==========================================================================
 	Description:
@@ -1872,4 +1863,3 @@ BOOLEAN ScanRunning(
 {
 	return (pAd->Mlme.SyncMachine.CurrState == SCAN_LISTEN) ? TRUE : FALSE;
 }
-

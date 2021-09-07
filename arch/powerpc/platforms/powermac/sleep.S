@@ -210,7 +210,6 @@ END_FTR_SECTION_IFSET(CPU_FTR_SPEC7450)
  * Here is the resume code.
  */
 
-
 /*
  * Core99 machines resume here
  * r4 has the physical address of SL_PC(sp) (unused)

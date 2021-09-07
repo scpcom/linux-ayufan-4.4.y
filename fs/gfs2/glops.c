@@ -456,4 +456,3 @@ const struct gfs2_glock_operations *gfs2_glops_list[] = {
 	[LM_TYPE_QUOTA] = &gfs2_quota_glops,
 	[LM_TYPE_JOURNAL] = &gfs2_journal_glops,
 };
-

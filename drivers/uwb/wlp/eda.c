@@ -56,7 +56,6 @@
 #include <linux/wlp.h>
 #include "wlp-internal.h"
 
-
 /* FIXME: cache is not purged, only on device close */
 
 /* FIXME: does not scale, change to dynamic array */

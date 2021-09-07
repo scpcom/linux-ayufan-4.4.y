@@ -62,7 +62,6 @@ __FBSDID("$FreeBSD: src/sys/opencrypto/crypto.c,v 1.27 2007/03/21 03:42:51 sam E
 __FBSDID("$FreeBSD: src/sys/opencrypto/crypto.c,v 1.16 2005/01/07 02:29:16 imp Exp $");
  */
 
-
 #ifndef AUTOCONF_INCLUDED
 #include <linux/config.h>
 #endif
@@ -1024,7 +1023,6 @@ crypto_kinvoke(struct cryptkop *krp, int crid)
 	return 0;
 }
 
-
 /*
  * Dispatch a crypto request to the appropriate crypto devices.
  */
@@ -1538,7 +1536,6 @@ crypto_ret_proc(void *arg)
 	complete_and_exit(&cryptoretproc_exited, 0);
 }
 
-
 #if 0 /* should put this into /proc or something */
 static void
 db_show_drivers(void)
@@ -1636,7 +1633,6 @@ DB_SHOW_COMMAND(kcrypto, db_show_kcrypto)
 }
 #endif
 
-
 static int
 crypto_init(void)
 {
@@ -1710,7 +1706,6 @@ bad:
 	return error;
 }
 
-
 static void
 crypto_exit(void)
 {
@@ -1754,7 +1749,6 @@ crypto_exit(void)
 	if (cryptop_zone != NULL)
 		kmem_cache_destroy(cryptop_zone);
 }
-
 
 EXPORT_SYMBOL(crypto_newsession);
 EXPORT_SYMBOL(crypto_freesession);

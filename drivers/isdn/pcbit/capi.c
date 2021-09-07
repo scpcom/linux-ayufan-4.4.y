@@ -45,7 +45,6 @@
 #include "edss1.h"
 #include "capi.h"
 
-
 /*
  *  Encoding of CAPI messages
  *
@@ -109,7 +108,6 @@ int capi_conn_req(const char * calledPN, struct sk_buff **skb, int proto)
 
         *(skb_put(*skb, 1)) = 0;        /* Keypad.Length = 0                 */
                   
-
         *(skb_put(*skb, 1)) = 0;        /* CallingPN.Length = 0              */
         *(skb_put(*skb, 1)) = 0;        /* CallingPSA.Length = 0             */
 
@@ -193,7 +191,6 @@ int capi_conn_active_resp(struct pcbit_chan* chan, struct sk_buff **skb)
         return 2;
 }
 
-
 int capi_select_proto_req(struct pcbit_chan *chan, struct sk_buff **skb, 
                           int outgoing)
 {
@@ -238,7 +235,6 @@ int capi_select_proto_req(struct pcbit_chan *chan, struct sk_buff **skb,
   
         *((ushort *) skb_put(*skb, 2)) = MRU;
 
- 
         *(skb_put(*skb, 1)) = 0x08;           /* Modulo */
         *(skb_put(*skb, 1)) = 0x07;           /* Max Window */
   
@@ -259,7 +255,6 @@ int capi_select_proto_req(struct pcbit_chan *chan, struct sk_buff **skb,
         return 18;
 }
 
-
 int capi_activate_transp_req(struct pcbit_chan *chan, struct sk_buff **skb)
 {
 
@@ -271,7 +266,6 @@ int capi_activate_transp_req(struct pcbit_chan *chan, struct sk_buff **skb)
 
         *((ushort*) skb_put(*skb, 2) ) = chan->callref;  
 
-        
         *(skb_put(*skb, 1)) = chan->layer2link; /* Layer2 id */
         *(skb_put(*skb, 1)) = 0x00;             /* Transmit by default */
 
@@ -286,7 +280,6 @@ int capi_tdata_req(struct pcbit_chan* chan, struct sk_buff *skb)
 {
 	ushort data_len;
 	
-
 	/*  
 	 * callref      - 2  
 	 * layer2link   - 1
@@ -371,7 +364,6 @@ int capi_disc_resp(struct pcbit_chan *chan, struct sk_buff **skb)
 
         return 2;
 }
-
 
 /*
  *  Decoding of CAPI messages
@@ -512,7 +504,6 @@ int capi_decode_conn_conf(struct pcbit_chan * chan, struct sk_buff *skb,
                 *complete = 1;
         }
 
-
         /* Optional Bearer Capability */
         skb_pull(skb, *(skb->data) + 1);
         
@@ -535,7 +526,6 @@ int capi_decode_conn_actv_ind(struct pcbit_chan * chan, struct sk_buff *skb)
         /* Yet Another Bearer Capability */
         skb_pull(skb, *(skb->data) + 1);
   
-
         /* Connected Party Number */
         len=*(skb->data);
 
@@ -575,7 +565,6 @@ int capi_decode_conn_actv_conf(struct pcbit_chan * chan, struct sk_buff *skb)
         */
         return errcode;
 }
-
 
 int capi_decode_sel_proto_conf(struct pcbit_chan *chan, struct sk_buff *skb)
 {
@@ -647,8 +636,3 @@ int capi_decode_debug_188(u_char *hdr, ushort hdrlen)
         return 0;
 }
 #endif
-
-
-
-
-

@@ -2754,7 +2754,6 @@ __vxge_hw_read_rts_ds(struct vxge_hw_vpath_reg __iomem *vpath_reg,
 	return;
 }
 
-
 /*
  * __vxge_hw_vpath_card_info_get - Get the serial numbers,
  * part number and product description.
@@ -5042,7 +5041,6 @@ void vxge_hw_blockpool_block_add(
 		status = VXGE_HW_FAIL;
 		goto exit;
 	}
-
 
 	if (!list_empty(&blockpool->free_entry_list))
 		entry = (struct __vxge_hw_blockpool_entry *)

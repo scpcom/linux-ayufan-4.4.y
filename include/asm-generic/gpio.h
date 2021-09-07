@@ -95,8 +95,7 @@ struct gpio_chip {
 
 	void			(*dbg_show)(struct seq_file *s,
 						struct gpio_chip *chip);
-
-
+ 
 	int			base;
 	u16			ngpio;
 	char			**names;
@@ -112,7 +111,6 @@ extern int __must_check gpiochip_reserve(int start, int ngpio);
 extern int gpiochip_add(struct gpio_chip *chip);
 extern int __must_check gpiochip_remove(struct gpio_chip *chip);
 
-
 /* Always use the library code for GPIO management calls,
  * or when sleeping may be involved.
  */
@@ -124,8 +122,7 @@ extern int gpio_direction_output(unsigned gpio, int value);
 
 extern int gpio_get_value_cansleep(unsigned gpio);
 extern void gpio_set_value_cansleep(unsigned gpio, int value);
-
-
+  
 /* A platform's <asm/gpio.h> code may want to inline the I/O calls when
  * the GPIO is constant and refers to some always-present controller,
  * giving direct access to chip registers and tight bitbanging loops.

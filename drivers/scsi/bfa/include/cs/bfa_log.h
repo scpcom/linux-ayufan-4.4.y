@@ -95,7 +95,6 @@ enum bfa_log_severity {
 
 #define BFA_LOG_MODID_OFFSET		16
 
-
 struct bfa_log_msgdef_s {
 	u32	msg_id;		/*  message id */
 	int		attributes;	/*  attributes */
@@ -154,7 +153,6 @@ struct bfa_log_mod_s;
  */
 typedef void (*bfa_log_cb_t)(struct bfa_log_mod_s *log_mod, u32 msg_id,
 			const char *format, ...);
-
 
 struct bfa_log_mod_s {
 	char		instance_info[16];	/*  instance info */

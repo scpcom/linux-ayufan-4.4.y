@@ -55,7 +55,6 @@
 #define	MCFSIM_DMA2ICR		MCFSIM_ICR8	/* DMA 2 ICR */
 #define	MCFSIM_DMA3ICR		MCFSIM_ICR9	/* DMA 3 ICR */
 
-
 #define	MCFINTC0_SIMR		0xFC04801C
 #define	MCFINTC0_CIMR		0xFC04801D
 #define	MCFINTC0_ICR0		0xFC048040
@@ -145,7 +144,6 @@
 #define MCF532x_I2C_I2SR_RXAK   (0x01)  // received acknowledge
 
 #define MCF532x_PAR_FECI2C	(volatile u8 *) (0xFC0A4053)
-
 
 /*
  *	The M5329EVB board needs a help getting its devices initialized 
@@ -1173,7 +1171,6 @@
 #define MCFGPIO_PIN_MAX			136
 #define MCFGPIO_IRQ_MAX			8
 #define MCFGPIO_IRQ_VECBASE		MCFINT_VECBASE
-
 
 /*********************************************************************
  *

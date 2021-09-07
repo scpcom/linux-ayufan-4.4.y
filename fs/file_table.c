@@ -440,7 +440,6 @@ struct file *fget_light(unsigned int fd, int *fput_needed)
 	return file;
 }
 
-
 void put_filp(struct file *file)
 {
 	if (atomic_long_dec_and_test(&file->f_count)) {

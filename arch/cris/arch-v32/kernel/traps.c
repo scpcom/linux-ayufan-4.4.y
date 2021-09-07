@@ -129,7 +129,6 @@ void handle_nmi(struct pt_regs *regs)
 #endif
 }
 
-
 #ifdef CONFIG_BUG
 extern void die_if_kernel(const char *str, struct pt_regs *regs, long err);
 
@@ -184,7 +183,6 @@ __asm__  ( ".text\n\t"
 	   "nop\n\t"
 	   "jump ret_from_intr\n\t"
 	   "nop\n\t");
-
 
 #ifdef CONFIG_DEBUG_BUGVERBOSE
 void

@@ -309,8 +309,6 @@ int ps3_repository_read_dev_reg(unsigned int bus_index,
 		reg_index, bus_addr, len);
 }
 
-
-
 int ps3_repository_find_device(struct ps3_repository_device *repo)
 {
 	int result;

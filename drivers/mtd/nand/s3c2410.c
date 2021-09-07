@@ -60,7 +60,6 @@ static int clock_stop = 1;
 static const int clock_stop = 0;
 #endif
 
-
 /* new oob placement block for use with hardware ecc generation
  */
 

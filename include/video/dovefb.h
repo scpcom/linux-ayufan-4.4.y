@@ -448,6 +448,5 @@ int clcd_platform_init(struct dovefb_mach_info *lcd0_dmi_data,
 		       struct dovefb_mach_info *lcd0_vid_dmi_data,
 		       struct dovebl_platform_data *backlight_data);
 
-
 #endif /* _KERNEL_ */
 #endif /* _DOVEFB_H_ */

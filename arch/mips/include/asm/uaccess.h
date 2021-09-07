@@ -65,7 +65,6 @@
 
 #define segment_eq(a, b)	((a).seg == (b).seg)
 
-
 /*
  * Is a address valid? This does a straighforward calculation rather
  * than tests.

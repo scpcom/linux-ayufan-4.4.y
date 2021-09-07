@@ -29,12 +29,10 @@
     *  MA 02111-1307 USA
     ********************************************************************* */
 
-
 #ifndef _SB1250_REGS_H
 #define _SB1250_REGS_H
 
 #include "sb1250_defs.h"
-
 
 /*  *********************************************************************
     *  Some general notes:
@@ -49,7 +47,6 @@
     *  The information in this file is based on the SB1250 SOC
     *  manual version 0.2, July 2000.
     ********************************************************************* */
-
 
 /*  *********************************************************************
     * Memory Controller Registers
@@ -131,7 +128,6 @@
 
 #endif
 
-
 /*  *********************************************************************
     * PCI Interface Registers
     ********************************************************************* */
@@ -140,7 +136,6 @@
 #define A_PCI_TYPE00_HEADER         0x00DE000000
 #define A_PCI_TYPE01_HEADER         0x00DE000800
 #endif
-
 
 /*  *********************************************************************
     * Ethernet DMA and MACs
@@ -169,7 +164,6 @@
 #define A_MAC_REGISTER(macnum,reg)                  \
             (A_MAC_BASE_0 +                         \
              MAC_SPACING*(macnum) + (reg))
-
 
 #define R_MAC_DMA_CHANNELS		0x800 /* Relative to A_MAC_CHANNEL_BASE */
 
@@ -266,11 +260,9 @@
 #define MAC_ADDR_COUNT			8
 #define MAC_CHMAP_COUNT			4
 
-
 /*  *********************************************************************
     * DUART Registers
     ********************************************************************* */
-
 
 #if SIBYTE_HDR_FEATURE_1250_112x    /* This MC only on 1250 & 112x */
 #define R_DUART_NUM_PORTS           2
@@ -296,7 +288,6 @@
 #define R_DUART_OPCR_X		    0x080
 #define R_DUART_AUXCTL_X	    0x090
 #endif /* 1250 PASS2 || 112x PASS1 || 1480 */
-
 
 /*
  * The IMR and ISR can't be addressed with A_DUART_CHANREG,
@@ -335,7 +326,6 @@
 #define R_DUART_CLEAR_OPR	    0x0C0
 #define R_DUART_IN_CHNG_A	    0x0D0
 #define R_DUART_IN_CHNG_B	    0x0E0
-
 
 /*
  * These constants are the absolute addresses.
@@ -383,11 +373,9 @@
 #define A_DUART_INPORT_CHNG_DEBUG   0x00100603F0
 #endif /* 1250 PASS2 || 112x PASS1 */
 
-
 /*  *********************************************************************
     * Synchronous Serial Registers
     ********************************************************************* */
-
 
 #if SIBYTE_HDR_FEATURE_1250_112x	/* sync serial only on 1250/112x */
 
@@ -407,7 +395,6 @@
             (A_SER_BASE_0 +                         \
              SER_SPACING*(sernum) + (reg))
 
-
 #define R_SER_DMA_CHANNELS		0   /* Relative to A_SER_BASE_x */
 
 #define A_SER_DMA_CHANNEL_BASE(sernum,txrx)    \
@@ -418,7 +405,6 @@
 #define A_SER_DMA_REGISTER(sernum, txrx, reg)           \
             (A_SER_DMA_CHANNEL_BASE(sernum, txrx) +    \
             (reg))
-
 
 /*
  * DMA channel registers, relative to A_SER_DMA_CHANNEL_BASE
@@ -506,7 +492,6 @@
 #define R_IO_EXT_START_ADDR	    0x0200
 #define R_IO_EXT_TIME_CFG0          0x0600
 #define R_IO_EXT_TIME_CFG1          0x0700
-
 
 #define A_IO_INTERRUPT_STATUS       0x0010061A00
 #define A_IO_INTERRUPT_DATA0        0x0010061A10
@@ -703,7 +688,6 @@
 #define A_ADDR_TRAP_DOWN(n) (A_ADDR_TRAP_DOWN_0 + ((n) * ADDR_TRAP_SPACING))
 #define A_ADDR_TRAP_CFG(n) (A_ADDR_TRAP_CFG_0 + ((n) * ADDR_TRAP_SPACING))
 
-
 /*  *********************************************************************
     * System Interrupt Mapper Registers
     ********************************************************************* */
@@ -888,6 +872,5 @@
 #define A_PHYS_L2CACHE_WAY2             _SB_MAKE64(0x00D01C0000)
 #define A_PHYS_L2CACHE_WAY3             _SB_MAKE64(0x00D01E0000)
 #endif
-
 
 #endif

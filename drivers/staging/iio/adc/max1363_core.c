@@ -169,7 +169,6 @@ static const enum max1363_modes max1238_mode_list[] = {
 	s6m7to8m9, s6m7to10m11, s7m6to9m8, s7m6to11m10,
 };
 
-
 enum { max1361,
        max1362,
        max1363,
@@ -333,7 +332,6 @@ static ssize_t max1363_show_av_scan_modes(struct device *dev,
 
 	return len;
 }
-
 
 /* The dev here is the sysfs related one, not the underlying i2c one */
 static ssize_t max1363_scan_direct(struct device *dev,

@@ -117,7 +117,6 @@ out:
 	return rt == NULL ? -EAGAIN : 0;
 }
 
-
 static int fib6_rule_match(struct fib_rule *rule, struct flowi *fl, int flags)
 {
 	struct fib6_rule *r = (struct fib6_rule *) rule;
@@ -313,7 +312,6 @@ int __init fib6_rules_init(void)
 {
 	return register_pernet_subsys(&fib6_rules_net_ops);
 }
-
 
 void fib6_rules_cleanup(void)
 {

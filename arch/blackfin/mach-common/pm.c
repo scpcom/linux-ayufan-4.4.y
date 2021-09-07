@@ -39,7 +39,6 @@
 #define WAKEUP_TYPE	PM_WAKE_BOTH_EDGES
 #endif
 
-
 void bfin_pm_suspend_standby_enter(void)
 {
 	unsigned long flags;

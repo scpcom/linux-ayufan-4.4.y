@@ -37,7 +37,6 @@
 #define BFIN_ICACHESIZE	(0*1024)
 #endif
 
-
 #ifdef CONFIG_BF537
 #define L1_CODE_START       0xFFA00000
 #define L1_DATA_A_START     0xFF800000
@@ -79,7 +78,6 @@
 #define L1_DATA_B_START     0xFF904000
 
 #define L1_CODE_LENGTH      0xC000
-
 
 #ifdef CONFIG_BFIN_DCACHE
 

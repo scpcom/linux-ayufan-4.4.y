@@ -41,8 +41,6 @@
  *
  */
 
-
-
 /** @file
  * Handles SEC2 legacy interface module registration and ioctl()
  * system call dispatch for the Talitos 2/3 xwc driver subsystem.
@@ -51,7 +49,6 @@
 #include <linux/kernel.h>
 #include <linux/fs.h>
 #include <asm/uaccess.h>
-
 
 /* Includes for SEC2 legacy interfaces */
 #include "Sec2.h"
@@ -68,8 +65,6 @@
 
 #define EXECMSG_POOL_DEPTH 32
 
-
-
 /* Globals for this module alone */
 
 RMinterfaceCtx *ifctx;
@@ -81,7 +76,6 @@ BOOLEAN         msgInUse[EXECMSG_POOL_DEPTH];
 T2DESC_AUXMAP   descPageMap[EXECMSG_POOL_DEPTH];
 
 uint32_t        msgID;
-
 
 /* Translate a CPSR into a SEC2 driver error                        */
 /* Notice that this does nothing with the error descriptor pointer, */
@@ -138,9 +132,6 @@ static int sec2xTranslateError(RMexecMessage *xmsg)
     return status;
 }
 
-
-
-
 static RMexecMessage *getExecMsg(void)
 {
     int i;
@@ -174,7 +165,6 @@ static void freeExecMsg(RMexecMessage *execMsg)
 
     return;
 }
-
 
 /* Release handler (callback) for a blocking request       */
 /* Invoked by the RM by reference out of a request message */
@@ -230,10 +220,6 @@ static void sec2xAsyncReleaseHandler(void *msg)
     freeExecMsg(thisMsg);
 }
 
-
-
-
-
 /**
  * Initialize the legacy interface and connect it to the
  * current resource manager
@@ -270,7 +256,6 @@ int SEC2xDrvInit(void)
         excMsgPool[i].sigval[3]              = 0;
         excMsgPool[i].owningIF               = NULL;
 
-
         excMsgPool[i].descHead      = kmalloc(sizeof(T2DPD) * T2_CHANNEL_FIFO_DEPTH, GFP_KERNEL | GFP_DMA);
         excMsgPool[i].descBufferMap = &descPageMap[i];
 
@@ -300,9 +285,6 @@ int SEC2xDrvInit(void)
     return 0;
 }
 
-
-
-
 /**
  * Disconnect this interface
  */
@@ -328,18 +310,14 @@ int SEC2xShutdown(void)
     return 0;
 }
 
-
-
 /**
  * Open a new path and make it known to this IF
  */
 int SEC2xOpen(struct inode *nd, struct file *fil)
 {
 
-
     return SEC2_SUCCESS;
 }
-
 
 /**
  * Close an open path
@@ -350,9 +328,6 @@ int SEC2xClose(struct inode *nd, struct file *fil)
     /* nothing needed here... */
     return SEC2_SUCCESS;
 }
-
-
-
 
 /**
  * ioctl() entry point from the I/O manager
@@ -374,7 +349,6 @@ int SEC2xIoctl(struct inode  *nd,
     MALLOC_REQ       *mem;
     KBUF_MULTI       *kbm;
     PTRTYPE           memtype;
-
 
     status = SEC2_SUCCESS;
 
@@ -448,7 +422,6 @@ int SEC2xIoctl(struct inode  *nd,
             /* handler to free resources and translate/report errors      */
             return status;
             break;
-
 
         /* blocking request types, should ONLY come from usermode */
         case IOCTL_PROC_REQ_BLOCK:
@@ -555,7 +528,6 @@ int SEC2xIoctl(struct inode  *nd,
             status = SEC2_UNIMPLEMENTED;
             break;
 
-
         case IOCTL_MALLOC:
             if ((((MALLOC_REQ *)param)->ptr =
                         kmalloc(((MALLOC_REQ *)param)->sz, GFP_KERNEL | GFP_DMA)) == 0)
@@ -636,15 +608,12 @@ int SEC2xIoctl(struct inode  *nd,
             status = SEC2_SUCCESS;
             break;
 
-
         case IOCTL_KBUF_MULTI_FREE:
             kbm = (KBUF_MULTI *)param;
             for (i = 0; i < MAX_PAIRS; i++)
                 if (kbm->pair[i].kbuf != NULL)
                     kfree(kbm->pair[i].kbuf);
             break;
-
-
 
         case IOCTL_INSTALL_AUX_HANDLER:
 #ifdef UNIMPLEMENTED
@@ -663,7 +632,6 @@ int SEC2xIoctl(struct inode  *nd,
                 break;
             }
 
-
             /* Channel spec is in range, and is reserved for use. Notice that */
             /* we really don't have any good means to identify the requestor  */
             /* for validity (could be the kernel itself), so will assume that */
@@ -677,12 +645,8 @@ int SEC2xIoctl(struct inode  *nd,
 
     } /* switch (code) */
 
-
     return status;
 }
-
-
-
 
 /* Equivalence symbol to mimic the entry point of the old driver */
 int SEC2_ioctl(struct inode  *nd,

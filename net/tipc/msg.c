@@ -40,7 +40,6 @@
 #include "msg.h"
 #include "bearer.h"
 
-
 #ifdef CONFIG_TIPC_DEBUG
 
 void tipc_msg_dbg(struct print_buf *buf, struct tipc_msg *msg, const char *str)

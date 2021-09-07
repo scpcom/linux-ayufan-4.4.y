@@ -47,7 +47,6 @@ typedef struct PACKED __HT_INFO_OCTET
 	UCHAR	Reserved:5;
 } HT_INFORMATION_OCTET;
 
-
 typedef struct PACKED __FRAME_HT_INFO
 {
 	HEADER_802_11   		Hdr;
@@ -57,5 +56,3 @@ typedef struct PACKED __FRAME_HT_INFO
 }   FRAME_HT_INFO, *PFRAME_HT_INFO;
 
 #endif /* __ACTION_H__ */
-
-

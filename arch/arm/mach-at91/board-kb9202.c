@@ -41,7 +41,6 @@
 
 #include "generic.h"
 
-
 static void __init kb9202_map_io(void)
 {
 	/* Initialize processor: 10 MHz crystal */

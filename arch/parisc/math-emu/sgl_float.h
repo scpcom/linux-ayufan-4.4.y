@@ -148,7 +148,6 @@
 /*  unsigned int signlessleft, signlessright; */			\
       (signlessleft < signlessright)  
     
-
 #define Sgl_copytoint_exponentmantissa(source,dest)     \
     dest = Sexponentmantissa(source)
 
@@ -384,7 +383,6 @@
         Sextallp2(rightb)) \
 	    Sextallp1(resulta) = Sextallp1(lefta)+Sextallp1(righta)+1; \
     else Sextallp1(resulta) = Sextallp1(lefta)+Sextallp1(righta)
-
 
 #define Sglext_arithrightshiftby1(srcdstA,srcdstB)	\
     Shiftdouble(Sextallp1(srcdstA),Sextallp2(srcdstB),1,Sextallp2(srcdstB)); \

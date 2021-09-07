@@ -40,7 +40,6 @@
 #include "../mlme_ex_def.h"
 //#include <stdarg.h>
 
-
 // ===========================================================================================
 // state_machine
 // ===========================================================================================
@@ -161,7 +160,6 @@ BOOLEAN MlmeEnqueueEx(
 	// This might happen when timer already been fired before cancel timer with mlmehalt
 	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS))
 		return FALSE;
-
 
 	// First check the size, it MUST not exceed the mlme queue size
 	if (MsgLen > MAX_LEN_OF_MLME_BUFFER)

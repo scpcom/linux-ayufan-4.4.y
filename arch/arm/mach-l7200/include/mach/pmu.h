@@ -21,7 +21,6 @@
 #define PMU_START (IO_START + PMU_OFF)  /* Physical addr. of the PMU reg. */
 #define PMU_BASE  (IO_BASE  + PMU_OFF)  /* Virtual addr. of the PMU reg. */
 
-
 /* Define the PMU registers for use by device drivers and the kernel. */
 
 typedef struct {
@@ -34,7 +33,6 @@ typedef struct {
 } pmu_interface;
 
 #define PMU ((volatile pmu_interface *)(PMU_BASE))
-
 
 /* Macro's for reading the common register fields. */
 
@@ -106,7 +104,6 @@ typedef struct {
 #define SDRB_SEL         1<<2
 #define SDRF_SEL         1<<1
 #define FASTBUS          1<<0
-
 
 /* CFG_SDRAM */
 

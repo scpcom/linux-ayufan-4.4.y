@@ -71,7 +71,6 @@
 #       define R600_CHANSIZE                           (1 << 7)
 #       define R600_CHANSIZE_OVERRIDE                  (1 << 10)
 
-
 #define R600_GENERAL_PWRMGT                                        0x618
 #	define R600_OPEN_DRAIN_PADS				   (1 << 11)
 
@@ -80,8 +79,6 @@
 #define R600_HIGH_VID_LOWER_GPIO_CNTL                              0x71c
 #define R600_MEDIUM_VID_LOWER_GPIO_CNTL                            0x720
 #define R600_LOW_VID_LOWER_GPIO_CNTL                               0x724
-
-
 
 #define R600_HDP_NONSURFACE_BASE                                0x2c04
 
@@ -109,6 +106,5 @@
 #define R600_BIOS_5_SCRATCH               0x1738
 #define R600_BIOS_6_SCRATCH               0x173c
 #define R600_BIOS_7_SCRATCH               0x1740
-
 
 #endif

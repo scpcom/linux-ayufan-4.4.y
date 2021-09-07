@@ -21,7 +21,6 @@ disclaimer.
 #include "usb/api/mvUsbDevApi.h"
 #include "usb/device/mvUsbDevPrv.h"
 
-
 /*FUNCTION*-------------------------------------------------------------
 *
 *  Function Name  : _usb_device_unstall_endpoint
@@ -268,7 +267,6 @@ uint_8 _usb_device_is_endpoint_stalled
    
 } /* EndBody */
 
-
 /*FUNCTION*-------------------------------------------------------------
 *
 *  Function Name  : _usb_device_process_resume
@@ -290,7 +288,6 @@ void _usb_device_assert_resume
    _usb_dci_vusb20_assert_resume(handle);
 
 } /* EndBody */
-
 
 /***************************/
 /* ARC USB Debug functions */
@@ -484,7 +481,6 @@ void _usb_regs(void* usbHandle)
         (unsigned)USB_32BIT_LE(dev_regs->REGISTERS.OPERATIONAL_DEVICE_REGISTERS.ENDPTCOMPLETE));
 }
 
-    
 void _usb_ep_status(void* usbHandle, int ep_num, int direction)
 {
     USB_DEV_STATE_STRUCT*               pUsbDev = (USB_DEV_STATE_STRUCT*)usbHandle;
@@ -566,7 +562,6 @@ void _usb_ep_status(void* usbHandle, int ep_num, int direction)
     }
 }
 
-
 /* DEBUG */
 uint_32 usbDebugFlags = ARC_DEBUG_FLAG_STATS
                       | ARC_DEBUG_FLAG_INIT 
@@ -629,7 +624,3 @@ void    _usb_debug_print_trace_log(void)
     USB_printf("USB trace log is not supported\n");
 }
 #endif /* MV_USB_TRACE_LOG */
-
-
-
-

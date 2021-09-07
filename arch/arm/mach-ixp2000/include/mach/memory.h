@@ -24,4 +24,3 @@
 	__phys_to_virt((((b - (*IXP2000_PCI_SDRAM_BAR & 0xfffffff0)) + 0x0)))
 
 #endif
-

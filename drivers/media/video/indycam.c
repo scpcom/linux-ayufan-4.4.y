@@ -35,7 +35,6 @@ MODULE_VERSION(INDYCAM_MODULE_VERSION);
 MODULE_AUTHOR("Mikael Nousiainen <tmnousia@cc.hut.fi>");
 MODULE_LICENSE("GPL");
 
-
 // #define INDYCAM_DEBUG
 
 #ifdef INDYCAM_DEBUG

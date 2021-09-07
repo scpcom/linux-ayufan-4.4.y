@@ -246,7 +246,6 @@ static const struct file_operations serio_raw_fops = {
 	.fasync =	serio_raw_fasync,
 };
 
-
 /*********************************************************************
  *                   Interface with serio port   	             *
  *********************************************************************/

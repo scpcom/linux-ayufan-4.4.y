@@ -360,7 +360,6 @@ error:
 }
 */
 
-
 /**
  * v9fs_clear_inode - release an inode
  * @inode: inode to release
@@ -452,7 +451,6 @@ v9fs_open_created(struct inode *inode, struct file *file)
 {
 	return 0;
 }
-
 
 /**
  * v9fs_create - Create a file

@@ -65,7 +65,6 @@
 #include <linux/sched.h>
 #include "i2lib.h"
 
-
 //***********************
 //* Function Prototypes *
 //***********************
@@ -936,7 +935,6 @@ i2InputFlush(i2ChanStrPtr pCh)
 	// Expedient way to zero out the buffer
 	pCh->Ibuf_strip = pCh->Ibuf_stuff;
 
-
 	// Update our flow control information and possibly queue ourselves to send
 	// it, depending on how much data has been stripped since the last time a
 	// packet was sent.
@@ -975,7 +973,6 @@ i2InputAvailable(i2ChanStrPtr pCh)
 
 	// Ensure channel structure seems real
 	if ( !i2Validate ( pCh ) ) return -1;
-
 
 	// initialize some accelerators and private copies
 	read_lock_irqsave(&pCh->Ibuf_spinlock, flags);
@@ -2168,7 +2165,6 @@ i2ServiceBoard ( i2eBordStrPtr pB )
 {
 	unsigned inmail;
 	unsigned long flags;
-
 
 	/* This should be atomic because of the way we are called... */
 	if (NO_MAIL_HERE == ( inmail = pB->i2eStartMail ) ) {

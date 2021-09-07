@@ -586,4 +586,3 @@ struct dcbnl_rtnl_ops dcbnl_ops = {
 	.getapp		= ixgbe_dcbnl_getapp,
 	.setapp		= ixgbe_dcbnl_setapp,
 };
-

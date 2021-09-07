@@ -33,7 +33,6 @@ static void hba_proc_msg(struct mv_hba_msg *pmsg)
 
 	phba = (PHBA_Extension) pmsg->data;
 
-	
 	MV_DBG(DMSG_HBA, "__MV__ In hba_proc_msg.\n");
 
 	MV_ASSERT(pmsg);
@@ -151,7 +150,6 @@ static void mv_wq_handler(struct work_struct *work)
 	}
 }
 
-
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
 static DECLARE_WORK(mv_wq, mv_wq_handler,NULL);
 #else
@@ -159,8 +157,6 @@ static DECLARE_WORK(mv_wq, mv_wq_handler);
 #endif
 
 #endif /* SUPPORT_WORKQUEUE */
-
-
 
 static void hba_msg_queue_init(void)
 {
@@ -178,7 +174,6 @@ static void hba_msg_queue_init(void)
 	}
 	
 }
-
 
 void hba_house_keeper_init(void)
 {
@@ -217,7 +212,6 @@ void hba_wait_eh()
 		schedule();
 	}
 }
-
 
 void hba_msg_insert(void *data, unsigned int msg, unsigned int param)
 {
@@ -288,7 +282,6 @@ void hba_add_timer(PMV_Request req, int timeout,
 	return;
 }
 	
-
 void hba_remove_timer_sync(PMV_Request req)
 {
 	/* should be using del_timer_sync, but ... HBA->lock ... */
@@ -310,4 +303,3 @@ void hba_init_timer(PMV_Request req)
 	init_timer(&req->eh_timeout);
 }
 #endif
-

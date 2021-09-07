@@ -32,7 +32,6 @@
 #include <linux/of_platform.h>
 #include <asm/io.h>
 
-
 struct ndfc_controller {
 	struct of_device *ofdev;
 	void __iomem *ndfcbase;

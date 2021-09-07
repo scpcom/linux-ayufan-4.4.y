@@ -51,7 +51,6 @@ static void _gef_gpio_set(void __iomem *reg, unsigned int offset, int value)
 	iowrite32be(data, reg);
 }
 
-
 static int gef_gpio_dir_in(struct gpio_chip *chip, unsigned offset)
 {
 	unsigned int data;

@@ -51,7 +51,6 @@ extern void __invalidate_icache_page(unsigned long);
 extern void __invalidate_icache_range(unsigned long, unsigned long);
 extern void __invalidate_dcache_range(unsigned long, unsigned long);
 
-
 #if XCHAL_DCACHE_IS_WRITEBACK
 extern void __flush_invalidate_dcache_all(void);
 extern void __flush_dcache_page(unsigned long);

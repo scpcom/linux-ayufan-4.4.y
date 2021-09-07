@@ -104,7 +104,6 @@ snd_emux_proc_info_read(struct snd_info_entry *entry,
 	mutex_unlock(&emu->register_mutex);
 }
 
-
 void snd_emux_proc_init(struct snd_emux *emu, struct snd_card *card, int device)
 {
 	struct snd_info_entry *entry;

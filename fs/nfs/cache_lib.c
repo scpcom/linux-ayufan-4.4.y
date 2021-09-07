@@ -137,4 +137,3 @@ void nfs_cache_unregister(struct cache_detail *cd)
 	sunrpc_cache_unregister_pipefs(cd);
 	rpc_put_mount();
 }
-

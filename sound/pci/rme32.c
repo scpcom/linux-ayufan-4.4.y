@@ -68,7 +68,6 @@
  * ****************************************************************************
  */
 
-
 #include <linux/delay.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>
@@ -189,7 +188,6 @@ MODULE_SUPPORTED_DEVICE("{{RME,Digi32}," "{RME,Digi32/8}," "{RME,Digi32 PRO}}");
 #define RME32_328_REVISION_NEW 101
 #define RME32_PRO_REVISION_WITH_8412 192
 #define RME32_PRO_REVISION_WITH_8414 150
-
 
 struct rme32 {
 	spinlock_t lock;
@@ -822,7 +820,6 @@ static irqreturn_t snd_rme32_interrupt(int irq, void *dev_id)
 
 static unsigned int period_bytes[] = { RME32_BLOCK_SIZE };
 
-
 static struct snd_pcm_hw_constraint_list hw_constraints_period_bytes = {
 	.count = ARRAY_SIZE(period_bytes),
 	.list = period_bytes,
@@ -1136,7 +1133,6 @@ snd_rme32_capture_pointer(struct snd_pcm_substream *substream)
 	return snd_rme32_pcm_byteptr(rme32) >> rme32->capture_frlog;
 }
 
-
 /* ack and pointer callbacks for fullduplex mode */
 static void snd_rme32_pb_trans_copy(struct snd_pcm_substream *substream,
 				    struct snd_pcm_indirect *rec, size_t bytes)
@@ -1421,7 +1417,6 @@ static int __devinit snd_rme32_create(struct rme32 * rme32)
 		}
 	}
 
-
 	rme32->playback_periodsize = 0;
 	rme32->capture_periodsize = 0;
 
@@ -1439,7 +1434,6 @@ static int __devinit snd_rme32_create(struct rme32 * rme32)
 		RME32_WCR_INP_0 | /* input select */
 		RME32_WCR_MUTE;	 /* muting on */
 	writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
-
 
 	/* init switch interface */
 	if ((err = snd_rme32_create_switches(rme32->card, rme32)) < 0) {

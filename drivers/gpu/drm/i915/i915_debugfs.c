@@ -34,7 +34,6 @@
 
 #define DRM_I915_RING_DEBUG 1
 
-
 #if defined(CONFIG_DEBUG_FS)
 
 #define ACTIVE_LIST	1
@@ -152,7 +151,6 @@ static int i915_gem_seqno_info(struct seq_file *m, void *data)
 	seq_printf(m, "IRQ sequence:     %d\n", dev_priv->mm.irq_gem_seqno);
 	return 0;
 }
-
 
 static int i915_interrupt_info(struct seq_file *m, void *data)
 {
@@ -414,4 +412,3 @@ void i915_debugfs_cleanup(struct drm_minor *minor)
 }
 
 #endif /* CONFIG_DEBUG_FS */
-

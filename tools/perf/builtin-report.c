@@ -561,7 +561,6 @@ callchain__fprintf_flat(FILE *fp, struct callchain_node *self,
 
 	ret += callchain__fprintf_flat(fp, self->parent, total_samples);
 
-
 	list_for_each_entry(chain, &self->val, list) {
 		if (chain->ip >= PERF_CONTEXT_MAX)
 			continue;
@@ -609,7 +608,6 @@ hist_entry_callchain__fprintf(FILE *fp, struct hist_entry *self,
 
 	return ret;
 }
-
 
 static size_t
 hist_entry__fprintf(FILE *fp, struct hist_entry *self, u64 total_samples)
@@ -692,7 +690,6 @@ static int thread__set_comm_adjust(struct thread *self, const char *comm)
 
 	return 0;
 }
-
 
 static struct symbol *
 resolve_symbol(struct thread *thread, struct map **mapp,

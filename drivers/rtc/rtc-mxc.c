@@ -504,4 +504,3 @@ module_exit(mxc_rtc_exit);
 MODULE_AUTHOR("Daniel Mack <daniel@caiaq.de>");
 MODULE_DESCRIPTION("RTC driver for Freescale MXC");
 MODULE_LICENSE("GPL");
-

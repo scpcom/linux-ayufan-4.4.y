@@ -405,7 +405,6 @@ static ssize_t capability_set(struct device *dev, struct device_attribute *attr,
 	return strlen(buf);
 }
 
-
 static DEVICE_ATTR(bootflag, 0644, bootflag_get, bootflag_set);
 static DEVICE_ATTR(boottime, 0644, boottime_get, boottime_set);
 static DEVICE_ATTR(channel, 0644, channel_get, channel_set);

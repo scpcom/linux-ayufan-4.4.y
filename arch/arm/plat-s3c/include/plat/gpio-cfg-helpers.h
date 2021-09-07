@@ -84,7 +84,6 @@ extern int s3c_gpio_setcfg_s3c24xx_a(struct s3c_gpio_chip *chip,
 extern int s3c_gpio_setcfg_s3c64xx_4bit(struct s3c_gpio_chip *chip,
 					unsigned int off, unsigned int cfg);
 
-
 /* Pull-{up,down} resistor controls.
  *
  * S3C2410,S3C2440,S3C24A0 = Pull-UP,
@@ -133,7 +132,6 @@ extern int s3c_gpio_setpull_1down(struct s3c_gpio_chip *chip,
 extern int s3c_gpio_setpull_updown(struct s3c_gpio_chip *chip,
 				   unsigned int off, s3c_gpio_pull_t pull);
 
-
 /**
  * s3c_gpio_getpull_updown() - Get configuration for choice of up, down or none
  * @chip: The gpio chip that the GPIO pin belongs to
@@ -173,4 +171,3 @@ extern s3c_gpio_pull_t s3c_gpio_getpull_s3c24xx(struct s3c_gpio_chip *chip,
 						unsigned int off);
 
 #endif /* __PLAT_GPIO_CFG_HELPERS_H */
-

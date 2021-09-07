@@ -388,7 +388,6 @@ struct alc_config_preset {
 #endif
 };
 
-
 /*
  * input MUX handling
  */
@@ -2083,7 +2082,6 @@ static struct hda_channel_mode alc880_fivestack_modes[2] = {
 	{ 8, alc880_fivestack_ch8_init },
 };
 
-
 /*
  * ALC880 6-stack model
  *
@@ -2142,7 +2140,6 @@ static struct snd_kcontrol_new alc880_six_stack_mixer[] = {
 	{ } /* end */
 };
 
-
 /*
  * ALC880 W810 model
  *
@@ -2192,7 +2189,6 @@ static struct snd_kcontrol_new alc880_w810_base_mixer[] = {
 	{ } /* end */
 };
 
-
 /*
  * Z710V model
  *
@@ -2222,7 +2218,6 @@ static struct snd_kcontrol_new alc880_z71v_mixer[] = {
 	HDA_CODEC_MUTE("Mic Playback Switch", 0x0b, 0x0, HDA_INPUT),
 	{ } /* end */
 };
-
 
 /*
  * ALC880 F1734 model
@@ -2255,7 +2250,6 @@ static struct hda_input_mux alc880_f1734_capture_source = {
 		{ "CD", 0x4 },
 	},
 };
-
 
 /*
  * ALC880 ASUS model
@@ -2495,7 +2489,6 @@ static int alc_build_controls(struct hda_codec *codec)
 	alc_free_kctls(codec); /* no longer needed */
 	return 0;
 }
-
 
 /*
  * initialize the codec volumes, etc
@@ -3404,7 +3397,6 @@ static int alc880_alt_capture_pcm_cleanup(struct hda_pcm_stream *hinfo,
 	return 0;
 }
 
-
 /*
  */
 static struct hda_pcm_stream alc880_pcm_analog_playback = {
@@ -3626,7 +3618,6 @@ static struct hda_codec_ops alc_patch_ops = {
 	.check_power_status = alc_check_power_status,
 #endif
 };
-
 
 /*
  * Test configuration for debugging
@@ -4867,7 +4858,6 @@ static int patch_alc880(struct hda_codec *codec)
 	return 0;
 }
 
-
 /*
  * ALC260 support
  */
@@ -4988,7 +4978,6 @@ static struct hda_input_mux alc260_favorit100_capture_sources[2] = {
 static struct hda_channel_mode alc260_modes[1] = {
 	{ 2, NULL },
 };
-
 
 /* Mixer combinations
  *
@@ -6489,7 +6478,6 @@ static int patch_alc260(struct hda_codec *codec)
 	return 0;
 }
 
-
 /*
  * ALC882/883/885/888/889 support
  *
@@ -6506,7 +6494,6 @@ static int patch_alc260(struct hda_codec *codec)
 #define ALC883_DIGOUT_NID	ALC882_DIGOUT_NID
 #define ALC883_DIGIN_NID	ALC882_DIGIN_NID
 #define ALC1200_DIGOUT_NID	0x10
-
 
 static struct hda_channel_mode alc882_ch_modes[1] = {
 	{ 8, NULL }
@@ -6726,7 +6713,6 @@ static struct hda_channel_mode alc883_3ST_6ch_clevo_modes[3] = {
 	{ 6, alc883_3ST_ch6_clevo_init },
 };
 
-
 /*
  * 6ch mode
  */
@@ -6814,7 +6800,6 @@ static struct hda_channel_mode alc885_mb5_6ch_modes[2] = {
 	{ 6, alc885_mb5_ch6_init },
 };
 
-
 /*
  * 2ch mode
  */
@@ -6879,7 +6864,6 @@ static struct hda_channel_mode alc883_4ST_8ch_modes[4] = {
 	{ 6, alc883_4ST_ch6_init },
 	{ 8, alc883_4ST_ch8_init },
 };
-
 
 /*
  * 2ch mode
@@ -6995,7 +6979,6 @@ static struct hda_channel_mode alc883_sixstack_modes[2] = {
 	{ 6, alc883_sixstack_ch6_init },
 	{ 8, alc883_sixstack_ch8_init },
 };
-
 
 /* Pin assignment: Front=0x14, Rear=0x15, CLFE=0x16, Side=0x17
  *                 Mic=0x18, Front Mic=0x19, Line-In=0x1a, HP=0x1b
@@ -7324,14 +7307,12 @@ static struct hda_verb alc885_init_input_verbs[] = {
 	{ }
 };
 
-
 /* Unmute Selector 24h and set the default input to front mic */
 static struct hda_verb alc889_init_input_verbs[] = {
 	{0x24, AC_VERB_SET_CONNECT_SEL, 0x00},
 	{0x24, AC_VERB_SET_AMP_GAIN_MUTE, AMP_OUT_UNMUTE},
 	{ }
 };
-
 
 #define alc883_init_verbs	alc882_base_init_verbs
 
@@ -7581,7 +7562,6 @@ static void alc885_mb5_unsol_event(struct hda_codec *codec,
 		alc885_mb5_automute(codec);
 }
 
-
 static struct hda_verb alc882_targa_verbs[] = {
 	{0x0c, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 	{0x0c, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(1)},
@@ -7675,7 +7655,6 @@ static void alc882_gpio_mute(struct hda_codec *codec, int pin, int muted)
 	gpiodir = snd_hda_codec_read(codec, codec->afg, 0,
 				     AC_VERB_GET_GPIO_DIRECTION, 0);
 	gpiodir |= (1 << pin);
-
 
 	snd_hda_codec_write(codec, codec->afg, 0,
 			    AC_VERB_SET_GPIO_MASK, gpiomask);
@@ -8732,7 +8711,6 @@ static void alc889A_mb31_unsol_event(struct hda_codec *codec, unsigned int res)
 		alc889A_mb31_automute(codec);
 }
 
-
 #ifdef CONFIG_SND_HDA_POWER_SAVE
 #define alc882_loopbacks	alc880_loopbacks
 #endif
@@ -9634,7 +9612,6 @@ static struct alc_config_preset alc882_presets[] = {
 	},
 };
 
-
 /*
  * Pin config fixes
  */
@@ -10005,7 +9982,6 @@ static int patch_alc882(struct hda_codec *codec)
 	return 0;
 }
 
-
 /*
  * ALC262 support
  */
@@ -10359,7 +10335,6 @@ static void alc262_hippo1_setup(struct hda_codec *codec)
 	spec->autocfg.speaker_pins[0] = 0x14;
 }
 
-
 static struct snd_kcontrol_new alc262_sony_mixer[] = {
 	HDA_CODEC_VOLUME("Master Playback Volume", 0x0c, 0x0, HDA_OUTPUT),
 	ALC262_HIPPO_MASTER_SWITCH,
@@ -10420,7 +10395,6 @@ static void alc262_tyan_setup(struct hda_codec *codec)
 	spec->autocfg.hp_pins[0] = 0x1b;
 	spec->autocfg.speaker_pins[0] = 0x15;
 }
-
 
 #define alc262_capture_mixer		alc882_capture_mixer
 #define alc262_capture_alt_mixer	alc882_capture_alt_mixer
@@ -11221,7 +11195,6 @@ static struct hda_verb alc262_HP_BPC_init_verbs[] = {
 	{0x1c, AC_VERB_SET_AMP_GAIN_MUTE, 0x7000 },
 	{0x1d, AC_VERB_SET_AMP_GAIN_MUTE, 0x7000 },
 
-
 	/* FIXME: use matrix-type input source selection */
 	/* Mixer elements: 0x18, 19, 1a, 1b, 1c, 1d, 14, 15, 0b, 12 */
 	/* Input mixer1: only unmute Mic */
@@ -11302,7 +11275,6 @@ static struct hda_verb alc262_HP_BPC_WildWest_init_verbs[] = {
 	{0x0e, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 	{0x0e, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(1)},
 
-
 	{0x15, AC_VERB_SET_PIN_WIDGET_CONTROL, PIN_HP },	/* HP */
 	{0x16, AC_VERB_SET_PIN_WIDGET_CONTROL, PIN_OUT },	/* Mono */
 	{0x18, AC_VERB_SET_PIN_WIDGET_CONTROL, PIN_VREF80 },	/* rear MIC */
@@ -11373,7 +11345,6 @@ static struct hda_verb alc262_toshiba_rx1_unsol_verbs[] = {
 	{}
 };
 
-
 #ifdef CONFIG_SND_HDA_POWER_SAVE
 #define alc262_loopbacks	alc880_loopbacks
 #endif
@@ -11442,7 +11413,6 @@ static int alc262_parse_auto_config(struct hda_codec *codec)
 #define alc262_auto_init_hp_out		alc882_auto_init_hp_out
 #define alc262_auto_init_analog_input	alc882_auto_init_analog_input
 #define alc262_auto_init_input_src	alc882_auto_init_input_src
-
 
 /* init callback for auto-configuration model -- overriding the default init */
 static void alc262_auto_init(struct hda_codec *codec)
@@ -11984,7 +11954,6 @@ static void alc268_acer_automute(struct hda_codec *codec, int force)
 	snd_hda_codec_amp_stereo(codec, 0x15, HDA_OUTPUT, 0,
 				 HDA_AMP_MUTE, mute);
 }
-
 
 /* bind hp and internal speaker mute (with plug check) */
 static int alc268_acer_master_sw_put(struct snd_kcontrol *kcontrol,
@@ -13434,7 +13403,6 @@ static int alc269_parse_auto_config(struct hda_codec *codec)
 #define alc269_auto_init_hp_out		alc268_auto_init_hp_out
 #define alc269_auto_init_analog_input	alc882_auto_init_analog_input
 
-
 /* init callback for auto-configuration model -- overriding the default init */
 static void alc269_auto_init(struct hda_codec *codec)
 {
@@ -14228,7 +14196,6 @@ static void alc861_toshiba_unsol_event(struct hda_codec *codec,
 #define alc861_pcm_digital_playback	alc880_pcm_digital_playback
 #define alc861_pcm_digital_capture	alc880_pcm_digital_capture
 
-
 #define ALC861_DIGOUT_NID	0x07
 
 static struct hda_channel_mode alc861_8ch_modes[1] = {
@@ -14528,7 +14495,6 @@ static struct hda_amp_list alc861_loopbacks[] = {
 };
 #endif
 
-
 /*
  * configuration and preset
  */
@@ -14674,7 +14640,6 @@ static struct alc_config_preset alc861_presets[] = {
 		.input_mux = &alc861_capture_source,
 	},
 };
-
 
 static int patch_alc861(struct hda_codec *codec)
 {
@@ -15370,7 +15335,6 @@ static int alc861vd_auto_create_input_ctls(struct hda_codec *codec,
 	return alc_auto_create_input_ctls(codec, cfg, 0x15, 0x22, 0);
 }
 
-
 static void alc861vd_auto_set_output_and_unmute(struct hda_codec *codec,
 				hda_nid_t nid, int pin_type, int dac_idx)
 {
@@ -15390,7 +15354,6 @@ static void alc861vd_auto_init_multi_out(struct hda_codec *codec)
 							    pin_type, i);
 	}
 }
-
 
 static void alc861vd_auto_init_hp_out(struct hda_codec *codec)
 {
@@ -15767,7 +15730,6 @@ static hda_nid_t alc272_adc_nids[1] = {
 
 static hda_nid_t alc662_capsrc_nids[2] = { 0x22, 0x23 };
 static hda_nid_t alc272_capsrc_nids[1] = { 0x23 };
-
 
 /* input MUX */
 /* FIXME: should be a matrix-type input source selection */
@@ -16261,7 +16223,6 @@ static struct hda_verb alc662_auto_init_verbs[] = {
 	{0x0d, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(1)},
 	{0x0e, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 	{0x0e, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(1)},
-
 
 	/* FIXME: use matrix-type input source selection */
 	/* Mixer elements: 0x18, 19, 1a, 1b, 1c, 1d, 14, 15, 16, 17, 0b */
@@ -16864,7 +16825,6 @@ static struct snd_kcontrol_new alc272_nc10_mixer[] = {
 #define alc662_loopbacks	alc880_loopbacks
 #endif
 
-
 /* pcm configuration: identical with ALC880 */
 #define alc662_pcm_analog_playback	alc880_pcm_analog_playback
 #define alc662_pcm_analog_capture	alc880_pcm_analog_capture
@@ -17241,7 +17201,6 @@ static struct alc_config_preset alc662_presets[] = {
 		.init_hook = alc663_mode4_inithook,
 	},
 };
-
 
 /*
  * BIOS auto configuration

@@ -45,7 +45,6 @@
 #include <asm/machdep.h>
 #endif
 
-
 EXPORT_SYMBOL(adb_client_list);
 
 extern struct adb_driver via_macii_driver;
@@ -572,7 +571,6 @@ adb_get_infos(int address, int *original_address, int *handler_id)
 
 	return (*original_address != 0);
 }
-
 
 /*
  * /dev/adb device driver.

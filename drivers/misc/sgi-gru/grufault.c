@@ -309,7 +309,6 @@ upm:
 	return -2;
 }
 
-
 /*
  * Drop a TLB entry into the GRU. The fault is described by info in an TFH.
  *	Input:
@@ -508,7 +507,6 @@ irqreturn_t gru_intr(int irq, void *dev_id)
 	}
 	return IRQ_HANDLED;
 }
-
 
 static int gru_user_dropin(struct gru_thread_state *gts,
 			   struct gru_tlb_fault_handle *tfh,

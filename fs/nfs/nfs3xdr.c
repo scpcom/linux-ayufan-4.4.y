@@ -249,7 +249,6 @@ xdr_decode_pre_op_attr(__be32 *p, struct nfs_fattr *fattr)
 	return p;
 }
 
-
 static inline __be32 *
 xdr_decode_wcc_data(__be32 *p, struct nfs_fattr *fattr)
 {

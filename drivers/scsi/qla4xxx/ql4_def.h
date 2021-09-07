@@ -33,7 +33,6 @@
 #include <scsi/scsi_transport.h>
 #include <scsi/scsi_transport_iscsi.h>
 
-
 #ifndef PCI_DEVICE_ID_QLOGIC_ISP4010
 #define PCI_DEVICE_ID_QLOGIC_ISP4010	0x4010
 #endif
@@ -269,7 +268,6 @@ struct ddb_entry {
 					 * logged it out */
 #define DF_ISNS_DISCOVERED	2	/* Device was discovered via iSNS */
 #define DF_FO_MASKED		3
-
 
 #include "ql4_fw.h"
 #include "ql4_nvram.h"

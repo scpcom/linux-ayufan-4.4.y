@@ -89,7 +89,6 @@ void (*board_nmi_handler_setup)(void);
 void (*board_ejtag_handler_setup)(void);
 void (*board_bind_eic_interrupt)(int irq, int regset);
 
-
 static void show_raw_backtrace(unsigned long reg29)
 {
 	unsigned long *sp = (unsigned long *)(reg29 & ~3);
@@ -1036,7 +1035,6 @@ asmlinkage void do_mt(struct pt_regs *regs)
 	force_sig(SIGILL, current);
 }
 
-
 asmlinkage void do_dsp(struct pt_regs *regs)
 {
 	if (cpu_has_dsp)
@@ -1725,7 +1723,6 @@ void __init trap_init(void)
 		//set_except_vector(14, handle_mc);
 		//set_except_vector(15, handle_ndc);
 	}
-
 
 	if (board_nmi_handler_setup)
 		board_nmi_handler_setup();

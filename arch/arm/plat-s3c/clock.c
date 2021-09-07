@@ -141,7 +141,6 @@ void clk_disable(struct clk *clk)
 	clk_disable(clk->parent);
 }
 
-
 unsigned long clk_get_rate(struct clk *clk)
 {
 	if (IS_ERR(clk))
@@ -295,8 +294,6 @@ struct clk clk_usb_bus = {
 	.parent		= &clk_upll,
 };
 
-
-
 struct clk s3c24xx_uclk = {
 	.name		= "uclk",
 	.id		= -1,
@@ -363,4 +360,3 @@ int __init s3c24xx_register_baseclocks(unsigned long xtal)
 
 	return 0;
 }
-

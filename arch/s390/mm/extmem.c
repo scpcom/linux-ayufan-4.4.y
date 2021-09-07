@@ -165,7 +165,6 @@ dcss_mkname(char *name, char *dcss_name)
 	ASCEBC(dcss_name, 8);
 }
 
-
 /*
  * search all segments in dcss_list, and return the one
  * namend *name. If not found, return NULL.
@@ -188,7 +187,6 @@ segment_by_name (char *name)
 	}
 	return retval;
 }
-
 
 /*
  * Perform a function on a dcss segment.
@@ -244,7 +242,6 @@ dcss_diag_translate_rc (int vm_rc) {
 		return -ENOENT;
 	return -EIO;
 }
-
 
 /* do a diag to get info about a segment.
  * fills start_address, end and vm_segtype fields

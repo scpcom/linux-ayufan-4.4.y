@@ -58,7 +58,6 @@ static int aac_alloc_comm(struct aac_dev *dev, void **commaddr, unsigned long co
 
 	size = fibsize + sizeof(struct aac_init) + commsize + commalign + printfbufsiz;
 
- 
 	base = pci_alloc_consistent(dev->pdev, size, &phys);
 
 	if(base == NULL)
@@ -422,5 +421,3 @@ struct aac_dev *aac_init_adapter(struct aac_dev *dev)
 
 	return dev;
 }
-
-    

@@ -5,7 +5,6 @@
  *  http://www.gnu.org/licenses/gpl.html
  */
 
-
 enum pstate {
 	HW_PSTATE_INVALID = 0xff,
 	HW_PSTATE_0 = 0,
@@ -55,7 +54,6 @@ struct powernow_k8_data {
 	struct cpumask *available_cores;
 };
 
-
 /* processor's cpuid instruction support */
 #define CPUID_PROCESSOR_SIGNATURE	1	/* function 1 */
 #define CPUID_XFAM			0x0ff00000	/* extended family */
@@ -99,7 +97,6 @@ struct powernow_k8_data {
 #define MSR_S_HI_CURRENT_VID      0x0000003f
 #define MSR_C_HI_STP_GNT_BENIGN	  0x00000001
 
-
 /* Hardware Pstate _PSS and MSR definitions */
 #define USE_HW_PSTATE		0x00000080
 #define HW_PSTATE_MASK 		0x00000007
@@ -114,7 +111,6 @@ struct powernow_k8_data {
 /* define the two driver architectures */
 #define CPU_OPTERON 0
 #define CPU_HW_PSTATE 1
-
 
 /*
  * There are restrictions frequencies have to follow:
@@ -178,7 +174,6 @@ struct powernow_k8_data {
 #define FID_MASK     0x1f
 #define EXT_VID_MASK 0x3f
 #define EXT_FID_MASK 0x3f
-
 
 /*
  * Version 1.4 of the PSB table. This table is constructed by BIOS and is

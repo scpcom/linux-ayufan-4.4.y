@@ -27,7 +27,6 @@ static struct thread	*last_match;
 static struct perf_header *header;
 static u64		sample_type;
 
-
 static int
 process_comm_event(event_t *event, unsigned long offset, unsigned long head)
 {

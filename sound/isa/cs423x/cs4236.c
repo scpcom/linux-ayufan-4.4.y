@@ -559,7 +559,6 @@ static struct isa_driver cs423x_isa_driver = {
 	},
 };
 
-
 #ifdef CONFIG_PNP
 static int __devinit snd_cs423x_pnpbios_detect(struct pnp_dev *pdev,
 					       const struct pnp_device_id *id)

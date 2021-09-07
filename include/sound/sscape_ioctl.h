@@ -1,7 +1,6 @@
 #ifndef SSCAPE_IOCTL_H
 #define SSCAPE_IOCTL_H
 
-
 struct sscape_bootblock
 {
   unsigned char code[256];

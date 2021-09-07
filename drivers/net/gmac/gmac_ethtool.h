@@ -23,4 +23,3 @@
 extern void set_ethtool_ops(struct net_device *netdev);
 
 #endif        //  #if !defined(__GMAC_ETHTOOL_H__)
-

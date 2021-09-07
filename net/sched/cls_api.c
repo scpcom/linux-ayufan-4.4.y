@@ -101,7 +101,6 @@ EXPORT_SYMBOL(unregister_tcf_proto_ops);
 static int tfilter_notify(struct sk_buff *oskb, struct nlmsghdr *n,
 			  struct tcf_proto *tp, unsigned long fh, int event);
 
-
 /* Select new prio value from the range, managed by kernel. */
 
 static inline u32 tcf_auto_prio(struct tcf_proto *tp)
@@ -219,7 +218,6 @@ replay:
 		err = -ENOENT;
 		if (n->nlmsg_type != RTM_NEWTFILTER || !(n->nlmsg_flags&NLM_F_CREATE))
 			goto errout;
-
 
 		/* Create new proto tcf */
 
@@ -588,7 +586,6 @@ nla_put_failure: __attribute__ ((unused))
 	return -1;
 }
 EXPORT_SYMBOL(tcf_exts_dump);
-
 
 int tcf_exts_dump_stats(struct sk_buff *skb, struct tcf_exts *exts,
 			const struct tcf_ext_map *map)

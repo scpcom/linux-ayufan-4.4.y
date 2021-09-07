@@ -387,7 +387,6 @@ static struct output_properties acpi_output_properties = {
 	.get_status = acpi_video_output_get,
 };
 
-
 /* thermal cooling device callbacks */
 static int video_get_max_state(struct thermal_cooling_device *cooling_dev, unsigned
 			       long *state)
@@ -474,7 +473,6 @@ acpi_video_device_set_state(struct acpi_video_device *device, int state)
 	struct acpi_object_list args = { 1, &arg0 };
 	unsigned long long ret;
 
-
 	arg0.integer.value = state;
 	status = acpi_evaluate_integer(device->dev->handle, "_DSS", &args, &ret);
 
@@ -488,7 +486,6 @@ acpi_video_device_lcd_query_levels(struct acpi_video_device *device,
 	int status;
 	struct acpi_buffer buffer = { ACPI_ALLOCATE_BUFFER, NULL };
 	union acpi_object *obj;
-
 
 	*levels = NULL;
 
@@ -657,7 +654,6 @@ acpi_video_device_EDID(struct acpi_video_device *device,
 	union acpi_object arg0 = { ACPI_TYPE_INTEGER };
 	struct acpi_object_list args = { 1, &arg0 };
 
-
 	*edid = NULL;
 
 	if (!device)
@@ -695,7 +691,6 @@ acpi_video_bus_set_POST(struct acpi_video_bus *video, unsigned long option)
 	unsigned long long tmp;
 	union acpi_object arg0 = { ACPI_TYPE_INTEGER };
 	struct acpi_object_list args = { 1, &arg0 };
-
 
 	arg0.integer.value = option;
 
@@ -755,7 +750,6 @@ acpi_video_bus_DOS(struct acpi_video_bus *video, int bios_flag, int lcd_flag)
 	acpi_integer status = 0;
 	union acpi_object arg0 = { ACPI_TYPE_INTEGER };
 	struct acpi_object_list args = { 1, &arg0 };
-
 
 	if (bios_flag < 0 || bios_flag > 3 || lcd_flag < 0 || lcd_flag > 1) {
 		status = -1;
@@ -1146,7 +1140,6 @@ static int acpi_video_device_info_seq_show(struct seq_file *seq, void *offset)
 {
 	struct acpi_video_device *dev = seq->private;
 
-
 	if (!dev)
 		goto end;
 
@@ -1181,7 +1174,6 @@ static int acpi_video_device_state_seq_show(struct seq_file *seq, void *offset)
 	int status;
 	struct acpi_video_device *dev = seq->private;
 	unsigned long long state;
-
 
 	if (!dev)
 		goto end;
@@ -1222,7 +1214,6 @@ acpi_video_device_write_state(struct file *file,
 	char str[12] = { 0 };
 	u32 state = 0;
 
-
 	if (!dev || count >= sizeof(str))
 		return -EINVAL;
 
@@ -1246,7 +1237,6 @@ acpi_video_device_brightness_seq_show(struct seq_file *seq, void *offset)
 {
 	struct acpi_video_device *dev = seq->private;
 	int i;
-
 
 	if (!dev || !dev->brightness) {
 		seq_printf(seq, "<not supported>\n");
@@ -1279,7 +1269,6 @@ acpi_video_device_write_brightness(struct file *file,
 	unsigned int level = 0;
 	int i;
 
-
 	if (!dev || !dev->brightness || count >= sizeof(str))
 		return -EINVAL;
 
@@ -1309,7 +1298,6 @@ static int acpi_video_device_EDID_seq_show(struct seq_file *seq, void *offset)
 	int status;
 	int i;
 	union acpi_object *edid = NULL;
-
 
 	if (!dev)
 		goto out;
@@ -1429,7 +1417,6 @@ static int acpi_video_bus_info_seq_show(struct seq_file *seq, void *offset)
 {
 	struct acpi_video_bus *video = seq->private;
 
-
 	if (!video)
 		goto end;
 
@@ -1454,7 +1441,6 @@ static int acpi_video_bus_ROM_seq_show(struct seq_file *seq, void *offset)
 {
 	struct acpi_video_bus *video = seq->private;
 
-
 	if (!video)
 		goto end;
 
@@ -1475,7 +1461,6 @@ static int acpi_video_bus_POST_info_seq_show(struct seq_file *seq, void *offset)
 	struct acpi_video_bus *video = seq->private;
 	unsigned long long options;
 	int status;
-
 
 	if (!video)
 		goto end;
@@ -1514,7 +1499,6 @@ static int acpi_video_bus_POST_seq_show(struct seq_file *seq, void *offset)
 	int status;
 	unsigned long long id;
 
-
 	if (!video)
 		goto end;
 
@@ -1532,7 +1516,6 @@ static int acpi_video_bus_POST_seq_show(struct seq_file *seq, void *offset)
 static int acpi_video_bus_DOS_seq_show(struct seq_file *seq, void *offset)
 {
 	struct acpi_video_bus *video = seq->private;
-
 
 	seq_printf(seq, "DOS setting: <%d>\n", video->dos_setting);
 
@@ -1560,7 +1543,6 @@ acpi_video_bus_write_POST(struct file *file,
 	struct acpi_video_bus *video = m->private;
 	char str[12] = { 0 };
 	unsigned long long opt, options;
-
 
 	if (!video || count >= sizeof(str))
 		return -EINVAL;
@@ -1600,7 +1582,6 @@ acpi_video_bus_write_DOS(struct file *file,
 	struct acpi_video_bus *video = m->private;
 	char str[12] = { 0 };
 	unsigned long opt;
-
 
 	if (!video || count >= sizeof(str))
 		return -EINVAL;
@@ -2028,7 +2009,6 @@ static int acpi_video_bus_put_one_device(struct acpi_video_device *device)
 	acpi_status status;
 	struct acpi_video_bus *video;
 
-
 	if (!device || !device->video)
 		return -ENOENT;
 
@@ -2330,7 +2310,6 @@ static int acpi_video_bus_add(struct acpi_device *device)
 static int acpi_video_bus_remove(struct acpi_device *device, int type)
 {
 	struct acpi_video_bus *video = NULL;
-
 
 	if (!device || !acpi_driver_data(device))
 		return -EINVAL;

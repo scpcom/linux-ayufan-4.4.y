@@ -183,7 +183,6 @@ struct dx_node
 	struct dx_entry	entries[0];
 };
 
-
 struct dx_frame
 {
 	struct buffer_head *bh;
@@ -616,7 +615,6 @@ static int ext3_htree_next_block(struct inode *dir, __u32 hash,
 	return 1;
 }
 
-
 /*
  * This function fills a red-black tree with information from a
  * directory block.  It returns the number directory entries loaded
@@ -666,7 +664,6 @@ static int htree_dirblock_to_tree(struct file *dir_file,
 	brelse(bh);
 	return count;
 }
-
 
 /*
  * This function fills a red-black tree with information from a
@@ -757,7 +754,6 @@ errout:
 	dx_release(frames);
 	return (err);
 }
-
 
 /*
  * Directory block splitting, compacting
@@ -954,7 +950,6 @@ static inline int search_dirblock(struct buffer_head * bh,
 					child->len = de->name_len;
 				}
 
-
 			}
 #endif
 			return 1;
@@ -968,7 +963,6 @@ static inline int search_dirblock(struct buffer_head * bh,
 	}
 	return 0;
 }
-
 
 /*
  *	ext3_find_entry()
@@ -1496,7 +1490,6 @@ errout:
 	*error = err;
 	return NULL;
 }
-
 
 /*
  * Add a new entry into a directory (leaf) block.  If de is non-NULL,

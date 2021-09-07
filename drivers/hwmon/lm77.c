@@ -75,7 +75,6 @@ static int lm77_write_value(struct i2c_client *client, u8 reg, u16 value);
 
 static struct lm77_data *lm77_update_device(struct device *dev);
 
-
 static const struct i2c_device_id lm77_id[] = {
 	{ "lm77", lm77 },
 	{ }

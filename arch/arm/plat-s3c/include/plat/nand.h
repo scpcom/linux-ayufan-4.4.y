@@ -54,4 +54,3 @@ struct s3c2410_platform_nand {
 	void			(*select_chip)(struct s3c2410_nand_set *,
 					       int chip);
 };
-

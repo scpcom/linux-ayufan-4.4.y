@@ -62,10 +62,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvBoard88W8660EnvSpech
 #define __INCmvBoard88W8660EnvSpech
-
 
 /* 88W8660 based boards ID numbers */
 /* =============================== */
@@ -80,8 +78,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RD_88W8660_AP82S_DDR1			(BOARD_ID_88W8660_BASE+0x2)
 #define BOARD_ID_88W8660_MAX			(BOARD_ID_88W8660_BASE+0x3)
 
-
-
 #define RD_88W8660_MPP0_7			0x0 
 #define RD_88W8660_MPP8_15			0x0
 #define RD_88W8660_BOARD_OUT_EN			0xFFF1C
@@ -94,7 +90,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DB_88W8660_DDR2_MPP8_15NB		0x00000002
 #define DB_88W8660_DDR2_OUT_EN			0xFFF5
 #define DB_88W8660_DDR2_OUT_VAL			0x0
-
 
 #define RD_88W8660_AP82S_MPP0_7	    	0x22 
 #define RD_88W8660_AP82S_MPP8_15	0x0

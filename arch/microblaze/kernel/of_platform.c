@@ -99,7 +99,6 @@ static int of_platform_bus_create(const struct device_node *bus,
 	return rc;
 }
 
-
 /**
  * of_platform_bus_probe - Probe the device-tree for platform busses
  * @root: parent of the first level to probe or NULL for the root of the tree

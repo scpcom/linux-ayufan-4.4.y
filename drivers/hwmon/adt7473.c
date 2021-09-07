@@ -903,7 +903,6 @@ static ssize_t show_alarm(struct device *dev,
 		return sprintf(buf, "0\n");
 }
 
-
 static SENSOR_DEVICE_ATTR(in1_max, S_IWUSR | S_IRUGO, show_volt_max,
 			  set_volt_max, 0);
 static SENSOR_DEVICE_ATTR(in2_max, S_IWUSR | S_IRUGO, show_volt_max,

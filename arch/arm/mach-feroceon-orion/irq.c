@@ -106,7 +106,6 @@ void __init mv_init_irq(void)
 	MV_REG_WRITE(MV_IRQ_CAUSE_REG, 0x0);
 	MV_REG_WRITE(MV_GPP_IRQ_CAUSE_REG, 0x0);
 
-
 	/* Do the core module ones */
 	for (i = 0; i < NR_IRQS; i++) {
 		set_irq_chip(i, &mv_chip);
@@ -129,4 +128,3 @@ void __init mv_init_irq(void)
 
 	return;
 }
-

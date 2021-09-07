@@ -47,7 +47,6 @@
 #define AT91SAM9263_ID_IRQ0	30	/* Advanced Interrupt Controller (IRQ0) */
 #define AT91SAM9263_ID_IRQ1	31	/* Advanced Interrupt Controller (IRQ1) */
 
-
 /*
  * User Peripheral physical base addresses.
  */
@@ -122,6 +121,5 @@
 #define AT91SAM9263_LCDC_BASE	0x00700000	/* LCD Controller */
 #define AT91SAM9263_DMAC_BASE	0x00800000	/* DMA Controller */
 #define AT91SAM9263_UHP_BASE	0x00a00000	/* USB Host controller */
-
 
 #endif

@@ -213,7 +213,6 @@ static inline void cvmx_write64_##TYPE(uint64_t addr, TYPE##_t val)     \
     *CASTPTR(volatile TYPE##_t, addr) = val;                            \
 }
 
-
 /* The following #if controls the definition of the macro
     CVMX_BUILD_READ64. This macro is used to build a load operation from
     a full 64bit address. With a 64bit ABI, this can be done with a simple
@@ -226,7 +225,6 @@ static inline TYPE##_t cvmx_read64_##TYPE(uint64_t addr)                \
 {                                                                       \
 	return *CASTPTR(volatile TYPE##_t, addr);			\
 }
-
 
 /* The following defines 8 functions for writing to a 64bit address. Each
     takes two arguments, the address and the value to write.
@@ -260,7 +258,6 @@ CVMX_BUILD_READ64(uint16, "lhu");
 CVMX_BUILD_READ64(uint8, "lbu");
 #define cvmx_read64 cvmx_read64_uint64
 
-
 static inline void cvmx_write_csr(uint64_t csr_addr, uint64_t val)
 {
 	cvmx_write64(csr_addr, val);
@@ -286,7 +283,6 @@ static inline uint64_t cvmx_read_csr(uint64_t csr_addr)
 	uint64_t val = cvmx_read64(csr_addr);
 	return val;
 }
-
 
 static inline void cvmx_send_single(uint64_t data)
 {

@@ -4,7 +4,6 @@
 ;;
 ;; Author: Mikael Starvik
 
-
 	.global cris_spin_lock
 	.global cris_spin_trylock
 

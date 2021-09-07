@@ -972,7 +972,6 @@ static int ppp_ioctl_trans(unsigned int fd, unsigned int cmd, unsigned long arg)
 	return err;
 }
 
-
 #ifdef CONFIG_BLOCK
 struct mtget32 {
 	compat_long_t	mt_type;
@@ -1569,7 +1568,6 @@ static int do_usbdevfs_control(unsigned int fd, unsigned int cmd, unsigned long 
         return sys_ioctl(fd, USBDEVFS_CONTROL, (unsigned long)p);
 }
 
-
 struct usbdevfs_bulktransfer32 {
         compat_uint_t ep;
         compat_uint_t len;
@@ -1596,7 +1594,6 @@ static int do_usbdevfs_bulk(unsigned int fd, unsigned int cmd, unsigned long arg
 
         return sys_ioctl(fd, USBDEVFS_BULK, (unsigned long)p);
 }
-
 
 /*
  *  USBDEVFS_SUBMITURB, USBDEVFS_REAPURB and USBDEVFS_REAPURBNDELAY
@@ -1822,7 +1819,6 @@ static int compat_ioctl_preallocate(struct file *file, unsigned long arg)
 	return ioctl_preallocate(file, p);
 }
 #endif
-
 
 typedef int (*ioctl_trans_handler_t)(unsigned int, unsigned int,
 					unsigned long, struct file *);

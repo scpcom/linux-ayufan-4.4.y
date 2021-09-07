@@ -19,7 +19,6 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-
 #include <asm/io.h>
 #include <asm/nvram.h>
 #include <linux/init.h>
@@ -27,7 +26,6 @@
 #include <linux/slab.h>
 #include <sound/core.h>
 #include "pmac.h"
-
 
 #ifdef CONFIG_ADB_CUDA
 #define PMAC_AMP_AVAIL
@@ -43,7 +41,6 @@ struct awacs_amp {
 #define CHECK_CUDA_AMP() (sys_ctrler == SYS_CTRLER_CUDA)
 
 #endif /* PMAC_AMP_AVAIL */
-
 
 static void snd_pmac_screamer_wait(struct snd_pmac *chip)
 {
@@ -114,7 +111,6 @@ static void screamer_recalibrate(struct snd_pmac *chip)
 #define screamer_recalibrate(chip) /* NOP */
 #endif
 
-
 /*
  * additional callback to set the pcm format
  */
@@ -124,7 +120,6 @@ static void snd_pmac_awacs_set_format(struct snd_pmac *chip)
 	chip->awacs_reg[1] |= chip->rate_index << 3;
 	snd_pmac_awacs_write_reg(chip, 1, chip->awacs_reg[1]);
 }
-
 
 /*
  * AWACS volume callbacks
@@ -197,7 +192,6 @@ static int snd_pmac_awacs_put_volume(struct snd_kcontrol *kcontrol,
 	return oldval != reg;
 }
 
-
 #define AWACS_VOLUME(xname, xreg, xshift, xinverted) \
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, .index = 0, \
   .info = snd_pmac_awacs_info_volume, \
@@ -255,7 +249,6 @@ static int snd_pmac_awacs_put_switch(struct snd_kcontrol *kcontrol,
   .get = snd_pmac_awacs_get_switch, \
   .put = snd_pmac_awacs_put_switch, \
   .private_value = (xreg) | ((xshift) << 8) | ((xinvert) << 16) }
-
 
 #ifdef PMAC_AMP_AVAIL
 /*
@@ -325,7 +318,6 @@ static void awacs_amp_free(struct snd_pmac *chip)
 	chip->mixer_data = NULL;
 	chip->mixer_free = NULL;
 }
-
 
 /*
  * mixer controls
@@ -534,7 +526,6 @@ static struct snd_kcontrol_new snd_pmac_awacs_amp_spk_sw __devinitdata = {
 
 #endif /* PMAC_AMP_AVAIL */
 
-
 /*
  * mic boost for screamer
  */
@@ -708,7 +699,6 @@ AWACS_SWITCH("PC Speaker Playback Switch", 1, SHIFT_PAROUT1, 1);
 static struct snd_kcontrol_new snd_pmac_awacs_speaker_sw_imac2 __devinitdata =
 AWACS_SWITCH("PC Speaker Playback Switch", 1, SHIFT_PAROUT1, 0);
 
-
 /*
  * add new mixer elements to the card
  */
@@ -724,7 +714,6 @@ static int build_mixers(struct snd_pmac *chip, int nums,
 	}
 	return 0;
 }
-
 
 /*
  * restore all registers
@@ -867,7 +856,6 @@ static void snd_pmac_awacs_update_automute(struct snd_pmac *chip, int do_notify)
 	}
 }
 #endif /* PMAC_SUPPORT_AUTOMUTE */
-
 
 /*
  * initialize chip

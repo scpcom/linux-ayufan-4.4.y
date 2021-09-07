@@ -70,7 +70,6 @@ typedef struct xfs_buf_log_format_t {
 #define	XFS_BLI_INODE_ALLOC_BUF	0x10
 #define XFS_BLI_STALE_INODE	0x20
 
-
 #ifdef __KERNEL__
 
 struct xfs_buf;

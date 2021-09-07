@@ -157,7 +157,6 @@ crt_enable(struct s1d13xxxfb_par *par, int enable)
 	s1d13xxxfb_writereg(par, S1DREG_COM_DISP_MODE, mode);
 }
 
-
 /*************************************************************
  framebuffer control functions
  *************************************************************/
@@ -782,7 +781,6 @@ s1d13xxxfb_fetch_hw_state(struct fb_info *info)
 		xres, yres, xres_virtual, yres_virtual, is_color, is_dual, is_tft);
 }
 
-
 static int
 s1d13xxxfb_remove(struct platform_device *pdev)
 {
@@ -1063,7 +1061,6 @@ static struct platform_driver s1d13xxxfb_driver = {
 	},
 };
 
-
 static int __init
 s1d13xxxfb_init(void)
 {
@@ -1076,7 +1073,6 @@ s1d13xxxfb_init(void)
 	return platform_driver_register(&s1d13xxxfb_driver);
 }
 
-
 static void __exit
 s1d13xxxfb_exit(void)
 {
@@ -1085,7 +1081,6 @@ s1d13xxxfb_exit(void)
 
 module_init(s1d13xxxfb_init);
 module_exit(s1d13xxxfb_exit);
-
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Framebuffer driver for S1D13xxx devices");

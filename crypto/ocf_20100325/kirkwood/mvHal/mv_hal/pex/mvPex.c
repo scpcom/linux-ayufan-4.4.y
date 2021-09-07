@@ -248,7 +248,6 @@ MV_U32 mvPexModeGet(MV_U32 pexIf,MV_PEX_MODE *pexMode)
     return MV_OK;
 }
 
-
 /* PEX configuration space read write */
 
 /*******************************************************************************
@@ -365,7 +364,6 @@ MV_U32 mvPexHwConfigRead (MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func,
 		}
 	}
     
-    
 	/* Creating PEX address to be passed */
 	pexData = (bus << PXCAR_BUS_NUM_OFFS);
 	pexData |= (dev << PXCAR_DEVICE_NUM_OFFS);
@@ -382,7 +380,6 @@ MV_U32 mvPexHwConfigRead (MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func,
 
 	DB(mvOsPrintf("mvPexConfigRead:address pexData=%x ",pexData));
     
-	
 	/* In order to let the PEX controller absorbed the address of the read 	*/
 	/* transaction we perform a validity check that the address was written */
 	if(pexData != MV_REG_READ(PEX_CFG_ADDR_REG(pexIf)))
@@ -457,7 +454,6 @@ MV_U32 mvPexHwConfigRead (MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func,
 
 			}
 			
-
 			/* save the original window values */
 			mvAhbToMbusWinGet(winNum,&originWin);
 
@@ -502,7 +498,6 @@ MV_U32 mvPexHwConfigRead (MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func,
 
 				pciAddr = (MV_U32)CPU_MEMIO_UNCACHED_ADDR(PEX_CONFIG_RW_WA_BASE);
 			}
-			
 			
 			/* remap should be as base */
 			if ((1 == winNum)||(0 == winNum))
@@ -615,12 +610,9 @@ MV_STATUS mvPexHwConfigWrite(MV_U32 pexIf, MV_U32 bus, MV_U32 dev,
 		return MV_ERROR;
 	}
 
-
-
 	localDev = mvPexLocalDevNumGet(pexIf);
 	localBus = mvPexLocalBusNumGet(pexIf);
 
-	
 	/* in PCI Express we have only one device number other than ourselves*/
 	/* and this number is the first number we encounter 
 		else than the localDev that can be any valid dev number*/
@@ -649,7 +641,6 @@ MV_STATUS mvPexHwConfigWrite(MV_U32 pexIf, MV_U32 bus, MV_U32 dev,
 			}
 		}
 
-		
 	}
 
 	/* if we are not accessing ourselves , then check the link */
@@ -741,7 +732,6 @@ MV_STATUS mvPexMasterEnable(MV_U32 pexIf, MV_BOOL enable)
 	pexCommandStatus = MV_REG_READ(PEX_CFG_DIRECT_ACCESS(pexIf,
 							    PEX_STATUS_AND_COMMAND));
 
-
 	if (MV_TRUE == enable)
 	{
 		pexCommandStatus |= PXSAC_MASTER_EN;
@@ -751,13 +741,11 @@ MV_STATUS mvPexMasterEnable(MV_U32 pexIf, MV_BOOL enable)
 		pexCommandStatus &= ~PXSAC_MASTER_EN;
 	}
 
-	
 	MV_REG_WRITE(PEX_CFG_DIRECT_ACCESS(pexIf,PEX_STATUS_AND_COMMAND),
 				 pexCommandStatus);
 
 	return MV_OK;
 }
-
 
 /*******************************************************************************
 * mvPexSlaveEnable - Enable/disale PEX interface slave transactions.
@@ -798,7 +786,6 @@ MV_STATUS mvPexSlaveEnable(MV_U32 pexIf, MV_U32 bus,MV_U32 dev, MV_BOOL enable)
 
 	}
 
-	
 	RegOffs = PEX_STATUS_AND_COMMAND;
 	
 	pexCommandStatus = mvPexConfigRead(pexIf, bus, dev, 0, RegOffs);
@@ -844,7 +831,6 @@ MV_STATUS mvPexLocalBusNumSet(MV_U32 pexIf, MV_U32 busNum)
 	MV_U32 localBus;
 	MV_U32 localDev;
 
-
 	/* Parameter checking   */
 	if (pexIf >= mvCtrlPexMaxIfGet())
 	{
@@ -861,8 +847,6 @@ MV_STATUS mvPexLocalBusNumSet(MV_U32 pexIf, MV_U32 busNum)
 	localBus = mvPexLocalBusNumGet(pexIf);
 	localDev = mvPexLocalDevNumGet(pexIf);
 
-
-
 	pexStatus  = MV_REG_READ(PEX_STATUS_REG(pexIf));
 
 	pexStatus &= ~PXSR_PEX_BUS_NUM_MASK;
@@ -871,10 +855,8 @@ MV_STATUS mvPexLocalBusNumSet(MV_U32 pexIf, MV_U32 busNum)
 
 	MV_REG_WRITE(PEX_STATUS_REG(pexIf), pexStatus);
 
-
 	return MV_OK;
 }
-
 
 /*******************************************************************************
 * mvPexLocalBusNumGet - Get PEX interface local bus number.
@@ -906,7 +888,6 @@ MV_U32 mvPexLocalBusNumGet(MV_U32 pexIf)
 		}
 	}
 
-
 	pexStatus  = MV_REG_READ(PEX_STATUS_REG(pexIf));
 
 	pexStatus &= PXSR_PEX_BUS_NUM_MASK;
@@ -914,7 +895,6 @@ MV_U32 mvPexLocalBusNumGet(MV_U32 pexIf)
 	return (pexStatus >> PXSR_PEX_BUS_NUM_OFFS);
 
 }
-
 
 /*******************************************************************************
 * mvPexLocalDevNumSet - Set PEX interface local device number.
@@ -959,7 +939,6 @@ MV_STATUS mvPexLocalDevNumSet(MV_U32 pexIf, MV_U32 devNum)
 	localBus = mvPexLocalBusNumGet(pexIf);
 	localDev = mvPexLocalDevNumGet(pexIf);
 
-
 	pexStatus  = MV_REG_READ(PEX_STATUS_REG(pexIf));
 
 	pexStatus &= ~PXSR_PEX_DEV_NUM_MASK;
@@ -967,7 +946,6 @@ MV_STATUS mvPexLocalDevNumSet(MV_U32 pexIf, MV_U32 devNum)
 	pexStatus |= (devNum << PXSR_PEX_DEV_NUM_OFFS) & PXSR_PEX_DEV_NUM_MASK;
 
 	MV_REG_WRITE(PEX_STATUS_REG(pexIf), pexStatus);
-
 
 	return MV_OK;
 }
@@ -1025,7 +1003,6 @@ MV_VOID mvPexPhyRegRead(MV_U32 pexIf, MV_U32 regOffset, MV_U16 *value)
 	*value = MV_REG_READ(PEX_PHY_ACCESS_REG(pexIf)); 
 }
 
-
 MV_VOID mvPexPhyRegWrite(MV_U32 pexIf, MV_U32 regOffset, MV_U16 value)
 {
 
@@ -1081,7 +1058,6 @@ MV_STATUS mvPexActiveStateLinkPMEnable(MV_U32 pexIf, MV_BOOL enable)
 	return MV_OK;
 }
 
-
 /*******************************************************************************
 * mvPexForceX1
 *
@@ -1123,7 +1099,6 @@ MV_BOOL mvPexIsPowerUp(MV_U32 pexIf)
 	return mvCtrlPwrClckGet(PEX_UNIT_ID, pexIf);	
 }
 
-
 MV_VOID mvPexPowerDown(MV_U32 pexIf)
 {
 	if ( (mvCtrlModelGet() == MV_78XX0_DEV_ID) ||
@@ -1138,6 +1113,3 @@ MV_VOID mvPexPowerDown(MV_U32 pexIf)
 		MV_REG_WRITE((0x41B00 -(pexIf)*0x10000), 0x20800087);
 	}
 }
-
-
-

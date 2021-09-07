@@ -38,7 +38,6 @@ static inline int chp_test_bit(u8 *bitmap, int num)
 	return (bitmap[byte] & mask) ? 1 : 0;
 }
 
-
 struct channel_path {
 	struct chp_id chpid;
 	int state;

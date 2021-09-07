@@ -244,7 +244,6 @@ GT_U8 lport2phy
 	return hwPort;
 }
 
-
 /*******************************************************************************
 * driverConfig
 *
@@ -321,7 +320,6 @@ GT_STATUS driverConfig
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * driverEnable
 *
@@ -351,7 +349,6 @@ GT_STATUS driverEnable
 	GT_UNUSED_PARAM(dev);
     return GT_OK;
 }
-
 
 GT_STATUS driverGetSerdesPort(GT_QD_DEV *dev, GT_U8* hwPort)
 {
@@ -447,7 +444,6 @@ static GT_STATUS driverFindPhyID
 					
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * driverIsPhyAttached
@@ -614,7 +610,6 @@ GT_STATUS driverPagedAccessStart
 			return GT_OK;
 	}
 
-
 	if((status= hwGetPhyRegField(dev,hwPort,22,0,8,pageReg)) != GT_OK)
 	{
 	    DBG_INFO(("Not able to read Phy Register.\n"));
@@ -623,7 +618,6 @@ GT_STATUS driverPagedAccessStart
 
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * driverPagedAccessStop
@@ -695,7 +689,6 @@ GT_STATUS driverPagedAccessStop
 			return GT_OK;
 	}
 
-
 	if((status= hwSetPhyRegField(dev,hwPort,22,0,8,pageReg)) != GT_OK)
 	{
 	    DBG_INFO(("Not able to write Phy Register.\n"));
@@ -704,7 +697,6 @@ GT_STATUS driverPagedAccessStop
 
     return GT_OK;
 }
-
 
 /*******************************************************************************
 * driverFindPhyInformation
@@ -973,5 +965,3 @@ GT_STATUS driverFindPhyInformation
 
     return GT_OK;
 }
-
-

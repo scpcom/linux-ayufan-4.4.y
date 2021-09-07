@@ -51,7 +51,6 @@
 /* CM_CLKSEL2_EMU, CM_CLKSEL3_EMU shared bits */
 #define OMAP3430_OVERRIDE_ENABLE			(1 << 19)
 
-
 /* Bits specific to each register */
 
 /* CM_FCLKEN_IVA2 */

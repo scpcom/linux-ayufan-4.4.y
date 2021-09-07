@@ -23,7 +23,6 @@
 #include "ieee80211_i.h"
 #include "wep.h"
 
-
 int ieee80211_wep_init(struct ieee80211_local *local)
 {
 	/* start WEP IV from a random value */
@@ -65,7 +64,6 @@ static inline bool ieee80211_wep_weak_iv(u32 iv, int keylen)
 	return false;
 }
 
-
 static void ieee80211_wep_get_iv(struct ieee80211_local *local,
 				 int keylen, int keyidx, u8 *iv)
 {
@@ -81,7 +79,6 @@ static void ieee80211_wep_get_iv(struct ieee80211_local *local,
 	*iv++ = local->wep_iv & 0xff;
 	*iv++ = keyidx << 6;
 }
-
 
 static u8 *ieee80211_wep_add_iv(struct ieee80211_local *local,
 				struct sk_buff *skb,
@@ -104,7 +101,6 @@ static u8 *ieee80211_wep_add_iv(struct ieee80211_local *local,
 	return newhdr + hdrlen;
 }
 
-
 static void ieee80211_wep_remove_iv(struct ieee80211_local *local,
 				    struct sk_buff *skb,
 				    struct ieee80211_key *key)
@@ -116,7 +112,6 @@ static void ieee80211_wep_remove_iv(struct ieee80211_local *local,
 	memmove(skb->data + WEP_IV_LEN, skb->data, hdrlen);
 	skb_pull(skb, WEP_IV_LEN);
 }
-
 
 /* Perform WEP encryption using given key. data buffer must have tailroom
  * for 4-byte ICV. data_len must not include this ICV. Note: this function
@@ -135,7 +130,6 @@ void ieee80211_wep_encrypt_data(struct crypto_blkcipher *tfm, u8 *rc4key,
 	sg_init_one(&sg, data, data_len + WEP_ICV_LEN);
 	crypto_blkcipher_encrypt(&desc, &sg, &sg, sg.length);
 }
-
 
 /* Perform WEP encryption on given skb. 4 bytes of extra space (IV) in the
  * beginning of the buffer 4 bytes of extra space (ICV) in the end of the
@@ -173,7 +167,6 @@ int ieee80211_wep_encrypt(struct ieee80211_local *local,
 	return 0;
 }
 
-
 /* Perform WEP decryption using given key. data buffer includes encrypted
  * payload, including 4-byte ICV, but _not_ IV. data_len must not include ICV.
  * Return 0 on success and -1 on ICV mismatch. */
@@ -195,7 +188,6 @@ int ieee80211_wep_decrypt_data(struct crypto_blkcipher *tfm, u8 *rc4key,
 
 	return 0;
 }
-
 
 /* Perform WEP decryption on given skb. Buffer includes whole WEP part of
  * the frame: IV (4 bytes), encrypted payload (including SNAP header),
@@ -259,7 +251,6 @@ static int ieee80211_wep_decrypt(struct ieee80211_local *local,
 
 	return ret;
 }
-
 
 bool ieee80211_wep_is_weak_iv(struct sk_buff *skb, struct ieee80211_key *key)
 {

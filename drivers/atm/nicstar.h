@@ -11,10 +11,8 @@
  *
  ******************************************************************************/
 
-
 #ifndef _LINUX_NICSTAR_H_
 #define _LINUX_NICSTAR_H_
-
 
 /* Includes *******************************************************************/
 
@@ -24,7 +22,6 @@
 #include <linux/skbuff.h>
 #include <linux/atmdev.h>
 #include <linux/atm_nicstar.h>
-
 
 /* Options ********************************************************************/
 
@@ -77,7 +74,6 @@
 #define TOP_HB 64
 #define TOP_IOVB 256
 
-
 #define MAX_TBD_PER_VC 1	/* Number of TBDs before a TSR */
 #define MAX_TBD_PER_SCQ 10	/* Only meaningful for variable rate SCQs */
 
@@ -89,13 +85,10 @@
 
 #define PCR_TOLERANCE (1.0001)
 
-
-
 /* ESI stuff ******************************************************************/
 
 #define NICSTAR_EPROM_MAC_ADDR_OFFSET 0x6C
 #define NICSTAR_EPROM_MAC_ADDR_OFFSET_ALT 0xF6
-
 
 /* #defines *******************************************************************/
 
@@ -123,10 +116,7 @@
 #define NS_SMSKBSIZE (NS_SMBUFSIZE + NS_AAL0_HEADER)
 #define NS_LGSKBSIZE (NS_SMBUFSIZE + NS_LGBUFSIZE)
 
-
 /* NICStAR structures located in host memory **********************************/
-
-
 
 /* RSQ - Receive Status Queue 
  *
@@ -180,8 +170,6 @@ typedef struct ns_rsqe
 #define NS_RSQ_NUM_ENTRIES (NS_RSQSIZE / 16)
 #define NS_RSQ_ALIGNMENT NS_RSQSIZE
 
-
-
 /* RCQ - Raw Cell Queue
  *
  * Written by the NICStAR, read by the device driver.
@@ -210,8 +198,6 @@ typedef struct ns_rcqe
 #define ns_rcqe_nextbufhandle(ns_rcqep) \
         (le32_to_cpu((ns_rcqep)->word_2))
 
-
-
 /* SCQ - Segmentation Channel Queue 
  *
  * Written by the device driver, read by the NICStAR.
@@ -230,7 +216,6 @@ typedef struct ns_scqe
 
 #define NS_SCQE_TYPE_TBD 0x00000000
 #define NS_SCQE_TYPE_TSR 0x80000000
-
 
 #define NS_TBD_EOPDU 0x40000000
 #define NS_TBD_AAL0  0x00000000
@@ -253,7 +238,6 @@ typedef struct ns_scqe
 #define ns_tbd_mkword_4(gfc, vpi, vci, pt, clp) \
       (cpu_to_le32((gfc) << 28 | (vpi) << 20 | (vci) << 4 | (pt) << 1 | (clp)))
 
-
 #define NS_TSR_INTENABLE 0x20000000
 
 #define NS_TSR_SCDISVBR 0xFFFF		/* Use as scdi for VBR SCD */
@@ -272,8 +256,6 @@ typedef struct ns_scqe
 #define CBR_SCQSIZE 1024
 
 #define NS_SCQE_SIZE 16
-
-
 
 /* TSQ - Transmit Status Queue
  *
@@ -301,11 +283,9 @@ typedef struct ns_tsi
 #define ns_tsi_init(ns_tsip) \
         ((ns_tsip)->word_2 = cpu_to_le32(NS_TSI_EMPTY))
 
-
 #define NS_TSQSIZE 8192
 #define NS_TSQ_NUM_ENTRIES 1024
 #define NS_TSQ_ALIGNMENT 8192
-
 
 #define NS_TSI_SCDISVBR NS_TSR_SCDISVBR
 
@@ -316,11 +296,7 @@ typedef struct ns_tsi
 #define ns_tsi_getscqpos(ns_tsip) \
         (le32_to_cpu((ns_tsip)->word_1) & 0x00007FFF)
 
-
-
 /* NICStAR structures located in local SRAM ***********************************/
-
-
 
 /* RCT - Receive Connection Table
  *
@@ -360,8 +336,6 @@ typedef struct ns_rcte
    /* NOTE: We could make macros to contruct the first word of the RCTE,
             but that doesn't seem to make much sense... */
 
-
-
 /* FBD - Free Buffer Descriptor
  *
  * Written by the device driver using via the command register.
@@ -372,9 +346,6 @@ typedef struct ns_fbd
    u32 buffer_handle;
    u32 dma_address;
 } ns_fbd;
-
-
-
 
 /* TST - Transmit Schedule Table
  *
@@ -399,8 +370,6 @@ typedef u32 ns_tste;
       - When the opcode is END, sramad specifies the SRAM address of the
         location of the next TST entry to read.
     */
-
-
 
 /* SCD - Segmentation Channel Descriptor
  *
@@ -428,11 +397,7 @@ typedef struct ns_scd
    /* NOTE: There are other fields in word 2 of the SCD, but as they should
             not be needed in the device driver they are not defined here. */
 
-
-
-
 /* NICStAR local SRAM memory map **********************************************/
-
 
 #define NS_RCT           0x00000
 #define NS_RCT_32_END    0x03FFF
@@ -455,10 +420,7 @@ typedef struct ns_scd
 #define NS_LGFBQ         0x1FC00
 #define NS_LGFBQ_END     0x1FFFF
 
-
-
 /* NISCtAR operation registers ************************************************/
-
 
 /* See Section 3.4 of `IDT77211 NICStAR User Manual' from www.idt.com */
 
@@ -487,9 +449,7 @@ enum ns_regs
    VPM   = 0x50       /* VPI/VCI Mask W */
 };
 
-
 /* NICStAR commands issued to the CMD register ********************************/
-
 
 /* Top 4 bits are command opcode, lower 28 are parameters. */
 
@@ -516,7 +476,6 @@ enum ns_regs
 
 #define NS_CMD_OPEN_CONNECTION (NS_CMD_OPENCLOSE_CONNECTION | 0x00080000)
 #define NS_CMD_CLOSE_CONNECTION NS_CMD_OPENCLOSE_CONNECTION
-
 
 /* NICStAR configuration bits *************************************************/
 
@@ -579,7 +538,6 @@ enum ns_regs
 #define NS_CFG_RXINT_624US   0x00003000
 #define NS_CFG_RXINT_899US   0x00004000
 
-
 /* NICStAR STATus bits ********************************************************/
 
 #define NS_STAT_SFBQC_MASK 0xFF000000   /* hi 8 bits Small Buffer Queue Count */
@@ -602,10 +560,7 @@ enum ns_regs
 #define ns_stat_sfbqc_get(stat) (((stat) & NS_STAT_SFBQC_MASK) >> 23)
 #define ns_stat_lfbqc_get(stat) (((stat) & NS_STAT_LFBQC_MASK) >> 15)
 
-
-
 /* #defines which depend on other #defines ************************************/
-
 
 #define NS_TST0 NS_TST_FRSCD
 #define NS_TST1 (NS_TST_FRSCD + NS_TST_NUM_ENTRIES + 1)
@@ -672,7 +627,6 @@ enum ns_regs
 #define NS_CFG_TSQFIE_OPT 0x00000000
 #endif /* ENABLE_TSQFIE */
 
-
 /* PCI stuff ******************************************************************/
 
 #ifndef PCI_VENDOR_ID_IDT
@@ -683,10 +637,7 @@ enum ns_regs
 #define PCI_DEVICE_ID_IDT_IDT77201 0x0001
 #endif /* PCI_DEVICE_ID_IDT_IDT77201 */
 
-
-
 /* Device driver structures ***************************************************/
-
 
 struct ns_skb_cb {
 	u32 buf_type;			/* BUF_SM/BUF_LG/BUF_NONE */
@@ -701,7 +652,6 @@ typedef struct tsq_info
    ns_tsi *next;
    ns_tsi *last;
 } tsq_info;
-
 
 typedef struct scq_info
 {
@@ -721,8 +671,6 @@ typedef struct scq_info
    spinlock_t lock;			/* SCQ spinlock */
 } scq_info;
 
-
-
 typedef struct rsq_info
 {
    void *org;
@@ -730,7 +678,6 @@ typedef struct rsq_info
    ns_rsqe *next;
    ns_rsqe *last;
 } rsq_info;
-
 
 typedef struct skb_pool
 {
@@ -741,7 +688,6 @@ typedef struct skb_pool
 /* NOTE: for small and large buffer pools, the count is not used, as the
          actual value used for buffer management is the one read from the
 	 card. */
-
 
 typedef struct vc_map
 {
@@ -755,7 +701,6 @@ typedef struct vc_map
    int tbd_count;
 } vc_map;
 
-
 struct ns_skb_data
 {
 	struct atm_vcc *vcc;
@@ -763,7 +708,6 @@ struct ns_skb_data
 };
 
 #define NS_SKB(skb) (((struct ns_skb_data *) (skb)->cb))
-
 
 typedef struct ns_dev
 {
@@ -806,7 +750,6 @@ typedef struct ns_dev
    spinlock_t res_lock;		/* Card resource lock */
 } ns_dev;
 
-
    /* NOTE: Each tste2vc entry relates a given TST entry to the corresponding
             CBR vc. If the entry is not allocated, it must be NULL.
 	    
@@ -815,6 +758,5 @@ typedef struct ns_dev
 	    
 	    scd2vc allows us to find out unused fixed rate SCDs, because
 	    they must have a NULL pointer here. */
-
 
 #endif /* _LINUX_NICSTAR_H_ */

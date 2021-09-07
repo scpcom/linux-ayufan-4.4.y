@@ -359,4 +359,3 @@ ENTRY(pci_sun4v_msg_setvalid)
 	retl
 	 mov	%o0, %o0
 ENDPROC(pci_sun4v_msg_setvalid)
-

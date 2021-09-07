@@ -15,7 +15,6 @@
 
 #define IPCNS_CALLBACK_PRI 0
 
-
 struct ipc_ids {
 	int in_use;
 	unsigned short seq;

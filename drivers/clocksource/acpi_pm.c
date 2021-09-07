@@ -74,7 +74,6 @@ static struct clocksource clocksource_acpi_pm = {
 
 };
 
-
 #ifdef CONFIG_PCI
 static int __devinitdata acpi_pm_good;
 static int __init acpi_pm_good_setup(char *__str)

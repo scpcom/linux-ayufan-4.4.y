@@ -48,7 +48,6 @@
 
 #include <mach/hardware.h>
 
-
 /* usb test masks and offsets */
 #define TEST_MASK    0xF
 #define TEST_OFFSET  16
@@ -71,7 +70,6 @@ MODULE_LICENSE(		"GPL"							);
 #define DAC_CTL   0x0008
 #define ADC_OUT   0x000A
 
-
 #define MEAS_IV_SHIFT    2
 #define MEAS_IV_MASK    0x7FF
 #define ADC_MODE_SHIFT       0
@@ -85,7 +83,6 @@ MODULE_LICENSE(		"GPL"							);
 
 /* scaling shift to allow precision calculation using scaled integers */
 #define ARITH_SCALING  12
-
 
 enum {
 SATA_TYPE = 0,
@@ -124,7 +121,6 @@ static void write_cr(u16 data, u16 address) {
 	wait_cr_ack();
 	return ;
 }
-
 
 struct debug_buffer {
 	ssize_t (*fill_func)(struct debug_buffer *);	/* fill method */
@@ -280,7 +276,6 @@ out:
 
 }
 
-
 static struct debug_buffer *alloc_buffer(u32 data, ssize_t (*fill_func)(struct debug_buffer *))
 {
 	struct debug_buffer *buf;
@@ -318,14 +313,12 @@ static int temperature_close(struct inode *inode, struct file *file)
 	return 0;
 }
 
-
 static struct file_operations temperature_fops = {
 	.owner		= THIS_MODULE,
 	.open = temperature_open,
 	.read = temperature_read,
 	.release	= temperature_close,
 };
-
 
 static int __init oxnas_temperature_init(void)
 {
@@ -352,8 +345,6 @@ static int __init oxnas_temperature_init(void)
 		goto no_sata_read;
 	}
 
-
-
 	printk(KERN_INFO "%s %s initialised\n", MODULE_NAME, MODULE_VERS);
 
 	return 0;
@@ -366,7 +357,6 @@ static int __init oxnas_temperature_init(void)
 		return rv;
 }
 
-
 static void __exit oxnas_temperature_exit(void)
 {
 	
@@ -377,7 +367,6 @@ static void __exit oxnas_temperature_exit(void)
 	printk(KERN_INFO "%s %s removed\n", MODULE_NAME, MODULE_VERS);
 	
 }
-
 
 module_init(oxnas_temperature_init);
 module_exit(oxnas_temperature_exit);

@@ -26,7 +26,6 @@ struct chsc_async_area {
 	__u8 data[PAGE_SIZE - 16 /* size of chsc_async_header */];
 } __attribute__ ((packed));
 
-
 struct chsc_response_struct {
 	__u16 length;
 	__u16 code;

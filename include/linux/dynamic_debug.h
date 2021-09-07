@@ -35,7 +35,6 @@ struct _ddebug {
 	unsigned int flags:8;
 } __attribute__((aligned(8)));
 
-
 int ddebug_add_module(struct _ddebug *tab, unsigned int n,
 				const char *modname);
 
@@ -60,7 +59,6 @@ extern int ddebug_remove_module(char *mod_name);
 		printk(KERN_DEBUG KBUILD_MODNAME ":" pr_fmt(fmt),	\
 				##__VA_ARGS__);				\
 	} while (0)
-
 
 #define dynamic_dev_dbg(dev, fmt, ...) do {				\
 	static struct _ddebug descriptor				\

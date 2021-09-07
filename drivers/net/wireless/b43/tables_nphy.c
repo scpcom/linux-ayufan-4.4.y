@@ -27,7 +27,6 @@
 #include "phy_common.h"
 #include "phy_n.h"
 
-
 struct b2055_inittab_entry {
 	/* Value to write if we use the 5GHz band. */
 	u16 ghz5;
@@ -269,7 +268,6 @@ static const struct b2055_inittab_entry b2055_inittab [] = {
   [B2055_C2_GENSPARE2]		= { .ghz5 = 0x0000, .ghz2 = 0x0000, NOUPLOAD, },
 };
 
-
 void b2055_upload_inittab(struct b43_wldev *dev,
 			  bool ghz5, bool ignore_uploadflag)
 {
@@ -290,7 +288,6 @@ void b2055_upload_inittab(struct b43_wldev *dev,
 		}
 	}
 }
-
 
 #define RADIOREGS(r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, \
 		  r12, r13, r14, r15, r16, r17, r18, r19, r20, r21) \
@@ -1334,7 +1331,6 @@ b43_nphy_get_chantabent(struct b43_wldev *dev, u8 channel)
 
 	return NULL;
 }
-
 
 const u8 b43_ntab_adjustpower0[] = {
 	0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01,

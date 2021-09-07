@@ -57,7 +57,6 @@ static int amd64_insert_memory(struct agp_memory *mem, off_t pg_start, int type)
 	if (mask_type != 0)
 		return -EINVAL;
 
-
 	/* Make sure we can fit the range in the gatt table. */
 	/* FIXME: could wrap */
 	if (((unsigned long)pg_start + mem->page_count) > num_entries)
@@ -109,7 +108,6 @@ static struct aper_size_info_32 amd64_aperture_sizes[7] =
 	{1024, 262144, 8+(sizeof(long)/8), 1<<1 | 1<<3},
 	{2048, 524288, 9+(sizeof(long)/8), 1<<2 | 1<<3}
 };
-
 
 /*
  * Get the current Aperture size from the x86-64.
@@ -164,7 +162,6 @@ static u64 amd64_configure(struct pci_dev *hammer, u64 gatt_table)
 	return aper_base;
 }
 
-
 static const struct aper_size_info_32 amd_8151_sizes[7] =
 {
 	{2048, 524288, 9, 0x00000000 },	/* 0 0 0 0 0 0 */
@@ -190,7 +187,6 @@ static int amd_8151_configure(void)
 	return 0;
 }
 
-
 static void amd64_cleanup(void)
 {
 	u32 tmp;
@@ -203,7 +199,6 @@ static void amd64_cleanup(void)
 		pci_write_config_dword(dev, AMD64_GARTAPERTURECTL, tmp);
 	}
 }
-
 
 static const struct agp_bridge_driver amd_8151_driver = {
 	.owner			= THIS_MODULE,
@@ -368,7 +363,6 @@ static void __devinit amd8151_init(struct pci_dev *pdev, struct agp_bridge_data 
 	}
 }
 
-
 static const struct aper_size_info_32 uli_sizes[7] =
 {
 	{256, 65536, 6, 10},
@@ -423,7 +417,6 @@ static int __devinit uli_agp_init(struct pci_dev *pdev)
 	pci_dev_put(dev1);
 	return 0;
 }
-
 
 static const struct aper_size_info_32 nforce3_sizes[5] =
 {
@@ -719,7 +712,6 @@ static struct pci_driver agp_amd64_pci_driver = {
 	.resume		= agp_amd64_resume,
 #endif
 };
-
 
 /* Not static due to IOMMU code calling it early. */
 int __init agp_amd64_init(void)

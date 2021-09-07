@@ -10,7 +10,6 @@
 #include <asm/hardware.h>
 #include <asm/arch/irqs.h>
 
-
         .macro  disable_fiq
         .endm
         
@@ -95,4 +94,3 @@
 
 1004:
                 .endm
-

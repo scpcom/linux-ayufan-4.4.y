@@ -42,7 +42,6 @@ static int i8042_aux_irq;
 static int i8042_command_reg = 0x64;
 static int i8042_data_reg = 0x60;
 
-
 static inline int i8042_read_data(void)
 {
 	return inb(I8042_DATA_REG);

@@ -79,7 +79,6 @@
 #define CARD_RX_LEN_REG			0x42
 #define CARD_RX_UNIT_REG		0x43
 
-
 struct btmrvl_sdio_card {
 	struct sdio_func *func;
 	u32 ioport;
@@ -93,7 +92,6 @@ struct btmrvl_sdio_device {
 	const char *helper;
 	const char *firmware;
 };
-
 
 /* Platform specific DMA alignment */
 #define BTSDIO_DMA_ALIGN		8

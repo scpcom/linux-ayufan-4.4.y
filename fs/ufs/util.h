@@ -10,7 +10,6 @@
 #include <linux/fs.h>
 #include "swab.h"
 
-
 /*
  * some useful macros
  */
@@ -27,8 +26,6 @@ static inline struct ufs_buffer_head *USPI_UBH(struct ufs_sb_private_info *spi)
 {
 	return &spi->s_ubh;
 }
-
-
 
 /*
  * macros used for accessing structures
@@ -289,7 +286,6 @@ static inline void ufs_put_locked_page(struct page *page)
        page_cache_release(page);
 }
 
-
 /*
  * macros and inline function to get important structures from ufs_sb_private_info
  */
@@ -313,10 +309,8 @@ static inline void *get_usb_offset(struct ufs_sb_private_info *uspi,
 #define ubh_get_usb_third(uspi)	\
 	((struct ufs_super_block_third *)get_usb_offset((uspi), 2*UFS_SECTOR_SIZE))
 
-
 #define ubh_get_ucg(ubh) \
 	((struct ufs_cylinder_group *)((ubh)->bh[0]->b_data))
-
 
 /*
  * Extract byte from ufs_buffer_head

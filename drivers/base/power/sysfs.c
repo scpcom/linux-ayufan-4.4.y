@@ -77,7 +77,6 @@ wake_store(struct device * dev, struct device_attribute *attr,
 
 static DEVICE_ATTR(wakeup, 0644, wake_show, wake_store);
 
-
 static struct attribute * power_attrs[] = {
 	&dev_attr_wakeup.attr,
 	NULL,

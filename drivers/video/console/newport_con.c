@@ -30,7 +30,6 @@
 #include <linux/linux_logo.h>
 #include <linux/font.h>
 
-
 extern unsigned long sgi_gfxaddr;
 
 #define FONT_DATA ((unsigned char *)font_vga_8x16.data)

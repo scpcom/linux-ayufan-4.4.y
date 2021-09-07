@@ -130,7 +130,6 @@ that protects the following:
 All external entry functions are locked with the priv->action_lock to ensure
 that only one external action is invoked at a time.
 
-
 */
 
 #include <linux/compiler.h>

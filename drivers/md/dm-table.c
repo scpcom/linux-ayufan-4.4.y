@@ -533,7 +533,6 @@ int dm_get_device(struct dm_target *ti, const char *path, sector_t start,
 				  start, len, mode, result);
 }
 
-
 /*
  * Decrement a devices use count and remove it if necessary.
  */

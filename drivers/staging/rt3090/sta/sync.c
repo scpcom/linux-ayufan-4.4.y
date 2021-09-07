@@ -38,7 +38,6 @@
 
 #include "../rt_config.h"
 
-
 #define ADHOC_ENTRY_BEACON_LOST_TIME	(2*OS_HZ)	// 2 sec
 
 /*
@@ -145,7 +144,6 @@ VOID ScanTimeout(
 	IN PVOID SystemSpecific3)
 {
 	RTMP_ADAPTER *pAd = (RTMP_ADAPTER *)FunctionContext;
-
 
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
@@ -372,7 +370,6 @@ VOID MlmeJoinReqAction(
 	AsicSwitchChannel(pAd, pAd->MlmeAux.Channel, FALSE);
 	AsicLockChannel(pAd, pAd->MlmeAux.Channel);
 
-
 	RTMPSetTimer(&pAd->MlmeAux.BeaconTimer, JOIN_TIMEOUT);
 
     do
@@ -440,7 +437,6 @@ VOID MlmeJoinReqAction(
 							  END_OF_ARGS);
 			FrameLen += Tmp;
 		}
-
 
 		MiniportMMRequest(pAd, 0, pOutBuffer, FrameLen);
 		MlmeFreeMemory(pAd, pOutBuffer);
@@ -588,7 +584,6 @@ VOID PeerBeaconAtScanAction(
 	UCHAR			AddHtInfoLen;
 	UCHAR			NewExtChannelOffset = 0xff;
 
-
 	// NdisFillMemory(Ssid, MAX_LEN_OF_SSID, 0x00);
 	pFrame = (PFRAME_802_11) Elem->Msg;
 	// Init Variable IE structure
@@ -647,7 +642,6 @@ VOID PeerBeaconAtScanAction(
 			Rssi = pAd->ScanTab.BssEntry[Idx].Rssi;
 
 		Rssi = RTMPMaxRssi(pAd, ConvertToRssi(pAd, Elem->Rssi0, RSSI_0), ConvertToRssi(pAd, Elem->Rssi1, RSSI_1), ConvertToRssi(pAd, Elem->Rssi2, RSSI_2));
-
 
 #ifdef DOT11_N_SUPPORT
 		if ((HtCapabilityLen > 0) || (PreNHtCapabilityLen > 0))
@@ -725,7 +719,6 @@ VOID PeerBeaconAtJoinAction(
 	pVIE->Length = 0;
     RTMPZeroMemory(&HtCapability, sizeof(HtCapability));
 	RTMPZeroMemory(&AddHtInfo, sizeof(ADD_HT_INFO_IE));
-
 
 	if (PeerBeaconAndProbeRspSanity(pAd,
 								Elem->Msg,
@@ -850,7 +843,6 @@ VOID PeerBeaconAtJoinAction(
 			RTMPCheckRates(pAd, pAd->MlmeAux.ExtRate, &pAd->MlmeAux.ExtRateLen);
 
             NdisZeroMemory(pAd->StaActive.SupportedPhyInfo.MCSSet, 16);
-
 
 #ifdef DOT11_N_SUPPORT
 			if (((pAd->StaCfg.WepStatus != Ndis802_11WEPEnabled) && (pAd->StaCfg.WepStatus != Ndis802_11Encryption2Enabled))
@@ -997,7 +989,6 @@ VOID PeerBeacon(
 	UCHAR			AddHtInfoLen;
 	UCHAR			NewExtChannelOffset = 0xff;
 
-
 #ifdef RALINK_ATE
     if (ATE_ON(pAd))
     {
@@ -1063,7 +1054,6 @@ VOID PeerBeacon(
 		is_my_bssid = MAC_ADDR_EQUAL(Bssid, pAd->CommonCfg.Bssid)? TRUE : FALSE;
 		is_my_ssid = SSID_EQUAL(Ssid, SsidLen, pAd->CommonCfg.Ssid, pAd->CommonCfg.SsidLen)? TRUE:FALSE;
 
-
 		// ignore BEACON not for my SSID
 		if ((! is_my_ssid) && (! is_my_bssid))
 			return;
@@ -1099,8 +1089,6 @@ VOID PeerBeacon(
 			NdisMoveMemory(pAd->ScanTab.BssEntry[Bssidx].PTSF, &Elem->Msg[24], 4);
 			NdisMoveMemory(&pAd->ScanTab.BssEntry[Bssidx].TTSF[0], &Elem->TimeStamp.u.LowPart, 4);
 			NdisMoveMemory(&pAd->ScanTab.BssEntry[Bssidx].TTSF[4], &Elem->TimeStamp.u.LowPart, 4);
-
-
 
 		}
 
@@ -1167,7 +1155,6 @@ VOID PeerBeacon(
 			}
 		}
 
-
 		NdisGetSystemUpTime(&Now);
 		pBss = &pAd->ScanTab.BssEntry[Bssidx];
 		pBss->Rssi = RealRssi;       // lastest RSSI
@@ -1183,7 +1170,6 @@ VOID PeerBeacon(
 			pAd->StaCfg.DtimCount = DtimCount;
 			pAd->StaCfg.DtimPeriod = DtimPeriod;
 			pAd->StaCfg.LastBeaconRxTime = Now;
-
 
 			RxWI.RSSI0 = Elem->Rssi0;
 			RxWI.RSSI1 = Elem->Rssi1;
@@ -1456,7 +1442,6 @@ VOID PeerBeacon(
 					{
 						USHORT NextDtim = DtimCount;
 
-
 						if (NextDtim == 0)
 							NextDtim = DtimPeriod;
 
@@ -1708,12 +1693,10 @@ VOID EnqueuePsPoll(
     }
 #endif // RALINK_ATE //
 
-
 	if (pAd->StaCfg.WindowsPowerMode == Ndis802_11PowerModeLegacy_PSP)
 	pAd->PsPollFrame.FC.PwrMgmt = PWR_SAVE;
 	MiniportMMRequest(pAd, 0, (PUCHAR)&pAd->PsPollFrame, sizeof(PSPOLL_FRAME));
 }
-
 
 /*
 	==========================================================================

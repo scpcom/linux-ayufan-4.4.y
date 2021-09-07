@@ -205,7 +205,6 @@ static inline unsigned long __xchg(unsigned long x, volatile void * ptr, int siz
 
 #define arch_align_stack(x) (x)
 
-
 static inline int irqs_disabled_flags(unsigned long flags)
 {
 	if (flags & 0x0700)

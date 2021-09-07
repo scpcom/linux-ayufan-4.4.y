@@ -30,10 +30,8 @@
 #include <linux/netlink.h>
 #include <net/iw_handler.h>
 
-
 //extern struct zsWdsStruct wds[ZM_WDS_PORT_NUMBER];
 extern struct zsVapStruct vap[ZM_VAP_PORT_NUMBER];
-
 
 /***** Rx *****/
 void zfLnxRecv80211(zdev_t* dev, zbuf_t* buf, struct zsAdditionInfo* addInfo)

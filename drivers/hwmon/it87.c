@@ -238,7 +238,6 @@ static const unsigned int pwm_freq[8] = {
 	750000 / 128,
 };
 
-
 struct it87_sio_data {
 	enum chips type;
 	/* Values read from Super-I/O config space */
@@ -300,7 +299,6 @@ static void it87_write_value(struct it87_data *data, u8 reg, u8 value);
 static struct it87_data *it87_update_device(struct device *dev);
 static int it87_check_pwm(struct device *dev);
 static void it87_init_device(struct platform_device *pdev);
-
 
 static struct platform_driver it87_driver = {
 	.driver = {

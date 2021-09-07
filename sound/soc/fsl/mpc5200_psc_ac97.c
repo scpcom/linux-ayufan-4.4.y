@@ -140,7 +140,6 @@ static int psc_ac97_hw_analog_params(struct snd_pcm_substream *substream,
 		params_channels(params), params_rate(params),
 		params_format(params));
 
-
 	if (substream->pstr->stream == SNDRV_PCM_STREAM_CAPTURE) {
 		if (params_channels(params) == 1)
 			psc_dma->slots |= 0x00000100;
@@ -253,8 +252,6 @@ struct snd_soc_dai psc_ac97_dai[] = {
 } };
 EXPORT_SYMBOL_GPL(psc_ac97_dai);
 
-
-
 /* ---------------------------------------------------------------------
  * OF platform bus binding code:
  * - Probe/remove operations
@@ -342,4 +339,3 @@ module_exit(psc_ac97_exit);
 MODULE_AUTHOR("Jon Smirl <jonsmirl@gmail.com>");
 MODULE_DESCRIPTION("mpc5200 AC97 module");
 MODULE_LICENSE("GPL");
-

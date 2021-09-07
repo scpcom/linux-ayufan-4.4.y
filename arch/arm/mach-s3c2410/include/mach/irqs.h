@@ -8,7 +8,6 @@
  * published by the Free Software Foundation.
 */
 
-
 #ifndef __ASM_ARCH_IRQS_H
 #define __ASM_ARCH_IRQS_H __FILE__
 

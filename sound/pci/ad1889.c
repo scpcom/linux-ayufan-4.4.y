@@ -688,7 +688,6 @@ snd_ad1889_proc_read(struct snd_info_entry *entry, struct snd_info_buffer *buffe
 	snd_iprintf(buffer, "Wave FIFO: %d %s words\n\n", tmp,
 			(reg & AD_DS_WSMC_WAST) ? "stereo" : "mono");
 				
-	
 	snd_iprintf(buffer, "Synthesis output: %s\n",
 			reg & AD_DS_WSMC_SYEN ? "enabled" : "disabled");
 	
@@ -727,7 +726,6 @@ snd_ad1889_proc_read(struct snd_info_entry *entry, struct snd_info_buffer *buffe
 	snd_iprintf(buffer, "Resampler FIFO: %d %s words\n\n", tmp,
 			(reg & AD_DS_WSMC_WAST) ? "stereo" : "mono");
 				
-	
 	/* doc says LSB represents -1.5dB, but the max value (-94.5dB)
 	suggests that LSB is -3dB, which is more coherent with the logarithmic
 	nature of the dB scale */

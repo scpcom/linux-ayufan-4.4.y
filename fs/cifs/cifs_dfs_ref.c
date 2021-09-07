@@ -102,7 +102,6 @@ static char *cifs_get_share_name(const char *node_name)
 	return UNC;
 }
 
-
 /**
  * cifs_compose_mount_options	-	creates mount options for refferral
  * @sb_mountdata:	parent/root DFS mount options (template)
@@ -229,7 +228,6 @@ compose_mount_options_err:
 	goto compose_mount_options_out;
 }
 
-
 static struct vfsmount *cifs_dfs_do_refmount(const struct vfsmount *mnt_parent,
 		struct dentry *dentry, const struct dfs_info3_param *ref)
 {
@@ -299,7 +297,6 @@ static void dump_referral(const struct dfs_info3_param *ref)
 	cFYI(1, ("DFS: ref_flags: %hd, path_consumed: %hd", ref->ref_flag,
 				ref->path_consumed));
 }
-
 
 static void*
 cifs_dfs_follow_mountpoint(struct dentry *dentry, struct nameidata *nd)
@@ -388,4 +385,3 @@ out_err:
 const struct inode_operations cifs_dfs_referral_inode_operations = {
 	.follow_link = cifs_dfs_follow_mountpoint,
 };
-

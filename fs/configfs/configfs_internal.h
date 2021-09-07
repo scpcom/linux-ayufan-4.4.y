@@ -157,4 +157,3 @@ static inline void configfs_put(struct configfs_dirent * sd)
 	if (atomic_dec_and_test(&sd->s_count))
 		release_configfs_dirent(sd);
 }
-

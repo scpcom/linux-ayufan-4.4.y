@@ -12,7 +12,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -455,7 +454,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaTestUnitReady(IN  MV_SATA_ADAPTER* 
     return MV_SCSI_COMMAND_STATUS_COMPLETED;
 }
 
-
 static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendDataCommand(IN  MV_SATA_ADAPTER*    pSataAdapter,
                                                              IN  MV_SATA_SCSI_CMD_BLOCK  *pScb)
 {
@@ -819,7 +817,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetReadCapacity16Data(IN MV_SATA_AD
     return MV_SCSI_COMMAND_STATUS_COMPLETED;
 }
 
-
 /*******************************************************************************
 * mvScsiAtaReportLuns - handle the SCSI-3 Report LUNS
 *
@@ -841,7 +838,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaReportLuns(IN MV_SATA_ADAPTER*    p
 							IN    MV_SATA_SCSI_CMD_BLOCK  *pScb)
 {
 	MV_U8   *buff;
-
 
     buff = pScb->pDataBuffer;
     memset(buff, 0, pScb->dataBufferLength);
@@ -890,7 +886,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendVerifyCommand(IN MV_SATA_ADAPTE
 		    (((unsigned) cmd[3]) << 16) |
 		    (((unsigned) cmd[2]) << 24);
 	    
-	    
 	    sectors = ((unsigned) cmd[8]) |
 		    (((unsigned) cmd[7]) << 8);
     }
@@ -905,7 +900,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendVerifyCommand(IN MV_SATA_ADAPTE
 		    (((MV_U64) cmd[4]) << 40) |
 		    (((MV_U64) cmd[3]) << 48) |
 		    (((MV_U64) cmd[2]) << 56);
-
 
 	    sectors = 
 		    ((unsigned) cmd[13]) |
@@ -1089,7 +1083,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaReassignBlocks(IN MV_SATA_ADAPTER  
 
 }
 
-
 #ifdef MV_SATA_SUPPORT_READ_WRITE_LONG
 static MV_SCSI_COMMAND_STATUS_TYPE mvScsiAtaWriteLong(IN MV_SATA_ADAPTER    *pSataAdapter,
                                                       IN  MV_SATA_SCSI_CMD_BLOCK  *pScb)
@@ -1107,7 +1100,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE mvScsiAtaWriteLong(IN MV_SATA_ADAPTER    *pSa
     MV_SAL_ADAPTER_EXTENSION *pAdapterExt = pScb->pSalAdapterExtension;
 
     memset(pCommandInfo, 0, sizeof(MV_QUEUE_COMMAND_INFO));
-
 
     LBA = (((MV_U32) pScb->ScsiCdb[5]) << 0) |
           (((MV_U32) pScb->ScsiCdb[4]) << 8) |
@@ -1177,7 +1169,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE mvScsiAtaWriteLong(IN MV_SATA_ADAPTER    *pSa
     pScb->isExtended = MV_FALSE;
     pCommandInfo->commandParams.NoneUdmaCommand.command = 0x32;
 
-
     mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, "Sending WRITE LONG command : channel %d, code %x pScb %p\n",
              pScb->bus, pScb->ScsiCdb[0], pScb);
 
@@ -1214,7 +1205,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE mvScsiAtaReadLong(IN MV_SATA_ADAPTER    *pSat
     MV_SAL_ADAPTER_EXTENSION *pAdapterExt = pScb->pSalAdapterExtension;
 
     memset(pCommandInfo, 0, sizeof(MV_QUEUE_COMMAND_INFO));
-
 
     LBA = (((MV_U32) pScb->ScsiCdb[5]) << 0) |
           (((MV_U32) pScb->ScsiCdb[4]) << 8) |
@@ -1283,7 +1273,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE mvScsiAtaReadLong(IN MV_SATA_ADAPTER    *pSat
     pCommandInfo->commandParams.NoneUdmaCommand.device = MV_BIT6 | (MV_U16)((LBA & 0xf000000) >> 24) ;
     pScb->isExtended = MV_FALSE;
     pCommandInfo->commandParams.NoneUdmaCommand.command = 0x22;
-
 
     mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, "Sending READ LONG command : channel %d, code %x pScb %p\n",
              pScb->bus, pScb->ScsiCdb[0], pScb);
@@ -1604,7 +1593,6 @@ static MV_BOOLEAN  mvScsiAtaGetModeSenseDataPhase2(IN MV_SATA_ADAPTER    *pSataA
     mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " %d %d: Mode Sense: cmd[2] 0x%xcode 0x%x control 0x%x "
              "allocation length %d \n", pSataAdapter->adapterId, pScb->bus,
              cmd[2], pageCode, pageControl, (MV_U32)cmd[4]);
-
 
     if (pageControl == 0x3)
     {
@@ -1934,7 +1922,6 @@ mvParseModeCachingPage(MV_SATA_ADAPTER *pSataAdapter,
     MV_U8                   index = 0;
     MV_SATA_SCSI_DRIVE_DATA *pDriveData = &pScb->pSalAdapterExtension->ataDriveData[pScb->bus][pScb->target];
 
-
     if ((buffer[index++] & 0xc0) || (buffer[index++] != 0x12) ||
         ((buffer[index++] | MV_BIT2)!= MV_BIT2) || (buffer[index++]) ||
         (buffer[index++] != 0xff) || (buffer[index++] != 0xff) ||
@@ -2060,7 +2047,6 @@ mvModeSenseCachingPage(MV_SATA_SCSI_CMD_BLOCK  *pScb,
                        MV_U8 *buffer,MV_U8 pageControl)
 {
     MV_SATA_SCSI_DRIVE_DATA *pDriveData = &pScb->pSalAdapterExtension->ataDriveData[pScb->bus][pScb->target];
-
 
     buffer[0] = 0x8; /* caching page*/
     buffer[1] = 0x12; /* length = 2 + 0x12*/
@@ -2551,8 +2537,6 @@ handleNoneUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
            pScb->senseDataLength : pScb->senseBufferLength);
 }
 
-
-
 static MV_VOID
 handleUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
                 MV_U32 responseFlags,
@@ -2580,7 +2564,6 @@ handleUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
 	SenseData.InformationDesc.type = 0;
 	SenseData.InformationDesc.AdditionalLength = 0xA;
 	SenseData.InformationDesc.valid = 1 << 7;
-
 
         mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " ATA Drive Registers:\n");
         mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, "%20s : %04x\n","Error", registerStruct->errorRegister);
@@ -3005,7 +2988,6 @@ MV_SCSI_COMMAND_STATUS_TYPE mvScsiAtaSendATAPICommand(MV_SATA_ADAPTER *pSataAdap
 #endif
     MV_QUEUE_COMMAND_RESULT result;
 
- 
     mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, "Send Packet command, adapter %d bus %d target %d lun %"
              "d pScb %p\n  dir(%d)  Data Buffer %p (%d), cdb %p (%d)\n",
              pSataAdapter->adapterId, pScb->bus, pScb->target,
@@ -3378,7 +3360,6 @@ MV_VOID     mvSataScsiSetDriveReady(MV_SAL_ADAPTER_EXTENSION *pAdapterExt,
     }
 }
 
-
 /* notify the translation layer with Reset and Power on reset*/
 MV_VOID mvSataScsiNotifyUA(MV_SAL_ADAPTER_EXTENSION *pAdapterExt,
                            MV_U8    channelIndex, MV_U8 PMPort)
@@ -3392,4 +3373,3 @@ MV_VOID mvSataScsiNotifyUA(MV_SAL_ADAPTER_EXTENSION *pAdapterExt,
     mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " %d %d %d: Notify SAL with Unit Attention condition.\n",
              pAdapterExt->pSataAdapter->adapterId, channelIndex, PMPort);
 }
-

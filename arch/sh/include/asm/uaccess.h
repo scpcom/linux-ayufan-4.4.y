@@ -254,5 +254,4 @@ int fixup_exception(struct pt_regs *regs);
 unsigned long search_exception_table(unsigned long addr);
 const struct exception_table_entry *search_exception_tables(unsigned long addr);
 
-
 #endif /* __ASM_SH_UACCESS_H */

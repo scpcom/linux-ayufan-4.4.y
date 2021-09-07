@@ -1271,7 +1271,6 @@ static ssize_t write_ports(struct file *file, char *buf, size_t size)
 	return rv;
 }
 
-
 int nfsd_max_blksize;
 
 /**

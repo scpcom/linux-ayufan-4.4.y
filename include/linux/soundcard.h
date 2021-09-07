@@ -24,7 +24,6 @@
  * SUCH DAMAGE.
  */
 
-
 /*
  * OSS interface version. With versions earlier than 3.6 this value is
  * an integer with value less than 361. In versions 3.6 and later
@@ -605,7 +604,6 @@ typedef struct audio_buf_info {
 #	define DSP_CAP_MULTI		0x00004000	/* support multiple open */
 #	define DSP_CAP_BIND		0x00008000	/* channel binding to front/rear/cneter/lfe */
 
-
 #define SNDCTL_DSP_GETTRIGGER		_SIOR ('P',16, int)
 #define SNDCTL_DSP_SETTRIGGER		_SIOW ('P',16, int)
 #	define PCM_ENABLE_INPUT		0x00000001
@@ -799,7 +797,6 @@ typedef struct copr_msg {
 #define SOUND_MIXER_ENHANCE	SOUND_MIXER_NONE
 #define SOUND_MIXER_MUTE	SOUND_MIXER_NONE
 #define SOUND_MIXER_LOUD	SOUND_MIXER_NONE
-
 
 #define SOUND_DEVICE_LABELS	{"Vol  ", "Bass ", "Trebl", "Synth", "Pcm  ", "Spkr ", "Line ", \
 				 "Mic  ", "CD   ", "Mix  ", "Pcm2 ", "Rec  ", "IGain", "OGain", \
@@ -1208,7 +1205,6 @@ void seqbuf_dump(void);	/* This function must be provided by programs */
 
 #define SEQ_BENDER(dev, chn, value) \
 		_CHN_COMMON(dev, MIDI_PITCH_BEND, chn, 0, 0, value)
-
 
 #define SEQ_V2_X_CONTROL(dev, voice, controller, value)	{_SEQ_NEEDBUF(8);\
 					_seqbuf[_seqbufptr] = SEQ_EXTENDED;\

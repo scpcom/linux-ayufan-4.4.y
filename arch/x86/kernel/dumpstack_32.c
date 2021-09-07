@@ -97,7 +97,6 @@ show_stack_log_lvl(struct task_struct *task, struct pt_regs *regs,
 	show_trace_log_lvl(task, regs, sp, bp, log_lvl);
 }
 
-
 void show_registers(struct pt_regs *regs)
 {
 	int i;
@@ -156,4 +155,3 @@ int is_valid_bugaddr(unsigned long ip)
 
 	return ud2 == 0x0b0f;
 }
-

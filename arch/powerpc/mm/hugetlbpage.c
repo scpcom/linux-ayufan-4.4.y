@@ -129,7 +129,6 @@ static int __hugepte_alloc(struct mm_struct *mm, hugepd_t *hpdp,
 	return 0;
 }
 
-
 static pud_t *hpud_offset(pgd_t *pgd, unsigned long addr, struct hstate *hstate)
 {
 	if (huge_page_shift(hstate) < PUD_SHIFT)
@@ -191,7 +190,6 @@ int alloc_bootmem_huge_page(struct hstate *hstate)
 	m->hstate = hstate;
 	return 1;
 }
-
 
 /* Modelled after find_linux_pte() */
 pte_t *huge_pte_offset(struct mm_struct *mm, unsigned long addr)
@@ -501,7 +499,6 @@ follow_huge_pmd(struct mm_struct *mm, unsigned long address,
 	return NULL;
 }
 
-
 unsigned long hugetlb_get_unmapped_area(struct file *file, unsigned long addr,
 					unsigned long len, unsigned long pgoff,
 					unsigned long flags)
@@ -593,7 +590,6 @@ int hash_huge_page(struct mm_struct *mm, unsigned long access,
 	 *	because we are doing software DIRTY bit management and the
 	 *	page is currently not DIRTY. 
 	 */
-
 
 	do {
 		old_pte = pte_val(*ptep);

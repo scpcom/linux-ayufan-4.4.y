@@ -398,4 +398,3 @@ void __init time_init(void)
 #endif
 	system_timer->init();
 }
-

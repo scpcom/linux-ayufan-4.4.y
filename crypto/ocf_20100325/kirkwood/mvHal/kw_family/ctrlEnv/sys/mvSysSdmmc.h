@@ -69,7 +69,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ctrlEnv/mvCtrlEnvLib.h"
 #include "ctrlEnv/sys/mvCpuIf.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -82,12 +81,10 @@ typedef struct _mvSdmmcDecWin
  
 } MV_SDMMC_DEC_WIN;
 
-
 #define MV_SDMMC_MAX_ADDR_DECODE_WIN 4
 
 #define MV_SDMMC_WIN_CTRL_REG(dev, win)        (MV_SDIO_REG_BASE + 0x108 + ((win)<<3))
 #define MV_SDMMC_WIN_BASE_REG(dev, win)        (MV_SDIO_REG_BASE + 0x10c + ((win)<<3))
-
 
 /* BITs in Windows 0-3 Control and Base Registers */
 #define MV_SDMMC_WIN_ENABLE_BIT               0
@@ -111,15 +108,8 @@ MV_STATUS mvSdmmcWinByTargetGet(MV_TARGET target, MV_SDMMC_DEC_WIN *pAddrDecWin)
 MV_STATUS mvSdmmcWinInit(MV_VOID);
 MV_VOID   mvSdmmcAddrDecShow(MV_VOID);
 
-
 #ifdef __cplusplus
 }
 #endif
 
-
 #endif
-
-
-
-
-

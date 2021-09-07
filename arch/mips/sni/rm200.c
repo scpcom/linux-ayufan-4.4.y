@@ -421,7 +421,6 @@ void __init sni_rm200_i8259_irqs(void)
 	setup_irq(RM200_I8259A_IRQ_BASE + PIC_CASCADE_IR, &sni_rm200_irq2);
 }
 
-
 #define SNI_RM200_INT_STAT_REG  CKSEG1ADDR(0xbc000000)
 #define SNI_RM200_INT_ENA_REG   CKSEG1ADDR(0xbc080000)
 

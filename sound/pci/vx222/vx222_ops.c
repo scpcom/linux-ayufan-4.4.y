@@ -31,7 +31,6 @@
 #include <asm/io.h>
 #include "vx222.h"
 
-
 static int vx2_reg_offset[VX_REG_MAX] = {
 	[VX_ICR]    = 0x00,
 	[VX_CVR]    = 0x04,
@@ -146,7 +145,6 @@ static void vx2_outl(struct vx_core *chip, int offset, unsigned int val)
 #undef vx_outl
 #define vx_outl(chip,reg,val)	vx2_outl((struct vx_core*)(chip), VX_##reg, val)
 
-
 /*
  * vx_reset_dsp - reset the DSP
  */
@@ -166,7 +164,6 @@ static void vx2_reset_dsp(struct vx_core *_chip)
 	/* set the reset dsp bit to 1 */
 	vx_outl(chip, CDSP, chip->regCDSP);
 }
-
 
 static int vx2_test_xilinx(struct vx_core *_chip)
 {
@@ -220,7 +217,6 @@ static int vx2_test_xilinx(struct vx_core *_chip)
 	return 0;
 }
 
-
 /**
  * vx_setup_pseudo_dma - set up the pseudo dma read/write mode.
  * @do_write: 0 = read, 1 = set up for DMA write
@@ -246,8 +242,6 @@ static inline void vx2_release_pseudo_dma(struct vx_core *chip)
 	/* HREQ pin disabled. */
 	vx_outl(chip, ICR, 0);
 }
-
-
 
 /* pseudo-dma write */
 static void vx2_dma_write(struct vx_core *chip, struct snd_pcm_runtime *runtime,
@@ -286,7 +280,6 @@ static void vx2_dma_write(struct vx_core *chip, struct snd_pcm_runtime *runtime,
 
 	vx2_release_pseudo_dma(chip);
 }
-
 
 /* pseudo dma read */
 static void vx2_dma_read(struct vx_core *chip, struct snd_pcm_runtime *runtime,
@@ -404,7 +397,6 @@ static int vx2_load_xilinx_binary(struct vx_core *chip, const struct firmware *x
 	return 0;
 }
 
-	
 /*
  * load the boot/dsp images
  */
@@ -431,7 +423,6 @@ static int vx2_load_dsp(struct vx_core *vx, int index, const struct firmware *ds
 		return -EINVAL;
 	}
 }
-
 
 /*
  * vx_test_and_ack - test and acknowledge interrupt
@@ -467,7 +458,6 @@ static int vx2_test_and_ack(struct vx_core *chip)
 	return 0;
 }
 
-
 /*
  * vx_validate_irq - enable/disable IRQ
  */
@@ -488,7 +478,6 @@ static void vx2_validate_irq(struct vx_core *_chip, int enable)
 	vx_outl(chip, CDSP, chip->regCDSP);
 }
 
-
 /*
  * write an AKM codec data (24bit)
  */
@@ -504,7 +493,6 @@ static void vx2_write_codec_reg(struct vx_core *chip, unsigned int data)
 	/* Terminate access to codec registers */
 	vx_inl(chip, RUER);
 }
-
 
 #define AKM_CODEC_POWER_CONTROL_CMD 0xA007
 #define AKM_CODEC_RESET_ON_CMD      0xA100
@@ -700,7 +688,6 @@ static void vx2_write_akm(struct vx_core *chip, int reg, unsigned int data)
 	vx2_write_codec_reg(chip, val);
 }
 
-
 /*
  * write codec bit for old VX222 board
  */
@@ -717,7 +704,6 @@ static void vx2_old_write_codec_bit(struct vx_core *chip, int codec, unsigned in
 	/* Terminate access to codec registers */
 	vx_inl(chip, RUER);
 }
-
 
 /*
  * reset codec bit
@@ -760,7 +746,6 @@ static void vx2_reset_codec(struct vx_core *_chip)
 	}
 }
 
-
 /*
  * change the audio source
  */
@@ -778,7 +763,6 @@ static void vx2_change_audio_source(struct vx_core *_chip, int src)
 	}
 	vx_outl(chip, CFG, chip->regCFG);
 }
-
 
 /*
  * set the clock source
@@ -805,8 +789,6 @@ static void vx2_reset_board(struct vx_core *_chip, int cold_reset)
 	chip->regCDSP = VX_CDSP_CODEC_RESET_MASK | VX_CDSP_DSP_RESET_MASK ;
 	chip->regCFG = 0;
 }
-
-
 
 /*
  * input level controls for VX222 Mic
@@ -849,7 +831,6 @@ static void vx2_set_input_level(struct snd_vx222 *chip)
 
 	vx_inl(chip, RUER); /* Terminate input level programming */
 }
-
 
 #define MIC_LEVEL_MAX	0xff
 
@@ -987,7 +968,6 @@ static int vx2_add_mic_controls(struct vx_core *_chip)
 	return 0;
 }
 
-
 /*
  * callbacks
  */
@@ -1028,4 +1008,3 @@ struct snd_vx_ops vx222_old_ops = {
 	.dma_write = vx2_dma_write,
 	.dma_read = vx2_dma_read,
 };
-

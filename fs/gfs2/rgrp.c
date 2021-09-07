@@ -1686,7 +1686,6 @@ static void gfs2_free_uninit_di(struct gfs2_rgrpd *rgd, u64 blkno)
 	gfs2_trans_add_rg(rgd);
 }
 
-
 void gfs2_free_di(struct gfs2_rgrpd *rgd, struct gfs2_inode *ip)
 {
 	gfs2_free_uninit_di(rgd, ip->i_no_addr);
@@ -1829,4 +1828,3 @@ void gfs2_rlist_free(struct gfs2_rgrp_list *rlist)
 		kfree(rlist->rl_ghs);
 	}
 }
-

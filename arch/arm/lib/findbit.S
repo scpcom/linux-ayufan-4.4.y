@@ -191,4 +191,3 @@ ENDPROC(_find_next_bit_be)
 		mov	r0, r2
 #endif
 		mov	pc, lr
-

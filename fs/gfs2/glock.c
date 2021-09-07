@@ -1341,7 +1341,6 @@ void gfs2_glock_complete(struct gfs2_glock *gl, int ret)
 		gfs2_glock_put(gl);
 }
 
-
 static int gfs2_shrink_glock_memory(int nr, gfp_t gfp_mask)
 {
 	struct gfs2_glock *gl;
@@ -1440,7 +1439,6 @@ out:
 	cond_resched();
 	return has_entries;
 }
-
 
 /**
  * thaw_glock - thaw out a glock which has an unprocessed reply waiting
@@ -1745,10 +1743,8 @@ static int gfs2_dump_lockstate(struct gfs2_sbd *sdp)
 			break;
 	}
 
-
 	return error;
 }
-
 
 int __init gfs2_glock_init(void)
 {

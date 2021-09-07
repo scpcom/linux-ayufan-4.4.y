@@ -59,7 +59,6 @@ StartDecryption(struct boot_data *boot)
 	boot->Cryptor = CRYPT_STARTTERM;
 }				/* StartDecryption */
 
-
 /***************************************************************/
 /* decrypt complete BootBuf                                    */
 /* NOTE: decryption must be applied to all or none boot tags - */
@@ -162,7 +161,6 @@ pof_handle_data(hysdn_card * card, int datlen)
 	return (0);
 }				/* pof_handle_data */
 
-
 /******************************************************************************/
 /* pof_write_buffer is called when the buffer has been filled with the needed */
 /* number of data bytes. The number delivered is additionally supplied for    */
@@ -259,7 +257,6 @@ pof_write_buffer(hysdn_card * card, int datlen)
 
 	return (boot->last_error);
 }				/* pof_write_buffer */
-
 
 /*******************************************************************************/
 /* pof_write_open is called when an open for boot on the cardlog device occurs. */

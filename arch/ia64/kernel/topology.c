@@ -36,7 +36,6 @@ void arch_fix_phys_package_id(int num, u32 slot)
 }
 EXPORT_SYMBOL_GPL(arch_fix_phys_package_id);
 
-
 #ifdef CONFIG_HOTPLUG_CPU
 int __ref arch_register_cpu(int num)
 {
@@ -68,7 +67,6 @@ static int __init arch_register_cpu(int num)
 }
 #endif /*CONFIG_HOTPLUG_CPU*/
 
-
 static int __init topology_init(void)
 {
 	int i, err = 0;
@@ -96,7 +94,6 @@ out:
 }
 
 subsys_initcall(topology_init);
-
 
 /*
  * Export cpu cache information through sysfs
@@ -462,4 +459,3 @@ static int __init cache_sysfs_init(void)
 }
 
 device_initcall(cache_sysfs_init);
-

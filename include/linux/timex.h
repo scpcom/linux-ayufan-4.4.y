@@ -123,7 +123,6 @@ struct timex {
 #define MOD_STATUS	ADJ_STATUS
 #define MOD_TIMECONST	ADJ_TIMECONST
 
-
 /*
  * Status codes (timex.status)
  */

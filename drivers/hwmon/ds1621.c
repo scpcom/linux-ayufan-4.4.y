@@ -222,7 +222,6 @@ static const struct attribute_group ds1621_group = {
 	.attrs = ds1621_attributes,
 };
 
-
 /* Return 0 if detection is successful, -ENODEV otherwise */
 static int ds1621_detect(struct i2c_client *client, int kind,
 			 struct i2c_board_info *info)
@@ -337,7 +336,6 @@ static void __exit ds1621_exit(void)
 {
 	i2c_del_driver(&ds1621_driver);
 }
-
 
 MODULE_AUTHOR("Christian W. Zuckschwerdt <zany@triq.net>");
 MODULE_DESCRIPTION("DS1621 driver");

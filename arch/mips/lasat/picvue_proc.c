@@ -126,7 +126,6 @@ static int pvc_proc_read_scroll(char *page, char **start,
 	return page - origpage;
 }
 
-
 void pvc_proc_timerfunc(unsigned long data)
 {
 	if (scroll_dir < 0)

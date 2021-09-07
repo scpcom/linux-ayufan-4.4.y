@@ -31,7 +31,6 @@
 #include "diva.h"
 #include "diva_pci.h"
 
-
 extern PISDN_ADAPTER IoAdapters[MAX_ADAPTER];
 extern void divas_get_version(char *);
 extern void diva_get_vserial_number(PISDN_ADAPTER IoAdapter, char *buf);
@@ -202,7 +201,6 @@ write_d_l1_down(struct file *file, const char __user *buffer, unsigned long coun
 	}
 	return (-EINVAL);
 }
-
 
 /*
 ** read dynamic_l1_down 

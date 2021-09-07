@@ -218,7 +218,6 @@ _user_exception:
 
 	j	common_exception
 
-
 /*
  * First-level exit handler for kernel exceptions
  * Save special registers and the live window frame.
@@ -700,7 +699,6 @@ ENTRY(debug_exception)
 	/* Debug exception while in exception mode. */
 1:	j	1b	// FIXME!!
 
-
 /*
  * We get here in case of an unrecoverable exception.
  * The only thing we can do is to be nice and print a panic message.
@@ -749,7 +747,6 @@ ENTRY(unrecoverable_exception)
 	callx4	a4
 
 1:	j	1b
-
 
 /* -------------------------- FAST EXCEPTION HANDLERS ----------------------- */
 
@@ -928,7 +925,6 @@ ENTRY(fast_alloca)
 	l32i	a2, a2, PT_AREG2
 	rfe
 
-
 /*
  * fast system calls.
  *
@@ -993,8 +989,6 @@ ENTRY(fast_syscall_unrecoverable)
         wsr     a0, EXCSAVE_1
         movi    a0, unrecoverable_exception
         callx0  a0
-
-
 
 /*
  * sysxtensa syscall handler
@@ -1099,9 +1093,6 @@ CATCH
 	l32i	a0, a2, PT_AREG0	# restore a0
 	movi	a2, -EINVAL
 	rfe
-
-
-
 
 /* fast_syscall_spill_registers.
  *
@@ -1259,7 +1250,6 @@ fast_syscall_spill_registers_fixup_return:
 	xsr	a3, EXCSAVE_1
 
 	rfde
-
 
 /*
  * spill all registers.
@@ -1520,7 +1510,6 @@ ENTRY(fast_second_level_miss)
 	l32i	a0, a1, TASK_MM		# tsk->mm
 	beqz	a0, 9f
 
-
 	/* We deliberately destroy a3 that holds the exception table. */
 
 8:	rsr	a3, EXCVADDR		# fault address
@@ -1663,9 +1652,7 @@ ENTRY(fast_second_level_miss)
 	isync
 	j	4b
 
-
 #endif	// DCACHE_WAY_SIZE > PAGE_SIZE
-
 
 2:	/* Invalid PGD, default exception handling */
 
@@ -1680,7 +1667,6 @@ ENTRY(fast_second_level_miss)
 	bbsi.l	a2, PS_UM_BIT, 1f
 	j	_kernel_exception
 1:	j	_user_exception
-
 
 /*
  * StoreProhibitedException
@@ -1830,7 +1816,6 @@ ENTRY(system_call)
 	callx4	a4
 	retw
 
-
 /*
  * Create a kernel thread
  *
@@ -1942,7 +1927,6 @@ ENTRY(_switch_to)
 
 	retw
 
-
 ENTRY(ret_from_fork)
 
 	/* void schedule_tail (struct task_struct *prev)
@@ -1956,4 +1940,3 @@ ENTRY(ret_from_fork)
 	callx4	a4
 
 	j	common_exception_return
-

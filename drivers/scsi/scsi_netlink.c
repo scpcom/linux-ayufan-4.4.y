@@ -50,7 +50,6 @@ struct scsi_nl_transport {
 static struct scsi_nl_transport transports[SCSI_NL_MAX_TRANSPORTS] =
 	{ {NULL, }, };
 
-
 struct scsi_nl_drvr {
 	struct list_head next;
 	int (*dmsg_handler)(struct Scsi_Host *shost, void *payload,
@@ -62,8 +61,6 @@ struct scsi_nl_drvr {
 	unsigned int refcnt;
 	int flags;
 };
-
-
 
 /**
  * scsi_nl_rcv_msg - Receive message handler.
@@ -148,7 +145,6 @@ next_msg:
 	}
 }
 
-
 /**
  * scsi_nl_rcv_event - Event handler for a netlink socket.
  * @this:		event notifier block
@@ -204,7 +200,6 @@ static struct notifier_block scsi_netlink_notifier = {
 	.notifier_call  = scsi_nl_rcv_event,
 };
 
-
 /*
  * GENERIC SCSI transport receive and event handlers
  */
@@ -255,7 +250,6 @@ scsi_generic_msg_handler(struct sk_buff *skb)
 		driver->refcnt++;
 		spin_unlock_irqrestore(&scsi_nl_lock, flags);
 
-
 		/* if successful, scsi_host_lookup takes a shost reference */
 		shost = scsi_host_lookup(msg->host_no);
 		if (!shost) {
@@ -296,7 +290,6 @@ rcv_exit:
 			 __func__, snlh->msgtype, err);
 	return err;
 }
-
 
 /**
  * scsi_nl_add_transport -
@@ -343,7 +336,6 @@ register_out:
 }
 EXPORT_SYMBOL_GPL(scsi_nl_add_transport);
 
-
 /**
  * scsi_nl_remove_transport -
  *    Disable transport receiption of messages and events
@@ -381,7 +373,6 @@ scsi_nl_remove_transport(u8 tport)
 	return;
 }
 EXPORT_SYMBOL_GPL(scsi_nl_remove_transport);
-
 
 /**
  * scsi_nl_add_driver -
@@ -431,7 +422,6 @@ scsi_nl_add_driver(u64 vendor_id, struct scsi_host_template *hostt,
 }
 EXPORT_SYMBOL_GPL(scsi_nl_add_driver);
 
-
 /**
  * scsi_nl_remove_driver -
  *    An driver is unregistering with the SCSI netlink messages
@@ -474,7 +464,6 @@ scsi_nl_remove_driver(u64 vendor_id)
 }
 EXPORT_SYMBOL_GPL(scsi_nl_remove_driver);
 
-
 /**
  * scsi_netlink_init - Called by SCSI subsystem to intialize
  * 	the SCSI transport netlink interface
@@ -513,7 +502,6 @@ scsi_netlink_init(void)
 	return;
 }
 
-
 /**
  * scsi_netlink_exit - Called by SCSI subsystem to disable the SCSI transport netlink interface
  *
@@ -530,7 +518,6 @@ scsi_netlink_exit(void)
 
 	return;
 }
-
 
 /*
  * Exported Interfaces
@@ -600,7 +587,6 @@ msg_fail:
 	return;
 }
 EXPORT_SYMBOL_GPL(scsi_nl_send_transport_msg);
-
 
 /**
  * scsi_nl_send_vendor_msg - called to send a shost vendor unique message
@@ -674,5 +660,3 @@ send_vendor_fail:
 	return err;
 }
 EXPORT_SYMBOL(scsi_nl_send_vendor_msg);
-
-

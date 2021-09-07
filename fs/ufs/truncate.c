@@ -63,7 +63,6 @@
 #define DIRECT_BLOCK ((inode->i_size + uspi->s_bsize - 1) >> uspi->s_bshift)
 #define DIRECT_FRAGMENT ((inode->i_size + uspi->s_fsize - 1) >> uspi->s_fshift)
 
-
 static int ufs_trunc_direct(struct inode *inode)
 {
 	struct ufs_inode_info *ufsi = UFS_I(inode);
@@ -167,7 +166,6 @@ next1:
 	UFSD("EXIT: ino %lu\n", inode->i_ino);
 	return retry;
 }
-
 
 static int ufs_trunc_indirect(struct inode *inode, u64 offset, void *p)
 {
@@ -408,7 +406,6 @@ static int ufs_alloc_lastblock(struct inode *inode)
        for (i = 0; i < end; ++i)
                bh = bh->b_this_page;
 
-
        err = ufs_getfrag_block(inode, lastfrag, bh, 1);
 
        if (unlikely(err))
@@ -499,7 +496,6 @@ out:
 	UFSD("EXIT: err %d\n", err);
 	return err;
 }
-
 
 /*
  * We don't define our `inode->i_op->truncate', and call it here,

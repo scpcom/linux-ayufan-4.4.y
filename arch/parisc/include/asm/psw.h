@@ -1,6 +1,5 @@
 #ifndef _PARISC_PSW_H
 
-
 #define	PSW_I	0x00000001
 #define	PSW_D	0x00000002
 #define	PSW_P	0x00000004

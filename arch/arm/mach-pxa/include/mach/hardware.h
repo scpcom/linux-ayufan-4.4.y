@@ -265,7 +265,6 @@
 		__cpu_is_pxa950(id);			\
 	 })
 
-
 /*
  * CPUID Core Generation Bit
  * <= 0x2 for pxa21x/pxa25x/pxa26x/pxa27x
@@ -318,6 +317,5 @@ extern unsigned long get_clock_tick_rate(void);
 #define pcibios_assign_all_busses()	1
 #define HAVE_ARCH_PCI_SET_DMA_MASK	1
 #endif
-
 
 #endif  /* _ASM_ARCH_HARDWARE_H */

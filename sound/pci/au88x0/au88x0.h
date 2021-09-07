@@ -91,7 +91,6 @@
 	(x->rev == 0xfe && x->device == PCI_DEVICE_ID_AUREAL_VORTEX_2) || \
 	(x->rev == 0xfe && x->device == PCI_DEVICE_ID_AUREAL_ADVANTAGE))
 
-
 /* PCM devices */
 #define VORTEX_PCM_ADB		0
 #define VORTEX_PCM_SPDIF	1

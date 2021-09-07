@@ -1362,7 +1362,6 @@ static int wm8993_set_tdm_slot(struct snd_soc_dai *dai, unsigned int tx_mask,
 		return -EINVAL;
 	}
 
-
 	switch (tx_mask) {
 	case 3:
 		break;
@@ -1650,7 +1649,6 @@ static struct i2c_driver wm8993_i2c_driver = {
 	.id_table = wm8993_i2c_id,
 };
 
-
 static int __init wm8993_modinit(void)
 {
 	int ret;
@@ -1668,7 +1666,6 @@ static void __exit wm8993_exit(void)
 	i2c_del_driver(&wm8993_i2c_driver);
 }
 module_exit(wm8993_exit);
-
 
 MODULE_DESCRIPTION("ASoC WM8993 driver");
 MODULE_AUTHOR("Mark Brown <broonie@opensource.wolfsonmicro.com>");

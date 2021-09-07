@@ -367,7 +367,6 @@
 #define AC97_WM9704_RPCM_VOL    0x70
 #define AC97_WM9711_OUT3VOL     0x16
 
-
 /* ac97->scaps */
 #define AC97_SCAP_AUDIO		(1<<0)	/* audio codec 97 */
 #define AC97_SCAP_MODEM		(1<<1)	/* modem codec 97 */

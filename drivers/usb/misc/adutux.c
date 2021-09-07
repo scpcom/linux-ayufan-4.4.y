@@ -42,7 +42,6 @@ do { 									\
 		printk(KERN_DEBUG __FILE__ " : " format " \n", ## arg);	\
 } while (0)
 
-
 /* Version Information */
 #define DRIVER_VERSION "v0.0.13"
 #define DRIVER_AUTHOR "John Homppi"

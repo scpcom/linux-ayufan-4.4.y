@@ -451,7 +451,6 @@ MUX_CFG_34XX("AD2_3430_USB3FS_PHY_MM3_TXDAT", 0x188,
 MUX_CFG_34XX("AC1_3430_USB3FS_PHY_MM3_TXEN_N", 0x18a,
 		OMAP34XX_MUX_MODE6 | OMAP34XX_PIN_OUTPUT)
 
-
 /* 34XX GPIO - bidirectional, unless the name has an "_OUT" suffix.
  * (Always specify PIN_INPUT, except for names suffixed by "_OUT".)
  * No internal pullup/pulldown without "_UP" or "_DOWN" suffix.

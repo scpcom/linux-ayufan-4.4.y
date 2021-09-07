@@ -139,8 +139,6 @@ static void sep_load_rom_code(struct sep_device *sep)
 static void sep_load_rom_code(struct sep_device *sep) { }
 #endif				/* SEP_DRIVER_ARM_DEBUG_MODE */
 
-
-
 /*----------------------------------------
 	DEFINES
 -----------------------------------------*/
@@ -166,7 +164,6 @@ static struct sep_device *sep_dev = &sep_instance;
   mutex for the access to the internals of the sep driver
 */
 static DEFINE_MUTEX(sep_mutex);
-
 
 /* wait queue head (event) of the driver */
 static DECLARE_WAIT_QUEUE_HEAD(sep_event);
@@ -290,7 +287,6 @@ static void *sep_shared_bus_to_virt(struct sep_device *sep,
 	return sep->shared_addr + (bus_address - sep->shared_bus);
 }
 
-
 /**
  *	sep_try_open		-	attempt to open a SEP device
  *	@sep: device to attempt to open
@@ -337,7 +333,6 @@ static int sep_open(struct inode *inode, struct file *filp)
 	sep_dev->data_pool_bytes_allocated = 0;
 	return 0;
 }
-
 
 /**
  *	sep_release		-	close a SEP device
@@ -404,7 +399,6 @@ static int sep_mmap(struct file *filp, struct vm_area_struct *vma)
 	return 0;
 }
 
-
 /*-----------------------------------------------
   poll function
 *----------------------------------------------*/
@@ -416,7 +410,6 @@ static unsigned int sep_poll(struct file *filp, poll_table * wait)
 	struct sep_device *sep = filp->private_data;
 
 	dbg("---------->SEP Driver poll: start\n");
-
 
 #if SEP_DRIVER_POLLING_MODE
 
@@ -485,7 +478,6 @@ static unsigned long sep_set_time(struct sep_device *sep)
 {
 	struct timeval time;
 	u32 *time_addr;	/* address of time as seen by the kernel */
-
 
 	dbg("sep:sep_set_time start\n");
 
@@ -648,7 +640,6 @@ static int sep_write_into_data_pool_handler(struct sep_device *sep, unsigned lon
 
 	/* calculate the start of the data pool */
 	data_pool_area_addr = sep->shared_addr + SEP_DRIVER_DATA_POOL_AREA_OFFSET_IN_BYTES;
-
 
 	/* check that the range of the virtual kernel address is correct */
 	if (virt_address < data_pool_area_addr || virt_address > (data_pool_area_addr + SEP_DRIVER_DATA_POOL_SHARED_AREA_SIZE_IN_BYTES)) {
@@ -962,7 +953,6 @@ end_function:
 	return 0;
 }
 
-
 /*
   this function calculates the size of data that can be inserted into the lli
   table from this array the condition is that either the table is full
@@ -1079,7 +1069,6 @@ static void sep_debug_print_lli_tables(struct sep_device *sep, struct sep_lli_en
 		edbg("SEP Driver:phys lli_table_ptr->block_size is %lu\n", lli_table_ptr->block_size);
 		edbg("SEP Driver:phys lli_table_ptr->physical_address is %08lx\n", lli_table_ptr->physical_address);
 
-
 		table_data_size = lli_table_ptr->block_size & 0xffffff;
 		num_table_entries = (lli_table_ptr->block_size >> 24) & 0xff;
 		lli_table_ptr = (struct sep_lli_entry_t *)
@@ -1094,7 +1083,6 @@ static void sep_debug_print_lli_tables(struct sep_device *sep, struct sep_lli_en
 	}
 	dbg("SEP Driver:<-------- sep_debug_print_lli_tables end\n");
 }
-
 
 /*
   This function prepares only input DMA table for synhronic symmetric
@@ -1348,7 +1336,6 @@ static int sep_construct_dma_tables_from_lli(struct sep_device *sep,
 	return 0;
 }
 
-
 /*
   This function builds input and output DMA tables for synhronic
   symmetric operations (AES, DES). It also checks that each table
@@ -1406,7 +1393,6 @@ static int sep_prepare_input_output_dma_table(struct sep_device *sep,
 	edbg("sep->in_num_pages is %lu\n", sep->in_num_pages);
 	edbg("sep->out_num_pages is %lu\n", sep->out_num_pages);
 	edbg("SEP_DRIVER_ENTRIES_PER_TABLE_IN_SEP is %x\n", SEP_DRIVER_ENTRIES_PER_TABLE_IN_SEP);
-
 
 	/* call the fucntion that creates table from the lli arrays */
 	result = sep_construct_dma_tables_from_lli(sep, lli_in_array, sep->in_num_pages, lli_out_array, sep->out_num_pages, block_size, lli_table_in_ptr, lli_table_out_ptr, in_num_entries_ptr, out_num_entries_ptr, table_data_size_ptr);
@@ -1625,8 +1611,6 @@ end_function:
 	return error;
 }
 
-
-
 /*
   This function creates a list of tables for flow and returns the data for
 	the first and last tables of the list
@@ -1762,7 +1746,6 @@ static struct sep_flow_context_t *sep_find_flow_context(struct sep_device *sep,
 	}
 	return NULL;
 }
-
 
 /*
   this function handles the request to create the DMA tables for flow
@@ -1969,7 +1952,6 @@ end_function:
 	return error;
 }
 
-
 /*
   this function returns the bus and virtual addresses of the static pool
 */
@@ -2023,7 +2005,6 @@ end_function:
 	dbg("SEP Driver:<-------- sep_get_physical_mapped_offset_handler end\n");
 	return error;
 }
-
 
 /*
   ?
@@ -2203,7 +2184,6 @@ static int sep_end_transaction_handler(struct sep_device *sep, unsigned long arg
 	return 0;
 }
 
-
 /**
  *	sep_set_flow_id_handler	-	handle flow setting
  *	@sep: the SEP we are configuring
@@ -2317,8 +2297,6 @@ static int sep_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, u
 	return error;
 }
 
-
-
 #if !SEP_DRIVER_POLLING_MODE
 
 /* handler for flow done interrupt */
@@ -2401,8 +2379,6 @@ end_function:
 }
 
 #endif
-
-
 
 #if 0
 
@@ -2544,7 +2520,6 @@ static int __devinit sep_probe(struct pci_dev *pdev, const struct pci_device_id 
 		goto end_function_uniomap;
 	}
 
-
 	edbg("SEP Driver:rar_bus is %08llx\n", (unsigned long long)sep->rar_bus);
 	edbg("SEP Driver:rar_virtual is %p\n", sep->rar_addr);
 
@@ -2612,7 +2587,6 @@ static struct file_operations sep_file_operations = {
 	.mmap = sep_mmap,
 };
 
-
 /* cdev struct of the driver */
 static struct cdev sep_cdev;
 
@@ -2640,7 +2614,6 @@ static int sep_register_driver_to_fs(void)
 	}
 	return ret_val;
 }
-
 
 /*--------------------------------------------------------------
   init function
@@ -2672,7 +2645,6 @@ end_function:
 	return ret_val;
 }
 
-
 /*-------------------------------------------------------------
   exit function
 --------------------------------------------------------------*/
@@ -2700,7 +2672,6 @@ static void __exit sep_exit(void)
 	edbg("SEP Driver: release_mem_region \n");
 	dbg("SEP Driver:<-------- Exit end\n");
 }
-
 
 module_init(sep_init);
 module_exit(sep_exit);

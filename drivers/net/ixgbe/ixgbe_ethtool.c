@@ -37,7 +37,6 @@
 
 #include "ixgbe.h"
 
-
 #define IXGBE_ALL_RAR_ENTRIES 16
 
 struct ixgbe_stats {

@@ -56,7 +56,6 @@
 #include "xenbus_comms.h"
 #include "xenbus_probe.h"
 
-
 int xen_store_evtchn;
 EXPORT_SYMBOL(xen_store_evtchn);
 
@@ -123,13 +122,11 @@ static int frontend_bus_id(char bus_id[XEN_BUS_ID_SIZE], const char *nodename)
 	return 0;
 }
 
-
 static void free_otherend_details(struct xenbus_device *dev)
 {
 	kfree(dev->otherend);
 	dev->otherend = NULL;
 }
-
 
 static void free_otherend_watch(struct xenbus_device *dev)
 {
@@ -139,7 +136,6 @@ static void free_otherend_watch(struct xenbus_device *dev)
 		dev->otherend_watch.node = NULL;
 	}
 }
-
 
 int read_otherend_details(struct xenbus_device *xendev,
 				 char *id_node, char *path_node)
@@ -166,7 +162,6 @@ int read_otherend_details(struct xenbus_device *xendev,
 
 	return 0;
 }
-
 
 static int read_backend_details(struct xenbus_device *xendev)
 {
@@ -239,7 +234,6 @@ static void otherend_changed(struct xenbus_watch *watch,
 		drv->otherend_changed(dev, state);
 }
 
-
 static int talk_to_otherend(struct xenbus_device *dev)
 {
 	struct xenbus_driver *drv = to_xenbus_driver(dev->dev.driver);
@@ -250,13 +244,11 @@ static int talk_to_otherend(struct xenbus_device *dev)
 	return drv->read_otherend_details(dev);
 }
 
-
 static int watch_otherend(struct xenbus_device *dev)
 {
 	return xenbus_watch_pathfmt(dev, &dev->otherend_watch, otherend_changed,
 				    "%s/%s", dev->otherend, "state");
 }
-
 
 int xenbus_dev_probe(struct device *_dev)
 {
@@ -743,7 +735,6 @@ static int xenbus_dev_resume(struct device *dev)
 
 /* A flag to determine if xenstored is 'ready' (i.e. has started) */
 int xenstored_ready = 0;
-
 
 int register_xenstore_notifier(struct notifier_block *nb)
 {

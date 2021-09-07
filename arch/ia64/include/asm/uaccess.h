@@ -296,7 +296,6 @@ extern unsigned long __do_clear_user (void __user *, unsigned long);
 	__cu_len;						\
 })
 
-
 /*
  * Returns: -EFAULT if exception before terminator, N if the entire buffer filled, else
  * strlen.

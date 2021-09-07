@@ -62,7 +62,6 @@ typedef signed int			INT;
 typedef signed long			LONG;
 typedef signed long long	LONGLONG;
 
-
 typedef unsigned char		UCHAR;
 typedef unsigned short		USHORT;
 typedef unsigned int		UINT;
@@ -91,4 +90,3 @@ typedef union _LARGE_INTEGER {
 } LARGE_INTEGER;
 
 #endif  // __RTMP_TYPE_H__
-

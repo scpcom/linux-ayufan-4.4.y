@@ -13,7 +13,6 @@
 
 #include <linux/device.h>
 
-
     /*
      *  Each Zorro board has a 32-bit ID of the form
      *
@@ -27,7 +26,6 @@
      *				for some GVP boards)
      */
 
-
 #define ZORRO_MANUF(id)		((id) >> 16)
 #define ZORRO_PROD(id)		(((id) >> 8) & 0xff)
 #define ZORRO_EPC(id)		((id) & 0xff)
@@ -37,12 +35,10 @@
 
 typedef __u32 zorro_id;
 
-
 #define ZORRO_WILDCARD		(0xffffffff)	/* not official */
 
 /* Include the ID list */
 #include <linux/zorro_ids.h>
-
 
     /*
      *  GVP identifies most of its products through the 'extended product code'
@@ -62,7 +58,6 @@ enum GVP_flags {
     GVP_NOBANK		= 0x20,
     GVP_14MHZ		= 0x40,
 };
-
 
 struct Node {
     struct  Node *ln_Succ;	/* Pointer to next (successor) */
@@ -119,7 +114,6 @@ struct ConfigDev {
 
 #include <asm/zorro.h>
 
-
     /*
      *  Zorro devices
      */
@@ -137,7 +131,6 @@ struct zorro_dev {
 
 #define	to_zorro_dev(n)	container_of(n, struct zorro_dev, dev)
 
-
     /*
      *  Zorro bus
      */
@@ -153,7 +146,6 @@ struct zorro_bus {
 extern struct zorro_bus zorro_bus;	/* single Zorro bus */
 extern struct bus_type zorro_bus_type;
 
-
     /*
      *  Zorro device IDs
      */
@@ -162,7 +154,6 @@ struct zorro_device_id {
 	zorro_id id;			/* Device ID or ZORRO_WILDCARD */
 	unsigned long driver_data;	/* Data private to the driver */
 };
-
 
     /*
      *  Zorro device drivers
@@ -179,10 +170,8 @@ struct zorro_driver {
 
 #define	to_zorro_driver(drv)	container_of(drv, struct zorro_driver, driver)
 
-
 #define zorro_for_each_dev(dev)	\
 	for (dev = &zorro_autocon[0]; dev < zorro_autocon+zorro_num_autocon; dev++)
-
 
 /* New-style probing */
 extern int zorro_register_driver(struct zorro_driver *);
@@ -193,10 +182,8 @@ static inline struct zorro_driver *zorro_dev_driver(const struct zorro_dev *z)
     return z->driver;
 }
 
-
 extern unsigned int zorro_num_autocon;	/* # of autoconfig devices found */
 extern struct zorro_dev zorro_autocon[ZORRO_NUM_AUTO];
-
 
     /*
      *  Zorro Functions
@@ -229,7 +216,6 @@ static inline void zorro_set_drvdata (struct zorro_dev *z, void *data)
 	dev_set_drvdata(&z->dev, data);
 }
 
-
     /*
      *  Bitmask indicating portions of available Zorro II RAM that are unused
      *  by the system. Every bit represents a 64K chunk, for a maximum of 8MB
@@ -247,7 +233,6 @@ extern DECLARE_BITMAP(zorro_unused_z2ram, 128);
 #define Z2RAM_CHUNKSIZE		(0x00010000)
 #define Z2RAM_CHUNKMASK		(0x0000ffff)
 #define Z2RAM_CHUNKSHIFT	(16)
-
 
 #endif /* __KERNEL__ */
 

@@ -34,9 +34,6 @@
 #define REG_CALIB_READ2             0x106C
 #define REG_A_FREQ_EST              0x1070
 
-
-
-
 //  20031101 Turbo add
 #define MASK_AMER_OFF_REG          BIT(31)
 

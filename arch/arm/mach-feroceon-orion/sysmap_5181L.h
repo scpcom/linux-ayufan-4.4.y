@@ -30,7 +30,6 @@
 #define PCI0_IO_BASE    0xf2100000
 #define PCI0_IO_SIZE    _1M
 
-
 /* Device: CS0 - SRAM, CS1 - RTC, CS2 - UART, CS3 - large flash */
 #define DEVICE_CS0_BASE 0xfa000000
 #define DEVICE_CS0_SIZE _2M
@@ -92,7 +91,6 @@ struct map_desc MEM_TABLE[] = 	{
   { CRYPT_ENG_BASE, __phys_to_pfn(CRYPT_ENG_BASE), CRYPT_ENG_SIZE, MT_DEVICE}	
 };
 
-
 MV_CPU_DEC_WIN SYSMAP_DB_88F5181L_DDR2_2XTDM[] = {
         /* base low        base high    size       	WinNum     enable */
 	{{SDRAM_CS0_BASE ,    0, SDRAM_CS0_SIZE } ,			0xFFFFFFFF,DIS},
@@ -120,7 +118,6 @@ MV_CPU_DEC_WIN SYSMAP_DB_88F5181L_DDR2_2XTDM[] = {
 #endif
    	{{TBL_TERM,TBL_TERM, TBL_TERM} ,TBL_TERM  ,TBL_TERM}		
 };
-
 
 MV_CPU_DEC_WIN SYSMAP_RD2_5181L_FE_GE[] = {
    	/* base low        base high    size       	WinNum     enable */
@@ -159,5 +156,3 @@ MV_CPU_DEC_WIN SYSMAP_RD2_5181L_FXO[] = {
 	{{CRYPT_ENG_BASE,     0, CRYPT_ENG_SIZE} ,			0x7  	  ,EN},
    	{{TBL_TERM,TBL_TERM, TBL_TERM} ,TBL_TERM  ,TBL_TERM}		
 };
-
-

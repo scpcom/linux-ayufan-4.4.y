@@ -77,7 +77,6 @@ static u32 bytemask[] = {
 	/*4*/	0xffffffff,
 };
 
-
 int ixp2000_pci_read_config(struct pci_bus *bus, unsigned int devfn, int where,
 				int size, u32 *value)
 {
@@ -125,7 +124,6 @@ int ixp2000_pci_write_config(struct pci_bus *bus, unsigned int devfn, int where,
 	return PCIBIOS_SUCCESSFUL;
 }
 
-
 static struct pci_ops ixp2000_pci_ops = {
 	.read	= ixp2000_pci_read_config,
 	.write	= ixp2000_pci_write_config
@@ -135,7 +133,6 @@ struct pci_bus *ixp2000_pci_scan_bus(int nr, struct pci_sys_data *sysdata)
 {
 	return pci_scan_bus(sysdata->busnr, &ixp2000_pci_ops, sysdata);
 }
-
 
 int ixp2000_pci_abort_handler(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 {
@@ -214,7 +211,6 @@ ixp2000_pci_preinit(void)
 				"PCI config cycle to non-existent device");
 }
 
-
 /*
  * IXP2000 systems often have large resource requirements, so we just
  * use our own resource space.
@@ -244,4 +240,3 @@ int ixp2000_pci_setup(int nr, struct pci_sys_data *sys)
 
 	return 1;
 }
-

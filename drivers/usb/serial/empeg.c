@@ -171,7 +171,6 @@ static int empeg_open(struct tty_struct *tty,struct usb_serial_port *port)
 	return result;
 }
 
-
 static void empeg_close(struct usb_serial_port *port)
 {
 	dbg("%s - port %d", __func__, port->number);
@@ -181,7 +180,6 @@ static void empeg_close(struct usb_serial_port *port)
 	/* Uncomment the following line if you want to see some statistics in your syslog */
 	/* dev_info (&port->dev, "Bytes In = %d  Bytes Out = %d\n", bytes_in, bytes_out); */
 }
-
 
 static int empeg_write(struct tty_struct *tty, struct usb_serial_port *port,
 					const unsigned char *buf, int count)
@@ -262,7 +260,6 @@ exit:
 	return bytes_sent;
 }
 
-
 static int empeg_write_room(struct tty_struct *tty)
 {
 	struct usb_serial_port *port = tty->driver_data;
@@ -283,7 +280,6 @@ static int empeg_write_room(struct tty_struct *tty)
 	return room;
 
 }
-
 
 static int empeg_chars_in_buffer(struct tty_struct *tty)
 {
@@ -307,7 +303,6 @@ static int empeg_chars_in_buffer(struct tty_struct *tty)
 	return chars;
 }
 
-
 static void empeg_write_bulk_callback(struct urb *urb)
 {
 	struct usb_serial_port *port = urb->context;
@@ -323,7 +318,6 @@ static void empeg_write_bulk_callback(struct urb *urb)
 
 	usb_serial_port_softint(port);
 }
-
 
 static void empeg_read_bulk_callback(struct urb *urb)
 {
@@ -374,14 +368,12 @@ static void empeg_read_bulk_callback(struct urb *urb)
 
 }
 
-
 static void empeg_throttle(struct tty_struct *tty)
 {
 	struct usb_serial_port *port = tty->driver_data;
 	dbg("%s - port %d", __func__, port->number);
 	usb_kill_urb(port->read_urb);
 }
-
 
 static void empeg_unthrottle(struct tty_struct *tty)
 {
@@ -396,7 +388,6 @@ static void empeg_unthrottle(struct tty_struct *tty)
 			"%s - failed submitting read urb, error %d\n",
 							__func__, result);
 }
-
 
 static int  empeg_startup(struct usb_serial *serial)
 {
@@ -416,7 +407,6 @@ static int  empeg_startup(struct usb_serial *serial)
 	return r;
 
 }
-
 
 static void empeg_init_termios(struct tty_struct *tty)
 {
@@ -461,7 +451,6 @@ static void empeg_init_termios(struct tty_struct *tty)
 
 	tty_encode_baud_rate(tty, 115200, 115200);
 }
-
 
 static int __init empeg_init(void)
 {
@@ -510,7 +499,6 @@ failed_usb_serial_register:
 	return retval;
 }
 
-
 static void __exit empeg_exit(void)
 {
 	int i;
@@ -534,7 +522,6 @@ static void __exit empeg_exit(void)
 	}
 	spin_unlock_irqrestore(&write_urb_pool_lock, flags);
 }
-
 
 module_init(empeg_init);
 module_exit(empeg_exit);

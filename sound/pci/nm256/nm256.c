@@ -89,8 +89,6 @@ MODULE_PARM_DESC(reset_workaround_2, "Enable extended AC97 RESET workaround for 
 static int enable;
 module_param(enable, bool, 0444);
 
-
-
 /*
  * hw definitions
  */
@@ -252,12 +250,10 @@ struct nm256 {
 
 };
 
-
 /*
  * include coefficient table
  */
 #include "nm256_coef.c"
-
 
 /*
  * PCI ids
@@ -270,7 +266,6 @@ static struct pci_device_id snd_nm256_ids[] = {
 };
 
 MODULE_DEVICE_TABLE(pci, snd_nm256_ids);
-
 
 /*
  * lowlvel stuffs
@@ -393,7 +388,6 @@ snd_nm256_load_coefficient(struct nm256 *chip, int stream, int number)
 		snd_nm256_writel(chip, addr + 4, base + end_offset);
 	}
 }
-
 
 /* The actual rates supported by the card. */
 static unsigned int samplerates[8] = {
@@ -627,7 +621,6 @@ snd_nm256_capture_trigger(struct snd_pcm_substream *substream, int cmd)
 	return err;
 }
 
-
 /*
  * prepare playback/capture channel
  */
@@ -651,7 +644,6 @@ static int snd_nm256_pcm_prepare(struct snd_pcm_substream *substream)
 
 	return 0;
 }
-
 
 /*
  * get the current pointer
@@ -741,7 +733,6 @@ snd_nm256_capture_copy(struct snd_pcm_substream *substream,
 
 #endif /* !__i386__ */
 
-
 /*
  * update playback/capture watermarks
  */
@@ -817,7 +808,6 @@ static struct snd_pcm_hardware snd_nm256_capture =
 	.period_bytes_max =	128 * 1024,
 };
 
-
 /* set dma transfer size */
 static int snd_nm256_pcm_hw_params(struct snd_pcm_substream *substream,
 				   struct snd_pcm_hw_params *hw_params)
@@ -885,7 +875,6 @@ snd_nm256_playback_close(struct snd_pcm_substream *substream)
 	snd_nm256_release_irq(chip);
 	return 0;
 }
-
 
 static int
 snd_nm256_capture_close(struct snd_pcm_substream *substream)
@@ -955,7 +944,6 @@ snd_nm256_pcm(struct nm256 *chip, int device)
 	return 0;
 }
 
-
 /* 
  * Initialize the hardware. 
  */
@@ -969,7 +957,6 @@ snd_nm256_init_chip(struct nm256 *chip)
 	//snd_nm256_playback_stop(chip);
 	//snd_nm256_capture_stop(chip);
 }
-
 
 static irqreturn_t
 snd_nm256_intr_check(struct nm256 *chip)
@@ -1629,7 +1616,6 @@ __error:
 	return err;
 }
 
-
 enum { NM_BLACKLISTED, NM_RESET_WORKAROUND, NM_RESET_WORKAROUND_2 };
 
 static struct snd_pci_quirk nm256_quirks[] __devinitdata = {
@@ -1641,7 +1627,6 @@ static struct snd_pci_quirk nm256_quirks[] __devinitdata = {
 	SND_PCI_QUIRK(0x1028, 0x0091, "Dell Latitude CSx", NM_RESET_WORKAROUND_2),
 	{ } /* terminator */
 };
-
 
 static int __devinit snd_nm256_probe(struct pci_dev *pci,
 				     const struct pci_device_id *pci_id)
@@ -1741,7 +1726,6 @@ static void __devexit snd_nm256_remove(struct pci_dev *pci)
 	pci_set_drvdata(pci, NULL);
 }
 
-
 static struct pci_driver driver = {
 	.name = "NeoMagic 256",
 	.id_table = snd_nm256_ids,
@@ -1752,7 +1736,6 @@ static struct pci_driver driver = {
 	.resume = nm256_resume,
 #endif
 };
-
 
 static int __init alsa_card_nm256_init(void)
 {

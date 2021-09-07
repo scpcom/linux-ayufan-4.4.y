@@ -199,7 +199,6 @@ MODULE_PARM_DESC(enable, "Enable RME Digi96 soundcard.");
 #define RME96_AD1852_VOL_BITS 14
 #define RME96_AD1855_VOL_BITS 10
 
-
 struct rme96 {
 	spinlock_t    lock;
 	int irq;
@@ -2192,7 +2191,6 @@ snd_rme96_dac_volume_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_valu
 	struct rme96 *rme96 = snd_kcontrol_chip(kcontrol);
         int change = 0;
 	unsigned int vol, maxvol;
-
 
 	if (!RME96_HAS_ANALOG_OUT(rme96))
 		return -EINVAL;

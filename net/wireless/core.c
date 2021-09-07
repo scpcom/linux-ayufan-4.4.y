@@ -197,7 +197,6 @@ int cfg80211_dev_rename(struct cfg80211_registered_device *rdev,
 			return -EINVAL;
 	}
 
-
 	/* Ignore nop renames */
 	if (strcmp(newname, dev_name(&rdev->wiphy.dev)) == 0)
 		return 0;

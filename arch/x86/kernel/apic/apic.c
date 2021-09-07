@@ -991,7 +991,6 @@ void lapic_shutdown(void)
 #endif
 		disable_local_APIC();
 
-
 	local_irq_restore(flags);
 }
 
@@ -1165,7 +1164,6 @@ static void __cpuinit lapic_setup_esr(void)
 			"vector: 0x%08x  after: 0x%08x\n",
 			oldvalue, value);
 }
-
 
 /**
  * setup_local_APIC - setup the local APIC

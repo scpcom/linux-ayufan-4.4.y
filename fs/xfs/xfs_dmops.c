@@ -26,7 +26,6 @@
 #include "xfs_ag.h"
 #include "xfs_mount.h"
 
-
 static struct xfs_dmops xfs_dmcore_stub = {
 	.xfs_send_data		= (xfs_send_data_t)fs_nosys,
 	.xfs_send_mmap		= (xfs_send_mmap_t)fs_noerr,

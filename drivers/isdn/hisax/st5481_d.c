@@ -207,8 +207,6 @@ static void l1m_debug(struct FsmInst *fi, char *fmt, ...)
               WAIT_FOR_RESET_IDLE   <- D_UNDERRUN        <- (8ms)                        
               IDLE                  <> Reset pipe
 
-              
-
   Transmit long frame (>= 16 bytes of encoded data):
 
   L1 FRAME    D_OUT_STATE           USB                  D CHANNEL

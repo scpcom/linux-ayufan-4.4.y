@@ -26,11 +26,9 @@
 #include "usbdefs.h"
 #include "variax.h"
 
-
 #define DRIVER_AUTHOR  "Markus Grabner <grabner@icg.tugraz.at>"
 #define DRIVER_DESC    "Line6 USB Driver"
 #define DRIVER_VERSION "0.8.0"
-
 
 /* table of devices that work with this driver */
 static struct usb_device_id line6_id_table[] = {
@@ -69,7 +67,6 @@ static struct line6_properties line6_properties_table[] = {
 	{ "Variax Workbench", LINE6_BIT_VARIAX,        LINE6_BIT_CONTROL     }
 };
 
-
 /*
 	This is Line6's MIDI manufacturer ID.
 */
@@ -77,7 +74,6 @@ const unsigned char line6_midi_id[] = { 0x00, 0x01, 0x0c };
 
 struct usb_line6 *line6_devices[LINE6_MAX_DEVICES];
 struct workqueue_struct *line6_workqueue;
-
 
 /**
 	 Class for asynchronous messages.
@@ -89,14 +85,12 @@ struct message {
 	int done;
 };
 
-
 /*
 	Forward declarations.
 */
 static void line6_data_received(struct urb *urb);
 static int line6_send_raw_message_async_part(struct message *msg,
 					     struct urb *urb);
-
 
 /*
 	Start to listen on endpoint.

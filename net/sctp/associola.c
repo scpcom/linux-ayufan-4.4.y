@@ -63,7 +63,6 @@
 static void sctp_assoc_bh_rcv(struct work_struct *work);
 static void sctp_assoc_free_asconf_acks(struct sctp_association *asoc);
 
-
 /* 1st Level Abstractions. */
 
 /* Initialize a new association from provided memory. */

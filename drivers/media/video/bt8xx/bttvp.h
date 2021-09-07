@@ -43,7 +43,6 @@
 #include <media/tveeprom.h>
 #include <media/ir-common.h>
 
-
 #include "bt848.h"
 #include "bttv.h"
 #include "btcx-risc.h"
@@ -248,7 +247,6 @@ int bttv_overlay_risc(struct bttv *btv, struct bttv_overlay *ov,
 		      const struct bttv_format *fmt,
 		      struct bttv_buffer *buf);
 
-
 /* ---------------------------------------------------------- */
 /* bttv-vbi.c                                                 */
 
@@ -289,7 +287,6 @@ extern int fini_bttv_i2c(struct bttv *btv);
 #define BTTV_MAX_FBUF   0x208000
 #define BTTV_TIMEOUT    msecs_to_jiffies(500)    /* 0.5 seconds */
 #define BTTV_FREE_IDLE  msecs_to_jiffies(1000)   /* one second */
-
 
 struct bttv_pll_info {
 	unsigned int pll_ifreq;    /* PLL input frequency        */

@@ -28,7 +28,6 @@
 #include "s3c24xx-i2s.h"
 #include "../codecs/uda134x.h"
 
-
 /* #define ENFORCE_RATES 1 */
 /*
   Unfortunately the S3C24XX in master mode has a limited capacity of
@@ -363,7 +362,6 @@ static void __exit s3c24xx_uda134x_exit(void)
 {
 	platform_driver_unregister(&s3c24xx_uda134x_driver);
 }
-
 
 module_init(s3c24xx_uda134x_init);
 module_exit(s3c24xx_uda134x_exit);

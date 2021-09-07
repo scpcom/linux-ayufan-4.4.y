@@ -186,4 +186,3 @@ static inline int security_netlbl_sid_to_secattr(u32 sid,
 const char *security_get_initial_sid_context(u32 sid);
 
 #endif /* _SELINUX_SECURITY_H_ */
-

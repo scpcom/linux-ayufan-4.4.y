@@ -182,7 +182,6 @@ struct nfsd4_lock {
 #define lk_resp_stateid u.ok.stateid
 #define lk_denied       u.denied
 
-
 struct nfsd4_lockt {
 	u32				lt_type;
 	clientid_t			lt_clientid;
@@ -193,7 +192,6 @@ struct nfsd4_lockt {
 	struct nfsd4_lock_denied  	lt_denied;
 };
 
- 
 struct nfsd4_locku {
 	u32             lu_type;
 	u32             lu_seqid;
@@ -202,7 +200,6 @@ struct nfsd4_locku {
 	u64             lu_length;
 	struct nfs4_stateowner  *lu_stateowner;
 };
-
 
 struct nfsd4_lookup {
 	u32		lo_len;             /* request */
@@ -254,7 +251,6 @@ struct nfsd4_open_downgrade {
 	u32             od_share_deny;
 	struct nfs4_stateowner *od_stateowner;
 };
-
 
 struct nfsd4_read {
 	stateid_t	rd_stateid;         /* request */

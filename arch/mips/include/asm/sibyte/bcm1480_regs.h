@@ -41,7 +41,6 @@
 
 #include "sb1250_regs.h"
 
-
 /*  *********************************************************************
     *  Some general notes:
     *
@@ -74,7 +73,6 @@
     *  the BCM1250 version and A_BCM1480_SCD_xxx implies the BCM1480
     *  version.
     ********************************************************************* */
-
 
 /*  *********************************************************************
     * Memory Controller Registers (Section 6)
@@ -167,7 +165,6 @@
 #define A_BCM1480_L2_BANK_ADDRESS(b)        (A_BCM1480_L2_BANK_BASE | (((b)&0x7)<<17))
 #define A_BCM1480_L2_MGMT_TAG_BASE          0x00D0000000
 
-
 /*  *********************************************************************
     * PCI-X Interface Registers (Section 7)
     ********************************************************************* */
@@ -199,7 +196,6 @@
 #ifndef R_MAC_DMA_OODPKTLOST
 #define R_MAC_DMA_OODPKTLOST        R_BCM1480_MAC_DMA_OODPKTLOST
 #endif
-
 
 /*  *********************************************************************
     * DUART Registers (Section 14)
@@ -286,7 +282,6 @@
 #define A_BCM1480_DUART_CLEAR_OPR_CD        0x00100606C0
 #define A_BCM1480_DUART_INPORT_CHNG_C       0x00100606D0
 #define A_BCM1480_DUART_INPORT_CHNG_D       0x00100606E0
-
 
 /*  *********************************************************************
     * Generic Bus Registers (Section 15) and PCMCIA Registers (Section 16)
@@ -465,7 +460,6 @@
     * System Bus Watcher Registers (Section 4.8)
     ********************************************************************* */
 
-
 /* Same as 1250 except BUS_ERR_STATUS_DEBUG is in a different place. */
 
 #define A_BCM1480_BUS_ERR_STATUS_DEBUG      0x00100208D8
@@ -488,7 +482,6 @@
 
 /* Same as 1250 */
 
-
 /*  *********************************************************************
     * HyperTransport Interface Registers (Section 8)
     ********************************************************************* */
@@ -501,7 +494,6 @@
 #define A_BCM1480_HT_PORT1_HEADER          0x00FE000800
 #define A_BCM1480_HT_PORT2_HEADER          0x00FE001000
 #define A_BCM1480_HT_TYPE00_HEADER         0x00FE002000
-
 
 /*  *********************************************************************
     * Node Controller Registers (Section 9)
@@ -538,7 +530,6 @@
 
 #define A_BCM1480_NC_SR_TIMEOUT_COUNTER     0x00DFBE0060
 #define A_BCM1480_NC_SR_TIMEOUT_COUNTER_SEL 0x00DFBE0080
-
 
 /*  *********************************************************************
     * H&R Block Configuration Registers (Section 12.4)
@@ -581,7 +572,6 @@
 #define BCM1480_HR_NUM_ROUTES               512
 #define BCM1480_HR_ROUTE_OFFSET             0x0000001000
 #define R_BCM1480_HR_RT_WORD(idx)           (BCM1480_HR_ROUTE_OFFSET + ((idx)*BCM1480_HR_ROUTE_SPACING))
-
 
 /* checked to here - ehs */
 /*  *********************************************************************
@@ -644,7 +634,6 @@
  * Interrupt mapping registers
  */
 
-
 #define A_BCM1480_PMI_INT_0                 0x0010056800
 #define A_BCM1480_PMI_INT(q)                (A_BCM1480_PMI_INT_0 + ((q>>8)<<8))
 #define A_BCM1480_PMI_INT_OFFSET_0          (A_BCM1480_PMI_INT_0 - A_BCM1480_PM_BASE)
@@ -682,7 +671,6 @@
 #define A_BCM1480_SWPERF_CNT2	0xdfb91890
 #define A_BCM1480_SWPERF_CNT3	0xdfb91898
 
-
 /*  *********************************************************************
     *  Switch Trace Unit
     ********************************************************************* */
@@ -708,8 +696,6 @@
 #define A_BCM1480_SWTRC_MATCH_DATA_MASK(x) (A_BCM1480_SWTRC_MATCH_DATA_MASK_0 + ((x)*16))
 #define A_BCM1480_SWTRC_MATCH_TAG_VALUE(x) (A_BCM1480_SWTRC_MATCH_TAG_VALUE_0 + ((x)*16))
 #define A_BCM1480_SWTRC_MATCH_TAG_MASK(x) (A_BCM1480_SWTRC_MATCH_TAG_MASK_0 + ((x)*16))
-
-
 
 /*  *********************************************************************
     *  High-Speed Port Registers (Section 13)
@@ -837,8 +823,6 @@
 #define R_BCM1480_HSP_TX_NEXT_ADDR_BASE 0x000040400
 #define R_BCM1480_HSP_TX_NEXT_ADDR_REGISTER(x)  (R_BCM1480_HSP_TX_NEXT_ADDR_BASE+ 8*(x))
 
-
-
 /*  *********************************************************************
     *  Physical Address Map (Table 10 and Figure 7)
     ********************************************************************* */
@@ -881,7 +865,6 @@
 #define A_BCM1480_PHYS_HT_UPPER_MATCH_BITS      _SB_MAKE64(0x3000000000)
 #define A_BCM1480_PHYS_HT_NODE_ALIAS            _SB_MAKE64(0x4000000000)
 #define A_BCM1480_PHYS_HT_FULLACCESS            _SB_MAKE64(0xF000000000)
-
 
 /*  *********************************************************************
     *  L2 Cache as RAM (Table 54)

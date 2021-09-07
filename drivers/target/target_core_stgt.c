@@ -24,7 +24,6 @@
  *
  ******************************************************************************/
 
-
 #define TARGET_CORE_STGT_C
 
 #include <linux/version.h>
@@ -188,7 +187,6 @@ int stgt_attach_hba(se_hba_t *hba, u32 host_id)
 
 	return 0;
 }
-
 
 static int stgt_lld_probe(struct device *dev)
 {

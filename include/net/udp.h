@@ -60,7 +60,6 @@ struct udp_table {
 extern struct udp_table udp_table;
 extern void udp_table_init(struct udp_table *);
 
-
 /* Note: this must match 'valbool' in sock_setsockopt */
 #define UDP_CSUM_NOXMIT		1
 

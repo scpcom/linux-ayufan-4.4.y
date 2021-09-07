@@ -39,7 +39,6 @@ int pcxhr_load_dsp_binary(struct pcxhr_mgr *mgr, const struct firmware *dsp);
 #define PCXHR_DSP_TIME_MASK		0x00ffffff
 #define PCXHR_DSP_TIME_INVALID		0x10000000
 
-
 #define PCXHR_SIZE_MAX_CMD		8
 #define PCXHR_SIZE_MAX_STATUS		16
 #define PCXHR_SIZE_MAX_LONG_STATUS	256
@@ -103,7 +102,6 @@ void pcxhr_set_pipe_cmd_params(struct pcxhr_rmh* rmh, int capture, unsigned int 
  */
 int pcxhr_send_msg(struct pcxhr_mgr *mgr, struct pcxhr_rmh *rmh);
 
-
 /* values used for CMD_ACCESS_IO_WRITE and CMD_ACCESS_IO_READ */
 #define IO_NUM_REG_CONT			0
 #define IO_NUM_REG_GENCLK		1
@@ -115,7 +113,6 @@ int pcxhr_send_msg(struct pcxhr_mgr *mgr, struct pcxhr_rmh *rmh);
 #define IO_NUM_REG_CONFIG_SRC		12
 #define IO_NUM_REG_OUT_ANA_LEVEL	20
 #define IO_NUM_REG_IN_ANA_LEVEL		21
-
 
 #define REG_CONT_UNMUTE_INPUTS		0x020000
 
@@ -194,7 +191,6 @@ int pcxhr_write_io_num_reg_cont(struct pcxhr_mgr *mgr, unsigned int mask,
 #define CS8420_45_CS		0x080094
 #define CS8420_67_CS		0x080096
 #define CS8416_01_CS		0x080098
-
 
 /* interrupt handling */
 irqreturn_t pcxhr_interrupt(int irq, void *dev_id);

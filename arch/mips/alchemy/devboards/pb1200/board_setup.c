@@ -30,7 +30,6 @@
 #include <prom.h>
 #include <au1xxx.h>
 
-
 const char *get_system_type(void)
 {
 	return "Alchemy Pb1200";

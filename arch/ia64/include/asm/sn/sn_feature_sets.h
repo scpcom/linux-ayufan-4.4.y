@@ -11,7 +11,6 @@
  * Copyright (c) 2005-2006 Silicon Graphics, Inc.  All rights reserved.
  */
 
-
 /* --------------------- PROM Features -----------------------------*/
 extern int sn_prom_feature_available(int id);
 
@@ -53,6 +52,5 @@ extern int sn_prom_feature_available(int id);
 #define  OSF_FEAT_LOG_SBES		1
 #define  OSF_ACPI_ENABLE		2
 #define  OSF_PCISEGMENT_ENABLE		3
-
 
 #endif /* _ASM_IA64_SN_FEATURE_SETS_H */

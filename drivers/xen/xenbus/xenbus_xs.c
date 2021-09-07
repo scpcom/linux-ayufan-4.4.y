@@ -753,7 +753,6 @@ static int process_msg(void)
 		mutex_unlock(&xs_state.response_mutex);
 	}
 
-
 	msg = kmalloc(sizeof(*msg), GFP_NOIO | __GFP_HIGH);
 	if (msg == NULL) {
 		err = -ENOMEM;

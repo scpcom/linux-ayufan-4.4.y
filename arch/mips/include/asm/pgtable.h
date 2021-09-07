@@ -355,7 +355,6 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 }
 #endif
 
-
 extern void __update_tlb(struct vm_area_struct *vma, unsigned long address,
 	pte_t pte);
 extern void __update_cache(struct vm_area_struct *vma, unsigned long address,

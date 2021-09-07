@@ -119,7 +119,6 @@ int iwl_txq_update_write_ptr(struct iwl_priv *priv, struct iwl_tx_queue *txq)
 }
 EXPORT_SYMBOL(iwl_txq_update_write_ptr);
 
-
 void iwl_free_tfds_in_queue(struct iwl_priv *priv,
 			    int sta_id, int tid, int freed)
 {
@@ -263,7 +262,6 @@ int iwl_queue_space(const struct iwl_queue *q)
 	return s;
 }
 EXPORT_SYMBOL(iwl_queue_space);
-
 
 /**
  * iwl_queue_init - Initialize queue's high/low-water and read/write indexes
@@ -549,7 +547,6 @@ static void iwl_tx_cmd_build_basic(struct iwl_priv *priv,
 	if (ieee80211_is_back_req(fc))
 		tx_flags |= TX_CMD_FLG_ACK_MSK | TX_CMD_FLG_IMM_BA_RSP_MASK;
 
-
 	tx_cmd->sta_id = std_id;
 	if (ieee80211_has_morefrags(fc))
 		tx_flags |= TX_CMD_FLG_MORE_FRAG_MSK;
@@ -829,7 +826,6 @@ int iwl_tx_skb(struct iwl_priv *priv, struct sk_buff *skb)
 	/* Copy MAC header from skb into command buffer */
 	memcpy(tx_cmd->hdr, hdr, hdr_len);
 
-
 	/* Total # bytes to be transmitted */
 	len = (u16)skb->len;
 	tx_cmd->len = cpu_to_le16(len);
@@ -1022,7 +1018,6 @@ int iwl_enqueue_hcmd(struct iwl_priv *priv, struct iwl_host_cmd *cmd)
 	len = sizeof(struct iwl_device_cmd);
 	len += (idx == TFD_CMD_SLOTS) ?  IWL_MAX_SCAN_SIZE : 0;
 
-
 #ifdef CONFIG_IWLWIFI_DEBUG
 	switch (out_cmd->hdr.cmd) {
 	case REPLY_TX_LINK_QUALITY_CMD:
@@ -1101,7 +1096,6 @@ int iwl_tx_queue_reclaim(struct iwl_priv *priv, int txq_id, int index)
 	return nfreed;
 }
 EXPORT_SYMBOL(iwl_tx_queue_reclaim);
-
 
 /**
  * iwl_hcmd_queue_reclaim - Reclaim TX command queue entries already Tx'd

@@ -43,7 +43,6 @@ static dma_addr_t dma_iommu_map_page(struct device *dev, struct page *page,
 			      size, device_to_mask(dev), direction, attrs);
 }
 
-
 static void dma_iommu_unmap_page(struct device *dev, dma_addr_t dma_handle,
 				 size_t size, enum dma_data_direction direction,
 				 struct dma_attrs *attrs)
@@ -51,7 +50,6 @@ static void dma_iommu_unmap_page(struct device *dev, dma_addr_t dma_handle,
 	iommu_unmap_page(get_iommu_table_base(dev), dma_handle, size, direction,
 			 attrs);
 }
-
 
 static int dma_iommu_map_sg(struct device *dev, struct scatterlist *sglist,
 			    int nelems, enum dma_data_direction direction,

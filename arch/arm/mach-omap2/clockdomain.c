@@ -46,7 +46,6 @@ static DEFINE_MUTEX(clkdm_mutex);
 /* array of powerdomain deps to be added/removed when clkdm in hwsup mode */
 static struct clkdm_pwrdm_autodep *autodeps;
 
-
 /* Private functions */
 
 /*
@@ -186,7 +185,6 @@ static struct clockdomain *_clkdm_lookup(const char *name)
 
 	return clkdm;
 }
-
 
 /* Public functions */
 
@@ -349,7 +347,6 @@ int clkdm_for_each(int (*fn)(struct clockdomain *clkdm, void *user),
 	return ret;
 }
 
-
 /**
  * clkdm_get_pwrdm - return a ptr to the pwrdm that this clkdm resides in
  * @clkdm: struct clockdomain *
@@ -364,7 +361,6 @@ struct powerdomain *clkdm_get_pwrdm(struct clockdomain *clkdm)
 
 	return clkdm->pwrdm.ptr;
 }
-
 
 /* Hardware clockdomain control */
 
@@ -535,7 +531,6 @@ void omap2_clkdm_deny_idle(struct clockdomain *clkdm)
 		_clkdm_del_autodeps(clkdm);
 }
 
-
 /* Clockdomain-to-clock framework interface code */
 
 /**
@@ -646,4 +641,3 @@ int omap2_clkdm_clk_disable(struct clockdomain *clkdm, struct clk *clk)
 
 	return 0;
 }
-

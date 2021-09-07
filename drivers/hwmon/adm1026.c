@@ -303,7 +303,6 @@ static void adm1026_fixup_gpio(struct i2c_client *client);
 static struct adm1026_data *adm1026_update_device(struct device *dev);
 static void adm1026_init_client(struct i2c_client *client);
 
-
 static const struct i2c_device_id adm1026_id[] = {
 	{ "adm1026", adm1026 },
 	{ }
@@ -556,7 +555,6 @@ static void adm1026_fixup_gpio(struct i2c_client *client)
 	adm1026_print_gpio(client);
 }
 
-
 static struct adm1026_data *adm1026_update_device(struct device *dev)
 {
 	struct i2c_client *client = to_i2c_client(dev);
@@ -764,7 +762,6 @@ static SENSOR_DEVICE_ATTR(in##offset##_min, S_IRUGO | S_IWUSR,	\
 static SENSOR_DEVICE_ATTR(in##offset##_max, S_IRUGO | S_IWUSR,	\
 		show_in_max, set_in_max, offset);
 
-
 in_reg(0);
 in_reg(1);
 in_reg(2);
@@ -828,9 +825,6 @@ static ssize_t set_in16_max(struct device *dev, struct device_attribute *attr, c
 static SENSOR_DEVICE_ATTR(in16_input, S_IRUGO, show_in16, NULL, 16);
 static SENSOR_DEVICE_ATTR(in16_min, S_IRUGO | S_IWUSR, show_in16_min, set_in16_min, 16);
 static SENSOR_DEVICE_ATTR(in16_max, S_IRUGO | S_IWUSR, show_in16_max, set_in16_max, 16);
-
-
-
 
 /* Now add fan read/write functions */
 
@@ -1027,7 +1021,6 @@ static SENSOR_DEVICE_ATTR(temp##offset##_min, S_IRUGO | S_IWUSR,	\
 		show_temp_min, set_temp_min, offset - 1);		\
 static SENSOR_DEVICE_ATTR(temp##offset##_max, S_IRUGO | S_IWUSR,	\
 		show_temp_max, set_temp_max, offset - 1);
-
 
 temp_reg(1);
 temp_reg(2);
@@ -1315,7 +1308,6 @@ static ssize_t set_alarm_mask(struct device *dev, struct device_attribute *attr,
 static DEVICE_ATTR(alarm_mask, S_IRUGO | S_IWUSR, show_alarm_mask,
 	set_alarm_mask);
 
-
 static ssize_t show_gpio(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	struct adm1026_data *data = adm1026_update_device(dev);
@@ -1342,7 +1334,6 @@ static ssize_t set_gpio(struct device *dev, struct device_attribute *attr, const
 }
 
 static DEVICE_ATTR(gpio, S_IRUGO | S_IWUSR, show_gpio, set_gpio);
-
 
 static ssize_t show_gpio_mask(struct device *dev, struct device_attribute *attr, char *buf)
 {

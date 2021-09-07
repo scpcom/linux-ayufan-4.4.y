@@ -44,7 +44,6 @@ module_param(debugmode, uint, S_IRUGO|S_IWUSR);
 
 /* -------- type definitions ----------------------------------------- */
 
-
 struct capidrv_contr {
 
 	struct capidrv_contr *next;
@@ -122,7 +121,6 @@ struct capidrv_contr {
 	u8 *q931_write;
 	u8 *q931_end;
 };
-
 
 struct capidrv_data {
 	struct capi20_appl ap;
@@ -297,7 +295,6 @@ static inline u8 cip2si2(u16 cipval)
 	return si[cipval];
 }
 
-
 /* -------- controller management ------------------------------------- */
 
 static inline capidrv_contr *findcontrbydriverid(int driverid)
@@ -325,7 +322,6 @@ static capidrv_contr *findcontrbynumber(u32 contr)
 	spin_unlock_irqrestore(&global_lock, flags);
 	return p;
 }
-
 
 /* -------- plci management ------------------------------------------ */
 
@@ -1353,7 +1349,6 @@ static void handle_ncci(_cmsg * cmsg)
 	       cmsg->adr.adrNCCI);
 }
 
-
 static void handle_data(_cmsg * cmsg, struct sk_buff *skb)
 {
 	capidrv_contr *card = findcontrbynumber(cmsg->adr.adrController & 0x7f);
@@ -2005,7 +2000,6 @@ static void enable_dchannel_trace(capidrv_contr *card)
 	send_message(card, &cmdcmsg);
 }
 
-
 static void send_listen(capidrv_contr *card)
 {
 	capi_fill_LISTEN_REQ(&cmdcmsg, global.ap.applid,
@@ -2027,7 +2021,6 @@ static void listentimerfunc(unsigned long x)
         send_listen(card);
 	mod_timer(&card->listentimer, jiffies + 60*HZ);
 }
-
 
 static int capidrv_addcontr(u16 contr, struct capi_profile *profp)
 {
@@ -2081,7 +2074,6 @@ static int capidrv_addcontr(u16 contr, struct capi_profile *profp)
 		card->interface.features |= ISDN_FEATURE_L2_MODEM;
 	card->interface.hl_hdrlen = 22; /* len of DATA_B3_REQ */
 	strncpy(card->interface.id, id, sizeof(card->interface.id) - 1);
-
 
 	card->q931_read = card->q931_buf;
 	card->q931_write = card->q931_buf;
@@ -2208,7 +2200,6 @@ static int capidrv_delcontr(u16 contr)
 	kfree(card);
 	return 0;
 }
-
 
 static void lower_callback(unsigned int cmd, u32 contr, void *data)
 {

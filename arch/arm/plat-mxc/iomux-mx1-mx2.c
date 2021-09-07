@@ -154,4 +154,3 @@ void mxc_gpio_release_multiple_pins(const int *pin_list, int count)
 
 }
 EXPORT_SYMBOL(mxc_gpio_release_multiple_pins);
-

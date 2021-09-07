@@ -390,7 +390,6 @@ static void rs_rate_init(void *priv_r, struct ieee80211_supported_band *sband,
 						IWL_FIRST_OFDM_RATE;
 	}
 
-
 	IWL_DEBUG_RATE(priv, "leave\n");
 }
 
@@ -469,7 +468,6 @@ static void rs_free_sta(void *iwl_priv, struct ieee80211_sta *sta,
 	IWL_DEBUG_RATE(priv, "leave\n");
 }
 
-
 /**
  * rs_tx_status - Update rate control values based on Tx results
  *
@@ -542,7 +540,6 @@ static void rs_tx_status(void *priv_rate, struct ieee80211_supported_band *sband
 
 		scale_rate_index = last_index;
 	}
-
 
 	/* Update the last index window with success/failure based on ACK */
 	IWL_DEBUG_RATE(priv, "Update rate %d with %s.\n",
@@ -1015,5 +1012,3 @@ void iwl3945_rate_control_unregister(void)
 {
 	ieee80211_rate_control_unregister(&rs_ops);
 }
-
-

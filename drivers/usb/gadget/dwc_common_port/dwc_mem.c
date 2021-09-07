@@ -29,7 +29,6 @@ struct allocation_manager
 	uint32_t max;
 };
 
-
 static struct allocation_manager *manager = NULL;
 
 static void add_allocation(uint32_t size, char const* func, int line, void *addr, int dma)
@@ -125,8 +124,6 @@ void dwc_memory_debug_report(void)
 		DWC_PRINTF("    addr=%p, size=%d from %s:%d, DMA=%d\n", a->addr, a->size, a->func, a->line, a->dma);
 	}
 }
-
-
 
 /* The replacement functions */
 void *dwc_alloc_debug(uint32_t size, char const* func, int line)

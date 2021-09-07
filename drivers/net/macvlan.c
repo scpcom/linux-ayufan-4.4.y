@@ -46,7 +46,6 @@ struct macvlan_dev {
 	struct net_device	*lowerdev;
 };
 
-
 static struct macvlan_dev *macvlan_hash_lookup(const struct macvlan_port *port,
 					       const unsigned char *addr)
 {

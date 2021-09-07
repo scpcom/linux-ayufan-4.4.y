@@ -206,7 +206,6 @@ typedef struct { pte_t pte; unsigned long hidx; } real_pte_t;
 typedef pte_t real_pte_t;
 #endif
 
-
 #ifdef CONFIG_PPC64
 typedef unsigned long pmd_t;
 #define pmd_val(x)	(x)

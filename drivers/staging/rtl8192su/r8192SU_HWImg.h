@@ -41,4 +41,3 @@ extern u32 Rtl8192SUMACPHY_Array_PG[MACPHY_Array_PGLength];
 extern u32 Rtl8192SUAGCTAB_Array[AGCTAB_ArrayLength];
 
 #endif //__INC_HAL8192SU_FW_IMG_H
-

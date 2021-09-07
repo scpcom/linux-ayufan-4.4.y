@@ -67,7 +67,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "mvFlashCom.h"
 
-
 /* AMD Flash IDs */
 #define AMD_FID_LV040B		0x4F		/* 29LV040B ID				*/
 						/* 4 Mbit, 512K x 8,			*/
@@ -123,7 +122,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* SST Flash IDs */
 #define SST_39VF_020 		0xD6	/* SST39VF020 (256KB = 4K * 64) */
-
 
 /* Amd Flash APIs */
 #define AMD_EARASE_MILI_TIMEOUT	8000		/* mili seconds 	*/

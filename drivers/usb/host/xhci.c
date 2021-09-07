@@ -478,7 +478,6 @@ int xhci_reset(struct xhci_hcd *xhci)
 #endif
 }
 
-
 #if 0
 /* Set up MSI-X table for entry 0 (may claim other entries later) */
 static int xhci_setup_msix(struct xhci_hcd *xhci)
@@ -802,7 +801,6 @@ int xhci_run(struct usb_hcd *hcd)
 #endif
 #endif
 
-
 	return 0;
 }
 
@@ -827,7 +825,6 @@ void xhci_stop(struct usb_hcd *hcd)
 	}
 	xhci_task_hcd = NULL;
 #endif
-
 
 	spin_lock_irq(&xhci->lock);
 	xhci_halt(xhci);
@@ -982,7 +979,6 @@ int xhci_check_args(struct usb_hcd *hcd, struct usb_device *udev,
 																		"virt_dev does not match\n", func);
 									return -EINVAL;
 					}
-
 
 	}
 	return 1;
@@ -1654,7 +1650,6 @@ static int xhci_configure_endpoint(struct xhci_hcd *xhci,
  							if (TRB_TYPE_LINK_LE32(command->command_trb->link.control))
  											command->command_trb =
  															xhci->cmd_ring->enq_seg->next->trbs;
-
 
 		list_add_tail(&command->cmd_list, &virt_dev->cmd_list);
 	} else {
@@ -2389,7 +2384,6 @@ int xhci_discover_or_reset_device(struct usb_hcd *hcd, struct usb_device *udev)
  																							SLOT_STATE_DISABLED)
  							return 0;
 
-
 	xhci_dbg(xhci, "Resetting device with slot ID %u\n", slot_id);
 	/* Allocate the command structure that holds the struct completion.
 	 * Assume we're in process context, since the normal device reset
@@ -2413,7 +2407,6 @@ int xhci_discover_or_reset_device(struct usb_hcd *hcd, struct usb_device *udev)
  			if (TRB_TYPE_LINK_LE32(reset_device_cmd->command_trb->link.control))
  							reset_device_cmd->command_trb =
  											xhci->cmd_ring->enq_seg->next->trbs;
-
 
 	list_add_tail(&reset_device_cmd->cmd_list, &virt_dev->cmd_list);
 	ret = xhci_queue_reset_device(xhci, slot_id);

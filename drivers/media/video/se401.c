@@ -60,7 +60,6 @@ module_param(video_nr, int, 0);
 
 static struct usb_driver se401_driver;
 
-
 /**********************************************************************
  *
  * Memory management
@@ -102,8 +101,6 @@ static void rvfree(void *mem, unsigned long size)
 	}
 	vfree(mem);
 }
-
-
 
 /****************************************************************************
  *
@@ -174,7 +171,6 @@ static unsigned short se401_get_feature(struct usb_se401 *se401,
  *
  ***************************************************************************/
 
-
 static int se401_send_pict(struct usb_se401 *se401)
 {
 	/* integration time low */
@@ -224,7 +220,6 @@ static int se401_get_pict(struct usb_se401 *se401, struct video_picture *p)
 	p->depth = 3; /* rgb24 */
 	return 0;
 }
-
 
 static int se401_set_pict(struct usb_se401 *se401, struct video_picture *p)
 {
@@ -578,7 +573,6 @@ static int se401_set_size(struct usb_se401 *se401, int width, int height)
 	return 0;
 }
 
-
 /****************************************************************************
  *
  * Video Decoding
@@ -741,7 +735,6 @@ static inline void decode_bayer(struct usb_se401 *se401,
 	int width = se401->cwidth;
 	int blineoffset = 0, bline;
 	int linelength = width * 3, i;
-
 
 	if (frame->curpix == 0) {
 		if (frame->grabstate == FRAME_READY)
@@ -936,14 +929,11 @@ static void usb_se401_remove_disconnected(struct usb_se401 *se401)
 	kfree(se401);
 }
 
-
-
 /****************************************************************************
  *
  * Video4Linux
  *
  ***************************************************************************/
-
 
 static int se401_open(struct file *file)
 {
@@ -1164,7 +1154,6 @@ static ssize_t se401_read(struct file *file, char __user *buf,
 	struct video_device *dev = file->private_data;
 	struct usb_se401 *se401 = (struct usb_se401 *)dev;
 
-
 	if (se401->dev ==  NULL)
 		return -EIO;
 	if (realcount > se401->cwidth*se401->cheight*3)
@@ -1249,8 +1238,6 @@ static struct video_device se401_template = {
 	.fops =         &se401_fops,
 	.release = video_device_release_empty,
 };
-
-
 
 /***************************/
 static int se401_init(struct usb_se401 *se401, int button)
@@ -1462,8 +1449,6 @@ static struct usb_driver se401_driver = {
 	.probe		 =  se401_probe,
 	.disconnect	 =  se401_disconnect,
 };
-
-
 
 /****************************************************************************
  *

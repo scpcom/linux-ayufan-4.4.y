@@ -52,7 +52,6 @@
 #define ALUA_DEFAULT_TRANS_DELAY_MSECS			0
 #define ALUA_MAX_TRANS_DELAY_MSECS			30000 /* 30 seconds */
 
-
 extern se_global_t *se_global;
 
 extern struct kmem_cache *t10_alua_lu_gp_cache;

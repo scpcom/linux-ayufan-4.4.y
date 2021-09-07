@@ -117,7 +117,6 @@ acpi_power_get_context(acpi_handle handle,
 	int result = 0;
 	struct acpi_device *device = NULL;
 
-
 	if (!resource)
 		return -ENODEV;
 
@@ -140,7 +139,6 @@ static int acpi_power_get_state(acpi_handle handle, int *state)
 	unsigned long long sta = 0;
 	char node_name[5];
 	struct acpi_buffer buffer = { sizeof(node_name), node_name };
-
 
 	if (!handle || !state)
 		return -EINVAL;
@@ -165,7 +163,6 @@ static int acpi_power_get_list_state(struct acpi_handle_list *list, int *state)
 {
 	int result = 0, state1;
 	u32 i = 0;
-
 
 	if (!list || !state)
 		return -EINVAL;
@@ -203,7 +200,6 @@ static int acpi_power_on(acpi_handle handle, struct acpi_device *dev)
 	struct acpi_power_resource *resource = NULL;
 	struct list_head *node, *next;
 	struct acpi_power_reference *ref;
-
 
 	result = acpi_power_get_context(handle, &resource);
 	if (result)
@@ -254,7 +250,6 @@ static int acpi_power_off_device(acpi_handle handle, struct acpi_device *dev)
 	struct acpi_power_resource *resource = NULL;
 	struct list_head *node, *next;
 	struct acpi_power_reference *ref;
-
 
 	result = acpi_power_get_context(handle, &resource);
 	if (result)
@@ -457,7 +452,6 @@ int acpi_power_get_inferred_state(struct acpi_device *device)
 	int list_state = 0;
 	int i = 0;
 
-
 	if (!device)
 		return -EINVAL;
 
@@ -493,7 +487,6 @@ int acpi_power_transition(struct acpi_device *device, int state)
 	struct acpi_handle_list *cl = NULL;	/* Current Resources */
 	struct acpi_handle_list *tl = NULL;	/* Target Resources */
 	int i = 0;
-
 
 	if (!device || (state < ACPI_STATE_D0) || (state > ACPI_STATE_D3))
 		return -EINVAL;
@@ -555,7 +548,6 @@ static int acpi_power_seq_show(struct seq_file *seq, void *offset)
 	struct list_head *node, *next;
 	struct acpi_power_reference *ref;
 
-
 	resource = seq->private;
 
 	if (!resource)
@@ -604,7 +596,6 @@ static int acpi_power_add_fs(struct acpi_device *device)
 {
 	struct proc_dir_entry *entry = NULL;
 
-
 	if (!device)
 		return -EINVAL;
 
@@ -648,7 +639,6 @@ static int acpi_power_add(struct acpi_device *device)
 	struct acpi_power_resource *resource = NULL;
 	union acpi_object acpi_object;
 	struct acpi_buffer buffer = { sizeof(acpi_object), &acpi_object };
-
 
 	if (!device)
 		return -EINVAL;
@@ -708,7 +698,6 @@ static int acpi_power_remove(struct acpi_device *device, int type)
 {
 	struct acpi_power_resource *resource = NULL;
 	struct list_head *node, *next;
-
 
 	if (!device || !acpi_driver_data(device))
 		return -EINVAL;

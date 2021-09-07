@@ -26,7 +26,6 @@
 #include "cprecomp.h"
 #include "queue.h"
 
-
 struct zsQueue* zfQueueCreate(zdev_t* dev, u16_t size)
 {
     struct zsQueue* q;
@@ -117,7 +116,6 @@ u16_t zfCompareDstwithBuf(zdev_t* dev, zbuf_t* buf, u8_t* addr)
 
     return 0;
 }
-
 
 zbuf_t* zfQueueGetWithMac(zdev_t* dev, struct zsQueue* q, u8_t* addr, u8_t* mb)
 {
@@ -222,7 +220,6 @@ void zfQueueAge(zdev_t* dev, struct zsQueue* q, u32_t tick, u32_t msAge)
     }
     return;
 }
-
 
 u8_t zfQueueRemovewithIndex(zdev_t* dev, struct zsQueue* q, u16_t index, u8_t* addr)
 {

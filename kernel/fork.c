@@ -842,7 +842,6 @@ void __cleanup_sighand(struct sighand_struct *sighand)
 		kmem_cache_free(sighand_cachep, sighand);
 }
 
-
 /*
  * Initialize POSIX timer handling for a thread group.
  */

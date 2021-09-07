@@ -34,7 +34,6 @@
 #include "dasd_eckd.h"
 #include "../cio/chsc.h"
 
-
 #ifdef PRINTK_HEADER
 #undef PRINTK_HEADER
 #endif				/* PRINTK_HEADER */
@@ -988,7 +987,6 @@ static int dasd_eckd_read_features(struct dasd_device *device)
 	return rc;
 }
 
-
 /*
  * Build CP for Perform Subsystem Function - SSC.
  */
@@ -1643,7 +1641,6 @@ dasd_eckd_erp_postaction(struct dasd_ccw_req * cqr)
 	return dasd_default_erp_postaction;
 }
 
-
 static void dasd_eckd_handle_unsolicited_interrupt(struct dasd_device *device,
 						   struct irb *irb)
 {
@@ -1696,7 +1693,6 @@ static void dasd_eckd_handle_unsolicited_interrupt(struct dasd_device *device,
 	dasd_schedule_device_bh(device);
 	return;
 };
-
 
 static struct dasd_ccw_req *dasd_eckd_build_cp_cmd_single(
 					       struct dasd_device *startdev,
@@ -2084,7 +2080,6 @@ static int prepare_itcw(struct itcw *itcw,
 	int rc = 0;
 	int sector = 0;
 	int dn, d;
-
 
 	/* setup prefix data */
 	basepriv = (struct dasd_eckd_private *) basedev->private;
@@ -3051,7 +3046,6 @@ static void dasd_eckd_dump_sense_ccw(struct dasd_device *device,
 	free_page((unsigned long) page);
 }
 
-
 /*
  * Print sense data from a tcw.
  */
@@ -3063,7 +3057,6 @@ static void dasd_eckd_dump_sense_tcw(struct dasd_device *device,
 
 	struct tsb *tsb;
 	u8 *sense;
-
 
 	page = (char *) get_zeroed_page(GFP_ATOMIC);
 	if (page == NULL) {

@@ -138,5 +138,3 @@ bfa_hwcb_isr_mode_set(struct bfa_s *bfa, bfa_boolean_t msix)
 {
 	bfa->iocfc.hwif.hw_rspq_ack = bfa_hwcb_rspq_ack_msix;
 }
-
-

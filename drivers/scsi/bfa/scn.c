@@ -175,8 +175,6 @@ bfa_fcs_port_scn_sm_online(struct bfa_fcs_port_scn_s *scn,
 	}
 }
 
-
-
 /**
  *  fcs_scn_private FCS SCN private functions
  */
@@ -314,8 +312,6 @@ bfa_fcs_port_scn_timeout(void *arg)
 
 	bfa_sm_send_event(scn, SCNSM_EVENT_TIMEOUT);
 }
-
-
 
 /**
  *  fcs_scn_public FCS state change notification public interfaces
@@ -478,5 +474,3 @@ bfa_fcs_port_scn_process_rscn(struct bfa_fcs_port_s *port, struct fchs_s *fchs,
 	if (nsquery)
 		bfa_fcs_port_ns_query(port);
 }
-
-

@@ -94,7 +94,6 @@ static void sk_isa_sifwritew(struct net_device *dev, unsigned short val, unsigne
 	outw(val, dev->base_addr + reg);
 }
 
-
 static int __init sk_isa_probe1(struct net_device *dev, int ioaddr)
 {
 	unsigned char old, chk1, chk2;

@@ -303,4 +303,3 @@ void dwc_wusb_gen_mic(uint8_t *ccm_nonce, uint8_t *kck,
 	dwc_wusb_prf_64(kck, ccm_nonce, "out-of-bandMIC",
 			data, WUSB_HANDSHAKE_LEN_FOR_MIC, mic);
 }
-

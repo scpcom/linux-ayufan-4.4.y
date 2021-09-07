@@ -53,7 +53,6 @@
 #define WM_CORE_VERSION		"1.00"
 #define DEFAULT_PRESSURE	0xb0c0
 
-
 /*
  * Touchscreen absolute values
  *

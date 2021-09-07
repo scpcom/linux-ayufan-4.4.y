@@ -64,4 +64,3 @@ static inline void eventfd_ctx_put(struct eventfd_ctx *ctx)
 #endif
 
 #endif /* _LINUX_EVENTFD_H */
-

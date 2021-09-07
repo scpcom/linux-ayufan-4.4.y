@@ -26,7 +26,6 @@ struct vpe_notifications {
 	struct list_head list;
 };
 
-
 extern int vpe_notify(int index, struct vpe_notifications *notify);
 
 extern void *vpe_get_shared(int index);

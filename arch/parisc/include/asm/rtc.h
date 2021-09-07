@@ -19,7 +19,6 @@
 #define SECS_PER_HOUR   (60 * 60)
 #define SECS_PER_DAY    (SECS_PER_HOUR * 24)
 
-
 #define RTC_PIE 0x40		/* periodic interrupt enable */
 #define RTC_AIE 0x20		/* alarm interrupt enable */
 #define RTC_UIE 0x10		/* update-finished interrupt enable */
@@ -58,7 +57,6 @@ static inline unsigned int get_rtc_time(struct rtc_time *wtime)
 //	Copyright (C) 1991, 1993, 1997, 1998 Free Software Foundation, Inc.
 //	This was originally a part of the GNU C Library.
 //      It is distributed under the GPL, and was swiped from offtime.c
-
 
 	days = tod_data.tod_sec / SECS_PER_DAY;
 	rem = tod_data.tod_sec % SECS_PER_DAY;

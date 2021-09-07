@@ -41,8 +41,6 @@
  * END_DESC
 */
 
-
-
 #include "float.h"
 #include "sgl_float.h"
 #include "dbl_float.h"

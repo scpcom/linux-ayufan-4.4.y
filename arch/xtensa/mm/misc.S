@@ -12,14 +12,12 @@
  * Chris Zankel	<chris@zankel.net>
  */
 
-
 #include <linux/linkage.h>
 #include <asm/page.h>
 #include <asm/pgtable.h>
 #include <asm/asmmacro.h>
 #include <asm/cacheasm.h>
 #include <asm/tlbflush.h>
-
 
 /*
  * clear_page and clear_user_page are the same for non-cache-aliased configs.
@@ -444,4 +442,3 @@ ENTRY(__invalidate_dcache_all)
 	dsync
 
 	retw
-

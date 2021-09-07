@@ -154,7 +154,6 @@ enum
 
 #define TCA_TBF_MAX (__TCA_TBF_MAX - 1)
 
-
 /* TEQL section */
 
 /* TEQL does not require any parameters */
@@ -340,7 +339,6 @@ enum
 };
 
 #define TCA_HFSC_MAX (__TCA_HFSC_MAX - 1)
-
 
 /* CBQ section */
 

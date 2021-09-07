@@ -380,7 +380,6 @@ struct bdb_sdvo_lvds_options {
 	u8 panel_misc_bits_4;
 } __attribute__((packed));
 
-
 #define BDB_DRIVER_FEATURE_NO_LVDS		0
 #define BDB_DRIVER_FEATURE_INT_LVDS		1
 #define BDB_DRIVER_FEATURE_SDVO_LVDS		2

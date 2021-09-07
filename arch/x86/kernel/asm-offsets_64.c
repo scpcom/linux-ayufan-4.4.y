@@ -65,7 +65,6 @@ int main(void)
 	OFFSET(PV_MMU_read_cr2, pv_mmu_ops, read_cr2);
 #endif
 
-
 #ifdef CONFIG_IA32_EMULATION
 #define ENTRY(entry) DEFINE(IA32_SIGCONTEXT_ ## entry, offsetof(struct sigcontext_ia32, entry))
 	ENTRY(ax);

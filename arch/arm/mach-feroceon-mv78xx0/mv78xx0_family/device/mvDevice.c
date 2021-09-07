@@ -73,8 +73,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	#define DB(x)    
 #endif	             
 
-
-
 /*******************************************************************************
 * mvDevPramSet - Set device interface bank parameters
 *
@@ -336,7 +334,6 @@ MV_VOID mvDevNandDevCsSet(MV_DEVICE device, MV_BOOL careMode)
     else
     	nfCtrlReg &= ~(DINFCR_NF_ACT_CE_MASK(device));
 
-    
     MV_REG_WRITE(DEV_NAND_CTRL_REG, nfCtrlReg);
 }
 
@@ -360,7 +357,6 @@ MV_32 mvDevNandDevCsGet(MV_VOID)
 {
 	MV_U32 nfCtrlReg;   /* NAND Flash Control Register */
     
-    
     nfCtrlReg = MV_REG_READ(DEV_NAND_CTRL_REG);
     
       nfCtrlReg &= (DINFCR_NF_CS_MASK(MV_NAND_CS));
@@ -371,4 +367,3 @@ MV_32 mvDevNandDevCsGet(MV_VOID)
     	return 0xffffffff;
 
 }
-

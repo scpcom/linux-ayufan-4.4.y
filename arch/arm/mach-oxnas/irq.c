@@ -54,8 +54,6 @@ void __init oxnas_init_irq(void)
     *((volatile unsigned long *) (GPIO_A_INTERRUPT_ENABLE))       = 0;
     *((volatile unsigned long *) (GPIO_B_INTERRUPT_ENABLE))       = 0;
 
-
-
     // Initialise IRQ tracking structures
     for (irq=0; irq < NR_IRQS; irq++)
     {
@@ -64,4 +62,3 @@ void __init oxnas_init_irq(void)
         set_irq_flags(irq, IRQF_VALID | IRQF_PROBE);
     }
 }
-

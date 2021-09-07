@@ -39,5 +39,4 @@
 #define PNX8550_CM_PLL_P_MASK           0x0000000c
 #define PNX8550_CM_PLL_PD_MASK          0x00000002
 
-
 #endif

@@ -84,7 +84,6 @@
  *
  */
 
-
 #include "matroxfb_misc.h"
 #include <linux/interrupt.h>
 #include <linux/matroxfb.h>

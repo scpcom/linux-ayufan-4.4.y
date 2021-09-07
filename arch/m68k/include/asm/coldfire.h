@@ -12,7 +12,6 @@
 #define	coldfire_h
 /****************************************************************************/
 
-
 /*
  *	Define master clock frequency. This is essentially done at config
  *	time now. No point enumerating dozens of possible clock options

@@ -171,4 +171,3 @@ void gfs2_trans_add_rg(struct gfs2_rgrpd *rgd)
 {
 	lops_add(rgd->rd_sbd, &rgd->rd_le);
 }
-

@@ -64,7 +64,6 @@ STATIC uint	xfs_qm_export_qtype_flags(uint);
 STATIC void	xfs_qm_export_dquot(xfs_mount_t *, xfs_disk_dquot_t *,
 					fs_disk_quota_t *);
 
-
 /*
  * Turn off quota accounting and/or enforcement for all udquots and/or
  * gdquots. Called only at unmount time.
@@ -285,7 +284,6 @@ xfs_qm_scall_trunc_qfiles(
 	return error ? error : error2;
 }
 
-
 /*
  * Switch on (a given) quota enforcement for a filesystem.  This takes
  * effect immediately.
@@ -384,7 +382,6 @@ xfs_qm_scall_quotaon(
 
 	return (0);
 }
-
 
 /*
  * Return quota status information, such as uquota-off, enforcements, etc.
@@ -648,7 +645,6 @@ xfs_qm_scall_getquota(
 	return (error ? XFS_ERROR(EFAULT) : 0);
 }
 
-
 STATIC int
 xfs_qm_log_quotaoff_end(
 	xfs_mount_t		*mp,
@@ -680,7 +676,6 @@ xfs_qm_log_quotaoff_end(
 	error = xfs_trans_commit(tp, 0);
 	return (error);
 }
-
 
 STATIC int
 xfs_qm_log_quotaoff(
@@ -735,7 +730,6 @@ error0:
 	*qoffstartp = qoffi;
 	return (error);
 }
-
 
 /*
  * Translate an internal style on-disk-dquot to the exportable format.
@@ -845,7 +839,6 @@ xfs_qm_export_flags(
 	return (uflags);
 }
 
-
 STATIC int
 xfs_dqrele_inode(
 	struct xfs_inode	*ip,
@@ -879,7 +872,6 @@ xfs_dqrele_inode(
 
 	return 0;
 }
-
 
 /*
  * Go thru all the inodes in the file system, releasing their dquots.
@@ -1097,7 +1089,6 @@ xfs_qm_internalqcheck_get_dquots(
 		xfs_qm_internalqcheck_dqget(mp, projid, XFS_DQ_PROJ, gd);
 }
 
-
 STATIC void
 xfs_qm_internalqcheck_dqadjust(
 	xfs_inode_t		*ip,
@@ -1171,7 +1162,6 @@ xfs_qm_internalqcheck_adjust(
 	*res = BULKSTAT_RV_DIDONE;
 	return (0);
 }
-
 
 /* PRIVATE, debugging */
 int

@@ -86,7 +86,6 @@ static inline int __netif_rx_schedule_prep(struct net_device *dev)
 #endif
 #endif
 
-
 /******************************************************************************
  *
  * Local Variables
@@ -839,7 +838,6 @@ int      Port)  /* port to start                                      */
 				&pAC->TxPort[Port][TX_PRIO_HIGH].TxSLET);
 	}
 
-
 	/*
 	** Using new values for the watermarks and the timer for
 	** low latency optimization
@@ -850,7 +848,6 @@ int      Port)  /* port to start                                      */
 		SK_OUT32(IoC, STAT_LEV_TIMER_INI, 50);
 		SK_OUT32(IoC, STAT_ISR_TIMER_INI, 10);
 	}
-
 
 	/*
 	** Initialize the Port (MAC, PHY etc.)
@@ -2259,10 +2256,6 @@ SK_AC *pAC)       /* pointer to adapter context   */
 				}
 			} /* if (SK_ADAPTER_WAITING_FOR_TIST(pAC)) */
 #endif
-
-
-
-
 
 #ifdef Y2_LE_CHECK
 			if (!HW_IS_EXT_LE_FORMAT(pAC) && pAC->LastOpc != 0xFF) {

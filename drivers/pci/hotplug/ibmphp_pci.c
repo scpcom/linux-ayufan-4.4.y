@@ -33,7 +33,6 @@
 #include <linux/list.h>
 #include "ibmphp.h"
 
-
 static int configure_device(struct pci_func *);
 static int configure_bridge(struct pci_func **, u8);
 static struct res_needed *scan_behind_bridge(struct pci_func *, u8);
@@ -642,11 +641,9 @@ static int configure_bridge (struct pci_func **func_passed, u8 slotno)
 	debug ("func->busno is %x\n", func->busno);
 	debug ("sec_number after writing is %x\n", sec_number);
 
-
 	/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	   !!!!!!!!!!!!!!!NEED TO ADD!!!  FAST BACK-TO-BACK ENABLE!!!!!!!!!!!!!!!!!!!! 
 	   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
-
 
 	/* First we need to allocate mem/io for the bridge itself in case it needs it */
 	for (count = 0; address[count]; count++) {	/* for 2 BARs */
@@ -1726,4 +1723,3 @@ static u8 find_sec_number (u8 primary_busno, u8 slotno)
 		return busno;
 	return 0xff;
 }
-

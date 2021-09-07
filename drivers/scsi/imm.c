@@ -29,7 +29,6 @@
 #define IMM_PROBE_EPP17 0x0100
 #define IMM_PROBE_EPP19 0x0200
 
-
 typedef struct {
 	struct pardevice *dev;	/* Parport device entry         */
 	int base;		/* Actual port address          */
@@ -1152,7 +1151,6 @@ static int __imm_attach(struct parport *pb)
 	if (!dev)
 		return -ENOMEM;
 
-
 	dev->base = -1;
 	dev->mode = IMM_AUTODETECT;
 	INIT_LIST_HEAD(&dev->list);
@@ -1162,7 +1160,6 @@ static int __imm_attach(struct parport *pb)
 
 	if (!dev->dev)
 		goto out;
-
 
 	/* Claim the bus so it remembers what we do to the control
 	 * registers. [ CTR and ECP ]

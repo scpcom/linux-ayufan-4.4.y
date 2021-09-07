@@ -111,7 +111,6 @@ static inline void lec_arp_put(struct lec_arp_table *entry)
 		kfree(entry);
 }
 
-
 static struct lane2_ops lane2_ops = {
 	lane2_resolve,		/* resolve,             spec 3.1.3 */
 	lane2_associate_req,	/* associate_req,       spec 3.1.4 */
@@ -669,7 +668,6 @@ static const struct net_device_ops lec_netdev_ops = {
 	.ndo_tx_timeout		= lec_tx_timeout,
 	.ndo_set_multicast_list	= lec_set_multicast_list,
 };
-
 
 static void lec_init(struct net_device *dev)
 {

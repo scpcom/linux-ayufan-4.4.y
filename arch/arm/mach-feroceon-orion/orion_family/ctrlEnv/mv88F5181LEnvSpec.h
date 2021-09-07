@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __IN88F5181LCtrlEnvSpech
 #define __IN88F5181LCtrlEnvSpech
 
@@ -76,9 +75,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_ETH_PORT_SGMII	{ MV_FALSE }
 #define USB_REG_BASE(dev)       (((dev) == 0) ? 0x50000 : 0xA0000)
 
-
 #define INTER_REGS_SIZE	 	 	_1M
-
 
 /* This define describes the maximum controller supported DRAM chip select 	*/
 /* also known as banks                                                     	*/
@@ -97,11 +94,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_INCLUDE_DEVICE_CS3
 #define MV_BOOTDEVICE_INDEX   3
 
-
-
 /* This define describes maximum of GPP groups supported by controller. 	*/
 #define MV_GPP_MAX_GROUP    1
-
 
 /* This define describes the maximum number of available Timer/counters.  	*/
 #define MV_CNTMR_MAX_COUNTER 2
@@ -139,7 +133,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PCI_HOST_BUS_NUM(pciIf)		MV_PEX_MAX_IF + (pciIf)
 #define PCI_HOST_DEV_NUM(pciIf)		0
 
-
 /* This define describes the maximum number of supported Ethernet ports 	*/
 #define MV_ETH_MAX_PORTS	1
 #define MV_ETH_PORT_SGMII   { MV_FALSE }
@@ -154,7 +147,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* This define describes the support of the NAND -Flash */
 #define MV_NAND_MAX		1
 
-
 #define SATA_REG_BASE           0x80000
 #define TDM_REG_BASE		0xB0000
 
@@ -162,7 +154,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_CESA_VERSION		 	        0
 #define MV_CESA_REG_BASE                0x9D000
 #define MV_CESA_SRAM_SIZE               8*1024
-
 
 /* Controler environment registers offsets */
 #define MPP_CONTROL_REG0				0x10000
@@ -222,7 +213,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MSAR_ARMDDRCLCK_MASK		(0xf << MSAR_ARMDDRCLCK_OFFS)
 #define MSAR_ARMDDRCLCK_H_MASK		BIT23
 
-
 #define MSAR_GIGA_PORT_MODE_OFFS		15
 #define MSAR_GIGA_PORT_MODE_MASK		(0x7 <<  MSAR_GIGA_PORT_MODE_OFFS)
    	
@@ -230,17 +220,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MSAR_GIGA_PORT_MODE_MII			(0x3 <<  MSAR_GIGA_PORT_MODE_OFFS)
 #define MSAR_GIGA_PORT_MODE_RGMII		(0x7 <<  MSAR_GIGA_PORT_MODE_OFFS)
 
-
-
-
 /* These macros help units to identify a target Mbus Arbiter group */
 #define MV_TARGET_IS_DRAM(target)   \
                             ((target >= SDRAM_CS0) && (target <= SDRAM_CS3))
 
 #define MV_TARGET_IS_PEX0(target)   \
                             ((target >= PEX0_MEM) && (target <= PEX0_IO))
-
-
 
 #define MV_TARGET_IS_PEX1(target)   0
 
@@ -255,15 +240,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_PCI_DRAM_BAR_TO_DRAM_TARGET(bar)   \
                             ((MV_TARGET)((MV_U32)(bar - CS0_BAR) + (MV_U32)SDRAM_CS0))
 
-                            
 #define MV_TARGET_IS_AS_BOOT(target)	0
 #define BOOT_TARGETS_NAME_ARRAY 		{}
 #define MV_CHANGE_BOOT_CS(target)		(target)
 
-
 #define TCLK_TO_COUNTER_RATIO   1   /* counters running in Tclk */
 /* typedefs */
-
 
 #ifndef MV_ASMLANGUAGE
 /* This enumerator described the possible Controller paripheral targets.    */
@@ -294,7 +276,6 @@ typedef enum _mvTarget
 #define PEX0_MEM0	PEX0_MEM
 #define PCI0_MEM0	PCI0_MEM
 
-
 /* For old competability */
 #define DEVICE_CS3	DEV_BOOCS
 
@@ -307,7 +288,6 @@ typedef enum _mvTarget
 /* Device Interface NAND Flash Control Register (DINFCR) */
 #define DINFCR_NF_CS_MASK(csNum)         (0x1 << ((((csNum)+1) % MV_DEVICE_MAX_CS) * 2))
 #define DINFCR_NF_ACT_CE_MASK(csNum)     (0x2 << ((((csNum)+1) % MV_DEVICE_MAX_CS) * 2))
-
 
 #if defined (MV_INCLUDE_PCI) && defined (MV_INCLUDE_PEX)
 
@@ -356,7 +336,6 @@ typedef enum _mvTargetId
     {0x00,CRYPT_TARGET_ID} /* CRYPT_ENG */	\
 }
 
-
 #define TARGETS_NAME_ARRAY	{					\
     "SDRAM_CS0", /* SDRAM_CS0 */		\
     "SDRAM_CS1", /* SDRAM_CS1 */		\
@@ -374,8 +353,6 @@ typedef enum _mvTargetId
     "CRYPT_ENG" /* CRYPT_ENG */	\
 }
 
-
 #endif /* MV_ASMLANGUAGE */
-
 
 #endif /* __IN88F5181LCtrlEnvSpech */

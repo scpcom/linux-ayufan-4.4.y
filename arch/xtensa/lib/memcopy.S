@@ -27,7 +27,6 @@
 #endif
 	.endm
 
-
 /*
  * void *memcpy(void *dst, const void *src, size_t len);
  * void *memmove(void *dst, const void *src, size_t len);
@@ -86,7 +85,6 @@ bcopy:
 	mov	a3, a2
 	mov	a2, a5
 	j	.Lcommon	# go to common code for memcpy+bcopy
-
 
 /*
  * Byte by byte copy

@@ -59,7 +59,6 @@ void HBA_ModuleStarted(struct mv_mod_desc *mod_desc);
 	 scmd->cmnd[9] ==0xE6||scmd->cmnd[9] ==0xEC||\
 	 scmd->cmnd[9] ==0xA1||scmd->cmnd[9] ==0xB0))
 
-
 #ifdef SUPPORT_EVENT
 /* wrapper for DriverEvent, needed to implement queue */
 typedef struct _Driver_Event_Entry
@@ -92,7 +91,6 @@ struct gen_module_desc {
 		   *(_parent_ext_p) = __ext_to_gen(_ext)->desc->parent->extension;           \
 	   }
 
-
 #define hba_notify_upper_md(ext, eid, param)                 			 	\
    {                                                                     	\
 	__ext_to_gen(ext)->desc->parent->ops->module_notification(       		\
@@ -101,8 +99,6 @@ struct gen_module_desc {
 					    					param);					 	\
    }
 
-
-
 #define HBA_GetControllerInfor(_ext, _pinfo)                              \
            {    \
 		   (_pinfo)->Base_Address = __ext_to_gen(_ext)->desc->hba_desc->Base_Address; \
@@ -110,7 +106,6 @@ struct gen_module_desc {
 		   (_pinfo)->Device_Id    = __ext_to_gen(_ext)->desc->hba_desc->device;    \
 		   (_pinfo)->Revision_Id  = __ext_to_gen(_ext)->desc->hba_desc->Revision_Id;  \
 	   }
-
 
 void hba_swap_buf_le16(u16 *buf, unsigned int words);
 
@@ -172,6 +167,5 @@ MV_BOOLEAN __is_scsi_cmd_simulated(MV_U8 cmd_type);
 void HBA_kunmap_sg(void*);
 /*set pci Device ID */
 MV_U16 SetDeviceID(MV_U32 pad_test);
-
 
 #endif /* __HBA_EXPOSE_H__ */

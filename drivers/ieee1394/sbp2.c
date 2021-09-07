@@ -230,7 +230,6 @@ module_param_named(long_ieee1394_id, sbp2_long_sysfs_ieee1394_id, bool, 0644);
 MODULE_PARM_DESC(long_ieee1394_id, "8+3+2 bytes format of ieee1394_id in sysfs "
 		 "(default = backwards-compatible = N, SAM-conforming = Y)");
 
-
 #define SBP2_INFO(fmt, args...)	HPSB_INFO("sbp2: "fmt, ## args)
 #define SBP2_ERR(fmt, args...)	HPSB_ERR("sbp2: "fmt, ## args)
 
@@ -254,7 +253,6 @@ static void sbp2_parse_unit_directory(struct sbp2_lu *,
 				      struct unit_directory *);
 static int sbp2_set_busy_timeout(struct sbp2_lu *);
 static int sbp2_max_speed_and_size(struct sbp2_lu *);
-
 
 static const u8 sbp2_speedto_max_payload[] = { 0x7, 0x8, 0x9, 0xa, 0xa, 0xa };
 
@@ -281,7 +279,6 @@ static const struct hpsb_address_ops sbp2_physdma_ops = {
 };
 #endif
 
-
 /*
  * Interface to driver core and IEEE 1394 core
  */
@@ -307,7 +304,6 @@ static struct hpsb_protocol_driver sbp2_driver = {
 		.remove		= sbp2_remove,
 	},
 };
-
 
 /*
  * Interface to SCSI core

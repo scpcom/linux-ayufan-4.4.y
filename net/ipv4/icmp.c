@@ -407,7 +407,6 @@ out_unlock:
 	icmp_xmit_unlock(sk);
 }
 
-
 /*
  *	Send an ICMP message in response to a situation
  *
@@ -526,7 +525,6 @@ void icmp_send(struct sk_buff *skb_in, int type, int code, __be32 info)
 
 	if (ip_options_echo(&icmp_param.replyopts, skb_in))
 		goto out_unlock;
-
 
 	/*
 	 *	Prepare data for ICMP header.
@@ -653,7 +651,6 @@ out_unlock:
 out:;
 }
 
-
 /*
  *	Handle ICMP_DEST_UNREACH, ICMP_TIME_EXCEED, and ICMP_QUENCH.
  */
@@ -774,7 +771,6 @@ out_err:
 	goto out;
 }
 
-
 /*
  *	Handle ICMP_REDIRECT.
  */
@@ -884,7 +880,6 @@ out_err:
 	ICMP_INC_STATS_BH(dev_net(skb_dst(skb)->dev), ICMP_MIB_INERRORS);
 	goto out;
 }
-
 
 /*
  *	Handle ICMP_ADDRESS_MASK requests.  (RFC950)
@@ -1028,7 +1023,6 @@ int icmp_rcv(struct sk_buff *skb)
 	 */
 	if (icmph->type > NR_ICMP_TYPES)
 		goto error;
-
 
 	/*
 	 *	Parse the ICMP message

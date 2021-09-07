@@ -29,7 +29,6 @@
 #include "../rt_config.h"
 #include "../netif_block.h"
 
-
 static NETIF_ENTRY freeNetIfEntryPool[FREE_NETIF_POOL_SIZE];
 static LIST_HEADER freeNetIfEntryList;
 
@@ -86,7 +85,6 @@ VOID releaseNetIf(
 	pBlockQueueEntry->SwTxQueueBlockFlag = FALSE;
 	return;
 }
-
 
 VOID StopNetIfQueue(
 	IN PRTMP_ADAPTER pAd,

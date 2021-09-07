@@ -356,7 +356,6 @@ int tick_resume_broadcast(void)
 	return broadcast;
 }
 
-
 #ifdef CONFIG_TICK_ONESHOT
 
 /* FIXME: use cpumask_var_t. */
@@ -571,7 +570,6 @@ void tick_broadcast_switch_to_oneshot(void)
 		tick_broadcast_setup_oneshot(bc);
 	spin_unlock_irqrestore(&tick_broadcast_lock, flags);
 }
-
 
 /*
  * Remove a dead CPU from broadcasting

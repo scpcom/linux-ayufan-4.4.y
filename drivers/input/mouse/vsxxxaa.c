@@ -108,8 +108,6 @@ MODULE_LICENSE ("GPL");
 #define VSXXXAA_PACKET_POR	0xa0
 #define MATCH_PACKET_TYPE(data, type)	(((data) & VSXXXAA_PACKET_MASK) == (type))
 
-
-
 struct vsxxxaa {
 	struct input_dev *dev;
 	struct serio *serio;
@@ -584,4 +582,3 @@ vsxxxaa_exit (void)
 
 module_init (vsxxxaa_init);
 module_exit (vsxxxaa_exit);
-

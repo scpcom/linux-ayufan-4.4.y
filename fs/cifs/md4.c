@@ -62,7 +62,6 @@ mdfour64(__u32 *M, __u32 *A, __u32 *B, __u32 *C, __u32 *D)
 	__u32 AA, BB, CC, DD;
 	__u32 X[16];
 
-
 	for (j = 0; j < 16; j++)
 		X[j] = M[j];
 

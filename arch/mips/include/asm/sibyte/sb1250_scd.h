@@ -107,13 +107,11 @@
 #define K_SYS_L2C_SIZE_BCM1125	K_SYS_L2C_SIZE_256KB
 #define K_SYS_L2C_SIZE_BCM1122	K_SYS_L2C_SIZE_128KB
 
-
 /* Number of CPU cores, bits 27:24  of revision register*/
 #define S_SYS_NUM_CPUS            _SB_MAKE64(24)
 #define M_SYS_NUM_CPUS            _SB_MAKEMASK(4, S_SYS_NUM_CPUS)
 #define V_SYS_NUM_CPUS(x)         _SB_MAKEVALUE(x, S_SYS_NUM_CPUS)
 #define G_SYS_NUM_CPUS(x)         _SB_GETVALUE(x, S_SYS_NUM_CPUS, M_SYS_NUM_CPUS)
-
 
 /* XXX: discourage people from using these constants.  */
 #define S_SYS_PART                  _SB_MAKE64(16)
@@ -127,7 +125,6 @@
 #define K_SYS_PART_BCM1125          0x1123
 #define K_SYS_PART_BCM1125H         0x1124
 #define K_SYS_PART_BCM1122          0x1113
-
 
 /* The "peripheral set" (SOC type) is the low 4 bits of the "part" field.  */
 #define S_SYS_SOC_TYPE              _SB_MAKE64(16)
@@ -213,7 +210,6 @@
 #define V_SYS_YPOS(x)             _SB_MAKEVALUE(x, S_SYS_YPOS)
 #define G_SYS_YPOS(x)             _SB_GETVALUE(x, S_SYS_YPOS, M_SYS_YPOS)
 #endif
-
 
 /*
  * System Config Register (Table 4-2)
@@ -307,7 +303,6 @@
 
 #endif
 
-
 /*
  * Mailbox Registers (Table 4-3)
  * Registers: SCD_MBOX_CPU_x
@@ -354,7 +349,6 @@
 #define S_SCD_WDOG_HAS_RESET        8
 #define M_SCD_WDOG_HAS_RESET        _SB_MAKEMASK1(S_SCD_WDOG_HAS_RESET)
 #endif
-
 
 /*
  * Timer Registers (Table 4-11) (Table 4-12) (Table 4-13)
@@ -406,7 +400,6 @@
 #define M_SPC_CFG_ENABLE	_SB_MAKEMASK1(33)
 #endif
 
-
 /*
  * Bus Watcher
  */
@@ -427,7 +420,6 @@
 #define G_SCD_BERR_DCODE(x)       _SB_GETVALUE(x, S_SCD_BERR_DCODE, M_SCD_BERR_DCODE)
 
 #define M_SCD_BERR_MULTERRS       _SB_MAKEMASK1(30)
-
 
 #define S_SCD_L2ECC_CORR_D        0
 #define M_SCD_L2ECC_CORR_D        _SB_MAKEMASK(8, S_SCD_L2ECC_CORR_D)
@@ -463,7 +455,6 @@
 #define M_SCD_MEM_BUSERR          _SB_MAKEMASK(8, S_SCD_MEM_BUSERR)
 #define V_SCD_MEM_BUSERR(x)       _SB_MAKEVALUE(x, S_SCD_MEM_BUSERR)
 #define G_SCD_MEM_BUSERR(x)       _SB_GETVALUE(x, S_SCD_MEM_BUSERR, M_SCD_MEM_BUSERR)
-
 
 /*
  * Address Trap Registers

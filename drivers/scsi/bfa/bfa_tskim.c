@@ -306,8 +306,6 @@ bfa_tskim_sm_hcb(struct bfa_tskim_s *tskim, enum bfa_tskim_event event)
 	}
 }
 
-
-
 /**
  *  bfa_tskim_private
  */
@@ -525,8 +523,6 @@ bfa_tskim_iocdisable_ios(struct bfa_tskim_s *tskim)
 	}
 }
 
-
-
 /**
  *  bfa_tskim_friend
  */
@@ -629,12 +625,9 @@ bfa_tskim_isr(struct bfa_s *bfa, struct bfi_msg_s *m)
 	}
 }
 
-
-
 /**
  *  bfa_tskim_api
  */
-
 
 struct bfa_tskim_s *
 bfa_tskim_alloc(struct bfa_s *bfa, struct bfad_tskim_s *dtsk)
@@ -685,5 +678,3 @@ bfa_tskim_start(struct bfa_tskim_s *tskim, struct bfa_itnim_s *itnim, lun_t lun,
 	list_add_tail(&tskim->qe, &itnim->tsk_q);
 	bfa_sm_send_event(tskim, BFA_TSKIM_SM_START);
 }
-
-

@@ -455,4 +455,3 @@ int get_tx_descriptor(
 
     return index;
 }
-

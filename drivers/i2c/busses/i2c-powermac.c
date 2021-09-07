@@ -179,7 +179,6 @@ static const struct i2c_algorithm i2c_powermac_algorithm = {
 	.functionality	= i2c_powermac_func,
 };
 
-
 static int __devexit i2c_powermac_remove(struct platform_device *dev)
 {
 	struct i2c_adapter	*adapter = platform_get_drvdata(dev);
@@ -199,7 +198,6 @@ static int __devexit i2c_powermac_remove(struct platform_device *dev)
 
 	return 0;
 }
-
 
 static int __devinit i2c_powermac_probe(struct platform_device *dev)
 {
@@ -292,7 +290,6 @@ static int __devinit i2c_powermac_probe(struct platform_device *dev)
 	return rc;
 }
 
-
 /* work with hotplug and coldplug */
 MODULE_ALIAS("platform:i2c-powermac");
 
@@ -310,7 +307,6 @@ static int __init i2c_powermac_init(void)
 	platform_driver_register(&i2c_powermac_driver);
 	return 0;
 }
-
 
 static void __exit i2c_powermac_cleanup(void)
 {

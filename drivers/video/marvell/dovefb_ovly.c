@@ -72,7 +72,6 @@ static struct _sViewPortOffset gViewPortOffset = {
 	.yOffset = 0
 };
 
-
 static void dovefb_do_tasklet(unsigned long data)
 {
 	struct fb_info *fi;
@@ -683,7 +682,6 @@ static int addFreeBuf(u8 **ppBufList, u8 *pFreeBuf)
 		}
 	}
 
-
 	if (i >= MAX_QUEUE_NUM)
 	    printk(KERN_INFO "buffer overflow\n");
 
@@ -811,8 +809,6 @@ static int dovefb_switch_buff(struct fb_info *fi)
 
 	return 0;
 }
-
-
 
 static void set_dma_control0(struct dovefb_layer_info *dfli)
 {
@@ -1048,14 +1044,12 @@ static int dovefb_ovly_set_par(struct fb_info *fi)
 	return 0;
 }
 
-
 static int dovefb_ovly_fb_sync(struct fb_info *info)
 {
 	struct dovefb_layer_info *dfli = info->par;
 
 	return wait_for_vsync(dfli);
 }
-
 
 /*
  *  dovefb_handle_irq(two lcd controllers)
@@ -1071,7 +1065,6 @@ int dovefb_ovly_handle_irq(u32 isr, struct dovefb_layer_info *dfli)
 
 	return 1;
 }
-
 
 #ifdef CONFIG_PM
 int dovefb_ovly_suspend(struct dovefb_layer_info *dfli, pm_message_t mesg)
@@ -1133,7 +1126,6 @@ int dovefb_ovly_init(struct dovefb_info *info, struct dovefb_mach_info *dmi)
 
 	return 0;
 }
-
 
 /* Fix me: Currently, bufferable property can't be enabled correctly. It has
  * to be enabled cacheable. Or write buffer won't act properly. Here
@@ -1201,7 +1193,6 @@ struct fb_ops dovefb_ovly_ops = {
 	.fb_sync	= dovefb_ovly_fb_sync,
 	.fb_ioctl	= dovefb_ovly_ioctl,
 };
-
 
 MODULE_AUTHOR("Green Wan <gwan@marvell.com>");
 MODULE_AUTHOR("Shadi Ammouri <shadi@marvell.com>");

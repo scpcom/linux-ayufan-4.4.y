@@ -164,8 +164,6 @@ enum
 	KERN_PANIC_ON_NMI=76, /* int: whether we will panic on an unrecovered */
 };
 
-
-
 /* CTL_VM names: */
 enum
 {
@@ -205,7 +203,6 @@ enum
 	VM_VDSO_ENABLED=34,	/* map VDSO into new processes? */
 	VM_MIN_SLAB=35,		 /* Percent pages ignored by zone reclaim */
 };
-
 
 /* CTL_NET names: */
 enum
@@ -656,7 +653,6 @@ enum {
 	NET_ATALK_AARP_RESOLVE_TIME=4
 };
 
-
 /* /proc/sys/net/netrom */
 enum {
 	NET_NETROM_DEFAULT_PATH_QUALITY=1,
@@ -810,7 +806,6 @@ enum {
 	NET_IRDA_WARN_NOREPLY_TIME=13,
 	NET_IRDA_LAP_KEEPALIVE_TIME=14,
 };
-
 
 /* CTL_FS names: */
 enum
@@ -1009,7 +1004,6 @@ extern ctl_handler sysctl_string;
 extern ctl_handler sysctl_intvec;
 extern ctl_handler sysctl_jiffies;
 extern ctl_handler sysctl_ms_jiffies;
-
 
 /*
  * Register a set of sysctl names by calling register_sysctl_table

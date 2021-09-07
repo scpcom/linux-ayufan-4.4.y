@@ -33,7 +33,6 @@
 
 #include <prom.h>
 
-
 char irq_tab_alchemy[][5] __initdata = {
 	[12] = { -1, INTA, INTX, INTX, INTX },   /* IDSEL 12 - HPT370	*/
 	[13] = { -1, INTA, INTB, INTC, INTD },   /* IDSEL 13 - PCI slot */
@@ -46,7 +45,6 @@ struct au1xxx_irqmap __initdata au1xxx_irq_map[] = {
 	{ AU1500_GPIO_203, IRQF_TRIGGER_LOW, 0 },
 	{ AU1500_GPIO_205, IRQF_TRIGGER_LOW, 0 },
 };
-
 
 const char *get_system_type(void)
 {

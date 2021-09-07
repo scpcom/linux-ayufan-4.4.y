@@ -12,7 +12,6 @@
  *
  */
 
-
 #ifndef _MV88FX_PCM_H
 #define _MV88FX_PCM_H
 
@@ -26,7 +25,6 @@
 #endif
 #define mv88fx_snd_error(format, args...) \
 	printk(KERN_ERR "%s(%d): "format"\n", __func__, __LINE__, ##args)
-
 
 struct mv88fx_snd_stream {
 
@@ -48,7 +46,6 @@ unsigned int dig_mode;	/* i2s,spdif,both */
  unsigned int spdif_status[4];	/* SPDIF status */
 
 };
-
 
 struct mv88fx_snd_chip {
 	struct snd_card *card;
@@ -74,8 +71,6 @@ struct mv88fx_snd_chip {
 
 };
 
-
-
 struct mv88fx_snd_machine_data {
 	struct platform_device *snd_dev;
 	int port;
@@ -88,12 +83,10 @@ struct mv88fx_snd_machine_data {
 #endif
 };
 
-
 #define MV88FX_SND_MIN_PERIODS		8
 #define MV88FX_SND_MAX_PERIODS		16
 #define	MV88FX_SND_MIN_PERIOD_BYTES	0x4000
 #define	MV88FX_SND_MAX_PERIOD_BYTES	0x4000
-
 
 /* read/write registers */
 #define mv88fx_snd_writel(base, offs, val)	\
@@ -110,17 +103,11 @@ struct mv88fx_snd_machine_data {
 	writel((readl(base + offs) & (~(bitmask))), \
 	base + offs)
 
-
-
-
 extern struct mv88fx_snd_chip *mv88fx_pcm_snd_chip;
 
 #define mv88fx_pcm_get_chip() mv88fx_pcm_snd_chip
 #define mv88fx_pcm_is_stereo(runtime)        ((runtime)->channels != 1)
 
-
 extern struct snd_soc_platform mv88fx_soc_platform;
-
-
 
 #endif

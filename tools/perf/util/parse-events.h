@@ -30,5 +30,4 @@ extern void print_events(void);
 extern char debugfs_path[];
 extern int valid_debugfs_mount(const char *debugfs);
 
-
 #endif /* _PARSE_EVENTS_H */

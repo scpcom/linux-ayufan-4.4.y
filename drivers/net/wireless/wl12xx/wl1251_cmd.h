@@ -125,7 +125,6 @@ enum {
 	MAX_COMMAND_STATUS            		= 0xff
 };
 
-
 /*
  * CMD_READ_MEMORY
  *
@@ -162,7 +161,6 @@ struct cmd_read_write_memory {
 
 #define CMDMBOX_HEADER_LEN 4
 #define CMDMBOX_INFO_ELEM_HEADER_LEN 4
-
 
 struct basic_scan_parameters {
 	u32 rx_config_options;
@@ -229,7 +227,6 @@ enum {
 
 #define JOIN_CMD_CTRL_TX_FLUSH             0x80 /* Firmware flushes all Tx */
 #define JOIN_CMD_CTRL_EARLY_WAKEUP_ENABLE  0x01 /* Early wakeup time */
-
 
 struct cmd_join {
 	struct wl1251_cmd_header header;
@@ -402,6 +399,5 @@ struct wl1251_cmd_set_keys {
 	u16 ac_seq_num16[NUM_ACCESS_CATEGORIES_COPY];
 	u32 ac_seq_num32[NUM_ACCESS_CATEGORIES_COPY];
 } __attribute__ ((packed));
-
 
 #endif /* __WL1251_CMD_H__ */

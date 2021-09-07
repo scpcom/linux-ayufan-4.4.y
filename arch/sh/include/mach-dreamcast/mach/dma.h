@@ -31,4 +31,3 @@
 #define G2_DMA_BASE		0xa05f7800
 
 #endif /* __ASM_SH_DREAMCAST_DMA_H */
-

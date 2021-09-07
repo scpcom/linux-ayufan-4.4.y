@@ -585,7 +585,6 @@ static int mwl8k_load_firmware(struct mwl8k_priv *priv)
 	return loops ? 0 : -ETIMEDOUT;
 }
 
-
 /*
  * Defines shared between transmission and reception.
  */
@@ -729,7 +728,6 @@ static inline void mwl8k_add_dma_header(struct sk_buff *skb)
 	tr->fwlen = cpu_to_le16(pktlen - hdrlen);
 }
 
-
 /*
  * Packet reception.
  */
@@ -867,7 +865,6 @@ static void mwl8k_rxq_deinit(struct ieee80211_hw *hw, int index)
 	rxq->rx_desc_area = NULL;
 }
 
-
 /*
  * Scan a list of BSSIDs to process for finalize join.
  * Allows for extension to process multiple BSSIDs.
@@ -959,7 +956,6 @@ static int rxq_process(struct ieee80211_hw *hw, int index, int limit)
 
 	return processed;
 }
-
 
 /*
  * Packet transmission.
@@ -1358,7 +1354,6 @@ mwl8k_txq_xmit(struct ieee80211_hw *hw, int index, struct sk_buff *skb)
 	return NETDEV_TX_OK;
 }
 
-
 /*
  * Firmware access.
  *
@@ -1411,7 +1406,6 @@ static void mwl8k_fw_unlock(struct ieee80211_hw *hw)
 		mutex_unlock(&priv->fw_mutex);
 	}
 }
-
 
 /*
  * Command processing.
@@ -2368,7 +2362,6 @@ static int mwl8k_cmd_use_fixed_rate(struct ieee80211_hw *hw,
 	return rc;
 }
 
-
 /*
  * Interrupt handling.
  */
@@ -2405,7 +2398,6 @@ static irqreturn_t mwl8k_interrupt(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
-
 
 /*
  * Core driver operations.

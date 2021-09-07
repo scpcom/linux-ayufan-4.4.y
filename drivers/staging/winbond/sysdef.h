@@ -1,5 +1,4 @@
 
-
 //
 // Winbond WLAN System Configuration defines
 //
@@ -13,13 +12,11 @@
 #define WB_LINUX
 #define WB_LINUX_WPA_PSK
 
-
 //#define _IBSS_BEACON_SEQ_STICK_
 #define _USE_FALLBACK_RATE_
 //#define ANTDIV_DEFAULT_ON
 
 #define _WPA2_	// 20061122 It's needed for current Linux driver
-
 
 #ifndef _WPA_PSK_DEBUG
 #undef  _WPA_PSK_DEBUG

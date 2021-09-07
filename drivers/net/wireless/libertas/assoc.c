@@ -23,7 +23,6 @@ static const u8 bssid_off[ETH_ALEN]  __attribute__ ((aligned (2))) =
  */
 #define CAPINFO_MASK	(~(0xda00))
 
-
 /**
  *  @brief This function finds common rates between rates and card rates.
  *
@@ -81,7 +80,6 @@ done:
 	return 0;
 }
 
-
 /**
  *  @brief Sets the MSB on basic rates as the firmware requires
  *
@@ -100,7 +98,6 @@ static void lbs_set_basic_rate_flags(u8 *rates, size_t len)
 			rates[i] |= 0x80;
 	}
 }
-
 
 static u8 iw_auth_to_ieee_auth(u8 auth)
 {
@@ -145,7 +142,6 @@ static int lbs_set_authentication(struct lbs_private *priv, u8 bssid[6], u8 auth
 	lbs_deb_leave_args(LBS_DEB_JOIN, "ret %d", ret);
 	return ret;
 }
-
 
 static int lbs_assoc_post(struct lbs_private *priv,
 			  struct cmd_ds_802_11_associate_response *resp)
@@ -1109,7 +1105,6 @@ static int assoc_helper_essid(struct lbs_private *priv,
 	return ret;
 }
 
-
 static int assoc_helper_bssid(struct lbs_private *priv,
                               struct assoc_request * assoc_req)
 {
@@ -1141,7 +1136,6 @@ out:
 	return ret;
 }
 
-
 static int assoc_helper_associate(struct lbs_private *priv,
                                   struct assoc_request * assoc_req)
 {
@@ -1166,7 +1160,6 @@ static int assoc_helper_associate(struct lbs_private *priv,
 	lbs_deb_leave_args(LBS_DEB_ASSOC, "ret %d", ret);
 	return ret;
 }
-
 
 static int assoc_helper_mode(struct lbs_private *priv,
                              struct assoc_request * assoc_req)
@@ -1260,7 +1253,6 @@ static int assoc_helper_channel(struct lbs_private *priv,
 	return ret;
 }
 
-
 static int assoc_helper_wep_keys(struct lbs_private *priv,
 				 struct assoc_request *assoc_req)
 {
@@ -1342,7 +1334,6 @@ out:
 	return ret;
 }
 
-
 static int assoc_helper_wpa_keys(struct lbs_private *priv,
                                  struct assoc_request * assoc_req)
 {
@@ -1383,7 +1374,6 @@ out:
 	return ret;
 }
 
-
 static int assoc_helper_wpa_ie(struct lbs_private *priv,
                                struct assoc_request * assoc_req)
 {
@@ -1402,7 +1392,6 @@ static int assoc_helper_wpa_ie(struct lbs_private *priv,
 	lbs_deb_leave_args(LBS_DEB_ASSOC, "ret %d", ret);
 	return ret;
 }
-
 
 static int should_deauth_infrastructure(struct lbs_private *priv,
                                         struct assoc_request * assoc_req)
@@ -1454,7 +1443,6 @@ out:
 	return ret;
 }
 
-
 static int should_stop_adhoc(struct lbs_private *priv,
                              struct assoc_request * assoc_req)
 {
@@ -1482,7 +1470,6 @@ static int should_stop_adhoc(struct lbs_private *priv,
 	lbs_deb_leave(LBS_DEB_ASSOC);
 	return 0;
 }
-
 
 /**
  *  @brief This function finds the best SSID in the Scan List
@@ -1567,7 +1554,6 @@ out:
 	lbs_deb_leave_args(LBS_DEB_SCAN, "ret %d", ret);
 	return ret;
 }
-
 
 void lbs_association_worker(struct work_struct *work)
 {
@@ -1750,7 +1736,6 @@ done:
 	lbs_deb_leave(LBS_DEB_ASSOC);
 }
 
-
 /*
  * Caller MUST hold any necessary locks
  */
@@ -1829,7 +1814,6 @@ struct assoc_request *lbs_get_association_request(struct lbs_private *priv)
 	return assoc_req;
 }
 
-
 /**
  *  @brief Deauthenticate from a specific BSS
  *
@@ -1862,4 +1846,3 @@ int lbs_cmd_80211_deauthenticate(struct lbs_private *priv, u8 bssid[ETH_ALEN],
 	lbs_deb_leave(LBS_DEB_JOIN);
 	return ret;
 }
-

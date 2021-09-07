@@ -499,7 +499,6 @@ sclp_eval_cpmsu(struct gds_vector *start, struct gds_vector *end)
 	}
 }
 
-
 static inline void
 sclp_eval_mdsmu(struct gds_vector *start, void *end)
 {

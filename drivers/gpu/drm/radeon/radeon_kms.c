@@ -30,7 +30,6 @@
 #include "radeon.h"
 #include "radeon_drm.h"
 
-
 /*
  * Driver load/unload
  */
@@ -89,7 +88,6 @@ int radeon_driver_unload_kms(struct drm_device *dev)
 	return 0;
 }
 
-
 /*
  * Userspace get informations ioctl
  */
@@ -126,7 +124,6 @@ int radeon_info_ioctl(struct drm_device *dev, void *data, struct drm_file *filp)
 	return 0;
 }
 
-
 /*
  * Outdated mess for old drm with Xorg being in charge (void function now).
  */
@@ -134,7 +131,6 @@ int radeon_driver_firstopen_kms(struct drm_device *dev)
 {
 	return 0;
 }
-
 
 void radeon_driver_lastclose_kms(struct drm_device *dev)
 {
@@ -154,7 +150,6 @@ void radeon_driver_preclose_kms(struct drm_device *dev,
 				struct drm_file *file_priv)
 {
 }
-
 
 /*
  * VBlank related functions.
@@ -198,7 +193,6 @@ void radeon_disable_vblank_kms(struct drm_device *dev, int crtc)
 
 	radeon_irq_set(rdev);
 }
-
 
 /*
  * IOCTL.
@@ -247,7 +241,6 @@ KMS_INVALID_IOCTL(radeon_irq_wait_kms)
 KMS_INVALID_IOCTL(radeon_cp_setparam_kms)
 KMS_INVALID_IOCTL(radeon_surface_alloc_kms)
 KMS_INVALID_IOCTL(radeon_surface_free_kms)
-
 
 struct drm_ioctl_desc radeon_ioctls_kms[] = {
 	DRM_IOCTL_DEF(DRM_RADEON_CP_INIT, radeon_cp_init_kms, DRM_AUTH|DRM_MASTER|DRM_ROOT_ONLY),

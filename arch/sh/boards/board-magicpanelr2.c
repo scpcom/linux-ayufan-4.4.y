@@ -373,7 +373,6 @@ static struct platform_device *mpr2_devices[] __initdata = {
 	&flash_device,
 };
 
-
 static int __init mpr2_devices_setup(void)
 {
 	set_mtd_partitions();

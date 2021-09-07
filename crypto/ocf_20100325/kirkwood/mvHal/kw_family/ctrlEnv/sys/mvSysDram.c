@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 /* includes */
 
 #include "ddr2/mvDramIf.h"
@@ -220,7 +219,6 @@ MV_STATUS mvDramIfWinGet(MV_TARGET target, MV_DRAM_DEC_WIN *pAddrDecWin)
 
 	pAddrDecWin->addrWin.baseHigh =  0;
 
-
 	if (sizeReg & SCSR_WIN_EN)
 	{
 		pAddrDecWin->enable = MV_TRUE;
@@ -345,4 +343,3 @@ static MV_BOOL sdramIfWinOverlap(MV_TARGET target, MV_ADDR_WIN *pAddrWin)
 	
 	return MV_FALSE;
 }
-

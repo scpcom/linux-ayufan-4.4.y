@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef _STORVSC_API_H_
 #define _STORVSC_API_H_
 

@@ -341,4 +341,3 @@ MODULE_LICENSE("GPL");
 /* Register initialization functions using helper macros */
 module_init(i2c_sis96x_init);
 module_exit(i2c_sis96x_exit);
-

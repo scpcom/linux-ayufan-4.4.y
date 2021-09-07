@@ -153,7 +153,6 @@ static struct page *srmmu_pmd_page(pmd_t pmd)
 static inline unsigned long srmmu_pgd_page(pgd_t pgd)
 { return srmmu_device_memory(pgd_val(pgd))?~0:(unsigned long)__nocache_va((pgd_val(pgd) & SRMMU_PTD_PMASK) << 4); }
 
-
 static inline int srmmu_pte_none(pte_t pte)
 { return !(pte_val(pte) & 0xFFFFFFF); }
 
@@ -558,7 +557,6 @@ static inline void free_context(int context)
 	remove_from_ctx_list(ctx_old);
 	add_to_free_ctxlist(ctx_old);
 }
-
 
 static void srmmu_switch_mm(struct mm_struct *old_mm, struct mm_struct *mm,
     struct task_struct *tsk, int cpu)
@@ -1498,7 +1496,6 @@ static void __init init_hypersparc(void)
 	BTFIXUPSET_CALL(flush_sig_insns, hypersparc_flush_sig_insns, BTFIXUPCALL_NORM);
 	BTFIXUPSET_CALL(flush_page_for_dma, hypersparc_flush_page_for_dma, BTFIXUPCALL_NOP);
 
-
 	poke_srmmu = poke_hypersparc;
 
 	hypersparc_setup_blockops();
@@ -1559,7 +1556,6 @@ static void __init init_cypress_common(void)
 	BTFIXUPSET_CALL(flush_tlb_mm, cypress_flush_tlb_mm, BTFIXUPCALL_NORM);
 	BTFIXUPSET_CALL(flush_tlb_page, cypress_flush_tlb_page, BTFIXUPCALL_NORM);
 	BTFIXUPSET_CALL(flush_tlb_range, cypress_flush_tlb_range, BTFIXUPCALL_NORM);
-
 
 	BTFIXUPSET_CALL(__flush_page_to_ram, cypress_flush_page_to_ram, BTFIXUPCALL_NORM);
 	BTFIXUPSET_CALL(flush_sig_insns, cypress_flush_sig_insns, BTFIXUPCALL_NOP);
@@ -1670,7 +1666,6 @@ static void __init init_swift(void)
 	BTFIXUPSET_CALL(flush_cache_page, swift_flush_cache_page, BTFIXUPCALL_NORM);
 	BTFIXUPSET_CALL(flush_cache_range, swift_flush_cache_range, BTFIXUPCALL_NORM);
 
-
 	BTFIXUPSET_CALL(flush_tlb_all, swift_flush_tlb_all, BTFIXUPCALL_NORM);
 	BTFIXUPSET_CALL(flush_tlb_mm, swift_flush_tlb_mm, BTFIXUPCALL_NORM);
 	BTFIXUPSET_CALL(flush_tlb_page, swift_flush_tlb_page, BTFIXUPCALL_NORM);
@@ -1773,7 +1768,6 @@ static void turbosparc_flush_tlb_page(struct vm_area_struct *vma, unsigned long 
 	FLUSH_END
 }
 
-
 static void __cpuinit poke_turbosparc(void)
 {
 	unsigned long mreg = srmmu_get_mmureg();
@@ -1863,7 +1857,6 @@ static void __init init_tsunami(void)
 	BTFIXUPSET_CALL(flush_cache_mm, tsunami_flush_cache_mm, BTFIXUPCALL_NORM);
 	BTFIXUPSET_CALL(flush_cache_page, tsunami_flush_cache_page, BTFIXUPCALL_NORM);
 	BTFIXUPSET_CALL(flush_cache_range, tsunami_flush_cache_range, BTFIXUPCALL_NORM);
-
 
 	BTFIXUPSET_CALL(flush_tlb_all, tsunami_flush_tlb_all, BTFIXUPCALL_NORM);
 	BTFIXUPSET_CALL(flush_tlb_mm, tsunami_flush_tlb_mm, BTFIXUPCALL_NORM);

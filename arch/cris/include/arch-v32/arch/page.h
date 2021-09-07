@@ -1,7 +1,6 @@
 #ifndef _ASM_CRIS_ARCH_PAGE_H
 #define _ASM_CRIS_ARCH_PAGE_H
 
-
 #ifdef __KERNEL__
 
 #define PAGE_OFFSET KSEG_C	/* kseg_c is mapped to physical ram. */

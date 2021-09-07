@@ -664,7 +664,6 @@ s32 ixgbe_setup_mac_link_82599(struct ixgbe_hw *hw,
 	else
 		orig_autoc = autoc;
 
-
 	if (link_mode == IXGBE_AUTOC_LMS_KX4_KX_KR ||
 	    link_mode == IXGBE_AUTOC_LMS_KX4_KX_KR_1G_AN ||
 	    link_mode == IXGBE_AUTOC_LMS_KX4_KX_KR_SGMII) {
@@ -832,8 +831,6 @@ static s32 ixgbe_reset_hw_82599(struct ixgbe_hw *hw)
 
 	msleep(50);
 
-
-
 	/*
 	 * Store the original AUTOC/AUTOC2 values if they have not been
 	 * stored off yet.  Otherwise restore the stored original
@@ -998,7 +995,6 @@ static s32 ixgbe_set_vfta_82599(struct ixgbe_hw *hw, u32 vlan, u32 vind,
 	else
 		bits &= ~(1 << bitindex);
 	IXGBE_WRITE_REG(hw, IXGBE_VFTA(regindex), bits);
-
 
 	/* Part 2
 	 * If the vind is set
@@ -1372,7 +1368,6 @@ s32 ixgbe_init_fdir_perfect_82599(struct ixgbe_hw *hw, u32 pballoc)
 
 	return 0;
 }
-
 
 /**
  *  ixgbe_atr_compute_hash_82599 - Compute the hashes for SW ATR

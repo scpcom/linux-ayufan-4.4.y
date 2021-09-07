@@ -302,7 +302,6 @@ static void fsl_elbc_cmdfunc(struct mtd_info *mtd, unsigned int command,
 		        "fsl_elbc_cmdfunc: NAND_CMD_READ0, page_addr:"
 		        " 0x%x, column: 0x%x.\n", page_addr, column);
 
-
 		out_be32(&lbc->fbcr, 0); /* read entire page to enable ECC */
 		set_addr(mtd, 0, page_addr, 0);
 

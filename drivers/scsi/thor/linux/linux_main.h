@@ -46,4 +46,3 @@ enum {
 #define HI_BUSADDR(x) (sizeof(BUS_ADDRESS)>4? (u64)(x) >> 32 : 0)
 
 #endif /*_LINUX_MAIN_H*/
-

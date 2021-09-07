@@ -43,7 +43,6 @@
 
 #include <linux/generic_serial.h>
 
-
 #include "linux_compat.h"
 #include "rio_linux.h"
 #include "pkt.h"
@@ -76,7 +75,6 @@ static int RIOCheckIsolated(struct rio_info *, struct Host *, unsigned int);
 static int RIOIsolate(struct rio_info *, struct Host *, unsigned int);
 static int RIOCheck(struct Host *, unsigned int);
 static void RIOConCon(struct rio_info *, struct Host *, unsigned int, unsigned int, unsigned int, unsigned int, int);
-
 
 /*
 ** Incoming on the ROUTE_RUP
@@ -491,7 +489,6 @@ int RIORouteRup(struct rio_info *p, unsigned int Rup, struct Host *HostP, struct
 	return 1;
 }
 
-
 void RIOFixPhbs(struct rio_info *p, struct Host *HostP, unsigned int unit)
 {
 	unsigned short link, port;
@@ -815,7 +812,6 @@ static int RIORemoveFromSavedTable(struct rio_info *p, struct Map *pMap)
 	return 0;
 }
 
-
 /*
 ** RIOCheckDisconnected :
 **
@@ -825,7 +821,6 @@ static int RIORemoveFromSavedTable(struct rio_info *p, struct Map *pMap)
 static int RIOFreeDisconnected(struct rio_info *p, struct Host *HostP, int unit)
 {
 	int link;
-
 
 	rio_dprintk(RIO_DEBUG_ROUTE, "RIOFreeDisconnect unit %d\n", unit);
 	/*
@@ -875,7 +870,6 @@ static int RIOFreeDisconnected(struct rio_info *p, struct Host *HostP, int unit)
 
 	return 0;
 }
-
 
 /*
 ** RIOFindFreeID :
@@ -1013,7 +1007,6 @@ int RIOFindFreeID(struct rio_info *p, struct Host *HostP, unsigned int * pID1, u
 	 */
 	return 1;
 }
-
 
 /*
 ** The link switch scenario.

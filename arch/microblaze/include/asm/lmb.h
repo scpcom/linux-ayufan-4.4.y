@@ -13,5 +13,3 @@
 #define LMB_REAL_LIMIT	0xFFFFFFFF
 
 #endif /* _ASM_MICROBLAZE_LMB_H */
-
-

@@ -17,7 +17,6 @@
 #include <linux/pci_ids.h>
 #include <linux/list.h>
 
-
 #define xstr(s) str(s)
 #define str(s) #s
 #define MOD_NAME xstr(KBUILD_BASENAME)
@@ -98,7 +97,6 @@ static void amd76xrom_cleanup(struct amd76xrom_window *window)
 	}
 }
 
-
 static int __devinit amd76xrom_init_one (struct pci_dev *pdev,
 	const struct pci_device_id *ent)
 {
@@ -154,7 +152,6 @@ static int __devinit amd76xrom_init_one (struct pci_dev *pdev,
 			(unsigned long long)window->rsrc.start,
 			(unsigned long long)window->rsrc.end);
 	}
-
 
 	/* Enable writes through the rom window */
 	pci_read_config_byte(pdev, 0x40, &byte);
@@ -269,7 +266,6 @@ static int __devinit amd76xrom_init_one (struct pci_dev *pdev,
 			goto out;
 		}
 
-
 		/* Calculate the new value of map_top */
 		map_top += map->mtd->size;
 
@@ -288,7 +284,6 @@ static int __devinit amd76xrom_init_one (struct pci_dev *pdev,
 	}
 	return 0;
 }
-
 
 static void __devexit amd76xrom_remove_one (struct pci_dev *pdev)
 {
@@ -348,4 +343,3 @@ module_exit(cleanup_amd76xrom);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Biederman <ebiederman@lnxi.com>");
 MODULE_DESCRIPTION("MTD map driver for BIOS chips on the AMD76X southbridge");
-

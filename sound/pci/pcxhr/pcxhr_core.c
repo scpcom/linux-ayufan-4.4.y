@@ -30,7 +30,6 @@
 #include "pcxhr_hwdep.h"
 #include "pcxhr_core.h"
 
-
 /* registers used on the PLX (port 1) */
 #define PCXHR_PLX_OFFSET_MIN	0x40
 #define PCXHR_PLX_MBOX0		0x40
@@ -107,7 +106,6 @@
 #define PCXHR_ISR_HI08_CHK		0x10
 #define PCXHR_ISR_HI08_HREQ		0x80
 
-
 /* constants used for delay in msec */
 #define PCXHR_WAIT_DEFAULT		2
 #define PCXHR_WAIT_IT			25
@@ -147,7 +145,6 @@ static int pcxhr_check_reg_bit(struct pcxhr_mgr *mgr, unsigned int reg,
 
 /* constants used with pcxhr_check_reg_bit() */
 #define PCXHR_TIMEOUT_DSP		200
-
 
 #define PCXHR_MASK_EXTRA_INFO		0x0000FE
 #define PCXHR_MASK_IT_HF0		0x000100
@@ -461,7 +458,6 @@ int pcxhr_load_dsp_binary(struct pcxhr_mgr *mgr, const struct firmware *dsp)
 				   PCXHR_TIMEOUT_DSP, &dummy);
 }
 
-
 struct pcxhr_cmd_info {
 	u32 opcode;		/* command word */
 	u16 st_length;		/* status length */
@@ -535,7 +531,6 @@ static char* cmd_names[] = {
 [CMD_AUDIO_LEVEL_ADJUST] =		"CMD_AUDIO_LEVEL_ADJUST",
 };
 #endif
-
 
 static int pcxhr_read_rmh_status(struct pcxhr_mgr *mgr, struct pcxhr_rmh *rmh)
 {
@@ -713,7 +708,6 @@ static int pcxhr_send_msg_nolock(struct pcxhr_mgr *mgr, struct pcxhr_rmh *rmh)
 	return err;
 }
 
-
 /**
  * pcxhr_init_rmh - initialize the RMH instance
  * @rmh: the rmh pointer to be initialized
@@ -729,7 +723,6 @@ void pcxhr_init_rmh(struct pcxhr_rmh *rmh, int cmd)
 	rmh->dsp_stat = pcxhr_dsp_cmds[cmd].st_type;
 	rmh->cmd_idx = cmd;
 }
-
 
 void pcxhr_set_pipe_cmd_params(struct pcxhr_rmh *rmh, int capture,
 			       unsigned int param1, unsigned int param2,
@@ -893,8 +886,6 @@ static int pcxhr_toggle_pipes(struct pcxhr_mgr *mgr, int audio_mask)
 	return 0;
 }
 
-
-
 int pcxhr_set_pipe_state(struct pcxhr_mgr *mgr, int playback_mask,
 			 int capture_mask, int start)
 {
@@ -1032,7 +1023,6 @@ static int pcxhr_handle_async_err(struct pcxhr_mgr *mgr, u32 err,
 		mgr->async_err_other_last = (int)err;
 	return 1;
 }
-
 
 void pcxhr_msg_tasklet(unsigned long arg)
 {

@@ -9,7 +9,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -220,5 +219,3 @@ int fp_sec_db_print(MV_FP_OP_TYPE op);
 #endif	/* CONFIG_MV_ETH_NFP_SEC */
 
 #endif /* __mv_nfp_mgr_h__ */
-
-

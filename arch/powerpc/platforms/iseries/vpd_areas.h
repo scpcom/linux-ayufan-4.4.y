@@ -59,7 +59,6 @@
 
 #define ItVpdAreasMaxSlotLabels			192
 
-
 struct ItVpdAreas {
 	u32	xSlicDesc;		// Descriptor			000-003
 	u16	xSlicSize;		// Size of this control block	004-005

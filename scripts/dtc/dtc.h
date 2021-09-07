@@ -75,7 +75,6 @@ static inline void *xrealloc(void *p, size_t len)
 
 typedef uint32_t cell_t;
 
-
 #define streq(a, b)	(strcmp((a), (b)) == 0)
 #define strneq(a, b, n)	(strncmp((a), (b), (n)) == 0)
 
@@ -101,7 +100,6 @@ struct data {
 	char *val;
 	struct marker *markers;
 };
-
 
 #define empty_data ((struct data){ /* all .members = 0 or NULL */ })
 
@@ -208,7 +206,6 @@ struct reserve_info *chain_reserve_entry(struct reserve_info *first,
 					 struct reserve_info *list);
 struct reserve_info *add_reserve_entry(struct reserve_info *list,
 				       struct reserve_info *new);
-
 
 struct boot_info {
 	struct reserve_info *reservelist;

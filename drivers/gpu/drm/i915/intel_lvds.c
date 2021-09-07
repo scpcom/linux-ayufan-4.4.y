@@ -812,7 +812,6 @@ static const struct drm_connector_funcs intel_lvds_connector_funcs = {
 	.destroy = intel_lvds_destroy,
 };
 
-
 static void intel_lvds_enc_destroy(struct drm_encoder *encoder)
 {
 	drm_encoder_cleanup(encoder);

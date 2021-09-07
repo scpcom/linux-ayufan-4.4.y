@@ -573,7 +573,6 @@ static int __devinit revo_init(struct snd_ice1712 *ice)
 	return 0;
 }
 
-
 static int __devinit revo_add_controls(struct snd_ice1712 *ice)
 {
 	struct revo51_spec *spec;

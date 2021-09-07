@@ -24,7 +24,6 @@
  * AUTHNULL as for AUTHUNIX, and that is done here.
  */
 
-
 struct unix_domain {
 	struct auth_domain	h;
 	int	addr_changes;
@@ -74,7 +73,6 @@ static void svcauth_unix_domain_release(struct auth_domain *dom)
 	kfree(dom->name);
 	kfree(ud);
 }
-
 
 /**************************************************
  * cache for IP address to unix_domain
@@ -291,7 +289,6 @@ static int ip_map_show(struct seq_file *m,
 	}
 	return 0;
 }
-
 
 struct cache_detail ip_map_cache = {
 	.owner		= THIS_MODULE,
@@ -799,7 +796,6 @@ svcauth_null_release(struct svc_rqst *rqstp)
 	return 0; /* don't drop */
 }
 
-
 struct auth_ops svcauth_null = {
 	.name		= "null",
 	.owner		= THIS_MODULE,
@@ -808,7 +804,6 @@ struct auth_ops svcauth_null = {
 	.release	= svcauth_null_release,
 	.set_client	= svcauth_unix_set_client,
 };
-
 
 static int
 svcauth_unix_accept(struct svc_rqst *rqstp, __be32 *authp)
@@ -875,7 +870,6 @@ svcauth_unix_release(struct svc_rqst *rqstp)
 	return 0;
 }
 
-
 struct auth_ops svcauth_unix = {
 	.name		= "unix",
 	.owner		= THIS_MODULE,
@@ -885,4 +879,3 @@ struct auth_ops svcauth_unix = {
 	.domain_release	= svcauth_unix_domain_release,
 	.set_client	= svcauth_unix_set_client,
 };
-

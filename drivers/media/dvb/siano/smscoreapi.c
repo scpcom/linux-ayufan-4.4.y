@@ -178,7 +178,6 @@ static void smscore_registry_settype(char *devpath,
 		sms_err("No registry found.");
 }
 
-
 static void list_add_locked(struct list_head *new, struct list_head *head,
 			    spinlock_t *lock)
 {
@@ -414,7 +413,6 @@ int smscore_register_device(struct smsdevice_params_t *params,
 }
 EXPORT_SYMBOL_GPL(smscore_register_device);
 
-
 static int smscore_sendrequest_and_wait(struct smscore_device_t *coredev,
 		void *buffer, size_t size, struct completion *completion) {
 	int rc = coredev->sendrequest_handler(coredev->context, buffer, size);
@@ -508,7 +506,6 @@ int smscore_start_device(struct smscore_device_t *coredev)
 	return rc;
 }
 EXPORT_SYMBOL_GPL(smscore_start_device);
-
 
 static int smscore_load_firmware_family2(struct smscore_device_t *coredev,
 					 void *buffer, size_t size)
@@ -946,7 +943,6 @@ smscore_client_t *smscore_find_client(struct smscore_device_t *coredev,
 	unsigned long flags;
 	struct list_head *firstid, *nextid;
 
-
 	spin_lock_irqsave(&coredev->clientslock, flags);
 	first = &coredev->clients;
 	for (next = first->next;
@@ -1006,7 +1002,6 @@ void smscore_onresponse(struct smscore_device_t *coredev,
 		if (coredev->mode == DEVICE_MODE_DVBT_BDA)
 			phdr->msgDstId = DVBT_BDA_CONTROL_MSG_ID;
 	}
-
 
 	client = smscore_find_client(coredev, phdr->msgType, phdr->msgDstId);
 
@@ -1238,7 +1233,6 @@ void smscore_unregister_client(struct smscore_client_t *client)
 
 	spin_lock_irqsave(&coredev->clientslock, flags);
 
-
 	while (!list_empty(&client->idlist)) {
 		struct smscore_idlist_t *identry =
 			(struct smscore_idlist_t *) client->idlist.next;
@@ -1294,7 +1288,6 @@ int smsclient_sendrequest(struct smscore_client_t *client,
 	return coredev->sendrequest_handler(coredev->context, buffer, size);
 }
 EXPORT_SYMBOL_GPL(smsclient_sendrequest);
-
 
 /* old GPIO managments implementation */
 int smscore_configure_gpio(struct smscore_device_t *coredev, u32 pin,
@@ -1434,7 +1427,6 @@ int smscore_gpio_configure(struct smscore_device_t *coredev, u8 PinNum,
 		u32 msgData[6];
 	} *pMsg;
 
-
 	if (PinNum > MAX_GPIO_PIN_NUMBER)
 		return -EINVAL;
 
@@ -1556,7 +1548,6 @@ int smscore_gpio_get_level(struct smscore_device_t *coredev, u8 PinNum,
 		struct SmsMsgHdr_ST xMsgHeader;
 		u32 msgData[2];
 	} *pMsg;
-
 
 	if (PinNum > MAX_GPIO_PIN_NUMBER)
 		return -EINVAL;

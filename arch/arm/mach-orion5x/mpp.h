@@ -70,5 +70,4 @@ struct orion5x_mpp_mode {
 
 void orion5x_mpp_conf(struct orion5x_mpp_mode *mode);
 
-
 #endif

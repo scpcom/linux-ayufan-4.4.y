@@ -153,7 +153,6 @@ static struct iwl_ops iwl6000_ops = {
 	.utils = &iwl6000_hcmd_utils,
 };
 
-
 /*
  * "h": Hybrid configuration, use both internal and external Power Amplifier
  */

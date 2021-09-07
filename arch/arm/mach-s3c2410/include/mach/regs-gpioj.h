@@ -10,7 +10,6 @@
  * S3C2440 GPIO J register definitions
 */
 
-
 #ifndef __ASM_ARCH_REGS_GPIOJ_H
 #define __ASM_ARCH_REGS_GPIOJ_H "gpioj"
 
@@ -103,4 +102,3 @@
 #define S3C2443_GPJ15		S3C2410_GPIONO(S3C2440_GPIO_BANKJ, 15)
 
 #endif	/* __ASM_ARCH_REGS_GPIOJ_H */
-

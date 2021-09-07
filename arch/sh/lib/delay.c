@@ -40,4 +40,3 @@ void __ndelay(unsigned long nsecs)
 {
 	__const_udelay(nsecs * 0x00000005);
 }
-

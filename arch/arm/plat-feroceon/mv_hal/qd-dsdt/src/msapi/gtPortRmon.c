@@ -49,7 +49,6 @@ static GT_STATUS statsReadRealtimeCounter
     OUT  GT_U32		    *statsData
 );
 
-
 /*******************************************************************************
 * gstatsFlushAll
 *
@@ -98,7 +97,6 @@ GT_STATUS gstatsFlushAll
 	return GT_OK;
 
 }
-
 
 /*******************************************************************************
 * gstatsFlushPort
@@ -217,7 +215,6 @@ GT_STATUS gstatsGetPortCounter
 	return GT_OK;
 
 }
-
 
 /*******************************************************************************
 * gstatsGetPortAllCounters
@@ -342,7 +339,6 @@ GT_STATUS gstatsGetPortCounter2
 
 }
 
-
 /*******************************************************************************
 * gstatsGetPortAllCounters2
 *
@@ -463,7 +459,6 @@ GT_STATUS gstatsGetPortCounter3
 	return GT_OK;
 
 }
-
 
 /*******************************************************************************
 * gstatsGetPortAllCounters3
@@ -649,7 +644,6 @@ GT_STATUS gstatsSetHistogramMode
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * gstatsGetRealtimePortCounter
 *
@@ -710,7 +704,6 @@ GT_STATUS gstatsGetRealtimePortCounter
 	return GT_OK;
 
 }
-
 
 /****************************************************************************/
 /* Internal use functions.                                                  */
@@ -868,7 +861,6 @@ static GT_STATUS statsOperationPerform
     return GT_OK;
 }
 
-
 /*******************************************************************************
 * statsCapture
 *
@@ -937,7 +929,6 @@ static GT_STATUS statsCapture
 	return GT_OK;
 
 }
-
 
 /*******************************************************************************
 * statsReadCounter
@@ -1023,7 +1014,6 @@ static GT_STATUS statsReadCounter
 	return GT_OK;
 
 }
-
 
 /*******************************************************************************
 * statsReadRealtimeCounter

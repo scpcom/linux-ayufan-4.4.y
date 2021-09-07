@@ -68,7 +68,6 @@ Revision History:
 
 */
 
-
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/types.h>
@@ -310,7 +309,6 @@ static int amd8111e_init_ring(struct net_device *dev)
 	lp->tx_complete_idx = 0;
 	lp->tx_ring_idx = 0;
 
-
 	if(lp->opened)
 		/* Free previously allocated transmit and receive skbs */
 		amd8111e_free_skbs(dev);
@@ -389,7 +387,6 @@ static int amd8111e_set_coalesce(struct net_device * dev, enum coal_mode cmod)
 	void __iomem *mmio = lp->mmio;
 	struct amd8111e_coalesce_conf * coal_conf = &lp->coal_conf;
 
-
 	switch(cmod)
 	{
 		case RX_INTR_COAL :
@@ -411,7 +408,6 @@ static int amd8111e_set_coalesce(struct net_device * dev, enum coal_mode cmod)
 			if( timeout > MAX_TIMEOUT ||
 					event_count > MAX_EVENT_COUNT )
 			return -EINVAL;
-
 
 			timeout = timeout * DELAY_TIMER_CONV;
 			writel(VAL0|STINTEN,mmio+INTEN0);
@@ -525,7 +521,6 @@ static void amd8111e_init_hw_default( struct amd8111e_priv* lp)
 	unsigned int reg_val;
 	unsigned int logic_filter[2] ={0,};
 	void __iomem *mmio = lp->mmio;
-
 
         /* stop the chip */
 	writel(RUN, mmio + CMD0);
@@ -1213,7 +1208,6 @@ static void amd8111e_poll(struct net_device *dev)
 }
 #endif
 
-
 /*
 This function closes the network interface and updates the statistics so that most recent statistics will be available after the interface is down.
 */
@@ -1370,7 +1364,6 @@ static void amd8111e_read_regs(struct amd8111e_priv *lp, u32 *buf)
 	buf[11] = readl(mmio + LADRF+4);
 	buf[12] = readl(mmio + STAT0);
 }
-
 
 /*
 This function sets promiscuos mode, all-multi mode or the multicast address
@@ -1718,7 +1711,6 @@ static int amd8111e_resume(struct pci_dev *pci_dev)
 	return 0;
 }
 
-
 static void __devexit amd8111e_remove_one(struct pci_dev *pdev)
 {
 	struct net_device *dev = pci_get_drvdata(pdev);
@@ -1917,7 +1909,6 @@ static int __devinit amd8111e_probe_one(struct pci_dev *pdev,
 	if(dynamic_ipg[card_idx++])
 		lp->options |= OPTION_DYN_IPG_ENABLE;
 
-
 	/* Initialize driver entry points */
 	dev->netdev_ops = &amd8111e_netdev_ops;
 	SET_ETHTOOL_OPS(dev, &ops);
@@ -1939,7 +1930,6 @@ static int __devinit amd8111e_probe_one(struct pci_dev *pdev,
 
 	/* Set receive buffer length and set jumbo option*/
 	amd8111e_set_rx_buff_len(dev);
-
 
 	err = register_netdev(dev);
 	if (err) {

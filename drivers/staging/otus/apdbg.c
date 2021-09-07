@@ -106,7 +106,6 @@ int set_ioctl(int sock, struct ifreq *req)
     return 0;
 }
 
-
 int read_reg(int sock, struct ifreq *req)
 {
     struct zdap_ioctl *zdreq = 0;
@@ -119,7 +118,6 @@ int read_reg(int sock, struct ifreq *req)
 
     return 0;
 }
-
 
 int read_mem(int sock, struct ifreq *req)
 {
@@ -142,7 +140,6 @@ int read_mem(int sock, struct ifreq *req)
 
     return 0;
 }
-
 
 int main(int argc, char **argv)
 {
@@ -454,4 +451,3 @@ char hex(char v)
     else
         return 0;
 }
-

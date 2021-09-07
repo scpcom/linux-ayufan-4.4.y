@@ -295,7 +295,6 @@ typedef struct dbdma_device_table {
 	u32	dev_intpolarity;
 } dbdev_tab_t;
 
-
 typedef struct dbdma_chan_config {
 	spinlock_t      lock;
 
@@ -361,7 +360,6 @@ void *au1xxx_ddma_get_nextptr_virt(au1x_ddma_desc_t *dp);
 void au1xxx_dbdma_suspend(void);
 void au1xxx_dbdma_resume(void);
 #endif
-
 
 /*
  * Some compatibilty macros -- needed to make changes to API

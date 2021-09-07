@@ -64,7 +64,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "mvFlash.h"
 
-
 #ifdef MV_DEBUG
 #define DB(x) x
 #else
@@ -167,7 +166,6 @@ MV_U32 mvFlashInit(MV_FLASH_INFO *pFlash)
 	flashCmdSet(pFlash, 0x2AA, 0, 0x55);
 	flashCmdSet(pFlash, 0x555, 0, 0x90);
 
-
 	/* Write auto select command: read Manufacturer ID 	*/
 	/* SST seq is: 0x5555 0xAA -> 0x2AAA 0x55 -> 0x5555 0x90 	*/
 	flashCmdSet(pFlash, 0x5555, 0, 0xAA);
@@ -177,12 +175,10 @@ MV_U32 mvFlashInit(MV_FLASH_INFO *pFlash)
 	DB(mvOsOutput("Flash: mvFlashInit base 0x%x devW %d busW %d\n",
 						pFlash->baseAddr, pFlash->devWidth, pFlash->busWidth));
 
-
 	/* get flash Manufactor and Id */
 	manu = flashBusWidthRd(pFlash, mvFlashBaseAddrGet(pFlash));
 	DB(mvOsOutput("Flash: mvFlashInit base 0x%x devW %d busW %d\n",
 						pFlash->baseAddr, pFlash->devWidth, pFlash->busWidth));
-
 
 	/* Some Micron flashes don't use A0 address for Identifier and
 	Lock information, so in order to read Identifier and lock information
@@ -194,7 +190,6 @@ MV_U32 mvFlashInit(MV_FLASH_INFO *pFlash)
 	DB(mvOsOutput("Flash: mvFlashInit base 0x%x devW %d busW %d\n",
 						pFlash->baseAddr, pFlash->devWidth, pFlash->busWidth));
 
-
 	if ((pFlash->devWidth == 1) &&
 		  ((flashBusWidthRd(pFlash, flashAddrExt(pFlash, 0, 0)) ==
 			flashBusWidthRd(pFlash, flashAddrExt(pFlash, 1, 0)))&&
@@ -204,7 +199,6 @@ MV_U32 mvFlashInit(MV_FLASH_INFO *pFlash)
 			id = flashBusWidthRd(pFlash, flashAddrExt(pFlash, 2, 0));
 
 		} else id = flashBusWidthRd(pFlash, flashAddrExt(pFlash, 1, 0));
-
 
 	/* check if this flash is Supported, and Init the pFlash flash feild */
 	if( MV_OK != flashStructGet(pFlash, manu, id ) )
@@ -216,7 +210,6 @@ MV_U32 mvFlashInit(MV_FLASH_INFO *pFlash)
 	DB(mvOsOutput("Flash: mvFlashInit base 0x%x devW %d busW %d\n",
 						pFlash->baseAddr, pFlash->devWidth, pFlash->busWidth));
 
-
 	/* Init pFlash sectors */
 	if(MV_OK != flashSecsInit(pFlash))
 	{
@@ -227,7 +220,6 @@ MV_U32 mvFlashInit(MV_FLASH_INFO *pFlash)
 	DB(mvOsOutput("Flash: mvFlashInit base 0x%x devW %d busW %d\n",
 						pFlash->baseAddr, pFlash->devWidth, pFlash->busWidth));
 
-
 	/* print all flash information */
 	DB(flashPrint(pFlash));
 
@@ -236,10 +228,8 @@ MV_U32 mvFlashInit(MV_FLASH_INFO *pFlash)
 	DB(mvOsOutput("Flash: mvFlashInit base 0x%x devW %d busW %d\n",
 						pFlash->baseAddr, pFlash->devWidth, pFlash->busWidth));
 
-
 	return mvFlashSizeGet(pFlash);
 }
-
 
 /* erase */
 /*******************************************************************************
@@ -323,7 +313,6 @@ MV_BOOL flashIsSecErased(MV_FLASH_INFO *pFlash, MV_U32 secNum)
 	}
 	return MV_TRUE;
 }
-
 
 /*******************************************************************************
 * mvFlashSecErase - Erase a flash sector.
@@ -445,7 +434,6 @@ MV_STATUS mvFlash32Wr(MV_FLASH_INFO *pFlash, MV_U32 offset, MV_U32 data)
                     __FUNCTION__, offset, secNum);
 		return MV_FAIL;
 	}
-
 
 	/* bus width is 32 bit */
 	if(mvFlashBusWidthGet(pFlash) == 4)
@@ -654,7 +642,6 @@ MV_U32 mvFlashBlockUnbufWr(MV_FLASH_INFO *pFlash, MV_U32 offset, MV_U32 blockSiz
 	return i;
 }
 
-
 /*******************************************************************************
 * mvFlashBlockWr - Write a block to flash.
 *
@@ -723,7 +710,6 @@ MV_U32 mvFlashBlockWr(MV_FLASH_INFO *pFlash, MV_U32 offset, MV_U32 blockSize,
 
 	flashReset(pFlash);
 
-
 	/* now write unbuffered the unaligned data*/
 	while (((offset % hwBuffSize) || (blockSize < hwBuffSize))&&(blockSize))
 	{
@@ -737,7 +723,6 @@ MV_U32 mvFlashBlockWr(MV_FLASH_INFO *pFlash, MV_U32 offset, MV_U32 blockSize,
 		}
 		else sizeToWrite = hwBuffSize - (offset % hwBuffSize);
 
-
 		unBufWritten = mvFlashBlockUnbufWr(pFlash, offset, sizeToWrite,
                                  pBlock);
 
@@ -749,7 +734,6 @@ MV_U32 mvFlashBlockWr(MV_FLASH_INFO *pFlash, MV_U32 offset, MV_U32 blockSize,
 		numOfBytesWritten += unBufWritten;
 
 		if (unBufWritten != sizeToWrite) return numOfBytesWritten;
-
 
 	}
 
@@ -800,7 +784,6 @@ MV_U32 mvFlashBlockWr(MV_FLASH_INFO *pFlash, MV_U32 offset, MV_U32 blockSize,
 
 	}
 
-
 	/* now write unbuffered the rest*/
 	if (blockSize)
 	{
@@ -816,10 +799,8 @@ MV_U32 mvFlashBlockWr(MV_FLASH_INFO *pFlash, MV_U32 offset, MV_U32 blockSize,
 
 	}
 
-
 	return numOfBytesWritten;
 }
-
 
 /* read */
 /*******************************************************************************
@@ -1107,7 +1088,6 @@ static MV_STATUS flashStructGet(MV_FLASH_INFO *pFlash, MV_U32 manu, MV_U32 id)
 	return MV_FAIL;
 }
 
-
 /*******************************************************************************
 *  flashSecsInit - Init the flash sector array in pFlash.
 *
@@ -1157,7 +1137,6 @@ static MV_STATUS flashSecsInit(MV_FLASH_INFO *pFlash)
 		}
 		restSecSize = (mvFlashSizeGet(pFlash) - temp) /
 			          (mvFlashNumOfSecsGet(pFlash) - numSecFrag);
-
 
 		if(mvFlashSecTypeGet(pFlash) == TOP) /* TOP */
 		{
@@ -1322,7 +1301,6 @@ static MV_STATUS mvFlashProg(MV_FLASH_INFO *pFlash, MV_U32 offset, MV_U32 data)
 {
 	MV_U32 status;
 
-
 	switch(mvFlashVenIdGet(pFlash))
 	{
 		case INTEL_MANUF: /* INTEL / MT */
@@ -1341,7 +1319,6 @@ static MV_STATUS mvFlashProg(MV_FLASH_INFO *pFlash, MV_U32 offset, MV_U32 data)
 	return status;
 
 }
-
 
 /*******************************************************************************
 * flashHwBufferProg - Prog flash via hw flash hw buffer
@@ -1368,7 +1345,6 @@ static MV_STATUS flashHwBufferProg(MV_FLASH_INFO *pFlash, MV_U32 offset, MV_U32 
 {
 	MV_U32 status;
 
-
 	switch(mvFlashVenIdGet(pFlash))
 	{
 		case INTEL_MANUF: /* INTEL / MT */
@@ -1381,7 +1357,6 @@ static MV_STATUS flashHwBufferProg(MV_FLASH_INFO *pFlash, MV_U32 offset, MV_U32 
 
 	return status;
 }
-
 
 /*******************************************************************************
 * flashGetHwBuffSize - get supported flash write buffer size.

@@ -62,11 +62,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
  
- 
 /* includes */
 #include "rtc/integ_rtc/mvRtc.h"
 #include "rtc/integ_rtc/mvRtcReg.h"
-
 
 /*******************************************************************************
 * mvRtcTimeSet - Update the Real Time Clock.
@@ -137,7 +135,6 @@ MV_VOID mvRtcTimeSet(MV_RTC_TIME* mvTime)
 
 	/* Update RTC Date Register */
 	MV_REG_WRITE(RTC_DATE_REG, dateVal);
-
 
 	return;
 }

@@ -65,7 +65,6 @@ static loff_t dev_nvram_llseek(struct file *file, loff_t offset, int origin)
 	return file->f_pos;
 }
 
-
 static ssize_t dev_nvram_read(struct file *file, char __user *buf,
 			  size_t count, loff_t *ppos)
 {
@@ -182,7 +181,6 @@ static struct miscdevice nvram_dev = {
 	&nvram_fops
 };
 
-
 #ifdef DEBUG_NVRAM
 static void nvram_print_partitions(char * label)
 {
@@ -201,7 +199,6 @@ static void nvram_print_partitions(char * label)
 }
 #endif
 
-
 static int nvram_write_header(struct nvram_partition * part)
 {
 	loff_t tmp_index;
@@ -212,7 +209,6 @@ static int nvram_write_header(struct nvram_partition * part)
 
 	return rc;
 }
-
 
 static unsigned char nvram_checksum(struct nvram_header *p)
 {
@@ -227,7 +223,6 @@ static unsigned char nvram_checksum(struct nvram_header *p)
 	c_sum = ((c_sum + c_sum2) >> 8) & 0xff;
 	return c_sum;
 }
-
 
 /*
  * Find an nvram partition, sig can be 0 for any
@@ -251,7 +246,6 @@ struct nvram_partition *nvram_find_partition(int sig, const char *name)
 	return NULL;
 }
 EXPORT_SYMBOL(nvram_find_partition);
-
 
 static int nvram_remove_os_partition(void)
 {
@@ -405,7 +399,6 @@ static int nvram_create_os_partition(void)
 	return 0;
 }
 
-
 /* nvram_setup_partition
  *
  * This will setup the partition we need for buffering the
@@ -478,7 +471,6 @@ static int nvram_setup_partition(void)
 	
 	return 0;
 }
-
 
 static int nvram_scan_partitions(void)
 {
@@ -592,7 +584,6 @@ void __exit nvram_cleanup(void)
 {
         misc_deregister( &nvram_dev );
 }
-
 
 #ifdef CONFIG_PPC_PSERIES
 

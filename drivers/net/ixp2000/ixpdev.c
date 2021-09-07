@@ -36,7 +36,6 @@ static struct ixpdev_tx_desc * const tx_desc =
 	(struct ixpdev_tx_desc *)(IXP2000_SRAM0_VIRT_BASE + TX_BUF_DESC_BASE);
 static int tx_pointer;
 
-
 static int ixpdev_xmit(struct sk_buff *skb, struct net_device *dev)
 {
 	struct ixpdev_priv *ip = netdev_priv(dev);
@@ -73,7 +72,6 @@ static int ixpdev_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	return NETDEV_TX_OK;
 }
-
 
 static int ixpdev_rx(struct net_device *dev, int processed, int budget)
 {

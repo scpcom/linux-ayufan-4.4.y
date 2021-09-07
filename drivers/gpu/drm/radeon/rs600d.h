@@ -371,7 +371,6 @@
 #define   G_007EDC_LB_D2_VBLANK_INTERRUPT(x)           (((x) >> 5) & 0x1)
 #define   C_007EDC_LB_D2_VBLANK_INTERRUPT              0xFFFFFFDF
 
-
 /* MC registers */
 #define R_000000_MC_STATUS                           0x000000
 #define   S_000000_MC_IDLE(x)                          (((x) & 0x1) << 0)

@@ -131,7 +131,6 @@ u32
 gss_unwrap_kerberos(struct gss_ctx *ctx_id, int offset,
 		struct xdr_buf *buf);
 
-
 u32
 krb5_encrypt(struct crypto_blkcipher *key,
 	     void *iv, void *in, void *out, int length);

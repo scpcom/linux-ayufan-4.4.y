@@ -734,7 +734,6 @@ u32 al7230_txvga_data[][2] =
 };
 //--------------------------------
 
-
 //; W89RF242 RFIC SPI programming initial data
 //; Winbond WLAN 11g RFIC BB-SPI register -- version FA5976A rev 1.3b
 //; Update Date: Ocotber 3, 2005 by PP10 Hsiang-Te Ho
@@ -819,7 +818,6 @@ u32 w89rf242_txvga_old_mapping[][2] =
 	{32, 18},
 	{34, 19},
 
-
 };
 
 // 20060619.3 modify from Bruce's mail
@@ -899,8 +897,6 @@ u32 w89rf242_txvga_data[][5] =
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
 //=============================================================================================================
 //  Uxx_ReadEthernetAddress --
 //
@@ -934,7 +930,6 @@ Uxx_ReadEthernetAddress(  struct hw_data * pHwData )
 	Wb35Reg_WriteSync( pHwData, 0x03e8, cpu_to_le32(*(u32 *)pHwData->PermanentMacAddress) ); //20060926 anson's endian
 	Wb35Reg_WriteSync( pHwData, 0x03ec, cpu_to_le32(*(u32 *)(pHwData->PermanentMacAddress+4)) ); //20060926 anson's endian
 }
-
 
 //===============================================================================================================
 //  CardGetMulticastBit --
@@ -1029,7 +1024,6 @@ void Set_ChanIndep_RfData_al7230_50(  struct hw_data * pHwData, u32 *pltmp, char
 		pltmp[i] = (1 << 31) | (0 << 30) | (24 << 24) | (al7230_rf_data_50[i]&0xffffff);
 	}
 }
-
 
 //=============================================================================================================
 // RFSynthesizer_initial --
@@ -2332,7 +2326,6 @@ void Mxx_initial(  struct hw_data * pHwData )
 	u32		pltmp[11];
 	u16	i;
 
-
 	//======================================================
 	// Initial Mxx register
 	//======================================================
@@ -2414,7 +2407,6 @@ void Mxx_initial(  struct hw_data * pHwData )
 	Wb35Reg_WriteSync( pHwData, 0x0898, 0xffff8888 );
 	reg->M98_MacControl = 0xffff8888;
 }
-
 
 void Uxx_power_off_procedure(  struct hw_data * pHwData )
 {
@@ -2674,10 +2666,3 @@ void BBProcessor_RateChanging(  struct hw_data * pHwData,  u8 rate ) // 20060613
 			break;
 	}
 }
-
-
-
-
-
-
-

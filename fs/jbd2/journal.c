@@ -1215,7 +1215,6 @@ static int load_superblock(journal_t *journal)
 	return 0;
 }
 
-
 /**
  * int jbd2_journal_load() - Read journal from disk.
  * @journal: Journal to act on.
@@ -1335,7 +1334,6 @@ int jbd2_journal_destroy(journal_t *journal)
 
 	return err;
 }
-
 
 /**
  *int jbd2_journal_check_used_features () - Check if features specified are used.
@@ -1519,7 +1517,6 @@ static int journal_convert_superblock_v1(journal_t *journal,
 	sync_dirty_buffer(bh);
 	return 0;
 }
-
 
 /**
  * int jbd2_journal_flush () - Flush journal
@@ -2303,4 +2300,3 @@ EXPORT_SYMBOL(jbd2_dev_to_name);
 MODULE_LICENSE("GPL");
 module_init(journal_init);
 module_exit(journal_exit);
-

@@ -12,7 +12,6 @@
 #include <linux/spinlock.h>		/* And spinlocks */
 #include <linux/delay.h>
 
-
 #define dma_outb(val,addr) (*((volatile unsigned char *)(addr+IO_BASE)) = (val))
 #define dma_inb(addr)	   (*((volatile unsigned char *)(addr+IO_BASE)))
 
@@ -192,7 +191,6 @@ static __inline__ void set_dma_addr(unsigned int dmanr, unsigned int a)
 	}
 }
 
-
 /* Set transfer size (max 64k for DMA1..3, 128k for DMA5..7) for
  * a specific DMA channel.
  * You must ensure the parameters are valid.
@@ -212,7 +210,6 @@ static __inline__ void set_dma_count(unsigned int dmanr, unsigned int count)
 	    dma_outb( (count>>9) & 0xff, ((dmanr&3)<<2) + 2 + IO_DMA2_BASE );
         }
 }
-
 
 /* Get DMA residue count. After a DMA transfer, this
  * should return zero. Reading this while a DMA transfer is
@@ -235,7 +232,6 @@ static __inline__ int get_dma_residue(unsigned int dmanr)
 
 	return (dmanr<=3)? count : (count<<1);
 }
-
 
 /* These are in kernel/dma.c: */
 extern int request_dma(unsigned int dmanr, const char * device_id);	/* reserve a DMA channel */

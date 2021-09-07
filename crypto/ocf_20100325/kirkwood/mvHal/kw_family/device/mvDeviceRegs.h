@@ -89,13 +89,10 @@ typedef enum _mvDevice
 	MV_DEV_MAX_CS = MV_DEVICE_MAX_CS
 }MV_DEVICE;
 
- 
 #endif /* MV_ASMLANGUAGE */
-
 
 #define NAND_CTRL_REG		0x10470
 
 #define NAND_ACTCEBOOT_BIT	BIT1
-
 
 #endif /* #ifndef __INCmvDeviceRegsH */

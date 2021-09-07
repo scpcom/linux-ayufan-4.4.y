@@ -503,7 +503,6 @@ void zfLedCtrl_BlinkWhenScan_Alpha(zdev_t* dev)
     counter++;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfLed100msCtrl              */
@@ -554,4 +553,3 @@ void zfLed100msCtrl(zdev_t* dev)
         }
     }
 }
-

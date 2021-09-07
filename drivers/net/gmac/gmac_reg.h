@@ -317,7 +317,6 @@ typedef enum gmac_mac_adr_1_low_reg {
     MAC_ADR1_LOW_A_BIT = 0
 } gmac_mac_adr_1_low_reg_t;
 
-
 /**
  * MMC register indices - registers accessed via the MAC accessor functions
  */
@@ -328,7 +327,6 @@ typedef enum gmac_mmc_regs {
     MMC_RX_MASK_REG = 67,
     MMC_TX_MASK_REG = 68
 } gmac_mmc_regs_t;
-
 
 /**
  * DMA register indices
@@ -348,7 +346,6 @@ typedef enum gmac_dma_regs {
     DMA_CUR_TX_ADR_REG      = 20,
     DMA_CUR_RX_ADR_REG      = 21
 } gmac_dma_regs_t;
-
 
 /**
  * DMA register field definitions
@@ -523,4 +520,3 @@ typedef enum gmac_dma_current_rx_adr_reg {
 } gmac_dma_current_rx_adr_reg_t;
 
 #endif        //  #if !defined(__GMAC_REG_H__)
-

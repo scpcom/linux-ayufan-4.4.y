@@ -247,8 +247,6 @@
 #define SSB_CHIPCO_PLLCTL_ADDR			0x0660
 #define SSB_CHIPCO_PLLCTL_DATA			0x0664
 
-
-
 /** PMU PLL registers */
 
 /* PMU rev 0 PLL registers */
@@ -382,8 +380,6 @@
 #define SSB_PMURES_5354_RF_PLL_FILTBYP		18
 #define SSB_PMURES_5354_BB_PLL_PU		19
 
-
-
 /** Chip specific Chip-Status register contents. */
 #define SSB_CHIPCO_CHST_4325_SPROM_OTP_SEL	0x00000003
 #define SSB_CHIPCO_CHST_4325_DEFCIS_SEL		0 /* OTP is powered up, use def. CIS, no SPROM */
@@ -397,8 +393,6 @@
 #define SSB_CHIPCO_CHST_4325_RCAL_VALUE		0x000001F0
 #define SSB_CHIPCO_CHST_4325_RCAL_VALUE_SHIFT	4
 #define SSB_CHIPCO_CHST_4325_PMUTOP_2B 		0x00000200 /* 1 for 2b, 0 for to 2a */
-
-
 
 /** Clockcontrol masks and values **/
 
@@ -456,7 +450,6 @@
 #define	SSB_CHIPCO_CLK_5350_N		0x0311
 #define	SSB_CHIPCO_CLK_5350_M		0x04020009
 
-
 /** Bits in the config registers **/
 
 #define	SSB_CHIPCO_CFG_EN		0x0001		/* Enable */
@@ -469,7 +462,6 @@
 #define	SSB_CHIPCO_CFG_CLKDIV		0x0060		/* Sync: Clock divisor */
 #define	SSB_CHIPCO_CFG_CLKEN		0x0080		/* Sync: Clock enable */
 #define	SSB_CHIPCO_CFG_BSTRO		0x0100		/* Sync: Size/Bytestrobe */
-
 
 /** Flash-specific control/status values */
 
@@ -521,7 +513,6 @@
 #define SSB_CHIPCO_FLASHSTA_AT_ID	0x38
 #define SSB_CHIPCO_FLASHSTA_AT_ID_SHIFT	3
 
-
 /** OTP **/
 
 /* OTP regions */
@@ -548,7 +539,6 @@
 
 #define	SSB_CHIPCO_OTP_SIGNATURE	0x578A
 #define	SSB_CHIPCO_OTP_MAGIC		0x4E56
-
 
 struct ssb_device;
 struct ssb_serial_port;

@@ -39,7 +39,6 @@ cache_begin:	li	t0, (1<<28)
 	mtc0 	zero, CP0_CAUSE
 	HAZARD_CP0
 
-
 	/* Set static virtual to phys address translation and TLB disabled */
 	mfc0 	t0, CP0_CONFIG, 7
 	HAZARD_CP0
@@ -91,7 +90,6 @@ cache_end:
 	addi   t0, t0, 0xf
 	mtc0   $8, $22, 5
 	nop
-
 
 	/* Setup CMEM_2, 32MB */
 	lui    t0, 0x1C00

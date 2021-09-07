@@ -35,7 +35,6 @@
  * when a file system is mounted (see ext2_fill_super).
  */
 
-
 #define in_range(b, first, len)	((b) >= (first) && (b) <= (first) + (len) - 1)
 
 struct ext2_group_desc * ext2_get_group_desc(struct super_block * sb,
@@ -1565,4 +1564,3 @@ unsigned long ext2_bg_num_gdb(struct super_block *sb, int group)
 {
 	return ext2_bg_has_super(sb, group) ? EXT2_SB(sb)->s_gdb_count : 0;
 }
-

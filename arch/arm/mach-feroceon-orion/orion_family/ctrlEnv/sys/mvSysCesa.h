@@ -65,7 +65,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __mvSysCesa_h__
 #define __mvSysCesa_h__
 
-
 #include "mvCommon.h"
 #include "cesa/mvCesa.h"
 #include "ctrlEnv/mvCtrlEnvSpec.h"
@@ -93,7 +92,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MV_CESA_TDMA_WIN_BASE_OFFSET        16
 #define MV_CESA_TDMA_WIN_BASE_MASK          (0xFFFF << MV_CESA_TDMA_WIN_BASE_OFFSET)
-
 
 MV_STATUS   mvCesaInit (int numOfSession, int queueDepth, char* pSramBase, void *osHandle);
 

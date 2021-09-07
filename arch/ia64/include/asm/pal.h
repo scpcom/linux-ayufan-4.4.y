@@ -124,14 +124,12 @@ typedef u64				pal_cache_level_t;
 #define PAL_CACHE_LEVEL_L1		1	/* L1 */
 #define PAL_CACHE_LEVEL_L2		2	/* L2 */
 
-
 /* Processor cache type at a particular level in the hierarchy */
 
 typedef u64				pal_cache_type_t;
 #define PAL_CACHE_TYPE_INSTRUCTION	1	/* Instruction cache */
 #define PAL_CACHE_TYPE_DATA		2	/* Data or unified cache */
 #define PAL_CACHE_TYPE_INSTRUCTION_DATA	3	/* Both Data & Instruction */
-
 
 #define PAL_CACHE_FLUSH_INVALIDATE	1	/* Invalidate clean lines */
 #define PAL_CACHE_FLUSH_CHK_INTRS	2	/* check for interrupts/mc while flushing */
@@ -170,7 +168,6 @@ typedef	union  pal_cache_config_info_2_s {
 	struct {
 		u32		cache_size;		/*cache size in bytes*/
 
-
 		u32		alias_boundary	: 8,	/* 39-32 aliased addr
 							 * separation for max
 							 * performance.
@@ -181,7 +178,6 @@ typedef	union  pal_cache_config_info_2_s {
 	} pcci2_bits;
 	u64			pcci2_data;
 } pal_cache_config_info_2_t;
-
 
 typedef struct pal_cache_config_info_s {
 	pal_status_t			pcci_status;
@@ -204,8 +200,6 @@ typedef struct pal_cache_config_info_s {
 #define pcci_alias_boundary	pcci_info_2.pcci2_bits.alias_boundary
 #define pcci_cache_size		pcci_info_2.pcci2_bits.cache_size
 
-
-
 /* Possible values for cache attributes */
 
 #define PAL_CACHE_ATTR_WT		0	/* Write through cache */
@@ -214,7 +208,6 @@ typedef struct pal_cache_config_info_s {
 						 * back depending on TLB
 						 * memory attributes
 						 */
-
 
 /* Possible values for cache hints */
 
@@ -263,19 +256,16 @@ typedef union pal_cache_protection_element_u {
 						 */
 #define PAL_CACHE_PROT_PART_MAX		6
 
-
 typedef struct pal_cache_protection_info_s {
 	pal_status_t			pcpi_status;
 	pal_cache_protection_element_t	pcp_info[PAL_CACHE_PROT_PART_MAX];
 } pal_cache_protection_info_t;
-
 
 /* Processor cache protection method encodings */
 #define PAL_CACHE_PROT_METHOD_NONE		0	/* No protection */
 #define PAL_CACHE_PROT_METHOD_ODD_PARITY	1	/* Odd parity */
 #define PAL_CACHE_PROT_METHOD_EVEN_PARITY	2	/* Even parity */
 #define PAL_CACHE_PROT_METHOD_ECC		3	/* ECC protection */
-
 
 /* Processor cache line identification in the hierarchy */
 typedef union pal_cache_line_id_u {
@@ -353,7 +343,6 @@ typedef struct pal_cache_line_info_s {
 
 } pal_cache_line_info_t;
 
-
 /* Machine Check related crap */
 
 /* Pending event status bits  */
@@ -401,13 +390,11 @@ typedef struct pal_process_state_info_s {
 						 * synched
 						 */
 
-
 			co		: 1,	/* Continuable */
 			ci		: 1,	/* MC isolated */
 			us		: 1,	/* Uncontained storage
 						 * damage.
 						 */
-
 
 			hd		: 1,	/* Non-essential hw
 						 * lost (no loss of
@@ -435,7 +422,6 @@ typedef struct pal_process_state_info_s {
 			dy		: 1,	/* Processor dynamic
 						 * state valid
 						 */
-
 
 			in		: 1,	/* 0 = MC, 1 = INIT */
 			rs		: 1,	/* RSE valid */
@@ -709,7 +695,6 @@ typedef union pal_mc_error_info_u {
 #define pmci_proc_pal_attempted_rendezvous	pme_processor.ra
 #define pmci_proc_pal_rendezvous_complete	pme_processor.rz
 
-
 #define pmci_cache_level			pme_cache.level
 #define pmci_cache_line_state			pme_cache.mesi
 #define pmci_cache_line_state_valid		pme_cache.mv
@@ -766,7 +751,6 @@ typedef struct pal_min_state_area_s {
 	u64	pmsa_br1;		/* branch register 1	   */
 	u64	pmsa_reserved[70];	/* pal_min_state_area should total to 1KB */
 } pal_min_state_area_t;
-
 
 struct ia64_pal_retval {
 	/*
@@ -845,9 +829,7 @@ extern pal_cache_config_info_t		pal_cache_config_info_get(pal_cache_level_t,
 extern pal_cache_protection_info_t	pal_cache_protection_info_get(pal_cache_level_t,
 								      pal_cache_type_t);
 
-
 extern void				pal_error(int);
-
 
 /* Useful wrappers for the current list of pal procedures */
 
@@ -955,7 +937,6 @@ ia64_pal_cache_flush (u64 cache_type, u64 invalidate, u64 *progress, u64 *vector
 	return iprv.status;
 }
 
-
 /* Initialize the processor controlled caches */
 static inline s64
 ia64_pal_cache_init (u64 level, u64 cache_type, u64 rest)
@@ -976,7 +957,6 @@ ia64_pal_cache_line_init (u64 physical_addr, u64 data_value)
 	PAL_CALL(iprv, PAL_CACHE_LINE_INIT, physical_addr, data_value, 0);
 	return iprv.status;
 }
-
 
 /* Read the data and tag of a processor controlled cache line for diags */
 static inline s64
@@ -1010,7 +990,6 @@ ia64_pal_cache_write (pal_cache_line_id_u_t line_id, u64 physical_addr, u64 data
 				physical_addr, data);
 	return iprv.status;
 }
-
 
 /* Return the parameters needed to copy relocatable PAL procedures from ROM to memory */
 static inline s64
@@ -1547,7 +1526,6 @@ typedef union  pal_version_u {
 	} pal_version_s;
 } pal_version_u_t;
 
-
 /*
  * Return PAL version information.  While the documentation states that
  * PAL_VERSION can be called in either physical or virtual mode, some
@@ -1587,7 +1565,6 @@ typedef union pal_tc_info_u {
 #define tc_num_entries		pal_tc_info_s.num_entries
 #define tc_associativity	pal_tc_info_s.associativity
 #define tc_num_sets		pal_tc_info_s.num_sets
-
 
 /* Return information about the virtual memory characteristics of the processor
  * implementation.

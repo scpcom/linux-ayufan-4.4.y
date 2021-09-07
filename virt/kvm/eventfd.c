@@ -94,7 +94,6 @@ irqfd_shutdown(struct work_struct *work)
 	kfree(irqfd);
 }
 
-
 /* assumes kvm->irqfds.lock is held */
 static bool
 irqfd_is_active(struct _irqfd *irqfd)

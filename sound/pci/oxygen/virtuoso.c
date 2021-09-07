@@ -199,7 +199,6 @@ static struct pci_device_id xonar_ids[] __devinitdata = {
 };
 MODULE_DEVICE_TABLE(pci, xonar_ids);
 
-
 #define GPIO_CS53x1_M_MASK	0x000c
 #define GPIO_CS53x1_M_SINGLE	0x0000
 #define GPIO_CS53x1_M_DOUBLE	0x0004
@@ -872,7 +871,6 @@ static int st_output_switch_get(struct snd_kcontrol *ctl,
 		value->value.enumerated.item[0] = 2;
 	return 0;
 }
-
 
 static int st_output_switch_put(struct snd_kcontrol *ctl,
 				struct snd_ctl_elem_value *value)

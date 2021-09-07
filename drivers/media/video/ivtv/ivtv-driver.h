@@ -632,7 +632,6 @@ struct ivtv {
 	u8 audio_bilingual_mode;        /* decoder setting how to handle bilingual MPEG audio */
 	struct cx2341x_mpeg_params params;              /* current encoder parameters */
 
-
 	/* Locking */
 	spinlock_t lock;                /* lock access to this struct */
 	struct mutex serialize_lock;    /* mutex used to serialize open/close/start/stop/ioctl operations */
@@ -642,7 +641,6 @@ struct ivtv {
 	struct ivtv_stream streams[IVTV_MAX_STREAMS]; 	/* stream data */
 	atomic_t capturing;		/* count number of active capture streams */
 	atomic_t decoding;		/* count number of active decoding streams */
-
 
 	/* Interrupts & DMA */
 	u32 irqmask;                    /* active interrupts */
@@ -663,12 +661,10 @@ struct ivtv {
 	wait_queue_head_t event_waitq;  /* wake up when the next decoder event arrives */
 	wait_queue_head_t vsync_waitq;  /* wake up when the next decoder vsync arrives */
 
-
 	/* Mailbox */
 	struct ivtv_mailbox_data enc_mbox;              /* encoder mailboxes */
 	struct ivtv_mailbox_data dec_mbox;              /* decoder mailboxes */
 	struct ivtv_api_cache api_cache[256]; 		/* cached API commands */
-
 
 	/* I2C */
 	struct i2c_adapter i2c_adap;
@@ -677,14 +673,12 @@ struct ivtv {
 	int i2c_state;                  /* i2c bit state */
 	struct mutex i2c_bus_lock;      /* lock i2c bus */
 
-
 	/* Program Index information */
 	u32 pgm_info_offset;            /* start of pgm info in encoder memory */
 	u32 pgm_info_num;               /* number of elements in the pgm cyclic buffer in encoder memory */
 	u32 pgm_info_write_idx;         /* last index written by the card that was transferred to pgm_info[] */
 	u32 pgm_info_read_idx;          /* last index in pgm_info read by the application */
 	struct v4l2_enc_idx_entry pgm_info[IVTV_MAX_PGM_INDEX]; /* filled from the pgm cyclic buffer on the card */
-
 
 	/* Miscellaneous */
 	u32 open_id;			/* incremented each time an open occurs, is >= 1 */
@@ -698,14 +692,11 @@ struct ivtv {
 	unsigned long dualwatch_jiffies;/* jiffies value of the previous dualwatch check */
 	u32 dualwatch_stereo_mode;      /* current detected dualwatch stereo mode */
 
-
 	/* VBI state info */
 	struct vbi_info vbi;            /* VBI-specific data */
 
-
 	/* YUV playback */
 	struct yuv_playback_info yuv_info;              /* YUV playback data */
-
 
 	/* OSD support */
 	unsigned long osd_video_pbase;

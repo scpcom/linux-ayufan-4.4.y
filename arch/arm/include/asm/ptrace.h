@@ -181,4 +181,3 @@ extern unsigned long profile_pc(struct pt_regs *regs);
 #endif /* __ASSEMBLY__ */
 
 #endif
-

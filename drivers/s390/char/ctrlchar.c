@@ -27,7 +27,6 @@ ctrlchar_handle_sysrq(struct work_struct *work)
 static DECLARE_WORK(ctrlchar_work, ctrlchar_handle_sysrq);
 #endif
 
-
 /**
  * Check for special chars at start of input.
  *

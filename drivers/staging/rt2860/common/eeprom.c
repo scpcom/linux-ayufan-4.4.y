@@ -904,7 +904,6 @@ VOID eFuseWritePhysical(
 	}
 }
 
-
 /*
 	========================================================================
 
@@ -1101,7 +1100,6 @@ INT	set_eFuseLoadFromBin_Proc(
 			}
       		}
 
-
 	}
 	else
 		{
@@ -1111,7 +1109,6 @@ INT	set_eFuseLoadFromBin_Proc(
 					return FALSE;
 
 		}
-
 
 	retval=filp_close(srcf,NULL);
 
@@ -1152,13 +1149,10 @@ INT	set_eFuseLoadFromBin_Proc(
 				*/
 				NdisZeroMemory(PDATA,16);
 
-
 			}
 		}
 
-
 	}
-
 
 	kfree(PDATA);
 	kfree(buffer);
@@ -1245,7 +1239,6 @@ NTSTATUS eFuseWriteRegistersFromBin(
 		{
 			DBGPRINT(RT_DEBUG_TRACE, ("Allocate New Blk, Data%d=%04x%04x\n",3-i,pData[2*i+1],pData[2*i]));
 			tempbuffer=((pData[2*i+1]<<16)&0xffff0000)|pData[2*i];
-
 
 			RTMP_IO_WRITE32(pAd, efuseDataOffset,tempbuffer);
 			efuseDataOffset -= 4;
@@ -1352,8 +1345,6 @@ NTSTATUS eFuseWriteRegistersFromBin(
 		else
 			return TRUE;
 	     }
-
-
 
 		//Step 2. Write mapping table
 		addr = EFUSE_USAGE_MAP_START+BlkNum;

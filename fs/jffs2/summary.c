@@ -100,7 +100,6 @@ static int jffs2_sum_add_mem(struct jffs2_summary *s, union jffs2_sum_mem *item)
 	return 0;
 }
 
-
 /* The following 3 functions are called from scan.c to collect summary info for not closed jeb */
 
 int jffs2_sum_add_padding_mem(struct jffs2_summary *s, uint32_t size)
@@ -438,7 +437,6 @@ static int jffs2_sum_process_sum_data(struct jffs2_sb_info *c, struct jffs2_eras
 					    jeb->offset + je32_to_cpu(spd->offset),
 					    jeb->offset + je32_to_cpu(spd->offset) + je32_to_cpu(spd->totlen));
 
-
 				/* This should never happen, but https://dev.laptop.org/ticket/4184 */
 				checkedlen = strnlen(spd->name, spd->nsize);
 				if (!checkedlen) {
@@ -450,7 +448,6 @@ static int jffs2_sum_process_sum_data(struct jffs2_sb_info *c, struct jffs2_eras
 					printk(KERN_ERR "Dirent at %08x has zeroes in name. Truncating to %d chars\n",
 					       jeb->offset + je32_to_cpu(spd->offset), checkedlen);
 				}
-
 
 				fd = jffs2_alloc_full_dirent(checkedlen+1);
 				if (!fd)

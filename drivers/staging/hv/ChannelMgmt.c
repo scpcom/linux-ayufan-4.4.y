@@ -639,7 +639,6 @@ int VmbusChannelRequestOffers(void)
 	REMOVE_ENTRY_LIST(&msgInfo->msgListEntry);
 	SpinlockRelease(gVmbusConnection.channelMsgLock);*/
 
-
 Cleanup:
 	if (msgInfo) {
 		kfree(msgInfo->WaitEvent);

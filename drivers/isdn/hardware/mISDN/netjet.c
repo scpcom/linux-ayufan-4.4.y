@@ -137,7 +137,6 @@ nj_disable_hwirq(struct tiger_hw *card)
 	outb(0, card->base + NJ_IRQMASK1);
 }
 
-
 static u8
 ReadISAC_nj(void *p, u8 offset)
 {
@@ -589,7 +588,6 @@ fill_dma(struct tiger_ch *bc)
 		bc_next_frame(bc);
 }
 
-
 static int
 bc_next_frame(struct tiger_ch *bc)
 {
@@ -945,7 +943,6 @@ error:
 	return ret;
 }
 
-
 static void
 nj_release(struct tiger_hw *card)
 {
@@ -984,7 +981,6 @@ nj_release(struct tiger_hw *card)
 	kfree(card);
 }
 
-
 static int
 nj_setup(struct tiger_hw *card)
 {
@@ -1000,7 +996,6 @@ nj_setup(struct tiger_hw *card)
 	ASSIGN_FUNC(nj, ISAC, card->isac);
 	return 0;
 }
-
 
 static int __devinit
 setup_instance(struct tiger_hw *card)
@@ -1109,7 +1104,6 @@ nj_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	return err;
 }
-
 
 static void __devexit nj_remove(struct pci_dev *pdev)
 {

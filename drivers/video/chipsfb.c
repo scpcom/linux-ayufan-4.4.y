@@ -484,7 +484,6 @@ static int chipsfb_pci_resume(struct pci_dev *pdev)
 }
 #endif /* CONFIG_PM */
 
-
 static struct pci_device_id chipsfb_pci_tbl[] = {
 	{ PCI_VENDOR_ID_CT, PCI_DEVICE_ID_CT_65550, PCI_ANY_ID, PCI_ANY_ID },
 	{ 0 }

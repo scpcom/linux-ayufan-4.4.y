@@ -29,7 +29,6 @@
 #include "../seq_lock.h"
 #include <linux/init.h>
 
-
 /*
  * constants
  */
@@ -49,7 +48,6 @@ struct seq_oss_midi {
 	struct seq_oss_devinfo *devinfo;	/* assigned OSSseq device */
 	snd_use_lock_t use_lock;
 };
-
 
 /*
  * midi device table
@@ -98,7 +96,6 @@ snd_seq_oss_midi_lookup_ports(int client)
 	return 0;
 }
 
-
 /*
  */
 static struct seq_oss_midi *
@@ -138,7 +135,6 @@ find_slot(int client, int port)
 	spin_unlock_irqrestore(&register_lock, flags);
 	return NULL;
 }
-
 
 #define PERM_WRITE (SNDRV_SEQ_PORT_CAP_WRITE|SNDRV_SEQ_PORT_CAP_SUBS_WRITE)
 #define PERM_READ (SNDRV_SEQ_PORT_CAP_READ|SNDRV_SEQ_PORT_CAP_SUBS_READ)
@@ -251,7 +247,6 @@ snd_seq_oss_midi_check_exit_port(int client, int port)
 	return 0;
 }
 
-
 /*
  * release the midi device if it was registered
  */
@@ -275,7 +270,6 @@ snd_seq_oss_midi_clear_all(void)
 	spin_unlock_irqrestore(&register_lock, flags);
 }
 
-
 /*
  * set up midi tables
  */
@@ -297,7 +291,6 @@ snd_seq_oss_midi_cleanup(struct seq_oss_devinfo *dp)
 	dp->max_mididev = 0;
 }
 
-
 /*
  * open all midi devices.  ignore errors.
  */
@@ -309,7 +302,6 @@ snd_seq_oss_midi_open_all(struct seq_oss_devinfo *dp, int file_mode)
 		snd_seq_oss_midi_open(dp, i, file_mode);
 }
 
-
 /*
  * get the midi device information
  */
@@ -320,7 +312,6 @@ get_mididev(struct seq_oss_devinfo *dp, int dev)
 		return NULL;
 	return get_mdev(dev);
 }
-
 
 /*
  * open the midi device if not opened yet
@@ -498,7 +489,6 @@ snd_seq_oss_midi_reset(struct seq_oss_devinfo *dp, int dev)
 	snd_use_lock_free(&mdev->use_lock);
 }
 
-
 /*
  * get client/port of the specified MIDI device
  */
@@ -513,7 +503,6 @@ snd_seq_oss_midi_get_addr(struct seq_oss_devinfo *dp, int dev, struct snd_seq_ad
 	addr->port = mdev->port;
 	snd_use_lock_free(&mdev->use_lock);
 }
-
 
 /*
  * input callback - this can be atomic
@@ -629,7 +618,6 @@ send_midi_event(struct seq_oss_devinfo *dp, struct snd_seq_event *ev, struct seq
 	return 0;
 }
 
-
 /*
  * dump midi data
  * return 0 : enqueued
@@ -668,7 +656,6 @@ snd_seq_oss_midi_make_info(struct seq_oss_devinfo *dp, int dev, struct midi_info
 	snd_use_lock_free(&mdev->use_lock);
 	return 0;
 }
-
 
 #ifdef CONFIG_PROC_FS
 /*

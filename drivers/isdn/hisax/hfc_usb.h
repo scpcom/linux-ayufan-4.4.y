@@ -10,7 +10,6 @@
 #define DRIVER_AUTHOR   "Peter Sprenger (sprenger@moving-byters.de)"
 #define DRIVER_DESC     "HFC-S USB based HiSAX ISDN driver"
 
-
 #define HFC_CTRL_TIMEOUT	20	/* 5ms timeout writing/reading regs */
 #define HFC_TIMER_T3		8000	/* timeout for l1 activation timer */
 #define HFC_TIMER_T4		500	/* time for state change interval */
@@ -46,7 +45,6 @@
 #define HFCUSB_STATES		0x30
 
 #define HFCUSB_CHIPID		0x40	/* ID value of HFC-S USB */
-
 
 /* fifo registers */
 #define HFCUSB_NUM_FIFOS	8	/* maximum number of fifos */
@@ -123,7 +121,6 @@ static struct hfcusb_symbolic_list urb_errlist[] = {
 	{-ESHUTDOWN, "Device unplugged"},
 	{-1, NULL}
 };
-
 
 /*
  * device dependant information to support different
@@ -202,6 +199,5 @@ typedef struct {
 
 #define LED_NORMAL   	0	// LEDs are normal
 #define LED_INVERTED 	1	// LEDs are inverted
-
 
 #endif	// __HFC_USB_H__

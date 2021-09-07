@@ -745,7 +745,6 @@ int do_one_initcall(initcall_t fn)
 	return ret.result;
 }
 
-
 extern initcall_t __initcall_start[], __initcall_end[], __early_initcall_end[];
 
 static void __init do_initcalls(void)

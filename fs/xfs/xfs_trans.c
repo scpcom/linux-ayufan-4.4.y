@@ -45,7 +45,6 @@
 #include "xfs_trans_space.h"
 #include "xfs_inode_item.h"
 
-
 STATIC void	xfs_trans_apply_sb_deltas(xfs_trans_t *);
 STATIC uint	xfs_trans_count_vecs(xfs_trans_t *);
 STATIC void	xfs_trans_fill_vecs(xfs_trans_t *, xfs_log_iovec_t *);
@@ -55,7 +54,6 @@ STATIC void	xfs_trans_chunk_committed(xfs_log_item_chunk_t *, xfs_lsn_t, int);
 STATIC void	xfs_trans_free(xfs_trans_t *);
 
 kmem_zone_t	*xfs_trans_zone;
-
 
 /*
  * Reservation functions here avoid a huge stack in xfs_trans_init
@@ -421,7 +419,6 @@ undo_blocks:
 	return error;
 }
 
-
 /*
  * Record the indicated change to the given field for application
  * to the file system's superblock when the transaction commits.
@@ -764,7 +761,6 @@ xfs_trans_unreserve_and_mod_sb(
 	}
 }
 
-
 /*
  * xfs_trans_commit
  *
@@ -993,7 +989,6 @@ shut_us_down:
 	return (error);
 }
 
-
 /*
  * Total up the number of log iovecs needed to commit this
  * transaction.  The transaction itself needs one for the
@@ -1124,7 +1119,6 @@ xfs_trans_fill_vecs(
 	XLOG_VEC_SET_TYPE(log_vector, XLOG_REG_TYPE_TRANSHDR);
 }
 
-
 /*
  * Unlock all of the transaction's items and free the transaction.
  * The transaction must not have modified any of its items, because
@@ -1201,7 +1195,6 @@ xfs_trans_cancel(
 	xfs_trans_free(tp);
 }
 
-
 /*
  * Free the transaction structure.  If there is more clean up
  * to do when the structure is freed, add it here.
@@ -1262,7 +1255,6 @@ xfs_trans_roll(
 	 * reference that we gained in xfs_trans_dup()
 	 */
 	xfs_log_ticket_put(trans->t_ticket);
-
 
 	/*
 	 * Reserve space in the log for th next transaction.

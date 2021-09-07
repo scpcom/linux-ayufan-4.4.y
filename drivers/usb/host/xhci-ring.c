@@ -414,7 +414,6 @@ static struct xhci_segment *find_trb_seg(
 	return cur_seg;
 }
 
-
 static struct xhci_ring *xhci_triad_to_transfer_ring(struct xhci_hcd *xhci,
 		unsigned int slot_id, unsigned int ep_index,
 		unsigned int stream_id)
@@ -916,7 +915,6 @@ void xhci_stop_endpoint_command_watchdog(unsigned long arg)
 	usb_hc_died(xhci_to_hcd(xhci));
 	xhci_dbg(xhci, "xHCI host controller is dead.\n");
 }
-
 
 static void update_ring_for_set_deq_completion(struct xhci_hcd *xhci,
 		struct xhci_virt_device *dev,
@@ -1673,7 +1671,6 @@ static int process_isoc_td(struct xhci_hcd *xhci, struct xhci_td *td,
  							break;
 	}
 
-
  			if (trb_comp_code == COMP_SUCCESS || skip_td) {
  							frame->actual_length = frame->length;
  							td->urb->actual_length += frame->length;
@@ -1725,7 +1722,6 @@ static int skip_isoc_td(struct xhci_hcd *xhci, struct xhci_td *td,
 
 			 return finish_td(xhci, td, NULL, event, ep, status, true);
 }
-
 
 /*
  * Process bulk and interrupt tds, update urb status and actual_length.
@@ -1968,7 +1964,6 @@ static int handle_tx_event(struct xhci_hcd *xhci,
  	xhci_dbg(xhci, "Miss service interval error, set skip flag\n");
  	goto cleanup;
 
-
 	default:
 		if (xhci_is_vendor_info_code(xhci, trb_comp_code)) {
 			status = 0;
@@ -1979,7 +1974,6 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 
 		goto cleanup;
 	}
-
 
 	 do {
 	 	/* This TRB should be in the TD at the head of this ring's
@@ -2044,10 +2038,8 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 										 "event_trb is a no-op TRB. Skip it\n");
 						goto cleanup;
 
-
 	}
 
-	
 	 	/* Now update the urb's actual_length and give back to
 	 	 * the core
 		 */

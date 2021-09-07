@@ -69,4 +69,3 @@
 #endif // IGMP_SNOOP_SUPPORT //
 
 #endif	// __RT_CONFIG_H__
-

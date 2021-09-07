@@ -75,4 +75,3 @@ void pmb_unmap(unsigned long addr);
 #endif /* __ASSEMBLY__ */
 
 #endif /* __MMU_H */
-

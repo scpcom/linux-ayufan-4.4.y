@@ -26,7 +26,6 @@
 #include "../w1.h"
 #include "../w1_int.h"
 
-
 #define DS1WM_CMD	0x00	/* R/W 4 bits command */
 #define DS1WM_DATA	0x01	/* R/W 8 bits, transmit/receive buffer */
 #define DS1WM_INT	0x02	/* R/W interrupt status */
@@ -54,7 +53,6 @@
 #define DS1WM_INTEN_ERBF    (1 << 4)	/* enable rx buffer full int */
 #define DS1WM_INTEN_ERSRF   (1 << 5)	/* enable rx shift register full int */
 #define DS1WM_INTEN_DQO	    (1 << 6)	/* enable direct bus driving ops */
-
 
 #define DS1WM_TIMEOUT (HZ * 5)
 
@@ -109,7 +107,6 @@ static inline u8 ds1wm_read_register(struct ds1wm_data *ds1wm_data, u32 reg)
 {
 	return __raw_readb(ds1wm_data->map + (reg << ds1wm_data->bus_shift));
 }
-
 
 static irqreturn_t ds1wm_isr(int isr, void *data)
 {

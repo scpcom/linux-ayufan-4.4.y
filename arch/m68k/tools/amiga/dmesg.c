@@ -17,11 +17,9 @@
  *  distribution for more details.
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
 
 #define CHIPMEM_START	0x00000000
 #define CHIPMEM_END	0x00200000	/* overridden by argv[1] */
@@ -36,7 +34,6 @@ struct savekmsg {
     u_long size;
     char data[0];
 };
-
 
 int main(int argc, char *argv[])
 {

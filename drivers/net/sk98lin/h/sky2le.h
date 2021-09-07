@@ -300,7 +300,6 @@ extern "C" {
 #define STLE_GET_DONE_IDX_TXS2(LowVal,HighVal)			\
 	((HighVal & STLE_TXS2_MSKH) >> STLE_TXS2_SHIFTH)
 
-
 #define SK_Y2_RXSTAT_CHECK_PKT(Len, RxStat, IsOk) {			\
 	(IsOk) = (((RxStat) & GMR_FS_RX_OK) != 0) &&			\
 			 (((RxStat) & GMR_FS_ANY_ERR) == 0);			\
@@ -311,7 +310,6 @@ extern "C" {
 		(IsOk) = SK_FALSE;									\
 	}														\
 }
-
 
 /******************************************************************************
  *
@@ -815,7 +813,6 @@ extern "C" {
 		}														\
 	}
 
-
 /*
  * for Yukon-2 the hardware is not polling the list elements, so it
  * is not necessary to change the own-bit of Rx or Tx LEs before
@@ -847,7 +844,6 @@ extern "C" {
 #define CLEAR_LE_OWN_FROM_DONE_TO(pTable, To)
 
 #endif	/* !SAFE_BUT_SLOW */
-
 
 /* typedefs *******************************************************************/
 
@@ -970,4 +966,3 @@ extern void SkGeY2InitSingleLETable();
 #endif	/* __cplusplus */
 
 #endif	/* __INC_SKY2LE_H */
-

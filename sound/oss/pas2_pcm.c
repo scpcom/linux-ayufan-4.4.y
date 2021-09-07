@@ -228,7 +228,6 @@ static int pas_audio_open(int dev, int mode)
 	if ((err = pas_set_intr(PAS_PCM_INTRBITS)) < 0)
 		return err;
 
-
 	pcm_count = 0;
 	open_mode = mode;
 

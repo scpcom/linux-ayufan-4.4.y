@@ -26,7 +26,6 @@
  *
  ******************************************************************************/
 
-
 #define ISCSI_SEQ_AND_PDU_LIST_C
 
 #include <linux/slab.h>
@@ -333,7 +332,6 @@ static inline void iscsi_determine_counts_for_list(
 		offset += CONN_OPS(conn)->MaxRecvDataSegmentLength;
 	}
 }
-
 
 /*	iscsi_build_pdu_and_seq_list():
  *

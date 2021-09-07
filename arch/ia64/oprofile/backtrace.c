@@ -67,7 +67,6 @@ static __inline__ int next_frame(ia64_backtrace_t *bt)
 	return unw_unwind(&bt->frame) == 0;
 }
 
-
 static void do_ia64_backtrace(struct unw_frame_info *info, void *vdata)
 {
 	ia64_backtrace_t *bt = vdata;

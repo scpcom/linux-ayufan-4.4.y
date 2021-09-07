@@ -270,7 +270,6 @@ return_to_handler:
 	rts
 	 mov.l	@r15+, r0
 
-
 	.align 2
 .Lftrace_return_to_handler:
 	.long	ftrace_return_to_handler

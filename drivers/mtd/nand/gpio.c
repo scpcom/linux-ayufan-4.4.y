@@ -37,7 +37,6 @@ struct gpiomtd {
 
 #define gpio_nand_getpriv(x) container_of(x, struct gpiomtd, mtd_info)
 
-
 #ifdef CONFIG_ARM
 /* gpio_nand_dosync()
  *
@@ -164,7 +163,6 @@ static int gpio_nand_verifybuf16(struct mtd_info *mtd, const u_char *buf,
 	return err;
 }
 
-
 static int gpio_nand_devready(struct mtd_info *mtd)
 {
 	struct gpiomtd *gpiomtd = gpio_nand_getpriv(mtd);
@@ -281,7 +279,6 @@ static int __devinit gpio_nand_probe(struct platform_device *dev)
 	if (ret)
 		goto err_rdy;
 	gpio_direction_input(gpiomtd->plat.gpio_rdy);
-
 
 	this->IO_ADDR_W  = this->IO_ADDR_R;
 	this->ecc.mode   = NAND_ECC_SOFT;

@@ -49,7 +49,6 @@ struct resource boot_param_res = {
         .flags = IORESOURCE_BUSY | IORESOURCE_MEM
 };
 
-
 /*
  * Do what every setup is needed on image and the
  * reboot code buffer to allow us to avoid allocations
@@ -166,4 +165,3 @@ unsigned long paddr_vmcoreinfo_note(void)
 {
 	return ia64_tpa((unsigned long)(char *)&vmcoreinfo_note);
 }
-

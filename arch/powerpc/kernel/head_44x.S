@@ -39,7 +39,6 @@
 #include <asm/asm-offsets.h>
 #include "head_booke.h"
 
-
 /* As with the other PowerPC ports, it is expected that when code
  * execution begins here, the following registers contain valid, yet
  * optional, information:

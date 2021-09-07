@@ -60,7 +60,6 @@ extern "C" {
 #define QD_SMI_ACCESS_LOOP		1000
 #define QD_SMI_TIMEOUT			2
 
-
 /****************************************************************************/
 /* Phy registers related functions.                                         */
 /****************************************************************************/
@@ -94,7 +93,6 @@ GT_STATUS hwReadPhyReg
     OUT GT_U16    *data
 );
 
-
 /*******************************************************************************
 * hwWritePhyReg
 *
@@ -124,7 +122,6 @@ GT_STATUS hwWritePhyReg
     IN  GT_U8     regAddr,
     IN  GT_U16    data
 );
-
 
 /*******************************************************************************
 * hwGetPhyRegField
@@ -159,7 +156,6 @@ GT_STATUS hwGetPhyRegField
     IN  GT_U8     fieldLength,
     OUT GT_U16    *data
 );
-
 
 /*******************************************************************************
 * hwSetPhyRegField
@@ -225,7 +221,6 @@ GT_STATUS hwPhyReset
 	IN	GT_U16		u16Data
 );
 
-
 /*******************************************************************************
 * hwReadPagedPhyReg
 *
@@ -258,7 +253,6 @@ GT_STATUS hwReadPagedPhyReg
 	IN  GT_U32	 anyPage,
 	OUT GT_U16   *data
 );
-
 
 /*******************************************************************************
 * hwWritePagedPhyReg
@@ -373,7 +367,6 @@ GT_STATUS hwSetPagedPhyRegField
     IN  GT_U16   data
 );
 
-
 /****************************************************************************/
 /* Per port registers related functions.                                    */
 /****************************************************************************/
@@ -407,7 +400,6 @@ GT_STATUS hwReadPortReg
     OUT GT_U16    *data
 );
 
-
 /*******************************************************************************
 * hwWritePortReg
 *
@@ -437,7 +429,6 @@ GT_STATUS hwWritePortReg
     IN  GT_U8     regAddr,
     IN  GT_U16    data
 );
-
 
 /*******************************************************************************
 * hwGetPortRegField
@@ -472,7 +463,6 @@ GT_STATUS hwGetPortRegField
     IN  GT_U8     fieldLength,
     OUT GT_U16    *data
 );
-
 
 /*******************************************************************************
 * hwSetPortRegField
@@ -573,7 +563,6 @@ GT_STATUS hwReadGlobalReg
     OUT GT_U16    *data
 );
 
-
 /*******************************************************************************
 * hwWriteGlobalReg
 *
@@ -601,7 +590,6 @@ GT_STATUS hwWriteGlobalReg
     IN  GT_U8     regAddr,
     IN  GT_U16    data
 );
-
 
 /*******************************************************************************
 * hwGetGlobalRegField
@@ -634,7 +622,6 @@ GT_STATUS hwGetGlobalRegField
     IN  GT_U8     fieldLength,
     OUT GT_U16    *data
 );
-
 
 /*******************************************************************************
 * hwSetGlobalRegField
@@ -669,7 +656,6 @@ GT_STATUS hwSetGlobalRegField
     IN  GT_U16    data
 );
 
-
 /****************************************************************************/
 /* Global 2 registers related functions.                                      */
 /****************************************************************************/
@@ -701,7 +687,6 @@ GT_STATUS hwReadGlobal2Reg
     OUT GT_U16    *data
 );
 
-
 /*******************************************************************************
 * hwWriteGlobal2Reg
 *
@@ -729,7 +714,6 @@ GT_STATUS hwWriteGlobal2Reg
     IN  GT_U8     regAddr,
     IN  GT_U16    data
 );
-
 
 /*******************************************************************************
 * hwGetGlobal2RegField
@@ -762,7 +746,6 @@ GT_STATUS hwGetGlobal2RegField
     IN  GT_U8     fieldLength,
     OUT GT_U16    *data
 );
-
 
 /*******************************************************************************
 * hwSetGlobal2RegField
@@ -854,7 +837,6 @@ GT_STATUS hwReadMiiReg
     IN  GT_U8     regAddr,
     OUT GT_U16    *data
 );
-
 
 /*******************************************************************************
 * hwWriteMiiReg

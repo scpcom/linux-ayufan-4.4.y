@@ -94,7 +94,6 @@ orion_clkevt_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 {
 	unsigned long flags;
 
-
 	local_irq_save(flags);
 
 	if (mode == CLOCK_EVT_MODE_PERIODIC) {
@@ -187,11 +186,8 @@ static void mv_init_timer(void)
 
 	clockevents_register_device(&orion_clkevt);
 
-
 }
 
 struct sys_timer mv_timer = {
         .init           = mv_init_timer,
 };
-
-

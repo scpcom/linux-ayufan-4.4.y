@@ -916,7 +916,6 @@ static struct shrinker dcache_shrinker = {
 	.seeks = DEFAULT_SEEKS,
 };
 
-
 /**
  * d_alloc	-	allocate a dcache entry
  * @parent: parent of entry to allocate

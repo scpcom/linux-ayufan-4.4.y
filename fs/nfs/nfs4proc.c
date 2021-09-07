@@ -287,7 +287,6 @@ static int nfs4_handle_exception(const struct nfs_server *server, int errorcode,
 	return nfs4_map_errors(ret);
 }
 
-
 static void renew_lease(const struct nfs_server *server, unsigned long timestamp)
 {
 	struct nfs_client *clp = server->nfs_client;
@@ -677,7 +676,6 @@ struct nfs4_opendata {
 	int cancelled;
 };
 
-
 static void nfs4_init_opendata_res(struct nfs4_opendata *p)
 {
 	p->o_res.f_attr = &p->f_attr;
@@ -894,7 +892,6 @@ no_delegation:
 
 	return ret;
 }
-
 
 static void nfs4_return_incompatible_delegation(struct inode *inode, fmode_t fmode)
 {
@@ -1589,7 +1586,6 @@ out_err:
 	*res = NULL;
 	return status;
 }
-
 
 static struct nfs4_state *nfs4_do_open(struct inode *dir, struct path *path, fmode_t fmode, int flags, struct iattr *sattr, struct rpc_cred *cred)
 {

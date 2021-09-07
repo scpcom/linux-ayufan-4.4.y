@@ -100,7 +100,6 @@ struct xtsplit {
 	struct pxdlist *pxdlist;
 };
 
-
 /*
  *	statistics
  */
@@ -111,7 +110,6 @@ static struct {
 	uint split;
 } xtStat;
 #endif
-
 
 /*
  * forward references
@@ -683,7 +681,6 @@ int xtInsert(tid_t tid,		/* transaction id */
 	return rc;
 }
 
-
 /*
  *	xtSplitUp()
  *
@@ -948,7 +945,6 @@ xtSplitUp(tid_t tid,
 
 	return 0;
 }
-
 
 /*
  *	xtSplitPage()
@@ -1224,7 +1220,6 @@ xtSplitPage(tid_t tid, struct inode *ip,
 	return (rc);
 }
 
-
 /*
  *	xtSplitRoot()
  *
@@ -1379,7 +1374,6 @@ xtSplitRoot(tid_t tid,
 	jfs_info("xtSplitRoot: sp:0x%p rp:0x%p", sp, rp);
 	return 0;
 }
-
 
 /*
  *	xtExtend()
@@ -2184,7 +2178,6 @@ printf("xtUpdate.updateLeft.split p:0x%p\n", p);
 	return rc;
 }
 
-
 /*
  *	xtAppend()
  *
@@ -2430,7 +2423,6 @@ int xtDelete(tid_t tid, struct inode *ip, s64 xoff, s32 xlen, int flag)
 	return 0;
 }
 
-
 /* - TBD for defragmentaion/reorganization -
  *
  *	xtDeleteUp()
@@ -2578,7 +2570,6 @@ xtDeleteUp(tid_t tid, struct inode *ip,
 
 	return 0;
 }
-
 
 /*
  * NAME:	xtRelocate()
@@ -2905,7 +2896,6 @@ xtRelocate(tid_t tid, struct inode * ip, xad_t * oxad,	/* old XAD */
 	return rc;
 }
 
-
 /*
  *	xtSearchNode()
  *
@@ -3030,7 +3020,6 @@ static int xtSearchNode(struct inode *ip, xad_t * xad,	/* required XAD entry */
 	}
 }
 
-
 /*
  *	xtRelink()
  *
@@ -3100,7 +3089,6 @@ static int xtRelink(tid_t tid, struct inode *ip, xtpage_t * p)
 }
 #endif				/*  _STILL_TO_PORT */
 
-
 /*
  *	xtInitRoot()
  *
@@ -3129,10 +3117,8 @@ void xtInitRoot(tid_t tid, struct inode *ip)
 		ip->i_size = 0;
 	}
 
-
 	return;
 }
-
 
 /*
  * We can run into a deadlock truncating a file with a large number of
@@ -3284,7 +3270,6 @@ s64 xtTruncate(tid_t tid, struct inode *ip, s64 newsize, int flag)
 
 	/* process entries backward from last index */
 	index = le16_to_cpu(p->header.nextindex) - 1;
-
 
 	/* Since this is the rightmost page at this level, and we may have
 	 * already freed a page that was formerly to the right, let's make
@@ -3731,7 +3716,6 @@ s64 xtTruncate(tid_t tid, struct inode *ip, s64 newsize, int flag)
 	return newsize;
 }
 
-
 /*
  *	xtTruncate_pmap()
  *
@@ -3836,7 +3820,6 @@ s64 xtTruncate_pmap(tid_t tid, struct inode *ip, s64 committed_size)
 	tlck->type = tlckXTREE | tlckFREE;
 	xtlck = (struct xtlock *) & tlck->lock;
 	xtlck->hwm.offset = index;
-
 
 	XT_PUTPAGE(mp);
 

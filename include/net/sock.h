@@ -755,7 +755,6 @@ static inline void sk_refcnt_debug_release(const struct sock *sk)
 #define sk_refcnt_debug_release(sk) do { } while (0)
 #endif /* SOCK_REFCNT_DEBUG */
 
-
 #ifdef CONFIG_PROC_FS
 /* Called with local bh disabled */
 extern void sock_prot_inuse_add(struct net *net, struct proto *prot, int inc);
@@ -766,7 +765,6 @@ static void inline sock_prot_inuse_add(struct net *net, struct proto *prot,
 {
 }
 #endif
-
 
 /* With per-bucket locks this operation is not-atomic, so that
  * this version is not worse.
@@ -1645,7 +1643,6 @@ sock_recv_timestamp(struct msghdr *msg, struct sock *sk, struct sk_buff *skb)
 extern int sock_tx_timestamp(struct msghdr *msg,
 			     struct sock *sk,
 			     union skb_shared_tx *shtx);
-
 
 /**
  * sk_eat_skb - Release a skb if it is no longer needed

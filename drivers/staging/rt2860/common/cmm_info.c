@@ -434,7 +434,6 @@ INT	Set_Channel_Proc(
 		success = FALSE;
 	}
 
-
 	if (success == TRUE)
 		DBGPRINT(RT_DEBUG_TRACE, ("Set_Channel_Proc::(Channel=%d)\n", pAd->CommonCfg.Channel));
 
@@ -528,7 +527,6 @@ INT	Set_BGProtection_Proc(
 			return FALSE;
 	}
 
-
 	DBGPRINT(RT_DEBUG_TRACE, ("Set_BGProtection_Proc::(BGProtection=%ld)\n", pAd->CommonCfg.UseBGProtection));
 
 	return TRUE;
@@ -549,7 +547,6 @@ INT	Set_TxPreamble_Proc(
 	RT_802_11_PREAMBLE	Preamble;
 
 	Preamble = simple_strtol(arg, 0, 10);
-
 
 	switch (Preamble)
 	{
@@ -698,7 +695,6 @@ INT	Set_PktAggregate_Proc(
 	else
 		return FALSE;  //Invalid argument
 
-
 	DBGPRINT(RT_DEBUG_TRACE, ("Set_PktAggregate_Proc::(AGGRE=%d)\n", pAd->CommonCfg.bAggregationCapable));
 
 	return TRUE;
@@ -733,7 +729,6 @@ INT	Set_IEEE80211H_Proc(
 
 	return TRUE;
 }
-
 
 #ifdef DBG
 /*
@@ -1248,7 +1243,6 @@ VOID	RTMPSetPhyMode(
 			break;
 	}
 
-
 	pAd->CommonCfg.BandState = UNKNOWN_BAND;
 }
 
@@ -1586,7 +1580,6 @@ VOID	RTMPSetIndividualHT(
 	    MlmeUpdateHtTxRates(pAd, apidx);
 }
 
-
 /*
 	========================================================================
 	Routine Description:
@@ -1594,7 +1587,6 @@ VOID	RTMPSetIndividualHT(
 
 	Arguments:
 		Send all HT IE in beacon/probe rsp/assoc rsp/action frame.
-
 
 	========================================================================
 */
@@ -1679,7 +1671,6 @@ VOID	RTMPAddWcidAttributeEntry(
 	}
 
 	RTMP_IO_WRITE32(pAd, offset, WCIDAttri);
-
 
 	// Update IV/EIV table
 	offset = MAC_IVEIV_TABLE_BASE + (Wcid * HW_IVEIV_ENTRY_SIZE);
@@ -1888,7 +1879,6 @@ VOID RTMPIoctlGetSiteSurvey(
 	DBGPRINT(RT_DEBUG_TRACE, ("RTMPIoctlGetSiteSurvey - wrq->u.data.length = %d\n", wrq->u.data.length));
 	os_free_mem(NULL, (PUCHAR)msg);
 }
-
 
 #define	MAC_LINE_LEN	(14+4+4+10+10+10+6+6)	// Addr+aid+psm+datatime+rxbyte+txbyte+current tx rate+last tx rate
 VOID RTMPIoctlGetMacTable(
@@ -2246,7 +2236,6 @@ INT	Set_HtGi_Proc(
 	return TRUE;
 }
 
-
 INT	Set_HtTxBASize_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PUCHAR			arg)
@@ -2264,7 +2253,6 @@ INT	Set_HtTxBASize_Proc(
 
 	return TRUE;
 }
-
 
 INT	Set_HtOpMode_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -2383,7 +2371,6 @@ INT	Set_HtBaWinSize_Proc(
 	ULONG Value;
 
 	Value = simple_strtol(arg, 0, 10);
-
 
 	if (Value >=1 && Value <= 64)
 	{
@@ -2571,7 +2558,6 @@ INT	Set_SendPSMPAction_Proc(
 
 	return FALSE;
 
-
 }
 
 INT	Set_HtMIMOPSmode_Proc(
@@ -2594,7 +2580,6 @@ INT	Set_HtMIMOPSmode_Proc(
 	return TRUE;
 }
 
-
 INT	Set_ForceShortGI_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PUCHAR			arg)
@@ -2615,8 +2600,6 @@ INT	Set_ForceShortGI_Proc(
 
 	return TRUE;
 }
-
-
 
 INT	Set_ForceGF_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -2840,7 +2823,6 @@ INT	Show_WirelessMode_Proc(
 	return 0;
 }
 
-
 INT	Show_TxBurst_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	OUT	PUCHAR			pBuf)
@@ -3005,7 +2987,6 @@ INT	Show_HtExtcha_Proc(
 	}
 	return 0;
 }
-
 
 INT	Show_HtMpduDensity_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -3243,4 +3224,3 @@ INT	Show_WPAPSK_Proc(
 
 	return 0;
 }
-

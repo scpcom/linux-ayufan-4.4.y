@@ -36,7 +36,6 @@ static struct sti_struct *default_sti __read_mostly;
 static int num_sti_roms __read_mostly;
 static struct sti_struct *sti_roms[MAX_STI_ROMS] __read_mostly;
 
-
 /* The colour indices used by STI are
  *   0 - Black
  *   1 - White
@@ -230,7 +229,6 @@ sti_bmove(struct sti_struct *sti, int src_y, int src_x,
 	} while (ret == 1);
 }
 
-
 static void sti_flush(unsigned long start, unsigned long end)
 {
 	flush_icache_range(start, end);
@@ -258,9 +256,6 @@ static void __devinit sti_rom_copy(unsigned long base, unsigned long count,
 	sti_flush(dest_start, (unsigned long)dest);
 }
 
-
-
-
 static char default_sti_path[21] __read_mostly;
 
 #ifndef MODULE
@@ -280,8 +275,6 @@ static int __devinit sti_setup(char *str)
  */
 __setup("sti=", sti_setup);
 #endif
-
-
 
 static char __devinitdata	*font_name[MAX_STI_ROMS] = { "VGA8x16", };
 static int __devinitdata	font_index[MAX_STI_ROMS],
@@ -339,8 +332,6 @@ static int __devinit sti_font_setup(char *str)
 __setup("sti_font=", sti_font_setup);
 #endif
 
-
-	
 static void __devinit
 sti_dump_globcfg(struct sti_glob_cfg *glob_cfg, unsigned int sti_mem_request)
 {
@@ -566,7 +557,6 @@ static struct sti_cooked_font __devinit
 		return rom->font_start;
 }
 
-
 static void __devinit
 sti_dump_rom(struct sti_rom *rom)
 {
@@ -583,7 +573,6 @@ sti_dump_rom(struct sti_rom *rom)
 	DPRINTK(("      ext bus support %02x\n", rom->ext_bus_support));
 	DPRINTK(("      alternate code type %d\n", rom->alt_code_type));
 }
-
 
 static int __devinit
 sti_cook_fonts(struct sti_cooked_rom *cooked_rom,
@@ -618,7 +607,6 @@ sti_cook_fonts(struct sti_cooked_rom *cooked_rom,
 	cooked_font->next_font = NULL;
 	return 1;
 }
-
 
 static int __devinit
 sti_search_font(struct sti_cooked_rom *rom, int height, int width)
@@ -950,7 +938,6 @@ static int __devinit sticore_pa_init(struct parisc_device *dev)
 	return 0;
 }
 
-
 static int __devinit sticore_pci_init(struct pci_dev *pd,
 		const struct pci_device_id *ent)
 {
@@ -998,12 +985,10 @@ static int __devinit sticore_pci_init(struct pci_dev *pd,
 	return 0;
 }
 
-
 static void __devexit sticore_pci_remove(struct pci_dev *pd)
 {
 	BUG();
 }
-
 
 static struct pci_device_id sti_pci_tbl[] = {
 	{ PCI_DEVICE(PCI_VENDOR_ID_HP, PCI_DEVICE_ID_HP_VISUALIZE_EG) },
@@ -1033,7 +1018,6 @@ static struct parisc_driver pa_sti_driver = {
 	.id_table	= sti_pa_tbl,
 	.probe		= sticore_pa_init,
 };
-
 
 /*
  * sti_init_roms() - detects all STI ROMs and stores them in sti_roms[]
@@ -1083,4 +1067,3 @@ EXPORT_SYMBOL(sti_get_rom);
 MODULE_AUTHOR("Philipp Rumpf, Helge Deller, Thomas Bogendoerfer");
 MODULE_DESCRIPTION("Core STI driver for HP's NGLE series graphics cards in HP PARISC machines");
 MODULE_LICENSE("GPL v2");
-

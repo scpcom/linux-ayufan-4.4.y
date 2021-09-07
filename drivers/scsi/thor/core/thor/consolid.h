@@ -58,4 +58,3 @@ Consolid_PushSendRequest(
 	);
 
 #endif
-

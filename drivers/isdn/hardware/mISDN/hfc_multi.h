@@ -60,7 +60,6 @@ struct hfc_chan {
 	s32		*coeff; /* memory pointer to 8 coeff blocks */
 };
 
-
 struct hfcm_hw {
 	u_char	r_ctrl;
 	u_char	r_irq_ctrl;
@@ -76,7 +75,6 @@ struct hfcm_hw {
 	u_char	r_bert_wd_md;
 	timer_t	timer;
 };
-
 
 /* for each stack these flags are used (cfg) */
 #define	HFC_CFG_NONCAP_TX	1 /* S/T TX interface has less capacity */
@@ -282,7 +280,6 @@ struct hfc_multi {
 #define PLX_CNTRL  0x50
 #define PLX_GPIOC  0x54
 
-
 /*
  * REGISTER SETTING FOR HFC-4S/8S AND HFC-E1
  */
@@ -461,7 +458,6 @@ struct hfc_multi {
 #define A_FIFO_DATA1_NOINC	0x84
 #define A_FIFO_DATA2_NOINC	0x84
 #define R_RAM_DATA		0xC0
-
 
 /*
  * BIT SETTING FOR HFC-4S/8S AND HFC-E1
@@ -1230,4 +1226,3 @@ struct hfc_register_names {
 	{"R_IRQ_FIFO_BL7",	0xCF},
 };
 #endif /* HFC_REGISTER_DEBUG */
-

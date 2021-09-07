@@ -43,7 +43,6 @@ struct au1xxx_irqmap __initdata au1xxx_irq_map[] = {
 	{ AU1000_GPIO_7, IRQF_TRIGGER_LOW, 0 },
 };
 
-
 /*
  * Support for External interrupts on the Pb1200 Development platform.
  */

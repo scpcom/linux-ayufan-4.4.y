@@ -23,8 +23,6 @@
 #include "usbip_common.h"
 #include "stub.h"
 
-
-
 static int stub_probe(struct usb_interface *interface,
 				const struct usb_device_id *id);
 static void stub_disconnect(struct usb_interface *interface);
@@ -32,7 +30,6 @@ static void stub_disconnect(struct usb_interface *interface);
 static void stub_syno_device_close_socket(struct usbip_device *ud);
 static void stub_syno_device_cleanup_urb(struct usbip_device *ud);
 #endif
-
 
 /*
  * Define device IDs here if you want to explicitly limit exportable devices.
@@ -68,11 +65,9 @@ struct usb_driver stub_driver = {
 	.id_table	= stub_table,
 };
 
-
 /*-------------------------------------------------------------------------*/
 
 /* Define sysfs entries for a usbip-bound device */
-
 
 /*
  * usbip_status shows status of usbip as long as this driver is bound to the
@@ -266,8 +261,6 @@ static void stub_remove_files(struct device *dev)
 #endif
 }
 
-
-
 /*-------------------------------------------------------------------------*/
 
 /* Event handler functions called by an event handler thread */
@@ -425,7 +418,6 @@ static void stub_device_unusable(struct usbip_device *ud)
 	spin_unlock(&ud->lock);
 }
 
-
 /*-------------------------------------------------------------------------*/
 
 /**
@@ -513,7 +505,6 @@ static int stub_device_free(struct stub_device *sdev)
 	return 0;
 }
 
-
 /*-------------------------------------------------------------------------*/
 
 /*
@@ -588,7 +579,6 @@ static int stub_probe(struct usb_interface *interface,
 	return 0;
 }
 
-
 /*
  * called in usb_disconnect() or usb_deregister()
  * but only if actconfig(active configuration) exists
@@ -608,7 +598,6 @@ static void stub_disconnect(struct usb_interface *interface)
 
 	usb_set_intfdata(interface, NULL);
 
-
 	/*
 	 * NOTE:
 	 * rx/tx threads are invoked for each usb_device.
@@ -623,7 +612,6 @@ static void stub_disconnect(struct usb_interface *interface)
 
 	/* 3. free sdev */
 	stub_device_free(sdev);
-
 
 	usbip_udbg("bye\n");
 }

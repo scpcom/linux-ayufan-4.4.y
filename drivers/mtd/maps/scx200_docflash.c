@@ -70,7 +70,6 @@ static struct mtd_partition partition_info[] = {
 #define NUM_PARTITIONS ARRAY_SIZE(partition_info)
 #endif
 
-
 static struct map_info scx200_docflash_map = {
 	.name      = "NatSemi SCx200 DOCCS Flash",
 };

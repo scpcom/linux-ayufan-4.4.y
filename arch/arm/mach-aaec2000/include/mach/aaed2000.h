@@ -36,5 +36,4 @@
 #define AAED_EGPIO_nLED1	0x20000000 /* LED 1 */
 #define AAED_EGPIO_nLED2	0x20000000 /* LED 2 */
 
-
 #endif /* __ARM_ARCH_AAED2000_H */

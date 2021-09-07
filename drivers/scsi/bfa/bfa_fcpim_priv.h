@@ -185,4 +185,3 @@ void            bfa_itnim_tskdone(struct bfa_itnim_s *itnim);
 bfa_boolean_t   bfa_itnim_hold_io(struct bfa_itnim_s *itnim);
 
 #endif /* __BFA_FCPIM_PRIV_H__ */
-

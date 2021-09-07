@@ -75,7 +75,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *
 *******************************************************************************/
 
-
 #ifndef __INCmvIdmah
 #define __INCmvIdmah
 
@@ -89,7 +88,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* typedefs */
 
-
 /* This struct describes IDMA descriptor structure                          */
 typedef struct _mvDmaDesc
 {
@@ -101,7 +99,6 @@ typedef struct _mvDmaDesc
                             /* physical address of the next descriptor,     */
                             /* otherwise it should be NULL.                 */
 }MV_DMA_DESC;
-
 
 /* mvIdma.h API list */
 MV_VOID mvDmaHalInit (MV_U32);
@@ -116,5 +113,3 @@ MV_STATUS mvDmaCommandSet(MV_U32 chan, MV_COMMAND command);
 MV_VOID mvIdmaRegs(MV_U32 chan);
 
 #endif /* __INCmvIdmah */
-
-

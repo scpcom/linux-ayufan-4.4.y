@@ -32,7 +32,6 @@ static wait_queue_head_t ir_block;
 // LINKED LIST OPERATIONS //
 ////////////////////////////
 
-
 ///////////////
 // CALLBACKS //
 ///////////////
@@ -281,13 +280,11 @@ DumpGPIO();
 		"GPIO Test Module",      	// const char * 	devname,
 		(void*) gpioTest_device  );   	// void * dev_id)
 	
-	
 	// set int condiiton....
 	for (i=CONFIG_OXNAS_I2C_SCL; i<=CONFIG_OXNAS_I2C_SDA; ++i)
 	{
 		int tmo;
 		int drv = i+1 > CONFIG_OXNAS_I2C_SDA ? CONFIG_OXNAS_I2C_SCL : i+1;	// BHC - This is rubbish, there's no contract saying SDA has to be on a higher numbered GPIO than SCL
-		
 		
 		// ================================================= level detect
 		// set an interrupt on i being high-level
@@ -444,20 +441,16 @@ printk("tmo4 == 0x%08x\n", tmo );
 			return -1;
 		}
 
-		
-		
 		// Setting lines to Input --------------------------------------
 		temp  = readl( GPIO_A_OUTPUT_ENABLE );
 		temp &= ~(GPIO_TEST_SCL | GPIO_TEST_SDA);
 		writel( temp, GPIO_A_OUTPUT_ENABLE );
 	}
 	
-	
 	printk("$G All gpiuo tests passed.\n");
 	
 	return 0;
 }
-
 
 /*
 Read callback:
@@ -502,7 +495,6 @@ ssize_t gpioTest_write(struct file *filp, const char __user *buf, size_t count, 
   
   printk( KERN_ERR "gpioTest_write:\n");
 
- 
   // Copy the data to be written from userspace
   // if(copy_from_user(dptr->data[s_pos]+q_pos, buf, count)){
   //   retval = -EFAULT;
@@ -520,8 +512,6 @@ ssize_t gpioTest_write(struct file *filp, const char __user *buf, size_t count, 
   // up(&dev->sem);
   return 0;
 }
-
-
 
 /*
 Release callback
@@ -549,9 +539,6 @@ int gpioTest_open(struct inode *inode, struct file *filp){
   return 0;
 }
 
-
-
-
 //////////////////
 // MODULE STUFF //
 //////////////////
@@ -566,7 +553,6 @@ struct file_operations gpioTest_fops = {
     .open =     gpioTest_open,
     .release =  gpioTest_release,
 };
-
 
 /*
  Module loading
@@ -588,7 +574,6 @@ static int gpioTest_init(void){
 	}else{
 		printk(KERN_WARNING "gpioTest: registered with major number:%i\n", MAJOR(dev));
 	}
-	
 	
 	// Allocate memory for gpioTest_COUNT gpioTest_devices
 	gpioTest_device = kmalloc(sizeof(struct gpioTest_dev), GFP_KERNEL);
@@ -631,15 +616,12 @@ static int gpioTest_init(void){
 		DumpGPIO();
 	}
 	
-
-
   return 0;
 
 fail:
   // do cleanup;
   return res;
 }
-
 
 /*
  Module unloading

@@ -62,7 +62,6 @@ MODULE_PARM_DESC(copybreak,
 	module_param_array_named(X, X, int, &num_##X, 0);	\
 	MODULE_PARM_DESC(X, desc);
 
-
 /*
  * Transmit Interrupt Delay in units of 1.024 microseconds
  * Tx interrupt delay needs to typically be set to something non zero

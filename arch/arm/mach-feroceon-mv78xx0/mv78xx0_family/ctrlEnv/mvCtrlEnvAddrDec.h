@@ -81,7 +81,6 @@ typedef struct _mvDecRegs
     MV_U32 sizeReg;
 } MV_DEC_REGS;
 
-
 /* This structure describes address decode window                           */
 typedef struct _mvDecWin 
 {

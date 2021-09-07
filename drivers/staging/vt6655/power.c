@@ -48,18 +48,13 @@
 
 /*---------------------  Static Definitions -------------------------*/
 
-
-
-
 /*---------------------  Static Classes  ----------------------------*/
 
 /*---------------------  Static Variables  --------------------------*/
 static int          msglevel                =MSG_LEVEL_INFO;
 /*---------------------  Static Functions  --------------------------*/
 
-
 /*---------------------  Export Variables  --------------------------*/
-
 
 /*---------------------  Export Functions  --------------------------*/
 
@@ -72,7 +67,6 @@ static int          msglevel                =MSG_LEVEL_INFO;
  *    None.
  *
 -*/
-
 
 VOID
 PSvEnablePowerSaving(
@@ -129,11 +123,6 @@ PSvEnablePowerSaving(
     return;
 }
 
-
-
-
-
-
 /*+
  *
  * Routine Description:
@@ -170,7 +159,6 @@ PSvDisablePowerSaving(
     return;
 }
 
-
 /*+
  *
  * Routine Description:
@@ -180,7 +168,6 @@ PSvDisablePowerSaving(
  *    TRUE, if power down success
  *    FALSE, if fail
 -*/
-
 
 BOOL
 PSbConsiderPowerDown(
@@ -236,8 +223,6 @@ PSbConsiderPowerDown(
     return TRUE;
 }
 
-
-
 /*+
  *
  * Routine Description:
@@ -248,8 +233,6 @@ PSbConsiderPowerDown(
  *
 -*/
 
-
-
 VOID
 PSvSendPSPOLL(
     IN HANDLE hDeviceContext
@@ -258,7 +241,6 @@ PSvSendPSPOLL(
     PSDevice            pDevice = (PSDevice)hDeviceContext;
     PSMgmtObject        pMgmt = pDevice->pMgmt;
     PSTxMgmtPacket      pTxPacket = NULL;
-
 
     memset(pMgmt->pbyPSPacketPool, 0, sizeof(STxMgmtPacket) + WLAN_HDR_ADDR2_LEN);
     pTxPacket = (PSTxMgmtPacket)pMgmt->pbyPSPacketPool;
@@ -285,8 +267,6 @@ PSvSendPSPOLL(
     return;
 }
 
-
-
 /*+
  *
  * Routine Description:
@@ -305,7 +285,6 @@ PSbSendNullPacket(
     PSTxMgmtPacket      pTxPacket = NULL;
     PSMgmtObject        pMgmt = pDevice->pMgmt;
     UINT                uIdx;
-
 
     if (pDevice->bLinkPass == FALSE) {
         return FALSE;
@@ -368,7 +347,6 @@ PSbSendNullPacket(
 //            DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO "Send Null Packet success....\n");
     }
 
-
     return TRUE ;
 }
 
@@ -409,4 +387,3 @@ PSbIsNextTBTTWakeUp(
 
     return bWakeUp;
 }
-

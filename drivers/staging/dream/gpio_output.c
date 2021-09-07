@@ -81,4 +81,3 @@ err_gpio_request_failed:
 	}
 	return ret;
 }
-

@@ -207,7 +207,6 @@ static int set_radio_freq(struct dvb_frontend *fe,
 		tuner_dbg("TEA5767 set to stereo\n");
 	}
 
-
 	buffer[3] = 0;
 
 	if (priv->ctrl.port2)
@@ -232,7 +231,6 @@ static int set_radio_freq(struct dvb_frontend *fe,
 
 	if (priv->ctrl.pllref)
 		buffer[4] |= TEA5767_PLLREF_ENABLE;
-
 
 	/* Rounds freq to next decimal value - for 62.5 KHz step */
 	/* frq = 20*(frq/16)+radio_frq[frq%16]; */
@@ -392,7 +390,6 @@ int tea5767_autodetection(struct i2c_adapter* i2c_adap, u8 i2c_addr)
 		printk(KERN_WARNING "Chip ID is not zero. It is not a TEA5767\n");
 		return -EINVAL;
 	}
-
 
 	return 0;
 }

@@ -33,7 +33,6 @@ typedef struct {
  	_audio_mem_info mem_array[5]; 
 } _audio_info;
 
-
 struct mv88fx_snd_stream {
 	struct snd_pcm_substream	*substream;
         struct device*		dev;
@@ -67,7 +66,6 @@ struct mv88fx_snd_stream {
 	unsigned char 	*area;	/* virtual pointer */
 	dma_addr_t 	addr;	/* physical address */
 
-	
 };
 
 struct mv88fx_snd_chip {
@@ -101,7 +99,6 @@ struct mv88fx_snd_chip {
 #define	MV88FX_SND_MIN_PERIOD_BYTES	0x4000
 #define	MV88FX_SND_MAX_PERIOD_BYTES	0x4000
 
-
 /* read/write registers */
 
 #define mv88fx_snd_writel(chip, offs, val)	\
@@ -120,5 +117,3 @@ static inline unsigned int mv88fx_snd_readl(struct mv88fx_snd_chip *chip,
 #define mv88fx_snd_bitreset(chip, offs, bitmask)	\
 		writel( (readl(0xf1000000 + offs) & (~(bitmask))), \
 			0xf1000000 + offs)
-
-

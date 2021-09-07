@@ -92,7 +92,6 @@
 #define reg_iop_scrc_in_rw_wr1bit___last___width 2
 #define reg_iop_scrc_in_rw_wr1bit_offset 32
 
-
 /* Constants */
 #define regk_iop_scrc_in_dif_in                   0x00000002
 #define regk_iop_scrc_in_hi                       0x00000000

@@ -210,5 +210,3 @@ bfad_remove_intr(struct bfad_s *bfad)
 		free_irq(bfad->pcidev->irq, bfad);
 	}
 }
-
-

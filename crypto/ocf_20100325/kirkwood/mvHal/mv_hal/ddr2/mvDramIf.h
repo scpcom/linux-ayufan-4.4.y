@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvDramIfh
 #define __INCmvDramIfh
 
@@ -105,7 +104,6 @@ typedef enum _mvDimmDdr2Cas
     DDR2_CL_6    = 0x40, 
     DDR2_CL_FAULT
 } MV_DIMM_DDR2_CAS;
-
 
 typedef struct _mvDramBankInfo
 {

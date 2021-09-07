@@ -158,8 +158,6 @@ static inline void *gru_chiplet_vaddr(void *vaddr, int pnode, int chiplet)
 	return vaddr + GRU_SIZE * (2 * pnode  + chiplet);
 }
 
-
-
 /*
  * Global TLB Fault Map
  * 	Bitmap of outstanding TLB misses needing interrupt/polling service.

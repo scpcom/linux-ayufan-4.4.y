@@ -901,4 +901,3 @@ int pcie_aspm_enabled(void)
        return !aspm_disabled;
 }
 EXPORT_SYMBOL(pcie_aspm_enabled);
-

@@ -27,7 +27,6 @@
 
 #define to_drv_attr(_attr) container_of(_attr, struct driver_attribute, attr)
 
-
 static int __must_check bus_rescan_devices_helper(struct device *dev,
 						void *data);
 
@@ -159,7 +158,6 @@ static struct kset_uevent_ops bus_uevent_ops = {
 };
 
 static struct kset *bus_kset;
-
 
 #ifdef CONFIG_HOTPLUG
 /* Manually detach a device from its associated driver. */
@@ -804,7 +802,6 @@ struct bus_type *find_bus(char *name)
 	return k ? to_bus(k) : NULL;
 }
 #endif  /*  0  */
-
 
 /**
  * bus_add_attrs - Add default attributes for this bus.

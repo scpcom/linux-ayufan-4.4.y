@@ -130,7 +130,6 @@ static struct ads7846_platform_data tsc2046_config __initdata = {
 	.keep_vref_on		= 1,
 };
 
-
 static struct omap2_mcspi_device_config tsc2046_mcspi_config = {
 	.turbo_mode	= 0,
 	.single_channel	= 1,	/* 0: slave, 1: master */

@@ -29,7 +29,6 @@
 #include <asm/sn/klconfig.h>
 #include <asm/sn/sn_private.h>
 
-
 #define SLOT_PFNSHIFT           (SLOT_SHIFT - PAGE_SHIFT)
 #define PFN_NASIDSHFT           (NASID_SHFT - PAGE_SHIFT)
 

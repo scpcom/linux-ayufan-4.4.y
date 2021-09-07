@@ -264,7 +264,6 @@ static irqreturn_t t1isa_interrupt(int interrupt, void *devptr)
 			printk(KERN_INFO "%s: DEBUG: %s\n", card->name, card->msgbuf);
 			break;
 
-
 		case 0xff:
 			spin_unlock_irqrestore(&card->lock, flags);
 			printk(KERN_ERR "%s: card reseted ?\n", card->name);
@@ -505,7 +504,6 @@ static char *t1isa_procinfo(struct capi_ctr *ctrl)
 		);
 	return cinfo->infobuf;
 }
-
 
 /* ------------------------------------------------------------- */
 

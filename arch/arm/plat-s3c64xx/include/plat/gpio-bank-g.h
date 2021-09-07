@@ -39,4 +39,3 @@
 
 #define S3C64XX_GPG5_MMC0_DATA3		(0x02 << 20)
 #define S3C64XX_GPG5_EINT_G5_5		(0x07 << 20)
-

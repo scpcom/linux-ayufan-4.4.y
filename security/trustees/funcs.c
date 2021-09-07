@@ -58,7 +58,6 @@ static int deepest_level = 0;
  */
 static LIST_HEAD(trustee_ic_list);
 
-
 /* The calling method needs to free the buffer created by this function
  * This method returns the filename for a dentry.  This is, of course,
  * relative to the device.  The filename can be truncated to be as deep as
@@ -279,7 +278,6 @@ static int copy_trustee_name(struct trustee_name *dst, struct trustee_name *src)
 
 	return 1;
 }
-
 
 /*
  * hashing function researched by Karl Nelson <kenelson @ ece ucdavis edu>

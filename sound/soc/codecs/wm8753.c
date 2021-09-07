@@ -211,7 +211,6 @@ SOC_ENUM_SINGLE(WM8753_ADC, 7, 4, wm8753_dat_sel),
 SOC_ENUM_SINGLE(WM8753_OUTCTL, 2, 2, wm8753_rout2_phase),
 };
 
-
 static int wm8753_get_dai(struct snd_kcontrol *kcontrol,
 	struct snd_ctl_elem_value *ucontrol)
 {

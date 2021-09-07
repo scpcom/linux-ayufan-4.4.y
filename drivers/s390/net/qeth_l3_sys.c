@@ -591,7 +591,6 @@ static QETH_DEVICE_ATTR(ipato_invert6, invert6, 0644,
 			qeth_l3_dev_ipato_invert6_show,
 			qeth_l3_dev_ipato_invert6_store);
 
-
 static ssize_t qeth_l3_dev_ipato_add6_show(struct device *dev,
 				struct device_attribute *attr, char *buf)
 {

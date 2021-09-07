@@ -513,7 +513,6 @@ int qla25xx_update_req_que(struct scsi_qla_host *vha, uint8_t que, uint8_t qos)
 	return ret;
 }
 
-
 /* Delete all queues for a given vhost */
 int
 qla25xx_delete_queues(struct scsi_qla_host *vha)

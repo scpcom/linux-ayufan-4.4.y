@@ -194,7 +194,6 @@ xfs_trans_find_item(xfs_trans_t	*tp, xfs_log_item_t *lip)
 	return lip->li_desc;
 }
 
-
 /*
  * Return a pointer to the first descriptor in the chunk list.
  * This does not return NULL if there are none, it panics.
@@ -235,7 +234,6 @@ xfs_trans_first_item(xfs_trans_t *tp)
 	cmn_err(CE_WARN, "xfs_trans_first_item() -- no first item");
 	return NULL;
 }
-
 
 /*
  * Given a descriptor, return the next descriptor in the chunk list.
@@ -334,8 +332,6 @@ xfs_trans_free_items(
 	tp->t_items_free = XFS_LIC_NUM_SLOTS;
 	tp->t_items.lic_next = NULL;
 }
-
-
 
 /*
  * This is called to unlock the items associated with a transaction.
@@ -439,7 +435,6 @@ xfs_trans_unlock_chunk(
 	return freed;
 }
 
-
 /*
  * This is called to add the given busy item to the transaction's
  * list of busy items.  It must find a free busy item descriptor
@@ -525,7 +520,6 @@ xfs_trans_add_busy(xfs_trans_t *tp, xfs_agnumber_t ag, xfs_extlen_t idx)
 	lbsp->lbc_idx = idx;
 	return lbsp;
 }
-
 
 /*
  * xfs_trans_free_busy

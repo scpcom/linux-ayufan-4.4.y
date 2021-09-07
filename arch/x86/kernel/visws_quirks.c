@@ -428,7 +428,6 @@ static int is_co_apic(unsigned int irq)
 	}
 }
 
-
 /*
  * This is the SGI Cobalt (IO-)APIC:
  */
@@ -495,7 +494,6 @@ static struct irq_chip cobalt_irq_type = {
 	.end =		end_cobalt_irq,
 };
 
-
 /*
  * This is the PIIX4-based 8259 that is wired up indirectly to Cobalt
  * -- not the manner expected by the code in i8259.c.
@@ -529,14 +527,12 @@ static struct irq_chip piix4_master_irq_type = {
 	.end =		end_piix4_master_irq,
 };
 
-
 static struct irq_chip piix4_virtual_irq_type = {
 	.typename =	"PIIX4-virtual",
 	.shutdown =	disable_8259A_irq,
 	.enable =	enable_8259A_irq,
 	.disable =	disable_8259A_irq,
 };
-
 
 /*
  * PIIX4-8259 master/virtual functions to handle interrupt requests
@@ -627,7 +623,6 @@ static struct irqaction cascade_action = {
 	.handler = 	no_action,
 	.name =		"cascade",
 };
-
 
 void init_VISWS_APIC_irqs(void)
 {

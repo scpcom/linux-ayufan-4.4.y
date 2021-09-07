@@ -156,7 +156,6 @@
 #define SYSC_IDLEMODE_SMART		0x2
 #define SYSC_CLOCKACTIVITY_FCLK		0x2
 
-
 struct omap_i2c_dev {
 	struct device		*dev;
 	void __iomem		*base;		/* virtual */
@@ -541,7 +540,6 @@ static int omap_i2c_xfer_msg(struct i2c_adapter *adap,
 	}
 	return -EIO;
 }
-
 
 /*
  * Prepare controller for a transaction and call omap_i2c_xfer_msg

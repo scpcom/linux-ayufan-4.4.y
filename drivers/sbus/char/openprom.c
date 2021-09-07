@@ -588,7 +588,6 @@ static int openprom_bsd_ioctl(struct inode * inode, struct file * file,
 	return err;
 }
 
-
 /*
  *	Handoff control to the correct ioctl handler.
  */

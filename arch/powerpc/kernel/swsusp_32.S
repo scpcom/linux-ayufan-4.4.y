@@ -36,7 +36,6 @@
 _GLOBAL(swsusp_save_area)
 	.space	SL_SIZE
 
-
 	.section .text
 	.align	5
 
@@ -128,7 +127,6 @@ _GLOBAL(swsusp_arch_suspend)
 	mtlr	r0
 
 	blr
-
 
 /* Resume code */
 _GLOBAL(swsusp_arch_resume)
@@ -347,4 +345,3 @@ turn_on_mmu:
 	sync
 	isync
 	rfi
-

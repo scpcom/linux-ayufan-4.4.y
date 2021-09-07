@@ -6,7 +6,6 @@
  * Copyright (C) 1998 Paul Mackerras.
  */
 
-
 #define PMU_DRIVER_VERSION	2
 
 /*
@@ -81,7 +80,6 @@
 #define PMU_I2C_STATUS_OK	0
 #define PMU_I2C_STATUS_DATAREAD	1
 #define PMU_I2C_STATUS_BUSY	0xfe
-
 
 /* Kind of PMU (model) */
 enum {

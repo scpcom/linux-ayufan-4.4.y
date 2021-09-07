@@ -731,7 +731,6 @@ static void sb16_audio_output_block(int dev, unsigned long buf, int count,
 	spin_unlock_irqrestore(&devc->lock, flags);
 }
 
-
 /*
  *	This fails on the Cyrix MediaGX. If you don't have the DMA enabled
  *	before the first sample arrives it locks up. However even if you

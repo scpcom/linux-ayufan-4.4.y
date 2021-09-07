@@ -103,7 +103,6 @@ disclaimer.
 #define MV_INCLUDE_SPI
 #endif
 
-
 /* NAND flash stuff */
 #ifdef CONFIG_MV_NAND_BOOT
 #define MV_NAND_BOOT
@@ -111,7 +110,6 @@ disclaimer.
 #ifdef CONFIG_MV_NAND
 #define MV_NAND
 #endif
-
 
 /****************************************************************/
 /************* General    configuration ********************/
@@ -199,7 +197,6 @@ disclaimer.
 /* DRAM cache coherency configuration */
 #define MV_CACHE_COHERENCY  MV_CACHE_COHER_SW
 
-
 #define ETHER_DRAM_COHER    MV_CACHE_COHER_SW   /* No HW coherency in 88Fxx81 devices */
 
 #if (ETHER_DRAM_COHER == MV_CACHE_COHER_HW_WB)
@@ -213,7 +210,6 @@ disclaimer.
 #else
  #error "Ethernet-DRAM undefined"
 #endif /* ETHER_DRAM_COHER */
-
 
 /****************************************************************/
 /************* Ethernet driver configuration ********************/
@@ -244,8 +240,6 @@ disclaimer.
 #elif defined(CONFIG_MV_TDM_ULAW_MODE)
  #define MV_TDM_ULAW_MODE
 #endif
-
-
 
 /* We use the following registers to store DRAM interface pre configuration   */
 /* auto-detection results													  */
@@ -298,10 +292,8 @@ disclaimer.
 /* Chip Select Base Address */
 #define BOOTDEV_CS_BASE 	0xfff00000U
 
-
 #define PCIx_IO_SIZE     	_8M
 #define PCIx_MEM0_SIZE  	_64M
-
 
 #define PCI0_IO_SIZE     PCIx_IO_SIZE
 #define PCI0_MEM0_SIZE   PCIx_MEM0_SIZE
@@ -327,10 +319,8 @@ disclaimer.
 #define PCI7_IO_SIZE     PCIx_IO_SIZE
 #define PCI7_MEM0_SIZE   PCIx_MEM0_SIZE
 
-
 #define CRYPTO_SIZE		_2M
 #define CPU_IF_SIZE		0
-
 
 #define PCI0_MEM0_BASE  0xcc000000U
 #define PCI1_MEM0_BASE  0xd0000000U
@@ -340,7 +330,6 @@ disclaimer.
 #define PCI5_MEM0_BASE  0xe0000000U
 #define PCI6_MEM0_BASE  0xe4000000U
 #define PCI7_MEM0_BASE  0xe8000000U
-
 
 #define PCI0_IO_BASE    0xf2000000U
 #define PCI1_IO_BASE    0xf3000000U
@@ -372,6 +361,4 @@ disclaimer.
 #define PEX_HOST_BUS_NUM(pciIf) (pciIf)
 #define PEX_HOST_DEV_NUM(pciIf) 0
 
-
 #endif /* __INCmvSysHwConfigh */
-

@@ -1,7 +1,6 @@
 #ifndef _ASM_CRIS_ARCH_PROCESSOR_H
 #define _ASM_CRIS_ARCH_PROCESSOR_H
 
-
 /* Return current instruction pointer. */
 #define current_text_addr() \
 	({void *pc; __asm__ __volatile__ ("lapcq .,%0" : "=rm" (pc)); pc;})

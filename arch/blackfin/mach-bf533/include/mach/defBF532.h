@@ -1224,5 +1224,4 @@
 #define SDEASE		      0x00000010	/* SDRAM EAB sticky error status - W1C */
 #define BGSTAT			0x00000020	/* Bus granted */
 
-
 #endif				/* _DEF_BF532_H */

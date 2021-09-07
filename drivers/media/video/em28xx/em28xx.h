@@ -555,7 +555,6 @@ struct em28xx {
 	int vbi_read;
 	unsigned char cur_field;
 
-
 	struct work_struct         request_module_wk;
 
 	/* locks */

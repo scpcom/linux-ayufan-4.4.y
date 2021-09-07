@@ -148,7 +148,6 @@ static int hidinput_setkeycode(struct input_dev *dev, int scancode,
 	return -EINVAL;
 }
 
-
 static void hidinput_configure_usage(struct hid_input *hidinput, struct hid_field *field,
 				     struct hid_usage *usage)
 {
@@ -513,7 +512,6 @@ mapped:
 	if (usage->code > max)
 		goto ignore;
 
-
 	if (usage->type == EV_ABS) {
 
 		int a = field->logical_minimum;
@@ -806,4 +804,3 @@ void hidinput_disconnect(struct hid_device *hid)
 	}
 }
 EXPORT_SYMBOL_GPL(hidinput_disconnect);
-

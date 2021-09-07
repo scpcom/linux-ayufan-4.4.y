@@ -54,7 +54,6 @@
 
 #define MII_LXT971_ISR		19  /* Interrupt Status Register */
 
-
 MODULE_DESCRIPTION("Intel LXT PHY driver");
 MODULE_AUTHOR("Andy Fleming");
 MODULE_LICENSE("GPL");
@@ -96,7 +95,6 @@ static int lxt970_config_init(struct phy_device *phydev)
 
 	return err;
 }
-
 
 static int lxt971_ack_interrupt(struct phy_device *phydev)
 {

@@ -25,7 +25,6 @@
 
 #include "u_ether.h"
 
-
 /*
  * This function packages a simple "CDC Subset" Ethernet port with no real
  * control mechanisms; just raw data transfer over two bulk endpoints.
@@ -300,7 +299,6 @@ geth_bind(struct usb_configuration *c, struct usb_function *f)
 			f->descriptors, &fs_subset_in_desc);
 	geth->fs.out = usb_find_endpoint(fs_eth_function,
 			f->descriptors, &fs_subset_out_desc);
-
 
 	/* support all relevant hardware speeds... we expect that when
 	 * hardware is dual speed, all bulk-capable endpoints work at

@@ -271,7 +271,6 @@ static void omap2430_clk_i2chs_find_idlest(struct clk *clk,
 	*idlest_bit = clk->enable_bit;
 }
 
-
 /**
  * omap2xxx_clk_get_core_rate - return the CORE_CLK rate
  * @clk: pointer to the combined dpll_ck + core_ck (currently "dpll_ck")

@@ -476,7 +476,6 @@ static void matroxfb_1bpp_imageblit(struct matrox_fb_info *minfo, u_int32_t fgx,
 	CRITEND
 }
 
-
 static void matroxfb_imageblit(struct fb_info* info, const struct fb_image* image) {
 	struct matrox_fb_info *minfo = info2minfo(info);
 

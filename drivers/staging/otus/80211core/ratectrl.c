@@ -37,7 +37,6 @@ const u32_t zcRateToPhyCtrl[] =
         0x800e0002, 0x800f0002, 0x80070002
     };
 
-
 const u8_t zcHtRateTable[15][4] =
     { /*[5G 20MHz]  [5G 40MHz] [2.4G 20MHz]  [2.4G 40MHz]*/
         {  4,          4,          0,          0},   /*OFDM6M OFDM6M  CCK1M  CCK1M  */
@@ -111,7 +110,6 @@ const u16_t FailDiff[] =
         9, 4, 3, 3,             /* MCS12 MCS13 MCS14 MCS15  , 24 25 26 27*/
         3, 0, 0                 /* MCS14SG, MCS15SG         , 28 29*/
     };
-
 
 #ifdef ZM_ENABLE_BA_RATECTRL
 u32_t TxMPDU[29];
@@ -343,7 +341,6 @@ void zfRateCtrlInitCell(zdev_t* dev, struct zsRcCell* rcCell, u8_t type,
     return;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfRateCtrlGetHigherRate     */
@@ -367,7 +364,6 @@ u8_t zfRateCtrlGetHigherRate(struct zsRcCell* rcCell)
             + (((rcCell->currentRateIndex+1) < rcCell->operationRateCount)?1:0);
     return rcCell->operationRateSet[rateIndex];
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -399,7 +395,6 @@ u8_t zfRateCtrlNextLowerRate(zdev_t* dev, struct zsRcCell* rcCell)
     rcCell->lastTime  = wd->tick;
     return rcCell->currentRate;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -557,7 +552,6 @@ u16_t zfRateCtrlGetTxRate(zdev_t* dev, struct zsRcCell* rcCell, u16_t* probing)
         wd->txFail[rcCell->currentRate] = wd->txFail[rcCell->currentRate] >> 1;
         wd->txMPDU[rcCell->currentRate] = wd->txMPDU[rcCell->currentRate] >> 1;
 
-
         if (rcCell->currentRate > 15) {
             highRate = zfRateCtrlGetHigherRate(rcCell);
             if ((highRate != rcCell->currentRate) && wd->PER[highRate] &&
@@ -605,7 +599,6 @@ u16_t zfRateCtrlGetTxRate(zdev_t* dev, struct zsRcCell* rcCell, u16_t* probing)
     zm_msg1_tx(ZM_LV_1, "Get Tx Rate=", newRate);
     return newRate;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -681,7 +674,6 @@ void zfRateCtrlTxFailEvent(zdev_t* dev, struct zsRcCell* rcCell, u8_t aggRate, u
 #endif
     return;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -764,7 +756,6 @@ void zfRateCtrlTxSuccessEvent(zdev_t* dev, struct zsRcCell* rcCell, u8_t success
     return;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfRateCtrlRxRssiEvent       */
@@ -795,7 +786,6 @@ void zfRateCtrlRxRssiEvent(struct zsRcCell* rcCell, u16_t rxRssi)
     rcCell->rxRssi = (((rcCell->rxRssi*7) + rxRssi)+4) >> 3;
     return;
 }
-
 
 #ifdef ZM_ENABLE_BA_RATECTRL
 u8_t HigherRate(u8_t Rate) {

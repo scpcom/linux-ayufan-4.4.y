@@ -3,7 +3,6 @@
  * Copyright (C) 1996, 2001, 2006 David S. Miller (davem@davemloft.net)
  */
 
-
 	.globl	sparc64_ttable_tl0, sparc64_ttable_tl1
 	.globl	tl0_icpe, tl1_icpe
 	.globl	tl0_dcpe, tl1_dcpe

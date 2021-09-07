@@ -230,7 +230,6 @@ Core_GetHDConfig(
 		endId = HDId;
 	}
 
-
 	for ( i=startId; i<=endId; i++ )
 	{
 		if ( Core_MapHDId(pCore, i, &portId, &deviceId) )
@@ -708,4 +707,3 @@ Core_pd_command(
 	return core_pd_cmd_handler[pReq->Cdb[1]](pCore, pReq);
 }
 #endif
-

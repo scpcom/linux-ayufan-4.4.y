@@ -1276,7 +1276,6 @@ static int i810fb_release(struct fb_info *info, int user)
 	return 0;
 }
 
-
 static int i810fb_setcolreg(unsigned regno, unsigned red, unsigned green, 
 			    unsigned blue, unsigned transp, 
 			    struct fb_info *info)

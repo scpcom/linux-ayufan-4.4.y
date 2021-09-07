@@ -15,10 +15,8 @@
 #include <sound/core.h>
 #include <sound/initval.h>
 
-
 static int line6_index[SNDRV_CARDS] = SNDRV_DEFAULT_IDX;
 static char *line6_id[SNDRV_CARDS] = SNDRV_DEFAULT_STR;
-
 
 /*
 	Initialize the Line6 USB audio system.

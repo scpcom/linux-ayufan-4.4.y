@@ -27,7 +27,6 @@
 	} while(0)
 #define set_pte_at(mm,addr,ptep,pteval) set_pte(ptep,pteval)
 
-
 /* PMD_SHIFT determines the size of the area a second-level page table can map */
 #ifdef CONFIG_SUN3
 #define PMD_SHIFT       17

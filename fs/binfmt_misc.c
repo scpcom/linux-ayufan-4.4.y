@@ -387,7 +387,6 @@ static Node *create_entry(const char __user *buffer, size_t count)
 	if (!e->interpreter[0])
 		goto Einval;
 
-
 	p = check_special_flags (p, e);
 
 	if (*p == '\n')
@@ -464,7 +463,6 @@ static void entry_status(Node *e, char *page)
 		*dp ++ = 'C';
 	}
 	*dp ++ = '\n';
-
 
 	if (!test_bit(Magic, &e->flags)) {
 		sprintf(dp, "extension .%s\n", e->magic);

@@ -24,5 +24,4 @@ static inline struct pci_dev *node_to_k8_nb_misc(int node)
 }
 #endif
 
-
 #endif /* _ASM_X86_K8_H */

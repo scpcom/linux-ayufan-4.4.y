@@ -339,7 +339,6 @@ static void master_free(struct snd_kcontrol *kcontrol)
 	kfree(master);
 }
 
-
 /**
  * snd_ctl_make_virtual_master - Create a virtual master control
  * @name: name string of the control element to create

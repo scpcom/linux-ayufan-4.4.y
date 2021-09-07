@@ -50,7 +50,6 @@ struct	digiflow_struct
 
 typedef struct digiflow_struct digiflow_t;
 
-
 /************************************************************************
  * Values for digi_flags 
  ************************************************************************/
@@ -64,7 +63,6 @@ typedef struct digiflow_struct digiflow_t;
 #define DIGI_FORCEDCD	0x0100		/* Force carrier		*/
 #define	DIGI_ALTPIN	0x0200		/* Alternate RJ-45 pin config	*/
 #define	DIGI_AIXON	0x0400		/* Aux flow control in fep	*/
-
 
 /************************************************************************
  * Values for digiDload

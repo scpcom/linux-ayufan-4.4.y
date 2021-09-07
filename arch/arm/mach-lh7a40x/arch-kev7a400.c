@@ -70,7 +70,6 @@ static struct irq_chip kev7a400_cpld_chip = {
 	.unmask	= kev7a400_unmask_cpld_irq,
 };
 
-
 static void kev7a400_cpld_handler (unsigned int irq, struct irq_desc *desc)
 {
 	u32 mask = CPLD_LATCHED_INTS;

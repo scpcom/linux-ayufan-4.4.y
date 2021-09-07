@@ -35,7 +35,6 @@
 .align 2;
 ___divsi3 :
 
-
   R3 = R0 ^ R1;
   R0 = ABS R0;
 

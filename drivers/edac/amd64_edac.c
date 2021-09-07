@@ -219,7 +219,6 @@ static u32 amd64_get_dct_mask(struct amd64_pvt *pvt, int dct, int csrow)
 		return pvt->dcsm1[amd64_map_to_dcs_mask(pvt, csrow)];
 }
 
-
 /*
  * In *base and *limit, pass back the full 40-bit base and limit physical
  * addresses for the node given by node_id.  This information is obtained from
@@ -620,7 +619,6 @@ static u64 sys_addr_to_input_addr(struct mem_ctl_info *mci, u64 sys_addr)
 	return input_addr;
 }
 
-
 /*
  * @input_addr is an InputAddr associated with the node represented by mci.
  * Translate @input_addr to a DramAddr and return the result.
@@ -759,7 +757,6 @@ static u64 extract_error_address(struct mem_ctl_info *mci,
 	return pvt->ops->get_error_address(mci, info);
 }
 
-
 /* Map the Error address to a PAGE and PAGE OFFSET. */
 static inline void error_address_to_page_and_offset(u64 error_address,
 						    u32 *page, u32 *offset)
@@ -825,7 +822,6 @@ static enum edac_type amd64_determine_edac_cap(struct amd64_pvt *pvt)
 	return edac_cap;
 }
 
-
 static void f10_debug_display_dimm_sizes(int ctrl, struct amd64_pvt *pvt,
 					 int ganged);
 
@@ -853,7 +849,6 @@ static void amd64_dump_misc_regs(struct amd64_pvt *pvt)
 		(pvt->dclr0 & BIT(14)) ?  "Y" : "N",
 		(pvt->dclr0 & BIT(15)) ?  "Y" : "N",
 		(pvt->dclr0 & BIT(16)) ?  "UN-Buffered" : "Buffered");
-
 
 	debugf1("  online-spare: 0x%8.08x\n", pvt->online_spare);
 
@@ -3041,7 +3036,6 @@ err_exit:
 
 	return ret;
 }
-
 
 static int __devinit amd64_init_one_instance(struct pci_dev *pdev,
 				 const struct pci_device_id *mc_type)

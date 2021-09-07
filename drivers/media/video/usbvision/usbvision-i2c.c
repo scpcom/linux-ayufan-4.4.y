@@ -23,7 +23,6 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/delay.h>
@@ -199,7 +198,6 @@ static struct i2c_algorithm usbvision_algo = {
 	.functionality = functionality,
 };
 
-
 /* ----------------------------------------------------------------------- */
 /* usbvision specific I2C functions                                        */
 /* ----------------------------------------------------------------------- */
@@ -350,7 +348,6 @@ usbvision_i2c_read_max4(struct usb_usbvision *usbvision, unsigned char addr,
 	}
 	return len;
 }
-
 
 static int usbvision_i2c_write_max4(struct usb_usbvision *usbvision,
 				 unsigned char addr, const char *buf,

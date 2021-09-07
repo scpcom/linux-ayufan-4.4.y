@@ -148,7 +148,6 @@
 # define VR8F_POWER_MASK		(0x3c)
 # define VR8F_POWER_POS			(2)
 
-
 struct ivch_priv {
 	bool quiet;
 
@@ -157,7 +156,6 @@ struct ivch_priv {
 	uint16_t save_VR01;
 	uint16_t save_VR40;
 };
-
 
 static void ivch_dump_regs(struct intel_dvo_device *dvo);
 

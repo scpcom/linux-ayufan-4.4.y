@@ -31,11 +31,9 @@
 #include <asm/mach-pb1x00/pb1000.h>
 #include <prom.h>
 
-
 struct au1xxx_irqmap __initdata au1xxx_irq_map[] = {
 	{ AU1000_GPIO_15, IRQF_TRIGGER_LOW, 0 },
 };
-
 
 const char *get_system_type(void)
 {

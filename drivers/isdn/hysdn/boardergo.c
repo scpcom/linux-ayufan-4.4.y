@@ -120,7 +120,6 @@ ergo_irq_bh(struct work_struct *ugli_api)
 	spin_unlock_irqrestore(&card->hysdn_lock, flags);
 }				/* ergo_irq_bh */
 
-
 /*********************************************************/
 /* stop the card (hardware reset) and disable interrupts */
 /*********************************************************/
@@ -385,8 +384,6 @@ ergo_waitpofready(struct HYSDN_CARD *card)
 	return (-ERR_POF_TIMEOUT);
 }				/* ergo_waitpofready */
 
-
-
 /************************************************************************************/
 /* release the cards hardware. Before releasing do a interrupt disable and hardware */
 /* reset. Also unmap dpram.                                                         */
@@ -402,7 +399,6 @@ ergo_releasehardware(hysdn_card * card)
 	iounmap(card->dpram);
 	card->dpram = NULL;	/* release shared mem */
 }				/* ergo_releasehardware */
-
 
 /*********************************************************************************/
 /* acquire the needed hardware ports and map dpram. If an error occurs a nonzero */

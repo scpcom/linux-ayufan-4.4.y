@@ -94,5 +94,4 @@ struct bfa_ethport_aen_data_s {
 	mac_t mac;	/*  MAC address of the physical port */
 };
 
-
 #endif /* __BFA_DEFS_ETHPORT_H__ */

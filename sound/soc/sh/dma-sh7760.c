@@ -22,7 +22,6 @@
 #include <sound/soc.h>
 #include <asm/dmabrg.h>
 
-
 /* registers and bits */
 #define BRGATXSAR	0x00
 #define BRGARXDAR	0x04
@@ -46,7 +45,6 @@
 #define ACR_TAM_NONE	(0 << 8)
 #define ACR_TAM_4BYTE	(1 << 8)
 #define ACR_TAM_2WORD	(2 << 8)
-
 
 struct camelot_pcm {
 	unsigned long mmio;  /* DMABRG audio channel control reg MMIO */

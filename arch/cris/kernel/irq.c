@@ -76,7 +76,6 @@ skip:
 	return 0;
 }
 
-
 /* called by the assembler IRQ entry functions defined in irq.h
  * to dispatch the interrupts to registered handlers
  * interrupts are disabled upon entry - depending on if the
@@ -105,4 +104,3 @@ void weird_irq(void)
 	printk("weird irq\n");
 	while(1);
 }
-

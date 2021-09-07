@@ -865,7 +865,6 @@ static int set_aw_pt_bi(struct zd_chip *chip, struct aw_pt_bi *s)
 	return zd_iowrite32a_locked(chip, reqs, ARRAY_SIZE(reqs));
 }
 
-
 static int set_beacon_interval(struct zd_chip *chip, u32 interval)
 {
 	int r;

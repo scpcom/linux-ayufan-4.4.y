@@ -8,7 +8,6 @@
 #ifndef __ASM_PREFETCH_H
 #define __ASM_PREFETCH_H
 
-
 /*
  * R5000 and RM5200 implements pref and prefx instructions but they're nops, so
  * rather than wasting time we pretend these processors don't support

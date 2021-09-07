@@ -33,7 +33,6 @@
 #include "page.h"
 #include "btnode.h"
 
-
 void nilfs_btnode_cache_init_once(struct address_space *btnc)
 {
 	memset(btnc, 0, sizeof(*btnc));

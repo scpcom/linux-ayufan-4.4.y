@@ -97,7 +97,6 @@ typedef struct {
 #define REG_RD_ADDR_strcop_rw_cfg 0
 #define REG_WR_ADDR_strcop_rw_cfg 0
 
-
 /* Constants */
 enum {
   regk_strcop_big                          = 0x00000001,

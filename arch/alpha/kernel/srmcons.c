@@ -20,7 +20,6 @@
 #include <asm/console.h>
 #include <asm/uaccess.h>
 
-
 static DEFINE_SPINLOCK(srmcons_callback_lock);
 static int srm_is_registered_console = 0;
 
@@ -226,7 +225,6 @@ srmcons_close(struct tty_struct *tty, struct file *filp)
 	spin_unlock_irqrestore(&srmconsp->lock, flags);
 }
 
-
 static struct tty_driver *srmcons_driver;
 
 static const struct tty_operations srmcons_ops = {
@@ -268,7 +266,6 @@ srmcons_init(void)
 
 module_init(srmcons_init);
 
-
 /*
  * The console driver
  */

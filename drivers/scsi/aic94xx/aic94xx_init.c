@@ -1037,7 +1037,6 @@ static int __init aic94xx_init(void)
 {
 	int err;
 
-
 	asd_printk("%s version %s loaded\n", ASD_DRIVER_DESCRIPTION,
 		   ASD_DRIVER_VERSION);
 

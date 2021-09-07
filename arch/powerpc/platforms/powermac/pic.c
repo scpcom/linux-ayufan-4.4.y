@@ -556,7 +556,6 @@ static int __init pmac_pic_probe_mpic(void)
 	return 0;
 }
 
-
 void __init pmac_pic_init(void)
 {
 	unsigned int flags = 0;
@@ -683,4 +682,3 @@ static int __init init_pmacpic_sysfs(void)
 	return 0;
 }
 machine_subsys_initcall(powermac, init_pmacpic_sysfs);
-

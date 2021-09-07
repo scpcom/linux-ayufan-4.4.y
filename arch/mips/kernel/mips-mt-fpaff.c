@@ -39,7 +39,6 @@ static inline struct task_struct *find_process_by_pid(pid_t pid)
 	return pid ? find_task_by_vpid(pid) : current;
 }
 
-
 /*
  * mipsmt_sys_sched_setaffinity - set the cpu affinity of a process
  */
@@ -149,7 +148,6 @@ out_unlock:
 		return -EFAULT;
 	return real_len;
 }
-
 
 static int __init fpaff_thresh(char *str)
 {

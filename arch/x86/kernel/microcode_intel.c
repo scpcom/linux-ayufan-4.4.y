@@ -472,4 +472,3 @@ struct microcode_ops * __init init_intel_microcode(void)
 {
 	return &microcode_intel_ops;
 }
-

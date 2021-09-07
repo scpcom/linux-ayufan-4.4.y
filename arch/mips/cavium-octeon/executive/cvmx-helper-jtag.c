@@ -35,7 +35,6 @@
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx-helper-jtag.h>
 
-
 /**
  * Initialize the internal QLM JTAG logic to allow programming
  * of the JTAG chain by the cvmx_helper_qlm_jtag_*() functions.

@@ -42,7 +42,6 @@ unsigned long __xchg32(int x, int *ptr)
 	return (unsigned long)temp;
 }
 
-
 unsigned long __xchg8(char x, char *ptr)
 {
 	unsigned long flags;
@@ -54,7 +53,6 @@ unsigned long __xchg8(char x, char *ptr)
 	_atomic_spin_unlock_irqrestore(ptr, flags);
 	return (unsigned long)temp;
 }
-
 
 #ifdef CONFIG_64BIT
 unsigned long __cmpxchg_u64(volatile unsigned long *ptr, unsigned long old, unsigned long new)

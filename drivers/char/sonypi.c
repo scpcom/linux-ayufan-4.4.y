@@ -348,7 +348,6 @@ static struct sonypi_event sonypi_helpev[] = {
 	{ 0, 0 }
 };
 
-
 /* The set of possible lid events */
 static struct sonypi_event sonypi_lidev[] = {
 	{ 0x51, SONYPI_EVENT_LID_CLOSED },

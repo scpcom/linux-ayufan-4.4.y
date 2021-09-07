@@ -289,4 +289,3 @@ VOID NotifyChSwAnnToPeerAPs(
 	IN UINT8 ChSwMode,
 	IN UINT8 Channel);
 #endif // __SPECTRUM_H__ //
-

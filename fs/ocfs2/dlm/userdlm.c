@@ -34,7 +34,6 @@
 #include <linux/types.h>
 #include <linux/crc32.h>
 
-
 #include "cluster/nodemanager.h"
 #include "cluster/heartbeat.h"
 #include "cluster/tcp.h"

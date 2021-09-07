@@ -424,4 +424,3 @@ module_exit(pmic_exit);
 MODULE_DESCRIPTION("Core/Protocol driver for Freescale MC13783 PMIC");
 MODULE_AUTHOR("Sascha Hauer <s.hauer@pengutronix.de>");
 MODULE_LICENSE("GPL");
-

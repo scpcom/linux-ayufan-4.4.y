@@ -97,7 +97,6 @@ static inline void regdump(struct net_device *dev) { }
 
 #endif
 
-
 /*====================================================================*/
 
 /* Parameters that can be set with 'insmod' */

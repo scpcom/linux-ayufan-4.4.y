@@ -2,7 +2,6 @@
 
 /* Written 1995-2000 by Werner Almesberger, EPFL LRC/ICA */
 
-
 #include <linux/module.h>
 #include <linux/atmdev.h>
 #include <linux/capability.h>
@@ -27,7 +26,6 @@ static void atm_push_raw(struct atm_vcc *vcc,struct sk_buff *skb)
 	}
 }
 
-
 static void atm_pop_raw(struct atm_vcc *vcc,struct sk_buff *skb)
 {
 	struct sock *sk = sk_atm(vcc);
@@ -38,7 +36,6 @@ static void atm_pop_raw(struct atm_vcc *vcc,struct sk_buff *skb)
 	dev_kfree_skb_any(skb);
 	sk->sk_write_space(sk);
 }
-
 
 static int atm_send_aal0(struct atm_vcc *vcc,struct sk_buff *skb)
 {
@@ -56,7 +53,6 @@ static int atm_send_aal0(struct atm_vcc *vcc,struct sk_buff *skb)
 	return vcc->dev->ops->send(vcc,skb);
 }
 
-
 int atm_init_aal0(struct atm_vcc *vcc)
 {
 	vcc->push = atm_push_raw;
@@ -65,7 +61,6 @@ int atm_init_aal0(struct atm_vcc *vcc)
 	vcc->send = atm_send_aal0;
 	return 0;
 }
-
 
 int atm_init_aal34(struct atm_vcc *vcc)
 {
@@ -76,7 +71,6 @@ int atm_init_aal34(struct atm_vcc *vcc)
 	return 0;
 }
 
-
 int atm_init_aal5(struct atm_vcc *vcc)
 {
 	vcc->push = atm_push_raw;
@@ -85,6 +79,5 @@ int atm_init_aal5(struct atm_vcc *vcc)
 	vcc->send = vcc->dev->ops->send;
 	return 0;
 }
-
 
 EXPORT_SYMBOL(atm_init_aal5);

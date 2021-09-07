@@ -10,11 +10,9 @@
 #ifndef _MVSDMMC_INCLUDE
 #define _MVSDMMC_INCLUDE
 
-
 #define MVSDMMC_DMA_SIZE			65536
 
 #define MVSDMMC_CMD_TIMEOUT			2 /* 100 usec*/
-
 
 /*
  * The base MMC clock rate
@@ -25,8 +23,6 @@
 
 #define MVSDMMC_BASE_FAST_CLOCK_ORION	400000000 /* 100000000 */
 #define MVSDMMC_BASE_FAST_CLOCK_KW		200000000 /* 100000000 */
-
-
 
 /*
  * SDIO register
@@ -79,7 +75,6 @@
 #define WINDOW_CTRL(i)				(0x108 + ((i) << 3))
 #define WINDOW_BASE(i)				(0x10c + ((i) << 3))
 
-
 /*
  * SDIO_PRESENT_STATE
  */
@@ -111,7 +106,6 @@
 #define SDIO_CMD_DATA_PRESENT			(1 << 5)
 #define SDIO_UNEXPECTED_RESP			(1 << 7)
 
-
 /*
  * SDIO_XFER_MODE
  */
@@ -121,7 +115,6 @@
 #define SDIO_XFER_MODE_AUTO_CMD12		(1 << 2)
 #define SDIO_XFER_MODE_INT_CHK_EN		(1 << 3)
 #define SDIO_XFER_MODE_TO_HOST			(1 << 4)
-
 
 /*
  * SDIO_HOST_CTRL
@@ -142,7 +135,6 @@
 #define SDIO_HOST_CTRL_DATA_WIDTH_4_BITS 	(1 << 9)
 #define SDIO_HOST_CTRL_HI_SPEED_EN 		(1 << 10)
 
-
 #define SDIO_HOST_CTRL_TMOUT_MASK 		(0xf << 11)
 #define SDIO_HOST_CTRL_TMOUT_MAX 		(0xf << 11)
 #define SDIO_HOST_CTRL_TMOUT(x) 		((x) << 11)
@@ -152,7 +144,6 @@
 		(SDIO_HOST_CTRL_TMOUT(x)(0xf))
 #define SDIO_HOST_CTRL_DFAULT_PUSH_PULL 	\
 		(SDIO_HOST_CTRL_TMOUT(x)(0xf) | SDIO_HOST_CTRL_PUSH_PULL_EN)
-
 
 /*
  * NOR status bits
@@ -172,7 +163,6 @@
 #define SDIO_NOR_BLK_GAP_EVT			(1 << 2)
 #define SDIO_NOR_XFER_DONE			(1 << 1)
 #define SDIO_NOR_CMD_DONE			(1 << 0)
-
 
 /*
  * ERR status bits
@@ -194,6 +184,5 @@
 #define SDIO_ERR_CMD_TIMEOUT			(1 << 0)
 
 #define SDIO_POLL_MASK 				0xffff /* enable all for polling */
-
 
 #endif /* _MVSDMMC_INCLUDE */

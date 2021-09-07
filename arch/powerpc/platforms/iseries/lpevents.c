@@ -338,4 +338,3 @@ static int __init proc_lpevents_init(void)
 	return 0;
 }
 __initcall(proc_lpevents_init);
-

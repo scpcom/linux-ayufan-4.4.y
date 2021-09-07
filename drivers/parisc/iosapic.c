@@ -126,7 +126,6 @@
 **   o disable IRdT - call disable_irq(vector[line]->processor_irq)
 */
 
-
 /* FIXME: determine which include files are really needed */
 #include <linux/types.h>
 #include <linux/kernel.h>
@@ -155,7 +154,6 @@
 #undef PCI_BRIDGE_FUNCS
 #undef DEBUG_IOSAPIC
 #undef DEBUG_IOSAPIC_IRT
-
 
 #ifdef DEBUG_IOSAPIC
 #define DBG(x...) printk(x)
@@ -213,7 +211,6 @@ static inline void iosapic_write(void __iomem *iosapic, unsigned int reg, u32 va
 
 /* bits in the "high" I/O Sapic IRdT entry */
 #define IOSAPIC_IRDT_ID_EID_SHIFT              0x10
-
 
 static DEFINE_SPINLOCK(iosapic_lock);
 
@@ -273,7 +270,6 @@ static struct irt_entry *iosapic_alloc_irt(int num_entries)
  * behind PCI to PCI bridges. See PCI to PCI Bridge Architecture Spec.
  * for the architected method of routing of IRQ's behind PPB's.
  */
-
 
 static int __init
 iosapic_load_irt(unsigned long cell_num, struct irt_entry **irt)
@@ -371,8 +367,6 @@ iosapic_load_irt(unsigned long cell_num, struct irt_entry **irt)
 	return num_entries;
 }
 
-
-
 void __init iosapic_init(void)
 {
 	unsigned long cell = 0;
@@ -396,7 +390,6 @@ void __init iosapic_init(void)
 	if (irt_num_entry == 0)
 		irt_cell = NULL;	/* old PDC w/o iosapic */
 }
-
 
 /*
 ** Return the IRT entry in case we need to look something else up.
@@ -455,7 +448,6 @@ irt_find_irqline(struct iosapic_info *isi, u8 slot, u8 intr_pin)
 			isi->isi_hpa, slot, intr_pin);
 	return NULL;
 }
-
 
 /*
 ** xlate_pin() supports the skewing of IRQ lines done by subsidiary bridges.
@@ -547,7 +539,6 @@ static void iosapic_rd_irt_entry(struct vector_info *vi , u32 *dp0, u32 *dp1)
 	*dp1 = iosapic_read(isp->addr, IOSAPIC_IRDT_ENTRY_HI(idx));
 }
 
-
 static void iosapic_wr_irt_entry(struct vector_info *vi, u32 dp0, u32 dp1)
 {
 	struct iosapic_info *isp = vi->iosapic;
@@ -613,7 +604,6 @@ iosapic_set_irt_data( struct vector_info *vi, u32 *dp0, u32 *dp1)
 	}
 	DBG_IRT("iosapic_set_irt_data(): 0x%x 0x%x\n", *dp0, *dp1);
 }
-
 
 static struct vector_info *iosapic_get_vector(unsigned int irq)
 {
@@ -836,7 +826,6 @@ int iosapic_fixup_irq(void *isi_obj, struct pci_dev *pcidev)
 	return pcidev->irq;
 }
 
-
 /*
 ** squirrel away the I/O Sapic Version
 */
@@ -845,7 +834,6 @@ iosapic_rd_version(struct iosapic_info *isi)
 {
 	return iosapic_read(isi->addr, IOSAPIC_REG_VERSION);
 }
-
 
 /*
 ** iosapic_register() is called by "drivers" with an integrated I/O SAPIC.
@@ -905,14 +893,12 @@ void *iosapic_register(unsigned long hpa)
 	return isi;
 }
 
-
 #ifdef DEBUG_IOSAPIC
 
 static void
 iosapic_prt_irt(void *irt, long num_entry)
 {
 	unsigned int i, *irp = (unsigned int *) irt;
-
 
 	printk(KERN_DEBUG MODULE_NAME ": Interrupt Routing Table (%lx entries)\n", num_entry);
 
@@ -921,7 +907,6 @@ iosapic_prt_irt(void *irt, long num_entry)
 					irp, i, irp[0], irp[1], irp[2], irp[3]);
 	}
 }
-
 
 static void
 iosapic_prt_vi(struct vector_info *vi)
@@ -934,7 +919,6 @@ iosapic_prt_vi(struct vector_info *vi)
 	printk(KERN_DEBUG "\t\teoi_addr: %p\n",  vi->eoi_addr);
 	printk(KERN_DEBUG "\t\teoi_data: %x\n",  vi->eoi_data);
 }
-
 
 static void
 iosapic_prt_isi(struct iosapic_info *isi)

@@ -31,7 +31,6 @@
 #include <linux/connector.h>
 #include <linux/delay.h>
 
-
 /*
  * This job is sent to the kevent workqueue.
  * While no event is once sent to any callback, the connector workqueue

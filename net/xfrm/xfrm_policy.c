@@ -216,7 +216,6 @@ expired:
 	xfrm_pol_put(xp);
 }
 
-
 /* Allocate xfrm_policy. Not used here, it is supposed to be used by pfkeyv2
  * SPD calls.
  */

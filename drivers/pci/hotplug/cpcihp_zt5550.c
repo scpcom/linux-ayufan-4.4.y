@@ -76,7 +76,6 @@ static void __iomem *csr_hc_data;
 static void __iomem *csr_int_status;
 static void __iomem *csr_int_mask;
 
-
 static int zt5550_hc_config(struct pci_dev *pdev)
 {
 	int ret;
@@ -278,7 +277,6 @@ static void __devexit zt5550_hc_remove_one(struct pci_dev *pdev)
 	cpci_hp_unregister_controller(&zt5550_hpc);
 	zt5550_hc_cleanup();
 }
-
 
 static struct pci_device_id zt5550_hc_pci_tbl[] = {
 	{ PCI_VENDOR_ID_ZIATECH, PCI_DEVICE_ID_ZIATECH_5550_HC, PCI_ANY_ID, PCI_ANY_ID, },

@@ -39,7 +39,6 @@
 #ifndef __SPECTRUM_DEF_H__
 #define __SPECTRUM_DEF_H__
 
-
 #define MAX_MEASURE_REQ_TAB_SIZE		32
 #define MAX_HASH_MEASURE_REQ_TAB_SIZE	MAX_MEASURE_REQ_TAB_SIZE
 
@@ -85,7 +84,6 @@ typedef struct _TPC_REQ_TAB
 	TPC_REQ_ENTRY Content[MAX_TPC_REQ_TAB_SIZE];
 } TPC_REQ_TAB, *PTPC_REQ_TAB;
 
-
 /* The regulatory information */
 typedef struct _DOT11_CHANNEL_SET
 {
@@ -100,8 +98,6 @@ typedef struct _DOT11_REGULATORY_INFORMATION
 	DOT11_CHANNEL_SET ChannelSet;
 } DOT11_REGULATORY_INFORMATION, *PDOT11_REGULATORY_INFORMATION;
 
-
-
 #define RM_TPC_REQ				0
 #define RM_MEASURE_REQ			1
 
@@ -110,7 +106,6 @@ typedef struct _DOT11_REGULATORY_INFORMATION
 #define RM_RPI_HISTOGRAM		2
 #define RM_CH_LOAD				3
 #define RM_NOISE_HISTOGRAM		4
-
 
 typedef struct PACKED _TPC_REPORT_INFO
 {

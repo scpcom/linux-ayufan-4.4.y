@@ -437,7 +437,6 @@ static int linear_make_request (struct request_queue *q, struct bio *bio)
 	tmp_dev = which_dev(mddev, bio->bi_sector);
 	start_sector = tmp_dev->end_sector - tmp_dev->rdev->sectors;
 
-
 	if (unlikely(bio->bi_sector >= (tmp_dev->end_sector)
 		     || (bio->bi_sector < start_sector))) {
 		char b[BDEVNAME_SIZE];
@@ -685,7 +684,6 @@ static void linear_exit (void)
 {
 	unregister_md_personality (&linear_personality);
 }
-
 
 module_init(linear_init);
 module_exit(linear_exit);

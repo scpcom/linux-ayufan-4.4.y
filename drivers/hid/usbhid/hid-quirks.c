@@ -113,7 +113,6 @@ static struct hid_blacklist *usbhid_exists_dquirk(const u16 idVendor,
 	return bl_entry;
 }
 
-
 /**
  * usbhid_modify_dquirk: add/replace a HID quirk
  * @idVendor: the 16-bit USB vendor ID, in native byteorder

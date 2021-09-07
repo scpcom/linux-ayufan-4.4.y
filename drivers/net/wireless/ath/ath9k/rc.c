@@ -936,7 +936,6 @@ static bool ath_rc_update_per(struct ath_softc *sc,
 				     (nretry_to_per_lookup[retries] >> 3));
 		}
 
-
 		/*
 		 * If we got at most one retry then increase the max rate if
 		 * this was a probe.  Otherwise, ignore the probe.

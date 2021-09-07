@@ -73,7 +73,6 @@
 
 #define EAGLEUSBVERSION "ueagle 1.4"
 
-
 /*
  * Debug macros
  */
@@ -1745,7 +1744,6 @@ static int uea_send_cmvs_e4(struct uea_softc *sc)
 		return ret;
 	uea_info(INS_TO_USBDEV(sc), "ATU-R firmware version : %x\n",
 			sc->stats.phy.firmid);
-
 
 	/* get options */
  	ret = len = request_cmvs(sc, &cmvs_ptr, &cmvs_fw, &ver);

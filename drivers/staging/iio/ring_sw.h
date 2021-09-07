@@ -28,7 +28,6 @@
  * This is a bit like supporting algorithms dependent on what the device
  * driver requests - some may support multiple options */
 
-
 #include <linux/autoconf.h>
 #include "iio.h"
 #include "ring_generic.h"
@@ -102,7 +101,6 @@ int iio_request_update_sw_rb(struct iio_ring_buffer *r);
  * iio_mark_update_needed_sw_rb() tell the ring buffer it needs a param update
  **/
 int iio_mark_update_needed_sw_rb(struct iio_ring_buffer *r);
-
 
 /**
  * iio_get_bpd_sw_rb() get the datum size in bytes
@@ -179,8 +177,6 @@ struct iio_sw_ring_buffer {
 
 struct iio_ring_buffer *iio_sw_rb_allocate(struct iio_dev *indio_dev);
 void iio_sw_rb_free(struct iio_ring_buffer *ring);
-
-
 
 #else /* CONFIG_IIO_RING_BUFFER*/
 static inline void iio_ring_sw_register_funcs(struct iio_ring_access_funcs *ra)

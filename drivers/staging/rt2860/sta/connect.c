@@ -226,7 +226,6 @@ VOID MlmeCntlMachinePerformAction(
 	}
 }
 
-
 /*
 	==========================================================================
 	Description:
@@ -353,7 +352,6 @@ VOID CntlOidSsidProc(
 	pAd->MlmeAux.SsidLen = (UCHAR)pOidSsid->SsidLength;
 	NdisZeroMemory(pAd->MlmeAux.Bssid, MAC_ADDR_LEN);
 	pAd->MlmeAux.BssType = pAd->StaCfg.BssType;
-
 
 	//
 	// Update Reconnect Ssid, that user desired to connect.
@@ -496,7 +494,6 @@ VOID CntlOidSsidProc(
 		}
 	}
 }
-
 
 /*
 	==========================================================================
@@ -785,7 +782,6 @@ VOID CntlWaitJoinProc(
 	}
 }
 
-
 /*
 	==========================================================================
 	Description:
@@ -1057,7 +1053,6 @@ VOID CntlWaitReassocProc(
 		}
 	}
 }
-
 
 #ifdef RT2870
 VOID	AdhocTurnOnQos(
@@ -1397,7 +1392,6 @@ VOID LinkUp(
 					}
 				}
 
-
 			}
 		}
 		// If WPANone is enabled, add key material and cipherAlg into Asic
@@ -1522,7 +1516,6 @@ VOID LinkUp(
 			}
 		}
 		NdisReleaseSpinLock(&pAd->MacTabLock);
-
 
 		// If WEP is enabled, add paiewise and shared key
         if (((pAd->StaCfg.WpaSupplicantUP)&&
@@ -1973,7 +1966,6 @@ VOID LinkDown(
 		NdisZeroMemory(pAd->StaCfg.ReplayCounter, 8);
 	}
 
-
 	//
 	// if link down come from AP, we need to remove all WPA keys on WPA mode.
 	// otherwise will cause 4-way handshaking failed, since the WPA key not empty.
@@ -2311,7 +2303,6 @@ VOID AuthParmFill(
 	==========================================================================
  */
 
-
 #ifdef RT2870
 
 VOID MlmeCntlConfirm(
@@ -2383,9 +2374,6 @@ VOID ComposeNullFrame(
 	pAd->NullContext.BulkOutSize =  TXINFO_SIZE + TXWI_SIZE + sizeof(pAd->NullFrame) + 4;
 #endif
 }
-
-
-
 
 /*
 	==========================================================================
@@ -2565,5 +2553,3 @@ ULONG MakeIbssBeacon(
 					FrameLen, SupRateLen, ExtRateLen, pAd->CommonCfg.Channel, pAd->CommonCfg.PhyMode));
 	return FrameLen;
 }
-
-

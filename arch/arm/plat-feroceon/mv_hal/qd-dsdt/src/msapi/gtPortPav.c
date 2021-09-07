@@ -80,8 +80,6 @@ GT_STATUS gpavSetPAV
     return GT_OK;
 }
 
-
-
 /*******************************************************************************
 * gpavGetPAV
 *
@@ -202,8 +200,6 @@ GT_STATUS gpavSetIngressMonitor
     return GT_OK;
 }
 
-
-
 /*******************************************************************************
 * gpavGetIngressMonitor
 *
@@ -267,4 +263,3 @@ GT_STATUS gpavGetIngressMonitor
     DBG_INFO(("OK.\n"));
     return GT_OK;
 }
-

@@ -374,7 +374,6 @@ static void sta_set_sinfo(struct sta_info *sta, struct station_info *sinfo)
 	}
 }
 
-
 static int ieee80211_dump_station(struct wiphy *wiphy, struct net_device *dev,
 				 int idx, u8 *mac, struct station_info *sinfo)
 {

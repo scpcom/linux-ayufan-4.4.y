@@ -277,7 +277,6 @@ group_add_out:
 		return err;
 	}
 
-
 	default:
 		return -ENOTTY;
 	}

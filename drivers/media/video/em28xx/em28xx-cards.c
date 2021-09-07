@@ -1787,7 +1787,6 @@ static inline void em28xx_set_model(struct em28xx *dev)
 				       EM28XX_I2C_FREQ_100_KHZ;
 }
 
-
 /* FIXME: Should be replaced by a proper mt9m111 driver */
 static int em28xx_initialize_mt9m111(struct em28xx *dev)
 {
@@ -1804,7 +1803,6 @@ static int em28xx_initialize_mt9m111(struct em28xx *dev)
 
 	return 0;
 }
-
 
 /* FIXME: Should be replaced by a proper mt9m001 driver */
 static int em28xx_initialize_mt9m001(struct em28xx *dev)
@@ -2391,7 +2389,6 @@ void em28xx_card_setup(struct em28xx *dev)
 		v4l2_subdev_call(sd, core, s_config, 0, &dev->sensor_xtal);
 	}
 
-
 	if (dev->board.adecoder == EM28XX_TVAUDIO)
 		v4l2_i2c_new_subdev(&dev->v4l2_dev, &dev->i2c_adap,
 			"tvaudio", "tvaudio", dev->board.tvaudio_addr, NULL);
@@ -2429,7 +2426,6 @@ void em28xx_card_setup(struct em28xx *dev)
 	if(!disable_ir)
 		em28xx_ir_init(dev);
 }
-
 
 #if defined(CONFIG_MODULES) && defined(MODULE)
 static void request_module_async(struct work_struct *work)
@@ -2616,7 +2612,6 @@ static int em28xx_init_dev(struct em28xx **devhandle, struct usb_device *udev,
 	INIT_LIST_HEAD(&dev->vidq.queued);
 	INIT_LIST_HEAD(&dev->vbiq.active);
 	INIT_LIST_HEAD(&dev->vbiq.queued);
-
 
 	if (dev->board.has_msp34xx) {
 		/* Send a reset to other chips via gpio */

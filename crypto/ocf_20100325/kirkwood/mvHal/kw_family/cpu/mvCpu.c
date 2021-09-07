@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #include "cpu/mvCpu.h"
 #include "ctrlEnv/mvCtrlEnvLib.h"
 #include "ctrlEnv/mvCtrlEnvRegs.h"
@@ -108,7 +107,6 @@ static MV_U32 mvCpu6180PclkGet(MV_VOID)
 
 	return tmpPClkRate;
 }
-
 
 MV_U32 mvCpuPclkGet(MV_VOID)
 {
@@ -176,7 +174,6 @@ MV_U32  mvCpuL2ClkGet(MV_VOID)
 #endif
 }
 
-
 /*******************************************************************************
 * mvCpuNameGet - Get CPU name
 *
@@ -217,7 +214,6 @@ MV_VOID mvCpuNameGet(char *pNameBuff)
 
     return;
 }
-
 
 #define MV_PROC_STR_SIZE 50
 
@@ -317,4 +313,3 @@ MV_U32 whoAmI(MV_VOID)
 {
 	return 0;
 }
-

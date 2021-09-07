@@ -622,8 +622,6 @@ bfa_pport_sm_iocfail(struct bfa_pport_s *pport, enum bfa_pport_sm_event event)
 	}
 }
 
-
-
 /**
  *  bfa_pport_private
  */
@@ -896,8 +894,6 @@ bfa_port_send_txcredit(void *port_cbarg)
 	bfa_reqq_produce(port->bfa, BFA_REQQ_PORT);
 }
 
-
-
 /**
  *  bfa_pport_public
  */
@@ -972,8 +968,6 @@ bfa_pport_isr(struct bfa_s *bfa, struct bfi_msg_s *msg)
 		bfa_assert(0);
 	}
 }
-
-
 
 /**
  *  bfa_pport_api
@@ -1667,5 +1661,3 @@ bfa_pport_is_linkup(struct bfa_s *bfa)
 {
 	return bfa_sm_cmp_state(BFA_PORT_MOD(bfa), bfa_pport_sm_linkup);
 }
-
-

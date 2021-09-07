@@ -23,10 +23,8 @@ disclaimer.
 
 #include "usb/common/mvUsbCore.h"
 
-
 #define USB_TEST_MODE_TEST_PACKET_LENGTH   (53)
 
- 
 #define USB_XD_QADD(head,tail,XD)      \
    if ((head) == NULL) {         \
       (head) = (XD);            \
@@ -93,8 +91,6 @@ typedef struct
 
 } USB_STATS;
 
-
-
 /* Callback function storage structure */
 typedef struct service_struct 
 {
@@ -159,7 +155,6 @@ typedef struct
     VUSB20_EP_TR_STRUCT_PTR          EP_DTD_TAILS[ARC_USB_MAX_ENDPOINTS * 2];
     SCRATCH_STRUCT_PTR               XD_SCRATCH_STRUCT_BASE;
    
-   
     SCRATCH_STRUCT_PTR               SCRATCH_STRUCT_BASE;
    
     uint_16                          USB_STATE;
@@ -206,7 +201,6 @@ typedef struct
 #define USB_DTD_PHYS_TO_VIRT(handle, physAddr)                                                    \
     (((physAddr) == 0) ? NULL : ((handle)->DTD_BASE_PTR +                             \
                                 ((physAddr) - (handle)->DTD_BASE_PHYS)))
-
 
 /***************************************
 **

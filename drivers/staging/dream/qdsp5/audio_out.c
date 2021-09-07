@@ -87,10 +87,6 @@ module_init(_pcm_log_init);
 #define LOG(id,arg) ev_log_write(&pcm_log, id, arg)
 #endif
 
-
-
-
-
 #define BUFSZ (960 * 5)
 #define DMASZ (BUFSZ * 2)
 

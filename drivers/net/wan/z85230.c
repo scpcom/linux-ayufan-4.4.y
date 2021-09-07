@@ -55,7 +55,6 @@
 
 #include "z85230.h"
 
-
 /**
  *	z8530_read_port - Architecture specific interface function
  *	@p: port to read
@@ -95,7 +94,6 @@ static inline int z8530_read_port(unsigned long p)
  *	dread 5uS sanity delay.
  */
 
-
 static inline void z8530_write_port(unsigned long p, u8 d)
 {
 	outb(d,Z8530_PORT_OF(p));
@@ -103,11 +101,8 @@ static inline void z8530_write_port(unsigned long p, u8 d)
 		udelay(5);
 }
 
-
-
 static void z8530_rx_done(struct z8530_channel *c);
 static void z8530_tx_done(struct z8530_channel *c);
-
 
 /**
  *	read_zsreg - Read a register from a Z85230 
@@ -183,7 +178,6 @@ static inline void write_zsctrl(struct z8530_channel *c, u8 val)
  *	Write directly to the data register on the Z8530
  */
 
-
 static inline void write_zsdata(struct z8530_channel *c, u8 val)
 {
 	z8530_write_port(c->dataio, val);
@@ -203,7 +197,6 @@ EXPORT_SYMBOL(z8530_dead_port);
 /*
  *	Register loading parameters for currently supported circuit types
  */
-
 
 /*
  *	Data clocked by telco end. This is the correct data for the UK
@@ -392,7 +385,6 @@ static void z8530_rx(struct z8530_channel *c)
 	write_zsctrl(c, RES_H_IUS);
 }
 
-
 /**
  *	z8530_tx - Handle a PIO transmit event
  *	@c: Z8530 channel to process
@@ -423,7 +415,6 @@ static void z8530_tx(struct z8530_channel *c)
 		}
 	}
 
-	
 	/*
 	 *	End of frame TX - fire another one
 	 */
@@ -565,7 +556,6 @@ static void z8530_dma_status(struct z8530_channel *chan)
 	
 	chan->status=status;
 
-
 	if(chan->dma_tx)
 	{
 		if(status&TxEOM)
@@ -621,7 +611,6 @@ static struct z8530_irqhandler z8530_txdma_sync = {
  *	For machines with PCI Z85x30 cards, or level triggered interrupts
  *	(eg the MacII) we must clear the interrupt cause or die.
  */
-
 
 static void z8530_rx_clear(struct z8530_channel *c)
 {
@@ -681,7 +670,6 @@ struct z8530_irqhandler z8530_nop=
 	z8530_tx_clear,
 	z8530_status_clear
 };
-
 
 EXPORT_SYMBOL(z8530_nop);
 
@@ -773,7 +761,6 @@ static char reg_init[16]=
 	0x55,0,0,0
 };
 
-
 /**
  *	z8530_sync_open - Open a Z8530 channel for PIO
  *	@dev:	The network interface we are using
@@ -808,7 +795,6 @@ int z8530_sync_open(struct net_device *dev, struct z8530_channel *c)
 	spin_unlock_irqrestore(c->lock, flags);
 	return 0;
 }
-
 
 EXPORT_SYMBOL(z8530_sync_open);
 
@@ -1071,7 +1057,6 @@ int z8530_sync_txdma_open(struct net_device *dev, struct z8530_channel *c)
 
 	c->tx_dma_buf[1] = c->tx_dma_buf[0] + PAGE_SIZE/2;
 
-
 	spin_lock_irqsave(c->lock, cflags);
 
 	/*
@@ -1151,7 +1136,6 @@ int z8530_sync_txdma_close(struct net_device *dev, struct z8530_channel *c)
 	unsigned long dflags, cflags;
 	u8 chk;
 
-	
 	spin_lock_irqsave(c->lock, cflags);
 	
 	c->irqs = &z8530_nop;
@@ -1196,9 +1180,7 @@ int z8530_sync_txdma_close(struct net_device *dev, struct z8530_channel *c)
 	return 0;
 }
 
-
 EXPORT_SYMBOL(z8530_sync_txdma_close);
-
 
 /*
  *	Name strings for Z8530 chips. SGI claim to have a 130, Zilog deny
@@ -1334,7 +1316,6 @@ int z8530_init(struct z8530_dev *dev)
 	return ret;
 }
 
-
 EXPORT_SYMBOL(z8530_init);
 
 /**
@@ -1409,7 +1390,6 @@ int z8530_channel_load(struct z8530_channel *c, u8 *rtable)
 
 EXPORT_SYMBOL(z8530_channel_load);
 
-
 /**
  *	z8530_tx_begin - Begin packet transmission
  *	@c: The Z8530 channel to kick
@@ -1456,7 +1436,6 @@ static void z8530_tx_begin(struct z8530_channel *c)
 	else
 	{
 		c->txcount=c->tx_skb->len;
-		
 		
 		if(c->dma_tx)
 		{
@@ -1735,7 +1714,6 @@ netdev_tx_t z8530_queue_xmit(struct z8530_channel *c, struct sk_buff *skb)
 	if(c->tx_next_skb)
 		return NETDEV_TX_BUSY;
 
-	
 	/* PC SPECIFIC - DMA limits */
 	
 	/*

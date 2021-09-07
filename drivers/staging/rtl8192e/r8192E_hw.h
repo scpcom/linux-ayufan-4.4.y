@@ -76,11 +76,8 @@ typedef enum _RT_RF_TYPE_819xU{
 
 #define EEPROM_TxPowerDiff	0x1F
 
-
 #define EEPROM_PwDiff		0x21	//0x21
 #define EEPROM_CrystalCap	0x22	//0x22
-
-
 
 #define EEPROM_TxPwIndex_CCK_V1		0x29	//0x29~0x2B
 #define EEPROM_TxPwIndex_OFDM_24G_V1	0x2C	//0x2C~0x2E
@@ -495,7 +492,6 @@ enum _RTL8192Pci_HW {
 #define RATE_ALL_OFDM_2SS	RATR_MCS8|RATR_MCS9	|RATR_MCS10|RATR_MCS11| \
 									RATR_MCS12|RATR_MCS13|RATR_MCS14|RATR_MCS15
 
-
 	DRIVER_RSSI		= 0x32c,	// Driver tell Firmware current RSSI
 	MCS_TXAGC		= 0x340, // MCS AGC
 	CCK_TXAGC		= 0x348, // CCK AGC
@@ -716,8 +712,6 @@ enum _RTL8192Pci_HW {
 	OFDM_TXAGC 		= 0x09e,
 	ANTSEL 			= 0x09f,
 
-
-
 	SIFS 			= 0x0b4,
 	DIFS 			= 0x0b5,
 	SLOT 			= 0x0b6,
@@ -765,7 +759,6 @@ enum _RTL8192Pci_HW {
 	INT_MIG                 = 0x0E2,      // Interrupt Migration (0xE2 ~ 0xE3)
 	TID_AC_MAP         	= 0x0E8,     // TID to AC Mapping Register
 	ANA_PARAM3 		= 0x0EE,
-
 
 //page 1
 	Wakeup0 		= 0x084,

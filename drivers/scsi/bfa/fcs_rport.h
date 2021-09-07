@@ -52,7 +52,6 @@ int  bfa_fcs_rport_get_state(struct bfa_fcs_rport_s *rport);
 struct bfa_fcs_rport_s *bfa_fcs_rport_create_by_wwn(struct bfa_fcs_port_s *port,
 			wwn_t wwn);
 
-
 /* Rport Features */
 void  bfa_fcs_rpf_init(struct bfa_fcs_rport_s *rport);
 void  bfa_fcs_rpf_rport_online(struct bfa_fcs_rport_s *rport);

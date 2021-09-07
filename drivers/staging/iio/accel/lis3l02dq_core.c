@@ -595,7 +595,6 @@ error_mutex_unlock:
 	return ret ? ret : len;
 }
 
-
 static int lis3l02dq_thresh_handler_th(struct iio_dev *dev_info,
 				       int index,
 				       s64 timestamp,
@@ -609,7 +608,6 @@ static int lis3l02dq_thresh_handler_th(struct iio_dev *dev_info,
 
 	return 0;
 }
-
 
 /* Unforunately it appears the interrupt won't clear unless you read from the
  * src register.

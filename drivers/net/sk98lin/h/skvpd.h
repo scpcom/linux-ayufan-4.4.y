@@ -129,7 +129,6 @@ typedef	struct s_vpd_key {
 	char			p_val;		/* start of the value string */
 } SK_VPD_KEY;
 
-
 /*
  * System specific VPD macros
  */
@@ -279,4 +278,3 @@ extern void	VpdErrLog();
 #endif	/* SK_KR_PROTO */
 
 #endif	/* __INC_SKVPD_H_ */
-

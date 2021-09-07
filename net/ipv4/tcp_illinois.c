@@ -300,7 +300,6 @@ static u32 tcp_illinois_ssthresh(struct sock *sk)
 	return max(tp->snd_cwnd - ((tp->snd_cwnd * ca->beta) >> BETA_SHIFT), 2U);
 }
 
-
 /* Extract info for Tcp socket info provided via netlink. */
 static void tcp_illinois_info(struct sock *sk, u32 ext,
 			      struct sk_buff *skb)

@@ -62,7 +62,6 @@ extern int get_cpu_capability(unsigned int *);
 #define STACK_TOP_MAX		(1UL << 42)
 #endif /* __s390x__ */
 
-
 #endif
 
 #define HAVE_ARCH_PICK_MMAP_LAYOUT

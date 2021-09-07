@@ -108,7 +108,6 @@ EXPORT_SYMBOL_GPL(videobuf_queue_to_vmalloc);
 
 /* --------------------------------------------------------------------- */
 
-
 void videobuf_queue_core_init(struct videobuf_queue *q,
 			 struct videobuf_queue_ops *ops,
 			 struct device *dev,
@@ -304,7 +303,6 @@ static int __videobuf_mmap_free(struct videobuf_queue *q)
 		return 0;
 
 	MAGIC_CHECK(q->int_ops->magic, MAGIC_QTYPE_OPS);
-
 
 	rc  = CALL(q, mmap_free, q);
 
@@ -580,7 +578,6 @@ int videobuf_qbuf(struct videobuf_queue *q,
 	return retval;
 }
 
-
 /* Locking: Caller holds q->vb_lock */
 static int stream_next_buffer_check_queue(struct videobuf_queue *q, int noblock)
 {
@@ -623,7 +620,6 @@ checks:
 done:
 	return retval;
 }
-
 
 /* Locking: Caller holds q->vb_lock */
 static int stream_next_buffer(struct videobuf_queue *q,
@@ -950,7 +946,6 @@ void videobuf_stop(struct videobuf_queue *q)
 
 	mutex_unlock(&q->vb_lock);
 }
-
 
 ssize_t videobuf_read_stream(struct videobuf_queue *q,
 			     char __user *data, size_t count, loff_t *ppos,

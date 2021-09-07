@@ -22,7 +22,6 @@
 #define NVRAM_AS1  0x75
 #define NVRAM_DATA 0x77
 
-
 /* RTC Offsets */
 
 #define MOTO_RTC_SECONDS	0x1FF9
@@ -66,7 +65,6 @@ struct nvram_partition {
 	struct nvram_header header;
 	unsigned int index;
 };
-
 
 extern int nvram_write_error_log(char * buff, int length,
 					 unsigned int err_type, unsigned int err_seq);

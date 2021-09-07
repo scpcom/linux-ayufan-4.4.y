@@ -88,4 +88,3 @@ void set_field(unsigned int *data, unsigned int field, unsigned int value)
 
 	*data = (*data & (~field)) | ((value << i) & field);
 }
-

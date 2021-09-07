@@ -6,5 +6,4 @@
  * published by the Free Software Foundation.
  */
 
-
 #define VMALLOC_END       (PAGE_OFFSET + 0x30000000)

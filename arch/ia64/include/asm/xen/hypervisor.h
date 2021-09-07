@@ -65,7 +65,6 @@ extern enum xen_domain_type xen_domain_type;
 #define xen_initial_domain()	(0)
 #endif
 
-
 #ifdef CONFIG_XEN
 extern struct shared_info *HYPERVISOR_shared_info;
 extern struct start_info *xen_start_info;

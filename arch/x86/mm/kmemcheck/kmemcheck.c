@@ -32,7 +32,6 @@
 #include "selftest.h"
 #include "shadow.h"
 
-
 #ifdef CONFIG_KMEMCHECK_DISABLED_BY_DEFAULT
 #  define KMEMCHECK_ENABLED 0
 #endif

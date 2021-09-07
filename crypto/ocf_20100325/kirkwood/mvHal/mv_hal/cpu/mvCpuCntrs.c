@@ -17,7 +17,6 @@
 #include "mvOs.h"
 #include "mvCpuCntrs.h"
 
-
 const static MV_CPU_CNTRS_OPS  mvCpuCntrsOpsTbl[MV_CPU_CNTRS_NUM][MV_CPU_CNTRS_OPS_NUM] =
 {   
     /*0*/
@@ -119,7 +118,6 @@ void mvCpuCntrsEventClear(MV_CPU_CNTRS_EVENT* pEvent)
     pEvent->num_of_measurements = 0;
 }
 
-                                                                                                              
 MV_CPU_CNTRS_EVENT* mvCpuCntrsEventCreate(char* name, MV_U32 print_threshold)
 {
     int                     i;
@@ -146,7 +144,6 @@ void    mvCpuCntrsEventDelete(MV_CPU_CNTRS_EVENT* event)
         mvOsFree(event);
 }
 
-                                                                                     
 MV_STATUS   mvCpuCntrsProgram(int counter, MV_CPU_CNTRS_OPS op, 
                                  char* name, MV_U32 overhead)
 {

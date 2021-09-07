@@ -47,7 +47,6 @@
 #include <linux/nfs4.h>
 #include <linux/nfs4_acl.h>
 
-
 /* mode bit translations: */
 #define NFS4_READ_MODE (NFS4_ACE_READ_DATA)
 #define NFS4_WRITE_MODE (NFS4_ACE_WRITE_DATA | NFS4_ACE_APPEND_DATA)

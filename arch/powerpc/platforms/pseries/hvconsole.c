@@ -49,7 +49,6 @@ int hvc_get_chars(uint32_t vtermno, char *buf, int count)
 
 EXPORT_SYMBOL(hvc_get_chars);
 
-
 /**
  * hvc_put_chars: send characters to firmware for denoted vterm adapter
  * @vtermno: The vtermno or unit_address of the adapter from which the data
@@ -62,7 +61,6 @@ int hvc_put_chars(uint32_t vtermno, const char *buf, int count)
 {
 	unsigned long *lbuf = (unsigned long *) buf;
 	long ret;
-
 
 	/* hcall will ret H_PARAMETER if 'count' exceeds firmware max.*/
 	if (count > MAX_VIO_PUT_CHARS)

@@ -35,7 +35,6 @@
 #include <asm/machdep.h>
 #include <asm/mvme147hw.h>
 
-
 static void mvme147_get_model(char *model);
 extern void mvme147_sched_init(irq_handler_t handler);
 extern unsigned long mvme147_gettimeoffset (void);
@@ -43,14 +42,12 @@ extern int mvme147_hwclk (int, struct rtc_time *);
 extern int mvme147_set_clock_mmss (unsigned long);
 extern void mvme147_reset (void);
 
-
 static int bcd2int (unsigned char b);
 
 /* Save tick handler routine pointer, will point to do_timer() in
  * kernel/sched.c, called via mvme147_process_int() */
 
 irq_handler_t tick_handler;
-
 
 int mvme147_parse_bootinfo(const struct bi_record *bi)
 {
@@ -100,7 +97,6 @@ void __init config_mvme147(void)
 		vme_brdtype = VME_TYPE_MVME147;
 }
 
-
 /* Using pcc tick timer 1 */
 
 static irqreturn_t mvme147_timer_int (int irq, void *dev_id)
@@ -109,7 +105,6 @@ static irqreturn_t mvme147_timer_int (int irq, void *dev_id)
 	m147_pcc->t1_int_cntrl = PCC_INT_ENAB|PCC_LEVEL_TIMER1;
 	return tick_handler(irq, dev_id);
 }
-
 
 void mvme147_sched_init (irq_handler_t timer_routine)
 {
@@ -192,7 +187,6 @@ static void scc_write (char ch)
 	scc_delay();
 	*p = ch;
 }
-
 
 void m147_scc_write (struct console *co, const char *str, unsigned count)
 {

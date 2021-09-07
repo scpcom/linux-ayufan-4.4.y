@@ -72,4 +72,3 @@ int __init ixdp425_pci_init(void)
 }
 
 subsys_initcall(ixdp425_pci_init);
-

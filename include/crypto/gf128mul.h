@@ -180,7 +180,6 @@ static inline void gf128mul_free_4k(struct gf128mul_4k *t)
 	kfree(t);
 }
 
-
 /* 64k table optimization, implemented for lle and bbe */
 
 struct gf128mul_64k {

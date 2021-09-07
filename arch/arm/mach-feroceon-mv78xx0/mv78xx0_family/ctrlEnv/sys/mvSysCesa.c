@@ -285,7 +285,6 @@ MV_STATUS mvCesaTdmaWinSet(MV_U32 winNum, MV_DEC_WIN *pDecWin)
     return MV_OK;
 }
 
-
 MV_STATUS   mvCesaTdmaAddrDecInit (void)
 {
     MV_U32          winNum;
@@ -345,9 +344,6 @@ MV_STATUS   mvCesaTdmaAddrDecInit (void)
     return MV_OK;
 }
 #endif /* MV_CESA_VERSION >= 2 */
-
-
-
 
 MV_STATUS mvCesaInit (int numOfSession, int queueDepth, char* pSramBase, void *osHandle)
 {

@@ -34,7 +34,6 @@
 #define	DATA_ADDR
 #endif
 
-
 OUTPUT_ARCH(m68k)
 ENTRY(_start)
 
@@ -196,4 +195,3 @@ SECTIONS {
 
 	DISCARDS
 }
-

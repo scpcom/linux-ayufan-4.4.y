@@ -72,7 +72,6 @@ static void spectrum_cs_release(struct pcmcia_device *link);
 #define HCR_IDLE	0x0E	/* don't run firmware after reset */
 #define HCR_MEM16	0x10	/* memory width bit, should be preserved */
 
-
 #define CS_CHECK(fn, ret) \
   do { last_fn = (fn); if ((last_ret = (ret)) != 0) goto cs_failed; } while (0)
 
@@ -416,7 +415,6 @@ spectrum_cs_release(struct pcmcia_device *link)
 		ioport_unmap(priv->hw.iobase);
 }				/* spectrum_cs_release */
 
-
 static int
 spectrum_cs_suspend(struct pcmcia_device *link)
 {
@@ -437,7 +435,6 @@ spectrum_cs_resume(struct pcmcia_device *link)
 
 	return err;
 }
-
 
 /********************************************************************/
 /* Module initialization					    */

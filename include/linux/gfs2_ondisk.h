@@ -189,7 +189,6 @@ offset = uid * sizeof(struct gfs2_quota);
 for group quotas, given gid,
 offset = (gid * sizeof(struct gfs2_quota)) + sizeof(struct gfs2_quota);
 
-
   uid:0   gid:0       uid:12   gid:12      uid:17   gid:17     uid:5142 gid:5142
 +-------+-------+    +-------+-------+    +-------+- - - -+    +- - - -+-------+
 | valid | valid | :: | valid | valid | :: | valid | inval | :: | inval | valid |

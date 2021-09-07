@@ -953,7 +953,6 @@ static int netxen_nic_set_flags(struct net_device *netdev, u32 data)
 	if ((hw_lro == 0) && netxen_send_lro_cleanup(adapter))
 		return -EIO;
 
-
 	return 0;
 }
 

@@ -24,7 +24,6 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-
 /* General Control Register */
 #define SIS_GCR		0x00
 #define		SIS_GCR_MACRO_POWER_DOWN		0x80000000
@@ -202,7 +201,6 @@
 #define SIS_WEISR_A	0xa8
 #define SIS_WEISR_B	0xac
 
-
 /* Playback DMA parameters (parameter RAM) */
 #define SIS_PLAY_DMA_OFFSET	0x0000
 #define SIS_PLAY_DMA_SIZE	0x10
@@ -274,7 +272,6 @@
 #define		SIS_CAPTURE_DMA_INTR_AT_MLP	0x00010000
 #define		SIS_CAPTURE_DMA_LEO_MASK		0x0000ffff
 #define SIS_CAPTURE_DMA_RESERVED	0x0c
-
 
 /* Mixer routing list start pointer (parameter RAM) */
 #define SIS_MIXER_START_OFFSET	0x1000

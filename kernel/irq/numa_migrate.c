@@ -116,4 +116,3 @@ struct irq_desc *move_irq_desc(struct irq_desc *desc, int node)
 
 	return desc;
 }
-

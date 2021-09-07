@@ -114,7 +114,7 @@
 #endif
 #include <asm/mce.h>
 
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 #include  <linux/synobios.h>
 #endif
 
@@ -225,7 +225,6 @@ static struct resource bss_resource = {
 	.flags	= IORESOURCE_BUSY | IORESOURCE_MEM
 };
 
-
 #ifdef CONFIG_X86_32
 /* cpu data as detected by the assembly code in head.S */
 struct cpuinfo_x86 new_cpu_data __cpuinitdata = {0, 0, 0, 0, -1, 1, 0, 0, -1};
@@ -263,7 +262,6 @@ struct cpuinfo_x86 boot_cpu_data __read_mostly = {
 };
 EXPORT_SYMBOL(boot_cpu_data);
 #endif
-
 
 #if !defined(CONFIG_X86_PAE) || defined(CONFIG_X86_64)
 unsigned long mmu_cr4_features;
@@ -450,7 +448,6 @@ static void __init reserve_initrd(void)
 	printk(KERN_INFO "RAMDISK: %08llx - %08llx\n", ramdisk_image,
 			ramdisk_end);
 
-
 	if (ramdisk_end <= end_of_lowmem) {
 		/* All in lowmem, easy case */
 		/*
@@ -571,7 +568,7 @@ static int __init early_internal_hd_num(char *p)
 __setup("ihd_num=", early_internal_hd_num);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 static int __init early_internal_netif_num(char *p)
 {
 	g_internal_netif_num = simple_strtol(p, NULL, 10);
@@ -599,7 +596,7 @@ static int __init early_SASmodel(char *p)
 __setup("SASmodel=", early_SASmodel);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 static int __init early_ahci_switch(char *p)
 {
         g_ahci_switch = simple_strtol(p, NULL, 10);
@@ -1164,7 +1161,6 @@ void __init setup_arch(char **cmdline_p)
 	insert_resource(&iomem_resource, &code_resource);
 	insert_resource(&iomem_resource, &data_resource);
 	insert_resource(&iomem_resource, &bss_resource);
-
 
 #ifdef CONFIG_X86_32
 	if (ppro_with_ram_bug()) {

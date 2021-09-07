@@ -73,7 +73,6 @@ static struct iwm_eeprom_entry eeprom_map[] = {
 	{"Calib RX IQ", 0, IWM_EEPROM_CALIB_RXIQ_LEN},
 };
 
-
 static int iwm_eeprom_read(struct iwm_priv *iwm, u8 eeprom_id)
 {
 	int ret;

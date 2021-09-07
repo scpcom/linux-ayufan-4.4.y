@@ -157,7 +157,6 @@
 /* Constants                                                              */
 /**************************************************************************/
 
-
 MODULE_LICENSE("GPL");
 MODULE_VERSION("1.0");
 
@@ -1398,7 +1397,6 @@ static void hwraid_log(struct command_s* cmd)
     odrb_decode_sg_error();
 }
 
-
 static void hwraid_cleanup(struct command_s* cmd)
 {
     int action;
@@ -1416,7 +1414,6 @@ static void hwraid_cleanup(struct command_s* cmd)
     cmd->error_flags = 0;
 	ox820sata_thaw_host(0);
 }
-
 
 /**
  * When this is called, we have control of the sata core, the command has
@@ -2068,7 +2065,6 @@ static int hwraid1_assemble(struct mddev_s* mddev)
     ret = ox820hwraid_disk_up(raiddev->raidset);
     return ret;
 }
-
 
 /**
  * Will creates a hardware raid-1 device if it can
@@ -2953,7 +2949,6 @@ static void hwraid1_degraded_eh_work(struct work_struct *work)
     }
 }
 
-
 /**
  * Used when an array was two-disk when the command started, but is now
  * single disk.
@@ -3019,7 +3014,6 @@ static void hwraid1_sbwrite_waiting(struct work_struct* ws)
         spin_unlock_irqrestore(mddev->queue->queue_lock, flags);
 	}
 }
-
 
 static void hwraid1_raise_barrier(conf_t *conf)
 {
@@ -3190,8 +3184,6 @@ void hwraid1_allow_barrier(conf_t *conf)
 	spin_unlock_irqrestore(&conf->resync_lock, flags);
 	wake_up(&conf->wait_barrier);
 }
-
-
 
 static void hwraid1_end_barrier(struct raidset_s* raid, int write)
 {
@@ -3939,7 +3931,6 @@ void ox820hwraid_restart_queue(void)
     }
 }
 
-
 /**
  * Prepares requests, performing command translaition and DMA mapping
  * irrespective of the host being busy.
@@ -4307,7 +4298,6 @@ static void ox820hwraid_disk_down(struct raidset_s* raid)
     /* queue shouly remain plugged after this */
     blk_sync_queue(raid->mddev->queue);
 }
-
 
 /**
  *

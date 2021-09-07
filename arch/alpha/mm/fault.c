@@ -29,7 +29,6 @@
 
 extern void die_if_kernel(char *,struct pt_regs *,long, unsigned long *);
 
-
 /*
  * Force a new ASN for a task.
  */
@@ -53,7 +52,6 @@ __load_new_mm_context(struct mm_struct *next_mm)
 
 	__reload_thread(pcb);
 }
-
 
 /*
  * This routine handles page faults.  It determines the address,

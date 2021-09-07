@@ -76,7 +76,6 @@
 #define _PCMCIA1Attr	_PCMCIAAttr(1)	/* PCMCIA 1 Attribute              */
 #define _PCMCIA1Mem	_PCMCIAMem(1)	/* PCMCIA 1 Memory                 */
 
-
 #define MCXX_SETUP_MASK     (0x7f)
 #define MCXX_ASST_MASK      (0x1f)
 #define MCXX_HOLD_MASK      (0x3f)
@@ -288,7 +287,6 @@ int __pxa2xx_drv_pcmcia_probe(struct device *dev)
 	return ret;
 }
 EXPORT_SYMBOL(__pxa2xx_drv_pcmcia_probe);
-
 
 static int pxa2xx_drv_pcmcia_probe(struct platform_device *dev)
 {

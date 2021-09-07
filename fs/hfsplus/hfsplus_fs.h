@@ -169,7 +169,6 @@ struct hfsplus_sb_info {
 #define HFSPLUS_SB_HFSX		0x0008
 #define HFSPLUS_SB_CASEFOLD	0x0010
 
-
 struct hfsplus_inode_info {
 	struct mutex extents_lock;
 	u32 clump_blocks, alloc_blocks;
@@ -275,7 +274,6 @@ struct hfsplus_readdir_data {
  * chattr/lsattr */
 #define HFSPLUS_IOC_EXT2_GETFLAGS	FS_IOC_GETFLAGS
 #define HFSPLUS_IOC_EXT2_SETFLAGS	FS_IOC_SETFLAGS
-
 
 /*
  * hfs+-specific ioctl for making the filesystem bootable

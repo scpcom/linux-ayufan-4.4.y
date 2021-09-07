@@ -59,9 +59,6 @@
 
 /*---------------------  Static Definitions -------------------------*/
 
-
-
-
 /*---------------------  Static Classes  ----------------------------*/
 
 /*---------------------  Static Variables  --------------------------*/
@@ -75,7 +72,6 @@ s_vProbeChannel(
     IN PSDevice pDevice
     );
 
-
 static
 PSTxMgmtPacket
 s_MgrMakeProbeRequest(
@@ -87,13 +83,11 @@ s_MgrMakeProbeRequest(
     IN PWLAN_IE_SUPP_RATES pCurrExtSuppRates
     );
 
-
 static
 BOOL
 s_bCommandComplete (
     PSDevice pDevice
     );
-
 
 static
 BOOL s_bClearBSSID_SCAN (
@@ -102,10 +96,7 @@ BOOL s_bClearBSSID_SCAN (
 
 /*---------------------  Export Variables  --------------------------*/
 
-
 /*---------------------  Export Functions  --------------------------*/
-
-
 
 /*
  * Description:
@@ -163,7 +154,6 @@ vAdHocBeaconStop(PSDevice  pDevice)
 
 } /* vAdHocBeaconStop */
 
-
 /*
  * Description:
  *      Restart AdHoc beacon after scan process complete
@@ -198,7 +188,6 @@ vAdHocBeaconRestart(PSDevice pDevice)
 
 }
 
-
 /*+
  *
  * Routine Description:
@@ -226,7 +215,6 @@ s_vProbeChannel(
     PSTxMgmtPacket  pTxPacket;
     PSMgmtObject    pMgmt = &(pDevice->sMgmtObj);
     UINT            ii;
-
 
     if (pDevice->byBBType == BB_TYPE_11A) {
         pbyRate = &abyCurrSuppRatesA[0];
@@ -259,9 +247,6 @@ s_vProbeChannel(
 
 }
 
-
-
-
 /*+
  *
  * Routine Description:
@@ -272,7 +257,6 @@ s_vProbeChannel(
  *    A ptr to Tx frame or NULL on allocation failue
  *
 -*/
-
 
 PSTxMgmtPacket
 s_MgrMakeProbeRequest(
@@ -287,7 +271,6 @@ s_MgrMakeProbeRequest(
 {
     PSTxMgmtPacket      pTxPacket = NULL;
     WLAN_FR_PROBEREQ    sFrame;
-
 
     pTxPacket = (PSTxMgmtPacket)pMgmt->pbyMgmtPacketPool;
     memset(pTxPacket, 0, sizeof(STxMgmtPacket) + WLAN_PROBEREQ_FR_MAXLEN);
@@ -322,10 +305,6 @@ s_MgrMakeProbeRequest(
     return pTxPacket;
 }
 
-
-
-
-
 VOID
 vCommandTimerWait(
     IN HANDLE    hDeviceContext,
@@ -343,9 +322,6 @@ vCommandTimerWait(
     return;
 }
 
-
-
-
 VOID
 vRunCommand(
     IN  HANDLE      hDeviceContext
@@ -360,7 +336,6 @@ vRunCommand(
     BYTE            byMask[8] = {1, 2, 4, 8, 0x10, 0x20, 0x40, 0x80};
     struct sk_buff  *skb;
     BYTE            byData;
-
 
     if (pDevice->dwDiagRefCount != 0)
         return;
@@ -569,7 +544,6 @@ vRunCommand(
                 CARDbRadioPowerOff(pDevice);
             s_bCommandComplete(pDevice);
             break;
-
 
         case WLAN_CMD_SSID_START:
 
@@ -998,7 +972,6 @@ vRunCommand(
             s_bCommandComplete(pDevice);
             break;
 
-
         case WLAN_CMD_CHANGE_BBSENSITIVITY_START:
 
             pDevice->bStopDataPkt = TRUE;
@@ -1049,7 +1022,6 @@ vRunCommand(
             s_bCommandComplete(pDevice);
             break;
 
-
         case WLAN_CMD_MAC_DISPOWERSAVING_START:
             ControlvReadByte (pDevice, MESSAGE_REQUEST_MACREG, MAC_REG_PSCTL, &byData);
             if ( (byData & PSCTL_PS) != 0 ) {
@@ -1082,7 +1054,6 @@ vRunCommand(
     return;
 }
 
-
 static
 BOOL
 s_bCommandComplete (
@@ -1094,7 +1065,6 @@ s_bCommandComplete (
     //WORD          wDeAuthenReason = 0;
     BOOL          bForceSCAN = TRUE;
     PSMgmtObject  pMgmt = &(pDevice->sMgmtObj);
-
 
     pDevice->eCommandState = WLAN_CMD_IDLE;
     if (pDevice->cbFreeCmdQueue == CMD_Q_SIZE) {
@@ -1201,7 +1171,6 @@ BOOL bScheduleCommand (
 {
     PSDevice        pDevice = (PSDevice)hDeviceContext;
 
-
     if (pDevice->cbFreeCmdQueue == 0) {
         return (FALSE);
     }
@@ -1286,7 +1255,6 @@ BOOL s_bClearBSSID_SCAN (
     return TRUE;
 }
 
-
 //mike add:reset command timer
 VOID
 vResetCommandTimer(
@@ -1351,4 +1319,3 @@ BSSvSecondTxData(
   return;
 }
 #endif
-

@@ -29,7 +29,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-
     Supports the following chips:
 
     Chip        #vin    #fan    #pwm    #temp  chip IDs       man ID
@@ -192,7 +191,6 @@ static const u8 W83627EHF_PWM_ENABLE_SHIFT[] = { 2, 4, 1, 4 };
 static const u8 W83627EHF_REG_PWM[] = { 0x01, 0x03, 0x11, 0x61 };
 static const u8 W83627EHF_REG_TARGET[] = { 0x05, 0x06, 0x13, 0x63 };
 static const u8 W83627EHF_REG_TOLERANCE[] = { 0x07, 0x07, 0x14, 0x62 };
-
 
 /* Advanced Fan control, some values are common for all fans */
 static const u8 W83627EHF_REG_FAN_MIN_OUTPUT[] = { 0x08, 0x09, 0x15, 0x64 };
@@ -987,7 +985,6 @@ store_pwm_enable(struct device *dev, struct device_attribute *attr,
 	mutex_unlock(&data->update_lock);
 	return count;
 }
-
 
 #define show_tol_temp(reg) \
 static ssize_t show_##reg(struct device *dev, struct device_attribute *attr, \

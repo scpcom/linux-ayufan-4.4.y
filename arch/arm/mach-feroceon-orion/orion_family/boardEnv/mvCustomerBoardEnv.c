@@ -70,12 +70,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DB_CUS1_BOARD_MPP_CONFIG_NUM		0x1
 #define DB_CUS1_BOARD_DEVICE_CONFIG_NUM		0x1
 
-
 MV_BOARD_PCI_IF db88f5181Cus1InfoBoardPciIf[] = 
 	/* {pciDevNum, {intAGppPin, intBGppPin, intCGppPin, intDGppPin}} */					
 	{{7, {N_A, N_A, N_A, N_A}}				/* pciSlot0 */					    
 	};
-
 
 MV_U8			rd88f5181Cus1InfoBoardDebugLedIf[DB_CUS1_BOARD_DEBUG_LED_NUM] =
 	{0, 11};
@@ -124,7 +122,6 @@ MV_BOARD_INFO rd88f5181Cus1Info = {
 	RD_88F5181L_CUS1_GPP_OE,			/* gppOutEnVal */
 	N_A,						/* gppPolarityVal */
 };
-
 
 MV_BOARD_INFO*	boardInfoTbl[]	=	{&rd88f5181Cus1Info};
 

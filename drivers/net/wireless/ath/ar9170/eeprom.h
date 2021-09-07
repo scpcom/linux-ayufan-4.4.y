@@ -121,7 +121,6 @@ struct ar9170_calctl_data {
 		control_edges[AR5416_MAX_CHAINS][AR5416_NUM_BAND_EDGES];
 } __packed;
 
-
 struct ar9170_eeprom {
 	__le16	length;
 	__le16	checksum;

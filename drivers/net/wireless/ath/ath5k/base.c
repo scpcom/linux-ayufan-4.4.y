@@ -68,7 +68,6 @@ static int modparam_all_channels;
 module_param_named(all_channels, modparam_all_channels, bool, S_IRUGO);
 MODULE_PARM_DESC(all_channels, "Expose all channels the device can use.");
 
-
 /******************\
 * Internal defines *
 \******************/
@@ -80,7 +79,6 @@ MODULE_DESCRIPTION("Support for 5xxx series of Atheros 802.11 wireless LAN cards
 MODULE_SUPPORTED_DEVICE("Atheros 5xxx WLAN cards");
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_VERSION("0.6.0 (EXPERIMENTAL)");
-
 
 /* Known PCI ids */
 static const struct pci_device_id ath5k_pci_id_table[] = {
@@ -212,8 +210,6 @@ static struct pci_driver ath5k_pci_driver = {
 	.resume		= ath5k_pci_resume,
 };
 
-
-
 /*
  * Prototypes - MAC 802.11 stack related functions
  */
@@ -332,7 +328,6 @@ static inline void ath5k_rxbuf_free(struct ath5k_softc *sc,
 	bf->skb = NULL;
 }
 
-
 /* Queues setup */
 static struct 	ath5k_txq *ath5k_txq_setup(struct ath5k_softc *sc,
 				int qtype, int subtype);
@@ -410,7 +405,6 @@ exit_ath5k_pci(void)
 
 module_init(init_ath5k_pci);
 module_exit(exit_ath5k_pci);
-
 
 /********************\
 * PCI Initialization *
@@ -631,7 +625,6 @@ ath5k_pci_probe(struct pci_dev *pdev,
 		}
 	}
 
-
 	/* ready to process interrupts */
 	__clear_bit(ATH_STAT_INVALID, sc->status);
 
@@ -708,7 +701,6 @@ ath5k_pci_resume(struct pci_dev *pdev)
 	return 0;
 }
 #endif /* CONFIG_PM */
-
 
 /***********************\
 * Driver Initialization *
@@ -877,9 +869,6 @@ ath5k_detach(struct pci_dev *pdev, struct ieee80211_hw *hw)
 	 * state and potentially want to use them.
 	 */
 }
-
-
-
 
 /********************\
 * Channel/mode setup *
@@ -1427,10 +1416,6 @@ ath5k_desc_free(struct ath5k_softc *sc, struct pci_dev *pdev)
 	sc->bufptr = NULL;
 }
 
-
-
-
-
 /**************\
 * Queues setup *
 \**************/
@@ -1631,9 +1616,6 @@ ath5k_txq_release(struct ath5k_softc *sc)
 		}
 }
 
-
-
-
 /*************\
 * RX Handling *
 \*************/
@@ -1718,7 +1700,6 @@ ath5k_rx_decrypted(struct ath5k_softc *sc, struct ath5k_desc *ds,
 
 	return 0;
 }
-
 
 static void
 ath5k_check_ibss_tsf(struct ath5k_softc *sc, struct sk_buff *skb,
@@ -1947,9 +1928,6 @@ unlock:
 	spin_unlock(&sc->rxbuflock);
 }
 
-
-
-
 /*************\
 * TX Handling *
 \*************/
@@ -2037,7 +2015,6 @@ ath5k_tasklet_tx(unsigned long data)
 			ath5k_tx_processq(sc, &sc->txqs[i]);
 }
 
-
 /*****************\
 * Beacon handling *
 \*****************/
@@ -2095,7 +2072,6 @@ ath5k_beacon_setup(struct ath5k_softc *sc, struct ath5k_buf *bf)
 	 */
 	if (ah->ah_ant_mode == AR5K_ANTMODE_SECTOR_AP)
 		antenna = sc->bsent & 4 ? 2 : 1;
-
 
 	/* FIXME: If we are in g mode and rate is a CCK rate
 	 * subtract ah->ah_txpower.txp_cck_ofdm_pwr_delta
@@ -2191,7 +2167,6 @@ ath5k_beacon_send(struct ath5k_softc *sc)
 
 	sc->bsent++;
 }
-
 
 /**
  * ath5k_beacon_update_timers - update beacon timers
@@ -2294,7 +2269,6 @@ ath5k_beacon_update_timers(struct ath5k_softc *sc, u64 bc_tsf)
 		intval & AR5K_BEACON_RESET_TSF ? "AR5K_BEACON_RESET_TSF" : "");
 }
 
-
 /**
  * ath5k_beacon_config - Configure the beacon queues and interrupts
  *
@@ -2367,7 +2341,6 @@ static void ath5k_tasklet_beacon(unsigned long data)
 		spin_unlock(&sc->block);
 	}
 }
-
 
 /********************\
 * Interrupt handling *
@@ -2642,7 +2615,6 @@ ath5k_tasklet_calibrate(unsigned long data)
 	ieee80211_wake_queues(sc->hw);
 
 }
-
 
 /********************\
 * Mac80211 functions *

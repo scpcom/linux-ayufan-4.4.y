@@ -401,7 +401,6 @@ static int __init it8712f_wdt_init(void)
 
 	return 0;
 
-
 reboot_out:
 	unregister_reboot_notifier(&it8712f_wdt_notifier);
 out:

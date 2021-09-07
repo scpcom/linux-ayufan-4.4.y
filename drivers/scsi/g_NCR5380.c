@@ -94,7 +94,6 @@
 #define AUTOPROBE_IRQ
 #define AUTOSENSE
 
-
 #ifdef CONFIG_SCSI_GENERIC_NCR53C400
 #define NCR53C400_PSEUDO_DMA 1
 #define PSEUDO_DMA
@@ -196,7 +195,6 @@ static void __init internal_setup(int board, char *str, int *ints)
 		++commandline_current;
 	}
 }
-
 
 /**
  * 	do_NCR53C80_setup		-	set up entry point
@@ -526,7 +524,6 @@ int generic_NCR5380_release_resources(struct Scsi_Host *instance)
 	iounmap(((struct NCR5380_hostdata *)instance->hostdata).iomem);
 	release_mem_region(instance->NCR5380_instance_name, NCR5380_region_size);
 #endif
-
 
 	return 0;
 }
@@ -941,7 +938,6 @@ module_param(ncr_53c400a, int, 0);
 module_param(dtc_3181e, int, 0);
 MODULE_LICENSE("GPL");
 
-
 static struct isapnp_device_id id_table[] __devinitdata = {
 	{
 	 ISAPNP_ANY_ID, ISAPNP_ANY_ID,
@@ -951,7 +947,6 @@ static struct isapnp_device_id id_table[] __devinitdata = {
 };
 
 MODULE_DEVICE_TABLE(isapnp, id_table);
-
 
 __setup("ncr5380=", do_NCR5380_setup);
 __setup("ncr53c400=", do_NCR53C400_setup);

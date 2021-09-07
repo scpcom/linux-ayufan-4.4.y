@@ -49,7 +49,6 @@ resource_size_t isa_mem_base;
 /* Default PCI flags is 0 on ppc32, modified at boot on ppc64 */
 unsigned int ppc_pci_flags = 0;
 
-
 static struct dma_map_ops *pci_dma_ops = &dma_direct_ops;
 
 void set_pci_dma_ops(struct dma_map_ops *dma_ops)
@@ -444,7 +443,6 @@ pgprot_t pci_phys_mem_access_prot(struct file *file,
 
 	return prot;
 }
-
 
 /*
  * Perform the actual remap of the pages for a PCI device mapping, as
@@ -914,7 +912,6 @@ static void __devinit fixup_resource(struct resource *res, struct pci_dev *dev)
 	res->end = (res->end + offset) & mask;
 }
 
-
 /* This header fixup will do the resource fixup for all devices as they are
  * probed, but not for bridge ranges
  */
@@ -1158,7 +1155,6 @@ void __devinit pci_fixup_cardbus(struct pci_bus *bus)
 	/* Now fixup devices on that bus */
 	pcibios_setup_bus_devices(bus);
 }
-
 
 static int skip_isa_ioresource_align(struct pci_dev *dev)
 {
@@ -1538,7 +1534,6 @@ void pcibios_claim_one_bus(struct pci_bus *bus)
 	list_for_each_entry(child_bus, &bus->children, node)
 		pcibios_claim_one_bus(child_bus);
 }
-
 
 /* pcibios_finish_adding_to_bus
  *

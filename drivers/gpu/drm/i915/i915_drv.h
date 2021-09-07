@@ -750,7 +750,6 @@ i915_enable_pipestat(drm_i915_private_t *dev_priv, int pipe, u32 mask);
 void
 i915_disable_pipestat(drm_i915_private_t *dev_priv, int pipe, u32 mask);
 
-
 /* i915_mem.c */
 extern int i915_mem_alloc(struct drm_device *dev, void *data,
 			  struct drm_file *file_priv);

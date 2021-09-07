@@ -11,7 +11,6 @@
 #ifndef _ASM_IA64_NUMA_H
 #define _ASM_IA64_NUMA_H
 
-
 #ifdef CONFIG_NUMA
 
 #include <linux/cache.h>
@@ -69,7 +68,6 @@ extern int paddr_to_nid(unsigned long paddr);
 
 extern void map_cpu_to_node(int cpu, int nid);
 extern void unmap_cpu_from_node(int cpu, int nid);
-
 
 #else /* !CONFIG_NUMA */
 #define map_cpu_to_node(cpu, nid)	do{}while(0)

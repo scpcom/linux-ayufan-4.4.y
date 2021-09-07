@@ -199,7 +199,6 @@ void iic(int n, unsigned long addr, unsigned long data1, unsigned long data2,
 		cpu_relax();
 }
 
-
 void init_iic(void)
 {
 	DEBUG(1, "init_iic:\n");
@@ -729,7 +728,6 @@ static int ar_initialize(struct video_device *dev)
 	return 0;
 }
 
-
 void ar_release(struct video_device *vfd)
 {
 	struct ar_device *ar = video_get_drvdata(vfd);
@@ -882,7 +880,6 @@ out_end:
 #endif
 	return ret;
 }
-
 
 static int __init ar_init_module(void)
 {

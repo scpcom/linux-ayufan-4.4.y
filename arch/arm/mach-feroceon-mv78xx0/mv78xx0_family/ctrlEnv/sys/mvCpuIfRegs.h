@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvCpuIfRegsh
 #define __INCmvCpuIfRegsh
 
@@ -101,7 +100,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* Erros are propogated to AHB */
 #define CCR_AHB_ERROR_PROP_INDICATE		(1 << CCR_AHB_ERROR_PROP_OFFS)
 
-
 #define CCR_ENDIAN_INIT_OFFS			3
 #define CCR_ENDIAN_INIT_MASK			BIT3
 #define CCR_ENDIAN_INIT_LITTLE			(0 << CCR_ENDIAN_INIT_OFFS)
@@ -111,7 +109,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CCR_CPU_ID_MASK				BIT4
 #define CCR_ARM_CPU_ID				(0 << CCR_CPU_ID_OFFS)
 #define CCR_MRVL_CPU_ID				(1 << CCR_CPU_ID_OFFS)
-
 
 #define CCR_MMU_DISABLED_OFFS			5			
 #define CCR_MMU_DISABLED_MASK			(1 << CCR_MMU_DISABLED_OFFS)
@@ -134,7 +131,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* ARM Control and Status register */
 /* CPU_CTRL_STAT_REG (CCSR) */
-
 
 /*
 This is used to block PCI express\PCI from access Socrates/Feroceon GP
@@ -162,7 +158,6 @@ while ARM boot is still in progress
 #define CMMCIR_ARM_TIMER2_INT_REQ			BIT6
 #define CMMCIR_ARM_TIMER3_INT_REQ			BIT7
 
-
 /* Mbus-L to Mbus Bridge Interrupt Mask Register*/
 /* CPU_AHB_MBUS_MASK_INT_REG (CAMMIR) */
 
@@ -170,7 +165,6 @@ while ARM boot is still in progress
 #define CMMCIR_ARM_SELF_INT_MASK	BIT0
 #define CMMCIR_ARM_SELF_INT_EN		(1 << CMMCIR_ARM_SELF_INT_OFFS)
 #define CMMCIR_ARM_SELF_INT_DIS		(0 << CMMCIR_ARM_SELF_INT_OFFS)
-
 
 #define CMMCIR_ARM_TIMER0_INT_REQ_OFFS	1
 #define CMMCIR_ARM_TIMER0_INT_REQ_MASK	BIT1
@@ -192,12 +186,10 @@ while ARM boot is still in progress
 #define CMMCIR_ARM_TIMER3_INT_REQ_EN	(1 << CMMCIR_ARM_TIMER1_INT_REQ_OFFS) 
 #define CMMCIR_ARM_TIMER3_INT_REQ_DIS	(0 << CMMCIR_ARM_TIMER1_INT_REQ_OFFS) 
 
-
 #define CMMCIR_ARM_WD_TIMER_INT_REQ_OFFS 3
 #define CMMCIR_ARM_WD_TIMER_INT_REQ_MASK BIT3
 #define CMMCIR_ARM_WD_TIMER_INT_REQ_EN	 (1 << CMMCIR_ARM_WD_TIMER_INT_REQ_OFFS) 
 #define CMMCIR_ARM_WD_TIMER_INT_REQ_DIS	 (0 << CMMCIR_ARM_WD_TIMER_INT_REQ_OFFS) 
-
 
 /*******************************************/
 /* Main Interrupt Controller Registers Map */
@@ -210,7 +202,6 @@ while ARM boot is still in progress
 #define CPU_INT_MASK_LOW_REG(cpu) 	    	(AHB_TO_MBUS_BASE(cpu) + 0x210)
 #define CPU_INT_MASK_HIGH_REG(cpu) 	    	(AHB_TO_MBUS_BASE(cpu) + 0x214)
 #define CPU_INT_SELECT_CAUSE_REG(cpu) 		(AHB_TO_MBUS_BASE(cpu) + 0x218)
-
 
 /*******************************************/
 /* Power Management control			   */
@@ -227,9 +218,6 @@ while ARM boot is still in progress
 #define CPMCR_CRYPTO_POWER_UP			BIT22
 #define CPMCR_DEVICE_POWER_UP			BIT23
 
-
-
-
 /*******************************************/
 /* ARM Doorbell Registers Map			   */
 /*******************************************/
@@ -238,7 +226,6 @@ while ARM boot is still in progress
 #define CPU_HOST_TO_ARM_MASK_REG		(AHB_TO_MBUS_BASE(cpu) + 0x404)
 #define CPU_ARM_TO_HOST_DRBL_REG		(AHB_TO_MBUS_BASE(cpu) + 0x408)
 #define CPU_ARM_TO_HOST_MASK_REG		(AHB_TO_MBUS_BASE(cpu) + 0x40C)
-
 
 #ifdef MV_CPU_LE
 #define CL2CR_L2_ECC_EN_OFFS			24
@@ -254,6 +241,4 @@ while ARM boot is still in progress
 #define CPU_L2_CONFIG_REG			0x20104
 #define CPU_CORE1_OFFSET       			0x4000
 
-
 #endif /* __INCmvCpuIfRegsh */
-

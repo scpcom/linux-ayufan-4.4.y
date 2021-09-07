@@ -49,7 +49,6 @@ static const struct file_operations name## _ops = {			\
 	debugfs_remove(local->debugfs.name);				\
 	local->debugfs.name = NULL;
 
-
 DEBUGFS_READONLY_FILE(frequency, 20, "%d",
 		      local->hw.conf.channel->center_freq);
 DEBUGFS_READONLY_FILE(total_ps_buffered, 20, "%d",
@@ -304,7 +303,6 @@ DEBUGFS_DEVSTATS_FILE(dot11ACKFailureCount);
 DEBUGFS_DEVSTATS_FILE(dot11RTSFailureCount);
 DEBUGFS_DEVSTATS_FILE(dot11FCSErrorCount);
 DEBUGFS_DEVSTATS_FILE(dot11RTSSuccessCount);
-
 
 void debugfs_hw_add(struct ieee80211_local *local)
 {

@@ -659,7 +659,6 @@ void __meminit __free_pages_bootmem(struct page *page, unsigned int order)
 	}
 }
 
-
 /*
  * The order of subdivision here is critical for the IO subsystem.
  * Please do not alter this order without good reasons and regression
@@ -763,7 +762,6 @@ struct page *__rmqueue_smallest(struct zone *zone, unsigned int order,
 
 	return NULL;
 }
-
 
 /*
  * This array describes the order lists are fallen back to when
@@ -2352,7 +2350,6 @@ static int build_zonelists_node(pg_data_t *pgdat, struct zonelist *zonelist,
 	return nr_zones;
 }
 
-
 /*
  *  zonelist_order:
  *  0 = automatic detection of better ordering.
@@ -2371,7 +2368,6 @@ static int build_zonelists_node(pg_data_t *pgdat, struct zonelist *zonelist,
  */
 static int current_zonelist_order = ZONELIST_ORDER_DEFAULT;
 static char zonelist_order_name[3][8] = {"Default", "Node", "Zone"};
-
 
 #ifdef CONFIG_NUMA
 /* The value user specified ....changed by config */
@@ -2444,7 +2440,6 @@ int numa_zonelist_order_handler(ctl_table *table, int write,
 	return 0;
 }
 
-
 #define MAX_NODE_LOAD (nr_online_nodes)
 static int node_load[MAX_NUMNODES];
 
@@ -2507,7 +2502,6 @@ static int find_next_best_node(int node, nodemask_t *used_node_mask)
 
 	return best_node;
 }
-
 
 /*
  * Build zonelists ordered by node and zones within node.
@@ -2708,7 +2702,6 @@ static void build_zonelist_cache(pg_data_t *pgdat)
 	for (z = zonelist->_zonerefs; z->zone; z++)
 		zlc->z_to_n[z - zonelist->_zonerefs] = zonelist_node_idx(z);
 }
-
 
 #else	/* CONFIG_NUMA */
 
@@ -3111,7 +3104,6 @@ static void setup_pagelist_highmark(struct per_cpu_pageset *p,
 	if ((high/4) > (PAGE_SHIFT * 8))
 		pcp->batch = PAGE_SHIFT * 8;
 }
-
 
 #ifdef CONFIG_NUMA
 /*

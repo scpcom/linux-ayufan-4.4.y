@@ -33,4 +33,3 @@ void sas_ssp_task_response(struct device *dev, struct sas_task *task,
 		tstat->stat = SAM_CHECK_COND;
 }
 EXPORT_SYMBOL_GPL(sas_ssp_task_response);
-

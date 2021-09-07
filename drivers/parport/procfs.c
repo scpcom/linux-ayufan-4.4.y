@@ -252,7 +252,6 @@ PARPORT_MIN_SPINTIME_VALUE;
 static const int parport_max_spintime_value =
 PARPORT_MAX_SPINTIME_VALUE;
 
-
 struct parport_sysctl_table {
 	struct ctl_table_header *sysctl_header;
 	ctl_table vars[12];
@@ -471,7 +470,6 @@ parport_default_sysctl_table = {
 		{}
 	}
 };
-
 
 int parport_proc_register(struct parport *port)
 {

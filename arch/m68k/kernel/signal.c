@@ -159,7 +159,6 @@ sys_sigaltstack(const stack_t __user *uss, stack_t __user *uoss)
 	return do_sigaltstack(uss, uoss, rdusp());
 }
 
-
 /*
  * Do a signal return; undo the signal stack.
  *
@@ -188,7 +187,6 @@ struct rt_sigframe
 	struct siginfo info;
 	struct ucontext uc;
 };
-
 
 static unsigned char fpu_version;	/* version number of fpu, set by setup_frame */
 

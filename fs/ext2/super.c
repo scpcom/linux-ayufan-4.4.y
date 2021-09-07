@@ -688,7 +688,6 @@ static loff_t ext2_max_size(int bits)
 	/* total blocks in file system block size */
 	upper_limit >>= (bits - 9);
 
-
 	/* indirect blocks */
 	meta_blocks = 1;
 	/* double indirect blocks */
@@ -1145,7 +1144,6 @@ static int ext2_sync_fs(struct super_block *sb, int wait)
 
 	return 0;
 }
-
 
 void ext2_write_super(struct super_block *sb)
 {

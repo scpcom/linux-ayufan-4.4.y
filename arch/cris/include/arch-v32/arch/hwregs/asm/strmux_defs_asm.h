@@ -76,7 +76,6 @@
 #define reg_strmux_rw_cfg___dma9___width 3
 #define reg_strmux_rw_cfg_offset 0
 
-
 /* Constants */
 #define regk_strmux_ata                           0x00000003
 #define regk_strmux_eth0                          0x00000001

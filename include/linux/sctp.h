@@ -54,7 +54,6 @@
 #include <linux/in.h>		/* We need in_addr.  */
 #include <linux/in6.h>		/* We need in6_addr.  */
 
-
 /* Section 3.1.  SCTP Common Header Format */
 typedef struct sctphdr {
 	__be16 source;
@@ -78,7 +77,6 @@ typedef struct sctp_chunkhdr {
 	__u8 flags;
 	__be16 length;
 } __attribute__((packed)) sctp_chunkhdr_t;
-
 
 /* Section 3.2.  Chunk Type Values.
  * [Chunk Type] identifies the type of information contained in the Chunk
@@ -112,7 +110,6 @@ typedef enum {
 	SCTP_CID_ASCONF			= 0xC1,
 	SCTP_CID_ASCONF_ACK		= 0x80,
 } sctp_cid_t; /* enum */
-
 
 /* Section 3.2
  *  Chunk Types are encoded such that the highest-order two bits specify
@@ -204,7 +201,6 @@ typedef enum {
 
 } sctp_param_t; /* enum */
 
-
 /* RFC 2960 Section 3.2.1
  *  The Parameter Types are encoded such that the highest-order two bits
  *  specify the action that must be taken if the processing endpoint does
@@ -245,7 +241,6 @@ enum {
 };
 enum { SCTP_DATA_FRAG_MASK = 0x03, };
 
-
 /* RFC 2960 Section 3.3.2 Initiation (INIT) (1)
  *
  *  This chunk is used to initiate a SCTP association between two
@@ -264,7 +259,6 @@ typedef struct sctp_init_chunk {
 	sctp_chunkhdr_t chunk_hdr;
 	sctp_inithdr_t init_hdr;
 } __attribute__((packed)) sctp_init_chunk_t;
-
 
 /* Section 3.3.2.1. IPv4 Address Parameter (5) */
 typedef struct sctp_ipv4addr_param {
@@ -349,8 +343,6 @@ typedef struct sctp_unrecognized_param {
 	sctp_paramhdr_t unrecognized;
 } __attribute__((packed)) sctp_unrecognized_param_t;
 
-
-
 /*
  * 3.3.4 Selective Acknowledgement (SACK) (3):
  *
@@ -384,7 +376,6 @@ typedef struct sctp_sack_chunk {
 	sctp_sackhdr_t sack_hdr;
 } __attribute__((packed)) sctp_sack_chunk_t;
 
-
 /* RFC 2960.  Section 3.3.5 Heartbeat Request (HEARTBEAT) (4):
  *
  *  An endpoint should send this chunk to its peer endpoint to probe the
@@ -401,7 +392,6 @@ typedef struct sctp_heartbeat_chunk {
 	sctp_heartbeathdr_t hb_hdr;
 } __attribute__((packed)) sctp_heartbeat_chunk_t;
 
-
 /* For the abort and shutdown ACK we must carry the init tag in the
  * common header. Just the common header is all that is needed with a
  * chunk descriptor.
@@ -409,7 +399,6 @@ typedef struct sctp_heartbeat_chunk {
 typedef struct sctp_abort_chunk {
         sctp_chunkhdr_t uh;
 } __attribute__((packed)) sctp_abort_chunk_t;
-
 
 /* For the graceful shutdown we must carry the tag (in common header)
  * and the highest consecutive acking value.
@@ -469,7 +458,6 @@ typedef enum {
 	SCTP_ERROR_NO_DATA         = cpu_to_be16(0x09),
 	SCTP_ERROR_COOKIE_IN_SHUTDOWN = cpu_to_be16(0x0a),
 
-
 	/* SCTP Implementation Guide:
 	 *  11  Restart of an association with new addresses
 	 *  12  User Initiated Abort
@@ -511,8 +499,6 @@ typedef enum {
 	 */
 	 SCTP_ERROR_UNSUP_HMAC	= cpu_to_be16(0x0105)
 } sctp_error_t;
-
-
 
 /* RFC 2960.  Appendix A.  Explicit Congestion Notification.
  *   Explicit Congestion Notification Echo (ECNE) (12)
@@ -598,7 +584,6 @@ struct sctp_fwdtsn_chunk {
 	struct sctp_chunkhdr chunk_hdr;
 	struct sctp_fwdtsn_hdr fwdtsn_hdr;
 } __attribute((packed));
-
 
 /* ADDIP
  * Section 3.1.1 Address Configuration Change Chunk (ASCONF)

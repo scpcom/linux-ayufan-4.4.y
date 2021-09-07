@@ -402,7 +402,6 @@ apecs_machine_check(unsigned long vector, unsigned long la_ptr)
 	mchk_sysdata = (struct el_apecs_sysdata_mcheck *)
 		(la_ptr + mchk_header->sys_offset);
 
-
 	/* Clear the error before any reporting.  */
 	mb();
 	mb(); /* magic */

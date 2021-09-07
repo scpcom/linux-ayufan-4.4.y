@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 /* includes */
 #include "mvCommon.h"
 #include "mvCtrlEnvLib.h"
@@ -118,7 +117,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* to change.																*/
 MV_U32 ctrlDevModel = -1;
 MV_U32 ctrlDevRev   = -1;
-
 
 /*******************************************************************************
 * mv64xxxInit - Initialize Marvell controller environment.
@@ -347,7 +345,6 @@ MV_U32 mvCtrlUsbMaxGet(void)
 
 }
 #endif
-
 
 #if defined(MV_INCLUDE_NAND)
 
@@ -655,7 +652,6 @@ MV_STATUS mvCtrlModelRevNameGet(char *pNameBuff)
 		break;
 	}
 
-
 	return MV_OK;
 }
 
@@ -693,7 +689,6 @@ MV_STATUS ctrlWinOverlapTest(MV_ADDR_WIN *pAddrWin1, MV_ADDR_WIN *pAddrWin2)
     winTop1  = winBase1 + pAddrWin1->size-1;
     winTop2  = winBase2 + pAddrWin2->size-1;
 
-    
     if (((winBase1 <= winTop2 ) && ( winTop2 <= winTop1)) ||
         ((winBase1 <= winBase2) && (winBase2 <= winTop1)))
     {
@@ -927,7 +922,6 @@ MV_U32	ctrlRegToSize(MV_U32 regSize, MV_U32 alignment)
 	   	return -1;
 	}
 	
-
 	/* Check that aligment is a power of two								*/
 	temp = alignment - 1;/* Now the alignmet is a sequance of '1' (0xffff) 	*/
 					
@@ -958,7 +952,6 @@ MV_U32	ctrlRegToSize(MV_U32 regSize, MV_U32 alignment)
 		
     return regSize;	
 }
-
 
 /*******************************************************************************
 * ctrlSizeRegRoundUp - Round up given size 
@@ -1160,7 +1153,6 @@ MV_BOOL		mvCtrlPwrClckGet(MV_UNIT_ID unitId, MV_U32 index)
 		break;
 	}
 
-
 	return state;	
 }
 #else
@@ -1280,7 +1272,6 @@ MV_VOID   mvMPPConfigToSPI(MV_VOID)
 	return;
 }
 
-
 /*******************************************************************************
 * mvMPPConfigToDefault - Change MPP[7:0] configuration to default configuration
 *
@@ -1296,5 +1287,3 @@ MV_VOID   mvMPPConfigToDefault(MV_VOID)
 {
 	return;
 }
-
-

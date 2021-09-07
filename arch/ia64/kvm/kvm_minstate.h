@@ -20,7 +20,6 @@
  *
  */
 
-
 #include <asm/asmmacro.h>
 #include <asm/types.h>
 #include <asm/kregs.h>
@@ -43,12 +42,9 @@
 	mov r18 = ar.bsp;							\
 	mov ar.rsc = 0x3;     /* set eager mode, pl 0, little-endian, loadrs=0 */
 
-
-
 #define KVM_MINSTATE_END_SAVE_MIN						\
 	bsw.1;          /* switch back to bank 1 (must be last in insn group) */\
 	;;
-
 
 #define PAL_VSA_SYNC_READ						\
 	/* begin to call pal vps sync_read */				\
@@ -64,7 +60,6 @@
 	br.cond.sptk kvm_vps_sync_read;		/*call the service*/	\
 	;;								\
 };									\
-
 
 #define KVM_MINSTATE_GET_CURRENT(reg)   mov reg=r21
 
@@ -93,7 +88,6 @@
  * Note that psr.ic is NOT turned on by this macro.  This is so that
  * we can pass interruption state as arguments to a handler.
  */
-
 
 #define PT(f) (VMM_PT_REGS_##f##_OFFSET)
 
@@ -248,7 +242,6 @@
 	adds r19 = PT(EML_UNAT)-PT(R4),r2;	\
 	;;					\
 	st8 [r19] = r18; /* eml_unat */ 	\
-
 
 #define KVM_SAVE_EXTRA				\
 .mem.offset 0,0; st8.spill [r2] = r4,16;	\

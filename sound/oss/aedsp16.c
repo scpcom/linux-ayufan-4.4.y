@@ -245,7 +245,6 @@
 
  */
 
-
 #define VERSION "1.3"		/* Version of Audio Excel DSP 16 driver */
 
 #undef	AEDSP16_DEBUG 		/* Define this to 1 to enable debug code     */
@@ -316,7 +315,6 @@
 #define DSP_COMMAND  0x0c	/* offset of DSP COMMAND           (w-) */
 #define DSP_STATUS   0x0c	/* offset of DSP STATUS            (r-) */
 #define DSP_DATAVAIL 0x0e	/* offset of DSP DATA AVAILABLE    (ro) */
-
 
 #define RETRY           10	/* Various retry values on I/O opera-   */
 #define STATUSRETRY   1000	/* tions. Sometimes we have to          */

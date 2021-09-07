@@ -5,7 +5,6 @@
  *
  */
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/delay.h>
@@ -100,8 +99,6 @@ static int s921_isdb_set_parameters(struct s921_isdb_t *dev, struct s921_isdb_t_
 
 	int ret;
 	/* auto is sufficient for now, lateron this should be reflected in an extra interface */
-
-
 
 	ret = dev->i2c_write(dev->priv_dev, 0xb0, 0xa0); //mod_b2);
 	ret = dev->i2c_write(dev->priv_dev, 0xb2, 0x3d); //mod_b2);

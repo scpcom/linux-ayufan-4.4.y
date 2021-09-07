@@ -1,7 +1,6 @@
 #ifndef _H8300_SHM_H
 #define _H8300_SHM_H
 
-
 /* format of page table entries that correspond to shared memory pages
    currently out in swap space (see also mm/swap.c):
    bits 0-1 (PAGE_PRESENT) is  = 0

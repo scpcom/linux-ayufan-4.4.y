@@ -42,7 +42,6 @@
 #include "xfs_rw.h"
 #include "xfs_error.h"
 
-
 kmem_zone_t	*xfs_ili_zone;		/* inode log item zone */
 
 /*
@@ -531,7 +530,6 @@ xfs_inode_item_format(
 	iip->ili_format.ilf_size = nvecs;
 }
 
-
 /*
  * This is called to pin the inode associated with the inode log
  * item in memory so it cannot be written out.  Do this by calling
@@ -545,7 +543,6 @@ xfs_inode_item_pin(
 	ASSERT(xfs_isilocked(iip->ili_inode, XFS_ILOCK_EXCL));
 	xfs_ipin(iip->ili_inode);
 }
-
 
 /*
  * This is called to unpin the inode associated with the inode log
@@ -835,7 +832,6 @@ xfs_inode_item_pushbuf(
 	return;
 }
 
-
 /*
  * This is called to asynchronously write the inode associated with this
  * inode log item out to disk. The inode will already have been locked by
@@ -908,7 +904,6 @@ static struct xfs_item_ops xfs_inode_item_ops = {
 					xfs_inode_item_committing
 };
 
-
 /*
  * Initialize the inode log item for a newly allocated (in-core) inode.
  */
@@ -955,7 +950,6 @@ xfs_inode_item_destroy(
 #endif
 	kmem_zone_free(xfs_ili_zone, ip->i_itemp);
 }
-
 
 /*
  * This is the inode flushing I/O completion routine.  It is called

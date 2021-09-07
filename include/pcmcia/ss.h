@@ -122,7 +122,6 @@ typedef struct window_t {
 /* Maximum number of memory windows per socket */
 #define MAX_WIN 4
 
-
 /*
  * Socket operations.
  */
@@ -166,7 +165,6 @@ struct pcmcia_socket {
  	/* deprecated */
 	unsigned int			sock;		/* socket number */
 
-
 	/* socket capabilities */
 	u_int				features;
 	u_int				irq_mask;
@@ -174,7 +172,6 @@ struct pcmcia_socket {
 	u_int				io_offset;
 	u_char				pci_irq;
 	struct pci_dev *		cb_dev;
-
 
 	/* socket setup is done so resources should be able to be allocated.
 	 * Only if set to 1, calls to find_{io,mem}_region are handled, and
@@ -242,7 +239,6 @@ struct pcmcia_socket {
 		u8			reserved:3;
 	} pcmcia_state;
 
-
 	/* for adding further pseudo-multifunction devices */
 	struct work_struct		device_add;
 
@@ -265,7 +261,6 @@ struct pcmcia_socket {
 	/* status of the card during resume from a system sleep state */
 	int				resume_status;
 };
-
 
 /* socket drivers must define the resource operations type they use. There
  * are three options:
@@ -293,6 +288,5 @@ extern void pcmcia_parse_events(struct pcmcia_socket *socket,
 /* to register and unregister a socket */
 extern int pcmcia_register_socket(struct pcmcia_socket *socket);
 extern void pcmcia_unregister_socket(struct pcmcia_socket *socket);
-
 
 #endif /* _LINUX_SS_H */

@@ -200,7 +200,6 @@
 #define reg_ata_r_masked_intr___bus3___bit 3
 #define reg_ata_r_masked_intr_offset 40
 
-
 /* Constants */
 #define regk_ata_active                           0x00000001
 #define regk_ata_byte                             0x00000001

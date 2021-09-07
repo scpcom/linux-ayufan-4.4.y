@@ -27,7 +27,6 @@
 #include "logging.h"
 #include "VmbusPrivate.h"
 
-
 struct VMBUS_CONNECTION gVmbusConnection = {
 	.ConnectState		= Disconnected,
 	.NextGpadlHandle	= ATOMIC_INIT(0xE1E10),

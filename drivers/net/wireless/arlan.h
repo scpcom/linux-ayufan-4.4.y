@@ -26,7 +26,6 @@
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
 
-
 //#define ARLAN_DEBUGGING 1
 
 #define ARLAN_PROC_INTERFACE
@@ -63,7 +62,6 @@ extern int     arlan_command(struct net_device * dev, int command);
 #define channelSetUNKNOWN 0
 #define systemIdUNKNOWN -1
 #define registrationModeUNKNOWN -1
-
 
 #define IFDEBUG( L ) if ( (L) & arlan_debug ) 
 #define ARLAN_FAKE_HDR_LEN 12 
@@ -379,8 +377,6 @@ struct arlan_private {
       int	init_etherdev_alloc;
 };
 
-
-
 #define ARLAN_CLEAR		0x00
 #define ARLAN_RESET 		0x01
 #define ARLAN_CHANNEL_ATTENTION 0x02
@@ -399,7 +395,6 @@ struct arlan_private {
 #define ARLAN_COM_ACTIVATE            0x09
 #define ARLAN_COM_GOTO_SLOW_POLL      0x0a
 #define ARLAN_COM_INT                 0x80
-
 
 #define TXLAST(dev) (((struct arlan_private *)netdev_priv(dev))->txRing[((struct arlan_private *)netdev_priv(dev))->txLast])
 #define TXHEAD(dev) (((struct arlan_private *)netdev_priv(dev))->txRing[0])
@@ -442,14 +437,9 @@ struct arlan_private {
 #define READSHMI(to) \
 	readl(&(to))
 
-
-
-
-
 #define registrationBad(dev)\
    ( (   READSHMB(((struct arlan_private *)netdev_priv(dev))->card->registrationMode)    > 0) && \
      (   READSHMB(((struct arlan_private *)netdev_priv(dev))->card->registrationStatus) == 0)    )
-
 
 #define readControlRegister(dev)\
  	READSHMB(((struct arlan_private *)netdev_priv(dev))->card->cntrlRegImage)
@@ -457,7 +447,6 @@ struct arlan_private {
 #define writeControlRegister(dev, v){\
    WRITESHMB(((struct arlan_private *)netdev_priv(dev))->card->cntrlRegImage	,((v) &0xF) );\
    WRITESHMB(((struct arlan_private *)netdev_priv(dev))->card->controlRegister	,(v) 	);}
-
 
 #define arlan_interrupt_lancpu(dev) {\
    int cr;   \
@@ -493,9 +482,6 @@ struct arlan_private {
 #define arlan_unlock_card_access(dev){\
    writeControlRegister(dev,readControlRegister(dev) | ARLAN_ACCESS ); }  
 
-
-
-
 #define ARLAN_COMMAND_RX		0x000001
 #define ARLAN_COMMAND_NOOP		0x000002
 #define ARLAN_COMMAND_NOOPINT		0x000004
@@ -524,8 +510,6 @@ struct arlan_private {
 					| ARLAN_COMMAND_RX_ABORT\
 					| ARLAN_COMMAND_RESET)
 
-
- 
 #define ARLAN_DEBUG_CHAIN_LOCKS		0x00001
 #define ARLAN_DEBUG_RESET		0x00002
 #define ARLAN_DEBUG_TIMING		0x00004

@@ -30,7 +30,6 @@
     *  MA 02111-1307 USA
     ********************************************************************* */
 
-
 #ifndef _SB1250_GENBUS_H
 #define _SB1250_GENBUS_H
 
@@ -99,7 +98,6 @@
 
 #define M_IO_BLK_CACHE		_SB_MAKEMASK1(15)
 
-
 /*
  * Generic Bus Timing 0 Registers (Table 11-7)
  */
@@ -136,7 +134,6 @@
 #define M_IO_RDY_SMPLE		_SB_MAKEMASK(3, S_IO_RDY_SMPLE)
 #define V_IO_RDY_SMPLE(x)	_SB_MAKEVALUE(x, S_IO_RDY_SMPLE)
 #define G_IO_RDY_SMPLE(x)	_SB_GETVALUE(x, S_IO_RDY_SMPLE, M_IO_RDY_SMPLE)
-
 
 /*
  * Generic Bus Timing 1 Registers (Table 11-8)
@@ -193,7 +190,6 @@
 #if SIBYTE_HDR_FEATURE(1250, PASS2) || SIBYTE_HDR_FEATURE(112x, PASS1) || SIBYTE_HDR_FEATURE_CHIP(1480)
 #define M_IO_COH_ERR	        _SB_MAKEMASK1(14)
 #endif /* 1250 PASS2 || 112x PASS1 || 1480 */
-
 
 /*
  * Generic Bus Output Drive Control Register 0 (Table 14-18)
@@ -311,7 +307,6 @@
 #define V_IO_DRV_R(x)		_SB_MAKEVALUE(x, S_IO_DRV_R)
 #define G_IO_DRV_R(x)		_SB_GETVALUE(x, S_IO_DRV_R, M_IO_DRV_R)
 
-
 /*
  * PCMCIA configuration register (Table 12-6)
  */
@@ -341,7 +336,6 @@
 #define K_PCMCIA_MODE_PCMA_IDEB 6	/* standard PCMCIA "A", IDE "B" */
 #define K_PCMCIA_MODE_IDEA_IDEB 7	/* IDE "A", IDE "B" */
 #endif
-
 
 /*
  * PCMCIA status register (Table 12-7)
@@ -469,6 +463,5 @@
 #define V_GPIO_INTR_ATYPE14(x)	_SB_MAKEVALUE(x, S_GPIO_INTR_ATYPE14)
 #define G_GPIO_INTR_ATYPE14(x)	_SB_GETVALUE(x, S_GPIO_INTR_ATYPE14, M_GPIO_INTR_ATYPE14)
 #endif
-
 
 #endif

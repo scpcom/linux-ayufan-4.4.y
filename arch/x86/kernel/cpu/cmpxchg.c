@@ -69,4 +69,3 @@ unsigned long long cmpxchg_486_u64(volatile void *ptr, u64 old, u64 new)
 }
 EXPORT_SYMBOL(cmpxchg_486_u64);
 #endif
-

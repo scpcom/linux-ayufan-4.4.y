@@ -10,4 +10,3 @@ static inline void acpi_video_unregister(void) { return; }
 #endif
 
 #endif
-

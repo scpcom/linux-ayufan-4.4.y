@@ -167,7 +167,6 @@ void zmii_put_mdio(struct of_device *ofdev, int input)
 	mutex_unlock(&dev->lock);
 }
 
-
 void zmii_set_speed(struct of_device *ofdev, int input, int speed)
 {
 	struct zmii_instance *dev = dev_get_drvdata(&ofdev->dev);

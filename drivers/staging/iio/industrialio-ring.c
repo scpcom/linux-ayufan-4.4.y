@@ -565,4 +565,3 @@ error_ret:
 	return ret ? ret : len;
 }
 EXPORT_SYMBOL(iio_scan_el_ts_store);
-

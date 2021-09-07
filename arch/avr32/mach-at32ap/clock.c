@@ -169,8 +169,6 @@ struct clk *clk_get_parent(struct clk *clk)
 }
 EXPORT_SYMBOL(clk_get_parent);
 
-
-
 #ifdef CONFIG_DEBUG_FS
 
 /* /sys/kernel/debug/at32ap_clk */
@@ -179,7 +177,6 @@ EXPORT_SYMBOL(clk_get_parent);
 #include <linux/debugfs.h>
 #include <linux/seq_file.h>
 #include "pm.h"
-
 
 #define	NEST_DELTA	2
 #define	NEST_MAX	6

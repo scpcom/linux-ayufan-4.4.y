@@ -764,7 +764,6 @@ static int cifs_filldir(char *pfindEntry, struct file *file, filldir_t filldir,
 	return rc;
 }
 
-
 int cifs_readdir(struct file *file, void *direntry, filldir_t filldir)
 {
 	int rc = 0;

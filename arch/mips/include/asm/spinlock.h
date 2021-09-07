@@ -25,7 +25,6 @@
  * (the type definitions are in asm/spinlock_types.h)
  */
 
-
 /*
  * Ticket locks are conceptually two parts, one indicating the current head of
  * the queue, and the other indicating the current tail. The lock is acquired

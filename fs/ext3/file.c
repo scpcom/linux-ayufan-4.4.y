@@ -88,4 +88,3 @@ const struct inode_operations ext3_file_inode_operations = {
 	.check_acl	= ext3_check_acl,
 	.fiemap		= ext3_fiemap,
 };
-

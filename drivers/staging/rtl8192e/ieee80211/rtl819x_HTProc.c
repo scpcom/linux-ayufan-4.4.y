@@ -111,7 +111,6 @@ void HTUpdateDefaultSetting(struct ieee80211_device* ieee)
 	pHTInfo->UsbRxFwAggrTimeout = 16; ////usb rx FW aggregation timeout threshold.It's in units of 64us
 #endif
 
-
 }
 /********************************************************************************************************************
  *function:  This function print out each field on HT capability IE mainly from (Beacon/ProbeRsp/AssocReq)
@@ -171,7 +170,6 @@ void HTDebugHTInfo(u8*	InfoIE, u8* TitleString)
 		pHTInfoEle = (PHT_INFORMATION_ELE)(&InfoIE[4]);
 	}else
 		pHTInfoEle = (PHT_INFORMATION_ELE)(&InfoIE[0]);
-
 
 	IEEE80211_DEBUG(IEEE80211_DL_HT, "<Log HT Information Element>. Called by %s\n", TitleString);
 
@@ -277,7 +275,6 @@ u16 HTHalfMcsToDataRate(struct ieee80211_device* ieee, 	u8	nMcsRate)
 	return MCS_DATA_RATE[is40MHz][isShortGI][(nMcsRate&0x7f)];
 }
 
-
 u16 HTMcsToDataRate( struct ieee80211_device* ieee, u8 nMcsRate)
 {
 	PRT_HIGH_THROUGHPUT	pHTInfo = ieee->pHTInfo;
@@ -341,8 +338,6 @@ u16  TxCountToDataRate( struct ieee80211_device* ieee, u8 nDataRate)
 		return MCS_DATA_RATE[is40MHz][isShortGI][nDataRate&0xf];
 	}
 }
-
-
 
 bool IsHTHalfNmodeAPs(struct ieee80211_device* ieee)
 {
@@ -431,7 +426,6 @@ u8 HTIOTActIsDisableMCS14(struct ieee80211_device* ieee, u8* PeerMacAddr)
 		ret = 1;
 	}
 
-
 	if(pHTInfo->bCurrentRT2RTAggregation)
 	{
 		// The parameter of pHTInfo->bCurrentRT2RTAggregation must be decided previously
@@ -441,7 +435,6 @@ u8 HTIOTActIsDisableMCS14(struct ieee80211_device* ieee, u8* PeerMacAddr)
 #endif
 	return ret;
  }
-
 
 /**
 * Function:	HTIOTActIsDisableMCS15
@@ -586,7 +579,6 @@ void HTResetIOTSetting(
 	pHTInfo->IOTPeer = HT_IOT_PEER_UNKNOWN;
 }
 
-
 /********************************************************************************************************************
  *function:  Construct Capablility Element in Beacon... if HTEnable is turned on
  *   input:  struct ieee80211_device* 	ieee
@@ -619,7 +611,6 @@ void HTConstructCapabilityElement(struct ieee80211_device* ieee, u8* posHTCap, u
 		pCapELE = (PHT_CAPABILITY_ELE)posHTCap;
 	}
 
-
 	//HT capability info
 	pCapELE->AdvCoding 		= 0; // This feature is not supported now!!
 	if(ieee->GetHalfNmodeSupportByAPsHandler(ieee->dev))
@@ -645,7 +636,6 @@ void HTConstructCapabilityElement(struct ieee80211_device* ieee, u8* posHTCap, u
 	pCapELE->DssCCk 		= ((pHT->bRegBW40MHz)?(pHT->bRegSuppCCK?1:0):0);
 	pCapELE->PSMP			= 0; // Do not support now!!
 	pCapELE->LSigTxopProtect	= 0; // Do not support now!!
-
 
 	//MAC HT parameters info
         // TODO: Nedd to take care of this part
@@ -685,7 +675,6 @@ void HTConstructCapabilityElement(struct ieee80211_device* ieee, u8* posHTCap, u
 	//Extended HT Capability Info
 	memset(&pCapELE->ExtHTCapInfo, 0, 2);
 
-
 	//TXBF Capabilities
 	memset(pCapELE->TxBFCap, 0, 4);
 
@@ -696,8 +685,6 @@ void HTConstructCapabilityElement(struct ieee80211_device* ieee, u8* posHTCap, u
 		*len = 30 + 2;
 	else
 		*len = 26 + 2;
-
-
 
 //	IEEE80211_DEBUG_DATA(IEEE80211_DL_DATA | IEEE80211_DL_HT, posHTCap, *len -2);
 
@@ -746,7 +733,6 @@ void HTConstructInfoElement(struct ieee80211_device* ieee, u8* posHTInfo, u8* le
 		pHTInfoEle->PcoPhase				= 0;
 
 		memset(pHTInfoEle->BasicMSC, 0, 16);
-
 
 		*len = 22 + 2; //same above
 
@@ -829,11 +815,7 @@ void HTConstructRT2RTAggElement(struct ieee80211_device* ieee, u8* posRT2RTAgg, 
 	posRT2RTAgg->Length = 6;
 #endif
 
-
-
-
 }
-
 
 /********************************************************************************************************************
  *function:  Pick the right Rate Adaptive table to use
@@ -946,8 +928,6 @@ u8 HTGetHighestMCSRate(struct ieee80211_device* ieee, u8* pMCSRateSet, u8* pMCSF
 	return (mcsRate|0x80);
 }
 
-
-
 /*
 **
 **1.Filter our operation rate set with AP's rate set
@@ -966,7 +946,6 @@ u8 HTFilterMCSRate( struct ieee80211_device* ieee, u8* pSupportMCS, u8* pOperate
 	for(i=0;i<=15;i++){
 		pOperateMCS[i] = ieee->Regdot11HTOperationalRateSet[i]&pSupportMCS[i];
 	}
-
 
 	// TODO: adjust our operational rate set  according to our channel bandwidth, STBC and Antenna number
 
@@ -1032,7 +1011,6 @@ void HTOnAssocRsp(struct ieee80211_device *ieee)
 	else
 		pPeerHTInfo = (PHT_INFORMATION_ELE)(pHTInfo->PeerHTInfoBuf);
 
-
 	////////////////////////////////////////////////////////
 	// Configurations:
 	////////////////////////////////////////////////////////
@@ -1066,7 +1044,6 @@ void HTOnAssocRsp(struct ieee80211_device *ieee)
 	pHTInfo->bCurSuppCCK =
 		((pHTInfo->bRegSuppCCK)?((pPeerHTCap->DssCCk==1)?true:false):false);
 
-
 	//
 	// Config and configure A-MSDU setting
 	//
@@ -1078,7 +1055,6 @@ void HTOnAssocRsp(struct ieee80211_device *ieee)
 		pHTInfo->nCurrent_AMSDU_MaxSize = nMaxAMSDUSize;
 	else
 		pHTInfo->nCurrent_AMSDU_MaxSize = pHTInfo->nAMSDU_MaxSize;
-
 
 	//
 	// Config A-MPDU setting
@@ -1183,8 +1159,6 @@ void HTOnAssocRsp(struct ieee80211_device *ieee)
 	//
 	pHTInfo->CurrentOpMode = pPeerHTInfo->OptMode;
 
-
-
 }
 
 void HTSetConnectBwModeCallback(struct ieee80211_device* ieee);
@@ -1228,8 +1202,6 @@ void HTInitializeHTInfo(struct ieee80211_device* ieee)
 	// AMPUD related
 	pHTInfo->CurrentMPDUDensity = pHTInfo->MPDU_Density;
 	pHTInfo->CurrentAMPDUFactor = pHTInfo->AMPDU_Factor;
-
-
 
 	// Initialize all of the parameters related to 11n
 	memset((void*)(&(pHTInfo->SelfHTCap)), 0, sizeof(pHTInfo->SelfHTCap));
@@ -1307,7 +1279,6 @@ HTParsingHTCapElement(
 	pBssDesc->BssHT.bdHTCapLen = HTCapIE.Length;
 
 }
-
 
 void
 HTParsingHTInfoElement(
@@ -1447,7 +1418,6 @@ void HTGetValueFromBeaconOrProbeRsp(
 			bssDesc->bBroadcomCapExist = true;
 	}
 
-
 	// For Cisco IOT issue
 	CiscoElement = PacketGetElement( mmpdu, EID_Vendor, OUI_SUB_CISCO_IE, OUI_SUBTYPE_DONT_CARE);
 	if(CiscoElement.Length != 0){ // 3: 0x00, 0x40, 0x96 ....
@@ -1456,7 +1426,6 @@ void HTGetValueFromBeaconOrProbeRsp(
 		bssDesc->bCiscoCapExist = false;
 	}
 }
-
 
 #endif
 /********************************************************************************************************************
@@ -1524,7 +1493,6 @@ void HTResetSelfAndSavePeerSetting(struct ieee80211_device* ieee, 	struct ieee80
 		if(bIOTAction)
 			pHTInfo->IOTAction |= HT_IOT_ACT_DISABLE_ALL_2SS;
 
-
 		bIOTAction = HTIOTActIsDisableEDCATurbo(ieee, pNetwork->bssid);
 		if(bIOTAction)
 			pHTInfo->IOTAction |= HT_IOT_ACT_DISABLE_EDCA_TURBO;
@@ -1536,7 +1504,6 @@ void HTResetSelfAndSavePeerSetting(struct ieee80211_device* ieee, 	struct ieee80
 		bIOTAction = HTIOTActIsCCDFsync(pNetwork->bssid);
 		if(bIOTAction)
 			pHTInfo->IOTAction |= HT_IOT_ACT_CDD_FSYNC;
-
 
 	}
 	else
@@ -1646,8 +1613,6 @@ void HTSetConnectBwMode(struct ieee80211_device* ieee, HT_CHANNEL_WIDTH	Bandwidt
 
 	if(pHTInfo->bRegBW40MHz == false)
 		return;
-
-
 
 	// To reduce dummy operation
 //	if((pHTInfo->bCurBW40MHz==false && Bandwidth==HT_CHANNEL_WIDTH_20) ||

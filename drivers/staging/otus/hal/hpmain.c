@@ -73,8 +73,6 @@ void zfGetHwTurnOffdynParam(zdev_t* dev,
 void zfSelAdcClk(zdev_t* dev, u8_t bw40, u32_t frequency);
 u32_t zfHpEchoCommand(zdev_t* dev, u32_t value);
 
-
-
 #define zm_hp_priv(x) (((struct zsHpPriv*)wd->hpPrivate)->x)
 static struct zsHpPriv zgHpPriv;
 
@@ -85,7 +83,6 @@ static struct zsHpPriv zgHpPriv;
 
 #define reg_write(addr, val) zfDelayWriteInternalReg(dev, addr+0x1bc000, val)
 #define zm_min(A, B) ((A>B)? B:A)
-
 
 /******************** Intialization ********************/
 u16_t zfHpInit(zdev_t* dev, u32_t frequency)
@@ -114,7 +111,6 @@ u16_t zfHpInit(zdev_t* dev, u32_t frequency)
 
     ((struct zsHpPriv*)wd->hpPrivate)->eepromImageIndex = 0;
 
-
     ((struct zsHpPriv*)wd->hpPrivate)->eepromImageRdReq     = 0;
 #ifdef ZM_OTUS_RX_STREAM_MODE
     ((struct zsHpPriv*)wd->hpPrivate)->remainBuf = NULL;
@@ -128,7 +124,6 @@ u16_t zfHpInit(zdev_t* dev, u32_t frequency)
     ((struct zsHpPriv*)wd->hpPrivate)->hwBBHeavyClip     = 1; // force enable 8107
     ((struct zsHpPriv*)wd->hpPrivate)->doBBHeavyClip     = 0;
     ((struct zsHpPriv*)wd->hpPrivate)->setValueHeavyClip = 0;
-
 
     /* Initialize driver core */
     zfInitCmdQueue(dev);
@@ -221,7 +216,6 @@ u16_t zfHpInit(zdev_t* dev, u32_t frequency)
     return 0;
 }
 
-
 u16_t zfHpReinit(zdev_t* dev, u32_t frequency)
 {
     u16_t ret;
@@ -290,7 +284,6 @@ u16_t zfHpReinit(zdev_t* dev, u32_t frequency)
 
     return 0;
 }
-
 
 u16_t zfHpRelease(zdev_t* dev)
 {
@@ -391,7 +384,6 @@ void zfInitPhy(zdev_t* dev,  u32_t frequency, u8_t bw40)
         }
     }
 
-
 #if ZM_FPGA_PHY == 1
     /* Starting External Hainan Register Initialization */
     /* TODO: */
@@ -409,8 +401,6 @@ void zfInitPhy(zdev_t* dev,  u32_t frequency, u8_t bw40)
      * Write addac shifts
      */
      // do this in firmware
-
-
 
     /* Zeroize board data */
     for (j=0; j<15; j++)
@@ -856,7 +846,6 @@ void zfInitPhy(zdev_t* dev,  u32_t frequency, u8_t bw40)
         }
     } /* if ((hpPriv->eepromImage[0x100+0x110*2/4]&0xff) == 0x80) //FEM TYPE */
 
-
     /* Bringup issue : force tx gain */
     //reg_write(0xa258, 0x0cc65381);
     //reg_write(0xa274, 0x0a1a7c15);
@@ -873,7 +862,6 @@ void zfInitPhy(zdev_t* dev,  u32_t frequency, u8_t bw40)
 
     zfFlushDelayWrite(dev);
 }
-
 
 void zfInitRf(zdev_t* dev, u32_t frequency)
 {
@@ -1055,7 +1043,6 @@ void zfSetBank4AndPowerTable(zdev_t* dev, u32_t frequency, u8_t bw40,
 
     zmw_get_wlan_dev(dev);
 
-
     /* if enable 802.11h, need to record curent channel index in channel array */
     if (wd->sta.DFSEnable)
     {
@@ -1079,7 +1066,6 @@ void zfSetBank4AndPowerTable(zdev_t* dev, u32_t frequency, u8_t bw40,
         }
 
 	}
-
 
 	if ( frequency > 3000 )
 	{
@@ -1137,14 +1123,12 @@ void zfSetBank4AndPowerTable(zdev_t* dev, u32_t frequency, u8_t bw40,
 	//zm_debug_msg1("0x9800+(0x2c<<2 =  ", data0);
 	//zm_debug_msg1("0x9800+(0x3a<<2 =  ", data1);
 
-
     zfFlushDelayWrite(dev);
 
     zfwSleep(dev, 10);
 
     return;
 }
-
 
 struct zsPhyFreqPara
 {
@@ -1464,7 +1448,6 @@ void zfHpSetFrequencyEx(zdev_t* dev, u32_t frequency, u8_t bw40,
        /* Bank 4 */
        zfSetBank4AndPowerTable(dev, frequency, bw40, extOffset);
 
-
         cmd[0] = 32 | (ZM_CMD_FREQUENCY << 8);
     }
 
@@ -1525,7 +1508,6 @@ void zfHpSetFrequencyEx(zdev_t* dev, u32_t frequency, u8_t bw40,
     /* Set Power, TPC, Gain table... */
 	zfSetPowerCalTable(dev, frequency, bw40, extOffset);
 
-
     /* store frequency */
     ((struct zsHpPriv*)wd->hpPrivate)->hwFrequency = (u16_t)frequency;
     ((struct zsHpPriv*)wd->hpPrivate)->hwBw40 = bw40;
@@ -1557,7 +1539,6 @@ void zfHpSetFrequencyEx(zdev_t* dev, u32_t frequency, u8_t bw40,
     //zfwSleep(dev, 1000);
 }
 
-
 /******************** Key ********************/
 
 u16_t zfHpResetKeyCache(zdev_t* dev)
@@ -1581,7 +1562,6 @@ u16_t zfHpResetKeyCache(zdev_t* dev)
 
     return 0;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -1639,7 +1619,6 @@ u32_t zfHpSetKey(zdev_t* dev, u8_t user, u8_t keyId, u8_t type,
     ret = zfIssueCmd(dev, cmd, 32, ZM_CMD_SET_KEY, NULL);
     return ret;
 }
-
 
 u32_t zfHpSetApPairwiseKey(zdev_t* dev, u16_t* staMacAddr, u8_t type,
         u32_t* key, u32_t* micKey, u16_t staAid)
@@ -1773,8 +1752,6 @@ u16_t zfHpRemoveKey(zdev_t* dev, u16_t user)
     return ret;
 }
 
-
-
 /******************** DMA ********************/
 u16_t zfHpStartRecv(zdev_t* dev)
 {
@@ -1788,7 +1765,6 @@ u16_t zfHpStopRecv(zdev_t* dev)
 {
     return 0;
 }
-
 
 /******************** MAC ********************/
 void zfInitMac(zdev_t* dev)
@@ -1829,7 +1805,6 @@ void zfInitMac(zdev_t* dev)
 
     //NAV protects ACK only (in TXOP)
     zfDelayWriteInternalReg(dev, 0x1c3b38, 0x201);
-
 
     /* Set Beacon PHY CTRL's TPC to 0x7, TA1=1 */
     /* OTUS set AM to 0x1 */
@@ -1910,7 +1885,6 @@ void zfInitMac(zdev_t* dev)
     return;
 }
 
-
 u16_t zfHpSetSnifferMode(zdev_t* dev, u16_t on)
 {
     if (on != 0)
@@ -1924,7 +1898,6 @@ u16_t zfHpSetSnifferMode(zdev_t* dev, u16_t on)
     zfFlushDelayWrite(dev);
     return 0;
 }
-
 
 u16_t zfHpSetApStaMode(zdev_t* dev, u8_t mode)
 {
@@ -1966,7 +1939,6 @@ skip:
     return 0;
 }
 
-
 u16_t zfHpSetBssid(zdev_t* dev, u8_t* bssidSrc)
 {
     u32_t  address;
@@ -1980,7 +1952,6 @@ u16_t zfHpSetBssid(zdev_t* dev, u8_t* bssidSrc)
     zfFlushDelayWrite(dev);
     return 0;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -2065,7 +2036,6 @@ u8_t zfHpUpdateQosParameter(zdev_t* dev, u16_t* cwminTbl, u16_t* cwmaxTbl,
     return 0;
 }
 
-
 void zfHpSetAtimWindow(zdev_t* dev, u16_t atimWin)
 {
     zm_msg1_mm(ZM_LV_0, "Set ATIM window to ", atimWin);
@@ -2073,14 +2043,12 @@ void zfHpSetAtimWindow(zdev_t* dev, u16_t atimWin)
     zfFlushDelayWrite(dev);
 }
 
-
 void zfHpSetBasicRateSet(zdev_t* dev, u16_t bRateBasic, u16_t gRateBasic)
 {
     zfDelayWriteInternalReg(dev, ZM_MAC_REG_BASIC_RATE, bRateBasic
                             | ((u16_t)gRateBasic<<8));
     zfFlushDelayWrite(dev);
 }
-
 
 /* HT40 send by OFDM 6M    */
 /* otherwise use reg 0x638 */
@@ -2831,7 +2799,6 @@ void zfDumpEepBandEdges(struct ar5416Eeprom* eepromImage);
 void zfPrintTargetPower2G(u8_t* tPow2xCck, u8_t* tPow2x2g, u8_t* tPow2x2gHt20, u8_t* tPow2x2gHt40);
 void zfPrintTargetPower5G(u8_t* tPow2x5g, u8_t* tPow2x5gHt20, u8_t* tPow2x5gHt40);
 
-
 s32_t zfInterpolateFunc(s32_t x, s32_t x1, s32_t y1, s32_t x2, s32_t y2)
 {
     s32_t y;
@@ -2945,9 +2912,6 @@ u8_t zfFindFreqIndex(u8_t f, u8_t* fArray, u8_t fArraySize)
     }
 }
 
-
-
-
 void zfInitPowerCal(zdev_t* dev)
 {
     //Program PHY Tx power relatives registers
@@ -2967,8 +2931,6 @@ void zfInitPowerCal(zdev_t* dev)
 #undef zm_write_phy_reg
 }
 
-
-
 void zfPrintTp(u8_t* pwr0, u8_t* vpd0, u8_t* pwr1, u8_t* vpd1)
 {
     #ifdef ZM_ENABLE_TPC_WINDOWS_DEBUG
@@ -2978,7 +2940,6 @@ void zfPrintTp(u8_t* pwr0, u8_t* vpd0, u8_t* pwr1, u8_t* vpd1)
     DbgPrint("vpd1 : %d, %d, %d, %d ,%d\n", vpd1[0], vpd1[1], vpd1[2], vpd1[3], vpd1[4]);
     #endif
 }
-
 
 /*
  * To find CTL index(0~23)
@@ -3024,7 +2985,6 @@ fbin2freq(u8_t fbin, u8_t is2GHz)
 
     return (u32_t)((is2GHz==1) ? (2300 + fbin) : (4800 + 5 * fbin));
 }
-
 
 u8_t zfGetMaxEdgePower(zdev_t* dev, CAL_CTL_EDGES *pCtlEdges, u32_t freq)
 {
@@ -3155,7 +3115,6 @@ u32_t zfHpCheckDoHeavyClip(zdev_t* dev, u32_t freq, CAL_CTL_EDGES *pCtlEdges, u8
 
     return ret;
 }
-
 
 void zfSetPowerCalTable(zdev_t* dev, u32_t frequency, u8_t bw40, u8_t extOffset)
 {
@@ -3395,7 +3354,6 @@ void zfSetPowerCalTable(zdev_t* dev, u32_t frequency, u8_t bw40, u8_t extOffset)
         }
 
     }
-
 
     /* Chain 1 */
     /* Get pwr and vpd test points from frequency */
@@ -3701,8 +3659,6 @@ void zfSetPowerCalTable(zdev_t* dev, u32_t frequency, u8_t bw40, u8_t extOffset)
                 hpPriv->tPow2x5gHt40);
     }
 
-
-
     /* 4. CTL */
     /*
      * 4.1 Get the bandedges tx power by frequency
@@ -3794,7 +3750,6 @@ void zfSetPowerCalTable(zdev_t* dev, u32_t frequency, u8_t bw40, u8_t extOffset)
             #ifdef ZM_ENABLE_BANDEDGES_WINDOWS_DEBUG
             zm_dbg(("CTL_2GHT40 ctl_i = %d\n", ctl_i));
             #endif
-
 
             /* 7a17 :  */
             /* Max power (dBm) for channel range when using DFS define by madwifi*/
@@ -3943,7 +3898,6 @@ void zfSetPowerCalTable(zdev_t* dev, u32_t frequency, u8_t bw40, u8_t extOffset)
                 }
             }
 
-
             /* Apply ctl mode to correct target power set */
             #ifdef ZM_ENABLE_BANDEDGES_WINDOWS_DEBUG
             zm_debug_msg1("ctlEdgesMaxPower5G     = ", ctlEdgesMaxPower5G);
@@ -4073,7 +4027,6 @@ void zfSetPowerCalTable(zdev_t* dev, u32_t frequency, u8_t bw40, u8_t extOffset)
             #endif
             hpPriv->currentAckRtsTpc = hpPriv->tPow2x2g[0];
         }
-
 
         zfFlushDelayWrite(dev);
 
@@ -4270,7 +4223,6 @@ void zfHpPowerSaveSetState(zdev_t* dev, u8_t psState)
         //reg_write(0x98b0,  0x00000013);
         //reg_write(0x98e4,  0x00000002);
 
-
         zfFlushDelayWrite(dev);
     }
     else //power down
@@ -4294,7 +4246,6 @@ void zfHpPowerSaveSetState(zdev_t* dev, u8_t psState)
         ////#bank 5
         //reg_write(0x98b0,  0x000e0013);
         //reg_write(0x98e4,  0x00018002);
-
 
         zfFlushDelayWrite(dev);
     }
@@ -4508,7 +4459,6 @@ u16_t zfHpDisableHwRetry(zdev_t* dev)
 /* Download SPI Fw */
 #define ZM_FIRMWARE_WLAN                0
 #define ZM_FIRMWARE_SPI_FLASH           1
-
 
 u16_t zfHpFirmwareDownload(zdev_t* dev, u8_t fwType)
 {

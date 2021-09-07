@@ -120,7 +120,6 @@ static int failure_state;
 #define HIGH_OVER_AVERAGE	(10 << 16)
 #define HIGH_OVER_IMMEDIATE	(14 << 16)
 
-
 /* Implementation... */
 static int create_cpu_loop(int cpu)
 {

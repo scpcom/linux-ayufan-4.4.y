@@ -96,7 +96,6 @@ struct user_datum {
 	struct mls_level dfltlevel;	/* default login MLS level for user */
 };
 
-
 /* Sensitivity attributes */
 struct level_datum {
 	struct mls_level *level;	/* sensitivity and associated categories */
@@ -296,4 +295,3 @@ static inline int next_entry(void *buf, struct policy_file *fp, size_t bytes)
 }
 
 #endif	/* _SS_POLICYDB_H_ */
-

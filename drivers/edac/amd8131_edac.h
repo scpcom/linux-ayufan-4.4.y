@@ -116,4 +116,3 @@ struct amd8131_info {
 };
 
 #endif /* _AMD8131_EDAC_H_ */
-

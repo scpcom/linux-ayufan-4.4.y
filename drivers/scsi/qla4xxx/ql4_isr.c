@@ -839,4 +839,3 @@ void qla4xxx_process_aen(struct scsi_qla_host * ha, uint8_t process_aen)
 	}
 	spin_unlock_irqrestore(&ha->hardware_lock, flags);
 }
-

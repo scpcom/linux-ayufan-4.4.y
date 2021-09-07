@@ -23,7 +23,6 @@
  *
  */
 
-
 #ifndef __KVM_VCPU_H__
 #define __KVM_VCPU_H__
 
@@ -451,7 +450,6 @@ static inline unsigned long itir_ps(unsigned long itir)
 	return ((itir >> 2) & 0x3f);
 }
 
-
 /**************************************************************************
   VCPU control register access routines
  **************************************************************************/
@@ -561,7 +559,6 @@ static inline void vcpu_set_iha(struct kvm_vcpu *vcpu, u64 val)
 	VCPU(vcpu, iha) = val;
 }
 
-
 static inline u64 vcpu_get_rr(struct kvm_vcpu *vcpu, u64 reg)
 {
 	return vcpu->arch.vrr[reg>>61];
@@ -628,7 +625,6 @@ static inline unsigned long vrrtomrr(unsigned long val)
 	rr.ve = 1;
 	return rr.val;
 }
-
 
 static inline int highest_bits(int *dat)
 {

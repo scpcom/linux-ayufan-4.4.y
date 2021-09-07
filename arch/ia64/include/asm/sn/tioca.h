@@ -9,7 +9,6 @@
  * Copyright (c) 2003-2005 Silicon Graphics, Inc. All rights reserved.
  */
 
-
 #define TIOCA_PART_NUM	0xE020
 #define TIOCA_MFGR_NUM	0x24
 #define TIOCA_REV_A	0x1
@@ -330,7 +329,6 @@ struct tioca {
 #define CA_PCI_DMA_PIO_MEM_TYPE		(1ull << 28)
 	/* bits 63:29 unused */
 
-
 /* ==== ca_agp_dma_addr_extn */
 	/* bits 19:0 unused */
 #define CA_AGP_DMA_NODE_ID		(0xffffull << 20)
@@ -422,7 +420,6 @@ struct tioca {
 #define CA_DEBUG_NSEL7			(0x7ull << 60)
 #define CA_DEBUG_NSEL7_SHFT		60
 	/* bit 63 unused */
-
 
 /* ==== ca_debug_domain_sel */
 #define CA_DEBUG_DOMAIN_L		(1ull << 0)
@@ -559,7 +556,6 @@ struct tioca {
  * Define Bus DMA ranges.  These are configurable (see constraints above)
  * and will probably need tuning based on experience.
  */
-
 
 /*
  * 11/24/03

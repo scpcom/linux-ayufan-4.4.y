@@ -85,7 +85,6 @@ static int __devinit uli8259_suspend_probe(struct pci_dev *pdev,
 	return 0;
 }
 
-
 static struct pci_device_id uli8259_pci_tbl[] = {
 	{ PCI_VENDOR_ID_AL, 0x1575, PCI_ANY_ID, PCI_ANY_ID, 0, 0},
 	{ 0, }

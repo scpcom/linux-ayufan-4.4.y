@@ -105,14 +105,12 @@ __clear_page_buffers(struct page *page)
 	page_cache_release(page);
 }
 
-
 static int quiet_error(struct buffer_head *bh)
 {
 	if (!test_bit(BH_Quiet, &bh->b_state) && printk_ratelimit())
 		return 0;
 	return 1;
 }
-
 
 static void buffer_io_error(struct buffer_head *bh)
 {
@@ -466,7 +464,6 @@ void mark_buffer_async_write(struct buffer_head *bh)
 	mark_buffer_async_write_endio(bh, end_buffer_async_write);
 }
 EXPORT_SYMBOL(mark_buffer_async_write);
-
 
 /*
  * fs/buffer.c contains helper functions for buffer-backed address space's

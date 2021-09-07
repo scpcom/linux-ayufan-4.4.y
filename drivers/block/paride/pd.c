@@ -60,7 +60,6 @@
                         choose the slave, -1 (the default) to choose the
                         first drive found.
 			
-
             major       You may use this parameter to overide the
                         default major number (45) that this driver
                         will use.  Be sure to change the device

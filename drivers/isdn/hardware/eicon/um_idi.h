@@ -3,7 +3,6 @@
 #ifndef __DIVA_USER_MODE_IDI_CORE_H__
 #define __DIVA_USER_MODE_IDI_CORE_H__
 
-
 /*
   interface between UM IDI core and OS dependent part
   */

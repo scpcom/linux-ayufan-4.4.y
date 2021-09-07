@@ -257,7 +257,6 @@
 #define SET_MINIMUM_RIGHTS (FILE_READ_EA | FILE_READ_ATTRIBUTES \
 				| READ_CONTROL | SYNCHRONIZE)
 
-
 /*
  * Invalid readdir handle
  */
@@ -667,7 +666,6 @@ struct ntlmv2_resp {
 	/* array of name entries could follow ending in minimum 4 byte struct */
 } __attribute__((packed));
 
-
 #define CIFS_NETWORK_OPSYS "CIFS VFS Client for Linux"
 
 /* Capabilities bits (for NTLM SessSetup request) */
@@ -720,7 +718,6 @@ typedef struct smb_com_tconx_rsp_ext {
 	unsigned char Service[1];	/* always ASCII, not Unicode */
 	/* STRING NativeFileSystem */
 } __attribute__((packed)) TCONX_RSP_EXT;
-
 
 /* tree connect Flags */
 #define DISCONNECT_TID          0x0001
@@ -904,7 +901,6 @@ typedef struct smb_com_open_rsp_ext {
 	__le32 GuestMaximalAccessRights;
 	__u16 ByteCount;        /* bct = 0 */
 } __attribute__((packed)) OPEN_RSP_EXT;
-
 
 /* format of legacy open request */
 typedef struct smb_com_openx_req {
@@ -1336,7 +1332,6 @@ typedef struct smb_com_transaction_qsec_req {
 	__le32 AclFlags;
 } __attribute__((packed)) QUERY_SEC_DESC_REQ;
 
-
 typedef struct smb_com_transaction_ssec_req {
 	struct smb_hdr hdr;     /* wct = 19 */
 	__u8 MaxSetupCount;
@@ -1541,7 +1536,6 @@ struct smb_t2_rsp {
 #define SMB_QUERY_FILE_POSITION_INFO    0x3f6
 #define SMB_QUERY_FILE_MODE_INFO        0x3f8
 #define SMB_QUERY_FILE_ALGN_INFO        0x3f9
-
 
 #define SMB_SET_FILE_BASIC_INFO	        0x101
 #define SMB_SET_FILE_DISPOSITION_INFO   0x102
@@ -1897,7 +1891,6 @@ typedef struct smb_com_transaction2_setfsi_rsp {
 	__u16 ByteCount;
 } __attribute__((packed)) TRANSACTION2_SETFSI_RSP;
 
-
 typedef struct smb_com_transaction2_get_dfs_refer_req {
 	struct smb_hdr hdr;	/* wct = 15 */
 	__le16 TotalParameterCount;
@@ -2059,7 +2052,6 @@ typedef struct {
 #else
 #define CIFS_UNIX_CAP_MASK              0x00000013
 #endif /* CONFIG_CIFS_POSIX */
-
 
 #define CIFS_POSIX_EXTENSIONS           0x00000010 /* support for new QFSInfo */
 
@@ -2320,7 +2312,6 @@ struct file_attrib_tag {
 	__le32 ReparseTag;
 } __attribute__((packed));      /* level 0x40b */
 
-
 /********************************************************/
 /*  FindFirst/FindNext transact2 data buffer formats    */
 /********************************************************/
@@ -2411,7 +2402,6 @@ typedef struct {
 	char FileName[1];
 } __attribute__((packed)) FIND_FILE_STANDARD_INFO; /* level 0x1 FF resp data */
 
-
 struct win_dev {
 	unsigned char type[8]; /* IntxCHR or IntxBLK */
 	__le64 major;
@@ -2449,7 +2439,6 @@ struct data_blob {
 	size_t length;
 	void (*free) (struct data_blob *data_blob);
 } __attribute__((packed));
-
 
 #ifdef CONFIG_CIFS_POSIX
 /*
@@ -2561,7 +2550,6 @@ typedef struct file_xattr_info {
 	/* followed by xattr_value[xattr_value_len], no pad */
 } __attribute__((packed)) FILE_XATTR_INFO; /* extended attribute info
 					      level 0x205 */
-
 
 /* flags for chattr command */
 #define EXT_SECURE_DELETE		0x00000001 /* EXT3_SECRM_FL */

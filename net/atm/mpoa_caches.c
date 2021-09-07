@@ -213,7 +213,6 @@ static void in_cache_remove_entry(in_cache_entry *entry,
 	return;
 }
 
-
 /* Call this every MPC-p2 seconds... Not exactly correct solution,
    but an easy one... */
 static void clear_count_and_expired(struct mpoa_client *client)
@@ -529,8 +528,6 @@ static void eg_destroy_cache(struct mpoa_client *mpc)
 	return;
 }
 
-
-
 static struct in_cache_ops ingress_ops = {
 	in_cache_add_entry,               /* add_entry       */
 	in_cache_get,                     /* get             */
@@ -557,7 +554,6 @@ static struct eg_cache_ops egress_ops = {
 	clear_expired,                    /* clear_expired    */
 	eg_destroy_cache                  /* destroy_cache    */
 };
-
 
 void atm_mpoa_init_cache(struct mpoa_client *mpc)
 {

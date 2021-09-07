@@ -30,7 +30,6 @@
     *  MA 02111-1307 USA
     ********************************************************************* */
 
-
 #ifndef _SB1250_SMBUS_H
 #define _SB1250_SMBUS_H
 
@@ -141,7 +140,6 @@
 #define M_SMB_MB                    _SB_MAKEMASK(8, S_SMB_MB)
 #define V_SMB_MB(x)                 _SB_MAKEVALUE(x, S_SMB_MB)
 
-
 /*
  * SMBus Packet Error Check register (Table 14-8)
  */
@@ -149,7 +147,6 @@
 #define S_SPEC_PEC                  0
 #define M_SPEC_PEC                  _SB_MAKEMASK(8, S_SPEC_PEC)
 #define V_SPEC_MB(x)                _SB_MAKEVALUE(x, S_SPEC_PEC)
-
 
 #if SIBYTE_HDR_FEATURE(1250, PASS2) || SIBYTE_HDR_FEATURE(112x, PASS1) || SIBYTE_HDR_FEATURE_CHIP(1480)
 

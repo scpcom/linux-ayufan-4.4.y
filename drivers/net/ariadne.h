@@ -35,7 +35,6 @@
  *	- an MC68230 Parallel Interface/Timer configured as 2 parallel ports
  */
 
-
     /*
      *	Am79C960 PCnet-ISA
      */
@@ -48,7 +47,6 @@ struct Am79C960 {
     volatile u_short Reset;	/* Reset Chip on Read Access */
     volatile u_short IDP;	/* ISACSR Data Port */
 };
-
 
     /*
      *	Am79C960 Control and Status Registers
@@ -154,7 +152,6 @@ struct Am79C960 {
 #define CSR114		0x7200	/* - Receive Collision Count */
 #define CSR124		0x7c00	/* - Buffer Management Unit Test */
 
-
     /*
      *	Am79C960 ISA Control and Status Registers
      *
@@ -168,7 +165,6 @@ struct Am79C960 {
 #define ISACSR5		0x0500	/* LED1 Status */
 #define ISACSR6		0x0600	/* LED2 Status */
 #define ISACSR7		0x0700	/* LED3 Status */
-
 
     /*
      *	Bit definitions for CSR0 (PCnet-ISA Controller Status)
@@ -193,7 +189,6 @@ struct Am79C960 {
 #define STRT		0x0200	/* Start */
 #define INIT		0x0100	/* Initialize */
 
-
     /*
      *	Bit definitions for CSR3 (Interrupt Masks and Deferral Control)
      *
@@ -208,7 +203,6 @@ struct Am79C960 {
 #define IDONM		0x0001	/* Initialization Done Mask */
 #define DXMT2PD		0x1000	/* Disable Transmit Two Part Deferral */
 #define EMBA		0x0800	/* Enable Modified Back-off Algorithm */
-
 
     /*
      *	Bit definitions for CSR4 (Test and Features Control)
@@ -230,7 +224,6 @@ struct Am79C960 {
 #define TXSTRTM		0x0400	/* Transmit Start Mask */
 #define JAB		0x0200	/* Jabber Error */
 #define JABM		0x0100	/* Jabber Error Mask */
-
 
     /*
      *	Bit definitions for CSR15 (Mode Register)
@@ -255,7 +248,6 @@ struct Am79C960 {
 #define DTX		0x0200	/* Disable Transmitter */
 #define DRX		0x0100	/* Disable Receiver */
 
-
     /*
      *	Bit definitions for ISACSR2 (Miscellaneous Configuration)
      *
@@ -263,7 +255,6 @@ struct Am79C960 {
      */
 
 #define ASEL		0x0200	/* Media Interface Port Auto Select */
-
 
     /*
      *	Bit definitions for ISACSR5-7 (LED1-3 Status)
@@ -279,7 +270,6 @@ struct Am79C960 {
 #define JABE		0x0200	/* Enable Jabber Signal */
 #define COLE		0x0100	/* Enable Collision Signal */
 
-
     /*
      *	Receive Descriptor Ring Entry
      */
@@ -291,7 +281,6 @@ struct RDRE {
     volatile u_short RMD3;	/* Message Byte Count */
 };
 
-
     /*
      *	Transmit Descriptor Ring Entry
      */
@@ -302,7 +291,6 @@ struct TDRE {
     volatile u_short TMD2;	/* Buffer Byte Count (two's complement) */
     volatile u_short TMD3;	/* Error Flags */
 };
-
 
     /*
      *	Receive Flags
@@ -317,7 +305,6 @@ struct TDRE {
 #define RF_STP		0x0002	/* Start of Packet */
 #define RF_ENP		0x0001	/* End of Packet */
 
-
     /*
      *	Transmit Flags
      */
@@ -331,7 +318,6 @@ struct TDRE {
 #define TF_STP		0x0002	/* Start of Packet */
 #define TF_ENP		0x0001	/* End of Packet */
 
-
     /*
      *	Error Flags
      */
@@ -342,8 +328,6 @@ struct TDRE {
 #define EF_LCAR		0x0008	/* Loss of Carrier */
 #define EF_RTRY		0x0004	/* Retry Error */
 #define EF_TDR		0xff03	/* Time Domain Reflectometry */
-
-
 
     /*
      *	MC68230 Parallel Interface/Timer
@@ -398,7 +382,6 @@ struct MC68230 {
     u_char Pad23[11];
 };
 
-
     /*
      *	Ariadne Expansion Board Structure
      */
@@ -412,4 +395,3 @@ struct MC68230 {
 
 #define ARIADNE_RAM		0x8000	/* Always access WORDs!! */
 #define ARIADNE_RAM_SIZE	0x8000
-

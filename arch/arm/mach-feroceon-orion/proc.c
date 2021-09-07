@@ -14,7 +14,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
 #include <linux/types.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -206,8 +205,6 @@ int __init start_resource_dump(void)
                                                                                                                              
 module_init(start_resource_dump);
  
-
-
 /* global variables from 'regdump' */
 static struct proc_dir_entry *soc_type;
 static struct proc_dir_entry *board_type;
@@ -253,5 +250,3 @@ int __init start_soc_type(void)
 }
                                                                                                                              
 module_init(start_soc_type);
-
-

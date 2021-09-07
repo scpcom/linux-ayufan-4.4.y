@@ -165,7 +165,6 @@ uint_8  _usb_device_get_dev_num(_usb_device_handle handle)
     return usb_dev_ptr->DEV_NUM;
 }
 
-
 /*FUNCTION*-------------------------------------------------------------
 *
 *  Function Name  : _usb_device_init
@@ -313,7 +312,6 @@ uint_8 _usb_device_init
    return USB_OK;   
 } /* EndBody */
 
-
 /*FUNCTION*-------------------------------------------------------------
 *
 *  Function Name  : _usb_device_shutdown
@@ -360,7 +358,6 @@ void _usb_device_shutdown(_usb_device_handle handle)
 
     _usb_device_cleanup(usb_dev_ptr);
 } /* EndBody */
-
 
 /*FUNCTION*----------------------------------------------------------------
 * 
@@ -671,7 +668,6 @@ uint_8 _usb_device_get_transfer_status
 
 } /* EndBody */
 
-
 /*FUNCTION*-------------------------------------------------------------
 *
 *  Function Name  : _usb_device_read_setup_data
@@ -736,7 +732,6 @@ uint_8 _usb_device_cancel_transfer
 
    return error;
 } /* EndBody */
-
 
 /*FUNCTION*-------------------------------------------------------------
 *

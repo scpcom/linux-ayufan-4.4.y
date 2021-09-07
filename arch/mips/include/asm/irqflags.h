@@ -56,7 +56,6 @@ static inline void raw_local_irq_enable(void)
 		: "memory");
 }
 
-
 /*
  * For cli() we have to insert nops to make sure that the new value
  * has actually arrived in the status register before the end of this
@@ -194,7 +193,6 @@ __asm__(
 	"	irq_disable_hazard					\n"
 	"	.set	pop						\n"
 	"	.endm							\n");
-
 
 static inline void raw_local_irq_restore(unsigned long flags)
 {

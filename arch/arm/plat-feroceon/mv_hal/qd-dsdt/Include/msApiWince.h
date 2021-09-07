@@ -67,7 +67,6 @@ typedef GT_STATUS (*FGT_PTR_INT_HANDLER)(FGT_INT_HANDLER*);
 
 typedef GT_STATUS (*FGT_PTR_U32_U32_U16)(GT_U32,GT_U32,GT_U16);
 
-
 extern FGT_PRT_ATUSIZE 			gfdbSetAtuSize;
 extern FGT_PRT_U32_U32 			gfdbGetAgingTimeRange;
 extern FGT_VALUE_U32 			gfdbSetAgingTimeout;
@@ -301,7 +300,6 @@ typedef struct _GT_IOCTL_PARAM
 #define IOCTL_gfdbLearnEnable    \
     CTL_CODE(FILE_DEVICE_NETWORK , FDB_FUNC_MASK + 10, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
-
 /*
 	Functions for STP
 */
@@ -386,7 +384,6 @@ typedef struct _GT_IOCTL_PARAM
 #define IOCTL_gprtSetPause    \
     CTL_CODE(FILE_DEVICE_NETWORK , PHY_CTRL_FUNC_MASK + 8, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
-
 /* 
 	Functions for Phy Interrupt
 */
@@ -425,7 +422,6 @@ typedef struct _GT_IOCTL_PARAM
 
 #define IOCTL_gprtGetMcRateLimit    \
     CTL_CODE(FILE_DEVICE_NETWORK , PORT_CTRL_FUNC_MASK + 7, METHOD_BUFFERED, FILE_ANY_ACCESS)
-
 
 /*
 	Functions for Port Statistics
@@ -502,7 +498,6 @@ typedef struct _GT_IOCTL_PARAM
 #define IOCTL_gcosSetDscp2Tc    \
     CTL_CODE(FILE_DEVICE_NETWORK , QOS_FUNC_MASK + 10, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
-
 /*
 	Functions for Sys Control
 */
@@ -547,7 +542,6 @@ typedef struct _GT_IOCTL_PARAM
 
 #define IOCTL_gsysGetPerPortDuplexPauseMac    \
     CTL_CODE(FILE_DEVICE_NETWORK , SYS_CTRL_FUNC_MASK + 13, METHOD_BUFFERED, FILE_ANY_ACCESS)
-
 
 #ifdef __cplusplus
 }

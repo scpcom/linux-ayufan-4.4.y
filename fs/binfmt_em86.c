@@ -19,7 +19,6 @@
 #include <linux/file.h>
 #include <linux/errno.h>
 
-
 #define EM86_INTERP	"/usr/bin/em86"
 #define EM86_I_NAME	"em86"
 

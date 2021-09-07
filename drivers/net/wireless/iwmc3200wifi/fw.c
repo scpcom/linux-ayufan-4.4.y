@@ -217,7 +217,6 @@ static int iwm_load_img(struct iwm_priv *iwm, const char *img_name)
 		 IWM_BUILD_YEAR(build_date), IWM_BUILD_MONTH(build_date),
 		 IWM_BUILD_DAY(build_date));
 
-
  err_release_fw:
 	release_firmware(fw);
 

@@ -150,7 +150,6 @@ int timeout_to_jiffies (int timeout)
 	return msecs_to_jiffies ((secs-1) * 1000);
 }
 
-
 void standby_add_timer(struct scsi_device *sdev, int timeout,
 		    void (*complete)(struct scsi_device *))
 {
@@ -175,7 +174,6 @@ void standby_add_timer(struct scsi_device *sdev, int timeout,
 	add_timer(&sdev->standby_timeout);
 }
 
-
 int standby_delete_timer(struct scsi_device *sdev)
 {
 	int rtn;
@@ -191,7 +189,6 @@ int standby_delete_timer(struct scsi_device *sdev)
 
 	return rtn;
 }
-
 
 void standby_times_out(struct scsi_device *sdev)
 {
@@ -215,7 +212,6 @@ void spinup_add_timer(struct scsi_device *sdev, int timeout,
 	if (sdev->spinup_timeout.function)
 		del_timer(&sdev->spinup_timeout);
 		
-	
 	sdev->spinup_timeout.data = (unsigned long)sdev;
 	
 	sdev->spinup_timeout.expires = jiffies + msecs_to_jiffies (timeout * 1000);
@@ -251,8 +247,6 @@ void spinup_times_out(struct scsi_device *sdev)
 	scsi_spinup_device_dequeue_next();
 	
 }
-
-
 
 int scsi_spinup_enabled(void)
 {

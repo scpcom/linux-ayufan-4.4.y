@@ -21,7 +21,6 @@ static void pci_visws_disable_irq(struct pci_dev *dev) { }
 
 /* void __init pcibios_penalize_isa_irq(int irq, int active) {} */
 
-
 unsigned int pci_bus0, pci_bus1;
 
 static int __init visws_map_irq(struct pci_dev *dev, u8 slot, u8 pin)

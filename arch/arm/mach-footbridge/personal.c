@@ -22,4 +22,3 @@ MACHINE_START(PERSONAL_SERVER, "Compaq-PersonalServer")
 	.init_irq	= footbridge_init_irq,
 	.timer		= &footbridge_timer,
 MACHINE_END
-

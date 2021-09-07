@@ -127,7 +127,6 @@ struct usb_hcd {
 	 */
 	struct mutex		*bandwidth_mutex;
 
-
 #define HCD_BUFFER_POOLS	4
 	struct dma_pool		*pool [HCD_BUFFER_POOLS];
 
@@ -184,7 +183,6 @@ struct hcd_timeout {	/* timeouts we allocate */
 };
 
 /*-------------------------------------------------------------------------*/
-
 
 struct hc_driver {
 	const char	*description;	/* "ehci-hcd" etc */
@@ -446,14 +444,12 @@ extern void usb_destroy_configuration(struct usb_device *dev);
 #define BitTime(bytecount) (7 * 8 * bytecount / 6) /* with integer truncation */
 #endif
 
-
 		/* Trying not to use worst-case bit-stuffing
 		 * of (7/6 * 8 * bytecount) = 9.33 * bytecount */
 		/* bytecount = data payload byte count */
 
 #define NS_TO_US(ns)	((ns + 500L) / 1000L)
 			/* convert & round nanoseconds to microseconds */
-
 
 /*
  * Full/low speed bandwidth allocation constants/support.
@@ -599,14 +595,12 @@ static inline void usbmon_urb_complete(struct usb_bus *bus, struct urb *urb,
 #define bitmap         DeviceRemovable
 #endif
 
-
 /*-------------------------------------------------------------------------*/
 
 /* random stuff */
 
 #define	RUN_CONTEXT (in_irq() ? "in_irq" \
 		: (in_interrupt() ? "in_interrupt" : "can sleep"))
-
 
 /* This rwsem is for use only by the hub driver and ehci-hcd.
  * Nobody else should touch it.

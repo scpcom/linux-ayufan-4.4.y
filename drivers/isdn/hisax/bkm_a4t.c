@@ -10,7 +10,6 @@
  *
  */
 
-
 #include <linux/init.h>
 #include "hisax.h"
 #include "isac.h"
@@ -21,7 +20,6 @@
 #include "bkm_ax.h"
 
 static const char *bkm_a4t_revision = "$Revision: 1.1 $";
-
 
 static inline u_char
 readreg(unsigned int ale, unsigned long adr, u_char off)
@@ -37,7 +35,6 @@ readreg(unsigned int ale, unsigned long adr, u_char off)
 	return ((unsigned char) ret);
 }
 
-
 static inline void
 readfifo(unsigned int ale, unsigned long adr, u_char off, u_char * data, int size)
 {
@@ -45,7 +42,6 @@ readfifo(unsigned int ale, unsigned long adr, u_char off, u_char * data, int siz
 	for (i = 0; i < size; i++)
 		*data++ = readreg(ale, adr, off);
 }
-
 
 static inline void
 writereg(unsigned int ale, unsigned long adr, u_char off, u_char data)
@@ -57,7 +53,6 @@ writereg(unsigned int ale, unsigned long adr, u_char off, u_char data)
 	__WAITI20__(po);
 }
 
-
 static inline void
 writefifo(unsigned int ale, unsigned long adr, u_char off, u_char * data, int size)
 {
@@ -66,7 +61,6 @@ writefifo(unsigned int ale, unsigned long adr, u_char off, u_char * data, int si
 	for (i = 0; i < size; i++)
 		writereg(ale, adr, off, *data++);
 }
-
 
 /* Interface functions */
 

@@ -58,7 +58,6 @@ struct orinoco_pccard {
 	unsigned long hard_reset_in_progress;
 };
 
-
 /********************************************************************/
 /* Function prototypes						    */
 /********************************************************************/
@@ -370,7 +369,6 @@ static int orinoco_cs_resume(struct pcmcia_device *link)
 
 	return err;
 }
-
 
 /********************************************************************/
 /* Module initialization					    */

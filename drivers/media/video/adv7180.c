@@ -35,7 +35,6 @@
 #define ADV7180_AUTODETECT_ENABLE_REG	0x07
 #define ADV7180_AUTODETECT_DEFAULT	0x7f
 
-
 #define ADV7180_STATUS1_REG 0x10
 #define ADV7180_STATUS1_AUTOD_MASK 0x70
 #define ADV7180_STATUS1_AUTOD_NTSM_M_J	0x00
@@ -49,7 +48,6 @@
 
 #define ADV7180_IDENT_REG 0x11
 #define ADV7180_ID_7180 0x18
-
 
 struct adv7180_state {
 	struct v4l2_subdev sd;
@@ -199,4 +197,3 @@ module_exit(adv7180_exit);
 MODULE_DESCRIPTION("Analog Devices ADV7180 video decoder driver");
 MODULE_AUTHOR("Mocean Laboratories");
 MODULE_LICENSE("GPL v2");
-

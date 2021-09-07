@@ -110,7 +110,6 @@
 #define CB_RD_NUM           32          // default # of RD
 #define CB_TD_NUM           32          // default # of TD
 
-
 // max number of physical segments
 // in a single NDIS packet. Above this threshold, the packet
 // is copied into a single physically contiguous buffer
@@ -120,8 +119,6 @@
 #define CB_MAX_MAP_REG_NUM  CB_MAX_TX_DESC
 
 #define CB_PROTOCOL_RESERVED_SECTION    16
-
-
 
 // if retrys excess 15 times , tx will abort, and
 // if tx fifo underflow, tx will fail
@@ -209,8 +206,6 @@
 #define TYPE_RXDMA1     1
 #define TYPE_MAXRD      2
 
-
-
 // TD_INFO flags control bit
 #define TD_FLAGS_NETIF_SKB               0x01       // check if need release skb
 #define TD_FLAGS_PRIV_SKB                0x02       // check if called from private skb(hostap)
@@ -275,7 +270,6 @@ typedef struct tagRDES0 {
 } __attribute__ ((__packed__))
 SRDES0;
 
-
 #endif
 
 typedef struct tagRDES1 {
@@ -338,14 +332,12 @@ STDES0;
 
 #endif
 
-
 typedef struct tagTDES1 {
     volatile    WORD    wReqCount;
     volatile    BYTE    byTCR;
     volatile    BYTE    byReserved;
 } __attribute__ ((__packed__))
 STDES1;
-
 
 typedef struct tagDEVICE_TD_INFO{
     struct sk_buff*     skb;
@@ -385,7 +377,6 @@ typedef struct tagSTxDesc {
 STxDesc, *PSTxDesc;
 typedef const STxDesc *PCSTxDesc;
 
-
 typedef struct tagSTxSyncDesc {
     volatile    STDES0  m_td0TD0;
     volatile    STDES1  m_td1TD1;
@@ -399,7 +390,6 @@ typedef struct tagSTxSyncDesc {
 } __attribute__ ((__packed__))
 STxSyncDesc, *PSTxSyncDesc;
 typedef const STxSyncDesc *PCSTxSyncDesc;
-
 
 //
 // RsvTime buffer header
@@ -466,7 +456,6 @@ typedef struct tagSRTS_g {
 SRTS_g, *PSRTS_g;
 typedef const SRTS_g *PCSRTS_g;
 
-
 typedef struct tagSRTS_g_FB {
     BYTE        bySignalField_b;
     BYTE        byServiceField_b;
@@ -487,7 +476,6 @@ typedef struct tagSRTS_g_FB {
 SRTS_g_FB, *PSRTS_g_FB;
 typedef const SRTS_g_FB *PCSRTS_g_FB;
 
-
 typedef struct tagSRTS_ab {
     BYTE        bySignalField;
     BYTE        byServiceField;
@@ -498,7 +486,6 @@ typedef struct tagSRTS_ab {
 }__attribute__ ((__packed__))
 SRTS_ab, *PSRTS_ab;
 typedef const SRTS_ab *PCSRTS_ab;
-
 
 typedef struct tagSRTS_a_FB {
     BYTE        bySignalField;
@@ -512,7 +499,6 @@ typedef struct tagSRTS_a_FB {
 }__attribute__ ((__packed__))
 SRTS_a_FB, *PSRTS_a_FB;
 typedef const SRTS_a_FB *PCSRTS_a_FB;
-
 
 //
 // CTS buffer header
@@ -548,7 +534,6 @@ typedef struct tagSCTS_FB {
 }__attribute__ ((__packed__))
 SCTS_FB, *PSCTS_FB;
 typedef const SCTS_FB *PCSCTS_FB;
-
 
 //
 // Tx FIFO header
@@ -606,7 +591,6 @@ typedef struct tagSTxDataHead_g_FB {
 STxDataHead_g_FB, *PSTxDataHead_g_FB;
 typedef const STxDataHead_g_FB *PCSTxDataHead_g_FB;
 
-
 typedef struct tagSTxDataHead_ab {
     BYTE    bySignalField;
     BYTE    byServiceField;
@@ -616,7 +600,6 @@ typedef struct tagSTxDataHead_ab {
 }__attribute__ ((__packed__))
 STxDataHead_ab, *PSTxDataHead_ab;
 typedef const STxDataHead_ab *PCSTxDataHead_ab;
-
 
 typedef struct tagSTxDataHead_a_FB {
     BYTE    bySignalField;
@@ -649,7 +632,6 @@ typedef struct tagSBEACONCtl {
 }__attribute__ ((__packed__))
 SBEACONCtl;
 
-
 typedef struct tagSSecretKey {
     DWORD   dwLowDword;
     BYTE    byHighByte;
@@ -675,8 +657,4 @@ SKeyEntry;
 
 /*---------------------  Export Functions  --------------------------*/
 
-
-
-
 #endif // __DESC_H__
-

@@ -560,7 +560,6 @@ static void mxcmci_request(struct mmc_host *mmc, struct mmc_request *req)
 			goto out;
 		}
 
-
 		cmdat |= CMD_DAT_CONT_DATA_ENABLE;
 
 		if (req->data->flags & MMC_DATA_WRITE)
@@ -667,7 +666,6 @@ static int mxcmci_get_ro(struct mmc_host *mmc)
 	 */
 	return -ENOSYS;
 }
-
 
 static const struct mmc_host_ops mxcmci_ops = {
 	.request	= mxcmci_request,

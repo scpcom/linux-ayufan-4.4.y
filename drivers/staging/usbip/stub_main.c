@@ -20,7 +20,6 @@
  * USA.
  */
 
-
 #include "usbip_common.h"
 #include "stub.h"
 
@@ -36,7 +35,6 @@ struct kmem_cache *stub_priv_cache;
 
 /* Define sysfs entries for the usbip driver */
 
-
 /*
  * busid_tables defines matching busids that usbip can grab. A user can change
  * dynamically what device is locally used and what device is exported to a
@@ -46,7 +44,6 @@ struct kmem_cache *stub_priv_cache;
 #define BUSID_SIZE 20
 static char busid_table[MAX_BUSID][BUSID_SIZE];
 static spinlock_t busid_table_lock;
-
 
 int match_busid(const char *busid)
 {
@@ -147,7 +144,6 @@ static ssize_t store_match_busid(struct device_driver *dev, const char *buf,
 
 	strncpy(busid, buf + 4, BUSID_SIZE);
 
-
 	if (!strncmp(buf, "add ", 4)) {
 		if (add_match_busid(busid) < 0)
 			return -ENOMEM;
@@ -168,8 +164,6 @@ static ssize_t store_match_busid(struct device_driver *dev, const char *buf,
 
 static DRIVER_ATTR(match_busid, S_IRUSR|S_IWUSR, show_match_busid,
 							store_match_busid);
-
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -239,7 +233,6 @@ void stub_device_cleanup_urbs(struct stub_device *sdev)
 		usb_free_urb(urb);
 	}
 }
-
 
 /*-------------------------------------------------------------------------*/
 

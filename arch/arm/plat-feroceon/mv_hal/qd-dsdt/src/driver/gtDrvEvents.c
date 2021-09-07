@@ -56,8 +56,6 @@ GT_STATUS drvEventsInit
 	return GT_OK;
 }
 
-
-
 /*******************************************************************************
 * eventQdSr
 *
@@ -92,4 +90,3 @@ GT_BOOL eventQdSr
 
     return (*intCause)?GT_TRUE:GT_FALSE;
 }
-

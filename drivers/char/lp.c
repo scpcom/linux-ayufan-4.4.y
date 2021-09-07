@@ -177,15 +177,12 @@ static void lp_release_parport(struct lp_struct *this_lp)
 	}
 }
 
-
-
 static int lp_preempt(void *handle)
 {
 	struct lp_struct *this_lp = (struct lp_struct *)handle;
 	set_bit(LP_PREEMPT_REQUEST, &this_lp->bits);
 	return (1);
 }
-
 
 /* 
  * Try to negotiate to a new mode; if unsuccessful negotiate to

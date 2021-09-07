@@ -157,7 +157,6 @@ struct b43_txhdr {
 #define  B43_TXH_PHY1_MODUL_QAM64	0x1800 /* QAM64 */
 #define  B43_TXH_PHY1_MODUL_QAM256	0x2000 /* QAM256 */
 
-
 /* r351 firmware compatibility stuff. */
 static inline
 bool b43_is_old_txhdr_format(struct b43_wldev *dev)
@@ -172,7 +171,6 @@ size_t b43_txhdr_size(struct b43_wldev *dev)
 		return 100 + sizeof(struct b43_plcp_hdr6);
 	return 104 + sizeof(struct b43_plcp_hdr6);
 }
-
 
 int b43_generate_txhdr(struct b43_wldev *dev,
 		       u8 * txhdr,
@@ -282,7 +280,6 @@ struct b43_rxhdr_fw4 {
 #define B43_RX_CHAN_ID_SHIFT		3
 #define B43_RX_CHAN_PHYTYPE		0x0007 /* PHY type */
 
-
 u8 b43_plcp_get_ratecode_cck(const u8 bitrate);
 u8 b43_plcp_get_ratecode_ofdm(const u8 bitrate);
 
@@ -299,7 +296,6 @@ bool b43_fill_txstatus_report(struct b43_wldev *dev,
 
 void b43_tx_suspend(struct b43_wldev *dev);
 void b43_tx_resume(struct b43_wldev *dev);
-
 
 /* Helper functions for converting the key-table index from "firmware-format"
  * to "raw-format" and back. The firmware API changed for this at some revision.

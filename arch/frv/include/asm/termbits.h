@@ -58,7 +58,6 @@ struct ktermios {
 #define VLNEXT 15
 #define VEOL2 16
 
-
 /* c_iflag bits */
 #define IGNBRK	0000001
 #define BRKINT	0000002
@@ -181,7 +180,6 @@ struct ktermios {
 #define PENDIN	0040000
 #define IEXTEN	0100000
 
-
 /* tcflow() and TCXONC use these */
 #define	TCOOFF		0
 #define	TCOON		1
@@ -199,4 +197,3 @@ struct ktermios {
 #define	TCSAFLUSH	2
 
 #endif /* _ASM_TERMBITS_H__ */
-

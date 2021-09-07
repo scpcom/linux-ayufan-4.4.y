@@ -206,7 +206,6 @@ static inline void outsl(unsigned long addr, const void *buffer, int count)
 #define iowrite32_rep(p, src, count) \
 	outsl((unsigned long) (p), (src), (count))
 
-
 #define IO_SPACE_LIMIT 0xffffffff
 
 #ifdef __KERNEL__

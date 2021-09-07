@@ -81,7 +81,6 @@ VOID	RTUSBInitTxDesc(
 		pSrc = (PUCHAR) pTxContext->TransferBuffer->field.WirelessPacket;
 	}
 
-
 	//Initialize a tx bulk urb
 	RTUSB_FILL_BULK_URB(pUrb,
 						pObj->pUsb_Dev,
@@ -119,7 +118,6 @@ VOID	RTUSBInitHTTxDesc(
 
 	pSrc = &pTxContext->TransferBuffer->field.WirelessPacket[pTxContext->NextBulkOutPosition];
 
-
 	//Initialize a tx bulk urb
 	RTUSB_FILL_BULK_URB(pUrb,
 						pObj->pUsb_Dev,
@@ -142,7 +140,6 @@ VOID	RTUSBInitRxDesc(
 	POS_COOKIE			pObj = (POS_COOKIE) pAd->OS_Cookie;
 	ULONG				RX_bulk_size;
 
-
 	pUrb = pRxContext->pUrb;
 	ASSERT(pUrb);
 
@@ -162,7 +159,6 @@ VOID	RTUSBInitRxDesc(
 
 	pUrb->transfer_dma	= pRxContext->data_dma + pAd->NextRxBulkInPosition;
 	pUrb->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
-
 
 }
 
@@ -187,7 +183,6 @@ VOID	RTUSBInitRxDesc(
 #define BULK_OUT_UNLOCK(pLock, IrqFlags)	\
 		if(1 /*!(in_interrupt() & 0xffff0000)*/)	\
 			RTMP_IRQ_UNLOCK((pLock), IrqFlags);
-
 
 VOID	RTUSBBulkOutDataPacket(
 	IN	PRTMP_ADAPTER	pAd,
@@ -222,7 +217,6 @@ VOID	RTUSBBulkOutDataPacket(
 		return;
 	}
 	BULK_OUT_UNLOCK(&pAd->BulkOutLock[BulkOutPipeId], IrqFlags);
-
 
 	pHTTXContext = &(pAd->TxContext[BulkOutPipeId]);
 
@@ -446,14 +440,12 @@ VOID	RTUSBBulkOutDataPacket(
 
 }
 
-
 VOID RTUSBBulkOutDataPacketComplete(purbb_t pUrb, struct pt_regs *pt_regs)
 {
 	PHT_TX_CONTEXT	pHTTXContext;
 	PRTMP_ADAPTER	pAd;
 	POS_COOKIE 		pObj;
 	UCHAR			BulkOutPipeId;
-
 
 	pHTTXContext	= (PHT_TX_CONTEXT)pUrb->context;
 	pAd 			= pHTTXContext->pAd;
@@ -487,7 +479,6 @@ VOID RTUSBBulkOutDataPacketComplete(purbb_t pUrb, struct pt_regs *pt_regs)
 				break;
 	}
 }
-
 
 /*
 	========================================================================
@@ -524,7 +515,6 @@ VOID	RTUSBBulkOutNullFrame(
 	// Increase Total transmit byte counter
 	pAd->RalinkCounters.TransmittedByteCount +=  pNullContext->BulkOutSize;
 
-
 	// Clear Null frame bulk flag
 	RTUSB_CLEAR_BULK_FLAG(pAd, fRTUSB_BULK_OUT_DATA_NULL);
 
@@ -553,7 +543,6 @@ VOID RTUSBBulkOutNullFrameComplete(purbb_t pUrb, struct pt_regs *pt_regs)
 	PTX_CONTEXT			pNullContext;
 	NTSTATUS			Status;
 	POS_COOKIE			pObj;
-
 
 	pNullContext	= (PTX_CONTEXT)pUrb->context;
 	pAd 			= pNullContext->pAd;
@@ -594,13 +583,11 @@ VOID	RTUSBBulkOutMLMEPacket(
 		(pMLMEContext->bWaitingBulkOut == FALSE))
 	{
 
-
 		// Clear MLME bulk flag
 		RTUSB_CLEAR_BULK_FLAG(pAd, fRTUSB_BULK_OUT_MLME);
 
 		return;
 	}
-
 
 	RTMP_IRQ_LOCK(&pAd->BulkOutLock[MGMTPIPEIDX], IrqFlags);
 	if ((pAd->BulkOutPending[MGMTPIPEIDX] == TRUE) || RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NEED_STOP_TX))
@@ -646,7 +633,6 @@ VOID	RTUSBBulkOutMLMEPacket(
 //	printk("<---RTUSBBulkOutMLMEPacket,Cpu=%d!, Dma=%d, SwIdx=%d!\n", pAd->MgmtRing.TxCpuIdx, pAd->MgmtRing.TxDmaIdx, pAd->MgmtRing.TxSwFreeIdx);
 }
 
-
 VOID RTUSBBulkOutMLMEPacketComplete(purbb_t pUrb, struct pt_regs *pt_regs)
 {
 	PTX_CONTEXT			pMLMEContext;
@@ -665,7 +651,6 @@ VOID RTUSBBulkOutMLMEPacketComplete(purbb_t pUrb, struct pt_regs *pt_regs)
 	pObj->mgmt_dma_done_task.data = (unsigned long)pUrb;
 	tasklet_hi_schedule(&pObj->mgmt_dma_done_task);
 }
-
 
 /*
 	========================================================================
@@ -699,7 +684,6 @@ VOID	RTUSBBulkOutPsPoll(
 	pPsPollContext->IRPPending = TRUE;
 	RTMP_IRQ_UNLOCK(&pAd->BulkOutLock[0], IrqFlags);
 
-
 	// Clear PS-Poll bulk flag
 	RTUSB_CLEAR_BULK_FLAG(pAd, fRTUSB_BULK_OUT_PSPOLL);
 
@@ -728,7 +712,6 @@ VOID RTUSBBulkOutPsPollComplete(purbb_t pUrb,struct pt_regs *pt_regs)
 	PTX_CONTEXT			pPsPollContext;
 	NTSTATUS			Status;
 	POS_COOKIE			pObj;
-
 
 	pPsPollContext= (PTX_CONTEXT)pUrb->context;
 	pAd = pPsPollContext->pAd;
@@ -782,7 +765,6 @@ VOID DoBulkIn(IN RTMP_ADAPTER *pAd)
 	}
 }
 
-
 /*
 	========================================================================
 
@@ -818,7 +800,6 @@ VOID	RTUSBBulkReceive(
 {
 	PRX_CONTEXT		pRxContext;
 	unsigned long	IrqFlags;
-
 
 	/* sanity check */
 	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NEED_STOP_HANDLE_RX))
@@ -861,7 +842,6 @@ VOID	RTUSBBulkReceive(
 
 }
 
-
 /*
 	========================================================================
 
@@ -894,7 +874,6 @@ VOID RTUSBBulkRxComplete(purbb_t pUrb, struct pt_regs *pt_regs)
 	PRTMP_ADAPTER	pAd;
 	POS_COOKIE 		pObj;
 
-
 	pRxContext	= (PRX_CONTEXT)pUrb->context;
 	pAd 		= pRxContext->pAd;
 	pObj 		= (POS_COOKIE) pAd->OS_Cookie;
@@ -903,8 +882,6 @@ VOID RTUSBBulkRxComplete(purbb_t pUrb, struct pt_regs *pt_regs)
 	tasklet_hi_schedule(&pObj->rx_done_task);
 
 }
-
-
 
 /*
 	========================================================================
@@ -1059,7 +1036,6 @@ VOID	RTUSBCleanUpMLMEBulkOutQueue(
 	DBGPRINT(RT_DEBUG_TRACE, ("<---CleanUpMLMEBulkOutQueue\n"));
 }
 
-
 /*
 	========================================================================
 
@@ -1068,7 +1044,6 @@ VOID	RTUSBCleanUpMLMEBulkOutQueue(
 	Arguments:
 
 	Return Value:
-
 
 	Note:
 
@@ -1116,7 +1091,6 @@ VOID	RTUSBCancelPendingBulkInIRP(
 	DBGPRINT_RAW(RT_DEBUG_TRACE, ("<---RTUSBCancelPendingBulkInIRP\n"));
 }
 
-
 /*
 	========================================================================
 
@@ -1143,7 +1117,6 @@ VOID	RTUSBCancelPendingBulkOutIRP(
 //	unsigned int 		IrqFlags;
 //	NDIS_SPIN_LOCK		*pLock;
 //	BOOLEAN				*pPending;
-
 
 //	pLock = &pAd->BulkOutLock[MGMTPIPEIDX];
 //	pPending = &pAd->BulkOutPending[MGMTPIPEIDX];
@@ -1191,7 +1164,6 @@ VOID	RTUSBCancelPendingBulkOutIRP(
 	pAd->BulkOutPending[MGMTPIPEIDX] = FALSE;
 	//RTMP_IRQ_UNLOCK(pLock, IrqFlags);
 
-
 	for (i = 0; i < BEACON_RING_SIZE; i++)
 	{
 		pBeaconContext = &(pAd->BeaconContext[i]);
@@ -1230,4 +1202,3 @@ VOID	RTUSBCancelPendingBulkOutIRP(
 		NdisReleaseSpinLock(&pAd->BulkOutLock[Idx]);
 	}
 }
-

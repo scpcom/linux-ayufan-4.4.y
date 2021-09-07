@@ -38,7 +38,6 @@ extern spinlock_t oxnas_gpio_spinlock;
 #define PCI_BUS_NONMEM_START			0x00000000
 #define PCI_BUS_NONMEM_SIZE	    		(CONFIG_OXNAS_PCI_BUS_NONMEM_SIZE)
                                
-                               
 #define PCI_BUS_PREMEM_START			PCI_BUS_NONMEM_START + PCI_BUS_NONMEM_SIZE
 #define PCI_BUS_PREMEM_SIZE	    		(CONFIG_OXNAS_PCI_BUS_PREMEM_SIZE)
 
@@ -88,8 +87,6 @@ static void oxnas_pci_write_core_config( unsigned int value, unsigned int config
 	spin_unlock_irqrestore(&oxnas_lock, flags);    
 }
 
-
-
 inline unsigned int CheckAndClearBusError(void)
 {
     unsigned int value = readl( PCI_ERROR_MSG ) & 0x00000003;
@@ -102,7 +99,6 @@ inline unsigned int CheckAndClearBusError(void)
     return value;    
 }
 
-
 void pciio_write(unsigned int  data, u32 addr, unsigned int size)
 {
 	// setup byte enables
@@ -112,7 +108,6 @@ void pciio_write(unsigned int  data, u32 addr, unsigned int size)
 	be                <<= trunc;
 	be	            = (~be) & 0x00000000f;
 	
-
 	data  &= (0xffffffff >> ((4-size)*8));
 	data <<= (trunc*8);
 
@@ -148,7 +143,6 @@ unsigned int pciio_read(u32 addr, unsigned int size)
 	be                <<= trunc;
 	be	            = (~be) & 0x00000000f;
 	
-		
 	//printk(KERN_DEBUG "$YPCI: pciio_read[ 0x%x ] ( 0x%x == ", size, addr );
 	
 	/* Setup the io read address (rounded down to word boundry) */
@@ -180,11 +174,9 @@ unsigned int pciio_read(u32 addr, unsigned int size)
 	be >>= (trunc*8);
 	be  &= (0xffffffff >> ((4-size)*8));
 	
-	
 	return be;	
 }
 EXPORT_SYMBOL(pciio_read);
-
 
 static int oxnas_read_config(struct pci_bus *bus, unsigned int devfn, int where,
 			  int size, u32 *value)
@@ -274,7 +266,6 @@ static int oxnas_write_config(struct pci_bus *bus, unsigned int devfn, int where
 		return PCIBIOS_DEVICE_NOT_FOUND;
     	}
     
-        
 	spin_lock_irqsave(&oxnas_lock, flags);
 	CheckAndClearBusError();
     
@@ -309,7 +300,6 @@ static int oxnas_write_config(struct pci_bus *bus, unsigned int devfn, int where
 	return PCIBIOS_SUCCESSFUL;
 }
 
-
 // #if PCI_BUS_NONMEM_START & 0x000fffff
 // #error PCI_BUS_NONMEM_START must be megabyte aligned
 // #endif
@@ -339,7 +329,6 @@ static struct resource pre_mem = {
 	.flags	= IORESOURCE_MEM | IORESOURCE_PREFETCH,
 };
 
-
 /*
  * This routine handles multiple bridges.
  */
@@ -349,11 +338,9 @@ static u8 __init oxnas_swizzle(struct pci_dev *dev, u8 *pinp)
 	return pci_std_swizzle(dev, pinp);
 }
 
-
 // static int irq_tab[4] __initdata = {
 //  	IRQ_AP_PCIINT0,	IRQ_AP_PCIINT1,	IRQ_AP_PCIINT2,	IRQ_AP_PCIINT3
 // };
-
 
 /*
  * map the specified device/slot/pin to an IRQ.  This works out such
@@ -366,7 +353,6 @@ static int __init oxnas_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 //	printk(KERN_DEBUG "PCI: oxnas_map_irq %d,%d,%d = %d\n", dev->bus->number, dev->devfn, slot, PCI_A_INTERRUPT /*pci_irq_table[pin-1]*/ );
 	return PCI_A_INTERRUPT;
 }
-
 
 static int __init  oxnas_pci_setup_resources(struct resource **resource)
 {	
@@ -399,7 +385,6 @@ static int __init  oxnas_pci_setup_resources(struct resource **resource)
 	return 1;
 }
 
-
 int __init oxnas_pci_setup(int nr, struct pci_sys_data *sys)
 {
 	int ret = 0;
@@ -423,12 +408,10 @@ int __init oxnas_pci_setup(int nr, struct pci_sys_data *sys)
 	return ret;
 }
 
-
 static struct pci_ops oxnas_pci_ops = {
 	.read	= oxnas_read_config,
 	.write	= oxnas_write_config,
 };
-
 
 struct pci_bus *oxnas_pci_scan_bus(int nr, struct pci_sys_data *sys)
 {

@@ -38,7 +38,6 @@
 #define DBG(fmt, args...)
 #endif
 
-
 void __init mpc85xx_rdb_pic_init(void)
 {
 	struct mpic *mpic;

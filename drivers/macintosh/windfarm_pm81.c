@@ -237,7 +237,6 @@ static struct wf_smu_sys_fans_state *wf_smu_sys_fans;
  *
  */
 
-
 #define WF_SMU_CPU_FANS_INTERVAL	1
 #define WF_SMU_CPU_FANS_MAX_HISTORY	16
 #define WF_SMU_CPU_FANS_SIBLING_SCALE	0x00001000
@@ -254,8 +253,6 @@ struct wf_smu_cpu_fans_state {
 };
 
 static struct wf_smu_cpu_fans_state *wf_smu_cpu_fans;
-
-
 
 /*
  * ***** Implementation *****
@@ -670,7 +667,6 @@ static void wf_smu_new_sensor(struct wf_sensor *sr)
 		wf_smu_all_sensors_ok = 1;
 }
 
-
 static int wf_smu_notify(struct notifier_block *self,
 			       unsigned long event, void *data)
 {
@@ -774,7 +770,6 @@ static struct platform_driver wf_smu_driver = {
 	},
 };
 
-
 static int __init wf_smu_init(void)
 {
 	int rc = -ENODEV;
@@ -802,7 +797,6 @@ static void __exit wf_smu_exit(void)
 
 	platform_driver_unregister(&wf_smu_driver);
 }
-
 
 module_init(wf_smu_init);
 module_exit(wf_smu_exit);

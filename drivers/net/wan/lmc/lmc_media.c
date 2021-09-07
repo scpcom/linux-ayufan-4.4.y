@@ -532,7 +532,6 @@ lmc_ds3_watchdog (lmc_softc_t * const sc)
     
 }
 
-
 /*
  *  SSI methods
  */
@@ -913,7 +912,6 @@ lmc_t1_read (lmc_softc_t * const sc, int a)
 }
 */
 
-
 static void
 lmc_t1_init (lmc_softc_t * const sc)
 {
@@ -1034,7 +1032,6 @@ lmc_t1_get_link_status (lmc_softc_t * const sc)
     lmc_mii_writereg (sc, 0, 17, T1FRAMER_ALARM1_STATUS);
     link_status = lmc_mii_readreg (sc, 0, 18);
 
-
     if (link_status & T1F_RAIS) {			/* turn on blue LED */
         ret = 0;
         if(sc->last_led_err[1] != 1){
@@ -1122,7 +1119,6 @@ lmc_t1_get_link_status (lmc_softc_t * const sc)
     lmc_mii_writereg (sc, 0, 17, T1FRAMER_ALARM2_STATUS);
     sc->lmc_xinfo.t1_alarm2_status = lmc_mii_readreg (sc, 0, 18);
 
-    
     lmc_trace(sc->lmc_device, "lmc_t1_get_link_status out");
 
     return ret;

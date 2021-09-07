@@ -27,7 +27,6 @@
 
 #include "dasd_int.h"
 
-
 static int
 dasd_ioctl_api_version(void __user *argp)
 {
@@ -105,7 +104,6 @@ static int dasd_ioctl_quiesce(struct dasd_block *block)
 	spin_unlock_irqrestore(get_ccwdev_lock(base->cdev), flags);
 	return 0;
 }
-
 
 /*
  * Resume device.

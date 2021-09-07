@@ -19,7 +19,6 @@
  *  fcs_uf.h FCS unsolicited frame receive
  */
 
-
 #ifndef __FCS_AUTH_H__
 #define __FCS_AUTH_H__
 

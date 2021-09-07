@@ -76,7 +76,6 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 	return pte;
 }
 
-
 /* Insert a PTE, top-level function is out of line. It uses an inline
  * low level function in the respective pgtable-* files
  */
@@ -146,7 +145,6 @@ static inline void __set_pte_at(struct mm_struct *mm, unsigned long addr,
 #endif
 }
 
-
 #define __HAVE_ARCH_PTEP_SET_ACCESS_FLAGS
 extern int ptep_set_access_flags(struct vm_area_struct *vma, unsigned long address,
 				 pte_t *ptep, pte_t entry, int dirty);
@@ -169,7 +167,6 @@ extern int ptep_set_access_flags(struct vm_area_struct *vma, unsigned long addre
 
 #define pgprot_cached_wthru(prot) (__pgprot((pgprot_val(prot) & ~_PAGE_CACHE_CTL) | \
 				            _PAGE_COHERENT | _PAGE_WRITETHRU))
-
 
 struct file;
 extern pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
@@ -198,7 +195,6 @@ extern void paging_init(void);
 		remap_pfn_range(vma, vaddr, pfn, size, prot)
 
 #include <asm-generic/pgtable.h>
-
 
 /*
  * This gets called at the end of handling a page fault, when

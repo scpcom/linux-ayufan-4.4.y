@@ -67,7 +67,6 @@ struct us_unusual_dev {
 	int (*initFunction)(struct us_data *);
 };
 
-
 /* Dynamic bitflag definitions (us->dflags): used in set_bit() etc. */
 #define US_FLIDX_URB_ACTIVE	0	/* current_urb is in use    */
 #define US_FLIDX_SG_ACTIVE	1	/* current_sg is in use     */

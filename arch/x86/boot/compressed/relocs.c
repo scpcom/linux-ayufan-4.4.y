@@ -168,8 +168,6 @@ static const char *sym_name(const char *sym_strtab, Elf32_Sym *sym)
 	return name;
 }
 
-
-
 #if BYTE_ORDER == LITTLE_ENDIAN
 #define le16_to_cpu(val) (val)
 #define le32_to_cpu(val) (val)
@@ -337,7 +335,6 @@ static void read_symtabs(FILE *fp)
 	}
 }
 
-
 static void read_relocs(FILE *fp)
 {
 	int i,j;
@@ -367,7 +364,6 @@ static void read_relocs(FILE *fp)
 		}
 	}
 }
-
 
 static void print_absolute_symbols(void)
 {

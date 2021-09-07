@@ -65,7 +65,6 @@ void coda_sysctl_clean(void);
     else memset( ptr, 0, size ); \
 } while (0)
 
-
 #define CODA_FREE(ptr,size) \
     do { if (size < PAGE_SIZE) kfree((ptr)); else vfree((ptr)); } while (0)
 

@@ -11,7 +11,6 @@
 #ifndef _ASM_SN_KLDIR_H
 #define _ASM_SN_KLDIR_H
 
-
 /*
  * The kldir memory area resides at a fixed place in each node's memory and
  * provides pointers to most other IP27 memory areas.  This allows us to

@@ -22,7 +22,6 @@
 extern int (*ixp4xx_pci_read)(u32 addr, u32 cmd, u32* data);
 extern int ixp4xx_pci_write(u32 addr, u32 cmd, u32 data);
 
-
 /*
  * IXP4xx provides two methods of accessing PCI memory space:
  *
@@ -227,7 +226,6 @@ __ixp4xx_readsl(const volatile void __iomem *bus_addr, u32 *vaddr, u32 count)
 		*vaddr++ = readl(bus_addr);
 }
 
-
 /*
  * We can use the built-in functions b/c they end up calling writeb/readb
  */
@@ -265,7 +263,6 @@ __ixp4xx_readsl(const volatile void __iomem *bus_addr, u32 *vaddr, u32 count)
 #define	insb(p, v, l)			__ixp4xx_insb(p, v, l)
 #define	insw(p, v, l)			__ixp4xx_insw(p, v, l)
 #define	insl(p, v, l)			__ixp4xx_insl(p, v, l)
-
 
 static inline void 
 __ixp4xx_outb(u8 value, u32 addr)
@@ -564,4 +561,3 @@ __ixp4xx_iowrite32_rep(void __iomem *addr, const void *vaddr, u32 count)
 #endif	// !CONFIG_PCI
 
 #endif	//  __ASM_ARM_ARCH_IO_H
-

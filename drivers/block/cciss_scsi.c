@@ -453,7 +453,6 @@ cciss_scsi_remove_entry(int ctlr, int hostno, int entry,
 			sd.bus, sd.target, sd.lun);
 }
 
-
 #define SCSI3ADDR_EQ(a,b) ( \
 	(a)[7] == (b)[7] && \
 	(a)[6] == (b)[6] && \
@@ -1208,7 +1207,6 @@ cciss_update_non_disk_devices(int cntl_num, int hostno)
 		goto out;
 	}
 
-
 	/* adjust our table of devices */	
 	for (i = 0; i < num_luns; i++) {
 		/* for each physical lun, do an inquiry */
@@ -1303,7 +1301,6 @@ cciss_scsi_user_command(int ctlr, int hostno, char *buffer, int length)
 	return length;
 }
 
-
 static int
 cciss_scsi_proc_info(struct Scsi_Host *sh,
 		char *buffer, /* data buffer */
@@ -1317,7 +1314,6 @@ cciss_scsi_proc_info(struct Scsi_Host *sh,
 	ctlr_info_t *ci;
 	int i;
 	int cntl_num;
-
 
 	ci = (ctlr_info_t *) sh->hostdata[0];
 	if (ci == NULL)  /* This really shouldn't ever happen. */
@@ -1394,7 +1390,6 @@ cciss_scatter_gather(struct pci_dev *pdev,
 	cp->Header.SGTotal = (__u16) use_sg; /* total sgs in this cmd list */
 	return;
 }
-
 
 static int
 cciss_scsi_queue_command (struct scsi_cmnd *cmd, void (* done)(struct scsi_cmnd *))

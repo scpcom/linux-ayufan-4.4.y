@@ -42,4 +42,3 @@
 #define MXC_INT_UART5		47
 #define MXC_INT_CCM		53
 #define MXC_INT_PCMCIA		54
-

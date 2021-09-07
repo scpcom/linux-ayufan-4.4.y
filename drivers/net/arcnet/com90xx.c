@@ -33,9 +33,7 @@
 #include <asm/io.h>
 #include <linux/arcdevice.h>
 
-
 #define VERSION "arcnet: COM90xx chipset support\n"
-
 
 /* Define this to speed up the autoprobe by assuming if only one io port and
  * shmem are left in the list at Stage 5, they must correspond to each
@@ -50,7 +48,6 @@
  * the option has no effect.
  */
 #undef FAST_PROBE
-
 
 /* Internal function declarations */
 static int com90xx_found(int ioaddr, int airq, u_long shmem, void __iomem *);
@@ -94,7 +91,6 @@ static int numcards;
 #define ASTATUS()	inb(_STATUS)
 #define ACOMMAND(cmd) 	outb((cmd),_COMMAND)
 #define AINTMASK(msk)	outb((msk),_INTMASK)
-
 
 static int com90xx_skip_probe __initdata = 0;
 
@@ -550,14 +546,12 @@ err_free_dev:
 	return -EIO;
 }
 
-
 static void com90xx_command(struct net_device *dev, int cmd)
 {
 	short ioaddr = dev->base_addr;
 
 	ACOMMAND(cmd);
 }
-
 
 static int com90xx_status(struct net_device *dev)
 {
@@ -566,14 +560,12 @@ static int com90xx_status(struct net_device *dev)
 	return ASTATUS();
 }
 
-
 static void com90xx_setmask(struct net_device *dev, int mask)
 {
 	short ioaddr = dev->base_addr;
 
 	AINTMASK(mask);
 }
-
 
 /*
  * Do a hardware reset on the card, and set up necessary registers.
@@ -626,7 +618,6 @@ static void com90xx_copy_to_card(struct net_device *dev, int bufnum, int offset,
 	TIME("memcpy_toio", count, memcpy_toio(memaddr, buf, count));
 }
 
-
 static void com90xx_copy_from_card(struct net_device *dev, int bufnum, int offset,
 				   void *buf, int count)
 {
@@ -634,7 +625,6 @@ static void com90xx_copy_from_card(struct net_device *dev, int bufnum, int offse
 	void __iomem *memaddr = lp->mem_start + bufnum * 512 + offset;
 	TIME("memcpy_fromio", count, memcpy_fromio(buf, memaddr, count));
 }
-
 
 MODULE_LICENSE("GPL");
 

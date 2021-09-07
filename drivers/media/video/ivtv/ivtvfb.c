@@ -930,7 +930,6 @@ static struct fb_ops ivtvfb_ops = {
 
 /* Initialization */
 
-
 /* Setup our initial video mode */
 static int ivtvfb_init_vidmode(struct ivtv *itv)
 {

@@ -149,5 +149,4 @@
 		__endl	\ar \as
 	.endm
 
-
 #endif /* _XTENSA_ASMMACRO_H */

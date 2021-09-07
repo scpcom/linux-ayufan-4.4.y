@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef _CHANNEL_INTERFACE_H_
 #define _CHANNEL_INTERFACE_H_
 

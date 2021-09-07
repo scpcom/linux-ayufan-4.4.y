@@ -560,4 +560,3 @@ struct SiS_Private
 };
 
 #endif
-

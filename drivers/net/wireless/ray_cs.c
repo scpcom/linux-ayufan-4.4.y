@@ -191,7 +191,6 @@ static int bc;
  */
 static char *phy_addr = NULL;
 
-
 /* A struct pcmcia_device structure has fields for most things that are needed
    to keep track of a socket, but there will usually be some device
    specific information that also needs to be kept track of.  The
@@ -368,7 +367,6 @@ static int ray_probe(struct pcmcia_device *p_dev)
 	local->wireless_data.spy_data = &local->spy_data;
 	dev->wireless_data = &local->wireless_data;
 #endif /* WIRELESS_SPY */
-
 
 	DEBUG(2, "ray_cs ray_attach calling ether_setup.)\n");
 	netif_stop_queue(dev);

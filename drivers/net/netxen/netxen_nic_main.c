@@ -1011,7 +1011,6 @@ netxen_nic_down(struct netxen_adapter *adapter, struct net_device *netdev)
 	spin_unlock(&adapter->tx_clean_lock);
 }
 
-
 static int
 netxen_nic_attach(struct netxen_adapter *adapter)
 {

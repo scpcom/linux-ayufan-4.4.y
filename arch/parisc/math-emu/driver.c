@@ -31,7 +31,6 @@
 #include "float.h"
 #include "math-emu.h"
 
-
 #define fptpos 31
 #define fpr1pos 10
 #define extru(r,pos,len) (((r) >> (31-(pos))) & (( 1 << (len)) - 1))

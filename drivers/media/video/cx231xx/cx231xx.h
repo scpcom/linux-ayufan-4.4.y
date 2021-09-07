@@ -29,7 +29,6 @@
 #include <linux/i2c-algo-bit.h>
 #include <linux/mutex.h>
 
-
 #include <media/videobuf-vmalloc.h>
 #include <media/v4l2-device.h>
 #include <media/ir-kbd-i2c.h>

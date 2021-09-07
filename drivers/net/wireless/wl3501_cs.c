@@ -1927,7 +1927,6 @@ static int wl3501_probe(struct pcmcia_device *p_dev)
 	if (!dev)
 		goto out_link;
 
-
 	dev->netdev_ops		= &wl3501_netdev_ops;
 	dev->watchdog_timeo	= 5 * HZ;
 
@@ -2090,7 +2089,6 @@ static int wl3501_resume(struct pcmcia_device *link)
 
 	return 0;
 }
-
 
 static struct pcmcia_device_id wl3501_ids[] = {
 	PCMCIA_DEVICE_MANF_CARD(0xd601, 0x0001),

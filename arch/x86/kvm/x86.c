@@ -533,7 +533,6 @@ void kvm_enable_efer_bits(u64 mask)
 }
 EXPORT_SYMBOL_GPL(kvm_enable_efer_bits);
 
-
 /*
  * Writes msr value into into the appropriate "register".
  * Returns 0 on success, non-0 otherwise.
@@ -943,7 +942,6 @@ int kvm_set_msr_common(struct kvm_vcpu *vcpu, u32 msr, u64 data)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(kvm_set_msr_common);
-
 
 /*
  * Reads an msr value (of 'msr_index') into 'pdata'.
@@ -2592,7 +2590,6 @@ out:
 	return r;
 }
 
-
 static int emulator_read_emulated(unsigned long addr,
 				  void *val,
 				  unsigned int bytes,
@@ -3334,7 +3331,6 @@ int kvm_fix_hypercall(struct kvm_vcpu *vcpu)
 	int ret = 0;
 	unsigned long rip = kvm_rip_read(vcpu);
 
-
 	/*
 	 * Blow out the MMU to ensure that no other VCPU has an active mapping
 	 * to ensure that the updated hypercall appears atomically across all
@@ -3757,14 +3753,12 @@ static int vcpu_enter_guest(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
 		profile_hit(KVM_PROFILING, (void *)rip);
 	}
 
-
 	kvm_lapic_sync_from_vapic(vcpu);
 
 	r = kvm_x86_ops->handle_exit(kvm_run, vcpu);
 out:
 	return r;
 }
-
 
 static int __vcpu_run(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
 {
@@ -3962,7 +3956,6 @@ int kvm_arch_vcpu_ioctl_set_regs(struct kvm_vcpu *vcpu, struct kvm_regs *regs)
 
 	kvm_rip_write(vcpu, regs->rip);
 	kvm_x86_ops->set_rflags(vcpu, regs->rflags);
-
 
 	vcpu->arch.exception.pending = false;
 
@@ -4206,7 +4199,6 @@ int kvm_load_segment_descriptor(struct kvm_vcpu *vcpu, u16 selector, int seg)
 
 	if (is_vm86_segment(vcpu, seg) || !(vcpu->arch.cr0 & X86_CR0_PE))
 		return kvm_load_realmode_segment(vcpu, selector, seg);
-
 
 	/* NULL selector is not valid for TR, CS and SS */
 	if ((seg == VCPU_SREG_CS || seg == VCPU_SREG_SS || seg == VCPU_SREG_TR)

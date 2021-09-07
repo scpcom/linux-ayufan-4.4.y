@@ -87,7 +87,6 @@ struct ixgb_adapter;
 	printk(KERN_##klevel PFX "%s: %s: " fmt, adapter->netdev->name, \
 		__func__ , ## args))
 
-
 /* TX/RX descriptor defines */
 #define DEFAULT_TXD      256
 #define MAX_TXD         4096
@@ -216,6 +215,5 @@ extern int ixgb_setup_tx_resources(struct ixgb_adapter *adapter);
 extern void ixgb_free_rx_resources(struct ixgb_adapter *adapter);
 extern void ixgb_free_tx_resources(struct ixgb_adapter *adapter);
 extern void ixgb_update_stats(struct ixgb_adapter *adapter);
-
 
 #endif /* _IXGB_H_ */

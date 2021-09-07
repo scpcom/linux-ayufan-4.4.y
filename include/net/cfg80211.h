@@ -24,7 +24,6 @@
 #include <net/iw_handler.h>
 #include <linux/wireless.h>
 
-
 /*
  * wireless hardware capability structures
  */
@@ -624,7 +623,6 @@ struct cfg80211_bss {
  */
 const u8 *ieee80211_bss_get_ie(struct cfg80211_bss *bss, u8 ie);
 
-
 /**
  * struct cfg80211_crypto_settings - Crypto settings
  * @wpa_versions: indicates which, if any, WPA versions are enabled
@@ -976,7 +974,6 @@ struct cfg80211_ops {
 	int	(*set_beacon)(struct wiphy *wiphy, struct net_device *dev,
 			      struct beacon_parameters *info);
 	int	(*del_beacon)(struct wiphy *wiphy, struct net_device *dev);
-
 
 	int	(*add_station)(struct wiphy *wiphy, struct net_device *dev,
 			       u8 *mac, struct station_parameters *params);
@@ -2010,6 +2007,5 @@ void cfg80211_roamed(struct net_device *dev, const u8 *bssid,
  */
 void cfg80211_disconnected(struct net_device *dev, u16 reason,
 			   u8 *ie, size_t ie_len, gfp_t gfp);
-
 
 #endif /* __NET_CFG80211_H */

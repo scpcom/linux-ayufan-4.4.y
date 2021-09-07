@@ -44,7 +44,6 @@
 	Made it fit for running in Linux Kernel by Alain Knaff (alain@knaff.lu)
 */
 
-
 #ifdef STATIC
 #define PREBOOT
 #else
@@ -108,7 +107,6 @@ struct bunzip_data {
 	struct group_data groups[MAX_GROUPS];	/* Huffman coding tables */
 	int io_error;			/* non-zero if we have IO error */
 };
-
 
 /* Return the next nnn bits of input.  All reads from the compressed input
    are done through this function.  All reads are big endian */

@@ -158,7 +158,6 @@ typedef enum {
 
 #define MULTI_DOMAIN_MASK 0xFF00
 
-
 /*
  * The following describe the bit masks for different passive scan
  * capability/requirements per regdomain.
@@ -328,7 +327,6 @@ static REG_DMN_PAIR_MAPPING regDomainPairs[] = {
 	{MKK12_MKKA1,	MKK12,		MKKA,		MKK5GHZ_FLAG1, NEED_NFC, PSCAN_MKKA1 | PSCAN_MKKA1_G, CTRY_JAPAN52 },
 	{MKK12_MKKC,	MKK12,		MKKC,		MKK5GHZ_FLAG1, NEED_NFC, NO_PSCAN, CTRY_JAPAN53 },
 	{MKK12_MKKA2,	MKK12,		MKKA,		MKK5GHZ_FLAG1, NEED_NFC, PSCAN_MKK1 | PSCAN_MKK3 | PSCAN_MKKA2 | PSCAN_MKKA2_G, CTRY_JAPAN54 },
-
 
 	/* These are super domains */
 	{WOR0_WORLD,	WOR0_WORLD,	WOR0_WORLD,	NO_REQ, NO_REQ, PSCAN_DEFER, 0 },
@@ -903,7 +901,6 @@ static REG_DMN_FREQ_BAND regDmn2GhzFreq[] = {
 	{ 2484, 2484, 20, 0, 20, 5, NO_DFS, NO_PSCAN | IS_ECM_CHAN, 0, 0},	/* W2_2484_2484 */
 };
 
-
 /*
  * 2GHz 11g channel tags
  */
@@ -992,8 +989,6 @@ static REG_DMN_FREQ_BAND regDmn2Ghz11gTurboFreq[] = {
 	{ 2512, 2732, 5,  6, 40, 40, NO_DFS, NO_PSCAN, 0, 0},  /* T1_2512_2732 */
 };
 
-
-
 /*
  * 2GHz 11n frequency tags
  */
@@ -1012,7 +1007,6 @@ static REG_DMN_FREQ_BAND regDmn2Ghz11ngFreq[] = {
 
 	{ 2312, 2732, 27, 6, 20, 5, NO_DFS, NO_PSCAN, 0, 0},    /* NG_DEMO_ALL_CHANNELS */
 };
-
 
 /*
  * 5GHz 11n frequency tags
@@ -1764,7 +1758,6 @@ u8_t IS_BIT_SET(u32_t bit, u64_t *bitmask)
 		return FALSE;
 }
 
-
 void zfHpGetRegulationTable(zdev_t* dev, u16_t regionCode, u16_t c_lo, u16_t c_hi)
 {
 	REG_DOMAIN rd5GHz, rd2GHz;
@@ -2339,7 +2332,6 @@ u16_t zfHpFindFirstNonDfsChannel(zdev_t* dev, u16_t aBand)
     return chan;
 }
 
-
 /* porting from ACU */
 /* save RegulatoryDomain in hpriv */
 u8_t zfHpGetRegulatoryDomain(zdev_t* dev)
@@ -2471,7 +2463,6 @@ u8_t zfHpGetRegulatoryDomain(zdev_t* dev)
     return 0xFF;// Didn't input RegDmn by mean to distinguish by customer
 
 }
-
 
 void zfHpDisableDfsChannel(zdev_t* dev, u8_t disableFlag)
 {

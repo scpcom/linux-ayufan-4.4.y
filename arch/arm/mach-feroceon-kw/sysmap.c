@@ -14,7 +14,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
 #include "mvSysHwConfig.h"
 #include "ctrlEnv/sys/mvCpuIf.h"
 #include <asm/mach/map.h>
@@ -251,7 +250,6 @@ MV_CPU_DEC_WIN* mv_sys_map(void)
         }
 }
 
-
 #if defined(CONFIG_MV_INCLUDE_CESA)
 u32 mv_crypto_base_get(void)
 {
@@ -273,5 +271,3 @@ void __init mv_map_io(void)
         iotable_init(MEM_TABLE, ARRAY_SIZE(MEM_TABLE));
 #endif /* CONFIG_MV_INTERNAL_REGS_SELECTIVE_MAPPING */	
 }
-
-

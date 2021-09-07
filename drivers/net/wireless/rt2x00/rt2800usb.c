@@ -1829,7 +1829,6 @@ static int rt2800usb_enable_radio(struct rt2x00_dev *rt2x00dev)
 	rt2x00_set_field32(&reg, WPDMA_GLO_CFG_ENABLE_TX_DMA, 1);
 	rt2x00usb_register_write(rt2x00dev, WPDMA_GLO_CFG, reg);
 
-
 	rt2x00usb_register_read(rt2x00dev, USB_DMA_CFG, &reg);
 	rt2x00_set_field32(&reg, USB_DMA_CFG_PHY_CLEAR, 0);
 	/* Don't use bulk in aggregation when working with USB 1.1 */

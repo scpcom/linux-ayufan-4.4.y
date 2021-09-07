@@ -27,7 +27,6 @@
 
 #include <linux/platform_device.h>
 
-
 #include <linux/leds.h>
  
 #include <asm/hardware.h>
@@ -94,7 +93,6 @@ static struct led_classdev oxnas_power_on_led = {
 	.brightness_set		= oxnasled_power_on_set,
 };
 
-
 #ifdef CONFIG_PM
 
 // TODO implement led suspend operation on NAS
@@ -123,7 +121,6 @@ static int oxnasled_probe(struct platform_device *pdev)
 
 	writel(PWM_PERIOD, PWM_CLOCK_REGISTER);
 
-	
 	/* enable PWM drives outputs */
 	for (i=0; i < NUMBER_LEDS ; ++i)
 	{
@@ -167,7 +164,6 @@ static int oxnasled_remove(struct platform_device *pdev)
 	return 0;
 }
 
-
 static struct platform_driver oxnasled_driver = {
 	.probe		= oxnasled_probe,
 	.remove		= oxnasled_remove,
@@ -186,8 +182,6 @@ static int __init oxnasled_init(void)
 	int ret;
 
 	ret = platform_driver_register(&oxnasled_driver);
-	
-	
 	
 	/* now register the devices on the bus so they can be associated with the driver */
 	if (!ret) 

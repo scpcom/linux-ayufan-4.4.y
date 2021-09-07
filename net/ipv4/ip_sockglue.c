@@ -91,7 +91,6 @@ static void ip_cmsg_recv_opts(struct msghdr *msg, struct sk_buff *skb)
 		 ip_hdr(skb) + 1);
 }
 
-
 static void ip_cmsg_recv_retopts(struct msghdr *msg, struct sk_buff *skb)
 {
 	unsigned char optbuf[sizeof(struct ip_options) + 40];
@@ -225,7 +224,6 @@ int ip_cmsg_send(struct net *net, struct msghdr *msg, struct ipcm_cookie *ipc)
 	}
 	return 0;
 }
-
 
 /* Special input handler for packets caught by router alert option.
    They are selected only by protocol field, and then processed likely
@@ -433,7 +431,6 @@ out:
 	return err;
 }
 
-
 /*
  *	Socket option code for IP. This is the end of the line after any
  *	TCP,UDP etc options on an IP socket.
@@ -638,7 +635,6 @@ static int do_ip_setsockopt(struct sock *sk, int level,
 				mreq.imr_ifindex = dev->ifindex;
 		} else
 			dev = dev_get_by_index(sock_net(sk), mreq.imr_ifindex);
-
 
 		err = -EADDRNOTAVAIL;
 		if (!dev)

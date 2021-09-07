@@ -691,7 +691,6 @@ int gigaset_isdn_setup_dial(struct at_state_t *at_state, void *data);
 void gigaset_i4l_cmd(struct cardstate *cs, int cmd);
 void gigaset_i4l_channel_cmd(struct bc_state *bcs, int cmd);
 
-
 static inline void gigaset_isdn_rcv_err(struct bc_state *bcs)
 {
 	isdn_ctrl response;

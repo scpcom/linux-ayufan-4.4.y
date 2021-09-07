@@ -68,7 +68,6 @@ enum {
 #define RX_BUF_SIZE						2352        // 600 	// For 301 must be multiple of 8
 #define MAX_RX_DESCRIPTORS              18         // Rx Layer 2
 
-
 // For brand-new rx system
 #define MDS_ID_IGNORE				ETHERNET_RX_DESCRIPTORS
 

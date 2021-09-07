@@ -457,7 +457,6 @@ int rawv6_rcv(struct sock *sk, struct sk_buff *skb)
 	return 0;
 }
 
-
 /*
  *	This should be easy, if there is something there
  *	we return it, otherwise we block.
@@ -974,7 +973,6 @@ static int rawv6_geticmpfilter(struct sock *sk, int level, int optname,
 
 	return 0;
 }
-
 
 static int do_rawv6_setsockopt(struct sock *sk, int level, int optname,
 			    char __user *optval, unsigned int optlen)

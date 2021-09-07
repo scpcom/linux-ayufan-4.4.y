@@ -80,13 +80,11 @@
 //#define JFFS2_NODETYPE_CHECKPOINT (JFFS2_FEATURE_RWCOMPAT_DELETE | JFFS2_NODE_ACCURATE | 3)
 //#define JFFS2_NODETYPE_OPTIONS (JFFS2_FEATURE_RWCOMPAT_COPY | JFFS2_NODE_ACCURATE | 4)
 
-
 #define JFFS2_INO_FLAG_PREREAD	  1	/* Do read_inode() for this one at
 					   mount time, don't wait for it to
 					   happen later */
 #define JFFS2_INO_FLAG_USERCOMPR  2	/* User has requested a specific
 					   compression type */
-
 
 /* These can go once we've made sure we've caught all uses without
    byteswapping */

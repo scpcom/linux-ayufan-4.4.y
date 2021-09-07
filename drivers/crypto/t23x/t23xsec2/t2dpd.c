@@ -41,13 +41,10 @@
  *
  */
 
-
-
 /** @file
  * Constructs packet descriptors for the legacy driver interface
  * for Talitos 2/3
  */
-
 
 #include <linux/kernel.h>
 #include <linux/types.h>
@@ -58,7 +55,6 @@
 #include "../t23xrm/t23xrmInternal.h"
 #include "Sec2.h"
 #include "Sec2local.h"
-
 
 /**
  * Header constants for AESA_CRYPT_REQ / DPD_AESA_CRYPT_GROUP
@@ -185,8 +181,6 @@ const unsigned long AesaDesc[1*NUM_AESA_CRYPT_DESC] = {
 
 };
 
-
-
 const unsigned long AesaMACDesc[1*NUM_AESA_MAC_DESC] = {
     /* DPD_AESA_CMAC                  OpId 0x6100 */
     ((EU_AES | AES_CMAC) << EU_SHIFT_PRIMARY) |
@@ -204,7 +198,6 @@ const unsigned long AesaMACDesc[1*NUM_AESA_MAC_DESC] = {
     ((EU_AES | AES_XCBC_MAC_ICV | AES_RDK) << EU_SHIFT_PRIMARY) |
         DESCTYPE_COMMON | HDR_OUTBOUND
 };
-
 
 const unsigned long AesaGCMDesc[1*NUM_AESA_GCM_DESC] = {
     /* DPD_AESA_GCM_ENCRYPT           OpId 0x6300 */
@@ -228,8 +221,6 @@ const unsigned long AesaGCMDesc[1*NUM_AESA_GCM_DESC] = {
         DESCTYPE_IPSEC_AES_GCM | HDR_OUTBOUND,
 };
 
-
-
 /**
  * Header constants for RNG_REQ / DPD_RNG_GROUP
  */
@@ -240,8 +231,6 @@ const unsigned long RngDesc[1*NUM_RNGA_DESC] = {
     (EU_RND << EU_SHIFT_PRIMARY) |
         DESCTYPE_COMMON
 };
-
-
 
 /**
  * Header constants for DES_CBC_CRYPT_REQ / DPD_DES_CBC_GROUP
@@ -298,9 +287,6 @@ const unsigned long DesCbcReq[1 * NUM_DES_CBC_DESC] = {
 
 };
 
-
-
-
 /**
  * Header constants for DES_CRYPT_REQ / DPD_DES_ECB_GROUP
  */
@@ -327,9 +313,6 @@ const unsigned long DesReq[1*NUM_DES_DESC] = {
         DESCTYPE_COMMON,
 };
 
-
-
-
 /**
  * Header constants for
  * ARC4_LOADCTX_CRYPT_REQ / DPD_RC4_LDCTX_CRYPT_ULCTX_GROUP
@@ -342,8 +325,6 @@ const unsigned long Rc4LoadCtxUnloadCtxReq[1*NUM_RC4_LOADCTX_UNLOADCTX_DESC] = {
         DESCTYPE_ARC4
 };
 
-
-
 /**
  * Header constants for
  * ARC4_LOADKEY_CRYPT_UNLOADCTX_REQ / DPD_RC4_LDKEY_CRYPT_ULCTX_GROUP
@@ -354,8 +335,6 @@ const unsigned long Rc4LoadKeyUnloadCtxReq[1*NUM_RC4_LOADKEY_UNLOADCTX_DESC] = {
     ((EU_ARC4 | ARC4_DUMP_CONTEXT) << EU_SHIFT_PRIMARY) |
         DESCTYPE_ARC4
 };
-
-
 
 /**
  * Header constants for HASH_REQ / DPD_HASH_LDCTX_HASH_ULCTX_GROUP
@@ -523,7 +502,6 @@ const unsigned long MdhaReq[1 * NUM_MDHA_DESC] = {
 
 };
 
-
 /**
  * Header constants for HASH_REQ / DPD_HASH_LDCTX_HASH_PAD_ULCTX_GROUP
  */
@@ -656,8 +634,6 @@ const unsigned long MdhaPadReq[1 * NUM_MDHA_PAD_DESC] = {
     ((EU_MDPRIME | MD_SHA512 | MD_INIT | MD_CICV | MD_PD) << EU_SHIFT_PRIMARY) |
         DESCTYPE_COMMON | HDR_INBOUND,
 };
-
-
 
 /**
  * Header constants for HMAC_PAD_REQ / DPD_HASH_LDCTX_HMAC_ULCTX_GROUP
@@ -794,8 +770,6 @@ const unsigned long HmacPadReq[1 * NUM_HMAC_PAD_DESC] = {
 
 };
 
-
-
 /**
  * Header constants for MOD_EXP_REQ  DPD_MM_LDCTX_EXP_ULCTX_GROUP
  */
@@ -807,7 +781,6 @@ const unsigned long PkhaMmExpReq[1*NUM_MM_EXP_DESC] = {
     ((EU_PK | PK_MOD_EXP_TEQ) << EU_SHIFT_PRIMARY) | DESCTYPE_PK_MONTY
 };
 
-
 /**
  * Header constants for MOD_SS_EXP_REQ / DPD_MM_SS_RSA_EXP
  */
@@ -818,7 +791,6 @@ const unsigned long PkhaMmSsExpReq[1*NUM_MM_SS_EXP_DESC] = {
     /* DPD_MM_SS_RSA_EXP_TEQ                   OpId 0x5b01 */
     ((EU_PK | PK_RSA_SS_TEQ) << EU_SHIFT_PRIMARY) | DESCTYPE_PK_MONTY,
 };
-
 
 /**
  * Header constants for MOD_R2MODN_REQ / DPD_MM_LDCTX_R2MODN_ULCTX_GROUP
@@ -1080,8 +1052,6 @@ const unsigned long PkhaMod2OpReq[1 * NUM_MOD_2OP_DESC] = {
         DESCTYPE_PK_MONTY | HDR_OUTBOUND
 };
 
-
-
 /**
  * Header constants for ECC_POINT_REQ / DPD_EC_LDCTX_kP_ULCTX_GROUP
  * These descriptors use the "packed" format
@@ -1128,8 +1098,6 @@ const unsigned long PkhaEccPointReq[1*NUM_EC_POINT_DESC] = {
         DESCTYPE_PK_ECC_PTMULT | HDR_OUTBOUND
 };
 
-
-
 /**
  * Header constants for ECC_2OP_REQ / DPD_EC_2OP_GROUP
  */
@@ -1150,7 +1118,6 @@ const unsigned long PkhaEcc2OpReq[1*NUM_EC_2OP_DESC] = {
         DESCTYPE_PK_MONTY | HDR_OUTBOUND
 };
 
-
 /**
  * Header constants for ECC_SPKBUILD_REQ / DPD_EC_SPKBUILD_GROUP
  */
@@ -1161,7 +1128,6 @@ const unsigned long PkhaEccSpkbuildReq[1*NUM_EC_SPKBUILD_DESC] =
     ((EU_PK | PK_PKBUILD) << EU_SHIFT_PRIMARY) |
         DESCTYPE_PK_ECC_ASM
 };
-
 
 /**
  * Header constants for ECC_PTADD_DBL
@@ -1188,7 +1154,6 @@ const unsigned long PkhaEccPtaddDblReq[1 * NUM_EC_PTADD_DBL_DESC] =
     ((EU_PK | PK_EC_F2M_DOUBLE) << EU_SHIFT_PRIMARY) |
      DESCTYPE_PK_ECC_PTADD_D
 };
-
 
 /**
  * Header constants for IPSEC_CBC_REQ / DPD_IPSEC_CBC_GROUP
@@ -1267,9 +1232,6 @@ const unsigned long IpsecCbcReq[1*NUM_IPSEC_CBC_DESC] = {
     DESCTYPE_HMAC | HDR_INBOUND
 };
 
-
-
-
 /**
  * Header constants for IPSEC_ECB_REQ / DPD_IPSEC_ECB_GROUP
  */
@@ -1346,8 +1308,6 @@ const unsigned long IpsecEcbReq[1*NUM_IPSEC_ECB_DESC] = {
     ((EU_MD | MD_INIT | MD_HMAC | MD_PD | MD_SHA256) << EU_SHIFT_SECONDARY) |
     DESCTYPE_HMAC | HDR_INBOUND,
 };
-
-
 
 /**
  * Header constants for IPSEC_AES_CBC_REQ / DPD_IPSEC_AES_CBC_GROUP
@@ -1427,9 +1387,6 @@ const unsigned long IpsecAesCbcReq[1*NUM_IPSEC_AES_CBC_DESC] = {
     DESCTYPE_HMAC | HDR_INBOUND
 };
 
-
-
-
 /**
  * Header constants for IPSEC_AES_ECB_REQ / DPD_IPSEC_AES_ECB_GROUP
  */
@@ -1507,8 +1464,6 @@ const unsigned long IpsecAesEcbReq[1*NUM_IPSEC_AES_ECB_DESC] = {
     ((EU_MD | MD_INIT | MD_HMAC  | MD_SHA256) << EU_SHIFT_SECONDARY) |
     DESCTYPE_HMAC | HDR_INBOUND,
 };
-
-
 
 /**
  * Header constants for IPSEC_ESP_REQ / DPD_IPSEC_ESP_GROUP
@@ -1732,9 +1687,6 @@ const unsigned long IpsecEspReq[1 * NUM_IPSEC_ESP_DESC] = {
     DESCTYPE_IPSEC_ESP | HDR_INBOUND
 };
 
-
-
-
 /**
  * Header constants for CCMP_REQ / DPD_CCMP_GROUP
  */
@@ -1758,9 +1710,6 @@ const unsigned long CcmpReq[1 * NUM_CCMP_DESC] = {
     ((EU_AES | AES_CCM | AES_FINALMAC | AES_INITMAC) << EU_SHIFT_PRIMARY) |
     DESCTYPE_AES_CCMP | HDR_INBOUND
 };
-
-
-
 
 /**
  * Header constants for SRTP_REQ / DPD_SRTP_GROUP
@@ -1794,8 +1743,6 @@ const unsigned long SrtpReq[1 * NUM_SRTP_DESC] = {
     ((EU_MD | MD_INIT | MD_HMAC | MD_PD | MD_SHA1) << EU_SHIFT_SECONDARY) ||
     DESCTYPE_SRTP | HDR_OUTBOUND,
 };
-
-
 
 /**
  * Header constants for KEA_CRYPT_REQ / DPD_KEA_CRYPT_GROUP
@@ -1863,8 +1810,6 @@ const unsigned long KeaReq[1 * NUM_KEA_CRYPT_DESC] = {
     DESCTYPE_COMMON | HDR_INBOUND
 };
 
-
-
 /**
  * Header constants for SNOW3G_CRYPT_REQ / DPD_SNOW3G_CRYPT_GROUP
  */
@@ -1911,7 +1856,6 @@ const unsigned long SnoReq[1 * NUM_SNOW3G_CRYPT_DESC] = {
     DESCTYPE_COMMON | HDR_INBOUND
 };
 
-
 /**
  * Header constants for RAID_XOR_REQ / DPD_RAID_XOR_REQ_GROUP
  */
@@ -1921,8 +1865,6 @@ const unsigned long RaidXorReq[1 * NUM_RAID_XOR_DESC] = {
     ((EU_AES | AES_XOR) << EU_SHIFT_PRIMARY) |
     DESCTYPE_RAIDXOR,
 };
-
-
 
 /**
  * Header constants for TLS_BLOCK_INBOUND_REQ / DPD_TLS_BLOCK_INBOUND_GROUP
@@ -2199,10 +2141,6 @@ const unsigned long TlsBlockInboundReq[1 * NUM_TLS_BLOCK_INBOUND_DESC] = {
     DESCTYPE_TLS_BLOCK | HDR_INBOUND,
 };
 
-
-
-
-
 /**
  * Header constants for TLS_BLOCK_OUTBOUND_REQ / DPD_TLS_BLOCK_OUTBOUND_GROUP
  */
@@ -2289,10 +2227,6 @@ const unsigned long TlsBlockOutboundReq[1 * NUM_TLS_BLOCK_OUTBOUND_DESC] = {
     DESCTYPE_TLS_BLOCK | HDR_OUTBOUND,
 
 };
-
-
-
-
 
 /**
  * Header constants for TLS_STREAM_INBOUND_REQ / DPD_TLS_STREAM_INBOUND_GROUP
@@ -2407,9 +2341,6 @@ const unsigned long TlsStreamInboundReq[1 * NUM_TLS_STREAM_INBOUND_DESC] = {
     DESCTYPE_TLS_STREAM | HDR_INBOUND,
 };
 
-
-
-
 /**
  * Header constants for TLS_STREAM_OUTBOUND_REQ / DPD_TLS_STREAM_OUTBOUND_GROUP
  */
@@ -2469,13 +2400,10 @@ const unsigned long TlsStreamOutboundReq[1 * NUM_TLS_STREAM_OUTBOUND_DESC] = {
     DESCTYPE_TLS_STREAM | HDR_OUTBOUND,
 };
 
-
 #define DES_STD_BLOCKSIZE      (8)
 #define ARC4_STD_MIN_KEYBYTES  (1)
 #define ARC4_STD_MAX_KEYBYTES  (16)
 #define ARC4_STD_CONTEXTBYTES  (259)
-
-
 
 #define STD_OFFSETS(s,l1,l2,p1,p2)  offsetof(s,l1), offsetof(s,l2),\
     offsetof(s,p1), 0
@@ -2487,8 +2415,6 @@ const unsigned long TlsStreamOutboundReq[1 * NUM_TLS_STREAM_OUTBOUND_DESC] = {
 
 static char NIL[] = {"NIL"};
 
-
-
 /*! \enum FLD_TYPE
   \brief A field can either be for reading from or writing to
  */
@@ -2497,7 +2423,6 @@ typedef enum {
     Write,
     Extent
 } FLD_TYPE;
-
 
 /**
  * DPD_FLD_DETAILS_ENTRY
@@ -2556,7 +2481,6 @@ typedef struct DPD_DETAILS_ENTRY
     DPD_FLD_DETAILS_ENTRY    fld[NUM_DPD_FLDS];
 } DPD_DETAILS_ENTRY;        /* Each request is enumerated here */
 
-
 BOOLEAN ChkDesIvLen(unsigned long len);
 BOOLEAN ChkDesKeyLen(unsigned long len);
 BOOLEAN ChkDesStaticDataLen(unsigned long len);
@@ -2571,10 +2495,8 @@ BOOLEAN ChkAesIvLen(unsigned long len);
 BOOLEAN ChkAesKeyLen(unsigned long len);
 BOOLEAN ChkCcmpKeyLen(unsigned long len);
 
-
 DPD_DETAILS_ENTRY DpdDetails[] =
 {
-
 
     /*
      * DPD_RNG_GROUP
@@ -2606,7 +2528,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
     /*
      * DPD_DES_CBC_GROUP
      *     pointer               length             extent
@@ -2636,9 +2557,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {NIL,           ALL_ZERO_OFFSETS,                                                             Read,  NULL}
         },
     },
-
-
-
 
     /*
      * DPD_DES_ECB_GROUP
@@ -2670,9 +2588,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
-
     /*
      * DPD_RC4_LDCTX_CRYPT_ULCTX_GROUP
      *     pointer               length             extent
@@ -2702,9 +2617,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {NIL,           ALL_ZERO_OFFSETS,                                                                      Read,  NULL}
         },
     },
-
-
-
 
     /*
      * DPD_RC4_LDKEY_CRYPT_ULCTX_GROUP
@@ -2736,9 +2648,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
-
     /*
      * DPD_HASH_LDCTX_HASH_ULCTX_GROUP
      *     pointer               length             extent
@@ -2768,9 +2677,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {NIL,           ALL_ZERO_OFFSETS,                                            Read,  NULL}
         },
     },
-
-
-
 
     /*
      * DPD_HASH_LDCTX_HASH_PAD_ULCTX_GROUP
@@ -2802,9 +2708,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
-
     /*
      * DPD_HASH_LDCTX_HMAC_ULCTX_GROUP
      *     pointer               length             extent
@@ -2834,9 +2737,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {NIL,           ALL_ZERO_OFFSETS,                                                Read,  NULL}
         },
     },
-
-
-
 
     /*
      * DPD_MM_LDCTX_EXP_ULCTX_GROUP
@@ -2868,9 +2768,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
-
     /*
      * DPD_MM_SS_RSA_EXP
      *     pointer               length             extent
@@ -2900,9 +2797,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {NIL,           ALL_ZERO_OFFSETS,                                                      Read,  NULL}
         },
     },
-
-
-
 
     /*
      * DPD_MM_LDCTX_R2MODN_ULCTX_GROUP
@@ -2934,9 +2828,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
-
     /*
      * DPD_MM_LDCTX_RRMODP_ULCTX_GROUP
      *     pointer               length             extent
@@ -2967,9 +2858,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
-
     /*
      * DPD_MM_MOD_INV_ULCTX_GROUP
      *     pointer               length             extent
@@ -2999,7 +2887,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {NIL,           ALL_ZERO_OFFSETS,                                                  Read,  NULL}
         },
     },
-
 
     /*
      * DPD_F2M_INV_ULCTX_GROUP
@@ -3032,10 +2919,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
-
-
     /*
      * DPD_MM_LDCTX_2OP_ULCTX_GROUP
      *     pointer               length             extent
@@ -3065,9 +2948,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {NIL,           ALL_ZERO_OFFSETS,                                                   Read,  NULL}
         },
     },
-
-
-
 
     /*
      * DPD_EC_LDCTX_kP_ULCTX_GROUP
@@ -3099,9 +2979,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
-
     /*
      * DPD_EC_2OP_GROUP
      *     pointer               length             extent
@@ -3131,9 +3008,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {NIL,           ALL_ZERO_OFFSETS,                                                   Read,  NULL}
         },
     },
-
-
-
 
     /*
      * DPD_EC_SPKBUILD_GROUP
@@ -3165,9 +3039,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
-
     /*
      * DPD_EC_PTADD_DBL_GROUP
      *     pointer               length             extent
@@ -3197,10 +3068,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {"b3Data",    STD_OFFSETS(ECC_PTADD_DBL_REQ, b3DataBytes,    b3DataBytes,    b3Data,    b3Data),    Write, NULL},
         },
     },
-
-
-
-
 
     /*
      * DPD_IPSEC_CBC_GROUP
@@ -3232,10 +3099,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
-
-
     /*
      * DPD_IPSEC_ECB_GROUP
      *     pointer               length             extent
@@ -3265,9 +3128,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {"hashDataOut",  STD_OFFSETS(IPSEC_ECB_REQ, hashDataOutBytes, hashDataOutBytes, hashDataOut,  hashDataOut),  Write, NULL}
         },
     },
-
-
-
 
     /*
      * DPD_IPSEC_ESP_GROUP
@@ -3299,9 +3159,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
-
     /*
      * DPD_IPSEC_AES_CBC_GROUP
      *     pointer               length             extent
@@ -3331,9 +3188,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {"hashDataOut",    STD_OFFSETS(IPSEC_CBC_REQ, hashDataOutBytes, hashDataOutBytes, hashDataOut,    hashDataOut),    Write, NULL}
         },
     },
-
-
-
 
     /*
      * DPD_IPSEC_AES_ECB_GROUP
@@ -3365,10 +3219,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
-
-
     /*
      * DPD_AESA_CRYPT_GROUP
      *     pointer               length             extent
@@ -3398,7 +3248,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {NIL,           ALL_ZERO_OFFSETS,                                                              Read,  NULL}
         },
     },
-
 
     /*
      * DPD_AESA_MAC_GROUP
@@ -3430,8 +3279,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
     /*
      * DPD_AESA_GCM_GROUP
      *     pointer               length             extent
@@ -3461,9 +3308,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {"IVout",       EXT_OFFSETS(AESA_GCM_REQ,   ivBytes,     ivBytes,     ivOut,      crcBytes),   Write, NULL},
         },
     },
-
-
-
 
     /*
      * DPD_CCMP_GROUP
@@ -3495,9 +3339,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
-
     /*
      * DPD_SRTP_GROUP
      *     pointer               length             extent
@@ -3527,10 +3368,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {"outIvData",   STD_OFFSETS(SRTP_REQ, outIvBytes,     outIvBytes,     outIvData,    outIvData),   Write, NULL}
         },
     },
-
-
-
-
 
     /*
      * DPD_KEA_CRYPT_GROUP
@@ -3592,7 +3429,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
     /*
      * DPD_RAID_XOR_GROUP
      *     pointer               length             extent
@@ -3622,7 +3458,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {"outData",     STD_OFFSETS(RAID_XOR_REQ, opSize, opSize, outData, outData), Write, NULL},
         },
     },
-
 
     /*
      * DPD_TLS_BLOCK_INBOUND_GROUP
@@ -3654,8 +3489,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
     /*
      * DPD_TLS_BLOCK_OUTBOUND_GROUP
      *     pointer               length             extent
@@ -3686,10 +3519,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
         },
     },
 
-
-
-
-
     /*
      * DPD_TLS_STREAM_INBOUND_GROUP
      *     pointer               length             extent
@@ -3719,11 +3548,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
             {"ivOutData",     STD_OFFSETS(TLS_STREAM_INBOUND_REQ, ivOutBytes,     ivOutBytes,     ivOutData,     ivOutData),     Write, NULL}
         },
     },
-
-
-
-
-
 
     /*
      * DPD_TLS_STREAM_OUTBOUND_GROUP
@@ -3765,7 +3589,6 @@ DPD_DETAILS_ENTRY DpdDetails[] =
 
 };
 
-
 int VerifyRequest(register void *rq, register DPD_DETAILS_ENTRY *dpdmap)
 {
     register int           i;
@@ -3793,10 +3616,6 @@ int VerifyRequest(register void *rq, register DPD_DETAILS_ENTRY *dpdmap)
     return SEC2_SUCCESS;
 }
 
-
-
-
-
 /**
  * Scan the DPDDetails table for a particular opId value.
  * Return a pointer to the entry if it is found, NULL otherwise
@@ -3810,8 +3629,6 @@ DPD_DETAILS_ENTRY *GetRequestDescEntry(unsigned long opId)
 
     return(DpdDetails[i].opId == 0 ? NULL : &DpdDetails[i]);
 }
-
-
 
 /**
  * This needs to get the core info from the RM */
@@ -3868,76 +3685,55 @@ int CheckCapability(unsigned long opID)
     return SEC2_SUCCESS;
 }
 
-
 BOOLEAN ChkDesIvLen(unsigned long len)
 {
     return len != 0 && len != DES_STD_BLOCKSIZE ? FALSE : TRUE;
 }
-
-
 
 BOOLEAN ChkDesKeyLen(unsigned long len)
 {
     return len != DES_STD_BLOCKSIZE && len != (2 * DES_STD_BLOCKSIZE) && len != (3 * DES_STD_BLOCKSIZE) ? FALSE : TRUE;
 }
 
-
-
 BOOLEAN ChkDesStaticDataLen(unsigned long len)
 {
     return (len & 0x7) != 0 ? FALSE : TRUE;
 }
-
-
 
 BOOLEAN ChkDesDataLen(unsigned long len)
 {
     return (len & 0x7) != 0 ? FALSE : TRUE;
 }
 
-
-
 BOOLEAN ChkDesCtxLen(unsigned long len)
 {
     return len != 0 && len != DES_STD_BLOCKSIZE ? FALSE : TRUE;
 }
-
-
 
 BOOLEAN ChkAesKeyLen(unsigned long len)
 {
     return len != 16 && len != 24 && len != 32 ? FALSE : TRUE;
 }
 
-
-
 BOOLEAN ChkAesIvLen(unsigned long len)
 {
     return len != 0 && len != 16 ? FALSE : TRUE;
 }
-
-
 
 BOOLEAN ChkArcKeyLen(unsigned long len)
 {
     return len < ARC4_STD_MIN_KEYBYTES || len > ARC4_STD_MAX_KEYBYTES ? FALSE : TRUE;
 }
 
-
-
 BOOLEAN ChkArcCtxLen(unsigned long len)
 {
     return len != ARC4_STD_CONTEXTBYTES ? FALSE : TRUE;
 }
 
-
-
 BOOLEAN ChkOptionalArcCtxLen(unsigned long len)
 {
     return len != ARC4_STD_CONTEXTBYTES && len != 0 ? FALSE : TRUE;
 }
-
-
 
 BOOLEAN ChkEccLen(unsigned long len)
 {
@@ -3952,16 +3748,10 @@ BOOLEAN FitInBlock(unsigned long len)
 }
 #endif
 
-
-
 BOOLEAN ChkCcmpKeyLen(unsigned long len)
 {
     return len != 0 && len != 16 ? FALSE : TRUE;
 }
-
-
-
-
 
 int constructDPDlist(GENERIC_REQ   *rqList,
                      RMexecMessage *execMsg,
@@ -3994,7 +3784,6 @@ int constructDPDlist(GENERIC_REQ   *rqList,
         status = VerifyRequest(thisRQ, dpdmap);
         if (status != SEC2_SUCCESS)
             return status;
-
 
         /* Get the descriptor header */
         thisDPD->hdr = dpdmap->hdrDesc[1 * (thisRQ->opId & DESC_NUM_MASK)];
@@ -4046,7 +3835,6 @@ int constructDPDlist(GENERIC_REQ   *rqList,
                         case PTR_PHYSICAL:
                             break;
 
-
                             /* If logical, then we assume that the buffer is     */
                             /* contiguous, and we only have to substitute a      */
                             /* physical address for the pointer specified        */
@@ -4058,7 +3846,6 @@ int constructDPDlist(GENERIC_REQ   *rqList,
                                 return SEC2_ADDRESS_PROBLEM;
                             }
                             break;
-
 
                             /* If user virtual, we have look at the page map for */
                             /* this buffer, create a scatterlist, and lock in    */
@@ -4072,7 +3859,6 @@ int constructDPDlist(GENERIC_REQ   *rqList,
                             }
                             break;
 
-
                             /* If kernel virtual, we have to build a scatterlist */
                             /* Not supported at this time - if ever...           */
                         case PTR_KERNEL_VIRTUAL:
@@ -4083,7 +3869,6 @@ int constructDPDlist(GENERIC_REQ   *rqList,
                                 return SEC2_ADDRESS_PROBLEM;
                             }
                             break;
-
 
                             /* NO default, if no specifed type, this is a bug... */
                         default:
@@ -4124,7 +3909,6 @@ int constructDPDlist(GENERIC_REQ   *rqList,
     return SEC2_SUCCESS;
 }
 
-
 /**
  * After done with a DPD list, free any resources it may have used */
 int releaseDPDlist(RMexecMessage *execMsg,
@@ -4133,7 +3917,6 @@ int releaseDPDlist(RMexecMessage *execMsg,
     int            i, status, totalDPDs;
     T2DPD         *thisDPD;
     T2DESC_AUXMAP *thisDPDmap;
-
 
     thisDPD    = execMsg->descHead;
     thisDPDmap = execMsg->descBufferMap;

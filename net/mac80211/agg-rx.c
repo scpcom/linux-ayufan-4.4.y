@@ -228,7 +228,6 @@ void ieee80211_process_addba_request(struct ieee80211_local *local,
 		buf_size = buf_size << sband->ht_cap.ampdu_factor;
 	}
 
-
 	/* examine state machine */
 	spin_lock_bh(&sta->lock);
 

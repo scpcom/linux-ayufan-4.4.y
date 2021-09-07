@@ -14,7 +14,6 @@
 #include <linux/platform_device.h>
 #include <linux/delay.h>
 
-
 #define RTC_TIME_REG_OFFS	0
 #define RTC_SECONDS_OFFS	0
 #define RTC_MINUTES_OFFS	8
@@ -26,7 +25,6 @@
 #define RTC_MDAY_OFFS		0
 #define RTC_MONTH_OFFS		8
 #define RTC_YEAR_OFFS		16
-
 
 struct rtc_plat_data {
 	struct rtc_device *rtc;

@@ -20,4 +20,3 @@ MV_U64 ZeroU64(MV_U64 v1);
 #endif
 
 #endif
-

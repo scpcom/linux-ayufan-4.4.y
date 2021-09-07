@@ -45,7 +45,6 @@
 #define	uint32 unsigned	long int
 #endif
 
-
 #ifndef	__MD5_H__
 #define	__MD5_H__
 
@@ -104,4 +103,3 @@ void F(char *password, unsigned char *ssid, int ssidlength, int iterations, int 
 int PasswordHash(char *password, unsigned char *ssid, int ssidlength, unsigned char *output);
 
 #endif /* aes.h	*/
-

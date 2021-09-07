@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #include "cpu/mvCpu.h"
 #include "ctrlEnv/mvCtrlEnvLib.h"
 
@@ -120,7 +119,6 @@ MV_U32 mvCpuPclkGet(MV_VOID)
 #endif
 #endif /* DB_FPGA */
 
-
 	return tmpPClkRate;
 }
 
@@ -161,7 +159,6 @@ MV_VOID mvCpuNameGet(char *pNameBuff)
 
     return;
 }
-
 
 #define MV_PROC_STR_SIZE 50
 
@@ -218,6 +215,3 @@ MV_U32 mvCpuIfPrintSystemConfig(MV_8 *buffer, MV_U32 index)
   count += mvOsSPrintf(buffer + count + index, "%s\n", Cpu_Stream_str);
   return count;
 }
-
-
-

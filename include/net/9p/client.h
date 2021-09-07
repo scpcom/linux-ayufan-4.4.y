@@ -209,5 +209,4 @@ int p9_parse_header(struct p9_fcall *, int32_t *, int8_t *, int16_t *, int);
 int p9stat_read(char *, int, struct p9_wstat *, int);
 void p9stat_free(struct p9_wstat *);
 
-
 #endif /* NET_9P_CLIENT_H */

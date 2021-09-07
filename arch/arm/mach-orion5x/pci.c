@@ -30,7 +30,6 @@
  * access to DDR banks.
  ****************************************************************************/
 
-
 /*****************************************************************************
  * PCIe controller
  ****************************************************************************/
@@ -60,7 +59,6 @@ static int pcie_valid_config(int bus, int dev)
 
 	return 1;
 }
-
 
 /*
  * PCIe config cycles are done by programming the PCIE_CONF_ADDR register
@@ -133,7 +131,6 @@ static struct pci_ops pcie_ops = {
 	.read = pcie_rd_conf,
 	.write = pcie_wr_conf,
 };
-
 
 static int __init pcie_setup(struct pci_sys_data *sys)
 {
@@ -521,7 +518,6 @@ static int __init pci_setup(struct pci_sys_data *sys)
 
 	return 1;
 }
-
 
 /*****************************************************************************
  * General PCIe + PCI

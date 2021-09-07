@@ -48,7 +48,6 @@ typedef struct __user_cap_data_struct {
         __u32 inheritable;
 } __user *cap_user_data_t;
 
-
 #define XATTR_CAPS_SUFFIX "capability"
 #define XATTR_NAME_CAPS XATTR_SECURITY_PREFIX XATTR_CAPS_SUFFIX
 
@@ -112,7 +111,6 @@ struct cpu_vfs_cap_data {
 
 #endif
 
-
 /**
  ** POSIX-draft defined capabilities.
  **/
@@ -166,7 +164,6 @@ struct cpu_vfs_cap_data {
 /* Allows forged pids on socket credentials passing. */
 
 #define CAP_SETUID           7
-
 
 /**
  ** Linux-specific capabilities

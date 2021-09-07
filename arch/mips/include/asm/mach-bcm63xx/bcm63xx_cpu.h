@@ -226,7 +226,6 @@ enum bcm63xx_regs_set {
 #define BCM_6358_MEMC_BASE		(0xfffe1200)
 #define BCM_6358_DDR_BASE		(0xfffe12a0)
 
-
 extern const unsigned long *bcm63xx_regs_base;
 
 static inline unsigned long bcm63xx_regset_address(enum bcm63xx_regs_set set)

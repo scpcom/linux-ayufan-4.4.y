@@ -32,7 +32,6 @@
 # define I8042_AUX_IRQ	12
 #endif
 
-
 /*
  * Register numbers.
  */

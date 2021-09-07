@@ -72,7 +72,6 @@ lpfc_debug_save_data(struct scsi_cmnd *cmnd)
 		return;
 	}
 
-
 	if (!sgde) {
 		printk(KERN_ERR "BLKGRD ERROR: data scatterlist is null\n");
 		return;
@@ -1386,7 +1385,6 @@ lpfc_bg_setup_bpl_prot(struct lpfc_hba *phba, struct scsi_cmnd *sc,
 		prot_bde->addrHigh = le32_to_cpu(putPaddrHigh(protphysaddr));
 		protgroup_len = sg_dma_len(sgpe);
 
-
 		/* must be integer multiple of the DIF block length */
 		BUG_ON(protgroup_len % 8);
 
@@ -1468,7 +1466,6 @@ lpfc_bg_setup_bpl_prot(struct lpfc_hba *phba, struct scsi_cmnd *sc,
 	} while (!alldone);
 
 out:
-
 
 	return num_bde;
 }
@@ -2039,7 +2036,6 @@ lpfc_handle_fcp_err(struct lpfc_vport *vport, struct lpfc_scsi_buf *lpfc_cmd,
 	uint32_t rsplen = 0;
 	uint32_t logit = LOG_FCP | LOG_FCP_ERROR;
 
-
 	/*
 	 *  If this is a task management command, there is no
 	 *  scsi packet associated with this lpfc_cmd.  The driver
@@ -2346,7 +2342,6 @@ lpfc_scsi_cmd_iocb_cmpl(struct lpfc_hba *phba, struct lpfc_iocbq *pIocbIn,
 		lpfc_release_scsi_buf(phba, lpfc_cmd);
 		return;
 	}
-
 
 	if (!result)
 		lpfc_rampup_queue_depth(vport, queue_depth);
@@ -3554,7 +3549,6 @@ lpfc_slave_destroy(struct scsi_device *sdev)
 	sdev->hostdata = NULL;
 	return;
 }
-
 
 struct scsi_host_template lpfc_template = {
 	.module			= THIS_MODULE,

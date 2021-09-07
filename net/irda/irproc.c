@@ -94,5 +94,3 @@ void irda_proc_unregister(void)
 		proc_irda = NULL;
 	}
 }
-
-

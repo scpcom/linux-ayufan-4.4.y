@@ -97,7 +97,6 @@ struct l4_kcq {
 #endif
 };
 
-
 /*
  * L4 KCQ CQE PG upload
  */
@@ -134,7 +133,6 @@ struct l4_kcq_upload_pg {
 #endif
 };
 
-
 /*
  * Gracefully close the connection request
  */
@@ -163,7 +161,6 @@ struct l4_kwq_close_req {
 	u32 cid;
 	u32 reserved2[6];
 };
-
 
 /*
  * The first request to be passed in order to establish connection in option2
@@ -257,7 +254,6 @@ struct l4_kwq_connect_req1 {
 	u32 rsrv2;
 };
 
-
 /*
  * The second ( optional )request to be passed in order to establish
  * connection in option2 - for IPv6 only
@@ -294,7 +290,6 @@ struct l4_kwq_connect_req2 {
 	u32 dst_ip_v6_3;
 	u32 dst_ip_v6_4;
 };
-
 
 /*
  * The third ( and last )request to be passed in order to establish
@@ -346,7 +341,6 @@ struct l4_kwq_connect_req3 {
 	u32 snd_buf;
 	u32 seed;
 };
-
 
 /*
  * a KWQE request to offload a PG connection
@@ -444,7 +438,6 @@ struct l4_kwq_offload_pg {
 	u32 host_opaque;
 };
 
-
 /*
  * Abortively close the connection request
  */
@@ -473,7 +466,6 @@ struct l4_kwq_reset_req {
 	u32 cid;
 	u32 reserved2[6];
 };
-
 
 /*
  * a KWQE request to update a PG connection
@@ -546,7 +538,6 @@ struct l4_kwq_update_pg {
 	u32 reserved4;
 	u32 reserved5;
 };
-
 
 /*
  * a KWQE request to upload a PG or L4 context

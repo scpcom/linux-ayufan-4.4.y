@@ -70,7 +70,6 @@
 #define D_SUBMODULE driver
 #include "debug-levels.h"
 
-
 int i2400m_idle_mode_disabled;	/* 0 (idle mode enabled) by default */
 module_param_named(idle_mode_disabled, i2400m_idle_mode_disabled, int, 0644);
 MODULE_PARM_DESC(idle_mode_disabled,
@@ -161,7 +160,6 @@ error_kzalloc:
 }
 EXPORT_SYMBOL_GPL(i2400m_queue_work);
 
-
 /*
  * Schedule i2400m's specific work on the system's queue.
  *
@@ -192,7 +190,6 @@ int i2400m_schedule_work(struct i2400m *i2400m,
 error_kzalloc:
 	return result;
 }
-
 
 /*
  * WiMAX stack operation: relay a message from user space
@@ -250,7 +247,6 @@ error_msg_to_dev:
 	return result;
 }
 
-
 /*
  * Context to wait for a reset to finalize
  */
@@ -258,7 +254,6 @@ struct i2400m_reset_ctx {
 	struct completion completion;
 	int result;
 };
-
 
 /*
  * WiMAX stack operation: reset a device
@@ -307,7 +302,6 @@ out:
 	d_fnend(4, dev, "(wimax_dev %p) = %d\n", wimax_dev, result);
 	return result;
 }
-
 
 /*
  * Check the MAC address we got from boot mode is ok
@@ -371,7 +365,6 @@ error:
 	d_fnend(3, dev, "(i2400m %p) = %d\n", i2400m, result);
 	return result;
 }
-
 
 /**
  * __i2400m_dev_start - Bring up driver communication with the device
@@ -462,7 +455,6 @@ error_bootstrap:
 	return result;
 }
 
-
 static
 int i2400m_dev_start(struct i2400m *i2400m, enum i2400m_bri bm_flags)
 {
@@ -474,7 +466,6 @@ int i2400m_dev_start(struct i2400m *i2400m, enum i2400m_bri bm_flags)
 	mutex_unlock(&i2400m->init_mutex);
 	return result;
 }
-
 
 /**
  * i2400m_dev_stop - Tear down driver communication with the device
@@ -505,7 +496,6 @@ void __i2400m_dev_stop(struct i2400m *i2400m)
 	d_fnend(3, dev, "(i2400m %p) = 0\n", i2400m);
 }
 
-
 /*
  * Watch out -- we only need to stop if there is a need for it. The
  * device could have reset itself and failed to come up again (see
@@ -521,7 +511,6 @@ void i2400m_dev_stop(struct i2400m *i2400m)
 	}
 	mutex_unlock(&i2400m->init_mutex);
 }
-
 
 /*
  * The device has rebooted; fix up the device and the driver
@@ -595,7 +584,6 @@ out:
 	return;
 }
 
-
 /**
  * i2400m_dev_reset_handle - Handle a device's reset in a thread context
  *
@@ -616,7 +604,6 @@ int i2400m_dev_reset_handle(struct i2400m *i2400m)
 				    GFP_ATOMIC);
 }
 EXPORT_SYMBOL_GPL(i2400m_dev_reset_handle);
-
 
 /**
  * i2400m_setup - bus-generic setup function for the i2400m device
@@ -722,7 +709,6 @@ error_bm_cmd_kzalloc:
 }
 EXPORT_SYMBOL_GPL(i2400m_setup);
 
-
 /**
  * i2400m_release - release the bus-generic driver resources
  *
@@ -747,7 +733,6 @@ void i2400m_release(struct i2400m *i2400m)
 }
 EXPORT_SYMBOL_GPL(i2400m_release);
 
-
 /*
  * Debug levels control; see debug.h
  */
@@ -762,7 +747,6 @@ struct d_level D_LEVEL[] = {
 	D_SUBMODULE_DEFINE(tx),
 };
 size_t D_LEVEL_SIZE = ARRAY_SIZE(D_LEVEL);
-
 
 static
 int __init i2400m_driver_init(void)

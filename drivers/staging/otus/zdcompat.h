@@ -27,7 +27,6 @@
 #ifndef _ZDCOMPAT_H
 #define _ZDCOMPAT_H
 
-
 #ifndef DECLARE_TASKLET
 #define tasklet_schedule(a)   schedule_task(a)
 #endif
@@ -40,6 +39,5 @@ typedef struct net_device netdevice_t;
 #endif
 
 #define USB_QUEUE_BULK 0
-
 
 #endif

@@ -65,7 +65,6 @@ struct sample_event{
 	u64 array[];
 };
 
-
 typedef union event_union {
 	struct perf_event_header	header;
 	struct ip_event			ip;

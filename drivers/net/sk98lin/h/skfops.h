@@ -31,9 +31,7 @@
  *
  ******************************************************************************/
 
-
 SK_BOOL fw_read(	SK_AC *pAC,    /* Pointer to adapter context */
 	char *name, SK_U8 **addr, SK_U32 *len );
 SK_BOOL fw_file_exists(	SK_AC *pAC,    /* Pointer to adapter context */
 	char *name );
-

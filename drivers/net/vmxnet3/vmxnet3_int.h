@@ -69,7 +69,6 @@
 # define VMXNET3_DRIVER_VERSION_REPORT VMXNET3_DRIVER_VERSION_STRING"-NAPI"
 #endif
 
-
 /*
  * Version numbers
  */
@@ -77,7 +76,6 @@
 
 /* a 32-bit int, each byte encode a verion number in VMXNET3_DRIVER_VERSION */
 #define VMXNET3_DRIVER_VERSION_NUM      0x01000500
-
 
 /*
  * Capabilities

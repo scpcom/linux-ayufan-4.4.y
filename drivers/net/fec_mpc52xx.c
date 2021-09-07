@@ -65,7 +65,6 @@ struct mpc52xx_fec_priv {
 	int seven_wire_mode;
 };
 
-
 static irqreturn_t mpc52xx_fec_interrupt(int, void *);
 static irqreturn_t mpc52xx_fec_rx_interrupt(int, void *);
 static irqreturn_t mpc52xx_fec_tx_interrupt(int, void *);
@@ -351,7 +350,6 @@ static void mpc52xx_fec_poll_controller(struct net_device *dev)
 	enable_irq(priv->r_irq);
 }
 #endif
-
 
 /* This handles BestComm transmit task interrupts
  */
@@ -770,7 +768,6 @@ static void mpc52xx_fec_reset(struct net_device *dev)
 	mpc52xx_fec_start(dev);
 }
 
-
 /* ethtool interface */
 static void mpc52xx_fec_get_drvinfo(struct net_device *dev,
 		struct ethtool_drvinfo *info)
@@ -818,7 +815,6 @@ static const struct ethtool_ops mpc52xx_fec_ethtool_ops = {
 	.get_msglevel = mpc52xx_fec_get_msglevel,
 	.set_msglevel = mpc52xx_fec_set_msglevel,
 };
-
 
 static int mpc52xx_fec_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 {
@@ -974,7 +970,6 @@ mpc52xx_fec_probe(struct of_device *op, const struct of_device_id *match)
 
 	return 0;
 
-
 	/* Error handling - free everything that might be allocated */
 probe_error:
 
@@ -1075,7 +1070,6 @@ static struct of_platform_driver mpc52xx_fec_driver = {
 #endif
 };
 
-
 /* ======================================================================== */
 /* Module                                                                   */
 /* ======================================================================== */
@@ -1102,7 +1096,6 @@ mpc52xx_fec_exit(void)
 	of_unregister_platform_driver(&mpc52xx_fec_mdio_driver);
 #endif
 }
-
 
 module_init(mpc52xx_fec_init);
 module_exit(mpc52xx_fec_exit);

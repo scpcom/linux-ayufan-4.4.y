@@ -11,9 +11,6 @@
  *                      This file is (c) under GNU PUBLIC LICENSE
  */
 
-
-
-
 #define BYTE							unsigned char
 #define WORD							unsigned int
 #define rByteAMD(cs, reg)					cs->readisac(cs, reg)
@@ -28,7 +25,6 @@
 
 #define AMD_CR		0x00
 #define AMD_DR		0x01
-
 
 #define DBUSY_TIMER_VALUE 80
 

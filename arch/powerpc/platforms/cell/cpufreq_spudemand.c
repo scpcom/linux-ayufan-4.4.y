@@ -175,10 +175,8 @@ static void __exit spu_gov_exit(void)
 	destroy_workqueue(kspugov_wq);
 }
 
-
 module_init(spu_gov_init);
 module_exit(spu_gov_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Christian Krafft <krafft@de.ibm.com>");
-

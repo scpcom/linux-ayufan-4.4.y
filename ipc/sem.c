@@ -282,7 +282,6 @@ static int newary(struct ipc_namespace *ns, struct ipc_params *params)
 	return sma->sem_perm.id;
 }
 
-
 /*
  * Called with sem_ids.rw_mutex and ipcp locked.
  */

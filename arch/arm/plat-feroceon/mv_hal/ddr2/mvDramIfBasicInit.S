@@ -107,7 +107,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define STATIC_SDRAM1_BANK0_SIZE		0x1ffffff9  /*  0x1514  */
 #define STATIC_SDRAM1_BANK0_BASE		0x20000000 /*   0x1510  */
 
-
 #define STATIC_SDRAM_CONFIG	     		0x43008C30 /*	0x1400  */	
 #define STATIC_DUNIT_CTRL_LOW			0x37543010 /*   0x1404  */  
 #define STATIC_SDRAM_TIME_CTRL_LOW		0x22125441 /*   0x1408  */  
@@ -229,7 +228,6 @@ _mvDramInitTiming:
 		MV_REG_WRITE_ASM (r6, r5, SDRAM_DUNIT_CTRL_REG)
 #endif
 
-
      	/*DDR SDRAM Initialization Control */
 		ldr	r6, =DSICR_INIT_EN
 		MV_REG_WRITE_ASM (r6, r1, DDR_SDRAM_INIT_CTRL_REG)
@@ -238,7 +236,6 @@ _mvDramInitTiming:
 		cmp    	r6, #0
 		bne 	2b
 		mov		pc, lr
-
 
 #if defined(MV_STATIC_DRAM_ON_BOARD) 
 /*************************************************************
@@ -276,7 +273,6 @@ _mvDramIfStaticInit:
 		ldr		r6, = STATIC_SDRAM1_BANK0_BASE
 		MV_REG_WRITE_ASM(r6, r5, SDRAM_BASE_ADDR_REG (0,2))
 #endif
-
 
 	/* set all dram configuration in temp registers */
 		ldr		r6, = STATIC_SDRAM0_BANK0_SIZE
@@ -848,7 +844,6 @@ defualt_order:
 exit_ddrAutoConfig:
         mov     PC, r11         /* r11 is saved link register */
 
-
 /***************************************************************************************/
 /*       r4 holds I2C EEPROM address
  *       r7 holds I2C EEPROM offset parameter for i2cRead and its --> returned value
@@ -949,7 +944,6 @@ regDdr2:
                                         /* or Mini-RDIMM (0x10)               */
 exit:
         mov     PC, r13
-
 
 /**************************/
 /* Return value in flag if no-Ecc then Z-flag is set */

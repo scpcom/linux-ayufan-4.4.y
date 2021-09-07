@@ -29,7 +29,6 @@
  *
  ******************************************************************************/
 
-
 #define TARGET_CORE_TRANSPORT_C
 
 #include <linux/version.h>
@@ -7183,7 +7182,6 @@ int transport_generic_map_mem_to_cmd(
 }
 EXPORT_SYMBOL(transport_generic_map_mem_to_cmd);
 	
-
 #ifndef SYNO_LIO_TRANSPORT_PATCHES
 /*	transport_generic_map_buffers_to_tasks():
  *
@@ -8320,7 +8318,6 @@ out:
 	return 0;
 }
 // END of MY_ABC_HERE
-
 
 #else
 u32 transport_generic_get_cdb_count(

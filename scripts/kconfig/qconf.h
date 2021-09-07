@@ -31,7 +31,6 @@ class ConfigItem;
 class ConfigLineEdit;
 class ConfigMainWindow;
 
-
 class ConfigSettings : public QSettings {
 public:
 	QValueList<int> readSizes(const QString& key, bool *ok);

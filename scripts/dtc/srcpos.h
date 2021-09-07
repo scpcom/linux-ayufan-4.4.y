@@ -68,8 +68,6 @@ typedef struct YYLTYPE {
 	}								\
     while (YYID (0))
 
-
-
 extern void yyerror(char const *);
 extern void yyerrorf(char const *, ...) __attribute__((format(printf, 1, 2)));
 

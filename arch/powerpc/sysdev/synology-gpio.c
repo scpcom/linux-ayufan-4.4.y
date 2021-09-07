@@ -109,7 +109,6 @@ typedef struct __tag_SYNO_QORIQ_STATUS_LED_GPIO {
 	u8 power_led;
 } SYNO_QORIQ_STATUS_LED_GPIO;
 
-
 typedef struct __tag_SYNO_QORIQ_GENERIC_GPIO {
 	SYNO_QORIQ_EXT_HDD_LED_GPIO	ext_sata_led;
 	SYNO_QORIQ_SOC_HDD_LED_GPIO	soc_sata_led;
@@ -119,7 +118,7 @@ typedef struct __tag_SYNO_QORIQ_GENERIC_GPIO {
 	SYNO_QORIQ_RACK_GPIO			rack;
 	SYNO_QORIQ_MULTI_BAY_GPIO		multi_bay;
 	SYNO_QORIQ_STATUS_LED_GPIO		status;
-}SYNO_QORIQ_GENERIC_GPIO;
+ }SYNO_QORIQ_GENERIC_GPIO;
 
 static SYNO_QORIQ_GENERIC_GPIO generic_gpio;
 
@@ -437,7 +436,6 @@ int SYNO_CHECK_HDD_PRESENT(int index)
 	return iPrzVal;
 }
 
-
 EXPORT_SYMBOL(SYNO_QORIQ_GPIO_PIN);
 EXPORT_SYMBOL(SYNOQorIQDiskLed);
 EXPORT_SYMBOL(SYNOQorIQIsBoardNeedPowerUpHDD);
@@ -449,7 +447,7 @@ EXPORT_SYMBOL(SYNO_CTRL_FAN_STATUS_GET);
 EXPORT_SYMBOL(SYNO_CTRL_ALARM_LED_SET);
 EXPORT_SYMBOL(SYNO_CTRL_BACKPLANE_STATUS_GET);
 EXPORT_SYMBOL(SYNO_CTRL_BUZZER_CLEARED_GET);
-EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
+ EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
 
 static void 
 QORIQ_813_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
@@ -509,7 +507,7 @@ QORIQ_813_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
 						},
-	};
+  	};
 
 	*global_gpio = gpio_813;
 }
@@ -572,7 +570,7 @@ QORIQ_413_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
 						},
-	};
+ 	};
 
 	*global_gpio = gpio_413;
 }
@@ -634,9 +632,8 @@ QORIQ_213p_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 		.status		  = {
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
-						},
-	};
-
+						}, 
+		};
 	*global_gpio = gpio_213p;
 }
 
@@ -698,7 +695,7 @@ QORIQ_rs213p_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
 						},
-	};
+  	};
 
 	*global_gpio = gpio_rs213p;
 }

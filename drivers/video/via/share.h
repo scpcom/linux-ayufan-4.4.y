@@ -1063,7 +1063,6 @@
 #define VX855_339_500M    0x00770005
 #define VX855_340_772M    0x00770005
 
-
 /* Definition CRTC Timing Index */
 #define H_TOTAL_INDEX               0
 #define H_ADDR_INDEX                1

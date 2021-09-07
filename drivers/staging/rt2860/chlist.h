@@ -41,7 +41,6 @@
 #include "rtmp_type.h"
 #include "rtmp_def.h"
 
-
 #define ODOR			0
 #define IDOR			1
 #define BOTH			2
@@ -1129,7 +1128,6 @@ static inline BOOLEAN IsValidChannel(
 		return TRUE;
 }
 
-
 static inline UCHAR GetExtCh(
 	IN UCHAR Channel,
 	IN UCHAR Direction)
@@ -1143,7 +1141,6 @@ static inline UCHAR GetExtCh(
 
 	return ExtCh;
 }
-
 
 static inline VOID N_ChannelCheck(
 	IN PRTMP_ADAPTER pAd)
@@ -1198,9 +1195,7 @@ static inline VOID N_ChannelCheck(
 		}
 	}
 
-
 }
-
 
 static inline VOID N_SetCenCh(
 	IN PRTMP_ADAPTER pAd)
@@ -1242,4 +1237,3 @@ static inline UINT8 GetCuntryMaxTxPwr(
 		return pAd->ChannelList[i].MaxTxPwr;
 }
 #endif // __CHLIST_H__
-

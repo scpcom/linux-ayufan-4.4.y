@@ -556,7 +556,6 @@ SND_SOC_DAPM_OUTPUT("SPK_RN"),
 SND_SOC_DAPM_OUTPUT("SPK_RP"),
 };
 
-
 static const struct snd_soc_dapm_route audio_paths[] = {
 	{ "DACL", NULL, "CLK_DSP" },
 	{ "DACL", NULL, "DACL Sidetone" },
@@ -923,7 +922,6 @@ static int wm8961_set_bias_level(struct snd_soc_codec *codec,
 	return 0;
 }
 
-
 #define WM8961_RATES SNDRV_PCM_RATE_8000_48000
 
 #define WM8961_FORMATS \
@@ -956,7 +954,6 @@ struct snd_soc_dai wm8961_dai = {
 	.ops = &wm8961_dai_ops,
 };
 EXPORT_SYMBOL_GPL(wm8961_dai);
-
 
 static struct snd_soc_codec *wm8961_codec;
 
@@ -1258,7 +1255,6 @@ static void __exit wm8961_exit(void)
 	i2c_del_driver(&wm8961_i2c_driver);
 }
 module_exit(wm8961_exit);
-
 
 MODULE_DESCRIPTION("ASoC WM8961 driver");
 MODULE_AUTHOR("Mark Brown <broonie@opensource.wolfsonmicro.com>");

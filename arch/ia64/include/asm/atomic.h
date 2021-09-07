@@ -17,7 +17,6 @@
 #include <asm/intrinsics.h>
 #include <asm/system.h>
 
-
 #define ATOMIC_INIT(i)		((atomic_t) { (i) })
 #define ATOMIC64_INIT(i)	((atomic64_t) { (i) })
 

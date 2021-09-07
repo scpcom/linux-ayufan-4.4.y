@@ -20,7 +20,6 @@
 #include <pcmcia/cs.h>
 #include "cs_internal.h"
 
-
 int pcmcia_validate_mem(struct pcmcia_socket *s)
 {
 	if (s->resource_ops->validate_mem)
@@ -63,7 +62,6 @@ void release_resource_db(struct pcmcia_socket *s)
 		s->resource_ops->exit(s);
 }
 
-
 static int static_init(struct pcmcia_socket *s)
 {
 	unsigned long flags;
@@ -78,7 +76,6 @@ static int static_init(struct pcmcia_socket *s)
 	return 0;
 }
 
-
 struct pccard_resource_ops pccard_static_ops = {
 	.validate_mem = NULL,
 	.adjust_io_region = NULL,
@@ -90,7 +87,6 @@ struct pccard_resource_ops pccard_static_ops = {
 	.exit = NULL,
 };
 EXPORT_SYMBOL(pccard_static_ops);
-
 
 #ifdef CONFIG_PCCARD_IODYN
 
@@ -141,13 +137,11 @@ static void pcmcia_align(void *align_data, struct resource *res,
 #endif
 }
 
-
 static int iodyn_adjust_io_region(struct resource *res, unsigned long r_start,
 				      unsigned long r_end, struct pcmcia_socket *s)
 {
 	return adjust_resource(res, r_start, r_end - r_start + 1);
 }
-
 
 static struct resource *iodyn_find_io_region(unsigned long base, int num,
 		unsigned long align, struct pcmcia_socket *s)

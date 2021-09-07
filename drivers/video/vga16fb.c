@@ -1443,7 +1443,6 @@ MODULE_LICENSE("GPL");
 module_init(vga16fb_init);
 module_exit(vga16fb_exit);
 
-
 /*
  * Overrides for Emacs so that we follow Linus's tabbing style.
  * ---------------------------------------------------------------------------
@@ -1451,4 +1450,3 @@ module_exit(vga16fb_exit);
  * c-basic-offset: 8
  * End:
  */
-

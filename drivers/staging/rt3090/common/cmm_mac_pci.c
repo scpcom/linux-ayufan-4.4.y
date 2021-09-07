@@ -29,7 +29,6 @@
 
 #include "../rt_config.h"
 
-
 /*
 	========================================================================
 
@@ -254,7 +253,6 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 		// Zero init this memory block
 		NdisZeroMemory(pAd->RxDescRing.AllocVa, pAd->RxDescRing.AllocSize);
 
-
 		DBGPRINT(RT_DEBUG_OFF,
 					("RX DESC %p  size = %ld\n", pAd->RxDescRing.AllocVa, pAd->RxDescRing.AllocSize));
 
@@ -319,7 +317,6 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 
 	}	while (FALSE);
 
-
 	NdisZeroMemory(&pAd->FragFrame, sizeof(FRAGMENT_FRAME));
 	pAd->FragFrame.pFragPacket =  RTMP_AllocateFragPacketBuffer(pAd, RX_BUFFER_NORMSIZE);
 
@@ -365,7 +362,6 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 		pAd->RxRing.RxCpuIdx = RX_RING_SIZE - 1;
 		//RTMP_IO_WRITE32(pAd, RX_CRX_IDX, pAd->RxRing.RX_CRX_IDX0);
 
-
 		// init MGMT ring index pointer
 		pAd->MgmtRing.TxSwFreeIdx = 0;
 		pAd->MgmtRing.TxCpuIdx = 0;
@@ -378,9 +374,6 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 	DBGPRINT_S(Status, ("<-- RTMPAllocTxRxRingMemory, Status=%x\n", Status));
 	return Status;
 }
-
-
-
 
 /*
 	========================================================================
@@ -414,7 +407,6 @@ VOID	RTMPRingCleanUp(
 	PRTMP_TX_RING	pTxRing;
 	unsigned long	IrqFlags;
 	//UINT32			RxSwReadIdx;
-
 
 	DBGPRINT(RT_DEBUG_TRACE,("RTMPRingCleanUp(RingIdx=%d, Pending-NDIS=%ld)\n", RingType, pAd->RalinkCounters.PendingNdisPacketCount));
 	switch (RingType)
@@ -528,7 +520,6 @@ VOID	RTMPRingCleanUp(
 	}
 }
 
-
 VOID RTMPFreeTxRxRingMemory(
     IN  PRTMP_ADAPTER   pAd)
 {
@@ -634,7 +625,6 @@ VOID RTMPFreeTxRxRingMemory(
 	DBGPRINT(RT_DEBUG_TRACE, ("<-- RTMPFreeTxRxRingMemory\n"));
 }
 
-
 /***************************************************************************
   *
   *	register related procedures.
@@ -659,13 +649,11 @@ VOID RT28XXDMADisable(
 {
 	WPDMA_GLO_CFG_STRUC     GloCfg;
 
-
 	RTMP_IO_READ32(pAd, WPDMA_GLO_CFG, &GloCfg.word);
 	GloCfg.word &= 0xff0;
 	GloCfg.field.EnTXWriteBackDDONE =1;
 	RTMP_IO_WRITE32(pAd, WPDMA_GLO_CFG, GloCfg.word);
 }
-
 
 /*
 ========================================================================
@@ -710,7 +698,6 @@ VOID RT28XXDMAEnable(
 	RTMP_IO_WRITE32(pAd, WPDMA_GLO_CFG, GloCfg.word);
 
 }
-
 
 BOOLEAN AsicCheckCommanOk(
 	IN PRTMP_ADAPTER pAd,
@@ -777,7 +764,6 @@ BOOLEAN AsicCheckCommanOk(
 	return FALSE;
 }
 
-
 /*
 ========================================================================
 Routine Description:
@@ -803,7 +789,6 @@ VOID RT28xx_UpdateBeaconToAsic(
 	UINT			i;
 	BOOLEAN			bBcnReq = FALSE;
 	UCHAR			bcn_idx = 0;
-
 
 	{
 		DBGPRINT(RT_DEBUG_ERROR, ("%s() : No valid Interface be found.\n", __FUNCTION__));
@@ -853,7 +838,6 @@ VOID RT28xx_UpdateBeaconToAsic(
 	}
 
 }
-
 
 #ifdef CONFIG_STA_SUPPORT
 VOID RT28xxPciStaAsicForceWakeup(
@@ -950,7 +934,6 @@ VOID RT28xxPciStaAsicForceWakeup(
     DBGPRINT(RT_DEBUG_TRACE, ("<=======RT28xxPciStaAsicForceWakeup\n"));
 }
 
-
 VOID RT28xxPciStaAsicSleepThenAutoWakeup(
 	IN PRTMP_ADAPTER pAd,
 	IN USHORT TbttNumToNextWakeUp)
@@ -1013,7 +996,6 @@ VOID RT28xxPciStaAsicSleepThenAutoWakeup(
 
 }
 
-
 VOID PsPollWakeExec(
 	IN PVOID SystemSpecific1,
 	IN PVOID FunctionContext,
@@ -1072,7 +1054,6 @@ VOID  RadioOnExec(
 	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS))
 	{
 		DBGPRINT(RT_DEBUG_TRACE,("-->RadioOnExec() return on SCAN_IN_PROGRESS; \n"));
-
 
 #ifdef RTMP_PCI_SUPPORT
 if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_PCIE_DEVICE)
@@ -1164,7 +1145,6 @@ if ((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)) && IS_VERSION_AFTER_F(p
 }
 #endif // CONFIG_STA_SUPPORT //
 
-
 /*
 	==========================================================================
 	Description:
@@ -1235,7 +1215,6 @@ if (!(((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)) && IS_VERSION_AFTER_
 	AsicCheckCommanOk(pAd, PowerWakeCID);
 	RTMP_ASIC_INTERRUPT_ENABLE(pAd);
 
-
 	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_IDLE_RADIO_OFF);
 	if (Level == GUI_IDLE_POWER_SAVE)
 	{
@@ -1289,7 +1268,6 @@ if (!(((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)) && IS_VERSION_AFTER_
         return TRUE;
 
 }
-
 
 /*
 	==========================================================================
@@ -1430,7 +1408,6 @@ BOOLEAN RT28xxPciAsicRadioOff(
 		RTMP_ASIC_INTERRUPT_DISABLE(pAd);
 	}
 
-
 	RTMP_IO_WRITE32(pAd, RX_CRX_IDX, pAd->RxRing.RxCpuIdx);
 	//  2. Send Sleep command
 	RTMP_IO_WRITE32(pAd, H2M_MAILBOX_STATUS, 0xffffffff);
@@ -1538,9 +1515,6 @@ if ((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)) && IS_VERSION_AFTER_F(p
 	return TRUE;
 }
 
-
-
-
 VOID RT28xxPciMlmeRadioOn(
 	IN PRTMP_ADAPTER pAd)
 {
@@ -1594,7 +1568,6 @@ VOID RT28xxPciMlmeRadioOn(
     }
 #endif // CONFIG_STA_SUPPORT //
 }
-
 
 VOID RT28xxPciMlmeRadioOFF(
 	IN PRTMP_ADAPTER pAd)
@@ -1705,7 +1678,6 @@ else
 #endif // CONFIG_STA_SUPPORT //
 {
 
-
 	brc=RT28xxPciAsicRadioOff(pAd, GUIRADIO_OFF, 0);
 
 	if (brc==FALSE)
@@ -1719,7 +1691,6 @@ else
 	GloCfg.field.EnableTxDMA = 0;
 	GloCfg.field.EnableRxDMA = 0;
 	RTMP_IO_WRITE32(pAd, WPDMA_GLO_CFG, GloCfg.word);	   // abort all TX rings
-
 
 	// MAC_SYS_CTRL => value = 0x0 => 40mA
 	RTMP_IO_WRITE32(pAd, MAC_SYS_CTRL, 0);

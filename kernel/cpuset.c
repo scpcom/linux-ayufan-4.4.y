@@ -1650,7 +1650,6 @@ static s64 cpuset_read_s64(struct cgroup *cont, struct cftype *cft)
 	return 0;
 }
 
-
 /*
  * for the common functions, 'private' gives the type of file
  */

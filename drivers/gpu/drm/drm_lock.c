@@ -380,7 +380,6 @@ void drm_idlelock_release(struct drm_lock_data *lock_data)
 }
 EXPORT_SYMBOL(drm_idlelock_release);
 
-
 int drm_i_have_hw_lock(struct drm_device *dev, struct drm_file *file_priv)
 {
 	struct drm_master *master = file_priv->master;

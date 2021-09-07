@@ -4,7 +4,6 @@ Module Name:
 
    CSMISAS.H
 
-
 Abstract:
 
    This file contains constants and data structure definitions used by drivers
@@ -79,7 +78,6 @@ Revision History:
 
 // EDM #ifdef _linux
 #ifdef __KERNEL__
-
 
 // Linux base types
 
@@ -869,7 +867,6 @@ typedef struct _CSMI_SAS_RAID_CONFIG_BUFFER {
    CSMI_SAS_RAID_CONFIG Configuration;
 } CSMI_SAS_RAID_CONFIG_BUFFER,
   *PCSMI_SAS_RAID_CONFIG_BUFFER;
-
 
 /* * * * * * * * * * SAS HBA Class Structures * * * * * * * * * */
 

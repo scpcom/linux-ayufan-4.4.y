@@ -77,7 +77,6 @@ rt2860_interrupt(int irq, void *dev_instance);
 #define RT28XX_START_DEQUEUE(pAd, QueIdx, irqFlags)		do{}while(0)
 #define RT28XX_STOP_DEQUEUE(pAd, QueIdx, irqFlags)		do{}while(0)
 
-
 #define RT28XX_HAS_ENOUGH_FREE_DESC(pAd, pTxBlk, freeNum, pPacket) \
 		((freeNum) >= (ULONG)(pTxBlk->TotalFragNum + RTMP_GET_PACKET_FRAGMENTS(pPacket) + 3)) /* rough estimate we will use 3 more descriptor. */
 #define RT28XX_RELEASE_DESC_RESOURCE(pAd, QueIdx)					\
@@ -86,7 +85,6 @@ rt2860_interrupt(int irq, void *dev_instance);
 #define NEED_QUEUE_BACK_FOR_AGG(pAd, QueIdx, freeNum, _TxFrameType) \
 		(((freeNum != (TX_RING_SIZE-1)) && (pAd->TxSwQueue[QueIdx].Number == 0)) || (freeNum<3))
 		//(((freeNum) != (TX_RING_SIZE-1)) && (pAd->TxSwQueue[QueIdx].Number == 1 /*0*/))
-
 
 #define HAL_KickOutMgmtTx(_pAd, _QueIdx, _pPacket, _pSrcBufVA, _SrcBufLen)	\
 			RtmpPCIMgmtKickOut(_pAd, _QueIdx, _pPacket, _pSrcBufVA, _SrcBufLen)
@@ -126,13 +124,11 @@ rt2860_interrupt(int irq, void *dev_instance);
 			 :	\
 			(_pAd->TxRing[_QueIdx].TxSwFreeIdx + TX_RING_SIZE - _pAd->TxRing[_QueIdx].TxCpuIdx - 1);
 
-
 #define GET_MGMTRING_FREENO(_pAd) \
 	(_pAd->MgmtRing.TxSwFreeIdx > _pAd->MgmtRing.TxCpuIdx)	? \
 			(_pAd->MgmtRing.TxSwFreeIdx - _pAd->MgmtRing.TxCpuIdx - 1) \
 			 :	\
 			(_pAd->MgmtRing.TxSwFreeIdx + MGMT_RING_SIZE - _pAd->MgmtRing.TxCpuIdx - 1);
-
 
 /* ----------------- RX Related MACRO ----------------- */
 
@@ -140,7 +136,6 @@ rt2860_interrupt(int irq, void *dev_instance);
 #define RT28XX_RCV_PKT_GET_INIT(pAd)
 #define RT28XX_RV_A_BUF_END
 //#define RT28XX_RV_ALL_BUF_END
-
 
 /* ----------------- ASIC Related MACRO ----------------- */
 // no use
@@ -175,7 +170,6 @@ rt2860_interrupt(int irq, void *dev_instance);
 						  pAd->SharedKey[apidx][KeyID].CipherAlg,		\
 						  pEntry); }
 
-
 // Insert the BA bitmap to ASIC for the Wcid entry
 #define RT28XX_ADD_BA_SESSION_TO_ASIC(_pAd, _Aid, _TID)					\
 		do{																\
@@ -185,7 +179,6 @@ rt2860_interrupt(int irq, void *dev_instance);
 			_Value |= (0x10000<<(_TID));								\
 			RTMP_IO_WRITE32((_pAd), _Offset, _Value);					\
 		}while(0)
-
 
 // Remove the BA bitmap from ASIC for the Wcid entry
 //		bitmap field starts at 0x10000 in ASIC WCID table
@@ -197,7 +190,6 @@ rt2860_interrupt(int irq, void *dev_instance);
 			_Value &= (~(0x10000 << (_TID)));							\
 			RTMP_IO_WRITE32((_pAd), _Offset, _Value);			\
 		}while(0)
-
 
 /* ----------------- PCI/USB Related MACRO ----------------- */
 
@@ -260,7 +252,6 @@ rt2860_interrupt(int irq, void *dev_instance);
 		NICEnableInterrupt(pAd); }
 
 #define RT28XX_PUT_DEVICE(dev_p)
-
 
 /* ----------------- MLME Related MACRO ----------------- */
 #define RT28XX_MLME_HANDLER(pAd)			MlmeHandler(pAd)
@@ -330,4 +321,3 @@ rt2860_interrupt(int irq, void *dev_instance);
     RT28xxPciMlmeRadioOFF(pAd);
 
 #endif //__RT2860_H__
-

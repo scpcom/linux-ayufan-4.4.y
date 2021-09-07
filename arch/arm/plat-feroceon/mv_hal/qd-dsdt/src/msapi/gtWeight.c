@@ -17,7 +17,6 @@
 #include <gtHwCntl.h>
 #include <gtDrvSwRegs.h>
 
-
 /*******************************************************************************
 * gsysSetQoSWeight
 *
@@ -175,7 +174,6 @@ GT_STATUS gsysSetQoSWeight
 	return GT_OK;
 }
 
-
 /*******************************************************************************
 * gsysGetQoSWeight
 *
@@ -330,4 +328,3 @@ GT_STATUS gsysGetQoSWeight
 
 	return GT_OK;
 }
-

@@ -205,7 +205,6 @@ ath5k_eeprom_init_header(struct ath5k_hw *ah)
 	return 0;
 }
 
-
 /*
  * Read antenna infos from eeprom
  */
@@ -851,7 +850,6 @@ ath5k_eeprom_read_pcal_info_5111(struct ath5k_hw *ah, int mode)
 	return ath5k_eeprom_convert_pcal_info_5111(ah, mode, pcal);
 }
 
-
 /*
  * Read power calibration for RF5112 chips
  *
@@ -916,7 +914,6 @@ ath5k_eeprom_convert_pcal_info_5112(struct ath5k_hw *ah, int mode,
 
 				if (!pd->pd_pwr)
 					return -ENOMEM;
-
 
 				/* Fill raw dataset
 				 * (all power levels are in 0.25dB units) */
@@ -1092,7 +1089,6 @@ ath5k_eeprom_read_pcal_info_5112(struct ath5k_hw *ah, int mode)
 
 	return ath5k_eeprom_convert_pcal_info_5112(ah, mode, gen_chan_info);
 }
-
 
 /*
  * Read power calibration for RF2413 chips
@@ -1423,7 +1419,6 @@ ath5k_eeprom_read_pcal_info_2413(struct ath5k_hw *ah, int mode)
 	return ath5k_eeprom_convert_pcal_info_2413(ah, mode, chinfo);
 }
 
-
 /*
  * Read per rate target power (this is the maximum tx power
  * supported by the card). This info is used when setting
@@ -1541,7 +1536,6 @@ ath5k_eeprom_read_pcal_info(struct ath5k_hw *ah)
 		read_pcal = ath5k_eeprom_read_pcal_info_2413;
 	else
 		read_pcal = ath5k_eeprom_read_pcal_info_5111;
-
 
 	for (mode = AR5K_EEPROM_MODE_11A; mode <= AR5K_EEPROM_MODE_11G;
 	mode++) {

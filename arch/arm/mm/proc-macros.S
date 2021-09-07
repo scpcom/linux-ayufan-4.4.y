@@ -72,7 +72,6 @@
 	mov	\reg, \reg, lsl \tmp		@ actual cache line size
 	.endm
 
-
 /*
  * Sanity check the PTE configuration for the code below - which makes
  * certain assumptions about how these bits are layed out.
@@ -154,7 +153,6 @@
 	mcr	p15, 0, r0, c7, c10, 1		@ flush_pte
 	.endm
 
-
 /*
  * The ARMv3, ARMv4 and ARMv5 set_pte_ext translation function,
  * covering most CPUs except Xscale and Xscale 3.
@@ -195,7 +193,6 @@
 	.endif
 	str	r2, [r0]			@ hardware version
 	.endm
-
 
 /*
  * Xscale set_pte_ext translation, split into two halves to cope

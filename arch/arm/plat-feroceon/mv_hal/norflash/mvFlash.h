@@ -92,5 +92,4 @@ MV_U32 mvFlashBlockRd (MV_FLASH_INFO *pFlash, MV_U32 offset, MV_U32 blockSize,
 MV_STATUS mvFlashSecLockSet(MV_FLASH_INFO *pFlash, MV_U32 secNum, 
 							                                 MV_BOOL enable);
 
-
 #endif /* __INCmvFlashH */

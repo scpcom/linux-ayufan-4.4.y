@@ -24,7 +24,6 @@
 #ifndef __BFI_CBREG_H__
 #define __BFI_CBREG_H__
 
-
 #define HOSTFN0_INT_STATUS               0x00014000
 #define __HOSTFN0_INT_STATUS_LVL_MK      0x00f00000
 #define __HOSTFN0_INT_STATUS_LVL_SH      20
@@ -178,7 +177,6 @@
 #define __PSS_LPU1_RESET                 0x00000002
 #define __PSS_LPU0_RESET                 0x00000001
 
-
 /*
  * These definitions are either in error/missing in spec. Its auto-generated
  * from hard coded values in regparse.pl.
@@ -189,7 +187,6 @@
 #define __SFP_TXRATE_EN_FIX              0x00000100
 #define __SFP_RXRATE_EN_FIX              0x00000080
 
-
 /*
  * These register definitions are auto-generated from hard coded values
  * in regparse.pl.
@@ -198,7 +195,6 @@
 #define HOSTFN1_LPU_MBOX0_8              0x00019260
 #define LPU_HOSTFN0_MBOX0_0              0x00019280
 #define LPU_HOSTFN1_MBOX0_8              0x000192e0
-
 
 /*
  * These register mapping definitions are auto-generated from mapping tables
@@ -227,7 +223,6 @@
 #define RME_Q_NUM(__fn, __q)  (((__fn) << 2) + (__q))
 #define CPE_Q_MASK(__q)  ((__q) & 0x3)
 #define RME_Q_MASK(__q)  ((__q) & 0x3)
-
 
 /*
  * PCI MSI-X vector defines
@@ -288,7 +283,6 @@ enum {
 #define __HFN_INT_CPE_MASK                 0x000000ffU
 #define __HFN_INT_RME_MASK                 0x0000ff00U
 
-
 /*
  * crossbow memory map.
  */
@@ -300,6 +294,4 @@ enum {
  * End of crossbow memory map
  */
 
-
 #endif /* __BFI_CBREG_H__ */
-

@@ -102,7 +102,6 @@ cryptoloop_init(struct loop_device *lo, const struct loop_info64 *info)
 	return err;
 }
 
-
 typedef int (*encdec_cbc_t)(struct blkcipher_desc *desc,
 			struct scatterlist *sg_out,
 			struct scatterlist *sg_in,

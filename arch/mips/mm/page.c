@@ -110,7 +110,6 @@ void copy_page(void *to, void *from) __attribute__((alias("copy_page_array")));
 
 EXPORT_SYMBOL(copy_page);
 
-
 static int pref_bias_clear_store __cpuinitdata;
 static int pref_bias_copy_load __cpuinitdata;
 static int pref_bias_copy_store __cpuinitdata;

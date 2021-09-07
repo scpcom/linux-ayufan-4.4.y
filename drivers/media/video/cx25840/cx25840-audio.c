@@ -15,7 +15,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 #include <linux/videodev2.h>
 #include <linux/i2c.h>
 #include <media/v4l2-common.h>
@@ -147,7 +146,6 @@ static int set_audclk_freq(struct i2c_client *client, u32 freq)
 				 * so avoid destroying registers. */
 				break;
 			}
-
 
 			if (!state->is_cx231xx) {
 				/* VID_PLL and AUX_PLL */

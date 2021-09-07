@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef _CHANNEL_MGMT_H_
 #define _CHANNEL_MGMT_H_
 
@@ -305,7 +304,6 @@ struct vmbus_channel_msginfo {
 	 */
 	unsigned char Msg[0];
 };
-
 
 struct vmbus_channel *AllocVmbusChannel(void);
 

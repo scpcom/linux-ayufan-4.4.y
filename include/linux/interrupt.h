@@ -432,7 +432,6 @@ struct tasklet_struct name = { NULL, 0, ATOMIC_INIT(0), func, data }
 #define DECLARE_TASKLET_DISABLED(name, func, data) \
 struct tasklet_struct name = { NULL, 0, ATOMIC_INIT(1), func, data }
 
-
 enum
 {
 	TASKLET_STATE_SCHED,	/* Tasklet is scheduled for execution */
@@ -490,7 +489,6 @@ static inline void tasklet_hi_schedule_first(struct tasklet_struct *t)
 	if (!test_and_set_bit(TASKLET_STATE_SCHED, &t->state))
 		__tasklet_hi_schedule_first(t);
 }
-
 
 static inline void tasklet_disable_nosync(struct tasklet_struct *t)
 {

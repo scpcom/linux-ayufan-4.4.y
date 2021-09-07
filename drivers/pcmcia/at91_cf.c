@@ -26,7 +26,6 @@
 #include <mach/board.h>
 #include <mach/at91rm9200_mc.h>
 
-
 /*
  * A0..A10 work in each range; A23 indicates I/O space;  A25 is CFRNW;
  * some other bit in {A24,A22..A11} is nREG to flag memory access

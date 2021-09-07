@@ -30,7 +30,6 @@
  *         -- Kyle McMartin <kyle@parisc-linux.org>
  */
 
-
 /* NOTES:
  * 
  * Function 0 is an IDE controller. It is identical to a PC87415 IDE
@@ -81,7 +80,6 @@
 #include <asm/superio.h>
 
 static struct superio_device sio_dev;
-
 
 #undef DEBUG_SUPERIO_INIT
 
@@ -426,7 +424,6 @@ static void __init superio_serial_init(void)
 #endif /* CONFIG_SERIAL_8250 */
 }
 
-
 static void __init superio_parport_init(void)
 {
 #ifdef CONFIG_PARPORT_PC
@@ -441,7 +438,6 @@ static void __init superio_parport_init(void)
 #endif	/* CONFIG_PARPORT_PC */
 }
 
-
 static void superio_fixup_pci(struct pci_dev *pdev)
 {
 	u8 prog;
@@ -453,7 +449,6 @@ static void superio_fixup_pci(struct pci_dev *pdev)
 	printk("PCI: Enabled native mode for NS87415 (pif=0x%x)\n", prog);
 }
 DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_NS, PCI_DEVICE_ID_NS_87415, superio_fixup_pci);
-
 
 static int __init
 superio_probe(struct pci_dev *dev, const struct pci_device_id *id)

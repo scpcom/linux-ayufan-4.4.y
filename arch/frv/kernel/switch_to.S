@@ -300,7 +300,6 @@ __restore_acc_fr555:
 
 	bra		__restore_acc_cont
 
-
 ###############################################################################
 #
 # save extra general regs and FP/Media regs

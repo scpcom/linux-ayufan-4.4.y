@@ -742,7 +742,6 @@ static int fsl_pcie_resume_restore(void)
 }
 #endif
 
-
 static int pci_pm_suspend(struct device *dev)
 {
 	struct pci_dev *pci_dev = to_pci_dev(dev);

@@ -65,6 +65,3 @@ RXbBulkInProcessData(
     );
 
 #endif // __RXTX_H__
-
-
-

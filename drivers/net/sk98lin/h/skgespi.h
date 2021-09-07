@@ -251,4 +251,3 @@ void spi_yuk2_sst_clear_write_protection(void);
 void spi_yuk2_erase_chip(void);
 unsigned short spi_yuk2_read_chip_id(void);
 int spi_yuk2_get_dev_index(void);
-

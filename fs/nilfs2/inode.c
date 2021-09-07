@@ -32,7 +32,6 @@
 #include "cpfile.h"
 #include "ifile.h"
 
-
 /**
  * nilfs_get_block() - get a file block on the filesystem (callback function)
  * @inode - inode struct of the target file

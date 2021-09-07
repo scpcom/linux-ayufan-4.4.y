@@ -28,7 +28,6 @@
 
 #define BFA_CEE_LLDP_MAX_STRING_LEN (128)
 
-
 /* FIXME: this is coming from the protocol spec. Can the host & apps share the
    protocol .h files ?
  */
@@ -44,7 +43,6 @@
 #define BFA_CEE_LLDP_SYS_CAP_SVLAN 	     0x0200
 #define BFA_CEE_LLDP_SYS_CAP_TPMR		 0x0400
 
-
 /* LLDP string type */
 struct bfa_cee_lldp_str_s {
 	u8 sub_type;
@@ -52,7 +50,6 @@ struct bfa_cee_lldp_str_s {
 	u8 rsvd[2];
 	u8 value[BFA_CEE_LLDP_MAX_STRING_LEN];
 };
-
 
 /* LLDP paramters */
 struct bfa_cee_lldp_cfg_s {
@@ -110,9 +107,6 @@ struct bfa_cee_attr_s {
 	u8 filler[3];
 };
 
-
-
-
 /* LLDP/DCBX/CEE Statistics */
 
 struct bfa_cee_lldp_stats_s {
@@ -144,7 +138,6 @@ struct bfa_cee_cfg_stats_s {
 	u32 recvd_invalid_cfg;
 };
 
-
 struct bfa_cee_stats_s {
 	struct bfa_cee_lldp_stats_s lldp_stats;
 	struct bfa_cee_dcbx_stats_s dcbx_stats;
@@ -153,7 +146,4 @@ struct bfa_cee_stats_s {
 
 #pragma pack()
 
-
 #endif	/* __BFA_DEFS_CEE_H__ */
-
-

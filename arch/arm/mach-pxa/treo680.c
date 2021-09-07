@@ -309,7 +309,6 @@ static struct pxa2xx_udc_mach_info treo680_udc_info __initdata = {
 	.gpio_pullup		= GPIO_NR_TREO680_USB_PULLUP,
 };
 
-
 /******************************************************************************
  * USB host
  ******************************************************************************/
@@ -404,7 +403,6 @@ static struct platform_device treo680_leds = {
 		.platform_data  = &gpio_led_info,
 	}
 };
-
 
 /******************************************************************************
  * Framebuffer

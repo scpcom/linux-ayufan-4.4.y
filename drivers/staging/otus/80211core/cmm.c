@@ -101,7 +101,6 @@ u16_t zfFindElement(zdev_t* dev, zbuf_t* buf, u8_t eid)
         HTType = 1;
     }
 
-
     bufLen = zfwBufGetSize(dev, buf);
     /* Search loop */
     while ((offset+2)<bufLen)                   // including element ID and length (2bytes)
@@ -161,7 +160,6 @@ u16_t zfFindElement(zdev_t* dev, zbuf_t* buf, u8_t eid)
     }
     return 0xffff;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -570,7 +568,6 @@ u16_t zfMmAddIeDs(zdev_t* dev, zbuf_t* buf, u16_t offset)
     return offset;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfMmAddIeErp                */
@@ -603,7 +600,6 @@ u16_t zfMmAddIeErp(zdev_t* dev, zbuf_t* buf, u16_t offset)
 
     return offset;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -714,7 +710,6 @@ u16_t zfMmAddHTCapability(zdev_t* dev, zbuf_t* buf, u16_t offset)
     return offset;
 }
 
-
 u16_t zfMmAddPreNHTCapability(zdev_t* dev, zbuf_t* buf, u16_t offset)
 {
     //u8_t OUI[3] = {0x0,0x90,0x4C};
@@ -821,8 +816,6 @@ u16_t zfMmAddExtendedHTCapability(zdev_t* dev, zbuf_t* buf, u16_t offset)
 
     return offset;
 }
-
-
 
 /************************************************************************/
 /*                                                                      */
@@ -955,7 +948,6 @@ void zfSendMmFrame(zdev_t* dev, u8_t frameType, u16_t* dst,
         	    }
             }
 
-
             if ((wd->wlanMode == ZM_MODE_AP)
                  && (wd->ap.wlanType[vap] != ZM_WLAN_TYPE_PURE_B))
             {
@@ -1086,7 +1078,6 @@ void zfSendMmFrame(zdev_t* dev, u8_t frameType, u16_t* dst,
             /* SSID */
             offset = zfStaAddIeSsid(dev, buf, offset);
 
-
             if ( wd->sta.currentFrequency < 3000 )
             {
                 /* Support Rate */
@@ -1112,7 +1103,6 @@ void zfSendMmFrame(zdev_t* dev, u8_t frameType, u16_t* dst,
                     offset = zfMmAddIeSupportRate(dev, buf, offset, ZM_WLAN_EID_EXTENDED_RATE, ZM_RATE_SET_OFDM);
                 }
             }
-
 
             //offset = zfStaAddIeWpaRsn(dev, buf, offset, frameType);
             //Move to wrapper function, for OS difference--CWYang(m)
@@ -1179,7 +1169,6 @@ void zfSendMmFrame(zdev_t* dev, u8_t frameType, u16_t* dst,
                 //offset = zfMmAddExtendedHTCapability(dev, buf, offset);
             }
 
-
             //Store asoc request frame body, for VISTA only
             wd->sta.asocReqFrameBodySize = ((offset - hlen) >
                     ZM_CACHED_FRAMEBODY_SIZE)?
@@ -1206,7 +1195,6 @@ void zfSendMmFrame(zdev_t* dev, u8_t frameType, u16_t* dst,
             zmw_tx_buf_writeh(dev, buf, offset, (u16_t)(p2|0xc000));
             offset+=2;
 
-
             if ( wd->frequency < 3000 )
             {
             /* Support Rate */
@@ -1220,8 +1208,6 @@ void zfSendMmFrame(zdev_t* dev, u8_t frameType, u16_t* dst,
                 /* Support Rate */
                 offset = zfMmAddIeSupportRate(dev, buf, offset, ZM_WLAN_EID_SUPPORT_RATE, ZM_RATE_SET_OFDM);
             }
-
-
 
             /* WME Parameters */
             if (wd->wlanMode == ZM_MODE_AP)
@@ -1325,7 +1311,6 @@ zlError:
     return;
 #endif
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -1688,7 +1673,6 @@ u16_t zfSendProbeReq(zdev_t* dev, zbuf_t* buf, u16_t offset, u8_t bWithSSID)
     zmw_get_wlan_dev(dev);
     zmw_declare_for_critical_section();
 
-
     /* SSID */
     if (bWithSSID == 0)  /* broadcast ssid */
     {
@@ -1744,7 +1728,6 @@ u16_t zfSendProbeReq(zdev_t* dev, zbuf_t* buf, u16_t offset, u8_t bWithSSID)
 
     return offset;
 }
-
 
 /************************************************************************/
 /*                                                                      */

@@ -90,7 +90,6 @@ struct iowa_bus *iowa_pio_find_bus(unsigned long port)
 	return iowa_pci_find(vaddr, 0);
 }
 
-
 #define DEF_PCI_AC_RET(name, ret, at, al, space, aa)		\
 static ret iowa_##name at					\
 {								\

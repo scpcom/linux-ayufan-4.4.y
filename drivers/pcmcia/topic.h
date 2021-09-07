@@ -139,7 +139,6 @@ static int topic97_override(struct yenta_socket *socket)
 	return 0;
 }
 
-
 static int topic95_override(struct yenta_socket *socket)
 {
 	u8 fctrl;

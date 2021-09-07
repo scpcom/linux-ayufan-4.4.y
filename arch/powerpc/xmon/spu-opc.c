@@ -23,7 +23,6 @@
 
 /* This file holds the Spu opcode table */
 
-
 /*
    Example contents of spu-insn.h
       id_tag	mode	mode	type	opcode	mnemonic	asmtype	    dependency		FPU	L/S?	branch?	instruction   

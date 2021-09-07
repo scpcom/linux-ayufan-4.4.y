@@ -281,7 +281,6 @@ static void restore_vga_mode(struct vgastate *state)
 	for (i = 2; i < state->num_seq; i++) 
 		vga_wseq(state->vgabase, i, saved->seq[i]);
 
-
 	/* unprotect vga regs */
 	vga_wcrtcs(state->vgabase, iobase, 17, saved->crtc[17] & ~0x80);
 	for (i = 0; i < state->num_crtc; i++) 
@@ -487,4 +486,3 @@ EXPORT_SYMBOL(restore_vga);
 MODULE_AUTHOR("James Simmons <jsimmons@users.sf.net>");
 MODULE_DESCRIPTION("VGA State Save/Restore");
 MODULE_LICENSE("GPL");
-

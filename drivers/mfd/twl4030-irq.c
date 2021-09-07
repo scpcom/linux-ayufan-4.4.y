@@ -34,7 +34,6 @@
 
 #include <linux/i2c/twl4030.h>
 
-
 /*
  * TWL4030 IRQ handling has two stages in hardware, and thus in software.
  * The Primary Interrupt Handler (PIH) stage exposes status bits saying
@@ -57,7 +56,6 @@
 #define REG_PIH_ISR_P1			0x01
 #define REG_PIH_ISR_P2			0x02
 #define REG_PIH_SIR			0x03	/* for testing */
-
 
 /* Linux could (eventually) use either IRQ line */
 static int irq_line;
@@ -102,7 +100,6 @@ struct sih {
 #define TWL4030_INT_PWR_EDR		TWL4030_INT_PWR_EDR1
 #define TWL4030_MODULE_KEYPAD_KEYP	TWL4030_MODULE_KEYPAD
 #define TWL4030_MODULE_INT_PWR		TWL4030_MODULE_INT
-
 
 /* Order in this table matches order in PIH_ISR.  That is,
  * BIT(n) in PIH_ISR is sih_modules[n].
@@ -182,7 +179,6 @@ static int twl4030_irq_thread(void *data)
 	long irq = (long)data;
 	static unsigned i2c_errors;
 	static const unsigned max_i2c_errors = 100;
-
 
 	current->flags |= PF_NOFREEZE;
 
@@ -662,7 +658,6 @@ int twl4030_sih_setup(int module)
 
 /* FIXME need a call to reverse twl4030_sih_setup() ... */
 
-
 /*----------------------------------------------------------------------*/
 
 /* FIXME pass in which interrupt line we'll use ... */
@@ -717,7 +712,6 @@ int twl_init_irq(int irq_num, unsigned irq_base, unsigned irq_end)
 	}
 
 	/* install an irq handler to demultiplex the TWL4030 interrupt */
-
 
 	init_completion(&irq_event);
 

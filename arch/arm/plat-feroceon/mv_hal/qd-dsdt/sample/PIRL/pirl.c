@@ -12,7 +12,6 @@
 *******************************************************************************/
 #include "msSample.h"
 
-
 /*
  *  This setup function configures the Port 0 of Marvell SOHO Switch Device with
  *	capability of PIRL to be :
@@ -90,4 +89,3 @@ GT_STATUS samplePIRLSetup(GT_QD_DEV *dev)
 
 	return status;
 }
-

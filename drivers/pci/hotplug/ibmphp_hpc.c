@@ -73,7 +73,6 @@ static int to_debug = 0;
 #define WPG_READDIRECT_MASK	0x10010000
 #define WPG_WRITEDIRECT_MASK	0x60010000
 
-
 //----------------------------------------------------------------------------
 // bit masks for I2C Master Control Register
 //----------------------------------------------------------------------------
@@ -120,7 +119,6 @@ static int process_changeinstatus (struct slot *, struct slot *);
 static int process_changeinlatch (u8, u8, struct controller *);
 static int hpc_wait_ctlr_notworking (int, struct controller *, void __iomem *, u8 *);
 //----------------------------------------------------------------------------
-
 
 /*----------------------------------------------------------------------
 * Name:    ibmphp_hpc_initvars
@@ -910,7 +908,6 @@ static int poll_hpc(void *data)
 	debug ("%s - Exit\n", __func__);
 	return 0;
 }
-
 
 /*----------------------------------------------------------------------
 * Name:    process_changeinstatus

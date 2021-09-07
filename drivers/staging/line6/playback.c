@@ -20,7 +20,6 @@
 #include "pod.h"
 #include "playback.h"
 
-
 /*
 	Software stereo volume control.
 */

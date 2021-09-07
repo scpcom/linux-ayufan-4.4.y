@@ -38,7 +38,6 @@
 #include <linux/jiffies.h>
 #include <asm/uaccess.h>
 
-
 #define MODULE_VERS "1.0"
 #define MODULE_NAME "procfs_example"
 
@@ -49,13 +48,10 @@ struct fb_data_t {
 	char value[FOOBAR_LEN + 1];
 };
 
-
 static struct proc_dir_entry *example_dir, *foo_file,
 	*bar_file, *jiffies_file, *symlink;
 
-
 struct fb_data_t foo_data, bar_data;
-
 
 static int proc_read_jiffies(char *page, char **start,
 			     off_t off, int count,
@@ -68,7 +64,6 @@ static int proc_read_jiffies(char *page, char **start,
 
 	return len;
 }
-
 
 static int proc_read_foobar(char *page, char **start,
 			    off_t off, int count, 
@@ -83,7 +78,6 @@ static int proc_read_foobar(char *page, char **start,
 
 	return len;
 }
-
 
 static int proc_write_foobar(struct file *file,
 			     const char *buffer,
@@ -105,7 +99,6 @@ static int proc_write_foobar(struct file *file,
 
 	return len;
 }
-
 
 static int __init init_procfs_example(void)
 {
@@ -179,7 +172,6 @@ out:
 	return rv;
 }
 
-
 static void __exit cleanup_procfs_example(void)
 {
 	remove_proc_entry("jiffies_too", example_dir);
@@ -191,7 +183,6 @@ static void __exit cleanup_procfs_example(void)
 	printk(KERN_INFO "%s %s removed\n",
 	       MODULE_NAME, MODULE_VERS);
 }
-
 
 module_init(init_procfs_example);
 module_exit(cleanup_procfs_example);

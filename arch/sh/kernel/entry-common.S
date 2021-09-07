@@ -52,7 +52,6 @@
 #  define resume_kernel		__restore_all
 #endif
 
-
 	.align	2
 ENTRY(exception_error)
 	!

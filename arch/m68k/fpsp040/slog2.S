@@ -137,7 +137,6 @@ slog10:
 	fmulx		INV_L10,%fp0
 	bra		t_frcinx
 
-
 	.global	slog2d
 slog2d:
 |--entry point for Log2(X), X is denormalized

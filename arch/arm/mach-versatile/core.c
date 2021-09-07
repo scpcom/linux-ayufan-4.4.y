@@ -249,7 +249,6 @@ unsigned long long sched_clock(void)
 	return v;
 }
 
-
 #define VERSATILE_FLASHCTRL    (__io_address(VERSATILE_SYS_BASE) + VERSATILE_SYS_FLASH_OFFSET)
 
 static int versatile_flash_init(void)
@@ -1038,4 +1037,3 @@ static void __init versatile_timer_init(void)
 struct sys_timer versatile_timer = {
 	.init		= versatile_timer_init,
 };
-

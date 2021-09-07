@@ -167,7 +167,6 @@
 #define		SAME_PAGE_PRIO_MASK			0x0F000000
 #define		MC_GLOBW_INIT_LAT_MASK			0xF0000000
 
-
 /*
  * PM4 packet
  */
@@ -481,7 +480,6 @@
 #define   G_006918_D2GRPH_SECONDARY_SURFACE_ADDRESS(x) (((x) >> 0) & 0xFFFFFFFF)
 #define   C_006918_D2GRPH_SECONDARY_SURFACE_ADDRESS    0x00000000
 
-
 #define R_000001_MC_FB_LOCATION                      0x000001
 #define   S_000001_MC_FB_START(x)                      (((x) & 0xFFFF) << 0)
 #define   G_000001_MC_FB_START(x)                      (((x) >> 0) & 0xFFFF)
@@ -504,7 +502,6 @@
 #define   S_000004_AGP_BASE_ADDR_2(x)                  (((x) & 0xF) << 0)
 #define   G_000004_AGP_BASE_ADDR_2(x)                  (((x) >> 0) & 0xF)
 #define   C_000004_AGP_BASE_ADDR_2                     0xFFFFFFF0
-
 
 #define R_00000F_CP_DYN_CNTL                         0x00000F
 #define   S_00000F_CP_FORCEON(x)                       (((x) & 0x1) << 0)

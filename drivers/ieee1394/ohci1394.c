@@ -347,7 +347,6 @@ static void ohci_soft_reset(struct ti_ohci *ohci) {
 	DBGMSG ("Soft reset finished");
 }
 
-
 /* Generate the dma receive prgs and start the context */
 static void initialize_dma_rcv_ctx(struct dma_rcv_ctx *d, int generate_irq)
 {
@@ -2103,7 +2102,6 @@ static int ohci_isoctl(struct hpsb_iso *iso, enum isoctl_cmd cmd, unsigned long 
  * IEEE-1394 functionality section END *
  ***************************************/
 
-
 /********************************************************
  * Global stuff (interrupt handler, init/shutdown code) *
  ********************************************************/
@@ -2983,7 +2981,6 @@ static void ohci_set_hw_config_rom(struct hpsb_host *host, __be32 *config_rom)
 	memcpy(ohci->csr_config_rom_cpu, config_rom, OHCI_CONFIG_ROM_LEN);
 }
 
-
 static quadlet_t ohci_hw_csr_reg(struct hpsb_host *host, int reg,
                                  quadlet_t data, quadlet_t compare)
 {
@@ -3093,7 +3090,6 @@ static int __devinit ohci1394_pci_probe(struct pci_dev *dev,
 	} else
 		ohci->selfid_swap = 1;
 #endif
-
 
 #ifndef PCI_DEVICE_ID_NVIDIA_NFORCE2_FW
 #define PCI_DEVICE_ID_NVIDIA_NFORCE2_FW 0x006e

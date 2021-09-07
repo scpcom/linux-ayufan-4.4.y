@@ -705,8 +705,6 @@ int __init early_acpi_boot_init(void)
 	return 0;
 }
 
-
-
 int __init acpi_boot_init(void)
 {
 

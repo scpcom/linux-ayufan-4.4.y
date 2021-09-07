@@ -82,7 +82,6 @@ static void __devinit early_uli5249(struct pci_dev *dev)
 	pci_write_config_byte(dev, 0x7c, temp);
 }
 
-
 static void __devinit quirk_uli1575(struct pci_dev *dev)
 {
 	int i;

@@ -52,7 +52,6 @@ static int titan_pchip1_present;
 # define DBG_CFG(args)
 #endif
 
-
 /*
  * Routines to access TIG registers.
  */
@@ -76,7 +75,6 @@ titan_write_tig(int offset, u8 value)
 	*tig_addr = (unsigned long)value;
 }
 
-
 /*
  * Given a bus, device, and function number, compute resulting
  * configuration space address
@@ -197,7 +195,6 @@ struct pci_ops titan_pci_ops =
 	.write =	titan_write_config,
 };
 
-
 void
 titan_pci_tbi(struct pci_controller *hose, dma_addr_t start, dma_addr_t end)
 {
@@ -436,7 +433,6 @@ titan_kill_arch(int mode)
 	titan_kill_pachips(TITAN_pachip0, TITAN_pachip1);
 }
 
-
 /*
  * IO map support.
  */
@@ -447,7 +443,6 @@ titan_ioportmap(unsigned long addr)
 	FIXUP_IOADDR_VGA(addr);
 	return (void __iomem *)(addr + TITAN_IO_BIAS);
 }
-
 
 void __iomem *
 titan_ioremap(unsigned long addr, unsigned long size)

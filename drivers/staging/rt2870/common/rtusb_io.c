@@ -38,7 +38,6 @@
 
 #include "../rt_config.h"
 
-
 /*
 	========================================================================
 
@@ -73,8 +72,6 @@ NTSTATUS	RTUSBFirmwareRun(
 	return Status;
 }
 
-
-
 /*
 	========================================================================
 
@@ -102,7 +99,6 @@ NTSTATUS RTUSBFirmwareWrite(
 
 	Status = RTUSBReadMACRegister(pAd, MAC_CSR0, &MacReg);
 
-
 	writeLen = FwLen;
 	RTUSBMultiWrite(pAd, FIRMWARE_IMAGE_BASE, pFwImage, writeLen);
 
@@ -116,7 +112,6 @@ NTSTATUS RTUSBFirmwareWrite(
 
 	return Status;
 }
-
 
 /*
 	========================================================================
@@ -250,7 +245,6 @@ NTSTATUS	RTUSBMultiWrite(
 {
 	NTSTATUS	Status;
 
-
         USHORT          index = 0,Value;
         PUCHAR          pSrc = pData;
         USHORT          resude = 0;
@@ -268,7 +262,6 @@ NTSTATUS	RTUSBMultiWrite(
 
 	return Status;
 }
-
 
 NTSTATUS RTUSBSingleWrite(
 	IN 	RTMP_ADAPTER 	*pAd,
@@ -290,7 +283,6 @@ NTSTATUS RTUSBSingleWrite(
 	return Status;
 
 }
-
 
 /*
 	========================================================================
@@ -327,13 +319,11 @@ NTSTATUS	RTUSBReadMACRegister(
 
 	*pValue = le2cpu32(localVal);
 
-
 	if (Status < 0)
 		*pValue = 0xffffffff;
 
 	return Status;
 }
-
 
 /*
 	========================================================================
@@ -365,8 +355,6 @@ NTSTATUS	RTUSBWriteMACRegister(
 
 	return Status;
 }
-
-
 
 #if 1
 /*
@@ -718,7 +706,6 @@ NTSTATUS RT30xxWriteRFRegister(
 	return STATUS_SUCCESS;
 }
 
-
 /*
 	========================================================================
 
@@ -1025,7 +1012,6 @@ NDIS_STATUS	RTUSBEnqueueCmdFromNdis(
 	else
 	RTUSBCMDUp(pAd);
 
-
     return(NDIS_STATUS_SUCCESS);
 }
 
@@ -1052,7 +1038,6 @@ NDIS_STATUS RTUSBEnqueueInternalCmd(
 {
 	NDIS_STATUS	status;
 	PCmdQElmt	cmdqelmt = NULL;
-
 
 	status = RTMPAllocateMemory((PVOID *)&cmdqelmt, sizeof(CmdQElmt));
 	if ((status != NDIS_STATUS_SUCCESS) || (cmdqelmt == NULL))
@@ -1163,7 +1148,6 @@ VOID	RTUSBDequeueCmd(
 	  If a thread in your driver uses this call, make sure your disconnect()
 	  method can wait for it to complete.  Since you don't have a handle on
 	  the URB used, you can't cancel the request.
-
 
 	Routine Description:
 
@@ -1582,7 +1566,6 @@ VOID CMDHandler(
 								int				ret = 0;
 								unsigned long	IrqFlags;
 
-
 								RTMP_IRQ_LOCK(&pAd->BulkInLock, IrqFlags);
 								pRxContext = &(pAd->RxContext[pAd->NextRxBulkInIndex]);
 								if ((pAd->PendingRx > 0) || (pRxContext->Readable == TRUE) || (pRxContext->InUse == TRUE))
@@ -1875,4 +1858,3 @@ VOID CMDHandler(
 		}
 	}	/* end of while */
 }
-

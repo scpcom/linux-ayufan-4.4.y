@@ -90,7 +90,6 @@ int omap2_sdrc_get_params(unsigned long r,
 	return 0;
 }
 
-
 void __init omap2_set_globals_sdrc(struct omap_globals *omap2_globals)
 {
 	omap2_sdrc_base = omap2_globals->sdrc;

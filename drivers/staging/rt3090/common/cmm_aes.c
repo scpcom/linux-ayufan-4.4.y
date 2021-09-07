@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 typedef	struct
 {
     UINT32 erk[64];     /* encryption round keys */
@@ -256,7 +255,6 @@ VOID mix_column(
 	xor_32(temp, tempb, out);
 }
 
-
 /************************************************/
 /* construct_mic_header1()                      */
 /* Builds the first MIC header block from       */
@@ -333,7 +331,6 @@ void construct_mic_header2(
 		mic_header2[15] = mpdu[31] & 0x00;
 	}
 }
-
 
 /************************************************/
 /* construct_mic_iv()                           */
@@ -526,8 +523,6 @@ BOOLEAN RTMPSoftDecryptAES(
 	payload_remainder = (payload_len) % 16;
 	num_blocks = (payload_len) / 16;
 
-
-
 	// Find start of payload
 	payload_index = HeaderLen + 8; //IV+EIV
 
@@ -587,7 +582,6 @@ BOOLEAN RTMPSoftDecryptAES(
 	bitwise_xor(aes_out, padded_buffer, chain_buffer);
 
 	NdisMoveMemory(TrailMIC, chain_buffer, 8);
-
 
 	//
 	// Calculate MIC
@@ -952,7 +946,6 @@ static uint32 KT3[256];
 	(b)[(i)	+ 2] = (uint8) ( (n) >>	 8 );		\
 	(b)[(i)	+ 3] = (uint8) ( (n)	   );		\
 }
-
 
 int	rt_aes_set_key( aes_context *ctx, uint8 *key, int nbits )
 {
@@ -1366,7 +1359,6 @@ VOID	AES_GTK_KEY_UNWRAP(
 	UCHAR       *R;
 	INT         num_blocks = c_len/8;	// unit:64bits
 
-
 	os_alloc_mem(NULL, (PUCHAR *)&R, 512);
 
 	if (R == NULL)
@@ -1405,10 +1397,8 @@ VOID	AES_GTK_KEY_UNWRAP(
 		plaintext[i] = R[i];
 	}
 
-
 	os_free_mem(NULL, R);
 }
-
 
 /* =======  The related function of AES-128-CMAC  ======= */
 VOID leftshift_onebit(
@@ -1442,7 +1432,6 @@ VOID do_padding(
 		else
 			pad[j] = 0x00;
 	}
-
 
 }
 

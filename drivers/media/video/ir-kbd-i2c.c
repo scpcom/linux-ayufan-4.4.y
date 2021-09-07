@@ -60,7 +60,6 @@ static int hauppauge;
 module_param(hauppauge, int, 0644);    /* Choose Hauppauge remote */
 MODULE_PARM_DESC(hauppauge, "Specify Hauppauge remote: 0=black, 1=grey (defaults to 0)");
 
-
 #define DEVNAME "ir-kbd-i2c"
 #define dprintk(level, fmt, arg...)	if (debug >= level) \
 	printk(KERN_DEBUG DEVNAME ": " fmt , ## arg)

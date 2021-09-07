@@ -33,9 +33,7 @@
 #include <linux/delay.h>
 #include "zc0301_sensor.h"
 
-
 static struct zc0301_sensor pas202bcb;
-
 
 static int pas202bcb_init(struct zc0301_device* cam)
 {
@@ -163,7 +161,6 @@ static int pas202bcb_init(struct zc0301_device* cam)
 	return err;
 }
 
-
 static int pas202bcb_get_ctrl(struct zc0301_device* cam,
 			      struct v4l2_control* ctrl)
 {
@@ -206,7 +203,6 @@ static int pas202bcb_get_ctrl(struct zc0301_device* cam,
 	}
 }
 
-
 static int pas202bcb_set_ctrl(struct zc0301_device* cam,
 			      const struct v4l2_control* ctrl)
 {
@@ -239,7 +235,6 @@ static int pas202bcb_set_ctrl(struct zc0301_device* cam,
 
 	return err ? -EIO : 0;
 }
-
 
 static struct zc0301_sensor pas202bcb = {
 	.name = "PAS202BCB",
@@ -330,7 +325,6 @@ static struct zc0301_sensor pas202bcb = {
 		.colorspace = V4L2_COLORSPACE_JPEG,
 	},
 };
-
 
 int zc0301_probe_pas202bcb(struct zc0301_device* cam)
 {

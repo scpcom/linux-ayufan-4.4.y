@@ -19,7 +19,6 @@
 #include <asm/sizes.h>
 #include "../arch/arm/mach-feroceon-kw/config/mvSysHwConfig.h"
 
-
 #define PCI_MEMORY_VADDR        PEX0_MEM_BASE	/* PCI MEM Vaddr */
 #define PCI_IO_VADDR            PEX0_IO_BASE	/* PCI IO Vadder */
 
@@ -31,4 +30,3 @@
 #define PCIMEM_BASE             PCI_MEMORY_VADDR /* mem base for VGA use*/
 
 #endif
-

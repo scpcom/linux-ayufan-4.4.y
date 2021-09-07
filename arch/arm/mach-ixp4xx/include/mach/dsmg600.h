@@ -25,7 +25,6 @@
 #define DSMG600_PCI_MAX_DEV	4
 #define DSMG600_PCI_IRQ_LINES	3
 
-
 /* PCI controller GPIO to IRQ pin mappings */
 #define DSMG600_PCI_INTA_PIN	11
 #define DSMG600_PCI_INTB_PIN	10

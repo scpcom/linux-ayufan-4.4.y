@@ -1297,7 +1297,6 @@ ip6_tnl_change_mtu(struct net_device *dev, int new_mtu)
 	return 0;
 }
 
-
 static const struct net_device_ops ip6_tnl_netdev_ops = {
 	.ndo_uninit = ip6_tnl_dev_uninit,
 	.ndo_start_xmit = ip6_tnl_xmit,
@@ -1325,7 +1324,6 @@ static void ip6_tnl_dev_setup(struct net_device *dev)
 	dev->addr_len = sizeof(struct in6_addr);
 	dev->features |= NETIF_F_NETNS_LOCAL;
 }
-
 
 /**
  * ip6_tnl_dev_init_gen - general initializer for all tunnel devices

@@ -1,7 +1,6 @@
 #ifndef _ASM_IA64_IA32_PRIV_H
 #define _ASM_IA64_IA32_PRIV_H
 
-
 #include <asm/ia32.h>
 
 #ifdef CONFIG_IA32_SUPPORT
@@ -72,7 +71,6 @@ struct _fpxreg_ia32 {
 struct _xmmreg_ia32 {
         unsigned int element[4];
 };
-
 
 struct _fpstate_ia32 {
        unsigned int    cw,

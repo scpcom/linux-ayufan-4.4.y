@@ -213,4 +213,3 @@ MACHINE_START(E740, "Toshiba e740")
 	.init_machine	= e740_init,
 	.timer		= &pxa_timer,
 MACHINE_END
-

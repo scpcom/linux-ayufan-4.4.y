@@ -11,7 +11,6 @@
  * This perhaps should live in drivers/char
  */
 
-
 #include <linux/types.h>
 #include <linux/errno.h>
 #include <linux/init.h>
@@ -28,7 +27,6 @@ static int nvram_fetch, nvram_store;
 static char nvram_buf[NVRW_CNT];	/* assume this is in the first 4GB */
 static DEFINE_SPINLOCK(nvram_lock);
 
-
 static ssize_t pSeries_nvram_read(char *buf, size_t count, loff_t *index)
 {
 	unsigned int i;
@@ -36,7 +34,6 @@ static ssize_t pSeries_nvram_read(char *buf, size_t count, loff_t *index)
 	int done;
 	unsigned long flags;
 	char *p = buf;
-
 
 	if (nvram_size == 0 || nvram_fetch == RTAS_UNKNOWN_SERVICE)
 		return -ENODEV;

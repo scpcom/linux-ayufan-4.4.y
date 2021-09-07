@@ -6,7 +6,6 @@ struct BA1struct {
 	u32 map[BA1_DWORD_SIZE];
 };
 
-
 static struct BA1struct BA1Struct = {
 {{ 0x00000000, 0x00003000 },{ 0x00010000, 0x00003800 },{ 0x00020000, 0x00007000 }},
 {0x00000000,0x00000000,0x00000000,0x00000000,

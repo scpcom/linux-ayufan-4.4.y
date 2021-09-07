@@ -107,4 +107,3 @@ void __init mv_init_irq(void)
 	/* TBD. Add support for error interrupts */
 	return;
 }
-

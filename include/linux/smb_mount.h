@@ -22,7 +22,6 @@ struct smb_mount_data {
 	__kernel_mode_t dir_mode;
 };
 
-
 #ifdef __KERNEL__
 
 /* "vers" in big-endian */

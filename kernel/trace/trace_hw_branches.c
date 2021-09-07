@@ -17,7 +17,6 @@
 #include "trace_output.h"
 #include "trace.h"
 
-
 #define BTS_BUFFER_SIZE (1 << 13)
 
 static DEFINE_PER_CPU(struct bts_tracer *, tracer);
@@ -28,7 +27,6 @@ static DEFINE_PER_CPU(unsigned char[BTS_BUFFER_SIZE], buffer);
 static int trace_hw_branches_enabled __read_mostly;
 static int trace_hw_branches_suspended __read_mostly;
 static struct trace_array *hw_branch_trace __read_mostly;
-
 
 static void bts_trace_init_cpu(int cpu)
 {

@@ -29,7 +29,6 @@ do {								\
 #define __flush_tlb_all() __flush_tlb()
 #define __flush_tlb_one(addr) __flush_tlb()
 
-
 /*
  * TLB flushing:
  *
@@ -62,7 +61,6 @@ do {								\
 	__flush_tlb_all();					\
 	preempt_enable();					\
 } while (0)
-
 
 #define __flush_tlb_global()			flush_tlb_all()
 #define flush_tlb()				flush_tlb_all()

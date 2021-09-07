@@ -703,7 +703,6 @@ void au0828_analog_unregister(struct au0828_dev *dev)
 	mutex_unlock(&au0828_sysfs_lock);
 }
 
-
 /* Usage lock check functions */
 static int res_get(struct au0828_fh *fh)
 {
@@ -987,7 +986,6 @@ static int au0828_set_format(struct au0828_dev *dev, unsigned int cmd,
 
 	return 0;
 }
-
 
 static int vidioc_queryctrl(struct file *file, void *priv,
 			    struct v4l2_queryctrl *qc)
@@ -1705,4 +1703,3 @@ int au0828_analog_register(struct au0828_dev *dev,
 
 	return 0;
 }
-

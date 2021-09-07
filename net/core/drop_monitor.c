@@ -34,7 +34,6 @@
 
 static void send_dm_alert(struct work_struct *unused);
 
-
 /*
  * Globals, our netlink socket pointer
  * and the work handle that will send up
@@ -135,7 +134,6 @@ static void trace_drop_common(struct sk_buff *skb, void *location)
 	int i;
 	struct per_cpu_dm_data *data = &__get_cpu_var(dm_cpu_data);
 
-
 	if (!atomic_add_unless(&data->dm_hit_count, -1, 0)) {
 		/*
 		 * we're already at zero, discard this hit
@@ -206,7 +204,6 @@ static void trace_napi_poll_hit(struct napi_struct *napi)
 	rcu_read_unlock();
 }
 
-
 static void free_dm_hw_stat(struct rcu_head *head)
 {
 	struct dm_hw_stat_delta *n;
@@ -257,7 +254,6 @@ static int set_all_monitor_traces(int state)
 		return -EINPROGRESS;
 	return rc;
 }
-
 
 static int net_dm_cmd_config(struct sk_buff *skb,
 			struct genl_info *info)

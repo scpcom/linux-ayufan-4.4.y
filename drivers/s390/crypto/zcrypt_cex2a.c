@@ -195,7 +195,6 @@ static int ICACRT_msg_to_type50CRT_msg(struct zcrypt_device *zdev,
 	    copy_from_user(inp, crt->inputdata, mod_len))
 		return -EFAULT;
 
-
 	return 0;
 }
 

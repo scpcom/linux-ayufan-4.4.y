@@ -18,8 +18,6 @@
 #include <gtHwCntl.h>
 #include <gtSem.h>
 
-
-
 /*******************************************************************************
 * analizePhy100MVCTResult
 *
@@ -104,7 +102,6 @@ GT_STATUS analizePhy100MVCTResult
 
 	return GT_OK;
 }
-
 
 /*******************************************************************************
 * getCableStatus_Phy100M
@@ -291,7 +288,6 @@ GT_STATUS workAround_Phy100M
 	return status;
 }
 
-
 static
 GT_STATUS  enable1stWorkAround_Phy1000M
 (
@@ -471,7 +467,6 @@ GT_STATUS analizePhy1000MVCTResult
 	return GT_OK;
 }
 
-
 /*******************************************************************************
 * getCableStatus_Phy1000M
 *
@@ -599,7 +594,6 @@ GT_STATUS workAround_Phy1000M
 	return GT_OK;
 }
 
-
 /*******************************************************************************
 * getCableStatus_Phy1000MPage
 *
@@ -724,8 +718,6 @@ GT_STATUS getCableStatus_Phy1000MPage
 
 	return GT_OK;
 }
-
-
 
 /*******************************************************************************
 * gvctGetCableStatus
@@ -911,7 +903,6 @@ cableDiagCleanup:
 	return status;	
 }
 
-
 /*******************************************************************************
 * getExStatus1000M
 *
@@ -1009,7 +1000,6 @@ static GT_STATUS getExStatus1000M
 	return GT_OK;
 }
 
-
 /*******************************************************************************
 * getExStatus1000MPage
 *
@@ -1106,7 +1096,6 @@ static GT_STATUS getExStatus1000MPage
 
 	return GT_OK;
 }
-
 
 /*******************************************************************************
 * gvctGet1000BTExtendedStatus
@@ -1226,5 +1215,3 @@ GT_STATUS gvctGet1000BTExtendedStatus
 	gtSemGive(dev,dev->phyRegsSem);
 	return status;
 }
-
-

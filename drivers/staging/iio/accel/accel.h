@@ -61,7 +61,6 @@
 #define IIO_DEV_ATTR_ACCEL_THRESH_Z(_mode, _show, _store, _addr)	\
 	IIO_DEVICE_ATTR(thresh_accel_z, _mode, _show, _store, _addr)
 
-
 /**
  * IIO_EVENT_ATTR_ACCEL_X_HIGH: threshold event, x acceleration
  * @_show: read x acceleration high threshold
@@ -134,7 +133,6 @@
 	IIO_EVENT_ATTR_SH(free_fall, _evlist, _show, _store, _mask)
 
 #define IIO_EVENT_CODE_FREE_FALL (IIO_EVENT_CODE_ACCEL_BASE + 6)
-
 
 #define IIO_EVENT_ATTR_ACCEL_X_ROC_HIGH_SH(_evlist, _show, _store, _mask) \
 	IIO_EVENT_ATTR_SH(accel_x_roc_high, _evlist, _show, _store, _mask)

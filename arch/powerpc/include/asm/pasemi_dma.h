@@ -28,7 +28,6 @@ struct pasdma_status {
 	u64 tx_sta[20];		/* TX channel status */
 };
 
-
 /* All these registers live in the PCI configuration space for the DMA PCI
  * device. Use the normal PCI config access functions for them.
  */
@@ -47,7 +46,6 @@ enum {
 	PAS_DMA_TXF_CFLG1 = 0x14c,	/* Set flags                  */
 };
 
-
 #define PAS_DMA_CAP_TXCH_TCHN_M	0x00ff0000 /* # of TX channels */
 #define PAS_DMA_CAP_TXCH_TCHN_S	16
 
@@ -63,7 +61,6 @@ enum {
 #define PAS_DMA_COM_TXSTA_ACT	0x00000001 /* active */
 #define PAS_DMA_COM_RXCMD_EN	0x00000001 /* enable */
 #define PAS_DMA_COM_RXSTA_ACT	0x00000001 /* active */
-
 
 /* Per-interface and per-channel registers */
 #define _PAS_DMA_RXINT_STRIDE		0x20
@@ -108,7 +105,6 @@ enum {
 #define    PAS_DMA_RXINT_BASEU_SIZ_S	16		/* 0 = 16K */
 #define    PAS_DMA_RXINT_BASEU_SIZ(x)	(((x) << PAS_DMA_RXINT_BASEU_SIZ_S) & \
 					 PAS_DMA_RXINT_BASEU_SIZ_M)
-
 
 #define _PAS_DMA_TXCHAN_STRIDE	0x20    /* Size per channel		*/
 #define _PAS_DMA_TXCHAN_TCMDSTA	0x300	/* Command / Status		*/
@@ -463,8 +459,6 @@ enum {
 #define CTRL_CMD_REG_S		0
 #define CTRL_CMD_REG(x)		((((long)(x)) << CTRL_CMD_REG_S) & \
 				 CTRL_CMD_REG_M)
-
-
 
 /* Prototypes for the shared DMA functions in the platform code. */
 

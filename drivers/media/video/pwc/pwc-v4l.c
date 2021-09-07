@@ -210,7 +210,6 @@ static struct v4l2_queryctrl pwc_controls[] = {
 	},
 };
 
-
 static void pwc_vidioc_fill_fmt(const struct pwc_device *pdev, struct v4l2_format *f)
 {
 	memset(&f->fmt.pix, 0, sizeof(struct v4l2_pix_format));
@@ -356,7 +355,6 @@ long pwc_video_do_ioctl(struct file *file, unsigned int cmd, void *arg)
 	}
 #endif
 
-
 	switch (cmd) {
 		/* Query cabapilities */
 		case VIDIOCGCAP:
@@ -399,7 +397,6 @@ long pwc_video_do_ioctl(struct file *file, unsigned int cmd, void *arg)
 				return -EINVAL;
 			return 0;
 		}
-
 
 		/* Picture functions; contrast etc. */
 		case VIDIOCGPICT:

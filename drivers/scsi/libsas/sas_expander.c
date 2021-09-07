@@ -802,7 +802,6 @@ static struct domain_device *sas_ex_discover_expander(
 	/* FIXME: better error handling */
 	BUG_ON(sas_port_add(phy->port) != 0);
 
-
 	switch (phy->attached_dev_type) {
 	case EDGE_DEV:
 		rphy = sas_expander_alloc(phy->port,

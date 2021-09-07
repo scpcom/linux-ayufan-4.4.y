@@ -46,7 +46,6 @@
 #include "hcd.h"
 #include "hub.h"
 
-
 /*-------------------------------------------------------------------------*/
 
 /*
@@ -193,7 +192,6 @@ static const u8 usb11_rh_dev_descriptor [18] = {
 	0x01,       /*  __u8  iSerialNumber; */
 	0x01        /*  __u8  bNumConfigurations; */
 };
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -422,7 +420,6 @@ rh_string(int id, struct usb_hcd const *hcd, u8 *data, unsigned len)
 
 	return ascii2desc(s, data, len);
 }
-
 
 /* Root hub control transfers execute synchronously */
 static int rh_call_control (struct usb_hcd *hcd, struct urb *urb)
@@ -789,8 +786,6 @@ static int usb_rh_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 	return rc;
 }
 
-
-
 /*
  * Show & store the current value of authorized_default
  */
@@ -835,7 +830,6 @@ static DEVICE_ATTR(authorized_default, 0644,
 	    usb_host_authorized_default_show,
 	    usb_host_authorized_default_store);
 
-
 /* Group all the USB bus attributes */
 static struct attribute *usb_bus_attrs[] = {
 		&dev_attr_authorized_default.attr,
@@ -846,8 +840,6 @@ static struct attribute_group usb_bus_attr_group = {
 	.name = NULL,	/* we want them in the same directory */
 	.attrs = usb_bus_attrs,
 };
-
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -992,7 +984,6 @@ static int register_root_hub(struct usb_hcd *hcd)
 	return retval;
 }
 
-
 /*-------------------------------------------------------------------------*/
 
 /**
@@ -1040,7 +1031,6 @@ long usb_calc_bus_time (int speed, int is_input, int isoc, int bytecount)
 	}
 }
 EXPORT_SYMBOL_GPL(usb_calc_bus_time);
-
 
 /*-------------------------------------------------------------------------*/
 

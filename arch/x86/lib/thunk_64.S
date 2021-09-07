@@ -33,7 +33,6 @@
 	CFI_ENDPROC
 	.endm
 	
-
 	.section .sched.text, "ax"
 #ifdef CONFIG_RWSEM_XCHGADD_ALGORITHM
 	thunk rwsem_down_read_failed_thunk,rwsem_down_read_failed

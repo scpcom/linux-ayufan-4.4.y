@@ -244,7 +244,6 @@ static void falcon_reconfigure_xgxs_core(struct efx_nic *efx)
 	falcon_write(efx, &reg, XX_SD_CTL_REG);
 }
 
-
 /* Try and bring the Falcon side of the Falcon-Phy XAUI link fails
  * to come back up. Bash it until it comes back up */
 static void falcon_check_xaui_link_up(struct efx_nic *efx, int tries)

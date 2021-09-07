@@ -197,7 +197,6 @@ static int btrfs_ioctl_setflags(struct file *file, void __user *arg)
 	else
 		ip->flags &= ~BTRFS_INODE_DIRSYNC;
 
-
 	trans = btrfs_join_transaction(root, 1);
 	BUG_ON(!trans);
 

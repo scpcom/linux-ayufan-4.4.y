@@ -38,7 +38,6 @@
 #include <mach/dma.h>
 #include <mach/clock.h>
 
-
 #define OMAP2_MCSPI_MAX_FREQ		48000000
 
 /* OMAP2 has 3 SPI controllers, while OMAP3 has 4 */
@@ -113,7 +112,6 @@ struct omap2_mcspi_dma {
  * cache operations; better heuristics consider wordsize and bitrate.
  */
 #define DMA_MIN_BYTES			8
-
 
 struct omap2_mcspi {
 	struct work_struct	work;
@@ -1210,7 +1208,6 @@ static struct platform_driver omap2_mcspi_driver = {
 	},
 	.remove =	__exit_p(omap2_mcspi_remove),
 };
-
 
 static int __init omap2_mcspi_init(void)
 {

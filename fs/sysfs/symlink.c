@@ -216,6 +216,5 @@ const struct inode_operations sysfs_symlink_inode_operations = {
 	.put_link = sysfs_put_link,
 };
 
-
 EXPORT_SYMBOL_GPL(sysfs_create_link);
 EXPORT_SYMBOL_GPL(sysfs_remove_link);

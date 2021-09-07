@@ -27,4 +27,3 @@
 #define MXC_INT_MLB		46
 #define MXC_INT_SPDIF		47
 #define MXC_INT_FEC		57
-

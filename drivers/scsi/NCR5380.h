@@ -197,7 +197,6 @@
 /* Access to host buffer stack */
 #define C400_HOST_BUFFER         NCR53C400_register_offset-4	/* rw */
 
-
 /* Note : PHASE_* macros are based on the values of the STATUS register */
 #define PHASE_MASK 	(SR_MSG | SR_CD | SR_IO)
 

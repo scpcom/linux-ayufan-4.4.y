@@ -153,7 +153,6 @@ static inline void pack_descriptor(struct desc_struct *desc, unsigned long base,
 	desc->p = 1;
 }
 
-
 static inline void set_tssldt_descriptor(void *d, unsigned long addr,
 					 unsigned type, unsigned size)
 {

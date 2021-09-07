@@ -57,8 +57,6 @@
 
 #define FIRMWARE_FILE_NAME "f2255usb.bin"
 
-
-
 /* default JPEG quality */
 #define S2255_DEF_JPEG_QUAL     50
 /* vendor request in */
@@ -101,7 +99,6 @@
 #define NUM_LINES_1CIFS_PAL	288
 #define LINE_SZ_DEF		640
 #define NUM_LINES_DEF		240
-
 
 /* predefined settings */
 #define FORMAT_NTSC	1
@@ -158,7 +155,6 @@ struct s2255_mode {
 	u32 usb_block;	/* block size. should be 4096 of DEF_USB_BLOCK */
 	u32 restart;	/* if DSP requires restart */
 };
-
 
 #define S2255_READ_IDLE		0
 #define S2255_READ_FRAME	1
@@ -349,7 +345,6 @@ static long s2255_vendor_req(struct s2255_dev *dev, unsigned char req,
 
 static struct usb_driver s2255_driver;
 
-
 /* Declare static vars that will be used as parameters */
 static unsigned int vid_limit = 16;	/* Video memory limit, in Mb */
 
@@ -369,7 +364,6 @@ static struct usb_device_id s2255_table[] = {
 	{ }			/* Terminating entry */
 };
 MODULE_DEVICE_TABLE(usb, s2255_table);
-
 
 #define BUFFER_TIMEOUT msecs_to_jiffies(400)
 
@@ -467,7 +461,6 @@ static int norm_minh(struct video_device *vdev)
 	    (NUM_LINES_1CIFS_NTSC) : (NUM_LINES_1CIFS_PAL);
 }
 
-
 /*
  * TODO: fixme: move YUV reordering to hardware
  * converts 2255 planar format to yuyv or uyvy
@@ -516,7 +509,6 @@ static void s2255_timer(unsigned long user_data)
 		return;
 	}
 }
-
 
 /* this loads the firmware asynchronously.
    Originally this was done synchroously in probe.
@@ -609,7 +601,6 @@ unlock:
 	return 0;
 }
 
-
 static const struct s2255_fmt *format_by_fourcc(int fourcc)
 {
 	unsigned int i;
@@ -622,9 +613,6 @@ static const struct s2255_fmt *format_by_fourcc(int fourcc)
 	}
 	return NULL;
 }
-
-
-
 
 /* video buffer vmalloc implementation based partly on VIVI driver which is
  *          Copyright (c) 2006 by
@@ -690,7 +678,6 @@ static void s2255_fillbuff(struct s2255_dev *dev, struct s2255_buffer *buf,
 	buf->vb.state = VIDEOBUF_DONE;
 }
 
-
 /* ------------------------------------------------------------------
    Videobuf operations
    ------------------------------------------------------------------*/
@@ -749,7 +736,6 @@ static int buffer_prepare(struct videobuf_queue *vq, struct videobuf_buffer *vb,
 	buf->vb.height = fh->height;
 	buf->vb.field = field;
 
-
 	if (VIDEOBUF_NEEDS_INIT == buf->vb.state) {
 		rc = videobuf_iolock(vq, &buf->vb, NULL);
 		if (rc < 0)
@@ -792,7 +778,6 @@ static struct videobuf_queue_ops s2255_video_qops = {
 	.buf_release = buffer_release,
 };
 
-
 static int res_get(struct s2255_dev *dev, struct s2255_fh *fh)
 {
 	/* is it free? */
@@ -820,7 +805,6 @@ static int res_check(struct s2255_fh *fh)
 	return fh->resources[fh->channel];
 }
 
-
 static void res_free(struct s2255_dev *dev, struct s2255_fh *fh)
 {
 	mutex_lock(&dev->lock);
@@ -829,7 +813,6 @@ static void res_free(struct s2255_dev *dev, struct s2255_fh *fh)
 	mutex_unlock(&dev->lock);
 	dprintk(1, "res: put\n");
 }
-
 
 static int vidioc_querycap(struct file *file, void *priv,
 			   struct v4l2_capability *cap)
@@ -1657,7 +1640,6 @@ static int s2255_open(struct file *file)
 		dev->chn_configured[cur_channel] = 1;
 	}
 
-
 	/* Put all controls at a sane state */
 	for (i = 0; i < ARRAY_SIZE(s2255_qctrl); i++)
 		qctl_regs[i] = s2255_qctrl[i].default_value;
@@ -1680,7 +1662,6 @@ static int s2255_open(struct file *file)
 	unlock_kernel();
 	return 0;
 }
-
 
 static unsigned int s2255_poll(struct file *file,
 			       struct poll_table_struct *wait)
@@ -1993,7 +1974,6 @@ static int save_frame(struct s2255_dev *dev, struct s2255_pipeinfo *pipe_info)
 			return -EINVAL;
 	}
 
-
 	idx = dev->cur_frame[dev->cc];
 	frm = &dev->buffer[dev->cc].frame[idx];
 
@@ -2011,7 +1991,6 @@ static int save_frame(struct s2255_dev *dev, struct s2255_pipeinfo *pipe_info)
 
 	/* skip the marker 512 bytes (and offset if out of sync) */
 	psrc = (u8 *)pipe_info->transfer_buffer + offset;
-
 
 	if (frm->lpvbits == NULL) {
 		dprintk(1, "s2255 frame buffer == NULL.%p %p %d %d",
@@ -2543,7 +2522,6 @@ static int s2255_probe(struct usb_interface *interface,
 	init_waitqueue_head(&dev->fw_data->wait_fw);
 	for (i = 0; i < MAX_CHANNELS; i++)
 		init_waitqueue_head(&dev->wait_setmode[i]);
-
 
 	dev->fw_data->fw_urb = usb_alloc_urb(0, GFP_KERNEL);
 

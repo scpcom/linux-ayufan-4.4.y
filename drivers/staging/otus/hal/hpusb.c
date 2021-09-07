@@ -34,7 +34,6 @@ extern void zfIdlRsp(zdev_t* dev, u32_t* rsp, u16_t rspLen);
 extern u16_t zfDelayWriteInternalReg(zdev_t* dev, u32_t addr, u32_t val);
 extern u16_t zfFlushDelayWrite(zdev_t* dev);
 
-
 #define USB_ENDPOINT_TX_INDEX   1
 #define USB_ENDPOINT_RX_INDEX   2
 #define USB_ENDPOINT_INT_INDEX  3
@@ -48,7 +47,6 @@ void zfIdlCmd(zdev_t* dev, u32_t* cmd, u16_t cmdLen)
 
     return;
 }
-
 
 /* zfAdjustCtrlSetting: fit OUTS format */
 /*     convert MIMO2 to OUTS             */
@@ -81,13 +79,11 @@ void zfAdjustCtrlSetting(zdev_t* dev, u16_t* header, zbuf_t* buf)
 
 	phyCtrl = 0;
 
-
 	/* MT : Bit[1~0] */
 	oldMT = oldPhyCtrl&0x3;
 	phyCtrl |= oldMT;
     if ( oldMT == 0x3 )   /* DL-OFDM (Duplicate Legacy OFDM) */
 		phyCtrl |= 0x1;
-
 
 	/* PT : Bit[2]    HT PT: 0 Mixed mode    1 Green field */
 	phyCtrl |= (oldPhyCtrl&0x4);
@@ -261,7 +257,6 @@ void zfAdjustCtrlSetting(zdev_t* dev, u16_t* header, zbuf_t* buf)
         tpc = (tpc > wd->maxTxPower5)? wd->maxTxPower5 : tpc;
     }
 
-
 #define ZM_MIN_TPC     5
 #define ZM_TPC_OFFSET  5
 #define ZM_SIGNAL_THRESHOLD  56
@@ -314,7 +309,6 @@ void zfAdjustCtrlSetting(zdev_t* dev, u16_t* header, zbuf_t* buf)
 	//DbgPrint("old phy ctrl =%08x \n", oldPhyCtrl);
     //DbgPrint("new phy ctrl =%08x \n", phyCtrl);
 }
-
 
 #define EXTRA_INFO_LEN      24    //RSSI(7) + EVM(12) + PHY(1) + MACStatus(4)
 u16_t zfHpSend(zdev_t* dev, u16_t* header, u16_t headerLen,
@@ -409,7 +403,6 @@ void zfHpQueryMonHalRxInfo(zdev_t* dev, u8_t *monHalRxInfo)
                 (u8_t*)&(((struct zsHpPriv*)wd->hpPrivate)->halRxInfo),
                 sizeof(struct zsHalRxInfo));
 }
-
 
 u8_t zfIsDataFrame(zdev_t* dev, zbuf_t* buf)
 {
@@ -566,7 +559,6 @@ void zfiUsbRecvPerPkt(zdev_t *dev, zbuf_t *buf)
 void zfiUsbRecv(zdev_t *dev, zbuf_t *buf)
 #endif
 {
-
 
 #if ZM_FW_LOOP_BACK != 1
     u8_t mpduInd;
@@ -914,7 +906,6 @@ void zfiUsbRecv(zdev_t *dev, zbuf_t *buf)
     u8_t    data;
     u8_t    i;
 
-
     /* Tx:  | ctrl_setting | Mac hdr | data | */
     /*            8            24       x     */
 
@@ -1171,7 +1162,6 @@ void zfUsbInit(zdev_t* dev)
     return;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfUsbFree                   */
@@ -1243,7 +1233,6 @@ void zfHpSendBeacon(zdev_t* dev, zbuf_t* buf, u16_t len)
     return;
 }
 
-
 #define ZM_STATUS_TX_COMP       0x00
 #define ZM_STATUS_RETRY_COMP    0x01
 #define ZM_STATUS_TX_FAILED     0x02
@@ -1263,7 +1252,6 @@ void zfiUsbRegIn(zdev_t* dev, u32_t* rsp, u16_t rspLen)
     //len = *u8rsp;
     type = *(u8rsp+1);
     u8rsp = u8rsp+4;
-
 
     /* Interrupt event */
     if ((type & 0xC0) == 0xC0)
@@ -1370,7 +1358,6 @@ void zfiUsbRegIn(zdev_t* dev, u32_t* rsp, u16_t rspLen)
         zfIdlRsp(dev, rsp, rspLen);
     }
 }
-
 
 #define ZM_PROGRAM_RAM_ADDR     0x200000 //0x1000 //0x700000
 #define FIRMWARE_DOWNLOAD       0x30
@@ -1586,4 +1573,3 @@ void zfiUsbOutComplete(zdev_t* dev, zbuf_t *buf, u8_t status, u8_t *hdr) {
     return;
 
 }
-

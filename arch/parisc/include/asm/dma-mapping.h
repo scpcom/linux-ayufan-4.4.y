@@ -116,7 +116,6 @@ dma_unmap_page(struct device *dev, dma_addr_t dma_address, size_t size,
 	dma_unmap_single(dev, dma_address, size, direction);
 }
 
-
 static inline void
 dma_sync_single_for_cpu(struct device *dev, dma_addr_t dma_handle, size_t size,
 		enum dma_data_direction direction)
@@ -224,7 +223,6 @@ parisc_walk_tree(struct device *dev)
 		
 #define GET_IOC(dev) (HBA_DATA(parisc_walk_tree(dev))->iommu);	
 	
-
 #ifdef CONFIG_IOMMU_CCIO
 struct parisc_device;
 struct ioc;

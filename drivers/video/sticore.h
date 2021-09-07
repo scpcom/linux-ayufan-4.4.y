@@ -48,14 +48,12 @@
 				   STI_PTR(glob_cfg));	\
        })
 
-
 #define sti_onscreen_x(sti) (sti->glob_cfg->onscreen_x)
 #define sti_onscreen_y(sti) (sti->glob_cfg->onscreen_y)
 
 /* sti_font_xy() use the native font ROM ! */
 #define sti_font_x(sti) (PTR_STI(sti->font)->width)
 #define sti_font_y(sti) (PTR_STI(sti->font)->height)
-
 
 /* STI function configuration structs */
 
@@ -98,7 +96,6 @@ struct sti_glob_cfg {
 	u32 ext_ptr;			/* pointer to extended glob_cfg data structure */
 };
 
-
 /* STI init function structs */
 
 struct sti_init_flags {
@@ -136,14 +133,11 @@ struct sti_init_inptr {
 	u32 ext_ptr;		/* pointer to extended init_graph inptr data structure*/
 };
 
-
 struct sti_init_outptr {
 	s32 errno;		/* error number on failure */
 	s32 text_planes;	/* number of planes used for text */
 	u32 future_ptr; 	/* pointer to future data */
 };
-
-
 
 /* STI configuration function structs */
 
@@ -305,7 +299,6 @@ struct sti_blkmv_outptr {
 	u32 future_ptr; 	/* pointer to future data */
 };
 
-
 /* internal generic STI struct */
 
 struct sti_struct {
@@ -344,7 +337,6 @@ struct sti_struct {
 	/* pointer to the fb_info where this STI device is used */
 	struct fb_info *info;
 };
-
 
 /* sticore interface functions */
 

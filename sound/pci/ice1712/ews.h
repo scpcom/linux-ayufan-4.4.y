@@ -44,7 +44,6 @@
 /* entry point */
 extern struct snd_ice1712_card_info snd_ice1712_ews_cards[];
 
-
 /* TerraTec EWX 24/96 configuration definitions */
 
 #define ICE1712_EWX2496_AK4524_CS	0x01	/* AK4524 chip select; low = active */

@@ -280,7 +280,6 @@ _STATIC(__mmu_off)
 	b	.	/* prevent speculative execution */
 #endif
 
-
 /*
  * Here is our main kernel entry point. We support currently 2 kind of entries
  * depending on the value of r5.

@@ -42,6 +42,3 @@
 BOOL ROUTEbRelay (PSDevice pDevice, PBYTE pbySkbData, UINT uDataLen, UINT uNodeIndex);
 
 #endif // __WROUTE_H__
-
-
-

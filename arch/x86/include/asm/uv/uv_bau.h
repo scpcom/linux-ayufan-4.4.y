@@ -127,7 +127,6 @@ struct bau_msg_payload {
 	unsigned int reserved1:32;	/* not usable */
 };
 
-
 /*
  * Message header:  16 bytes (128 bits) (bytes 0x30-0x3f of descriptor)
  * see table 4.2.3.0.1 in broacast_assist spec.

@@ -31,7 +31,6 @@
 
 struct bfa_log_msgdef_s bfa_log_msg_array[] = {
 
-
 /* messages define for BFA_AEN_CAT_ADAPTER Module */
 {BFA_AEN_ADAPTER_ADD, BFA_LOG_ATTR_NONE | BFA_LOG_ATTR_LOG, BFA_LOG_INFO,
  "BFA_AEN_ADAPTER_ADD",
@@ -43,9 +42,6 @@ struct bfa_log_msgdef_s bfa_log_msg_array[] = {
  "Adapter removed: SN = %s.",
  ((BFA_LOG_S << BFA_LOG_ARG0) | 0), 1},
 
-
-
-
 /* messages define for BFA_AEN_CAT_AUDIT Module */
 {BFA_AEN_AUDIT_AUTH_ENABLE, BFA_LOG_ATTR_NONE | BFA_LOG_ATTR_LOG,
  BFA_LOG_INFO, "BFA_AEN_AUDIT_AUTH_ENABLE",
@@ -56,9 +52,6 @@ struct bfa_log_msgdef_s bfa_log_msg_array[] = {
  BFA_LOG_INFO, "BFA_AEN_AUDIT_AUTH_DISABLE",
  "Authentication disabled for base port: WWN = %s.",
  ((BFA_LOG_S << BFA_LOG_ARG0) | 0), 1},
-
-
-
 
 /* messages define for BFA_AEN_CAT_ETHPORT Module */
 {BFA_AEN_ETHPORT_LINKUP, BFA_LOG_ATTR_NONE | BFA_LOG_ATTR_LOG, BFA_LOG_INFO,
@@ -80,9 +73,6 @@ struct bfa_log_msgdef_s bfa_log_msg_array[] = {
  "BFA_AEN_ETHPORT_DISABLE",
  "Base port ethernet interface disabled: mac = %s.",
  ((BFA_LOG_S << BFA_LOG_ARG0) | 0), 1},
-
-
-
 
 /* messages define for BFA_AEN_CAT_IOC Module */
 {BFA_AEN_IOC_HBGOOD, BFA_LOG_ATTR_NONE | BFA_LOG_ATTR_LOG, BFA_LOG_INFO,
@@ -110,9 +100,6 @@ struct bfa_log_msgdef_s bfa_log_msg_array[] = {
  "Running firmware version is incompatible with the driver version.",
  (0), 0},
 
-
-
-
 /* messages define for BFA_AEN_CAT_ITNIM Module */
 {BFA_AEN_ITNIM_ONLINE, BFA_LOG_ATTR_NONE | BFA_LOG_ATTR_LOG, BFA_LOG_INFO,
  "BFA_AEN_ITNIM_ONLINE",
@@ -128,9 +115,6 @@ struct bfa_log_msgdef_s bfa_log_msg_array[] = {
  BFA_LOG_ERROR, "BFA_AEN_ITNIM_DISCONNECT",
  "Target (WWN = %s) connectivity lost for initiator (WWN = %s).",
  ((BFA_LOG_S << BFA_LOG_ARG0) | (BFA_LOG_S << BFA_LOG_ARG1) | 0), 2},
-
-
-
 
 /* messages define for BFA_AEN_CAT_LPORT Module */
 {BFA_AEN_LPORT_NEW, BFA_LOG_ATTR_NONE | BFA_LOG_ATTR_LOG, BFA_LOG_INFO,
@@ -193,9 +177,6 @@ struct bfa_log_msgdef_s bfa_log_msg_array[] = {
  BFA_LOG_WARNING, "BFA_AEN_LPORT_NPIV_UNKNOWN",
  "Virtual port (WWN = %s) login failed.",
  ((BFA_LOG_S << BFA_LOG_ARG0) | 0), 1},
-
-
-
 
 /* messages define for BFA_AEN_CAT_PORT Module */
 {BFA_AEN_PORT_ONLINE, BFA_LOG_ATTR_NONE, BFA_LOG_INFO, "BFA_AEN_PORT_ONLINE",
@@ -272,9 +253,6 @@ struct bfa_log_msgdef_s bfa_log_msg_array[] = {
  "Unsupported SFP found: WWN/MAC = %s.",
  ((BFA_LOG_S << BFA_LOG_ARG0) | 0), 1},
 
-
-
-
 /* messages define for BFA_AEN_CAT_RPORT Module */
 {BFA_AEN_RPORT_ONLINE, BFA_LOG_ATTR_NONE | BFA_LOG_ATTR_LOG, BFA_LOG_INFO,
  "BFA_AEN_RPORT_ONLINE",
@@ -303,9 +281,6 @@ struct bfa_log_msgdef_s bfa_log_msg_array[] = {
  ((BFA_LOG_D << BFA_LOG_ARG0) | (BFA_LOG_S << BFA_LOG_ARG1) |
   (BFA_LOG_S << BFA_LOG_ARG2) | 0), 3},
 
-
-
-
 /* messages define for FCS Module */
 {BFA_LOG_FCS_FABRIC_NOSWITCH, BFA_LOG_ATTR_NONE | BFA_LOG_ATTR_LOG,
  BFA_LOG_INFO, "FCS_FABRIC_NOSWITCH",
@@ -318,9 +293,6 @@ struct bfa_log_msgdef_s bfa_log_msg_array[] = {
  " switch port VF_ID: %04x.",
  ((BFA_LOG_S << BFA_LOG_ARG0) | (BFA_LOG_X << BFA_LOG_ARG1) |
   (BFA_LOG_X << BFA_LOG_ARG2) | 0), 3},
-
-
-
 
 /* messages define for HAL Module */
 {BFA_LOG_HAL_ASSERT, BFA_LOG_ATTR_NONE | BFA_LOG_ATTR_LOG, BFA_LOG_ERROR,
@@ -346,9 +318,6 @@ struct bfa_log_msgdef_s bfa_log_msg_array[] = {
  "SM Assertion failure: %s:%d: event = %d",
  ((BFA_LOG_S << BFA_LOG_ARG0) | (BFA_LOG_D << BFA_LOG_ARG1) |
   (BFA_LOG_D << BFA_LOG_ARG2) | 0), 3},
-
-
-
 
 /* messages define for LINUX Module */
 {BFA_LOG_LINUX_DEVICE_CLAIMED, BFA_LOG_ATTR_NONE | BFA_LOG_ATTR_LOG,
@@ -412,9 +381,6 @@ struct bfa_log_msgdef_s bfa_log_msg_array[] = {
  ((BFA_LOG_D << BFA_LOG_ARG0) | (BFA_LOG_P << BFA_LOG_ARG1) |
   (BFA_LOG_X << BFA_LOG_ARG2) | 0), 3},
 
-
-
-
 /* messages define for WDRV Module */
 {BFA_LOG_WDRV_IOC_INIT_ERROR, BFA_LOG_ATTR_NONE | BFA_LOG_ATTR_LOG,
  BFA_LOG_INFO, "WDRV_IOC_INIT_ERROR",
@@ -445,7 +411,6 @@ struct bfa_log_msgdef_s bfa_log_msg_array[] = {
  BFA_LOG_INFO, "WDRV_BASE_ADDRESS_MAP_ERROR",
  "Unable to map the IOC onto the system address space.  ",
  (0), 0},
-
 
 {0, 0, 0, "", "", 0, 0},
 };

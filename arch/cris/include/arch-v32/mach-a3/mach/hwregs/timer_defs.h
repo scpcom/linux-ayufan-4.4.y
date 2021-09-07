@@ -233,7 +233,6 @@ typedef struct {
 #define REG_RD_ADDR_timer_rw_test 88
 #define REG_WR_ADDR_timer_rw_test 88
 
-
 /* Constants */
 enum {
   regk_timer_ext                           = 0x00000001,

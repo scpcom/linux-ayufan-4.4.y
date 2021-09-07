@@ -2184,7 +2184,6 @@ static struct pci_device_id stradis_pci_tbl[] = {
 	{ 0 }
 };
 
-
 static struct pci_driver stradis_driver = {
 	.name = "stradis",
 	.id_table = stradis_pci_tbl,

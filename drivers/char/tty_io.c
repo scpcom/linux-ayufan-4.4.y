@@ -711,7 +711,6 @@ void disassociate_ctty(int on_exit)
 	struct tty_struct *tty;
 	struct pid *tty_pgrp = NULL;
 
-
 	tty = get_current_tty();
 	if (tty) {
 		tty_pgrp = get_pid(tty->pgrp);
@@ -781,7 +780,6 @@ void no_tty(void)
 	unlock_kernel();
 	proc_clear_tty(tsk);
 }
-
 
 /**
  *	stop_tty	-	propagate flow control
@@ -1035,7 +1033,6 @@ void tty_write_message(struct tty_struct *tty, char *msg)
 	unlock_kernel();
 	return;
 }
-
 
 /**
  *	tty_write		-	write method for tty device file
@@ -1867,9 +1864,6 @@ static int tty_open(struct inode *inode, struct file *filp)
 	unlock_kernel();
 	return ret;
 }
-
-
-
 
 /**
  *	tty_release		-	vfs callback for close

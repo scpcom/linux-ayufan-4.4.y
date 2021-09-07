@@ -65,7 +65,6 @@ static const char version[] __initdata =
 	KERN_INFO "smctr.c: v1.4 7/12/00 by jschlst@samba.org\n";
 static const char cardname[] = "smctr";
 
-
 #define SMCTR_IO_EXTENT   20
 
 #ifdef CONFIG_MCA_LEGACY
@@ -745,7 +744,6 @@ static int smctr_close(struct net_device *dev)
                 tp->QueueSkb++;
                 dev_kfree_skb(skb);
         }
-
 
         return (0);
 }
@@ -2118,7 +2116,6 @@ static irqreturn_t smctr_interrupt(int irq, void *dev_id)
                         case ISB_IMC_MAC_TYPE_2:
                                 err = smctr_issue_read_ring_status_cmd(dev);
                                 break;
-
 
                         /* Type 0x05 - TX Frame Interrupt (FI). */
                         case ISB_IMC_TX_FRAME:

@@ -24,7 +24,6 @@ extern int get_sb_mtd(struct file_system_type *fs_type, int flags,
 		      struct vfsmount *mnt);
 extern void kill_mtd_super(struct super_block *sb);
 
-
 #endif /* __KERNEL__ */
 
 #endif /* __MTD_SUPER_H__ */

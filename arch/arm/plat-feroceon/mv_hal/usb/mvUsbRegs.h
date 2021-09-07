@@ -69,7 +69,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif /* __cplusplus */
 
-
 /*******************************************/
 /* USB ARC Core Registers                  */
 /*******************************************/
@@ -129,7 +128,6 @@ extern "C" {
 
 #define MV_USB_CORE_STREAM_DISABLE_BIT          4
 #define MV_USB_CORE_STREAM_DISABLE_MASK         (1 << MV_USB_CORE_STREAM_DISABLE_BIT)
-
 
 #define MV_USB_CORE_ENDPT_SETUP_STAT_REG(dev)    (USB_REG_BASE(dev) + 0x1AC)
 #define MV_USB_CORE_ENDPT_PRIME_REG(dev)         (USB_REG_BASE(dev) + 0x1B0)

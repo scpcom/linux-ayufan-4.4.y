@@ -27,7 +27,6 @@
 #define NSLU2_PCI_MAX_DEV	3
 #define NSLU2_PCI_IRQ_LINES	3
 
-
 /* PCI controller GPIO to IRQ pin mappings */
 #define NSLU2_PCI_INTA_PIN	11
 #define NSLU2_PCI_INTB_PIN	10

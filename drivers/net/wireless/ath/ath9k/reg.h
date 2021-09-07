@@ -316,7 +316,6 @@
 #define AR_IMR_S5_TIMER_TRIG        0x000000FF
 #define AR_IMR_S5_TIMER_THRESH      0x0000FF00
 
-
 #define AR_ISR_RAC            0x00c0
 #define AR_ISR_S0_S           0x00c4
 #define AR_ISR_S0_QCU_TXOK      0x000003FF
@@ -458,7 +457,6 @@
 
 #define AR_Q_RDYTIMESHDN    0x0a40
 #define AR_Q_RDYTIMESHDN_M  0x000003FF
-
 
 #define AR_NUM_DCU      10
 #define AR_DCU_0        0x0001
@@ -681,7 +679,6 @@
 #define AR9280_WA_DEFAULT           	0x0040073b
 #define AR_WA_DEFAULT               	0x0000073f
 
-
 #define AR_PM_STATE                 0x4008
 #define AR_PM_STATE_PME_D3COLD_VAUX 0x00100000
 
@@ -869,7 +866,6 @@
 #define AR_INTR_MAC_ASLEEP                    0x00040000
 #define AR_INTR_SPURIOUS                      0xFFFFFFFF
 
-
 #define AR_INTR_SYNC_CAUSE_CLR                0x4028
 
 #define AR_INTR_SYNC_CAUSE                    0x4028
@@ -898,7 +894,6 @@ enum {
 	AR_INTR_SYNC_MAC_ASLEEP = 0x00010000,
 	AR_INTR_SYNC_MAC_SLEEP_ACCESS = 0x00020000,
 	AR_INTR_SYNC_ALL = 0x0003FFFF,
-
 
 	AR_INTR_SYNC_DEFAULT = (AR_INTR_SYNC_HOST1_FATAL |
 				AR_INTR_SYNC_HOST1_PERR |
@@ -1013,7 +1008,6 @@ enum {
 #define AR_PCIE_MSI                              0x4094
 #define AR_PCIE_MSI_ENABLE                       0x00000001
 
-
 #define AR_RTC_9160_PLL_DIV	0x000003ff
 #define AR_RTC_9160_PLL_DIV_S   0
 #define AR_RTC_9160_PLL_REFDIV  0x00003C00
@@ -1065,7 +1059,6 @@ enum {
 	((AR_SREV_9100(ah)) ? (AR_RTC_BASE + 0x004c) : 0x704c)
 #define AR_RTC_FORCE_WAKE_EN        0x00000001
 #define AR_RTC_FORCE_WAKE_ON_INT    0x00000002
-
 
 #define AR_RTC_INTR_CAUSE \
 	((AR_SREV_9100(ah)) ? (AR_RTC_BASE + 0x0050) : 0x7050)
@@ -1133,7 +1126,6 @@ enum {
 #define AR9285_AN_RF2G1_PDPADRV2_S   24
 #define AR9285_AN_RF2G1_PDPAOUT      0x00800000
 #define AR9285_AN_RF2G1_PDPAOUT_S    23
-
 
 #define AR9285_AN_RF2G2              0x7824
 #define AR9285_AN_RF2G2_OFFCAL       0x00001000
@@ -1211,7 +1203,6 @@ enum {
 #define AR9285_AN_RF2G8                  0x783C
 #define AR9285_AN_RF2G8_PADRVGN2TAB0     0x0001C000
 #define AR9285_AN_RF2G8_PADRVGN2TAB0_S   14
-
 
 #define AR9285_AN_RF2G9          0x7840
 #define AR9285_AN_RXTXBB1              0x7854
@@ -1470,7 +1461,6 @@ enum {
 
 #define AR_RXFIFO_CFG          0x8114
 
-
 #define AR_MIC_QOS_CONTROL 0x8118
 #define AR_MIC_QOS_SELECT  0x811c
 
@@ -1567,7 +1557,6 @@ enum {
 #define AR_TXOP_X          0x81ec
 #define AR_TXOP_X_VAL      0x000000FF
 
-
 #define AR_TXOP_0_3    0x81f0
 #define AR_TXOP_4_7    0x81f4
 #define AR_TXOP_8_11   0x81f8
@@ -1631,10 +1620,8 @@ enum {
 #define AR_MAC_PCU_LOGIC_ANALYZER               0x8264
 #define AR_MAC_PCU_LOGIC_ANALYZER_DISBUG20768   0x20000000
 
-
 #define AR_2040_MODE                0x8318
 #define AR_2040_JOINED_RX_CLEAR 0x00000001
-
 
 #define AR_EXTRCCNT         0x8328
 
@@ -1664,7 +1651,6 @@ enum {
 #define AR_MAC_PCU_ASYNC_FIFO_REG3_DATAPATH_SEL        0x00000400
 #define AR_MAC_PCU_ASYNC_FIFO_REG3_SOFT_RESET          0x80000000
 
-
 #define AR_AES_MUTE_MASK0       0x805c
 #define AR_AES_MUTE_MASK0_FC    0x0000FFFF
 #define AR_AES_MUTE_MASK0_QOS   0xFFFF0000
@@ -1680,7 +1666,6 @@ enum {
 #define AR_RATE_DURATION_31     0x87CC
 #define AR_RATE_DURATION_32     0x8780
 #define AR_RATE_DURATION(_n)    (AR_RATE_DURATION_0 + ((_n)<<2))
-
 
 #define AR_KEYTABLE_0           0x8800
 #define AR_KEYTABLE(_n)         (AR_KEYTABLE_0 + ((_n)*32))

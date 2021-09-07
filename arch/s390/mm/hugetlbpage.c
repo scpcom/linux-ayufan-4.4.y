@@ -8,7 +8,6 @@
 #include <linux/mm.h>
 #include <linux/hugetlb.h>
 
-
 void set_huge_pte_at(struct mm_struct *mm, unsigned long addr,
 				   pte_t *pteptr, pte_t pteval)
 {

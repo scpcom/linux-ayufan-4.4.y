@@ -156,4 +156,3 @@ module_exit(wpan_phy_class_exit);
 
 MODULE_DESCRIPTION("IEEE 802.15.4 device class");
 MODULE_LICENSE("GPL v2");
-

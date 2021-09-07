@@ -87,7 +87,6 @@ static int (*core99_erase_bank)(int bank);
 
 static char *nvram_image;
 
-
 static unsigned char core99_nvram_read_byte(int addr)
 {
 	if (nvram_image == NULL)
@@ -159,7 +158,6 @@ static void direct_nvram_write_byte(int addr, unsigned char val)
 	out_8(&nvram_data[(addr & (NVRAM_SIZE - 1)) * nvram_mult], val);
 }
 
-
 static unsigned char indirect_nvram_read_byte(int addr)
 {
 	unsigned char val;
@@ -182,7 +180,6 @@ static void indirect_nvram_write_byte(int addr, unsigned char val)
 	out_8(&nvram_data[(addr & 0x1f) << 4], val);
 	spin_unlock_irqrestore(&nv_lock, flags);
 }
-
 
 #ifdef CONFIG_ADB_PMU
 

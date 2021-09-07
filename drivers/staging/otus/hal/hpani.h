@@ -148,7 +148,6 @@ typedef enum {
 #define AR_PHY_TX_END_PA_ON       0x0000FF00
 #define AR_PHY_TX_END_PA_ON_S       8
 
-
 #define AR_PHY_RF_CTL3                  0x1C5828
 #define AR_PHY_TX_END_TO_A2_RX_ON       0x00FF0000
 #define AR_PHY_TX_END_TO_A2_RX_ON_S     16

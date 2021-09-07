@@ -86,7 +86,6 @@ static inline void dwc_wusb_prf_256(u8 *key, u8 *nonce,
 	dwc_wusb_prf(256, key, nonce, label, bytes, len, result);
 }
 
-
 void dwc_wusb_fill_ccm_nonce(uint16_t haddr, uint16_t daddr, uint8_t *tkid,
 			       uint8_t *nonce);
 void dwc_wusb_gen_nonce(uint16_t addr,
@@ -95,7 +94,6 @@ void dwc_wusb_gen_nonce(uint16_t addr,
 void dwc_wusb_gen_key(uint8_t *ccm_nonce, uint8_t *mk,
 			uint8_t *hnonce, uint8_t *dnonce,
 			uint8_t *kck, uint8_t *ptk);
-
 
 void dwc_wusb_gen_mic(uint8_t *ccm_nonce, uint8_t
 			*kck, uint8_t *data, uint8_t *mic);

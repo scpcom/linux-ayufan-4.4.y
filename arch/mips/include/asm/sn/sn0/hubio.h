@@ -64,7 +64,6 @@
 #define BTEOFF_NOTIFY		(IIO_BTE_NOTIFY_0 - IIO_BTE_STAT_0)
 #define BTEOFF_INT		(IIO_BTE_INT_0 - IIO_BTE_STAT_0)
 
-
 /*
  * The following definitions use the names defined in the IO interface
  * document for ease of reference.  When possible, software should
@@ -110,7 +109,6 @@
 #define IIO_IIDSR_NODE_MASK	0x0000ff00
 #define IIO_IIDSR_LVL_SHIFT	0
 #define IIO_IIDSR_LVL_MASK	0x0000003f
-
 
 /* GFX Flow Control Node/Widget Register */
 #define IIO_IGFX_0	0x400140	/* gfx node/widget register 0 */
@@ -182,7 +180,6 @@ typedef union hubii_wid_u {
         } wid_fields_s;
 } hubii_wid_t;
 
-
 typedef union hubii_wcr_u {
 	u64	wcr_reg_value;
 	struct {
@@ -215,7 +212,6 @@ typedef union hubii_wstat_u {
 	} wstat_fields_s;
 } hubii_wstat_t;
 
-
 typedef union hubii_ilcsr_u {
 	u64	icsr_reg_value;
 	struct {
@@ -234,7 +230,6 @@ typedef union hubii_ilcsr_u {
 
         } icsr_fields_s;
 } hubii_ilcsr_t;
-
 
 typedef union hubii_iowa_u {
 	u64	iowa_reg_value;
@@ -294,7 +289,6 @@ typedef union io_perf_cnt {
 
 #endif /* !__ASSEMBLY__ */
 
-
 #define LNK_STAT_WORKING	0x2
 
 #define IIO_LLP_CB_MAX	0xffff
@@ -311,7 +305,6 @@ typedef union io_perf_cnt {
 #define IIO_IOPRB_D	0x4001c8	/* PRB entry d */
 #define IIO_IOPRB_E	0x4001d0	/* PRB entry e */
 #define IIO_IOPRB_F	0x4001d8	/* PRB entry f */
-
 
 #define IIO_IXCC	0x4001e0	/* Crosstalk credit count timeout */
 #define IIO_IXTCC	IIO_IXCC
@@ -342,7 +335,6 @@ typedef union io_perf_cnt {
 #define IIO_ICCR	0x4003b0	/* CRB Control Register */
 #define IIO_ICTO	0x4003b8	/* CRB Time Out Register */
 #define IIO_ICTP	0x4003c0	/* CRB Time Out Prescalar */
-
 
 /*
  * ICMR register fields
@@ -504,8 +496,6 @@ typedef union h1_icrba_u {
 #define	IIO_ICRB_ECODE_TOUT	6	/* CRB timeout before deallocating */
 #define	IIO_ICRB_ECODE_XTERR	7	/* Incoming xtalk pkt had error bit */
 
-
-
 /*
  * Fields in CRB Register B
  */
@@ -596,7 +586,6 @@ typedef union h1_icrbb_u {
 			pnd_req: 1;	/* reqs not issued due to IOQ full */
 	} h1_icrbb_field_s;
 } h1_icrbb_t;
-
 
 #define	b_imsgtype	icrbb_field_s.imsgtype
 #define	b_btenum	icrbb_field_s.btenum
@@ -725,7 +714,6 @@ typedef union icrbd_s {
 #define	icrbd_toutvld	icrbd_field_s.toutvld
 #define	icrbd_ctxtvld	icrbd_field_s.ctxtvld
 #define	icrbd_context	icrbd_field_s.context
-
 
 typedef union hubii_ifdr_u {
 	u64	hi_ifdr_value;

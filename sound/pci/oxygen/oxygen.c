@@ -82,7 +82,6 @@ static struct pci_device_id oxygen_ids[] __devinitdata = {
 };
 MODULE_DEVICE_TABLE(pci, oxygen_ids);
 
-
 #define GPIO_AK5385_DFS_MASK	0x0003
 #define GPIO_AK5385_DFS_NORMAL	0x0000
 #define GPIO_AK5385_DFS_DOUBLE	0x0001

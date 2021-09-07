@@ -3,7 +3,6 @@
 
 #ifdef __KERNEL__
 
-
 /*
  * These are for ISA/PCI shared memory _only_ and should never be used
  * on any other type of memory, including Zorro memory. They are meant to
@@ -135,7 +134,6 @@ static inline void io_insl(unsigned int addr, void *buf, int len)
 #define insl(a,b,l) io_insl(a,b,l)
 
 #define IO_SPACE_LIMIT 0xffffffff
-
 
 /* Values for nocacheflag and cmode */
 #define IOMAP_FULL_CACHING		0

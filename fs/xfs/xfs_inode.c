@@ -249,7 +249,6 @@ xfs_inotobp(
 	return 0;
 }
 
-
 /*
  * This routine is called to map an inode to the buffer containing
  * the on-disk version of the inode.  It returns a pointer to the
@@ -1502,7 +1501,6 @@ xfs_itruncate_finish(
 	ASSERT(ip->i_itemp != NULL);
 	ASSERT(ip->i_itemp->ili_flags & XFS_ILI_HOLD);
 
-
 	ntp = *tp;
 	mp = (ntp)->t_mountp;
 	ASSERT(! XFS_NOT_DQATTACHED(mp, ip));
@@ -2001,7 +1999,6 @@ xfs_ifree_cluster(
 		blkno = XFS_AGB_TO_DADDR(mp, XFS_INO_TO_AGNO(mp, inum),
 					 XFS_INO_TO_AGBNO(mp, inum));
 
-
 		/*
 		 * Look for each inode in memory and attempt to lock it,
 		 * we can be racing with flush and tail pushing here.
@@ -2339,7 +2336,6 @@ xfs_iroot_realloc(
 	return;
 }
 
-
 /*
  * This is called when the amount of space needed for if_data
  * is increased or decreased.  The change in size is indicated by
@@ -2538,7 +2534,6 @@ xfs_iunpin_nowait(
 {
 	__xfs_iunpin_wait(ip, 0);
 }
-
 
 /*
  * xfs_iextents_copy()
@@ -2800,7 +2795,6 @@ out_free:
 	kmem_free(ilist);
 	return 0;
 
-
 cluster_corrupt_out:
 	/*
 	 * Corruption detected in the clustering loop.  Invalidate the
@@ -3031,7 +3025,6 @@ cluster_corrupt_out:
 	return XFS_ERROR(EFSCORRUPTED);
 }
 
-
 STATIC int
 xfs_iflush_int(
 	xfs_inode_t		*ip,
@@ -3051,7 +3044,6 @@ xfs_iflush_int(
 
 	iip = ip->i_itemp;
 	mp = ip->i_mount;
-
 
 	/*
 #ifdef CONFIG_SYNO_PLX_PORTING
@@ -3277,8 +3269,6 @@ xfs_iflush_int(
 corrupt_out:
 	return XFS_ERROR(EFSCORRUPTED);
 }
-
-
 
 #ifdef XFS_ILOCK_TRACE
 void

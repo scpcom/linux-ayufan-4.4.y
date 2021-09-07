@@ -135,7 +135,6 @@ void DH_PublicKey_Generate (
     BigInteger_Free(&pBI_PublicKey);
 } /* End of DH_PublicKey_Generate */
 
-
 /*
 ========================================================================
 Routine Description:

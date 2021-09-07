@@ -16,7 +16,6 @@
 
 #include <asm/dec/kn02.h>
 
-
 /*
  * Bits 7:0 of the Control Register are write-only -- the
  * corresponding bits of the Status Register have a different
@@ -27,9 +26,7 @@
  */
 u32 cached_kn02_csr;
 
-
 static int kn02_irq_base;
-
 
 static inline void unmask_kn02_irq(unsigned int irq)
 {
@@ -62,7 +59,6 @@ static struct irq_chip kn02_irq_type = {
 	.mask_ack = ack_kn02_irq,
 	.unmask = unmask_kn02_irq,
 };
-
 
 void __init init_kn02_irqs(int base)
 {

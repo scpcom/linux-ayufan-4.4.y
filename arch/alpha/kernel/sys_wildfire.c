@@ -327,7 +327,6 @@ wildfire_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 	return irq;
 }
 
-
 /*
  * The System Vectors
  */

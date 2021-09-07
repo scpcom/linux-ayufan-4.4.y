@@ -63,5 +63,4 @@ struct video1394_wait {
 	struct timeval filltime;	/* time of buffer full */
 };
 
-
 #endif

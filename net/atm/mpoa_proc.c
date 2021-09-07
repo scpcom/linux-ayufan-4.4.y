@@ -292,11 +292,4 @@ void mpc_proc_clean(void)
 	remove_proc_entry(STAT_FILE_NAME,atm_proc_root);
 }
 
-
 #endif /* CONFIG_PROC_FS */
-
-
-
-
-
-

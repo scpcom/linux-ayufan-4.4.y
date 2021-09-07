@@ -342,4 +342,3 @@ MACHINE_START(MX27ADS, "Freescale i.MX27ADS")
 	.init_machine   = mx27ads_board_init,
 	.timer          = &mx27ads_timer,
 MACHINE_END
-

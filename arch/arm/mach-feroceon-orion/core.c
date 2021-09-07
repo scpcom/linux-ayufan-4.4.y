@@ -103,7 +103,6 @@ u32 mvTclk = 166666667;
 u32 mvSysclk = 200000000;
 u32 mvIsUsbHost = 1;
 
-
 u8	mvMacAddr[CONFIG_MV_ETH_PORTS_NUM][6];
 u16	mvMtu[CONFIG_MV_ETH_PORTS_NUM] = {0};
 extern MV_U32 gBoardId; 
@@ -175,7 +174,6 @@ int mv_idma_usage_get(int* free_map)
 }
 #endif /* CONFIG_MV_INCLUDE_IDMA */
 
-
 void print_board_info(void)
 {
     char name_buff[50];
@@ -194,7 +192,6 @@ void print_board_info(void)
     printk("\n\n");
     printk(" Detected Tclk %d and SysClk %d \n",mvTclk, mvSysclk);
 }
-
 
 /*Platform devices list*/
 /*****************************************************************************
@@ -252,7 +249,6 @@ static struct platform_device mv_uart = {
 	.num_resources		= ARRAY_SIZE(mv_uart_resources),
 	.resource		= mv_uart_resources,
 };
-
 
 static void serial_initialize(void)
 {
@@ -405,7 +401,6 @@ static void __init mv_init(void)
 
 	printk("Sys Clk = %d, Tclk = %d\n",mvSysclk ,mvTclk  );
 	
-
     	if ((mvCtrlModelGet() == MV_5281_DEV_ID) || (mvCtrlModelGet() == MV_1281_DEV_ID)
 			|| (mvCtrlModelGet() == MV_6183_DEV_ID))
             mv_orion_ver = MV_ORION2; /* Orion II */
@@ -432,7 +427,6 @@ static void __init mv_init(void)
 	/* At this point, the CPU windows are configured according to default definitions in mvSysHwConfig.h */
 	/* and cpuAddrWinMap table in mvCpuIf.c. Now it's time to change defaults for each platform.         */
 	mvCpuIfAddDecShow();
-
 
 #if defined(CONFIG_MTD_PHYSMAP)
 	mv_mtd_initialize();
@@ -472,7 +466,6 @@ static void __init mv_init(void)
     return;
 }
 
-
 MACHINE_START(FEROCEON_ORION ,"Feroceon-Orion")
     /* MAINTAINER("MARVELL") */
     .phys_io = 0xf1000000,
@@ -483,4 +476,3 @@ MACHINE_START(FEROCEON_ORION ,"Feroceon-Orion")
     .timer = &mv_timer,
     .init_machine = mv_init,
 MACHINE_END
-

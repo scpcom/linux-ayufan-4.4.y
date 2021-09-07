@@ -408,7 +408,6 @@ static int xc_set_RF_frequency(struct xc5000_priv *priv, u32 freq_hz)
 	return xc_write_reg(priv, XREG_FINERFREQ, freq_code);
 }
 
-
 static int xc_set_IF_frequency(struct xc5000_priv *priv, u32 freq_khz)
 {
 	u32 freq_code = (freq_khz * 1024)/1000;
@@ -417,7 +416,6 @@ static int xc_set_IF_frequency(struct xc5000_priv *priv, u32 freq_khz)
 
 	return xc_write_reg(priv, XREG_IF_OUT, freq_code);
 }
-
 
 static int xc_get_ADC_Envelope(struct xc5000_priv *priv, u16 *adc_envelope)
 {

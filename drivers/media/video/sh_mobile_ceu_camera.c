@@ -204,7 +204,6 @@ static void free_buffer(struct videobuf_queue *vq,
 #define CEU_CEIER_CPEIE (1 << 0) /* one-frame capture end interrupt */
 #define CEU_CAPCR_CTNCP (1 << 16) /* continuous capture mode (if set) */
 
-
 static void sh_mobile_ceu_capture(struct sh_mobile_ceu_dev *pcdev)
 {
 	struct soc_camera_device *icd = pcdev->icd;

@@ -26,7 +26,6 @@
 #include <linux/mod_devicetable.h>
 #include <linux/spi/spi.h>
 
-
 /* SPI bustype and spi_master class are registered after board init code
  * provides the SPI device tables, ensuring that both are present by the
  * time controller driver registration causes spi_devices to "enumerate".
@@ -144,7 +143,6 @@ struct bus_type spi_bus_type = {
 	.resume		= spi_resume,
 };
 EXPORT_SYMBOL_GPL(spi_bus_type);
-
 
 static int spi_drv_probe(struct device *dev)
 {
@@ -269,7 +267,6 @@ int spi_add_device(struct spi_device *spi)
 	/* Set the bus ID string */
 	dev_set_name(&spi->dev, "%s.%u", dev_name(&spi->master->dev),
 			spi->chip_select);
-
 
 	/* We need to make sure there's no other device with this
 	 * chipselect **BEFORE** we call setup(), else we'll trash
@@ -439,7 +436,6 @@ static struct class spi_master_class = {
 	.dev_release	= spi_master_release,
 };
 
-
 /**
  * spi_alloc_master - allocate SPI master controller
  * @dev: the controller, possibly using the platform_bus
@@ -542,7 +538,6 @@ done:
 }
 EXPORT_SYMBOL_GPL(spi_register_master);
 
-
 static int __unregister(struct device *dev, void *master_dev)
 {
 	/* note: before about 2.6.14-rc1 this would corrupt memory: */
@@ -603,7 +598,6 @@ struct spi_master *spi_busnum_to_master(u16 bus_num)
 	return master;
 }
 EXPORT_SYMBOL_GPL(spi_busnum_to_master);
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -721,7 +715,6 @@ int spi_async(struct spi_device *spi, struct spi_message *message)
 	return master->transfer(spi, message);
 }
 EXPORT_SYMBOL_GPL(spi_async);
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -890,4 +883,3 @@ err0:
  * include needing to have boardinfo data structures be much more public.
  */
 postcore_initcall(spi_init);
-

@@ -2259,7 +2259,6 @@ static void zfcp_fsf_send_fcp_ctm_handler(struct zfcp_fsf_req *req)
 		req->status |= ZFCP_STATUS_FSFREQ_TMFUNCFAILED;
 }
 
-
 static void zfcp_fsf_send_fcp_command_handler(struct zfcp_fsf_req *req)
 {
 	struct zfcp_unit *unit;

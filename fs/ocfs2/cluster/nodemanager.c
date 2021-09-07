@@ -35,7 +35,6 @@
  * cluster references throughout where nodes are looked up */
 struct o2nm_cluster *o2nm_single_cluster = NULL;
 
-
 struct o2nm_node *o2nm_get_node_by_num(u8 node_num)
 {
 	struct o2nm_node *node = NULL;
@@ -871,7 +870,6 @@ void o2nm_undepend_this_node(void)
 	o2nm_undepend_item(&local_node->nd_item);
 	o2nm_node_put(local_node);
 }
-
 
 static void __exit exit_o2nm(void)
 {

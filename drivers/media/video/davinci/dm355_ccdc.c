@@ -89,7 +89,6 @@ static struct ccdc_params_raw ccdc_hw_params_raw = {
 	},
 };
 
-
 /* Object for CCDC ycbcr mode */
 static struct ccdc_params_ycbcr ccdc_hw_params_ycbcr = {
 	.win = CCDC_WIN_PAL,

@@ -7,7 +7,6 @@
  * Copyright (C) 1995 David S. Miller (davem@caip.rutgers.edu)
  */
 
-
 /* Empirical constants... */
 #ifdef CONFIG_SUN3
 #define KADB_DEBUGGER_BEGVM     0x0fee0000    /* There is no kadb yet but...*/

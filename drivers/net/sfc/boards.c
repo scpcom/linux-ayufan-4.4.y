@@ -293,7 +293,6 @@ struct efx_board_data {
 	int (*init) (struct efx_nic *nic);
 };
 
-
 static struct efx_board_data board_data[] = {
 	{ EFX_BOARD_SFE4001, "SFE4001", "10GBASE-T adapter", sfe4001_init },
 	{ EFX_BOARD_SFE4002, "SFE4002", "XFP adapter", sfe4002_init },

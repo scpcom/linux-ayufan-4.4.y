@@ -493,7 +493,6 @@ static void snd_ptr_write(struct snd_emu10k1 *emu,
 	spin_unlock_irqrestore(&emu->emu_lock, flags);
 }
 
-
 static void snd_emu_proc_ptr_reg_read(struct snd_info_entry *entry,
 				      struct snd_info_buffer *buffer, int iobase, int offset, int length, int voices)
 {
@@ -544,7 +543,6 @@ static void snd_emu_proc_ptr_reg_write20(struct snd_info_entry *entry,
 	snd_emu_proc_ptr_reg_write(entry, buffer, 0x20);
 }
 	
-
 static void snd_emu_proc_ptr_reg_read00a(struct snd_info_entry *entry,
 					 struct snd_info_buffer *buffer)
 {

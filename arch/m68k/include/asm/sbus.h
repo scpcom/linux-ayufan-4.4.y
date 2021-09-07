@@ -36,7 +36,6 @@ extern inline unsigned long _sbus_readl(unsigned long addr)
 	return *(volatile unsigned long *)addr;
 }
 
-
 #define sbus_readb(a) _sbus_readb((unsigned long)a)
 #define sbus_writeb(v, a) _sbus_writeb(v, (unsigned long)a)
 #define sbus_readl(a) _sbus_readl((unsigned long)a)

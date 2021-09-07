@@ -20,7 +20,6 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-
 #include <linux/init.h>
 #include <linux/interrupt.h>
 #include <linux/slab.h>
@@ -195,7 +194,6 @@ static int pcxhr_pll_freq_register(unsigned int freq, unsigned int* pllreg,
 	return 0;
 }
 
-
 #define PCXHR_FREQ_REG_MASK		0x1f
 #define PCXHR_FREQ_QUARTZ_48000		0x00
 #define PCXHR_FREQ_QUARTZ_24000		0x01
@@ -292,7 +290,6 @@ static int pcxhr_get_clock_reg(struct pcxhr_mgr *mgr, unsigned int rate,
 	*freq = realfreq;
 	return 0;
 }
-
 
 static int pcxhr_sub_set_clock(struct pcxhr_mgr *mgr,
 			       unsigned int rate,
@@ -398,7 +395,6 @@ int pcxhr_set_clock(struct pcxhr_mgr *mgr, unsigned int rate)
 	return 0;
 }
 
-
 static int pcxhr_sub_get_external_clock(struct pcxhr_mgr *mgr,
 					enum pcxhr_clock_type clock_type,
 					int *sample_rate)
@@ -460,7 +456,6 @@ static int pcxhr_sub_get_external_clock(struct pcxhr_mgr *mgr,
 	*sample_rate = rate;
 	return 0;
 }
-
 
 int pcxhr_get_external_clock(struct pcxhr_mgr *mgr,
 			     enum pcxhr_clock_type clock_type,
@@ -646,7 +641,6 @@ static int pcxhr_update_r_buffer(struct pcxhr_stream *stream)
 	return err;
 }
 
-
 #if 0
 static int pcxhr_pipe_sample_count(struct pcxhr_stream *stream,
 				   snd_pcm_uframes_t *sample_count)
@@ -806,7 +800,6 @@ static void pcxhr_trigger_tasklet(unsigned long arg)
 #endif
 }
 
-
 /*
  *  trigger callback
  */
@@ -864,7 +857,6 @@ static int pcxhr_trigger(struct snd_pcm_substream *subs, int cmd)
 	return 0;
 }
 
-
 static int pcxhr_hardware_timer(struct pcxhr_mgr *mgr, int start)
 {
 	struct pcxhr_rmh rmh;
@@ -917,7 +909,6 @@ static int pcxhr_prepare(struct snd_pcm_substream *subs)
 	return err;
 }
 
-
 /*
  *  HW_PARAMS callback for all pcms
  */
@@ -956,7 +947,6 @@ static int pcxhr_hw_free(struct snd_pcm_substream *subs)
 	return 0;
 }
 
-
 /*
  *  CONFIGURATION SPACE for all pcms, mono pcm must update channels_max
  */
@@ -985,7 +975,6 @@ static struct snd_pcm_hardware pcxhr_caps =
 	.periods_min      = 2,
 	.periods_max      = (32*1024/PCXHR_GRANULARITY),
 };
-
 
 static int pcxhr_open(struct snd_pcm_substream *subs)
 {
@@ -1072,7 +1061,6 @@ static int pcxhr_open(struct snd_pcm_substream *subs)
 	return 0;
 }
 
-
 static int pcxhr_close(struct snd_pcm_substream *subs)
 {
 	struct snd_pcxhr *chip = snd_pcm_substream_chip(subs);
@@ -1098,7 +1086,6 @@ static int pcxhr_close(struct snd_pcm_substream *subs)
 	return 0;
 }
 
-
 static snd_pcm_uframes_t pcxhr_stream_pointer(struct snd_pcm_substream *subs)
 {
 	unsigned long flags;
@@ -1119,7 +1106,6 @@ static snd_pcm_uframes_t pcxhr_stream_pointer(struct snd_pcm_substream *subs)
 	return (snd_pcm_uframes_t)((timer_buf_periods * runtime->period_size) +
 				   timer_period_frag);
 }
-
 
 static struct snd_pcm_ops pcxhr_ops = {
 	.open      = pcxhr_open,
@@ -1175,7 +1161,6 @@ static int pcxhr_chip_dev_free(struct snd_device *device)
 	struct snd_pcxhr *chip = device->device_data;
 	return pcxhr_chip_free(chip);
 }
-
 
 /*
  */

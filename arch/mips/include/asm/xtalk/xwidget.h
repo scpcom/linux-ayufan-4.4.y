@@ -150,7 +150,6 @@ typedef struct xwidget_hwid_s {
 	xwidget_mfg_num_t	mfg_num;
 } *xwidget_hwid_t;
 
-
 /*
  * Returns 1 if a driver that handles devices described by hwid1 is able
  * to manage a device with hardwareid hwid2.  NOTE: We don't check rev

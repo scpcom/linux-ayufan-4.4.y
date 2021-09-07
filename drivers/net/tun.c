@@ -1457,7 +1457,6 @@ static const struct ethtool_ops tun_ethtool_ops = {
 	.set_rx_csum	= tun_set_rx_csum
 };
 
-
 static int __init tun_init(void)
 {
 	int ret = 0;

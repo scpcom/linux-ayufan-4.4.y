@@ -130,7 +130,6 @@ void et131x_disable_interrupts(struct et131x_adapter *adapter)
 	writel(INT_MASK_DISABLE, &adapter->regs->global.int_mask);
 }
 
-
 /**
  * et131x_isr - The Interrupt Service Routine for the driver.
  * @irq: the IRQ on which the interrupt was received.

@@ -1676,7 +1676,6 @@ extern "C" {
 /* I2C Address */
 #define I2C_SENS_ADDR	LM80_ADDR	/* I2C Sensor Address (Volt and Temp) */
 
-
 /*	B2_BSC_CTRL		 8 bit	Blink Source Counter Control */
 							/* Bit  7.. 2:	reserved */
 #define BSC_START	BIT_1S		/* Start Blink Source Counter */
@@ -1694,7 +1693,6 @@ extern "C" {
 /*	Y2_PEX_PHY_ADDR/DATA		PEX PHY address and data reg  (Yukon-2 only) */
 #define PEX_RD_ACCESS	BIT_31	/* Access Mode Read = 1, Write = 0 */
 #define PEX_DB_ACCESS	BIT_30	/* Access to debug register */
-
 
 /*	B3_RAM_ADDR		32 bit	RAM Address, to read or write */
 					/* Bit 31..19:	reserved */
@@ -1777,7 +1775,6 @@ extern "C" {
 #define RX1_T_ON	BIT_2S		/* RX1 Timeout/Recv Timer Test On */
 #define RX1_T_OFF	BIT_1S		/* RX1 Timeout/Recv Timer Tst Off */
 #define RX1_T_STEP	BIT_0S		/* RX1 Timeout/Recv Timer Step */
-
 
 /* Transmit Arbiter Registers MAC 1 and 2, use MR_ADDR() to access */
 /*	TXA_ITI_INI		32 bit	Tx Arb Interval Timer Init Val */
@@ -1999,7 +1996,6 @@ extern "C" {
 #define RB_RP_TST_OFF	BIT_9	/* Read Pointer Test Off */
 #define RB_RP_UP		BIT_8	/* Read Pointer Increment */
 
-
 /* Receive and Transmit MAC FIFO Registers (GENESIS only) */
 
 /*	RX_MFF_EA		32 bit	Receive MAC FIFO End Address */
@@ -2084,7 +2080,6 @@ extern "C" {
 #define MFF_DIS_OP_MD	BIT_2S	/* Disable Operation Mode */
 #define MFF_RST_CLR		BIT_1S	/* Clear MAC FIFO Reset */
 #define MFF_RST_SET		BIT_0S	/* Set   MAC FIFO Reset */
-
 
 /*	Link LED Counter Registers (GENESIS only) */
 
@@ -2201,7 +2196,6 @@ extern "C" {
 #define PC_POLL_RST_CLR	BIT_1	/* Clear Polling Unit Reset (Enable) */
 #define PC_POLL_RST_SET	BIT_0	/* Set   Polling Unit Reset */
 
-
 /* The bit definition of the following registers is still missing! */
 /* B28_Y2_SMB_CONFIG		32 bit	ASF SMBus Config Register */
 /* B28_Y2_SMB_CSD_REG		32 bit	ASF SMB Control/Status/Data */
@@ -2224,7 +2218,6 @@ extern "C" {
 							/* Bit 31.. 2	reserved */
 #define Y2_ASF_CLR_ASFI	BIT_1	/* Clear host IRQ */
 #define Y2_ASF_HOST_IRQ	BIT_0	/* Issue an IRQ to HOST system */
-
 
 /*	STAT_CTRL		32 bit	Status BMU control register (Yukon-2 only) */
 							/* Bit  7.. 5:	reserved */
@@ -2326,7 +2319,6 @@ extern "C" {
 #define GMLC_RST_CLR	BIT_1S		/* Clear Link Reset */
 #define GMLC_RST_SET	BIT_0S		/* Set   Link Reset */
 
-
 /*	WOL_CTRL_STAT	16 bit	WOL Control/Status Reg */
 #define WOL_CTL_LINK_CHG_OCC			BIT_15S
 #define WOL_CTL_MAGIC_PKT_OCC			BIT_14S
@@ -2375,7 +2367,6 @@ extern "C" {
 
 #define WOL_LENGTH_MSK		0x7f
 #define WOL_LENGTH_SHIFT	8
-
 
 /* typedefs ******************************************************************/
 
@@ -2682,7 +2673,6 @@ typedef union u_HwLeTxRxSt {
 #define CSS_ISIPV4		BIT_1S	/* packet is a IPv4 packet */
 #define CSS_LINK_BIT	BIT_0S	/* port number (legacy) */
 
-
 /* YUKON-2 Rx/Tx opcodes defines */
 #define OP_TCPWRITE		0x11
 #define OP_TCPSTART		0x12
@@ -2704,7 +2694,6 @@ typedef union u_HwLeTxRxSt {
 #define OP_PACKET		0x41
 #define OP_LARGESEND	0x43
 #define OP_LSOV2		0x45							/* Yukon Ext only */
-
 
 /* YUKON-2 STATUS opcodes defines */
 #define OP_RXSTAT		0x60
@@ -2815,7 +2804,6 @@ typedef union u_HwLeTxRxSt {
  * usage	SK_IN32(IoC, RB_ADDR(Q_R2, RB_RP), pVal)
  */
 #define RB_ADDR(Queue, Offs)	(B16_RAM_REGS + (Queue) + (Offs))
-
 
 /* MAC Related Registers */
 #define MAC_1		0	/* 1st port */
@@ -3275,4 +3263,3 @@ typedef union u_HwLeTxRxSt {
 #endif	/* __cplusplus */
 
 #endif	/* __INC_SKGEHW_H */
-

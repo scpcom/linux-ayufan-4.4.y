@@ -71,7 +71,6 @@ static long long squashfs_inode_lookup(struct super_block *sb, int ino_num)
 	return le64_to_cpu(ino);
 }
 
-
 static struct dentry *squashfs_export_iget(struct super_block *sb,
 	unsigned int ino_num)
 {
@@ -87,7 +86,6 @@ static struct dentry *squashfs_export_iget(struct super_block *sb,
 	return dentry;
 }
 
-
 static struct dentry *squashfs_fh_to_dentry(struct super_block *sb,
 		struct fid *fid, int fh_len, int fh_type)
 {
@@ -98,7 +96,6 @@ static struct dentry *squashfs_fh_to_dentry(struct super_block *sb,
 	return squashfs_export_iget(sb, fid->i32.ino);
 }
 
-
 static struct dentry *squashfs_fh_to_parent(struct super_block *sb,
 		struct fid *fid, int fh_len, int fh_type)
 {
@@ -108,7 +105,6 @@ static struct dentry *squashfs_fh_to_parent(struct super_block *sb,
 	return squashfs_export_iget(sb, fid->i32.parent_ino);
 }
 
-
 static struct dentry *squashfs_get_parent(struct dentry *child)
 {
 	struct inode *inode = child->d_inode;
@@ -116,7 +112,6 @@ static struct dentry *squashfs_get_parent(struct dentry *child)
 
 	return squashfs_export_iget(inode->i_sb, parent_ino);
 }
-
 
 /*
  * Read uncompressed inode lookup table indexes off disk into memory
@@ -147,7 +142,6 @@ __le64 *squashfs_read_inode_lookup_table(struct super_block *sb,
 
 	return inode_lookup_table;
 }
-
 
 const struct export_operations squashfs_export_ops = {
 	.fh_to_dentry = squashfs_fh_to_dentry,

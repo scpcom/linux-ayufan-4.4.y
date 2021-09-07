@@ -45,7 +45,6 @@
 	or	EPSW_IE|EPSW_IM_7,epsw
 	.endm
 
-
 	.am33_2
 
 ###############################################################################
@@ -192,7 +191,6 @@ need_resched:
 	call	preempt_schedule_irq[],0
 	jmp	need_resched
 #endif
-
 
 ###############################################################################
 #
@@ -724,6 +722,5 @@ ENTRY(sys_call_table)
 	.long sys_pwritev		/* 335 */
 	.long sys_rt_tgsigqueueinfo
 	.long sys_perf_event_open
-
 
 nr_syscalls=(.-sys_call_table)/4

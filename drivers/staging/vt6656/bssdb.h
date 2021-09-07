@@ -68,11 +68,9 @@
 
 #define MAX_WPA_IE_LEN      64
 
-
 /*---------------------  Export Classes  ----------------------------*/
 
 /*---------------------  Export Variables  --------------------------*/
-
 
 /*---------------------  Export Types  ------------------------------*/
 
@@ -84,7 +82,6 @@ typedef struct tagSERPObject {
     BOOL    bERPExist;
     BYTE    byERP;
 }ERPObject, *PERPObject;
-
 
 typedef struct tagSRSNCapObject {
     BOOL    bRSNCapExist;
@@ -156,8 +153,6 @@ typedef struct tagKnownBSS {
 }__attribute__ ((__packed__))
 KnownBSS , *PKnownBSS;
 
-
-
 typedef enum tagNODE_STATE {
     NODE_FREE,
     NODE_AGED,
@@ -165,7 +160,6 @@ typedef enum tagNODE_STATE {
     NODE_AUTH,
     NODE_ASSOC
 } NODE_STATE, *PNODE_STATE;
-
 
 // STA node info
 typedef struct tagKnownNodeDB {
@@ -226,10 +220,7 @@ typedef struct tagKnownNodeDB {
 
 } KnownNodeDB, *PKnownNodeDB;
 
-
 /*---------------------  Export Functions  --------------------------*/
-
-
 
 PKnownBSS
 BSSpSearchBSSList(
@@ -273,7 +264,6 @@ BSSbInsertToBSSList(
     IN HANDLE pRxPacketContext
     );
 
-
 BOOL
 BSSbUpdateToBSSList(
     IN HANDLE hDeviceContext,
@@ -296,7 +286,6 @@ BSSbUpdateToBSSList(
     IN HANDLE pRxPacketContext
     );
 
-
 BOOL
 BSSbIsSTAInNodeDB(
     IN HANDLE hDeviceContext,
@@ -318,12 +307,10 @@ BSSvUpdateAPNode(
     IN PWLAN_IE_SUPP_RATES pExtSuppRates
     );
 
-
 VOID
 BSSvSecondCallBack(
     IN HANDLE hDeviceContext
     );
-
 
 VOID
 BSSvUpdateNodeTxCounter(
@@ -343,7 +330,6 @@ VOID
 BSSvAddMulticastNode(
     IN HANDLE hDeviceContext
     );
-
 
 VOID
 BSSvClearNodeDBTable(

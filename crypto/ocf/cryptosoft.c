@@ -78,7 +78,6 @@ struct ocf_request {
 };
 #endif
 
-
 struct swcr_data {
 	int					sw_type;
 	int					sw_alg;
@@ -228,7 +227,6 @@ int swcr_debug = 0;
 module_param(swcr_debug, int, 0644);
 MODULE_PARM_DESC(swcr_debug, "Enable debug");
 
-
 #ifdef MY_ABC_HERE
 static void ocf_async_done(struct crypto_async_request *async_req,
                                 int error)
@@ -270,7 +268,6 @@ static void ocf_async_wait(struct ocf_request *ocf_req,
     ocf_req->req = NULL;
 }
 #endif
-
 
 /*
  * Generate a new software session.
@@ -656,7 +653,6 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 			sg_num = 1;
 		}
 
-
 		switch (sw->sw_type) {
 		case SW_TYPE_BLKCIPHER: {
 			unsigned char iv[EALG_MAX_BLOCK_LEN];
@@ -881,7 +877,6 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 						crd->crd_inject, olen, obuf);
 				crp->crp_olen = olen;
 			}
-
 
 			} break;
 

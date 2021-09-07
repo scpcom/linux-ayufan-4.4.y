@@ -94,7 +94,6 @@ static void dump_packet(const char *text, quadlet_t *data, int size, int speed)
 static void abort_requests(struct hpsb_host *host);
 static void queue_packet_complete(struct hpsb_packet *packet);
 
-
 /**
  * hpsb_set_packet_complete_task - set task that runs when a packet completes
  * @packet: the packet whose completion we want the task added to
@@ -259,7 +258,6 @@ int hpsb_bus_reset(struct hpsb_host *host)
 	return 0;
 }
 
-
 /*
  * Verify num_of_selfids SelfIDs and return number of nodes.  Return zero in
  * case verification failed.
@@ -414,7 +412,6 @@ static void build_speed_map(struct hpsb_host *host, int nodecount)
 			if (speedcap[i] == SELFID_SPEED_UNKNOWN)
 				speedcap[i] = local_link_speed;
 }
-
 
 /**
  * hpsb_selfid_received - hand over received selfid packet to the core
@@ -786,7 +783,6 @@ dequeue:
 
 	queue_packet_complete(packet);
 }
-
 
 static struct hpsb_packet *create_reply_packet(struct hpsb_host *host,
 					       quadlet_t *data, size_t dsize)

@@ -39,7 +39,6 @@ void* zfwMemAllocate(zdev_t* dev, u32_t size)
     return mem;
 }
 
-
 /* Called to free allocated memory */
 void zfwMemFree(zdev_t* dev, void* mem, u32_t size)
 {

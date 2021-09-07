@@ -50,17 +50,11 @@ typedef struct _scatter_assoc
     unsigned long pos;
 } SCATTER_ASSOC;
 
-
-
-
-
 static const SCATTER_ASSOC SCTMAP_RNG[] =
 {
     {offsetof(RNG_REQ, rngData), 0x10},
     {0, 0}
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_DES_CBC_CTX[] =
 {
@@ -72,8 +66,6 @@ static const SCATTER_ASSOC SCTMAP_DES_CBC_CTX[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_DES_ECB[] =
 {
     {offsetof(DES_CRYPT_REQ, keyData), 0x04},
@@ -81,8 +73,6 @@ static const SCATTER_ASSOC SCTMAP_DES_ECB[] =
     {offsetof(DES_CRYPT_REQ, outData), 0x10},
     {0, 0}
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_RC4_LDCTX_CRYPT_ULCTX[] =
 {
@@ -93,8 +83,6 @@ static const SCATTER_ASSOC SCTMAP_RC4_LDCTX_CRYPT_ULCTX[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_RC4_LDKEY_CRYPT_ULCTX[] =
 {
     {offsetof(ARC4_LOADKEY_CRYPT_UNLOADCTX_REQ, keyData),     0x04},
@@ -103,8 +91,6 @@ static const SCATTER_ASSOC SCTMAP_RC4_LDKEY_CRYPT_ULCTX[] =
     {offsetof(ARC4_LOADKEY_CRYPT_UNLOADCTX_REQ, outCtxData),  0x20},
     {0, 0}
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_HASH_LDCTX_HASH_ULCTX[] =
 {
@@ -115,8 +101,6 @@ static const SCATTER_ASSOC SCTMAP_HASH_LDCTX_HASH_ULCTX[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_HASH_LDCTX_HASH_PAD_ULCTX[] =
 {
     {offsetof(HASH_REQ, ctxData),  0x02},
@@ -125,8 +109,6 @@ static const SCATTER_ASSOC SCTMAP_HASH_LDCTX_HASH_PAD_ULCTX[] =
     {offsetof(HASH_REQ, outData),  0x20},
     {0, 0}
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_HASH_LDCTX_HMAC_ULCTX[] =
 {
@@ -137,8 +119,6 @@ static const SCATTER_ASSOC SCTMAP_HASH_LDCTX_HMAC_ULCTX[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_MM_LDCTX_EXP_ULCTX[] =
 {
     {offsetof(MOD_EXP_REQ, aData),   0x02},
@@ -147,8 +127,6 @@ static const SCATTER_ASSOC SCTMAP_MM_LDCTX_EXP_ULCTX[] =
     {offsetof(MOD_EXP_REQ, outData), 0x10},
     {0, 0}
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_MM_SS_RSA_EXP[] =
 {
@@ -159,16 +137,12 @@ static const SCATTER_ASSOC SCTMAP_MM_SS_RSA_EXP[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_MM_LDCTX_R2MODN_ULCTX[] =
 {
     {offsetof(MOD_R2MODN_REQ, modData), 0x08},
     {offsetof(MOD_R2MODN_REQ, outData), 0x10},
     {0, 0}
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_MM_LDCTX_RRMODP_ULCTX[] =
 {
@@ -178,7 +152,6 @@ static const SCATTER_ASSOC SCTMAP_MM_LDCTX_RRMODP_ULCTX[] =
     {0, 0}
 };
 
-
 static const SCATTER_ASSOC SCTMAP_MM_MOD_INV_ULCTX[] =
 {
     {offsetof(MOD_INV_REQ, nData),   0x01},
@@ -186,7 +159,6 @@ static const SCATTER_ASSOC SCTMAP_MM_MOD_INV_ULCTX[] =
     {offsetof(MOD_INV_REQ, outData), 0x10},
     {0, 0}
 };
-
 
 static const SCATTER_ASSOC SCTMAP_MOD_LDCTX_2OP_ULCTX[] =
 {
@@ -196,8 +168,6 @@ static const SCATTER_ASSOC SCTMAP_MOD_LDCTX_2OP_ULCTX[] =
     {offsetof(MOD_2OP_REQ, outData), 0x10},
     {0, 0}
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_EC_LDCTX_kP_ULCTX[] =
 {
@@ -210,8 +180,6 @@ static const SCATTER_ASSOC SCTMAP_EC_LDCTX_kP_ULCTX[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_EC_2OP[] =
 {
     {offsetof(ECC_2OP_REQ, bData),   0x01},
@@ -220,8 +188,6 @@ static const SCATTER_ASSOC SCTMAP_EC_2OP[] =
     {offsetof(ECC_2OP_REQ, outData), 0x08},
     {0, 0}
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_EC_SPKBUILD_ULCTX[] =
 {
@@ -235,8 +201,6 @@ static const SCATTER_ASSOC SCTMAP_EC_SPKBUILD_ULCTX[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_ECC_PTADD_DBL[] =
 {
     {offsetof(ECC_PTADD_DBL_REQ, modData),    0x01},
@@ -247,8 +211,6 @@ static const SCATTER_ASSOC SCTMAP_ECC_PTADD_DBL[] =
     {offsetof(ECC_PTADD_DBL_REQ, b2Data),     0x20},
     {offsetof(ECC_PTADD_DBL_REQ, b3Data),     0x40},
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_IPSEC_CBC[] =
 {
@@ -262,8 +224,6 @@ static const SCATTER_ASSOC SCTMAP_IPSEC_CBC[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_IPSEC_ESP[] =
 {
     {offsetof(IPSEC_ESP_REQ, hashKeyData),     0x01},
@@ -275,8 +235,6 @@ static const SCATTER_ASSOC SCTMAP_IPSEC_ESP[] =
     {offsetof(IPSEC_ESP_REQ, cryptCtxOutData), 0x40},
     {0, 0}
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_IPSEC_STATIC_CBC[] =
 {
@@ -290,8 +248,6 @@ static const SCATTER_ASSOC SCTMAP_IPSEC_STATIC_CBC[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_IPSEC_ECB[] =
 {
     {offsetof(IPSEC_ECB_REQ, hashKeyData),  0x01},
@@ -302,8 +258,6 @@ static const SCATTER_ASSOC SCTMAP_IPSEC_ECB[] =
     {offsetof(IPSEC_ECB_REQ, hashDataOut),  0x40},
     {0, 0}
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_IPSEC_AES_CBC[] =
 {
@@ -317,8 +271,6 @@ static const SCATTER_ASSOC SCTMAP_IPSEC_AES_CBC[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_IPSEC_AES_ECB[] =
 {
     {offsetof(IPSEC_AES_ECB_REQ, hashKeyData),  0x01},
@@ -330,8 +282,6 @@ static const SCATTER_ASSOC SCTMAP_IPSEC_AES_ECB[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_AESA_CRYPT[] =
 {
     {offsetof(AESA_CRYPT_REQ, inIvData),   0x02},
@@ -341,8 +291,6 @@ static const SCATTER_ASSOC SCTMAP_AESA_CRYPT[] =
     {offsetof(AESA_CRYPT_REQ, outCtxData), 0x20},
     {0, 0}
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_CCMP[] =
 {
@@ -354,8 +302,6 @@ static const SCATTER_ASSOC SCTMAP_CCMP[] =
     {offsetof(CCMP_REQ, MICData),      0x40},
     {0, 0}
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_SRTP[] =
 {
@@ -369,8 +315,6 @@ static const SCATTER_ASSOC SCTMAP_SRTP[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_KEA_CRYPT[] =
 {
     {offsetof(KEA_CRYPT_REQ, ivData),   0x02},
@@ -381,8 +325,6 @@ static const SCATTER_ASSOC SCTMAP_KEA_CRYPT[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_RAID_XOR[] =
 {
     {offsetof(RAID_XOR_REQ, inDataA),  0x08},
@@ -391,8 +333,6 @@ static const SCATTER_ASSOC SCTMAP_RAID_XOR[] =
     {offsetof(RAID_XOR_REQ, outData),  0x40},
     {0, 0}
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_TLS_BLOCK_INBOUND[] =
 {
@@ -406,8 +346,6 @@ static const SCATTER_ASSOC SCTMAP_TLS_BLOCK_INBOUND[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_TLS_BLOCK_OUTBOUND[] =
 {
     {offsetof(TLS_BLOCK_OUTBOUND_REQ, hashKeyData),    0x01},
@@ -419,8 +357,6 @@ static const SCATTER_ASSOC SCTMAP_TLS_BLOCK_OUTBOUND[] =
     {offsetof(TLS_BLOCK_OUTBOUND_REQ, ivOutData),      0x40},
     {0, 0}
 };
-
-
 
 static const SCATTER_ASSOC SCTMAP_TLS_STREAM_INBOUND[] =
 {
@@ -434,8 +370,6 @@ static const SCATTER_ASSOC SCTMAP_TLS_STREAM_INBOUND[] =
     {0, 0}
 };
 
-
-
 static const SCATTER_ASSOC SCTMAP_TLS_STREAM_OUTBOUND[] =
 {
     {offsetof(TLS_STREAM_OUTBOUND_REQ, hashKeyData),   0x01},
@@ -446,9 +380,6 @@ static const SCATTER_ASSOC SCTMAP_TLS_STREAM_OUTBOUND[] =
     {offsetof(TLS_STREAM_OUTBOUND_REQ, ivOutData),     0x40},
     {0, 0}
 };
-
-
-
 
 static unsigned char locate(SCATTER_ASSOC *assoc,
                             unsigned long offset)

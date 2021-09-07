@@ -333,4 +333,3 @@ MACHINE_START(MX31MOBOARD, "EPFL Mobots mx31moboard")
 	.init_machine   = mxc_board_init,
 	.timer          = &mx31moboard_timer,
 MACHINE_END
-

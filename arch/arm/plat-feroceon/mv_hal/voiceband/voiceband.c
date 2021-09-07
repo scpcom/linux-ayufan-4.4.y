@@ -161,4 +161,3 @@ MV_VOID mvVbSpiWrite(MV_U32 lineId, MV_U8 address, mv_line_t lineType, MV_U8 dat
 
 #endif /* MV_TDM_2CHANNELS */
 }
-

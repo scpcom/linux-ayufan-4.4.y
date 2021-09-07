@@ -38,7 +38,6 @@
 unsigned int csum_partial(const unsigned char * buff, int len, unsigned int sum)
  */
 
-
 #ifdef CONFIG_ISA_DUAL_ISSUE
 
 	/*

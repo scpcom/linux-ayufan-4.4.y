@@ -36,7 +36,6 @@
 #include "rdma.h"
 #include "ib.h"
 
-
 /*
  * This is stored as mr->r_trans_private.
  */

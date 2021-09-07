@@ -27,7 +27,6 @@
 #include <asm/mmu_context.h>
 #include <asm/dvma.h>
 
-
 #undef DEBUG_MMU_EMU
 #define DEBUG_PROM_MAPS
 
@@ -141,7 +140,6 @@ void mmu_emu_init(unsigned long bootmem_end)
 	for (i=0; i < __pa(bootmem_end) / SUN3_PMEG_SIZE ; ++i)
 		pmeg_alloc[i] = 2;
 
-
 	/* I'm thinking that most of the top pmeg's are going to be
 	   used for something, and we probably shouldn't risk it */
 	for(num = 0xf0; num <= 0xff; num++)
@@ -183,7 +181,6 @@ void mmu_emu_init(unsigned long bootmem_end)
 	}
 
 	dvma_init();
-
 
 	/* blank everything below the kernel, and we've got the base
 	   mapping to start all the contexts off with... */
@@ -290,7 +287,6 @@ inline void mmu_emu_map_pmeg (int context, int vaddr)
 	/* Find a spare one. */
 	while (pmeg_alloc[curr_pmeg] == 2)
 		++curr_pmeg;
-
 
 #ifdef DEBUG_MMU_EMU
 printk("mmu_emu_map_pmeg: pmeg %x to context %d vaddr %x\n",

@@ -47,10 +47,8 @@ otherwise the following defines will be ignored */
 /* Internal registers: size is defined in Controllerenvironment */
 #define INTER_REGS_BASE	0xF1000000
 
-
 /* DRAM detection stuff */
 #define MV_DRAM_AUTO_SIZE
-
 
 #define PCI_ARBITER_CTRL    /* Use/unuse the Marvell integrated PCI arbiter	*/
 #undef	PCI_ARBITER_BOARD	/* Use/unuse the PCI arbiter on board			*/
@@ -59,7 +57,6 @@ otherwise the following defines will be ignored */
 #if defined(PCI_ARBITER_CTRL) && defined (PCI_ARBITER_BOARD)
 	#error "Please select either integrated PCI arbiter or board arbiter"
 #endif
-
 
 /* Board clock detection */
 #define TCLK_AUTO_DETECT    /* Use Tclk auto detection 		*/

@@ -177,7 +177,6 @@ struct i2400m_poke_table{
 	.data = cpu_to_le32(d)		\
 }
 
-
 /**
  * i2400m_reset_type - methods to reset a device
  *
@@ -489,7 +488,6 @@ struct i2400m {
 	unsigned long fw_version;	/* version of the firmware interface */
 };
 
-
 /*
  * Initialize a 'struct i2400m' from all zeroes
  *
@@ -518,7 +516,6 @@ void i2400m_init(struct i2400m *i2400m)
 	mutex_init(&i2400m->init_mutex);
 	/* wake_tx_ws is initialized in i2400m_tx_setup() */
 }
-
 
 /*
  * Bus-generic internal APIs
@@ -640,7 +637,6 @@ unsigned i2400m_brh_get_signature(const struct i2400m_bootrom_header *hdr)
 		>> I2400M_BRH_SIGNATURE_SHIFT;
 }
 
-
 /*
  * Driver / device setup and internal functions
  */
@@ -704,7 +700,6 @@ void i2400m_pld_set(struct i2400m_pld *pld, size_t size,
 		((type << I2400M_PLD_TYPE_SHIFT) & I2400M_PLD_TYPE_MASK)
 		|  (size & I2400M_PLD_SIZE_MASK));
 }
-
 
 /*
  * API for the bus-specific drivers
@@ -835,7 +830,6 @@ unsigned i2400m_ge_v1_4(struct i2400m *i2400m)
 	return i2400m->fw_version >= 0x00090002;
 }
 
-
 /*
  * Do a millisecond-sleep for allowing wireshark to dump all the data
  * packets. Used only for debugging.
@@ -853,6 +847,5 @@ void __i2400m_msleep(unsigned ms)
 
 extern int i2400m_idle_mode_disabled;
 extern int i2400m_rx_reorder_disabled;
-
 
 #endif /* #ifndef __I2400M_H__ */

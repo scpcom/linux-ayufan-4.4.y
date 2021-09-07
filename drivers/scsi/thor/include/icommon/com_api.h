@@ -163,6 +163,4 @@
 #define API_IOCTL_MAX                       				(API_IOCTL_DEFAULT_FUN + 5)
 #endif
 
-
 #endif /*  __MV_COM_API_H__ */
-

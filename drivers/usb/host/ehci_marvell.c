@@ -18,7 +18,6 @@
 
 /* #define DRIVER_AUTHOR "Dima Epshtein" */
 
-
 #ifdef CONFIG_USB_DEBUG
     #define DEBUG
 #else
@@ -39,7 +38,6 @@
 #define PORT_SPEED_HIGH		2
 
 static int ehci_marvell_setup(struct usb_hcd *hcd);
-
 
 void 	ehci_marvell_port_status_changed(struct ehci_hcd *ehci)
 {
@@ -203,7 +201,6 @@ static int ehci_marvell_remove(struct platform_device *pdev)
    return 0;
 } 
  
- 
 static struct platform_driver ehci_marvell_driver =  
 { 
     .driver.name = "ehci_marvell", 
@@ -211,5 +208,3 @@ static struct platform_driver ehci_marvell_driver =
     .remove = ehci_marvell_remove,
     .shutdown = usb_hcd_platform_shutdown, 
 };  
-
-

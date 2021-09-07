@@ -111,7 +111,6 @@ void mv_early_printk(char *fmt,...)
 }
 #endif
 
-
 extern void __init mv_map_io(void);
 extern void __init mv_init_irq(void);
 extern struct sys_timer mv_timer;
@@ -124,7 +123,6 @@ unsigned int support_wait_for_interrupt = 0x1;
 u32 mvTclk = 166666667;
 u32 mvSysclk = 200000000;
 u32 mvIsUsbHost = 1;
-
 
 u8	mvMacAddr[CONFIG_MV_ETH_PORTS_NUM][6];
 u16	mvMtu[CONFIG_MV_ETH_PORTS_NUM] = {0};
@@ -188,7 +186,6 @@ unsigned char*  mv_sram_usage_get(int* sram_size_ptr)
     return (char *)(mv_crypto_base_get() + used_size);
 }
 #endif
-
 
 void print_board_info(void)
 {
@@ -273,7 +270,6 @@ static struct platform_device kw_i2c1 = {
                .platform_data = &kw_i2c_pdata,
        },
 };
-
 
 /*****************************************************************************
  * UART
@@ -425,7 +421,6 @@ static struct orion_i2s_platform_data mv_i2s_plat_data = {
 	.i2s_play = 1,
 };
 
-
 static struct platform_device mv_i2s = {
 	.name           = "mv88fx_snd",
 	.id             = 0,
@@ -456,8 +451,6 @@ void __init mv_i2s_init(void)
 	platform_device_register(&mv_i2s);
 	return;
 }
-
-
 
 #endif /* #ifdef CONFIG_MV_INCLUDE_AUDIO */
 
@@ -817,7 +810,6 @@ static void __init mv_init(void)
 #endif
 	}
 
-
     	/* Init Tclk & SysClk */
     	mvTclk = mvBoardTclkGet();
    	mvSysclk = mvBoardSysClkGet();
@@ -985,4 +977,3 @@ MACHINE_START(FEROCEON_KW ,"Feroceon-KW")
     .fixup = kw_tag_fixup_mem32,
 #endif
 MACHINE_END
-

@@ -367,7 +367,6 @@ sysc_notify_resume:
 	la	%r14,BASED(sysc_work_loop)
 	br	%r1			# call do_notify_resume
 
-
 #
 # _TIF_RESTART_SVC is set, set up registers and restart svc
 #

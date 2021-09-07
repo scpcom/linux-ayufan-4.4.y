@@ -23,8 +23,6 @@ extern int gru_check_status_proc(void *cb);
 extern int gru_wait_proc(void *cb);
 extern void gru_wait_abort_proc(void *cb);
 
-
-
 /*
  * Architecture dependent functions
  */
@@ -174,7 +172,6 @@ struct gru_instruction {
 #define OP_BSTORE	0x0e
 #define OP_VFLUSH	0x0f
 
-
 /* Extended opcodes values (exopc field) */
 
 /* GAMIR - AMOs with implicit operands */
@@ -214,7 +211,6 @@ struct gru_instruction {
 /* GAMXR - SGI Arithmetic unit */
 #define EOP_XR_CSWAP	0x0b /* Masked compare exchange */
 
-
 /* Transfer types (xtype field) */
 #define XTYPE_B		0x0	/* byte */
 #define XTYPE_S		0x1	/* short (2-byte) */
@@ -222,13 +218,11 @@ struct gru_instruction {
 #define XTYPE_DW	0x3	/* doubleword (8-byte) */
 #define XTYPE_CL	0x6	/* cacheline (64-byte) */
 
-
 /* Instruction access attributes (iaa0, iaa1 fields) */
 #define IAA_RAM		0x0	/* normal cached RAM access */
 #define IAA_NCRAM	0x2	/* noncoherent RAM access */
 #define IAA_MMIO	0x1	/* noncoherent memory-mapped I/O space */
 #define IAA_REGISTER	0x3	/* memory-mapped registers, etc. */
-
 
 /* Instruction mode attributes (ima field) */
 #define IMA_MAPPED	0x0	/* Virtual mode  */
@@ -294,7 +288,6 @@ union gru_mesqhead {
 	};
 };
 
-
 /* Generate the low word of a GRU instruction */
 static inline unsigned int
 __opword(unsigned char opcode, unsigned char exopc, unsigned char xtype,
@@ -327,7 +320,6 @@ static inline void gru_start_instruction(struct gru_instruction *ins, int op32)
 	gru_ordered_store_int(ins, op32);
 	gru_flush_cache(ins);
 }
-
 
 /* Convert "hints" to IMA */
 #define CB_IMA(h)		((h) | IMA_UNMAPPED)
@@ -443,7 +435,6 @@ static inline void gru_nop(void *cb, int hints)
 
 	gru_start_instruction(ins, __opword(OP_NOP, 0, 0, 0, 0, CB_IMA(hints)));
 }
-
 
 static inline void gru_bcopy(void *cb, const unsigned long src,
 		unsigned long dest,
@@ -584,7 +575,6 @@ extern int gru_get_cb_exception_detail(void *cb,
 
 #define GRU_EXC_STR_SIZE		256
 
-
 /*
  * Control block definition for checking status
  */
@@ -661,7 +651,6 @@ static inline void gru_wait_abort(void *cb)
 {
 	gru_wait_abort_proc(cb);
 }
-
 
 /*
  * Get a pointer to a control block

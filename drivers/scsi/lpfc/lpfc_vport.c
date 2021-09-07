@@ -546,7 +546,6 @@ lpfc_vport_disable(struct fc_vport *fc_vport, bool disable)
 		return enable_vport(fc_vport);
 }
 
-
 int
 lpfc_vport_delete(struct fc_vport *fc_vport)
 {
@@ -774,7 +773,6 @@ lpfc_destroy_vport_work_array(struct lpfc_hba *phba, struct lpfc_vport **vports)
 	kfree(vports);
 }
 
-
 /**
  * lpfc_vport_reset_stat_data - Reset the statistical data for the vport
  * @vport: Pointer to vport object.
@@ -795,7 +793,6 @@ lpfc_vport_reset_stat_data(struct lpfc_vport *vport)
 				sizeof(struct lpfc_scsicmd_bkt));
 	}
 }
-
 
 /**
  * lpfc_alloc_bucket - Allocate data buffer required for statistical data

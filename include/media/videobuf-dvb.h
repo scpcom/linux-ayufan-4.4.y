@@ -52,7 +52,6 @@ void videobuf_dvb_dealloc_frontends(struct videobuf_dvb_frontends *f);
 struct videobuf_dvb_frontend * videobuf_dvb_get_frontend(struct videobuf_dvb_frontends *f, int id);
 int videobuf_dvb_find_frontend(struct videobuf_dvb_frontends *f, struct dvb_frontend *p);
 
-
 /*
  * Local variables:
  * c-basic-offset: 8

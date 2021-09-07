@@ -67,7 +67,6 @@ static struct cpufreq_frequency_table elanfreq_table[] = {
 	{0,	CPUFREQ_TABLE_END},
 };
 
-
 /**
  *	elanfreq_get_cpu_frequency: determine current cpu speed
  *
@@ -104,7 +103,6 @@ static unsigned int elanfreq_get_cpu_frequency(unsigned int cpu)
 	return (1<<((clockspeed_reg & 0xE0) >> 5)) * 1000;
 }
 
-
 /**
  *	elanfreq_set_cpu_frequency: Change the CPU core frequency
  *	@cpu: cpu number
@@ -129,7 +127,6 @@ static void elanfreq_set_cpu_state(unsigned int state)
 
 	printk(KERN_INFO "elanfreq: attempting to set frequency to %i kHz\n",
 			elan_multiplier[state].clock);
-
 
 	/*
 	 * Access to the Elan's internal registers is indexed via
@@ -164,7 +161,6 @@ static void elanfreq_set_cpu_state(unsigned int state)
 	cpufreq_notify_transition(&freqs, CPUFREQ_POSTCHANGE);
 };
 
-
 /**
  *	elanfreq_validatespeed: test if frequency range is valid
  *	@policy: the policy to validate
@@ -192,7 +188,6 @@ static int elanfreq_target(struct cpufreq_policy *policy,
 
 	return 0;
 }
-
 
 /*
  *	Module init and exit code
@@ -231,13 +226,11 @@ static int elanfreq_cpu_init(struct cpufreq_policy *policy)
 	return 0;
 }
 
-
 static int elanfreq_cpu_exit(struct cpufreq_policy *policy)
 {
 	cpufreq_frequency_table_put_attr(policy->cpu);
 	return 0;
 }
-
 
 #ifndef MODULE
 /**
@@ -260,12 +253,10 @@ static int __init elanfreq_setup(char *str)
 __setup("elanfreq=", elanfreq_setup);
 #endif
 
-
 static struct freq_attr *elanfreq_attr[] = {
 	&cpufreq_freq_attr_scaling_available_freqs,
 	NULL,
 };
-
 
 static struct cpufreq_driver elanfreq_driver = {
 	.get		= elanfreq_get_cpu_frequency,
@@ -277,7 +268,6 @@ static struct cpufreq_driver elanfreq_driver = {
 	.owner		= THIS_MODULE,
 	.attr		= elanfreq_attr,
 };
-
 
 static int __init elanfreq_init(void)
 {
@@ -292,12 +282,10 @@ static int __init elanfreq_init(void)
 	return cpufreq_register_driver(&elanfreq_driver);
 }
 
-
 static void __exit elanfreq_exit(void)
 {
 	cpufreq_unregister_driver(&elanfreq_driver);
 }
-
 
 module_param(max_freq, int, 0444);
 

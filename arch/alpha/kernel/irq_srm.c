@@ -9,7 +9,6 @@
 #include "proto.h"
 #include "irq_impl.h"
 
-
 /*
  * Is the palcode SMP safe? In other words: can we call cserve_ena/dis
  * at the same time in multiple CPUs? To be safe I added a spinlock

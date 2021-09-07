@@ -18,7 +18,6 @@
  *
  */
 
-
 #ifndef __ASM_PARAVIRT_H
 #define __ASM_PARAVIRT_H
 
@@ -311,7 +310,6 @@ static inline unsigned long long paravirt_sched_clock(void)
 #define paravirt_do_steal_accounting(new_itm)		0
 
 #endif /* __ASSEMBLY__ */
-
 
 #endif /* CONFIG_PARAVIRT_GUEST */
 

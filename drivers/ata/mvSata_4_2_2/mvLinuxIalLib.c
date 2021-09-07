@@ -12,7 +12,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -63,7 +62,6 @@ extern void ResubmitMvCommand(unsigned long data);
     #define scsi_to_pci_dma_dir(scsi_dir) ((int)(scsi_dir))
 #endif
 
-
 /* Connect / disconnect timers. */
 /* Note that the disconnect timer should be smaller than the SCSI */
 /* subsystem timer. */
@@ -80,7 +78,6 @@ struct rescan_wrapper
 #endif
 };
 #endif
-
 
 static void *mv_ial_lib_prd_allocate(IAL_HOST_T *pHost);
 
@@ -102,13 +99,11 @@ dma_addr_t inline pci64_map_page(struct pci_dev *hwdev, void* address,
     return mm;
 }
 
-
 void inline pci64_unmap_page(struct pci_dev *hwdev, dma_addr_t address,
                              size_t size, int direction)
 {
     pci_unmap_page(hwdev, address, size, direction);
 }
-
 
 int mv_ial_lib_prd_init(IAL_HOST_T *pHost)
 {
@@ -161,7 +156,6 @@ int mv_ial_lib_prd_free(IAL_HOST_T *pHost, int size, dma_addr_t dmaPtr,
     return 0;
 }
 
-
 int mv_ial_lib_prd_destroy(IAL_HOST_T *pHost)
 {
     MV_U8 temp;
@@ -182,7 +176,6 @@ int mv_ial_lib_prd_destroy(IAL_HOST_T *pHost)
     }
     return 0;
 }
-
 
 /*******************************************************************************
  *  Name:   mv_ial_lib_add_done_queue
@@ -362,7 +355,6 @@ void mv_ial_lib_do_done (struct scsi_cmnd *cmnd)
         cmnd = temp;
     }
 }
-
 
 /*******************************************************************************
  *  Name:   mv_ial_lib_free_channel
@@ -577,8 +569,6 @@ static int mv_ial_lib_add_buffer_to_prd_table(MV_SATA_ADAPTER   *pMvSataAdapter,
 
     mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG,"insert to PRD table, count=%d, buf_addr=%x, buf_len=%x\n",
              *count,(unsigned int) buf_addr, buf_len);
-
-
 
     /*
     The buffer is splitted in case then either the buffer size exceeds 64 KB
@@ -866,7 +856,6 @@ int mv_ial_lib_generate_prd(MV_SATA_ADAPTER *pMvSataAdapter, struct scsi_cmnd *S
 #endif
                              scsi_to_pci_dma_dir(SCpnt->sc_data_direction));
 
-
             return -1;
         }
         PRD_dma_address = pci64_map_page(pAdapter->pcidev,
@@ -884,7 +873,6 @@ int mv_ial_lib_generate_prd(MV_SATA_ADAPTER *pMvSataAdapter, struct scsi_cmnd *S
     mvLogMsg(MV_IAL_LOG_ID,  MV_DEBUG, "PRD table allocated (dma) %x \n", PRD_dma_address);
     return 0;
 }
-
 
 /****************************************************************
  *  Name: mv_ial_block_requests
@@ -943,8 +931,6 @@ static void mv_ial_unblock_requests(struct IALAdapter *pAdapter, MV_U8 channelIn
         scsi_unblock_requests(pAdapter->host[channelIndex]->scsihost);
     }
 }
-
-
 
 #ifdef MY_ABC_HERE
 static inline void
@@ -1126,7 +1112,6 @@ MV_BOOLEAN mv_ial_lib_event_notify(MV_SATA_ADAPTER *pMvSataAdapter, MV_EVENT_TYP
     case MV_EVENT_TYPE_SATA_CABLE:
         {
 
-
             if (param1 == MV_SATA_CABLE_EVENT_CONNECT)
             {
 
@@ -1286,7 +1271,6 @@ void IALChannelCommandsQueueFlushed(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channel
 {
 
 }
-
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
 #ifdef MY_ABC_HERE
@@ -1504,7 +1488,6 @@ MV_BOOLEAN IALBusChangeNotifyEx(MV_SATA_ADAPTER *pSataAdapter,
     return MV_TRUE;
 }
 
-
 void asyncStartTimerFunction(unsigned long data)
 {
     IAL_ADAPTER_T   *pAdapter = (IAL_ADAPTER_T *)data;
@@ -1718,7 +1701,6 @@ int mv_ial_lib_allocate_edma_queues(IAL_ADAPTER_T *pAdapter)
     pAdapter->responsesArrayBaseDmaAlignedAddr &=
     ~(pAdapter->responseQueueSize - 1);
 
-
     if ((pAdapter->responsesArrayBaseDmaAlignedAddr - pAdapter->responsesArrayBaseDmaAddr) !=
         (pAdapter->responsesArrayBaseAlignedAddr - pAdapter->responsesArrayBaseAddr))
     {
@@ -1789,7 +1771,6 @@ MV_BOOLEAN IALCompletion(struct mvSataAdapter *pSataAdapter,
     struct scsi_cmnd   *SCpnt = (struct scsi_cmnd *)pCmdBlock->IALData;
     struct mv_comp_info *pInfo = ( struct mv_comp_info *) &(SCpnt->SCp);
     MV_U8       host_status;
-
 
      switch (pCmdBlock->ScsiCommandCompletion)
     {

@@ -174,7 +174,6 @@ static int btrfs_xattr_set_acl(struct inode *inode, int type,
 	return ret;
 }
 
-
 static int btrfs_xattr_acl_access_get(struct inode *inode, const char *name,
 				      void *value, size_t size)
 {

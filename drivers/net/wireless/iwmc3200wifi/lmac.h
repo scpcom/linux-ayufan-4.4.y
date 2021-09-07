@@ -225,7 +225,6 @@ struct iwm_coex_prio_table_cmd {
 #define REPLY_WRITE_READ		0x26
 #define REPLY_INSTALL_SEC_KEY		0x27
 
-
 #define REPLY_RATE_SCALE		0x47
 #define REPLY_LEDS_CMD			0x48
 #define REPLY_TX_LINK_QUALITY_CMD	0x4e
@@ -369,7 +368,6 @@ struct iwm_coex_prio_table_cmd {
 
 #define LMAC_COMMAND_ID_MAX		0xff
 #define LMAC_COMMAND_ID_NUM		(LMAC_COMMAND_ID_MAX + 1)
-
 
 /* Calibration */
 

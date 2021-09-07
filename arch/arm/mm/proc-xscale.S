@@ -489,7 +489,6 @@ ENTRY(cpu_xscale_set_pte_ext)
 	xscale_set_pte_ext_epilogue
 	mov	pc, lr
 
-
 	.ltorg
 
 	.align
@@ -950,4 +949,3 @@ __pxa270_proc_info:
 	.long	xscale_mc_user_fns
 	.long	xscale_cache_fns
 	.size	__pxa270_proc_info, . - __pxa270_proc_info
-

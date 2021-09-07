@@ -151,7 +151,6 @@ static void __init check_config(void)
 #endif
 }
 
-
 void __init check_bugs(void)
 {
 	identify_boot_cpu();

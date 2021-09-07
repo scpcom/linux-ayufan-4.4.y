@@ -20,7 +20,6 @@
 
 #include "appldata.h"
 
-
 #define P2K(x) ((x) << (PAGE_SHIFT - 10))	/* Converts #Pages to KB */
 
 /*
@@ -67,7 +66,6 @@ static struct appldata_mem_data {
 // <-- New in 2.6
 
 } __attribute__((packed)) appldata_mem_data;
-
 
 /*
  * appldata_get_mem_data()
@@ -117,7 +115,6 @@ static void appldata_get_mem_data(void *data)
 	mem_data->sync_count_2++;
 }
 
-
 static struct appldata_ops ops = {
 	.name      = "mem",
 	.record_nr = APPLDATA_RECORD_MEM_ID,
@@ -127,7 +124,6 @@ static struct appldata_ops ops = {
 	.owner     = THIS_MODULE,
 	.mod_lvl   = {0xF0, 0xF0},		/* EBCDIC "00" */
 };
-
 
 /*
  * appldata_mem_init()
@@ -148,7 +144,6 @@ static void __exit appldata_mem_exit(void)
 {
 	appldata_unregister_ops(&ops);
 }
-
 
 module_init(appldata_mem_init);
 module_exit(appldata_mem_exit);

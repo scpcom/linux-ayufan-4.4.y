@@ -9,7 +9,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -27,7 +26,6 @@ disclaimer.
 *******************************************************************************/
 #ifndef _MV_OS_LNX_H_
 #define _MV_OS_LNX_H_
-                                                                                                                                               
                                                                                                                                                
 #ifdef __KERNEL__
 /* for kernel space */
@@ -84,7 +82,6 @@ extern void mv_early_printk(char *fmt,...);
 #define mvCopyFromOs        copy_from_user
 #define mvCopyToOs          copy_to_user
 
- 
 #include "mvTypes.h"
 #include "mvCommon.h"
   
@@ -122,11 +119,9 @@ extern void mv_early_printk(char *fmt,...);
 #define mvOsCacheInvalidate(pDev, p, size)                          \
     pci_map_single( (pDev), (p), (size), PCI_DMA_FROMDEVICE )
 
-
 #define CPU_PHY_MEM(x)              (MV_U32)x
 #define CPU_MEMIO_CACHED_ADDR(x)    (void*)x
 #define CPU_MEMIO_UNCACHED_ADDR(x)  (void*)x
-
 
 /* CPU architecture dependent 32, 16, 8 bit read/write IO addresses */
 #define MV_MEMIO32_WRITE(addr, data)    \
@@ -146,7 +141,6 @@ extern void mv_early_printk(char *fmt,...);
 
 #define MV_MEMIO8_READ(addr)            \
     ((*((volatile unsigned char*)(addr))))
-
 
 /* No Fast Swap implementation (in assembler) for ARM */
 #define MV_32BIT_LE_FAST(val)            MV_32BIT_LE(val)
@@ -206,7 +200,6 @@ static __inline void mvOsBridgeReorderWA(void)
 }
 #endif
 
-
 /* Flash APIs */
 #define MV_FL_8_READ            MV_MEMIO8_READ
 #define MV_FL_16_READ           MV_MEMIO_LE16_READ
@@ -220,7 +213,6 @@ static __inline void mvOsBridgeReorderWA(void)
 #define MV_FL_8_DATA_WRITE      MV_MEMIO8_WRITE
 #define MV_FL_16_DATA_WRITE     MV_MEMIO16_WRITE
 #define MV_FL_32_DATA_WRITE     MV_MEMIO32_WRITE
-
 
 /* CPU cache information */
 #define CPU_I_CACHE_LINE_SIZE   32    /* 2do: replace 32 with linux core macro */
@@ -271,13 +263,8 @@ static __inline void mvOsPrefetch(const void *ptr)
 #endif
 }
 
-
 /* Flush CPU pipe */
 #define CPU_PIPE_FLUSH
-
-
-
-
 
 /* register manipulations  */
 
@@ -363,8 +350,6 @@ extern int reg_arry_index;
           MV_32BIT_LE_FAST(~bitMask))))
 #endif
 
-
-
 /* ARM architecture APIs */
 MV_U32  mvOsCpuRevGet (MV_VOID);
 MV_U32  mvOsCpuPartGet (MV_VOID);
@@ -380,5 +365,3 @@ void mvOsIoCachedFree( void* osHandle, MV_U32 size, MV_ULONG phyAddr, void* pVir
 int mvOsRand(void);
 
 #endif /* _MV_OS_LNX_H_ */
-
-

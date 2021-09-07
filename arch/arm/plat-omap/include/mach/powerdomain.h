@@ -21,7 +21,6 @@
 
 #include <mach/cpu.h>
 
-
 /* Powerdomain basic power states */
 #define PWRDM_POWER_OFF		0x0
 #define PWRDM_POWER_RET		0x1
@@ -37,10 +36,8 @@
 
 #define PWRSTS_OFF_RET_ON	(PWRSTS_OFF_RET | (1 << PWRDM_POWER_ON))
 
-
 /* Powerdomain flags */
 #define PWRDM_HAS_HDWR_SAR	(1 << 0) /* hardware save-and-restore support */
-
 
 /*
  * Number of memory banks that are power-controllable.	On OMAP3430, the
@@ -125,7 +122,6 @@ struct powerdomain {
 	s64 state_timer[4];
 #endif
 };
-
 
 void pwrdm_init(struct powerdomain **pwrdm_list);
 

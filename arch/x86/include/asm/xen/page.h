@@ -35,7 +35,6 @@ typedef struct xpaddr {
 #define MAX_DOMAIN_PAGES						\
     ((unsigned long)((u64)CONFIG_XEN_MAX_DOMAIN_MEMORY * 1024 * 1024 * 1024 / PAGE_SIZE))
 
-
 extern unsigned long get_phys_to_machine(unsigned long pfn);
 extern void set_phys_to_machine(unsigned long pfn, unsigned long mfn);
 
@@ -162,7 +161,6 @@ static inline pte_t __pte_ma(pteval_t x)
 #define __pmd_ma(x)	((pmd_t) { (x) } )
 
 #define pgd_val_ma(x)	((x).pgd)
-
 
 xmaddr_t arbitrary_virt_to_machine(void *address);
 unsigned long arbitrary_virt_to_mfn(void *vaddr);

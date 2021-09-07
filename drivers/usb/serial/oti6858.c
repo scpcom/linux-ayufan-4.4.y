@@ -75,7 +75,6 @@ static struct usb_driver oti6858_driver = {
 
 static int debug;
 
-
 /* buffering code, copied from pl2303 driver */
 #define PL2303_BUF_SIZE		1024
 #define PL2303_TMP_BUF_SIZE	1024
@@ -171,7 +170,6 @@ static unsigned int oti6858_buf_put(struct oti6858_buf *pb, const char *buf,
 					unsigned int count);
 static unsigned int oti6858_buf_get(struct oti6858_buf *pb, char *buf,
 					unsigned int count);
-
 
 /* device info */
 static struct usb_serial_driver oti6858_device = {
@@ -775,7 +773,6 @@ static int oti6858_ioctl(struct tty_struct *tty,
 	return -ENOIOCTLCMD;
 }
 
-
 static void oti6858_release(struct usb_serial *serial)
 {
 	struct oti6858_private *priv;
@@ -1007,7 +1004,6 @@ static void oti6858_write_bulk_callback(struct urb *urb)
 	}
 }
 
-
 /*
  * oti6858_buf_alloc
  *
@@ -1197,4 +1193,3 @@ MODULE_LICENSE("GPL");
 
 module_param(debug, bool, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(debug, "enable debug output");
-

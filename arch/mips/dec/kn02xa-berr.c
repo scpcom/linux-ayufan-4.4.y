@@ -124,7 +124,6 @@ irqreturn_t dec_kn02xa_be_interrupt(int irq, void *dev_id)
 	die("Unrecoverable bus error", regs);
 }
 
-
 void __init dec_kn02xa_be_init(void)
 {
 	volatile u32 *mbcs = (void *)CKSEG1ADDR(KN4K_SLOT_BASE + KN4K_MB_CSR);

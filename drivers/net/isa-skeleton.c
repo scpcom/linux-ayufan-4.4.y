@@ -114,7 +114,6 @@ static struct	net_device_stats *net_get_stats(struct net_device *dev);
 static void	set_multicast_list(struct net_device *dev);
 static void     net_tx_timeout(struct net_device *dev);
 
-
 /* Example routines you must write ;->. */
 #define tx_done(dev) 1
 static void	hardware_send_packet(short ioaddr, char *buf, int length);

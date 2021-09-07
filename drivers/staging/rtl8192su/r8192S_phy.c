@@ -105,7 +105,6 @@ u32 phy_QueryUsbBBReg(struct net_device* dev, u32	RegAddr)
 	u8	PollingCnt = 50;
 	u8	BBWaitCounter = 0;
 
-
 	//
 	// <Roger_Notes> Due to PASSIVE_LEVEL, so we ONLY simply busy waiting for a while here.
 	// We have to make sure that previous BB I/O has been done.
@@ -151,8 +150,6 @@ u32 phy_QueryUsbBBReg(struct net_device* dev, u32	RegAddr)
 	return ReturnValue;
 }
 
-
-
 //
 // Description:
 //	Base Band wrote by 4181 to make sure that operation could be done in unlimited cycle.
@@ -197,8 +194,6 @@ phy_SetUsbBBReg(struct net_device* dev,u32	RegAddr,u32 Data)
 	priv->bChangeBBInProgress = false;
 }
 
-
-
 //
 // Description:
 //	RF read by 4181 to make sure that operation could be done in unlimited cycle.
@@ -220,7 +215,6 @@ u32 phy_QueryUsbRFReg(	struct net_device* dev, RF90_RADIO_PATH_E eRFPath,	u32	Of
 	//u32 	tmplong,tmplong2;
 	u8	PollingCnt = 50;
 	u8	RFWaitCounter = 0;
-
 
 	//
 	// <Roger_Notes> Due to PASSIVE_LEVEL, so we ONLY simply busy waiting for a while here.
@@ -251,7 +245,6 @@ u32 phy_QueryUsbRFReg(	struct net_device* dev, RF90_RADIO_PATH_E eRFPath,	u32	Of
 	priv->bChangeRFInProgress = true;
 	//PlatformReleaseSpinLock(Adapter, RT_RF_OPERATE_SPINLOCK);
 
-
 	Offset &= 0x3f; //RF_Offset= 0x00~0x3F
 
 	write_nic_dword(dev, RF_BB_CMD_ADDR, 0xF0000002|
@@ -278,7 +271,6 @@ u32 phy_QueryUsbRFReg(	struct net_device* dev, RF90_RADIO_PATH_E eRFPath,	u32	Of
 
 }
 
-
 //
 // Description:
 //	RF wrote by 4181 to make sure that operation could be done in unlimited cycle.
@@ -297,7 +289,6 @@ void phy_SetUsbRFReg(struct net_device* dev,RF90_RADIO_PATH_E eRFPath,u32	RegAdd
 	struct r8192_priv *priv = ieee80211_priv(dev);
 	u8	PollingCnt = 50;
 	u8	RFWaitCounter = 0;
-
 
 	//
 	// <Roger_Notes> Due to PASSIVE_LEVEL, so we ONLY simply busy waiting for a while here.
@@ -328,7 +319,6 @@ void phy_SetUsbRFReg(struct net_device* dev,RF90_RADIO_PATH_E eRFPath,u32	RegAdd
 	priv->bChangeRFInProgress = true;
 	//PlatformReleaseSpinLock(Adapter, RT_RF_OPERATE_SPINLOCK);
 
-
 	RegAddr &= 0x3f; //RF_Offset= 0x00~0x3F
 
 	write_nic_dword(dev, RF_BB_CMD_DATA, Data);
@@ -354,9 +344,7 @@ void phy_SetUsbRFReg(struct net_device* dev,RF90_RADIO_PATH_E eRFPath,u32	RegAdd
 
 }
 
-
 /*---------------------Define local function prototype-----------------------*/
-
 
 /*----------------------------Function Body----------------------------------*/
 //
@@ -382,7 +370,6 @@ u32 rtl8192_QueryBBReg(struct net_device* dev, u32 RegAddr, u32 BitMask)
 {
 
   	u32	ReturnValue = 0, OriginalValue, BitShift;
-
 
 	RT_TRACE(COMP_RF, "--->PHY_QueryBBReg(): RegAddr(%#x), BitMask(%#x)\n", RegAddr, BitMask);
 
@@ -441,7 +428,6 @@ void rtl8192_setBBreg(struct net_device* dev, u32 RegAddr, u32 BitMask, u32 Data
 {
 	u32	OriginalValue, BitShift, NewValue;
 
-
 	RT_TRACE(COMP_RF, "--->PHY_SetBBReg(): RegAddr(%#x), BitMask(%#x), Data(%#x)\n", RegAddr, BitMask, Data);
 
 	//
@@ -485,7 +471,6 @@ void rtl8192_setBBreg(struct net_device* dev, u32 RegAddr, u32 BitMask, u32 Data
 	return;
 }
 
-
 //
 // 2. RF register R/W API
 //
@@ -511,7 +496,6 @@ u32 rtl8192_phy_QueryRFReg(struct net_device* dev, RF90_RADIO_PATH_E eRFPath, u3
 {
 	u32 Original_Value, Readback_Value, BitShift;//, flags;
 	struct r8192_priv *priv = ieee80211_priv(dev);
-
 
 	RT_TRACE(COMP_RF, "--->PHY_QueryRFReg(): RegAddr(%#x), eRFPath(%#x), BitMask(%#x)\n", RegAddr, eRFPath,BitMask);
 
@@ -648,7 +632,6 @@ static u32 phy_CalculateBitShift(u32 BitMask)
 	return (i);
 }
 
-
 //
 // 3. Initial MAC/BB/RF config by reading MAC/BB/RF txt.
 //
@@ -773,7 +756,6 @@ PHY_RFConfig8192S(struct net_device* dev)
 	return (rtStatus == RT_STATUS_SUCCESS) ? 1:0;
 }
 
-
 // Joseph test: new initialize order!!
 // Test only!! This part need to be re-organized.
 // Now it is just for 8256.
@@ -862,7 +844,6 @@ phy_SetBBtoDiffRFWithHeaderFile(struct net_device* dev, u8 ConfigType)
 	return RT_STATUS_SUCCESS;
 }
 
-
 //use in phy only
 static	RT_STATUS
 phy_BB8192S_Config_ParaFile(struct net_device* dev)
@@ -923,11 +904,9 @@ phy_BB8192S_Config_ParaFile(struct net_device* dev)
 		goto phy_BB8190_Config_ParaFile_Fail;
 	}
 
-
 	// Check if the CCK HighPower is turned ON.
 	// This is used to calculate PWDB.
 	priv->bCckHighPower = (bool)(rtl8192_QueryBBReg(dev, rFPGA0_XA_HSSIParameter2, 0x200));
-
 
 phy_BB8190_Config_ParaFile_Fail:
 	return rtStatus;
@@ -1332,7 +1311,6 @@ PHY_CheckBBAndRFOK(
 			break;
 		}
 
-
 		//
 		// Check whether readback data is correct
 		//
@@ -1375,7 +1353,6 @@ PHY_SetRFPowerState8192SUsb(
 		RFPowerState=RF_OFF;
 		WaitShutDown=TRUE;
 	}
-
 
 	priv->RFPowerState = RFPowerState;
 	switch( priv->rf_chip )
@@ -1500,8 +1477,6 @@ void PHY_GetHWRegOriginalValue(struct net_device* dev)
 				rOFDM0_RxDetector3, priv->framesync);
 }
 //YJ,modified,090107,end
-
-
 
 /**
 * Function:	phy_InitBBRFRegisterDefinition
@@ -1629,7 +1604,6 @@ static void phy_InitBBRFRegisterDefinition(	struct net_device* dev)
 	//pHalData->PHYRegDef[RF90_PATH_D].rfLSSIReadBackPi = rFPGA0_XD_LSSIReadBack;
 
 }
-
 
 //
 //	Description:  Change RF power state.
@@ -2197,7 +2171,6 @@ static u8 phy_DbmToTxPwrIdx(
 	u8				TxPwrIdx = 0;
 	long				Offset = 0;
 
-
 	//
 	// Tested by MP, we found that CCK Index 0 equals to -7dbm, OFDM legacy equals to
 	// 3dbm, and OFDM HT equals to 0dbm repectively.
@@ -2289,10 +2262,6 @@ PHY_ScanOperationBackup8192S(
 	PMGNT_INFO			pMgntInfo = &(Adapter->MgntInfo);
 	u4Byte				BitMask;
 	u1Byte				initial_gain;
-
-
-
-
 
 	if(!Adapter->bDriverStopped)
 	{
@@ -2431,7 +2400,6 @@ void PHY_SetBWModeCallback8192S(struct net_device *dev)
 			if (priv->card_8192_version >= VERSION_8192S_BCUT)
 				write_nic_byte(dev, rFPGA0_AnalogParameter2, 0x58);
 
-
 			break;
 
 		/* 40 MHz channel*/
@@ -2502,7 +2470,6 @@ void PHY_SetBWModeCallback8192S(struct net_device *dev)
 	RT_TRACE(COMP_SWBW, "<==SetBWModeCallback8190Pci() \n" );
 }
 
-
  /*-----------------------------------------------------------------------------
  * Function:   SetBWMode8190Pci()
  *
@@ -2524,7 +2491,6 @@ void rtl8192_SetBWMode(struct net_device *dev, HT_CHANNEL_WIDTH	Bandwidth, HT_EX
 {
 	struct r8192_priv *priv = ieee80211_priv(dev);
 	HT_CHANNEL_WIDTH tmpBW = priv->CurrentChannelBW;
-
 
 	// Modified it for 20/40 mhz switch by guangan 070531
 
@@ -2700,7 +2666,6 @@ u8 rtl8192_phy_SwChnl(struct net_device* dev, u8 channel)
 	}
         return true;
 }
-
 
 //
 // Description:
@@ -2882,7 +2847,6 @@ phy_SwChnlStepByStep(
 		break;
 	}
 
-
 	do{
 		switch(*stage)
 		{
@@ -2968,7 +2932,6 @@ phy_FinishSwChnlNow(	// We should not call this function directly
 	}
 }
 
-
 /*-----------------------------------------------------------------------------
  * Function:	PHYCheckIsLegalRfPath8190Pci()
  *
@@ -3000,8 +2963,6 @@ u8 rtl8192_phy_CheckIsLegalRFPath(struct net_device* dev, u32 eRFPath)
 	return	rtValue;
 
 }	/* PHY_CheckIsLegalRfPath8192S */
-
-
 
 /*-----------------------------------------------------------------------------
  * Function:	PHY_IQCalibrate8192S()
@@ -3067,7 +3028,6 @@ PHY_IQCalibrate(	struct net_device* dev)
 		rtl8192_setBBreg(dev, 0xc08, bMaskDWord, 0x000000e4);
 		udelay(5);
 		rtl8192_setBBreg(dev, 0xe28, bMaskDWord, 0x0);
-
 
 		reg = rtl8192_QueryBBReg(dev, 0xeac, bMaskDWord);
 
@@ -3142,11 +3102,9 @@ PHY_IQCalibrate(	struct net_device* dev)
 
 	}
 
-
 	//
 	// 3. QFN64. Not enabled now !!! We must use different gain table for 1T2R.
 	//
-
 
 }
 
@@ -3292,7 +3250,6 @@ extern void PHY_IQCalibrateBcut(struct net_device* dev)
 			rtl8192_setBBreg(dev, 0x828, bMaskDWord, 0x01000000);
 		}
 
-
 		reg = rtl8192_QueryBBReg(dev, 0xeac, bMaskDWord);
 
 		// 3.	check fail bit, and fill BB IQ matrix
@@ -3374,15 +3331,11 @@ extern void PHY_IQCalibrateBcut(struct net_device* dev)
 	for (i = 0; i < 13; i++)
 		rtl8192_setBBreg(dev, calibrate_set[i], bMaskDWord, load_value[i]);
 
-
 	//
 	// 3. QFN64. Not enabled now !!! We must use different gain table for 1T2R.
 	//
 
-
-
 }	// PHY_IQCalibrateBcut
-
 
 //
 // Move from phycfg.c to gen.c to be code independent later
@@ -3400,7 +3353,6 @@ void SwChnlCallback8192SUsb(struct net_device *dev)
 
 	RT_TRACE(COMP_SCAN, "==>SwChnlCallback8190Pci(), switch to channel\
 				%d\n", priv->chan);
-
 
 	if(!priv->up)
 		return;
@@ -3433,7 +3385,6 @@ void SwChnlCallback8192SUsb(struct net_device *dev)
 	}while(TRUE);
 }
 
-
 //
 // Callback routine of the work item for switch channel.
 //
@@ -3457,7 +3408,6 @@ void SwChnlCallback8192SUsbWorkItem(struct net_device *dev )
 
 	RT_TRACE(COMP_TRACE, "<== SwChnlCallback8192SUsbWorkItem()\n");
 }
-
 
 /*-----------------------------------------------------------------------------
  * Function:    SetBWModeCallback8192SUsb()
@@ -3687,7 +3637,6 @@ void SetBWModeCallback8192SUsbWorkItem(struct net_device *dev)
 
 			break;
 
-
 		default:
 			RT_TRACE(COMP_DBG, "SetBWModeCallback8192SUsbWorkItem(): unknown Bandwidth: %#X\n"\
 						,priv->CurrentChannelBW);
@@ -3823,7 +3772,6 @@ extern void InitialGainOperateWorkItemCallBack(struct work_struct *work)
 			break;
 	}
 }
-
 
 //-----------------------------------------------------------------------------
 //	Description:
@@ -4080,4 +4028,3 @@ void phy_SetFwCmdIOCallback(struct net_device* dev)
 	RT_TRACE(COMP_CMD, "<---SetFwCmdIOWorkItemCallback()\n");
 
 }
-

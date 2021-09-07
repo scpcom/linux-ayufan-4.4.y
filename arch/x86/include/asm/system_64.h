@@ -4,7 +4,6 @@
 #include <asm/segment.h>
 #include <asm/cmpxchg.h>
 
-
 static inline unsigned long read_cr8(void)
 {
 	unsigned long cr8;

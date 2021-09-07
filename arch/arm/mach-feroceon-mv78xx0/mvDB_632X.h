@@ -37,4 +37,3 @@ MV_CPU_DEC_WIN SYSMAP_DB_623X[] = {
     	/* Table terminator */
    	{{TBL_TERM, TBL_TERM, TBL_TERM}, TBL_TERM, TBL_TERM}
 };
-

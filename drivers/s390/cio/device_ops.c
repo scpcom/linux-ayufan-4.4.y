@@ -316,7 +316,6 @@ int ccw_device_start_timeout(struct ccw_device *cdev, struct ccw1 *cpa,
 					    expires);
 }
 
-
 /**
  * ccw_device_halt() - halt I/O request processing
  * @cdev: target ccw device
@@ -697,7 +696,6 @@ _ccw_device_get_subchannel_number(struct ccw_device *cdev)
 {
 	return cdev->private->schid.sch_no;
 }
-
 
 MODULE_LICENSE("GPL");
 EXPORT_SYMBOL(ccw_device_set_options_mask);

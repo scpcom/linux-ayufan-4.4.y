@@ -259,4 +259,3 @@ module_exit(ricoh_mmc_drv_exit);
 MODULE_AUTHOR("Philip Langdale <philipl@alumni.utexas.net>");
 MODULE_DESCRIPTION("Ricoh MMC Controller disabling driver");
 MODULE_LICENSE("GPL");
-

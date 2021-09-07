@@ -106,7 +106,6 @@ static inline u32 getmiso(struct spi_device *dev)
 #define	EXPAND_BITBANG_TXRX
 #include <linux/spi/spi_bitbang.h>
 
-
 static u32 ox820_spigpio_txrx_mode0(struct spi_device *spi,
 				      unsigned nsecs, u32 word, u8 bits)
 {
@@ -131,7 +130,6 @@ static u32 ox820_spigpio_txrx_mode3(struct spi_device *spi,
 	return bitbang_txrx_be_cpha1(spi, nsecs, 1, word, bits);
 }
 
-
 static void ox820_spigpio_chipselect(struct spi_device *dev, int value)
 {
 
@@ -140,7 +138,6 @@ static void ox820_spigpio_chipselect(struct spi_device *dev, int value)
 	DEBUG_OX("GPIO A STATUS 0x%08x\n", readl(GPIO_A_OUTPUT_VALUE));
 	DEBUG_OX("GPIO B STATUS 0x%08x\n", readl(GPIO_B_OUTPUT_VALUE));
 }
-
 
 static int ox820_spigpio_probe(struct platform_device *dev)
 {

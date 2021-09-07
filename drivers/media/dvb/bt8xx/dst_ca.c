@@ -50,7 +50,6 @@
 	}										\
 } while(0)
 
-
 static unsigned int verbose = 5;
 module_param(verbose, int, 0644);
 MODULE_PARM_DESC(verbose, "verbose startup messages, default is 1 (yes)");
@@ -126,7 +125,6 @@ error:
 	return -EIO;
 }
 
-
 static int dst_put_ci(struct dst_state *state, u8 *data, int len, u8 *ca_string, int read)
 {
 	u8 dst_ca_comm_err = 0;
@@ -146,8 +144,6 @@ static int dst_put_ci(struct dst_state *state, u8 *data, int len, u8 *ca_string,
 
 	return 0;
 }
-
-
 
 static int ca_get_app_info(struct dst_state *state)
 {
@@ -269,7 +265,6 @@ static int ca_get_slot_descr(struct dst_state *state, struct ca_msg *p_ca_messag
 	return -EOPNOTSUPP;
 }
 
-
 static int ca_get_slot_info(struct dst_state *state, struct ca_slot_info *p_ca_slot_info, void __user *arg)
 {
 	int i;
@@ -308,7 +303,6 @@ static int ca_get_slot_info(struct dst_state *state, struct ca_slot_info *p_ca_s
 
 	return 0;
 }
-
 
 static int ca_get_message(struct dst_state *state, struct ca_msg *p_ca_message, void __user *arg)
 {
@@ -419,7 +413,6 @@ static int debug_string(u8 *msg, u32 length, u32 offset)
 	return 0;
 }
 
-
 static int ca_set_pmt(struct dst_state *state, struct ca_msg *p_ca_message, struct ca_msg *hw_buffer, u8 reply, u8 query)
 {
 	u32 length = 0;
@@ -438,7 +431,6 @@ static int ca_set_pmt(struct dst_state *state, struct ca_msg *p_ca_message, stru
 
 	return 0;
 }
-
 
 /*	Board supports CA PMT reply ?		*/
 static int dst_check_ca_pmt(struct dst_state *state, struct ca_msg *p_ca_message, struct ca_msg *hw_buffer)
@@ -491,7 +483,6 @@ static int ca_send_message(struct dst_state *state, struct ca_msg *p_ca_message,
 		result = -EFAULT;
 		goto free_mem_and_exit;
 	}
-
 
 	if (p_ca_message->msg) {
 		ca_message_header_len = p_ca_message->length;	/*	Restore it back when you are done	*/

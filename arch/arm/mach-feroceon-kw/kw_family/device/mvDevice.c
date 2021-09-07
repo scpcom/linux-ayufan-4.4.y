@@ -70,6 +70,3 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else                
 	#define DB(x)    
 #endif	             
-
-
-

@@ -26,7 +26,6 @@
  *
  */
 
-
 #include <asm/hardware.h>
 #include <linux/stddef.h>
 #include <linux/kernel.h>
@@ -1225,7 +1224,6 @@ static struct hp_hardware hp_hardware_list[] __devinitdata = {
 	{HPHW_FAULTY, 0, }  /* Special Marker for last entry */
 };
 
-
 static struct hp_cpu_type_mask {
 	unsigned short model;
 	unsigned short mask;
@@ -1364,7 +1362,6 @@ parisc_hardware_description(struct parisc_device_id *id)
 	return "unknown device";
 }
 
-
 /* Interpret hversion (ret[0]) from PDC_MODEL(4)/PDC_MODEL_INFO(0) */
 enum cpu_type __cpuinit
 parisc_get_cpu_type(unsigned long hversion)
@@ -1380,4 +1377,3 @@ parisc_get_cpu_type(unsigned long hversion)
 
 	return pcx;	/* not reached: */
 }
-

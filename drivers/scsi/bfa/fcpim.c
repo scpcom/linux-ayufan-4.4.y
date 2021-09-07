@@ -359,8 +359,6 @@ bfa_fcs_itnim_sm_initiator(struct bfa_fcs_itnim_s *itnim,
 	}
 }
 
-
-
 /**
  *  itnim_private FCS ITNIM private interfaces
  */
@@ -522,8 +520,6 @@ bfa_fcs_itnim_free(struct bfa_fcs_itnim_s *itnim)
 	bfa_itnim_delete(itnim->bfa_itnim);
 	bfa_fcb_itnim_free(itnim->fcs->bfad, itnim->itnim_drv);
 }
-
-
 
 /**
  *  itnim_public FCS ITNIM public interfaces
@@ -840,5 +836,3 @@ bfa_fcs_fcpim_modexit(struct bfa_fcs_s *fcs)
 {
 	bfa_fcs_modexit_comp(fcs);
 }
-
-

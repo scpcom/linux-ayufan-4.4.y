@@ -197,7 +197,6 @@ static int vol_cdev_fsync(struct file *file, struct dentry *dentry,
 	return ubi_sync(ubi->ubi_num);
 }
 
-
 static ssize_t vol_cdev_read(struct file *file, __user char *buf, size_t count,
 			     loff_t *offp)
 {

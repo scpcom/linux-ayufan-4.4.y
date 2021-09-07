@@ -37,7 +37,6 @@
 #include <linux/regulator/consumer.h>
 #include <linux/err.h>
 
-
 /* Register defines */
 
 #define VENDOR_ID_LO			0x00
@@ -235,8 +234,6 @@
 /* In module TWL4030_MODULE_INTBR */
 #define PMBR1				0x0D
 #define GPIO_USB_4PIN_ULPI_2430C	(3 << 0)
-
-
 
 enum linkstat {
 	USB_LINK_UNKNOWN = 0,

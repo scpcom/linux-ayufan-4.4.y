@@ -80,7 +80,6 @@
 	}								\
 } while (0)
 
-
 #define BFA_LOG(bfad, level, mask, fmt, arg...)				\
 do { 									\
 	if (((mask) & (((struct bfad_s *)(bfad))->			\
@@ -122,7 +121,6 @@ int bfa_os_MWB(void *);
 	(((_x) & 0x0000ff00) << 8)	|	\
 	(((_x) & 0x00ff0000) >> 8)	|	\
 	(((_x) & 0xff000000) >> 24))
-
 
 #ifndef __BIGENDIAN
 #define bfa_os_htons(_x) ((u16)((((_x) & 0xff00) >> 8) | \

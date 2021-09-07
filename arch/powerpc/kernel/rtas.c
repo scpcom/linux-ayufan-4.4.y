@@ -196,7 +196,6 @@ static int udbg_rtascon_getc(void)
 	return c;
 }
 
-
 void __init udbg_init_rtas_console(void)
 {
 	udbg_putc = udbg_rtascon_putc;
@@ -363,7 +362,6 @@ int rtas_get_error_log_max(void)
 	return rtas_error_log_max;
 }
 EXPORT_SYMBOL(rtas_get_error_log_max);
-
 
 static char rtas_err_buf[RTAS_ERROR_LOG_MAX];
 static int rtas_last_error_token;

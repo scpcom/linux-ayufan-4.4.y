@@ -33,7 +33,6 @@ char *s3c6410_hsmmc_clksrcs[4] = {
 	/* [3] = "48m", - note not succesfully used yet */
 };
 
-
 void s3c6410_setup_sdhci0_cfg_card(struct platform_device *dev,
 				    void __iomem *r,
 				    struct mmc_ios *ios,
@@ -65,4 +64,3 @@ void s3c6410_setup_sdhci0_cfg_card(struct platform_device *dev,
 	writel(ctrl2, r + S3C_SDHCI_CONTROL2);
 	writel(ctrl3, r + S3C_SDHCI_CONTROL3);
 }
-

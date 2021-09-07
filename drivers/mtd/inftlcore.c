@@ -537,7 +537,6 @@ hitused:
 		if (writeEUN != BLOCK_NIL)
 			return writeEUN;
 
-
 		/*
 		 * OK. We didn't find one in the existing chain, or there
 		 * is no existing chain. Allocate a new one.

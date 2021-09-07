@@ -1,5 +1,4 @@
 
-
 struct map_desc DB_78XX0_MEM_TABLE[] __initdata = {
 
  { PCI0_MEM0_BASE,  	__phys_to_pfn(PCI0_MEM0_BASE),  PCIx_MEM0_SIZE, MT_DEVICE},
@@ -23,7 +22,6 @@ struct map_desc DB_78XX0_MEM_TABLE[] __initdata = {
 // { BOOTDEV_CS_BASE, __phys_to_pfn(BOOTDEV_CS_BASE), BOOTDEV_CS_SIZE, MT_DEVICE}
 };
 
-
 struct map_desc DB_78200_MEM_TABLE[] __initdata = {
 
  { PCI0_MEM0_BASE,  	__phys_to_pfn(PCI0_MEM0_BASE),  PCIx_MEM0_SIZE, MT_DEVICE},
@@ -46,4 +44,3 @@ struct map_desc DB_78200_MEM_TABLE[] __initdata = {
 #endif 
  { CRYPTO_ENG_BASE,__phys_to_pfn(CRYPTO_ENG_BASE), CRYPTO_SIZE, MT_DEVICE  },					
 };
-

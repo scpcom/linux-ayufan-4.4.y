@@ -9,7 +9,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -57,7 +56,6 @@ static char usb_dev_name[]  = "mv_udc";
 static char usb_host_name[] = "ehci_marvell";
 static char usb_bus_name[]  = "platform";
 
-
 static void mv_usb_release(struct device *dev)
 {
     struct platform_device  *pdev = to_platform_device(dev); 
@@ -69,7 +67,6 @@ static void mv_usb_release(struct device *dev)
     kfree(pdev->dev.dma_mask);
     kfree(pdev);
 } 
-
 
 static int __init   mv_usb_init(void)
 {
@@ -160,4 +157,3 @@ static int __init   mv_usb_init(void)
 }
 
 subsys_initcall(mv_usb_init);
-

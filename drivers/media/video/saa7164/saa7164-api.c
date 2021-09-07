@@ -60,7 +60,6 @@ int saa7164_api_read_eeprom(struct saa7164_dev *dev, u8 *buf, int buflen)
 		&reg[0], 128, buf);
 }
 
-
 int saa7164_api_configure_port_mpeg2ts(struct saa7164_dev *dev,
 	struct saa7164_tsport *port,
 	tmComResTSFormatDescrHeader_t *tsfmt)
@@ -559,7 +558,6 @@ int saa7164_api_i2c_write(struct saa7164_i2c *bus, u8 addr, u32 datalen,
 	return ret == SAA_OK ? 0 : -EIO;
 }
 
-
 int saa7164_api_modify_gpio(struct saa7164_dev *dev, u8 unitid,
 	u8 pin, u8 state)
 {
@@ -595,6 +593,3 @@ int saa7164_api_clear_gpiobit(struct saa7164_dev *dev, u8 unitid,
 {
 	return saa7164_api_modify_gpio(dev, unitid, pin, 0);
 }
-
-
-

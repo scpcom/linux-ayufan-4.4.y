@@ -35,7 +35,6 @@ struct net_local
 	spinlock_t	lock;		/* Serializing lock */
 };
 
-
 #define RX_STATUS (ioaddr + 0x06)
 #define RX_CMD	  RX_STATUS
 #define TX_STATUS (ioaddr + 0x07)
@@ -88,4 +87,3 @@ struct net_local
 #define RX_RUNT 0x08
 #define RX_MISSED 0x01		/* Missed a packet due to 3c501 braindamage. */
 #define RX_GOOD	0x30		/* Good packet 0x20, or simple overflow 0x10. */
-

@@ -182,7 +182,6 @@ static char *smc_mca_adapter_names[] __initdata = {
 
 static int ultra_found = 0;
 
-
 static const struct net_device_ops ultramca_netdev_ops = {
 	.ndo_open		= ultramca_open,
 	.ndo_stop		= ultramca_close_card,
@@ -546,7 +545,6 @@ static int ultramca_remove(struct device *gen_dev)
 	return 0;
 }
 
-
 static struct mca_driver ultra_driver = {
 	.id_table = smc_mca_adapter_ids,
 	.driver = {
@@ -573,4 +571,3 @@ static void __exit ultramca_cleanup_module(void)
 }
 module_init(ultramca_init_module);
 module_exit(ultramca_cleanup_module);
-

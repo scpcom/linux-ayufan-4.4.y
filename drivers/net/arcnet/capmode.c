@@ -36,7 +36,6 @@
 
 #define VERSION "arcnet: cap mode (`c') encapsulation support loaded.\n"
 
-
 static void rx(struct net_device *dev, int bufnum,
 	       struct archdr *pkthdr, int length);
 static int build_header(struct sk_buff *skb,
@@ -46,7 +45,6 @@ static int build_header(struct sk_buff *skb,
 static int prepare_tx(struct net_device *dev, struct archdr *pkt, int length,
 		      int bufnum);
 static int ack_tx(struct net_device *dev, int acked);
-
 
 static struct ArcProto capmode_proto =
 {
@@ -59,7 +57,6 @@ static struct ArcProto capmode_proto =
 	NULL,
 	ack_tx
 };
-
 
 static void arcnet_cap_init(void)
 {
@@ -76,7 +73,6 @@ static void arcnet_cap_init(void)
 	arc_proto_default = &capmode_proto;
 	arc_raw_proto = &capmode_proto;
 }
-
 
 #ifdef MODULE
 
@@ -96,8 +92,6 @@ module_exit(capmode_module_exit);
 
 MODULE_LICENSE("GPL");
 #endif				/* MODULE */
-
-
 
 /* packet receiver */
 static void rx(struct net_device *dev, int bufnum,
@@ -152,7 +146,6 @@ static void rx(struct net_device *dev, int bufnum,
 	netif_rx(skb);
 }
 
-
 /*
  * Create the ARCnet hard/soft headers for cap mode.
  * There aren't any soft headers in cap mode - not even the protocol id.
@@ -192,14 +185,12 @@ static int build_header(struct sk_buff *skb,
 	return hdr_size;	/* success */
 }
 
-
 static int prepare_tx(struct net_device *dev, struct archdr *pkt, int length,
 		      int bufnum)
 {
 	struct arcnet_local *lp = netdev_priv(dev);
 	struct arc_hardware *hard = &pkt->hard;
 	int ofs;
-
 
 	/* hard header is not included in packet length */
 	length -= ARC_HDR_SIZE;
@@ -245,7 +236,6 @@ static int prepare_tx(struct net_device *dev, struct archdr *pkt, int length,
 	return 1;		/* done */
 }
 
-
 static int ack_tx(struct net_device *dev, int acked)
 {
   struct arcnet_local *lp = netdev_priv(dev);
@@ -271,7 +261,6 @@ static int ack_tx(struct net_device *dev, int acked)
   skb_reset_mac_header(ackskb);
   ackpkt = (struct archdr *)skb_mac_header(ackskb);
   /* skb_pull(ackskb, ARC_HDR_SIZE); */
-
 
   skb_copy_from_linear_data(lp->outgoing.skb, ackpkt,
 		ARC_HDR_SIZE + sizeof(struct arc_cap));

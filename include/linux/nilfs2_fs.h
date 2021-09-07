@@ -61,7 +61,6 @@
 #define NILFS_FL_USER_VISIBLE	0x0003DFFF /* User visible flags */
 #define NILFS_FL_USER_MODIFIABLE	0x000380FF /* User modifiable flags */
 
-
 #define NILFS_INODE_BMAP_SIZE	7
 /**
  * struct nilfs_inode - structure of an inode on disk
@@ -151,7 +150,6 @@ struct nilfs_super_root {
 #define NILFS_MOUNT_BARRIER		0x1000  /* Use block barriers */
 #define NILFS_MOUNT_STRICT_ORDER	0x2000  /* Apply strict in-order
 						   semantics also for data */
-
 
 /**
  * struct nilfs_super_block - structure of super block on disk
@@ -311,7 +309,6 @@ enum {
 #define NILFS_DIR_ROUND			(NILFS_DIR_PAD - 1)
 #define NILFS_DIR_REC_LEN(name_len)	(((name_len) + 12 + NILFS_DIR_ROUND) & \
 					~NILFS_DIR_ROUND)
-
 
 /**
  * struct nilfs_finfo - file information
@@ -526,7 +523,6 @@ nilfs_cpinfo_##name(const struct nilfs_cpinfo *cpinfo)			\
 NILFS_CPINFO_FNS(SNAPSHOT, snapshot)
 NILFS_CPINFO_FNS(INVALID, invalid)
 NILFS_CPINFO_FNS(MINOR, minor)
-
 
 /**
  * struct nilfs_cpfile_header - checkpoint file header

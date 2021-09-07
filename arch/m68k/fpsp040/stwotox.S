@@ -222,7 +222,6 @@ TWOOK1:
 	bles		TWOMAIN
 	bra		EXPBORS
 
-
 TWOMAIN:
 |--USUAL CASE, 2^(-70) <= |X| <= 16480
 
@@ -406,7 +405,6 @@ expr:
 	faddx		%fp3,%fp0		| ...FP0 IS R+R*S*(A2+S*A4)
 
 	faddx		%fp2,%fp0		| ...FP0 IS EXP(R) - 1
-
 
 |--FINAL RECONSTRUCTION PROCESS
 |--EXP(X) = 2^M*2^(J/64) + 2^M*2^(J/64)*(EXP(R)-1)  -  (1 OR 0)

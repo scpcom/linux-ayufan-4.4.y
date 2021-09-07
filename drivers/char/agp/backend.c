@@ -79,7 +79,6 @@ struct agp_bridge_data *agp_backend_acquire(struct pci_dev *pdev)
 }
 EXPORT_SYMBOL(agp_backend_acquire);
 
-
 /**
  *	agp_backend_release  -  release the lock on the agp backend.
  *
@@ -95,7 +94,6 @@ void agp_backend_release(struct agp_bridge_data *bridge)
 		atomic_dec(&bridge->agp_in_use);
 }
 EXPORT_SYMBOL(agp_backend_release);
-
 
 static const struct { int mem, agp; } maxes_table[] = {
 	{0, 0},
@@ -131,7 +129,6 @@ static int agp_find_max(void)
 	result = result << (20 - PAGE_SHIFT);
 	return result;
 }
-
 
 static int agp_backend_initialize(struct agp_bridge_data *bridge)
 {
@@ -270,7 +267,6 @@ struct agp_bridge_data *agp_alloc_bridge(void)
 }
 EXPORT_SYMBOL(agp_alloc_bridge);
 
-
 void agp_put_bridge(struct agp_bridge_data *bridge)
 {
         kfree(bridge);
@@ -279,7 +275,6 @@ void agp_put_bridge(struct agp_bridge_data *bridge)
                 agp_bridge = NULL;
 }
 EXPORT_SYMBOL(agp_put_bridge);
-
 
 int agp_add_bridge(struct agp_bridge_data *bridge)
 {
@@ -331,7 +326,6 @@ err_out:
 }
 EXPORT_SYMBOL_GPL(agp_add_bridge);
 
-
 void agp_remove_bridge(struct agp_bridge_data *bridge)
 {
 	agp_backend_cleanup(bridge);
@@ -378,4 +372,3 @@ MODULE_ALIAS_MISCDEV(AGPGART_MINOR);
 
 module_init(agp_init);
 module_exit(agp_exit);
-

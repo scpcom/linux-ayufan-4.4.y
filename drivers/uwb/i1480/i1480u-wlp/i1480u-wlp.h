@@ -79,7 +79,6 @@ enum {
 	i1480u_RX_BUFS = 9,
 };
 
-
 /**
  * UNTD packet type
  *
@@ -122,7 +121,6 @@ static inline void untd_hdr_set_rx_tx(struct untd_hdr *hdr, int rx_tx)
 	hdr->type = (hdr->type & ~0x04) | (rx_tx << 2);
 }
 
-
 /**
  * USB Network Transfer Descriptor - Complete Packet
  *
@@ -138,7 +136,6 @@ struct untd_hdr_cmp {
 	u8		padding;
 } __attribute__((packed));
 
-
 /**
  * USB Network Transfer Descriptor - First fragment
  *
@@ -152,7 +149,6 @@ struct untd_hdr_1st {
 	u8		padding[3];
 } __attribute__((packed));
 
-
 /**
  * USB Network Transfer Descriptor - Next / Last [Rest]
  *
@@ -162,7 +158,6 @@ struct untd_hdr_rst {
 	struct untd_hdr	hdr;
 	u8		padding;
 } __attribute__((packed));
-
 
 /**
  * Transmission context

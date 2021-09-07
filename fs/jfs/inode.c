@@ -30,7 +30,6 @@
 #include "jfs_unicode.h"
 #include "jfs_debug.h"
 
-
 struct inode *jfs_iget(struct super_block *sb, unsigned long ino)
 {
 	struct inode *inode;

@@ -24,7 +24,6 @@
  *  __QNXNTO__
  */
  
-
 #include "mv_os.h"
 
 #if !defined(IN)
@@ -285,7 +284,6 @@ typedef MV_I32 MV_FILE_HANDLE;
 #define DEVICE_ID_6480					0x6480
 #define DEVICE_ID_UNKNOWN				0xFFFF
 
-
 /* OS_LINUX depedent definition*/
 
 #if defined(_OS_LINUX) || defined(__QNXNTO__)
@@ -316,10 +314,8 @@ typedef MV_I32 MV_FILE_HANDLE;
 	             spin_unlock_irqrestore(plock, flag);  \
              } while (0)
 
-
 /* Delayed Execution Services */
 #define OSSW_INIT_TIMER(ptimer) init_timer(ptimer)
-
 
 #else
 

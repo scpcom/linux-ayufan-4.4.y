@@ -29,7 +29,6 @@
 #include <linux/spi/ads7846.h>
 #include <asm/irq.h>
 
-
 /*
  * This code has been heavily tested on a Nokia 770, and lightly
  * tested on other ads7846 devices (OSK/Mistral, Lubbock).
@@ -299,7 +298,6 @@ name ## _show(struct device *dev, struct device_attribute *attr, char *buf) \
 } \
 static DEVICE_ATTR(name, S_IRUGO, name ## _show, NULL);
 
-
 /* Sysfs conventions report temperatures in millidegrees Celsius.
  * ADS7846 could use the low-accuracy two-sample scheme, but can't do the high
  * accuracy scheme without calibration data.  For now we won't try either;
@@ -312,7 +310,6 @@ static inline unsigned null_adjust(struct ads7846 *ts, ssize_t v)
 
 SHOW(temp0, temp0, null_adjust)		/* temp1_input */
 SHOW(temp1, temp1, null_adjust)		/* temp2_input */
-
 
 /* sysfs conventions report voltages in millivolts.  We can convert voltages
  * if we know vREF.  userspace may need to scale vAUX to match the board's
@@ -340,7 +337,6 @@ static inline unsigned vbatt_adjust(struct ads7846 *ts, ssize_t v)
 
 SHOW(in0_input, vaux, vaux_adjust)
 SHOW(in1_input, vbatt, vbatt_adjust)
-
 
 static struct attribute *ads7846_attributes[] = {
 	&dev_attr_temp0.attr,

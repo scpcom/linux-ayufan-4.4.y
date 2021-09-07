@@ -147,7 +147,6 @@ static inline void cfg80211_unhold_bss(struct cfg80211_internal_bss *bss)
 	WARN_ON(r < 0);
 }
 
-
 struct cfg80211_registered_device *cfg80211_rdev_by_wiphy_idx(int wiphy_idx);
 int get_wiphy_idx(struct wiphy *wiphy);
 
@@ -258,7 +257,6 @@ struct cfg80211_cached_keys {
 	u8 data[6][WLAN_MAX_KEY_LEN];
 	int def, defmgmt;
 };
-
 
 /* free object */
 extern void cfg80211_dev_free(struct cfg80211_registered_device *rdev);

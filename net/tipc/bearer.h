@@ -43,7 +43,6 @@
 #define MAX_BEARERS 8
 #define MAX_MEDIA 4
 
-
 /**
  * struct media - TIPC media information available to internal users
  * @send_msg: routine which handles buffer transmission
@@ -128,7 +127,6 @@ int tipc_bearer_resolve_congestion(struct bearer *b_ptr, struct link *l_ptr);
 int tipc_bearer_init(void);
 void tipc_bearer_stop(void);
 void tipc_bearer_lock_push(struct bearer *b_ptr);
-
 
 /**
  * tipc_bearer_send- sends buffer to destination over bearer

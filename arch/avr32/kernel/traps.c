@@ -276,7 +276,6 @@ asmlinkage void do_fpe(unsigned long ecr, struct pt_regs *regs)
 	_exception(SIGILL, regs, ILL_COPROC, regs->pc);
 }
 
-
 void __init trap_init(void)
 {
 

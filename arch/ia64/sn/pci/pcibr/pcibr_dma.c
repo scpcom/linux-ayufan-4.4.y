@@ -119,7 +119,6 @@ pcibr_dmamap_ate32(struct pcidev_info *info,
 	if (pcibus_info->pbi_devreg[internal_device] & PCIBR_DEV_SWAP_DIR)
 		ATE_SWAP_ON(pci_addr);
 
-
 	return pci_addr;
 }
 

@@ -44,7 +44,6 @@
 #define NLMDBG_XDR		0x0100
 #define NLMDBG_ALL		0x7fff
 
-
 /*
  * Support for printing NLM cookies in dprintk()
  */

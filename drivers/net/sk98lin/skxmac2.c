@@ -73,7 +73,6 @@ static int	SkXmAutoNegDoneLone(SK_AC*, SK_IOC, int);
 static int	SkXmAutoNegDoneNat (SK_AC*, SK_IOC, int);
 #endif /* OTHER_PHY */
 
-
 #ifdef GENESIS
 /******************************************************************************
  *
@@ -114,7 +113,6 @@ SK_U16	SK_FAR *pVal)	/* Pointer to Value */
 
 	return(0);
 }	/* SkXmPhyRead */
-
 
 /******************************************************************************
  *
@@ -160,7 +158,6 @@ SK_U16	Val)		/* Value */
 	return(0);
 }	/* SkXmPhyWrite */
 #endif /* GENESIS */
-
 
 #ifdef YUKON
 /******************************************************************************
@@ -285,7 +282,6 @@ SK_U16	SK_FAR *pVal)	/* Pointer to Value */
 	return(Rtv);
 }	/* SkGmPhyRead */
 
-
 /******************************************************************************
  *
  *	SkGmPhyWrite() - Write to GPHY register
@@ -390,7 +386,6 @@ SK_U16	Val)		/* Value */
 }	/* SkGmPhyWrite */
 #endif /* YUKON */
 
-
 #ifdef SK_DIAG
 /******************************************************************************
  *
@@ -411,7 +406,6 @@ SK_U16	*pVal)		/* Pointer to Value */
 	pAC->GIni.GIFunc.pFnMacPhyRead(pAC, IoC, Port, PhyReg, pVal);
 }	/* SkGePhyRead */
 
-
 /******************************************************************************
  *
  *	SkGePhyWrite() - Write to PHY register
@@ -431,7 +425,6 @@ SK_U16	Val)		/* Value */
 	pAC->GIni.GIFunc.pFnMacPhyWrite(pAC, IoC, Port, PhyReg, Val);
 }	/* SkGePhyWrite */
 #endif /* SK_DIAG */
-
 
 /******************************************************************************
  *
@@ -492,7 +485,6 @@ SK_BOOL	Enable)	/* Enable / Disable */
 
 }	/* SkMacPromiscMode*/
 
-
 /******************************************************************************
  *
  *	SkMacHashing() - Enable / Disable Hashing
@@ -551,7 +543,6 @@ SK_BOOL	Enable)	/* Enable / Disable */
 #endif /* YUKON */
 
 }	/* SkMacHashing*/
-
 
 #ifdef SK_DIAG
 /******************************************************************************
@@ -641,7 +632,6 @@ int		Mode)		/* Mode is SK_STRIP_FCS_ON/OFF, SK_STRIP_PAD_ON/OFF,
 	}
 }	/* SkXmSetRxCmd */
 
-
 /******************************************************************************
  *
  *	SkGmSetRxCmd() - Modify the value of the GMAC's Rx Control Register
@@ -699,7 +689,6 @@ int		Mode)		/* Mode is SK_STRIP_FCS_ON/OFF, SK_STRIP_PAD_ON/OFF,
 	}
 }	/* SkGmSetRxCmd */
 
-
 /******************************************************************************
  *
  *	SkMacSetRxCmd() - Modify the value of the MAC's Rx Control Register
@@ -725,7 +714,6 @@ int		Mode)		/* Rx Mode */
 	}
 
 }	/* SkMacSetRxCmd */
-
 
 /******************************************************************************
  *
@@ -775,7 +763,6 @@ SK_BOOL	Enable)	/* Enable / Disable */
 
 #endif /* SK_DIAG */
 
-
 #ifdef GENESIS
 /******************************************************************************
  *
@@ -812,7 +799,6 @@ int		StopNum)	/* Stop after finished with this Register Idx (0..15) */
 }	/* SkXmClrExactAddr */
 #endif /* GENESIS */
 
-
 /******************************************************************************
  *
  *	SkMacFlushTxFifo() - Flush the MAC's transmit FIFO
@@ -848,7 +834,6 @@ int		Port)	/* Port Index (MAC_1 + n) */
 
 }	/* SkMacFlushTxFifo */
 
-
 /******************************************************************************
  *
  *	SkMacFlushRxFifo() - Flush the MAC's receive FIFO
@@ -883,7 +868,6 @@ int		Port)	/* Port Index (MAC_1 + n) */
 #endif /* YUKON */
 
 }	/* SkMacFlushRxFifo */
-
 
 #ifdef GENESIS
 /******************************************************************************
@@ -966,7 +950,6 @@ int		Port)	/* Port Index (MAC_1 + n) */
 
 }	/* SkXmSoftRst */
 
-
 /******************************************************************************
  *
  *	SkXmHardRst() - Do a XMAC hardware reset
@@ -1036,7 +1019,6 @@ int		Port)	/* Port Index (MAC_1 + n) */
 	}
 }	/* SkXmHardRst */
 
-
 /******************************************************************************
  *
  *	SkXmClearRst() - Release the PHY & XMAC reset
@@ -1074,7 +1056,6 @@ int		Port)	/* Port Index (MAC_1 + n) */
 	}
 }	/* SkXmClearRst */
 #endif /* GENESIS */
-
 
 #ifdef YUKON
 /******************************************************************************
@@ -1120,7 +1101,6 @@ int		Port)	/* Port Index (MAC_1 + n) */
 
 }	/* SkGmSoftRst */
 
-
 /******************************************************************************
  *
  *	SkGmHardRst() - Do a GMAC hardware reset
@@ -1161,7 +1141,6 @@ int		Port)	/* Port Index (MAC_1 + n) */
 	}
 
 }	/* SkGmHardRst */
-
 
 /******************************************************************************
  *
@@ -1293,7 +1272,6 @@ int		Port)	/* Port Index (MAC_1 + n) */
 }	/* SkGmClearRst */
 #endif /* YUKON */
 
-
 /******************************************************************************
  *
  *	SkMacSoftRst() - Do a MAC software reset
@@ -1333,7 +1311,6 @@ int		Port)	/* Port Index (MAC_1 + n) */
 	pAC->GIni.GP[Port].PState = SK_PRT_STOP;
 
 }	/* SkMacSoftRst */
-
 
 /******************************************************************************
  *
@@ -1610,7 +1587,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 }	/* SkXmInitMac */
 #endif /* GENESIS */
 
-
 #ifdef YUKON
 /******************************************************************************
  *
@@ -1845,7 +1821,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 }	/* SkGmInitMac */
 #endif /* YUKON */
 
-
 #ifdef GENESIS
 /******************************************************************************
  *
@@ -1892,7 +1867,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 		break;
 	}
 }	/* SkXmInitDupMd */
-
 
 /******************************************************************************
  *
@@ -1977,7 +1951,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 
 	XM_OUT32(IoC, Port, XM_MODE, DWord);
 }	/* SkXmInitPauseMd*/
-
 
 /******************************************************************************
  *
@@ -2071,7 +2044,6 @@ SK_BOOL	DoLoop)		/* Should a PHY LoopBack be set-up? */
 	/* Write to the PHY control register */
 	SkXmPhyWrite(pAC, IoC, Port, PHY_XMAC_CTRL, Ctrl);
 }	/* SkXmInitPhyXmac */
-
 
 /******************************************************************************
  *
@@ -2222,7 +2194,6 @@ SK_BOOL	DoLoop)		/* Should a PHY LoopBack be set-up? */
 		("PHY Control Reg = 0x%04X\n", Ctrl1));
 }	/* SkXmInitPhyBcom */
 #endif /* GENESIS */
-
 
 #ifdef YUKON
 #ifdef SK_PHY_LP_MODE
@@ -3542,7 +3513,6 @@ SK_BOOL	DoLoop)		/* Should a PHY LoopBack be set-up? */
 }	/* SkGmInitPhyMarv */
 #endif /* YUKON */
 
-
 #ifdef OTHER_PHY
 /******************************************************************************
  *
@@ -3668,7 +3638,6 @@ SK_BOOL	DoLoop)		/* Should a PHY LoopBack be set-up? */
 		("PHY Control Reg = 0x%04X\n", Ctrl1));
 }	/* SkXmInitPhyLone */
 
-
 /******************************************************************************
  *
  *	SkXmInitPhyNat() - Initialize the National PHY registers
@@ -3689,7 +3658,6 @@ SK_BOOL	DoLoop)		/* Should a PHY LoopBack be set-up? */
 /* todo: National */
 }	/* SkXmInitPhyNat */
 #endif /* OTHER_PHY */
-
 
 /******************************************************************************
  *
@@ -3742,7 +3710,6 @@ SK_BOOL	DoLoop)		/* Should a PHY LoopBack be set-up? */
 #endif /* YUKON */
 
 }	/* SkMacInitPhy */
-
 
 #ifdef GENESIS
 /******************************************************************************
@@ -3828,7 +3795,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 
 	return(SK_AND_OK);
 }	/* SkXmAutoNegDoneXmac */
-
 
 /******************************************************************************
  *
@@ -3929,7 +3895,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 	return(SK_AND_OK);
 }	/* SkXmAutoNegDoneBcom */
 #endif /* GENESIS */
-
 
 #ifdef YUKON
 /******************************************************************************
@@ -4150,7 +4115,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 }	/* SkGmAutoNegDoneMarv */
 #endif /* YUKON */
 
-
 #ifdef OTHER_PHY
 /******************************************************************************
  *
@@ -4254,7 +4218,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 	return(SK_AND_OK);
 }	/* SkXmAutoNegDoneLone */
 
-
 /******************************************************************************
  *
  *	SkXmAutoNegDoneNat() - Auto-negotiation handling
@@ -4276,7 +4239,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 	return(SK_AND_OK);
 }	/* SkXmAutoNegDoneNat */
 #endif /* OTHER_PHY */
-
 
 /******************************************************************************
  *
@@ -4348,7 +4310,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 	return(SK_AND_OK);
 }	/* SkMacAutoNegDone */
 
-
 #ifndef SK_SLIM
 #ifdef GENESIS
 /******************************************************************************
@@ -4406,7 +4367,6 @@ int		Para)		/* Parameter to set: MAC or PHY LoopBack, Duplex Mode */
 }	/* SkXmSetRxTxEn */
 #endif /* GENESIS */
 
-
 #ifdef YUKON
 /******************************************************************************
  *
@@ -4451,7 +4411,6 @@ int		Para)		/* Parameter to set: MAC LoopBack, Duplex Mode */
 }	/* SkGmSetRxTxEn */
 #endif /* YUKON */
 
-
 /******************************************************************************
  *
  *	SkMacSetRxTxEn() - Special Set Rx/Tx Enable and parameters
@@ -4482,7 +4441,6 @@ int		Para)
 
 }	/* SkMacSetRxTxEn */
 #endif /* !SK_SLIM */
-
 
 /******************************************************************************
  *
@@ -4644,7 +4602,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 
 }	/* SkMacRxTxEnable */
 
-
 /******************************************************************************
  *
  *	SkMacRxTxDisable() - Disable Receiver and Transmitter
@@ -4686,7 +4643,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 #endif /* YUKON */
 
 }	/* SkMacRxTxDisable */
-
 
 /******************************************************************************
  *
@@ -4756,7 +4712,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 #endif /* YUKON */
 
 }	/* SkMacIrqDisable */
-
 
 #ifndef SK_SLIM
 /******************************************************************************
@@ -4912,7 +4867,6 @@ SK_U16	IStatus)	/* Interrupt Status word to analyse */
 }	/* SkXmAutoNegLipaXmac */
 #endif /* GENESIS */
 
-
 /******************************************************************************
  *
  *	SkMacAutoNegLipaPhy() - Decides whether Link Partner could do auto-neg
@@ -4941,7 +4895,6 @@ SK_U16	PhyStat)	/* PHY Status word to analyse */
 		pPrt->PLipaAutoNeg = SK_LIPA_AUTO;
 	}
 }	/* SkMacAutoNegLipaPhy */
-
 
 #ifdef GENESIS
 /******************************************************************************
@@ -5087,7 +5040,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 }	/* SkXmIrq */
 #endif /* GENESIS */
 
-
 #ifdef YUKON
 /******************************************************************************
  *
@@ -5173,7 +5125,6 @@ int		Port)		/* Port Index (MAC_1 + n) */
 }	/* SkGmIrq */
 #endif /* YUKON */
 
-
 /******************************************************************************
  *
  *	SkMacIrq() - Interrupt Service Routine for MAC
@@ -5256,7 +5207,6 @@ unsigned int Port)	/* Port Index (MAC_1 + n) */
 	return(0);
 }	/* SkXmUpdateStats */
 
-
 /******************************************************************************
  *
  *	SkXmMacStatistic() - Get XMAC counter value
@@ -5289,7 +5239,6 @@ SK_U32	SK_FAR *pVal)	/* Pointer to return statistic value */
 	return(0);
 }	/* SkXmMacStatistic */
 
-
 /******************************************************************************
  *
  *	SkXmResetCounter() - Clear MAC statistic counter
@@ -5312,7 +5261,6 @@ unsigned int Port)	/* Port Index (MAC_1 + n) */
 
 	return(0);
 }	/* SkXmResetCounter */
-
 
 /******************************************************************************
  *
@@ -5363,7 +5311,6 @@ SK_U64	SK_FAR *pStatus)	/* Pointer for return overflow status value */
 }	/* SkXmOverflowStatus */
 #endif /* GENESIS */
 
-
 #ifdef YUKON
 /******************************************************************************
  *
@@ -5383,7 +5330,6 @@ unsigned int Port)	/* Port Index (MAC_1 + n) */
 {
 	return(0);
 }
-
 
 /******************************************************************************
  *
@@ -5423,7 +5369,6 @@ SK_U32	SK_FAR *pVal)	/* Pointer to return statistic value */
 	return(0);
 }	/* SkGmMacStatistic */
 
-
 /******************************************************************************
  *
  *	SkGmResetCounter() - Clear MAC statistic counter
@@ -5460,7 +5405,6 @@ unsigned int Port)	/* Port Index (MAC_1 + n) */
 
 	return(0);
 }	/* SkGmResetCounter */
-
 
 /******************************************************************************
  *
@@ -5530,7 +5474,6 @@ SK_U64	SK_FAR *pStatus)	/* Pointer for return overflow status value */
 
 	return(0);
 }	/* SkGmOverflowStatus */
-
 
 #ifndef SK_SLIM
 /******************************************************************************
@@ -5744,4 +5687,3 @@ SK_BOOL	StartTest)	/* flag for start / get result */
 #endif /* YUKON */
 
 /* End of file */
-

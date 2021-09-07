@@ -122,11 +122,9 @@ static DECLARE_WAIT_QUEUE_HEAD(kethubd_wait);
 static struct task_struct *kethubd_task;
 static const char ethub_name[] = "ethub";
 
-
 #define HUB_DEBOUNCE_TIMEOUT	1500
 #define HUB_DEBOUNCE_STEP	  25
 #define HUB_DEBOUNCE_STABLE	 100
-
 
 static int usb_reset_and_verify_device(struct usb_device *udev);
 
@@ -377,7 +375,6 @@ void ethub_usb_kick_kethubd(struct usb_device *hdev)
 	if (hub)
 		kick_kethubd(hub);
 }
-
 
 /* completion function, fires on port status changes and various faults */
 static void hub_irq(struct urb *urb)
@@ -1294,7 +1291,6 @@ bool ethub_usb_device_is_owned(struct usb_device *udev)
 	return !!hub->port_owners[udev->portnum - 1];
 }
 
-
 static void recursively_mark_NOTATTACHED(struct usb_device *udev)
 {
 	int i;
@@ -1767,7 +1763,6 @@ fail:
 	return err;
 }
 
-
 /**
  * usb_deauthorize_device - deauthorize a device (usbcore-internal)
  * @usb_dev: USB device
@@ -1801,7 +1796,6 @@ out_unauthorized:
 	usb_unlock_device(usb_dev);
 	return 0;
 }
-
 
 int ethub_usb_authorize_device(struct usb_device *usb_dev)
 {
@@ -1858,7 +1852,6 @@ out_authorized:
 	usb_unlock_device(usb_dev);	// complements locktree
 	return result;
 }
-
 
 #define PORT_RESET_TRIES	5
 #define SET_ADDRESS_TRIES	2
@@ -2578,7 +2571,6 @@ static inline int remote_wakeup(struct usb_device *udev)
 #define hub_resume		NULL
 #define hub_reset_resume	NULL
 #endif
-
 
 /* USB 2.0 spec, 7.1.7.3 / fig 7-29:
  *

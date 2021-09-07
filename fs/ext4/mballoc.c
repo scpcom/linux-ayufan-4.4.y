@@ -19,7 +19,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-
  */
 
-
 /*
  * mballoc.c contains the multiblocks allocation routines
  */
@@ -1199,7 +1198,6 @@ static void ext4_mb_unload_buddy(struct ext4_buddy *e4b)
 		up_read(e4b->alloc_semp);
 }
 
-
 static int mb_find_order_for_block(struct ext4_buddy *e4b, int block)
 {
 	int order = 1;
@@ -2264,7 +2262,6 @@ static const struct file_operations ext4_mb_seq_groups_fops = {
 	.release	= seq_release,
 };
 
-
 /* Create and initialize ext4_group_info data for the given group. */
 int ext4_mb_add_groupinfo(struct super_block *sb, ext4_group_t group,
 			  struct ext4_group_desc *desc)
@@ -2730,7 +2727,6 @@ void exit_ext4_mballoc(void)
 	ext4_remove_debugfs_entry();
 }
 
-
 /*
  * Check quota and mark choosed space (ac->ac_b_ex) non-free in bitmaps
  * Returns 0 if success or error code
@@ -2754,7 +2750,6 @@ ext4_mb_mark_diskspace_used(struct ext4_allocation_context *ac,
 	sb = ac->ac_sb;
 	sbi = EXT4_SB(sb);
 	es = sbi->s_es;
-
 
 	err = -EIO;
 	bitmap_bh = ext4_read_block_bitmap(sb, ac->ac_b_ex.fe_group);

@@ -40,7 +40,6 @@
 
 #include <asm/unaligned.h>
 
-
 /* NOTES:
  *
  * - For now, we won't try to interoperate with a real mmc/sd/sdio
@@ -68,7 +67,6 @@
  *   during that time ... at least on unshared bus segments.
  */
 
-
 /*
  * Local protocol constants, internal to data block protocols.
  */
@@ -87,7 +85,6 @@
 #define SPI_TOKEN_STOP_TRAN	0xfd	/* terminate multiblock write */
 
 #define MMC_SPI_BLOCKSIZE	512
-
 
 /* These fixed timeouts come from the latest SD specs, which say to ignore
  * the CSD values.  The R1B value is for card erase (e.g. the "I forgot the
@@ -150,7 +147,6 @@ struct mmc_spi_host {
 	void			*ones;
 	dma_addr_t		ones_dma;
 };
-
 
 /****************************************************************************/
 
@@ -233,7 +229,6 @@ static int mmc_spi_readtoken(struct mmc_spi_host *host, unsigned long timeout)
 {
 	return mmc_spi_skip(host, timeout, 1, 0xff);
 }
-
 
 /*
  * Note that for SPI, cmd->resp[0] is not the same data as "native" protocol
@@ -1272,7 +1267,6 @@ static const struct mmc_host_ops mmc_spi_ops = {
 	.get_cd		= mmc_spi_get_cd,
 };
 
-
 /****************************************************************************/
 
 /*
@@ -1499,7 +1493,6 @@ nomem:
 	return status;
 }
 
-
 static int __devexit mmc_spi_remove(struct spi_device *spi)
 {
 	struct mmc_host		*mmc = dev_get_drvdata(&spi->dev);
@@ -1532,7 +1525,6 @@ static int __devexit mmc_spi_remove(struct spi_device *spi)
 	return 0;
 }
 
-
 static struct spi_driver mmc_spi_driver = {
 	.driver = {
 		.name =		"mmc_spi",
@@ -1543,20 +1535,17 @@ static struct spi_driver mmc_spi_driver = {
 	.remove =	__devexit_p(mmc_spi_remove),
 };
 
-
 static int __init mmc_spi_init(void)
 {
 	return spi_register_driver(&mmc_spi_driver);
 }
 module_init(mmc_spi_init);
 
-
 static void __exit mmc_spi_exit(void)
 {
 	spi_unregister_driver(&mmc_spi_driver);
 }
 module_exit(mmc_spi_exit);
-
 
 MODULE_AUTHOR("Mike Lavender, David Brownell, "
 		"Hans-Peter Nilsson, Jan Nikitenko");

@@ -44,7 +44,6 @@ typedef struct ktrace_snap {
 	int		ks_index;	/* current index */
 } ktrace_snap_t;
 
-
 #ifdef CONFIG_XFS_TRACE
 
 extern void ktrace_init(int zentries);

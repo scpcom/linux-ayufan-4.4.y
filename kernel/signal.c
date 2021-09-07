@@ -338,7 +338,6 @@ int unhandled_signal(struct task_struct *tsk, int sig)
 	return !tracehook_consider_fatal_signal(tsk, sig);
 }
 
-
 /* Notify the system that a driver wants to block all signals for this
  * process, and wants to be notified if any signals at all were to be
  * sent/acted upon.  If the notifier routine returns non-zero, then the
@@ -1991,7 +1990,6 @@ EXPORT_SYMBOL(send_sig_info);
 EXPORT_SYMBOL(sigprocmask);
 EXPORT_SYMBOL(block_all_signals);
 EXPORT_SYMBOL(unblock_all_signals);
-
 
 /*
  * System call entry points.

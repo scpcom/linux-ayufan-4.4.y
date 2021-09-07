@@ -170,8 +170,6 @@ ENTRY(csum_partial)
 3:
 	j	5b		/* branch to handle the remaining byte */
 
-
-
 /*
  * Copy from ds while checksumming, otherwise like csum_partial
  *
@@ -367,7 +365,6 @@ DST(	s8i	a8, a3, 1	)
 6:
 	j	4b		/* process the possible trailing odd byte */
 
-
 # Exception handler:
 .section .fixup, "ax"
 /*
@@ -406,4 +403,3 @@ DST(	s8i	a8, a3, 1	)
 	retw
 
 .previous
-

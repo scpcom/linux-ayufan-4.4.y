@@ -205,7 +205,6 @@
 /* HUBADDR */
 #define MUSB_HUBADDR_MULTI_TT		0x80
 
-
 #ifndef CONFIG_BLACKFIN
 
 /*

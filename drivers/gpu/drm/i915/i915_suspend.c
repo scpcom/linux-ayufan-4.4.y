@@ -851,4 +851,3 @@ int i915_restore_state(struct drm_device *dev)
 
 	return 0;
 }
-

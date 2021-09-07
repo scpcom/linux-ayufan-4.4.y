@@ -271,7 +271,6 @@ static int epia_test_proto( PIA *pi, char * scratch, int verbose )
 
 }
 
-
 static void epia_log_adapter( PIA *pi, char * scratch, int verbose )
 
 {       char    *mode_string[6] = {"4-bit","5/3","8-bit",

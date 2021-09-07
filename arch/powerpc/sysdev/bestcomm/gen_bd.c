@@ -25,7 +25,6 @@
 #include "bestcomm_priv.h"
 #include "gen_bd.h"
 
-
 /* ======================================================================== */
 /* Task image/var/inc                                                       */
 /* ======================================================================== */
@@ -79,7 +78,6 @@ struct bcom_gen_bd_priv {
 	int		ipr;
 	int		maxbufsize;
 };
-
 
 /* ======================================================================== */
 /* Task support code                                                        */
@@ -168,7 +166,6 @@ bcom_gen_bd_rx_release(struct bcom_task *tsk)
 	bcom_task_free(tsk);
 }
 EXPORT_SYMBOL_GPL(bcom_gen_bd_rx_release);
-
 
 extern struct bcom_task *
 bcom_gen_bd_tx_init(int queue_len, phys_addr_t fifo,
@@ -347,8 +344,6 @@ bcom_psc_gen_bd_tx_init(unsigned psc_num, int queue_len, phys_addr_t fifo)
 }
 EXPORT_SYMBOL_GPL(bcom_psc_gen_bd_tx_init);
 
-
 MODULE_DESCRIPTION("BestComm General Buffer Descriptor tasks driver");
 MODULE_AUTHOR("Jeff Gibbons <jeff.gibbons@appspec.com>");
 MODULE_LICENSE("GPL v2");
-

@@ -545,7 +545,6 @@ static void illegal_op(struct pt_regs * regs, long interruption_code)
 	}
 }
 
-
 #ifdef CONFIG_MATHEMU
 asmlinkage void 
 specification_exception(struct pt_regs * regs, long interruption_code)

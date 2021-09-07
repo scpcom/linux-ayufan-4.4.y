@@ -150,7 +150,6 @@
 
 #define DMA_AUTOINIT		0x10
 
-
 extern spinlock_t  dma_spin_lock;
 
 static inline unsigned long claim_dma_lock(void)
@@ -238,7 +237,6 @@ static inline void set_dma_page(unsigned int dmanr, char pagenr)
 	}
 }
 
-
 /* Set transfer address & page bits for specific DMA channel.
  * Assumes dma flipflop is clear.
  */
@@ -253,7 +251,6 @@ static inline void set_dma_addr(unsigned int dmanr, unsigned int a)
 		dma_outb((a >> 9) & 0xff, ((dmanr & 3) << 2) + IO_DMA2_BASE);
 	}
 }
-
 
 /* Set transfer size (max 64k for DMA0..3, 128k for DMA5..7) for
  * a specific DMA channel.
@@ -278,7 +275,6 @@ static inline void set_dma_count(unsigned int dmanr, unsigned int count)
 	}
 }
 
-
 /* Get DMA residue count. After a DMA transfer, this
  * should return zero. Reading this while a DMA transfer is
  * still in progress will return unpredictable results.
@@ -301,7 +297,6 @@ static inline int get_dma_residue(unsigned int dmanr)
 
 	return (dmanr <= 3) ? count : (count << 1);
 }
-
 
 /* These are in kernel/dma.c: */
 extern int request_dma(unsigned int dmanr, const char *device_id);

@@ -39,7 +39,6 @@ static inline char * strncpy(char *dest, const char *src, size_t n)
   return xdest;
 }
 
-
 #ifndef CONFIG_COLDFIRE
 
 #define __HAVE_ARCH_STRCMP

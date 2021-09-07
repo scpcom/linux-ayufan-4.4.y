@@ -35,7 +35,6 @@
 			printk(s, ##a);    \
 	} while (0)
 
-
 #if defined(CONFIG_X86_LOCAL_APIC) && defined(CONFIG_X86_32)
 extern void generic_apic_probe(void);
 #else
@@ -255,7 +254,6 @@ static inline int apic_is_clustered_box(void)
 extern u8 setup_APIC_eilvt_mce(u8 vector, u8 msg_type, u8 mask);
 extern u8 setup_APIC_eilvt_ibs(u8 vector, u8 msg_type, u8 mask);
 
-
 #else /* !CONFIG_X86_LOCAL_APIC */
 static inline void lapic_shutdown(void) { }
 #define local_apic_timer_c2_ok		1
@@ -403,7 +401,6 @@ static inline u32 safe_apic_wait_icr_idle(void)
 	return apic->safe_wait_icr_idle();
 }
 
-
 static inline void ack_APIC_irq(void)
 {
 #ifdef CONFIG_X86_LOCAL_APIC
@@ -458,7 +455,6 @@ static inline void default_wait_for_init_deassert(atomic_t *deassert)
 
 extern void generic_bigsmp_probe(void);
 
-
 #ifdef CONFIG_X86_LOCAL_APIC
 
 #include <asm/smp.h>
@@ -475,7 +471,6 @@ static inline const struct cpumask *default_target_cpus(void)
 }
 
 DECLARE_EARLY_PER_CPU(u16, x86_bios_cpu_apicid);
-
 
 static inline unsigned int read_apic_id(void)
 {

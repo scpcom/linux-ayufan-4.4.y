@@ -317,4 +317,3 @@ void gaudio_cleanup(struct gaudio *card)
 	if (card)
 		gaudio_close_snd_dev(card);
 }
-

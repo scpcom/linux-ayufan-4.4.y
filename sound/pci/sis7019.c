@@ -928,7 +928,6 @@ static unsigned short sis_ac97_rw(struct sis7019 *sis, int codec, u32 cmd)
 
 	rdy = codec_ready[codec];
 
-
 	/* Get the AC97 semaphore -- software first, so we don't spin
 	 * pounding out IO reads on the hardware semaphore...
 	 */

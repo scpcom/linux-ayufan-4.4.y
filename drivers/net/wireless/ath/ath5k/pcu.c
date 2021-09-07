@@ -46,7 +46,6 @@ int ath5k_hw_set_opmode(struct ath5k_hw *ah)
 {
 	u32 pcu_reg, beacon_reg, low_id, high_id;
 
-
 	/* Preserve rest settings */
 	pcu_reg = ath5k_hw_reg_read(ah, AR5K_STA_ID1) & 0xffff0000;
 	pcu_reg &= ~(AR5K_STA_ID1_ADHOC | AR5K_STA_ID1_AP
@@ -170,7 +169,6 @@ void ath5k_hw_set_ack_bitrate_high(struct ath5k_hw *ah, bool high)
 	}
 }
 
-
 /******************\
 * ACK/CTS Timeouts *
 \******************/
@@ -237,7 +235,6 @@ int ath5k_hw_set_cts_timeout(struct ath5k_hw *ah, unsigned int timeout)
 
 	return 0;
 }
-
 
 /****************\
 * BSSID handling *
@@ -449,7 +446,6 @@ int ath5k_hw_set_bssid_mask(struct ath5k_hw *ah, const u8 *mask)
 	return -EIO;
 }
 
-
 /************\
 * RX Control *
 \************/
@@ -611,7 +607,6 @@ void ath5k_hw_set_rx_filter(struct ath5k_hw *ah, u32 filter)
 		ath5k_hw_reg_write(ah, data, AR5K_PHY_ERR_FIL);
 
 }
-
 
 /****************\
 * Beacon control *
@@ -965,7 +960,6 @@ int ath5k_hw_beaconq_finish(struct ath5k_hw *ah, unsigned long phys_addr)
 }
 #endif
 
-
 /*********************\
 * Key table functions *
 \*********************/
@@ -1172,4 +1166,3 @@ int ath5k_hw_set_key_lladdr(struct ath5k_hw *ah, u16 entry, const u8 *mac)
 
 	return 0;
 }
-

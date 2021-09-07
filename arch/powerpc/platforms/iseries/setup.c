@@ -77,7 +77,6 @@ static unsigned long build_iSeries_Memory_Map(void);
 static void iseries_shared_idle(void);
 static void iseries_dedicated_idle(void);
 
-
 struct MemoryBlock {
 	unsigned long absStart;
 	unsigned long absEnd;

@@ -37,20 +37,14 @@
 
 #include "../rt_config.h"
 
-
 #define EFUSE_USAGE_MAP_START	0x2d0
 #define EFUSE_USAGE_MAP_END		0x2fc
 #define EFUSE_USAGE_MAP_SIZE	45
 
-
-
 #define EFUSE_EEPROM_DEFULT_FILE	"RT30xxEEPROM.bin"
 #define MAX_EEPROM_BIN_FILE_SIZE	1024
 
-
-
 #define EFUSE_TAG				0x2fe
-
 
 #ifdef RT_BIG_ENDIAN
 typedef	union	_EFUSE_CTRL_STRUC {
@@ -114,13 +108,11 @@ static VOID eFuseWritePhysical(
 	PUCHAR lpOutBuffer,
 	ULONG nOutBufferSize);
 
-
 static NTSTATUS eFuseWriteRegistersFromBin(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	USHORT Offset,
 	IN	USHORT Length,
 	IN	USHORT* pData);
-
 
 /*
 ========================================================================
@@ -700,7 +692,6 @@ static NTSTATUS eFuseWriteRegisters(
 	return TRUE;
 }
 
-
 /*
 ========================================================================
 
@@ -746,7 +737,6 @@ static VOID eFuseWritePhysical(
 	}
 }
 
-
 /*
 ========================================================================
 
@@ -785,9 +775,6 @@ NTSTATUS eFuseWrite(
 
 	return TRUE;
 }
-
-
-
 
 /*
 ========================================================================
@@ -832,7 +819,6 @@ INT set_eFuseGetFreeBlockCount_Proc(
 	return TRUE;
 }
 
-
 INT set_eFusedump_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg)
@@ -854,7 +840,6 @@ USHORT InBuf[3];
 	}
 	return TRUE;
 }
-
 
 INT	set_eFuseLoadFromBin_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -913,7 +898,6 @@ INT	set_eFuseLoadFromBin_Proc(
 			DBGPRINT(RT_DEBUG_TRACE, ("--> Error closing file %s\n", src));
 	}
 
-
 	RtmpOSFSInfoChange(&osfsInfo, FALSE);
 
 	for(j=0;j<i;j++)
@@ -957,13 +941,11 @@ closeFile:
 recoverFS:
 	RtmpOSFSInfoChange(&osfsInfo, FALSE);
 
-
 	if (memPtr)
 		kfree(memPtr);
 
 	return retval;
 }
-
 
 static NTSTATUS eFuseWriteRegistersFromBin(
 	IN	PRTMP_ADAPTER	pAd,
@@ -1045,7 +1027,6 @@ static NTSTATUS eFuseWriteRegistersFromBin(
 		{
 			DBGPRINT(RT_DEBUG_TRACE, ("Allocate New Blk, Data%d=%04x%04x\n",3-i,pData[2*i+1],pData[2*i]));
 			tempbuffer=((pData[2*i+1]<<16)&0xffff0000)|pData[2*i];
-
 
 			RTMP_IO_WRITE32(pAd, efuseDataOffset,tempbuffer);
 			efuseDataOffset -= 4;
@@ -1153,8 +1134,6 @@ static NTSTATUS eFuseWriteRegistersFromBin(
 		else
 			return TRUE;
 	     }
-
-
 
 		//Step 2. Write mapping table
 		addr = EFUSE_USAGE_MAP_START+BlkNum;
@@ -1278,7 +1257,6 @@ static NTSTATUS eFuseWriteRegistersFromBin(
 	return TRUE;
 }
 
-
 int rtmp_ee_efuse_read16(
 	IN RTMP_ADAPTER *pAd,
 	IN USHORT Offset,
@@ -1294,7 +1272,6 @@ int rtmp_ee_efuse_read16(
 	return (*pValue);
 }
 
-
 int rtmp_ee_efuse_write16(
 	IN RTMP_ADAPTER *pAd,
 	IN USHORT Offset,
@@ -1309,7 +1286,6 @@ int rtmp_ee_efuse_write16(
         eFuseWriteRegisters(pAd, Offset, 2, &data);
 	return 0;
 }
-
 
 int RtmpEfuseSupportCheck(
 	IN RTMP_ADAPTER *pAd)
@@ -1330,7 +1306,6 @@ INT set_eFuseBufferModeWriteBack_Proc(
 {
 	UINT Enable;
 
-
 	if(strlen(arg)>0)
 	{
 		Enable= simple_strtol(arg, 0, 16);
@@ -1346,7 +1321,6 @@ INT set_eFuseBufferModeWriteBack_Proc(
 		return FALSE;
 	return TRUE;
 }
-
 
 /*
 	========================================================================
@@ -1373,10 +1347,8 @@ INT eFuseLoadEEPROM(
 	RTMP_OS_FD				srcf;
 	RTMP_OS_FS_INFO			osFSInfo;
 
-
 	src=EFUSE_BUFFER_PATH;
 	DBGPRINT(RT_DEBUG_TRACE, ("FileName=%s\n",src));
-
 
 	RtmpOSFSInfoChange(&osFSInfo, TRUE);
 
@@ -1393,7 +1365,6 @@ INT eFuseLoadEEPROM(
 
 				memset(pAd->EEPROMImage, 0x00, MAX_EEPROM_BIN_FILE_SIZE);
 
-
 			retval =RtmpOSFileRead(srcf, (PSTRING)pAd->EEPROMImage, MAX_EEPROM_BIN_FILE_SIZE);
 			if (retval > 0)
 							{
@@ -1404,7 +1375,6 @@ INT eFuseLoadEEPROM(
 				DBGPRINT(RT_DEBUG_ERROR, ("Read file \"%s\" failed(errCode=%d)!\n", src, retval));
 
 		}
-
 
 	}
 	else
@@ -1421,7 +1391,6 @@ INT eFuseLoadEEPROM(
 		DBGPRINT(RT_DEBUG_TRACE, ("--> Error %d closing %s\n", -retval, src));
 	}
 
-
 	RtmpOSFSInfoChange(&osFSInfo, FALSE);
 
 	return TRUE;
@@ -1436,13 +1405,10 @@ INT eFuseWriteEeeppromBuf(
 	RTMP_OS_FD				srcf;
 	RTMP_OS_FS_INFO			osFSInfo;
 
-
 	src=EFUSE_BUFFER_PATH;
 	DBGPRINT(RT_DEBUG_TRACE, ("FileName=%s\n",src));
 
 	RtmpOSFSInfoChange(&osFSInfo, TRUE);
-
-
 
 	if (src && *src)
 	{
@@ -1474,7 +1440,6 @@ INT eFuseWriteEeeppromBuf(
 
 		}
 
-
 	}
 	else
 	{
@@ -1493,7 +1458,6 @@ INT eFuseWriteEeeppromBuf(
 	RtmpOSFSInfoChange(&osFSInfo, FALSE);
 	return TRUE;
 }
-
 
 VOID eFuseGetFreeBlockCount(IN PRTMP_ADAPTER pAd,
 	PUINT EfuseFreeBlock)

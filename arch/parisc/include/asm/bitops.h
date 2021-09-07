@@ -18,7 +18,6 @@
 
 #define CHOP_SHIFTCOUNT(x) (((unsigned long) (x)) & (BITS_PER_LONG - 1))
 
-
 #define smp_mb__before_clear_bit()      smp_mb()
 #define smp_mb__after_clear_bit()       smp_mb()
 

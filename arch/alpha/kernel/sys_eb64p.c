@@ -33,7 +33,6 @@
 #include "pci_impl.h"
 #include "machvec_impl.h"
 
-
 /* Note mask bit is true for DISABLED irqs.  */
 static unsigned int cached_irq_mask = -1;
 
@@ -199,7 +198,6 @@ eb64p_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 	const long min_idsel = 5, max_idsel = 9, irqs_per_slot = 5;
 	return COMMON_TABLE_LOOKUP;
 }
-
 
 /*
  * The System Vector

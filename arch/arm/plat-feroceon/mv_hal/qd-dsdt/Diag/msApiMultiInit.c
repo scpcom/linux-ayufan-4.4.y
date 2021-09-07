@@ -421,4 +421,3 @@ errorExit:
 
 	return GT_FAIL;
 }
-

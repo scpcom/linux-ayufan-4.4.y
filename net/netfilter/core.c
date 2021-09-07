@@ -152,7 +152,6 @@ unsigned int nf_iterate(struct list_head *head,
 	return NF_ACCEPT;
 }
 
-
 /* Returns 1 if okfn() needs to be executed by the caller,
  * -EPERM for NF_DROP, 0 otherwise. */
 int nf_hook_slow(u_int8_t pf, unsigned int hook, struct sk_buff *skb,
@@ -186,7 +185,6 @@ next_hook:
 	return ret;
 }
 EXPORT_SYMBOL(nf_hook_slow);
-
 
 int skb_make_writable(struct sk_buff *skb, unsigned int writable_len)
 {

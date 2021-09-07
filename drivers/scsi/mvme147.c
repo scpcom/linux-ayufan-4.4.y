@@ -148,7 +148,6 @@ static struct scsi_host_template driver_template = {
 	.use_clustering		= ENABLE_CLUSTERING
 };
 
-
 #include "scsi_module.c"
 
 int mvme147_release(struct Scsi_Host *instance)

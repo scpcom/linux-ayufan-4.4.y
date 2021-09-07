@@ -29,7 +29,6 @@
 #include "mdt.h"
 #include "alloc.h"
 
-
 static inline unsigned long
 nilfs_palloc_groups_per_desc_block(const struct inode *inode)
 {

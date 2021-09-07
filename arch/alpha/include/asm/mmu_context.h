@@ -22,7 +22,6 @@
 #include <asm/io.h>
 #endif
 
-
 static inline unsigned long
 __reload_thread(struct pcb_struct *pcb)
 {
@@ -38,7 +37,6 @@ __reload_thread(struct pcb_struct *pcb)
 
 	return v0;
 }
-
 
 /*
  * The maximum ASN's the processor supports.  On the EV4 this is 63

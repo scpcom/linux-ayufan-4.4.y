@@ -50,7 +50,6 @@ static struct scsi_device_handler *get_device_handler(const char *name)
 	return found;
 }
 
-
 static struct scsi_device_handler *
 scsi_dh_cache_lookup(struct scsi_device *sdev)
 {

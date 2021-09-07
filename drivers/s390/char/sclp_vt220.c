@@ -107,7 +107,6 @@ static struct sclp_register sclp_vt220_register = {
 	.pm_event_fn		= sclp_vt220_pm_event_fn,
 };
 
-
 /*
  * Put provided request buffer back into queue and check emit pending
  * buffers if necessary.
@@ -823,4 +822,3 @@ sclp_vt220_con_init(void)
 
 console_initcall(sclp_vt220_con_init);
 #endif /* CONFIG_SCLP_VT220_CONSOLE */
-

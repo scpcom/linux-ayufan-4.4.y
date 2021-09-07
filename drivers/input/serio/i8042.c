@@ -290,7 +290,6 @@ static int i8042_aux_write(struct serio *serio, unsigned char c)
 					I8042_CMD_MUX_SEND + port->mux);
 }
 
-
 /*
  * i8042_aux_close attempts to clear AUX or KBD port state by disabling
  * and then re-enabling it.
@@ -919,7 +918,6 @@ static int i8042_controller_init(void)
 	return 0;
 }
 
-
 /*
  * Reset the controller and reset CRT to the original value set by BIOS.
  */
@@ -958,7 +956,6 @@ static void i8042_controller_reset(void)
 	if (i8042_command(&i8042_initial_ctr, I8042_CMD_CTL_WCTR))
 		printk(KERN_WARNING "i8042.c: Can't restore CTR.\n");
 }
-
 
 /*
  * i8042_panic_blink() will flash the keyboard LEDs and is called when
@@ -1068,7 +1065,6 @@ static int i8042_pm_restore(struct device *dev)
 			return -EIO;
 		}
 	}
-
 
 #ifdef CONFIG_X86
 	if (i8042_dritek)

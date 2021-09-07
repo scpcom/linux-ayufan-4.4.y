@@ -74,7 +74,6 @@ struct tipc_port {
 	struct tipc_msg phdr;
 };
 
-
 struct tipc_port *tipc_createport_raw(void *usr_handle,
 			u32 (*dispatcher)(struct tipc_port *, struct sk_buff *),
 			void (*wakeup)(struct tipc_port *),
@@ -96,8 +95,6 @@ void *tipc_get_handle(const u32 ref);
 
 int tipc_disconnect_port(struct tipc_port *tp_ptr);
 
-
 #endif
 
 #endif
-

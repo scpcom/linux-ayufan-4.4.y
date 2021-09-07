@@ -59,10 +59,8 @@ static void ks8695_irq_ack(unsigned int irqno)
 	__raw_writel((1 << irqno), KS8695_IRQ_VA + KS8695_INTST);
 }
 
-
 static struct irq_chip ks8695_irq_level_chip;
 static struct irq_chip ks8695_irq_edge_chip;
-
 
 static int ks8695_irq_set_type(unsigned int irqno, unsigned int type)
 {

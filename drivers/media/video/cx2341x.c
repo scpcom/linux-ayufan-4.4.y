@@ -18,7 +18,6 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #include <linux/module.h>
 #include <linux/errno.h>
 #include <linux/kernel.h>
@@ -134,7 +133,6 @@ static const struct cx2341x_mpeg_params default_params = {
 	.video_chroma_median_filter_top = 255,
 	.video_chroma_median_filter_bottom = 0,
 };
-
 
 /* Map the control ID to the correct field in the cx2341x_mpeg_params
    struct. Return -EINVAL if the ID is unknown, else return 0. */
@@ -1218,4 +1216,3 @@ EXPORT_SYMBOL(cx2341x_log_status);
  * c-basic-offset: 8
  * End:
  */
-

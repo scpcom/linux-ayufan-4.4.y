@@ -192,7 +192,6 @@ enum fc_els_rjt_reason {
 	ELS_RJT_VENDOR =	0xff,	/* vendor specific error */
 };
 
-
 /*
  * reason code explanation (er_explan).
  */

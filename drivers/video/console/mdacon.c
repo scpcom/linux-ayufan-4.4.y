@@ -101,7 +101,6 @@ MODULE_PARM_DESC(mda_last_vc, "Last virtual console. Default: 16");
 #define MDA_GFX_MODE_EN		0x01
 #define MDA_GFX_PAGE_EN		0x02
 
-
 /*
  * MDA could easily be classified as "pre-dinosaur hardware".
  */
@@ -172,7 +171,6 @@ static inline void mda_set_cursor_size(int from, int to)
 	mda_cursor_size_from = from;
 	mda_cursor_size_to   = to;
 }
-
 
 #ifndef MODULE
 static int __init mdacon_setup(char *str)
@@ -560,7 +558,6 @@ static int mdacon_scroll(struct vc_data *c, int t, int b, int dir, int lines)
 	return 0;
 }
 
-
 /*
  *  The console `switch' structure for the MDA based console
  */
@@ -601,4 +598,3 @@ module_init(mda_console_init);
 module_exit(mda_console_exit);
 
 MODULE_LICENSE("GPL");
-

@@ -80,7 +80,6 @@ static char __initdata device_type_pci[] = "pci";
 static char __initdata device_type_vdevice[] = "vdevice";
 static char __initdata device_type_vscsi[] = "vscsi";
 
-
 /* EBCDIC to ASCII conversion routines */
 
 static unsigned char __init e2a(unsigned char x)

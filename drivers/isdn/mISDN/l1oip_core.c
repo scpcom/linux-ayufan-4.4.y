@@ -79,7 +79,6 @@
 	NOTE: only one debug value must be given for all cards
 	enable debugging (see l1oip.h for debug options)
 
-
 Special mISDN controls:
 
  op = MISDN_CTRL_SETPEER*
@@ -92,7 +91,6 @@ Special mISDN controls:
 
  * Use l1oipctrl for comfortable setting or removing ip address.
    (Layer 1 Over IP CTRL)
-
 
 L1oIP-Protocol
 --------------
@@ -136,7 +134,6 @@ Frame Header:
 | Data....	|
 
 ...
-
 
 * Only included in some cases.
 
@@ -183,7 +180,6 @@ second. This causes a wrap arround each 8,192 seconds. There is no requirement
 for the initial "Time Base", but 0 should be used for the first packet.
 In case of HDLC data, this timestamp counts the packet or byte number.
 
-
 Two Timers:
 
 After initialisation, a timer of 15 seconds is started. Whenever a packet is
@@ -193,13 +189,11 @@ empty packet is transmitted. This keep the connection alive.
 When a valid packet is received, a timer 65 seconds is started. The interface
 become ACTIVE. If the timer expires, the interface becomes INACTIVE.
 
-
 Dynamic IP handling:
 
 To allow dynamic IP, the ID must be non 0. In this case, any packet with the
 correct port number and ID will be accepted. If the remote side changes its IP
 the new IP is used for all transmitted packets until it changes again.
-
 
 On Demand:
 
@@ -207,7 +201,6 @@ If the ondemand parameter is given, the remote IP is set to 0 on timeout.
 This will stop keepalive traffic to remote. If the remote is online again,
 traffic will continue to the remote address. This is usefull for road warriors.
 This feature only works with ID set, otherwhise it is highly unsecure.
-
 
 Socket and Thread
 -----------------
@@ -358,7 +351,6 @@ l1oip_socket_send(struct l1oip *hc, u8 localcodec, u8 channel, u32 chanmask,
 	return len;
 }
 
-
 /*
  * receive channel data from socket
  */
@@ -457,7 +449,6 @@ l1oip_socket_recv(struct l1oip *hc, u8 remotecodec, u8 channel, u16 timebase,
 			queue_ch_frame(&bch->ch, PH_DATA_IND, rx_counter, nskb);
 	}
 }
-
 
 /*
  * parse frame and extract channel data
@@ -646,7 +637,6 @@ multiframe:
 	}
 }
 
-
 /*
  * socket stuff
  */
@@ -827,7 +817,6 @@ l1oip_socket_open(struct l1oip *hc)
 	return 0;
 }
 
-
 static void
 l1oip_send_bh(struct work_struct *work)
 {
@@ -840,7 +829,6 @@ l1oip_send_bh(struct work_struct *work)
 	/* send an empty l1oip frame at D-channel */
 	l1oip_socket_send(hc, 0, hc->d_idx, 0, 0, NULL, 0);
 }
-
 
 /*
  * timer stuff
@@ -883,7 +871,6 @@ l1oip_timeout(void *data)
 		hc->sin_remote.sin_addr.s_addr = 0;
 	}
 }
-
 
 /*
  * message handling
@@ -1253,7 +1240,6 @@ l1oip_bctrl(struct mISDNchannel *ch, u_int cmd, void *arg)
 	return err;
 }
 
-
 /*
  * cleanup module and stack
  */
@@ -1305,7 +1291,6 @@ l1oip_cleanup(void)
 
 	l1oip_4bit_free();
 }
-
 
 /*
  * module and stack init
@@ -1537,4 +1522,3 @@ l1oip_init(void)
 
 module_init(l1oip_init);
 module_exit(l1oip_cleanup);
-

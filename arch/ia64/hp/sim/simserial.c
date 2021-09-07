@@ -223,7 +223,6 @@ static void transmit_chars(struct async_struct *info, int *intr_done)
 	int count;
 	unsigned long flags;
 
-
 	local_irq_save(flags);
 
 	if (info->x_char) {
@@ -280,7 +279,6 @@ static void rs_flush_chars(struct tty_struct *tty)
 
 	transmit_chars(info, NULL);
 }
-
 
 static int rs_write(struct tty_struct * tty,
 		    const unsigned char *buf, int count)
@@ -388,7 +386,6 @@ static void rs_unthrottle(struct tty_struct * tty)
 	}
 	printk(KERN_INFO "simrs_unthrottle called\n");
 }
-
 
 static int rs_ioctl(struct tty_struct *tty, struct file * file,
 		    unsigned int cmd, unsigned long arg)
@@ -606,7 +603,6 @@ static void rs_wait_until_sent(struct tty_struct *tty, int timeout)
 {
 }
 
-
 /*
  * rs_hangup() --- called by tty_hangup() when a hangup is signaled.
  */
@@ -632,7 +628,6 @@ static void rs_hangup(struct tty_struct *tty)
 	info->tty = NULL;
 	wake_up_interruptible(&info->open_wait);
 }
-
 
 static int get_async_struct(int line, struct async_struct **ret_info)
 {
@@ -769,7 +764,6 @@ errout:
 	local_irq_restore(flags);
 	return retval;
 }
-
 
 /*
  * This routine is called whenever a serial port is opened.  It

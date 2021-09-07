@@ -15,7 +15,6 @@
 
 */
 
-
 #ifdef CONFIG_SCSI_FLASHPOINT
 
 #define MAX_CARDS	8

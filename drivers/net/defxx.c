@@ -311,7 +311,6 @@ static struct pci_driver dfx_pci_driver;
 static struct eisa_driver dfx_eisa_driver;
 static struct tc_driver dfx_tc_driver;
 
-
 /*
  * =======================
  * = dfx_port_write_long =
@@ -385,7 +384,6 @@ static void dfx_port_write_long(DFX_board_t *bp, int offset, u32 data)
 		dfx_outl(bp, offset, data);
 }
 
-
 static inline void dfx_readl(DFX_board_t *bp, int offset, u32 *data)
 {
 	mb();
@@ -408,7 +406,6 @@ static void dfx_port_read_long(DFX_board_t *bp, int offset, u32 *data)
 	else
 		dfx_inl(bp, offset, data);
 }
-
 
 /*
  * ================
@@ -631,7 +628,6 @@ err_out:
 	return err;
 }
 
-
 /*
  * ================
  * = dfx_bus_init =
@@ -835,7 +831,6 @@ static void __devexit dfx_bus_uninit(struct net_device *dev)
 	}
 }
 
-
 /*
  * ========================
  * = dfx_bus_config_check =
@@ -923,7 +918,6 @@ static void __devinit dfx_bus_config_check(DFX_board_t *bp)
 			}
 		}
 	}
-
 
 /*
  * ===================
@@ -1151,7 +1145,6 @@ static int __devinit dfx_driver_init(struct net_device *dev,
 	return(DFX_K_SUCCESS);
 }
 
-
 /*
  * =================
  * = dfx_adap_init =
@@ -1351,7 +1344,6 @@ static int dfx_adap_init(DFX_board_t *bp, int get_buffers)
 	return(DFX_K_SUCCESS);
 	}
 
-
 /*
  * ============
  * = dfx_open =
@@ -1439,7 +1431,6 @@ static int dfx_open(struct net_device *dev)
 	netif_start_queue(dev);
 	return(0);
 }
-
 
 /*
  * =============
@@ -1532,7 +1523,6 @@ static int dfx_close(struct net_device *dev)
 	return(0);
 }
 
-
 /*
  * ======================
  * = dfx_int_pr_halt_id =
@@ -1615,7 +1605,6 @@ static void dfx_int_pr_halt_id(DFX_board_t	*bp)
 			break;
 		}
 	}
-
 
 /*
  * ==========================
@@ -1768,7 +1757,6 @@ static void dfx_int_type_0_process(DFX_board_t	*bp)
 		}
 	}
 
-
 /*
  * ==================
  * = dfx_int_common =
@@ -1841,7 +1829,6 @@ static void dfx_int_common(struct net_device *dev)
 	if (port_status & PI_PSTATUS_M_TYPE_0_PENDING)
 		dfx_int_type_0_process(bp);	/* process Type 0 interrupts */
 	}
-
 
 /*
  * =================
@@ -1962,7 +1949,6 @@ static irqreturn_t dfx_interrupt(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
-
 
 /*
  * =====================
@@ -2150,7 +2136,6 @@ static struct net_device_stats *dfx_ctl_get_stats(struct net_device *dev)
 	return((struct net_device_stats *) &bp->stats);
 	}
 
-
 /*
  * ==============================
  * = dfx_ctl_set_multicast_list =
@@ -2271,7 +2256,6 @@ static void dfx_ctl_set_multicast_list(struct net_device *dev)
 		}
 	}
 
-
 /*
  * ===========================
  * = dfx_ctl_set_mac_address =
@@ -2361,7 +2345,6 @@ static int dfx_ctl_set_mac_address(struct net_device *dev, void *addr)
 	return(0);			/* always return zero */
 	}
 
-
 /*
  * ======================
  * = dfx_ctl_update_cam =
@@ -2446,7 +2429,6 @@ static int dfx_ctl_update_cam(DFX_board_t *bp)
 	return(DFX_K_SUCCESS);
 	}
 
-
 /*
  * ==========================
  * = dfx_ctl_update_filters =
@@ -2511,7 +2493,6 @@ static int dfx_ctl_update_filters(DFX_board_t *bp)
 		return(DFX_K_FAILURE);
 	return(DFX_K_SUCCESS);
 	}
-
 
 /*
  * ======================
@@ -2633,7 +2614,6 @@ static int dfx_hw_dma_cmd_req(DFX_board_t *bp)
 	return(DFX_K_SUCCESS);
 	}
 
-
 /*
  * ========================
  * = dfx_hw_port_ctrl_req =
@@ -2717,7 +2697,6 @@ static int dfx_hw_port_ctrl_req(
 	return(DFX_K_SUCCESS);
 	}
 
-
 /*
  * =====================
  * = dfx_hw_adap_reset =
@@ -2771,7 +2750,6 @@ static void dfx_hw_adap_reset(
 	dfx_port_write_long(bp, PI_PDQ_K_REG_PORT_RESET, 0);
 	}
 
-
 /*
  * ========================
  * = dfx_hw_adap_state_rd =
@@ -2806,7 +2784,6 @@ static int dfx_hw_adap_state_rd(DFX_board_t *bp)
 	dfx_port_read_long(bp, PI_PDQ_K_REG_PORT_STATUS, &port_status);
 	return((port_status & PI_PSTATUS_M_STATE) >> PI_PSTATUS_V_STATE);
 	}
-
 
 /*
  * =====================
@@ -2874,7 +2851,6 @@ static void my_skb_align(struct sk_buff *skb, int n)
 
 	skb_reserve(skb, v - x);
 }
-
 
 /*
  * ================
@@ -2977,7 +2953,6 @@ static int dfx_rcv_init(DFX_board_t *bp, int get_buffers)
 	dfx_port_write_long(bp, PI_PDQ_K_REG_TYPE_2_PROD, bp->rcv_xmt_reg.lword);
 	return 0;
 	}
-
 
 /*
  * =========================
@@ -3126,7 +3101,6 @@ static void dfx_rcv_queue_process(
 		bp->rcv_xmt_reg.index.rcv_comp += 1;
 		}
 	}
-
 
 /*
  * =====================
@@ -3346,7 +3320,6 @@ static netdev_tx_t dfx_xmt_queue_pkt(struct sk_buff *skb,
 	return NETDEV_TX_OK;	/* packet queued to adapter */
 	}
 
-
 /*
  * ================
  * = dfx_xmt_done =
@@ -3424,7 +3397,6 @@ static int dfx_xmt_done(DFX_board_t *bp)
 		}
 	return freed;
 	}
-
 
 /*
  * =================
@@ -3622,7 +3594,6 @@ static void __devexit dfx_unregister(struct device *bdev)
 	free_netdev(dev);
 }
 
-
 static int __devinit __maybe_unused dfx_dev_register(struct device *);
 static int __devexit __maybe_unused dfx_dev_unregister(struct device *);
 
@@ -3714,7 +3685,6 @@ static int __devexit __maybe_unused dfx_dev_unregister(struct device *dev)
 	dfx_unregister(dev);
 	return 0;
 }
-
 
 static int __devinit dfx_init(void)
 {

@@ -135,4 +135,3 @@ void bond_alb_clear_vlan(struct bonding *bond, unsigned short vlan_id);
 void bond_alb_info_show(struct seq_file *seq);
 #endif
 #endif /* __BOND_ALB_H__ */
-

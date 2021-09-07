@@ -12,7 +12,6 @@
 
 #define SCSI_NO_TAG	(-1)    /* identify no tag in use */
 
-
 #ifdef CONFIG_BLOCK
 
 /**

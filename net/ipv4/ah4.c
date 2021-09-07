@@ -9,7 +9,6 @@
 #include <net/icmp.h>
 #include <net/protocol.h>
 
-
 /* Clear mutable options and find final destination to substitute
  * into IP header for icv calculation. Options are already checked
  * for validity, so paranoia is not required. */
@@ -297,7 +296,6 @@ static void ah_destroy(struct xfrm_state *x)
 	crypto_free_hash(ahp->tfm);
 	kfree(ahp);
 }
-
 
 static const struct xfrm_type ah_type =
 {

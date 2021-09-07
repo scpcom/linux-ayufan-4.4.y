@@ -121,4 +121,3 @@ static inline void *kmap(struct page *page)
 #endif
 
 #endif /* _PARISC_CACHEFLUSH_H */
-

@@ -64,7 +64,6 @@
 static unsigned int ath5k_debug;
 module_param_named(debug, ath5k_debug, uint, 0);
 
-
 #ifdef CONFIG_ATH5K_DEBUG
 
 #include <linux/seq_file.h>
@@ -77,7 +76,6 @@ static int ath5k_debugfs_open(struct inode *inode, struct file *file)
 	file->private_data = inode->i_private;
 	return 0;
 }
-
 
 /* debugfs: registers */
 
@@ -192,7 +190,6 @@ static const struct file_operations fops_registers = {
 	.owner = THIS_MODULE,
 };
 
-
 /* debugfs: beacons */
 
 static ssize_t read_file_beacon(struct file *file, char __user *user_buf,
@@ -269,7 +266,6 @@ static const struct file_operations fops_beacon = {
 	.owner = THIS_MODULE,
 };
 
-
 /* debugfs: reset */
 
 static ssize_t write_file_reset(struct file *file,
@@ -286,7 +282,6 @@ static const struct file_operations fops_reset = {
 	.open = ath5k_debugfs_open,
 	.owner = THIS_MODULE,
 };
-
 
 /* debugfs: debug level */
 
@@ -363,7 +358,6 @@ static const struct file_operations fops_debug = {
 	.owner = THIS_MODULE,
 };
 
-
 /* init */
 
 void
@@ -410,7 +404,6 @@ ath5k_debug_finish_device(struct ath5k_softc *sc)
 	debugfs_remove(sc->debug.debugfs_reset);
 	debugfs_remove(sc->debug.debugfs_phydir);
 }
-
 
 /* functions used in other places */
 

@@ -172,7 +172,6 @@ static const struct file_operations fops_dma = {
 	.owner = THIS_MODULE
 };
 
-
 void ath_debug_stat_interrupt(struct ath_softc *sc, enum ath9k_int status)
 {
 	if (status)

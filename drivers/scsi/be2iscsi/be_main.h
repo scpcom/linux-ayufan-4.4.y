@@ -21,7 +21,6 @@
 #ifndef _BEISCSI_MAIN_
 #define _BEISCSI_MAIN_
 
-
 #include <linux/kernel.h>
 #include <linux/pci.h>
 #include <linux/in.h>
@@ -35,8 +34,6 @@
 #include <scsi/scsi_transport_iscsi.h>
 
 #include "be.h"
-
-
 
 #define DRV_NAME		"be2iscsi"
 #define BUILD_STR		"2.0.527.0"
@@ -598,7 +595,6 @@ struct amap_cq_db {
 } __packed;
 
 void beiscsi_process_eq(struct beiscsi_hba *phba);
-
 
 struct iscsi_wrb {
 	u32 dw[16];

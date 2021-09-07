@@ -94,7 +94,6 @@ void ufs_free_fragments(struct inode *inode, u64 fragment, unsigned count)
 	vfs_dq_free_block(inode, count);
 #endif
 
-	
 	fs32_add(sb, &ucg->cg_cs.cs_nffree, count);
 	uspi->cs_total.cs_nffree += count;
 	fs32_add(sb, &UFS_SB(sb)->fs_cs(cgno).cs_nffree, count);
@@ -301,7 +300,6 @@ static void ufs_change_blocknr(struct inode *inode, sector_t beg,
 		pos = i & mask;
 		for (j = 0; j < pos; ++j)
 			bh = bh->b_this_page;
-
 
 		if (unlikely(index == last_index))
 			lblock = end & mask;
@@ -819,7 +817,6 @@ static unsigned ubh_scanc(struct ufs_sb_private_info *uspi,
 	unsigned rest, offset;
 	unsigned char *cp;
 	
-
 	offset = begin & ~uspi->s_fmask;
 	begin >>= uspi->s_fshift;
 	for (;;) {
@@ -979,7 +976,6 @@ static void ufs_clusteracct(struct super_block * sb,
 	if (forw > 0)
 		fs32_sub(sb, (__fs32*)ubh_get_addr(UCPI_UBH(ucpi), ucpi->c_clustersumoff + (forw << 2)), cnt);
 }
-
 
 static unsigned char ufs_fragtable_8fpb[] = {
 	0x00, 0x01, 0x01, 0x02, 0x01, 0x01, 0x02, 0x04, 0x01, 0x01, 0x01, 0x03, 0x02, 0x03, 0x04, 0x08,

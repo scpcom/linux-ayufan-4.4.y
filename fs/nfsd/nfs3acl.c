@@ -134,7 +134,6 @@ static int nfs3svc_decode_getaclargs(struct svc_rqst *rqstp, __be32 *p,
 	return xdr_argsize_check(rqstp, p);
 }
 
-
 static int nfs3svc_decode_setaclargs(struct svc_rqst *rqstp, __be32 *p,
 		struct nfsd3_setaclargs *args)
 {
@@ -267,4 +266,3 @@ struct svc_version	nfsd_acl_version3 = {
 		.vs_xdrsize	= NFS3_SVC_XDRSIZE,
 		.vs_hidden	= 1,
 };
-

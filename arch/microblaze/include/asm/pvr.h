@@ -115,7 +115,6 @@ struct pvr_s {
 /* MSR Reset value PVR mask */
 #define PVR11_MSR_RESET_VALUE_MASK	0x000007FF
 
-
 /* PVR access macros */
 #define PVR_IS_FULL(pvr)		(pvr.pvr[0] & PVR0_PVR_FULL_MASK)
 #define PVR_USE_BARREL(pvr)		(pvr.pvr[0] & PVR0_USE_BARREL_MASK)
@@ -183,7 +182,6 @@ struct pvr_s {
 #define PVR_DCACHE_BYTE_SIZE(pvr) \
 			(1 << ((pvr.pvr[5] & PVR5_DCACHE_BYTE_SIZE_MASK) >> 16))
 
-
 #define PVR_ICACHE_BASEADDR(pvr)	(pvr.pvr[6] & PVR6_ICACHE_BASEADDR_MASK)
 #define PVR_ICACHE_HIGHADDR(pvr)	(pvr.pvr[7] & PVR7_ICACHE_HIGHADDR_MASK)
 
@@ -201,7 +199,6 @@ struct pvr_s {
 #define PVR_MMU_DTLB_SIZE(pvr)	(pvr.pvr[11] & PVR11_MMU_DTLB_SIZE)
 #define PVR_MMU_TLB_ACCESS(pvr)	(pvr.pvr[11] & PVR11_MMU_TLB_ACCESS)
 #define PVR_MMU_ZONES(pvr)	(pvr.pvr[11] & PVR11_MMU_ZONES)
-
 
 int cpu_has_pvr(void);
 void get_pvr(struct pvr_s *pvr);

@@ -76,7 +76,6 @@ struct print_buf *const TIPC_LOG = &log_buf;
 static char print_string[TIPC_PB_MAX_STR];
 static DEFINE_SPINLOCK(print_lock);
 
-
 #define FORMAT(PTR,LEN,FMT) \
 {\
        va_list args;\
@@ -424,4 +423,3 @@ struct sk_buff *tipc_log_dump(void)
 	}
 	return reply;
 }
-

@@ -41,8 +41,6 @@ wakeup_pmode_return:
 bogus_magic:
 	jmp	bogus_magic
 
-
-
 save_registers:
 	sgdt	saved_gdt
 	sidt	saved_idt
@@ -60,7 +58,6 @@ save_registers:
 
 	movl	$ret_point, saved_eip
 	ret
-
 
 restore_registers:
 	movl	saved_context_ebp, %ebp
@@ -97,4 +94,3 @@ saved_gdt:	.long	0,0
 saved_idt:	.long	0,0
 saved_ldt:	.long	0
 saved_tss:	.long	0
-

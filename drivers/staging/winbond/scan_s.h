@@ -104,13 +104,10 @@ typedef struct _SCAN_PARAMETERS
 #define BG_SCAN								6
 #define BG_SCANNING							7
 
-
 // The value will load from EEPROM
 // If 0xff is set in EEPOM, the driver will use SCAN_MAX_CHNL_TIME instead.
 // The definition is in WbHal.h
 //	#define SCAN_MAX_CHNL_TIME				(50)
-
-
 
 // static functions
 

@@ -176,7 +176,6 @@ static int bf5xx_ad73311_hw_params(struct snd_pcm_substream *substream,
 	return 0;
 }
 
-
 static struct snd_soc_ops bf5xx_ad73311_ops = {
 	.startup = bf5xx_ad73311_startup,
 	.hw_params = bf5xx_ad73311_hw_params,
@@ -237,4 +236,3 @@ module_exit(bf5xx_ad73311_exit);
 MODULE_AUTHOR("Cliff Cai");
 MODULE_DESCRIPTION("ALSA SoC AD73311 Blackfin");
 MODULE_LICENSE("GPL");
-

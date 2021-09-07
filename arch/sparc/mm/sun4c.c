@@ -1730,7 +1730,6 @@ static unsigned long sun4c_pte_to_pgoff(pte_t pte)
 	return pte_val(pte) & ((1UL << PTE_FILE_MAX_BITS) - 1);
 }
 
-
 static inline unsigned long sun4c_pmd_page_v(pmd_t pmd)
 {
 	return (pmd_val(pmd) & PAGE_MASK);
@@ -1815,7 +1814,6 @@ static void sun4c_free_pgd_fast(pgd_t *pgd)
 	pgd_quicklist = (unsigned long *) pgd;
 	pgtable_cache_size++;
 }
-
 
 static inline pte_t *
 sun4c_pte_alloc_one_fast(struct mm_struct *mm, unsigned long address)

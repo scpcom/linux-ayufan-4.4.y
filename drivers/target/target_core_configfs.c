@@ -2515,8 +2515,6 @@ static ssize_t target_core_alua_tg_pt_gp_store_attr_alua_write_metadata(
 
 SE_DEV_ALUA_TG_PT_ATTR(alua_write_metadata, S_IRUGO | S_IWUSR);
 
-
-
 /*
  * nonop_delay_msecs
  */
@@ -3183,7 +3181,6 @@ out:
 	kmem_cache_free(se_hba_cache, hba);
 	return ERR_PTR(ret);
 }
-
 
 static void target_core_call_delhbafromtarget(
 	struct config_group *group,

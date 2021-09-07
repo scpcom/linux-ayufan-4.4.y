@@ -63,5 +63,3 @@
 #define SO_DOMAIN		39
 
 #endif /* _ASM_SOCKET_H */
-
-

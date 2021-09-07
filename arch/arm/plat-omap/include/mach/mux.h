@@ -115,7 +115,6 @@
 	PU_PD_REG(pu_pd_reg, pu_pd_status)		\
 },
 
-
 /*
  * OMAP730/850 has a slightly different config for the pin mux.
  * - config regs are the OMAP730_IO_CONF_x regs (see omap730.h) regs and
@@ -142,7 +141,6 @@
 	PULL_REG_850(mux_reg, pull_bit, pull_status)	\
 	PU_PD_REG(NA, 0)		\
 },
-
 
 #define MUX_CFG_24XX(desc, reg_offset, mode,			\
 				pull_en, pull_mode, dbg)	\
@@ -269,7 +267,6 @@ enum omap850_index {
 	W16_850_USB_PU_EN,
 	W17_850_USB_VBUSI,
 };
-
 
 enum omap1xxx_index {
 	/* UART1 (BT_UART_GATING)*/
@@ -764,7 +761,6 @@ enum omap34xx_index {
 	R3_3430_USB2HS_PHY_DATA5,
 	R4_3430_USB2HS_PHY_DATA6,
 	T2_3430_USB2HS_PHY_DATA7,
-
 
 	/* TLL - HSUSB: 12-pin TLL Port 1*/
 	Y8_3430_USB1HS_TLL_CLK,

@@ -135,7 +135,6 @@ typedef struct {
 typedef unsigned int reg_rt_trace_r_redir;
 #define REG_RD_ADDR_rt_trace_r_redir 20
 
-
 /* Constants */
 enum {
   regk_rt_trace_brk                        = 0x0000000c,

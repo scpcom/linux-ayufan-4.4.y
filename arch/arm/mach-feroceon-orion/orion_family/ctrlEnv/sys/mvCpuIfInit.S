@@ -72,7 +72,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mvCtrlEnvAsm.h"
 #include "cpu/mvCpuArm.h"
 
-
 /*******************************************************************************
 * mvCpuIfPreInit - Make early initialization of CPU interface.
 *
@@ -135,7 +134,6 @@ calcConfigReg:
          ldr   r4, = Lrom_start_of_data
          ldr	r4, [r4]
          add   r7, r4, r7
-
 
 #else
 	ldr     r7, = _cpuARMDDRCLK

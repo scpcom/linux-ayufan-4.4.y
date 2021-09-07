@@ -48,7 +48,6 @@
 #define IS_INF(a) ((a)->exp == 0x7fff)
 #define IS_ZERO(a) ((a)->mant.m64 == 0)
 
-
 #define fp_set_sr(bit) ({					\
 	FPDATA->fpsr |= 1 << (bit);				\
 })

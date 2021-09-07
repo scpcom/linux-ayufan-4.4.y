@@ -107,14 +107,12 @@ struct menu_device {
 	u64		correction_factor[BUCKETS];
 };
 
-
 #define LOAD_INT(x) ((x) >> FSHIFT)
 #define LOAD_FRAC(x) LOAD_INT(((x) & (FIXED_1-1)) * 100)
 
 static int get_loadavg(void)
 {
 	unsigned long this = this_cpu_load();
-
 
 	return LOAD_INT(this) * 10 + LOAD_FRAC(this) / 10;
 }
@@ -203,7 +201,6 @@ static int menu_select(struct cpuidle_device *dev)
 	data->expected_us =
 	    DIV_ROUND_UP((u32)ktime_to_ns(tick_nohz_get_sleep_length()), 1000);
 
-
 	data->bucket = which_bucket(data->expected_us);
 
 	multiplier = performance_multiplier();
@@ -225,7 +222,6 @@ static int menu_select(struct cpuidle_device *dev)
 	 */
 	if (data->expected_us > 5)
 		data->last_state_idx = CPUIDLE_DRIVER_STATE_START;
-
 
 	/* find the deepest idle state that satisfies our constraints */
 	for (i = CPUIDLE_DRIVER_STATE_START; i < dev->state_count; i++) {
@@ -278,7 +274,6 @@ static void menu_update(struct cpuidle_device *dev)
 	if (unlikely(!(target->flags & CPUIDLE_FLAG_TIME_VALID)))
 		last_idle_us = data->expected_us;
 
-
 	measured_us = last_idle_us;
 
 	/*
@@ -287,7 +282,6 @@ static void menu_update(struct cpuidle_device *dev)
 	 */
 	if (measured_us > data->exit_us)
 		measured_us -= data->exit_us;
-
 
 	/* update our correction ratio */
 

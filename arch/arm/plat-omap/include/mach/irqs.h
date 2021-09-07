@@ -129,7 +129,6 @@
 #define INT_850_GPIO_BANK6	18
 #define INT_850_SPGIO_WR	29
 
-
 /*
  * IRQ numbers for interrupt handler 2
  *
@@ -425,7 +424,6 @@
 
 #define	INT_34XX_BENCH_MPU_EMUL	3
 
-
 #define IRQ_GIC_START		32
 #define INT_44XX_LOCALTIMER_IRQ	29
 #define INT_44XX_LOCALWDT_IRQ	30
@@ -513,7 +511,6 @@
 #define INT_44XX_PARTHASH_IRQ	(79 + IRQ_GIC_START)
 #define INT_44XX_MMC3_IRQ	(94 + IRQ_GIC_START)
 #define INT_44XX_MMC4_IRQ	(96 + IRQ_GIC_START)
-
 
 /* Max. 128 level 2 IRQs (OMAP1610), 192 GPIOs (OMAP730/850) and
  * 16 MPUIO lines */

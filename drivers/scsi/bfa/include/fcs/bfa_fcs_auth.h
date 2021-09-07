@@ -31,8 +31,6 @@ struct bfa_fcs_s;
 
 struct bfa_fcs_fabric_s;
 
-
-
 struct bfa_fcs_auth_s {
 	bfa_sm_t	sm;	/*  state machine */
 	bfa_boolean_t   policy;	/*  authentication enabled/disabled */

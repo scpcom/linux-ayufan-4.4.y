@@ -139,7 +139,6 @@ Private IOCTL to set up for displaying MJPEG
 #define BUZIOC_SYNC           _IOR ('v', BASE_VIDIOCPRIVATE+5,  struct zoran_sync)
 #define BUZIOC_G_STATUS       _IOWR('v', BASE_VIDIOCPRIVATE+6,  struct zoran_status)
 
-
 #ifdef __KERNEL__
 
 #define MAJOR_VERSION 0		/* driver major version */

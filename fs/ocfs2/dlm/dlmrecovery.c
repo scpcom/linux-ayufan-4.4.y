@@ -24,7 +24,6 @@
  *
  */
 
-
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/types.h>
@@ -39,7 +38,6 @@
 #include <linux/timer.h>
 #include <linux/kthread.h>
 #include <linux/delay.h>
-
 
 #include "cluster/heartbeat.h"
 #include "cluster/nodemanager.h"
@@ -227,8 +225,6 @@ void dlm_complete_recovery_thread(struct dlm_ctxt *dlm)
 	}
 }
 
-
-
 /*
  * this is lame, but here's how recovery works...
  * 1) all recovery threads cluster wide will work on recovering
@@ -361,7 +357,6 @@ static int dlm_is_node_recovered(struct dlm_ctxt *dlm, u8 node)
 	return recovered;
 }
 
-
 int dlm_wait_for_node_death(struct dlm_ctxt *dlm, u8 node, int timeout)
 {
 	if (timeout) {
@@ -412,7 +407,6 @@ static int dlm_in_recovery(struct dlm_ctxt *dlm)
 	spin_unlock(&dlm->spinlock);
 	return in_recovery;
 }
-
 
 void dlm_wait_for_recovery(struct dlm_ctxt *dlm)
 {
@@ -788,7 +782,6 @@ static int dlm_request_all_locks(struct dlm_ctxt *dlm, u8 request_from,
 
 	mlog(0, "\n");
 
-
 	mlog(0, "dlm_request_all_locks: dead node is %u, sending request "
 		  "to %u\n", dead_node, request_from);
 
@@ -939,7 +932,6 @@ leave:
 	free_page((unsigned long)data);
 }
 
-
 static int dlm_send_all_done_msg(struct dlm_ctxt *dlm, u8 dead_node, u8 send_to)
 {
 	int ret, tmpret;
@@ -965,7 +957,6 @@ static int dlm_send_all_done_msg(struct dlm_ctxt *dlm, u8 dead_node, u8 send_to)
 		ret = tmpret;
 	return ret;
 }
-
 
 int dlm_reco_data_done_handler(struct o2net_msg *msg, u32 len, void *data,
 			       void **ret_data)
@@ -1089,7 +1080,6 @@ static inline int dlm_num_locks_in_lockres(struct dlm_lock_resource *res)
 	return total_locks;
 }
 
-
 static int dlm_send_mig_lockres_msg(struct dlm_ctxt *dlm,
 				      struct dlm_migratable_lockres *mres,
 				      u8 send_to,
@@ -1163,7 +1153,6 @@ static void dlm_init_migratable_lockres(struct dlm_migratable_lockres *mres,
 	mres->flags = flags;
 	mres->master = master;
 }
-
 
 /* returns 1 if this lock fills the network structure,
  * 0 otherwise */
@@ -1302,8 +1291,6 @@ error:
 	     res->lockname.len, res->lockname.name);
 	return ret;
 }
-
-
 
 /*
  * this message will contain no more than one page worth of
@@ -1478,7 +1465,6 @@ leave:
 	return ret;
 }
 
-
 static void dlm_mig_lockres_worker(struct dlm_work_item *item, void *data)
 {
 	struct dlm_ctxt *dlm;
@@ -1546,8 +1532,6 @@ leave:
 	mlog_exit(ret);
 }
 
-
-
 static int dlm_lockres_master_requery(struct dlm_ctxt *dlm,
 				      struct dlm_lock_resource *res,
 				      u8 *real_master)
@@ -1605,7 +1589,6 @@ static int dlm_lockres_master_requery(struct dlm_ctxt *dlm,
 	return ret;
 }
 
-
 int dlm_do_master_requery(struct dlm_ctxt *dlm, struct dlm_lock_resource *res,
 			  u8 nodenum, u8 *real_master)
 {
@@ -1633,7 +1616,6 @@ int dlm_do_master_requery(struct dlm_ctxt *dlm, struct dlm_lock_resource *res,
 	}
 	return ret;
 }
-
 
 /* this function cannot error, so unless the sending
  * or receiving of the message failed, the owner can
@@ -2012,8 +1994,6 @@ void dlm_move_lockres_to_recovery_list(struct dlm_ctxt *dlm,
 	}
 }
 
-
-
 /* removes all recovered locks from the recovery list.
  * sets the res->owner to the new master.
  * unsets the RECOVERY flag and wakes waiters. */
@@ -2212,7 +2192,6 @@ static void dlm_free_dead_locks(struct dlm_ctxt *dlm,
  *
  */
 
-
 static void dlm_do_local_recovery_cleanup(struct dlm_ctxt *dlm, u8 dead_node)
 {
 	struct hlist_node *iter;
@@ -2220,7 +2199,6 @@ static void dlm_do_local_recovery_cleanup(struct dlm_ctxt *dlm, u8 dead_node)
 	int i;
 	struct hlist_head *bucket;
 	struct dlm_lock *lock;
-
 
 	/* purge any stale mles */
 	dlm_clean_master_list(dlm, dead_node);

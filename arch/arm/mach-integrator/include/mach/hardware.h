@@ -49,4 +49,3 @@
 #define PCIBIOS_MIN_MEM 	0x00100000
 
 #endif
-

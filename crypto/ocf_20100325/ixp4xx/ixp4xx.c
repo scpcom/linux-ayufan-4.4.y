@@ -348,7 +348,6 @@ ixp_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 	return 0;
 }
 
-
 /*
  * Free a session.
  */
@@ -382,7 +381,6 @@ ixp_freesession(device_t dev, u_int64_t tid)
 	}
 	return 0;
 }
-
 
 /*
  * callback for when hash processing is complete
@@ -564,7 +562,6 @@ done:
 	kmem_cache_free(qcache, q);
 }
 
-
 /*
  * because we cannot process the Q from the Register callback
  * we do it here on a task Q.
@@ -655,7 +652,6 @@ ixp_register_cb(UINT32 ctx_id, IX_MBUF *bufp, IxCryptoAccStatus status)
 	schedule_work(&ixp->ixp_pending_work);
 }
 
-
 /*
  * callback for when data processing is complete
  */
@@ -691,7 +687,6 @@ ixp_perform_cb(
 	crypto_done(q->ixp_q_crp);
 	kmem_cache_free(qcache, q);
 }
-
 
 /*
  * registration is not callable at IRQ time,  so we defer
@@ -927,12 +922,10 @@ done:
 	return 0;
 }
 
-
 #ifdef __ixp46X
 /*
  * key processing support for the ixp465
  */
-
 
 /*
  * copy a BN (LE) into a buffer (BE) an fill out the op appropriately
@@ -1018,7 +1011,6 @@ ixp_copy_obuf(struct crparam *p, IxCryptoAccPkeEauOpResult *op, UINT32 *buf)
 	return 0;
 }
 
-
 /*
  * the parameter offsets for exp_mod
  */
@@ -1102,7 +1094,6 @@ ixp_kperform_cb(
 	spin_unlock_irqrestore(&ixp_pkq_lock, flags);
 }
 
-
 static int
 ixp_kprocess(device_t dev, struct cryptkop *krp, int hint)
 {
@@ -1115,7 +1106,6 @@ ixp_kprocess(device_t dev, struct cryptkop *krp, int hint)
 			krp->krp_param[IXP_PARAM_EXP].crp_nbits,
 			krp->krp_param[IXP_PARAM_MOD].crp_nbits,
 			krp->krp_param[IXP_PARAM_RES].crp_nbits);
-
 
 	if (krp->krp_op != CRK_MOD_EXP) {
 		krp->krp_status = EOPNOTSUPP;
@@ -1169,8 +1159,6 @@ err:
 	crypto_kdone(krp);
 	return (0);
 }
-
-
 
 #ifdef CONFIG_OCF_RANDOMHARVEST
 /*
@@ -1240,8 +1228,6 @@ ixp_read_random(void *arg, u_int32_t *buf, int maxwords)
 #endif /* CONFIG_OCF_RANDOMHARVEST */
 
 #endif /* __ixp46X */
-
-
 
 /*
  * our driver startup and shutdown routines

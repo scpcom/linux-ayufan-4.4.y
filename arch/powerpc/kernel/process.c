@@ -290,7 +290,6 @@ int set_dabr(unsigned long dabr)
 	mtspr(SPRN_DABR, dabr);
 #endif
 
-
 	return 0;
 }
 
@@ -379,7 +378,6 @@ struct task_struct *__switch_to(struct task_struct *prev,
 	if (unlikely(__get_cpu_var(current_dabr) != new->thread.dabr))
 		set_dabr(new->thread.dabr);
 #endif
-
 
 	new_thread = &new->thread;
 	old_thread = &current->thread;

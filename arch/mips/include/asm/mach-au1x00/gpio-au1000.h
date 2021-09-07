@@ -24,7 +24,6 @@
 
 #define MAKE_IRQ(intc, off)	(AU1000_INTC##intc##_INT_BASE + (off))
 
-
 static inline int au1000_gpio1_to_irq(int gpio)
 {
 	return MAKE_IRQ(1, gpio - ALCHEMY_GPIO1_BASE);
@@ -537,7 +536,6 @@ static inline int alchemy_irq_to_gpio(int irq)
 
 #ifndef CONFIG_GPIOLIB
 
-
 #ifndef CONFIG_ALCHEMY_GPIO_INDIRECT	/* case (4) */
 
 static inline int gpio_direction_input(int gpio)
@@ -591,9 +589,7 @@ static inline void gpio_free(unsigned gpio)
 
 #endif	/* !CONFIG_ALCHEMY_GPIO_INDIRECT */
 
-
 #else	/* CONFIG GPIOLIB */
-
 
  /* using gpiolib to provide up to 2 gpio_chips for on-chip gpios */
 #ifndef CONFIG_ALCHEMY_GPIO_INDIRECT	/* case (2) */
@@ -608,7 +604,6 @@ static inline void gpio_free(unsigned gpio)
 #include <asm-generic/gpio.h>
 
 #endif	/* !CONFIG_ALCHEMY_GPIO_INDIRECT */
-
 
 #endif	/* !CONFIG_GPIOLIB */
 

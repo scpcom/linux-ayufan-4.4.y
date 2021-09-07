@@ -27,7 +27,6 @@
  *
  */
 
-
 #if defined(CONFIG_SERIAL_LH7A40X_CONSOLE) && defined(CONFIG_MAGIC_SYSRQ)
 #define SUPPORT_SYSRQ
 #endif
@@ -105,7 +104,6 @@
 #define EPS		(0x04)	/* Even Parity Set */
 #define FEN		(0x10)	/* FIFO Enable */
 #define BRK		(0x01)	/* Send Break */
-
 
 struct uart_port_lh7a40x {
 	struct uart_port port;
@@ -249,7 +247,6 @@ static irqreturn_t lh7a40xuart_int (int irq, void* dev_id)
 	struct uart_port* port = dev_id;
 	unsigned int cLoopLimit = ISR_LOOP_LIMIT;
 	unsigned int isr = UR (port, UART_R_ISR);
-
 
 	do {
 		if (isr & (RxInt | RxTimeoutInt))
@@ -548,7 +545,6 @@ static void lh7a40xuart_console_write (struct console* co,
 	struct uart_port* port = &lh7a40x_ports[co->index].port;
 	unsigned int con = UR (port, UART_R_CON);
 	unsigned int inten = UR (port, UART_R_INTEN);
-
 
 	UR (port, UART_R_INTEN) = 0;		/* Disable all interrupts */
 	BIT_SET (port, UART_R_CON, UARTEN | SIRDIS); /* Enable UART */

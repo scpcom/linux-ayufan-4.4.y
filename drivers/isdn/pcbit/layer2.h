@@ -33,8 +33,6 @@
 
 #define LOAD_RETRY      18000000
 
-
-
 /* TAM - XX - C - S  - NUM */
 #define PREHDR_LEN 8
 /* TT  - M  - I - TH - TD  */      
@@ -144,7 +142,6 @@ static __inline__ struct pcbit_dev * chan2dev(struct pcbit_chan * chan)
         struct pcbit_dev * dev;
         int i;
 
-
         for (i=0; i<MAX_PCBIT_CARDS; i++)
                 if ((dev=dev_pcbit[i]))
                         if (dev->b1 == chan || dev->b2 == chan)
@@ -164,7 +161,6 @@ static __inline__ struct pcbit_dev * finddev(int id)
 	return dev;
   return NULL;
 }
-
 
 /*
  *  Support routines for reading and writing in the board
@@ -277,12 +273,4 @@ static __inline__ void memcpy_frompcbit(struct pcbit_dev * dev, u_char * data, i
     }
 }
 
-
 #endif
-
-
-
-
-
-
-

@@ -14,7 +14,6 @@
  *
  */
 
-
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/pci.h>
@@ -80,7 +79,6 @@ static ssize_t local_cpus_show(struct device *dev,
 	buf[len] = '\0';
 	return len;
 }
-
 
 static ssize_t local_cpulist_show(struct device *dev,
 			struct device_attribute *attr, char *buf)

@@ -270,7 +270,6 @@ pat_query_module(ulong pcell_loc, ulong mod_index)
 	return PDC_OK;
 }
 
-
 /* pat pdc can return information about a variety of different
  * types of memory (e.g. firmware,i/o, etc) but we only care about
  * the usable physical ram right now. Since the firmware specific
@@ -422,7 +421,6 @@ static void __init sprockets_memconfig(void)
 #define sprockets_memconfig() pagezero_memconfig()
 
 #endif	/* !CONFIG_64BIT */
-
 
 #ifndef CONFIG_PA20
 

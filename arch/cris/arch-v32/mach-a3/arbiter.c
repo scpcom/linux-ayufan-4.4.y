@@ -519,7 +519,6 @@ int crisv32_arbiter_unwatch(int id)
 
 extern void show_registers(struct pt_regs *regs);
 
-
 static irqreturn_t
 crisv32_foo_arbiter_irq(int irq, void *dev_id)
 {
@@ -631,4 +630,3 @@ crisv32_bar_arbiter_irq(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
-

@@ -139,7 +139,6 @@ static void br_flood(struct net_bridge *br, struct sk_buff *skb,
 	kfree_skb(skb);
 }
 
-
 /* called with rcu_read_lock */
 void br_flood_deliver(struct net_bridge *br, struct sk_buff *skb)
 {

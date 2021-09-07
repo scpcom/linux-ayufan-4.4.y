@@ -41,7 +41,6 @@
 /* found that USB transmission queue is going to be full, it will       */
 /* not allow packets with lower priority to enter the USB channel.      */
 
-
 /* Structure for USB call back functions */
 struct zfCbUsbFuncTbl {
     void (*zfcbUsbRecv)(zdev_t *dev, zbuf_t *buf);
@@ -62,7 +61,6 @@ struct zfCbUsbFuncTbl {
 
 /* When USB data transfer completed in endpoint 1, OAL shall call this function */
 /* void (*zfcbUsbOutComplete)(zdev_t* dev, zbuf_t *buf, u8_t status, u8_t *hdr); */
-
 
 /* Call out functions                                                   */
 /* Below are the functions that supply by the OAL for 80211core to      */

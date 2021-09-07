@@ -38,7 +38,6 @@ u32 bfi_image_cb_size;
 u32 *bfi_image_ct;
 u32 *bfi_image_cb;
 
-
 #define	BFAD_FW_FILE_CT	"ctfw.bin"
 #define	BFAD_FW_FILE_CB	"cbfw.bin"
 MODULE_FIRMWARE(BFAD_FW_FILE_CT);
@@ -94,4 +93,3 @@ bfi_image_ct_get_chunk(u32 off)
 u32 *
 bfi_image_cb_get_chunk(u32 off)
 { return (u32 *)(bfi_image_cb + off); }
-

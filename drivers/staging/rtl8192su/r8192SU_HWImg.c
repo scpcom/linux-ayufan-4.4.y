@@ -4899,4 +4899,3 @@ u32 Rtl8192SUAGCTAB_Array[AGCTAB_ArrayLength] = {
 0xc78,0x721e001e,
 0xc78,0x721f001e,
 };
-

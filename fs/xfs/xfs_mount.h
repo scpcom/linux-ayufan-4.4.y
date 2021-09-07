@@ -66,7 +66,6 @@ struct xfs_nameops;
 struct xfs_ail;
 struct xfs_quotainfo;
 
-
 /*
  * Prototypes and functions for the Data Migration subsystem.
  */
@@ -107,7 +106,6 @@ typedef struct xfs_dmops {
 	(*(mp)->m_dm_ops->xfs_send_mount)(mp,right,path,name)
 #define XFS_SEND_UNMOUNT(mp, ip,right,mode,rval,fl) \
 	(*(mp)->m_dm_ops->xfs_send_unmount)(mp,ip,right,mode,rval,fl)
-
 
 #ifdef HAVE_PERCPU_SB
 
@@ -283,7 +281,6 @@ typedef struct xfs_mount {
 #define XFS_MOUNT_FILESTREAMS	(1ULL << 24)	/* enable the filestreams
 						   allocator */
 #define XFS_MOUNT_NOATTR2	(1ULL << 25)	/* disable use of attr2 format */
-
 
 /*
  * Default minimum read and write sizes.

@@ -8,7 +8,6 @@
  * archive for more details.
  */
 
-
 #ifndef __SAVAGEFB_H__
 #define __SAVAGEFB_H__
 
@@ -25,7 +24,6 @@
 # define DBG(x)
 # define SavagePrintRegs(...)
 #endif
-
 
 #define PCI_CHIP_SAVAGE4      0x8a22
 #define PCI_CHIP_SAVAGE3D     0x8a20
@@ -51,8 +49,6 @@
 #define PCI_CHIP_SUPSAV_IX64DDR		0x8c2d
 #define PCI_CHIP_SUPSAV_IXCSDR		0x8c2e
 #define PCI_CHIP_SUPSAV_IXCDDR		0x8c2f
-
-
 
 #define S3_SAVAGE3D_SERIES(chip)  ((chip>=S3_SAVAGE3D) && (chip<=S3_SAVAGE_MX))
 
@@ -174,7 +170,6 @@ struct savage_reg {
 
 #define NR_PALETTE	256
 
-
 struct savagefb_par;
 
 struct savagefb_i2c_chan {
@@ -249,7 +244,6 @@ struct savagefb_par {
 #define BCI_BD_BW_DISABLE            0x10000000
 #define BCI_BD_SET_BPP(bd, bpp)      ((bd) |= (((bpp) & 0xFF) << 16))
 #define BCI_BD_SET_STRIDE(bd, st)    ((bd) |= ((st) & 0xFFFF))
-
 
 /* IO functions */
 static inline u8 savage_in8(u32 addr, struct savagefb_par *par)
@@ -409,6 +403,5 @@ extern void savagefb_fillrect(struct fb_info *info,
 			      const struct fb_fillrect *rect);
 extern void savagefb_imageblit(struct fb_info *info,
 			       const struct fb_image *image);
-
 
 #endif /* __SAVAGEFB_H__ */

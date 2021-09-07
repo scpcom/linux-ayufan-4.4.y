@@ -579,13 +579,11 @@ static VOID RTMPInsertRsnIeCap(
 
 	pRSN_Cap = (RSN_CAPABILITIES*)(pRsnIe + (*rsn_len));
 
-
 	pRSN_Cap->word = cpu2le16(pRSN_Cap->word);
 
 	(*rsn_len) += sizeof(RSN_CAPABILITIES);	// update current RSNIE length
 
 }
-
 
 /*
 	========================================================================
@@ -681,7 +679,6 @@ VOID RTMPMakeRSNIE(
 
 	hex_dump("The primary RSNIE", pRsnIe, (*rsnielen_cur_p));
 
-
 }
 
 /*
@@ -711,10 +708,8 @@ BOOLEAN RTMPCheckWPAframe(
 	ULONG	Body_len;
 	BOOLEAN Cancelled;
 
-
     if(DataByteCount < (LENGTH_802_1_H + LENGTH_EAPOL_H))
         return FALSE;
-
 
 	// Skip LLC header
     if (NdisEqualMemory(SNAP_802_1H, pData, 6) ||
@@ -792,7 +787,6 @@ VOID	AES_GTK_KEY_UNWRAP(
 	UCHAR       *R;
 	INT         num_blocks = c_len/8;	// unit:64bits
 
-
 	os_alloc_mem(NULL, (PUCHAR *)&R, 512);
 
 	if (R == NULL)
@@ -830,7 +824,6 @@ VOID	AES_GTK_KEY_UNWRAP(
 	{
 		plaintext[i] = R[i];
 	}
-
 
 	os_free_mem(NULL, R);
 }

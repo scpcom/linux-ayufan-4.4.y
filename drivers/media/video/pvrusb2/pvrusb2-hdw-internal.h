@@ -124,7 +124,6 @@ struct pvr2_ctl_info {
 	} def;
 };
 
-
 /* Same as pvr2_ctl_info, but includes storage for the control description */
 #define PVR2_CTLD_INFO_DESC_SIZE 32
 struct pvr2_ctld_info {
@@ -136,8 +135,6 @@ struct pvr2_ctrl {
 	const struct pvr2_ctl_info *info;
 	struct pvr2_hdw *hdw;
 };
-
-
 
 /* Disposition of firmware1 loading situation */
 #define FW1_STATE_UNKNOWN 0
@@ -266,7 +263,6 @@ struct pvr2_hdw {
 
 	/* Place to block while waiting for state changes */
 	wait_queue_head_t state_wait_data;
-
 
 	int force_dirty;        /* consider all controls dirty if true */
 	int flag_ok;            /* device in known good state */

@@ -41,7 +41,6 @@ struct qeth_ipato_entry {
 	int mask_bits;
 };
 
-
 void qeth_l3_ipaddr4_to_string(const __u8 *, char *);
 int qeth_l3_string_to_ipaddr4(const char *, __u8 *);
 void qeth_l3_ipaddr6_to_string(const __u8 *, char *);

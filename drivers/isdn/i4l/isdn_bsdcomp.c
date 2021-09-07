@@ -298,7 +298,6 @@ static void bsd_free (void *state)
 	}
 }
 
-
 /*
  * Allocate space for a (de) compressor.
  */

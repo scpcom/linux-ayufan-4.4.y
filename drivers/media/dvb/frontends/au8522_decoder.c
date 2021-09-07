@@ -47,7 +47,6 @@ MODULE_LICENSE("GPL");
 
 static int au8522_analog_debug;
 
-
 module_param_named(analog_debug, au8522_analog_debug, int, 0644);
 
 MODULE_PARM_DESC(analog_debug,
@@ -57,7 +56,6 @@ struct au8522_register_config {
 	u16 reg_name;
 	u8 reg_val[8];
 };
-
 
 /* Video Decoder Filter Coefficients
    The values are as follows from left to right
@@ -98,7 +96,6 @@ struct au8522_register_config filter_coef[] = {
 };
 #define NUM_FILTER_COEF (sizeof(filter_coef)\
 			 / sizeof(struct au8522_register_config))
-
 
 /* Registers 0x060b through 0x0652 are the LP Filter coefficients
    The values are as follows from left to right

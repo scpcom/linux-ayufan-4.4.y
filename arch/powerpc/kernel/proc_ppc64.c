@@ -119,4 +119,3 @@ static int page_map_mmap( struct file *file, struct vm_area_struct *vma )
 						dp->size, vma->vm_page_prot);
 	return 0;
 }
-

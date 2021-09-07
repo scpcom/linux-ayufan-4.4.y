@@ -40,7 +40,6 @@ struct fsl_pq_mdio {
 	u8 res4[2728];
 } __attribute__ ((packed));
 
-
 int fsl_pq_mdio_read(struct mii_bus *bus, int mii_id, int regnum);
 int fsl_pq_mdio_write(struct mii_bus *bus, int mii_id, int regnum, u16 value);
 int fsl_pq_local_mdio_write(struct fsl_pq_mdio __iomem *regs, int mii_id,

@@ -13,7 +13,6 @@
 #include <asm/io.h>
 #include <mach-se/mach/se7206.h>
 
-
 static inline void delay(void)
 {
 	ctrl_inw(0x20000000);  /* P2 ROM Area */

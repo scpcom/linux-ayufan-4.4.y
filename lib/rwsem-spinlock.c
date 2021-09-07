@@ -173,7 +173,6 @@ int __down_read_trylock(struct rw_semaphore *sem)
 	unsigned long flags;
 	int ret = 0;
 
-
 	spin_lock_irqsave(&sem->wait_lock, flags);
 
 	if (sem->activity >= 0 && list_empty(&sem->wait_list)) {

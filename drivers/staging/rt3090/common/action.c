@@ -39,11 +39,9 @@
 #include "../rt_config.h"
 #include "../action.h"
 
-
 static VOID ReservedAction(
 	IN PRTMP_ADAPTER pAd,
 	IN MLME_QUEUE_ELEM *Elem);
-
 
 /*
     ==========================================================================
@@ -91,7 +89,6 @@ VOID ActionStateMachineInit(
 	StateMachineSetAction(S, ACT_IDLE, MT2_MLME_QOS_CATE, (STATE_MACHINE_FUNC)MlmeQOSAction);
 	StateMachineSetAction(S, ACT_IDLE, MT2_MLME_DLS_CATE, (STATE_MACHINE_FUNC)MlmeDLSAction);
 	StateMachineSetAction(S, ACT_IDLE, MT2_ACT_INVALID, (STATE_MACHINE_FUNC)MlmeInvalidAction);
-
 
 }
 
@@ -338,8 +335,6 @@ VOID PeerDLSAction(
 }
 #endif // QOS_DLS_SUPPORT //
 
-
-
 #ifdef DOT11_N_SUPPORT
 VOID PeerBAAction(
 	IN PRTMP_ADAPTER pAd,
@@ -360,7 +355,6 @@ VOID PeerBAAction(
 			break;
 	}
 }
-
 
 #ifdef DOT11N_DRAFT3
 
@@ -386,7 +380,6 @@ VOID StaPublicAction(
 		pAd->Mlme.CntlMachine.CurrState = CNTL_WAIT_OID_LIST_SCAN;
 	}
 }
-
 
 /*
 Description : Build Intolerant Channel Rerpot from Trigger event table.
@@ -430,7 +423,6 @@ ULONG BuildIntolerantChannelRep(
 	return FrameLen;
 }
 
-
 /*
 Description : Send 20/40 BSS Coexistence Action frame If one trigger event is triggered.
 */
@@ -471,7 +463,6 @@ VOID Send2040CoexistAction(
 
 }
 
-
 /*
 	==========================================================================
 	Description:
@@ -501,7 +492,6 @@ VOID Update2040CoexistFrameAndNotify(
 	}
 }
 #endif // CONFIG_STA_SUPPORT //
-
 
 BOOLEAN ChannelSwitchSanityCheck(
 	IN	PRTMP_ADAPTER	pAd,
@@ -534,7 +524,6 @@ BOOLEAN ChannelSwitchSanityCheck(
 
 	return TRUE;
 }
-
 
 VOID ChannelSwitchAction(
 	IN	PRTMP_ADAPTER	pAd,
@@ -650,7 +639,6 @@ VOID PeerPublicAction(
 				DBGPRINT(RT_DEBUG_TRACE, ("ACTION - 20/40 BSS Coexistence Management action----> \n"));
 				hex_dump("CoexistenceMgmtFrame", Elem->Msg, Elem->MsgLen);
 
-
 				pCoexistInfo = (BSS_2040_COEXIST_ELEMENT *) &Elem->Msg[LENGTH_802_11+2];
 				//hex_dump("CoexistInfo", (PUCHAR)pCoexistInfo, sizeof(BSS_2040_COEXIST_ELEMENT));
 				if (Elem->MsgLen >= (LENGTH_802_11 + sizeof(BSS_2040_COEXIST_ELEMENT) + sizeof(BSS_2040_INTOLERANT_CH_REPORT)))
@@ -679,7 +667,6 @@ VOID PeerPublicAction(
 #endif // DOT11_N_SUPPORT //
 
 }
-
 
 static VOID ReservedAction(
 	IN PRTMP_ADAPTER pAd,
@@ -715,7 +702,6 @@ static VOID respond_ht_information_exchange_action(
 	ULONG			FrameLen;
 	FRAME_HT_INFO	HTINFOframe, *pFrame;
 	UCHAR			*pAddr;
-
 
 	// 2. Always send back ADDBA Response
 	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);	 //Get an unused nonpaged memory
@@ -756,7 +742,6 @@ static VOID respond_ht_information_exchange_action(
 	MlmeFreeMemory(pAd, pOutBuffer);
 }
 
-
 #ifdef DOT11N_DRAFT3
 VOID SendNotifyBWActionFrame(
 	IN PRTMP_ADAPTER pAd,
@@ -768,7 +753,6 @@ VOID SendNotifyBWActionFrame(
 	FRAME_ACTION_HDR	Frame;
 	ULONG			FrameLen;
 	PUCHAR			pAddr1;
-
 
 	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);  //Get an unused nonpaged memory
 	if(NStatus != NDIS_STATUS_SUCCESS)
@@ -793,13 +777,11 @@ VOID SendNotifyBWActionFrame(
 	*(pOutBuffer + FrameLen) = pAd->CommonCfg.AddHTInfo.AddHtInfo.RecomWidth;
 	FrameLen++;
 
-
 	MiniportMMRequest(pAd, QID_AC_BE, pOutBuffer, FrameLen);
 	DBGPRINT(RT_DEBUG_TRACE,("ACT - SendNotifyBWAction(NotifyBW= %d)!\n", pAd->CommonCfg.AddHTInfo.AddHtInfo.RecomWidth));
 
 }
 #endif // DOT11N_DRAFT3 //
-
 
 VOID PeerHTAction(
 	IN PRTMP_ADAPTER pAd,
@@ -873,7 +855,6 @@ VOID PeerHTAction(
 	}
 }
 
-
 /*
 	==========================================================================
 	Description:
@@ -920,7 +901,6 @@ VOID ORIBATimerTimeout(
 	}
 }
 
-
 VOID SendRefreshBAR(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	MAC_TABLE_ENTRY	*pEntry)
@@ -957,7 +937,6 @@ VOID SendRefreshBAR(
 			}
 
 			Sequence = pEntry->TxSeq[TID];
-
 
 #ifdef CONFIG_STA_SUPPORT
 			IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -1015,13 +994,11 @@ VOID BarHeaderInit(
 	pCntlBar->BarControl.Compressed = 1;
 	pCntlBar->BarControl.ACKPolicy = 0;
 
-
 	pCntlBar->Duration = 16 + RTMPCalcDuration(pAd, RATE_1, sizeof(FRAME_BA));
 
 	COPY_MAC_ADDR(pCntlBar->Addr1, pDA);
 	COPY_MAC_ADDR(pCntlBar->Addr2, pSA);
 }
-
 
 /*
 	==========================================================================

@@ -233,7 +233,6 @@ void __init MMU_init_hw(void)
 	printk("Total memory = %lldMB; using %ldkB for hash table (at %p)\n",
 	       (unsigned long long)(total_memory >> 20), Hash_size >> 10, Hash);
 
-
 	/*
 	 * Patch up the instructions in hashtable.S:create_hpte
 	 */

@@ -347,7 +347,6 @@
 #define reg_intr_vect_r_guru___jtag___bit 0
 #define reg_intr_vect_r_guru_offset 16
 
-
 /* Constants */
 #define regk_intr_vect_off                        0x00000000
 #define regk_intr_vect_on                         0x00000001

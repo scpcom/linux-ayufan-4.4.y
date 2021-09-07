@@ -72,7 +72,6 @@ void PHY_SetRF8256Bandwidth(struct net_device* dev , HT_CHANNEL_WIDTH Bandwidth)
 					RT_TRACE(COMP_ERR, "PHY_SetRF8256Bandwidth(): unknown hardware version\n");
 				}
 
-
 				break;
 			default:
 				RT_TRACE(COMP_ERR, "PHY_SetRF8256Bandwidth(): unknown Bandwidth: %#X\n",Bandwidth );
@@ -237,7 +236,6 @@ phy_RF8256_Config_ParaFile_Fail:
 	return RT_STATUS_FAILURE;
 }
 
-
 void PHY_SetRF8256CCKTxPower(struct net_device*	dev, u8	powerlevel)
 {
 	u32	TxAGC=0;
@@ -292,7 +290,6 @@ void PHY_SetRF8256CCKTxPower(struct net_device*	dev, u8	powerlevel)
 	#endif
 #endif
 }
-
 
 void PHY_SetRF8256OFDMTxPower(struct net_device* dev, u8 powerlevel)
 {
@@ -612,7 +609,6 @@ SetRFPowerState8190(
 					// 2008.09.30 add
 					rtl8192_setBBreg(dev, rFPGA0_AnalogParameter2, 0x20000000, 0x0); // 0x884
 
-
 					//disable clock 80/88 MHz 2008.09.30 mark
 					//PHY_SetBBReg(Adapter, rFPGA0_AnalogParameter1, 0x4, 0x0); // 0x880[2]
 					//2 BB
@@ -704,8 +700,6 @@ SetRFPowerState8190(
 	RT_TRACE(COMP_POWER, "<=========== SetRFPowerState8190() bResult = %d!\n", bResult);
 	return bResult;
 }
-
-
 
 //
 //	Description:
@@ -890,7 +884,6 @@ MlmeDisassociateRequest(
 
 }
 
-
 static void
 MgntDisconnectAP(
 	struct net_device* dev,
@@ -934,7 +927,6 @@ MgntDisconnectAP(
 			write_nic_dword(dev, RCR,RegRCR);
 			priv->ReceiveConfig = RegRCR;
 
-
 	}
 	// 2004.10.11, by rcnjko.
 	//MlmeDisassociateRequest( Adapter, pMgntInfo->Bssid, disas_lv_ss );
@@ -943,7 +935,6 @@ MgntDisconnectAP(
 	priv->ieee80211->state = IEEE80211_NOLINK;
 	//pMgntInfo->AsocTimestamp = 0;
 }
-
 
 static bool
 MgntDisconnect(
@@ -1082,7 +1073,6 @@ MgntActSet_RF_State(
 			priv->ieee80211->RfOffReason = 0;
 			bActionAllowed = true;
 
-
 			if(rtState == eRfOff && ChangeSource >=RF_CHANGE_BY_HW )
 			{
 				bConnectBySSID = true;
@@ -1109,7 +1099,6 @@ MgntActSet_RF_State(
 				// 2007.05.28, by shien chang.
 
 			}
-
 
 		priv->ieee80211->RfOffReason |= ChangeSource;
 		bActionAllowed = true;
@@ -1157,5 +1146,3 @@ MgntActSet_RF_State(
 	RT_TRACE(COMP_POWER, "<===MgntActSet_RF_State()\n");
 	return bActionAllowed;
 }
-
-

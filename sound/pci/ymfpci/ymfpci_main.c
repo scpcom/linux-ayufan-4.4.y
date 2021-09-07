@@ -1601,7 +1601,6 @@ static int snd_ymfpci_put_dup4ch(struct snd_kcontrol *kcontrol, struct snd_ctl_e
 	return change;
 }
 
-
 static struct snd_kcontrol_new snd_ymfpci_controls[] __devinitdata = {
 {
 	.iface = SNDRV_CTL_ELEM_IFACE_MIXER,
@@ -1637,7 +1636,6 @@ YMFPCI_SINGLE(SNDRV_CTL_NAME_IEC958("Loop",NONE,NONE), 0, YDSXGR_SPDIFINCTRL, 4)
 	.put = snd_ymfpci_put_dup4ch,
 },
 };
-
 
 /*
  * GPIO
@@ -1777,7 +1775,6 @@ static struct snd_kcontrol_new snd_ymfpci_pcm_volume __devinitdata = {
 	.put = snd_ymfpci_pcm_vol_put,
 };
 
-
 /*
  *  Mixer routines
  */
@@ -1873,7 +1870,6 @@ int __devinit snd_ymfpci_mixer(struct snd_ymfpci *chip, int rear_switch)
 	return 0;
 }
 
-
 /*
  * timer
  */
@@ -1951,7 +1947,6 @@ int __devinit snd_ymfpci_timer(struct snd_ymfpci *chip, int device)
 	chip->timer = timer;
 	return err;
 }
-
 
 /*
  *  proc interface

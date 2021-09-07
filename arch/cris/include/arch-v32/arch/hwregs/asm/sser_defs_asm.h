@@ -405,7 +405,6 @@
 #define reg_sser_r_masked_intr___r958err___bit 8
 #define reg_sser_r_masked_intr_offset 40
 
-
 /* Constants */
 #define regk_sser_both                            0x00000002
 #define regk_sser_bulk                            0x00000001

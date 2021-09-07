@@ -82,7 +82,6 @@ static inline void shutdown_jiffies_counter(void)
 
 #endif /* !__ASSEMBLY__ */
 
-
 /*
  * timestamp counter specifications
  */

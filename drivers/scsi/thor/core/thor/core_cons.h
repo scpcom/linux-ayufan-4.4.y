@@ -26,4 +26,3 @@ extern void Core_InternalSendRequest(MV_PVOID This, PMV_Request pReq);
 #define CONS_SEND_REQUEST	Core_InternalSendRequest
 
 #endif
-

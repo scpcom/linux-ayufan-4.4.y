@@ -1030,7 +1030,6 @@ int load_kernel(void)
 	return err;
 }
 
-
 void symbol__init(void)
 {
 	elf_version(EV_CURRENT);

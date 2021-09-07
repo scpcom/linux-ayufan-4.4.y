@@ -15,7 +15,6 @@ Major Change History:
 Notes:
 	This file is ported from RTL8185B Windows driver.
 
-
 --*/
 
 /*--------------------------Include File------------------------------------*/
@@ -27,7 +26,6 @@ Notes:
 #include "r8180_wx.h"
 
 #include "ieee80211/dot11d.h"
-
 
 //#define CONFIG_RTL8180_IO_MAP
 
@@ -58,7 +56,6 @@ static u8 MAC_REG_TABLE[][2]={
 			{0xC9, 0x22}, {0xCA, 0x22}, {0xCB, 0x22}, {0xCC, 0x22}, {0xCD, 0x22},//lzm add 080826
                         {0xe2, 0x00},
 
-
                         //PAGE 2:
                         {0x5e, 0x02},
                         {0x0c, 0x04}, {0x4c, 0x30}, {0x4d, 0x08}, {0x50, 0x05}, {0x51, 0xf5},
@@ -72,7 +69,6 @@ static u8 MAC_REG_TABLE[][2]={
                         //PAGA 0:
                         {0x5e, 0x00},{0x9f, 0x03}
                 };
-
 
 static u8  ZEBRA_AGC[]={
 			0,
@@ -140,7 +136,6 @@ PlatformIOWrite2Byte(
 	write_nic_word(dev, offset, data);
 	read_nic_word(dev, offset); // To make sure write operation is completed, 2005.11.09, by rcnjko.
 
-
 }
 u8 PlatformIORead1Byte(struct net_device *dev, u32 offset);
 
@@ -206,7 +201,6 @@ PlatformIORead1Byte(
 
 	data = read_nic_byte(dev, offset);
 
-
 	return data;
 }
 
@@ -220,7 +214,6 @@ PlatformIORead2Byte(
 
 	data = read_nic_word(dev, offset);
 
-
 	return data;
 }
 
@@ -233,7 +226,6 @@ PlatformIORead4Byte(
 	u32	data = 0;
 
 	data = read_nic_dword(dev, offset);
-
 
 	return data;
 }
@@ -329,7 +321,6 @@ ZEBRA_RFSerialWrite(
 	SetOutputEnableOfRfPins(dev);
 }
 //by amy
-
 
 int
 HwHSSIThreeWire(
@@ -601,7 +592,6 @@ HwThreeWire(
 	return bResult;
 }
 
-
 void
 RF_WriteReg(
 	struct net_device *dev,
@@ -615,7 +605,6 @@ RF_WriteReg(
 	u8			low2high;
 	//u32			RF_Read = 0;
 	struct r8180_priv *priv = (struct r8180_priv *)ieee80211_priv(dev);
-
 
 	switch(priv->rf_chip)
 	{
@@ -679,7 +668,6 @@ RF_WriteReg(
 			}
 			break;
 
-
 		default:
 			DMESGE("RF_WriteReg(): invalid RegThreeWireMode(%d) !!!", priv->RegThreeWireMode);
 			break;
@@ -691,7 +679,6 @@ RF_WriteReg(
 		break;
 	}
 }
-
 
 void
 ZEBRA_RFSerialRead(
@@ -817,7 +804,6 @@ ZEBRA_RFSerialRead(
 	//PlatformEFIOWrite2Byte(pAdapter, RFPinsOutput, 0x0480);
 }
 
-
 u32
 RF_ReadReg(
 	struct net_device *dev,
@@ -886,7 +872,6 @@ RF_ReadReg(
 
 	return dataRead;
 }
-
 
 // by Owen on 04/07/14 for writing BB register successfully
 void
@@ -1024,11 +1009,9 @@ ZEBRA_Config_85BASIC_HardCode(
 	u32	u4bRegOffset, u4bRegValue, u4bRF23, u4bRF24;
        u8			u1b24E;
 
-
 	//=============================================================================
 	// 87S_PCIE :: RADIOCFG.TXT
 	//=============================================================================
-
 
 	// Page1 : reg16-reg30
 	RF_WriteReg(dev, 0x00, 0x013f);			mdelay(1); // switch to page1
@@ -1064,7 +1047,6 @@ ZEBRA_Config_85BASIC_HardCode(
 	RF_WriteReg(dev, 0x0e, 0x0020);			mdelay(1);
 	RF_WriteReg(dev, 0x0f, 0x0990);			mdelay(1);
 
-
 	// Page1 : reg16-reg30
 	RF_WriteReg(dev, 0x00, 0x013f);			mdelay(1);
 
@@ -1082,7 +1064,6 @@ ZEBRA_Config_85BASIC_HardCode(
 		RF_WriteReg(dev, 0x05, 0x059b);			mdelay(1);
 		RF_WriteReg(dev, 0x06, 0x0081);			mdelay(1);
 	}
-
 
 	RF_WriteReg(dev, 0x07, 0x01A0);			mdelay(1);
 // Don't write RF23/RF24 to make a difference between 87S C cut and D cut. asked by SD3 stevenl.
@@ -1220,8 +1201,6 @@ ZEBRA_Config_85BASIC_HardCode(
 	write_nic_byte(dev, OFDM_TXAGC, 0x1B);
 	write_nic_byte(dev, ANTSEL, 0x03);
 
-
-
 	//=============================================================================
 	// AGC.txt
 	//=============================================================================
@@ -1278,7 +1257,6 @@ ZEBRA_Config_85BASIC_HardCode(
 //by amy 080312}
 //by amy for antenna
 }
-
 
 void
 UpdateInitialGain(
@@ -1362,7 +1340,6 @@ UpdateInitialGain(
 				write_phy_ofdm(dev, 0x05, 0xfc);	mdelay(1);
 				break;
 
-
 			default:	//MP
 				//DMESG("RTL8187 + 8225 Initial Gain State 1: -82 dBm (default)\n");
 				write_phy_ofdm(dev, 0x17, 0x26);	mdelay(1);
@@ -1371,7 +1348,6 @@ UpdateInitialGain(
 				break;
 		}
 		break;
-
 
 	default:
 		DMESG("UpdateInitialGain(): unknown RFChipID: %#X\n", priv->rf_chip);
@@ -1438,9 +1414,6 @@ PhyConfig8185(
 	return;
 }
 
-
-
-
 void
 HwConfigureRTL8185(
 		struct net_device *dev
@@ -1490,7 +1463,6 @@ HwConfigureRTL8185(
 		val8 = val8 | 0x01 ;
 	}
 
-
 	write_nic_byte(dev, TXAGC_CTL, val8);
 
 	// Tx Antenna including Feedback control
@@ -1528,8 +1500,6 @@ HwConfigureRTL8185(
 	write_nic_byte(dev, RATE_FALLBACK, val8);
 }
 
-
-
 static void
 MacConfig_85BASIC_HardCode(
 	struct net_device *dev)
@@ -1562,8 +1532,6 @@ MacConfig_85BASIC_HardCode(
 	}
 	//============================================================================
 }
-
-
 
 static void
 MacConfig_85BASIC(
@@ -1613,9 +1581,6 @@ MacConfig_85BASIC(
 //by amy
 
 }
-
-
-
 
 u8
 GetSupportedWirelessMode8185(
@@ -1714,7 +1679,6 @@ ActUpdateChannelAccessSetting(
 	// this setting is copied from rtl8187B.  xiong-2006-11-13
 	if(bFollowLegacySetting)
 	{
-
 
 		//
 		// Follow 802.11 seeting to AC parameter, all AC shall use the same parameter.
@@ -1844,7 +1808,6 @@ ActUpdateChannelAccessSetting(
 			}
 		}
 
-
 	}
 }
 
@@ -1888,7 +1851,6 @@ ActSetWirelessMode8185(
 			btWirelessMode = WIRELESS_MODE_B;
 		}
 	}
-
 
 	// 2. Swtich band: RF or BB specific actions,
 	// for example, refresh tables in omc8255, or change initial gain if necessary.
@@ -1994,14 +1956,12 @@ MlmeDisassociateRequest(
 		//ShuChen TODO: What to do when disassociate.
 		DrvIFIndicateDisassociation(dev, unspec_reason);
 
-
 	//	pMgntInfo->AsocTimestamp = 0;
 		for(i=0;i<6;i++)  priv->ieee80211->current_network.bssid[i] = 0x22;
 //		pMgntInfo->mBrates.Length = 0;
 //		Adapter->HalFunc.SetHwRegHandler( Adapter, HW_VAR_BASIC_RATE, (pu1Byte)(&pMgntInfo->mBrates) );
 
 		ieee80211_disassociate(priv->ieee80211);
-
 
 	}
 
@@ -2203,7 +2163,6 @@ MgntActSet_RF_State(
 #endif
 	rtState = priv->eRFPowerState;
 
-
 	switch(StateToSet)
 	{
 	case eRfOn:
@@ -2252,8 +2211,6 @@ MgntActSet_RF_State(
 //				PlatformZeroMemory( pMgntInfo->bssDesc4Query, sizeof(RT_WLAN_BSS)*MAX_BSS_DESC );
 //				pMgntInfo->NumBssDesc4Query = 0;
 			}
-
-
 
 		priv->RfOffReason |= ChangeSource;
 		bActionAllowed = true;
@@ -2606,7 +2563,6 @@ void rtl8185b_adapter_start(struct net_device *dev)
 
  }
 
-
 void rtl8185b_rx_enable(struct net_device *dev)
 {
 	u8 cmd;
@@ -2670,12 +2626,9 @@ void rtl8185b_tx_enable(struct net_device *dev)
 
 	//write_nic_dword(dev,TX_CONF,txconf);
 
-
 /*
 	rtl8180_set_mode(dev,EPROM_CMD_CONFIG);
 	write_nic_byte(dev, TX_DMA_POLLING, priv->dma_poll_mask);
 	rtl8180_set_mode(dev,EPROM_CMD_NORMAL);
 	*/
 }
-
-

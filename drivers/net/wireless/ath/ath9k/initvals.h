@@ -1232,7 +1232,6 @@ static const u32 ar5416Bank6_9100[][3] = {
     { 0x000098d0, 0x0000000f, 0x0010000f },
 };
 
-
 static const u32 ar5416Bank6TPC_9100[][3] = {
 
     { 0x0000989c, 0x00000000, 0x00000000 },
@@ -5318,7 +5317,6 @@ static const u_int32_t ar9287Modes_tx_gain_9287_1_0[][6] = {
     { 0x0000a274, 0x0a180000, 0x0a180000, 0x0a1aa000, 0x0a1aa000, 0x0a1aa000 },
 };
 
-
 static const u_int32_t ar9287Modes_rx_gain_9287_1_0[][6] = {
     /* Address      5G-HT20     5G-HT40     2G-HT40     2G-HT20     Turbo   */
     { 0x00009a00, 0x00000000, 0x00000000, 0x0000a120, 0x0000a120, 0x0000a120 },
@@ -6363,7 +6361,6 @@ static const u_int32_t ar9287PciePhy_clkreq_off_L1_9287_1_1[][2] = {
     {0x00004040,  0x00043007 },
     {0x00004044,  0x00000000 },
 };
-
 
 /* AR9271 initialization values automaticaly created: 03/23/09 */
 static const u_int32_t ar9271Modes_9271_1_0[][6] = {

@@ -39,9 +39,6 @@
 */
 #include "../rt_config.h"
 
-
-
-
 /*
 	========================================================================
 
@@ -259,7 +256,6 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 		// Zero init this memory block
 		NdisZeroMemory(pAd->RxDescRing.AllocVa, pAd->RxDescRing.AllocSize);
 
-
 		printk("RX DESC %p  size = %ld\n", pAd->RxDescRing.AllocVa,
 					pAd->RxDescRing.AllocSize);
 
@@ -318,7 +314,6 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 
 	}	while (FALSE);
 
-
 	NdisZeroMemory(&pAd->FragFrame, sizeof(FRAGMENT_FRAME));
 	pAd->FragFrame.pFragPacket =  RTMP_AllocateFragPacketBuffer(pAd, RX_BUFFER_NORMSIZE);
 
@@ -340,7 +335,6 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 	DBGPRINT_S(Status, ("<-- RTMPAllocTxRxRingMemory, Status=%x\n", Status));
 	return Status;
 }
-
 
 /*
 	========================================================================
@@ -394,7 +388,6 @@ VOID	NICInitTxRxRingAndBacklogQueue(
 
 	pAd->PrivateInfo.TxRingFullCnt       = 0;
 }
-
 
 /*
 	========================================================================
@@ -538,7 +531,6 @@ VOID	RTMPRingCleanUp(
 	}
 }
 
-
 NDIS_STATUS AdapterBlockAllocateMemory(
 	IN PVOID	handle,
 	OUT	PVOID	*ppAd)
@@ -561,7 +553,6 @@ NDIS_STATUS AdapterBlockAllocateMemory(
 		return (NDIS_STATUS_FAILURE);
 	}
 }
-
 
 void RTMP_AllocateTxDescMemory(
 	IN	PRTMP_ADAPTER pAd,
@@ -613,7 +604,6 @@ void RTMP_FreeRxDescMemory(
 
 	PCI_FREE_CONSISTENT(pObj->pci_dev, Length, VirtualAddress, PhysicalAddress);
 }
-
 
 void RTMP_AllocateFirstTxBuffer(
 	IN	PRTMP_ADAPTER pAd,
@@ -755,7 +745,6 @@ VOID RTMPFreeTxRxRingMemory(
 	DBGPRINT(RT_DEBUG_TRACE, ("<-- RTMPFreeTxRxRingMemory\n"));
 }
 
-
 /*
  * FUNCTION: Allocate a packet buffer for DMA
  * ARGUMENTS:
@@ -793,7 +782,6 @@ PNDIS_PACKET RTMP_AllocateRxPacketBuffer(
 
 	return (PNDIS_PACKET) pkt;
 }
-
 
 VOID Invalid_Remaining_Packet(
 	IN	PRTMP_ADAPTER pAd,
@@ -850,7 +838,6 @@ PNDIS_PACKET GetPacketFromRxRing(
 		goto done;
 	}
 
-
 	// return rx descriptor
 	NdisMoveMemory(pSaveRxD, pRxD, RXD_SIZE);
 
@@ -894,4 +881,3 @@ done:
 	return pRxPacket;
 }
 /* End of 2860_rtmp_init.c */
-

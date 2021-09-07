@@ -73,7 +73,6 @@ that reside in a different clock domain to the processor bus */
 /* Link layer registers */
 #define OX820SATA_SERROR_IRQ_MASK (5)
 
-
 #define OX820SATA_WIN0_OFF_MASK  (0xffff0000)
 #define OX820SATA_WIN0_OFF_OFF   (16)
 #define OX820SATA_WIN0_CONT_ERR  (1 << 15)
@@ -164,8 +163,6 @@ that reside in a different clock domain to the processor bus */
 #define OX820SATA_RAW_BIST_FIS        (OX820SATA_INT_BIST_FIS       << 16)
 #define OX820SATA_RAW_WANT            (OX820SATA_INT_WANT           << 16)
 #define OX820SATA_RAW_ERRORS          (OX820SATA_INT_ERRORS         << 16)
-
-
 
 /** SATA core register offsets */
 #define OX820SATA_DM_DBG1             ( SATACORE_REGS_BASE + 0x000 )
@@ -272,7 +269,6 @@ an interrupt */
 /* Final EOTs */
 #define OX820SATA_SGDMA_REQQUAL     (0x00220001)
 
-
 #define OX820SATA_DMA_CORESIZE      (0x20)
 #define OX820SATA_DMA_BASE0         ((u32* )(SATADMA_REGS_BASE + (0 * OX820SATA_DMA_CORESIZE)))
 #define OX820SATA_DMA_BASE1         ((u32* )(SATADMA_REGS_BASE + (1 * OX820SATA_DMA_CORESIZE)))
@@ -356,7 +352,6 @@ disk (bus B) */
 #define OX820SATA_DPE_CIPHER \
     (OX820SATA_DPE_CTL_ENABLE | OX820SATA_DPE_PASSTHRU)
     
-
 #define OX820SATA_DPE_STATUS          ( SATADPE_REGS_BASE + 0x04 )
 #define OX820SATA_DPE_STS_IDLE        (1 <<  0)
 #define OX820SATA_DPE_STS_RX_SPACE    (1 <<  2)

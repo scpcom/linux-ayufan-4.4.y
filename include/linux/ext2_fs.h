@@ -348,7 +348,6 @@ struct ext2_inode {
 #define EXT2_MOUNT_GRPQUOTA		0x040000  /* group quota */
 #define EXT2_MOUNT_RESERVATION		0x080000  /* Preallocation */
 
-
 #define clear_opt(o, opt)		o &= ~EXT2_MOUNT_##opt
 #define set_opt(o, opt)			o |= EXT2_MOUNT_##opt
 #define test_opt(sb, opt)		(EXT2_SB(sb)->s_mount_opt & \

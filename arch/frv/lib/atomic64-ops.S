@@ -17,7 +17,6 @@
 	.text
 	.balign 4
 
-
 ###############################################################################
 #
 # long long atomic64_inc_return(atomic64_t *v)
@@ -159,4 +158,3 @@ __cmpxchg_64:
 	bralr
 
 	.size		__cmpxchg_64, .-__cmpxchg_64
-

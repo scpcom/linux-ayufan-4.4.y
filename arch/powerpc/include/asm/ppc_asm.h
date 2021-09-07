@@ -350,7 +350,6 @@ BEGIN_FTR_SECTION			\
 END_FTR_SECTION_IFCLR(CPU_FTR_601)
 #endif
 
-	
 /*
  * This instruction is not implemented on the PPC 603 or 601; however, on
  * the 403GCX and 405GP tlbia IS defined and tlbie is not.
@@ -367,7 +366,6 @@ END_FTR_SECTION_IFCLR(CPU_FTR_601)
 	addi	r4,r4,0x1000;			\
 	bdnz	0b
 #endif
-
 
 #ifdef CONFIG_IBM440EP_ERR42
 #define PPC440EP_ERR42 isync
@@ -462,7 +460,6 @@ END_FTR_SECTION_IFCLR(CPU_FTR_601)
 #define	cr6	6
 #define	cr7	7
 
-
 /* General Purpose Registers (GPRs) */
 
 #define	r0	0
@@ -497,7 +494,6 @@ END_FTR_SECTION_IFCLR(CPU_FTR_601)
 #define	r29	29
 #define	r30	30
 #define	r31	31
-
 
 /* Floating Point Registers (FPRs) */
 

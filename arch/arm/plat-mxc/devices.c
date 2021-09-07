@@ -34,4 +34,3 @@ int __init mxc_register_device(struct platform_device *pdev, void *data)
 
 	return ret;
 }
-

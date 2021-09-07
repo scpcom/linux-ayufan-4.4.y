@@ -55,7 +55,6 @@
 #include "iwl-sta.h"
 #include "iwl-calib.h"
 
-
 /******************************************************************************
  *
  * module boiler plate
@@ -80,7 +79,6 @@
 #endif
 
 #define DRV_VERSION     IWLWIFI_VERSION VD VS
-
 
 MODULE_DESCRIPTION(DRV_DESCRIPTION);
 MODULE_VERSION(DRV_VERSION);
@@ -669,7 +667,6 @@ static void iwl_rx_card_state_notif(struct iwl_priv *priv,
 	else
 		clear_bit(STATUS_RF_KILL_HW, &priv->status);
 
-
 	if (!(flags & RXON_CARD_DISABLED))
 		iwl_scan_cancel(priv);
 
@@ -1240,7 +1237,6 @@ static void iwl_irq_tasklet(struct iwl_priv *priv)
 			 inta & ~priv->inta_mask);
 	}
 
-
 	/* Re-enable all interrupts */
 	/* only Re-enable if diabled by irq */
 	if (test_bit(STATUS_INT_ENABLED, &priv->status))
@@ -1249,7 +1245,6 @@ static void iwl_irq_tasklet(struct iwl_priv *priv)
 	spin_unlock_irqrestore(&priv->lock, flags);
 
 }
-
 
 /******************************************************************************
  *
@@ -1272,7 +1267,6 @@ static void iwl_nic_start(struct iwl_priv *priv)
 	/* Remove all resets to allow NIC to operate */
 	iwl_write32(priv, CSR_RESET, 0);
 }
-
 
 /**
  * iwl_read_ucode - Read uCode images from disk file.
@@ -1806,7 +1800,6 @@ static void iwl_alive_start(struct iwl_priv *priv)
 			iwl_mac_beacon_update(priv->hw, beacon);
 	}
 
-
 	if (test_and_clear_bit(STATUS_MODE_PENDING, &priv->status))
 		iwl_set_mode(priv, priv->iw_mode);
 
@@ -2062,7 +2055,6 @@ static int __iwl_up(struct iwl_priv *priv)
 	return -EIO;
 }
 
-
 /*****************************************************************************
  *
  * Workqueue callbacks
@@ -2182,10 +2174,8 @@ void iwl_post_associate(struct iwl_priv *priv)
 	IWL_DEBUG_ASSOC(priv, "Associated as %d to: %pM\n",
 			priv->assoc_id, priv->active_rxon.bssid_addr);
 
-
 	if (test_bit(STATUS_EXIT_PENDING, &priv->status))
 		return;
-
 
 	if (!priv->vif || !priv->is_open)
 		return;
@@ -2628,9 +2618,7 @@ static ssize_t store_debug_level(struct device *d,
 static DEVICE_ATTR(debug_level, S_IWUSR | S_IRUGO,
 			show_debug_level, store_debug_level);
 
-
 #endif /* CONFIG_IWLWIFI_DEBUG */
-
 
 static ssize_t show_temperature(struct device *d,
 				struct device_attribute *attr, char *buf)
@@ -2760,7 +2748,6 @@ static ssize_t store_filter_flags(struct device *d,
 static DEVICE_ATTR(filter_flags, S_IWUSR | S_IRUGO, show_filter_flags,
 		   store_filter_flags);
 
-
 static ssize_t show_statistics(struct device *d,
 			       struct device_attribute *attr, char *buf)
 {
@@ -2798,7 +2785,6 @@ static ssize_t show_statistics(struct device *d,
 }
 
 static DEVICE_ATTR(statistics, S_IRUGO, show_statistics, NULL);
-
 
 /*****************************************************************************
  *
@@ -2957,7 +2943,6 @@ static int iwl_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 		goto out_pci_disable_device;
 
 	pci_set_drvdata(pdev, priv);
-
 
 	/***********************
 	 * 3. Read REV register
@@ -3161,7 +3146,6 @@ static void __devexit iwl_pci_remove(struct pci_dev *pdev)
 	iwl_clear_stations_table(priv);
 	iwl_eeprom_free(priv);
 
-
 	/*netif_stop_queue(dev); */
 	flush_workqueue(priv->workqueue);
 
@@ -3188,7 +3172,6 @@ static void __devexit iwl_pci_remove(struct pci_dev *pdev)
 
 	ieee80211_free_hw(priv->hw);
 }
-
 
 /*****************************************************************************
  *
@@ -3293,4 +3276,3 @@ MODULE_PARM_DESC(debug50, "50XX debug output mask (deprecated)");
 module_param_named(debug, iwl_debug_level, uint, 0644);
 MODULE_PARM_DESC(debug, "debug output mask");
 #endif
-

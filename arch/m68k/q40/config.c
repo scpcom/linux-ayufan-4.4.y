@@ -61,7 +61,6 @@ static struct console q40_console_driver = {
 	.index	= -1,
 };
 
-
 /* early debugging function:*/
 extern char *q40_mem_cptr; /*=(char *)0xff020000;*/
 static int _cpleft;
@@ -197,18 +196,15 @@ void __init config_q40(void)
 	mach_max_dma_address = 1024*1024*1024;
 }
 
-
 int q40_parse_bootinfo(const struct bi_record *rec)
 {
 	return 1;
 }
 
-
 static unsigned long q40_gettimeoffset(void)
 {
 	return 5000 * (ql_ticks != 0);
 }
-
 
 /*
  * Looks like op is non-zero for setting the clock, and zero for
@@ -293,7 +289,6 @@ static int q40_set_clock_mmss(unsigned long nowtime)
 
 	return retval;
 }
-
 
 /* get and set PLL calibration of RTC clock */
 #define Q40_RTC_PLL_MASK ((1<<5)-1)

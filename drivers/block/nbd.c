@@ -444,7 +444,6 @@ static void nbd_clear_que(struct nbd_device *lo)
 	}
 }
 
-
 static void nbd_handle_req(struct nbd_device *lo, struct request *req)
 {
 	if (!blk_fs_request(req))

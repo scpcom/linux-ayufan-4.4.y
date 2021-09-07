@@ -471,7 +471,6 @@ static DECLARE_INTC_DESC_ACK(intc_irq_desc, "sh7763-irq", irq_vectors,
 			     NULL, irq_mask_registers, irq_prio_registers,
 			     irq_sense_registers, irq_ack_registers);
 
-
 /* External interrupt pins in IRL mode */
 static struct intc_vect irl_vectors[] __initdata = {
 	INTC_VECT(IRL_LLLL, 0x200), INTC_VECT(IRL_LLLH, 0x220),

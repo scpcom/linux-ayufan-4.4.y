@@ -17,7 +17,6 @@
 #define CCW_CLAW_CMD_READFF          0x22      /* read an FF */
 #define CCW_CLAW_CMD_SENSEID         0xe4      /* Sense ID */
 
-
 /*-----------------------------------------------------*
 *    CLAW Unique constants                             *
 *------------------------------------------------------*/
@@ -332,11 +331,8 @@ struct claw_privbk {
 
 };
 
-
 /************************************************************/
 /* define global constants                                  */
 /************************************************************/
 
 #define CCWBK_SIZE sizeof(struct ccwbk)
-
-

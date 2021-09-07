@@ -46,7 +46,6 @@ static int          msglevel                =MSG_LEVEL_INFO;
 
 /*---------------------  Export Definitions -------------------------*/
 
-
 static SChannelTblElement sChannelTbl[CB_MAX_CHANNEL+1] =
 {
   {0,   0,    FALSE},
@@ -107,8 +106,6 @@ static SChannelTblElement sChannelTbl[CB_MAX_CHANNEL+1] =
   {161, 5805, TRUE}, //55
   {165, 5825, TRUE}  //56
 };
-
-
 
 /************************************************************************
  * The Radar regulation rules for each country
@@ -435,7 +432,6 @@ CHvChannelGetList (
     memcpy(pbyChannelTable, ChannelRuleTab[uCountryCodeIdx].bChannelIdxList, CB_MAX_CHANNEL);
     return (TRUE);
 }
-
 
 VOID CHvInitChannelTable (PVOID pDeviceHandler)
 {

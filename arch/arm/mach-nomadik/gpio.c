@@ -88,7 +88,6 @@ int nmk_gpio_get_mode(int gpio)
 }
 EXPORT_SYMBOL(nmk_gpio_get_mode);
 
-
 /* IRQ functions */
 static inline int nmk_gpio_get_bitmask(int gpio)
 {
@@ -360,7 +359,6 @@ static int nmk_gpio_remove(struct amba_device *dev)
 	return 0;
 }
 
-
 /* We have 0x1f080060 and 0x1f180060, accept both using the mask */
 static struct amba_id nmk_gpio_ids[] = {
 	{
@@ -392,5 +390,3 @@ arch_initcall(nmk_gpio_init);
 MODULE_AUTHOR("Prafulla WADASKAR and Alessandro Rubini");
 MODULE_DESCRIPTION("Nomadik GPIO Driver");
 MODULE_LICENSE("GPL");
-
-

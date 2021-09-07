@@ -32,7 +32,6 @@
 #include "envy24ht.h"
 #include "vt1720_mobo.h"
 
-
 static int __devinit k8x800_init(struct snd_ice1712 *ice)
 {
 	ice->vt1720 = 1;
@@ -87,7 +86,6 @@ static unsigned char sn25p_eeprom[] __devinitdata = {
 	[ICE_EEP2_GPIO_STATE2] = 0x00,	/* - */
 };
 
-
 /* entry point */
 struct snd_ice1712_card_info snd_vt1720_mobo_cards[] __devinitdata = {
 	{
@@ -137,4 +135,3 @@ struct snd_ice1712_card_info snd_vt1720_mobo_cards[] __devinitdata = {
 	},
 	{ } /* terminator */
 };
-

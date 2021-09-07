@@ -34,7 +34,6 @@ u32 mv_device_cs1_base_get(void);
 #include "sysmap_rd78xx0_H3C.h"
 #include "sysmap_db632x.h"
 
-
 static u32 mv_pci_mem_base[] = 
 {
 	PCI0_MEM0_BASE,
@@ -59,7 +58,6 @@ static u32 mv_pci_io_base[] =
 	PCI7_IO_BASE, 
 };
 
-
 static MV_TARGET mv_pci_io_target[] = 
 {
 	PCI0_IO,
@@ -71,8 +69,6 @@ static MV_TARGET mv_pci_io_target[] =
 	PCI6_IO, 
 	PCI7_IO, 
 };
-
-	
 
 u32 mv_pci_mem_base_get(int ifNum)
 {
@@ -116,7 +112,6 @@ MV_TARGET mv_pci_io_target_get(int ifNum)
 		panic("%s: error, PCI %d does not exist\n", __FUNCTION__, ifNum);
 	return 0;
 }
-
 
 int mv_is_pci_io_mapped(int ifNum)
 {
@@ -178,7 +173,6 @@ int mv_pci_if_num_to_skip(void)
 	}
 }
 
-
 #if defined(CONFIG_MV_INCLUDE_CESA)
 u32 mv_crypto_base_get(void)
 {
@@ -186,8 +180,6 @@ u32 mv_crypto_base_get(void)
 }
 EXPORT_SYMBOL(mv_crypto_base_get);
 #endif
-
-
 
 #if !defined(CONFIG_MV_INTERNAL_REGS_SELECTIVE_MAPPING)
 void __init mv_map_io(void)
@@ -218,7 +210,6 @@ void __init mv_map_io(void)
         }	
 }
 #endif
-
 
 /*	Dynamic configuration accroding to setting in power management register.
 	If unit is powered down during the boot (bit is 0 in Power Management Register ), 
@@ -253,7 +244,6 @@ void __init mv_map_io(void)
 	TDM			0xB0000		64K		24
 	
 */
-
 
 #if defined(CONFIG_MV_INTERNAL_REGS_SELECTIVE_MAPPING)
 /* need to make sure it is big enough to hold all mapping entries */
@@ -351,5 +341,3 @@ void __init mv_map_io(void)
 }
 
 #endif /* CONFIG_MV_INTERNAL_REGS_SELECTIVE_MAPPING */
-
-

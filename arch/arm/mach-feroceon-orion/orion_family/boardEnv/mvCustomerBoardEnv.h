@@ -62,14 +62,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvBoardCustomerEnvSpech
 #define __INCmvBoardCustomerEnvSpech
 
-
 /* Customer based boards ID numbers */
 /* =============================== */
-
 
 #define RD_88F5181L_CUS1_MPP0_7	       	0x55000000
 #define RD_88F5181L_CUS1_MPP8_15	0x0
@@ -82,6 +79,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DB_CUSTOMER1_ID				(BOARD_ID_CUSTOMER_BASE+0x0)
 
 #define BOARD_ID_CUSTOMER_MAX			(BOARD_ID_CUSTOMER_BASE+0x1)
-
 
 #endif /* __INCmvBoardCustomerEnvSpech */

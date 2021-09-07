@@ -493,7 +493,6 @@ static int __init mip6_init(void)
 		goto mip6_rawv6_mh_fail;
 	}
 
-
 	return 0;
 
  mip6_rawv6_mh_fail:

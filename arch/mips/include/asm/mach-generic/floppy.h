@@ -108,7 +108,6 @@ static inline void fd_free_irq(void)
 
 #define fd_free_irq()           free_irq(FLOPPY_IRQ, NULL);
 
-
 static inline unsigned long fd_getfdaddr1(void)
 {
 	return 0x3f0;

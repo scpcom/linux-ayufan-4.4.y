@@ -80,7 +80,6 @@ static inline void gfs2_inum_out(const struct gfs2_inode *ip,
 	dent->de_inum.no_addr = cpu_to_be64(ip->i_no_addr);
 }
 
-
 extern void gfs2_set_iop(struct inode *inode);
 extern struct inode *gfs2_inode_lookup(struct super_block *sb, unsigned type, 
 				       u64 no_addr, u64 no_formal_ino,
@@ -129,4 +128,3 @@ static inline int gfs2_localflocks(const struct gfs2_sbd *sdp)
 #endif /* CONFIG_GFS2_FS_LOCKING_DLM */
 
 #endif /* __INODE_DOT_H__ */
-

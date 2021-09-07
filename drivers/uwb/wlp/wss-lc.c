@@ -166,7 +166,6 @@ error_kobject_register:
 	return result;
 }
 
-
 /**
  * Release WSS
  *
@@ -240,7 +239,6 @@ int wlp_wss_enroll_discovered(struct wlp_wss *wss, struct wlp_uuid *wssid)
 	struct wlp_wssid_e *wssid_e;
 	char buf[WLP_WSS_UUID_STRSIZE];
 	int result = -ENXIO;
-
 
 	mutex_lock(&wlp->nbmutex);
 	list_for_each_entry(neighbor, &wlp->neighbors, node) {
@@ -800,7 +798,6 @@ int wlp_wss_prep_hdr(struct wlp *wlp, struct wlp_eda_node *eda_entry,
 	return result;
 }
 
-
 /**
  * Prepare skb for neighbor: connect if not already and prep WLP header
  *
@@ -901,7 +898,6 @@ int wlp_wss_send_copy(struct wlp *wlp, struct wlp_eda_node *eda_entry,
 out:
 	return result;
 }
-
 
 /**
  * Setup WSS

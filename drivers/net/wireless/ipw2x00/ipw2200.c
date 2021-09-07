@@ -33,7 +33,6 @@
 #include <linux/sched.h>
 #include "ipw2200.h"
 
-
 #ifndef KBUILD_EXTMOD
 #define VK "k"
 #else
@@ -103,7 +102,6 @@ static int antenna = CFG_SYS_ANTENNA_BOTH;
 #ifdef CONFIG_IPW2200_PROMISCUOUS
 static int rtap_iface = 0;     /* def: 0 -- do not create rtap interface */
 #endif
-
 
 #ifdef CONFIG_IPW2200_QOS
 static int qos_enable = 0;
@@ -3322,7 +3320,6 @@ static int ipw_reset_nic(struct ipw_priv *priv)
 	IPW_DEBUG_TRACE("<<\n");
 	return rc;
 }
-
 
 struct ipw_fw {
 	__le32 ver;
@@ -7246,7 +7243,6 @@ static int ipw_qos_set_tx_queue_command(struct ipw_priv *priv,
 					struct tfd_data *tfd)
 {
 	int tx_queue_id = 0;
-
 
 	tx_queue_id = from_priority_to_tx_queue[priority] - 1;
 	tfd->tx_flags_ext |= DCT_FLAG_EXT_QOS_ENABLED;

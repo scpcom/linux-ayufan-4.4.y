@@ -273,8 +273,8 @@ _GLOBAL(mpc85xx_enter_deep_sleep)
 	lis	r3, 0xf00e
 	lwz	r4, 0x84(r3)
 	clrlwi	r4, r4, 16
-	oris	r4, r4, 0x12a3
-	stw	r4, 0x84(r3)
+ 	oris	r4, r4, 0x12a3
+ 	stw	r4, 0x84(r3)
 	lwz	r4, 0x84(r3)
 
 	/* set deep sleep bit in POWMGTSCR */
@@ -282,8 +282,8 @@ _GLOBAL(mpc85xx_enter_deep_sleep)
 	lwz	r8, powmgtreq@l(r3)
 
 	lis	r3, 0xf00e
-	mr	r4, r8
-	stw	r4, 0x80(r3)
+ 	mr	r4, r8
+ 	stw	r4, 0x80(r3)
 	lwz	r4, 0x80(r3)		/* read-back to flush write */
 	twi	0, r4, 0
 	isync
@@ -598,7 +598,6 @@ mpc85xx_deep_resume:
 	mtdec	r3
 
 	blr
-
 
 _GLOBAL(mpc85xx_cpu_down)
        stwu    r1,-16(r1)

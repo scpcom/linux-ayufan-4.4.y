@@ -1074,4 +1074,3 @@ void zfcp_dbf_adapter_unregister(struct zfcp_dbf *dbf)
 	dbf->adapter->dbf = NULL;
 	kfree(dbf);
 }
-

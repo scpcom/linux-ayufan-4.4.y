@@ -60,7 +60,6 @@
 static unsigned long next_mmu_context;
 static unsigned long context_map[LAST_CONTEXT / BITS_PER_LONG + 1];
 
-
 /*
  * Set up the context for a new address space.
  */

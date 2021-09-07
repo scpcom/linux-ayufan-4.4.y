@@ -124,7 +124,6 @@ u32 tfrc_tx_hist_rtt(struct tfrc_tx_hist_entry *head, const u64 seqno,
 	return rtt;
 }
 
-
 /*
  *	Receiver History Routines
  */

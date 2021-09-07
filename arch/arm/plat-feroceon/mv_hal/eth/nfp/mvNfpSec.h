@@ -165,7 +165,6 @@ typedef struct _mv_nfp_sec_cesa_priv {
 	MV_CESA_COMMAND		*pCesaCmd;
 } MV_NFP_SEC_CESA_PRIV;
 
-
 MV_NFP_SEC_SPD_RULE* mvNfpSecSPDRuleFind(MV_U32 dstIp, MV_U32 srcIp,
 	MV_U8 proto, MV_U16 dport, MV_U16 sport, MV_NFP_SEC_RULE_DB_DIR inOut);
 
@@ -190,4 +189,3 @@ MV_VOID mvNfpSecDbPrint(MV_VOID);
 #endif /* CONFIG_MV_ETH_NFP_SEC */
 
 #endif /* __mvNfpSec_h__ */
-

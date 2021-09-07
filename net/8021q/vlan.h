@@ -3,7 +3,6 @@
 
 #include <linux/if_vlan.h>
 
-
 /**
  *	struct vlan_priority_tci_mapping - vlan egress priority mappings
  *	@priority: skb priority

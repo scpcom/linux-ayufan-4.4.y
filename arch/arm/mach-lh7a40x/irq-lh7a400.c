@@ -51,7 +51,6 @@ static struct irq_chip lh7a400_gpio_chip = {
 	.unmask	= lh7a400_unmask_irq,
 };
 
-
   /* IRQ initialization */
 
 void __init lh7a400_init_irq (void)

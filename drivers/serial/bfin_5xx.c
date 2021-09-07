@@ -213,7 +213,6 @@ static void bfin_serial_enable_ms(struct uart_port *port)
 {
 }
 
-
 #if ANOMALY_05000363 && defined(CONFIG_SERIAL_BFIN_PIO)
 # define UART_GET_ANOMALY_THRESHOLD(uart)    ((uart)->anomaly_threshold)
 # define UART_SET_ANOMALY_THRESHOLD(uart, v) ((uart)->anomaly_threshold = (v))
@@ -1281,7 +1280,6 @@ console_initcall(bfin_serial_rs_console_init);
 #define BFIN_SERIAL_CONSOLE	NULL
 #endif /* CONFIG_SERIAL_BFIN_CONSOLE */
 
-
 #ifdef CONFIG_EARLY_PRINTK
 static __init void early_serial_putc(struct uart_port *port, int ch)
 {
@@ -1454,7 +1452,6 @@ static void __exit bfin_serial_exit(void)
 	platform_driver_unregister(&bfin_serial_driver);
 	uart_unregister_driver(&bfin_serial_reg);
 }
-
 
 module_init(bfin_serial_init);
 module_exit(bfin_serial_exit);

@@ -456,7 +456,6 @@ exit:
 	return retval;
 }
 
-
 static const struct i2c_algorithm smbus_algorithm = {
 	.smbus_xfer	= sis630_access,
 	.functionality	= sis630_func,
@@ -501,7 +500,6 @@ static void __devexit sis630_remove(struct pci_dev *dev)
 	}
 }
 
-
 static struct pci_driver sis630_driver = {
 	.name		= "sis630_smbus",
 	.id_table	= sis630_ids,
@@ -514,12 +512,10 @@ static int __init i2c_sis630_init(void)
 	return pci_register_driver(&sis630_driver);
 }
 
-
 static void __exit i2c_sis630_exit(void)
 {
 	pci_unregister_driver(&sis630_driver);
 }
-
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Alexander Malysh <amalysh@web.de>");

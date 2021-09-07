@@ -256,7 +256,6 @@ struct rndis_keepalive_c {	/* IN (optionally OUT) */
 #define FLAG_RNDIS_PHYM_NOT_WIRELESS	0x0001
 #define FLAG_RNDIS_PHYM_WIRELESS	0x0002
 
-
 extern void rndis_status(struct usbnet *dev, struct urb *urb);
 extern int
 rndis_command(struct usbnet *dev, struct rndis_msg_hdr *buf, int buflen);

@@ -100,7 +100,6 @@ static struct irqaction stmp3xxx_timer_irq = {
 	.dev_id		= &ckevt_timrot,
 };
 
-
 /*
  * Set up timer interrupt, and return the current time in seconds.
  */

@@ -255,7 +255,6 @@
 #define reg_gio_rw_pe_oe___oe___width 18
 #define reg_gio_rw_pe_oe_offset 88
 
-
 /* Constants */
 #define regk_gio_anyedge                          0x00000007
 #define regk_gio_hi                               0x00000001

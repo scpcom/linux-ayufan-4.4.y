@@ -17,7 +17,6 @@
 #include "pci-quirks.h"
 #include "xhci-ext-caps.h"
 
-
 #define UHCI_USBLEGSUP		0xc0		/* legacy support */
 #define UHCI_USBCMD		0		/* command register */
 #define UHCI_USBINTR		4		/* interrupt register */
@@ -53,7 +52,6 @@
 #define EHCI_USBLEGSUP_OS	(1 << 24)	/* OS semaphore */
 #define EHCI_USBLEGCTLSTS	4		/* legacy control/status */
 #define EHCI_USBLEGCTLSTS_SOOE	(1 << 13)	/* SMI on ownership change */
-
 
 /*
  * Make sure the controller is completely inactive, unable to

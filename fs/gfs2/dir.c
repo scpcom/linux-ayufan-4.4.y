@@ -84,7 +84,6 @@ typedef int (*leaf_call_t) (struct gfs2_inode *dip, u32 index, u32 len,
 typedef int (*gfs2_dscan_t)(const struct gfs2_dirent *dent,
 			    const struct qstr *name, void *opaque);
 
-
 int gfs2_dir_get_new_buffer(struct gfs2_inode *ip, u64 block,
 			    struct buffer_head **bhp)
 {
@@ -136,8 +135,6 @@ static int gfs2_dir_write_stuffed(struct gfs2_inode *ip, const char *buf,
 
 	return size;
 }
-
-
 
 /**
  * gfs2_dir_write_data - Write directory information to the inode
@@ -255,7 +252,6 @@ static int gfs2_dir_read_stuffed(struct gfs2_inode *ip, char *buf,
 
 	return (error) ? error : size;
 }
-
 
 /**
  * gfs2_dir_read_data - Read a data from a directory inode
@@ -525,7 +521,6 @@ consist_inode:
 	return ERR_PTR(-EIO);
 }
 
-
 /**
  * dirent_first - Return the first dirent
  * @dip: the directory
@@ -784,7 +779,6 @@ static struct gfs2_dirent *gfs2_dirent_search(struct inode *inode,
 
 		return error ? ERR_PTR(error) : NULL;
 	}
-
 
 	error = gfs2_meta_inode_buffer(ip, &bh);
 	if (error)
@@ -1664,7 +1658,6 @@ int gfs2_dir_add(struct inode *inode, const struct qstr *name,
 	return error;
 }
 
-
 /**
  * gfs2_dir_del - Delete a directory entry
  * @dip: The GFS2 inode
@@ -2025,4 +2018,3 @@ int gfs2_diradd_alloc_required(struct inode *inode, const struct qstr *name)
 	brelse(bh);
 	return 0;
 }
-

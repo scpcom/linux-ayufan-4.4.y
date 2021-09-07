@@ -660,7 +660,6 @@ static void __init xd_dtc_init_controller (unsigned int address)
 	outb(0,XD_RESET);		/* reset the controller */
 }
 
-
 static void __init xd_dtc5150cx_init_drive (u_char drive)
 {
 	/* values from controller's BIOS - BIOS chip may be removed */
@@ -1039,7 +1038,6 @@ static void __init xd_setparam (u_char command,u_char drive,u_char heads,u_short
 	if (xd_command(cmdblk,PIO_MODE,NULL,&cmdblk[6],NULL,XD_TIMEOUT * 2))
 		printk("xd: error setting characteristics for xd%c\n", 'a'+drive);
 }
-
 
 #ifdef MODULE
 

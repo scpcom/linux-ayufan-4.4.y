@@ -166,7 +166,6 @@ static int __snd_open(struct inode *inode, struct file *file)
 	return err;
 }
 
-
 /* BKL pushdown: nasty #ifdef avoidance wrapper */
 static int snd_open(struct inode *inode, struct file *file)
 {

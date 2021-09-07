@@ -13,13 +13,11 @@
  *
  */
 
-
 #include <linux/isdn.h>
 #include "isdn_x25iface.h"
 #include "isdn_net.h"
 #include <linux/concap.h>
 #include "isdn_concap.h"
-
 
 /* The following set of device service operations are for encapsulation
    protocols that require for reliable datalink semantics. That means:
@@ -38,7 +36,6 @@
    signaling on the D-channel) while the B-channel is down.
    */
 
-
 static int isdn_concap_dl_data_req(struct concap_proto *concap, struct sk_buff *skb)
 {
 	struct net_device *ndev = concap -> net_dev;
@@ -56,7 +53,6 @@ static int isdn_concap_dl_data_req(struct concap_proto *concap, struct sk_buff *
 	IX25DEBUG( "isdn_concap_dl_data_req: %s : isdn_net_send_skb returned %d\n", concap -> net_dev -> name, 0);
 	return 0;
 }
-
 
 static int isdn_concap_dl_connect_req(struct concap_proto *concap)
 {

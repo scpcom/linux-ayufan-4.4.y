@@ -93,8 +93,6 @@
 #	define ATA_12                0xa1      /* 12-byte pass-thru */
 #endif
 
-
-
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,11)
 #define PCI_D0 0
 #include <linux/suspend.h>
@@ -120,7 +118,6 @@ static inline int try_to_freeze(unsigned long refrigerator_flags)
 #define MV_INLINE inline
 #define CDB_INQUIRY_EVPD    1 
 
-
 typedef void (*OSSW_TIMER_FUNCTION)(unsigned long);
 typedef  void (*CORE_TIMER_FUNCTION)(void *);
 typedef  void (*OS_TIMER_FUNCTION)(void *);
@@ -133,7 +130,6 @@ typedef unsigned long OSSW_TIMER_DATA;
 /*Driver Version for Command Line Interface Query.*/
 #  define VER_MAJOR           1
 
-
 #   define VER_MINOR        2
 #   define VER_BUILD        24
 
@@ -144,7 +140,6 @@ typedef unsigned long OSSW_TIMER_DATA;
 #else
 #   define VER_OEM         VER_OEM_GENERIC
 #endif /* __OEM_INTEL__ */
-
 
 #ifdef RAID_DRIVER
 #   define VER_TEST         ""

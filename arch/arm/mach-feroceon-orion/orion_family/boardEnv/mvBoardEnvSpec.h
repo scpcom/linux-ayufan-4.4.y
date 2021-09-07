@@ -62,12 +62,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvBoardEnvSpech
 #define __INCmvBoardEnvSpech
 
 #include "mvSysHwConfig.h"
-
 
 /* For future use */
 #define BD_ID_DATA_START_OFFS	0x0
@@ -75,11 +73,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define BD_SYS_NUM_OFFS			0x4
 #define BD_NAME_OFFS			0x8
 
-
-
 /* MPP possible values in the remarks should be updated from the board
    sheet or taken from HW team */
-
 
 /* I2C bus addresses */
 #define MV_BOARD_CTRL_I2C_ADDR			0x0     /* Controller slave addr */
@@ -98,7 +93,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_BOARD_ID_EEPROM_OFFSET0              0x1F0		/* last 16byte in 0.5KByte EEPROMS */
 #define MV_BOARD_ID_EEPROM_OFFSET1              0x1FF0		/* last 16byte in 8KByte EEPROMS */
 #define MV_BOARD_I2C_MAGIC                      0xFEEDFEED
-
 
 #define BOOT_FLASH_INDEX					0
 #define MAIN_FLASH_INDEX					1
@@ -149,9 +143,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_DB_FPGA_TCLK			MV_BOARD_SYSCLK_250MHZ
 #define MV_BOARD_REF_CLOCK		3686400		/* Refrence Clock 3.6864MHz 	*/
 
-
-
-
 #include "mv88F1281BoardEnv.h"
 #include "mv88F5082BoardEnv.h"
 #include "mv88F5182BoardEnv.h"
@@ -163,6 +154,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mv88F6183BoardEnv.h"
 #include "mv88F6183LBoardEnv.h"
 #include "mvCustomerBoardEnv.h"
-
 
 #endif /* __INCmvBoardEnvSpech */

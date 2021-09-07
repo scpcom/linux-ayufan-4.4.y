@@ -49,7 +49,6 @@ struct au1xxx_irqmap __initdata au1xxx_irq_map[] = {
        { AU1500_GPIO_205, IRQF_TRIGGER_LOW, 0 },
 };
 
-
 void __init board_init_irq(void)
 {
 	au1xxx_setup_irqmap(au1xxx_irq_map, ARRAY_SIZE(au1xxx_irq_map));

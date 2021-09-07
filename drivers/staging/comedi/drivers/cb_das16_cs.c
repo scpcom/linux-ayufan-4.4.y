@@ -28,7 +28,6 @@ Author: ds
 Updated: Mon, 04 Nov 2002 20:04:21 -0800
 Status: experimental
 
-
 */
 
 #include <linux/interrupt.h>

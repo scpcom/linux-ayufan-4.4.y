@@ -26,7 +26,6 @@
 
 #include "mmc-twl4030.h"
 
-
 #if defined(CONFIG_REGULATOR) && \
 	(defined(CONFIG_MMC_OMAP_HS) || defined(CONFIG_MMC_OMAP_HS_MODULE))
 

@@ -6,7 +6,6 @@
  *	David Mosberger-Tang <davidm@hpl.hp.com>
  */
 
-
 #include <asm/io.h>		/* need byte IO */
 
 extern unsigned long MAX_DMA_ADDRESS;

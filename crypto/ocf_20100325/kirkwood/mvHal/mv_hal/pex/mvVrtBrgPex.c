@@ -86,7 +86,6 @@ MV_STATUS mvPexHwConfigWrite(MV_U32 pexIf, MV_U32 bus, MV_U32 dev,
                            MV_U32 func, MV_U32 regOff, MV_U32 data);
 void resetPexConfig(MV_U32 pexIf, MV_U32 bus, MV_U32 dev);
 
-
 PEX_HEADER_DATA configHdr[16] = 
 {
 {0x888811ab, 0x00000000}, /*[device ID, vendor ID] */
@@ -106,7 +105,6 @@ PEX_HEADER_DATA configHdr[16] =
 {0x00000000, 0x00000000},  /*[expansion ROM base address] */ 
 {0x00000000, 0x000000FF},  /*[bridge control, interrupt pin, interrupt line] */             
 };
-
 
 #define HEADER_WRITE(data, offset) configHdr[offset/4].data = ((configHdr[offset/4].data & ~configHdr[offset/4].mask) | \
 																(data & configHdr[offset/4].mask))
@@ -152,11 +150,9 @@ MV_STATUS mvPexVrtBrgInit(MV_U32 pexIf)
 	/* reset PEX tree to recover previous U-boot/Boot configurations */
 	MV_U32 localBus = mvPexLocalBusNumGet(pexIf);
 
-
 	resetPexConfig(pexIf, localBus, 1);
 	return MV_OK;
 }
-
 
 MV_U32 mvPexVrtBrgConfigRead (MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func, 
                         MV_U32 regOff)
@@ -214,7 +210,6 @@ MV_U32 mvPexVrtBrgConfigRead (MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func,
 	mvPexLocalDevNumSet(pexIf, localDev);	
 	return val;
 }
-
 
 MV_STATUS mvPexVrtBrgConfigWrite(MV_U32 pexIf, MV_U32 bus, MV_U32 dev, 
                            MV_U32 func, MV_U32 regOff, MV_U32 data)
@@ -276,9 +271,6 @@ MV_STATUS mvPexVrtBrgConfigWrite(MV_U32 pexIf, MV_U32 bus, MV_U32 dev,
 	return status;
 }
 
-
-
-
 void resetPexConfig(MV_U32 pexIf, MV_U32 bus, MV_U32 dev)
 {
 	MV_U32 tData;
@@ -309,5 +301,3 @@ void resetPexConfig(MV_U32 pexIf, MV_U32 bus, MV_U32 dev)
 		}
 	}
 }
-
-

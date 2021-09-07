@@ -30,5 +30,4 @@ static inline void restore_astate(int cpu)
 }
 #endif
 
-
 #endif /* _PASEMI_PASEMI_H */

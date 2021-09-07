@@ -308,4 +308,3 @@ aoechr_exit(void)
 	class_destroy(aoe_class);
 	unregister_chrdev(AOE_MAJOR, "aoechr");
 }
-

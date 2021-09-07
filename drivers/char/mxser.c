@@ -75,7 +75,6 @@
 #define PCI_DEVICE_ID_CB134I	0x1341
 #define PCI_DEVICE_ID_CP138U	0x1380
 
-
 #define C168_ASIC_ID    1
 #define C104_ASIC_ID    2
 #define C102_ASIC_ID	0xB
@@ -800,7 +799,6 @@ static int mxser_change_speed(struct tty_struct *tty,
 		}
 	}
 
-
 	outb(fcr, info->ioaddr + UART_FCR);	/* set fcr */
 	outb(cval, info->ioaddr + UART_LCR);
 
@@ -1060,7 +1058,6 @@ static void mxser_flush_buffer(struct tty_struct *tty)
 	char fcr;
 	unsigned long flags;
 
-
 	spin_lock_irqsave(&info->slock, flags);
 	info->xmit_cnt = info->xmit_head = info->xmit_tail = 0;
 
@@ -1073,7 +1070,6 @@ static void mxser_flush_buffer(struct tty_struct *tty)
 
 	tty_wakeup(tty);
 }
-
 
 static void mxser_close_port(struct tty_struct *tty, struct tty_port *port)
 {
@@ -1209,7 +1205,6 @@ static int mxser_put_char(struct tty_struct *tty, unsigned char ch)
 	}
 	return 1;
 }
-
 
 static void mxser_flush_chars(struct tty_struct *tty)
 {
@@ -1365,7 +1360,6 @@ static int mxser_tiocmget(struct tty_struct *tty, struct file *file)
 	unsigned char control, status;
 	unsigned long flags;
 
-
 	if (tty->index == MXSER_PORTS)
 		return -ENOIOCTLCMD;
 	if (test_bit(TTY_IO_ERROR, &tty->flags))
@@ -1391,7 +1385,6 @@ static int mxser_tiocmset(struct tty_struct *tty, struct file *file,
 {
 	struct mxser_port *info = tty->driver_data;
 	unsigned long flags;
-
 
 	if (tty->index == MXSER_PORTS)
 		return -ENOIOCTLCMD;

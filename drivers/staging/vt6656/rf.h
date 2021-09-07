@@ -55,8 +55,6 @@
 #define RF_EMU              0x80
 #define RF_MASK             0x7F
 
-
-
 /*---------------------  Export Classes  ----------------------------*/
 
 /*---------------------  Export Variables  --------------------------*/
@@ -95,6 +93,3 @@ BOOL s_bVT3226D0_11bLoCurrentAdjust(
     );
 
 #endif // __RF_H__
-
-
-

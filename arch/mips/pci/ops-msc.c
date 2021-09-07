@@ -81,7 +81,6 @@ static int msc_pcibios_config_access(unsigned char access_type,
 	return 0;
 }
 
-
 /*
  * We can't address 8 and 16 bit words directly.  Instead we have to
  * read/write a 32bit word and mask/modify the data we actually want.

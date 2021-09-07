@@ -311,12 +311,10 @@ static void atl1c_common_task(struct work_struct *work)
 	return;
 }
 
-
 static void atl1c_del_timer(struct atl1c_adapter *adapter)
 {
 	del_timer_sync(&adapter->phy_config_timer);
 }
-
 
 /*
  * atl1c_tx_timeout - Respond to a Tx Hang
@@ -959,7 +957,6 @@ static void atl1c_configure_des_ring(struct atl1c_adapter *adapter)
 				AT_DMA_LO_ADDR_MASK));
 	AT_WRITE_REG(hw, REG_TPD_RING_SIZE,
 			(u32)(tpd_ring[0].count & TPD_RING_SIZE_MASK));
-
 
 	/* RFD */
 	AT_WRITE_REG(hw, REG_RX_BASE_ADDR_HI,

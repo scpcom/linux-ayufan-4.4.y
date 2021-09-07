@@ -113,7 +113,6 @@
 #define SENSOR_PREFIX		"ibm,sensor-"
 #define cel_to_fahr(x)		((x*9/5)+32)
 
-
 /* Globals */
 static struct rtas_sensors sensors;
 static struct device_node *rtas_node = NULL;
@@ -695,7 +694,6 @@ static void check_location(struct seq_file *m, const char *c)
 	}
 }
 
-
 /* ****************************************************************** */
 /* 
  * Format: 
@@ -712,7 +710,6 @@ static void check_location_string(struct seq_file *m, const char *c)
 		c++;
 	}
 }
-
 
 /* ****************************************************************** */
 

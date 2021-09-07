@@ -46,7 +46,7 @@
 
 #include "setup.h"
 
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 extern char gszSynoHWVersion[];
 #endif
 
@@ -161,7 +161,6 @@ notrace unsigned long __init early_init(unsigned long dt_ptr)
 
 	return KERNELBASE + offset;
 }
-
 
 /*
  * Find out what kind of machine we're on and save any data we need
@@ -361,7 +360,7 @@ static int __init early_internal_hd_num(char *p)
 __setup("ihd_num=", early_internal_hd_num);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 static int __init early_internal_netif_num(char *p)
 {
 	g_internal_netif_num = simple_strtol(p, NULL, 10);
@@ -416,7 +415,6 @@ static int __init early_disk_seq_reserve(char *p)
 }
 __setup("DiskSeqReverse=", early_disk_seq_reserve);
 #endif
-
 
 /* Checks "l3cr=xxxx" command-line option */
 int __init ppc_setup_l3cr(char *str)

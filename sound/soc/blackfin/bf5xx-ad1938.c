@@ -139,4 +139,3 @@ module_exit(bf5xx_ad1938_exit);
 MODULE_AUTHOR("Barry Song");
 MODULE_DESCRIPTION("ALSA SoC AD1938 board driver");
 MODULE_LICENSE("GPL");
-

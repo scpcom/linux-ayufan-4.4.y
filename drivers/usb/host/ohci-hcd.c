@@ -103,12 +103,10 @@ static inline void sb800_prefetch(struct ohci_hcd *ohci, int on)
 }
 #endif
 
-
 #include "ohci-hub.c"
 #include "ohci-dbg.c"
 #include "ohci-mem.c"
 #include "ohci-q.c"
-
 
 /*
  * On architectures with edge-triggered interrupts we must never return
@@ -119,7 +117,6 @@ static inline void sb800_prefetch(struct ohci_hcd *ohci, int on)
 #else
 #define IRQ_NOTMINE	IRQ_NONE
 #endif
-
 
 /* Some boards misreport power switching/overcurrent */
 static int distrust_firmware = 1;
@@ -1058,7 +1055,6 @@ MODULE_LICENSE ("GPL");
 #define PLATFORM_DRIVER		ohci_hcd_sh_driver
 #endif
 
-
 #ifdef CONFIG_USB_OHCI_HCD_PPC_OF
 #include "ohci-ppc-of.c"
 #define OF_PLATFORM_DRIVER	ohci_hcd_ppc_of_driver
@@ -1241,4 +1237,3 @@ static void __exit ohci_hcd_mod_exit(void)
 	clear_bit(USB_OHCI_LOADED, &usb_hcds_loaded);
 }
 module_exit(ohci_hcd_mod_exit);
-

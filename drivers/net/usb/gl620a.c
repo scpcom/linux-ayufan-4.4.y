@@ -31,7 +31,6 @@
 #include <linux/usb.h>
 #include <linux/usb/usbnet.h>
 
-
 /*
  * GeneSys GL620USB-A (www.genesyslogic.com.tw)
  *
@@ -242,4 +241,3 @@ module_exit(usbnet_exit);
 MODULE_AUTHOR("Jiun-Jie Huang");
 MODULE_DESCRIPTION("GL620-USB-A Host-to-Host Link cables");
 MODULE_LICENSE("GPL");
-

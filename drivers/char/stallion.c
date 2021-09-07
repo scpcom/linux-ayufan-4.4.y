@@ -141,7 +141,6 @@ static const struct tty_port_operations stl_port_ops;
 #define	BRD_FOUND	0x1
 #define STL_PROBED	0x2
 
-
 /*
  *	Define the port structure istate flags. These set of flags are
  *	modified at interrupt time - so setting and reseting them needs
@@ -3288,7 +3287,6 @@ static void stl_cd1400echintr(struct stlpanel *panelp, unsigned int iobase)
 	else if (svrtype & SVRR_MDM)
 		stl_cd1400mdmisr(panelp, iobase);
 }
-
 
 /*****************************************************************************/
 

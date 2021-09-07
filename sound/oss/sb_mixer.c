@@ -111,7 +111,6 @@ MIX_ENT(SOUND_MIXER_IGAIN,	0x00, 0, 0, 0x00, 0, 0),
 MIX_ENT(SOUND_MIXER_OGAIN,	0x00, 0, 0, 0x00, 0, 0)
 };
 
-
 /* SM_GAMES          Master volume is lower and PCM & FM volumes
 			     higher than with SB Pro. This improves the
 			     sound quality */

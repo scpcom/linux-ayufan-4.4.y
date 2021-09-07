@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #define DB_88W8660_BOARD_PCI_IF_NUM		0x3
 #define DB_88W8660_BOARD_TWSI_DEF_NUM		0x1
 #define DB_88W8660_BOARD_MAC_INFO_NUM		0x1
@@ -178,7 +177,6 @@ MV_BOARD_MPP_INFO rd88w8660ddr1InfoBoardMppConfigValue[RD_88W8660_BOARD_MPP_CONF
 	N_A,
 	N_A}}};
 
-
 MV_DEV_CS_INFO rd88w8660InfoBoardDeCsInfo[RD_88W8660_BOARD_DEVICE_CONFIG_NUM] = 
 		/*{params, devType, devWidth}*/			   
 		{{3, 0x8fcfffff, BOARD_DEV_NOR_FLASH, 8}};	/* bootCs */                    
@@ -206,7 +204,6 @@ MV_BOARD_INFO rd88w8660Info = {
 	RD_88W8660_BOARD_MPP_POLAR,			/* gppPolarityVal */
 	rd88w8660InfoBoardSwitchInfo			/* pSwitchInfo */
 };
-
 
 #define RD_88W8660_AP82S_BOARD_PCI_IF_NUM		0x1
 #define RD_88W8660_AP82S_BOARD_TWSI_DEF_NUM		0x1
@@ -260,7 +257,6 @@ MV_DEV_CS_INFO rd88w8660Ap82sInfoBoardDeCsInfo[RD_88W8660_AP82S_BOARD_DEVICE_CON
 		{{3, 0x8fcfffff, BOARD_DEV_NOR_FLASH, 8}};	/* bootCs */                    
 #endif
 
-
 MV_BOARD_INFO rd88w8660Ap82sInfo = {
 	"RD-88W8660-AP82S",				/* boardName[MAX_BOARD_NAME_LEN] */
 	RD_88W8660_AP82S_BOARD_MPP_CONFIG_NUM,		/* numBoardMppConfig */
@@ -291,7 +287,5 @@ MV_BOARD_INFO*	boardInfoTbl[3] = 	{&db88w8660ddr2Info,
 					&rd88w8660Ap82sInfo	
 					};
 
-
 #define	BOARD_ID_BASE				BOARD_ID_88W8660_BASE
 #define MV_MAX_BOARD_ID				BOARD_ID_88W8660_MAX
-

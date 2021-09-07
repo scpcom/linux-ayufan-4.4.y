@@ -8,7 +8,6 @@
 	     <maz@gloups.fdn.fr>
              Copyright (C) 1999, 2000 Ingo Molnar, Red Hat
 
-
    RAID-0 management functions.
 
    This program is free software; you can redistribute it and/or modify
@@ -392,7 +391,6 @@ static int raid0_run(mddev_t *mddev)
 	mddev->degraded = 0;
 #endif
 
-
 	if (mddev->chunk_sectors == 0) {
 		printk(KERN_ERR "md/raid0: chunk size must be set.\n");
 		return -EINVAL;
@@ -620,7 +618,6 @@ static int raid0_make_request(struct request_queue *q, struct bio *bio)
 		return 0;
 	}
 #endif
-
 
 	cpu = part_stat_lock();
 	part_stat_inc(cpu, &mddev->gendisk->part0, ios[rw]);

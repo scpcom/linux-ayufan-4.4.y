@@ -19,7 +19,6 @@ MODULE_DESCRIPTION("Texas Instruments TVP5150A video decoder driver");
 MODULE_AUTHOR("Mauro Carvalho Chehab");
 MODULE_LICENSE("GPL");
 
-
 static int debug;
 module_param(debug, int, 0);
 MODULE_PARM_DESC(debug, "Debug level (0-2)");
@@ -955,7 +954,6 @@ static int tvp5150_g_fmt(struct v4l2_subdev *sd, struct v4l2_format *fmt)
 	return 0;
 }
 
-
 static int tvp5150_g_chip_ident(struct v4l2_subdev *sd,
 				struct v4l2_dbg_chip_ident *chip)
 {
@@ -968,7 +966,6 @@ static int tvp5150_g_chip_ident(struct v4l2_subdev *sd,
 	return v4l2_chip_ident_i2c_client(client, chip, V4L2_IDENT_TVP5150,
 					  rev);
 }
-
 
 #ifdef CONFIG_VIDEO_ADV_DEBUG
 static int tvp5150_g_register(struct v4l2_subdev *sd, struct v4l2_dbg_register *reg)
@@ -1053,7 +1050,6 @@ static const struct v4l2_subdev_ops tvp5150_ops = {
 	.tuner = &tvp5150_tuner_ops,
 	.video = &tvp5150_video_ops,
 };
-
 
 /****************************************************************************
 			I2C Client & Driver

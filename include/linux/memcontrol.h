@@ -256,7 +256,6 @@ mem_cgroup_zone_nr_pages(struct mem_cgroup *memcg, struct zone *zone,
 	return 0;
 }
 
-
 static inline struct zone_reclaim_stat*
 mem_cgroup_get_reclaim_stat(struct mem_cgroup *memcg, struct zone *zone)
 {
@@ -289,4 +288,3 @@ unsigned long mem_cgroup_soft_limit_reclaim(struct zone *zone, int order,
 #endif /* CONFIG_CGROUP_MEM_CONT */
 
 #endif /* _LINUX_MEMCONTROL_H */
-

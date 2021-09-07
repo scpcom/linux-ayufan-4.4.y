@@ -15,7 +15,6 @@
  *
  */
 
-
 #include <linux/sched.h>
 #include <linux/timer.h>
 #include <linux/major.h>
@@ -29,7 +28,6 @@
 #include <asm/irq.h>
 #include <asm/pgtable.h>
 #include <asm/atariints.h>
-
 
 /*
  * stuff from the old atasound.c
@@ -46,7 +44,6 @@ void atari_microwire_cmd (int cmd)
 }
 EXPORT_SYMBOL(atari_microwire_cmd);
 
-
 /* PSG base frequency */
 #define	PSG_FREQ	125000
 /* PSG envelope base frequency times 10 */
@@ -61,7 +58,6 @@ void atari_mksound (unsigned int hz, unsigned int ticks)
 	int period;
 
 	local_irq_save(flags);
-
 
 	/* Disable generator A in mixer control.  */
 	sound_ym.rd_data_reg_sel = 7;

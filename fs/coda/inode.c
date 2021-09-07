@@ -303,4 +303,3 @@ struct file_system_type coda_fs_type = {
 	.kill_sb	= kill_anon_super,
 	.fs_flags	= FS_BINARY_MOUNTDATA,
 };
-

@@ -556,4 +556,3 @@ iscsi_datain_req_t *iscsi_get_datain_values(
 
 	return NULL;
 }
-

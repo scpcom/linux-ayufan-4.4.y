@@ -424,7 +424,6 @@ struct xhci_ep_ctx *xhci_get_ep_ctx(struct xhci_hcd *xhci,
 		(ctx->bytes + (ep_index * CTX_SIZE(xhci->hcc_params)));
 }
 
-
 /***************** Streams structures manipulation *************************/
 
 void xhci_free_stream_ctx(struct xhci_hcd *xhci,
@@ -792,7 +791,6 @@ void xhci_free_stream_info(struct xhci_hcd *xhci,
 	kfree(stream_info);
 }
 
-
 /***************** Device context manipulation *************************/
 
 static void xhci_init_endpoint_timer(struct xhci_hcd *xhci,
@@ -932,7 +930,6 @@ void xhci_copy_ep0_dequeue_into_input_ctx(struct xhci_hcd *xhci,
 		ep_ring->enqueue)
 		| ep_ring->cycle_state);
 }
-
 
 /* Setup an xHCI virtual device for a Set Address command */
 int xhci_setup_addressable_virt_dev(struct xhci_hcd *xhci, struct usb_device *udev)
@@ -1762,7 +1759,6 @@ static int xhci_check_trb_in_td_math(struct xhci_hcd *xhci, gfp_t mem_flags)
 	xhci_dbg(xhci, "TRB math tests passed.\n");
 	return 0;
 }
-
 
 int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 {

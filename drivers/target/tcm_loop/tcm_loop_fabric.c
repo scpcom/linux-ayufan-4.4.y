@@ -86,7 +86,6 @@ u32 tcm_loop_get_default_depth(se_portal_group_t *se_tpg)
 	return 1;
 }
 
-
 u32 tcm_loop_get_pr_transport_id(
 	se_portal_group_t *se_tpg,
 	se_node_acl_t *se_nacl,
@@ -255,7 +254,6 @@ u32 tpg_loop_sess_get_index(se_session_t *se_sess)
 }
 #endif /* SNMP_SUPPORT */
 
-
 void tcm_loop_set_default_node_attributes(se_node_acl_t *se_acl)
 {
 	return;
@@ -287,7 +285,6 @@ void tcm_loop_close_session(se_session_t *se_sess)
 	BUG();
 };
 
-
 #warning FIXME: tcm_loop_stop_session()
 void tcm_loop_stop_session(
 	se_session_t *se_sess,
@@ -296,7 +293,6 @@ void tcm_loop_stop_session(
 {
 	BUG();
 }
-
 
 #warning FIXME: tcm_loop_fall_back_to_erl0()
 void tcm_loop_fall_back_to_erl0(se_session_t *se_sess)
@@ -519,4 +515,3 @@ MODULE_LICENSE("GPL");
 module_init(tcm_loop_fabric_init);
 module_exit(tcm_loop_fabric_exit);
 #endif /* MODULE */
-

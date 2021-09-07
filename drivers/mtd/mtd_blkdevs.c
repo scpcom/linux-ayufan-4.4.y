@@ -128,7 +128,6 @@ static void mtd_blktrans_request(struct request_queue *rq)
 	wake_up_process(tr->blkcore_priv->thread);
 }
 
-
 static int blktrans_open(struct block_device *bdev, fmode_t mode)
 {
 	struct mtd_blktrans_dev *dev = bdev->bd_disk->private_data;

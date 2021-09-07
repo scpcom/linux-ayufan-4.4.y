@@ -492,7 +492,6 @@ static ssize_t read_kmem(struct file *file, char __user *buf,
 	return read ? read : err;
 }
 
-
 static inline ssize_t
 do_write_kmem(void *p, unsigned long realp, const char __user * buf,
 	      size_t count, loff_t *ppos)
@@ -545,7 +544,6 @@ do_write_kmem(void *p, unsigned long realp, const char __user * buf,
 	*ppos += written;
 	return written;
 }
-
 
 /*
  * This function writes to the *virtual* memory as seen by the kernel.

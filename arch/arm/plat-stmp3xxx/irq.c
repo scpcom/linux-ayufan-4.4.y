@@ -48,4 +48,3 @@ void __init stmp3xxx_init_irq(struct irq_chip *chip)
 	/* Barrier */
 	(void)__raw_readl(REGS_ICOLL_BASE + HW_ICOLL_STAT);
 }
-

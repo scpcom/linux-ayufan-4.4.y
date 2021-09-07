@@ -17,7 +17,6 @@ struct device;
  * The base API.
  */
 
-
 /*
  * struct clk - an machine class defined object / cookie.
  */
@@ -83,11 +82,9 @@ unsigned long clk_get_rate(struct clk *clk);
  */
 void clk_put(struct clk *clk);
 
-
 /*
  * The remaining APIs are optional for machine class support.
  */
-
 
 /**
  * clk_round_rate - adjust a rate to the exact rate a clock can provide

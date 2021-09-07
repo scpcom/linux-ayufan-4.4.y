@@ -86,7 +86,6 @@ extract_icmp_fields(const struct sk_buff *skb,
 	return 0;
 }
 
-
 static bool
 socket_match(const struct sk_buff *skb, const struct xt_match_param *par,
 	     const struct xt_socket_mtinfo1 *info)

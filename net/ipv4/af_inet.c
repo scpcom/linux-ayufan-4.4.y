@@ -116,7 +116,6 @@
 #include <linux/mroute.h>
 #endif
 
-
 /* The inetsw table contains everything that inet_create needs to
  * build a new socket.
  */
@@ -415,7 +414,6 @@ out_rcu_unlock:
 	goto out;
 }
 
-
 /*
  *	The peer socket should always be NULL (or else). When we call this
  *	function we are destroying the object and from then on nobody
@@ -687,7 +685,6 @@ do_err:
 }
 EXPORT_SYMBOL(inet_accept);
 
-
 /*
  *	This does both peername and sockname.
  */
@@ -732,7 +729,6 @@ int inet_sendmsg(struct kiocb *iocb, struct socket *sock, struct msghdr *msg,
 }
 EXPORT_SYMBOL(inet_sendmsg);
 
-
 static ssize_t inet_sendpage(struct socket *sock, struct page *page, int offset,
 			     size_t size, int flags)
 {
@@ -746,7 +742,6 @@ static ssize_t inet_sendpage(struct socket *sock, struct page *page, int offset,
 		return sk->sk_prot->sendpage(sk, page, offset, size, flags);
 	return sock_no_sendpage(sock, page, offset, size, flags);
 }
-
 
 int inet_shutdown(struct socket *sock, int how)
 {
@@ -976,7 +971,6 @@ static struct inet_protosw inetsw_array[] =
 		.no_check =   UDP_CSUM_DEFAULT,
 		.flags =      INET_PROTOSW_PERMANENT,
        },
-
 
        {
 	       .type =       SOCK_RAW,
@@ -1704,4 +1698,3 @@ static int __init ipv4_proc_init(void)
 #endif /* CONFIG_PROC_FS */
 
 MODULE_ALIAS_NETPROTO(PF_INET);
-

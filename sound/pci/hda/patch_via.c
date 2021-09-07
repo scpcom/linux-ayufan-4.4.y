@@ -39,7 +39,6 @@
 /*                                                                           */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #include <linux/init.h>
 #include <linux/delay.h>
 #include <linux/slab.h>
@@ -186,7 +185,6 @@ static struct snd_kcontrol_new vt1708_control_templates[] = {
 	HDA_CODEC_MUTE(NULL, 0, 0, 0),
 };
 
-
 struct via_spec {
 	/* codec parameterization */
 	struct snd_kcontrol_new *mixers[3];
@@ -325,7 +323,6 @@ static void via_auto_set_output_and_unmute(struct hda_codec *codec,
 		snd_hda_codec_write(codec, nid, 0, 
 				    AC_VERB_SET_EAPD_BTLENABLE, 0x02);
 }
-
 
 static void via_auto_init_multi_out(struct hda_codec *codec)
 {
@@ -516,7 +513,6 @@ static struct hda_verb vt1708_volume_init_verbs[] = {
 	{0x15, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 	{0x27, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 
-
 	/* Unmute input amps (CD, Line In, Mic 1 & Mic 2) of the analog-loopback
 	 * mixer widget
 	 */
@@ -569,7 +565,6 @@ static int via_playback_pcm_cleanup(struct hda_pcm_stream *hinfo,
 	struct via_spec *spec = codec->spec;
 	return snd_hda_multi_out_analog_cleanup(codec, &spec->multiout);
 }
-
 
 static void playback_multi_pcm_prep_0(struct hda_codec *codec,
 				      unsigned int stream_tag,
@@ -1378,7 +1373,6 @@ static int patch_vt1708(struct hda_codec *codec)
 		       "from BIOS.  Using genenic mode...\n");
 	}
 
-	
 	spec->stream_name_analog = "VT1708 Analog";
 	spec->stream_analog_playback = &vt1708_pcm_analog_playback;
 	/* disable 32bit format on VT1708 */
@@ -1390,7 +1384,6 @@ static int patch_vt1708(struct hda_codec *codec)
 	spec->stream_digital_playback = &vt1708_pcm_digital_playback;
 	spec->stream_digital_capture = &vt1708_pcm_digital_capture;
 
-	
 	if (!spec->adc_nids && spec->input_mux) {
 		spec->adc_nids = vt1708_adc_nids;
 		spec->num_adc_nids = ARRAY_SIZE(vt1708_adc_nids);
@@ -1447,7 +1440,6 @@ static struct hda_verb vt1709_10ch_volume_init_verbs[] = {
 	{0x14, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 	{0x15, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 	{0x16, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
-
 
 	/* Unmute input amps (CD, Line In, Mic 1 & Mic 2) of the analog-loopback
 	 * mixer widget
@@ -1861,7 +1853,6 @@ static int patch_vt1709_10ch(struct hda_codec *codec)
 	spec->stream_digital_playback = &vt1709_pcm_digital_playback;
 	spec->stream_digital_capture = &vt1709_pcm_digital_capture;
 
-	
 	if (!spec->adc_nids && spec->input_mux) {
 		spec->adc_nids = vt1709_adc_nids;
 		spec->num_adc_nids = ARRAY_SIZE(vt1709_adc_nids);
@@ -1890,7 +1881,6 @@ static struct hda_verb vt1709_6ch_volume_init_verbs[] = {
 	{0x14, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 	{0x15, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 	{0x16, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
-
 
 	/* Unmute input amps (CD, Line In, Mic 1 & Mic 2) of the analog-loopback
 	 * mixer widget
@@ -1955,7 +1945,6 @@ static int patch_vt1709_6ch(struct hda_codec *codec)
 	spec->stream_digital_playback = &vt1709_pcm_digital_playback;
 	spec->stream_digital_capture = &vt1709_pcm_digital_capture;
 
-	
 	if (!spec->adc_nids && spec->input_mux) {
 		spec->adc_nids = vt1709_adc_nids;
 		spec->num_adc_nids = ARRAY_SIZE(vt1709_adc_nids);
@@ -2004,7 +1993,6 @@ static struct hda_verb vt1708B_8ch_volume_init_verbs[] = {
 	{0x13, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 	{0x14, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 
-
 	/* Unmute input amps (CD, Line In, Mic 1 & Mic 2) of the analog-loopback
 	 * mixer widget
 	 */
@@ -2038,7 +2026,6 @@ static struct hda_verb vt1708B_4ch_volume_init_verbs[] = {
 	 */
 	{0x13, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 	{0x14, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
-
 
 	/* Unmute input amps (CD, Line In, Mic 1 & Mic 2) of the analog-loopback
 	 * mixer widget
@@ -2950,7 +2937,6 @@ static struct hda_verb vt1702_volume_init_verbs[] = {
 	{0x12, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 	{0x1F, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 	{0x20, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
-
 
 	/* Unmute input amps (CD, Line In, Mic 1 & Mic 2) of the analog-loopback
 	 * mixer widget

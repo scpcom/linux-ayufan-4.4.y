@@ -115,7 +115,6 @@ disclaimer.
 #define MV_INCLUDE_SDIO
 #endif
 
-
 /* NAND flash stuff */
 #ifdef CONFIG_MV_NAND_BOOT
 #define MV_NAND_BOOT
@@ -128,7 +127,6 @@ disclaimer.
 #ifdef CONFIG_MV_SPI_BOOT
 #define MV_SPI_BOOT
 #endif
-
 
 /****************************************************************/
 /************* General    configuration ********************/
@@ -148,8 +146,6 @@ disclaimer.
 /****************************************************************/
 #define MV_NFP_SEC_Q_SIZE		64
 #define MV_NFP_SEC_REQ_Q_SIZE		1000
-
-
 
 /****************************************************************/
 /************* CESA configuration ********************/
@@ -225,7 +221,6 @@ disclaimer.
 /* DRAM cache coherency configuration */
 #define MV_CACHE_COHERENCY  MV_CACHE_COHER_SW
 
-
 #define ETHER_DRAM_COHER    MV_CACHE_COHER_SW   /* No HW coherency in 88Fxx81 devices */
 
 #if (ETHER_DRAM_COHER == MV_CACHE_COHER_HW_WB)
@@ -239,7 +234,6 @@ disclaimer.
 #else
  #error "Ethernet-DRAM undefined"
 #endif /* ETHER_DRAM_COHER */
-
 
 /****************************************************************/
 /************* Ethernet driver configuration ********************/
@@ -369,7 +363,4 @@ otherwise the following defines will be ignored */
 /* PEX-PCI\PCI-PCI Bridge*/
 #define PCI0_IF_PTP		0		/* Bridge exist on pciIf0*/
 
- 
-
 #endif /* __INCmvSysHwConfigh */
-

@@ -24,7 +24,6 @@
 #error Please include mach/iomux.h
 #endif
 
-
 /* Primary GPIO pin functions */
 
 #define PA5_PF_LSCLK            (GPIO_PORTA | GPIO_PF | GPIO_OUT | 5)
@@ -232,6 +231,5 @@
 #define PC8_AOUT_USBOTG_TXR_INT (GPIO_PORTC | GPIO_AOUT | GPIO_IN | 8)
 #define PC15_AOUT_WKGD          (GPIO_PORTC | GPIO_AOUT | GPIO_IN | 15)
 #define PF21_AOUT_DTACK         (GPIO_PORTF | GPIO_AOUT | GPIO_IN | 21)
-
 
 #endif

@@ -29,7 +29,6 @@
     *  MA 02111-1307 USA
     ********************************************************************* */
 
-
 #ifndef _SB1250_MC_H
 #define _SB1250_MC_H
 
@@ -130,7 +129,6 @@
 				V_MC_BANK2_MAP_DEFAULT | V_MC_BANK3_MAP_DEFAULT | V_MC_CHANNEL_SEL(0) | \
                                 M_MC_IOB1HIGHPRIORITY | V_MC_QUEUE_SIZE_DEFAULT
 
-
 /*
  * Memory clock config register (Table 6-15)
  *
@@ -228,8 +226,6 @@
                                      V_MC_CLOCK_DRIVE_DEFAULT | \
                                      V_MC_REF_RATE_DEFAULT
 
-
-
 /*
  * DRAM Command Register (Table 6-13)
  */
@@ -297,8 +293,6 @@
 #define M_MC_PRE_ON_A8              _SB_MAKEMASK1(36)
 #define M_MC_RAM_WITH_A13           _SB_MAKEMASK1(37)
 #endif /* 1250 PASS3 || 112x PASS1 */
-
-
 
 /*
  * SDRAM Timing Register  (Table 6-15)
@@ -403,7 +397,6 @@
  *                               M_MC_r2wIDLE_TWOCYCLES | \
  */
 
-
 /*
  * Chip Select Start Address Register (Table 6-17)
  */
@@ -480,7 +473,6 @@
 #define S_MC_RAS_MBZ                37
 #define M_MC_RAS_MBZ                _SB_MAKEMASK(27, S_MC_RAS_MBZ)
 
-
 /*
  * Column Address Bits Register (Table 6-21)
  */
@@ -494,7 +486,6 @@
 
 #define S_MC_CAS_MBZ                23
 #define M_MC_CAS_MBZ                _SB_MAKEMASK(41, S_MC_CAS_MBZ)
-
 
 /*
  * Bank Address Address Bits Register (Table 6-22)
@@ -545,6 +536,5 @@
 
 #define S_MC_ECC_INVERT             0
 #define M_MC_ECC_INVERT             _SB_MAKEMASK(8, S_MC_ECC_INVERT)
-
 
 #endif

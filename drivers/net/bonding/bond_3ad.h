@@ -282,4 +282,3 @@ int bond_3ad_xmit_xor(struct sk_buff *skb, struct net_device *dev);
 int bond_3ad_lacpdu_recv(struct sk_buff *skb, struct net_device *dev, struct packet_type* ptype, struct net_device *orig_dev);
 int bond_3ad_set_carrier(struct bonding *bond);
 #endif //__BOND_3AD_H__
-

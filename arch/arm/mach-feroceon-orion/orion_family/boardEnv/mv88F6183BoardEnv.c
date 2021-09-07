@@ -270,6 +270,5 @@ MV_BOARD_INFO*	boardInfoTbl[] = 	{&db88f6183BpInfo,
 					 &rd88f6183ApInfo
 					};
 
-
 #define	BOARD_ID_BASE				BOARD_ID_88F6183_BASE
 #define MV_MAX_BOARD_ID				BOARD_ID_88F6183_MAX

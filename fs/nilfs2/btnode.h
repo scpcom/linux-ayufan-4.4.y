@@ -29,7 +29,6 @@
 #include <linux/fs.h>
 #include <linux/backing-dev.h>
 
-
 struct nilfs_btnode_chkey_ctxt {
 	__u64 oldkey;
 	__u64 newkey;
@@ -53,6 +52,5 @@ void nilfs_btnode_abort_change_key(struct address_space *,
 				   struct nilfs_btnode_chkey_ctxt *);
 
 #define nilfs_btnode_mark_dirty(bh)	nilfs_mark_buffer_dirty(bh)
-
 
 #endif	/* _NILFS_BTNODE_H */

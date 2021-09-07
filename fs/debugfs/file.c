@@ -357,7 +357,6 @@ struct dentry *debugfs_create_x32(const char *name, mode_t mode,
 }
 EXPORT_SYMBOL_GPL(debugfs_create_x32);
 
-
 static int debugfs_size_t_set(void *data, u64 val)
 {
 	*(size_t *)data = val;
@@ -387,7 +386,6 @@ struct dentry *debugfs_create_size_t(const char *name, mode_t mode,
 	return debugfs_create_file(name, mode, parent, value, &fops_size_t);
 }
 EXPORT_SYMBOL_GPL(debugfs_create_size_t);
-
 
 static ssize_t read_file_bool(struct file *file, char __user *user_buf,
 			      size_t count, loff_t *ppos)

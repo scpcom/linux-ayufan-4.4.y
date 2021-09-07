@@ -96,7 +96,6 @@ static int __init proteon_probe1(struct net_device *dev, int ioaddr)
 	if (!request_region(ioaddr, PROTEON_IO_EXTENT, cardname))
 		return -ENODEV;
 		
-
 	chk1 = inb(ioaddr + 0x1f);      /* Get Proteon ID reg 1 */
 	if (chk1 != 0x1f) 
 		goto nodev;

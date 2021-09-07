@@ -213,7 +213,6 @@ static void mtdoops_write(struct mtdoops_context *cxt, int panic)
 	mtdoops_inc_counter(cxt);
 }
 
-
 static void mtdoops_workfunc_write(struct work_struct *work)
 {
 	struct mtdoops_context *cxt =
@@ -268,7 +267,6 @@ static void find_next_position(struct mtdoops_context *cxt)
 
 	mtdoops_inc_counter(cxt);
 }
-
 
 static void mtdoops_notify_add(struct mtd_info *mtd)
 {
@@ -446,7 +444,6 @@ static void __exit mtdoops_console_exit(void)
 	kfree(cxt->name);
 	vfree(cxt->oops_buf);
 }
-
 
 subsys_initcall(mtdoops_console_init);
 module_exit(mtdoops_console_exit);

@@ -67,7 +67,6 @@
 # define RPCDBG_FACILITY        RPCDBG_AUTH
 #endif
 
-
 /* read_token is a mic token, and message_buffer is the data that the mic was
  * supposedly taken over. */
 

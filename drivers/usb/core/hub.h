@@ -215,7 +215,6 @@ struct usb_hub_status {
 #define HUB_CHANGE_LOCAL_POWER	0x0001
 #define HUB_CHANGE_OVERCURRENT	0x0002
 
-
 /*
  * Hub descriptor
  * See USB 2.0 spec Table 11-13
@@ -258,7 +257,6 @@ struct usb_hub_descriptor {
 	__u8  PortPwrCtrlMask[(USB_MAXCHILDREN + 1 + 7) / 8];
 #endif
 } __attribute__ ((packed));
-
 
 /* port indicator status selectors, tables 11-7 and 11-25 */
 #define HUB_LED_AUTO	0

@@ -44,7 +44,6 @@
 //static int          msglevel                =MSG_LEVEL_DEBUG;
 static int          msglevel                =MSG_LEVEL_INFO;
 
-
 /*---------------------  Static Classes  ----------------------------*/
 
 /*---------------------  Static Variables  --------------------------*/
@@ -53,9 +52,7 @@ static int          msglevel                =MSG_LEVEL_INFO;
 
 /*---------------------  Export Variables  --------------------------*/
 
-
 /*---------------------  Export Functions  --------------------------*/
-
 
 /*+
  *
@@ -96,7 +93,6 @@ INTvWorkItem(
 
  }
 
-
 NTSTATUS
 INTnsProcessData(
     IN  PSDevice pDevice
@@ -106,7 +102,6 @@ INTnsProcessData(
     PSINTData       pINTData;
     PSMgmtObject    pMgmt = &(pDevice->sMgmtObj);
     struct net_device_stats* pStats = &pDevice->stats;
-
 
     DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO"---->s_nsInterruptProcessData\n");
 

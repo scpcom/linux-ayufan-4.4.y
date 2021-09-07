@@ -58,11 +58,9 @@ MODULE_FIRMWARE("radeon/RV730_me.bin");
 MODULE_FIRMWARE("radeon/RV710_pfp.bin");
 MODULE_FIRMWARE("radeon/RV710_me.bin");
 
-
 int r600_cs_legacy(struct drm_device *dev, void *data, struct drm_file *filp,
 			unsigned family, u32 *ib, int *l);
 void r600_cs_legacy_init(void);
-
 
 # define ATI_PCIGART_PAGE_SIZE		4096	/**< PCI GART page size */
 # define ATI_PCIGART_PAGE_MASK		(~(ATI_PCIGART_PAGE_SIZE-1))
@@ -1064,7 +1062,6 @@ static void r600_gfx_init(struct drm_device *dev,
 							R600_S7_X(0x7) |
 							R600_S7_Y(0x8)));
 
-
 	switch (dev_priv->flags & RADEON_FAMILY_MASK) {
 	case CHIP_R600:
 	case CHIP_RV630:
@@ -1671,7 +1668,6 @@ static void r600_cp_init_ring_buffer(struct drm_device *dev,
 	DRM_UDELAY(15000);
 	RADEON_WRITE(R600_GRBM_SOFT_RESET, 0);
 
-
 	/* Set ring buffer size */
 #ifdef __BIG_ENDIAN
 	RADEON_WRITE(R600_CP_RB_CNTL,
@@ -2267,7 +2263,6 @@ int r600_cp_dispatch_indirect(struct drm_device *dev,
 
 		DRM_DEBUG("dwords:%d\n", dwords);
 		DRM_DEBUG("offset 0x%lx\n", offset);
-
 
 		/* Indirect buffer data must be a multiple of 16 dwords.
 		 * pad the data with a Type-2 CP packet.

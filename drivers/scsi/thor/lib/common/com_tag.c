@@ -69,4 +69,3 @@ MV_BOOLEAN Tag_IsEmpty(PTag_Stack pTagStack)
 	}
 	return MV_FALSE;
 }
-

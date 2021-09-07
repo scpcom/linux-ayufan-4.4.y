@@ -84,7 +84,6 @@ enum
 	__IFLA_MAX
 };
 
-
 #define IFLA_MAX (__IFLA_MAX - 1)
 
 /* backwards compatibility for userspace */

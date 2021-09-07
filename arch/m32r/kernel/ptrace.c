@@ -212,7 +212,6 @@ static int ptrace_setregs(struct task_struct *tsk, void __user *uregs)
 	return ret;
 }
 
-
 static inline int
 check_condition_bit(struct task_struct *child)
 {
@@ -579,7 +578,6 @@ init_debug_traps(struct task_struct *child)
 		p->insn[i] = 0;
 	}
 }
-
 
 /*
  * Called by kernel/ptrace.c when detaching..

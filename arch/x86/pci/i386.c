@@ -37,7 +37,6 @@
 #include <asm/pci_x86.h>
 #include <asm/io_apic.h>
 
-
 static int
 skip_isa_ioresource_align(struct pci_dev *dev) {
 

@@ -246,7 +246,6 @@ static ssize_t store_rotate(struct device *device,
 	return count;
 }
 
-
 static ssize_t show_rotate(struct device *device,
 			   struct device_attribute *attr, char *buf)
 {

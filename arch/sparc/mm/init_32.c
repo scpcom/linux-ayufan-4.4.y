@@ -419,7 +419,6 @@ void __init mem_init(void)
 		prom_halt();
 	}
 
-
 	/* Saves us work later. */
 	memset((void *)&empty_zero_page, 0, PAGE_SIZE);
 

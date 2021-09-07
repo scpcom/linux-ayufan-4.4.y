@@ -132,7 +132,6 @@ struct iser_hdr {
 	__be64  read_va;
 } __attribute__((packed));
 
-
 /* Length of an object name string */
 #define ISER_OBJECT_NAME_SIZE		    64
 

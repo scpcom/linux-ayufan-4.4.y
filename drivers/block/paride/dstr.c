@@ -189,7 +189,6 @@ static void dstr_write_block( PIA *pi, char * buf, int count )
         }
 }
 
-
 static void dstr_log_adapter( PIA *pi, char * scratch, int verbose )
 
 {       char    *mode_string[5] = {"4-bit","8-bit","EPP-8",

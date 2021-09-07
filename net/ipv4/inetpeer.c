@@ -98,7 +98,6 @@ static DEFINE_SPINLOCK(inet_peer_unused_lock);
 static void peer_check_expire(unsigned long dummy);
 static DEFINE_TIMER(peer_periodic_timer, peer_check_expire, 0, 0);
 
-
 /* Called from ip_output.c:ip_init  */
 void __init inet_initpeers(void)
 {

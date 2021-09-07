@@ -40,7 +40,6 @@
 #include <pcmcia/cisreg.h>
 #include <pcmcia/ciscode.h>
 
-
 #define DRV_NAME "pata_pcmcia"
 #define DRV_VERSION "0.3.5"
 
@@ -179,7 +178,6 @@ static struct ata_port_operations pcmcia_8bit_port_ops = {
 
 #define CS_CHECK(fn, ret) \
 do { last_fn = (fn); if ((last_ret = (ret)) != 0) goto cs_failed; } while (0)
-
 
 struct pcmcia_config_check {
 	unsigned long ctl_base;

@@ -398,7 +398,6 @@ retry:
 }
 EXPORT_SYMBOL(pasemi_dma_alloc_flag);
 
-
 /* pasemi_dma_free_flag - Deallocates a flag (event)
  * @flag: Flag number to deallocate
  *
@@ -411,7 +410,6 @@ void pasemi_dma_free_flag(int flag)
 	set_bit(flag, flags_free);
 }
 EXPORT_SYMBOL(pasemi_dma_free_flag);
-
 
 /* pasemi_dma_set_flag - Sets a flag (event) to 1
  * @flag: Flag number to set active
@@ -463,7 +461,6 @@ retry:
 }
 EXPORT_SYMBOL(pasemi_dma_alloc_fun);
 
-
 /* pasemi_dma_free_fun - Deallocates a function engine
  * @flag: Engine number to deallocate
  *
@@ -476,7 +473,6 @@ void pasemi_dma_free_fun(int fun)
 	set_bit(fun, fun_free);
 }
 EXPORT_SYMBOL(pasemi_dma_free_fun);
-
 
 static void *map_onedev(struct pci_dev *p, int index)
 {

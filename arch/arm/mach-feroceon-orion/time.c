@@ -187,4 +187,3 @@ static void mv_init_timer(void)
 struct sys_timer mv_timer = {
         .init           = mv_init_timer,
 };
-

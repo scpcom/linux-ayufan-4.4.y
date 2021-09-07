@@ -49,7 +49,6 @@ struct ieee80211_tx_status_rtap_hdr {
 	u8 data_retries;
 } __attribute__ ((packed));
 
-
 void ieee80211_configure_filter(struct ieee80211_local *local)
 {
 	u64 mc;
@@ -1040,7 +1039,6 @@ static void __exit ieee80211_exit(void)
 
 	ieee80211_debugfs_netdev_exit();
 }
-
 
 subsys_initcall(ieee80211_init);
 module_exit(ieee80211_exit);

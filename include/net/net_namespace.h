@@ -86,7 +86,6 @@ struct net {
 	struct net_generic	*gen;
 };
 
-
 #include <linux/seq_file_net.h>
 
 /* Init's network namespace */
@@ -107,7 +106,6 @@ static inline struct net *copy_net_ns(unsigned long flags, struct net *net_ns)
 	return net_ns;
 }
 #endif /* CONFIG_NET */
-
 
 extern struct list_head net_namespace_list;
 
@@ -167,7 +165,6 @@ int net_eq(const struct net *net1, const struct net *net2)
 	return 1;
 }
 #endif
-
 
 #ifdef NETNS_REFCNT_DEBUG
 static inline struct net *hold_net(struct net *net)

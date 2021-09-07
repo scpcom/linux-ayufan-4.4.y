@@ -619,4 +619,3 @@ void do_notify_resume(struct pt_regs *regs, unsigned long orig_i0, unsigned long
 			key_replace_session_keyring();
 	}
 }
-

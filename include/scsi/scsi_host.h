@@ -23,7 +23,6 @@ struct scsi_host_cmd_pool;
 struct scsi_transport_template;
 struct blk_queue_tags;
 
-
 /*
  * The various choices mean:
  * NONE: Self evident.	Host adapter is not capable of scatter-gather.
@@ -95,7 +94,6 @@ struct scsi_host_template {
 	 * Status: OPTIONAL
 	 */
 	int (* ioctl)(struct scsi_device *dev, int cmd, void __user *arg);
-
 
 #ifdef CONFIG_COMPAT
 	/* 
@@ -696,7 +694,6 @@ struct Scsi_Host {
 	unsigned char dma_channel;
 	unsigned int  irq;
 	
-
 	enum scsi_host_state shost_state;
 
 	/* ldm bits */

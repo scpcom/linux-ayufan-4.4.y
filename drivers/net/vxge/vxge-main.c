@@ -2714,7 +2714,6 @@ vxge_open(struct net_device *dev)
 		goto out1;
 	}
 
-
 	if (vdev->config.intr_type != MSI_X) {
 		netif_napi_add(dev, &vdev->napi, vxge_poll_inta,
 			vdev->config.napi_weight);

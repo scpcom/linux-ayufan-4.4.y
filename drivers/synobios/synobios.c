@@ -604,18 +604,15 @@ END:
 	return ret;
 }
 
-
 int synobios_open(struct inode *inode, struct file *filp)
 {
 	return 0;
 }
 
-
 int synobios_release(struct inode *inode, struct file *filp)
 {
 	return 0;
 }
-
 
 struct file_operations synobios_fops = {
 	/*llseek:*/
@@ -798,4 +795,3 @@ MODULE_LICENSE("Synology Inc.");
 
 module_init(synobios_init);
 module_exit(synobios_cleanup);
-

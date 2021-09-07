@@ -24,7 +24,6 @@ static int jffs2_compression_mode = JFFS2_COMPR_MODE_PRIORITY;
 /* Statistics for blocks stored without compression */
 static uint32_t none_stat_compr_blocks=0,none_stat_decompr_blocks=0,none_stat_compr_size=0;
 
-
 /*
  * Return 1 to use this compression
  */

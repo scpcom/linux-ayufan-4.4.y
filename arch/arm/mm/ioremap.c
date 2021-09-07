@@ -254,7 +254,6 @@ remap_area_supersections(unsigned long virt, unsigned long pfn,
 }
 #endif
 
-
 /*
  * Remap an arbitrary physical address space into the kernel virtual
  * address space. Needed when the kernel wants to access high addresses

@@ -713,7 +713,6 @@ static void __init sbus_irq_trans_init(struct device_node *dp)
 }
 #endif /* CONFIG_SBUS */
 
-
 static unsigned int central_build_irq(struct device_node *dp,
 				      unsigned int ino,
 				      void *_data)

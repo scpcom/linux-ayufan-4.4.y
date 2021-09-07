@@ -63,7 +63,6 @@
 #define CM_CLKSEL2					0x0044
 #define CM_CLKSTCTRL					0x0048
 
-
 /* Architecture-specific registers */
 
 #define OMAP24XX_CM_FCLKEN2				0x0004
@@ -88,7 +87,6 @@
 #define OMAP3430ES2_CM_CLKSEL5				0x0050
 #define OMAP3430_CM_CLKSEL2_EMU				0x0050
 #define OMAP3430_CM_CLKSEL3_EMU				0x0054
-
 
 /* Clock management domain register get/set */
 
@@ -126,6 +124,5 @@ static inline u32 cm_clear_mod_reg_bits(u32 bits, s16 module, s16 idx)
 
 /* CM_IDLEST_GFX */
 #define OMAP_ST_GFX					(1 << 0)
-
 
 #endif

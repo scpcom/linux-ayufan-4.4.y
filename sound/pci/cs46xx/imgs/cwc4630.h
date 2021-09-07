@@ -301,7 +301,6 @@ static u32 cwc4630_parameter[] = {
 /* 007C */ 0x00000000,0x00000000,0x00000000,0x00000000
 }; /* #PARAMETER_END */
 
-
 static struct dsp_segment_desc cwc4630_segments[] = {
   { SEGTYPE_SP_PROGRAM, 0x00000000, 0x00000328, cwc4630_code },
   { SEGTYPE_SP_PARAMETER, 0x00000000, 0x00000080, cwc4630_parameter },

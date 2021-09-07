@@ -1047,7 +1047,6 @@ set_tuner:
 	EXIT_RC(WR16(s, 0x0800000, 1));
 	EXIT_RC(RD16(s, 0x0800000));
 
-
 	EXIT_RC(SC_WaitForReady(s));
 	EXIT_RC(WR16(s, 0x0820042, 0));
 	EXIT_RC(WR16(s, 0x0820041, v22));
@@ -1061,7 +1060,6 @@ set_tuner:
 	WR16(s, 0x0820041, 1);
 	WR16(s, 0x0820040, 1);
 	SC_SendCommand(s, 1);
-
 
 	rc = WR16(s, 0x2150000, 2);
 	rc = WR16(s, 0x2150016, a);
@@ -1507,4 +1505,3 @@ EXPORT_SYMBOL(drx397xD_attach);
 MODULE_DESCRIPTION("Micronas DRX397xD DVB-T Frontend");
 MODULE_AUTHOR("Henk Vergonet");
 MODULE_LICENSE("GPL");
-

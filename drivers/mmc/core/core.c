@@ -1034,7 +1034,6 @@ void mmc_detect_change(struct mmc_host *host, unsigned long delay)
 
 EXPORT_SYMBOL(mmc_detect_change);
 
-
 void mmc_rescan(struct work_struct *work)
 {
 	struct mmc_host *host =
@@ -1049,7 +1048,6 @@ void mmc_rescan(struct work_struct *work)
 		host->bus_ops->detect(host);
 
 	mmc_bus_put(host);
-
 
 	mmc_bus_get(host);
 

@@ -49,9 +49,6 @@ extern u32 unit_id;
 #define INTPIN6		0x0A58
 #define INTPIN7		0x0A5C
 
-
-
-
 /* TITAN register offsets */
 #define CPRR		0x0004
 #define CPDSR		0x0008
@@ -104,7 +101,6 @@ extern u32 unit_id;
 #define USB_IRQ		((USB_MSGINT / 0x20) + 2)
 #endif
 #define TIMER_IRQ	12
-
 
 /* Device address ranges */
 #define EXCITE_OFFS_OCD		0x1fffc000

@@ -224,4 +224,3 @@ extern void omap_ctrl_writel(u32 val, u16 offset);
 #endif	/* __ASSEMBLY__ */
 
 #endif /* __ASM_ARCH_CONTROL_H */
-

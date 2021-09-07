@@ -97,4 +97,3 @@ void CPU_WATCHDOG_TIMEOUT(unsigned t)
 {
 	(void)hook_call(hook_dog_timeout, 1, t);
 }
-

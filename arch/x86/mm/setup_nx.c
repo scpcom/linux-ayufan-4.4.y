@@ -66,4 +66,3 @@ void __cpuinit check_efer(void)
 		__supported_pte_mask &= ~_PAGE_NX;
 }
 #endif
-

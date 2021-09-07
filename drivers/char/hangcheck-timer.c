@@ -134,14 +134,12 @@ static inline unsigned long long monotonic_clock(void)
 }
 #endif  /* HAVE_MONOTONIC */
 
-
 /* Last time scheduled */
 static unsigned long long hangcheck_tsc, hangcheck_tsc_margin;
 
 static void hangcheck_fire(unsigned long);
 
 static DEFINE_TIMER(hangcheck_ticktock, hangcheck_fire, 0, 0);
-
 
 static void hangcheck_fire(unsigned long data)
 {
@@ -172,7 +170,6 @@ static void hangcheck_fire(unsigned long data)
 	hangcheck_tsc = monotonic_clock();
 }
 
-
 static int __init hangcheck_init(void)
 {
 	printk("Hangcheck: starting hangcheck timer %s (tick is %d seconds, margin is %d seconds).\n",
@@ -191,7 +188,6 @@ static int __init hangcheck_init(void)
 
 	return 0;
 }
-
 
 static void __exit hangcheck_exit(void)
 {

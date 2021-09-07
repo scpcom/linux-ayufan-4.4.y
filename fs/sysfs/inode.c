@@ -177,7 +177,6 @@ static inline void set_inode_attr(struct inode * inode, struct iattr * iattr)
 	inode->i_ctime = iattr->ia_ctime;
 }
 
-
 /*
  * sysfs has a different i_mutex lock order behavior for i_mutex than other
  * filesystems; sysfs i_mutex is called in many places with subsystem locks

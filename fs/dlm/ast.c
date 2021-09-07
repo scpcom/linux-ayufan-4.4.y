@@ -24,7 +24,6 @@ static struct task_struct *	astd_task;
 static unsigned long		astd_wakeflags;
 static struct mutex		astd_running;
 
-
 void dlm_del_ast(struct dlm_lkb *lkb)
 {
 	spin_lock(&ast_queue_lock);
@@ -162,4 +161,3 @@ void dlm_astd_resume(void)
 {
 	mutex_unlock(&astd_running);
 }
-

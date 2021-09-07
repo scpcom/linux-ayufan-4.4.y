@@ -30,7 +30,6 @@
 #include "logging.h"
 #include "vmbus.h"
 
-
 /* FIXME! We need to do this dynamically for PIC and APIC system */
 #define VMBUS_IRQ		0x5
 #define VMBUS_IRQ_VECTOR	IRQ5_VECTOR
@@ -77,7 +76,6 @@ static void vmbus_child_device_get_info(struct hv_device *device_obj,
 static ssize_t vmbus_show_device_attr(struct device *dev,
 				      struct device_attribute *dev_attr,
 				      char *buf);
-
 
 unsigned int vmbus_loglevel = (ALL_MODULES << 16 | INFO_LVL);
 EXPORT_SYMBOL(vmbus_loglevel);
@@ -350,7 +348,6 @@ static int vmbus_bus_init(int (*drv_init)(struct hv_driver *drv))
 		ret = -1;
 		goto cleanup;
 	}
-
 
 	vmbus_drv_obj->GetChannelOffers();
 

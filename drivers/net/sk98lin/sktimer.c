@@ -46,10 +46,8 @@ intro()
 {}
 #endif
 
-
 /* Forward declaration */
 static void timer_done(SK_AC *pAC,SK_IOC Ioc,int Restart);
-
 
 /*
  * Inits the software timer
@@ -176,14 +174,12 @@ SK_EVPARA	Para)		/* Event Parameter for this timer */
 	SkHwtStart(pAC, Ioc, pAC->Tim.StQueue->TmDelta);
 }
 
-
 void	SkTimerDone(
 SK_AC	*pAC,		/* Adapters context */
 SK_IOC	Ioc)		/* IoContext */
 {
 	timer_done(pAC, Ioc, 1);
 }
-
 
 static void	timer_done(
 SK_AC	*pAC,		/* Adapters context */

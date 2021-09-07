@@ -36,5 +36,4 @@ static inline int irq_to_gpio(int irq)
 	return irq - IRQ_MV78XX0_GPIO_START;
 }
 
-
 #endif

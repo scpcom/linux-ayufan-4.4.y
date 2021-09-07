@@ -41,7 +41,6 @@ typedef struct config_t {
 	} irq;
 } config_t;
 
-
 struct cis_cache_entry {
 	struct list_head	node;
 	unsigned int		addr;
@@ -129,7 +128,6 @@ extern int cs_debug_level(int);
 #define cs_err(skt, fmt, arg...) \
 	dev_printk(KERN_ERR, &skt->dev, "cs: " fmt, ## arg)
 
-
 /*
  * Stuff internal to module "pcmcia_core":
  */
@@ -149,8 +147,6 @@ int cb_alloc(struct pcmcia_socket *s);
 void cb_free(struct pcmcia_socket *s);
 int read_cb_mem(struct pcmcia_socket *s, int space, u_int addr, u_int len,
 		void *ptr);
-
-
 
 /*
  * Stuff exported by module "pcmcia_core" to module "pcmcia"

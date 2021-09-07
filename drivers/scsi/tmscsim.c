@@ -242,14 +242,12 @@
 #include <scsi/scsicam.h>
 #include <scsi/scsi_tcq.h>
 
-
 #define DC390_BANNER "Tekram DC390/AM53C974"
 #define DC390_VERSION "2.1d 2004-05-27"
 
 #define PCI_DEVICE_ID_AMD53C974 	PCI_DEVICE_ID_AMD_SCSI
 
 #include "tmscsim.h"
-
 
 static void dc390_DataOut_0( struct dc390_acb* pACB, struct dc390_srb* pSRB, u8 *psstatus);
 static void dc390_DataIn_0( struct dc390_acb* pACB, struct dc390_srb* pSRB, u8 *psstatus);
@@ -500,7 +498,6 @@ dc390_freetag (struct dc390_dcb* pDCB, struct dc390_srb* pSRB)
 	}
 }
 
-
 static int
 dc390_StartSCSI( struct dc390_acb* pACB, struct dc390_dcb* pDCB, struct dc390_srb* pSRB )
 {
@@ -634,14 +631,12 @@ dc390_StartSCSI( struct dc390_acb* pACB, struct dc390_dcb* pDCB, struct dc390_sr
     return 0;
 }
 
-
 static void __inline__
 dc390_InvalidCmd(struct dc390_acb* pACB)
 {
 	if (pACB->pActiveDCB->pActiveSRB->SRBState & (SRB_START_ | SRB_MSGOUT))
 		DC390_write8(ScsiCmd, CLEAR_FIFO_CMD);
 }
-
 
 static irqreturn_t __inline__
 DC390_Interrupt(void *dev_id)
@@ -960,7 +955,6 @@ dc390_MsgOut_0( struct dc390_acb* pACB, struct dc390_srb* pSRB, u8 *psstatus)
     //DC390_write8 (DMA_Cmd, DMA_IDLE_CMD);
 }
 
-
 static void __inline__
 dc390_reprog (struct dc390_acb* pACB, struct dc390_dcb* pDCB)
 {
@@ -970,7 +964,6 @@ dc390_reprog (struct dc390_acb* pACB, struct dc390_dcb* pDCB)
   DC390_write8 (CtrlReg4, pDCB->CtrlR4);
   dc390_SetXferRate (pACB, pDCB);
 }
-
 
 #ifdef DC390_DEBUG0
 static void
@@ -1038,7 +1031,6 @@ dc390_MsgIn_QTag (struct dc390_acb* pACB, struct dc390_dcb* pDCB, s8 tag)
     }
   return pSRB;
 }
-
 
 /* set async transfer mode */
 static void 
@@ -1131,7 +1123,6 @@ dc390_MsgIn_set_sync (struct dc390_acb* pACB, struct dc390_srb* pSRB)
   dc390_reprog (pACB, pDCB);
 }
 
-
 /* handle RESTORE_PTR */
 /* This doesn't look very healthy... to-be-fixed */
 static void 
@@ -1175,7 +1166,6 @@ dc390_restore_ptr (struct dc390_acb* pACB, struct dc390_srb* pSRB)
   pSRB->TotalXferredLen = pSRB->Saved_Ptr;
 }
 
-
 /* According to the docs, the AM53C974 reads the message and 
  * generates a Successful Operation IRQ before asserting ACK for
  * the last byte (how does it know whether it's the last ?) */
@@ -1197,8 +1187,6 @@ dc390_MsgIn_complete (u8 *msgbuf, u32 len)
 	if (len < 2) return 0;
   return 1;
 }
-
-
 
 /* read and eval received messages */
 static void
@@ -1273,7 +1261,6 @@ dc390_MsgIn_0( struct dc390_acb* pACB, struct dc390_srb* pSRB, u8 *psstatus)
     DC390_write8 (ScsiCmd, MSG_ACCEPTED_CMD);
     //DC390_write8 (DMA_Cmd, DMA_IDLE_CMD);
 }
-
 
 static void
 dc390_DataIO_Comm( struct dc390_acb* pACB, struct dc390_srb* pSRB, u8 ioDir)
@@ -1352,7 +1339,6 @@ dc390_DataIO_Comm( struct dc390_acb* pACB, struct dc390_srb* pSRB, u8 ioDir)
 */
     }
 }
-
 
 static void
 dc390_DataOutPhase( struct dc390_acb* pACB, struct dc390_srb* pSRB, u8 *psstatus)
@@ -1482,7 +1468,6 @@ dc390_Nop_1( struct dc390_acb* pACB, struct dc390_srb* pSRB, u8 *psstatus)
 {
 }
 
-
 static void
 dc390_SetXferRate( struct dc390_acb* pACB, struct dc390_dcb* pDCB )
 {
@@ -1512,7 +1497,6 @@ dc390_SetXferRate( struct dc390_acb* pACB, struct dc390_dcb* pDCB )
     }
     return;
 }
-
 
 static void
 dc390_Disconnect( struct dc390_acb* pACB )
@@ -1576,7 +1560,6 @@ disc1:
     }
     pACB->MsgLen = 0;
 }
-
 
 static void
 dc390_Reselect( struct dc390_acb* pACB )
@@ -1690,7 +1673,6 @@ dc390_RequestSense(struct dc390_acb* pACB, struct dc390_dcb* pDCB, struct dc390_
 	pSRB->SGToBeXferLen = 0;
 	return dc390_StartSCSI(pACB, pDCB, pSRB);
 }
-
 
 static void
 dc390_SRBdone( struct dc390_acb* pACB, struct dc390_dcb* pDCB, struct dc390_srb* pSRB )
@@ -1806,7 +1788,6 @@ cmd_done:
     return;
 }
 
-
 /* Remove all SRBs from Going list and inform midlevel */
 static void
 dc390_DoingSRB_Done(struct dc390_acb* pACB, struct scsi_cmnd *cmd)
@@ -1835,7 +1816,6 @@ dc390_DoingSRB_Done(struct dc390_acb* pACB, struct scsi_cmnd *cmd)
 	pdcb = pdcb->pNextDCB;
     } while( pdcb != pDCB );
 }
-
 
 static void
 dc390_ResetSCSIBus( struct dc390_acb* pACB )
@@ -1988,7 +1968,6 @@ static void dc390_dumpinfo (struct dc390_acb* pACB, struct dc390_dcb* pDCB, stru
     printk ("DC390: In case of driver trouble read Documentation/scsi/tmscsim.txt\n");
 }
 
-
 static int DC390_abort(struct scsi_cmnd *cmd)
 {
 	struct dc390_acb *pACB = (struct dc390_acb*) cmd->device->host->hostdata;
@@ -2007,7 +1986,6 @@ static int DC390_abort(struct scsi_cmnd *cmd)
 
 	return FAILED;
 }
-
 
 static void dc390_ResetDevParam( struct dc390_acb* pACB )
 {

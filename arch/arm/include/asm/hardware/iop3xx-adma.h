@@ -417,7 +417,6 @@ static inline u32 iop_desc_get_dest_addr(struct iop_adma_desc_slot *desc,
 	return 0;
 }
 
-
 static inline u32 iop_desc_get_qdest_addr(struct iop_adma_desc_slot *desc,
 					  struct iop_adma_chan *chan)
 {

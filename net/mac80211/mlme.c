@@ -429,7 +429,6 @@ static void ieee80211_send_assoc(struct ieee80211_sub_if_data *sdata,
 	ieee80211_tx_skb(sdata, skb, 0);
 }
 
-
 static void ieee80211_send_deauth_disassoc(struct ieee80211_sub_if_data *sdata,
 					   const u8 *bssid, u16 stype, u16 reason,
 					   void *cookie)
@@ -987,7 +986,6 @@ ieee80211_direct_probe(struct ieee80211_sub_if_data *sdata,
 	return RX_MGMT_NONE;
 }
 
-
 static enum rx_mgmt_action __must_check
 ieee80211_authenticate(struct ieee80211_sub_if_data *sdata,
 		       struct ieee80211_mgd_work *wk)
@@ -1278,7 +1276,6 @@ static void ieee80211_auth_completed(struct ieee80211_sub_if_data *sdata,
 	printk(KERN_DEBUG "%s: authenticated\n", sdata->dev->name);
 }
 
-
 static void ieee80211_auth_challenge(struct ieee80211_sub_if_data *sdata,
 				     struct ieee80211_mgd_work *wk,
 				     struct ieee80211_mgmt *mgmt,
@@ -1349,7 +1346,6 @@ ieee80211_rx_mgmt_auth(struct ieee80211_sub_if_data *sdata,
 	return RX_MGMT_NONE;
 }
 
-
 static enum rx_mgmt_action __must_check
 ieee80211_rx_mgmt_deauth(struct ieee80211_sub_if_data *sdata,
 			 struct ieee80211_mgd_work *wk,
@@ -1384,7 +1380,6 @@ ieee80211_rx_mgmt_deauth(struct ieee80211_sub_if_data *sdata,
 	return RX_MGMT_CFG80211_DEAUTH;
 }
 
-
 static enum rx_mgmt_action __must_check
 ieee80211_rx_mgmt_disassoc(struct ieee80211_sub_if_data *sdata,
 			   struct ieee80211_mgmt *mgmt, size_t len)
@@ -1411,7 +1406,6 @@ ieee80211_rx_mgmt_disassoc(struct ieee80211_sub_if_data *sdata,
 	ieee80211_set_disassoc(sdata, false);
 	return RX_MGMT_CFG80211_DISASSOC;
 }
-
 
 static enum rx_mgmt_action __must_check
 ieee80211_rx_mgmt_assoc_resp(struct ieee80211_sub_if_data *sdata,
@@ -1623,7 +1617,6 @@ ieee80211_rx_mgmt_assoc_resp(struct ieee80211_sub_if_data *sdata,
 	return RX_MGMT_CFG80211_ASSOC;
 }
 
-
 static void ieee80211_rx_bss_info(struct ieee80211_sub_if_data *sdata,
 				  struct ieee80211_mgmt *mgmt,
 				  size_t len,
@@ -1662,7 +1655,6 @@ static void ieee80211_rx_bss_info(struct ieee80211_sub_if_data *sdata,
 		ieee80211_sta_process_chanswitch(sdata, sw_elem, bss);
 	}
 }
-
 
 static void ieee80211_rx_mgmt_probe_resp(struct ieee80211_sub_if_data *sdata,
 					 struct ieee80211_mgd_work *wk,
@@ -1853,7 +1845,6 @@ static void ieee80211_rx_mgmt_beacon(struct ieee80211_sub_if_data *sdata,
 	changed |= ieee80211_handle_bss_capability(sdata,
 			le16_to_cpu(mgmt->u.beacon.capab_info),
 			erp_valid, erp_value);
-
 
 	if (elems.ht_cap_elem && elems.ht_info_elem && elems.wmm_param &&
 	    !(ifmgd->flags & IEEE80211_STA_DISABLE_11N)) {
@@ -2140,7 +2131,6 @@ static void ieee80211_sta_work(struct work_struct *work)
 			mutex_lock(&ifmgd->mtx);
 		}
 	}
-
 
 	ieee80211_recalc_idle(local);
 

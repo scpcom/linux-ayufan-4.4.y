@@ -64,7 +64,6 @@ DEFINE_SPINLOCK(feature_lock);
 #define LOCK(flags)	spin_lock_irqsave(&feature_lock, flags);
 #define UNLOCK(flags)	spin_unlock_irqrestore(&feature_lock, flags);
 
-
 /*
  * Instance of some macio stuffs
  */
@@ -100,7 +99,6 @@ static const char *macio_names[] =
 	"K2",
 	"Shasta",
 };
-
 
 struct device_node *uninorth_node;
 u32 __iomem *uninorth_base;
@@ -1314,7 +1312,6 @@ intrepid_aack_delay_enable(struct device_node *node, long param, long value)
 	return 0;
 }
 
-
 #endif /* CONFIG_POWER4 */
 
 static long
@@ -1324,7 +1321,6 @@ core99_read_gpio(struct device_node *node, long param, long value)
 
 	return MACIO_IN8(param);
 }
-
 
 static long
 core99_write_gpio(struct device_node *node, long param, long value)
@@ -1493,7 +1489,6 @@ static long g5_i2s_enable(struct device_node *node, long param, long value)
 	return 0;
 }
 
-
 #ifdef CONFIG_SMP
 static long g5_reset_cpu(struct device_node *node, long param, long value)
 {
@@ -1550,7 +1545,6 @@ void g5_phy_disable_cpu1(void)
 #endif /* CONFIG_POWER4 */
 
 #ifndef CONFIG_POWER4
-
 
 #ifdef CONFIG_PM
 static u32 save_gpio_levels[2];
@@ -1670,7 +1664,6 @@ static void intrepid_shutdown(struct macio_chip *macio, int sleep_mode)
 	(void)MACIO_IN32(KEYLARGO_FCR0);
 	mdelay(10);
 }
-
 
 static int
 core99_sleep(void)
@@ -1889,7 +1882,6 @@ static long generic_get_mb_info(struct device_node *node, long param, long value
 	}
 	return -EINVAL;
 }
-
 
 /*
  * Table definitions
@@ -2547,7 +2539,6 @@ found:
 	if (model && (strncmp(model, "PowerBook", 9) == 0
 		   || strncmp(model, "iBook", 5) == 0))
 		pmac_mb.board_flags |= PMAC_MB_MOBILE;
-
 
 	printk(KERN_INFO "PowerMac motherboard: %s\n", pmac_mb.model_name);
 done:

@@ -28,7 +28,6 @@
 #ifndef __ATE_H__
 #define __ATE_H__
 
-
 #ifdef LINUX
 #define ate_print printk
 #define ATEDBGPRINT DBGPRINT
@@ -39,7 +38,6 @@
 #endif // CONFIG_STA_SUPPORT //
 #endif // RTMP_MAC_PCI //
 #endif // LINUX //
-
 
 #define ATE_ON(_p)              (((_p)->ate.Mode) != ATE_STOP)
 
@@ -107,12 +105,10 @@
 }
 #endif // RTMP_MAC_PCI //
 
-
 #ifdef RT30xx
 #define ATE_RF_IO_READ8_BY_REG_ID(_A, _I, _pV)     RTMP_RF_IO_READ8_BY_REG_ID(_A, _I, _pV)
 #define ATE_RF_IO_WRITE8_BY_REG_ID(_A, _I, _V)     RTMP_RF_IO_WRITE8_BY_REG_ID(_A, _I, _V)
 #endif // RT30xx //
-
 
 VOID rt_ee_read_all(
 	IN  PRTMP_ADAPTER   pAd,
@@ -186,7 +182,6 @@ INT	Set_ATE_TX_GI_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg);
 
-
 INT	Set_ATE_RX_FER_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg);
@@ -218,7 +213,6 @@ INT Set_ATE_Load_E2P_Proc(
 INT Set_ATE_Read_E2P_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg);
-
 
 INT	Set_ATE_Show_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -284,7 +278,6 @@ INT Set_RFWrite_Proc(
 #endif // DBG //
 #endif // RALINK_28xx_QA //
 
-
 VOID ATEAsicSwitchChannel(
 	IN PRTMP_ADAPTER pAd);
 
@@ -302,7 +295,6 @@ CHAR ATEConvertToRssi(
 VOID ATESampleRssi(
 	IN PRTMP_ADAPTER	pAd,
 	IN PRXWI_STRUC		pRxWI);
-
 
 #ifdef CONFIG_STA_SUPPORT
 VOID RTMPStationStop(

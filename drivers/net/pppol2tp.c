@@ -101,7 +101,6 @@
 #include <asm/byteorder.h>
 #include <asm/atomic.h>
 
-
 #define PPPOL2TP_DRV_VERSION	"V1.0"
 
 /* L2TP header constants */

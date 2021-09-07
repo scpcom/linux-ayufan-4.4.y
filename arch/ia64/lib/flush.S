@@ -9,7 +9,6 @@
 
 #include <asm/asmmacro.h>
 
-
 	/*
 	 * flush_icache_range(start,end)
 	 *

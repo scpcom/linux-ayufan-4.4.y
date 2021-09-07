@@ -68,4 +68,3 @@
 #define S3C64XX_GPF14_CLKOUT0		(0x03 << 28)
 
 #define S3C64XX_GPF15_PWM_TOUT1		(0x02 << 30)
-

@@ -47,7 +47,6 @@
 #include "xattr.h"
 #include "acl.h"
 
-
 /*
  * define how far ahead to read directories while searching them.
  */
@@ -185,7 +184,6 @@ struct dx_node
 	struct fake_dirent fake;
 	struct dx_entry	entries[0];
 };
-
 
 struct dx_frame
 {
@@ -648,7 +646,6 @@ static int ext4_htree_next_block(struct inode *dir, __u32 hash,
 	return 1;
 }
 
-
 /*
  * This function fills a red-black tree with information from a
  * directory block.  It returns the number directory entries loaded
@@ -699,7 +696,6 @@ static int htree_dirblock_to_tree(struct file *dir_file,
 	brelse(bh);
 	return count;
 }
-
 
 /*
  * This function fills a red-black tree with information from a
@@ -790,7 +786,6 @@ errout:
 	dx_release(frames);
 	return (err);
 }
-
 
 /*
  * Directory block splitting, compacting
@@ -997,7 +992,6 @@ static inline int search_dirblock(struct buffer_head *bh,
 	}
 	return 0;
 }
-
 
 /*
  *	ext4_find_entry()
@@ -1989,7 +1983,6 @@ static void ext4_dec_count(handle_t *handle, struct inode *inode)
 	if (S_ISDIR(inode->i_mode) && inode->i_nlink == 0)
 		inc_nlink(inode);
 }
-
 
 static int ext4_add_nondir(handle_t *handle,
 		struct dentry *dentry, struct inode *inode)

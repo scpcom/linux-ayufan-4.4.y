@@ -43,13 +43,11 @@
 
 #include "rtmp_os.h"
 
-
 #define DECLARE_TIMER_FUNCTION(_func)			\
 	void rtmp_timer_##_func(unsigned long data)
 
 #define GET_TIMER_FUNCTION(_func)				\
 	rtmp_timer_##_func
-
 
 /* ----------------- Timer Related MARCO ---------------*/
 // In some os or chipset, we have a lot of timer functions and will read/write register,
@@ -78,14 +76,12 @@ typedef struct  _RALINK_TIMER_STRUCT    {
 #endif // RTMP_TIMER_TASK_SUPPORT //
 }RALINK_TIMER_STRUCT, *PRALINK_TIMER_STRUCT;
 
-
 #ifdef RTMP_TIMER_TASK_SUPPORT
 typedef struct _RTMP_TIMER_TASK_ENTRY_
 {
 	RALINK_TIMER_STRUCT			*pRaTimer;
 	struct _RTMP_TIMER_TASK_ENTRY_	*pNext;
 }RTMP_TIMER_TASK_ENTRY;
-
 
 #define TIMER_QUEUE_SIZE_MAX	128
 typedef struct _RTMP_TIMER_TASK_QUEUE_
@@ -122,13 +118,11 @@ void rtmp_timer_##_func(unsigned long data)										\
 }
 #endif // RTMP_TIMER_TASK_SUPPORT //
 
-
 DECLARE_TIMER_FUNCTION(MlmePeriodicExec);
 DECLARE_TIMER_FUNCTION(MlmeRssiReportExec);
 DECLARE_TIMER_FUNCTION(AsicRxAntEvalTimeout);
 DECLARE_TIMER_FUNCTION(APSDPeriodicExec);
 DECLARE_TIMER_FUNCTION(AsicRfTuningExec);
-
 
 #ifdef CONFIG_STA_SUPPORT
 DECLARE_TIMER_FUNCTION(BeaconTimeout);
@@ -147,16 +141,10 @@ DECLARE_TIMER_FUNCTION(RadioOnExec);
 DECLARE_TIMER_FUNCTION(DlsTimeoutAction);
 #endif // QOS_DLS_SUPPORT //
 
-
 #endif // CONFIG_STA_SUPPORT //
-
-
-
 
 #if defined(AP_LED) || defined(STA_LED)
 DECLARE_TIMER_FUNCTION(LedCtrlMain);
 #endif
-
-
 
 #endif // __RTMP_TIMER_H__ //

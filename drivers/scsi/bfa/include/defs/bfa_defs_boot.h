@@ -67,5 +67,4 @@ struct bfa_boot_cfg_s {
 	struct bfa_boot_bootlun_s blun_disc[BFA_BOOT_BOOTLUN_MAX];
 };
 
-
 #endif /* __BFA_DEFS_BOOT_H__ */

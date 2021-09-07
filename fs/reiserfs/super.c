@@ -1819,7 +1819,6 @@ static int reiserfs_fill_super(struct super_block *s, void *data, int silent)
 		} else
 			set_sb_mnt_count(rs, sb_mnt_count(rs) + 1);
 
-
 		journal_mark_dirty(&th, s, SB_BUFFER_WITH_SB(s));
 		errval = journal_end(&th, s, 1);
 		if (errval) {

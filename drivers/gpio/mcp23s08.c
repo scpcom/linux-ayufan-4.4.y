@@ -10,7 +10,6 @@
 #include <linux/spi/spi.h>
 #include <linux/spi/mcp23s08.h>
 
-
 /* Registers are all 8 bits wide.
  *
  * The mcp23s17 has twice as many bits, and can be configured to work

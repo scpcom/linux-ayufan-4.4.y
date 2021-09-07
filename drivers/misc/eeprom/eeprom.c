@@ -35,7 +35,6 @@ static const unsigned short normal_i2c[] = { 0x50, 0x51, 0x52, 0x53, 0x54,
 /* Insmod parameters */
 I2C_CLIENT_INSMOD_1(eeprom);
 
-
 /* Size of EEPROM in bytes */
 #define EEPROM_SIZE		256
 
@@ -53,7 +52,6 @@ struct eeprom_data {
 	u8 data[EEPROM_SIZE];		/* Register values */
 	enum eeprom_nature nature;
 };
-
 
 static void eeprom_update_client(struct i2c_client *client, u8 slice)
 {
@@ -245,7 +243,6 @@ static void __exit eeprom_exit(void)
 {
 	i2c_del_driver(&eeprom_driver);
 }
-
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl> and "
 		"Philip Edelbrock <phil@netroedge.com> and "

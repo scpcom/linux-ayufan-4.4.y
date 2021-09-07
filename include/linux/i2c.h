@@ -259,7 +259,6 @@ struct i2c_board_info {
 #define I2C_BOARD_INFO(dev_type, dev_addr) \
 	.type = dev_type, .addr = (dev_addr)
 
-
 #if defined(CONFIG_I2C) || defined(CONFIG_I2C_MODULE)
 /* Add-on boards should register/unregister their devices; e.g. a board
  * with integrated I2C, a config eeprom, sensors, and a codec that's
@@ -413,7 +412,6 @@ struct i2c_client_address_data {
 #define I2C_ADDRS(addr, addrs...) \
 	((const unsigned short []){ addr, ## addrs, I2C_CLIENT_END })
 
-
 /* ----- functions exported by i2c.o */
 
 /* administration...
@@ -441,7 +439,6 @@ extern void i2c_clients_command(struct i2c_adapter *adap,
 
 extern struct i2c_adapter *i2c_get_adapter(int id);
 extern void i2c_put_adapter(struct i2c_adapter *adap);
-
 
 /* Return the functionality mask */
 static inline u32 i2c_get_functionality(struct i2c_adapter *adap)
@@ -580,7 +577,6 @@ union i2c_smbus_data {
 #define I2C_SMBUS_BLOCK_PROC_CALL   7		/* SMBus 2.0 */
 #define I2C_SMBUS_I2C_BLOCK_DATA    8
 
-
 #ifdef __KERNEL__
 
 /* These defines are used for probing i2c client addresses */
@@ -619,7 +615,6 @@ I2C_CLIENT_MODULE_PARM(force_##name,					\
 		       "List of adapter,address pairs which are "	\
 		       "unquestionably assumed to contain a `"		\
 		       # name "' chip")
-
 
 #define I2C_CLIENT_INSMOD_COMMON					\
 I2C_CLIENT_MODULE_PARM(probe, "List of adapter,address pairs to scan "	\

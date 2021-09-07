@@ -15,7 +15,6 @@
 
 #include <asm/ds.h>
 
-
 #define BUFFER_SIZE		521	/* Intentionally chose an odd size. */
 #define SMALL_BUFFER_SIZE	24	/* A single bts entry. */
 

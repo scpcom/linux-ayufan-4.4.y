@@ -39,7 +39,6 @@
 #include "../rt_config.h"
 #include "action.h"
 
-
 static VOID ReservedAction(
 	IN PRTMP_ADAPTER pAd,
 	IN MLME_QUEUE_ELEM *Elem);
@@ -303,7 +302,6 @@ VOID PeerPublicAction(
 		return;
 }
 
-
 static VOID ReservedAction(
 	IN PRTMP_ADAPTER pAd,
 	IN MLME_QUEUE_ELEM *Elem)
@@ -337,7 +335,6 @@ static VOID respond_ht_information_exchange_action(
 	ULONG			FrameLen;
 	FRAME_HT_INFO	HTINFOframe, *pFrame;
 	UCHAR   		*pAddr;
-
 
 	// 2. Always send back ADDBA Response
 	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);	 //Get an unused nonpaged memory
@@ -443,7 +440,6 @@ VOID PeerHTAction(
 	}
 }
 
-
 /*
 	==========================================================================
 	Description:
@@ -479,7 +475,6 @@ VOID ORIBATimerTimeout(
 		total --;
 	}
 }
-
 
 VOID SendRefreshBAR(
 	IN	PRTMP_ADAPTER	pAd,
@@ -564,13 +559,11 @@ VOID BarHeaderInit(
 	pCntlBar->BarControl.Compressed = 1;
 	pCntlBar->BarControl.ACKPolicy = 0;
 
-
 	pCntlBar->Duration = 16 + RTMPCalcDuration(pAd, RATE_1, sizeof(FRAME_BA));
 
 	COPY_MAC_ADDR(pCntlBar->Addr1, pDA);
 	COPY_MAC_ADDR(pCntlBar->Addr2, pSA);
 }
-
 
 /*
 	==========================================================================

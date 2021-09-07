@@ -71,7 +71,6 @@ int hpsb_default_host_entry(struct hpsb_host *host)
 	return 0;
 }
 
-
 #ifdef CONFIG_IEEE1394_ETH1394_ROM_ENTRY
 #include "eth1394.h"
 

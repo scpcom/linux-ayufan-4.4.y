@@ -321,7 +321,6 @@ static unsigned long s3c2443_getrate_uart(struct clk *clk)
 	return parent_rate / (div + 1);
 }
 
-
 static int s3c2443_setrate_uart(struct clk *clk, unsigned long rate)
 {
 	unsigned long parent_rate = clk_get_rate(clk->parent);
@@ -361,7 +360,6 @@ static unsigned long s3c2443_getrate_hsspi(struct clk *clk)
 
 	return parent_rate / (div + 1);
 }
-
 
 static int s3c2443_setrate_hsspi(struct clk *clk, unsigned long rate)
 {

@@ -27,7 +27,6 @@
  *
  ******************************************************************************/
 
-
 #ifndef TARGET_CORE_DEVICE_H
 #define TARGET_CORE_DEVICE_H
 

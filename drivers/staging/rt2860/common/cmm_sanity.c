@@ -36,7 +36,6 @@
 */
 #include "../rt_config.h"
 
-
 extern UCHAR	CISCO_OUI[];
 
 extern UCHAR	WPA_OUI[];

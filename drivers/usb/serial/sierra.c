@@ -777,7 +777,6 @@ static void sierra_close(struct usb_serial_port *port)
 		portdata->opened = 0;
 		spin_unlock_irq(&intfdata->susp_lock);
 
-
 		/* Stop reading urbs */
 		sierra_stop_rx_urbs(port);
 		/* .. and release them */
@@ -803,7 +802,6 @@ static int sierra_open(struct tty_struct *tty, struct usb_serial_port *port)
 	/* Set some sane defaults */
 	portdata->rts_state = 1;
 	portdata->dtr_state = 1;
-
 
 	endpoint = port->bulk_in_endpointAddress;
 	for (i = 0; i < ARRAY_SIZE(portdata->in_urbs); i++) {
@@ -835,7 +833,6 @@ static int sierra_open(struct tty_struct *tty, struct usb_serial_port *port)
 
 	return 0;
 }
-
 
 static void sierra_dtr_rts(struct usb_serial_port *port, int on)
 {
@@ -1027,7 +1024,6 @@ static int __init sierra_init(void)
 	retval = usb_serial_register(&sierra_device);
 	if (retval)
 		goto failed_device_register;
-
 
 	retval = usb_register(&sierra_driver);
 	if (retval)

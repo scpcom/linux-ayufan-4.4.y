@@ -18,7 +18,6 @@
 
 	.globl	input_data
 
-
 	.text
 
 	nop
@@ -77,7 +76,6 @@ basse:	move.d	$pc, $r5
 	nop
 
 	move.d	$r5, [input_data] ; for the decompressor
-
 
 	;; Clear the decompressors BSS (between _edata and _end)
 

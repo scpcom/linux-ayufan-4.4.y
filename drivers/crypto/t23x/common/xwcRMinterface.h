@@ -45,16 +45,13 @@
  * 2.1.0   2009_05_04 sec - remove redundant registration info
  */
 
-
 #ifndef XWCRMINTFC_H
 #define XWCRMINTFC_H
-
 
 /** @file
  * xwcRMinterface.h defines the inteface to the extensible driver
  * resource manager independent of the accelerator architecture.
  */
-
 
 #ifdef __KERNEL__
 #include <linux/wait.h>
@@ -62,7 +59,6 @@
 #endif
 
 #include "../common/t23.h"
-
 
 /* Use this as our "tag" for determining request compatibility, */
 /* should it become a consideration                             */
@@ -120,15 +116,11 @@ typedef uint32_t RMstatus;
 /**< Framework version not supported by this RM */
 #define RM_UNSUPPORTED_FW        (-12)
 
-
-
-
 /*
  * The basic context for a registered interface
  * The RM owns these, they are filled out and referenced to
  * the interface being registered.
  */
-
 
 typedef struct __RMinterfaceCtx {
 
@@ -140,13 +132,6 @@ typedef struct __RMinterfaceCtx {
 #endif
 
 } RMinterfaceCtx;
-
-
-
-
-
-
-
 
 /**
  * Basic RM request execution message
@@ -166,7 +151,6 @@ typedef struct __RMinterfaceCtx {
  *  The request will return an entry ID that the IF can maintain
  *  if it needs to cancel a request.
  */
-
 
 typedef struct _RMexecMessage {
     /* If framework evolves, this is a version compatibility tag */
@@ -198,7 +182,6 @@ typedef struct _RMexecMessage {
     void              *errDesc;     /**< physical address of the descriptor
                                          triggering the error, if implemented
                                          by the hardware in use             */
-
 
     /*
      * Part #3: Exec message release handler specification.
@@ -242,16 +225,11 @@ typedef struct _RMexecMessage {
     int                sigval[4]; /**< saved signals for user process */
     uint8_t            buftype; /**< memory type for buffer releases */
 
-
-
     /*
      * Part #6: Miscellaneous tracking information
      */
     RMinterfaceCtx    *owningIF; /**< Request belongs to this Interface */
 } RMexecMessage;
-
-
-
 
 /**
  * General prototypes for the RM's functionality exposed to an IF
@@ -262,19 +240,15 @@ RMstatus xwcRMqueueRequest(RMinterfaceCtx *intfc,
                            RMexecMessage  *execMsg,
                            uint32_t       *entryID);
 
-
-
 /** Cancel a queued request */
 RMstatus xwcRMcancelRequest(RMinterfaceCtx *intfc,
                             uint32_t        entryID);
-
 
 /** Registration prototypes for any resource manager */
 RMstatus xwcRMregisterInterface(uint8_t         *intname,
                                 RMinterfaceCtx **regdesc);
 
 RMstatus xwcRMderegisterInterface(RMinterfaceCtx *regdesc);
-
 
 /** Memory buffer mapping/management functions for use by all IFs */
 
@@ -301,6 +275,5 @@ RMstatus xwcMemReleaseUserVirtual(uint32_t    ent,
 RMstatus xwcMemReleaseKernelVirtual(uint32_t    ent,
                                     void       *pd,
                                     void       *pdmap);
-
 
 #endif /* XWCRMINTFC_H */

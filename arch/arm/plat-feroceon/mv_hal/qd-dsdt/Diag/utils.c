@@ -110,7 +110,6 @@ GT_STATUS gtSort(int list[], GT_CMP_FUNC cmpFunc, void* buf, GT_U32 len)
 	return GT_OK;
 }
  
-
 GT_U16 hashFunction(char eaddr[])
 {
 	GT_U16 crc_reg;
@@ -138,7 +137,6 @@ GT_U16 hashFunction(char eaddr[])
 
 	return crc_reg;
 }
-
 
 GT_U16 hashToBucket(GT_U16 hash, GT_U16 mode)
 {
@@ -571,7 +569,6 @@ GT_U16 createATUList(GT_QD_DEV *dev,TEST_ATU_ENTRY entry[], GT_U16 entrySize, GT
 	return dynamicMacs;
 }
 
-
 GT_STATUS testFixedAtu(GT_QD_DEV *dev,GT_U8 dbNum,GT_U8 atuSize)
 {
 	GT_STATUS status;
@@ -693,7 +690,6 @@ GT_STATUS testFixedAtu(GT_QD_DEV *dev,GT_U8 dbNum,GT_U8 atuSize)
 	macEntry[15].entryState.ucEntryState = GT_UC_DYNAMIC;
 	macEntry[15].DBNum = dbNum;
 
-	
 	for(i=0; i<16; i++)
 	{
 		displayHash(macEntry[i].macAddr.arEther,dbNum,64<<atuSize);
@@ -708,4 +704,3 @@ GT_STATUS testFixedAtu(GT_QD_DEV *dev,GT_U8 dbNum,GT_U8 atuSize)
 	return GT_OK;
 
 }
-

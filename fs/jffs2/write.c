@@ -18,7 +18,6 @@
 #include "nodelist.h"
 #include "compr.h"
 
-
 int jffs2_do_new_inode(struct jffs2_sb_info *c, struct jffs2_inode_info *f,
 		       uint32_t mode, struct jffs2_raw_inode *ri)
 {
@@ -528,7 +527,6 @@ int jffs2_do_create(struct jffs2_sb_info *c, struct jffs2_inode_info *dir_f, str
 	return 0;
 }
 
-
 int jffs2_do_unlink(struct jffs2_sb_info *c, struct jffs2_inode_info *dir_f,
 		    const char *name, int namelen, struct jffs2_inode_info *dead_f,
 		    uint32_t time)
@@ -647,7 +645,6 @@ int jffs2_do_unlink(struct jffs2_sb_info *c, struct jffs2_inode_info *dir_f,
 
 	return 0;
 }
-
 
 int jffs2_do_link (struct jffs2_sb_info *c, struct jffs2_inode_info *dir_f, uint32_t ino, uint8_t type, const char *name, int namelen, uint32_t time)
 {

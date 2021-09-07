@@ -230,7 +230,6 @@ static int __init icp_ocfDrvInit(void)
 	    kmem_cache_create("ICP Op Data", sizeof(struct icp_drvOpData) +
 	            defBuffListInfo.metaSize ,0, SLAB_HWCACHE_ALIGN, NULL, NULL);
 
-
 	ICP_CACHE_NULL_CHECK(drvOpData_zone);
 
 	drvDH_zone = ICP_CACHE_CREATE("ICP DH data", CpaCyDhPhase1KeyGenOpData);

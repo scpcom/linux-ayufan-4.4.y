@@ -42,7 +42,6 @@ struct s3c2410_ep {
 	unsigned			setup_stage : 1;
 };
 
-
 /* Warning : ep0 has a fifo of 16 bytes */
 /* Don't try to set 32 or 64            */
 /* also testusb 14 fails  wit 16 but is */

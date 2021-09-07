@@ -79,7 +79,6 @@
 
 #define OLYMPIC_DEBUG 0
 
-
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/errno.h>
@@ -177,7 +176,6 @@ static struct pci_device_id olympic_pci_tbl[] = {
 	{ } 	/* Terminating Entry */
 };
 MODULE_DEVICE_TABLE(pci,olympic_pci_tbl) ; 
-
 
 static int olympic_probe(struct pci_dev *pdev, const struct pci_device_id *ent); 
 static int olympic_init(struct net_device *dev);
@@ -314,7 +312,6 @@ static int olympic_init(struct net_device *dev)
 			return -ENODEV;
 		}
 	}
-
 
 	/* Needed for cardbus */
 	if(!(readl(olympic_mmio+BCTL) & BCTL_MODE_INDICATOR)) {
@@ -1062,7 +1059,6 @@ static netdev_tx_t olympic_xmit(struct sk_buff *skb,
 
 }
 	
-
 static int olympic_close(struct net_device *dev) 
 {
 	struct olympic_private *olympic_priv=netdev_priv(dev);
@@ -1280,7 +1276,6 @@ static void olympic_srb_bh(struct net_device *dev)
 			} /* switch srb[2] */
 			break ; 
 
-		
 		/* SRB_SET_FUNC_ADDRESS - Called by the set_rx_mode 
 		 */
 
@@ -1744,7 +1739,6 @@ static void __exit olympic_pci_cleanup(void)
 {
 	pci_unregister_driver(&olympic_driver) ; 
 }	
-
 
 module_init(olympic_pci_init) ; 
 module_exit(olympic_pci_cleanup) ; 

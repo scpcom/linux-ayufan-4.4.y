@@ -67,7 +67,6 @@
 		trace_hardirqs_off();			\
 	} while (0)
 
-
 #define local_irq_restore(flags)			\
 	do {						\
 		typecheck(unsigned long, flags);	\

@@ -124,5 +124,4 @@
 #define PARM_TX_NUM_BUFS_DEF    4
 #define PARM_DMA_CACHE_DEF      0
 
-
 #endif /* __ET131X_DEFS_H__ */

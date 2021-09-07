@@ -20,8 +20,6 @@
 
 #define CS42L51_CACHE_SIZE (CS42L51_REG_MAX+1)
 
-
-
 /*#define CS42L51_DEBUG(format, args...) \
 	printk(KERN_ERR "%s(%d): "format"\n", __FUNCTION__, __LINE__, ##args)
 */
@@ -108,7 +106,6 @@ static void cs42l51_fill_cache(struct snd_soc_codec *codec)
 
 }
 
-
 static void cs42l51_sync_cache(struct snd_soc_codec *codec)
 {
 	u8 *cache = codec->reg_cache;
@@ -117,7 +114,6 @@ static void cs42l51_sync_cache(struct snd_soc_codec *codec)
 	for (reg = 1; reg <= CS42L51_REG_MAX; reg++)
 		cs42l51_write(codec, reg, cache[reg]);
 }
-
 
 static void cs42l51_set_bits(struct snd_soc_codec *codec, u32 addr,
 			     u32 start_bit, u32 end_bit, u32 value)
@@ -326,7 +322,6 @@ static int cs42l51_set_dai_fmt(struct snd_soc_dai *dai,
 	return 0;
 }
 
-
 static int cs42l51_set_bias_level(struct snd_soc_codec *codec,
 				 enum snd_soc_bias_level level)
 {
@@ -357,7 +352,6 @@ static struct snd_soc_dai_ops cs42l51_dai_ops = {
 		.set_sysclk = cs42l51_set_dai_sysclk,
 		.set_fmt = cs42l51_set_dai_fmt,
 };
-
 
 struct snd_soc_dai cs42l51_dai = {
 	.name = "CS42L51",
@@ -442,7 +436,6 @@ static int cs42l51_init(struct snd_soc_device *socdev)
 	}
 	cs42l51_add_controls(codec);
 
-
 	ret = snd_soc_init_card(socdev);
 	if (ret < 0) {
 		pr_err("failed to register card\n");
@@ -477,7 +470,6 @@ static int cs42l51_i2c_probe(struct i2c_client *client,
 	struct snd_soc_codec *codec = socdev->card->codec;
 	struct i2c_adapter *adap = to_i2c_adapter(client->dev.parent);
 	int ret;
-
 
 	CS42L51_DEBUG("");
 

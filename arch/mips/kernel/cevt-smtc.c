@@ -166,7 +166,6 @@ static int mips_next_event(unsigned long delta,
 	return 0;
 }
 
-
 void smtc_distribute_timer(int vpe)
 {
 	unsigned long flags;
@@ -175,7 +174,6 @@ void smtc_distribute_timer(int vpe)
 	struct clock_event_device *cd;
 	unsigned long nextstamp;
 	unsigned long reference;
-
 
 repeat:
 	nextstamp = 0L;
@@ -230,7 +228,6 @@ repeat:
 	}
 }
 
-
 irqreturn_t c0_compare_interrupt(int irq, void *dev_id)
 {
 	int cpu = smp_processor_id();
@@ -245,7 +242,6 @@ irqreturn_t c0_compare_interrupt(int irq, void *dev_id)
 	}
 	return IRQ_HANDLED;
 }
-
 
 int __cpuinit smtc_clockevent_init(void)
 {

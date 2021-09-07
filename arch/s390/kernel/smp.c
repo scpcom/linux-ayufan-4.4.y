@@ -825,7 +825,6 @@ static ssize_t show_cpu_address(struct sys_device *dev,
 }
 static SYSDEV_ATTR(address, 0444, show_cpu_address, NULL);
 
-
 static struct attribute *cpu_common_attrs[] = {
 #ifdef CONFIG_HOTPLUG_CPU
 	&attr_configure.attr,

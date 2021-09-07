@@ -252,7 +252,6 @@ iiInitialize(i2eBordStrPtr pB)
 	// message.
 	pB->i2eValid = I2E_INCOMPLETE;
 
-
 	// Now attempt to read the message.
 
 	for (itemp = 0; itemp < sizeof(porStr); itemp++)
@@ -606,7 +605,6 @@ ii2DelayTimer(unsigned int mseconds)
 //
 //******************************************************************************
 
-
 static int ii2DelValue = 1190;  // See timing calculations below
 						// 1666 for fastest theoretical machine
 						// 1190 safe for most fast 386 machines
@@ -900,7 +898,6 @@ iiWaitForTxEmptyII(i2eBordStrPtr pB, int mSdelay)
 		// Therefore for extra safety, we force the critical section to be
 		// completely atomic, and pick up after ourselves before allowing any
 		// interrupts of any kind.
-
 
 		write_lock_irqsave(&Dl_spinlock, flags);
 		outb(SEL_COMMAND, pB->i2ePointer);

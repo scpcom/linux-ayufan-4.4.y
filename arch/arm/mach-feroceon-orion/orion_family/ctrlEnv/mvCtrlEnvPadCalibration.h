@@ -96,7 +96,6 @@ typedef enum __mvethcpuinterfacevoltage__
 #define MV_ETH_CPU_INTERFACE_VOLTAGE 			MV_CTRL_ENV_CPU_INTERFACE_VOLTAGE_1_8V
 #define MV_CTRL_ENV_CPU_INTERFACE_VOLTAGE_MAX 	MV_CTRL_ENV_CPU_INTERFACE_VOLTAGE_2_5
 
-
 /* The Ethernet interface driving strength  (Table 33 in Doc. No. MV-S300848-00, Rev. A) */	  
 #undef  MV_CTRL_ENV_ETHERNET_INTERFACE_DRIVING_STRENGTH_HSTL_1_8V 
 #undef  MV_CTRL_ENV_ETHERNET_INTERFACE_DRIVING_STRENGTH_3_3V 
@@ -123,7 +122,6 @@ typedef struct _mvEthDeviceProcessType
     int     ResistorType3;
 } MV_CTRL_ENV_DEVICE_PROCESS_TYPE;
 
-
 /* The Ethernet interface driving strength table */	  
 
 typedef struct _EthernetPadCalibration
@@ -131,7 +129,6 @@ typedef struct _EthernetPadCalibration
     int     padCalibrationDrvN;
     int     padCalibrationDrvP;
 } MV_CTRL_ENV_ETHERNET_PAD_CALIBRATION;
-
 
 typedef enum __mvethEthernetPadCalibrationType_
 {
@@ -141,7 +138,6 @@ typedef enum __mvethEthernetPadCalibrationType_
     
 }MV_CTRL_ENV_ETHERNET_PAD_CALIBRATION_TYPE;
 
-
 /* function */
 
 void  mvCtrlEnvPadCalibrationInit(void);
@@ -150,13 +146,8 @@ int   mvCtrlEnvEthInterfaceDrivingStrengthGet(void);
 void  mvCtrlEnvEthCpuPadCalibrationVoltSet(int Value);
 int   mvCtrlEnvEthCpuPadCalibrationVoltGet(void);
 
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
 #endif /* __mvCtrlEnvEthPad_Calibration_h__ */
-
-
-
-

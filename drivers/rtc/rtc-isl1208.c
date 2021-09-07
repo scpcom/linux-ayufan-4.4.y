@@ -378,7 +378,6 @@ isl1208_i2c_set_time(struct i2c_client *client, struct rtc_time const *tm)
 	return 0;
 }
 
-
 static int
 isl1208_rtc_set_time(struct device *dev, struct rtc_time *tm)
 {

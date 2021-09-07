@@ -90,4 +90,3 @@ static int coda_pioctl(struct inode * inode, struct file * filp,
 	path_put(&path);
         return error;
 }
-

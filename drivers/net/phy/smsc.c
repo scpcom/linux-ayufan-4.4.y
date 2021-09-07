@@ -39,7 +39,6 @@
 #define MII_LAN83C185_ISF_INT_PHYLIB_EVENTS \
 	(MII_LAN83C185_ISF_INT6 | MII_LAN83C185_ISF_INT4)
 
-
 static int smsc_phy_config_intr(struct phy_device *phydev)
 {
 	int rc = phy_write (phydev, MII_LAN83C185_IM,
@@ -61,7 +60,6 @@ static int smsc_phy_config_init(struct phy_device *phydev)
 {
 	return smsc_phy_ack_interrupt (phydev);
 }
-
 
 static struct phy_driver lan83c185_driver = {
 	.phy_id		= 0x0007c0a0, /* OUI=0x00800f, Model#=0x0a */

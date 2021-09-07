@@ -228,7 +228,6 @@ typedef struct scsi_info_t {
 	int                    stop;
 } scsi_info_t;
 
-
 /* synchronous transfer negotiation data */
 typedef struct _sync_data {
 	unsigned int SyncNegotiation;
@@ -273,7 +272,6 @@ typedef struct _nsp_hw_data {
 	spinlock_t Lock;
 
 	scsi_info_t   *ScsiInfo; /* attach <-> detect glue */
-
 
 #ifdef NSP_DEBUG
 	int CmdId; /* Accepted command serial number.

@@ -38,7 +38,6 @@ static uint64_t msi_multiple_irq_bitmask;
  */
 static DEFINE_SPINLOCK(msi_free_irq_bitmask_lock);
 
-
 /**
  * Called when a driver request MSI interrupts instead of the
  * legacy INT A-D. This routine will allocate multiple interrupts
@@ -169,7 +168,6 @@ try_only_one:
 	return 0;
 }
 
-
 /**
  * Called when a device no longer needs its MSI interrupts. All
  * MSI interrupts for the device are freed.
@@ -211,7 +209,6 @@ void arch_teardown_msi_irq(unsigned int irq)
 	spin_unlock(&msi_free_irq_bitmask_lock);
 }
 
-
 /*
  * Called by the interrupt handling code when an MSI interrupt
  * occurs.
@@ -248,7 +245,6 @@ static irqreturn_t octeon_msi_interrupt(int cpl, void *dev_id)
 	}
 	return IRQ_NONE;
 }
-
 
 /*
  * Initializes the MSI interrupt handling code

@@ -77,12 +77,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define BAR_SIZE_OFFS			12
 #define BAR_SIZE_MASK			(0xFFFFF << BAR_SIZE_OFFS)
 
-
-
 #define MV_PEX_WIN_DEFAULT		6
 #define MV_PEX_WIN_EXP_ROM		7
 #define PEX_MAX_TARGET_WIN		8
-
 
 #define PEX_MAX_BARS			3
 #define PEX_INTER_REGS_BAR		0
@@ -95,7 +92,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PEX_BAR_CTRL_REG(pexIf,bar)		(0x41804 + (bar-1)*4- (pexIf)*0x10000)
 #define PEX_EXP_ROM_BAR_CTRL_REG(pexIf)	(0x4180C - (pexIf)*0x10000)
 
-
 /* PCI Express BAR Control Register */
 /* PEX_BAR_CTRL_REG (PXBCR) */
 
@@ -103,8 +99,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PXBCR_BAR_SIZE_OFFS			16
 #define PXBCR_BAR_SIZE_MASK			(0xffff << PXBCR_BAR_SIZE_OFFS)
 #define PXBCR_BAR_SIZE_ALIGNMENT	0x10000
-
-
 
 /* PCI Express Expansion ROM BAR Control Register */
 /* PEX_EXP_ROM_BAR_CTRL_REG (PXERBCR) */
@@ -204,8 +198,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PXWERRR_REMAP_MASK				(0xffff << PXWERRR_REMAP_OFFS)
 #define PXWERRR_REMAP_ALIGNMENT			0x10000
 
-
-
 /*PEX_MEMORY_BAR_BASE_ADDR(barNum) (PXMBBA)*/ 
 /* PCI Express BAR0 Internal Register*/
 /*PEX BAR0_INTER_REG (PXBIR)*/
@@ -223,19 +215,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PXBIR_BASE_MASK		(0xfff << PXBIR_BASE_OFFS)
 #define PXBIR_BASE_ALIGNMET	(1 << PXBIR_BASE_OFFS)
 
-
 /* PCI Express BAR0 Internal (High) Register*/
 /*PEX BAR0_INTER_REG_HIGH (PXBIRH)*/      
 
 #define PXBIRH_BASE_OFFS			0		/* Base address. Bits [63:32] */
 #define PXBIRH_BASE_MASK			(0xffffffff << PBBHR_BASE_OFFS)
 
-
 #define PEX_BAR_DEFAULT_ATTRIB		0xc /* Memory - Prefetch - 64 bit address */
 #define PEX_BAR0_DEFAULT_ATTRIB	    PEX_BAR_DEFAULT_ATTRIB  
 #define PEX_BAR1_DEFAULT_ATTRIB		PEX_BAR_DEFAULT_ATTRIB
 #define PEX_BAR2_DEFAULT_ATTRIB		PEX_BAR_DEFAULT_ATTRIB
-
 
 /* PCI Express BAR1 Register */
 /*  PCI Express BAR2 Register*/
@@ -254,7 +243,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PXBR_BASE_OFFS		16		/* Base address. Address bits [31:16] */
 #define PXBR_BASE_MASK		(0xffff << PXBR_BASE_OFFS)
 #define PXBR_BASE_ALIGNMET	(1 << PXBR_BASE_OFFS)
-
 
 /* PCI Express BAR1 (High) Register*/
 /* PCI Express BAR2 (High) Register*/
@@ -312,7 +300,6 @@ typedef struct _mvPexDecWin
 /* Global Functions prototypes */
 /* mvPexHalInit - Initialize PEX interfaces*/
 MV_STATUS mvPexInit(MV_U32 pexIf, MV_PEX_TYPE pexType);
-
 
 /* mvPexTargetWinSet - Set PEX to peripheral target address window BAR*/
 MV_STATUS mvPexTargetWinSet(MV_U32 pexIf, MV_U32 winNum, 

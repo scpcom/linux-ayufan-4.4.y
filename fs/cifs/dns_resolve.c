@@ -163,5 +163,3 @@ out:
 	kfree(name);
 	return rc;
 }
-
-

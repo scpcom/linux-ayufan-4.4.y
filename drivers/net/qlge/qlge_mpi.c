@@ -476,7 +476,6 @@ static int ql_mailbox_command(struct ql_adapter *qdev, struct mbox_params *mbcp)
 	int status;
 	unsigned long count;
 
-
 	/* Begin polled mode for MPI */
 	ql_write32(qdev, INTR_MASK, (INTR_MASK_PI << 16));
 
@@ -484,7 +483,6 @@ static int ql_mailbox_command(struct ql_adapter *qdev, struct mbox_params *mbcp)
 	status = ql_exec_mb_cmd(qdev, mbcp);
 	if (status)
 		goto end;
-
 
 	/* If we're generating a system error, then there's nothing
 	 * to wait for.
@@ -548,7 +546,6 @@ end:
 	ql_write32(qdev, INTR_MASK, (INTR_MASK_PI << 16) | INTR_MASK_PI);
 	return status;
 }
-
 
 /* Get MPI firmware version. This will be used for
  * driver banner and for ethtool info.
@@ -672,7 +669,6 @@ static int ql_mb_set_port_cfg(struct ql_adapter *qdev)
 	mbcp->mbox_in[0] = MB_CMD_SET_PORT_CFG;
 	mbcp->mbox_in[1] = qdev->link_config;
 	mbcp->mbox_in[2] = qdev->max_frame_size;
-
 
 	status = ql_mailbox_command(qdev, mbcp);
 	if (status)

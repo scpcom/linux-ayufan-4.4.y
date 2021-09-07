@@ -96,7 +96,6 @@ TRACE_EVENT(foo_bar,
 
 /***** NOTICE! The #if protection ends here. *****/
 
-
 /*
  * There are several ways I could have done this. If I left out the
  * TRACE_INCLUDE_PATH, then it would default to the kernel source

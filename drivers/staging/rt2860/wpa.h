@@ -119,7 +119,6 @@
 #define PEER_MSG3_RETRY_TIMER_CTR           10
 #define GROUP_MSG1_RETRY_TIMER_CTR          20
 
-
 #define EAPOL_START_DISABLE					0
 #define EAPOL_START_PSK						1
 #define EAPOL_START_1X						2

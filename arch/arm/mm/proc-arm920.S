@@ -57,7 +57,6 @@
  */
 #define CACHE_DLIMIT	65536
 
-
 	.text
 /*
  * cpu_arm920_proc_init()
@@ -113,7 +112,6 @@ ENTRY(cpu_arm920_reset)
 ENTRY(cpu_arm920_do_idle)
 	mcr	p15, 0, r0, c7, c0, 4		@ Wait for interrupt
 	mov	pc, lr
-
 
 #ifndef CONFIG_CPU_DCACHE_WRITETHROUGH
 
@@ -317,7 +315,6 @@ ENTRY(arm920_cache_fns)
 	.long	arm920_dma_flush_range
 
 #endif
-
 
 ENTRY(cpu_arm920_dcache_clean_area)
 1:	mcr	p15, 0, r0, c7, c10, 1		@ clean D entry

@@ -23,7 +23,6 @@
 #include <linux/usb/langwell_otg.h>
 #endif
 
-
 /*-------------------------------------------------------------------------*/
 
 /* driver data structures and utilities */
@@ -81,7 +80,6 @@ struct langwell_dtd {
 	struct langwell_dtd	*next_dtd_virt;
 };
 
-
 /*
  * dQH: Device Endpoint Queue Head
  * describe where all transfers are managed
@@ -122,7 +120,6 @@ struct langwell_dqh {
 	struct usb_ctrlrequest	dqh_setup;	/* setup packet buffer */
 } __attribute__ ((aligned(64)));
 
-
 /* endpoint data structure */
 struct langwell_ep {
 	struct usb_ep		ep;
@@ -138,7 +135,6 @@ struct langwell_ep {
 				ep_num:8;
 };
 
-
 /* request data structure */
 struct langwell_request {
 	struct usb_request	req;
@@ -150,7 +146,6 @@ struct langwell_request {
 	unsigned		mapped:1;
 };
 
-
 /* ep0 transfer state */
 enum ep0_state {
 	WAIT_FOR_SETUP,
@@ -160,7 +155,6 @@ enum ep0_state {
 	DATA_STATE_RECV,
 };
 
-
 /* device suspend state */
 enum lpm_state {
 	LPM_L0,	/* on */
@@ -168,7 +162,6 @@ enum lpm_state {
 	LPM_L2,	/* suspend */
 	LPM_L3,	/* off */
 };
-
 
 /* device data structure */
 struct langwell_udc {
@@ -225,4 +218,3 @@ struct langwell_udc {
 	/* make sure release() is done */
 	struct completion	*done;
 };
-

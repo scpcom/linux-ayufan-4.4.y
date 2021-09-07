@@ -115,7 +115,6 @@ static struct platform_driver ipmi_driver = {
 	}
 };
 
-
 /*
  * Indexes into stats[] in smi_info below.
  */
@@ -158,7 +157,6 @@ enum si_stat_indexes {
 
 	/* Number of asyncronous messages received. */
 	SI_STAT_incoming_messages,
-
 
 	/* This *must* remain last, add new values above this. */
 	SI_NUM_STATS
@@ -945,7 +943,6 @@ static int ipmi_thread(void *data)
 	return 0;
 }
 
-
 static void poll(void *send_info)
 {
 	struct smi_info *smi_info = send_info;
@@ -1211,7 +1208,6 @@ module_param(unload_when_empty, int, 0);
 MODULE_PARM_DESC(unload_when_empty, "Unload the module if no interfaces are"
 		 " specified or found, default is 1.  Setting to 0"
 		 " is useful for hot add of devices using hotmod.");
-
 
 static void std_irq_cleanup(struct smi_info *info)
 {
@@ -2304,7 +2300,6 @@ static struct pci_driver ipmi_pci_driver = {
 };
 #endif /* CONFIG_PCI */
 
-
 #ifdef CONFIG_PPC_OF
 static int __devinit ipmi_of_probe(struct of_device *dev,
 			 const struct of_device_id *match)
@@ -3082,7 +3077,6 @@ static __devinit int init_ipmi_si(void)
 		       rv);
 		return rv;
 	}
-
 
 	/* Parse out the si_type string into its components. */
 	str = si_type_str;

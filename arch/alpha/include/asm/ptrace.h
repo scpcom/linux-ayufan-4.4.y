@@ -1,7 +1,6 @@
 #ifndef _ASMAXP_PTRACE_H
 #define _ASMAXP_PTRACE_H
 
-
 /*
  * This struct defines the way the registers are stored on the
  * kernel stack during a system call or other kernel entry

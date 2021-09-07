@@ -65,7 +65,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __INCMVSysXorh
 #define __INCMVSysXorh
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -132,7 +131,6 @@ MV_STATUS   mvXorProtWinSet (MV_U32 unit,MV_U32 chan, MV_U32 winNum, MV_BOOL acc
 MV_STATUS   mvXorPciRemap(MV_U32 unit, MV_U32 winNum, MV_U32 addrHigh);
 
 MV_VOID     mvXorAddrDecShow(MV_VOID);
-
 
 #ifdef __cplusplus
 }

@@ -49,7 +49,6 @@
 
 #include <net/ip_vs.h>
 
-
 EXPORT_SYMBOL(register_ip_vs_scheduler);
 EXPORT_SYMBOL(unregister_ip_vs_scheduler);
 EXPORT_SYMBOL(ip_vs_skb_replace);
@@ -64,7 +63,6 @@ EXPORT_SYMBOL(ip_vs_conn_put);
 #ifdef CONFIG_IP_VS_DEBUG
 EXPORT_SYMBOL(ip_vs_get_debug_level);
 #endif
-
 
 /* ID used in ICMP lookups */
 #define icmp_id(icmph)          (((icmph)->un).echo.id)
@@ -121,7 +119,6 @@ ip_vs_in_stats(struct ip_vs_conn *cp, struct sk_buff *skb)
 	}
 }
 
-
 static inline void
 ip_vs_out_stats(struct ip_vs_conn *cp, struct sk_buff *skb)
 {
@@ -144,7 +141,6 @@ ip_vs_out_stats(struct ip_vs_conn *cp, struct sk_buff *skb)
 	}
 }
 
-
 static inline void
 ip_vs_conn_stats(struct ip_vs_conn *cp, struct ip_vs_service *svc)
 {
@@ -161,7 +157,6 @@ ip_vs_conn_stats(struct ip_vs_conn *cp, struct ip_vs_service *svc)
 	spin_unlock(&ip_vs_stats.lock);
 }
 
-
 static inline int
 ip_vs_set_state(struct ip_vs_conn *cp, int direction,
 		const struct sk_buff *skb,
@@ -171,7 +166,6 @@ ip_vs_set_state(struct ip_vs_conn *cp, int direction,
 		return 0;
 	return pp->state_transition(cp, direction, skb, pp);
 }
-
 
 /*
  *  IPVS persistent scheduling function
@@ -360,7 +354,6 @@ ip_vs_sched_persist(struct ip_vs_service *svc,
 	return cp;
 }
 
-
 /*
  *  IPVS main scheduling function
  *  It selects a server according to the virtual service, and
@@ -426,7 +419,6 @@ ip_vs_schedule(struct ip_vs_service *svc, const struct sk_buff *skb)
 	ip_vs_conn_stats(cp, svc);
 	return cp;
 }
-
 
 /*
  *  Pass or drop the packet.
@@ -520,7 +512,6 @@ int ip_vs_leave(struct ip_vs_service *svc, struct sk_buff *skb,
 
 	return NF_DROP;
 }
-
 
 /*
  *      It is hooked before NF_IP_PRI_NAT_SRC at the NF_INET_POST_ROUTING
@@ -1039,7 +1030,6 @@ ip_vs_out(unsigned int hooknum, struct sk_buff *skb,
 	return handle_response(af, skb, pp, cp, iph.len);
 }
 
-
 /*
  *	Handle ICMP messages in the outside-to-inside direction (incoming).
  *	Find any that might be relevant, check against existing connections,
@@ -1246,7 +1236,6 @@ ip_vs_in_icmp_v6(struct sk_buff *skb, int *related, unsigned int hooknum)
 }
 #endif
 
-
 /*
  *	Check if it's for virtual services, look it up,
  *	and send it on its way...
@@ -1375,7 +1364,6 @@ ip_vs_in(unsigned int hooknum, struct sk_buff *skb,
 	return ret;
 }
 
-
 /*
  *	It is hooked at the NF_INET_FORWARD chain, in order to catch ICMP
  *      related packets destined for 0.0.0.0/0.
@@ -1412,7 +1400,6 @@ ip_vs_forward_icmp_v6(unsigned int hooknum, struct sk_buff *skb,
 	return ip_vs_in_icmp_v6(skb, &r, hooknum);
 }
 #endif
-
 
 static struct nf_hook_ops ip_vs_ops[] __read_mostly = {
 	/* After packet filtering, forward packet through VS/DR, VS/TUN,
@@ -1488,7 +1475,6 @@ static struct nf_hook_ops ip_vs_ops[] __read_mostly = {
 	},
 #endif
 };
-
 
 /*
  *	Initialize IP Virtual Server

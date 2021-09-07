@@ -485,7 +485,6 @@ CIFSSMBNegotiate(unsigned int xid, struct cifsSesInfo *ses)
 		}
 		cFYI(1, ("server->timeAdj: %d seconds", server->timeAdj));
 
-
 		/* BB get server time for time conversions and add
 		code to use it and timezone since this is not UTC */
 
@@ -1426,7 +1425,6 @@ CIFSSMBRead(const int xid, struct cifsTconInfo *tcon, const int netfid,
 	return rc;
 }
 
-
 int
 CIFSSMBWrite(const int xid, struct cifsTconInfo *tcon,
 	     const int netfid, const unsigned int count,
@@ -1610,7 +1608,6 @@ CIFSSMBWrite2(const int xid, struct cifsTconInfo *tcon,
 	else /* wct == 12 pad bigger by four bytes */
 		iov[0].iov_len = smb_hdr_len + 8;
 
-
 	rc = SendReceive2(xid, tcon->ses, iov, n_vec + 1, &resp_buf_type,
 			  long_op);
 	cifs_stats_inc(&tcon->num_writes);
@@ -1645,7 +1642,6 @@ CIFSSMBWrite2(const int xid, struct cifsTconInfo *tcon,
 
 	return rc;
 }
-
 
 int
 CIFSSMBLock(const int xid, struct cifsTconInfo *tcon,
@@ -1838,7 +1834,6 @@ plk_err_exit:
 
 	return rc;
 }
-
 
 int
 CIFSSMBClose(const int xid, struct cifsTconInfo *tcon, int smb_file_id)
@@ -3257,9 +3252,6 @@ QInfRetry:
 	return rc;
 }
 
-
-
-
 int
 CIFSSMBQPathInfo(const int xid, struct cifsTconInfo *tcon,
 		 const unsigned char *searchName,
@@ -4447,7 +4439,6 @@ QFSUnixRetry:
 	if (rc == -EAGAIN)
 		goto QFSUnixRetry;
 
-
 	return rc;
 }
 
@@ -4522,8 +4513,6 @@ SETFSUnixRetry:
 
 	return rc;
 }
-
-
 
 int
 CIFSSMBQFSPosixInfo(const int xid, struct cifsTconInfo *tcon,
@@ -4610,7 +4599,6 @@ QFSPosixRetry:
 
 	return rc;
 }
-
 
 /* We can not use write of zero bytes trick to
    set file size due to need for large file support.  Also note that

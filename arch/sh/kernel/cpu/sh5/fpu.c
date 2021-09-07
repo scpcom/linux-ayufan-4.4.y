@@ -136,7 +136,6 @@ do_fpu_error(unsigned long ex, struct pt_regs *regs)
 	force_sig(SIGFPE, tsk);
 }
 
-
 asmlinkage void
 do_fpu_state_restore(unsigned long ex, struct pt_regs *regs)
 {

@@ -499,7 +499,6 @@ static void install_bootstrap(void)
 		rom_bootstrap[i] = src[i];
 }
 
-
 static int mioa701_sys_suspend(struct sys_device *sysdev, pm_message_t state)
 {
 	int i = 0, is_bt_on;

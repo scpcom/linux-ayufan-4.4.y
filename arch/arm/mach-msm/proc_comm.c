@@ -106,5 +106,3 @@ int msm_proc_comm(unsigned cmd, unsigned *data1, unsigned *data2)
 
 	return ret;
 }
-
-

@@ -220,7 +220,6 @@ VOID WpaEAPOLKeyAction(
 
 	*((USHORT *)&peerKeyInfo) = cpu2le16(*((USHORT *)&peerKeyInfo));
 
-
 	// 1. Check EAPOL frame version and type
 	EapolVr	= (UCHAR) Elem->Msg[LENGTH_802_11+LENGTH_802_1_H];
 
@@ -534,7 +533,6 @@ VOID	WpaPairMsg1Action(
 	//Convert to little-endian format.
 	*((USHORT *)&Packet.KeyDesc.KeyInfo) = cpu2le16(*((USHORT *)&Packet.KeyDesc.KeyInfo));
 
-
 	// 4. Fill SNonce
 	NdisMoveMemory(Packet.KeyDesc.KeyNonce, pAd->StaCfg.SNonce, LEN_KEY_DESC_NONCE);
 
@@ -575,7 +573,6 @@ VOID	WpaPairMsg1Action(
 			  			LENGTH_802_3,     			&Header802_3,
 						Packet.Body_Len[1] + 4,    &Packet,
 						END_OF_ARGS);
-
 
 	// 5. Copy frame to Tx ring and send Msg 2 to authenticator
 	RTMPToWirelessSta(pAd, Header802_3, LENGTH_802_3, (PUCHAR)&Packet, Packet.Body_Len[1] + 4, TRUE);
@@ -723,13 +720,11 @@ VOID Wpa2PairMsg1Action(
 	}
 	NdisMoveMemory(Packet.KeyDesc.KeyMic, Mic, LEN_KEY_DESC_MIC);
 
-
 	// Make  Transmitting frame
 	MakeOutgoingFrame(pOutBuffer,           	&FrameLen,
 			  			LENGTH_802_3,     		&Header802_3,
 						Packet.Body_Len[1] + 4, &Packet,
 						END_OF_ARGS);
-
 
 	// 5. Copy frame to Tx ring
 	RTMPToWirelessSta(pAd, Header802_3, LENGTH_802_3, (PUCHAR)&Packet, Packet.Body_Len[1] + 4, TRUE);
@@ -785,7 +780,6 @@ VOID	WpaPairMsg3Action(
 
 	*((USHORT*)&peerKeyInfo) = cpu2le16(*((USHORT*)&peerKeyInfo));
 
-
 	// 1. Verify cipher type match
 	if (pAd->StaCfg.WepStatus  == Ndis802_11Encryption3Enabled && (peerKeyInfo.KeyDescVer != 2))
 	{
@@ -807,7 +801,6 @@ VOID	WpaPairMsg3Action(
 	}
 	else
 		DBGPRINT(RT_DEBUG_TRACE, ("RSN_IE VALID in Msg 3 of WPA1 4-way handshake!! \n"));
-
 
 	// 2. Check MIC value
 	// Save the MIC and replace with zero
@@ -953,7 +946,6 @@ VOID	WpaPairMsg3Action(
 			  			LENGTH_802_3,     		&Header802_3,
 						Packet.Body_Len[1] + 4, &Packet,
 						END_OF_ARGS);
-
 
 	// Copy frame to Tx ring and Send Message 4 to authenticator
 	RTMPToWirelessSta(pAd, Header802_3, LENGTH_802_3, (PUCHAR)&Packet, Packet.Body_Len[1] + 4, TRUE);
@@ -1209,7 +1201,6 @@ VOID    Wpa2PairMsg3Action(
 						Packet.Body_Len[1] + 4, &Packet,
 						END_OF_ARGS);
 
-
 	// Copy frame to Tx ring and Send Message 4 to authenticator
 	RTMPToWirelessSta(pAd, Header802_3, LENGTH_802_3, (PUCHAR)&Packet, Packet.Body_Len[1] + 4, TRUE);
 
@@ -1221,7 +1212,6 @@ VOID    Wpa2PairMsg3Action(
 
 	MlmeFreeMemory(pAd, (PUCHAR)pOutBuffer);
 	os_free_mem(pAd, (PUCHAR)mpool);
-
 
 	// send wireless event - for set key done WPA2
 	if (pAd->CommonCfg.bWirelessEvent)
@@ -1330,7 +1320,6 @@ VOID	WpaGroupMsg1Action(
 	}
 	else
 		DBGPRINT(RT_DEBUG_TRACE, (" MIC VALID in group msg 1 of 2-way handshake!!!!!!!!!! \n"));
-
 
 	// 3. Decrypt GTK from Key Data
 	if (pAd->StaCfg.WepStatus == Ndis802_11Encryption3Enabled)
@@ -1489,12 +1478,10 @@ VOID	WpaGroupMsg1Action(
 	}
 	NdisMoveMemory(Packet.KeyDesc.KeyMic, Mic, LEN_KEY_DESC_MIC);
 
-
 	MakeOutgoingFrame(pOutBuffer,       		&FrameLen,
 						LENGTH_802_3,     		&Header802_3,
 						Packet.Body_Len[1] + 4, &Packet,
 						END_OF_ARGS);
-
 
 	// 5. Copy frame to Tx ring and prepare for encryption
 	RTMPToWirelessSta(pAd, Header802_3, LENGTH_802_3, (PUCHAR)&Packet, Packet.Body_Len[1] + 4, FALSE);
@@ -1622,7 +1609,6 @@ VOID    RTMPToWirelessSta(
 
     Return Value:
 
-
     ========================================================================
 */
 BOOLEAN CheckRSNIE(
@@ -1684,7 +1670,6 @@ BOOLEAN CheckRSNIE(
 
 }
 
-
 /*
     ========================================================================
 
@@ -1745,7 +1730,6 @@ BOOLEAN ParseKeyData(
 		DBGPRINT(RT_DEBUG_ERROR, ("ERROR: KeyDataLength is too short \n"));
         return FALSE;
     }
-
 
 	// Sanity check - shared key index should not be 0
 	if (pKDE->GTKEncap.Kid == 0)
@@ -2011,7 +1995,6 @@ VOID	WpaMicFailureReportFrame(
 	// Convert to little-endian format.
 	*((USHORT *)&Packet.KeyDesc.KeyInfo) = cpu2le16(*((USHORT *)&Packet.KeyDesc.KeyInfo));
 
-
 	MlmeAllocateMemory(pAd, (PUCHAR *)&pOutBuffer);  // allocate memory
 	if(pOutBuffer == NULL)
 	{
@@ -2088,4 +2071,3 @@ VOID WpaDisassocApAndBlockAssoc(
 	pAd->Mlme.CntlMachine.CurrState = CNTL_WAIT_DISASSOC;
 	pAd->StaCfg.bBlockAssoc = TRUE;
 }
-

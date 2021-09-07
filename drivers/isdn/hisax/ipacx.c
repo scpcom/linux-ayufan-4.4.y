@@ -22,7 +22,6 @@
 #define B_FIFO_SIZE       64
 #define D_FIFO_SIZE       32
 
-
 // ipacx interrupt mask values    
 #define _MASK_IMASK     0x2E  // global mask
 #define _MASKB_IMASK    0x0B
@@ -433,7 +432,6 @@ dch_init(struct IsdnCardState *cs)
   cs->writeisac(cs, IPACX_MON_CR,   0x00);  // disable monitor channel
 }
 
-
 //==========================================================
 // B channel functions
 //==========================================================
@@ -833,7 +831,6 @@ bch_init(struct IsdnCardState *cs, int hscx)
 	bch_mode(cs->bcs + hscx, 0, hscx);
 }
 
-
 //==========================================================
 // Shared functions
 //==========================================================
@@ -910,4 +907,3 @@ init_ipacx(struct IsdnCardState *cs, int part)
 }
 
 //----------------- end of file -----------------------
-

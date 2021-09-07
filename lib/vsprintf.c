@@ -1431,7 +1431,6 @@ do {									\
 	str += sizeof(type);						\
 } while (0)
 
-
 	while (*fmt) {
 		read = format_decode(fmt, &spec);
 

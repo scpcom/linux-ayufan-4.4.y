@@ -68,7 +68,6 @@ void prom_putchar(char c)
 	_prom_putchar(c);
 }
 
-
 char *prom_getenv(char *s)
 {
 	return _prom_getenv(s);
@@ -109,7 +108,6 @@ static void __init sni_mem_init(void)
 		u32		pad2;
 	} memconf[8];
 	int brd_type = *(unsigned char *)SNI_IDPROM_BRDTYPE;
-
 
 	/* MemSIZE from prom in 16MByte chunks */
 	memsize = *((unsigned char *) SNI_IDPROM_MEMSIZE) * 16;

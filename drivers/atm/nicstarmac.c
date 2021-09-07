@@ -20,7 +20,6 @@ typedef void __iomem *virt_addr_t;
 #define osp_MicroDelay(microsec) {unsigned long useconds = (microsec); \
                                   udelay((useconds));}
 
-
 /* The following tables represent the timing diagrams found in
  * the Data Sheet for the Xicor X25020 EEProm.  The #defines below
  * represent the bits in the NICStAR's General Purpose register
@@ -62,7 +61,6 @@ static u_int32_t rdsrtab[] =
 };
 #endif  /*  0  */
 
-
 /* Read from EEPROM = 0000 0011b */
 static u_int32_t readtab[] =
 {
@@ -87,7 +85,6 @@ static u_int32_t readtab[] =
     CLK_HIGH | SI_HIGH    /* 1 */
 };
 
-
 /* Clock to read from/write to the eeprom */
 static u_int32_t clocktab[] =
 {	
@@ -109,7 +106,6 @@ static u_int32_t clocktab[] =
     CLK_HIGH,
     CLK_LOW 
 };
-
 
 #define NICSTAR_REG_WRITE(bs, reg, val) \
 	while ( readl(bs + STAT) & 0x0200 ) ; \
@@ -160,7 +156,6 @@ nicstar_read_eprom_status( virt_addr_t base )
    return rbyte;
 }
 #endif  /*  0  */
-
 
 /*
  * This routine will clock the Read_data function into the X2520
@@ -216,7 +211,6 @@ read_eprom_byte(virt_addr_t base, u_int8_t offset)
    return tempread;
 }
 
-
 static void
 nicstar_init_eprom( virt_addr_t base )
 {
@@ -244,7 +238,6 @@ nicstar_init_eprom( virt_addr_t base )
     osp_MicroDelay( CYCLE_DELAY );
 }
 
-
 /*
  * This routine will be the interface to the ReadPromByte function
  * above.
@@ -267,10 +260,8 @@ nicstar_read_eprom(
     }
 }
 
-
 /*
 void osp_MicroDelay(int x) {
     
 }
 */
-

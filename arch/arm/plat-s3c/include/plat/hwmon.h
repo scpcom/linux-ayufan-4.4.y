@@ -38,4 +38,3 @@ struct s3c_hwmon_pdata {
 };
 
 #endif /* __ASM_ARCH_ADC_HWMON_H */
-

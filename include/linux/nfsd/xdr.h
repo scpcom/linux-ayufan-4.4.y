@@ -134,7 +134,6 @@ union nfsd_xdrstore {
 
 #define NFS2_SVC_XDRSIZE	sizeof(union nfsd_xdrstore)
 
-
 int nfssvc_decode_void(struct svc_rqst *, __be32 *, void *);
 int nfssvc_decode_fhandle(struct svc_rqst *, __be32 *, struct nfsd_fhandle *);
 int nfssvc_decode_sattrargs(struct svc_rqst *, __be32 *,

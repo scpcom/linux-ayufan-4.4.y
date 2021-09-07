@@ -17,7 +17,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
-
 #include <asm/byteorder.h>
 #include <linux/init.h>
 #include <linux/crypto.h>
@@ -407,8 +406,6 @@ static int cast6_setkey(struct crypto_tfm *tfm, const u8 *in_key,
 	key[6] = be32_to_cpu(p_key[6]);		/* G */
 	key[7] = be32_to_cpu(p_key[7]);		/* H */
 	
-
-
 	for (i = 0; i < 12; i++) {
 		W (key, 2 * i);
 		W (key, 2 * i + 1);

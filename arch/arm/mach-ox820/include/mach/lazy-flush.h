@@ -42,7 +42,6 @@ static inline int dcache_dirty_cpu(struct page* page) {
 	return (((page)->flags >> PG_dcache_cpu_shift) & PG_dcache_cpu_mask);
 }
 
-
 /**
  * This will atomically clear the clean bit and set the cpu dirty bit
  * for this cpu in the page->flags
@@ -85,7 +84,6 @@ static inline unsigned set_dcache_clean(struct page* page) {
 
 	local_irq_save(flags);
 
-
 	asm volatile(
 		"1: ldrex r5, [%3]    \n"	/* get page->flags for exclusive access */
 		"   bic   r4, r5, %2  \n"	/* mask out all cpu dirty bits */
@@ -97,7 +95,6 @@ static inline unsigned set_dcache_clean(struct page* page) {
 		:  /* outputs */
 		: "r" (&page_flags) ,"r" (set_bits), "r" (clear_bits), "r" (&page->flags)
 		: "memory", "cc", "r4", "r5", "r6");
-
 
     local_irq_restore(flags);
 

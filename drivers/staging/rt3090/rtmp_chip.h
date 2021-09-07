@@ -102,14 +102,11 @@
 
 #define RETRY_LIMIT		10
 
-
-
 // ------------------------------------------------------
 // BBP & RF	definition
 // ------------------------------------------------------
 #define	BUSY		                1
 #define	IDLE		                0
-
 
 //-------------------------------------------------------------------------
 // EEPROM definition
@@ -159,7 +156,6 @@
 #define EEPROM_TXPOWER_DELTA		0x50	// 20MHZ AND 40 MHZ use different power. This is delta in 40MHZ.
 #define VALID_EEPROM_VERSION        1
 
-
 /*
   *   EEPROM operation related marcos
   */
@@ -168,8 +164,6 @@
 
 #define RT28xx_EEPROM_WRITE16(_pAd, _offset, _value)		\
 	(_pAd)->chipOps.eewrite((RTMP_ADAPTER *)(_pAd), (USHORT)(_offset), (USHORT)(_value))
-
-
 
 // -------------------------------------------------------------------
 //  E2PROM data layout
@@ -190,7 +184,6 @@ typedef union  _MCU_LEDCS_STRUC {
 	} field;
 	UCHAR				word;
 } MCU_LEDCS_STRUC, *PMCU_LEDCS_STRUC;
-
 
 //
 // EEPROM antenna select format

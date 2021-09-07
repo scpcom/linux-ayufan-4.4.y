@@ -33,7 +33,6 @@
 #include <linux/adb.h>
 #include <linux/pmu.h>
 
-
 #define MB_DEBUG
 
 #ifdef MB_DEBUG
@@ -746,7 +745,6 @@ static int media_bay_resume(struct macio_dev *mdev)
 	}
 	return 0;
 }
-
 
 /* Definitions of "ops" structures.
  */

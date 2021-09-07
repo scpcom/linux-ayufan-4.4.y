@@ -41,7 +41,6 @@ static struct mt2060_config bristol_mt2060_config[2] = {
 	}
 };
 
-
 static struct dibx000_agc_config bristol_dib3000p_mt2060_agc_config = {
 	.band_caps = BAND_VHF | BAND_UHF,
 	.setup     = (1 << 8) | (5 << 5) | (0 << 4) | (0 << 3) | (0 << 2) | (2 << 0),
@@ -470,8 +469,6 @@ static u8 rc_request[] = { REQUEST_POLL_RC, 0 };
 /* Number of keypresses to ignore before start repeating */
 #define RC_REPEAT_DELAY 6
 #define RC_REPEAT_DELAY_V1_20 10
-
-
 
 /* Used by firmware versions < 1.20 (deprecated) */
 static int dib0700_rc_query_legacy(struct dvb_usb_device *d, u32 *event,
@@ -1500,7 +1497,6 @@ static int dib807x_tuner_attach(struct dvb_usb_adapter *adap)
 	return 0;
 }
 
-
 /* STK807x */
 static int stk807x_frontend_attach(struct dvb_usb_adapter *adap)
 {
@@ -1567,7 +1563,6 @@ static int stk807xpvr_frontend_attach1(struct dvb_usb_adapter *adap)
 
 	return adap->fe == NULL ? -ENODEV : 0;
 }
-
 
 /* STK7070PD */
 static struct dib7000p_config stk7070pd_dib7000p_config[2] = {
@@ -1790,7 +1785,6 @@ static int mxl5007t_tuner_attach(struct dvb_usb_adapter *adap)
 			  &adap->dev->i2c_adap, 0x60,
 			  &hcw_mxl5007t_config) == NULL ? -ENODEV : 0;
 }
-
 
 /* DVB-USB and USB stuff follows */
 struct usb_device_id dib0700_usb_id_table[] = {

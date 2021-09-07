@@ -141,7 +141,6 @@ void __init ixp2000_map_io(void)
 	ixp2000_reg_wrb(IXP2000_SLOWPORT_FRM, 1);
 }
 
-
 /*************************************************************************
  * Serial port support for IXP2000
  *************************************************************************/
@@ -178,7 +177,6 @@ void __init ixp2000_uart_init(void)
 {
 	platform_device_register(&ixp2000_serial_device);
 }
-
 
 /*************************************************************************
  * Timer-tick functions for IXP2000
@@ -292,7 +290,6 @@ void gpio_line_config(int line, int direction)
 	local_irq_restore(flags);
 }
 EXPORT_SYMBOL(gpio_line_config);
-
 
 /*************************************************************************
  * IRQ handling IXP2000
@@ -507,4 +504,3 @@ void __init ixp2000_init_irq(void)
 		set_irq_flags(irq, IRQF_VALID);
 	}
 }
-

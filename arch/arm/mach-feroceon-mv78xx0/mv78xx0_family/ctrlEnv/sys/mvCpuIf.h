@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvCpuIfh
 #define __INCmvCpuIfh
 
@@ -85,8 +84,6 @@ typedef struct _mvCpuIfDecWin
 
 }MV_CPU_DEC_WIN;
 
-
-
 /* mvCpuIfLib.h API list */
 
 MV_STATUS mvCpuIfInit(MV_CPU_DEC_WIN *winMap);
@@ -96,8 +93,6 @@ MV_STATUS mvCpuIfTargetWinEnable(MV_TARGET target,MV_BOOL enable);
 MV_U32    mvCpuIfTargetWinSizeGet(MV_TARGET target);
 MV_U32   mvCpuIfTargetWinBaseLowGet(MV_TARGET target);
 MV_U32    mvCpuIfTargetWinBaseHighGet(MV_TARGET target);
-
-
 
 #if defined(MV_INCLUDE_PEX)
 MV_U32	  mvCpuIfPciIfRemap(MV_TARGET pciIfTarget, MV_ADDR_WIN *pAddrDecWin);

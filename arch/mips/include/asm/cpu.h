@@ -35,7 +35,6 @@
 #define PRID_COMP_LEXRA		0x0b0000
 #define PRID_COMP_CAVIUM	0x0d0000
 
-
 /*
  * Assigned values for the product ID register.  In order to detect a
  * certain CPU type exactly eventually additional registers may need to
@@ -227,7 +226,6 @@ enum cpu_type_enum {
 	CPU_LAST
 };
 
-
 /*
  * ISA Level encodings
  *
@@ -282,6 +280,5 @@ enum cpu_type_enum {
 #define MIPS_ASE_SMARTMIPS	0x00000008 /* SmartMIPS */
 #define MIPS_ASE_DSP		0x00000010 /* Signal Processing ASE */
 #define MIPS_ASE_MIPSMT		0x00000020 /* CPU supports MIPS MT */
-
 
 #endif /* _ASM_CPU_H */

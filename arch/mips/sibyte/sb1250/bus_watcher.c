@@ -38,7 +38,6 @@
 #include <asm/sibyte/sb1250_int.h>
 #include <asm/sibyte/sb1250_scd.h>
 
-
 struct bw_stats_struct {
 	uint64_t status;
 	uint32_t l2_err;
@@ -52,7 +51,6 @@ struct bw_stats_struct {
 	unsigned long mem_bad_d;
 	unsigned long bus_error;
 } bw_stats;
-
 
 static void print_summary(uint32_t status, uint32_t l2_err,
 			  uint32_t memio_err)

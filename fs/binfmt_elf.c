@@ -266,7 +266,6 @@ create_elf_tables(struct linux_binprm *bprm, struct elfhdr *exec,
 	sp = (elf_addr_t __user *)bprm->p;
 #endif
 
-
 	/*
 	 * Grow the stack manually; some architectures have a limit on how
 	 * far ahead a user-space access may be in order to grow the stack.
@@ -372,7 +371,6 @@ static unsigned long total_mapping_size(struct elf_phdr *cmds, int nr)
 	return cmds[last_idx].p_vaddr + cmds[last_idx].p_memsz -
 				ELF_PAGESTART(cmds[first_idx].p_vaddr);
 }
-
 
 /* This is much more generalized than the library routine read function,
    so we keep this separate.  Technically the library read function

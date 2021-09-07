@@ -112,7 +112,6 @@ static struct nfs_mount_data nfs_data __initdata = { 0, };/* NFS mount info */
 static int nfs_port __initdata = 0;		/* Port to connect to for NFS */
 static int mount_port __initdata = 0;		/* Mount daemon port number */
 
-
 /***************************************************************************
 
 			     Parsing of options
@@ -322,7 +321,6 @@ static int __init root_nfs_name(char *name)
 	return 1;
 }
 
-
 /*
  *  Get NFS server address.
  */
@@ -356,7 +354,6 @@ static void __init root_nfs_print(void)
 }
 #endif
 
-
 static int __init root_nfs_init(void)
 {
 #ifdef NFSROOT_DEBUG
@@ -379,7 +376,6 @@ static int __init root_nfs_init(void)
 
 	return 0;
 }
-
 
 /*
  *  Parse NFS server and directory information passed on the kernel
@@ -432,7 +428,6 @@ static int __init root_nfs_getport(int program, int version, int proto)
 	return rpcb_getport_sync(&sin, program, version, proto);
 }
 
-
 /*
  *  Use portmapper to find mountd and nfsd port numbers if not overriden
  *  by the user. Use defaults if portmapper is not available.
@@ -480,7 +475,6 @@ static int __init root_nfs_ports(void)
 
 	return 0;
 }
-
 
 /*
  *  Get a file handle from the server for the directory which is to be

@@ -318,7 +318,6 @@ unsigned long round_jiffies_up_relative(unsigned long j)
 }
 EXPORT_SYMBOL_GPL(round_jiffies_up_relative);
 
-
 static inline void set_running_timer(struct tvec_base *base,
 					struct timer_list *timer)
 {
@@ -1642,7 +1641,6 @@ static int __cpuinit timer_cpu_notify(struct notifier_block *self,
 static struct notifier_block __cpuinitdata timers_nb = {
 	.notifier_call	= timer_cpu_notify,
 };
-
 
 void __init init_timers(void)
 {

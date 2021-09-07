@@ -654,7 +654,6 @@ int netdev_boot_setup_check(struct net_device *dev)
 }
 EXPORT_SYMBOL(netdev_boot_setup_check);
 
-
 /**
  *	netdev_boot_base	- get address from boot time settings
  *	@prefix: prefix for network device
@@ -797,7 +796,6 @@ struct net_device *__dev_get_by_index(struct net *net, int ifindex)
 	return NULL;
 }
 EXPORT_SYMBOL(__dev_get_by_index);
-
 
 /**
  *	dev_get_by_index - find a device by its ifindex
@@ -1030,7 +1028,6 @@ int dev_alloc_name(struct net_device *dev, const char *name)
 }
 EXPORT_SYMBOL(dev_alloc_name);
 
-
 /**
  *	dev_change_name - change name of a device
  *	@dev: device
@@ -1136,7 +1133,6 @@ int dev_set_alias(struct net_device *dev, const char *alias, size_t len)
 	strlcpy(dev->ifalias, alias, len+1);
 	return len;
 }
-
 
 /**
  *	netdev_features_change - device changes features
@@ -1353,7 +1349,6 @@ int dev_close(struct net_device *dev)
 }
 EXPORT_SYMBOL(dev_close);
 
-
 /**
  *	dev_disable_lro - disable Large Receive Offload on a device
  *	@dev: device
@@ -1375,7 +1370,6 @@ void dev_disable_lro(struct net_device *dev)
 	WARN_ON(dev->features & NETIF_F_LRO);
 }
 EXPORT_SYMBOL(dev_disable_lro);
-
 
 static int dev_boot_phase = 1;
 
@@ -1558,7 +1552,6 @@ static void dev_queue_xmit_nit(struct sk_buff *skb, struct net_device *dev)
 	rcu_read_unlock();
 }
 
-
 static inline void __netif_reschedule(struct Qdisc *q)
 {
 	struct softnet_data *sd;
@@ -1603,7 +1596,6 @@ void dev_kfree_skb_any(struct sk_buff *skb)
 		dev_kfree_skb(skb);
 }
 EXPORT_SYMBOL(dev_kfree_skb_any);
-
 
 /**
  * netif_device_detach - mark device as removed
@@ -2120,7 +2112,6 @@ out:
 }
 EXPORT_SYMBOL(dev_queue_xmit);
 
-
 /*=======================================================================
 			Receiver routines
   =======================================================================*/
@@ -2130,7 +2121,6 @@ int netdev_budget __read_mostly = 300;
 int weight_p __read_mostly = 64;            /* old backlog weight */
 
 DEFINE_PER_CPU(struct netif_rx_stats, netdev_rx_stat) = { 0, };
-
 
 /**
  *	netif_rx	-	post buffer to the network code
@@ -2967,7 +2957,6 @@ void netif_napi_del(struct napi_struct *napi)
 }
 EXPORT_SYMBOL(netif_napi_del);
 
-
 static void net_rx_action(struct softirq_action *h)
 {
 	struct list_head *list = &__get_cpu_var(softnet_data).poll_list;
@@ -3073,7 +3062,6 @@ int register_gifconf(unsigned int family, gifconf_func_t *gifconf)
 	return 0;
 }
 EXPORT_SYMBOL(register_gifconf);
-
 
 /*
  *	Map an interface index to its name (SIOCGIFNAME)
@@ -3432,7 +3420,6 @@ static const struct file_operations ptype_seq_fops = {
 	.release = seq_release_net,
 };
 
-
 static int __net_init dev_proc_net_init(struct net *net)
 {
 	int rc = -ENOMEM;
@@ -3479,7 +3466,6 @@ static int __init dev_proc_init(void)
 #else
 #define dev_proc_init() 0
 #endif	/* CONFIG_PROC_FS */
-
 
 /**
  *	netdev_set_master	-	set up master/slave pair
@@ -3714,7 +3700,6 @@ static int __hw_addr_add(struct netdev_hw_addr_list *list, unsigned char *addr,
 			return 0;
 		}
 	}
-
 
 	alloc_size = sizeof(*ha);
 	if (alloc_size < L1_CACHE_BYTES)
@@ -4226,7 +4211,6 @@ static void dev_unicast_init(struct net_device *dev)
 {
 	__hw_addr_init(&dev->uc);
 }
-
 
 static void __dev_addr_discard(struct dev_addr_list **list)
 {
@@ -4777,7 +4761,6 @@ int dev_ioctl(struct net *net, unsigned int cmd, void __user *arg)
 	}
 }
 
-
 /**
  *	dev_new_index	-	allocate an ifindex
  *	@net: the applicable net namespace
@@ -4833,7 +4816,6 @@ static void rollback_registered(struct net_device *dev)
 
 	/* Shutdown queueing discipline. */
 	dev_shutdown(dev);
-
 
 	/* Notify protocols, that we are about to destroy
 	   this device. They should clean all the things.
@@ -5087,7 +5069,6 @@ int init_dummy_netdev(struct net_device *dev)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(init_dummy_netdev);
-
 
 /**
  *	register_netdev	- register a network device
@@ -5652,7 +5633,6 @@ static int dev_cpu_callback(struct notifier_block *nfb,
 	return NOTIFY_OK;
 }
 
-
 /**
  *	netdev_increment_features - increment feature set by one
  *	@all: current feature set
@@ -5892,4 +5872,3 @@ static int __init initialize_hashrnd(void)
 }
 
 late_initcall_sync(initialize_hashrnd);
-

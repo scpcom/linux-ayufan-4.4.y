@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 char* GetPhyMode(
 	int Mode)
 {
@@ -60,7 +59,6 @@ char* GetPhyMode(
 	}
 }
 
-
 char* GetBW(
 	int BW)
 {
@@ -79,7 +77,6 @@ char* GetBW(
 			return "N/A";
 	}
 }
-
 
 /*
     ==========================================================================
@@ -138,7 +135,6 @@ INT RT_CfgSetCountryRegion(
 
 }
 
-
 /*
     ==========================================================================
     Description:
@@ -170,7 +166,6 @@ INT RT_CfgSetWirelessMode(
 
 }
 
-
 INT RT_CfgSetShortSlot(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg)
@@ -188,7 +183,6 @@ INT RT_CfgSetShortSlot(
 
 	return TRUE;
 }
-
 
 /*
     ==========================================================================
@@ -244,7 +238,6 @@ INT	RT_CfgSetWepKey(
 
 	return TRUE;
 }
-
 
 /*
     ==========================================================================

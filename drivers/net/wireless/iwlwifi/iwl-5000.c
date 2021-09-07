@@ -91,7 +91,6 @@ static int iwl5000_apm_stop_master(struct iwl_priv *priv)
 	return 0;
 }
 
-
 int iwl5000_apm_init(struct iwl_priv *priv)
 {
 	int ret = 0;
@@ -156,7 +155,6 @@ void iwl5000_apm_stop(struct iwl_priv *priv)
 	spin_unlock_irqrestore(&priv->lock, flags);
 }
 
-
 int iwl5000_apm_reset(struct iwl_priv *priv)
 {
 	int ret = 0;
@@ -166,7 +164,6 @@ int iwl5000_apm_reset(struct iwl_priv *priv)
 	iwl_set_bit(priv, CSR_RESET, CSR_RESET_REG_FLAG_SW_RESET);
 
 	udelay(10);
-
 
 	/* FIXME: put here L1A -L0S w/a */
 
@@ -197,7 +194,6 @@ out:
 
 	return ret;
 }
-
 
 /* NIC configuration for 5000 series and up */
 void iwl5000_nic_config(struct iwl_priv *priv)
@@ -241,10 +237,8 @@ void iwl5000_nic_config(struct iwl_priv *priv)
 				APMG_PS_CTRL_EARLY_PWR_OFF_RESET_DIS,
 				~APMG_PS_CTRL_EARLY_PWR_OFF_RESET_DIS);
 
-
 	spin_unlock_irqrestore(&priv->lock, flags);
 }
-
 
 /*
  * EEPROM
@@ -810,7 +804,6 @@ int iwl5000_alive_notify(struct iwl_priv *priv)
 
 	spin_unlock_irqrestore(&priv->lock, flags);
 
-
 	iwl5000_send_wimax_coex(priv);
 
 	iwl5000_set_Xtal_calib(priv);
@@ -1084,7 +1077,6 @@ u16 iwl5000_build_addsta_hcmd(const struct iwl_addsta_cmd *cmd, u8 *data)
 	return size;
 }
 
-
 /*
  * Activate/Deactivate Tx DMA/FIFO channels according tx fifos mask
  * must be called under priv->lock and mac access
@@ -1093,7 +1085,6 @@ void iwl5000_txq_set_sched(struct iwl_priv *priv, u32 mask)
 {
 	iwl_write_prph(priv, IWL50_SCD_TXFACT, mask);
 }
-
 
 static inline u32 iwl5000_get_scd_ssn(struct iwl5000_tx_resp *tx_resp)
 {
@@ -1329,7 +1320,6 @@ void iwl5000_rx_handler_setup(struct iwl_priv *priv)
 					iwl5000_rx_calib_complete;
 	priv->rx_handlers[REPLY_TX] = iwl5000_rx_reply_tx;
 }
-
 
 int iwl5000_hw_valid_rtc_data_addr(u32 addr)
 {
@@ -1649,7 +1639,6 @@ struct iwl_mod_params iwl50_mod_params = {
 	.restart_fw = 1,
 	/* the rest are 0 by default */
 };
-
 
 struct iwl_cfg iwl5300_agn_cfg = {
 	.name = "5300AGN",

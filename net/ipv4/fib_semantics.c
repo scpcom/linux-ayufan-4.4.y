@@ -79,7 +79,6 @@ for (nhsel=0; nhsel < 1; nhsel++)
 
 #define endfor_nexthops(fi) }
 
-
 static const struct
 {
 	int	error;
@@ -134,7 +133,6 @@ static const struct
 		.scope	= RT_SCOPE_NOWHERE,
 	},	/* RTN_XRESOLVE */
 };
-
 
 /* Release a nexthop info record */
 
@@ -471,7 +469,6 @@ int fib_nh_match(struct fib_config *cfg, struct fib_info *fi)
 #endif
 	return 0;
 }
-
 
 /*
    Picture
@@ -1195,7 +1192,6 @@ void fib_select_multipath(const struct flowi *flp, struct fib_result *res)
 			return;
 		}
 	}
-
 
 	/* w should be random number [0..fi->fib_power-1],
 	   it is pretty bad approximation.

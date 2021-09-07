@@ -190,8 +190,6 @@ static void 	tms380tr_write_tpl_status(TPL *tpl, unsigned int Status);
 #define SIFWRITEW(val, reg) \
 	(((struct net_local *)netdev_priv(dev))->sifwritew(dev, val, reg))
 
-
-
 #if 0 /* TMS380TR_DEBUG > 0 */
 static int madgemc_sifprobe(struct net_device *dev)
 {
@@ -2399,4 +2397,3 @@ void cleanup_module(void)
 #endif
 
 MODULE_LICENSE("GPL");
-

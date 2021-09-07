@@ -86,10 +86,6 @@ static int          msglevel                =MSG_LEVEL_INFO;
 
 /*---------------------  Export Functions  --------------------------*/
 
-
-
-
-
 /*
  * Description:
  *      Read All MAC Registers to buffer
@@ -707,7 +703,6 @@ VOID MACvRestoreContext (DWORD_PTR dwIoBase, PBYTE pbyCxtBuf)
     VNSvOutPortD(dwIoBase + MAC_REG_AC0DMAPTR, *(PDWORD)(pbyCxtBuf + MAC_REG_AC0DMAPTR));
     VNSvOutPortD(dwIoBase + MAC_REG_BCNDMAPTR, *(PDWORD)(pbyCxtBuf + MAC_REG_BCNDMAPTR));
 
-
     VNSvOutPortD(dwIoBase + MAC_REG_RXDMAPTR0, *(PDWORD)(pbyCxtBuf + MAC_REG_RXDMAPTR0));
 
     VNSvOutPortD(dwIoBase + MAC_REG_RXDMAPTR1, *(PDWORD)(pbyCxtBuf + MAC_REG_RXDMAPTR1));
@@ -755,7 +750,6 @@ BOOL MACbCompareContext (DWORD_PTR dwIoBase, PBYTE pbyCxtBuf)
     if (dwData != *(PDWORD)(pbyCxtBuf + MAC_REG_RXDMAPTR1)) {
         return FALSE;
     }
-
 
     return TRUE;
 }
@@ -912,7 +906,6 @@ BOOL MACbSafeTxOff (DWORD_PTR dwIoBase)
     //AC0
     VNSvOutPortD(dwIoBase + MAC_REG_AC0DMACTL, DMACTL_CLRRUN);
 
-
     for (ww = 0; ww < W_MAX_TIMEOUT; ww++) {
         VNSvInPortD(dwIoBase + MAC_REG_TXDMACTL0, &dwData);
         if ( !(dwData & DMACTL_RUN))
@@ -1056,7 +1049,6 @@ void MACvInitialize (DWORD_PTR dwIoBase)
     VNSvOutPortB(dwIoBase + MAC_REG_TFTCTL, TFTCTL_TSFCNTRST);
     // enable TSF counter
     VNSvOutPortB(dwIoBase + MAC_REG_TFTCTL, TFTCTL_TSFCNTREN);
-
 
     // set packet filter
     // receive directed and broadcast address
@@ -1219,8 +1211,6 @@ BYTE    byOrgDMACtl;
     }
 }
 
-
-
 void MACvSetCurrTXDescAddr (int iTxType, DWORD_PTR dwIoBase, DWORD dwCurrDescAddr)
 {
     if(iTxType == TYPE_AC0DMA){
@@ -1308,7 +1298,6 @@ void MACvOneShotTimer1MicroSec (DWORD_PTR dwIoBase, UINT uDelayTime)
     VNSvOutPortB(dwIoBase + MAC_REG_TMCTL1, (TMCTL_TMD | TMCTL_TE));
 }
 
-
 void MACvSetMISCFifo (DWORD_PTR dwIoBase, WORD wOffset, DWORD dwData)
 {
     if (wOffset > 273)
@@ -1317,7 +1306,6 @@ void MACvSetMISCFifo (DWORD_PTR dwIoBase, WORD wOffset, DWORD dwData)
     VNSvOutPortD(dwIoBase + MAC_REG_MISCFFDATA, dwData);
     VNSvOutPortW(dwIoBase + MAC_REG_MISCFFCTL, MISCFFCTL_WRITE);
 }
-
 
 BOOL MACbTxDMAOff (DWORD_PTR dwIoBase, UINT idx)
 {
@@ -1464,7 +1452,6 @@ int     ii;
     if (byLocalID <= 1)
         return;
 
-
     DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO"MACvSetKeyEntry\n");
     wOffset = MISCFIFO_KEYETRY0;
     wOffset += (uEntryIdx * MISCFIFO_KEYENTRYSIZE);
@@ -1505,8 +1492,6 @@ int     ii;
     }
 }
 
-
-
 /*
  * Description:
  *      Disable the Key Entry by MISCFIFO
@@ -1532,7 +1517,6 @@ WORD    wOffset;
     VNSvOutPortD(dwIoBase + MAC_REG_MISCFFDATA, 0);
     VNSvOutPortW(dwIoBase + MAC_REG_MISCFFCTL, MISCFFCTL_WRITE);
 }
-
 
 /*
  * Description:
@@ -1583,7 +1567,6 @@ int     ii;
 
 }
 
-
 /*
  * Description:
  *      Enable default Key (KeyEntry[10]) by MISCFIFO
@@ -1603,7 +1586,6 @@ void MACvEnableDefaultKey (DWORD_PTR dwIoBase, BYTE byLocalID)
 {
 WORD    wOffset;
 DWORD   dwData;
-
 
     if (byLocalID <= 1)
         return;
@@ -1639,7 +1621,6 @@ void MACvDisableDefaultKey (DWORD_PTR dwIoBase)
 WORD    wOffset;
 DWORD   dwData;
 
-
     wOffset = MISCFIFO_KEYETRY0;
     wOffset += (10 * MISCFIFO_KEYENTRYSIZE);
 
@@ -1673,7 +1654,6 @@ int     ii;
     if (byLocalID <= 1)
         return;
 
-
     DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO"MACvSetDefaultTKIPKeyEntry\n");
     wOffset = MISCFIFO_KEYETRY0;
     // Kyle test : change offset from 10 -> 0
@@ -1703,8 +1683,6 @@ int     ii;
 
 }
 
-
-
 /*
  * Description:
  *      Set the Key Control by MISCFIFO
@@ -1728,7 +1706,6 @@ DWORD   dwData;
     if (byLocalID <= 1)
         return;
 
-
     DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO"MACvSetKeyEntry\n");
     wOffset = MISCFIFO_KEYETRY0;
     wOffset += (uEntryIdx * MISCFIFO_KEYENTRYSIZE);
@@ -1744,4 +1721,3 @@ DWORD   dwData;
     VNSvOutPortW(dwIoBase + MAC_REG_MISCFFCTL, MISCFFCTL_WRITE);
 
 }
-

@@ -419,7 +419,6 @@ void wm831x_free_irq(struct wm831x *wm831x, unsigned int irq, void *data)
 }
 EXPORT_SYMBOL_GPL(wm831x_free_irq);
 
-
 static void wm831x_handle_irq(struct wm831x *wm831x, int irq, int status)
 {
 	struct wm831x_irq_data *irq_data = &wm831x_irqs[irq];
@@ -489,7 +488,6 @@ out:
 	enable_irq(wm831x->irq);
 }
 
-
 static irqreturn_t wm831x_cpu_irq(int irq, void *data)
 {
 	struct wm831x *wm831x = data;
@@ -514,7 +512,6 @@ int wm831x_irq_init(struct wm831x *wm831x, int irq)
 			 "No interrupt specified - functionality limited\n");
 		return 0;
 	}
-
 
 	wm831x->irq_wq = create_singlethread_workqueue("wm831x-irq");
 	if (!wm831x->irq_wq) {

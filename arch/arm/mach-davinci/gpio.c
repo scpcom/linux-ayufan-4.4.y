@@ -28,7 +28,6 @@
 
 #include <asm/mach/irq.h>
 
-
 static DEFINE_SPINLOCK(gpio_lock);
 
 struct davinci_gpio {

@@ -70,7 +70,6 @@ unsigned char mca_device_read_pos(struct mca_device *mca_dev, int reg)
 }
 EXPORT_SYMBOL(mca_device_read_pos);
 
-
 /**
  *	mca_device_write_pos - read POS register from card
  *	@mca_dev: device to write pos register to
@@ -160,7 +159,6 @@ void *mca_device_transform_memory(struct mca_device *mca_dev, void *mem)
 	return mca_bus->f.mca_transform_memory(mca_dev, mem);
 }
 EXPORT_SYMBOL(mca_device_transform_memory);
-
 
 /**
  *	mca_device_claimed - check if claimed by driver

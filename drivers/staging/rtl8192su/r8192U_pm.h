@@ -10,7 +10,6 @@
 
 */
 
-
 #ifndef R8192_PM_H
 #define R8192_PM_H
 

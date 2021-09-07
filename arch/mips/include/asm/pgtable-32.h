@@ -34,7 +34,6 @@ extern void add_wired_entry(unsigned long entrylo0, unsigned long entrylo1,
 extern int add_temporary_entry(unsigned long entrylo0, unsigned long entrylo1,
 			       unsigned long entryhi, unsigned long pagemask);
 
-
 /* Basically we have the same two-level (which is the logical three level
  * Linux page table layout folded) page tables as the i386.  Some day
  * when we have proper page coloring support we can have a 1% quicker

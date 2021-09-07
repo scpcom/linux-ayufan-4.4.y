@@ -113,7 +113,6 @@ static void	hwm_conv_can(struct s_smc *smc, char *data, int len);
 #define		hwm_conv_can(smc,data,len)
 #endif
 
-
 static inline int is_my_addr(const struct s_smc *smc, 
 			     const struct fddi_addr *addr)
 {
@@ -212,7 +211,6 @@ void smt_emulate_token_ct(struct s_smc *smc, int mac_index)
 	u_long	count;
 	u_long	time;
 
-
 	time = smt_get_time();
 	count =	((time - smc->sm.last_tok_time[mac_index]) *
 					100)/TICKS_PER_SECOND;
@@ -240,7 +238,6 @@ void smt_event(struct s_smc *smc, int event)
 #ifndef SMT_REAL_TOKEN_CT
 	int		i ;
 #endif
-
 
 	if (smc->sm.please_reconnect) {
 		smc->sm.please_reconnect -- ;
@@ -872,7 +869,6 @@ static void smt_send_rdf(struct s_smc *smc, SMbuf *rej, int fc, int reason,
 	DB_SMT("SMT: sending RDF to %s,reason = 0x%x\n",
 		addr_to_string(&sm->smt_source),reason) ;
 
-
 	/*
 	 * note: get framelength from MAC length, NOT from SMT header
 	 * smt header length is included in sm_len
@@ -1147,8 +1143,6 @@ static void smt_add_frame_len(SMbuf *mb, int len)
 	smt->smt_len += len ;
 	mb->sm_len += len ;
 }
-
-
 
 /*
  * fill values in UNA parameter
@@ -1489,7 +1483,6 @@ static void smt_fill_mac_fnc(struct s_smc *smc, struct smt_p_mac_fnc *fnc)
 	fnc->nc_counter = smc->mib.m[MAC0].fddiMACNotCopied_Ct ;
 }
 
-
 /*
  * fill manufacturer field
  */
@@ -1565,7 +1558,6 @@ u_long smt_get_tid(struct s_smc *smc)
 		;
 	return(tid & 0x3fffffffL) ;
 }
-
 
 /*
  * table of parameter lengths
@@ -2043,4 +2035,3 @@ static void hwm_conv_can(struct s_smc *smc, char *data, int len)
 #endif
 
 #endif	/* no SLIM_SMT */
-

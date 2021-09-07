@@ -2,7 +2,6 @@
 /*
    osdblk.c -- Export a single SCSI OSD object as a Linux block device
 
-
    Copyright 2009 Red Hat, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -18,7 +17,6 @@
    along with this program; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
-
    Instructions for use
    --------------------
 
@@ -28,7 +26,6 @@
       OSD device /dev/osd1.
 
       $ echo "1234 5678 /dev/osd1" > /sys/class/osdblk/add
-
 
    2) List all active blkdev<->object mappings.
 
@@ -46,13 +43,11 @@
       - OSD object id
       - OSD device
 
-
    3) Remove an active blkdev<->object mapping.
 
       In this example, we remove the mapping with blkdev unique id 1.
 
       $ echo 1 > /sys/class/osdblk/remove
-
 
    NOTE:  The actual creation and deletion of OSD objects is outside the scope
    of this driver.
@@ -698,4 +693,3 @@ static void __exit osdblk_exit(void)
 
 module_init(osdblk_init);
 module_exit(osdblk_exit);
-

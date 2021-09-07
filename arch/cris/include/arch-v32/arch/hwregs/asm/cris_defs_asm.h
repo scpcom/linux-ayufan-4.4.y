@@ -106,7 +106,6 @@
 /* Register rw_gc_r3, scope cris, type rw */
 #define reg_cris_rw_gc_r3_offset 44
 
-
 /* Constants */
 #define regk_cris_no                              0x00000000
 #define regk_cris_rw_gc_cfg_default               0x00000000

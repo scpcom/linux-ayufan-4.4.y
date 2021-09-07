@@ -27,7 +27,6 @@
 
 #include "u_ether.h"
 
-
 /*
  * Ethernet gadget driver -- with CDC and non-CDC options
  * Builds on hardware support for a full duplex link.
@@ -196,7 +195,6 @@ static const struct usb_descriptor_header *otg_desc[] = {
 	NULL,
 };
 
-
 /* string IDs are assigned dynamically */
 
 #define STRING_MANUFACTURER_IDX		0
@@ -341,7 +339,6 @@ static int __init eth_bind(struct usb_composite_dev *cdev)
 		device_desc.bcdDevice =
 			cpu_to_le16(0x0300 | 0x0099);
 	}
-
 
 	/* Allocate string descriptor numbers ... note that string
 	 * contents can be overridden by the composite_dev glue.

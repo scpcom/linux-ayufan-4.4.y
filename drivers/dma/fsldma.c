@@ -396,7 +396,6 @@ static struct fsl_desc_sw *fsl_dma_alloc_descriptor(
 	return desc_sw;
 }
 
-
 /**
  * fsl_dma_alloc_chan_resources - Allocate resources for DMA channel.
  * @fsl_chan : Freescale DMA channel

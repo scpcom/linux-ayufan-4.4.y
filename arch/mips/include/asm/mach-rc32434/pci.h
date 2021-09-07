@@ -290,7 +290,6 @@ struct pci_msu {
 /* Swap byte field applies to both DMA channel 8 and 9 */
 #define	PCI_DMAD_SB		(1 << 24)	/* swap byte field */
 
-
 /*
  * PCI Target Control Register
  */

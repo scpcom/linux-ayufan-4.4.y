@@ -150,7 +150,6 @@ static INLINE int      mvEthPortTxEnable(void* pPortHndl, int queue, int max_dee
     return -1;
 }
 
-
 /* defines  */
 #define ETH_CSUM_MIN_BYTE_COUNT     72
 
@@ -197,7 +196,6 @@ static INLINE int      mvEthPortTxEnable(void* pPortHndl, int queue, int max_dee
             ETH_SET_FULL_DUPLEX_MASK                    |   \
             ETH_SET_MII_SPEED_100_MASK                  |   \
             ETH_MAX_RX_PACKET_1552BYTE
-
 
 #define PORT_SERIAL_CONTROL_1000MB_FORCE_VALUE              \
             ETH_FORCE_LINK_PASS_MASK                    |   \
@@ -382,7 +380,6 @@ static INLINE MV_STATUS   mvEthPortTx(void* pEthPortHndl, int txQueue, MV_PKT_IN
 
     return MV_OK;
 }
-
 
 /*******************************************************************************
 * mvEthPortSgTx - Send an Ethernet packet
@@ -773,7 +770,4 @@ static INLINE MV_STATUS   mvEthPortRxDone(void* pEthPortHndl, int rxQueue, MV_PK
     return MV_OK;
 }
 
-
 #endif /* __mvEthGbe_h__ */
-
-

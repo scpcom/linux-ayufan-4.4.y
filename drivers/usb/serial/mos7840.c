@@ -179,7 +179,6 @@
 #define NUM_URBS                        16	/* URB Count */
 #define URB_TRANSFER_BUFFER_SIZE        32	/* URB Size  */
 
-
 static const struct usb_device_id moschip_port_id_table[] = {
 	{USB_DEVICE(USB_VENDOR_ID_MOSCHIP, MOSCHIP_DEVICE_ID_7840)},
 	{USB_DEVICE(USB_VENDOR_ID_MOSCHIP, MOSCHIP_DEVICE_ID_7820)},
@@ -247,7 +246,6 @@ struct moschip_port {
 	char busy[NUM_URBS];
 	bool read_urb_busy;
 };
-
 
 static int debug;
 
@@ -763,7 +761,6 @@ static void mos7840_bulk_in_callback(struct urb *urb)
 		mos7840_port->read_urb_busy = false;
 		return;
 	}
-
 
 	mos7840_port->read_urb->dev = serial->dev;
 

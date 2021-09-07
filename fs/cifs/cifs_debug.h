@@ -43,7 +43,6 @@ void dump_smb(struct smb_hdr *, int);
  */
 #ifdef CIFS_DEBUG
 
-
 /* information message: e.g., configuration, major event */
 extern int cifsFYI;
 #define cifsfyi(format,arg...) if (cifsFYI & CIFS_INFO) printk(KERN_DEBUG " " __FILE__ ": " format "\n" "" , ## arg)

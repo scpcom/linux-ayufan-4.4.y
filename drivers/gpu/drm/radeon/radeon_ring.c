@@ -216,7 +216,6 @@ void radeon_ib_pool_fini(struct radeon_device *rdev)
 	mutex_unlock(&rdev->ib_pool.mutex);
 }
 
-
 /*
  * Ring.
  */
@@ -331,7 +330,6 @@ void radeon_ring_fini(struct radeon_device *rdev)
 	}
 	mutex_unlock(&rdev->cp.mutex);
 }
-
 
 /*
  * Debugfs info

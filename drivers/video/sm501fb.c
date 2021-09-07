@@ -866,7 +866,6 @@ static int sm501fb_set_par_pnl(struct fb_info *info)
 	return 0;
 }
 
-
 /* chan_to_field
  *
  * convert a colour value into a field position
@@ -1754,7 +1753,6 @@ err_alloc:
 	return ret;
 }
 
-
 /*
  *  Cleanup
  */
@@ -1866,7 +1864,6 @@ static void sm501fb_resume_fb(struct sm501fb_info *info,
 	vfree(par->store_cursor);
 }
 
-
 /* suspend and resume support */
 
 static int sm501fb_suspend(struct platform_device *pdev, pm_message_t state)
@@ -1887,7 +1884,6 @@ static int sm501fb_suspend(struct platform_device *pdev, pm_message_t state)
 
 #define SM501_CRT_CTRL_SAVE (SM501_DC_CRT_CONTROL_TVP |        \
 			     SM501_DC_CRT_CONTROL_SEL)
-
 
 static int sm501fb_resume(struct platform_device *pdev)
 {

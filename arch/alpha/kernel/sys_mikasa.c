@@ -32,7 +32,6 @@
 #include "pci_impl.h"
 #include "machvec_impl.h"
 
-
 /* Note mask bit is true for ENABLED irqs.  */
 static int cached_irq_mask;
 
@@ -123,7 +122,6 @@ mikasa_init_irq(void)
 	common_init_isa_dma();
 }
 
-
 /*
  * PCI Fixup configuration.
  *
@@ -179,7 +177,6 @@ mikasa_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 	return COMMON_TABLE_LOOKUP;
 }
 
-
 #if defined(CONFIG_ALPHA_GENERIC) || !defined(CONFIG_ALPHA_PRIMO)
 static void
 mikasa_apecs_machine_check(unsigned long vector, unsigned long la_ptr)
@@ -207,7 +204,6 @@ mikasa_apecs_machine_check(unsigned long vector, unsigned long la_ptr)
 			         || code == MCHK_NO_TABT)));
 }
 #endif
-
 
 /*
  * The System Vector

@@ -553,7 +553,6 @@ static void ibmvscsi_timeout(struct srp_event_struct *evt_struct)
 	ibmvscsi_reset_host(hostdata);
 }
 
-
 /* ------------------------------------------------------------
  * Routines for sending and receiving SRPs
  */

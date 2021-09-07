@@ -231,7 +231,6 @@ isdn_audio_alaw2ulaw(unsigned char *buff, unsigned long len)
  * Used by permission of Gert Doering
  */
 
-
 #define ZEROTRAP                /* turn on the trap as per the MIL-STD */
 #undef ZEROTRAP
 #define BIAS 0x84               /* define the add-in bias for 16 bit samples */
@@ -283,7 +282,6 @@ isdn_audio_linear2ulaw(int sample)
 #endif
 	return (ulawbyte);
 }
-
 
 static int Mx[3][8] =
 {

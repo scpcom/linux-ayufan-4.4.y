@@ -95,7 +95,6 @@ static inline long us2ticks(int us)
 	return us * (1000000 / HZ);
 }
 
-
 #ifdef ARLAN_ENTRY_EXIT_DEBUGGING
 #define ARLAN_DEBUG_ENTRY(name) \
 	{\
@@ -115,7 +114,6 @@ static inline long us2ticks(int us)
 #define ARLAN_DEBUG_ENTRY(name)
 #define ARLAN_DEBUG_EXIT(name)
 #endif
-
 
 #define arlan_interrupt_ack(dev)\
         clearClearInterrupt(dev);\
@@ -142,7 +140,6 @@ static inline int arlan_drop_tx(struct net_device *dev)
 	}
 	return 1;
 }
-
 
 int arlan_command(struct net_device *dev, int command_p)
 {
@@ -225,7 +222,6 @@ int arlan_command(struct net_device *dev, int command_p)
 			READSHMB(arlan->commandByte)) &&
 			conf->pre_Command_Wait > (i++) * 10)
 			udelay(10);
-
 
 		if ((READSHMB(arlan->resetFlag) ||
 			READSHMB(arlan->commandByte)) &&
@@ -493,11 +489,9 @@ static inline void arlan_command_process(struct net_device *dev)
 	}
 }
 
-
 static inline void arlan_retransmit_now(struct net_device *dev)
 {
 	struct arlan_private *priv = netdev_priv(dev);
-
 
 	ARLAN_DEBUG_ENTRY("arlan_retransmit_now");
 	if (TXLAST(dev).offset == 0)
@@ -528,8 +522,6 @@ static inline void arlan_retransmit_now(struct net_device *dev)
 
 	ARLAN_DEBUG_EXIT("arlan_retransmit_now");
 }
-
-
 
 static void arlan_registration_timer(unsigned long data)
 {
@@ -579,7 +571,6 @@ static void arlan_registration_timer(unsigned long data)
 		}
 	}
 
-
 	if (!registrationBad(dev) && priv->ReTransmitRequested)
 	{
 		IFDEBUG(ARLAN_DEBUG_TX_CHAIN)
@@ -622,7 +613,6 @@ static void arlan_registration_timer(unsigned long data)
 	add_timer(&priv->timer);
 }
 
-
 #ifdef ARLAN_DEBUGGING
 
 static void arlan_print_registers(struct net_device *dev, int line)
@@ -632,7 +622,6 @@ static void arlan_print_registers(struct net_device *dev, int line)
 
 	u_char hostcpuLock, lancpuLock, controlRegister, cntrlRegImage,
 		txStatus, rxStatus, interruptInProgress, commandByte;
-
 
 	ARLAN_DEBUG_ENTRY("arlan_print_registers");
 	READSHM(interruptInProgress, arlan->interruptInProgress, u_char);
@@ -652,7 +641,6 @@ static void arlan_print_registers(struct net_device *dev, int line)
 }
 #endif
 
-
 static int arlan_hw_tx(struct net_device *dev, char *buf, int length)
 {
 	int i;
@@ -664,13 +652,11 @@ static int arlan_hw_tx(struct net_device *dev, char *buf, int length)
 	int tailStarts = 0x800;
 	int headEnds = 0x0;
 
-
 	ARLAN_DEBUG_ENTRY("arlan_hw_tx");
 	if (TXHEAD(dev).offset)
 		headEnds = (((TXHEAD(dev).offset + TXHEAD(dev).length - offsetof(struct arlan_shmem, txBuffer)) / 64) + 1) * 64;
 	if (TXTAIL(dev).offset)
 		tailStarts = 0x800 - (((TXTAIL(dev).offset - offsetof(struct arlan_shmem, txBuffer)) / 64) + 2) * 64;
-
 
 	if (!TXHEAD(dev).offset && length < tailStarts)
 	{
@@ -735,7 +721,6 @@ static int arlan_hw_tx(struct net_device *dev, char *buf, int length)
 	else
 		netif_start_queue (dev);
 
-
 	IFDEBUG(ARLAN_DEBUG_HEADER_DUMP)
 		printk(KERN_WARNING "%s Transmit t %2x:%2x:%2x:%2x:%2x:%2x f %2x:%2x:%2x:%2x:%2x:%2x \n", dev->name,
 		   (unsigned char) buf[0], (unsigned char) buf[1], (unsigned char) buf[2], (unsigned char) buf[3],
@@ -755,7 +740,6 @@ static int arlan_hw_tx(struct net_device *dev, char *buf, int length)
 	return 0;
 }
 
-
 static int arlan_hw_config(struct net_device *dev)
 {
 	struct arlan_private *priv = netdev_priv(dev);
@@ -767,7 +751,6 @@ static int arlan_hw_config(struct net_device *dev)
 	printk(KERN_NOTICE "%s arlan configure called \n", dev->name);
 	if (arlan_EEPROM_bad)
 		printk(KERN_NOTICE "arlan configure with eeprom bad option \n");
-
 
 	WRITESHM(arlan->spreadingCode, conf->spreadingCode, u_char);
 	WRITESHM(arlan->channelSet, conf->channelSet, u_char);
@@ -836,7 +819,6 @@ static int arlan_hw_config(struct net_device *dev)
 	ARLAN_DEBUG_EXIT("arlan_hw_config");
 	return 0;
 }
-
 
 static int arlan_read_card_configuration(struct net_device *dev)
 {
@@ -953,9 +935,7 @@ static int arlan_read_card_configuration(struct net_device *dev)
 	return 0;
 }
 
-
 static int lastFoundAt = 0xbe000;
-
 
 /*
  * This is the real probe routine. Linux has a history of friendly device
@@ -1018,7 +998,6 @@ static int arlan_mac_addr(struct net_device *dev, void *p)
 {
 	struct sockaddr *addr = p;
 
-
 	ARLAN_DEBUG_ENTRY("arlan_mac_addr");
 	return -EINVAL;
 
@@ -1062,7 +1041,6 @@ static int __init arlan_setup_device(struct net_device *dev, int num)
 	ap->Conf->rx_tweak1 = 30;
 	ap->Conf->rx_tweak2 = 0;
 
-
 	err = register_netdev(dev);
 	if (err) {
 		release_mem_region(virt_to_phys((void *) dev->mem_start), 
@@ -1104,7 +1082,6 @@ static int __init arlan_probe_here(struct net_device *dev,
 	return 0;
 }
 
-
 static int arlan_open(struct net_device *dev)
 {
 	struct arlan_private *priv = netdev_priv(dev);
@@ -1120,7 +1097,6 @@ static int arlan_open(struct net_device *dev)
 			dev->name, dev->irq);
 		return ret;
 	}
-
 
 	priv->bad = 0;
 	priv->lastReset = 0;
@@ -1158,7 +1134,6 @@ static int arlan_open(struct net_device *dev)
 	return 0;
 }
 
-
 static void arlan_tx_timeout (struct net_device *dev)
 {
 	printk(KERN_ERR "%s: arlan transmit timed out, kernel decided\n", dev->name);
@@ -1167,7 +1142,6 @@ static void arlan_tx_timeout (struct net_device *dev)
 	// dev->trans_start = jiffies;
 	// netif_start_queue (dev);
 }
-
 
 static netdev_tx_t arlan_tx(struct sk_buff *skb, struct net_device *dev)
 {
@@ -1201,7 +1175,6 @@ bad_end:
 	ARLAN_DEBUG_EXIT("arlan_tx");
 	return NETDEV_TX_BUSY;
 }
-
 
 static inline int DoNotReTransmitCrap(struct net_device *dev)
 {
@@ -1256,7 +1229,6 @@ static inline void RetryOrFail(struct net_device *dev)
 
 	ARLAN_DEBUG_EXIT("RetryOrFail");
 }
-
 
 static void arlan_tx_done_interrupt(struct net_device *dev, int status)
 {
@@ -1396,7 +1368,6 @@ static void arlan_tx_done_interrupt(struct net_device *dev, int status)
 	ARLAN_DEBUG_EXIT("arlan_tx_done_interrupt");
 }
 
-
 static void arlan_rx_interrupt(struct net_device *dev, u_char rxStatus, u_short rxOffset, u_short pkt_len)
 {
 	char *skbtmp;
@@ -1405,7 +1376,6 @@ static void arlan_rx_interrupt(struct net_device *dev, u_char rxStatus, u_short 
 	struct arlan_private *priv = netdev_priv(dev);
 	volatile struct arlan_shmem __iomem *arlan = priv->card;
 	struct arlan_conf_stru *conf = priv->Conf;
-
 
 	ARLAN_DEBUG_ENTRY("arlan_rx_interrupt");
 	// by spec,   not                WRITESHMB(arlan->rxStatus,0x00);
@@ -1633,7 +1603,6 @@ ends:
 		rxOffset = READSHMS(arlan->rxOffset);
 		pkt_len = READSHMS(arlan->rxLength);
 
-
 		priv->irq_test_done = 1;
 
 		interrupt_count++;
@@ -1657,7 +1626,6 @@ static irqreturn_t arlan_interrupt(int irq, void *dev_id)
 
 	ARLAN_DEBUG_ENTRY("arlan_interrupt");
 
-
 	if (!rxStatus && !txStatus)
 		priv->interrupt_ack_requested++;
 
@@ -1669,7 +1637,6 @@ static irqreturn_t arlan_interrupt(int irq, void *dev_id)
 	return IRQ_HANDLED;
 
 }
-
 
 static int arlan_close(struct net_device *dev)
 {
@@ -1710,7 +1677,6 @@ static struct net_device_stats *arlan_statistics(struct net_device *dev)
 	struct arlan_private *priv = netdev_priv(dev);
 	volatile struct arlan_shmem __iomem *arlan = priv->card;
 
-
 	ARLAN_DEBUG_ENTRY("arlan_statistics");
 
 	/* Update the statistics from the device registers. */
@@ -1734,14 +1700,12 @@ static struct net_device_stats *arlan_statistics(struct net_device *dev)
 	return &dev->stats;
 }
 
-
 static void arlan_set_multicast(struct net_device *dev)
 {
 	struct arlan_private *priv = netdev_priv(dev);
 	volatile struct arlan_shmem __iomem *arlan = priv->card;
 	struct arlan_conf_stru *conf = priv->Conf;
 	int board_conf_needed = 0;
-
 
 	ARLAN_DEBUG_ENTRY("arlan_set_multicast");
 
@@ -1767,7 +1731,6 @@ static void arlan_set_multicast(struct net_device *dev)
 
 	ARLAN_DEBUG_EXIT("arlan_set_multicast");
 }
-
 
 struct net_device * __init arlan_probe(int unit)
 {
@@ -1800,7 +1763,6 @@ struct net_device * __init arlan_probe(int unit)
 		}
 			
 	}
-
 
 	for (m = (int)phys_to_virt(lastFoundAt) + ARLAN_SHMEM_SIZE; 
 	     m <= (int)phys_to_virt(0xDE000); 
@@ -1852,7 +1814,6 @@ int __init init_module(void)
 	return 0;
 }
 
-
 void __exit cleanup_module(void)
 {
 	int i = 0;
@@ -1881,7 +1842,6 @@ void __exit cleanup_module(void)
 
 	ARLAN_DEBUG_EXIT("cleanup_module");
 }
-
 
 #endif
 MODULE_LICENSE("GPL");

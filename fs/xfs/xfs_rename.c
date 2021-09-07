@@ -40,7 +40,6 @@
 #include "xfs_trans_space.h"
 #include "xfs_vnodeops.h"
 
-
 /*
  * Enter all inodes for a rename transaction into a sorted array.
  */

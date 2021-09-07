@@ -108,7 +108,6 @@
 #define IXP4XX_EXP_CFG2     IXP4XX_EXP_REG(IXP4XX_EXP_CFG2_OFFSET) 
 #define IXP4XX_EXP_CFG3     IXP4XX_EXP_REG(IXP4XX_EXP_CFG3_OFFSET)
 
-
 /*
  * Peripheral Space Register Region Base Addresses
  */
@@ -132,7 +131,6 @@
 #define IXP4XX_TIMESYNC_BASE_PHYS	(IXP4XX_PERIPHERAL_BASE_PHYS + 0x10000)
 #define IXP4XX_I2C_BASE_PHYS		(IXP4XX_PERIPHERAL_BASE_PHYS + 0x11000)
 #define IXP4XX_SSP_BASE_PHYS		(IXP4XX_PERIPHERAL_BASE_PHYS + 0x12000)
-
 
 #define IXP4XX_UART1_BASE_VIRT		(IXP4XX_PERIPHERAL_BASE_VIRT + 0x0000)
 #define IXP4XX_UART2_BASE_VIRT		(IXP4XX_PERIPHERAL_BASE_VIRT + 0x1000)
@@ -176,7 +174,6 @@
 #define IXP4XX_ICIP2_OFFSET     0x2C /* IRQ Status */
 #define IXP4XX_ICFP2_OFFSET	0x30 /* FIQ Status */
 #define IXP4XX_ICEEN_OFFSET	0x34 /* Error High Pri Enable */
-
 
 /*
  * Interrupt Controller Register Definitions.
@@ -293,7 +290,6 @@
 #define	IXP4XX_WDT_IRQ_ENABLE		0x00000002
 #define	IXP4XX_WDT_COUNT_ENABLE		0x00000004
 
-
 /*
  * Constants to make it easy to access PCI Control/Status registers
  */
@@ -402,7 +398,6 @@
  */
 #define CRP_AD_CBE_BESL         20
 #define CRP_AD_CBE_WRITE	0x00010000
-
 
 /*
  * USB Device Controller
@@ -639,7 +634,6 @@
 					 IXP4XX_FEATURE_PCI              | \
 					 IXP4XX_FEATURE_UTOPIA_PHY_LIMIT | \
 					 IXP4XX_FEATURE_XSCALE_MAX_FREQ)
-
 
 /* IXP43x/46x CPUs */
 #define IXP4XX_FEATURE_ECC_TIMESYNC	(1 << 15)

@@ -32,7 +32,6 @@ extern void xen_sysenter_target(void);
 extern void xen_syscall_target(void);
 extern void xen_syscall32_target(void);
 
-
 /**
  * machine_specific_memory_setup - Hook for machine specific memory setup.
  **/

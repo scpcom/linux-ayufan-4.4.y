@@ -88,7 +88,6 @@ struct wb35_mto_params {
 
 };
 
-
 #define MTO_DATA()                  (adapter->sMtoPara)
 #define MTO_HAL()                   (&adapter->sHwData)
 #define MTO_SET_PREAMBLE_TYPE(x)    // 20040511 Turbo mark LM_PREAMBLE_TYPE(&pcore_data->lm_data) = (x)
@@ -121,7 +120,6 @@ struct wb35_mto_params {
 #define MTO_SQ_ANT(x)               MTO_DATA().SQ_Ant[(x)]
 #define MTO_AGING_TIMEOUT()         MTO_DATA().aging_timeout
 
-
 #define MTO_TXFLOWCOUNT()			MTO_DATA().TxFlowCount
 //--------- DTO threshold parameters -------------
 #define	MTOPARA_PERIODIC_CHECK_CYCLE()		MTO_DATA().DTO_PeriodicCheckCycle
@@ -134,7 +132,6 @@ struct wb35_mto_params {
 #define	MTOPARA_TXRETRYRATE_REDUCE()		MTO_DATA().DTO_TxRetryRateReduce
 #define MTOPARA_TXPOWER_INDEX()			MTO_DATA().DTO_TxPowerIndex
 //------------------------------------------------
-
 
 extern u16  MTO_Frag_Th_Tbl[];
 
@@ -154,5 +151,3 @@ extern u8 MTO_GetTxFallbackRate(struct wbsoft_priv *adapter);
 extern void MTO_SetTxCount(struct wbsoft_priv *adapter, u8 t0, u8 index);
 
 #endif //__MTO_H__
-
-

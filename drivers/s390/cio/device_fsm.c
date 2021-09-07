@@ -562,7 +562,6 @@ ccw_device_recog_timeout(struct ccw_device *cdev, enum dev_event dev_event)
 	}
 }
 
-
 void
 ccw_device_verify_done(struct ccw_device *cdev, int err)
 {

@@ -74,7 +74,6 @@ I2C_CLIENT_INSMOD_2(lm78, lm79);
 #define LM78_REG_CHIPID 0x49
 #define LM78_REG_I2C_ADDR 0x48
 
-
 /* Conversions. Rounding and limit checking is only done on the TO_REG 
    variants. */
 
@@ -141,7 +140,6 @@ struct lm78_data {
 	u16 alarms;		/* Register encoding, combined */
 };
 
-
 static int lm78_i2c_detect(struct i2c_client *client, int kind,
 			   struct i2c_board_info *info);
 static int lm78_i2c_probe(struct i2c_client *client,
@@ -155,7 +153,6 @@ static int lm78_read_value(struct lm78_data *data, u8 reg);
 static int lm78_write_value(struct lm78_data *data, u8 reg, u8 value);
 static struct lm78_data *lm78_update_device(struct device *dev);
 static void lm78_init_device(struct lm78_data *data);
-
 
 static const struct i2c_device_id lm78_i2c_id[] = {
 	{ "lm78", lm78 },
@@ -184,7 +181,6 @@ static struct platform_driver lm78_isa_driver = {
 	.probe		= lm78_isa_probe,
 	.remove		= __devexit_p(lm78_isa_remove),
 };
-
 
 /* 7 Voltages */
 static ssize_t show_in(struct device *dev, struct device_attribute *da,
@@ -1027,8 +1023,6 @@ static void __exit sm_lm78_exit(void)
 	}
 	i2c_del_driver(&lm78_driver);
 }
-
-
 
 MODULE_AUTHOR("Frodo Looijaard <frodol@dds.nl>");
 MODULE_DESCRIPTION("LM78/LM79 driver");

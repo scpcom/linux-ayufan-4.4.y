@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvCtrlEnvAsmh
 #define __INCmvCtrlEnvAsmh
 #include "pci/mvPciRegs.h"
@@ -142,7 +141,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	#error "No Way to get Device ID"
 #endif /* MV_INCLUDE_PEX */
 #endif /* MV_88F5180N */
-
 
 /* Read Revision into toReg bits 7:0 0xd0000000*/
 #if defined(MV_88F5180N)

@@ -28,7 +28,6 @@
 #ifndef __MSND_CLASSIC_H
 #define __MSND_CLASSIC_H
 
-
 #define DSP_NUMIO				0x10
 
 #define	HP_MEMM					0x08

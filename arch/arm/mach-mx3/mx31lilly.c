@@ -152,4 +152,3 @@ MACHINE_START(LILLY1131, "INCO startec LILLY-1131")
 	.init_machine	= mx31lilly_board_init,
 	.timer		= &mx31lilly_timer,
 MACHINE_END
-

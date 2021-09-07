@@ -129,7 +129,6 @@ GT_STATUS sampleQos(GT_QD_DEV *dev)
 		return status;
 	}
 
-
 	/*
 	 *	IPv4/IPv6 (Priority 0 ~ 63, 6 bits)
 	 *	Priority 0~7 is using QuaterDeck Queue 0.
@@ -192,5 +191,3 @@ GT_STATUS sampleQos(GT_QD_DEV *dev)
 
 	return GT_OK;
 }
-
-

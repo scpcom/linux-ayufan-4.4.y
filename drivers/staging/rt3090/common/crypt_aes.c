@@ -209,14 +209,12 @@ static const UINT8 aes_mul_e[] = {
     0xd7, 0xd9, 0xcb, 0xc5, 0xef, 0xe1, 0xf3, 0xfd, 0xa7, 0xa9, 0xbb, 0xb5, 0x9f, 0x91, 0x83, 0x8d, /* f */
 };
 
-
 /* For AES_CMAC */
 #define AES_MAC_LENGTH 16 /* 128-bit string */
 static UINT8 Const_Zero[16] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 static UINT8 Const_Rb[16] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x87};
-
 
 /*
 ========================================================================
@@ -302,7 +300,6 @@ VOID AES_KeyExpansion (
         KeyIndex++;
     } /* End of while */
 } /* End of AES_KeyExpansion */
-
 
 /*
 ========================================================================
@@ -476,7 +473,6 @@ VOID AES_Encrypt (
     *CipherBlockSize = ((UINT) AES_STATE_ROWS)*((UINT) AES_STATE_COLUMNS);
 } /* End of AES_Encrypt */
 
-
 /*
 ========================================================================
 Routine Description:
@@ -649,7 +645,6 @@ VOID AES_Decrypt (
     *PlainBlockSize = ((UINT) AES_STATE_ROWS)*((UINT) AES_STATE_COLUMNS);
 } /* End of AES_Decrypt */
 
-
 /*
 ========================================================================
 Routine Description:
@@ -709,7 +704,6 @@ VOID AES_CBC_Encrypt (
         return;
     } /* End of if */
 
-
     /*
      * 2. Main algorithm
      *    - Plain text divide into serveral blocks (16 bytes/block)
@@ -752,7 +746,6 @@ VOID AES_CBC_Encrypt (
     CipherBlockStart += CipherBlockSize;
     *CipherTextLength = CipherBlockStart;
 } /* End of AES_CBC_Encrypt */
-
 
 /*
 ========================================================================
@@ -811,7 +804,6 @@ VOID AES_CBC_Decrypt (
         return;
     } /* End of if */
 
-
     /*
      * 2. Main algorithm
      *    - Cypher text divide into serveral blocks (16 bytes/block)
@@ -841,8 +833,6 @@ VOID AES_CBC_Decrypt (
     *PlainTextLength = PlainBlockStart - PaddingSize;
 
 } /* End of AES_CBC_Encrypt */
-
-
 
 /*
 ========================================================================
@@ -924,7 +914,6 @@ VOID AES_CMAC_GenerateSubKey (
             SubKey2[Index] ^= Const_Rb[Index];
     } /* End of if */
 } /* End of AES_CMAC_GenerateSubKey */
-
 
 /*
 ========================================================================

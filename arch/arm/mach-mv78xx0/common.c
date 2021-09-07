@@ -27,7 +27,6 @@
 #include <plat/time.h>
 #include "common.h"
 
-
 /*****************************************************************************
  * Common bits
  ****************************************************************************/
@@ -123,7 +122,6 @@ static int get_tclk(void)
 	return tclk;
 }
 
-
 /*****************************************************************************
  * I/O Address Mapping
  ****************************************************************************/
@@ -164,7 +162,6 @@ void __init mv78xx0_map_io(void)
 	iotable_init(mv78xx0_io_desc, ARRAY_SIZE(mv78xx0_io_desc));
 }
 
-
 /*****************************************************************************
  * EHCI
  ****************************************************************************/
@@ -174,7 +171,6 @@ static struct orion_ehci_data mv78xx0_ehci_data = {
 };
 
 static u64 ehci_dmamask = 0xffffffffUL;
-
 
 /*****************************************************************************
  * EHCI0
@@ -208,7 +204,6 @@ void __init mv78xx0_ehci0_init(void)
 	platform_device_register(&mv78xx0_ehci0);
 }
 
-
 /*****************************************************************************
  * EHCI1
  ****************************************************************************/
@@ -241,7 +236,6 @@ void __init mv78xx0_ehci1_init(void)
 	platform_device_register(&mv78xx0_ehci1);
 }
 
-
 /*****************************************************************************
  * EHCI2
  ****************************************************************************/
@@ -273,7 +267,6 @@ void __init mv78xx0_ehci2_init(void)
 {
 	platform_device_register(&mv78xx0_ehci2);
 }
-
 
 /*****************************************************************************
  * GE00
@@ -335,7 +328,6 @@ void __init mv78xx0_ge00_init(struct mv643xx_eth_platform_data *eth_data)
 	platform_device_register(&mv78xx0_ge00);
 }
 
-
 /*****************************************************************************
  * GE01
  ****************************************************************************/
@@ -391,7 +383,6 @@ void __init mv78xx0_ge01_init(struct mv643xx_eth_platform_data *eth_data)
 	platform_device_register(&mv78xx0_ge01_shared);
 	platform_device_register(&mv78xx0_ge01);
 }
-
 
 /*****************************************************************************
  * GE10
@@ -461,7 +452,6 @@ void __init mv78xx0_ge10_init(struct mv643xx_eth_platform_data *eth_data)
 	platform_device_register(&mv78xx0_ge10_shared);
 	platform_device_register(&mv78xx0_ge10);
 }
-
 
 /*****************************************************************************
  * GE11
@@ -554,7 +544,6 @@ static struct resource mv78xx0_i2c_0_resources[] = {
 	},
 };
 
-
 static struct platform_device mv78xx0_i2c_0 = {
 	.name		= MV64XXX_I2C_CTLR_NAME,
 	.id		= 0,
@@ -586,7 +575,6 @@ static struct resource mv78xx0_i2c_1_resources[] = {
 		.flags  = IORESOURCE_IRQ,
 	},
 };
-
 
 static struct platform_device mv78xx0_i2c_1 = {
 	.name		= MV64XXX_I2C_CTLR_NAME,
@@ -638,7 +626,6 @@ void __init mv78xx0_sata_init(struct mv_sata_platform_data *sata_data)
 	platform_device_register(&mv78xx0_sata);
 }
 
-
 /*****************************************************************************
  * UART0
  ****************************************************************************/
@@ -681,7 +668,6 @@ void __init mv78xx0_uart0_init(void)
 {
 	platform_device_register(&mv78xx0_uart0);
 }
-
 
 /*****************************************************************************
  * UART1
@@ -726,7 +712,6 @@ void __init mv78xx0_uart1_init(void)
 	platform_device_register(&mv78xx0_uart1);
 }
 
-
 /*****************************************************************************
  * UART2
  ****************************************************************************/
@@ -769,7 +754,6 @@ void __init mv78xx0_uart2_init(void)
 {
 	platform_device_register(&mv78xx0_uart2);
 }
-
 
 /*****************************************************************************
  * UART3
@@ -814,7 +798,6 @@ void __init mv78xx0_uart3_init(void)
 	platform_device_register(&mv78xx0_uart3);
 }
 
-
 /*****************************************************************************
  * Time handling
  ****************************************************************************/
@@ -826,7 +809,6 @@ static void mv78xx0_timer_init(void)
 struct sys_timer mv78xx0_timer = {
 	.init = mv78xx0_timer_init,
 };
-
 
 /*****************************************************************************
  * General

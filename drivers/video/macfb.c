@@ -872,7 +872,6 @@ static int __init macfb_init(void)
 			civic_cmap_regs = ioremap(CIVIC_BASE, 0x1000);
 			break;
 
-		
 			/* Write a setpalette function for your machine, then
 			   you can add something similar here.  These are
 			   grouped by classes of video chipsets.  Some of this

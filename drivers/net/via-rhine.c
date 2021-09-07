@@ -20,7 +20,6 @@
 	410 Severn Ave., Suite 210
 	Annapolis MD 21403
 
-
 	This driver contains some changes from the original Donald Becker
 	version. He may or may not be interested in bug reports on this
 	code. You can find his versions at:
@@ -32,7 +31,6 @@
 #define DRV_NAME	"via-rhine"
 #define DRV_VERSION	"1.4.3"
 #define DRV_RELDATE	"2007-03-06"
-
 
 /* A few user-configurable values.
    These may be modified when a driver module is loaded. */
@@ -62,7 +60,6 @@ static int avoid_D3;
 /* Maximum number of multicast addresses to filter (vs. rx-all-multicast).
    The Rhine has a 64 element 8390-like hash table. */
 static const int multicast_filter_limit = 32;
-
 
 /* Operational parameters that are set at compile time. */
 
@@ -216,7 +213,6 @@ http://www.scyld.com/expert/NWay.html
 ftp://ftp.via.com.tw/public/lan/Products/NIC/VT86C100A/Datasheet/VT86C100A03.pdf
 ftp://ftp.via.com.tw/public/lan/Products/NIC/VT6102/Datasheet/VT6102_021.PDF
 
-
 IVc. Errata
 
 The VT86C100A manual is not reliable information.
@@ -226,7 +222,6 @@ and unaligned IP headers on receive.
 The chip does not pad to minimum transmit length.
 
 */
-
 
 /* This table drives the PCI probe routines. It's mostly boilerplate in all
    of the drivers, and will likely be provided by some future kernel.
@@ -275,7 +270,6 @@ static const struct pci_device_id rhine_pci_tbl[] = {
 	{ }	/* terminate list */
 };
 MODULE_DEVICE_TABLE(pci, rhine_pci_tbl);
-
 
 /* Offsets to the device registers. */
 enum register_offsets {
@@ -1874,7 +1868,6 @@ static int rhine_close(struct net_device *dev)
 	return 0;
 }
 
-
 static void __devexit rhine_remove_one(struct pci_dev *pdev)
 {
 	struct net_device *dev = pci_get_drvdata(pdev);
@@ -2047,12 +2040,10 @@ static int __init rhine_init(void)
 	return pci_register_driver(&rhine_driver);
 }
 
-
 static void __exit rhine_cleanup(void)
 {
 	pci_unregister_driver(&rhine_driver);
 }
-
 
 module_init(rhine_init);
 module_exit(rhine_cleanup);

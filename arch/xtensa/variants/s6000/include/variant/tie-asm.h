@@ -27,8 +27,6 @@
 /*  Misc  */
 #define XTHAL_SAS_ALL	0xFFFF	/* include all default NCP contents */
 
-
-
 /* Macro to save all non-coprocessor (extra) custom TIE and optional state
  * (not including zero-overhead loop registers).
  * Save area ptr (clobbered):  ptr  (16 byte aligned)
@@ -59,11 +57,7 @@
 	.endif
 	.endm	// xchal_ncp_load
 
-
-
 #define XCHAL_NCP_NUM_ATMPS	1
-
-
 
 /* Macro to save the state of TIE coprocessor FPU.
  * Save area ptr (clobbered):  ptr  (16 byte aligned)
@@ -301,4 +295,3 @@
 	.macro xchal_cp7_load	p a b c d continue=0 ofs=-1 select=-1 ; .endm
 
 #endif /*_XTENSA_CORE_TIE_ASM_H*/
-

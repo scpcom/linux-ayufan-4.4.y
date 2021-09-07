@@ -51,5 +51,3 @@ static inline void inet_ctl_sock_destroy(struct sock *sk)
 }
 
 #endif
-
-

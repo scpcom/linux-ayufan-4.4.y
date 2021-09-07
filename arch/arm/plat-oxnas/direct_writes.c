@@ -1634,7 +1634,6 @@ file_map_read:
 				file_context->last_extent_flag = false;
 			}
 			
-
 #ifdef DEBUG
 			printk(KERN_INFO "Discontinuous locations new  - start - %lld, end -%lld\n", file_context->write_start_offset, file_context->write_end_offset);
 #endif
@@ -1655,7 +1654,6 @@ file_map_read:
 	write_result = oxnas_direct_disk_write(file_context, disk_context,
 											&filemap_offset, count,	size_written,
 											bytes_into_block, fp);
-											
 											
 	/* Release pages holding network data */
 	release_netdma_net_frags(net_rx_context);

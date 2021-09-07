@@ -39,7 +39,6 @@ writeisac(void __iomem *adr, u_char off, u_char data)
 	writeb(data, adr + ((off & 1) ? 0x2ff : 0x100) + off); mb();
 }
 
-
 static inline u_char
 readhscx(void __iomem *adr, int hscx, u_char off)
 {

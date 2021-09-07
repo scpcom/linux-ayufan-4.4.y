@@ -369,4 +369,3 @@ int dt_get_virtual_reg(void *node, void **addr, int nres)
 
 	return n;
 }
-

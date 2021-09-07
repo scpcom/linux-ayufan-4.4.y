@@ -19,7 +19,6 @@
  * 02110-1301, USA.
  */
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -655,7 +654,6 @@ no_second:
 	return 0;
 }
 
-
 int msp3410d_thread(void *data)
 {
 	struct i2c_client *client = data;
@@ -1121,4 +1119,3 @@ int msp_detect_stereo(struct i2c_client *client)
 	}
 	return 0;
 }
-

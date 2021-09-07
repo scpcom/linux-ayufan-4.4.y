@@ -314,7 +314,6 @@
 
 #ifdef __KERNEL__
 
-
 #define NR_syscalls			298 /* length of syscall table */
 
 /*

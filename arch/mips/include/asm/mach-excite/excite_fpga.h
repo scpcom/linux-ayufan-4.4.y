@@ -1,7 +1,6 @@
 #ifndef EXCITE_FPGA_H_INCLUDED
 #define EXCITE_FPGA_H_INCLUDED
 
-
 /**
  * Address alignment of the individual FPGA bytes.
  * The address arrangement of the individual bytes of the FPGA is two
@@ -13,19 +12,15 @@ typedef unsigned char excite_cci_fpga_align_t __attribute__ ((aligned(2)));
 typedef unsigned char excite_cci_fpga_align_t;
 #endif
 
-
 /**
  * Size of Dual Ported RAM.
  */
 #define EXCITE_DPR_SIZE 263
 
-
 /**
  * Size of Reserved Status Fields in Dual Ported RAM.
  */
 #define EXCITE_DPR_STATUS_SIZE 7
-
-
 
 /**
  * FPGA.
@@ -72,9 +67,6 @@ typedef struct excite_fpga {
 	excite_cci_fpga_align_t rm9k_irq_mask;
 #endif
 
-
 } excite_fpga;
-
-
 
 #endif	/* ndef EXCITE_FPGA_H_INCLUDED */

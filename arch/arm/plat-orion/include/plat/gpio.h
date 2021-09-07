@@ -39,5 +39,4 @@ void __init orion_gpio_init(void);
 extern struct irq_chip orion_gpio_irq_chip;
 void orion_gpio_irq_handler(int irqoff);
 
-
 #endif

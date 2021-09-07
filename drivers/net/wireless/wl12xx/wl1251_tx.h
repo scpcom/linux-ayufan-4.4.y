@@ -110,7 +110,6 @@ struct tx_control {
 	unsigned reserved:7;
 } __attribute__ ((packed));
 
-
 struct tx_double_buffer_desc {
 	/* Length of payload, including headers. */
 	u16 length;

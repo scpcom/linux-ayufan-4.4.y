@@ -251,11 +251,9 @@ static void __exit wf_lm75_sensor_exit(void)
 	i2c_del_driver(&wf_lm75_driver);
 }
 
-
 module_init(wf_lm75_sensor_init);
 module_exit(wf_lm75_sensor_exit);
 
 MODULE_AUTHOR("Benjamin Herrenschmidt <benh@kernel.crashing.org>");
 MODULE_DESCRIPTION("LM75 sensor objects for PowerMacs thermal control");
 MODULE_LICENSE("GPL");
-

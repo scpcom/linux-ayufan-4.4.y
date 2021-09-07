@@ -86,9 +86,7 @@
 
 /************************************************************************
 
-
 		struct
-
 
 ************************************************************************/
 struct fsi_priv {
@@ -118,9 +116,7 @@ static struct fsi_master *master;
 
 /************************************************************************
 
-
 		basic read write function
-
 
 ************************************************************************/
 static int __fsi_reg_write(u32 reg, u32 data)
@@ -199,9 +195,7 @@ static int fsi_master_mask_set(u32 reg, u32 mask, u32 data)
 
 /************************************************************************
 
-
 		basic function
-
 
 ************************************************************************/
 static struct fsi_priv *fsi_get(struct snd_pcm_substream *substream)
@@ -329,9 +323,7 @@ static int fsi_get_residue(struct fsi_priv *fsi, int is_play)
 
 /************************************************************************
 
-
 		basic dma function
-
 
 ************************************************************************/
 #define PORTA_DMA 0
@@ -366,9 +358,7 @@ static void fsi_free_dma_chan(void)
 
 /************************************************************************
 
-
 		ctrl function
-
 
 ************************************************************************/
 static void fsi_irq_enable(struct fsi_priv *fsi, int is_play)
@@ -553,9 +543,7 @@ static irqreturn_t fsi_interrupt(int irq, void *data)
 
 /************************************************************************
 
-
 		dai ops
-
 
 ************************************************************************/
 static int fsi_dai_startup(struct snd_pcm_substream *substream,
@@ -727,9 +715,7 @@ static struct snd_soc_dai_ops fsi_dai_ops = {
 
 /************************************************************************
 
-
 		pcm ops
-
 
 ************************************************************************/
 static struct snd_pcm_hardware fsi_pcm_hardware = {
@@ -800,9 +786,7 @@ static struct snd_pcm_ops fsi_pcm_ops = {
 
 /************************************************************************
 
-
 		snd_soc_platform
-
 
 ************************************************************************/
 #define PREALLOC_BUFFER		(32 * 1024)
@@ -830,9 +814,7 @@ static int fsi_pcm_new(struct snd_card *card,
 
 /************************************************************************
 
-
 		alsa struct
-
 
 ************************************************************************/
 struct snd_soc_dai fsi_soc_dai[] = {
@@ -873,9 +855,7 @@ EXPORT_SYMBOL_GPL(fsi_soc_platform);
 
 /************************************************************************
 
-
 		platform function
-
 
 ************************************************************************/
 static int fsi_probe(struct platform_device *pdev)

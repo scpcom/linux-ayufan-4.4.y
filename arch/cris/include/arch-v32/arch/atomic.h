@@ -33,4 +33,3 @@ extern spinlock_t cris_atomic_locks[];
 #endif
 
 #endif
-

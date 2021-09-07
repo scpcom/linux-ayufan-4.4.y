@@ -175,7 +175,6 @@ void __init mv_pci_preinit(void)
 	}
 }
 
-
 static void __init mv_pci_shutdown(unsigned int pciIf)
 {
 #if defined(CONFIG_MV78200) || defined(CONFIG_MV632X)
@@ -207,8 +206,6 @@ static int is_pex_pci_bridge(u32 pciIf)
 	return ((pciIf == 3)? (mvBoardIdGet() == DB_78XX0_ID || 
 			       mvBoardIdGet() == DB_78200_ID) :0);
 }
-
-
 
 /* Currentlly the PCI config read/write are implemented as read modify write
    to 32 bit.
@@ -331,12 +328,10 @@ static int mv_pci_write_config(struct pci_bus *bus, unsigned int devfn, int wher
 	return 0;
 }
 
-
 static struct pci_ops mv_pci_ops = {
         .read   = mv_pci_read_config,
         .write  = mv_pci_write_config,
 };
-
 
 int __init mv_pci_setup(int nr, struct pci_sys_data *sys)
 {
@@ -401,7 +396,6 @@ int __init mv_pci_setup(int nr, struct pci_sys_data *sys)
 	return 1;
 }
 
-
 struct pci_bus *mv_pci_scan_bus(int nr, struct pci_sys_data *sys)
 {
 	struct pci_ops *ops = &mv_pci_ops;	
@@ -431,7 +425,6 @@ struct pci_bus *mv_pci_scan_bus(int nr, struct pci_sys_data *sys)
 	}
 	return bus;
 }
-
 
 static int __init mv_map_irq_0(struct pci_dev *dev, u8 slot, u8 pin)
 {	
@@ -473,14 +466,12 @@ static int __init mv_map_irq_7(struct pci_dev *dev, u8 slot, u8 pin)
 	return mv_pci_irqnum_get(7);
 }
 
-
 static struct hw_pci mv_pci __initdata = {
 	.swizzle        	= pci_std_swizzle,
         .setup                  = mv_pci_setup,
         .scan                   = mv_pci_scan_bus,
         .preinit                = mv_pci_preinit,
 };
-
 
 static int __init mv_pci_init(void)
 {
@@ -494,6 +485,4 @@ static int __init mv_pci_init(void)
     return 0;
 }
 
-
 subsys_initcall(mv_pci_init);
-

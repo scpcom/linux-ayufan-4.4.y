@@ -85,7 +85,6 @@ static void mroute_clean_tables(struct net *net);
 
 static struct timer_list ipmr_expire_timer;
 
-
 #ifdef CONFIG_PROC_FS
 
 struct ipmr_mfc_iter {
@@ -93,7 +92,6 @@ struct ipmr_mfc_iter {
 	struct mfc6_cache **cache;
 	int ct;
 };
-
 
 static struct mfc6_cache *ipmr_mfc_seq_idx(struct net *net,
 					   struct ipmr_mfc_iter *it, loff_t pos)
@@ -120,9 +118,6 @@ static struct mfc6_cache *ipmr_mfc_seq_idx(struct net *net,
 	it->cache = NULL;
 	return NULL;
 }
-
-
-
 
 /*
  *	The /proc interfaces to multicast routing /proc/ip6_mr_cache /proc/ip6_mr_vif
@@ -556,7 +551,6 @@ static void ip6mr_destroy_unres(struct mfc6_cache *c)
 
 	ip6mr_cache_free(c);
 }
-
 
 /* Single timer process for all the unresolved queue. */
 
@@ -1484,7 +1478,6 @@ int ip6mr_ioctl(struct sock *sk, int cmd, void __user *arg)
 	}
 }
 
-
 static inline int ip6mr_forward2_finish(struct sk_buff *skb)
 {
 	IP6_INC_STATS_BH(dev_net(skb_dst(skb)->dev), ip6_dst_idev(skb_dst(skb)),
@@ -1641,7 +1634,6 @@ dont_forward:
 	return 0;
 }
 
-
 /*
  *	Multicast packets for forwarding arrive here
  */
@@ -1679,7 +1671,6 @@ int ip6_mr_input(struct sk_buff *skb)
 
 	return 0;
 }
-
 
 static int
 ip6mr_fill_mroute(struct sk_buff *skb, struct mfc6_cache *c, struct rtmsg *rtm)
@@ -1781,4 +1772,3 @@ int ip6mr_get_route(struct net *net,
 	read_unlock(&mrt_lock);
 	return err;
 }
-

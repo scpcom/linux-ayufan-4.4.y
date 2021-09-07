@@ -40,7 +40,6 @@
 #define YMIN_NOMINAL 1408
 #define YMAX_NOMINAL 4448
 
-
 /*****************************************************************************
  *	Stuff we need even when we do not want native Synaptics support
  ****************************************************************************/
@@ -746,4 +745,3 @@ int synaptics_init(struct psmouse *psmouse)
 }
 
 #endif /* CONFIG_MOUSE_PS2_SYNAPTICS */
-

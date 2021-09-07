@@ -94,7 +94,6 @@ _exit:
 
 	jmp	_exit
 
-
 putc:
 	moveb	%d7,0xfffff907
 1:
@@ -107,4 +106,3 @@ putc:
 env:
 	.long	0
 	.text
-

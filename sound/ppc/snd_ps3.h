@@ -100,7 +100,6 @@ struct snd_ps3_card_info {
 
 };
 
-
 /* PS3 audio DMAC block size in bytes */
 #define PS3_AUDIO_DMAC_BLOCK_SIZE (128)
 /* one stage (stereo)  of audio FIFO in bytes */

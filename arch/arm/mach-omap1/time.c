@@ -52,7 +52,6 @@
 #include <asm/mach/irq.h>
 #include <asm/mach/time.h>
 
-
 #define OMAP_MPU_TIMER_BASE		OMAP_MPU_TIMER1_BASE
 #define OMAP_MPU_TIMER_OFFSET		0x100
 
@@ -176,7 +175,6 @@ static __init void omap_init_mpu_timer(unsigned long rate)
 	clockevent_mpu_timer1.cpumask = cpumask_of(0);
 	clockevents_register_device(&clockevent_mpu_timer1);
 }
-
 
 /*
  * ---------------------------------------------------------------------------

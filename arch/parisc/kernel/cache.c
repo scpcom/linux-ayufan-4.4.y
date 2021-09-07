@@ -33,7 +33,6 @@ int dcache_stride __read_mostly;
 int icache_stride __read_mostly;
 EXPORT_SYMBOL(dcache_stride);
 
-
 /* On some machines (e.g. ones with the Merced bus), there can be
  * only a single PxTLB broadcast at a time; this must be guaranteed
  * by software.  We put a spinlock around all TLB flushes  to
@@ -323,7 +322,6 @@ flush_user_cache_page_non_current(struct vm_area_struct *vma,
 	preempt_enable();
 }
 
-
 static inline void
 __flush_cache_page(struct vm_area_struct *vma, unsigned long vmaddr)
 {
@@ -345,7 +343,6 @@ void flush_dcache_page(struct page *page)
 	unsigned long addr;
 	pgoff_t pgoff;
 	unsigned long pfn = page_to_pfn(page);
-
 
 	if (mapping && !mapping_mapped(mapping)) {
 		set_bit(PG_dcache_dirty, &page->flags);
@@ -550,7 +547,6 @@ flush_user_icache_range(unsigned long start, unsigned long end)
 	else
 		flush_instruction_cache();
 }
-
 
 void flush_cache_range(struct vm_area_struct *vma,
 		unsigned long start, unsigned long end)

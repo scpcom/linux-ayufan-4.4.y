@@ -453,7 +453,6 @@ static int wm8903_class_w_put(struct snd_kcontrol *kcontrol,
 	.get = snd_soc_dapm_get_volsw, .put = wm8903_class_w_put, \
 	.private_value =  SOC_SINGLE_VALUE(reg, shift, max, invert) }
 
-
 /* ALSA can only do steps of .01dB */
 static const DECLARE_TLV_DB_SCALE(digital_tlv, -7200, 75, 1);
 
@@ -574,7 +573,6 @@ static const struct soc_enum rinput_enum =
 
 static const struct soc_enum rinput_inv_enum =
 	SOC_ENUM_SINGLE(WM8903_ANALOGUE_RIGHT_INPUT_1, 4, 3, rinput_mux_text);
-
 
 static const char *sidetone_text[] = {
 	"None", "Left", "Right"

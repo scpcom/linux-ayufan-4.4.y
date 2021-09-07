@@ -238,7 +238,6 @@
 
 extern int cx18_debug;
 
-
 struct cx18_options {
 	int megabytes[CX18_MAX_STREAMS]; /* Size in megabytes of each stream */
 	int cardtype;		/* force card type on load */
@@ -305,7 +304,6 @@ struct cx18_dvb {
 
 struct cx18;	 /* forward reference */
 struct cx18_scb; /* forward reference */
-
 
 #define CX18_MAX_MDL_ACKS 2
 #define CX18_MAX_IN_WORK_ORDERS (CX18_MAX_FW_MDLS_PER_STREAM + 7)

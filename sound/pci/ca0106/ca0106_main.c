@@ -453,7 +453,6 @@ int snd_ca0106_i2c_write(struct snd_ca0106 *emu,
     	return 0;
 }
 
-
 static void snd_ca0106_intr_enable(struct snd_ca0106 *emu, unsigned int intrenb)
 {
 	unsigned long flags;
@@ -475,7 +474,6 @@ static void snd_ca0106_intr_disable(struct snd_ca0106 *emu, unsigned int intrenb
 	outl(intr_enable, emu->port + INTE);
 	spin_unlock_irqrestore(&emu->emu_lock, flags);
 }
-
 
 static void snd_ca0106_pcm_free_substream(struct snd_pcm_runtime *runtime)
 {
@@ -883,7 +881,6 @@ static int snd_ca0106_pcm_prepare_capture(struct snd_pcm_substream *substream)
 	        snd_ca0106_i2c_write(emu, ADC_MASTER, over_sampling); /* Adjust the over sampler to better suit the capture rate. */
 	}
 
-
 	/*
 	printk(KERN_DEBUG
 	       "prepare:channel_number=%d, rate=%d, format=0x%x, channels=%d, "
@@ -1143,7 +1140,6 @@ static struct snd_pcm_ops snd_ca0106_playback_rear_ops = {
         .trigger =      snd_ca0106_pcm_trigger_playback,  
         .pointer =      snd_ca0106_pcm_pointer_playback, 
 };
-
 
 static unsigned short snd_ca0106_ac97_read(struct snd_ac97 *ac97,
 					     unsigned short reg)
@@ -1667,7 +1663,6 @@ static int __devinit snd_ca0106_create(int dev, struct snd_card *card,
 	return 0;
 }
 
-
 static void ca0106_midi_interrupt_enable(struct snd_ca_midi *midi, int intr)
 {
 	snd_ca0106_intr_enable((struct snd_ca0106 *)(midi->dev_id), intr);
@@ -1748,7 +1743,6 @@ static int __devinit snd_ca0106_midi(struct snd_ca0106 *chip, unsigned int chann
 
 	return 0;
 }
-
 
 static int __devinit snd_ca0106_probe(struct pci_dev *pci,
 					const struct pci_device_id *pci_id)

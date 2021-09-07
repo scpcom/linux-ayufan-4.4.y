@@ -9,7 +9,6 @@
 #ifndef _ASM_SN_ADDRS_H
 #define _ASM_SN_ADDRS_H
 
-
 #ifndef __ASSEMBLY__
 #include <linux/smp.h>
 #include <linux/types.h>
@@ -23,7 +22,6 @@
 #elif defined(CONFIG_SGI_IP35)
 #include <asm/sn/sn1/addrs.h>
 #endif
-
 
 #ifndef __ASSEMBLY__
 
@@ -40,7 +38,6 @@
 
 #endif /* __ASSEMBLY__ */
 
-
 #define NASID_GET_META(_n)	((_n) >> NASID_LOCAL_BITS)
 #ifdef CONFIG_SGI_IP27
 #define NASID_GET_LOCAL(_n)	((_n) & 0xf)
@@ -53,7 +50,6 @@
 #define CHANGE_ADDR_NASID(_pa, _nasid)	\
 		((UINT64_CAST(_pa) & ~NASID_MASK) | \
 		 (UINT64_CAST(_nasid) <<  NASID_SHFT))
-
 
 /*
  * The following macros are used to index to the beginning of a specific
@@ -73,7 +69,6 @@
 #define TO_NODE_UNCAC(_n, _x)	(NODE_UNCAC_BASE(_n) | ((_x) & TO_PHYS_MASK))
 #define TO_NODE_MSPEC(_n, _x)	(NODE_MSPEC_BASE(_n) | ((_x) & TO_PHYS_MASK))
 #define TO_NODE_HSPEC(_n, _x)	(NODE_HSPEC_BASE(_n) | ((_x) & TO_PHYS_MASK))
-
 
 #define RAW_NODE_SWIN_BASE(nasid, widget)				\
 	(NODE_IO_BASE(nasid) + (UINT64_CAST(widget) << SWIN_SIZE_BITS))
@@ -238,7 +233,6 @@
 				 (UINT64_CAST(_ba) & 3) << 3)
 #endif /* CONFIG_SGI_IP27 */
 
-
 /*
  * The following macros produce the correct base virtual address for
  * the hub registers.  The LOCAL_HUB_* macros produce the appropriate
@@ -318,7 +312,6 @@
 #define KLDIR_ADDR(nasid)						\
 	TO_NODE_UNCAC((nasid), KLDIR_OFFSET)
 #define KLDIR_SIZE		0x0400
-
 
 /*
  * Software structure locations -- indirected through KLDIR
@@ -426,6 +419,5 @@
 #define GPDA_ADDR(nasid)	TO_NODE_CAC(nasid, GPDA_OFFSET)
 
 #endif /* !__ASSEMBLY__ */
-
 
 #endif /* _ASM_SN_ADDRS_H */

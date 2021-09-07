@@ -210,7 +210,6 @@ do {							\
 #define pmd_clear(xp)	do { set_pmd(xp, __pmd(0)); } while (0)
 #define	pmd_bad(x)	0
 
-
 #define pages_to_mb(x) ((x) >> (20 - PAGE_SHIFT))
 
 #ifndef __ASSEMBLY__
@@ -374,7 +373,6 @@ static inline void ptep_mkdirty(pte_t *ptep)
  * do not support it, this is a no-op.
  */
 #define pgprot_noncached(prot)	__pgprot(pgprot_val(prot) | _PAGE_CACHE)
-
 
 /*
  * Conversion functions: convert a page and protection to a page entry,

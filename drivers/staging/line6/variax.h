@@ -12,7 +12,6 @@
 #ifndef VARIAX_H
 #define VARIAX_H
 
-
 #include "driver.h"
 
 #include <linux/spinlock.h>
@@ -23,17 +22,14 @@
 
 #include "dumprequest.h"
 
-
 #define VARIAX_ACTIVATE_DELAY 10
 #define VARIAX_STARTUP_DELAY 3
-
 
 enum {
 	VARIAX_DUMP_PASS1 = LINE6_DUMP_CURRENT,
 	VARIAX_DUMP_PASS2,
 	VARIAX_DUMP_PASS3
 };
-
 
 /**
 	 Binary Variax model dump
@@ -98,11 +94,9 @@ struct usb_line6_variax {
 	struct timer_list activate_timer;
 };
 
-
 extern void variax_disconnect(struct usb_interface *interface);
 extern int variax_init(struct usb_interface *interface,
 		       struct usb_line6_variax *variax);
 extern void variax_process_message(struct usb_line6_variax *variax);
-
 
 #endif

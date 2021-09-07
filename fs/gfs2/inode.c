@@ -459,7 +459,6 @@ struct inode *gfs2_lookup_simple(struct inode *dip, const char *name)
 		return inode;
 }
 
-
 /**
  * gfs2_lookupi - Look up a filename in a directory and return its inode
  * @d_gh: An initialized holder for the directory glock
@@ -999,4 +998,3 @@ void gfs2_dinode_print(const struct gfs2_inode *ip)
 	printk(KERN_INFO "  i_eattr = %llu\n",
 	       (unsigned long long)ip->i_eattr);
 }
-

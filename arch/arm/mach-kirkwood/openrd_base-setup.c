@@ -83,7 +83,6 @@ static int __init openrd_base_pci_init(void)
  }
 subsys_initcall(openrd_base_pci_init);
 
-
 MACHINE_START(OPENRD_BASE, "Marvell OpenRD Base Board")
 	/* Maintainer: Dhaval Vasa <dhaval.vasa@einfochips.com> */
 	.phys_io	= KIRKWOOD_REGS_PHYS_BASE,

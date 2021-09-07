@@ -396,7 +396,6 @@ char *hid_resolv_usage(unsigned usage, struct seq_file *f) {
 		return NULL;
 	}
 
-
 	if (!f) {
 		len = strlen(buf);
 		snprintf(buf+len, max(0, HID_DEBUG_BUFSIZE - len), ".");
@@ -892,7 +891,6 @@ void hid_dump_input_mapping(struct hid_device *hid, struct seq_file *f)
 
 }
 
-
 static int hid_debug_rdesc_show(struct seq_file *f, void *p)
 {
 	struct hid_device *hdev = f->private;
@@ -1052,7 +1050,6 @@ static const struct file_operations hid_debug_events_fops = {
 	.release        = hid_debug_events_release,
 };
 
-
 void hid_debug_register(struct hid_device *hdev, const char *name)
 {
 	hdev->debug_dir = debugfs_create_dir(name, hid_debug_root);
@@ -1081,4 +1078,3 @@ void hid_debug_exit(void)
 {
 	debugfs_remove_recursive(hid_debug_root);
 }
-

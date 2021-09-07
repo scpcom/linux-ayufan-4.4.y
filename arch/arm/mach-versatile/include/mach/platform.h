@@ -45,7 +45,6 @@
  * 
  */
 
-
 /* ------------------------------------------------------------------------
  *  Versatile Registers
  * ------------------------------------------------------------------------
@@ -141,7 +140,6 @@
 #define VERSATILE_SYS_CTRL_RESET_DoC          0x06
 
 #define VERSATILE_SYS_CTRL_LED         (1 << 0)
-
 
 /* ------------------------------------------------------------------------
  *  Versatile control registers
@@ -279,7 +277,6 @@
 #define VERSATILE_INTREG_OFFSET		0x8	/* Interrupt control */
 #define VERSATILE_DECODE_OFFSET		0xC	/* Fitted logic modules */
 
-
 /* ------------------------------------------------------------------------
  *  Versatile Interrupt Controller - control registers
  * ------------------------------------------------------------------------
@@ -378,7 +375,6 @@
 #define SIC_INT_PCI2                    29
 #define SIC_INT_PCI3                    30
 
-
 /* 
  *  Clean base - dummy
  * 
@@ -395,7 +391,6 @@
 #define VERSATILE_TIMER2_EnSel	17
 #define VERSATILE_TIMER3_EnSel	19
 #define VERSATILE_TIMER4_EnSel	21
-
 
 #define MAX_TIMER                       2
 #define MAX_PERIOD                      699050

@@ -166,7 +166,6 @@ static int tc6387xb_remove(struct platform_device *dev)
 	return 0;
 }
 
-
 static struct platform_driver tc6387xb_platform_driver = {
 	.driver = {
 		.name		= "tc6387xb",
@@ -176,7 +175,6 @@ static struct platform_driver tc6387xb_platform_driver = {
 	.suspend        = tc6387xb_suspend,
 	.resume         = tc6387xb_resume,
 };
-
 
 static int __init tc6387xb_init(void)
 {

@@ -94,7 +94,6 @@ static int __init parse_savemaxmem(char *p)
 }
 __setup("savemaxmem=", parse_savemaxmem);
 
-
 static size_t copy_oldmem_vaddr(void *vaddr, char *buf, size_t csize,
                                unsigned long offset, int userbuf)
 {

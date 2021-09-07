@@ -157,7 +157,6 @@ static unsigned long zone_nr_lru_pages(struct zone *zone,
 	return zone_page_state(zone, NR_LRU_BASE + lru);
 }
 
-
 /*
  * Add a shrinker callback to be called from the vm
  */
@@ -2157,9 +2156,9 @@ static int kswapd(void *p)
 
 	lockdep_set_current_reclaim_state(GFP_KERNEL);
 
-	if (!cpumask_empty(cpumask))
+ 	if (!cpumask_empty(cpumask))
 		set_cpus_allowed_ptr(tsk, cpumask);
-	current->reclaim_state = &reclaim_state;
+ 	current->reclaim_state = &reclaim_state;
 
 	/*
 	 * Tell the memory management that we're a "memory allocator",
@@ -2402,7 +2401,6 @@ unsigned long shrink_all_memory(unsigned long nr_pages)
 		} while (sc.nr_reclaimed < nr_pages &&
 				reclaim_state.reclaimed_slab > 0);
 	}
-
 
 out:
 	current->reclaim_state = NULL;
@@ -2832,7 +2830,6 @@ static void scan_zone_unevictable_pages(struct zone *zone)
 	}
 }
 
-
 /**
  * scan_all_zones_unevictable_pages - scan all unevictable lists for evictable pages
  *
@@ -2904,7 +2901,6 @@ static ssize_t write_scan_unevictable_node(struct sys_device *dev,
 	return 1;
 }
 
-
 static SYSDEV_ATTR(scan_unevictable_pages, S_IRUGO | S_IWUSR,
 			read_scan_unevictable_node,
 			write_scan_unevictable_node);
@@ -2918,4 +2914,3 @@ void scan_unevictable_unregister_node(struct node *node)
 {
 	sysdev_remove_file(&node->sysdev, &attr_scan_unevictable_pages);
 }
-

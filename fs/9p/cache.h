@@ -65,7 +65,6 @@ extern int __v9fs_readpages_from_fscache(struct inode *inode,
 					 unsigned *nr_pages);
 extern void __v9fs_readpage_to_fscache(struct inode *inode, struct page *page);
 
-
 /**
  * v9fs_cache_register - Register v9fs file system with the cache
  */

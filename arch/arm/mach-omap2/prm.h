@@ -91,7 +91,6 @@
 #define OMAP3_PRM_IRQENABLE_MPU_OFFSET	0x001c
 #define OMAP3430_PRM_IRQENABLE_MPU	OMAP34XX_PRM_REGADDR(OCP_MOD, 0x001c)
 
-
 #define OMAP3_PRM_VC_SMPS_SA_OFFSET	0x0020
 #define OMAP3430_PRM_VC_SMPS_SA		OMAP34XX_PRM_REGADDR(OMAP3430_GR_MOD, 0x0020)
 #define OMAP3_PRM_VC_SMPS_VOL_RA_OFFSET	0x0024
@@ -214,7 +213,6 @@
 #define OMAP3430_PRM_IRQSTATUS_IVA2			0x00f8
 #define OMAP3430_PRM_IRQENABLE_IVA2			0x00fc
 
-
 #ifndef __ASSEMBLER__
 
 /* Power/reset management domain register get/set */
@@ -286,7 +284,6 @@ static inline u32 prm_clear_mod_reg_bits(u32 bits, s16 module, s16 idx)
 #define OMAP_RST_DPLL3					(1 << 2)
 #define OMAP_RST_GS					(1 << 1)
 
-
 /*
  * Bits common to module-shared registers
  *
@@ -304,7 +301,6 @@ static inline u32 prm_clear_mod_reg_bits(u32 bits, s16 module, s16 idx)
  *	 PM_PWSTST_NEON
  */
 #define OMAP_INTRANSITION				(1 << 20)
-
 
 /*
  * 24XX: PM_PWSTST_GFX, PM_PWSTST_DSP
@@ -383,6 +379,5 @@ static inline u32 prm_clear_mod_reg_bits(u32 bits, s16 module, s16 idx)
  */
 #define OMAP_POWERSTATE_SHIFT				0
 #define OMAP_POWERSTATE_MASK				(0x3 << 0)
-
 
 #endif

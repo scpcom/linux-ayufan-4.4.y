@@ -56,8 +56,6 @@ static int          msglevel                =MSG_LEVEL_INFO;
 
 /*---------------------  Export Functions  --------------------------*/
 
-
-
 /*
  * Description: Clear All Statistic Counter
  *
@@ -75,7 +73,6 @@ void STAvClearAllCounter (PSStatCounter pStatistic)
     // set memory to zero
 	memset(pStatistic, 0, sizeof(SStatCounter));
 }
-
 
 /*
  * Description: Update Isr Statistic Counter
@@ -101,7 +98,6 @@ void STAvUpdateIsrStatCounter (PSStatCounter pStatistic, BYTE byIsr0, BYTE byIsr
         return;
     }
 
-
     if (byIsr0 & ISR_ACTX)              // ISR, bit0
         pStatistic->ISRStat.dwIsrTx0OK++;           // TXDMA0 successful
 
@@ -120,7 +116,6 @@ void STAvUpdateIsrStatCounter (PSStatCounter pStatistic, BYTE byIsr0, BYTE byIsr
     if (byIsr0 & ISR_WATCHDOG)          // ISR, bit7
         pStatistic->ISRStat.dwIsrWatchDog++;
 
-
     if (byIsr1 & ISR_FETALERR)              // ISR, bit8
         pStatistic->ISRStat.dwIsrUnrecoverableError++;
 
@@ -134,7 +129,6 @@ void STAvUpdateIsrStatCounter (PSStatCounter pStatistic, BYTE byIsr0, BYTE byIsr
         pStatistic->ISRStat.dwIsrRxNoBuf++;             // Rx No Buff
 
 }
-
 
 /*
  * Description: Update Rx Statistic Counter
@@ -298,7 +292,6 @@ void STAvUpdateRDStatCounter (PSStatCounter pStatistic,
     pStatistic->dwRsrRxPacket++;
     pStatistic->dwRsrRxOctet += cbFrameLength;
 
-
     if (IS_TYPE_DATA(pbyBuffer)) {
         pStatistic->dwRsrRxData++;
     } else if (IS_TYPE_MGMT(pbyBuffer)){
@@ -343,8 +336,6 @@ void STAvUpdateRDStatCounter (PSStatCounter pStatistic,
 
 }
 
-
-
 /*
  * Description: Update Rx Statistic Counter and copy Rx buffer
  *
@@ -388,7 +379,6 @@ STAvUpdateRDStatCounterEx (
     // rx pattern, we just see 10 bytes for sample
     memcpy(pStatistic->abyCntRxPattern, (PBYTE)pbyBuffer, 10);
 }
-
 
 /*
  * Description: Update Tx Statistic Counter
@@ -483,8 +473,6 @@ STAvUpdateTDStatCounter (
     }
 }
 
-
-
 /*
  * Description: Update 802.11 mib counter
  *
@@ -569,5 +557,3 @@ STAvUpdateUSBCounter(PSUSBCounter pUsbCounter,
 //    }
 
 }
-
-

@@ -23,7 +23,6 @@ MODULE_AUTHOR("Alan Hourihane <alanh@fairlite.demon.co.uk> / Kars de Jong <jongk
 MODULE_DESCRIPTION("Amiga A4000T NCR53C710 driver");
 MODULE_LICENSE("GPL");
 
-
 static struct scsi_host_template a4000t_scsi_driver_template = {
 	.name		= "A4000T builtin SCSI",
 	.proc_name	= "A4000t",

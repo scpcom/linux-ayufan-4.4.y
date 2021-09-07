@@ -149,7 +149,6 @@ static int hp_sdc_rtc_read_bbrtc (struct rtc_time *rtctm)
 	return 0;
 }
 
-
 static int64_t hp_sdc_rtc_read_i8042timer (uint8_t loadcmd, int numreg)
 {
 	hp_sdc_transaction t;
@@ -187,7 +186,6 @@ static int64_t hp_sdc_rtc_read_i8042timer (uint8_t loadcmd, int numreg)
 		((uint64_t)(tseq[20]) << 24) | ((uint64_t)(tseq[25]) << 32));
 }
 
-
 /* Read the i8042 real-time clock */
 static inline int hp_sdc_rtc_read_rt(struct timeval *res) {
 	int64_t raw;
@@ -206,7 +204,6 @@ static inline int hp_sdc_rtc_read_rt(struct timeval *res) {
 	return 0;
 }
 
-
 /* Read the i8042 fast handshake timer */
 static inline int hp_sdc_rtc_read_fhs(struct timeval *res) {
 	int64_t raw;
@@ -222,7 +219,6 @@ static inline int hp_sdc_rtc_read_fhs(struct timeval *res) {
 
 	return 0;
 }
-
 
 /* Read the i8042 match timer (a.k.a. alarm) */
 static inline int hp_sdc_rtc_read_mt(struct timeval *res) {
@@ -240,7 +236,6 @@ static inline int hp_sdc_rtc_read_mt(struct timeval *res) {
 	return 0;
 }
 
-
 /* Read the i8042 delay timer */
 static inline int hp_sdc_rtc_read_dt(struct timeval *res) {
 	int64_t raw;
@@ -257,7 +252,6 @@ static inline int hp_sdc_rtc_read_dt(struct timeval *res) {
 	return 0;
 }
 
-
 /* Read the i8042 cycle timer (a.k.a. periodic) */
 static inline int hp_sdc_rtc_read_ct(struct timeval *res) {
 	int64_t raw;
@@ -273,7 +267,6 @@ static inline int hp_sdc_rtc_read_ct(struct timeval *res) {
 
 	return 0;
 }
-
 
 /* Set the i8042 real-time clock */
 static int hp_sdc_rtc_set_rt (struct timeval *setto)
@@ -341,7 +334,6 @@ static int hp_sdc_rtc_set_fhs (struct timeval *setto)
 	if (hp_sdc_enqueue_transaction(&t)) return -1;
 	return 0;
 }
-
 
 /* Set the i8042 match timer (a.k.a. alarm) */
 #define hp_sdc_rtc_set_mt (setto) \
@@ -633,7 +625,6 @@ static int hp_sdc_rtc_ioctl(struct inode *inode, struct file *file,
 
                 if ((yrs -= eH) > 255)    /* They are unsigned */
                         return -EINVAL;
-
 
                 return 0;
         }

@@ -30,7 +30,6 @@
 
 #include "rtmp_type.h"
 
-
 // 4-byte HTC field.  maybe included in any frame except non-QOS data frame.  The Order bit must set 1.
 typedef struct PACKED {
 #ifdef RT_BIG_ENDIAN
@@ -82,7 +81,6 @@ typedef struct PACKED {
     USHORT      Txop_QueueSize:8;
 #endif /* !RT_BIG_ENDIAN */
 } QOS_CONTROL, *PQOS_CONTROL;
-
 
 // 2-byte Frame control field
 typedef	struct	PACKED {

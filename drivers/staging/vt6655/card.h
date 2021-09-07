@@ -40,7 +40,6 @@
 #define CARD_LB_MAC             MAKEWORD(MAC_LB_INTERNAL, 0)   // PHY must ISO, avoid MAC loopback packet go out
 #define CARD_LB_PHY             MAKEWORD(MAC_LB_EXT, 0)
 
-
 #define DEFAULT_MSDU_LIFETIME           512  // ms
 #define DEFAULT_MSDU_LIFETIME_RES_64us  8000 // 64us
 
@@ -77,8 +76,6 @@ typedef enum _CARD_OP_MODE {
     OP_MODE_AP,
     OP_MODE_UNKNOWN
 } CARD_OP_MODE, *PCARD_OP_MODE;
-
-
 
 /*---------------------  Export Classes  ----------------------------*/
 
@@ -128,7 +125,6 @@ BOOL CARDbSetTxDataRate(
     WORD    wDataRate
     );
 
-
 BOOL CARDbRemoveKey (PVOID pDeviceHandler, PBYTE pbyBSSID);
 
 BOOL
@@ -143,7 +139,6 @@ PVOID
 CARDpGetCurrentAddress (
     IN PVOID            pDeviceHandler
     );
-
 
 VOID CARDvInitChannelTable(PVOID pDeviceHandler);
 BYTE CARDbyGetChannelMapping(PVOID pDeviceHandler, BYTE byChannelNumber, CARD_PHY_TYPE ePhyType);
@@ -251,6 +246,3 @@ CARDbyAutoChannelSelect(
 BYTE CARDbyGetChannelNumber(PVOID pDeviceHandler, BYTE byChannelIndex);
 
 #endif // __CARD_H__
-
-
-

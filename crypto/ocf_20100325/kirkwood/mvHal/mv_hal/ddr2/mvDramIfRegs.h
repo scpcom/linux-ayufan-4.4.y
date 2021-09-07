@@ -415,7 +415,6 @@ extern "C" {
 #define SECR_THRECC_MASK            (SECR_THRECC_MAX << SECR_THRECC_OFFS)
 #define SECR_THRECC(threshold)      (threshold << SECR_THRECC_OFFS)
 
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

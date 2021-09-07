@@ -39,12 +39,10 @@
 #include "xfs_error.h"
 #include "xfs_rw.h"
 
-
 STATIC xfs_buf_t *xfs_trans_buf_item_match(xfs_trans_t *, xfs_buftarg_t *,
 		xfs_daddr_t, int);
 STATIC xfs_buf_t *xfs_trans_buf_item_match_all(xfs_trans_t *, xfs_buftarg_t *,
 		xfs_daddr_t, int);
-
 
 /*
  * Get and lock the buffer for the caller if it is not already
@@ -380,7 +378,6 @@ xfs_trans_read_buf(
 			return XFS_ERROR(EIO);
 		}
 
-
 		bip = XFS_BUF_FSPRIVATE(bp, xfs_buf_log_item_t*);
 		bip->bli_recur++;
 
@@ -488,7 +485,6 @@ shutdown_abort:
 	*bpp = NULL;
 	return XFS_ERROR(EIO);
 }
-
 
 /*
  * Release the buffer bp which was previously acquired with one of the
@@ -795,7 +791,6 @@ xfs_trans_log_buf(xfs_trans_t	*tp,
 	xfs_buf_item_trace("BLOG", bip);
 }
 
-
 /*
  * This called to invalidate a buffer that is being used within
  * a transaction.  Typically this is because the blocks in the
@@ -938,8 +933,6 @@ xfs_trans_stale_inode_buf(
 		xfs_buf_iodone;
 }
 
-
-
 /*
  * Mark the buffer as being one which contains newly allocated
  * inodes.  We need to make sure that even if this buffer is
@@ -965,7 +958,6 @@ xfs_trans_inode_alloc_buf(
 
 	bip->bli_flags |= XFS_BLI_INODE_ALLOC_BUF;
 }
-
 
 /*
  * Similar to xfs_trans_inode_buf(), this marks the buffer as a cluster of

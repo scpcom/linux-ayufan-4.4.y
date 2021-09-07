@@ -102,7 +102,6 @@ static unsigned int snd_us428ctls_poll(struct snd_hwdep *hw, struct file *file, 
 	return mask;
 }
 
-
 static int snd_usX2Y_hwdep_dsp_status(struct snd_hwdep *hw,
 				      struct snd_hwdep_dsp_status *info)
 {
@@ -134,7 +133,6 @@ static int snd_usX2Y_hwdep_dsp_status(struct snd_hwdep *hw,
  	info->version = USX2Y_DRIVER_VERSION; 
 	return 0;
 }
-
 
 static int usX2Y_create_usbmidi(struct snd_card *card)
 {
@@ -242,7 +240,6 @@ static int snd_usX2Y_hwdep_dsp_load(struct snd_hwdep *hw,
 	return err;
 }
 
-
 int usX2Y_hwdep_new(struct snd_card *card, struct usb_device* device)
 {
 	int err;
@@ -261,4 +258,3 @@ int usX2Y_hwdep_new(struct snd_card *card, struct usb_device* device)
 	sprintf(hw->name, "/proc/bus/usb/%03d/%03d", device->bus->busnum, device->devnum);
 	return 0;
 }
-

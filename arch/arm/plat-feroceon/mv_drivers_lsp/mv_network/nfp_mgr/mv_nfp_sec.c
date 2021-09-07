@@ -9,7 +9,6 @@ introductory statement regarding license alternatives, (ii) delete the two
 license alternatives that you have not elected to use and (iii) preserve the
 Marvell copyright notice above.
 
-
 ********************************************************************************
 Marvell GPL License Option
 
@@ -83,7 +82,6 @@ static MV_NFP_SEC_CESA_PRIV * req_array[MV_NFP_SEC_REQ_Q_SIZE];
 unsigned int req_empty = 0;
 unsigned int req_ready = 0;
 
-
 /* TBD -  should be used from netdev.c */
 INLINE void  nfp_sec_pkt_info_free(MV_PKT_INFO* pPktInfo)
 {
@@ -125,8 +123,6 @@ static INLINE MV_VOID mvNfpSecInvRange(MV_U8* addr, MV_U32 size)
 	for(i = 0; align <= (addr+size); align += CPU_D_CACHE_LINE_SIZE)
 		mvOsCacheLineInv(NULL, align);
 }
-
-
 
 static inline void mvNfpSecBuildMac(MV_PKT_INFO *pPktInfo, MV_NFP_SEC_SA_ENTRY* pSAEntry)
 {
@@ -405,7 +401,6 @@ nfp_sec_complete_in(unsigned long data)
 #endif /* !ETH_TX_DONE_ISR */
 }
 
-
 /*
  * nfp sec callback. 
  */
@@ -477,7 +472,6 @@ nfp_sec_interrupt_handler(int irq, void *arg)
 
 	return IRQ_HANDLED;
 }
-
 
 static int nfp_sec_add_rule(int dir, u32 spi, char* sa_mac, char* da_mac, 
 	u32 left_peer, u32 right_peer, int if_out, u32 left_sub, u32 right_sub)
@@ -701,7 +695,6 @@ static int nfp_sec_init(void)
 
 	return 0;
 }
-
 
 module_init(nfp_sec_init);
 

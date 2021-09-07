@@ -147,7 +147,6 @@ void udbg_scc_init(int force_scc)
 	for (i = 0; i < sizeof(scc_inittab); ++i)
 		out_8(sccc, scc_inittab[i]);
 
-
 	udbg_putc = udbg_scc_putc;
 	udbg_getc = udbg_scc_getc;
 	udbg_getc_poll = udbg_scc_getc_poll;

@@ -129,7 +129,6 @@ fail:
 	return ERR_PTR(ret);
 }
 
-
 int btrfs_lookup_file_extent(struct btrfs_trans_handle *trans,
 			     struct btrfs_root *root,
 			     struct btrfs_path *path, u64 objectid,
@@ -146,7 +145,6 @@ int btrfs_lookup_file_extent(struct btrfs_trans_handle *trans,
 	ret = btrfs_search_slot(trans, root, &file_key, path, ins_len, cow);
 	return ret;
 }
-
 
 int btrfs_lookup_bio_sums(struct btrfs_root *root, struct inode *inode,
 			  struct bio *bio, u32 *dst)

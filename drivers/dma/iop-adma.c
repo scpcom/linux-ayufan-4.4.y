@@ -131,7 +131,6 @@ iop_desc_unmap_pq(struct iop_adma_chan *iop_chan, struct iop_adma_desc_slot *des
 	desc->group_head = NULL;
 }
 
-
 static dma_cookie_t
 iop_adma_run_tx_complete_actions(struct iop_adma_desc_slot *desc,
 	struct iop_adma_chan *iop_chan, dma_cookie_t cookie)

@@ -86,7 +86,6 @@ static unsigned long JCHCTtbl[2][7] = {
 	{0x27, 0x26, 0x26, 0x0E, 0x09, 0x00, 0x00}    /* 133MHz */
 };
 
-
 /* DMA transfer mode  table */
 /* JCHDCTM/JCHDCTS */
 static unsigned long JCHDCTxtbl[2][7] = {
@@ -117,7 +116,6 @@ static unsigned long JCACTSELtbl[2][7] = {
 	{0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x00},   /* 100MHz */
 	{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01}    /* 133MHz */
 };
-
 
 static u8 scc_ide_inb(unsigned long port)
 {
@@ -885,7 +883,6 @@ static void scc_ide_exit(void)
 }
 module_exit(scc_ide_exit);
  */
-
 
 MODULE_DESCRIPTION("PCI driver module for Toshiba SCC IDE");
 MODULE_LICENSE("GPL");

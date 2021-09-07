@@ -42,15 +42,11 @@
  * 2.1.0   2009_05_04  sec - add SNOW-3G support
  */
 
-
-
-
 /** @file
  * Handles post-request processing for the resource manager, including
  * the core of deferred-service processing to follow an interrupt (the
  * actual tasklet declaration is in t23xrmISR.c)
  */
-
 
 #include <linux/kernel.h>
 #include <linux/interrupt.h>
@@ -66,10 +62,8 @@ if (thisDev->channelState[i] == CHstateBusy) { \
     thisDev->freeChannels++; } \
     spin_unlock_irqrestore(&thisDev->execQlock, irqflags);
 
-
 extern void rmStartDesc(T2CoreInstance *t2blk, RMexecMessage *rq, int32_t ch);
 extern RMinterfaceCtx ifCtx[];
-
 
 /**
  * Deferred service responder to process messages off the ISR
@@ -93,7 +87,6 @@ void t23RMdeferredInterruptResponder(int inst)
 #endif
 
     thisDev = ifCtx[inst].devctx;
-
 
     /* Spin through "do" for as many events on the ISR event queue */
     /* This means that the tasklet might get invoked with nothing to */
@@ -293,7 +286,6 @@ void t23RMdeferredInterruptResponder(int inst)
                            thisEvent->secEUstate[i]);
 #endif
                 }
-
 
         /* Once we get down here, we should have some free channels */
         /* If there's stuff on the exec queue, start as many        */

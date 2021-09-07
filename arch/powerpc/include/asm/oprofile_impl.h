@@ -67,7 +67,6 @@ extern struct op_powerpc_model op_model_7450;
 extern struct op_powerpc_model op_model_cell;
 extern struct op_powerpc_model op_model_pa6t;
 
-
 /* All the classic PPC parts use these */
 static inline unsigned int classic_ctr_read(unsigned int i)
 {
@@ -132,7 +131,6 @@ static inline void classic_ctr_write(unsigned int i, unsigned int val)
 		break;
 	}
 }
-
 
 extern void op_powerpc_backtrace(struct pt_regs * const regs, unsigned int depth);
 

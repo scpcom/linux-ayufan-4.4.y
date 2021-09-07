@@ -97,7 +97,6 @@
 #define IEEE80211_STYPE_QOS_CFPOLL		0x00E0
 #define IEEE80211_STYPE_QOS_CFACKPOLL		0x00F0
 
-
 /* miscellaneous IEEE 802.11 constants */
 #define IEEE80211_MAX_FRAG_THRESHOLD	2352
 #define IEEE80211_MAX_RTS_THRESHOLD	2353
@@ -677,7 +676,6 @@ struct ieee80211_mgmt {
 /* mgmt header + 1 byte category code */
 #define IEEE80211_MIN_ACTION_SIZE offsetof(struct ieee80211_mgmt, u.action.u)
 
-
 /* Management MIC information element (IEEE 802.11w) */
 struct ieee80211_mmie {
 	u8 element_id;
@@ -726,7 +724,6 @@ struct ieee80211_bar {
 /* 802.11 BAR control masks */
 #define IEEE80211_BAR_CTRL_ACK_POLICY_NORMAL     0x0000
 #define IEEE80211_BAR_CTRL_CBMTID_COMPRESSED_BA  0x0004
-
 
 #define IEEE80211_HT_MCS_MASK_LEN		10
 
@@ -868,7 +865,6 @@ struct ieee80211_ht_info {
 #define IEEE80211_HT_STBC_PARAM_PCO_ACTIVE		0x0400
 #define IEEE80211_HT_STBC_PARAM_PCO_PHASE		0x0800
 
-
 /* block-ack parameters */
 #define IEEE80211_ADDBA_PARAM_POLICY_MASK 0x0002
 #define IEEE80211_ADDBA_PARAM_TID_MASK 0x003C
@@ -882,7 +878,6 @@ struct ieee80211_ht_info {
  */
 #define IEEE80211_MIN_AMPDU_BUF 0x8
 #define IEEE80211_MAX_AMPDU_BUF 0x40
-
 
 /* Spatial Multiplexing Power Save Modes */
 #define WLAN_HT_CAP_SM_PS_STATIC	0
@@ -920,7 +915,6 @@ struct ieee80211_ht_info {
 #define IEEE80211_SPCT_MSR_RPRT_TYPE_BASIC	0
 #define IEEE80211_SPCT_MSR_RPRT_TYPE_CCA	1
 #define IEEE80211_SPCT_MSR_RPRT_TYPE_RPI	2
-
 
 /* 802.11g ERP information element */
 #define WLAN_ERP_NON_ERP_PRESENT (1<<0)
@@ -982,7 +976,6 @@ enum ieee80211_statuscode {
 	WLAN_STATUS_STA_NOT_QSTA = 50,
 };
 
-
 /* Reason codes */
 enum ieee80211_reasoncode {
 	WLAN_REASON_UNSPECIFIED = 1,
@@ -1021,7 +1014,6 @@ enum ieee80211_reasoncode {
 	WLAN_REASON_QSTA_TIMEOUT = 39,
 	WLAN_REASON_QSTA_CIPHER_NOT_SUPP = 45,
 };
-
 
 /* Information Element IDs */
 enum ieee80211_eid {
@@ -1207,7 +1199,6 @@ enum ieee80211_sa_query_action {
 	WLAN_ACTION_SA_QUERY_REQUEST = 0,
 	WLAN_ACTION_SA_QUERY_RESPONSE = 1,
 };
-
 
 /* A-MSDU 802.11n */
 #define IEEE80211_QOS_CONTROL_A_MSDU_PRESENT 0x0080

@@ -20,7 +20,6 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-
 #include <linux/init.h>
 #include <linux/interrupt.h>
 #include <linux/pci.h>
@@ -66,7 +65,6 @@ static struct pci_device_id snd_mixart_ids[] = {
 };
 
 MODULE_DEVICE_TABLE(pci, snd_mixart_ids);
-
 
 static int mixart_set_pipe_state(struct mixart_mgr *mgr,
 				 struct mixart_pipe *pipe, int start)
@@ -158,7 +156,6 @@ static int mixart_set_pipe_state(struct mixart_mgr *mgr,
 	return 0;
 }
 
-
 static int mixart_set_clock(struct mixart_mgr *mgr,
 			    struct mixart_pipe *pipe, unsigned int rate)
 {
@@ -207,7 +204,6 @@ static int mixart_set_clock(struct mixart_mgr *mgr,
 
 	return 0;
 }
-
 
 /*
  *  Allocate or reference output pipe for analog IOs (pcmp0/1)
@@ -319,7 +315,6 @@ snd_mixart_add_ref_pipe(struct snd_mixart *chip, int pcm_number, int capture,
 
 	return pipe;
 }
-
 
 int snd_mixart_kill_ref_pipe(struct mixart_mgr *mgr,
 			     struct mixart_pipe *pipe, int monitoring)
@@ -491,7 +486,6 @@ static int snd_mixart_prepare(struct snd_pcm_substream *subs)
 	return 0;
 }
 
-
 static int mixart_set_format(struct mixart_stream *stream, snd_pcm_format_t format)
 {
 	int err;
@@ -571,7 +565,6 @@ static int mixart_set_format(struct mixart_stream *stream, snd_pcm_format_t form
 	return 0;
 }
 
-
 /*
  *  HW_PARAMS callback for all pcms
  */
@@ -644,8 +637,6 @@ static int snd_mixart_hw_free(struct snd_pcm_substream *subs)
 	return 0;
 }
 
-
-
 /*
  *  TODO CONFIGURATION SPACE for all pcms, mono pcm must update channels_max
  */
@@ -690,7 +681,6 @@ static struct snd_pcm_hardware snd_mixart_digital_caps =
 	.periods_min      = 2,
 	.periods_max      = (32*1024/256),
 };
-
 
 static int snd_mixart_playback_open(struct snd_pcm_substream *subs)
 {
@@ -765,7 +755,6 @@ static int snd_mixart_playback_open(struct snd_pcm_substream *subs)
 
 	return err;
 }
-
 
 static int snd_mixart_capture_open(struct snd_pcm_substream *subs)
 {
@@ -844,8 +833,6 @@ static int snd_mixart_capture_open(struct snd_pcm_substream *subs)
 	return err;
 }
 
-
-
 static int snd_mixart_close(struct snd_pcm_substream *subs)
 {
 	struct snd_mixart *chip = snd_pcm_substream_chip(subs);
@@ -875,7 +862,6 @@ static int snd_mixart_close(struct snd_pcm_substream *subs)
 	return 0;
 }
 
-
 static snd_pcm_uframes_t snd_mixart_stream_pointer(struct snd_pcm_substream *subs)
 {
 	struct snd_pcm_runtime *runtime = subs->runtime;
@@ -883,8 +869,6 @@ static snd_pcm_uframes_t snd_mixart_stream_pointer(struct snd_pcm_substream *sub
 
 	return (snd_pcm_uframes_t)((stream->buf_periods * runtime->period_size) + stream->buf_period_frag);
 }
-
-
 
 static struct snd_pcm_ops snd_mixart_playback_ops = {
 	.open      = snd_mixart_playback_open,
@@ -957,7 +941,6 @@ static int snd_mixart_pcm_analog(struct snd_mixart *chip)
 	return 0;
 }
 
-
 /*
  */
 static int snd_mixart_pcm_digital(struct snd_mixart *chip)
@@ -999,7 +982,6 @@ static int snd_mixart_chip_dev_free(struct snd_device *device)
 	struct snd_mixart *chip = device->device_data;
 	return snd_mixart_chip_free(chip);
 }
-
 
 /*
  */
@@ -1048,7 +1030,6 @@ int snd_mixart_create_pcm(struct snd_mixart* chip)
 	}
 	return err;
 }
-
 
 /*
  * release all the cards assigned to a manager instance
@@ -1205,7 +1186,6 @@ static struct snd_info_entry_ops snd_mixart_proc_ops_BA1 = {
 	.llseek = snd_mixart_BA1_llseek
 };
 
-
 static void snd_mixart_proc_read(struct snd_info_entry *entry, 
                                  struct snd_info_buffer *buffer)
 {
@@ -1266,7 +1246,6 @@ static void __devinit snd_mixart_proc_init(struct snd_mixart *chip)
 	}
 }
 /* end of proc interface */
-
 
 /*
  *    probe function - creates the card manager

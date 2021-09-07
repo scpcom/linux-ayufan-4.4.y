@@ -1415,7 +1415,6 @@ static void moxa_stop(struct tty_struct *tty)
 	ch->statusflags |= TXSTOPPED;
 }
 
-
 static void moxa_start(struct tty_struct *tty)
 {
 	struct moxa_port *ch = tty->driver_data;
@@ -2109,7 +2108,6 @@ static int MoxaPortReadData(struct moxa_port *port)
 	return total;
 }
 
-
 static int MoxaPortTxQueue(struct moxa_port *port)
 {
 	void __iomem *ofsAddr = port->tableAddr;
@@ -2166,7 +2164,6 @@ static int moxa_get_serial_info(struct moxa_port *info,
 	return copy_to_user(retinfo, &tmp, sizeof(*retinfo)) ? -EFAULT : 0;
 }
 
-
 static int moxa_set_serial_info(struct moxa_port *info,
 		struct serial_struct __user *new_info)
 {
@@ -2195,8 +2192,6 @@ static int moxa_set_serial_info(struct moxa_port *info,
 	info->type = new_serial.type;
 	return 0;
 }
-
-
 
 /*****************************************************************************
  *	Static local functions: 					     *

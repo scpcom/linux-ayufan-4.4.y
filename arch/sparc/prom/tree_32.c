@@ -177,7 +177,6 @@ void prom_getstring(int node, char *prop, char *user_buf, int ubuf_size)
 }
 EXPORT_SYMBOL(prom_getstring);
 
-
 /* Does the device at node 'node' have name 'name'?
  * YES = 1   NO = 0
  */

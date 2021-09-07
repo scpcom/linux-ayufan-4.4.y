@@ -136,7 +136,6 @@ int mc13783_register_irq(struct mc13783 *mc13783, int irq,
 #define MC13783_REG_TEST_3			63
 #define MC13783_REG_NB				64
 
-
 /*
  * Interrupt Status
  */
@@ -393,4 +392,3 @@ int mc13783_register_irq(struct mc13783 *mc13783, int irq,
 #define MC13783_ADC4_ADDBIS29		(1 << 23)
 
 #endif /* __LINUX_MFD_MC13783_PRIV_H */
-

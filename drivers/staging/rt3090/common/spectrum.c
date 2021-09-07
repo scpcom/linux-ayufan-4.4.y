@@ -39,7 +39,6 @@
 #include "../rt_config.h"
 #include "../action.h"
 
-
 /* The regulatory information in the USA (US) */
 DOT11_REGULATORY_INFORMATION USARegulatoryInfo[] =
 {
@@ -60,7 +59,6 @@ DOT11_REGULATORY_INFORMATION USARegulatoryInfo[] =
 };
 #define USA_REGULATORY_INFO_SIZE (sizeof(USARegulatoryInfo) / sizeof(DOT11_REGULATORY_INFORMATION))
 
-
 /* The regulatory information in Europe */
 DOT11_REGULATORY_INFORMATION EuropeRegulatoryInfo[] =
 {
@@ -72,7 +70,6 @@ DOT11_REGULATORY_INFORMATION EuropeRegulatoryInfo[] =
     {4,                 {13,                  20,           {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}}}
 };
 #define EU_REGULATORY_INFO_SIZE (sizeof(EuropeRegulatoryInfo) / sizeof(DOT11_REGULATORY_INFORMATION))
-
 
 /* The regulatory information in Japan */
 DOT11_REGULATORY_INFORMATION JapanRegulatoryInfo[] =
@@ -114,7 +111,6 @@ DOT11_REGULATORY_INFORMATION JapanRegulatoryInfo[] =
 };
 #define JP_REGULATORY_INFO_SIZE (sizeof(JapanRegulatoryInfo) / sizeof(DOT11_REGULATORY_INFORMATION))
 
-
 CHAR RTMP_GetTxPwr(
 	IN PRTMP_ADAPTER pAd,
 	IN HTTRANSMIT_SETTING HTTxMode)
@@ -135,7 +131,6 @@ typedef struct __TX_PWR_CFG
 	UINT8 TxPwrRef = 0;
 	CHAR DaltaPwr;
 	ULONG TxPwr[5];
-
 
 	TX_PWR_CFG TxPwrCfg[] = {
 		{MODE_CCK, 0, 0, 4, 0x000000f0},
@@ -231,7 +226,6 @@ typedef struct __TX_PWR_CFG
 		}
 	}
 
-
 	switch(HTTxMode.field.MODE)
 	{
 		case MODE_CCK:
@@ -280,7 +274,6 @@ typedef struct __TX_PWR_CFG
 
 	return CurTxPwr;
 }
-
 
 VOID MeasureReqTabInit(
 	IN PRTMP_ADAPTER pAd)
@@ -561,7 +554,6 @@ static PTPC_REQ_ENTRY TpcReqLookUp(
 
 	return pEntry;
 }
-
 
 static PTPC_REQ_ENTRY TpcReqInsert(
 	IN PRTMP_ADAPTER	pAd,
@@ -916,7 +908,6 @@ VOID InsertTpcReportIE(
 
 	*pFrameLen = *pFrameLen + TempLen;
 
-
 	return;
 }
 
@@ -960,7 +951,6 @@ static VOID InsertChSwAnnIE(
 
 	*pFrameLen = *pFrameLen + TempLen;
 
-
 	return;
 }
 
@@ -978,7 +968,6 @@ static VOID InsertChSwAnnIE(
 		6. Measure Channel.
 		7. Measure Start time.
 		8. Measure Duration.
-
 
 	Return	: None.
 	==========================================================================
@@ -1405,7 +1394,6 @@ static VOID StartDFSProcedure(
 		2. message length.
 		3. Channel switch announcement infomation buffer.
 
-
 	Return	: None.
 	==========================================================================
  */
@@ -1786,7 +1774,6 @@ static VOID PeerChSwAnnAction(
 		return;
 	}
 
-
 #ifdef CONFIG_STA_SUPPORT
 	if (pAd->OpMode == OPMODE_STA)
 	{
@@ -1838,7 +1825,6 @@ static VOID PeerChSwAnnAction(
 
 	return;
 }
-
 
 /*
 	==========================================================================

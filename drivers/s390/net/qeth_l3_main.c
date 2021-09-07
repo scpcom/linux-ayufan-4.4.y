@@ -41,7 +41,6 @@ static int qeth_l3_deregister_addr_entry(struct qeth_card *,
 static int __qeth_l3_set_online(struct ccwgroup_device *, int);
 static int __qeth_l3_set_offline(struct ccwgroup_device *, int);
 
-
 static int qeth_l3_isxdigit(char *buf)
 {
 	while (*buf) {
@@ -303,7 +302,6 @@ static int qeth_l3_add_ip(struct qeth_card *card, struct qeth_ipaddr *addr)
 	spin_unlock_irqrestore(&card->ip_lock, flags);
 	return rc;
 }
-
 
 static struct qeth_ipaddr *qeth_l3_get_addr_buffer(
 				enum qeth_prot_versions prot)

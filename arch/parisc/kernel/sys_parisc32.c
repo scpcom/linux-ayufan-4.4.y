@@ -268,7 +268,6 @@ asmlinkage int sys32_sendfile64(int out_fd, int in_fd, compat_loff_t __user *off
 	return ret;
 }
 
-
 /* lseek() needs a wrapper because 'offset' can be negative, but the top
  * half of the argument has been zeroed by syscall.S.
  */

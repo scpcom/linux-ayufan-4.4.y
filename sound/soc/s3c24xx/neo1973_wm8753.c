@@ -417,7 +417,6 @@ static const struct snd_soc_dapm_widget wm8753_dapm_widgets[] = {
 	SND_SOC_DAPM_MIC("Call Mic", NULL),
 };
 
-
 static const struct snd_soc_dapm_route dapm_routes[] = {
 
 	/* Connections to the lm4857 amp */

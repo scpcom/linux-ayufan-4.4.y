@@ -526,7 +526,6 @@ bool debugfs_initialized(void)
 }
 EXPORT_SYMBOL_GPL(debugfs_initialized);
 
-
 static struct kobject *debug_kobj;
 
 static int __init debugfs_init(void)
@@ -558,4 +557,3 @@ static void __exit debugfs_exit(void)
 core_initcall(debugfs_init);
 module_exit(debugfs_exit);
 MODULE_LICENSE("GPL");
-

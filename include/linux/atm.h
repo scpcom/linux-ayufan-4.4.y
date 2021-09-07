@@ -2,7 +2,6 @@
  
 /* Written 1995-2000 by Werner Almesberger, EPFL LRC/ICA */
  
-
 /*
  * WARNING: User-space programs should not #include <linux/atm.h> directly.
  *          Instead, #include <atm.h>
@@ -22,7 +21,6 @@
 #include <linux/atmioc.h>
 #include <linux/types.h>
 
-
 /* general ATM constants */
 #define ATM_CELL_SIZE		    53	/* ATM cell size incl. header */
 #define ATM_CELL_PAYLOAD	    48	/* ATM payload size */
@@ -36,7 +34,6 @@
 #define ATM_MAX_VPI		   255	/* maximum VPI at the UNI */
 #define ATM_MAX_VPI_NNI		  4096	/* maximum VPI at the NNI */
 #define ATM_MAX_VCI		 65535	/* maximum VCI */
-
 
 /* "protcol" values for the socket system call */
 #define ATM_NO_AAL	0		/* AAL not specified */
@@ -78,14 +75,12 @@
 #define SO_MULTIPOINT	__SO_ENCODE(SOL_ATM, 5, int)
 			    /* make this vc a p2mp */
 
-
 /*
  * Note @@@: since the socket layers don't really distinguish the control and
  * the data plane but generally seems to be data plane-centric, any layer is
  * about equally wrong for the SAP. If you have a better idea about this,
  * please speak up ...
  */
-
 
 /* ATM cell header (for AAL0) */
 
@@ -101,7 +96,6 @@
 #define ATM_HDR_CLP		0x00000001
 /* END_CH */
 
-
 /* PTI codings */
 
 /* BEGIN_PTI */
@@ -114,7 +108,6 @@
 #define ATM_PTI_RSV_RM	6  /* reserved for traffic control/resource mgmt */
 #define ATM_PTI_RSV	7  /* reserved */
 /* END_PTI */
-
 
 /*
  * The following items should stay in linux/atm.h, which should be linked to
@@ -171,7 +164,6 @@ struct atm_qos {
 #define ATM_VPI_UNSPEC	-2
 #define ATM_VCI_UNSPEC	-2
 
-
 struct sockaddr_atmpvc {
 	unsigned short 	sap_family;	/* address family, AF_ATMPVC  */
 	struct {			/* PVC address */
@@ -201,7 +193,6 @@ struct sockaddr_atmpvc {
 #define ATM_LIJ_RPJ	2		/* set to root-prompted join */
 #define ATM_LIJ_NJ	3		/* set to network join */
 
-
 struct sockaddr_atmsvc {
     unsigned short 	sas_family;	/* address family, AF_ATMSVC */
     struct {				/* SVC address */
@@ -213,18 +204,15 @@ struct sockaddr_atmsvc {
     } sas_addr __ATM_API_ALIGN;		/* SVC address */
 };
 
-
 static __inline__ int atmsvc_addr_in_use(struct sockaddr_atmsvc addr)
 {
 	return *addr.sas_addr.prv || *addr.sas_addr.pub;
 }
 
-
 static __inline__ int atmpvc_addr_in_use(struct sockaddr_atmpvc addr)
 {
 	return addr.sap_addr.itf || addr.sap_addr.vpi || addr.sap_addr.vci;
 }
-
 
 /*
  * Some stuff for linux/sockios.h

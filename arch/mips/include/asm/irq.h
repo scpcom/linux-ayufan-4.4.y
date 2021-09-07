@@ -135,7 +135,6 @@ do {									\
  * IRQ affinity, we have this variant that skips the affinity check.
  */
 
-
 #define do_IRQ_no_affinity(irq)						\
 do {									\
 	irq_enter();							\

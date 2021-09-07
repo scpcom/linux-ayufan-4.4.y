@@ -63,7 +63,6 @@ unsigned long clk_get_rate(struct clk *clk)
 }
 EXPORT_SYMBOL(clk_get_rate);
 
-
 void clk_cken_enable(struct clk *clk)
 {
 	CKEN |= 1 << clk->cken;

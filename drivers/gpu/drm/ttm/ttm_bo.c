@@ -77,7 +77,6 @@ static struct kobj_type ttm_bo_glob_kobj_type  = {
 	.default_attrs = ttm_bo_global_attrs
 };
 
-
 static inline uint32_t ttm_bo_type_flags(unsigned type)
 {
 	return 1 << (type);
@@ -723,7 +722,6 @@ static uint32_t ttm_bo_select_caching(struct ttm_mem_type_manager *man,
 
 	return result;
 }
-
 
 static bool ttm_bo_mt_compatible(struct ttm_mem_type_manager *man,
 				 bool disallow_fixed,
@@ -1396,7 +1394,6 @@ out_no_drp:
 	return ret;
 }
 EXPORT_SYMBOL(ttm_bo_global_init);
-
 
 int ttm_bo_device_release(struct ttm_bo_device *bdev)
 {

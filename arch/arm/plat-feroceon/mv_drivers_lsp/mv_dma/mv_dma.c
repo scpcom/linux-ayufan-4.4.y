@@ -208,7 +208,6 @@ static unsigned long dma_copy(void *to, const void *from, unsigned long n, unsig
         unsigned char kaddr_kernel_static = 0;
 	DPRINTK("dma_copy: entering\n");
 
-
 	/* 
       	 * The unaligned is taken care seperatly since the dst might be part of a cache line that is changed 
 	 * by other process -> we must not invalidate this cache lines and we can't also flush it, since other 
@@ -372,7 +371,6 @@ static unsigned long dma_copy(void *to, const void *from, unsigned long n, unsig
 		    index++;
                 }
                 
-
 		/* go to next chunk */
 		from += chunk;
 		to += chunk;
@@ -408,7 +406,6 @@ unlock_dma:
         DPRINTK("dma_copy(0x%x, 0x%x, %lu): exiting\n", (u32) to,
                 (u32) from, n);
        
-
         if(n != 0)
         {
        	    if(to_user)
@@ -693,7 +690,6 @@ void *dma_memcpy(void *to, const void *from, __kernel_size_t n)
 		dmac_flush_range(from, from + n);
 		dmac_inv_range(to, to + n);
 
-               
 	    /* Start DMA */
             DPRINTK(" activate DMA: channel %d from %x to %x len %x\n",CPY_CHAN1, phys_from, phys_to, n);
 	    mvDmaTransfer(CPY_CHAN1, phys_from, phys_to, n, 0);

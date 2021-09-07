@@ -6,7 +6,6 @@
  * Copyright (C) 1996,1997 Jakub Jelinek (jj@sunsite.mff.cuni.cz)
  */
 
-
 #include <linux/jiffies.h>
 #include <linux/kernel.h>
 #include <linux/sched.h>

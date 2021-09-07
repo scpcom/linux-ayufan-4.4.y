@@ -70,7 +70,6 @@ static unsigned int vid_limit = 16;
 module_param(vid_limit, uint, 0644);
 MODULE_PARM_DESC(vid_limit, "capture memory limit in megabytes");
 
-
 /* supported controls */
 static struct v4l2_queryctrl vivi_qctrl[] = {
 	{

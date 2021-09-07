@@ -15,7 +15,6 @@
 
 #include "scsi_priv.h"
 
-
 /*
  * scsi_dev_info_list: structure to hold black/white listed devices.
  */
@@ -33,7 +32,6 @@ struct scsi_dev_info_list_table {
 	const char *name;	/* name of list for /proc (NULL for global) */
 	int key;		/* unique numeric identifier */
 };
-
 
 static const char spaces[] = "                "; /* 16 of them */
 static unsigned scsi_default_dev_flags;
@@ -453,7 +451,6 @@ int scsi_get_device_flags(struct scsi_device *sdev,
 	return scsi_get_device_flags_keyed(sdev, vendor, model,
 					   SCSI_DEVINFO_GLOBAL);
 }
-
 
 /**
  * get_device_flags_keyed - get device specific flags from the dynamic device list.

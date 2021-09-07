@@ -264,7 +264,6 @@ static int cond_insertf(struct avtab *a, struct avtab_key *k, struct avtab_datum
 	struct avtab_node *node_ptr;
 	u8 found;
 
-
 	/*
 	 * For type rules we have to make certain there aren't any
 	 * conflicting rules by searching the te_avtab and the

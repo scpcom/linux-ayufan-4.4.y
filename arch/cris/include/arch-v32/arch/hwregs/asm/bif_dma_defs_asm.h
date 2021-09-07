@@ -450,7 +450,6 @@
 #define reg_bif_dma_r_pin_stat___pin7___bit 7
 #define reg_bif_dma_r_pin_stat_offset 192
 
-
 /* Constants */
 #define regk_bif_dma_as_master                    0x00000001
 #define regk_bif_dma_as_slave                     0x00000001

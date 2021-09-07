@@ -172,7 +172,6 @@ MODULE_DEVICE_TABLE(pnp_card, snd_opl3sa2_pnpids);
 
 #endif /* CONFIG_PNP */
 
-
 /* read control port (w/o spinlock) */
 static unsigned char __snd_opl3sa2_read(struct snd_opl3sa2 *chip, unsigned char reg)
 {

@@ -116,4 +116,3 @@
 #define BP_APBX_CHn_SEMA_PHORE	16
 
 #endif
-

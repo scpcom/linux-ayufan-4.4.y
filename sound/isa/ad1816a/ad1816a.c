@@ -95,9 +95,7 @@ static struct pnp_card_device_id snd_ad1816a_pnpids[] = {
 
 MODULE_DEVICE_TABLE(pnp_card, snd_ad1816a_pnpids);
 
-
 #define	DRIVER_NAME	"snd-card-ad1816a"
-
 
 static int __devinit snd_card_ad1816a_pnp(int dev, struct snd_card_ad1816a *acard,
 					  struct pnp_card_link *card,

@@ -253,7 +253,6 @@ static struct board_info __initdata board_96348gw_11 = {
 		.force_duplex_full	= 1,
 	},
 
-
 	.has_ohci0 = 1,
 	.has_pccard = 1,
 	.has_ehci0 = 1,
@@ -363,7 +362,6 @@ static struct board_info __initdata board_FAST2404 = {
                 .force_duplex_full      = 1,
         },
 
-
         .has_ohci0 = 1,
         .has_pccard = 1,
         .has_ehci0 = 1,
@@ -431,7 +429,6 @@ static struct board_info __initdata board_96358vw = {
 		.force_duplex_full	= 1,
 	},
 
-
 	.has_ohci0 = 1,
 	.has_pccard = 1,
 	.has_ehci0 = 1,
@@ -481,7 +478,6 @@ static struct board_info __initdata board_96358vw2 = {
 		.force_speed_100	= 1,
 		.force_duplex_full	= 1,
 	},
-
 
 	.has_ohci0 = 1,
 	.has_pccard = 1,
@@ -837,4 +833,3 @@ int __init board_register_devices(void)
 
 	return 0;
 }
-

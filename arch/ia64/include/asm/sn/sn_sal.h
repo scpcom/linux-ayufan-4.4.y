@@ -11,7 +11,6 @@
  * Copyright (c) 2000-2006 Silicon Graphics, Inc.  All rights reserved.
  */
 
-
 #include <asm/sal.h>
 #include <asm/sn/sn_cpuid.h>
 #include <asm/sn/arch.h>
@@ -566,7 +565,6 @@ sn_system_serial_number(void) {
 	}
 }
 	
-
 /*
  * Returns a unique id number for this system and partition (suitable for
  * use with license managers), based in part on the system serial number.
@@ -790,7 +788,6 @@ ia64_sn_sysctl_iobrick_pci_op(nasid_t n, u64 connection_type,
 	    	return rv.v0;
 	return 0;
 }
-
 
 /*
  * Open a subchannel for sending arbitrary data to the system

@@ -267,7 +267,6 @@ u8 iwl_add_station(struct iwl_priv *priv, const u8 *addr, bool is_ap, u8 flags,
 		return sta_id;
 	}
 
-
 	station = &priv->stations[sta_id];
 	station->used = IWL_STA_DRIVER_ACTIVE;
 	IWL_DEBUG_ASSOC(priv, "Add STA to driver ID %d: %pM\n",
@@ -448,7 +447,6 @@ int iwl_remove_station(struct iwl_priv *priv, const u8 *addr, bool is_ap)
 				addr);
 		goto out;
 	}
-
 
 	priv->stations[sta_id].used &= ~IWL_STA_DRIVER_ACTIVE;
 
@@ -755,7 +753,6 @@ static int iwl_set_tkip_dynamic_key_info(struct iwl_priv *priv,
 		"no space for a new key");
 
 	priv->stations[sta_id].sta.key.key_flags = key_flags;
-
 
 	/* This copy is acutally not needed: we get the key with each TX */
 	memcpy(priv->stations[sta_id].keyinfo.key, keyconf->key, 16);
@@ -1194,4 +1191,3 @@ void iwl_update_ps_mode(struct iwl_priv *priv, u16 ps_bit, u8 *addr)
 		}
 	}
 }
-

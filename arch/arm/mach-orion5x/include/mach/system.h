@@ -27,5 +27,4 @@ static inline void arch_reset(char mode, const char *cmd)
 	orion5x_setbits(CPU_SOFT_RESET, 1);
 }
 
-
 #endif

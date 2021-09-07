@@ -7,4 +7,3 @@ static inline int arch_prepare_suspend(void)
 }
 
 #endif
-

@@ -502,7 +502,6 @@ void cdev_del(struct cdev *p)
 	kobject_put(&p->kobj);
 }
 
-
 static void cdev_default_release(struct kobject *kobj)
 {
 	struct cdev *p = container_of(kobj, struct cdev, kobj);
@@ -568,7 +567,6 @@ void __init chrdev_init(void)
 	cdev_map = kobj_map_init(base_probe, &chrdevs_lock);
 	bdi_init(&directly_mappable_cdev_bdi);
 }
-
 
 /* Let modules do char dev stuff */
 EXPORT_SYMBOL(register_chrdev_region);

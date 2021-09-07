@@ -27,7 +27,6 @@
 #include "proto.h"
 #include "pci_impl.h"
 
-
 /*
  * NOTE: Herein lie back-to-back mb instructions.  They are magic. 
  * One plausible explanation is that the i/o controller does not properly
@@ -624,7 +623,6 @@ cia_restore_srm_settings(void)
 #define cia_restore_srm_settings()	do {} while (0)
 #endif /* ALPHA_RESTORE_SRM_SETUP */
 
-
 static void __init
 do_init_arch(int is_pyxis)
 {
@@ -1096,7 +1094,6 @@ cia_decode_parity_error(struct el_CIA_sysdata_mcheck *cia)
 	printk(KERN_CRIT "  Address: %#010lx, Mask: %#lx\n", addr, mask);
 }
 #endif /* CONFIG_VERBOSE_MCHECK */
-
 
 static int
 cia_decode_mchk(unsigned long la_ptr)

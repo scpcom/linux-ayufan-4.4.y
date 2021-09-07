@@ -114,7 +114,6 @@ static const char *format_endpt =
 /* E:  Ad=xx(s) Atr=xx(ssss) MxPS=dddd Ivl=D?s */
   "E:  Ad=%02x(%c) Atr=%02x(%-4s) MxPS=%4d Ivl=%d%cs\n";
 
-
 /*
  * Need access to the driver and USB bus lists.
  * extern struct list_head usb_bus_list;
@@ -447,7 +446,6 @@ static char *usb_dump_desc(char *start, char *end, struct usb_device *dev)
 	}
 	return start;
 }
-
 
 #ifdef PROC_EXTRA /* TBD: may want to add this code later */
 

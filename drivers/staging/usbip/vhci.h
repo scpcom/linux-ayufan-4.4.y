@@ -20,7 +20,6 @@
 #include <linux/platform_device.h>
 #include "../../usb/core/hcd.h"
 
-
 struct vhci_device {
 	struct usb_device *udev;
 
@@ -38,7 +37,6 @@ struct vhci_device {
 
 	struct usbip_device ud;
 
-
 	/* lock for the below link lists */
 	spinlock_t priv_lock;
 
@@ -54,7 +52,6 @@ struct vhci_device {
 	wait_queue_head_t waitq_tx;
 };
 
-
 /* urb->hcpriv, use container_of() */
 struct vhci_priv {
 	unsigned long seqnum;
@@ -63,7 +60,6 @@ struct vhci_priv {
 	struct vhci_device *vdev;
 	struct urb *urb;
 };
-
 
 struct vhci_unlink {
 	/* seqnum of this request */
@@ -105,10 +101,8 @@ struct vhci_hcd {
 	int pending_port;
 };
 
-
 extern struct vhci_hcd *the_controller;
 extern struct attribute_group dev_attr_group;
-
 
 /*-------------------------------------------------------------------------*/
 /* prototype declaration */

@@ -55,12 +55,9 @@
 
 #include "ieee80211.h"
 
-
 /*
 
-
 802.11 Data Frame
-
 
 802.11 frame_contorl for data frames - 2 bytes
      ,-----------------------------------------------------------------------------------------.
@@ -106,7 +103,6 @@ Desc. | IV  | Encrypted | ICV |
       |     | IP Packet |     |
       `-----------------------'
 Total: 8 non-data bytes
-
 
 802.3 Ethernet Data Frame
 
@@ -229,7 +225,6 @@ int ieee80211_encrypt_fragment(
 
 	return 0;
 }
-
 
 void ieee80211_txb_free(struct ieee80211_txb *txb) {
 	//int i;
@@ -558,7 +553,6 @@ NO_PROTECTION:
 	tcb_desc->bRTSBW		= false;
 }
 
-
 void ieee80211_txrate_selectmode(struct ieee80211_device* ieee, cb_desc* tcb_desc)
 {
 #ifdef TO_DO_LIST
@@ -641,7 +635,6 @@ int ieee80211_xmit(struct sk_buff *skb, struct net_device *dev)
 		       ieee->dev->name);
 		goto success;
 	}
-
 
 	if(likely(ieee->raw_tx == 0)){
 		if (unlikely(skb->len < SNAP_SIZE + sizeof(u16))) {
@@ -776,8 +769,6 @@ int ieee80211_xmit(struct sk_buff *skb, struct net_device *dev)
 		} else {
 			txb->queue_index = WME_AC_BK;;
 		}
-
-
 
 		for (i = 0; i < nr_frags; i++) {
 			skb_frag = txb->fragments[i];

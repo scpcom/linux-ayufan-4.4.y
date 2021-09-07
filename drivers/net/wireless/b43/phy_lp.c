@@ -29,7 +29,6 @@
 #include "phy_common.h"
 #include "tables_lpphy.h"
 
-
 static inline u16 channel2freq_lp(u8 channel)
 {
 	if (channel < 14)
@@ -2003,7 +2002,6 @@ static int lpphy_b2062_tune(struct b43_wldev *dev,
 	b43_radio_mask(dev, B2062_S_RFPLL_CTL14, ~0x04);
 	return err;
 }
-
 
 /* This was previously called lpphy_japan_filter */
 static void lpphy_set_analog_filter(struct b43_wldev *dev, int channel)

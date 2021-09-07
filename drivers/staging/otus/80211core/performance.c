@@ -122,7 +122,6 @@ void zfiPerformanceGraph(zdev_t* dev)
 
 }
 
-
 void zfiPerformanceRefresh(zdev_t* dev)
 {
     u16_t   i;

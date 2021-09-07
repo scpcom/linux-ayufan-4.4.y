@@ -97,7 +97,6 @@ typedef struct ErrLogEntry_tag {
 /*40 */ 
 } tErrLogEntry;
 
-
 #if defined(__TURBOC__)
 #if sizeof(tErrLogEntry) != ERRLOG_ENTRY_SIZE
 #error size of tErrLogEntry != ERRLOG_ENTRY_SIZE
@@ -122,13 +121,11 @@ typedef struct DpramBootSpooler_tag {
 /*23 */ 
 } tDpramBootSpooler;
 
-
 #define DPRAM_SPOOLER_MIN_SIZE  5       /* Len+RdPtr+Wrptr+2*data */
 #define DPRAM_SPOOLER_DEF_SIZE  0x23    /* current default size   */
 
 /*--------------------------------------HYCARD/ERGO DPRAM SoftUart----------*/ 
 				    /* at DPRAM offset 0x1C00: */ 
 #define SIZE_RSV_SOFT_UART  0x1B0   /* 432 bytes reserved for SoftUart */
-
 
 #endif	/* __INCE1PC_H__ */

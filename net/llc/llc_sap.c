@@ -368,7 +368,6 @@ static void llc_sap_mcast(struct llc_sap *sap,
 	read_unlock_bh(&sap->sk_list.lock);
 }
 
-
 void llc_sap_handler(struct llc_sap *sap, struct sk_buff *skb)
 {
 	struct llc_addr laddr;

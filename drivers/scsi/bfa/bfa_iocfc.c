@@ -582,8 +582,6 @@ bfa_iocfc_reset_cbfn(void *bfa_arg)
 	bfa_isr_enable(bfa);
 }
 
-
-
 /**
  *  bfa_ioc_public
  */
@@ -847,7 +845,6 @@ bfa_iocfc_disable(struct bfa_s *bfa)
 	bfa_ioc_disable(&bfa->ioc);
 }
 
-
 bfa_boolean_t
 bfa_iocfc_is_operational(struct bfa_s *bfa)
 {
@@ -868,5 +865,3 @@ bfa_iocfc_get_bootwwns(struct bfa_s *bfa, u8 *nwwns, wwn_t **wwns)
 }
 
 #endif
-
-

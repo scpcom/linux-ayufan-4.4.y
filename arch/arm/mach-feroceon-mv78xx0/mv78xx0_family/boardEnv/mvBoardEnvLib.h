@@ -107,7 +107,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DUART_BAUD_RATE			115200
 #define MAX_CLOCK_MARGINE		5000000	/* Maximum detected clock margine */
 
-
 typedef enum _devBoardClass
 {
 	BOARD_DEV_NOR_FLASH,
@@ -134,7 +133,6 @@ typedef enum _devBoardClass
 	BOARD_DEV_OTHER,   
 } MV_BOARD_DEV_CLASS;
 
-
 typedef struct _devCsInfo
 {
     MV_U8		deviceCS;
@@ -155,7 +153,6 @@ typedef enum _boardMacSpeed
 
 /* Locals */
 
-
 MV_VOID 	mvBoardEnvInit(MV_VOID);
 MV_U32      mvBoardIdGet(MV_VOID);
 MV_STATUS	mvBoardNameGet(char *pNameBuff);
@@ -172,7 +169,6 @@ MV_U32      mvBoardMppGet(MV_U32 mppGroupNum);
 MV_U8		mvBoardRtcTwsiAddrTypeGet(MV_VOID);
 MV_U8		mvBoardRtcTwsiAddrGet(MV_VOID);
 
-
 MV_32	    mvBoardPciGpioPinGet(MV_U32 pciIf, MV_U32 idSel, MV_U32 intPin);
 MV_32	    mvBoardWDGpioPinGet(MV_VOID);
 MV_32	    mvBoardDbgLedGpioMaskGet(MV_VOID);
@@ -180,7 +176,6 @@ MV_32	    mvBoardDbgLedGpioMaskGet(MV_VOID);
 MV_32	    mvBoardGpioIntMaskGet(MV_VOID);
 MV_32	    mvBoardUSBVbusGpioPinGet(int devId);
 MV_32	    mvBoardUSBVbusEnGpioPinGet(int devId);
-
 
 MV_VOID		mvBoardReset(MV_VOID);
 MV_TARGET   	mvBoardGetDevCSNum(MV_32 devNum, MV_BOARD_DEV_CLASS devClass);

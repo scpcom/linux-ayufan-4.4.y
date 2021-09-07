@@ -80,7 +80,6 @@ static int revid_errata;
 #define dprintk(msg...) cpufreq_debug_printk(CPUFREQ_DEBUG_DRIVER, \
 		"longhaul", msg)
 
-
 /* Clock ratios multiplied by 10 */
 static int mults[32];
 static int eblcr[32];
@@ -108,7 +107,6 @@ static char *print_speed(int speed)
 }
 #endif
 
-
 static unsigned int calc_speed(int mult)
 {
 	int khz;
@@ -118,7 +116,6 @@ static unsigned int calc_speed(int mult)
 	khz *= 1000;
 	return khz;
 }
-
 
 static int longhaul_get_cpu_mult(void)
 {
@@ -425,7 +422,6 @@ static int guess_fsb(int mult)
 	return 0;
 }
 
-
 static int __init longhaul_get_ranges(void)
 {
 	unsigned int i, j, k = 0;
@@ -529,7 +525,6 @@ static int __init longhaul_get_ranges(void)
 	return 0;
 }
 
-
 static void __init longhaul_setup_voltagescaling(void)
 {
 	union msr_longhaul longhaul;
@@ -628,12 +623,10 @@ static void __init longhaul_setup_voltagescaling(void)
 	printk(KERN_INFO PFX "Voltage scaling enabled.\n");
 }
 
-
 static int longhaul_verify(struct cpufreq_policy *policy)
 {
 	return cpufreq_frequency_table_verify(policy, longhaul_table);
 }
-
 
 static int longhaul_target(struct cpufreq_policy *policy,
 			    unsigned int target_freq, unsigned int relation)
@@ -681,7 +674,6 @@ static int longhaul_target(struct cpufreq_policy *policy,
 	longhaul_index = table_index;
 	return 0;
 }
-
 
 static unsigned int longhaul_get(unsigned int cpu)
 {
@@ -956,7 +948,6 @@ static struct cpufreq_driver longhaul_driver = {
 	.attr	= longhaul_attr,
 };
 
-
 static int __init longhaul_init(void)
 {
 	struct cpuinfo_x86 *c = &cpu_data(0);
@@ -989,7 +980,6 @@ static int __init longhaul_init(void)
 
 	return -ENODEV;
 }
-
 
 static void __exit longhaul_exit(void)
 {

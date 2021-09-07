@@ -138,7 +138,6 @@ void lis3lv02d_poweron(struct lis3lv02d *lis3)
 }
 EXPORT_SYMBOL_GPL(lis3lv02d_poweron);
 
-
 static irqreturn_t lis302dl_interrupt(int irq, void *dummy)
 {
 	/*
@@ -280,7 +279,6 @@ static void lis3lv02d_joystick_poll(struct input_polled_dev *pidev)
 	input_report_abs(pidev->input, ABS_Z, z - lis3_dev.zcalib);
 }
 
-
 static inline void lis3lv02d_calibrate_joystick(void)
 {
 	lis3lv02d_get_xyz(&lis3_dev,
@@ -397,7 +395,6 @@ static struct attribute_group lis3lv02d_attribute_group = {
 	.attrs = lis3lv02d_attributes
 };
 
-
 static int lis3lv02d_add_fs(struct lis3lv02d *lis3)
 {
 	lis3->pdev = platform_device_register_simple(DRIVER_NAME, -1, NULL, 0);
@@ -492,4 +489,3 @@ EXPORT_SYMBOL_GPL(lis3lv02d_init_device);
 MODULE_DESCRIPTION("ST LIS3LV02Dx three-axis digital accelerometer driver");
 MODULE_AUTHOR("Yan Burman, Eric Piel, Pavel Machek");
 MODULE_LICENSE("GPL");
-

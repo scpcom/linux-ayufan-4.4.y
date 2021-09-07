@@ -2033,7 +2033,6 @@ int snd_soc_dapm_new_controls(struct snd_soc_codec *codec,
 }
 EXPORT_SYMBOL_GPL(snd_soc_dapm_new_controls);
 
-
 /**
  * snd_soc_dapm_stream_event - send a stream event to the dapm core
  * @codec: audio codec

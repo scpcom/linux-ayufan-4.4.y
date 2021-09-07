@@ -81,7 +81,6 @@ int mv88fx_snd_hw_playback_set(struct mv88fx_snd_chip	*chip)
 	MV_SPDIF_PLAYBACK_CTRL	spdif_play_ctrl;
 	MV_AUDIO_FREQ_DATA 	dco_ctrl;
 
-
 	dco_ctrl.offset = chip->dco_ctrl_offst;
 	
 	switch(audio_stream->rate) {
@@ -219,7 +218,6 @@ int mv88fx_snd_hw_playback_set(struct mv88fx_snd_chip	*chip)
 	return 0;
 }
 
-
 int mv88fx_snd_hw_capture_set(struct mv88fx_snd_chip	*chip)
 {
         struct mv88fx_snd_stream *audio_stream = 
@@ -230,7 +228,6 @@ int mv88fx_snd_hw_capture_set(struct mv88fx_snd_chip	*chip)
 	MV_AUDIO_RECORD_CTRL 	pcm_rec_ctrl;
 	MV_I2S_RECORD_CTRL	i2s_rec_ctrl;
 	MV_AUDIO_FREQ_DATA	dco_ctrl;
-
 
 	dco_ctrl.offset = chip->dco_ctrl_offst;
 
@@ -282,7 +279,6 @@ int mv88fx_snd_hw_capture_set(struct mv88fx_snd_chip	*chip)
 	}
 	else pcm_rec_ctrl.monoChannel = AUDIO_REC_LEFT_MONO;
 		
-
 	pcm_rec_ctrl.bufferPhyBase = audio_stream->dma_addr;
 	pcm_rec_ctrl.bufferSize = audio_stream->dma_size;
 	
@@ -336,7 +332,6 @@ int mv88fx_snd_hw_capture_set(struct mv88fx_snd_chip	*chip)
 
 #endif
 	
-
 	return 0;
 
 }

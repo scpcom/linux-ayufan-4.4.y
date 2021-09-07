@@ -31,7 +31,6 @@ disclaimer.
 #ifndef __INCmv88F5182SysHwConfigh
 #define __INCmv88F5182SysHwConfigh
 
-
 /* PEX Work arround */
 /* the target we will use for the workarround */
 #define PEX_CONFIG_RW_WA_TARGET PEX0_MEM
@@ -45,10 +44,8 @@ otherwise the following defines will be ignored */
 #define PEX_CONFIG_RW_WA_BASE 0xF0000000
 #define PEX_CONFIG_RW_WA_SIZE _16M
 
- 
 /* Internal registers: size is defined in Controllerenvironment */
 #define INTER_REGS_BASE	0xF1000000
-
 
 /* DRAM detection stuff */
 #define MV_DRAM_AUTO_SIZE
@@ -65,7 +62,6 @@ otherwise the following defines will be ignored */
 #define TCLK_AUTO_DETECT    /* Use Tclk auto detection 		*/
 #define SYSCLK_AUTO_DETECT	/* Use SysClk auto detection 	*/
 #define PCLCK_AUTO_DETECT  /* Use PClk auto detection */
-
 
 /* PEX-PCI\PCI-PCI Bridge*/
 #define PCI0_IF_PTP		0		/* Bridge exist on pciIf0*/

@@ -73,7 +73,6 @@ static inline int phy_read_via_mac_unit(
                (priv->gmii_csr_clk_range << MAC_GMII_ADR_CR_BIT) |
                (1UL << MAC_GMII_ADR_GB_BIT);
 
-
 	spin_lock_irqsave(&phy_access_spinlock[priv->unit], mask);
     unit_mac_reg_write(unit, MAC_GMII_ADR_REG, addr);
 

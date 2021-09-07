@@ -10,7 +10,6 @@
 /* Stepped frequency increment is 128000 Hz */
 /* Schmitdt trigger threshold assumed:  1 / 3.3 V */
 
-
 /* Inverse C.ln(V') == 216 */
 #define THERM_INTERPOLATION_STEP  8
 #define THERM_ENTRIES_IN_CALIB_TABLE  128

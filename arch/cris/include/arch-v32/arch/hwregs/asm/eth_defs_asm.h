@@ -470,7 +470,6 @@
 #define reg_eth_r_masked_intr___mdio___bit 13
 #define reg_eth_r_masked_intr_offset 88
 
-
 /* Constants */
 #define regk_eth_discard                          0x00000000
 #define regk_eth_ether                            0x00000000

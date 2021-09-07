@@ -85,7 +85,6 @@ static unsigned int skip_txen_test; /* force skip of txen test at init time */
 
 #define BOTH_EMPTY 	(UART_LSR_TEMT | UART_LSR_THRE)
 
-
 /*
  * We default to IRQ0 for the "no irq" hack.   Some
  * machine types want others as well - they're free
@@ -1901,7 +1900,6 @@ static int serial8250_get_poll_char(struct uart_port *port)
 
 	return serial_inp(up, UART_RX);
 }
-
 
 static void serial8250_put_poll_char(struct uart_port *port,
 			 unsigned char c)

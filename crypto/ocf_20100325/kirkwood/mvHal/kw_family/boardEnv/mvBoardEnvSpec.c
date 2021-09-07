@@ -81,7 +81,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #define DB_88F6281A_BOARD_DEBUG_LED_NUM		    0x0
 
-
 MV_BOARD_TWSI_INFO	db88f6281AInfoBoardTwsiDev[] =
 	/* {{MV_BOARD_DEV_CLASS	devClass, MV_U8	twsiDevAddr, MV_U8 twsiDevAddrType}} */
 	{
@@ -140,7 +139,6 @@ MV_BOARD_MPP_INFO	db88f6281AInfoBoardMppConfigValue[] =
 	DB_88F6281A_MPP48_55		
 	}}};
 
-
 MV_BOARD_INFO db88f6281AInfo = {
 	"DB-88F6281A-BP",				/* boardName[MAX_BOARD_NAME_LEN] */
 	DB_88F6281A_BOARD_MPP_GROUP_TYPE_NUM,		/* numBoardMppGroupType */
@@ -168,7 +166,6 @@ MV_BOARD_INFO db88f6281AInfo = {
 	BIT6, 						/* gppPolarityValHigh */
 	NULL						/* pSwitchInfo */
 };
-
 
 #define RD_88F6281A_BOARD_PCI_IF_NUM		0x0
 #define RD_88F6281A_BOARD_TWSI_DEF_NUM		0x2
@@ -268,7 +265,6 @@ MV_BOARD_INFO rd88f6281AInfo = {
 	BIT6, 						/* gppPolarityValHigh */
 	rd88f6281AInfoBoardSwitchInfo			/* pSwitchInfo */
 };
-
 
 #define DB_88F6192A_BOARD_PCI_IF_NUM            0x0
 #define DB_88F6192A_BOARD_TWSI_DEF_NUM		    0x7
@@ -592,7 +588,6 @@ MV_BOARD_INFO db88f6180AInfo = {
 	NULL						/* pSwitchInfo */
 };
 
-
 #define RD_88F6281A_PCAC_BOARD_PCI_IF_NUM		0x0
 #define RD_88F6281A_PCAC_BOARD_TWSI_DEF_NUM		0x1
 #define RD_88F6281A_PCAC_BOARD_MAC_INFO_NUM		0x1
@@ -677,7 +672,6 @@ MV_BOARD_INFO rd88f6281APcacInfo = {
 	0, 	 					/* gppPolarityValHigh */
 	NULL						/* pSwitchInfo */
 };
-
 
 /* 6281 Sheeva Plug*/
 
@@ -844,5 +838,3 @@ MV_BOARD_INFO*	boardInfoTbl[] = 	{
                     &dbCustomerInfo,
                     &sheevaPlugInfo
 					};
-
-

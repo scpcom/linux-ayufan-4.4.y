@@ -360,7 +360,6 @@ static struct uart_port internal_serial_port_2 = {
 };
 #endif // CONFIG_ARCH_OXNAS_UART2
 
-
 static void __init oxnas_mapio(void)
 {
     unsigned int uart_line=0;

@@ -539,7 +539,6 @@ static int pcf50633_resume(struct device *dev)
 
 	/* Restore regulators' state */
 
-
 	get_device(pcf->dev);
 
 	/*

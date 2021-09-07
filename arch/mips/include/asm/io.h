@@ -513,7 +513,6 @@ BUILDSTRING(l, u32)
 BUILDSTRING(q, u64)
 #endif
 
-
 #ifdef CONFIG_CPU_CAVIUM_OCTEON
 #define mmiowb() wmb()
 #else

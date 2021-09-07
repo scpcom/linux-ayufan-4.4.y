@@ -1401,7 +1401,6 @@ static struct adt7475_data *adt7475_update_device(struct device *dev)
 				((ext >> (i * 2)) & 3);
 		}
 
-		
 		for (i = 0; i < ADT7475_TEMP_COUNT; i++)
 			data->temp[INPUT][i] =
 				(adt7475_read(TEMP_REG(i)) << 2) |

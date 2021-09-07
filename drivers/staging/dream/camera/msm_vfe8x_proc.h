@@ -1286,7 +1286,6 @@ struct VFE_StatsCmdType {
 	uint32_t  /* reserved */ : 26;
 } __attribute__((packed, aligned(4)));
 
-
 struct vfe_statsframe {
 	uint32_t lastPixel:12;
 	uint32_t /* reserved */ : 4;

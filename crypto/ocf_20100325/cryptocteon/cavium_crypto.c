@@ -383,7 +383,6 @@ octo_des_cbc_encrypt(
     return 0;
 }
 
-
 int
 octo_des_cbc_decrypt(
     struct octo_sess *od,
@@ -523,7 +522,6 @@ octo_aes_cbc_encrypt(
     octeon_crypto_disable(&state, flags);
     return 0;
 }
-
 
 int
 octo_aes_cbc_decrypt(
@@ -1777,7 +1775,6 @@ octo_aes_cbc_md5_decrypt(
 	CVM_LOAD_MD5_UNIT(*pdata, next);
 	auth_len -= 8;
     }
-
 
     /* finish the hash */
     CVMX_PREFETCH0(od->octo_hmouter);

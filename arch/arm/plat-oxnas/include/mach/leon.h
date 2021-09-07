@@ -33,4 +33,3 @@ extern void shutdown_copro(void);
 
 #endif        //  #if !defined(__LEON_H__)
 #endif // CONFIG_SUPPORT_LEON
-

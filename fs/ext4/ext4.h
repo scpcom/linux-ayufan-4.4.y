@@ -103,7 +103,6 @@ typedef unsigned int ext4_group_t;
 /* We are doing stream allocation */
 #define EXT4_MB_STREAM_ALLOC		0x0800
 
-
 struct ext4_allocation_request {
 	/* target inode for block we're allocating */
 	struct inode *inode;
@@ -498,7 +497,6 @@ struct ext4_new_group_data {
 #define EXT4_IOC32_GETVERSION_OLD	FS_IOC32_GETVERSION
 #define EXT4_IOC32_SETVERSION_OLD	FS_IOC32_SETVERSION
 #endif
-
 
 /*
  *  Mount options
@@ -1404,7 +1402,6 @@ struct dx_hash_info
  */
 #define HASH_NB_ALWAYS		1
 
-
 /*
  * Describe an inode's exact location on disk and in memory
  */
@@ -1920,7 +1917,6 @@ extern int ext4_resetpreallocate(struct file *filp, loff_t offset, loff_t len);
 extern int ext4_move_extents(struct file *o_filp, struct file *d_filp,
 			     __u64 start_orig, __u64 start_donor,
 			     __u64 len, __u64 *moved_len);
-
 
 /*
  * Add new method to test wether block and inode bitmaps are properly

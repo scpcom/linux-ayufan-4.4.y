@@ -259,7 +259,6 @@ static struct clk_sources clkset_uhost = {
 	.nr_sources	= ARRAY_SIZE(clkset_uhost_list),
 };
 
-
 /* The peripheral clocks are all controlled via clocksource followed
  * by an optional divider and gate stage. We currently roll this into
  * one clock which hides the intermediate clock from the mux.

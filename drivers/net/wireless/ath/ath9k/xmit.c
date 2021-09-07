@@ -2070,8 +2070,6 @@ static void ath_tx_complete_poll_work(struct work_struct *work)
 			msecs_to_jiffies(ATH_TX_COMPLETE_POLL_INT));
 }
 
-
-
 void ath_tx_tasklet(struct ath_softc *sc)
 {
 	int i;

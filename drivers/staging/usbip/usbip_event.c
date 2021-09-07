@@ -33,7 +33,6 @@ static int event_handler(struct usbip_device *ud)
 	while (usbip_event_happened(ud)) {
 		usbip_dbg_eh("pending event %lx\n", ud->event);
 
-		
 #ifdef MY_ABC_HERE
 		/*
 		 * USBIP_EH_CLOSE_SOCKET close socket/cleap up urb and 

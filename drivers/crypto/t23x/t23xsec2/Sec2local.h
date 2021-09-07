@@ -38,17 +38,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 #ifndef SEC2LOCAL_H
 #define SEC2LOCAL_H
-
 
 /** @file
  * Descriptor construction definitions for the SEC2.x
  *   - security processing core family
  */
-
 
 #ifdef _cplusplus
 extern "C" {
@@ -58,11 +54,8 @@ extern "C" {
 #include "../common/xwcRMinterface.h"
 #include "Sec2.h"
 
-
 #define SEC2X_DEVMAJOR   (0)
 #define SEC2X_DEVNAME    "sec2x"
-
-
 
     /**
      * Types of requests. These are saved off in the dynamic request
@@ -79,7 +72,6 @@ extern "C" {
                                 will waitqueue the request */
     } RQ_TYPE;
 
-
     /**
      * Specifies the memory translation needed when putting addresses
      * in a descriptor under construction
@@ -94,9 +86,6 @@ extern "C" {
         PTR_KERNEL_VIRTUAL, /**< points to a kernel memory buffer     */
     } PTRTYPE;
 
-
-
-
     /*
      * Internal prototypes
      */
@@ -104,7 +93,6 @@ extern "C" {
     /* t2dpd.c */
     int constructDPDlist(GENERIC_REQ *rqList, RMexecMessage *exMsg, PTRTYPE memtyp);
     int releaseDPDlist(RMexecMessage *exMsg, PTRTYPE memtyp);
-
 
 #ifdef _cplusplus
 }

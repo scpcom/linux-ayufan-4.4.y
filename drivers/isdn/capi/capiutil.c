@@ -679,7 +679,6 @@ char *capi_cmd2str(u8 cmd, u8 subcmd)
 	return mnames[command_2_index(cmd, subcmd)];
 }
 
-
 /*-------------------------------------------------------*/
 
 #ifdef CONFIG_CAPI_TRACE
@@ -737,8 +736,6 @@ static char *pnames[] =
     /*2e */ "Reject",
     /*2f */ "Useruserdata"
 };
-
-
 
 #include <stdarg.h>
 
@@ -927,7 +924,6 @@ void cdebbuf_free(_cdebbuf *cdb)
 		kfree(cdb->buf);
 	kfree(cdb);
 }
-
 
 /**
  * capi_message2str() - format CAPI 2.0 message for printing

@@ -14,7 +14,6 @@
 #ifndef __ASM_ARCH_REGISTERS_H
 #define __ASM_ARCH_REGISTERS_H
 
-
 	/* Physical register base addresses */
 
 #define AC97C_PHYS	(0x80000000)	/* AC97 Controller */
@@ -52,7 +51,6 @@
 /*#define KBD_PHYS	(0x80000e00) */
 /*#define LCDICP_PHYS	(0x80001000) */
 
-
 	/* Clock/State Controller register */
 
 #define CSC_PWRSR	__REG(CSC_PHYS + 0x00) /* Reset register & ID */
@@ -89,7 +87,6 @@
 #define INTC_INTENS	__REG(INTC_PHYS + 0x08)	/* Enable Set */
 #define INTC_INTENC	__REG(INTC_PHYS + 0x0c)	/* Enable Clear */
 
-
 	/* Vectored Interrupted Controller registers */
 
 #define VIC1_IRQSTATUS	__REG(VIC1_PHYS + 0x00)
@@ -125,7 +122,6 @@
 
 #define USBH_CMDSTATUS	__REG(USBH_PHYS + 0x08)
 
-
 	/* GPIO registers */
 
 #define GPIO_INTTYPE1	__REG(GPIO_PHYS + 0x4c)	/* Interrupt Type 1 (Edge) */
@@ -141,7 +137,6 @@
 #define GPIO_PEDD	__REG(GPIO_PHYS + 0x24)
 #define GPIO_PED	__REG(GPIO_PHYS + 0x20)
 
-
 	/* Static Memory Controller registers */
 
 #define SMC_BCR0	__REG(SMC_PHYS + 0x00)	/* Bank 0 Configuration */
@@ -150,7 +145,6 @@
 #define SMC_BCR3	__REG(SMC_PHYS + 0x0C)	/* Bank 3 Configuration */
 #define SMC_BCR6	__REG(SMC_PHYS + 0x18)	/* Bank 6 Configuration */
 #define SMC_BCR7	__REG(SMC_PHYS + 0x1c)	/* Bank 7 Configuration */
-
 
 #ifdef CONFIG_MACH_KEV7A400
 # define CPLD_RD_OPT_DIP_SW	__REG16(CPLD_PHYS + 0x00) /* Read Option SW */
@@ -219,6 +213,5 @@
 #define GPIO_GPIOFINTEN		__REG(GPIO_PHYS + 0x58)	/* GPIOF IRQ enable */
 #define GPIO_INTSTATUS		__REG(GPIO_PHYS + 0x5c)	/* GPIOF IRQ latch */
 #define GPIO_RAWINTSTATUS	__REG(GPIO_PHYS + 0x60)	/* GPIOF IRQ raw */
-
 
 #endif  /* _ASM_ARCH_REGISTERS_H */

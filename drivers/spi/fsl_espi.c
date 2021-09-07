@@ -515,7 +515,7 @@ static int __exit fsl_espi_remove(struct of_device *ofdev)
 
 #define fsl_espi_suspend NULL
 #define fsl_espi_resume  NULL
-
+ 
 static struct of_device_id fsl_espi_of_match[] = {
 	{ .compatible = "fsl,espi",},
 	{}

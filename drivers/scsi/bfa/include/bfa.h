@@ -96,7 +96,6 @@ struct bfa_sge_s {
 	((u32 *)(__sge))[2] = bfa_os_htonl(((u32 *)(__sge))[2]);      \
 } while (0)
 
-
 /*
  * bfa stats interfaces
  */

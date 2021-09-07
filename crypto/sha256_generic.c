@@ -213,7 +213,6 @@ static void sha256_transform(u32 *state, const u8 *input)
 	memset(W, 0, 64 * sizeof(u32));
 }
 
-
 static int sha224_init(struct shash_desc *desc)
 {
 	struct sha256_state *sctx = shash_desc_ctx(desc);

@@ -1,7 +1,6 @@
 #ifndef _CRIS_ARCH_PAGE_H
 #define _CRIS_ARCH_PAGE_H
 
-
 #ifdef __KERNEL__
 
 /* This handles the memory map.. */

@@ -239,7 +239,6 @@ static struct resource bfin_spi0_resource[] = {
 	}
 };
 
-
 /* SPI controller data */
 static struct bfin5xx_spi_master bfin_spi0_info = {
 	.num_chipselect = 8,

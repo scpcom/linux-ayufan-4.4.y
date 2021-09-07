@@ -362,7 +362,6 @@ static int dbgp_control_msg(unsigned devnum, int requesttype,
 	return dbgp_bulk_read(devnum, 0, data, size);
 }
 
-
 /* Find a PCI capability */
 static u32 __init find_cap(u32 num, u32 slot, u32 func, int cap)
 {

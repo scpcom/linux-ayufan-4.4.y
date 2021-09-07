@@ -33,7 +33,6 @@
 
 /*---------------------  Export Definitions -------------------------*/
 
-
 /*---------------------  Export Classes  ----------------------------*/
 
 // Init card type
@@ -90,6 +89,3 @@ CARDbChannelSwitch (
     );
 
 #endif // __CARD_H__
-
-
-

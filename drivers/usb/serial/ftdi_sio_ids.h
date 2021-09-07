@@ -7,14 +7,11 @@
  *
  */
 
-
 /**********************************/
 /***** devices using FTDI VID *****/
 /**********************************/
 
-
 #define FTDI_VID	0x0403	/* Vendor Id */
-
 
 /*** "original" FTDI device PIDs ***/
 
@@ -24,7 +21,6 @@
 #define FTDI_4232H_PID 0x6011 /* Quad channel hi-speed device */
 #define FTDI_SIO_PID	0x8372	/* Product Id SIO application of 8U100AX  */
 #define FTDI_232RL_PID  0xFBFA  /* Product ID for FT232RL */
-
 
 /*** third-party PIDs (using FTDI_VID) ***/
 
@@ -465,13 +461,9 @@
 /* www.canusb.com Lawicel CANUSB device (FTDI_VID) */
 #define FTDI_CANUSB_PID 0xFFA8 /* Product Id */
 
-
-
 /********************************/
 /** third-party VID/PID combos **/
 /********************************/
-
-
 
 /*
  * Atmel STK541
@@ -970,8 +962,6 @@
 #define MTXORB_FTDI_RANGE_01FD_PID	0x01FD
 #define MTXORB_FTDI_RANGE_01FE_PID	0x01FE
 #define MTXORB_FTDI_RANGE_01FF_PID	0x01FF
-
-
 
 /*
  * The Mobility Lab (TML)

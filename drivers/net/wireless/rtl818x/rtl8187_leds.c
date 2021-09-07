@@ -216,4 +216,3 @@ void rtl8187_leds_exit(struct ieee80211_hw *dev)
 	cancel_delayed_work_sync(&priv->led_on);
 }
 #endif /* def CONFIG_RTL8187_LED */
-

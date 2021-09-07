@@ -109,7 +109,6 @@ static const struct super_operations smb_sops =
 	.remount_fs	= smb_remount,
 };
 
-
 /* We are always generating a new inode here */
 struct inode *
 smb_iget(struct super_block *sb, struct smb_fattr *fattr)

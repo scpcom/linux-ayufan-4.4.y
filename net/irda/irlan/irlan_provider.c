@@ -416,4 +416,3 @@ int irlan_provider_open_ctrl_tsap(struct irlan_cb *self)
 
 	return 0;
 }
-

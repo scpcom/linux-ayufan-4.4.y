@@ -74,7 +74,6 @@ int					mp_bus_id_to_node[MAX_MP_BUSSES];
 int					mp_bus_id_to_local[MAX_MP_BUSSES];
 int					quad_local_to_mp_bus_id[NR_CPUS/4][4];
 
-
 static inline void numaq_register_node(int node, struct sys_cfg_data *scd)
 {
 	struct eachquadmem *eq = scd->eq + node;

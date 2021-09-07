@@ -110,7 +110,6 @@ MODULE_PARM_DESC(nodelay, "Disable 500ms init delay");
 static int enable;
 module_param(enable, bool, 0444);
 
-
 /* revision numbers for via686 */
 #define VIA_REV_686_A		0x10
 #define VIA_REV_686_B		0x11
@@ -305,7 +304,6 @@ DEFINE_VIA_REGSET(CAPTURE_8233, 0x60);
 #define VIA_DXS_NO_VRA	4
 #define VIA_DXS_SRC	5
 
-
 /*
  * pcm stream
  */
@@ -336,7 +334,6 @@ struct viadev {
 	int in_interrupt;
 	int shadow_shift;
 };
-
 
 enum { TYPE_CARD_VIA686 = 1, TYPE_CARD_VIA8233 };
 enum { TYPE_VIA686, TYPE_VIA8233, TYPE_VIA8233A };
@@ -488,7 +485,6 @@ static int build_via_table(struct viadev *dev, struct snd_pcm_substream *substre
 	return 0;
 }
 
-
 static int clean_via_table(struct viadev *dev, struct snd_pcm_substream *substream,
 			   struct pci_dev *pci)
 {
@@ -614,7 +610,6 @@ static void snd_via82xx_channel_reset(struct via82xx *chip, struct viadev *viade
 	viadev->lastpos = 0;
 	viadev->hwptr_done = 0;
 }
-
 
 /*
  *  Interrupt handler
@@ -760,7 +755,6 @@ static int snd_via82xx_pcm_trigger(struct snd_pcm_substream *substream, int cmd)
 		snd_via82xx_channel_reset(chip, viadev);
 	return 0;
 }
-
 
 /*
  * pointer callbacks
@@ -912,7 +906,6 @@ unlock:
 	return bytes_to_frames(substream->runtime, res);
 }
 
-
 /*
  * hw_params callback:
  * allocate the buffer and build up the buffer description table
@@ -949,7 +942,6 @@ static int snd_via82xx_hw_free(struct snd_pcm_substream *substream)
 	snd_pcm_lib_free_pages(substream);
 	return 0;
 }
-
 
 /*
  * set up the table pointer
@@ -1137,7 +1129,6 @@ static int snd_via8233_capture_prepare(struct snd_pcm_substream *substream)
 	return 0;
 }
 
-
 /*
  * pcm hardware definition, identical for both playback and capture
  */
@@ -1161,7 +1152,6 @@ static struct snd_pcm_hardware snd_via82xx_hw =
 	.periods_max =		VIA_TABLE_SIZE / 2,
 	.fifo_size =		0,
 };
-
 
 /*
  * open callback skeleton
@@ -1214,7 +1204,6 @@ static int snd_via82xx_pcm_open(struct via82xx *chip, struct viadev *viadev,
 
 	return 0;
 }
-
 
 /*
  * open callback for playback on via686
@@ -1345,7 +1334,6 @@ static int snd_via8233_playback_close(struct snd_pcm_substream *substream)
 	return snd_via82xx_pcm_close(substream);
 }
 
-
 /* via686 playback callbacks */
 static struct snd_pcm_ops snd_via686_playback_ops = {
 	.open =		snd_via686_playback_open,
@@ -1410,7 +1398,6 @@ static struct snd_pcm_ops snd_via8233_capture_ops = {
 	.pointer =	snd_via8233_pcm_pointer,
 	.page =		snd_pcm_sgbuf_ops_page,
 };
-
 
 static void init_viadev(struct via82xx *chip, int idx, unsigned int reg_offset,
 			int shadow_pos, int direction)
@@ -1556,7 +1543,6 @@ static int __devinit snd_via686_pcm_new(struct via82xx *chip)
 					      64*1024, VIA_MAX_BUFSIZE);
 	return 0;
 }
-
 
 /*
  *  Mixer part
@@ -1949,7 +1935,6 @@ static inline int snd_via686_create_gameport(struct via82xx *chip, unsigned char
 static inline void snd_via686_free_gameport(struct via82xx *chip) { }
 #endif
 
-
 /*
  *
  */
@@ -2083,7 +2068,6 @@ static int __devinit snd_via686_init_misc(struct via82xx *chip)
 
 	return 0;
 }
-
 
 /*
  * proc interface

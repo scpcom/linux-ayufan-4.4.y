@@ -98,7 +98,6 @@ static unsigned int inline norm_maxw(v4l2_std_id norm)
 	return (norm & (V4L2_STD_MN & ~V4L2_STD_PAL_Nc)) ? 720 : 768;
 }
 
-
 static unsigned int inline norm_maxh(v4l2_std_id norm)
 {
 	return (norm & V4L2_STD_625_50) ? 576 : 480;
@@ -435,7 +434,6 @@ struct cx8800_dev {
 	struct pci_dev             *pci;
 	unsigned char              pci_rev,pci_lat;
 
-
 	/* capture queues */
 	struct cx88_dmaqueue       vidq;
 	struct cx88_dmaqueue       vbiq;
@@ -449,7 +447,6 @@ struct cx8800_dev {
 /* ----------------------------------------------------------- */
 /* function 1: audio/alsa stuff                                */
 /* =============> moved to cx88-alsa.c <====================== */
-
 
 /* ----------------------------------------------------------- */
 /* function 2: mpeg stuff                                      */
@@ -611,7 +608,6 @@ extern void cx88_core_put(struct cx88_core *core,
 extern int cx88_start_audio_dma(struct cx88_core *core);
 extern int cx88_stop_audio_dma(struct cx88_core *core);
 
-
 /* ----------------------------------------------------------- */
 /* cx88-vbi.c                                                  */
 
@@ -635,7 +631,6 @@ extern struct videobuf_queue_ops cx8800_vbi_qops;
 /* cx88-i2c.c                                                  */
 
 extern int cx88_i2c_init(struct cx88_core *core, struct pci_dev *pci);
-
 
 /* ----------------------------------------------------------- */
 /* cx88-cards.c                                                */

@@ -65,7 +65,6 @@ static struct pci_device_id rtl8180_pci_id_tbl[] __devinitdata = {
         }
 };
 
-
 static char* ifname = "wlan%d";
 static int hwseqnum = 0;
 static int hwwep = 0;
@@ -78,7 +77,6 @@ MODULE_DEVICE_TABLE(pci, rtl8180_pci_id_tbl);
 MODULE_AUTHOR("Andrea Merello <andreamrl@tiscali.it>");
 MODULE_DESCRIPTION("Linux driver for Realtek RTL8180 / RTL8185 WiFi cards");
 
-
 module_param(ifname, charp, S_IRUGO|S_IWUSR );
 module_param(hwseqnum,int, S_IRUGO|S_IWUSR);
 module_param(hwwep,int, S_IRUGO|S_IWUSR);
@@ -88,7 +86,6 @@ MODULE_PARM_DESC(devname," Net interface name, wlan%d=default");
 MODULE_PARM_DESC(hwseqnum," Try to use hardware 802.11 header sequence numbers. Zero=default");
 MODULE_PARM_DESC(hwwep," Try to use hardware WEP support. Still broken and not available on all cards");
 MODULE_PARM_DESC(channels," Channel bitmask for specific locales. NYI");
-
 
 static int __devinit rtl8180_pci_probe(struct pci_dev *pdev,
 				       const struct pci_device_id *id);
@@ -361,7 +358,6 @@ void rtl8180_proc_init_one(struct net_device *dev)
 		      "/proc/net/r8180/%s/stats-rx\n",
 		      dev->name);
 	}
-
 
 	e = create_proc_read_entry("stats-tx", S_IFREG | S_IRUGO,
 				   priv->dir_dev, proc_get_stats_tx, dev);
@@ -1288,7 +1284,6 @@ short alloc_rx_desc_ring(struct net_device *dev, u16 bufsize, int count)
 	return 0;
 }
 
-
 void set_nic_rxring(struct net_device *dev)
 {
 	u8 pgreg;
@@ -1866,7 +1861,6 @@ drop: // this is used when we have not enought mem
 		priv->rxbuffer=(priv->rxbuffer->next);
 	}
 }
-
 
 void rtl8180_dma_kick(struct net_device *dev, int priority)
 {
@@ -3215,7 +3209,6 @@ void rtl8180_set_hw_wep(struct net_device *dev)
 	      read_nic_dword(dev,KEY0+4+4),read_nic_dword(dev,KEY0+4),
 	      read_nic_dword(dev,KEY0));
 }
-
 
 void rtl8185_rf_pins_enable(struct net_device *dev)
 {

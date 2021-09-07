@@ -62,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-
 #ifndef __INCmvCtrlEnvAsmh
 #define __INCmvCtrlEnvAsmh
 #include "pex/mvPexRegs.h"
@@ -93,6 +92,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         /* Read device revision */			\
         MV_REG_READ_ASM(toReg, tmpReg, PEX_CFG_DIRECT_ACCESS(0,PEX_CLASS_CODE_AND_REVISION_ID));\
         and     toReg, toReg, PXCCARI_REVID_MASK_AS                  /* Mask for calss ID */
-
 
 #endif /* __INCmvCtrlEnvAsmh */

@@ -150,4 +150,3 @@ void __init init_IRQ(void)
 		intc_irq_set_type(irq, 0);
 	}
 }
-

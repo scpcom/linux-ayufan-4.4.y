@@ -132,7 +132,6 @@ struct snd_interwave {
 #endif
 };
 
-
 #ifdef CONFIG_PNP
 static int isa_registered;
 static int pnp_registered;
@@ -162,7 +161,6 @@ static struct pnp_card_device_id snd_interwave_pnpids[] = {
 MODULE_DEVICE_TABLE(pnp_card, snd_interwave_pnpids);
 
 #endif /* CONFIG_PNP */
-
 
 #ifdef SNDRV_STB
 static void snd_interwave_i2c_setlines(struct snd_i2c_bus *bus, int ctrl, int data)

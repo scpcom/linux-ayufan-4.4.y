@@ -52,7 +52,6 @@
 #include "sam9_smc.h"
 #include "generic.h"
 
-
 static void __init ek_map_io(void)
 {
 	/* Initialize processor: 18.432 MHz crystal */
@@ -72,7 +71,6 @@ static void __init ek_init_irq(void)
 {
 	at91sam9261_init_interrupts(NULL);
 }
-
 
 /*
  * DM9000 ethernet device
@@ -149,14 +147,12 @@ static void __init ek_add_device_dm9000(void)
 static void __init ek_add_device_dm9000(void) {}
 #endif /* CONFIG_DM9000 */
 
-
 /*
  * USB Host Port
  */
 static struct at91_usbh_data __initdata ek_usbh_data = {
 	.ports		= 2,
 };
-
 
 /*
  * USB Device Port
@@ -165,7 +161,6 @@ static struct at91_udc_data __initdata ek_udc_data = {
 	.vbus_pin	= AT91_PIN_PB29,
 	.pullup_pin	= 0,		/* pull-up driven by UDC */
 };
-
 
 /*
  * MCI (SD/MMC)
@@ -176,7 +171,6 @@ static struct at91_mmc_data __initdata ek_mmc_data = {
 //	.wp_pin		= ... not connected
 //	.vcc_pin	= ... not connected
 };
-
 
 /*
  * NAND flash
@@ -245,7 +239,6 @@ static void __init ek_add_device_nand(void)
 
 	at91_add_device_nand(&ek_nand_data);
 }
-
 
 /*
  * ADS7846 Touchscreen
@@ -355,7 +348,6 @@ static struct spi_board_info ek_spi_devices[] = {
 	},
 #endif
 };
-
 
 /*
  * LCD Controller
@@ -483,7 +475,6 @@ static struct atmel_lcdfb_info __initdata ek_lcdc_data = {
 #else
 static struct atmel_lcdfb_info __initdata ek_lcdc_data;
 #endif
-
 
 /*
  * GPIO Buttons

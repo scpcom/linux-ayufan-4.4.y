@@ -114,7 +114,6 @@ enum snoop_when {
 
 #define	MAX_USBFS_BUFFER_SIZE	16384
 
-
 static int connected(struct dev_state *ps)
 {
 	return (!list_empty(&ps->list) &&

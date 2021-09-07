@@ -821,5 +821,4 @@ union uvh_si_alias2_overlay_config_u {
     } s;
 };
 
-
 #endif /* _ASM_IA64_UV_UV_MMRS_H */

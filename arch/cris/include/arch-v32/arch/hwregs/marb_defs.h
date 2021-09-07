@@ -225,7 +225,6 @@ typedef struct {
 #define REG_RD_ADDR_marb_rw_no_snoop_rq 836
 #define REG_WR_ADDR_marb_rw_no_snoop_rq 836
 
-
 /* Constants */
 enum {
   regk_marb_cpud                           = 0x0000000b,
@@ -463,7 +462,6 @@ typedef unsigned int reg_marb_bp_r_brk_size;
 typedef unsigned int reg_marb_bp_rw_ack;
 #define REG_RD_ADDR_marb_bp_rw_ack 40
 #define REG_WR_ADDR_marb_bp_rw_ack 40
-
 
 /* Constants */
 enum {

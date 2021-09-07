@@ -20,7 +20,6 @@
  * 2002-07 Benny Sjostrand benny@hostmobility.com
  */
 
-
 #include <asm/io.h>
 #include <linux/delay.h>
 #include <linux/pm.h>
@@ -227,7 +226,6 @@ void cs46xx_dsp_remove_scb (struct snd_cs46xx *chip, struct dsp_scb_descriptor *
 #endif
 }
 
-
 #ifdef CONFIG_PROC_FS
 void cs46xx_dsp_proc_free_scb_desc (struct dsp_scb_descriptor * scb)
 {
@@ -309,14 +307,12 @@ _dsp_create_generic_scb (struct snd_cs46xx *chip, char * name, u32 * scb_data, u
 
 	scb = cs46xx_dsp_create_scb(chip,name,scb_data,dest);
 
-
 	scb->sub_list_ptr = ins->the_null_scb;
 	scb->next_scb_ptr = ins->the_null_scb;
 
 	scb->parent_scb_ptr = parent_scb;
 	scb->task_entry = task_entry;
 
-  
 	/* update parent SCB */
 	if (scb->parent_scb_ptr) {
 #if 0
@@ -349,7 +345,6 @@ _dsp_create_generic_scb (struct snd_cs46xx *chip, char * name, u32 * scb_data, u
 
 		spin_unlock_irqrestore(&chip->reg_lock, flags);
 	}
-
 
 	cs46xx_dsp_proc_register_scb_desc (chip,scb);
 
@@ -409,7 +404,6 @@ cs46xx_dsp_create_timing_master_scb (struct snd_cs46xx *chip)
 	return scb;
 }
 
-
 struct dsp_scb_descriptor * 
 cs46xx_dsp_create_codec_out_scb(struct snd_cs46xx * chip, char * codec_name,
                                 u16 channel_disp, u16 fifo_addr, u16 child_scb_addr,
@@ -439,7 +433,6 @@ cs46xx_dsp_create_codec_out_scb(struct snd_cs46xx * chip, char * codec_name,
 		0x0000,0x0080,          /* (!AC97!) COexpVolChangeRate:COscaleShiftCount */
 		0,child_scb_addr        /* COreserved - need child scb to work with rom code */
 	};
-  
   
 	scb = cs46xx_dsp_create_generic_scb(chip,codec_name,(u32 *)&codec_out_scb,
 					    dest,"S16_CODECOUTPUTTASK",parent_scb,
@@ -491,7 +484,6 @@ cs46xx_dsp_create_codec_in_scb(struct snd_cs46xx * chip, char * codec_name,
 					    scb_child_type);
 	return scb;
 }
-
 
 static struct dsp_scb_descriptor * 
 cs46xx_dsp_create_pcm_reader_scb(struct snd_cs46xx * chip, char * scb_name,
@@ -693,7 +685,6 @@ cs46xx_dsp_create_src_task_scb(struct snd_cs46xx * chip, char * scb_name,
 						      scb_child_type);
 		}
 
-
 	}
 
 	return scb;
@@ -741,7 +732,6 @@ cs46xx_dsp_create_filter_scb(struct snd_cs46xx * chip, char * scb_name,
 		.b2_left             = 0x0e38,
 	};
 
-
 	scb = cs46xx_dsp_create_generic_scb(chip,scb_name,(u32 *)&filter_scb,
 					    dest,"FILTERTASK",parent_scb,
 					    scb_child_type);
@@ -782,13 +772,11 @@ cs46xx_dsp_create_mix_only_scb(struct snd_cs46xx * chip, char * scb_name,
 		}
 	};
 
-
 	scb = cs46xx_dsp_create_generic_scb(chip,scb_name,(u32 *)&master_mix_scb,
 					    dest,"S16_MIX",parent_scb,
 					    scb_child_type);
 	return scb;
 }
-
 
 struct dsp_scb_descriptor * 
 cs46xx_dsp_create_mix_to_ostream_scb(struct snd_cs46xx * chip, char * scb_name,
@@ -834,7 +822,6 @@ cs46xx_dsp_create_mix_to_ostream_scb(struct snd_cs46xx * chip, char * scb_name,
 		0xFFFF,0
 	};
 
-
 	scb = cs46xx_dsp_create_generic_scb(chip,scb_name,(u32 *)&mix2_ostream_scb,
 				
 	    dest,"S16_MIX_TO_OSTREAM",parent_scb,
@@ -842,7 +829,6 @@ cs46xx_dsp_create_mix_to_ostream_scb(struct snd_cs46xx * chip, char * scb_name,
   
 	return scb;
 }
-
 
 struct dsp_scb_descriptor * 
 cs46xx_dsp_create_vari_decimate_scb(struct snd_cs46xx * chip,char * scb_name,
@@ -887,7 +873,6 @@ cs46xx_dsp_create_vari_decimate_scb(struct snd_cs46xx * chip,char * scb_name,
 	return scb;
 }
 
-
 static struct dsp_scb_descriptor * 
 cs46xx_dsp_create_pcm_serial_input_scb(struct snd_cs46xx * chip, char * scb_name, u32 dest,
                                        struct dsp_scb_descriptor * input_scb,
@@ -896,7 +881,6 @@ cs46xx_dsp_create_pcm_serial_input_scb(struct snd_cs46xx * chip, char * scb_name
 {
 
 	struct dsp_scb_descriptor * scb;
-
 
 	struct dsp_pcm_serial_input_scb pcm_serial_input_scb = {
 		{ 0,
@@ -929,7 +913,6 @@ cs46xx_dsp_create_pcm_serial_input_scb(struct snd_cs46xx * chip, char * scb_name
 					    scb_child_type);
 	return scb;
 }
-
 
 static struct dsp_scb_descriptor * 
 cs46xx_dsp_create_asynch_fg_tx_scb(struct snd_cs46xx * chip, char * scb_name, u32 dest,
@@ -976,7 +959,6 @@ cs46xx_dsp_create_asynch_fg_tx_scb(struct snd_cs46xx * chip, char * scb_name, u3
 
 	return scb;
 }
-
 
 struct dsp_scb_descriptor * 
 cs46xx_dsp_create_asynch_fg_rx_scb(struct snd_cs46xx * chip, char * scb_name, u32 dest,
@@ -1026,7 +1008,6 @@ cs46xx_dsp_create_asynch_fg_rx_scb(struct snd_cs46xx * chip, char * scb_name, u3
 	return scb;
 }
 
-
 #if 0 /* not used */
 struct dsp_scb_descriptor * 
 cs46xx_dsp_create_output_snoop_scb(struct snd_cs46xx * chip, char * scb_name, u32 dest,
@@ -1068,7 +1049,6 @@ cs46xx_dsp_create_output_snoop_scb(struct snd_cs46xx * chip, char * scb_name, u3
 	return scb;
 }
 #endif /* not used */
-
 
 struct dsp_scb_descriptor * 
 cs46xx_dsp_create_spio_write_scb(struct snd_cs46xx * chip, char * scb_name, u32 dest,
@@ -1351,7 +1331,6 @@ cs46xx_dsp_create_pcm_channel (struct snd_cs46xx * chip,
 
 		ins->nsrc_scb ++;
 	} 
-  
   
 	snprintf (scb_name,DSP_MAX_SCB_NAME,"PCMReader_SCB%d",pcm_index);
 
@@ -1675,7 +1654,6 @@ int cs46xx_dsp_enable_spdif_out (struct snd_cs46xx *chip)
 									  ins->asynch_tx_scb,
 									  SCB_ON_PARENT_SUBLIST_SCB);
   
-	
 	if (!ins->spdif_pcm_input_scb) return -ENOMEM;
 
 	/* monitor state */
@@ -1717,7 +1695,6 @@ int  cs46xx_dsp_disable_spdif_out (struct snd_cs46xx *chip)
 	/* monitor state */
 	ins->spdif_status_out  &= ~DSP_SPDIF_STATUS_OUTPUT_ENABLED;
 
-
 	return 0;
 }
 
@@ -1744,7 +1721,6 @@ int cs46xx_iec958_pre_open (struct snd_cs46xx *chip)
 								SPDIFO_IP_OUTPUT_BUFFER1,
 								ins->master_mix_scb,
 								SCB_ON_PARENT_NEXT_SCB);
-
 
 	/* set spdif channel status value for streaming */
 	cs46xx_poke_via_dsp (chip,SP_SPDOUT_CSUV, ins->spdif_csuv_stream);

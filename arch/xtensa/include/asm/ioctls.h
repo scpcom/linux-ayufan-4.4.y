@@ -82,7 +82,6 @@
 # define TIOCPKT_NOSTOP		16
 # define TIOCPKT_DOSTOP		32
 
-
 #define TIOCNOTTY	_IO('T', 34)
 #define TIOCSETD	_IOW('T', 35, int)
 #define TIOCGETD	_IOR('T', 36, int)

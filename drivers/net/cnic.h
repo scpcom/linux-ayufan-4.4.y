@@ -8,7 +8,6 @@
  *
  */
 
-
 #ifndef CNIC_H
 #define CNIC_H
 
@@ -297,4 +296,3 @@ struct bnx2x_bd_chain_next {
 #define CDU_REGION_NUMBER_UCM_AG 4
 
 #endif
-

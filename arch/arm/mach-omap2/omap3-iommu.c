@@ -19,7 +19,6 @@
 #define OMAP3_MMU1_IRQ	24
 #define OMAP3_MMU2_IRQ	28
 
-
 static unsigned long iommu_base[] __initdata = {
 	OMAP3_MMU1_BASE,
 	OMAP3_MMU2_BASE,

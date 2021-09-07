@@ -36,7 +36,6 @@ char * __init prom_getcmdline(void)
 	return &(arcs_cmdline[0]);
 }
 
-
 void  __init prom_init_cmdline(void)
 {
 	char *cp;

@@ -751,7 +751,6 @@ GT_STATUS sysEnable( GT_QD_DEV *dev)
     return driverEnable(dev);
 }
 
-
 /*******************************************************************************
 * qdUnloadDriver
 *
@@ -847,7 +846,6 @@ GT_STATUS qdUnloadDriver
 	return GT_OK;
 }
 
-
 /*******************************************************************************
 * gtRegister
 *
@@ -892,5 +890,3 @@ static GT_BOOL gtRegister(GT_QD_DEV *dev, BSP_FUNCTIONS* pBSPFunctions)
 	
 	return GT_TRUE;
 }
-
-

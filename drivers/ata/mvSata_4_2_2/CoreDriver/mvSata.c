@@ -119,7 +119,6 @@ static unsigned long int g_jiffies_lastwake;
 /* for the command result */
 #define MV_EDMA_REQUEST_COMMANDS_NUM            11
 
-
 /* Fix the watermark to the following default value */
 #define MV_WATER_MARK_FIX                       29 /* write 5'b11101 to bits 12:8*/
 
@@ -199,7 +198,6 @@ do{                                                                 \
 
 #define MV_CHANNEL_INDEX(unit, port)    (((unit) << 2) | (port))
 
-
 /* Typedefs */
 
 typedef struct mvDmaRequestQueueEntry
@@ -243,7 +241,6 @@ typedef struct mvDmaResponseQueueEntry
     volatile MV_U16 responseFlags;
     volatile MV_U32 timeStamp;
 } MV_DMA_RESPONSE_QUEUE_ENTRY;
-
 
 /* local functions  */
 
@@ -475,15 +472,11 @@ static void checkIogBit(MV_SATA_ADAPTER *pAdapter,
 static MV_BOOLEAN iogReset(MV_SATA_ADAPTER *pAdapter);
 #endif
 
-
 /* Calculate the base address of the registers for a SATA channel */
 MV_U32 edmaRegOffst[MV_SATA_CHANNELS_NUM] = {0x22000, 0x24000, 0x26000, 0x28000,
 0x32000, 0x34000, 0x36000, 0x38000};
 
 #define getEdmaRegOffset(x) edmaRegOffst[(x)]
-
-
-
 
 MV_BOOLEAN waitForBusyAfterHReset(MV_SATA_ADAPTER *pAdapter,
                                   MV_U8 channelIndex)
@@ -511,7 +504,6 @@ MV_BOOLEAN waitForBusyAfterHReset(MV_SATA_ADAPTER *pAdapter,
 
 static void unmaskEdmaInterrupts(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex)
 {
-
 
     if (pAdapter->sataAdapterGeneration >= MV_SATA_GEN_II)
     {
@@ -1424,7 +1416,6 @@ static void handleEdmaResponse(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex,
     }
 }
 
-
 #ifdef MV_SATA_C2C_COMM
 /*******************************************************************************
 * handleBmDmaInterrupt - handle DMA interrupt received for a given channel
@@ -1505,7 +1496,6 @@ static void handleBmDMAInterrupt(MV_SATA_ADAPTER *pAdapter,
     }
 }
 #endif
-
 
 /*******************************************************************************
 * handleEdmaInterrupt - handle EDMA interrupt receivd for a given channel
@@ -2144,7 +2134,6 @@ static MV_BOOLEAN handleAsyncNotify(MV_SATA_ADAPTER *pAdapter,
             ((regVal1 & MV_BIT31) == MV_BIT31))
         {
 
-
             mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG_INTERRUPTS,
                      "%d %d: PM asynchronous notification interrupt.\n",
                      pAdapter->adapterId, channelIndex);
@@ -2325,7 +2314,6 @@ static MV_VOID handlePCIErrorInterrupt(MV_SATA_ADAPTER *pAdapter)
         _dumpPCIRegs(pAdapter);
     }
 
-
     {
         MV_U8   i;
 
@@ -2427,8 +2415,6 @@ static void handleC2CInterrupt(MV_SATA_CHANNEL *pSataChannel)
     }
 }
 #endif
-
-
 
 static void handleDeviceInterrupt(MV_SATA_ADAPTER *pAdapter, MV_U8 sataUnit,
                                   MV_U8 port)
@@ -3096,7 +3082,6 @@ static void completePacketCommand(MV_SATA_CHANNEL *pSataChannel,
     }
     pSataChannel->recoveredErrorsCounter = 0;
     
-
     removeCommand(pSataChannel,pCommandEntry);
 
     pParams->callBack(pSataChannel->mvSataAdapter, pSataChannel->channelNumber,
@@ -3414,7 +3399,6 @@ static void flushDmaQueue(MV_SATA_CHANNEL *pSataChannel,MV_FLUSH_TYPE flushType,
 {
     mvSataCommandCompletionCallBack_t callBackFunc;
     int i;
-
 
     mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG_ERROR, "%d %d: Flush DMA, type=%s, commands"
              " %d (on EDMA %d)\n", pSataChannel->mvSataAdapter->adapterId,
@@ -3746,7 +3730,6 @@ static void _channelHardReset(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex)
     /* 2. Wait 25uSeconds*/
     mvMicroSecondsDelay(pAdapter, MV_HARD_RESET_WAIT_ASSERT);
 
-
     /* 3. Clear ATA reset bit*/
     MV_REG_WRITE_DWORD(pAdapter->adapterIoBaseAddress, EdmaCommandOffset, 0);
     MV_REG_READ_DWORD(pAdapter->adapterIoBaseAddress, EdmaCommandOffset);
@@ -3968,7 +3951,6 @@ void SYNOdumpAtaDeviceRegisters(MV_SATA_ADAPTER *pAdapter,
     pRegisters->statusRegister = MV_REG_READ_BYTE(ioBaseAddr,
                                                   eDmaRegsOffset + MV_ATA_DEVICE_STATUS_REG_OFFSET);
 
-
 }
 
 /**
@@ -4109,10 +4091,6 @@ static void _establishSataCommAll(MV_SATA_ADAPTER *pAdapter)
     }
 }
 #endif //MY_ABC_HERE
-
-
-
-
 
 void _setActivePMPort(MV_SATA_CHANNEL *pSataChannel, MV_U8 PMPort)
 {
@@ -4303,7 +4281,6 @@ static void revertFlashInterfaceRegs (MV_SATA_ADAPTER *pAdapter)
                                      MV_FLASH_GPIO_PORT_CONTROL_OFFSET);
         regTemp &= 0x3;
         regTemp |= (MV_BIT5 | MV_BIT6);
-
 
         MV_REG_WRITE_DWORD (pAdapter->adapterIoBaseAddress,
                             MV_FLASH_GPIO_PORT_CONTROL_OFFSET, regTemp);
@@ -4632,7 +4609,6 @@ void disableSaDevInterrupts(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex)
 {
     MV_U32      maskBit = 0;
 
-
     maskBit = SaDevInterrutpBit(channelIndex);
     mvOsSemTake(&pAdapter->interruptsMaskSem);
     pAdapter->mainMask &= ~maskBit;
@@ -4791,7 +4767,6 @@ static void EdmaReqQueueInsert(MV_SATA_CHANNEL *pSataChannel,
                                MV_UDMA_COMMAND_PARAMS  *pUdmaParams)
 {
     MV_BUS_ADDR_T   ioBaseAddr = pSataChannel->mvSataAdapter->adapterIoBaseAddress;
-
 
     mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG|MV_DEBUG_UDMA_COMMAND, " %d %d: Insert Edma "
              "Request. PMPort %x host tag = 0x%x device tag = 0x%x\n",
@@ -5001,7 +4976,6 @@ static MV_BOOLEAN isGoodCompletionsExpected(MV_SATA_CHANNEL *pSataChannel)
         {
             rspInPtr = getRegField(rspInReg, 3, 5);
         }
-
 
         if (pSataChannel->rspOutPtr != rspInPtr)
         {
@@ -5294,8 +5268,6 @@ static MV_VOID enterRequestSenseState(MV_SATA_CHANNEL *pSataChannel)
         handlePortError(pSataChannel);
     }
 }
-
-
 
 /* this function used for NCQ error handling, called from the ReadLogExt command
     callback function, it makes sanity checks for the command output and
@@ -5926,7 +5898,6 @@ static MV_BOOLEAN sendNoneUdmaCommand(MV_SATA_CHANNEL *pSataChannel,
                                   MV_ATA_DEVICE_PIO_DATA_REG_OFFSET,
                                   *pParams->bufPtr++);
                 MV_CPU_WRITE_BUFFER_FLUSH();
-
 
                 ATAstatus = MV_REG_READ_BYTE(ioBaseAddr, eDmaRegsOffset +
                                              MV_ATA_DEVICE_STATUS_REG_OFFSET);
@@ -6929,7 +6900,6 @@ static MV_BOOLEAN _checkSStatusAfterHReset(MV_SATA_ADAPTER* pAdapter,
     }
 }
 
-
 /*******************************************************************************
 * mvSataChannelHardReset - issue channel SATA HARD reset.
 *
@@ -6983,7 +6953,6 @@ MV_BOOLEAN mvSataChannelHardReset(MV_SATA_ADAPTER *pAdapter,
     }
     mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG_ERROR, " %d %d: Issue HRST\n", pAdapter->adapterId,
              channelIndex);
-
 
     _channelHardReset(pAdapter, channelIndex);
     _resetBmDma(pAdapter, channelIndex);
@@ -7229,7 +7198,6 @@ MV_BOOLEAN mvSataConfigEdmaMode(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex,
     {
         val |= (MV_EDMA_CONFIG_BURST_SIZE_EXT_MASK | MV_BIT13);
     }
-
 
     if (pAdapter->sataAdapterGeneration == MV_SATA_GEN_IIE)
     {
@@ -7779,7 +7747,6 @@ m"
             return MV_FALSE;
         }
 
-
         pAdapter->pre[channelIndex] = pre;
         pAdapter->signalAmps[channelIndex] = signalAmps;
         regAddr = getEdmaRegOffset(channelIndex) +
@@ -7899,7 +7866,6 @@ MV_BOOLEAN mvSataChannelPhyPowerOn(MV_SATA_ADAPTER *pAdapter,
         regVal &= 0x00000FFF;
         /* regVal |= MV_BIT12;*/
         regVal |= 0x009B1000;
-
 
         regVal &= ~(MV_BIT9);
         MV_REG_WRITE_DWORD (pAdapter->adapterIoBaseAddress,
@@ -8044,12 +8010,6 @@ MV_BOOLEAN mvSataChannelFarLoopbackDiagnostic(MV_SATA_ADAPTER *pAdapter,
                 result =  MV_FALSE;
             }
             _fixPhyParams(pAdapter, channelIndex);
-
-
-
-
-
-
 
         }
     }
@@ -8448,12 +8408,6 @@ SKIP:
     mvOsSemRelease(&pSataChannel->semaphore);
     return MV_QUEUE_COMMAND_RESULT_OK;
 
-
-
-
-
-
-
 }
 /*******************************************************************************
 * mvSataSetInterruptsScheme - Modify interrupt scheme
@@ -8669,7 +8623,6 @@ MV_BOOLEAN mvSataInterruptServiceRoutine(MV_SATA_ADAPTER *pAdapter)
                     handleDeviceInterrupt(pAdapter, sataUnit, port);
                 }
 
-
                 mainCause >>= 2;
                 unitRspInPtr >>= 8;
             }
@@ -8745,7 +8698,6 @@ MV_BOOLEAN mvSataUnmaskAdapterInterrupt(MV_SATA_ADAPTER *pAdapter)
     mvOsSemRelease(&pAdapter->interruptsMaskSem);
     return MV_TRUE;
 }
-
 
 /*******************************************************************************
 * mvSataEnableStaggeredSpinUpAll - Enables staggared spin-up of all SATA channels
@@ -9345,7 +9297,6 @@ static void activateBMDmaMode(MV_SATA_ADAPTER *pAdapter,
         _setRegBits(ioBaseAddr, pSataChannel->eDmaRegsOffset + 0x6C, MV_BIT0);
     }
     
-    
     MV_REG_WRITE_DWORD (ioBaseAddr, pSataChannel->eDmaRegsOffset +
                         MV_BMDMA_COMMAND_OFFSET, 0);
            mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG,
@@ -9451,7 +9402,6 @@ MV_BOOLEAN mvSataC2CInit (MV_SATA_ADAPTER *pAdapter,
     /* regVal |= MV_BIT12;*/
     regVal |= 0x009B1000;
 
-
     if (mvSataC2CMode == MV_SATA_C2C_MODE_INITIATOR)
     {
         regVal |= MV_BIT10; /* Initiator */
@@ -9484,7 +9434,6 @@ MV_BOOLEAN mvSataC2CInit (MV_SATA_ADAPTER *pAdapter,
     mvOsSemRelease(&pSataChannel->semaphore);
     return MV_TRUE;
 }
-
 
 /*******************************************************************************
 * mvSataC2CStop - Stop channel to channel communication mode
@@ -9562,8 +9511,6 @@ MV_BOOLEAN mvSataC2CStop (MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex)
     mvOsSemRelease(&pSataChannel->semaphore);
     return MV_TRUE;
 }
-
-
 
 /*******************************************************************************
 * mvSataC2CSendRegisterDeviceToHostFIS - sends Register device to host FIS
@@ -9657,8 +9604,6 @@ MV_BOOLEAN  mvSataC2CSendRegisterDeviceToHostFIS(
     mvOsSemRelease(&pSataChannel->semaphore);
     return res;
 }
-
-
 
 /*******************************************************************************
 * mvSataC2CActivateBmDma - activate B-M DMA
@@ -9758,7 +9703,6 @@ MV_BOOLEAN  mvSataC2CActivateBmDma(MV_SATA_ADAPTER *pAdapter,
     mvOsSemRelease(&pSataChannel->semaphore);
     return res;
 }
-
 
 /*******************************************************************************
 * mvSataC2CResetBmDma - reset B-M DMA
@@ -9909,7 +9853,6 @@ static MV_BOOLEAN sendVendorUniqueFIS(MV_SATA_ADAPTER *pAdapter,
     MV_REG_WRITE_DWORD(ioBaseAddr, pSataChannel->eDmaRegsOffset +
                        MV_SATA_II_VENDOR_UQ_REG_OFFSET,
                        vendorUniqueBuffer[i - 1]);
-
 
     /* polling with timeout*/
     for (i = 0;  i < 200; i++)
@@ -10201,7 +10144,6 @@ static MV_U8 readIoGranularityCount(MV_SATA_ADAPTER *pAdapter,
     return value;
 }
 
-
 /*******************************************************************************
 * checkIogBit - Check bit of I/O granularity cause register.
 *
@@ -10355,7 +10297,6 @@ static void iogInterrupt(MV_SATA_ADAPTER *pAdapter,
     }
 }
 
-
 /*******************************************************************************
 * iogReset - reset all settings in HW related to I/O granularity.
 *
@@ -10409,8 +10350,6 @@ static MV_BOOLEAN iogReset(MV_SATA_ADAPTER *pAdapter)
     mvOsSemRelease(&pAdapter->iogSemaphore);
 }
 
-
-
 #endif
 static MV_U32 getRegField(MV_U32 regVal, MV_U32 fieldOff, MV_U32 bitsNum)
 {
@@ -10436,7 +10375,6 @@ void _dumpPCIRegs(MV_SATA_ADAPTER *pAdapter)
     }
     mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG_ERROR, "%d :Dump PCI Regs\n",
              pAdapter->adapterId);
-
 
     mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG_ERROR, "%-25s  %04x %08x\n",
              "Main interrupt Cause",pAdapter->mainCauseOffset,
@@ -10585,10 +10523,6 @@ void _dumpEDMARegs(MV_SATA_ADAPTER *pMvSataAdapter, MV_U8 channelIndex)
 
     }
 
-
-
-
-
 }
 
 void _dumpChannelQueues(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex)
@@ -10614,7 +10548,6 @@ void _dumpChannelQueues(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex)
                  pAdapter->adapterId, channelIndex);
         return ;
     }
-
 
     mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG_ERROR, "Request Qeueu Info:\n");
     mvLogMsg(MV_CORE_DRIVER_LOG_ID, MV_DEBUG_ERROR, " virt addr %p:\n",
@@ -10740,9 +10673,3 @@ void _printATARegs(MV_STORAGE_DEVICE_REGISTERS   *pDeviceRegs)
 }
 
 #endif /*MV_LOGGER*/
-
-
-
-
-
-

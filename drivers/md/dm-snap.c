@@ -1223,7 +1223,6 @@ static int snapshot_iterate_devices(struct dm_target *ti,
 	return fn(ti, snap->origin, 0, ti->len, data);
 }
 
-
 /*-----------------------------------------------------------------
  * Origin methods
  *---------------------------------------------------------------*/

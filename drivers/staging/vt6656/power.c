@@ -50,18 +50,13 @@
 
 /*---------------------  Static Definitions -------------------------*/
 
-
-
-
 /*---------------------  Static Classes  ----------------------------*/
 
 /*---------------------  Static Variables  --------------------------*/
 static int          msglevel                =MSG_LEVEL_INFO;
 /*---------------------  Static Functions  --------------------------*/
 
-
 /*---------------------  Export Variables  --------------------------*/
-
 
 /*---------------------  Export Functions  --------------------------*/
 
@@ -74,7 +69,6 @@ static int          msglevel                =MSG_LEVEL_INFO;
  *    None.
  *
 -*/
-
 
 VOID
 PSvEnablePowerSaving(
@@ -105,7 +99,6 @@ PSvEnablePowerSaving(
 
     //Warren:MUST turn on this once before turn on AUTOSLEEP ,or the AUTOSLEEP doesn't work
     MACvRegBitsOn(pDevice, MAC_REG_PSCTL, PSCTL_GO2DOZE);
-
 
     if (wListenInterval >= 2) {
 
@@ -139,11 +132,6 @@ PSvEnablePowerSaving(
     return;
 }
 
-
-
-
-
-
 /*+
  *
  * Routine Description:
@@ -161,7 +149,6 @@ PSvDisablePowerSaving(
 {
     PSDevice        pDevice = (PSDevice)hDeviceContext;
 //    PSMgmtObject    pMgmt = &(pDevice->sMgmtObj);
-
 
     // disable power saving hw function
     CONTROLnsRequestOut(pDevice,
@@ -187,7 +174,6 @@ PSvDisablePowerSaving(
     return;
 }
 
-
 /*+
  *
  * Routine Description:
@@ -197,7 +183,6 @@ PSvDisablePowerSaving(
  *    TRUE, if power down success
  *    FALSE, if fail
 -*/
-
 
 BOOL
 PSbConsiderPowerDown(
@@ -209,7 +194,6 @@ PSbConsiderPowerDown(
     PSDevice        pDevice = (PSDevice)hDeviceContext;
     PSMgmtObject    pMgmt = &(pDevice->sMgmtObj);
     BYTE            byData;
-
 
     // check if already in Doze mode
     ControlvReadByte(pDevice, MESSAGE_REQUEST_MACREG, MAC_REG_PSCTL, &byData);
@@ -248,8 +232,6 @@ PSbConsiderPowerDown(
     return TRUE;
 }
 
-
-
 /*+
  *
  * Routine Description:
@@ -260,8 +242,6 @@ PSbConsiderPowerDown(
  *
 -*/
 
-
-
 VOID
 PSvSendPSPOLL(
     IN HANDLE hDeviceContext
@@ -270,7 +250,6 @@ PSvSendPSPOLL(
     PSDevice            pDevice = (PSDevice)hDeviceContext;
     PSMgmtObject        pMgmt = &(pDevice->sMgmtObj);
     PSTxMgmtPacket      pTxPacket = NULL;
-
 
     memset(pMgmt->pbyPSPacketPool, 0, sizeof(STxMgmtPacket) + WLAN_HDR_ADDR2_LEN);
     pTxPacket = (PSTxMgmtPacket)pMgmt->pbyPSPacketPool;
@@ -297,8 +276,6 @@ PSvSendPSPOLL(
     return;
 }
 
-
-
 /*+
  *
  * Routine Description:
@@ -316,8 +293,6 @@ PSbSendNullPacket(
     PSDevice            pDevice = (PSDevice)hDeviceContext;
     PSTxMgmtPacket      pTxPacket = NULL;
     PSMgmtObject        pMgmt = &(pDevice->sMgmtObj);
-
-
 
     if (pDevice->bLinkPass == FALSE) {
         return FALSE;
@@ -374,7 +349,6 @@ PSbSendNullPacket(
 //            DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO "Send Null Packet success....\n");
     }
 
-
     return TRUE ;
 }
 
@@ -421,4 +395,3 @@ PSbIsNextTBTTWakeUp(
 
     return bWakeUp;
 }
-

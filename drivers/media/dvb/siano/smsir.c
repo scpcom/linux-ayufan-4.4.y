@@ -19,7 +19,6 @@
 
  ****************************************************************/
 
-
 #include <linux/types.h>
 #include <linux/input.h>
 
@@ -91,7 +90,6 @@ u32 ir_toggle;
 
 #define RC5_PUSH_BIT(dst, bit, pos)	\
 	{ dst <<= 1; dst |= bit; pos++; }
-
 
 static void sms_ir_rc5_event(struct smscore_device_t *coredev,
 				u32 toggle, u32 addr, u32 cmd)
@@ -182,7 +180,6 @@ static void sms_rc5_parse_word(struct smscore_device_t *coredev)
 				RC5_ADDR(rc5_word),
 				RC5_INSTR(rc5_word));
 }
-
 
 static void sms_rc5_accumulate_bits(struct smscore_device_t *coredev,
 		s32 ir_sample)
@@ -298,4 +295,3 @@ void sms_ir_exit(struct smscore_device_t *coredev)
 
 	sms_log("");
 }
-

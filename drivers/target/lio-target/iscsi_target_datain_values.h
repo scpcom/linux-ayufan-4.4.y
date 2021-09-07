@@ -13,4 +13,3 @@ extern iscsi_global_t *iscsi_global;
 extern struct kmem_cache *lio_dr_cache;
 
 #endif   /*** ISCSI_TARGET_DATAIN_VALUES_H ***/
-

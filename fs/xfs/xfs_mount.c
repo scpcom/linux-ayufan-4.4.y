@@ -47,7 +47,6 @@
 
 STATIC void	xfs_unmountfs_wait(xfs_mount_t *);
 
-
 #ifdef HAVE_PERCPU_SB
 STATIC void	xfs_icsb_balance_counter(xfs_mount_t *, xfs_sb_field_t,
 						int);
@@ -196,7 +195,6 @@ xfs_uuid_unmount(
 	ASSERT(i < xfs_uuid_table_size);
 	mutex_unlock(&xfs_uuid_table_mutex);
 }
-
 
 /*
  * Free up the resources associated with a mount structure.  Assume that
@@ -650,7 +648,6 @@ xfs_readsb(xfs_mount_t *mp, int flags)
 	}
 	return error;
 }
-
 
 /*
  * xfs_mount_common
@@ -1558,7 +1555,6 @@ xfs_mod_sb(xfs_trans_t *tp, __int64_t fields)
 	xfs_trans_log_buf(tp, bp, first, last);
 }
 
-
 /*
  * xfs_mod_incore_sb_unlocked() is a utility routine common used to apply
  * a delta to a specified field in the in-core superblock.  Simply
@@ -1945,7 +1941,6 @@ xfs_mount_log_sb(
 	return error;
 }
 
-
 #ifdef HAVE_PERCPU_SB
 /*
  * Per-cpu incore superblock counters
@@ -2138,7 +2133,6 @@ xfs_icsb_unlock_cntr(
 {
 	clear_bit(XFS_ICSB_FLAG_LOCK, &icsbp->icsb_flags);
 }
-
 
 STATIC_INLINE void
 xfs_icsb_lock_all_counters(

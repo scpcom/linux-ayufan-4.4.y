@@ -100,7 +100,6 @@ module_param(oos_shadow, bool, 0644);
 #define PT64_INDEX(address, level)\
 	(((address) >> PT64_LEVEL_SHIFT(level)) & ((1 << PT64_LEVEL_BITS) - 1))
 
-
 #define PT32_LEVEL_BITS 10
 
 #define PT32_LEVEL_SHIFT(level) \
@@ -114,7 +113,6 @@ module_param(oos_shadow, bool, 0644);
 
 #define PT32_INDEX(address, level)\
 	(((address) >> PT32_LEVEL_SHIFT(level)) & ((1 << PT32_LEVEL_BITS) - 1))
-
 
 #define PT64_BASE_ADDR_MASK (((1ULL << 52) - 1) & ~(u64)(PAGE_SIZE-1))
 #define PT64_DIR_BASE_ADDR_MASK \
@@ -171,7 +169,6 @@ struct kvm_shadow_walk_iterator {
 	for (shadow_walk_init(&(_walker), _vcpu, _addr);	\
 	     shadow_walk_okay(&(_walker));			\
 	     shadow_walk_next(&(_walker)))
-
 
 struct kvm_unsync_walk {
 	int (*entry) (struct kvm_mmu_page *sp, struct kvm_unsync_walk *walk);
@@ -1013,7 +1010,6 @@ static void mmu_page_remove_parent_pte(struct kvm_mmu_page *sp,
 		}
 	BUG();
 }
-
 
 static void mmu_parent_walk(struct kvm_vcpu *vcpu, struct kvm_mmu_page *sp,
 			    mmu_parent_walk_fn fn)
@@ -2016,7 +2012,6 @@ static int nonpaging_map(struct kvm_vcpu *vcpu, gva_t v, int write, gfn_t gfn)
 	r = __direct_map(vcpu, v, write, level, gfn, pfn);
 	spin_unlock(&vcpu->kvm->mmu_lock);
 
-
 	return r;
 
 out_unlock:
@@ -2024,7 +2019,6 @@ out_unlock:
 	kvm_release_pfn_clean(pfn);
 	return 0;
 }
-
 
 static void mmu_free_roots(struct kvm_vcpu *vcpu)
 {
@@ -3179,7 +3173,6 @@ static gva_t canonicalize(gva_t gva)
 #endif
 	return gva;
 }
-
 
 typedef void (*inspect_spte_fn) (struct kvm *kvm, struct kvm_mmu_page *sp,
 				 u64 *sptep);

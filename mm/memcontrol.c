@@ -736,7 +736,6 @@ static void mem_cgroup_lru_add_after_commit_swapcache(struct page *page)
 	spin_unlock_irqrestore(&zone->lru_lock, flags);
 }
 
-
 void mem_cgroup_move_lists(struct page *page,
 			   enum lru_list from, enum lru_list to)
 {
@@ -1015,7 +1014,6 @@ void mem_cgroup_print_oom_info(struct mem_cgroup *memcg, struct task_struct *p)
 
 	if (!memcg)
 		return;
-
 
 	rcu_read_lock();
 
@@ -1570,9 +1568,7 @@ static int mem_cgroup_move_parent(struct page_cgroup *pc,
 	if (!pcg)
 		return -EINVAL;
 
-
 	parent = mem_cgroup_from_cont(pcg);
-
 
 	ret = __mem_cgroup_try_charge(NULL, gfp_mask, &parent, false, page);
 	if (ret || !parent)
@@ -1690,7 +1686,6 @@ int mem_cgroup_cache_charge(struct page *page, struct mm_struct *mm,
 	 */
 	if (!(gfp_mask & __GFP_WAIT)) {
 		struct page_cgroup *pc;
-
 
 		pc = lookup_page_cgroup(page);
 		if (!pc)
@@ -1831,7 +1826,6 @@ void mem_cgroup_cancel_charge_swapin(struct mem_cgroup *mem)
 	}
 	css_put(&mem->css);
 }
-
 
 /*
  * uncharge if !page_mapped(page)
@@ -2450,7 +2444,6 @@ int mem_cgroup_force_empty_write(struct cgroup *cont, unsigned int event)
 	return mem_cgroup_force_empty(mem_cgroup_from_cont(cont), true);
 }
 
-
 static u64 mem_cgroup_hierarchy_read(struct cgroup *cont, struct cftype *cft)
 {
 	return mem_cgroup_from_cont(cont)->use_hierarchy;
@@ -2659,7 +2652,6 @@ static int mem_cgroup_reset(struct cgroup *cont, unsigned int event)
 	return 0;
 }
 
-
 /* For read statistics */
 enum {
 	MCS_CACHE,
@@ -2696,7 +2688,6 @@ struct {
 	{"active_file", "total_active_file"},
 	{"unevictable", "total_unevictable"}
 };
-
 
 static int mem_cgroup_get_local_stat(struct mem_cgroup *mem, void *data)
 {
@@ -2842,7 +2833,6 @@ static int mem_cgroup_swappiness_write(struct cgroup *cgrp, struct cftype *cft,
 
 	return 0;
 }
-
 
 static struct cftype mem_cgroup_files[] = {
 	{

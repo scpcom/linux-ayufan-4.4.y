@@ -1326,7 +1326,6 @@ static int process_rx_packet(gmac_priv_t *priv)
                 }
             }
             
-            
 			// Update total packet length skb metadata
 			skb->len = partial_len;
 			skb->data_len = skb->len - hlen;
@@ -1600,7 +1599,6 @@ static int poll(
     
     return work_done;
 }
-
 
 #if defined(CONFIG_ARCH_OX820)
 static void netoe_finish_xmit(struct net_device *dev)
@@ -4409,4 +4407,3 @@ void post_phy_reset_action(struct net_device *dev)
 			break;
 	}
 }
-

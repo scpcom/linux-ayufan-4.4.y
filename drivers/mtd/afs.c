@@ -275,7 +275,6 @@ static void __exit afs_parser_exit(void)
 module_init(afs_parser_init);
 module_exit(afs_parser_exit);
 
-
 MODULE_AUTHOR("ARM Ltd");
 MODULE_DESCRIPTION("ARM Firmware Suite partition parser");
 MODULE_LICENSE("GPL");

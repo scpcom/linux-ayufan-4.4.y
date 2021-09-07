@@ -317,7 +317,6 @@ static unsigned char at24_readb(unsigned long regaddr, unsigned char addr)
 	return data;
 }
 
-
 /*
  * Enable basic functions of the Madge chipset needed
  * for initialization.
@@ -466,4 +465,3 @@ static void __exit abyss_rmmod (void)
 
 module_init(abyss_init);
 module_exit(abyss_rmmod);
-

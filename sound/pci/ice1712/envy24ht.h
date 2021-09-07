@@ -122,7 +122,6 @@ enum {
 #define VT1724_REG_GPIO_DATA_22	0x1e /* byte direction for GPIO 16:22 */
 #define VT1724_REG_GPIO_WRITE_MASK_22	0x1f /* byte write mask for GPIO 16:22 */
 
-
 /* 
  *  Professional multi-track direct control registers
  */
@@ -211,7 +210,6 @@ enum {
 #define VT1724_MT_PDMA1_ADDR		0x70	/* dword */
 #define VT1724_MT_PDMA1_SIZE		0x74	/* word */
 #define VT1724_MT_PDMA1_COUNT		0x76	/* word */
-
 
 unsigned char snd_vt1724_read_i2c(struct snd_ice1712 *ice, unsigned char dev, unsigned char addr);
 void snd_vt1724_write_i2c(struct snd_ice1712 *ice, unsigned char dev, unsigned char addr, unsigned char data);

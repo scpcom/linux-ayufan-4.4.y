@@ -70,7 +70,6 @@ static struct buffer_head *get_block_length(struct super_block *sb,
 	return bh;
 }
 
-
 /*
  * Read and decompress a metadata block or datablock.  Length is non-zero
  * if a datablock is being read (the size is stored elsewhere in the
@@ -87,7 +86,6 @@ int squashfs_read_data(struct super_block *sb, void **buffer, u64 index,
 	int offset = index & ((1 << msblk->devblksize_log2) - 1);
 	u64 cur_index = index >> msblk->devblksize_log2;
 	int bytes, compressed, b = 0, k = 0, page = 0, avail;
-
 
 	bh = kcalloc((msblk->block_size >> msblk->devblksize_log2) + 1,
 				sizeof(*bh), GFP_KERNEL);

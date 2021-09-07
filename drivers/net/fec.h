@@ -72,7 +72,6 @@
 
 #endif /* CONFIG_M5272 */
 
-
 /*
  *	Define the buffer descriptor structure.
  */
@@ -139,7 +138,6 @@ struct bufdesc {
 #define BD_ENET_TX_UN           ((ushort)0x0002)
 #define BD_ENET_TX_CSL          ((ushort)0x0001)
 #define BD_ENET_TX_STATS        ((ushort)0x03ff)        /* All status bits */
-
 
 /****************************************************************************/
 #endif /* FEC_H */

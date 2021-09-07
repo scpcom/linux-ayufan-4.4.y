@@ -193,7 +193,6 @@ void check_mm_mode_switch(struct kvm_vcpu *vcpu,  struct ia64_psr old_psr,
 	return;
 }
 
-
 /*
  * In physical mode, insert tc/tr for region 0 and 4 uses
  * RID[0] and RID[4] which is for physical mode emulation.
@@ -1193,7 +1192,6 @@ void vcpu_itr_i(struct kvm_vcpu *vcpu, u64 slot, u64 pte, u64 itir, u64 ifa)
 	vcpu_quick_region_set(VMX(vcpu, itr_regions), va);
 }
 
-
 void vcpu_itr_d(struct kvm_vcpu *vcpu, u64 slot, u64 pte, u64 itir, u64 ifa)
 {
 	u64 gpfn;
@@ -1268,7 +1266,6 @@ void vcpu_ptc_ga(struct kvm_vcpu *vcpu, u64 va, u64 ps)
 	local_irq_restore(psr);
 }
 
-
 void vcpu_ptc_g(struct kvm_vcpu *vcpu, u64 va, u64 ps)
 {
 	vcpu_ptc_ga(vcpu, va, ps);
@@ -1337,8 +1334,6 @@ void kvm_itr_d(struct kvm_vcpu *vcpu, INST64 inst)
 	ifa = vcpu_get_ifa(vcpu);
 	vcpu_itr_d(vcpu, slot, pte, itir, ifa);
 }
-
-
 
 void kvm_itr_i(struct kvm_vcpu *vcpu, INST64 inst)
 {
@@ -1686,8 +1681,6 @@ unsigned long vcpu_cover(struct kvm_vcpu *vcpu)
 	return (IA64_NO_FAULT);
 }
 
-
-
 /**************************************************************************
   VCPU banked general register access routines
  **************************************************************************/
@@ -1716,7 +1709,6 @@ void vcpu_bsw0(struct kvm_vcpu *vcpu)
 	unsigned long *runat = &regs->eml_unat;
 	unsigned long *b0unat = &VCPU(vcpu, vbnat);
 	unsigned long *b1unat = &VCPU(vcpu, vnat);
-
 
 	if (VCPU(vcpu, vpsr) & IA64_PSR_BN) {
 		for (i = 0; i < 16; i++) {

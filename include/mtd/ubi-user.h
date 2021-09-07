@@ -395,7 +395,6 @@ struct ubi_map_req {
 	__s8  padding[3];
 } __attribute__ ((packed));
 
-
 /**
  * struct ubi_set_prop_req - a data structure used to set an ubi volume
  *                           property.

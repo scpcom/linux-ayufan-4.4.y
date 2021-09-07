@@ -37,7 +37,6 @@
 
 #include "../rt_config.h"
 
-
 UINT FCSTAB_32[256] =
 {
 	0x00000000, 0x77073096, 0xee0e612c, 0x990951ba,
@@ -197,7 +196,6 @@ VOID	RTMPEncryptData(
 	pAd->PrivateInfo.FCSCRC32 = RTMP_CALC_FCS32(pAd->PrivateInfo.FCSCRC32, pSrc, Len);
 	ARCFOUR_ENCRYPT(&pAd->PrivateInfo.WEPCONTEXT, pDest, pSrc, Len);
 }
-
 
 /*
 	========================================================================
@@ -421,7 +419,6 @@ VOID	ARCFOUR_ENCRYPT(
 		pSrc        Pointer to the Source data
 		Len         Indicate the length of the Source dta
 
-
 	========================================================================
 */
 
@@ -439,7 +436,6 @@ VOID	WPAARCFOUR_ENCRYPT(
 	for (i = 0; i < Len; i++)
 		pDest[i] = pSrc[i] ^ ARCFOUR_BYTE(Ctx);
 }
-
 
 /*
 	========================================================================
@@ -471,7 +467,6 @@ UINT	RTMP_CALC_FCS32(
 
 	return (Fcs);
 }
-
 
 /*
 	========================================================================

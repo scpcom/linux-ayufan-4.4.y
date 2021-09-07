@@ -255,7 +255,6 @@ extern void __handle_bad_pmd_kernel(pmd_t * pmd);
  */
 #define pages_to_mb(x) ((x) >> (20-PAGE_SHIFT))
 
-
 /*
  * The following have defined behavior only work if pte_present() is true.
  */
@@ -273,7 +272,6 @@ static inline pte_t pte_mkdirty(pte_t pte)	{ set_pte(&pte, __pte(pte_val(pte) | 
 static inline pte_t pte_mkyoung(pte_t pte)	{ set_pte(&pte, __pte(pte_val(pte) | _PAGE_ACCESSED)); return pte; }
 static inline pte_t pte_mkhuge(pte_t pte)	{ set_pte(&pte, __pte(pte_val(pte) | _PAGE_SZHUGE)); return pte; }
 static inline pte_t pte_mkspecial(pte_t pte)	{ return pte; }
-
 
 /*
  * Conversion functions: convert a page and protection to a page entry.

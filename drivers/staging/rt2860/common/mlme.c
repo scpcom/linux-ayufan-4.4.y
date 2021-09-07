@@ -607,9 +607,6 @@ VOID MlmeHandler(
 					StateMachinePerformAction(pAd, &pAd->Mlme.ActMachine, Elem);
 					break;
 
-
-
-
 				default:
 					DBGPRINT(RT_DEBUG_TRACE, ("ERROR: Illegal machine %ld in MlmeHandler()\n", Elem->Machine));
 					break;
@@ -678,8 +675,6 @@ VOID MlmeHalt(
 
 	RTMPCancelTimer(&pAd->Mlme.PeriodicTimer,		&Cancelled);
 	RTMPCancelTimer(&pAd->Mlme.RxAntEvalTimer,		&Cancelled);
-
-
 
 	if (!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))
 	{
@@ -1084,8 +1079,6 @@ VOID STAMlmePeriodicExec(
 	}
 #endif
 
-
-
    	AsicStaBbpTuning(pAd);
 
 	TxTotalCnt = pAd->RalinkCounters.OneSecTxNoRetryOkCount +
@@ -1355,7 +1348,6 @@ VOID MlmeAutoScan(
 VOID MlmeAutoReconnectLastSSID(
 	IN PRTMP_ADAPTER pAd)
 {
-
 
 	// check CntlMachine.CurrState to avoid collision with NDIS SetOID request
 	if ((pAd->Mlme.CntlMachine.CurrState == CNTL_IDLE) &&
@@ -2153,8 +2145,6 @@ VOID MlmeDynamicTxRateSwitching(
 		//
 		pEntry->LastTimeTxRateChangeAction = pEntry->LastSecTxRateChangeAction;
 
-
-
 		//
 		// CASE 1. when TX samples are fewer than 15, then decide TX rate solely on RSSI
 		//         (criteria copied from RT2500 for Netopia case)
@@ -2617,7 +2607,6 @@ VOID StaQuickResponeForRateUpExec(
 				TxErrorRatio = ((pEntry->OneSecTxRetryOkCount + pEntry->OneSecTxFailCount) * 100) / TxTotalCnt;
 		}
 
-
 		//
 		// CASE 1. when TX samples are fewer than 15, then decide TX rate solely on RSSI
 		//         (criteria copied from RT2500 for Netopia case)
@@ -2853,7 +2842,6 @@ VOID UpdateBasicRateBitmap(
     UCHAR *sup_p = pAdapter->CommonCfg.SupRate;
     UCHAR *ext_p = pAdapter->CommonCfg.ExtRate;
     ULONG bitmap = pAdapter->CommonCfg.BasicRateBitmap;
-
 
     /* if A mode, always use fix BasicRateBitMap */
     //if (pAdapter->CommonCfg.Channel == PHY_11A)
@@ -3360,7 +3348,6 @@ VOID MlmeRadioOn(
 // bss_table.c
 // ===========================================================================================
 
-
 /*! \brief initialize BSS table
  *	\param p_tab pointer to the table
  *	\return none
@@ -3700,7 +3687,6 @@ VOID BssEntrySet(
 	{
 		PEID_STRUCT     pEid;
 		USHORT          Length = 0;
-
 
 		NdisZeroMemory(&pBss->WpaIE.IE[0], MAX_CUSTOM_LEN);
 		NdisZeroMemory(&pBss->RsnIE.IE[0], MAX_CUSTOM_LEN);
@@ -4071,7 +4057,6 @@ VOID BssTableSsidSort(
 	BssTableSortByRssi(OutTab);
 }
 
-
 // IRQL = DISPATCH_LEVEL
 VOID BssTableSortByRssi(
 	IN OUT BSS_TABLE *OutTab)
@@ -4133,7 +4118,6 @@ VOID BssCipherParse(
 	pBss->WPA2.GroupCipher	 = Ndis802_11WEPDisabled;
 	pBss->WPA2.RsnCapability = 0;
 	pBss->WPA2.bMixMode 	 = FALSE;
-
 
 	Length = (INT) pBss->VarIELen;
 
@@ -4744,7 +4728,6 @@ BOOLEAN MlmeEnqueueForRecv(
 
 	return TRUE;
 }
-
 
 /*! \brief	 Dequeue a message from the MLME Queue
  *	\param	*Queue	  The MLME Queue
@@ -6516,7 +6499,6 @@ VOID AsicDisableRDG(
 	TX_LINK_CFG_STRUC	TxLinkCfg;
 	UINT32				Data = 0;
 
-
 	RTMP_IO_READ32(pAd, TX_LINK_CFG, &TxLinkCfg.word);
 	TxLinkCfg.field.TxRDGEn = 0;
 	RTMP_IO_WRITE32(pAd, TX_LINK_CFG, TxLinkCfg.word);
@@ -6851,7 +6833,6 @@ VOID AsicSetEdcaParm(
 		RTMP_IO_WRITE32(pAd, EDCA_AC2_CFG, Ac2Cfg.word);
 		RTMP_IO_WRITE32(pAd, EDCA_AC3_CFG, Ac3Cfg.word);
 
-
 		//========================================================
 		//      DMA Register has a copy too.
 		//========================================================
@@ -7082,7 +7063,6 @@ VOID AsicAddSharedKeyEntry(
 #endif
 	}
 
-
 	//
 	// Update cipher algorithm. WSTA always use BSS0
 	//
@@ -7156,7 +7136,6 @@ VOID AsicRemoveSharedKeyEntry(
 
 }
 
-
 VOID AsicUpdateWCIDAttribute(
 	IN PRTMP_ADAPTER pAd,
 	IN USHORT		WCID,
@@ -7203,7 +7182,6 @@ VOID AsicUpdateRxWCIDTable(
 	Addr = pAddr[4] + (pAddr[5] << 8);
 	RTMP_IO_WRITE32(pAd, offset + 4, Addr);
 }
-
 
 /*
     ========================================================================
@@ -7313,7 +7291,6 @@ VOID AsicAddKeyEntry(
 #endif
 	}
 
-
 	//
 	// 4.) Modify IV/EIV if needs
 	//     This will force Asic to use this key ID by setting IV.
@@ -7400,7 +7377,6 @@ VOID AsicAddKeyEntry(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<== AsicAddKeyEntry\n"));
 }
-
 
 /*
 	========================================================================
@@ -8343,7 +8319,6 @@ BOOLEAN RTMPCheckEntryEnableAutoRateSwitch(
 	return result;
 }
 
-
 BOOLEAN RTMPAutoRateSwitchCheck(
 	IN PRTMP_ADAPTER    pAd)
 {
@@ -8352,7 +8327,6 @@ BOOLEAN RTMPAutoRateSwitchCheck(
 
 	return FALSE;
 }
-
 
 /*
     ========================================================================
@@ -8560,7 +8534,6 @@ VOID AsicStaBbpTuning(
 			}
 		}
 
-
 	}
 }
 
@@ -8753,7 +8726,6 @@ VOID AsicTurnOffRFClk(
 	}
 }
 
-
 VOID AsicTurnOnRFClk(
 	IN PRTMP_ADAPTER pAd,
 	IN	UCHAR			Channel)
@@ -8819,4 +8791,3 @@ VOID AsicTurnOnRFClk(
 		pAd->RfIcType,
 		R2));
 }
-

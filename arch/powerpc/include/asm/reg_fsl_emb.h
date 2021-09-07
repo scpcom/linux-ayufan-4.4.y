@@ -67,6 +67,5 @@
 #define PMRN_UPMLCB3	0x103	/* User PM Local Control B3 */
 #define PMRN_UPMGC0	0x180	/* User PM Global Control 0 */
 
-
 #endif /* __ASM_POWERPC_REG_FSL_EMB_H__ */
 #endif /* __KERNEL__ */

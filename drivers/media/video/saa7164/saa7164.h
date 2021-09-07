@@ -394,7 +394,5 @@ extern unsigned int saa_debug;
 #define saa7164_readl(reg) readl(dev->lmmio + ((reg) >> 2))
 #define saa7164_writel(reg, value) writel((value), dev->lmmio + ((reg) >> 2))
 
-
 #define saa7164_readb(reg)             readl(dev->bmmio + (reg))
 #define saa7164_writeb(reg, value)     writel((value), dev->bmmio + (reg))
-

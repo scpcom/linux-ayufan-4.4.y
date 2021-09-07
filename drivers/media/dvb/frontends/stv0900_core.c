@@ -639,7 +639,6 @@ static int stv0900_read_signal_strength(struct dvb_frontend *fe, u16 *strength)
 	return 0;
 }
 
-
 static s32 stv0900_carr_get_quality(struct dvb_frontend *fe,
 					const struct stv0900_table *lookup)
 {
@@ -919,7 +918,6 @@ void stv0900_activate_s2_modcode(struct stv0900_internal *i_params,
 			field_index = mod_code % 2;
 			break;
 		}
-
 
 		switch (matype) {
 		case 0:

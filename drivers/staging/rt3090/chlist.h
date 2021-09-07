@@ -42,7 +42,6 @@
 #include "rtmp_type.h"
 #include "rtmp_def.h"
 
-
 #define ODOR			0
 #define IDOR			1
 #define BOTH			2
@@ -75,7 +74,6 @@ typedef struct _CH_FREQ_MAP_{
 extern CH_FREQ_MAP CH_HZ_ID_MAP[];
 extern int CH_HZ_ID_MAP_NUM;
 
-
 #define     MAP_CHANNEL_ID_TO_KHZ(_ch, _khz)					\
 		do{													\
 			int _chIdx;											\
@@ -105,7 +103,6 @@ extern int CH_HZ_ID_MAP_NUM;
 			if (_chIdx == CH_HZ_ID_MAP_NUM)					\
 				(_ch) = 1;											\
 		}while(0)
-
 
 VOID BuildChannelListEx(
 	IN PRTMP_ADAPTER pAd);

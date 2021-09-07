@@ -34,5 +34,3 @@ bfa_sm_to_state(struct bfa_sm_table_s *smt, bfa_sm_t sm)
 		i++;
 	return smt[i].state;
 }
-
-

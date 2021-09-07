@@ -693,7 +693,6 @@ void syno_disk_hiternation_cmd_printk(struct scsi_device *sdp, struct scsi_cmnd 
 }
 #endif /* MY_ABC_HERE */
 
-
 /**
  * scsi_dispatch_command - Dispatch a command to the low-level driver.
  * @cmd: command block we are dispatching.

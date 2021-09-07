@@ -858,7 +858,6 @@ int fc_lport_reset(struct fc_lport *);
  */
 int fc_set_mfs(struct fc_lport *lp, u32 mfs);
 
-
 /*
  * REMOTE PORT LAYER
  *****************************/
@@ -869,7 +868,6 @@ void fc_rport_terminate_io(struct fc_rport *rp);
  * DISCOVERY LAYER
  *****************************/
 int fc_disc_init(struct fc_lport *lp);
-
 
 /*
  * SCSI LAYER
@@ -944,7 +942,6 @@ void fc_fcp_ddp_setup(struct fc_fcp_pkt *fsp, u16 xid);
  * Initializes ELS/CT interface
  */
 int fc_elsct_init(struct fc_lport *lp);
-
 
 /*
  * EXCHANGE MANAGER LAYER
@@ -1059,7 +1056,6 @@ struct fc_exch *fc_exch_alloc(struct fc_lport *lport, struct fc_frame *fp);
  * Start a new sequence on the same exchange as the supplied sequence.
  */
 struct fc_seq *fc_seq_start_next(struct fc_seq *sp);
-
 
 /*
  * Reset all EMs of a lport, releasing its all sequences and

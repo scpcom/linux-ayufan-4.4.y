@@ -32,7 +32,6 @@
 
 #include "gadget_chips.h"
 
-
 /* we must assign addresses for configurable endpoints (like net2280) */
 static __initdata unsigned epnum;
 
@@ -41,7 +40,6 @@ static __initdata unsigned epnum;
 /* more than 15 configurable endpoints */
 static __initdata unsigned in_epnum;
 #endif
-
 
 /*
  * This should work with endpoints from controller drivers sharing the
@@ -308,4 +306,3 @@ void __init usb_ep_autoconfig_reset (struct usb_gadget *gadget)
 #endif
 	epnum = 0;
 }
-

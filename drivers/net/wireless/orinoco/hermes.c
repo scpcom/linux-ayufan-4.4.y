@@ -70,7 +70,6 @@
 
 #endif /* ! HERMES_DEBUG */
 
-
 /*
  * Internal functions
  */

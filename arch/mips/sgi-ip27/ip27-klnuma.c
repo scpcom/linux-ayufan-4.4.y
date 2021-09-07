@@ -51,7 +51,6 @@ void __init setup_replication_mask(void)
 	GDA->g_ktext_repmask = &ktext_repmask;
 }
 
-
 static __init void set_ktext_source(nasid_t client_nasid, nasid_t server_nasid)
 {
 	cnodeid_t client_cnode;
@@ -133,4 +132,3 @@ pfn_t node_getfirstfree(cnodeid_t cnode)
 		return (KDM_TO_PHYS(PAGE_ALIGN(SYMMON_STK_ADDR(nasid, 0))) >>
 								PAGE_SHIFT);
 }
-

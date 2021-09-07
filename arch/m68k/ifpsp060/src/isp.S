@@ -428,7 +428,6 @@ uieh_cont:
 	bsr.l		_imem_read_long		# fetch opword & extword
 	mov.l		%d0,EXC_OPWORD(%a6)	# store extword on stack
 
-
 #########################################################################
 # muls.l	0100 1100 00 |<ea>|	0*** 1100 0000 0***		#
 # mulu.l	0100 1100 00 |<ea>|	0*** 0100 0000 0***		#
@@ -522,7 +521,6 @@ uieh_div64_a7:
 uieh_group2:
 	btst		&0x18,%d0		# test for not movep
 	beq.b		uieh_not_movep
-
 
 	bsr.l		_moveperipheral		# _movep()
 	bra.w		uieh_done

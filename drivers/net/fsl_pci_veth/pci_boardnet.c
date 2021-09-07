@@ -135,7 +135,6 @@ static int boardnet_open(struct net_device *dev)
 		 */
 		fsl_send_msg(&msg_unit_host2ep, HOST_UP);
 
-
 	retval = request_irq(dev->irq, boardnet_interrupt, 0,
 				dev->name, dev);
 	if (retval) {

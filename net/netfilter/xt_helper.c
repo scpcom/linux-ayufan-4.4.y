@@ -22,7 +22,6 @@ MODULE_DESCRIPTION("Xtables: Related connection matching");
 MODULE_ALIAS("ipt_helper");
 MODULE_ALIAS("ip6t_helper");
 
-
 static bool
 helper_mt(const struct sk_buff *skb, const struct xt_match_param *par)
 {

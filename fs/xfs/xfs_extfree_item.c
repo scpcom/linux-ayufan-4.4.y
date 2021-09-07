@@ -29,7 +29,6 @@
 #include "xfs_trans_priv.h"
 #include "xfs_extfree_item.h"
 
-
 kmem_zone_t	*xfs_efi_zone;
 kmem_zone_t	*xfs_efd_zone;
 
@@ -86,7 +85,6 @@ xfs_efi_item_format(xfs_efi_log_item_t	*efip,
 	ASSERT(size >= sizeof(xfs_efi_log_format_t));
 }
 
-
 /*
  * Pinning has no meaning for an efi item, so just return.
  */
@@ -96,7 +94,6 @@ xfs_efi_item_pin(xfs_efi_log_item_t *efip)
 {
 	return;
 }
-
 
 /*
  * While EFIs cannot really be pinned, the unpin operation is the
@@ -236,7 +233,6 @@ static struct xfs_item_ops xfs_efi_item_ops = {
 	.iop_committing = (void(*)(xfs_log_item_t*, xfs_lsn_t))
 					xfs_efi_item_committing
 };
-
 
 /*
  * Allocate and initialize an efi item with the given number of extents.
@@ -410,7 +406,6 @@ xfs_efd_item_format(xfs_efd_log_item_t	*efdp,
 	ASSERT(size >= sizeof(xfs_efd_log_format_t));
 }
 
-
 /*
  * Pinning has no meaning for an efd item, so just return.
  */
@@ -420,7 +415,6 @@ xfs_efd_item_pin(xfs_efd_log_item_t *efdp)
 {
 	return;
 }
-
 
 /*
  * Since pinning has no meaning for an efd item, unpinning does
@@ -530,7 +524,6 @@ static struct xfs_item_ops xfs_efd_item_ops = {
 	.iop_committing = (void(*)(xfs_log_item_t*, xfs_lsn_t))
 					xfs_efd_item_committing
 };
-
 
 /*
  * Allocate and initialize an efd item with the given number of extents.

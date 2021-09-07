@@ -26,7 +26,6 @@
  * Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
  *****************************************************************************/
 
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
@@ -90,7 +89,6 @@ static const struct iwl_power_vec_entry range_0[IWL_POWER_NUM] = {
 	{{SLP, SLP_TOUT(50), SLP_TOUT(25), SLP_VEC(2, 2, 4, 4, 0xFF)}, 1},
 	{{SLP, SLP_TOUT(25), SLP_TOUT(25), SLP_VEC(2, 2, 4, 6, 0xFF)}, 2}
 };
-
 
 /* for DTIM period IWL_DTIM_RANGE_0_MAX + 1 through IWL_DTIM_RANGE_1_MAX */
 static const struct iwl_power_vec_entry range_1[IWL_POWER_NUM] = {
@@ -200,7 +198,6 @@ static const struct iwl_tt_restriction restriction_range[IWL_TI_STATE_MAX] = {
 	{IWL_ANT_OK_NONE, IWL_ANT_OK_NONE, false }
 };
 
-
 static void iwl_power_sleep_cam_cmd(struct iwl_priv *priv,
 				    struct iwl_powertable_cmd *cmd)
 {
@@ -271,7 +268,6 @@ static int iwl_set_power(struct iwl_priv *priv, struct iwl_powertable_cmd *cmd)
 	return iwl_send_cmd_pdu(priv, POWER_TABLE_CMD,
 				sizeof(struct iwl_powertable_cmd), cmd);
 }
-
 
 int iwl_power_update_mode(struct iwl_priv *priv, bool force)
 {

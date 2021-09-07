@@ -57,7 +57,6 @@ static void snd_emu8000_tweak_voice(struct snd_emu8000 *emu, int ch);
 #define LIMITVALUE(x, a, b) do { if ((x) < (a)) (x) = (a); else if ((x) > (b)) (x) = (b); } while (0)
 #define LIMITMAX(x, a) do {if ((x) > (a)) (x) = (a); } while (0)
 
-
 /*
  * set up operators
  */
@@ -86,8 +85,6 @@ snd_emu8000_ops_setup(struct snd_emu8000 *hw)
 	hw->emu->ops = emu8000_ops;
 }
 
-
-
 /*
  * Terminate a voice
  */
@@ -104,7 +101,6 @@ release_voice(struct snd_emux_voice *vp)
 	EMU8000_DCYSUSV_WRITE(hw, vp->ch, dcysusv);
 }
 
-
 /*
  */
 static void
@@ -115,7 +111,6 @@ terminate_voice(struct snd_emux_voice *vp)
 	hw = vp->hw;
 	EMU8000_DCYSUSV_WRITE(hw, vp->ch, 0x807F);
 }
-
 
 /*
  */
@@ -141,7 +136,6 @@ update_voice(struct snd_emux_voice *vp, int update)
 	if (update & SNDRV_EMUX_UPDATE_Q)
 		set_filterQ(hw, vp);
 }
-
 
 /*
  * Find a channel (voice) within the EMU that is not in use or at least
@@ -475,7 +469,6 @@ sysex(struct snd_emux *emu, char *buf, int len, int parsed, struct snd_midi_chan
 	}
 }
 
-
 #ifdef CONFIG_SND_SEQUENCER_OSS
 /*
  * OSS ioctl callback
@@ -512,14 +505,12 @@ oss_ioctl(struct snd_emux *emu, int cmd, int p1, int p2)
 }
 #endif
 
-
 /*
  * additional patch keys
  */
 
 #define SNDRV_EMU8000_LOAD_CHORUS_FX	0x10	/* optarg=mode */
 #define SNDRV_EMU8000_LOAD_REVERB_FX	0x11	/* optarg=mode */
-
 
 /*
  * callback routine
@@ -543,4 +534,3 @@ load_fx(struct snd_emux *emu, int type, int mode, const void __user *buf, long l
 	}
 	return -EINVAL;
 }
-

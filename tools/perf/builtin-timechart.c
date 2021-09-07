@@ -34,7 +34,6 @@
 static char		const *input_name = "perf.data";
 static char		const *output_name = "output.svg";
 
-
 static unsigned long	page_size;
 static unsigned long	mmap_window = 32;
 static u64		sample_type;
@@ -47,7 +46,6 @@ static u64		turbo_frequency;
 static u64		first_time, last_time;
 
 static int		power_only;
-
 
 static struct perf_header	*header;
 
@@ -86,7 +84,6 @@ struct per_pid {
 
 	int painted;
 };
-
 
 struct per_pidcomm {
 	struct per_pidcomm *next;
@@ -333,8 +330,6 @@ enum trace_flag_type {
 	TRACE_FLAG_SOFTIRQ		= 0x10,
 };
 
-
-
 struct sched_switch {
 	struct trace_entry te;
 	char prev_comm[TASK_COMM_LEN];
@@ -446,7 +441,6 @@ static void sched_switch(int cpu, u64 timestamp, struct trace_entry *te)
 	struct per_pid *p = NULL, *prev_p;
 	struct sched_switch *sw = (void *)te;
 
-
 	prev_p = find_create_pid(sw->prev_pid);
 
 	p = find_create_pid(sw->next_pid);
@@ -470,7 +464,6 @@ static void sched_switch(int cpu, u64 timestamp, struct trace_entry *te)
 			prev_p->current->state = TYPE_WAITING;
 	}
 }
-
 
 static int
 process_sample_event(event_t *event)
@@ -602,7 +595,6 @@ static u64 sample_time(event_t *event)
 	return 0;
 }
 
-
 /*
  * We first queue all events, sorted backwards by insertion.
  * The order will get flipped later.
@@ -718,7 +710,6 @@ static void sort_pids(void)
 	}
 	all_data = new_list;
 }
-
 
 static void draw_c_p_states(void)
 {
@@ -923,8 +914,6 @@ static int determine_display_tasks(u64 threshold)
 	return count;
 }
 
-
-
 #define TIME_THRESH 10000000
 
 static void write_svg_file(const char *filename)
@@ -933,7 +922,6 @@ static void write_svg_file(const char *filename)
 	int count;
 
 	numcpus++;
-
 
 	count = determine_display_tasks(TIME_THRESH);
 
@@ -1001,7 +989,6 @@ static void process_samples(void)
 		process_sample_event(event);
 	}
 }
-
 
 static int __cmd_timechart(void)
 {
@@ -1103,7 +1090,6 @@ done:
 	rc = EXIT_SUCCESS;
 	close(input);
 
-
 	process_samples();
 
 	end_sample_processing();
@@ -1164,7 +1150,6 @@ static const struct option options[] = {
 		    "output power data only"),
 	OPT_END()
 };
-
 
 int cmd_timechart(int argc, const char **argv, const char *prefix __used)
 {

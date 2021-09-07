@@ -102,7 +102,6 @@ void zfStaPutApIntoBlockingList(zdev_t* dev, u8_t* bssid, u8_t weight)
     return;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfStaIsApInBlockingList     */
@@ -149,7 +148,6 @@ u16_t zfStaIsApInBlockingList(zdev_t* dev, u8_t* bssid)
     return FALSE;
 }
 
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfStaRefreshBlockList       */
@@ -190,7 +188,6 @@ void zfStaRefreshBlockList(zdev_t* dev, u16_t flushFlag)
     zmw_leave_critical_section(dev);
     return;
 }
-
 
 /************************************************************************/
 /*                                                                      */
@@ -283,7 +280,6 @@ u8_t zfiWlanIBSSIteratePeerStations(zdev_t* dev, u8_t numToIterate, zfpIBSSItera
 
     return index;
 }
-
 
 s8_t zfStaFindFreeOpposite(zdev_t* dev, u16_t *sa, int *pFoundIdx)
 {
@@ -450,7 +446,6 @@ int zfStaSetOppositeInfoFromBSSInfo(zdev_t* dev, struct zsBssInfo* pBssInfo)
                 zfRateCtrlInitCell(dev, &wd->sta.oppositeInfo[i].rcCell, 1, 0, pBssInfo->SG40);
         }
     }
-
 
     zfStaInitCommonOppositeInfo(dev, i);
 zlReturn:
@@ -1033,7 +1028,6 @@ void zfStaIbssPSSend(zdev_t* dev)
     wd->sta.ibssPSDataCount = 0;
 }
 
-
 void zfStaReconnect(zdev_t* dev)
 {
     zmw_get_wlan_dev(dev);
@@ -1083,7 +1077,6 @@ void zfStaTimer100ms(zdev_t* dev)
     }
 }
 
-
 void zfStaCheckRxBeacon(zdev_t* dev)
 {
     zmw_get_wlan_dev(dev);
@@ -1123,8 +1116,6 @@ void zfStaCheckRxBeacon(zdev_t* dev)
         }
     }
 }
-
-
 
 void zfStaCheckConnectTimeout(zdev_t* dev)
 {
@@ -1524,7 +1515,6 @@ u8_t zfStaInitBssInfo(zdev_t* dev, zbuf_t* buf,
         pBssInfo->frequency = zfChNumToFreq(dev, channel, 0); // auto check
         pBssInfo->channel = channel;
 
-
     }
     else
     {
@@ -1603,8 +1593,6 @@ u8_t zfStaInitBssInfo(zdev_t* dev, zbuf_t* buf,
         goto zlError;
     }
     zfCopyFromRxBuffer(dev, buf, pBssInfo->supportedRates, offset, length+2);
-
-
 
     /* get Country information */
     if ( (offset = zfFindElement(dev, buf, ZM_WLAN_EID_COUNTRY)) != 0xffff )
@@ -2199,7 +2187,6 @@ zlReturn:
     return;
 }
 
-
 void zfAuthFreqCompleteCb(zdev_t* dev)
 {
     zmw_get_wlan_dev(dev);
@@ -2284,7 +2271,6 @@ void zfStaProcessAuth(zdev_t* dev, zbuf_t* buf, u16_t* src, u16_t apId)
                 zfSendMmFrame(dev, ZM_WLAN_FRAME_TYPE_ASOCREQ,
                               wd->sta.bssid, 0, 0, 0);
             }
-
 
         }
         else
@@ -2427,7 +2413,6 @@ void zfStaProcessAsocRsp(zdev_t* dev, zbuf_t* buf)
                 }
             }
 
-
             //Store asoc response frame body, for VISTA only
             wd->sta.asocRspFrameBodySize = zfwBufGetSize(dev, buf)-24;
             if (wd->sta.asocRspFrameBodySize > ZM_CACHED_FRAMEBODY_SIZE)
@@ -2544,7 +2529,6 @@ void zfStaProcessAsocRsp(zdev_t* dev, zbuf_t* buf)
     			        wd->CurrentRxRateKbps = 54000;
     			    }
                 }
-
 
                 wd->zfcbConnectNotify(dev, ZM_STATUS_MEDIA_CONNECT, wd->sta.bssid);
             }
@@ -2779,8 +2763,6 @@ void zfStaProcessDisasoc(zdev_t* dev, zbuf_t* buf)
         }
     }
 }
-
-
 
 /************************************************************************/
 /*                                                                      */
@@ -3263,7 +3245,6 @@ void zfIbssConnectNetwork(zdev_t* dev)
             zmw_leave_critical_section(dev);
         }
 
-
         if (zfHpIsDfsChannel(dev, wd->frequency))
         {
             wd->frequency = zfHpFindFirstNonDfsChannel(dev, wd->frequency > 3000);
@@ -3616,7 +3597,6 @@ connect_done:
     zfTimerSchedule(dev, ZM_EVENT_IBSS_MONITOR, ZM_TICK_IBSS_MONITOR);
     zmw_leave_critical_section(dev);
 
-
     if (wd->zfcbConnectNotify != NULL)
     {
         wd->zfcbConnectNotify(dev, ZM_STATUS_MEDIA_CONNECT, wd->sta.bssid);
@@ -3787,7 +3767,6 @@ static struct zsBssInfo* zfInfraFindAPToConnect(zdev_t* dev,
                     pNowBssInfo = pBssInfo;
                     wd->sta.apWmeCapability = pBssInfo->wmeSupport;
 
-
                     goto done;
             }
         }
@@ -3806,7 +3785,6 @@ done:
 
     return pNowBssInfo;
 }
-
 
 void zfInfraConnectNetwork(zdev_t* dev)
 {
@@ -3960,8 +3938,6 @@ void zfInfraConnectNetwork(zdev_t* dev)
                 wd->sta.rsnIe[1] = 0;
             }
         }
-
-
 
         /* check preamble bit */
         wd->preambleTypeInUsed = wd->preambleType;
@@ -4167,7 +4143,6 @@ void zfInfraConnectNetwork(zdev_t* dev)
         goto zlConnectFailed;
     }
 
-
     zfCoreSetFrequencyV2(dev, wd->frequency, zfStaStartConnectCb);
     return;
 
@@ -4256,7 +4231,6 @@ u8_t zfCheckAuthentication(zdev_t* dev, struct zsBssInfo* pBssInfo)
     {
         return ret;
     }
-
 
 	switch(wd->sta.authMode)
 	//switch(wd->ws.authMode)//Quickly reboot
@@ -4383,7 +4357,6 @@ u8_t zfCheckAuthentication(zdev_t* dev, struct zsBssInfo* pBssInfo)
                 {
                     ret = FALSE;
                 }
-
 
             }
             else
@@ -4785,8 +4758,6 @@ u16_t zfStaAddIeIbss(zdev_t* dev, zbuf_t* buf, u16_t offset)
     return offset;
 }
 
-
-
 /************************************************************************/
 /*                                                                      */
 /*    FUNCTION DESCRIPTION                  zfStaAddIeWmeInfo           */
@@ -5064,7 +5035,6 @@ void zfSendNullData(zdev_t* dev, u8_t type)
         goto zlError;
     }
 
-
     return;
 
 zlError:
@@ -5290,7 +5260,6 @@ u16_t zfStaRxValidateFrame(zdev_t* dev, zbuf_t* buf)
         return ZM_ERR_DATA_BEFORE_CONNECTED;
     }
 
-
     if ( (zfStaIsConnected(dev))&&((frameType & 0xf) == ZM_WLAN_DATA_FRAME) )
     {
         /* check BSSID */
@@ -5439,7 +5408,6 @@ void zfStaMicFailureHandling(zdev_t* dev, zbuf_t* buf)
         }
     }
 }
-
 
 u8_t zfStaBlockWlanScan(zdev_t* dev)
 {

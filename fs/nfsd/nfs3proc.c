@@ -658,7 +658,6 @@ nfsd3_proc_pathconf(struct svc_rqst * rqstp, struct nfsd_fhandle      *argp,
 	RETURN_STATUS(nfserr);
 }
 
-
 /*
  * Commit a file (range) to stable storage.
  */
@@ -681,7 +680,6 @@ nfsd3_proc_commit(struct svc_rqst * rqstp, struct nfsd3_commitargs *argp,
 
 	RETURN_STATUS(nfserr);
 }
-
 
 /*
  * NFSv3 Server procedures.

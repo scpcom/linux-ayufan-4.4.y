@@ -26,7 +26,6 @@
 
 #include "davinci-pcm.h"
 
-
 /*
  * NOTE:  terminology here is confusing.
  *

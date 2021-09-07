@@ -578,7 +578,6 @@ static struct bus_type ccwgroup_bus_type = {
 	.pm = &ccwgroup_pm_ops,
 };
 
-
 static int ccwgroup_notifier(struct notifier_block *nb, unsigned long action,
 			     void *data)
 {
@@ -589,7 +588,6 @@ static int ccwgroup_notifier(struct notifier_block *nb, unsigned long action,
 
 	return NOTIFY_OK;
 }
-
 
 /**
  * ccwgroup_driver_register() - register a ccw group driver

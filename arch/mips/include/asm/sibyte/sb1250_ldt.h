@@ -29,7 +29,6 @@
     *  MA 02111-1307 USA
     ********************************************************************* */
 
-
 #ifndef _SB1250_LDT_H
 #define _SB1250_LDT_H
 
@@ -75,7 +74,6 @@
 #define R_LDT_TYPE1_EXPCRC	0x00DC
 #define R_LDT_TYPE1_RXCRC	0x00F0
 
-
 /*
  * LDT Device ID register
  */
@@ -89,7 +87,6 @@
 #define M_LDT_DEVICEID_DEVICEID		_SB_MAKEMASK_32(16, S_LDT_DEVICEID_DEVICEID)
 #define V_LDT_DEVICEID_DEVICEID(x)	_SB_MAKEVALUE_32(x, S_LDT_DEVICEID_DEVICEID)
 #define G_LDT_DEVICEID_DEVICEID(x)	_SB_GETVALUE_32(x, S_LDT_DEVICEID_DEVICEID, M_LDT_DEVICEID_DEVICEID)
-
 
 /*
  * LDT Command Register (Table 8-13)
@@ -148,8 +145,6 @@
 #define M_LDT_DEVHDR_BIST		_SB_MAKEMASK_32(8, S_LDT_DEVHDR_BIST)
 #define V_LDT_DEVHDR_BIST(x)		_SB_MAKEVALUE_32(x, S_LDT_DEVHDR_BIST)
 #define G_LDT_DEVHDR_BIST(x)		_SB_GETVALUE_32(x, S_LDT_DEVHDR_BIST, M_LDT_DEVHDR_BIST)
-
-
 
 /*
  * LDT Status Register (Table 8-14).  Note that these constants
@@ -291,7 +286,6 @@
 #define M_LDT_SRICMD_EXPENDIAN		_SB_MAKEMASK1_32(26)
 #endif /* 1250 PASS2 || 112x PASS1 */
 
-
 #define S_LDT_SRICMD_RXMARGIN		20
 #define M_LDT_SRICMD_RXMARGIN		_SB_MAKEMASK_32(5, S_LDT_SRICMD_RXMARGIN)
 #define V_LDT_SRICMD_RXMARGIN(x)	_SB_MAKEVALUE_32(x, S_LDT_SRICMD_RXMARGIN)
@@ -420,4 +414,3 @@
 #endif /* 1250 PASS2 || 112x PASS1 */
 
 #endif
-

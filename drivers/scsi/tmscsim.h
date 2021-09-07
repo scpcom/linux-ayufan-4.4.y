@@ -64,7 +64,6 @@ u8		MsgOutBuf[6];
 //u8		IORBFlag;	/*;81h-Reset, 2-retry */
 };
 
-
 /*
 ;-----------------------------------------------------------------------
 ; Device Control Block
@@ -97,7 +96,6 @@ u8		NegoPeriod;	/*;for nego. */
 u8		SyncPeriod;	/*;for reg. */
 u8		SyncOffset;	/*;for reg. and nego.(low nibble) */
 };
-
 
 /*
 ;-----------------------------------------------------------------------
@@ -153,9 +151,7 @@ struct dc390_srb	TmpSRB;
 struct dc390_srb	SRB_array[MAX_SRB_CNT]; 	/* 50 SRBs */
 };
 
-
 /*;-----------------------------------------------------------------------*/
-
 
 #define BIT31	0x80000000
 #define BIT30	0x40000000
@@ -384,7 +380,6 @@ u8	xx2;
 
 #define DATA_XFER_CMD		INFO_XFER_CMD
 
-
 /*; SCSI Status Reg.(+10H) (r) */
 #define INTERRUPT		BIT7
 #define ILLEGAL_OP_ERR		BIT6
@@ -521,7 +516,6 @@ u8	xx2;
 #define Intern_State	Sync_Period	/* r */
 #define Current_Fifo	Sync_Offset	/* r	Curr. FIFO / int. state */
 
-
 #define DC390_read8(address)			\
 	(inb (pACB->IOPortBase + (address)))
 
@@ -545,6 +539,5 @@ u8	xx2;
 
 #define DC390_write32(address,value)		\
 	outl ((value), pACB->IOPortBase + (address))
-
 
 #endif /* _TMSCSIM_H */

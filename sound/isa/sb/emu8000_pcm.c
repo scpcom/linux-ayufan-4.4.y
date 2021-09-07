@@ -45,7 +45,6 @@
  * alsa-lib...
  */
 
-
 struct snd_emu8k_pcm {
 	struct snd_emu8000 *emu;
 	struct snd_pcm_substream *substream;
@@ -69,7 +68,6 @@ struct snd_emu8k_pcm {
 };
 
 #define LOOP_BLANK_SIZE		8
-
 
 /*
  * open up channels for the simultaneous data transfer and playback
@@ -150,7 +148,6 @@ static int calc_rate_offset(int hz)
 	return snd_sf_linear_to_log(hz, OFFSET_SAMPLERATE, SAMPLERATE_RATIO);
 }
 
-
 /*
  */
 
@@ -185,7 +182,6 @@ static inline int emu8k_get_curpos(struct snd_emu8k_pcm *rec, int ch)
 	return val;
 }
 
-
 /*
  * timer interrupt handler
  * check the current position and update the period if necessary.
@@ -218,7 +214,6 @@ static void emu8k_pcm_timer_func(unsigned long data)
 	}
 	spin_unlock(&rec->timer_lock);
 }
-
 
 /*
  * open pcm
@@ -406,7 +401,6 @@ static int emu8k_pcm_trigger(struct snd_pcm_substream *subs, int cmd)
 	return 0;
 }
 
-
 /*
  * copy / silence ops
  */
@@ -422,7 +416,6 @@ do { \
 	if (signal_pending(current))\
 		return -EAGAIN;\
 } while (0)
-
 
 #ifdef USE_NONINTERLEAVE
 /* copy one channel block */
@@ -561,7 +554,6 @@ static int emu8k_pcm_silence(struct snd_pcm_substream *subs,
 }
 #endif
 
-
 /*
  * allocate a memory block
  */
@@ -662,7 +654,6 @@ static snd_pcm_uframes_t emu8k_pcm_pointer(struct snd_pcm_substream *subs)
 	return 0;
 }
 
-
 static struct snd_pcm_ops emu8k_pcm_ops = {
 	.open =		emu8k_pcm_open,
 	.close =	emu8k_pcm_close,
@@ -675,7 +666,6 @@ static struct snd_pcm_ops emu8k_pcm_ops = {
 	.copy =		emu8k_pcm_copy,
 	.silence =	emu8k_pcm_silence,
 };
-
 
 static void snd_emu8000_pcm_free(struct snd_pcm *pcm)
 {

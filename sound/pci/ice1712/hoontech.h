@@ -37,7 +37,6 @@
 
 extern struct snd_ice1712_card_info snd_ice1712_hoontech_cards[];
 
-
 /* Hoontech SoundTrack Audio DSP 24 GPIO definitions */
 
 #define ICE1712_STDSP24_0_BOX(r, x)	r[0] = ((r[0] & ~3) | ((x)&3))

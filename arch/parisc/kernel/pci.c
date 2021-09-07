@@ -30,7 +30,6 @@
 # define DBGC(x...)
 #endif
 
-
 #if DEBUG_RESOURCES
 #define DBG_RES(x...)	printk(KERN_DEBUG x)
 #else
@@ -56,7 +55,6 @@ static int pci_hba_count __read_mostly;
 /* parisc_pci_hba used by pci_port->in/out() ops to lookup bus data.  */
 #define PCI_HBA_MAX 32
 static struct pci_hba_data *parisc_pci_hba[PCI_HBA_MAX] __read_mostly;
-
 
 /********************************************************************
 **
@@ -93,7 +91,6 @@ PCI_PORT_IN(b,  8)
 PCI_PORT_IN(w, 16)
 PCI_PORT_IN(l, 32)
 
-
 #define PCI_PORT_OUT(type, size) \
 void out##type (u##size d, int addr) \
 { \
@@ -107,8 +104,6 @@ EXPORT_SYMBOL(out##type);
 PCI_PORT_OUT(b,  8)
 PCI_PORT_OUT(w, 16)
 PCI_PORT_OUT(l, 32)
-
-
 
 /*
  * BIOS32 replacement.
@@ -126,7 +121,6 @@ static int __init pcibios_init(void)
 	return 0;
 }
 
-
 /* Called from pci_do_scan_bus() *after* walking a bus but before walking PPBs. */
 void pcibios_fixup_bus(struct pci_bus *bus)
 {
@@ -136,7 +130,6 @@ void pcibios_fixup_bus(struct pci_bus *bus)
 		printk(KERN_WARNING "pci_bios != NULL but fixup_bus() is!\n");
 	}
 }
-
 
 char *pcibios_setup(char *str)
 {
@@ -173,7 +166,6 @@ void pcibios_set_master(struct pci_dev *dev)
 	pci_write_config_word(dev, PCI_CACHE_LINE_SIZE,
 				(0x80 << 8) | (L1_CACHE_BYTES / sizeof(u32)));
 }
-
 
 void __init pcibios_init_bus(struct pci_bus *bus)
 {
@@ -275,7 +267,6 @@ void pcibios_align_resource(void *data, struct resource *res,
 	/* The caller updates the end field, we don't.  */
 }
 
-
 /*
  * A driver is enabling the device.  We make sure that all the appropriate
  * bits are set to allow the device to operate as the driver is expecting.
@@ -311,7 +302,6 @@ int pcibios_enable_device(struct pci_dev *dev, int mask)
 	}
 	return 0;
 }
-
 
 /* PA-RISC specific */
 void pcibios_register_hba(struct pci_hba_data *hba)

@@ -14,7 +14,6 @@
 #define CAPI_MAXCONTR	32	/* maximum number of controller    */
 #define CAPI_MAXDATAWINDOW	8
 
-
 typedef struct kcapi_flagdef {
 	int contr;
 	int flag;
@@ -41,7 +40,6 @@ typedef struct kcapi_carddef {
 #define KCAPI_TRACE_FULL_NO_DATA	2
 #define KCAPI_TRACE_SHORT		3
 #define KCAPI_TRACE_FULL		4
-
 
 #ifdef __KERNEL__
 
@@ -87,8 +85,6 @@ int capi20_manufacturer(unsigned int cmd, void __user *data);
 /* temporary hack XXX */
 void capi20_set_callback(struct capi20_appl *ap, 
 			 void (*callback) (unsigned int cmd, __u32 contr, void *data));
-
-
 
 #define CAPI_NOERROR                      0x0000
 

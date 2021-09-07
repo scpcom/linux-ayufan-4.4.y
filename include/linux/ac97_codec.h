@@ -219,7 +219,6 @@
 /* Total number of defined registers.  */
 #define AC97_REG_CNT 64
 
-
 /* OSS interface to the ac97s.. */
 #define AC97_STEREO_MASK (SOUND_MASK_VOLUME|SOUND_MASK_PCM|\
 	SOUND_MASK_LINE|SOUND_MASK_CD|\

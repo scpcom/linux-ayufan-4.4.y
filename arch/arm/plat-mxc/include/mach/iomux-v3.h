@@ -119,4 +119,3 @@ void mxc_iomux_v3_release_multiple_pads(struct pad_desc *pad_list, int count);
 void mxc_iomux_v3_init(void __iomem *iomux_v3_base);
 
 #endif /* __MACH_IOMUX_V3_H__*/
-

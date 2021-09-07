@@ -168,4 +168,3 @@ static inline int get_memcfg_numaq(void)
 }
 #endif /* CONFIG_X86_NUMAQ */
 #endif /* _ASM_X86_NUMAQ_H */
-

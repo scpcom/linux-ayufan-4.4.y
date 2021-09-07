@@ -33,7 +33,6 @@ MODULE_VERSION("2.11");
 MODULE_PARM_DESC(hash_size, "Trustees hash size");
 module_param_named(hash_size, trustee_hash_size, uint, 0444);
 
-
 static int __init trustees_init(void)
 {
 	if (trustees_funcs_init_globals() != 0) {

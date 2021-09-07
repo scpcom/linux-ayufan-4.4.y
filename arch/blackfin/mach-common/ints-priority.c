@@ -73,7 +73,6 @@ struct ivg_slice {
 	struct ivgx *istop;
 } ivg7_13[IVG13 - IVG7 + 1];
 
-
 /*
  * Search SIC_IAR and fill tables with the irqvalues
  * and their positions in the SIC_ISR register.
@@ -1077,7 +1076,6 @@ int __init init_arch_irq(void)
 	for (irq = GPIO_IRQ_BASE; irq < NR_IRQS; irq++)
 		set_irq_chip_and_handler(irq, &bfin_gpio_irqchip,
 					 handle_level_irq);
-
 
 	bfin_write_IMASK(0);
 	CSYNC();

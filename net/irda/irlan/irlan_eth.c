@@ -70,7 +70,6 @@ static void irlan_eth_setup(struct net_device *dev)
 	dev->netdev_ops		= &irlan_eth_netdev_ops;
 	dev->destructor		= free_netdev;
 
-
 	/*
 	 * Lets do all queueing in IrTTP instead of this device driver.
 	 * Queueing here as well can introduce some strange latency

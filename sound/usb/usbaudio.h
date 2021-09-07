@@ -21,7 +21,6 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-
 /*
  */
 
@@ -106,7 +105,6 @@
 #define USB_AUDIO_FORMAT_IEC1937_MPEG2_EXT	0x2004
 #define USB_AUDIO_FORMAT_IEC1937_MPEG2_LAYER1_LS	0x2005
 #define USB_AUDIO_FORMAT_IEC1937_MPEG2_LAYER23_LS	0x2006
-
 
 /* maximum number of endpoints per interface */
 #define MIDI_MAX_ENDPOINTS 2

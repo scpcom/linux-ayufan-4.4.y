@@ -93,7 +93,6 @@ struct dwc_otg_pcd;
 
 struct usb_iso_request;
 
-
 struct usb_gadget_iso_packet_descriptor
 {
        unsigned int            offset;

@@ -251,7 +251,6 @@ BUILD_TRAP_HANDLER(singlestep)
 	local_irq_restore(flags);
 }
 
-
 BUILD_TRAP_HANDLER(breakpoint)
 {
 	unsigned long flags;

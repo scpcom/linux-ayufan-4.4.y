@@ -48,7 +48,6 @@ struct karma_data {
 
 static int rio_karma_init(struct us_data *us);
 
-
 /*
  * The table of devices
  */
@@ -86,7 +85,6 @@ static struct us_unusual_dev karma_unusual_dev_list[] = {
 };
 
 #undef UNUSUAL_DEV
-
 
 /*
  * Send commands to Rio Karma.

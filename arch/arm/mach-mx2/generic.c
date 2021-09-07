@@ -94,4 +94,3 @@ void __init mx21_init_irq(void)
 {
 	mx27_init_irq();
 }
-

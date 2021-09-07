@@ -27,7 +27,6 @@
 #include "r8192S_phyreg.h"
 #include "r8192S_phy.h"
 
-
 /*---------------------------Define Local Constant---------------------------*/
 // Define local structure for debug!!!!!
 typedef struct RF_Shadow_Compare_Map {
@@ -44,12 +43,8 @@ typedef struct RF_Shadow_Compare_Map {
 }RF_SHADOW_T;
 /*---------------------------Define Local Constant---------------------------*/
 
-
 /*------------------------Define global variable-----------------------------*/
 /*------------------------Define global variable-----------------------------*/
-
-
-
 
 /*---------------------Define local function prototype-----------------------*/
 void phy_RF6052_Config_HardCode(struct net_device* dev);
@@ -89,7 +84,6 @@ extern void RF_ChangeTxPath(struct net_device* dev,  u16 DataRate)
 {
 }	/* RF_ChangeTxPath */
 
-
 /*-----------------------------------------------------------------------------
  * Function:    PHY_RF6052SetBandwidth()
  *
@@ -108,7 +102,6 @@ void PHY_RF6052SetBandwidth(struct net_device* dev, HT_CHANNEL_WIDTH Bandwidth)	
 {
 	//u8				eRFPath;
 	//struct r8192_priv 	*priv = ieee80211_priv(dev);
-
 
 	//if (priv->card_8192 == NIC_8192SE)
 	{
@@ -133,7 +126,6 @@ void PHY_RF6052SetBandwidth(struct net_device* dev, HT_CHANNEL_WIDTH Bandwidth)	
 	}
 //	else
 }
-
 
 /*-----------------------------------------------------------------------------
  * Function:	PHY_RF6052SetCckTxPower
@@ -175,8 +167,6 @@ extern void PHY_RF6052SetCckTxPower(struct net_device* dev, u8	powerlevel)
 
 }	/* PHY_RF6052SetCckTxPower */
 
-
-
 /*-----------------------------------------------------------------------------
  * Function:	PHY_RF6052SetOFDMTxPower
  *
@@ -213,7 +203,6 @@ extern void PHY_RF6052SetOFDMTxPower(struct net_device* dev, u8 powerlevel)
 	u8	rf_pwr_diff = 0;
 	u8	Legacy_pwrdiff=0, HT20_pwrdiff=0, BandEdge_Pwrdiff=0;
 	u8	ofdm_bandedge_chnl_low=0, ofdm_bandedge_chnl_high=0;
-
 
 	// We only care about the path A for legacy.
 	if (priv->EEPROMVersion != 2)
@@ -553,7 +542,6 @@ RT_STATUS phy_RF6052_Config_ParaFile(struct net_device* dev)
 	BB_REGISTER_DEFINITION_T	*pPhyReg;
 	//u8			eCheckItem;
 
-
 	//3//-----------------------------------------------------------------
 	//3// <2> Initialize RF
 	//3//-----------------------------------------------------------------
@@ -585,7 +573,6 @@ RT_STATUS phy_RF6052_Config_ParaFile(struct net_device* dev)
 		/* Set bit number of Address and Data for RF register */
 		rtl8192_setBBreg(dev, pPhyReg->rfHSSIPara2, b3WireAddressLength, 0x0); 	// Set 1 to 4 bits for 8255
 		rtl8192_setBBreg(dev, pPhyReg->rfHSSIPara2, b3WireDataLength, 0x0);	// Set 0 to 12  bits for 8255
-
 
 		/*----Initialize RF fom connfiguration file----*/
 		switch(eRFPath)
@@ -629,7 +616,6 @@ phy_RF6052_Config_ParaFile_Fail:
 	return rtStatus;
 }
 
-
 //
 // ==> RF shadow Operation API Code Section!!!
 //
@@ -667,7 +653,6 @@ extern u32 PHY_RFShadowRead(
 
 }	/* PHY_RFShadowRead */
 
-
 extern void PHY_RFShadowWrite(
 	struct net_device		* dev,
 	u32	eRFPath,
@@ -679,7 +664,6 @@ extern void PHY_RFShadowWrite(
 	RF_Shadow[eRFPath][Offset].Driver_Write = true;
 
 }	/* PHY_RFShadowWrite */
-
 
 extern void PHY_RFShadowCompare(
 	struct net_device		* dev,
@@ -722,7 +706,6 @@ extern void PHY_RFShadowRecorver(
 
 }	/* PHY_RFShadowRecorver */
 
-
 extern void PHY_RFShadowCompareAll(struct net_device * dev)
 {
 	u32		eRFPath;
@@ -737,7 +720,6 @@ extern void PHY_RFShadowCompareAll(struct net_device * dev)
 	}
 
 }	/* PHY_RFShadowCompareAll */
-
 
 extern void PHY_RFShadowRecorverAll(struct net_device * dev)
 {
@@ -754,7 +736,6 @@ extern void PHY_RFShadowRecorverAll(struct net_device * dev)
 
 }	/* PHY_RFShadowRecorverAll */
 
-
 extern void PHY_RFShadowCompareFlagSet(
 	struct net_device 		* dev,
 	RF90_RADIO_PATH_E	eRFPath,
@@ -766,7 +747,6 @@ extern void PHY_RFShadowCompareFlagSet(
 
 }	/* PHY_RFShadowCompareFlagSet */
 
-
 extern void PHY_RFShadowRecorverFlagSet(
 	struct net_device 		* dev,
 	RF90_RADIO_PATH_E	eRFPath,
@@ -777,7 +757,6 @@ extern void PHY_RFShadowRecorverFlagSet(
 	RF_Shadow[eRFPath][Offset].Recorver= Type;
 
 }	/* PHY_RFShadowRecorverFlagSet */
-
 
 extern void PHY_RFShadowCompareFlagSetAll(struct net_device  * dev)
 {
@@ -798,7 +777,6 @@ extern void PHY_RFShadowCompareFlagSetAll(struct net_device  * dev)
 
 }	/* PHY_RFShadowCompareFlagSetAll */
 
-
 extern void PHY_RFShadowRecorverFlagSetAll(struct net_device  * dev)
 {
 	u32		eRFPath;
@@ -817,8 +795,6 @@ extern void PHY_RFShadowRecorverFlagSetAll(struct net_device  * dev)
 	}
 
 }	/* PHY_RFShadowCompareFlagSetAll */
-
-
 
 extern void PHY_RFShadowRefresh(struct net_device  * dev)
 {

@@ -72,7 +72,6 @@ static struct {
 	struct tcp_log	*log;
 } tcp_probe;
 
-
 static inline int tcp_probe_used(void)
 {
 	return (tcp_probe.head - tcp_probe.tail) % bufsize;

@@ -243,7 +243,6 @@ static void parport_cs_release(struct pcmcia_device *link)
 	pcmcia_disable_device(link);
 } /* parport_cs_release */
 
-
 static struct pcmcia_device_id parport_ids[] = {
 	PCMCIA_DEVICE_FUNC_ID(3),
 	PCMCIA_MFC_DEVICE_PROD_ID12(1,"Elan","Serial+Parallel Port: SP230",0x3beb8cf2,0xdb9e58bc),

@@ -6,7 +6,6 @@
 #include <asm/io.h>
 #include "proto.h"
 
-
 /*
  * The SRM console *disables* the IDE interface, this code ensures it's
  * enabled.

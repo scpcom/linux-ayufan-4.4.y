@@ -137,13 +137,9 @@
 #define WLAN_MGMT_STATUS_INVALID_RSN_IE_CAP             45
 #define WLAN_MGMT_STATUS_CIPHER_REJECT                  46
 
-
-
 // Auth Algorithm
 #define WLAN_AUTH_ALG_OPENSYSTEM                0
 #define WLAN_AUTH_ALG_SHAREDKEY                 1
-
-
 
 // Management Frame Field Offsets
 // Note: Not all fields are listed because of variable lengths.
@@ -189,7 +185,6 @@
 
 #define WLAN_DEAUTHEN_OFF_REASON            0
 
-
 //
 // Cipher Suite Selectors defiened in 802.11i
 //
@@ -222,14 +217,11 @@
 #define MEASURE_MODE_INCAPABLE  0x02
 #define MEASURE_MODE_REFUSED    0x04
 
-
-
 /*---------------------  Export Classes  ----------------------------*/
 
 /*---------------------  Export Variables  --------------------------*/
 
 /*---------------------  Export Types  ------------------------------*/
-
 
 // Information Element Types
 
@@ -240,7 +232,6 @@ typedef struct tagWLAN_IE {
 }__attribute__ ((__packed__))
 WLAN_IE, *PWLAN_IE;
 
-
 // Service Set Identity (SSID)
 #pragma pack(1)
 typedef struct tagWLAN_IE_SSID {
@@ -250,7 +241,6 @@ typedef struct tagWLAN_IE_SSID {
 }__attribute__ ((__packed__))
 WLAN_IE_SSID, *PWLAN_IE_SSID;
 
-
 // Supported Rates
 #pragma pack(1)
 typedef struct tagWLAN_IE_SUPP_RATES {
@@ -259,8 +249,6 @@ typedef struct tagWLAN_IE_SUPP_RATES {
     BYTE   abyRates[1];
 }__attribute__ ((__packed__))
 WLAN_IE_SUPP_RATES,  *PWLAN_IE_SUPP_RATES;
-
-
 
 // FH Parameter Set
 #pragma pack(1)
@@ -282,7 +270,6 @@ typedef struct tagWLAN_IE_DS_PARMS {
 }__attribute__ ((__packed__))
 WLAN_IE_DS_PARMS,  *PWLAN_IE_DS_PARMS;
 
-
 // CF Parameter Set
 #pragma pack(1)
 typedef struct tagWLAN_IE_CF_PARMS {
@@ -294,7 +281,6 @@ typedef struct tagWLAN_IE_CF_PARMS {
     WORD   wCFPDurRemaining;
 }__attribute__ ((__packed__))
 WLAN_IE_CF_PARMS,  *PWLAN_IE_CF_PARMS;
-
 
 // TIM
 #pragma pack(1)
@@ -308,7 +294,6 @@ typedef struct tagWLAN_IE_TIM {
 }__attribute__ ((__packed__))
 WLAN_IE_TIM,  *PWLAN_IE_TIM;
 
-
 // IBSS Parameter Set
 #pragma pack(1)
 typedef struct tagWLAN_IE_IBSS_PARMS {
@@ -318,7 +303,6 @@ typedef struct tagWLAN_IE_IBSS_PARMS {
 }__attribute__ ((__packed__))
 WLAN_IE_IBSS_PARMS, *PWLAN_IE_IBSS_PARMS;
 
-
 // Challenge Text
 #pragma pack(1)
 typedef struct tagWLAN_IE_CHALLENGE {
@@ -327,7 +311,6 @@ typedef struct tagWLAN_IE_CHALLENGE {
     BYTE   abyChallenge[1];
 }__attribute__ ((__packed__))
 WLAN_IE_CHALLENGE,  *PWLAN_IE_CHALLENGE;
-
 
 #pragma pack(1)
 typedef struct tagWLAN_IE_RSN_EXT {
@@ -393,7 +376,6 @@ typedef struct tagWLAN_IE_ERP {
     BYTE   byContext;
 }__attribute__ ((__packed__))
 WLAN_IE_ERP,  *PWLAN_IE_ERP;
-
 
 #pragma pack(1)
 typedef struct _MEASEURE_REQ {
@@ -507,7 +489,6 @@ typedef struct _WLAN_IE_TPC_REP {
     BYTE                byLinkMargin;
 } WLAN_IE_TPC_REP, *PWLAN_IE_TPC_REP;
 
-
 typedef struct _WLAN_IE_IBSS_DFS {
     BYTE                byElementID;
     BYTE                len;
@@ -517,8 +498,6 @@ typedef struct _WLAN_IE_IBSS_DFS {
 } WLAN_IE_IBSS_DFS, *PWLAN_IE_IBSS_DFS;
 
 #pragma pack()
-
-
 
 // Frame Types
 // prototype structure, all mgmt frame types will start with these members
@@ -561,7 +540,6 @@ typedef struct tagWLAN_FR_BEACON {
     PWLAN_IE_QUIET          pIE_Quiet;
 
 } WLAN_FR_BEACON, *PWLAN_FR_BEACON;
-
 
 // IBSS ATIM frame
 typedef struct tagWLAN_FR_IBSSATIM {

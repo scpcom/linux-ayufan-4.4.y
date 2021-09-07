@@ -77,4 +77,3 @@ void __init config_sun3x(void)
 #endif
 
 }
-

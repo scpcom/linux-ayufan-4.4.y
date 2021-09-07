@@ -542,7 +542,6 @@ static s32 i801_access(struct i2c_adapter * adap, u16 addr,
 	return 0;
 }
 
-
 static u32 i801_func(struct i2c_adapter *adapter)
 {
 	return I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_BYTE |

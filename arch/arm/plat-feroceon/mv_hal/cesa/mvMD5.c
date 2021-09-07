@@ -312,7 +312,6 @@ void    mvMD5(unsigned char const *buf, unsigned len, unsigned char* digest)
     mvMD5Final(digest, &ctx);
 }
 
-
 void    mvHmacMd5(unsigned char const* text, int text_len,
                   unsigned char const* key, int key_len,
                   unsigned char* digest)

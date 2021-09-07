@@ -8,7 +8,6 @@
 
 #include <asm/raw_io.h>
 
-
 #define q40_master_addr 0xff000000
 
 #define IIRQ_REG            0x0       /* internal IRQ reg */
@@ -37,7 +36,6 @@
 #define SER_ENABLE_REG      0x0c      /* allow serial ints to be generated */
 #endif
 #define EXT_ENABLE_REG      0x10      /* ... rest of the ISA ints ... */
-
 
 #define master_inb(_reg_)      in_8((unsigned char *)q40_master_addr+_reg_)
 #define master_outb(_b_,_reg_)  out_8((unsigned char *)q40_master_addr+_reg_,_b_)

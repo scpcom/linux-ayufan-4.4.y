@@ -71,7 +71,6 @@
 #define DMA_32BIT_PFN		IOVA_PFN(DMA_BIT_MASK(32))
 #define DMA_64BIT_PFN		IOVA_PFN(DMA_BIT_MASK(64))
 
-
 /* VT-d pages must always be _smaller_ than MM pages. Otherwise things
    are never going to work. */
 static inline unsigned long dma_to_mm_pfn(unsigned long dma_pfn)
@@ -399,7 +398,6 @@ static inline void *iommu_kmem_cache_alloc(struct kmem_cache *cachep)
 	return vaddr;
 }
 
-
 static inline void *alloc_pgtable_page(void)
 {
 	unsigned int flags;
@@ -447,7 +445,6 @@ void free_iova_mem(struct iova *iova)
 {
 	kmem_cache_free(iommu_iova_cache, iova);
 }
-
 
 static inline int width_to_agaw(int width);
 
@@ -1161,7 +1158,6 @@ static int iommu_disable_translation(struct intel_iommu *iommu)
 	return 0;
 }
 
-
 static int iommu_init_domains(struct intel_iommu *iommu)
 {
 	unsigned long ndomains;
@@ -1196,7 +1192,6 @@ static int iommu_init_domains(struct intel_iommu *iommu)
 		set_bit(0, iommu->domain_ids);
 	return 0;
 }
-
 
 static void domain_exit(struct dmar_domain *domain);
 static void vm_domain_exit(struct dmar_domain *domain);
@@ -2126,7 +2121,6 @@ static int identity_mapping(struct pci_dev *pdev)
 
 	if (likely(!iommu_identity_mapping))
 		return 0;
-
 
 	list_for_each_entry(info, &si_domain->devices, link)
 		if (info->dev == pdev)

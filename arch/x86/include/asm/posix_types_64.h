@@ -7,7 +7,6 @@
 #endif
 #endif
 
-
 /*
  * This file is generally used by user-level software, so you need to
  * be a little careful about namespace pollution etc.  Also, we cannot

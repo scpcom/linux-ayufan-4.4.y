@@ -82,7 +82,6 @@ enum {
 	I2400MS_SETTLE_TIME = 40,
 };
 
-
 /**
  * struct i2400ms - descriptor for a SDIO connected i2400m
  *
@@ -113,13 +112,11 @@ struct i2400ms {
 	size_t bm_ack_size;
 };
 
-
 static inline
 void i2400ms_init(struct i2400ms *i2400ms)
 {
 	i2400m_init(&i2400ms->i2400m);
 }
-
 
 extern int i2400ms_rx_setup(struct i2400ms *);
 extern void i2400ms_rx_release(struct i2400ms *);

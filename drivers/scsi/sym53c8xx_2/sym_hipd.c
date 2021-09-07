@@ -280,7 +280,6 @@ static void sym_selectclock(struct sym_hcb *np, u_char scntl3)
 	OUTB(np, nc_stest3, 0x00);		/* Restart scsi clock 	*/
 }
 
-
 /*
  *  Determine the chip's clock frequency.
  *
@@ -3835,7 +3834,6 @@ out_ok:
 out_reject:
 	OUTL_DSP(np, SCRIPTB_BA(np, msg_bad));
 }
-
 
 /*
  *  chip calculation of the data residual.

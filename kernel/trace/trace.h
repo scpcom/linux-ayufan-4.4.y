@@ -234,7 +234,6 @@ struct tracer_flags {
 /* Makes more easy to define a tracer opt */
 #define TRACER_OPT(s, b)	.name = #s, .bit = b
 
-
 /**
  * struct tracer - a specific tracer and its callbacks to interact with debugfs
  * @name: the name chosen to select it on the available_tracers file
@@ -285,7 +284,6 @@ struct tracer {
 	int			print_max;
 	struct tracer_flags	*flags;
 };
-
 
 #define TRACE_PIPE_ALL_CPU	-1
 

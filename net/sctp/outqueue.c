@@ -697,7 +697,6 @@ int sctp_outq_uncork(struct sctp_outq *q)
 	return error;
 }
 
-
 /*
  * Try to flush an outqueue.
  *
@@ -1176,7 +1175,6 @@ int sctp_outq_sack(struct sctp_outq *q, struct sctp_sackhdr *sack)
 	} else {
 		highest_new_tsn = sctp_highest_new_tsn(sack, asoc);
 	}
-
 
 	/* Run through the retransmit queue.  Credit bytes received
 	 * and free those chunks that we can.

@@ -92,7 +92,6 @@ struct hpsb_iso {
 	int channel; /* -1 if multichannel */
 	int dma_mode; /* dma receive mode */
 
-
 	/* greatest # of packets between interrupts - controls
 	 * the maximum latency of the buffer */
 	int irq_interval;

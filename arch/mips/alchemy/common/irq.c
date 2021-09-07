@@ -203,7 +203,6 @@ struct au1xxx_irqmap au1xxx_ic0_map[] __initdata = {
 #endif
 };
 
-
 #ifdef CONFIG_PM
 
 /*
@@ -286,7 +285,6 @@ void restore_au1xxx_intctl(void)
 	au_writel(sleep_intctl_mask[0], IC0_MASKSET); au_sync();
 }
 #endif /* CONFIG_PM */
-
 
 static void au1x_ic0_unmask(unsigned int irq_nr)
 {

@@ -1079,7 +1079,6 @@ void r600_gpu_init(struct radeon_device *rdev)
 	WREG32(PA_SC_ENHANCE, FORCE_EOV_MAX_CLK_CNT(4095));
 }
 
-
 /*
  * Indirect registers accessor
  */
@@ -1100,7 +1099,6 @@ void r600_pciep_wreg(struct radeon_device *rdev, u32 reg, u32 v)
 	WREG32(PCIE_PORT_DATA, (v));
 	(void)RREG32(PCIE_PORT_DATA);
 }
-
 
 /*
  * CP & Ring
@@ -1324,7 +1322,6 @@ void r600_ring_init(struct radeon_device *rdev, unsigned ring_size)
 	rdev->cp.align_mask = 16 - 1;
 }
 
-
 /*
  * GPU scratch registers helpers function.
  */
@@ -1483,7 +1480,6 @@ void r600_clear_surface_reg(struct radeon_device *rdev, int reg)
 {
 	/* FIXME: implement */
 }
-
 
 bool r600_card_posted(struct radeon_device *rdev)
 {
@@ -1720,7 +1716,6 @@ void r600_fini(struct radeon_device *rdev)
 	radeon_dummy_page_fini(rdev);
 }
 
-
 /*
  * CS stuff
  */
@@ -1798,9 +1793,6 @@ int r600_ib_test(struct radeon_device *rdev)
 	radeon_ib_free(rdev, &ib);
 	return r;
 }
-
-
-
 
 /*
  * Debugfs info

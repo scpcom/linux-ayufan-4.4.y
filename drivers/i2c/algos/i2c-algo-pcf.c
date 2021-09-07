@@ -36,7 +36,6 @@
 #include <linux/i2c-algo-pcf.h>
 #include "i2c-algo-pcf.h"
 
-
 #define DEB2(x) if (i2c_debug >= 2) x
 #define DEB3(x) if (i2c_debug >= 3) x /* print several statistical values */
 #define DEBPROTO(x) if (i2c_debug >= 9) x;
@@ -292,7 +291,6 @@ static int pcf_readbytes(struct i2c_adapter *i2c_adap, char *buf,
 
 	return i - 1;
 }
-
 
 static int pcf_doAddress(struct i2c_algo_pcf_data *adap,
 			 struct i2c_msg *msg)

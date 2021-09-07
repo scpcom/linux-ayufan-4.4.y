@@ -1193,4 +1193,3 @@ int ieee80211_reconfig(struct ieee80211_local *local)
 #endif
 	return 0;
 }
-

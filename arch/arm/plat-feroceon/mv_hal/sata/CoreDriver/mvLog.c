@@ -73,7 +73,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 #include "mvOsS.h"
 
-
 #if defined (MV_LOG_DEBUG) || defined (MV_LOG_ERROR)
 
 const char* mvLogMsgType[MV_MAX_MESSAGE_TYPE] = {
@@ -102,7 +101,6 @@ static MV_LOG_FILTER_HEADER mvLogInstance[MV_MAX_LOG_MODULES] =
 };
 
 static char szMessageBuffer[1024];
-
 
 MV_BOOLEAN mvLogRegisterModule(MV_U8 moduleId, MV_U32 filterMask, const char* name)
 {
@@ -137,7 +135,6 @@ MV_BOOLEAN mvLogSetModuleFilter(MV_U8 moduleId, MV_U32 filterMask)
     mvLogInstance[moduleId].filterMask = filterMask;
     return MV_TRUE;
 }
-
 
 MV_U32 mvLogGetModuleFilter(MV_U8 moduleId)
 {

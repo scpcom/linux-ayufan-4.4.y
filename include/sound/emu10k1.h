@@ -148,7 +148,6 @@
 #define INTE_A_MIDITXENABLE2	0x00020000	/* Enable MIDI transmit-buffer-empty interrupts	*/
 #define INTE_A_MIDIRXENABLE2	0x00010000	/* Enable MIDI receive-buffer-empty interrupts	*/
 
-
 #define INTE_SAMPLERATETRACKER	0x00002000	/* Enable sample rate tracker interrupts	*/
 						/* NOTE: This bit must always be enabled       	*/
 #define INTE_FXDSPENABLE	0x00001000	/* Enable FX DSP interrupts			*/
@@ -216,8 +215,6 @@
 						/* conversion for the corresponding		*/
  						/* I2S format input				*/
 /* Rest of HCFG 0x0000000f same as below. LOCKSOUNDCACHE etc.  */
-
-
 
 /* Older chips */
 #define HCFG_CODECFORMAT_AC97	0x00000000	/* AC97 CODEC format -- Primary Output		*/
@@ -365,7 +362,6 @@
 /* When reading, use these bitfields: */
 #define JOYSTICK_BUTTONS	0x0f		/* Joystick button data				*/
 #define JOYSTICK_COMPARATOR	0xf0		/* Joystick comparator data			*/
-
 
 /********************************************************************************************************/
 /* Emu10k1 pointer-offset register set, accessed through the PTR and DATA registers			*/
@@ -529,7 +525,6 @@
 #define IFATN_ATTENUATION_MASK	0x000000ff	/* Initial attenuation in 0.375dB steps			*/
 #define IFATN_ATTENUATION	0x08000019
 
-
 #define PEFE			0x1a		/* Pitch envelope and filter envelope amount register	*/
 #define PEFE_PITCHAMOUNT_MASK	0x0000ff00	/* Pitch envlope amount					*/
 						/* Signed 2's complement, +/- one octave peak extremes	*/
@@ -542,7 +537,6 @@
 						/* Signed 2's complement, +/- one octave extremes	*/
 #define FMMOD_MOFILTER		0x000000ff	/* Filter LFO modulation depth				*/
 						/* Signed 2's complement, +/- three octave extremes	*/
-
 
 #define TREMFRQ 		0x1c		/* Tremolo amount and modulation LFO frequency register	*/
 #define TREMFRQ_DEPTH		0x0000ff00	/* Tremolo depth					*/
@@ -708,7 +702,6 @@
 
 /* Current Send H, G Amounts */
 #define A_CSHG			0x4f
-
 
 #define CDCS			0x50		/* CD-ROM digital channel status register	*/
 
@@ -954,7 +947,6 @@
 #define HIWORD_OPCODE_MASK	0x00f00000	/* Instruction opcode				*/
 #define HIWORD_RESULT_MASK	0x000ffc00	/* Instruction result				*/
 #define HIWORD_OPA_MASK		0x000003ff	/* Instruction operand A			*/
-
 
 /* Audigy Soundcard have a different instruction format */
 #define A_MICROCODEBASE		0x600

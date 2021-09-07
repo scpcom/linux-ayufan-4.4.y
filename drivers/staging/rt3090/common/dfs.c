@@ -37,15 +37,12 @@
 
 #include "../rt_config.h"
 
-
 typedef struct _RADAR_DURATION_TABLE
 {
 	ULONG RDDurRegion;
 	ULONG RadarSignalDuration;
 	ULONG Tolerance;
 } RADAR_DURATION_TABLE, *PRADAR_DURATION_TABLE;
-
-
 
 UCHAR RdIdleTimeTable[MAX_RD_REGION][4] =
 {
@@ -114,7 +111,6 @@ VOID BbpRadarDetectionStart(
 			(RdIdleTimeTable[pAd->CommonCfg.RadarDetect.RDDurRegion][0] + pAd->CommonCfg.RadarDetect.DfsSessionTime) : 250;
 
 #ifdef MERGE_ARCH_TEAM
-
 
 #else // Original RT28xx source code.
 	RTMP_IO_WRITE8(pAd, 0x7020, 0x1d);
@@ -199,7 +195,6 @@ VOID RadarDetectionStart(
 	else
 		CtsProtect = 0x01;
 
-
 	// send start-RD with CTS protection command to MCU
 	// highbyte [7]		reserve
 	// highbyte [6:5]	0x: stop Carrier/Radar detection
@@ -237,7 +232,6 @@ VOID RadarDetectionStop(
 	return;
 }
 #endif // DFS_SUPPORT //
-
 
 /*
 	========================================================================
@@ -337,7 +331,6 @@ ULONG RTMPReadRadarDuration(
 #ifdef DFS_SUPPORT
 	UINT8 duration1 = 0, duration2 = 0, duration3 = 0;
 
-
 	BBP_IO_READ8_BY_REG_ID(pAd, BBP_R116, &duration1);
 	BBP_IO_READ8_BY_REG_ID(pAd, BBP_R117, &duration2);
 	BBP_IO_READ8_BY_REG_ID(pAd, BBP_R118, &duration3);
@@ -408,19 +401,14 @@ VOID RadarDetectPeriodic(
 	if (pAd->CommonCfg.RadarDetect.RDMode != RD_SILENCE_MODE)
 			return;
 
-
-
 	// channel availability check time is 60sec, use 65 for assurance
 	if (pAd->CommonCfg.RadarDetect.RDCount++ > pAd->CommonCfg.RadarDetect.ChMovingTime)
 	{
 		DBGPRINT(RT_DEBUG_TRACE, ("Not found radar signal, start send beacon and radar detection in service monitor\n\n"));
 		BbpRadarDetectionStop(pAd);
 
-
 		AsicEnableBssSync(pAd);
 		pAd->CommonCfg.RadarDetect.RDMode = RD_NORMAL_MODE;
-
-
 
 		return;
 	}

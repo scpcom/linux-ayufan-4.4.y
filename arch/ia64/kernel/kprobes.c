@@ -924,7 +924,6 @@ int __kprobes kprobe_fault_handler(struct pt_regs *regs, int trapnr)
 	struct kprobe *cur = kprobe_running();
 	struct kprobe_ctlblk *kcb = get_kprobe_ctlblk();
 
-
 	switch(kcb->kprobe_status) {
 	case KPROBE_HIT_SS:
 	case KPROBE_REENTER:

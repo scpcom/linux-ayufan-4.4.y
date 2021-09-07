@@ -9,9 +9,7 @@
  *	(c) 1998 Martin Mares <mj@ucw.cz>
  */
 
-
 #include <asm/io.h>
-
 
 #if defined(CONFIG_VGA_CONSOLE) || defined(CONFIG_MDA_CONSOLE)
 

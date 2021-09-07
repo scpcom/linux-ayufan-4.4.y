@@ -76,7 +76,6 @@ struct atmel_pcm_dma_params {
 
 extern struct snd_soc_platform atmel_soc_platform;
 
-
 /*
  * SSC register access (since ssc_writel() / ssc_readl() require literal name)
  */
