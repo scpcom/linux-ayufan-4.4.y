@@ -47,6 +47,9 @@
 #include <linux/delay.h>
 #include <linux/raid/md_p.h>
 #include <linux/raid/md_u.h>
+#ifdef MY_ABC_HERE
+#include <linux/list_sort.h>
+#endif
 #include "md.h"
 #include "bitmap.h"
 
@@ -57,11 +60,6 @@ extern int SynoDebugFlag;
 #endif
 #endif
 
-#ifdef MY_DEF_HERE
-#undef MODULE
-extern int *SYNOMdpMajor;
-extern struct list_head SYNOAllDetectedDevices;
-#endif
 #ifdef MY_ABC_HERE
 extern int (*funcSYNORaidDiskUnplug)(char *szDiskName);
 EXPORT_SYMBOL(SYNORaidRdevUnplug);
@@ -71,6 +69,10 @@ void SYNORaidUnplugTask(struct work_struct *);
 
 #define DEBUG 0
 #define dprintk(x...) ((void)(DEBUG && printk(x)))
+
+#ifdef MY_ABC_HERE
+DEFINE_SPINLOCK(MdListLock);
+#endif
 
 #ifdef __LITTLE_ENDIAN
 #define SYNO_RAID_USE_BE_SB
@@ -6020,6 +6022,9 @@ static int md_ioctl(struct block_device *bdev, fmode_t mode,
 				} else {
 					status.inSync = 0;
 				}
+				if (0 == mddev->level || LEVEL_LINEAR == mddev->level) {
+					status.inSync = 0;
+				}
 				if (mddev->curr_resync > 2) {
 					status.finishSectors = (mddev->curr_resync - atomic_read(&mddev->recovery_active));
 				} else {
@@ -7452,9 +7457,6 @@ static int __init md_init(void)
 		unregister_blkdev(MD_MAJOR, "md");
 		return -1;
 	}
-#ifdef MY_DEF_HERE
-	SYNOMdpMajor = &mdp_major;
-#endif
 	blk_register_region(MKDEV(MD_MAJOR, 0), 1UL<<MINORBITS, THIS_MODULE,
 			    md_probe, NULL, NULL);
 	blk_register_region(MKDEV(mdp_major, 0), 1UL<<MINORBITS, THIS_MODULE,
@@ -7492,10 +7494,12 @@ void md_autodetect_dev(dev_t dev)
 	node_detected_dev = kzalloc(sizeof(*node_detected_dev), GFP_KERNEL);
 	if (node_detected_dev) {
 		node_detected_dev->dev = dev;
-#ifdef MY_DEF_HERE
-		list_add_tail(&node_detected_dev->list, &SYNOAllDetectedDevices);
-#else
+#ifdef MY_ABC_HERE
+		spin_lock(&MdListLock);
+#endif
 		list_add_tail(&node_detected_dev->list, &all_detected_devices);
+#ifdef MY_ABC_HERE
+		spin_unlock(&MdListLock);
 #endif
 	} else {
 		printk(KERN_CRIT "md: md_autodetect_dev: kzalloc failed"
@@ -7544,30 +7548,77 @@ END:
 }
 #endif
 
+#ifdef MY_ABC_HERE
+/**
+ * This function is comparason function for list_sort
+ * database.
+ *
+ * @param priv merge sort key
+ * @param plistHead1 first list_head
+ * @param plistHead2 second list_head
+ *
+ * @return > 0: plistHead1 is front of plistHead2
+ * @return = 0: no operation
+ * @return < 0: plistHead2 is front of plistHead1
+ */
+static int device_sort_cmp(void *priv, struct list_head *plistHead1, struct list_head *plistHead2)
+{
+	struct detected_devices_node *pnode1 = NULL;
+	struct detected_devices_node *pnode2 = NULL;
+	int iRet = 0;
+
+	if (plistHead1 != plistHead2) {
+		pnode1 = list_entry(plistHead1, struct detected_devices_node, list);
+		pnode2 = list_entry(plistHead2, struct detected_devices_node, list);
+
+		if (MAJOR(pnode1->dev) == MAJOR(pnode2->dev)) {
+			iRet = MINOR(pnode1->dev) - MINOR(pnode2->dev);
+		} else {
+			iRet = MAJOR(pnode1->dev) - MAJOR(pnode2->dev);
+		}
+	}
+
+	return iRet;
+}
+#endif
+
 static void autostart_arrays(int part)
 {
 	mdk_rdev_t *rdev;
 	struct detected_devices_node *node_detected_dev;
 	dev_t dev;
 	int i_scanned, i_passed;
+#ifdef MY_ABC_HERE
+	int iIsEmpty = 0;
+#endif
 
 	i_scanned = 0;
 	i_passed = 0;
 
 	printk(KERN_INFO "md: Autodetecting RAID arrays.\n");
 
-#ifdef MY_DEF_HERE
-	while (!list_empty(&SYNOAllDetectedDevices) && i_scanned < INT_MAX) {
+#ifdef MY_ABC_HERE
+	spin_lock(&MdListLock);
+	iIsEmpty = list_empty(&all_detected_devices);
+#ifdef MY_ABC_HERE
+	list_sort(NULL, &all_detected_devices, device_sort_cmp);
+#endif
+	spin_unlock(&MdListLock);
+	while (!iIsEmpty && i_scanned < INT_MAX) {
 		i_scanned++;
-		node_detected_dev = list_entry(SYNOAllDetectedDevices.next,
+		spin_lock(&MdListLock);
+		node_detected_dev = list_entry(all_detected_devices.next,
 					struct detected_devices_node, list);
+		list_del(&node_detected_dev->list);
+		iIsEmpty = list_empty(&all_detected_devices);
+		spin_unlock(&MdListLock);
 #else
 	while (!list_empty(&all_detected_devices) && i_scanned < INT_MAX) {
 		i_scanned++;
 		node_detected_dev = list_entry(all_detected_devices.next,
 					struct detected_devices_node, list);
-#endif
 		list_del(&node_detected_dev->list);
+#endif
 		dev = node_detected_dev->dev;
 		kfree(node_detected_dev);
 		rdev = md_import_device(dev,0, 90);
@@ -8150,10 +8201,6 @@ END:
 	return;
 }
 EXPORT_SYMBOL(SynoMDWakeUpDevices);
-#endif
-
-#ifdef MY_DEF_HERE
-#define MODULE
 #endif
 
 EXPORT_SYMBOL(register_md_personality);

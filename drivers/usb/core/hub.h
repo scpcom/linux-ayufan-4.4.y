@@ -28,6 +28,15 @@
 #define HUB_GET_TT_STATE	10
 #define HUB_STOP_TT		11
 
+#ifdef MY_ABC_HERE
+/*
+ * Hub class additional requests defined by USB 3.0 spec
+ * See USB 3.0 spec Table 10-6
+ */
+#define HUB_SET_DEPTH			12
+#define HUB_GET_PORT_ERR_COUNT	13
+#endif
+
 /*
  * Hub Class feature numbers
  * See USB 2.0 spec Table 11-17
@@ -130,6 +139,12 @@ enum XHCI_SPECIAL_RESET_MODE{
 #define USB_SS_PORT_STAT_POWER		0x0200
 #define USB_SS_PORT_STAT_SPEED		0x1c00
 #define USB_PORT_STAT_SPEED_5GBPS	0x0000
+/* Valid only if port is enabled */
+/* Bits that are the same from USB 2.0 */
+#define USB_SS_PORT_STAT_MASK (USB_PORT_STAT_CONNECTION |          \
+		USB_PORT_STAT_ENABLE |      \
+		USB_PORT_STAT_OVERCURRENT | \
+		USB_PORT_STAT_RESET)
 
 /*
  * Definitions for PORT_LINK_STATE values
@@ -204,7 +219,13 @@ struct usb_hub_status {
  */
 
 #define USB_DT_HUB			(USB_TYPE_CLASS | 0x09)
+#ifdef MY_ABC_HERE
+#define USB_DT_SS_HUB       (USB_TYPE_CLASS | 0x0a)
+#endif
 #define USB_DT_HUB_NONVAR_SIZE		7
+#ifdef MY_ABC_HERE
+#define USB_DT_SS_HUB_SIZE          12
+#endif
 
 struct usb_hub_descriptor {
 	__u8  bDescLength;
@@ -213,9 +234,26 @@ struct usb_hub_descriptor {
 	__le16 wHubCharacteristics;
 	__u8  bPwrOn2PwrGood;
 	__u8  bHubContrCurrent;
-		/* add 1 bit for hub status change; round to bytes */
+#ifdef MY_ABC_HERE
+	/* 2.0 and 3.0 hubs differ here */
+	union {
+		struct {
+			/* add 1 bit for hub status change; round to bytes */
+			__u8  DeviceRemovable[(USB_MAXCHILDREN + 1 + 7) / 8];
+			__u8  PortPwrCtrlMask[(USB_MAXCHILDREN + 1 + 7) / 8];
+		}  __attribute__ ((packed)) hs;
+
+		struct {
+			__u8 bHubHdrDecLat;
+			__le16 wHubDelay;
+			__le16 DeviceRemovable;
+		}  __attribute__ ((packed)) ss;
+	} u;
+#else
+	/* add 1 bit for hub status change; round to bytes */
 	__u8  DeviceRemovable[(USB_MAXCHILDREN + 1 + 7) / 8];
 	__u8  PortPwrCtrlMask[(USB_MAXCHILDREN + 1 + 7) / 8];
+#endif
 } __attribute__ ((packed));
 
 

@@ -452,4 +452,19 @@ ENTRY(sys_call_table)
     .long sys_ni_syscall
 #endif
     .long sys_ni_syscall
+#ifdef MY_ABC_HERE
+    .long sys_SYNOStat                   /* 416 */
+    .long sys_SYNOFStat                  /* 417 */
+    .long sys_SYNOLStat                  /* 418 */
+    .long sys_SYNOStat64                   /* 419 */
+    .long sys_SYNOFStat64                  /* 420 */
+    .long sys_SYNOLStat64                  /* 421 */
+#else
+    .long sys_ni_syscall
+    .long sys_ni_syscall
+    .long sys_ni_syscall
+    .long sys_ni_syscall
+    .long sys_ni_syscall
+    .long sys_ni_syscall
+#endif /* MY_ABC_HERE */
 #endif

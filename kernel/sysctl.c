@@ -177,13 +177,14 @@ EXPORT_SYMBOL(gSwitchDev);
 EXPORT_SYMBOL(gDevPCIName);
 #endif
 
+
 #if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 int giSynoHddLedEnabled = 1;
 EXPORT_SYMBOL(giSynoHddLedEnabled);
 #endif
 
 #ifdef MY_ABC_HERE
-char gszSerialNum[12];
+char gszSerialNum[32];
 EXPORT_SYMBOL(gszSerialNum);
 char gszCustomSerialNum[32];
 EXPORT_SYMBOL(gszCustomSerialNum);
@@ -205,6 +206,7 @@ EXPORT_SYMBOL(funcSynoEunitPowerctlType);
 #endif
 
 #endif
+
 
 /* External variables not in a header file. */
 extern int C_A_D;
@@ -1324,7 +1326,7 @@ static struct ctl_table kern_table[] = {
 		.ctl_name		= CTL_UNNUMBERED,
 		.procname		= "syno_serial",
 		.data			= &gszSerialNum,
-		.maxlen			= 12,
+		.maxlen			= 32,
 		.mode			= 0444,
 		.proc_handler	= &proc_dostring,
 		.strategy		= &sysctl_string,

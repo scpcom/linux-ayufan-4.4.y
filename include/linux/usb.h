@@ -179,6 +179,9 @@ struct usb_interface {
 	unsigned needs_altsetting0:1;	/* switch to altsetting 0 is pending */
 	unsigned needs_binding:1;	/* needs delayed unbind/rebind */
 	unsigned reset_running:1;
+#ifdef MY_ABC_HERE
+	unsigned resetting_device:1;    /* true: bandwidth alloc after reset */
+#endif
 
 	struct device dev;		/* interface specific device info */
 	struct device *usb_dev;
@@ -1063,7 +1066,8 @@ typedef void (*usb_complete_t)(struct urb *);
  * @number_of_packets: Lists the number of ISO transfer buffers.
  * @interval: Specifies the polling interval for interrupt or isochronous
  *	transfers.  The units are frames (milliseconds) for full and low
- *	speed devices, and microframes (1/8 millisecond) for highspeed ones.
+ *	speed devices, and microframes (1/8 millisecond) for highspeed
+ *	and SuperSpeed devices.
  * @error_count: Returns the number of ISO transfers that reported errors.
  * @context: For use in completion functions.  This normally points to
  *	request-specific driver context.
@@ -1295,9 +1299,15 @@ static inline void usb_fill_bulk_urb(struct urb *urb,
  *
  * Initializes a interrupt urb with the proper information needed to submit
  * it to a device.
- * Note that high speed interrupt endpoints use a logarithmic encoding of
- * the endpoint interval, and express polling intervals in microframes
- * (eight per millisecond) rather than in frames (one per millisecond).
+ * Note that High Speed and SuperSpeed interrupt endpoints use a logarithmic
+ * encoding of the endpoint interval, and express polling intervals in
+ * microframes (eight per millisecond) rather than in frames (one per
+ * millisecond).
+ *
+ * Wireless USB also uses the logarithmic encoding, but specifies it in units of
+ * 128us instead of 125us.  For Wireless USB devices, the interval is passed
+ * through to the host controller, rather than being translated into microframe
+ * units.
  */
 static inline void usb_fill_int_urb(struct urb *urb,
 				    struct usb_device *dev,
@@ -1314,7 +1324,11 @@ static inline void usb_fill_int_urb(struct urb *urb,
 	urb->transfer_buffer_length = buffer_length;
 	urb->complete = complete_fn;
 	urb->context = context;
+#ifdef MY_ABC_HERE
+	if (dev->speed == USB_SPEED_HIGH || dev->speed == USB_SPEED_SUPER)
+#else
 	if (dev->speed == USB_SPEED_HIGH)
+#endif
 		urb->interval = 1 << (interval - 1);
 	else
 		urb->interval = interval;

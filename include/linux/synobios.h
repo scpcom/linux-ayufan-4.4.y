@@ -239,6 +239,17 @@ typedef struct _SynoRtcTimePkt {
 	unsigned char    year;
 } SYNORTCTIMEPKT;
 
+typedef struct _tag_SYNO_SUPERIO_PACKAGE{
+	unsigned char ldn;
+	unsigned char reg;
+	unsigned char value;
+} SYNO_SUPERIO_PACKAGE;
+
+typedef struct _tag_SYNO_MEM_ACCESS {
+	unsigned int addr;
+	unsigned int value;
+} SYNO_MEM_ACCESS;
+
 #define MAX_CPU 2
 typedef struct _SynoCpuTemp {
 	unsigned char blSurface;
@@ -361,6 +372,12 @@ typedef	enum {
 } BACKPLANE_STATUS;
 
 typedef enum {
+	EUP_FULLY_SUPPORT = 0,
+	EUP_NOT_FULLY_SUPPORT,
+	EUP_NOT_SUPPORT,
+} SYNO_EUP_SUPPORT;
+
+typedef enum {
     TEMPERATURE_OVER_NORMAL = -7,
 } SYNO_SHUTDOWN_LOG;
 
@@ -408,6 +425,9 @@ typedef struct _tag_FanStatus {
 #define FAN_SPEED_SHIFT_SET(duty_cycle, hz)   ((duty_cycle) + ((hz) << 8) + FAN_SPEED_PWM_FORMAT_SHIFT)
 #define FAN_SPEED_SHIFT_HZ_GET(speed)		  (((speed) - FAN_SPEED_PWM_FORMAT_SHIFT) >> 8)   /* shift 8bit and get hz value  */
 #define FAN_SPEED_SHIFT_DUTY_GET(speed)		  (((speed) - FAN_SPEED_PWM_FORMAT_SHIFT) & 0xFF) /* duty cycle is set in the first 8bit, so get it in first 8bit */
+
+/* if curspeed is stop and nxtspeed is lower than "high", return true. else return false*/
+#define IS_FAN_NEED_TO_SPIN_FASTER_FIRST(NxtSpeed, CurSpeed) (((NxtSpeed) < FAN_SPEED_PWM_FORMAT_SHIFT) ? ( FAN_SPEED_HIGH > (NxtSpeed) && FAN_SPEED_STOP == (CurSpeed) ) : (65 > FAN_SPEED_SHIFT_DUTY_GET(NxtSpeed) && (0 == FAN_SPEED_SHIFT_DUTY_GET(CurSpeed) ||  FAN_SPEED_STOP == CurSpeed)))
 
 // Synology Disk Station Brand
 enum {
@@ -520,6 +540,7 @@ typedef enum _tag_EUNIT_PWRON_TYPE {
 	EUNIT_NOT_SUPPORT,
 	EUNIT_PWRON_GPIO,
 	EUNIT_PWRON_ATACMD,
+	EUNIT_SAS_NO_PWRON,
 }EUNIT_PWRON_TYPE;
 
 typedef enum _tag_POWER_IN_SEQ {
@@ -624,6 +645,11 @@ typedef enum {
 	MICROP_ID_3413xsp = 0x4e, /* 'N' */
 	MICROP_ID_913p = 0x4f, /* 'O' */
 	MICROP_ID_713p = 0x50, /* 'P' */
+	MICROP_ID_1513p = 0x51, /* 'Q' */
+	MICROP_ID_1813p = 0x52, /* 'R' */
+	MICROP_ID_RS2413p = 0x53, /* 'S' */
+	MICROP_ID_RS2413rpp = 0x54, /* 'T' */
+	MICROP_ID_713 = 0x55, /* 'U' */
 	MICROP_ID_UNKNOW = 0xFF,
 } SYNO_MICROP_ID;
 
@@ -752,14 +778,18 @@ typedef struct {
 #define HW_RS812p      "RS812+"        //"RS812+"
 #define HW_RS812rpp	   "RS812rp+"      //"RS812rp+"
 #define HW_DS1812p     "DS1812+"       //"DS1812+"
+#define HW_DS1813p     "DS1813+"       //"DS1813+"
 #define HW_RS2212p     "RS2212+"       //"RS2212+"
 #define HW_RS2212rpp   "RS2212rp+"     //"RS2212rp+"
+#define HW_RS2413p     "RS2413+"       //"RS2413+"
+#define HW_RS2413rpp   "RS2413rp+"     //"RS2413rp+"
 #define HW_DS2413p     "DS2413+"       //"DS2413+"
 #define HW_RS212       "RS212"         //"RS212"
 #define HW_DS212jv10   "DS212j"        //"DS212j"
 #define HW_DS212jv20   "DS212jv20"     //"DS212j"
 #define HW_RS812       "RS812"         //"RS812"
 #define HW_DS1512p     "DS1512+"       //"DS1512+"
+#define HW_DS1513p     "DS1513+"       //"DS1513+"
 #define HW_DS212pv10   "DS212pv10"     //"DS212+"
 #define HW_DS212pv20   "DS212pv20"     //"DS212+"
 #define HW_DS112j      "DS112jv10"     //"DS112j"
@@ -767,14 +797,20 @@ typedef struct {
 #define HW_DS112pv10   "DS112pv10"     //"DS112+"
 #define HW_DS112slim   "DS112slim"     //"DS112slim"
 #define HW_DS413jv10   "DS413jv10"     //"DS413jv10"
+#define HW_DS414jv10   "DS414jv10"     //"DS414jv10"
 #define HW_DS213pv10   "DS213pv10"     //"DS213pv10"
 #define HW_DS213airv10 "DS213airv10"   //"DS213airv10"
 #define HW_DS213v10    "DS213v10"      //"DS213v10"
-#define HW_NVR413v10   "NVR413v10"     //"NVR413v10"
+#define HW_NVR613v10   "NVR613v10"     //"NVR613v10"
 #define HW_VS240hdv10  "VS240hdv10"    //"VS240hdv10"
 #define HW_RS813       "RS813v10"      //"RS813v10"
 #define HW_RS213p      "RS213pv10"     //"RS213pv10"
-#define HW_RS213       "RS213v10"      //"RS213v10"
+#define HW_DS213jv10   "DS213jv10"     //"DS213jv10"
+#define HW_DS713       "DS713"         //"DS713"
+#define HW_US3v10      "US3v10"        //"US3v10"
+#define HW_DS114v10    "DS114v10"      //"DS114v10"
+#define HW_RS214v10   "RS214v10"     //"RS214v10"
+#define HW_DS214v10   "DS214v10"     //"DS214v10"
 #define HW_UNKNOWN     "DSUnknown"
 									    
 typedef struct _tag_HwCapability {
@@ -794,7 +830,7 @@ typedef enum {
 	MODEL_RS407,
 	MODEL_CS407,
 	MODEL_CS407e,
-	MODEL_DS207mv,
+	MODEL_DS207mv,  // 10
 	MODEL_DS107r2,
 	MODEL_DS508,
 	MODEL_RS408,
@@ -804,7 +840,7 @@ typedef enum {
 	MODEL_DS509p,
 	MODEL_RS409p,
 	MODEL_RS409rpp,
-	MODEL_DS209p,
+	MODEL_DS209p,  //20
 	MODEL_DS209pII,
 	MODEL_DS108j,
 	MODEL_DS109j,
@@ -814,7 +850,7 @@ typedef enum {
 	MODEL_DS409slim,
 	MODEL_DS409,
 	MODEL_RS409,
-	MODEL_DS109p,
+	MODEL_DS109p,  //30
 	MODEL_DS410j,
 	MODEL_DS210j,
 	MODEL_DS110j,
@@ -824,7 +860,7 @@ typedef enum {
 	MODEL_DS210p,
 	MODEL_DS410,
 	MODEL_DS411p,
-	MODEL_DS411pII,
+	MODEL_DS411pII,  //40
 	MODEL_DS110p,
 	MODEL_RS810p,
 	MODEL_RS810rpp,
@@ -834,7 +870,7 @@ typedef enum {
 	MODEL_DS011j,
 	MODEL_DS111,
 	MODEL_DS411slim,
-	MODEL_DS411,
+	MODEL_DS411,  //50
 	MODEL_DS1511p,
 	MODEL_DS211p,
 	MODEL_RS3411rpxs,
@@ -844,7 +880,7 @@ typedef enum {
 	MODEL_RS3412rpxs,
 	MODEL_RS3412xs,
 	MODEL_DS3612xs,
-	MODEL_RS3413xsp,
+	MODEL_RS3413xsp,  //60
 	MODEL_RS411,
 	MODEL_DS111j,
 	MODEL_RS2211p,
@@ -854,16 +890,18 @@ typedef enum {
 	MODEL_DS413,
 	MODEL_DS412p,
 	MODEL_DS913p,
-	MODEL_DS713p,
+	MODEL_DS713p,  //70
 	MODEL_RS812p,
 	MODEL_RS812rpp,
 	MODEL_DS1812p,
 	MODEL_RS2212p,
 	MODEL_RS2212rpp,
+	MODEL_RS2413p,
+	MODEL_RS2413rpp,
 	MODEL_DS2413p,
 	MODEL_RS212,
 	MODEL_DS212j,
-	MODEL_RS812,
+	MODEL_RS812,  //80
 	MODEL_DS1512p,
 	MODEL_DS212p,
 	MODEL_DS112j,
@@ -871,14 +909,22 @@ typedef enum {
 	MODEL_DS112p,
 	MODEL_DS112slim,
 	MODEL_DS413j,
+	MODEL_DS414j,
 	MODEL_DS213p,
-	MODEL_DS213air,
+	MODEL_DS213air,  //90
 	MODEL_DS213,
-	MODEL_NVR413,
+	MODEL_NVR613,
 	MODEL_VS240hd,
 	MODEL_RS813,
 	MODEL_RS213p,
-	MODEL_RS213,
+	MODEL_RS214,
+	MODEL_DS1513p,
+	MODEL_DS1813p,
+	MODEL_DS213j,
+	MODEL_DS713,  //100
+	MODEL_US3,
+	MODEL_DS114,
+	MODEL_DS214,
 	MODEL_INVALID
 } PRODUCT_MODEL;
 
@@ -1016,6 +1062,10 @@ typedef struct _tag_SYNO_SYS_STATUS {
 #define SYNOIO_PWM_CTL     _IOWR(SYNOBIOS_IOC_MAGIC, 39, SynoPWMCTL)
 #define SYNOIO_CHECK_MICROP_ID     _IO(SYNOBIOS_IOC_MAGIC, 40)
 #define SYNOIO_GET_EUNIT_TYPE     _IOR(SYNOBIOS_IOC_MAGIC, 41, EUNIT_PWRON_TYPE)
+#define SYNOIO_SET_BUZZER_CLEAR	_IOWR(SYNOBIOS_IOC_MAGIC, 42, unsigned char)
+#define SYNOIO_WRITE_MEM		_IOWR(SYNOBIOS_IOC_MAGIC, 43, SYNO_MEM_ACCESS)
+#define SYNOIO_READ_MEM			_IOWR(SYNOBIOS_IOC_MAGIC, 44, SYNO_MEM_ACCESS)
+
 
 #define SYNOIO_MANUTIL_MODE       _IOWR(SYNOBIOS_IOC_MAGIC, 128, int)
 #define SYNOIO_RECORD_EVENT       _IOWR(SYNOBIOS_IOC_MAGIC, 129, int)
@@ -1036,6 +1086,11 @@ typedef struct _tag_SYNO_SYS_STATUS {
 #define DISK_BADSECTOR_GET     _IOWR(SYNOBIOS_IOC_MAGIC, 214, struct disk_bs_map_ctlcmd)
 #define DISK_BADSECTOR_RESET   _IOWR(SYNOBIOS_IOC_MAGIC, 215, int)
 #endif
+
+#define SYNOIO_SUPERIO_READ		_IOWR(SYNOBIOS_IOC_MAGIC, 216, SYNO_SUPERIO_PACKAGE)
+#define SYNOIO_SUPERIO_WRITE		_IOWR(SYNOBIOS_IOC_MAGIC, 217, SYNO_SUPERIO_PACKAGE)
+#define SYNOIO_IS_FULLY_SUPPORT_EUP	_IOWR(SYNOBIOS_IOC_MAGIC, 218, SYNO_EUP_SUPPORT)
+
 /*
 #define SYNOIO_HWSTATUS		_IOR('A', 102, struct _Synohw)
 #define SYNOIO_TESTING		_IOW('P', 104, int)
@@ -1241,6 +1296,8 @@ typedef struct _tag_SYNO_SYS_STATUS {
 #define SYNO_SYS_RUN                    0x4002
 #define SYNO_SYS_SHUTDOWN               0x4003
 #define SYNO_SYS_NODISK                 0x4004
+#define SYNO_SYS_WAIT_RESET             0x4005
+#define SYNO_SYS_FACTORY_DEFAULT        0x4006
 #define SYNO_LED_USB_COPY_NONE          0x5100
 #define SYNO_LED_USB_COPY_STEADY        0x5101
 #define SYNO_LED_USB_COPY_BLINK         0x5102
@@ -1249,6 +1306,9 @@ typedef struct _tag_SYNO_SYS_STATUS {
 #define SYNO_LED_HDD_AB                 0x5202
 #define SYNO_LED_HDD_OFF                0x5203
 #define SYNO_LED_HDD_GB                 0x5204
+#define SYNO_LED_ALARM_ON				0x5205
+#define SYNO_LED_ALARM_BLINKING			0x5206
+#define SYNO_LED_ALARM_OFF				0x5207
 #define SYNO_BEEP_OFF                   0x5300
 #define SYNO_BEEP_ON                    0x5301
 #define SYNO_BEEP_200MS                 0x5302
@@ -1294,6 +1354,7 @@ struct synobios_ops {
 	int		(*uninit_auto_poweron)(void);
 	int		(*set_alarm_led)(unsigned char);
 	int		(*get_buzzer_cleared)(unsigned char *buzzer_cleared);
+	int		(*set_buzzer_clear)(unsigned char buzzer_clear);
 	int		(*get_power_status)(POWER_INFO *);
 	int		(*get_backplane_status)(BACKPLANE_STATUS *);
 	int		(*module_type_init)(struct synobios_ops *);
@@ -1304,6 +1365,11 @@ struct synobios_ops {
 	int		(*pwm_ctl)(SynoPWMCTL *);
 	int		(*check_microp_id)(const struct synobios_ops *);
 	int		(*set_microp_id)(void);
+	int		(*get_superio)(SYNO_SUPERIO_PACKAGE *);
+	int		(*set_superio)(SYNO_SUPERIO_PACKAGE *);
+	int		(*exdisplay_handler)(struct _SynoMsgPkt *);
+	int		(*read_memory)(SYNO_MEM_ACCESS*);
+	int		(*write_memory)(SYNO_MEM_ACCESS*);
 };
 
 /* TODO: Because user space also need this define, so we define them here. 
@@ -1322,6 +1388,7 @@ struct synobios_ops {
 #define EBOX_INFO_DEEP_SLEEP	"deepsleep_support"
 #define EBOX_INFO_IRQ_OFF		"irq_off"
 #define EBOX_INFO_UNIQUE_RX410	"RX410"
+#define EBOX_INFO_UNIQUE_RX413	"RX413"
 #define EBOX_INFO_UNIQUE_DX510	"DX510"
 #define EBOX_INFO_UNIQUE_DX513	"DX513"
 #define EBOX_INFO_UNIQUE_RX4	"RX4"
@@ -1334,6 +1401,7 @@ struct synobios_ops {
 #define SYNO_UNIQUE(x)		(x>>2)
 #define IS_SYNOLOGY_RX4(x) (SYNO_UNIQUE(x) == 0x15 || SYNO_UNIQUE(x) == 0xd)
 #define IS_SYNOLOGY_RX410(x) (SYNO_UNIQUE(x) == 0xd)
+#define IS_SYNOLOGY_RX413(x) (0)
 #define IS_SYNOLOGY_DX5(x) (SYNO_UNIQUE(x) == 0xa || SYNO_UNIQUE(x) == 0x1a)
 #define IS_SYNOLOGY_DX510(x) (SYNO_UNIQUE(x) == 0x1a)
 #define IS_SYNOLOGY_DX513(x) (SYNO_UNIQUE(x) == 0x6)

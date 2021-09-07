@@ -2428,6 +2428,7 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 	ahci_scr_write(&ap->link, SCR_ERROR, serror);
 	host_ehi->serror |= serror;
 
+
 	/* some controllers set IRQ_IF_ERR on device errors, ignore it */
 	if (hpriv->flags & AHCI_HFLAG_IGN_IRQ_IF_ERR)
 		irq_stat &= ~PORT_IRQ_IF_ERR;
@@ -2488,6 +2489,11 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 #endif
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
+#endif
+#ifdef MY_ABC_HERE
+		if (irq_stat & PORT_IRQ_CONNECT) {
+			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
+		}
 #endif
 		ata_ehi_hotplugged(host_ehi);
 		ata_ehi_push_desc(host_ehi, "%s",

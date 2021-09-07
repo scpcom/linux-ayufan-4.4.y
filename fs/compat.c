@@ -2342,17 +2342,23 @@ asmlinkage ssize_t compat_sys_recvfile(int fd, int s, loff_t *offset, size_t nby
  * sys_SYNOUtime() is used to update create time.
  *
  * @param	filename	The file to be changed create time.
- * 			times	Create time should be stored in 
- *				actime field.
+ * @param	pCtime
+ *  
  * @return	0	success
  *			!0	error
  */
-asmlinkage long compat_sys_SYNOUtime(char __user * filename, struct compat_utimbuf __user *times)
+asmlinkage long compat_sys_SYNOUtime(char __user * filename, struct compat_timespec __user *pCtime)
 {
 	int error;
 	struct path path;
 	struct inode *inode = NULL;
 	struct iattr newattrs;
+	compat_time_t   tv_sec;
+	s32     tv_nsec;
+	
+	if (!pCtime) {
+		   return -EINVAL;
+	}
 
 	error = user_path_at(AT_FDCWD, filename, LOOKUP_FOLLOW, &path);
 	if (error)
@@ -2363,23 +2369,27 @@ asmlinkage long compat_sys_SYNOUtime(char __user * filename, struct compat_utimb
 	if (IS_RDONLY(inode))
 		goto dput_and_out;
 
-	if (times) {
-		error = get_user(newattrs.ia_ctime.tv_sec, &times->actime);
-		newattrs.ia_ctime.tv_nsec = 0;
-		if (error)
-			goto dput_and_out;
+	error = get_user(tv_sec, &pCtime->tv_sec);
+	if (error)
+		goto dput_and_out;
+	error = get_user(tv_nsec, &pCtime->tv_nsec);
+	if (error)
+		goto dput_and_out;
 
-		newattrs.ia_valid = ATTR_CREATE_TIME;
-		mutex_lock(&inode->i_mutex);
-		if (inode->i_op && inode->i_op->setattr)  {
-			error = inode->i_op->setattr(path.dentry, &newattrs);
-		} else {
-			error = inode_change_ok(inode, &newattrs);
-			if (!error)
-				error = inode_setattr(inode, &newattrs);
-		}
-		mutex_unlock(&inode->i_mutex);
+	newattrs.ia_ctime.tv_sec = tv_sec;
+	newattrs.ia_ctime.tv_nsec = tv_nsec;
+	newattrs.ia_valid = ATTR_CREATE_TIME;
+	mutex_lock(&inode->i_mutex);
+	if (inode->i_op && inode->i_op->setattr)  {
+		error = inode->i_op->setattr(path.dentry, &newattrs);
+	} else {
+		error = inode_change_ok(inode, &newattrs);
+		if (!error)
+			setattr_copy(inode, &newattrs);
+			mark_inode_dirty(inode);
+			error = 0;
 	}
+	mutex_unlock(&inode->i_mutex);
 
 dput_and_out:
 	path_put(&path);

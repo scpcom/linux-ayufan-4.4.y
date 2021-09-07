@@ -79,6 +79,11 @@
 #include <linux/clockchips.h>
 #include <linux/clocksource.h>
 
+#if defined(MY_ABC_HERE)
+#include <linux/synobios.h>
+extern char gszSynoHWVersion[];
+#endif
+
 static cycle_t rtc_read(struct clocksource *);
 static struct clocksource clocksource_rtc = {
 	.name         = "rtc",
@@ -742,6 +747,18 @@ void start_cpu_decrementer(void)
 #endif /* defined(CONFIG_BOOKE) || defined(CONFIG_40x) */
 }
 
+
+#if defined(CONFIG_SYNO_MPC8533_TIMEBASE_FREQ) && (0 != CONFIG_SYNO_MPC8533_TIMEBASE_FREQ)
+static inline void SYNOChangeMPC853xTimebaseFreq(void)
+{
+	if (0 == strncmp(gszSynoHWVersion, HW_DS110p, strlen(HW_DS110p)) ||
+		0 == strncmp(gszSynoHWVersion, HW_DS210p, strlen(HW_DS210p)) ||
+		0 == strncmp(gszSynoHWVersion, HW_DS410, strlen(HW_DS410))) {
+		ppc_tb_freq = CONFIG_SYNO_MPC8533_TIMEBASE_FREQ;
+	}
+}
+#endif
+
 void __init generic_calibrate_decr(void)
 {
 	ppc_tb_freq = DEFAULT_TB_FREQ;		/* hardcoded default */
@@ -752,6 +769,10 @@ void __init generic_calibrate_decr(void)
 		printk(KERN_ERR "WARNING: Estimating decrementer frequency "
 				"(not found)\n");
 	}
+
+#if defined(CONFIG_SYNO_MPC8533_TIMEBASE_FREQ) && (0 != CONFIG_SYNO_MPC8533_TIMEBASE_FREQ)
+	SYNOChangeMPC853xTimebaseFreq();
+#endif
 
 	ppc_proc_freq = DEFAULT_PROC_FREQ;	/* hardcoded default */
 

@@ -55,30 +55,6 @@ struct stat {
 #endif
 };
 
-#ifdef MY_ABC_HERE
-#ifndef st_SynoCreateTime
-#define st_SynoCreateTime st_ctime_nsec
-#endif
-#endif
-
-#ifdef MY_ABC_HERE
-#ifndef st_SynoMode
-#define st_SynoMode st_atime_nsec
-#endif
-#endif
-
-#ifdef MY_ABC_HERE
-#ifndef st_syno_achv_ver
-#define st_syno_achv_ver st_mtime_nsec
-#endif
-#endif
-
-#ifdef MY_ABC_HERE
-#ifndef st_SynoUnicodeStat
-#define st_SynoUnicodeStat st_mtime_nsec
-#endif
-#endif
-
 /* This matches struct stat64 in glibc2.1. Only used for 32 bit. */
 struct stat64 {
 	unsigned long long st_dev;		/* Device.  */

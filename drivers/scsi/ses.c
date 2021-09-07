@@ -128,6 +128,9 @@ static int ses_set_page2_descriptor(struct enclosure_device *edev,
 				desc_ptr[0] &= 0xf0;
 			}
 		}
+#ifdef CONFIG_SYNO_SAS_ENCLOSURE_ID_CTRL
+		desc_ptr += 4;
+#endif
 	}
 
 	return ses_send_diag(sdev, 2, ses_dev->page2, ses_dev->page2_len);
@@ -153,9 +156,89 @@ static unsigned char *ses_get_page2_descriptor(struct enclosure_device *edev,
 			if (count++ == descriptor)
 				return desc_ptr;
 		}
+#ifdef CONFIG_SYNO_SAS_ENCLOSURE_ID_CTRL
+		desc_ptr += 4;
+#endif
 	}
 	return NULL;
 }
+
+#ifdef CONFIG_SYNO_SAS_ENCLOSURE_ID_CTRL
+// this function is copy from ses_get_page2_descriptor
+static unsigned char *ses_get_page2_descriptor_display(struct enclosure_device *edev)
+{
+	int i, j;
+	struct scsi_device *sdev = to_scsi_device(edev->edev.parent);
+	struct ses_device *ses_dev = edev->scratch;
+	unsigned char *type_ptr = ses_dev->page1 + 12 + ses_dev->page1[11];
+	unsigned char *desc_ptr = ses_dev->page2 + 8;
+
+	ses_recv_diag(sdev, 2, ses_dev->page2, ses_dev->page2_len);
+
+	for (i = 0; i < ses_dev->page1[10]; i++, type_ptr += 4) {
+		for (j = 0; j < type_ptr[1]; j++) {
+			desc_ptr += 4;
+			if (type_ptr[0] != ENCLOSURE_COMPONENT_DISPLAY)
+				continue;
+			return desc_ptr;
+		}
+		desc_ptr += 4;
+	}
+	return NULL;
+}
+
+// this function is copy from ses_set_page2_descriptor
+static int ses_set_page2_descriptor_display(struct enclosure_device *edev,
+				      unsigned char *desc)
+{
+	int i, j;
+	struct scsi_device *sdev = to_scsi_device(edev->edev.parent);
+	struct ses_device *ses_dev = edev->scratch;
+	unsigned char *type_ptr = ses_dev->page1 + 12 + ses_dev->page1[11];
+	unsigned char *desc_ptr = ses_dev->page2 + 8;
+
+	/* Clear everything */
+	memset(desc_ptr, 0, ses_dev->page2_len - 8);
+	for (i = 0; i < ses_dev->page1[10]; i++, type_ptr += 4) {
+		for (j = 0; j < type_ptr[1]; j++) {
+			desc_ptr += 4;
+			if (type_ptr[0] != ENCLOSURE_COMPONENT_DISPLAY)
+				continue;
+			memcpy(desc_ptr, desc, 4);
+			/* clear reserved, just in case */
+			desc_ptr[0] &= 0x40;
+			/* set select */
+			desc_ptr[0] |= 0x80;
+		}
+		desc_ptr += 4;
+	}
+
+	return ses_send_diag(sdev, 2, ses_dev->page2, ses_dev->page2_len);
+}
+
+static void ses_get_display(struct enclosure_device *edev, char *szDisplay, const int leng)
+{
+	unsigned char *desc;
+
+	BUG_ON(!szDisplay || leng < 2);
+	desc = ses_get_page2_descriptor_display(edev);
+	if (desc) {
+		szDisplay[0] = desc[3];
+		szDisplay[1] = desc[2];
+	}
+}
+
+static int ses_set_display(struct enclosure_device *edev, const char *szDisplay, const int leng)
+{
+	unsigned char desc[4] = {0};
+
+	BUG_ON(!szDisplay || leng < 2);
+	desc[1] = 0x2;
+	desc[2] = szDisplay[1];
+	desc[3] = szDisplay[0];
+	return ses_set_page2_descriptor_display(edev, desc);
+}
+#endif
 
 static void ses_get_fault(struct enclosure_device *edev,
 			  struct enclosure_component *ecomp)
@@ -258,6 +341,13 @@ static struct enclosure_component_callbacks ses_enclosure_callbacks = {
 	.set_locate		= ses_set_locate,
 	.set_active		= ses_set_active,
 };
+
+#ifdef CONFIG_SYNO_SAS_ENCLOSURE_ID_CTRL
+static struct enclosure_display_callback ses_display_callbacks = {
+	.get_display = ses_get_display,
+	.set_display = ses_set_display,
+};
+#endif
 
 struct ses_host_edev {
 	struct Scsi_Host *shost;
@@ -602,6 +692,9 @@ static int ses_intf_add(struct device *cdev,
 		goto err_free;
 	}
 
+#ifdef CONFIG_SYNO_SAS_ENCLOSURE_ID_CTRL
+	edev->display_cb = &ses_display_callbacks;
+#endif
 	kfree(hdr_buf);
 
 	edev->scratch = ses_dev;

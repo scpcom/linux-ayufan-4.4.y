@@ -1774,6 +1774,11 @@ do_prequeue:
 			} else
 #endif
 			{
+#if defined(MY_ABC_HERE) && !defined(CONFIG_SYNO_QORIQ)
+				if(msg->msg_flags & MSG_KERNSPACE)
+					err = skb_copy_datagram_iovec1(skb, offset, msg->msg_iov, used);
+				else
+#endif /* MY_ABC_HERE && !CONFIG_SYNO_QORIQ */
 				err = skb_copy_datagram_iovec(skb, offset,
 						msg->msg_iov, used);
 				if (err) {
@@ -1863,6 +1868,7 @@ skip_copy:
 		tp->ucopy.pinned_list = NULL;
 	}
 #endif
+
 
 	/* According to UNIX98, msg_name/msg_namelen are ignored
 	 * on connected socket. I was just happy when found this 8) --ANK

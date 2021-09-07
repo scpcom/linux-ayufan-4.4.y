@@ -19,6 +19,10 @@
 #include <linux/cpu.h>
 #include "pci.h"
 
+#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
+#include <linux/delay.h>
+#endif
+
 struct pci_dynid {
 	struct list_head node;
 	struct pci_device_id id;
@@ -530,6 +534,13 @@ static int pci_restore_standard_config(struct pci_dev *pci_dev)
 
 	if (pci_dev->current_state != PCI_D0) {
 		int error = pci_set_power_state(pci_dev, PCI_D0);
+#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
+		while (error) {
+			printk("Last set pci_set_power_state failed. error: %d %s(%d), try set power state again\n", error, __func__, __LINE__);
+			msleep(3000);
+			error = pci_set_power_state(pci_dev, PCI_D0);
+		}
+#endif
 		if (error)
 			return error;
 	}

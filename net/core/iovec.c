@@ -105,6 +105,7 @@ int memcpy_toiovec(struct iovec *iov, unsigned char *kdata, int len)
  *	Note: this modifies the original iovec.
  */
 
+
 void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len)
 {
 	while(len>0)

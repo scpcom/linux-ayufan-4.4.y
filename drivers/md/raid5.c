@@ -96,6 +96,7 @@
 
 #define printk_rl(args...) ((void) (printk_ratelimit() && printk(args)))
 
+
 #ifdef MY_ABC_HERE
 static unsigned char IsDiskErrorSet(mddev_t *mddev)
 {
@@ -210,6 +211,7 @@ static int stripe_operations_active(struct stripe_head *sh)
 	       test_bit(STRIPE_BIOFILL_RUN, &sh->state) ||
 	       test_bit(STRIPE_COMPUTE_RUN, &sh->state);
 }
+
 
 static void __release_stripe(raid5_conf_t *conf, struct stripe_head *sh)
 {
@@ -2621,6 +2623,9 @@ static int fetch_block5(struct stripe_head *sh, struct stripe_head_state *s,
 	     s->syncing || s->expanding ||
 	     (s->failed &&
 	      (failed_dev->toread ||
+#ifdef MY_ABC_HERE
+		s->to_write ||
+#endif
 	       (failed_dev->towrite &&
 		!test_bit(R5_OVERWRITE, &failed_dev->flags)))))) {
 		/* We would like to get this block, possibly by computing it,
@@ -2839,6 +2844,10 @@ static void handle_stripe_dirtying5(raid5_conf_t *conf,
 		struct stripe_head *sh,	struct stripe_head_state *s, int disks)
 {
 	int rmw = 0, rcw = 0, i;
+#ifdef MY_ABC_HERE
+	rmw = 2;
+	rcw = 1;
+#else
 	for (i = disks; i--; ) {
 		/* would I have to read this buffer for read_modify_write */
 		struct r5dev *dev = &sh->dev[i];
@@ -2861,6 +2870,7 @@ static void handle_stripe_dirtying5(raid5_conf_t *conf,
 				rcw += 2*disks;
 		}
 	}
+#endif
 	pr_debug("for sector %llu, rmw=%d rcw=%d\n",
 		(unsigned long long)sh->sector, rmw, rcw);
 	set_bit(STRIPE_HANDLE, &sh->state);
@@ -2888,14 +2898,24 @@ static void handle_stripe_dirtying5(raid5_conf_t *conf,
 		}
 	if (rcw <= rmw && rcw > 0)
 		/* want reconstruct write, but need to get some data */
+#ifdef MY_ABC_HERE
+		rcw = 0;
+#endif
 		for (i = disks; i--; ) {
 			struct r5dev *dev = &sh->dev[i];
 			if (!test_bit(R5_OVERWRITE, &dev->flags) &&
 			    i != sh->pd_idx &&
 			    !test_bit(R5_LOCKED, &dev->flags) &&
 			    !(test_bit(R5_UPTODATE, &dev->flags) ||
+#ifndef MY_ABC_HERE
 			    test_bit(R5_Wantcompute, &dev->flags)) &&
 			    test_bit(R5_Insync, &dev->flags)) {
+#else
+			    test_bit(R5_Wantcompute, &dev->flags))) {
+                                rcw++;
+				if (!test_bit(R5_Insync, &dev->flags))
+					continue; /* it's a failed drive */
+#endif
 				if (
 				  test_bit(STRIPE_PREREAD_ACTIVE, &sh->state)) {
 					pr_debug("Read_old block "
@@ -3510,6 +3530,9 @@ static void handle_stripe5(struct stripe_head *sh)
 	 * or to load a block that is being partially written.
 	 */
 	if (s.to_read || s.non_overwrite ||
+#ifdef MY_ABC_HERE
+	    (s.to_write && s.failed) ||
+#endif
 	    (s.syncing && (s.uptodate + s.compute < disks)) || s.expanding)
 		handle_stripe_fill5(sh, &s, disks);
 

@@ -55,6 +55,7 @@
 #include <net/tcp.h>
 #endif /* MY_ABC_HERE */
 
+
 /*
  * Shared mappings implemented 30.11.1994. It's not fully working yet,
  * though.
@@ -2625,6 +2626,7 @@ do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
 	struct msghdr   msg;
 	size_t          cBytesToReceive = 0;
 	int             crgPagePtr = 0;
+	int             flags = AOP_FLAG_UNINTERRUPTIBLE|AOP_FLAG_RECVFILE;
 
 	*rbytes = 0;
 	*wbytes = 0;
@@ -2665,7 +2667,7 @@ do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
 		page = NULL;
 		write_begin_ret =
 			mapping->a_ops->write_begin(
-					file, mapping, pos, bytes, AOP_FLAG_UNINTERRUPTIBLE|AOP_FLAG_RECVFILE,
+					file, mapping, pos, bytes, flags,
 					&page, &fsdata[cPagesAllocated]);
 		if (write_begin_ret) {
 			err = write_begin_ret;

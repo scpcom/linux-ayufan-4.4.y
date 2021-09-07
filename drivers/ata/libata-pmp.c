@@ -26,6 +26,7 @@ const struct ata_port_operations sata_pmp_port_ops = {
 	.error_handler		= sata_pmp_error_handler,
 };
 
+
 /**
  *	sata_pmp_read - read PMP register
  *	@link: link to read PMP register for
@@ -321,13 +322,18 @@ END:
 unsigned int
 syno_sata_pmp_write_gpio(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
 {
+	int iRet = -1;
 	syno_pm_device_info_set(link->ap, WRITE, pPM_pkg);
 
 	if(pPM_pkg->encode) {
 		pPM_pkg->encode(pPM_pkg, WRITE);
 	}
 
-	return sata_pmp_write(link, pPM_pkg->gpio_addr, pPM_pkg->var);
+	iRet = sata_pmp_write(link, pPM_pkg->gpio_addr, pPM_pkg->var);
+	/* HW suggestions: delay 5ms, wait for CPLD ready */
+	mdelay(5);
+
+	return iRet;
 }
 
 static u8
@@ -437,16 +443,25 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 	}
 	/* lock to prevent others to do pmp power control */
 	ap->pflags |= ATA_PFLAG_PMP_PMCTL;
-	DBGMESG("port %d do pmp power ctl %d\n", ap->print_id, blPowerOn);
+	/* we should make sure this port isn't frozen */
+	if (ap->pflags & ATA_PFLAG_FROZEN) {
+		printk("ata%u: is FROZEN, thaw it now\n", ap->print_id);
+		spin_unlock_irqrestore(ap->lock, flags);
+		ata_eh_thaw_port(ap);
+		spin_lock_irqsave(ap->lock, flags);
+	}
+	DBGMESG("port %d do pmp power ctl %d, and thaw it\n", ap->print_id, blPowerOn);
 	spin_unlock_irqrestore(ap->lock, flags);
 
 	syno_pm_unique_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
 							sata_pmp_gscr_devid(ap->link.device->gscr),
 							&pm_pkg);
 	if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
+		printk("ata%d pm unique write fail\n", ap->print_id);
 		goto END;
 	}
 	if (syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg)) {
+		printk("ata%d pm unique read fail\n", ap->print_id);
 		goto END;
 	}
 
@@ -468,7 +483,7 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 	for (iRetry = 0; blPowerOn ^ syno_pm_is_poweron(sata_pmp_gscr_vendor(ap->link.device->gscr),
 													sata_pmp_gscr_devid(ap->link.device->gscr),
 													&pm_pkg)
-					 && iRetry < ATA_EH_PMP_TRIES; ++iRetry) {
+					 && iRetry < SYNO_PMP_PWR_TRIES; ++iRetry) {
 
 		if (!blPowerOn) {
 			if (syno_sata_pmp_check_powerbtn(ap)) {
@@ -480,6 +495,7 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 								 sata_pmp_gscr_devid(ap->link.device->gscr),
 								 &pm_pkg, 0);
 		if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
+			printk("ata%d pm poweron write 0 fail\n", ap->print_id);
 			goto END;
 		}
 
@@ -497,6 +513,7 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 								 sata_pmp_gscr_devid(ap->link.device->gscr),
 								 &pm_pkg, 1);
 		if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
+			printk("ata%d pm poweron write 1 fail\n", ap->print_id);
 			goto END;
 		}
 
@@ -516,17 +533,19 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 				sata_pmp_gscr_devid(ap->link.device->gscr),
 				&pm_pkg);
 		if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
+			printk("ata%d re-check pm unique write fail\n", ap->print_id);
 			goto END;
 		}
 		if (syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg)) {
+			printk("ata%d re-check pm unique read fail\n", ap->print_id);
 			goto END;
 		}
 		if (blPowerOn ^ syno_pm_is_poweron(sata_pmp_gscr_vendor(ap->link.device->gscr),
 										   sata_pmp_gscr_devid(ap->link.device->gscr),
 										   &pm_pkg)) {
-			if (iRetry == (ATA_EH_PMP_TRIES - 1)) {
+			if (iRetry == (SYNO_PMP_PWR_TRIES - 1)) {
 				printk("port %d do pmp power ctl %d after %d tries fail\n",
-						ap->print_id, blPowerOn, ATA_EH_PMP_TRIES);
+						ap->print_id, blPowerOn, SYNO_PMP_PWR_TRIES);
 			} else {
 				printk("port %d do pmp power ctl %d fail, retry it\n", ap->print_id, blPowerOn);
 			}
@@ -563,6 +582,7 @@ END:
 	return iRet;
 }
 #endif /* SYNO_SATA_PM_DEVICE_GPIO */
+
 
 /**
  *	sata_pmp_qc_defer_cmd_switch - qc_defer for command switching PMP
@@ -716,10 +736,14 @@ static const char *sata_pmp_spec_rev_str(const u32 *gscr)
 	return "<unknown>";
 }
 
+#define PMP_GSCR_SII_POL 129
+
 static int sata_pmp_configure(struct ata_device *dev, int print_info)
 {
 	struct ata_port *ap = dev->link->ap;
 	u32 *gscr = dev->gscr;
+	u16 vendor = sata_pmp_gscr_vendor(gscr);
+	u16 devid = sata_pmp_gscr_devid(gscr);
 	unsigned int err_mask = 0;
 	const char *reason;
 	int nr_ports, rc;
@@ -749,12 +773,39 @@ static int sata_pmp_configure(struct ata_device *dev, int print_info)
 		goto fail;
 	}
 
+	/* Disable sending Early R_OK.
+	 * With "cached read" HDD testing and multiple ports busy on a SATA
+	 * host controller, 3726 PMP will very rarely drop a deferred
+	 * R_OK that was intended for the host. Symptom will be all
+	 * 5 drives under test will timeout, get reset, and recover.
+	 */
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+	/*our DX513 and DX213 use 3826 chip */
+	if (vendor == 0x1095 && (devid == 0x3726 || devid == 0x3826)) {
+#else
+	if (vendor == 0x1095 && devid == 0x3726) {
+#endif
+		u32 reg;
+
+		err_mask = sata_pmp_read(&ap->link, PMP_GSCR_SII_POL, &reg);
+		if (err_mask) {
+			rc = -EIO;
+			reason = "failed to read Sil3726 Private Register";
+			goto fail;
+		}
+		reg &= ~0x1;
+		err_mask = sata_pmp_write(&ap->link, PMP_GSCR_SII_POL, reg);
+		if (err_mask) {
+			rc = -EIO;
+			reason = "failed to write Sil3726 Private Register";
+			goto fail;
+		}
+	}
+
 	if (print_info) {
 		ata_dev_printk(dev, KERN_INFO, "Port Multiplier %s, "
 			       "0x%04x:0x%04x r%d, %d ports, feat 0x%x/0x%x\n",
-			       sata_pmp_spec_rev_str(gscr),
-			       sata_pmp_gscr_vendor(gscr),
-			       sata_pmp_gscr_devid(gscr),
+			       sata_pmp_spec_rev_str(gscr), vendor, devid,
 			       sata_pmp_gscr_rev(gscr),
 			       nr_ports, gscr[SATA_PMP_GSCR_FEAT_EN],
 			       gscr[SATA_PMP_GSCR_FEAT]);
@@ -1029,7 +1080,7 @@ static void sata_pmp_detach(struct ata_device *dev)
 #ifdef MY_ABC_HERE
 	if ((dev->link->uiSflags || dev->link->ap->uiSflags) && ata_dev_enabled(dev)) {
 		ata_dev_printk(dev, KERN_WARNING,
-				"still have recovery flags 0x%x, don't detach this pmp dev\n", dev->link->uiSflags);
+				"still have recovery flags link 0x%x ap 0x%x, don't detach this pmp dev\n", dev->link->uiSflags, dev->link->ap->uiSflags);
 		dev->ulSflags |= ATA_SYNO_DFLAG_PMP_DETACH;
 		/*FIXME: set detach flag, copy form ata_eh_detach_dev */
 		ata_for_each_link(tlink, ap, EDGE) {
@@ -1038,6 +1089,10 @@ static void sata_pmp_detach(struct ata_device *dev)
 		return;
 	}
 	dev->ulSflags &= ~ATA_SYNO_DFLAG_PMP_DETACH;
+	ata_for_each_link(tlink, ap, EDGE) {
+		DBGMESG("ata%u: do pmp detach, clear all link uiSflags\n", dev->link->ap->print_id);
+		tlink->uiSflags = 0;
+	}
 #endif
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	ap->PMSynoUnique = 0;
@@ -1149,7 +1204,7 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 	struct ata_port *ap = link->ap;
 	u32 *gscr = (void *)ap->sector_buf;
 	int rc;
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) 
 	struct ata_port *master_ap = NULL;
 #endif
 
@@ -1202,6 +1257,7 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
  fail:
 	ata_dev_printk(dev, KERN_ERR,
 		       "PMP revalidation failed (errno=%d)\n", rc);
+
 
 	DPRINTK("EXIT, rc=%d\n", rc);
 	return rc;
@@ -1269,6 +1325,9 @@ static int sata_pmp_eh_recover_pmp(struct ata_port *ap,
 	int tries = ATA_EH_PMP_TRIES;
 	int detach = 0, rc = 0;
 	int reval_failed = 0;
+#ifdef MY_ABC_HERE
+	unsigned int uiSflags = 0x0;
+#endif
 
 	DPRINTK("ENTER\n");
 
@@ -1343,14 +1402,28 @@ static int sata_pmp_eh_recover_pmp(struct ata_port *ap,
 #ifdef MY_ABC_HERE
 	/* GSCR fail is not only attached to link, we must check pmp gscr fail here.
 	 * If pmp recover success, we must clear it here. */
-	if (ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL) {
+	if (ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL ||
+		link->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL) {
 		ata_port_printk(ap, KERN_ERR, "recovery success, clear gscr fail flag");
 		ap->uiSflags &= ~ATA_SYNO_FLAG_GSCR_FAIL;
+		link->uiSflags &= ~ATA_SYNO_FLAG_GSCR_FAIL;
 	}
 #endif
 	return 0;
 
  fail:
+#ifdef MY_ABC_HERE
+	/* set link error flags to ata port for ata port error handling.
+	 * GSCR may clear by link reset, but it may still have GSCR error,
+	 * so we must check port GSCR fail */
+	if ((uiSflags = uiCheckPortLinksFlags(ap))) {
+		if (ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL) {
+			ap->uiSflags = uiSflags | ATA_SYNO_FLAG_GSCR_FAIL;
+		} else {
+			ap->uiSflags = uiSflags;
+		}
+	}
+#endif
 	sata_pmp_detach(dev);
 	if (detach)
 		ata_eh_detach_dev(dev);
@@ -1606,9 +1679,6 @@ static int sata_pmp_eh_recover(struct ata_port *ap)
 	ata_port_printk(ap, KERN_ERR,
 			"failed to recover PMP after %d tries, giving up\n",
 			ATA_EH_PMP_TRIES);
-	sata_pmp_detach(pmp_dev);
-	ata_dev_disable(pmp_dev);
-
 #ifdef MY_ABC_HERE
 	/* set link error flags to ata port for ata port error handling.
 	 * GSCR may clear by link reset, but it may still have GSCR error,
@@ -1621,6 +1691,9 @@ static int sata_pmp_eh_recover(struct ata_port *ap)
 		}
 	}
 #endif
+	sata_pmp_detach(pmp_dev);
+	ata_dev_disable(pmp_dev);
+
 	return rc;
 }
 

@@ -41,10 +41,6 @@
 #include "hwraid.h"
 #endif
 
-#ifdef MY_DEF_HERE
-extern void md_run_setup(void);
-#endif
-
 #define DEBUG 0
 #if DEBUG
 #define PRINTK(x...) printk(x)
@@ -2884,20 +2880,7 @@ static struct mdk_personality raid1_personality =
 
 static int __init raid_init(void)
 {
-#ifdef MY_DEF_HERE
-	mm_segment_t origin_fs;
-
-	register_md_personality(&raid1_personality);
-
-	origin_fs = get_fs();
-	set_fs(get_ds());
-	md_run_setup();
-	set_fs(origin_fs);
-
-	return 0;
-#else
 	return register_md_personality(&raid1_personality);
-#endif
 }
 
 static void raid_exit(void)

@@ -9,10 +9,67 @@ config SYNO_QORIQ
 	help
 	  Say Y here to enable Freescale QorIQ porting codes.
 
+config SYNO_QORIQ_FSL_SATA_NRESET
+	bool "Increasing eSATA compatibility on QorIQ eSATA"
+	depends on SYNO_QORIQ
+	default y
+	help
+		Say Y here to disable software reset for ATA_DEV_ATA class
+
 config SYNO_QORIQ_FIX_OCF_RACE
 	bool "fix ocf race"
 	depends on SYNO_QORIQ
 	default y
 	help
 	  Say Y here to fix cryptosoft race condition
+
+config SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
+	bool "fix resume failed when wakeup from deepsleep"
+	depends on SYNO_QORIQ
+	default y
+	help
+	  Say Y here to reset pci device until it resume succeed
+
+config SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
+	bool "fix resume failed when wakeup from deepsleep"
+	depends on SYNO_QORIQ
+	default y
+	help
+	  Say Y here to reset pci device until it resume succeed
+
+config SYNO_SAS_ENCLOSURE_ID_CTRL
+	bool "This mechanism will help kernel to enum enclosure id control interface in sysfs"
+	depends on SCSI_ENCLOSURE && ENCLOSURE_SERVICES
+	default n
+	help
+	  Say Y here to to enum enclosure id control interface in sysfs
+
+config SYNO_INQUIRY_USE_ATA_COMMAND
+	bool "Using ATA command to obtain STAT disk vendor and model name"
+	depends on SYNO_BROMOLOW
+	default y
+	help
+	  Using ATA command to obtain STAT disk complete information
+
+config SYNO_INQUIRY_STANDARD
+	bool "Correct the vendor and model information showed in /proc/scsi/scsi"
+	depends on SYNO_BROMOLOW
+	default y
+	help
+	  Correct the vendor and model information showed in /proc/scsi/scsi
+
+config SYNO_NET_INIT_OPERATION
+	bool "fix the default eth0 status when booting without link"
+	depends on SYNO_QORIQ
+	default y
+	help
+	  Say Y here to fix this issue. Please not port this to new kernel
+
+
+config SYNO_MPC8533_TIMEBASE_FREQ
+    int "PPC853x Timebase frequency"
+    depends on SYNO_MPC8533
+    default 0
+    help
+        Overwrite default timebase frequency
 

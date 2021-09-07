@@ -76,7 +76,7 @@ extern unsigned char grgbLanMac[4][16];
 #endif
 
 #ifdef MY_ABC_HERE
-extern char gszSerialNum[12];
+extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
@@ -331,7 +331,7 @@ static int __init early_hw_version(char *p)
 	*szPtr = 0;
 	strcat(szPtr,"-j");
 
-	printk("Synology Hareware Version: %s\n", gszSynoHWVersion);
+	printk("Synology Hardware Version: %s\n", gszSynoHWVersion);
 
 	return 1;
 }

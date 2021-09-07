@@ -406,6 +406,34 @@
 #define SYNOACLSysGetPerm(arg1, arg2)            syscall(__NR_SYNOACLGetPerm, arg1, arg2)
 #endif
 
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOStat              416
+#define __NR_SYNOFStat              417
+#define __NR_SYNOLStat              418
+#define __NR_SYNOStat64                 419
+#define __NR_SYNOFStat64                420
+#define __NR_SYNOLStat64                421
+
+#if !defined(__KERNEL__)
+/* direct SYNOStat to stat64 in 32-bit platform
+ * 64-bits arch has no stat64 support */
+#include <bits/wordsize.h>
+#if __WORDSIZE == 64
+#define SYNOStat(arg1, arg2, arg3)  syscall(__NR_SYNOStat, arg1, arg2, arg3)
+#define SYNOFStat(arg1, arg2, arg3) syscall(__NR_SYNOFStat, arg1, arg2, arg3)
+#define SYNOLStat(arg1, arg2, arg3) syscall(__NR_SYNOLStat, arg1, arg2, arg3)
+
+#elif (_FILE_OFFSET_BITS == 64)
+#define SYNOStat(arg1, arg2, arg3)  syscall(__NR_SYNOStat64, arg1, arg2, arg3)
+#define SYNOFStat(arg1, arg2, arg3) syscall(__NR_SYNOFStat64, arg1, arg2, arg3)
+#define SYNOLStat(arg1, arg2, arg3) syscall(__NR_SYNOLStat64, arg1, arg2, arg3)
+
+#endif
+#endif /* __KERNEL__ */
+
+#endif /* MY_ABC_HERE */
+
 #ifdef MY_ABC_HERE
 #define __syscall_return(type, res) \
 do { \

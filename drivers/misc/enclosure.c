@@ -421,8 +421,41 @@ static ssize_t enclosure_show_components(struct device *cdev,
 	return snprintf(buf, 40, "%d\n", edev->components);
 }
 
+#ifdef CONFIG_SYNO_SAS_ENCLOSURE_ID_CTRL
+static ssize_t enclosure_show_display(struct device *cdev,
+					 struct device_attribute *attr,
+					 char *buf)
+{
+	struct enclosure_device *edev = to_enclosure_device(cdev);
+	char szDisplay[2] = {0};
+
+	if (edev->display_cb) {
+		edev->display_cb->get_display(edev, szDisplay, sizeof(szDisplay));
+	}
+	return snprintf(buf, 40, "%c\n", szDisplay[0]);
+}
+
+static ssize_t enclosure_set_display(struct device *cdev,
+					 struct device_attribute *attr,
+					 const char *buf, size_t count)
+{
+	struct enclosure_device *edev = to_enclosure_device(cdev);
+	char szDisplay[2] = {0};
+
+	szDisplay[0] = buf[0];
+	szDisplay[1] = 0;
+	if (edev->display_cb) {
+		edev->display_cb->set_display(edev, szDisplay, sizeof(szDisplay));
+	}
+	return count;
+}
+#endif
+
 static struct device_attribute enclosure_attrs[] = {
 	__ATTR(components, S_IRUGO, enclosure_show_components, NULL),
+#ifdef CONFIG_SYNO_SAS_ENCLOSURE_ID_CTRL
+	__ATTR(encId, S_IRUGO | S_IWUSR, enclosure_show_display, enclosure_set_display),
+#endif
 	__ATTR_NULL
 };
 

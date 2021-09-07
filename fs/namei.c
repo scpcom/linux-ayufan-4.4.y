@@ -1182,6 +1182,35 @@ static int do_lookup(struct nameidata *nd, struct qstr *name,
 		goto need_lookup;
 	if (dentry->d_op && dentry->d_op->d_revalidate)
 		goto need_revalidate;
+#ifdef MY_ABC_HERE
+	if (!dentry->d_inode && (DCACHE_CASELESS_COMPARE & nd->path.dentry->d_flags)) {
+		struct dentry * parent = nd->path.dentry;
+		struct inode *dir = parent->d_inode;
+		struct dentry * result, *new_dentry;
+
+		/* Don't create child dentry for a dead directory. */
+		if (IS_DEADDIR(dir)) {
+			goto fail;
+		}
+
+		d_invalidate(dentry);
+		dput(dentry);
+		mutex_lock(&dir->i_mutex);
+		new_dentry = d_alloc(parent, name);
+		if (!new_dentry) {
+			mutex_unlock(&dir->i_mutex);
+			dentry = ERR_PTR(-ENOMEM);
+			goto fail;
+		}
+		result = dir->i_op->lookup(dir, new_dentry, nd);
+		if (result)
+			dput(new_dentry);
+		else
+			result = new_dentry;
+		dentry = result;
+		mutex_unlock(&dir->i_mutex);
+	}
+#endif
 done:
 	path->mnt = mnt;
 	path->dentry = dentry;
@@ -1280,6 +1309,9 @@ static int __link_path_walk(const char *name, struct nameidata *nd)
 			slashes_count--;
 		}
 		*cur_location = '\0';
+		if (!*name) {
+			cur_location_updated = 1;
+		}
 	}
 #else
 	while (*name=='/')

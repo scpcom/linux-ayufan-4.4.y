@@ -12,10 +12,14 @@
 #define SYNO_HAVE_GCC_VERSION(a,b) (__GNUC__ > (a) || (__GNUC__ == (a) && __GNUC_MINOR__ >= (b)))
 #define SYNO_HAVE_GLIBC_VERSION(a,b) ( __GLIBC__ > (a) || (__GLIBC__ == (a) && __GLIBC_MINOR__ >= (b)))
 #if 1
+#define CONSISTENT_DMA_SIZE 0x00800000
+#endif
+
+#if 1
 #define SYNO_USB_FLASH_DEVICE_INDEX 255
 #define SYNO_USB_FLASH_DEVICE_NAME  "synoboot"
 #define SYNO_USB_FLASH_DEVICE_PATH  "/dev/synoboot"
-#if 0 
+#if 0
 #define IS_SYNO_USBBOOT_ID_VENDOR(VENDOR) (0xF400 == (VENDOR) || 0xF401 == (VENDOR))
 #define IS_SYNO_USBBOOT_ID_PRODUCT(PRODUCT) (0xF400 == (PRODUCT) || 0xF401 == (PRODUCT))
 #else
@@ -63,16 +67,6 @@
 
 #if 1 && defined(MY_ABC_HERE)
 #define SYNO_SATA_PM_DEVICE_GPIO
-#endif
-
-#if defined(SYNO_SATA_PM_DEVICE_GPIO) && defined(MY_ABC_HERE)
-#if 1 
-#define SYNO_MAX_SATA_ID 20
-#define SYNO_PWRPIN_ENCODE_LEN 2
-#define SYNO_PORT_SIGN 'N'
-#define SYNO_PWRPIN_ITEM_LEN 1 + SYNO_PWRPIN_ENCODE_LEN*2
-#endif
-
 #endif
 
 #ifdef MY_ABC_HERE

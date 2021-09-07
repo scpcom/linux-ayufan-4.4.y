@@ -262,6 +262,7 @@ static int pmc_probe(struct of_device *ofdev, const struct of_device_id *id)
 
 			/* Enable Power Down for deep sleep mode */
 			setbits32(&guts->dscr, CCSR_GUTS_DSCR_ENB_PWR_DWN);
+
 		}
 	}
 

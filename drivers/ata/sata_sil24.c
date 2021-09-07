@@ -1028,14 +1028,6 @@ static int sil24_pmp_hardreset(struct ata_link *link, unsigned int *class,
 		return rc;
 	}
 
-#ifdef SYNO_FIX_HORKAGE_15G_MISSING
-	/* test if we need reset it again */
-	if(iNeedResetAgainFor15G(link)) {
-		DBGMESG("ata port %d has ALREADY_APPLY_15G and not 1.5G speed, need to reset it again\n",
-				link->ap->print_id);
-		sata_std_hardreset(link, class, deadline);
-	}
-#endif
 	return sata_std_hardreset(link, class, deadline);
 }
 
@@ -1081,6 +1073,7 @@ static void sil24_error_intr(struct ata_port *ap)
 	ehi = &link->eh_info;
 	ata_ehi_clear_desc(ehi);
 
+
 	ata_ehi_push_desc(ehi, "irq_stat 0x%08x", irq_stat);
 
 	if (irq_stat & PORT_IRQ_SDB_NOTIFY) {
@@ -1103,6 +1096,9 @@ static void sil24_error_intr(struct ata_port *ap)
 #endif
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
+#endif
+#ifdef MY_ABC_HERE
+		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 #endif
 		ata_ehi_hotplugged(ehi);
 		ata_ehi_push_desc(ehi, "%s",

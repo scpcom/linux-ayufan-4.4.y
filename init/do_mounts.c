@@ -25,11 +25,7 @@
 int __initdata rd_doload;	/* 1 = load RAM disk, 0 = don't load */
 
 int root_mountflags = MS_RDONLY | MS_SILENT;
-#ifdef MY_DEF_HERE
-char * __initdata root_device_name;
-#else
 static char * __initdata root_device_name;
-#endif
 static char __initdata saved_root_name[64];
 static int __initdata root_wait;
 
@@ -385,9 +381,7 @@ void __init prepare_namespace(void)
 	 */
 	wait_for_device_probe();
 
-#if !defined(MY_DEF_HERE)
 	md_run_setup();
-#endif
 
 	if (saved_root_name[0]) {
 		root_device_name = saved_root_name;

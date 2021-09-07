@@ -2418,6 +2418,7 @@ static int sd_probe(struct device *dev)
 #ifdef	MY_ABC_HERE
 	struct ata_port *ap;
 	int start_index;
+	int iRetry = 0;
 	u32 want_idx = 0;
 #endif
 #ifdef	SYNO_SAS_DISK_NAME
@@ -2535,8 +2536,8 @@ static int sd_probe(struct device *dev)
 		}
 #endif
 		// try again
-		if (want_idx != index && 
-			(SYNO_DISK_SATA == sdkp->synodisktype)) {
+		while (want_idx != index && 
+			(SYNO_DISK_SATA == sdkp->synodisktype && iRetry < 15)) {
 			/* Sometimes raid is not release all scsi disk yet. Try to delay and reget */
 			printk("want_idx %d index %d. delay and reget\n", want_idx, index);
 
@@ -2549,6 +2550,7 @@ static int sd_probe(struct device *dev)
 			error = syno_ida_get_new(&sd_index_ida, want_idx, &index);
 
 			printk("want_idx %d index %d\n", want_idx, index);
+			iRetry++;
 		}
 
 #else /* MY_ABC_HERE */

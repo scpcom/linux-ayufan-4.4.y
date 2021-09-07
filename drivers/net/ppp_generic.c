@@ -2148,6 +2148,7 @@ int ppp_register_net_channel(struct net *net, struct ppp_channel *chan)
 	spin_lock_bh(&pn->all_channels_lock);
 	pch->file.index = ++pn->last_channel_index;
 	list_add(&pch->list, &pn->new_channels);
+
 	atomic_inc(&channel_count);
 	spin_unlock_bh(&pn->all_channels_lock);
 
@@ -2675,6 +2676,7 @@ static void ppp_shutdown_interface(struct ppp *ppp)
  */
 static void ppp_destroy_interface(struct ppp *ppp)
 {
+
 	atomic_dec(&ppp_unit_count);
 
 	if (!ppp->file.dead || ppp->n_channels) {
@@ -2823,6 +2825,7 @@ ppp_disconnect_channel(struct channel *pch)
  */
 static void ppp_destroy_channel(struct channel *pch)
 {
+
 	atomic_dec(&channel_count);
 
 	if (!pch->file.dead) {
@@ -2839,6 +2842,7 @@ static void ppp_destroy_channel(struct channel *pch)
 static void __exit ppp_cleanup(void)
 {
 	/* should never happen */
+
 	if (atomic_read(&ppp_unit_count) || atomic_read(&channel_count))
 		printk(KERN_ERR "PPP: removing module but units remain!\n");
 	unregister_chrdev(PPP_MAJOR, "ppp");

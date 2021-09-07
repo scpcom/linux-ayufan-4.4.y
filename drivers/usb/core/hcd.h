@@ -95,6 +95,9 @@ struct usb_hcd {
 #define HCD_FLAG_SAW_IRQ	0x00000002
 
 	unsigned		rh_registered:1;/* is root hub registered? */
+#ifdef MY_ABC_HERE
+	unsigned        msix_enabled:1; /* driver has MSI-X enabled? */
+#endif
 
 	/* The next flag is a stopgap, to be removed when all the HCDs
 	 * support the new root-hub polling mechanism. */
@@ -141,6 +144,15 @@ struct usb_hcd {
 
 #define	HC_IS_RUNNING(state) ((state) & __ACTIVE)
 #define	HC_IS_SUSPENDED(state) ((state) & __SUSPEND)
+
+#if defined(CONFIG_USB_ETRON_HCD_MODULE)
+	u8      chip_id;
+#define HCD_CHIP_ID_UNKNOWN 0x00
+#define HCD_CHIP_ID_ETRON_EJ168 0x10
+#define HCD_CHIP_ID_ETRON_EJ188 0x20
+
+	u32     rh_usb3_ports;
+#endif
 
 	/* more shared queuing code would be good; it should support
 	 * smarter scheduling, handle transaction translators, etc;
@@ -408,6 +420,12 @@ extern void usb_destroy_configuration(struct usb_device *dev);
 
 /*-------------------------------------------------------------------------*/
 
+#ifdef MY_ABC_HERE
+/* class requests from USB 3.0 hub spec, table 10-5 */
+#define SetHubDepth     (0x3000 | HUB_SET_DEPTH)
+#define GetPortErrorCount   (0x8000 | HUB_GET_PORT_ERR_COUNT)
+#endif
+
 /*
  * Generic bandwidth allocation constants/support
  */
@@ -565,7 +583,11 @@ static inline void usbmon_urb_complete(struct usb_bus *bus, struct urb *urb,
 
 /* hub.h ... DeviceRemovable in 2.4.2-ac11, gone in 2.4.10 */
 /* bleech -- resurfaced in 2.4.11 or 2.4.12 */
-#define bitmap 	DeviceRemovable
+#if defined(CONFIG_USB_ETRON_HCD_MODULE)
+#define bitmap      u.hs.DeviceRemovable
+#else
+#define bitmap         DeviceRemovable
+#endif
 
 
 /*-------------------------------------------------------------------------*/

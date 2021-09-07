@@ -65,7 +65,7 @@ static inline int initrd_load(void) { return 0; }
 
 #endif
 
-#if defined(CONFIG_BLK_DEV_MD) || defined(MY_DEF_HERE)
+#ifdef CONFIG_BLK_DEV_MD
 
 void md_run_setup(void);
 

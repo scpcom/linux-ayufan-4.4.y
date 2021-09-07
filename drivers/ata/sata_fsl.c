@@ -711,6 +711,10 @@ static unsigned int sata_fsl_dev_classify(struct ata_port *ap)
 	return ata_dev_classify(&tf);
 }
 
+#ifdef CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
+static unsigned int softreset_class = 0;
+#endif
+
 static int sata_fsl_hardreset(struct ata_link *link, unsigned int *class,
 					unsigned long deadline)
 {
@@ -722,6 +726,13 @@ static int sata_fsl_hardreset(struct ata_link *link, unsigned int *class,
 	unsigned long start_jiffies;
 
 	DPRINTK("in xx_hardreset\n");
+
+#ifdef CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
+	if (&ap->link == link && link->flags & ATA_LFLAG_NO_SRST) {
+		link->flags &= ~ATA_LFLAG_NO_SRST;
+		softreset_class = 0;
+	}
+#endif
 
 try_offline_again:
 	/*
@@ -812,6 +823,12 @@ try_offline_again:
 				"Signature Update detected @ %d msecs\n",
 				jiffies_to_msecs(jiffies - start_jiffies));
 		*class = sata_fsl_dev_classify(ap);
+
+#ifdef CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
+		if (link == &ap->link && ATA_DEV_ATA == softreset_class) {
+			link->flags |= ATA_LFLAG_NO_SRST;
+		}
+#endif
 		return 0;
 	}
 
@@ -941,6 +958,11 @@ static int sata_fsl_softreset(struct ata_link *link, unsigned int *class,
 		 */
 
 		*class = sata_fsl_dev_classify(ap);
+#ifdef CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
+		if (&ap->link == link) {
+			softreset_class = *class;
+		}
+#endif
 
 		DPRINTK("class = %d\n", *class);
 		VPRINTK("ccreg = 0x%x\n", ioread32(hcr_base + CC));
@@ -1006,6 +1028,7 @@ static void sata_fsl_error_intr(struct ata_port *ap)
 	DPRINTK("error_intr,hStat=0x%x,CE=0x%x,DE =0x%x,SErr=0x%x\n",
 		hstatus, cereg, ioread32(hcr_base + DE), SError);
 
+
 	/* handle fatal errors */
 	if (hstatus & FATAL_ERROR_DECODE) {
 		ehi->err_mask |= AC_ERR_ATA_BUS;
@@ -1034,6 +1057,9 @@ static void sata_fsl_error_intr(struct ata_port *ap)
 #endif
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
+#endif
+#ifdef MY_ABC_HERE
+		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 #endif
 		DPRINTK("SATA FSL: PHYRDY change indication\n");
 

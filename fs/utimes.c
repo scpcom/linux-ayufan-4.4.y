@@ -44,17 +44,20 @@ SYSCALL_DEFINE2(utime, char __user *, filename, struct utimbuf __user *, times)
  * sys_SYNOUtime() is used to update create time.
  *
  * @param	filename	The file to be changed create time.
- * 			times	Create time should be stored in 
- *				actime field.
+ * 			pCtime  Create time.
  * @return	0	success
  *			!0	error
  */
-asmlinkage long sys_SYNOUtime(char * filename, struct utimbuf * times)
+asmlinkage long sys_SYNOUtime(char * filename, struct timespec * pCtime)
 {
 	int error;
 	struct path path;
 	struct inode *inode = NULL;
 	struct iattr newattrs;
+
+	if (!pCtime) {
+		return -EINVAL;
+	}
 
 	error = user_path_at(AT_FDCWD, filename, LOOKUP_FOLLOW, &path);
 	if (error)
@@ -65,23 +68,21 @@ asmlinkage long sys_SYNOUtime(char * filename, struct utimbuf * times)
 	if (IS_RDONLY(inode))
 		goto dput_and_out;
 
-	if (times) {
-		error = get_user(newattrs.ia_ctime.tv_sec, &times->actime);
-		newattrs.ia_ctime.tv_nsec = 0;
-		if (error)
-			goto dput_and_out;
+	error = copy_from_user(&newattrs.ia_ctime, pCtime, sizeof(struct timespec));
+	if (error)
+		goto dput_and_out;
 
-		newattrs.ia_valid = ATTR_CREATE_TIME;
-		mutex_lock(&inode->i_mutex);
-		if (inode->i_op && inode->i_op->setattr)  {
-			error = inode->i_op->setattr(path.dentry, &newattrs);
-		} else {
-			error = inode_change_ok(inode, &newattrs);
-			if (!error)
-				error = inode_setattr(inode, &newattrs);
+	newattrs.ia_valid = ATTR_CREATE_TIME;
+	mutex_lock(&inode->i_mutex);
+	if (inode->i_op && inode->i_op->setattr)  {
+		error = inode->i_op->setattr(path.dentry, &newattrs);
+	} else {
+		error = inode_change_ok(inode, &newattrs);
+		if (!error) {
+			error = inode_setattr(inode, &newattrs);
 		}
-		mutex_unlock(&inode->i_mutex);
 	}
+	mutex_unlock(&inode->i_mutex);
 
 dput_and_out:
 	path_put(&path);

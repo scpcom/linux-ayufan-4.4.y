@@ -75,7 +75,11 @@
  * module options
  */
 
+#ifdef MY_ABC_HERE
+static int msi = 1;
+#else /* MY_ABC_HERE */
 static int msi;
+#endif /* MY_ABC_HERE */
 #ifdef CONFIG_PCI
 module_param(msi, int, S_IRUGO);
 MODULE_PARM_DESC(msi, "Enable use of PCI MSI (0=off, 1=on)");
@@ -2625,6 +2629,7 @@ static void mv_unexpected_intr(struct ata_port *ap, int edma_was_enabled)
 	ata_port_freeze(ap);
 }
 
+
 /**
  *      mv_err_intr - Handle error interrupts on the port
  *      @ap: ATA channel to manipulate
@@ -2672,6 +2677,7 @@ static void mv_err_intr(struct ata_port *ap)
 			return;
 	}
 
+
 	qc = mv_get_active_qc(ap);
 	ata_ehi_clear_desc(ehi);
 	ata_ehi_push_desc(ehi, "edma_err_cause=%08x pp_flags=%08x",
@@ -2718,6 +2724,11 @@ static void mv_err_intr(struct ata_port *ap)
 #endif
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
+#endif
+#ifdef MY_ABC_HERE
+		if (edma_err_cause & EDMA_ERR_DEV_CON) {
+			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
+		}
 #endif
 		ata_ehi_hotplugged(ehi);
 		ata_ehi_push_desc(ehi, edma_err_cause & EDMA_ERR_DEV_DCON ?
@@ -3782,6 +3793,7 @@ static int mv_hardreset(struct ata_link *link, unsigned int *class,
 	pp->pp_flags &= ~MV_PP_FLAG_EDMA_EN;
 	pp->pp_flags &=
 	  ~(MV_PP_FLAG_FBS_EN | MV_PP_FLAG_NCQ_EN | MV_PP_FLAG_FAKE_ATA_BUSY);
+
 
 	/* Workaround for errata FEr SATA#10 (part 2) */
 	do {

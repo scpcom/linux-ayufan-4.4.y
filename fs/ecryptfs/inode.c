@@ -1169,6 +1169,9 @@ int ecryptfs_getattr(struct vfsmount *mnt, struct dentry *dentry,
 #ifdef MY_ABC_HERE
 		stat->SynoMode = lower_stat.SynoMode;
 #endif
+#ifdef MY_ABC_HERE
+		stat->SynoCreateTime = lower_stat.SynoCreateTime;
+#endif
 #ifdef CONFIG_FS_SYNO_ACL
 		stat->mode = lower_stat.mode;
 #endif

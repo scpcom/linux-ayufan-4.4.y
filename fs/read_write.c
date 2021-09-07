@@ -35,6 +35,7 @@ struct write_sock_to_file_stat write_from_sock = {0};
 #endif /* COLLECT_WRITE_SOCK_TO_FILE_STAT */
 #endif /*CONFIG_ARCH_FEROCEON*/
 
+
 const struct file_operations generic_ro_fops = {
 	.llseek		= generic_file_llseek,
 	.read		= do_sync_read,
@@ -659,10 +660,11 @@ asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, si
 		size_t cBytewritten = 0;
 
 		do {
-			ret = do_recvfile(file, sock, &pos,
-						  (nbytes_left >= (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)) ?
-						   (MAX_PAGES_PER_RECVFILE * PAGE_SIZE) : nbytes_left
-						  , &cBytereceived, &cBytewritten);
+				ret = do_recvfile(file, sock, &pos,
+							  (nbytes_left >= (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)) ?
+							   (MAX_PAGES_PER_RECVFILE * PAGE_SIZE) : nbytes_left
+							  , &cBytereceived, &cBytewritten);
+
 			if(ret > 0) {
 				bytes_received += ret;
 				bytes_written += ret;

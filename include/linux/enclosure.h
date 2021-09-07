@@ -29,6 +29,9 @@
 /* A few generic types ... taken from ses-2 */
 enum enclosure_component_type {
 	ENCLOSURE_COMPONENT_DEVICE = 0x01,
+#ifdef CONFIG_SYNO_SAS_ENCLOSURE_ID_CTRL
+	ENCLOSURE_COMPONENT_DISPLAY = 0x0C,
+#endif
 	ENCLOSURE_COMPONENT_ARRAY_DEVICE = 0x17,
 };
 
@@ -81,6 +84,15 @@ struct enclosure_component_callbacks {
 			  enum enclosure_component_setting);
 };
 
+#ifdef CONFIG_SYNO_SAS_ENCLOSURE_ID_CTRL
+struct enclosure_display_callback {
+	void (*get_display) (struct enclosure_device *,
+			char *, const int );
+	int (*set_display) (struct enclosure_device *,
+			const char *, const int );
+};
+#endif
+
 
 struct enclosure_component {
 	void *scratch;
@@ -99,6 +111,9 @@ struct enclosure_device {
 	struct list_head node;
 	struct device edev;
 	struct enclosure_component_callbacks *cb;
+#ifdef CONFIG_SYNO_SAS_ENCLOSURE_ID_CTRL
+	struct enclosure_display_callback *display_cb;
+#endif
 	int components;
 	struct enclosure_component component[0];
 };

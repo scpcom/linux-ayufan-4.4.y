@@ -46,6 +46,16 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
+#if defined(SYNO_INQUIRY_STANDARD) || defined(CONFIG_SYNO_INQUIRY_USE_ATA_COMMAND)
+#define SYNO_INQUIRY_TMP_LEN 32
+#define SYNO_RESULT_LEN 256
+#define SYNO_INQUIRY_LEN 36
+#define SZ_STAT_DISK_VENDOR "ATA     "
+#ifdef SYNO_SAS_DISK_NAME
+extern int g_is_sas_model;
+#endif
+#endif
+
 #define ALLOC_FAILURE_MSG	KERN_ERR "%s: Allocation failure during" \
 	" SCSI scanning, some SCSI devices might not be configured\n"
 
@@ -550,8 +560,7 @@ static void sanitize_inquiry_string(unsigned char *s, int len)
 	}
 }
 
-#ifdef MY_ABC_HERE
-#define SYNO_INQUIRY_TMP_LEN 32
+#ifdef SYNO_INQUIRY_STANDARD
 /**
  * ssyno_standard_inquiry_strin - refine the vendor and model strings of SATA disks 
  * @szInqStr: INQUIRY result string to be refined
@@ -581,7 +590,7 @@ static void syno_standard_inquiry_string(unsigned char *szInqStr, unsigned int u
 	 * Only transfering the strings that vendor is ATA.
 	 * vendor set as "ATA" means the disk is a SATA disk
 	 */
-	if (strncmp(szInqStr, "ATA     ", 8)) {
+	if (strncmp(szInqStr, SZ_STAT_DISK_VENDOR, 8)) {
 		goto END;
 	}
 
@@ -620,6 +629,100 @@ END:
 	return;
 }
 #endif
+
+#ifdef CONFIG_SYNO_INQUIRY_USE_ATA_COMMAND
+/**
+ * Description:
+ * 	The result of SCSI INQUIRY from a SATA disk might set vendor as "ATA"
+ * 	and set model as "vendor model" in 16 characters. This could let model
+ * 	name obtain incomplete. For expample, model will be "KINGSTON SKC100S"
+ * 	after INQUIRY command executes. But the complete model name of the disk
+ * 	is "SKC100S3120G".
+ *	This function use ATA command to obtain SATA disk informatiom and then
+ *	refines the INQUIRY result of SATA disks to correctly fill the vendor
+ *	and model entries. This function resets the result string and parses the
+ *	original model string and fills the correct data into each entry.
+ * References:
+ * 	1. Information Technology - AT Attachment with Packet Interface - 5 (ATA/ATAPI-5)
+ * 	2. ATA Command Pass-Through
+ *
+ * @param
+ * 	sdev[IN]: send ATA command to the SCSI device
+ * 	szInqReturn[OUT]: INQUIRY result string to be refined
+ * 	iInqLen[IN]: length of the query command
+ * 	iLen[IN]: length of the string
+ *
+ **/
+void scsi_ata_identify_device(struct scsi_device *sdev, unsigned char *szInqReturn, const int iInqLen, const int iLen)
+{
+	unsigned char szScsiCmd[MAX_COMMAND_SIZE] = {0};
+	unsigned char szInqResult[SYNO_RESULT_LEN] = {0};
+	char szTmpResult[SYNO_INQUIRY_TMP_LEN] = {'\0'};
+	int i = 0;
+	int iResid;
+	int blPreIsSpace = 0;
+	int blSegmented = 0;
+	int iRes = 0;
+	struct scsi_sense_hdr sshdr;
+
+	memset(szScsiCmd, 0, MAX_COMMAND_SIZE);
+
+	/* ATA PASS-THROUGH (16) command */
+	szScsiCmd[0] = 0x85;
+	/* PROTOCOL=PIO Data-In */
+	szScsiCmd[1] = 0x08;
+	/* T_DIR=1, BYT_BLOK=1, T_LENGTH=2 */
+	szScsiCmd[2] = 0x0e;
+	/* ATA IDENTIFY DEVICE command */
+	szScsiCmd[14] = 0xec;
+
+	iRes = scsi_execute_req(sdev, szScsiCmd, DMA_FROM_DEVICE,
+		szInqResult, iInqLen, &sshdr, HZ*10, 5, &iResid);
+
+	/* Swap string for endian problems */
+	for (i = 0; i < SYNO_RESULT_LEN - 1; i += 2)
+	{
+		char tmp = szInqResult[i];
+		szInqResult[i] = szInqResult[i+1];
+		szInqResult[i+1] = tmp;
+	}
+
+	/* Search the end of vendor name */
+	for (i = 0; i < SYNO_INQUIRY_TMP_LEN; i++) {
+		if ('\0' == szInqResult[54+i]) {
+			break;
+		}
+
+		if (' ' == szInqResult[54+i]) {
+			if(1 == blPreIsSpace){
+				goto END;
+			}
+			blPreIsSpace = 1;
+		} else if (blPreIsSpace) {
+			blSegmented =1;
+			break;
+		}
+	}
+
+	if (!blSegmented){
+		goto END;
+	}
+
+	/* Copy vendor name form word 27 */
+	memcpy(szTmpResult, &szInqResult[54], i);
+	/* Copy model data after the vendor name */
+	memcpy(&szTmpResult[8], &szInqResult[54 + i], 16);
+	/* Copy firmware revision from word 23*/
+	memcpy(&szTmpResult[iLen - 4], &szInqResult[46], 4);
+
+	memset(szInqReturn, 0, iLen);
+	memcpy(szInqReturn, szTmpResult, iLen);
+
+END:
+	return;
+}
+#endif
+
 /**
  * scsi_probe_lun - probe a single LUN using a SCSI INQUIRY
  * @sdev:	scsi_device to probe
@@ -704,7 +807,15 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	}
 
 	if (result == 0) {
-#ifdef MY_ABC_HERE
+#if defined(CONFIG_SYNO_INQUIRY_USE_ATA_COMMAND) && defined(SYNO_SAS_DISK_NAME)
+		if( 1 == g_is_sas_model &&
+				SYNO_INQUIRY_LEN <= try_inquiry_len &&
+				!strncmp(SZ_STAT_DISK_VENDOR, &inq_result[8], 8)){
+			scsi_ata_identify_device(sdev, &inq_result[8], try_inquiry_len, 28);
+		}
+#endif
+
+#ifdef SYNO_INQUIRY_STANDARD
 		syno_standard_inquiry_string(&inq_result[8], 28);
 #endif
 		sanitize_inquiry_string(&inq_result[8], 8);

@@ -2490,7 +2490,15 @@ void bond_mii_monitor(struct work_struct *work)
 
 	if (bond_miimon_inspect(bond)) {
 		read_unlock(&bond->lock);
+#ifdef MY_ABC_HERE
+		/* Race avoidance with bond_close flush of workqueue */
+		if (!rtnl_trylock()) {
+			read_lock(&bond->lock);
+			goto re_arm;
+		}
+#else
 		rtnl_lock();
+#endif /* MY_ABC_HERE */
 		read_lock(&bond->lock);
 
 		bond_miimon_commit(bond);

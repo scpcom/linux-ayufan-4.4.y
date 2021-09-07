@@ -54,6 +54,7 @@ struct mpc8xxx_gpio_chip {
 #endif
 };
 
+
 static inline u32 mpc8xxx_gpio2mask(unsigned int gpio)
 {
 #ifdef CONFIG_SYNO_QORIQ
@@ -208,6 +209,8 @@ static int mpc8xxx_gpio_dir_out(struct gpio_chip *gc, unsigned int gpio, int val
 
 	return 0;
 }
+
+
 
 static void __init mpc8xxx_add_controller(struct device_node *np)
 {

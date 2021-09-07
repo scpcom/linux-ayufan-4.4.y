@@ -433,6 +433,7 @@ enum {
 	ATA_EH_DEV_TRIES	= 3,
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	ATA_EH_PMP_TRIES	= 3,
+	SYNO_PMP_PWR_TRIES	= 10,
 #else
 	ATA_EH_PMP_TRIES	= 5,
 #endif
@@ -704,6 +705,7 @@ struct ata_device {
 	unsigned long ulLastCmd;
 	unsigned long ulSpinupState;
 	int			  iCheckPwr;
+	struct work_struct	SendWakeEventTask;
 
 	/* bit definitions */
 	#define CHKPOWER_CHECKING 0
@@ -1339,19 +1341,21 @@ extern struct ata_port *SynoEunitFindMaster(struct ata_port *ap);
 int syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn);
 #endif /* SYNO_SATA_PM_DEVICE_GPIO */
 
-#ifdef SYNO_FIX_HORKAGE_15G_MISSING
-typedef enum {
-	UNKNOW_HORKAGE_STAGE = 0,
-	NOT_APPLY_15G,
-	FIRST_APPLY_15G,
-	ALREADY_APPLY_15G,
-} SYNO_HORKAGE_STAGE;
-extern SYNO_HORKAGE_STAGE SynoGetHorkageStage(struct ata_link *pLink);
-extern int iNeedResetAgainFor15G(struct ata_link *pLink);
-#endif
+
 
 #ifdef MY_ABC_HERE
 extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun);
+#endif
+
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#define IS_SYNO_PMP_WRITE_CMD(tf) (ATA_CMD_PMP_WRITE == tf->command && SATA_PMP_GSCR_3XXX_GPIO == tf->feature)
+#define IS_SYNO_PMP_READ_CMD(tf) (ATA_CMD_PMP_READ == tf->command && SATA_PMP_GSCR_3XXX_GPIO == tf->feature)
+#define IS_SYNO_PMP_CMD(tf) (IS_SYNO_PMP_READ_CMD(tf) || IS_SYNO_PMP_WRITE_CMD(tf))
+#endif
+
+#ifdef MY_ABC_HERE
+#define IS_SYNO_SPINUP_CMD(qc) (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) && \
+			(ATA_CMD_CHK_POWER == qc->tf.command || ATA_CMD_FPDMA_READ == qc->tf.command))
 #endif
 
 /*

@@ -139,6 +139,7 @@ extern unsigned char SYNOQorIQIsBoardNeedPowerUpHDD(u32);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 #endif
 
+
 /* param_buf is thrown away after initialization, disallow read */
 module_param_string(force, ata_force_param_buf, sizeof(ata_force_param_buf), 0);
 MODULE_PARM_DESC(force, "Force ATA configurations including cable type, link speed and transfer mode (see Documentation/kernel-parameters.txt for details)");
@@ -1823,7 +1824,7 @@ unsigned syno_ata_exec_internal_gpio(struct ata_device *dev,
 
 	/* prepare & issue qc */
 	qc->tf = *tf;
-	if (ATA_CMD_PMP_READ == tf->command && SATA_PMP_GSCR_3XXX_GPIO == tf->feature) {
+	if (IS_SYNO_PMP_READ_CMD(tf)) {
 		/* only read need result tf */
 		qc->flags |= ATA_QCFLAG_RESULT_TF;
 	}
@@ -2151,8 +2152,7 @@ unsigned ata_exec_internal(struct ata_device *dev,
 	}
 
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
-	if ((ATA_CMD_PMP_WRITE == tf->command || ATA_CMD_PMP_READ == tf->command) &&
-		SATA_PMP_GSCR_3XXX_GPIO == tf->feature &&
+	if (IS_SYNO_PMP_CMD(tf) &&
 		!(ehc->i.action & ATA_EH_REVALIDATE))
 		return syno_ata_exec_internal_gpio(dev, tf, timeout);
 	else
@@ -5359,6 +5359,9 @@ static void ata_verify_xfer(struct ata_queued_cmd *qc)
 void ata_qc_complete(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
+#if defined(MY_ABC_HERE) || defined(SYNO_SATA_PM_DEVICE_GPIO)
+	struct ata_taskfile *tf = &qc->tf;
+#endif
 
 	/* XXX: New EH and old EH use different mechanisms to
 	 * synchronize EH with regular execution path.
@@ -5385,9 +5388,7 @@ void ata_qc_complete(struct ata_queued_cmd *qc)
 			fill_result_tf(qc);
 
 #if defined(MY_ABC_HERE) || defined(SYNO_SATA_PM_DEVICE_GPIO)
-			if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) &&
-				(ATA_CMD_CHK_POWER == qc->tf.command || ATA_CMD_PMP_WRITE == qc->tf.command ||
-				 ATA_CMD_PMP_READ || ATA_CMD_VERIFY == qc->tf.command))
+			if (IS_SYNO_PMP_CMD(tf) || IS_SYNO_SPINUP_CMD(qc))
 				__ata_qc_complete(qc);
 			else if (!ata_tag_internal(qc->tag))
 #else
@@ -5947,6 +5948,9 @@ void ata_link_init(struct ata_port *ap, struct ata_link *link, int pmp)
 	link->pmp = pmp;
 	link->active_tag = ATA_TAG_POISON;
 	link->hw_sata_spd_limit = UINT_MAX;
+#ifdef MY_ABC_HERE
+	link->uiSflags = 0x0;
+#endif
 
 	/* can't use iterator, ap isn't initialized yet */
 	for (i = 0; i < ATA_MAX_DEVICES; i++) {
@@ -5961,6 +5965,7 @@ void ata_link_init(struct ata_port *ap, struct ata_link *link, int pmp)
 		dev->ulSpinupState = 0;
 		dev->ulLastCmd = 0;
 		dev->iCheckPwr = 0;
+		INIT_WORK(&dev->SendWakeEventTask, SynoSendWakeEvent);
 #endif
 		ata_dev_init(dev);
 	}
@@ -6065,7 +6070,9 @@ struct ata_port *ata_port_alloc(struct ata_host *host)
 	ap->stats.idle_irq = 1;
 #endif
 #ifdef MY_ABC_HERE
+	ap->uiSflags = 0x0;
 	ap->iFakeError = 0;
+	ap->iDetectStat = 0;
 	INIT_WORK(&ap->SendPwrResetEventTask, SendPwrResetEvent);
 	INIT_WORK(&ap->SendPortDisEventTask, SendPortDisEvent);
 #endif
@@ -6490,6 +6497,7 @@ static void DelayForHWCtl(struct ata_port *pAp)
 		iIsDoLatency = 1;
 	}
 #endif
+
 
 	if (!(pAp->host->flags & ATA_HOST_LLD_SPINUP_DELAY)) {
 #if defined(CONFIG_SYNO_MPC8533) || defined(CONFIG_SYNO_MPC854X)
@@ -6971,7 +6979,19 @@ int ata_pci_device_do_resume(struct pci_dev *pdev)
 {
 	int rc;
 
+
+#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
+	rc = pci_set_power_state(pdev, PCI_D0);
+	while(rc) {
+		/* add delay to wait pci device */
+		msleep(1000);
+		rc = pci_set_power_state(pdev, PCI_D0);
+		printk("First resume failed, continue set PCI_D0 until succeed rc=%d %s(%d)\n", rc, __func__, __LINE__);
+	}
+#else
 	pci_set_power_state(pdev, PCI_D0);
+#endif
+
 	pci_restore_state(pdev);
 
 	rc = pcim_enable_device(pdev);
@@ -7349,107 +7369,6 @@ void syno_ata_info_print(struct ata_port *ap)
 EXPORT_SYMBOL(syno_ata_info_print);
 #endif
 
-#ifdef SYNO_FIX_HORKAGE_15G_MISSING
-/**
- * return the current ata link horkage stage,
- * The stages are based on ata_do_link_spd_horkage(..)
- *
- * @param [IN] pLink : the ata link
- *
- * @return FIRST_APPLY_15G: this link is apply ATA_HORKAGE_1_5_GBPS now
- *         ALREADY_APPLY_15G : this link is already applied ATA_HORKAGE_1_5_GBPS
- *         NOT_APPLY_15G : thik link isn't apply ATA_HORKAGE_1_5_GBPS
- */
-SYNO_HORKAGE_STAGE SynoGetHorkageStage(struct ata_link *pLink)
-{
-	SYNO_HORKAGE_STAGE Ret = UNKNOW_HORKAGE_STAGE;
-	struct ata_device *dev;
-	u32 target = 0;
-	u32 target_limit = 0;
-
-	if (!pLink) {
-		goto END;
-	}
-
-
-	ata_for_each_dev(dev, pLink, ALL) {
-		/* only have ATA_HORKAGE_1_5_GBPS, we should check */
-		if (dev->horkage & ATA_HORKAGE_1_5_GBPS) {
-			target = 1;
-		} else {
-			continue;
-		}
-		target_limit = (1 << target) - 1;
-
-		/* ata_do_link_spd_horkage(..) will do "plink->sata_spd_limit = target_limit",
-		 * so we must chek "pLink->sata_spd > target" at first */
-		if (pLink->sata_spd > target) {
-			Ret = FIRST_APPLY_15G;
-			goto END;
-		}
-
-		/* we must check this after "pLink->sata_spd > target" case */
-		if (pLink->sata_spd_limit <= target_limit) {
-			Ret = ALREADY_APPLY_15G;
-			goto END;
-		}
-
-		printk("Horkage Stage error? break now.\n");
-		break;
-	}
-
-	Ret = NOT_APPLY_15G;
-
-END:
-	return Ret;
-}
-
-/* test if we need reset it again:
- * if ALREADY_APPLY_15G and not 1.5G speed,
- * some chip need reset again to adjust speed
- * back to 1.5G
- *
- * @return 0: no need reset
- *         1: need reset
- *
- */
-int iNeedResetAgainFor15G(struct ata_link *pLink)
-{
-	int iRet = 0;
-	u32 sstatus = 0x0;
-	u32 scontrol = 0x0;
-	u32 tmp = 0x0;
-
-	if (!pLink) {
-		goto END;
-	}
-
-	/* only ALREADY_APPLY_15G, we need reset again */
-	if (ALREADY_APPLY_15G != SynoGetHorkageStage(pLink)) {
-		goto END;
-	}
-
-	/* the following most code is copied/modified from
-	 * sata_print_link_status(..) to check if 1.5G now */
-	if (sata_scr_read(pLink, SCR_STATUS, &sstatus)) {
-		/* can't read sstatus */
-		goto END;
-	}
-	sata_scr_read(pLink, SCR_CONTROL, &scontrol);
-
-	tmp = (sstatus >> 4) & 0xf;
-	if (0x1 == tmp) {
-		/* already speed 1.5G, please ref. sstatus register of sata chip spec. */
-		goto END;
-	}
-
-	/* have ALREADY_APPLY_15G and not 1.5G speed, we need reset again */
-	iRet = 1;
-
-END:
-	return iRet;
-}
-#endif
 
 /*
  * libata is essentially a library of internal helper functions for

@@ -94,7 +94,7 @@ extern const char gfar_driver_version[];
 /* These need to be powers of 2 for this driver */
 #ifdef CONFIG_GFAR_SKBUFF_RECYCLING
 #define DEFAULT_TX_RING_SIZE	1024
-#define DEFAULT_RX_RING_SIZE	1024
+#define DEFAULT_RX_RING_SIZE	64
 #else
 #define DEFAULT_TX_RING_SIZE	256
 #define DEFAULT_RX_RING_SIZE	256

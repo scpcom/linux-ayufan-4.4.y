@@ -123,6 +123,16 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	return xhci_pci_reinit(xhci, pdev);
 }
 
+#ifdef CONFIG_USB_ETRON_HCD_MODULE
+static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
+{
+	if (dev->vendor == 0x1b6f)
+		return -ENODEV;
+
+	return usb_hcd_pci_probe(dev, id);
+}
+#endif
+
 static const struct hc_driver xhci_pci_hc_driver = {
 	.description =		hcd_name,
 	.product_desc =		"xHCI Host Controller",
@@ -186,7 +196,11 @@ static struct pci_driver xhci_pci_driver = {
 	.name =		(char *) hcd_name,
 	.id_table =	pci_ids,
 
+#ifdef CONFIG_USB_ETRON_HCD_MODULE
+	.probe =	xhci_pci_probe,
+#else
 	.probe =	usb_hcd_pci_probe,
+#endif
 	.remove =	usb_hcd_pci_remove,
 	/* suspend and resume implemented later */
 

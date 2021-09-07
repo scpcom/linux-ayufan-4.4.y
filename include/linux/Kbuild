@@ -394,3 +394,4 @@ header-y += synosata.h
 header-y += syno_debug.h
 header-y += synobios.h
 header-y += syno_acl_xattr_ds.h
+header-y += timerfd.h

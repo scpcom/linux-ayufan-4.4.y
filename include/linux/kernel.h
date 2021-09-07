@@ -159,6 +159,11 @@ static inline void might_fault(void)
 }
 #endif
 
+struct va_format {
+	const char *fmt;
+	va_list *va;
+};
+
 extern struct atomic_notifier_head panic_notifier_list;
 extern long (*panic_blink)(long time);
 NORET_TYPE void panic(const char * fmt, ...)
@@ -218,7 +223,7 @@ extern struct pid *session_of_pgrp(struct pid *pgrp);
  * should be able to fix this issue or at least get a concrete idea of the
  * problem by reading your message without the need of looking at the kernel
  * code.
- * 
+ *
  * Use it for definite and high priority BIOS bugs.
  *
  * FW_WARN

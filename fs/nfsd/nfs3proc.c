@@ -556,7 +556,7 @@ nfsd3_proc_fsinfo(struct svc_rqst * rqstp, struct nfsd_fhandle    *argp,
 	if (IPPROTO_UDP == rqstp->rq_prot) {
 		resp->f_rtpref = 8192;
 	} else {
-		resp->f_rtpref = NFSSVC_MAXBLKSIZE;
+		resp->f_rtpref = max_blocksize;
 	}
 #else
 	resp->f_rtpref = max_blocksize;

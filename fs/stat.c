@@ -261,15 +261,6 @@ static int cp_new_stat(struct kstat *stat, struct stat __user *statbuf)
 	tmp.st_mtime_nsec = stat->mtime.tv_nsec;
 	tmp.st_ctime_nsec = stat->ctime.tv_nsec;
 #endif
-#ifdef MY_ABC_HERE
-	tmp.st_SynoCreateTime = stat->SynoCreateTime.tv_sec;
-#endif
-#ifdef MY_ABC_HERE
-	tmp.st_SynoMode = stat->SynoMode;
-#endif
-#ifdef MY_ABC_HERE
-	tmp.st_syno_achv_ver = stat->syno_archive_version;
-#endif
 	tmp.st_blocks = stat->blocks;
 	tmp.st_blksize = stat->blksize;
 	return copy_to_user(statbuf,&tmp,sizeof(tmp)) ? -EFAULT : 0;
@@ -491,12 +482,13 @@ SYSCALL_DEFINE3(readlink, const char __user *, path, char __user *, buf,
  * The filename will be convert to real filename and return to user space.
  * In caller, the length of filename must equal or be larger than SYNO_SMB_PSTRING_LEN.
 */
-int __SYNOCaselessStat(char __user * filename, struct kstat *stat, unsigned flags, int *lastComponent)
+int __SYNOCaselessStat(char __user * filename, int isLink, struct kstat *stat, int *lastComponent)
 {
 	struct path path;
 	int error;
 	char *real_filename = NULL;
 	int real_filename_len = 0;
+	unsigned int flags = 0;
 
 	real_filename = kmalloc(SYNO_SMB_PSTRING_LEN, GFP_KERNEL);
 	if (!real_filename) {
@@ -508,6 +500,12 @@ int __SYNOCaselessStat(char __user * filename, struct kstat *stat, unsigned flag
 		printk("%s(%d) orig name:[%s] len:[%u]\n", __FUNCTION__, __LINE__, filename, (unsigned int)strlen(filename));
 	}
 #endif
+	
+	if (isLink) {
+		flags = LOOKUP_CASELESS_COMPARE;
+	} else {
+		flags = LOOKUP_FOLLOW|LOOKUP_CASELESS_COMPARE;
+	}
 	error = syno_user_path_at(AT_FDCWD, filename, flags, &path, &real_filename, &real_filename_len, lastComponent);
 	if (!error) {
 		error = vfs_getattr(path.mnt, path.dentry, stat);
@@ -529,7 +527,7 @@ int __SYNOCaselessStat(char __user * filename, struct kstat *stat, unsigned flag
 
 	kfree(real_filename);
 #ifdef MY_ABC_HERE
-	if(syno_hibernation_log_sec > 0) {
+	if(!isLink && syno_hibernation_log_sec > 0) {
 		syno_do_hibernation_log(filename);
 	}
 #endif
@@ -537,49 +535,7 @@ int __SYNOCaselessStat(char __user * filename, struct kstat *stat, unsigned flag
 	return error;
 }
 EXPORT_SYMBOL(__SYNOCaselessStat);
-
-asmlinkage long sys_SYNOCaselessStat(char __user * filename, struct stat __user *statbuf)
-{
-	int lastComponent = 0;
-	long error = -1;
-	struct kstat stat;
-
-	error = __SYNOCaselessStat(filename, &stat, LOOKUP_FOLLOW|LOOKUP_CASELESS_COMPARE, &lastComponent);
-	if (!error) {
-		error = cp_new_stat(&stat, statbuf);
-	} else if(error == -ENOENT) {
-		struct stat tmp;
-
-		memset(&tmp, 0, sizeof(tmp));
-		tmp.st_SynoUnicodeStat = lastComponent;
-		error = copy_to_user(statbuf, &tmp, sizeof(tmp)) ? -EFAULT : error;
-	}
-
-	return error;
-}
-
-asmlinkage long sys_SYNOCaselessLStat(char __user * filename, struct stat __user *statbuf)
-{
-	int lastComponent = 0;
-	long error = -1;
-	struct kstat stat;
-
-	error = __SYNOCaselessStat(filename, &stat, LOOKUP_CASELESS_COMPARE, &lastComponent);
-	if (!error) {
-		error = cp_new_stat(&stat, statbuf);
-	} else if(error == -ENOENT) {
-		struct stat tmp;
-
-		memset(&tmp, 0, sizeof(tmp));
-		tmp.st_SynoUnicodeStat = lastComponent;
-		error = copy_to_user(statbuf, &tmp, sizeof(tmp)) ? -EFAULT : error;
-	}
-
-	return error;
-}
-
 #endif
-
 
 /* ---------- LFS-64 ----------- */
 #ifdef __ARCH_WANT_STAT64
@@ -615,15 +571,6 @@ static long cp_new_stat64(struct kstat *stat, struct stat64 __user *statbuf)
 	tmp.st_mtime_nsec = stat->mtime.tv_nsec;
 	tmp.st_ctime = stat->ctime.tv_sec;
 	tmp.st_ctime_nsec = stat->ctime.tv_nsec;
-#ifdef MY_ABC_HERE
-	tmp.st_SynoCreateTime = stat->SynoCreateTime.tv_sec;
-#endif
-#ifdef	MY_ABC_HERE
-	tmp.st_SynoMode = stat->SynoMode;
-#endif
-#ifdef MY_ABC_HERE
-	tmp.st_syno_achv_ver = stat->syno_archive_version;
-#endif
 	tmp.st_size = stat->size;
 	tmp.st_blocks = stat->blocks;
 	tmp.st_blksize = stat->blksize;
@@ -681,21 +628,201 @@ SYSCALL_DEFINE4(fstatat64, int, dfd, char __user *, filename,
 }
 
 #ifdef MY_ABC_HERE
+struct SYNOSTAT64 {
+	struct stat64 st;
+	struct SYNOSTAT_EXTRA ext;
+};
+
+static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYNOSTAT __user * pSt, struct SYNOSTAT64 __user * pSt64)
+{
+	int error = -EFAULT;
+
+	if (pSt64){
+		if (flags & SYNOST_STAT) {
+			error = cp_new_stat64(pKst, &pSt64->st);
+		}
+#ifdef MY_ABC_HERE
+		if (flags & SYNOST_ARBIT) {
+			if (__put_user(pKst->SynoMode, &pSt64->ext.archBit)){
+				goto Out;
+			}
+		}
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
+		if (flags & SYNOST_CREATIME) {
+			if (copy_to_user(&pSt64->ext.creatTime, &pKst->SynoCreateTime, sizeof(pSt64->ext.creatTime))){
+				goto Out;
+			}
+		}
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
+		if (flags & SYNOST_BKPVER) {
+			if (__put_user(pKst->syno_archive_version, &pSt64->ext.bkpVer)){
+				goto Out;
+			}
+		}
+#endif /* MY_ABC_HERE */
+	} else if (pSt) {
+		if (flags & SYNOST_STAT) {
+			if(0 != (error = cp_new_stat(pKst, &pSt->st))){
+				goto Out;
+			}
+		}
+#ifdef MY_ABC_HERE
+		if (flags & SYNOST_ARBIT) {
+			if (__put_user(pKst->SynoMode, &pSt->ext.archBit)){
+				goto Out;
+			}
+		}
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
+		if (flags & SYNOST_CREATIME) {
+			if (copy_to_user(&pSt->ext.creatTime, &pKst->SynoCreateTime, sizeof(pSt->ext.creatTime))){
+				goto Out;
+			}
+		}
+#endif
+#ifdef MY_ABC_HERE
+		if (flags & SYNOST_BKPVER) {
+			if (__put_user(pKst->syno_archive_version, &pSt->ext.bkpVer)){
+				goto Out;
+			}
+		}
+#endif /* MY_ABC_HERE */
+	} else {
+		error = -EINVAL;
+		goto Out;
+	}
+
+	error = 0;
+Out:
+	return error;
+}
+
+static int do_SYNOStat(char __user * filename, int isLink, int f, struct SYNOSTAT __user * pSt, struct SYNOSTAT64 __user * pSt64)
+{
+	long error = -EINVAL;
+	int lastComponent = 0;
+	struct kstat kst;
+
+	if (f & SYNOST_IS_CASELESS) {
+#ifdef MY_ABC_HERE
+		error = __SYNOCaselessStat(filename, isLink, &kst, &lastComponent);
+		if (-ENOENT == error) {
+			if (pSt) {
+				if (__put_user(lastComponent, &pSt->ext.lastComponent)){
+					goto Out;
+				}
+			} else if (pSt64){
+				if (__put_user(lastComponent, &pSt64->ext.lastComponent)){
+					goto Out;
+				}
+			}
+		}
+#else
+		error = -EOPNOTSUPP;
+#endif
+	} else {
+		if (isLink) {
+			error = vfs_lstat(filename, &kst);
+		} else {
+			error = vfs_stat(filename, &kst);
+#ifdef MY_ABC_HERE
+			if(syno_hibernation_log_sec > 0) {
+				syno_do_hibernation_log(filename);
+			}
+#endif
+		}
+	}
+
+	if (error) {
+		goto Out;
+	}
+
+	error = SYNOStatCopyToUser(&kst, f, pSt, pSt64);
+Out:
+	return error;
+}
+
+static int do_SYNOFStat(unsigned int fd, int flags, struct SYNOSTAT __user * pSt, struct SYNOSTAT64 __user * pSt64)
+{
+	int error;
+	struct kstat kst;
+
+	error = vfs_fstat(fd, &kst);
+	if (!error) {
+		error = SYNOStatCopyToUser(&kst, flags, pSt, pSt64);
+	}
+	return error;
+}
+
+SYSCALL_DEFINE3(SYNOFStat, unsigned int, fd, unsigned int, flags, struct SYNOSTAT __user *, pSt)
+{
+	return do_SYNOFStat(fd, flags, pSt, NULL);
+}
+SYSCALL_DEFINE3(SYNOFStat64, unsigned int, fd, unsigned int, flags, struct SYNOSTAT64 __user *, pSt)
+{
+	return do_SYNOFStat(fd, flags, NULL, pSt);
+}
+
+SYSCALL_DEFINE3(SYNOStat, char __user *, filename, unsigned int, flags, struct SYNOSTAT __user *, pSt)
+{
+	return do_SYNOStat(filename, 0, flags, pSt, NULL);
+}
+SYSCALL_DEFINE3(SYNOStat64, char __user *, filename, unsigned int, flags, struct SYNOSTAT64 __user *, pSt)
+{
+	return do_SYNOStat(filename, 0, flags, NULL, pSt);
+}
+
+SYSCALL_DEFINE3(SYNOLStat, char __user *, filename, unsigned int, flags, struct SYNOSTAT __user *, pSt)
+{
+	return do_SYNOStat(filename, 1, flags, pSt, NULL);
+}
+SYSCALL_DEFINE3(SYNOLStat64, char __user *, filename, unsigned int, flags, struct SYNOSTAT64 __user *, pSt)
+{
+	return do_SYNOStat(filename, 1, flags, NULL, pSt);
+}
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+
+asmlinkage long sys_SYNOCaselessStat(char __user * filename, struct stat __user *statbuf)
+{
+	int lastComponent = 0;
+	long error = -1;
+	struct kstat stat;
+
+	error = __SYNOCaselessStat(filename, 0, &stat, &lastComponent);
+	if (!error) {
+		error = cp_new_stat(&stat, statbuf);
+	}
+
+	return error;
+}
+
+asmlinkage long sys_SYNOCaselessLStat(char __user * filename, struct stat __user *statbuf)
+{
+	int lastComponent = 0;
+	long error = -1;
+	struct kstat stat;
+
+	error = __SYNOCaselessStat(filename, 1, &stat, &lastComponent);
+	if (!error) {
+		error = cp_new_stat(&stat, statbuf);
+	}
+
+	return error;
+}
+
 asmlinkage long sys_SYNOCaselessStat64(char __user * filename, struct stat64 __user *statbuf)
 {
 	int lastComponent = 0;
 	long error = -1;
 	struct kstat stat;
 
-	error = __SYNOCaselessStat(filename, &stat, LOOKUP_FOLLOW|LOOKUP_CASELESS_COMPARE, &lastComponent);
+	error = __SYNOCaselessStat(filename, 0, &stat, &lastComponent);
 	if (!error) {
 		error = cp_new_stat64(&stat, statbuf);
-	} else if(error == -ENOENT) {
-		struct stat64 tmp;
-
-		memset(&tmp, 0, sizeof(tmp));
-		tmp.st_SynoUnicodeStat = lastComponent;
-		error = copy_to_user(statbuf, &tmp, sizeof(tmp)) ? -EFAULT : error;
 	}
 
 	return error;
@@ -707,15 +834,9 @@ asmlinkage long sys_SYNOCaselessLStat64(char __user * filename, struct stat64 __
 	long error = -1;
 	struct kstat stat;
 
-	error = __SYNOCaselessStat(filename, &stat, LOOKUP_CASELESS_COMPARE, &lastComponent);
+	error = __SYNOCaselessStat(filename, 1, &stat, &lastComponent);
 	if (!error) {
 		error = cp_new_stat64(&stat, statbuf);
-	} else if(error == -ENOENT) {
-		struct stat64 tmp;
-
-		memset(&tmp, 0, sizeof(tmp));
-		tmp.st_SynoUnicodeStat = lastComponent;
-		error = copy_to_user(statbuf, &tmp, sizeof(tmp)) ? -EFAULT : error;
 	}
 
 	return error;

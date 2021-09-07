@@ -464,6 +464,9 @@ static void sil_host_intr(struct ata_port *ap, u32 bmdma2)
 #ifdef MY_ABC_HERE
 			syno_ata_info_print(ap);
 #endif
+#ifdef MY_ABC_HERE
+			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
+#endif
 			goto freeze;
 		}
 

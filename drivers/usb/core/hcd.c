@@ -1620,6 +1620,11 @@ int usb_hcd_alloc_bandwidth(struct usb_device *udev,
 	struct usb_hcd *hcd;
 	struct usb_host_endpoint *ep;
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(udev))
+		return etapi_usb_hcd_alloc_bandwidth(udev, new_config, cur_alt, new_alt);
+#endif
+
 	hcd = bus_to_hcd(udev->bus);
 	if (!hcd->driver->check_bandwidth)
 		return 0;
@@ -1676,6 +1681,25 @@ int usb_hcd_alloc_bandwidth(struct usb_device *udev,
 		}
 	}
 	if (cur_alt && new_alt) {
+#ifdef MY_ABC_HERE
+		struct usb_interface *iface = usb_ifnum_to_if(udev,
+				cur_alt->desc.bInterfaceNumber);
+
+		if (iface->resetting_device) {
+			/*
+			 * The USB core just reset the device, so the xHCI host
+			 * and the device will think alt setting 0 is installed.
+			 * However, the USB core will pass in the alternate
+			 * setting installed before the reset as cur_alt.  Dig
+			 * out the alternate setting 0 structure, or the first
+			 * alternate setting if a broken device doesn't have alt
+			 * setting 0.
+			 */
+			cur_alt = usb_altnum_to_altsetting(iface, 0);
+			if (!cur_alt)
+				cur_alt = &iface->altsetting[0];
+		}
+#endif
 		/* Drop all the endpoints in the current alt setting */
 		for (i = 0; i < cur_alt->desc.bNumEndpoints; i++) {
 			ret = hcd->driver->drop_endpoint(hcd, udev,
@@ -1938,6 +1962,9 @@ irqreturn_t usb_hcd_irq (int irq, void *__hcd)
 	local_irq_restore(flags);
 	return rc;
 }
+#ifdef MY_ABC_HERE
+EXPORT_SYMBOL_GPL(usb_hcd_irq);
+#endif
 
 /*-------------------------------------------------------------------------*/
 

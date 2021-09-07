@@ -2417,6 +2417,7 @@ err_out:
 	return err;
 }
 
+
 static struct of_device_id talitos_match[] = {
 	{
 #ifdef CONFIG_SYNO_MPC8533

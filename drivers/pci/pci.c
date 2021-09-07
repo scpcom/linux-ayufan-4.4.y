@@ -541,6 +541,119 @@ static int pci_raw_set_power_state(struct pci_dev *dev, pci_power_t state)
 }
 
 /**
+ * syno_pci_raw_set_power_state - Use PCI PM registers to set the power state of
+ *                           given PCI device, and return error when set failed!
+ * @dev: PCI device to handle.
+ * @state: PCI power state (D0, D1, D2, D3hot) to put the device into.
+ *
+ * RETURN VALUE:
+ * -EINVAL if the requested state is invalid.
+ * -EIO if device does not support PCI PM or its PM capabilities register has a
+ * wrong version, or device doesn't support the requested state.
+ * 0 if device already is in the requested state.
+ * 0 if device's power state has been successfully changed.
+ */
+#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
+static int syno_pci_raw_set_power_state(struct pci_dev *dev, pci_power_t state)
+{
+	u16 pmcsr;
+	bool need_restore = false;
+
+	/* Check if we're already there */
+	if (dev->current_state == state)
+		return 0;
+
+	if (!dev->pm_cap)
+		return -EIO;
+
+	if (state < PCI_D0 || state > PCI_D3hot)
+		return -EINVAL;
+
+	/* Validate current state:
+	 * Can enter D0 from any state, but if we can only go deeper
+	 * to sleep if we're already in a low power state
+	 */
+	if (state != PCI_D0 && dev->current_state <= PCI_D3cold
+	    && dev->current_state > state) {
+		dev_err(&dev->dev, "invalid power transition "
+			"(from state %d to %d)\n", dev->current_state, state);
+		return -EINVAL;
+	}
+
+	/* check if this device supports the desired state */
+	if ((state == PCI_D1 && !dev->d1_support)
+	   || (state == PCI_D2 && !dev->d2_support))
+		return -EIO;
+
+	pci_read_config_word(dev, dev->pm_cap + PCI_PM_CTRL, &pmcsr);
+
+	/* If we're (effectively) in D3, force entire word to 0.
+	 * This doesn't affect PME_Status, disables PME_En, and
+	 * sets PowerState to 0.
+	 */
+	switch (dev->current_state) {
+	case PCI_D0:
+	case PCI_D1:
+	case PCI_D2:
+		pmcsr &= ~PCI_PM_CTRL_STATE_MASK;
+		pmcsr |= state;
+		break;
+	case PCI_D3hot:
+	case PCI_D3cold:
+	case PCI_UNKNOWN: /* Boot-up */
+		if ((pmcsr & PCI_PM_CTRL_STATE_MASK) == PCI_D3hot
+		 && !(pmcsr & PCI_PM_CTRL_NO_SOFT_RESET))
+			need_restore = true;
+		/* Fall-through: force to D0 */
+	default:
+		pmcsr = 0;
+		break;
+	}
+
+	/* enter specified state */
+	pci_write_config_word(dev, dev->pm_cap + PCI_PM_CTRL, pmcsr);
+
+	/* Mandatory power management transition delays */
+	/* see PCI PM 1.1 5.6.1 table 18 */
+	if (state == PCI_D3hot || dev->current_state == PCI_D3hot)
+		msleep(pci_pm_d3_delay);
+	else if (state == PCI_D2 || dev->current_state == PCI_D2)
+		udelay(PCI_PM_D2_DELAY);
+
+	pci_read_config_word(dev, dev->pm_cap + PCI_PM_CTRL, &pmcsr);
+	dev->current_state = (pmcsr & PCI_PM_CTRL_STATE_MASK);
+	if (dev->current_state != state && printk_ratelimit())
+	{
+		dev_info(&dev->dev, "Refused to change power state, "
+			"currently in D%d\n", dev->current_state);
+		printk(KERN_ERR, "Refused to change power state, currently in D%d\n", dev->current_state);
+
+		return -EIO;
+	}
+
+	/* According to section 5.4.1 of the "PCI BUS POWER MANAGEMENT
+	 * INTERFACE SPECIFICATION, REV. 1.2", a device transitioning
+	 * from D3hot to D0 _may_ perform an internal reset, thereby
+	 * going to "D0 Uninitialized" rather than "D0 Initialized".
+	 * For example, at least some versions of the 3c905B and the
+	 * 3c556B exhibit this behaviour.
+	 *
+	 * At least some laptop BIOSen (e.g. the Thinkpad T21) leave
+	 * devices in a D3hot state at boot.  Consequently, we need to
+	 * restore at least the BARs so that the device will be
+	 * accessible to its driver.
+	 */
+	if (need_restore)
+		pci_restore_bars(dev);
+
+	if (dev->bus->self)
+		pcie_aspm_pm_state_change(dev->bus->self);
+
+	return 0;
+}
+#endif
+
+/**
  * pci_update_current_state - Read PCI power state of given device from its
  *                            PCI PM registers and cache it
  * @dev: PCI device to handle.
@@ -649,7 +762,11 @@ int pci_set_power_state(struct pci_dev *dev, pci_power_t state)
 	if (state == PCI_D3hot && (dev->dev_flags & PCI_DEV_FLAGS_NO_D3))
 		return 0;
 
+#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
+	error = syno_pci_raw_set_power_state(dev, state);
+#else
 	error = pci_raw_set_power_state(dev, state);
+#endif
 
 	if (!__pci_complete_power_transition(dev, state))
 		error = 0;
@@ -892,9 +1009,19 @@ static int do_pci_enable_device(struct pci_dev *dev, int bars)
 	err = pci_set_power_state(dev, PCI_D0);
 	if (err < 0 && err != -EIO)
 		return err;
+
+#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
+	/*
+	 * In some case, if eanble pci device immediately after set power state
+	 * system will freeze at enable device, add 1 second delay to workaround
+	 */
+	msleep(1000);
+#endif
+
 	err = pcibios_enable_device(dev, bars);
 	if (err < 0)
 		return err;
+
 	pci_fixup_device(pci_fixup_enable, dev);
 
 	return 0;

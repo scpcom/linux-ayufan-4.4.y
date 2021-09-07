@@ -110,6 +110,7 @@ typedef struct __tag_SYNO_QORIQ_STATUS_LED_GPIO {
 	u8 power_led;
 } SYNO_QORIQ_STATUS_LED_GPIO;
 
+
 typedef struct __tag_SYNO_QORIQ_GENERIC_GPIO {
 	SYNO_QORIQ_EXT_HDD_LED_GPIO	ext_sata_led;
 	SYNO_QORIQ_SOC_HDD_LED_GPIO	soc_sata_led;
@@ -395,6 +396,7 @@ SYNO_QORIQ_GPIO_PIN(int pin, int *pValue, int isWrite)
 END:
 	return 0;
 }
+
 
 EXPORT_SYMBOL(SYNO_QORIQ_GPIO_PIN);
 EXPORT_SYMBOL(SYNOQorIQDiskLed);

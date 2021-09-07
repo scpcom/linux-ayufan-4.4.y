@@ -34,6 +34,9 @@ void fsstack_copy_attr_all(struct inode *dest, const struct inode *src,
 	//For ecryptfs archive bit
 	dest->i_mode2 = src->i_mode2;
 #endif
+#ifdef MY_ABC_HERE
+	dest->i_CreateTime = src->i_CreateTime;
+#endif
 	/*
 	 * Update the nlinks AFTER updating the above fields, because the
 	 * get_links callback may depend on them.

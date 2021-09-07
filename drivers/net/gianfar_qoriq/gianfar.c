@@ -890,8 +890,10 @@ inline void gfar_hwaccel_tcp4_receive(struct gfar_private *priv,
 	TCP_SKB_CB(skb)->sacked	 = 0;
 	rt = (struct rtable *)__sk_dst_check(gfar_sk, 0);
 	if (rt) {
-		dst_use(&rt->u.dst, jiffies);
-		skb_dst_set(skb,&rt->u.dst);
+		if(!skb_rtable(skb)) {
+			dst_use(&rt->u.dst, jiffies);
+			skb_dst_set(skb,&rt->u.dst);
+		}
 	}
 
 	bh_lock_sock(gfar_sk);
@@ -1691,6 +1693,7 @@ static int gfar_probe(struct of_device *ofdev,
 		 printk(KERN_INFO "%s:TX BD ring size for Q[%d]: %d\n",
 			dev->name, i, priv->tx_queue[i]->tx_ring_size);
 
+
 	return 0;
 
 register_fail:
@@ -1739,7 +1742,6 @@ static void gfar_enable_filer(struct net_device *dev)
 	temp &= ~RCTRL_FSQEN;
 	temp &= ~RCTRL_PRSDEP_MASK;
 	temp |= RCTRL_PRSDEP_L2L3;
-
 	gfar_write(&regs->rctrl, temp);
 
 	unlock_rx_qs(priv);
@@ -1760,6 +1762,7 @@ static int gfar_get_ip(struct net_device *dev)
 	}
 	return -ENOENT;
 }
+
 
 static void gfar_config_filer_table(struct net_device *dev)
 {
@@ -1959,6 +1962,7 @@ static int gfar_arp_resume(struct net_device *dev)
 
 	netif_device_attach(dev);
 	enable_napi(priv);
+
 
 	return 0;
 }
@@ -2750,6 +2754,7 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 					dev->name, grp->interruptTransmit);
 			goto err_irq_fail;
 		}
+
 	}
 
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
@@ -3202,6 +3207,10 @@ static int gfar_enet_open(struct net_device *dev)
 	netif_tx_start_all_queues(dev);
 
 	device_set_wakeup_enable(&priv->ofdev->dev, priv->wol_en);
+
+#ifdef CONFIG_SYNO_NET_INIT_OPERATION
+	linkwatch_fire_event(dev);
+#endif
 
 	return err;
 }
@@ -5708,6 +5717,7 @@ END:
 }
 EXPORT_SYMBOL(SynoQorIQWOLSet);
 #endif
+
 
 static struct of_device_id gfar_match[] =
 {
