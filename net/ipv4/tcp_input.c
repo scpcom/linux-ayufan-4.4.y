@@ -16,7 +16,18 @@
 #include <asm/unaligned.h>
 #include <net/netdma.h>
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+#include <net/tnkdrv.h>
+#endif
+#endif  
+
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_TNK)
+ 
+int sysctl_tcp_timestamps __read_mostly;
+#else  
 int sysctl_tcp_timestamps __read_mostly = 1;
+#endif  
 int sysctl_tcp_window_scaling __read_mostly = 1;
 int sysctl_tcp_sack __read_mostly = 1;
 int sysctl_tcp_fack __read_mostly = 1;
@@ -27,7 +38,11 @@ int sysctl_tcp_app_win __read_mostly = 31;
 int sysctl_tcp_adv_win_scale __read_mostly = 1;
 EXPORT_SYMBOL(sysctl_tcp_adv_win_scale);
 
+#ifdef MY_ABC_HERE
+int sysctl_tcp_challenge_ack_limit = 1000;
+#else
 int sysctl_tcp_challenge_ack_limit = 100;
+#endif  
 
 int sysctl_tcp_stdurg __read_mostly;
 int sysctl_tcp_rfc1337 __read_mostly;
@@ -40,6 +55,13 @@ int sysctl_tcp_moderate_rcvbuf __read_mostly = 1;
 int sysctl_tcp_early_retrans __read_mostly = 3;
 #if defined(MY_DEF_HERE)
 int sysctl_tcp_default_delack_segs __read_mostly = 1;
+#endif  
+#if defined(CONFIG_SYNO_LSP_HI3536)
+int sysctl_tcp_default_init_rwnd __read_mostly = TCP_DEFAULT_INIT_RCVWND;
+#ifdef CONFIG_TNK
+extern struct tnkfuncs *tnk;
+EXPORT_SYMBOL(sysctl_tcp_early_retrans);
+#endif
 #endif  
 
 #define FLAG_DATA		0x01  
@@ -233,11 +255,19 @@ static void tcp_grow_window(struct sock *sk, const struct sk_buff *skb)
 static void tcp_fixup_rcvbuf(struct sock *sk)
 {
 	u32 mss = tcp_sk(sk)->advmss;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	u32 icwnd = sysctl_tcp_default_init_rwnd;
+#else  
 	u32 icwnd = TCP_DEFAULT_INIT_RCVWND;
+#endif  
 	int rcvmem;
 
 	if (mss > 1460)
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		icwnd = max_t(u32, (1460 * icwnd) / mss, 2);
+#else  
 		icwnd = max_t(u32, (1460 * TCP_DEFAULT_INIT_RCVWND) / mss, 2);
+#endif  
 
 	rcvmem = SKB_TRUESIZE(mss + MAX_TCP_HEADER);
 	while (tcp_win_from_space(rcvmem) < mss)
@@ -414,6 +444,18 @@ static void tcp_event_data_recv(struct sock *sk, struct sk_buff *skb)
 	struct tcp_sock *tp = tcp_sk(sk);
 	struct inet_connection_sock *icsk = inet_csk(sk);
 	u32 now;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+     
+	if (tnk && (skb->len > 0)
+		&& !tcp_hdr(skb)->fin
+		&& !tcp_hdr(skb)->rst
+		&& (!sk->sk_lock.owned)) {
+		(&sk->sk_tnkinfo)->update_path = UPDATE_PATH_RECV;
+		tnk->tcp_update(sk, skb->len);
+	}
+#endif
+#endif  
 
 	inet_csk_schedule_ack(sk);
 
@@ -2485,13 +2527,31 @@ static void tcp_send_challenge_ack(struct sock *sk)
 	 
 	static u32 challenge_timestamp;
 	static unsigned int challenge_count;
+#ifdef MY_ABC_HERE
+	u32 count;
+#endif  
 	u32 now = jiffies / HZ;
 
 	if (now != challenge_timestamp) {
+#ifdef MY_ABC_HERE
+		u32 half = (sysctl_tcp_challenge_ack_limit + 1) >> 1;
+
+#endif  
 		challenge_timestamp = now;
+#ifdef MY_ABC_HERE
+		WRITE_ONCE(challenge_count, half +
+			   prandom_u32_max(sysctl_tcp_challenge_ack_limit));
+#else
 		challenge_count = 0;
+#endif  
 	}
+#ifdef MY_ABC_HERE
+	count = READ_ONCE(challenge_count);
+	if (count > 0) {
+		WRITE_ONCE(challenge_count, count - 1);
+#else
 	if (++challenge_count <= sysctl_tcp_challenge_ack_limit) {
+#endif  
 		NET_INC_STATS_BH(sock_net(sk), LINUX_MIB_TCPCHALLENGEACK);
 		tcp_send_ack(sk);
 	}
@@ -2904,7 +2964,15 @@ void tcp_reset(struct sock *sk)
 	default:
 		sk->sk_err = ECONNRESET;
 	}
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
 	 
+	sk->sk_tnkinfo.howto_destroy = TNK_DESTROY_SHUTDOWN;
+	if (tnk)
+		tnk->tcp_reset(sk);
+#endif
+#endif  
+
 	smp_wmb();
 
 	if (!sock_flag(sk, SOCK_DEAD))
@@ -3183,11 +3251,25 @@ static bool tcp_try_coalesce(struct sock *sk,
 			     bool *fragstolen)
 {
 	int delta;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	struct tnkcb *cb;
+#endif
+#endif  
 
 	*fragstolen = false;
 
 	if (tcp_hdr(from)->fin)
 		return false;
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	 
+	cb = &(TCP_SKB_CB(to)->header.tcb);
+	if (cb->magic == TNK_MAGIC)
+		return false;
+#endif
+#endif  
 
 	if (TCP_SKB_CB(from)->seq != TCP_SKB_CB(to)->end_seq)
 		return false;
@@ -3387,6 +3469,20 @@ static void tcp_data_queue(struct sock *sk, struct sk_buff *skb)
 	if (TCP_SKB_CB(skb)->seq == TCP_SKB_CB(skb)->end_seq)
 		goto drop;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	if (tnk) {
+		 
+		if ((sk->sk_tnkinfo.state == TNKINFO_STATE_ACTIVATING)
+				|| (sk->sk_tnkinfo.state
+					== TNKINFO_STATE_ACTIVE)) {
+
+			if (!sk->sk_tnkinfo.finflag && !sk->sk_tnkinfo.rstflag)
+				goto drop;
+		}
+	}
+#endif
+#endif  
 	skb_dst_drop(skb);
 	__skb_pull(skb, th->doff * 4);
 
@@ -3445,7 +3541,7 @@ queue_and_out:
 		if (eaten > 0)
 			kfree_skb_partial(skb, fragstolen);
 		if (!sock_flag(sk, SOCK_DEAD))
-			sk->sk_data_ready(sk, 0);
+			sk->sk_data_ready(sk);
 		return;
 	}
 
@@ -3842,7 +3938,7 @@ static void tcp_urg(struct sock *sk, struct sk_buff *skb, const struct tcphdr *t
 				BUG();
 			tp->urg_data = TCP_URG_VALID | tmp;
 			if (!sock_flag(sk, SOCK_DEAD))
-				sk->sk_data_ready(sk, 0);
+				sk->sk_data_ready(sk);
 		}
 	}
 }
@@ -3932,11 +4028,11 @@ static bool tcp_dma_try_early_copy(struct sock *sk, struct sk_buff *skb,
 		    (tcp_flag_word(tcp_hdr(skb)) & TCP_FLAG_PSH) ||
 		    (atomic_read(&sk->sk_rmem_alloc) > (sk->sk_rcvbuf >> 1))) {
 			tp->ucopy.wakeup = 1;
-			sk->sk_data_ready(sk, 0);
+			sk->sk_data_ready(sk);
 		}
 	} else if (chunk > 0) {
 		tp->ucopy.wakeup = 1;
-		sk->sk_data_ready(sk, 0);
+		sk->sk_data_ready(sk);
 	}
 out:
 	return copied_early;
@@ -4114,7 +4210,7 @@ no_ack:
 #endif
 			if (eaten)
 				kfree_skb_partial(skb, fragstolen);
-			sk->sk_data_ready(sk, 0);
+			sk->sk_data_ready(sk);
 			return 0;
 		}
 	}
@@ -4258,6 +4354,16 @@ static int tcp_rcv_synsent_state_process(struct sock *sk, struct sk_buff *skb,
 
 		if (!th->syn)
 			goto discard_and_undo;
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+		 
+		if (tnk) {
+			tnk->tcp_prepare(sk, skb);
+			tnk->tcp_open(sk);
+		}
+#endif
+#endif  
 
 		TCP_ECN_rcv_synack(tp, th);
 
@@ -4596,3 +4702,65 @@ discard:
 	return 0;
 }
 EXPORT_SYMBOL(tcp_rcv_state_process);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+#if SWITCH_SEND_FIN
+int tnk_tcp_fin_acked_state_process(struct sock *sk)
+{
+	struct tcp_sock *tp = tcp_sk(sk);
+
+	lock_sock(sk);
+
+	switch (sk->sk_state) {
+	case TCP_FIN_WAIT1:
+		tcp_set_state(sk, TCP_FIN_WAIT2);
+		sk->sk_shutdown |= SEND_SHUTDOWN;
+
+		if (!sock_flag(sk, SOCK_DEAD))
+			 
+			sk->sk_state_change(sk);
+		else {
+			 
+			if (tp->linger2 < 0) {
+				tcp_done(sk);
+				NET_INC_STATS_BH(sock_net(sk),
+					LINUX_MIB_TCPABORTONDATA);
+				goto out;
+			}
+			 
+#if 0
+			tmo = tcp_fin_time(sk);
+			if (tmo > TCP_TIMEWAIT_LEN) {
+				inet_csk_reset_keepalive_timer(sk,
+					tmo - TCP_TIMEWAIT_LEN);
+			} else {
+				tcp_time_wait(sk, TCP_FIN_WAIT2, tmo);
+				goto out;
+			}
+#endif
+			tcp_done(sk);
+			goto out;
+		}
+		break;
+
+	case TCP_CLOSING:
+		 
+		tcp_done(sk);
+		goto out;
+		break;
+	case TCP_LAST_ACK:
+		tcp_update_metrics(sk);
+		tcp_done(sk);
+		goto out;
+		break;
+	}
+out:
+	release_sock(sk);
+
+	return 0;
+}
+EXPORT_SYMBOL(tnk_tcp_fin_acked_state_process);
+#endif
+#endif
+#endif  

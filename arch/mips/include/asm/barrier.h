@@ -180,4 +180,21 @@
 #define nudge_writes() mb()
 #endif
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define smp_store_release(p, v)						\
+do {									\
+	compiletime_assert_atomic_type(*p);				\
+	smp_mb();							\
+	ACCESS_ONCE(*p) = (v);						\
+} while (0)
+
+#define smp_load_acquire(p)						\
+({									\
+	typeof(*p) ___p1 = ACCESS_ONCE(*p);				\
+	compiletime_assert_atomic_type(*p);				\
+	smp_mb();							\
+	___p1;								\
+})
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 #endif /* __ASM_BARRIER_H */

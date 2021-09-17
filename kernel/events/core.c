@@ -240,7 +240,11 @@ static void perf_duration_warn(struct irq_work *w)
 			"perf interrupt took too long (%lld > %lld), lowering "
 			"kernel.perf_event_max_sample_rate to %d\n",
 			avg_local_sample_len,
+#if defined(CONFIG_SYNO_HI3536)
+			(u64) atomic_read(&perf_sample_allowed_ns),
+#else /* CONFIG_SYNO_HI3536 */
 			atomic_read(&perf_sample_allowed_ns),
+#endif /* CONFIG_SYNO_HI3536 */
 			sysctl_perf_event_sample_rate);
 }
 

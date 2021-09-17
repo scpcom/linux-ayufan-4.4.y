@@ -94,6 +94,14 @@
  */
 #define CRYPTO_ALG_KERN_DRIVER_ONLY	0x00001000
 
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+/*
+ * Mark a cipher as a service implementation only usable by another
+ * cipher and never by a normal user of the kernel crypto API
+ */
+#define CRYPTO_ALG_INTERNAL		0x00002000
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+
 /*
  * Transform masks and values (for crt_flags).
  */

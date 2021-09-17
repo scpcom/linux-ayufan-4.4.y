@@ -18,6 +18,9 @@
 #include <linux/sched/sysctl.h>
 #include <linux/sched/rt.h>
 #include <linux/timer.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/freezer.h>
+#endif  
 
 #include <asm/uaccess.h>
 
@@ -1116,7 +1119,11 @@ static int __sched do_nanosleep(struct hrtimer_sleeper *t, enum hrtimer_mode mod
 			t->task = NULL;
 
 		if (likely(t->task))
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			freezable_schedule();
+#else  
 			schedule();
+#endif  
 
 		hrtimer_cancel(&t->timer);
 		mode = HRTIMER_MODE_ABS;

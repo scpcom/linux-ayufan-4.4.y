@@ -85,6 +85,10 @@ config EVENT_TRACING
 	select CONTEXT_SWITCH_TRACER
 	bool
 
+config GPU_TRACEPOINTS
+	bool
+	depends on SYNO_LSP_HI3536
+
 config CONTEXT_SWITCH_TRACER
 	bool
 

@@ -36,10 +36,16 @@ struct ipv6_devconf {
 	__s32		accept_ra_rt_info_max_plen;
 #endif
 #endif
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	__s32		accept_ra_rt_table;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	__s32		proxy_ndp;
 	__s32		accept_source_route;
 #ifdef CONFIG_IPV6_OPTIMISTIC_DAD
 	__s32		optimistic_dad;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	__s32		use_optimistic;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #endif
 #ifdef CONFIG_IPV6_MROUTE
 	__s32		mc_forwarding;

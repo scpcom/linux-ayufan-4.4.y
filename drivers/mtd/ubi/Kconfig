@@ -12,7 +12,8 @@ if MTD_UBI
 
 config MTD_UBI_WL_THRESHOLD
 	int "UBI wear-leveling threshold"
-	default 4096
+	default 128 if SYNO_LSP_HI3536
+	default 4096 if !SYNO_LSP_HI3536
 	range 2 65536
 	help
 	  This parameter defines the maximum difference between the highest

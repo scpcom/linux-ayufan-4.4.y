@@ -49,6 +49,12 @@ void mem_cgroup_sockets_destroy(struct mem_cgroup *memcg)
 {
 }
 #endif
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+#include <net/tnkdrv.h>
+#endif
+#endif  
  
 #define SOCK_DEBUGGING
 #ifdef SOCK_DEBUGGING
@@ -237,12 +243,18 @@ struct sock {
 	u32			sk_classid;
 	struct cg_proto		*sk_cgrp;
 	void			(*sk_state_change)(struct sock *sk);
-	void			(*sk_data_ready)(struct sock *sk, int bytes);
+	void			(*sk_data_ready)(struct sock *sk);
 	void			(*sk_write_space)(struct sock *sk);
 	void			(*sk_error_report)(struct sock *sk);
 	int			(*sk_backlog_rcv)(struct sock *sk,
 						  struct sk_buff *skb);
 	void                    (*sk_destruct)(struct sock *sk);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	struct tnkinfo		sk_tnkinfo;
+#endif
+#endif  
 };
 
 #define SK_NO_REUSE	0

@@ -27,6 +27,11 @@
  *
  * See Documentation/arm/kernel_user_helpers.txt for formal definitions.
  */
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <asm/unistd.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 	.align	5
 	.globl	__kuser_helper_start
 __kuser_helper_start:

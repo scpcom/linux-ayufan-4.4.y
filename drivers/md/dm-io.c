@@ -25,6 +25,8 @@ struct dm_io_client {
 	struct bio_set *bios;
 };
 
+#define sinfo(fmt, args...)
+
 struct io {
 	unsigned long error_bits;
 	atomic_t count;
@@ -35,9 +37,16 @@ struct io {
 	void *vma_invalidate_address;
 	unsigned long vma_invalidate_size;
 #ifdef MY_ABC_HERE
-	int is_return_err;
+	unsigned long bi_flags;
 #endif  
 } __attribute__((aligned(DM_IO_MAX_REGIONS)));
+
+#ifdef MY_ABC_HERE
+static int has_correction_flag(unsigned long bi_flags)
+{
+	return 0;
+}
+#endif  
 
 static struct kmem_cache *_dm_io_cache;
 
@@ -95,7 +104,11 @@ static void retrieve_io_and_region_from_bio(struct bio *bio, struct io **io,
 	*region = val & (DM_IO_MAX_REGIONS - 1);
 }
 
+#ifdef MY_ABC_HERE
+static void dec_count_common(struct io *io, unsigned int region, int error, unsigned long bi_flags)
+#else
 static void dec_count(struct io *io, unsigned int region, int error)
+#endif  
 {
 	if (error)
 		set_bit(region, &io->error_bits);
@@ -118,6 +131,18 @@ static void dec_count(struct io *io, unsigned int region, int error)
 		}
 	}
 }
+
+#ifdef MY_ABC_HERE
+static void dec_count_syno(struct io *io, unsigned int region, int error, unsigned long bi_flags)
+{
+	dec_count_common(io, region, error, bi_flags);
+}
+
+static void dec_count(struct io *io, unsigned int region, int error)
+{
+	dec_count_common(io, region, error, 0);
+}
+#endif
 
 static void endio(struct bio *bio, int error)
 {
@@ -268,11 +293,7 @@ static void do_region(int rw, unsigned region, struct dm_io_region *where,
 		bio->bi_sector = where->sector + (where->count - remaining);
 		bio->bi_bdev = where->bdev;
 		bio->bi_end_io = endio;
-#ifdef MY_ABC_HERE
-		if (1 == io->is_return_err) {
-			set_bit(BIO_MD_RETURN_ERROR, &bio->bi_flags);
-		}
-#endif  
+
 		store_io_and_region_in_bio(bio, io, region);
 
 		if (rw & REQ_DISCARD) {
@@ -302,6 +323,12 @@ static void do_region(int rw, unsigned region, struct dm_io_region *where,
 		}
 
 		atomic_inc(&io->count);
+#ifdef MY_ABC_HERE
+		bio->bi_flags |= io->bi_flags;
+		if (has_correction_flag(io->bi_flags)) {
+			sinfo("bio start=%llu size=%llu", (u64)bio->bi_sector, (u64)to_sector(bio->bi_size));
+		}
+#endif  
 		submit_bio(rw, bio);
 	} while (remaining);
 }
@@ -330,7 +357,7 @@ static void dispatch_io(int rw, unsigned int num_regions,
 #ifdef MY_ABC_HERE
 static int sync_io(struct dm_io_client *client, unsigned int num_regions,
 		   struct dm_io_region *where, int rw, struct dpages *dp,
-		   unsigned long *error_bits, int is_return_err)
+		   unsigned long *error_bits, unsigned long bi_flags)
 #else
 static int sync_io(struct dm_io_client *client, unsigned int num_regions,
 		   struct dm_io_region *where, int rw, struct dpages *dp,
@@ -355,7 +382,15 @@ static int sync_io(struct dm_io_client *client, unsigned int num_regions,
 	io->vma_invalidate_address = dp->vma_invalidate_address;
 	io->vma_invalidate_size = dp->vma_invalidate_size;
 #ifdef MY_ABC_HERE
-	io->is_return_err = is_return_err;
+	if (has_correction_flag(bi_flags)) {
+		sinfo("add io flags start");
+	}
+
+	io->bi_flags = bi_flags;
+
+	if (has_correction_flag(bi_flags)) {
+		sinfo("add io flags finish");
+	}
 #endif  
 
 	dispatch_io(rw, num_regions, where, dp, io, 1);
@@ -371,7 +406,7 @@ static int sync_io(struct dm_io_client *client, unsigned int num_regions,
 #ifdef MY_ABC_HERE
 static int async_io(struct dm_io_client *client, unsigned int num_regions,
 		    struct dm_io_region *where, int rw, struct dpages *dp,
-		    io_notify_fn fn, void *context, int is_return_err)
+		    io_notify_fn fn, void *context, unsigned long bi_flags)
 #else
 static int async_io(struct dm_io_client *client, unsigned int num_regions,
 		    struct dm_io_region *where, int rw, struct dpages *dp,
@@ -394,7 +429,11 @@ static int async_io(struct dm_io_client *client, unsigned int num_regions,
 	io->callback = fn;
 	io->context = context;
 #ifdef MY_ABC_HERE
-	io->is_return_err = is_return_err;
+	io->bi_flags = bi_flags;
+
+	if (has_correction_flag(bi_flags)) {
+		sinfo("set bi_flags=%lx", bi_flags);
+	}
 #endif  
 
 	io->vma_invalidate_address = dp->vma_invalidate_address;
@@ -440,12 +479,17 @@ static int dp_init(struct dm_io_request *io_req, struct dpages *dp,
 	return 0;
 }
 #ifdef MY_ABC_HERE
+ 
 int syno_dm_io(struct dm_io_request *io_req, unsigned num_regions,
-	  struct dm_io_region *where, unsigned long *sync_error_bits)
+	  struct dm_io_region *where, unsigned long *sync_error_bits, unsigned long bi_flags)
 {
 	int r;
 	struct dpages dp;
-	int is_return_err = 1;
+	if (has_correction_flag(bi_flags)) {
+		sinfo("set extra bi_flags=%lx", bi_flags);
+	}
+
+	bi_flags |= 1 << BIO_MD_RETURN_ERROR;
 
 	r = dp_init(io_req, &dp, (unsigned long)where->count << SECTOR_SHIFT);
 	if (r)
@@ -453,9 +497,9 @@ int syno_dm_io(struct dm_io_request *io_req, unsigned num_regions,
 
 	if (!io_req->notify.fn)
 		return sync_io(io_req->client, num_regions, where,
-			       io_req->bi_rw, &dp, sync_error_bits, is_return_err);
+			       io_req->bi_rw, &dp, sync_error_bits, bi_flags);
 	return async_io(io_req->client, num_regions, where, io_req->bi_rw,
-			&dp, io_req->notify.fn, io_req->notify.context, is_return_err);
+			&dp, io_req->notify.fn, io_req->notify.context, bi_flags);
 }
 EXPORT_SYMBOL(syno_dm_io);
 #endif  

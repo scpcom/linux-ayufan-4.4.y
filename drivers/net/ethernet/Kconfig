@@ -11,6 +11,10 @@ menuconfig ETHERNET
 
 if ETHERNET
 
+if SYNO_LSP_HI3536
+source "drivers/net/ethernet/stmmac/Kconfig"
+endif # SYNO_LSP_HI3536
+
 config MDIO
 	tristate
 
@@ -175,5 +179,8 @@ source "drivers/net/ethernet/via/Kconfig"
 source "drivers/net/ethernet/wiznet/Kconfig"
 source "drivers/net/ethernet/xilinx/Kconfig"
 source "drivers/net/ethernet/xircom/Kconfig"
+if SYNO_LSP_HI3536
+source "drivers/net/ethernet/hieth-gmac/Kconfig"
+endif # SYNO_LSP_HI3536
 
 endif # ETHERNET

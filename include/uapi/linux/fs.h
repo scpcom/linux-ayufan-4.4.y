@@ -124,6 +124,10 @@ struct inodes_stat_t {
 #define FITHAW		_IOWR('X', 120, int)	 
 #define FITRIM		_IOWR('X', 121, struct fstrim_range)	 
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define FIDTRIM	_IOWR('f', 128, struct fstrim_range)	 
+#endif  
+
 #ifdef MY_ABC_HERE
 #define FIGETVERSION			_IOWR('x', 122, unsigned int)	 
 #define FISETVERSION			_IOWR('x', 123, unsigned int)	 

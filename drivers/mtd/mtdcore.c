@@ -18,6 +18,10 @@
 #include <linux/backing-dev.h>
 #include <linux/gfp.h>
 #include <linux/slab.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/io.h>
+#include <mach/platform.h>
+#endif  
 
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
@@ -53,6 +57,54 @@ static DEFINE_IDR(mtd_idr);
 
 DEFINE_MUTEX(mtd_table_mutex);
 EXPORT_SYMBOL_GPL(mtd_table_mutex);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_SPI_TYPE_SWITCH
+DEFINE_MUTEX(spi_type_mutex);
+EXPORT_SYMBOL_GPL(spi_type_mutex);
+
+#ifdef CONFIG_ARCH_HI3536
+static unsigned char mtd_get_spi_type(struct mtd_info *mtd)
+{
+	unsigned char type = DEVICE_TYPE_UNKNOWN;
+
+	switch (mtd->type) {
+	case MTD_NORFLASH:
+		type = SPI_DEVICE_TYPE_NOR_FLASH;
+		break;
+	case MTD_NANDFLASH:
+		type = SPI_DEVICE_TYPE_NAND_FLASH;
+	default:
+		break;
+	}
+
+	return type;
+}
+
+static void mtd_dev_type_switch(unsigned char type)
+{
+	unsigned int reg, base = IO_ADDRESS(REG_BASE_MISC);
+
+	reg = readl((void __iomem *)(base + REG_MISC_CTRL3));
+	reg &= ~SPI_DEVICE_TYPE_MASK;
+	reg |= SET_SPI_DEVICE_TYPE(type);
+	writel(reg, (void __iomem *)(base + REG_MISC_CTRL3));
+}
+#endif  
+
+void mtd_switch_spi_type(struct mtd_info *mtd)
+{
+	unsigned char type;
+
+	type = mtd_get_spi_type(mtd);
+	if (type == DEVICE_TYPE_UNKNOWN)
+		return;
+
+	mtd_dev_type_switch(type);
+}
+EXPORT_SYMBOL_GPL(mtd_switch_spi_type);
+#endif  
+#endif  
 
 struct mtd_info *__mtd_next_device(int i)
 {
@@ -420,9 +472,13 @@ int mtd_device_parse_register(struct mtd_info *mtd, const char * const *types,
 		err = add_mtd_partitions(mtd, real_parts, err);
 		kfree(real_parts);
 	} else if (err == 0) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		 
+#else  
 		err = add_mtd_device(mtd);
 		if (err == 1)
 			err = -ENODEV;
+#endif  
 	}
 
 	return err;

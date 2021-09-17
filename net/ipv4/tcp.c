@@ -25,14 +25,28 @@
 #include <linux/crypto.h>
 #include <linux/time.h>
 #include <linux/slab.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/uid_stat.h>
+#endif  
 
 #include <net/icmp.h>
 #include <net/inet_common.h>
 #include <net/tcp.h>
 #include <net/xfrm.h>
 #include <net/ip.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <net/ip6_route.h>
+#include <net/ipv6.h>
+#include <net/transp_v6.h>
+#endif  
 #include <net/netdma.h>
 #include <net/sock.h>
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+#include <net/tnkdrv.h>
+#endif
+#endif  
 
 #include <asm/uaccess.h>
 #include <asm/ioctls.h>
@@ -89,6 +103,55 @@ void tcp_enter_memory_pressure(struct sock *sk)
 	}
 }
 EXPORT_SYMBOL(tcp_enter_memory_pressure);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+struct tnkfuncs *tnk;
+
+void tcp_register_tnk_funcs(struct tnkfuncs *f)
+{
+	tnk = f;
+}
+EXPORT_SYMBOL(tcp_register_tnk_funcs);
+
+int proc_tnk_cfg_tcp_retries2(struct ctl_table *table, int write,
+		void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	int ret;
+
+	ret = proc_dointvec(table, write, buffer, lenp, ppos);
+	if (write && ret == 0 && tnk)
+		tnk->config_tcp_retries2(sysctl_tcp_retries2);
+
+	return ret;
+}
+
+#if SWITCH_DUPACK_NUM
+int proc_tnk_cfg_tcp_dupack_cnt(struct ctl_table *table, int write,
+		void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	int ret;
+
+	ret = proc_dointvec(table, write, buffer, lenp, ppos);
+	if (write && ret == 0 && tnk)
+		tnk->config_tcp_dupack_cnt(sysctl_tcp_reordering);
+
+	return ret;
+}
+#endif
+
+int proc_tnk_thin_linear_timeouts(struct ctl_table *table, int write,
+		void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	int ret;
+
+	ret = proc_dointvec(table, write, buffer, lenp, ppos);
+	if (write && ret == 0 && tnk)
+		tnk->set_thin_linear_timeouts(sysctl_tcp_thin_linear_timeouts);
+
+	return ret;
+}
+#endif
+#endif  
 
 static u8 secs_to_retrans(int seconds, int timeout, int rto_max)
 {
@@ -400,6 +463,13 @@ ssize_t tcp_splice_read(struct socket *sock, loff_t *ppos,
 				ret = -EAGAIN;
 				break;
 			}
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+			if (tnk && sk->sk_tnkinfo.entry != NULL)
+				tnk->tcp_wait_data(sk, &timeo);
+			else
+#endif
+#endif  
 			sk_wait_data(sk, &timeo);
 			if (signal_pending(current)) {
 				ret = sock_intr_errno(timeo);
@@ -532,6 +602,17 @@ static ssize_t do_tcp_sendpages(struct sock *sk, struct page *page, int offset,
 	clear_bit(SOCK_ASYNC_NOSPACE, &sk->sk_socket->flags);
 
 	mss_now = tcp_send_mss(sk, &size_goal, flags);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	 
+	if (tnk) {
+		copied = tnk->tcp_sendpages(sk, page, offset, size, flags);
+		if (copied != -EINVAL)
+			return copied;
+	}
+#endif
+#endif  
+
 	copied = 0;
 
 	err = -EPIPE;
@@ -712,6 +793,11 @@ int tcp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 
 	lock_sock(sk);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	sk->sk_tnkinfo.reetrant++;
+#endif
+#endif  
 	flags = msg->msg_flags;
 	if (flags & MSG_FASTOPEN) {
 		err = tcp_sendmsg_fastopen(sk, msg, &copied_syn, size);
@@ -754,6 +840,19 @@ int tcp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	if (sk->sk_err || (sk->sk_shutdown & SEND_SHUTDOWN))
 		goto out_err;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	 
+	if (tnk) {
+		copied = tnk->tcp_sendmsg(sk, msg->msg_iov,
+				msg->msg_iovlen, flags);
+		if (copied != -EINVAL)
+			goto out;
+	}
+
+	copied = 0;
+#endif
+#endif  
 	sg = !!(sk->sk_route_caps & NETIF_F_SG);
 
 	while (--iovlen >= 0) {
@@ -891,8 +990,17 @@ wait_for_memory:
 out:
 	if (copied)
 		tcp_push(sk, flags, mss_now, tp->nonagle);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	sk->sk_tnkinfo.reetrant--;
+#endif
+#endif  
 out_nopush:
 	release_sock(sk);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (copied + copied_syn)
+		uid_stat_tcp_snd(current_uid(), copied + copied_syn);
+#endif  
 	return copied + copied_syn;
 
 do_fault:
@@ -908,6 +1016,11 @@ do_error:
 		goto out;
 out_err:
 	err = sk_stream_error(sk, flags, err);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	sk->sk_tnkinfo.reetrant--;
+#endif
+#endif  
 	release_sock(sk);
 	return err;
 }
@@ -1092,6 +1205,25 @@ int tcp_read_sock(struct sock *sk, read_descriptor_t *desc,
 
 	if (sk->sk_state == TCP_LISTEN)
 		return -ENOTCONN;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	 
+	if (tnk) {
+		int err;
+		int value;
+		err = tnk->tcp_read_sock(sk, desc, recv_actor, &copied);
+		if (!err)
+			return copied;
+		else if (err != -EINVAL) {
+			value = copied ? copied : err;
+			return value;
+		}
+		 
+		seq = tp->copied_seq;
+	}
+#endif
+#endif  
+
 	while ((skb = tcp_recv_skb(sk, seq, &offset)) != NULL) {
 		if (offset < skb->len) {
 			int used;
@@ -1141,6 +1273,9 @@ int tcp_read_sock(struct sock *sk, read_descriptor_t *desc,
 	if (copied > 0) {
 		tcp_recv_skb(sk, seq, &offset);
 		tcp_cleanup_rbuf(sk, copied);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		uid_stat_tcp_rcv(current_uid(), copied);
+#endif  
 	}
 	return copied;
 }
@@ -1165,6 +1300,11 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	bool copied_early = false;
 	struct sk_buff *skb;
 	u32 urg_hole = 0;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	int tnk_fin_flag = 0;
+#endif
+#endif  
 
 #if defined(MY_DEF_HERE)
 #ifdef CONFIG_NET_DMA
@@ -1208,6 +1348,30 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	}
 
 	target = sock_rcvlowat(sk, flags & MSG_WAITALL, len);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+tnk_tcp_recv:
+	 
+	if (tnk) {
+		err = tnk->tcp_receive(sk, seq, &timeo,
+				target, msg->msg_iov, &copied,
+				&len, tnk_fin_flag, flags);
+		if (!err) {
+			err = (!timeo && copied == 0) ? -EAGAIN : copied;
+			if (sk->sk_state == TCP_CLOSE_WAIT) {
+				if (!copied)
+					err = copied;
+			}
+			goto out;
+		} else if (err != -EINVAL) {
+			err = copied ? copied : err;
+			goto out;
+		}
+		err = -ENOTCONN;
+	}
+#endif
+#endif  
 
 #ifdef CONFIG_NET_DMA
 	tp->ucopy.dma_chan = NULL;
@@ -1296,6 +1460,15 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		}
 
 		skb_queue_walk(&sk->sk_receive_queue, skb) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+			if (tcp_hdr(skb)->fin && tnk) {
+				tnk_fin_flag = tnk->tcp_check_fin(sk);
+				if (tnk_fin_flag)
+					goto tnk_tcp_recv;
+			}
+#endif
+#endif  
 			 
 			if (WARN(before(*seq, TCP_SKB_CB(skb)->seq),
 				 "recvmsg bug: copied %X seq %X rcvnxt %X fl %X\n",
@@ -1363,6 +1536,14 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		}
 
 		tcp_cleanup_rbuf(sk, copied);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+		if (tnk) {
+			if (tnk->tcp_check_connect_state(sk))
+				goto tnk_tcp_recv;
+		}
+#endif
+#endif  
 
 		if (!sysctl_tcp_low_latency && tp->ucopy.task == user_recv) {
 			 
@@ -1583,6 +1764,11 @@ skip_copy:
 	tcp_cleanup_rbuf(sk, copied);
 
 	release_sock(sk);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (copied > 0)
+		uid_stat_tcp_rcv(current_uid(), copied);
+#endif  
 	return copied;
 
 out:
@@ -1591,6 +1777,10 @@ out:
 
 recv_urg:
 	err = tcp_recv_urg(sk, msg, len, flags);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (err > 0)
+		uid_stat_tcp_rcv(current_uid(), err);
+#endif  
 	goto out;
 
 recv_sndq:
@@ -1667,8 +1857,34 @@ void tcp_shutdown(struct sock *sk, int how)
 	    (TCPF_ESTABLISHED | TCPF_SYN_SENT |
 	     TCPF_SYN_RECV | TCPF_CLOSE_WAIT)) {
 		 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		if (tcp_close_state(sk)) {
+#ifdef CONFIG_TNK
+			int val = 0;
+			sk->sk_tnkinfo.howto_destroy = TNK_DESTROY_SHUTDOWN;
+			if (tnk)
+#if SWITCH_SEND_FIN
+				val = tnk->tcp_send_fin(sk);
+#else
+				val = tnk->tcp_close(sk, 1);
+#endif
+
+			if (!val) {
+#endif
+				tcp_send_fin(sk);
+#ifdef CONFIG_TNK
+			} else {
+				sk->sk_err = ETIMEDOUT;
+				sk->sk_error_report(sk);
+
+				tcp_done(sk);
+			}
+#endif
+		}
+#else  
 		if (tcp_close_state(sk))
 			tcp_send_fin(sk);
+#endif  
 	}
 }
 EXPORT_SYMBOL(tcp_shutdown);
@@ -1711,10 +1927,33 @@ void tcp_close(struct sock *sk, long timeout)
 		__kfree_skb(skb);
 	}
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	sk->sk_tnkinfo.howto_destroy = TNK_DESTROY_CLOSE;
+	if (tnk) {
+		tnk->tcp_disable_rcv(sk);
+		data_was_unread += tnk->tcp_recv_queue_data_size(sk);
+	}
+#endif
+#endif  
+
 	sk_mem_reclaim(sk);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (sk->sk_state == TCP_CLOSE) {
+#ifdef CONFIG_TNK
+		 
+		if (tnk) {
+			sk->sk_tnkinfo.howto_destroy = TNK_DESTROY_CLOSE;
+			tnk->tcp_close(sk, 0);
+		}
+#endif
+		goto adjudge_to_death;
+	}
+#else  
 	if (sk->sk_state == TCP_CLOSE)
 		goto adjudge_to_death;
+#endif  
 
 	if (unlikely(tcp_sk(sk)->repair)) {
 		sk->sk_prot->disconnect(sk, 0);
@@ -1729,7 +1968,27 @@ void tcp_close(struct sock *sk, long timeout)
 		NET_INC_STATS_USER(sock_net(sk), LINUX_MIB_TCPABORTONDATA);
 	} else if (tcp_close_state(sk)) {
 		 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+		int val = 0;
+		sk->sk_tnkinfo.howto_destroy = TNK_DESTROY_CLOSE;
+		 
+		if (tnk)
+#if SWITCH_SEND_FIN
+			val = tnk->tcp_send_fin(sk);
+#else
+			val = tnk->tcp_close(sk, 1);
+#endif
+
+		if (!val) {
+#endif
+			tcp_send_fin(sk);
+#ifdef CONFIG_TNK
+		}
+#endif
+#else  
 		tcp_send_fin(sk);
+#endif  
 	}
 
 	sk_stream_wait_close(sk, timeout);
@@ -1764,6 +2023,15 @@ adjudge_to_death:
 				inet_csk_reset_keepalive_timer(sk,
 						tmo - TCP_TIMEWAIT_LEN);
 			} else {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+				if (tnk) {
+					sk->sk_tnkinfo.howto_destroy =
+						TNK_DESTROY_CLOSE;
+					tnk->tcp_close(sk, 0);
+				}
+#endif
+#endif  
 				tcp_time_wait(sk, TCP_FIN_WAIT2, tmo);
 				goto out;
 			}
@@ -1784,10 +2052,29 @@ adjudge_to_death:
 		 
 		if (req != NULL)
 			reqsk_fastopen_remove(sk, req, false);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+		 
+		if (tnk) {
+			sk->sk_tnkinfo.howto_destroy = TNK_DESTROY_CLOSE;
+			tnk->tcp_close(sk, 0);
+		}
+#endif
+#endif  
 		inet_csk_destroy_sock(sk);
 	}
 	 
 out:
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+#if !SWITCH_SEND_FIN
+	if (tnk) {
+		sk->sk_tnkinfo.howto_destroy = TNK_DESTROY_CLOSE;
+		tnk->tcp_close(sk, 0);
+	}
+#endif
+#endif
+#endif  
 	bh_unlock_sock(sk);
 	local_bh_enable();
 	sock_put(sk);
@@ -1986,13 +2273,31 @@ static int do_tcp_setsockopt(struct sock *sk, int level,
 		} else {
 			tp->nonagle &= ~TCP_NAGLE_OFF;
 		}
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+		if (tnk)
+			tnk->tcp_set_nagle_cork(sk);
+#endif
+#endif  
 		break;
 
 	case TCP_THIN_LINEAR_TIMEOUTS:
 		if (val < 0 || val > 1)
 			err = -EINVAL;
 		else
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+		{
+#endif
 			tp->thin_lto = val;
+#ifdef CONFIG_TNK
+			if (tnk)
+				tnk->tcp_set_thin_linear_timeouts(sk);
+		}
+#endif
+#else  
+			tp->thin_lto = val;
+#endif  
 		break;
 
 	case TCP_THIN_DUPACK:
@@ -2062,6 +2367,12 @@ static int do_tcp_setsockopt(struct sock *sk, int level,
 				tp->nonagle |= TCP_NAGLE_PUSH;
 			tcp_push_pending_frames(sk);
 		}
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+		if (tnk)
+			tnk->tcp_set_nagle_cork(sk);
+#endif
+#endif  
 		break;
 
 	case TCP_KEEPIDLE:
@@ -2858,6 +3169,15 @@ void tcp_done(struct sock *sk)
 
 	sk->sk_shutdown = SHUTDOWN_MASK;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	if (tnk) {
+		sk->sk_tnkinfo.howto_destroy = TNK_DESTROY_CLOSE;
+		tnk->tcp_close(sk, 0);
+	}
+#endif
+#endif  
+
 	if (!sock_flag(sk, SOCK_DEAD))
 		sk->sk_state_change(sk);
 	else
@@ -2973,3 +3293,108 @@ void __init tcp_init(void)
 
 	tcp_tasklet_init();
 }
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static int tcp_is_local(struct net *net, __be32 addr) {
+	struct rtable *rt;
+	struct flowi4 fl4 = { .daddr = addr };
+	rt = ip_route_output_key(net, &fl4);
+	if (IS_ERR_OR_NULL(rt))
+		return 0;
+	return rt->dst.dev && (rt->dst.dev->flags & IFF_LOOPBACK);
+}
+
+#if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
+static int tcp_is_local6(struct net *net, struct in6_addr *addr) {
+	struct rt6_info *rt6 = rt6_lookup(net, addr, addr, 0, 0);
+	return rt6 && rt6->dst.dev && (rt6->dst.dev->flags & IFF_LOOPBACK);
+}
+#endif
+
+int tcp_nuke_addr(struct net *net, struct sockaddr *addr)
+{
+	int family = addr->sa_family;
+	unsigned int bucket;
+
+	struct in_addr *in;
+#if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
+#if defined(CONFIG_SYNO_HI3536)
+	struct in6_addr *in6 = NULL;
+#else  
+	struct in6_addr *in6;
+#endif  
+#endif
+	if (family == AF_INET) {
+		in = &((struct sockaddr_in *)addr)->sin_addr;
+#if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
+	} else if (family == AF_INET6) {
+		in6 = &((struct sockaddr_in6 *)addr)->sin6_addr;
+#endif
+	} else {
+		return -EAFNOSUPPORT;
+	}
+
+	for (bucket = 0; bucket < tcp_hashinfo.ehash_mask; bucket++) {
+		struct hlist_nulls_node *node;
+		struct sock *sk;
+		spinlock_t *lock = inet_ehash_lockp(&tcp_hashinfo, bucket);
+
+restart:
+		spin_lock_bh(lock);
+		sk_nulls_for_each(sk, node, &tcp_hashinfo.ehash[bucket].chain) {
+			struct inet_sock *inet = inet_sk(sk);
+
+			if (sysctl_ip_dynaddr && sk->sk_state == TCP_SYN_SENT)
+				continue;
+			if (sock_flag(sk, SOCK_DEAD))
+				continue;
+
+			if (family == AF_INET) {
+				__be32 s4 = inet->inet_rcv_saddr;
+				if (s4 == LOOPBACK4_IPV6)
+					continue;
+
+				if (in->s_addr != s4 &&
+				    !(in->s_addr == INADDR_ANY &&
+				      !tcp_is_local(net, s4)))
+					continue;
+			}
+
+#if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
+			if (family == AF_INET6) {
+				struct in6_addr *s6;
+				if (!inet->pinet6)
+					continue;
+
+				s6 = &inet->pinet6->rcv_saddr;
+				if (ipv6_addr_type(s6) == IPV6_ADDR_MAPPED)
+					continue;
+
+				if (!ipv6_addr_equal(in6, s6) &&
+				    !(ipv6_addr_equal(in6, &in6addr_any) &&
+				      !tcp_is_local6(net, s6)))
+				continue;
+			}
+#endif
+
+			sock_hold(sk);
+			spin_unlock_bh(lock);
+
+			local_bh_disable();
+			bh_lock_sock(sk);
+			sk->sk_err = ETIMEDOUT;
+			sk->sk_error_report(sk);
+
+			tcp_done(sk);
+			bh_unlock_sock(sk);
+			local_bh_enable();
+			sock_put(sk);
+
+			goto restart;
+		}
+		spin_unlock_bh(lock);
+	}
+
+	return 0;
+}
+#endif  

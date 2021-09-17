@@ -35,7 +35,11 @@
 #include <net/netfilter/nf_conntrack.h>
 #endif
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+void
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static void
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 xt_socket_put_sk(struct sock *sk)
 {
 	if (sk->sk_state == TCP_TIME_WAIT)
@@ -43,6 +47,9 @@ xt_socket_put_sk(struct sock *sk)
 	else
 		sock_put(sk);
 }
+#if defined(CONFIG_SYNO_LSP_HI3536)
+EXPORT_SYMBOL(xt_socket_put_sk);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static int
 extract_icmp4_fields(const struct sk_buff *skb,
@@ -101,9 +108,14 @@ extract_icmp4_fields(const struct sk_buff *skb,
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+struct sock*
+xt_socket_get4_sk(const struct sk_buff *skb, struct xt_action_param *par)
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static bool
 socket_match(const struct sk_buff *skb, struct xt_action_param *par,
 	     const struct xt_socket_mtinfo1 *info)
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	const struct iphdr *iph = ip_hdr(skb);
 	struct udphdr _hdr, *hp = NULL;
@@ -120,7 +132,11 @@ socket_match(const struct sk_buff *skb, struct xt_action_param *par,
 		hp = skb_header_pointer(skb, ip_hdrlen(skb),
 					sizeof(_hdr), &_hdr);
 		if (hp == NULL)
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			return NULL;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 			return false;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 		protocol = iph->protocol;
 		saddr = iph->saddr;
@@ -131,9 +147,17 @@ socket_match(const struct sk_buff *skb, struct xt_action_param *par,
 	} else if (iph->protocol == IPPROTO_ICMP) {
 		if (extract_icmp4_fields(skb, &protocol, &saddr, &daddr,
 					&sport, &dport))
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			return NULL;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 			return false;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	} else {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		return NULL;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		return false;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	}
 
 #ifdef XT_SOCKET_HAVE_CONNTRACK
@@ -157,6 +181,53 @@ socket_match(const struct sk_buff *skb, struct xt_action_param *par,
 
 	sk = nf_tproxy_get_sock_v4(dev_net(skb->dev), protocol,
 				   saddr, daddr, sport, dport, par->in, NFT_LOOKUP_ANY);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536 */
+	if (sk != NULL) {
+		bool wildcard;
+		bool transparent = true;
+
+		/* Ignore sockets listening on INADDR_ANY */
+		wildcard = (sk->sk_state != TCP_TIME_WAIT &&
+			    inet_sk(sk)->inet_rcv_saddr == 0);
+
+		/* Ignore non-transparent sockets,
+		   if XT_SOCKET_TRANSPARENT is used */
+		if (info && info->flags & XT_SOCKET_TRANSPARENT)
+			transparent = ((sk->sk_state != TCP_TIME_WAIT &&
+					inet_sk(sk)->transparent) ||
+				       (sk->sk_state == TCP_TIME_WAIT &&
+					inet_twsk(sk)->tw_transparent));
+
+		xt_socket_put_sk(sk);
+
+		if (wildcard || !transparent)
+			sk = NULL;
+	}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
+	pr_debug("proto %hhu %pI4:%hu -> %pI4:%hu (orig %pI4:%hu) sock %p\n",
+		 protocol, &saddr, ntohs(sport),
+		 &daddr, ntohs(dport),
+		 &iph->daddr, hp ? ntohs(hp->dest) : 0, sk);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	return sk;
+#else /* CONFIG_SYNO_LSP_HI3536 */
+	return (sk != NULL);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+}
+#if defined(CONFIG_SYNO_LSP_HI3536)
+EXPORT_SYMBOL(xt_socket_get4_sk);
+
+static bool
+socket_match(const struct sk_buff *skb, struct xt_action_param *par,
+	     const struct xt_socket_mtinfo1 *info)
+{
+	struct sock *sk;
+
+	sk = xt_socket_get4_sk(skb, par);
 	if (sk != NULL) {
 		bool wildcard;
 		bool transparent = true;
@@ -179,13 +250,9 @@ socket_match(const struct sk_buff *skb, struct xt_action_param *par,
 			sk = NULL;
 	}
 
-	pr_debug("proto %hhu %pI4:%hu -> %pI4:%hu (orig %pI4:%hu) sock %p\n",
-		 protocol, &saddr, ntohs(sport),
-		 &daddr, ntohs(dport),
-		 &iph->daddr, hp ? ntohs(hp->dest) : 0, sk);
-
 	return (sk != NULL);
 }
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static bool
 socket_mt4_v0(const struct sk_buff *skb, struct xt_action_param *par)
@@ -255,8 +322,13 @@ extract_icmp6_fields(const struct sk_buff *skb,
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+struct sock*
+xt_socket_get6_sk(const struct sk_buff *skb, struct xt_action_param *par)
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static bool
 socket_mt6_v1(const struct sk_buff *skb, struct xt_action_param *par)
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	struct ipv6hdr *iph = ipv6_hdr(skb);
 	struct udphdr _hdr, *hp = NULL;
@@ -264,7 +336,11 @@ socket_mt6_v1(const struct sk_buff *skb, struct xt_action_param *par)
 	struct in6_addr *daddr = NULL, *saddr = NULL;
 	__be16 uninitialized_var(dport), uninitialized_var(sport);
 	int thoff = 0, uninitialized_var(tproto);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	const struct xt_socket_mtinfo1 *info = (struct xt_socket_mtinfo1 *) par->matchinfo;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	tproto = ipv6_find_hdr(skb, &thoff, -1, NULL, NULL);
 	if (tproto < 0) {
@@ -276,7 +352,11 @@ socket_mt6_v1(const struct sk_buff *skb, struct xt_action_param *par)
 		hp = skb_header_pointer(skb, thoff,
 					sizeof(_hdr), &_hdr);
 		if (hp == NULL)
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			return NULL;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 			return false;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 		saddr = &iph->saddr;
 		sport = hp->source;
@@ -286,13 +366,69 @@ socket_mt6_v1(const struct sk_buff *skb, struct xt_action_param *par)
 	} else if (tproto == IPPROTO_ICMPV6) {
 		if (extract_icmp6_fields(skb, thoff, &tproto, &saddr, &daddr,
 					 &sport, &dport))
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			return NULL;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 			return false;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	} else {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		return NULL;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		return false;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	}
 
 	sk = nf_tproxy_get_sock_v6(dev_net(skb->dev), tproto,
 				   saddr, daddr, sport, dport, par->in, NFT_LOOKUP_ANY);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536 */
+	if (sk != NULL) {
+		bool wildcard;
+		bool transparent = true;
+
+		/* Ignore sockets listening on INADDR_ANY */
+		wildcard = (sk->sk_state != TCP_TIME_WAIT &&
+			    ipv6_addr_any(&inet6_sk(sk)->rcv_saddr));
+
+		/* Ignore non-transparent sockets,
+		   if XT_SOCKET_TRANSPARENT is used */
+		if (info && info->flags & XT_SOCKET_TRANSPARENT)
+			transparent = ((sk->sk_state != TCP_TIME_WAIT &&
+					inet_sk(sk)->transparent) ||
+				       (sk->sk_state == TCP_TIME_WAIT &&
+					inet_twsk(sk)->tw_transparent));
+
+		xt_socket_put_sk(sk);
+
+		if (wildcard || !transparent)
+			sk = NULL;
+	}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
+	pr_debug("proto %hhd %pI6:%hu -> %pI6:%hu "
+		 "(orig %pI6:%hu) sock %p\n",
+		 tproto, saddr, ntohs(sport),
+		 daddr, ntohs(dport),
+		 &iph->daddr, hp ? ntohs(hp->dest) : 0, sk);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	return sk;
+#else /* CONFIG_SYNO_LSP_HI3536 */
+	return (sk != NULL);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+}
+#if defined(CONFIG_SYNO_LSP_HI3536)
+EXPORT_SYMBOL(xt_socket_get6_sk);
+
+static bool
+socket_mt6_v1(const struct sk_buff *skb, struct xt_action_param *par)
+{
+	struct sock *sk;
+	const struct xt_socket_mtinfo1 *info;
+
+	info = (struct xt_socket_mtinfo1 *) par->matchinfo;
+	sk = xt_socket_get6_sk(skb, par);
 	if (sk != NULL) {
 		bool wildcard;
 		bool transparent = true;
@@ -315,14 +451,9 @@ socket_mt6_v1(const struct sk_buff *skb, struct xt_action_param *par)
 			sk = NULL;
 	}
 
-	pr_debug("proto %hhd %pI6:%hu -> %pI6:%hu "
-		 "(orig %pI6:%hu) sock %p\n",
-		 tproto, saddr, ntohs(sport),
-		 daddr, ntohs(dport),
-		 &iph->daddr, hp ? ntohs(hp->dest) : 0, sk);
-
 	return (sk != NULL);
 }
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #endif
 
 static struct xt_match socket_mt_reg[] __read_mostly = {

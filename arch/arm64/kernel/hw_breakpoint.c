@@ -20,13 +20,20 @@
 
 #define pr_fmt(fmt) "hw-breakpoint: " fmt
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/compat.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <linux/errno.h>
 #include <linux/hw_breakpoint.h>
 #include <linux/perf_event.h>
 #include <linux/ptrace.h>
 #include <linux/smp.h>
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #include <asm/compat.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <asm/current.h>
 #include <asm/debug-monitors.h>
 #include <asm/hw_breakpoint.h>

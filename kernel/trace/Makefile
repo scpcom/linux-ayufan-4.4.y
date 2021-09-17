@@ -60,5 +60,8 @@ obj-$(CONFIG_KGDB_KDB) += trace_kdb.o
 endif
 obj-$(CONFIG_PROBE_EVENTS) += trace_probe.o
 obj-$(CONFIG_UPROBE_EVENT) += trace_uprobe.o
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_GPU_TRACEPOINTS) += gpu-traces.o
+endif # CONFIG_SYNO_LSP_HI3536
 
 libftrace-y := ftrace.o

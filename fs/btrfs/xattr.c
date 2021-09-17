@@ -79,7 +79,6 @@ static int do_setxattr(struct btrfs_trans_handle *trans,
 	path = btrfs_alloc_path();
 	if (!path)
 		return -ENOMEM;
-	path->skip_release_on_error = 1;
 
 	if (!value) {
 		di = btrfs_lookup_xattr(trans, root, path, btrfs_ino(inode),
@@ -92,7 +91,12 @@ static int do_setxattr(struct btrfs_trans_handle *trans,
 	}
 
 	if (flags & XATTR_REPLACE) {
-		ASSERT(mutex_is_locked(&inode->i_mutex));
+		if(!mutex_is_locked(&inode->i_mutex)) {
+			pr_err("BTRFS: assertion failed: %s, file: %s, line: %d",
+			       "mutex_is_locked(&inode->i_mutex)", __FILE__,
+			       __LINE__);
+			BUG();
+		}
 		di = btrfs_lookup_xattr(NULL, root, path, btrfs_ino(inode),
 					name, name_len, 0);
 		if (!di) {
@@ -117,7 +121,11 @@ static int do_setxattr(struct btrfs_trans_handle *trans,
 	} else if (ret == -EEXIST) {
 		ret = 0;
 		di = btrfs_match_dir_item_name(root, path, name, name_len);
-		ASSERT(di);  
+		if(!di) {  
+			pr_err("BTRFS: assertion failed: %s, file: %s, line: %d",
+			       "di", __FILE__, __LINE__);
+			BUG();
+		}
 	} else if (ret) {
 		goto out;
 	}

@@ -3,7 +3,13 @@
 #
 ccflags-$(CONFIG_USB_GADGET_DEBUG) := -DDEBUG
 
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+ifndef CONFIG_HIUSB_DEVICE
 obj-$(CONFIG_USB_GADGET)	+= udc-core.o
+endif
+else # CONFIG_SYNO_LSP_HI3536
+obj-$(CONFIG_USB_GADGET)	+= udc-core.o
+endif # CONFIG_SYNO_LSP_HI3536
 obj-$(CONFIG_USB_LIBCOMPOSITE)	+= libcomposite.o
 libcomposite-y			:= usbstring.o config.o epautoconf.o
 libcomposite-y			+= composite.o functions.o configfs.o
@@ -34,6 +40,9 @@ obj-$(CONFIG_USB_MV_UDC)	+= mv_udc.o
 mv_udc-y			:= mv_udc_core.o
 obj-$(CONFIG_USB_FUSB300)	+= fusb300_udc.o
 obj-$(CONFIG_USB_MV_U3D)	+= mv_u3d_core.o
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_HIUSB_DEVICE)	+= hi_hs_dev/
+endif # CONFIG_SYNO_LSP_HI3536
 
 # USB Functions
 usb_f_acm-y			:= f_acm.o
@@ -65,6 +74,9 @@ g_nokia-y			:= nokia.o
 g_webcam-y			:= webcam.o
 g_ncm-y				:= ncm.o
 g_acm_ms-y			:= acm_ms.o
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+g_android-y			:= android.o
+endif # CONFIG_SYNO_LSP_HI3536
 g_tcm_usb_gadget-y		:= tcm_usb_gadget.o
 
 obj-$(CONFIG_USB_ZERO)		+= g_zero.o
@@ -84,4 +96,7 @@ obj-$(CONFIG_USB_G_NOKIA)	+= g_nokia.o
 obj-$(CONFIG_USB_G_WEBCAM)	+= g_webcam.o
 obj-$(CONFIG_USB_G_NCM)		+= g_ncm.o
 obj-$(CONFIG_USB_G_ACM_MS)	+= g_acm_ms.o
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_USB_G_ANDROID)	+= g_android.o
+endif # CONFIG_SYNO_LSP_HI3536
 obj-$(CONFIG_USB_GADGET_TARGET)	+= tcm_usb_gadget.o

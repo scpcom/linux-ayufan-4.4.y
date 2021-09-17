@@ -932,6 +932,20 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 
 			temp = xhci_readl(xhci, port_array[wIndex]);
 			break;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		 
+		case USB_PORT_FEAT_TEST:
+			if (hcd->speed != HCD_USB2)
+				goto error;
+			if (!timeout || timeout > 5)
+				goto error;
+			xhci_quiesce(xhci);
+			xhci_halt(xhci);
+			temp = xhci_readl(xhci, port_array[wIndex] + 1);
+			temp |= timeout << 28;
+			xhci_writel(xhci, temp, port_array[wIndex]+1);
+			break;
+#endif  
 		case USB_PORT_FEAT_U1_TIMEOUT:
 			if (hcd->speed != HCD_USB3)
 				goto error;
@@ -1098,8 +1112,8 @@ int xhci_bus_suspend(struct usb_hcd *hcd)
 	spin_lock_irqsave(&xhci->lock, flags);
 
 	if (hcd->self.root_hub->do_remote_wakeup) {
-		if (bus_state->resuming_ports ||	/* USB2 */
-		    bus_state->port_remote_wakeup) {	/* USB3 */
+		if (bus_state->resuming_ports ||	 
+		    bus_state->port_remote_wakeup) {	 
 			spin_unlock_irqrestore(&xhci->lock, flags);
 			xhci_dbg(xhci, "suspend failed because a port is resuming\n");
 			return -EBUSY;

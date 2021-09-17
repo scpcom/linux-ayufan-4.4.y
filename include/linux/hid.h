@@ -649,8 +649,13 @@ struct hid_driver {
 	int (*input_mapped)(struct hid_device *hdev,
 			struct hid_input *hidinput, struct hid_field *field,
 			struct hid_usage *usage, unsigned long **bit, int *max);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	int (*input_configured)(struct hid_device *hdev,
+				struct hid_input *hidinput);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	void (*input_configured)(struct hid_device *hdev,
 				 struct hid_input *hidinput);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	void (*feature_mapping)(struct hid_device *hdev,
 			struct hid_field *field,
 			struct hid_usage *usage);

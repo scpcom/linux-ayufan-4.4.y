@@ -1608,6 +1608,13 @@ UNUSUAL_DEV(  0x1210, 0x0003, 0x0100, 0x0100,
 /* Reported by fangxiaozhi <huananhu@huawei.com>
  * This brings the HUAWEI data card devices into multi-port mode
  */
+#if defined(CONFIG_SYNO_LSP_HI3536)
+UNUSUAL_VENDOR_INTF(0x12d1, 0x08, 0x06, 0x50,
+		"HUAWEI MOBILE",
+		"Mass Storage",
+		USB_SC_DEVICE, USB_PR_DEVICE, usb_stor_huawei_init,
+		0),
+#else /* CONFIG_SYNO_LSP_HI3536 */
 UNUSUAL_DEV(  0x12d1, 0x1001, 0x0000, 0x0000,
 		"HUAWEI MOBILE",
 		"Mass Storage",
@@ -1938,6 +1945,7 @@ UNUSUAL_DEV(  0x12d1, 0x143F, 0x0000, 0x0000,
 		"Mass Storage",
 		USB_SC_DEVICE, USB_PR_DEVICE, usb_stor_huawei_e220_init,
 		0),
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /* Reported by Vilius Bilinkevicius <vilisas AT xxx DOT lt) */
 UNUSUAL_DEV(  0x132b, 0x000b, 0x0001, 0x0001,

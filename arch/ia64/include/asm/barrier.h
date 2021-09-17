@@ -52,6 +52,28 @@
 # define smp_read_barrier_depends()	do { } while(0)
 #endif
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+/*
+ * IA64 GCC turns volatile stores into st.rel and volatile loads into ld.acq no
+ * need for asm trickery!
+ */
+
+#define smp_store_release(p, v)						\
+do {									\
+	compiletime_assert_atomic_type(*p);				\
+	barrier();							\
+	ACCESS_ONCE(*p) = (v);						\
+} while (0)
+
+#define smp_load_acquire(p)						\
+({									\
+	typeof(*p) ___p1 = ACCESS_ONCE(*p);				\
+	compiletime_assert_atomic_type(*p);				\
+	barrier();							\
+	___p1;								\
+})
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 /*
  * XXX check on this ---I suspect what Linus really wants here is
  * acquire vs release semantics but we can't discuss this stuff with

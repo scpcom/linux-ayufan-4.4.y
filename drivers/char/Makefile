@@ -56,6 +56,9 @@ obj-$(CONFIG_PCMCIA)		+= pcmcia/
 obj-$(CONFIG_HANGCHECK_TIMER)	+= hangcheck-timer.o
 obj-$(CONFIG_TCG_TPM)		+= tpm/
 
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_DCC_TTY)		+= dcc_tty.o
+endif # CONFIG_SYNO_LSP_HI3536
 obj-$(CONFIG_PS3_FLASH)		+= ps3flash.o
 
 obj-$(CONFIG_JS_RTC)		+= js-rtc.o

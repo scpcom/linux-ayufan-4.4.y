@@ -275,6 +275,14 @@ static int __init coherency_pci_notify_init(void)
 
 arch_initcall(coherency_pci_notify_init);
 #else  
+ 
+static int coherency_enabled;
+
+int coherency_available(void)
+{
+	return coherency_enabled;
+}
+
 int __init coherency_init(void)
 {
 	struct device_node *np;

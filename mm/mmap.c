@@ -717,7 +717,12 @@ again:			remove_next = 1 + (end > next->vm_end);
 }
 
 static inline int is_mergeable_vma(struct vm_area_struct *vma,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			struct file *file, unsigned long vm_flags,
+			const char __user *anon_name)
+#else  
 			struct file *file, unsigned long vm_flags)
+#endif  
 {
 	if (vma->vm_flags ^ vm_flags)
 		return 0;
@@ -725,6 +730,10 @@ static inline int is_mergeable_vma(struct vm_area_struct *vma,
 		return 0;
 	if (vma->vm_ops && vma->vm_ops->close)
 		return 0;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (vma_get_anon_name(vma) != anon_name)
+		return 0;
+#endif  
 	return 1;
 }
 
@@ -741,9 +750,16 @@ static inline int is_mergeable_anon_vma(struct anon_vma *anon_vma1,
 
 static int
 can_vma_merge_before(struct vm_area_struct *vma, unsigned long vm_flags,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	struct anon_vma *anon_vma, struct file *file, pgoff_t vm_pgoff,
+	const char __user *anon_name)
+{
+	if (is_mergeable_vma(vma, file, vm_flags, anon_name) &&
+#else  
 	struct anon_vma *anon_vma, struct file *file, pgoff_t vm_pgoff)
 {
 	if (is_mergeable_vma(vma, file, vm_flags) &&
+#endif  
 	    is_mergeable_anon_vma(anon_vma, vma->anon_vma, vma)) {
 		if (vma->vm_pgoff == vm_pgoff)
 			return 1;
@@ -753,9 +769,16 @@ can_vma_merge_before(struct vm_area_struct *vma, unsigned long vm_flags,
 
 static int
 can_vma_merge_after(struct vm_area_struct *vma, unsigned long vm_flags,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	struct anon_vma *anon_vma, struct file *file, pgoff_t vm_pgoff,
+	const char __user *anon_name)
+{
+	if (is_mergeable_vma(vma, file, vm_flags, anon_name) &&
+#else  
 	struct anon_vma *anon_vma, struct file *file, pgoff_t vm_pgoff)
 {
 	if (is_mergeable_vma(vma, file, vm_flags) &&
+#endif  
 	    is_mergeable_anon_vma(anon_vma, vma->anon_vma, vma)) {
 		pgoff_t vm_pglen;
 		vm_pglen = (vma->vm_end - vma->vm_start) >> PAGE_SHIFT;
@@ -765,11 +788,22 @@ can_vma_merge_after(struct vm_area_struct *vma, unsigned long vm_flags,
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+ 
+#else  
+ 
+#endif  
+ 
 struct vm_area_struct *vma_merge(struct mm_struct *mm,
 			struct vm_area_struct *prev, unsigned long addr,
 			unsigned long end, unsigned long vm_flags,
 		     	struct anon_vma *anon_vma, struct file *file,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			pgoff_t pgoff, struct mempolicy *policy,
+			const char __user *anon_name)
+#else  
 			pgoff_t pgoff, struct mempolicy *policy)
+#endif  
 {
 	pgoff_t pglen = (end - addr) >> PAGE_SHIFT;
 	struct vm_area_struct *area, *next;
@@ -788,13 +822,23 @@ struct vm_area_struct *vma_merge(struct mm_struct *mm,
 
 	if (prev && prev->vm_end == addr &&
   			mpol_equal(vma_policy(prev), policy) &&
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			can_vma_merge_after(prev, vm_flags, anon_vma,
+						file, pgoff, anon_name)) {
+#else  
 			can_vma_merge_after(prev, vm_flags,
 						anon_vma, file, pgoff)) {
+#endif  
 		 
 		if (next && end == next->vm_start &&
 				mpol_equal(policy, vma_policy(next)) &&
+#if defined(CONFIG_SYNO_LSP_HI3536)
+				can_vma_merge_before(next, vm_flags, anon_vma,
+						file, pgoff+pglen, anon_name) &&
+#else  
 				can_vma_merge_before(next, vm_flags,
 					anon_vma, file, pgoff+pglen) &&
+#endif  
 				is_mergeable_anon_vma(prev->anon_vma,
 						      next->anon_vma, NULL)) {
 							 
@@ -811,8 +855,13 @@ struct vm_area_struct *vma_merge(struct mm_struct *mm,
 
 	if (next && end == next->vm_start &&
  			mpol_equal(policy, vma_policy(next)) &&
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			can_vma_merge_before(next, vm_flags, anon_vma,
+					file, pgoff+pglen, anon_name)) {
+#else  
 			can_vma_merge_before(next, vm_flags,
 					anon_vma, file, pgoff+pglen)) {
+#endif  
 		if (prev && addr < prev->vm_end)	 
 			err = vma_adjust(prev, prev->vm_start,
 				addr, prev->vm_pgoff, NULL);
@@ -1018,6 +1067,9 @@ unsigned long do_mmap_pgoff(struct file *file, unsigned long addr,
 		*populate = len;
 	return addr;
 }
+#if defined(CONFIG_SYNO_LSP_HI3536)
+EXPORT_SYMBOL(do_mmap_pgoff);
+#endif  
 
 SYSCALL_DEFINE6(mmap_pgoff, unsigned long, addr, unsigned long, len,
 		unsigned long, prot, unsigned long, flags,
@@ -1154,7 +1206,12 @@ munmap_back:
 		vm_flags |= VM_ACCOUNT;
 	}
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	vma = vma_merge(mm, prev, addr, addr + len, vm_flags, NULL, file, pgoff,
+			NULL, NULL);
+#else  
 	vma = vma_merge(mm, prev, addr, addr + len, vm_flags, NULL, file, pgoff, NULL);
+#endif  
 	if (vma)
 		goto out;
 
@@ -2025,6 +2082,9 @@ int do_munmap(struct mm_struct *mm, unsigned long start, size_t len)
 
 	return 0;
 }
+#if defined(CONFIG_SYNO_LSP_HI3536)
+EXPORT_SYMBOL(do_munmap);
+#endif  
 
 int vm_munmap(unsigned long start, size_t len)
 {
@@ -2102,7 +2162,11 @@ static unsigned long do_brk(unsigned long addr, unsigned long len)
 		return -ENOMEM;
 
 	vma = vma_merge(mm, prev, addr, addr + len, flags,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+					NULL, NULL, pgoff, NULL, NULL);
+#else  
 					NULL, NULL, pgoff, NULL);
+#endif  
 	if (vma)
 		goto out;
 
@@ -2226,7 +2290,12 @@ struct vm_area_struct *copy_vma(struct vm_area_struct **vmap,
 	if (find_vma_links(mm, addr, addr + len, &prev, &rb_link, &rb_parent))
 		return NULL;	 
 	new_vma = vma_merge(mm, prev, addr, addr + len, vma->vm_flags,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			vma->anon_vma, vma->vm_file, pgoff, vma_policy(vma),
+			vma_get_anon_name(vma));
+#else  
 			vma->anon_vma, vma->vm_file, pgoff, vma_policy(vma));
+#endif  
 	if (new_vma) {
 		 
 		if (unlikely(vma_start >= new_vma->vm_start &&

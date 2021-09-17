@@ -12,8 +12,12 @@ enum {
 	ARM_SEC_CORE,
 	ARM_SEC_EXIT,
 	ARM_SEC_DEVEXIT,
+#if defined(CONFIG_SYNO_HI3536)
+	// do nothing
+#else /* CONFIG_SYNO_HI3536 */
 	ARM_SEC_HOT,
 	ARM_SEC_UNLIKELY,
+#endif /* CONFIG_SYNO_HI3536 */
 	ARM_SEC_MAX,
 };
 

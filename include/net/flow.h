@@ -10,6 +10,9 @@
 #include <linux/socket.h>
 #include <linux/in6.h>
 #include <linux/atomic.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/uidgid.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 struct flowi_common {
 	int	flowic_oif;
@@ -23,6 +26,9 @@ struct flowi_common {
 #define FLOWI_FLAG_CAN_SLEEP		0x02
 #define FLOWI_FLAG_KNOWN_NH		0x04
 	__u32	flowic_secid;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	kuid_t	flowic_uid;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 };
 
 union flowi_uli {
@@ -59,6 +65,9 @@ struct flowi4 {
 #define flowi4_proto		__fl_common.flowic_proto
 #define flowi4_flags		__fl_common.flowic_flags
 #define flowi4_secid		__fl_common.flowic_secid
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define flowi4_uid		__fl_common.flowic_uid
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/* (saddr,daddr) must be grouped, same order as in IP header */
 	__be32			saddr;
@@ -78,7 +87,12 @@ static inline void flowi4_init_output(struct flowi4 *fl4, int oif,
 				      __u32 mark, __u8 tos, __u8 scope,
 				      __u8 proto, __u8 flags,
 				      __be32 daddr, __be32 saddr,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+				      __be16 dport, __be16 sport,
+				      kuid_t uid)
+#else /* CONFIG_SYNO_LSP_HI3536 */
 				      __be16 dport, __be16 sport)
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	fl4->flowi4_oif = oif;
 	fl4->flowi4_iif = 0;
@@ -88,6 +102,9 @@ static inline void flowi4_init_output(struct flowi4 *fl4, int oif,
 	fl4->flowi4_proto = proto;
 	fl4->flowi4_flags = flags;
 	fl4->flowi4_secid = 0;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	fl4->flowi4_uid = uid;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	fl4->daddr = daddr;
 	fl4->saddr = saddr;
 	fl4->fl4_dport = dport;
@@ -115,6 +132,9 @@ struct flowi6 {
 #define flowi6_proto		__fl_common.flowic_proto
 #define flowi6_flags		__fl_common.flowic_flags
 #define flowi6_secid		__fl_common.flowic_secid
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define flowi6_uid		__fl_common.flowic_uid
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	struct in6_addr		daddr;
 	struct in6_addr		saddr;
 	__be32			flowlabel;
@@ -158,6 +178,9 @@ struct flowi {
 #define flowi_proto	u.__fl_common.flowic_proto
 #define flowi_flags	u.__fl_common.flowic_flags
 #define flowi_secid	u.__fl_common.flowic_secid
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define flowi_uid	u.__fl_common.flowic_uid
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 } __attribute__((__aligned__(BITS_PER_LONG/8)));
 
 static inline struct flowi *flowi4_to_flowi(struct flowi4 *fl4)

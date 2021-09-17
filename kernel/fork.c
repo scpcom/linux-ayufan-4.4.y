@@ -176,6 +176,11 @@ struct kmem_cache *vm_area_cachep;
 
 static struct kmem_cache *mm_cachep;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+ 
+static ATOMIC_NOTIFIER_HEAD(task_free_notifier);
+#endif  
+
 static void account_kernel_stack(struct thread_info *ti, int account)
 {
 	struct zone *zone = page_zone(virt_to_page(ti));
@@ -209,6 +214,20 @@ static inline void put_signal_struct(struct signal_struct *sig)
 		free_signal_struct(sig);
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+int task_free_register(struct notifier_block *n)
+{
+	return atomic_notifier_chain_register(&task_free_notifier, n);
+}
+EXPORT_SYMBOL(task_free_register);
+
+int task_free_unregister(struct notifier_block *n)
+{
+	return atomic_notifier_chain_unregister(&task_free_notifier, n);
+}
+EXPORT_SYMBOL(task_free_unregister);
+#endif  
+
 void __put_task_struct(struct task_struct *tsk)
 {
 	WARN_ON(!tsk->exit_state);
@@ -220,6 +239,9 @@ void __put_task_struct(struct task_struct *tsk)
 	delayacct_tsk_free(tsk);
 	put_signal_struct(tsk->signal);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	atomic_notifier_call_chain(&task_free_notifier, 0, tsk);
+#endif  
 	if (!profile_handoff_task(tsk))
 		free_task(tsk);
 }
@@ -280,6 +302,12 @@ static struct task_struct *dup_task_struct(struct task_struct *orig)
 		goto free_ti;
 
 	tsk->stack = ti;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_SECCOMP
+	 
+	tsk->seccomp.filter = NULL;
+#endif
+#endif  
 
 	setup_thread_stack(tsk, orig);
 	clear_user_return_notifier(tsk);
@@ -657,7 +685,12 @@ struct mm_struct *mm_access(struct task_struct *task, unsigned int mode)
 
 	mm = get_task_mm(task);
 	if (mm && mm != current->mm &&
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			!ptrace_may_access(task, mode) &&
+			!capable(CAP_SYS_RESOURCE)) {
+#else  
 			!ptrace_may_access(task, mode)) {
+#endif  
 		mmput(mm);
 		mm = ERR_PTR(-EACCES);
 	}
@@ -999,6 +1032,25 @@ static void copy_flags(unsigned long clone_flags, struct task_struct *p)
 	p->flags = new_flags;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static void copy_seccomp(struct task_struct *p)
+{
+#ifdef CONFIG_SECCOMP
+	 
+	assert_spin_locked(&current->sighand->siglock);
+
+	get_seccomp_filter(current);
+	p->seccomp = current->seccomp;
+
+	if (task_no_new_privs(current))
+		task_set_no_new_privs(p);
+
+	if (p->seccomp.mode != SECCOMP_MODE_DISABLED)
+		set_tsk_thread_flag(p, TIF_SECCOMP);
+#endif
+}
+#endif  
+
 SYSCALL_DEFINE1(set_tid_address, int __user *, tidptr)
 {
 	current->clear_child_tid = tidptr;
@@ -1072,7 +1124,11 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 		goto fork_out;
 
 	ftrace_graph_init_task(p);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	 
+#else  
 	get_seccomp_filter(p);
+#endif  
 
 	rt_mutex_init_task(p);
 
@@ -1292,6 +1348,11 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	}
 
 	spin_lock(&current->sighand->siglock);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	 
+	copy_seccomp(p);
+#endif  
 
 	recalc_sigpending();
 	if (signal_pending(current)) {
@@ -1577,8 +1638,15 @@ static int check_unshare_flags(unsigned long unshare_flags)
 		return -EINVAL;
 	 
 	if (unshare_flags & (CLONE_THREAD | CLONE_SIGHAND | CLONE_VM)) {
-		 
-		if (atomic_read(&current->mm->mm_users) > 1)
+		if (!thread_group_empty(current))
+			return -EINVAL;
+	}
+	if (unshare_flags & (CLONE_SIGHAND | CLONE_VM)) {
+		if (atomic_read(&current->sighand->count) > 1)
+			return -EINVAL;
+	}
+	if (unshare_flags & CLONE_VM) {
+		if (!current_is_single_threaded())
 			return -EINVAL;
 	}
 
@@ -1632,11 +1700,11 @@ SYSCALL_DEFINE1(unshare, unsigned long, unshare_flags)
 	if (unshare_flags & CLONE_NEWPID)
 		unshare_flags |= CLONE_THREAD;
 	 
-	if (unshare_flags & CLONE_THREAD)
-		unshare_flags |= CLONE_VM;
-	 
 	if (unshare_flags & CLONE_VM)
 		unshare_flags |= CLONE_SIGHAND;
+	 
+	if (unshare_flags & CLONE_SIGHAND)
+		unshare_flags |= CLONE_THREAD;
 	 
 	if (unshare_flags & CLONE_NEWNS)
 		unshare_flags |= CLONE_FS;

@@ -565,6 +565,216 @@ static int __scsi_error_from_host_byte(struct scsi_cmnd *cmd, int result)
 	return error;
 }
 
+#ifdef MY_ABC_HERE
+extern unsigned char
+blSectorNeedAutoRemap(struct scsi_cmnd *scsi_cmd, sector_t lba);
+
+static void
+syno_scsi_do_remap_done(struct request *req, int uptodate)
+{
+	__blk_put_request(req->q, req);
+}
+
+static unsigned int
+syno_scsi_do_remap(struct scsi_cmnd *scsi_cmd, sector_t badLba)
+{
+	unsigned int iRet = -1, iCheck = 0, i = 0;
+	unsigned int uSectors = 0;
+	struct request_queue *q = NULL;
+	u8 lbal = 0;
+	size_t size = 0;
+	struct scsi_device *device = NULL;
+	struct request *req = NULL;
+
+	if (NULL == scsi_cmd) {
+		printk("%s:%s(%d) Failed to get scsi_cmd", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	device = scsi_cmd->device;
+	if (NULL == device) {
+		printk("%s:%s(%d) Failed to get device", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	q = device->request_queue;
+	if (NULL == q) {
+		printk("%s:%s(%d) Failed to get request_queue\n", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	uSectors = queue_physical_block_size(q) / queue_logical_block_size(q);
+	lbal = (u8)(badLba & 0xff);
+	lbal = (lbal & (~(uSectors - 1)));  
+	size = SYNO_SCSI_SECT_SIZE * uSectors;
+
+	req = blk_get_request(q, WRITE, GFP_ATOMIC);
+	if (NULL == req) {
+		printk("%s:%s(%d) Failed to get request\n", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	req->cmd[0] = WRITE_16;
+	req->cmd[1] = 0;
+	 
+	req->cmd[2] = (u8)((badLba & 0xff00000000000000) >> 56);
+	req->cmd[3] = (u8)((badLba & 0xff000000000000) >> 48);
+	req->cmd[4] = (u8)((badLba & 0xff0000000000) >> 40);
+	req->cmd[5] = (u8)((badLba & 0xff00000000) >> 32);
+	req->cmd[6] = (u8)((badLba & 0xff000000) >> 24);
+	req->cmd[7] = (u8)((badLba & 0xff0000) >> 16);
+	req->cmd[8] = (u8)((badLba & 0xff00) >> 8);
+	req->cmd[9] = lbal;
+	 
+	req->cmd[10] = (u8)((uSectors & 0xff000000) >> 24);
+	req->cmd[11] = (u8)((uSectors & 0xff0000) >> 16);
+	req->cmd[12] = (u8)((uSectors & 0xff00) >> 8);
+	req->cmd[13] = (u8)(uSectors & 0xff);
+
+	req->cmd_len = COMMAND_SIZE(req->cmd[0]);
+
+	req->cmd_type = REQ_TYPE_BLOCK_PC;
+	req->cmd_flags |= REQ_QUIET;
+	req->timeout = 60 * HZ;
+	req->retries = 0;
+
+	iCheck = blk_rq_map_kern(q, req, page_address(ZERO_PAGE(0)), size, GFP_DMA | GFP_KERNEL);
+	if (0 != iCheck) {
+		printk("%s:%s(%d) blk_rq_map_kern return != 0\n", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	sdev_printk(KERN_INFO, device, "Insert write command :");
+	for (i = 0; i < req->cmd_len; ++i) {
+		printk("%02x ", req->cmd[i]);
+	}
+	printk("\n");
+
+	blk_execute_rq_nowait(q, NULL, req, 1, syno_scsi_do_remap_done);
+
+	iRet = 0;
+	goto OUT;
+ERR:
+	if (NULL != req) {
+		blk_put_request(req);
+	}
+OUT:
+	return iRet;
+}
+
+static int
+syno_scsi_check_ncq_fake_unc(const u8 * sense_buffer, int iSbLen)
+{
+	int iRet = 0;
+	const u8 * desc = NULL;
+	u8 format = 0;
+
+	if (7 > iSbLen) {
+		goto OUT;
+	}
+
+	format = 0x7f & sense_buffer[0];
+	if (0x72 == format || 0x73 == format) {
+		desc = scsi_sense_desc_find(sense_buffer, iSbLen, 0  );
+		if (desc && (0xa == desc[1])) {
+			iRet = SYNO_NCQ_FAKE_UNC & desc[SYNO_DESCRIPTOR_RESERVED_INDEX];
+		}
+	}
+OUT:
+	return iRet;
+}
+
+static unsigned int
+syno_scsi_writes_sector(struct scsi_cmnd *scsi_cmd)
+{
+	unsigned int iRet = -1, iCheck = 0;
+	sector_t badLba = 0;
+	u8 blIsWrite = 0;
+#ifdef MY_ABC_HERE
+	struct bio* b = NULL;
+	unsigned int len = 0;
+	int i = 0;
+#endif  
+
+	if (NULL == scsi_cmd) {
+		printk("%s:%s(%d) Failed to get scsi_cmd", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	if (NULL == scsi_cmd->request) {
+		printk("%s:%s(%d) Failed to get scsi_cmd request\n", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	if (NULL == scsi_cmd->sense_buffer) {
+		printk("%s:%s(%d) Failed to get scsi_cmd sense_buffer\n", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	if (NULL == scsi_cmd->cmnd) {
+		printk("%s:%s(%d) Failed to get scsi_cmd cmnd\n", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	iCheck = scsi_get_sense_info_fld(scsi_cmd->sense_buffer,
+			SCSI_SENSE_BUFFERSIZE,
+			(u64*) &badLba);
+	if (0 == iCheck) {
+		printk("%s:%s(%d) sense info in sense data invalid\n", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	if (syno_scsi_check_ncq_fake_unc(scsi_cmd->sense_buffer, SCSI_SENSE_BUFFERSIZE)) {
+		scmd_printk(KERN_INFO, scsi_cmd, "UNC ERROR code but NCQ abort, do NOT remap");
+		goto ERR;
+	}
+
+	switch (scsi_cmd->cmnd[0]) {
+		case WRITE_6:
+		case WRITE_10:
+		case WRITE_12:
+		case WRITE_16:
+		case WRITE_32:
+			blIsWrite = 1;
+			break;
+		default:
+			if (DMA_TO_DEVICE == scsi_cmd->sc_data_direction) {
+				blIsWrite = 1;
+			}
+	}
+
+	scmd_printk(KERN_INFO, scsi_cmd, "%s unc at %llu\n",
+		(blIsWrite) ? "write" : "read",
+		(unsigned long long)badLba);
+
+	if (!blIsWrite && !blSectorNeedAutoRemap(scsi_cmd, badLba)) {
+		goto ERR;
+	}
+
+#ifdef MY_ABC_HERE
+	 
+	if (!blIsWrite) {
+		for (b = scsi_cmd->request->bio; b; b = b->bi_next) {
+			len = 0;
+			for (i = 0; i < b->bi_vcnt; i++) {
+				len += b->bi_io_vec[i].bv_len;
+			}
+			if (b->bi_sector <= badLba && badLba < b->bi_sector + (len >> 9)) {
+				set_bit(BIO_AUTO_REMAP, &b->bi_flags);
+				printk("%s:%s(%d) set bio BIO_AUTO_REMAP bit on\n",
+					__FILE__, __FUNCTION__, __LINE__);
+			}
+		}
+	}
+#endif  
+
+	syno_scsi_do_remap(scsi_cmd, badLba);
+	iRet = 0;
+ERR:
+	return iRet;
+}
+#endif  
+
 void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 {
 	int result = cmd->result;
@@ -814,6 +1024,31 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 			 
 			action = ACTION_FAIL;
 			break;
+#ifdef MY_ABC_HERE
+		case MEDIUM_ERROR:
+			switch (sshdr.asc) {
+				case 0x11:
+					switch (sshdr.ascq) {
+						case 0x00:
+						case 0x04:
+						case 0x14:
+							syno_scsi_writes_sector(cmd);
+							description = "Medium with UNC error";
+							action = ACTION_FAIL;
+							break;
+						default:
+							description = "Medium error Unhandled ASCQ code";
+							action = ACTION_FAIL;
+							break;
+					}
+					break;
+				default:
+					description = "Medium error Unhandled ASC code";
+					action = ACTION_FAIL;
+					break;
+			}
+			break;
+#endif  
 		default:
 			description = "Unhandled sense code";
 			action = ACTION_FAIL;

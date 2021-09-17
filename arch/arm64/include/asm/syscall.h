@@ -16,8 +16,11 @@
 #ifndef __ASM_SYSCALL_H
 #define __ASM_SYSCALL_H
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <uapi/linux/audit.h>
+#include <linux/compat.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <linux/err.h>
-
 
 static inline int syscall_get_nr(struct task_struct *task,
 				 struct pt_regs *regs)
@@ -30,7 +33,6 @@ static inline void syscall_rollback(struct task_struct *task,
 {
 	regs->regs[0] = regs->orig_x0;
 }
-
 
 static inline long syscall_get_error(struct task_struct *task,
 				     struct pt_regs *regs)
@@ -103,5 +105,19 @@ static inline void syscall_set_arguments(struct task_struct *task,
 
 	memcpy(&regs->regs[i], args, n * sizeof(args[0]));
 }
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+/*
+ * We don't care about endianness (__AUDIT_ARCH_LE bit) here because
+ * AArch64 has the same system calls both on little- and big- endian.
+ */
+static inline int syscall_get_arch(void)
+{
+	if (is_compat_task())
+		return AUDIT_ARCH_ARM;
+
+	return AUDIT_ARCH_AARCH64;
+}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #endif	/* __ASM_SYSCALL_H */

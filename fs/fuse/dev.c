@@ -16,6 +16,9 @@
 #include <linux/swap.h>
 #include <linux/splice.h>
 #include <linux/aio.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/freezer.h>
+#endif  
 
 MODULE_ALIAS_MISCDEV(FUSE_MINOR);
 MODULE_ALIAS("devname:fuse");
@@ -415,7 +418,14 @@ __acquires(fc->lock)
 	}
 
 	spin_unlock(&fc->lock);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+
+	while (req->state != FUSE_REQ_FINISHED)
+		wait_event_freezable(req->waitq,
+				     req->state == FUSE_REQ_FINISHED);
+#else  
 	wait_event(req->waitq, req->state == FUSE_REQ_FINISHED);
+#endif  
 	spin_lock(&fc->lock);
 
 	if (!req->aborted)

@@ -6796,6 +6796,14 @@ static int mem_cgroup_can_attach(struct cgroup *cgroup,
 	return ret;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static int mem_cgroup_allow_attach(struct cgroup *cgroup,
+				   struct cgroup_taskset *tset)
+{
+	return subsys_cgroup_allow_attach(cgroup, tset);
+}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 static void mem_cgroup_cancel_attach(struct cgroup *cgroup,
 				     struct cgroup_taskset *tset)
 {
@@ -6964,6 +6972,13 @@ static int mem_cgroup_can_attach(struct cgroup *cgroup,
 {
 	return 0;
 }
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static int mem_cgroup_allow_attach(struct cgroup *cgroup,
+				   struct cgroup_taskset *tset)
+{
+	return 0;
+}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 static void mem_cgroup_cancel_attach(struct cgroup *cgroup,
 				     struct cgroup_taskset *tset)
 {
@@ -6999,6 +7014,9 @@ struct cgroup_subsys mem_cgroup_subsys = {
 	.can_attach = mem_cgroup_can_attach,
 	.cancel_attach = mem_cgroup_cancel_attach,
 	.attach = mem_cgroup_move_task,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	.allow_attach = mem_cgroup_allow_attach,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	.bind = mem_cgroup_bind,
 	.base_cftypes = mem_cgroup_files,
 	.early_init = 0,

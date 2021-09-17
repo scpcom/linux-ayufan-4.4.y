@@ -14,10 +14,19 @@
  * r10 points at the start of the private FP workspace in the thread structure
  * sp points to a struct pt_regs (as defined in include/asm/proc/ptrace.h)
  */
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#include <linux/init.h>
+#include <linux/linkage.h>
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 #include <asm/thread_info.h>
 #include <asm/vfpmacros.h>
 #include <linux/kern_levels.h>
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#include <asm/assembler.h>
+#include <asm/asm-offsets.h>
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 #include "../kernel/entry-header.S"
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
 	.macro	DBGSTR, str
 #ifdef DEBUG
@@ -65,7 +74,6 @@
 #endif
 	.endm
 
-
 @ VFP hardware support entry point.
 @
 @  r0  = instruction opcode (32-bit ARM or two 16-bit Thumb)
@@ -77,6 +85,13 @@
 @  IRQs enabled.
 ENTRY(vfp_support_entry)
 	DBGSTR3	"instr %08x pc %08x state %p", r0, r2, r10
+
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+	ldr	r3, [sp, #S_PSR]	@ Neither lazy restore nor FP exceptions
+	and	r3, r3, #MODE_MASK	@ are supported in kernel mode
+	teq	r3, #USR_MODE
+	bne	vfp_kmode_exception	@ Returns through lr
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
 	VFPFMRX	r1, FPEXC		@ Is the VFP enabled?
 	DBGSTR1	"fpexc %08x", r1
@@ -174,14 +189,17 @@ vfp_hw_state_valid:
 					@ else it's one 32-bit instruction, so
 					@ always subtract 4 from the following
 					@ instruction address.
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+	dec_preempt_count_ti r10, r4
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 #ifdef CONFIG_PREEMPT_COUNT
 	get_thread_info	r10
 	ldr	r4, [r10, #TI_PREEMPT]	@ get preempt count
 	sub	r11, r4, #1		@ decrement it
 	str	r11, [r10, #TI_PREEMPT]
 #endif
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	mov	pc, r9			@ we think we have handled things
-
 
 look_for_VFP_exceptions:
 	@ Check for synchronous or asynchronous exception
@@ -194,16 +212,28 @@ look_for_VFP_exceptions:
 	tst	r5, #FPSCR_IXE
 	bne	process_exception
 
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+	tst	r5, #FPSCR_LENGTH_MASK
+	beq	skip
+	orr	r1, r1, #FPEXC_DEX
+	b	process_exception
+skip:
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+
 	@ Fall into hand on to next handler - appropriate coproc instr
 	@ not recognised by VFP
 
 	DBGSTR	"not VFP"
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+	dec_preempt_count_ti r10, r4
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 #ifdef CONFIG_PREEMPT_COUNT
 	get_thread_info	r10
 	ldr	r4, [r10, #TI_PREEMPT]	@ get preempt count
 	sub	r11, r4, #1		@ decrement it
 	str	r11, [r10, #TI_PREEMPT]
 #endif
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	mov	pc, lr
 
 process_exception:

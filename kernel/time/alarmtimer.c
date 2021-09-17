@@ -72,7 +72,6 @@ struct rtc_device *alarmtimer_get_rtcdev(void)
 	return ret;
 }
 
-
 static int alarmtimer_rtc_add_device(struct device *dev,
 				struct class_interface *class_intf)
 {
@@ -162,7 +161,6 @@ static void alarmtimer_dequeue(struct alarm_base *base, struct alarm *alarm)
 	alarm->state &= ~ALARMTIMER_STATE_ENQUEUED;
 }
 
-
 /**
  * alarmtimer_fired - Handles alarm hrtimer being fired.
  * @timer: pointer to hrtimer being run
@@ -198,6 +196,14 @@ static enum hrtimer_restart alarmtimer_fired(struct hrtimer *timer)
 	return ret;
 
 }
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+ktime_t alarm_expires_remaining(const struct alarm *alarm)
+{
+	struct alarm_base *base = &alarm_bases[alarm->type];
+	return ktime_sub(alarm->node.expires, base->gettime());
+}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #ifdef CONFIG_RTC_CLASS
 /**
@@ -285,7 +291,6 @@ static void alarmtimer_freezerset(ktime_t absexp, enum alarmtimer_type type)
 	spin_unlock_irqrestore(&freezer_delta_lock, flags);
 }
 
-
 /**
  * alarm_init - Initialize an alarm structure
  * @alarm: ptr to alarm to be initialized
@@ -304,8 +309,16 @@ void alarm_init(struct alarm *alarm, enum alarmtimer_type type,
 	alarm->state = ALARMTIMER_STATE_INACTIVE;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+/**
+ * alarm_start - Sets an absolute alarm to fire
+ */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 /**
  * alarm_start - Sets an alarm to fire
+ */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+/**
  * @alarm: ptr to alarm to set
  * @start: time to run the alarm
  */
@@ -323,6 +336,33 @@ int alarm_start(struct alarm *alarm, ktime_t start)
 	spin_unlock_irqrestore(&base->lock, flags);
 	return ret;
 }
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+/**
+ * alarm_start_relative - Sets a relative alarm to fire
+ * @alarm: ptr to alarm to set
+ * @start: time relative to now to run the alarm
+ */
+int alarm_start_relative(struct alarm *alarm, ktime_t start)
+{
+	struct alarm_base *base = &alarm_bases[alarm->type];
+
+	start = ktime_add(start, base->gettime());
+	return alarm_start(alarm, start);
+}
+
+void alarm_restart(struct alarm *alarm)
+{
+	struct alarm_base *base = &alarm_bases[alarm->type];
+	unsigned long flags;
+
+	spin_lock_irqsave(&base->lock, flags);
+	hrtimer_set_expires(&alarm->timer, alarm->node.expires);
+	hrtimer_restart(&alarm->timer);
+	alarmtimer_enqueue(base, alarm);
+	spin_unlock_irqrestore(&base->lock, flags);
+}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /**
  * alarm_try_to_cancel - Tries to cancel an alarm timer
@@ -345,7 +385,6 @@ int alarm_try_to_cancel(struct alarm *alarm)
 	return ret;
 }
 
-
 /**
  * alarm_cancel - Spins trying to cancel an alarm timer until it is done
  * @alarm: ptr to alarm to be canceled
@@ -361,7 +400,6 @@ int alarm_cancel(struct alarm *alarm)
 		cpu_relax();
 	}
 }
-
 
 u64 alarm_forward(struct alarm *alarm, ktime_t now, ktime_t interval)
 {
@@ -394,8 +432,14 @@ u64 alarm_forward(struct alarm *alarm, ktime_t now, ktime_t interval)
 	return overrun;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+u64 alarm_forward_now(struct alarm *alarm, ktime_t interval)
+{
+	struct alarm_base *base = &alarm_bases[alarm->type];
 
-
+	return alarm_forward(alarm, base->gettime(), interval);
+}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /**
  * clock2alarm - helper that converts from clockid to alarmtypes
@@ -619,7 +663,6 @@ static int alarmtimer_do_nsleep(struct alarm *alarm, ktime_t absexp)
 	return (alarm->data == NULL);
 }
 
-
 /**
  * update_rmtp - Update remaining timespec value
  * @exp: expiration time
@@ -677,7 +720,6 @@ static long __sched alarm_timer_nsleep_restart(struct restart_block *restart)
 		if (ret <= 0)
 			goto out;
 	}
-
 
 	/* The other values in restart are already filled in */
 	ret = -ERESTART_RESTARTBLOCK;
@@ -749,7 +791,6 @@ static int alarm_timer_nsleep(const clockid_t which_clock, int flags,
 out:
 	return ret;
 }
-
 
 /* Suspend hook structures */
 static const struct dev_pm_ops alarmtimer_pm_ops = {

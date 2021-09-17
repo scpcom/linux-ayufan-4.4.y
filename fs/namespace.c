@@ -17,6 +17,9 @@
 #include <linux/uaccess.h>
 #include <linux/proc_ns.h>
 #include <linux/magic.h>
+#ifdef MY_ABC_HERE
+#include <linux/string.h>
+#endif  
 #include "pnode.h"
 #include "internal.h"
 
@@ -49,7 +52,12 @@ static int mnt_group_start = 1;
 static struct list_head *mount_hashtable __read_mostly;
 static struct list_head *mountpoint_hashtable __read_mostly;
 static struct kmem_cache *mnt_cache __read_mostly;
+#ifdef MY_ABC_HERE
+ 
+struct rw_semaphore namespace_sem;
+#else
 static struct rw_semaphore namespace_sem;
+#endif  
 
 struct kobject *fs_kobj;
 EXPORT_SYMBOL_GPL(fs_kobj);
@@ -1071,7 +1079,7 @@ SYSCALL_DEFINE2(umount, char __user *, name, int, flags)
 	if (!(flags & UMOUNT_NOFOLLOW))
 		lookup_flags |= LOOKUP_FOLLOW;
 
-	retval = user_path_at(AT_FDCWD, name, lookup_flags, &path);
+	retval = user_path_mountpoint_at(AT_FDCWD, name, lookup_flags, &path);
 	if (retval)
 		goto out;
 	mnt = real_mount(path.mnt);
@@ -1455,18 +1463,89 @@ static int change_mount_flags(struct vfsmount *mnt, int ms_flags)
 	return error;
 }
 
+#ifdef MY_ABC_HERE
+static struct syno_mnt_options {
+	long relatime_period;
+};
+
+static void option_erase(char *str) {
+	char *next = strchr(str, ',');
+
+	if (next) {
+		next++;
+		while (*next) {
+			*str = *next;
+			str++;
+			next++;
+		}
+	}
+	while (*str) {
+		*str = '\0';
+		str++;
+	}
+}
+
+enum {
+	Opt_relatime_period,
+	Opt_err,
+};
+
+static struct option_table {
+	int token;
+	const char *name;
+	const char *pattern;
+} tokens[] = {
+	{Opt_relatime_period, "relatime_period", "relatime_period=%ld"},
+	{Opt_err, NULL, NULL},
+};
+
+static int syno_parse_options(struct syno_mnt_options *options, char *data) {
+	struct option_table *p;
+	char *str;
+
+	if (!data)
+		return 0;
+
+	for (p = tokens; p->token != Opt_err; p++) {
+		while (NULL != (str = strstr(data, p->name))) {
+			switch (p->token) {
+				case Opt_relatime_period:
+					if (1 != sscanf(str, p->pattern, &(options->relatime_period))
+						|| options->relatime_period <= 0 || options->relatime_period > 365*10)
+						return -EINVAL;
+					break;
+				default:
+					break;
+			}
+			option_erase(str);
+		}
+	}
+	return 0;
+}
+#endif  
+
 static int do_remount(struct path *path, int flags, int mnt_flags,
 		      void *data)
 {
 	int err;
 	struct super_block *sb = path->mnt->mnt_sb;
 	struct mount *mnt = real_mount(path->mnt);
+#ifdef MY_ABC_HERE
+	struct syno_mnt_options options;
+#endif  
 
 	if (!check_mnt(mnt))
 		return -EINVAL;
 
 	if (path->dentry != path->mnt->mnt_root)
 		return -EINVAL;
+
+#ifdef MY_ABC_HERE
+	memset(&options, 0, sizeof(struct syno_mnt_options));
+	err = syno_parse_options(&options, data);
+	if (err)
+		return -EINVAL;
+#endif  
 
 	if ((mnt->mnt.mnt_flags & MNT_LOCK_READONLY) &&
 	    !(mnt_flags & MNT_READONLY)) {
@@ -1512,6 +1591,10 @@ static int do_remount(struct path *path, int flags, int mnt_flags,
 		mnt->mnt.mnt_flags = mnt_flags;
 		br_write_unlock(&vfsmount_lock);
 	}
+#ifdef MY_ABC_HERE
+	if (options.relatime_period > 0)
+		sb->relatime_period = options.relatime_period;
+#endif  
 	up_write(&sb->s_umount);
 	if (!err) {
 		br_write_lock(&vfsmount_lock);
@@ -1661,6 +1744,9 @@ static int do_new_mount(struct path *path, const char *fstype, int flags,
 	struct user_namespace *user_ns = current->nsproxy->mnt_ns->user_ns;
 	struct vfsmount *mnt;
 	int err;
+#ifdef MY_ABC_HERE
+	struct syno_mnt_options options;
+#endif  
 
 	if (!fstype)
 		return -EINVAL;
@@ -1681,6 +1767,13 @@ static int do_new_mount(struct path *path, const char *fstype, int flags,
 		}
 	}
 
+#ifdef MY_ABC_HERE
+	memset(&options, 0, sizeof(struct syno_mnt_options));
+	err = syno_parse_options(&options, data);
+	if (err)
+		return -EINVAL;
+#endif  
+
 	mnt = vfs_kern_mount(type, flags, name, data);
 	if (!IS_ERR(mnt) && (type->fs_flags & FS_HAS_SUBTYPE) &&
 	    !mnt->mnt_sb->s_subtype)
@@ -1697,6 +1790,11 @@ static int do_new_mount(struct path *path, const char *fstype, int flags,
 		ext4_fill_mount_path(mnt->mnt_sb, d_path(path, buf, sizeof(buf)));
 	}
 #endif
+
+#ifdef MY_ABC_HERE
+	if (options.relatime_period > 0)
+		mnt->mnt_sb->relatime_period = options.relatime_period;
+#endif  
 
 	if (err)
 		mntput(mnt);
@@ -1974,6 +2072,7 @@ long do_mount(const char *dev_name, const char *dir_name,
 	else
 		retval = do_new_mount(&path, type_page, flags, mnt_flags,
 				      dev_name, data_page);
+
 #ifdef MY_ABC_HERE
 	up_read(&s_reshape_mount_key);
 #endif  

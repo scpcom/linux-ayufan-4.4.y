@@ -158,6 +158,9 @@ static int sco_connect(struct sock *sk)
 {
 	bdaddr_t *src = &bt_sk(sk)->src;
 	bdaddr_t *dst = &bt_sk(sk)->dst;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	__u16 pkt_type = sco_pi(sk)->pkt_type;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	struct sco_conn *conn;
 	struct hci_conn *hcon;
 	struct hci_dev  *hdev;
@@ -173,11 +176,23 @@ static int sco_connect(struct sock *sk)
 
 	if (lmp_esco_capable(hdev) && !disable_esco)
 		type = ESCO_LINK;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	else {
+		type = SCO_LINK;
+		pkt_type &= SCO_ESCO_MASK;
+	}
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	else
 		type = SCO_LINK;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	hcon = hci_connect(hdev, type, pkt_type, dst, BDADDR_BREDR,
+			   BT_SECURITY_LOW, HCI_AT_NO_BONDING);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	hcon = hci_connect(hdev, type, dst, BDADDR_BREDR, BT_SECURITY_LOW,
 			   HCI_AT_NO_BONDING);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	if (IS_ERR(hcon)) {
 		err = PTR_ERR(hcon);
 		goto done;
@@ -445,6 +460,15 @@ static int sco_sock_create(struct net *net, struct socket *sock, int protocol,
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static int sco_sock_bind(struct socket *sock, struct sockaddr *addr, int addr_len)
+{
+	struct sockaddr_sco sa;
+	struct sock *sk = sock->sk;
+	int len, err = 0;
+
+	BT_DBG("sk %p %pMR", sk, &sa.sco_bdaddr);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static int sco_sock_bind(struct socket *sock, struct sockaddr *addr, int addr_len)
 {
 	struct sockaddr_sco *sa = (struct sockaddr_sco *) addr;
@@ -452,12 +476,19 @@ static int sco_sock_bind(struct socket *sock, struct sockaddr *addr, int addr_le
 	int err = 0;
 
 	BT_DBG("sk %p %pMR", sk, &sa->sco_bdaddr);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	if (!addr || addr->sa_family != AF_BLUETOOTH)
 		return -EINVAL;
 
 	if (addr_len < sizeof(struct sockaddr_sco))
 		return -EINVAL;
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	memset(&sa, 0, sizeof(sa));
+	len = min_t(unsigned int, sizeof(sa), addr_len);
+	memcpy(&sa, addr, len);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	lock_sock(sk);
 
@@ -471,7 +502,12 @@ static int sco_sock_bind(struct socket *sock, struct sockaddr *addr, int addr_le
 		goto done;
 	}
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	bacpy(&bt_sk(sk)->src, &sa.sco_bdaddr);
+	sco_pi(sk)->pkt_type = sa.sco_pkt_type;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	bacpy(&bt_sk(sk)->src, &sa->sco_bdaddr);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	sk->sk_state = BT_BOUND;
 
@@ -482,6 +518,36 @@ done:
 
 static int sco_sock_connect(struct socket *sock, struct sockaddr *addr, int alen, int flags)
 {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	struct sock *sk = sock->sk;
+	struct sockaddr_sco sa;
+	int len, err;
+
+	BT_DBG("sk %p", sk);
+
+	if (!addr || addr->sa_family != AF_BLUETOOTH)
+		return -EINVAL;
+
+	memset(&sa, 0, sizeof(sa));
+	len = min_t(unsigned int, sizeof(sa), alen);
+	memcpy(&sa, addr, len);
+
+	lock_sock(sk);
+
+	if (sk->sk_type != SOCK_SEQPACKET) {
+		err = -EINVAL;
+		goto done;
+	}
+
+	if (sk->sk_state != BT_OPEN && sk->sk_state != BT_BOUND) {
+		err = -EBADFD;
+		goto done;
+	}
+
+	/* Set destination address and psm */
+	bacpy(&bt_sk(sk)->dst, &sa.sco_bdaddr);
+	sco_pi(sk)->pkt_type = sa.sco_pkt_type;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	struct sockaddr_sco *sa = (struct sockaddr_sco *) addr;
 	struct sock *sk = sock->sk;
 	int err;
@@ -502,6 +568,7 @@ static int sco_sock_connect(struct socket *sock, struct sockaddr *addr, int alen
 
 	/* Set destination address and psm */
 	bacpy(&bt_sk(sk)->dst, &sa->sco_bdaddr);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	err = sco_connect(sk);
 	if (err)
@@ -625,6 +692,9 @@ static int sco_sock_getname(struct socket *sock, struct sockaddr *addr, int *len
 		bacpy(&sa->sco_bdaddr, &bt_sk(sk)->dst);
 	else
 		bacpy(&sa->sco_bdaddr, &bt_sk(sk)->src);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	sa->sco_pkt_type = sco_pi(sk)->pkt_type;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	return 0;
 }
@@ -978,7 +1048,7 @@ static void sco_conn_ready(struct sco_conn *conn)
 			sk->sk_state = BT_CONNECTED;
 
 		/* Wake up parent */
-		parent->sk_data_ready(parent, 1);
+		parent->sk_data_ready(parent);
 
 		bh_unlock_sock(parent);
 

@@ -192,10 +192,19 @@ EXPORT_SYMBOL(s_reshape_mount_key);
 #endif  
 
 #ifdef MY_ABC_HERE
-unsigned char g_syno_sata_remap[SATA_REMAP_MAX] = {SATA_REMAP_NOT_INIT};
+int g_syno_sata_remap[SATA_REMAP_MAX] = {SATA_REMAP_NOT_INIT};
 EXPORT_SYMBOL(g_syno_sata_remap);
 int g_use_sata_remap = 0;
 EXPORT_SYMBOL(g_use_sata_remap);
+#endif  
+
+#ifdef MY_DEF_HERE
+char gszPciAddrList[PCI_ADDR_NUM_MAX][PCI_ADDR_LEN_MAX] = {{0}};
+int gPciAddrNum = 0;
+int gPciDeferStart = M2SATA_START_IDX;
+EXPORT_SYMBOL(gszPciAddrList);
+EXPORT_SYMBOL(gPciAddrNum);
+EXPORT_SYMBOL(gPciDeferStart);
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -322,6 +331,11 @@ int (*syno_disk_map_table_gen_mv14xx)(int *iDiskMapTable, int iPortMax);
 EXPORT_SYMBOL(syno_disk_map_table_gen_mv14xx);
 #endif  
 
+#ifdef MY_DEF_HERE
+int g_syno_ds1815p_speed_limit = 1;
+EXPORT_SYMBOL(g_syno_ds1815p_speed_limit);
+#endif  
+
 extern int sysctl_overcommit_memory;
 extern int sysctl_overcommit_ratio;
 extern int max_threads;
@@ -332,6 +346,10 @@ extern char core_pattern[];
 extern unsigned int core_pipe_limit;
 #endif
 extern int pid_max;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+extern int extra_free_kbytes;
+extern int min_free_order_shift;
+#endif  
 extern int pid_max_min, pid_max_max;
 extern int percpu_pagelist_fraction;
 extern int compat_log;
@@ -1755,6 +1773,23 @@ static struct ctl_table vm_table[] = {
 		.proc_handler	= min_free_kbytes_sysctl_handler,
 		.extra1		= &zero,
 	},
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	{
+		.procname	= "extra_free_kbytes",
+		.data		= &extra_free_kbytes,
+		.maxlen		= sizeof(extra_free_kbytes),
+		.mode		= 0644,
+		.proc_handler	= min_free_kbytes_sysctl_handler,
+		.extra1		= &zero,
+	},
+	{
+		.procname	= "min_free_order_shift",
+		.data		= &min_free_order_shift,
+		.maxlen		= sizeof(min_free_order_shift),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec
+	},
+#endif  
 	{
 		.procname	= "percpu_pagelist_fraction",
 		.data		= &percpu_pagelist_fraction,

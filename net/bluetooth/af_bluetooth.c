@@ -30,6 +30,13 @@
 #include <net/bluetooth/bluetooth.h>
 #include <linux/proc_fs.h>
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifndef CONFIG_BT_SOCK_DEBUG
+#undef  BT_DBG
+#define BT_DBG(D...)
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 #define VERSION "2.16"
 
 /* Bluetooth sockets */
@@ -103,10 +110,43 @@ void bt_sock_unregister(int proto)
 }
 EXPORT_SYMBOL(bt_sock_unregister);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_PARANOID_NETWORK
+static inline int current_has_bt_admin(void)
+{
+	return !current_euid();
+}
+
+static inline int current_has_bt(void)
+{
+	return current_has_bt_admin();
+}
+# else
+static inline int current_has_bt_admin(void)
+{
+	return 1;
+}
+
+static inline int current_has_bt(void)
+{
+	return 1;
+}
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 static int bt_sock_create(struct net *net, struct socket *sock, int proto,
 			  int kern)
 {
 	int err;
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (proto == BTPROTO_RFCOMM || proto == BTPROTO_SCO ||
+			proto == BTPROTO_L2CAP) {
+		if (!current_has_bt())
+			return -EPERM;
+	} else if (!current_has_bt_admin())
+		return -EPERM;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	if (net != &init_net)
 		return -EAFNOSUPPORT;

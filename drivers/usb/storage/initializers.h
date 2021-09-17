@@ -46,5 +46,10 @@ int usb_stor_euscsi_init(struct us_data *us);
  * flash reader */
 int usb_stor_ucr61s2b_init(struct us_data *us);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+/* This places the HUAWEI usb dongles in multi-port mode */
+int usb_stor_huawei_init(struct us_data *us);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 /* This places the HUAWEI E220 devices in multi-port mode */
 int usb_stor_huawei_e220_init(struct us_data *us);
+#endif /* CONFIG_SYNO_LSP_HI3536 */

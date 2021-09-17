@@ -134,6 +134,12 @@ static struct sk_buff *ipv6_gso_segment(struct sk_buff *skb,
 				fptr->frag_off |= htons(IP6_MF);
 			offset += (ntohs(ipv6h->payload_len) -
 				   sizeof(struct frag_hdr));
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			/* when ipv6 packet has extend header,
+			 * offset should substract the exthdr len.
+			 */
+			offset -= unfrag_ip6hlen - sizeof(*ipv6h);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		}
 	}
 

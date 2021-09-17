@@ -71,4 +71,8 @@ static inline int string_unescape_any_inplace(char *buf)
 	return string_unescape_any(buf, buf, 0);
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+char *ultohstr(u64 size, char *buf, int len);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 #endif

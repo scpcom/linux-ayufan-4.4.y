@@ -432,6 +432,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
 		mmc_of_parse(host->mmc);
 		sdhci_get_of_property(pdev);
 		pdata = pxav3_get_mmc_pdata(dev);
+		pdev->dev.platform_data = pdata;
 #if defined(MY_ABC_HERE)
 		host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
 		host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);

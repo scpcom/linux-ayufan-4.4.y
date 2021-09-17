@@ -34,3 +34,4 @@ obj-$(CONFIG_MDIO_BUS_MUX)	+= mdio-mux.o
 obj-$(CONFIG_MDIO_BUS_MUX_GPIO)	+= mdio-mux-gpio.o
 obj-$(CONFIG_MDIO_BUS_MUX_MMIOREG) += mdio-mux-mmioreg.o
 obj-$(CONFIG_AQR105_PHY)	+= aquantia.o
+obj-$(CONFIG_SYNO_ALPINE_AQR105_PHY)	+= aquantia_alpine.o

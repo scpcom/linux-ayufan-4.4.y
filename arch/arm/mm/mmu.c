@@ -551,6 +551,31 @@ static void __init *early_alloc(unsigned long sz)
 	return early_alloc_aligned(sz, sz);
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static pte_t * __init early_pte_alloc(pmd_t *pmd)
+{
+	if (pmd_none(*pmd) || pmd_bad(*pmd))
+		return early_alloc(PTE_HWTABLE_OFF + PTE_HWTABLE_SIZE);
+	return pmd_page_vaddr(*pmd);
+}
+
+static void __init early_pte_install(pmd_t *pmd, pte_t *pte, unsigned long prot)
+{
+	__pmd_populate(pmd, __pa(pte), prot);
+	BUG_ON(pmd_bad(*pmd));
+}
+
+static pte_t * __init early_pte_alloc_and_install(pmd_t *pmd,
+	unsigned long addr, unsigned long prot)
+{
+	if (pmd_none(*pmd)) {
+		pte_t *pte = early_pte_alloc(pmd);
+		early_pte_install(pmd, pte, prot);
+	}
+	BUG_ON(pmd_bad(*pmd));
+	return pte_offset_kernel(pmd, addr);
+}
+#else  
 static pte_t * __init early_pte_alloc(pmd_t *pmd, unsigned long addr, unsigned long prot)
 {
 	if (pmd_none(*pmd)) {
@@ -568,16 +593,28 @@ static pte_t * __init early_pte_alloc(pmd_t *pmd, unsigned long addr, unsigned l
 	BUG_ON(pmd_bad(*pmd));
 	return pte_offset_kernel(pmd, addr);
 }
+#endif  
 
 static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
 				  unsigned long end, unsigned long pfn,
 				  const struct mem_type *type)
 {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	pte_t *start_pte = early_pte_alloc(pmd);
+	pte_t *pte = start_pte + pte_index(addr);
+
+	BUG_ON(!pmd_none(*pmd) && pmd_bad(*pmd) && ((addr | end) & ~PMD_MASK));
+#else  
 	pte_t *pte = early_pte_alloc(pmd, addr, type->prot_l1);
+#endif  
+
 	do {
 		set_pte_ext(pte, pfn_pte(pfn, __pgprot(type->prot_pte)), 0);
 		pfn++;
 	} while (pte++, addr += PAGE_SIZE, addr != end);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	early_pte_install(pmd, start_pte, type->prot_l1);
+#endif  
 }
 
 static void __init __map_init_section(pmd_t *pmd, unsigned long addr,
@@ -601,7 +638,12 @@ static void __init __map_init_section(pmd_t *pmd, unsigned long addr,
 
 static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
 				      unsigned long end, phys_addr_t phys,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+				      const struct mem_type *type,
+				      bool force_pages)
+#else  
 				      const struct mem_type *type)
+#endif  
 {
 	pmd_t *pmd = pmd_offset(pud, addr);
 	unsigned long next;
@@ -611,7 +653,12 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
 		next = pmd_addr_end(addr, end);
 
 		if (type->prot_sect &&
+#if defined(CONFIG_SYNO_LSP_HI3536)
+				((addr | next | phys) & ~SECTION_MASK) == 0 &&
+				!force_pages) {
+#else  
 				((addr | next | phys) & ~SECTION_MASK) == 0) {
+#endif  
 			__map_init_section(pmd, addr, next, phys, type);
 		} else {
 			alloc_init_pte(pmd, addr, next,
@@ -625,14 +672,23 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
 
 static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
 				  unsigned long end, phys_addr_t phys,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+				  const struct mem_type *type,
+				  bool force_pages)
+#else  
 				  const struct mem_type *type)
+#endif  
 {
 	pud_t *pud = pud_offset(pgd, addr);
 	unsigned long next;
 
 	do {
 		next = pud_addr_end(addr, end);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		alloc_init_pmd(pud, addr, next, phys, type, force_pages);
+#else  
 		alloc_init_pmd(pud, addr, next, phys, type);
+#endif  
 		phys += next - addr;
 	} while (pud++, addr = next, addr != end);
 }
@@ -689,7 +745,11 @@ static void __init create_36bit_mapping(struct map_desc *md,
 }
 #endif	 
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static void __init create_mapping(struct map_desc *md, bool force_pages)
+#else  
 static void __init create_mapping(struct map_desc *md)
+#endif  
 {
 	unsigned long addr, length, end;
 	phys_addr_t phys;
@@ -737,7 +797,11 @@ static void __init create_mapping(struct map_desc *md)
 	do {
 		unsigned long next = pgd_addr_end(addr, end);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		alloc_init_pud(pgd, addr, next, phys, type, force_pages);
+#else  
 		alloc_init_pud(pgd, addr, next, phys, type);
+#endif  
 
 		phys += next - addr;
 		addr = next;
@@ -756,7 +820,11 @@ void __init iotable_init(struct map_desc *io_desc, int nr)
 	svm = early_alloc_aligned(sizeof(*svm) * nr, __alignof__(*svm));
 
 	for (md = io_desc; nr; md++, nr--) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		create_mapping(md, false);
+#else  
 		create_mapping(md);
+#endif  
 
 		vm = &svm->vm;
 		vm->addr = (void *)(md->virtual & PAGE_MASK);
@@ -853,7 +921,11 @@ void __init debug_ll_io_init(void)
 	map.virtual &= PAGE_MASK;
 	map.length = PAGE_SIZE;
 	map.type = MT_DEVICE;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	create_mapping(&map, false);
+#else  
 	create_mapping(&map);
+#endif  
 }
 #endif
 
@@ -915,6 +987,30 @@ void __init sanity_check_meminfo(void)
 	for (i = 0, j = 0; i < meminfo.nr_banks; i++) {
 		struct membank *bank = &meminfo.bank[j];
 		*bank = meminfo.bank[i];
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_SPARSEMEM
+		if (pfn_to_section_nr(bank_pfn_start(bank)) !=
+		    pfn_to_section_nr(bank_pfn_end(bank) - 1)) {
+			phys_addr_t sz;
+			unsigned long start_pfn = bank_pfn_start(bank);
+			unsigned long end_pfn = SECTION_ALIGN_UP(start_pfn + 1);
+			sz = ((phys_addr_t)(end_pfn - start_pfn) << PAGE_SHIFT);
+
+			if (meminfo.nr_banks >= NR_BANKS) {
+				pr_crit("NR_BANKS too low, ignoring %lld bytes of memory\n",
+					(unsigned long long)(bank->size - sz));
+			} else {
+				memmove(bank + 1, bank,
+					(meminfo.nr_banks - i) * sizeof(*bank));
+				meminfo.nr_banks++;
+				bank[1].size -= sz;
+				bank[1].start = __pfn_to_phys(end_pfn);
+			}
+			bank->size = sz;
+		}
+#endif
+#endif  
 
 		if (bank->start > ULONG_MAX)
 			highmem = 1;
@@ -1081,7 +1177,11 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 	map.virtual = MODULES_VADDR;
 	map.length = ((unsigned long)_etext - map.virtual + ~SECTION_MASK) & SECTION_MASK;
 	map.type = MT_ROM;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	create_mapping(&map, false);
+#else  
 	create_mapping(&map);
+#endif  
 #endif
 
 #ifdef FLUSH_BASE
@@ -1089,14 +1189,22 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 	map.virtual = FLUSH_BASE;
 	map.length = SZ_1M;
 	map.type = MT_CACHECLEAN;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	create_mapping(&map, false);
+#else  
 	create_mapping(&map);
+#endif  
 #endif
 #ifdef FLUSH_BASE_MINICACHE
 	map.pfn = __phys_to_pfn(FLUSH_BASE_PHYS + SZ_1M);
 	map.virtual = FLUSH_BASE_MINICACHE;
 	map.length = SZ_1M;
 	map.type = MT_MINICLEAN;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	create_mapping(&map, false);
+#else  
 	create_mapping(&map);
+#endif  
 #endif
 
 	map.pfn = __phys_to_pfn(virt_to_phys(vectors));
@@ -1107,20 +1215,32 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 #else
 	map.type = MT_LOW_VECTORS;
 #endif
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	create_mapping(&map, false);
+#else  
 	create_mapping(&map);
+#endif  
 
 	if (!vectors_high()) {
 		map.virtual = 0;
 		map.length = PAGE_SIZE * 2;
 		map.type = MT_LOW_VECTORS;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		create_mapping(&map, false);
+#else  
 		create_mapping(&map);
+#endif  
 	}
 
 	map.pfn += 1;
 	map.virtual = 0xffff0000 + PAGE_SIZE;
 	map.length = PAGE_SIZE;
 	map.type = MT_LOW_VECTORS;
+#if defined(CONFIG_SYNO_HI3536)
+	create_mapping(&map, false);
+#else  
 	create_mapping(&map);
+#endif  
 
 #if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
 	prepare_highmem_tables();
@@ -1143,7 +1263,11 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 static void __init kmap_init(void)
 {
 #ifdef CONFIG_HIGHMEM
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	pkmap_page_table = early_pte_alloc_and_install(pmd_off_k(PKMAP_BASE),
+#else  
 	pkmap_page_table = early_pte_alloc(pmd_off_k(PKMAP_BASE),
+#endif  
 		PKMAP_BASE, _PAGE_KERNEL_TABLE);
 #endif
 }
@@ -1151,11 +1275,21 @@ static void __init kmap_init(void)
 static void __init map_lowmem(void)
 {
 	struct memblock_region *reg;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	phys_addr_t start;
+	phys_addr_t end;
+	struct map_desc map;
+#endif  
 
 	for_each_memblock(memory, reg) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		start = reg->base;
+		end = start + reg->size;
+#else  
 		phys_addr_t start = reg->base;
 		phys_addr_t end = start + reg->size;
 		struct map_desc map;
+#endif  
 
 		if (end > arm_lowmem_limit)
 			end = arm_lowmem_limit;
@@ -1167,8 +1301,26 @@ static void __init map_lowmem(void)
 		map.length = end - start;
 		map.type = MT_MEMORY;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		create_mapping(&map, false);
+#else  
 		create_mapping(&map);
+#endif  
 	}
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_DEBUG_RODATA
+	start = __pa(_stext) & PMD_MASK;
+	end = ALIGN(__pa(__end_rodata), PMD_SIZE);
+
+	map.pfn = __phys_to_pfn(start);
+	map.virtual = __phys_to_virt(start);
+	map.length = end - start;
+	map.type = MT_MEMORY;
+
+	create_mapping(&map, true);
+#endif
+#endif  
 }
 
 void __init paging_init(struct machine_desc *mdesc)

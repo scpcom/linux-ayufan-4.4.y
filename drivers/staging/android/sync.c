@@ -79,12 +79,22 @@ static void sync_timeline_free(struct kref *kref)
 		container_of(kref, struct sync_timeline, kref);
 	unsigned long flags;
 
-	if (obj->ops->release_obj)
-		obj->ops->release_obj(obj);
-
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	spin_lock_irqsave(&sync_timeline_list_lock, flags);
 	list_del(&obj->sync_timeline_list);
 	spin_unlock_irqrestore(&sync_timeline_list_lock, flags);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
+	if (obj->ops->release_obj)
+		obj->ops->release_obj(obj);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536 */
+	spin_lock_irqsave(&sync_timeline_list_lock, flags);
+	list_del(&obj->sync_timeline_list);
+	spin_unlock_irqrestore(&sync_timeline_list_lock, flags);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	kfree(obj);
 }
@@ -92,11 +102,21 @@ static void sync_timeline_free(struct kref *kref)
 void sync_timeline_destroy(struct sync_timeline *obj)
 {
 	obj->destroyed = true;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	smp_wmb();
 
+	/*
+	 * signal any children that their parent is going away.
+	 */
+	sync_timeline_signal(obj);
+
+	kref_put(&obj->kref, sync_timeline_free);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	/*
 	 * If this is not the last reference, signal any children
 	 * that their parent is going away.
 	 */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	if (!kref_put(&obj->kref, sync_timeline_free))
 		sync_timeline_signal(obj);

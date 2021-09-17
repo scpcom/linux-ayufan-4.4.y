@@ -76,6 +76,11 @@ struct frag_hdr {
 
 #define	IP6_MF	0x0001
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define IP6_REPLY_MARK(net, mark) \
+	((net)->ipv6.sysctl.fwmark_reflect ? (mark) : 0)
+#endif  
+
 #include <net/sock.h>
 
 extern int sysctl_mld_max_msf;
@@ -211,6 +216,14 @@ static inline void fl6_sock_release(struct ip6_flowlabel *fl)
 }
 
 extern void icmpv6_notify(struct sk_buff *skb, u8 type, u8 code, __be32 info);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+int icmpv6_push_pending_frames(struct sock *sk, struct flowi6 *fl6,
+			       struct icmp6hdr *thdr, int len);
+
+struct dst_entry *icmpv6_route_lookup(struct net *net, struct sk_buff *skb,
+				      struct sock *sk, struct flowi6 *fl6);
+#endif  
 
 extern int 			ip6_ra_control(struct sock *sk, int sel);
 

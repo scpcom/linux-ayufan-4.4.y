@@ -166,6 +166,9 @@ struct vm_area_struct {
 			unsigned long rb_subtree_last;
 		} linear;
 		struct list_head nonlinear;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		const char __user *anon_name;
+#endif  
 	} shared;
 
 	struct list_head anon_vma_chain;  
@@ -329,6 +332,17 @@ static inline cpumask_t *mm_cpumask(struct mm_struct *mm)
 {
 	return mm->cpu_vm_mask_var;
 }
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+ 
+static inline const char __user *vma_get_anon_name(struct vm_area_struct *vma)
+{
+	if (vma->vm_file)
+		return NULL;
+
+	return vma->shared.anon_name;
+}
+#endif  
 
 #if defined(CONFIG_NUMA_BALANCING) || defined(CONFIG_COMPACTION)
  

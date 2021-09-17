@@ -460,4 +460,10 @@ extern int gBadSectorTest;
 #endif  
 #endif  
 
+#ifdef MY_ABC_HERE
+#define SYNO_DESCRIPTOR_RESERVED_INDEX 3  
+#define SYNO_NCQ_FAKE_UNC 0x01  
+#define SYNO_SCSI_SECT_SIZE 512
+#endif  
+
 #endif  

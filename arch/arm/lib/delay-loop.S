@@ -40,6 +40,9 @@ ENTRY(__loop_const_udelay)			@ 0 <= r0 <= 0x7fffff06
 /*
  * loops = r0 * HZ * loops_per_jiffy / 1000000
  */
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		.align 3
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 @ Delay routine
 ENTRY(__loop_delay)

@@ -23,6 +23,9 @@ struct hidraw {
 	wait_queue_head_t wait;
 	struct hid_device *hid;
 	struct device *dev;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	spinlock_t list_lock;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	struct list_head list;
 };
 

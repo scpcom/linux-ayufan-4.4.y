@@ -113,6 +113,9 @@ struct hd_struct {
 #endif
 	atomic_t ref;
 	struct rcu_head rcu_head;
+#ifdef MY_ABC_HERE
+	unsigned auto_remap;
+#endif  
 };
 
 #define GENHD_FL_REMOVABLE			1
@@ -550,6 +553,9 @@ struct unixware_disklabel {
 #define ADDPART_FLAG_NONE	0
 #define ADDPART_FLAG_RAID	1
 #define ADDPART_FLAG_WHOLEDISK	2
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define ADDPART_FLAG_READONLY   4
+#endif  
 
 extern int blk_alloc_devt(struct hd_struct *part, dev_t *devt);
 extern void blk_free_devt(dev_t devt);

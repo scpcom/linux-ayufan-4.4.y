@@ -19,7 +19,11 @@ typedef elf_greg_t elf_gregset_t[ELF_NGREG];
 
 typedef struct user_fp elf_fpregset_t;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+ 
+#else
 #define EM_ARM	40
+#endif  
 
 #define EF_ARM_EABI_MASK	0xff000000
 #define EF_ARM_EABI_UNKNOWN	0x00000000

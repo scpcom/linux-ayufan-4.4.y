@@ -707,8 +707,10 @@ void __cfg80211_disconnected(struct net_device *dev, const u8 *ie,
 		    wdev->iftype != NL80211_IFTYPE_P2P_CLIENT))
 		return;
 
+#if !defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_CFG80211_ALLOW_RECONNECT))
 	if (wdev->sme_state != CFG80211_SME_CONNECTED)
 		return;
+#endif /* !CONFIG_SYNO_LSP_HI3536 || (CONFIG_SYNO_LSP_HI3536 && !CONFIG_CFG80211_ALLOW_RECONNECT) */
 
 	if (wdev->current_bss) {
 		cfg80211_unhold_bss(wdev->current_bss);
@@ -785,10 +787,21 @@ int __cfg80211_connect(struct cfg80211_registered_device *rdev,
 
 	ASSERT_WDEV_LOCK(wdev);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifndef CONFIG_CFG80211_ALLOW_RECONNECT
 	if (wdev->sme_state != CFG80211_SME_IDLE)
 		return -EALREADY;
 
 	if (WARN_ON(wdev->connect_keys)) {
+#else
+	if (wdev->connect_keys) {
+#endif
+#else /* CONFIG_SYNO_LSP_HI3536 */
+	if (wdev->sme_state != CFG80211_SME_IDLE)
+		return -EALREADY;
+
+	if (WARN_ON(wdev->connect_keys)) {
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		kfree(wdev->connect_keys);
 		wdev->connect_keys = NULL;
 	}

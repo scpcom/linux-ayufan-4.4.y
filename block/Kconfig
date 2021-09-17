@@ -99,6 +99,20 @@ config BLK_DEV_THROTTLING
 
 	See Documentation/cgroups/blkio-controller.txt for more information.
 
+config CMDLINE_PARSER
+	bool "Block device command line partition parser"
+	depends on SYNO_LSP_HI3536
+	default n
+	---help---
+	Parsing command line, get the partitions information.
+
+config PART_CHANGE
+	bool "Support change partition by file '/proc/partchange'"
+	depends on SYNO_LSP_HI3536
+	default y
+	---help---
+	  Support change partition by file '/proc/partchange'
+
 menu "Partition Types"
 
 source "block/partitions/Kconfig"

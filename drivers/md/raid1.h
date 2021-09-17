@@ -64,10 +64,6 @@ struct r1bio {
 	int			read_disk;
 
 	struct list_head	retry_list;
-#ifdef MY_ABC_HERE
-	unsigned int read_failed;
-	int orig_disk_idx;
-#endif  
 	 
 	struct bio_vec		*behind_bvecs;
 	int			behind_page_count;

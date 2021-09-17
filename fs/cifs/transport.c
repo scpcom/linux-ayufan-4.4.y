@@ -447,7 +447,11 @@ wait_for_response(struct TCP_Server_Info *server, struct mid_q_entry *midQ)
 {
 	int error;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	error = wait_event_freezekillable_unsafe(server->response_q,
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	error = wait_event_freezekillable(server->response_q,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 				    midQ->mid_state != MID_REQUEST_SUBMITTED);
 	if (error < 0)
 		return -ERESTARTSYS;

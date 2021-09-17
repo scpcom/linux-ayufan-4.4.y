@@ -12,6 +12,9 @@ fb-y                              := fbmem.o fbmon.o fbcmap.o fbsysfs.o \
                                      modedb.o fbcvt.o
 fb-objs                           := $(fb-y)
 
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_ADF)		  += adf/
+endif # CONFIG_SYNO_LSP_HI3536
 obj-$(CONFIG_VT)		  += console/
 obj-$(CONFIG_LOGO)		  += logo/
 obj-y				  += backlight/

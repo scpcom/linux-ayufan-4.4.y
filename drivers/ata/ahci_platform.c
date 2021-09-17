@@ -26,6 +26,38 @@
 #include "ahci.h"
 
 static void ahci_host_stop(struct ata_host *host);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static unsigned int ncq_en = CONFIG_HI_SATA_NCQ;
+module_param(ncq_en, uint, 0600);
+MODULE_PARM_DESC(ncq_en, "ahci ncq flag (default:1)");
+
+#ifdef CONFIG_HI_SATA_RAM
+unsigned sg_num = CONFIG_HI_SATA_RAM_SG_NUM;
+EXPORT_SYMBOL(sg_num);
+
+void set_ram_mode(unsigned int ports)
+{
+	unsigned int temp;
+
+	temp = readl((void *)IO_ADDRESS(0x1212000C));
+
+	if (ports == 2) {
+		temp |= 0x1 << 9;
+		temp &= ~(0x1 << 10);
+	} else if (ports == 3) {
+		temp &= ~(0x1 << 9);
+		temp |= 0x1 << 10;
+	} else if (ports == 4) {
+		temp |= 0x1 << 9;
+		temp |= 0x1 << 10;
+	}
+
+	writel(temp, (void *)IO_ADDRESS(0x1212000C));
+
+	return;
+}
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 enum ahci_type {
 	AHCI,		/* standard platform ahci */
@@ -86,6 +118,62 @@ static struct scsi_host_template ahci_platform_sht = {
 	AHCI_SHT("ahci_platform"),
 };
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_ARCH_HI3536
+#define HI_SATA_SYS_CTRL	IO_ADDRESS(0x1205008C)
+#define HI_SATA_USE_ESATA	16
+static unsigned int hi_sata_use_esata(void)
+{
+	unsigned int tmp_val;
+
+	tmp_val = readl((void *)HI_SATA_SYS_CTRL);
+	tmp_val = (tmp_val >> HI_SATA_USE_ESATA) & 0x3;
+
+	return (unsigned int)tmp_val;
+}
+#endif
+
+#ifdef CONFIG_ARCH_HI3531A
+#define HI_SATA_SYS_CTRL	IO_ADDRESS(0x1205008C)
+#define HI_SATA_USE_ESATA	12
+static unsigned int hi_sata_port_nr(void)
+{
+	unsigned int tmp_val, mode, port_nr;
+
+	tmp_val = readl((void *)HI_SATA_SYS_CTRL);
+	mode = (tmp_val >> HI_SATA_USE_ESATA) & 0xf;
+
+	switch (mode) {
+	case 0x0:
+		port_nr = 4;
+		break;
+
+	case 0x1:
+	case 0x8:
+		port_nr = 3;
+		break;
+
+	case 0x2:
+	case 0x3:
+	case 0x9:
+		port_nr = 2;
+		break;
+
+	case 0xa:
+	case 0xb:
+		port_nr = 1;
+		break;
+
+	default:
+		port_nr = 0;
+		break;
+	}
+
+	return port_nr;
+}
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 static int ahci_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
@@ -100,6 +188,11 @@ static int ahci_probe(struct platform_device *pdev)
 	int n_ports;
 	int i;
 	int rc;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_ARCH_HI3536
+	unsigned int temp_val;
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	mem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (!mem) {
@@ -160,6 +253,10 @@ static int ahci_probe(struct platform_device *pdev)
 	/* prepare host */
 	if (hpriv->cap & HOST_CAP_NCQ)
 		pi.flags |= ATA_FLAG_NCQ;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (!ncq_en)
+		pi.flags &= ~ATA_FLAG_NCQ;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	if (hpriv->cap & HOST_CAP_PMP)
 		pi.flags |= ATA_FLAG_PMP;
@@ -173,6 +270,37 @@ static int ahci_probe(struct platform_device *pdev)
 	 */
 	n_ports = max(ahci_nr_ports(hpriv->cap), fls(hpriv->port_map));
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_ARCH_HI3536
+	temp_val = hi_sata_use_esata();
+
+	if (temp_val == 0) {
+		n_ports = 4;
+#ifdef CONFIG_HI_SATA_RAM
+		sg_num = 58;
+		ahci_platform_sht.sg_tablesize = 58;
+		set_ram_mode(n_ports);
+#endif
+	} else if (temp_val == 1) {
+		n_ports = 3;
+#ifdef CONFIG_HI_SATA_RAM
+		sg_num = 79;
+		ahci_platform_sht.sg_tablesize = 79;
+		set_ram_mode(n_ports);
+#endif
+	} else if (temp_val == 3) {
+		n_ports = 2;
+#ifdef CONFIG_HI_SATA_RAM
+		sg_num = 120;
+		ahci_platform_sht.sg_tablesize = 120;
+		set_ram_mode(n_ports);
+#endif
+	}
+#endif
+#ifdef CONFIG_ARCH_HI3531A
+	n_ports = hi_sata_port_nr();
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	host = ata_host_alloc_pinfo(dev, ppi, n_ports);
 	if (!host) {
 		rc = -ENOMEM;

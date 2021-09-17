@@ -1,3 +1,10 @@
+config MTD_NAND_IDS
+	tristate "Include chip ids for known NAND devices."
+	depends on (!SYNO_LSP_HI3536 && MTD_NAND) || (SYNO_LSP_HI3536 && MTD)
+	help
+	  Useful for NAND drivers that do not use the NAND subsystem but
+	  still like to take advantage of the known chip information.
+
 config MTD_NAND_ECC
 	tristate
 
@@ -21,6 +28,16 @@ menuconfig MTD_NAND
 	  <http://www.linux-mtd.infradead.org/doc/nand.html>.
 
 if MTD_NAND
+
+config MTD_NAND_VERIFY_WRITE
+	bool "Verify NAND page writes"
+	depends on SYNO_LSP_HI3536
+	help
+	  This adds an extra check when data is written to the flash. The
+	  NAND flash device internally checks only bits transitioning
+	  from 1 to 0. There is a rare possibility that even though the
+	  device thinks the write was successful, a bit could have been
+	  flipped accidentally due to device wear or something else.
 
 config MTD_NAND_BCH
 	tristate
@@ -132,9 +149,6 @@ config BCH_CONST_T
 	default 4 if MTD_NAND_OMAP_BCH4
 	default 8 if MTD_NAND_OMAP_BCH8
 endif
-
-config MTD_NAND_IDS
-	tristate
 
 config MTD_NAND_RICOH
 	tristate "Ricoh xD card reader"
@@ -650,5 +664,11 @@ config MTD_NAND_AL
 	depends on MTD_NAND && ARCH_ALPINE
 	help
 	  Enable support for NAND Flash chips on Annapurna Labs NAND controllers.
+
+if SYNO_LSP_HI3536
+source "drivers/mtd/nand/hisnfc100/Kconfig"
+source "drivers/mtd/nand/hinfc610/Kconfig"
+source "drivers/mtd/nand/hifmc100/Kconfig"
+endif # SYNO_LSP_HI3536
 
 endif # MTD_NAND

@@ -339,7 +339,13 @@ static int usb_unbind_interface(struct device *dev)
 
 	lpm_disable_error = usb_unlocked_disable_lpm(udev);
 
-	if (!driver->soft_unbind)
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	 
+	if (!driver->soft_unbind || udev->state == USB_STATE_NOTATTACHED)
+#else  
+	 
+	 if (!driver->soft_unbind)
+#endif  
 		usb_disable_interface(udev, intf, false);
 
 	driver->disconnect(intf);
@@ -1070,7 +1076,7 @@ int usb_resume(struct device *dev, pm_message_t msg)
 
 #endif  
 
-#ifdef CONFIG_PM_RUNTIME
+#if (defined(CONFIG_PM_RUNTIME) && !defined(CONFIG_SYNO_LSP_HI3536)) || (defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_USB_SUSPEND))
 
 void usb_enable_autosuspend(struct usb_device *udev)
 {

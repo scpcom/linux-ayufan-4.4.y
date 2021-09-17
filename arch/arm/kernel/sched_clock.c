@@ -27,6 +27,10 @@ struct clock_data {
 	bool needs_suspend;
 };
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static DEFINE_SPINLOCK(sched_clock_lock);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 static void sched_clock_poll(unsigned long wrap_ticks);
 static DEFINE_TIMER(sched_clock_timer, sched_clock_poll, 0, 0);
 static int irqtime = -1;
@@ -51,8 +55,54 @@ static inline u64 notrace cyc_to_ns(u64 cyc, u32 mult, u32 shift)
 	return (cyc * mult) >> shift;
 }
 
+#if defined(CONFIG_SYNO_HI3536)
+static unsigned long long notrace cyc_to_sched_clock(u32 cyc, u32 mask)
+{
+	u64 epoch_ns;
+	u32 epoch_cyc;
+
+	if (cd.suspended)
+		return cd.epoch_ns;
+
+	/*
+	 * Load the epoch_cyc and epoch_ns atomically.  We do this by
+	 * ensuring that we always write epoch_cyc, epoch_ns and
+	 * epoch_cyc_copy in strict order, and read them in strict order.
+	 * If epoch_cyc and epoch_cyc_copy are not equal, then we're in
+	 * the middle of an update, and we should repeat the load.
+	 */
+	do {
+		epoch_cyc = cd.epoch_cyc;
+		smp_rmb();
+		epoch_ns = cd.epoch_ns;
+		smp_rmb();
+	} while (epoch_cyc != cd.epoch_cyc_copy);
+
+	return epoch_ns + cyc_to_ns((cyc - epoch_cyc) & mask, cd.mult, cd.shift);
+}
+#endif /* CONFIG_SYNO_HI3536 */
+
 static unsigned long long notrace sched_clock_32(void)
 {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	unsigned long long t_clk;
+	u32 cyc;
+#ifndef CONFIG_LOCKDEP
+	unsigned long flags;
+#endif
+
+#ifndef CONFIG_LOCKDEP
+	spin_lock_irqsave(&sched_clock_lock, flags);
+#endif
+	cyc = read_sched_clock();
+	t_clk = cyc_to_sched_clock(cyc, sched_clock_mask);
+
+#ifndef CONFIG_LOCKDEP
+	spin_unlock_irqrestore(&sched_clock_lock, flags);
+#endif
+
+	return t_clk;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	u64 epoch_ns;
 	u32 epoch_cyc;
 	u32 cyc;
@@ -77,6 +127,7 @@ static unsigned long long notrace sched_clock_32(void)
 	cyc = read_sched_clock();
 	cyc = (cyc - epoch_cyc) & sched_clock_mask;
 	return epoch_ns + cyc_to_ns(cyc, cd.mult, cd.shift);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
 /*
@@ -85,9 +136,15 @@ static unsigned long long notrace sched_clock_32(void)
 static void notrace update_sched_clock(void)
 {
 	unsigned long flags;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	unsigned long lock_flags;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	u32 cyc;
 	u64 ns;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	spin_lock_irqsave(&sched_clock_lock, lock_flags);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	cyc = read_sched_clock();
 	ns = cd.epoch_ns +
 		cyc_to_ns((cyc - cd.epoch_cyc) & sched_clock_mask,
@@ -103,6 +160,9 @@ static void notrace update_sched_clock(void)
 	smp_wmb();
 	cd.epoch_cyc = cyc;
 	raw_local_irq_restore(flags);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	spin_unlock_irqrestore(&sched_clock_lock, lock_flags);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
 static void sched_clock_poll(unsigned long wrap_ticks)

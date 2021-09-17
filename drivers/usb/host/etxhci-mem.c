@@ -1350,8 +1350,6 @@ static void xhci_apply_device_quirk(struct xhci_hcd * xhci,
 		{ USB_DEVICE(0x054c, 0x05bf), .driver_info = XHCI_QUIRK_DONOT_DOWNGRADE },
 		{ USB_DEVICE(0x04c5, 0x120e), .driver_info = XHCI_QUIRK_DONOT_DOWNGRADE },
 		{ USB_DEVICE(0x8564, 0x1000), .driver_info = XHCI_QUIRK_DONOT_DOWNGRADE },
-		{ USB_DEVICE(0x0bc2, 0x2312), .driver_info = XHCI_QUIRK_DONOT_DOWNGRADE },
-		{ USB_DEVICE(0x13fe, 0x5200), .driver_info = XHCI_QUIRK_DONOT_DOWNGRADE },
 		{ USB_DEVICE(0x0471, 0x0151), .driver_info = XHCI_QUIRK_DONOT_DATA_TOGGLE_CLEANUP },
 	};
 	struct xhci_virt_device *virt_dev;
@@ -1429,10 +1427,10 @@ int etxhci_endpoint_init(struct xhci_hcd *xhci,
 		/* Attempt to use the ring cache */
 		if (virt_dev->num_rings_cached == 0)
 			return -ENOMEM;
+		virt_dev->num_rings_cached--;
 		virt_dev->eps[ep_index].new_ring =
 			virt_dev->ring_cache[virt_dev->num_rings_cached];
 		virt_dev->ring_cache[virt_dev->num_rings_cached] = NULL;
-		virt_dev->num_rings_cached--;
 		xhci_reinit_cached_ring(xhci, virt_dev->eps[ep_index].new_ring,
 					1, type);
 	}

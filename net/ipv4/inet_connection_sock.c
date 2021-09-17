@@ -395,6 +395,22 @@ void inet_csk_clear_xmit_timers(struct sock *sk)
 }
 EXPORT_SYMBOL(inet_csk_clear_xmit_timers);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(CONFIG_TNK) && defined(SWITCH_KEEPALIVE)
+void inet_csk_clear_xmit_timers_except_keepalive(struct sock *sk)
+{
+	struct inet_connection_sock *icsk = inet_csk(sk);
+
+	icsk->icsk_pending = icsk->icsk_ack.pending =
+		icsk->icsk_ack.blocked = 0;
+
+	sk_stop_timer(sk, &icsk->icsk_retransmit_timer);
+	sk_stop_timer(sk, &icsk->icsk_delack_timer);
+}
+EXPORT_SYMBOL(inet_csk_clear_xmit_timers_except_keepalive);
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 void inet_csk_delete_keepalive_timer(struct sock *sk)
 {
 	sk_stop_timer(sk, &sk->sk_timer);
@@ -417,12 +433,21 @@ struct dst_entry *inet_csk_route_req(struct sock *sk,
 	struct net *net = sock_net(sk);
 	int flags = inet_sk_flowi_flags(sk);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	flowi4_init_output(fl4, sk->sk_bound_dev_if, ireq->ir_mark,
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	flowi4_init_output(fl4, sk->sk_bound_dev_if, sk->sk_mark,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 			   RT_CONN_FLAGS(sk), RT_SCOPE_UNIVERSE,
 			   sk->sk_protocol,
 			   flags,
 			   (opt && opt->opt.srr) ? opt->opt.faddr : ireq->rmt_addr,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			   ireq->loc_addr, ireq->rmt_port, inet_sk(sk)->inet_sport,
+			   sock_i_uid(sk));
+#else /* CONFIG_SYNO_LSP_HI3536 */
 			   ireq->loc_addr, ireq->rmt_port, inet_sk(sk)->inet_sport);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	security_req_classify_flow(req, flowi4_to_flowi(fl4));
 	rt = ip_route_output_flow(net, fl4, sk);
 	if (IS_ERR(rt))
@@ -454,11 +479,20 @@ struct dst_entry *inet_csk_route_child_sock(struct sock *sk,
 
 	rcu_read_lock();
 	opt = rcu_dereference(newinet->inet_opt);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	flowi4_init_output(fl4, sk->sk_bound_dev_if, inet_rsk(req)->ir_mark,
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	flowi4_init_output(fl4, sk->sk_bound_dev_if, sk->sk_mark,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 			   RT_CONN_FLAGS(sk), RT_SCOPE_UNIVERSE,
 			   sk->sk_protocol, inet_sk_flowi_flags(sk),
 			   (opt && opt->opt.srr) ? opt->opt.faddr : ireq->rmt_addr,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			   ireq->loc_addr, ireq->rmt_port, inet_sk(sk)->inet_sport,
+			   sock_i_uid(sk));
+#else /* CONFIG_SYNO_LSP_HI3536 */
 			   ireq->loc_addr, ireq->rmt_port, inet_sk(sk)->inet_sport);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	security_req_classify_flow(req, flowi4_to_flowi(fl4));
 	rt = ip_route_output_flow(net, fl4, sk);
 	if (IS_ERR(rt))
@@ -687,6 +721,10 @@ struct sock *inet_csk_clone_lock(const struct sock *sk,
 		inet_sk(newsk)->inet_num = ntohs(inet_rsk(req)->loc_port);
 		inet_sk(newsk)->inet_sport = inet_rsk(req)->loc_port;
 		newsk->sk_write_space = sk_stream_write_space;
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		newsk->sk_mark = inet_rsk(req)->ir_mark;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 		newicsk->icsk_retransmits = 0;
 		newicsk->icsk_backoff	  = 0;

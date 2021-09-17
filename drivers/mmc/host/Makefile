@@ -42,6 +42,9 @@ obj-$(CONFIG_SDH_BFIN)		+= bfin_sdh.o
 obj-$(CONFIG_MMC_DW)		+= dw_mmc.o
 obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
 obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_MMC_DW_HISI)	+= dw_mmc-hisi.o
+endif # CONFIG_SYNO_LSP_HI3536
 obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
 obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
 obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
@@ -66,3 +69,7 @@ obj-$(CONFIG_MMC_SDHCI_ST)		+= sdhci-st.o
 ifeq ($(CONFIG_CB710_DEBUG),y)
 	CFLAGS-cb710-mmc	+= -DDEBUG
 endif
+
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_HIMCIV200)  += himciv200/
+endif # CONFIG_SYNO_LSP_HI3536

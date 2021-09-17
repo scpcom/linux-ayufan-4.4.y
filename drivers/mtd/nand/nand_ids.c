@@ -26,6 +26,24 @@ struct nand_flash_dev nand_flash_ids[] = {
 	{"TC58NVG6D2 64G 3.3V 8-bit",
 		{ .id = {0x98, 0xde, 0x94, 0x82, 0x76, 0x56, 0x04, 0x20} },
 		  SZ_8K, SZ_8K, SZ_2M, 0, 8, 640},
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_MTD_NAND_MUSEUM_IDS
+	LEGACY_ID_NAND("NAND 1MiB 5V 8-bit",	0x6E, 1, SZ_4K, SP_OPTIONS),
+	LEGACY_ID_NAND("NAND 2MiB 5V 8-bit",	0x64, 2, SZ_4K, SP_OPTIONS),
+	LEGACY_ID_NAND("NAND 4MiB 5V 8-bit",	0x6B, 4, SZ_8K, SP_OPTIONS),
+	LEGACY_ID_NAND("NAND 1MiB 3,3V 8-bit",	0xE8, 1, SZ_4K, SP_OPTIONS),
+	LEGACY_ID_NAND("NAND 1MiB 3,3V 8-bit",	0xEC, 1, SZ_4K, SP_OPTIONS),
+	LEGACY_ID_NAND("NAND 2MiB 3,3V 8-bit",	0xEA, 2, SZ_4K, SP_OPTIONS),
+	LEGACY_ID_NAND("NAND 4MiB 3,3V 8-bit",	0xD5, 4, SZ_8K, SP_OPTIONS),
+	LEGACY_ID_NAND("NAND 4MiB 3,3V 8-bit",	0xE3, 4, SZ_8K, SP_OPTIONS),
+	LEGACY_ID_NAND("NAND 4MiB 3,3V 8-bit",	0xE5, 4, SZ_8K, SP_OPTIONS),
+	LEGACY_ID_NAND("NAND 8MiB 3,3V 8-bit",	0xD6, 8, SZ_8K, SP_OPTIONS),
+	LEGACY_ID_NAND("NAND 8MiB 1,8V 8-bit",	0x39, 8, SZ_8K, SP_OPTIONS),
+	LEGACY_ID_NAND("NAND 8MiB 3,3V 8-bit",	0xE6, 8, SZ_8K, SP_OPTIONS),
+	LEGACY_ID_NAND("NAND 8MiB 1,8V 16-bit",	0x49, 8, SZ_8K, SP_OPTIONS16),
+	LEGACY_ID_NAND("NAND 8MiB 3,3V 16-bit",	0x59, 8, SZ_8K, SP_OPTIONS16),
+#endif
+#else  
 
 	LEGACY_ID_NAND("NAND 4MiB 5V 8-bit",   0x6B, 4, SZ_8K, SP_OPTIONS),
 	LEGACY_ID_NAND("NAND 4MiB 3,3V 8-bit", 0xE3, 4, SZ_8K, SP_OPTIONS),
@@ -33,6 +51,7 @@ struct nand_flash_dev nand_flash_ids[] = {
 	LEGACY_ID_NAND("NAND 8MiB 3,3V 8-bit", 0xD6, 8, SZ_8K, SP_OPTIONS),
 	LEGACY_ID_NAND("NAND 8MiB 3,3V 8-bit", 0xE6, 8, SZ_8K, SP_OPTIONS),
 
+#endif  
 	LEGACY_ID_NAND("NAND 16MiB 1,8V 8-bit",  0x33, 16, SZ_16K, SP_OPTIONS),
 	LEGACY_ID_NAND("NAND 16MiB 3,3V 8-bit",  0x73, 16, SZ_16K, SP_OPTIONS),
 	LEGACY_ID_NAND("NAND 16MiB 1,8V 16-bit", 0x43, 16, SZ_16K, SP_OPTIONS16),
@@ -133,10 +152,37 @@ struct nand_flash_dev nand_flash_ids[] = {
 	EXTENDED_ID_NAND("NAND 64GiB 1,8V 16-bit", 0x2E, 65536, LP_OPTIONS16),
 	EXTENDED_ID_NAND("NAND 64GiB 3,3V 16-bit", 0x4E, 65536, LP_OPTIONS16),
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	 
+	{"AND 128MiB 3,3V 8-bit", {.id = {0x01} }, 2048, 128, 0x4000,
+		NAND_IS_AND | NAND_NO_AUTOINCR | NAND_NEED_READRDY
+		| NAND_4PAGE_ARRAY | BBT_AUTO_REFRESH},
+
+	{NULL,}
+#else  
 	{NULL}
+#endif  
 };
 
 struct nand_manufacturers nand_manuf_ids[] = {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	{NAND_MFR_TOSHIBA,	"Toshiba"},
+	{NAND_MFR_SAMSUNG,	"Samsung"},
+	{NAND_MFR_FUJITSU,	"Fujitsu"},
+	{NAND_MFR_NATIONAL,	"National"},
+	{NAND_MFR_RENESAS,	"Renesas"},
+	{NAND_MFR_STMICRO,	"ST Micro"},
+	{NAND_MFR_HYNIX,	"Hynix"},
+	{NAND_MFR_MICRON,	"Micron"},
+	{NAND_MFR_AMD,		"AMD/Spansion"},
+	{NAND_MFR_MACRONIX,	"Macronix"},
+	{NAND_MFR_GD,		"GD"},
+	{NAND_MFR_EON,		"Eon"},
+	{NAND_MFR_ESMT,		"ESMT"},
+	{NAND_MFR_WINBOND,	"Winbond"},
+	{NAND_MFR_ATO,		"ATO"},
+	{0x0,			"Unknown"}
+#else  
 	{NAND_MFR_TOSHIBA, "Toshiba"},
 	{NAND_MFR_SAMSUNG, "Samsung"},
 	{NAND_MFR_FUJITSU, "Fujitsu"},
@@ -149,6 +195,7 @@ struct nand_manufacturers nand_manuf_ids[] = {
 	{NAND_MFR_MACRONIX, "Macronix"},
 	{NAND_MFR_EON, "Eon"},
 	{0x0, "Unknown"}
+#endif  
 };
 
 EXPORT_SYMBOL(nand_manuf_ids);

@@ -2,6 +2,9 @@
 # Makefile for the Linux network Ethernet device drivers.
 #
 
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_STMMAC_ETH_TNK) += stmmac/
+endif # CONFIG_SYNO_LSP_HI3536
 obj-$(CONFIG_NET_VENDOR_3COM) += 3com/
 obj-$(CONFIG_NET_VENDOR_8390) += 8390/
 obj-$(CONFIG_NET_VENDOR_ADAPTEC) += adaptec/
@@ -78,3 +81,6 @@ obj-$(CONFIG_NET_VENDOR_VIA) += via/
 obj-$(CONFIG_NET_VENDOR_WIZNET) += wiznet/
 obj-$(CONFIG_NET_VENDOR_XILINX) += xilinx/
 obj-$(CONFIG_NET_VENDOR_XIRCOM) += xircom/
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_HIETH_GMAC) += hieth-gmac/
+endif # CONFIG_SYNO_LSP_HI3536

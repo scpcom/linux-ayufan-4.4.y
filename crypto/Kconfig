@@ -179,6 +179,11 @@ config CRYPTO_ABLK_HELPER_X86
 	depends on X86
 	select CRYPTO_CRYPTD
 
+config CRYPTO_ABLK_HELPER
+	tristate "Crypto ABLK helper"
+	depends on SYNO_LSP_HI3536
+	select CRYPTO_CRYPTD
+
 config CRYPTO_GLUE_HELPER_X86
 	tristate
 	depends on X86
@@ -376,6 +381,25 @@ config CRYPTO_CRC32_PCLMUL
 	  which will enable any routine to use the CRC-32-IEEE 802.3 checksum
 	  and gain better performance as compared with the table implementation.
 
+config CRYPTO_CRCT10DIF
+	tristate "CRCT10DIF algorithm"
+	select CRYPTO_HASH
+	help
+	  CRC T10 Data Integrity Field computation is being cast as
+	  a crypto transform.  This allows for faster crc t10 diff
+	  transforms to be used if they are available.
+
+config CRYPTO_CRCT10DIF_PCLMUL
+	tristate "CRCT10DIF PCLMULQDQ hardware acceleration"
+	depends on X86 && 64BIT && CRC_T10DIF
+	select CRYPTO_HASH
+	help
+	  For x86_64 processors with SSE4.2 and PCLMULQDQ supported,
+	  CRC T10 DIF PCLMULQDQ computation can be hardware
+	  accelerated PCLMULQDQ instruction. This option will create
+	  'crct10dif-plcmul' module, which is faster when computing the
+	  crct10dif checksum as compared with the generic table implementation.
+
 config CRYPTO_GHASH
 	tristate "GHASH digest algorithm"
 	select CRYPTO_GF128MUL
@@ -515,7 +539,7 @@ config CRYPTO_SHA1_SPARC64
 
 config CRYPTO_SHA1_ARM
 	tristate "SHA1 digest algorithm (ARM-asm)"
-	depends on ARM
+	depends on ARM && !SYNO_BACKPORT_ARM_CRYPTO
 	select CRYPTO_SHA1
 	select CRYPTO_HASH
 	help
@@ -733,9 +757,22 @@ config CRYPTO_AES_SPARC64
 	  for some popular block cipher mode is supported too, including
 	  ECB and CBC.
 
+config CRYPTO_AES_PPC_SPE
+	tristate "AES cipher algorithms (PPC SPE)"
+	depends on PPC && SPE && SYNO_BACKPORT_ARM_CRYPTO
+	help
+	  AES cipher algorithms (FIPS-197). Additionally the acceleration
+	  for popular block cipher modes ECB, CBC, CTR and XTS is supported.
+	  This module should only be used for low power (router) devices
+	  without hardware AES acceleration (e.g. caam crypto). It reduces the
+	  size of the AES tables from 16KB to 8KB + 256 bytes and mitigates
+	  timining attacks. Nevertheless it might be not as secure as other
+	  architecture specific assembler implementations that work on 1KB
+	  tables or 256 bytes S-boxes.
+
 config CRYPTO_AES_ARM
 	tristate "AES cipher algorithms (ARM-asm)"
-	depends on ARM
+	depends on ARM && !SYNO_BACKPORT_ARM_CRYPTO
 	select CRYPTO_ALGAPI
 	select CRYPTO_AES
 	help

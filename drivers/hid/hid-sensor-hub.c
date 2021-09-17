@@ -197,7 +197,12 @@ int sensor_hub_set_feature(struct hid_sensor_hub_device *hsdev, u32 report_id,
 
 	mutex_lock(&data->mutex);
 	report = sensor_hub_report(report_id, hsdev->hdev, HID_FEATURE_REPORT);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (!report || (field_index >=  report->maxfield) ||
+	    report->field[field_index]->report_count < 1) {
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	if (!report || (field_index >=  report->maxfield)) {
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		ret = -EINVAL;
 		goto done_proc;
 	}

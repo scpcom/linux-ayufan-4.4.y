@@ -230,6 +230,8 @@ static void mmc_select_card_type(struct mmc_card *card)
 	card->ext_csd.card_type = card_type;
 }
 
+#define MMC_MIN_PART_SWITCH_TIME	300
+
 static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
 {
 	int err = 0, idx;
@@ -253,7 +255,7 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
 	}
 
 	card->ext_csd.rev = ext_csd[EXT_CSD_REV];
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(CONFIG_SYNO_LSP_HI3536)
 	if (card->ext_csd.rev > 7) {
 #else  
 	if (card->ext_csd.rev > 6) {
@@ -292,7 +294,7 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
 		card->ext_csd.part_config = ext_csd[EXT_CSD_PART_CONFIG];
 
 		card->ext_csd.part_time = 10 * ext_csd[EXT_CSD_PART_SWITCH_TIME];
-		/* Some eMMC set the value too low so set a minimum */
+		 
 		if (card->ext_csd.part_time &&
 		    card->ext_csd.part_time < MMC_MIN_PART_SWITCH_TIME)
 			card->ext_csd.part_time = MMC_MIN_PART_SWITCH_TIME;

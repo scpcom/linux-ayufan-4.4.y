@@ -17,6 +17,9 @@ endif
 ifeq ($(CONFIG_SYNO_ARMADA),y)
 include $(srctree)/arch/arm/mach-mvebu/Makefile.boot
 endif
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+include $(srctree)/arch/arm/boot/dts/Makefile
+endif # CONFIG_SYNO_LSP_HI3536
 
 # Note: the following conditions must always be true:
 #   ZRELADDR == virt_to_phys(PAGE_OFFSET + TEXT_OFFSET)
@@ -33,6 +36,16 @@ INITRD_PHYS := $(initrd_phys-y)
 export ZRELADDR INITRD_PHYS PARAMS_PHYS
 
 targets := Image zImage xipImage bootpImage uImage
+
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+DTB_NAMES := $(subst $\",,$(CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE_NAMES))
+ifneq ($(DTB_NAMES),)
+DTB_LIST := $(addsuffix .dtb,$(DTB_NAMES))
+else
+DTB_LIST := $(dtb-y)
+endif
+DTB_OBJS := $(addprefix $(obj)/dts/,$(DTB_LIST))
+endif # CONFIG_SYNO_LSP_HI3536
 
 ifeq ($(CONFIG_XIP_KERNEL),y)
 
@@ -61,6 +74,12 @@ $(obj)/compressed/vmlinux: $(obj)/Image FORCE
 $(obj)/zImage:	$(obj)/compressed/vmlinux FORCE
 	$(call if_changed,objcopy)
 	@$(kecho) '  Kernel: $@ is ready'
+
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+$(obj)/zImage-dtb:	$(obj)/zImage $(DTB_OBJS) FORCE
+	$(call if_changed,cat)
+	@echo '  Kernel: $@ is ready'
+endif # CONFIG_SYNO_LSP_HI3536
 
 endif
 

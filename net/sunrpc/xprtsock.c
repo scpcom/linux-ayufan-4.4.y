@@ -252,7 +252,7 @@ struct sock_xprt {
 	/*
 	 * Saved socket callback addresses
 	 */
-	void			(*old_data_ready)(struct sock *, int);
+	void			(*old_data_ready)(struct sock *);
 	void			(*old_state_change)(struct sock *);
 	void			(*old_write_space)(struct sock *);
 };
@@ -725,6 +725,12 @@ static int xs_tcp_send_request(struct rpc_task *task)
 		dprintk("RPC:       xs_tcp_send_request(%u) = %d\n",
 				xdr->len - req->rq_bytes_sent, status);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+		if (unlikely(status == -EAGAIN))
+			goto check_nospace;
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		if (unlikely(status < 0))
 			break;
 
@@ -739,7 +745,25 @@ static int xs_tcp_send_request(struct rpc_task *task)
 
 		if (status != 0)
 			continue;
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_TNK)
+check_nospace:
+		/*  MGB 20-AUG-11
+		 *
+		 *  Race condition.  We break out of this loop but before we
+		 *  lock and sleep we get notified of write space.  So cll
+		 *  xs_nospace () inside the loop and continue if 0 return.
+		 *  */
+		/* status = -EAGAIN; */
+		status = xs_nospace(task);
+
+		if (!status) {
+			/* printk ("%s write space race avoid,*/
+			/* looping\n", __func__);*/
+			continue;
+		}
+#else /* CONFIG_SYNO_LSP_HI3536 && CONFIG_TNK */
 		status = -EAGAIN;
+#endif /* CONFIG_SYNO_LSP_HI3536 && CONFIG_TNK */
 		break;
 	}
 
@@ -749,7 +773,15 @@ static int xs_tcp_send_request(struct rpc_task *task)
 		/* Should we call xs_close() here? */
 		break;
 	case -EAGAIN:
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_TNK)
+		/*  MGB 20-AUG-11
+		 *
+		 *  dealt with above
+		 */
+		/* status = xs_nospace(task); */
+#else /* CONFIG_SYNO_LSP_HI3536 && CONFIG_TNK */
 		status = xs_nospace(task);
+#endif /* CONFIG_SYNO_LSP_HI3536 && CONFIG_TNK */
 		break;
 	default:
 		dprintk("RPC:       sendmsg returned unrecognized error %d\n",
@@ -918,7 +950,7 @@ static int xs_local_copy_to_xdr(struct xdr_buf *xdr, struct sk_buff *skb)
  *
  * Currently this assumes we can read the whole reply in a single gulp.
  */
-static void xs_local_data_ready(struct sock *sk, int len)
+static void xs_local_data_ready(struct sock *sk)
 {
 	struct rpc_task *task;
 	struct rpc_xprt *xprt;
@@ -981,7 +1013,7 @@ static void xs_local_data_ready(struct sock *sk, int len)
  * @len: how much data to read
  *
  */
-static void xs_udp_data_ready(struct sock *sk, int len)
+static void xs_udp_data_ready(struct sock *sk)
 {
 	struct rpc_task *task;
 	struct rpc_xprt *xprt;
@@ -1416,7 +1448,7 @@ static int xs_tcp_data_recv(read_descriptor_t *rd_desc, struct sk_buff *skb, uns
  * @bytes: how much data to read
  *
  */
-static void xs_tcp_data_ready(struct sock *sk, int bytes)
+static void xs_tcp_data_ready(struct sock *sk)
 {
 	struct rpc_xprt *xprt;
 	read_descriptor_t rd_desc;

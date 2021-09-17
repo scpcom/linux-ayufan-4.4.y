@@ -32,6 +32,13 @@ int sysctl_tcp_retries2 __read_mostly = TCP_RETR2;
 int sysctl_tcp_orphan_retries __read_mostly;
 int sysctl_tcp_thin_linear_timeouts __read_mostly;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+EXPORT_SYMBOL(sysctl_tcp_keepalive_time);
+EXPORT_SYMBOL(sysctl_tcp_retries2);
+extern struct tnkfuncs *tnk;
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 static void tcp_write_err(struct sock *sk)
 {
 	sk->sk_err = sk->sk_err_soft ? : ETIMEDOUT;
@@ -552,11 +559,29 @@ void tcp_set_keepalive(struct sock *sk, int val)
 	if ((1 << sk->sk_state) & (TCPF_CLOSE | TCPF_LISTEN))
 		return;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+#if !SWITCH_KEEPALIVE
+	if (tnk) {
+		if ((sk->sk_tnkinfo.state == TNKINFO_STATE_ACTIVATING)
+		|| (sk->sk_tnkinfo.state == TNKINFO_STATE_ACTIVE)) {
+			return;
+		}
+	}
+#endif
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	if (val && !sock_flag(sk, SOCK_KEEPOPEN))
 		inet_csk_reset_keepalive_timer(sk, keepalive_time_when(tcp_sk(sk)));
 	else if (!val)
 		inet_csk_delete_keepalive_timer(sk);
 }
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+EXPORT_SYMBOL(tcp_set_keepalive);
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static void tcp_keepalive_timer (unsigned long data)
 {
@@ -565,6 +590,18 @@ static void tcp_keepalive_timer (unsigned long data)
 	struct tcp_sock *tp = tcp_sk(sk);
 	u32 elapsed;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+#if !SWITCH_KEEPALIVE
+	if (tnk) {
+		if ((sk->sk_tnkinfo.state == TNKINFO_STATE_ACTIVATING)
+		|| (sk->sk_tnkinfo.state == TNKINFO_STATE_ACTIVE)) {
+			return;
+		}
+	}
+#endif
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	/* Only process if socket is not in use. */
 	bh_lock_sock(sk);
 	if (sock_owned_by_user(sk)) {
@@ -599,6 +636,14 @@ static void tcp_keepalive_timer (unsigned long data)
 	/* It is alive without keepalive 8) */
 	if (tp->packets_out || tcp_send_head(sk))
 		goto resched;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+#if SWITCH_KEEPALIVE
+	if (tnk && tnk->tcp_check_tx_queue(sk))
+		goto resched;
+#endif
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	elapsed = keepalive_time_elapsed(tp);
 
@@ -615,6 +660,16 @@ static void tcp_keepalive_timer (unsigned long data)
 			tcp_write_err(sk);
 			goto out;
 		}
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+#if SWITCH_KEEPALIVE
+		if (tnk && tnk->tcp_keepalive(sk)) {
+			icsk->icsk_probes_out++;
+			elapsed = keepalive_intvl_when(tp);
+		} else
+#endif
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		if (tcp_write_wakeup(sk) <= 0) {
 			icsk->icsk_probes_out++;
 			elapsed = keepalive_intvl_when(tp);

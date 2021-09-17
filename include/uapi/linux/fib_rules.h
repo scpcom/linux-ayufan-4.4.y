@@ -49,6 +49,10 @@ enum {
 	FRA_TABLE,	/* Extended table id */
 	FRA_FWMASK,	/* mask for netfilter mark */
 	FRA_OIFNAME,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	FRA_UID_START,	/* UID range */
+	FRA_UID_END,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	__FRA_MAX
 };
 

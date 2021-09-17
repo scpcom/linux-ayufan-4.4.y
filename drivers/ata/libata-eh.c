@@ -2768,6 +2768,10 @@ static int ata_eh_schedule_probe(struct ata_device *dev)
 	return 1;
 }
 
+#if defined (MY_DEF_HERE)
+	struct platform_device *plat_dev = NULL;
+#endif
+
 static int ata_eh_handle_dev_fail(struct ata_device *dev, int err)
 {
 	struct ata_eh_context *ehc = &dev->link->eh_context;

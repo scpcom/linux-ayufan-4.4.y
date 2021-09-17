@@ -36,6 +36,9 @@ generic-y += segment.h
 generic-y += sembuf.h
 generic-y += serial.h
 generic-y += shmbuf.h
+ifdef CONFIG_SYNO_LSP_HI3536
+generic-y += simd.h
+endif # CONFIG_SYNO_LSP_HI3536
 generic-y += sizes.h
 generic-y += socket.h
 generic-y += sockios.h

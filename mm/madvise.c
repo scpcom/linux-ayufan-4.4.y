@@ -102,7 +102,12 @@ static long madvise_behavior(struct vm_area_struct * vma,
 
 	pgoff = vma->vm_pgoff + ((start - vma->vm_start) >> PAGE_SHIFT);
 	*prev = vma_merge(mm, *prev, start, end, new_flags, vma->anon_vma,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+				vma->vm_file, pgoff, vma_policy(vma),
+				vma_get_anon_name(vma));
+#else /* CONFIG_SYNO_LSP_HI3536 */
 				vma->vm_file, pgoff, vma_policy(vma));
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	if (*prev) {
 		vma = *prev;
 		goto success;

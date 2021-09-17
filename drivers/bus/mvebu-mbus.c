@@ -1261,7 +1261,7 @@ static int __init mvebu_mbus_common_init(struct mvebu_mbus_state *mbus,
 int __init mvebu_mbus_init(const char *soc, phys_addr_t mbuswins_phys_base,
 			   size_t mbuswins_size,
 			   phys_addr_t sdramwins_phys_base,
-			   size_t sdramwins_size)
+			   size_t sdramwins_size, int is_coherent)
 {
 	const struct of_device_id *of_id;
 

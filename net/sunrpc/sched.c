@@ -254,7 +254,11 @@ static int rpc_wait_bit_killable(void *word)
 {
 	if (fatal_signal_pending(current))
 		return -ERESTARTSYS;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	freezable_schedule_unsafe();
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	freezable_schedule();
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	return 0;
 }
 

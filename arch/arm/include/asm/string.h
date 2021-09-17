@@ -14,6 +14,9 @@ extern char * strchr(const char * s, int c);
 
 #define __HAVE_ARCH_MEMCPY
 extern void * memcpy(void *, const void *, __kernel_size_t);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+extern void *_memcpy(void *, const void *, __kernel_size_t);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #define __HAVE_ARCH_MEMMOVE
 extern void * memmove(void *, const void *, __kernel_size_t);

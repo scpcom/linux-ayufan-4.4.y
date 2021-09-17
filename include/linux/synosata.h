@@ -335,6 +335,8 @@ syno_support_disk_num(unsigned short vendor,
 			ret = 4;
 		} else if (IS_SYNOLOGY_RX1214(syno_uniq) || IS_SYNOLOGY_RX1217(syno_uniq) || IS_SYNOLOGY_DX1215(syno_uniq)) {
 			ret = 3;
+		} else if (IS_SYNOLOGY_DX517(syno_uniq)) {
+			ret = 5;
 		} else {
 			printk("%s not synology device", __FUNCTION__);
 			ret = 5;

@@ -11,6 +11,9 @@
 #include <asm/shmparam.h>
 #include <asm/cachetype.h>
 #include <asm/outercache.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <asm/rodata.h>
+#endif  
 
 #define CACHE_COLOUR(vaddr)	((vaddr & (SHMLBA - 1)) >> PAGE_SHIFT)
 

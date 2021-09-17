@@ -166,15 +166,36 @@ EXPORT_SYMBOL_GPL(ipv6_find_tlv);
  * to explore inner IPv6 header, eg. ICMPv6 error messages.
  *
  * If target header is found, its offset is set in *offset and return protocol
+ */
+#if defined(CONFIG_SYNO_LSP_HI3536)
+/*
+ * number. Otherwise, return -ENOENT or -EBADMSG.
+ */
+#else /* CONFIG_SYNO_LSP_HI3536 */
+/*
  * number. Otherwise, return -1.
+ */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+/*
  *
  * If the first fragment doesn't contain the final protocol header or
  * NEXTHDR_NONE it is considered invalid.
  *
  * Note that non-1st fragment is special case that "the protocol number
  * of last header" is "next header" field in Fragment header. In this case,
+ */
+#if defined(CONFIG_SYNO_LSP_HI3536)
+/*
+ * *offset is meaningless. If fragoff is not NULL, the fragment offset is
+ * stored in *fragoff; if it is NULL, return -EINVAL.
+ */
+#else /* CONFIG_SYNO_LSP_HI3536 */
+/*
  * *offset is meaningless and fragment offset is stored in *fragoff if fragoff
  * isn't NULL.
+ */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+/*
  *
  * if flags is not NULL and it's a fragment, then the frag flag
  * IP6_FH_F_FRAG will be set. If it's an AH header, the
@@ -253,9 +274,18 @@ int ipv6_find_hdr(const struct sk_buff *skb, unsigned int *offset,
 				if (target < 0 &&
 				    ((!ipv6_ext_hdr(hp->nexthdr)) ||
 				     hp->nexthdr == NEXTHDR_NONE)) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+					if (fragoff) {
+						*fragoff = _frag_off;
+						return hp->nexthdr;
+					} else {
+						return -EINVAL;
+					}
+#else /* CONFIG_SYNO_LSP_HI3536 */
 					if (fragoff)
 						*fragoff = _frag_off;
 					return hp->nexthdr;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 				}
 				if (!found)
 					return -ENOENT;

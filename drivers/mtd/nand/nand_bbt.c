@@ -988,6 +988,17 @@ int nand_update_bbt(struct mtd_info *mtd, loff_t offs)
 
 static uint8_t scan_ff_pattern[] = { 0xff, 0xff };
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static uint8_t scan_agand_pattern[] = { 0x1C, 0x71, 0xC7, 0x1C, 0x71, 0xC7 };
+
+static struct nand_bbt_descr agand_flashbased = {
+	.options = NAND_BBT_SCANEMPTY | NAND_BBT_SCANALLPAGES,
+	.offs = 0x20,
+	.len = 6,
+	.pattern = scan_agand_pattern
+};
+#endif  
+
 static uint8_t bbt_pattern[] = {'B', 'b', 't', '0' };
 static uint8_t mirror_pattern[] = {'1', 't', 'b', 'B' };
 
@@ -1078,6 +1089,19 @@ static int nand_create_badblock_pattern(struct nand_chip *this)
 int nand_default_bbt(struct mtd_info *mtd)
 {
 	struct nand_chip *this = mtd->priv;
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	 
+	if (this->options & NAND_IS_AND) {
+		 
+		if (!this->bbt_td) {
+			this->bbt_td = &bbt_main_descr;
+			this->bbt_md = &bbt_mirror_descr;
+		}
+		this->bbt_options |= NAND_BBT_USE_FLASH;
+		return nand_scan_bbt(mtd, &agand_flashbased);
+	}
+#endif  
 
 	if (this->bbt_options & NAND_BBT_USE_FLASH) {
 		 

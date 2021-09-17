@@ -378,7 +378,7 @@ static ssize_t regmap_access_read_file(struct file *file,
 
 		if (p >= *ppos) {
 			 
-			if (buf_pos >= count - 1 - tot_len)
+			if (buf_pos + tot_len + 1 >= count)
 				break;
 
 			snprintf(buf + buf_pos, count - buf_pos,

@@ -552,12 +552,16 @@ int device_create_file(struct device *dev,
 	int error = 0;
 
 	if (dev) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		 
+#else  
 		WARN(((attr->attr.mode & S_IWUGO) && !attr->store),
 			"Attribute %s: write permission without 'store'\n",
 			attr->attr.name);
 		WARN(((attr->attr.mode & S_IRUGO) && !attr->show),
 			"Attribute %s: read permission without 'show'\n",
 			attr->attr.name);
+#endif  
 		error = sysfs_create_file(&dev->kobj, &attr->attr);
 	}
 

@@ -33,7 +33,11 @@ typedef unsigned long elf_greg_t;
 typedef elf_greg_t elf_gregset_t[ELF_NGREG];
 typedef struct user_fpsimd_state elf_fpregset_t;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #define EM_AARCH64		183
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /*
  * AArch64 static relocation types.
@@ -151,7 +155,11 @@ extern unsigned long arch_randomize_brk(struct mm_struct *mm);
 #define arch_randomize_brk arch_randomize_brk
 
 #ifdef CONFIG_COMPAT
+#if defined(CONFIG_SYNO_LSP_HI3536)
+// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #define EM_ARM				40
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #define COMPAT_ELF_PLATFORM		("v8l")
 
 #define COMPAT_ELF_ET_DYN_BASE		(randomize_et_dyn(2 * TASK_SIZE_32 / 3))

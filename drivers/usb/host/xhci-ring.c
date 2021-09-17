@@ -2369,8 +2369,44 @@ static int prepare_ring(struct xhci_hcd *xhci, struct xhci_ring *ep_ring,
 	}
 
 	while (1) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		if (room_on_ring(xhci, ep_ring, num_trbs)) {
+			union xhci_trb *trb = ep_ring->enqueue;
+			unsigned int usable = ep_ring->enq_seg->trbs +
+					TRBS_PER_SEGMENT - 1 - trb;
+			u32 nop_cmd;
+
+			if (num_trbs == 1 || num_trbs <= usable || usable == 0)
+				break;
+
+			if (ep_ring->type != TYPE_BULK)
+				 
+				break;
+
+			if (num_trbs >= TRBS_PER_SEGMENT) {
+				xhci_err(xhci, "Too many fragments %d, max %d\n",
+						num_trbs, TRBS_PER_SEGMENT - 1);
+				return -ENOMEM;
+			}
+
+			nop_cmd = cpu_to_le32(TRB_TYPE(TRB_TR_NOOP) |
+					ep_ring->cycle_state);
+			ep_ring->num_trbs_free -= usable;
+			do {
+				trb->generic.field[0] = 0;
+				trb->generic.field[1] = 0;
+				trb->generic.field[2] = 0;
+				trb->generic.field[3] = nop_cmd;
+				trb++;
+			} while (--usable);
+			ep_ring->enqueue = trb;
+			if (room_on_ring(xhci, ep_ring, num_trbs))
+				break;
+		}
+#else  
 		if (room_on_ring(xhci, ep_ring, num_trbs))
 			break;
+#endif  
 
 		if (ep_ring == xhci->cmd_ring) {
 			xhci_err(xhci, "Do not support expand command ring\n");
@@ -2625,7 +2661,6 @@ static int queue_bulk_sg_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 
 	urb_priv = urb->hcpriv;
 
-	/* Deal with URB_ZERO_PACKET - need one more td/trb */
 	zero_length_needed = urb->transfer_flags & URB_ZERO_PACKET &&
 		urb_priv->length == 2;
 	if (zero_length_needed) {
@@ -2923,7 +2958,7 @@ int xhci_queue_ctrl_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 	if (start_cycle == 0)
 		field |= 0x1;
 
-	if (xhci->hci_version == 0x100) {
+	if (xhci->hci_version >= 0x100) {
 		if (urb->transfer_buffer_length > 0) {
 			if (setup->bRequestType & USB_DIR_IN)
 				field |= TRB_TX_TYPE(TRB_DATA_IN);

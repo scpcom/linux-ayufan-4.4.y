@@ -1664,8 +1664,11 @@ static void xhci_get_hub_device_info(struct xhci_hcd *xhci,
 		goto fail;
 
 	slot_ctx->dev_info |= cpu_to_le32(DEV_HUB);
+	 
 	if (udev->descriptor.bDeviceProtocol == 2)
 		slot_ctx->dev_info |= cpu_to_le32(DEV_MTT);
+	else if (udev->speed == USB_SPEED_FULL)
+		slot_ctx->dev_info &= cpu_to_le32(~DEV_MTT);
 
 	if (xhci->hci_version > 0x95) {
 		slot_ctx->dev_info2 |= cpu_to_le32(XHCI_MAX_PORTS(descriptor->bNbrPorts));
@@ -2774,8 +2777,12 @@ int etxhci_update_hub_device(struct usb_hcd *hcd, struct usb_device *hdev,
 	ctrl_ctx->add_flags |= cpu_to_le32(SLOT_FLAG);
 	slot_ctx = etxhci_get_slot_ctx(xhci, config_cmd->in_ctx);
 	slot_ctx->dev_info |= cpu_to_le32(DEV_HUB);
+	 
 	if (tt->multi)
 		slot_ctx->dev_info |= cpu_to_le32(DEV_MTT);
+	else if (hdev->speed == USB_SPEED_FULL)
+		slot_ctx->dev_info &= cpu_to_le32(~DEV_MTT);
+
 	if (xhci->hci_version > 0x95) {
 		xhci_dbg(xhci, "xHCI version %x needs hub "
 				"TT think time and number of ports\n",

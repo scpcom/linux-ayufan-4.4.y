@@ -84,6 +84,9 @@ struct bio {
 #define BIO_RESET_BITS	13
 #define BIO_OWNS_VEC	13	 
 #ifdef MY_ABC_HERE
+#define BIO_AUTO_REMAP 14	 
+#endif  
+#ifdef MY_ABC_HERE
  
 #define BIO_MD_RETURN_ERROR 15
 #endif  

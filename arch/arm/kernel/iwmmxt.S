@@ -61,8 +61,16 @@
  * r9  = ret_from_exception
  * lr  = undefined instr exit
  *
+ */
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+/*
+ * called from prefetch exception handler with interrupts enabled
+ */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+/*
  * called from prefetch exception handler with interrupts disabled
  */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
 ENTRY(iwmmxt_task_enable)
 

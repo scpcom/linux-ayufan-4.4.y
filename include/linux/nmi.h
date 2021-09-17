@@ -14,6 +14,20 @@
  * may be used to reset the timeout - for code which intentionally
  * disables interrupts for a long time. This call is stateless.
  */
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(CONFIG_HAVE_NMI_WATCHDOG) || defined(CONFIG_HARDLOCKUP_DETECTOR_NMI)
+#include <asm/nmi.h>
+#endif
+
+#if defined(CONFIG_HAVE_NMI_WATCHDOG) || defined(CONFIG_HARDLOCKUP_DETECTOR)
+extern void touch_nmi_watchdog(void);
+#else
+static inline void touch_nmi_watchdog(void)
+{
+	touch_softlockup_watchdog();
+}
+#endif
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #if defined(CONFIG_HAVE_NMI_WATCHDOG) || defined(CONFIG_HARDLOCKUP_DETECTOR)
 #include <asm/nmi.h>
 extern void touch_nmi_watchdog(void);
@@ -23,6 +37,7 @@ static inline void touch_nmi_watchdog(void)
 	touch_softlockup_watchdog();
 }
 #endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /*
  * Create trigger_all_cpu_backtrace() out of the arch-provided

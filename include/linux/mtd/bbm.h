@@ -28,6 +28,10 @@ struct nand_bbt_descr {
 #define NAND_BBT_LASTBLOCK	0x00000010
  
 #define NAND_BBT_ABSPAGE	0x00000020
+#if defined(CONFIG_SYNO_LSP_HI3536)
+ 
+#define NAND_BBT_SEARCH		0x00000040
+#endif  
  
 #define NAND_BBT_PERCHIP	0x00000080
  

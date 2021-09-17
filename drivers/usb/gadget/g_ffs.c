@@ -385,6 +385,13 @@ static int gfs_bind(struct usb_composite_dev *cdev)
 		if (unlikely(ret < 0))
 			goto error_unbind;
 	}
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	/* add adb idvendor and adb device name */
+	coverwrite.idVendor = 0x18d1;
+	coverwrite.serial_number = "0123456789";
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 	usb_composite_overwrite_options(cdev, &coverwrite);
 	return 0;
 

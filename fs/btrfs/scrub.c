@@ -1122,7 +1122,6 @@ static void scrub_recheck_block(struct btrfs_fs_info *fs_info,
 		scrub_recheck_block_checksum(fs_info, sblock, is_metadata,
 					     have_csum, csum, generation,
 					     csum_size);
-
 	return;
 }
 

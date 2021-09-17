@@ -582,7 +582,11 @@ static int crypto_gcm_verify(struct aead_request *req,
 
 	crypto_xor(auth_tag, iauth_tag, 16);
 	scatterwalk_map_and_copy(iauth_tag, req->src, cryptlen, authsize, 0);
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+	return crypto_memneq(iauth_tag, auth_tag, authsize) ? -EBADMSG : 0;
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	return memcmp(iauth_tag, auth_tag, authsize) ? -EBADMSG : 0;
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 }
 
 static void gcm_decrypt_done(struct crypto_async_request *areq, int err)

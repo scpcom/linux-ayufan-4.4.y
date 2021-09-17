@@ -71,6 +71,8 @@ config ARM
 
 config ARM_HAS_SG_CHAIN
 	bool
+	default y if SYNO_LSP_HI3536
+	select ARCH_HAS_SG_CHAIN if SYNO_LSP_HI3536
 
 config NEED_SG_DMA_LENGTH
 	bool
@@ -910,6 +912,115 @@ config ARCH_ALPINE
 	help
 	  This enables support for the AnnapurnaLabs SoC Gen1 boards.
 
+config ARCH_HI3536
+	bool "Hisilicon hi3536 family"
+	select ARM_AMBA
+	select HAVE_CLK
+	select CLKDEV_LOOKUP
+	select HAVE_SCHED_CLOCK
+	select GENERIC_TIME
+	select GENERIC_CLOCKEVENTS
+	select ARCH_HAS_CPUFREQ
+	select MIGHT_HAVE_PCI
+	select HAVE_SMP
+	select HAVE_ARM_SCU
+	select MIGHT_HAVE_CACHE_L2X0
+	select NEED_MACH_IO_H
+	select NEED_MACH_MEMORY_H
+	select ARCH_HAS_CPUFREQ
+	select USB_ARCH_HAS_OHCI
+	select USB_ARCH_HAS_EHCI
+	select USB_ARCH_HAS_XHCI
+	depends on SYNO_LSP_HI3536
+	help
+	  This enables support for Hisilicon Hi3536 platform.
+	  With the advanced ARM Cortex A17 processor,
+	  Hi3536 serial provides high-speed processing capability.
+	  And Hi3536 serial constains a very powerfull media process engine,
+	  two ethernet interface, EHCI and OHCI controllers, PCI-Express
+	  controller and many peripheral equipments.
+
+config ARCH_HI3536_SLAVE
+	bool "Hisilicon hi3536 family slave"
+	select ARM_AMBA
+	select HAVE_CLK
+	select CLKDEV_LOOKUP
+	select HAVE_SCHED_CLOCK
+	select GENERIC_TIME
+	select GENERIC_CLOCKEVENTS
+	select ARCH_HAS_CPUFREQ
+	select MIGHT_HAVE_PCI
+	select HAVE_SMP
+	select HAVE_ARM_SCU
+	select MIGHT_HAVE_CACHE_L2X0
+	select NEED_MACH_IO_H
+	select NEED_MACH_MEMORY_H
+	select ARCH_HAS_CPUFREQ
+	select USB_ARCH_HAS_OHCI
+	select USB_ARCH_HAS_EHCI
+	select USB_ARCH_HAS_XHCI
+	depends on SYNO_LSP_HI3536
+	help
+	  This enables support for Hisilicon Hi3536 platform.
+	  With the advanced ARM Cortex A17 processor,
+	  Hi3536 serial provides high-speed processing capability.
+	  And Hi3536 serial constains a very powerfull media process engine,
+	  two ethernet interface, EHCI and OHCI controllers, PCI-Express
+	  controller and many peripheral equipments.
+	  This runs in A17 + A7 mode,it's for A7.
+
+config ARCH_HI3521A
+	bool "Hisilicon hi3521a family"
+	select ARM_AMBA
+	select HAVE_CLK
+	select CLKDEV_LOOKUP
+	select HAVE_SCHED_CLOCK
+	select GENERIC_TIME
+	select GENERIC_CLOCKEVENTS
+	select ARCH_HAS_CPUFREQ
+	select HAVE_ARM_SCU
+	select NEED_MACH_IO_H
+	select NEED_MACH_MEMORY_H
+	select ARCH_HAS_CPUFREQ
+	select USB_ARCH_HAS_OHCI
+	select USB_ARCH_HAS_EHCI
+	depends on SYNO_LSP_HI3536
+	help
+	  This enables support for Hisilicon Hi3521A platform.
+	  With the advanced ARM Cortex A7 processor,
+	  Hi3521A serial provides high-speed processing capability.
+	  And Hi3521a serial constains a very powerfull media process engine,
+	  onr ethernet interface, EHCI and OHCI controllers, and many peripheral
+	  equipments.
+
+config ARCH_HI3531A
+	bool "Hisilicon hi3531a family"
+	select ARM_AMBA
+	select HAVE_CLK
+	select CLKDEV_LOOKUP
+	select HAVE_SCHED_CLOCK
+	select GENERIC_TIME
+	select GENERIC_CLOCKEVENTS
+	select ARCH_HAS_CPUFREQ
+	select MIGHT_HAVE_PCI
+	select HAVE_SMP
+	select HAVE_ARM_SCU
+	select MIGHT_HAVE_CACHE_L2X0
+	select NEED_MACH_IO_H
+	select NEED_MACH_MEMORY_H
+	select ARCH_HAS_CPUFREQ
+	select USB_ARCH_HAS_OHCI
+	select USB_ARCH_HAS_EHCI
+	select USB_ARCH_HAS_XHCI
+	depends on SYNO_LSP_HI3536
+	help
+	  This enables support for Hisilicon Hi3531A platform.
+	  With the advanced ARM Cortex A9 processor,
+	  Hi3531A serial provides high-speed processing capability.
+	  And Hi3531a serial constains a very powerfull media process engine,
+	  onr ethernet interface, EHCI and OHCI controllers, and many peripheral
+	  equipments.
+
 endchoice
 
 menu "Multiple platform selection"
@@ -1077,6 +1188,24 @@ source "arch/arm/mach-alpine/Kconfig"
 source "arch/arm/mach-w90x900/Kconfig"
 
 source "arch/arm/mach-zynq/Kconfig"
+
+if SYNO_LSP_HI3536
+if ARCH_HI3536
+source "arch/arm/mach-hi3536/Kconfig"
+endif
+
+if ARCH_HI3536_SLAVE
+source "arch/arm/mach-hi3536slave/Kconfig"
+endif
+
+if ARCH_HI3521A
+source "arch/arm/mach-hi3521a/Kconfig"
+endif
+
+if ARCH_HI3531A
+source "arch/arm/mach-hi3531a/Kconfig"
+endif
+endif # SYNO_LSP_HI3536
 
 # Definitions to make life easier
 config ARCH_ACORN
@@ -1467,8 +1596,15 @@ config PCI_HOST_ITE8152
 	select DMABOUNCE
 
 source "drivers/pci/Kconfig"
+if SYNO_LSP_HI3536
+source "drivers/pci/pcie/Kconfig"
+source "drivers/pci/hotplug/Kconfig"
+endif # SYNO_LSP_HI3536
 
 source "drivers/pcmcia/Kconfig"
+if SYNO_LSP_HI3536
+source "drivers/pci/hipcie/Kconfig"
+endif # SYNO_LSP_HI3536
 
 endmenu
 
@@ -1609,6 +1745,7 @@ config NR_CPUS
 	int "Maximum number of CPUs (2-32)"
 	range 2 32
 	depends on SMP
+	default "2" if ARCH_HI3531A
 	default "4"
 
 config HOTPLUG_CPU
@@ -1663,6 +1800,10 @@ config HZ
 		ARCH_S5PV210 || ARCH_EXYNOS4
 	default AT91_TIMER_HZ if ARCH_AT91
 	default SHMOBILE_TIMER_HZ if ARCH_SHMOBILE
+	default HI_3536_HZ if ARCH_HI3536
+	default HI_3536_HZ if ARCH_HI3536_SLAVE
+	default HI_3521A_HZ if ARCH_HI3521A
+	default HI_3531A_HZ if ARCH_HI3531A
 	default 100
 
 config SCHED_HRTICK
@@ -1888,6 +2029,16 @@ config XEN
 	help
 	  Say Y if you want to run Linux in a Virtual Machine on Xen on ARM.
 
+config ARM_FLUSH_CONSOLE_ON_RESTART
+	bool "Force flush the console on restart"
+	depends on SYNO_LSP_HI3536
+	help
+	  If the console is locked while the system is rebooted, the messages
+	  in the temporary logbuffer would not have propogated to all the
+	  console drivers. This option forces the console lock to be
+	  released if it failed to be acquired, which will cause all the
+	  pending messages to be flushed.
+
 endmenu
 
 menu "Boot options"
@@ -1916,6 +2067,21 @@ config DEPRECATED_PARAM_STRUCT
 	help
 	  This was deprecated in 2001 and announced to live on for 5 years.
 	  Some old boot loaders still use this way.
+
+config BUILD_ARM_APPENDED_DTB_IMAGE
+	bool "Build a concatenated zImage/dtb by default"
+	depends on OF && SYNO_LSP_HI3536
+	help
+	  Enabling this option will cause a concatenated zImage and list of
+	  DTBs to be built by default (instead of a standalone zImage.)
+	  The image will built in arch/arm/boot/zImage-dtb
+
+config BUILD_ARM_APPENDED_DTB_IMAGE_NAMES
+	string "Default dtb names"
+	depends on BUILD_ARM_APPENDED_DTB_IMAGE && SYNO_LSP_HI3536
+	help
+	  Space separated list of names of dtbs to append when
+	  building a concatenated zImage-dtb.
 
 # Compressed boot loader in ROM.  Yes, we really want to ask about
 # TEXT and BSS so we preserve their values in the config files.
@@ -2266,6 +2432,14 @@ config NEON
 	  Say Y to include support code for NEON, the ARMv7 Advanced SIMD
 	  Extension.
 
+config KERNEL_MODE_NEON
+	bool "Support for NEON in kernel mode"
+	default n
+	depends on NEON
+	depends on SYNO_BACKPORT_ARM_CRYPTO
+	help
+	  Say Y to include support for NEON in kernel mode.
+
 endmenu
 
 menu "Userspace binary formats"
@@ -2310,6 +2484,11 @@ source "arch/arm/Kconfig.debug"
 source "security/Kconfig"
 
 source "crypto/Kconfig"
+if SYNO_BACKPORT_ARM_CRYPTO
+if CRYPTO
+source "arch/arm/crypto/Kconfig"
+endif
+endif # SYNO_BACKPORT_ARM_CRYPTO
 
 source "lib/Kconfig"
 

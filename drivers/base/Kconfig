@@ -187,13 +187,22 @@ config GENERIC_CPU_DEVICES
 	bool
 	default n
 
+config HAVE_CPU_AUTOPROBE
+	def_bool ARCH_HAS_CPU_AUTOPROBE
+	depends on SYNO_LSP_HI3536
+
+config GENERIC_CPU_AUTOPROBE
+	bool
+	depends on !ARCH_HAS_CPU_AUTOPROBE && SYNO_LSP_HI3536
+	select HAVE_CPU_AUTOPROBE
+
 config SOC_BUS
 	bool
 
 source "drivers/base/regmap/Kconfig"
 
 config DMA_SHARED_BUFFER
-	bool
+	bool "DMA Shared Buffer"
 	default n
 	select ANON_INODES
 	help

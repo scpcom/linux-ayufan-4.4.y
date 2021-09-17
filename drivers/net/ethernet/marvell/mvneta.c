@@ -766,7 +766,7 @@ static void mvneta_defaults_set(struct mvneta_port *pp)
 
 	mvreg_write(pp, MVNETA_MBUS_RETRY, 0x20);
 
-	for (cpu = 0; cpu < CONFIG_NR_CPUS; cpu++)
+	for_each_present_cpu(cpu)
 		mvreg_write(pp, MVNETA_CPU_MAP(cpu),
 			    (MVNETA_CPU_RXQ_ACCESS_ALL_MASK |
 			     MVNETA_CPU_TXQ_ACCESS_ALL_MASK));

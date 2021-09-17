@@ -174,6 +174,11 @@ int main(void)
 	DEVID_FIELD(x86_cpu_id, model);
 	DEVID_FIELD(x86_cpu_id, vendor);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	DEVID(cpu_feature);
+	DEVID_FIELD(cpu_feature, feature);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 	DEVID(mei_cl_device_id);
 	DEVID_FIELD(mei_cl_device_id, name);
 

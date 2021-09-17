@@ -2205,10 +2205,18 @@ static int pair_device(struct sock *sk, struct hci_dev *hdev, void *data,
 		auth_type = HCI_AT_DEDICATED_BONDING_MITM;
 
 	if (cp->addr.type == BDADDR_BREDR)
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		conn = hci_connect(hdev, ACL_LINK, 0, &cp->addr.bdaddr,
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		conn = hci_connect(hdev, ACL_LINK, &cp->addr.bdaddr,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 				   cp->addr.type, sec_level, auth_type);
 	else
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		conn = hci_connect(hdev, LE_LINK, 0, &cp->addr.bdaddr,
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		conn = hci_connect(hdev, LE_LINK, &cp->addr.bdaddr,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 				   cp->addr.type, sec_level, auth_type);
 
 	if (IS_ERR(conn)) {

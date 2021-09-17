@@ -3025,12 +3025,21 @@ static void mmc_test_remove(struct mmc_card *card)
 	mmc_test_free_dbgfs_file(card);
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static void mmc_test_shutdown(struct mmc_card *card)
+{
+}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 static struct mmc_driver mmc_driver = {
 	.drv		= {
 		.name	= "mmc_test",
 	},
 	.probe		= mmc_test_probe,
 	.remove		= mmc_test_remove,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	.shutdown	= mmc_test_shutdown,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 };
 
 static int __init mmc_test_init(void)

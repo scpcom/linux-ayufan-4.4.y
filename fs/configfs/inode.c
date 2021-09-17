@@ -62,7 +62,7 @@ static const struct inode_operations configfs_inode_operations ={
 
 int configfs_setattr(struct dentry * dentry, struct iattr * iattr)
 {
-	struct inode * inode = dentry->d_inode;
+	struct inode * inode = d_inode(dentry);
 	struct configfs_dirent * sd = dentry->d_fsdata;
 	struct iattr * sd_iattr;
 	unsigned int ia_valid = iattr->ia_valid;
@@ -195,7 +195,7 @@ int configfs_create(struct dentry * dentry, umode_t mode, void (*init)(struct in
 	if (!dentry)
 		return -ENOENT;
 
-	if (dentry->d_inode)
+	if (d_really_is_positive(dentry))
 		return -EEXIST;
 
 	sd = dentry->d_fsdata;
@@ -203,8 +203,7 @@ int configfs_create(struct dentry * dentry, umode_t mode, void (*init)(struct in
 	if (!inode)
 		return -ENOMEM;
 
-	p_inode = dentry->d_parent->d_inode;
-	p_inode->i_mtime = p_inode->i_ctime = CURRENT_TIME;
+	p_inode = d_inode(dentry->d_parent);
 	p_inode->i_mtime = p_inode->i_ctime = current_fs_time(p_inode->i_sb);
 	configfs_set_inode_lock_class(sd, inode);
 
@@ -253,11 +252,11 @@ void configfs_drop_dentry(struct configfs_dirent * sd, struct dentry * parent)
 
 	if (dentry) {
 		spin_lock(&dentry->d_lock);
-		if (!(d_unhashed(dentry) && dentry->d_inode)) {
+		if (!d_unhashed(dentry) && d_really_is_positive(dentry)) {
 			dget_dlock(dentry);
 			__d_drop(dentry);
 			spin_unlock(&dentry->d_lock);
-			simple_unlink(parent->d_inode, dentry);
+			simple_unlink(d_inode(parent), dentry);
 		} else
 			spin_unlock(&dentry->d_lock);
 	}
@@ -268,7 +267,7 @@ void configfs_hash_and_remove(struct dentry * dir, const char * name)
 	struct configfs_dirent * sd;
 	struct configfs_dirent * parent_sd = dir->d_fsdata;
 
-	if (dir->d_inode == NULL)
+	if (d_really_is_negative(dir))
 		/* no inode means this hasn't been made visible yet */
 		return;
 

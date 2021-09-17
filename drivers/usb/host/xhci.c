@@ -140,7 +140,7 @@ int xhci_reset(struct xhci_hcd *xhci)
 	return ret;
 }
 
-#ifdef CONFIG_PCI
+#if defined(CONFIG_PCI) && (!defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_ARCH_HI3536)))
 static int xhci_free_msi(struct xhci_hcd *xhci)
 {
 	int i;
@@ -548,7 +548,11 @@ int xhci_run(struct usb_hcd *hcd)
 {
 	u32 temp;
 	u64 temp_64;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	 
+#else  
 	int ret;
+#endif  
 	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
 
 	hcd->uses_new_polling = 1;
@@ -557,9 +561,17 @@ int xhci_run(struct usb_hcd *hcd)
 
 	xhci_dbg(xhci, "xhci_run\n");
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if 0
 	ret = xhci_try_enable_msi(hcd);
 	if (ret)
 		return ret;
+#endif
+#else  
+	ret = xhci_try_enable_msi(hcd);
+	if (ret)
+		return ret;
+#endif  
 
 #ifdef CONFIG_USB_XHCI_HCD_DEBUGGING
 	init_timer(&xhci->event_ring_timer);
@@ -977,12 +989,20 @@ static int xhci_check_args(struct usb_hcd *hcd, struct usb_device *udev,
 	struct xhci_virt_device	*virt_dev;
 
 	if (!hcd || (check_ep && !ep) || !udev) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		pr_debug("xHCI %s called with invalid args\n",
+#else  
 		printk(KERN_DEBUG "xHCI %s called with invalid args\n",
+#endif  
 				func);
 		return -EINVAL;
 	}
 	if (!udev->parent) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		pr_debug("xHCI %s called for root hub\n",
+#else  
 		printk(KERN_DEBUG "xHCI %s called for root hub\n",
+#endif  
 				func);
 		return 0;
 	}
@@ -990,14 +1010,22 @@ static int xhci_check_args(struct usb_hcd *hcd, struct usb_device *udev,
 	xhci = hcd_to_xhci(hcd);
 	if (check_virt_dev) {
 		if (!udev->slot_id || !xhci->devs[udev->slot_id]) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			pr_debug("xHCI %s called with unaddressed "
+#else  
 			printk(KERN_DEBUG "xHCI %s called with unaddressed "
+#endif  
 						"device\n", func);
 			return -EINVAL;
 		}
 
 		virt_dev = xhci->devs[udev->slot_id];
 		if (virt_dev->udev != udev) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			pr_debug("xHCI %s called with udev and "
+#else  
 			printk(KERN_DEBUG "xHCI %s called with udev and "
+#endif  
 					  "virt_dev does not match\n", func);
 			return -EINVAL;
 		}
@@ -2892,7 +2920,7 @@ void xhci_free_dev(struct usb_hcd *hcd, struct usb_device *udev)
 {
 	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
 	struct xhci_virt_device *virt_dev;
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(CONFIG_SYNO_HI3536)
 	 
 #else  
 	struct device *dev = hcd->self.controller;
@@ -2966,7 +2994,7 @@ static int xhci_reserve_host_control_ep_resources(struct xhci_hcd *xhci)
 int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 {
 	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(CONFIG_SYNO_HI3536)
 	 
 #else  
 	struct device *dev = hcd->self.controller;
@@ -3207,7 +3235,7 @@ int xhci_find_raw_port_number(struct usb_hcd *hcd, int port1)
 	return raw_port;
 }
 
-#ifdef CONFIG_PM_RUNTIME
+#if (defined(CONFIG_PM_RUNTIME) && !defined(CONFIG_SYNO_LSP_HI3536)) || (defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_USB_SUSPEND))
 
 static int xhci_besl_encoding[16] = {125, 150, 200, 300, 400, 500, 1000, 2000,
 	3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
@@ -3979,11 +4007,7 @@ int xhci_update_hub_device(struct usb_hcd *hcd, struct usb_device *hdev,
 	ctrl_ctx->add_flags |= cpu_to_le32(SLOT_FLAG);
 	slot_ctx = xhci_get_slot_ctx(xhci, config_cmd->in_ctx);
 	slot_ctx->dev_info |= cpu_to_le32(DEV_HUB);
-	/*
-	 * refer to section 6.2.2: MTT should be 0 for full speed hub,
-	 * but it may be already set to 1 when setup an xHCI virtual
-	 * device, so clear it anyway.
-	 */
+	 
 	if (tt->multi)
 		slot_ctx->dev_info |= cpu_to_le32(DEV_MTT);
 	else if (hdev->speed == USB_SPEED_FULL)
@@ -4240,6 +4264,13 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_LICENSE("GPL");
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_HIUSB_XHCI
+#include "hiusb-xhci.c"
+#define PLATFORM_DRIVER        usb_xhci_driver
+#endif
+#endif  
+
 static int __init xhci_hcd_init(void)
 {
 	int retval;
@@ -4247,14 +4278,37 @@ static int __init xhci_hcd_init(void)
 	if (usb_disabled())
 		return -ENODEV;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifndef CONFIG_HIUSB_XHCI
+	retval = xhci_register_pci();
+	if (retval < 0) {
+		pr_debug("Problem registering PCI driver.");
+		return retval;
+	}
+#endif
+
+#ifdef CONFIG_HIUSB_XHCI
+	retval = platform_device_register(&hiusb_xhci_platdev);
+	if (retval < 0) {
+		pr_err("%s->%d, platform_device_register fail.\n",
+				__func__, __LINE__);
+		return -ENODEV;
+	}
+#endif
+#else  
 	retval = xhci_register_pci();
 	if (retval < 0) {
 		printk(KERN_DEBUG "Problem registering PCI driver.");
 		return retval;
 	}
+#endif  
 	retval = xhci_register_plat();
 	if (retval < 0) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		pr_debug("Problem registering platform driver.");
+#else  
 		printk(KERN_DEBUG "Problem registering platform driver.");
+#endif  
 		goto unreg_pci;
 	}
 	 
@@ -4272,7 +4326,16 @@ static int __init xhci_hcd_init(void)
 
 	return 0;
 unreg_pci:
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifndef CONFIG_HIUSB_XHCI
 	xhci_unregister_pci();
+#endif
+#ifdef CONFIG_HIUSB_XHCI
+	platform_device_unregister(&hiusb_xhci_platdev);
+#endif
+#else  
+	xhci_unregister_pci();
+#endif  
 	return retval;
 }
 module_init(xhci_hcd_init);
@@ -4282,7 +4345,17 @@ static void __exit xhci_hcd_cleanup(void)
 #if defined(MY_ABC_HERE)
 	kthread_stop(kxhcd_task);
 #endif  
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifndef CONFIG_HIUSB_XHCI
+	xhci_unregister_pci();
+#endif
+	xhci_unregister_plat();
+#ifdef CONFIG_HIUSB_XHCI
+	platform_device_unregister(&hiusb_xhci_platdev);
+#endif
+#else  
 	xhci_unregister_pci();
 	xhci_unregister_plat();
+#endif  
 }
 module_exit(xhci_hcd_cleanup);

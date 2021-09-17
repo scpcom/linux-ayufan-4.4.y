@@ -686,17 +686,10 @@ int btrfs_wait_ordered_range(struct inode *inode, u64 start, u64 len)
 			orig_end = INT_LIMIT(loff_t);
 	}
 
-	ret = filemap_fdatawrite_range(inode->i_mapping, start, orig_end);
+	ret = btrfs_fdatawrite_range(inode, start, orig_end);
 	if (ret)
 		return ret;
-	 
-	if (test_bit(BTRFS_INODE_HAS_ASYNC_EXTENT,
-		     &BTRFS_I(inode)->runtime_flags)) {
-		ret = filemap_fdatawrite_range(inode->i_mapping, start,
-					       orig_end);
-		if (ret)
-			return ret;
-	}
+
 	ret = filemap_fdatawait_range(inode->i_mapping, start, orig_end);
 	if (ret)
 		return ret;

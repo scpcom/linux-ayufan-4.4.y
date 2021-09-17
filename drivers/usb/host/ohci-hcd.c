@@ -58,11 +58,11 @@ static void ohci_dump (struct ohci_hcd *ohci, int verbose);
 static int ohci_init (struct ohci_hcd *ohci);
 static void ohci_stop (struct usb_hcd *hcd);
 
-#if defined(CONFIG_PM) || defined(CONFIG_PCI)
+#if defined(CONFIG_PM) || (defined(CONFIG_PCI) && (!defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_ARCH_HI3536))))
 static int ohci_restart (struct ohci_hcd *ohci);
 #endif
 
-#ifdef CONFIG_PCI
+#if defined(CONFIG_PCI) && (!defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_ARCH_HI3536)))
 static void sb800_prefetch(struct ohci_hcd *ohci, int on);
 #else
 static inline void sb800_prefetch(struct ohci_hcd *ohci, int on)
@@ -734,8 +734,14 @@ static void ohci_stop (struct usb_hcd *hcd)
 	if (quirk_nec(ohci))
 		flush_work(&ohci->nec_work);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	ohci_writel (ohci, OHCI_INTR_MIE, &ohci->regs->intrdisable);
+	ohci_usb_reset(ohci);
+#else  
 	ohci_usb_reset (ohci);
 	ohci_writel (ohci, OHCI_INTR_MIE, &ohci->regs->intrdisable);
+#endif  
+
 	free_irq(hcd->irq, hcd);
 	hcd->irq = 0;
 
@@ -755,7 +761,7 @@ static void ohci_stop (struct usb_hcd *hcd)
 	}
 }
 
-#if defined(CONFIG_PM) || defined(CONFIG_PCI)
+#if defined(CONFIG_PM) || (defined(CONFIG_PCI) && (!defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_ARCH_HI3536))))
 
 static int ohci_restart (struct ohci_hcd *ohci)
 {
@@ -881,7 +887,13 @@ MODULE_AUTHOR (DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_LICENSE ("GPL");
 
-#ifdef CONFIG_PCI
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_HIUSB_OHCI
+#include "hiusb-ohci.c"
+#define PLATFORM_DRIVER		hiusb_ohci_hcd_driver
+#endif
+#endif  
+#if defined(CONFIG_PCI) && (!defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_ARCH_HI3536)))
 #include "ohci-pci.c"
 #define PCI_DRIVER		ohci_pci_driver
 #endif
@@ -1007,10 +1019,25 @@ static int __init ohci_hcd_mod_init(void)
 	if (usb_disabled())
 		return -ENODEV;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	pr_info("%s: " DRIVER_DESC "\n", hcd_name);
+#else  
 	printk(KERN_INFO "%s: " DRIVER_DESC "\n", hcd_name);
+#endif  
 	pr_debug ("%s: block sizes: ed %Zd td %Zd\n", hcd_name,
 		sizeof (struct ed), sizeof (struct td));
 	set_bit(USB_OHCI_LOADED, &usb_hcds_loaded);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_HIUSB_OHCI
+	retval = platform_device_register(&hiusb_ohci_platdev);
+	if (retval < 0) {
+		pr_err("%s->%d, platform_device_register fail.\n",
+		       __func__, __LINE__);
+		return -ENODEV;
+	}
+#endif
+#endif  
 
 #ifdef DEBUG
 	ohci_debug_root = debugfs_create_dir("ohci", usb_debug_root);
@@ -1189,6 +1216,12 @@ static int __init ohci_hcd_mod_init(void)
 #endif
 
 	clear_bit(USB_OHCI_LOADED, &usb_hcds_loaded);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_HIUSB_OHCI
+	platform_device_unregister(&hiusb_ohci_platdev);
+#endif
+#endif  
 	return retval;
 }
 module_init(ohci_hcd_mod_init);
@@ -1247,5 +1280,11 @@ static void __exit ohci_hcd_mod_exit(void)
 	debugfs_remove(ohci_debug_root);
 #endif
 	clear_bit(USB_OHCI_LOADED, &usb_hcds_loaded);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_HIUSB_OHCI
+	platform_device_unregister(&hiusb_ohci_platdev);
+#endif
+#endif  
 }
 module_exit(ohci_hcd_mod_exit);

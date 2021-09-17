@@ -605,11 +605,17 @@ resizefs_out:
 		return err;
 	}
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	case FIDTRIM:
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	case FITRIM:
 	{
 		struct request_queue *q = bdev_get_queue(sb->s_bdev);
 		struct fstrim_range range;
 		int ret = 0;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		int flags  = cmd == FIDTRIM ? BLKDEV_DISCARD_SECURE : 0;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 		if (!capable(CAP_SYS_ADMIN))
 			return -EPERM;
@@ -617,13 +623,21 @@ resizefs_out:
 		if (!blk_queue_discard(q))
 			return -EOPNOTSUPP;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		if ((flags & BLKDEV_DISCARD_SECURE) && !blk_queue_secdiscard(q))
+			return -EOPNOTSUPP;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		if (copy_from_user(&range, (struct fstrim_range __user *)arg,
 		    sizeof(range)))
 			return -EFAULT;
 
 		range.minlen = max((unsigned int)range.minlen,
 				   q->limits.discard_granularity);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		ret = ext4_trim_fs(sb, &range, flags);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		ret = ext4_trim_fs(sb, &range);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		if (ret < 0)
 			return ret;
 

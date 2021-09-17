@@ -1565,6 +1565,45 @@ out_free_group_list:
 	return retval;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static int cgroup_allow_attach(struct cgroup *cgrp, struct cgroup_taskset *tset)
+{
+	struct cgroup_subsys *ss;
+	int ret;
+
+	for_each_subsys(cgrp->root, ss) {
+		if (ss->allow_attach) {
+			ret = ss->allow_attach(cgrp, tset);
+			if (ret)
+				return ret;
+		} else {
+			return -EACCES;
+		}
+	}
+
+	return 0;
+}
+
+int subsys_cgroup_allow_attach(struct cgroup *cgrp, struct cgroup_taskset *tset)
+{
+	const struct cred *cred = current_cred(), *tcred;
+	struct task_struct *task;
+
+	if (capable(CAP_SYS_NICE))
+		return 0;
+
+	cgroup_taskset_for_each(task, cgrp, tset) {
+		tcred = __task_cred(task);
+
+		if (current != task && cred->euid != tcred->uid &&
+		    cred->euid != tcred->suid)
+			return -EACCES;
+	}
+
+	return 0;
+}
+#endif  
+
 static int attach_task_by_pid(struct cgroup *cgrp, u64 pid, bool threadgroup)
 {
 	struct task_struct *tsk;
@@ -1588,9 +1627,21 @@ retry_find_task:
 		if (!uid_eq(cred->euid, GLOBAL_ROOT_UID) &&
 		    !uid_eq(cred->euid, tcred->uid) &&
 		    !uid_eq(cred->euid, tcred->suid)) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			 
+			struct cgroup_taskset tset = { };
+			tset.single.task = tsk;
+			tset.single.cgrp = cgrp;
+			ret = cgroup_allow_attach(cgrp, &tset);
+			if (ret) {
+				rcu_read_unlock();
+				goto out_unlock_cgroup;
+			}
+#else  
 			rcu_read_unlock();
 			ret = -EACCES;
 			goto out_unlock_cgroup;
+#endif  
 		}
 	} else
 		tsk = current;
@@ -3918,6 +3969,9 @@ static int __init SynoCGroupMemEnable(char *str) {
 			break;
 		}
 	}
+#if defined(CONFIG_SYNO_HI3536)
+	return 1;
+#endif  
 }
 
 __setup("cgroup_memory", SynoCGroupMemEnable);

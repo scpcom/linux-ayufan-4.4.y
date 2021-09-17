@@ -26,7 +26,8 @@
 #ifdef MY_ABC_HERE
 #if defined (F_CLEAR_ARCHIVE) || defined (F_SETSMB_ARCHIVE) || defined (F_SETSMB_HIDDEN) || \
 	defined (F_SETSMB_SYSTEM) || defined (F_CLRSMB_ARCHIVE) || defined (F_CLRSMB_HIDDEN) || \
-	defined (F_CLRSMB_SYSTEM) || defined (F_CLEAR_S3_ARCHIVE)
+	defined (F_CLRSMB_SYSTEM) || defined (F_CLEAR_S3_ARCHIVE) || \
+	defined (F_SETSMB_SPARSE) || defined (F_CLRSMB_SPARSE)
 #error "Samba archive bit redefine."
 #endif
 
@@ -50,7 +51,7 @@
 #define F_CLRSMB_SYSTEM             (SYNO_FCNTL_BASE + 6)
 #define F_CLEAR_S3_ARCHIVE          (SYNO_FCNTL_BASE + 7)
 
-#ifdef MY_ABC_HERE 
+#ifdef MY_ABC_HERE
 #define F_CLRSMB_READONLY           (SYNO_FCNTL_BASE + 8)
 #define F_SETSMB_READONLY           (SYNO_FCNTL_BASE + 9)
 #define F_CLRACL_INHERIT            (SYNO_FCNTL_BASE + 10)
@@ -61,9 +62,14 @@
 #define F_SETACL_SUPPORT            (SYNO_FCNTL_BASE + 15)
 #define F_CLRACL_OWNER_IS_GROUP     (SYNO_FCNTL_BASE + 16)
 #define F_SETACL_OWNER_IS_GROUP     (SYNO_FCNTL_BASE + 17)
-#define SYNO_FCNTL_LAST             F_SETACL_OWNER_IS_GROUP
+#define F_SETSMB_SPARSE				(SYNO_FCNTL_BASE + 18)
+#define F_CLRSMB_SPARSE				(SYNO_FCNTL_BASE + 19)
+#define SYNO_FCNTL_LAST             F_CLRSMB_SPARSE
 #else
-#define SYNO_FCNTL_LAST             F_CLEAR_S3_ARCHIVE
+#define F_SETSMB_SPARSE				(SYNO_FCNTL_BASE + 8)
+#define F_CLRSMB_SPARSE				(SYNO_FCNTL_BASE + 9)
+
+#define SYNO_FCNTL_LAST             F_CLRSMB_SPARSE
 #endif  
 
 #endif  

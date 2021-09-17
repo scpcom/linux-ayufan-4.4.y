@@ -1025,15 +1025,23 @@ EXPORT_SYMBOL_GPL(spi_busnum_to_master);
 
 int spi_setup(struct spi_device *spi)
 {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if !CONFIG_SPI_CORE_HISILICON
 	unsigned	bad_bits;
+#endif
+#endif  
 	int		status = 0;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if !CONFIG_SPI_CORE_HISILICON
 	bad_bits = spi->mode & ~spi->master->mode_bits;
 	if (bad_bits) {
 		dev_err(&spi->dev, "setup: unsupported mode bits %x\n",
 			bad_bits);
 		return -EINVAL;
 	}
+#endif
+#endif  
 
 	if (!spi->bits_per_word)
 		spi->bits_per_word = 8;

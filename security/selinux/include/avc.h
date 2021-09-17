@@ -102,7 +102,11 @@ static inline u32 avc_audit_required(u32 requested,
 }
 
 int slow_avc_audit(u32 ssid, u32 tsid, u16 tclass,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		   u32 requested, u32 audited, u32 denied, int result,
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		   u32 requested, u32 audited, u32 denied,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		   struct common_audit_data *a,
 		   unsigned flags);
 
@@ -137,7 +141,11 @@ static inline int avc_audit(u32 ssid, u32 tsid,
 	if (likely(!audited))
 		return 0;
 	return slow_avc_audit(ssid, tsid, tclass,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			      requested, audited, denied, result,
+#else /* CONFIG_SYNO_LSP_HI3536 */
 			      requested, audited, denied,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 			      a, flags);
 }
 

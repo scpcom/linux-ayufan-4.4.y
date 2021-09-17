@@ -26,6 +26,9 @@
 #include <linux/major.h>
 #include <linux/device.h>
 #include <linux/cdev.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/wakelock.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include "input-compat.h"
 
 struct evdev {
@@ -46,6 +49,11 @@ struct evdev_client {
 	unsigned int tail;
 	unsigned int packet_head; /* [future] position of the first element of next packet */
 	spinlock_t buffer_lock; /* protects access to buffer, head and tail */
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	struct wake_lock wake_lock;
+	bool use_wake_lock;
+	char name[28];
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	struct fasync_struct *fasync;
 	struct evdev *evdev;
 	struct list_head node;
@@ -73,10 +81,18 @@ static void __pass_event(struct evdev_client *client,
 		client->buffer[client->tail].value = 0;
 
 		client->packet_head = client->tail;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		if (client->use_wake_lock)
+			wake_unlock(&client->wake_lock);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	}
 
 	if (event->type == EV_SYN && event->code == SYN_REPORT) {
 		client->packet_head = client->head;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		if (client->use_wake_lock)
+			wake_lock(&client->wake_lock);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		kill_fasync(&client->fasync, SIGIO, POLL_IN);
 	}
 }
@@ -291,6 +307,10 @@ static int evdev_release(struct inode *inode, struct file *file)
 	mutex_unlock(&evdev->mutex);
 
 	evdev_detach_client(evdev, client);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (client->use_wake_lock)
+		wake_lock_destroy(&client->wake_lock);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	if (is_vmalloc_addr(client))
 		vfree(client);
@@ -328,6 +348,10 @@ static int evdev_open(struct inode *inode, struct file *file)
 
 	client->bufsize = bufsize;
 	spin_lock_init(&client->buffer_lock);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	snprintf(client->name, sizeof(client->name), "%s-%d",
+			dev_name(&evdev->dev), task_tgid_vnr(current));
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	client->evdev = evdev;
 	evdev_attach_client(evdev, client);
 
@@ -394,6 +418,11 @@ static int evdev_fetch_next_event(struct evdev_client *client,
 	if (have_event) {
 		*event = client->buffer[client->tail++];
 		client->tail &= client->bufsize - 1;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		if (client->use_wake_lock &&
+		    client->packet_head == client->tail)
+			wake_unlock(&client->wake_lock);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	}
 
 	spin_unlock_irq(&client->buffer_lock);
@@ -682,6 +711,37 @@ static int evdev_handle_mt_request(struct input_dev *dev,
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static int evdev_enable_suspend_block(struct evdev *evdev,
+				      struct evdev_client *client)
+{
+	if (client->use_wake_lock)
+		return 0;
+
+	spin_lock_irq(&client->buffer_lock);
+	wake_lock_init(&client->wake_lock, WAKE_LOCK_SUSPEND, client->name);
+	client->use_wake_lock = true;
+	if (client->packet_head != client->tail)
+		wake_lock(&client->wake_lock);
+	spin_unlock_irq(&client->buffer_lock);
+	return 0;
+}
+
+static int evdev_disable_suspend_block(struct evdev *evdev,
+				       struct evdev_client *client)
+{
+	if (!client->use_wake_lock)
+		return 0;
+
+	spin_lock_irq(&client->buffer_lock);
+	client->use_wake_lock = false;
+	wake_lock_destroy(&client->wake_lock);
+	spin_unlock_irq(&client->buffer_lock);
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 static long evdev_do_ioctl(struct file *file, unsigned int cmd,
 			   void __user *p, int compat_mode)
 {
@@ -763,6 +823,17 @@ static long evdev_do_ioctl(struct file *file, unsigned int cmd,
 
 	case EVIOCSKEYCODE_V2:
 		return evdev_handle_set_keycode_v2(dev, p);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	case EVIOCGSUSPENDBLOCK:
+		return put_user(client->use_wake_lock, ip);
+
+	case EVIOCSSUSPENDBLOCK:
+		if (p)
+			return evdev_enable_suspend_block(evdev, client);
+		else
+			return evdev_disable_suspend_block(evdev, client);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	}
 
 	size = _IOC_SIZE(cmd);

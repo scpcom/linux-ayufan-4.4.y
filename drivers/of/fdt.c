@@ -661,20 +661,79 @@ int __init early_init_dt_scan_memory(unsigned long node, const char *uname,
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+/*
+ * Convert configs to something easy to use in C code
+ */
+#if defined(CONFIG_CMDLINE_FORCE)
+static const int overwrite_incoming_cmdline = 1;
+static const int read_dt_cmdline;
+static const int concat_cmdline;
+#elif defined(CONFIG_CMDLINE_EXTEND)
+static const int overwrite_incoming_cmdline;
+static const int read_dt_cmdline = 1;
+static const int concat_cmdline = 1;
+#else /* CMDLINE_FROM_BOOTLOADER */
+static const int overwrite_incoming_cmdline;
+static const int read_dt_cmdline = 1;
+static const int concat_cmdline;
+#endif
+
+#ifdef CONFIG_CMDLINE
+static const char *config_cmdline = CONFIG_CMDLINE;
+#else
+static const char *config_cmdline = "";
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 int __init early_init_dt_scan_chosen(unsigned long node, const char *uname,
 				     int depth, void *data)
 {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	unsigned long l = 0;
+	char *p = NULL;
+	char *cmdline = data;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	unsigned long l;
 	char *p;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	pr_debug("search \"chosen\", depth: %d, uname: %s\n", depth, uname);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (depth != 1 || !cmdline ||
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	if (depth != 1 || !data ||
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	    (strcmp(uname, "chosen") != 0 && strcmp(uname, "chosen@0") != 0))
 		return 0;
 
 	early_init_dt_check_for_initrd(node);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	/* Put CONFIG_CMDLINE in if forced or if data had nothing in it to start */
+	if (overwrite_incoming_cmdline || !cmdline[0])
+		strlcpy(cmdline, config_cmdline, COMMAND_LINE_SIZE);
+
+	/* Retrieve command line unless forcing */
+	if (read_dt_cmdline)
+		p = of_get_flat_dt_prop(node, "bootargs", &l);
+
+	if (p != NULL && l > 0) {
+		if (concat_cmdline) {
+			int cmdline_len;
+			int copy_len;
+			strlcat(cmdline, " ", COMMAND_LINE_SIZE);
+			cmdline_len = strlen(cmdline);
+			copy_len = COMMAND_LINE_SIZE - cmdline_len - 1;
+			copy_len = min((int)l, copy_len);
+			strncpy(cmdline + cmdline_len, p, copy_len);
+			cmdline[cmdline_len + copy_len] = '\0';
+		} else {
+			strlcpy(cmdline, p, min((int)l, COMMAND_LINE_SIZE));
+		}
+	}
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	/* Retrieve command line */
 	p = of_get_flat_dt_prop(node, "bootargs", &l);
 	if (p != NULL && l > 0)
@@ -691,6 +750,7 @@ int __init early_init_dt_scan_chosen(unsigned long node, const char *uname,
 #endif
 		strlcpy(data, CONFIG_CMDLINE, COMMAND_LINE_SIZE);
 #endif /* CONFIG_CMDLINE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	pr_debug("Command line is: %s\n", (char*)data);
 

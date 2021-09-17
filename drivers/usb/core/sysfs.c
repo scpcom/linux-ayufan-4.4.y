@@ -352,7 +352,7 @@ static void remove_persist_attributes(struct device *dev)
 
 #endif	 
 
-#ifdef	CONFIG_PM_RUNTIME
+#if (defined(CONFIG_PM_RUNTIME) && !defined(CONFIG_SYNO_LSP_HI3536)) || (defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_USB_SUSPEND))
 
 static ssize_t
 show_connected_duration(struct device *dev, struct device_attribute *attr,

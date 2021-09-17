@@ -60,7 +60,7 @@ void dm_io_client_destroy(struct dm_io_client *client);
 
 #ifdef MY_ABC_HERE
 int syno_dm_io(struct dm_io_request *io_req, unsigned num_regions,
-	  struct dm_io_region *region, unsigned long *sync_error_bits);
+		struct dm_io_region *region, unsigned long *sync_error_bits, unsigned long bi_flags);
 #endif  
 int dm_io(struct dm_io_request *io_req, unsigned num_regions,
 	  struct dm_io_region *region, unsigned long *sync_error_bits);

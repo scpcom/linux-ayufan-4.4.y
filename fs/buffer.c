@@ -91,13 +91,23 @@ static void buffer_io_error(struct buffer_head *bh)
 {
 	char b[BDEVNAME_SIZE];
 #ifdef MY_ABC_HERE
-	if (printk_ratelimit()) {
-#endif  
+	static unsigned long long b_blocknr_last = 0;
+
+	if (b_blocknr_last == (unsigned long long)bh->b_blocknr) {
+		printk_ratelimited(KERN_ERR "Buffer I/O error on device %s, logical block %Lu\n",
+			bdevname(bh->b_bdev, b),
+			b_blocknr_last);
+	} else {
+		b_blocknr_last = (unsigned long long)bh->b_blocknr;
+		printk_ratelimited(KERN_ERR "Buffer I/O error on device %s, logical block in range %Lu + 0-2(%d)\n",
+			bdevname(bh->b_bdev, b),
+			(b_blocknr_last >> CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT) << CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT,
+			CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT);
+	}
+#else
 	printk(KERN_ERR "Buffer I/O error on device %s, logical block %Lu\n",
 			bdevname(bh->b_bdev, b),
 			(unsigned long long)bh->b_blocknr);
-#ifdef MY_ABC_HERE
-	}
 #endif  
 }
 
@@ -128,7 +138,11 @@ void end_buffer_write_sync(struct buffer_head *bh, int uptodate)
 	} else {
 		if (!quiet_error(bh)) {
 			buffer_io_error(bh);
+#ifdef MY_ABC_HERE
+			printk_ratelimited(KERN_WARNING "lost page write due to "
+#else
 			printk(KERN_WARNING "lost page write due to "
+#endif  
 					"I/O error on %s\n",
 				       bdevname(bh->b_bdev, b));
 		}
@@ -275,7 +289,11 @@ void end_buffer_async_write(struct buffer_head *bh, int uptodate)
 	} else {
 		if (!quiet_error(bh)) {
 			buffer_io_error(bh);
+#ifdef MY_ABC_HERE
+			printk_ratelimited(KERN_WARNING "lost page write due to "
+#else
 			printk(KERN_WARNING "lost page write due to "
+#endif  
 					"I/O error on %s\n",
 			       bdevname(bh->b_bdev, b));
 		}

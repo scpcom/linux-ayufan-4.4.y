@@ -114,6 +114,10 @@ struct send_ctx {
 #ifdef MY_ABC_HERE
 	u32 subvol_flags;
 #endif
+#ifdef MY_ABC_HERE
+	u64 skip_cmd_count;
+	u64 current_cmd_pos;
+#endif  
 
 	struct list_head new_refs;
 	struct list_head deleted_refs;
@@ -584,6 +588,15 @@ static int send_cmd(struct send_ctx *sctx)
 	u32 crc;
 
 	hdr = (struct btrfs_cmd_header *)sctx->send_buf;
+
+#ifdef MY_ABC_HERE
+	if (sctx->current_cmd_pos < sctx->skip_cmd_count && (le16_to_cpu(hdr->cmd) != BTRFS_SEND_C_SUBVOL) && (le16_to_cpu(hdr->cmd) != BTRFS_SEND_C_SNAPSHOT)) {
+		sctx->current_cmd_pos++;
+		sctx->send_size = 0;
+		return 0;
+	}
+#endif  
+
 	hdr->len = cpu_to_le32(sctx->send_size - sizeof(*hdr));
 	hdr->crc = 0;
 
@@ -1258,14 +1271,7 @@ static int read_symlink(struct btrfs_root *root,
 	if (ret < 0)
 		goto out;
 	if (ret) {
-		/*
-		 * An empty symlink inode. Can happen in rare error paths when
-		 * creating a symlink (transaction committed before the inode
-		 * eviction handler removed the symlink inode items and a crash
-		 * happened in between or the subvol was snapshoted in between).
-		 * Print an informative message to dmesg/syslog so that the user
-		 * can delete the symlink.
-		 */
+		 
 		btrfs_err(root->fs_info,
 			  "Found empty symlink inode %llu at root %llu",
 			  ino, root->root_key.objectid);
@@ -2120,8 +2126,9 @@ out:
 }
 
 #ifdef MY_ABC_HERE
-static void write_calculate_size(struct send_ctx *sctx)
+static int write_calculate_size(struct send_ctx *sctx)
 {
+	int ret = 0;
 	struct timeval now;
 	unsigned long val;
 
@@ -2131,9 +2138,10 @@ static void write_calculate_size(struct send_ctx *sctx)
 	val += ((now.tv_usec - sctx->write_timeval.tv_usec) / 1000);
 	if (val > 800) {
 		snprintf(sctx->send_buf, sctx->send_max_size, "About:%llu\n", sctx->total_data_size);
-		write_buf(sctx->send_filp, sctx->send_buf, strlen(sctx->send_buf), &sctx->send_off);
+		ret = write_buf(sctx->send_filp, sctx->send_buf, strlen(sctx->send_buf), &sctx->send_off);
 		sctx->write_timeval = now;
 	}
+	return ret;
 }
 #endif  
 
@@ -2145,8 +2153,7 @@ static int send_truncate(struct send_ctx *sctx, u64 ino, u64 gen, u64 size)
 #ifdef MY_ABC_HERE
 	if (sctx->phase == SEND_PHASE_COMPUTE_DATA_SIZE) {
 		sctx->total_data_size += sizeof(struct btrfs_cmd_header) + sizeof(struct fs_path);
-		write_calculate_size(sctx);
-		return 0;
+		return write_calculate_size(sctx);
 	}
 #endif
 
@@ -3068,14 +3075,17 @@ finish:
 	list_for_each_entry(cur, &pm->update_refs, list) {
 #ifdef MY_ABC_HERE
 		 
+		u64 gen;
 		ret = get_inode_info(sctx->send_root, cur->dir, NULL,
-			     NULL , NULL, NULL, NULL, NULL);
-		if (ret == -ENOENT) {
+			     &gen , NULL, NULL, NULL, NULL);
+		if (ret < 0 && ret != -ENOENT) {
+			goto out;
+		}
+		
+		if (ret == -ENOENT || gen != cur->dir_gen) {
 			ret = 0;
 			continue;
 		}
-		if (ret < 0)
-			goto out;
 #else
 		if (cur->dir == rmdir_ino)
 			continue;
@@ -3370,8 +3380,7 @@ static int process_recorded_refs(struct send_ctx *sctx, int *pending_move)
 #ifdef MY_ABC_HERE
 	if (sctx->phase == SEND_PHASE_COMPUTE_DATA_SIZE) {
 		sctx->total_data_size += sizeof(struct btrfs_cmd_header) + sizeof(struct fs_path);
-		write_calculate_size(sctx);
-		return 0;
+		return write_calculate_size(sctx);
 	}
 #endif
 
@@ -4260,7 +4269,11 @@ out:
 	return ret;
 }
 
+#ifdef MY_ABC_HERE
+static ssize_t fill_read_buf(struct send_ctx *sctx, u64 offset, u32 len, bool onlyCalculateSize)
+#else
 static ssize_t fill_read_buf(struct send_ctx *sctx, u64 offset, u32 len)
+#endif  
 {
 	struct btrfs_root *root = sctx->send_root;
 	struct btrfs_fs_info *fs_info = root->fs_info;
@@ -4292,19 +4305,52 @@ static ssize_t fill_read_buf(struct send_ctx *sctx, u64 offset, u32 len)
 
 	last_index = (offset + len - 1) >> PAGE_CACHE_SHIFT;
 
+#ifdef MY_ABC_HERE
+	if (!onlyCalculateSize) {
+#endif  
 	memset(&sctx->ra, 0, sizeof(struct file_ra_state));
 	file_ra_state_init(&sctx->ra, inode->i_mapping);
+#ifdef MY_ABC_HERE
+#else
 	btrfs_force_ra(inode->i_mapping, &sctx->ra, NULL, index,
 		       last_index - index + 1);
+#endif  
+#ifdef MY_ABC_HERE
+	}
+#endif  
 
 	while (index <= last_index) {
 		unsigned cur_len = min_t(unsigned, len,
 					 PAGE_CACHE_SIZE - pg_offset);
+#ifdef MY_ABC_HERE
+		if (!onlyCalculateSize) {
+#endif  
+#ifdef MY_ABC_HERE
+		page = find_lock_page(inode->i_mapping, index);
+		if (!page) {
+			page_cache_sync_readahead(inode->i_mapping,
+						  &sctx->ra, NULL, index,
+						  last_index + 1 - index);
+
+			page = find_or_create_page(inode->i_mapping, index, GFP_NOFS);
+			if (unlikely(page == NULL)) {
+				ret = -ENOMEM;
+				break;
+			}
+		}
+
+		if (PageReadahead(page)) {
+			page_cache_async_readahead(inode->i_mapping,
+						   &sctx->ra, NULL, page, index,
+						   last_index + 1 - index);
+		}
+#else
 		page = find_or_create_page(inode->i_mapping, index, GFP_NOFS);
 		if (!page) {
 			ret = -ENOMEM;
 			break;
 		}
+#endif  
 
 		if (!PageUptodate(page)) {
 			btrfs_readpage(NULL, page);
@@ -4322,6 +4368,9 @@ static ssize_t fill_read_buf(struct send_ctx *sctx, u64 offset, u32 len)
 		kunmap(page);
 		unlock_page(page);
 		page_cache_release(page);
+#ifdef MY_ABC_HERE
+		}
+#endif  
 		index++;
 		pg_offset = 0;
 		len -= cur_len;
@@ -4344,7 +4393,15 @@ static int send_write(struct send_ctx *sctx, u64 offset, u32 len)
 
 verbose_printk("btrfs: send_write offset=%llu, len=%d\n", offset, len);
 
+#ifdef MY_ABC_HERE
+	if (sctx->current_cmd_pos < sctx->skip_cmd_count) {
+		num_read = fill_read_buf(sctx, offset, len, true);
+	} else {
+		num_read = fill_read_buf(sctx, offset, len, false);
+	}
+#else
 	num_read = fill_read_buf(sctx, offset, len);
+#endif  
 	if (num_read <= 0) {
 		if (num_read < 0)
 			ret = num_read;
@@ -4355,6 +4412,12 @@ verbose_printk("btrfs: send_write offset=%llu, len=%d\n", offset, len);
 	if (ret < 0)
 		goto out;
 
+#ifdef MY_ABC_HERE
+	if (sctx->current_cmd_pos < sctx->skip_cmd_count) {
+		goto send_cmd_label;
+	}
+#endif  
+
 	ret = get_cur_path(sctx, sctx->cur_ino, sctx->cur_inode_gen, p);
 	if (ret < 0)
 		goto out;
@@ -4363,6 +4426,9 @@ verbose_printk("btrfs: send_write offset=%llu, len=%d\n", offset, len);
 	TLV_PUT_U64(sctx, BTRFS_SEND_A_FILE_OFFSET, offset);
 	TLV_PUT(sctx, BTRFS_SEND_A_DATA, sctx->read_buf, num_read);
 
+#ifdef MY_ABC_HERE
+send_cmd_label:
+#endif  
 	ret = send_cmd(sctx);
 
 tlv_put_failure:
@@ -4475,8 +4541,7 @@ static int send_hole(struct send_ctx *sctx, u64 end)
 #ifdef MY_ABC_HERE
 	if (sctx->phase == SEND_PHASE_COMPUTE_DATA_SIZE) {
 		sctx->total_data_size += end - offset;
-		write_calculate_size(sctx);
-		return 0;
+		return write_calculate_size(sctx);
 	}
 #endif
 
@@ -4543,10 +4608,10 @@ static int send_write_or_clone(struct send_ctx *sctx,
 	if (sctx->phase == SEND_PHASE_COMPUTE_DATA_SIZE) {
 		if (clone_root && IS_ALIGNED(offset + len, bs)) {
 			sctx->total_data_size += sizeof(struct btrfs_cmd_header) + sizeof(struct fs_path);
-			write_calculate_size(sctx);
+			ret = write_calculate_size(sctx);
 		} else if (offset < sctx->cur_inode_size) {
 			sctx->total_data_size += len;
-			write_calculate_size(sctx);
+			ret = write_calculate_size(sctx);
 		}
 		goto out;
 	}
@@ -4969,7 +5034,10 @@ static int syno_attribute_handler(struct send_ctx *sctx)
 #ifdef MY_ABC_HERE
 			if (sctx->phase == SEND_PHASE_COMPUTE_DATA_SIZE) {
 				sctx->total_data_size += sizeof(archive_bit_le32);
-				write_calculate_size(sctx);
+				ret = write_calculate_size(sctx);
+				if (ret < 0) {
+					goto out;
+				}
 			} else {
 #endif  
 			ret = send_set_xattr(sctx, p, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_BIT,
@@ -5227,7 +5295,10 @@ static int changed_inode(struct send_ctx *sctx,
 			if (sctx->phase == SEND_PHASE_COMPUTE_DATA_SIZE) {
 				if (S_ISREG(sctx->cur_inode_mode)) {
 					sctx->total_data_size += sctx->cur_inode_size;
-					write_calculate_size(sctx);
+					ret = write_calculate_size(sctx);
+					if (ret < 0) {
+						goto out;
+					}
 				}
 				 
 			} else {
@@ -5268,8 +5339,7 @@ static int changed_ref(struct send_ctx *sctx,
 #ifdef MY_ABC_HERE
 	if (sctx->phase == SEND_PHASE_COMPUTE_DATA_SIZE) {
 		sctx->total_data_size += sizeof(struct btrfs_cmd_header) + sizeof(struct fs_path);
-		write_calculate_size(sctx);
-		return 0;
+		return write_calculate_size(sctx);
 	}
 #endif
 
@@ -5296,8 +5366,7 @@ static int changed_xattr(struct send_ctx *sctx,
 #ifdef MY_ABC_HERE
 	if (sctx->phase == SEND_PHASE_COMPUTE_DATA_SIZE) {
 		sctx->total_data_size += sizeof(struct btrfs_cmd_header) + sizeof(struct fs_path);
-		write_calculate_size(sctx);
-		return 0;
+		return write_calculate_size(sctx);
 	}
 #endif
 
@@ -5636,9 +5705,15 @@ long btrfs_ioctl_send(struct file *mnt_file, void __user *arg_)
 	sctx->send_root = send_root;
 #ifdef MY_ABC_HERE
 	sctx->subvol_flags = BTRFS_I(file_inode(mnt_file))->flags;
+#endif
+#ifdef MY_ABC_HERE
 	sctx->total_data_size = arg->total_data_size;
 	do_gettimeofday(&sctx->write_timeval);
-#endif
+#endif  
+#ifdef MY_ABC_HERE
+	sctx->skip_cmd_count = arg->skip_cmd_count;
+	sctx->current_cmd_pos = 0;
+#endif  
 	 
 	if (btrfs_root_dead(sctx->send_root)) {
 		ret = -EPERM;

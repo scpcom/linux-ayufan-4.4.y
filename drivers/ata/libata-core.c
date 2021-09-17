@@ -87,6 +87,10 @@ static int ata_force_tbl_size;
 
 static char ata_force_param_buf[PAGE_SIZE] __initdata;
 
+#ifdef MY_DEF_HERE
+extern int g_syno_ds1815p_speed_limit;
+#endif  
+
 #if defined(MY_ABC_HERE)
 #include <linux/syno_gpio.h>
 
@@ -1969,14 +1973,16 @@ int ata_dev_configure(struct ata_device *dev)
 	}
 #endif  
 
-#ifdef MY_ABC_HERE
-	 
-	if (syno_is_hw_version(HW_DS1815p)) {
-		if(ap && (ap->print_id == 7 || ap->print_id == 8)) {
-			dev->horkage |= ATA_HORKAGE_1_5_GBPS;
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+	if (1 == g_syno_ds1815p_speed_limit) {
+		 
+		if (syno_is_hw_version(HW_DS1815p)) {
+			if(ap && (ap->print_id == 7 || ap->print_id == 8)) {
+				dev->horkage |= ATA_HORKAGE_1_5_GBPS;
+			}
 		}
 	}
-#endif
+#endif  
 	ata_force_horkage(dev);
 
 	if (dev->horkage & ATA_HORKAGE_DISABLE) {
@@ -3482,6 +3488,8 @@ static const struct ata_blacklist_entry ata_device_blacklist [] = {
 	{ "PIONEER DVD-RW  DVR-212D",	NULL,	ATA_HORKAGE_NOSETXFER },
 	{ "PIONEER DVD-RW  DVR-216D",	NULL,	ATA_HORKAGE_NOSETXFER },
 
+	{ "SuperSSpeed S238*",		NULL,	ATA_HORKAGE_NOTRIM, },
+
 	{ "WDC WD800JD-*",		NULL,	ATA_HORKAGE_WD_BROKEN_LPM },
 	{ "WDC WD1200JD-*",		NULL,	ATA_HORKAGE_WD_BROKEN_LPM },
 	{ "WDC WD1600JD-*",		NULL,	ATA_HORKAGE_WD_BROKEN_LPM },
@@ -3669,7 +3677,6 @@ static unsigned int ata_dev_set_xfermode(struct ata_device *dev)
 	else  
 		return 0;
 
-	/* On some disks, this command causes spin-up, so we need longer timeout */
 	err_mask = ata_exec_internal(dev, &tf, NULL, DMA_NONE, NULL, 0, 15000);
 
 	DPRINTK("EXIT, err_mask=%x\n", err_mask);
@@ -4524,6 +4531,13 @@ struct ata_host *ata_host_alloc(struct device *dev, int max_ports)
 			goto err_out;
 
 		ap->port_no = i;
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_ARCH_HI3531A
+		if (mplx_port0)
+			ap->port_no += 1;
+#endif
+#endif  
 		host->ports[i] = ap;
 	}
 
@@ -5402,6 +5416,22 @@ u32 ata_wait_register(struct ata_port *ap, void __iomem *reg, u32 mask, u32 val,
 
 	return tmp;
 }
+
+bool sata_lpm_ignore_phy_events(struct ata_link *link)
+{
+	unsigned long lpm_timeout = link->last_lpm_change +
+				    msecs_to_jiffies(ATA_TMOUT_SPURIOUS_PHY);
+
+	if (link->lpm_policy > ATA_LPM_MAX_POWER)
+		return true;
+
+	if ((link->flags & ATA_LFLAG_CHANGED) &&
+	    time_before(jiffies, lpm_timeout))
+		return true;
+
+	return false;
+}
+EXPORT_SYMBOL_GPL(sata_lpm_ignore_phy_events);
 
 static unsigned int ata_dummy_qc_issue(struct ata_queued_cmd *qc)
 {

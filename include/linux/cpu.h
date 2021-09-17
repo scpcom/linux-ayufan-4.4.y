@@ -53,7 +53,7 @@ enum {
 
 	CPU_PRI_PERF		= 20,
 	CPU_PRI_MIGRATION	= 10,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
 	CPU_PRI_SMPBOOT		= 9,
 #endif  
 	 
@@ -112,7 +112,7 @@ static inline void unregister_cpu_notifier(struct notifier_block *nb)
 }
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
 void smpboot_thread_init(void);
 #endif  
 int cpu_up(unsigned int cpu);
@@ -141,7 +141,7 @@ static inline void cpu_maps_update_done(void)
 {
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
 static inline void smpboot_thread_init(void)
 {
 }
@@ -210,5 +210,14 @@ void arch_cpu_idle_prepare(void);
 void arch_cpu_idle_enter(void);
 void arch_cpu_idle_exit(void);
 void arch_cpu_idle_dead(void);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define IDLE_START 1
+#define IDLE_END 2
+
+void idle_notifier_register(struct notifier_block *n);
+void idle_notifier_unregister(struct notifier_block *n);
+void idle_notifier_call_chain(unsigned long val);
+#endif  
 
 #endif  

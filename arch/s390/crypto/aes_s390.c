@@ -26,6 +26,9 @@
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/spinlock.h>
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#include <crypto/xts.h>
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 #include "crypt_s390.h"
 
 #define AES_KEYLEN_128		1
@@ -586,6 +589,13 @@ static int xts_aes_set_key(struct crypto_tfm *tfm, const u8 *in_key,
 {
 	struct s390_xts_ctx *xts_ctx = crypto_tfm_ctx(tfm);
 	u32 *flags = &tfm->crt_flags;
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+	int err;
+
+	err = xts_check_key(tfm, in_key, key_len);
+	if (err)
+		return err;
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
 	switch (key_len) {
 	case 32:

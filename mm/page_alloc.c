@@ -152,7 +152,15 @@ static char * const zone_names[MAX_NR_ZONES] = {
 	 "Movable",
 };
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+ 
 int min_free_kbytes = 1024;
+int min_free_order_shift = 1;
+
+int extra_free_kbytes = 0;
+#else  
+int min_free_kbytes = 1024;
+#endif  
 
 static unsigned long __meminitdata nr_kernel_pages;
 static unsigned long __meminitdata nr_all_pages;
@@ -1309,7 +1317,11 @@ static bool __zone_watermark_ok(struct zone *z, int order, unsigned long mark,
 		 
 		free_pages -= z->free_area[o].nr_free << o;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		min >>= min_free_order_shift;
+#else  
 		min >>= 1;
+#endif  
 
 		if (free_pages <= min)
 			return false;
@@ -4036,6 +4048,9 @@ static void setup_per_zone_lowmem_reserve(void)
 static void __setup_per_zone_wmarks(void)
 {
 	unsigned long pages_min = min_free_kbytes >> (PAGE_SHIFT - 10);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	unsigned long pages_low = extra_free_kbytes >> (PAGE_SHIFT - 10);
+#endif  
 	unsigned long lowmem_pages = 0;
 	struct zone *zone;
 	unsigned long flags;
@@ -4046,11 +4061,21 @@ static void __setup_per_zone_wmarks(void)
 	}
 
 	for_each_zone(zone) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		u64 min, low;
+
+		spin_lock_irqsave(&zone->lock, flags);
+		min = (u64)pages_min * zone->managed_pages;
+		do_div(min, lowmem_pages);
+		low = (u64)pages_low * zone->managed_pages;
+		do_div(low, vm_total_pages);
+#else  
 		u64 tmp;
 
 		spin_lock_irqsave(&zone->lock, flags);
 		tmp = (u64)pages_min * zone->managed_pages;
 		do_div(tmp, lowmem_pages);
+#endif  
 		if (is_highmem(zone)) {
 			 
 			unsigned long min_pages;
@@ -4060,11 +4085,22 @@ static void __setup_per_zone_wmarks(void)
 			zone->watermark[WMARK_MIN] = min_pages;
 		} else {
 			 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			zone->watermark[WMARK_MIN] = min;
+#else  
 			zone->watermark[WMARK_MIN] = tmp;
+#endif  
 		}
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		zone->watermark[WMARK_LOW]  = min_wmark_pages(zone) +
+					low + (min >> 2);
+		zone->watermark[WMARK_HIGH] = min_wmark_pages(zone) +
+					low + (min >> 1);
+#else  
 		zone->watermark[WMARK_LOW]  = min_wmark_pages(zone) + (tmp >> 2);
 		zone->watermark[WMARK_HIGH] = min_wmark_pages(zone) + (tmp >> 1);
+#endif  
 
 		setup_zone_migrate_reserve(zone);
 		spin_unlock_irqrestore(&zone->lock, flags);
@@ -4123,6 +4159,11 @@ int __meminit init_per_zone_wmark_min(void)
 }
 module_init(init_per_zone_wmark_min)
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+ 
+#else  
+ 
+#endif  
 int min_free_kbytes_sysctl_handler(ctl_table *table, int write, 
 	void __user *buffer, size_t *length, loff_t *ppos)
 {

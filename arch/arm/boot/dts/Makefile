@@ -265,13 +265,30 @@ dtb-$(CONFIG_ARCH_ALPINE) += \
 	alpine_db.dtb \
 	alpine_db_m0.dtb \
 
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+DTB_NAMES := $(subst $\",,$(CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE_NAMES))
+ifneq ($(DTB_NAMES),)
+DTB_LIST := $(addsuffix .dtb,$(DTB_NAMES))
+else
+DTB_LIST := $(dtb-y)
+endif
+
+targets += dtbs
+targets += $(DTB_LIST)
+else # CONFIG_SYNO_LSP_HI3536
 targets += dtbs
 targets += $(dtb-y)
+endif # CONFIG_SYNO_LSP_HI3536
 endif
 
 # *.dtb used to be generated in the directory above. Clean out the
 # old build results so people don't accidentally use them.
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+dtbs: $(addprefix $(obj)/, $(DTB_LIST))
+	$(Q)rm -f $(obj)/../*.dtb
+else # CONFIG_SYNO_LSP_HI3536
 dtbs: $(addprefix $(obj)/, $(dtb-y))
 	$(Q)rm -f $(obj)/../*.dtb
+endif # CONFIG_SYNO_LSP_HI3536
 
 clean-files := *.dtb

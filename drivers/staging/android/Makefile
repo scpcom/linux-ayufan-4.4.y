@@ -1,5 +1,10 @@
 ccflags-y += -I$(src)			# needed for trace events
 
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-y					+= ion/
+obj-$(CONFIG_FIQ_DEBUGGER)		+= fiq_debugger/
+endif # CONFIG_SYNO_LSP_HI3536
+
 obj-$(CONFIG_ANDROID_BINDER_IPC)	+= binder.o
 obj-$(CONFIG_ASHMEM)			+= ashmem.o
 obj-$(CONFIG_ANDROID_LOGGER)		+= logger.o

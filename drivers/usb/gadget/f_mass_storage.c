@@ -372,12 +372,21 @@ static bool start_out_transfer(struct fsg_common *common, struct fsg_buffhd *bh)
 	return true;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static int sleep_thread(struct fsg_common *common, bool can_freeze)
+#else  
 static int sleep_thread(struct fsg_common *common)
+#endif  
 {
 	int	rc = 0;
 
 	for (;;) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		if (can_freeze)
+			try_to_freeze();
+#else  
 		try_to_freeze();
+#endif  
 		set_current_state(TASK_INTERRUPTIBLE);
 		if (signal_pending(current)) {
 			rc = -EINTR;
@@ -450,7 +459,11 @@ static int do_read(struct fsg_common *common)
 
 		bh = common->next_buffhd_to_fill;
 		while (bh->state != BUF_STATE_EMPTY) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			rc = sleep_thread(common, false);
+#else  
 			rc = sleep_thread(common);
+#endif  
 			if (rc)
 				return rc;
 		}
@@ -699,7 +712,11 @@ static int do_write(struct fsg_common *common)
 			continue;
 		}
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		rc = sleep_thread(common, false);
+#else  
 		rc = sleep_thread(common);
+#endif  
 		if (rc)
 			return rc;
 	}
@@ -1203,7 +1220,11 @@ static int throw_away_data(struct fsg_common *common)
 			continue;
 		}
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		rc = sleep_thread(common, true);
+#else  
 		rc = sleep_thread(common);
+#endif  
 		if (rc)
 			return rc;
 	}
@@ -1288,7 +1309,11 @@ static int send_status(struct fsg_common *common)
 
 	bh = common->next_buffhd_to_fill;
 	while (bh->state != BUF_STATE_EMPTY) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		rc = sleep_thread(common, true);
+#else  
 		rc = sleep_thread(common);
+#endif  
 		if (rc)
 			return rc;
 	}
@@ -1445,7 +1470,11 @@ static int do_scsi_command(struct fsg_common *common)
 	bh = common->next_buffhd_to_fill;
 	common->next_buffhd_to_drain = bh;
 	while (bh->state != BUF_STATE_EMPTY) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		rc = sleep_thread(common, true);
+#else  
 		rc = sleep_thread(common);
+#endif  
 		if (rc)
 			return rc;
 	}
@@ -1756,7 +1785,11 @@ static int get_next_command(struct fsg_common *common)
 
 	bh = common->next_buffhd_to_fill;
 	while (bh->state != BUF_STATE_EMPTY) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		rc = sleep_thread(common, true);
+#else  
 		rc = sleep_thread(common);
+#endif  
 		if (rc)
 			return rc;
 	}
@@ -1767,7 +1800,11 @@ static int get_next_command(struct fsg_common *common)
 		return -EIO;
 
 	while (bh->state != BUF_STATE_FULL) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		rc = sleep_thread(common, true);
+#else  
 		rc = sleep_thread(common);
+#endif  
 		if (rc)
 			return rc;
 	}
@@ -1912,7 +1949,9 @@ static void handle_exception(struct fsg_common *common)
 		}
 	}
 
+#if defined(MY_DEF_HERE)
 	wait_for_writing_thread_done(common);
+#endif  
 
 	if (likely(common->fsg)) {
 		for (i = 0; i < fsg_num_buffers; ++i) {
@@ -1932,7 +1971,11 @@ static void handle_exception(struct fsg_common *common)
 			}
 			if (num_active == 0)
 				break;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			if (sleep_thread(common, true))
+#else  
 			if (sleep_thread(common))
+#endif  
 				return;
 		}
 
@@ -2034,7 +2077,11 @@ static int fsg_main_thread(void *common_)
 		}
 
 		if (!common->running) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			sleep_thread(common, true);
+#else  
 			sleep_thread(common);
+#endif  
 			continue;
 		}
 

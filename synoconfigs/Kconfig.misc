@@ -31,6 +31,11 @@ config SYNO_IO_ERROR_LIMIT_MSG
 	bool "Reduce the rate of IO error print messages"
 	default y
 
+config SYNO_IO_ERROR_LIMIT_MSG_SHIFT
+	int "Reduce the rate of IO error print messages - for the variable number"
+	depends on SYNO_IO_ERROR_LIMIT_MSG
+	default "12"
+
 config SYNO_EMULATE_U64_DIVISOR
 	bool "Emulate caculating of u64 remainder"
 	default y
@@ -99,6 +104,10 @@ config SYNO_ALPINE_TUNING_CRYPTO_PERFORMANCE
 	bool "Tuning Alpine crypto engine performance"
 	default y
 	depends on SYNO_ALPINE
+
+config SYNO_BACKPORT_ARM_CRYPTO
+	bool "Use ARM related crypto patches packported from upstream kernel 4.7"
+	default n
 
 endmenu #Encryption
 

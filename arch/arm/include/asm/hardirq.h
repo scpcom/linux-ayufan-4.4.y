@@ -5,7 +5,11 @@
 #include <linux/threads.h>
 #include <asm/irq.h>
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define NR_IPI	7
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #define NR_IPI	6
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 typedef struct {
 	unsigned int __softirq_pending;

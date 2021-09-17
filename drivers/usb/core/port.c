@@ -11,6 +11,9 @@
 static const struct attribute_group *port_dev_group[];
 extern inline int hub_is_superspeed(struct usb_device *hdev);
 
+#ifdef MY_ABC_HERE
+extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
+#endif  
 static ssize_t show_port_connect_type(struct device *dev,
 	struct device_attribute *attr, char *buf)
 {
@@ -58,7 +61,7 @@ static void usb_port_device_release(struct device *dev)
 	kfree(port_dev);
 }
 
-#ifdef CONFIG_PM_RUNTIME
+#if (defined(CONFIG_PM_RUNTIME) && !defined(CONFIG_SYNO_LSP_HI3536)) || (defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_USB_SUSPEND))
 static int usb_port_runtime_resume(struct device *dev)
 {
 	struct usb_port *port_dev = to_usb_port(dev);
@@ -118,7 +121,7 @@ static int usb_port_runtime_suspend(struct device *dev)
 #endif
 
 static const struct dev_pm_ops usb_port_pm_ops = {
-#ifdef CONFIG_PM_RUNTIME
+#if (defined(CONFIG_PM_RUNTIME) && !defined(CONFIG_SYNO_LSP_HI3536)) || (defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_USB_SUSPEND))
 	.runtime_suspend =	usb_port_runtime_suspend,
 	.runtime_resume =	usb_port_runtime_resume,
 	.runtime_idle =		pm_generic_runtime_idle,
@@ -138,6 +141,7 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 #if defined(MY_DEF_HERE) ||\
 	defined(MY_DEF_HERE)
 	struct usb_device *hdev = hub->hdev;
+	int i = 0;
 #endif  
 #ifdef MY_DEF_HERE
 	extern char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13];
@@ -147,6 +151,7 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 	extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13];
 	extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 	extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+	int value = 0;
 #endif  
 
 	port_dev = kzalloc(sizeof(*port_dev), GFP_KERNEL);
@@ -168,7 +173,6 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 
 #ifdef MY_DEF_HERE
 	if (hdev && hdev->serial) {
-		int i;
 		for (i = 0; i < CONFIG_SYNO_NUM_CASTRATED_XHC; i++) {
 			if (0 == strcmp(gSynoCastratedXhcAddr[i], hdev->serial) &&
 				gSynoCastratedXhcPortBitmap[i] & (0x01 << (port1 - 1))) {
@@ -183,15 +187,26 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 
 #ifdef MY_DEF_HERE
 	if (hdev && hdev->serial) {
-		int i;
 		for (i = 0; i < CONFIG_SYNO_USB_VBUS_NUM_GPIO; i++) {
 			if (0 == strcmp(gSynoUsbVbusHostAddr[i], hdev->serial)) {
+#ifdef MY_ABC_HERE
+				value = 0;
+				if (0 == syno_pch_lpc_gpio_pin(gSynoUsbVbusGpp[i], &value, 0) && 0 == value) {
+					value = 1;
+					if (0 == syno_pch_lpc_gpio_pin(gSynoUsbVbusGpp[i], &value, 1)) {
+						printk(KERN_INFO " port%d is going to power up Vbus by "
+								"GPIO#%d\n", port1, gSynoUsbVbusGpp[i]);
+						mdelay(100);
+					}
+				}
+#else  
 				if (0 == gpio_get_value(gSynoUsbVbusGpp[i])) {
 					gpio_set_value(gSynoUsbVbusGpp[i], 1);
-					printk(KERN_INFO " port%d is going to power up Vbus by"
+					printk(KERN_INFO " port%d is going to power up Vbus by "
 							"GPIO#%d\n", port1, gSynoUsbVbusGpp[i]);
 					mdelay(100);
 				}
+#endif  
 				if (port1 == gSynoUsbVbusPort[i])
 					port_dev->syno_vbus_gpp = gSynoUsbVbusGpp[i];
 			}

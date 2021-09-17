@@ -583,7 +583,8 @@ void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag
 				IS_SYNOLOGY_DX513(ap->PMSynoUnique) ||
 				IS_SYNOLOGY_DX213(ap->PMSynoUnique) ||
 				IS_SYNOLOGY_RX413(ap->PMSynoUnique) ||
-				IS_SYNOLOGY_RX415(ap->PMSynoUnique)) {
+				IS_SYNOLOGY_RX415(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_DX517(ap->PMSynoUnique)) {
 			if (ap->host == pAp_master->host && ap->port_no == pAp_master->port_no) {
 				unsigned long flags;
 				spin_lock_irqsave(ap->lock, flags);
@@ -778,7 +779,7 @@ syno_pm_info_show(struct device *dev, struct device_attribute *attr, char *buf)
 				 "\"\n");
 
 		strncat(szTmp1, szTmp, BDEVNAME_SIZE);
-
+		 
 		if (IS_SYNOLOGY_RX410(ap->PMSynoUnique)) {
 			snprintf(szTmp,
 					BDEVNAME_SIZE,
@@ -907,6 +908,14 @@ syno_pm_info_show(struct device *dev, struct device_attribute *attr, char *buf)
 					"%s=\"%s\"\n%s=\"%d\"\n",
 					EBOX_INFO_UNIQUE_KEY,
 					EBOX_INFO_UNIQUE_DX1215,
+					EBOX_INFO_EMID_KEY,
+					ap->PMSynoEMID);
+		} else if(IS_SYNOLOGY_DX517(ap->PMSynoUnique)) {
+			snprintf(szTmp,
+					BDEVNAME_SIZE,
+					"%s=\"%s\"\n%s=\"%d\"\n",
+					EBOX_INFO_UNIQUE_KEY,
+					EBOX_INFO_UNIQUE_DX517,
 					EBOX_INFO_EMID_KEY,
 					ap->PMSynoEMID);
 		} else {
@@ -1129,6 +1138,54 @@ DEVICE_ATTR(syno_sata_disk_led_ctrl, S_IWUSR,
 EXPORT_SYMBOL_GPL(dev_attr_syno_sata_disk_led_ctrl);
 #endif  
 
+#ifdef MY_DEF_HERE
+ 
+static int syno_shift_remap_table(struct ata_host *host)
+{
+	int i = 0;
+	int iRet = -1;
+	char szPciAddress[PCI_ADDR_LEN_MAX + 1];
+	struct pci_dev *pdev = NULL;
+	struct pci_dev *pdev_cur = NULL;
+
+	if (NULL == host) {
+		printk("Bad parameter!\n");
+		goto END;
+	}
+
+	if (0 == host->n_ports || NULL == host->ports) {
+		printk("Error: ata port informaion is needed.");
+		goto END;
+	}
+
+	pdev = to_pci_dev(host->dev);
+	pdev_cur = pdev;
+
+	while (NULL != pdev_cur) {
+		snprintf(szPciAddress, sizeof(szPciAddress),"%04x%02x%02x%x",
+				pci_domain_nr(pdev_cur->bus), pdev_cur->bus->number,
+				PCI_SLOT(pdev_cur->devfn), PCI_FUNC(pdev_cur->devfn));
+
+		for (i = 0; i < gPciAddrNum; i++) {
+			if (0 == strncmp(szPciAddress, gszPciAddrList[i], PCI_ADDR_LEN_MAX)) {
+				syno_insert_sata_index_remap(
+					host->ports[0]->print_id - 1,
+					host->n_ports,
+					gPciDeferStart);
+
+				gPciDeferStart += host->n_ports;
+				iRet = 1;
+				goto END;
+			}
+		}
+		pdev_cur = pdev_cur->bus->self;
+	}
+	iRet = 0;
+END:
+	return iRet;
+}
+#endif  
+
 static ssize_t ata_scsi_park_show(struct device *device,
 				  struct device_attribute *attr, char *buf)
 {
@@ -1321,9 +1378,6 @@ struct device_attribute *ata_common_sdev_attrs[] = {
 	&dev_attr_unload_heads,
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_wcache,
-#endif  
-#ifdef CONFIG_SYNO_SATA_DISK_SERIAL
-	&dev_attr_syno_disk_serial,
 #endif  
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_sata_disk_led_ctrl,
@@ -2063,6 +2117,13 @@ int __ata_change_queue_depth(struct ata_port *ap, struct scsi_device *sdev,
 		queue_depth = 1;
 	}
 	spin_unlock_irqrestore(ap->lock, flags);
+	
+#ifdef MY_ABC_HERE	
+	 
+	if (!ata_ncq_enabled(dev) && 1 == sdev->queue_depth) {
+		return sdev->queue_depth;
+	}
+#endif  
 
 	queue_depth = min(queue_depth, sdev->host->can_queue);
 	queue_depth = min(queue_depth, ata_id_queue_depth(dev->id));
@@ -2428,11 +2489,22 @@ static void ata_scsi_qc_complete(struct ata_queued_cmd *qc)
 	struct ata_port *ap = qc->ap;
 	struct scsi_cmnd *cmd = qc->scsicmd;
 	u8 *cdb = cmd->cmnd;
+#ifdef MY_ABC_HERE
+	u8 *desc = NULL;
+#endif  
 	int need_sense = (qc->err_mask != 0);
 
 #ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
 	 
-	syno_result_tf_lba_restore(qc);
+	if (ata_is_ncq(qc->tf.protocol) &&
+			!(qc->err_mask & AC_ERR_NCQ)) {
+#endif  
+		 
+		syno_result_tf_lba_restore(qc);
+#ifdef MY_ABC_HERE
+	}
+#endif  
 #endif  
 
 	if (((cdb[0] == ATA_16) || (cdb[0] == ATA_12)) &&
@@ -2444,6 +2516,15 @@ static void ata_scsi_qc_complete(struct ata_queued_cmd *qc)
 		} else {
 			 
 			ata_gen_ata_sense(qc);
+#ifdef MY_ABC_HERE
+			 
+			if ( (qc->result_tf.feature & ATA_UNC) &&
+					ata_is_ncq(qc->tf.protocol) &&
+					!(qc->err_mask & AC_ERR_NCQ) ) {
+				desc = qc->scsicmd->sense_buffer + 8;
+				desc[SYNO_DESCRIPTOR_RESERVED_INDEX] |= SYNO_NCQ_FAKE_UNC;
+			}
+#endif  
 		}
 	}
 
@@ -3179,7 +3260,8 @@ static unsigned int ata_scsiop_read_cap(struct ata_scsi_args *args, u8 *rbuf)
 		rbuf[14] = (lowest_aligned >> 8) & 0x3f;
 		rbuf[15] = lowest_aligned;
 
-		if (ata_id_has_trim(args->id)) {
+		if (ata_id_has_trim(args->id) &&
+		    !(dev->horkage & ATA_HORKAGE_NOTRIM)) {
 			rbuf[14] |= 0x80;  
 
 			if (ata_id_has_zero_after_trim(args->id))
@@ -4084,6 +4166,13 @@ void ata_scsi_simulate(struct ata_device *dev, struct scsi_cmnd *cmd)
 int ata_scsi_add_hosts(struct ata_host *host, struct scsi_host_template *sht)
 {
 	int i, rc;
+#ifdef MY_DEF_HERE
+	int isCacheSSD = 0;
+
+	if (1 == syno_shift_remap_table(host)) {
+		isCacheSSD = 1;
+	}
+#endif  
 
 	for (i = 0; i < host->n_ports; i++) {
 		struct ata_port *ap = host->ports[i];
@@ -4108,6 +4197,9 @@ int ata_scsi_add_hosts(struct ata_host *host, struct scsi_host_template *sht)
 
 		shost->max_host_blocked = 1;
 
+#ifdef MY_DEF_HERE
+		shost->isCacheSSD = isCacheSSD;
+#endif
 		rc = scsi_add_host_with_dma(ap->scsi_host,
 						&ap->tdev, ap->host->dev);
 		if (rc)

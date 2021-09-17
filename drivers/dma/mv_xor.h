@@ -23,7 +23,6 @@
 #define XOR_OPERATION_MODE_MEMCPY	2
 #define XOR_OPERATION_MODE_IN_DESC	7
 #define XOR_DESCRIPTOR_SWAP		BIT(14)
-#define XOR_DESC_SUCCESS		0x40000000
 
 #define XOR_DESC_OPERATION_XOR            (0 << 24)
 #define XOR_DESC_OPERATION_CRC32C         (1 << 24)
@@ -39,6 +38,7 @@
 #define XOR_OPERATION_MODE_MEMCPY	2
 #define XOR_OPERATION_MODE_MEMSET	4
 #endif  
+#define XOR_DESC_SUCCESS		0x40000000
 
 #define XOR_CURR_DESC(chan)	(chan->mmr_base + 0x210 + (chan->idx * 4))
 #define XOR_NEXT_DESC(chan)	(chan->mmr_base + 0x200 + (chan->idx * 4))

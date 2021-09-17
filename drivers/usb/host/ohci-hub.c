@@ -42,6 +42,10 @@
 static void dl_done_list (struct ohci_hcd *);
 static void finish_unlinks (struct ohci_hcd *, u16);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+extern void set_usbhost_connect(int index, int online);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 #ifdef	CONFIG_PM
 static int ohci_rh_suspend (struct ohci_hcd *ohci, int autostop)
 __releases(ohci->lock)
@@ -497,6 +501,11 @@ ohci_hub_status_data (struct usb_hcd *hcd, char *buf)
 	for (i = 0; i < ohci->num_ports; i++) {
 		u32	status = roothub_portstatus (ohci, i);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_HIUSB_DEVICE2_0
+		set_usbhost_connect(i, status & RH_PS_CCS);
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		/* can't autostop if ports are connected */
 		any_connected |= (status & RH_PS_CCS);
 
@@ -741,6 +750,11 @@ static int ohci_hub_control (
 			goto error;
 		wIndex--;
 		temp = roothub_portstatus (ohci, wIndex);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_HIUSB_DEVICE2_0
+		set_usbhost_connect(wIndex, temp & RH_PS_CCS);
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		put_unaligned_le32(temp, buf);
 
 #ifndef	OHCI_VERBOSE_DEBUG

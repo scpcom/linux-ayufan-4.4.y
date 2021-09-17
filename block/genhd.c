@@ -403,7 +403,7 @@ static void register_disk(struct gendisk *disk)
 	struct hd_struct *part;
 	int err;
 #ifdef MY_DEF_HERE
-	int error;
+	int error = -1;
 #endif  
 
 	ddev->parent = disk->driverfs_dev;
@@ -946,6 +946,24 @@ static void disk_release(struct device *dev)
 		blk_put_queue(disk->queue);
 	kfree(disk);
 }
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static int disk_uevent(struct device *dev, struct kobj_uevent_env *env)
+{
+	struct gendisk *disk = dev_to_disk(dev);
+	struct disk_part_iter piter;
+	struct hd_struct *part;
+	int cnt = 0;
+
+	disk_part_iter_init(&piter, disk, 0);
+	while((part = disk_part_iter_next(&piter)))
+		cnt++;
+	disk_part_iter_exit(&piter);
+	add_uevent_var(env, "NPARTS=%u", cnt);
+	return 0;
+}
+#endif  
+
 struct class block_class = {
 	.name		= "block",
 };
@@ -965,6 +983,9 @@ static struct device_type disk_type = {
 	.groups		= disk_attr_groups,
 	.release	= disk_release,
 	.devnode	= block_devnode,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	.uevent		= disk_uevent,
+#endif  
 };
 
 #ifdef CONFIG_PROC_FS

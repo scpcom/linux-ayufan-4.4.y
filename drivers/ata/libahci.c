@@ -36,10 +36,30 @@ extern int *gpGreenLedMap;
 extern int SYNO_CTRL_HDD_ACT_NOTIFY(int index);
 #endif  
 #endif  
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+#endif  
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_ARCH_HI3536
+#include "hi_ahci_sys_hi3536_defconfig.h"
+#endif
+
+#ifdef CONFIG_ARCH_HI3521A
+#include "hi_ahci_sys_hi3521a_defconfig.h"
+#endif
+
+#ifdef CONFIG_ARCH_HI3531A
+#include "hi_ahci_sys_hi3531a_defconfig.h"
+#endif
+#endif  
 
 static int ahci_skip_host_reset;
 int ahci_ignore_sss;
 EXPORT_SYMBOL_GPL(ahci_ignore_sss);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static int fbs_en = CONFIG_HI_SATA_FBS;
+#endif  
 
 module_param_named(skip_host_reset, ahci_skip_host_reset, int, 0444);
 MODULE_PARM_DESC(skip_host_reset, "skip global host reset (0=don't skip, 1=skip)");
@@ -47,6 +67,28 @@ MODULE_PARM_DESC(skip_host_reset, "skip global host reset (0=don't skip, 1=skip)
 module_param_named(ignore_sss, ahci_ignore_sss, int, 0444);
 MODULE_PARM_DESC(ignore_sss, "Ignore staggered spinup flag (0=don't ignore, 1=ignore)");
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+module_param(fbs_en, uint, 0600);
+MODULE_PARM_DESC(fbs_en, "ahci fbs flags (default:1)");
+
+#if (defined(CONFIG_ARCH_HI3536) \
+	|| defined(CONFIG_ARCH_HI3521A) \
+	|| defined(CONFIG_ARCH_HI3531A)) \
+	&& !defined(CONFIG_SATA_AHCI)
+#define AHCI_TIMEOUT_COUNT	10
+#define AHCI_POLL_TIMER		(20 * HZ)
+
+struct ata_fbs_ctrl {
+	unsigned int fbs_enable_ctrl;  
+	unsigned int fbs_mode_ctrl;    
+	unsigned int fbs_enable_flag;
+	unsigned int fbs_disable_flag;
+	unsigned int fbs_cmd_issue_flag;
+	struct timer_list poll_timer;
+};
+static struct ata_fbs_ctrl fbs_ctrl[4];
+#endif
+#endif  
 static int ahci_set_lpm(struct ata_link *link, enum ata_lpm_policy policy,
 			unsigned hints);
 static ssize_t ahci_led_show(struct ata_port *ap, char *buf);
@@ -263,9 +305,6 @@ struct device_attribute *ahci_sdev_attrs[] = {
 	&dev_attr_unload_heads,
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_wcache,
-#endif  
-#ifdef CONFIG_SYNO_SATA_DISK_SERIAL
-	&dev_attr_syno_disk_serial,
 #endif  
 #ifdef MY_DEF_HERE
 	&dev_attr_sw_locate,
@@ -586,7 +625,11 @@ void ahci_save_initial_config(struct device *dev,
 		}
 	}
 
+#ifdef MY_ABC_HERE
 	if (!port_map) {
+#else  
+	if (!port_map && vers < 0x10300) {
+#endif  
 		port_map = (1 << ahci_nr_ports(cap)) - 1;
 		dev_warn(dev, "forcing PORTS_IMPL to 0x%x\n", port_map);
 
@@ -917,6 +960,25 @@ END:
 	return ret;
 }
 EXPORT_SYMBOL(syno_ahci_disk_led_enable);
+
+#ifdef MY_ABC_HERE
+ 
+int syno_ahci_disk_led_enable_by_port(const unsigned short diskPort, const int iValue)
+{
+	int i = 0;
+	unsigned short scsiHostNum = 0;
+	 
+	for (i = 0; i < SATA_REMAP_MAX; i++) {
+		if ((unsigned short)syno_get_remap_idx(i) == (diskPort - 1)) {
+			scsiHostNum = (unsigned short) i;
+			break;
+		}
+	}
+
+	return syno_ahci_disk_led_enable(scsiHostNum, iValue);
+}
+EXPORT_SYMBOL(syno_ahci_disk_led_enable_by_port);
+#endif  
 #endif  
 
 static void ahci_start_port(struct ata_port *ap)
@@ -1384,7 +1446,11 @@ static void ahci_port_init(struct device *dev, struct ata_port *ap,
 	if (tmp)
 		writel(tmp, port_mmio + PORT_IRQ_STAT);
 
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_ARCH_HI3531A)
+	writel(1 << ap->port_no, mmio + HOST_IRQ_STAT);
+#else  
 	writel(1 << port_no, mmio + HOST_IRQ_STAT);
+#endif  
 }
 
 void ahci_init_controller(struct ata_host *host)
@@ -1445,7 +1511,12 @@ void ahci_fill_cmd_slot(struct ahci_port_priv *pp, unsigned int tag,
 {
 	dma_addr_t cmd_tbl_dma;
 
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HI_SATA_RAM)
+	 
+	cmd_tbl_dma = pp->cmd_tbl_dma + tag * 0x800;
+#else  
 	cmd_tbl_dma = pp->cmd_tbl_dma + tag * AHCI_CMD_TBL_SZ;
+#endif  
 
 	pp->cmd_slot[tag].opts = cpu_to_le32(opts);
 	pp->cmd_slot[tag].status = 0;
@@ -1506,6 +1577,14 @@ static int ahci_exec_polled_cmd(struct ata_port *ap, int pmp,
 	ata_tf_to_fis(tf, pmp, is_cmd, fis);
 	ahci_fill_cmd_slot(pp, 0, cmd_fis_len | flags | (pmp << 12));
 
+	if (pp->fbs_enabled && pp->fbs_last_dev != pmp) {
+		tmp = readl(port_mmio + PORT_FBS);
+		tmp &= ~(PORT_FBS_DEV_MASK | PORT_FBS_DEC);
+		tmp |= pmp << PORT_FBS_DEV_OFFSET;
+		writel(tmp, port_mmio + PORT_FBS);
+		pp->fbs_last_dev = pmp;
+	}
+
 	writel(1, port_mmio + PORT_CMD_ISSUE);
 
 	if (timeout_msec) {
@@ -1534,7 +1613,36 @@ int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 	bool fbs_disabled = false;
 	int rc;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if (defined(CONFIG_ARCH_HI3536) \
+	|| defined(CONFIG_ARCH_HI3521A) \
+	|| defined(CONFIG_ARCH_HI3531A)) \
+	&& !defined(CONFIG_SATA_AHCI)
+	unsigned int port_num = ap->port_no;
+#endif
+#endif  
+
 	DPRINTK("ENTER\n");
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if (defined(CONFIG_ARCH_HI3536) \
+	|| defined(CONFIG_ARCH_HI3521A) \
+	|| defined(CONFIG_ARCH_HI3531A)) \
+	&& !defined(CONFIG_SATA_AHCI)
+	if (fbs_ctrl[port_num].fbs_enable_ctrl &&
+			(link->pmp == SATA_PMP_CTRL_PORT)) {
+		struct ahci_port_priv *pp = ap->private_data;
+
+		if (pp->fbs_enabled == false)
+			ahci_enable_fbs(ap);
+
+		fbs_ctrl[port_num].fbs_enable_flag = 0;
+		fbs_ctrl[port_num].fbs_disable_flag = 0;
+		fbs_ctrl[port_num].fbs_cmd_issue_flag = 0;
+
+	}
+#endif
+#endif  
 
 	rc = ahci_kick_engine(ap);
 	if (rc && rc != -EOPNOTSUPP)
@@ -1707,7 +1815,83 @@ static void ahci_postreset(struct ata_link *link, unsigned int *class)
 	void __iomem *port_mmio = ahci_port_base(ap);
 	u32 new_tmp, tmp;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if (defined(CONFIG_ARCH_HI3536) || defined(CONFIG_ARCH_HI3531A)) \
+	&& !defined(CONFIG_SATA_AHCI)
+	u32 sstatus;
+#endif
+#endif  
 	ata_std_postreset(link, class);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(CONFIG_ARCH_HI3536) && !defined(CONFIG_SATA_AHCI)
+	if ((sata_scr_read(link, SCR_STATUS, &sstatus) == 0) &&
+				((sstatus & 0xf) != 0x3)) {
+		switch (ap->port_no) {
+		case 0:
+			writel(0x419, (void *)IO_ADDRESS(0x12120090));
+			writel(0x439, (void *)IO_ADDRESS(0x12120090));
+			writel(0x419, (void *)IO_ADDRESS(0x12120090));
+			writel(0x0, (void *)IO_ADDRESS(0x12120090));
+			break;
+		case 1:
+			writel(0x419, (void *)IO_ADDRESS(0x12120094));
+			writel(0x439, (void *)IO_ADDRESS(0x12120094));
+			writel(0x419, (void *)IO_ADDRESS(0x12120094));
+			writel(0x0, (void *)IO_ADDRESS(0x12120094));
+			break;
+		case 2:
+			writel(0x439, (void *)IO_ADDRESS(0x12120098));
+			writel(0x479, (void *)IO_ADDRESS(0x12120098));
+			writel(0x439, (void *)IO_ADDRESS(0x12120098));
+			writel(0x0, (void *)IO_ADDRESS(0x12120098));
+			break;
+		case 3:
+			writel(0x419, (void *)IO_ADDRESS(0x12120098));
+			writel(0x459, (void *)IO_ADDRESS(0x12120098));
+			writel(0x419, (void *)IO_ADDRESS(0x12120098));
+			writel(0x0, (void *)IO_ADDRESS(0x12120098));
+			break;
+		default:
+			break;
+		}
+	}
+#endif
+
+#if defined(CONFIG_ARCH_HI3531A) && !defined(CONFIG_SATA_AHCI)
+	if ((sata_scr_read(link, SCR_STATUS, &sstatus) == 0) &&
+				((sstatus & 0xf) != 0x3)) {
+		switch (ap->port_no) {
+		case 0:
+			writel(0x439, (void *)IO_ADDRESS(0x12120138));
+			writel(0x479, (void *)IO_ADDRESS(0x12120138));
+			writel(0x439, (void *)IO_ADDRESS(0x12120138));
+			writel(0x0, (void *)IO_ADDRESS(0x12120138));
+			break;
+		case 1:
+			writel(0x419, (void *)IO_ADDRESS(0x12120138));
+			writel(0x459, (void *)IO_ADDRESS(0x12120138));
+			writel(0x419, (void *)IO_ADDRESS(0x12120138));
+			writel(0x0, (void *)IO_ADDRESS(0x12120138));
+			break;
+		case 2:
+			writel(0x439, (void *)IO_ADDRESS(0x12120134));
+			writel(0x479, (void *)IO_ADDRESS(0x12120134));
+			writel(0x439, (void *)IO_ADDRESS(0x12120134));
+			writel(0x0, (void *)IO_ADDRESS(0x12120134));
+			break;
+		case 3:
+			writel(0x419, (void *)IO_ADDRESS(0x12120134));
+			writel(0x459, (void *)IO_ADDRESS(0x12120134));
+			writel(0x419, (void *)IO_ADDRESS(0x12120134));
+			writel(0x0, (void *)IO_ADDRESS(0x12120134));
+			break;
+		default:
+			break;
+		}
+	}
+#endif
+#endif  
 
 	new_tmp = tmp = readl(port_mmio + PORT_CMD);
 	if (*class == ATA_DEV_ATAPI)
@@ -1745,24 +1929,38 @@ int sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc)
 {
 	struct ata_link *link = qc->dev->link;
 	struct ata_port *ap = link->ap;
+	u8 prot = qc->tf.protocol;
 
-	if (ap->excl_link == NULL || ap->excl_link == link) {
-		if (ap->nr_active_links == 0 || ata_link_active(link)) {
+	int is_excl = (ata_is_atapi(prot) ||
+		       (qc->flags & ATA_QCFLAG_RESULT_TF));
+
+	if (unlikely(ap->excl_link)) {
+		if (link == ap->excl_link) {
+			if (ap->nr_active_links)
+				return ATA_DEFER_PORT;
 			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
-			return ata_std_qc_defer(qc);
+		} else {
+			if (!ap->nr_active_links) {
+				 
+				if (is_excl) {
+					ap->excl_link = link;
+					qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+				} else {
+					 
+					ap->excl_link = NULL;
+				}
+			} else {
+				return ATA_DEFER_PORT;
+			}
 		}
-
+	} else if (unlikely(is_excl)) {
 		ap->excl_link = link;
-	} else {
-		 
-		if (!ap->nr_active_links) {
-			ap->excl_link = link;
-			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
-			return ata_std_qc_defer(qc);
-		}
+		if (ap->nr_active_links)
+			return ATA_DEFER_PORT;
+		qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
 	}
 
-	return ATA_DEFER_PORT;
+	return ata_std_qc_defer(qc);
 }
 EXPORT_SYMBOL_GPL(sata_syno_ahci_defer_cmd);
 #endif  
@@ -1785,6 +1983,73 @@ static int ahci_pmp_qc_defer(struct ata_queued_cmd *qc)
 	struct ata_port *ap = qc->ap;
 	struct ahci_port_priv *pp = ap->private_data;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if (defined(CONFIG_ARCH_HI3536) \
+	|| defined(CONFIG_ARCH_HI3521A) \
+	|| defined(CONFIG_ARCH_HI3531A)) \
+	&& !defined(CONFIG_SATA_AHCI)
+	int is_atapi = ata_is_atapi(qc->tf.protocol);
+	void __iomem *port_mmio = ahci_port_base(ap);
+	unsigned int port_num = ap->port_no;
+	unsigned int cmd_timeout_count;
+
+	if (fbs_ctrl[port_num].fbs_enable_ctrl &&
+			(ap->link.pmp == SATA_PMP_CTRL_PORT)) {
+		if (is_atapi || fbs_ctrl[ap->port_no].fbs_cmd_issue_flag) {
+			mod_timer(&fbs_ctrl[port_num].poll_timer,
+					jiffies + AHCI_POLL_TIMER);
+
+			if (!fbs_ctrl[port_num].fbs_disable_flag) {
+				cmd_timeout_count = 0;
+				while (readl(port_mmio + PORT_SCR_ACT)
+						|| readl(port_mmio
+							+ PORT_CMD_ISSUE)
+						|| readl(port_mmio
+							+ PORT_IRQ_STAT)) {
+					cmd_timeout_count++;
+					if (cmd_timeout_count >=
+							AHCI_TIMEOUT_COUNT) {
+						fbs_ctrl[ap->port_no].
+							fbs_cmd_issue_flag = 1;
+						cmd_timeout_count = 0;
+						return ATA_DEFER_LINK;
+					}
+				}
+
+				if (pp->fbs_enabled == true)
+					ahci_disable_fbs(ap);
+
+				ap->excl_link = NULL;
+				ap->nr_active_links = 0;
+				fbs_ctrl[port_num].fbs_disable_flag = 1;
+				fbs_ctrl[port_num].fbs_enable_flag = 0;
+				fbs_ctrl[ap->port_no].fbs_cmd_issue_flag = 0;
+			}
+		} else {
+			if (fbs_ctrl[port_num].fbs_enable_flag) {
+				cmd_timeout_count = 0;
+				while (readl(port_mmio + PORT_SCR_ACT)
+						|| readl(port_mmio
+							+ PORT_CMD_ISSUE)
+						|| readl(port_mmio
+							+ PORT_IRQ_STAT)) {
+					cmd_timeout_count++;
+					if (cmd_timeout_count >=
+							AHCI_TIMEOUT_COUNT) {
+						cmd_timeout_count = 0;
+						return ATA_DEFER_LINK;
+					}
+				}
+
+				if (pp->fbs_enabled == false)
+					ahci_enable_fbs(ap);
+				fbs_ctrl[port_num].fbs_enable_flag = 0;
+				fbs_ctrl[port_num].fbs_disable_flag = 0;
+			}
+		}
+	}
+#endif
+#endif  
 	if (!sata_pmp_attached(ap) || pp->fbs_enabled)
 		return ata_std_qc_defer(qc);
 	else
@@ -1801,7 +2066,12 @@ static void ahci_qc_prep(struct ata_queued_cmd *qc)
 	const u32 cmd_fis_len = 5;  
 	unsigned int n_elem;
 
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HI_SATA_RAM)
+	 
+	cmd_tbl = pp->cmd_tbl + qc->tag * 0x800;
+#else  
 	cmd_tbl = pp->cmd_tbl + qc->tag * AHCI_CMD_TBL_SZ;
+#endif  
 
 	ata_tf_to_fis(&qc->tf, qc->dev->link->pmp, 1, cmd_tbl);
 	if (is_atapi) {
@@ -1859,7 +2129,7 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 		u32 fbs = readl(port_mmio + PORT_FBS);
 		int pmp = fbs >> PORT_FBS_DWE_OFFSET;
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_LSP_HI3536)
 		if ((fbs & PORT_FBS_SDE) && (pmp < ap->nr_pmp_links)) {
 #else  
 		if ((fbs & PORT_FBS_SDE) && (pmp < ap->nr_pmp_links) &&
@@ -1949,9 +2219,19 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 			"connection status changed" : "PHY RDY changed");
 	}
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (irq_stat & PORT_IRQ_FREEZE) {
+		if ((irq_stat & PORT_IRQ_IF_ERR) && fbs_need_dec) {
+			ata_link_abort(link);
+			ahci_fbs_dec_intr(ap);
+		} else
+			ata_port_freeze(ap);
+	} else if (fbs_need_dec) {
+#else  
 	if (irq_stat & PORT_IRQ_FREEZE)
 		ata_port_freeze(ap);
 	else if (fbs_need_dec) {
+#endif  
 		ata_link_abort(link);
 		ahci_fbs_dec_intr(ap);
 	} else
@@ -1971,18 +2251,23 @@ static void ahci_handle_port_interrupt(struct ata_port *ap,
 	if (unlikely(resetting))
 		status &= ~PORT_IRQ_BAD_PMP;
 
-	if (ap->link.lpm_policy > ATA_LPM_MAX_POWER) {
+	if (sata_lpm_ignore_phy_events(&ap->link)) {
 		status &= ~PORT_IRQ_PHYRDY;
 		ahci_scr_write(&ap->link, SCR_ERROR, SERR_PHYRDY_CHG);
 	}
 
 	if (unlikely(status & PORT_IRQ_ERROR)) {
 		ahci_error_intr(ap, status);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		if (!(status & ~(PORT_IRQ_ERROR)))
+			return;
+#else  
 		return;
+#endif  
 	}
 
 	if (status & PORT_IRQ_SDB_FIS) {
-		 
+			 
 		if (hpriv->cap & HOST_CAP_SNTF)
 			sata_async_notification(ap);
 		else {
@@ -2028,6 +2313,72 @@ void ahci_port_intr(struct ata_port *ap)
 	status = readl(port_mmio + PORT_IRQ_STAT);
 	writel(status, port_mmio + PORT_IRQ_STAT);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(CONFIG_ARCH_HI3536) && !defined(CONFIG_SATA_AHCI)
+	if (status & PORT_IRQ_CONNECT) {
+		switch (ap->port_no) {
+		case 0:
+			writel(0x19, (void *)IO_ADDRESS(0x12120090));
+			writel(0x39, (void *)IO_ADDRESS(0x12120090));
+			writel(0x19, (void *)IO_ADDRESS(0x12120090));
+			writel(0x0, (void *)IO_ADDRESS(0x12120090));
+			break;
+		case 1:
+			writel(0x19, (void *)IO_ADDRESS(0x12120094));
+			writel(0x39, (void *)IO_ADDRESS(0x12120094));
+			writel(0x19, (void *)IO_ADDRESS(0x12120094));
+			writel(0x0, (void *)IO_ADDRESS(0x12120094));
+			break;
+		case 2:
+			writel(0x39, (void *)IO_ADDRESS(0x12120098));
+			writel(0x79, (void *)IO_ADDRESS(0x12120098));
+			writel(0x39, (void *)IO_ADDRESS(0x12120098));
+			writel(0x0, (void *)IO_ADDRESS(0x12120098));
+			break;
+		case 3:
+			writel(0x19, (void *)IO_ADDRESS(0x12120098));
+			writel(0x59, (void *)IO_ADDRESS(0x12120098));
+			writel(0x19, (void *)IO_ADDRESS(0x12120098));
+			writel(0x0, (void *)IO_ADDRESS(0x12120098));
+			break;
+		default:
+			break;
+		}
+	}
+#endif
+#if defined(CONFIG_ARCH_HI3531A) && !defined(CONFIG_SATA_AHCI)
+	if (status & PORT_IRQ_CONNECT) {
+		switch (ap->port_no) {
+		case 0:
+			writel(0x39, (void *)IO_ADDRESS(0x12120138));
+			writel(0x79, (void *)IO_ADDRESS(0x12120138));
+			writel(0x39, (void *)IO_ADDRESS(0x12120138));
+			writel(0x0, (void *)IO_ADDRESS(0x12120138));
+			break;
+		case 1:
+			writel(0x19, (void *)IO_ADDRESS(0x12120138));
+			writel(0x59, (void *)IO_ADDRESS(0x12120138));
+			writel(0x19, (void *)IO_ADDRESS(0x12120138));
+			writel(0x0, (void *)IO_ADDRESS(0x12120138));
+			break;
+		case 2:
+			writel(0x39, (void *)IO_ADDRESS(0x12120134));
+			writel(0x79, (void *)IO_ADDRESS(0x12120134));
+			writel(0x39, (void *)IO_ADDRESS(0x12120134));
+			writel(0x0, (void *)IO_ADDRESS(0x12120134));
+			break;
+		case 3:
+			writel(0x19, (void *)IO_ADDRESS(0x12120134));
+			writel(0x59, (void *)IO_ADDRESS(0x12120134));
+			writel(0x19, (void *)IO_ADDRESS(0x12120134));
+			writel(0x0, (void *)IO_ADDRESS(0x12120134));
+			break;
+		default:
+			break;
+		}
+	}
+#endif
+#endif  
 	ahci_handle_port_interrupt(ap, port_mmio, status);
 }
 
@@ -2100,10 +2451,16 @@ irqreturn_t ahci_hw_interrupt(int irq, void *dev_instance)
 	for (i = 0; i < host->n_ports; i++) {
 		struct ata_port *ap;
 
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_ARCH_HI3531A)
+		ap = host->ports[i];
+		if (!(irq_masked & (1 << ap->port_no)))
+			continue;
+#else  
 		if (!(irq_masked & (1 << i)))
 			continue;
 
 		ap = host->ports[i];
+#endif  
 		if (ap) {
 			ahci_hw_port_interrupt(ap);
 			VPRINTK("port %u\n", i);
@@ -2149,10 +2506,16 @@ irqreturn_t ahci_interrupt(int irq, void *dev_instance)
 	for (i = 0; i < host->n_ports; i++) {
 		struct ata_port *ap;
 
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_ARCH_HI3531A)
+		ap = host->ports[i];
+		if (!(irq_masked & (1 << ap->port_no)))
+			continue;
+#else  
 		if (!(irq_masked & (1 << i)))
 			continue;
 
 		ap = host->ports[i];
+#endif  
 		if (ap) {
 			ahci_port_intr(ap);
 			VPRINTK("port %u\n", i);
@@ -2356,7 +2719,15 @@ static void ahci_enable_fbs(struct ata_port *ap)
 	writel(fbs | PORT_FBS_EN, port_mmio + PORT_FBS);
 	fbs = readl(port_mmio + PORT_FBS);
 	if (fbs & PORT_FBS_EN) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if !defined(CONFIG_ARCH_HI3536) \
+	&& !defined(CONFIG_ARCH_HI3521A) \
+	&& !defined(CONFIG_ARCH_HI3531A)
 		dev_info(ap->host->dev, "FBS is enabled\n");
+#endif
+#else  
+		dev_info(ap->host->dev, "FBS is enabled\n");
+#endif  
 		pp->fbs_enabled = true;
 		pp->fbs_last_dev = -1;  
 	} else
@@ -2390,11 +2761,29 @@ static void ahci_disable_fbs(struct ata_port *ap)
 	if (fbs & PORT_FBS_EN)
 		dev_err(ap->host->dev, "Failed to disable FBS\n");
 	else {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if (defined(CONFIG_ARCH_HI3536) \
+	|| defined(CONFIG_ARCH_HI3521A) \
+	|| defined(CONFIG_ARCH_HI3531A)) \
+	&& !defined(CONFIG_SATA_AHCI)
 		dev_info(ap->host->dev, "FBS is disabled\n");
+#endif
+#else  
+		dev_info(ap->host->dev, "FBS is disabled\n");
+#endif  
 		pp->fbs_enabled = false;
 	}
 
 	ahci_start_engine(ap);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if (defined(CONFIG_ARCH_HI3536) \
+	|| defined(CONFIG_ARCH_HI3521A) \
+	|| defined(CONFIG_ARCH_HI3531A)) \
+	&& !defined(CONFIG_SATA_AHCI)
+	writel(HI_SATA_FIFOTH_VALUE, (port_mmio + HI_SATA_PORT_FIFOTH));
+#endif
+#endif  
 }
 
 static void ahci_pmp_attach(struct ata_port *ap)
@@ -2403,11 +2792,32 @@ static void ahci_pmp_attach(struct ata_port *ap)
 	struct ahci_port_priv *pp = ap->private_data;
 	u32 cmd;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if (defined(CONFIG_ARCH_HI3536) \
+	|| defined(CONFIG_ARCH_HI3521A) \
+	|| defined(CONFIG_ARCH_HI3531A)) \
+	&& !defined(CONFIG_SATA_AHCI)
+	unsigned int port_num = ap->port_no;
+#endif
+#endif  
+
 	cmd = readl(port_mmio + PORT_CMD);
 	cmd |= PORT_CMD_PMP;
 	writel(cmd, port_mmio + PORT_CMD);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if (defined(CONFIG_ARCH_HI3536) \
+	|| defined(CONFIG_ARCH_HI3521A) \
+	|| defined(CONFIG_ARCH_HI3531A)) \
+	&& !defined(CONFIG_SATA_AHCI)
+	if (fbs_ctrl[port_num].fbs_enable_ctrl)
+		ahci_enable_fbs(ap);
+	else
+		ahci_disable_fbs(ap);
+#endif
+#else  
 	ahci_enable_fbs(ap);
+#endif  
 
 	pp->intr_mask |= PORT_IRQ_BAD_PMP;
 
@@ -2465,6 +2875,28 @@ static int ahci_port_suspend(struct ata_port *ap, pm_message_t mesg)
 }
 #endif
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if (defined(CONFIG_ARCH_HI3536) \
+	|| defined(CONFIG_ARCH_HI3521A) \
+	|| defined(CONFIG_ARCH_HI3531A)) \
+	&& !defined(CONFIG_SATA_AHCI)
+static void ahci_poll_func(unsigned long arg)
+{
+	struct ata_port *ap = (struct ata_port *)arg;
+	unsigned int port_num = ap->port_no;
+
+	if (ap->link.pmp == SATA_PMP_CTRL_PORT) {
+		fbs_ctrl[port_num].fbs_enable_flag = 1;
+		fbs_ctrl[port_num].fbs_disable_flag = 0;
+	}
+}
+#endif
+
+#ifdef CONFIG_HI_SATA_RAM
+extern unsigned int sg_num;
+#endif
+#endif  
+
 static int ahci_port_start(struct ata_port *ap)
 {
 	struct ahci_host_priv *hpriv = ap->host->private_data;
@@ -2473,6 +2905,11 @@ static int ahci_port_start(struct ata_port *ap)
 	void *mem;
 	dma_addr_t mem_dma;
 	size_t dma_sz, rx_fis_sz;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_HI_SATA_RAM
+	unsigned int ram_addr_phy1, ram_addr_phy2, cmd_slot_ram, cmd_tbl_ram;
+#endif
+#endif  
 
 	pp = devm_kzalloc(dev, sizeof(*pp), GFP_KERNEL);
 	if (!pp)
@@ -2493,10 +2930,20 @@ static int ahci_port_start(struct ata_port *ap)
 	}
 
 	if (pp->fbs_supported) {
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HI_SATA_RAM)
+		dma_sz = AHCI_PORT_PRIV_FBS_DMA_SZ
+				+ sg_num * 16 * AHCI_MAX_CMDS;
+#else  
 		dma_sz = AHCI_PORT_PRIV_FBS_DMA_SZ;
+#endif  
 		rx_fis_sz = AHCI_RX_FIS_SZ * 16;
 	} else {
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HI_SATA_RAM)
+		dma_sz = AHCI_PORT_PRIV_DMA_SZ
+				+ sg_num * 16 * AHCI_MAX_CMDS;
+#else  
 		dma_sz = AHCI_PORT_PRIV_DMA_SZ;
+#endif  
 		rx_fis_sz = AHCI_RX_FIS_SZ;
 	}
 
@@ -2505,6 +2952,31 @@ static int ahci_port_start(struct ata_port *ap)
 		return -ENOMEM;
 	memset(mem, 0, dma_sz);
 
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HI_SATA_RAM)
+	ram_addr_phy1 = CONFIG_HI_SATA_RAM_CMD_BASE
+			+ (ap->port_no * CONFIG_HI_SATA_RAM_CMD_IO_SIZE);
+	cmd_slot_ram = (unsigned int)ioremap(ram_addr_phy1,
+					CONFIG_HI_SATA_RAM_CMD_IO_SIZE);
+
+	memset((void *)cmd_slot_ram, 0, CONFIG_HI_SATA_RAM_CMD_IO_SIZE);
+
+	ram_addr_phy2 = CONFIG_HI_SATA_RAM_PRDT_BASE
+			+ (ap->port_no * CONFIG_HI_SATA_RAM_PRDT_IO_SIZE);
+	cmd_tbl_ram = (unsigned int)ioremap(ram_addr_phy2,
+					CONFIG_HI_SATA_RAM_PRDT_IO_SIZE);
+
+	memset((void *)cmd_tbl_ram, 0, CONFIG_HI_SATA_RAM_PRDT_IO_SIZE);
+
+	pp->cmd_slot = (struct ahci_cmd_hdr *)cmd_slot_ram;
+	pp->cmd_slot_dma = ram_addr_phy1;
+
+	pp->rx_fis = mem;
+	pp->rx_fis_dma = mem_dma;
+
+	pp->cmd_tbl = (void *)cmd_tbl_ram;
+	pp->cmd_tbl_dma = ram_addr_phy2;
+#else  
+	 
 	pp->cmd_slot = mem;
 	pp->cmd_slot_dma = mem_dma;
 
@@ -2519,6 +2991,7 @@ static int ahci_port_start(struct ata_port *ap)
 
 	pp->cmd_tbl = mem;
 	pp->cmd_tbl_dma = mem_dma;
+#endif  
 
 	pp->intr_mask = DEF_PORT_IRQ;
 
@@ -2528,6 +3001,23 @@ static int ahci_port_start(struct ata_port *ap)
 	}
 
 	ap->private_data = pp;
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if (defined(CONFIG_ARCH_HI3536) \
+	|| defined(CONFIG_ARCH_HI3521A) \
+	|| defined(CONFIG_ARCH_HI3531A)) \
+	&& !defined(CONFIG_SATA_AHCI)
+	fbs_ctrl[ap->port_no].fbs_enable_ctrl = fbs_en;
+	fbs_ctrl[ap->port_no].fbs_enable_flag = 0;
+	fbs_ctrl[ap->port_no].fbs_disable_flag = 0;
+	fbs_ctrl[ap->port_no].fbs_cmd_issue_flag = 0;
+
+	init_timer(&fbs_ctrl[ap->port_no].poll_timer);
+	fbs_ctrl[ap->port_no].poll_timer.function = ahci_poll_func;
+	fbs_ctrl[ap->port_no].poll_timer.data = (unsigned long)ap;
+	fbs_ctrl[ap->port_no].poll_timer.expires = jiffies + AHCI_POLL_TIMER;
+#endif
+#endif  
 
 	return ahci_port_resume(ap);
 }

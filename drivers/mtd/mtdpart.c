@@ -557,7 +557,7 @@ out_register:
 			MacNumber = 8;
 			break;
 		default:
-			printk(KERN_ERR, "Undefined verder version %d\n", giVenderFormatVersion);
+			printk(KERN_ERR "Undefined vender version %d\n", giVenderFormatVersion);
 		}
 
 		for (n = 0; n < MacNumber; n++) {

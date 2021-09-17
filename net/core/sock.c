@@ -313,7 +313,7 @@ int sock_queue_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	spin_unlock_irqrestore(&list->lock, flags);
 
 	if (!sock_flag(sk, SOCK_DEAD))
-		sk->sk_data_ready(sk, skb_len);
+		sk->sk_data_ready(sk);
 	return 0;
 }
 EXPORT_SYMBOL(sock_queue_rcv_skb);
@@ -741,6 +741,17 @@ set_rcvbuf:
 		sock_valbool_flag(sk, SOCK_NOFCS, valbool);
 		break;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	case SO_TOE_ENABLE:
+		if (valbool)
+			sk->sk_tnkinfo.not_capable = TNK_SOCK_SET_TOE_ON;
+		else
+			sk->sk_tnkinfo.not_capable = TNK_SOCK_SET_TOE_OFF;
+		break;
+#endif
+#endif  
+
 	case SO_SELECT_ERR_QUEUE:
 		sock_valbool_flag(sk, SOCK_SELECT_ERR_QUEUE, valbool);
 		break;
@@ -997,6 +1008,22 @@ int sock_getsockopt(struct socket *sock, int level, int optname,
 	case SO_SELECT_ERR_QUEUE:
 		v.val = sock_flag(sk, SOCK_SELECT_ERR_QUEUE);
 		break;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	case SO_TOE_ENABLE:
+		if (sk->sk_tnkinfo.not_capable == TNK_SOCK_SET_TOE_ON)
+			v.val = 1;
+		else
+			v.val = 0;
+		break;
+	case SO_TOE_STATE:
+		if (sk->sk_tnkinfo.state >= TNKINFO_STATE_ACTIVATING)
+			v.val = 1;
+		else
+			v.val = 0;
+		break;
+#endif
+#endif  
 
 	default:
 		return -ENOPROTOOPT;
@@ -1844,7 +1871,7 @@ static void sock_def_error_report(struct sock *sk)
 	rcu_read_unlock();
 }
 
-static void sock_def_readable(struct sock *sk, int len)
+static void sock_def_readable(struct sock *sk)
 {
 	struct socket_wq *wq;
 

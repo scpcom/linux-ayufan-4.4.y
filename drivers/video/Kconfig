@@ -2475,6 +2475,9 @@ source "drivers/video/omap2/Kconfig"
 source "drivers/video/exynos/Kconfig"
 source "drivers/video/mmp/Kconfig"
 source "drivers/video/backlight/Kconfig"
+if SYNO_LSP_HI3536
+source "drivers/video/adf/Kconfig"
+endif # SYNO_LSP_HI3536
 
 if VT
 	source "drivers/video/console/Kconfig"

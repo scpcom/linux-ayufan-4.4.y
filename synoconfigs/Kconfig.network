@@ -111,4 +111,21 @@ config SYNO_IPV6_EXPORT_IN6ADDR_ANY
 	bool "Export in6addr_any value for modules"
 	default y
 
+config SYNO_CVE_2016_5696
+	bool "Fix CVE-2016-5696"
+	default y
+
+config SYNO_NF_NAT_WORKAROUND
+       bool "Fix BUG_ON on nf_nat_setup_info when HA is running"
+       default y
+
+config SYNO_ALPINE_AQR105_PHY
+	bool "Drivers for Aqantia aqr105 phy"
+	depends on SYNO_LSP_ALPINE
+
+config SYNO_ALPINE_SKB_TRUESIZE_ADJUST
+	bool "Adjust truesize_of skb avoild warnon"
+	depends on SYNO_ALPINE
+	default y
+
 endmenu #Network

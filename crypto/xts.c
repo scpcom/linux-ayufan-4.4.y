@@ -35,6 +35,13 @@ static int setkey(struct crypto_tfm *parent, const u8 *key,
 {
 	struct priv *ctx = crypto_tfm_ctx(parent);
 	struct crypto_cipher *child = ctx->tweak;
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+	int err;
+
+	err = xts_check_key(parent, key, keylen);
+	if (err)
+		return err;
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	u32 *flags = &parent->crt_flags;
 	int err;
 
@@ -45,6 +52,7 @@ static int setkey(struct crypto_tfm *parent, const u8 *key,
 		*flags |= CRYPTO_TFM_RES_BAD_KEY_LEN;
 		return -EINVAL;
 	}
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
 	/* we need two cipher instances: one to compute the initial 'tweak'
 	 * by encrypting the IV (usually the 'plain' iv) and the other

@@ -686,35 +686,38 @@ static void __mv_xor_slot_cleanup(struct mv_xor_chan *mv_chan)
 	dma_cookie_t cookie = 0;
 	int busy = mv_chan_is_busy(mv_chan);
 	u32 current_desc = mv_chan_get_current_desc(mv_chan);
-#if defined(MY_ABC_HERE)
 	int current_cleaned = 0;
 	struct mv_xor_desc *hw_desc;
+#if defined(MY_ABC_HERE)
 	struct dma_chan *dma_chan;
 	dma_chan = &mv_chan->dmachan;
 
 	dma_sync_single_for_cpu(dma_chan->device->dev, (dma_addr_t) NULL,
 				(size_t) NULL, DMA_FROM_DEVICE);
-#else  
-	int seen_current = 0;
 #endif  
 
 	dev_dbg(mv_chan_to_devp(mv_chan), "%s %d\n", __func__, __LINE__);
 	dev_dbg(mv_chan_to_devp(mv_chan), "current_desc %x\n", current_desc);
 	mv_xor_clean_completed_slots(mv_chan);
 
-#if defined(MY_ABC_HERE)
 	list_for_each_entry_safe(iter, _iter, &mv_chan->chain,
-				 node) {
-		 
+#if defined(MY_ABC_HERE)
+					node) {
+#else
+					chain_node) {
+#endif  
+
 		hw_desc = iter->hw_desc;
 		if (hw_desc->status & XOR_DESC_SUCCESS) {
+#if defined(MY_ABC_HERE)
 			if (iter->type == DMA_CRC32C) {
 				struct mv_xor_desc *hw_desc = iter->hw_desc;
 				BUG_ON(!iter->crc32_result);
 				*iter->crc32_result = ~hw_desc->crc32_result;
 			}
-
-			cookie = mv_xor_run_tx_complete_actions(iter, mv_chan, cookie);
+#endif  
+			cookie = mv_xor_run_tx_complete_actions(iter, mv_chan,
+								cookie);
 
 			mv_xor_clean_slot(iter, mv_chan);
 
@@ -734,65 +737,36 @@ static void __mv_xor_slot_cleanup(struct mv_xor_chan *mv_chan)
 		if (current_cleaned) {
 			 
 			iter = list_entry(mv_chan->chain.next,
-						struct mv_xor_desc_slot,
-						node);
-			mv_xor_start_new_chain(mv_chan, iter);
-		} else {
-			if (!list_is_last(&iter->node, &mv_chan->chain)) {
-				 
-				iter = list_entry(iter->node.next, struct mv_xor_desc_slot, node);
-				mv_xor_start_new_chain(mv_chan, iter);
-			} else {
-				 
-				tasklet_schedule(&mv_chan->irq_tasklet);
-			}
-		}
-	}
-#else  
-	list_for_each_entry_safe(iter, _iter, &mv_chan->chain,
-					chain_node) {
-
-		if (seen_current)
-			break;
-
-		if (iter->async_tx.phys == current_desc) {
-			seen_current = 1;
-			if (busy)
-				break;
-			}
-		}
-	}
-
-	if ((busy == 0) && !list_empty(&mv_chan->chain)) {
-		if (current_cleaned) {
-			/*
-			 * current descriptor cleaned and removed, run
-			 * from list head
-			 */
-			iter = list_entry(mv_chan->chain.next,
 					  struct mv_xor_desc_slot,
+#if defined(MY_ABC_HERE)
+					  node);
+#else
 					  chain_node);
+#endif  
 			mv_xor_start_new_chain(mv_chan, iter);
 		} else {
+#if defined(MY_ABC_HERE)
+			if (!list_is_last(&iter->node, &mv_chan->chain)) {
+#else
 			if (!list_is_last(&iter->chain_node, &mv_chan->chain)) {
-				/*
-				 * descriptors are still waiting after
-				 * current, trigger them
-				 */
+#endif  
+				 
+#if defined(MY_ABC_HERE)
+				iter = list_entry(iter->node.next,
+						  struct mv_xor_desc_slot,
+						  node);
+#else
 				iter = list_entry(iter->chain_node.next,
 						  struct mv_xor_desc_slot,
 						  chain_node);
+#endif  
 				mv_xor_start_new_chain(mv_chan, iter);
 			} else {
-				/*
-				 * some descriptors are still waiting
-				 * to be cleaned
-				 */
+				 
 				tasklet_schedule(&mv_chan->irq_tasklet);
 			}
 		}
 	}
-#endif  
 
 	if (cookie > 0)
 		mv_chan->dmachan.completed_cookie = cookie;

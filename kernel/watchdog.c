@@ -34,12 +34,26 @@ static DEFINE_PER_CPU(bool, softlockup_touch_sync);
 static DEFINE_PER_CPU(bool, soft_watchdog_warn);
 static DEFINE_PER_CPU(unsigned long, hrtimer_interrupts);
 static DEFINE_PER_CPU(unsigned long, soft_lockup_hrtimer_cnt);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_HARDLOCKUP_DETECTOR
+static DEFINE_PER_CPU(bool, hard_watchdog_warn);
+static DEFINE_PER_CPU(bool, watchdog_nmi_touch);
+static DEFINE_PER_CPU(unsigned long, hrtimer_interrupts_saved);
+#endif
+#ifdef CONFIG_HARDLOCKUP_DETECTOR_OTHER_CPU
+static cpumask_t __read_mostly watchdog_cpus;
+#endif
+#ifdef CONFIG_HARDLOCKUP_DETECTOR_NMI
+static DEFINE_PER_CPU(struct perf_event *, watchdog_ev);
+#endif
+#else  
 #ifdef CONFIG_HARDLOCKUP_DETECTOR
 static DEFINE_PER_CPU(bool, hard_watchdog_warn);
 static DEFINE_PER_CPU(bool, watchdog_nmi_touch);
 static DEFINE_PER_CPU(unsigned long, hrtimer_interrupts_saved);
 static DEFINE_PER_CPU(struct perf_event *, watchdog_ev);
 #endif
+#endif  
 #ifdef MY_ABC_HERE
 static DEFINE_PER_CPU(unsigned long, softlockup_counter);
 #endif
@@ -152,7 +166,8 @@ void touch_softlockup_watchdog_sync(void)
 	__raw_get_cpu_var(watchdog_touch_ts) = 0;
 }
 
-#ifdef CONFIG_HARDLOCKUP_DETECTOR
+#if (defined(CONFIG_HARDLOCKUP_DETECTOR) && !defined(CONFIG_SYNO_LSP_HI3536)) || \
+	(defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HARDLOCKUP_DETECTOR_NMI))
  
 static int is_hardlockup(void)
 {
@@ -166,6 +181,72 @@ static int is_hardlockup(void)
 }
 #endif
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_HARDLOCKUP_DETECTOR_OTHER_CPU
+static unsigned int watchdog_next_cpu(unsigned int cpu)
+{
+	cpumask_t cpus = watchdog_cpus;
+	unsigned int next_cpu;
+
+	next_cpu = cpumask_next(cpu, &cpus);
+	if (next_cpu >= nr_cpu_ids)
+		next_cpu = cpumask_first(&cpus);
+
+	if (next_cpu == cpu)
+		return nr_cpu_ids;
+
+	return next_cpu;
+}
+
+static int is_hardlockup_other_cpu(unsigned int cpu)
+{
+	unsigned long hrint = per_cpu(hrtimer_interrupts, cpu);
+
+	if (per_cpu(hrtimer_interrupts_saved, cpu) == hrint)
+		return 1;
+
+	per_cpu(hrtimer_interrupts_saved, cpu) = hrint;
+	return 0;
+}
+
+static void watchdog_check_hardlockup_other_cpu(void)
+{
+	unsigned int next_cpu;
+
+	if (__this_cpu_read(hrtimer_interrupts) % 3 != 0)
+		return;
+
+	next_cpu = watchdog_next_cpu(smp_processor_id());
+	if (next_cpu >= nr_cpu_ids)
+		return;
+
+	smp_rmb();
+
+	if (per_cpu(watchdog_nmi_touch, next_cpu) == true) {
+		per_cpu(watchdog_nmi_touch, next_cpu) = false;
+		return;
+	}
+
+	if (is_hardlockup_other_cpu(next_cpu)) {
+		 
+		if (per_cpu(hard_watchdog_warn, next_cpu) == true)
+			return;
+
+		if (hardlockup_panic)
+			panic("Watchdog detected hard LOCKUP on cpu %u", next_cpu);
+		else
+			WARN(1, "Watchdog detected hard LOCKUP on cpu %u", next_cpu);
+
+		per_cpu(hard_watchdog_warn, next_cpu) = true;
+	} else {
+		per_cpu(hard_watchdog_warn, next_cpu) = false;
+	}
+}
+#else
+static inline void watchdog_check_hardlockup_other_cpu(void) { return; }
+#endif
+#endif  
+
 static int is_softlockup(unsigned long touch_ts)
 {
 	unsigned long now = get_timestamp();
@@ -176,7 +257,8 @@ static int is_softlockup(unsigned long touch_ts)
 	return 0;
 }
 
-#ifdef CONFIG_HARDLOCKUP_DETECTOR
+#if (defined(CONFIG_HARDLOCKUP_DETECTOR) && !defined(CONFIG_SYNO_LSP_HI3536)) || \
+	(defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HARDLOCKUP_DETECTOR_NMI))
 
 static struct perf_event_attr wd_hw_attr = {
 	.type		= PERF_TYPE_HARDWARE,
@@ -233,6 +315,11 @@ static enum hrtimer_restart watchdog_timer_fn(struct hrtimer *hrtimer)
 	int duration;
 
 	watchdog_interrupt_count();
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	 
+	watchdog_check_hardlockup_other_cpu();
+#endif  
 
 	wake_up_process(__this_cpu_read(softlockup_watchdog));
 
@@ -338,7 +425,8 @@ static void watchdog(unsigned int cpu)
 	__touch_watchdog();
 }
 
-#ifdef CONFIG_HARDLOCKUP_DETECTOR
+#if (defined(CONFIG_HARDLOCKUP_DETECTOR) && !defined(CONFIG_SYNO_LSP_HI3536)) || \
+	(defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HARDLOCKUP_DETECTOR_NMI))
  
 static unsigned long cpu0_err;
 
@@ -402,8 +490,34 @@ static void watchdog_nmi_disable(unsigned int cpu)
 	return;
 }
 #else
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_HARDLOCKUP_DETECTOR_OTHER_CPU
+static int watchdog_nmi_enable(unsigned int cpu)
+{
+	 
+	per_cpu(watchdog_nmi_touch, cpu) = true;
+	smp_wmb();
+	cpumask_set_cpu(cpu, &watchdog_cpus);
+	return 0;
+}
+
+static void watchdog_nmi_disable(unsigned int cpu)
+{
+	unsigned int next_cpu = watchdog_next_cpu(cpu);
+
+	if (next_cpu < nr_cpu_ids)
+		per_cpu(watchdog_nmi_touch, next_cpu) = true;
+	smp_wmb();
+	cpumask_clear_cpu(cpu, &watchdog_cpus);
+}
+#else
 static int watchdog_nmi_enable(unsigned int cpu) { return 0; }
 static void watchdog_nmi_disable(unsigned int cpu) { return; }
+#endif  
+#else  
+static int watchdog_nmi_enable(unsigned int cpu) { return 0; }
+static void watchdog_nmi_disable(unsigned int cpu) { return; }
+#endif  
 #endif  
 
 #ifdef CONFIG_SYSCTL

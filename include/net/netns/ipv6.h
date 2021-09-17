@@ -28,6 +28,9 @@ struct netns_sysctl_ipv6 {
 	int ip6_rt_mtu_expires;
 	int ip6_rt_min_advmss;
 	int icmpv6_time;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	int fwmark_reflect;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 };
 
 struct netns_ipv6 {

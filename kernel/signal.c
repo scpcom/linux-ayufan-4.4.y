@@ -2849,7 +2849,11 @@ int do_sigtimedwait(const sigset_t *which, siginfo_t *info,
 		recalc_sigpending();
 		spin_unlock_irq(&tsk->sighand->siglock);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		timeout = freezable_schedule_timeout_interruptible(timeout);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		timeout = schedule_timeout_interruptible(timeout);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 		spin_lock_irq(&tsk->sighand->siglock);
 		__set_task_blocked(tsk, &tsk->real_blocked);

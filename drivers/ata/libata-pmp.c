@@ -113,7 +113,8 @@ syno_pm_gpio_config(struct ata_port *ap)
 
 		sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_GPI_POLARITY, 0xFFFFF);
 
-		sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_SATA_BLINK_RATE, 0x2082082);
+		sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_SATA_0_TO_3_BLINK_RATE, 0x2082082);
+		sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_SATA_4_BLINK_RATE, 0x00000082);
 
 		sata_pmp_write(&(ap->link), 0x090, 0x00001F1F);
 		sata_pmp_write(&(ap->link), 0x091, 0xFFF0003A);
@@ -175,6 +176,9 @@ syno_pm_device_config(struct ata_port *ap)
 			syno_pm_device_config_set(ap, 0, 0x91, 0xEFF);
 			syno_pm_device_config_set(ap, 2, 0x91, 0xF7F);
 		}
+	}
+	if (IS_SYNOLOGY_DX517(ap->PMSynoUnique)) {
+		syno_pm_device_config_set(ap, 4, 0x91, 0xE7F);
 	}
 }
 
@@ -442,7 +446,8 @@ u8 syno_pm_is_synology_9705(const struct ata_port *ap)
 	if (!IS_SYNOLOGY_RX413(ap->PMSynoUnique) &&
 		!IS_SYNOLOGY_RX1214(ap->PMSynoUnique) &&
 		!IS_SYNOLOGY_RX1217(ap->PMSynoUnique) &&
-		!IS_SYNOLOGY_DX1215(ap->PMSynoUnique)) {
+		!IS_SYNOLOGY_DX1215(ap->PMSynoUnique) &&
+		!IS_SYNOLOGY_DX517(ap->PMSynoUnique)) {
 		goto END;
 	}
 
@@ -746,6 +751,19 @@ syno_pmp_ports_num(struct ata_port *ap)
 #ifdef MY_ABC_HERE
 		 
 		if (syno_pm_is_synology_3xxx(ap) && (ap->link.uiStsFlags & SYNO_STATUS_IS_MV9235)) {
+			ata_port_printk(ap, KERN_ERR, "This expansion unit is unsupported\n");
+			ret = 0;
+		}
+#endif  
+#ifdef MY_DEF_HERE
+		if (syno_is_hw_version(HW_DS1517p) && syno_pm_is_synology_3xxx(ap)) {
+			ata_port_printk(ap, KERN_ERR, "This expansion unit is unsupported\n");
+			ret = 0;
+		}
+#endif  
+#if defined (MY_DEF_HERE) && defined (MY_ABC_HERE)
+		 
+		if (IS_SYNOLOGY_DX517(ap->PMSynoUnique) && (ap->link.uiStsFlags & SYNO_STATUS_IS_SIL)) {
 			ata_port_printk(ap, KERN_ERR, "This expansion unit is unsupported\n");
 			ret = 0;
 		}
@@ -1277,7 +1295,6 @@ static void sata_pmp_quirks(struct ata_port *ap)
 				       ATA_LFLAG_NO_SRST |
 				       ATA_LFLAG_ASSUME_ATA;
 		}
-#if defined(MY_ABC_HERE)
 	} else if (vendor == 0x11ab && devid == 0x4140) {
 		 
 		ata_for_each_link(link, ap, EDGE) {
@@ -1285,7 +1302,6 @@ static void sata_pmp_quirks(struct ata_port *ap)
 			if (link->pmp == 4)
 				link->flags |= ATA_LFLAG_DISABLED;
 		}
-#endif  
 	}
 }
 
@@ -1330,6 +1346,9 @@ int sata_pmp_attach(struct ata_device *dev)
 	syno_pm_gpio_config(ap);
 	syno_prepare_custom_info(ap);
 #ifdef MY_ABC_HERE
+	if (0 == ap->PMSynoEMID) {
+		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
+	}
 	 
 	if (IS_SYNOLOGY_DX510(ap->PMSynoUnique)) {
 		target = 1;

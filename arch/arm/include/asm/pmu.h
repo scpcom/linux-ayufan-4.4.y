@@ -8,6 +8,14 @@
 #include <linux/interrupt.h>
 #include <linux/perf_event.h>
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+ 
+enum arm_pmu_type {
+	ARM_PMU_DEVICE_CPU	= 0,
+	ARM_NUM_PMU_DEVICES,
+};
+#endif  
+
 struct arm_pmu_platdata {
 	irqreturn_t (*handle_irq)(int irq, void *dev,
 				  irq_handler_t pmu_handler);

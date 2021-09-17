@@ -76,4 +76,12 @@
 
 #define SO_SELECT_ERR_QUEUE	45
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+/* TOE option for hisi device only */
+#define SO_TOE_ENABLE           76
+#define SO_TOE_STATE		77
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 #endif /* __ASM_GENERIC_SOCKET_H */

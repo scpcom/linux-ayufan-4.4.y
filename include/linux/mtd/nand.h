@@ -30,8 +30,13 @@ extern int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
 
 #define NAND_MAX_CHIPS		8
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define NAND_MAX_OOBSIZE	4800
+#define NAND_MAX_PAGESIZE	32768
+#else  
 #define NAND_MAX_OOBSIZE	640
 #define NAND_MAX_PAGESIZE	8192
+#endif  
 
 #define NAND_NCE		0x01
  
@@ -50,6 +55,9 @@ extern int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
 #define NAND_CMD_READOOB	0x50
 #define NAND_CMD_ERASE1		0x60
 #define NAND_CMD_STATUS		0x70
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define NAND_CMD_STATUS_MULTI	0x71
+#endif  
 #define NAND_CMD_SEQIN		0x80
 #define NAND_CMD_RNDIN		0x85
 #define NAND_CMD_READID		0x90
@@ -57,6 +65,9 @@ extern int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
 #define NAND_CMD_PARAM		0xec
 #define NAND_CMD_GET_FEATURES	0xee
 #define NAND_CMD_SET_FEATURES	0xef
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define NAND_CMD_SYNC_RESET	0xfc
+#endif  
 #define NAND_CMD_RESET		0xff
 
 #define NAND_CMD_LOCK		0x2a
@@ -66,6 +77,21 @@ extern int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
 #define NAND_CMD_READSTART	0x30
 #define NAND_CMD_RNDOUTSTART	0xE0
 #define NAND_CMD_CACHEDPROG	0x15
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+ 
+#define NAND_CMD_DEPLETE1	0x100
+#define NAND_CMD_DEPLETE2	0x38
+#define NAND_CMD_STATUS_MULTI	0x71
+#define NAND_CMD_STATUS_ERROR	0x72
+ 
+#define NAND_CMD_STATUS_ERROR0	0x73
+#define NAND_CMD_STATUS_ERROR1	0x74
+#define NAND_CMD_STATUS_ERROR2	0x75
+#define NAND_CMD_STATUS_ERROR3	0x76
+#define NAND_CMD_STATUS_RESET	0x7f
+#define NAND_CMD_STATUS_CLEAR	0xff
+#endif  
 
 #define NAND_CMD_NONE		-1
 
@@ -103,20 +129,34 @@ typedef enum {
 
 #define NAND_GET_DEVICE		0x80
 
-#if defined (MY_DEF_HERE)
+#if defined (MY_DEF_HERE) || defined(CONFIG_SYNO_LSP_HI3536)
  
 #define NAND_NO_AUTOINCR	0x00000001
 #endif  
  
 #define NAND_BUSWIDTH_16	0x00000002
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
  
+#define NAND_NO_PADDING		0x00000004
+#endif  
+
 #define NAND_CACHEPRG		0x00000008
-#if defined (MY_DEF_HERE)
+#if defined (MY_DEF_HERE) || defined(CONFIG_SYNO_LSP_HI3536)
 
 #define NAND_COPYBACK		0x00000010
 
 #endif  
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
  
+#define NAND_IS_AND		0x00000020
+ 
+#define NAND_4PAGE_ARRAY	0x00000040
+ 
+#define BBT_AUTO_REFRESH	0x00000080
+#endif  
+
 #define NAND_NEED_READRDY	0x00000100
 
 #define NAND_NO_SUBPAGE_WRITE	0x00000200
@@ -366,6 +406,9 @@ struct nand_chip {
 	u16 (*read_word)(struct mtd_info *mtd);
 	void (*write_buf)(struct mtd_info *mtd, const uint8_t *buf, int len);
 	void (*read_buf)(struct mtd_info *mtd, uint8_t *buf, int len);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	int (*verify_buf)(struct mtd_info *mtd, const uint8_t *buf, int len);
+#endif  
 	void (*select_chip)(struct mtd_info *mtd, int chip);
 	int (*block_bad)(struct mtd_info *mtd, loff_t ofs, int getchip);
 	int (*block_markbad)(struct mtd_info *mtd, loff_t ofs);
@@ -454,7 +497,15 @@ struct nand_chip {
 #define NAND_MFR_MICRON		0x2c
 #define NAND_MFR_AMD		0x01
 #define NAND_MFR_MACRONIX	0xc2
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define NAND_MFR_GD		0xc8
+#endif  
 #define NAND_MFR_EON		0x92
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define NAND_MFR_ESMT		0xC8
+#define NAND_MFR_WINBOND	0xef
+#define NAND_MFR_ATO		0x9b
+#endif  
 
 #define NAND_MAX_ID_LEN 8
 

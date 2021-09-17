@@ -18,5 +18,10 @@ obj-$(CONFIG_MTD_SST25L)	+= sst25l.o
 obj-$(CONFIG_MTD_BCM47XXSFLASH)	+= bcm47xxsflash.o
 obj-$(CONFIG_MTD_STM_SPI_FSM)	+= stm_spi_fsm.o
 
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_MTD_SPI_IDS)	+= spi_ids.o
+obj-$(CONFIG_MTD_HISFC350)	+= hisfc350/
+obj-$(CONFIG_HIFMC_SPI_NOR)	+= hifmc100/
+endif # CONFIG_SYNO_LSP_HI3536
 
 CFLAGS_docg3.o			+= -I$(src)

@@ -402,6 +402,10 @@ static int parse_command(const char __user *buffer, size_t count)
 		return -EINVAL;
 	if (copy_from_user(s, buffer, count))
 		return -EFAULT;
+#if defined(CONFIG_SYNO_HI3536)
+	if (count == 0)
+		return 0;
+#endif /* CONFIG_SYNO_HI3536 */
 	if (s[count-1] == '\n')
 		count--;
 	if (count == 1 && s[0] == '0')

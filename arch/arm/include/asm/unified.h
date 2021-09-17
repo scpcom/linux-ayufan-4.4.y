@@ -54,6 +54,9 @@
 
 #endif	/* CONFIG_THUMB2_KERNEL */
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #ifndef CONFIG_ARM_ASM_UNIFIED
 
 /*
@@ -126,5 +129,6 @@ __asm__(
 #endif	/* __ASSEMBLY__ */
 
 #endif	/* CONFIG_ARM_ASM_UNIFIED */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #endif	/* !__ASM_UNIFIED_H */

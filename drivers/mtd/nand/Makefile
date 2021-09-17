@@ -8,6 +8,11 @@ obj-$(CONFIG_MTD_NAND_BCH)		+= nand_bch.o
 obj-$(CONFIG_MTD_NAND_IDS)		+= nand_ids.o
 obj-$(CONFIG_MTD_SM_COMMON) 		+= sm_common.o
 
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_MTD_NAND_HISNFC100)	+= hisnfc100/
+obj-$(CONFIG_MTD_NAND_HINFC610)		+= hinfc610/
+obj-$(CONFIG_HIFMC_SPI_NAND)		+= hifmc100/
+endif # CONFIG_SYNO_LSP_HI3536
 obj-$(CONFIG_MTD_NAND_CAFE)		+= cafe_nand.o
 obj-$(CONFIG_MTD_NAND_AMS_DELTA)	+= ams-delta.o
 obj-$(CONFIG_MTD_NAND_DENALI)		+= denali.o
@@ -61,4 +66,8 @@ ifeq ($(CONFIG_SYNO_LSP_ARMADA),y)
 obj-$(CONFIG_MTD_NAND_MVEBU_NFC)	+= mvebu_nfc/
 endif
 
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+nand-objs := nand_base.o nand_bbt.o hinfc_gen.o hinfc_spl_ids.o match_table.o
+else # CONFIG_SYNO_LSP_HI3536
 nand-objs := nand_base.o nand_bbt.o
+endif # CONFIG_SYNO_LSP_HI3536

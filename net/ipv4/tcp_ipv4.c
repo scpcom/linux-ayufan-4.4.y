@@ -26,6 +26,12 @@
 #include <net/xfrm.h>
 #include <net/netdma.h>
 #include <net/secure_seq.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+#include <net/tnkdrv.h>
+#endif
+#endif  
+
 #include <net/tcp_memcontrol.h>
 
 #include <linux/inet.h>
@@ -36,6 +42,12 @@
 
 #include <linux/crypto.h>
 #include <linux/scatterlist.h>
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+extern struct tnkfuncs *tnk;
+#endif
+#endif  
 
 int sysctl_tcp_tw_reuse __read_mostly;
 int sysctl_tcp_low_latency __read_mostly;
@@ -1207,7 +1219,7 @@ static int tcp_v4_conn_req_fastopen(struct sock *sk,
 		tp->rcv_nxt = TCP_SKB_CB(skb)->end_seq;
 		tp->syn_data_acked = 1;
 	}
-	sk->sk_data_ready(sk, 0);
+	sk->sk_data_ready(sk);
 	bh_unlock_sock(child);
 	sock_put(child);
 	WARN_ON(req->sk == NULL);
@@ -1269,6 +1281,9 @@ int tcp_v4_conn_request(struct sock *sk, struct sk_buff *skb)
 	ireq->rmt_addr = saddr;
 	ireq->no_srccheck = inet_sk(sk)->transparent;
 	ireq->opt = tcp_v4_save_options(skb);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	ireq->ir_mark = inet_request_mark(sk, skb);
+#endif  
 
 	if (security_inet_conn_request(sk, skb, req))
 		goto drop_and_free;
@@ -1426,6 +1441,17 @@ struct sock *tcp_v4_syn_recv_sock(struct sock *sk, struct sk_buff *skb,
 	if (__inet_inherit_port(sk, newsk) < 0)
 		goto put_and_exit;
 	__inet_hash_nolisten(newsk, NULL);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	 
+	if (tnk) {
+		 
+		newsk->sk_tnkinfo.state = 0;
+		tnk->tcp_prepare(newsk, skb);
+		tnk->tcp_open(newsk);
+	}
+#endif
+#endif  
 
 	return newsk;
 
@@ -1503,6 +1529,20 @@ int tcp_v4_do_rcv(struct sock *sk, struct sk_buff *skb)
 	if (tcp_v4_inbound_md5_hash(sk, skb))
 		goto discard;
 #endif
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+	if (tnk) {
+		 
+		if ((sk->sk_tnkinfo.state == TNKINFO_STATE_ACTIVATING)
+				|| (sk->sk_tnkinfo.state
+					== TNKINFO_STATE_ACTIVE)) {
+
+			if (!sk->sk_tnkinfo.finflag && !sk->sk_tnkinfo.rstflag)
+				goto discard;
+		}
+	}
+#endif
+#endif  
 
 	if (sk->sk_state == TCP_ESTABLISHED) {  
 		struct dst_entry *dst = sk->sk_rx_dst;
@@ -1515,10 +1555,29 @@ int tcp_v4_do_rcv(struct sock *sk, struct sk_buff *skb)
 				sk->sk_rx_dst = NULL;
 			}
 		}
+#if defined(CONFIG_SYNO_LSP_HI3536)
+ 
+#ifdef CONFIG_TNK
+		if (tnk)
+			sk->sk_tnkinfo.enable = 1;
+#endif
+#endif  
 		if (tcp_rcv_established(sk, skb, tcp_hdr(skb), skb->len)) {
 			rsk = sk;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+			if (tnk)
+				sk->sk_tnkinfo.enable = 0;
+#endif
+#endif  
 			goto reset;
 		}
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+		if (tnk)
+			sk->sk_tnkinfo.enable = 0;
+#endif
+#endif  
 		return 0;
 	}
 

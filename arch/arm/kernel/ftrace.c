@@ -13,6 +13,9 @@
  */
 
 #include <linux/ftrace.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/module.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <linux/uaccess.h>
 
 #include <asm/cacheflush.h>
@@ -62,6 +65,22 @@ static unsigned long adjust_address(struct dyn_ftrace *rec, unsigned long addr)
 	return addr;
 }
 #endif
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+int ftrace_arch_code_modify_prepare(void)
+{
+	set_kernel_text_rw();
+	set_all_modules_text_rw();
+	return 0;
+}
+
+int ftrace_arch_code_modify_post_process(void)
+{
+	set_all_modules_text_ro();
+	set_kernel_text_ro();
+	return 0;
+}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static unsigned long ftrace_call_replace(unsigned long pc, unsigned long addr)
 {

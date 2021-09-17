@@ -55,7 +55,11 @@
  * also linked into the probe response struct.
  */
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define IEEE80211_SCAN_RESULT_EXPIRE	(7 * HZ)
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #define IEEE80211_SCAN_RESULT_EXPIRE	(30 * HZ)
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static void bss_free(struct cfg80211_internal_bss *bss)
 {

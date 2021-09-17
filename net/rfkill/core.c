@@ -792,6 +792,7 @@ void rfkill_pause_polling(struct rfkill *rfkill)
 }
 EXPORT_SYMBOL(rfkill_pause_polling);
 
+#if !defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_RFKILL_PM))
 void rfkill_resume_polling(struct rfkill *rfkill)
 {
 	BUG_ON(!rfkill);
@@ -826,14 +827,17 @@ static int rfkill_resume(struct device *dev)
 
 	return 0;
 }
+#endif /* !CONFIG_SYNO_LSP_HI3536 || (CONFIG_SYNO_LSP_HI3536 && CONFIG_RFKILL_PM) */
 
 static struct class rfkill_class = {
 	.name		= "rfkill",
 	.dev_release	= rfkill_release,
 	.dev_attrs	= rfkill_dev_attrs,
 	.dev_uevent	= rfkill_dev_uevent,
+#if !defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_RFKILL_PM))
 	.suspend	= rfkill_suspend,
 	.resume		= rfkill_resume,
+#endif /* !CONFIG_SYNO_LSP_HI3536 || (CONFIG_SYNO_LSP_HI3536 && CONFIG_RFKILL_PM) */
 };
 
 bool rfkill_blocked(struct rfkill *rfkill)

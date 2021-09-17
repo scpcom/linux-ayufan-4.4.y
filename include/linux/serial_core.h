@@ -60,6 +60,9 @@ struct uart_ops {
 	void		(*pm)(struct uart_port *, unsigned int state,
 			      unsigned int oldstate);
 	int		(*set_wake)(struct uart_port *, unsigned int state);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	void		(*wake_peer)(struct uart_port *);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/*
 	 * Return a string describing the type of the port

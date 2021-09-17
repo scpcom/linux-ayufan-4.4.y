@@ -8,8 +8,14 @@
 #include <linux/fs.h>
 #include <linux/export.h>
 #include <linux/seq_file.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/vmalloc.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <linux/slab.h>
 #include <linux/cred.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/mm.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #include <asm/uaccess.h>
 #include <asm/page.h>
@@ -29,6 +35,18 @@ static void seq_set_overflow(struct seq_file *m)
 {
 	m->count = m->size;
 }
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static void *seq_buf_alloc(unsigned long size)
+{
+	void *buf;
+
+	buf = kmalloc(size, GFP_KERNEL | __GFP_NOWARN);
+	if (!buf && size > PAGE_SIZE)
+		buf = vmalloc(size);
+	return buf;
+}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /**
  *	seq_open -	initialize sequential file
@@ -96,7 +114,11 @@ static int traverse(struct seq_file *m, loff_t offset)
 		return 0;
 	}
 	if (!m->buf) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		m->buf = seq_buf_alloc(m->size = PAGE_SIZE);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		m->buf = kmalloc(m->size = PAGE_SIZE, GFP_KERNEL);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		if (!m->buf)
 			return -ENOMEM;
 	}
@@ -135,8 +157,13 @@ static int traverse(struct seq_file *m, loff_t offset)
 
 Eoverflow:
 	m->op->stop(m, p);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	kvfree(m->buf);
+	m->buf = seq_buf_alloc(m->size <<= 1);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	kfree(m->buf);
 	m->buf = kmalloc(m->size <<= 1, GFP_KERNEL);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	return !m->buf ? -ENOMEM : -EAGAIN;
 }
 
@@ -191,7 +218,11 @@ ssize_t seq_read(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 
 	/* grab buffer if we didn't have one */
 	if (!m->buf) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		m->buf = seq_buf_alloc(m->size = PAGE_SIZE);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		m->buf = kmalloc(m->size = PAGE_SIZE, GFP_KERNEL);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		if (!m->buf)
 			goto Enomem;
 	}
@@ -231,8 +262,13 @@ ssize_t seq_read(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 		if (m->count < m->size)
 			goto Fill;
 		m->op->stop(m, p);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		kvfree(m->buf);
+		m->buf = seq_buf_alloc(m->size <<= 1);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		kfree(m->buf);
 		m->buf = kmalloc(m->size <<= 1, GFP_KERNEL);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		if (!m->buf)
 			goto Enomem;
 		m->count = 0;
@@ -349,7 +385,11 @@ EXPORT_SYMBOL(seq_lseek);
 int seq_release(struct inode *inode, struct file *file)
 {
 	struct seq_file *m = file->private_data;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	kvfree(m->buf);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	kfree(m->buf);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	kfree(m);
 	return 0;
 }
@@ -604,13 +644,21 @@ EXPORT_SYMBOL(single_open);
 int single_open_size(struct file *file, int (*show)(struct seq_file *, void *),
 		void *data, size_t size)
 {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	char *buf = seq_buf_alloc(size);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	char *buf = kmalloc(size, GFP_KERNEL);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	int ret;
 	if (!buf)
 		return -ENOMEM;
 	ret = single_open(file, show, data);
 	if (ret) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		kvfree(buf);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		kfree(buf);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		return ret;
 	}
 	((struct seq_file *)file->private_data)->buf = buf;

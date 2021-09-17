@@ -131,8 +131,13 @@ extern struct task_struct *cpu_switch_to(struct task_struct *prev,
 #define task_pt_regs(p) \
 	((struct pt_regs *)(THREAD_START_SP + task_stack_page(p)) - 1)
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define KSTK_EIP(tsk)	((unsigned long)task_pt_regs(tsk)->pc)
+#define KSTK_ESP(tsk)	user_stack_pointer(task_pt_regs(tsk))
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #define KSTK_EIP(tsk)	task_pt_regs(tsk)->pc
 #define KSTK_ESP(tsk)	task_pt_regs(tsk)->sp
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /*
  * Prefetching support

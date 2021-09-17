@@ -12,6 +12,9 @@
 #include <asm/ptrace.h>
 #include <asm/domain.h>
 #include <asm/opcodes-virt.h>
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#include <asm/asm-offsets.h>
+#endif  
 
 #define IOMEM(x)	(x)
 
@@ -128,6 +131,44 @@
 	asm_trace_hardirqs_on_cond eq
 	restore_irqs_notrace \oldcpsr
 	.endm
+
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+ 
+	.macro	get_thread_info, rd
+ ARM(	mov	\rd, sp, lsr #13	)
+ THUMB(	mov	\rd, sp			)
+ THUMB(	lsr	\rd, \rd, #13		)
+	mov	\rd, \rd, lsl #13
+	.endm
+
+#ifdef CONFIG_PREEMPT_COUNT
+	.macro	inc_preempt_count, ti, tmp
+	ldr	\tmp, [\ti, #TI_PREEMPT]	@ get preempt count
+	add	\tmp, \tmp, #1			@ increment it
+	str	\tmp, [\ti, #TI_PREEMPT]
+	.endm
+
+	.macro	dec_preempt_count, ti, tmp
+	ldr	\tmp, [\ti, #TI_PREEMPT]	@ get preempt count
+	sub	\tmp, \tmp, #1			@ decrement it
+	str	\tmp, [\ti, #TI_PREEMPT]
+	.endm
+
+	.macro	dec_preempt_count_ti, ti, tmp
+	get_thread_info \ti
+	dec_preempt_count \ti, \tmp
+	.endm
+#else
+	.macro	inc_preempt_count, ti, tmp
+	.endm
+
+	.macro	dec_preempt_count, ti, tmp
+	.endm
+
+	.macro	dec_preempt_count_ti, ti, tmp
+	.endm
+#endif
+#endif  
 
 #define USER(x...)				\
 9999:	x;					\

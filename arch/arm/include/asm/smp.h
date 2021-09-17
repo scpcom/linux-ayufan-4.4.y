@@ -81,6 +81,10 @@ extern void arch_send_call_function_single_ipi(int cpu);
 extern void arch_send_call_function_ipi_mask(const struct cpumask *mask);
 extern void arch_send_wakeup_ipi_mask(const struct cpumask *mask);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+extern void smp_send_all_cpu_backtrace(void);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 struct smp_operations {
 #ifdef CONFIG_SMP
 	/*

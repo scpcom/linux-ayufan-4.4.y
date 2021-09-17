@@ -282,6 +282,20 @@ extern void __put_mtd_device(struct mtd_info *mtd);
 extern struct mtd_info *get_mtd_device_nm(const char *name);
 extern void put_mtd_device(struct mtd_info *mtd);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_SPI_TYPE_SWITCH
+#define DEVICE_TYPE_UNKNOWN		0xff
+
+extern struct mutex spi_type_mutex;
+extern void mtd_switch_spi_type(struct mtd_info *mtd);
+#endif
+
+#ifdef CONFIG_HIFMC_SWITCH_DEV_TYPE
+extern unsigned char mtd_get_spi_type(struct mtd_info *mtd);
+extern void mtd_dev_type_switch(unsigned char type);
+#endif
+#endif  
+
 struct mtd_notifier {
 	void (*add)(struct mtd_info *mtd);
 	void (*remove)(struct mtd_info *mtd);

@@ -518,6 +518,44 @@ config SPI_DW_MMIO
 	depends on SPI_DESIGNWARE && HAVE_CLK
 
 #
+# SPI_HISILICON SPI BUS driver configuration
+#
+config SPI_HISILICON
+	tristate "hisilicon spi controller support"
+	depends on SYNO_LSP_HI3536 && (ARCH_HI3521A || ARCH_HI3531A)
+	select SPI_CORE_HISILICON
+	help
+	  Hisilicon SPI controller has 1 bus.
+	  We can access some spi device though it.
+	  This IP is only used in HISILICON chip.
+
+if SPI_HISILICON
+config SPI_CORE_HISILICON
+	bool
+
+config HI_SPI_DEBUG
+	bool "hisilicon spi debug enable"
+	default n
+	help
+	  Say "yes" to enable debug messaging, hisilicon spi driver
+	  will print some debug information.
+	  When we need debug message,enable this option.
+	  By default, does not need.
+
+config HI_SPI0_IO_BASE
+	hex "hisilicon spi0 register base address"
+	default "0x120d0000" if (ARCH_HI3521A || ARCH_HI3531A)
+
+config HI_SPI0_IO_SIZE
+	hex "hisilicon spi0 register address size"
+	default "0x100" if (ARCH_HI3521A || ARCH_HI3531A)
+
+config HI_SPI0_FIFO_SIZE
+	int "hisilicon spi0 tx rx fifo size"
+	default "256" if (ARCH_HI3521A || ARCH_HI3531A)
+endif
+
+#
 # There are lots of SPI device types, with sensors and memory
 # being probably the most widely used ones.
 #
@@ -530,6 +568,15 @@ config SPI_SPIDEV
 
 	  Note that this application programming interface is EXPERIMENTAL
 	  and hence SUBJECT TO CHANGE WITHOUT NOTICE while it stabilizes.
+
+config SPI_SPIDEV_INFO
+	tristate "User mode SPI device info support"
+	depends on SYNO_LSP_HI3536
+	help
+	  This supports user mode SPI protocol drivers device information.
+	  We can creat some spi_device for user mode SPI protocol drivers.
+	  Such as HI3521A creating 2 spi device, bus 0 has 2 chip select.
+	  This driver is only used in HI3516A chip.
 
 config SPI_TLE62X0
 	tristate "Infineon TLE62X0 (for power switching)"

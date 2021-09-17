@@ -848,7 +848,7 @@ union xhci_trb {
 #define NEC_FW_MINOR(p)		(((p) >> 0) & 0xff)
 #define NEC_FW_MAJOR(p)		(((p) >> 8) & 0xff)
 
-#define TRBS_PER_SEGMENT	64
+#define TRBS_PER_SEGMENT	256
  
 #define MAX_RSVD_CMD_TRBS	(TRBS_PER_SEGMENT - 3)
 #define TRB_SEGMENT_SIZE	(TRBS_PER_SEGMENT*16)
@@ -1296,7 +1296,8 @@ static inline void xhci_unregister_pci(void) {}
 #endif
 
 #if defined(CONFIG_USB_XHCI_PLATFORM) \
-	|| defined(CONFIG_USB_XHCI_PLATFORM_MODULE)
+	|| defined(CONFIG_USB_XHCI_PLATFORM_MODULE) \
+	|| (defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HIUSB_HOST))
 int xhci_register_plat(void);
 void xhci_unregister_plat(void);
 #else

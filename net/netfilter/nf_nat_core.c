@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * (C) 1999-2001 Paul `Rusty' Russell
  * (C) 2002-2006 Netfilter Core Team <coreteam@netfilter.org>
@@ -357,6 +360,7 @@ out:
 	rcu_read_unlock();
 }
 
+#ifdef MY_ABC_HERE
 /* bridge netfilter uses cloned skbs when forwarding to multiple bridge ports.
  * when userspace queueing is involved, we might try to set up NAT bindings
  * on the same conntrack simultaneoulsy.  Can happen e.g. when broadcast has
@@ -385,6 +389,7 @@ static inline void nf_nat_bridge_unlock(struct nf_conn *ct)
 	spin_unlock_bh(&ct->lock);
 #endif
 }
+#endif /* MY_ABC_HERE */
 
 unsigned int
 nf_nat_setup_info(struct nf_conn *ct,
@@ -395,22 +400,31 @@ nf_nat_setup_info(struct nf_conn *ct,
 	struct nf_conntrack_tuple curr_tuple, new_tuple;
 	struct nf_conn_nat *nat;
 
+#ifdef MY_ABC_HERE
 	NF_CT_ASSERT(maniptype == NF_NAT_MANIP_SRC ||
 		     maniptype == NF_NAT_MANIP_DST);
 
 	if (!nf_nat_bridge_lock(ct, maniptype))
 		return NF_ACCEPT;
+#endif /* MY_ABC_HERE */
 	/* nat helper or nfctnetlink also setup binding */
 	nat = nfct_nat(ct);
 	if (!nat) {
 		nat = nf_ct_ext_add(ct, NF_CT_EXT_NAT, GFP_ATOMIC);
 		if (nat == NULL) {
+#ifdef MY_ABC_HERE
 			nf_nat_bridge_unlock(ct);
+#endif /* MY_ABC_HERE */
 			pr_debug("failed to add NAT extension\n");
 			return NF_ACCEPT;
 		}
 	}
 
+#ifdef MY_ABC_HERE
+#else
+	NF_CT_ASSERT(maniptype == NF_NAT_MANIP_SRC ||
+		     maniptype == NF_NAT_MANIP_DST);
+#endif /* MY_ABC_HERE */
 	BUG_ON(nf_nat_initialized(ct, maniptype));
 
 	/* What we've got will look like inverse of reply. Normally
@@ -457,36 +471,12 @@ nf_nat_setup_info(struct nf_conn *ct,
 	else
 		ct->status |= IPS_SRC_NAT_DONE;
 
+#ifdef MY_ABC_HERE
 	nf_nat_bridge_unlock(ct);
+#endif /* MY_ABC_HERE */
 	return NF_ACCEPT;
 }
 EXPORT_SYMBOL(nf_nat_setup_info);
-
-static unsigned int
-__nf_nat_alloc_null_binding(struct nf_conn *ct, enum nf_nat_manip_type manip)
-{
-	/* Force range to this IP; let proto decide mapping for
-	 * per-proto parts (hence not IP_NAT_RANGE_PROTO_SPECIFIED).
-	 * Use reply in case it's already been mangled (eg local packet).
-	 */
-	union nf_inet_addr ip =
-		(manip == NF_NAT_MANIP_SRC ?
-		ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.u3 :
-		ct->tuplehash[IP_CT_DIR_REPLY].tuple.src.u3);
-	struct nf_nat_range range = {
-		.flags		= NF_NAT_RANGE_MAP_IPS,
-		.min_addr	= ip,
-		.max_addr	= ip,
-	};
-	return nf_nat_setup_info(ct, &range, manip);
-}
-
-unsigned int
-nf_nat_alloc_null_binding(struct nf_conn *ct, unsigned int hooknum)
-{
-	return __nf_nat_alloc_null_binding(ct, HOOK2MANIP(hooknum));
-}
-EXPORT_SYMBOL_GPL(nf_nat_alloc_null_binding);
 
 /* Do packet manipulations according to nf_nat_setup_info. */
 unsigned int nf_nat_packet(struct nf_conn *ct,
@@ -771,9 +761,9 @@ static const struct nla_policy nat_nla_policy[CTA_NAT_MAX+1] = {
 
 static int
 nfnetlink_parse_nat(const struct nlattr *nat,
-		    const struct nf_conn *ct, struct nf_nat_range *range,
-		    const struct nf_nat_l3proto *l3proto)
+		    const struct nf_conn *ct, struct nf_nat_range *range)
 {
+	const struct nf_nat_l3proto *l3proto;
 	struct nlattr *tb[CTA_NAT_MAX+1];
 	int err;
 
@@ -783,46 +773,38 @@ nfnetlink_parse_nat(const struct nlattr *nat,
 	if (err < 0)
 		return err;
 
+	rcu_read_lock();
+	l3proto = __nf_nat_l3proto_find(nf_ct_l3num(ct));
+	if (l3proto == NULL) {
+		err = -EAGAIN;
+		goto out;
+	}
 	err = l3proto->nlattr_to_range(tb, range);
 	if (err < 0)
-		return err;
+		goto out;
 
 	if (!tb[CTA_NAT_PROTO])
-		return 0;
+		goto out;
 
-	return nfnetlink_parse_nat_proto(tb[CTA_NAT_PROTO], ct, range);
+	err = nfnetlink_parse_nat_proto(tb[CTA_NAT_PROTO], ct, range);
+out:
+	rcu_read_unlock();
+	return err;
 }
 
-/* This function is called under rcu_read_lock() */
 static int
 nfnetlink_parse_nat_setup(struct nf_conn *ct,
 			  enum nf_nat_manip_type manip,
 			  const struct nlattr *attr)
 {
 	struct nf_nat_range range;
-	const struct nf_nat_l3proto *l3proto;
 	int err;
 
-	/* Should not happen, restricted to creating new conntracks
-	 * via ctnetlink.
-	 */
-	if (WARN_ON_ONCE(nf_nat_initialized(ct, manip)))
-		return -EEXIST;
-
-	/* Make sure that L3 NAT is there by when we call nf_nat_setup_info to
-	 * attach the null binding, otherwise this may oops.
-	 */
-	l3proto = __nf_nat_l3proto_find(nf_ct_l3num(ct));
-	if (l3proto == NULL)
-		return -EAGAIN;
-
-	/* No NAT information has been passed, allocate the null-binding */
-	if (attr == NULL)
-		return __nf_nat_alloc_null_binding(ct, manip);
-
-	err = nfnetlink_parse_nat(attr, ct, &range, l3proto);
+	err = nfnetlink_parse_nat(attr, ct, &range);
 	if (err < 0)
 		return err;
+	if (nf_nat_initialized(ct, manip))
+		return -EEXIST;
 
 	return nf_nat_setup_info(ct, &range, manip);
 }

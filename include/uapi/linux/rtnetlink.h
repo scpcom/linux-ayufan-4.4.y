@@ -297,6 +297,9 @@ enum rtattr_type_t {
 	RTA_TABLE,
 	RTA_MARK,
 	RTA_MFC_STATS,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	RTA_UID,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	__RTA_MAX
 };
 

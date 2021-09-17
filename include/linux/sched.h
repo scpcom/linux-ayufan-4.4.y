@@ -892,10 +892,19 @@ struct task_struct {
 	unsigned in_execve:1;	 
 	unsigned in_iowait:1;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	 
+#else  
+	 
 	unsigned no_new_privs:1;
+#endif  
 
 	unsigned sched_reset_on_fork:1;
 	unsigned sched_contributes_to_load:1;
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	unsigned long atomic_flags;  
+#endif  
 
 	pid_t pid;
 	pid_t tgid;
@@ -1313,6 +1322,11 @@ static inline cputime_t task_gtime(struct task_struct *t)
 extern void task_cputime_adjusted(struct task_struct *p, cputime_t *ut, cputime_t *st);
 extern void thread_group_cputime_adjusted(struct task_struct *p, cputime_t *ut, cputime_t *st);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+extern int task_free_register(struct notifier_block *n);
+extern int task_free_unregister(struct notifier_block *n);
+#endif  
+
 #define PF_EXITING	0x00000004	 
 #define PF_EXITPIDONE	0x00000008	 
 #define PF_VCPU		0x00000010	 
@@ -1375,6 +1389,21 @@ static inline void memalloc_noio_restore(unsigned int flags)
 {
 	current->flags = (current->flags & ~PF_MEMALLOC_NOIO) | flags;
 }
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+ 
+#define PFA_NO_NEW_PRIVS 0x00000001	 
+
+static inline bool task_no_new_privs(struct task_struct *p)
+{
+	return test_bit(PFA_NO_NEW_PRIVS, &p->atomic_flags);
+}
+
+static inline void task_set_no_new_privs(struct task_struct *p)
+{
+	set_bit(PFA_NO_NEW_PRIVS, &p->atomic_flags);
+}
+#endif  
 
 #define JOBCTL_STOP_SIGMASK	0xffff	 
 
@@ -1813,7 +1842,7 @@ static inline bool thread_group_leader(struct task_struct *p)
 	return p->exit_signal >= 0;
 }
 
-static inline int has_group_leader_pid(struct task_struct *p)
+static inline bool has_group_leader_pid(struct task_struct *p)
 {
 	return task_pid(p) == p->signal->leader_pid;
 }

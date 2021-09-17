@@ -18,6 +18,10 @@
 #include <linux/slab.h>
 #include <linux/i2c.h>
 #include <linux/delay.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/gpio.h>
+#include <linux/platform_data/ds2482.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <asm/delay.h>
 
 #include "../w1.h"
@@ -56,7 +60,6 @@
 #define DS2482_REG_CFG_PPM		0x02	/* presence pulse masking */
 #define DS2482_REG_CFG_APU		0x01	/* active pull-up */
 
-
 /**
  * Write and verify codes for the CHANNEL_SELECT command (DS2482-800 only).
  * To set the channel, write the value at the index of the channel.
@@ -66,7 +69,6 @@ static const u8 ds2482_chan_wr[8] =
 	{ 0xF0, 0xE1, 0xD2, 0xC3, 0xB4, 0xA5, 0x96, 0x87 };
 static const u8 ds2482_chan_rd[8] =
 	{ 0xB8, 0xB1, 0xAA, 0xA3, 0x9C, 0x95, 0x8E, 0x87 };
-
 
 /**
  * Status Register bit definitions (read only)
@@ -80,11 +82,13 @@ static const u8 ds2482_chan_rd[8] =
 #define DS2482_REG_STS_PPD		0x02
 #define DS2482_REG_STS_1WB		0x01
 
-
 static int ds2482_probe(struct i2c_client *client,
 			const struct i2c_device_id *id);
 static int ds2482_remove(struct i2c_client *client);
-
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static int ds2482_suspend(struct device *dev);
+static int ds2482_resume(struct device *dev);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /**
  * Driver data (common to all clients)
@@ -94,10 +98,20 @@ static const struct i2c_device_id ds2482_id[] = {
 	{ }
 };
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static const struct dev_pm_ops ds2482_pm_ops = {
+	.suspend = ds2482_suspend,
+	.resume = ds2482_resume,
+};
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 static struct i2c_driver ds2482_driver = {
 	.driver = {
 		.owner	= THIS_MODULE,
 		.name	= "ds2482",
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		.pm = &ds2482_pm_ops,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	},
 	.probe		= ds2482_probe,
 	.remove		= ds2482_remove,
@@ -119,6 +133,9 @@ struct ds2482_w1_chan {
 struct ds2482_data {
 	struct i2c_client	*client;
 	struct mutex		access_lock;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	int			slpz_gpio;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/* 1-wire interface(s) */
 	int			w1_count;	/* 1 or 8 */
@@ -130,7 +147,6 @@ struct ds2482_data {
 	u8			reg_config;
 };
 
-
 /**
  * Helper to calculate values for configuration register
  * @param conf the raw config value
@@ -140,7 +156,6 @@ static inline u8 ds2482_calculate_config(u8 conf)
 {
 	return conf | ((~conf & 0x0f) << 4);
 }
-
 
 /**
  * Sets the read pointer.
@@ -200,7 +215,6 @@ static inline int ds2482_send_cmd_data(struct ds2482_data *pdev,
 	return 0;
 }
 
-
 /*
  * 1-Wire interface code
  */
@@ -254,7 +268,6 @@ static int ds2482_set_channel(struct ds2482_data *pdev, u8 channel)
 	}
 	return -1;
 }
-
 
 /**
  * Performs the touch-bit function, which writes a 0 or 1 and reads the level.
@@ -379,7 +392,6 @@ static u8 ds2482_w1_read_byte(void *data)
 	return result;
 }
 
-
 /**
  * Sends a reset on the 1-wire interface
  *
@@ -444,11 +456,35 @@ static u8 ds2482_w1_set_pullup(void *data, int delay)
 	return retval;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static int ds2482_suspend(struct device *dev)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	struct ds2482_data *data = i2c_get_clientdata(client);
+
+	if (data->slpz_gpio >= 0)
+		gpio_set_value(data->slpz_gpio, 0);
+	return 0;
+}
+
+static int ds2482_resume(struct device *dev)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	struct ds2482_data *data = i2c_get_clientdata(client);
+
+	if (data->slpz_gpio >= 0)
+		gpio_set_value(data->slpz_gpio, 1);
+	return 0;
+}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static int ds2482_probe(struct i2c_client *client,
 			const struct i2c_device_id *id)
 {
 	struct ds2482_data *data;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	struct ds2482_platform_data *pdata;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	int err = -ENODEV;
 	int temp1;
 	int idx;
@@ -515,6 +551,18 @@ static int ds2482_probe(struct i2c_client *client,
 		}
 	}
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	pdata = client->dev.platform_data;
+	data->slpz_gpio = pdata ? pdata->slpz_gpio : -1;
+
+	if (data->slpz_gpio >= 0) {
+		err = gpio_request_one(data->slpz_gpio, GPIOF_OUT_INIT_HIGH,
+				       "ds2482.slpz");
+		if (err < 0)
+			goto exit_w1_remove;
+	}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 	return 0;
 
 exit_w1_remove:
@@ -538,6 +586,13 @@ static int ds2482_remove(struct i2c_client *client)
 		if (data->w1_ch[idx].pdev != NULL)
 			w1_remove_master_device(&data->w1_ch[idx].w1_bm);
 	}
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (data->slpz_gpio >= 0) {
+		gpio_set_value(data->slpz_gpio, 0);
+		gpio_free(data->slpz_gpio);
+	}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/* Free the memory */
 	kfree(data);

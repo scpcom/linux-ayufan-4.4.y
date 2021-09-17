@@ -5,6 +5,11 @@
 # Rewritten to use lists instead of if-statements.
 #
 
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+#Hi3536 ipcm drivers
+obj-$(CONFIG_HI3536_IPCM) += hi-ipcm/
+endif # CONFIG_SYNO_LSP_HI3536
+
 obj-y				+= irqchip/
 obj-y				+= bus/
 
@@ -113,6 +118,9 @@ obj-$(CONFIG_CPU_IDLE)		+= cpuidle/
 obj-y				+= mmc/
 obj-$(CONFIG_MEMSTICK)		+= memstick/
 obj-y				+= leds/
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_SWITCH)		+= switch/
+endif # CONFIG_SYNO_LSP_HI3536
 obj-$(CONFIG_INFINIBAND)	+= infiniband/
 obj-$(CONFIG_SGI_SN)		+= sn/
 obj-y				+= firmware/
@@ -150,6 +158,10 @@ obj-$(CONFIG_RPMSG)		+= rpmsg/
 obj-$(CONFIG_VIRT_DRIVERS)	+= virt/
 obj-$(CONFIG_HYPERV)		+= hv/
 
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_XOR_ENGINE)	+= xor/
+endif # CONFIG_SYNO_LSP_HI3536
+
 obj-$(CONFIG_PM_DEVFREQ)	+= devfreq/
 obj-$(CONFIG_EXTCON)		+= extcon/
 obj-$(CONFIG_MEMORY)		+= memory/
@@ -157,6 +169,11 @@ obj-$(CONFIG_IIO)		+= iio/
 obj-$(CONFIG_VME_BUS)		+= vme/
 obj-$(CONFIG_IPACK_BUS)		+= ipack/
 obj-$(CONFIG_NTB)		+= ntb/
+
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_HIDMAC_V300) += hidmacv300/
+obj-$(CONFIG_HI_DMAC) += hidmac/
+endif # CONFIG_SYNO_LSP_HI3536
 
 #LPM Support
 obj-$(CONFIG_PM)		+= lpm/

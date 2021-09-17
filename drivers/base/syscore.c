@@ -10,6 +10,9 @@
 #include <linux/mutex.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/wakeup_reason.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static LIST_HEAD(syscore_ops_list);
 static DEFINE_MUTEX(syscore_ops_lock);
@@ -73,6 +76,10 @@ int syscore_suspend(void)
 	return 0;
 
  err_out:
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	log_suspend_abort_reason("System core suspend callback %pF failed",
+		ops->suspend);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	pr_err("PM: System core suspend callback %pF failed.\n", ops->suspend);
 
 	list_for_each_entry_continue(ops, &syscore_ops_list, node)

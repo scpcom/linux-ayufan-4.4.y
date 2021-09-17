@@ -272,6 +272,9 @@ struct btrfs_ioctl_clone_range_args {
 
 #define BTRFS_DEFRAG_RANGE_COMPRESS 1
 #define BTRFS_DEFRAG_RANGE_START_IO 2
+#ifdef MY_ABC_HERE
+#define BTRFS_DEFRAG_RANGE_SYNO_DEFRAG (1ULL << 2)
+#endif  
 
 #define BTRFS_SAME_DATA_DIFFERS	1
  
@@ -430,7 +433,16 @@ struct btrfs_ioctl_subvol_info_args {
 	__u8 ruuid[BTRFS_UUID_SIZE];
 };
 #endif  
- 
+
+#ifdef MY_ABC_HERE
+struct btrfs_ioctl_snapshot_size_query_args {
+	__u64 snap_count;
+	__s64 fd;
+	__u64 __user *snap_id;
+	__u64 calc_size;
+};
+#endif  
+
 #define BTRFS_SEND_FLAG_NO_FILE_DATA		0x1
 
 #define BTRFS_SEND_FLAG_OMIT_STREAM_HEADER	0x2
@@ -461,9 +473,23 @@ struct btrfs_ioctl_send_args {
 	__u64 flags;			 
 #ifdef MY_ABC_HERE
 	__u64 total_data_size;    
-	int g_verbose;
+	__u32 g_verbose;
 #endif
+#ifdef MY_ABC_HERE
+	__u64 skip_cmd_count;
+#endif  
+
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+	__u32 reserved_u32;
+	__u64 reserved[1];		 
+#elif defined(MY_ABC_HERE)
+	__u32 reserved_u32;
+	__u64 reserved[2];		 
+#elif defined(MY_ABC_HERE)
+	__u64 reserved[3];		 
+#else
 	__u64 reserved[4];		 
+#endif  
 };
 
 #ifdef MY_ABC_HERE
@@ -615,6 +641,11 @@ static inline char *btrfs_err_str(enum btrfs_err_code err_code)
 				   struct btrfs_ioctl_feature_flags[2])
 #define BTRFS_IOC_GET_SUPPORTED_FEATURES _IOR(BTRFS_IOCTL_MAGIC, 57, \
 				   struct btrfs_ioctl_feature_flags[3])
+
+#ifdef MY_ABC_HERE
+#define BTRFS_IOC_SNAPSHOT_SIZE_QUERY _IOWR(BTRFS_IOCTL_MAGIC, 247, \
+				   struct btrfs_ioctl_snapshot_size_query_args)
+#endif  
 
 #ifdef MY_ABC_HERE
 #define BTRFS_IOC_COMPR_CTL _IOR(BTRFS_IOCTL_MAGIC, 248, \

@@ -1,5 +1,8 @@
 
 obj-$(CONFIG_ATA)		+= libata.o
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_HI_SATA)		+= hi_ahci_device.o hi_sata_dbg.o
+endif # CONFIG_SYNO_LSP_HI3536
 
 ifeq ($(CONFIG_ARCH_ALPINE),y)
 KBUILD_CPPFLAGS += -Iarch/arm/mach-alpine/include/al_hal/

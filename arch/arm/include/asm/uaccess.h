@@ -451,6 +451,12 @@ do {									\
 	: "cc")
 
 #ifdef CONFIG_MMU
+#if defined(CONFIG_SYNO_LSP_HI3536)
+extern unsigned long hi_copy_from_user(void *to,
+				const void __user *from, unsigned long n);
+extern unsigned long hi_copy_to_user(void *to,
+				const void __user *from, unsigned long n);
+#endif  
 extern unsigned long __must_check __copy_from_user(void *to, const void __user *from, unsigned long n);
 extern unsigned long __must_check __copy_to_user(void __user *to, const void *from, unsigned long n);
 extern unsigned long __must_check __copy_to_user_std(void __user *to, const void *from, unsigned long n);
@@ -464,17 +470,36 @@ extern unsigned long __must_check __clear_user_std(void __user *addr, unsigned l
 
 static inline unsigned long __must_check copy_from_user(void *to, const void __user *from, unsigned long n)
 {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (access_ok(VERIFY_READ, from, n)) {
+#ifdef CONFIG_HI_IOMMU
+		n = hi_copy_from_user(to, from, n);
+#else
+		n = __copy_from_user(to, from, n);
+#endif
+	} else  
+		memset(to, 0, n);
+#else  
 	if (access_ok(VERIFY_READ, from, n))
 		n = __copy_from_user(to, from, n);
 	else  
 		memset(to, 0, n);
+#endif  
 	return n;
 }
 
 static inline unsigned long __must_check copy_to_user(void __user *to, const void *from, unsigned long n)
 {
 	if (access_ok(VERIFY_WRITE, to, n))
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_HI_IOMMU
+		n = hi_copy_to_user(to, from, n);
+#else
 		n = __copy_to_user(to, from, n);
+#endif
+#else  
+		n = __copy_to_user(to, from, n);
+#endif  
 	return n;
 }
 

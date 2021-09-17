@@ -1002,6 +1002,11 @@ ssize_t splice_direct_to_actor(struct file *in, struct splice_desc *sd,
 		read_len = ret;
 		sd->total_len = read_len;
 
+		if (read_len < len)
+			sd->flags |= SPLICE_F_MORE;
+		else if (!more)
+			sd->flags &= ~SPLICE_F_MORE;
+		 
 		ret = actor(pipe, sd);
 		if (unlikely(ret <= 0)) {
 			sd->pos = prev_pos;

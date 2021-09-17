@@ -5,6 +5,7 @@
  * After timer expires a kevent will be sent.
  *
  * Copyright (C) 2004, 2010 Nokia Corporation
+ *
  * Written by Timo Teras <ext-timo.teras@nokia.com>
  *
  * Converted to x_tables and reworked for upstream inclusion
@@ -38,8 +39,19 @@
 #include <linux/netfilter/xt_IDLETIMER.h>
 #include <linux/kdev_t.h>
 #include <linux/kobject.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/skbuff.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <linux/workqueue.h>
 #include <linux/sysfs.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/rtc.h>
+#include <linux/time.h>
+#include <linux/math64.h>
+#include <linux/suspend.h>
+#include <linux/notifier.h>
+#include <net/net_namespace.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 struct idletimer_tg_attr {
 	struct attribute attr;
@@ -55,13 +67,103 @@ struct idletimer_tg {
 	struct kobject *kobj;
 	struct idletimer_tg_attr attr;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	struct timespec delayed_timer_trigger;
+	struct timespec last_modified_timer;
+	struct timespec last_suspend_time;
+	struct notifier_block pm_nb;
+
+	int timeout;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	unsigned int refcnt;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	bool work_pending;
+	bool send_nl_msg;
+	bool active;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 };
 
 static LIST_HEAD(idletimer_tg_list);
 static DEFINE_MUTEX(list_mutex);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static DEFINE_SPINLOCK(timestamp_lock);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static struct kobject *idletimer_tg_kobj;
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static bool check_for_delayed_trigger(struct idletimer_tg *timer,
+		struct timespec *ts)
+{
+	bool state;
+	struct timespec temp;
+	spin_lock_bh(&timestamp_lock);
+	timer->work_pending = false;
+	if ((ts->tv_sec - timer->last_modified_timer.tv_sec) > timer->timeout ||
+			timer->delayed_timer_trigger.tv_sec != 0) {
+		state = false;
+		temp.tv_sec = timer->timeout;
+		temp.tv_nsec = 0;
+		if (timer->delayed_timer_trigger.tv_sec != 0) {
+			temp = timespec_add(timer->delayed_timer_trigger, temp);
+			ts->tv_sec = temp.tv_sec;
+			ts->tv_nsec = temp.tv_nsec;
+			timer->delayed_timer_trigger.tv_sec = 0;
+			timer->work_pending = true;
+			schedule_work(&timer->work);
+		} else {
+			temp = timespec_add(timer->last_modified_timer, temp);
+			ts->tv_sec = temp.tv_sec;
+			ts->tv_nsec = temp.tv_nsec;
+		}
+	} else {
+		state = timer->active;
+	}
+	spin_unlock_bh(&timestamp_lock);
+	return state;
+}
+
+static void notify_netlink_uevent(const char *iface, struct idletimer_tg *timer)
+{
+	char iface_msg[NLMSG_MAX_SIZE];
+	char state_msg[NLMSG_MAX_SIZE];
+	char timestamp_msg[NLMSG_MAX_SIZE];
+	char *envp[] = { iface_msg, state_msg, timestamp_msg, NULL };
+	int res;
+	struct timespec ts;
+	uint64_t time_ns;
+	bool state;
+
+	res = snprintf(iface_msg, NLMSG_MAX_SIZE, "INTERFACE=%s",
+		       iface);
+	if (NLMSG_MAX_SIZE <= res) {
+		pr_err("message too long (%d)", res);
+		return;
+	}
+
+	get_monotonic_boottime(&ts);
+	state = check_for_delayed_trigger(timer, &ts);
+	res = snprintf(state_msg, NLMSG_MAX_SIZE, "STATE=%s",
+			state ? "active" : "inactive");
+
+	if (NLMSG_MAX_SIZE <= res) {
+		pr_err("message too long (%d)", res);
+		return;
+	}
+
+	time_ns = timespec_to_ns(&ts);
+	res = snprintf(timestamp_msg, NLMSG_MAX_SIZE, "TIME_NS=%llu", time_ns);
+	if (NLMSG_MAX_SIZE <= res) {
+		timestamp_msg[0] = '\0';
+		pr_err("message too long (%d)", res);
+	}
+
+	pr_debug("putting nlmsg: <%s> <%s>\n", iface_msg, state_msg);
+	kobject_uevent_env(idletimer_tg_kobj, KOBJ_CHANGE, envp);
+	return;
+
+}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static
 struct idletimer_tg *__idletimer_tg_find_by_label(const char *label)
@@ -83,6 +185,9 @@ static ssize_t idletimer_tg_show(struct kobject *kobj, struct attribute *attr,
 {
 	struct idletimer_tg *timer;
 	unsigned long expires = 0;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	unsigned long now = jiffies;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	mutex_lock(&list_mutex);
 
@@ -92,11 +197,23 @@ static ssize_t idletimer_tg_show(struct kobject *kobj, struct attribute *attr,
 
 	mutex_unlock(&list_mutex);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (time_after(expires, now))
+		return sprintf(buf, "%u\n",
+			       jiffies_to_msecs(expires - now) / 1000);
+
+	if (timer->send_nl_msg)
+		return sprintf(buf, "0 %d\n",
+			jiffies_to_msecs(now - expires) / 1000);
+	else
+		return sprintf(buf, "0\n");
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	if (time_after(expires, jiffies))
 		return sprintf(buf, "%u\n",
 			       jiffies_to_msecs(expires - jiffies) / 1000);
 
 	return sprintf(buf, "0\n");
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
 static void idletimer_tg_work(struct work_struct *work)
@@ -105,6 +222,11 @@ static void idletimer_tg_work(struct work_struct *work)
 						  work);
 
 	sysfs_notify(idletimer_tg_kobj, NULL, timer->attr.attr.name);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (timer->send_nl_msg)
+		notify_netlink_uevent(timer->attr.attr.name, timer);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
 static void idletimer_tg_expired(unsigned long data)
@@ -113,8 +235,62 @@ static void idletimer_tg_expired(unsigned long data)
 
 	pr_debug("timer %s expired\n", timer->attr.attr.name);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	spin_lock_bh(&timestamp_lock);
+	timer->active = false;
+	timer->work_pending = true;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	schedule_work(&timer->work);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	spin_unlock_bh(&timestamp_lock);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static int idletimer_resume(struct notifier_block *notifier,
+		unsigned long pm_event, void *unused)
+{
+	struct timespec ts;
+	unsigned long time_diff, now = jiffies;
+	struct idletimer_tg *timer = container_of(notifier,
+			struct idletimer_tg, pm_nb);
+	if (!timer)
+		return NOTIFY_DONE;
+	switch (pm_event) {
+	case PM_SUSPEND_PREPARE:
+		get_monotonic_boottime(&timer->last_suspend_time);
+		break;
+	case PM_POST_SUSPEND:
+		spin_lock_bh(&timestamp_lock);
+		if (!timer->active) {
+			spin_unlock_bh(&timestamp_lock);
+			break;
+		}
+		/* since jiffies are not updated when suspended now represents
+		 * the time it would have suspended */
+		if (time_after(timer->timer.expires, now)) {
+			get_monotonic_boottime(&ts);
+			ts = timespec_sub(ts, timer->last_suspend_time);
+			time_diff = timespec_to_jiffies(&ts);
+			if (timer->timer.expires > (time_diff + now)) {
+				mod_timer_pending(&timer->timer,
+						(timer->timer.expires - time_diff));
+			} else {
+				del_timer(&timer->timer);
+				timer->timer.expires = 0;
+				timer->active = false;
+				timer->work_pending = true;
+				schedule_work(&timer->work);
+			}
+		}
+		spin_unlock_bh(&timestamp_lock);
+		break;
+	default:
+		break;
+	}
+	return NOTIFY_DONE;
+}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static int idletimer_tg_create(struct idletimer_tg_info *info)
 {
@@ -145,6 +321,22 @@ static int idletimer_tg_create(struct idletimer_tg_info *info)
 	setup_timer(&info->timer->timer, idletimer_tg_expired,
 		    (unsigned long) info->timer);
 	info->timer->refcnt = 1;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	info->timer->send_nl_msg = (info->send_nl_msg == 0) ? false : true;
+	info->timer->active = true;
+	info->timer->timeout = info->timeout;
+
+	info->timer->delayed_timer_trigger.tv_sec = 0;
+	info->timer->delayed_timer_trigger.tv_nsec = 0;
+	info->timer->work_pending = false;
+	get_monotonic_boottime(&info->timer->last_modified_timer);
+
+	info->timer->pm_nb.notifier_call = idletimer_resume;
+	ret = register_pm_notifier(&info->timer->pm_nb);
+	if (ret)
+		printk(KERN_WARNING "[%s] Failed to register pm notifier %d\n",
+				__func__, ret);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	mod_timer(&info->timer->timer,
 		  msecs_to_jiffies(info->timeout * 1000) + jiffies);
@@ -161,6 +353,36 @@ out:
 	return ret;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static void reset_timer(const struct idletimer_tg_info *info)
+{
+	unsigned long now = jiffies;
+	struct idletimer_tg *timer = info->timer;
+	bool timer_prev;
+
+	spin_lock_bh(&timestamp_lock);
+	timer_prev = timer->active;
+	timer->active = true;
+	/* timer_prev is used to guard overflow problem in time_before*/
+	if (!timer_prev || time_before(timer->timer.expires, now)) {
+		pr_debug("Starting Checkentry timer (Expired, Jiffies): %lu, %lu\n",
+				timer->timer.expires, now);
+		/* checks if there is a pending inactive notification*/
+		if (timer->work_pending)
+			timer->delayed_timer_trigger = timer->last_modified_timer;
+		else {
+			timer->work_pending = true;
+			schedule_work(&timer->work);
+		}
+	}
+
+	get_monotonic_boottime(&timer->last_modified_timer);
+	mod_timer(&timer->timer,
+			msecs_to_jiffies(info->timeout * 1000) + now);
+	spin_unlock_bh(&timestamp_lock);
+}
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 /*
  * The actual xt_tables plugin.
  */
@@ -168,14 +390,30 @@ static unsigned int idletimer_tg_target(struct sk_buff *skb,
 					 const struct xt_action_param *par)
 {
 	const struct idletimer_tg_info *info = par->targinfo;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	unsigned long now = jiffies;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	pr_debug("resetting timer %s, timeout period %u\n",
 		 info->label, info->timeout);
 
 	BUG_ON(!info->timer);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	info->timer->active = true;
+
+	if (time_before(info->timer->timer.expires, now)) {
+		schedule_work(&info->timer->work);
+		pr_debug("Starting timer %s (Expired, Jiffies): %lu, %lu\n",
+			 info->label, info->timer->timer.expires, now);
+	}
+
+	/* TODO: Avoid modifying timers on each packet */
+	reset_timer(info);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	mod_timer(&info->timer->timer,
 		  msecs_to_jiffies(info->timeout * 1000) + jiffies);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	return XT_CONTINUE;
 }
@@ -185,7 +423,11 @@ static int idletimer_tg_checkentry(const struct xt_tgchk_param *par)
 	struct idletimer_tg_info *info = par->targinfo;
 	int ret;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	pr_debug("checkentry targinfo %s\n", info->label);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	pr_debug("checkentry targinfo%s\n", info->label);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	if (info->timeout == 0) {
 		pr_debug("timeout value is zero\n");
@@ -204,9 +446,13 @@ static int idletimer_tg_checkentry(const struct xt_tgchk_param *par)
 	info->timer = __idletimer_tg_find_by_label(info->label);
 	if (info->timer) {
 		info->timer->refcnt++;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		reset_timer(info);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		mod_timer(&info->timer->timer,
 			  msecs_to_jiffies(info->timeout * 1000) + jiffies);
 
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		pr_debug("increased refcnt of timer %s to %u\n",
 			 info->label, info->timer->refcnt);
 	} else {
@@ -236,11 +482,18 @@ static void idletimer_tg_destroy(const struct xt_tgdtor_param *par)
 		list_del(&info->timer->entry);
 		del_timer_sync(&info->timer->timer);
 		sysfs_remove_file(idletimer_tg_kobj, &info->timer->attr.attr);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		unregister_pm_notifier(&info->timer->pm_nb);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		kfree(info->timer->attr.attr.name);
 		kfree(info->timer);
 	} else {
 		pr_debug("decreased refcnt of timer %s to %u\n",
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		info->label, info->timer->refcnt);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 			 info->label, info->timer->refcnt);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	}
 
 	mutex_unlock(&list_mutex);
@@ -248,6 +501,9 @@ static void idletimer_tg_destroy(const struct xt_tgdtor_param *par)
 
 static struct xt_target idletimer_tg __read_mostly = {
 	.name		= "IDLETIMER",
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	.revision	= 1,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	.family		= NFPROTO_UNSPEC,
 	.target		= idletimer_tg_target,
 	.targetsize     = sizeof(struct idletimer_tg_info),
@@ -313,3 +569,6 @@ MODULE_DESCRIPTION("Xtables: idle time monitor");
 MODULE_LICENSE("GPL v2");
 MODULE_ALIAS("ipt_IDLETIMER");
 MODULE_ALIAS("ip6t_IDLETIMER");
+#if defined(CONFIG_SYNO_LSP_HI3536)
+MODULE_ALIAS("arpt_IDLETIMER");
+#endif /* CONFIG_SYNO_LSP_HI3536 */

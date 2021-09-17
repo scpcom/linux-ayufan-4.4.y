@@ -224,13 +224,39 @@ static ssize_t ashmem_read(struct file *file, char __user *buf,
 
 	/* If size is not set, or set to 0, always return EOF. */
 	if (asma->size == 0)
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		goto out_unlock;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		goto out;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	if (!asma->file) {
 		ret = -EBADF;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		goto out_unlock;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		goto out;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	}
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	mutex_unlock(&ashmem_mutex);
+
+	/*
+	 * asma and asma->file are used outside the lock here.  We assume
+	 * once asma->file is set it will never be changed, and will not
+	 * be destroyed until all references to the file are dropped and
+	 * ashmem_release is called.
+	 */
+	ret = asma->file->f_op->read(asma->file, buf, len, pos);
+	if (ret >= 0) {
+		/** Update backing file pos, since f_ops->read() doesn't */
+		asma->file->f_pos = *pos;
+	}
+	return ret;
+
+out_unlock:
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	ret = asma->file->f_op->read(asma->file, buf, len, pos);
 	if (ret < 0)
 		goto out;
@@ -239,6 +265,7 @@ static ssize_t ashmem_read(struct file *file, char __user *buf,
 	asma->file->f_pos = *pos;
 
 out:
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	mutex_unlock(&ashmem_mutex);
 	return ret;
 }
@@ -317,6 +344,15 @@ static int ashmem_mmap(struct file *file, struct vm_area_struct *vma)
 	}
 	get_file(asma->file);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (vma->vm_flags & VM_SHARED)
+		shmem_set_file(vma, asma->file);
+	else {
+		if (vma->vm_file)
+			fput(vma->vm_file);
+		vma->vm_file = asma->file;
+	}
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	/*
 	 * XXX - Reworked to use shmem_zero_setup() instead of
 	 * shmem_set_file while we're in staging. -jstultz
@@ -332,6 +368,7 @@ static int ashmem_mmap(struct file *file, struct vm_area_struct *vma)
 	if (vma->vm_file)
 		fput(vma->vm_file);
 	vma->vm_file = asma->file;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 out:
 	mutex_unlock(&ashmem_mutex);
@@ -363,7 +400,13 @@ static int ashmem_shrink(struct shrinker *s, struct shrink_control *sc)
 	if (!sc->nr_to_scan)
 		return lru_count;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (!mutex_trylock(&ashmem_mutex))
+		return -1;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	mutex_lock(&ashmem_mutex);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 	list_for_each_entry_safe(range, next, &ashmem_lru_list, lru) {
 		loff_t start = range->pgstart * PAGE_SIZE;
 		loff_t end = (range->pgend + 1) * PAGE_SIZE;
@@ -413,6 +456,9 @@ out:
 
 static int set_name(struct ashmem_area *asma, void __user *name)
 {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	int len;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	int ret = 0;
 	char local_name[ASHMEM_NAME_LEN];
 
@@ -425,6 +471,21 @@ static int set_name(struct ashmem_area *asma, void __user *name)
 	 * variable that does not need protection and later copy the local
 	 * variable to the structure member with lock held.
 	 */
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	len = strncpy_from_user(local_name, name, ASHMEM_NAME_LEN);
+	if (len < 0)
+		return len;
+	if (len == ASHMEM_NAME_LEN)
+		local_name[ASHMEM_NAME_LEN - 1] = '\0';
+	mutex_lock(&ashmem_mutex);
+	/* cannot change an existing mapping's name */
+	if (unlikely(asma->file))
+		ret = -EINVAL;
+	else
+		strcpy(asma->name + ASHMEM_NAME_PREFIX_LEN, local_name);
+
+	mutex_unlock(&ashmem_mutex);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	if (copy_from_user(local_name, name, ASHMEM_NAME_LEN))
 		return -EFAULT;
 
@@ -439,6 +500,7 @@ static int set_name(struct ashmem_area *asma, void __user *name)
 	asma->name[ASHMEM_FULL_NAME_LEN-1] = '\0';
 out:
 	mutex_unlock(&ashmem_mutex);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	return ret;
 }

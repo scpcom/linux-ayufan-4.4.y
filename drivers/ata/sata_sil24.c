@@ -26,6 +26,10 @@ extern void syno_ledtrig_active_set(int iLedNum);
 extern int *gpGreenLedMap;
 #endif  
 
+#ifdef MY_DEF_HERE
+extern int g_syno_ds1815p_speed_limit;
+#endif  
+
 struct sil24_prb {
 	__le16	ctrl;
 	__le16	prot;
@@ -1295,9 +1299,28 @@ static void sil24_init_controller(struct ata_host *host)
 		tmp = readl(port + PORT_PHY_CFG);
 		tmp &= ~0x1f;
 		if (syno_is_hw_version(HW_DS1815p)) {
+#ifdef MY_DEF_HERE
+			 
+			if (1 == g_syno_ds1815p_speed_limit) {
+				dev_info(host->dev, "Increase sil3132 swing to 0x15\n");
+				 
+				tmp |= 0x15;
+			} else {
+				if (2 == host->host_no) {  
+					dev_info(host->dev, "Increase sil3132 swing to 0xa\n");
+					 
+					tmp |= 0x0a;
+				} else {  
+					dev_info(host->dev, "Increase sil3132 swing to 0x15\n");
+					 
+					tmp |= 0x15;
+				}
+			}
+#else  
 			dev_info(host->dev, "Increase sil3132 swing to 0x15\n");
 			 
 			tmp |= 0x15;
+#endif  
 		} else if (syno_is_hw_version(HW_DS1515p)) {
 			dev_info(host->dev, "Increase sil3132 swing to 0x13\n");
 			 
@@ -1394,6 +1417,18 @@ static int sil24_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 
 	pci_set_master(pdev);
+
+#ifdef MY_DEF_HERE
+	if (pdev->vendor == 0x1095 && (pdev->device == 0x3132 || pdev->device == 0x3531)) {
+		int i=0;
+
+		for (i = 0; i < host->n_ports; i++) {
+			struct ata_port *ap = host->ports[i];
+			ap->link.uiStsFlags |= SYNO_STATUS_IS_SIL;
+		}
+	}
+#endif  
+
 	return ata_host_activate(host, pdev->irq, sil24_interrupt, IRQF_SHARED,
 				 &sil24_sht);
 }

@@ -23,6 +23,9 @@
 
 #include <asm/hwcap.h>
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define PTRACE_SET_SYSCALL	23
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /*
  * PSR bits
@@ -57,7 +60,6 @@
 #define PSR_s		0x00ff0000	/* Status		*/
 #define PSR_x		0x0000ff00	/* Extension		*/
 #define PSR_c		0x000000ff	/* Control		*/
-
 
 #ifndef __ASSEMBLY__
 

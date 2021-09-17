@@ -11,5 +11,12 @@ obj-$(CONFIG_HIBERNATION)	+= hibernate.o snapshot.o swap.o user.o \
 				   block_io.o
 obj-$(CONFIG_PM_AUTOSLEEP)	+= autosleep.o
 obj-$(CONFIG_PM_WAKELOCKS)	+= wakelock.o
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_SUSPEND_TIME)	+= suspend_time.o
+endif # CONFIG_SYNO_LSP_HI3536
 
 obj-$(CONFIG_MAGIC_SYSRQ)	+= poweroff.o
+
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_SUSPEND)	+= wakeup_reason.o
+endif # CONFIG_SYNO_LSP_HI3536

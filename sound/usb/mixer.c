@@ -762,6 +762,7 @@ static void volume_control_quirks(struct usb_mixer_elem_info *cval,
 	case USB_ID(0x046d, 0x081d):  
 	case USB_ID(0x046d, 0x0825):  
 	case USB_ID(0x046d, 0x0826):  
+	case USB_ID(0x046d, 0x08ca):  
 	case USB_ID(0x046d, 0x0991):
 	 
 		if (!strcmp(kctl->id.name, "Mic Capture Volume")) {

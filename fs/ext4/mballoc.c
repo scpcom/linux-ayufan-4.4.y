@@ -2084,7 +2084,12 @@ int ext4_mb_release(struct super_block *sb)
 }
 
 static inline int ext4_issue_discard(struct super_block *sb,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		ext4_group_t block_group, ext4_grpblk_t cluster, int count,
+		unsigned long flags)
+#else  
 		ext4_group_t block_group, ext4_grpblk_t cluster, int count)
+#endif  
 {
 	ext4_fsblk_t discard_block;
 
@@ -2093,7 +2098,11 @@ static inline int ext4_issue_discard(struct super_block *sb,
 	count = EXT4_C2B(EXT4_SB(sb), count);
 	trace_ext4_discard_blocks(sb,
 			(unsigned long long) discard_block, count);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	return sb_issue_discard(sb, discard_block, count, GFP_NOFS, flags);
+#else  
 	return sb_issue_discard(sb, discard_block, count, GFP_NOFS, 0);
+#endif  
 }
 
 static void ext4_free_data_callback(struct super_block *sb,
@@ -2111,7 +2120,11 @@ static void ext4_free_data_callback(struct super_block *sb,
 	if (test_opt(sb, DISCARD)) {
 		err = ext4_issue_discard(sb, entry->efd_group,
 					 entry->efd_start_cluster,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+					 entry->efd_count, 0);
+#else  
 					 entry->efd_count);
+#endif  
 		if (err && err != -EOPNOTSUPP)
 			ext4_msg(sb, KERN_WARNING, "discard request in"
 				 " group:%d block:%d count:%d failed"
@@ -3807,14 +3820,8 @@ do_more:
 	if ((flags & EXT4_FREE_BLOCKS_METADATA) && ext4_handle_valid(handle)) {
 		struct ext4_free_data *new_entry;
 		 
-	retry:
-		new_entry = kmem_cache_alloc(ext4_free_data_cachep, GFP_NOFS);
-		if (!new_entry) {
-			 
-			cond_resched();
-			congestion_wait(BLK_RW_ASYNC, HZ/50);
-			goto retry;
-		}
+		new_entry = kmem_cache_alloc(ext4_free_data_cachep,
+				GFP_NOFS|__GFP_NOFAIL);
 		new_entry->efd_start_cluster = bit;
 		new_entry->efd_group = block_group;
 		new_entry->efd_count = count_clusters;
@@ -3826,7 +3833,12 @@ do_more:
 	} else {
 		 
 		if (test_opt(sb, DISCARD)) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			err = ext4_issue_discard(sb, block_group, bit, count,
+						 0);
+#else  
 			err = ext4_issue_discard(sb, block_group, bit, count);
+#endif  
 			if (err && err != -EOPNOTSUPP)
 				ext4_msg(sb, KERN_WARNING, "discard request in"
 					 " group:%d block:%d count:%lu failed"
@@ -3992,7 +4004,12 @@ error_return:
 }
 
 static int ext4_trim_extent(struct super_block *sb, int start, int count,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			    ext4_group_t group, struct ext4_buddy *e4b,
+			    unsigned long blkdev_flags)
+#else  
 			     ext4_group_t group, struct ext4_buddy *e4b)
+#endif  
 {
 	struct ext4_free_extent ex;
 	int ret = 0;
@@ -4007,7 +4024,11 @@ static int ext4_trim_extent(struct super_block *sb, int start, int count,
 
 	mb_mark_used(e4b, &ex);
 	ext4_unlock_group(sb, group);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	ret = ext4_issue_discard(sb, group, start, count, blkdev_flags);
+#else  
 	ret = ext4_issue_discard(sb, group, start, count);
+#endif  
 	ext4_lock_group(sb, group);
 	mb_free_blocks(NULL, e4b, start, ex.fe_len);
 	return ret;
@@ -4016,7 +4037,11 @@ static int ext4_trim_extent(struct super_block *sb, int start, int count,
 static ext4_grpblk_t
 ext4_trim_all_free(struct super_block *sb, ext4_group_t group,
 		   ext4_grpblk_t start, ext4_grpblk_t max,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		   ext4_grpblk_t minblocks, unsigned long blkdev_flags)
+#else  
 		   ext4_grpblk_t minblocks)
+#endif  
 {
 	void *bitmap;
 	ext4_grpblk_t next, count = 0, free_count = 0;
@@ -4049,7 +4074,12 @@ ext4_trim_all_free(struct super_block *sb, ext4_group_t group,
 
 		if ((next - start) >= minblocks) {
 			ret = ext4_trim_extent(sb, start,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+					       next - start, group, &e4b,
+					       blkdev_flags);
+#else  
 					       next - start, group, &e4b);
+#endif  
 			if (ret && ret != -EOPNOTSUPP)
 				break;
 			ret = 0;
@@ -4087,7 +4117,12 @@ out:
 	return ret;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+int ext4_trim_fs(struct super_block *sb, struct fstrim_range *range,
+			unsigned long blkdev_flags)
+#else  
 int ext4_trim_fs(struct super_block *sb, struct fstrim_range *range)
+#endif  
 {
 	struct ext4_group_info *grp;
 	ext4_group_t group, first_group, last_group;
@@ -4135,7 +4170,11 @@ int ext4_trim_fs(struct super_block *sb, struct fstrim_range *range)
 
 		if (grp->bb_free >= minlen) {
 			cnt = ext4_trim_all_free(sb, group, first_cluster,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+						end, minlen, blkdev_flags);
+#else  
 						end, minlen);
+#endif  
 			if (cnt < 0) {
 				ret = cnt;
 				break;

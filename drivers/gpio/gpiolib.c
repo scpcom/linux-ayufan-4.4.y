@@ -154,7 +154,11 @@ static struct gpio_desc *gpiochip_offset_to_desc(struct gpio_chip *chip,
  
 static int desc_to_gpio(const struct gpio_desc *desc)
 {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	return desc - &gpio_desc[0];
+#else  
 	return desc->chip->base + gpio_chip_hwgpio(desc);
+#endif  
 }
 
 static int gpio_ensure_requested(struct gpio_desc *desc)
@@ -722,7 +726,6 @@ static int gpiod_export(struct gpio_desc *desc, bool direction_may_change)
 
 	mutex_lock(&sysfs_lock);
 
-	/* check if chip is being removed */
 	if (!chip || !chip->exported) {
 		status = -ENODEV;
 		goto fail_unlock;
@@ -971,7 +974,7 @@ static void gpiochip_unexport(struct gpio_chip *chip)
 		sysfs_remove_group(&dev->kobj, &gpiochip_attr_group);
 		put_device(dev);
 		device_unregister(dev);
-		/* prevent further gpiod exports */
+		 
 		chip->exported = 0;
 		status = 0;
 	} else
@@ -982,7 +985,6 @@ static void gpiochip_unexport(struct gpio_chip *chip)
 		pr_debug("%s: chip %s status %d\n", __func__,
 				chip->label, status);
 
-	/* unregister gpiod class devices owned by sysfs */
 	for (i = 0; i < chip->ngpio; i++) {
 		desc = &chip->desc[i];
 		if (test_and_clear_bit(FLAG_SYSFS, &desc->flags))
@@ -1115,14 +1117,22 @@ int gpiochip_add(struct gpio_chip *chip)
 		}
 	}
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	spin_unlock_irqrestore(&gpio_lock, flags);
+#endif  
+
 #ifdef CONFIG_PINCTRL
 	INIT_LIST_HEAD(&chip->pin_ranges);
 #endif
 
 	of_gpiochip_add(chip);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	 
+#else  
 unlock:
 	spin_unlock_irqrestore(&gpio_lock, flags);
+#endif  
 
 	if (status)
 		goto fail;
@@ -1136,6 +1146,10 @@ unlock:
 		chip->label ? : "generic");
 
 	return 0;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+unlock:
+	spin_unlock_irqrestore(&gpio_lock, flags);
+#endif  
 fail:
 	 
 	pr_err("gpiochip_add: gpios %d..%d (%s) failed to register\n",

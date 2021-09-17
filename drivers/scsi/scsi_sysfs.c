@@ -496,6 +496,31 @@ static int scsi_sdev_check_buf_bit(const char *buf)
 #endif
 
 #ifdef MY_ABC_HERE
+extern void
+ScsiRemapModeSet(struct scsi_device *sdev, unsigned char blAutoRemap);
+static ssize_t
+sdev_show_auto_remap(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	sdev = to_scsi_device(dev);
+	return snprintf (buf, 20, "%d type 0x%x\n", sdev->auto_remap, sdev->type);
+}
+
+static ssize_t
+sdev_store_auto_remap(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev;
+	int val = 0;
+	sdev = to_scsi_device(dev);
+	sscanf (buf, "%d", &val);
+
+	ScsiRemapModeSet(sdev, val ? 1 : 0);
+	return count;
+}
+static DEVICE_ATTR(auto_remap, S_IRUGO | S_IWUSR, sdev_show_auto_remap, sdev_store_auto_remap);
+#endif  
+
+#ifdef MY_ABC_HERE
 static ssize_t
 syno_disk_serial_show(struct device *device, struct device_attribute *attr, char *buf)
 {
@@ -568,6 +593,45 @@ END:
 }
 
 static DEVICE_ATTR(syno_spindown, S_IRUGO, sdev_show_syno_spindown, NULL);
+
+static ssize_t
+sdev_show_syno_standby_syncing(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	int iRet = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	iRet = snprintf (buf, 20, "%u\n", sdev->do_standby_syncing);
+
+END:
+	return iRet;
+}
+
+static ssize_t
+sdev_store_syno_standby_syncing(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev;
+	unsigned long ulstandby_syncing;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	sscanf(buf, "%lu", &ulstandby_syncing);
+	if (0 < ulstandby_syncing) {
+		sdev->do_standby_syncing = 1;
+	} else {
+		sdev->do_standby_syncing = 0;
+	}
+
+END:
+	return count;
+}
+
+static DEVICE_ATTR(syno_standby_syncing, S_IRUGO | S_IWUSR, sdev_show_syno_standby_syncing, sdev_store_syno_standby_syncing);
 #endif  
 
 #ifdef MY_DEF_HERE
@@ -583,9 +647,17 @@ const char *disk_spd_string(unsigned char spd)
 	};
 
 	if (spd > (ARRAY_SIZE(spd_str) - 1)){
+#if defined(CONFIG_SYNO_HI3536)
+		szRet = (char *)spd_str[0];
+#else  
 		szRet = spd_str[0];
+#endif  
 	}else{
+#if defined(CONFIG_SYNO_HI3536)
+		szRet = (char *)spd_str[spd];
+#else  
 		szRet = spd_str[spd];
+#endif  
 	}
 
 	return szRet;
@@ -596,7 +668,11 @@ sdev_show_syno_disk_spd(struct device *dev, struct device_attribute *attr, char 
 {
 	        struct scsi_device *sdev = to_scsi_device(dev);
 		int iRet = -EFAULT;
+#if defined(CONFIG_SYNO_HI3536)
+		int iDiskSpd = 0;
+#else  
 		int iDiskSpd = NULL;
+#endif  
 
 		if (NULL == (sdev = to_scsi_device(dev))){
 			goto END;
@@ -863,8 +939,12 @@ static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_ioerr_cnt.attr,
 	&dev_attr_modalias.attr,
 #ifdef MY_ABC_HERE
+	&dev_attr_auto_remap.attr,
+#endif  
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_idle_time.attr,
 	&dev_attr_syno_spindown.attr,
+	&dev_attr_syno_standby_syncing.attr,
 #endif  
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_scmd_min_timeout.attr,

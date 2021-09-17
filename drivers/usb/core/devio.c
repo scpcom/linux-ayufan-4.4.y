@@ -1882,7 +1882,6 @@ static long usbdev_do_ioctl(struct file *file, unsigned int cmd,
 
 	usb_lock_device(dev);
 
-	/* Reap operations are allowed even after disconnection */
 	switch (cmd) {
 	case USBDEVFS_REAPURB:
 		snoop(&dev->dev, "%s: REAPURB\n", __func__);

@@ -753,7 +753,7 @@ ascend:
 
 		if (!locked && read_seqretry(&rename_lock, seq))
 			goto rename_retry;
-		/* go into the first sibling still alive */
+		 
 		do {
 			next = child->d_child.next;
 			if (next == &this_parent->d_subdirs)
@@ -847,7 +847,7 @@ ascend:
 
 		if (!locked && read_seqretry(&rename_lock, seq))
 			goto rename_retry;
-		/* go into the first sibling still alive */
+		 
 		do {
 			next = child->d_child.next;
 			if (next == &this_parent->d_subdirs)
@@ -1898,6 +1898,14 @@ static int prepend_path(const struct path *path,
 
 		if (dentry == vfsmnt->mnt_root || IS_ROOT(dentry)) {
 			 
+			if (dentry != vfsmnt->mnt_root) {
+				*buffer = orig_buffer;
+				*buflen = orig_len;
+				slash = false;
+				error = 3;
+				goto global_root;
+			}
+			 
 			if (!mnt_has_parent(mnt))
 				goto global_root;
 			dentry = mnt->mnt_mountpoint;
@@ -1925,12 +1933,6 @@ static int prepend_path(const struct path *path,
 	return error;
 
 global_root:
-	 
-	if (IS_ROOT(dentry) &&
-	    (dentry->d_name.len != 1 || dentry->d_name.name[0] != '/')) {
-		WARN(1, "Root dentry has weird name <%.*s>\n",
-		     (int) dentry->d_name.len, dentry->d_name.name);
-	}
 	if (!slash)
 		error = prepend(buffer, buflen, "/", 1);
 	if (!error)
@@ -2242,7 +2244,7 @@ ascend:
 
 		if (!locked && read_seqretry(&rename_lock, seq))
 			goto rename_retry;
-		/* go into the first sibling still alive */
+		 
 		do {
 			next = child->d_child.next;
 			if (next == &this_parent->d_subdirs)

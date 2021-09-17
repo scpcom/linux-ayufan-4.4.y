@@ -7,6 +7,9 @@ obj-y				:= dma-mapping.o extable.o fault.o init.o \
 
 obj-$(CONFIG_MMU)		+= fault-armv.o flush.o idmap.o ioremap.o \
 				   mmap.o pgd.o mmu.o
+#if defined(CONFIG_SYNO_LSP_HI3536)
+obj-$(CONFIG_DEBUG_RODATA)	+= rodata.o
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 ifneq ($(CONFIG_MMU),y)
 obj-y				+= nommu.o

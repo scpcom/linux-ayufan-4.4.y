@@ -5,6 +5,9 @@
 ccflags-$(CONFIG_USB_DEBUG) := -DDEBUG
 
 obj-$(CONFIG_USB_PHY)			+= phy.o
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_USB_OTG_WAKELOCK)		+= otg-wakelock.o
+endif # CONFIG_SYNO_LSP_HI3536
 
 # transceiver drivers, keep the list sorted
 

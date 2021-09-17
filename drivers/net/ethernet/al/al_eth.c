@@ -1761,7 +1761,11 @@ static	struct sk_buff *al_eth_rx_skb(struct al_eth_adapter *adapter,
 
 	skb->len += len;
 	skb->data_len += len;
+#ifdef MY_DEF_HERE
+	skb->truesize += 2048;  
+#else  
 	skb->truesize += len;
+#endif  
 #endif
 #if 0
 	skb_reserve(skb, AL_ETH_RX_OFFSET);
@@ -3780,7 +3784,7 @@ void syno_alpine_wol_set_wrapper(unsigned int device)
 		phy_write(priv->phydev, 21, 0x1000);
 		phy_write(priv->phydev, 31, 0x0000);  
 #ifdef MY_DEF_HERE
-		if (syno_is_hw_version(HW_DS1515)) {
+		if (syno_is_hw_version(HW_DS1515) || syno_is_hw_version(HW_DS1517)) {
 			phy_write(priv->phydev, 31, 0x0003);  
 		}
 #endif

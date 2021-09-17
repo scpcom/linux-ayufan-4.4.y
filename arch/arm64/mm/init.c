@@ -109,9 +109,17 @@ static void __init zone_sizes_init(unsigned long min, unsigned long max)
 }
 
 #ifdef CONFIG_HAVE_ARCH_PFN_VALID
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define PFN_MASK ((1UL << (64 - PAGE_SHIFT)) - 1)
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 int pfn_valid(unsigned long pfn)
 {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	return (pfn & PFN_MASK) == pfn && memblock_is_memory(pfn << PAGE_SHIFT);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	return memblock_is_memory(pfn << PAGE_SHIFT);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 EXPORT_SYMBOL(pfn_valid);
 #endif

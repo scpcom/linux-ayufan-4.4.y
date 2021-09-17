@@ -131,3 +131,6 @@ obj-$(CONFIG_CEPH_FS)		+= ceph/
 obj-$(CONFIG_PSTORE)		+= pstore/
 obj-$(CONFIG_EFIVAR_FS)		+= efivarfs/
 obj-$(CONFIG_AUFS_FS)           += aufs/
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_YAFFS_FS)		+= yaffs2/
+endif # CONFIG_SYNO_LSP_HI3536

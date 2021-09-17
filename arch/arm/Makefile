@@ -28,6 +28,16 @@ GZFLAGS		:=-9
 # Never generate .eh_frame
 KBUILD_CFLAGS	+= $(call cc-option,-fno-dwarf2-cfi-asm)
 
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+ifeq ($(CROSS_COMPILE), arm-hisiv300-linux-)
+	KBUILD_CFLAGS   += -fno-aggressive-loop-optimizations
+endif
+
+ifeq ($(CROSS_COMPILE), arm-hisiv400-linux-)
+	KBUILD_CFLAGS   += -fno-aggressive-loop-optimizations
+endif
+endif # CONFIG_SYNO_LSP_HI3536
+
 # Do not use arch/arm/defconfig - it's always outdated.
 # Select a platform tht is kept up-to-date
 KBUILD_DEFCONFIG := versatile_defconfig
@@ -211,6 +221,12 @@ machine-$(CONFIG_ARCH_STI)     += sti
 machine-$(CONFIG_ARCH_VIRT)		+= virt
 machine-$(CONFIG_ARCH_ZYNQ)		+= zynq
 machine-$(CONFIG_ARCH_SUNXI)		+= sunxi
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+machine-$(CONFIG_ARCH_HI3536)		+= hi3536
+machine-$(CONFIG_ARCH_HI3536_SLAVE)	+= hi3536slave
+machine-$(CONFIG_ARCH_HI3521A)		+= hi3521a
+machine-$(CONFIG_ARCH_HI3531A)		+= hi3531a
+endif # CONFIG_SYNO_LSP_HI3536
 
 
 # Platform directory name.  This list is sorted alphanumerically
@@ -294,6 +310,8 @@ libs-y				:= arch/arm/lib/ $(libs-y)
 # Default target when executing plain make
 ifeq ($(CONFIG_XIP_KERNEL),y)
 KBUILD_IMAGE := xipImage
+else ifeq ($(CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE),y)
+KBUILD_IMAGE := zImage-dtb
 else
 KBUILD_IMAGE := zImage
 endif
@@ -324,6 +342,11 @@ zinstall uinstall install: vmlinux
 
 dtbs: scripts
 	$(Q)$(MAKE) $(build)=$(boot)/dts MACHINE=$(MACHINE) dtbs
+
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+zImage-dtb: vmlinux scripts dtbs
+	$(Q)$(MAKE) $(build)=$(boot) MACHINE=$(MACHINE) $(boot)/$@
+endif # CONFIG_SYNO_LSP_HI3536
 
 # We use MRPROPER_FILES and CLEAN_FILES now
 archclean:

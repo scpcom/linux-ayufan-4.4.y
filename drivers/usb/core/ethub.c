@@ -1421,9 +1421,7 @@ static inline void announce_device(struct usb_device *udev) { }
 static int usb_enumerate_device(struct usb_device *udev)
 {
 	int err = 0;
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(3,10,35))
 	int retry = 2;
-#endif
 
 	if (udev->config == NULL) {
 		err = usb_get_configuration(udev);
@@ -1455,7 +1453,10 @@ static int usb_enumerate_device(struct usb_device *udev)
 	udev->product = usb_cache_string(udev, udev->descriptor.iProduct);
 	udev->manufacturer = usb_cache_string(udev,
 					      udev->descriptor.iManufacturer);
-	udev->serial = usb_cache_string(udev, udev->descriptor.iSerialNumber);
+	do {
+		udelay(500);
+		udev->serial = usb_cache_string(udev, udev->descriptor.iSerialNumber);
+	} while (!udev->serial && retry--);
 
 #ifdef MY_DEF_HERE
 	if (0x054c == le16_to_cpu(udev->descriptor.idVendor) &&

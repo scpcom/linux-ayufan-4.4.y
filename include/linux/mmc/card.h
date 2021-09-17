@@ -512,6 +512,9 @@ struct mmc_driver {
 	void (*remove)(struct mmc_card *);
 	int (*suspend)(struct mmc_card *);
 	int (*resume)(struct mmc_card *);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	void (*shutdown)(struct mmc_card *);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 };
 
 extern int mmc_register_driver(struct mmc_driver *);

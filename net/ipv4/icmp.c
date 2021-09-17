@@ -337,6 +337,9 @@ static void icmp_reply(struct icmp_bxm *icmp_param, struct sk_buff *skb)
 	struct sock *sk;
 	struct inet_sock *inet;
 	__be32 daddr, saddr;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	u32 mark = IP4_REPLY_MARK(net, skb->mark);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	if (ip_options_echo(&icmp_param->replyopts.opt.opt, skb))
 		return;
@@ -349,6 +352,9 @@ static void icmp_reply(struct icmp_bxm *icmp_param, struct sk_buff *skb)
 	icmp_param->data.icmph.checksum = 0;
 
 	inet->tos = ip_hdr(skb)->tos;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	sk->sk_mark = mark;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	daddr = ipc.addr = ip_hdr(skb)->saddr;
 	saddr = fib_compute_spec_dst(skb);
 	ipc.opt = NULL;
@@ -361,6 +367,9 @@ static void icmp_reply(struct icmp_bxm *icmp_param, struct sk_buff *skb)
 	memset(&fl4, 0, sizeof(fl4));
 	fl4.daddr = daddr;
 	fl4.saddr = saddr;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	fl4.flowi4_mark = mark;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	fl4.flowi4_tos = RT_TOS(ip_hdr(skb)->tos);
 	fl4.flowi4_proto = IPPROTO_ICMP;
 	security_skb_classify_flow(skb, flowi4_to_flowi(&fl4));
@@ -379,7 +388,11 @@ static struct rtable *icmp_route_lookup(struct net *net,
 					struct flowi4 *fl4,
 					struct sk_buff *skb_in,
 					const struct iphdr *iph,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+					__be32 saddr, u8 tos, u32 mark,
+#else /* CONFIG_SYNO_LSP_HI3536 */
 					__be32 saddr, u8 tos,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 					int type, int code,
 					struct icmp_bxm *param)
 {
@@ -391,6 +404,9 @@ static struct rtable *icmp_route_lookup(struct net *net,
 	fl4->daddr = (param->replyopts.opt.opt.srr ?
 		      param->replyopts.opt.opt.faddr : iph->saddr);
 	fl4->saddr = saddr;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	fl4->flowi4_mark = mark;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	fl4->flowi4_tos = RT_TOS(tos);
 	fl4->flowi4_proto = IPPROTO_ICMP;
 	fl4->fl4_icmp_type = type;
@@ -488,6 +504,9 @@ void icmp_send(struct sk_buff *skb_in, int type, int code, __be32 info)
 	struct flowi4 fl4;
 	__be32 saddr;
 	u8  tos;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	u32 mark;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	struct net *net;
 	struct sock *sk;
 
@@ -584,6 +603,9 @@ void icmp_send(struct sk_buff *skb_in, int type, int code, __be32 info)
 	tos = icmp_pointers[type].error ? ((iph->tos & IPTOS_TOS_MASK) |
 					   IPTOS_PREC_INTERNETCONTROL) :
 					  iph->tos;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	mark = IP4_REPLY_MARK(net, skb_in->mark);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	if (ip_options_echo(&icmp_param.replyopts.opt.opt, skb_in))
 		goto out_unlock;
@@ -600,11 +622,18 @@ void icmp_send(struct sk_buff *skb_in, int type, int code, __be32 info)
 	icmp_param.skb	  = skb_in;
 	icmp_param.offset = skb_network_offset(skb_in);
 	inet_sk(sk)->tos = tos;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	sk->sk_mark = mark;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	ipc.addr = iph->saddr;
 	ipc.opt = &icmp_param.replyopts.opt;
 	ipc.tx_flags = 0;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	rt = icmp_route_lookup(net, &fl4, skb_in, iph, saddr, tos, mark,
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	rt = icmp_route_lookup(net, &fl4, skb_in, iph, saddr, tos,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 			       type, code, &icmp_param);
 	if (IS_ERR(rt))
 		goto out_unlock;
@@ -937,7 +966,12 @@ error:
 void icmp_err(struct sk_buff *skb, u32 info)
 {
 	struct iphdr *iph = (struct iphdr *)skb->data;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	int offset = iph->ihl<<2;
+	struct icmphdr *icmph = (struct icmphdr *)(skb->data + offset);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	struct icmphdr *icmph = (struct icmphdr *)(skb->data+(iph->ihl<<2));
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	int type = icmp_hdr(skb)->type;
 	int code = icmp_hdr(skb)->code;
 	struct net *net = dev_net(skb->dev);
@@ -947,7 +981,11 @@ void icmp_err(struct sk_buff *skb, u32 info)
 	 * triggered by ICMP_ECHOREPLY which sent from kernel.
 	 */
 	if (icmph->type != ICMP_ECHOREPLY) {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		ping_err(skb, offset, info);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		ping_err(skb, info);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		return;
 	}
 

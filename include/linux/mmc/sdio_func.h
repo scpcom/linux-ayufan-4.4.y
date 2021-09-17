@@ -22,6 +22,16 @@ struct sdio_func;
 
 typedef void (sdio_irq_handler_t)(struct sdio_func *);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+/*
+ * Structure used to hold embedded SDIO device data from platform layer
+ */
+struct sdio_embedded_func {
+	uint8_t f_class;
+	uint32_t f_maxblksize;
+};
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 /*
  * SDIO function CIS tuple (unknown to the core)
  */
@@ -130,6 +140,10 @@ extern int sdio_release_irq(struct sdio_func *func);
 extern unsigned int sdio_align_size(struct sdio_func *func, unsigned int sz);
 
 extern u8 sdio_readb(struct sdio_func *func, unsigned int addr, int *err_ret);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+extern u8 sdio_readb_ext(struct sdio_func *func, unsigned int addr, int *err_ret,
+	unsigned in);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 extern u16 sdio_readw(struct sdio_func *func, unsigned int addr, int *err_ret);
 extern u32 sdio_readl(struct sdio_func *func, unsigned int addr, int *err_ret);
 

@@ -16,6 +16,10 @@
 #ifndef __ASM_PGTABLE_3LEVEL_TYPES_H
 #define __ASM_PGTABLE_3LEVEL_TYPES_H
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <asm/types.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 typedef u64 pteval_t;
 typedef u64 pmdval_t;
 typedef u64 pgdval_t;

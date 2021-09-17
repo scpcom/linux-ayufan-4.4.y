@@ -2,6 +2,10 @@ menu "Device Drivers"
 
 source "drivers/base/Kconfig"
 
+if SYNO_LSP_HI3536
+source "drivers/hi-ipcm/Kconfig"
+endif # CONFIG_SYNO_LSP_HI3536
+
 source "drivers/bus/Kconfig"
 
 source "drivers/connector/Kconfig"
@@ -100,6 +104,10 @@ source "drivers/memstick/Kconfig"
 
 source "drivers/leds/Kconfig"
 
+if SYNO_LSP_HI3536
+source "drivers/switch/Kconfig"
+endif # CONFIG_SYNO_LSP_HI3536
+
 source "drivers/accessibility/Kconfig"
 
 source "drivers/infiniband/Kconfig"
@@ -165,6 +173,13 @@ source "drivers/irqchip/Kconfig"
 source "drivers/ipack/Kconfig"
 
 source "drivers/reset/Kconfig"
+
+if SYNO_LSP_HI3536
+source "drivers/hidmac/Kconfig"
+
+source "drivers/hidmacv300/Kconfig"
+source "drivers/xor/Kconfig"
+endif # SYNO_LSP_HI3536
 
 source "drivers/phy/Kconfig"
 

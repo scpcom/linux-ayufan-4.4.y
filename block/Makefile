@@ -18,3 +18,7 @@ obj-$(CONFIG_IOSCHED_CFQ)	+= cfq-iosched.o
 
 obj-$(CONFIG_BLOCK_COMPAT)	+= compat_ioctl.o
 obj-$(CONFIG_BLK_DEV_INTEGRITY)	+= blk-integrity.o
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_CMDLINE_PARSER)	+= cmdline-parser.o
+obj-$(CONFIG_PART_CHANGE)	+= part-change.o
+endif # CONFIG_SYNO_LSP_HI3536

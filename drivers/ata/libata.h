@@ -39,6 +39,11 @@ enum {
 	ATA_DNXFER_QUIET	= (1 << 31),
 };
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_ARCH_HI3531A
+extern unsigned int mplx_port0;
+#endif
+#endif  
 extern atomic_t ata_print_id;
 extern int atapi_passthru16;
 extern int libata_fua;

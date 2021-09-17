@@ -3,6 +3,20 @@
 #
 comment "USB Host Controller Drivers"
 
+if SYNO_LSP_HI3536
+if ARCH_HI3536
+source "drivers/usb/host/Kconfig.hi3536"
+endif
+
+if ARCH_HI3521A
+source "drivers/usb/host/Kconfig.hiusb2_0"
+endif
+
+if ARCH_HI3531A
+source "drivers/usb/host/Kconfig.hi3531A"
+endif
+endif #SYNO_LSP_HI3536
+
 config USB_ETRON_HCD
 	tristate "Etron HCD support"
 	depends on PCI

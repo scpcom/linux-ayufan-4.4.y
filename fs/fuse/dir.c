@@ -14,6 +14,11 @@
 #include "../synoacl_int.h"
 #endif  
 
+#ifdef MY_ABC_HERE
+#include "../ntfs/time.h"
+#include "../ntfs/endian.h"
+#endif  
+
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 #include <linux/xattr.h>
 #endif  
@@ -1868,8 +1873,15 @@ static int fuse_removexattr(struct dentry *entry, const char *name)
 	return err;
 }
 
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#define SZ_FS_NTFS	"ntfs"
+#define IS_NTFS_FS(inode) (inode->i_sb->s_subtype && !strcmp(SZ_FS_NTFS, inode->i_sb->s_subtype))
+#endif  
 #ifdef MY_ABC_HERE
-static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int stat_flag)
+#define XATTR_NTFS_CREATE_TIME "ntfs_crtime"
+#endif  
+#ifdef MY_ABC_HERE
+static int fuse_syno_glusterfs_getattr(struct dentry *dentry, struct kstat *stat, int stat_flag)
 {
 	int err = 0;
 	struct inode *dir;
@@ -1878,24 +1890,7 @@ static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int stat
 	struct inode *inode;
 	struct qstr name;
 
-	if (!dentry->d_parent || !dentry->d_parent->d_inode) {
-		printk(KERN_WARNING"fuse syno getattr null entry\n");
-		return -EINVAL;
-	}
 	dir = dentry->d_parent->d_inode;
-
-	if (!IS_GLUSTER_FS(dentry->d_inode)) {
-#ifdef MY_ABC_HERE
-			stat->syno_create_time = dentry->d_inode->i_create_time;
-#endif  
-#ifdef MY_ABC_HERE
-			stat->syno_archive_bit = dentry->d_inode->i_archive_bit;
-#endif  
-#ifdef MY_ABC_HERE
-			stat->syno_archive_version = dentry->d_inode->i_archive_version;
-#endif  
-		return 0;
-	}
 
 	if (stat_flag & (SYNOST_ALL | SYNOST_IS_CASELESS)) {
 		synostat = kmalloc(FUSE_SYNOSTAT_SIZE, GFP_KERNEL);
@@ -1928,6 +1923,55 @@ out:
 	iput(inode);
 	return err;
 }
+
+static int fuse_syno_ntfs_getattr(struct dentry *dentry, struct kstat *stat, int stat_flag)
+{
+#ifdef MY_ABC_HERE
+	int size = 0;
+	sle64 time_le = 0;
+	s64 time_s = 0;
+
+	size = fuse_getxattr(dentry, XATTR_SYSTEM_PREFIX XATTR_NTFS_CREATE_TIME, &time_s, sizeof(time_s));
+	if (size == sizeof(time_s)) {
+		time_le = cpu_to_sle64(time_s);
+		stat->syno_create_time = ntfs2utc(time_le);
+	} else {
+		memset(&stat->syno_create_time, 0, sizeof(stat->syno_create_time));
+	}
+#endif  
+#ifdef MY_ABC_HERE
+	stat->syno_archive_bit = dentry->d_inode->i_archive_bit;
+#endif  
+#ifdef MY_ABC_HERE
+	stat->syno_archive_version = dentry->d_inode->i_archive_version;
+#endif  
+	return 0;
+}
+
+static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int stat_flag)
+{
+	if (!dentry->d_parent || !dentry->d_parent->d_inode) {
+		printk(KERN_WARNING"fuse syno getattr null entry\n");
+		return -EINVAL;
+	}
+
+	if (IS_GLUSTER_FS(dentry->d_inode)) {
+		return fuse_syno_glusterfs_getattr(dentry, stat, stat_flag);
+	} else if (IS_NTFS_FS(dentry->d_inode)) {
+		return fuse_syno_ntfs_getattr(dentry, stat, stat_flag);
+	}
+
+#ifdef MY_ABC_HERE
+	stat->syno_create_time = dentry->d_inode->i_create_time;
+#endif  
+#ifdef MY_ABC_HERE
+	stat->syno_archive_bit = dentry->d_inode->i_archive_bit;
+#endif  
+#ifdef MY_ABC_HERE
+	stat->syno_archive_version = dentry->d_inode->i_archive_version;
+#endif  
+	return 0;
+}
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -1944,18 +1988,37 @@ static int fuse_syno_set_archive_version(struct dentry *dentry, u32 archive_vers
 #endif  
 
 #ifdef MY_ABC_HERE
-static int fuse_syno_set_create_time(struct dentry *dentry, struct timespec* time)
+static int fuse_syno_set_glusterfs_create_time(struct dentry *dentry, struct timespec* time)
 {
 	struct syno_gf_xattr_crtime time_le;
-	struct inode *inode = dentry->d_inode;
 
-	if (!IS_GLUSTER_FS(inode)) {
-		return -EOPNOTSUPP;
-	}
 	time_le.sec = cpu_to_le64(time->tv_sec);
 	time_le.nsec = cpu_to_le32(time->tv_nsec);
 
 	return fuse_setxattr(dentry, XATTR_SYNO_PREFIX XATTR_SYNO_CREATE_TIME, &time_le, sizeof(time_le), 0);
+}
+
+static int fuse_syno_set_ntfs_create_time(struct dentry *dentry, struct timespec* time)
+{
+	sle64 time_le;
+	s64 time_s;
+
+	time_le = utc2ntfs(*time);
+	time_s = sle64_to_cpu(time_le);
+
+	return fuse_setxattr(dentry, XATTR_SYSTEM_PREFIX XATTR_NTFS_CREATE_TIME, &time_s, sizeof(time_s), 0);
+}
+
+static int fuse_syno_set_create_time(struct dentry *dentry, struct timespec* time)
+{
+	struct inode *inode = dentry->d_inode;
+
+	if (IS_GLUSTER_FS(inode)) {
+		return fuse_syno_set_glusterfs_create_time(dentry, time);
+	} else if (IS_NTFS_FS(inode)) {
+		return fuse_syno_set_ntfs_create_time(dentry, time);
+	}
+	return -EOPNOTSUPP;
 }
 #endif  
 
@@ -2064,6 +2127,11 @@ static int fuse_syno_bypass_is_synoacl(struct dentry *dentry, int cmd, int reter
 {
 	if (IS_GLUSTER_FS(dentry->d_inode)) {
 		return 0;
+	}
+	if (cmd == BYPASS_SYNOACL_SYNOARCHIVE_OVERWRITE) {
+		if (inode_owner_or_capable(dentry->d_inode)) {
+			return 0;
+		}
 	}
 	return reterror;
 }

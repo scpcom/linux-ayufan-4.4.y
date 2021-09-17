@@ -37,6 +37,9 @@
 struct sockaddr_sco {
 	sa_family_t	sco_family;
 	bdaddr_t	sco_bdaddr;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	__u16		sco_pkt_type;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 };
 
 /* SCO socket options */
@@ -72,7 +75,12 @@ struct sco_conn {
 
 struct sco_pinfo {
 	struct bt_sock	bt;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	__u16		pkt_type;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	__u32		flags;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 	struct sco_conn	*conn;
 };
 

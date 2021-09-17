@@ -16,6 +16,9 @@
 #include <linux/ioctl.h>
 #include <linux/compat.h>
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include "uapi/ashmem.h"
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #define ASHMEM_NAME_LEN		256
 
 #define ASHMEM_NAME_DEF		"dev/ashmem"
@@ -45,6 +48,7 @@ struct ashmem_pin {
 #define ASHMEM_UNPIN		_IOW(__ASHMEMIOC, 8, struct ashmem_pin)
 #define ASHMEM_GET_PIN_STATUS	_IO(__ASHMEMIOC, 9)
 #define ASHMEM_PURGE_ALL_CACHES	_IO(__ASHMEMIOC, 10)
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /* support of 32bit userspace on 64bit platforms */
 #ifdef CONFIG_COMPAT

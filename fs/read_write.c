@@ -1356,10 +1356,6 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 		fsnotify_modify(file);
 		ret = total_written;
 	} else if(rwbytes) {
-#ifdef CONFIG_IA32_EMULATION
-		rwbytes[0]=total_received;
-		rwbytes[1]=total_written;
-#else
 #if defined(CONFIG_ARM)
 		if (copy_to_user(&rwbytes[0], &total_received, sizeof(size_t)) != 0) {
 #else  
@@ -1376,7 +1372,6 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 			ret = -ENOMEM;
 			goto out;
 		}
-#endif
 	}
 
 out:

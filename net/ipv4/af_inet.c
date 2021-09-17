@@ -119,6 +119,21 @@
 #include <linux/mroute.h>
 #endif
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_ANDROID_PARANOID_NETWORK
+#include <linux/android_aid.h>
+
+static inline int current_has_network(void)
+{
+	return in_egroup_p(AID_INET) || capable(CAP_NET_RAW);
+}
+#else
+static inline int current_has_network(void)
+{
+	return 1;
+}
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /* The inetsw table contains everything that inet_create needs to
  * build a new socket.
@@ -284,6 +299,11 @@ static int inet_create(struct net *net, struct socket *sock, int protocol,
 	int try_loading_module = 0;
 	int err;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (!current_has_network())
+		return -EACCES;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 	if (unlikely(!inet_ehash_secret))
 		if (sock->type != SOCK_RAW && sock->type != SOCK_DGRAM)
 			build_ehash_secret();
@@ -339,8 +359,12 @@ lookup_protocol:
 	}
 
 	err = -EPERM;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (sock->type == SOCK_RAW && !kern && !capable(CAP_NET_RAW))
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	if (sock->type == SOCK_RAW && !kern &&
 	    !ns_capable(net->user_ns, CAP_NET_RAW))
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		goto out_rcu_unlock;
 
 	sock->ops = answer->ops;
@@ -417,7 +441,6 @@ out_rcu_unlock:
 	rcu_read_unlock();
 	goto out;
 }
-
 
 /*
  *	The peer socket should always be NULL (or else). When we call this
@@ -726,7 +749,6 @@ do_err:
 }
 EXPORT_SYMBOL(inet_accept);
 
-
 /*
  *	This does both peername and sockname.
  */
@@ -908,6 +930,9 @@ int inet_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 	case SIOCSIFPFLAGS:
 	case SIOCGIFPFLAGS:
 	case SIOCSIFFLAGS:
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	case SIOCKILLADDR:
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		err = devinet_ioctl(net, cmd, (void __user *)arg);
 		break;
 	default:
@@ -1866,4 +1891,3 @@ static int __init ipv4_proc_init(void)
 #endif /* CONFIG_PROC_FS */
 
 MODULE_ALIAS_NETPROTO(PF_INET);
-

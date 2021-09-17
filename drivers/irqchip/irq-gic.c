@@ -75,6 +75,17 @@ struct irq_chip gic_arch_extn = {
 
 static struct gic_chip_data gic_data[MAX_GIC_NR] __read_mostly;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+ 
+struct gic_sgi_handle {
+	unsigned int irq;
+	void (*handle)(unsigned int cpu_intrf,
+			unsigned int irq_num, struct pt_regs *regs);
+};
+struct gic_sgi_handle ipc_irq_handle;
+EXPORT_SYMBOL(ipc_irq_handle);
+#endif  
+
 #ifdef CONFIG_GIC_NON_BANKED
 static void __iomem *gic_get_percpu_base(union gic_base *base)
 {
@@ -268,6 +279,17 @@ static asmlinkage void __exception_irq_entry gic_handle_irq(struct pt_regs *regs
 		}
 		if (irqnr < 16) {
 			writel_relaxed(irqstat, cpu_base + GIC_CPU_EOI);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			 
+			if ((irqnr == ipc_irq_handle.irq)
+				&& (ipc_irq_handle.handle)) {
+				ipc_irq_handle.handle(((irqstat >> 10) & 0x7),
+						irqnr, regs);
+				continue;
+			}
+#endif  
+
 #ifdef CONFIG_SMP
 			handle_IPI(irqnr, regs);
 #endif
@@ -345,6 +367,102 @@ static u8 gic_get_cpumask(struct gic_chip_data *gic)
 	return mask;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536) && \
+	(defined(CONFIG_ARCH_HI3536) \
+	|| defined(CONFIG_ARCH_HI3521A) \
+	|| defined(CONFIG_ARCH_HI3531A))
+static void __init gic_dist_init(struct gic_chip_data *gic)
+{
+	unsigned int i;
+	u32 cpumask;
+	unsigned int gic_irqs = gic->gic_irqs;
+	void __iomem *base = gic_data_dist_base(gic);
+
+#ifdef CONFIG_A17_BOOT_A7
+	unsigned int tmp;
+	unsigned int mod;
+	unsigned int j;
+	unsigned int k;
+	unsigned int irq_num;
+	char *t;
+	char *argv[CONFIG_IRQNUM_SEND_TO_A7];
+	unsigned int irqnum[CONFIG_IRQNUM_SEND_TO_A7] = {0};
+	char *s = CONFIG_IRQ_TO_A7;
+	char *irqnumchar = (char *)kzalloc(4*1024, GFP_KERNEL);
+
+	if (!irqnumchar)
+		return;
+
+	strncpy(irqnumchar, s, strlen(s));
+
+	irqnumchar[strlen(irqnumchar)+1] = '\0';
+	t = irqnumchar;
+
+	for (j = 0; (argv[j] = strsep(&t, ",")) != NULL; j++) {
+		if (j == ARRAY_SIZE(argv)) {
+			WARN(1, "The number of irq is too large,");
+			WARN(1, "please increase the irq buf\n");
+			break;
+		}
+	}
+	irq_num = j;
+
+	for (k = 0; (k < irq_num) && (argv[k] != NULL); k++)
+		irqnum[k] = memparse(argv[k], NULL);
+#endif
+	writel_relaxed(0, base + GIC_DIST_CTRL);
+
+	for (i = 32; i < gic_irqs; i += 16)
+		writel_relaxed(0, base + GIC_DIST_CONFIG + i * 4 / 16);
+
+	cpumask = gic_get_cpumask(gic);
+	cpumask |= cpumask << 8;
+	cpumask |= cpumask << 16;
+
+	for (i = 32; i < gic_irqs; i += 4) {
+#ifdef CONFIG_A17_BOOT_A7
+		for (j = 0; j < irq_num && irqnum[j] != 0; j++) {
+			if ((i <= irqnum[j]) && (irqnum[j]) < (i+4)) {
+				mod = irqnum[j] % 4;
+				tmp = readl_relaxed(base +
+						GIC_DIST_TARGET + i * 4 / 4);
+				switch (mod) {
+				case 0:
+					 
+					tmp = (tmp & (0xffffff00)) | (1 << 4);
+					break;
+				case 1:
+					 
+					tmp = ((tmp & (0xffff00ff))|(1 << 12));
+					break;
+				case 2:
+					 
+					tmp = ((tmp & (0xff00ffff))|(1 << 20));
+					break;
+				case 3:
+					 
+					tmp = ((tmp & (0x00ffffff))|(1 << 28));
+					break;
+				}
+				writel_relaxed(tmp, base +
+						GIC_DIST_TARGET + i * 4 / 4);
+			}
+		}
+		if (0 != tmp)
+			continue;
+#endif
+		writel_relaxed(cpumask, base + GIC_DIST_TARGET + i * 4 / 4);
+	}
+
+	for (i = 32; i < gic_irqs; i += 4)
+		writel_relaxed(0xa0a0a0a0, base + GIC_DIST_PRI + i * 4 / 4);
+
+	for (i = 32; i < gic_irqs; i += 32)
+		writel_relaxed(0xffffffff, base + GIC_DIST_ENABLE_CLEAR + i * 4 / 32);
+
+	writel_relaxed(1, base + GIC_DIST_CTRL);
+}
+#else  
 static void __init gic_dist_init(struct gic_chip_data *gic)
 {
 	unsigned int i;
@@ -371,6 +489,7 @@ static void __init gic_dist_init(struct gic_chip_data *gic)
 
 	writel_relaxed(1, base + GIC_DIST_CTRL);
 }
+#endif  
 
 static void __cpuinit gic_cpu_init(struct gic_chip_data *gic)
 {
@@ -749,7 +868,13 @@ void __init gic_init_bases(unsigned int gic_nr, int irq_start,
 	set_handle_irq(gic_handle_irq);
 
 	gic_chip.flags |= gic_arch_extn.flags;
+#if !defined(CONFIG_SYNO_LSP_HI3536) || \
+	(defined(CONFIG_SYNO_LSP_HI3536) && \
+	 (defined(CONFIG_ARCH_HI3536) \
+	 || defined(CONFIG_ARCH_HI3521A) \
+	 || defined(CONFIG_ARCH_HI3531A)))
 	gic_dist_init(gic);
+#endif
 	gic_cpu_init(gic);
 	gic_pm_init(gic);
 }

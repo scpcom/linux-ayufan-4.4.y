@@ -35,6 +35,9 @@
  */
 struct iio_event_interface {
 	wait_queue_head_t	wait;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	struct mutex		read_lock;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	DECLARE_KFIFO(det_events, struct iio_event_data, 16);
 
 	struct list_head	dev_attr_list;
@@ -97,14 +100,24 @@ static ssize_t iio_event_chrdev_read(struct file *filep,
 	if (count < sizeof(struct iio_event_data))
 		return -EINVAL;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (mutex_lock_interruptible(&ev_int->read_lock))
+		return -ERESTARTSYS;
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	spin_lock_irq(&ev_int->wait.lock);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 	if (kfifo_is_empty(&ev_int->det_events)) {
 		if (filep->f_flags & O_NONBLOCK) {
 			ret = -EAGAIN;
 			goto error_unlock;
 		}
 		/* Blocking on device; waiting for something to be there */
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		ret = wait_event_interruptible(ev_int->wait,
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		ret = wait_event_interruptible_locked_irq(ev_int->wait,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 					!kfifo_is_empty(&ev_int->det_events));
 		if (ret)
 			goto error_unlock;
@@ -114,7 +127,11 @@ static ssize_t iio_event_chrdev_read(struct file *filep,
 	ret = kfifo_to_user(&ev_int->det_events, buf, count, &copied);
 
 error_unlock:
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	mutex_unlock(&ev_int->read_lock);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	spin_unlock_irq(&ev_int->wait.lock);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	return ret ? ret : copied;
 }
@@ -371,6 +388,9 @@ static void iio_setup_ev_int(struct iio_event_interface *ev_int)
 {
 	INIT_KFIFO(ev_int->det_events);
 	init_waitqueue_head(&ev_int->wait);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	mutex_init(&ev_int->read_lock);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
 static const char *iio_event_group_name = "events";
@@ -434,6 +454,9 @@ int iio_device_register_eventset(struct iio_dev *indio_dev)
 
 error_free_setup_event_lines:
 	__iio_remove_event_config_attrs(indio_dev);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	mutex_destroy(&indio_dev->event_interface->read_lock);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	kfree(indio_dev->event_interface);
 error_ret:
 
@@ -446,5 +469,8 @@ void iio_device_unregister_eventset(struct iio_dev *indio_dev)
 		return;
 	__iio_remove_event_config_attrs(indio_dev);
 	kfree(indio_dev->event_interface->group.attrs);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	mutex_destroy(&indio_dev->event_interface->read_lock);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	kfree(indio_dev->event_interface);
 }

@@ -165,6 +165,7 @@ loop:
 	atomic_set(&cur_trans->use_count, 2);
 	atomic_set(&cur_trans->pending_ordered, 0);
 	cur_trans->start_time = get_seconds();
+	cur_trans->dirty_bg_run = 0;
 
 	cur_trans->delayed_refs.href_root = RB_ROOT;
 	atomic_set(&cur_trans->delayed_refs.num_entries, 0);
@@ -187,6 +188,10 @@ loop:
 	INIT_LIST_HEAD(&cur_trans->pending_snapshots);
 	INIT_LIST_HEAD(&cur_trans->pending_chunks);
 	INIT_LIST_HEAD(&cur_trans->switch_commits);
+	INIT_LIST_HEAD(&cur_trans->dirty_bgs);
+	INIT_LIST_HEAD(&cur_trans->io_bgs);
+	mutex_init(&cur_trans->cache_write_mutex);
+	spin_lock_init(&cur_trans->dirty_bgs_lock);
 	list_add_tail(&cur_trans->list, &fs_info->trans_list);
 	extent_io_tree_init(&cur_trans->dirty_pages,
 			     fs_info->btree_inode->i_mapping);
@@ -372,11 +377,8 @@ again:
 		}
 	} while (ret == -EBUSY);
 
-	if (ret < 0) {
-		 
-		BUG_ON(type == TRANS_JOIN_NOLOCK);
+	if (ret < 0)
 		goto join_fail;
-	}
 
 	cur_trans = root->fs_info->running_transaction;
 
@@ -852,7 +854,6 @@ static int update_cowonly_root(struct btrfs_trans_handle *trans,
 	struct btrfs_root *tree_root = root->fs_info->tree_root;
 
 	old_root_used = btrfs_root_used(&root->root_item);
-	btrfs_write_dirty_block_groups(trans, root);
 
 	while (1) {
 		old_root_bytenr = btrfs_root_bytenr(&root->root_item);
@@ -868,9 +869,6 @@ static int update_cowonly_root(struct btrfs_trans_handle *trans,
 			return ret;
 
 		old_root_used = btrfs_root_used(&root->root_item);
-		ret = btrfs_write_dirty_block_groups(trans, root);
-		if (ret)
-			return ret;
 	}
 
 	return 0;
@@ -880,13 +878,11 @@ static noinline int commit_cowonly_roots(struct btrfs_trans_handle *trans,
 					 struct btrfs_root *root)
 {
 	struct btrfs_fs_info *fs_info = root->fs_info;
+	struct list_head *dirty_bgs = &trans->transaction->dirty_bgs;
+	struct list_head *io_bgs = &trans->transaction->io_bgs;
 	struct list_head *next;
 	struct extent_buffer *eb;
 	int ret;
-
-	ret = btrfs_run_delayed_refs(trans, root, (unsigned long)-1);
-	if (ret)
-		return ret;
 
 	eb = btrfs_lock_root_node(fs_info->tree_root);
 	ret = btrfs_cow_block(trans, fs_info->tree_root, eb, NULL,
@@ -911,14 +907,19 @@ static noinline int commit_cowonly_roots(struct btrfs_trans_handle *trans,
 	if (ret)
 		return ret;
 
-	ret = btrfs_run_delayed_refs(trans, root, (unsigned long)-1);
+	ret = btrfs_setup_space_cache(trans, root);
 	if (ret)
 		return ret;
 
+	ret = btrfs_run_delayed_refs(trans, root, (unsigned long)-1);
+	if (ret)
+		return ret;
+again:
 	while (!list_empty(&fs_info->dirty_cowonly_roots)) {
 		next = fs_info->dirty_cowonly_roots.next;
 		list_del_init(next);
 		root = list_entry(next, struct btrfs_root, dirty_list);
+		clear_bit(BTRFS_ROOT_DIRTY, &root->state);
 
 		if (root != fs_info->extent_root)
 			list_add_tail(&root->dirty_list,
@@ -926,7 +927,22 @@ static noinline int commit_cowonly_roots(struct btrfs_trans_handle *trans,
 		ret = update_cowonly_root(trans, root);
 		if (ret)
 			return ret;
+		ret = btrfs_run_delayed_refs(trans, root, (unsigned long)-1);
+		if (ret)
+			return ret;
 	}
+
+	while (!list_empty(dirty_bgs) || !list_empty(io_bgs)) {
+		ret = btrfs_write_dirty_block_groups(trans, root);
+		if (ret)
+			return ret;
+		ret = btrfs_run_delayed_refs(trans, root, (unsigned long)-1);
+		if (ret)
+			return ret;
+	}
+
+	if (!list_empty(&fs_info->dirty_cowonly_roots))
+		goto again;
 
 	list_add_tail(&fs_info->extent_root->dirty_list,
 		      &trans->transaction->switch_commits);
@@ -1471,7 +1487,7 @@ static inline int btrfs_start_delalloc_flush(struct btrfs_fs_info *fs_info)
 	if (btrfs_test_opt(fs_info->tree_root, FLUSHONCOMMIT))
 		return btrfs_start_delalloc_roots(fs_info, 1, -1);
 #ifdef MY_ABC_HERE
-	else if (fs_info->delalloc_inodes_nr > fs_info->flushoncommit_threshold)
+	else if (fs_info->flushoncommit_threshold && fs_info->delalloc_inodes_nr > fs_info->flushoncommit_threshold)
 		return btrfs_start_delalloc_roots(fs_info, 1, -1);
 #endif
 	return 0;
@@ -1482,7 +1498,7 @@ static inline void btrfs_wait_delalloc_flush(struct btrfs_fs_info *fs_info)
 	if (btrfs_test_opt(fs_info->tree_root, FLUSHONCOMMIT))
 		btrfs_wait_ordered_roots(fs_info, -1);
 #ifdef MY_ABC_HERE
-	else if (fs_info->ordered_extent_nr > fs_info->flushoncommit_threshold) {
+	else if (fs_info->flushoncommit_threshold && fs_info->ordered_extent_nr > fs_info->flushoncommit_threshold) {
 		btrfs_wait_ordered_roots(fs_info, -1);
 	}
 #endif
@@ -1539,6 +1555,24 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 #ifdef MY_ABC_HERE
 	trans->pending_snap_rm = false;
 #endif  
+	if (!cur_trans->dirty_bg_run) {
+		int run_it = 0;
+
+		mutex_lock(&root->fs_info->ro_block_group_mutex);
+		if (!cur_trans->dirty_bg_run) {
+			run_it = 1;
+			cur_trans->dirty_bg_run = 1;
+		}
+		mutex_unlock(&root->fs_info->ro_block_group_mutex);
+
+		if (run_it)
+			ret = btrfs_start_dirty_block_groups(trans, root);
+	}
+	if (ret) {
+		btrfs_end_transaction(trans, root);
+		return ret;
+	}
+
 	spin_lock(&root->fs_info->trans_lock);
 	if (cur_trans->state >= TRANS_STATE_COMMIT_START) {
 		spin_unlock(&root->fs_info->trans_lock);
@@ -1677,6 +1711,8 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 	switch_commit_roots(cur_trans, root->fs_info);
 
 	assert_qgroups_uptodate(trans);
+	ASSERT(list_empty(&cur_trans->dirty_bgs));
+	ASSERT(list_empty(&cur_trans->io_bgs));
 	update_super_roots(root);
 
 	btrfs_set_super_log_root(root->fs_info->super_copy, 0);

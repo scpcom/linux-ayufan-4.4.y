@@ -2,6 +2,10 @@
 # SATA/PATA driver configuration
 #
 
+if SYNO_LSP_HI3536
+source "drivers/ata/Kconfig.hiahci"
+endif # SYNO_LSP_HI3536
+
 config HAVE_PATA_PLATFORM
 	bool
 	help
@@ -101,6 +105,7 @@ config SATA_AHCI_MV
 
 config SATA_AHCI_PLATFORM
 	tristate "Platform AHCI SATA support"
+	depends on !SYNO_LSP_HI3536 || (SYNO_LSP_HI3536 && HI_SATA)
 	help
 	  This option enables support for Platform AHCI Serial ATA
 	  controllers.

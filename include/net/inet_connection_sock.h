@@ -163,6 +163,11 @@ extern void inet_csk_init_xmit_timers(struct sock *sk,
 				      void (*delack_handler)(unsigned long),
 				      void (*keepalive_handler)(unsigned long));
 extern void inet_csk_clear_xmit_timers(struct sock *sk);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(CONFIG_TNK) && defined(SWITCH_KEEPALIVE)
+extern void inet_csk_clear_xmit_timers_except_keepalive(struct sock *sk);
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static inline void inet_csk_schedule_ack(struct sock *sk)
 {

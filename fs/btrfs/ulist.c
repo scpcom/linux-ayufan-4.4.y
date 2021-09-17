@@ -150,8 +150,8 @@ struct ulist_node *ulist_next(struct ulist *ulist, struct ulist_iterator *uiter)
 	return node;
 }
 
-#if defined(MY_ABC_HERE)
-int ulist_add_lru_adjust(struct ulist *ulist, u64 val, gfp_t gfp_mask)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+int ulist_add_lru_adjust(struct ulist *ulist, u64 val, u64 aux, gfp_t gfp_mask)
 {
 	int ret;
 	struct ulist_node *node;
@@ -167,6 +167,7 @@ int ulist_add_lru_adjust(struct ulist *ulist, u64 val, gfp_t gfp_mask)
 		return -ENOMEM;
 
 	node->val = val;
+	node->aux = aux;
 #ifdef CONFIG_BTRFS_DEBUG
 	node->seqnum = ulist->nnodes;
 #endif
@@ -192,4 +193,24 @@ void ulist_remove_first(struct ulist *ulist)
 	ulist->nnodes--;
 	kfree(node);
 }
-#endif
+#endif  
+
+#if defined(MY_ABC_HERE) || \
+    defined(MY_ABC_HERE)
+struct ulist_node * ulist_search(struct ulist *ulist, u64 val)
+{
+	struct rb_node *n = ulist->root.rb_node;
+	struct ulist_node *u = NULL;
+
+	while (n) {
+		u = rb_entry(n, struct ulist_node, rb_node);
+		if (u->val < val)
+			n = n->rb_right;
+		else if (u->val > val)
+			n = n->rb_left;
+		else
+			return u;
+	}
+	return NULL;
+}
+#endif  

@@ -12,11 +12,7 @@
 #define PCI_DEVICE_ID_ETRON_EJ168	0x7023
 #define PCI_DEVICE_ID_ETRON_EJ188	0x7052
 
-#ifdef MY_DEF_HERE
-static const char hcd_name[] = "etxhci_hcd_150526_syno";
-#else
-static const char hcd_name[] = "etxhci_hcd-150603d1";
-#endif  
+static const char hcd_name[] = "etxhci_hcd-161024";
 
 static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
 {
@@ -97,6 +93,7 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	struct xhci_hcd *xhci;
 	struct hc_driver *driver;
 	struct usb_hcd *hcd;
+	char name[16];
 
 	if (dev->vendor != PCI_VENDOR_ID_ETRON)
 		return -ENODEV;
@@ -126,7 +123,8 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	if (retval)
 		goto put_usb3_hcd;
 	 
-	xhci->bulk_xfer_wq = create_singlethread_workqueue(pci_name(dev));
+	snprintf(name, sizeof(name), "etxhci_wq%d", hcd->self.busnum);
+	xhci->bulk_xfer_wq = create_singlethread_workqueue(name);
 	if (!xhci->bulk_xfer_wq) {
 		retval = -ENOMEM;
 		goto put_usb3_hcd;

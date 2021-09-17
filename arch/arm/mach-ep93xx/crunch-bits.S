@@ -62,8 +62,16 @@
  * r9  = ret_from_exception
  * lr  = undefined instr exit
  *
+ */
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+/*
+ * called from prefetch exception handler with interrupts enabled
+ */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+/*
  * called from prefetch exception handler with interrupts disabled
  */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 ENTRY(crunch_task_enable)
 	ldr	r8, =(EP93XX_APB_VIRT_BASE + 0x00130000)	@ syscon addr
 

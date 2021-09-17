@@ -14,13 +14,32 @@
 # Based on the ia64 boot/Makefile.
 #
 
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+include $(srctree)/arch/arm64/boot/dts/Makefile
+endif # CONFIG_SYNO_LSP_HI3536
+
 targets := Image Image.gz
+
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+DTB_NAMES := $(subst $\",,$(CONFIG_BUILD_ARM64_APPENDED_DTB_IMAGE_NAMES))
+ifneq ($(DTB_NAMES),)
+DTB_LIST := $(addsuffix .dtb,$(DTB_NAMES))
+else
+DTB_LIST := $(dtb-y)
+endif
+DTB_OBJS := $(addprefix $(obj)/dts/,$(DTB_LIST))
+endif # CONFIG_SYNO_LSP_HI3536
 
 $(obj)/Image: vmlinux FORCE
 	$(call if_changed,objcopy)
 
 $(obj)/Image.gz: $(obj)/Image FORCE
 	$(call if_changed,gzip)
+
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+$(obj)/Image.gz-dtb: $(obj)/Image.gz $(DTB_OBJS) FORCE
+	$(call if_changed,cat)
+endif # CONFIG_SYNO_LSP_HI3536
 
 install: $(obj)/Image
 	$(CONFIG_SHELL) $(srctree)/$(src)/install.sh $(KERNELRELEASE) \

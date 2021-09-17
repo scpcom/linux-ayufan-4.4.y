@@ -812,7 +812,11 @@ done:
 }
 EXPORT_SYMBOL_GPL(usb_add_config);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static void unbind_config(struct usb_composite_dev *cdev,
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static void remove_config(struct usb_composite_dev *cdev,
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 			      struct usb_configuration *config)
 {
 	while (!list_empty(&config->functions)) {
@@ -827,7 +831,11 @@ static void remove_config(struct usb_composite_dev *cdev,
 			/* may free memory for "f" */
 		}
 	}
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	list_del(&config->list);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	if (config->unbind) {
 		DBG(cdev, "unbind config '%s'/%p\n", config->label, config);
 		config->unbind(config);
@@ -854,9 +862,17 @@ void usb_remove_config(struct usb_composite_dev *cdev,
 	if (cdev->config == config)
 		reset_config(cdev);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	list_del(&config->list);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
+
 	spin_unlock_irqrestore(&cdev->lock, flags);
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	unbind_config(cdev, config);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	remove_config(cdev, config);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
 /*-------------------------------------------------------------------------*/
@@ -1525,7 +1541,12 @@ static void __composite_unbind(struct usb_gadget *gadget, bool unbind_driver)
 		struct usb_configuration	*c;
 		c = list_first_entry(&cdev->configs,
 				struct usb_configuration, list);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		list_del(&c->list);
+		unbind_config(cdev, c);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		remove_config(cdev, c);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	}
 	if (cdev->driver->unbind && unbind_driver)
 		cdev->driver->unbind(cdev);

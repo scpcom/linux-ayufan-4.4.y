@@ -51,7 +51,11 @@ struct task_struct;
 extern void debug_show_all_locks(void);
 extern void debug_show_held_locks(struct task_struct *task);
 extern void debug_check_no_locks_freed(const void *from, unsigned long len);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+extern void debug_check_no_locks_held(void);
+#else /* CONFIG_SYNO_LSP_HI3536 */
 extern void debug_check_no_locks_held(struct task_struct *task);
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #else
 static inline void debug_show_all_locks(void)
 {
@@ -67,7 +71,11 @@ debug_check_no_locks_freed(const void *from, unsigned long len)
 }
 
 static inline void
+#if defined(CONFIG_SYNO_LSP_HI3536)
+debug_check_no_locks_held(void)
+#else /* CONFIG_SYNO_LSP_HI3536 */
 debug_check_no_locks_held(struct task_struct *task)
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 }
 #endif

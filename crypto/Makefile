@@ -2,8 +2,19 @@
 # Cryptographic API
 #
 
+ifeq ($(CONFIG_SYNO_BACKPORT_ARM_CRYPTO),y)
+# memneq MUST be built with -Os or -O0 to prevent early-return optimizations
+# that will defeat memneq's actual purpose to prevent timing attacks.
+CFLAGS_REMOVE_memneq.o := -O1 -O2 -O3
+CFLAGS_memneq.o := -Os
+endif # CONFIG_SYNO_BACKPORT_ARM_CRYPTO
+
 obj-$(CONFIG_CRYPTO) += crypto.o
+ifeq ($(CONFIG_SYNO_BACKPORT_ARM_CRYPTO),y)
+crypto-y := api.o cipher.o compress.o memneq.o
+else # CONFIG_SYNO_BACKPORT_ARM_CRYPTO
 crypto-y := api.o cipher.o compress.o
+endif # CONFIG_SYNO_BACKPORT_ARM_CRYPTO
 
 obj-$(CONFIG_CRYPTO_WORKQUEUE) += crypto_wq.o
 
@@ -83,6 +94,7 @@ obj-$(CONFIG_CRYPTO_ZLIB) += zlib.o
 obj-$(CONFIG_CRYPTO_MICHAEL_MIC) += michael_mic.o
 obj-$(CONFIG_CRYPTO_CRC32C) += crc32c.o
 obj-$(CONFIG_CRYPTO_CRC32) += crc32.o
+obj-$(CONFIG_CRYPTO_CRCT10DIF) += crct10dif_common.o crct10dif_generic.o
 obj-$(CONFIG_CRYPTO_AUTHENC) += authenc.o authencesn.o
 obj-$(CONFIG_CRYPTO_LZO) += lzo.o
 obj-$(CONFIG_CRYPTO_842) += 842.o
@@ -104,3 +116,6 @@ obj-$(CONFIG_SYNO_CRYPTODEV_LINUX) += cryptodev-linux/
 obj-$(CONFIG_XOR_BLOCKS) += xor.o
 obj-$(CONFIG_ASYNC_CORE) += async_tx/
 obj-$(CONFIG_ASYMMETRIC_KEY_TYPE) += asymmetric_keys/
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_CRYPTO_ABLK_HELPER) += ablk_helper.o
+endif # CONFIG_SYNO_LSP_HI3536

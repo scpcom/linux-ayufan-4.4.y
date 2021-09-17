@@ -31,6 +31,12 @@
 #include <net/inet_ecn.h>
 #include <net/dst.h>
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+#include <net/tnkdrv.h>
+#endif
+#endif  
+
 #include <linux/seq_file.h>
 #include <linux/memcontrol.h>
 
@@ -204,6 +210,9 @@ extern int sysctl_tcp_default_delack_segs;
 #else  
 extern int sysctl_tcp_min_tso_segs;
 #endif  
+#if defined(CONFIG_SYNO_LSP_HI3536)
+extern int sysctl_tcp_default_init_rwnd;
+#endif  
 
 extern atomic_long_t tcp_memory_allocated;
 extern struct percpu_counter tcp_sockets_allocated;
@@ -294,6 +303,13 @@ extern void tcp_twsk_destructor(struct sock *sk);
 extern ssize_t tcp_splice_read(struct socket *sk, loff_t *ppos,
 			       struct pipe_inode_info *pipe, size_t len,
 			       unsigned int flags);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+#if SWITCH_SEND_FIN
+extern int tnk_tcp_fin_acked_state_process(struct sock *sk);
+#endif
+#endif
+#endif  
 
 static inline void tcp_dec_quickack_mode(struct sock *sk,
 					 const unsigned int pkts)
@@ -442,6 +458,23 @@ extern void tcp_send_ack(struct sock *sk);
 extern void tcp_send_delayed_ack(struct sock *sk);
 extern void tcp_send_loss_probe(struct sock *sk);
 extern bool tcp_schedule_loss_probe(struct sock *sk);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+extern void tnk_send_fin(struct sock *sk);
+extern void tnk_send_ack(struct sock *sk, unsigned int rcv_nxt,
+		unsigned window);
+extern void tnk_send_probe(struct sock *sk, unsigned int seq,
+		unsigned int ack_seq, unsigned int);
+extern int proc_tnk_cfg_tcp_retries2(struct ctl_table *table, int write,
+		void __user *buffer, size_t *lenp, loff_t *ppos);
+#if SWITCH_DUPACK_NUM
+extern int proc_tnk_cfg_tcp_dupack_cnt(struct ctl_table *table, int write,
+		void __user *buffer, size_t *lenp, loff_t *ppos);
+#endif
+extern int proc_tnk_thin_linear_timeouts(struct ctl_table *table, int write,
+		void __user *buffer, size_t *lenp, loff_t *ppos);
+#endif
+#endif  
 
 extern void tcp_cwnd_application_limited(struct sock *sk);
 extern void tcp_resume_early_retransmit(struct sock *sk);
@@ -565,6 +598,11 @@ struct tcp_skb_cb {
 #if IS_ENABLED(CONFIG_IPV6)
 		struct inet6_skb_parm	h6;
 #endif
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_TNK
+		struct tnkcb		tcb;
+#endif
+#endif  
 	} header;	 
 	__u32		seq;		 
 	__u32		end_seq;	 
@@ -1317,6 +1355,10 @@ extern struct sk_buff **tcp4_gro_receive(struct sk_buff **head,
 					 struct sk_buff *skb);
 extern int tcp_gro_complete(struct sk_buff *skb);
 extern int tcp4_gro_complete(struct sk_buff *skb);
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+extern int tcp_nuke_addr(struct net *net, struct sockaddr *addr);
+#endif  
 
 #ifdef CONFIG_PROC_FS
 extern int tcp4_proc_init(void);

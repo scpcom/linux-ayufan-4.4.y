@@ -1265,8 +1265,27 @@ next_slot:
 					goto out_check;
 			}
 			 
+#ifdef MY_ABC_HERE
+			if (csum_exist_in_range(root, disk_bytenr, num_bytes)) {
+				if (!nolock) {
+					btrfs_end_write_no_snapshoting(root);
+				}
+				goto out_check;
+			}
+#else
 			if (csum_exist_in_range(root, disk_bytenr, num_bytes))
 				goto out_check;
+#endif  
+#ifdef MY_ABC_HERE
+			if (test_bit(BTRFS_INODE_IN_SYNO_DEFRAG, &BTRFS_I(inode)->runtime_flags) &&
+				test_range_bit(&BTRFS_I(inode)->io_tree, found_key.offset,
+				        extent_end - 1, EXTENT_DEFRAG, 1, NULL)) {
+				if (!nolock) {
+					btrfs_end_write_no_snapshoting(root);
+				}
+				goto out_check;
+			}
+#endif  
 			nocow = 1;
 		} else if (extent_type == BTRFS_FILE_EXTENT_INLINE) {
 			extent_end = found_key.offset +
@@ -2503,6 +2522,10 @@ static int btrfs_finish_ordered_io(struct btrfs_ordered_extent *ordered_extent)
 		ret = -EIO;
 		goto out;
 	}
+
+	btrfs_free_io_failure_record(inode, ordered_extent->file_offset,
+				     ordered_extent->file_offset +
+				     ordered_extent->len - 1);
 
 	if (test_bit(BTRFS_ORDERED_TRUNCATED, &ordered_extent->flags)) {
 		truncated = true;
@@ -4435,7 +4458,10 @@ void btrfs_evict_inode(struct inode *inode)
 		goto no_delete;
 	}
 	 
-	btrfs_wait_ordered_range(inode, 0, (u64)-1);
+	if (!special_file(inode->i_mode))
+		btrfs_wait_ordered_range(inode, 0, (u64)-1);
+
+	btrfs_free_io_failure_record(inode, 0, (u64)-1);
 
 	if (root->fs_info->log_root_recovering) {
 		BUG_ON(test_bit(BTRFS_INODE_HAS_ORPHAN_ITEM,
@@ -6395,9 +6421,12 @@ static int lock_extent_direct(struct inode *inode, u64 lockstart, u64 lockend,
 			btrfs_put_ordered_extent(ordered);
 		} else {
 			 
-			ret = filemap_write_and_wait_range(inode->i_mapping,
-							   lockstart,
-							   lockend);
+			ret = btrfs_fdatawrite_range(inode, lockstart, lockend);
+			if (ret)
+				break;
+			ret = filemap_fdatawait_range(inode->i_mapping,
+						      lockstart,
+						      lockend);
 			if (ret)
 				break;
 
@@ -7097,11 +7126,6 @@ static int btrfs_writepage(struct page *page, struct writeback_control *wbc)
 		return 0;
 	}
 
-	/*
-	 * If we are under memory pressure we will call this directly from the
-	 * VM, we need to make sure we have the inode referenced for the ordered
-	 * extent.  If not just return like we didn't do anything.
-	 */
 	if (!igrab(inode)) {
 		redirty_page_for_writepage(wbc, page);
 		return AOP_WRITEPAGE_ACTIVATE;
@@ -8115,9 +8139,9 @@ static int btrfs_symlink(struct inode *dir, struct dentry *dentry,
 #endif
 	 
 #if defined(MY_ABC_HERE)
-	trans = btrfs_start_transaction(root, 5 + credit_for_syno);
+	trans = btrfs_start_transaction(root, 7 + credit_for_syno);
 #else
-	trans = btrfs_start_transaction(root, 5);
+	trans = btrfs_start_transaction(root, 7);
 #endif  
 	if (IS_ERR(trans))
 		return PTR_ERR(trans);

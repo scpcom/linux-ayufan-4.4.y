@@ -159,6 +159,9 @@ ipv4_connected:
 	fl6.flowi6_mark = sk->sk_mark;
 	fl6.fl6_dport = inet->inet_dport;
 	fl6.fl6_sport = inet->inet_sport;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	fl6.flowi6_uid = sock_i_uid(sk);
+#endif  
 
 	if (!fl6.flowi6_oif && (addr_type&IPV6_ADDR_MULTICAST))
 		fl6.flowi6_oif = np->mcast_oif;

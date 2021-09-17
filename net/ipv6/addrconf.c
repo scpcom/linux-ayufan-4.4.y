@@ -161,6 +161,9 @@ static struct ipv6_devconf ipv6_devconf __read_mostly = {
 	.accept_ra_rt_info_max_plen = 0,
 #endif
 #endif
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	.accept_ra_rt_table	= 0,
+#endif  
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	 
 	.disable_ipv6		= 0,
@@ -199,6 +202,9 @@ static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
 	.accept_ra_rt_info_max_plen = 0,
 #endif
 #endif
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	.accept_ra_rt_table	= 0,
+#endif  
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	 
 	.disable_ipv6		= 0,
@@ -1093,6 +1099,11 @@ enum {
 #endif
 	IPV6_SADDR_RULE_ORCHID,
 	IPV6_SADDR_RULE_PREFIX,
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_IPV6_OPTIMISTIC_DAD
+	IPV6_SADDR_RULE_NOT_OPTIMISTIC,
+#endif
+#endif  
 	IPV6_SADDR_RULE_MAX
 };
 
@@ -1119,6 +1130,17 @@ static inline int ipv6_saddr_preferred(int type)
 		return 1;
 	return 0;
 }
+
+#if defined(CONFIG_SYNO_LSP_HI3536)
+static inline bool ipv6_use_optimistic_addr(struct inet6_dev *idev)
+{
+#ifdef CONFIG_IPV6_OPTIMISTIC_DAD
+	return idev && idev->cnf.optimistic_dad && idev->cnf.use_optimistic;
+#else
+	return false;
+#endif
+}
+#endif  
 
 static int ipv6_get_saddr_eval(struct net *net,
 			       struct ipv6_saddr_score *score,
@@ -1160,10 +1182,23 @@ static int ipv6_get_saddr_eval(struct net *net,
 		score->scopedist = ret;
 		break;
 	case IPV6_SADDR_RULE_PREFERRED:
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	    {
+		 
+		u8 avoid = IFA_F_DEPRECATED;
+
+		if (!ipv6_use_optimistic_addr(score->ifa->idev))
+			avoid |= IFA_F_OPTIMISTIC;
+		ret = ipv6_saddr_preferred(score->addr_type) ||
+		      !(score->ifa->flags & avoid);
+		break;
+	    }
+#else  
 		 
 		ret = ipv6_saddr_preferred(score->addr_type) ||
 		      !(score->ifa->flags & (IFA_F_DEPRECATED|IFA_F_OPTIMISTIC));
 		break;
+#endif  
 #ifdef CONFIG_IPV6_MIP6
 	case IPV6_SADDR_RULE_HOA:
 	    {
@@ -1207,6 +1242,14 @@ static int ipv6_get_saddr_eval(struct net *net,
 			ret = score->ifa->prefix_len;
 		score->matchlen = ret;
 		break;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_IPV6_OPTIMISTIC_DAD
+	case IPV6_SADDR_RULE_NOT_OPTIMISTIC:
+		 
+		ret = !(score->ifa->flags & IFA_F_OPTIMISTIC);
+		break;
+#endif
+#endif  
 	default:
 		ret = 0;
 	}
@@ -1781,12 +1824,34 @@ static void  __ipv6_try_regen_rndid(struct inet6_dev *idev, struct in6_addr *tmp
 }
 #endif
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+u32 addrconf_rt_table(const struct net_device *dev, u32 default_table) {
+	 
+	struct inet6_dev *idev = in6_dev_get(dev);
+	u32 table;
+	int sysctl = idev->cnf.accept_ra_rt_table;
+	if (sysctl == 0) {
+		table = default_table;
+	} else if (sysctl > 0) {
+		table = (u32) sysctl;
+	} else {
+		table = (unsigned) dev->ifindex + (-sysctl);
+	}
+	in6_dev_put(idev);
+	return table;
+}
+#endif  
+
 static void
 addrconf_prefix_route(struct in6_addr *pfx, int plen, struct net_device *dev,
 		      unsigned long expires, u32 flags)
 {
 	struct fib6_config cfg = {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		.fc_table = addrconf_rt_table(dev, RT6_TABLE_PREFIX),
+#else  
 		.fc_table = RT6_TABLE_PREFIX,
+#endif  
 		.fc_metric = IP6_RT_PRIO_ADDRCONF,
 		.fc_ifindex = dev->ifindex,
 		.fc_expires = expires,
@@ -1815,7 +1880,12 @@ static struct rt6_info *addrconf_get_prefix_route(const struct in6_addr *pfx,
 	struct rt6_info *rt = NULL;
 	struct fib6_table *table;
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	table = fib6_get_table(dev_net(dev),
+			       addrconf_rt_table(dev, RT6_TABLE_PREFIX));
+#else  
 	table = fib6_get_table(dev_net(dev), RT6_TABLE_PREFIX);
+#endif  
 	if (table == NULL)
 		return NULL;
 
@@ -2941,8 +3011,18 @@ static void addrconf_dad_start(struct inet6_ifaddr *ifp)
 		return;
 	}
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	if (ifp->flags & IFA_F_OPTIMISTIC) {
+		ip6_ins_rt(ifp->rt);
+		if (ipv6_use_optimistic_addr(idev)) {
+			 
+			ipv6_ifa_notify(RTM_NEWADDR, ifp);
+		}
+	}
+#else  
 	if (ifp->flags & IFA_F_OPTIMISTIC)
 		ip6_ins_rt(ifp->rt);
+#endif  
 
 	addrconf_dad_kick(ifp);
 out:
@@ -3852,10 +3932,16 @@ static inline void ipv6_store_devconf(struct ipv6_devconf *cnf,
 	array[DEVCONF_ACCEPT_RA_RT_INFO_MAX_PLEN] = cnf->accept_ra_rt_info_max_plen;
 #endif
 #endif
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	array[DEVCONF_ACCEPT_RA_RT_TABLE] = cnf->accept_ra_rt_table;
+#endif  
 	array[DEVCONF_PROXY_NDP] = cnf->proxy_ndp;
 	array[DEVCONF_ACCEPT_SOURCE_ROUTE] = cnf->accept_source_route;
 #ifdef CONFIG_IPV6_OPTIMISTIC_DAD
 	array[DEVCONF_OPTIMISTIC_DAD] = cnf->optimistic_dad;
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	array[DEVCONF_USE_OPTIMISTIC] = cnf->use_optimistic;
+#endif  
 #endif
 #ifdef CONFIG_IPV6_MROUTE
 	array[DEVCONF_MC_FORWARDING] = cnf->mc_forwarding;
@@ -4539,6 +4625,15 @@ static struct addrconf_sysctl_table
 		},
 #endif
 #endif
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		{
+			.procname	= "accept_ra_rt_table",
+			.data		= &ipv6_devconf.accept_ra_rt_table,
+			.maxlen		= sizeof(int),
+			.mode		= 0644,
+			.proc_handler	= proc_dointvec,
+		},
+#endif  
 		{
 			.procname	= "proxy_ndp",
 			.data		= &ipv6_devconf.proxy_ndp,
@@ -4562,6 +4657,16 @@ static struct addrconf_sysctl_table
 			.proc_handler   = proc_dointvec,
 
 		},
+#if defined(CONFIG_SYNO_LSP_HI3536)
+		{
+			.procname       = "use_optimistic",
+			.data           = &ipv6_devconf.use_optimistic,
+			.maxlen         = sizeof(int),
+			.mode           = 0644,
+			.proc_handler   = proc_dointvec,
+
+		},
+#endif  
 #endif
 #ifdef CONFIG_IPV6_MROUTE
 		{

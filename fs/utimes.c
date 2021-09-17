@@ -235,7 +235,8 @@ SYSCALL_DEFINE2(SYNOUtime, const char __user *, filename, struct timespec __user
 				goto drop_write;
 		} else if (inode->i_op->syno_bypass_is_synoacl) {
 			 
-			error = inode->i_op->syno_bypass_is_synoacl(path.dentry, 0, -EPERM);
+			error = inode->i_op->syno_bypass_is_synoacl(path.dentry,
+					                BYPASS_SYNOACL_SYNOUTIME, -EPERM);
 			if (error)
 				goto drop_write;
 		} else {

@@ -76,4 +76,12 @@ config SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 	default n
 	depends on SYNO_BROMOLOW || SYNO_BROADWELL
 
+config SYNO_HI3536
+	bool "Hisilicon Hi3536 SoC"
+	select SYNO_LSP_HI3536
+
+config SYNO_LSP_HI3536
+	bool "Apply Hisilicon Hi3536 LSP"
+	depends on SYNO_HI3536
+
 endmenu #Platform Selection

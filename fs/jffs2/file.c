@@ -140,8 +140,12 @@ static int jffs2_write_begin(struct file *filp, struct address_space *mapping,
 		return -ENOMEM;
 	*pagep = pg;
 
-	if (alloc_len) {
+	jffs2_dbg(1, "%s()\n", __func__);
+
+	if (pageofs > inode->i_size) {
 		 
+		struct jffs2_sb_info *c = JFFS2_SB_INFO(inode->i_sb);
+		struct jffs2_raw_inode ri;
 		struct jffs2_full_dnode *fn;
 		uint32_t alloc_len;
 

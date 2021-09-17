@@ -41,6 +41,13 @@ finish_urb(struct ohci_hcd *ohci, struct urb *urb, int status)
 __releases(ohci->lock)
 __acquires(ohci->lock)
 {
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(CONFIG_SYNO_HI3536)
+	// do nothing
+#else /* CONFIG_SYNO_HI3536 */
+	struct device *dev = ohci_to_hcd(ohci)->self.controller;
+#endif /* CONFIG_SYNO_HI3536 */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	struct usb_host_endpoint *ep = urb->ep;
 	struct urb_priv *urb_priv;
 

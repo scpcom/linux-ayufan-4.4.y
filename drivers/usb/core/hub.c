@@ -111,6 +111,9 @@ struct usb_hub *usb_hub_to_struct_hub(struct usb_device *hdev)
 static int usb_device_supports_lpm(struct usb_device *udev)
 {
 	 
+	if (udev->quirks & USB_QUIRK_NO_LPM)
+		return 0;
+
 	if (udev->speed == USB_SPEED_HIGH) {
 		if (udev->bos->ext_cap &&
 			(USB_LPM_SUPPORT &
@@ -2657,7 +2660,7 @@ void usb_enable_ltm(struct usb_device *udev)
 }
 EXPORT_SYMBOL_GPL(usb_enable_ltm);
 
-#ifdef	CONFIG_PM
+#if (defined(CONFIG_PM) && !defined(CONFIG_SYNO_LSP_HI3536)) || (defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_USB_SUSPEND))
  
 static int usb_disable_function_remotewakeup(struct usb_device *udev)
 {
@@ -2997,9 +3000,9 @@ int usb_port_resume(struct usb_device *udev, pm_message_t msg)
 	return status;
 }
 
-#endif	 
+#endif  
 
-#ifdef	CONFIG_PM_RUNTIME
+#if (defined(CONFIG_PM_RUNTIME) && !defined(CONFIG_SYNO_LSP_HI3536)) || (defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_USB_SUSPEND))
 
 int usb_remote_wakeup(struct usb_device *udev)
 {
@@ -3021,7 +3024,37 @@ int usb_remote_wakeup(struct usb_device *udev)
 	return status;
 }
 
-#endif
+#endif  
+
+#if defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_USB_SUSPEND)
+
+int usb_port_suspend(struct usb_device *udev, pm_message_t msg)
+{
+	return 0;
+}
+
+int usb_port_resume(struct usb_device *udev, pm_message_t msg)
+{
+	struct usb_hub	*hub = usb_hub_to_struct_hub(udev->parent);
+	int		port1 = udev->portnum;
+	int		status;
+	u16		portchange, portstatus;
+
+	status = hub_port_status(hub, port1, &portstatus, &portchange);
+	status = check_port_resume_type(udev,
+			hub, port1, status, portchange, portstatus);
+
+	if (status) {
+		dev_dbg(&udev->dev, "can't resume, status %d\n", status);
+		hub_port_logical_disconnect(hub, port1);
+	} else if (udev->reset_resume) {
+		dev_dbg(&udev->dev, "reset-resume\n");
+		status = usb_reset_and_verify_device(udev);
+	}
+	return status;
+}
+
+#endif  
 
 static int check_ports_changed(struct usb_hub *hub)
 {
@@ -3739,12 +3772,7 @@ port_speed_morph:
 						r = -EPROTO;
 					break;
 				}
-				/*
-				 * Some devices time out if they are powered on
-				 * when already connected. They need a second
-				 * reset. But only on the first attempt,
-				 * lest we get into a time out/reset loop
-				 */
+				 
 				if (r == 0  || (r == -ETIMEDOUT && j == 0))
 					break;
 			}
@@ -3864,6 +3892,8 @@ port_speed_morph:
 			retval = -ENOMSG;
 		goto fail;
 	}
+
+	usb_detect_quirks(udev);
 
 #if defined (MY_DEF_HERE)
 
@@ -4044,12 +4074,21 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 			}
 #endif  
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#ifdef CONFIG_USB_SUSPEND
+		} else if (udev->state == USB_STATE_SUSPENDED &&
+				udev->persist_enabled) {
+			 
+			status = usb_remote_wakeup(udev);
+#endif
+#else  
 #ifdef CONFIG_PM_RUNTIME
 		} else if (udev->state == USB_STATE_SUSPENDED &&
 				udev->persist_enabled) {
 			 
 			status = usb_remote_wakeup(udev);
 #endif
+#endif  
 
 		} else {
 			status = -ENODEV;	 

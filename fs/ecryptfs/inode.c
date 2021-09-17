@@ -253,6 +253,10 @@ out:
 static int ecryptfs_i_size_read(struct dentry *dentry, struct inode *inode)
 {
 	struct ecryptfs_crypt_stat *crypt_stat;
+#ifdef MY_ABC_HERE
+	struct ecryptfs_mount_crypt_stat *mount_crypt_stat =
+		&ecryptfs_superblock_to_private(dentry->d_sb)->mount_crypt_stat;
+#endif  
 	int rc;
 
 	rc = ecryptfs_get_lower_file(dentry, inode);
@@ -269,6 +273,16 @@ static int ecryptfs_i_size_read(struct dentry *dentry, struct inode *inode)
 	if (!(crypt_stat->flags & ECRYPTFS_POLICY_APPLIED))
 		ecryptfs_set_default_sizes(crypt_stat);
 
+#ifdef MY_ABC_HERE
+	if (mount_crypt_stat->flags & ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED) {
+		rc = ecryptfs_read_and_validate_xattr_region(dentry, inode);
+		if (rc) {
+			rc = ecryptfs_read_and_validate_header_region(inode);
+		}
+		ecryptfs_put_lower_file(inode);
+	}
+	else {
+#endif  
 	rc = ecryptfs_read_and_validate_header_region(inode);
 	ecryptfs_put_lower_file(inode);
 	if (rc) {
@@ -276,7 +290,10 @@ static int ecryptfs_i_size_read(struct dentry *dentry, struct inode *inode)
 		if (!rc)
 			crypt_stat->flags |= ECRYPTFS_METADATA_IN_XATTR;
 	}
-
+#ifdef MY_ABC_HERE
+	}
+#endif  
+	 
 	return 0;
 }
 

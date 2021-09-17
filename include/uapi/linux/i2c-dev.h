@@ -51,6 +51,10 @@
 #define I2C_PEC		0x0708	/* != 0 to use PEC with SMBus */
 #define I2C_SMBUS	0x0720	/* SMBus transfer */
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define I2C_16BIT_REG   0x0709  /* 16BIT REG WIDTH */
+#define I2C_16BIT_DATA  0x070a  /* 16BIT DATA WIDTH */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /* This is the structure as used in the I2C_SMBUS ioctl call */
 struct i2c_smbus_ioctl_data {
@@ -67,6 +71,5 @@ struct i2c_rdwr_ioctl_data {
 };
 
 #define  I2C_RDRW_IOCTL_MAX_MSGS	42
-
 
 #endif /* _UAPI_LINUX_I2C_DEV_H */

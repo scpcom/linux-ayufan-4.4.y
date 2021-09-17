@@ -23,6 +23,10 @@ struct fib_rule {
 	struct fib_rule __rcu	*ctarget;
 	char			iifname[IFNAMSIZ];
 	char			oifname[IFNAMSIZ];
+#if defined(CONFIG_SYNO_LSP_HI3536)
+	kuid_t			uid_start;
+	kuid_t			uid_end;
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	struct rcu_head		rcu;
 	struct net *		fr_net;
 };
@@ -73,6 +77,18 @@ struct fib_rules_ops {
 	struct rcu_head		rcu;
 };
 
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#define FRA_GENERIC_POLICY \
+	[FRA_IIFNAME]	= { .type = NLA_STRING, .len = IFNAMSIZ - 1 }, \
+	[FRA_OIFNAME]	= { .type = NLA_STRING, .len = IFNAMSIZ - 1 }, \
+	[FRA_PRIORITY]	= { .type = NLA_U32 }, \
+	[FRA_FWMARK]	= { .type = NLA_U32 }, \
+	[FRA_FWMASK]	= { .type = NLA_U32 }, \
+	[FRA_TABLE]     = { .type = NLA_U32 }, \
+	[FRA_GOTO]	= { .type = NLA_U32 }, \
+	[FRA_UID_START]	= { .type = NLA_U32 }, \
+	[FRA_UID_END]	= { .type = NLA_U32 }
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #define FRA_GENERIC_POLICY \
 	[FRA_IIFNAME]	= { .type = NLA_STRING, .len = IFNAMSIZ - 1 }, \
 	[FRA_OIFNAME]	= { .type = NLA_STRING, .len = IFNAMSIZ - 1 }, \
@@ -81,6 +97,7 @@ struct fib_rules_ops {
 	[FRA_FWMASK]	= { .type = NLA_U32 }, \
 	[FRA_TABLE]     = { .type = NLA_U32 }, \
 	[FRA_GOTO]	= { .type = NLA_U32 }
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static inline void fib_rule_get(struct fib_rule *rule)
 {

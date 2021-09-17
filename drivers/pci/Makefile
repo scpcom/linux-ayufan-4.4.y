@@ -9,6 +9,9 @@ obj-$(CONFIG_PROC_FS) += proc.o
 obj-$(CONFIG_SYSFS) += slot.o
 
 obj-$(CONFIG_PCI_QUIRKS) += quirks.o
+ifeq ($(CONFIG_SYNO_LSP_HI3536),y)
+obj-$(CONFIG_HIPCIE) += hipcie/
+endif # CONFIG_SYNO_LSP_HI3536
 
 # Build PCI Express stuff if needed
 obj-$(CONFIG_PCIEPORTBUS) += pcie/

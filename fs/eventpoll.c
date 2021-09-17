@@ -34,6 +34,9 @@
 #include <linux/mutex.h>
 #include <linux/anon_inodes.h>
 #include <linux/device.h>
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#include <linux/freezer.h>
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <asm/uaccess.h>
 #include <asm/io.h>
 #include <asm/mman.h>
@@ -1602,7 +1605,12 @@ fetch_events:
 			}
 
 			spin_unlock_irqrestore(&ep->lock, flags);
+#if defined(CONFIG_SYNO_LSP_HI3536)
+			if (!freezable_schedule_hrtimeout_range(to, slack,
+								HRTIMER_MODE_ABS))
+#else /* CONFIG_SYNO_LSP_HI3536 */
 			if (!schedule_hrtimeout_range(to, slack, HRTIMER_MODE_ABS))
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 				timed_out = 1;
 
 			spin_lock_irqsave(&ep->lock, flags);

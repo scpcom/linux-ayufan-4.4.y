@@ -2164,6 +2164,9 @@ static int unmap_ref_private(struct mm_struct *mm, struct vm_area_struct *vma,
 		if (iter_vma == vma)
 			continue;
 
+		if (iter_vma->vm_flags & VM_MAYSHARE)
+			continue;
+
 		if (!is_vma_resv_set(iter_vma, HPAGE_RESV_OWNER))
 			unmap_hugepage_range(iter_vma, address,
 					     address + huge_page_size(h), page);

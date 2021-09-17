@@ -387,7 +387,17 @@ static void lp3943_syno_brightness_set(u8 brightness, enum lp3943_led_mode *mode
 	if (!mode) {
 		goto END;
 	}
-	*mode = brightness == 0 ? LP3943_LED_OFF : nodeMode;
+	switch (brightness) {
+		case 0:
+			*mode = LP3943_LED_OFF;
+			break;
+		case 255:
+			*mode = LP3943_LED_ON;
+			break;
+		default:
+			*mode = nodeMode;
+			break;
+	}
 
 END:
 	return;

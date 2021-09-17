@@ -29,6 +29,7 @@
 #define NAMEI_RA_SIZE	     (NAMEI_RA_CHUNKS * NAMEI_RA_BLOCKS)
 
 #ifdef MY_ABC_HERE
+extern struct kmem_cache *ext4_syno_caseless_cachep;
  
 static unsigned char ext4_utf8_namei_buf[UNICODE_UTF8_BUFSIZE];
 extern spinlock_t ext4_namei_buf_lock;   
@@ -44,15 +45,28 @@ unsigned int ext4_strhash(const unsigned char *name, unsigned int len)
 
 static int ext4_dentry_hash(const struct dentry *dentry, const struct inode *inode, struct qstr *this)
 {
+	char* hash_buf;
 	unsigned int upperlen;
 
+	if (NAME_MAX < this->len) {
+		goto static_buf;
+	}
+
+	hash_buf = kmem_cache_alloc(ext4_syno_caseless_cachep, GFP_NOFS);
+	if (NULL == hash_buf) {
+		goto static_buf;
+	}
+
+	upperlen = syno_utf8_toupper(hash_buf, this->name, NAME_MAX, this->len, NULL);
+	this->hash = ext4_strhash(hash_buf, upperlen);
+	kmem_cache_free(ext4_syno_caseless_cachep, hash_buf);
+
+	return 0;
+
+static_buf:
 	spin_lock(&ext4_namei_buf_lock);
-
-	upperlen = syno_utf8_toupper(ext4_utf8_namei_buf,this->name,
-									  UNICODE_UTF8_BUFSIZE - 1 , this->len, NULL);
-
+	upperlen = syno_utf8_toupper(ext4_utf8_namei_buf, this->name, UNICODE_UTF8_BUFSIZE - 1 , this->len, NULL);
 	this->hash = ext4_strhash(ext4_utf8_namei_buf, upperlen);
-
 	spin_unlock(&ext4_namei_buf_lock);
 
 	return 0;
@@ -124,6 +138,9 @@ static struct buffer_head *__ext4_read_dirblock(struct inode *inode,
 	struct buffer_head *bh;
 	struct ext4_dir_entry *dirent;
 	int err = 0, is_dx_block = 0;
+#ifdef MY_ABC_HERE
+	static unsigned long block_last = 0;
+#endif  
 
 	bh = ext4_bread(NULL, inode, block, 0, &err);
 	if (!bh) {
@@ -132,10 +149,26 @@ static struct buffer_head *__ext4_read_dirblock(struct inode *inode,
 					       "Directory hole found");
 			return ERR_PTR(-EIO);
 		}
+#ifdef MY_ABC_HERE
+		if (block_last == (unsigned long)block) {
+			__ext4_warning(inode->i_sb, __func__, line,
+			       "error reading directory block "
+			       "(ino %lu, block %lu)", inode->i_ino,
+			       block_last);
+		} else {
+			block_last = (unsigned long)block;
+			__ext4_warning(inode->i_sb, __func__, line,
+			       "error reading directory block "
+			       "(ino %lu, block in range %lu + 0-2(%d))", inode->i_ino,
+			       (block_last >> CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT) << CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT,
+			       CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT);
+		}
+#else
 		__ext4_warning(inode->i_sb, __func__, line,
 			       "error reading directory block "
 			       "(ino %lu, block %lu)", inode->i_ino,
 			       (unsigned long) block);
+#endif  
 		return ERR_PTR(err);
 	}
 	dirent = (struct ext4_dir_entry *) bh->b_data;
