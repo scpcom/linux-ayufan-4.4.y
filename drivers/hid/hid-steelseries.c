@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  HID driver for Steelseries SRW-S1
  *
@@ -254,12 +257,12 @@ static int steelseries_srws1_probe(struct hid_device *hdev,
 		goto err_free;
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (!hid_validate_values(hdev, HID_OUTPUT_REPORT, 0, 0, 16)) {
 		ret = -ENODEV;
 		goto err_free;
 	}
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	ret = hid_hw_start(hdev, HID_CONNECT_DEFAULT);
 	if (ret) {

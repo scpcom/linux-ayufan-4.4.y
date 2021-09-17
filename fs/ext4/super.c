@@ -409,7 +409,7 @@ static void ext4_journal_commit_callback(journal_t *journal, transaction_t *txn)
 	spin_unlock(&sbi->s_md_lock);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static void ext4_error_uevent(struct super_block *sb)
 {
 	int i;
@@ -463,7 +463,7 @@ static void ext4_handle_error(struct super_block *sb)
 	if (test_opt(sb, ERRORS_RO)) {
 		ext4_msg(sb, KERN_CRIT, "Remounting filesystem read-only");
 		sb->s_flags |= MS_RDONLY;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		ext4_error_uevent(sb);
 #endif  
 	}
@@ -652,7 +652,7 @@ void __ext4_abort(struct super_block *sb, const char *function,
 		if (EXT4_SB(sb)->s_journal)
 			jbd2_journal_abort(EXT4_SB(sb)->s_journal, -EIO);
 		save_error_info(sb, function, line);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		ext4_error_uevent(sb);
 #endif  
 	}

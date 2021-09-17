@@ -7,7 +7,7 @@
 
 #include <asm/glue.h>
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define _CACHE
 #else  
 #undef _CACHE

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Public keys for module signature verification
  *
  * Copyright (C) 2012 Red Hat, Inc. All Rights Reserved.

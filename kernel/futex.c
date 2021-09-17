@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Fast Userspace Mutexes (which I call "Futexes!").
  *  (C) Rusty Russell, IBM 2002
@@ -62,9 +65,9 @@
 #include <linux/ptrace.h>
 #include <linux/sched/rt.h>
 #include <linux/hugetlb.h>
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 #include <linux/freezer.h>
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #include <asm/futex.h>
 
@@ -1938,11 +1941,11 @@ static void futex_wait_queue_me(struct futex_hash_bucket *hb, struct futex_q *q,
 		 * is no timeout, or if it has yet to expire.
 		 */
 		if (!timeout || timeout->task)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			freezable_schedule();
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 			schedule();
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	}
 	__set_current_state(TASK_RUNNING);
 }

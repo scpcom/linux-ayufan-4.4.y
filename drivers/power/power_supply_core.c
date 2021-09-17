@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Universal power supply monitor class
  *
@@ -67,15 +70,15 @@ static int __power_supply_changed_work(struct device *dev, void *data)
 
 static void power_supply_changed_work(struct work_struct *work)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	unsigned long flags;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	struct power_supply *psy = container_of(work, struct power_supply,
 						changed_work);
 
 	dev_dbg(psy->dev, "%s\n", __func__);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	spin_lock_irqsave(&psy->changed_lock, flags);
 	if (psy->changed) {
 		psy->changed = false;
@@ -92,30 +95,30 @@ static void power_supply_changed_work(struct work_struct *work)
 	if (!psy->changed)
 		pm_relax(psy->dev);
 	spin_unlock_irqrestore(&psy->changed_lock, flags);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	class_for_each_device(power_supply_class, NULL, psy,
 			      __power_supply_changed_work);
 
 	power_supply_update_leds(psy);
 
 	kobject_uevent(&psy->dev->kobj, KOBJ_CHANGE);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 }
 
 void power_supply_changed(struct power_supply *psy)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	unsigned long flags;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	dev_dbg(psy->dev, "%s\n", __func__);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	spin_lock_irqsave(&psy->changed_lock, flags);
 	psy->changed = true;
 	pm_stay_awake(psy->dev);
 	spin_unlock_irqrestore(&psy->changed_lock, flags);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	schedule_work(&psy->changed_work);
 }
 EXPORT_SYMBOL_GPL(power_supply_changed);
@@ -536,12 +539,12 @@ int power_supply_register(struct device *parent, struct power_supply *psy)
 	if (rc)
 		goto device_add_failed;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	spin_lock_init(&psy->changed_lock);
 	rc = device_init_wakeup(dev, true);
 	if (rc)
 		goto wakeup_init_failed;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	rc = psy_register_thermal(psy);
 	if (rc)
@@ -564,9 +567,9 @@ create_triggers_failed:
 register_cooler_failed:
 	psy_unregister_thermal(psy);
 register_thermal_failed:
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 wakeup_init_failed:
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	device_del(dev);
 kobject_set_name_failed:
 device_add_failed:

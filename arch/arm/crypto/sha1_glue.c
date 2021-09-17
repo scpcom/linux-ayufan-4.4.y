@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Cryptographic API.
  * Glue code for the SHA1 Secure Hash Algorithm assembler implementation
@@ -22,12 +25,12 @@
 #include <linux/cryptohash.h>
 #include <linux/types.h>
 #include <crypto/sha.h>
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 #include <crypto/sha1_base.h>
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 #include <asm/byteorder.h>
 
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 #include "sha1.h"
 
 asmlinkage void sha1_block_data_order(u32 *digest,
@@ -58,7 +61,7 @@ int sha1_finup_arm(struct shash_desc *desc, const u8 *data,
 	return sha1_final(desc, out);
 }
 EXPORT_SYMBOL_GPL(sha1_finup_arm);
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 struct SHA1_CTX {
 	uint32_t h0,h1,h2,h3,h4;
 	u64 count;
@@ -165,17 +168,17 @@ static int sha1_import(struct shash_desc *desc, const void *in)
 	memcpy(sctx, in, sizeof(*sctx));
 	return 0;
 }
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 
 static struct shash_alg alg = {
 	.digestsize	=	SHA1_DIGEST_SIZE,
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 	.init		=	sha1_base_init,
 	.update		=	sha1_update_arm,
 	.final		=	sha1_final,
 	.finup		=	sha1_finup_arm,
 	.descsize	=	sizeof(struct sha1_state),
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 	.init		=	sha1_init,
 	.update		=	sha1_update,
 	.final		=	sha1_final,
@@ -183,7 +186,7 @@ static struct shash_alg alg = {
 	.import		=	sha1_import,
 	.descsize	=	sizeof(struct SHA1_CTX),
 	.statesize	=	sizeof(struct SHA1_CTX),
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 	.base		=	{
 		.cra_name	=	"sha1",
 		.cra_driver_name=	"sha1-asm",

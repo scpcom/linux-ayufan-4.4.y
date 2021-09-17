@@ -26,7 +26,7 @@
 #include <net/xfrm.h>
 #include <net/netdma.h>
 #include <net/secure_seq.h>
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 #include <net/tnkdrv.h>
 #endif
@@ -43,7 +43,7 @@
 #include <linux/crypto.h>
 #include <linux/scatterlist.h>
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 extern struct tnkfuncs *tnk;
 #endif
@@ -1281,7 +1281,7 @@ int tcp_v4_conn_request(struct sock *sk, struct sk_buff *skb)
 	ireq->rmt_addr = saddr;
 	ireq->no_srccheck = inet_sk(sk)->transparent;
 	ireq->opt = tcp_v4_save_options(skb);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	ireq->ir_mark = inet_request_mark(sk, skb);
 #endif  
 
@@ -1441,7 +1441,7 @@ struct sock *tcp_v4_syn_recv_sock(struct sock *sk, struct sk_buff *skb,
 	if (__inet_inherit_port(sk, newsk) < 0)
 		goto put_and_exit;
 	__inet_hash_nolisten(newsk, NULL);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	 
 	if (tnk) {
@@ -1529,7 +1529,7 @@ int tcp_v4_do_rcv(struct sock *sk, struct sk_buff *skb)
 	if (tcp_v4_inbound_md5_hash(sk, skb))
 		goto discard;
 #endif
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	if (tnk) {
 		 
@@ -1555,7 +1555,7 @@ int tcp_v4_do_rcv(struct sock *sk, struct sk_buff *skb)
 				sk->sk_rx_dst = NULL;
 			}
 		}
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
  
 #ifdef CONFIG_TNK
 		if (tnk)
@@ -1564,7 +1564,7 @@ int tcp_v4_do_rcv(struct sock *sk, struct sk_buff *skb)
 #endif  
 		if (tcp_rcv_established(sk, skb, tcp_hdr(skb), skb->len)) {
 			rsk = sk;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 			if (tnk)
 				sk->sk_tnkinfo.enable = 0;
@@ -1572,7 +1572,7 @@ int tcp_v4_do_rcv(struct sock *sk, struct sk_buff *skb)
 #endif  
 			goto reset;
 		}
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 		if (tnk)
 			sk->sk_tnkinfo.enable = 0;

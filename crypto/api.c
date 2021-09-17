@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Scatterlist Cryptographic API.
  *
@@ -257,7 +260,7 @@ struct crypto_alg *crypto_alg_mod_lookup(const char *name, u32 type, u32 mask)
 		mask |= CRYPTO_ALG_TESTED;
 	}
 
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 	/*
 	 * If the internal flag is set for a cipher, require a caller to
 	 * to invoke the cipher with the internal flag to use that cipher.
@@ -267,7 +270,7 @@ struct crypto_alg *crypto_alg_mod_lookup(const char *name, u32 type, u32 mask)
 	 */
 	if (!((type | mask) & CRYPTO_ALG_INTERNAL))
 		mask |= CRYPTO_ALG_INTERNAL;
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 
 	larval = crypto_larval_lookup(name, type, mask);
 	if (IS_ERR(larval) || !crypto_is_larval(larval))

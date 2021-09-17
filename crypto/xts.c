@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* XTS: as defined in IEEE1619/D16
  *	http://grouper.ieee.org/groups/1619/email/pdf00086.pdf
  *	(sector sizes which are not a multiple of 16 bytes are,
@@ -35,13 +38,13 @@ static int setkey(struct crypto_tfm *parent, const u8 *key,
 {
 	struct priv *ctx = crypto_tfm_ctx(parent);
 	struct crypto_cipher *child = ctx->tweak;
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 	int err;
 
 	err = xts_check_key(parent, key, keylen);
 	if (err)
 		return err;
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 	u32 *flags = &parent->crt_flags;
 	int err;
 
@@ -52,7 +55,7 @@ static int setkey(struct crypto_tfm *parent, const u8 *key,
 		*flags |= CRYPTO_TFM_RES_BAD_KEY_LEN;
 		return -EINVAL;
 	}
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 
 	/* we need two cipher instances: one to compute the initial 'tweak'
 	 * by encrypting the IV (usually the 'plain' iv) and the other

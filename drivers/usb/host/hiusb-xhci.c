@@ -33,12 +33,12 @@ static void xhci_plat_quirks(struct device *dev, struct xhci_hcd *xhci)
 	 * here that the generic code does not try to make a pci_dev from our
 	 * dev struct in order to setup MSI
 	 */
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 	/* xhci->quirks |= XHCI_BROKEN_MSI; */
 	xhci->quirks |= XHCI_PLAT;
-#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#else /* MY_DEF_HERE */
 	xhci->quirks |= XHCI_BROKEN_MSI;
-#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#endif /* MY_DEF_HERE */
 }
 
 /* called during probe() after chip reset completes */

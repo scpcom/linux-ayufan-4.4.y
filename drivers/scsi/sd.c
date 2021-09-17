@@ -103,7 +103,7 @@ static void sd_unlock_native_capacity(struct gendisk *disk);
 static int  sd_probe(struct device *);
 static int  sd_remove(struct device *);
 static void sd_shutdown(struct device *);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static int sd_suspend_system(struct device *);
 static int sd_suspend_runtime(struct device *);
 #else  
@@ -770,7 +770,7 @@ static struct class sd_disk_class = {
 };
 
 static const struct dev_pm_ops sd_pm_ops = {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	.suspend		= sd_suspend_system,
 	.resume			= sd_resume,
 	.poweroff		= sd_suspend_system,
@@ -1596,7 +1596,7 @@ static int sd_sync_cache(struct scsi_disk *sdkp)
 		sd_print_result(sdkp, res);
 		if (driver_byte(res) & DRIVER_SENSE)
 			sd_print_sense_hdr(sdkp, &sshdr);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		 
 		if (scsi_sense_valid(&sshdr) &&
 			(sshdr.asc == 0x3a ||	 
@@ -1621,7 +1621,7 @@ static int sd_sync_cache(struct scsi_disk *sdkp)
 #endif  
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 	if (res)
@@ -1863,7 +1863,7 @@ sd_spinup_disk(struct scsi_disk *sdkp)
 						      &sshdr, SD_TIMEOUT,
 						      SD_MAX_RETRIES, NULL);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			if (the_result != 0) {
 				mdelay(200);
 				the_result = scsi_execute_req(sdkp->device, cmd,
@@ -3471,7 +3471,7 @@ static int sd_start_stop_device(struct scsi_disk *sdkp, int start)
 		sd_print_result(sdkp, res);
 		if (driver_byte(res) & DRIVER_SENSE)
 			sd_print_sense_hdr(sdkp, &sshdr);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		if (scsi_sense_valid(&sshdr) &&
 			 
 			sshdr.asc == 0x3a)
@@ -3479,7 +3479,7 @@ static int sd_start_stop_device(struct scsi_disk *sdkp, int start)
 #endif  
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	 
 	if (res)
 		return -EIO;
@@ -3500,7 +3500,7 @@ static void sd_shutdown(struct device *dev)
 	if (pm_runtime_suspended(dev))
 		goto exit;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (sdkp->WCE && sdkp->media_present) {
 #else  
 	if (sdkp->WCE) {
@@ -3518,7 +3518,7 @@ exit:
 	scsi_disk_put(sdkp);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static int sd_suspend_common(struct device *dev, bool ignore_stop_errors)
 #else  
 static int sd_suspend(struct device *dev)
@@ -3530,14 +3530,14 @@ static int sd_suspend(struct device *dev)
 	if (!sdkp)	 
 		return 0;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (sdkp->WCE && sdkp->media_present) {
 #else  
 	if (sdkp->WCE) {
 #endif  
 		sd_printk(KERN_NOTICE, sdkp, "Synchronizing SCSI cache\n");
 		ret = sd_sync_cache(sdkp);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		if (ret) {
 			 
 			if (ret == -ENODEV)
@@ -3553,7 +3553,7 @@ static int sd_suspend(struct device *dev)
 	if (sdkp->device->manage_start_stop) {
 		sd_printk(KERN_NOTICE, sdkp, "Stopping disk\n");
 		ret = sd_start_stop_device(sdkp, 0);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		if (ignore_stop_errors)
 			ret = 0;
 #endif  
@@ -3564,7 +3564,7 @@ done:
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static int sd_suspend_system(struct device *dev)
 {
 	return sd_suspend_common(dev, true);

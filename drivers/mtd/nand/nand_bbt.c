@@ -988,7 +988,7 @@ int nand_update_bbt(struct mtd_info *mtd, loff_t offs)
 
 static uint8_t scan_ff_pattern[] = { 0xff, 0xff };
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static uint8_t scan_agand_pattern[] = { 0x1C, 0x71, 0xC7, 0x1C, 0x71, 0xC7 };
 
 static struct nand_bbt_descr agand_flashbased = {
@@ -1090,7 +1090,7 @@ int nand_default_bbt(struct mtd_info *mtd)
 {
 	struct nand_chip *this = mtd->priv;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	 
 	if (this->options & NAND_IS_AND) {
 		 

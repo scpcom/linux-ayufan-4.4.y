@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright (c) 2007 Jiri Kosina
  */
@@ -23,9 +26,9 @@ struct hidraw {
 	wait_queue_head_t wait;
 	struct hid_device *hid;
 	struct device *dev;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	spinlock_t list_lock;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	struct list_head list;
 };
 

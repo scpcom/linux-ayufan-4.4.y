@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/kernel/ptrace.c
  *
@@ -916,11 +919,11 @@ enum ptrace_syscall_dir {
 	PTRACE_SYSCALL_EXIT,
 };
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static void tracehook_report_syscall(struct pt_regs *regs,
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 static int tracehook_report_syscall(struct pt_regs *regs,
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 				    enum ptrace_syscall_dir dir)
 {
 	unsigned long ip;
@@ -938,11 +941,11 @@ static int tracehook_report_syscall(struct pt_regs *regs,
 		current_thread_info()->syscall = -1;
 
 	regs->ARM_ip = ip;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	return current_thread_info()->syscall;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 }
 
 asmlinkage int syscall_trace_enter(struct pt_regs *regs, int scno)
@@ -954,15 +957,15 @@ asmlinkage int syscall_trace_enter(struct pt_regs *regs, int scno)
 		return -1;
 
 	if (test_thread_flag(TIF_SYSCALL_TRACE))
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		tracehook_report_syscall(regs, PTRACE_SYSCALL_ENTER);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		scno = tracehook_report_syscall(regs, PTRACE_SYSCALL_ENTER);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	scno = current_thread_info()->syscall;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	if (test_thread_flag(TIF_SYSCALL_TRACEPOINT))
 		trace_sys_enter(regs, scno);

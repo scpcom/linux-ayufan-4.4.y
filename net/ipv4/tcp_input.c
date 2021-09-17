@@ -16,13 +16,13 @@
 #include <asm/unaligned.h>
 #include <net/netdma.h>
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 #include <net/tnkdrv.h>
 #endif
 #endif  
 
-#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_TNK)
+#if defined(MY_DEF_HERE) && defined(CONFIG_TNK)
  
 int sysctl_tcp_timestamps __read_mostly;
 #else  
@@ -56,7 +56,7 @@ int sysctl_tcp_early_retrans __read_mostly = 3;
 #if defined(MY_DEF_HERE)
 int sysctl_tcp_default_delack_segs __read_mostly = 1;
 #endif  
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 int sysctl_tcp_default_init_rwnd __read_mostly = TCP_DEFAULT_INIT_RCVWND;
 #ifdef CONFIG_TNK
 extern struct tnkfuncs *tnk;
@@ -255,7 +255,7 @@ static void tcp_grow_window(struct sock *sk, const struct sk_buff *skb)
 static void tcp_fixup_rcvbuf(struct sock *sk)
 {
 	u32 mss = tcp_sk(sk)->advmss;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	u32 icwnd = sysctl_tcp_default_init_rwnd;
 #else  
 	u32 icwnd = TCP_DEFAULT_INIT_RCVWND;
@@ -263,7 +263,7 @@ static void tcp_fixup_rcvbuf(struct sock *sk)
 	int rcvmem;
 
 	if (mss > 1460)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		icwnd = max_t(u32, (1460 * icwnd) / mss, 2);
 #else  
 		icwnd = max_t(u32, (1460 * TCP_DEFAULT_INIT_RCVWND) / mss, 2);
@@ -444,7 +444,7 @@ static void tcp_event_data_recv(struct sock *sk, struct sk_buff *skb)
 	struct tcp_sock *tp = tcp_sk(sk);
 	struct inet_connection_sock *icsk = inet_csk(sk);
 	u32 now;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
      
 	if (tnk && (skb->len > 0)
@@ -2964,7 +2964,7 @@ void tcp_reset(struct sock *sk)
 	default:
 		sk->sk_err = ECONNRESET;
 	}
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	 
 	sk->sk_tnkinfo.howto_destroy = TNK_DESTROY_SHUTDOWN;
@@ -3251,7 +3251,7 @@ static bool tcp_try_coalesce(struct sock *sk,
 			     bool *fragstolen)
 {
 	int delta;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	struct tnkcb *cb;
 #endif
@@ -3262,7 +3262,7 @@ static bool tcp_try_coalesce(struct sock *sk,
 	if (tcp_hdr(from)->fin)
 		return false;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	 
 	cb = &(TCP_SKB_CB(to)->header.tcb);
@@ -3469,7 +3469,7 @@ static void tcp_data_queue(struct sock *sk, struct sk_buff *skb)
 	if (TCP_SKB_CB(skb)->seq == TCP_SKB_CB(skb)->end_seq)
 		goto drop;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	if (tnk) {
 		 
@@ -4355,7 +4355,7 @@ static int tcp_rcv_synsent_state_process(struct sock *sk, struct sk_buff *skb,
 		if (!th->syn)
 			goto discard_and_undo;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 		 
 		if (tnk) {
@@ -4703,7 +4703,7 @@ discard:
 }
 EXPORT_SYMBOL(tcp_rcv_state_process);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 #if SWITCH_SEND_FIN
 int tnk_tcp_fin_acked_state_process(struct sock *sk)

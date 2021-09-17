@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* RSA asymmetric public-key algorithm [RFC3447]
  *
  * Copyright (C) 2012 Red Hat, Inc. All Rights Reserved.
@@ -13,9 +16,9 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/slab.h>
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 #include <crypto/algapi.h>
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 #include "public_key.h"
 
 MODULE_LICENSE("GPL");
@@ -192,20 +195,20 @@ static int RSA_verify(const u8 *H, const u8 *EM, size_t k, size_t hash_size,
 		}
 	}
 
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 	if (crypto_memneq(asn1_template, EM + T_offset, asn1_size) != 0) {
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 	if (memcmp(asn1_template, EM + T_offset, asn1_size) != 0) {
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 		kleave(" = -EBADMSG [EM[T] ASN.1 mismatch]");
 		return -EBADMSG;
 	}
 
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 	if (crypto_memneq(H, EM + T_offset + asn1_size, hash_size) != 0) {
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 	if (memcmp(H, EM + T_offset + asn1_size, hash_size) != 0) {
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 		kleave(" = -EKEYREJECTED [EM[T] hash mismatch]");
 		return -EKEYREJECTED;
 	}

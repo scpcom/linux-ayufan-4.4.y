@@ -16,7 +16,7 @@
 #ifdef MY_DEF_HERE
 #include <linux/of.h>
 #endif  
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <linux/cpufeature.h>
 #endif  
 
@@ -250,7 +250,7 @@ static void cpu_device_release(struct device *dev)
 	 
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_HAVE_CPU_AUTOPROBE
 #ifdef CONFIG_GENERIC_CPU_AUTOPROBE
 static ssize_t print_cpu_modalias(struct device *dev,
@@ -304,7 +304,7 @@ int __cpuinit register_cpu(struct cpu *cpu, int num)
 	cpu->dev.of_node = of_get_cpu_node(num, NULL);
 #endif  
 #ifdef CONFIG_ARCH_HAS_CPU_AUTOPROBE
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	cpu->dev.bus->uevent = cpu_uevent;
 #else  
 	cpu->dev.bus->uevent = arch_cpu_uevent;
@@ -337,7 +337,7 @@ struct device *get_cpu_device(unsigned cpu)
 }
 EXPORT_SYMBOL_GPL(get_cpu_device);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_HAVE_CPU_AUTOPROBE
 static DEVICE_ATTR(modalias, 0444, print_cpu_modalias, NULL);
 #endif
@@ -357,7 +357,7 @@ static struct attribute *cpu_root_attrs[] = {
 	&cpu_attrs[2].attr.attr,
 	&dev_attr_kernel_max.attr,
 	&dev_attr_offline.attr,
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_HAVE_CPU_AUTOPROBE
 	&dev_attr_modalias.attr,
 #endif

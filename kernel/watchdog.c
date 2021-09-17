@@ -34,7 +34,7 @@ static DEFINE_PER_CPU(bool, softlockup_touch_sync);
 static DEFINE_PER_CPU(bool, soft_watchdog_warn);
 static DEFINE_PER_CPU(unsigned long, hrtimer_interrupts);
 static DEFINE_PER_CPU(unsigned long, soft_lockup_hrtimer_cnt);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_HARDLOCKUP_DETECTOR
 static DEFINE_PER_CPU(bool, hard_watchdog_warn);
 static DEFINE_PER_CPU(bool, watchdog_nmi_touch);
@@ -166,8 +166,8 @@ void touch_softlockup_watchdog_sync(void)
 	__raw_get_cpu_var(watchdog_touch_ts) = 0;
 }
 
-#if (defined(CONFIG_HARDLOCKUP_DETECTOR) && !defined(CONFIG_SYNO_LSP_HI3536)) || \
-	(defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HARDLOCKUP_DETECTOR_NMI))
+#if (defined(CONFIG_HARDLOCKUP_DETECTOR) && !defined(MY_DEF_HERE)) || \
+	(defined(MY_DEF_HERE) && defined(CONFIG_HARDLOCKUP_DETECTOR_NMI))
  
 static int is_hardlockup(void)
 {
@@ -181,7 +181,7 @@ static int is_hardlockup(void)
 }
 #endif
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_HARDLOCKUP_DETECTOR_OTHER_CPU
 static unsigned int watchdog_next_cpu(unsigned int cpu)
 {
@@ -257,8 +257,8 @@ static int is_softlockup(unsigned long touch_ts)
 	return 0;
 }
 
-#if (defined(CONFIG_HARDLOCKUP_DETECTOR) && !defined(CONFIG_SYNO_LSP_HI3536)) || \
-	(defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HARDLOCKUP_DETECTOR_NMI))
+#if (defined(CONFIG_HARDLOCKUP_DETECTOR) && !defined(MY_DEF_HERE)) || \
+	(defined(MY_DEF_HERE) && defined(CONFIG_HARDLOCKUP_DETECTOR_NMI))
 
 static struct perf_event_attr wd_hw_attr = {
 	.type		= PERF_TYPE_HARDWARE,
@@ -316,7 +316,7 @@ static enum hrtimer_restart watchdog_timer_fn(struct hrtimer *hrtimer)
 
 	watchdog_interrupt_count();
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	 
 	watchdog_check_hardlockup_other_cpu();
 #endif  
@@ -425,8 +425,8 @@ static void watchdog(unsigned int cpu)
 	__touch_watchdog();
 }
 
-#if (defined(CONFIG_HARDLOCKUP_DETECTOR) && !defined(CONFIG_SYNO_LSP_HI3536)) || \
-	(defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HARDLOCKUP_DETECTOR_NMI))
+#if (defined(CONFIG_HARDLOCKUP_DETECTOR) && !defined(MY_DEF_HERE)) || \
+	(defined(MY_DEF_HERE) && defined(CONFIG_HARDLOCKUP_DETECTOR_NMI))
  
 static unsigned long cpu0_err;
 
@@ -490,7 +490,7 @@ static void watchdog_nmi_disable(unsigned int cpu)
 	return;
 }
 #else
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_HARDLOCKUP_DETECTOR_OTHER_CPU
 static int watchdog_nmi_enable(unsigned int cpu)
 {

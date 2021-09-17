@@ -1220,7 +1220,7 @@ int fat_fill_super(struct super_block *sb, void *data, int silent, int isvfat,
 	struct inode *fsinfo_inode = NULL;
 	struct buffer_head *bh;
 	struct fat_boot_sector *b;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	struct fat_boot_bsx *bsx;
 #endif  
 	struct msdos_sb_info *sbi;
@@ -1356,7 +1356,7 @@ int fat_fill_super(struct super_block *sb, void *data, int silent, int isvfat,
 			goto out_fail;
 		}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		bsx = (struct fat_boot_bsx *)(bh->b_data + FAT32_BSX_OFFSET);
 #endif  
 
@@ -1375,13 +1375,13 @@ int fat_fill_super(struct super_block *sb, void *data, int silent, int isvfat,
 		}
 
 		brelse(fsinfo_bh);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	} else {
 		bsx = (struct fat_boot_bsx *)(bh->b_data + FAT16_BSX_OFFSET);
 #endif  
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	 
 	sbi->vol_id = (((u32)bsx->vol_id[0]) | ((u32)bsx->vol_id[1] << 8) |
 		((u32)bsx->vol_id[2] << 16) | ((u32)bsx->vol_id[3] << 24));

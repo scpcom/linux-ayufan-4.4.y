@@ -40,7 +40,7 @@
 #include <linux/syscore_ops.h>
 #include <linux/version.h>
 #include <linux/ctype.h>
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <linux/mm.h>
 #include <linux/mempolicy.h>
 #include <linux/sched.h>
@@ -315,7 +315,7 @@ void emergency_restart(void)
 }
 EXPORT_SYMBOL_GPL(emergency_restart);
 
-#if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
+#if defined(MY_DEF_HERE)
 void syno_stmmac_release(void);
 #endif  
 
@@ -325,7 +325,7 @@ void kernel_restart_prepare(char *cmd)
 	system_state = SYSTEM_RESTART;
 	usermodehelper_disable();
 	device_shutdown();
-#if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
+#if defined(MY_DEF_HERE)
 	syno_stmmac_release();
 #endif  
 #if defined(MY_DEF_HERE)
@@ -389,7 +389,7 @@ static void kernel_shutdown_prepare(enum system_states state)
 	if (SYSTEM_POWER_OFF == system_state)
 		syno_turnoff_all_usb_vbus_gpio();
 #endif  
-#if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
+#if defined(MY_DEF_HERE)
 	syno_stmmac_release();
 #endif  
 }
@@ -1868,7 +1868,7 @@ static int prctl_get_tid_address(struct task_struct *me, int __user **tid_addr)
 }
 #endif
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_MMU
 static int prctl_update_vma_anon_name(struct vm_area_struct *vma,
 		struct vm_area_struct **prev,
@@ -2012,7 +2012,7 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 		unsigned long, arg4, unsigned long, arg5)
 {
 	struct task_struct *me = current;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	struct task_struct *tsk;
 #endif  
 	unsigned char comm[sizeof(me->comm)];
@@ -2138,7 +2138,7 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 			else
 				return -EINVAL;
 			break;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		case PR_SET_TIMERSLACK_PID:
 			if (current->pid != (pid_t)arg3 &&
 					!capable(CAP_SYS_NICE))
@@ -2190,7 +2190,7 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 		if (arg2 != 1 || arg3 || arg4 || arg5)
 			return -EINVAL;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		task_set_no_new_privs(current);
 #else  
 		current->no_new_privs = 1;
@@ -2199,7 +2199,7 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 	case PR_GET_NO_NEW_PRIVS:
 		if (arg2 || arg3 || arg4 || arg5)
 			return -EINVAL;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		return task_no_new_privs(current) ? 1 : 0;
 	case PR_SET_VMA:
 		error = prctl_set_vma(arg2, arg3, arg4, arg5);

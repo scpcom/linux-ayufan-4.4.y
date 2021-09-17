@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/fat/dir.c
  *
@@ -776,14 +779,14 @@ static int fat_ioctl_readdir(struct inode *inode, struct file *filp,
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static int fat_ioctl_volume_id(struct inode *dir)
 {
 	struct super_block *sb = dir->i_sb;
 	struct msdos_sb_info *sbi = MSDOS_SB(sb);
 	return sbi->vol_id;
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 static long fat_dir_ioctl(struct file *filp, unsigned int cmd,
 			  unsigned long arg)
@@ -801,10 +804,10 @@ static long fat_dir_ioctl(struct file *filp, unsigned int cmd,
 		short_only = 0;
 		both = 1;
 		break;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	case VFAT_IOCTL_GET_VOLUME_ID:
 		return fat_ioctl_volume_id(inode);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	default:
 		return fat_generic_ioctl(filp, cmd, arg);
 	}
@@ -845,10 +848,10 @@ static long fat_compat_dir_ioctl(struct file *filp, unsigned cmd,
 		short_only = 0;
 		both = 1;
 		break;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	case VFAT_IOCTL_GET_VOLUME_ID:
 		return fat_ioctl_volume_id(inode);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	default:
 		return fat_generic_ioctl(filp, cmd, (unsigned long)arg);
 	}

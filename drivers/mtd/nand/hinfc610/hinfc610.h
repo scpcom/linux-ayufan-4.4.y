@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
  *
@@ -49,7 +52,7 @@
 	#warning NOT config CONFIG_HINFC610_MAX_CHIP, \
 	used default value, maybe invalid.
 #endif /* CONFIG_HINFC610_MAX_CHIP */
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 /*****************************************************************************/
 #define HINFC_ECC_ERR_NUM0_BUF0			0xa0
 #define HINFC_ECC_ERR_NUM1_BUF0			0xa4
@@ -57,7 +60,7 @@
 #define HINFC_ECC_ERR_NUM1_BUF1			0xcc
 
 #define GET_ECC_ERR_NUM(_i, _reg)		(((_reg) >> ((_i) * 8)) & 0xff)
-#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#endif /* MY_DEF_HERE */
 
 /*****************************************************************************/
 #define HINFC610_REG_BASE_ADDRESS_LEN                 (0x100)

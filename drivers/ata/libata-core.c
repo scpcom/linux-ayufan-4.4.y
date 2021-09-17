@@ -4535,7 +4535,7 @@ struct ata_host *ata_host_alloc(struct device *dev, int max_ports)
 
 		ap->port_no = i;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_ARCH_HI3531A
 		if (mplx_port0)
 			ap->port_no += 1;

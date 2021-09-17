@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Glue Code for 3-way parallel assembler optimized version of Twofish
  *
@@ -277,11 +280,11 @@ int xts_twofish_setkey(struct crypto_tfm *tfm, const u8 *key,
 	u32 *flags = &tfm->crt_flags;
 	int err;
 
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 	err = xts_check_key(tfm, key, keylen);
 	if (err)
 		return err;
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 	/* key consists of keys of equal size concatenated, therefore
 	 * the length must be even
 	 */
@@ -289,7 +292,7 @@ int xts_twofish_setkey(struct crypto_tfm *tfm, const u8 *key,
 		*flags |= CRYPTO_TFM_RES_BAD_KEY_LEN;
 		return -EINVAL;
 	}
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 
 	/* first half of xts-key is for crypt */
 	err = __twofish_setkey(&ctx->crypt_ctx, key, keylen / 2, flags);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2012 ARM Ltd.
  *
@@ -83,7 +86,7 @@ static inline int reinstall_suspended_bps(struct pt_regs *regs)
 }
 #endif
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_COMPAT
 int aarch32_break_handler(struct pt_regs *regs);
 #else
@@ -92,7 +95,7 @@ static int aarch32_break_handler(struct pt_regs *regs)
 	return -EFAULT;
 }
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #endif	/* __ASSEMBLY */
 #endif	/* __KERNEL__ */

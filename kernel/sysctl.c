@@ -360,7 +360,7 @@ extern char core_pattern[];
 extern unsigned int core_pipe_limit;
 #endif
 extern int pid_max;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 extern int extra_free_kbytes;
 extern int min_free_order_shift;
 #endif  
@@ -1796,7 +1796,7 @@ static struct ctl_table vm_table[] = {
 		.proc_handler	= min_free_kbytes_sysctl_handler,
 		.extra1		= &zero,
 	},
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	{
 		.procname	= "extra_free_kbytes",
 		.data		= &extra_free_kbytes,

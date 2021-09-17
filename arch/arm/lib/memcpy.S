@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/lib/memcpy.S
  *
@@ -56,24 +59,24 @@
 
 /* Prototype: void *memcpy(void *dest, const void *src, size_t n); */
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_HI_IOMMU
 ENTRY(_memcpy)
 #else
 ENTRY(memcpy)
 #endif
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 ENTRY(memcpy)
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #include "copy_template.S"
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_HI_IOMMU
 ENDPROC(_memcpy)
 #else
 ENDPROC(memcpy)
 #endif
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 ENDPROC(memcpy)
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */

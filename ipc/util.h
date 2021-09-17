@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/ipc/util.h
  * Copyright (C) 1999 Christoph Rohland
@@ -50,9 +53,9 @@ static inline void shm_exit_ns(struct ipc_namespace *ns) { }
 struct ipc_rcu {
 	struct rcu_head rcu;
 	atomic_t refcount;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	void *data[0];
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 } ____cacheline_aligned_in_smp;
 
 #define ipc_rcu_to_struct(p)  ((void *)(p+1))

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_CGROUP_H
 #define _LINUX_CGROUP_H
 /*
@@ -578,9 +581,9 @@ struct cgroup_subsys {
 	void (*css_offline)(struct cgroup *cgrp);
 	void (*css_free)(struct cgroup *cgrp);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	int (*allow_attach)(struct cgroup *cgrp, struct cgroup_taskset *tset);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	int (*can_attach)(struct cgroup *cgrp, struct cgroup_taskset *tset);
 	void (*cancel_attach)(struct cgroup *cgrp, struct cgroup_taskset *tset);
 	void (*attach)(struct cgroup *cgrp, struct cgroup_taskset *tset);
@@ -871,7 +874,7 @@ unsigned short css_id(struct cgroup_subsys_state *css);
 unsigned short css_depth(struct cgroup_subsys_state *css);
 struct cgroup_subsys_state *cgroup_css_from_dir(struct file *f, int id);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /*
  * Default Android check for whether the current process is allowed to move a
  * task across cgroups, either because CAP_SYS_NICE is set or because the uid
@@ -881,7 +884,7 @@ struct cgroup_subsys_state *cgroup_css_from_dir(struct file *f, int id);
  */
 int subsys_cgroup_allow_attach(struct cgroup *cgrp,
 			       struct cgroup_taskset *tset);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #else /* !CONFIG_CGROUPS */
 
@@ -906,13 +909,13 @@ static inline int cgroup_attach_task_all(struct task_struct *from,
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static inline int subsys_cgroup_allow_attach(struct cgroup *cgrp,
 					     struct cgroup_taskset *tset)
 {
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 #endif /* !CONFIG_CGROUPS */
 
 #endif /* _LINUX_CGROUP_H */

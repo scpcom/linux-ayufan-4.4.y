@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * RNDIS MSG parser
  *
@@ -1121,18 +1124,18 @@ static struct proc_dir_entry *rndis_connect_state [RNDIS_MAX_CONFIGS];
 
 #endif /* CONFIG_USB_GADGET_DEBUG_FILES */
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static bool rndis_initialized;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 int rndis_init(void)
 {
 	u8 i;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (rndis_initialized)
 		return 0;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	for (i = 0; i < RNDIS_MAX_CONFIGS; i++) {
 #ifdef	CONFIG_USB_GADGET_DEBUG_FILES
@@ -1160,9 +1163,9 @@ int rndis_init(void)
 		INIT_LIST_HEAD(&(rndis_per_dev_params[i].resp_queue));
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	rndis_initialized = true;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	return 0;
 }
 
@@ -1173,11 +1176,11 @@ void rndis_exit(void)
 	char name[20];
 #endif
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (!rndis_initialized)
 		return;
 	rndis_initialized = false;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_USB_GADGET_DEBUG_FILES
 	for (i = 0; i < RNDIS_MAX_CONFIGS; i++) {

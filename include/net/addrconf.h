@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _ADDRCONF_H
 #define _ADDRCONF_H
 
@@ -190,9 +193,9 @@ static inline bool ipv6_is_mld(struct sk_buff *skb, int nexthdr, int offset)
 extern void addrconf_prefix_rcv(struct net_device *dev,
 				u8 *opt, int len, bool sllao);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 u32 addrconf_rt_table(const struct net_device *dev, u32 default_table);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /*
  *	anycast prototypes (anycast.c)

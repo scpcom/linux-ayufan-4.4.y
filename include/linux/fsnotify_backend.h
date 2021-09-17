@@ -171,7 +171,7 @@ struct fsnotify_event {
 
 	u32 sync_cookie;	 
 	const unsigned char *file_name;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -179,7 +179,7 @@ struct fsnotify_event {
 #endif
 #endif  
 	size_t name_len;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -188,7 +188,7 @@ struct fsnotify_event {
 #endif  
 	struct pid *tgid;
 
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef CONFIG_FANOTIFY_ACCESS_PERMISSIONS
@@ -198,7 +198,7 @@ struct fsnotify_event {
 
 	struct list_head private_data_list;	 
 
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef MY_ABC_HERE
 	const unsigned char *full_name;
 #endif

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
    BlueZ - Bluetooth protocol stack for Linux
    Copyright (c) 2000-2001, 2010, Code Aurora Forum. All rights reserved.
@@ -1119,11 +1122,11 @@ static void hci_cs_create_conn(struct hci_dev *hdev, __u8 status)
 		}
 	} else {
 		if (!conn) {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			conn = hci_conn_add(hdev, ACL_LINK, 0, &cp->bdaddr);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 			conn = hci_conn_add(hdev, ACL_LINK, &cp->bdaddr);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 			if (conn) {
 				conn->out = true;
 				conn->link_mode |= HCI_LM_MASTER;
@@ -1752,7 +1755,7 @@ unlock:
 	hci_conn_check_pending(hdev);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static inline bool is_sco_active(struct hci_dev *hdev)
 {
 	if (hci_conn_hash_lookup_state(hdev, SCO_LINK, BT_CONNECTED) ||
@@ -1761,7 +1764,7 @@ static inline bool is_sco_active(struct hci_dev *hdev)
 		return true;
 	return false;
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 static void hci_conn_request_evt(struct hci_dev *hdev, struct sk_buff *skb)
 {
@@ -1790,12 +1793,12 @@ static void hci_conn_request_evt(struct hci_dev *hdev, struct sk_buff *skb)
 		conn = hci_conn_hash_lookup_ba(hdev, ev->link_type,
 					       &ev->bdaddr);
 		if (!conn) {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			/* pkt_type not yet used for incoming connections */
 			conn = hci_conn_add(hdev, ev->link_type, 0, &ev->bdaddr);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 			conn = hci_conn_add(hdev, ev->link_type, &ev->bdaddr);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 			if (!conn) {
 				BT_ERR("No memory for new connection");
 				hci_dev_unlock(hdev);
@@ -1814,12 +1817,12 @@ static void hci_conn_request_evt(struct hci_dev *hdev, struct sk_buff *skb)
 
 			bacpy(&cp.bdaddr, &ev->bdaddr);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			if (lmp_rswitch_capable(hdev) && ((mask & HCI_LM_MASTER)
 						|| is_sco_active(hdev)))
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 			if (lmp_rswitch_capable(hdev) && (mask & HCI_LM_MASTER))
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 				cp.role = 0x00; /* Become master */
 			else
 				cp.role = 0x01; /* Remain slave */
@@ -2988,9 +2991,9 @@ static void hci_sync_conn_complete_evt(struct hci_dev *hdev,
 		hci_conn_add_sysfs(conn);
 		break;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	case 0x10:	/* Connection Accept Timeout */
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	case 0x11:	/* Unsupported Feature or Parameter Value */
 	case 0x1c:	/* SCO interval rejected */
 	case 0x1a:	/* Unsupported Remote Feature */
@@ -3568,11 +3571,11 @@ static void hci_le_conn_complete_evt(struct hci_dev *hdev, struct sk_buff *skb)
 
 	conn = hci_conn_hash_lookup_state(hdev, LE_LINK, BT_CONNECT);
 	if (!conn) {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		conn = hci_conn_add(hdev, LE_LINK, 0, &ev->bdaddr);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		conn = hci_conn_add(hdev, LE_LINK, &ev->bdaddr);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		if (!conn) {
 			BT_ERR("No memory for new connection");
 			goto unlock;

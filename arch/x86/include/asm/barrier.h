@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _ASM_X86_BARRIER_H
 #define _ASM_X86_BARRIER_H
 
@@ -100,7 +103,7 @@
 #define set_mb(var, value) do { var = value; barrier(); } while (0)
 #endif /* SMP */
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #if defined(CONFIG_X86_OOSTORE) || defined(CONFIG_X86_PPRO_FENCE)
 
 /*
@@ -141,7 +144,7 @@ do {									\
 })
 
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /*
  * Stop RDTSC speculation. This is needed when you need to use RDTSC

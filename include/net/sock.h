@@ -50,7 +50,7 @@ void mem_cgroup_sockets_destroy(struct mem_cgroup *memcg)
 }
 #endif
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 #include <net/tnkdrv.h>
 #endif
@@ -117,7 +117,7 @@ struct sock_common {
 		struct hlist_nulls_node skc_portaddr_node;
 	};
 	struct proto		*skc_prot;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef CONFIG_NET_NS
@@ -136,7 +136,7 @@ struct sock_common {
 	 
 	int                     skc_dontcopy_end[0];
 	 
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_NET_NS
 	struct net	 	*skc_net;
 #endif
@@ -212,7 +212,7 @@ struct sock {
 #if defined(MY_DEF_HERE)
 	 
 #else  
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 	u32			sk_pacing_rate;  
@@ -249,7 +249,7 @@ struct sock {
 	struct sk_buff		*sk_send_head;
 	__s32			sk_peek_off;
 	int			sk_write_pending;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef CONFIG_SECURITY
@@ -267,12 +267,12 @@ struct sock {
 						  struct sk_buff *skb);
 	void                    (*sk_destruct)(struct sock *sk);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	struct tnkinfo		sk_tnkinfo;
 #endif
 #endif  
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	u32			sk_pacing_rate;  
 #ifdef CONFIG_SECURITY
 	void			*sk_security;
@@ -769,7 +769,7 @@ struct proto {
 						struct sk_buff *skb);
 
 	void		(*release_cb)(struct sock *sk);
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	void		(*mtu_reduced)(struct sock *sk);
 #endif  
 

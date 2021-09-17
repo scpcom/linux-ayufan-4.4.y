@@ -411,12 +411,12 @@ static __always_inline void __write_once_size(volatile void *p, void *res, int s
 # define __same_type(a, b) __builtin_types_compatible_p(typeof(a), typeof(b))
 #endif
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /* Is this type a native word size -- useful for atomic operations */
 #ifndef __native_word
 # define __native_word(t) (sizeof(t) == sizeof(int) || sizeof(t) == sizeof(long))
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /* Compile time object size, -1 for unknown */
 #ifndef __compiletime_object_size
@@ -457,11 +457,11 @@ static __always_inline void __write_once_size(volatile void *p, void *res, int s
 #define compiletime_assert(condition, msg) \
 	_compiletime_assert(condition, msg, __compiletime_assert_, __LINE__)
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define compiletime_assert_atomic_type(t)				\
 	compiletime_assert(__native_word(t),				\
 		"Need native word sized stores/loads for atomicity.")
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /*
  * Prevent the compiler from merging or refetching accesses.  The compiler

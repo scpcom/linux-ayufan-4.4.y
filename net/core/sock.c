@@ -741,7 +741,7 @@ set_rcvbuf:
 		sock_valbool_flag(sk, SOCK_NOFCS, valbool);
 		break;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	case SO_TOE_ENABLE:
 		if (valbool)
@@ -1008,7 +1008,7 @@ int sock_getsockopt(struct socket *sock, int level, int optname,
 	case SO_SELECT_ERR_QUEUE:
 		v.val = sock_flag(sk, SOCK_SELECT_ERR_QUEUE);
 		break;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	case SO_TOE_ENABLE:
 		if (sk->sk_tnkinfo.not_capable == TNK_SOCK_SET_TOE_ON)

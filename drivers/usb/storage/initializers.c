@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Special Initializers for certain USB Mass Storage devices
  *
  * Current development and maintenance by:
@@ -92,13 +95,13 @@ int usb_stor_ucr61s2b_init(struct us_data *us)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /* This places the HUAWEI usb dongles in multi-port mode */
 static int usb_stor_huawei_feature_init(struct us_data *us)
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 /* This places the HUAWEI E220 devices in multi-port mode */
 int usb_stor_huawei_e220_init(struct us_data *us)
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 {
 	int result;
 
@@ -110,7 +113,7 @@ int usb_stor_huawei_e220_init(struct us_data *us)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /*
  * It will send a scsi switch command called rewind' to huawei dongle.
  * When the dongle receives this command at the first time,
@@ -182,4 +185,4 @@ int usb_stor_huawei_init(struct us_data *us)
 	}
 	return result;
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */

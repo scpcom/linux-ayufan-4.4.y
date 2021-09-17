@@ -207,7 +207,7 @@ static int xhci_stop_device(struct xhci_hcd *xhci, int slot_id, int suspend)
 
 	timeleft = wait_for_completion_interruptible_timeout(
 			cmd->completion,
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 			XHCI_CMD_DEFAULT_TIMEOUT);
 #else  
 			USB_CTRL_SET_TIMEOUT);
@@ -936,7 +936,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 
 			temp = xhci_readl(xhci, port_array[wIndex]);
 			break;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		 
 		case USB_PORT_FEAT_TEST:
 			if (hcd->speed != HCD_USB2)

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* include/linux/android_alarm.h
  *
  * Copyright (C) 2006-2007 Google, Inc.
@@ -16,12 +19,12 @@
 #ifndef _LINUX_ANDROID_ALARM_H
 #define _LINUX_ANDROID_ALARM_H
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <linux/compat.h>
 #include <linux/ioctl.h>
 
 #include "uapi/android_alarm.h"
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 #include <linux/ioctl.h>
 #include <linux/time.h>
 #include <linux/compat.h>
@@ -65,7 +68,7 @@ enum android_alarm_return_flags {
 #define ANDROID_ALARM_SET_RTC               _IOW('a', 5, struct timespec)
 #define ANDROID_ALARM_BASE_CMD(cmd)         (cmd & ~(_IOC(0, 0, 0xf0, 0)))
 #define ANDROID_ALARM_IOCTL_TO_TYPE(cmd)    (_IOC_NR(cmd) >> 4)
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_COMPAT
 #define ANDROID_ALARM_SET_COMPAT(type)		ALARM_IOW(2, type, \

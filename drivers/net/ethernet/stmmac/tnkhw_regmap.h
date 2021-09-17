@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*****************************************************************************
   This is the driver for the CreVinn TOE-NK-2G TCP Offload Engine.
   TOE-NK-2G incorporates a Synopsys Ethernet MAC core.
@@ -384,14 +387,14 @@
 #define TNK_MASK_INTR_STAT_DMA_TTX_ACK     0x00000001
 #define TNK_OFFSET_INTR_STAT_DMA_TTX_ERR   1
 #define TNK_MASK_INTR_STAT_DMA_TTX_ERR     0x00000001
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 #define TNK_INTR_STAT_GMAC0_DATA	BIT(2)
 #define TNK_INTR_STAT_GMAC1_DATA	BIT(3)
 #define TNK_OFFSET_INTR_STAT_DMA_CH2       4
 #define TNK_MASK_INTR_STAT_DMA_CH2         0x00000001
 #define TNK_INTR_STAT_GMAC0_CTRL	BIT(5)
 #define TNK_INTR_STAT_GMAC1_CTRL	BIT(6)
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 #define TNK_OFFSET_INTR_STAT_DMA_CH0       2
 #define TNK_MASK_INTR_STAT_DMA_CH0         0x00000001
 #define TNK_OFFSET_INTR_STAT_DMA_CH1       3
@@ -402,7 +405,7 @@
 #define TNK_MASK_INTR_STAT_GMAC0           0x00000001
 #define TNK_OFFSET_INTR_STAT_GMAC1         6
 #define TNK_MASK_INTR_STAT_GMAC1           0x00000001
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 #define TNK_OFFSET_INTR_STAT_TOE           7
 #define TNK_MASK_INTR_STAT_TOE             0x00000001
 #define TNK_OFFSET_INTR_STAT_TTX_ACK1		8
@@ -425,28 +428,28 @@
 #define TNK_MASK_INTR_RX_LRO2			0x1
 #define TNK_OFFSET_INTR_RX_LRO3			17
 #define TNK_MASK_INTR_RX_LRO3			0x1
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 #define TNK_INTR_GROUP_GMAC0 \
 	(TNK_INTR_STAT_GMAC0_DATA | TNK_INTR_STAT_GMAC0_CTRL)
 #define TNK_INTR_GROUP_GMAC1 \
 	(TNK_INTR_STAT_GMAC1_DATA | TNK_INTR_STAT_GMAC1_CTRL)
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 /* TNK_INTR_STAT register mask */
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 #define TNK_MASK_INTR		(0x000000b7 | \
 				(1 << TNK_OFFSET_INTR_RX_LRO0))
 #define TNK_MASK_INTR1		((1 << TNK_OFFSET_INTR_STAT_TTX_ACK1) | \
 				(1 << TNK_OFFSET_INTR_STAT_RX1) | \
 				(1 << TNK_OFFSET_INTR_RX_LRO1) | \
 				TNK_INTR_GROUP_GMAC1)
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 #define TNK_MASK_INTR		(0x000000ff | \
 				(1 << TNK_OFFSET_INTR_RX_LRO0))
 #define TNK_MASK_INTR1		((1 << TNK_OFFSET_INTR_STAT_TTX_ACK1) | \
 				(1 << TNK_OFFSET_INTR_STAT_RX1) | \
 				(1 << TNK_OFFSET_INTR_RX_LRO1))
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 #define TNK_MASK_INTR2		((1 << TNK_OFFSET_INTR_STAT_TTX_ACK2) | \
 				(1 << TNK_OFFSET_INTR_STAT_RX2) | \
 				(1 << TNK_OFFSET_INTR_RX_LRO2))

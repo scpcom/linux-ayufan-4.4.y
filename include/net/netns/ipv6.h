@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ipv6 in net namespaces
  */
@@ -28,9 +31,9 @@ struct netns_sysctl_ipv6 {
 	int ip6_rt_mtu_expires;
 	int ip6_rt_min_advmss;
 	int icmpv6_time;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	int fwmark_reflect;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 };
 
 struct netns_ipv6 {
@@ -39,9 +42,9 @@ struct netns_ipv6 {
 	struct ipv6_devconf	*devconf_dflt;
 	struct inet_peer_base	*peers;
 	struct netns_frags	frags;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_NETFILTER
 	struct xt_table		*ip6table_filter;
 	struct xt_table		*ip6table_mangle;
@@ -51,7 +54,7 @@ struct netns_ipv6 {
 #endif
 	struct xt_table		*ip6table_nat;
 #endif
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 	struct rt6_info         *ip6_null_entry;
 	struct rt6_statistics   *rt6_stats;
 	struct timer_list       ip6_fib_timer;
@@ -60,23 +63,23 @@ struct netns_ipv6 {
 	struct dst_ops		ip6_dst_ops;
 	unsigned int		 ip6_rt_gc_expire;
 	unsigned long		 ip6_rt_last_gc;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_IPV6_MULTIPLE_TABLES
 	struct rt6_info         *ip6_prohibit_entry;
 	struct rt6_info         *ip6_blk_hole_entry;
 	struct fib6_table       *fib6_local_tbl;
 	struct fib_rules_ops    *fib6_rules_ops;
 #endif
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 	struct sock		**icmp_sk;
 	struct sock             *ndisc_sk;
 	struct sock             *tcp_sk;
 	struct sock             *igmp_sk;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_IPV6_MROUTE
 #ifndef CONFIG_IPV6_MROUTE_MULTIPLE_TABLES
 	struct mr6_table	*mrt6;
@@ -85,9 +88,9 @@ struct netns_ipv6 {
 	struct fib_rules_ops	*mr6_rules_ops;
 #endif
 #endif
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 	atomic_t		dev_addr_genid;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_NETFILTER
 	struct xt_table		*ip6table_filter;
 	struct xt_table		*ip6table_mangle;
@@ -111,7 +114,7 @@ struct netns_ipv6 {
 	struct fib_rules_ops	*mr6_rules_ops;
 #endif
 #endif
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 };
 
 #if IS_ENABLED(CONFIG_NF_DEFRAG_IPV6)

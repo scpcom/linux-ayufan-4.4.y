@@ -317,7 +317,7 @@ int module_finalize(const Elf32_Ehdr *hdr, const Elf_Shdr *sechdrs,
 			maps[ARM_SEC_EXIT].unw_sec = s;
 		else if (strcmp(".ARM.exidx.devexit.text", secname) == 0)
 			maps[ARM_SEC_DEVEXIT].unw_sec = s;
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 		 
 #else  
 		else if (strcmp(".ARM.exidx.text.unlikely", secname) == 0)
@@ -335,7 +335,7 @@ int module_finalize(const Elf32_Ehdr *hdr, const Elf_Shdr *sechdrs,
 			maps[ARM_SEC_EXIT].txt_sec = s;
 		else if (strcmp(".devexit.text", secname) == 0)
 			maps[ARM_SEC_DEVEXIT].txt_sec = s;
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 		 
 #else  
 		else if (strcmp(".text.unlikely", secname) == 0)

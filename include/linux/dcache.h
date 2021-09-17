@@ -91,7 +91,7 @@ struct dentry {
 	void *d_fsdata;			 
 
 	struct list_head d_lru;		 
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	union {
 		struct hlist_node d_alias;	 
 	 	struct rcu_head d_rcu;
@@ -101,7 +101,7 @@ struct dentry {
 #endif
 	struct list_head d_subdirs;	 
 	 
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	struct list_head d_child;	 
 #else
 	union {
@@ -125,7 +125,7 @@ struct dentry_operations {
 	int (*d_compare)(const struct dentry *, const struct inode *,
 			const struct dentry *, const struct inode *,
 			unsigned int, const char *, const struct qstr *);
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -140,7 +140,7 @@ struct dentry_operations {
 	char *(*d_dname)(struct dentry *, char *, int);
 	struct vfsmount *(*d_automount)(struct path *);
 	int (*d_manage)(struct dentry *, bool);
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef MY_ABC_HERE
 	int (*d_compare_case)(const struct dentry *, unsigned int, const char *,
 			const struct qstr *, int caseless);
@@ -194,7 +194,7 @@ static inline int dname_external(struct dentry *dentry)
 }
 
 #ifdef MY_ABC_HERE
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 extern int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount);
 extern int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount);
 #else  

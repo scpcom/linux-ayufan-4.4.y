@@ -8,7 +8,7 @@
 #define TRACER_ACCESSED_BIT	0
 #define TRACER_RUNNING_BIT	1
 #define TRACER_CYCLE_ACC_BIT	2
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define TRACER_TRACE_DATA_BIT	3
 #define TRACER_TIMESTAMP_BIT	4
 #define TRACER_BRANCHOUTPUT_BIT	5
@@ -17,7 +17,7 @@
 #define TRACER_ACCESSED		BIT(TRACER_ACCESSED_BIT)
 #define TRACER_RUNNING		BIT(TRACER_RUNNING_BIT)
 #define TRACER_CYCLE_ACC	BIT(TRACER_CYCLE_ACC_BIT)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define TRACER_TRACE_DATA	BIT(TRACER_TRACE_DATA_BIT)
 #define TRACER_TIMESTAMP	BIT(TRACER_TIMESTAMP_BIT)
 #define TRACER_BRANCHOUTPUT	BIT(TRACER_BRANCHOUTPUT_BIT)
@@ -30,7 +30,7 @@
 #define etm_writel(t, v, x) \
 	(writel_relaxed((v), (t)->etm_regs + (x)))
 #define etm_readl(t, x) (readl_relaxed((t)->etm_regs + (x)))
-#elif defined(CONFIG_SYNO_LSP_HI3536)
+#elif defined(MY_DEF_HERE)
 #define etm_writel(t, id, v, x) \
 	(__raw_writel((v), (t)->etm_regs[(id)] + (x)))
 #define etm_readl(t, id, x) (__raw_readl((t)->etm_regs[(id)] + (x)))
@@ -54,7 +54,7 @@
 #define ETMCTRL_POWERDOWN	1
 #define ETMCTRL_PROGRAM		(1 << 10)
 #define ETMCTRL_PORTSEL		(1 << 11)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define ETMCTRL_CONTEXTIDSIZE(x) (((x) & 3) << 14)
 #else  
 #define ETMCTRL_DO_CONTEXTID	(3 << 14)
@@ -70,13 +70,13 @@
 #define ETMCTRL_DATA_DO_BOTH	(ETMCTRL_DATA_DO_DATA | ETMCTRL_DATA_DO_ADDR)
 #define ETMCTRL_BRANCH_OUTPUT	(1 << 8)
 #define ETMCTRL_CYCLEACCURATE	(1 << 12)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define ETMCTRL_TIMESTAMP_EN	(1 << 28)
 #define ETMCTRL_RETURN_STACK_EN	(1 << 29)
 #endif  
 
 #define ETMR_CONFCODE		(0x04)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define ETMCCR_ETMIDR_PRESENT	BIT(31)
 #endif  
 
@@ -129,7 +129,7 @@
 #define ETMTE_INCLEXCL		BIT(24)
 #define ETMR_TRACEENEVT		0x20
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define ETMR_VIEWDATAEVT	0x30
 #define ETMR_VIEWDATACTRL1	0x34
 #define ETMR_VIEWDATACTRL2	0x38
@@ -175,7 +175,7 @@
 #define ETBFF_TRIGIN		BIT(8)
 #define ETBFF_TRIGEVT		BIT(9)
 #define ETBFF_TRIGFL		BIT(10)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define ETBFF_STOPFL		BIT(12)
 #endif  
 
@@ -189,7 +189,7 @@
 #define etb_readl(t, x) (__raw_readl((t)->etb_regs + (x)))
 #endif  
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define etm_lock(t, id) \
 	do { etm_writel((t), (id), 0, CSMR_LOCKACCESS); } while (0)
 #define etm_unlock(t, id) \

@@ -947,7 +947,7 @@ static void disk_release(struct device *dev)
 	kfree(disk);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static int disk_uevent(struct device *dev, struct kobj_uevent_env *env)
 {
 	struct gendisk *disk = dev_to_disk(dev);
@@ -983,7 +983,7 @@ static struct device_type disk_type = {
 	.groups		= disk_attr_groups,
 	.release	= disk_release,
 	.devnode	= block_devnode,
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	.uevent		= disk_uevent,
 #endif  
 };

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * FP/SIMD state saving and restoring
  *
@@ -42,7 +45,7 @@ ENTRY(fpsimd_load_state)
 	ret
 ENDPROC(fpsimd_load_state)
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_KERNEL_MODE_NEON
 
 /*
@@ -66,4 +69,4 @@ ENTRY(fpsimd_load_partial_state)
 ENDPROC(fpsimd_load_partial_state)
 
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */

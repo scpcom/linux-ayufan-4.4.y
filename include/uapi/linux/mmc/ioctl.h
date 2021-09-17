@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef LINUX_MMC_IOCTL_H
 #define LINUX_MMC_IOCTL_H
 
@@ -55,7 +58,7 @@ struct mmc_ioc_cmd {
  */
 #define MMC_IOC_MAX_BYTES  (512L * 256)
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 struct mmc_erase_cmd {
 	unsigned int from; /* first sector to erase */
 	unsigned int nr;   /* number of sectors to erase */
@@ -73,6 +76,6 @@ struct mmc_erase_cmd {
 #define MMC_TRIM_ARGS            0x00008001
 
 #define MMC_ERASE_CMD _IOW(MMC_BLOCK_MAJOR, 1, struct mmc_erase_cmd)
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #endif /* LINUX_MMC_IOCTL_H */

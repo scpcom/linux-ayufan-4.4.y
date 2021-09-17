@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 
 #include <linux/linkage.h>
 #include <linux/errno.h>
@@ -210,7 +213,7 @@ cond_syscall(compat_sys_open_by_handle_at);
 /* compare kernel pointers */
 cond_syscall(sys_kcmp);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /* operate on Secure Computing state */
 cond_syscall(sys_seccomp);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */

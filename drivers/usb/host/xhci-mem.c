@@ -1524,7 +1524,7 @@ void xhci_mem_cleanup(struct xhci_hcd *xhci)
 
 	if (xhci->lpm_command)
 		xhci_free_command(xhci, xhci->lpm_command);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	xhci->lpm_command = NULL;
 #endif  
 	xhci->cmd_ring_reserved_trbs = 0;
@@ -1588,7 +1588,7 @@ void xhci_mem_cleanup(struct xhci_hcd *xhci)
 	if (!xhci->rh_bw)
 		goto no_bw;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	for (i = 0; i < num_ports && xhci->rh_bw; i++) {
 #else  
 	for (i = 0; i < num_ports; i++) {

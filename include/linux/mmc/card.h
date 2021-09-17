@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/include/linux/mmc/card.h
  *
@@ -512,9 +515,9 @@ struct mmc_driver {
 	void (*remove)(struct mmc_card *);
 	int (*suspend)(struct mmc_card *);
 	int (*resume)(struct mmc_card *);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	void (*shutdown)(struct mmc_card *);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 };
 
 extern int mmc_register_driver(struct mmc_driver *);

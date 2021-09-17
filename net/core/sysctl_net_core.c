@@ -18,7 +18,7 @@
 #include <net/net_ratelimit.h>
 
 static int zero = 0;
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE) || defined(CONFIG_SYNO_HI3536)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
  
 #else  
 static int one = 1;

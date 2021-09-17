@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright IBM Corp. 1999, 2009
  *
@@ -32,7 +35,7 @@
 
 #define set_mb(var, value)		do { var = value; mb(); } while (0)
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define smp_store_release(p, v)						\
 do {									\
 	compiletime_assert_atomic_type(*p);				\
@@ -47,6 +50,6 @@ do {									\
 	barrier();							\
 	___p1;								\
 })
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #endif /* __ASM_BARRIER_H */

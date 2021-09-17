@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Definitions for working with the Flattened Device Tree data format
  *
@@ -91,7 +94,7 @@ extern int of_flat_dt_is_compatible(unsigned long node, const char *name);
 extern int of_flat_dt_match(unsigned long node, const char *const *matches);
 extern unsigned long of_get_flat_dt_root(void);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /*
  * early_init_dt_scan_chosen - scan the device tree for ramdisk and bootargs
  *
@@ -113,7 +116,7 @@ extern unsigned long of_get_flat_dt_root(void);
  * - CMDLINE_FROM_BOOTLOADER=true, dt bootargs=empty, @data is empty string
  *     CONFIG_CMDLINE (or "" if that's not defined)
  */
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 extern int early_init_dt_scan_chosen(unsigned long node, const char *uname,
 				     int depth, void *data);
 extern void early_init_dt_check_for_initrd(unsigned long node);

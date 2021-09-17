@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <asm/bitsperlong.h>
 
 /*
@@ -693,7 +696,7 @@ __SYSCALL(__NR_kcmp, sys_kcmp)
 #define __NR_finit_module 273
 __SYSCALL(__NR_finit_module, sys_finit_module)
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /* Backporting seccomp, skip a few ...
  * #define __NR_sched_setattr 274
 __SYSCALL(__NR_sched_setattr, sys_sched_setattr)
@@ -707,10 +710,10 @@ __SYSCALL(__NR_seccomp, sys_seccomp)
 
 #undef __NR_syscalls
 #define __NR_syscalls 278
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 #undef __NR_syscalls
 #define __NR_syscalls 274
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /*
  * All syscalls below here should go away really,

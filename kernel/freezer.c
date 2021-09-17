@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * kernel/freezer.c - Function to freeze a process
  *
@@ -119,7 +122,7 @@ bool freeze_task(struct task_struct *p)
 {
 	unsigned long flags;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	/*
 	 * This check can race with freezer_do_not_count, but worst case that
 	 * will result in an extra wakeup being sent to the task.  It does not
@@ -131,7 +134,7 @@ bool freeze_task(struct task_struct *p)
 	 */
 	if (freezer_should_skip(p))
 		return false;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	spin_lock_irqsave(&freezer_lock, flags);
 	if (!freezing(p) || frozen(p)) {

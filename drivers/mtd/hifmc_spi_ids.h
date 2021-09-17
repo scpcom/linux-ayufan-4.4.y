@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /******************************************************************************
  *	Flash Memory Controller Device Driver
  *	Copyright (c) 2014 - 2015 by Hisilicon
@@ -73,12 +76,12 @@
 #define SPI_CMD_WRITE_DUAL		0xA2	/* 2 IO program only date */
 #define SPI_CMD_WRITE_DUAL_ADDR		0xD2	/* 2 IO program date&addr */
 #define SPI_CMD_WRITE_QUAD		0x32	/* 4 IO program only date */
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 #define SPI_CMD_WRITE_QUAD_ADDR		0x38	/* 4 IO program date&addr */
 /* #define SPI_CMD_WRITE_QUAD_ADDR		0x12 */
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 #define SPI_CMD_WRITE_QUAD_ADDR		0x12	/* 4 IO program date&addr */
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 #define SPI_CMD_SE_4K			0x20	/* 4KB sector Erase */
 #define SPI_CMD_SE_32K			0x52	/* 32KB sector Erase */

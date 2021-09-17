@@ -253,7 +253,7 @@ do_page_fault(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 	if (interrupts_enabled(regs))
 		local_irq_enable();
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	 
 	if (in_atomic() || irqs_disabled() || !mm)
 #else  

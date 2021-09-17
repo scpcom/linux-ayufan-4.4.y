@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Based on arch/arm/kernel/sys_arm.c
  *
@@ -26,11 +29,11 @@
 #include <linux/uaccess.h>
 
 #include <asm/cacheflush.h>
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <asm/unistd.h>
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 #include <asm/unistd32.h>
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 static inline void
 do_compat_cache_op(unsigned long start, unsigned long end, int flags)

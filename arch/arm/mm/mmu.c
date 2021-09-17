@@ -551,7 +551,7 @@ static void __init *early_alloc(unsigned long sz)
 	return early_alloc_aligned(sz, sz);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static pte_t * __init early_pte_alloc(pmd_t *pmd)
 {
 	if (pmd_none(*pmd) || pmd_bad(*pmd))
@@ -599,7 +599,7 @@ static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
 				  unsigned long end, unsigned long pfn,
 				  const struct mem_type *type)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	pte_t *start_pte = early_pte_alloc(pmd);
 	pte_t *pte = start_pte + pte_index(addr);
 
@@ -612,7 +612,7 @@ static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
 		set_pte_ext(pte, pfn_pte(pfn, __pgprot(type->prot_pte)), 0);
 		pfn++;
 	} while (pte++, addr += PAGE_SIZE, addr != end);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	early_pte_install(pmd, start_pte, type->prot_l1);
 #endif  
 }
@@ -638,7 +638,7 @@ static void __init __map_init_section(pmd_t *pmd, unsigned long addr,
 
 static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
 				      unsigned long end, phys_addr_t phys,
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 				      const struct mem_type *type,
 				      bool force_pages)
 #else  
@@ -653,7 +653,7 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
 		next = pmd_addr_end(addr, end);
 
 		if (type->prot_sect &&
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 				((addr | next | phys) & ~SECTION_MASK) == 0 &&
 				!force_pages) {
 #else  
@@ -672,7 +672,7 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
 
 static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
 				  unsigned long end, phys_addr_t phys,
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 				  const struct mem_type *type,
 				  bool force_pages)
 #else  
@@ -684,7 +684,7 @@ static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
 
 	do {
 		next = pud_addr_end(addr, end);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		alloc_init_pmd(pud, addr, next, phys, type, force_pages);
 #else  
 		alloc_init_pmd(pud, addr, next, phys, type);
@@ -745,7 +745,7 @@ static void __init create_36bit_mapping(struct map_desc *md,
 }
 #endif	 
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static void __init create_mapping(struct map_desc *md, bool force_pages)
 #else  
 static void __init create_mapping(struct map_desc *md)
@@ -797,7 +797,7 @@ static void __init create_mapping(struct map_desc *md)
 	do {
 		unsigned long next = pgd_addr_end(addr, end);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		alloc_init_pud(pgd, addr, next, phys, type, force_pages);
 #else  
 		alloc_init_pud(pgd, addr, next, phys, type);
@@ -820,7 +820,7 @@ void __init iotable_init(struct map_desc *io_desc, int nr)
 	svm = early_alloc_aligned(sizeof(*svm) * nr, __alignof__(*svm));
 
 	for (md = io_desc; nr; md++, nr--) {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		create_mapping(md, false);
 #else  
 		create_mapping(md);
@@ -921,7 +921,7 @@ void __init debug_ll_io_init(void)
 	map.virtual &= PAGE_MASK;
 	map.length = PAGE_SIZE;
 	map.type = MT_DEVICE;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	create_mapping(&map, false);
 #else  
 	create_mapping(&map);
@@ -988,7 +988,7 @@ void __init sanity_check_meminfo(void)
 		struct membank *bank = &meminfo.bank[j];
 		*bank = meminfo.bank[i];
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_SPARSEMEM
 		if (pfn_to_section_nr(bank_pfn_start(bank)) !=
 		    pfn_to_section_nr(bank_pfn_end(bank) - 1)) {
@@ -1177,7 +1177,7 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 	map.virtual = MODULES_VADDR;
 	map.length = ((unsigned long)_etext - map.virtual + ~SECTION_MASK) & SECTION_MASK;
 	map.type = MT_ROM;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	create_mapping(&map, false);
 #else  
 	create_mapping(&map);
@@ -1189,7 +1189,7 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 	map.virtual = FLUSH_BASE;
 	map.length = SZ_1M;
 	map.type = MT_CACHECLEAN;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	create_mapping(&map, false);
 #else  
 	create_mapping(&map);
@@ -1200,7 +1200,7 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 	map.virtual = FLUSH_BASE_MINICACHE;
 	map.length = SZ_1M;
 	map.type = MT_MINICLEAN;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	create_mapping(&map, false);
 #else  
 	create_mapping(&map);
@@ -1215,7 +1215,7 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 #else
 	map.type = MT_LOW_VECTORS;
 #endif
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	create_mapping(&map, false);
 #else  
 	create_mapping(&map);
@@ -1225,7 +1225,7 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 		map.virtual = 0;
 		map.length = PAGE_SIZE * 2;
 		map.type = MT_LOW_VECTORS;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		create_mapping(&map, false);
 #else  
 		create_mapping(&map);
@@ -1236,7 +1236,7 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 	map.virtual = 0xffff0000 + PAGE_SIZE;
 	map.length = PAGE_SIZE;
 	map.type = MT_LOW_VECTORS;
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	create_mapping(&map, false);
 #else  
 	create_mapping(&map);
@@ -1263,7 +1263,7 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 static void __init kmap_init(void)
 {
 #ifdef CONFIG_HIGHMEM
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	pkmap_page_table = early_pte_alloc_and_install(pmd_off_k(PKMAP_BASE),
 #else  
 	pkmap_page_table = early_pte_alloc(pmd_off_k(PKMAP_BASE),
@@ -1275,14 +1275,14 @@ static void __init kmap_init(void)
 static void __init map_lowmem(void)
 {
 	struct memblock_region *reg;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	phys_addr_t start;
 	phys_addr_t end;
 	struct map_desc map;
 #endif  
 
 	for_each_memblock(memory, reg) {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		start = reg->base;
 		end = start + reg->size;
 #else  
@@ -1301,14 +1301,14 @@ static void __init map_lowmem(void)
 		map.length = end - start;
 		map.type = MT_MEMORY;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		create_mapping(&map, false);
 #else  
 		create_mapping(&map);
 #endif  
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_DEBUG_RODATA
 	start = __pa(_stext) & PMD_MASK;
 	end = ALIGN(__pa(__end_rodata), PMD_SIZE);

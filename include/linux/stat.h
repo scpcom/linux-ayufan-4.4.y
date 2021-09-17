@@ -24,7 +24,7 @@ struct kstat {
 	u64		ino;
 	dev_t		dev;
 	umode_t		mode;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -42,7 +42,7 @@ struct kstat {
 	struct timespec  atime;
 	struct timespec	mtime;
 	struct timespec	ctime;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -51,7 +51,7 @@ struct kstat {
 #endif  
 	unsigned long	blksize;
 	unsigned long long	blocks;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef MY_ABC_HERE
 	struct timespec syno_create_time;
 #endif

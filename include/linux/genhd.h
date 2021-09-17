@@ -553,7 +553,7 @@ struct unixware_disklabel {
 #define ADDPART_FLAG_NONE	0
 #define ADDPART_FLAG_RAID	1
 #define ADDPART_FLAG_WHOLEDISK	2
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define ADDPART_FLAG_READONLY   4
 #endif  
 

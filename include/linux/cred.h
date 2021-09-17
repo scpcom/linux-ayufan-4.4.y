@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Credentials management - see Documentation/security/credentials.txt
  *
  * Copyright (C) 2008 Red Hat, Inc. All Rights Reserved.
@@ -122,9 +125,9 @@ struct cred {
 	kernel_cap_t	cap_permitted;	/* caps we're permitted */
 	kernel_cap_t	cap_effective;	/* caps we can actually use */
 	kernel_cap_t	cap_bset;	/* capability bounding set */
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_KEYS
 	unsigned char	jit_keyring;	/* default keyring to attach requested
 					 * keys to */
@@ -136,12 +139,12 @@ struct cred {
 #ifdef CONFIG_SECURITY
 	void		*security;	/* subjective LSM security */
 #endif
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 	struct user_struct *user;	/* real user ID subscription */
 	struct user_namespace *user_ns; /* user_ns the caps and keyrings are relative to. */
 	struct group_info *group_info;	/* supplementary groups for euid/fsgid */
 	struct rcu_head	rcu;		/* RCU deletion hook */
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_KEYS
 	unsigned char	jit_keyring;	/* default keyring to attach requested
 					 * keys to */
@@ -153,7 +156,7 @@ struct cred {
 #ifdef CONFIG_SECURITY
 	void		*security;	/* subjective LSM security */
 #endif
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 };
 
 extern void __put_cred(struct cred *);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
  *
@@ -1280,7 +1283,7 @@ static int hisfc350_probe(struct hisfc_host *host)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 static int hisfc350_unlock_dummy(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
 	return 0;
@@ -1290,7 +1293,7 @@ static int hisfc350_lock_dummy(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
 	return 0;
 }
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 
 static int hisfc350_driver_probe(struct platform_device *plat_dev)
 {
@@ -1351,10 +1354,10 @@ static int hisfc350_driver_probe(struct platform_device *plat_dev)
 	mtd->writesize = 1;
 	mtd->flags = MTD_CAP_NORFLASH;
 	mtd->owner = THIS_MODULE;
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	mtd->_unlock = hisfc350_unlock_dummy;
 	mtd->_lock = hisfc350_lock_dummy;
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	if (hisfc350_probe(host)) {
 		result = -ENODEV;
@@ -1366,11 +1369,11 @@ static int hisfc350_driver_probe(struct platform_device *plat_dev)
 	if (mtd_has_partitions()) {
 
 		static char const *part_probes[] = {
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 			"RedBoot",
-#else /* CONFIG_SYNO_HI3536 */
+#else /* MY_DEF_HERE */
 			"cmdlinepart",
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 			NULL,
 		};
 

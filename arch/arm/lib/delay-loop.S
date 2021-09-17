@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/lib/delay.S
  *
@@ -40,9 +43,9 @@ ENTRY(__loop_const_udelay)			@ 0 <= r0 <= 0x7fffff06
 /*
  * loops = r0 * HZ * loops_per_jiffy / 1000000
  */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		.align 3
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 @ Delay routine
 ENTRY(__loop_delay)

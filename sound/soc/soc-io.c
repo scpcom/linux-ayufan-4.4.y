@@ -8,7 +8,7 @@
 #else
 #include <linux/regmap.h>
 #endif  
-#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_HI3536)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 #include <linux/regmap.h>
 #endif  
 #include <linux/export.h>

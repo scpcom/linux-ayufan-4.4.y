@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Block chaining cipher operations.
  * 
@@ -70,23 +73,23 @@ static inline u8 *blkcipher_get_spot(u8 *start, unsigned int len)
 	return max(start, end_page);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static inline unsigned int blkcipher_done_slow(struct blkcipher_walk *walk,
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 static inline unsigned int blkcipher_done_slow(struct crypto_blkcipher *tfm,
 					       struct blkcipher_walk *walk,
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 					       unsigned int bsize)
 {
 	u8 *addr;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 
 	addr = (u8 *)ALIGN((unsigned long)walk->buffer, walk->alignmask + 1);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	unsigned int alignmask = crypto_blkcipher_alignmask(tfm);
 
 	addr = (u8 *)ALIGN((unsigned long)walk->buffer, alignmask + 1);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	addr = blkcipher_get_spot(addr, bsize);
 	scatterwalk_copychunks(addr, &walk->out, bsize, 1);
 	return bsize;
@@ -114,11 +117,11 @@ static inline unsigned int blkcipher_done_fast(struct blkcipher_walk *walk,
 int blkcipher_walk_done(struct blkcipher_desc *desc,
 			struct blkcipher_walk *walk, int err)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	struct crypto_blkcipher *tfm = desc->tfm;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	unsigned int nbytes = 0;
 
 	if (likely(err >= 0)) {
@@ -130,11 +133,11 @@ int blkcipher_walk_done(struct blkcipher_desc *desc,
 			err = -EINVAL;
 			goto err;
 		} else
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			n = blkcipher_done_slow(walk, n);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 			n = blkcipher_done_slow(tfm, walk, n);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 		nbytes = walk->total - n;
 		err = 0;
@@ -153,11 +156,11 @@ err:
 	}
 
 	if (walk->iv != desc->info)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		memcpy(desc->info, walk->iv, walk->ivsize);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		memcpy(desc->info, walk->iv, crypto_blkcipher_ivsize(tfm));
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	if (walk->buffer != walk->page)
 		kfree(walk->buffer);
 	if (walk->page)
@@ -247,35 +250,35 @@ static inline int blkcipher_next_fast(struct blkcipher_desc *desc,
 static int blkcipher_walk_next(struct blkcipher_desc *desc,
 			       struct blkcipher_walk *walk)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	struct crypto_blkcipher *tfm = desc->tfm;
 	unsigned int alignmask = crypto_blkcipher_alignmask(tfm);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	unsigned int bsize;
 	unsigned int n;
 	int err;
 
 	n = walk->total;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (unlikely(n < walk->cipher_blocksize)) {
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	if (unlikely(n < crypto_blkcipher_blocksize(tfm))) {
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		desc->flags |= CRYPTO_TFM_RES_BAD_BLOCK_LEN;
 		return blkcipher_walk_done(desc, walk, -EINVAL);
 	}
 
 	walk->flags &= ~(BLKCIPHER_WALK_SLOW | BLKCIPHER_WALK_COPY |
 			 BLKCIPHER_WALK_DIFF);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (!scatterwalk_aligned(&walk->in, walk->alignmask) ||
 	    !scatterwalk_aligned(&walk->out, walk->alignmask)) {
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	if (!scatterwalk_aligned(&walk->in, alignmask) ||
 	    !scatterwalk_aligned(&walk->out, alignmask)) {
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		walk->flags |= BLKCIPHER_WALK_COPY;
 		if (!walk->page) {
 			walk->page = (void *)__get_free_page(GFP_ATOMIC);
@@ -284,20 +287,20 @@ static int blkcipher_walk_next(struct blkcipher_desc *desc,
 		}
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	bsize = min(walk->walk_blocksize, n);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	bsize = min(walk->blocksize, n);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	n = scatterwalk_clamp(&walk->in, n);
 	n = scatterwalk_clamp(&walk->out, n);
 
 	if (unlikely(n < bsize)) {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		err = blkcipher_next_slow(desc, walk, bsize, walk->alignmask);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		err = blkcipher_next_slow(desc, walk, bsize, alignmask);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		goto set_phys_lowmem;
 	}
 
@@ -319,7 +322,7 @@ set_phys_lowmem:
 	return err;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static inline int blkcipher_copy_iv(struct blkcipher_walk *walk)
 {
 	unsigned bs = walk->walk_blocksize;
@@ -342,7 +345,7 @@ static inline int blkcipher_copy_iv(struct blkcipher_walk *walk)
 	walk->iv = memcpy(iv, walk->iv, walk->ivsize);
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 static inline int blkcipher_copy_iv(struct blkcipher_walk *walk,
 				    struct crypto_blkcipher *tfm,
 				    unsigned int alignmask)
@@ -367,20 +370,20 @@ static inline int blkcipher_copy_iv(struct blkcipher_walk *walk,
 	walk->iv = memcpy(iv, walk->iv, ivsize);
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 int blkcipher_walk_virt(struct blkcipher_desc *desc,
 			struct blkcipher_walk *walk)
 {
 	walk->flags &= ~BLKCIPHER_WALK_PHYS;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	walk->walk_blocksize = crypto_blkcipher_blocksize(desc->tfm);
 	walk->cipher_blocksize = walk->walk_blocksize;
 	walk->ivsize = crypto_blkcipher_ivsize(desc->tfm);
 	walk->alignmask = crypto_blkcipher_alignmask(desc->tfm);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	walk->blocksize = crypto_blkcipher_blocksize(desc->tfm);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	return blkcipher_walk_first(desc, walk);
 }
 EXPORT_SYMBOL_GPL(blkcipher_walk_virt);
@@ -389,14 +392,14 @@ int blkcipher_walk_phys(struct blkcipher_desc *desc,
 			struct blkcipher_walk *walk)
 {
 	walk->flags |= BLKCIPHER_WALK_PHYS;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	walk->walk_blocksize = crypto_blkcipher_blocksize(desc->tfm);
 	walk->cipher_blocksize = walk->walk_blocksize;
 	walk->ivsize = crypto_blkcipher_ivsize(desc->tfm);
 	walk->alignmask = crypto_blkcipher_alignmask(desc->tfm);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	walk->blocksize = crypto_blkcipher_blocksize(desc->tfm);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	return blkcipher_walk_first(desc, walk);
 }
 EXPORT_SYMBOL_GPL(blkcipher_walk_phys);
@@ -404,12 +407,12 @@ EXPORT_SYMBOL_GPL(blkcipher_walk_phys);
 static int blkcipher_walk_first(struct blkcipher_desc *desc,
 				struct blkcipher_walk *walk)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	struct crypto_blkcipher *tfm = desc->tfm;
 	unsigned int alignmask = crypto_blkcipher_alignmask(tfm);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	if (WARN_ON_ONCE(in_irq()))
 		return -EDEADLK;
@@ -420,13 +423,13 @@ static int blkcipher_walk_first(struct blkcipher_desc *desc,
 
 	walk->buffer = NULL;
 	walk->iv = desc->info;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (unlikely(((unsigned long)walk->iv & walk->alignmask))) {
 		int err = blkcipher_copy_iv(walk);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	if (unlikely(((unsigned long)walk->iv & alignmask))) {
 		int err = blkcipher_copy_iv(walk, tfm, alignmask);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		if (err)
 			return err;
 	}
@@ -443,19 +446,19 @@ int blkcipher_walk_virt_block(struct blkcipher_desc *desc,
 			      unsigned int blocksize)
 {
 	walk->flags &= ~BLKCIPHER_WALK_PHYS;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	walk->walk_blocksize = blocksize;
 	walk->cipher_blocksize = crypto_blkcipher_blocksize(desc->tfm);
 	walk->ivsize = crypto_blkcipher_ivsize(desc->tfm);
 	walk->alignmask = crypto_blkcipher_alignmask(desc->tfm);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	walk->blocksize = blocksize;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	return blkcipher_walk_first(desc, walk);
 }
 EXPORT_SYMBOL_GPL(blkcipher_walk_virt_block);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 int blkcipher_aead_walk_virt_block(struct blkcipher_desc *desc,
 				   struct blkcipher_walk *walk,
 				   struct crypto_aead *tfm,
@@ -469,7 +472,7 @@ int blkcipher_aead_walk_virt_block(struct blkcipher_desc *desc,
 	return blkcipher_walk_first(desc, walk);
 }
 EXPORT_SYMBOL_GPL(blkcipher_aead_walk_virt_block);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 static int setkey_unaligned(struct crypto_tfm *tfm, const u8 *key,
 			    unsigned int keylen)

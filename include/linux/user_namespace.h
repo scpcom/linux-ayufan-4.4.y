@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_USER_NAMESPACE_H
 #define _LINUX_USER_NAMESPACE_H
 
@@ -27,25 +30,25 @@ struct user_namespace {
 	struct uid_gid_map	projid_map;
 	atomic_t		count;
 	struct user_namespace	*parent;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#else /* MY_DEF_HERE */
 	int			level;
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 	kuid_t			owner;
 	kgid_t			group;
 	unsigned int		proc_inum;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#else /* MY_DEF_HERE */
 	unsigned long		flags;
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 	bool			may_mount_sysfs;
 	bool			may_mount_proc;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	int			level;
 	unsigned long		flags;
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 };
 
 extern struct user_namespace init_user_ns;

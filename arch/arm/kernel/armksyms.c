@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/kernel/armksyms.c
  *
@@ -48,13 +51,13 @@ extern void __aeabi_ulcmp(void);
 
 extern void fpundefinstr(void);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_HI_IOMMU
 extern int vdma_flag;
 extern int hi_memcpy(void *dst, const void *src, size_t count);
 int vdma_waterline = CONFIG_HI_IOMMU_THRESHOLD;
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	/* platform dependent support */
 EXPORT_SYMBOL(arm_delay_ops);
@@ -90,7 +93,7 @@ EXPORT_SYMBOL(strchr);
 EXPORT_SYMBOL(strrchr);
 EXPORT_SYMBOL(memset);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_HI_IOMMU
 void *memcpy(void *dest, const void *src, size_t n)
 {
@@ -110,7 +113,7 @@ void *memcpy(void *dest, const void *src, size_t n)
 	return dest;
 }
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 EXPORT_SYMBOL(memcpy);
 EXPORT_SYMBOL(memmove);
 EXPORT_SYMBOL(memchr);
@@ -119,7 +122,7 @@ EXPORT_SYMBOL(__memzero);
 #ifdef CONFIG_MMU
 EXPORT_SYMBOL(copy_page);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_HI_IOMMU
 unsigned long hi_copy_from_user(void *to,
 		const void __user *from, unsigned long n)
@@ -159,7 +162,7 @@ unsigned long hi_copy_to_user(void *to, const void __user *from, unsigned long n
 }
 EXPORT_SYMBOL(hi_copy_to_user);
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 EXPORT_SYMBOL(__copy_from_user);
 EXPORT_SYMBOL(__copy_to_user);
 EXPORT_SYMBOL(__clear_user);

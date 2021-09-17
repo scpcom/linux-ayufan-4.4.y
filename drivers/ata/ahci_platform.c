@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * AHCI SATA platform driver
  *
@@ -26,7 +29,7 @@
 #include "ahci.h"
 
 static void ahci_host_stop(struct ata_host *host);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static unsigned int ncq_en = CONFIG_HI_SATA_NCQ;
 module_param(ncq_en, uint, 0600);
 MODULE_PARM_DESC(ncq_en, "ahci ncq flag (default:1)");
@@ -57,7 +60,7 @@ void set_ram_mode(unsigned int ports)
 	return;
 }
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 enum ahci_type {
 	AHCI,		/* standard platform ahci */
@@ -118,7 +121,7 @@ static struct scsi_host_template ahci_platform_sht = {
 	AHCI_SHT("ahci_platform"),
 };
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_ARCH_HI3536
 #define HI_SATA_SYS_CTRL	IO_ADDRESS(0x1205008C)
 #define HI_SATA_USE_ESATA	16
@@ -172,7 +175,7 @@ static unsigned int hi_sata_port_nr(void)
 	return port_nr;
 }
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 static int ahci_probe(struct platform_device *pdev)
 {
@@ -188,11 +191,11 @@ static int ahci_probe(struct platform_device *pdev)
 	int n_ports;
 	int i;
 	int rc;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_ARCH_HI3536
 	unsigned int temp_val;
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	mem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (!mem) {
@@ -253,10 +256,10 @@ static int ahci_probe(struct platform_device *pdev)
 	/* prepare host */
 	if (hpriv->cap & HOST_CAP_NCQ)
 		pi.flags |= ATA_FLAG_NCQ;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (!ncq_en)
 		pi.flags &= ~ATA_FLAG_NCQ;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	if (hpriv->cap & HOST_CAP_PMP)
 		pi.flags |= ATA_FLAG_PMP;
@@ -270,7 +273,7 @@ static int ahci_probe(struct platform_device *pdev)
 	 */
 	n_ports = max(ahci_nr_ports(hpriv->cap), fls(hpriv->port_map));
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_ARCH_HI3536
 	temp_val = hi_sata_use_esata();
 
@@ -300,7 +303,7 @@ static int ahci_probe(struct platform_device *pdev)
 #ifdef CONFIG_ARCH_HI3531A
 	n_ports = hi_sata_port_nr();
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	host = ata_host_alloc_pinfo(dev, ppi, n_ports);
 	if (!host) {
 		rc = -ENOMEM;

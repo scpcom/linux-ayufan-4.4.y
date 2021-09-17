@@ -416,12 +416,12 @@ __und_usr:
 	@
 	adr	r9, BSYM(ret_from_exception)
 
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 	@ IRQs must be enabled before attempting to read the instruction from
 	@ user space since that could cause a page/translation fault if the
 	@ page table was modified by another CPU.
 	enable_irq
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 
 	tst	r3, #PSR_T_BIT			@ Thumb mode?
 	bne	__und_usr_thumb
@@ -532,15 +532,15 @@ ENDPROC(__und_usr)
  *  r10 = this threads thread_info structure
  *  lr  = unrecognised instruction return address
  */
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 /*
  * IRQs enabled, FIQs enabled.
  */
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 /*
  * IRQs disabled, FIQs enabled.
  */
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 	@
 	@ Fall-through from Thumb-2 __und_usr
 	@
@@ -646,11 +646,11 @@ call_fpe:
 #endif
 
 do_fpe:
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 	enable_irq
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 	ldr	r4, .LCfp
 	add	r10, r10, #TI_FPSTATE		@ r10 = workspace
 	ldr	pc, [r4]			@ Call FP module USR entry point
@@ -678,12 +678,12 @@ __und_usr_fault_32:
 	b	1f
 __und_usr_fault_16:
 	mov	r1, #2
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 1:	mov	r0, sp
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 1:	enable_irq
 	mov	r0, sp
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 	adr	lr, BSYM(ret_from_exception)
 	b	__und_fault
 ENDPROC(__und_usr_fault_32)

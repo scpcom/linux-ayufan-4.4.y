@@ -321,8 +321,8 @@ static inline bool usb_acpi_power_manageable(struct usb_device *hdev, int index)
 	{ return true; }
 #endif
 
-#if (defined(CONFIG_SYNO_LSP_HI3536_V2060) && defined(CONFIG_USB_SUSPEND)) || \
-	(!defined(CONFIG_SYNO_LSP_HI3536_V2060) && defined(CONFIG_PM_RUNTIME))
+#if (defined(MY_DEF_HERE) && defined(CONFIG_USB_SUSPEND)) || \
+	(!defined(MY_DEF_HERE) && defined(CONFIG_PM_RUNTIME))
 extern void usb_enable_autosuspend(struct usb_device *udev);
 extern void usb_disable_autosuspend(struct usb_device *udev);
 

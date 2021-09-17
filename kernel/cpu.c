@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  
 #include <linux/proc_fs.h>
 #include <linux/smp.h>
@@ -650,7 +653,7 @@ void init_cpu_online(const struct cpumask *src)
 	cpumask_copy(to_cpumask(cpu_online_bits), src);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static ATOMIC_NOTIFIER_HEAD(idle_notifier);
 
 void idle_notifier_register(struct notifier_block *n)

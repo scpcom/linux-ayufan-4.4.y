@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/kernel/process.c
  *
@@ -32,9 +35,9 @@
 #include <linux/hw_breakpoint.h>
 #include <linux/cpuidle.h>
 #include <linux/leds.h>
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <linux/console.h>
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #include <asm/cacheflush.h>
 #include <asm/idmap.h>
@@ -60,7 +63,7 @@ static const char *isa_modes[] = {
   "ARM" , "Thumb" , "Jazelle", "ThumbEE"
 };
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_SMP
 void arch_trigger_all_cpu_backtrace(void)
 {
@@ -72,12 +75,12 @@ void arch_trigger_all_cpu_backtrace(void)
 	dump_stack();
 }
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 extern void call_with_stack(void (*fn)(void *), void *arg, void *sp);
 typedef void (*phys_reset_t)(unsigned long);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_ARM_FLUSH_CONSOLE_ON_RESTART
 void arm_machine_flush_console(void)
 {
@@ -102,7 +105,7 @@ void arm_machine_flush_console(void)
 {
 }
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /*
  * A temporary stack to use for CPU reset. This is static so that we
@@ -191,9 +194,9 @@ void arch_cpu_idle_prepare(void)
 
 void arch_cpu_idle_enter(void)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	idle_notifier_call_chain(IDLE_START);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	ledtrig_cpu(CPU_LED_IDLE_START);
 #ifdef CONFIG_PL310_ERRATA_769419
 	wmb();
@@ -203,9 +206,9 @@ void arch_cpu_idle_enter(void)
 void arch_cpu_idle_exit(void)
 {
 	ledtrig_cpu(CPU_LED_IDLE_END);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	idle_notifier_call_chain(IDLE_END);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 }
 
 #ifdef CONFIG_HOTPLUG_CPU
@@ -245,7 +248,7 @@ __setup("reboot=", reboot_setup);
  */
 void machine_shutdown(void)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_SMP
 	/*
 	 * Disable preemption so we're guaranteed to
@@ -256,7 +259,7 @@ void machine_shutdown(void)
 	 */
 	preempt_disable();
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	disable_nonboot_cpus();
 }
 
@@ -302,11 +305,11 @@ void machine_restart(char *cmd)
 {
 	smp_send_stop();
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	/* Flush the console to make sure all the relevant messages make it
 	 * out to the console drivers */
 	arm_machine_flush_console();
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	arm_pm_restart(reboot_mode, cmd);
 
@@ -319,7 +322,7 @@ void machine_restart(char *cmd)
 	while (1);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /*
  * dump a block of kernel memory from around the given address
  */
@@ -389,7 +392,7 @@ static void show_extra_register_data(struct pt_regs *regs, int nbytes)
 	show_data(regs->ARM_r10 - nbytes, nbytes * 2, "R10");
 	set_fs(fs);
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 void __show_regs(struct pt_regs *regs)
 {
@@ -448,9 +451,9 @@ void __show_regs(struct pt_regs *regs)
 	}
 #endif
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	show_extra_register_data(regs, 128);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 }
 
 void show_regs(struct pt_regs * regs)

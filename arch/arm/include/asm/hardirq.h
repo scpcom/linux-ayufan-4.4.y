@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __ASM_HARDIRQ_H
 #define __ASM_HARDIRQ_H
 
@@ -5,11 +8,11 @@
 #include <linux/threads.h>
 #include <asm/irq.h>
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define NR_IPI	7
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 #define NR_IPI	6
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 typedef struct {
 	unsigned int __softirq_pending;

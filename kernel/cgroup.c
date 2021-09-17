@@ -1565,7 +1565,7 @@ out_free_group_list:
 	return retval;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static int cgroup_allow_attach(struct cgroup *cgrp, struct cgroup_taskset *tset)
 {
 	struct cgroup_subsys *ss;
@@ -1627,7 +1627,7 @@ retry_find_task:
 		if (!uid_eq(cred->euid, GLOBAL_ROOT_UID) &&
 		    !uid_eq(cred->euid, tcred->uid) &&
 		    !uid_eq(cred->euid, tcred->suid)) {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			 
 			struct cgroup_taskset tset = { };
 			tset.single.task = tsk;
@@ -3969,7 +3969,7 @@ static int __init SynoCGroupMemEnable(char *str) {
 			break;
 		}
 	}
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	return 1;
 #endif  
 }

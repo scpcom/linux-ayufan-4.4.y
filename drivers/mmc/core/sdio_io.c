@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/mmc/core/sdio_io.c
  *
@@ -383,7 +386,7 @@ u8 sdio_readb(struct sdio_func *func, unsigned int addr, int *err_ret)
 }
 EXPORT_SYMBOL_GPL(sdio_readb);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /**
  *	sdio_readb_ext - read a single byte from a SDIO function
  *	@func: SDIO function to access
@@ -416,7 +419,7 @@ unsigned char sdio_readb_ext(struct sdio_func *func, unsigned int addr,
 	return val;
 }
 EXPORT_SYMBOL_GPL(sdio_readb_ext);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /**
  *	sdio_writeb - write a single byte to a SDIO function

@@ -352,7 +352,7 @@ repeat:
 		return;
 	}
 
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	if (unlikely(dentry->d_flags & DCACHE_DISCONNECTED))
 		goto kill_it;
 #endif  
@@ -755,7 +755,7 @@ ascend:
 
 		if (!locked && read_seqretry(&rename_lock, seq))
 			goto rename_retry;
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 		 
 		do {
 			next = child->d_child.next;
@@ -859,7 +859,7 @@ ascend:
 
 		if (!locked && read_seqretry(&rename_lock, seq))
 			goto rename_retry;
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 		 
 		do {
 			next = child->d_child.next;
@@ -967,7 +967,7 @@ struct dentry *d_alloc(struct dentry * parent, const struct qstr *name)
 	if (!dentry)
 		return NULL;
 
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	dentry->d_flags |= DCACHE_RCUACCESS;
 #endif  
 	spin_lock(&parent->d_lock);
@@ -1564,7 +1564,7 @@ static void __d_rehash(struct dentry * entry, struct hlist_bl_head *b)
 {
 	BUG_ON(!d_unhashed(entry));
 	hlist_bl_lock(b);
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 	entry->d_flags |= DCACHE_RCUACCESS;
@@ -1689,7 +1689,7 @@ static void __d_move(struct dentry * dentry, struct dentry * target)
 	swap(dentry->d_name.hash, target->d_name.hash);
 
 	if (IS_ROOT(dentry)) {
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 		dentry->d_flags |= DCACHE_RCUACCESS;
 #endif  
 		dentry->d_parent = target->d_parent;
@@ -1774,7 +1774,7 @@ static void __d_materialise_dentry(struct dentry *dentry, struct dentry *anon)
 	switch_names(dentry, anon);
 	swap(dentry->d_name.hash, anon->d_name.hash);
 
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	dentry->d_flags |= DCACHE_RCUACCESS;
 #endif  
 	dentry->d_parent = dentry;
@@ -1923,7 +1923,7 @@ static int prepend_path(const struct path *path,
 	struct dentry *dentry = path->dentry;
 	struct vfsmount *vfsmnt = path->mnt;
 	struct mount *mnt = real_mount(vfsmnt);
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	char *orig_buffer = *buffer;
 	int orig_len = *buflen;
 #endif  
@@ -1934,7 +1934,7 @@ static int prepend_path(const struct path *path,
 		struct dentry * parent;
 
 		if (dentry == vfsmnt->mnt_root || IS_ROOT(dentry)) {
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 			 
 			if (dentry != vfsmnt->mnt_root) {
 				*buffer = orig_buffer;
@@ -1972,7 +1972,7 @@ static int prepend_path(const struct path *path,
 	return error;
 
 global_root:
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 	 
@@ -2293,7 +2293,7 @@ ascend:
 
 		if (!locked && read_seqretry(&rename_lock, seq))
 			goto rename_retry;
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 		 
 		do {
 			next = child->d_child.next;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
     i2c-dev.c - i2c-bus driver, char device interface
 
@@ -137,9 +140,9 @@ static ssize_t i2cdev_read(struct file *file, char __user *buf, size_t count,
 {
 	char *tmp;
 	int ret;
-#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HI_I2C)
+#if defined(MY_DEF_HERE) && defined(CONFIG_HI_I2C)
 	int temp;
-#endif /* CONFIG_SYNO_LSP_HI3536 && CONFIG_HI_I2C */
+#endif /* MY_DEF_HERE && CONFIG_HI_I2C */
 
 	struct i2c_client *client = file->private_data;
 
@@ -150,9 +153,9 @@ static ssize_t i2cdev_read(struct file *file, char __user *buf, size_t count,
 	if (tmp == NULL)
 		return -ENOMEM;
 
-#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HI_I2C)
+#if defined(MY_DEF_HERE) && defined(CONFIG_HI_I2C)
 	temp = copy_from_user(tmp, buf, count);
-#endif /* CONFIG_SYNO_LSP_HI3536 && CONFIG_HI_I2C */
+#endif /* MY_DEF_HERE && CONFIG_HI_I2C */
 
 	pr_debug("i2c-dev: i2c-%d reading %zu bytes.\n",
 		iminor(file_inode(file)), count);
@@ -437,13 +440,13 @@ static long i2cdev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		 * the PEC flag already set, the i2c-dev driver won't see
 		 * (or use) this setting.
 		 */
-#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HI_I2C)
+#if defined(MY_DEF_HERE) && defined(CONFIG_HI_I2C)
 		if ((arg > 0x3ff) ||
 		    (((client->flags & I2C_M_TEN) == 0) && arg > 0xfe))
-#else /* CONFIG_SYNO_LSP_HI3536 && CONFIG_HI_I2C */
+#else /* MY_DEF_HERE && CONFIG_HI_I2C */
 		if ((arg > 0x3ff) ||
 		    (((client->flags & I2C_M_TEN) == 0) && arg > 0x7f))
-#endif /* CONFIG_SYNO_LSP_HI3536 && CONFIG_HI_I2C */
+#endif /* MY_DEF_HERE && CONFIG_HI_I2C */
 			return -EINVAL;
 		if (cmd == I2C_SLAVE && i2cdev_check_addr(client->adapter, arg))
 			return -EBUSY;
@@ -462,7 +465,7 @@ static long i2cdev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		else
 			client->flags &= ~I2C_CLIENT_PEC;
 		return 0;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	case I2C_16BIT_REG:
 		if (arg)
 			client->flags |= I2C_M_16BIT_REG;
@@ -475,7 +478,7 @@ static long i2cdev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		else
 			client->flags &= ~I2C_M_16BIT_DATA;
 		return 0;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	case I2C_FUNCS:
 		funcs = i2c_get_functionality(client->adapter);
 		return put_user(funcs, (unsigned long __user *)arg);

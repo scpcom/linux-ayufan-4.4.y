@@ -25,7 +25,7 @@
 #include <linux/crypto.h>
 #include <linux/time.h>
 #include <linux/slab.h>
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <linux/uid_stat.h>
 #endif  
 
@@ -34,7 +34,7 @@
 #include <net/tcp.h>
 #include <net/xfrm.h>
 #include <net/ip.h>
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <net/ip6_route.h>
 #include <net/ipv6.h>
 #include <net/transp_v6.h>
@@ -42,7 +42,7 @@
 #include <net/netdma.h>
 #include <net/sock.h>
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 #include <net/tnkdrv.h>
 #endif
@@ -103,7 +103,7 @@ void tcp_enter_memory_pressure(struct sock *sk)
 	}
 }
 EXPORT_SYMBOL(tcp_enter_memory_pressure);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 struct tnkfuncs *tnk;
 
@@ -463,7 +463,7 @@ ssize_t tcp_splice_read(struct socket *sock, loff_t *ppos,
 				ret = -EAGAIN;
 				break;
 			}
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 			if (tnk && sk->sk_tnkinfo.entry != NULL)
 				tnk->tcp_wait_data(sk, &timeo);
@@ -602,7 +602,7 @@ static ssize_t do_tcp_sendpages(struct sock *sk, struct page *page, int offset,
 	clear_bit(SOCK_ASYNC_NOSPACE, &sk->sk_socket->flags);
 
 	mss_now = tcp_send_mss(sk, &size_goal, flags);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	 
 	if (tnk) {
@@ -793,7 +793,7 @@ int tcp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 
 	lock_sock(sk);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	sk->sk_tnkinfo.reetrant++;
 #endif
@@ -840,7 +840,7 @@ int tcp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	if (sk->sk_err || (sk->sk_shutdown & SEND_SHUTDOWN))
 		goto out_err;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	 
 	if (tnk) {
@@ -990,14 +990,14 @@ wait_for_memory:
 out:
 	if (copied)
 		tcp_push(sk, flags, mss_now, tp->nonagle);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	sk->sk_tnkinfo.reetrant--;
 #endif
 #endif  
 out_nopush:
 	release_sock(sk);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (copied + copied_syn)
 		uid_stat_tcp_snd(current_uid(), copied + copied_syn);
 #endif  
@@ -1016,7 +1016,7 @@ do_error:
 		goto out;
 out_err:
 	err = sk_stream_error(sk, flags, err);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	sk->sk_tnkinfo.reetrant--;
 #endif
@@ -1205,7 +1205,7 @@ int tcp_read_sock(struct sock *sk, read_descriptor_t *desc,
 
 	if (sk->sk_state == TCP_LISTEN)
 		return -ENOTCONN;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	 
 	if (tnk) {
@@ -1273,7 +1273,7 @@ int tcp_read_sock(struct sock *sk, read_descriptor_t *desc,
 	if (copied > 0) {
 		tcp_recv_skb(sk, seq, &offset);
 		tcp_cleanup_rbuf(sk, copied);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		uid_stat_tcp_rcv(current_uid(), copied);
 #endif  
 	}
@@ -1300,7 +1300,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	bool copied_early = false;
 	struct sk_buff *skb;
 	u32 urg_hole = 0;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	int tnk_fin_flag = 0;
 #endif
@@ -1349,7 +1349,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 
 	target = sock_rcvlowat(sk, flags & MSG_WAITALL, len);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 tnk_tcp_recv:
 	 
@@ -1460,7 +1460,7 @@ tnk_tcp_recv:
 		}
 
 		skb_queue_walk(&sk->sk_receive_queue, skb) {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 			if (tcp_hdr(skb)->fin && tnk) {
 				tnk_fin_flag = tnk->tcp_check_fin(sk);
@@ -1536,7 +1536,7 @@ tnk_tcp_recv:
 		}
 
 		tcp_cleanup_rbuf(sk, copied);
-#if defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 		if (tnk) {
 			if (tnk->tcp_check_connect_state(sk))
@@ -1573,7 +1573,7 @@ tnk_tcp_recv:
 				dma_async_issue_pending(tp->ucopy.dma_chan);
 		}
 #endif
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 		if (tnk) {
 			 
@@ -1774,7 +1774,7 @@ skip_copy:
 
 	release_sock(sk);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (copied > 0)
 		uid_stat_tcp_rcv(current_uid(), copied);
 #endif  
@@ -1786,7 +1786,7 @@ out:
 
 recv_urg:
 	err = tcp_recv_urg(sk, msg, len, flags);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (err > 0)
 		uid_stat_tcp_rcv(current_uid(), err);
 #endif  
@@ -1866,7 +1866,7 @@ void tcp_shutdown(struct sock *sk, int how)
 	    (TCPF_ESTABLISHED | TCPF_SYN_SENT |
 	     TCPF_SYN_RECV | TCPF_CLOSE_WAIT)) {
 		 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		if (tcp_close_state(sk)) {
 #ifdef CONFIG_TNK
 			int val = 0;
@@ -1936,7 +1936,7 @@ void tcp_close(struct sock *sk, long timeout)
 		__kfree_skb(skb);
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	sk->sk_tnkinfo.howto_destroy = TNK_DESTROY_CLOSE;
 	if (tnk) {
@@ -1948,7 +1948,7 @@ void tcp_close(struct sock *sk, long timeout)
 
 	sk_mem_reclaim(sk);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (sk->sk_state == TCP_CLOSE) {
 #ifdef CONFIG_TNK
 		 
@@ -1977,7 +1977,7 @@ void tcp_close(struct sock *sk, long timeout)
 		NET_INC_STATS_USER(sock_net(sk), LINUX_MIB_TCPABORTONDATA);
 	} else if (tcp_close_state(sk)) {
 		 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 		int val = 0;
 		sk->sk_tnkinfo.howto_destroy = TNK_DESTROY_CLOSE;
@@ -2032,7 +2032,7 @@ adjudge_to_death:
 				inet_csk_reset_keepalive_timer(sk,
 						tmo - TCP_TIMEWAIT_LEN);
 			} else {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 				if (tnk) {
 					sk->sk_tnkinfo.howto_destroy =
@@ -2061,7 +2061,7 @@ adjudge_to_death:
 		 
 		if (req != NULL)
 			reqsk_fastopen_remove(sk, req, false);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 		 
 		if (tnk) {
@@ -2074,7 +2074,7 @@ adjudge_to_death:
 	}
 	 
 out:
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 #if !SWITCH_SEND_FIN
 	if (tnk) {
@@ -2282,7 +2282,7 @@ static int do_tcp_setsockopt(struct sock *sk, int level,
 		} else {
 			tp->nonagle &= ~TCP_NAGLE_OFF;
 		}
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 		if (tnk)
 			tnk->tcp_set_nagle_cork(sk);
@@ -2294,7 +2294,7 @@ static int do_tcp_setsockopt(struct sock *sk, int level,
 		if (val < 0 || val > 1)
 			err = -EINVAL;
 		else
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 		{
 #endif
@@ -2376,7 +2376,7 @@ static int do_tcp_setsockopt(struct sock *sk, int level,
 				tp->nonagle |= TCP_NAGLE_PUSH;
 			tcp_push_pending_frames(sk);
 		}
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 		if (tnk)
 			tnk->tcp_set_nagle_cork(sk);
@@ -3178,7 +3178,7 @@ void tcp_done(struct sock *sk)
 
 	sk->sk_shutdown = SHUTDOWN_MASK;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	if (tnk) {
 		sk->sk_tnkinfo.howto_destroy = TNK_DESTROY_CLOSE;
@@ -3303,7 +3303,7 @@ void __init tcp_init(void)
 	tcp_tasklet_init();
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static int tcp_is_local(struct net *net, __be32 addr) {
 	struct rtable *rt;
 	struct flowi4 fl4 = { .daddr = addr };
@@ -3327,7 +3327,7 @@ int tcp_nuke_addr(struct net *net, struct sockaddr *addr)
 
 	struct in_addr *in;
 #if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	struct in6_addr *in6 = NULL;
 #else  
 	struct in6_addr *in6;

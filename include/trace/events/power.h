@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #undef TRACE_SYSTEM
 #define TRACE_SYSTEM power
 
@@ -146,7 +149,7 @@ DEFINE_EVENT(clock, clock_set_rate,
 	TP_ARGS(name, state, cpu_id)
 );
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 TRACE_EVENT(clock_set_parent,
 
 	TP_PROTO(const char *name, const char *parent_name),
@@ -165,7 +168,7 @@ TRACE_EVENT(clock_set_parent,
 
 	TP_printk("%s parent=%s", __get_str(name), __get_str(parent_name))
 );
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /*
  * The power domain events are used for power domains transitions

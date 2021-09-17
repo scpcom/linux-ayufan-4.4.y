@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* mm/ashmem.c
  *
  * Anonymous Shared Memory Subsystem, ashmem
@@ -224,22 +227,22 @@ static ssize_t ashmem_read(struct file *file, char __user *buf,
 
 	/* If size is not set, or set to 0, always return EOF. */
 	if (asma->size == 0)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		goto out_unlock;
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		goto out;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	if (!asma->file) {
 		ret = -EBADF;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		goto out_unlock;
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		goto out;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	mutex_unlock(&ashmem_mutex);
 
 	/*
@@ -256,7 +259,7 @@ static ssize_t ashmem_read(struct file *file, char __user *buf,
 	return ret;
 
 out_unlock:
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	ret = asma->file->f_op->read(asma->file, buf, len, pos);
 	if (ret < 0)
 		goto out;
@@ -265,7 +268,7 @@ out_unlock:
 	asma->file->f_pos = *pos;
 
 out:
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	mutex_unlock(&ashmem_mutex);
 	return ret;
 }
@@ -344,7 +347,7 @@ static int ashmem_mmap(struct file *file, struct vm_area_struct *vma)
 	}
 	get_file(asma->file);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (vma->vm_flags & VM_SHARED)
 		shmem_set_file(vma, asma->file);
 	else {
@@ -352,7 +355,7 @@ static int ashmem_mmap(struct file *file, struct vm_area_struct *vma)
 			fput(vma->vm_file);
 		vma->vm_file = asma->file;
 	}
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	/*
 	 * XXX - Reworked to use shmem_zero_setup() instead of
 	 * shmem_set_file while we're in staging. -jstultz
@@ -368,7 +371,7 @@ static int ashmem_mmap(struct file *file, struct vm_area_struct *vma)
 	if (vma->vm_file)
 		fput(vma->vm_file);
 	vma->vm_file = asma->file;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 out:
 	mutex_unlock(&ashmem_mutex);
@@ -400,12 +403,12 @@ static int ashmem_shrink(struct shrinker *s, struct shrink_control *sc)
 	if (!sc->nr_to_scan)
 		return lru_count;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (!mutex_trylock(&ashmem_mutex))
 		return -1;
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	mutex_lock(&ashmem_mutex);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	list_for_each_entry_safe(range, next, &ashmem_lru_list, lru) {
 		loff_t start = range->pgstart * PAGE_SIZE;
@@ -456,9 +459,9 @@ out:
 
 static int set_name(struct ashmem_area *asma, void __user *name)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	int len;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	int ret = 0;
 	char local_name[ASHMEM_NAME_LEN];
 
@@ -471,7 +474,7 @@ static int set_name(struct ashmem_area *asma, void __user *name)
 	 * variable that does not need protection and later copy the local
 	 * variable to the structure member with lock held.
 	 */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	len = strncpy_from_user(local_name, name, ASHMEM_NAME_LEN);
 	if (len < 0)
 		return len;
@@ -485,7 +488,7 @@ static int set_name(struct ashmem_area *asma, void __user *name)
 		strcpy(asma->name + ASHMEM_NAME_PREFIX_LEN, local_name);
 
 	mutex_unlock(&ashmem_mutex);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	if (copy_from_user(local_name, name, ASHMEM_NAME_LEN))
 		return -EFAULT;
 
@@ -500,7 +503,7 @@ static int set_name(struct ashmem_area *asma, void __user *name)
 	asma->name[ASHMEM_FULL_NAME_LEN-1] = '\0';
 out:
 	mutex_unlock(&ashmem_mutex);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	return ret;
 }

@@ -16,7 +16,7 @@
 #include <linux/swap.h>
 #include <linux/splice.h>
 #include <linux/aio.h>
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <linux/freezer.h>
 #endif  
 
@@ -418,7 +418,7 @@ __acquires(fc->lock)
 	}
 
 	spin_unlock(&fc->lock);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 
 	while (req->state != FUSE_REQ_FINISHED)
 		wait_event_freezable(req->waitq,

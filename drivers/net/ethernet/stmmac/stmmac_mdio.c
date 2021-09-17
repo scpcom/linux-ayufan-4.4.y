@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
   STMMAC Ethernet Driver -- MDIO bus implementation
   Provides Bus interface for MII registers
@@ -212,7 +215,7 @@ static int stmmac_mdio_reset(struct mii_bus *bus)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR)
+#if defined(MY_DEF_HERE)
 static void syno_disable_rtl8211e_clk125(struct phy_device *phydev)
 {
 	unsigned int clock;
@@ -222,7 +225,7 @@ static void syno_disable_rtl8211e_clk125(struct phy_device *phydev)
 	phy_write(phydev, 0x1f, 0x00);
 	syno_update_rtl8211e_led_behavior(phydev);
 }
-#endif /* CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR */
+#endif /* MY_DEF_HERE */
 
 /**
  * stmmac_mdio_register
@@ -291,9 +294,9 @@ int stmmac_mdio_register(struct net_device *ndev)
 				phydev->irq = priv->phy_irq;
 				irqlist[addr] = priv->phy_irq;
 			}
-#if defined(CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR)
+#if defined(MY_DEF_HERE)
 			syno_disable_rtl8211e_clk125(phydev);
-#endif /* CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR */
+#endif /* MY_DEF_HERE */
 
 			pr_info("%s: PHY ID %08x at %d IRQ %d (%s)%s\n",
 				ndev->name, phydev->phy_id, addr,

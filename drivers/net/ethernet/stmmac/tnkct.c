@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*****************************************************************************
  * This is the driver for the CreVinn TOE-NK-2G TCP Offload Engine.
  * TOE-NK-2G incorporates a Synopsys Ethernet MAC core.
@@ -1845,12 +1848,12 @@ int tnk_ct_init(unsigned int max_connections)
 		spin_lock_init(&e->tx_q_lock);
 		spin_lock_init(&e->adv_wnd_lock);
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 #if SWITCH_RECV_LRO
 		setup_timer(&e->remove_timer, tnk_ct_remove_rx_timer,
 			(unsigned long)e);
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 		skb_queue_head_init(&e->receive_queue);
 		skb_queue_head_init(&e->transmit_queue);
 		skb_queue_head_init(&e->out_of_order_queue);
@@ -1916,7 +1919,7 @@ void tnk_ct_close_active_connections(int graceful)
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 #if SWITCH_RECV_LRO
 static void tnk_ct_clear_remove_entry_list(void)
 {
@@ -1938,7 +1941,7 @@ static void tnk_ct_clear_remove_entry_list(void)
 	spin_unlock(&tnk_ct_lock);
 }
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 void tnk_ct_shutdown(void)
 {
@@ -1966,11 +1969,11 @@ void tnk_ct_shutdown(void)
 #endif
 #endif
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 #if SWITCH_RECV_LRO
 	tnk_ct_clear_remove_entry_list();
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 	kfree(tnk_entry_list);
 	tnk_entry_list = NULL;
 }
@@ -2378,14 +2381,14 @@ struct tnkentry *tnk_ct_create(struct sock *sk, struct tnkentry *e)
 	setup_timer(&e->check_keepalive_timer, tnk_check_alive_timer,
 			(unsigned long)e);
 #endif
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 #if SWITCH_RECV_LRO
 	setup_timer(&e->remove_timer, tnk_ct_remove_rx_timer,
 			(unsigned long)e);
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 	/*  Now that the entry struct is initialised, add it to the list */
 	spin_lock(&tnk_ct_lock);
@@ -2546,18 +2549,18 @@ int tnk_ct_stop(struct tnkentry *e, int tx_done_timeout)
 		skb_queue_len(&e->sk->sk_write_queue));
 #endif
 #if !SWITCH_ZERO_PROBE
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	del_timer_sync(&e->zero_window_probe_timer);
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 	del_timer(&e->zero_window_probe_timer);
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 #endif
 #if SWITCH_KEEPALIVE
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	del_timer_sync(&e->check_keepalive_timer);
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 	del_timer(&e->check_keepalive_timer);
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 #endif
 	return err;
 }
@@ -2573,11 +2576,11 @@ void tnk_ct_remove(struct tnkentry *e)
 	atomic_dec(&tnk_num_active_connections);
 #if SWITCH_RECV_LRO
 	if (atomic_read(&tnk_num_active_connections) == 0)
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 		del_timer_sync(&tnk_zero_wnd_check_timer);
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 		del_timer(&tnk_zero_wnd_check_timer);
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 #endif
 	spin_unlock(&tnk_ct_lock);
 

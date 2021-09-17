@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * YAFFS: Yet Another Flash File System. A NAND-flash specific file system.
  *
@@ -3055,13 +3058,13 @@ static struct {
 };
 
 #define MAX_MASK_NAME_LENGTH 40
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 static int yaffs_proc_write_trace_options(struct file *file, const char __user *buf,
 					  size_t count, loff_t *data)
-#else /* CONFIG_SYNO_HI3536 */
+#else /* MY_DEF_HERE */
 static int yaffs_proc_write_trace_options(struct file *file, const char *buf,
 					  unsigned long count, void *data)
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 {
 	unsigned rg = 0, mask_bitfield;
 	char *end;
@@ -3156,13 +3159,13 @@ static int yaffs_proc_write_trace_options(struct file *file, const char *buf,
 	return count;
 }
 
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 static int yaffs_proc_write(struct file *file, const char __user *buf,
 			    size_t count, loff_t *data)
-#else /* CONFIG_SYNO_HI3536 */
+#else /* MY_DEF_HERE */
 static int yaffs_proc_write(struct file *file, const char *buf,
 			    unsigned long count, void *data)
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 {
 	return yaffs_proc_write_trace_options(file, buf, count, data);
 }

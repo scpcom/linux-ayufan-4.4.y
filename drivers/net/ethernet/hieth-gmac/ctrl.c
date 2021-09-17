@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/skbuff.h>
 #include <linux/dma-mapping.h>
 #include "util.h"
@@ -246,18 +249,18 @@ int higmac_xmit_release_skb(struct higmac_netdev_local *ld)
 	struct sk_buff *skb = NULL;
 	int tx_rq_wr_offset, tx_rq_rd_offset, pos;
 	struct higmac_desc *tx_rq_desc;
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	struct higmac_tso_desc *tx_rq_tso_desc = NULL;
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 #ifndef HIGMAC_TSO_SUPPORTED
 	dma_addr_t dma_addr;
 #endif
 	int ret = 0;
 	int release = false;
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	spin_lock(&ld->txlock);
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 	tx_rq_wr_offset = higmac_readl_bits(ld, TX_RQ_WR_ADDR,
 			BITS_TX_RQ_WR_ADDR);/* logic write */
@@ -269,11 +272,11 @@ int higmac_xmit_release_skb(struct higmac_netdev_local *ld)
 reload:
 		tx_rq_desc = ld->tx_rq.desc + pos;
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 		skb = ld->tx_skb[pos];
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 		skb = tx_rq_desc->skb_buff_addr;
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 		if (!skb) {
 			pr_err("tx_rq: desc consistent warning:");
 			pr_err("tx_rq_rd_offset = 0x%x, ", tx_rq_rd_offset);
@@ -299,12 +302,12 @@ reload:
 		}
 
 #ifdef HIGMAC_TSO_SUPPORTED
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 		tx_rq_tso_desc = (struct higmac_tso_desc *)tx_rq_desc;
 		ret = higmac_xmit_release_gso(ld, tx_rq_tso_desc, pos);
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 		ret = higmac_xmit_release_gso(ld, tx_rq_desc, pos);
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 		if (ret < 0)
 			break;
 #else
@@ -315,11 +318,11 @@ reload:
 		ld->tx_bq.skb[pos] = NULL;
 		dev_kfree_skb_any(skb);
 next:
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 		ld->tx_skb[pos] = NULL;
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 		tx_rq_desc->skb_buff_addr = 0;
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 		tx_rq_rd_offset += DESC_SIZE;
 		if (tx_rq_rd_offset ==
@@ -337,9 +340,9 @@ next:
 			pr_info("netif_wake_queue(gmac%d)\n", ld->index);
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	spin_unlock(&ld->txlock);
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 	return ret;
 }
@@ -352,11 +355,11 @@ struct send_pkt_info	pkt_rec[MAX_RECORD];
 
 #ifdef HIGMAC_TSO_SUPPORTED
 int higmac_check_tx_err(struct higmac_netdev_local *ld,
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 		struct higmac_tso_desc *tx_bq_desc, int desc_pos)
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 		struct higmac_desc *tx_bq_desc, int desc_pos)
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 {
 	unsigned int tx_err = tx_bq_desc->tx_err;
 	if (unlikely(tx_err & ERR_ALL)) {
@@ -384,17 +387,17 @@ int higmac_check_tx_err(struct higmac_netdev_local *ld,
 }
 
 int higmac_xmit_release_gso(struct higmac_netdev_local *ld,
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 		struct higmac_tso_desc *tx_bq_desc, int desc_pos)
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 		struct higmac_desc *tx_bq_desc, int desc_pos)
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 {
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	struct sk_buff *skb = ld->tx_skb[desc_pos];
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 	struct sk_buff *skb = tx_bq_desc->skb_buff_addr;
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 	int pkt_type;
 	unsigned int tso_ver = higmac_board_info[ld->index].tso_ver;
 	int nfrags = skb_shinfo(skb)->nr_frags;
@@ -403,14 +406,14 @@ int higmac_xmit_release_gso(struct higmac_netdev_local *ld,
 		if (unlikely(
 			higmac_check_tx_err(ld, tx_bq_desc, desc_pos) < 0)) {
 			/* dev_close */
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 			higmac_irq_disable(ld, DEF_INT_MASK);
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 			higmac_irq_disable(ld, RX_BQ_IN_INT
 					| RX_BQ_IN_TIMEOUT_INT
 					| TX_RQ_IN_INT
 					| TX_RQ_IN_TIMEOUT_INT);
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 			higmac_hw_desc_disable(ld);
 
 			netif_carrier_off(ld->netdev);
@@ -462,11 +465,11 @@ int higmac_xmit_release_gso(struct higmac_netdev_local *ld,
 }
 
 int higmac_get_pkt_info(struct higmac_netdev_local *ld,
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 		struct sk_buff *skb, struct higmac_tso_desc *tx_bq_desc)
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 		struct sk_buff *skb, struct higmac_desc *tx_bq_desc)
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 {
 	int nfrags = skb_shinfo(skb)->nr_frags;
 
@@ -627,11 +630,11 @@ sw_tso_end:
 }
 
 int higmac_xmit_gso(struct higmac_netdev_local *ld, struct sk_buff *skb,
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 		struct higmac_tso_desc *tx_bq_desc, int desc_pos)
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 		struct higmac_desc *tx_bq_desc, int desc_pos)
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 {
 	int pkt_type = PKT_NORMAL;
 	int nfrags = skb_shinfo(skb)->nr_frags;
@@ -756,22 +759,22 @@ int higmac_xmit_real_send(struct higmac_netdev_local *ld, struct sk_buff *skb)
 	}
 
 	spin_lock_irqsave(&ld->txlock, txflags);
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	if (unlikely(ld->tx_skb[pos])) {
 		spin_unlock_irqrestore(&ld->txlock, txflags);
 		return -EBUSY;
 	}
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 	if (unlikely(ld->tx_bq.skb[pos])) {
 		spin_unlock_irqrestore(&ld->txlock, txflags);
 		return -EBUSY;
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	}
 
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 	} else
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 		ld->tx_bq.skb[pos] = skb;
 #ifndef HIGMAC_TSO_SUPPORTED
 	spin_unlock_irqrestore(&ld->txlock, txflags);
@@ -779,22 +782,22 @@ int higmac_xmit_real_send(struct higmac_netdev_local *ld, struct sk_buff *skb)
 
 	tx_bq_desc = ld->tx_bq.desc + pos;
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	ld->tx_skb[pos] = skb;
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 	tx_bq_desc->skb_buff_addr = skb;
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 #ifdef HIGMAC_TSO_SUPPORTED
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	ret = higmac_xmit_gso(ld, skb,
 				(struct higmac_tso_desc *)tx_bq_desc, pos);
 	if (unlikely(ret < 0)) {
 		ld->tx_skb[pos] = NULL;
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 	ret = higmac_xmit_gso(ld, skb, tx_bq_desc, pos);
 	if (unlikely(ret < 0)) {
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 		ld->tx_bq.skb[pos] = NULL;
 		spin_unlock_irqrestore(&ld->txlock, txflags);
 		if (ret == -E_MAC_SW_GSO || ret == -E_MAC_UFO_BROADCAST)
@@ -863,11 +866,11 @@ int higmac_feed_hw(struct higmac_netdev_local *ld)
 	for (i = 0; i < wr_rd_dist - 1; i++) {
 		int pos = rx_fq_wr_offset >> DESC_BYTE_SHIFT;
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 		if (ld->rx_fq.skb[pos] || ld->rx_skb[pos])
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 		if (ld->rx_fq.skb[pos])
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 			goto out;
 		else {
 			skb = dev_alloc_skb(SKB_SIZE);
@@ -885,14 +888,14 @@ int higmac_feed_hw(struct higmac_netdev_local *ld)
 		rx_fq_desc->data_buff_addr =
 			dma_map_single(ld->dev, skb->data,
 					HIETH_MAX_FRAME_SIZE, DMA_FROM_DEVICE);
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 		rx_fq_desc->buffer_len = HIETH_MAX_FRAME_SIZE - 1;
 		rx_fq_desc->data_len = 0;
 		rx_fq_desc->fl = 0;
 		rx_fq_desc->descvid = DESC_VLD_FREE;
 
 		ld->rx_skb[pos] = skb;
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 #ifdef HIGMAC_TSO_SUPPORTED
 		rx_fq_desc->desc1.rx.buffer_len = HIETH_MAX_FRAME_SIZE - 1;
 		rx_fq_desc->desc1.rx.data_len = 0;
@@ -905,7 +908,7 @@ int higmac_feed_hw(struct higmac_netdev_local *ld)
 		rx_fq_desc->descvid = DESC_VLD_FREE;
 #endif
 		rx_fq_desc->skb_buff_addr = skb;
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 		rx_fq_wr_offset += DESC_SIZE;
 		if (rx_fq_wr_offset >=

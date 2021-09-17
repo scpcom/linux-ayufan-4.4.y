@@ -451,7 +451,7 @@ do {									\
 	: "cc")
 
 #ifdef CONFIG_MMU
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 extern unsigned long hi_copy_from_user(void *to,
 				const void __user *from, unsigned long n);
 extern unsigned long hi_copy_to_user(void *to,
@@ -470,7 +470,7 @@ extern unsigned long __must_check __clear_user_std(void __user *addr, unsigned l
 
 static inline unsigned long __must_check copy_from_user(void *to, const void __user *from, unsigned long n)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (access_ok(VERIFY_READ, from, n)) {
 #ifdef CONFIG_HI_IOMMU
 		n = hi_copy_from_user(to, from, n);
@@ -491,7 +491,7 @@ static inline unsigned long __must_check copy_from_user(void *to, const void __u
 static inline unsigned long __must_check copy_to_user(void __user *to, const void *from, unsigned long n)
 {
 	if (access_ok(VERIFY_WRITE, to, n))
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_HI_IOMMU
 		n = hi_copy_to_user(to, from, n);
 #else

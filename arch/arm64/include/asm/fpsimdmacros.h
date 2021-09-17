@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * FP/SIMD state saving and restoring macros
  *
@@ -63,7 +66,7 @@
 	msr	fpcr, x\tmpnr
 .endm
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 .altmacro
 .macro fpsimd_save_partial state, numnr, tmpnr1, tmpnr2
 	mrs	x\tmpnr1, fpsr
@@ -98,4 +101,4 @@
 	.endr
 0:
 .endm
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */

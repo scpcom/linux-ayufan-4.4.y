@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * INET		An implementation of the TCP/IP protocol suite for the LINUX
  *		operating system.  INET is implemented using the  BSD Socket
@@ -56,11 +59,11 @@ static struct inet_protosw pingv6_protosw = {
 };
 
 /* Compatibility glue so we can support IPv6 when it's compiled as a module */
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 int dummy_ipv6_recv_error(struct sock *sk, struct msghdr *msg, int len, int *addr_len)
-#else /* CONFIG_SYNO_HI3536 */
+#else /* MY_DEF_HERE */
 int dummy_ipv6_recv_error(struct sock *sk, struct msghdr *msg, int len)
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 {
 	return -EAFNOSUPPORT;
 }
@@ -76,11 +79,11 @@ int dummy_icmpv6_err_convert(u8 type, u8 code, int *err)
 void dummy_ipv6_icmp_error(struct sock *sk, struct sk_buff *skb, int err,
 			    __be16 port, u32 info, u8 *payload) {}
 int dummy_ipv6_chk_addr(struct net *net, const struct in6_addr *addr,
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 			const struct net_device *dev, int strict)
-#else /* CONFIG_SYNO_HI3536 */
+#else /* MY_DEF_HERE */
 			struct net_device *dev, int strict)
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 {
 	return 0;
 }

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xor.c : Multiple Devices driver for Linux
  *
@@ -27,25 +30,25 @@
 /* The xor routines to use.  */
 static struct xor_block_template *active_template;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_XOR_ENGINE
 extern int xor_memxor(unsigned int src_count,
 		unsigned int bytes, void *dest, void **srcs);
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 void
 xor_blocks(unsigned int src_count, unsigned int bytes, void *dest, void **srcs)
 {
 	unsigned long *p1, *p2, *p3, *p4;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_XOR_ENGINE
 		if (!xor_memxor(src_count, bytes, dest, srcs))
 			return;
 		else
 			pr_err("XOR offload failed, use Soft XOR.\n");
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	p1 = (unsigned long *) srcs[0];
 	if (src_count == 1) {

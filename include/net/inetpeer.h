@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *		INETPEER - A storage for permanent information about peers
  *
@@ -48,9 +51,9 @@ struct inet_peer {
 	union {
 		struct {
 			atomic_t			rid;		/* Frag reception counter */
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 			atomic_t			ip_id_count;
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 		};
 		struct rcu_head         rcu;
 		struct inet_peer	*gc_next;

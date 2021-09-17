@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __HIGMAC_H__
 #define __HIGMAC_H__
 
@@ -41,10 +44,10 @@
 #define TX_OUTCFF_WR_DESC_ENA		(1<<1)
 #define TX_CFF_RD_DESC_ENA		(1<<0)
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 #define DEF_INT_MASK			(RX_BQ_IN_INT | RX_BQ_IN_TIMEOUT_INT | \
 					TX_RQ_IN_INT | TX_RQ_IN_TIMEOUT_INT)
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 #define HIGMAC_SYNC_BARRIER() do { isb(); dsb(); dmb(); } while (0)
 
@@ -134,7 +137,7 @@ enum {/* DEFAULT: duplex_full */
 #define DESC_WORD_CNT		(1 << DESC_WORD_SHIFT)
 #define DESC_SIZE		(1 << DESC_BYTE_SHIFT)
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 #if defined(CONFIG_HIGMAC_DESC_4_WORD)
 struct higmac_desc {
 	unsigned int data_buff_addr;
@@ -236,7 +239,7 @@ struct higmac_tso_desc {
 	unsigned int reserve7;
 };
 #endif
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 struct higmac_desc {
 	unsigned int data_buff_addr;
 
@@ -301,7 +304,7 @@ struct higmac_desc {
 	unsigned int reserve7;
 #endif
 };
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 struct higmac_adapter {
 	void	__iomem *fwdctl_iobase;/* forwarding iobase */
@@ -351,10 +354,10 @@ struct higmac_netdev_local {
 #define tx_bq		pool[2]
 #define tx_rq		pool[3]
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	struct sk_buff **tx_skb;
 	struct sk_buff **rx_skb;
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 	struct device		*dev;
 	struct net_device	*netdev;
@@ -381,11 +384,11 @@ struct higmac_netdev_local {
 	spinlock_t		txlock;
 	spinlock_t		pmtlock;
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	struct napi_struct napi;
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 	struct tasklet_struct	bf_recv;
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 	int			dev_state;	/* INIT/OPEN/CLOSE */
 #define INIT			(0) /* power off gmac */
 #define OPEN			(1) /* power on gmac */
@@ -395,15 +398,15 @@ struct higmac_netdev_local {
 #ifdef HIGMAC_TSO_SUPPORTED
 enum tso_version {
 	VER_NO_TSO = 0x0,
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	VER_BYTE_SPLICE = 0x1,
 	VER_SG_COE = 0x2,
 	VER_TSO = 0x3,
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 	VER_BYTE_SPLICE = 0x100,
 	VER_SG_COE = 0x200,
 	VER_TSO = 0x300,
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 };
 #endif
 
@@ -422,11 +425,11 @@ struct higmac_board_info {
 #ifdef HIGMAC_TSO_DEBUG
 #define MAX_RECORD	(100)
 struct send_pkt_info {
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	struct higmac_tso_desc	desc;
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 	struct higmac_desc	desc;
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 	int			status;
 };
 

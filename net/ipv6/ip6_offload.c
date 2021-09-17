@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	IPV6 GSO/GRO offload support
  *	Linux INET6 implementation
@@ -134,12 +137,12 @@ static struct sk_buff *ipv6_gso_segment(struct sk_buff *skb,
 				fptr->frag_off |= htons(IP6_MF);
 			offset += (ntohs(ipv6h->payload_len) -
 				   sizeof(struct frag_hdr));
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			/* when ipv6 packet has extend header,
 			 * offset should substract the exthdr len.
 			 */
 			offset -= unfrag_ip6hlen - sizeof(*ipv6h);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		}
 	}
 

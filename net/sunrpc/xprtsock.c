@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/net/sunrpc/xprtsock.c
  *
@@ -725,12 +728,12 @@ static int xs_tcp_send_request(struct rpc_task *task)
 		dprintk("RPC:       xs_tcp_send_request(%u) = %d\n",
 				xdr->len - req->rq_bytes_sent, status);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 		if (unlikely(status == -EAGAIN))
 			goto check_nospace;
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		if (unlikely(status < 0))
 			break;
 
@@ -745,7 +748,7 @@ static int xs_tcp_send_request(struct rpc_task *task)
 
 		if (status != 0)
 			continue;
-#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_TNK)
+#if defined(MY_DEF_HERE) && defined(CONFIG_TNK)
 check_nospace:
 		/*  MGB 20-AUG-11
 		 *
@@ -761,9 +764,9 @@ check_nospace:
 			/* looping\n", __func__);*/
 			continue;
 		}
-#else /* CONFIG_SYNO_LSP_HI3536 && CONFIG_TNK */
+#else /* MY_DEF_HERE && CONFIG_TNK */
 		status = -EAGAIN;
-#endif /* CONFIG_SYNO_LSP_HI3536 && CONFIG_TNK */
+#endif /* MY_DEF_HERE && CONFIG_TNK */
 		break;
 	}
 
@@ -773,15 +776,15 @@ check_nospace:
 		/* Should we call xs_close() here? */
 		break;
 	case -EAGAIN:
-#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_TNK)
+#if defined(MY_DEF_HERE) && defined(CONFIG_TNK)
 		/*  MGB 20-AUG-11
 		 *
 		 *  dealt with above
 		 */
 		/* status = xs_nospace(task); */
-#else /* CONFIG_SYNO_LSP_HI3536 && CONFIG_TNK */
+#else /* MY_DEF_HERE && CONFIG_TNK */
 		status = xs_nospace(task);
-#endif /* CONFIG_SYNO_LSP_HI3536 && CONFIG_TNK */
+#endif /* MY_DEF_HERE && CONFIG_TNK */
 		break;
 	default:
 		dprintk("RPC:       sendmsg returned unrecognized error %d\n",

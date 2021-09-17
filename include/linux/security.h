@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Linux Security plug
  *
@@ -1402,12 +1405,12 @@ static inline void security_free_mnt_opts(struct security_mnt_opts *opts)
 struct security_operations {
 	char name[SECURITY_NAME_MAX + 1];
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	int (*binder_set_context_mgr) (struct task_struct *mgr);
 	int (*binder_transaction) (struct task_struct *from, struct task_struct *to);
 	int (*binder_transfer_binder) (struct task_struct *from, struct task_struct *to);
 	int (*binder_transfer_file) (struct task_struct *from, struct task_struct *to, struct file *file);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	int (*ptrace_access_check) (struct task_struct *child, unsigned int mode);
 	int (*ptrace_traceme) (struct task_struct *parent);
@@ -1696,12 +1699,12 @@ extern int register_security(struct security_operations *ops);
 extern void __init security_fixup_ops(struct security_operations *ops);
 
 /* Security operations */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 int security_binder_set_context_mgr(struct task_struct *mgr);
 int security_binder_transaction(struct task_struct *from, struct task_struct *to);
 int security_binder_transfer_binder(struct task_struct *from, struct task_struct *to);
 int security_binder_transfer_file(struct task_struct *from, struct task_struct *to, struct file *file);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 int security_ptrace_access_check(struct task_struct *child, unsigned int mode);
 int security_ptrace_traceme(struct task_struct *parent);
 int security_capget(struct task_struct *target,
@@ -1881,7 +1884,7 @@ static inline int security_init(void)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static inline int security_binder_set_context_mgr(struct task_struct *mgr)
 {
 	return 0;
@@ -1901,7 +1904,7 @@ static inline int security_binder_transfer_file(struct task_struct *from, struct
 {
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 static inline int security_ptrace_access_check(struct task_struct *child,
 					     unsigned int mode)

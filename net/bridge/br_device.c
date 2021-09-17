@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	Device handling code
  *	Linux ethernet bridge
@@ -41,14 +44,14 @@ netdev_tx_t br_dev_xmit(struct sk_buff *skb, struct net_device *dev)
 	}
 #endif
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	u64_stats_update_begin(&brstats->syncp);
 	brstats->tx_packets++;
 	brstats->tx_bytes += skb->len;
 	u64_stats_update_end(&brstats->syncp);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	if (!br_allowed_ingress(br, br_get_vlan_info(br), skb, &vid))
 		goto out;
@@ -58,13 +61,13 @@ netdev_tx_t br_dev_xmit(struct sk_buff *skb, struct net_device *dev)
 	skb_reset_mac_header(skb);
 	skb_pull(skb, ETH_HLEN);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	u64_stats_update_begin(&brstats->syncp);
 	brstats->tx_packets++;
 	/* Exclude ETH_HLEN from byte stats for consistency with Rx chain */
 	brstats->tx_bytes += skb->len;
 	u64_stats_update_end(&brstats->syncp);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	if (is_broadcast_ether_addr(dest))
 		br_flood_deliver(br, skb);

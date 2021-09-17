@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _NET_IP6_ROUTE_H
 #define _NET_IP6_ROUTE_H
 
@@ -136,11 +139,11 @@ extern int			rt6_route_rcv(struct net_device *dev,
 					      const struct in6_addr *gwaddr);
 
 extern void ip6_update_pmtu(struct sk_buff *skb, struct net *net, __be32 mtu,
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			    int oif, u32 mark, kuid_t uid);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 			    int oif, u32 mark);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 extern void ip6_sk_update_pmtu(struct sk_buff *skb, struct sock *sk,
 			       __be32 mtu);
 extern void ip6_redirect(struct sk_buff *skb, struct net *net, int oif, u32 mark);

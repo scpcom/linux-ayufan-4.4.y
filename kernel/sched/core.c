@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  
 #include <linux/mm.h>
 #include <linux/module.h>
@@ -1147,7 +1150,7 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 	success = 1;  
 	cpu = task_cpu(p);
 
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	 
 	smp_rmb();
 #endif  
@@ -1155,7 +1158,7 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 		goto stat;
 
 #ifdef CONFIG_SMP
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	 
 	smp_rmb();
 #endif  
@@ -5386,7 +5389,7 @@ static inline int preempt_count_equals(int preempt_offset)
 	return (nested == preempt_offset);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static int __might_sleep_init_called;
 int __init __might_sleep_init(void)
 {
@@ -5402,7 +5405,7 @@ void __might_sleep(const char *file, int line, int preempt_offset)
 
 	rcu_sleep_check();  
 	if ((preempt_count_equals(preempt_offset) && !irqs_disabled()) ||
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	    oops_in_progress)
 		return;
 	if (system_state != SYSTEM_RUNNING &&
@@ -6288,7 +6291,7 @@ struct cgroup_subsys cpu_cgroup_subsys = {
 	.css_offline	= cpu_cgroup_css_offline,
 	.can_attach	= cpu_cgroup_can_attach,
 	.attach		= cpu_cgroup_attach,
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	.allow_attach	= subsys_cgroup_allow_attach,
 #endif  
 	.exit		= cpu_cgroup_exit,

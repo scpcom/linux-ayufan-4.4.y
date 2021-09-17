@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	inet6 interface/address list definitions
  *	Linux INET6 implementation 
@@ -183,15 +186,15 @@ struct inet6_dev {
 	__u32			if_flags;
 	int			dead;
 
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_IPV6_PRIVACY
 	u8			rndid[8];
 	struct timer_list	regen_timer;
 	struct list_head	tempaddr_list;
 #endif
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 
 	struct in6_addr		token;
 
@@ -201,13 +204,13 @@ struct inet6_dev {
 	struct ipv6_devstat	stats;
 	unsigned long		tstamp; /* ipv6InterfaceTable update timestamp */
 	struct rcu_head		rcu;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_IPV6_PRIVACY
 	u8			rndid[8];
 	struct timer_list	regen_timer;
 	struct list_head	tempaddr_list;
 #endif
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 };
 
 static inline void ipv6_eth_mc_map(const struct in6_addr *addr, char *buf)

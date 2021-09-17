@@ -52,7 +52,7 @@
 #include "bond_3ad.h"
 #include "bond_alb.h"
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include "../ethernet/stmmac/tnkhw.h"
 #include "../ethernet/stmmac/tnksysctl.h"
 #endif  
@@ -60,7 +60,7 @@
 #define BOND_LINK_MON_INTERV	0
 #define BOND_LINK_ARP_INTERV	0
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
 #define DELTA_LIMIT		100
  
@@ -163,9 +163,9 @@ module_param(resend_igmp, int, 0);
 MODULE_PARM_DESC(resend_igmp, "Number of IGMP membership reports to send on "
 			      "link failure");
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 static int select_slave_dev(struct net_device *dev)
 #else  
 int select_slave_dev(struct net_device *dev)
@@ -185,7 +185,7 @@ int select_slave_dev(struct net_device *dev)
 	return -1;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 static void tnk_bonding_set_slave_link_status(struct slave *slave, bool link_up)
 {
 	if (hitoe) {
@@ -935,7 +935,7 @@ void bond_change_active_slave(struct bonding *bond, struct slave *new_active)
 
 			new_active->delay = 0;
 			new_active->link = BOND_LINK_UP;
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
 			tnk_bonding_set_slave_link_status(new_active, true);
 #endif
@@ -1016,7 +1016,7 @@ void bond_select_active_slave(struct bonding *bond)
 	best_slave = bond_find_best_slave(bond);
 	if (best_slave != bond->curr_active_slave) {
 		bond_change_active_slave(bond, best_slave);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
 		if (hitoe && bond->curr_active_slave) {
 			int slave_dev_id = 0;
@@ -1315,7 +1315,7 @@ static bool bond_should_deliver_exact_match(struct sk_buff *skb,
 					    struct bonding *bond)
 {
 	if (bond_is_slave_inactive(slave)) {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
 		if (hitoe) {
 			 
@@ -1747,7 +1747,7 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 		bond_is_active_slave(new_slave) ? "n active" : " backup",
 		new_slave->link != BOND_LINK_DOWN ? "n up" : " down");
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
 	if (hitoe) {
 		 
@@ -1970,7 +1970,7 @@ static int __bond_release_one(struct net_device *bond_dev,
 
 	kfree(slave);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
 	  
 	if (hitoe) {
@@ -2200,9 +2200,9 @@ static void bond_miimon_commit(struct bonding *bond)
 			slave->link = BOND_LINK_UP;
 			slave->jiffies = jiffies;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 			tnk_bonding_set_slave_link_status(slave, true);
 #else  
 			if (hitoe) {
@@ -2264,9 +2264,9 @@ static void bond_miimon_commit(struct bonding *bond)
 
 			slave->link = BOND_LINK_DOWN;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 			tnk_bonding_set_slave_link_status(slave, false);
 #else  
 			if (hitoe) {
@@ -2573,7 +2573,7 @@ void bond_loadbalance_arp_mon(struct work_struct *work)
 	read_lock(&bond->lock);
 
 	delta_in_ticks = msecs_to_jiffies(bond->params.arp_interval);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
 	if (hitoe && (delta_in_ticks < DELTA_LIMIT))
 		delta_in_ticks <<= 3;
@@ -2601,9 +2601,9 @@ void bond_loadbalance_arp_mon(struct work_struct *work)
 
 				slave->link  = BOND_LINK_UP;
 				bond_set_active_slave(slave);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 				tnk_bonding_set_slave_link_status(slave, true);
 #else  
 				if (hitoe) {
@@ -2640,9 +2640,9 @@ void bond_loadbalance_arp_mon(struct work_struct *work)
 
 				slave->link  = BOND_LINK_DOWN;
 				bond_set_backup_slave(slave);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 				tnk_bonding_set_slave_link_status(slave, false);
 #else  
 				if (hitoe) {
@@ -2758,9 +2758,9 @@ static void bond_ab_arp_commit(struct bonding *bond, int delta_in_ticks)
 			continue;
 
 		case BOND_LINK_UP:
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 			tnk_bonding_set_slave_link_status(slave, true);
 #else  
 			if (hitoe) {
@@ -2801,9 +2801,9 @@ static void bond_ab_arp_commit(struct bonding *bond, int delta_in_ticks)
 				slave->link_failure_count++;
 
 			slave->link = BOND_LINK_DOWN;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 			tnk_bonding_set_slave_link_status(slave, false);
 #else  
 			if (hitoe) {
@@ -2907,7 +2907,7 @@ void bond_activebackup_arp_mon(struct work_struct *work)
 	read_lock(&bond->lock);
 
 	delta_in_ticks = msecs_to_jiffies(bond->params.arp_interval);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
 	if (hitoe && (delta_in_ticks < DELTA_LIMIT))
 		delta_in_ticks <<= 3;
@@ -3223,7 +3223,7 @@ static int bond_open(struct net_device *bond_dev)
 		bond_3ad_initiate_agg_selection(bond, 1);
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
 	 
 	if (hitoe) {
@@ -3251,7 +3251,7 @@ static int bond_close(struct net_device *bond_dev)
 		bond_alb_deinitialize(bond);
 	}
 	bond->recv_probe = NULL;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
 	if (hitoe) {
 		TNKB_DBG(".............%s..............\n",
@@ -3886,7 +3886,7 @@ void bond_set_mode_ops(struct bonding *bond, int mode)
 {
 	struct net_device *bond_dev = bond->dev;
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
 	if (hitoe) {
 		 
@@ -4104,7 +4104,7 @@ static int bond_check_params(struct bond_params *params)
 			       mode == NULL ? "NULL" : mode);
 			return -EINVAL;
 		}
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
 		if (hitoe) {
 			 
@@ -4173,7 +4173,7 @@ static int bond_check_params(struct bond_params *params)
 		max_bonds = BOND_DEFAULT_MAX_BONDS;
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
 	if (hitoe) {
 		if (max_bonds > 1) {
@@ -4567,7 +4567,7 @@ static int __init bonding_init(void)
 
 	pr_info("%s", bond_version);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef TNK_BONDING
 	TNKB_DBG("TOE bonding init hitoe = %d\n", hitoe);
 #endif

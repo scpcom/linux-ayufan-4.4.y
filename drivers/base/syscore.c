@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  syscore.c - Execution of system core operations.
  *
@@ -10,9 +13,9 @@
 #include <linux/mutex.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <linux/wakeup_reason.h>
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 static LIST_HEAD(syscore_ops_list);
 static DEFINE_MUTEX(syscore_ops_lock);
@@ -76,10 +79,10 @@ int syscore_suspend(void)
 	return 0;
 
  err_out:
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	log_suspend_abort_reason("System core suspend callback %pF failed",
 		ops->suspend);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	pr_err("PM: System core suspend callback %pF failed.\n", ops->suspend);
 
 	list_for_each_entry_continue(ops, &syscore_ops_list, node)

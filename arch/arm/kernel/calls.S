@@ -393,17 +393,17 @@
 		CALL(sys_kcmp)
 		CALL(sys_finit_module)
 #ifdef MY_ABC_HERE
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /* 380 */	CALL(sys_ni_syscall)		/* reserved sys_sched_setattr */
 		CALL(sys_ni_syscall)		/* reserved sys_sched_getattr */
 		CALL(sys_ni_syscall)		/* reserved sys_renameat2     */
 		CALL(sys_seccomp)
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 /* 380 */	CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		CALL(sys_ni_syscall)
 /* 385 */	CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)

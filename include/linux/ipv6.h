@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _IPV6_H
 #define _IPV6_H
 
@@ -19,9 +22,9 @@ struct ipv6_devconf {
 	__s32		rtr_solicit_interval;
 	__s32		rtr_solicit_delay;
 	__s32		force_mld_version;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_IPV6_PRIVACY
 	__s32		use_tempaddr;
 	__s32		temp_valid_lft;
@@ -29,13 +32,13 @@ struct ipv6_devconf {
 	__s32		regen_max_retry;
 	__s32		max_desync_factor;
 #endif
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 	__s32		max_addresses;
 	__s32		accept_ra_defrtr;
 	__s32		accept_ra_pinfo;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_IPV6_ROUTER_PREF
 	__s32		accept_ra_rtr_pref;
 	__s32		rtr_probe_interval;
@@ -43,31 +46,31 @@ struct ipv6_devconf {
 	__s32		accept_ra_rt_info_max_plen;
 #endif
 #endif
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 	__s32		accept_ra_rt_table;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	__s32		proxy_ndp;
 	__s32		accept_source_route;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_IPV6_OPTIMISTIC_DAD
 	__s32		optimistic_dad;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	__s32		use_optimistic;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 #endif
 #ifdef CONFIG_IPV6_MROUTE
 	__s32		mc_forwarding;
 #endif
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 	__s32		disable_ipv6;
 	__s32		accept_dad;
 	__s32		force_tllao;
 	__s32           ndisc_notify;
 	void		*sysctl;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_IPV6_PRIVACY
 	__s32		use_tempaddr;
 	__s32		temp_valid_lft;
@@ -89,7 +92,7 @@ struct ipv6_devconf {
 #ifdef CONFIG_IPV6_MROUTE
 	__s32		mc_forwarding;
 #endif
-#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
+#endif /* MY_DEF_HERE */
 };
 
 struct ipv6_params {

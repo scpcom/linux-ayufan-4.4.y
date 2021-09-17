@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Based on arch/arm/kernel/process.c
  *
@@ -20,9 +23,9 @@
 
 #include <stdarg.h>
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <linux/compat.h>
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 #include <linux/export.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
@@ -144,7 +147,7 @@ void machine_restart(char *cmd)
 	while (1);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /*
  * dump a block of kernel memory from around the given address
  */
@@ -207,7 +210,7 @@ static void show_extra_register_data(struct pt_regs *regs, int nbytes)
 	}
 	set_fs(fs);
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 void __show_regs(struct pt_regs *regs)
 {
@@ -224,10 +227,10 @@ void __show_regs(struct pt_regs *regs)
 		if (i % 2 == 0)
 			printk("\n");
 	}
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (!user_mode(regs))
 		show_extra_register_data(regs, 128);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	printk("\n");
 }
 
@@ -274,11 +277,11 @@ void release_thread(struct task_struct *dead_task)
 
 int arch_dup_task_struct(struct task_struct *dst, struct task_struct *src)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	fpsimd_preserve_current_state();
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	fpsimd_save_state(&current->thread.fpsimd_state);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	*dst = *src;
 	return 0;
 }

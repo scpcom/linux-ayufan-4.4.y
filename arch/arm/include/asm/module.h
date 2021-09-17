@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _ASM_ARM_MODULE_H
 #define _ASM_ARM_MODULE_H
 
@@ -12,12 +15,12 @@ enum {
 	ARM_SEC_CORE,
 	ARM_SEC_EXIT,
 	ARM_SEC_DEVEXIT,
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_HI3536 */
+#else /* MY_DEF_HERE */
 	ARM_SEC_HOT,
 	ARM_SEC_UNLIKELY,
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 	ARM_SEC_MAX,
 };
 

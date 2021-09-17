@@ -31,7 +31,7 @@
 #include <net/inet_ecn.h>
 #include <net/dst.h>
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 #include <net/tnkdrv.h>
 #endif
@@ -210,7 +210,7 @@ extern int sysctl_tcp_default_delack_segs;
 #else  
 extern int sysctl_tcp_min_tso_segs;
 #endif  
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 extern int sysctl_tcp_default_init_rwnd;
 #endif  
 
@@ -303,7 +303,7 @@ extern void tcp_twsk_destructor(struct sock *sk);
 extern ssize_t tcp_splice_read(struct socket *sk, loff_t *ppos,
 			       struct pipe_inode_info *pipe, size_t len,
 			       unsigned int flags);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 #if SWITCH_SEND_FIN
 extern int tnk_tcp_fin_acked_state_process(struct sock *sk);
@@ -458,7 +458,7 @@ extern void tcp_send_ack(struct sock *sk);
 extern void tcp_send_delayed_ack(struct sock *sk);
 extern void tcp_send_loss_probe(struct sock *sk);
 extern bool tcp_schedule_loss_probe(struct sock *sk);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 extern void tnk_send_fin(struct sock *sk);
 extern void tnk_send_ack(struct sock *sk, unsigned int rcv_nxt,
@@ -598,7 +598,7 @@ struct tcp_skb_cb {
 #if IS_ENABLED(CONFIG_IPV6)
 		struct inet6_skb_parm	h6;
 #endif
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 		struct tnkcb		tcb;
 #endif
@@ -1356,7 +1356,7 @@ extern struct sk_buff **tcp4_gro_receive(struct sk_buff **head,
 extern int tcp_gro_complete(struct sk_buff *skb);
 extern int tcp4_gro_complete(struct sk_buff *skb);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 extern int tcp_nuke_addr(struct net *net, struct sockaddr *addr);
 #endif  
 

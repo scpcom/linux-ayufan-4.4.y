@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * FP/SIMD context switching and fault handling
  *
@@ -32,7 +35,7 @@
 #define FPEXC_IXF	(1 << 4)
 #define FPEXC_IDF	(1 << 7)
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /*
  * In order to reduce the number of times the FPSIMD state is needlessly saved
  * and restored, we need to keep track of two things:
@@ -86,7 +89,7 @@
  *   whatever is in the FPSIMD registers is not saved to memory, but discarded.
  */
 static DEFINE_PER_CPU(struct fpsimd_state *, fpsimd_last_state);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /*
  * Trapped FP/ASIMD access.
@@ -126,7 +129,7 @@ void do_fpsimd_exc(unsigned int esr, struct pt_regs *regs)
 
 void fpsimd_thread_switch(struct task_struct *next)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	/*
 	 * Save the current FPSIMD state to memory, but only if whatever is in
 	 * the registers is in fact the most recent userland FPSIMD state of
@@ -153,28 +156,28 @@ void fpsimd_thread_switch(struct task_struct *next)
 			set_ti_thread_flag(task_thread_info(next),
 					   TIF_FOREIGN_FPSTATE);
 	}
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	/* check if not kernel threads */
 	if (current->mm)
 		fpsimd_save_state(&current->thread.fpsimd_state);
 	if (next->mm)
 		fpsimd_load_state(&next->thread.fpsimd_state);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 }
 
 void fpsimd_flush_thread(void)
 {
 	preempt_disable();
 	memset(&current->thread.fpsimd_state, 0, sizeof(struct fpsimd_state));
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	set_thread_flag(TIF_FOREIGN_FPSTATE);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	fpsimd_load_state(&current->thread.fpsimd_state);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	preempt_enable();
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /*
  * Save the userland FPSIMD state of 'current' to memory, but only if the state
  * currently held in the registers does in fact belong to 'current'
@@ -310,7 +313,7 @@ static void fpsimd_pm_init(void)
 #else
 static inline void fpsimd_pm_init(void) { }
 #endif /* CONFIG_CPU_PM */
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /*
  * FP/SIMD support code initialisation.

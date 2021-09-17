@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/arch/arm64/crypto/aes-glue.c - wrapper code for ARMv8 AES
  *
@@ -15,9 +18,9 @@
 #include <crypto/algapi.h>
 #include <linux/module.h>
 #include <linux/cpufeature.h>
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 #include <crypto/xts.h>
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 
 #ifdef USE_V8_CRYPTO_EXTENSIONS
 #define MODE			"ce"
@@ -82,15 +85,15 @@ static int xts_set_key(struct crypto_tfm *tfm, const u8 *in_key,
 	struct crypto_aes_xts_ctx *ctx = crypto_tfm_ctx(tfm);
 	int ret;
 
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 	ret = xts_check_key(tfm, in_key, key_len);
 	if (ret)
 		return ret;
 
 	ret = aes_expandkey(&ctx->key1, in_key, key_len / 2);
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 	ret = crypto_aes_expand_key(&ctx->key1, in_key, key_len / 2);
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 	if (!ret)
 		ret = crypto_aes_expand_key(&ctx->key2, &in_key[key_len / 2],
 					    key_len / 2);
@@ -298,13 +301,13 @@ static struct crypto_alg aes_algs[] = { {
 	.cra_blkcipher = {
 		.min_keysize	= AES_MIN_KEY_SIZE,
 		.max_keysize	= AES_MAX_KEY_SIZE,
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 		.ivsize		= 0,
 		.setkey		= aes_setkey,
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 		.ivsize		= AES_BLOCK_SIZE,
 		.setkey		= crypto_aes_set_key,
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 		.encrypt	= ecb_encrypt,
 		.decrypt	= ecb_decrypt,
 	},
@@ -377,11 +380,11 @@ static struct crypto_alg aes_algs[] = { {
 	.cra_ablkcipher = {
 		.min_keysize	= AES_MIN_KEY_SIZE,
 		.max_keysize	= AES_MAX_KEY_SIZE,
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 		.ivsize		= 0,
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 		.ivsize		= AES_BLOCK_SIZE,
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 		.setkey		= ablk_set_key,
 		.encrypt	= ablk_encrypt,
 		.decrypt	= ablk_decrypt,

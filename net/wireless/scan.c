@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * cfg80211 scan result handling
  *
@@ -55,11 +58,11 @@
  * also linked into the probe response struct.
  */
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define IEEE80211_SCAN_RESULT_EXPIRE	(7 * HZ)
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 #define IEEE80211_SCAN_RESULT_EXPIRE	(30 * HZ)
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 static void bss_free(struct cfg80211_internal_bss *bss)
 {

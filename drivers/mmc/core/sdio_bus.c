@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/mmc/core/sdio_bus.c
  *
@@ -25,11 +28,11 @@
 #include "sdio_cis.h"
 #include "sdio_bus.h"
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_MMC_EMBEDDED_SDIO
 #include <linux/mmc/host.h>
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /* show configuration fields */
 #define sdio_config_attr(field, format_string)				\
@@ -276,7 +279,7 @@ static void sdio_release_func(struct device *dev)
 {
 	struct sdio_func *func = dev_to_sdio_func(dev);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_MMC_EMBEDDED_SDIO
 	/*
 	 * If this device is embedded then we never allocated
@@ -285,9 +288,9 @@ static void sdio_release_func(struct device *dev)
 	if (!func->card->host->embedded_sdio_data.funcs)
 #endif
 		sdio_free_func_cis(func);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	sdio_free_func_cis(func);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	kfree(func->info);
 

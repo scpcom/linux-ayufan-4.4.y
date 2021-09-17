@@ -12,7 +12,7 @@
 #include <asm/ptrace.h>
 #include <asm/domain.h>
 #include <asm/opcodes-virt.h>
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 #include <asm/asm-offsets.h>
 #endif  
 
@@ -132,7 +132,7 @@
 	restore_irqs_notrace \oldcpsr
 	.endm
 
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
  
 	.macro	get_thread_info, rd
  ARM(	mov	\rd, sp, lsr #13	)

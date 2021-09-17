@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  HID driver for Logitech Unifying receivers
  *
@@ -803,13 +806,13 @@ static int logi_dj_probe(struct hid_device *hdev,
 		goto hid_parse_fail;
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (!hid_validate_values(hdev, HID_OUTPUT_REPORT, REPORT_ID_DJ_SHORT,
 				 0, DJREPORT_SHORT_LENGTH - 1)) {
 		retval = -ENODEV;
 		goto hid_parse_fail;
 	}
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	/* Starts the usb device and connects to upper interfaces hiddev and
 	 * hidraw */

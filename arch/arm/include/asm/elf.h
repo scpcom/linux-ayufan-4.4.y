@@ -19,7 +19,7 @@ typedef elf_greg_t elf_gregset_t[ELF_NGREG];
 
 typedef struct user_fp elf_fpregset_t;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
  
 #else
 #define EM_ARM	40

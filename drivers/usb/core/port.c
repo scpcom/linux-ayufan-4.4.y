@@ -61,7 +61,7 @@ static void usb_port_device_release(struct device *dev)
 	kfree(port_dev);
 }
 
-#if (defined(CONFIG_PM_RUNTIME) && !defined(CONFIG_SYNO_LSP_HI3536)) || (defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_USB_SUSPEND))
+#if (defined(CONFIG_PM_RUNTIME) && !defined(MY_DEF_HERE)) || (defined(MY_DEF_HERE) && defined(CONFIG_USB_SUSPEND))
 static int usb_port_runtime_resume(struct device *dev)
 {
 	struct usb_port *port_dev = to_usb_port(dev);
@@ -121,7 +121,7 @@ static int usb_port_runtime_suspend(struct device *dev)
 #endif
 
 static const struct dev_pm_ops usb_port_pm_ops = {
-#if (defined(CONFIG_PM_RUNTIME) && !defined(CONFIG_SYNO_LSP_HI3536)) || (defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_USB_SUSPEND))
+#if (defined(CONFIG_PM_RUNTIME) && !defined(MY_DEF_HERE)) || (defined(MY_DEF_HERE) && defined(CONFIG_USB_SUSPEND))
 	.runtime_suspend =	usb_port_runtime_suspend,
 	.runtime_resume =	usb_port_runtime_resume,
 	.runtime_idle =		pm_generic_runtime_idle,

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2012 ARM Ltd.
  *
@@ -16,9 +19,9 @@
 #ifndef __ASM_CPUTYPE_H
 #define __ASM_CPUTYPE_H
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 #define ID_MIDR_EL1		"midr_el1"
 #define ID_MPIDR_EL1		"mpidr_el1"
 #define ID_CTR_EL0		"ctr_el0"
@@ -28,25 +31,25 @@
 #define ID_AA64AFR0_EL1		"id_aa64afr0_el1"
 #define ID_AA64ISAR0_EL1	"id_aa64isar0_el1"
 #define ID_AA64MMFR0_EL1	"id_aa64mmfr0_el1"
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #define INVALID_HWID		ULONG_MAX
 
 #define MPIDR_HWID_BITMASK	0xff00ffffff
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define read_cpuid(reg) ({						\
 	u64 __val;							\
 	asm("mrs	%0, " #reg : "=r" (__val));			\
 	__val;								\
 })
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 #define read_cpuid(reg) ({						\
 	u64 __val;							\
 	asm("mrs	%0, " reg : "=r" (__val));			\
 	__val;								\
 })
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #define ARM_CPU_IMP_ARM		0x41
 
@@ -63,20 +66,20 @@
  */
 static inline u32 __attribute_const__ read_cpuid_id(void)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	return read_cpuid(MIDR_EL1);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	return read_cpuid(ID_MIDR_EL1);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 }
 
 static inline u64 __attribute_const__ read_cpuid_mpidr(void)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	return read_cpuid(MPIDR_EL1);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	return read_cpuid(ID_MPIDR_EL1);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 }
 
 static inline unsigned int __attribute_const__ read_cpuid_implementor(void)
@@ -91,11 +94,11 @@ static inline unsigned int __attribute_const__ read_cpuid_part_number(void)
 
 static inline u32 __attribute_const__ read_cpuid_cachetype(void)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	return read_cpuid(CTR_EL0);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	return read_cpuid(ID_CTR_EL0);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 }
 
 void cpuinfo_store_cpu(void);

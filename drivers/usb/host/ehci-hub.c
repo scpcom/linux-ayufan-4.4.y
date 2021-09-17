@@ -3,7 +3,7 @@
 #endif
  
 #include <linux/usb/otg.h>
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_ARCH_HI3531A
 #include <mach/hardware.h>
 #endif
@@ -11,7 +11,7 @@
 
 #define	PORT_WAKE_BITS	(PORT_WKOC_E|PORT_WKDISC_E|PORT_WKCONN_E)
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_ARCH_HI3531A
 #define CRG_REG_BASE                    0x12040000
 #define REG_CRG77                       0x0134
@@ -901,7 +901,7 @@ static int ehci_hub_control (
 				ehci->reset_done [wIndex] = jiffies
 						+ msecs_to_jiffies (50);
 			}
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_ARCH_HI3531A
 			if (ehci_readl(ehci, status_reg) == 0x1005) {
 				unsigned int reg, reg1, base_reg;

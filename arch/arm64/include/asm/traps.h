@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Based on arch/arm/include/asm/traps.h
  *
@@ -18,7 +21,7 @@
 #ifndef __ASM_TRAP_H
 #define __ASM_TRAP_H
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <linux/list.h>
 
 struct undef_hook {
@@ -31,7 +34,7 @@ struct undef_hook {
 };
 
 void register_undef_hook(struct undef_hook *hook);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 static inline int in_exception_text(unsigned long ptr)
 {

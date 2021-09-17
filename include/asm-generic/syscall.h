@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Access to user system call parameters and results
  *
@@ -145,14 +148,14 @@ void syscall_set_arguments(struct task_struct *task, struct pt_regs *regs,
 /**
  * syscall_get_arch - return the AUDIT_ARCH for the current system call
  */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 /*
  * @task:	task of interest, must be in system call entry tracing
  * @regs:	task_pt_regs() of @task
  */
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 /*
  *
  * Returns the AUDIT_ARCH_* based on the system call convention in use.
@@ -163,9 +166,9 @@ void syscall_set_arguments(struct task_struct *task, struct pt_regs *regs,
  * Architectures which permit CONFIG_HAVE_ARCH_SECCOMP_FILTER must
  * provide an implementation of this.
  */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 int syscall_get_arch(void);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 int syscall_get_arch(struct task_struct *task, struct pt_regs *regs);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 #endif	/* _ASM_SYSCALL_H */

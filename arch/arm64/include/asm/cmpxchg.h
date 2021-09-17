@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Based on arch/arm/include/asm/cmpxchg.h
  *
@@ -158,7 +161,7 @@ static inline unsigned long __cmpxchg_mb(volatile void *ptr, unsigned long old,
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define cmpxchg(ptr, o, n) \
 ({ \
 	__typeof__(*(ptr)) __ret; \
@@ -176,7 +179,7 @@ static inline unsigned long __cmpxchg_mb(volatile void *ptr, unsigned long old,
 			  (unsigned long)(n), sizeof(*(ptr))); \
 	__ret; \
 })
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 #define cmpxchg(ptr,o,n)						\
 	((__typeof__(*(ptr)))__cmpxchg_mb((ptr),			\
 					  (unsigned long)(o),		\
@@ -188,7 +191,7 @@ static inline unsigned long __cmpxchg_mb(volatile void *ptr, unsigned long old,
 				       (unsigned long)(o),		\
 				       (unsigned long)(n),		\
 				       sizeof(*(ptr))))
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #define cmpxchg64(ptr,o,n)		cmpxchg((ptr),(o),(n))
 #define cmpxchg64_local(ptr,o,n)	cmpxchg_local((ptr),(o),(n))

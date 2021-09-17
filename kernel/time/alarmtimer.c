@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Alarmtimer interface
  *
@@ -197,13 +200,13 @@ static enum hrtimer_restart alarmtimer_fired(struct hrtimer *timer)
 
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 ktime_t alarm_expires_remaining(const struct alarm *alarm)
 {
 	struct alarm_base *base = &alarm_bases[alarm->type];
 	return ktime_sub(alarm->node.expires, base->gettime());
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_RTC_CLASS
 /**
@@ -309,15 +312,15 @@ void alarm_init(struct alarm *alarm, enum alarmtimer_type type,
 	alarm->state = ALARMTIMER_STATE_INACTIVE;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /**
  * alarm_start - Sets an absolute alarm to fire
  */
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 /**
  * alarm_start - Sets an alarm to fire
  */
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 /**
  * @alarm: ptr to alarm to set
  * @start: time to run the alarm
@@ -337,7 +340,7 @@ int alarm_start(struct alarm *alarm, ktime_t start)
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /**
  * alarm_start_relative - Sets a relative alarm to fire
  * @alarm: ptr to alarm to set
@@ -362,7 +365,7 @@ void alarm_restart(struct alarm *alarm)
 	alarmtimer_enqueue(base, alarm);
 	spin_unlock_irqrestore(&base->lock, flags);
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /**
  * alarm_try_to_cancel - Tries to cancel an alarm timer
@@ -432,14 +435,14 @@ u64 alarm_forward(struct alarm *alarm, ktime_t now, ktime_t interval)
 	return overrun;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 u64 alarm_forward_now(struct alarm *alarm, ktime_t interval)
 {
 	struct alarm_base *base = &alarm_bases[alarm->type];
 
 	return alarm_forward(alarm, base->gettime(), interval);
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /**
  * clock2alarm - helper that converts from clockid to alarmtypes

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/nfs/nfs3proc.c
  *
@@ -33,11 +36,11 @@ nfs3_rpc_wrapper(struct rpc_clnt *clnt, struct rpc_message *msg, int flags)
 		res = rpc_call_sync(clnt, msg, flags);
 		if (res != -EJUKEBOX)
 			break;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		freezable_schedule_timeout_killable_unsafe(NFS_JUKEBOX_RETRY_TIME);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		freezable_schedule_timeout_killable(NFS_JUKEBOX_RETRY_TIME);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		res = -ERESTARTSYS;
 	} while (!fatal_signal_pending(current));
 	return res;

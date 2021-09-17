@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
  *
@@ -736,7 +739,7 @@ void hinfc610_write_buf(struct mtd_info *mtd, const uint8_t *buf,
 	memcpy(host->buffer + host->column + host->offset, buf, len);
 	host->offset += len;
 }
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 /*****************************************************************************/
 static void hinfc610_ecc_err_num_count(struct mtd_info *mtd,
 		uint8_t ecc_st, int reg)
@@ -754,7 +757,7 @@ static void hinfc610_ecc_err_num_count(struct mtd_info *mtd,
 			mtd->ecc_stats.corrected += err_num;
 	}
 }
-#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#endif /* MY_DEF_HERE */
 
 /*****************************************************************************/
 
@@ -762,15 +765,15 @@ void hinfc610_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 {
 	struct nand_chip *chip = mtd->priv;
 	struct hinfc_host *host = chip->priv;
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 	int reg;
 	uint8_t ecc_step = host->pagesize >> 10;
-#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#endif /* MY_DEF_HERE */
 
 	memcpy(buf, host->buffer + host->column + host->offset, len);
 	host->offset += len;
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 	/* 2K or 4K or 8K(1) or 16K(1-1) pagesize */
 	reg = hinfc_read(host, HINFC_ECC_ERR_NUM0_BUF0);
 	hinfc610_ecc_err_num_count(mtd, ecc_step, reg);
@@ -788,7 +791,7 @@ void hinfc610_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 			hinfc610_ecc_err_num_count(mtd, ecc_step, reg);
 		}
 	}
-#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#endif /* MY_DEF_HERE */
 }
 /*****************************************************************************/
 /*

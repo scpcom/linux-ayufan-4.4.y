@@ -717,7 +717,7 @@ again:			remove_next = 1 + (end > next->vm_end);
 }
 
 static inline int is_mergeable_vma(struct vm_area_struct *vma,
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			struct file *file, unsigned long vm_flags,
 			const char __user *anon_name)
 #else  
@@ -730,7 +730,7 @@ static inline int is_mergeable_vma(struct vm_area_struct *vma,
 		return 0;
 	if (vma->vm_ops && vma->vm_ops->close)
 		return 0;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (vma_get_anon_name(vma) != anon_name)
 		return 0;
 #endif  
@@ -750,7 +750,7 @@ static inline int is_mergeable_anon_vma(struct anon_vma *anon_vma1,
 
 static int
 can_vma_merge_before(struct vm_area_struct *vma, unsigned long vm_flags,
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	struct anon_vma *anon_vma, struct file *file, pgoff_t vm_pgoff,
 	const char __user *anon_name)
 {
@@ -769,7 +769,7 @@ can_vma_merge_before(struct vm_area_struct *vma, unsigned long vm_flags,
 
 static int
 can_vma_merge_after(struct vm_area_struct *vma, unsigned long vm_flags,
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	struct anon_vma *anon_vma, struct file *file, pgoff_t vm_pgoff,
 	const char __user *anon_name)
 {
@@ -788,7 +788,7 @@ can_vma_merge_after(struct vm_area_struct *vma, unsigned long vm_flags,
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
  
 #else  
  
@@ -798,7 +798,7 @@ struct vm_area_struct *vma_merge(struct mm_struct *mm,
 			struct vm_area_struct *prev, unsigned long addr,
 			unsigned long end, unsigned long vm_flags,
 		     	struct anon_vma *anon_vma, struct file *file,
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			pgoff_t pgoff, struct mempolicy *policy,
 			const char __user *anon_name)
 #else  
@@ -822,7 +822,7 @@ struct vm_area_struct *vma_merge(struct mm_struct *mm,
 
 	if (prev && prev->vm_end == addr &&
   			mpol_equal(vma_policy(prev), policy) &&
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			can_vma_merge_after(prev, vm_flags, anon_vma,
 						file, pgoff, anon_name)) {
 #else  
@@ -832,7 +832,7 @@ struct vm_area_struct *vma_merge(struct mm_struct *mm,
 		 
 		if (next && end == next->vm_start &&
 				mpol_equal(policy, vma_policy(next)) &&
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 				can_vma_merge_before(next, vm_flags, anon_vma,
 						file, pgoff+pglen, anon_name) &&
 #else  
@@ -855,7 +855,7 @@ struct vm_area_struct *vma_merge(struct mm_struct *mm,
 
 	if (next && end == next->vm_start &&
  			mpol_equal(policy, vma_policy(next)) &&
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			can_vma_merge_before(next, vm_flags, anon_vma,
 					file, pgoff+pglen, anon_name)) {
 #else  
@@ -1067,7 +1067,7 @@ unsigned long do_mmap_pgoff(struct file *file, unsigned long addr,
 		*populate = len;
 	return addr;
 }
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(do_mmap_pgoff);
 #endif  
 
@@ -1206,7 +1206,7 @@ munmap_back:
 		vm_flags |= VM_ACCOUNT;
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	vma = vma_merge(mm, prev, addr, addr + len, vm_flags, NULL, file, pgoff,
 			NULL, NULL);
 #else  
@@ -2082,7 +2082,7 @@ int do_munmap(struct mm_struct *mm, unsigned long start, size_t len)
 
 	return 0;
 }
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(do_munmap);
 #endif  
 
@@ -2162,7 +2162,7 @@ static unsigned long do_brk(unsigned long addr, unsigned long len)
 		return -ENOMEM;
 
 	vma = vma_merge(mm, prev, addr, addr + len, flags,
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 					NULL, NULL, pgoff, NULL, NULL);
 #else  
 					NULL, NULL, pgoff, NULL);
@@ -2290,7 +2290,7 @@ struct vm_area_struct *copy_vma(struct vm_area_struct **vmap,
 	if (find_vma_links(mm, addr, addr + len, &prev, &rb_link, &rb_parent))
 		return NULL;	 
 	new_vma = vma_merge(mm, prev, addr, addr + len, vma->vm_flags,
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			vma->anon_vma, vma->vm_file, pgoff, vma_policy(vma),
 			vma_get_anon_name(vma));
 #else  

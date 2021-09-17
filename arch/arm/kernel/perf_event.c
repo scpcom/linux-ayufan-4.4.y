@@ -232,7 +232,7 @@ validate_event(struct pmu_hw_events *hw_events,
 	       struct perf_event *event)
 {
 	struct arm_pmu *armpmu = to_arm_pmu(event->pmu);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 	struct pmu *leader_pmu = event->group_leader->pmu;
@@ -241,7 +241,7 @@ validate_event(struct pmu_hw_events *hw_events,
 	if (is_software_event(event))
 		return 1;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (event->state < PERF_EVENT_STATE_OFF)
 #else  
 	if (event->pmu != leader_pmu || event->state < PERF_EVENT_STATE_OFF)

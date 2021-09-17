@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This is a module which is used for rejecting packets.
  */
@@ -129,7 +132,7 @@ static void send_reset(struct sk_buff *oldskb, int hook)
 static inline void send_unreach(struct sk_buff *skb_in, int code)
 {
 	icmp_send(skb_in, ICMP_DEST_UNREACH, code, 0);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_IP_NF_TARGET_REJECT_SKERR
 	if (skb_in->sk) {
 		skb_in->sk->sk_err = icmp_err_convert[code].errno;
@@ -138,7 +141,7 @@ static inline void send_unreach(struct sk_buff *skb_in, int code)
 			skb_in->sk->sk_err, skb_in, skb_in->sk);
 	}
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 }
 
 static unsigned int

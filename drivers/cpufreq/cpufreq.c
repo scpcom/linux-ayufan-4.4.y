@@ -252,7 +252,7 @@ bool have_governor_per_policy(void)
 {
 	return cpufreq_driver->have_governor_per_policy;
 }
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL_GPL(have_governor_per_policy);
 
 struct kobject *get_governor_parent_kobj(struct cpufreq_policy *policy)

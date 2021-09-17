@@ -720,7 +720,7 @@ struct ext4_inode_info {
 	struct inode vfs_inode;
 	struct jbd2_inode *jinode;
 
-#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if !defined(MY_DEF_HERE)
 	spinlock_t i_raw_lock;	 
 #endif
 
@@ -764,7 +764,7 @@ struct ext4_inode_info {
 	tid_t i_datasync_tid;
 
 	__u32 i_csum_seed;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	spinlock_t i_raw_lock;	 
 #endif
 };
@@ -941,7 +941,7 @@ struct ext4_super_block {
 	__le32	s_overhead_clusters;	 
 #ifdef MY_ABC_HERE 
 	__le32	s_reserved[106];	 
-#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if !defined(MY_DEF_HERE)
 	__le32	s_archive_version;	 
 	__le32  s_archive_version_obsoleted;
 #endif
@@ -949,7 +949,7 @@ struct ext4_super_block {
 	__le32	s_reserved[108];	 
 #endif  
 	__le32	s_checksum;		 
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES) && defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 	__le32	s_archive_version;	 
 	__le32  s_archive_version_obsoleted;
 #endif
@@ -1082,7 +1082,7 @@ struct ext4_sb_info {
 	struct flex_groups *s_flex_groups;
 	ext4_group_t s_flex_groups_allocated;
 
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -1097,7 +1097,7 @@ struct ext4_sb_info {
 
 	struct workqueue_struct *dio_unwritten_wq;
 
-#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if !defined(MY_DEF_HERE)
 #ifdef MY_ABC_HERE
 	atomic_t reada_group_desc_threads;  
 	struct workqueue_struct *group_desc_readahead_wq;
@@ -1122,7 +1122,7 @@ struct ext4_sb_info {
 	struct list_head s_es_lru;
 	struct percpu_counter s_extent_cache_cnt;
 	spinlock_t s_es_lru_lock ____cacheline_aligned_in_smp;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef MY_ABC_HERE
 	int s_new_error_fs_event_flag;
 	char *s_mount_path;
@@ -1132,7 +1132,7 @@ struct ext4_sb_info {
 	int s_swap_create_time;
 #endif
 #endif  
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef MY_ABC_HERE
 	atomic_t reada_group_desc_threads;  
 	struct workqueue_struct *group_desc_readahead_wq;
@@ -1754,7 +1754,7 @@ extern int ext4_mb_add_groupinfo(struct super_block *sb,
 		ext4_group_t i, struct ext4_group_desc *desc);
 extern int ext4_group_add_blocks(handle_t *handle, struct super_block *sb,
 				ext4_fsblk_t block, unsigned long count);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 extern int ext4_trim_fs(struct super_block *, struct fstrim_range *,
 				unsigned long blkdev_flags);
 #else  

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * The Flash Memory Controller v100 Device Driver for hisilicon
  *
@@ -33,12 +36,12 @@
 
 #undef HIFMC100_SPI_NAND_SUPPORT_REG_WRITE
 /* #define HIFMC100_SPI_NAND_SUPPORT_REG_WRITE */
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 /*****************************************************************************/
 #define HIFMC100_ECC_ERR_NUM0_BUF0		0xc0
 
 #define GET_ECC_ERR_NUM(_i, _reg)		(((_reg) >> ((_i) * 8)) & 0xff)
-#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#endif /* MY_DEF_HERE */
 
 /*****************************************************************************/
 #define REG_CNT_HIGH_BLOCK_NUM_SHIFT		10

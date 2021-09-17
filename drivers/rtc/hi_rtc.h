@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * include/hi_rtc.h for Linux .
  *
@@ -57,8 +60,8 @@ typedef struct {
 #define HI_RTC_REG_SET		_IOW('p', 0x0c,  reg_data_t)
 #define HI_RTC_REG_READ		_IOR('p', 0x0d,  reg_data_t)
 
-#if defined(CONFIG_SYNO_HI3536_RTC_HCTOSYS)
+#if defined(MY_DEF_HERE)
 int hirtc_get_time(rtc_time_t *compositetime);
-#endif /* CONFIG_SYNO_HI3536_RTC_HCTOSYS */
+#endif /* MY_DEF_HERE */
 
 #endif

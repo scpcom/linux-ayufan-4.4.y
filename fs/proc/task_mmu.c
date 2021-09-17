@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/mm.h>
 #include <linux/hugetlb.h>
 #include <linux/huge_mm.h>
@@ -134,7 +137,7 @@ static void release_task_mempolicy(struct proc_maps_private *priv)
 }
 #endif
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static void seq_print_vma_name(struct seq_file *m, struct vm_area_struct *vma)
 {
 	const char __user *name = vma_get_anon_name(vma);
@@ -184,7 +187,7 @@ static void seq_print_vma_name(struct seq_file *m, struct vm_area_struct *vma)
 
 	seq_putc(m, ']');
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 static void vma_stop(struct proc_maps_private *priv, struct vm_area_struct *vma)
 {
@@ -394,17 +397,17 @@ show_map_vma(struct seq_file *m, struct vm_area_struct *vma, int is_pid)
 				pad_len_spaces(m, len);
 				seq_printf(m, "[stack:%d]", tid);
 			}
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			goto done;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		if (vma_get_anon_name(vma)) {
 			pad_len_spaces(m, len);
 			seq_print_vma_name(m, vma);
 		}
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	}
 
 done:
@@ -702,13 +705,13 @@ static int show_smap(struct seq_file *m, void *v, int is_pid)
 
 	show_smap_vma_flags(m, vma);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (vma_get_anon_name(vma)) {
 		seq_puts(m, "Name:           ");
 		seq_print_vma_name(m, vma);
 		seq_putc(m, '\n');
 	}
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	if (m->count < m->size)  /* vma is copied successfully */
 		m->version = (vma != get_gate_vma(task->mm))

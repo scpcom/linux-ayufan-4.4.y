@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifdef CONFIG_ARCH_HI3531A
 
 #include "hi_ahci_sys_hi3531a_defconfig.h"
@@ -112,11 +115,11 @@ static void hi_sata_phy_reset(void)
 		if (mplx_port0)
 			tmp_val |= HI_SATA_PHY1A_RST | HI_SATA_PHY0_RST;
 		else
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 			tmp_val |= HI_SATA_PHY1_RST | HI_SATA_PHY0B_RST;
-#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#else /* MY_DEF_HERE */
 			tmp_val |= HI_SATA_PHY1_RST | HI_SATA_PHY0A_RST;
-#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#endif /* MY_DEF_HERE */
 	}
 	if (nport == 2) {
 		if (mplx_port0)
@@ -144,11 +147,11 @@ static void hi_sata_phy_unreset(void)
 		if (mplx_port0)
 			tmp_val &= ~(HI_SATA_PHY1A_RST | HI_SATA_PHY0_RST);
 		else
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 			tmp_val &= ~(HI_SATA_PHY1_RST | HI_SATA_PHY0B_RST);
-#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#else /* MY_DEF_HERE */
 			tmp_val &= ~(HI_SATA_PHY1_RST | HI_SATA_PHY0A_RST);
-#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#endif /* MY_DEF_HERE */
 	}
 	if (nport == 2) {
 		if (mplx_port0)

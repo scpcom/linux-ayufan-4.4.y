@@ -281,7 +281,7 @@ struct address_space_operations {
 	int (*write_end)(struct file *, struct address_space *mapping,
 				loff_t pos, unsigned len, unsigned copied,
 				struct page *page, void *fsdata);
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -310,7 +310,7 @@ struct address_space_operations {
 	int (*swap_activate)(struct swap_info_struct *sis, struct file *file,
 				sector_t *span);
 	void (*swap_deactivate)(struct file *file);
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef MY_ABC_HERE
 	int (*aggregate_write_end)(struct file *, struct address_space *mapping,
 				loff_t pos, unsigned len, unsigned copied,
@@ -439,7 +439,7 @@ struct inode {
 	struct super_block	*i_sb;
 	struct address_space	*i_mapping;
 
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef CONFIG_SECURITY
@@ -481,7 +481,7 @@ struct inode {
 		struct rcu_head		i_rcu;
 	};
 	u64			i_version;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -521,7 +521,7 @@ struct inode {
 #ifdef CONFIG_IMA
 	atomic_t		i_readcount;  
 #endif
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -532,7 +532,7 @@ struct inode {
 #endif  
 #endif  
 	void			*i_private;  
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_SECURITY
 	void			*i_security;
 #endif
@@ -698,7 +698,7 @@ struct file {
 	struct file_ra_state	f_ra;
 
 	u64			f_version;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef CONFIG_SECURITY
@@ -717,7 +717,7 @@ struct file {
 #ifdef CONFIG_DEBUG_WRITECOUNT
 	unsigned long f_mnt_write_state;
 #endif
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_SECURITY
 	void			*f_security;
 #endif
@@ -1136,7 +1136,7 @@ struct super_block {
 	struct rw_semaphore	s_umount;
 	int			s_count;
 	atomic_t		s_active;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef CONFIG_SECURITY
@@ -1185,7 +1185,7 @@ struct super_block {
 	char __rcu *s_options;
 	const struct dentry_operations *s_d_op;  
 
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -1210,7 +1210,7 @@ struct super_block {
 	long relatime_period;
 #endif  
 
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	void                    *s_security;
 #ifdef MY_ABC_HERE
 	struct mutex s_archive_mutex;
@@ -1354,7 +1354,7 @@ struct file_operations {
 };
 
 struct inode_operations {
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -1378,7 +1378,7 @@ struct inode_operations {
 	int (*mknod) (struct inode *,struct dentry *,umode_t,dev_t);
 	int (*rename) (struct inode *, struct dentry *,
 			struct inode *, struct dentry *);
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -1423,7 +1423,7 @@ struct inode_operations {
 	int (*atomic_open)(struct inode *, struct dentry *,
 			   struct file *, unsigned open_flag,
 			   umode_t create_mode, int *opened);
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef MY_ABC_HERE
 	int (*syno_getattr)(struct dentry *, struct kstat *, int flags);
 #endif
@@ -1472,7 +1472,7 @@ extern ssize_t vfs_writev(struct file *, const struct iovec __user *,
 		unsigned long, loff_t *);
 
 struct super_operations {
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -1510,7 +1510,7 @@ struct super_operations {
 	int (*bdev_try_to_free_page)(struct super_block*, struct page*, gfp_t);
 	int (*nr_cached_objects)(struct super_block *);
 	void (*free_cached_objects)(struct super_block *, int);
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef MY_ABC_HERE
 	int (*syno_get_sb_archive_ver)(struct super_block *sb, u32 *version);
 	int (*syno_set_sb_archive_ver)(struct super_block *sb, u32 version);
@@ -1661,7 +1661,7 @@ struct file_system_type {
 
 	struct lock_class_key i_lock_key;
 	struct lock_class_key i_mutex_key;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -1669,7 +1669,7 @@ struct file_system_type {
 #endif
 #endif  
 	struct lock_class_key i_mutex_dir_key;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef MY_ABC_HERE
 	struct lock_class_key i_syno_mutex_key;
 #endif

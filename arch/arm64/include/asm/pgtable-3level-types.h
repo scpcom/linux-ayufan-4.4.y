@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2012 ARM Ltd.
  *
@@ -16,9 +19,9 @@
 #ifndef __ASM_PGTABLE_3LEVEL_TYPES_H
 #define __ASM_PGTABLE_3LEVEL_TYPES_H
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <asm/types.h>
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 typedef u64 pteval_t;
 typedef u64 pmdval_t;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_PRCTL_H
 #define _LINUX_PRCTL_H
 
@@ -149,7 +152,7 @@
 
 #define PR_GET_TID_ADDRESS	40
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /* Sets the timerslack for arbitrary threads
  * arg2 slack value, 0 means "use default"
  * arg3 pid of the thread whose timer slack needs to be set
@@ -158,6 +161,6 @@
 
 #define PR_SET_VMA		0x53564d41
 #define PR_SET_VMA_ANON_NAME		0
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #endif /* _LINUX_PRCTL_H */

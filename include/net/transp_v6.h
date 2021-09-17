@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _TRANSP_V6_H
 #define _TRANSP_V6_H
 
@@ -11,9 +14,9 @@ extern struct proto rawv6_prot;
 extern struct proto udpv6_prot;
 extern struct proto udplitev6_prot;
 extern struct proto tcpv6_prot;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 extern struct proto pingv6_prot;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 struct flowi6;
 
@@ -24,10 +27,10 @@ extern int				ipv6_frag_init(void);
 extern void				ipv6_frag_exit(void);
 
 /* transport protocols */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 extern int				pingv6_init(void);
 extern void				pingv6_exit(void);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 extern int				rawv6_init(void);
 extern void				rawv6_exit(void);
 extern int				udpv6_init(void);

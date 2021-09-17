@@ -10,7 +10,7 @@
 #include <linux/gfp.h>
 #include <linux/module.h>
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 #include <net/tnkdrv.h>
 #endif
@@ -36,7 +36,7 @@ int sysctl_tcp_slow_start_after_idle __read_mostly = 1;
 static bool tcp_write_xmit(struct sock *sk, unsigned int mss_now, int nonagle,
 			   int push_one, gfp_t gfp);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 extern struct tnkfuncs *tnk;
 #endif
@@ -157,7 +157,7 @@ void tcp_select_initial_window(int __space, __u32 mss,
 		}
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	 
 	if (mss > (1 << *rcv_wscale)) {
 		int init_cwnd = sysctl_tcp_default_init_rwnd;
@@ -775,7 +775,7 @@ static int tcp_transmit_skb(struct sock *sk, struct sk_buff *skb, int clone_it,
 	return net_xmit_eval(err);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 #if !SWITCH_SEND_ACK || !SWITCH_ZERO_PROBE
 static int tnk_transmit_skb(struct sock *sk, struct sk_buff *skb, int clone_it,
@@ -1168,7 +1168,7 @@ unsigned int tcp_sync_mss(struct sock *sk, u32 pmtu)
 	if (icsk->icsk_mtup.enabled)
 		mss_now = min(mss_now, tcp_mtu_to_mss(sk, icsk->icsk_mtup.search_low));
 	tp->mss_cache = mss_now;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	if (tnk)
 		tnk->tcp_sync_mss(sk);
@@ -1206,7 +1206,7 @@ unsigned int tcp_current_mss(struct sock *sk)
 
 	return mss_now;
 }
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 EXPORT_SYMBOL(tcp_current_mss);
 #endif
@@ -2188,7 +2188,7 @@ coalesce:
 	__tcp_push_pending_frames(sk, tcp_current_mss(sk), TCP_NAGLE_OFF);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 
 void tnk_send_fin(struct sock *sk)
@@ -2224,7 +2224,7 @@ void tcp_send_active_reset(struct sock *sk, gfp_t priority)
 {
 	struct sk_buff *skb;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 	sk->sk_tnkinfo.howto_destroy = TNK_DESTROY_CLOSE;
 	 
@@ -2625,7 +2625,7 @@ void tcp_send_ack(struct sock *sk)
 	tcp_transmit_skb(sk, buff, 0, sk_gfp_atomic(sk, GFP_ATOMIC));
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_TNK
 #if !SWITCH_SEND_ACK
 void tnk_send_ack(struct sock *sk, unsigned int rcv_nxt,

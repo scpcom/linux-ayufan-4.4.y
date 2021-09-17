@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  fs/timerfd.c
  *
@@ -8,9 +11,9 @@
  *
  */
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <linux/alarmtimer.h>
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 #include <linux/file.h>
 #include <linux/poll.h>
 #include <linux/init.h>
@@ -29,14 +32,14 @@
 #include <linux/rcupdate.h>
 
 struct timerfd_ctx {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	union {
 		struct hrtimer tmr;
 		struct alarm alarm;
 	} t;
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	struct hrtimer tmr;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	ktime_t tintv;
 	ktime_t moffs;
 	wait_queue_head_t wqh;
@@ -51,27 +54,27 @@ struct timerfd_ctx {
 static LIST_HEAD(cancel_list);
 static DEFINE_SPINLOCK(cancel_lock);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static inline bool isalarm(struct timerfd_ctx *ctx)
 {
 	return ctx->clockid == CLOCK_REALTIME_ALARM ||
 		ctx->clockid == CLOCK_BOOTTIME_ALARM;
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /*
  * This gets called when the timer event triggers. We set the "expired"
  * flag, but we do not re-arm the timer (in case it's necessary,
  * tintv.tv64 != 0) until the timer is accessed.
  */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static void timerfd_triggered(struct timerfd_ctx *ctx)
 {
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 static enum hrtimer_restart timerfd_tmrproc(struct hrtimer *htmr)
 {
 	struct timerfd_ctx *ctx = container_of(htmr, struct timerfd_ctx, tmr);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	unsigned long flags;
 
 	spin_lock_irqsave(&ctx->wqh.lock, flags);
@@ -79,14 +82,14 @@ static enum hrtimer_restart timerfd_tmrproc(struct hrtimer *htmr)
 	ctx->ticks++;
 	wake_up_locked(&ctx->wqh);
 	spin_unlock_irqrestore(&ctx->wqh.lock, flags);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	return HRTIMER_NORESTART;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static enum hrtimer_restart timerfd_tmrproc(struct hrtimer *htmr)
 {
 	struct timerfd_ctx *ctx = container_of(htmr, struct timerfd_ctx,
@@ -103,7 +106,7 @@ static enum alarmtimer_restart timerfd_alarmproc(struct alarm *alarm,
 	timerfd_triggered(ctx);
 	return ALARMTIMER_NORESTART;
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /*
  * Called when the clock was set to cancel the timers in the cancel
@@ -152,14 +155,14 @@ static bool timerfd_canceled(struct timerfd_ctx *ctx)
 
 static void timerfd_setup_cancel(struct timerfd_ctx *ctx, int flags)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if ((ctx->clockid == CLOCK_REALTIME ||
 	     ctx->clockid == CLOCK_REALTIME_ALARM) &&
 	    (flags & TFD_TIMER_ABSTIME) && (flags & TFD_TIMER_CANCEL_ON_SET)) {
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	if (ctx->clockid == CLOCK_REALTIME && (flags & TFD_TIMER_ABSTIME) &&
 	    (flags & TFD_TIMER_CANCEL_ON_SET)) {
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		if (!ctx->might_cancel) {
 			ctx->might_cancel = true;
 			spin_lock(&cancel_lock);
@@ -175,14 +178,14 @@ static ktime_t timerfd_get_remaining(struct timerfd_ctx *ctx)
 {
 	ktime_t remaining;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (isalarm(ctx))
 		remaining = alarm_expires_remaining(&ctx->t.alarm);
 	else
 		remaining = hrtimer_expires_remaining(&ctx->t.tmr);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	remaining = hrtimer_expires_remaining(&ctx->tmr);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	return remaining.tv64 < 0 ? ktime_set(0, 0): remaining;
 }
@@ -202,7 +205,7 @@ static int timerfd_setup(struct timerfd_ctx *ctx, int flags,
 	ctx->ticks = 0;
 	ctx->tintv = timespec_to_ktime(ktmr->it_interval);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (isalarm(ctx)) {
 		alarm_init(&ctx->t.alarm,
 			   ctx->clockid == CLOCK_REALTIME_ALARM ?
@@ -213,14 +216,14 @@ static int timerfd_setup(struct timerfd_ctx *ctx, int flags,
 		hrtimer_set_expires(&ctx->t.tmr, texp);
 		ctx->t.tmr.function = timerfd_tmrproc;
 	}
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	hrtimer_init(&ctx->tmr, clockid, htmode);
 	hrtimer_set_expires(&ctx->tmr, texp);
 	ctx->tmr.function = timerfd_tmrproc;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	if (texp.tv64 != 0) {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		if (isalarm(ctx)) {
 			if (flags & TFD_TIMER_ABSTIME)
 				alarm_start(&ctx->t.alarm, texp);
@@ -229,9 +232,9 @@ static int timerfd_setup(struct timerfd_ctx *ctx, int flags,
 		} else {
 			hrtimer_start(&ctx->t.tmr, texp, htmode);
 		}
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		hrtimer_start(&ctx->tmr, texp, htmode);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 		if (timerfd_canceled(ctx))
 			return -ECANCELED;
@@ -244,15 +247,15 @@ static int timerfd_release(struct inode *inode, struct file *file)
 	struct timerfd_ctx *ctx = file->private_data;
 
 	timerfd_remove_cancel(ctx);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 
 	if (isalarm(ctx))
 		alarm_cancel(&ctx->t.alarm);
 	else
 		hrtimer_cancel(&ctx->t.tmr);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	hrtimer_cancel(&ctx->tmr);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	kfree_rcu(ctx, rcu);
 	return 0;
 }
@@ -309,7 +312,7 @@ static ssize_t timerfd_read(struct file *file, char __user *buf, size_t count,
 			 * callback to avoid DoS attacks specifying a very
 			 * short timer period.
 			 */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 			if (isalarm(ctx)) {
 				ticks += alarm_forward_now(
 					&ctx->t.alarm, ctx->tintv) - 1;
@@ -319,11 +322,11 @@ static ssize_t timerfd_read(struct file *file, char __user *buf, size_t count,
 							     ctx->tintv) - 1;
 				hrtimer_restart(&ctx->t.tmr);
 			}
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 			ticks += hrtimer_forward_now(&ctx->tmr,
 						     ctx->tintv) - 1;
 			hrtimer_restart(&ctx->tmr);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		}
 		ctx->expired = 0;
 		ctx->ticks = 0;
@@ -365,14 +368,14 @@ SYSCALL_DEFINE2(timerfd_create, int, clockid, int, flags)
 
 	if ((flags & ~TFD_CREATE_FLAGS) ||
 	    (clockid != CLOCK_MONOTONIC &&
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	     clockid != CLOCK_REALTIME &&
 	     clockid != CLOCK_REALTIME_ALARM &&
 	     clockid != CLOCK_BOOTTIME &&
 	     clockid != CLOCK_BOOTTIME_ALARM))
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	     clockid != CLOCK_REALTIME))
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		return -EINVAL;
 
 	ctx = kzalloc(sizeof(*ctx), GFP_KERNEL);
@@ -381,7 +384,7 @@ SYSCALL_DEFINE2(timerfd_create, int, clockid, int, flags)
 
 	init_waitqueue_head(&ctx->wqh);
 	ctx->clockid = clockid;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 
 	if (isalarm(ctx))
 		alarm_init(&ctx->t.alarm,
@@ -390,9 +393,9 @@ SYSCALL_DEFINE2(timerfd_create, int, clockid, int, flags)
 			   timerfd_alarmproc);
 	else
 		hrtimer_init(&ctx->t.tmr, clockid, HRTIMER_MODE_ABS);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	hrtimer_init(&ctx->tmr, clockid, HRTIMER_MODE_ABS);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	ctx->moffs = ktime_get_monotonic_offset();
 
@@ -430,7 +433,7 @@ static int do_timerfd_settime(int ufd, int flags,
 	 */
 	for (;;) {
 		spin_lock_irq(&ctx->wqh.lock);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 
 		if (isalarm(ctx)) {
 			if (alarm_try_to_cancel(&ctx->t.alarm) >= 0)
@@ -439,10 +442,10 @@ static int do_timerfd_settime(int ufd, int flags,
 			if (hrtimer_try_to_cancel(&ctx->t.tmr) >= 0)
 				break;
 		}
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		if (hrtimer_try_to_cancel(&ctx->tmr) >= 0)
 			break;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		spin_unlock_irq(&ctx->wqh.lock);
 		cpu_relax();
 	}
@@ -453,17 +456,17 @@ static int do_timerfd_settime(int ufd, int flags,
 	 * We do not update "ticks" and "expired" since the timer will be
 	 * re-programmed again in the following timerfd_setup() call.
 	 */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (ctx->expired && ctx->tintv.tv64) {
 		if (isalarm(ctx))
 			alarm_forward_now(&ctx->t.alarm, ctx->tintv);
 		else
 			hrtimer_forward_now(&ctx->t.tmr, ctx->tintv);
 	}
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	if (ctx->expired && ctx->tintv.tv64)
 		hrtimer_forward_now(&ctx->tmr, ctx->tintv);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	old->it_value = ktime_to_timespec(timerfd_get_remaining(ctx));
 	old->it_interval = ktime_to_timespec(ctx->tintv);
@@ -490,7 +493,7 @@ static int do_timerfd_gettime(int ufd, struct itimerspec *t)
 	spin_lock_irq(&ctx->wqh.lock);
 	if (ctx->expired && ctx->tintv.tv64) {
 		ctx->expired = 0;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 
 		if (isalarm(ctx)) {
 			ctx->ticks +=
@@ -503,11 +506,11 @@ static int do_timerfd_gettime(int ufd, struct itimerspec *t)
 				- 1;
 			hrtimer_restart(&ctx->t.tmr);
 		}
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		ctx->ticks +=
 			hrtimer_forward_now(&ctx->tmr, ctx->tintv) - 1;
 		hrtimer_restart(&ctx->tmr);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	}
 	t->it_value = ktime_to_timespec(timerfd_get_remaining(ctx));
 	t->it_interval = ktime_to_timespec(ctx->tintv);

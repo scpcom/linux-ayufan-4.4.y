@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 
 #include <linux/wait.h>
 #include <linux/backing-dev.h>
@@ -297,11 +300,11 @@ void bdi_wakeup_thread_delayed(struct backing_dev_info *bdi)
 
 	timeout = msecs_to_jiffies(dirty_writeback_interval * 10);
 	spin_lock_bh(&bdi->wb_lock);
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	if (test_bit(BDI_REGISTERED, &bdi->state))
-#else /* CONFIG_SYNO_HI3536 */
+#else /* MY_DEF_HERE */
 	if (test_bit(BDI_registered, &bdi->state))
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 		queue_delayed_work(bdi_wq, &bdi->wb.dwork, timeout);
 	spin_unlock_bh(&bdi->wb_lock);
 }
@@ -336,11 +339,11 @@ int bdi_register(struct backing_dev_info *bdi, struct device *parent,
 	bdi->dev = dev;
 
 	bdi_debug_register(bdi, dev_name(dev));
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	set_bit(BDI_REGISTERED, &bdi->state);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	set_bit(BDI_registered, &bdi->state);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	spin_lock_bh(&bdi_lock);
 	list_add_tail_rcu(&bdi->bdi_list, &bdi_list);
@@ -372,11 +375,11 @@ static void bdi_wb_shutdown(struct backing_dev_info *bdi)
 
 	/* Make sure nobody queues further work */
 	spin_lock_bh(&bdi->wb_lock);
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	clear_bit(BDI_REGISTERED, &bdi->state);
-#else /* CONFIG_SYNO_HI3536 */
+#else /* MY_DEF_HERE */
 	clear_bit(BDI_registered, &bdi->state);
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 	spin_unlock_bh(&bdi->wb_lock);
 
 	/*

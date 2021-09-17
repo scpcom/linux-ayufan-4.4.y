@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * 32-bit compatibility support for ELF format executables and core dumps.
  *
@@ -88,12 +91,12 @@ static void cputime_to_compat_timeval(const cputime_t cputime,
 #define	ELF_HWCAP		COMPAT_ELF_HWCAP
 #endif
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef	COMPAT_ELF_HWCAP2
 #undef	ELF_HWCAP2
 #define	ELF_HWCAP2		COMPAT_ELF_HWCAP2
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #ifdef	COMPAT_ARCH_DLINFO
 #undef	ARCH_DLINFO

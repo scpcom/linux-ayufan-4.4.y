@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /***************************************************************************
  * Linux PPP over X - Generic PPP transport layer sockets
  * Linux PPP over Ethernet (PPPoE) Socket Implementation (RFC 2516) 
@@ -42,7 +45,7 @@ struct pptp_opt {
 	int ppp_flags;
 };
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 struct pppolac_opt {
 	__u32		local;
 	__u32		remote;
@@ -60,7 +63,7 @@ struct pppopns_opt {
 	void		(*data_ready)(struct sock *sk_raw, int length);
 	int		(*backlog_rcv)(struct sock *sk_raw, struct sk_buff *skb);
 };
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #include <net/sock.h>
 
@@ -72,10 +75,10 @@ struct pppox_sock {
 	union {
 		struct pppoe_opt pppoe;
 		struct pptp_opt  pptp;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		struct pppolac_opt lac;
 		struct pppopns_opt pns;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	} proto;
 	__be16			num;
 };

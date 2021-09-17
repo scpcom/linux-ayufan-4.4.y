@@ -26,7 +26,7 @@ struct nand_flash_dev nand_flash_ids[] = {
 	{"TC58NVG6D2 64G 3.3V 8-bit",
 		{ .id = {0x98, 0xde, 0x94, 0x82, 0x76, 0x56, 0x04, 0x20} },
 		  SZ_8K, SZ_8K, SZ_2M, 0, 8, 640},
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_MTD_NAND_MUSEUM_IDS
 	LEGACY_ID_NAND("NAND 1MiB 5V 8-bit",	0x6E, 1, SZ_4K, SP_OPTIONS),
 	LEGACY_ID_NAND("NAND 2MiB 5V 8-bit",	0x64, 2, SZ_4K, SP_OPTIONS),
@@ -152,7 +152,7 @@ struct nand_flash_dev nand_flash_ids[] = {
 	EXTENDED_ID_NAND("NAND 64GiB 1,8V 16-bit", 0x2E, 65536, LP_OPTIONS16),
 	EXTENDED_ID_NAND("NAND 64GiB 3,3V 16-bit", 0x4E, 65536, LP_OPTIONS16),
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	 
 	{"AND 128MiB 3,3V 8-bit", {.id = {0x01} }, 2048, 128, 0x4000,
 		NAND_IS_AND | NAND_NO_AUTOINCR | NAND_NEED_READRDY
@@ -165,13 +165,13 @@ struct nand_flash_dev nand_flash_ids[] = {
 };
 
 struct nand_manufacturers nand_manuf_ids[] = {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	{NAND_MFR_TOSHIBA,	"Toshiba"},
 	{NAND_MFR_SAMSUNG,	"Samsung"},
 	{NAND_MFR_FUJITSU,	"Fujitsu"},
 	{NAND_MFR_NATIONAL,	"National"},
 	{NAND_MFR_RENESAS,	"Renesas"},
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 	{NAND_MFR_ST_MICRO,	"ST/Micro"},
 #else  
 	{NAND_MFR_STMICRO,	"ST Micro"},
@@ -179,7 +179,7 @@ struct nand_manufacturers nand_manuf_ids[] = {
 	{NAND_MFR_HYNIX,	"Hynix"},
 	{NAND_MFR_MICRON,	"Micron"},
 	{NAND_MFR_AMD,		"AMD/Spansion"},
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 	{NAND_MFR_GD_ESMT,	"GD/ESMT"},
 	{NAND_MFR_EON,		"Eon"},
 #else  
@@ -190,7 +190,7 @@ struct nand_manufacturers nand_manuf_ids[] = {
 #endif  
 	{NAND_MFR_WINBOND,	"Winbond"},
 	{NAND_MFR_ATO,		"ATO"},
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 	{NAND_MFR_MXIC,		"MXIC"},
 	{NAND_MFR_ALL_FLASH,	"All-flash"},
 	{NAND_MFR_PARAGON,	"Paragon"},

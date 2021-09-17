@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
   This is the driver for the ST MAC 10/100/1000 on-chip Ethernet controllers.
   ST Ethernet IPs are built around a Synopsys IP Core.
@@ -364,7 +367,7 @@ static inline u32 stmmac_tx_avail(struct stmmac_priv *priv)
 	return priv->dirty_tx + priv->dma_tx_size - priv->cur_tx - 1;
 }
 
-#if defined(CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR)
+#if defined(MY_DEF_HERE)
 void syno_update_rtl8211e_led_behavior(struct phy_device *phydev)
 {
 	/* To change LED behavior, switch to extension Page first:
@@ -392,7 +395,7 @@ void syno_update_rtl8211e_led_behavior(struct phy_device *phydev)
 	 */
 	phy_write(phydev, 0x1f, 0x00);
 }
-#endif /* CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR */
+#endif /* MY_DEF_HERE */
 
 /* On some ST platforms, some HW system configuraton registers have to be
  * set according to the link speed negotiated.
@@ -457,22 +460,22 @@ static void stmmac_adjust_link(struct net_device *dev)
 {
 	struct stmmac_priv *priv = netdev_priv(dev);
 	struct phy_device *phydev = priv->phydev;
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#else /* MY_DEF_HERE */
 	unsigned long flags;
-#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#endif /* MY_DEF_HERE */
 	int new_state = 0;
 	unsigned int fc = priv->flow_ctrl, pause_time = priv->pause;
 
 	if (phydev == NULL)
 		return;
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 	spin_lock(&priv->lock);
-#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#else /* MY_DEF_HERE */
 	spin_lock_irqsave(&priv->lock, flags);
-#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#endif /* MY_DEF_HERE */
 
 	if (phydev->link) {
 		u32 ctrl = readl(priv->ioaddr + MAC_CTRL_REG);
@@ -545,23 +548,23 @@ static void stmmac_adjust_link(struct net_device *dev)
 		if (netif_msg_link(priv))
 			phy_print_status(phydev);
 	}
-#if defined(CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR)
+#if defined(MY_DEF_HERE)
 	syno_update_rtl8211e_led_behavior(phydev);
-#endif /* CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#if defined(MY_DEF_HERE)
 	spin_unlock(&priv->lock);
-#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#else /* MY_DEF_HERE */
 	spin_unlock_irqrestore(&priv->lock, flags);
-#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+#endif /* MY_DEF_HERE */
 
 	DBG(probe, DEBUG, "stmmac_adjust_link: exiting\n");
 }
 
-#if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
+#if defined(MY_DEF_HERE)
 #define SYNO_GMAC_NUM 2
 struct net_device *gmac_netdevs[SYNO_GMAC_NUM];
-#endif /* CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING */
+#endif /* MY_DEF_HERE */
 
 /**
  * stmmac_init_phy - PHY initialization
@@ -578,13 +581,13 @@ static int stmmac_init_phy(struct net_device *dev)
 	char phy_id[MII_BUS_ID_SIZE + 3];
 	char bus_id[MII_BUS_ID_SIZE];
 
-#if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
+#if defined(MY_DEF_HERE)
 	if (dev->dev_id < SYNO_GMAC_NUM) {
 		gmac_netdevs[dev->dev_id] = dev;
 	} else {
 		WARN_ON(1);
 	}
-#endif /* CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING */
+#endif /* MY_DEF_HERE */
 
 	priv->oldlink = 0;
 	priv->speed = 0;
@@ -1417,13 +1420,13 @@ static int stmmac_open(struct net_device *dev)
 static int stmmac_release(struct net_device *dev)
 {
 	struct stmmac_priv *priv = netdev_priv(dev);
-#if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
+#if defined(MY_DEF_HERE)
 	if (dev->dev_id < SYNO_GMAC_NUM) {
 		gmac_netdevs[dev->dev_id] = NULL;
 	} else {
 		WARN_ON(1);
 	}
-#endif /* CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING */
+#endif /* MY_DEF_HERE */
 
 #ifdef TNK_BONDING
 	if (hitoe)
@@ -1459,7 +1462,7 @@ static int stmmac_release(struct net_device *dev)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
+#if defined(MY_DEF_HERE)
 void syno_stmmac_release(void)
 {
 	int i;
@@ -1471,7 +1474,7 @@ void syno_stmmac_release(void)
 	}
 }
 EXPORT_SYMBOL(syno_stmmac_release);
-#endif /* CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING */
+#endif /* MY_DEF_HERE */
 
 static void stmmac_proc_gmac(struct seq_file *s, int index, char *dir,
 			     unsigned int curr,
@@ -2185,9 +2188,9 @@ static int stmmac_change_mtu(struct net_device *dev, int new_mtu)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 #define TNK_INTR_STAT_GMAC0_DATA \
 	(TNK_MASK_INTR_STAT_DMA_CH0 << TNK_OFFSET_INTR_STAT_DMA_CH0)
 #define TNK_INTR_STAT_GMAC0_CTRL \
@@ -2200,7 +2203,7 @@ static int stmmac_change_mtu(struct net_device *dev, int new_mtu)
 	(TNK_INTR_STAT_GMAC0_DATA | TNK_INTR_STAT_GMAC0_CTRL)
 #define TNK_INTR_GROUP_GMAC1 \
 	(TNK_INTR_STAT_GMAC1_DATA | TNK_INTR_STAT_GMAC1_CTRL)
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 #if SWITCH_RECV_LRO
 #define TNK_INTR_GROUP_TOE \
@@ -2218,7 +2221,7 @@ static int stmmac_change_mtu(struct net_device *dev, int new_mtu)
 	 | (TNK_MASK_INTR_STAT_TOE << TNK_OFFSET_INTR_STAT_TOE))
 #endif
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 static void stmmac_mac_irq(enum tnk_gmac_id mac_id,
 			   bool data_irq, bool ctrl_irq)
 {
@@ -2307,7 +2310,7 @@ static irqreturn_t stmmac_interrupt(int irq, void *arg)
 #endif
 	return IRQ_HANDLED;
 }
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 static irqreturn_t stmmac_interrupt(int irq, void *arg)
 {
 	struct net_device *dev;
@@ -2387,7 +2390,7 @@ static irqreturn_t stmmac_interrupt(int irq, void *arg)
 handled:
 	return IRQ_HANDLED;
 }
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_NET_POLL_CONTROLLER
 /* Polling receive - used by NETCONSOLE and other diagnostic tools
@@ -2489,13 +2492,13 @@ static int stmmac_probe(struct net_device *dev)
 	dev->netdev_ops = &stmmac_netdev_ops;
 	stmmac_set_ethtool_ops(dev);
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	dev->hw_features |= NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_IPV6_CSUM;
 	dev->features |= dev->hw_features | NETIF_F_HIGHDMA;
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 	dev->features |= NETIF_F_SG | NETIF_F_HIGHDMA | NETIF_F_IP_CSUM
 				| NETIF_F_IPV6_CSUM;
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 	dev->watchdog_timeo = msecs_to_jiffies(watchdog);
 #ifdef STMMAC_VLAN_TAG_USED
@@ -2805,7 +2808,7 @@ static int stmmac_dvr_remove(struct platform_device *pdev)
 
 	/*  Disable all interrupts */
 	writel(0, stmmac_base_ioaddr + TNK_REG_INTR_EN);
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 #if SWITCH_MULTI_INTR
 #if (TOE_MULTI_INTR_NUM > 1)
 	writel(0, stmmac_base_ioaddr + TNK_REG_INTR1_EN);
@@ -2817,7 +2820,7 @@ static int stmmac_dvr_remove(struct platform_device *pdev)
 	writel(0, stmmac_base_ioaddr + TNK_REG_INTR3_EN);
 #endif
 #endif
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 	/* Free the IRQ lines */
 	free_irq(SYNOP_GMAC_IRQNUM, pdev);
@@ -3048,9 +3051,9 @@ static int stmmac_dvr_probe(struct platform_device *pdev)
 		}
 
 		stmmac_external_phy_reset(i, syscfg_base_ioaddr);
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 		stmmac_syscfg_phy_cfg(priv, SPEED_100, DUPLEX_FULL, 0);
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 		pr_info("\t%s - (dev. name: %s - id: %d, IRQ #%d\n"
 			"\tIO base addr: 0x%p)\n", ndev->name, pdev->name,

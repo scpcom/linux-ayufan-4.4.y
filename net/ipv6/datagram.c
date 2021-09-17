@@ -159,7 +159,7 @@ ipv4_connected:
 	fl6.flowi6_mark = sk->sk_mark;
 	fl6.fl6_dport = inet->inet_dport;
 	fl6.fl6_sport = inet->inet_sport;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	fl6.flowi6_uid = sock_i_uid(sk);
 #endif  
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/kernel/seccomp.c
  *
@@ -18,26 +21,26 @@
 #include <linux/compat.h>
 #include <linux/sched.h>
 #include <linux/seccomp.h>
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <linux/slab.h>
 #include <linux/syscalls.h>
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /* #define SECCOMP_DEBUG 1 */
 
 #ifdef CONFIG_SECCOMP_FILTER
 #include <asm/syscall.h>
 #include <linux/filter.h>
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <linux/pid.h>
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 #include <linux/ptrace.h>
 #include <linux/security.h>
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 #include <linux/slab.h>
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 #include <linux/tracehook.h>
 #include <linux/uaccess.h>
 
@@ -106,11 +109,11 @@ u32 seccomp_bpf_load(int off)
 	if (off == BPF_DATA(nr))
 		return syscall_get_nr(current, regs);
 	if (off == BPF_DATA(arch))
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		return syscall_get_arch();
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		return syscall_get_arch(current, regs);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	if (off >= BPF_DATA(args[0]) && off < BPF_DATA(args[6])) {
 		unsigned long value;
 		int arg = (off - BPF_DATA(args[0])) / sizeof(u64);
@@ -216,35 +219,35 @@ static int seccomp_check_filter(struct sock_filter *filter, unsigned int flen)
  */
 static u32 seccomp_run_filters(int syscall)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	struct seccomp_filter *f = ACCESS_ONCE(current->seccomp.filter);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	struct seccomp_filter *f;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	u32 ret = SECCOMP_RET_ALLOW;
 
 	/* Ensure unexpected behavior doesn't result in failing open. */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (unlikely(WARN_ON(f == NULL)))
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	if (WARN_ON(current->seccomp.filter == NULL))
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		return SECCOMP_RET_KILL;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	/* Make sure cross-thread synced filter points somewhere sane. */
 	smp_read_barrier_depends();
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * All filters in the list are evaluated and the lowest BPF return
 	 * value always takes priority (ignoring the DATA).
 	 */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	for (; f; f = f->prev) {
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	for (f = current->seccomp.filter; f; f = f->prev) {
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		u32 cur_ret = sk_run_filter(NULL, f->insns);
 		if ((cur_ret & SECCOMP_RET_ACTION) < (ret & SECCOMP_RET_ACTION))
 			ret = cur_ret;
@@ -253,7 +256,7 @@ static u32 seccomp_run_filters(int syscall)
 }
 #endif /* CONFIG_SECCOMP_FILTER */
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static inline bool seccomp_may_assign_mode(unsigned long seccomp_mode)
 {
 	assert_spin_locked(&current->sighand->siglock);
@@ -277,10 +280,10 @@ static inline void seccomp_assign_mode(struct task_struct *task,
 	smp_mb();
 	set_tsk_thread_flag(task, TIF_SECCOMP);
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_SECCOMP_FILTER
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /* Returns 1 if the parent is an ancestor of the child. */
 static int is_ancestor(struct seccomp_filter *parent,
 		       struct seccomp_filter *child)
@@ -388,9 +391,9 @@ static inline void seccomp_sync_threads(void)
 		}
 	}
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /**
  * seccomp_prepare_filter: Prepares a seccomp filter for use.
  * @fprog: BPF program to install
@@ -398,7 +401,7 @@ static inline void seccomp_sync_threads(void)
  * Returns filter on success or an ERR_PTR on failure.
  */
 static struct seccomp_filter *seccomp_prepare_filter(struct sock_fprog *fprog)
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 /**
  * seccomp_attach_filter: Attaches a seccomp filter to current.
  * @fprog: BPF program to install
@@ -406,7 +409,7 @@ static struct seccomp_filter *seccomp_prepare_filter(struct sock_fprog *fprog)
  * Returns 0 on success or an errno on failure.
  */
 static long seccomp_attach_filter(struct sock_fprog *fprog)
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 {
 	struct seccomp_filter *filter;
 	unsigned long fp_size = fprog->len * sizeof(struct sock_filter);
@@ -414,21 +417,21 @@ static long seccomp_attach_filter(struct sock_fprog *fprog)
 	long ret;
 
 	if (fprog->len == 0 || fprog->len > BPF_MAXINSNS)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		return ERR_PTR(-EINVAL);
 	BUG_ON(INT_MAX / fprog->len < sizeof(struct sock_filter));
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		return -EINVAL;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	for (filter = current->seccomp.filter; filter; filter = filter->prev)
 		total_insns += filter->len + 4;  /* include a 4 instr penalty */
 	if (total_insns > MAX_INSNS_PER_PATH)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		return ERR_PTR(-ENOMEM);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		return -ENOMEM;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Installing a seccomp filter requires that the task have
@@ -436,28 +439,28 @@ static long seccomp_attach_filter(struct sock_fprog *fprog)
 	 * This avoids scenarios where unprivileged tasks can affect the
 	 * behavior of privileged children.
 	 */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (!task_no_new_privs(current) &&
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	if (!current->no_new_privs &&
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	    security_capable_noaudit(current_cred(), current_user_ns(),
 				     CAP_SYS_ADMIN) != 0)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		return ERR_PTR(-EACCES);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		return -EACCES;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	/* Allocate a new seccomp_filter */
 	filter = kzalloc(sizeof(struct seccomp_filter) + fp_size,
 			 GFP_KERNEL|__GFP_NOWARN);
 	if (!filter)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		return ERR_PTR(-ENOMEM);;
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		return -ENOMEM;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	atomic_set(&filter->usage, 1);
 	filter->len = fprog->len;
 
@@ -476,9 +479,9 @@ static long seccomp_attach_filter(struct sock_fprog *fprog)
 	if (ret)
 		goto fail;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	return filter;
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	/*
 	 * If there is an existing filter, make it the prev and don't drop its
 	 * task reference.
@@ -486,18 +489,18 @@ static long seccomp_attach_filter(struct sock_fprog *fprog)
 	filter->prev = current->seccomp.filter;
 	current->seccomp.filter = filter;
 	return 0;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 fail:
 	kfree(filter);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	return ERR_PTR(ret);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	return ret;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /**
  * seccomp_prepare_user_filter - prepares a user-supplied sock_fprog
  * @user_filter: pointer to the user data containing a sock_fprog.
@@ -509,7 +512,7 @@ seccomp_prepare_user_filter(const char __user *user_filter)
 {
 	struct sock_fprog fprog;
 	struct seccomp_filter *filter = ERR_PTR(-EFAULT);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 /**
  * seccomp_attach_user_filter - attaches a user-supplied sock_fprog
  * @user_filter: pointer to the user data containing a sock_fprog.
@@ -520,7 +523,7 @@ long seccomp_attach_user_filter(char __user *user_filter)
 {
 	struct sock_fprog fprog;
 	long ret = -EFAULT;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_COMPAT
 	if (is_compat_task()) {
@@ -533,18 +536,18 @@ long seccomp_attach_user_filter(char __user *user_filter)
 #endif
 	if (copy_from_user(&fprog, user_filter, sizeof(fprog)))
 		goto out;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	filter = seccomp_prepare_filter(&fprog);
 out:
 	return filter;
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	ret = seccomp_attach_filter(&fprog);
 out:
 	return ret;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /**
  * seccomp_attach_filter: validate and attach filter
  * @flags:  flags to change filter behavior
@@ -591,7 +594,7 @@ static long seccomp_attach_filter(unsigned int flags,
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /* get_seccomp_filter - increments the reference count of the filter on @tsk */
 void get_seccomp_filter(struct task_struct *tsk)
@@ -603,14 +606,14 @@ void get_seccomp_filter(struct task_struct *tsk)
 	atomic_inc(&orig->usage);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static inline void seccomp_filter_free(struct seccomp_filter *filter)
 {
 	if (filter) {
 		kfree(filter);
 	}
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /* put_seccomp_filter - decrements the ref count of tsk->seccomp.filter */
 void put_seccomp_filter(struct task_struct *tsk)
@@ -620,11 +623,11 @@ void put_seccomp_filter(struct task_struct *tsk)
 	while (orig && atomic_dec_and_test(&orig->usage)) {
 		struct seccomp_filter *freeme = orig;
 		orig = orig->prev;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		seccomp_filter_free(freeme);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		kfree(freeme);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	}
 }
 
@@ -643,11 +646,11 @@ static void seccomp_send_sigsys(int syscall, int reason)
 	info.si_code = SYS_SECCOMP;
 	info.si_call_addr = (void __user *)KSTK_EIP(current);
 	info.si_errno = reason;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	info.si_arch = syscall_get_arch();
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	info.si_arch = syscall_get_arch(current, task_pt_regs(current));
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	info.si_syscall = syscall;
 	force_sig_info(SIGSYS, &info, current);
 }
@@ -672,16 +675,16 @@ static int mode1_syscalls_32[] = {
 
 int __secure_computing(int this_syscall)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	int mode = current->seccomp.mode;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	int exit_sig = 0;
 	int *syscall;
 	u32 ret;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	/*
 	 * Make sure that any changes to mode from another thread have
 	 * been seen after TIF_SECCOMP was seen.
@@ -689,9 +692,9 @@ int __secure_computing(int this_syscall)
 	rmb();
 
 	switch (current->seccomp.mode) {
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	switch (mode) {
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	case SECCOMP_MODE_STRICT:
 		syscall = mode1_syscalls;
 #ifdef CONFIG_COMPAT
@@ -776,7 +779,7 @@ long prctl_get_seccomp(void)
 	return current->seccomp.mode;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /**
  * seccomp_set_mode_strict: internal function for setting strict seccomp
  *
@@ -893,7 +896,7 @@ SYSCALL_DEFINE3(seccomp, unsigned int, op, unsigned int, flags,
 {
 	return do_seccomp(op, flags, uargs);
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /**
  * prctl_set_seccomp: configures current->seccomp.mode
@@ -901,9 +904,9 @@ SYSCALL_DEFINE3(seccomp, unsigned int, op, unsigned int, flags,
  * @filter: optional struct sock_fprog for use with SECCOMP_MODE_FILTER
  *
  */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 /*
  * This function may be called repeatedly with a @seccomp_mode of
  * SECCOMP_MODE_FILTER to install additional filters.  Every filter
@@ -913,25 +916,25 @@ SYSCALL_DEFINE3(seccomp, unsigned int, op, unsigned int, flags,
  * Once current->seccomp.mode is non-zero, it may not be changed.
  *
  */
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 /*
  * Returns 0 on success or -EINVAL on failure.
  */
 long prctl_set_seccomp(unsigned long seccomp_mode, char __user *filter)
 {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	unsigned int op;
 	char __user *uargs;
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	long ret = -EINVAL;
 
 	if (current->seccomp.mode &&
 	    current->seccomp.mode != seccomp_mode)
 		goto out;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	switch (seccomp_mode) {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	case SECCOMP_MODE_STRICT:
 		op = SECCOMP_SET_MODE_STRICT;
 		/*
@@ -947,7 +950,7 @@ long prctl_set_seccomp(unsigned long seccomp_mode, char __user *filter)
 		break;
 	default:
 		return -EINVAL;
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	case SECCOMP_MODE_STRICT:
 		ret = 0;
 #ifdef TIF_NOTSC
@@ -963,16 +966,16 @@ long prctl_set_seccomp(unsigned long seccomp_mode, char __user *filter)
 #endif
 	default:
 		goto out;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	}
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	/* prctl interface doesn't have flags, so they are always zero. */
 	return do_seccomp(op, 0, uargs);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	current->seccomp.mode = seccomp_mode;
 	set_thread_flag(TIF_SECCOMP);
 out:
 	return ret;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 }

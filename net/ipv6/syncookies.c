@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  IPv6 Syncookies implementation for the Linux kernel
  *
@@ -212,9 +215,9 @@ struct sock *cookie_v6_check(struct sock *sk, struct sk_buff *skb)
 	    ipv6_addr_type(&ireq6->rmt_addr) & IPV6_ADDR_LINKLOCAL)
 		ireq6->iif = inet6_iif(skb);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	ireq->ir_mark = inet_request_mark(sk, skb);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	req->expires = 0UL;
 	req->num_retrans = 0;
@@ -242,16 +245,16 @@ struct sock *cookie_v6_check(struct sock *sk, struct sk_buff *skb)
 		final_p = fl6_update_dst(&fl6, np->opt, &final);
 		fl6.saddr = ireq6->loc_addr;
 		fl6.flowi6_oif = sk->sk_bound_dev_if;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		fl6.flowi6_mark = ireq->ir_mark;
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		fl6.flowi6_mark = sk->sk_mark;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		fl6.fl6_dport = inet_rsk(req)->rmt_port;
 		fl6.fl6_sport = inet_sk(sk)->inet_sport;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		fl6.flowi6_uid = sock_i_uid(sk);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		security_req_classify_flow(req, flowi6_to_flowi(&fl6));
 
 		dst = ip6_dst_lookup_flow(sk, &fl6, final_p, false);

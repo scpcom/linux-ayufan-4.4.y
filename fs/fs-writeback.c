@@ -66,7 +66,7 @@ static inline struct inode *wb_inode(struct list_head *head)
 static void bdi_wakeup_thread(struct backing_dev_info *bdi)
 {
 	spin_lock_bh(&bdi->wb_lock);
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	if (test_bit(BDI_REGISTERED, &bdi->state))
 #else  
 	if (test_bit(BDI_registered, &bdi->state))
@@ -81,7 +81,7 @@ static void bdi_queue_work(struct backing_dev_info *bdi,
 	trace_writeback_queue(bdi, work);
 
 	spin_lock_bh(&bdi->wb_lock);
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	if (!test_bit(BDI_REGISTERED, &bdi->state)) {
 #else  
 	if (!test_bit(BDI_registered, &bdi->state)) {
@@ -738,7 +738,7 @@ void bdi_writeback_workfn(struct work_struct *work)
 	current->flags |= PF_SWAPWRITE;
 
 	if (likely(!current_is_workqueue_rescuer() ||
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 		   !test_bit(BDI_REGISTERED, &bdi->state))) {
 #else  
 		   !test_bit(BDI_registered, &bdi->state))) {
@@ -822,7 +822,7 @@ void __mark_inode_dirty(struct inode *inode, int flags)
 	if ((inode->i_state & flags) == flags)
 		return;
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (unlikely(block_dump > 1))
 #else  
 	if (unlikely(block_dump))
@@ -858,7 +858,7 @@ void __mark_inode_dirty(struct inode *inode, int flags)
 			spin_unlock(&inode->i_lock);
 			spin_lock(&bdi->wb.list_lock);
 			if (bdi_cap_writeback_dirty(bdi)) {
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 				WARN(!test_bit(BDI_REGISTERED, &bdi->state),
 #else  
 				WARN(!test_bit(BDI_registered, &bdi->state),

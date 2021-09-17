@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* i2c-core.c - a device driver for the iic-bus interface		     */
 /* ------------------------------------------------------------------------- */
 /*   Copyright (C) 1995-99 Simon G. Vogl
@@ -486,15 +489,15 @@ static int i2c_check_client_addr_validity(const struct i2c_client *client)
 		if (client->addr > 0x3ff)
 			return -EINVAL;
 	} else {
-#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HI_I2C)
+#if defined(MY_DEF_HERE) && defined(CONFIG_HI_I2C)
 		/* 7-bit address, reject the general call address */
 		if (client->addr == 0x00 || client->addr > 0xfe)
 			return -EINVAL;
-#else /* CONFIG_SYNO_LSP_HI3536 && CONFIG_HI_I2C */
+#else /* MY_DEF_HERE && CONFIG_HI_I2C */
 		/* 7-bit address, reject the general call address */
 		if (client->addr == 0x00 || client->addr > 0x7f)
 			return -EINVAL;
-#endif /* CONFIG_SYNO_LSP_HI3536 && CONFIG_HI_I2C */
+#endif /* MY_DEF_HERE && CONFIG_HI_I2C */
 	}
 	return 0;
 }
@@ -1592,11 +1595,11 @@ int i2c_master_send(const struct i2c_client *client, const char *buf, int count)
 	struct i2c_msg msg;
 
 	msg.addr = client->addr;
-#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HI_I2C)
+#if defined(MY_DEF_HERE) && defined(CONFIG_HI_I2C)
 	msg.flags = client->flags;
-#else /* CONFIG_SYNO_LSP_HI3536 && CONFIG_HI_I2C */
+#else /* MY_DEF_HERE && CONFIG_HI_I2C */
 	msg.flags = client->flags & I2C_M_TEN;
-#endif /* CONFIG_SYNO_LSP_HI3536 && CONFIG_HI_I2C */
+#endif /* MY_DEF_HERE && CONFIG_HI_I2C */
 	msg.len = count;
 	msg.buf = (char *)buf;
 
@@ -1625,11 +1628,11 @@ int i2c_master_recv(const struct i2c_client *client, char *buf, int count)
 	int ret;
 
 	msg.addr = client->addr;
-#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_HI_I2C)
+#if defined(MY_DEF_HERE) && defined(CONFIG_HI_I2C)
 	msg.flags = client->flags;
-#else /* CONFIG_SYNO_LSP_HI3536 && CONFIG_HI_I2C */
+#else /* MY_DEF_HERE && CONFIG_HI_I2C */
 	msg.flags = client->flags & I2C_M_TEN;
-#endif /* CONFIG_SYNO_LSP_HI3536 && CONFIG_HI_I2C */
+#endif /* MY_DEF_HERE && CONFIG_HI_I2C */
 	msg.flags |= I2C_M_RD;
 	msg.len = count;
 	msg.buf = buf;

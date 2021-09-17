@@ -637,7 +637,7 @@ struct net_device {
 	struct net_device_stats	stats;
 	atomic_long_t		rx_dropped;  
 
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef CONFIG_WIRELESS_EXT
@@ -689,7 +689,7 @@ struct net_device {
 	unsigned int		promiscuity;
 	unsigned int		allmulti;
 
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #if IS_ENABLED(CONFIG_VLAN_8021Q)
@@ -778,7 +778,7 @@ struct net_device {
 	struct netpoll_info __rcu	*npinfo;
 #endif
 
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 	 
 #else  
 #ifdef CONFIG_NET_NS
@@ -833,7 +833,7 @@ struct net_device {
 	int group;
 
 	struct pm_qos_request	pm_qos_req;
-#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_WIRELESS_EXT
 	 
 	const struct iw_handler_def *	wireless_handlers;

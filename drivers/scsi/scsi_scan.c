@@ -688,7 +688,7 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	unsigned char scsi_cmd[MAX_COMMAND_SIZE];
 	int first_inquiry_len, try_inquiry_len, next_inquiry_len;
 	int response_len = 0;
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	int pass, count, result = 0;
 #else  
 	int pass, count, result;

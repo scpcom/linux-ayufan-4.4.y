@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2012 ARM Ltd.
  *
@@ -30,7 +33,7 @@
 #define COMPAT_HWCAP_IDIVA	(1 << 17)
 #define COMPAT_HWCAP_IDIVT	(1 << 18)
 #define COMPAT_HWCAP_IDIV	(COMPAT_HWCAP_IDIVA|COMPAT_HWCAP_IDIVT)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define COMPAT_HWCAP_EVTSTRM	(1 << 21)
 
 #define COMPAT_HWCAP2_AES	(1 << 0)
@@ -38,7 +41,7 @@
 #define COMPAT_HWCAP2_SHA1	(1 << 2)
 #define COMPAT_HWCAP2_SHA2	(1 << 3)
 #define COMPAT_HWCAP2_CRC32	(1 << 4)
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 #ifndef __ASSEMBLY__
 /*
@@ -46,7 +49,7 @@
  * instruction set this cpu supports.
  */
 #define ELF_HWCAP		(elf_hwcap)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 
 #ifdef CONFIG_COMPAT
 #define COMPAT_ELF_HWCAP	(compat_elf_hwcap)
@@ -55,7 +58,7 @@ extern unsigned int compat_elf_hwcap, compat_elf_hwcap2;
 #endif
 
 extern unsigned long elf_hwcap;
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 #define COMPAT_ELF_HWCAP	(COMPAT_HWCAP_HALF|COMPAT_HWCAP_THUMB|\
 				 COMPAT_HWCAP_FAST_MULT|COMPAT_HWCAP_EDSP|\
 				 COMPAT_HWCAP_TLS|COMPAT_HWCAP_VFP|\
@@ -63,6 +66,6 @@ extern unsigned long elf_hwcap;
 				 COMPAT_HWCAP_NEON|COMPAT_HWCAP_IDIV)
 
 extern unsigned int elf_hwcap;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 #endif
 #endif

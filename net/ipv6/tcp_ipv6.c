@@ -234,7 +234,7 @@ static int tcp_v6_connect(struct sock *sk, struct sockaddr *uaddr,
 	fl6.flowi6_mark = sk->sk_mark;
 	fl6.fl6_dport = usin->sin6_port;
 	fl6.fl6_sport = inet->inet_sport;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	fl6.flowi6_uid = sock_i_uid(sk);
 #endif  
 
@@ -762,7 +762,7 @@ static void tcp_v6_send_response(struct sk_buff *skb, u32 seq, u32 ack, u32 win,
 	fl6.flowi6_proto = IPPROTO_TCP;
 	if (ipv6_addr_type(&fl6.daddr) & IPV6_ADDR_LINKLOCAL)
 		fl6.flowi6_oif = inet6_iif(skb);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	fl6.flowi6_mark = IP6_REPLY_MARK(net, skb->mark);
 #endif  
 	fl6.fl6_dport = t1->dest;
@@ -958,7 +958,7 @@ static int tcp_v6_conn_request(struct sock *sk, struct sk_buff *skb)
 		TCP_ECN_create_request(req, skb, sock_net(sk));
 
 	treq->iif = sk->sk_bound_dev_if;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	inet_rsk(req)->ir_mark = inet_request_mark(sk, skb);
 #endif  
 

@@ -47,7 +47,7 @@
 #define   L2X0_DYNAMIC_CLK_GATING_EN	(1 << 1)
 #define   L2X0_STNDBY_MODE_EN		(1 << 0)
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define L2X0_CACHE_ID_REV_MASK		(0x3f)
 #endif  
 #define L2X0_CACHE_ID_PART_MASK		(0xf << 6)
@@ -90,7 +90,7 @@
 
 #define L2X0_WAY_SIZE_SHIFT		3
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #define REV_PL310_R2P0				4
 #endif  
 

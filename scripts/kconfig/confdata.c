@@ -1113,11 +1113,11 @@ static void randomize_choice_values(struct symbol *csym)
 	csym->flags &= ~(SYMBOL_VALID);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 void set_all_choice_values(struct symbol *csym)
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 static void set_all_choice_values(struct symbol *csym)
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 {
 	struct property *prop;
 	struct symbol *sym;
@@ -1134,11 +1134,11 @@ static void set_all_choice_values(struct symbol *csym)
 	}
 	csym->flags |= SYMBOL_DEF_USER;
 	/* clear VALID to get value calculated */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	csym->flags &= ~(SYMBOL_VALID | SYMBOL_NEED_SET_CHOICE_VALUES);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	csym->flags &= ~(SYMBOL_VALID);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 }
 
 void conf_set_all_new_symbols(enum conf_def_mode mode)
@@ -1240,7 +1240,7 @@ void conf_set_all_new_symbols(enum conf_def_mode mode)
 	 * selected in a choice block and we set it to yes,
 	 * and the rest to no.
 	 */
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (mode != def_random) {
 		for_all_symbols(i, csym) {
 			if ((sym_is_choice(csym) && !sym_has_value(csym)) ||
@@ -1248,7 +1248,7 @@ void conf_set_all_new_symbols(enum conf_def_mode mode)
 				csym->flags |= SYMBOL_NEED_SET_CHOICE_VALUES;
 		}
 	}
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	for_all_symbols(i, csym) {
 		if (sym_has_value(csym) || !sym_is_choice(csym))
@@ -1257,11 +1257,11 @@ void conf_set_all_new_symbols(enum conf_def_mode mode)
 		sym_calc_value(csym);
 		if (mode == def_random)
 			randomize_choice_values(csym);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		// do nothing
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		else
 			set_all_choice_values(csym);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	}
 }

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
   Copyright (C) 2007-2009  STMicroelectronics Ltd
 
@@ -119,8 +122,8 @@ void stmmac_proc(struct seq_file *s);
 
 extern struct net_device *stmmac_device_list[];
 
-#if defined(CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR)
+#if defined(MY_DEF_HERE)
 void syno_update_rtl8211e_led_behavior(struct phy_device *phydev);
-#endif /* CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR */
+#endif /* MY_DEF_HERE */
 
 #endif /* __STMMAC_H__ */

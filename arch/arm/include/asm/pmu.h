@@ -8,7 +8,7 @@
 #include <linux/interrupt.h>
 #include <linux/perf_event.h>
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
  
 enum arm_pmu_type {
 	ARM_PMU_DEVICE_CPU	= 0,

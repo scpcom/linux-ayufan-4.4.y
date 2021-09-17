@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
  *
@@ -80,11 +83,11 @@ static int spi_mx25l25635e_qe_enable(struct hisfc_spi *spi)
 
 	HISFC350_CMD_WAIT_CPU_FINISH(host);
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 	if (DEBUG_SPI_QE) {
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 		spi->driver->wait_ready(spi);
 
 		status = spi_general_get_flash_register(spi, SPI_CMD_RDSR);
@@ -93,11 +96,11 @@ static int spi_mx25l25635e_qe_enable(struct hisfc_spi *spi)
 			pr_info("* SPI %s Quad succeed.\n", str[op]);
 		else
 			DBG_MSG("%s Quad failed! [%#x]\n", str[op], status);
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#else /* MY_DEF_HERE */
 	}
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 	return op;
 }

@@ -250,7 +250,7 @@ static void part_release(struct device *dev)
 	kfree(p);
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 static int part_uevent(struct device *dev, struct kobj_uevent_env *env)
 {
 	struct hd_struct *part = dev_to_part(dev);
@@ -260,15 +260,15 @@ static int part_uevent(struct device *dev, struct kobj_uevent_env *env)
 		add_uevent_var(env, "PARTNAME=%s", part->info->volname);
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 struct device_type part_type = {
 	.name		= "partition",
 	.groups		= part_attr_groups,
 	.release	= part_release,
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	.uevent		= part_uevent,
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 };
 
 static void delete_partition_rcu_cb(struct rcu_head *head)
@@ -355,10 +355,10 @@ struct hd_struct *add_partition(struct gendisk *disk, int partno,
 	p->partno = partno;
 	p->policy = get_disk_ro(disk);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	if (flags & ADDPART_FLAG_READONLY)
 		p->policy = 1;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	if (info) {
 		struct partition_meta_info *pinfo = alloc_part_info(disk);

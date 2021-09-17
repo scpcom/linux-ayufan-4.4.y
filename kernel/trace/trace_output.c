@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * trace_output.c
  *
@@ -702,13 +705,13 @@ int trace_print_context(struct trace_iterator *iter)
 	unsigned long secs, usec_rem;
 	char comm[TASK_COMM_LEN];
 	int ret;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	int tgid;
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	trace_find_cmdline(entry->pid, comm);
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	ret = trace_seq_printf(s, "%16s-%-5d ", comm, entry->pid);
 	if (!ret)
 		return 0;
@@ -724,10 +727,10 @@ int trace_print_context(struct trace_iterator *iter)
 	}
 
 	ret = trace_seq_printf(s, "[%03d] ", iter->cpu);
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	ret = trace_seq_printf(s, "%16s-%-5d [%03d] ",
 			       comm, entry->pid, iter->cpu);
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	if (!ret)
 		return 0;
 
@@ -1056,7 +1059,7 @@ static struct trace_event trace_fn_event = {
 	.funcs		= &trace_fn_funcs,
 };
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 /* TRACE_GRAPH_ENT */
 static enum print_line_t trace_graph_ent_trace(struct trace_iterator *iter, int flags,
 					struct trace_event *event)
@@ -1218,7 +1221,7 @@ static struct trace_event trace_graph_ret_event = {
 	.type		= TRACE_GRAPH_RET,
 	.funcs		= &trace_graph_ret_funcs,
 };
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 /* TRACE_CTX an TRACE_WAKE */
 static enum print_line_t trace_ctxwake_print(struct trace_iterator *iter,
@@ -1610,10 +1613,10 @@ static struct trace_event trace_print_event = {
 
 static struct trace_event *events[] __initdata = {
 	&trace_fn_event,
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	&trace_graph_ent_event,
 	&trace_graph_ret_event,
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	&trace_ctx_event,
 	&trace_wake_event,
 	&trace_stack_event,

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Dynamic function tracing support.
  *
@@ -13,9 +16,9 @@
  */
 
 #include <linux/ftrace.h>
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 #include <linux/module.h>
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 #include <linux/uaccess.h>
 
 #include <asm/cacheflush.h>
@@ -66,7 +69,7 @@ static unsigned long adjust_address(struct dyn_ftrace *rec, unsigned long addr)
 }
 #endif
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 int ftrace_arch_code_modify_prepare(void)
 {
 	set_kernel_text_rw();
@@ -80,7 +83,7 @@ int ftrace_arch_code_modify_post_process(void)
 	set_kernel_text_ro();
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 static unsigned long ftrace_call_replace(unsigned long pc, unsigned long addr)
 {

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* hi_rtc.c
  *
  * Copyright (c) 2012 Hisilicon Co., Ltd.
@@ -262,11 +265,11 @@ static int rtcSecond2Date(rtc_time_t *compositetime,
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 int hirtc_get_alarm(rtc_time_t *compositetime)
-#else /* CONFIG_SYNO_HI3536 */
+#else /* MY_DEF_HERE */
 static int hirtc_get_alarm(rtc_time_t *compositetime)
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 {
 	unsigned char dayl, dayh;
 	unsigned char second, minute, hour;
@@ -286,13 +289,13 @@ static int hirtc_get_alarm(rtc_time_t *compositetime)
 
 	return 0;
 }
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(hirtc_get_alarm);
 
 int hirtc_set_alarm(rtc_time_t compositetime)
-#else /* CONFIG_SYNO_HI3536 */
+#else /* MY_DEF_HERE */
 static int hirtc_set_alarm(rtc_time_t compositetime)
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 {
 	unsigned int days;
 	unsigned long seconds = 0;
@@ -318,13 +321,13 @@ static int hirtc_set_alarm(rtc_time_t compositetime)
 
 	return 0;
 }
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(hirtc_set_alarm);
 
 int hirtc_get_time(rtc_time_t *compositetime)
-#else /* CONFIG_SYNO_HI3536 */
+#else /* MY_DEF_HERE */
 static int hirtc_get_time(rtc_time_t *compositetime)
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 {
 	unsigned char dayl, dayh;
 	unsigned char second, minute, hour;
@@ -363,13 +366,13 @@ static int hirtc_get_time(rtc_time_t *compositetime)
 
 	return 0;
 }
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(hirtc_get_time);
 
 int hirtc_set_time(rtc_time_t compositetime)
-#else /* CONFIG_SYNO_HI3536 */
+#else /* MY_DEF_HERE */
 static int hirtc_set_time(rtc_time_t compositetime)
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 {
 	unsigned char ret;
 	unsigned int days;
@@ -409,16 +412,16 @@ static int hirtc_set_time(rtc_time_t compositetime)
 	spi_rtc_write(RTC_LR_D_H, (days >> 8));
 
 	spi_rtc_write(RTC_LORD, (ret|0x1));
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 	msleep(500);
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 
 	HI_MSG("set time ok!\n");
 	return 0;
 }
-#if defined(CONFIG_SYNO_HI3536)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(hirtc_set_time);
-#endif /* CONFIG_SYNO_HI3536 */
+#endif /* MY_DEF_HERE */
 
 static long hi_rtc_ioctl(struct file *file,
 		unsigned int cmd,
@@ -681,11 +684,11 @@ static int __init rtc_init(void)
     /* enable total interrupt. */
     spi_rtc_write(RTC_IMSC, 0x4);
 
-#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if defined(MY_DEF_HERE)
 	/* set default freq */
 	spi_rtc_write(RTC_FREQ_H, 0x8);
 	spi_rtc_write(RTC_FREQ_L, 0x1b);
-#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 

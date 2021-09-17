@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2012 Google, Inc.
  *
@@ -152,11 +155,11 @@ TRACE_EVENT(binder_transaction_node_to_ref,
 	TP_STRUCT__entry(
 		__field(int, debug_id)
 		__field(int, node_debug_id)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		__field(binder_uintptr_t, node_ptr)
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		__field(void __user *, node_ptr)
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		__field(int, ref_debug_id)
 		__field(uint32_t, ref_desc)
 	),
@@ -167,14 +170,14 @@ TRACE_EVENT(binder_transaction_node_to_ref,
 		__entry->ref_debug_id = ref->debug_id;
 		__entry->ref_desc = ref->desc;
 	),
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	TP_printk("transaction=%d node=%d src_ptr=0x%016llx ==> dest_ref=%d dest_desc=%d",
 		  __entry->debug_id, __entry->node_debug_id,
 		  (u64)__entry->node_ptr,
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	TP_printk("transaction=%d node=%d src_ptr=0x%p ==> dest_ref=%d dest_desc=%d",
 		  __entry->debug_id, __entry->node_debug_id, __entry->node_ptr,
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 		  __entry->ref_debug_id, __entry->ref_desc)
 );
 
@@ -187,11 +190,11 @@ TRACE_EVENT(binder_transaction_ref_to_node,
 		__field(int, ref_debug_id)
 		__field(uint32_t, ref_desc)
 		__field(int, node_debug_id)
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 		__field(binder_uintptr_t, node_ptr)
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 		__field(void __user *, node_ptr)
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 	),
 	TP_fast_assign(
 		__entry->debug_id = t->debug_id;
@@ -200,16 +203,16 @@ TRACE_EVENT(binder_transaction_ref_to_node,
 		__entry->node_debug_id = ref->node->debug_id;
 		__entry->node_ptr = ref->node->ptr;
 	),
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 	TP_printk("transaction=%d node=%d src_ref=%d src_desc=%d ==> dest_ptr=0x%016llx",
 		  __entry->debug_id, __entry->node_debug_id,
 		  __entry->ref_debug_id, __entry->ref_desc,
 		  (u64)__entry->node_ptr)
-#else /* CONFIG_SYNO_LSP_HI3536 */
+#else /* MY_DEF_HERE */
 	TP_printk("transaction=%d node=%d src_ref=%d src_desc=%d ==> dest_ptr=0x%p",
 		  __entry->debug_id, __entry->node_debug_id,
 		  __entry->ref_debug_id, __entry->ref_desc, __entry->node_ptr)
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 );
 
 TRACE_EVENT(binder_transaction_ref_to_ref,

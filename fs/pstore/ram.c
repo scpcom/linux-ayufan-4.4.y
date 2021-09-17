@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * RAM Oops/Panic logger
  *
@@ -388,13 +391,13 @@ static int ramoops_init_prz(struct device *dev, struct ramoops_context *cxt,
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(MY_DEF_HERE)
 void notrace ramoops_console_write_buf(const char *buf, size_t size)
 {
 	struct ramoops_context *cxt = &oops_cxt;
 	persistent_ram_write(cxt->cprz, buf, size);
 }
-#endif /* CONFIG_SYNO_LSP_HI3536 */
+#endif /* MY_DEF_HERE */
 
 static int ramoops_probe(struct platform_device *pdev)
 {

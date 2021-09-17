@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/vfp/vfpmodule.c
  *
@@ -20,9 +23,9 @@
 #include <linux/init.h>
 #include <linux/uaccess.h>
 #include <linux/user.h>
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 #include <linux/export.h>
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 
 #include <asm/cp15.h>
 #include <asm/cputype.h>
@@ -447,7 +450,7 @@ static void vfp_enable(void *unused)
 	set_copro_access(access | CPACC_FULL(10) | CPACC_FULL(11));
 }
 
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 /* Called by platforms on which we want to disable VFP because it may not be
  * present on all CPUs within a SMP complex. Needs to be called prior to
  * vfp_init().
@@ -460,7 +463,7 @@ void vfp_disable(void)
 	}
 	VFP_arch = 1;
 }
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_CPU_PM
 static int vfp_pm_suspend(void)
@@ -659,21 +662,21 @@ int vfp_restore_user_hwstate(struct user_vfp __user *ufp,
 static int vfp_hotplug(struct notifier_block *b, unsigned long action,
 	void *hcpu)
 {
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 	if (action == CPU_DYING || action == CPU_DYING_FROZEN)
 		vfp_current_hw_state[(long)hcpu] = NULL;
 	else if (action == CPU_STARTING || action == CPU_STARTING_FROZEN)
 		vfp_enable(NULL);
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 	if (action == CPU_DYING || action == CPU_DYING_FROZEN) {
 		vfp_force_reload((long)hcpu, current_thread_info());
 	} else if (action == CPU_STARTING || action == CPU_STARTING_FROZEN)
 		vfp_enable(NULL);
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 	return NOTIFY_OK;
 }
 
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 void vfp_kmode_exception(void)
 {
 	/*
@@ -739,7 +742,7 @@ void kernel_neon_end(void)
 EXPORT_SYMBOL(kernel_neon_end);
 
 #endif /* CONFIG_KERNEL_MODE_NEON */
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 
 /*
  * VFP support code initialisation.
@@ -764,7 +767,7 @@ static int __init vfp_init(void)
 	vfp_vector = vfp_null_entry;
 
 	pr_info("VFP support v0.3: ");
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 	if (VFP_arch) {
 		pr_cont("not present\n");
 		return 0;
@@ -831,7 +834,7 @@ static int __init vfp_init(void)
 		(vfpsid & FPSID_PART_MASK) >> FPSID_PART_BIT,
 		(vfpsid & FPSID_VARIANT_MASK) >> FPSID_VARIANT_BIT,
 		(vfpsid & FPSID_REV_MASK) >> FPSID_REV_BIT);
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 	if (VFP_arch)
 		pr_cont("not present\n");
 	else if (vfpsid & FPSID_NODOUBLE) {
@@ -889,13 +892,13 @@ static int __init vfp_init(void)
 #endif
 		}
 	}
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
+#if defined(MY_DEF_HERE)
 core_initcall(vfp_init);
-#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#else /* MY_DEF_HERE */
 late_initcall(vfp_init);
-#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
+#endif /* MY_DEF_HERE */
