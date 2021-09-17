@@ -76,6 +76,10 @@ BTRFS_WORK_HELPER(extent_refs_helper);
 BTRFS_WORK_HELPER(scrub_helper);
 BTRFS_WORK_HELPER(scrubwrc_helper);
 BTRFS_WORK_HELPER(scrubnc_helper);
+#ifdef MY_DEF_HERE
+BTRFS_WORK_HELPER(syno_nocow_endio_helper);
+BTRFS_WORK_HELPER(syno_high_priority_endio_helper);
+#endif  
 
 static struct __btrfs_workqueue *
 __btrfs_alloc_workqueue(const char *name, int flags, int max_active,

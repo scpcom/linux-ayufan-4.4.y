@@ -44,6 +44,11 @@ struct btrfs_ordered_sum {
 
 #define BTRFS_ORDERED_LOGGED 10  
 #define BTRFS_ORDERED_PENDING 11  
+#ifdef MY_DEF_HERE
+#define BTRFS_ORDERED_WORK_INITIALIZED 13
+#define BTRFS_ORDERED_HIGH_PRIORITY 14
+#endif  
+
 struct btrfs_ordered_extent {
 	 
 	u64 file_offset;
@@ -85,6 +90,9 @@ struct btrfs_ordered_extent {
 	struct completion completion;
 	struct btrfs_work flush_work;
 	struct list_head work_list;
+#ifdef MY_DEF_HERE
+	int high_priority;
+#endif  
 };
 
 static inline int btrfs_ordered_sum_size(struct btrfs_root *root,

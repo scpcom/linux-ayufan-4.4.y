@@ -4013,8 +4013,11 @@ static noinline int btrfs_clone_files(struct file *file, struct file *file_src,
 	if (len == 0)
 		olen = len = src->i_size - off;
 	 
-	if (off + len == src->i_size)
+	if (off + len == src->i_size) {
+		if (!IS_ALIGNED(len, bs) && destoff + len < inode->i_size)
+			goto out_unlock;
 		len = ALIGN(src->i_size, bs) - off;
+	}
 
 	if (len == 0) {
 		ret = 0;
@@ -4123,6 +4126,7 @@ static long btrfs_ioctl_trans_start(struct file *file)
 	struct inode *inode = file_inode(file);
 	struct btrfs_root *root = BTRFS_I(inode)->root;
 	struct btrfs_trans_handle *trans;
+	struct btrfs_file_private *private;
 	int ret;
 
 	ret = -EPERM;
@@ -4130,8 +4134,16 @@ static long btrfs_ioctl_trans_start(struct file *file)
 		goto out;
 
 	ret = -EINPROGRESS;
-	if (file->private_data)
+	private = file->private_data;
+	if (private && private->trans)
 		goto out;
+	if (!private) {
+		private = kzalloc(sizeof(struct btrfs_file_private),
+				  GFP_KERNEL);
+		if (!private)
+			return -ENOMEM;
+		file->private_data = private;
+	}
 
 	ret = -EROFS;
 	if (btrfs_root_readonly(root))
@@ -4148,7 +4160,7 @@ static long btrfs_ioctl_trans_start(struct file *file)
 	if (IS_ERR(trans))
 		goto out_drop;
 
-	file->private_data = trans;
+	private->trans = trans;
 	return 0;
 
 out_drop:
@@ -4384,14 +4396,13 @@ long btrfs_ioctl_trans_end(struct file *file)
 {
 	struct inode *inode = file_inode(file);
 	struct btrfs_root *root = BTRFS_I(inode)->root;
-	struct btrfs_trans_handle *trans;
+	struct btrfs_file_private *private = file->private_data;
 
-	trans = file->private_data;
-	if (!trans)
+	if (!private || !private->trans)
 		return -EINVAL;
-	file->private_data = NULL;
 
-	btrfs_end_transaction(trans, root);
+	btrfs_end_transaction(private->trans, root);
+	private->trans = NULL;
 
 	atomic_dec(&root->fs_info->open_ioctl_trans);
 

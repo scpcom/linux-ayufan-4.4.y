@@ -320,6 +320,9 @@ int dma_memcpy_fill_sg_from_iovec(struct dma_chan *chan, struct iovec *iov,
 	int iovec_idx;
 	int page_idx;
 	int sg_nents = 0;
+#ifdef CONFIG_SYNO_ALPINE_RUNOUT_IOVEC_LOG
+	int init_len = len;
+#endif  
 
 	pr_debug("%s %d:  nr iovecs %d. len 0x%x\n",
 					__func__, __LINE__,
@@ -369,6 +372,16 @@ int dma_memcpy_fill_sg_from_iovec(struct dma_chan *chan, struct iovec *iov,
 		iovec_idx++;
 	}
 
+#ifdef CONFIG_SYNO_ALPINE_RUNOUT_IOVEC_LOG
+	printk(KERN_ERR"run out of iovecs, nr_iovecs=%d, init_len=%d, remaining len=%d\n", pinned_list->nr_iovecs, init_len, len);
+	iovec_idx = 0;
+	while (iovec_idx < pinned_list->nr_iovecs) {
+		if (iov[iovec_idx].iov_len) {
+			printk(KERN_ERR"iov[%d].iov_len=%d\n", iovec_idx, iov[iovec_idx].iov_len);
+		}
+		iovec_idx++;
+	}
+#endif  
 	BUG();
 	return -EFAULT;
 }

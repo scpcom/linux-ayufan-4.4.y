@@ -5,7 +5,20 @@
 #ifndef __SYNO_H_
 #define __SYNO_H_
 
+#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+#define SYNO_CEDARVIEW_USE_EFI_REBOOT
+#endif
+
 #if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_FLASH_PART
+#endif
+
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_GPIO_CTRL
+#endif
+
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_POWEROFF
 
 #ifdef MY_DEF_HERE
 #define SYNO_EVANSPORT_TTYS1_PORT	0x2F8
@@ -14,6 +27,22 @@
 #define SYNO_EVANSPORT_TXR		0
 #define SYNO_EVANSPORT_LCR		3
 #endif
+#endif
+
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_EXPORT_SYMBOL
+#endif
+
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_NON_PREEMPT_SMB
+#endif
+
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_WOL_WORKAROUND
+#endif
+
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_IPV4_ROUTE_WORKAROUND
 #endif
 
 #ifdef	MY_DEF_HERE
@@ -40,7 +69,15 @@
 #define SYNO_6281_MTU_WA
 #endif
 
+#if defined(CONFIG_PPC_85xx)
+#define SYNO_IPV6_110p_IPV6_READY
+#endif
+
 #define SYNO_FIX_MD_RESIZE_BUSY_LOOP 5
+
+#ifdef MY_DEF_HERE
+#define SYNO_ATA_AHCI_LED_MSG
+#endif
 
 #ifdef CONFIG_SYNO_EXT4_CREATE_TIME_BIG_ENDIAN_SWAP
 #define SYNO_CREATE_TIME_SWAP_VERSION 3719
@@ -82,6 +119,12 @@
  
 #define SYNO_INTERNAL_MICROSD_NAME "4-4"
 #endif  
+#endif  
+
+#if defined(CONFIG_SYNO_BROMOLOW)
+ 
+#define SYNO_SAS_LINK_HOTPLUG_UEVENT
+
 #endif  
 
 #endif  

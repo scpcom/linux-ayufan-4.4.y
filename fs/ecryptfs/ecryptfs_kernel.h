@@ -298,6 +298,9 @@ struct ecryptfs_sb_info {
 	struct super_block *wsi_sb;
 	struct ecryptfs_mount_crypt_stat mount_crypt_stat;
 	struct backing_dev_info bdi;
+#ifdef MY_ABC_HERE
+	struct dentry *dentry;
+#endif  
 };
 
 struct ecryptfs_file_info {

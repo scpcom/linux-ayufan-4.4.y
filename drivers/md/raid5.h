@@ -284,6 +284,23 @@ struct r5conf {
 #define ALGORITHM_PARITY_0_6		20
 #define ALGORITHM_PARITY_N_6		ALGORITHM_PARITY_N
 
+#ifdef MY_DEF_HERE
+ 
+#define ALGORITHM_RAID_F1_0		ALGORITHM_LEFT_SYMMETRIC
+#define ALGORITHM_RAID_F1_1		32
+#define ALGORITHM_RAID_F1_2		33
+#define ALGORITHM_RAID_F1_3		34
+#define ALGORITHM_RAID_F1_4		35
+
+#define ALGORITHM_RAID_F1			ALGORITHM_RAID_F1_1
+
+static inline int algorithm_valid_raid_f1(int layout)
+{
+	return layout == ALGORITHM_RAID_F1_0 ||
+		((layout >= ALGORITHM_RAID_F1_1) &&
+		(layout <= ALGORITHM_RAID_F1_4));
+}
+#endif  
 static inline int algorithm_valid_raid5(int layout)
 {
 	return (layout >= 0) &&
@@ -311,4 +328,11 @@ extern int raid5_set_cache_size(struct mddev *mddev, int size);
 #define sector_mod(a,b) sector_div(a,b)
 #endif  
 
+#ifdef MY_DEF_HERE
+static inline int md_raid_diff_uneven_count(int algorithm)
+{
+	return (algorithm == ALGORITHM_RAID_F1_0? 0: algorithm - ALGORITHM_RAID_F1_1 + 1);
+}
+
+#endif  
 #endif

@@ -91,6 +91,9 @@ struct async_submit_bio {
 	u64 bio_offset;
 	struct btrfs_work work;
 	int error;
+#ifdef MY_DEF_HERE
+	int throttle;
+#endif  
 };
 
 #ifdef CONFIG_DEBUG_LOCK_ALLOC
@@ -946,17 +949,37 @@ static void run_one_async_done(struct btrfs_work *work)
 static void run_one_async_free(struct btrfs_work *work)
 {
 	struct async_submit_bio *async;
+#ifdef MY_DEF_HERE
+	struct btrfs_fs_info *fs_info;
+#endif  
 
 	async = container_of(work, struct  async_submit_bio, work);
+#ifdef MY_DEF_HERE
+	if (async->throttle) {
+		fs_info = BTRFS_I(async->inode)->root->fs_info;
+		if (atomic_dec_return(&fs_info->syno_async_submit_nr) < fs_info->syno_async_submit_throttle &&
+			waitqueue_active(&fs_info->syno_async_submit_queue_wait))
+			wake_up(&fs_info->syno_async_submit_queue_wait);
+	}
+#endif  
 	kfree(async);
 }
 
+#ifdef MY_DEF_HERE
+int btrfs_wq_submit_bio(struct btrfs_fs_info *fs_info, struct inode *inode,
+			int rw, struct bio *bio, int mirror_num,
+			unsigned long bio_flags,
+			u64 bio_offset,
+			extent_submit_bio_hook_t *submit_bio_start,
+			extent_submit_bio_hook_t *submit_bio_done, int throttle)
+#else
 int btrfs_wq_submit_bio(struct btrfs_fs_info *fs_info, struct inode *inode,
 			int rw, struct bio *bio, int mirror_num,
 			unsigned long bio_flags,
 			u64 bio_offset,
 			extent_submit_bio_hook_t *submit_bio_start,
 			extent_submit_bio_hook_t *submit_bio_done)
+#endif  
 {
 	struct async_submit_bio *async;
 
@@ -970,6 +993,9 @@ int btrfs_wq_submit_bio(struct btrfs_fs_info *fs_info, struct inode *inode,
 	async->mirror_num = mirror_num;
 	async->submit_bio_start = submit_bio_start;
 	async->submit_bio_done = submit_bio_done;
+#ifdef MY_DEF_HERE
+	async->throttle = throttle;
+#endif  
 
 	btrfs_init_work(&async->work, btrfs_worker_helper, run_one_async_start,
 			run_one_async_done, run_one_async_free);
@@ -980,6 +1006,11 @@ int btrfs_wq_submit_bio(struct btrfs_fs_info *fs_info, struct inode *inode,
 	async->error = 0;
 
 	atomic_inc(&fs_info->nr_async_submits);
+#ifdef MY_DEF_HERE
+	if (async->throttle) {
+		atomic_inc(&fs_info->syno_async_submit_nr);
+	}
+#endif  
 
 	if (rw & REQ_SYNC)
 		btrfs_set_work_high_priority(&async->work);
@@ -1069,11 +1100,19 @@ static int btree_submit_bio_hook(struct inode *inode, int rw, struct bio *bio,
 				    mirror_num, 0);
 	} else {
 		 
+#ifdef MY_DEF_HERE
+		ret = btrfs_wq_submit_bio(BTRFS_I(inode)->root->fs_info,
+					  inode, rw, bio, mirror_num, 0,
+					  bio_offset,
+					  __btree_submit_bio_start,
+					  __btree_submit_bio_done, 0);
+#else
 		ret = btrfs_wq_submit_bio(BTRFS_I(inode)->root->fs_info,
 					  inode, rw, bio, mirror_num, 0,
 					  bio_offset,
 					  __btree_submit_bio_start,
 					  __btree_submit_bio_done);
+#endif  
 	}
 
 	if (ret) {
@@ -2226,6 +2265,10 @@ static void btrfs_stop_all_workers(struct btrfs_fs_info *fs_info)
 #endif  
 	btrfs_destroy_workqueue(fs_info->qgroup_rescan_workers);
 	btrfs_destroy_workqueue(fs_info->extent_workers);
+#ifdef MY_DEF_HERE
+	btrfs_destroy_workqueue(fs_info->syno_nocow_endio_workers);
+	btrfs_destroy_workqueue(fs_info->syno_high_priority_endio_workers);
+#endif  
 }
 
 static void free_root_extent_buffers(struct btrfs_root *root)
@@ -2688,6 +2731,10 @@ int open_ctree(struct super_block *sb,
 	 
 	INIT_RADIX_TREE(&fs_info->reada_tree, GFP_NOFS & ~__GFP_WAIT);
 	spin_lock_init(&fs_info->reada_lock);
+#ifdef MY_DEF_HERE
+	spin_lock_init(&fs_info->syno_delayed_ref_throttle_lock);
+	INIT_LIST_HEAD(&fs_info->syno_delayed_ref_throttle_tickets);
+#endif  
 
 	fs_info->thread_pool_size = min_t(unsigned long,
 					  num_online_cpus() + 2, 8);
@@ -2726,12 +2773,31 @@ int open_ctree(struct super_block *sb,
 	init_waitqueue_head(&fs_info->balance_wait_q);
 	btrfs_init_async_reclaim_work(&fs_info->async_reclaim_work);
 #ifdef MY_DEF_HERE
+	btrfs_init_async_delayed_ref_work(&fs_info->async_delayed_ref_work);
+#endif  
+#ifdef MY_DEF_HERE
 	atomic_set(&fs_info->syno_writeback_thread_count, 0);
 	fs_info->syno_writeback_thread_max = 0;
 	fs_info->dev_replace_may_start = 0;
 #endif  
 #ifdef MY_DEF_HERE
+	atomic_set(&fs_info->syno_async_submit_nr, 0);
+	fs_info->syno_async_submit_throttle = 128;
+	init_waitqueue_head(&fs_info->syno_async_submit_queue_wait);
+#endif  
+#ifdef MY_DEF_HERE
+	atomic_set(&fs_info->syno_ordered_extent_nr, 0);
+	fs_info->syno_max_ordered_queue_size = 65536;
+	init_waitqueue_head(&fs_info->syno_ordered_queue_wait);
+#endif  
+#ifdef MY_DEF_HERE
 	fs_info->avoid_fs_root_null_pointer_dereference = 1;
+#endif  
+
+#ifdef MY_DEF_HERE
+	atomic64_set(&fs_info->fsync_cnt, 0);
+	atomic64_set(&fs_info->fsync_full_commit_cnt, 0);
+	fs_info->commit_time_debug = 0;
 #endif  
 
 	sb->s_blocksize = 4096;
@@ -2792,16 +2858,6 @@ int open_ctree(struct super_block *sb,
 #ifdef MY_DEF_HERE
 	fs_info->metadata_ratio = 50;
 #endif
-#ifdef MY_DEF_HERE
-	fs_info->ordered_extent_nr = 0;
-	if (totalram_pages > ((2ULL*1024*1024*1024)/PAGE_SIZE)) {
-		fs_info->ordered_extent_throttle = 0;
-	} else if (totalram_pages > ((1ULL*1024*1024*1024)/PAGE_SIZE)) {
-		fs_info->ordered_extent_throttle = 400000;
-	} else {
-		fs_info->ordered_extent_throttle = 200000;
-	}
-#endif  
 
 	spin_lock_init(&fs_info->qgroup_lock);
 	mutex_init(&fs_info->qgroup_ioctl_lock);
@@ -2865,6 +2921,12 @@ int open_ctree(struct super_block *sb,
 	disk_super = fs_info->super_copy;
 	if (!btrfs_super_root(disk_super))
 		goto fail_alloc;
+
+#ifdef MY_DEF_HERE
+	 
+	if (btrfs_super_total_bytes(disk_super) < 1024ULL * 1024 * 1024 * 1024)
+		fs_info->data_alloc_cluster.empty_cluster = 512ULL * 1024 * 1024;
+#endif  
 
 	if (btrfs_super_flags(disk_super) & BTRFS_SUPER_FLAG_ERROR)
 		set_bit(BTRFS_FS_STATE_ERROR, &fs_info->fs_state);
@@ -2997,8 +3059,18 @@ int open_ctree(struct super_block *sb,
 		btrfs_alloc_workqueue("qgroup-rescan", flags, 1, 0);
 	fs_info->extent_workers =
 		btrfs_alloc_workqueue("extent-refs", flags,
+#ifdef MY_DEF_HERE
+				      min_t(u64, 4,
+#else
 				      min_t(u64, fs_devices->num_devices,
+#endif  
 					    max_active), 8);
+#ifdef MY_DEF_HERE
+	fs_info->syno_nocow_endio_workers =
+		btrfs_alloc_workqueue("syno_nocow", flags, max_active, 2);
+	fs_info->syno_high_priority_endio_workers =
+		btrfs_alloc_workqueue("syno_high_priority", flags, max_active, 2);
+#endif  
 
 	if (!(fs_info->workers && fs_info->delalloc_workers &&
 	      fs_info->submit_workers && fs_info->flush_workers &&
@@ -3011,6 +3083,9 @@ int open_ctree(struct super_block *sb,
 	      fs_info->fixup_workers && fs_info->extent_workers &&
 #ifdef MY_DEF_HERE
 	      fs_info->flush_meta_workers &&
+#endif  
+#ifdef MY_DEF_HERE
+	      fs_info->syno_nocow_endio_workers && fs_info->syno_high_priority_endio_workers &&
 #endif  
 	      fs_info->qgroup_rescan_workers)) {
 		err = -ENOMEM;
@@ -4110,6 +4185,9 @@ int close_ctree(struct btrfs_root *root)
 	btrfs_cleanup_defrag_inodes(fs_info);
 
 	cancel_work_sync(&fs_info->async_reclaim_work);
+#ifdef MY_DEF_HERE
+	cancel_work_sync(&fs_info->async_delayed_ref_work);
+#endif  
 
 	if (!(fs_info->sb->s_flags & MS_RDONLY)) {
 		ret = btrfs_commit_super(root);

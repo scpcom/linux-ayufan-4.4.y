@@ -806,7 +806,8 @@ static void wait_barrier(struct r1conf *conf)
 				    !conf->barrier ||
 				    (conf->nr_pending &&
 				     current->bio_list &&
-				     !bio_list_empty(current->bio_list)),
+				     (!bio_list_empty(&current->bio_list[0]) ||
+				      !bio_list_empty(&current->bio_list[1]))),
 				    conf->resync_lock);
 		conf->nr_waiting--;
 	}
@@ -1913,7 +1914,16 @@ static int process_checks(struct r1bio *r1_bio)
 				if (memcmp(page_address(p),
 					   page_address(s),
 					   sbio->bi_io_vec[j].bv_len))
+#ifdef MY_ABC_HERE
+				{
+					if (MD_SYNC_DEBUG_ON == mddev->sync_debug) {
+						printk(KERN_ERR "md/raid1:%s: raid1 not sync in sector: %llu, size: %u\n", mdname(mddev), (u64) r1_bio->sector, r1_bio->sectors);
+					}
 					break;
+				}
+#else  
+					break;
+#endif  
 			}
 		} else
 			j = 0;

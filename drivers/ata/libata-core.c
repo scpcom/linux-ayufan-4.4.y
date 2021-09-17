@@ -1981,6 +1981,13 @@ int ata_dev_configure(struct ata_device *dev)
 	if (ata_msg_probe(ap))
 		ata_dev_dbg(dev, "%s: ENTER\n", __func__);
 
+#ifdef MY_ABC_HERE
+	 
+	memset(&(dev->link->ata_latency), 0, sizeof(struct syno_ata_latency));
+	memset(&(dev->link->latency_stat), 0, sizeof(struct syno_latency_stat));
+	generate_random_uuid(dev->link->latency_stat.uuid);
+#endif  
+
 	dev->horkage |= ata_dev_blacklisted(dev);
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 	if(ap->nr_pmp_links) {
@@ -2508,12 +2515,14 @@ static int syno_ata_present_print_check(void)
 
 void syno_ata_present_print(struct ata_port *ap, const char *eventlog)
 {
+	bool blPresent = false;
 	int iHavePres = 0;
 	if (ap->nr_pmp_links == 0) {
 #ifdef MY_ABC_HERE
 		if (syno_ata_present_print_check() && HAVE_HDD_DETECT(ap->syno_disk_index + 1)) {
 			if (SYNO_CHECK_HDD_DETECT(ap->syno_disk_index + 1)) {
 				ata_port_printk(ap, KERN_ERR, "Disk is present for %s event\n", eventlog);
+				blPresent = true;
 			} else {
 				ata_port_printk(ap, KERN_ERR, "Disk is not present for %s event\n", eventlog);
 			}
@@ -2523,6 +2532,7 @@ void syno_ata_present_print(struct ata_port *ap, const char *eventlog)
 		if (GPIO_UNDEF != SYNO_GET_HDD_PRESENT_PIN(ap->syno_disk_index + 1)) {
 			if (SYNO_CHECK_HDD_PRESENT(ap->syno_disk_index + 1)) {
 				ata_port_printk(ap, KERN_ERR, "Disk is present for %s event\n", eventlog);
+				blPresent = true;
 			} else {
 				ata_port_printk(ap, KERN_ERR, "Disk is not present for %s event\n", eventlog);
 			}
@@ -4033,6 +4043,10 @@ static inline unsigned int syno_ata_latency_bucket_offset_get(const u64 u64Laten
 		uOffset += 1;
 	}
 
+	if (unlikely( 0x7FFF < u64Latency)) {
+		uOffset += 1;
+	}
+
 	return uOffset;
 }
 
@@ -4067,10 +4081,10 @@ static void syno_ata_cmd_latency_preprocess(struct ata_queued_cmd *qc,
 	uBucketOffset = syno_ata_latency_bucket_offset_get(u64StepOffset);
 	u64StepOffset >>= (5 * uBucketOffset);
 	if (unlikely(31 < u64StepOffset)) {
-		uBucketOffset = 2;
+		uBucketOffset = (SYNO_LATENCY_BUCKETS_END - 1);
 		u64StepOffset = 31;
 	}
-	link->ata_latency.u32RespTimeBuckets[u8QcType][uBucketOffset][u64StepOffset] += 1;
+	link->ata_latency.u64RespTimeBuckets[u8QcType][uBucketOffset][u64StepOffset] += 1;
 	return;
 }
 #endif  
@@ -4234,7 +4248,7 @@ static void syno_ata_latency_calculate(struct ata_link *link, u64 u64AtaIntrTime
 	uBucketOffset = syno_ata_latency_bucket_offset_get(u64StepOffset);
 	u64StepOffset >>= (5 * uBucketOffset);
 	if (unlikely(31 < u64StepOffset)) {
-		uBucketOffset = 2;
+		uBucketOffset = (SYNO_LATENCY_BUCKETS_END - 1);
 		u64StepOffset = 31;
 	}
 
@@ -4242,7 +4256,7 @@ static void syno_ata_latency_calculate(struct ata_link *link, u64 u64AtaIntrTime
 		link->latency_stat.u64TotalTime[iType]
 				+= (u64CmdLatencyTime * link->ata_latency.u16CplCmdCnt[iType]);
 
-		link->ata_latency.u32TimeBuckets[iType][uBucketOffset][u64StepOffset]
+		link->ata_latency.u64TimeBuckets[iType][uBucketOffset][u64StepOffset]
 									+= link->ata_latency.u16CplCmdCnt[iType];
 	}
 
@@ -4690,11 +4704,6 @@ void ata_link_init(struct ata_port *ap, struct ata_link *link, int pmp)
 	link->pmp = pmp;
 	link->active_tag = ATA_TAG_POISON;
 	link->hw_sata_spd_limit = UINT_MAX;
-#ifdef MY_ABC_HERE
-	memset(&(link->ata_latency), 0, sizeof(struct syno_ata_latency));
-	memset(&(link->latency_stat), 0, sizeof(struct syno_latency_stat));
-	memset(&(link->prev_latency_stat), 0, sizeof(struct syno_latency_stat));
-#endif  
 
 	for (i = 0; i < ATA_MAX_DEVICES; i++) {
 		struct ata_device *dev = &link->device[i];
@@ -5992,8 +6001,11 @@ EXPORT_SYMBOL_GPL(ata_cable_sata);
 
 int (*funcSYNOSendDiskResetPwrEvent)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSendDiskResetPwrEvent);
-int (*funcSYNOSendDiskPortDisEvent)(unsigned int, unsigned int) = NULL;
+int (*funcSYNOSendDiskPortDisEvent)(unsigned int, unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSendDiskPortDisEvent);
+int (*funcSYNOSendDiskPortLostEvent)(unsigned int,
+		unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNOSendDiskPortLostEvent);
 
 #ifdef MY_ABC_HERE
 int (*funcSYNOSendEboxRefreshEvent)(int portIndex) = NULL;

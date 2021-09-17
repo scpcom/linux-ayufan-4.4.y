@@ -2506,11 +2506,19 @@ out:
 	return ret;
 }
 
+#ifdef MY_DEF_HERE
+static int btrfs_bitmap_cluster(struct btrfs_block_group_cache *block_group,
+				struct btrfs_free_space *entry,
+				struct btrfs_free_cluster *cluster,
+				u64 offset, u64 bytes,
+				u64 cont1_bytes, u64 min_bytes, u64 empty_size)
+#else
 static int btrfs_bitmap_cluster(struct btrfs_block_group_cache *block_group,
 				struct btrfs_free_space *entry,
 				struct btrfs_free_cluster *cluster,
 				u64 offset, u64 bytes,
 				u64 cont1_bytes, u64 min_bytes)
+#endif  
 {
 	struct btrfs_free_space_ctl *ctl = block_group->free_space_ctl;
 	unsigned long next_zero;
@@ -2525,7 +2533,11 @@ static int btrfs_bitmap_cluster(struct btrfs_block_group_cache *block_group,
 
 	i = offset_to_bit(entry->offset, ctl->unit,
 			  max_t(u64, offset, entry->offset));
+#ifdef MY_DEF_HERE
+	want_bits = bytes_to_bits(empty_size, ctl->unit);
+#else
 	want_bits = bytes_to_bits(bytes, ctl->unit);
+#endif  
 	min_bits = bytes_to_bits(min_bytes, ctl->unit);
 
 	if (entry->max_extent_size &&
@@ -2549,6 +2561,14 @@ again:
 
 	if (!found_bits) {
 		entry->max_extent_size = (u64)max_bits * ctl->unit;
+#ifdef MY_DEF_HERE
+		if (total_found < empty_size)
+			return -ENOSPC;
+		if (entry->max_extent_size < cont1_bytes)
+			return -ENOSPC;
+		if (entry->max_extent_size < bytes)
+			return -EAGAIN;
+#endif  
 		return -ENOSPC;
 	}
 
@@ -2562,7 +2582,11 @@ again:
 	if (cluster->max_size < found_bits * ctl->unit)
 		cluster->max_size = found_bits * ctl->unit;
 
+#ifdef MY_DEF_HERE
+	if (total_found < want_bits || cluster->max_size < max(bytes, cont1_bytes)) {
+#else
 	if (total_found < want_bits || cluster->max_size < cont1_bytes) {
+#endif  
 		i = next_zero + 1;
 		goto again;
 	}
@@ -2578,11 +2602,20 @@ again:
 	return 0;
 }
 
+#ifdef MY_DEF_HERE
+ 
+static noinline int
+setup_cluster_no_bitmap(struct btrfs_block_group_cache *block_group,
+			struct btrfs_free_cluster *cluster,
+			struct list_head *bitmaps, u64 offset, u64 bytes,
+			u64 cont1_bytes, u64 min_bytes, u64 empty_size)
+#else
 static noinline int
 setup_cluster_no_bitmap(struct btrfs_block_group_cache *block_group,
 			struct btrfs_free_cluster *cluster,
 			struct list_head *bitmaps, u64 offset, u64 bytes,
 			u64 cont1_bytes, u64 min_bytes)
+#endif  
 {
 	struct btrfs_free_space_ctl *ctl = block_group->free_space_ctl;
 	struct btrfs_free_space *first = NULL;
@@ -2630,8 +2663,17 @@ setup_cluster_no_bitmap(struct btrfs_block_group_cache *block_group,
 			max_extent = entry->bytes;
 	}
 
+#ifdef MY_DEF_HERE
+	if (window_free < empty_size)
+		return -ENOSPC;
+	if (max_extent < cont1_bytes)
+		return -ENOSPC;
+	if (max_extent < bytes)
+		return -EAGAIN;
+#else
 	if (window_free < bytes || max_extent < cont1_bytes)
 		return -ENOSPC;
+#endif  
 
 	cluster->window_start = first->offset;
 
@@ -2657,11 +2699,19 @@ setup_cluster_no_bitmap(struct btrfs_block_group_cache *block_group,
 	return 0;
 }
 
+#ifdef MY_DEF_HERE
+static noinline int
+setup_cluster_bitmap(struct btrfs_block_group_cache *block_group,
+		     struct btrfs_free_cluster *cluster,
+		     struct list_head *bitmaps, u64 offset, u64 bytes,
+		     u64 cont1_bytes, u64 min_bytes, u64 empty_size)
+#else
 static noinline int
 setup_cluster_bitmap(struct btrfs_block_group_cache *block_group,
 		     struct btrfs_free_cluster *cluster,
 		     struct list_head *bitmaps, u64 offset, u64 bytes,
 		     u64 cont1_bytes, u64 min_bytes)
+#endif  
 {
 	struct btrfs_free_space_ctl *ctl = block_group->free_space_ctl;
 	struct btrfs_free_space *entry = NULL;
@@ -2681,15 +2731,26 @@ setup_cluster_bitmap(struct btrfs_block_group_cache *block_group,
 	}
 
 	list_for_each_entry(entry, bitmaps, list) {
+#ifdef MY_DEF_HERE
+		if (entry->bytes < min_bytes)
+			continue;
+		ret = btrfs_bitmap_cluster(block_group, entry, cluster, offset,
+					   bytes, cont1_bytes, min_bytes, empty_size);
+#else
 		if (entry->bytes < bytes)
 			continue;
 		ret = btrfs_bitmap_cluster(block_group, entry, cluster, offset,
 					   bytes, cont1_bytes, min_bytes);
+#endif  
 		if (!ret)
 			return 0;
 	}
 
+#ifdef MY_DEF_HERE
+	return ret;
+#else
 	return -ENOSPC;
+#endif  
 }
 
 int btrfs_find_space_cluster(struct btrfs_root *root,
@@ -2706,17 +2767,30 @@ int btrfs_find_space_cluster(struct btrfs_root *root,
 	LIST_HEAD(bitmaps);
 	u64 min_bytes;
 	u64 cont1_bytes;
+#ifdef MY_DEF_HERE
+	int ret1 = 0;
+	int ret = 0;
+#else
 	int ret;
+#endif  
 
 	if (btrfs_test_opt(root, SSD_SPREAD)) {
 		cont1_bytes = min_bytes = bytes + empty_size;
 	} else if (block_group->flags & BTRFS_BLOCK_GROUP_METADATA) {
+#ifdef MY_DEF_HERE
+		cont1_bytes = min_bytes = 64 * 1024;
+	} else {
+		cont1_bytes = empty_size >> 3;
+		min_bytes = cluster->min_bytes;  
+	}
+#else
 		cont1_bytes = bytes;
 		min_bytes = block_group->sectorsize;
 	} else {
 		cont1_bytes = max(bytes, (bytes + empty_size) >> 2);
 		min_bytes = block_group->sectorsize;
 	}
+#endif  
 
 	spin_lock(&ctl->tree_lock);
 
@@ -2740,13 +2814,29 @@ int btrfs_find_space_cluster(struct btrfs_root *root,
 				 min_bytes);
 
 	INIT_LIST_HEAD(&bitmaps);
+#ifdef MY_DEF_HERE
+	ret1 = setup_cluster_no_bitmap(block_group, cluster, &bitmaps, offset,
+				      bytes,
+				      cont1_bytes, min_bytes, empty_size);
+#else
 	ret = setup_cluster_no_bitmap(block_group, cluster, &bitmaps, offset,
 				      bytes + empty_size,
 				      cont1_bytes, min_bytes);
+#endif  
+#ifdef MY_DEF_HERE
+	if (ret1) {
+		ret = setup_cluster_bitmap(block_group, cluster, &bitmaps,
+					   offset, bytes,
+					   cont1_bytes, min_bytes, empty_size);
+		if (ret && ret1 == -EAGAIN)
+			ret = -EAGAIN;
+	}
+#else
 	if (ret)
 		ret = setup_cluster_bitmap(block_group, cluster, &bitmaps,
 					   offset, bytes + empty_size,
 					   cont1_bytes, min_bytes);
+#endif  
 
 	list_for_each_entry_safe(entry, tmp, &bitmaps, list)
 		list_del_init(&entry->list);
@@ -2777,7 +2867,10 @@ void btrfs_init_free_cluster(struct btrfs_free_cluster *cluster)
 	cluster->max_size = 0;
 #ifdef MY_DEF_HERE
 	cluster->reserve_bytes = 0;
-#endif
+	cluster->empty_cluster = 1024ULL * 1024 * 1024;  
+	cluster->min_bytes = 1 * 1024 * 1024;
+	cluster->excluded_size = (u64)-1;
+#endif  
 	cluster->fragmented = false;
 	INIT_LIST_HEAD(&cluster->block_group_list);
 	cluster->block_group = NULL;

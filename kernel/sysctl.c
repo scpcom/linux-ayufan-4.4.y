@@ -90,6 +90,9 @@ EXPORT_SYMBOL(syno_hibernation_log_level);
 
 int giSynoAtaDebug=0;
 EXPORT_SYMBOL(giSynoAtaDebug);
+
+int gSynoPageAllocFailedLog = 1;
+EXPORT_SYMBOL(gSynoPageAllocFailedLog);
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -317,6 +320,8 @@ EXPORT_SYMBOL(gSynoSASHBAAddr);
 #ifdef MY_ABC_HERE
 int (*syno_test_list)(unsigned char, struct tty_struct *);
 EXPORT_SYMBOL(syno_test_list);
+int (*syno_get_current)(unsigned char, struct tty_struct *);
+EXPORT_SYMBOL(syno_get_current);
 #endif  
 
 #if defined(MY_DEF_HERE)
@@ -356,12 +361,6 @@ unsigned long guSynoScsiCmdSN = 0;
 EXPORT_SYMBOL(guSynoScsiCmdSN);
 #endif  
 
-#ifdef MY_ABC_HERE
-unsigned int SynoDiskLatencyType = 0x6;
-EXPORT_SYMBOL(SynoDiskLatencyType);
-unsigned int gSynoDiskLatencyRank[SYNO_DISK_LATENCY_RANK_NUM] = {99, 90, 70, 50, 0};
-EXPORT_SYMBOL(gSynoDiskLatencyRank);
-#endif  
 #ifdef MY_ABC_HERE
 
 #define SZ_IF_PREFIX "eth"
@@ -1273,6 +1272,15 @@ static struct ctl_table kern_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_doulongvec_minmax,
 	},
+#ifdef MY_ABC_HERE
+	{
+		.procname	= "hung_task_warnings_default",
+		.data		= &sysctl_hung_task_warnings_default,
+		.maxlen		= sizeof(unsigned long),
+		.mode		= 0644,
+		.proc_handler	= proc_doulongvec_minmax,
+	},
+#endif  
 #endif
 #ifdef CONFIG_COMPAT
 	{
@@ -1385,6 +1393,13 @@ static struct ctl_table kern_table[] = {
 	{
 		.procname       = "syno_ata_debug",
 		.data           = &giSynoAtaDebug,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
+	{
+		.procname       = "syno_page_alloc_failed_log",
+		.data           = &gSynoPageAllocFailedLog,
 		.maxlen         = sizeof (int),
 		.mode           = 0644,
 		.proc_handler   = proc_dointvec,
@@ -1643,22 +1658,6 @@ static struct ctl_table kern_table[] = {
 		.maxlen         = sizeof(gSynoSfpUnsupportNotify),
 		.mode           = 0644,
 		.proc_handler   = SynoProcDoIntVec,
-	},
-#endif  
-#ifdef MY_ABC_HERE
-	{
-		.procname       = "syno_disk_latency_type",
-		.data           = &SynoDiskLatencyType,
-		.maxlen         = sizeof (int),
-		.mode           = 0644,
-		.proc_handler   = proc_dointvec,
-	},
-	{
-		.procname       = "syno_disk_latency_rank",
-		.data           = &gSynoDiskLatencyRank,
-		.maxlen         = sizeof (gSynoDiskLatencyRank),
-		.mode           = 0644,
-		.proc_handler   = proc_dointvec,
 	},
 #endif  
 	{ }
@@ -3323,4 +3322,42 @@ int syno_is_hw_version(const char *hw_version)
 	}
 }
 EXPORT_SYMBOL(syno_is_hw_version);
+#endif  
+
+#ifdef MY_DEF_HERE
+int (*funcSYNOReadAdtFanSpeedRpm)(struct _SYNO_HWMON_SENSOR_TYPE *) = NULL;
+EXPORT_SYMBOL(funcSYNOReadAdtFanSpeedRpm);
+int (*funcSYNOReadAdtVoltageSensor)(struct _SYNO_HWMON_SENSOR_TYPE *) = NULL;
+EXPORT_SYMBOL(funcSYNOReadAdtVoltageSensor);
+int (*funcSYNOReadAdtThermalSensor)(struct _SYNO_HWMON_SENSOR_TYPE *) = NULL;
+EXPORT_SYMBOL(funcSYNOReadAdtThermalSensor);
+
+int syno_get_adt_fan_speed_rpm(struct _SYNO_HWMON_SENSOR_TYPE *FanSpeedRpm)
+{
+	int ret = -1;
+	if (funcSYNOReadAdtFanSpeedRpm) {
+		ret = funcSYNOReadAdtFanSpeedRpm(FanSpeedRpm);
+	}
+	return ret;
+}
+EXPORT_SYMBOL(syno_get_adt_fan_speed_rpm);
+int syno_get_adt_thermal_sensor(struct _SYNO_HWMON_SENSOR_TYPE *SysThermal)
+{
+	int ret = -1;
+	if (funcSYNOReadAdtThermalSensor) {
+		ret = funcSYNOReadAdtThermalSensor(SysThermal);
+	}
+	return ret;
+
+}
+EXPORT_SYMBOL(syno_get_adt_thermal_sensor);
+int syno_get_adt_voltage_sensor(struct _SYNO_HWMON_SENSOR_TYPE *SysVoltage)
+{
+	int ret = -1;
+	if (funcSYNOReadAdtVoltageSensor) {
+		ret = funcSYNOReadAdtVoltageSensor(SysVoltage);
+	}
+	return ret;
+}
+EXPORT_SYMBOL(syno_get_adt_voltage_sensor);
 #endif  

@@ -201,9 +201,6 @@ struct btrfs_dir_item *btrfs_lookup_dir_item(struct btrfs_trans_handle *trans,
 	struct btrfs_key key;
 	int ins_len = mod < 0 ? -1 : 0;
 	int cow = mod != 0;
-#ifdef MY_DEF_HERE
-	u32 hash;
-#endif /* MY_DEF_HERE */
 
 	key.objectid = dir;
 	btrfs_set_key_type(&key, BTRFS_DIR_ITEM_KEY);

@@ -31,6 +31,7 @@
 #include "print-tree.h"
 #include "locking.h"
 #ifdef MY_DEF_HERE
+#include <linux/vmalloc.h>
 #include <linux/file.h>
 #include "ulist.h"
 extern int write_buf(struct file *filp, const void *buf, u32 len, loff_t *off);
@@ -3193,11 +3194,31 @@ void btrfs_set_item_key_safe(struct btrfs_root *root, struct btrfs_path *path,
 	slot = path->slots[0];
 	if (slot > 0) {
 		btrfs_item_key(eb, &disk_key, slot - 1);
-		BUG_ON(comp_keys(&disk_key, new_key) >= 0);
+		if (unlikely(comp_keys(&disk_key, new_key) >= 0)) {
+			btrfs_crit(root->fs_info,
+		"slot %u key (%llu %u %llu) new key (%llu %u %llu)",
+				   slot, btrfs_disk_key_objectid(&disk_key),
+				   btrfs_disk_key_type(&disk_key),
+				   btrfs_disk_key_offset(&disk_key),
+				   new_key->objectid, new_key->type,
+				   new_key->offset);
+			btrfs_print_leaf(root, eb);
+			BUG();
+		}
 	}
 	if (slot < btrfs_header_nritems(eb) - 1) {
 		btrfs_item_key(eb, &disk_key, slot + 1);
-		BUG_ON(comp_keys(&disk_key, new_key) <= 0);
+		if (unlikely(comp_keys(&disk_key, new_key) <= 0)) {
+			btrfs_crit(root->fs_info,
+		"slot %u key (%llu %u %llu) new key (%llu %u %llu)",
+				   slot, btrfs_disk_key_objectid(&disk_key),
+				   btrfs_disk_key_type(&disk_key),
+				   btrfs_disk_key_offset(&disk_key),
+				   new_key->objectid, new_key->type,
+				   new_key->offset);
+			btrfs_print_leaf(root, eb);
+			BUG();
+		}
 	}
 
 	btrfs_cpu_key_to_disk(&disk_key, new_key);
@@ -5334,11 +5355,6 @@ static int syno_send_check_skip_xattr(struct btrfs_root *root, u64 ino, const ch
 	int ret;
 	struct btrfs_dir_item *di;
 	struct btrfs_path *path;
-	struct extent_buffer *leaf;
-	unsigned long data_ptr;
-	u32 data_len;
-	const char* sz_true = "true";
-	char buf[8];
 
 	path = btrfs_alloc_path();
 	if (!path)
@@ -5353,29 +5369,14 @@ static int syno_send_check_skip_xattr(struct btrfs_root *root, u64 ino, const ch
 		ret = PTR_ERR(di);
 		goto out;
 	}
-
-	leaf = path->nodes[0];
-	data_len = btrfs_dir_data_len(leaf, di);
-	if (data_len != strlen(sz_true)) {
-		ret = 0;
-		goto out;
-	}
-
 	/*
-	 * The way things are packed into the leaf is like this
-	 * |struct btrfs_dir_item|name|data|
-	 * where name is the xattr name, so security.foo, and data is the
-	 * content of the xattr.  data_ptr points to the location in memory
-	 * where the data starts in the in memory leaf
+	 * DSM#126656 Workaround for ABB set C++ bool true to xattr.
+	 * C++'s sizeof(bool) is implementation-defined and bool's binary
+	 * representation is not specified, so string and bool are mixed up.
+	 * Therefore we let this function return 1 if the xattr is set to simplify
+	 * the flow.
 	 */
-	data_ptr = (unsigned long)((char *)(di + 1) +
-				   btrfs_dir_name_len(leaf, di));
-	read_extent_buffer(leaf, buf, data_ptr, data_len);
-	buf[data_len] = '\0';
-	if (strcmp(buf, sz_true) == 0)
-		ret = 1;
-	else
-		ret = 0;
+	ret = 1;
 out:
 	btrfs_free_path(path);
 	return ret;
@@ -5923,10 +5924,13 @@ int btrfs_snapshot_size_query(struct file *file,
 	struct ulist_node *ulist_node;
 	struct btrfs_file_extent_item *ei;
 
-	ctx = kzalloc(sizeof(*ctx) + sizeof(struct btrfs_snapshot_size_entry) * snap_count, GFP_KERNEL);
+	ctx = kzalloc(sizeof(*ctx) + sizeof(struct btrfs_snapshot_size_entry) * snap_count, GFP_KERNEL | __GFP_NOWARN);
 	if (!ctx) {
-		ret = -ENOMEM;
-		goto out;
+		ctx = vzalloc(sizeof(*ctx) + sizeof(struct btrfs_snapshot_size_entry) * snap_count);
+		if (!ctx) {
+			ret = -ENOMEM;
+			goto out;
+		}
 	}
 	ctx->root = RB_ROOT;
 	ctx->flags = snap_args->flags;
@@ -6158,12 +6162,12 @@ out:
 				spin_unlock(&ctx->snaps[i].root->root_item_lock);
 			}
 		}
+		if (ctx->out_filp)
+			fput(ctx->out_filp);
 	}
 	ulist_free(roots);
 
-	if (ctx->out_filp)
-		fput(ctx->out_filp);
-	kfree(ctx);
+	kvfree(ctx);
 	return ret;
 }
 #endif /* MY_DEF_HERE */

@@ -917,7 +917,13 @@ struct btrfs_free_cluster {
 
 #ifdef MY_DEF_HERE
 	u64 reserve_bytes;
-#endif
+
+	u64 empty_cluster;  
+
+	u64 min_bytes;      
+
+	u64 excluded_size;  
+#endif  
 
 	bool fragmented;
 
@@ -1069,12 +1075,22 @@ struct btrfs_stripe_hash_table {
 #define BTRFS_STRIPE_HASH_TABLE_BITS 11
 
 void btrfs_init_async_reclaim_work(struct work_struct *work);
+#ifdef MY_DEF_HERE
+void btrfs_init_async_delayed_ref_work(struct work_struct *work);
+#endif  
 
 struct reloc_control;
 struct btrfs_device;
 struct btrfs_fs_devices;
 struct btrfs_balance_control;
 struct btrfs_delayed_root;
+
+#ifdef MY_DEF_HERE
+struct btrfs_delayed_ref_throttle_ticket {
+	u64 count;
+	struct list_head list;
+};
+#endif  
 
 struct btrfs_fs_info {
 	u8 fsid[BTRFS_FSID_SIZE];
@@ -1229,6 +1245,10 @@ struct btrfs_fs_info {
 #ifdef MY_DEF_HERE
 	struct btrfs_workqueue *reada_path_workers;
 #endif
+#ifdef MY_DEF_HERE
+	struct btrfs_workqueue *syno_nocow_endio_workers;
+	struct btrfs_workqueue *syno_high_priority_endio_workers;
+#endif  
 
 	struct btrfs_workqueue *fixup_workers;
 	struct btrfs_workqueue *delayed_workers;
@@ -1324,8 +1344,14 @@ struct btrfs_fs_info {
 	u32 check_integrity_print_mask;
 #endif
 #ifdef MY_DEF_HERE
-	int ordered_extent_nr;
-	int ordered_extent_throttle;
+	atomic_t syno_async_submit_nr;
+	u32 syno_async_submit_throttle;
+	wait_queue_head_t syno_async_submit_queue_wait;
+#endif  
+#ifdef MY_DEF_HERE
+	atomic_t syno_ordered_extent_nr;
+	int syno_max_ordered_queue_size;
+	wait_queue_head_t syno_ordered_queue_wait;
 #endif  
 
 	unsigned int quota_enabled:1;
@@ -1390,6 +1416,10 @@ struct btrfs_fs_info {
 	unsigned int update_uuid_tree_gen:1;
 
 	struct work_struct async_reclaim_work;
+#ifdef MY_DEF_HERE
+	 
+	struct work_struct async_delayed_ref_work;
+#endif  
 
 	spinlock_t unused_bgs_lock;
 	struct list_head unused_bgs;
@@ -1433,6 +1463,17 @@ struct btrfs_fs_info {
 	struct percpu_counter delayed_data_ref;
 	struct percpu_counter write_flush;
 	struct percpu_counter write_fua;
+#endif  
+
+#ifdef MY_DEF_HERE
+	atomic64_t fsync_cnt;
+	atomic64_t fsync_full_commit_cnt;
+	unsigned int commit_time_debug:1;
+#endif  
+
+#ifdef MY_DEF_HERE
+	spinlock_t syno_delayed_ref_throttle_lock;
+	struct list_head syno_delayed_ref_throttle_tickets;
 #endif  
 };
 
@@ -1582,6 +1623,11 @@ struct btrfs_snapshot_size_entry {
 	int root_level;
 	int level;
 	u64 snap_exclusive_size;
+};
+
+struct btrfs_file_private {
+	struct btrfs_trans_handle *trans;
+	void *filldir_buf;
 };
 
 struct btrfs_snapshot_size_ctx {
@@ -2839,6 +2885,8 @@ static inline gfp_t btrfs_alloc_write_mask(struct address_space *mapping)
 	return mapping_gfp_mask(mapping) & ~__GFP_FS;
 }
 
+u64 btrfs_csum_bytes_to_leaves(struct btrfs_root *root, u64 csum_bytes);
+
 static inline u64 btrfs_calc_trans_metadata_size(struct btrfs_root *root,
 						 unsigned num_items)
 {
@@ -3545,6 +3593,9 @@ int btrfs_clone_file_range(struct file *file_in, loff_t pos_in,
 			   struct file *file_out, loff_t pos_out, u64 len);
 #ifdef MY_DEF_HERE
 int btrfs_clone_check_compr(struct file *file, struct file *file_src);
+#endif  
+#ifdef MY_DEF_HERE
+void syno_ordered_extent_throttle(struct btrfs_fs_info *fs_info);
 #endif  
 
 int btrfs_defrag_leaves(struct btrfs_trans_handle *trans,

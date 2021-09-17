@@ -11,6 +11,9 @@
 #include <linux/hwmon-vid.h>
 #include <linux/err.h>
 #include <linux/jiffies.h>
+#ifdef MY_DEF_HERE
+#include <linux/synobios.h>
+#endif  
 
 #define INPUT		0
 #define MIN		1
@@ -1811,6 +1814,182 @@ static void adt7475_remove_files(struct i2c_client *client,
 		sysfs_remove_group(&client->dev.kobj, &vid_attr_group);
 }
 
+#ifdef MY_DEF_HERE
+extern int (*funcSYNOReadAdtFanSpeedRpm)(struct _SYNO_HWMON_SENSOR_TYPE *);
+extern int (*funcSYNOReadAdtVoltageSensor)(struct _SYNO_HWMON_SENSOR_TYPE *);
+extern int (*funcSYNOReadAdtThermalSensor)(struct _SYNO_HWMON_SENSOR_TYPE *);
+static struct i2c_client *syno_find_adt7490_client(void)
+{
+    struct i2c_client *client, *_n, *ret = NULL;
+
+    list_for_each_entry_safe(client, _n, &adt7475_driver.clients, detected) {
+		if (SYNO_IS_ADT7490(client)) {
+			ret = client;
+			break;
+		}
+	}
+
+	return ret;
+}
+
+static int syno_parse_adt_voltage_sensor(struct _SYNO_HWMON_SENSOR_TYPE *SysVoltage)
+{
+	struct i2c_client *client;
+	struct adt7475_data *data;
+	int i = 0;
+
+	client = syno_find_adt7490_client();
+	if (NULL == client || NULL == SysVoltage) {
+		return -ENODEV;
+	}
+
+	data = i2c_get_clientdata(client);
+
+	for (i = 0 ; i < SysVoltage->sensor_num ; i++) {
+		snprintf(SysVoltage->sensor[i].value, sizeof(SysVoltage->sensor[i].value), "%d", reg2volt(i, data->voltage[INPUT][i], data->bypass_attn));
+	}
+
+	return 0;
+}
+
+static int syno_parse_adt_thermal_sensor(struct _SYNO_HWMON_SENSOR_TYPE *SysThermal)
+{
+	struct i2c_client *client;
+	struct adt7475_data *data;
+	int i = 0;
+
+	client = syno_find_adt7490_client();
+	if (NULL == client || NULL == SysThermal) {
+		return -ENODEV;
+	}
+
+	data = i2c_get_clientdata(client);
+
+	for (i = 0 ; i < SysThermal->sensor_num ; i++) {
+		snprintf(SysThermal->sensor[i].value, sizeof(SysThermal->sensor[i].value), "%d", reg2temp(data, data->temp[INPUT][i]) / 1000);
+	}
+
+	return 0;
+}
+
+static int syno_parse_adt_fan_speed_rpm(struct _SYNO_HWMON_SENSOR_TYPE *FanSpeedRpm)
+{
+	struct i2c_client *client;
+	struct adt7475_data *data;
+	int i = 0;
+
+	client = syno_find_adt7490_client();
+	if (NULL == client || NULL == FanSpeedRpm) {
+		return -ENODEV;
+	}
+
+	data = i2c_get_clientdata(client);
+
+	for (i = 0 ; i < FanSpeedRpm->sensor_num ; i++) {
+		snprintf(FanSpeedRpm->sensor[i].value, sizeof(FanSpeedRpm->sensor[i].value), "%d",  tach2rpm(data->tach[INPUT][i]));
+	}
+
+	return 0;
+}
+
+static struct i2c_client *syno_find_adt7490_client_for_rc18015xsp(int index)
+{
+    struct i2c_client *client, *_n, *ret = NULL;
+	int i = 0;
+
+    list_for_each_entry_safe(client, _n, &adt7475_driver.clients, detected) {
+		if (SYNO_IS_ADT7490(client)) {
+			if (i == index){
+				ret = client;
+				break;
+			} else {
+				i++;
+			}
+		}
+	}
+
+	return ret;
+}
+
+static int syno_parse_adt_voltage_sensor_for_rc18015xsp(struct _SYNO_HWMON_SENSOR_TYPE *SysVoltage)
+{
+	struct i2c_client *client1, *client2;
+	struct adt7475_data *data1, *data2;
+	int i = 0;
+
+	client1 = syno_find_adt7490_client_for_rc18015xsp(1);
+	 
+	client2 = syno_find_adt7490_client_for_rc18015xsp(0);
+	if (NULL == client1 || NULL == client2 || NULL == SysVoltage) {
+		return -ENODEV;
+	}
+
+	data1 = i2c_get_clientdata(client1);
+	data2 = i2c_get_clientdata(client2);
+
+	for (i = 0 ; i < SysVoltage->sensor_num - 1 ; i++) {
+		snprintf(SysVoltage->sensor[i].value, sizeof(SysVoltage->sensor[i].value), "%d", reg2volt(i, data1->voltage[INPUT][i], data1->bypass_attn));
+	}
+	 
+	snprintf(SysVoltage->sensor[SysVoltage->sensor_num - 1].value, sizeof(SysVoltage->sensor[SysVoltage->sensor_num - 1].value), "%d", reg2volt(i, data2->voltage[INPUT][2], data2->bypass_attn));
+
+	return 0;
+}
+
+static int syno_parse_adt_thermal_sensor_for_rc18015xsp(struct _SYNO_HWMON_SENSOR_TYPE *SysThermal)
+{
+	struct i2c_client *client1, *client2;
+	struct adt7475_data *data1, *data2;
+	int i = 0;
+
+	client1 = syno_find_adt7490_client_for_rc18015xsp(1);
+	 
+	client2 = syno_find_adt7490_client_for_rc18015xsp(0);
+	if (NULL == client1 || NULL == client2 || NULL == SysThermal) {
+		return -ENODEV;
+	}
+
+	data1 = i2c_get_clientdata(client1);
+	data2 = i2c_get_clientdata(client2);
+
+	for (i = 0 ; i < SysThermal->sensor_num - 1 ; i++) {
+		snprintf(SysThermal->sensor[i].value, sizeof(SysThermal->sensor[i].value), "%d", reg2temp(data1, data1->temp[INPUT][i]) / 1000);
+	}
+	 
+	snprintf(SysThermal->sensor[SysThermal->sensor_num - 1].value, sizeof(SysThermal->sensor[SysThermal->sensor_num - 1].value), "%d", reg2temp(data2, data2->temp[INPUT][1]) / 1000);
+
+	return 0;
+}
+
+static int syno_parse_adt_fan_speed_rpm_for_rc18015xsp(struct _SYNO_HWMON_SENSOR_TYPE *FanSpeedRpm)
+{
+	struct i2c_client *client1, *client2;
+	struct adt7475_data *data1, *data2;
+	int i = 0;
+
+	client1 = syno_find_adt7490_client_for_rc18015xsp(1);
+	 
+	client2 = syno_find_adt7490_client_for_rc18015xsp(0);
+	if (NULL == client1 || NULL == client2 || NULL == FanSpeedRpm) {
+		return -ENODEV;
+	}
+
+	data1 = i2c_get_clientdata(client1);
+	data2 = i2c_get_clientdata(client2);
+
+	for (i = 0 ; i < FanSpeedRpm->sensor_num ; i++) {
+		if (i < ADT7475_TACH_COUNT) {
+			snprintf(FanSpeedRpm->sensor[i].value, sizeof(FanSpeedRpm->sensor[i].value), "%d",  tach2rpm(data1->tach[INPUT][i]));
+		} else {
+			snprintf(FanSpeedRpm->sensor[i].value, sizeof(FanSpeedRpm->sensor[i].value), "%d",  tach2rpm(data2->tach[INPUT][i - ADT7475_TACH_COUNT]));
+		}
+	}
+
+	return 0;
+}
+
+#endif  
+
 static int adt7475_probe(struct i2c_client *client,
 			 const struct i2c_device_id *id)
 {
@@ -1866,6 +2045,16 @@ static int adt7475_probe(struct i2c_client *client,
 		configPECI = adt7475_read(REG_PECI_CONFIG);
 		configPECI = 0x00;
 		i2c_smbus_write_byte_data(client, REG_PECI_CONFIG, configPECI);
+		 
+		if (syno_is_hw_version(HW_RC18015xsp)) {
+			funcSYNOReadAdtFanSpeedRpm = syno_parse_adt_fan_speed_rpm_for_rc18015xsp;
+			funcSYNOReadAdtVoltageSensor = syno_parse_adt_voltage_sensor_for_rc18015xsp;
+			funcSYNOReadAdtThermalSensor = syno_parse_adt_thermal_sensor_for_rc18015xsp;
+		} else {
+			funcSYNOReadAdtFanSpeedRpm = syno_parse_adt_fan_speed_rpm;
+			funcSYNOReadAdtVoltageSensor = syno_parse_adt_voltage_sensor;
+			funcSYNOReadAdtThermalSensor = syno_parse_adt_thermal_sensor;
+		}
 	}
 #endif  
 
@@ -1986,6 +2175,11 @@ eremove:
 static int adt7475_remove(struct i2c_client *client)
 {
 	struct adt7475_data *data = i2c_get_clientdata(client);
+#ifdef MY_DEF_HERE
+	funcSYNOReadAdtFanSpeedRpm = NULL;
+	funcSYNOReadAdtVoltageSensor = NULL;
+	funcSYNOReadAdtThermalSensor = NULL;
+#endif  
 
 	hwmon_device_unregister(data->hwmon_dev);
 	adt7475_remove_files(client, data);

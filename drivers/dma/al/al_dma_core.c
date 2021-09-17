@@ -48,6 +48,11 @@ static dma_cookie_t al_dma_tx_submit_unlock(
 static void al_dma_free_chan_resources(
 	struct dma_chan *c);
 
+#ifdef CONFIG_SYNO_ALPINE_DMA_FIX
+static void al_dma_free_chan_resources_int(
+	struct dma_chan *c);
+#endif /* CONFIG_SYNO_ALPINE_DMA_FIX */
+
 static int al_dma_alloc_chan_resources(
 	struct dma_chan *c);
 
@@ -1102,7 +1107,11 @@ static int al_dma_alloc_chan_resources(struct dma_chan *c)
 			"memory for Rx submission descriptors\n",
 			chan->rx_descs_num * sizeof(union al_udma_desc));
 
+#ifdef CONFIG_SYNO_ALPINE_DMA_FIX
+		al_dma_free_chan_resources_int(c);
+#else /* CONFIG_SYNO_ALPINE_DMA_FIX */
 		al_dma_free_chan_resources(c);
+#endif /* CONFIG_SYNO_ALPINE_DMA_FIX */
 		return -ENOMEM;
 	}
 	dev_dbg(dev, "allocted rx descriptor ring: virt 0x%p phys 0x%llx\n",
@@ -1119,7 +1128,11 @@ static int al_dma_alloc_chan_resources(struct dma_chan *c)
 			"memory for Rx completion descriptors\n",
 			chan->rx_descs_num * AL_DMA_RAID_RX_CDESC_SIZE);
 
+#ifdef CONFIG_SYNO_ALPINE_DMA_FIX
+		al_dma_free_chan_resources_int(c);
+#else /* CONFIG_SYNO_ALPINE_DMA_FIX */
 		al_dma_free_chan_resources(c);
+#endif /* CONFIG_SYNO_ALPINE_DMA_FIX */
 		return -ENOMEM;
 	}
 
@@ -1157,7 +1170,11 @@ static int al_dma_alloc_chan_resources(struct dma_chan *c)
 			ring_alloc_order,
 			AL_DMA_SW_RING_MIN_ORDER);
 
+#ifdef CONFIG_SYNO_ALPINE_DMA_FIX
+		al_dma_free_chan_resources_int(c);
+#else /* CONFIG_SYNO_ALPINE_DMA_FIX */
 		al_dma_free_chan_resources(c);
+#endif /* CONFIG_SYNO_ALPINE_DMA_FIX */
 		return -EINVAL;
 	} else if (ring_alloc_order > AL_DMA_SW_RING_MAX_ORDER) {
 		dev_err(
@@ -1167,7 +1184,11 @@ static int al_dma_alloc_chan_resources(struct dma_chan *c)
 			ring_alloc_order,
 			AL_DMA_SW_RING_MAX_ORDER);
 
+#ifdef CONFIG_SYNO_ALPINE_DMA_FIX
+		al_dma_free_chan_resources_int(c);
+#else /* CONFIG_SYNO_ALPINE_DMA_FIX */
 		al_dma_free_chan_resources(c);
+#endif /* CONFIG_SYNO_ALPINE_DMA_FIX */
 		return -EINVAL;
 	} else if (ring_alloc_order > rx_descs_order) {
 		dev_warn(
@@ -1198,7 +1219,11 @@ static int al_dma_alloc_chan_resources(struct dma_chan *c)
 	if (rc) {
 		dev_err(dev, "failed to initialize hal q %d. rc %d\n",
 			chan->idx, rc);
+#ifdef CONFIG_SYNO_ALPINE_DMA_FIX
+		al_dma_free_chan_resources_int(c);
+#else /* CONFIG_SYNO_ALPINE_DMA_FIX */
 		al_dma_free_chan_resources(c);
+#endif /* CONFIG_SYNO_ALPINE_DMA_FIX */
 		return rc;
 	}
 
@@ -1206,12 +1231,27 @@ static int al_dma_alloc_chan_resources(struct dma_chan *c)
 	return  1 << chan->alloc_order;
 }
 
+#ifdef CONFIG_SYNO_ALPINE_DMA_FIX
 /******************************************************************************
  *****************************************************************************/
 /* al_dma_free_chan_resources - free tx and rx descriptor rings
+ * Call al_dma_free_chan_resources twice make sw_ring freed but not set to NULL
+ * We don't put dma chan resource if ref count = 0
  * @chan: channel to be free
  */
+
 static void al_dma_free_chan_resources(struct dma_chan *c)
+{
+	return;
+}
+
+/* al_dma_free_chan_resources_int - free tx and rx descriptor rings
+ * @chan: channel to be free
+ */
+static void al_dma_free_chan_resources_int(struct dma_chan *c)
+#else /* CONFIG_SYNO_ALPINE_DMA_FIX */
+static void al_dma_free_chan_resources(struct dma_chan *c)
+#endif /* CONFIG_SYNO_ALPINE_DMA_FIX */
 {
 	struct al_dma_chan *chan = to_al_dma_chan(c);
 	struct device *dev = chan->device->common.dev;
@@ -1230,6 +1270,9 @@ static void al_dma_free_chan_resources(struct dma_chan *c)
 		al_dma_free_ring_ent(sw_ring[i], chan);
 
 	kfree(chan->sw_ring);
+#ifdef CONFIG_SYNO_ALPINE_DMA_FIX
+	chan->sw_ring = NULL;
+#endif /* CONFIG_SYNO_ALPINE_DMA_FIX */
 
 	spin_unlock_bh(&chan->cleanup_lock);
 	if (chan->tx_dma_desc_virt != NULL) {

@@ -36,6 +36,7 @@
 #include "mount.h"
 #ifdef MY_ABC_HERE
 extern struct rw_semaphore namespace_sem;
+static DEFINE_RATELIMIT_STATE(_namei_rs, (3600 * HZ), 1);
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -930,6 +931,8 @@ int syno_fetch_mountpoint_fullpath(struct vfsmount *mnt, size_t buf_len, char *m
 
 	mnt_dentry_path_buf = kmalloc(PATH_MAX, GFP_ATOMIC);
 	if(!mnt_dentry_path_buf) {
+		if (__ratelimit(&_namei_rs))
+			printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 		ret = -ENOMEM;
 		goto ERR;
 	}
@@ -3976,6 +3979,8 @@ static inline struct synotify_rename_path * get_rename_path(struct vfsmount *vfs
 
 	rename_path = kmalloc(sizeof(struct synotify_rename_path), GFP_NOFS);
 	if (!rename_path) {
+		if (__ratelimit(&_namei_rs))
+			printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 		goto end;
 	}
 
@@ -3993,11 +3998,15 @@ static inline struct synotify_rename_path * get_rename_path(struct vfsmount *vfs
 
 	old_path_buf = kmalloc(PATH_MAX, GFP_NOFS);
 	if (!old_path_buf) {
+		if (__ratelimit(&_namei_rs))
+			printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 		goto end;
 	}
 
 	new_path_buf = kmalloc(PATH_MAX, GFP_NOFS);
 	if (!new_path_buf) {
+		if (__ratelimit(&_namei_rs))
+			printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 		goto end;
 	}
 

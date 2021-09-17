@@ -143,4 +143,13 @@ config SYNO_ARMADA38X_LOG_REDUCE
 	default y
 	depends on SYNO_LSP_ARMADA_2015_T1_1p4
 
+config SYNO_ADD_ROUTE_CHECK
+    bool "check if interface is link up before adding route"
+	default n
+
+config SYNO_ALPINE_RUNOUT_IOVEC_LOG
+	bool "Print more info while running out of iovecs in dma_memcpy_fill_sg_from_iovec"
+	default y
+	depends on SYNO_ALPINE
+
 endmenu #Network

@@ -275,9 +275,6 @@ enum {
 	Opt_datasum, Opt_treelog, Opt_noinode_cache,
 	Opt_nologreplay,
 #ifdef MY_DEF_HERE
-	Opt_ordered_extent_throttle,
-#endif  
-#ifdef MY_DEF_HERE
 	Opt_no_block_group_hint,
 #endif
 #ifdef MY_DEF_HERE
@@ -320,9 +317,6 @@ static match_table_t tokens = {
 	{Opt_nologreplay, "nologreplay"},
 	{Opt_flushoncommit, "flushoncommit"},
 	{Opt_noflushoncommit, "noflushoncommit"},
-#ifdef MY_DEF_HERE
-	{Opt_ordered_extent_throttle, "ordered_extent_throttle=%d"},
-#endif  
 	{Opt_ratio, "metadata_ratio=%d"},
 	{Opt_discard, "discard"},
 	{Opt_nodiscard, "nodiscard"},
@@ -584,19 +578,6 @@ int btrfs_parse_options(struct btrfs_root *root, char *options,
 			btrfs_set_and_info(root, NOLOGREPLAY,
 					   "disabling log replay at mount time");
 			break;
-#ifdef MY_DEF_HERE
-		case Opt_ordered_extent_throttle:
-			ret = match_int(&args[0], &intarg);
-			if (ret) {
-				goto out;
-			} else if (intarg >= 0) {
-				info->ordered_extent_throttle = intarg;
-			} else {
-				ret = -EINVAL;
-				goto out;
-			}
-			break;
-#endif
 		case Opt_flushoncommit:
 			btrfs_set_and_info(root, FLUSHONCOMMIT,
 					   "turning on flush-on-commit");
@@ -1166,11 +1147,6 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 		seq_printf(seq, ",check_int_print_mask=%d",
 				info->check_integrity_print_mask);
 #endif
-#ifdef MY_DEF_HERE
-	if (info->ordered_extent_throttle)
-		seq_printf(seq, ",ordered_extent_throttle=%d",
-				info->ordered_extent_throttle);
-#endif  
 	if (info->metadata_ratio)
 		seq_printf(seq, ",metadata_ratio=%d",
 				info->metadata_ratio);
@@ -1511,6 +1487,9 @@ static int btrfs_remount(struct super_block *sb, int *flags, char *data)
 	if (*flags & MS_RDONLY) {
 		 
 		cancel_work_sync(&fs_info->async_reclaim_work);
+#ifdef MY_DEF_HERE
+		cancel_work_sync(&fs_info->async_delayed_ref_work);
+#endif  
 
 		down(&fs_info->uuid_tree_rescan_sem);
 		 

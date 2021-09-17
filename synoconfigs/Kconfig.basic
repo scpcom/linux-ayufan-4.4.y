@@ -302,4 +302,8 @@ config SYNO_HI3536_HARD_RESET_CPU
 	default y
 	depends on SYNO_HI3536
 
+config SYNO_WARN_ALLOC_FAILED_RATELIMIT
+	bool "Set harder rate limit for warn_alloc_failed()"
+	default y
+
 endmenu #Kernel Core Enhancements

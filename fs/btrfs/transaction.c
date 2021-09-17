@@ -50,6 +50,14 @@ void btrfs_put_transaction(struct btrfs_transaction *transaction)
 	if (atomic_dec_and_test(&transaction->use_count)) {
 		BUG_ON(!list_empty(&transaction->list));
 		WARN_ON(!RB_EMPTY_ROOT(&transaction->delayed_refs.href_root));
+		if (transaction->delayed_refs.pending_csums)
+			printk(KERN_ERR "pending csums is %llu\n",
+			       transaction->delayed_refs.pending_csums);
+#ifdef MY_DEF_HERE
+		if (transaction->delayed_refs.num_pending_csums_leafs)
+			printk(KERN_ERR "delayed_refs.num_pending_csums_leafs is %llu\n",
+			       transaction->delayed_refs.num_pending_csums_leafs);
+#endif  
 		while (!list_empty(&transaction->pending_chunks)) {
 			struct extent_map *em;
 
@@ -195,9 +203,13 @@ loop:
 	cur_trans->delayed_refs.href_root = RB_ROOT;
 	atomic_set(&cur_trans->delayed_refs.num_entries, 0);
 	cur_trans->delayed_refs.num_heads_ready = 0;
+	cur_trans->delayed_refs.pending_csums = 0;
 	cur_trans->delayed_refs.num_heads = 0;
 	cur_trans->delayed_refs.flushing = 0;
 	cur_trans->delayed_refs.run_delayed_start = 0;
+#ifdef MY_DEF_HERE
+	cur_trans->delayed_refs.num_pending_csums_leafs = 0;
+#endif  
 
 	smp_mb();
 	if (!list_empty(&fs_info->tree_mod_seq_list))
@@ -216,6 +228,7 @@ loop:
 	INIT_LIST_HEAD(&cur_trans->dirty_bgs);
 	INIT_LIST_HEAD(&cur_trans->io_bgs);
 	mutex_init(&cur_trans->cache_write_mutex);
+	cur_trans->num_dirty_bgs = 0;
 	spin_lock_init(&cur_trans->dirty_bgs_lock);
 	list_add_tail(&cur_trans->list, &fs_info->trans_list);
 	extent_io_tree_init(&cur_trans->dirty_pages,
@@ -430,6 +443,10 @@ again:
 #endif  
 	INIT_LIST_HEAD(&h->qgroup_ref_list);
 	INIT_LIST_HEAD(&h->new_bgs);
+#ifdef MY_DEF_HERE
+	h->syno_delayed_ref_throttle_ticket = NULL;
+	h->check_throttle = false;
+#endif  
 
 	smp_mb();
 	if (cur_trans->state >= TRANS_STATE_BLOCKED &&
@@ -674,6 +691,9 @@ static int __btrfs_end_transaction(struct btrfs_trans_handle *trans,
 
 	trans->delayed_ref_updates = 0;
 	if (!trans->sync) {
+#ifdef MY_DEF_HERE
+		unsigned long sync_cur = cur;
+#endif  
 		must_run_delayed_refs =
 			btrfs_should_throttle_delayed_refs(trans, root);
 		cur = max_t(unsigned long, cur, 32);
@@ -686,6 +706,43 @@ static int __btrfs_end_transaction(struct btrfs_trans_handle *trans,
 		    (trans->type & (__TRANS_JOIN_NOLOCK | __TRANS_ATTACH)))
 #endif  
 			must_run_delayed_refs = 2;
+
+#ifdef MY_DEF_HERE
+		if (1 == must_run_delayed_refs) {
+			struct btrfs_delayed_ref_throttle_ticket ticket;
+			bool need_clean_list = true;
+			ticket.count = sync_cur;
+			INIT_LIST_HEAD(&ticket.list);
+			spin_lock(&info->syno_delayed_ref_throttle_lock);
+			list_move_tail(&ticket.list, &info->syno_delayed_ref_throttle_tickets);
+			spin_unlock(&info->syno_delayed_ref_throttle_lock);
+			if (!btrfs_fs_closing(root->fs_info) &&
+				!test_bit(BTRFS_FS_STATE_REMOUNTING, &root->fs_info->fs_state) &&
+				!work_busy(&root->fs_info->async_delayed_ref_work)) {
+				queue_work(system_unbound_wq, &root->fs_info->async_delayed_ref_work);
+			}
+			btrfs_async_run_delayed_refs(root, cur, 0);
+			must_run_delayed_refs = 0;
+			trans->syno_delayed_ref_throttle_ticket = &ticket;
+			while (sync_cur-- && (btrfs_should_throttle_delayed_refs(trans, root) == 1)) {
+				btrfs_run_delayed_refs(trans, root, 1);
+				spin_lock(&info->syno_delayed_ref_throttle_lock);
+				if (ticket.count == 0) {
+					list_del_init(&ticket.list);
+					need_clean_list = false;
+					spin_unlock(&info->syno_delayed_ref_throttle_lock);
+					break;
+				}
+				spin_unlock(&info->syno_delayed_ref_throttle_lock);
+			}
+			trans->syno_delayed_ref_throttle_ticket = NULL;
+			if (need_clean_list) {
+				spin_lock(&info->syno_delayed_ref_throttle_lock);
+				list_del_init(&ticket.list);
+				spin_unlock(&info->syno_delayed_ref_throttle_lock);
+			}
+		}
+#endif  
 	}
 
 	if (trans->qgroup_reserved) {
@@ -756,6 +813,13 @@ static int __btrfs_end_transaction(struct btrfs_trans_handle *trans,
 
 	kmem_cache_free(btrfs_trans_handle_cachep, trans);
 	if (must_run_delayed_refs) {
+#ifdef MY_DEF_HERE
+		if (!btrfs_fs_closing(root->fs_info) &&
+			!test_bit(BTRFS_FS_STATE_REMOUNTING, &root->fs_info->fs_state) &&
+			!work_busy(&root->fs_info->async_delayed_ref_work)) {
+			queue_work(system_unbound_wq, &root->fs_info->async_delayed_ref_work);
+		}
+#endif  
 		btrfs_async_run_delayed_refs(root, cur,
 					     must_run_delayed_refs == 1);
 	}
@@ -803,6 +867,11 @@ int btrfs_write_marked_extents(struct btrfs_root *root,
 	struct extent_state *cached_state = NULL;
 	u64 start = 0;
 	u64 end;
+#ifdef MY_DEF_HERE
+	u64 count = 0;
+	u64 size = 0;
+	u64 total_size = 0;
+#endif  
 
 	while (!find_first_extent_bit(dirty_pages, start, &start, &end,
 				      mark, &cached_state)) {
@@ -824,8 +893,20 @@ int btrfs_write_marked_extents(struct btrfs_root *root,
 			werr = filemap_fdatawait_range(mapping, start, end);
 		cached_state = NULL;
 		cond_resched();
+#ifdef MY_DEF_HERE
+		if (root->fs_info->commit_time_debug) {
+			count ++;
+			size = end - start + 1;
+			total_size += size;
+		}
+#endif  
 		start = end + 1;
 	}
+#ifdef MY_DEF_HERE
+	if (root->fs_info->commit_time_debug) {
+		btrfs_warn(root->fs_info, "Writeback extent: count(%llu) size(%llu)", count, total_size);
+	}
+#endif  
 	return werr;
 }
 
@@ -1587,6 +1668,16 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 	struct btrfs_transaction *prev_trans = NULL;
 	struct btrfs_inode *btree_ino = BTRFS_I(root->fs_info->btree_inode);
 	int ret;
+#ifdef MY_DEF_HERE
+	struct timespec commit_start, commit_wait_lock, commit_done;
+	struct timespec commit_interval1, commit_interval2;
+#endif  
+
+#ifdef MY_DEF_HERE
+	if (root->fs_info->commit_time_debug) {
+		commit_start = current_fs_time(root->fs_info->sb);
+	}
+#endif  
 
 	if (unlikely(ACCESS_ONCE(cur_trans->aborted))) {
 		ret = cur_trans->aborted;
@@ -1805,6 +1896,12 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 
 	wake_up(&root->fs_info->transaction_wait);
 
+#ifdef MY_DEF_HERE
+	if (root->fs_info->commit_time_debug) {
+		commit_wait_lock = current_fs_time(root->fs_info->sb);
+	}
+#endif  
+
 	ret = btrfs_write_and_wait_transaction(trans, root);
 	if (ret) {
 		btrfs_error(root->fs_info, ret,
@@ -1827,6 +1924,17 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 	mutex_unlock(&root->fs_info->tree_log_mutex);
 
 	btrfs_finish_extent_commit(trans, root);
+
+#ifdef MY_DEF_HERE
+	if (root->fs_info->commit_time_debug) {
+		commit_done = current_fs_time(root->fs_info->sb);
+		commit_interval1 = timespec_sub(commit_wait_lock, commit_start);
+		commit_interval2 = timespec_sub(commit_done, commit_wait_lock);
+		btrfs_warn(root->fs_info, "btrfs full commit: Section1(%lu.%lu) Section2(%lu.%lu)",
+				commit_interval1.tv_sec, commit_interval1.tv_nsec,
+				commit_interval2.tv_sec, commit_interval2.tv_nsec);
+	}
+#endif  
 
 	if (cur_trans->have_free_bgs)
 		btrfs_clear_space_info_full(root->fs_info);

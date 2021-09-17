@@ -56,6 +56,10 @@ config SYNO_MD_RAID5_BS_REWRITE
 	default y
 	depends on SYNO_MD_BAD_SECTOR_AUTO_REMAP && SYNO_MD_EIO_NODEV_HANDLER
 
+config SYNO_MD_RAID5_FORCE_RCW
+	bool "Force RAID5 go rcw path"
+	default y
+
 config SYNO_MD_STRIPE_MEMORY_ESTIMATION
 	bool "Raid5/6 stripe cache memory usage"
 	default y
@@ -102,6 +106,10 @@ config SYNO_MD_FIX_RAID5_RESHAPE_HANG
 	bool "Resolve the raid 5 hang problem during expansion with disk error or hotplug out."
 	default y
 
+config SYNO_MD_SYNC_DEBUG
+	bool "MD Sync Debug Flag"
+	default y
+
 config SYNO_MD_SYNC_MSG
 	bool "Let md sync action log be stored in /var/log/messages."
 	default y
@@ -128,6 +136,10 @@ config SYNO_MD_SB_RETRY
 
 config SYNO_MD_RAID5D_PROXY
 	bool "run proxy thread when raid5 finish reshaping"
+	default y
+
+config SYNO_MD_RAID_F1
+	bool "Support RAID F1"
 	default y
 
 config SYNO_MD_SYNC_STATUS_REPORT
@@ -602,6 +614,10 @@ config SYNO_ATA_PRINT_SN
     bool "Add log for disk serial number"
     default y
 
+config SYNO_BLOCK_MONITOR_TOOL
+	bool "Disk block layer performance monitor tool"
+	default y
+
 endmenu #SATA
 
 menu "SAS"
@@ -674,6 +690,11 @@ config SYNO_SAS_MPT2_HOTPLUG_PHY
 	default y
 	depends on SCSI_MPT2SAS
 
+config SYNO_SAS_MPT2_RESERVE_SCSIIO_LIST
+	bool "Reserve some scsiio list for internal usage"
+	default y
+	depends on SCSI_MPT2SAS
+
 config SYNO_SAS_MPT2_RESET_ON_REBOOT
 	bool "Issue hard reset on LSI 2308 SAS controller when rebooting"
 	default n
@@ -720,6 +741,16 @@ config SYNO_MPT3_SATA_DEFAULT_NCQ_OFF
 
 config SYNO_MPT3_SKIP_ADD_WHEN_SES_DEVICE_BUSY
 	bool "Requeueu event when SES device busy"
+	depends on SCSI_MPT3SAS
+	default y
+
+config SYNO_MPT3_ENHANCED_LOG_INFO_MESSAGE
+	bool "Enhanced log_info messages"
+	depends on SCSI_MPT3SAS
+	default y
+
+config SYNO_MPT3_HBA_TEMPERATURE_READ
+	bool "Add an sysfs entry for reading HBA temperature"
 	depends on SCSI_MPT3SAS
 	default y
 
@@ -971,6 +1002,11 @@ config SYNO_MICROP_CTRL
 
 config SYNO_TTY_EXPORT
 	bool "Export uP symbol for synobios"
+	default y
+
+config SYNO_SERIAL_8250_DISABLE_CONSOLE_DMA
+	bool "Avoid 8250 console port allocation DMA failure"
+	depends on SERIAL_8250
 	default y
 
 endmenu #Serial/TTYs

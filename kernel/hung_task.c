@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Detect Hung Task
  *
@@ -35,7 +38,12 @@ unsigned long __read_mostly sysctl_hung_task_check_count = PID_MAX_LIMIT;
  */
 unsigned long __read_mostly sysctl_hung_task_timeout_secs = CONFIG_DEFAULT_HUNG_TASK_TIMEOUT;
 
+#ifdef MY_ABC_HERE
+unsigned long __read_mostly sysctl_hung_task_warnings_default = CONFIG_SYNO_DEFAULT_HUNG_TASK_WARNINGS;
+unsigned long __read_mostly sysctl_hung_task_warnings = CONFIG_SYNO_DEFAULT_HUNG_TASK_WARNINGS;
+#else /* MY_ABC_HERE */
 unsigned long __read_mostly sysctl_hung_task_warnings = 10;
+#endif /* MY_ABC_HERE */
 
 static int __read_mostly did_panic;
 

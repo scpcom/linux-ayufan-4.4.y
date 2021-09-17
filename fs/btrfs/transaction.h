@@ -41,6 +41,7 @@ struct btrfs_transaction {
 	struct list_head switch_commits;
 	struct list_head dirty_bgs;
 	struct list_head io_bgs;
+	u64 num_dirty_bgs;
 
 	struct mutex cache_write_mutex;
 	spinlock_t dirty_bgs_lock;
@@ -98,6 +99,10 @@ struct btrfs_trans_handle {
 #ifdef MY_DEF_HERE
 	struct btrfs_pending_snapshot *pending_snap;
 	bool pending_snap_rm;
+#endif  
+#ifdef MY_DEF_HERE
+	struct btrfs_delayed_ref_throttle_ticket *syno_delayed_ref_throttle_ticket;
+	bool check_throttle;
 #endif  
 };
 

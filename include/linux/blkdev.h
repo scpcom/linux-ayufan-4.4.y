@@ -168,6 +168,10 @@ struct request {
 	unsigned short nr_integrity_segments;
 #endif
 #endif
+#ifdef MY_ABC_HERE
+	unsigned int syno_seq;
+	u64 u64IssueTime;
+#endif  
 };
 
 static inline unsigned short req_get_ioprio(struct request *req)

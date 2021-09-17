@@ -2258,6 +2258,7 @@ extern int do_recvfile(struct file *, struct socket *, loff_t , size_t , size_t 
 extern void aggregate_recvfile_flush_only(struct file *file);
 extern int do_aggregate_recvfile(struct file *file, struct socket *sock, loff_t pos, size_t count, size_t *rbytes , size_t *wbytes, unsigned flush_only);
 extern int flush_aggregate_recvfile(int fd);
+extern int flush_aggregate_recvfile_filp(struct file *file);
 #else  
 #if defined(MY_DEF_HERE)
 #ifdef CONFIG_ARM_PAGE_SIZE_32KB

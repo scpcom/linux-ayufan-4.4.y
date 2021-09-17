@@ -64,6 +64,10 @@ DEFINE_PER_CPU(int, _numa_mem_);
 EXPORT_PER_CPU_SYMBOL(_numa_mem_);
 #endif
 
+#ifdef  MY_ABC_HERE
+extern int gSynoPageAllocFailedLog;
+#endif  
+
 nodemask_t node_states[NR_NODE_STATES] __read_mostly = {
 	[N_POSSIBLE] = NODE_MASK_ALL,
 	[N_ONLINE] = { { [0] = 1UL } },
@@ -1569,9 +1573,16 @@ static inline bool should_suppress_show_mem(void)
 	return ret;
 }
 
+#ifdef MY_ABC_HERE
+#define SYNO_WARN_ALLOC_FAILED_RATELIMIT_BURST 1
+static DEFINE_RATELIMIT_STATE(nopage_rs,
+		DEFAULT_RATELIMIT_INTERVAL,
+		SYNO_WARN_ALLOC_FAILED_RATELIMIT_BURST);
+#else
 static DEFINE_RATELIMIT_STATE(nopage_rs,
 		DEFAULT_RATELIMIT_INTERVAL,
 		DEFAULT_RATELIMIT_BURST);
+#endif
 
 void warn_alloc_failed(gfp_t gfp_mask, int order, const char *fmt, ...)
 {
@@ -2013,7 +2024,13 @@ rebalance:
 	}
 
 nopage:
+#ifdef  MY_ABC_HERE
+	if (0 < gSynoPageAllocFailedLog) {
+		warn_alloc_failed(gfp_mask, order, NULL);
+	}
+#else
 	warn_alloc_failed(gfp_mask, order, NULL);
+#endif  
 	return page;
 got_pg:
 	if (kmemcheck_enabled)

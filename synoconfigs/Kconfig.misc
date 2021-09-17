@@ -105,6 +105,11 @@ config SYNO_FIX_RTC_WAKE_AFTER_POWER_FAILURE
 	default y
 	depends on SYNO_X64
 
+config SYNO_ALPINE_DMA_FIX
+	bool "Fix alpine DMA engine bugs"
+	depends on SYNO_ALPINE
+	default y
+
 endmenu #MISC Features
 
 menu "Encryption"
