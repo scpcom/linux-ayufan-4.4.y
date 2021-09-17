@@ -810,6 +810,19 @@ do {									       \
 
 #endif /* defined(__KERNEL__) || defined(__linux__) */
 
+#ifdef CONFIG_SYNO_EXT4_ARCHIVE_BIT
+#define ext4_archive_bit		i_checksum_hi
+#endif
+
+#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+#define ext4_archive_version_bad	s_usr_quota_inum
+#endif
+
+#if defined(CONFIG_SYNO_EXT4_ERROR_REPORT) || defined(CONFIG_SYNO_EXT4_CASELESS_STAT)
+#define SYNO_HASH_MAGIC       0x01856E96      // 25521814
+#define s_syno_hash_magic     s_checksum
+#endif /* CONFIG_SYNO_EXT4_ERROR_REPORT || CONFIG_SYNO_EXT4_CASELESS_STAT */
+
 #include "extents_status.h"
 
 /*
@@ -952,6 +965,9 @@ struct ext4_inode_info {
 /*
  * Mount flags set via mount options or defaults
  */
+#ifdef CONFIG_SYNO_EXT4_OLDALLOC
+#define EXT4_MOUNT_OLDALLOC		0x00002  /* Don't use the new Orlov allocator */
+#endif
 #define EXT4_MOUNT_GRPID		0x00004	/* Create files with directory's group */
 #define EXT4_MOUNT_DEBUG		0x00008	/* Some debugging messages */
 #define EXT4_MOUNT_ERRORS_CONT		0x00010	/* Continue on errors */
@@ -1148,7 +1164,13 @@ struct ext4_super_block {
 	__le32	s_usr_quota_inum;	/* inode for tracking user quota */
 	__le32	s_grp_quota_inum;	/* inode for tracking group quota */
 	__le32	s_overhead_clusters;	/* overhead blocks/clusters in fs */
+#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION 
+	__le32	s_reserved[106];	/* Paddint to the end of the block */
+	__le32	s_archive_version;	/* Last archived version */
+	__le32  s_archive_version_obsoleted;
+#else
 	__le32	s_reserved[108];	/* Padding to the end of the block */
+#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION */
 	__le32	s_checksum;		/* crc32c(superblock) */
 };
 
@@ -1292,6 +1314,14 @@ struct ext4_sb_info {
 	unsigned int s_log_groups_per_flex;
 	struct flex_groups *s_flex_groups;
 	ext4_group_t s_flex_groups_allocated;
+
+#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+	int s_new_error_fs_event_flag;
+	char *s_mount_path;
+#endif
+#ifdef CONFIG_SYNO_EXT4_CREATE_TIME_BIG_ENDIAN_SWAP
+	int s_swap_create_time;
+#endif
 
 	/* workqueue for dio unwritten */
 	struct workqueue_struct *dio_unwritten_wq;
@@ -1694,9 +1724,16 @@ static inline __le16 ext4_rec_len_to_disk(unsigned len, unsigned blocksize)
  * (c) Daniel Phillips, 2001
  */
 
+#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+#define is_dx(dir) ((EXT4_SB(dir->i_sb)->s_es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC)) && \
+					!(EXT4_HAS_COMPAT_FEATURE(dir->i_sb, \
+				      EXT4_FEATURE_COMPAT_DIR_INDEX)) && \
+					(EXT4_I(dir)->i_flags & EXT4_INDEX_FL))
+#else
 #define is_dx(dir) (EXT4_HAS_COMPAT_FEATURE(dir->i_sb, \
 				      EXT4_FEATURE_COMPAT_DIR_INDEX) && \
 		    ext4_test_inode_flag((dir), EXT4_INODE_INDEX))
+#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
 #define EXT4_DIR_LINK_MAX(dir) (!is_dx(dir) && (dir)->i_nlink >= EXT4_LINK_MAX)
 #define EXT4_DIR_LINK_EMPTY(dir) ((dir)->i_nlink == 2 || (dir)->i_nlink == 1)
 
@@ -1741,17 +1778,14 @@ struct dx_hash_info
 	u32		*seed;
 };
 
-
 /* 32 and 64 bit signed EOF for dx directories */
 #define EXT4_HTREE_EOF_32BIT   ((1UL  << (32 - 1)) - 1)
 #define EXT4_HTREE_EOF_64BIT   ((1ULL << (64 - 1)) - 1)
-
 
 /*
  * Control parameters used by ext4_htree_next_block
  */
 #define HASH_NB_ALWAYS		1
-
 
 /*
  * Describe an inode's exact location on disk and in memory
@@ -1799,7 +1833,11 @@ ext4_group_first_block_no(struct super_block *sb, ext4_group_t group_no)
 /*
  * Timeout and state flag for lazy initialization inode thread.
  */
+#ifdef CONFIG_SYNO_EXT4_LAZYINIT_WAIT_MULT
+#define EXT4_DEF_LI_WAIT_MULT			CONFIG_SYNO_EXT4_LAZYINIT_WAIT_MULT
+#else
 #define EXT4_DEF_LI_WAIT_MULT			10
+#endif
 #define EXT4_DEF_LI_MAX_START_DELAY		5
 #define EXT4_LAZYINIT_QUIT			0x0001
 #define EXT4_LAZYINIT_RUNNING			0x0002
@@ -1992,8 +2030,12 @@ void ext4_insert_dentry(struct inode *inode,
 			const char *name, int namelen);
 static inline void ext4_update_dx_flag(struct inode *inode)
 {
+#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+	if (EXT4_SB(inode->i_sb)->s_es->s_syno_hash_magic != cpu_to_le32(SYNO_HASH_MAGIC))
+#else
 	if (!EXT4_HAS_COMPAT_FEATURE(inode->i_sb,
 				     EXT4_FEATURE_COMPAT_DIR_INDEX))
+#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
 		ext4_clear_inode_flag(inode, EXT4_INODE_INDEX);
 }
 static unsigned char ext4_filetype_table[] = {
@@ -2030,7 +2072,6 @@ extern struct inode *__ext4_new_inode(handle_t *, struct inode *, umode_t,
 				    type, nblocks)		    \
 	__ext4_new_inode(NULL, (dir), (mode), (qstr), (goal), (owner), \
 			 (type), __LINE__, (nblocks))
-
 
 extern void ext4_free_inode(handle_t *, struct inode *);
 extern struct inode * ext4_orphan_get(struct super_block *, unsigned long);
@@ -2106,6 +2147,9 @@ extern void ext4_set_inode_flags(struct inode *);
 extern void ext4_get_inode_flags(struct ext4_inode_info *);
 extern int ext4_alloc_da_blocks(struct inode *inode);
 extern void ext4_set_aops(struct inode *inode);
+#ifdef CONFIG_SYNO_EXT4_SKIP_JOURNAL_SYMLINK
+extern void ext4_set_writeback_aops(struct inode *inode);
+#endif
 extern int ext4_writepage_trans_blocks(struct inode *);
 extern int ext4_chunk_trans_blocks(struct inode *, int nrblocks);
 extern int ext4_discard_partial_page_buffers(handle_t *handle,
@@ -2115,6 +2159,13 @@ extern int ext4_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf);
 extern qsize_t *ext4_get_reserved_space(struct inode *inode);
 extern void ext4_da_update_reserve_space(struct inode *inode,
 					int used, int quota_claim);
+#ifdef CONFIG_SYNO_EXT4_STAT
+extern int ext4_syno_getattr(struct dentry *d, struct kstat *stat, int flags);
+#endif
+#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION
+extern int ext4_syno_get_archive_ver(struct dentry *d, u32 *);
+extern int ext4_syno_set_archive_ver(struct dentry *d, u32);
+#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
 
 /* indirect.c */
 extern int ext4_ind_map_blocks(handle_t *handle, struct inode *inode,
@@ -2143,6 +2194,16 @@ extern int ext4_orphan_add(handle_t *, struct inode *);
 extern int ext4_orphan_del(handle_t *, struct inode *);
 extern int ext4_htree_fill_tree(struct file *dir_file, __u32 start_hash,
 				__u32 start_minor_hash, __u32 *next_hash);
+#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+extern int search_dir(struct buffer_head *bh,
+		      char *search_buf,
+		      int buf_size,
+		      struct inode *dir,
+		      const struct qstr *d_name,
+		      unsigned int offset,
+		      struct ext4_dir_entry_2 **res_dir,
+			  int caseless);
+#else
 extern int search_dir(struct buffer_head *bh,
 		      char *search_buf,
 		      int buf_size,
@@ -2150,6 +2211,7 @@ extern int search_dir(struct buffer_head *bh,
 		      const struct qstr *d_name,
 		      unsigned int offset,
 		      struct ext4_dir_entry_2 **res_dir);
+#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
 extern int ext4_generic_delete_entry(handle_t *handle,
 				     struct inode *dir,
 				     struct ext4_dir_entry_2 *de_del,
@@ -2534,10 +2596,18 @@ extern int htree_inlinedir_to_tree(struct file *dir_file,
 				   struct dx_hash_info *hinfo,
 				   __u32 start_hash, __u32 start_minor_hash,
 				   int *has_inline_data);
+#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+extern struct buffer_head *ext4_find_inline_entry(struct inode *dir,
+					const struct qstr *d_name,
+					struct ext4_dir_entry_2 **res_dir,
+					int *has_inline_data,
+					int caseless);
+#else
 extern struct buffer_head *ext4_find_inline_entry(struct inode *dir,
 					const struct qstr *d_name,
 					struct ext4_dir_entry_2 **res_dir,
 					int *has_inline_data);
+#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
 extern int ext4_delete_inline_entry(handle_t *handle,
 				    struct inode *dir,
 				    struct ext4_dir_entry_2 *de_del,
@@ -2587,7 +2657,6 @@ static inline void ext4_set_de_type(struct super_block *sb,
 	if (EXT4_HAS_INCOMPAT_FEATURE(sb, EXT4_FEATURE_INCOMPAT_FILETYPE))
 		de->file_type = ext4_type_by_mode[(mode & S_IFMT)>>S_SHIFT];
 }
-
 
 /* symlink.c */
 extern const struct inode_operations ext4_symlink_inode_operations;
@@ -2647,7 +2716,6 @@ extern int ext4_find_delalloc_range(struct inode *inode,
 extern int ext4_find_delalloc_cluster(struct inode *inode, ext4_lblk_t lblk);
 extern int ext4_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 			__u64 start, __u64 len);
-
 
 /* move_extent.c */
 extern void ext4_double_down_write_data_sem(struct inode *first,

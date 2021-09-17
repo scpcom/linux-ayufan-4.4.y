@@ -51,8 +51,15 @@ static int is_dx_dir(struct inode *inode)
 {
 	struct super_block *sb = inode->i_sb;
 
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+	if ((EXT3_SB(inode->i_sb)->s_es->s_syno_hash_magic !=
+		     cpu_to_le32(SYNO_HASH_MAGIC)) &&
+		EXT3_HAS_COMPAT_FEATURE(inode->i_sb,
+		     EXT3_FEATURE_COMPAT_DIR_INDEX) &&
+#else
 	if (EXT3_HAS_COMPAT_FEATURE(inode->i_sb,
 		     EXT3_FEATURE_COMPAT_DIR_INDEX) &&
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 	    ((EXT3_I(inode)->i_flags & EXT3_INDEX_FL) ||
 	     ((inode->i_size >> sb->s_blocksize_bits) == 1)))
 		return 1;
@@ -81,6 +88,9 @@ int ext3_check_dir_entry (const char * function, struct inode * dir,
 		error_msg = "inode out of bounds";
 
 	if (unlikely(error_msg != NULL))
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+		if (printk_ratelimit())
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
 		ext3_error (dir->i_sb, function,
 			"bad entry in directory #%lu: %s - "
 			"offset=%lu, inode=%lu, rec_len=%d, name_len=%d",
@@ -283,7 +293,6 @@ static inline loff_t ext3_get_htree_eof(struct file *filp)
 		return EXT3_HTREE_EOF_64BIT;
 }
 
-
 /*
  * ext3_dir_llseek() calls generic_file_llseek[_size]() to handle both
  * non-htree and htree directories, where the "offset" is in terms
@@ -367,7 +376,6 @@ static void free_rb_tree_fname(struct rb_root *root)
 	}
 }
 
-
 static struct dir_private_info *ext3_htree_create_dir_info(struct file *filp,
 							   loff_t pos)
 {
@@ -444,8 +452,6 @@ int ext3_htree_store_dirent(struct file *dir_file, __u32 hash,
 	rb_insert_color(&new_fn->rb_hash, &info->root);
 	return 0;
 }
-
-
 
 /*
  * This is a helper function for ext3_dx_readdir.  It calls filldir

@@ -18,6 +18,10 @@
 
 #include <asm/ioctls.h>
 
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#include <linux/mount.h>
+#endif
+
 /* So that the fiemap access checks can't overflow on 32 bit machines. */
 #define FIEMAP_MAX_EXTENTS	(UINT_MAX / sizeof(struct fiemap_extent))
 
@@ -465,6 +469,193 @@ static int file_ioctl(struct file *filp, unsigned int cmd,
 	return vfs_ioctl(filp, cmd, arg);
 }
 
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+static int archive_check_capable(struct inode *inode)
+{
+	if((!S_ISDIR(inode->i_mode)) && (!S_ISREG(inode->i_mode)))
+		return -EPERM;
+	
+	if (!capable(CAP_SYS_ADMIN))
+		return -EPERM;
+
+	if (!inode->i_sb->s_op->syno_set_sb_archive_ver)
+		return -EINVAL;
+	if (!inode->i_sb->s_op->syno_get_sb_archive_ver)
+		return -EINVAL;
+
+	return 0;
+}
+
+static int ioctl_get_version(struct inode *inode, unsigned int *p_ver)
+{
+	int error;
+	struct super_block *sb = inode->i_sb;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+
+	error = sb->s_op->syno_get_sb_archive_ver(sb, p_ver);
+	return error;
+}
+
+static int ioctl_set_version(struct file *filp, unsigned int version)
+{
+	int error;
+	struct inode *inode = filp->f_dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+	if ((UINT_MAX - 1) <= version) {
+		return -EPERM;
+	}
+	error = mnt_want_write(filp->f_path.mnt);
+	if (error)
+		return error;
+
+	mutex_lock(&sb->s_archive_mutex);
+	error = sb->s_op->syno_set_sb_archive_ver(sb, version);
+	mutex_unlock(&sb->s_archive_mutex);
+	mnt_drop_write(filp->f_path.mnt);
+	return error;
+}
+
+static int ioctl_inc_version(struct file *filp)
+{
+	unsigned int ver;
+	int error;
+	struct inode *inode = filp->f_dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+	error = mnt_want_write(filp->f_path.mnt);
+	if (error)
+		return error;
+
+	mutex_lock(&sb->s_archive_mutex);
+	error = sb->s_op->syno_get_sb_archive_ver(sb, &ver);
+	if (error)
+		goto unlock;
+
+	// archive ver of inode = archive ver of sb + 1
+	if ((UINT_MAX - 1) <= (ver + 1)) {
+		error = -EPERM;
+		goto unlock;
+	}
+	error = sb->s_op->syno_set_sb_archive_ver(sb, ver + 1);
+unlock:
+	mutex_unlock(&sb->s_archive_mutex);
+	mnt_drop_write(filp->f_path.mnt);
+	return error;
+}
+
+static int ioctl_set_file_version(struct file *filp, unsigned int version)
+{
+	struct inode *inode = filp->f_dentry->d_inode;
+	int error;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+
+	if (!inode->i_op->syno_set_archive_ver)
+		return -EINVAL;
+
+	error = mnt_want_write(filp->f_path.mnt);
+	if (error)
+		return error;
+
+	error = inode->i_op->syno_set_archive_ver(filp->f_dentry, version);
+	mnt_drop_write(filp->f_path.mnt);
+	return error;
+}
+#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+static int ioctl_get_bad_version(struct inode *inode, unsigned int *p_ver)
+{
+	int error;
+	struct super_block *sb = inode->i_sb;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+
+	if (!sb->s_op->syno_get_sb_archive_ver1)
+		return -EINVAL;
+
+	error = inode->i_sb->s_op->syno_get_sb_archive_ver1(sb, p_ver);
+	return error;
+}
+
+static int ioctl_clear_bad_version(struct file *filp)
+{
+	int error;
+	struct inode *inode = filp->f_dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
+	unsigned int ver, ver1;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+
+	if (!sb->s_op->syno_get_sb_archive_ver1)
+		return -EINVAL;
+	if (!sb->s_op->syno_set_sb_archive_ver1)
+		return -EINVAL;
+
+	error = mnt_want_write(filp->f_path.mnt);
+	if (error)
+		return error;
+
+	mutex_lock(&sb->s_archive_mutex);
+	error = sb->s_op->syno_get_sb_archive_ver(sb, &ver);
+	if (error)
+		goto unlock;
+
+	error = sb->s_op->syno_get_sb_archive_ver1(sb, &ver1);
+	if (error)
+		goto unlock;
+
+	error = sb->s_op->syno_set_sb_archive_ver(sb, max(ver, ver1) + 1);
+	if (error)
+		goto unlock;
+
+	error = sb->s_op->syno_set_sb_archive_ver1(sb, 0);
+unlock:
+	mutex_unlock(&sb->s_archive_mutex);
+	mnt_drop_write(filp->f_path.mnt);
+	return error;
+}
+
+static int ioctl_set_bad_version(struct file *filp, unsigned int version)
+{
+	int error;
+	struct inode *inode = filp->f_dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+
+	if (!sb->s_op->syno_set_sb_archive_ver1)
+		return -EINVAL;
+
+	error = mnt_want_write(filp->f_path.mnt);
+	if (error)
+		return error;
+
+	mutex_lock(&sb->s_archive_mutex);
+	error = sb->s_op->syno_set_sb_archive_ver1(sb, version);
+	mutex_unlock(&sb->s_archive_mutex);
+	mnt_drop_write(filp->f_path.mnt);
+	return error;
+}
+#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
+#endif /* CONFIG_SYNO_FS_ARCHIVE_VERSION */
+
 static int ioctl_fionbio(struct file *filp, int __user *argp)
 {
 	unsigned int flag;
@@ -548,6 +739,9 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 {
 	int error = 0;
 	int __user *argp = (int __user *)arg;
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+	unsigned int ver = 0;
+#endif
 	struct inode *inode = file_inode(filp);
 
 	switch (cmd) {
@@ -590,6 +784,44 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 
 	case FIGETBSZ:
 		return put_user(inode->i_sb->s_blocksize, argp);
+
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+	case FIGETVERSION:
+		error = ioctl_get_version(inode, &ver);
+		if (!error) {
+			error = put_user(ver, (unsigned int __user *)arg) ? -EFAULT : 0;
+		}
+		break;
+	case FISETVERSION:
+		if ((error = get_user(ver, (unsigned int __user *)arg)) != 0)
+			break;
+		error = ioctl_set_version(filp, ver);
+		break;
+	case FIINCVERSION:
+		error = ioctl_inc_version(filp);
+		break;
+	case FISETFILEVERSION:
+		if ((error = get_user(ver, (unsigned int __user *)arg)) != 0)
+			break;
+		error = ioctl_set_file_version(filp, ver);
+		break;
+#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+	case FIGETBADVERSION:
+		error = ioctl_get_bad_version(inode, &ver);
+		if (!error) {
+			error = put_user(ver, (unsigned int __user *)arg) ? -EFAULT : 0;
+		}
+		break;
+	case FICLEARBADVERSION:
+		error = ioctl_clear_bad_version(filp);
+		break;
+	case FISETBADVERSION:
+		if ((error = get_user(ver, (unsigned int __user *)arg)) != 0)
+			break;
+		error = ioctl_set_bad_version(filp, ver);
+		break;
+#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
+#endif /* CONFIG_SYNO_FS_ARCHIVE_VERSION */
 
 	default:
 		if (S_ISREG(inode->i_mode))

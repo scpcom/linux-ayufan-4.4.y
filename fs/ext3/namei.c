@@ -30,12 +30,64 @@
 #include "xattr.h"
 #include "acl.h"
 
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+#include <linux/namei.h>
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 /*
  * define how far ahead to read directories while searching them.
  */
 #define NAMEI_RA_CHUNKS  2
 #define NAMEI_RA_BLOCKS  4
 #define NAMEI_RA_SIZE        (NAMEI_RA_CHUNKS * NAMEI_RA_BLOCKS)
+
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+static unsigned char ext3_utf8_namei_buf[UNICODE_UTF8_BUFSIZE];
+extern spinlock_t ext3_namei_buf_lock;  /* init at ext3_fill_super() */
+
+unsigned int ext3_strhash(const unsigned char *name, unsigned int len)
+{
+	unsigned long hash = init_name_hash();
+
+	while (len--)
+		hash = partial_name_hash(*name++, hash);
+	return end_name_hash(hash);
+}
+
+/* Hash a string to an integer in a caseless way */
+static int ext3_dentry_hash(const struct dentry *dentry, const struct inode *inode, struct qstr *this)
+{
+	unsigned int upperlen;
+
+	spin_lock(&ext3_namei_buf_lock);
+
+	upperlen = syno_utf8_toupper(ext3_utf8_namei_buf,this->name,
+									  UNICODE_UTF8_BUFSIZE - 1 , this->len, NULL);
+
+	this->hash = ext3_strhash(ext3_utf8_namei_buf, upperlen);
+
+	spin_unlock(&ext3_namei_buf_lock);
+
+	return 0;
+}
+
+/* return 1 on failure and 0 on success */
+static int ext3_dentry_compare(const struct dentry *dentry,
+							   unsigned int len, const char *str,
+							   const struct qstr *name, int caseless)
+{
+	if (caseless) {
+		return syno_utf8_strcmp(str, name->name, len, name->len, NULL);
+	} else {
+		return dentry_cmp(dentry, name->name, name->len);
+	}
+}
+
+struct dentry_operations ext3_dentry_operations =
+{
+	.d_hash		= ext3_dentry_hash,
+	.d_compare_case	= ext3_dentry_compare,
+};
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 
 static struct buffer_head *ext3_append(handle_t *handle,
 					struct inode *inode,
@@ -117,7 +169,6 @@ struct dx_node
 	struct dx_entry	entries[0];
 };
 
-
 struct dx_frame
 {
 	struct buffer_head *bh;
@@ -159,9 +210,15 @@ static int ext3_htree_next_block(struct inode *dir, __u32 hash,
 				 struct dx_frame *frame,
 				 struct dx_frame *frames,
 				 __u32 *start_hash);
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+static struct buffer_head * ext3_dx_find_entry(struct inode *dir,
+			struct qstr *entry, struct ext3_dir_entry_2 **res_dir,
+			int *err, int caseless);
+#else
 static struct buffer_head * ext3_dx_find_entry(struct inode *dir,
 			struct qstr *entry, struct ext3_dir_entry_2 **res_dir,
 			int *err);
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 static int ext3_dx_add_entry(handle_t *handle, struct dentry *dentry,
 			     struct inode *inode);
 
@@ -548,7 +605,6 @@ static int ext3_htree_next_block(struct inode *dir, __u32 hash,
 	return 1;
 }
 
-
 /*
  * This function fills a red-black tree with information from a
  * directory block.  It returns the number directory entries loaded
@@ -596,7 +652,6 @@ static int htree_dirblock_to_tree(struct file *dir_file,
 	brelse(bh);
 	return count;
 }
-
 
 /*
  * This function fills a red-black tree with information from a
@@ -688,7 +743,6 @@ errout:
 	return (err);
 }
 
-
 /*
  * Directory block splitting, compacting
  */
@@ -766,8 +820,12 @@ static void dx_insert_block(struct dx_frame *frame, u32 hash, u32 block)
 
 static void ext3_update_dx_flag(struct inode *inode)
 {
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+	if (EXT3_SB(inode->i_sb)->s_es->s_syno_hash_magic != cpu_to_le32(SYNO_HASH_MAGIC))
+#else
 	if (!EXT3_HAS_COMPAT_FEATURE(inode->i_sb,
 				     EXT3_FEATURE_COMPAT_DIR_INDEX))
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 		EXT3_I(inode)->i_flags &= ~EXT3_INDEX_FL;
 }
 
@@ -777,6 +835,22 @@ static void ext3_update_dx_flag(struct inode *inode)
  * `len <= EXT3_NAME_LEN' is guaranteed by caller.
  * `de != NULL' is guaranteed by caller.
  */
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+static inline int ext3_match (int len, const char * const name,
+			      struct ext3_dir_entry_2 * de, int caseless)
+{
+	if (len != de->name_len)
+		return 0;
+	if (!de->inode)
+		return 0;
+	if (caseless) {
+		if (!syno_utf8_strcmp(de->name, name, de->name_len, len, NULL))
+			return 1;
+		return 0;
+	}
+	return !memcmp(name, de->name, len);
+}
+#else
 static inline int ext3_match (int len, const char * const name,
 			      struct ext3_dir_entry_2 * de)
 {
@@ -786,21 +860,35 @@ static inline int ext3_match (int len, const char * const name,
 		return 0;
 	return !memcmp(name, de->name, len);
 }
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 
 /*
  * Returns 0 if not found, -1 on failure, and 1 on success
  */
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+static inline int search_dirblock(struct buffer_head * bh,
+				  struct inode *dir,
+				  struct qstr *child,
+				  unsigned long offset,
+				  struct ext3_dir_entry_2 ** res_dir,
+				  int caseless)
+#else
 static inline int search_dirblock(struct buffer_head * bh,
 				  struct inode *dir,
 				  struct qstr *child,
 				  unsigned long offset,
 				  struct ext3_dir_entry_2 ** res_dir)
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 {
 	struct ext3_dir_entry_2 * de;
 	char * dlimit;
 	int de_len;
 	const char *name = child->name;
 	int namelen = child->len;
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+	char *new_dname = NULL;
+	const char *ext_dname = NULL;
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 
 	de = (struct ext3_dir_entry_2 *) bh->b_data;
 	dlimit = bh->b_data + dir->i_sb->s_blocksize;
@@ -809,12 +897,46 @@ static inline int search_dirblock(struct buffer_head * bh,
 		/* do minimal checking `by hand' */
 
 		if ((char *) de + namelen <= dlimit &&
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+		    ext3_match (namelen, name, de, caseless)) {
+#else
 		    ext3_match (namelen, name, de)) {
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 			/* found a match - just to be sure, do a full check */
 			if (!ext3_check_dir_entry("ext3_find_entry",
 						  dir, de, bh, offset))
 				return -1;
 			*res_dir = de;
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+			/* If we do caseless lookup after dentry queue of parent be cleared,
+			* file name may async between dentry queue and disk.
+			* So we should make sure it is the real name before dentry be added to queue.
+			*/
+			if (caseless &&	dentry_string_cmp(child->name, de->name, de->name_len)) {
+				if (de->name_len > (DNAME_INLINE_LEN - 1) && de->name_len > child->len) {
+					new_dname = kmalloc(de->name_len + 1, GFP_KERNEL);
+					if (!new_dname) {
+						return -1;
+					}
+					if (child->len > (DNAME_INLINE_LEN -1)) {
+						ext_dname = child->name;
+					}
+					memcpy((unsigned char*)new_dname, de->name, de->name_len);
+					new_dname[de->name_len] = 0;
+
+					child->len = de->name_len;
+					child->name = new_dname;
+
+					if (ext_dname) {
+						kfree(ext_dname);
+					}
+				} else {
+					memcpy((unsigned char*)child->name, de->name, de->name_len);
+					((char*)child->name)[de->name_len] = 0;
+					child->len = de->name_len;
+				}
+			}
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 			return 1;
 		}
 		/* prevent looping on a bad block */
@@ -827,7 +949,6 @@ static inline int search_dirblock(struct buffer_head * bh,
 	return 0;
 }
 
-
 /*
  *	ext3_find_entry()
  *
@@ -839,9 +960,16 @@ static inline int search_dirblock(struct buffer_head * bh,
  * The returned buffer_head has ->b_count elevated.  The caller is expected
  * to brelse() it when appropriate.
  */
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT 
+static struct buffer_head *ext3_find_entry(struct inode *dir,
+					struct qstr *entry,
+					struct ext3_dir_entry_2 **res_dir,
+					int caseless)
+#else
 static struct buffer_head *ext3_find_entry(struct inode *dir,
 					struct qstr *entry,
 					struct ext3_dir_entry_2 **res_dir)
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 {
 	struct super_block * sb;
 	struct buffer_head * bh_use[NAMEI_RA_SIZE];
@@ -872,7 +1000,11 @@ static struct buffer_head *ext3_find_entry(struct inode *dir,
 		goto restart;
 	}
 	if (is_dx(dir)) {
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+		bh = ext3_dx_find_entry(dir, entry, res_dir, &err, caseless);
+#else
 		bh = ext3_dx_find_entry(dir, entry, res_dir, &err);
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 		/*
 		 * On success, or if the error was file not found,
 		 * return.  Otherwise, fall back to doing a search the
@@ -927,8 +1059,13 @@ restart:
 			brelse(bh);
 			goto next;
 		}
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+		i = search_dirblock(bh, dir, entry,
+			    block << EXT3_BLOCK_SIZE_BITS(sb), res_dir, caseless);
+#else
 		i = search_dirblock(bh, dir, entry,
 			    block << EXT3_BLOCK_SIZE_BITS(sb), res_dir);
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 		if (i == 1) {
 			EXT3_I(dir)->i_dir_start_lookup = block;
 			ret = bh;
@@ -961,9 +1098,15 @@ cleanup_and_exit:
 	return ret;
 }
 
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+static struct buffer_head * ext3_dx_find_entry(struct inode *dir,
+			struct qstr *entry, struct ext3_dir_entry_2 **res_dir,
+			int *err, int caseless)
+#else
 static struct buffer_head * ext3_dx_find_entry(struct inode *dir,
 			struct qstr *entry, struct ext3_dir_entry_2 **res_dir,
 			int *err)
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 {
 	struct super_block *sb = dir->i_sb;
 	struct dx_hash_info	hinfo;
@@ -979,9 +1122,15 @@ static struct buffer_head * ext3_dx_find_entry(struct inode *dir,
 		if (!(bh = ext3_dir_bread (NULL, dir, block, 0, err)))
 			goto errout;
 
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+		retval = search_dirblock(bh, dir, entry,
+					 block << EXT3_BLOCK_SIZE_BITS(sb),
+					 res_dir, caseless);
+#else
 		retval = search_dirblock(bh, dir, entry,
 					 block << EXT3_BLOCK_SIZE_BITS(sb),
 					 res_dir);
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 		if (retval == 1) {
 			dx_release(frames);
 			return bh;
@@ -1016,11 +1165,22 @@ static struct dentry *ext3_lookup(struct inode * dir, struct dentry *dentry, uns
 	struct inode * inode;
 	struct ext3_dir_entry_2 * de;
 	struct buffer_head * bh;
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+	int caseless = 0;
+
+	if (flags & LOOKUP_CASELESS_COMPARE) {
+		caseless = 1;
+	}
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 
 	if (dentry->d_name.len > EXT3_NAME_LEN)
 		return ERR_PTR(-ENAMETOOLONG);
 
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+	bh = ext3_find_entry(dir, &dentry->d_name, &de, caseless);
+#else
 	bh = ext3_find_entry(dir, &dentry->d_name, &de);
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 	inode = NULL;
 	if (bh) {
 		unsigned long ino = le32_to_cpu(de->inode);
@@ -1038,9 +1198,13 @@ static struct dentry *ext3_lookup(struct inode * dir, struct dentry *dentry, uns
 			return ERR_PTR(-EIO);
 		}
 	}
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+	if (!dentry->d_op) {
+		d_set_d_op(dentry, dentry->d_sb->s_d_op);
+	}
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 	return d_splice_alias(inode, dentry);
 }
-
 
 struct dentry *ext3_get_parent(struct dentry *child)
 {
@@ -1049,7 +1213,11 @@ struct dentry *ext3_get_parent(struct dentry *child)
 	struct ext3_dir_entry_2 * de;
 	struct buffer_head *bh;
 
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+	bh = ext3_find_entry(child->d_inode, &dotdot, &de, 1);
+#else
 	bh = ext3_find_entry(child->d_inode, &dotdot, &de);
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 	if (!bh)
 		return ERR_PTR(-ENOENT);
 	ino = le32_to_cpu(de->inode);
@@ -1227,7 +1395,6 @@ errout:
 	return NULL;
 }
 
-
 /*
  * Add a new entry into a directory (leaf) block.  If de is non-NULL,
  * it points to a directory entry which is guaranteed to be large
@@ -1261,7 +1428,11 @@ static int add_dirent_to_buf(handle_t *handle, struct dentry *dentry,
 				brelse (bh);
 				return -EIO;
 			}
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+			if (ext3_match (namelen, name, de, 0)) {
+#else
 			if (ext3_match (namelen, name, de)) {
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 				brelse (bh);
 				return -EEXIST;
 			}
@@ -1466,7 +1637,12 @@ static int ext3_add_entry (handle_t *handle, struct dentry *dentry,
 			return retval;
 
 		if (blocks == 1 && !dx_fallback &&
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+			(EXT3_SB(sb)->s_es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC)) &&
+			!EXT3_HAS_COMPAT_FEATURE(sb, EXT3_FEATURE_COMPAT_DIR_INDEX))
+#else
 		    EXT3_HAS_COMPAT_FEATURE(sb, EXT3_FEATURE_COMPAT_DIR_INDEX))
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 			return make_indexed_dir(handle, dentry, inode, bh);
 		brelse(bh);
 	}
@@ -2080,7 +2256,11 @@ static int ext3_rmdir (struct inode * dir, struct dentry *dentry)
 		return PTR_ERR(handle);
 
 	retval = -ENOENT;
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+	bh = ext3_find_entry(dir, &dentry->d_name, &de, 0);
+#else
 	bh = ext3_find_entry(dir, &dentry->d_name, &de);
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 	if (!bh)
 		goto end_rmdir;
 
@@ -2145,7 +2325,11 @@ static int ext3_unlink(struct inode * dir, struct dentry *dentry)
 		handle->h_sync = 1;
 
 	retval = -ENOENT;
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+	bh = ext3_find_entry(dir, &dentry->d_name, &de, 0);
+#else
 	bh = ext3_find_entry(dir, &dentry->d_name, &de);
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 	if (!bh)
 		goto end_unlink;
 
@@ -2359,7 +2543,11 @@ static int ext3_rename (struct inode * old_dir, struct dentry *old_dentry,
 	if (IS_DIRSYNC(old_dir) || IS_DIRSYNC(new_dir))
 		handle->h_sync = 1;
 
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+	old_bh = ext3_find_entry(old_dir, &old_dentry->d_name, &old_de, 0);
+#else
 	old_bh = ext3_find_entry(old_dir, &old_dentry->d_name, &old_de);
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 	/*
 	 *  Check for inode number is _not_ due to possible IO errors.
 	 *  We might rmdir the source, keep it as pwd of some process
@@ -2372,7 +2560,11 @@ static int ext3_rename (struct inode * old_dir, struct dentry *old_dentry,
 		goto end_rename;
 
 	new_inode = new_dentry->d_inode;
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+	new_bh = ext3_find_entry(new_dir, &new_dentry->d_name, &new_de, 0);
+#else
 	new_bh = ext3_find_entry(new_dir, &new_dentry->d_name, &new_de);
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 	if (new_bh) {
 		if (!new_inode) {
 			brelse (new_bh);
@@ -2442,8 +2634,13 @@ static int ext3_rename (struct inode * old_dir, struct dentry *old_dentry,
 		struct buffer_head *old_bh2;
 		struct ext3_dir_entry_2 *old_de2;
 
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+		old_bh2 = ext3_find_entry(old_dir, &old_dentry->d_name,
+					  &old_de2, 0);
+#else
 		old_bh2 = ext3_find_entry(old_dir, &old_dentry->d_name,
 					  &old_de2);
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 		if (old_bh2) {
 			retval = ext3_delete_entry(handle, old_dir,
 						   old_de2, old_bh2);
@@ -2508,6 +2705,13 @@ end_rename:
  * directories can handle most operations...
  */
 const struct inode_operations ext3_dir_inode_operations = {
+#ifdef CONFIG_SYNO_EXT3_STAT
+	.syno_getattr	= ext3_syno_getattr,
+#endif
+#ifdef CONFIG_SYNO_EXT3_ARCHIVE_VERSION
+	.syno_get_archive_ver = ext3_syno_get_archive_ver,
+	.syno_set_archive_ver = ext3_syno_set_archive_ver,
+#endif
 	.create		= ext3_create,
 	.lookup		= ext3_lookup,
 	.link		= ext3_link,
@@ -2528,6 +2732,13 @@ const struct inode_operations ext3_dir_inode_operations = {
 };
 
 const struct inode_operations ext3_special_inode_operations = {
+#ifdef CONFIG_SYNO_EXT3_STAT
+	.syno_getattr	= ext3_syno_getattr,
+#endif
+#ifdef CONFIG_SYNO_EXT3_ARCHIVE_VERSION
+	.syno_get_archive_ver = ext3_syno_get_archive_ver,
+	.syno_set_archive_ver = ext3_syno_set_archive_ver,
+#endif
 	.setattr	= ext3_setattr,
 #ifdef CONFIG_EXT3_FS_XATTR
 	.setxattr	= generic_setxattr,

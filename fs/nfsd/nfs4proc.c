@@ -527,6 +527,11 @@ static __be32
 nfsd4_access(struct svc_rqst *rqstp, struct nfsd4_compound_state *cstate,
 	     struct nfsd4_access *access)
 {
+#ifdef CONFIG_SYNO_NFS4_DISABLE_UDP
+	if (IPPROTO_UDP == rqstp->rq_prot) {
+		return nfserr_acces;
+	}
+#endif
 	if (access->ac_req_access & ~NFS3_ACCESS_FULL)
 		return nfserr_inval;
 

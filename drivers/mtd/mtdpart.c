@@ -33,6 +33,17 @@
 
 #include "mtdcore.h"
 
+#ifdef CONFIG_SYNO_MAC_ADDRESS
+extern unsigned char grgbLanMac[CONFIG_SYNO_MAC_MAX][16];
+#endif /* CONFIG_SYNO_MAC_ADDRESS */
+#ifdef CONFIG_SYNO_SERIAL
+extern char gszSerialNum[];
+extern char gszCustomSerialNum[];
+#define SYNO_SN_TAG "SN="
+#define SYNO_CHKSUM_TAG "CHK="
+#define SYNO_SN_12_SIG SYNO_SN_TAG  // signature for 12 serial number
+#endif /* CONFIG_SYNO_SERIAL */
+
 /* Our partition linked list */
 static LIST_HEAD(mtd_partitions);
 static DEFINE_MUTEX(mtd_partitions_mutex);
@@ -50,7 +61,6 @@ struct mtd_part {
  * the pointer to that structure with this macro.
  */
 #define PART(x)  ((struct mtd_part *)(x))
-
 
 /*
  * MTD methods which simply translate the effective address and pass through
@@ -530,6 +540,150 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 	}
 
 out_register:
+#if defined(CONFIG_SYNO_MAC_ADDRESS) || defined(CONFIG_SYNO_SERIAL)
+	if ((memcmp(part->name, "vender", 7)==0) ||
+		(memcmp(part->name, "vendor", 7)==0)) {
+		u_char rgbszBuf[128];
+		int i = 0, x = 0;
+		size_t retlen;
+		unsigned int Sum;
+		u_char ucSum;
+#ifdef CONFIG_SYNO_MAC_ADDRESS
+		int n = 0;
+		int gVenderMacNumber = 0;
+		char rgbLanMac[CONFIG_SYNO_MAC_MAX][6];
+#endif /* CONFIG_SYNO_MAC_ADDRESS */
+#ifdef CONFIG_SYNO_SERIAL
+		char szSerialBuffer[32];
+		char *ptr;
+		char szSerial[32];
+		char szCheckSum[32];
+		unsigned int uichksum = 0;
+		unsigned int uiTemp = 0;
+#endif /* CONFIG_SYNO_SERIAL */
+
+		part_read(&slave->mtd, 0, 128, &retlen, rgbszBuf);
+
+#ifdef CONFIG_SYNO_MAC_ADDRESS
+		/**
+		 * FIXME: current vender structure on arm platform only support
+		 * max 4 lans instead of CONFIG_SYNO_MAC_MAX.
+		 * If more lans needed, check DSM #52055
+		 */
+		x = 0;
+		gVenderMacNumber = 0;
+		for (n = 0; n < CONFIG_SYNO_MAC_MAX; n++) {
+			for (Sum=0,ucSum=0,i=0; i<6; i++) {
+				Sum+=rgbszBuf[i+x];
+				ucSum+=rgbszBuf[i+x];
+				rgbLanMac[n][i] = rgbszBuf[i+x];
+			}
+			x+=6;
+
+			if (Sum==0 || ucSum!=rgbszBuf[x]) {
+				printk("vender Mac%d checksum error ucSum:0x%02x Buf:0x%02x Sum:%d.\n", 
+						n, ucSum, rgbszBuf[x], Sum);
+				grgbLanMac[n][0] = '\0';
+			} else {
+				snprintf(grgbLanMac[n], sizeof(grgbLanMac),
+						"%02x%02x%02x%02x%02x%02x",
+				rgbLanMac[n][0],
+				rgbLanMac[n][1],
+				rgbLanMac[n][2],
+				rgbLanMac[n][3],
+				rgbLanMac[n][4],
+				rgbLanMac[n][5]);
+			}
+
+			x++;
+			gVenderMacNumber++;
+		}
+#endif /* CONFIG_SYNO_MAC_ADDRESS */
+#ifdef CONFIG_SYNO_SERIAL
+		memset(szSerial, 0, sizeof(szSerial));
+		memset(szCheckSum, 0, sizeof(szCheckSum));
+		memset(gszSerialNum, 0, 32);
+		memcpy(szSerialBuffer, &(rgbszBuf[32]), 32);
+
+		// this is new defined SN
+		if (0 == strncmp(szSerialBuffer, SYNO_SN_12_SIG,strlen(SYNO_SN_12_SIG))) {
+			//paring serial number with format 'SN=1350KKN99999'
+			ptr = strstr(szSerialBuffer, SYNO_SN_TAG);
+			if (NULL == ptr) {
+				printk("no serial tag found, serial buffer='%s'\n", szSerialBuffer);
+				goto SKIP_SERIAL;
+			}
+			ptr += strlen(SYNO_SN_TAG);
+			i = 0;
+			while (0 != *ptr && ',' != *ptr) {
+				szSerial[i++] = *ptr;
+				ptr++;
+			}
+			szSerial[i] = '\0';
+
+			//paring serial number with format 'CHK=125'
+			ptr = strstr(szSerialBuffer, SYNO_CHKSUM_TAG);
+			if (NULL == ptr) {
+				printk("no checksum tag found, serial buffer='%s'\n", szSerialBuffer);
+				goto SKIP_SERIAL;
+			}
+			ptr += strlen(SYNO_CHKSUM_TAG);
+			i = 0;
+			while (0 != *ptr && ',' != *ptr) {
+				szCheckSum[i++] = *ptr;
+				ptr++;
+			}
+			szCheckSum[i] = '\0';
+
+			//calculate checksum
+			for (i = 0 ; i < strlen(szSerial); i++) {
+				uichksum += szSerial[i];
+			}
+
+			//------ check checksum ------
+			if (0 != strict_strtoul(szCheckSum, 10, &uiTemp)) {
+				printk("string conversion error: '%s'\n", szCheckSum);
+				goto SKIP_SERIAL;
+			} else if (uichksum != uiTemp) {
+				printk("serial number checksum error, serial='%s', checksum='%u' not '%u'\n", szSerial, uichksum, uiTemp);
+				goto SKIP_SERIAL;
+			}
+		} else {
+			unsigned char ucChkSum = 0;
+			//calculate checksum
+			for (i = 0 ; i < 10; i++) {
+				ucChkSum += szSerialBuffer[i];
+			}
+			//------ check checksum ------
+			if (ucChkSum != szSerialBuffer[10]) {
+				printk("serial number checksum error, serial='%s', checksum='%d' not '%d'", szSerialBuffer, ucChkSum, szSerialBuffer[10]);
+				goto SKIP_SERIAL;
+			} else {
+				memcpy(szSerial, szSerialBuffer, 10);
+			}
+		}
+		snprintf(gszSerialNum, 32, "%s", szSerial);
+SKIP_SERIAL:
+		printk("serial number='%s'", gszSerialNum);
+
+		//read custom serial number out, it is in the vender partion shift 64 bytes.
+		x = 64;
+		for (Sum=0,ucSum=0,i=0; i<31; i++) {
+			Sum+=rgbszBuf[i+x];
+			ucSum+=rgbszBuf[i+x];
+			gszCustomSerialNum[i] = rgbszBuf[i+x];
+		}
+		x+=31;
+		if (Sum==0 || ucSum!=rgbszBuf[x]) {
+			for (i=0; i<32; i++) {
+				gszCustomSerialNum[i] = 0;
+			}
+		} else {
+			printk("Custom Serial Number: %s\n", gszCustomSerialNum);
+		}
+#endif /* CONFIG_SYNO_SERIAL */
+	}
+#endif /* CONFIG_SYNO_MAC_ADDRESS || CONFIG_SYNO_SERIAL */
 	return slave;
 }
 
@@ -773,3 +927,21 @@ uint64_t mtd_get_device_size(const struct mtd_info *mtd)
 	return PART(mtd)->master->size;
 }
 EXPORT_SYMBOL_GPL(mtd_get_device_size);
+
+#ifdef CONFIG_SYNO_MTD_INFO
+int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned long length)
+{
+	struct mtd_part *part = PART(mtd);
+
+	part->offset = offset;
+	part->offset &= part->master->size-1;
+
+	mtd->size = length;
+
+	if (part->offset + mtd->size > part->master->size) {
+		return -EFAULT;
+	}
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_MTD_INFO */

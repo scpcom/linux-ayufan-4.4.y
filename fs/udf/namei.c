@@ -32,11 +32,21 @@
 #include <linux/crc-itu-t.h>
 #include <linux/exportfs.h>
 
+#ifdef CONFIG_SYNO_UDF_CASELESS
+static inline int udf_match(int len1, const unsigned char *name1, int len2,
+			    const unsigned char *name2, int iCaseless)
+#else
 static inline int udf_match(int len1, const unsigned char *name1, int len2,
 			    const unsigned char *name2)
+#endif
 {
 	if (len1 != len2)
 		return 0;
+#ifdef CONFIG_SYNO_UDF_CASELESS
+	if (iCaseless) {
+		return !strncasecmp(name1, name2, len1);
+	}
+#endif
 
 	return !memcmp(name1, name2, len1);
 }
@@ -234,8 +244,14 @@ static struct fileIdentDesc *udf_find_entry(struct inode *dir,
 			continue;
 
 		flen = udf_get_filename(dir->i_sb, nameptr, fname, lfi);
+#ifdef CONFIG_SYNO_UDF_CASELESS
+		if (flen && udf_match(flen, fname, child->len, child->name,
+					UDF_QUERY_FLAG(dir->i_sb, SYNO_UDF_FLAG_CASELESS)))
+			goto out_ok;
+#else
 		if (flen && udf_match(flen, fname, child->len, child->name))
 			goto out_ok;
+#endif
 	}
 
 out_err:
@@ -1213,7 +1229,6 @@ static struct dentry *udf_get_parent(struct dentry *child)
 out_unlock:
 	return ERR_PTR(-EACCES);
 }
-
 
 static struct dentry *udf_nfs_get_inode(struct super_block *sb, u32 block,
 					u16 partref, __u32 generation)

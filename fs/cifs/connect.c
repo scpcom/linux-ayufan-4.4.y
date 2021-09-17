@@ -1352,6 +1352,9 @@ cifs_parse_mount_options(const char *mountdata, const char *devname,
 			vol->no_linux_ext = 1;
 			break;
 		case Opt_nocase:
+#ifdef CONFIG_SYNO_CIFS_MOUNT_CASELESS
+			SynoPosixSemanticsEnabled = 0;
+#endif /* CONFIG_SYNO_CIFS_MOUNT_CASELESS */
 			vol->nocase = 1;
 			break;
 		case Opt_brl:
@@ -3260,7 +3263,6 @@ cifs_cleanup_volume_info(struct smb_vol *volume_info)
 	kfree(volume_info);
 }
 
-
 #ifdef CONFIG_CIFS_DFS_UPCALL
 /*
  * cifs_build_path_to_root returns full path to root when we do not have an
@@ -3724,7 +3726,6 @@ CIFSTCon(const unsigned int xid, struct cifs_ses *ses,
 			is_unicode = true;
 		else
 			is_unicode = false;
-
 
 		/* skip service field (NB: this field is always ASCII) */
 		if (length == 3) {

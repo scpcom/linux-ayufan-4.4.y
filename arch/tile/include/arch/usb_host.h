@@ -20,7 +20,4 @@
 #include <arch/abi.h>
 #include <arch/usb_host_def.h>
 
-#ifndef __ASSEMBLER__
-#endif /* !defined(__ASSEMBLER__) */
-
 #endif /* !defined(__ARCH_USB_HOST_H__) */

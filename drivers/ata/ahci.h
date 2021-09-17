@@ -49,6 +49,16 @@
 #define EM_MSG_LED_VALUE_OFF          0xfff80000
 #define EM_MSG_LED_VALUE_ON           0x00010000
 
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
+#define EM_MSG_LOCATE_LED_MASK        0x00380000
+#define EM_MSG_FAULT_LED_MASK         0x01c00000
+
+enum{
+	ATA_FLAG_SW_LOCATE      = (1 << 24), /* driver supports sw locate led */
+	ATA_FLAG_SW_FAULT       = (1 << 25), /* driver supports sw fault led */
+};
+#endif /* CONFIG_SYNO_ATA_AHCI_LED_SGPIO */
+
 enum {
 	AHCI_MAX_PORTS		= 32,
 	AHCI_MAX_SG		= 168, /* hardware max is 64K */
@@ -232,6 +242,9 @@ enum {
 						        port start (wait until
 						        error-handling stage) */
 	AHCI_HFLAG_MULTI_MSI		= (1 << 16), /* multiple PCI MSIs */
+#ifdef CONFIG_SYNO_MV_9235_PORTING
+	AHCI_HFLAG_YES_MV9235_FIX   = (1 << 31),
+#endif /* CONFIG_SYNO_MV_9235_PORTING */
 
 	/* ap->flags bits */
 
@@ -284,6 +297,12 @@ struct ahci_em_priv {
 	unsigned long saved_activity;
 	unsigned long activity;
 	unsigned long led_state;
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
+	unsigned long saved_locate;
+	unsigned long locate;
+	unsigned long saved_fault;
+	unsigned long fault;
+#endif /* CONFIG_SYNO_ATA_AHCI_LED_SGPIO */
 };
 
 struct ahci_port_priv {
@@ -339,6 +358,15 @@ extern struct device_attribute *ahci_sdev_attrs[];
 extern struct ata_port_operations ahci_ops;
 extern struct ata_port_operations ahci_pmp_retry_srst_ops;
 
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+extern int sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc);
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
+extern struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
+                                            const struct scsi_device *scsidev);
+#endif /* CONFIG_SYNO_ATA_AHCI_LED_SGPIO */
+
 unsigned int ahci_dev_classify(struct ata_port *ap);
 void ahci_fill_cmd_slot(struct ahci_port_priv *pp, unsigned int tag,
 			u32 opts);
@@ -366,6 +394,14 @@ irqreturn_t ahci_hw_interrupt(int irq, void *dev_instance);
 irqreturn_t ahci_thread_fn(int irq, void *dev_instance);
 void ahci_print_info(struct ata_host *host, const char *scc_s);
 int ahci_host_activate(struct ata_host *host, int irq, unsigned int n_msis);
+
+#ifdef CONFIG_SYNO_MV_9235_GPIO_CTRL
+static inline void __iomem *ahci_host_base(struct ata_host *host)
+{
+	struct ahci_host_priv *hpriv = host->private_data;
+	return hpriv->mmio;
+}
+#endif /* CONFIG_SYNO_MV_9235_GPIO_CTRL */
 
 static inline void __iomem *__ahci_port_base(struct ata_host *host,
 					     unsigned int port_no)

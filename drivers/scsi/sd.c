@@ -98,6 +98,31 @@ MODULE_ALIAS_SCSI_DEVICE(TYPE_RBC);
 #define SD_MINORS	0
 #endif
 
+#ifdef CONFIG_SYNO_BOOT_SATA_DOM
+extern int gSynoBootSATADOM;
+#endif /* CONFIG_SYNO_BOOT_SATA_DOM */
+
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
+
+struct SpinupQueue {
+	spinlock_t q_lock;
+	unsigned int q_id;
+	atomic_t q_spinup_quota;
+	struct list_head q_disk_list;
+	struct list_head q_head;
+};
+
+LIST_HEAD(SpinupListHead);
+DEFINE_SPINLOCK(SpinupListLock);
+
+#define MAX_ALLOWED_SPINUP_NUM  12
+atomic_t gSpinupCmdNum = ATOMIC_INIT(0);
+
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY */
+
+#ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
+extern int gSynoHasDynModule;
+#endif /*CONFIG_SYNO_DYN_MODULE_INSTALL*/
 static void sd_config_discard(struct scsi_disk *, unsigned int);
 static void sd_config_write_same(struct scsi_disk *);
 static int  sd_revalidate_disk(struct gendisk *);
@@ -117,6 +142,22 @@ static void sd_print_result(struct scsi_disk *, int);
 
 static DEFINE_SPINLOCK(sd_index_lock);
 static DEFINE_IDA(sd_index_ida);
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+#include <linux/libata.h>
+#include <linux/usb.h>
+#include "../usb/storage/usb.h"
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+extern u8 syno_is_synology_pm(const struct ata_port *ap);
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+static DEFINE_IDA(usb_index_ida);
+static DEFINE_IDA(sas_index_ida);
+#ifdef CONFIG_SYNO_ISCSI_DEVICE
+static DEFINE_IDA(iscsi_index_ida);
+#endif /* CONFIG_SYNO_ISCSI_DEVICE */
+extern int g_is_sas_model;
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
 
 /* This semaphore is used to mediate the 0->1 reference get in the
  * face of object destruction (i.e. we can't allow a get on an
@@ -213,6 +254,271 @@ sd_store_manage_start_stop(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
+
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+static void
+SpinupQueueDump(struct SpinupQueue *q)
+{
+	struct scsi_device *d;
+
+	printk(" QUEUE %d:\n", q->q_id);
+	list_for_each_entry(d, &(q->q_disk_list), spinup_list) {
+		printk("  disk [%d]\n", d->id);
+	}
+}
+
+static void
+SpinupQueueDumpAll(void)
+{
+	struct SpinupQueue *q;
+
+	printk(" -------- queue dump\n");
+	list_for_each_entry(q, &SpinupListHead, q_head) {
+		SpinupQueueDump(q);
+	}
+	printk(" ======== queue dump\n");
+}
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG */
+
+/**
+ *
+ * Must be called with lock held.
+ */
+static struct SpinupQueue *
+SpinupQueueFindById(unsigned int id)
+{
+	struct SpinupQueue *q;
+
+	list_for_each_entry(q, &SpinupListHead, q_head) {
+		if (q->q_id == id) {
+			return q;
+		}
+	}
+	return NULL;
+}
+
+/**
+ *
+ * Must be called with lock held.
+ */
+static struct SpinupQueue *
+SpinupQueueAlloc(unsigned int id)
+{
+	struct SpinupQueue *qNew;
+
+	/* TODO check parameter */
+
+	qNew = kmalloc(sizeof(struct SpinupQueue), GFP_KERNEL);
+	INIT_LIST_HEAD(&(qNew->q_disk_list));
+	INIT_LIST_HEAD(&(qNew->q_head));
+	qNew->q_id = id;
+	spin_lock_init(&(qNew->q_lock));
+	atomic_set(&(qNew->q_spinup_quota), 4); /* TODO set to some changable default value */
+
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+	printk(" == add queue %p for id %d\n", qNew, id);
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG */
+	return qNew;
+}
+
+static int
+SpinupQueueDiskAdd(struct SpinupQueue *sq, struct scsi_device *sd)
+{
+	unsigned long flags;
+
+	spin_lock_irqsave(&(sq->q_lock), flags);
+
+	list_add_tail(&(sd->spinup_list), &(sq->q_disk_list));
+	sd->spinup_queue = sq;
+
+	spin_unlock_irqrestore(&(sq->q_lock), flags);
+	return 0;
+}
+
+static int
+SpinupQueueDiskRemove(struct SpinupQueue *pSQ, struct scsi_device *pSD)
+{
+	unsigned long flags;
+
+	if (NULL == pSD->spinup_queue) {
+		return 0;
+	}
+	spin_lock_irqsave(&(pSQ->q_lock), flags);
+
+	BUG_ON(pSQ != pSD->spinup_queue);
+
+	list_del(&(pSD->spinup_list));
+	pSD->spinup_queue = NULL;
+
+	spin_unlock_irqrestore(&(pSQ->q_lock), flags);
+	return 0;
+}
+
+static void
+SpinupQueueSet(struct scsi_device *sdp, unsigned int new_id)
+{
+	unsigned int old_id;
+	struct SpinupQueue *qOld;
+	struct SpinupQueue *qNew;
+
+	unsigned long flags;
+
+	/* lock */
+	spin_lock_irqsave(&SpinupListLock, flags);
+
+	old_id = sdp->spinup_queue_id;
+
+	if (old_id == new_id) {
+		/* No change. Do nothing. */
+		spin_unlock_irqrestore(&SpinupListLock, flags);
+		return;
+	}
+	/* If it was in another queue, remove first. */
+	if (NULL != sdp->spinup_queue) {
+		unsigned long flags_sd;
+
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+		sdev_printk(KERN_ERR, sdp, " = remove disk from queue %d\n",
+				sdp->spinup_queue->q_id);
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG */
+		/* delete disk from old list */
+		qOld = sdp->spinup_queue;
+		BUG_ON(NULL == qOld);
+		SpinupQueueDiskRemove(qOld, sdp);
+
+		/* Delete the queue if it is empty */
+		spin_lock_irqsave(&(qOld->q_lock), flags_sd);
+		if (list_empty(&(qOld->q_disk_list))) {
+			list_del(&(qOld->q_head));
+		}
+		spin_unlock_irqrestore(&(qOld->q_lock), flags_sd);
+	}
+	if (new_id) { /* Want to be added to a new queue */
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+		sdev_printk(KERN_ERR, sdp, " = add disk to queue %d\n",
+				new_id);
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG */
+
+		/* Find list of the given id */
+
+		qNew = SpinupQueueFindById(new_id);
+		/* if not found, create a new list for this id. */
+		if (NULL == qNew) {
+			/* alloc & init */
+			qNew = SpinupQueueAlloc(new_id);
+			/* Insert into queue list */
+			list_add_tail( &(qNew->q_head), &SpinupListHead);
+		}
+		/* then add self into disk list of queue. */
+		SpinupQueueDiskAdd(qNew, sdp);
+
+	}
+	sdp->spinup_queue_id = new_id;
+
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+	SpinupQueueDumpAll();
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG */
+	/* TODO create queue, add to existing queue, or remove queue */
+	spin_unlock_irqrestore(&SpinupListLock, flags);
+
+}
+
+static ssize_t
+sd_store_spinup_queue_id(struct device *dev, struct device_attribute *attr,
+			   const char *buf, size_t count)
+{
+	struct scsi_disk *sdkp = to_scsi_disk(dev);
+	struct scsi_device *sdp = sdkp->device;
+	unsigned int new_id;
+
+	if (!capable(CAP_SYS_ADMIN))
+		return -EACCES;
+
+	new_id = simple_strtoul(buf, NULL, 10);
+
+	SpinupQueueSet(sdp, new_id);
+
+	return count;
+}
+
+/**
+ *
+ * Check if disk can spin up, and log spinup status.
+ *
+ * To be called from scsi midlayer to reflect spinup status.
+ *
+ * Return:
+ * - 1 if caller can spinup disk
+ * - 0 if caller must not spin up disk.
+ */
+int
+SynoSpinupBegin(struct scsi_device *device)
+{
+	int ret = 0;
+	struct SpinupQueue *q;
+
+	/* Only handle disks that has been added to queue. */
+	q = device->spinup_queue;
+	if (NULL == q) {
+		goto Return;
+	}
+	/* Check if this disk is spinning up */
+	if (device->spinup_in_process) {
+		/* Already spinning up. */
+		goto Return;
+	}
+	/* Atomic dec */
+	if (atomic_read(&(device->spinup_queue->q_spinup_quota))) {
+		atomic_dec(&(device->spinup_queue->q_spinup_quota));
+	} else {
+		/* No quota to spin up more disks. Just let it retry. */
+		goto Return;
+	}
+
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+	sdev_printk(KERN_ERR, device, "Spinup disk...\n");
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG */
+	device->spinup_in_process = 1;
+
+	/* caller can spin up disk now. */
+	ret = 1;
+Return:
+	return ret;
+}
+
+/**
+ * Clean up spinup status.
+ *
+ * Called from SCSI midlayer when spinup is done.
+ */
+void SynoSpinupEnd(struct scsi_device *sdev)
+{
+	struct SpinupQueue *q;
+
+	q = sdev->spinup_queue;
+	atomic_inc(&(sdev->spinup_queue->q_spinup_quota));
+	sdev->spinup_in_process = 0;
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+	sdev_printk(KERN_ERR, sdev, "Spinup done. Q %d remaining %d \n",
+			sdev->spinup_queue_id,
+			atomic_read(&(sdev->spinup_queue->q_spinup_quota)));
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG */
+}
+
+int SynoSpinupRemove(struct scsi_device *sdev)
+{
+	unsigned long flags;
+	int ret;
+
+	spin_lock_irqsave(&SpinupListLock, flags);
+	ret = SpinupQueueDiskRemove(sdev->spinup_queue, sdev);
+	spin_unlock_irqrestore(&SpinupListLock, flags);
+
+	return ret;
+}
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY */
+
 static ssize_t
 sd_store_allow_restart(struct device *dev, struct device_attribute *attr,
 		       const char *buf, size_t count)
@@ -258,6 +564,18 @@ sd_show_manage_start_stop(struct device *dev, struct device_attribute *attr,
 
 	return snprintf(buf, 20, "%u\n", sdp->manage_start_stop);
 }
+
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
+static ssize_t
+sd_show_spinup_queue_id(struct device *dev, struct device_attribute *attr,
+			  char *buf)
+{
+	struct scsi_disk *sdkp = to_scsi_disk(dev);
+	struct scsi_device *sdp = sdkp->device;
+
+	return snprintf(buf, 20, "%u\n", sdp->spinup_queue_id);
+}
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY */
 
 static ssize_t
 sd_show_allow_restart(struct device *dev, struct device_attribute *attr,
@@ -460,6 +778,10 @@ static struct device_attribute sd_disk_attrs[] = {
 	       sd_store_allow_restart),
 	__ATTR(manage_start_stop, S_IRUGO|S_IWUSR, sd_show_manage_start_stop,
 	       sd_store_manage_start_stop),
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
+	__ATTR(spinup_queue_id, S_IRUGO|S_IWUSR, sd_show_spinup_queue_id,
+	       sd_store_spinup_queue_id),
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY */
 	__ATTR(protection_type, S_IRUGO|S_IWUSR, sd_show_protection_type,
 	       sd_store_protection_type),
 	__ATTR(protection_mode, S_IRUGO, sd_show_protection_mode, NULL),
@@ -1251,6 +1573,40 @@ static int sd_getgeo(struct block_device *bdev, struct hd_geometry *geo)
 	return 0;
 }
 
+#ifdef CONFIG_SYNO_BADSECTOR_TEST
+static int ScsiSetBadSector(struct gendisk *pDisk, SDBADSECTORS *pSectors)
+{
+	int iDrive = SynoGetInternalDiskSeq(pDisk->disk_name);
+	int max_support_disk = sizeof(grgSdBadSectors)/sizeof(SDBADSECTORS);
+
+	if (pSectors == NULL) {
+		return -EINVAL;
+	}
+	gBadSectorTest = 1;
+	if (iDrive >= 0 &&
+		iDrive < max_support_disk) {
+
+		if (copy_from_user(&grgSdBadSectors[iDrive], pSectors, sizeof(SDBADSECTORS))) {
+			return -EINVAL;
+		}
+		if (grgSdBadSectors[iDrive].uiEnable) {
+			int i;
+			for (i = 0; i < 100; i++) {
+				printk("%s[%d]:%s set bad sector: %u, max support disk: %d\n",
+					   __FILE__, __LINE__, pDisk->disk_name,
+					   grgSdBadSectors[iDrive].rgSectors[i], max_support_disk);
+				if (grgSdBadSectors[iDrive].rgSectors[i] == 0xFFFFFFFF) {
+					break;
+				}
+			}
+		}
+		return 0;
+	} else {
+		return -EINVAL;
+	}
+}
+#endif /* CONFIG_SYNO_BADSECTOR_TEST */
+
 /**
  *	sd_ioctl - process an ioctl
  *	@inode: only i_rdev/i_bdev members may be used
@@ -1302,6 +1658,22 @@ static int sd_ioctl(struct block_device *bdev, fmode_t mode,
 		case SCSI_IOCTL_GET_BUS_NUMBER:
 			error = scsi_ioctl(sdp, cmd, p);
 			break;
+#ifdef CONFIG_SYNO_BADSECTOR_TEST
+		case SCSI_IOCTL_SET_BADSECTORS:
+			return ScsiSetBadSector(disk, p);
+#endif /* CONFIG_SYNO_BADSECTOR_TEST */
+#ifdef CONFIG_SYNO_DISK_HIBERNATION
+		case SD_IOCTL_IDLE:
+		{
+			return (jiffies - sdp->idle) / HZ + 1;
+		}
+		case SD_IOCTL_SUPPORT_SLEEP:
+		{
+			int *pCanSleep = (int *)arg;
+			*pCanSleep = sdp->nospindown ? 0 : 1;
+			return 0;
+		}
+#endif /* CONFIG_SYNO_DISK_HIBERNATION */
 		default:
 			error = scsi_cmd_blk_ioctl(bdev, mode, cmd, p);
 			if (error != -ENOTTY)
@@ -1427,7 +1799,6 @@ static int sd_sync_cache(struct scsi_disk *sdkp)
 	if (!scsi_device_online(sdp))
 		return -ENODEV;
 
-
 	for (retries = 3; retries > 0; --retries) {
 		unsigned char cmd[10] = { 0 };
 
@@ -1463,7 +1834,6 @@ static void sd_rescan(struct device *dev)
 		scsi_disk_put(sdkp);
 	}
 }
-
 
 #ifdef CONFIG_COMPAT
 /* 
@@ -1843,7 +2213,6 @@ sd_spinup_disk(struct scsi_disk *sdkp)
 			printk("not responding...\n");
 	}
 }
-
 
 /*
  * Determine whether disk supports Data Integrity Field.
@@ -2317,7 +2686,6 @@ sd_read_cache_type(struct scsi_disk *sdkp, unsigned char *buffer)
 	int old_rcd = sdkp->RCD;
 	int old_dpofua = sdkp->DPOFUA;
 
-
 	if (sdkp->cache_override)
 		return;
 
@@ -2507,6 +2875,37 @@ static void sd_read_app_tag_own(struct scsi_disk *sdkp, unsigned char *buffer)
 	return;
 }
 
+#ifdef CONFIG_SYNO_SCSI_GET_ATA_IDENTITY
+/**
+ * syno_get_ata_identity - Get ATA IDENTITY via ATA PASS-THRU command
+ * @sdev: the disk you want to get ata identity
+ * @id: ata identity result will stored in here
+ *
+ * return 0: if it's SAS disk or failed
+ *        1: success
+ */
+int
+syno_get_ata_identity(struct scsi_device *sdev, u16 *id)
+{
+	unsigned char scsi_cmd[MAX_COMMAND_SIZE] = {0};
+
+	/* ATA IDENTIFY DEVICE via ATA PASS-THRU(16)*/
+	scsi_cmd[0] = ATA_16;
+	scsi_cmd[1] = 0x08; /* PIO Data-in */
+	scsi_cmd[2] = 0x0e; /* T_DIR=1, BYT_BLOK=1, T_LENGTH=2 */
+	scsi_cmd[14] = ATA_CMD_ID_ATA;
+
+	/* if it's SAS disk, ATA PASS-THRU will fail. Return -1 */
+	if (scsi_execute_req(sdev, scsi_cmd, DMA_FROM_DEVICE,
+		id, 512, NULL, 10 * HZ, 5, NULL)) {
+		return 0;
+	}
+
+	return 1;
+}
+EXPORT_SYMBOL(syno_get_ata_identity);
+#endif /* CONFIG_SYNO_SCSI_GET_ATA_IDENTITY */
+
 /**
  * sd_read_block_limits - Query disk device for preferred I/O sizes.
  * @disk: disk to query
@@ -2542,6 +2941,28 @@ static void sd_read_block_limits(struct scsi_disk *sdkp)
 			sdkp->max_unmap_blocks = lba_count;
 
 		sdkp->unmap_granularity = get_unaligned_be32(&buffer[28]);
+
+#ifdef CONFIG_SYNO_SAS_FIX_TRIM_GRANULARITY
+#define SYNO_MD_CHUNK_SIZE 65536
+	/*
+	 * Correct TRIM granularity read from Block Limits VPD
+	 *
+	 * When using SATA SSD on SAS model, the TRIM granularity value
+	 * is larger than our md chunk size. This causes raid0 / raid10
+	 * can't do TRIM. So we correct the value here for SAS model.
+	 *
+	 * What we do is exactly the same as what ata layer does. Refer
+	 * to ata_scsiop_inq_b0 in drivers/ata/libata-scsi.c for more
+	 * details. Also, the behavior should always keep consistent with
+	 * ata_scsiop_inq_b0.
+	 */
+	if (1 == g_is_sas_model && (SYNO_MD_CHUNK_SIZE >> 9) < sdkp->unmap_granularity) {
+		u16 id[ATA_ID_WORDS] = {0};
+		if (syno_get_ata_identity(sdkp->device, id) && ata_id_has_trim(id)) {
+			sdkp->unmap_granularity = 1;
+		}
+	}
+#endif /* CONFIG_SYNO_SAS_FIX_TRIM_GRANULARITY */
 
 		if (buffer[32] & 0x80)
 			sdkp->unmap_alignment =
@@ -2695,7 +3116,22 @@ static int sd_revalidate_disk(struct gendisk *disk)
 		goto out;
 	}
 
+#if defined(CONFIG_SYNO_SAS_SPINUP_DELAY) && defined(CONFIG_SYNO_SAS_DISK_NAME)
+	if (1 == g_is_sas_model) {
+		/* Too much spin up cmd, wait here */
+		while (MAX_ALLOWED_SPINUP_NUM < atomic_read(&(gSpinupCmdNum))) {
+			msleep(1000);
+		}
+
+		atomic_inc(&(gSpinupCmdNum));
+		sd_spinup_disk(sdkp);
+		atomic_dec(&(gSpinupCmdNum));
+	} else {
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY && CONFIG_SYNO_SAS_DISK_NAME */
 	sd_spinup_disk(sdkp);
+#if defined(CONFIG_SYNO_SAS_SPINUP_DELAY) && defined(CONFIG_SYNO_SAS_DISK_NAME)
+	}
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY && CONFIG_SYNO_SAS_DISK_NAME */
 
 	/*
 	 * Without media there is no reason to ask; moreover, some devices
@@ -2737,6 +3173,45 @@ static int sd_revalidate_disk(struct gendisk *disk)
  out:
 	return 0;
 }
+
+#ifdef	CONFIG_SYNO_FIXED_DISK_NAME
+extern int syno_ida_get_new(struct ida *idp, int starting_id, int *id);
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
+
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+/**
+ *	syno_sd_format_sas_disk_name - format sas disk name
+ *
+ *	@prefix: name prefix - ie. "sd" for SCSI disks, "sas" for SAS disks
+ *	@synoindex: index of the disk to format name for
+ *	@buf: output buffer
+ *	@buflen: length of the output buffer
+ *
+ *	SAS disk names starts at sas1.  The 26th device is sas26 and the
+ *	27th is sas27.
+ *
+ *	CONTEXT:
+ *	Don't care.
+ *
+ *	RETURNS:
+ *	0 on success, -errno on failure.
+ */
+static int syno_sd_format_sas_disk_name(char *prefix, int synoindex, char *buf, int buflen)
+{
+	/* disk format is sata1, so synoindex  1 position in this string
+	 * So we at least need to prepare 1 position for this string
+	 */
+	if (buflen <= (strlen(prefix) + (synoindex + 1)/10 + 1)) {
+		return -EINVAL;
+	}
+
+	if (snprintf(buf, buflen, "%s%d", prefix, synoindex + 1) <= 0) {
+		return -EINVAL;
+	}
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
 
 /**
  *	sd_unlock_native_capacity - unlock native capacity
@@ -2865,6 +3340,115 @@ static void sd_probe_async(void *data, async_cookie_t cookie)
 	put_device(&sdkp->dev);
 }
 
+#ifdef CONFIG_SYNO_USB_FLASH_BOOT
+static bool syno_find_synoboot(void)
+{
+	bool find = false;
+	struct scsi_disk *sdisk = NULL;
+	struct class_dev_iter iter;
+	struct device *dev;
+
+	class_dev_iter_init(&iter, &sd_disk_class, NULL, NULL);
+	dev = class_dev_iter_next(&iter);
+	while (dev) {
+		if (!dev->parent) {
+			dev = class_dev_iter_next(&iter);
+			continue;
+		}
+		sdisk = dev_get_drvdata(dev->parent);
+		if (sdisk && sdisk->disk) {
+			if (0 == strcmp(CONFIG_SYNO_USB_FLASH_DEVICE_NAME, sdisk->disk->disk_name)) {
+				find = true;
+				goto OUT;
+			}
+		}
+		dev = class_dev_iter_next(&iter);
+	}
+OUT:
+	class_dev_iter_exit(&iter);
+	return find;
+}
+#endif /*CONFIG_SYNO_USB_FLASH_BOOT*/
+
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+static SYNO_DISK_TYPE syno_disk_type_get(struct device *dev)
+{
+	struct scsi_device *sdp = to_scsi_device(dev);
+#ifdef CONFIG_SYNO_BOOT_SATA_DOM
+	bool blIsSynoboot = false;
+#endif /* CONFIG_SYNO_BOOT_SATA_DOM */
+
+	// iscsi
+#ifdef CONFIG_SYNO_ISCSI_DEVICE
+	if(strcmp(sdp->host->hostt->name, "iSCSI Initiator over TCP/IP") == 0){
+		return SYNO_DISK_ISCSI;
+	}
+#endif /* CONFIG_SYNO_ISCSI_DEVICE */
+
+#ifdef CONFIG_SYNO_USB_FLASH_BOOT
+	if (SYNO_PORT_TYPE_USB == sdp->host->hostt->syno_port_type) {
+		struct us_data *us = host_to_us(sdp->host);
+		struct usb_device *usbdev = us->pusb_dev;
+		//Since the UAS doesn't has the us_data structure , the us will be NULL , avoid the NULL pointer accessing
+		if (NULL == us) {
+			return SYNO_DISK_USB;
+		}
+		if (NULL == usbdev) {
+			return SYNO_DISK_USB;
+		}
+		if (IS_SYNO_USBBOOT_ID_VENDOR(le16_to_cpu(usbdev->descriptor.idVendor)) &&
+			IS_SYNO_USBBOOT_ID_PRODUCT(le16_to_cpu(usbdev->descriptor.idProduct))) {
+#ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
+			if(0 == gSynoHasDynModule){
+				return SYNO_DISK_USB;
+			}
+#endif /*CONFIG_SYNO_DYN_MODULE_INSTALL*/
+			if (!syno_find_synoboot()) {
+				return SYNO_DISK_SYNOBOOT;
+			}
+		}
+		return SYNO_DISK_USB;
+	}
+
+	if (SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type) {
+#ifdef CONFIG_SYNO_BOOT_SATA_DOM
+		/* Dual Head SATA DOM */
+		if (1 == gSynoBootSATADOM) {
+			if (!strncmp(CONFIG_SYNO_SATA_DOM_VENDOR, sdp->vendor, strlen(CONFIG_SYNO_SATA_DOM_VENDOR))
+				&& !strncmp(CONFIG_SYNO_SATA_DOM_MODEL, sdp->model, strlen(CONFIG_SYNO_SATA_DOM_MODEL))) {
+				blIsSynoboot = true;
+			} else if (!strncmp(CONFIG_SYNO_SATA_DOM_VENDOR_SECOND_SRC, sdp->vendor, strlen(CONFIG_SYNO_SATA_DOM_VENDOR_SECOND_SRC))
+				&& !strncmp(CONFIG_SYNO_SATA_DOM_MODEL_SECOND_SRC, sdp->model, strlen(CONFIG_SYNO_SATA_DOM_MODEL_SECOND_SRC))) {
+				blIsSynoboot = true;
+			}
+#ifdef CONFIG_SYNO_USB_FLASH_BOOT
+			if (blIsSynoboot && !syno_find_synoboot()) {
+				return SYNO_DISK_SYNOBOOT;
+			}
+#endif /* CONFIG_SYNO_USB_FLASH_BOOT */
+		}
+#endif /* CONFIG_SYNO_BOOT_SATA_DOM */
+		// else treat as internal disks
+		return SYNO_DISK_SATA;
+	}
+#else /*CONFIG_SYNO_USB_FLASH_BOOT*/
+	if (SYNO_PORT_TYPE_USB == sdp->host->hostt->syno_port_type) {
+		return SYNO_DISK_USB;
+	}
+
+	if (SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type) {
+		// else treat as internal disks
+		return SYNO_DISK_SATA;
+	}
+#endif /*CONFIG_SYNO_USB_FLASH_BOOT*/
+	// sas disks
+	if (SYNO_PORT_TYPE_SAS == sdp->host->hostt->syno_port_type) {
+		return SYNO_DISK_SAS;
+	}
+	return SYNO_DISK_UNKNOWN;
+}
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
+
 /**
  *	sd_probe - called during driver initialization and whenever a
  *	new scsi device is attached to the system. It is called once
@@ -2890,6 +3474,19 @@ static int sd_probe(struct device *dev)
 	struct gendisk *gd;
 	int index;
 	int error;
+#ifdef	CONFIG_SYNO_FIXED_DISK_NAME
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+	struct ata_port *ap;
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#ifdef CONFIG_SYNO_ISCSI_DEVICE
+	int start_index;
+#endif /* CONFIG_SYNO_ISCSI_DEVICE */
+	int iRetry = 0;
+	u32 want_idx = 0;
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+	u32 synoidx;
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
 
 	error = -ENODEV;
 	if (sdp->type != TYPE_DISK && sdp->type != TYPE_MOD && sdp->type != TYPE_RBC)
@@ -2907,12 +3504,124 @@ static int sd_probe(struct device *dev)
 	if (!gd)
 		goto out_free;
 
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+	sdkp->synodisktype = syno_disk_type_get(dev);
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
 	do {
 		if (!ida_pre_get(&sd_index_ida, GFP_KERNEL))
 			goto out_put;
 
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+		if (1 == g_is_sas_model) {
+			// ida_pre_get may sleep, use before locking
+			switch(sdkp->synodisktype) {
+#ifdef CONFIG_SYNO_ISCSI_DEVICE
+				case SYNO_DISK_ISCSI:
+					if (!ida_pre_get(&iscsi_index_ida, GFP_KERNEL))
+						goto out_put;
+					break;
+#endif /* CONFIG_SYNO_ISCSI_DEVICE */
+				case SYNO_DISK_USB:
+					if (!ida_pre_get(&usb_index_ida, GFP_KERNEL))
+						goto out_put;
+					break;
+				case SYNO_DISK_SAS:
+					if (!ida_pre_get(&sas_index_ida, GFP_KERNEL))
+						goto out_put;
+					break;
+				default:
+					break;
+			}
+		}
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+
+#ifdef CONFIG_SYNO_DISK_HIBERNATION
+		sdp->idle = jiffies;
+		sdp->nospindown = 0;
+		sdp->spindown = 0;
+#endif /* CONFIG_SYNO_DISK_HIBERNATION */
+
 		spin_lock(&sd_index_lock);
+
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+		switch(sdkp->synodisktype) {
+#ifdef CONFIG_SYNO_ISCSI_DEVICE
+			case SYNO_DISK_ISCSI:
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+				if (1 == g_is_sas_model) {
+					error = syno_ida_get_new(&iscsi_index_ida, 0, &synoidx);
+					want_idx = 0;
+					break;
+				}
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+					want_idx = SYNO_ISCSI_DEVICE_INDEX;
+				break;
+#endif /* CONFIG_SYNO_ISCSI_DEVICE */
+#ifdef CONFIG_SYNO_USB_FLASH_BOOT
+			case SYNO_DISK_SYNOBOOT:
+				want_idx = CONFIG_SYNO_USB_FLASH_DEVICE_INDEX;
+				break;
+#endif /*CONFIG_SYNO_USB_FLASH_BOOT*/
+			case SYNO_DISK_USB:
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+				if (1 == g_is_sas_model) {
+					error = syno_ida_get_new(&usb_index_ida, 0, &synoidx);
+					want_idx = 0;
+					break;
+				}
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+				want_idx = CONFIG_SYNO_MAX_INTERNAL_DISK + 1;
+				break;
+			case SYNO_DISK_SAS:
+			case SYNO_DISK_SATA:
+			default:
+				// SAS model use different naming scheme
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+				if (1 == g_is_sas_model) {
+					error = syno_ida_get_new(&sas_index_ida, 0, &synoidx);
+					want_idx = 0;
+					break;
+				}
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+				if (sdp->host->hostt->syno_index_get) {
+					want_idx = sdp->host->hostt->syno_index_get(sdp->host, sdp->channel, sdp->id, sdp->lun);
+				}else{
+					want_idx = sdp->host->host_no;
+				}
+				break;
+		}
+
+		error = syno_ida_get_new(&sd_index_ida, want_idx, &index);
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+		if (1 == g_is_sas_model) {
+			sdkp->synoindex = synoidx;
+			goto SYNO_SKIP_WANT_RETRY;
+		}
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+
+		while (want_idx != index &&
+			(SYNO_DISK_SATA == sdkp->synodisktype) && iRetry < 15) {
+			/* Sometimes raid is not release all scsi disk yet. Try to delay and reget */
+			printk("want_idx %d index %d. delay and reget\n", want_idx, index);
+
+			ida_remove(&sd_index_ida, index);
+			spin_unlock(&sd_index_lock);
+
+			schedule_timeout_uninterruptible(HZ);
+
+			spin_lock(&sd_index_lock);
+			error = syno_ida_get_new(&sd_index_ida, want_idx, &index);
+
+			printk("want_idx %d index %d\n", want_idx, index);
+			iRetry++;
+		}
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+SYNO_SKIP_WANT_RETRY:
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+
+#else
 		error = ida_get_new(&sd_index_ida, &index);
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
 		spin_unlock(&sd_index_lock);
 	} while (error == -EAGAIN);
 
@@ -2921,7 +3630,82 @@ static int sd_probe(struct device *dev)
 		goto out_put;
 	}
 
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+	gd->systemDisk = 0;
+	switch(sdkp->synodisktype) {
+#ifdef CONFIG_SYNO_ISCSI_DEVICE
+		case SYNO_DISK_ISCSI:
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+			if (1 == g_is_sas_model) {
+				error = syno_sd_format_sas_disk_name(CONFIG_SYNO_SAS_ISCSI_DEVICE_PREFIX, synoidx, gd->disk_name, DISK_NAME_LEN);
+				printk("got iSCSI disk[%d]\n", synoidx);
+				break;
+			}
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+			start_index = index - SYNO_ISCSI_DEVICE_INDEX;
+			error = sd_format_disk_name(CONFIG_SYNO_ISCSI_DEVICE_PREFIX, start_index, gd->disk_name, DISK_NAME_LEN);
+			printk("got iSCSI disk[%d]\n", start_index);
+			break;
+#endif /* CONFIG_SYNO_ISCSI_DEVICE */
+#ifdef CONFIG_SYNO_USB_FLASH_BOOT
+		case SYNO_DISK_SYNOBOOT:
+			// we assume synoboot will be plugged only once
+			sprintf(gd->disk_name, CONFIG_SYNO_USB_FLASH_DEVICE_NAME);
+			error = 0;
+			break;
+#endif/*CONFIG_SYNO_USB_FLASH_BOOT*/
+
+		case SYNO_DISK_SAS:
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+			error = syno_sd_format_sas_disk_name(CONFIG_SYNO_SAS_DEVICE_PREFIX, synoidx, gd->disk_name, DISK_NAME_LEN);
+			// block device
+			if (NULL != dev &&
+				// sas target
+				NULL != dev->parent &&
+				// sas end device
+				NULL != dev->parent->parent &&
+				// sas port
+				NULL != dev->parent->parent->parent &&
+				// internal/external expander
+				NULL != dev->parent->parent->parent->parent &&
+				// expander - host/expander port
+				NULL != dev->parent->parent->parent->parent->parent &&
+				// host/expander
+				NULL != dev->parent->parent->parent->parent->parent->parent) {
+				// if this level parent of this device is scsi host, then it is one of our internal SAS disks
+				if (scsi_is_host_device(dev->parent->parent->parent->parent->parent->parent)) {
+					gd->systemDisk = 1;
+				}
+			}
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+			break;
+		case SYNO_DISK_SATA:
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+			ap = ata_shost_to_port(sdp->host);
+			// enuit is not system disk
+			if (NULL != ap && !syno_is_synology_pm(ap)) {
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+				gd->systemDisk = 1;
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+			}
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+			error = sd_format_disk_name(CONFIG_SYNO_SATA_DEVICE_PREFIX, index, gd->disk_name, DISK_NAME_LEN);
+			break;
+		case SYNO_DISK_USB:
+		default:
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+			if (1 == g_is_sas_model) {
+				error = syno_sd_format_sas_disk_name(CONFIG_SYNO_SAS_USB_DEVICE_PREFIX, synoidx, gd->disk_name, DISK_NAME_LEN);
+				break;
+			}
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+			error = sd_format_disk_name(CONFIG_SYNO_SATA_DEVICE_PREFIX, index, gd->disk_name, DISK_NAME_LEN);
+			break;
+	}
+#else
 	error = sd_format_disk_name("sd", index, gd->disk_name, DISK_NAME_LEN);
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
+
 	if (error) {
 		sdev_printk(KERN_WARNING, sdp, "SCSI disk (sd) name length exceeded.\n");
 		goto out_free_index;
@@ -2955,12 +3739,34 @@ static int sd_probe(struct device *dev)
 
 	get_device(&sdkp->dev);	/* prevent release before async_schedule */
 	async_schedule_domain(sd_probe_async, sdkp, &scsi_sd_probe_domain);
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+	strlcpy(sdp->syno_disk_name, gd->disk_name, BDEVNAME_SIZE);
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
 
 	return 0;
 
  out_free_index:
 	spin_lock(&sd_index_lock);
 	ida_remove(&sd_index_ida, index);
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+	if (1 == g_is_sas_model) {
+		switch(sdkp->synodisktype) {
+#ifdef CONFIG_SYNO_ISCSI_DEVICE
+			case SYNO_DISK_ISCSI:
+				ida_remove(&iscsi_index_ida, synoidx);
+				break;
+#endif /* CONFIG_SYNO_ISCSI_DEVICE */
+			case SYNO_DISK_USB:
+				ida_remove(&usb_index_ida, synoidx);
+				break;
+			case SYNO_DISK_SAS:
+				ida_remove(&sas_index_ida, synoidx);
+				break;
+			default:
+				break;
+		}
+	}
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
 	spin_unlock(&sd_index_lock);
  out_put:
 	put_disk(gd);
@@ -3019,6 +3825,25 @@ static void scsi_disk_release(struct device *dev)
 	
 	spin_lock(&sd_index_lock);
 	ida_remove(&sd_index_ida, sdkp->index);
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+	if (1 == g_is_sas_model) {
+		switch(sdkp->synodisktype) {
+#ifdef CONFIG_SYNO_ISCSI_DEVICE
+			case SYNO_DISK_ISCSI:
+				ida_remove(&iscsi_index_ida, sdkp->synoindex);
+				break;
+#endif /* CONFIG_SYNO_ISCSI_DEVICE */
+			case SYNO_DISK_USB:
+				ida_remove(&usb_index_ida, sdkp->synoindex);
+				break;
+			case SYNO_DISK_SAS:
+				ida_remove(&sas_index_ida, sdkp->synoindex);
+				break;
+			default:
+				break;
+		}
+	}
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
 	spin_unlock(&sd_index_lock);
 
 	disk->private_data = NULL;
@@ -3142,6 +3967,10 @@ static int __init init_sd(void)
 		if (register_blkdev(sd_major(i), "sd") == 0)
 			majors++;
 
+#ifdef CONFIG_SYNO_BADSECTOR_TEST
+	gBadSectorTest = 0;
+#endif /* CONFIG_SYNO_BADSECTOR_TEST */
+
 	if (!majors)
 		return -ENODEV;
 
@@ -3221,3 +4050,308 @@ static void sd_print_result(struct scsi_disk *sdkp, int result)
 	scsi_show_result(result);
 }
 
+#ifdef CONFIG_SYNO_SCSI_DEVICE_INDEX
+int SynoSCSIGetDeviceIndex(struct block_device *bdev)
+{
+	struct gendisk *disk = NULL;
+
+	BUG_ON(bdev == NULL);
+	disk = bdev->bd_disk;
+
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+	if (g_is_sas_model) {
+		return container_of(disk->private_data, struct scsi_disk, driver)->synoindex;
+	}
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+	return container_of(disk->private_data, struct scsi_disk, driver)->index;
+}
+EXPORT_SYMBOL(SynoSCSIGetDeviceIndex);
+#endif /* CONFIG_SYNO_SCSI_DEVICE_INDEX */
+
+#if defined(CONFIG_SYNO_MD_EIO_NODEV_HANDLER) || defined(CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP)
+/**
+ * Please modify this when SCSI_DISK* is bigger than 15 when
+ * porting kernel
+ *
+ * @param major_idx
+ *
+ * @return unsigned char
+ */
+static unsigned char
+blIsScsiDevice(int major)
+{
+	unsigned char ret = 0;
+
+	switch (major) {
+	case SCSI_DISK0_MAJOR:
+	case SCSI_DISK1_MAJOR ... SCSI_DISK7_MAJOR:
+	case SCSI_DISK8_MAJOR ... SCSI_DISK15_MAJOR:
+		ret = 1;
+		break;
+	default:
+		break;
+	}
+
+	return ret;
+}
+#endif /* defined(CONFIG_SYNO_MD_EIO_NODEV_HANDLER) || defined(CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP) */
+
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+int
+IsDeviceDisappear(struct block_device *bdev)
+{
+	struct gendisk *disk = NULL;
+	struct scsi_disk *sdkp;
+	int ret = 0;
+
+	if (!bdev) {
+		WARN_ON(bdev == NULL);
+		goto END;
+	}
+
+	disk = bdev->bd_disk;
+	if (!disk) {
+		WARN_ON(disk == NULL);
+		goto END;
+	}
+
+	if (!blIsScsiDevice(disk->major)) {
+		/* Only work for scsi disk */
+		printk("This is not a kind of scsi disk %d\n", disk->major);
+		goto END;
+	}
+
+	/* is whole disk */
+	sdkp = container_of(disk->private_data, struct scsi_disk, driver);
+	if (!sdkp) {
+		WARN_ON(!sdkp);
+		goto END;
+	}
+
+	switch (sdkp->device->sdev_state) {
+	case SDEV_OFFLINE:
+	case SDEV_DEL:
+	case SDEV_CANCEL:
+		ret = 1;
+		break;
+	default:
+		break;
+	}
+
+END:
+	return ret;
+}
+
+EXPORT_SYMBOL(IsDeviceDisappear);
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+
+#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
+/**
+ * Set the partition to specify remap mode
+ *
+ * @param gd     [IN] general disk. Should not be NULL
+ * @param phd    [IN] partition. Should not be NULL
+ * @param blAutoRemap
+ *               [IN] remap mode
+ */
+void
+PartitionRemapModeSet(struct gendisk *gd,
+					  struct hd_struct *phd,
+					  unsigned char blAutoRemap)
+{
+	struct scsi_disk *sdkp;
+	struct scsi_device *sdev;
+
+	if (!gd || !phd) {
+		goto END;
+	}
+
+	phd->auto_remap = blAutoRemap;
+	if (!blAutoRemap) {
+		if (!blIsScsiDevice(gd->major)) {
+			/* Only work for scsi disk */
+			printk("This is not a kind of scsi disk %d\n", gd->major);
+			goto END;
+		}
+
+		sdkp = container_of(gd->private_data, struct scsi_disk, driver);
+		if (!sdkp) {
+			printk(" sdkp is NULL\n");
+			goto END;
+		}
+
+		sdev = sdkp->device;
+		if(!sdev) {
+			printk(" sdev is NULL\n");
+			goto END;
+		}
+		sdev->auto_remap = 0;
+	}
+END:
+	return;
+}
+
+/**
+ * Set the scsi device to specift remap mode.
+ *
+ * And also set the relative partition to that mode.
+ *
+ * @param sdev   [IN] scsi devide. Should not be NULL.
+ * @param blAutoRemap
+ *               [IN] auto remap mode.
+ */
+void
+ScsiRemapModeSet(struct scsi_device *sdev,
+				 unsigned char blAutoRemap)
+{
+	struct scsi_disk *sdkp;
+	struct gendisk *gd;
+	struct hd_struct *phd;
+	int i = 0;
+
+	if (!sdev) {
+		goto END;
+	}
+
+	if (TYPE_DISK != sdev->type) {
+		printk("Only support scsi disk\n");
+		goto END;
+	}
+
+	sdev->auto_remap = blAutoRemap;
+	sdkp = dev_get_drvdata(&sdev->sdev_gendev);
+	if (!sdkp) {
+		goto END;
+	}
+
+	gd = sdkp->disk;
+	if (!gd) {
+		goto END;
+	}
+
+	/* disk part */
+	for (i = 0; i < gd->minors; i++) {
+		phd = disk_get_part(gd, i+1);
+		if (!phd || !phd->nr_sects)
+			continue;
+
+		phd->auto_remap = blAutoRemap;
+	}
+END:
+	return;
+}
+
+/**
+ * Set the block device to specify remap mode
+ *
+ * @param bdev   [IN] block device. Should not be NULL.
+ * @param blAutoRemap
+ *               [IN] remap mode
+ */
+void
+RaidRemapModeSet(struct block_device *bdev, unsigned char blAutoRemap)
+{
+	struct gendisk *disk = NULL;
+	struct scsi_disk *sdkp;
+
+	if (!bdev) {
+		WARN_ON(bdev == NULL);
+		return;
+	}
+
+	disk = bdev->bd_disk;
+	if (!disk) {
+		WARN_ON(disk == NULL);
+		return;
+	}
+
+	if (!blIsScsiDevice(disk->major)) {
+		/* Only work for scsi disk */
+		printk("This is not a kind of scsi disk %d\n", disk->major);
+		return;
+	}
+
+	if (bdev->bd_part) {
+		/* is a partition of some disks */
+		bdev->bd_part->auto_remap = blAutoRemap;
+	} else {
+		/* is whole disk */
+		sdkp = container_of(disk->private_data, struct scsi_disk, driver);
+		if (!sdkp) {
+			WARN_ON(!sdkp);
+			return;
+		}
+		ScsiRemapModeSet(sdkp->device, blAutoRemap);
+	}
+}
+
+unsigned char
+blSectorNeedAutoRemap(struct scsi_cmnd *scsi_cmd,
+					  sector_t lba)
+{
+	struct scsi_device *sdev;
+	struct scsi_disk *sdkp;
+	struct gendisk *gd;
+	struct hd_struct *phd;
+	char szName[BDEVNAME_SIZE];
+	sector_t start, end;
+	u8 ret = 0;
+	int i = 0;
+
+	if (!scsi_cmd) {
+		WARN_ON(1);
+		goto END;
+	}
+
+	sdev = scsi_cmd->device;
+	if (!sdev) {
+		WARN_ON(1);
+		goto END;
+	}
+
+	if (TYPE_DISK != sdev->type) {
+		printk("Only support scsi disk\n");
+		goto END;
+	}
+
+	/* global disk auto remap */
+	if (sdev->auto_remap) {
+		ret = 1;
+		printk("%s auto remap is on\n", dev_name(&sdev->sdev_gendev));
+		goto END;
+	}
+
+	sdkp = dev_get_drvdata(&sdev->sdev_gendev);
+	if (!sdkp) {
+		goto END;
+	}
+
+	gd = sdkp->disk;
+	if (!gd) {
+		goto END;
+	}
+
+	/* disk part */
+	for (i = 0; i < gd->minors; i++) {
+		phd = disk_get_part(gd, i+1);
+		if (!phd || !phd->nr_sects)
+			continue;
+
+		start = phd->start_sect;
+		end = phd->nr_sects + start - 1;
+
+		if (lba >= start && lba <= end) {
+			printk("lba %llu start %llu end %llu\n", (unsigned long long)lba, (unsigned long long)start, (unsigned long long)end);
+			ret = phd->auto_remap;
+			printk("%s auto_remap %u\n", disk_name(gd, i+1, szName), phd->auto_remap);
+		}
+	}
+END:
+	return ret;
+}
+
+EXPORT_SYMBOL(blSectorNeedAutoRemap);
+EXPORT_SYMBOL(RaidRemapModeSet);
+EXPORT_SYMBOL(ScsiRemapModeSet);
+EXPORT_SYMBOL(PartitionRemapModeSet);
+#endif /* CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP */

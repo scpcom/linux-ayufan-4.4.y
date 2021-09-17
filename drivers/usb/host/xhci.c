@@ -500,7 +500,6 @@ static int xhci_all_ports_seen_u0(struct xhci_hcd *xhci)
 	return (xhci->port_status_u0 == ((1 << xhci->num_usb3_ports)-1));
 }
 
-
 /*
  * Initialize memory for HCD and xHC (one-time init).
  *
@@ -534,7 +533,6 @@ int xhci_init(struct usb_hcd *hcd)
 }
 
 /*-------------------------------------------------------------------------*/
-
 
 #ifdef CONFIG_USB_XHCI_HCD_DEBUGGING
 static void xhci_event_ring_work(unsigned long arg)
@@ -587,6 +585,15 @@ static void xhci_event_ring_work(unsigned long arg)
 }
 #endif
 
+#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+extern int gSynoFactoryUSB3Disable;
+#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+
+#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+extern int gSynoFactoryUSBFastReset;
+extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
+#endif /* CONFIG_SYNO_FACTORY_USB_FAST_RESET */
+
 static int xhci_run_finished(struct xhci_hcd *xhci)
 {
 	if (xhci_start(xhci)) {
@@ -600,6 +607,20 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 		xhci_ring_cmd_db(xhci);
 
 	xhci_dbg(xhci, "Finished xhci_run for USB3 roothub\n");
+
+#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+	if (1 == gSynoFactoryUSB3Disable) {
+		printk("xhci USB3 ports are disabled!\n");
+	}
+#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+
+#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+	if (1 == gSynoFactoryUSBFastReset) {
+		printk("USB_FAST_RESET enabled!\n");
+		blk_timeout_factory = 1;
+	}
+#endif
+
 	return 0;
 }
 
@@ -762,6 +783,13 @@ void xhci_stop(struct usb_hcd *hcd)
 	xhci_mem_cleanup(xhci);
 	xhci_dbg(xhci, "xhci_stop completed - status = %x\n",
 		    xhci_readl(xhci, &xhci->op_regs->status));
+
+#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+	if (1 == gSynoFactoryUSBFastReset) {
+		printk("USB_FAST_RESET disabled!\n");
+		blk_timeout_factory = 0;
+	}
+#endif
 }
 
 /*
@@ -2549,7 +2577,6 @@ static int xhci_reserve_bandwidth(struct xhci_hcd *xhci,
 	return -ENOMEM;
 }
 
-
 /* Issue a configure endpoint command or evaluate context command
  * and wait for it to finish.
  */
@@ -3576,7 +3603,6 @@ static int xhci_reserve_host_control_ep_resources(struct xhci_hcd *xhci)
 			xhci->num_active_eps);
 	return 0;
 }
-
 
 /*
  * Returns 0 if the xHC ran out of device slots, the Enable Slot command

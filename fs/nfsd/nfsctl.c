@@ -49,6 +49,12 @@ enum {
 	NFSD_Gracetime,
 	NFSD_RecoveryDir,
 #endif
+#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+	NFSD_UDP_Size,
+#endif /*CONFIG_SYNO_NFSD_UDP_PACKET*/
+#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+	NFSD_UNIX_PRI,
+#endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
 };
 
 /*
@@ -67,6 +73,12 @@ static ssize_t write_leasetime(struct file *file, char *buf, size_t size);
 static ssize_t write_gracetime(struct file *file, char *buf, size_t size);
 static ssize_t write_recoverydir(struct file *file, char *buf, size_t size);
 #endif
+#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+static ssize_t write_udp_size(struct file *file, char *buf, size_t size);
+#endif /*CONFIG_SYNO_NFSD_UDP_PACKET*/
+#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+static ssize_t write_unix_enable(struct file *file, char *buf, size_t size);
+#endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
 
 static ssize_t (*write_op[])(struct file *, char *, size_t) = {
 	[NFSD_Fh] = write_filehandle,
@@ -82,6 +94,12 @@ static ssize_t (*write_op[])(struct file *, char *, size_t) = {
 	[NFSD_Gracetime] = write_gracetime,
 	[NFSD_RecoveryDir] = write_recoverydir,
 #endif
+#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+	[NFSD_UDP_Size] = write_udp_size,
+#endif /*CONFIG_SYNO_NFSD_UDP_PACKET*/
+#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+	[NFSD_UNIX_PRI] = write_unix_enable,
+#endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
 };
 
 static ssize_t nfsctl_transaction_write(struct file *file, const char __user *buf, size_t size, loff_t *pos)
@@ -224,7 +242,6 @@ static struct file_operations reply_cache_stats_operations = {
 /*
  * payload - write methods
  */
-
 
 /**
  * write_unlock_ip - Release all locks used by a client
@@ -530,6 +547,81 @@ out_free:
 	return rv;
 }
 
+#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+u32 nfs_udp_f_rtpref;
+u32 nfs_udp_f_wtpref;
+
+static ssize_t write_udp_size(struct file *file, char *buf, size_t size)
+{
+	int err = 0;
+	u32 preferReadSize = CONFIG_SYNO_NFSD_UDP_DEF_PACKET_SIZE;
+	u32 preferWriteSize = CONFIG_SYNO_NFSD_UDP_DEF_PACKET_SIZE;
+
+	if (0 == size) {
+		goto End;
+	}
+
+	// use sscanf to get read and write size
+	if (2 != sscanf(buf, "%u %u", &preferReadSize, &preferWriteSize)) {
+		err = -EINVAL;
+		goto End;
+	}
+
+	// make sure the packet size is on the range we want
+	if (CONFIG_SYNO_NFSD_UDP_MIN_PACKET_SIZE > preferReadSize || CONFIG_SYNO_NFSD_UDP_MAX_PACKET_SIZE < preferReadSize ||
+		CONFIG_SYNO_NFSD_UDP_MIN_PACKET_SIZE > preferWriteSize || CONFIG_SYNO_NFSD_UDP_MAX_PACKET_SIZE < preferWriteSize) {
+		err = -EINVAL;
+		goto End;
+	}
+
+	nfs_udp_f_rtpref = preferReadSize;
+	nfs_udp_f_wtpref = preferWriteSize;
+
+End:
+	if (err) {
+		return err;
+	} else {
+		return scnprintf(buf, SIMPLE_TRANSACTION_LIMIT, "rsize=%d,wsize=%d\n", nfs_udp_f_rtpref, nfs_udp_f_wtpref);
+	}
+}
+#endif /*CONFIG_SYNO_NFSD_UDP_PACKET*/
+
+#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+u32 bl_unix_pri_enable;
+
+static ssize_t write_unix_enable(struct file *file, char *buf, size_t size)
+{
+	int err = 0;
+	u32 bl_tmp_unix_pri_enable;
+
+	if (0 == size) {
+		goto End;
+	}
+
+	// use sscanf to get if unix privilege enable
+	if (1 != sscanf(buf, "%u", &bl_tmp_unix_pri_enable)) {
+		err = -EINVAL;
+		printk("NFSD error wrong format of unix_pri_enable in /proc");
+		goto End;
+	}
+
+	// check if value valid
+	if (0 != bl_tmp_unix_pri_enable && 1 != bl_tmp_unix_pri_enable) {
+		err = -EINVAL;
+		printk("NFSD error wrong value of unix_pri_enable in /proc %u", bl_unix_pri_enable);
+		goto End;
+	}
+
+	bl_unix_pri_enable = bl_tmp_unix_pri_enable;
+End:
+	if (err) {
+		return err;
+	} else {
+		return scnprintf(buf, SIMPLE_TRANSACTION_LIMIT, "%u\n", bl_unix_pri_enable);
+	}
+}
+#endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
+
 static ssize_t __write_versions(struct file *file, char *buf, size_t size)
 {
 	char *mesg = buf;
@@ -828,7 +920,6 @@ static ssize_t write_ports(struct file *file, char *buf, size_t size)
 	return rv;
 }
 
-
 int nfsd_max_blksize;
 
 /**
@@ -1067,6 +1158,12 @@ static int nfsd_fill_super(struct super_block * sb, void * data, int silent)
 		[NFSD_Gracetime] = {"nfsv4gracetime", &transaction_ops, S_IWUSR|S_IRUSR},
 		[NFSD_RecoveryDir] = {"nfsv4recoverydir", &transaction_ops, S_IWUSR|S_IRUSR},
 #endif
+#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+		[NFSD_UDP_Size] = {"udppacketsize", &transaction_ops, S_IWUSR|S_IRUGO},
+#endif /* CONFIG_SYNO_NFSD_UDP_PACKET */
+#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+		[NFSD_UNIX_PRI] = {"unix_privilege_enable", &transaction_ops, S_IWUSR|S_IRUGO},
+#endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
 		/* last one */ {""}
 	};
 	struct net *net = data;
@@ -1164,6 +1261,15 @@ static int __init init_nfsd(void)
 {
 	int retval;
 	printk(KERN_INFO "Installing knfsd (copyright (C) 1996 okir@monad.swb.de).\n");
+
+#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+	/*initial default udp packet size*/
+	nfs_udp_f_rtpref = CONFIG_SYNO_NFSD_UDP_DEF_PACKET_SIZE;
+	nfs_udp_f_wtpref = CONFIG_SYNO_NFSD_UDP_DEF_PACKET_SIZE;
+#endif /*CONFIG_SYNO_NFSD_UDP_PACKET*/
+#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+	bl_unix_pri_enable = 1;
+#endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
 
 	retval = register_cld_notifier();
 	if (retval)

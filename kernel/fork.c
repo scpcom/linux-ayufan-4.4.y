@@ -417,7 +417,11 @@ static int dup_mmap(struct mm_struct *mm, struct mm_struct *oldmm)
 			struct inode *inode = file_inode(file);
 			struct address_space *mapping = file->f_mapping;
 
+#ifdef CONFIG_AUFS_FHSM
+			vma_get_file(tmp);
+#else
 			get_file(file);
+#endif /* CONFIG_AUFS_FHSM */
 			if (tmp->vm_flags & VM_DENYWRITE)
 				atomic_dec(&inode->i_writecount);
 			mutex_lock(&mapping->i_mmap_mutex);
@@ -685,6 +689,29 @@ struct mm_struct *get_task_mm(struct task_struct *task)
 	return mm;
 }
 EXPORT_SYMBOL_GPL(get_task_mm);
+
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+struct mm_struct *syno_get_task_mm(struct task_struct *task)
+{
+	struct mm_struct *mm;
+
+	task_lock(task);
+	mm = task->mm;
+	if (mm) {
+		atomic_inc(&mm->mm_users);
+	}else{
+		mm = task->active_mm;
+		if(mm) {
+			atomic_inc(&mm->mm_users);
+		}else{
+			mm = NULL;
+		}
+	}
+	task_unlock(task);
+	return mm;
+}
+EXPORT_SYMBOL_GPL(syno_get_task_mm);
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
 
 struct mm_struct *mm_access(struct task_struct *task, unsigned int mode)
 {
@@ -1006,7 +1033,6 @@ void __cleanup_sighand(struct sighand_struct *sighand)
 		kmem_cache_free(sighand_cachep, sighand);
 	}
 }
-
 
 /*
  * Initialize POSIX timer handling for a thread group.

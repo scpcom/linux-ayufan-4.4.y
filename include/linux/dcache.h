@@ -151,6 +151,10 @@ struct dentry_operations {
 	int (*d_compare)(const struct dentry *, const struct inode *,
 			const struct dentry *, const struct inode *,
 			unsigned int, const char *, const struct qstr *);
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+	int (*d_compare_case)(const struct dentry *, unsigned int, const char *,
+			const struct qstr *, int caseless);
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
 	int (*d_delete)(const struct dentry *);
 	void (*d_release)(struct dentry *);
 	void (*d_prune)(struct dentry *);
@@ -210,12 +214,25 @@ struct dentry_operations {
 
 #define DCACHE_DENTRY_KILLED	0x100000
 
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#define DCACHE_OP_COMPARE_CASE	0x10000000
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+
+#ifdef CONFIG_SYNO_ECRYPTFS_FILENAME_SYSCALL
+#define DCACHE_ECRYPTFS_DECRYPT 0x20000000
+#endif
+
 extern seqlock_t rename_lock;
 
 static inline int dname_external(struct dentry *dentry)
 {
 	return dentry->d_name.name != dentry->d_iname;
 }
+
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+extern inline int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount);
+extern inline int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount);
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
 
 /*
  * These are the low-level FS interfaces to the dcache..
@@ -298,10 +315,18 @@ extern struct dentry *d_ancestor(struct dentry *, struct dentry *);
 /* appendix may either be NULL or be used for transname suffixes */
 extern struct dentry *d_lookup(const struct dentry *, const struct qstr *);
 extern struct dentry *d_hash_and_lookup(struct dentry *, struct qstr *);
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+extern struct dentry *d_lookup_case(struct dentry *, struct qstr *, int caseless);
+extern struct dentry *__d_lookup(const struct dentry *, const struct qstr *, int caseless);
+extern struct dentry *__d_lookup_rcu(const struct dentry *parent,
+				const struct qstr *name,
+				unsigned *seq, struct inode *inode, int caseless);
+#else
 extern struct dentry *__d_lookup(const struct dentry *, const struct qstr *);
 extern struct dentry *__d_lookup_rcu(const struct dentry *parent,
 				const struct qstr *name,
 				unsigned *seq, struct inode *inode);
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
 
 /**
  * __d_rcu_to_refcount - take a refcount on dentry if sequence check is ok

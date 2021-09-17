@@ -255,7 +255,6 @@ static int proc_pid_auxv(struct task_struct *task, char *buffer)
 	return res;
 }
 
-
 #ifdef CONFIG_KALLSYMS
 /*
  * Provides a wchan file via kallsyms in a proper one-value-per-file format.
@@ -595,7 +594,6 @@ static bool has_pid_permissions(struct pid_namespace *pid,
 	return ptrace_may_access(task, PTRACE_MODE_READ);
 }
 
-
 static int proc_pid_permission(struct inode *inode, int mask)
 {
 	struct pid_namespace *pid = inode->i_sb->s_fs_info;
@@ -623,8 +621,6 @@ static int proc_pid_permission(struct inode *inode, int mask)
 	}
 	return generic_permission(inode, mask);
 }
-
-
 
 static const struct inode_operations proc_def_inode_operations = {
 	.setattr	= proc_setattr,
@@ -1246,7 +1242,6 @@ static const struct file_operations proc_fault_inject_operations = {
 };
 #endif
 
-
 #ifdef CONFIG_SCHED_DEBUG
 /*
  * Print out various scheduling related per-task fields:
@@ -1523,7 +1518,6 @@ const struct inode_operations proc_pid_link_inode_operations = {
 	.follow_link	= proc_pid_follow_link,
 	.setattr	= proc_setattr,
 };
-
 
 /* building an inode */
 
@@ -1829,7 +1823,11 @@ static int proc_map_files_get_link(struct dentry *dentry, struct path *path)
 	down_read(&mm->mmap_sem);
 	vma = find_exact_vma(mm, vm_start, vm_end);
 	if (vma && vma->vm_file) {
+#ifdef CONFIG_AUFS_FHSM
+		*path = vma_pr_or_file(vma)->f_path;
+#else
 		*path = vma->vm_file->f_path;
+#endif /* CONFIG_AUFS_FHSM */
 		path_get(path);
 		rc = 0;
 	}

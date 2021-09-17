@@ -171,7 +171,11 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 	if (!ses->need_reconnect && !tcon->need_reconnect)
 		return 0;
 
+#ifdef CONFIG_SYNO_CIFS_TCON_RECONNECT_CODEPAGE_UTF8
+	nls_codepage = load_nls("utf8");
+#else
 	nls_codepage = load_nls_default();
+#endif /* CONFIG_SYNO_CIFS_TCON_RECONNECT_CODEPAGE_UTF8 */
 
 	/*
 	 * need to prevent multiple threads trying to simultaneously
@@ -498,7 +502,6 @@ CIFSSMBNegotiate(const unsigned int xid, struct cifs_ses *ses)
 			server->timeAdj *= 60; /* also in seconds */
 		}
 		cifs_dbg(FYI, "server->timeAdj: %d seconds\n", server->timeAdj);
-
 
 		/* BB get server time for time conversions and add
 		code to use it and timezone since this is not UTC */
@@ -1336,7 +1339,11 @@ openRetry:
 	/* XP does not handle ATTR_POSIX_SEMANTICS */
 	/* but it helps speed up case sensitive checks for other
 	servers such as Samba */
+#ifdef CONFIG_SYNO_CIFS_MOUNT_CASELESS
+	if (tcon->ses->capabilities & CAP_UNIX && SynoPosixSemanticsEnabled)
+#else
 	if (tcon->ses->capabilities & CAP_UNIX)
+#endif /* CONFIG_SYNO_CIFS_MOUNT_CASELESS */
 		pSMB->FileAttributes |= cpu_to_le32(ATTR_POSIX_SEMANTICS);
 
 	if (create_options & CREATE_OPTION_READONLY)
@@ -1742,7 +1749,6 @@ CIFSSMBRead(const unsigned int xid, struct cifs_io_parms *io_parms,
 		since file handle passed in no longer valid */
 	return rc;
 }
-
 
 int
 CIFSSMBWrite(const unsigned int xid, struct cifs_io_parms *io_parms,
@@ -2175,7 +2181,6 @@ CIFSSMBWrite2(const unsigned int xid, struct cifs_io_parms *io_parms,
 	else /* wct == 12 pad bigger by four bytes */
 		iov[0].iov_len = smb_hdr_len + 8;
 
-
 	rc = SendReceive2(xid, tcon->ses, iov, n_vec + 1, &resp_buf_type, 0);
 	cifs_stats_inc(&tcon->stats.cifs_stats.num_writes);
 	if (rc) {
@@ -2457,7 +2462,6 @@ plk_err_exit:
 
 	return rc;
 }
-
 
 int
 CIFSSMBClose(const unsigned int xid, struct cifs_tcon *tcon, int smb_file_id)
@@ -5227,7 +5231,6 @@ QFSUnixRetry:
 	if (rc == -EAGAIN)
 		goto QFSUnixRetry;
 
-
 	return rc;
 }
 
@@ -5302,8 +5305,6 @@ SETFSUnixRetry:
 
 	return rc;
 }
-
-
 
 int
 CIFSSMBQFSPosixInfo(const unsigned int xid, struct cifs_tcon *tcon,
@@ -5390,7 +5391,6 @@ QFSPosixRetry:
 
 	return rc;
 }
-
 
 /*
  * We can not use write of zero bytes trick to set file size due to need for
@@ -6092,7 +6092,6 @@ QAllEAsRetry:
 		cifs_dbg(FYI, "Send error in QueryAllEAs = %d\n", rc);
 		goto QAllEAsOut;
 	}
-
 
 	/* BB also check enough total bytes returned */
 	/* BB we need to improve the validity checking

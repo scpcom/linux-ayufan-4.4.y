@@ -126,6 +126,9 @@ struct hd_struct {
 #endif
 	atomic_t ref;
 	struct rcu_head rcu_head;
+#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
+	unsigned auto_remap;
+#endif /* CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP */
 };
 
 #define GENHD_FL_REMOVABLE			1
@@ -200,6 +203,9 @@ struct gendisk {
 	struct blk_integrity *integrity;
 #endif
 	int node_id;
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+	int systemDisk;
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
 };
 
 static inline struct gendisk *part_to_disk(struct hd_struct *part)

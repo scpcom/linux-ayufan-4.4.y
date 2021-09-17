@@ -128,7 +128,6 @@ static int __init init_zero_pfn(void)
 }
 core_initcall(init_zero_pfn);
 
-
 #if defined(SPLIT_RSS_COUNTING)
 
 void sync_mm_rss(struct mm_struct *mm)
@@ -1313,7 +1312,6 @@ static void unmap_page_range(struct mmu_gather *tlb,
 	tlb_end_vma(tlb, vma);
 	mem_cgroup_uncharge_end();
 }
-
 
 static void unmap_single_vma(struct mmu_gather *tlb,
 		struct vm_area_struct *vma, unsigned long start_addr,
@@ -2753,7 +2751,11 @@ reuse:
 			set_page_dirty_balance(dirty_page, page_mkwrite);
 			/* file_update_time outside page_lock */
 			if (vma->vm_file)
+#ifdef CONFIG_AUFS_FHSM
+				vma_file_update_time(vma);
+#else
 				file_update_time(vma->vm_file);
+#endif /* CONFIG_AUFS_FHSM */
 		}
 		put_page(dirty_page);
 		if (page_mkwrite) {
@@ -2981,7 +2983,6 @@ void unmap_mapping_range(struct address_space *mapping,
 	details.last_index = hba + hlen - 1;
 	if (details.last_index < details.first_index)
 		details.last_index = ULONG_MAX;
-
 
 	mutex_lock(&mapping->i_mmap_mutex);
 	if (unlikely(!RB_EMPTY_ROOT(&mapping->i_mmap)))
@@ -3460,7 +3461,11 @@ static int __do_fault(struct mm_struct *mm, struct vm_area_struct *vma,
 
 		/* file_update_time outside page_lock */
 		if (vma->vm_file && !page_mkwrite)
+#ifdef CONFIG_AUFS_FHSM
+			vma_file_update_time(vma);
+#else
 			file_update_time(vma->vm_file);
+#endif /* CONFIG_AUFS_FHSM */
 	} else {
 		unlock_page(vmf.page);
 		if (anon)
@@ -4294,3 +4299,69 @@ void copy_user_huge_page(struct page *dst, struct page *src,
 	}
 }
 #endif /* CONFIG_TRANSPARENT_HUGEPAGE || CONFIG_HUGETLBFS */
+
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+extern struct mm_struct *syno_get_task_mm(struct task_struct *task);
+int syno_access_process_vm(struct task_struct *tsk, unsigned long addr, void *buf, int len, int write)
+{
+	struct mm_struct *mm;
+	struct vm_area_struct *vma;
+	void *old_buf = buf;
+
+	mm = syno_get_task_mm(tsk);
+	if (!mm)
+		return 0;
+
+	down_read(&mm->mmap_sem);
+	/* ignore errors, just check how much was successfully transferred */
+	while (len) {
+		int bytes, ret, offset;
+		void *maddr;
+		struct page *page = NULL;
+
+		ret = get_user_pages(tsk, mm, addr, 1,
+				write, 1, &page, &vma);
+		if (ret <= 0) {
+			/*
+			 * Check if this is a VM_IO | VM_PFNMAP VMA, which
+			 * we can access using slightly different code.
+			 */
+#ifdef CONFIG_HAVE_IOREMAP_PROT
+			vma = find_vma(mm, addr);
+			if (!vma)
+				break;
+			if (vma->vm_ops && vma->vm_ops->access)
+				ret = vma->vm_ops->access(vma, addr, buf,
+							  len, write);
+			if (ret <= 0)
+#endif
+				break;
+			bytes = ret;
+		} else {
+			bytes = len;
+			offset = addr & (PAGE_SIZE-1);
+			if (bytes > PAGE_SIZE-offset)
+				bytes = PAGE_SIZE-offset;
+
+			maddr = kmap(page);
+			if (write) {
+				copy_to_user_page(vma, page, addr,
+						  maddr + offset, buf, bytes);
+				set_page_dirty_lock(page);
+			} else {
+				copy_from_user_page(vma, page, addr,
+						    buf, maddr + offset, bytes);
+			}
+			kunmap(page);
+			page_cache_release(page);
+		}
+		len -= bytes;
+		buf += bytes;
+		addr += bytes;
+	}
+	up_read(&mm->mmap_sem);
+	mmput(mm);
+
+	return buf - old_buf;
+}
+#endif /* CONFIG_SYNO_DEBUG_FLAG */

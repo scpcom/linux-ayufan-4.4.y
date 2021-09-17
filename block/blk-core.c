@@ -38,6 +38,11 @@
 #include "blk.h"
 #include "blk-cgroup.h"
 
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+#include <linux/synolib.h>
+extern int syno_hibernation_log_level;
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+
 EXPORT_TRACEPOINT_SYMBOL_GPL(block_bio_remap);
 EXPORT_TRACEPOINT_SYMBOL_GPL(block_rq_remap);
 EXPORT_TRACEPOINT_SYMBOL_GPL(block_bio_complete);
@@ -1605,13 +1610,18 @@ static inline void blk_partition_remap(struct bio *bio)
 static void handle_bad_sector(struct bio *bio)
 {
 	char b[BDEVNAME_SIZE];
-
+#ifdef CONFIG_SYNO_BLOCK_LIMIT_BAD_SECTOR_MSG
+    if (printk_ratelimit()) {
+#endif /* CONFIG_SYNO_BLOCK_LIMIT_BAD_SECTOR_MSG */
 	printk(KERN_INFO "attempt to access beyond end of device\n");
 	printk(KERN_INFO "%s: rw=%ld, want=%Lu, limit=%Lu\n",
 			bdevname(bio->bi_bdev, b),
 			bio->bi_rw,
 			(unsigned long long)bio_end_sector(bio),
 			(long long)(i_size_read(bio->bi_bdev->bd_inode) >> 9));
+#ifdef CONFIG_SYNO_BLOCK_LIMIT_BAD_SECTOR_MSG
+    }
+#endif /* CONFIG_SYNO_BLOCK_LIMIT_BAD_SECTOR_MSG */
 
 	set_bit(BIO_EOF, &bio->bi_flags);
 }
@@ -1888,6 +1898,14 @@ void submit_bio(int rw, struct bio *bio)
 				bdevname(bio->bi_bdev, b),
 				count);
 		}
+
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+		if(syno_hibernation_log_level > 0) {
+			char b[BDEVNAME_SIZE];
+			syno_do_hibernation_bio_log(bdevname(bio->bi_bdev, b));
+		}
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+
 	}
 
 	generic_make_request(bio);
@@ -2331,10 +2349,16 @@ bool blk_update_request(struct request *req, int error, unsigned int nr_bytes)
 			error_type = "I/O";
 			break;
 		}
+#ifdef CONFIG_SYNO_IO_ERROR_LIMIT_MSG
+		if (printk_ratelimit()) {
+#endif /* CONFIG_SYNO_IO_ERROR_LIMIT_MSG */
 		printk_ratelimited(KERN_ERR "end_request: %s error, dev %s, sector %llu\n",
 				   error_type, req->rq_disk ?
 				   req->rq_disk->disk_name : "?",
 				   (unsigned long long)blk_rq_pos(req));
+#ifdef CONFIG_SYNO_IO_ERROR_LIMIT_MSG
+		}
+#endif /* CONFIG_SYNO_IO_ERROR_LIMIT_MSG */
 
 	}
 
@@ -2454,7 +2478,6 @@ static void blk_finish_request(struct request *req, int error)
 
 	if (req->cmd_flags & REQ_DONTPREP)
 		blk_unprep_request(req);
-
 
 	blk_account_io_done(req);
 
@@ -3183,6 +3206,19 @@ void blk_post_runtime_resume(struct request_queue *q, int err)
 }
 EXPORT_SYMBOL(blk_post_runtime_resume);
 #endif
+#ifdef CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+void syno_flashcache_return_error(struct bio *bio)
+{
+	/* defined in blk_types.h */
+	if (bio_flagged(bio, BIO_MD_RETURN_ERROR)) {
+		printk(KERN_DEBUG "Get flashcache access md error, return error code\n");
+		bio_endio(bio, 1);
+	} else {
+		bio_endio(bio, 0);
+	}
+}
+EXPORT_SYMBOL(syno_flashcache_return_error);
+#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
 
 int __init blk_dev_init(void)
 {

@@ -57,6 +57,9 @@ int cifsFYI = 0;
 int traceSMB = 0;
 bool enable_oplocks = true;
 unsigned int linuxExtEnabled = 1;
+#ifdef CONFIG_SYNO_CIFS_MOUNT_CASELESS
+unsigned int SynoPosixSemanticsEnabled = 1;
+#endif /* CONFIG_SYNO_CIFS_MOUNT_CASELESS */
 unsigned int lookupCacheEnabled = 1;
 unsigned int global_secflags = CIFSSEC_DEF;
 /* unsigned int ntlmv2_support = 0; */
@@ -492,7 +495,13 @@ static void cifs_umount_begin(struct super_block *sb)
 		   all waiting network requests, nothing to do */
 		spin_unlock(&cifs_tcp_ses_lock);
 		return;
+#ifdef CONFIG_SYNO_CIFS_FORCE_UMOUNT
+	// tcon->tc_count will always 1. Because it will re-use the exist tcon
+	// So we need to check the same value which is checked before kill_sb.
+	} else if (atomic_read(&sb->s_active) == 1)
+#else
 	} else if (tcon->tc_count == 1)
+#endif /* CONFIG_SYNO_CIFS_FORCE_UMOUNT */
 		tcon->tidStatus = CifsExiting;
 	spin_unlock(&cifs_tcp_ses_lock);
 

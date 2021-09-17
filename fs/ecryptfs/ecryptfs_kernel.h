@@ -40,6 +40,10 @@
 #include <linux/ecryptfs.h>
 #include <linux/crypto.h>
 
+#ifdef CONFIG_SYNO_ECRYPTFS_OCF
+#include <cryptodev.h>
+#endif /* CONFIG_SYNO_ECRYPTFS_OCF */
+
 #define ECRYPTFS_DEFAULT_IV_BYTES 16
 #define ECRYPTFS_DEFAULT_EXTENT_SIZE 4096
 #define ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE 8192
@@ -234,7 +238,11 @@ struct ecryptfs_crypt_stat {
 	size_t extent_shift;
 	unsigned int extent_mask;
 	struct ecryptfs_mount_crypt_stat *mount_crypt_stat;
+#ifdef CONFIG_SYNO_ECRYPTFS_OCF
+	struct cryptoini cr_dm; /* OCF session */
+#else /* CONFIG_SYNO_ECRYPTFS_OCF */
 	struct crypto_ablkcipher *tfm;
+#endif /* CONFIG_SYNO_ECRYPTFS_OCF */
 	struct crypto_hash *hash_tfm; /* Crypto context for generating
 				       * the initialization vectors */
 	unsigned char cipher[ECRYPTFS_MAX_CIPHER_NAME_SIZE];

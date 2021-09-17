@@ -86,7 +86,6 @@ int hfsplus_strcmp(const struct hfsplus_unistr *s1,
 	       len1 > len2 ? 1 : 0;
 }
 
-
 #define Hangul_SBase	0xac00
 #define Hangul_LBase	0x1100
 #define Hangul_VBase	0x1161
@@ -96,7 +95,6 @@ int hfsplus_strcmp(const struct hfsplus_unistr *s1,
 #define Hangul_VCount	21
 #define Hangul_TCount	28
 #define Hangul_NCount	(Hangul_VCount * Hangul_TCount)
-
 
 static u16 *hfsplus_compose_lookup(u16 *p, u16 cc)
 {
@@ -118,9 +116,30 @@ static u16 *hfsplus_compose_lookup(u16 *p, u16 cc)
 	return NULL;
 }
 
+#ifdef CONFIG_SYNO_HFSPLUS_EA
+static int hfsplus_uni2asc_ex(struct super_block *sb,
+		const struct hfsplus_unistr *ustr,
+		char *astr, int *len_p, int convert);
 int hfsplus_uni2asc(struct super_block *sb,
 		const struct hfsplus_unistr *ustr,
 		char *astr, int *len_p)
+{
+	return hfsplus_uni2asc_ex(sb, ustr, astr, len_p, 1);
+}
+int hfsplus_attr_uni2asc(struct super_block *sb,
+		const struct hfsplus_unistr *ustr,
+		char *astr, int *len_p)
+{
+	return hfsplus_uni2asc_ex(sb, ustr, astr, len_p, 0);
+}
+int hfsplus_uni2asc_ex(struct super_block *sb,
+		const struct hfsplus_unistr *ustr,
+		char *astr, int *len_p, int convert)
+#else
+int hfsplus_uni2asc(struct super_block *sb,
+		const struct hfsplus_unistr *ustr,
+		char *astr, int *len_p)
+#endif
 {
 	const hfsplus_unichr *ip;
 	struct nls_table *nls = HFSPLUS_SB(sb)->nls;
@@ -186,6 +205,9 @@ int hfsplus_uni2asc(struct super_block *sb,
 				c0 = 0x2400;
 				break;
 			case '/':
+#ifdef CONFIG_SYNO_HFSPLUS_EA
+				if (convert)
+#endif
 				c0 = ':';
 				break;
 			}
@@ -252,8 +274,20 @@ out:
  * Convert one or more ASCII characters into a single unicode character.
  * Returns the number of ASCII characters corresponding to the unicode char.
  */
+#ifdef CONFIG_SYNO_HFSPLUS_EA
+static inline int asc2unichar_ex(struct super_block *sb, const char *astr, int len,
+			      wchar_t *uc, int convert);
 static inline int asc2unichar(struct super_block *sb, const char *astr, int len,
 			      wchar_t *uc)
+{
+	return asc2unichar_ex(sb, astr, len, uc, 1);
+}
+static inline int asc2unichar_ex(struct super_block *sb, const char *astr, int len,
+			      wchar_t *uc, int convert)
+#else
+static inline int asc2unichar(struct super_block *sb, const char *astr, int len,
+			      wchar_t *uc)
+#endif
 {
 	int size = HFSPLUS_SB(sb)->nls->char2uni(astr, len, uc);
 	if (size <= 0) {
@@ -265,6 +299,9 @@ static inline int asc2unichar(struct super_block *sb, const char *astr, int len,
 		*uc = 0;
 		break;
 	case ':':
+#ifdef CONFIG_SYNO_HFSPLUS_EA
+		if (convert)
+#endif
 		*uc = '/';
 		break;
 	}
@@ -295,9 +332,30 @@ static inline u16 *decompose_unichar(wchar_t uc, int *size)
 	return hfsplus_decompose_table + (off / 4);
 }
 
+#ifdef CONFIG_SYNO_HFSPLUS_EA
+static int hfsplus_asc2uni_ex(struct super_block *sb,
+		    struct hfsplus_unistr *ustr, int max_unistr_len,
+		    const char *astr, int len, int convert);
 int hfsplus_asc2uni(struct super_block *sb,
 		    struct hfsplus_unistr *ustr, int max_unistr_len,
 		    const char *astr, int len)
+{
+	return hfsplus_asc2uni_ex(sb, ustr, max_unistr_len, astr, len, 1);
+}
+int hfsplus_attr_asc2uni(struct super_block *sb,
+		    struct hfsplus_unistr *ustr, int max_unistr_len,
+		    const char *astr, int len)
+{
+	return hfsplus_asc2uni_ex(sb, ustr, max_unistr_len, astr, len, 0);
+}
+static int hfsplus_asc2uni_ex(struct super_block *sb,
+		    struct hfsplus_unistr *ustr, int max_unistr_len,
+		    const char *astr, int len, int convert)
+#else
+int hfsplus_asc2uni(struct super_block *sb,
+		    struct hfsplus_unistr *ustr, int max_unistr_len,
+		    const char *astr, int len)
+#endif
 {
 	int size, dsize, decompose;
 	u16 *dstr, outlen = 0;
@@ -305,7 +363,11 @@ int hfsplus_asc2uni(struct super_block *sb,
 
 	decompose = !test_bit(HFSPLUS_SB_NODECOMPOSE, &HFSPLUS_SB(sb)->flags);
 	while (outlen < max_unistr_len && len > 0) {
+#ifdef CONFIG_SYNO_HFSPLUS_EA
+		size = asc2unichar_ex(sb, astr, len, &c, convert);
+#else
 		size = asc2unichar(sb, astr, len, &c);
+#endif
 
 		if (decompose)
 			dstr = decompose_unichar(c, &dsize);
@@ -468,5 +530,10 @@ int hfsplus_compare_dentry(const struct dentry *parent,
 		return -1;
 	if (len1 > len2)
 		return 1;
+#ifdef CONFIG_SYNO_HFSPLUS_CASELESS_CREATE_BY_NEW_NAME
+	if (casefold) {
+		strncpy((char *)str, name->name, len);
+	}
+#endif
 	return 0;
 }

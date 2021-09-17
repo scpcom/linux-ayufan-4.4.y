@@ -26,22 +26,8 @@
 #define KEYS_PER_NODE (NODE_SIZE / sizeof(sector_t))
 #define CHILDREN_PER_NODE (KEYS_PER_NODE + 1)
 
-/*
- * The table has always exactly one reference from either mapped_device->map
- * or hash_cell->new_map. This reference is not counted in table->holders.
- * A pair of dm_create_table/dm_destroy_table functions is used for table
- * creation/destruction.
- *
- * Temporary references from the other code increase table->holders. A pair
- * of dm_table_get/dm_table_put functions is used to manipulate it.
- *
- * When the table is about to be destroyed, we wait for table->holders to
- * drop to zero.
- */
-
 struct dm_table {
 	struct mapped_device *md;
-	atomic_t holders;
 	unsigned type;
 
 	/* btree table */
@@ -208,7 +194,6 @@ int dm_table_create(struct dm_table **result, fmode_t mode,
 
 	INIT_LIST_HEAD(&t->devices);
 	INIT_LIST_HEAD(&t->target_callbacks);
-	atomic_set(&t->holders, 0);
 
 	if (!num_targets)
 		num_targets = KEYS_PER_NODE;
@@ -251,10 +236,6 @@ void dm_table_destroy(struct dm_table *t)
 	if (!t)
 		return;
 
-	while (atomic_read(&t->holders))
-		msleep(1);
-	smp_mb();
-
 	/* free the indexes */
 	if (t->depth >= 2)
 		vfree(t->index[t->depth - 2]);
@@ -278,22 +259,6 @@ void dm_table_destroy(struct dm_table *t)
 
 	kfree(t);
 }
-
-void dm_table_get(struct dm_table *t)
-{
-	atomic_inc(&t->holders);
-}
-EXPORT_SYMBOL(dm_table_get);
-
-void dm_table_put(struct dm_table *t)
-{
-	if (!t)
-		return;
-
-	smp_mb__before_atomic_dec();
-	atomic_dec(&t->holders);
-}
-EXPORT_SYMBOL(dm_table_put);
 
 /*
  * Checks to see if we need to extend highs or targets.
@@ -516,6 +481,35 @@ int dm_get_device(struct dm_target *ti, const char *path, fmode_t mode,
 	return 0;
 }
 EXPORT_SYMBOL(dm_get_device);
+
+#ifdef CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT
+int dm_handle_4kn_target_support(struct dm_target *ti, struct dm_dev *dev,
+			 sector_t start, sector_t len, void *data)
+{
+	struct queue_limits *limits = data;
+	struct block_device *bdev = dev->bdev;
+	struct request_queue *target_queue = bdev_get_queue(bdev);
+	char b[BDEVNAME_SIZE];
+	unsigned short logical_block_size = 0;
+
+	if (unlikely(!target_queue)) {
+		DMWARN("%s: requset_queue should not be NULL (%s)",
+		       dm_device_name(ti->table->md), bdevname(bdev, b));
+		return 0;
+	}
+
+	logical_block_size = target_queue->limits.logical_block_size;
+
+	if (4096 == logical_block_size) {
+		// Target is a 4KN disk
+		syno_limits_logical_block_size(limits, logical_block_size);
+	}
+
+	return 0;
+}
+
+EXPORT_SYMBOL_GPL(dm_handle_4kn_target_support);
+#endif /* CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT */
 
 int dm_set_device_limits(struct dm_target *ti, struct dm_dev *dev,
 			 sector_t start, sector_t len, void *data)
@@ -844,6 +838,12 @@ int dm_table_add_target(struct dm_table *t, const char *type,
 	if (!tgt->num_discard_bios && tgt->discards_supported)
 		DMWARN("%s: %s: ignoring discards_supported because num_discard_bios is zero.",
 		       dm_device_name(t->md), type);
+
+#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
+	if (tgt->type->lvinfoset){
+		tgt->type->lvinfoset(tgt);
+	}
+#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
 
 	return 0;
 
@@ -1313,6 +1313,13 @@ int dm_calculate_queue_limits(struct dm_table *table,
 			return -EINVAL;
 
 combine_limits:
+
+#ifdef CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT
+		if (ti->type->handle_4kn_target_support) {
+			ti->type->handle_4kn_target_support(ti, dm_handle_4kn_target_support,
+						  &ti_limits);
+		}
+#endif /* CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT */
 		/*
 		 * Merge this target's queue limits into the overall limits
 		 * for the table.

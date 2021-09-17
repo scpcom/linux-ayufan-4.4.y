@@ -138,6 +138,20 @@ ipv4_connected:
 		if (!sk->sk_bound_dev_if && (addr_type & IPV6_ADDR_MULTICAST))
 			sk->sk_bound_dev_if = np->mcast_oif;
 
+#ifdef CONFIG_SYNO_IPV6_LINKLOCAL
+		if (__ipv6_addr_is_link_local(addr_type) && !sk->sk_bound_dev_if) {
+			struct net_device *dev = NULL;
+			for_each_netdev(sock_net(sk), dev) {
+				unsigned flags = dev_get_flags(dev);
+				if ((flags & IFF_RUNNING) &&
+					!(flags & (IFF_LOOPBACK | IFF_SLAVE))) {
+					sk->sk_bound_dev_if = dev->ifindex;
+					break;
+				}
+			}
+		}
+#endif /* CONFIG_SYNO_IPV6_LINKLOCAL */
+
 		/* Connect to link-local address requires an interface */
 		if (!sk->sk_bound_dev_if) {
 			err = -EINVAL;
@@ -472,7 +486,6 @@ out_free_skb:
 out:
 	return err;
 }
-
 
 int ip6_datagram_recv_ctl(struct sock *sk, struct msghdr *msg,
 			  struct sk_buff *skb)

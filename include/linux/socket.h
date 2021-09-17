@@ -1,7 +1,6 @@
 #ifndef _LINUX_SOCKET_H
 #define _LINUX_SOCKET_H
 
-
 #include <asm/socket.h>			/* arch-dependent defines	*/
 #include <linux/sockios.h>		/* the SIOCxxx I/O controls	*/
 #include <linux/uio.h>			/* iovec support		*/
@@ -253,6 +252,11 @@ struct ucred {
 #define MSG_SENDPAGE_NOTLAST 0x20000 /* sendpage() internal : not the last page */
 #define MSG_EOF         MSG_FIN
 
+#ifdef CONFIG_SYNO_FS_RECVFILE
+#define MSG_KERNSPACE       0x40000
+#define MSG_NOCATCHSIGNAL   0x80000
+#endif /* CONFIG_SYNO_FS_RECVFILE */
+
 #define MSG_FASTOPEN	0x20000000	/* Send data in TCP SYN */
 #define MSG_CMSG_CLOEXEC 0x40000000	/* Set close_on_exit for file
 					   descriptor received through
@@ -262,7 +266,6 @@ struct ucred {
 #else
 #define MSG_CMSG_COMPAT	0		/* We never have 32 bit fixups */
 #endif
-
 
 /* Setsockoptions(2) level. Thanks to BSD these must match IPPROTO_xxx */
 #define SOL_IP		0
@@ -307,6 +310,9 @@ extern void cred_to_ucred(struct pid *pid, const struct cred *cred, struct ucred
 
 extern int memcpy_fromiovecend(unsigned char *kdata, const struct iovec *iov,
 			       int offset, int len);
+#ifdef CONFIG_SYNO_FS_RECVFILE
+extern void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len);
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 extern int csum_partial_copy_fromiovecend(unsigned char *kdata, 
 					  struct iovec *iov, 
 					  int offset, 

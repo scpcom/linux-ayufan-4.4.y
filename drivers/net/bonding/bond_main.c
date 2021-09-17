@@ -513,6 +513,20 @@ static void bond_del_vlans_from_slave(struct bonding *bond,
 
 /*------------------------------- Link status -------------------------------*/
 
+#ifdef CONFIG_SYNO_BONDING_INIT_STATUS
+static void default_operstate(struct net_device *dev)
+{
+	if (!netif_carrier_ok(dev)) {
+		dev->operstate = (dev->ifindex != dev->iflink ?
+			IF_OPER_LOWERLAYERDOWN : IF_OPER_DOWN);
+	} else if (netif_dormant(dev)) {
+		dev->operstate = IF_OPER_DORMANT;
+	} else {
+		dev->operstate = IF_OPER_UP;
+	}
+}
+#endif /* CONFIG_SYNO_BONDING_INIT_STATUS */
+
 /*
  * Set the carrier state for the master according to the state of its
  * slaves.  If any slaves are up, the master is up.  In 802.3ad mode,
@@ -743,7 +757,6 @@ static void bond_mc_del(struct bonding *bond, void *addr)
 		}
 	}
 }
-
 
 static void __bond_resend_igmp_join_requests(struct net_device *dev)
 {
@@ -1336,10 +1349,33 @@ static void bond_netpoll_cleanup(struct net_device *bond_dev)
 static void bond_set_dev_addr(struct net_device *bond_dev,
 			      struct net_device *slave_dev)
 {
+#ifdef CONFIG_SYNO_MAC_ADDRESS
+	unsigned char szMac[MAX_ADDR_LEN];
+	memset(szMac, 0, sizeof(szMac));
+#endif /* CONFIG_SYNO_MAC_ADDRESS */
+
 	pr_debug("bond_dev=%p\n", bond_dev);
 	pr_debug("slave_dev=%p\n", slave_dev);
 	pr_debug("slave_dev->addr_len=%d\n", slave_dev->addr_len);
+
+#ifdef CONFIG_SYNO_MAC_ADDRESS
+	if (syno_get_dev_vendor_mac(slave_dev->name, szMac)) {
+		printk("%s:%s(%d) dev:[%s] get vendor mac fail\n",
+				__FILE__, __FUNCTION__, __LINE__, slave_dev->name);
+		/**
+		 *  Cannot get SYNO's vendor mac, possibly because
+		 *	- mac not written to onboard flash, or
+		 *	- this eth is on addon card rather than on mainboard.
+		 *	Fallback to perm_hwaddr.
+		 */
+		memcpy(bond_dev->dev_addr, slave_dev->dev_addr, slave_dev->addr_len);
+	} else {
+		/* Normal case: set to syno vendor mac */
+		memcpy(bond_dev->dev_addr, szMac, ETH_ALEN);
+	}
+#else /* CONFIG_SYNO_MAC_ADDRESS */
 	memcpy(bond_dev->dev_addr, slave_dev->dev_addr, slave_dev->addr_len);
+#endif /* CONFIG_SYNO_MAC_ADDRESS */
 	bond_dev->addr_assign_type = NET_ADDR_SET;
 	call_netdevice_notifiers(NETDEV_CHANGEADDR, bond_dev);
 }
@@ -1537,6 +1573,9 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	struct sockaddr addr;
 	int link_reporting;
 	int res = 0;
+#ifdef CONFIG_SYNO_MAC_ADDRESS
+	unsigned char szMac[MAX_ADDR_LEN] = {0};
+#endif /* CONFIG_SYNO_MAC_ADDRESS */
 
 	if (!bond->params.use_carrier &&
 	    slave_dev->ethtool_ops->get_link == NULL &&
@@ -1671,7 +1710,26 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	 * that need it, and for restoring it upon release, and then
 	 * set it to the master's address
 	 */
+#ifdef CONFIG_SYNO_MAC_ADDRESS
+	memset(szMac, 0, sizeof(szMac));
+
+	if (syno_get_dev_vendor_mac(slave_dev->name, szMac)){
+		printk("%s:%s(%d) dev:[%s] get vendor mac fail\n",
+				__FILE__, __FUNCTION__, __LINE__, slave_dev->name);
+		/**
+		 * Cannot get SYNO's vendor mac, possibly because
+		 *	- mac not written to onboard flash, or
+		 *	- this eth is on addon card rather than on mainboard.
+		 *	Fallback to perm_hwaddr.
+		 */
+		memcpy(new_slave->perm_hwaddr, slave_dev->dev_addr, ETH_ALEN);
+	} else {
+		/* Normal case: set to syno vendor mac */
+		memcpy(new_slave->perm_hwaddr, szMac, ETH_ALEN);
+	}
+#else /* CONFIG_SYNO_MAC_ADDRESS */
 	memcpy(new_slave->perm_hwaddr, slave_dev->dev_addr, ETH_ALEN);
+#endif /* CONFIG_SYNO_MAC_ADDRESS */
 
 	if (!bond->params.fail_over_mac) {
 		/*
@@ -1874,6 +1932,9 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	write_unlock_bh(&bond->curr_slave_lock);
 
 	bond_set_carrier(bond);
+#ifdef CONFIG_SYNO_BONDING_INIT_STATUS
+	default_operstate(bond->dev);
+#endif /* CONFIG_SYNO_BONDING_INIT_STATUS */
 
 #ifdef CONFIG_NET_POLL_CONTROLLER
 	slave_dev->npinfo = bond_netpoll_info(bond);
@@ -2292,7 +2353,6 @@ static int bond_slave_info_query(struct net_device *bond_dev, struct ifslave *in
 
 /*-------------------------------- Monitoring -------------------------------*/
 
-
 static int bond_miimon_inspect(struct bonding *bond)
 {
 	struct slave *slave;
@@ -2594,7 +2654,6 @@ static void bond_arp_send(struct net_device *slave_dev, int arp_op, __be32 dest_
 	}
 	arp_xmit(skb);
 }
-
 
 static void bond_arp_send_all(struct bonding *bond, struct slave *slave)
 {
@@ -3593,7 +3652,6 @@ static int bond_do_ioctl(struct net_device *bond_dev, struct ifreq *ifr, int cmd
 		if (!mii)
 			return -EINVAL;
 
-
 		if (mii->reg_num == 1) {
 			struct bonding *bond = netdev_priv(bond_dev);
 			mii->val_out = 0;
@@ -3880,7 +3938,6 @@ static int bond_set_mac_address(struct net_device *bond_dev, void *addr)
 	if (bond->params.mode == BOND_MODE_ALB)
 		return bond_alb_set_mac_address(bond_dev, addr);
 
-
 	pr_debug("bond=%p, name=%s\n",
 		 bond, bond_dev ? bond_dev->name : "None");
 
@@ -4011,7 +4068,6 @@ out:
 
 	return NETDEV_TX_OK;
 }
-
 
 /*
  * in active-backup mode, we know that bond->curr_active_slave is always valid if
@@ -4176,7 +4232,6 @@ static inline int bond_slave_override(struct bonding *bond,
 
 	return res;
 }
-
 
 static u16 bond_select_queue(struct net_device *dev, struct sk_buff *skb)
 {

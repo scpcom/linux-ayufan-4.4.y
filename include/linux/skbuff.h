@@ -295,7 +295,6 @@ struct skb_shared_info {
 #define SKB_DATAREF_SHIFT 16
 #define SKB_DATAREF_MASK ((1 << SKB_DATAREF_SHIFT) - 1)
 
-
 enum {
 	SKB_FCLONE_UNAVAILABLE,
 	SKB_FCLONE_ORIG,
@@ -520,7 +519,6 @@ struct sk_buff {
  *	Handling routines are only of interest to the kernel
  */
 #include <linux/slab.h>
-
 
 #define SKB_ALLOC_FCLONE	0x01
 #define SKB_ALLOC_RX		0x02
@@ -1279,7 +1277,6 @@ static inline struct sk_buff *__skb_dequeue_tail(struct sk_buff_head *list)
 	return skb;
 }
 
-
 static inline bool skb_is_nonlinear(const struct sk_buff *skb)
 {
 	return skb->data_len;
@@ -1984,7 +1981,6 @@ static inline struct sk_buff *dev_alloc_skb(unsigned int length)
 	return netdev_alloc_skb(NULL, length);
 }
 
-
 static inline struct sk_buff *__netdev_alloc_skb_ip_align(struct net_device *dev,
 		unsigned int length, gfp_t gfp)
 {
@@ -2447,6 +2443,11 @@ extern unsigned int    datagram_poll(struct file *file, struct socket *sock,
 extern int	       skb_copy_datagram_iovec(const struct sk_buff *from,
 					       int offset, struct iovec *to,
 					       int size);
+#ifdef CONFIG_SYNO_FS_RECVFILE
+extern int	       skb_copy_datagram_iovec1(const struct sk_buff *from,
+					       int offset, struct iovec *to,
+					       int size);
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 extern int	       skb_copy_and_csum_datagram_iovec(struct sk_buff *skb,
 							int hlen,
 							struct iovec *iov);

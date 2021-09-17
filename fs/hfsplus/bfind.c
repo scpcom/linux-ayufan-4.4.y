@@ -196,7 +196,11 @@ int hfs_brec_find(struct hfs_find_data *fd, search_strategy_t do_key_compare)
 		res = __hfs_brec_find(bnode, fd, do_key_compare);
 		if (!height)
 			break;
+#ifdef CONFIG_SYNO_HFSPLUS_BREC_FIND_RET_CHECK
+		if (fd->record < 0 || res == -EINVAL)
+#else
 		if (fd->record < 0)
+#endif
 			goto release;
 
 		parent = nidx;

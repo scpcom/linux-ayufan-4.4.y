@@ -1,7 +1,6 @@
 #ifndef _LINUX_KERNEL_H
 #define _LINUX_KERNEL_H
 
-
 #include <stdarg.h>
 #include <linux/linkage.h>
 #include <linux/stddef.h>
@@ -102,7 +101,6 @@
 	(quot * (numer)) + ((rem * (numer)) / (denom));	\
 }							\
 )
-
 
 #define _RET_IP_		(unsigned long)__builtin_return_address(0)
 #define _THIS_IP_  ({ __label__ __here; __here: (unsigned long)&&__here; })
@@ -652,6 +650,18 @@ ftrace_vprintk(const char *fmt, va_list ap)
 static inline void ftrace_dump(enum ftrace_dump_mode oops_dump_mode) { }
 #endif /* CONFIG_TRACING */
 
+#ifdef CONFIG_SYNO_NET_BOND_ALB_INFO
+/*
+ *      Display an IP address in readable format.
+ */
+#define NIPQUAD(addr) \
+    ((unsigned char *)&addr)[0], \
+    ((unsigned char *)&addr)[1], \
+    ((unsigned char *)&addr)[2], \
+    ((unsigned char *)&addr)[3]
+#define NIPQUAD_FMT "%u.%u.%u.%u"
+#endif /* CONFIG_SYNO_NET_BOND_ALB_INFO */
+
 /*
  * min()/max()/clamp() macros that also do
  * strict type-checking.. See the
@@ -765,7 +775,6 @@ static inline void ftrace_dump(enum ftrace_dump_mode oops_dump_mode) { }
 	typeof(val) __max = (max);		\
 	__val = __val < __min ? __min: __val;	\
 	__val > __max ? __max: __val; })
-
 
 /*
  * swap - swap value of @a and @b

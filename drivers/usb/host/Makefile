@@ -19,6 +19,10 @@ ifneq ($(CONFIG_USB_XHCI_PLATFORM), )
 	xhci-hcd-y		+= xhci-plat.o
 endif
 
+etxhci-hcd-y := etxhci.o etxhci-mem.o etxhci-pci.o
+etxhci-hcd-y += etxhci-ring.o etxhci-hub.o etxhci-dbg.o
+etxhci-hcd-y += etxhci-ejxxx.o
+
 obj-$(CONFIG_USB_WHCI_HCD)	+= whci/
 
 obj-$(CONFIG_PCI)		+= pci-quirks.o
@@ -41,6 +45,7 @@ obj-$(CONFIG_USB_OHCI_HCD)	+= ohci-hcd.o
 obj-$(CONFIG_USB_UHCI_HCD)	+= uhci-hcd.o
 obj-$(CONFIG_USB_FHCI_HCD)	+= fhci.o
 obj-$(CONFIG_USB_XHCI_HCD)	+= xhci-hcd.o
+obj-$(CONFIG_USB_ETRON_HCD)	+= etxhci-hcd.o
 obj-$(CONFIG_USB_SL811_HCD)	+= sl811-hcd.o
 obj-$(CONFIG_USB_SL811_CS)	+= sl811_cs.o
 obj-$(CONFIG_USB_U132_HCD)	+= u132-hcd.o

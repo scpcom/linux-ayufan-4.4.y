@@ -16,6 +16,10 @@
 #include <linux/evm.h>
 #include <linux/ima.h>
 
+#ifdef CONFIG_SYNO_FS_WINACL
+#include "synoacl_int.h"
+#endif /* CONFIG_SYNO_FS_WINACL */
+
 /**
  * inode_change_ok - check if attribute changes to an inode are allowed
  * @inode:	inode to check
@@ -174,6 +178,9 @@ int notify_change(struct dentry * dentry, struct iattr * attr)
 	int error;
 	struct timespec now;
 	unsigned int ia_valid = attr->ia_valid;
+#ifdef CONFIG_SYNO_FS_WINACL
+	int isSYNOACL = 0;
+#endif /* CONFIG_SYNO_FS_WINACL */
 
 	WARN_ON_ONCE(!mutex_is_locked(&inode->i_mutex));
 
@@ -239,12 +246,26 @@ int notify_change(struct dentry * dentry, struct iattr * attr)
 	if (error)
 		return error;
 
+#ifdef CONFIG_SYNO_FS_WINACL
+	isSYNOACL = IS_SYNOACL(dentry);
+	if (isSYNOACL) {
+		error = synoacl_op_inode_chg_ok(dentry, attr);
+		if (error) {
+			return error;
+		}
+	}
+#endif /* CONFIG_SYNO_FS_WINACL */
 	if (inode->i_op->setattr)
 		error = inode->i_op->setattr(dentry, attr);
 	else
 		error = simple_setattr(dentry, attr);
 
 	if (!error) {
+#ifdef CONFIG_SYNO_FS_WINACL
+		if (isSYNOACL) {
+			synoacl_op_setattr_post(dentry, attr);
+		}
+#endif /* CONFIG_SYNO_FS_WINACL */
 		fsnotify_change(dentry, ia_valid);
 		ima_inode_post_setattr(dentry);
 		evm_inode_post_setattr(dentry, ia_valid);

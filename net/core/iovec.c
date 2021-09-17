@@ -74,6 +74,31 @@ int verify_iovec(struct msghdr *m, struct iovec *iov, struct sockaddr_storage *a
 	return err;
 }
 
+#ifdef CONFIG_SYNO_FS_RECVFILE
+/* this was removed in 2.6. Re-add it because we beed it in recvfile. */
+/*
+ *	In kernel copy to iovec. Returns -EFAULT on error.
+ *
+ *	Note: this modifies the original iovec.
+ */
+void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len)
+{
+	while(len>0)
+	{
+		if(iov->iov_len)
+		{
+			int copy = min_t(unsigned int, iov->iov_len, len);
+			memcpy(iov->iov_base, kdata, copy);
+			kdata+=copy;
+			len-=copy;
+			iov->iov_len-=copy;
+			iov->iov_base+=copy;
+		}
+		iov++;
+	}
+}
+#endif /* CONFIG_SYNO_FS_RECVFILE */
+
 /*
  *	Copy kernel to iovec. Returns -EFAULT on error.
  */

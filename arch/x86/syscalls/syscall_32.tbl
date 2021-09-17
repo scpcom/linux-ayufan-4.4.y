@@ -357,3 +357,39 @@
 348	i386	process_vm_writev	sys_process_vm_writev		compat_sys_process_vm_writev
 349	i386	kcmp			sys_kcmp
 350	i386	finit_module		sys_finit_module
+
+#
+# start - CONFIG_SYNO_SYSTEM_CALL
+# Synology defined system calls are listed here.
+#
+# 400 is available for reuse
+# 401 is available for reuse
+402	i386	SYNOUtime		sys_SYNOUtime			compat_sys_SYNOUtime
+403	i386	SYNOArchiveBit		sys_SYNOArchiveBit
+404	i386	recvfile		sys_recvfile
+#405	i386	SYNOMTDAlloc		sys_SYNOMTDAlloc
+406	i386	SYNOCaselessStat	sys_SYNOCaselessStat64		sys32_SYNOCaselessStat64
+407	i386	SYNOCaselessLStat	sys_SYNOCaselessLStat64		sys32_SYNOCaselessLStat64
+#408	i386	SYNOCaselessStat64	sys_SYNOCaselessStat64						# not used
+#400	i386	SYNOCaselessLStat64	sys_SYNOCaselessLStat64						# not used
+410	i386	SYNOEcryptName		sys_SYNOEcryptName
+411	i386	SYNODecryptName		sys_SYNODecryptName
+412	i386	SYNOACLCheckPerm	sys_SYNOACLCheckPerm
+413	i386	SYNOACLIsSupport	sys_SYNOACLIsSupport
+414	i386	SYNOACLGetPerm		sys_SYNOACLGetPerm
+#415	# not used
+#416	# not used
+#417	# not used
+#418	# not used
+419	i386	SYNOStat		sys_SYNOStat64			sys32_SYNOStat64
+420	i386	SYNOFStat		sys_SYNOFStat64			sys32_SYNOFStat64
+421	i386	SYNOLStat		sys_SYNOLStat64			sys32_SYNOLStat64
+422	i386	SYNONotifyInit		sys_SYNONotifyInit
+423	i386	SYNONotifyAddWatch	sys_SYNONotifyAddWatch
+424	i386	SYNONotifyRemoveWatch	sys_SYNONotifyRemoveWatch
+#425	i386	SYNONotifyAddWatch	sys_SYNONotifyAddWatch32			# not used
+#426	i386	SYNONotifyRemoveWatch	sys_SYNONotifyRemoveWatch32			# not used
+427	i386	SYNOArchiveOverwrite	sys_SYNOArchiveOverwrite
+#
+# end - CONFIG_SYNO_SYSTEM_CALL
+#

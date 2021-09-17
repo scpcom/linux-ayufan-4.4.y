@@ -1118,7 +1118,6 @@ static inline void cifs_stats_bytes_read(struct cifs_tcon *tcon,
 
 #endif
 
-
 /*
  * This is the prototype for the mid receive function. This function is for
  * receiving the rest of the SMB frame, starting with the WordCount (which is
@@ -1469,6 +1468,9 @@ GLOBAL_EXTERN unsigned int global_secflags;	/* if on, session setup sent
 				with more secure ntlmssp2 challenge/resp */
 GLOBAL_EXTERN unsigned int sign_CIFS_PDUs;  /* enable smb packet signing */
 GLOBAL_EXTERN unsigned int linuxExtEnabled;/*enable Linux/Unix CIFS extensions*/
+#ifdef CONFIG_SYNO_CIFS_MOUNT_CASELESS
+GLOBAL_EXTERN unsigned int SynoPosixSemanticsEnabled;/*enable POSIX SEMANTICS*/
+#endif /* CONFIG_SYNO_CIFS_MOUNT_CASELESS */
 GLOBAL_EXTERN unsigned int CIFSMaxBufSize;  /* max size not including hdr */
 GLOBAL_EXTERN unsigned int cifs_min_rcv;    /* min size of big ntwrk buf pool */
 GLOBAL_EXTERN unsigned int cifs_min_small;  /* min size of small buf pool */

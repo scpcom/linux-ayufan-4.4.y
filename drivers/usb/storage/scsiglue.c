@@ -529,8 +529,28 @@ static ssize_t store_max_sectors(struct device *dev, struct device_attribute *at
 static DEVICE_ATTR(max_sectors, S_IRUGO | S_IWUSR, show_max_sectors,
 		store_max_sectors);
 
+#ifdef CONFIG_SYNO_HAS_SDCARDREADER
+extern int blIsCardReader(struct usb_device *usbdev);
+static ssize_t show_syno_cardreader(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdp = to_scsi_device(dev);
+	struct us_data *us = host_to_us(sdp->host);
+	struct usb_device *usbdev = us->pusb_dev;
+
+	if (blIsCardReader(usbdev)) {
+		return sprintf(buf, "1");
+	} else {
+		return sprintf(buf, "0");
+	}
+}
+static DEVICE_ATTR(syno_cardreader, S_IRUGO, show_syno_cardreader, NULL);
+#endif /* CONFIG_SYNO_HAS_SDCARDREADER */
+
 static struct device_attribute *sysfs_device_attr_list[] = {
 		&dev_attr_max_sectors,
+#ifdef CONFIG_SYNO_HAS_SDCARDREADER
+		&dev_attr_syno_cardreader,
+#endif /* CONFIG_SYNO_HAS_SDCARDREADER */
 		NULL,
 		};
 
@@ -585,6 +605,10 @@ struct scsi_host_template usb_stor_host_template = {
 
 	/* sysfs device attributes */
 	.sdev_attrs =			sysfs_device_attr_list,
+
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+	.syno_port_type         = SYNO_PORT_TYPE_USB,
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
 
 	/* module management */
 	.module =			THIS_MODULE

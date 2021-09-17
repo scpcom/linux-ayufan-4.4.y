@@ -4,8 +4,6 @@
 #include <uapi/asm/ptrace.h>
 
 #ifndef __ASSEMBLY__
-#if defined(CONFIG_CPU_H8S)
-#endif
 #ifndef PS_S
 #define PS_S  (0x10)
 #endif

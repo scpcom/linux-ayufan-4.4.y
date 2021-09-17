@@ -36,7 +36,6 @@
 #include <linux/lockdep.h>
 #include "internal.h"
 
-
 LIST_HEAD(super_blocks);
 DEFINE_SPINLOCK(sb_lock);
 
@@ -214,6 +213,10 @@ static struct super_block *alloc_super(struct file_system_type *type, int flags)
 		s->s_op = &default_op;
 		s->s_time_gran = 1000000000;
 		s->cleancache_poolid = -1;
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+		mutex_init(&s->s_archive_mutex);
+		s->s_archive_version = 0;
+#endif
 
 		s->s_shrink.seeks = DEFAULT_SEEKS;
 		s->s_shrink.shrink = prune_super;
@@ -278,7 +281,6 @@ static void put_super(struct super_block *sb)
 	__put_super(sb);
 	spin_unlock(&sb_lock);
 }
-
 
 /**
  *	deactivate_locked_super	-	drop an active reference to superblock

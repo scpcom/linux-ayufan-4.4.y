@@ -154,7 +154,6 @@ struct usb_hcd {
 	struct usb_hcd		*shared_hcd;
 	struct usb_hcd		*primary_hcd;
 
-
 #define HCD_BUFFER_POOLS	4
 	struct dma_pool		*pool[HCD_BUFFER_POOLS];
 
@@ -171,6 +170,13 @@ struct usb_hcd {
 
 #define	HC_IS_RUNNING(state) ((state) & __ACTIVE)
 #define	HC_IS_SUSPENDED(state) ((state) & __SUSPEND)
+
+#if defined(CONFIG_USB_ETRON_HUB)
+	u8		chip_id;
+#define HCD_CHIP_ID_UNKNOWN 0x00
+#define HCD_CHIP_ID_ETRON_EJ168 0x10
+#define HCD_CHIP_ID_ETRON_EJ188 0x20
+#endif /* CONFIG_USB_ETRON_HUB */
 
 	/* more shared queuing code would be good; it should support
 	 * smarter scheduling, handle transaction translators, etc;
@@ -202,7 +208,6 @@ struct hcd_timeout {	/* timeouts we allocate */
 };
 
 /*-------------------------------------------------------------------------*/
-
 
 struct hc_driver {
 	const char	*description;	/* "ehci-hcd" etc */
@@ -358,6 +363,11 @@ struct hc_driver {
 	int	(*disable_usb3_lpm_timeout)(struct usb_hcd *,
 			struct usb_device *, enum usb3_link_state state);
 	int	(*find_raw_port_number)(struct usb_hcd *, int);
+#if defined(CONFIG_USB_ETRON_HUB)
+	int	(*update_uas_device)(struct usb_hcd *, struct usb_device *, int);
+	void	(*stop_endpoint)(struct usb_hcd *, struct usb_device *,
+				struct usb_host_endpoint *);
+#endif /* CONFIG_USB_ETRON_HUB */
 };
 
 extern int usb_hcd_link_urb_to_ep(struct usb_hcd *hcd, struct urb *urb);
@@ -520,7 +530,6 @@ extern void usb_ep0_reinit(struct usb_device *);
 #define SetHubFeature		(0x2000 | USB_REQ_SET_FEATURE)
 #define SetPortFeature		(0x2300 | USB_REQ_SET_FEATURE)
 
-
 /*-------------------------------------------------------------------------*/
 
 /* class requests from USB 3.0 hub spec, table 10-5 */
@@ -538,7 +547,6 @@ extern void usb_ep0_reinit(struct usb_device *);
 
 #define NS_TO_US(ns)	((ns + 500L) / 1000L)
 			/* convert & round nanoseconds to microseconds */
-
 
 /*
  * Full/low speed bandwidth allocation constants/support.
@@ -654,7 +662,6 @@ static inline void usbmon_urb_complete(struct usb_bus *bus, struct urb *urb,
 
 #define	RUN_CONTEXT (in_irq() ? "in_irq" \
 		: (in_interrupt() ? "in_interrupt" : "can sleep"))
-
 
 /* This rwsem is for use only by the hub driver and ehci-hcd.
  * Nobody else should touch it.

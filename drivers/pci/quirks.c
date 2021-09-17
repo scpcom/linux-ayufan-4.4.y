@@ -43,6 +43,9 @@ static void quirk_mmio_always_on(struct pci_dev *dev)
 }
 DECLARE_PCI_FIXUP_CLASS_EARLY(PCI_ANY_ID, PCI_ANY_ID,
 				PCI_CLASS_BRIDGE_HOST, 8, quirk_mmio_always_on);
+#ifdef CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF
+DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_INTEL, 0x2934, quirk_mmio_always_on);
+#endif /* CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF */
 
 /* The Mellanox Tavor device gives false positive parity errors
  * Mark this device with a broken_parity_status, to allow
@@ -793,7 +796,6 @@ static void quirk_via_acpi(struct pci_dev *d)
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C586_3,	quirk_via_acpi);
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C686_4,	quirk_via_acpi);
 
-
 /*
  *	VIA bridges which have VLink
  */
@@ -1088,7 +1090,6 @@ static void quirk_eisa_bridge(struct pci_dev *dev)
 	dev->class = PCI_CLASS_BRIDGE_EISA << 8;
 }
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_82375,	quirk_eisa_bridge);
-
 
 /*
  * On ASUS P4B boards, the SMBus PCI Device within the ICH2/4 southbridge
@@ -1385,7 +1386,6 @@ static void quirk_sis_503(struct pci_dev *dev)
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_SI,	PCI_DEVICE_ID_SI_503,		quirk_sis_503);
 DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_SI,	PCI_DEVICE_ID_SI_503,		quirk_sis_503);
 
-
 /*
  * On ASUS A8V and A8V Deluxe boards, the onboard AC97 audio controller
  * and MC97 modem controller are disabled when a second PCI soundcard is
@@ -1531,7 +1531,6 @@ static void quirk_pcie_mch(struct pci_dev *pdev)
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_E7520_MCH,	quirk_pcie_mch);
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_E7320_MCH,	quirk_pcie_mch);
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_E7525_MCH,	quirk_pcie_mch);
-
 
 /*
  * It's possible for the MSI to get corrupted if shpc and acpi
@@ -2866,7 +2865,6 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x65f8, quirk_intel_mc_errata);
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x65f9, quirk_intel_mc_errata);
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x65fa, quirk_intel_mc_errata);
 
-
 static ktime_t fixup_debug_start(struct pci_dev *dev,
 				 void (*fn)(struct pci_dev *dev))
 {
@@ -2944,6 +2942,226 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_CHELSIO, 0x0030,
 			 quirk_broken_intx_masking);
 DECLARE_PCI_FIXUP_HEADER(0x1814, 0x0601, /* Ralink RT2800 802.11n PCI */
 			 quirk_broken_intx_masking);
+#ifdef CONFIG_SYNO_MV_9235_PORTING
+/*
+ * Marvell provide PCI Programming steps for 88SE9235 without SPI flash
+ * to slove some compatibility issue.
+ *
+ * The reference document is put in SynoStorage
+ *     HW_Docs\datasheets_Roadmaps\SATA\marvell\SATA6g_88SE923x\software\
+ *     Marvell_SE92159235_NonSPI__flash_Support_App_Note_r1.0.doc
+ */
+static void mv9235_non_spi_programming(struct pci_dev *dev)
+{
+	void __iomem *bar5;
+
+	bar5 = ioremap(pci_resource_start(dev, 5), pci_resource_len(dev, 5));
+	if (!bar5) {
+		dev_warn(&dev->dev, "Can't map mv9235 registers\n");
+		return;
+	}
+
+	dev_info(&dev->dev, "Apply mv9235 specific programming steps\n");
+
+	// sata port0-interrupt boundary of command
+	writel(0x00000104, bar5+0x178);
+	ndelay(80);
+	// Disable the interrupt blocking; port interrupt coalescing count
+	writel(0x00500B03, bar5+0x17C);
+	ndelay(80);
+	// sata port1-interrupt boundary of command
+	writel(0x00000104, bar5+0x1F8);
+	ndelay(80);
+	// Disable the interrupt blocking; port interrupt coalescing count
+	writel(0x00500B03, bar5+0x1FC);
+	ndelay(80);
+	// sata port2-interrupt boundary of command
+	writel(0x00000104, bar5+0x278);
+	ndelay(80);
+	// Disable the interrupt blocking; port interrupt coalescing count
+	writel(0x00500B03, bar5+0x27C);
+	ndelay(80);
+	// sata port3-interrupt boundary of command
+	writel(0x00000104, bar5+0x2F8);
+	ndelay(80);
+	// Disable the interrupt blocking; port interrupt coalescing count
+	writel(0x00500B03, bar5+0x2FC);
+	ndelay(80);
+	// 6G drives issue/HW CC
+	writel(0x0000001C, bar5+0xA0);
+	ndelay(80);
+	writel(0x00935038, bar5+0xA4);
+	ndelay(80);
+	// SSC parameter calculate in PLL CTL2
+	writel(0x0000000C, bar5+0xA0);
+	ndelay(80);
+	writel(0xA5A58757, bar5+0xA4);
+	ndelay(80);
+	// SSC parameter calculate in PLL CTL1
+	writel(0x00000008, bar5+0xA0);
+	ndelay(80);
+	writel(0x0001388F, bar5+0xA4);
+	ndelay(80);
+}
+DECLARE_PCI_FIXUP_FINAL(0x1b4b, 0x9235, mv9235_non_spi_programming);
+DECLARE_PCI_FIXUP_FINAL(0x1b4b, 0x9215, mv9235_non_spi_programming);
+#endif /* CONFIG_SYNO_MV_9235_PORTING */
+
+#ifdef CONFIG_SYNO_MV_9170_PORTING
+/*
+ * Marvell provide PCI Programming steps for 88SE9170 without SPI flash
+ * to slove some compatibility issue.
+ */
+static void mv9170_non_spi_programming(struct pci_dev *dev)
+{
+	void __iomem *bar5;
+
+	bar5 = ioremap(pci_resource_start(dev, 5), pci_resource_len(dev, 5));
+	if (!bar5) {
+		dev_warn(&dev->dev, "Can't map mv9170 registers\n");
+		return;
+	}
+
+	dev_info(&dev->dev, "Apply mv9170 specific programming steps\n");
+
+	//port0-GEN1
+	writel(0x0000008D, bar5+0x178);
+	ndelay(80);
+	writel(0x0000C962, bar5+0x17C);
+	ndelay(80);
+	//port1-GEN1
+	writel(0x0000008D, bar5+0x1F8);
+	ndelay(80);
+	writel(0x0000C962, bar5+0x1FC);
+	ndelay(80);
+	//port0-GEN3
+	writel(0x00000091, bar5+0x178);
+	ndelay(80);
+	writel(0x00000E75, bar5+0x17C);
+	ndelay(80);
+	//port1-GEN3
+	writel(0x00000091, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000E75, bar5+0x1FC);
+	ndelay(80);
+	//port0-password
+	writel(0x000000A2, bar5+0x178);
+	ndelay(80);
+	writel(0x00000046, bar5+0x17C);
+	ndelay(80);
+	//port1-password
+	writel(0x000000A2, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000046, bar5+0x1FC);
+	ndelay(80);
+	//port0-ffe-isel
+	writel(0x000000ED, bar5+0x178);
+	ndelay(80);
+	writel(0x00002400, bar5+0x17C);
+	ndelay(80);
+	//port1-ffe-isel
+	writel(0x000000ED, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00002400, bar5+0x1FC);
+	ndelay(80);
+	//port0-sampler-scale
+	writel(0x000000DB, bar5+0x178);
+	ndelay(80);
+	writel(0x00000000, bar5+0x17C);
+	ndelay(80);
+	//port1-sampler-scale
+	writel(0x000000DB, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000000, bar5+0x1FC);
+	ndelay(80);
+	//port0-vset
+	writel(0x000000A9, bar5+0x178);
+	ndelay(80);
+	writel(0x00005556, bar5+0x17C);
+	ndelay(80);
+	//port1-vset
+	writel(0x000000A9, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00005556, bar5+0x1FC);
+	ndelay(80);
+	//port0-cal-sampler-start
+	writel(0x000000D6, bar5+0x178);
+	ndelay(80);
+	writel(0x00000000, bar5+0x17C);
+	ndelay(80);
+	//port1-cal-sampler-start
+	writel(0x000000D6, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000000, bar5+0x1FC);
+	ndelay(80);
+	//port0-cal-sampler-start
+	writel(0x000000D6, bar5+0x178);
+	ndelay(80);
+	writel(0x00000200, bar5+0x17C);
+	ndelay(80);
+	//port1-cal-sampler-start
+	writel(0x000000D6, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000200, bar5+0x1FC);
+	ndelay(80);
+	//set the amplitude to 3.5%
+	writel(0x00000008, bar5+0xA0);
+	ndelay(80);
+	writel(0x11888EAE, bar5+0xA4);
+	ndelay(80);
+	//enable SSC
+	writel(0x00000004, bar5+0xA0);
+	ndelay(80);
+	writel(0x00009C4F, bar5+0xA4);
+	ndelay(80);
+}
+DECLARE_PCI_FIXUP_FINAL(0x1b4b, 0x9170, mv9170_non_spi_programming);
+#endif /* CONFIG_SYNO_MV_9170_PORTING */
+
+#ifdef CONFIG_SYNO_LYNXPOINT_XHCI_QUIRK
+/*
+ * The XHCI of Denlow platform has some additional programming code in ACPI method _PS0,
+ * but this method doesn't execute during boot time at linux-3.10.x. This change lead to
+ * USB 2.0 devices can't be detected at USB 3.0 port. So we port _PS0 as a PCI quirks.
+ * It will be applied at boot time.
+ *
+ */
+static void intel_lynxpoint_xhci_quirk(struct pci_dev *dev)
+{
+	void __iomem *mmio_base;
+	u16 pm_ctrl;
+	u32 val;
+
+	if (!dev->pm_cap) {
+		dev_warn(&dev->dev, "Lynx Point XHCI quirks: Doesn't have PM capability\n");
+		return ;
+	}
+
+	//
+	// Switch to D0
+	//
+	dev_info(&dev->dev, "Lynx Point XHCI quirks: Set power state to D0\n");
+	pci_read_config_word(dev, dev->pm_cap + PCI_PM_CTRL, &pm_ctrl);
+	pm_ctrl &= ~PCI_PM_CTRL_STATE_MASK;
+	pm_ctrl |= PCI_D0;
+	pci_write_config_word(dev, dev->pm_cap + PCI_PM_CTRL, pm_ctrl);
+
+	//
+	// Set MMIO Offset 8154[31]
+	//
+	mmio_base = pci_ioremap_bar(dev, 0);
+	if (!mmio_base) {
+		dev_warn(&dev->dev, "Lynx Point XHCI quirks: Can't map mmio registers\n");
+		return ;
+	}
+
+	val = readl(mmio_base + 0x8154);
+	writel((val | 0x80000000), mmio_base + 0x8154);
+
+	pci_iounmap(dev, mmio_base);
+}
+DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, 0x8c31, intel_lynxpoint_xhci_quirk);
+#endif /* CONFIG_SYNO_LYNXPOINT_XHCI_QUIRK */
 
 static void pci_do_fixups(struct pci_dev *dev, struct pci_fixup *f,
 			  struct pci_fixup *end)
@@ -3029,7 +3247,6 @@ void pci_fixup_device(enum pci_fixup_pass pass, struct pci_dev *dev)
 	pci_do_fixups(dev, start, end);
 }
 EXPORT_SYMBOL(pci_fixup_device);
-
 
 static int __init pci_apply_final_quirks(void)
 {

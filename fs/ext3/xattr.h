@@ -21,6 +21,9 @@
 #define EXT3_XATTR_INDEX_TRUSTED		4
 #define	EXT3_XATTR_INDEX_LUSTRE			5
 #define EXT3_XATTR_INDEX_SECURITY	        6
+#ifdef CONFIG_SYNO_EXT3_XATTR
+#define EXT3_XATTR_INDEX_SYNO	7
+#endif
 
 struct ext3_xattr_header {
 	__le32	h_magic;	/* magic number for identification */
@@ -58,6 +61,9 @@ struct ext3_xattr_entry {
 
 # ifdef CONFIG_EXT3_FS_XATTR
 
+#ifdef CONFIG_SYNO_EXT3_XATTR
+extern struct xattr_handler ext3_xattr_syno_handler;
+#endif
 extern const struct xattr_handler ext3_xattr_user_handler;
 extern const struct xattr_handler ext3_xattr_trusted_handler;
 extern const struct xattr_handler ext3_xattr_acl_access_handler;

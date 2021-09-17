@@ -8,7 +8,6 @@
  * This could probably be made into a module, because it is not often in use.
  */
 
-
 #define EXT4FS_DEBUG
 
 #include <linux/errno.h>
@@ -696,8 +695,10 @@ static int verify_reserved_gdb(struct super_block *sb,
 	unsigned grp;
 	__le32 *p = (__le32 *)primary->b_data;
 	int gdbackups = 0;
+	unsigned translate32 = 0;
 
 	while ((grp = ext4_list_backups(sb, &three, &five, &seven)) < end) {
+		translate32 = grp * EXT4_BLOCKS_PER_GROUP(sb) + blk;
 		if (le32_to_cpu(*p++) !=
 		    grp * EXT4_BLOCKS_PER_GROUP(sb) + blk){
 			ext4_warning(sb, "reserved GDT %llu"
@@ -1025,8 +1026,13 @@ exit_free:
  * do not copy the full number of backups at this time.  The resize
  * which changed s_groups_count will backup again.
  */
+#ifdef CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX
+static void update_backups(struct super_block *sb, int blk_off, char *data,
+			   int size, int meta_bg, int group_num)
+#else
 static void update_backups(struct super_block *sb, int blk_off, char *data,
 			   int size, int meta_bg)
+#endif /* CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX */
 {
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
 	ext4_group_t last;
@@ -1034,7 +1040,11 @@ static void update_backups(struct super_block *sb, int blk_off, char *data,
 	unsigned three = 1;
 	unsigned five = 5;
 	unsigned seven = 7;
+#ifdef CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX
+	ext4_group_t group = meta_bg ? group_num : 0;
+#else
 	ext4_group_t group = 0;
+#endif /* CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX */
 	int rest = sb->s_blocksize - size;
 	handle_t *handle;
 	int err = 0, err2;
@@ -1229,7 +1239,6 @@ static int ext4_setup_new_descs(handle_t *handle, struct super_block *sb,
 	__u16				*bg_flags = flex_gd->bg_flags;
 	int				i, gdb_off, gdb_num, err = 0;
 	
-
 	for (i = 0; i < flex_gd->count; i++, group_data++, bg_flags++) {
 		group = group_data->group;
 
@@ -1354,8 +1363,12 @@ static void ext4_update_super(struct super_block *sb,
 
 	/* Update the reserved block counts only once the new group is
 	 * active. */
+#ifdef CONFIG_SYNO_EXT4_SKIP_ADD_RESERVED_BLOCKS
+	// Don't update reserved blocks
+#else
 	ext4_r_blocks_count_set(es, ext4_r_blocks_count(es) +
 				reserved_blocks);
+#endif /* CONFIG_SYNO_EXT4_SKIP_ADD_RESERVED_BLOCKS */
 
 	/* Update the free space counts */
 	percpu_counter_add(&sbi->s_freeclusters_counter,
@@ -1460,16 +1473,26 @@ exit_journal:
 				EXT4_FEATURE_INCOMPAT_META_BG);
 		sector_t old_gdb = 0;
 
+#ifdef CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX
+		update_backups(sb, sbi->s_sbh->b_blocknr, (char *)es,
+			       sizeof(struct ext4_super_block), 0, 0);
+#else
 		update_backups(sb, sbi->s_sbh->b_blocknr, (char *)es,
 			       sizeof(struct ext4_super_block), 0);
+#endif /* CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX */
 		for (; gdb_num <= gdb_num_end; gdb_num++) {
 			struct buffer_head *gdb_bh;
 
 			gdb_bh = sbi->s_group_desc[gdb_num];
 			if (old_gdb == gdb_bh->b_blocknr)
 				continue;
+#ifdef CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX
+			update_backups(sb, gdb_bh->b_blocknr, gdb_bh->b_data,
+				       gdb_bh->b_size, meta_bg, group);
+#else
 			update_backups(sb, gdb_bh->b_blocknr, gdb_bh->b_data,
 				       gdb_bh->b_size, meta_bg);
+#endif /* CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX */
 			old_gdb = gdb_bh->b_blocknr;
 		}
 	}
@@ -1599,7 +1622,6 @@ int ext4_group_add(struct super_block *sb, struct ext4_new_group_data *input)
 		}
 	}
 
-
 	err = verify_group_input(sb, input);
 	if (err)
 		goto out;
@@ -1667,8 +1689,13 @@ errout:
 		if (test_opt(sb, DEBUG))
 			printk(KERN_DEBUG "EXT4-fs: extended group to %llu "
 			       "blocks\n", ext4_blocks_count(es));
+#ifdef CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX
+		update_backups(sb, EXT4_SB(sb)->s_sbh->b_blocknr,
+			       (char *)es, sizeof(struct ext4_super_block), 0, 0);
+#else
 		update_backups(sb, EXT4_SB(sb)->s_sbh->b_blocknr,
 			       (char *)es, sizeof(struct ext4_super_block), 0);
+#endif /* CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX */
 	}
 	return err;
 }
@@ -1750,7 +1777,6 @@ int ext4_group_extend(struct super_block *sb, struct ext4_super_block *es,
 	err = ext4_group_extend_no_check(sb, o_blocks_count, add);
 	return err;
 } /* ext4_group_extend */
-
 
 static int num_desc_blocks(struct super_block *sb, ext4_group_t groups)
 {

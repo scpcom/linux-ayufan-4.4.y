@@ -70,10 +70,25 @@ static int linear_mergeable_bvec(struct request_queue *q,
 	sector_t sector = bvm->bi_sector + get_start_sect(bvm->bi_bdev);
 	int maxbytes = biovec->bv_len;
 	struct request_queue *subq;
+#ifdef CONFIG_SYNO_MD_FIX_LINEAR_ACCESS_NULL_RDEV
+	struct md_rdev *rdev = NULL;
+#endif /* CONFIG_SYNO_MD_FIX_LINEAR_ACCESS_NULL_RDEV */
 
 	rcu_read_lock();
 	dev0 = which_dev(mddev, sector);
 	maxsectors = dev0->end_sector - sector;
+#ifdef CONFIG_SYNO_MD_FIX_LINEAR_ACCESS_NULL_RDEV
+	rdev = rcu_dereference(dev0->rdev);
+	if (NULL != rdev) {
+		subq = bdev_get_queue(rdev->bdev);
+		if (subq->merge_bvec_fn) {
+			bvm->bi_bdev = rdev->bdev;
+			bvm->bi_sector -= dev0->end_sector - rdev->sectors;
+			maxbytes = min(maxbytes, subq->merge_bvec_fn(subq, bvm,
+									 biovec));
+		}
+	}
+#else /* CONFIG_SYNO_MD_FIX_LINEAR_ACCESS_NULL_RDEV */
 	subq = bdev_get_queue(dev0->rdev->bdev);
 	if (subq->merge_bvec_fn) {
 		bvm->bi_bdev = dev0->rdev->bdev;
@@ -81,6 +96,7 @@ static int linear_mergeable_bvec(struct request_queue *q,
 		maxbytes = min(maxbytes, subq->merge_bvec_fn(subq, bvm,
 							     biovec));
 	}
+#endif /* CONFIG_SYNO_MD_FIX_LINEAR_ACCESS_NULL_RDEV */
 	rcu_read_unlock();
 
 	if (maxsectors < bio_sectors)
@@ -103,16 +119,36 @@ static int linear_congested(void *data, int bits)
 	struct linear_conf *conf;
 	int i, ret = 0;
 
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+	if (mddev->degraded) {
+		return ret;
+	}
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+
 	if (mddev_congested(mddev, bits))
 		return 1;
 
 	rcu_read_lock();
 	conf = rcu_dereference(mddev->private);
 
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+	for (i = 0; i < mddev->raid_disks && !ret ; i++) {
+		struct md_rdev *rdev = rcu_dereference(conf->disks[i].rdev);
+		struct request_queue *q = NULL;
+
+		if (!rdev) {
+			continue;
+		}
+
+		q = bdev_get_queue(rdev->bdev);
+		ret |= bdi_congested(&q->backing_dev_info, bits);
+	}
+#else /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 	for (i = 0; i < mddev->raid_disks && !ret ; i++) {
 		struct request_queue *q = bdev_get_queue(conf->disks[i].rdev->bdev);
 		ret |= bdi_congested(&q->backing_dev_info, bits);
 	}
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 
 	rcu_read_unlock();
 	return ret;
@@ -176,9 +212,23 @@ static struct linear_conf *linear_conf(struct mddev *mddev, int raid_disks)
 			discard_supported = true;
 	}
 	if (cnt != raid_disks) {
+#ifdef CONFIG_SYNO_MD_STATUS_GET
+		/*
+		 * for Linear status consistense to other raid type
+		 * Let it can assemble.
+		 */
+		mddev->degraded = mddev->raid_disks - cnt;
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+		mddev->nodev_and_crashed = 1;
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+		printk(KERN_ERR "md/linear:%s: not enough drives present.\n",
+		       mdname(mddev));
+		return conf;
+#else /* CONFIG_SYNO_MD_STATUS_GET */
 		printk(KERN_ERR "md/linear:%s: not enough drives present. Aborting!\n",
 		       mdname(mddev));
 		goto out;
+#endif /* CONFIG_SYNO_MD_STATUS_GET */
 	}
 
 	if (!discard_supported)
@@ -210,6 +260,9 @@ static int linear_run (struct mddev *mddev)
 
 	if (md_check_no_bitmap(mddev))
 		return -EINVAL;
+#ifdef CONFIG_SYNO_MD_STATUS_GET
+	mddev->degraded = 0;
+#endif /* CONFIG_SYNO_MD_STATUS_GET */
 	conf = linear_conf(mddev, mddev->raid_disks);
 
 	if (!conf)
@@ -286,20 +339,92 @@ static int linear_stop (struct mddev *mddev)
 	return 0;
 }
 
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+/**
+ * This is end_io callback function.
+ * We can use this for bad sector report and device error
+ * handing. Prevent umount panic from file system
+ *
+ * @author \$Author: khchen $
+ * @version \$Revision: 1.1
+ *
+ * @param bio    Should not be NULL. Passing from block layer
+ * @param error  error number
+ */
+static void
+SynoLinearEndRequest(struct bio *bio, int error)
+{
+	int uptodate = test_bit(BIO_UPTODATE, &bio->bi_flags);
+	struct mddev *mddev = NULL;
+	struct md_rdev *rdev = NULL;
+	struct bio *data_bio;
+
+	data_bio = bio->bi_private;
+
+	rdev = (struct md_rdev *)data_bio->bi_next;
+	mddev = rdev->mddev;
+
+	bio->bi_end_io = data_bio->bi_end_io;
+	bio->bi_private = data_bio->bi_private;
+
+	if (!uptodate) {
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+		if (IsDeviceDisappear(rdev->bdev)) {
+			syno_md_error(mddev, rdev);
+		} else {
+#ifdef CONFIG_SYNO_MD_SECTOR_STATUS_REPORT
+#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
+			if (bio_flagged(bio, BIO_AUTO_REMAP)) {
+				SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
+			}
+#else /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
+			SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
+#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
+#endif /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
+			md_error(mddev, rdev);
+		}
+#else /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+		md_error(mddev, rdev);
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+	}
+
+	atomic_dec(&rdev->nr_pending);
+	bio_put(data_bio);
+	/* Let mount could successful and bad sector could keep accessing, no matter it success or not */
+	bio_endio(bio, 0);
+}
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+
 static void linear_make_request(struct mddev *mddev, struct bio *bio)
 {
 	struct dev_info *tmp_dev;
 	sector_t start_sector;
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+	struct bio *data_bio;
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 
 	if (unlikely(bio->bi_rw & REQ_FLUSH)) {
 		md_flush_request(mddev, bio);
 		return;
 	}
 
+#ifdef CONFIG_SYNO_MD_STATUS_GET
+	/**
+	* if there has any device offline, we don't make any request to
+	* our linear md array
+	*/
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+	if (mddev->nodev_and_crashed) {
+#else /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+	if (mddev->degraded) {
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+		bio_endio(bio, 0);
+		return;
+	}
+#endif /* CONFIG_SYNO_MD_STATUS_GET */
 	rcu_read_lock();
 	tmp_dev = which_dev(mddev, bio->bi_sector);
 	start_sector = tmp_dev->end_sector - tmp_dev->rdev->sectors;
-
 
 	if (unlikely(bio->bi_sector >= (tmp_dev->end_sector)
 		     || (bio->bi_sector < start_sector))) {
@@ -333,10 +458,25 @@ static void linear_make_request(struct mddev *mddev, struct bio *bio)
 		bio_pair_release(bp);
 		return;
 	}
-		    
+
 	bio->bi_bdev = tmp_dev->rdev->bdev;
 	bio->bi_sector = bio->bi_sector - start_sector
 		+ tmp_dev->rdev->data_offset;
+
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+	data_bio = bio_clone(bio, GFP_NOIO);
+
+	if (data_bio) {
+		atomic_inc(&tmp_dev->rdev->nr_pending);
+		data_bio->bi_end_io = bio->bi_end_io;
+		data_bio->bi_private = bio->bi_private;
+		data_bio->bi_next = (void *)tmp_dev->rdev;
+
+		bio->bi_end_io = SynoLinearEndRequest;
+		bio->bi_private = data_bio;
+	}
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+
 	rcu_read_unlock();
 
 	if (unlikely((bio->bi_rw & REQ_DISCARD) &&
@@ -349,12 +489,168 @@ static void linear_make_request(struct mddev *mddev, struct bio *bio)
 	generic_make_request(bio);
 }
 
+#ifdef CONFIG_SYNO_MD_STATUS_GET
+
+static void
+syno_linear_status(struct seq_file *seq, struct mddev *mddev)
+{
+	struct linear_conf *conf;
+	struct md_rdev *rdev;
+	int j;
+
+	seq_printf(seq, " %dk rounding", mddev->chunk_sectors / 2);
+	seq_printf(seq, " [%d/%d] [", mddev->raid_disks, mddev->raid_disks - mddev->degraded);
+	rcu_read_lock();
+	conf = rcu_dereference(mddev->private);
+	for (j = 0; j < mddev->raid_disks; j++)
+	{
+		rdev = rcu_dereference(conf->disks[j].rdev);
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+		if(rdev &&
+		   !test_bit(Faulty, &rdev->flags)) {
+#else /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+		if(rdev) {
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+			seq_printf (seq, "%s", 
+						test_bit(In_sync, &rdev->flags) ? 
+						(test_bit(DiskError, &rdev->flags) ? "E" : "U") : "_");
+#else /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+			seq_printf (seq, "%s", "U");
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+		} else {
+			seq_printf (seq, "%s", "_");
+		}
+	}
+	rcu_read_unlock();
+	seq_printf (seq, "]");
+}
+#else /* CONFIG_SYNO_MD_STATUS_GET */
 static void linear_status (struct seq_file *seq, struct mddev *mddev)
 {
 
 	seq_printf(seq, " %dk rounding", mddev->chunk_sectors / 2);
 }
+#endif /* CONFIG_SYNO_MD_STATUS_GET */
 
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+static int
+SynoLinearRemoveDisk(struct mddev *mddev, struct md_rdev *rdev)
+{
+	int err = 0;
+	char nm[20];
+	struct linear_conf *conf = mddev->private;
+	int number = rdev->raid_disk;
+
+	if (!rdev) {
+		goto END;
+	}
+
+	/*
+		use the same synchronize method as RAID5
+		see raid5.c:raid5_remove_disk
+	*/
+	conf->disks[number].rdev = NULL;
+	synchronize_rcu();
+	if (atomic_read(&rdev->nr_pending)) {
+		/* lost the race, try later */
+		err = -EBUSY;
+		conf->disks[number].rdev = rdev;
+		goto END;
+	}
+
+	/**
+	 * Linear don't has their own thread, we just remove it's sysfs
+	 * when there has no other pending request
+	 */
+	sprintf(nm,"rd%d", number);
+	sysfs_remove_link(&mddev->kobj, nm);
+	rdev->raid_disk = -1;
+END:
+	return err;
+}
+
+/**
+ * This is our implement for raid handler.
+ * It mainly for handling device hotplug.
+ * We let it look like other raid type.
+ * Set it faulty could let SDK know it's status
+ *
+ * @author \$Author: khchen $
+ * @version \$Revision: 1.1
+ *
+ * @param mddev  Should not be NULL. passing from md.c
+ * @param rdev   Should not be NULL. passing from md.c
+ */
+static void
+SynoLinearError(struct mddev *mddev, struct md_rdev *rdev)
+{
+	if (test_and_clear_bit(In_sync, &rdev->flags)) {
+		if (mddev->degraded < mddev->raid_disks) {
+			SYNO_UPDATE_SB_WORK *update_sb = NULL;
+			mddev->degraded++;
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+			mddev->nodev_and_crashed = 1;
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+			set_bit(Faulty, &rdev->flags);
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+			clear_bit(DiskError, &rdev->flags);
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+
+			if (NULL == (update_sb = kzalloc(sizeof(SYNO_UPDATE_SB_WORK), GFP_ATOMIC))) {
+				WARN_ON(!update_sb);
+				goto END;
+			}
+
+			INIT_WORK(&update_sb->work, SynoUpdateSBTask);
+			update_sb->mddev = mddev;
+			schedule_work(&update_sb->work);
+			set_bit(MD_CHANGE_DEVS, &mddev->flags);
+		}
+	}
+END:
+	return;
+}
+
+/**
+ * This is our implement for raid handler.
+ * It mainly for mdadm set device faulty. We let it look like
+ * other raid type. Let it become read only (scemd would remount
+ * if it find DiskError)
+ *
+ * You should not sync super block in the same thread, otherwise
+ * would panic.
+ *
+ * @author \$Author: khchen $
+ * @version \$Revision: 1.1  *
+ *
+ * @param mddev  Should not be NULL. passing from md.c
+ * @param rdev   Should not be NULL. passing from md.c
+ */
+static void
+SynoLinearErrorInternal(struct mddev *mddev, struct md_rdev *rdev)
+{
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+	if (!test_bit(DiskError, &rdev->flags)) {
+		SYNO_UPDATE_SB_WORK *update_sb = NULL;
+
+		set_bit(DiskError, &rdev->flags);
+		if (NULL == (update_sb = kzalloc(sizeof(SYNO_UPDATE_SB_WORK), GFP_ATOMIC))) {
+			WARN_ON(!update_sb);
+			goto END;
+		}
+
+		INIT_WORK(&update_sb->work, SynoUpdateSBTask);
+		update_sb->mddev = mddev;
+		schedule_work(&update_sb->work);
+		set_bit(MD_CHANGE_DEVS, &mddev->flags);
+	}
+
+END:
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+	return;
+}
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 
 static struct md_personality linear_personality =
 {
@@ -364,8 +660,17 @@ static struct md_personality linear_personality =
 	.make_request	= linear_make_request,
 	.run		= linear_run,
 	.stop		= linear_stop,
+#ifdef CONFIG_SYNO_MD_STATUS_GET
+	.status		= syno_linear_status,
+#else /* CONFIG_SYNO_MD_STATUS_GET */
 	.status		= linear_status,
+#endif /* CONFIG_SYNO_MD_STATUS_GET */
 	.hot_add_disk	= linear_add,
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+	.hot_remove_disk	= SynoLinearRemoveDisk,
+	.error_handler		= SynoLinearErrorInternal,
+	.syno_error_handler	= SynoLinearError,
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 	.size		= linear_size,
 };
 
@@ -378,7 +683,6 @@ static void linear_exit (void)
 {
 	unregister_md_personality (&linear_personality);
 }
-
 
 module_init(linear_init);
 module_exit(linear_exit);

@@ -50,6 +50,16 @@ asmlinkage long sys32_fallocate(int, int, unsigned,
 asmlinkage long sys32_sigreturn(void);
 asmlinkage long sys32_rt_sigreturn(void);
 
+#ifdef CONFIG_SYNO_FS_STAT
+asmlinkage long sys32_SYNOStat64(char __user *, unsigned int, struct SYNOSTAT64 __user *);
+asmlinkage long sys32_SYNOFStat64(unsigned int fd, unsigned int flags, struct SYNOSTAT64 __user *);
+asmlinkage long sys32_SYNOLStat64(char __user *, unsigned int flags, struct SYNOSTAT64 __user *);
+#endif /* CONFIG_SYNO_FS_STAT */
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+asmlinkage long sys32_SYNOCaselessStat64(char __user *, struct stat64 __user *);
+asmlinkage long sys32_SYNOCaselessLStat64(char __user *, struct stat64 __user *);
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+
 #endif /* CONFIG_COMPAT */
 
 #endif /* _ASM_X86_SYS_IA32_H */

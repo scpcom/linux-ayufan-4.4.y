@@ -62,6 +62,15 @@ static int ext3_statfs (struct dentry * dentry, struct kstatfs * buf);
 static int ext3_unfreeze(struct super_block *sb);
 static int ext3_freeze(struct super_block *sb);
 
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+extern struct dentry_operations ext3_dentry_operations;
+
+spinlock_t ext3_namei_buf_lock;  /* lock for ext3_utf8_namei_buf[] in fs/ext3/namei.c */
+spinlock_t ext3_hash_buf_lock;   /* lock for ext3_utf8_hash_buf[] in fs/ext3/namei.c */
+static int ext3_namei_lock_init = 0;
+static int ext3_hash_lock_init = 0;
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
+
 /*
  * Wrappers for journal_start/end.
  */
@@ -586,6 +595,10 @@ static char *data_mode_string(unsigned long mode)
 	return "unknown";
 }
 
+#if defined(CONFIG_SYNO_DEBUG_FLAG)
+extern int SynoDebugFlag;
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+
 /*
  * Show an option if
  *  - it's set to a non-default value OR
@@ -672,7 +685,6 @@ static int ext3_show_options(struct seq_file *seq, struct dentry *root)
 	return 0;
 }
 
-
 static struct inode *ext3_nfs_get_inode(struct super_block *sb,
 		u64 ino, u32 generation)
 {
@@ -736,6 +748,42 @@ static int bdev_try_to_free_page(struct super_block *sb, struct page *page,
 	return try_to_free_buffers(page);
 }
 
+#ifdef CONFIG_SYNO_EXT3_ARCHIVE_VERSION
+static int ext3_syno_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
+{
+	struct ext3_super_block *es = EXT3_SB(sb)->s_es;
+	handle_t *handle;
+	int err, err2;
+
+	sb->s_archive_version = archive_ver;
+	es->s_archive_version = cpu_to_le32(sb->s_archive_version);
+
+	handle = ext3_journal_start_sb(sb, 1);
+	if (IS_ERR(handle)) {
+		err = PTR_ERR(handle);
+		goto exit;
+	}
+	err = ext3_journal_get_write_access(handle, EXT3_SB(sb)->s_sbh);
+	if (err) {
+		goto exit_journal;
+	}
+	err = ext3_journal_dirty_metadata(handle, EXT3_SB(sb)->s_sbh);
+exit_journal:
+	err2 = ext3_journal_stop(handle);
+	if (!err) {
+		err = err2;
+	}
+exit:
+	return err;
+}
+
+static int ext3_syno_get_sb_archive_ver(struct super_block *sb, u32 *archive_ver)
+{
+	*archive_ver = sb->s_archive_version;
+	return 0;
+}
+#endif /* CONFIG_SYNO_EXT3_ARCHIVE_VERSION */
+
 #ifdef CONFIG_QUOTA
 #define QTYPE2NAME(t) ((t)==USRQUOTA?"user":"group")
 #define QTYPE2MOPT(on, t) ((t)==USRQUOTA?((on)##USRJQUOTA):((on)##GRPJQUOTA))
@@ -775,6 +823,10 @@ static const struct quotactl_ops ext3_qctl_operations = {
 #endif
 
 static const struct super_operations ext3_sops = {
+#ifdef CONFIG_SYNO_EXT3_ARCHIVE_VERSION
+	.syno_set_sb_archive_ver = ext3_syno_set_sb_archive_ver,
+	.syno_get_sb_archive_ver = ext3_syno_get_sb_archive_ver,
+#endif
 	.alloc_inode	= ext3_alloc_inode,
 	.destroy_inode	= ext3_destroy_inode,
 	.write_inode	= ext3_write_inode,
@@ -1334,6 +1386,8 @@ static int ext3_setup_super(struct super_block *sb, struct ext3_super_block *es,
 		ext3_msg(sb, KERN_WARNING,
 			"warning: mounting fs with errors, "
 			"running e2fsck is recommended");
+#ifdef CONFIG_SYNO_EXT_SKIP_FSCK_REMINDER
+#else
 	else if ((__s16) le16_to_cpu(es->s_max_mnt_count) > 0 &&
 		 le16_to_cpu(es->s_mnt_count) >=
 			le16_to_cpu(es->s_max_mnt_count))
@@ -1346,6 +1400,7 @@ static int ext3_setup_super(struct super_block *sb, struct ext3_super_block *es,
 		ext3_msg(sb, KERN_WARNING,
 			"warning: checktime reached, "
 			"running e2fsck is recommended");
+#endif
 #if 0
 		/* @@@ We _will_ want to clear the valid bit if we find
                    inconsistencies, to force a fsck at reboot.  But for
@@ -1437,7 +1492,6 @@ static int ext3_check_descriptors(struct super_block *sb)
 	sbi->s_es->s_free_inodes_count=cpu_to_le32(ext3_count_free_inodes(sb));
 	return 1;
 }
-
 
 /* ext3_orphan_cleanup() walks a singly-linked list of inodes (starting at
  * the superblock) which were deleted from all directories, but held open by
@@ -1583,7 +1637,6 @@ static loff_t ext3_max_size(int bits)
 	/* total blocks in file system block size */
 	upper_limit >>= (bits - 9);
 
-
 	/* indirect blocks */
 	meta_blocks = 1;
 	/* double indirect blocks */
@@ -1625,7 +1678,6 @@ static ext3_fsblk_t descriptor_loc(struct super_block *sb,
 		has_super = 1;
 	return (has_super + ext3_group_first_block_no(sb, bg));
 }
-
 
 static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 {
@@ -2043,12 +2095,23 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		ext3_msg(sb, KERN_ERR, "error: corrupt root inode, run e2fsck");
 		goto failed_mount3;
 	}
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+	sb->s_d_op = &ext3_dentry_operations;
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 	sb->s_root = d_make_root(root);
 	if (!sb->s_root) {
 		ext3_msg(sb, KERN_ERR, "error: get root dentry failed");
 		ret = -ENOMEM;
 		goto failed_mount3;
 	}
+
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+	// root is mounted, attach our dentry operations
+	sb->s_root->d_op = &ext3_dentry_operations;
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
+#ifdef CONFIG_SYNO_EXT3_ARCHIVE_VERSION
+	sb->s_archive_version = le32_to_cpu(es->s_archive_version);
+#endif
 
 	if (ext3_setup_super(sb, es, sb->s_flags & MS_RDONLY))
 		sb->s_flags |= MS_RDONLY;
@@ -2064,6 +2127,16 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_JOURNAL_DATA ? "journal":
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_ORDERED_DATA ? "ordered":
 		"writeback");
+#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+	if (!ext3_namei_lock_init) {
+		spin_lock_init(&ext3_namei_buf_lock);
+		ext3_namei_lock_init=1;
+	}
+	if (!ext3_hash_lock_init) {
+		spin_lock_init(&ext3_hash_buf_lock);
+		ext3_hash_lock_init=1;
+	}
+#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
 
 	return 0;
 
@@ -2434,7 +2507,6 @@ static int ext3_commit_super(struct super_block *sb,
 	}
 	return error;
 }
-
 
 /*
  * Have we just finished recovery?  If so, and if we are mounting (or

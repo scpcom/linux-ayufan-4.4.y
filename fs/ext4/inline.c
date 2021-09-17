@@ -1618,10 +1618,18 @@ out:
 	return ret;
 }
 
+#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+struct buffer_head *ext4_find_inline_entry(struct inode *dir,
+					const struct qstr *d_name,
+					struct ext4_dir_entry_2 **res_dir,
+					int *has_inline_data,
+					int caseless)
+#else
 struct buffer_head *ext4_find_inline_entry(struct inode *dir,
 					const struct qstr *d_name,
 					struct ext4_dir_entry_2 **res_dir,
 					int *has_inline_data)
+#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
 {
 	int ret;
 	struct ext4_iloc iloc;
@@ -1640,8 +1648,13 @@ struct buffer_head *ext4_find_inline_entry(struct inode *dir,
 	inline_start = (void *)ext4_raw_inode(&iloc)->i_block +
 						EXT4_INLINE_DOTDOT_SIZE;
 	inline_size = EXT4_MIN_INLINE_DATA_SIZE - EXT4_INLINE_DOTDOT_SIZE;
+#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+	ret = search_dir(iloc.bh, inline_start, inline_size,
+			 dir, d_name, 0, res_dir, caseless);
+#else
 	ret = search_dir(iloc.bh, inline_start, inline_size,
 			 dir, d_name, 0, res_dir);
+#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
 	if (ret == 1)
 		goto out_find;
 	if (ret < 0)
@@ -1653,8 +1666,13 @@ struct buffer_head *ext4_find_inline_entry(struct inode *dir,
 	inline_start = ext4_get_inline_xattr_pos(dir, &iloc);
 	inline_size = ext4_get_inline_size(dir) - EXT4_MIN_INLINE_DATA_SIZE;
 
+#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+	ret = search_dir(iloc.bh, inline_start, inline_size,
+			 dir, d_name, 0, res_dir, caseless);
+#else
 	ret = search_dir(iloc.bh, inline_start, inline_size,
 			 dir, d_name, 0, res_dir);
+#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
 	if (ret == 1)
 		goto out_find;
 
@@ -1907,7 +1925,6 @@ void ext4_inline_data_truncate(struct inode *inode, int *has_inline)
 		.name_index = EXT4_XATTR_INDEX_SYSTEM,
 		.name = EXT4_XATTR_SYSTEM_DATA,
 	};
-
 
 	needed_blocks = ext4_writepage_trans_blocks(inode);
 	handle = ext4_journal_start(inode, EXT4_HT_INODE, needed_blocks);

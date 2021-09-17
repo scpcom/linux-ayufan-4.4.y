@@ -105,6 +105,17 @@ cifs_mapchar(char *target, const __u16 src_char, const struct nls_table *cp,
 	case UNI_LESSTHAN:
 		*target = '<';
 		break;
+#ifdef CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER
+	case UNI_DQUOT:
+		*target = '"';
+		break;
+	case UNI_DIVSLASH:
+		*target = '/';
+		break;
+	case UNI_CRGRET:
+		*target = '\r';
+		break;
+#endif /* CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER */
 	default:
 		goto cp_convert;
 	}
@@ -189,6 +200,32 @@ cifs_from_utf16(char *to, const __le16 *from, int tolen, int fromlen,
 	return outlen;
 }
 
+#ifdef CONFIG_SYNO_CIFS_NO_SPECIAL_CHAR_LOGON
+int
+cifs_strtoUTF16_NoSpecialChar(__le16 *to, const char *from, int len,
+	      const struct nls_table *codepage)
+{
+	int charlen;
+	int i;
+	wchar_t wchar_to; /* needed to quiet sparse */
+
+	for (i = 0; len && *from; i++, from += charlen, len -= charlen) {
+		charlen = codepage->char2uni(from, len, &wchar_to);
+		if (charlen < 1) {
+			cifs_dbg(VFS, "strtoUTF16: char2uni of 0x%x returned %d",
+				*from, charlen);
+			/* A question mark */
+			wchar_to = 0x003f;
+			charlen = 1;
+		}
+		put_unaligned_le16(wchar_to, &to[i]);
+	}
+
+	put_unaligned_le16(0, &to[i]);
+	return i;
+}
+#endif /* CONFIG_SYNO_CIFS_NO_SPECIAL_CHAR_LOGON */
+
 /*
  * NAME:	cifs_strtoUTF16()
  *
@@ -203,6 +240,9 @@ cifs_strtoUTF16(__le16 *to, const char *from, int len,
 	int i;
 	wchar_t wchar_to; /* needed to quiet sparse */
 
+#ifdef CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER
+	/* remove the convert to match special char convert rule */
+#else
 	/* special case for utf8 to handle no plane0 chars */
 	if (!strcmp(codepage->charset, "utf8")) {
 		/*
@@ -223,17 +263,55 @@ cifs_strtoUTF16(__le16 *to, const char *from, int len,
 		 * invalid encoded characters
 		 */
 	}
+#endif /* CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER */
 
 	for (i = 0; len && *from; i++, from += charlen, len -= charlen) {
+#ifdef CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER
+		if (0x0d == *from) {    //'\r'
+			to[i] = cpu_to_le16(0xf00d);
+			charlen = 1;
+		} else if (0x2a == *from) {     //'*'
+			to[i] = cpu_to_le16(0xf02a);
+			charlen = 1;
+		} else if (0x2f == *from) {     //'/'
+			to[i] = cpu_to_le16(0xf02f);
+			charlen = 1;
+		} else if (0x3c == *from) {     //'<'
+			to[i] = cpu_to_le16(0xf03c);
+			charlen = 1;
+		} else if (0x3e == *from) {     //'>'
+			to[i] = cpu_to_le16(0xf03e);
+			charlen = 1;
+		} else if (0x3f == *from) {     //'?'
+			to[i] = cpu_to_le16(0xf03f);
+			charlen = 1;
+		} else if (0x7c== *from) {      //'|'
+			to[i] = cpu_to_le16(0xf07c);
+			charlen = 1;
+		} else if (0x3a== *from) {      //':'
+			to[i] = cpu_to_le16(0xf022);
+			charlen = 1;
+		} else if (0x22== *from) {      //'"'
+			to[i] = cpu_to_le16(0xf020);
+			charlen = 1;
+		} else {
+#endif /* CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER */
 		charlen = codepage->char2uni(from, len, &wchar_to);
 		if (charlen < 1) {
+#ifdef CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER
+			/* remove debug? */
+#else
 			cifs_dbg(VFS, "strtoUTF16: char2uni of 0x%x returned %d\n",
 				 *from, charlen);
+#endif /* CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER */
 			/* A question mark */
 			wchar_to = 0x003f;
 			charlen = 1;
 		}
 		put_unaligned_le16(wchar_to, &to[i]);
+#ifdef CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER
+		}
+#endif /* CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER */
 	}
 
 success:
@@ -323,6 +401,17 @@ cifsConvertToUTF16(__le16 *target, const char *source, int srclen,
 		case '|':
 			dst_char = cpu_to_le16(UNI_PIPE);
 			break;
+#ifdef CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER
+		case '"':
+			dst_char = cpu_to_le16(UNI_DQUOT);
+			break;
+		case '/':
+			dst_char = cpu_to_le16(UNI_DIVSLASH);
+			break;
+		case '\r':
+			dst_char = cpu_to_le16(UNI_CRGRET);
+			break;
+#endif /* CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER */
 		/*
 		 * FIXME: We can not handle remapping backslash (UNI_SLASH)
 		 * until all the calls to build_path_from_dentry are modified,

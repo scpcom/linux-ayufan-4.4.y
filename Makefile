@@ -365,7 +365,8 @@ LINUXINCLUDE    := \
 		-Iarch/$(hdr-arch)/include/generated \
 		$(if $(KBUILD_SRC), -I$(srctree)/include) \
 		-Iinclude \
-		$(USERINCLUDE)
+		$(USERINCLUDE) \
+		-include $(if $(KBUILD_SRC),$(srctree)/)include/linux/syno.h
 
 KBUILD_CPPFLAGS := -D__KERNEL__
 
@@ -549,7 +550,7 @@ else
 PHONY += include/config/auto.conf
 
 include/config/auto.conf:
-	$(Q)test -e include/generated/autoconf.h -a -e $@ || (		\
+	@$(Q)test -e include/generated/autoconf.h -a -e $@ || (		\
 	echo >&2;							\
 	echo >&2 "  ERROR: Kernel configuration is invalid.";		\
 	echo >&2 "         include/generated/autoconf.h or $@ are missing.";\

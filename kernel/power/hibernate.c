@@ -31,7 +31,6 @@
 
 #include "power.h"
 
-
 static int nocompress;
 static int noresume;
 static int resume_wait;
@@ -500,6 +499,18 @@ int hibernation_restore(int platform_mode)
 	return error;
 }
 
+#ifdef CONFIG_SYNO_X86_AUTO_POWER_ON
+void syno_schedule_power_on_prepare(void)
+{
+	if (!hibernation_ops) {
+		return;
+	}
+
+	hibernation_ops->begin();
+	hibernation_ops->end();
+}
+#endif /* CONFIG_SYNO_X86_AUTO_POWER_ON */
+
 /**
  * hibernation_platform_enter - Power off the system using the platform driver.
  */
@@ -699,7 +710,6 @@ int hibernate(void)
 	return error;
 }
 
-
 /**
  * software_resume - Resume from a saved hibernation image.
  *
@@ -846,7 +856,6 @@ close_finish:
 }
 
 late_initcall(software_resume);
-
 
 static const char * const hibernation_modes[] = {
 	[HIBERNATION_PLATFORM]	= "platform",
@@ -1046,11 +1055,9 @@ static struct attribute * g[] = {
 	NULL,
 };
 
-
 static struct attribute_group attr_group = {
 	.attrs = g,
 };
-
 
 static int __init pm_disk_init(void)
 {
@@ -1058,7 +1065,6 @@ static int __init pm_disk_init(void)
 }
 
 core_initcall(pm_disk_init);
-
 
 static int __init resume_setup(char *str)
 {

@@ -804,7 +804,6 @@ void *idr_get_next(struct idr *idp, int *nextidp)
 }
 EXPORT_SYMBOL(idr_get_next);
 
-
 /**
  * idr_replace - replace pointer for given id
  * @idp: idr handle
@@ -870,7 +869,6 @@ void idr_init(struct idr *idp)
 	spin_lock_init(&idp->lock);
 }
 EXPORT_SYMBOL(idr_init);
-
 
 /**
  * DOC: IDA description
@@ -1020,6 +1018,14 @@ int ida_get_new_above(struct ida *ida, int starting_id, int *p_id)
 	return 0;
 }
 EXPORT_SYMBOL(ida_get_new_above);
+
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+int syno_ida_get_new(struct ida *idp, int starting_id, int *id)
+{
+	return ida_get_new_above(idp, starting_id, id);
+}
+EXPORT_SYMBOL(syno_ida_get_new);
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
 
 /**
  * ida_remove - remove the given ID

@@ -507,7 +507,6 @@ static void stub_recv_cmd_submit(struct stub_device *sdev,
 
 	usbip_pack_pdu(pdu, priv->urb, USBIP_CMD_SUBMIT, 0);
 
-
 	if (usbip_recv_xbuff(ud, priv->urb) < 0)
 		return;
 
@@ -548,7 +547,7 @@ static void stub_rx_pdu(struct usbip_device *ud)
 	struct stub_device *sdev = container_of(ud, struct stub_device, ud);
 	struct device *dev = &sdev->interface->dev;
 
-	usbip_dbg_stub_rx("Enter\n");
+	usbip_dbg_stub_rx("Enter stub_rx_pdu\n");
 
 	memset(&pdu, 0, sizeof(pdu));
 
@@ -575,7 +574,10 @@ static void stub_rx_pdu(struct usbip_device *ud)
 	case USBIP_CMD_UNLINK:
 		stub_recv_cmd_unlink(sdev, &pdu);
 		break;
-
+#ifdef CONFIG_SYNO_USB_USBIP
+	case USBIP_RESET_DEV:
+		printk("reset device\n");
+#endif
 	case USBIP_CMD_SUBMIT:
 		stub_recv_cmd_submit(sdev, &pdu);
 		break;

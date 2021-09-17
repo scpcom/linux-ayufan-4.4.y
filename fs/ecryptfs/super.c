@@ -181,7 +181,50 @@ static int ecryptfs_show_options(struct seq_file *m, struct dentry *root)
 	return 0;
 }
 
+#ifdef CONFIG_SYNO_ECRYPTFS_ARCHIVE_VERSION
+static int ecryptfs_syno_get_sb_archive_ver(struct super_block *sb, u32 *archive_ver)
+{
+	struct super_block *lower_sb = ecryptfs_superblock_to_lower(sb);
+	if (!lower_sb->s_op->syno_get_sb_archive_ver)
+		return -EINVAL;
+	return lower_sb->s_op->syno_get_sb_archive_ver(lower_sb, archive_ver);
+}
+
+static int ecryptfs_syno_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
+{
+	struct super_block *lower_sb = ecryptfs_superblock_to_lower(sb);
+	if (!lower_sb->s_op->syno_set_sb_archive_ver)
+		return -EINVAL;
+	return lower_sb->s_op->syno_set_sb_archive_ver(lower_sb, archive_ver);
+}
+#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+static int ecryptfs_get_sb_archive_ver1(struct super_block *sb, u32 *archive_ver)
+{
+	struct super_block *lower_sb = ecryptfs_superblock_to_lower(sb);
+	if (!lower_sb->s_op->syno_get_sb_archive_ver1)
+		return -EINVAL;
+	return lower_sb->s_op->syno_get_sb_archive_ver1(lower_sb, archive_ver);
+}
+
+static int ecryptfs_set_sb_archive_ver1(struct super_block *sb, u32 archive_ver)
+{
+	struct super_block *lower_sb = ecryptfs_superblock_to_lower(sb);
+	if (!lower_sb->s_op->syno_set_sb_archive_ver1)
+		return -EINVAL;
+	return lower_sb->s_op->syno_set_sb_archive_ver1(lower_sb, archive_ver);
+}
+#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
+#endif /* CONFIG_SYNO_ECRYPTFS_ARCHIVE_VERSION */
+
 const struct super_operations ecryptfs_sops = {
+#ifdef CONFIG_SYNO_ECRYPTFS_ARCHIVE_VERSION
+	.syno_get_sb_archive_ver = ecryptfs_syno_get_sb_archive_ver,
+	.syno_set_sb_archive_ver = ecryptfs_syno_set_sb_archive_ver,
+#endif
+#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+	.syno_get_sb_archive_ver1 = ecryptfs_get_sb_archive_ver1,
+	.syno_set_sb_archive_ver1 = ecryptfs_set_sb_archive_ver1,
+#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
 	.alloc_inode = ecryptfs_alloc_inode,
 	.destroy_inode = ecryptfs_destroy_inode,
 	.statfs = ecryptfs_statfs,

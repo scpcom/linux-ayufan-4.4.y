@@ -402,6 +402,14 @@ enum {
 	SATA_PMP_GSCR_ERROR_EN	= 33,
 	SATA_PMP_GSCR_FEAT	= 64,
 	SATA_PMP_GSCR_FEAT_EN	= 96,
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+	SATA_PMP_GSCR_3XXX_GPIO	= 130,
+	SATA_PMP_GSCR_9705_GPI = 944,
+	SATA_PMP_GSCR_9705_GPO = 928,
+	SATA_PMP_GSCR_9705_GPO_EN = 932,       /* GPIO dataout enable */
+	SATA_PMP_GSCR_9705_GPI_POLARITY = 940, /* GPIO datain polarity */
+	SATA_PMP_GSCR_9705_SATA_BLINK_RATE = 1004, /* Blink rate counter register */
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 
 	SATA_PMP_PSCR_STATUS	= 0,
 	SATA_PMP_PSCR_ERROR	= 1,
@@ -615,7 +623,6 @@ static inline bool ata_id_has_dipm(const u16 *id)
 
 	return val & (1 << 3);
 }
-
 
 static inline bool ata_id_has_fua(const u16 *id)
 {

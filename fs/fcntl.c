@@ -26,6 +26,214 @@
 #include <asm/siginfo.h>
 #include <asm/uaccess.h>
 
+#ifdef CONFIG_SYNO_FS_WINACL
+#include "synoacl_int.h"
+#define ACL_MASK_NONE 0
+#endif
+
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+
+#include <linux/mount.h>
+
+struct syno_archive_map {
+	unsigned int sAr;	//syno archive
+	int isSetCmd;
+};
+
+static struct syno_archive_map rgSynoAr[] = {
+	{S2_IARCHIVE, 0},               /* F_CLEAR_ARCHIVE */
+	{S2_SMB_ARCHIVE, 1},            /* F_SETSMB_ARCHIVE */
+	{S2_SMB_HIDDEN, 1},             /* F_SETSMB_HIDDEN */
+	{S2_SMB_SYSTEM, 1},             /* F_SETSMB_SYSTEM */
+	{S2_SMB_ARCHIVE, 0},            /* F_CLRSMB_ARCHIVE */
+	{S2_SMB_HIDDEN, 0},             /* F_CLRSMB_HIDDEN */
+	{S2_SMB_SYSTEM, 0},             /* F_CLRSMB_SYSTEM */
+	{S3_IARCHIVE, 0},               /* F_CLEAR_S3_ARCHIVE */
+#ifdef CONFIG_SYNO_FS_WINACL
+	{S2_SMB_READONLY, 0},           /* F_CLRSMB_READONLY */
+	{S2_SMB_READONLY, 1},           /* F_SETSMB_READONLY */
+	{S2_SYNO_ACL_INHERIT, 0},       /* F_CLRACL_INHERIT */
+	{S2_SYNO_ACL_INHERIT, 1},       /* F_SETSMB_INHERIT */
+	{S2_SYNO_ACL_EXIST, 0},         /* F_CLRACL_HAS_ACL */
+	{S2_SYNO_ACL_EXIST, 1},         /* F_SETACL_HAS_ACL */
+	{S2_SYNO_ACL_SUPPORT, 0},       /* F_CLRACL_SUPPORT */
+	{S2_SYNO_ACL_SUPPORT, 1},       /* F_SETACL_SUPPORT */
+	{S2_SYNO_ACL_IS_OWNER_GROUP, 0},/* F_CLRACL_OWNER_IS_GROUP */
+	{S2_SYNO_ACL_IS_OWNER_GROUP, 1},/* F_SETACL_OWNER_IS_GROUP */
+#endif /* CONFIG_SYNO_FS_WINACL */
+};
+
+#ifdef CONFIG_SYNO_FS_WINACL
+const int rgSynoArAclTag[] = {
+	PROTECT_BY_ACL,                 /* F_CLEAR_ARCHIVE */
+	PROTECT_BY_ACL,                 /* F_SETSMB_ARCHIVE */
+	PROTECT_BY_ACL,                 /* F_SETSMB_HIDDEN */
+	PROTECT_BY_ACL,                 /* F_SETSMB_SYSTEM */
+	PROTECT_BY_ACL,                 /* F_CLRSMB_ARCHIVE */
+	PROTECT_BY_ACL,                 /* F_CLRSMB_HIDDEN */
+	PROTECT_BY_ACL,                 /* F_CLRSMB_SYSTEM */
+	PROTECT_BY_ACL,                 /* F_CLEAR_S3_ARCHIVE */
+	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, /* F_CLRSMB_READONLY */
+	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, /* F_SETSMB_READONLY */
+	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, /* F_CLRACL_INHERIT */
+	PROTECT_BY_ACL | NEED_FS_ACL_SUPPORT,                          /* F_SETACL_INHERIT */
+	NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT,                  /* F_CLRACL_HAS_ACL */
+	NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT,                  /* F_SETACL_HAS_ACL */
+	NEED_FS_ACL_SUPPORT,                                           /* F_CLRACL_SUPPORT */
+	NEED_FS_ACL_SUPPORT,                                           /* F_SETACL_SUPPORT */
+	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, /* F_CLRACL_OWNER_IS_GROUP */
+	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, /* F_SETACL_OWNER_IS_GROUP */
+};
+
+const int rgSynoArAclMask[] = {
+	MAY_WRITE_ATTR,       /* F_CLEAR_ARCHIVE */
+	MAY_WRITE_ATTR,       /* F_SETSMB_ARCHIVE */
+	MAY_WRITE_ATTR,       /* F_SETSMB_HIDDEN */
+	MAY_WRITE_ATTR,       /* F_SETSMB_SYSTEM */
+	MAY_WRITE_ATTR,       /* F_CLRSMB_ARCHIVE */
+	MAY_WRITE_ATTR,       /* F_CLRSMB_HIDDEN */
+	MAY_WRITE_ATTR,       /* F_CLRSMB_SYSTEM */
+	MAY_WRITE_ATTR,       /* F_CLEAR_S3_ARCHIVE */
+	MAY_WRITE_ATTR,       /* F_CLRSMB_READONLY */
+	MAY_WRITE_ATTR,       /* F_SETSMB_READONLY */
+	MAY_WRITE_PERMISSION, /* F_CLRACL_INHERIT */
+	MAY_WRITE_PERMISSION, /* F_SETACL_INHERIT */
+	ACL_MASK_NONE,        /* F_CLRACL_HAS_ACL */
+	ACL_MASK_NONE,        /* F_SETACL_HAS_ACL */
+	ACL_MASK_NONE,        /* F_CLRACL_SUPPORT */
+	ACL_MASK_NONE,        /* F_SETACL_SUPPORT */
+	MAY_GET_OWNER_SHIP,   /* F_CLRACL_OWNER_IS_GROUP */
+	MAY_GET_OWNER_SHIP,   /* F_SETACL_OWNER_IS_GROUP */
+};
+
+struct syno_archive_permission_mapping {
+	unsigned int sAr;	//syno archive
+	int permission;
+};
+static struct syno_archive_permission_mapping rgSynoArPermission[] = {
+	/* General archive */
+	{S2_IARCHIVE, MAY_WRITE_ATTR},
+	{S2_SMB_ARCHIVE, MAY_WRITE_ATTR},
+	{S2_SMB_HIDDEN, MAY_WRITE_ATTR},
+	{S2_SMB_SYSTEM, MAY_WRITE_ATTR},
+
+	/* ACL archive */
+	{S2_SMB_READONLY, MAY_WRITE_ATTR},
+	{S2_SYNO_ACL_IS_OWNER_GROUP, MAY_GET_OWNER_SHIP},
+	{S2_SYNO_ACL_INHERIT, MAY_WRITE_PERMISSION},
+	{S2_SYNO_ACL_EXIST, MAY_WRITE_PERMISSION},
+	{S2_SYNO_ACL_SUPPORT, MAY_WRITE_PERMISSION},
+	{0, -1}
+};
+#endif /* CONFIG_SYNO_FS_WINACL */
+
+long __SYNOArchiveSet(struct dentry *dentry, unsigned int cmd)
+{
+	int i = cmd - SYNO_FCNTL_BASE;
+	struct inode *inode = dentry->d_inode;
+	long err;
+	u32 archive_bit;
+
+	mutex_lock(&inode->i_syno_mutex);
+	err = syno_op_get_archive_bit(dentry, &archive_bit);
+	if (err)
+		goto unlock;
+
+	if ((rgSynoAr[i].isSetCmd == ((archive_bit & rgSynoAr[i].sAr)?1:0))){
+		err = 0;
+		goto unlock;
+	}
+#ifdef CONFIG_SYNO_FS_WINACL
+	if (0 > (err = synoacl_op_arbit_chg_ok(dentry, cmd, rgSynoArAclTag[i], rgSynoArAclMask[i]))){
+		goto unlock;
+	}
+#endif /* CONFIG_SYNO_FS_WINACL */
+	if (rgSynoAr[i].isSetCmd) {
+		archive_bit |= rgSynoAr[i].sAr;
+#ifdef CONFIG_SYNO_FS_WINACL
+		if (S2_SYNO_ACL_INHERIT == rgSynoAr[i].sAr) {
+			archive_bit |= S2_SYNO_ACL_SUPPORT;
+		}
+#endif /* CONFIG_SYNO_FS_WINACL */
+	} else {
+		archive_bit &= ~rgSynoAr[i].sAr;
+	}
+
+	err = syno_op_set_archive_bit_nolock(dentry, archive_bit);
+unlock:
+	mutex_unlock(&inode->i_syno_mutex);
+	return err;
+}
+EXPORT_SYMBOL(__SYNOArchiveSet);
+
+long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
+{
+	struct inode *inode = dentry->d_inode;
+	int err = 0;
+	u32 archive_bit;
+#ifdef CONFIG_SYNO_FS_WINACL
+	int permissionCheck = 0;
+	int i = 0;
+#endif
+	mutex_lock(&inode->i_syno_mutex);
+	err = syno_op_get_archive_bit(dentry, &archive_bit);
+	if (err)
+		goto unlock;
+
+#ifdef CONFIG_SYNO_FS_WINACL
+	if (IS_SYNOACL(dentry)) {
+		for (i = 0; -1 != rgSynoArPermission[i].permission; i++) {
+			if ((archive_bit & rgSynoArPermission[i].sAr) == (flags & rgSynoArPermission[i].sAr)) {
+				continue;
+			}
+			permissionCheck |= rgSynoArPermission[i].permission;
+		}
+		err = synoacl_op_perm(dentry, permissionCheck);
+		if (err) {
+			goto unlock;
+		}
+	} else {
+		if (!inode_owner_or_capable(inode)) {
+			err = -EPERM;
+			goto unlock;
+		}
+	}
+	if (ALL_SYNO_ACL_ARCHIVE & flags) {
+		if (!IS_FS_SYNOACL(inode)) {
+			err = -EOPNOTSUPP;
+			goto unlock;
+		}
+		// S2_SYNO_ACL_SUPPORT should be set if you want to set ACL archive bit.
+		if (!(S2_SYNO_ACL_SUPPORT & flags)) {
+			err = -EINVAL;
+			goto unlock;
+		}
+	}
+#else
+	if (!inode_owner_or_capable(inode)) {
+		err = -EPERM;
+		goto unlock;
+	}
+#endif /* CONFIG_SYNO_FS_WINACL */
+	if ((~ALL_ARCHIVE_BIT) & flags) {
+		err = -EINVAL;
+		goto unlock;
+	}
+
+	if (flags == archive_bit)
+		goto unlock;
+
+	err = syno_op_set_archive_bit_nolock(dentry, flags);
+unlock:
+	mutex_unlock(&inode->i_syno_mutex);
+	return err;
+}
+EXPORT_SYMBOL(__SYNOArchiveOverwrite);
+#endif /* CONFIG_SYNO_FS_ARCHIVE_BIT */
+
+#ifdef CONFIG_SYNO_FS_WINACL
+#include "synoacl_int.h"
+#endif /* CONFIG_SYNO_FS_WINACL */
 #define SETFL_MASK (O_APPEND | O_NONBLOCK | O_NDELAY | O_DIRECT | O_NOATIME)
 
 static int setfl(int fd, struct file * filp, unsigned long arg)
@@ -327,6 +535,15 @@ static long do_fcntl(int fd, unsigned int cmd, unsigned long arg,
 	case F_GETPIPE_SZ:
 		err = pipe_fcntl(filp, cmd, arg);
 		break;
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+	case SYNO_FCNTL_BASE ... SYNO_FCNTL_LAST:
+		err = mnt_want_write(filp->f_path.mnt);
+		if (err)
+			break;
+		err = __SYNOArchiveSet(filp->f_dentry, cmd);
+		mnt_drop_write(filp->f_path.mnt);
+		break;
+#endif /* CONFIG_SYNO_FS_ARCHIVE_BIT */
 	default:
 		break;
 	}

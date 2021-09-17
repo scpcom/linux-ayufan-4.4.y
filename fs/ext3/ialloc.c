@@ -33,7 +33,6 @@
  * the free blocks count in the block.
  */
 
-
 /*
  * Read the inode allocation bitmap for a given block_group, reading
  * into the specified slot in the superblock's bitmap cache.
@@ -464,7 +463,6 @@ got:
 	if (S_ISDIR(mode))
 		percpu_counter_inc(&sbi->s_dirs_counter);
 
-
 	if (test_opt(sb, GRPID)) {
 		inode->i_mode = mode;
 		inode->i_uid = current_fsuid();
@@ -476,6 +474,12 @@ got:
 	/* This is the optimal IO size (for stat), not the fs block size */
 	inode->i_blocks = 0;
 	inode->i_mtime = inode->i_atime = inode->i_ctime = CURRENT_TIME_SEC;
+#ifdef CONFIG_SYNO_EXT3_CREATE_TIME
+	inode->i_create_time = CURRENT_TIME_SEC;
+#endif
+#ifdef CONFIG_SYNO_EXT3_ARCHIVE_BIT
+	inode->i_archive_bit = ALL_SYNO_ARCHIVE;
+#endif
 
 	memset(ei->i_data, 0, sizeof(ei->i_data));
 	ei->i_dir_start_lookup = 0;
@@ -703,4 +707,3 @@ unsigned long ext3_count_dirs (struct super_block * sb)
 	}
 	return count;
 }
-

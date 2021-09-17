@@ -38,7 +38,6 @@
 static int fat_default_codepage = CONFIG_FAT_DEFAULT_CODEPAGE;
 static char fat_default_iocharset[] = CONFIG_FAT_DEFAULT_IOCHARSET;
 
-
 static int fat_add_cluster(struct inode *inode)
 {
 	int err, cluster;
@@ -162,6 +161,14 @@ static int fat_write_begin(struct file *file, struct address_space *mapping,
 	err = cont_write_begin(file, mapping, pos, len, flags,
 				pagep, fsdata, fat_get_block,
 				&MSDOS_I(mapping->host)->mmu_private);
+#ifdef CONFIG_SYNO_FS_RECVFILE
+	if (err >= 0 && (flags & AOP_FLAG_RECVFILE)) {
+		if (pos+len > mapping->host->i_size) {
+			i_size_write(mapping->host, pos+len);
+			mark_inode_dirty(mapping->host);
+		}
+	} else
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 	if (err < 0)
 		fat_write_failed(mapping, pos + len);
 	return err;
@@ -860,7 +867,11 @@ enum {
 	Opt_charset, Opt_shortname_lower, Opt_shortname_win95,
 	Opt_shortname_winnt, Opt_shortname_mixed, Opt_utf8_no, Opt_utf8_yes,
 	Opt_uni_xl_no, Opt_uni_xl_yes, Opt_nonumtail_no, Opt_nonumtail_yes,
+#ifdef CONFIG_SYNO_FAT_DEFAULT_MNT_FLUSH
+	Opt_obsolete, Opt_flush, Opt_noflush, Opt_tz_utc, Opt_rodir, Opt_err_cont,
+#else
 	Opt_obsolete, Opt_flush, Opt_tz_utc, Opt_rodir, Opt_err_cont,
+#endif
 	Opt_err_panic, Opt_err_ro, Opt_discard, Opt_nfs, Opt_time_offset,
 	Opt_nfs_stale_rw, Opt_nfs_nostale_ro, Opt_err,
 };
@@ -886,6 +897,9 @@ static const match_table_t fat_tokens = {
 	{Opt_debug, "debug"},
 	{Opt_immutable, "sys_immutable"},
 	{Opt_flush, "flush"},
+#ifdef CONFIG_SYNO_FAT_DEFAULT_MNT_FLUSH
+	{Opt_noflush, "noflush"},
+#endif
 	{Opt_tz_utc, "tz=UTC"},
 	{Opt_time_offset, "time_offset=%d"},
 	{Opt_err_cont, "errors=continue"},
@@ -977,6 +991,9 @@ static int parse_options(struct super_block *sb, char *options, int is_vfat,
 	opts->tz_set = 0;
 	opts->nfs = 0;
 	opts->errors = FAT_ERRORS_RO;
+#ifdef CONFIG_SYNO_FAT_DEFAULT_MNT_FLUSH
+	opts->flush = 1;
+#endif
 	*debug = 0;
 
 	if (!options)
@@ -1070,6 +1087,11 @@ static int parse_options(struct super_block *sb, char *options, int is_vfat,
 		case Opt_flush:
 			opts->flush = 1;
 			break;
+#ifdef CONFIG_SYNO_FAT_DEFAULT_MNT_FLUSH
+		case Opt_noflush:
+			opts->flush = 0;
+			break;
+#endif
 		case Opt_time_offset:
 			if (match_int(&args[0], &option))
 				return -EINVAL;
@@ -1485,17 +1507,39 @@ int fat_fill_super(struct super_block *sb, void *data, int silent, int isvfat,
 	sprintf(buf, "cp%d", sbi->options.codepage);
 	sbi->nls_disk = load_nls(buf);
 	if (!sbi->nls_disk) {
+#ifdef CONFIG_SYNO_FAT_LOAD_DEF_NLS_IF_FAIL
+		if(!silent) {
+			fat_msg(sb, KERN_ERR, "FAT: nls_disk load default table\n");
+		}
+		sbi->nls_disk = load_nls_default();
+		if (!sbi->nls_disk){
+			fat_msg(sb, KERN_ERR, "FAT: nls_disk load default failed\n");
+			goto out_fail;
+		}
+#else
 		fat_msg(sb, KERN_ERR, "codepage %s not found", buf);
 		goto out_fail;
+#endif
 	}
 
 	/* FIXME: utf8 is using iocharset for upper/lower conversion */
 	if (sbi->options.isvfat) {
 		sbi->nls_io = load_nls(sbi->options.iocharset);
 		if (!sbi->nls_io) {
+#ifdef CONFIG_SYNO_FAT_LOAD_DEF_NLS_IF_FAIL
+			if(!silent) {
+				fat_msg(sb, KERN_ERR, "FAT: nls_io load default table\n");
+			}
+			sbi->nls_io = load_nls_default();
+			if (!sbi->nls_io){
+				fat_msg(sb, KERN_ERR, "FAT: nls_io load default failed\n");
+				goto out_fail;
+			}
+#else
 			fat_msg(sb, KERN_ERR, "IO charset %s not found",
 			       sbi->options.iocharset);
 			goto out_fail;
+#endif
 		}
 	}
 

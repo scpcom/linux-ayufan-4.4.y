@@ -120,11 +120,20 @@ int del_match_busid(char *busid)
 	/* found */
 	ret = 0;
 
+#ifdef CONFIG_SYNO_USB_USBIP
+	if (busid_table[idx].status == STUB_BUSID_ADDED)
+		busid_table[idx].status = STUB_BUSID_OTHER;
+#endif
+
 	if (busid_table[idx].status == STUB_BUSID_OTHER)
 		memset(busid_table[idx].name, 0, BUSID_SIZE);
 
+#ifdef CONFIG_SYNO_USB_USBIP
+	if (busid_table[idx].status != STUB_BUSID_OTHER)
+#else
 	if ((busid_table[idx].status != STUB_BUSID_OTHER) &&
 	    (busid_table[idx].status != STUB_BUSID_ADDED))
+#endif
 		busid_table[idx].status = STUB_BUSID_REMOV;
 
 out:

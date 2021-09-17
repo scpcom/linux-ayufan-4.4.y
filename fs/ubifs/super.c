@@ -384,7 +384,16 @@ static void ubifs_dirty_inode(struct inode *inode, int flags)
 {
 	struct ubifs_inode *ui = ubifs_inode(inode);
 
+#if defined(CONFIG_SYNO_FS_ARCHIVE_BIT) || defined(CONFIG_SYNO_FS_ARCHIVE_VERSION)
+	if (!mutex_is_locked(&ui->ui_mutex)) {
+		/* because the fuction won't lock when it's called by SYNO_ArchiveModify
+		 * we skip it
+		 **/
+		return;
+	}
+#else
 	ubifs_assert(mutex_is_locked(&ui->ui_mutex));
+#endif
 	if (!ui->dirty) {
 		ui->dirty = 1;
 		dbg_gen("inode %lu",  inode->i_ino);

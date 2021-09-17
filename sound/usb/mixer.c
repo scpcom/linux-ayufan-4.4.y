@@ -276,7 +276,6 @@ static int get_abs_value(struct usb_mixer_elem_info *cval, int val)
 	return val;
 }
 
-
 /*
  * retrieve a mixer value
  */
@@ -422,7 +421,6 @@ static int get_cur_mix_value(struct usb_mixer_elem_info *cval,
 	return 0;
 }
 
-
 /*
  * set a mixer value
  */
@@ -532,7 +530,6 @@ int snd_usb_mixer_vol_tlv(struct snd_kcontrol *kcontrol, int op_flag,
 
 static int parse_audio_unit(struct mixer_build *state, int unitid);
 
-
 /*
  * check if the input/output channel routing is enabled on the given bitmap.
  * used for mixer unit parser
@@ -542,7 +539,6 @@ static int check_matrix_bitmap(unsigned char *bmap, int ich, int och, int num_ou
 	int idx = ich * num_outs + och;
 	return bmap[idx >> 3] & (0x80 >> (idx & 7));
 }
-
 
 /*
  * add an alsa control element
@@ -568,7 +564,6 @@ int snd_usb_mixer_add_control(struct usb_mixer_interface *mixer,
 	mixer->id_elems[cval->id] = cval;
 	return 0;
 }
-
 
 /*
  * get a terminal name string
@@ -661,7 +656,6 @@ static int get_term_name(struct mixer_build *state, struct usb_audio_term *iterm
 		}
 	return 0;
 }
-
 
 /*
  * parse the source unit recursively until it reaches to a terminal
@@ -762,7 +756,6 @@ static int check_input_term(struct mixer_build *state, int id, struct usb_audio_
 	return -ENODEV;
 }
 
-
 /*
  * Feature Unit
  */
@@ -790,14 +783,12 @@ static struct usb_feature_control_info audio_feature_info[] = {
 	{ "Phase Inverter Control",	USB_MIXER_BOOLEAN },
 };
 
-
 /* private_free callback */
 static void usb_mixer_elem_free(struct snd_kcontrol *kctl)
 {
 	kfree(kctl->private_data);
 	kctl->private_data = NULL;
 }
-
 
 /*
  * interface to ALSA control for feature/mixer units
@@ -902,6 +893,17 @@ static void volume_control_quirks(struct usb_mixer_elem_info *cval,
 		}
 		break;
 
+#ifdef CONFIG_SYNO_STATIC_HIDDEV_MINOR
+	/* There is one case that cval->max = -1 , cval->min = -9473 , so -1-(-9473) = 9472
+	 * 9472 is larger than 384 , it causes warn on in function build_feature_ctl()
+	 * So we add a quirk of it
+	 */
+	case USB_ID(0x0d8c, 0x0103): /* Synology remote DAC */
+		if (!strcmp(kctl->id.name, "PCM Playback Volume")) {
+			cval->res = 37;
+		}
+		break;
+#endif /* CONFIG_SYNO_STATIC_HIDDEV_MINOR */
 	}
 }
 
@@ -1313,8 +1315,6 @@ static void build_feature_ctl(struct mixer_build *state, void *raw_desc,
 	snd_usb_mixer_add_control(state->mixer, kctl);
 }
 
-
-
 /*
  * parse a feature unit
  *
@@ -1432,7 +1432,6 @@ static int parse_audio_feature_unit(struct mixer_build *state, int unitid, void 
 	return 0;
 }
 
-
 /*
  * Mixer Unit
  */
@@ -1497,7 +1496,6 @@ static void build_mixer_unit_ctl(struct mixer_build *state,
 	snd_usb_mixer_add_control(state->mixer, kctl);
 }
 
-
 /*
  * parse a mixer unit
  */
@@ -1545,7 +1543,6 @@ static int parse_audio_mixer_unit(struct mixer_build *state, int unitid, void *r
 	}
 	return 0;
 }
-
 
 /*
  * Processing Unit / Extension Unit
@@ -1598,7 +1595,6 @@ static struct snd_kcontrol_new mixer_procunit_ctl = {
 	.get = mixer_ctl_procunit_get,
 	.put = mixer_ctl_procunit_put,
 };
-
 
 /*
  * predefined data for processing units
@@ -1801,7 +1797,6 @@ static int build_audio_procunit(struct mixer_build *state, int unitid, void *raw
 	return 0;
 }
 
-
 static int parse_audio_processing_unit(struct mixer_build *state, int unitid, void *raw_desc)
 {
 	return build_audio_procunit(state, unitid, raw_desc, procunits, "Processing Unit");
@@ -1813,7 +1808,6 @@ static int parse_audio_extension_unit(struct mixer_build *state, int unitid, voi
 	 * That's ok as the layout is the same */
 	return build_audio_procunit(state, unitid, raw_desc, extunits, "Extension Unit");
 }
-
 
 /*
  * Selector Unit
@@ -1880,7 +1874,6 @@ static struct snd_kcontrol_new mixer_selectunit_ctl = {
 	.get = mixer_ctl_selector_get,
 	.put = mixer_ctl_selector_put,
 };
-
 
 /* private free callback.
  * free both private_data and private_value
@@ -2017,7 +2010,6 @@ static int parse_audio_selector_unit(struct mixer_build *state, int unitid, void
 
 	return 0;
 }
-
 
 /*
  * parse an audio unit recursively

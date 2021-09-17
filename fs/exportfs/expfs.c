@@ -17,10 +17,11 @@
 #include <linux/sched.h>
 
 #define dprintk(fmt, args...) do{}while(0)
-
+#ifdef CONFIG_FS_SYNO_WINACL
+#include <linux/magic.h>
+#endif
 
 static int get_name(const struct path *path, char *name, struct dentry *child);
-
 
 static int exportfs_get_name(struct vfsmount *mnt, struct dentry *dir,
 		char *name, struct dentry *child)
@@ -440,6 +441,15 @@ struct dentry *exportfs_decode_fh(struct vfsmount *mnt, struct fid *fid,
 		 * file handle.  If this fails we'll have to give up.
 		 */
 		err = -ESTALE;
+#ifdef CONFIG_FS_SYNO_WINACL
+		if (result->d_sb->s_magic == BTRFS_SUPER_MAGIC) {
+			target_dir = nop->get_parent(result);
+			if (!target_dir || IS_ERR(target_dir))
+				goto fh_to_parent;
+			goto reconnect_target_dir;
+		}
+fh_to_parent:
+#endif
 		if (!nop->fh_to_parent)
 			goto err_result;
 
@@ -451,6 +461,9 @@ struct dentry *exportfs_decode_fh(struct vfsmount *mnt, struct fid *fid,
 		if (IS_ERR(target_dir))
 			goto err_result;
 
+#ifdef CONFIG_FS_SYNO_WINACL
+reconnect_target_dir:
+#endif
 		/*
 		 * And as usual we need to make sure the parent directory is
 		 * connected to the filesystem root.  The VFS really doesn't

@@ -1,7 +1,6 @@
 #ifndef _ASM_X86_IA32_H
 #define _ASM_X86_IA32_H
 
-
 #ifdef CONFIG_IA32_EMULATION
 
 #include <linux/compat.h>
@@ -64,6 +63,21 @@ struct stat64 {
 
 	unsigned long long	st_ino;
 } __attribute__((packed));
+
+#ifdef CONFIG_SYNO_FS_STAT
+// For 32 bit application 
+struct SYNOSTAT64_EXTRA {
+	struct compat_timespec create_time;
+	unsigned int archive_version;
+	unsigned int archive_bit;
+	unsigned int last_component;
+};
+
+struct SYNOSTAT64 {
+	struct stat64 st;
+	struct SYNOSTAT64_EXTRA ext;
+};
+#endif /* CONFIG_SYNO_FS_STAT */
 
 #define IA32_STACK_TOP IA32_PAGE_OFFSET
 

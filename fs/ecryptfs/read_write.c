@@ -202,6 +202,9 @@ int ecryptfs_write(struct inode *ecryptfs_inode, char *data, loff_t offset,
 			rc2 = ecryptfs_write_inode_size_to_metadata(
 								ecryptfs_inode);
 			if (rc2) {
+#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+				if (-EDQUOT != rc && -ENOSPC != rc)
+#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING */
 				printk(KERN_ERR	"Problem with "
 				       "ecryptfs_write_inode_size_to_metadata; "
 				       "rc = [%d]\n", rc2);

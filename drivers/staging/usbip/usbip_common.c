@@ -592,6 +592,15 @@ void usbip_header_correct_endian(struct usbip_header *pdu, int send)
 	case USBIP_RET_UNLINK:
 		correct_endian_ret_unlink(&pdu->u.ret_unlink, send);
 		break;
+#ifdef CONFIG_SYNO_USB_USBIP
+	case USBIP_RESET_DEV:
+		if(send) {
+			correct_endian_ret_submit(&pdu->u.ret_submit, send);
+		} else {
+			correct_endian_cmd_submit(&pdu->u.cmd_submit, send);
+		}
+		break;
+#endif
 	default:
 		/* NOT REACHED */
 		pr_err("unknown command\n");

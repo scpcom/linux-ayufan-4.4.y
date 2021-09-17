@@ -13,11 +13,17 @@
 
 #include <linux/i2c.h>
 #include <linux/spi/spi.h>
+#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#else
 #include <linux/regmap.h>
+#endi /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
 #include <linux/export.h>
 #include <sound/soc.h>
 
+#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#else
 #include <trace/events/asoc.h>
+#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
 
 #ifdef CONFIG_REGMAP
 static int hw_write(struct snd_soc_codec *codec, unsigned int reg,

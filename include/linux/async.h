@@ -37,6 +37,11 @@ struct async_domain {
 	struct async_domain _name = { .pending = LIST_HEAD_INIT(_name.pending), \
 				      .registered = 0 }
 
+#ifdef CONFIG_SYNO_SPINUP_DELAY
+extern void syno_async_schedule_enabled_set(int iValue);
+extern int syno_async_schedule_enabled_get(void);
+#endif /* CONFIG_SYNO_SPINUP_DELAY */
+
 extern async_cookie_t async_schedule(async_func_t func, void *data);
 extern async_cookie_t async_schedule_domain(async_func_t func, void *data,
 					    struct async_domain *domain);

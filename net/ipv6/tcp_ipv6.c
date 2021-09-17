@@ -185,6 +185,20 @@ static int tcp_v6_connect(struct sock *sk, struct sockaddr *uaddr,
 			sk->sk_bound_dev_if = usin->sin6_scope_id;
 		}
 
+#ifdef CONFIG_SYNO_IPV6_LINKLOCAL
+		if (__ipv6_addr_is_link_local(addr_type) && !sk->sk_bound_dev_if) {
+			struct net_device *dev = NULL;
+			for_each_netdev(sock_net(sk), dev) {
+				unsigned flags = dev_get_flags(dev);
+				if ((flags & IFF_RUNNING) &&
+					!(flags & (IFF_LOOPBACK | IFF_SLAVE))) {
+					sk->sk_bound_dev_if = dev->ifindex;
+					break;
+				}
+			}
+		}
+#endif /* CONFIG_SYNO_IPV6_LINKLOCAL */
+
 		/* Connect to link-local address requires an interface */
 		if (!sk->sk_bound_dev_if)
 			return -EINVAL;
@@ -457,7 +471,6 @@ out:
 	bh_unlock_sock(sk);
 	sock_put(sk);
 }
-
 
 static int tcp_v6_send_synack(struct sock *sk, struct dst_entry *dst,
 			      struct flowi6 *fl6,
@@ -906,7 +919,6 @@ static void tcp_v6_reqsk_send_ack(struct sock *sk, struct sk_buff *skb,
 			req->rcv_wnd, tcp_time_stamp, req->ts_recent,
 			tcp_v6_md5_do_lookup(sk, &ipv6_hdr(skb)->daddr), 0);
 }
-
 
 static struct sock *tcp_v6_hnd_req(struct sock *sk,struct sk_buff *skb)
 {
@@ -1408,7 +1420,6 @@ csum_err:
 	TCP_INC_STATS_BH(sock_net(sk), TCP_MIB_CSUMERRORS);
 	TCP_INC_STATS_BH(sock_net(sk), TCP_MIB_INERRS);
 	goto discard;
-
 
 ipv6_pktoptions:
 	/* Do you ask, what is it?

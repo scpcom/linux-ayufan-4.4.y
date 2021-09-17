@@ -365,6 +365,9 @@ static void scsi_device_dev_release_usercontext(struct work_struct *work)
 	scsi_target_reap(scsi_target(sdev));
 
 	kfree(sdev->inquiry);
+#ifdef CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+	kfree(sdev->model);
+#endif /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
 	kfree(sdev);
 
 	if (parent)
@@ -444,6 +447,18 @@ void scsi_sysfs_unregister(void)
  * sdev_show_function: macro to create an attr function that can be used to
  * show a non-bit field.
  */
+#ifdef CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#define sdev_show_function(field, format_string)				\
+static ssize_t								\
+sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
+		   char *buf)						\
+{									\
+	struct scsi_device *sdev;					\
+	sdev = to_scsi_device(dev);					\
+	return snprintf (buf, CONFIG_SYNO_DISK_MODEL_NUM + 4, format_string, sdev->field);		\
+}									\
+
+#else /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
 #define sdev_show_function(field, format_string)				\
 static ssize_t								\
 sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
@@ -454,6 +469,8 @@ sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
 	return snprintf (buf, 20, format_string, sdev->field);		\
 }									\
 
+#endif /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
+
 /*
  * sdev_rd_attr: macro to create a function and attribute variable for a
  * read only field.
@@ -461,7 +478,6 @@ sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
 #define sdev_rd_attr(field, format_string)				\
 	sdev_show_function(field, format_string)			\
 static DEVICE_ATTR(field, S_IRUGO, sdev_show_##field, NULL);
-
 
 /*
  * sdev_rw_attr: create a function and attribute variable for a
@@ -524,6 +540,90 @@ static int scsi_sdev_check_buf_bit(const char *buf)
 		return -EINVAL;
 }
 #endif
+
+#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
+extern void
+ScsiRemapModeSet(struct scsi_device *sdev, unsigned char blAutoRemap);
+static ssize_t
+sdev_show_auto_remap(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	sdev = to_scsi_device(dev);
+	return snprintf (buf, 20, "%d type 0x%x\n", sdev->auto_remap, sdev->type);
+}
+
+static ssize_t
+sdev_store_auto_remap(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev;
+	int val = 0;
+	sdev = to_scsi_device(dev);
+	sscanf (buf, "%d", &val);
+
+	ScsiRemapModeSet(sdev, val ? 1 : 0);
+	return count;
+}
+static DEVICE_ATTR(auto_remap, S_IRUGO | S_IWUSR, sdev_show_auto_remap, sdev_store_auto_remap);
+#endif /* CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP */
+
+#ifdef CONFIG_SYNO_DISK_HIBERNATION
+/* FIXME: We don't know why SAS disks led blinking when open it, so we add a sysfs interface to prevent it
+ * The following code is copied from "case SD_IOCTL_IDLE: " ind "sd.c" */
+static ssize_t
+sdev_show_syno_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	int iRet = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	iRet = snprintf (buf, 20, "%lu\n", (jiffies - sdev->idle) / HZ + 1);
+
+END:
+	return iRet;
+}
+
+static ssize_t
+sdev_store_syno_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev;
+	unsigned long idletime;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	sscanf(buf, "%lu", &idletime);
+	// idletime = (jiffies - sdev->idle) / HZ + 1
+	sdev->idle = jiffies - (idletime -1) * HZ;
+
+END:
+	return count;
+}
+
+static DEVICE_ATTR(syno_idle_time, S_IRUGO | S_IWUSR, sdev_show_syno_idle_time, sdev_store_syno_idle_time);
+
+static ssize_t
+sdev_show_syno_spindown(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	int iRet = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	iRet = snprintf (buf, 20, "%d\n", sdev->spindown);
+
+END:
+	return iRet;
+}
+
+static DEVICE_ATTR(syno_spindown, S_IRUGO, sdev_show_syno_spindown, NULL);
+#endif /* CONFIG_SYNO_DISK_HIBERNATION */
+
 /*
  * Create the actual show/store functions and data structures.
  */
@@ -532,7 +632,11 @@ sdev_rd_attr (queue_depth, "%d\n");
 sdev_rd_attr (type, "%d\n");
 sdev_rd_attr (scsi_level, "%d\n");
 sdev_rd_attr (vendor, "%.8s\n");
+#ifdef CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+sdev_rd_attr (model, "%."CONFIG_SYNO_DISK_MODEL_LEN"s\n");
+#else /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
 sdev_rd_attr (model, "%.16s\n");
+#endif /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
 sdev_rd_attr (rev, "%.4s\n");
 
 /*
@@ -728,6 +832,13 @@ static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_iodone_cnt.attr,
 	&dev_attr_ioerr_cnt.attr,
 	&dev_attr_modalias.attr,
+#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
+	&dev_attr_auto_remap.attr,
+#endif /* CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP */
+#ifdef CONFIG_SYNO_DISK_HIBERNATION
+	&dev_attr_syno_idle_time.attr,
+	&dev_attr_syno_spindown.attr,
+#endif /* CONFIG_SYNO_DISK_HIBERNATION */
 	REF_EVT(media_change),
 	NULL
 };
@@ -748,6 +859,9 @@ sdev_store_queue_depth_rw(struct device *dev, struct device_attribute *attr,
 	int depth, retval;
 	struct scsi_device *sdev = to_scsi_device(dev);
 	struct scsi_host_template *sht = sdev->host->hostt;
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
+	unsigned long flags;
+#endif /* CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK */
 
 	if (!sht->change_queue_depth)
 		return -EINVAL;
@@ -757,12 +871,28 @@ sdev_store_queue_depth_rw(struct device *dev, struct device_attribute *attr,
 	if (depth < 1)
 		return -EINVAL;
 
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
+	//spin_lock_irqsave to prevent scsi_softirq_done() will call scsi_handle_queue_ramp_up() to increase queue_depth
+	spin_lock_irqsave(sdev->host->host_lock, flags);
+#endif /* CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK */
+
 	retval = sht->change_queue_depth(sdev, depth,
 					 SCSI_QDEPTH_DEFAULT);
+
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
+	if (retval < 0) {
+		spin_unlock_irqrestore(sdev->host->host_lock, flags);
+		return retval;
+	}
+#else /* CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK */
 	if (retval < 0)
 		return retval;
+#endif /* CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK */
 
 	sdev->max_queue_depth = sdev->queue_depth;
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
+	spin_unlock_irqrestore(sdev->host->host_lock, flags);
+#endif /* CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK */
 
 	return count;
 }
@@ -981,6 +1111,11 @@ void __scsi_remove_device(struct scsi_device *sdev)
 	put_device(dev);
 }
 
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+int (*funcSYNORaidDiskUnplug)(char *szDiskName) = NULL;
+EXPORT_SYMBOL(funcSYNORaidDiskUnplug);
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+
 /**
  * scsi_remove_device - unregister a device from the scsi bus
  * @sdev:	scsi_device to unregister
@@ -992,6 +1127,14 @@ void scsi_remove_device(struct scsi_device *sdev)
 	mutex_lock(&shost->scan_mutex);
 	__scsi_remove_device(sdev);
 	mutex_unlock(&shost->scan_mutex);
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
+	SynoSpinupRemove(sdev);
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY */
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+	if (funcSYNORaidDiskUnplug) {
+		funcSYNORaidDiskUnplug(sdev->syno_disk_name);
+	}
+#endif  /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 }
 EXPORT_SYMBOL(scsi_remove_device);
 

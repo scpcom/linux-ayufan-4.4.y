@@ -132,6 +132,11 @@
 
 #include "net-sysfs.h"
 
+#if defined(CONFIG_SYNO_SWITCH_NET_DEVICE_NAME)
+extern unsigned int gSwitchDev;
+extern char gDevPCIName[CONFIG_SYNO_MAX_SWITCHABLE_NET_DEVICE][CONFIG_SYNO_NET_DEVICE_ENCODING_LENGTH];
+#endif /* defined(CONFIG_SYNO_SWITCH_NET_DEVICE_NAME) */
+
 /* Instead of increasing this, you should create a hash table. */
 #define MAX_GRO_SKBS 8
 
@@ -143,6 +148,139 @@ static DEFINE_SPINLOCK(offload_lock);
 struct list_head ptype_base[PTYPE_HASH_SIZE] __read_mostly;
 struct list_head ptype_all __read_mostly;	/* Taps */
 static struct list_head offload_base __read_mostly;
+
+#if defined(CONFIG_SYNO_E1000E_LED_SWITCH) || defined(CONFIG_SYNO_IGB_LED_SWITCH)
+void (*funcSynoNicLedCtrl)(int iEnable) = NULL;
+EXPORT_SYMBOL(funcSynoNicLedCtrl);
+#endif /* CONFIG_SYNO_E1000E_LED_SWITCH || CONFIG_SYNO_IGB_LED_SWITCH */
+
+#ifdef CONFIG_SYNO_MAC_ADDRESS
+static unsigned int str_to_hex(char ch)
+{
+	if ((ch >= '0') && (ch <= '9'))
+		return (ch - '0');
+
+	if ((ch >= 'a') && (ch <= 'f'))
+		return (ch - 'a' + 10);
+
+	if ((ch >= 'A') && (ch <= 'F'))
+		return (ch - 'A' + 10);
+
+	return 0;
+}
+
+void convert_str_to_mac(char *source , char *dest)
+{
+	dest[0] = (str_to_hex(source[0]) << 4) + str_to_hex(source[1]);
+	dest[1] = (str_to_hex(source[2]) << 4) + str_to_hex(source[3]);
+	dest[2] = (str_to_hex(source[4]) << 4) + str_to_hex(source[5]);
+	dest[3] = (str_to_hex(source[6]) << 4) + str_to_hex(source[7]);
+	dest[4] = (str_to_hex(source[8]) << 4) + str_to_hex(source[9]);
+	dest[5] = (str_to_hex(source[10]) << 4) + str_to_hex(source[11]);
+}
+
+/**
+ * Check if the target interface should not use vender mac when bonding
+ *
+ * eg. RC18015xs+ has a special heartbeat interface mon.hb0 (using the 5th vender mac)
+ * but an external NIC on RC18015xs+ with interface eth4 should not use 5th
+ * vender mac when bonding, a grub parameter skip_bond_vender_mac_interfaces is
+ * used to skip these interfaces
+ * eg. skip_bond_vender_mac_interfaces=4,5,6,7 means eth4,5,6,7 will be skipped
+ * using vender mac when bonding
+ *
+ * return 1 if need to skip this interface
+ *        0 if not
+ *       -1 if error
+ */
+static int syno_skip_bond_vender_mac(int iMacIndex)
+{
+	extern const char gszSkipVenderMacInterfaces[256];
+	char szDupIfns[256] = {'\0'};
+	char *token = NULL;
+	char *ptr = NULL;
+	long iSkipIndex = 0;
+	int iMatch = 0;
+
+	if (0 == strlen(gszSkipVenderMacInterfaces)) {
+		goto END;
+	}
+
+	snprintf(szDupIfns, sizeof(szDupIfns), "%s", gszSkipVenderMacInterfaces);
+	ptr = szDupIfns;
+	// eg. szDupIfns="4,5,6,7"
+	while (NULL != (token = strsep(&ptr, ","))) {
+		if (0 != kstrtol(token, 10, &iSkipIndex)) {
+			// something error
+			iMatch = -1;
+			goto END;
+		}
+		if ((long)iMacIndex == iSkipIndex) {
+			iMatch = 1;
+			goto END;
+		}
+		if (!ptr) {
+			break;
+		}
+	}
+
+END:
+	return iMatch;
+}
+
+#define SYNO_VENDOR_MAC_SUCCESS     0
+#define SYNO_VENDOR_MAC_EMPTY       1
+#define SYNO_VENDOR_MAC_FAIL        2
+int syno_get_dev_vendor_mac(const char *szDev, char *szMac)
+{
+	extern unsigned char grgbLanMac[CONFIG_SYNO_MAC_MAX][16];
+#ifdef CONFIG_SYNO_INTERNAL_NETIF_NUM
+	extern unsigned long g_internal_netif_num;
+#endif /* CONFIG_SYNO_INTERNAL_NETIF_NUM */
+	int err = SYNO_VENDOR_MAC_FAIL;
+	char szIFPrefix[IFNAMSIZ] = "eth";
+	int iMacIndex = 0;
+	const char *pMacIndex = NULL;
+	int iMatch = 0;
+
+	if (!szMac || !szDev)
+		goto ERR;
+
+	// According to function __dev_get_by_name
+	// we can use strncmp & IFNAMSIZ to replace memcmp to avoid #48870
+	if (!strncmp(szDev, szIFPrefix, strlen(szIFPrefix))) {
+		pMacIndex = szDev + strlen(szIFPrefix);
+		iMacIndex = simple_strtol(pMacIndex, NULL, 10);
+#ifdef CONFIG_SYNO_INTERNAL_NETIF_NUM
+		if (0 > iMacIndex || g_internal_netif_num <= iMacIndex) {
+			err = SYNO_VENDOR_MAC_FAIL;
+			goto ERR;
+		}
+#endif /* CONFIG_SYNO_INTERNAL_NETIF_NUM */
+		if (1 == (iMatch = syno_skip_bond_vender_mac(iMacIndex))) {
+			err = SYNO_VENDOR_MAC_EMPTY;
+			goto ERR;
+		} else if (-1 == iMatch) {
+			printk(KERN_ERR "Error when match bond vender mac\n");
+			err = SYNO_VENDOR_MAC_FAIL;
+			goto ERR;
+		}
+
+		if (!strcmp(grgbLanMac[iMacIndex], "")) {
+			err = SYNO_VENDOR_MAC_EMPTY;
+			goto ERR;
+		}
+		convert_str_to_mac(grgbLanMac[iMacIndex], szMac);
+	} else {
+		goto ERR;
+	}
+
+	err = SYNO_VENDOR_MAC_SUCCESS;
+ERR:
+	return err;
+}
+EXPORT_SYMBOL(syno_get_dev_vendor_mac);
+#endif /* CONFIG_SYNO_MAC_ADDRESS */
 
 /*
  * The @dev_base_head list is protected by @dev_base_lock and the rtnl
@@ -435,7 +573,6 @@ void dev_remove_pack(struct packet_type *pt)
 }
 EXPORT_SYMBOL(dev_remove_pack);
 
-
 /**
  *	dev_add_offload - register offload handlers
  *	@po: protocol offload declaration
@@ -574,7 +711,6 @@ int netdev_boot_setup_check(struct net_device *dev)
 	return 0;
 }
 EXPORT_SYMBOL(netdev_boot_setup_check);
-
 
 /**
  *	netdev_boot_base	- get address from boot time settings
@@ -765,7 +901,6 @@ struct net_device *dev_get_by_index_rcu(struct net *net, int ifindex)
 	return NULL;
 }
 EXPORT_SYMBOL(dev_get_by_index_rcu);
-
 
 /**
  *	dev_get_by_index - find a device by its ifindex
@@ -1170,7 +1305,6 @@ int dev_set_alias(struct net_device *dev, const char *alias, size_t len)
 	return len;
 }
 
-
 /**
  *	netdev_features_change - device changes features
  *	@dev: device to cause notification
@@ -1406,7 +1540,6 @@ int dev_close(struct net_device *dev)
 }
 EXPORT_SYMBOL(dev_close);
 
-
 /**
  *	dev_disable_lro - disable Large Receive Offload on a device
  *	@dev: device
@@ -1431,7 +1564,6 @@ void dev_disable_lro(struct net_device *dev)
 		netdev_WARN(dev, "failed to disable LRO!\n");
 }
 EXPORT_SYMBOL(dev_disable_lro);
-
 
 static int dev_boot_phase = 1;
 
@@ -2142,7 +2274,6 @@ void dev_kfree_skb_any(struct sk_buff *skb)
 }
 EXPORT_SYMBOL(dev_kfree_skb_any);
 
-
 /**
  * netif_device_detach - mark device as removed
  * @dev: network device
@@ -2313,7 +2444,6 @@ struct sk_buff *skb_mac_gso_segment(struct sk_buff *skb,
 	return segs;
 }
 EXPORT_SYMBOL(skb_mac_gso_segment);
-
 
 /* openvswitch calls this on rx path, so we need a different check.
  */
@@ -2862,7 +2992,6 @@ out:
 	return rc;
 }
 EXPORT_SYMBOL(dev_queue_xmit);
-
 
 /*=======================================================================
 			Receiver routines
@@ -3836,7 +3965,6 @@ normal:
 	ret = GRO_NORMAL;
 	goto pull;
 }
-
 
 static gro_result_t napi_skb_finish(gro_result_t ret, struct sk_buff *skb)
 {
@@ -4935,7 +5063,6 @@ static void rollback_registered_many(struct list_head *head)
 		/* Shutdown queueing discipline. */
 		dev_shutdown(dev);
 
-
 		/* Notify protocols, that we are about to destroy
 		   this device. They should clean all the things.
 		*/
@@ -5211,6 +5338,10 @@ int register_netdevice(struct net_device *dev)
 	int ret;
 	struct net *net = dev_net(dev);
 
+#ifdef CONFIG_SYNO_SWITCH_NET_DEVICE_NAME
+	// we assume internal lans are comming up before extension lans
+    static int netdevCnt = 0;
+#endif /* CONFIG_SYNO_SWITCH_NET_DEVICE_NAME */
 	BUG_ON(dev_boot_phase);
 	ASSERT_RTNL();
 
@@ -5228,6 +5359,11 @@ int register_netdevice(struct net_device *dev)
 	ret = dev_get_valid_name(net, dev, dev->name);
 	if (ret < 0)
 		goto out;
+#ifdef CONFIG_SYNO_SWITCH_NET_DEVICE_NAME
+	if (gSwitchDev > 0 && netdevCnt < gSwitchDev && !strncmp("eth", dev->name, 3)) {
+		snprintf(dev->name, sizeof(dev->name), "eth%c", gDevPCIName[netdevCnt++][0]);
+	}
+#endif /* CONFIG_SYNO_SWITCH_NET_DEVICE_NAME */
 
 	/* Init, if this function is available */
 	if (dev->netdev_ops->ndo_init) {
@@ -5379,7 +5515,6 @@ int init_dummy_netdev(struct net_device *dev)
 }
 EXPORT_SYMBOL_GPL(init_dummy_netdev);
 
-
 /**
  *	register_netdev	- register a network device
  *	@dev: device to register
@@ -5509,7 +5644,6 @@ void netdev_run_todo(void)
 
 	__rtnl_unlock();
 
-
 	/* Wait for rcu callbacks to finish before next phase */
 	if (!list_empty(&list))
 		rcu_barrier();
@@ -5595,7 +5729,11 @@ struct rtnl_link_stats64 *dev_get_stats(struct net_device *dev,
 	} else {
 		netdev_stats_to_stats64(storage, &dev->stats);
 	}
+#ifdef CONFIG_SYNO_SKIP_RXDROP_BY_CORE
+	/* skip the rx_drop from kernel core, only count rx_drop by device driver */
+#else
 	storage->rx_dropped += atomic_long_read(&dev->rx_dropped);
+#endif /* CONFIG_SYNO_SKIP_RXDROP_BY_CORE */
 	return storage;
 }
 EXPORT_SYMBOL(dev_get_stats);
@@ -6030,7 +6168,6 @@ static int dev_cpu_callback(struct notifier_block *nfb,
 
 	return NOTIFY_OK;
 }
-
 
 /**
  *	netdev_increment_features - increment feature set by one

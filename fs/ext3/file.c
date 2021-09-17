@@ -67,6 +67,13 @@ const struct file_operations ext3_file_operations = {
 };
 
 const struct inode_operations ext3_file_inode_operations = {
+#ifdef CONFIG_SYNO_EXT3_STAT
+	.syno_getattr	= ext3_syno_getattr,
+#endif
+#ifdef CONFIG_SYNO_EXT3_ARCHIVE_VERSION
+	.syno_get_archive_ver = ext3_syno_get_archive_ver,
+	.syno_set_archive_ver = ext3_syno_set_archive_ver,
+#endif
 	.setattr	= ext3_setattr,
 #ifdef CONFIG_EXT3_FS_XATTR
 	.setxattr	= generic_setxattr,
@@ -77,4 +84,3 @@ const struct inode_operations ext3_file_inode_operations = {
 	.get_acl	= ext3_get_acl,
 	.fiemap		= ext3_fiemap,
 };
-

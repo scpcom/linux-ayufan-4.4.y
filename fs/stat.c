@@ -18,6 +18,15 @@
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+#include <linux/synolib.h>
+extern int SynoDebugFlag;
+extern int syno_hibernation_log_level;
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+
+#ifdef CONFIG_SYNO_FS_WINACL
+#include "synoacl_int.h"
+#endif /* CONFIG_SYNO_FS_WINACL */
 void generic_fillattr(struct inode *inode, struct kstat *stat)
 {
 	stat->dev = inode->i_sb->s_dev;
@@ -45,6 +54,21 @@ int vfs_getattr(struct path *path, struct kstat *stat)
 	retval = security_inode_getattr(path->mnt, path->dentry);
 	if (retval)
 		return retval;
+
+#ifdef CONFIG_SYNO_FS_WINACL
+	if (IS_SYNOACL(path->dentry)) {
+		if (inode->i_op->getattr) {
+			if (0 != (retval = inode->i_op->getattr(path->mnt, path->dentry, stat)))
+				return retval;
+		} else {
+			generic_fillattr(inode, stat);
+		}
+
+		synoacl_op_to_mode(path->dentry, stat);
+
+		return 0;
+	}
+#endif /* CONFIG_SYNO_FS_WINACL */
 
 	if (inode->i_op->getattr)
 		return inode->i_op->getattr(path->mnt, path->dentry, stat);
@@ -111,6 +135,68 @@ int vfs_lstat(const char __user *name, struct kstat *stat)
 }
 EXPORT_SYMBOL(vfs_lstat);
 
+#ifdef CONFIG_SYNO_FS_STAT
+int __always_inline syno_vfs_getattr(struct path *path, struct kstat *stat, int stat_flags)
+{
+	int error = 0;
+
+	error = vfs_getattr(path, stat);
+	if ((!error) && stat_flags) {
+		struct inode *inode = path->dentry->d_inode;
+
+		if (inode->i_op->syno_getattr) {
+			error = inode->i_op->syno_getattr(path->dentry, stat, stat_flags);
+		} else {
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+			stat->syno_create_time = inode->i_create_time;
+#endif
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+			stat->syno_archive_bit = inode->i_archive_bit;
+#endif
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+			stat->syno_archive_version = inode->i_archive_version;
+#endif
+		}
+	}
+	return error;
+}
+
+// copy from vfs_fstat
+int syno_vfs_fstat(unsigned int fd, struct kstat *stat, int stat_flags)
+{
+	struct fd f = fdget_raw(fd);
+	int error = -EBADF;
+
+	if (f.file) {
+		error = syno_vfs_getattr(&f.file->f_path, stat, stat_flags);
+		fdput(f);
+	}
+	return error;
+}
+EXPORT_SYMBOL(syno_vfs_fstat);
+
+int syno_vfs_fstatat(const char __user *name, struct kstat *stat, int lookup_flags, int stat_flags)
+{
+	struct path path;
+	int error = -EINVAL;
+
+retry:
+	error = user_path_at(AT_FDCWD, name, lookup_flags, &path);
+	if (error)
+		goto out;
+
+	error = syno_vfs_getattr(&path, stat, stat_flags);
+	path_put(&path);
+	if (retry_estale(error, lookup_flags)) {
+		lookup_flags |= LOOKUP_REVAL;
+		goto retry;
+	}
+
+out:
+	return error;
+}
+EXPORT_SYMBOL(syno_vfs_fstatat);
+#endif /* CONFIG_SYNO_FS_STAT */
 
 #ifdef __ARCH_WANT_OLD_STAT
 
@@ -160,6 +246,12 @@ SYSCALL_DEFINE2(stat, const char __user *, filename,
 {
 	struct kstat stat;
 	int error;
+
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+	if(syno_hibernation_log_level > 0) {
+		syno_do_hibernation_filename_log(filename);
+	}
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
 
 	error = vfs_stat(filename, &stat);
 	if (error)
@@ -248,7 +340,16 @@ SYSCALL_DEFINE2(newstat, const char __user *, filename,
 		struct stat __user *, statbuf)
 {
 	struct kstat stat;
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+	int error;
+
+	if(syno_hibernation_log_level > 0) {
+		syno_do_hibernation_filename_log(filename);
+	}
+	error = vfs_stat(filename, &stat);
+#else
 	int error = vfs_stat(filename, &stat);
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
 
 	if (error)
 		return error;
@@ -285,8 +386,16 @@ SYSCALL_DEFINE4(newfstatat, int, dfd, const char __user *, filename,
 SYSCALL_DEFINE2(newfstat, unsigned int, fd, struct stat __user *, statbuf)
 {
 	struct kstat stat;
-	int error = vfs_fstat(fd, &stat);
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+	int error;
 
+	if(syno_hibernation_log_level > 0) {
+		syno_do_hibernation_fd_log(fd);
+	}
+	error = vfs_fstat(fd, &stat);
+#else
+	int error = vfs_fstat(fd, &stat);
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
 	if (!error)
 		error = cp_new_stat(&stat, statbuf);
 
@@ -332,7 +441,6 @@ SYSCALL_DEFINE3(readlink, const char __user *, path, char __user *, buf,
 {
 	return sys_readlinkat(AT_FDCWD, path, buf, bufsiz);
 }
-
 
 /* ---------- LFS-64 ----------- */
 #if defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)
@@ -382,6 +490,12 @@ SYSCALL_DEFINE2(stat64, const char __user *, filename,
 		struct stat64 __user *, statbuf)
 {
 	struct kstat stat;
+
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+	if(syno_hibernation_log_level > 0) {
+		syno_do_hibernation_filename_log(filename);
+	}
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
 	int error = vfs_stat(filename, &stat);
 
 	if (!error)
@@ -425,6 +539,369 @@ SYSCALL_DEFINE4(fstatat64, int, dfd, const char __user *, filename,
 	return cp_new_stat64(&stat, statbuf);
 }
 #endif /* __ARCH_WANT_STAT64 || __ARCH_WANT_COMPAT_STAT64 */
+
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+/* This stat is used by caseless protocol.
+ * The filename will be convert to real filename and return to user space.
+ * In caller, the length of filename must equal or be larger than SYNO_SMB_PSTRING_LEN.
+*/
+int __SYNOCaselessStat(char __user * filename, int nofollowLink, struct kstat *stat, int *last_component, int flags)
+{
+	struct path path;
+	int error;
+	int f;
+	char *real_filename = NULL;
+	int real_filename_len = 0;
+
+	real_filename = kmalloc(SYNO_SMB_PSTRING_LEN, GFP_KERNEL);
+	if (!real_filename) {
+		return -ENOMEM;
+	}
+
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+	if(!nofollowLink && syno_hibernation_log_level > 0) {
+		syno_do_hibernation_filename_log(filename);
+	}
+
+	if (SynoDebugFlag) {
+		printk("%s(%d) orig name:[%s] len:[%u]\n", __FUNCTION__, __LINE__, filename, (unsigned int)strlen(filename));
+	}
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+	if (nofollowLink) {
+		f = LOOKUP_CASELESS_COMPARE;
+	} else {
+		f = LOOKUP_FOLLOW|LOOKUP_CASELESS_COMPARE;
+	}
+	error = syno_user_path_at(AT_FDCWD, filename, f, &path, &real_filename, &real_filename_len, last_component);
+	if (!error) {
+		error = syno_vfs_getattr(&path, stat, flags);
+		path_put(&path);
+		if (real_filename_len) {
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+			if (SynoDebugFlag) {
+				printk("%s(%d) convert name:[%s]\n",__FUNCTION__,__LINE__,filename);
+			}
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+			error = copy_to_user(filename, real_filename, real_filename_len) ? -EFAULT : error;
+		}
+	}
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+	if (error && SynoDebugFlag) {
+		printk("%s(%d) convert name:[%s], error:[%d]\n",__FUNCTION__,__LINE__,filename, error);
+	}
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+
+	kfree(real_filename);
+	return error;
+}
+EXPORT_SYMBOL(__SYNOCaselessStat);
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+
+#ifdef CONFIG_SYNO_SYSTEM_CALL
+#if defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)
+SYSCALL_DEFINE2(SYNOCaselessStat64, char __user *, filename, struct stat64 __user *, statbuf)
+{
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+	int last_component = 0;
+	long error = -1;
+	struct kstat stat;
+
+	error = __SYNOCaselessStat(filename, 0, &stat, &last_component, 0);
+	if (!error) {
+		error = cp_new_stat64(&stat, statbuf);
+	}
+
+	return error;
+#else
+	return -EOPNOTSUPP;
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+}
+
+SYSCALL_DEFINE2(SYNOCaselessLStat64, char __user *, filename, struct stat64 __user *, statbuf)
+{
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+	int last_component = 0;
+	long error = -1;
+	struct kstat stat;
+
+	error = __SYNOCaselessStat(filename, 1, &stat, &last_component, 0);
+	if (!error) {
+		error = cp_new_stat64(&stat, statbuf);
+	}
+
+	return error;
+#else
+	return -EOPNOTSUPP;
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+}
+
+#else /* !(__ARCH_WANT_STAT64 || __ARCH_WANT_COMPAT_STAT64) */
+SYSCALL_DEFINE2(SYNOCaselessStat, char __user *, filename, struct stat __user *, statbuf)
+{
+#ifdef CONFIF_SYNO_FS_CASELESS_STAT
+	int last_component = 0;
+	long error = -1;
+	struct kstat stat;
+
+	error = __SYNOCaselessStat(filename, 0, &stat, &last_component, 0);
+	if (!error) {
+		error = cp_new_stat(&stat, statbuf);
+	}
+
+	return error;
+#else
+	return -EOPNOTSUPP;
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+}
+
+SYSCALL_DEFINE2(SYNOCaselessLStat, char __user *, filename, struct stat __user *, statbuf)
+{
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+	int last_component = 0;
+	long error = -1;
+	struct kstat stat;
+
+	error = __SYNOCaselessStat(filename, 1, &stat, &last_component, 0);
+	if (!error) {
+		error = cp_new_stat(&stat, statbuf);
+	}
+
+	return error;
+#else
+	return -EOPNOTSUPP;
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+}
+#endif /* __ARCH_WANT_STAT64 || __ARCH_WANT_COMPAT_STAT64 */
+#endif /* CONFIG_SYNO_SYSTEM_CALL */
+
+#ifdef CONFIG_SYNO_FS_STAT
+
+#if defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)
+struct SYNOSTAT64 {
+	struct stat64 st;
+	struct SYNOSTAT_EXTRA ext;
+};
+
+static long SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct SYNOSTAT64 __user * statbuf)
+{
+	long error = -EFAULT;
+
+	if (!statbuf) {
+		error = -EINVAL;
+		goto Out;
+	}
+
+	if (flags & SYNOST_STAT) {
+		if (0 != (error = cp_new_stat64(pKst, &statbuf->st))) {
+			goto Out;
+		}
+	}
+
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+	if (flags & SYNOST_ARCHIVE_BIT) {
+		if (__put_user(pKst->syno_archive_bit, &statbuf->ext.archive_bit)) {
+			goto Out;
+		}
+	}
+#endif
+
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+	if (flags & SYNOST_ARCHIVE_VER) {
+		if (__put_user(pKst->syno_archive_version, &statbuf->ext.archive_version)) {
+			goto Out;
+		}
+	}
+#endif
+
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+	if (flags & SYNOST_CREATE_TIME) {
+		if (copy_to_user(&statbuf->ext.create_time, &pKst->syno_create_time, sizeof(statbuf->ext.create_time))){
+			goto Out;
+		}
+	}
+#endif
+
+	error = 0;
+Out:
+	return error;
+}
+
+static int do_SYNOStat64(char __user * filename, int no_follow_link, int flags, struct SYNOSTAT64 __user * statbuf)
+{
+	long error = -EINVAL;
+	struct kstat kst;
+
+	if (flags & SYNOST_IS_CASELESS) {
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+		int last_component = 0;
+		error = __SYNOCaselessStat(filename, no_follow_link, &kst, &last_component, flags);
+		if (-ENOENT == error) {
+			if (statbuf){
+				if (__put_user(last_component, &statbuf->ext.last_component)){
+					goto Out;
+				}
+			}
+		}
+#else
+		error = -EOPNOTSUPP;
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+	} else {
+		if (no_follow_link) {
+			error = syno_vfs_fstatat(filename, &kst, 0, flags);
+		} else {
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+			if(syno_hibernation_log_level > 0) {
+				syno_do_hibernation_filename_log(filename);
+			}
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+			error = syno_vfs_fstatat(filename, &kst, LOOKUP_FOLLOW, flags);
+		}
+	}
+
+	if (error) {
+		goto Out;
+	}
+
+	error = SYNOStat64CopyToUser(&kst, flags, statbuf);
+Out:
+	return error;
+}
+
+SYSCALL_DEFINE3(SYNOStat64, const char __user *, filename, unsigned int, flags, struct SYNOSTAT64 __user *, statbuf)
+{
+	return do_SYNOStat64(filename, 0, flags, statbuf);
+}
+
+SYSCALL_DEFINE3(SYNOFStat64, unsigned int, fd, unsigned int, flags, struct SYNOSTAT64 __user *, statbuf)
+{
+	int error;
+	struct kstat kst;
+
+	error = syno_vfs_fstat(fd, &kst, flags);
+	if (error) {
+		return error;
+	}
+
+	return SYNOStat64CopyToUser(&kst, flags, statbuf);
+}
+
+SYSCALL_DEFINE3(SYNOLStat64, const char __user *, filename, unsigned int, flags, struct SYNOSTAT64 __user *, statbuf)
+{
+	return do_SYNOStat64(filename, 1, flags, statbuf);
+}
+
+#else /* __ARCH_WANT_STAT64 || __ARCH_WANT_COMPAT_STAT64 */
+
+static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYNOSTAT __user * statbuf)
+{
+	int error = -EFAULT;
+
+	if (!statbuf) {
+		error = -EINVAL;
+		goto Out;
+	}
+
+	if (flags & SYNOST_STAT) {
+		if(0 != (error = cp_new_stat(pKst, &statbuf->st))){
+			goto Out;
+		}
+	}
+
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+	if (flags & SYNOST_ARCHIVE_BIT) {
+		if (__put_user(pKst->syno_archive_bit, &statbuf->ext.archive_bit)) {
+			goto Out;
+		}
+	}
+#endif
+
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+	if (flags & SYNOST_ARCHIVE_VER) {
+		if (__put_user(pKst->syno_archive_version, &statbuf->ext.archive_version)) {
+			goto Out;
+		}
+	}
+#endif
+
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+	if (flags & SYNOST_CREATE_TIME) {
+		if (copy_to_user(&statbuf->ext.create_time, &pKst->syno_create_time, sizeof(statbuf->ext.create_time))){
+			goto Out;
+		}
+	}
+#endif
+
+	error = 0;
+Out:
+	return error;
+}
+
+static int do_SYNOStat(char __user * filename, int no_follow_link, int flags, struct SYNOSTAT __user * statbuf)
+{
+	long error = -EINVAL;
+	struct kstat kst;
+
+	if (flags & SYNOST_IS_CASELESS) {
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+		int last_component = 0;
+		error = __SYNOCaselessStat(filename, no_follow_link, &kst, &last_component, flags);
+		if (-ENOENT == error) {
+			if (statbuf){
+				if (__put_user(last_component, &statbuf->ext.last_component)){
+					goto Out;
+				}
+			}
+		}
+#else
+		error = -EOPNOTSUPP;
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+	} else {
+		if (no_follow_link) {
+			error = syno_vfs_fstatat(filename, &kst, 0, flags);
+		} else {
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+			if(syno_hibernation_log_level > 0) {
+				syno_do_hibernation_filename_log(filename);
+			}
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+			error = syno_vfs_fstatat(filename, &kst, LOOKUP_FOLLOW, flags);
+		}
+	}
+
+	if (error) {
+		goto Out;
+	}
+
+	error = SYNOStatCopyToUser(&kst, flags, statbuf);
+Out:
+	return error;
+}
+
+SYSCALL_DEFINE3(SYNOStat, char __user *, filename, unsigned int, flags, struct SYNOSTAT __user *, statbuf)
+{
+	return do_SYNOStat(filename, 0, flags, statbuf);
+}
+
+SYSCALL_DEFINE3(SYNOFStat, unsigned int, fd, unsigned int, flags, struct SYNOSTAT __user *, statbuf)
+{
+	int error;
+	struct kstat kst;
+
+	error = syno_vfs_fstat(fd, &kst, flags);
+	if (error) {
+		return error;
+	}
+
+	return SYNOStatCopyToUser(&kst, flags, statbuf);
+}
+
+SYSCALL_DEFINE3(SYNOLStat, char __user *, filename, unsigned int, flags, struct SYNOSTAT __user *, statbuf)
+{
+	return do_SYNOStat(filename, 1, flags, statbuf);
+}
+
+#endif /* __ARCH_WANT_STAT64 || __ARCH_WANT_COMPAT_STAT64 */
+#endif /* CONFIG_SYNO_FS_STAT */
 
 /* Caller is here responsible for sufficient locking (ie. inode->i_lock) */
 void __inode_add_bytes(struct inode *inode, loff_t bytes)

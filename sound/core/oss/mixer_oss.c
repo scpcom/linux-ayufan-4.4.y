@@ -38,6 +38,9 @@ MODULE_DESCRIPTION("Mixer OSS emulation for ALSA.");
 MODULE_LICENSE("GPL");
 MODULE_ALIAS_SNDRV_MINOR(SNDRV_MINOR_OSS_MIXER);
 
+#if defined(CONFIG_SYNO_AUDIO_KEEP_VOLUME)
+extern int gSynoAudioVolume;
+#endif /*CONFIG_SYNO_AUDIO_KEEP_VOLUME*/
 static int snd_mixer_oss_open(struct inode *inode, struct file *file)
 {
 	struct snd_card *card;
@@ -303,6 +306,9 @@ static int snd_mixer_oss_set_volume(struct snd_mixer_oss_file *fmixer,
 		result = pslot->put_volume(fmixer, pslot, left, right);
 	if (result < 0)
 		return result;
+#if defined(CONFIG_SYNO_AUDIO_KEEP_VOLUME)
+	gSynoAudioVolume = ( left + right ) / 2;
+#endif /*CONFIG_SYNO_AUDIO_KEEP_VOLUME*/
 	pslot->volume[0] = left;
 	pslot->volume[1] = right;
  	return (left & 0xff) | ((right & 0xff) << 8);

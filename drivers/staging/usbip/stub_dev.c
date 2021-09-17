@@ -124,13 +124,15 @@ static ssize_t store_sockfd(struct device *dev, struct device_attribute *attr,
 
 	} else {
 		dev_info(dev, "stub down\n");
-
+#ifdef CONFIG_SYNO_USB_USBIP
+	/* Skip the step to force shutdown socket and reset device */
+#else
 		spin_lock_irq(&sdev->ud.lock);
 		if (sdev->ud.status != SDEV_ST_USED)
 			goto err;
 
 		spin_unlock_irq(&sdev->ud.lock);
-
+#endif
 		usbip_event_add(&sdev->ud, SDEV_EVENT_DOWN);
 	}
 
@@ -351,7 +353,7 @@ static int stub_probe(struct usb_interface *interface,
 	int err = 0;
 	struct bus_id_priv *busid_priv;
 
-	dev_dbg(&interface->dev, "Enter\n");
+	dev_dbg(&interface->dev, "Enter probe\n");
 
 	/* check we should claim or not by busid_table */
 	busid_priv = get_busid_priv(udev_busid);
@@ -463,7 +465,7 @@ static void stub_disconnect(struct usb_interface *interface)
 	const char *udev_busid = dev_name(interface->dev.parent);
 	struct bus_id_priv *busid_priv;
 
-	dev_dbg(&interface->dev, "Enter\n");
+	dev_dbg(&interface->dev, "Enter disconnect\n");
 
 	busid_priv = get_busid_priv(udev_busid);
 	if (!busid_priv) {
@@ -537,7 +539,11 @@ static int stub_post_reset(struct usb_interface *interface)
 }
 
 struct usb_driver stub_driver = {
+#ifdef CONFIG_SYNO_USB_USBIP
+	.name		= "usbip",
+#else
 	.name		= "usbip-host",
+#endif
 	.probe		= stub_probe,
 	.disconnect	= stub_disconnect,
 	.id_table	= stub_table,

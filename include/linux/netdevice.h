@@ -186,7 +186,6 @@ struct net_device_stats {
 	unsigned long	tx_compressed;
 };
 
-
 #include <linux/cache.h>
 #include <linux/skbuff.h>
 
@@ -286,7 +285,6 @@ enum netdev_state_t {
 	__LINK_STATE_LINKWATCH_PENDING,
 	__LINK_STATE_DORMANT,
 };
-
 
 /*
  * This structure holds at boot time configured netdevice settings. They
@@ -1073,7 +1071,6 @@ struct net_device {
 	struct list_head	unreg_list;
 	struct list_head	upper_dev_list; /* List of upper devices */
 
-
 	/* currently active device features */
 	netdev_features_t	features;
 	/* user-changeable features */
@@ -1156,7 +1153,6 @@ struct net_device {
 	unsigned int		promiscuity;
 	unsigned int		allmulti;
 
-
 	/* Protocol specific pointers */
 
 #if IS_ENABLED(CONFIG_VLAN_8021Q)
@@ -1189,7 +1185,6 @@ struct net_device {
 						   because most packets are
 						   unicast) */
 
-
 #ifdef CONFIG_RPS
 	struct netdev_rx_queue	*_rx;
 
@@ -1206,7 +1201,6 @@ struct net_device {
 
 	struct netdev_queue __rcu *ingress_queue;
 	unsigned char		broadcast[MAX_ADDR_LEN];	/* hw bcast add	*/
-
 
 /*
  * Cache lines mostly used on transmit path
@@ -1598,11 +1592,9 @@ extern int register_netdevice_notifier(struct notifier_block *nb);
 extern int unregister_netdevice_notifier(struct notifier_block *nb);
 extern int call_netdevice_notifiers(unsigned long val, struct net_device *dev);
 
-
 extern rwlock_t				dev_base_lock;		/* Device list lock */
 
 extern seqcount_t	devnet_rename_seq;	/* Device rename seq */
-
 
 #define for_each_netdev(net, d)		\
 		list_for_each_entry(d, &(net)->dev_base_head, dev_list)
@@ -2352,7 +2344,6 @@ static inline bool netif_dormant(const struct net_device *dev)
 	return test_bit(__LINK_STATE_DORMANT, &dev->state);
 }
 
-
 /**
  *	netif_oper_up - test if device is operational
  *	@dev: network device
@@ -2819,6 +2810,10 @@ static inline bool netif_supports_nofcs(struct net_device *dev)
 }
 
 extern struct pernet_operations __net_initdata loopback_net_ops;
+
+#ifdef CONFIG_SYNO_MAC_ADDRESS
+extern int syno_get_dev_vendor_mac(const char *szDev, char *szMac);
+#endif /* CONFIG_SYNO_MAC_ADDRESS */
 
 /* Logging, debugging and troubleshooting/diagnostic helpers. */
 

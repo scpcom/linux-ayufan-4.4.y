@@ -602,6 +602,12 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 	int error;
 	struct dentry *dentry = NULL, *trap;
 	const char *old_name;
+#ifdef CONFIG_SYNO_FS_NOTIFY
+	char *tmp_old_full = NULL;
+	char *tmp_new_full = NULL;
+	char *tmp_old_buff = NULL;
+	char *tmp_new_buff = NULL;
+#endif
 
 	trap = lock_rename(new_dir, old_dir);
 	/* Source or destination directories don't exist? */
@@ -616,6 +622,15 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 	if (IS_ERR(dentry) || dentry == trap || dentry->d_inode)
 		goto exit;
 
+#ifdef CONFIG_SYNO_FS_NOTIFY
+	tmp_old_buff = kmalloc(PATH_MAX, GFP_NOFS);
+	tmp_new_buff = kmalloc(PATH_MAX, GFP_NOFS);
+	if (!tmp_old_buff || !tmp_new_buff) {
+		goto exit;
+	}
+	tmp_old_full = dentry_path_raw(old_dentry, tmp_old_buff, PATH_MAX-1);
+	tmp_new_full = dentry_path_raw(dentry, tmp_new_buff, PATH_MAX-1);
+#endif
 	old_name = fsnotify_oldname_init(old_dentry->d_name.name);
 
 	error = simple_rename(old_dir->d_inode, old_dentry, new_dir->d_inode,
@@ -625,14 +640,24 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 		goto exit;
 	}
 	d_move(old_dentry, dentry);
+#ifdef CONFIG_SYNO_FS_NOTIFY
+	fsnotify_move(old_dir->d_inode, new_dir->d_inode, old_name,
+		S_ISDIR(old_dentry->d_inode->i_mode),
+		NULL, old_dentry, tmp_old_full, tmp_new_full);
+#else
 	fsnotify_move(old_dir->d_inode, new_dir->d_inode, old_name,
 		S_ISDIR(old_dentry->d_inode->i_mode),
 		NULL, old_dentry);
+#endif
 	fsnotify_oldname_free(old_name);
 	unlock_rename(new_dir, old_dir);
 	dput(dentry);
 	return old_dentry;
 exit:
+#ifdef CONFIG_SYNO_FS_NOTIFY
+	kfree(tmp_old_buff);
+	kfree(tmp_new_buff);
+#endif
 	if (dentry && !IS_ERR(dentry))
 		dput(dentry);
 	unlock_rename(new_dir, old_dir);
@@ -648,7 +673,6 @@ bool debugfs_initialized(void)
 	return debugfs_registered;
 }
 EXPORT_SYMBOL_GPL(debugfs_initialized);
-
 
 static struct kobject *debug_kobj;
 
@@ -669,4 +693,3 @@ static int __init debugfs_init(void)
 	return retval;
 }
 core_initcall(debugfs_init);
-

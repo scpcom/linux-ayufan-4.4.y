@@ -615,6 +615,8 @@ static int ext2_setup_super (struct super_block * sb,
 		ext2_msg(sb, KERN_WARNING,
 			"warning: mounting fs with errors, "
 			"running e2fsck is recommended");
+#ifdef CONFIG_SYNO_EXT_SKIP_FSCK_REMINDER
+#else
 	else if ((__s16) le16_to_cpu(es->s_max_mnt_count) >= 0 &&
 		 le16_to_cpu(es->s_mnt_count) >=
 		 (unsigned short) (__s16) le16_to_cpu(es->s_max_mnt_count))
@@ -627,6 +629,7 @@ static int ext2_setup_super (struct super_block * sb,
 		ext2_msg(sb, KERN_WARNING,
 			"warning: checktime reached, "
 			"running e2fsck is recommended");
+#endif
 	if (!le16_to_cpu(es->s_max_mnt_count))
 		es->s_max_mnt_count = cpu_to_le16(EXT2_DFL_MAX_MNT_COUNT);
 	le16_add_cpu(&es->s_mnt_count, 1);
@@ -714,7 +717,6 @@ static loff_t ext2_max_size(int bits)
 
 	/* total blocks in file system block size */
 	upper_limit >>= (bits - 9);
-
 
 	/* indirect blocks */
 	meta_blocks = 1;

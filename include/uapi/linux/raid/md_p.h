@@ -83,6 +83,10 @@
 				   * dire need
 				   */
 
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+#define MD_DISK_ERROR		6 /* disk error in degraded mode */
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+
 typedef struct mdp_device_descriptor_s {
 	__u32 number;		/* 0 Device number in the entire set	      */
 	__u32 major;		/* 1 Device major number		      */
@@ -111,7 +115,6 @@ typedef struct mdp_device_descriptor_s {
  *   "raid_disks-delta_disks" is the old.  If -ve, raid_disks is the
  *   old value and "raid_disks+delta_disks" is the new (smaller) value.
  */
-
 
 typedef struct mdp_superblock_s {
 	/*

@@ -28,6 +28,10 @@
 #include <linux/sunrpc/clnt.h>
 #include <linux/sunrpc/bc_xprt.h>
 
+#ifdef CONFIG_SYNO_NFS4_DISABLE_UDP
+#include <uapi/linux/nfs.h>
+#endif
+
 #define RPCDBG_FACILITY	RPCDBG_SVCDSP
 
 static void svc_unregister(const struct svc_serv *serv, struct net *net);
@@ -199,7 +203,6 @@ svc_pool_map_init_percpu(struct svc_pool_map *m)
 	return pidx;
 };
 
-
 /*
  * Initialise the pool map for SVC_POOL_PERNODE mode.
  * Returns number of pools or <0 on error.
@@ -227,7 +230,6 @@ svc_pool_map_init_pernode(struct svc_pool_map *m)
 
 	return pidx;
 }
-
 
 /*
  * Add a reference to the global map of cpus to pools (and
@@ -270,7 +272,6 @@ svc_pool_map_get(void)
 	return m->npools;
 }
 
-
 /*
  * Drop a reference to the global map of cpus to pools.
  * When the last reference is dropped, the map data is
@@ -295,7 +296,6 @@ svc_pool_map_put(void)
 
 	mutex_unlock(&svc_pool_map_mutex);
 }
-
 
 static int svc_pool_map_get_node(unsigned int pidx)
 {
@@ -961,6 +961,11 @@ int svc_register(const struct svc_serv *serv, struct net *net,
 			if (progp->pg_vers[i]->vs_hidden)
 				continue;
 
+#ifdef CONFIG_SYNO_NFS4_DISABLE_UDP
+			if (NFS_PROGRAM == progp->pg_prog && 4 == i && IPPROTO_UDP == proto) {
+				continue;
+			}
+#endif /*CONFIG_SYNO_NFS4_DISABLE_UDP*/
 			error = __svc_register(net, progp->pg_name, progp->pg_prog,
 						i, family, proto, port);
 			if (error < 0)

@@ -33,7 +33,6 @@ static void TEA_transform(__u32 buf[4], __u32 const in[])
 	buf[1] += b1;
 }
 
-
 /* The old legacy hash */
 static __u32 dx_hack_hash_unsigned(const char *name, int len)
 {
@@ -123,6 +122,11 @@ static void str2hashbuf_unsigned(const char *msg, int len, __u32 *buf, int num)
 		*buf++ = pad;
 }
 
+#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+static unsigned char ext4_utf8_hash_buf[UNICODE_UTF8_BUFSIZE];
+extern spinlock_t ext4_hash_buf_lock;  /* init at ext4_fill_super() */
+#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
+
 /*
  * Returns the hash of a filename.  If len is 0 and name is NULL, then
  * this function can be used to test whether or not a hash version is
@@ -145,6 +149,16 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 	__u32		in[8], buf[4];
 	void		(*str2hashbuf)(const char *, int, __u32 *, int) =
 				str2hashbuf_signed;
+#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+
+	spin_lock(&ext4_hash_buf_lock);
+
+	if (name && (len > 0)) {
+		len = syno_utf8_toupper(ext4_utf8_hash_buf, name,
+								  UNICODE_UTF8_BUFSIZE - 1 , len, NULL);
+		name = ext4_utf8_hash_buf;
+	}
+#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
 
 	/* Initialize the default seed for the hash checksum functions */
 	buf[0] = 0x67452301;
@@ -197,6 +211,9 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 		break;
 	default:
 		hinfo->hash = 0;
+#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+		spin_unlock(&ext4_hash_buf_lock);
+#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
 		return -1;
 	}
 	hash = hash & ~1;
@@ -204,5 +221,8 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 		hash = (EXT4_HTREE_EOF_32BIT - 1) << 1;
 	hinfo->hash = hash;
 	hinfo->minor_hash = minor_hash;
+#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+	spin_unlock(&ext4_hash_buf_lock);
+#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
 	return 0;
 }

@@ -29,6 +29,14 @@
 #define HASH_SHIFT ilog2(PAGE_SIZE / sizeof(struct list_head))
 #define HASH_SIZE (1UL << HASH_SHIFT)
 
+#ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
+extern int gSynoHasDynModule;
+#endif /*CONFIG_SYNO_DYN_MODULE_INSTALL*/
+
+#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+extern void ext4_fill_mount_path(struct super_block *sb, const char *szPath);
+#endif
+
 static int event;
 static DEFINE_IDA(mnt_id_ida);
 static DEFINE_IDA(mnt_group_ida);
@@ -54,6 +62,9 @@ EXPORT_SYMBOL_GPL(fs_kobj);
  * tree or hash is modified or when a vfsmount structure is modified.
  */
 DEFINE_BRLOCK(vfsmount_lock);
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(vfsmount_lock);
+#endif /* CONFIG_AUFS_FHSM */
 
 static inline unsigned long hash(struct vfsmount *mnt, struct dentry *dentry)
 {
@@ -427,6 +438,9 @@ void __mnt_drop_write(struct vfsmount *mnt)
 	mnt_dec_writers(real_mount(mnt));
 	preempt_enable();
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(__mnt_drop_write);
+#endif /* CONFIG_AUFS_FHSM */
 
 /**
  * mnt_drop_write - give up write access to a mount
@@ -1456,6 +1470,9 @@ int iterate_mounts(int (*f)(struct vfsmount *, void *), void *arg,
 	}
 	return 0;
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(iterate_mounts);
+#endif /* CONFIG_AUFS_FHSM */
 
 static void cleanup_group_ids(struct mount *mnt, struct mount *end)
 {
@@ -2005,6 +2022,13 @@ static int do_new_mount(struct path *path, const char *fstype, int flags,
 		return PTR_ERR(mnt);
 
 	err = do_add_mount(real_mount(mnt), path, mnt_flags);
+#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+	if (!err && !strcmp(fstype, "ext4")) {
+		char buf[SYNO_MOUNT_PATH_LEN] = {'\0'};
+		ext4_fill_mount_path(mnt->mnt_sb, d_path(path, buf, sizeof(buf)));
+	}
+#endif
+
 	if (err)
 		mntput(mnt);
 	return err;
@@ -2264,6 +2288,18 @@ long do_mount(const char *dev_name, const char *dir_name,
 	struct path path;
 	int retval = 0;
 	int mnt_flags = 0;
+
+#ifdef CONFIG_SYNO_INSTALL_FLAG
+	extern int gSynoInstallFlag;
+	if ( 0 == gSynoInstallFlag &&
+#ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
+			gSynoHasDynModule &&
+#endif /*CONFIG_SYNO_DYN_MODULE_INSTALL*/
+			NULL != dev_name &&
+			strstr(dev_name, CONFIG_SYNO_USB_FLASH_DEVICE_PATH)) {
+		return -EINVAL;
+	}
+#endif /*CONFIG_SYNO_INSTALL_FLAG*/
 
 	/* Discard magic */
 	if ((flags & MS_MGC_MSK) == MS_MGC_VAL)
@@ -2900,3 +2936,6 @@ const struct proc_ns_operations mntns_operations = {
 	.install	= mntns_install,
 	.inum		= mntns_inum,
 };
+
+int (*funcSYNOSendErrorFsBtrfsEvent)(const u8*) = NULL;
+EXPORT_SYMBOL(funcSYNOSendErrorFsBtrfsEvent);

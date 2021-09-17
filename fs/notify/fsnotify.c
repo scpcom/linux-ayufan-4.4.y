@@ -28,6 +28,10 @@
 #include "fsnotify.h"
 #include "../mount.h"
 
+#ifdef CONFIG_SYNO_FS_NOTIFY
+#include <linux/nsproxy.h>
+#endif
+
 /*
  * Clear all of the marks on an inode when it is being evicted from core
  */
@@ -295,6 +299,127 @@ out:
 	return ret;
 }
 EXPORT_SYMBOL_GPL(fsnotify);
+
+#ifdef CONFIG_SYNO_FS_NOTIFY
+/* Retrieve mount by given super block, remember to invoke mntput afterward.
+ * Note: In the case that different mount has same super block, it will get the first matching mount
+ * It is undefined behavior on bind mount case.
+ */
+inline struct vfsmount *get_vfsmount_by_sb(struct super_block *sb)
+{
+	struct list_head *head = NULL;
+	struct mount *mnt = NULL;
+	struct nsproxy *nsproxy = NULL;
+	if (!sb)
+		return NULL;
+
+	nsproxy = current->nsproxy;
+	if (nsproxy) {
+		struct mnt_namespace *mnt_space = nsproxy->mnt_ns;
+		if(mnt_space){
+			list_for_each(head, &mnt_space->list) {
+				mnt = list_entry(head, struct mount, mnt_list);
+				if (mnt && mnt->mnt.mnt_sb == sb) {
+					return &mnt->mnt;
+				}
+			}
+		}
+	}
+	return NULL;
+}
+
+inline int SYNOFsnotify(__u32 mask, void *data, int data_is,
+	     const unsigned char *file_name, u32 cookie)
+{
+	struct hlist_node *mount_node = NULL;
+	struct fsnotify_mark *mount_mark = NULL;
+	struct fsnotify_event *event = NULL;
+	struct mount *mnt = NULL;
+	int idx = 0;
+	/* global tests shouldn't care about events on child only the specific event */
+	__u32 test_mask = (mask & ~FS_EVENT_ON_CHILD);
+
+	if (data_is != FSNOTIFY_EVENT_SYNO)
+		return 0;
+
+	if (!((struct path *)data)->mnt)
+		return 0;
+
+	mnt = real_mount(((struct path *)data)->mnt);
+	if (!(test_mask & mnt->mnt_fsnotify_mask))
+		return 0;
+
+	idx = srcu_read_lock(&fsnotify_mark_srcu);
+
+	mount_node = srcu_dereference(mnt->mnt_fsnotify_marks.first,
+						 &fsnotify_mark_srcu);
+
+	while (mount_node) {
+
+		mount_mark = hlist_entry(srcu_dereference(mount_node, &fsnotify_mark_srcu),
+							struct fsnotify_mark, m.m_list);
+
+		send_to_group(NULL, NULL, mount_mark, mask, data,
+					    data_is, cookie, file_name, &event);
+
+		mount_node = srcu_dereference(mount_node->next,
+							 &fsnotify_mark_srcu);
+	}
+
+	srcu_read_unlock(&fsnotify_mark_srcu, idx);
+	/*
+	 * fsnotify_create_event() took a reference so the event can't be cleaned
+	 * up while we are still trying to add it to lists, drop that one.
+	 */
+	if (event)
+		fsnotify_put_event(event);
+
+	return 0;
+}
+
+/* Do syno notify according to given dentry and mask */
+int SYNONotify(struct dentry *dentry, __u32 mask)
+{
+	struct path path;
+	char *dentry_path = NULL;
+	char *dentry_buf = NULL;
+	int ret = 0;
+
+	memset(&path, 0, sizeof(struct path));
+	if(!dentry){
+		ret = -EINVAL;
+		goto ERR;
+	}
+
+	path.mnt = get_vfsmount_by_sb(dentry->d_sb);
+	if(!path.mnt){
+		ret = -EINVAL;
+		goto ERR;
+	}
+	path.dentry = dentry;
+	mntget(path.mnt);
+
+	dentry_buf = kmalloc(PATH_MAX, GFP_NOFS);
+	if(!dentry_buf){
+		ret = -ENOMEM;
+		goto ERR;
+	}
+
+	dentry_path = dentry_path_raw(dentry, dentry_buf, PATH_MAX-1);
+	if (IS_ERR(dentry_path)) {
+		ret = PTR_ERR(dentry_path);
+		goto ERR;
+	}
+	SYNOFsnotify(mask, &path, FSNOTIFY_EVENT_SYNO, dentry_path, 0);
+
+ERR:
+	if (path.mnt)
+		mntput(path.mnt);
+	kfree(dentry_buf);
+	return ret;
+}
+EXPORT_SYMBOL(SYNONotify);
+#endif /* CONFIG_SYNO_FS_NOTIFY */
 
 static __init int fsnotify_init(void)
 {

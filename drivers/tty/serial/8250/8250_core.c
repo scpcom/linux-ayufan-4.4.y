@@ -84,7 +84,6 @@ static unsigned int skip_txen_test; /* force skip of txen test at init time */
 
 #define BOTH_EMPTY 	(UART_LSR_TEMT | UART_LSR_THRE)
 
-
 #ifdef CONFIG_SERIAL_8250_DETECT_IRQ
 #define CONFIG_SERIAL_DETECT_IRQ 1
 #endif
@@ -1535,6 +1534,10 @@ static int serial8250_default_handle_irq(struct uart_port *port)
 	return serial8250_handle_irq(port, iir);
 }
 
+#ifdef CONFIG_SYNO_XR17V35X_SERIAL
+int gSynoBuzzerMutePressed = 0;
+EXPORT_SYMBOL(gSynoBuzzerMutePressed);
+#endif
 /*
  * These Exar UARTs have an extra interrupt indicator that could
  * fire for a few unimplemented interrupts.  One of which is a
@@ -1551,10 +1554,26 @@ static int exar_handle_irq(struct uart_port *port)
 
 	if ((port->type == PORT_XR17V35X) ||
 	   (port->type == PORT_XR17D15X)) {
+#ifdef CONFIG_SYNO_XR17V35X_SERIAL
+		unsigned long flags;
+		unsigned char mpiolow, mpiohigh;
+		spin_lock_irqsave(&port->lock, flags);
+#endif
 		int0 = serial_port_in(port, 0x80);
 		int1 = serial_port_in(port, 0x81);
 		int2 = serial_port_in(port, 0x82);
 		int3 = serial_port_in(port, 0x83);
+#ifdef CONFIG_SYNO_XR17V35X_SERIAL
+		if (int1 & 0x6) {
+			mpiolow = serial_port_in(port, 0x90);
+			mpiohigh = serial_port_in(port, 0x96);
+			if (mpiolow & 0x1) {
+				gSynoBuzzerMutePressed = 1;
+			}
+			ret = 1;
+		}
+		spin_unlock_irqrestore(&port->lock, flags);
+#endif
 	}
 
 	return ret;
@@ -1901,7 +1920,6 @@ static int serial8250_get_poll_char(struct uart_port *port)
 
 	return serial_port_in(port, UART_RX);
 }
-
 
 static void serial8250_put_poll_char(struct uart_port *port,
 			 unsigned char c)
@@ -2475,7 +2493,6 @@ serial8250_set_ldisc(struct uart_port *port, int new)
 		port->flags &= ~UPF_HARDPPS_CD;
 }
 
-
 void serial8250_do_pm(struct uart_port *port, unsigned int state,
 		      unsigned int oldstate)
 {
@@ -2910,7 +2927,11 @@ serial8250_console_write(struct console *co, const char *s, unsigned int count)
 static int __init serial8250_console_setup(struct console *co, char *options)
 {
 	struct uart_port *port;
+#ifdef CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT
+        int baud = 115200;
+#else
 	int baud = 9600;
+#endif /* CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT */
 	int bits = 8;
 	int parity = 'n';
 	int flow = 'n';

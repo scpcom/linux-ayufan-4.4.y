@@ -712,7 +712,6 @@ void __sock_recv_timestamp(struct msghdr *msg, struct sock *sk,
 		}
 	}
 
-
 	memset(ts, 0, sizeof(ts));
 	if (sock_flag(sk, SOCK_TIMESTAMPING_SOFTWARE) &&
 	    ktime_to_timespec_cond(skb->tstamp, ts + 0))
@@ -928,7 +927,6 @@ static ssize_t sock_aio_read(struct kiocb *iocb, const struct iovec *iov,
 
 	if (iocb->ki_left == 0)	/* Match SYS5 behaviour */
 		return 0;
-
 
 	x = alloc_sock_iocb(iocb, &siocb);
 	if (!x)
@@ -1816,7 +1814,12 @@ SYSCALL_DEFINE6(recvfrom, int, fd, void __user *, ubuf, size_t, size,
 {
 	struct socket *sock;
 	struct iovec iov;
+#ifdef CONFIG_SYNO_FS_RECVFILE
+	// Fix bug 4511 in DS2.0. This is a workaround method.
+	struct msghdr msg = {0};
+#else
 	struct msghdr msg;
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 	struct sockaddr_storage address;
 	int err, err2;
 	int fput_needed;

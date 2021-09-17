@@ -101,7 +101,6 @@ __clear_page_buffers(struct page *page)
 	page_cache_release(page);
 }
 
-
 static int quiet_error(struct buffer_head *bh)
 {
 	if (!test_bit(BH_Quiet, &bh->b_state) && printk_ratelimit())
@@ -109,13 +108,18 @@ static int quiet_error(struct buffer_head *bh)
 	return 1;
 }
 
-
 static void buffer_io_error(struct buffer_head *bh)
 {
 	char b[BDEVNAME_SIZE];
+#ifdef CONFIG_SYNO_IO_ERROR_LIMIT_MSG
+	if (printk_ratelimit()) {
+#endif /* CONFIG_SYNO_IO_ERROR_LIMIT_MSG */
 	printk(KERN_ERR "Buffer I/O error on device %s, logical block %Lu\n",
 			bdevname(bh->b_bdev, b),
 			(unsigned long long)bh->b_blocknr);
+#ifdef CONFIG_SYNO_IO_ERROR_LIMIT_MSG
+	}
+#endif /* CONFIG_SYNO_IO_ERROR_LIMIT_MSG */
 }
 
 /*
@@ -416,7 +420,6 @@ void mark_buffer_async_write(struct buffer_head *bh)
 }
 EXPORT_SYMBOL(mark_buffer_async_write);
 
-
 /*
  * fs/buffer.c contains helper functions for buffer-backed address space's
  * fsync functions.  A common requirement for buffer-based filesystems is
@@ -433,7 +436,7 @@ EXPORT_SYMBOL(mark_buffer_async_write);
  * try_to_free_buffers() will be operating against the *blockdev* mapping
  * at the time, not against the S_ISREG file which depends on those buffers.
  * So the locking for private_list is via the private_lock in the address_space
- * which backs the buffers.  Which is different from the address_space 
+ * which backs the buffers.  Which is different from the address_space
  * against which the buffers are listed.  So for a particular address_space,
  * mapping->private_lock does *not* protect mapping->private_list!  In fact,
  * mapping->private_list will always be protected by the backing blockdev's
@@ -696,7 +699,7 @@ EXPORT_SYMBOL(__set_page_dirty_buffers);
  * Do this in two main stages: first we copy dirty buffers to a
  * temporary inode list, queueing the writes as we go.  Then we clean
  * up, waiting for those writes to complete.
- * 
+ *
  * During this second stage, any subsequent updates to the file may end
  * up refiling the buffer on the original inode's dirty list again, so
  * there is a chance we will end up with a buffer queued for write but
@@ -774,7 +777,7 @@ static int fsync_buffers_list(spinlock_t *lock, struct list_head *list)
 		brelse(bh);
 		spin_lock(lock);
 	}
-	
+
 	spin_unlock(lock);
 	err2 = osync_buffers_list(lock, list);
 	if (err)
@@ -884,7 +887,7 @@ no_grow:
 	/*
 	 * Return failure for non-async IO requests.  Async IO requests
 	 * are not allowed to fail, so we have to wait until buffer heads
-	 * become available.  But we don't want tasks sleeping with 
+	 * become available.  But we don't want tasks sleeping with
 	 * partially complete buffers, so all were released above.
 	 */
 	if (!retry)
@@ -893,7 +896,7 @@ no_grow:
 	/* We're _really_ low on memory. Now we just
 	 * wait for old buffer heads to become free due to
 	 * finishing IO.  Since this is an async request and
-	 * the reserve list is empty, we're sure there are 
+	 * the reserve list is empty, we're sure there are
 	 * async buffer heads in use.
 	 */
 	free_more_memory();
@@ -929,7 +932,7 @@ static sector_t blkdev_max_block(struct block_device *bdev, unsigned int size)
 
 /*
  * Initialise the state of a blockdev page's buffers.
- */ 
+ */
 static sector_t
 init_page_buffers(struct page *page, struct block_device *bdev,
 			sector_t block, int size)
@@ -1370,7 +1373,7 @@ EXPORT_SYMBOL(__breadahead);
  *  @bdev: the block_device to read from
  *  @block: number of block
  *  @size: size (in bytes) to read
- * 
+ *
  *  Reads a specified block, and returns buffer head that contains it.
  *  It returns NULL if the block was unreadable.
  */
@@ -1406,7 +1409,7 @@ static bool has_bh_in_lru(int cpu, void *dummy)
 {
 	struct bh_lru *b = per_cpu_ptr(&bh_lrus, cpu);
 	int i;
-	
+
 	for (i = 0; i < BH_LRU_SIZE; i++) {
 		if (b->bhs[i])
 			return 1;
@@ -1885,7 +1888,7 @@ int __block_write_begin(struct page *page, loff_t pos, unsigned len,
 		if (PageUptodate(page)) {
 			if (!buffer_uptodate(bh))
 				set_buffer_uptodate(bh);
-			continue; 
+			continue;
 		}
 		if (!buffer_uptodate(bh) && !buffer_delay(bh) &&
 		    !buffer_unwritten(bh) &&
@@ -2188,7 +2191,7 @@ EXPORT_SYMBOL(block_read_full_page);
 
 /* utility function for filesystems that need to do work on expanding
  * truncates.  Uses filesystem pagecache writes to allow the filesystem to
- * deal with the hole.  
+ * deal with the hole.
  */
 int generic_cont_expand_simple(struct inode *inode, loff_t size)
 {
@@ -2389,7 +2392,11 @@ int block_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf,
 	 * Update file times before taking page lock. We may end up failing the
 	 * fault so this update may be superfluous but who really cares...
 	 */
+#ifdef CONFIG_AUFS_FHSM
+	vma_file_update_time(vma);
+#else
 	file_update_time(vma->vm_file);
+#endif /* CONFIG_AUFS_FHSM */
 
 	ret = __block_page_mkwrite(vma, vmf, get_block);
 	sb_end_pagefault(sb);
@@ -2764,7 +2771,7 @@ int block_truncate_page(struct address_space *mapping,
 
 	length = blocksize - length;
 	iblock = (sector_t)index << (PAGE_CACHE_SHIFT - inode->i_blkbits);
-	
+
 	page = grab_cache_page(mapping, index);
 	err = -ENOMEM;
 	if (!page)
@@ -3030,7 +3037,7 @@ EXPORT_SYMBOL(submit_bh);
  *
  * ll_rw_block sets b_end_io to simple completion handler that marks
  * the buffer up-to-date (if approriate), unlocks the buffer and wakes
- * any waiters. 
+ * any waiters.
  *
  * All of the buffers must be for the same device, and must also be a
  * multiple of the current approved size for the device.

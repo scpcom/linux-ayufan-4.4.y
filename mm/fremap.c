@@ -202,16 +202,39 @@ get_write_lock:
 		 */
 		if (mapping_cap_account_dirty(mapping)) {
 			unsigned long addr;
+#ifdef CONFIG_AUFS_FHSM
+			struct file *file = vma->vm_file,
+				*prfile = vma->vm_prfile;
+#else
 			struct file *file = get_file(vma->vm_file);
+#endif /* CONFIG_AUFS_FHSM */
+
 			/* mmap_region may free vma; grab the info now */
 			vm_flags = vma->vm_flags;
-
+#ifdef CONFIG_AUFS_FHSM
+			vma_get_file(vma);
+#endif /* CONFIG_AUFS_FHSM */
 			addr = mmap_region(file, start, size, vm_flags, pgoff);
+#ifdef CONFIG_AUFS_FHSM
+			vma_fput(vma);
+#else
 			fput(file);
+#endif /* CONFIG_AUFS_FHSM */
 			if (IS_ERR_VALUE(addr)) {
 				err = addr;
 			} else {
 				BUG_ON(addr != start);
+#ifdef CONFIG_AUFS_FHSM
+				if (prfile) {
+					struct vm_area_struct *new_vma;
+
+					new_vma = find_vma(mm, addr);
+					if (!new_vma->vm_prfile)
+						new_vma->vm_prfile = prfile;
+					if (new_vma != vma)
+						get_file(prfile);
+				}
+#endif /* CONFIG_AUFS_FHSM */
 				err = 0;
 			}
 			goto out_freed;

@@ -31,7 +31,6 @@
 #include "cifs_fs_sb.h"
 #include "fscache.h"
 
-
 static void cifs_set_ops(struct inode *inode)
 {
 	struct cifs_sb_info *cifs_sb = CIFS_SB(inode->i_sb);
@@ -137,6 +136,9 @@ cifs_fattr_to_inode(struct inode *inode, struct cifs_fattr *fattr)
 	set_nlink(inode, fattr->cf_nlink);
 	inode->i_uid = fattr->cf_uid;
 	inode->i_gid = fattr->cf_gid;
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+	inode->i_create_time = cifs_NTtimeToUnix(cpu_to_le64(fattr->cf_createtime));
+#endif
 
 	/* if dynperm is set, don't clobber existing mode */
 	if (inode->i_state & I_NEW ||

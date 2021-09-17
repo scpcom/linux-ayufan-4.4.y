@@ -2429,6 +2429,12 @@ int vt_kmsg_redirect(int new)
  * The console must be locked when we get here.
  */
 
+#ifdef CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT
+/* 
+ * virtual terminal is not actvated in our implementation,
+ * so the related functions is not needed.
+ */
+#else /* CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT */
 static void vt_console_print(struct console *co, const char *b, unsigned count)
 {
 	struct vc_data *vc = vc_cons[fg_console].d;
@@ -2535,6 +2541,7 @@ static struct console vt_console_driver = {
 	.flags		= CON_PRINTBUFFER,
 	.index		= -1,
 };
+#endif /* CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT */
 #endif
 
 /*
@@ -2796,7 +2803,6 @@ static int con_open(struct tty_struct *tty, struct file *filp)
 	return 0;
 }
 
-
 static void con_close(struct tty_struct *tty, struct file *filp)
 {
 	/* Nothing to do - we defer to shutdown */
@@ -2908,8 +2914,15 @@ static int __init con_init(void)
 
 	console_unlock();
 
+#ifdef CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT
+/*
+ * virtual terminal is not actvated in our implementation,
+ * so the related functions is not needed.
+ */
+#else /* CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT */
 #ifdef CONFIG_VT_CONSOLE
 	register_console(&vt_console_driver);
+#endif /* CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT */
 #endif
 	return 0;
 }
@@ -3086,7 +3099,6 @@ err:
 	module_put(owner);
 	return retval;
 };
-
 
 static int bind_con_driver(const struct consw *csw, int first, int last,
 			   int deflt)
@@ -4130,7 +4142,6 @@ static int con_font_default(struct vc_data *vc, struct console_font_op *op)
 	char *s = name;
 	int rc;
 
-
 	if (!op->data)
 		s = NULL;
 	else if (strncpy_from_user(name, op->data, MAX_FONT_NAME - 1) < 0)
@@ -4159,7 +4170,6 @@ static int con_font_copy(struct vc_data *vc, struct console_font_op *op)
 {
 	int con = op->height;
 	int rc;
-
 
 	console_lock();
 	if (vc->vc_mode != KD_TEXT)

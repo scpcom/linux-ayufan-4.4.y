@@ -23,6 +23,9 @@
 #define EXT4_XATTR_INDEX_SECURITY	        6
 #define EXT4_XATTR_INDEX_SYSTEM			7
 #define EXT4_XATTR_INDEX_RICHACL		8
+#ifdef CONFIG_SYNO_EXT4_XATTR
+#define EXT4_XATTR_INDEX_SYNO			EXT4_XATTR_INDEX_RICHACL // 8
+#endif
 
 struct ext4_xattr_header {
 	__le32	h_magic;	/* magic number for identification */
@@ -94,6 +97,9 @@ struct ext4_xattr_ibody_find {
 	struct ext4_iloc iloc;
 };
 
+#ifdef CONFIG_SYNO_EXT4_XATTR
+extern struct xattr_handler ext4_xattr_syno_handler;
+#endif
 extern const struct xattr_handler ext4_xattr_user_handler;
 extern const struct xattr_handler ext4_xattr_trusted_handler;
 extern const struct xattr_handler ext4_xattr_acl_access_handler;

@@ -424,7 +424,11 @@ EXPORT_SYMBOL_GPL(do_trace_rcu_torture_read);
 #define RCU_STALL_DELAY_DELTA	       0
 #endif
 
+#ifdef CONFIG_SYNO_RCU_CPU_STALL_SUPPRESS
+int rcu_cpu_stall_suppress __read_mostly = 1; /* 1 = suppress stall warnings. */
+#else
 int rcu_cpu_stall_suppress __read_mostly; /* 1 = suppress stall warnings. */
+#endif
 int rcu_cpu_stall_timeout __read_mostly = CONFIG_RCU_CPU_STALL_TIMEOUT;
 
 module_param(rcu_cpu_stall_suppress, int, 0644);

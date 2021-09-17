@@ -7,7 +7,6 @@
  * parsing is required.
  */
 
-
 /* associates an integer enumerator with a pattern string. */
 struct match_token {
 	int token;
@@ -31,3 +30,7 @@ int match_octal(substring_t *, int *result);
 int match_hex(substring_t *, int *result);
 size_t match_strlcpy(char *, const substring_t *, size_t);
 char *match_strdup(const substring_t *);
+
+#if defined(CONFIG_SYNO_ISOFS_UINT_UID_GID) || defined(CONFIG_SYNO_UDF_UINT_UID_GID)
+int SYNO_get_option_ul(substring_t *args, unsigned long *option);
+#endif

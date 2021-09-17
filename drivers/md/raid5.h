@@ -197,6 +197,7 @@ enum reconstruct_states {
 struct stripe_head {
 	struct hlist_node	hash;
 	struct list_head	lru;	      /* inactive_list or handle_list */
+	struct llist_node	release_list;
 	struct r5conf		*raid_conf;
 	short			generation;	/* increments with every
 						 * reshape */
@@ -211,6 +212,8 @@ struct stripe_head {
 	enum check_states	check_state;
 	enum reconstruct_states reconstruct_state;
 	spinlock_t		stripe_lock;
+	int			cpu;
+	struct r5worker_group	*group;
 	/**
 	 * struct stripe_operations
 	 * @target - STRIPE_OP_COMPUTE_BLK target
@@ -321,6 +324,10 @@ enum {
 	STRIPE_OPS_REQ_PENDING,
 	STRIPE_ON_UNPLUG_LIST,
 	STRIPE_DISCARD,
+	STRIPE_ON_RELEASE_LIST,
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+	STRIPE_NORETRY,
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
 };
 
 /*
@@ -358,9 +365,21 @@ enum {
  * HANDLE gets cleared if stripe_handle leaves nothing locked.
  */
 
-
 struct disk_info {
 	struct md_rdev	*rdev, *replacement;
+};
+
+struct r5worker {
+	struct work_struct work;
+	struct r5worker_group *group;
+	bool working;
+};
+
+struct r5worker_group {
+	struct list_head handle_list;
+	struct r5conf *conf;
+	struct r5worker *workers;
+	int stripes_cnt;
 };
 
 struct r5conf {
@@ -386,6 +405,7 @@ struct r5conf {
 	int			prev_chunk_sectors;
 	int			prev_algo;
 	short			generation; /* increments with every reshape */
+	seqcount_t		gen_lock;	/* lock against generation changes */
 	unsigned long		reshape_checkpoint; /* Time we last updated
 						     * metadata */
 	long long		min_offset_diff; /* minimum difference between
@@ -445,6 +465,7 @@ struct r5conf {
 	 */
 	atomic_t		active_stripes;
 	struct list_head	inactive_list;
+	struct llist_head	released_stripes;
 	wait_queue_head_t	wait_for_stripe;
 	wait_queue_head_t	wait_for_overlap;
 	int			inactive_blocked;	/* release of inactive stripes blocked,
@@ -458,6 +479,9 @@ struct r5conf {
 	 * the new thread here until we fully activate the array.
 	 */
 	struct md_thread	*thread;
+	struct r5worker_group	*worker_groups;
+	int			group_cnt;
+	int			worker_cnt_per_group;
 };
 
 /*
@@ -489,7 +513,6 @@ struct r5conf {
 #define ALGORITHM_ROTATING_ZERO_RESTART	8 /* DDF PRL=6 RLQ=1 */
 #define ALGORITHM_ROTATING_N_RESTART	9 /* DDF PRL=6 RLQ=2 */
 #define ALGORITHM_ROTATING_N_CONTINUE	10 /*DDF PRL=6 RLQ=3 */
-
 
 /* For every RAID5 algorithm we define a RAID6 algorithm
  * with exactly the same layout for data and parity, and
@@ -525,4 +548,9 @@ static inline int algorithm_is_DDF(int layout)
 extern int md_raid5_congested(struct mddev *mddev, int bits);
 extern void md_raid5_kick_device(struct r5conf *conf);
 extern int raid5_set_cache_size(struct mddev *mddev, int size);
+
+#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
+#define sector_mod(a,b) sector_div(a,b)
+#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
+
 #endif

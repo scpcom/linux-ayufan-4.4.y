@@ -9,7 +9,18 @@
 #define _SCSI_SCSI_H
 
 #include <linux/types.h>
+#ifdef __KERNEL__
 #include <linux/scatterlist.h>
+#endif
+
+#ifndef __KERNEL__
+/* SYNO SCSI UAPI
+ * The three headers scsi.h, scsi_ioctl.h, and sg.h are required by some
+ * user space applications but kept in kernel space. We just drop sections
+ * that are kernel internal in scsi.h (guarded by ifdef __KERNEL__), and
+ * export them from include/uapi/scsi/ via symbolic links. */
+typedef unsigned char u8;
+#endif
 
 struct scsi_cmnd;
 
@@ -184,6 +195,8 @@ struct scsi_cmnd;
 #define	ATA_16		      0x85	/* 16-byte pass-thru */
 #define	ATA_12		      0xa1	/* 12-byte pass-thru */
 
+#ifdef __KERNEL__
+
 /*
  *	SCSI command lengths
  */
@@ -226,6 +239,7 @@ extern void
 scsi_unregister_acpi_bus_type(struct acpi_bus_type *bus);
 #endif
 
+#endif /* __KERNEL__ */
 /*
  *  SCSI Architecture Model (SAM) Status codes. Taken from SAM-3 draft
  *  T10/1561-D Revision 4 Draft dated 7th November 2002.
@@ -304,7 +318,6 @@ static inline int scsi_status_is_good(int status)
 #define VOLUME_OVERFLOW     0x0d
 #define MISCOMPARE          0x0e
 
-
 /*
  *  DEVICE TYPES
  *  Please keep them in 0x%02x format for $MODALIAS to work
@@ -382,7 +395,6 @@ static inline int scsi_is_wlun(unsigned int lun)
 {
 	return (lun & 0xff00) == SCSI_W_LUN_BASE;
 }
-
 
 /*
  *  MESSAGE CODES
@@ -519,7 +531,6 @@ static inline int scsi_is_wlun(unsigned int lun)
 #define READ_ELEMENT_STATUS_TIMEOUT	(5 * 60 * HZ)
 #define READ_DEFECT_DATA_TIMEOUT	(60 * HZ )
 
-
 #define IDENTIFY_BASE       0x80
 #define IDENTIFY(can_disconnect, lun)   (IDENTIFY_BASE |\
 		     ((can_disconnect) ?  0x40 : 0) |\
@@ -547,7 +558,6 @@ static inline int scsi_is_wlun(unsigned int lun)
 #define SCSI_INQ_PQ_NOT_CON     0x01
 #define SCSI_INQ_PQ_NOT_CAP     0x03
 
-
 /*
  * Here are some scsi specific ioctl commands which are sometimes useful.
  *
@@ -573,5 +583,25 @@ static inline __u32 scsi_to_u32(__u8 *ptr)
 {
 	return (ptr[0]<<24) + (ptr[1]<<16) + (ptr[2]<<8) + ptr[3];
 }
+
+#ifdef __KERNEL__
+
+#ifdef CONFIG_SYNO_BADSECTOR_TEST
+#include <linux/syno.h>
+#define SCSI_IOCTL_SET_BADSECTORS    0x5400
+
+typedef struct _tag_SdBadSectors {
+	unsigned int     rgSectors[101];
+	unsigned short     rgEnableSector[101];
+	unsigned short     uiEnable;   // 0-->disable, 1-->enable for read
+} SDBADSECTORS, *PSDBADSECTORS;
+#define EN_BAD_SECTOR_READ      0x01
+#define EN_BAD_SECTOR_WRITE     0x02
+
+extern SDBADSECTORS grgSdBadSectors[CONFIG_SYNO_MAX_INTERNAL_DISK];
+extern int gBadSectorTest;
+#define SynoGetInternalDiskSeq(szBdevName) (szBdevName[2] - 'a')
+#endif /* CONFIG_SYNO_BADSECTOR_TEST */
+#endif /* __KERNEL__ */
 
 #endif /* _SCSI_SCSI_H */

@@ -92,6 +92,12 @@ struct scsi_device {
 	unsigned long last_queue_ramp_up;	/* last queue ramp up time */
 
 	unsigned int id, lun, channel;
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+	char syno_disk_name[BDEVNAME_SIZE];		/* name of major driver */
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
+#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
+	unsigned char auto_remap;
+#endif /* CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP */
 
 	unsigned int manufacturer;	/* Manufacturer of device, for using 
 					 * vendor-specific cmd's */
@@ -175,6 +181,12 @@ struct scsi_device {
 	atomic_t iodone_cnt;
 	atomic_t ioerr_cnt;
 
+#ifdef CONFIG_SYNO_DISK_HIBERNATION
+	unsigned long   idle;   /* scsi idle time in jiffers */
+	unsigned char	spindown;
+	unsigned char   nospindown;
+#endif /* CONFIG_SYNO_DISK_HIBERNATION */
+
 	struct device		sdev_gendev,
 				sdev_dev;
 
@@ -183,6 +195,23 @@ struct scsi_device {
 
 	struct scsi_dh_data	*scsi_dh_data;
 	enum scsi_device_state sdev_state;
+
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
+	/* Which queue is this disk in. 
+	 * 0 indicates none and should spin up immediately. */
+	unsigned int	    spinup_queue_id;
+	/* Which queue is this disk in. Maybe NULL (id = 0). */
+	struct SpinupQueue *spinup_queue;
+	/* list_head to link against queue */
+	struct list_head    spinup_list;
+	/* Indicates the disk is already spinning up */
+	unsigned int	    spinup_in_process;
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY */
+
+#ifdef CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT
+	unsigned int        scmd_timeout_sec;
+#endif /* CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT */
+
 	unsigned long		sdev_data[0];
 } __attribute__((aligned(sizeof(unsigned long))));
 
@@ -289,6 +318,12 @@ static inline struct scsi_target *scsi_target(struct scsi_device *sdev)
 
 #define starget_printk(prefix, starget, fmt, a...)	\
 	dev_printk(prefix, &(starget)->dev, fmt, ##a)
+
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
+int SynoSpinupBegin(struct scsi_device *device);
+void SynoSpinupEnd(struct scsi_device *sdev);
+int SynoSpinupRemove(struct scsi_device *sdev);
+#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY */
 
 extern struct scsi_device *__scsi_add_device(struct Scsi_Host *,
 		uint, uint, uint, void *hostdata);

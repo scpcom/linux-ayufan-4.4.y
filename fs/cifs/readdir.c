@@ -192,6 +192,9 @@ cifs_dir_info_to_fattr(struct cifs_fattr *fattr, FILE_DIRECTORY_INFO *info,
 	fattr->cf_mtime = cifs_NTtimeToUnix(info->LastWriteTime);
 
 	cifs_fill_common_info(fattr, cifs_sb);
+#ifdef CONFIG_SYNO_CIFS_INIT_NLINK
+	fattr->cf_nlink = 1;
+#endif /* CONFIG_SYNO_CIFS_INIT_NLINK */
 }
 
 static void
@@ -752,7 +755,6 @@ static int cifs_filldir(char *find_entry, struct file *file, filldir_t filldir,
 		     fattr.cf_dtype);
 	return rc;
 }
-
 
 int cifs_readdir(struct file *file, void *direntry, filldir_t filldir)
 {

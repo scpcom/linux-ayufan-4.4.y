@@ -71,6 +71,13 @@ void fsstack_copy_attr_all(struct inode *dest, const struct inode *src)
 	dest->i_ctime = src->i_ctime;
 	dest->i_blkbits = src->i_blkbits;
 	dest->i_flags = src->i_flags;
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+	//For ecryptfs archive bit
+	dest->i_archive_bit = src->i_archive_bit;
+#endif
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+	dest->i_create_time = src->i_create_time;
+#endif
 	set_nlink(dest, src->i_nlink);
 }
 EXPORT_SYMBOL_GPL(fsstack_copy_attr_all);

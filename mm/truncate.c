@@ -22,7 +22,6 @@
 #include <linux/cleancache.h>
 #include "internal.h"
 
-
 /**
  * do_invalidatepage - invalidate part or all of a page
  * @page: the page which is affected
@@ -576,6 +575,20 @@ void truncate_setsize(struct inode *inode, loff_t newsize)
 }
 EXPORT_SYMBOL(truncate_setsize);
 
+#ifdef CONFIG_SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
+void ecryptfs_truncate_setsize(struct inode *inode, loff_t newsize)
+{
+	loff_t oldsize;
+
+	oldsize = inode->i_size;
+	i_size_write(inode, newsize);
+
+	if (oldsize > newsize) {
+		truncate_pagecache(inode, oldsize, newsize);
+	}
+}
+EXPORT_SYMBOL(ecryptfs_truncate_setsize);
+#endif /* CONFIG_SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE */
 /**
  * truncate_pagecache_range - unmap and remove pagecache that is hole-punched
  * @inode: inode

@@ -18,7 +18,10 @@
 #include <linux/workqueue.h>
 #include <linux/delay.h>
 #include <linux/export.h>
+#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#else
 #include <trace/events/asoc.h>
+#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
 
 /**
  * snd_soc_jack_new - Create a new jack
@@ -67,7 +70,10 @@ void snd_soc_jack_report(struct snd_soc_jack *jack, int status, int mask)
 	struct snd_soc_jack_pin *pin;
 	int enable;
 
+#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#else
 	trace_snd_soc_jack_report(jack, mask, status);
+#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
 
 	if (!jack)
 		return;
@@ -80,7 +86,10 @@ void snd_soc_jack_report(struct snd_soc_jack *jack, int status, int mask)
 	jack->status &= ~mask;
 	jack->status |= status & mask;
 
+#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#else
 	trace_snd_soc_jack_notify(jack, status);
+#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
 
 	list_for_each_entry(pin, &jack->pins, list) {
 		enable = pin->mask & jack->status;
@@ -258,7 +267,10 @@ static irqreturn_t gpio_handler(int irq, void *data)
 	struct snd_soc_jack_gpio *gpio = data;
 	struct device *dev = gpio->jack->codec->card->dev;
 
+#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#else
 	trace_snd_soc_jack_irq(gpio->name);
+#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SO*/
 
 	if (device_may_wakeup(dev))
 		pm_wakeup_event(dev, gpio->debounce_time + 50);

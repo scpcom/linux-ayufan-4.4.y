@@ -89,6 +89,15 @@ int efi_enabled(int facility)
 }
 EXPORT_SYMBOL(efi_enabled);
 
+#ifdef CONFIG_SYNO_EFI
+static bool __initdata disable_runtime = true;
+static int __init setup_withefi(char *arg)
+{
+	disable_runtime = false;
+	return 0;
+}
+early_param("withefi", setup_withefi);
+#else /* CONFIG_SYNO_EFI */
 static bool __initdata disable_runtime = false;
 static int __init setup_noefi(char *arg)
 {
@@ -96,6 +105,7 @@ static int __init setup_noefi(char *arg)
 	return 0;
 }
 early_param("noefi", setup_noefi);
+#endif /* CONFIG_SYNO_EFI */
 
 int add_efi_memmap;
 EXPORT_SYMBOL(add_efi_memmap);
@@ -115,7 +125,6 @@ static int __init setup_storage_paranoia(char *arg)
 	return 0;
 }
 early_param("efi_no_storage_paranoia", setup_storage_paranoia);
-
 
 static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
 {
@@ -765,6 +774,11 @@ void __init efi_init(void)
 		return;
 
 	set_bit(EFI_MEMMAP, &x86_efi_facility);
+
+#ifdef CONFIG_SYNO_CEDARVIEW_USE_EFI_REBOOT
+	/* Set reboot by EFI */
+	reboot_type = BOOT_EFI;
+#endif
 
 #if EFI_DEBUG
 	print_efi_memmap();

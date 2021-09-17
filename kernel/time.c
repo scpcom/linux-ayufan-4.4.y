@@ -176,8 +176,12 @@ int do_sys_settimeofday(const struct timespec *tv, const struct timezone *tz)
 		update_vsyscall_tz();
 		if (firsttime) {
 			firsttime = 0;
+#ifdef CONFIG_SYNO_KERNEL_UTC_TIME
+/* Keep UTC Time In Kernel And RTC */
+#else
 			if (!tv)
 				warp_clock();
+#endif /* CONFIG_SYNO_KERNEL_UTC_TIME */
 		}
 	}
 	if (tv)

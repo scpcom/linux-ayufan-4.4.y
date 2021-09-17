@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	Neighbour Discovery for IPv6
  *	Linux INET6 implementation
@@ -106,7 +109,6 @@ static const struct neigh_ops ndisc_hh_ops = {
 	.output =		neigh_resolve_output,
 	.connected_output =	neigh_resolve_output,
 };
-
 
 static const struct neigh_ops ndisc_direct_ops = {
 	.family =		AF_INET6,
@@ -516,7 +518,6 @@ static void ndisc_send_na(struct net_device *dev, struct neighbour *neigh,
 		ndisc_fill_addr_option(skb, ND_OPT_TARGET_LL_ADDR,
 				       dev->dev_addr);
 
-
 	ndisc_send_skb(skb, daddr, src_addr);
 }
 
@@ -632,7 +633,6 @@ void ndisc_send_rs(struct net_device *dev, const struct in6_addr *saddr,
 
 	ndisc_send_skb(skb, daddr, saddr);
 }
-
 
 static void ndisc_error_report(struct neighbour *neigh, struct sk_buff *skb)
 {
@@ -1171,10 +1171,14 @@ static void ndisc_router_discovery(struct sk_buff *skb)
 
 		rt = rt6_add_dflt_router(&ipv6_hdr(skb)->saddr, skb->dev, pref);
 		if (rt == NULL) {
+#ifdef MY_ABC_HERE
+			goto skip_defrtr;
+#else
 			ND_PRINTK(0, err,
 				  "RA: %s failed to add default route\n",
 				  __func__);
 			return;
+#endif
 		}
 
 		neigh = dst_neigh_lookup(&rt->dst, &ipv6_hdr(skb)->saddr);
@@ -1652,7 +1656,6 @@ int ndisc_ifinfo_sysctl_change(struct ctl_table *ctl, int write, void __user *bu
 	}
 	return ret;
 }
-
 
 #endif
 

@@ -16,6 +16,10 @@
 
 #include "base.h"
 
+#if defined(CONFIG_SYNO_LIMIT_CPU_CORES)
+#include <linux/synobios.h>
+#endif /* CONFIG_SYNO_LIMIT_CPU_CORES */
+
 struct bus_type cpu_subsys = {
 	.name = "cpu",
 	.dev_name = "cpu",
@@ -52,6 +56,16 @@ static ssize_t __ref store_online(struct device *dev,
 	int from_nid, to_nid;
 	ssize_t ret;
 
+#ifdef CONFIG_SYNO_LIMIT_CPU_CORES
+	if(syno_is_hw_version(HW_DS712pv20)) {
+		if( 1 == cpuid || 3 == cpuid ) {
+			printk(KERN_ERR "This model does not allow changing the specified cpu state.\n");
+			ret = count;
+			goto END;
+		}
+	}
+#endif /* CONFIG_SYNO_LIMIT_CPU_CORES */
+
 	cpu_hotplug_driver_lock();
 	switch (buf[0]) {
 	case '0':
@@ -81,6 +95,11 @@ static ssize_t __ref store_online(struct device *dev,
 
 	if (ret >= 0)
 		ret = count;
+
+#ifdef CONFIG_SYNO_LIMIT_CPU_CORES
+END:
+#endif /* CONFIG_SYNO_LIMIT_CPU_CORES */
+
 	return ret;
 }
 static DEVICE_ATTR(online, 0644, show_online, store_online);

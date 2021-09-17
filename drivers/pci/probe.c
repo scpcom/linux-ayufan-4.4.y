@@ -174,6 +174,12 @@ int __pci_read_base(struct pci_dev *dev, enum pci_bar_type type,
 	bool bar_too_big = false, bar_disabled = false;
 
 	mask = type ? PCI_ROM_ADDRESS_MASK : ~0;
+#ifdef CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF
+	if (PCI_VENDOR_ID_INTEL == dev->vendor && 0x2934 == dev->device) {
+		dev_printk(KERN_INFO, &dev->dev, "[%04x:%04x] Reading BAR - reg %x\n",
+		   dev->vendor, dev->device, pos);
+	}
+#endif /* CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF */
 
 	/* No printks while decoding is disabled! */
 	if (!dev->mmio_always_on) {
@@ -270,13 +276,17 @@ int __pci_read_base(struct pci_dev *dev, enum pci_bar_type type,
 
 	goto out;
 
-
 fail:
 	res->flags = 0;
 out:
 	if (!dev->mmio_always_on)
 		pci_write_config_word(dev, PCI_COMMAND, orig_cmd);
-
+#ifdef CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF
+	if (PCI_VENDOR_ID_INTEL == dev->vendor && 0x2934 == dev->device) {
+		dev_printk(KERN_INFO, &dev->dev, "[%04x:%04x] Sizing Complete - reg %x\n",
+		   dev->vendor, dev->device, pos);
+	}
+#endif /* CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF */
 	if (bar_too_big)
 		dev_err(&dev->dev, "reg %x: can't handle 64-bit BAR\n", pos);
 	if (res->flags && !bar_disabled)
@@ -556,7 +566,6 @@ static enum pci_bus_speed agp_speed(int agp3, int agpstat)
 	return agp_speeds[index];
 }
 
-
 static void pci_set_bus_speed(struct pci_bus *bus)
 {
 	struct pci_dev *bridge = bus->self;
@@ -616,7 +625,6 @@ static void pci_set_bus_speed(struct pci_bus *bus)
 		pcie_update_link_speed(bus, linksta);
 	}
 }
-
 
 static struct pci_bus *pci_alloc_child_bus(struct pci_bus *parent,
 					   struct pci_dev *bridge, int busnr)

@@ -18,6 +18,12 @@ struct dm_sysfs_attr {
 struct dm_sysfs_attr dm_attr_##_name = \
 	__ATTR(_name, S_IRUGO, dm_attr_##_name##_show, NULL)
 
+#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#define DM_ATTR_RW(_name) \
+struct dm_sysfs_attr dm_attr_##_name = \
+	__ATTR(_name, S_IRUGO|S_IWUSR, dm_attr_##_name##_show, dm_attr_##_name##_store)
+#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+
 static ssize_t dm_attr_show(struct kobject *kobj, struct attribute *attr,
 			    char *page)
 {
@@ -57,6 +63,42 @@ static ssize_t dm_attr_uuid_show(struct mapped_device *md, char *buf)
 	return strlen(buf);
 }
 
+#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+static ssize_t dm_attr_store(struct kobject *kobj, struct attribute *attr, const char *buf, size_t len)
+{
+	struct dm_sysfs_attr *dm_attr = NULL;
+	struct mapped_device *md = NULL;
+	char szBuf[2] = {'\0'}; /* just fix compiler warning, 0 or 1 */
+
+	dm_attr = container_of(attr, struct dm_sysfs_attr, attr);
+	if (!dm_attr->store)
+		return -EIO;
+
+	md = dm_get_from_kobject(kobj);
+	if (!md)
+		return -EINVAL;
+
+	snprintf(szBuf, sizeof(szBuf), "%s", buf);
+	dm_attr->store(md, szBuf);
+	dm_put(md);
+
+	return len;
+}
+
+static ssize_t dm_attr_active_show(struct mapped_device *md, char *buf)
+{
+	sprintf(buf, "%d\n", dm_active_get(md));
+
+	return strlen(buf);
+}
+static ssize_t dm_attr_active_store(struct mapped_device *md, char *buf)
+{
+	dm_active_set(md, simple_strtol(buf, NULL, 10));
+	return 0;
+}
+static DM_ATTR_RW(active);
+#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+
 static ssize_t dm_attr_suspended_show(struct mapped_device *md, char *buf)
 {
 	sprintf(buf, "%d\n", dm_suspended_md(md));
@@ -72,11 +114,17 @@ static struct attribute *dm_attrs[] = {
 	&dm_attr_name.attr,
 	&dm_attr_uuid.attr,
 	&dm_attr_suspended.attr,
+#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+	&dm_attr_active.attr,
+#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
 	NULL,
 };
 
 static const struct sysfs_ops dm_sysfs_ops = {
 	.show	= dm_attr_show,
+#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+	.store	= dm_attr_store,
+#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
 };
 
 /*

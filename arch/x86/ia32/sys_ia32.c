@@ -49,7 +49,6 @@
 
 #define AA(__x)		((unsigned long)(__x))
 
-
 asmlinkage long sys32_truncate64(const char __user *filename,
 				 unsigned long offset_low,
 				 unsigned long offset_high)
@@ -94,6 +93,161 @@ static int cp_stat64(struct stat64 __user *ubuf, struct kstat *stat)
 		return -EFAULT;
 	return 0;
 }
+
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+#include <linux/synolib.h>
+extern int syno_hibernation_log_level;
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+extern int __SYNOCaselessStat(char __user * filename, int no_follow_link, struct kstat *stat, int *last_component, int flags);
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+
+#ifdef CONFIG_SYNO_SYSTEM_CALL
+asmlinkage long sys32_SYNOCaselessStat64(char __user *filename, struct stat64 __user *statbuf)
+{
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+	int last_component = 0;
+	long error = -1;
+	struct kstat stat;
+
+	error =  __SYNOCaselessStat(filename, 0, &stat, &last_component, 0);
+	if (!error) {
+		error = cp_stat64(statbuf, &stat);
+	}
+
+	return error;
+#else
+	return -EOPNOTSUPP;
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+}
+
+asmlinkage long sys32_SYNOCaselessLStat64(char __user *filename, struct stat64 __user *statbuf)
+{
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+	int last_component = 0;
+	long error = -1;
+	struct kstat stat;
+
+	error =  __SYNOCaselessStat(filename, 1, &stat, &last_component, 0);
+	if (!error) {
+		error = cp_stat64(statbuf, &stat);
+	}
+
+	return error;
+#else
+	return -EOPNOTSUPP;
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+}
+#endif /* CONFIG_SYNO_SYSTEM_CALL */
+
+#ifdef CONFIG_SYNO_FS_STAT
+
+#include <linux/namei.h>
+
+extern int syno_vfs_fstat(unsigned int fd, struct kstat *stat, int stat_flags);
+extern int syno_vfs_fstatat(const char __user *name, struct kstat *stat, int lookup_flags, int stat_flags);
+
+static int SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct SYNOSTAT64 __user * pSt)
+{
+	int error = -EFAULT;
+
+	if (flags & SYNOST_STAT) {
+		error = cp_stat64(&pSt->st, pKst);
+		if (error) {
+			goto Out;
+		}
+	}
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+	if (flags & SYNOST_ARCHIVE_BIT) {
+		if (__put_user(pKst->syno_archive_bit, &pSt->ext.archive_bit)){
+			goto Out;
+		}
+	}
+#endif /* CONFIG_SYNO_FS_ARCHIVE_BIT */
+
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+	if (flags & SYNOST_ARCHIVE_VER) {
+		if (__put_user(pKst->syno_archive_version, &pSt->ext.archive_version)){
+			goto Out;
+		}
+	}
+#endif /* CONFIG_SYNO_FS_ARCHIVE_VERSION */
+
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+	if (flags & SYNOST_CREATE_TIME) {
+		if (__put_user(pKst->syno_create_time.tv_sec, &pSt->ext.create_time.tv_sec)){
+			goto Out;
+		}
+		if (__put_user(pKst->syno_create_time.tv_nsec, &pSt->ext.create_time.tv_nsec)){
+			goto Out;
+		}
+	}
+#endif /* CONFIG_SYNO_FS_CREATE_TIME */
+	error = 0;
+Out:
+	return error;
+}
+
+static long do_SYNOStat64(char __user * filename, int no_follow_link, unsigned int flags, struct SYNOSTAT64 __user * pSt)
+{
+	long error = -EINVAL;
+	struct kstat kst;
+
+	if (flags & SYNOST_IS_CASELESS) {
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+		int last_component = 0;
+		error = __SYNOCaselessStat(filename, no_follow_link, &kst, &last_component, flags);
+		if (-ENOENT == error) {
+			if (__put_user(last_component, &pSt->ext.last_component)){
+				goto Out;
+			}
+		}
+#else
+		error = -EOPNOTSUPP;
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+	} else if (no_follow_link) {
+		error = syno_vfs_fstatat(filename, &kst, 0, flags);
+	} else {
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+			if(syno_hibernation_log_level > 0) {
+				syno_do_hibernation_filename_log(filename);
+			}
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+		error = syno_vfs_fstatat(filename, &kst, LOOKUP_FOLLOW, flags);
+	}
+
+	if (error) {
+		goto Out;
+	}
+
+	error = SYNOStat64CopyToUser(&kst, flags, pSt);
+Out:
+	return error;
+}
+
+asmlinkage long sys32_SYNOStat64(char __user * filename, unsigned int flags, struct SYNOSTAT64 __user * pSt)
+{
+	return do_SYNOStat64(filename, 0, flags, pSt);
+}
+
+asmlinkage long sys32_SYNOFStat64(unsigned int fd, unsigned int flags, struct SYNOSTAT64 __user * pSt)
+{
+	int error;
+	struct kstat kst;
+
+	error = syno_vfs_fstat(fd, &kst, flags);
+	if (!error) {
+		error = SYNOStat64CopyToUser(&kst, flags, pSt);
+	}
+	return error;
+}
+
+asmlinkage long sys32_SYNOLStat64(char __user * filename, unsigned int flags, struct SYNOSTAT64 __user * pSt)
+{
+	return do_SYNOStat64(filename, 1, flags, pSt);
+}
+#endif /* CONFIG_SYNO_FS_STAT */
 
 asmlinkage long sys32_stat64(const char __user *filename,
 			     struct stat64 __user *statbuf)
@@ -186,7 +340,6 @@ asmlinkage long sys32_pwrite(unsigned int fd, const char __user *ubuf,
 	return sys_pwrite64(fd, ubuf, count,
 			  ((loff_t)AA(poshi) << 32) | AA(poslo));
 }
-
 
 /*
  * Some system calls that need sign extended arguments. This could be

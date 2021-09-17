@@ -119,6 +119,16 @@ struct bio {
  */
 #define BIO_RESET_BITS	13
 #define BIO_OWNS_VEC	13	/* bio_free() should free bvec */
+#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
+#define BIO_AUTO_REMAP 14	/* record if auto-remap occurred */
+#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
+#ifdef CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+/*
+ * Currently, our RAID1 device won't return error on make_reuest() when RAID1 is crashed
+ * So we add this flag to told md layer that is should eturn error for flashcache * devices
+ */
+#define BIO_MD_RETURN_ERROR 15
+#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
 
 #define bio_flagged(bio, flag)	((bio)->bi_flags & (1 << (flag)))
 

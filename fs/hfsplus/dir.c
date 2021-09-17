@@ -17,6 +17,10 @@
 #include "hfsplus_raw.h"
 #include "xattr.h"
 
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+extern struct mutex syno_hfsplus_global_mutex;
+#endif
+
 static inline void hfsplus_instantiate(struct dentry *dentry,
 				       struct inode *inode, u32 cnid)
 {
@@ -36,12 +40,30 @@ static struct dentry *hfsplus_lookup(struct inode *dir, struct dentry *dentry,
 	u32 cnid, linkid = 0;
 	u16 type;
 
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_lock(&syno_hfsplus_global_mutex);
+#endif
+#ifdef CONFIG_SYNO_HFSPLUS_MAX_FILENAME_CHECK
+	if (dentry->d_name.len > NAME_MAX) {
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+		mutex_unlock(&syno_hfsplus_global_mutex);
+#endif
+		return ERR_PTR(-ENAMETOOLONG);
+	}
+#endif
 	sb = dir->i_sb;
 
 	dentry->d_fsdata = NULL;
 	err = hfs_find_init(HFSPLUS_SB(sb)->cat_tree, &fd);
 	if (err)
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+		{
+			mutex_unlock(&syno_hfsplus_global_mutex);
+			return ERR_PTR(err);
+		}
+#else
 		return ERR_PTR(err);
+#endif
 	hfsplus_cat_build_key(sb, fd.search_key, dir->i_ino, &dentry->d_name);
 again:
 	err = hfs_brec_read(&fd, &entry, sizeof(entry));
@@ -110,14 +132,27 @@ again:
 	hfs_find_exit(&fd);
 	inode = hfsplus_iget(dir->i_sb, cnid);
 	if (IS_ERR(inode))
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+		{
+			mutex_unlock(&syno_hfsplus_global_mutex);
+			return ERR_CAST(inode);
+		}
+#else
 		return ERR_CAST(inode);
+#endif
 	if (S_ISREG(inode->i_mode))
 		HFSPLUS_I(inode)->linkid = linkid;
 out:
 	d_add(dentry, inode);
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_unlock(&syno_hfsplus_global_mutex);
+#endif
 	return NULL;
 fail:
 	hfs_find_exit(&fd);
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_unlock(&syno_hfsplus_global_mutex);
+#endif
 	return ERR_PTR(err);
 }
 
@@ -135,9 +170,20 @@ static int hfsplus_readdir(struct file *filp, void *dirent, filldir_t filldir)
 	if (filp->f_pos >= inode->i_size)
 		return 0;
 
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_lock(&syno_hfsplus_global_mutex);
+#endif
+
 	err = hfs_find_init(HFSPLUS_SB(sb)->cat_tree, &fd);
 	if (err)
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	{
+		mutex_unlock(&syno_hfsplus_global_mutex);
 		return err;
+	}
+#else
+		return err;
+#endif
 	hfsplus_cat_build_key(sb, fd.search_key, inode->i_ino, NULL);
 	err = hfs_brec_find(&fd, hfs_find_rec_by_key);
 	if (err)
@@ -250,6 +296,9 @@ next:
 	memcpy(&rd->key, fd.key, sizeof(struct hfsplus_cat_key));
 out:
 	hfs_find_exit(&fd);
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_unlock(&syno_hfsplus_global_mutex);
+#endif
 	return err;
 }
 
@@ -280,6 +329,9 @@ static int hfsplus_link(struct dentry *src_dentry, struct inode *dst_dir,
 		return -EPERM;
 	if (!S_ISREG(inode->i_mode))
 		return -EPERM;
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_lock(&syno_hfsplus_global_mutex);
+#endif
 
 	mutex_lock(&sbi->vh_mutex);
 	if (inode->i_ino == (u32)(unsigned long)src_dentry->d_fsdata) {
@@ -320,6 +372,9 @@ static int hfsplus_link(struct dentry *src_dentry, struct inode *dst_dir,
 	hfsplus_mark_mdb_dirty(dst_dir->i_sb);
 out:
 	mutex_unlock(&sbi->vh_mutex);
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_unlock(&syno_hfsplus_global_mutex);
+#endif
 	return res;
 }
 
@@ -334,6 +389,9 @@ static int hfsplus_unlink(struct inode *dir, struct dentry *dentry)
 
 	if (HFSPLUS_IS_RSRC(inode))
 		return -EPERM;
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_lock(&syno_hfsplus_global_mutex);
+#endif
 
 	mutex_lock(&sbi->vh_mutex);
 	cnid = (u32)(unsigned long)dentry->d_fsdata;
@@ -377,6 +435,9 @@ static int hfsplus_unlink(struct inode *dir, struct dentry *dentry)
 	mark_inode_dirty(inode);
 out:
 	mutex_unlock(&sbi->vh_mutex);
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_unlock(&syno_hfsplus_global_mutex);
+#endif
 	return res;
 }
 
@@ -388,6 +449,9 @@ static int hfsplus_rmdir(struct inode *dir, struct dentry *dentry)
 
 	if (inode->i_size != 2)
 		return -ENOTEMPTY;
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_lock(&syno_hfsplus_global_mutex);
+#endif
 
 	mutex_lock(&sbi->vh_mutex);
 	res = hfsplus_delete_cat(inode->i_ino, dir, &dentry->d_name);
@@ -399,6 +463,9 @@ static int hfsplus_rmdir(struct inode *dir, struct dentry *dentry)
 	mark_inode_dirty(inode);
 out:
 	mutex_unlock(&sbi->vh_mutex);
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_unlock(&syno_hfsplus_global_mutex);
+#endif
 	return res;
 }
 
@@ -409,6 +476,9 @@ static int hfsplus_symlink(struct inode *dir, struct dentry *dentry,
 	struct inode *inode;
 	int res = -ENOSPC;
 
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_lock(&syno_hfsplus_global_mutex);
+#endif
 	mutex_lock(&sbi->vh_mutex);
 	inode = hfsplus_new_inode(dir->i_sb, S_IFLNK | S_IRWXUGO);
 	if (!inode)
@@ -441,6 +511,9 @@ out_err:
 	iput(inode);
 out:
 	mutex_unlock(&sbi->vh_mutex);
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_unlock(&syno_hfsplus_global_mutex);
+#endif
 	return res;
 }
 
@@ -450,6 +523,10 @@ static int hfsplus_mknod(struct inode *dir, struct dentry *dentry,
 	struct hfsplus_sb_info *sbi = HFSPLUS_SB(dir->i_sb);
 	struct inode *inode;
 	int res = -ENOSPC;
+
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_lock(&syno_hfsplus_global_mutex);
+#endif
 
 	mutex_lock(&sbi->vh_mutex);
 	inode = hfsplus_new_inode(dir->i_sb, mode);
@@ -482,6 +559,9 @@ failed_mknod:
 	iput(inode);
 out:
 	mutex_unlock(&sbi->vh_mutex);
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_unlock(&syno_hfsplus_global_mutex);
+#endif
 	return res;
 }
 
@@ -511,11 +591,17 @@ static int hfsplus_rename(struct inode *old_dir, struct dentry *old_dentry,
 			return res;
 	}
 
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_lock(&syno_hfsplus_global_mutex);
+#endif
 	res = hfsplus_rename_cat((u32)(unsigned long)old_dentry->d_fsdata,
 				 old_dir, &old_dentry->d_name,
 				 new_dir, &new_dentry->d_name);
 	if (!res)
 		new_dentry->d_fsdata = old_dentry->d_fsdata;
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	mutex_unlock(&syno_hfsplus_global_mutex);
+#endif
 	return res;
 }
 
@@ -529,8 +615,13 @@ const struct inode_operations hfsplus_dir_inode_operations = {
 	.symlink		= hfsplus_symlink,
 	.mknod			= hfsplus_mknod,
 	.rename			= hfsplus_rename,
+#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+	.setxattr		= hfsplus_syno_setxattr,
+	.getxattr		= hfsplus_syno_getxattr,
+#else
 	.setxattr		= generic_setxattr,
 	.getxattr		= generic_getxattr,
+#endif
 	.listxattr		= hfsplus_listxattr,
 	.removexattr		= hfsplus_removexattr,
 };

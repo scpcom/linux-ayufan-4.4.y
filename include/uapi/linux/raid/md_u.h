@@ -64,6 +64,17 @@
 #define STOP_ARRAY_RO		_IO (MD_MAJOR, 0x33)
 #define RESTART_ARRAY_RW	_IO (MD_MAJOR, 0x34)
 
+#ifdef CONFIG_SYNO_MD_STATUS_GET
+#define GET_SYNC_STATUS    _IOR(MD_MAJOR, 0x60, MD_SYNC_STATUS)
+#define GET_ARRAY_STATUS    _IOR(MD_MAJOR, 0x61, int)
+
+typedef struct __tag_MD_SYNC_STATUS {
+	unsigned long long inSync;     // 1 --> in sync, 0, not in sync
+	unsigned long long finishSectors;
+	unsigned long long totalSectors;
+} MD_SYNC_STATUS;
+#endif /* CONFIG_SYNO_MD_STATUS_GET */
+
 /* 63 partitions with the alternate major number (mdp) */
 #define MdpMinorShift 6
 

@@ -76,7 +76,6 @@ struct r1conf {
 	 */
 	int			recovery_disabled;
 
-
 	/* poolinfo contains information about the content of the
 	 * mempools - it changes when the array grows or shrinks
 	 */
@@ -88,7 +87,6 @@ struct r1conf {
 	 * a read error.
 	 */
 	struct page		*tmppage;
-
 
 	/* When taking over an array from a different personality, we store
 	 * the new thread here until we fully activate the array.
@@ -124,6 +122,10 @@ struct r1bio {
 	int			read_disk;
 
 	struct list_head	retry_list;
+#ifdef CONFIG_SYNO_MD_SECTOR_STATUS_REPORT
+	unsigned int read_failed;
+	int orig_disk_idx;
+#endif /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
 	/* Next two are only valid when R1BIO_BehindIO is set */
 	struct bio_vec		*behind_bvecs;
 	int			behind_page_count;

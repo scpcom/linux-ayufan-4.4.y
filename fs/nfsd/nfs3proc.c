@@ -15,6 +15,13 @@
 #define NFSDDBG_FACILITY		NFSDDBG_PROC
 
 #define RETURN_STATUS(st)	{ resp->status = (st); return (st); }
+#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+	extern u32 nfs_udp_f_rtpref;
+	extern u32 nfs_udp_f_wtpref;
+#endif /*CONFIG_SYNO_NFSD_UDP_PACKET*/
+#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+extern u32 bl_unix_pri_enable;
+#endif
 
 static int	nfs3_ftypes[] = {
 	0,			/* NF3NON */
@@ -537,10 +544,32 @@ nfsd3_proc_fsinfo(struct svc_rqst * rqstp, struct nfsd_fhandle    *argp,
 				SVCFH_fmt(&argp->fh));
 
 	resp->f_rtmax  = max_blocksize;
+#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+	if (IPPROTO_UDP == rqstp->rq_prot) {
+		if (CONFIG_SYNO_NFSD_UDP_MIN_PACKET_SIZE <= nfs_udp_f_rtpref && CONFIG_SYNO_NFSD_UDP_MAX_PACKET_SIZE >= nfs_udp_f_rtpref) {
+			resp->f_rtpref = nfs_udp_f_rtpref;
+		} else {
+			resp->f_rtpref = CONFIG_SYNO_NFSD_UDP_DEF_PACKET_SIZE;
+			dprintk("nfsd: FSINFO(3) nfs_udp_f_rtpref value is not correct %d\n", nfs_udp_f_rtpref);
+		}
+		if (CONFIG_SYNO_NFSD_UDP_MIN_PACKET_SIZE <= nfs_udp_f_wtpref && CONFIG_SYNO_NFSD_UDP_MAX_PACKET_SIZE >= nfs_udp_f_wtpref) {
+			resp->f_wtpref = nfs_udp_f_wtpref;
+		} else {
+			resp->f_wtpref = CONFIG_SYNO_NFSD_UDP_DEF_PACKET_SIZE;
+			dprintk("nfsd: FSINFO(3) nfs_udp_f_wtpref value is not correct %d\n", nfs_udp_f_wtpref);
+		}
+	} else {
+		resp->f_rtpref = max_blocksize;
+		resp->f_wtpref = max_blocksize;
+	}
+#else
 	resp->f_rtpref = max_blocksize;
+#endif /* CONFIG_SYNO_NFSD_UDP_PACKET */
 	resp->f_rtmult = PAGE_SIZE;
 	resp->f_wtmax  = max_blocksize;
+#ifndef CONFIG_SYNO_NFSD_UDP_PACKET
 	resp->f_wtpref = max_blocksize;
+#endif /* CONFIG_SYNO_NFSD_UDP_PACKET */
 	resp->f_wtmult = PAGE_SIZE;
 	resp->f_dtpref = PAGE_SIZE;
 	resp->f_maxfilesize = ~(u32) 0;
@@ -608,7 +637,6 @@ nfsd3_proc_pathconf(struct svc_rqst * rqstp, struct nfsd_fhandle      *argp,
 	RETURN_STATUS(nfserr);
 }
 
-
 /*
  * Commit a file (range) to stable storage.
  */
@@ -631,7 +659,6 @@ nfsd3_proc_commit(struct svc_rqst * rqstp, struct nfsd3_commitargs *argp,
 
 	RETURN_STATUS(nfserr);
 }
-
 
 /*
  * NFSv3 Server procedures.

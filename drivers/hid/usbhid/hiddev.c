@@ -34,6 +34,9 @@
 #include <linux/hid.h>
 #include <linux/hiddev.h>
 #include <linux/compat.h>
+#ifdef CONFIG_SYNO_STATIC_HIDDEV_MINOR
+#include <linux/string.h>
+#endif /* CONFIG_SYNO_STATIC_HIDDEV_MINOR */
 #include <linux/vmalloc.h>
 #include "usbhid.h"
 
@@ -230,7 +233,6 @@ static int hiddev_fasync(int fd, struct file *file, int on)
 	return fasync_helper(fd, file, on, &list->fasync);
 }
 
-
 /*
  * release file op
  */
@@ -391,7 +393,6 @@ static ssize_t hiddev_read(struct file * file, char __user * buffer, size_t coun
 			mutex_unlock(&list->thread_lock);
 			return retval;
 		}
-
 
 		while (list->head != list->tail &&
 		       retval + event_size <= count) {
@@ -881,6 +882,55 @@ int hiddev_connect(struct hid_device *hid, unsigned int force)
 	struct usbhid_device *usbhid = hid->driver_data;
 	int retval;
 
+#ifdef CONFIG_SYNO_STATIC_HIDDEV_MINOR
+#define UPS_USAGE									0x840004
+#define POWER_USAGE							0x840020	/* wrong, but needed for MGE */
+	int minor_offset = 8;
+	unsigned int i = 0;
+
+	/* usb device should register by hiddev (ups, lp, synology remote controller..etc)
+	 * because of our userspace application open static device name.
+	 * But usb keyboard and mouse should register by hid-input or cannot work.
+	*/
+	if (!force) {
+		for (i = 0; i < hid->maxcollection; i++){
+			if (hid->collection[i].type == HID_COLLECTION_APPLICATION) {
+				if ((((hid->collection[i].usage & 0xffff) == 2) || ((hid->collection[i].usage & 0xffff) == 6)) &&
+					!(hid->name && !memcmp(hid->name, "Raytac Corporation Wireless USB Device (2.4G)", 45)) &&
+					!(hid->name && !memcmp(hid->name, "Synology Incorporated", 21))) {
+					continue;
+				}
+				break;
+			}
+		}
+
+		if (i == hid->maxcollection)
+			return -1;
+	}
+
+	if ((hid->collection[i].usage & HID_USAGE_PAGE) == HID_UP_GENDESK &&
+		( ((hid->collection[i].usage & 0xffff) == 2) || ((hid->collection[i].usage & 0xffff) == 6))
+		&& (hid->name && !memcmp(hid->name, "Raytac Corporation Wireless USB Device (2.4G)", 45))) {
+		/*
+		 * The ((hid->collection[i].usage & 0xffff) == 2) is Mouse and
+		 * ((hid->collection[i].usage & 0xffff) == 6) is Keyboard
+		 * Our RF remote controller simulate itself as Keyboard and Mouse.
+		 *
+		 * You can see this structure in hid-core.c:
+		 *
+		 *  static char *hid_types[] = {"Device", "Pointer", "Mouse", "Device", "Joystick",
+		 *              "Gamepad", "Keyboard", "Keypad", "Multi-Axis Controller"};
+		 */
+		minor_offset = 5;
+	} else if (((hid->collection[i].usage & 0xffff) == 6) &&
+                (hid->name && !memcmp(hid->name, "Synology Incorporated", 21))) {
+		minor_offset = 5;
+	} else if (hid->collection[i].usage == UPS_USAGE ||
+		   hid->collection[i].usage == POWER_USAGE) {
+		/* Make UPS to be hiddev0 */
+		minor_offset = 0;
+	}
+#else
 	if (!force) {
 		unsigned int i;
 		for (i = 0; i < hid->maxcollection; i++)
@@ -892,6 +942,7 @@ int hiddev_connect(struct hid_device *hid, unsigned int force)
 		if (i == hid->maxcollection)
 			return -1;
 	}
+#endif /* CONFIG_SYNO_STATIC_HIDDEV_MINOR */
 
 	if (!(hiddev = kzalloc(sizeof(struct hiddev), GFP_KERNEL)))
 		return -1;
@@ -903,7 +954,11 @@ int hiddev_connect(struct hid_device *hid, unsigned int force)
 	hid->hiddev = hiddev;
 	hiddev->hid = hid;
 	hiddev->exist = 1;
+#if CONFIG_SYNO_STATIC_HIDDEV_MINOR
+	retval = usb_register_dev1(usbhid->intf, &hiddev_class, minor_offset);
+#else
 	retval = usb_register_dev(usbhid->intf, &hiddev_class);
+#endif /* CONFIG_SYNO_STATIC_HIDDEV_MINOR */
 	if (retval) {
 		hid_err(hid, "Not able to get a minor for this device\n");
 		hid->hiddev = NULL;

@@ -36,6 +36,12 @@
 /*
  *
  */
+#if defined(CONFIG_SYNO_AUDIO_KEEP_VOLUME)
+int gSynoAudioVolume = 50;
+EXPORT_SYMBOL(gSynoAudioVolume);
+static int snd_info_syno_audio_volume_init(void);
+static int snd_info_syno_audio_volume_done(void);
+#endif /* CONFIG_SYNO_AUDIO_KEEP_VOLUME */
 
 #ifdef CONFIG_PROC_FS
 
@@ -80,7 +86,6 @@ struct snd_info_private_data {
 static int snd_info_version_init(void);
 static int snd_info_version_done(void);
 static void snd_info_disconnect(struct snd_info_entry *entry);
-
 
 /* resize the proc r/w buffer */
 static int resize_info_buffer(struct snd_info_buffer *buffer,
@@ -554,6 +559,9 @@ int __init snd_info_init(void)
 	}
 #endif
 	snd_info_version_init();
+#if defined(CONFIG_SYNO_AUDIO_KEEP_VOLUME)
+	snd_info_syno_audio_volume_init();
+#endif /*CONFIG_SYNO_AUDIO_KEEP_VOLUME*/
 	snd_minor_info_init();
 	snd_minor_info_oss_init();
 	snd_card_info_init();
@@ -566,6 +574,9 @@ int __exit snd_info_done(void)
 	snd_minor_info_oss_done();
 	snd_minor_info_done();
 	snd_info_version_done();
+#if defined(CONFIG_SYNO_AUDIO_KEEP_VOLUME)
+	snd_info_syno_audio_volume_done();
+#endif /*CONFIG_SYNO_AUDIO_KEEP_VOLUME*/
 	if (snd_proc_root) {
 #if defined(CONFIG_SND_SEQUENCER) || defined(CONFIG_SND_SEQUENCER_MODULE)
 		snd_info_free_entry(snd_seq_root);
@@ -581,7 +592,6 @@ int __exit snd_info_done(void)
 /*
 
  */
-
 
 /*
  * create a card proc file
@@ -673,7 +683,6 @@ int snd_info_card_free(struct snd_card *card)
 	card->proc_root = NULL;
 	return 0;
 }
-
 
 /**
  * snd_info_get_line - read one line from the procfs buffer
@@ -1002,4 +1011,35 @@ static int __exit snd_info_version_done(void)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_AUDIO_KEEP_VOLUME)
+static struct snd_info_entry *snd_info_syno_audio_volume_entry;
+
+static void snd_info_syno_audio_volume_read(struct snd_info_entry *entry, struct snd_info_buffer *buffer)
+{
+       snd_iprintf(buffer, "%d\n", gSynoAudioVolume);
+}
+
+static int __init snd_info_syno_audio_volume_init(void)
+{
+       struct snd_info_entry *entry;
+
+       entry = snd_info_create_module_entry(THIS_MODULE, "syno_audio_volume", NULL);
+       if (entry == NULL) {
+               return -ENOMEM;
+       }
+       entry->c.text.read = snd_info_syno_audio_volume_read;
+       if (snd_info_register(entry) < 0) {
+               snd_info_free_entry(entry);
+               return -ENOMEM;
+       }
+       snd_info_syno_audio_volume_entry = entry;
+       return 0;
+}
+
+static int __exit snd_info_syno_audio_volume_done(void)
+{
+       snd_info_free_entry(snd_info_syno_audio_volume_entry);
+       return 0;
+}
+#endif /*CONFIG_SYNO_AUDIO_KEEP_VOLUME*/
 #endif /* CONFIG_PROC_FS */

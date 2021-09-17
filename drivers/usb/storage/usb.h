@@ -65,7 +65,6 @@ struct us_unusual_dev {
 	int (*initFunction)(struct us_data *);
 };
 
-
 /* Dynamic bitflag definitions (us->dflags): used in set_bit() etc. */
 #define US_FLIDX_URB_ACTIVE	0	/* current_urb is in use    */
 #define US_FLIDX_SG_ACTIVE	1	/* current_sg is in use     */
@@ -191,6 +190,9 @@ extern int usb_stor_reset_resume(struct usb_interface *iface);
 #define usb_stor_reset_resume	NULL
 #endif
 
+#if defined(CONFIG_USB_ETRON_HUB)
+extern int usb_is_etron_hcd(struct usb_device *udev);
+#endif /* CONFIG_USB_ETRON_HUB */
 extern int usb_stor_pre_reset(struct usb_interface *iface);
 extern int usb_stor_post_reset(struct usb_interface *iface);
 

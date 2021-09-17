@@ -1,6 +1,8 @@
 #ifndef _BCACHE_BSET_H
 #define _BCACHE_BSET_H
 
+#include <linux/slab.h>
+
 /*
  * BKEYS:
  *
@@ -141,6 +143,8 @@
  */
 
 /* Btree key comparison/iteration */
+
+#define MAX_BSETS		4U
 
 struct btree_iter {
 	size_t size, used;
@@ -303,7 +307,6 @@ static inline bool ptr_available(struct cache_set *c, const struct bkey *k,
 {
 	return (PTR_DEV(k, i) < MAX_CACHES_PER_SET) && PTR_CACHE(c, k, i);
 }
-
 
 typedef bool (*ptr_filter_fn)(struct btree *, const struct bkey *);
 

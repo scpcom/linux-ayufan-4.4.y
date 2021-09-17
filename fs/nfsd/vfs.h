@@ -27,6 +27,10 @@
 #define NFSD_MAY_NOT_BREAK_LEASE	0x200
 #define NFSD_MAY_BYPASS_GSS		0x400
 #define NFSD_MAY_READ_IF_EXEC		0x800
+#ifdef CONFIG_SYNO_FS_WINACL
+#define NFSD_MAY_APPEND			0x1000
+#define NFSD_MAY_SYNO_NOP		0x2000
+#endif //CONFIG_SYNO_FS_WINACL
 
 #define NFSD_MAY_64BIT_COOKIE		0x1000 /* 64 bit readdir cookies for >= NFSv3 */
 

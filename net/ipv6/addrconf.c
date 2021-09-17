@@ -201,7 +201,11 @@ static struct ipv6_devconf ipv6_devconf __read_mostly = {
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	/* we do not accept RH0 by default. */
 	.disable_ipv6		= 0,
+#ifdef CONFIG_SYNO_IPV6_RFC_4862
+	.accept_dad     = 2,
+#else
 	.accept_dad		= 1,
+#endif /* CONFIG_SYNO_IPV6_RFC_4862 */
 };
 
 static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
@@ -235,7 +239,11 @@ static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	/* we do not accept RH0 by default. */
 	.disable_ipv6		= 0,
+#ifdef CONFIG_SYNO_IPV6_RFC_4862
+    .accept_dad     = 2,
+#else
 	.accept_dad		= 1,
+#endif /* CONFIG_SYNO_IPV6_RFC_4862 */
 };
 
 /* IPv6 Wildcard Address and Loopback Address defined by RFC2553 */
@@ -709,7 +717,6 @@ static void dev_forward_change(struct inet6_dev *idev)
 	inet6_netconf_notify_devconf(dev_net(dev), NETCONFA_FORWARDING,
 				     dev->ifindex, &idev->cnf);
 }
-
 
 static void addrconf_forward_change(struct net *net, __s32 newf)
 {
@@ -1976,7 +1983,6 @@ addrconf_prefix_route(struct in6_addr *pfx, int plen, struct net_device *dev,
 	ip6_route_add(&cfg);
 }
 
-
 static struct rt6_info *addrconf_get_prefix_route(const struct in6_addr *pfx,
 						  int plen,
 						  const struct net_device *dev,
@@ -2008,7 +2014,6 @@ out:
 	read_unlock_bh(&table->tb6_lock);
 	return rt;
 }
-
 
 /* Create "default" multicast route to the interface */
 
@@ -2546,7 +2551,6 @@ static int inet6_addr_del(struct net *net, int ifindex, const struct in6_addr *p
 	return -EADDRNOTAVAIL;
 }
 
-
 int addrconf_add_ifaddr(struct net *net, void __user *arg)
 {
 	struct in6_ifreq ireq;
@@ -2713,7 +2717,6 @@ static void addrconf_add_linklocal(struct inet6_dev *idev, const struct in6_addr
 	    !dev_net(idev->dev)->ipv6.devconf_all->forwarding)
 		addr_flags |= IFA_F_OPTIMISTIC;
 #endif
-
 
 	ifp = ipv6_add_addr(idev, addr, 64, IFA_LINK, addr_flags);
 	if (!IS_ERR(ifp)) {
@@ -4071,7 +4074,6 @@ static int inet6_dump_ifmcaddr(struct sk_buff *skb, struct netlink_callback *cb)
 	return inet6_dump_addr(skb, cb, type);
 }
 
-
 static int inet6_dump_ifacaddr(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	enum addr_type_t type = ANYCAST_ADDR;
@@ -5025,7 +5027,6 @@ static void addrconf_sysctl_unregister(struct inet6_dev *idev)
 	__addrconf_sysctl_unregister(&idev->cnf);
 	neigh_sysctl_unregister(idev->nd_parms);
 }
-
 
 #endif
 

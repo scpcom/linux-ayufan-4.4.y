@@ -22,6 +22,11 @@
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+#include <linux/synolib.h>
+extern int syno_hibernation_log_level;
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+
 typedef ssize_t (*io_fn_t)(struct file *, char __user *, size_t, loff_t *);
 typedef ssize_t (*iov_fn_t)(struct kiocb *, const struct iovec *,
 		unsigned long, loff_t);
@@ -474,6 +479,12 @@ SYSCALL_DEFINE3(read, unsigned int, fd, char __user *, buf, size_t, count)
 	struct fd f = fdget(fd);
 	ssize_t ret = -EBADF;
 
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+	if(syno_hibernation_log_level > 0) {
+		syno_do_hibernation_fd_log(fd);
+	}
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+
 	if (f.file) {
 		loff_t pos = file_pos_read(f.file);
 		ret = vfs_read(f.file, buf, count, &pos);
@@ -488,6 +499,12 @@ SYSCALL_DEFINE3(write, unsigned int, fd, const char __user *, buf,
 {
 	struct fd f = fdget(fd);
 	ssize_t ret = -EBADF;
+
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+	if(syno_hibernation_log_level > 0) {
+		syno_do_hibernation_fd_log(fd);
+	}
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
 
 	if (f.file) {
 		loff_t pos = file_pos_read(f.file);
@@ -1231,3 +1248,125 @@ COMPAT_SYSCALL_DEFINE4(sendfile64, int, out_fd, int, in_fd,
 	return do_sendfile(out_fd, in_fd, NULL, count, 0);
 }
 #endif
+
+#ifdef CONFIG_SYNO_SYSTEM_CALL
+#ifdef CONFIG_SYNO_FS_RECVFILE
+SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, size_t *, rwbytes)
+{
+	int ret = 0;
+	struct file *file = NULL;                /* reg file struct */
+	struct socket *sock = NULL;
+	struct inode *inode;
+	size_t bytes_received = 0;
+	size_t bytes_written = 0;
+	loff_t pos;                 /* file offset */
+
+	if (!offset) {
+		ret = -EINVAL;
+		goto out;
+	}
+
+	if(copy_from_user(&pos, offset, sizeof(loff_t))) {
+		ret = -EFAULT;
+		goto out;
+	}
+
+	if (nbytes <= 0) {
+		if (nbytes < 0) {
+			ret = -EINVAL;
+		}
+		goto out;
+	}
+
+	/* check fd for regular file */
+	file = fget(fd);
+	if (!file) {
+		ret = -EBADF;
+		goto out;
+	}
+	if (!(file->f_mode & FMODE_WRITE)) {
+		ret = -EBADF;
+		goto out;
+	}
+
+	/* check socket fd */
+	sock = sockfd_lookup(s, &ret);
+	if((!sock) || ret)
+		goto out;
+
+	if(!sock->sk) {
+		/* not a socket */
+		ret = -EINVAL;
+		goto out;
+	}
+
+	inode = file->f_dentry->d_inode->i_mapping->host;
+	mutex_lock(&inode->i_mutex);
+	/* refer to sock_read->sock_recvmsg->tcp_recvmsg */
+	if (nbytes <= (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)){
+			ret = do_recvfile(file, sock, pos, nbytes, &bytes_received, &bytes_written);
+	} else {
+		/* this case should seldom/never happen */
+		size_t nbytes_left = nbytes;
+		size_t cBytereceived = 0;
+		size_t cBytewritten = 0;
+
+		do {
+				ret = do_recvfile(file, sock, pos,
+							  (nbytes_left >= (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)) ?
+							   (MAX_PAGES_PER_RECVFILE * PAGE_SIZE) : nbytes_left
+							  , &cBytereceived, &cBytewritten);
+			if(ret > 0) {
+				bytes_received += ret;
+				bytes_written += ret;
+				nbytes_left -= ret;
+			}
+			else  {
+				bytes_received += cBytereceived;
+				bytes_written += cBytewritten;
+				break;
+			}
+		} while(nbytes_left > 0);
+		if(ret >= 0)
+			ret = bytes_received;
+	}
+	mutex_unlock(&inode->i_mutex);
+
+	if(0 > ret && rwbytes) {
+#ifdef CONFIG_IA32_EMULATION
+		rwbytes[0]=bytes_received;
+		rwbytes[1]=bytes_written;
+#else
+		int ret_copy_to_user = 0;
+		ret_copy_to_user = copy_to_user(&rwbytes[0], &bytes_received, sizeof(size_t));
+		if (ret_copy_to_user < 0) {
+			ret = -ENOMEM;
+			goto out;
+		}
+		ret_copy_to_user = copy_to_user(&rwbytes[1], &bytes_written, sizeof(size_t));
+		if (ret_copy_to_user < 0) {
+			ret = -ENOMEM;
+			goto out;
+		}
+#endif
+	}
+
+	if (ret >= 0)
+		fsnotify_modify(file);
+
+out:
+	if(file)
+		fput(file);
+	if(sock)
+		fput(sock->file);
+
+	return ret;
+
+}
+#else
+SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, size_t *, rwbytes)
+{
+	return 0;
+}
+#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* CONFIG_SYNO_SYSTEM_CALL */

@@ -347,6 +347,9 @@ static void set_max_drc(void)
 
 static int nfsd_get_default_max_blksize(void)
 {
+#if defined(CONFIG_SYNO_NFSD_WRITE_SIZE_MIN)
+	return CONFIG_SYNO_NFSD_WRITE_SIZE_MIN;
+#else
 	struct sysinfo i;
 	unsigned long long target;
 	unsigned long ret;
@@ -364,6 +367,7 @@ static int nfsd_get_default_max_blksize(void)
 	while (ret > target && ret >= 8*1024*2)
 		ret /= 2;
 	return ret;
+#endif /*CONFIG_SYNO_NFSD_WRITE_SIZE_MIN*/
 }
 
 int nfsd_create_serv(struct net *net)
@@ -532,7 +536,6 @@ out:
 	mutex_unlock(&nfsd_mutex);
 	return error;
 }
-
 
 /*
  * This is the NFS server kernel thread

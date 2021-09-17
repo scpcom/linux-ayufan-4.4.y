@@ -50,8 +50,13 @@ void hfsplus_fill_defaults(struct hfsplus_sb_info *opts)
 	if (!opts)
 		return;
 
+#ifdef CONFIG_SYNO_HFSPLUS_EA
+	opts->creator = 0;
+	opts->type = 0;
+#else
 	opts->creator = HFSPLUS_DEF_CR_TYPE;
 	opts->type = HFSPLUS_DEF_CR_TYPE;
+#endif
 	opts->umask = current_umask();
 	opts->uid = current_uid();
 	opts->gid = current_gid();
@@ -235,5 +240,9 @@ int hfsplus_show_options(struct seq_file *seq, struct dentry *root)
 		seq_printf(seq, ",nodecompose");
 	if (test_bit(HFSPLUS_SB_NOBARRIER, &sbi->flags))
 		seq_printf(seq, ",nobarrier");
+#ifdef CONFIG_SYNO_HFSPLUS_SHOW_CASELESS_INFO
+	if (test_bit(HFSPLUS_SB_CASEFOLD, &sbi->flags))
+		seq_printf(seq, ",caseless");
+#endif
 	return 0;
 }

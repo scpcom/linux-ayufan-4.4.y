@@ -246,7 +246,6 @@ static void tty_del_file(struct file *file)
 	tty_free_file(file);
 }
 
-
 #define TTY_NUMBER(tty) ((tty)->index + (tty)->driver->name_base)
 
 /**
@@ -619,7 +618,6 @@ static void __tty_hangup(struct tty_struct *tty, int exit_session)
 	if (!tty)
 		return;
 
-
 	spin_lock(&redirect_lock);
 	if (redirect && file_tty(redirect) == tty) {
 		f = redirect;
@@ -747,7 +745,6 @@ void tty_vhangup(struct tty_struct *tty)
 }
 
 EXPORT_SYMBOL(tty_vhangup);
-
 
 /**
  *	tty_vhangup_self	-	process vhangup for own ctty
@@ -912,7 +909,6 @@ void no_tty(void)
 	disassociate_ctty(0);
 	proc_clear_tty(tsk);
 }
-
 
 /**
  *	stop_tty	-	propagate flow control
@@ -1122,6 +1118,11 @@ static inline ssize_t do_tty_write(
 		if (size > chunk)
 			size = chunk;
 		ret = -EFAULT;
+#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+		if (0 == strcmp(tty->name, "ttyS1"))
+			memcpy(tty->write_buf, buf, size);
+		else
+#endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
 		if (copy_from_user(tty->write_buf, buf, size))
 			break;
 		ret = write(tty, file, tty->write_buf, size);
@@ -1173,7 +1174,6 @@ void tty_write_message(struct tty_struct *tty, char *msg)
 	return;
 }
 
-
 /**
  *	tty_write		-	write method for tty device file
  *	@file: tty file pointer
@@ -1210,7 +1210,15 @@ static ssize_t tty_write(struct file *file, const char __user *buf,
 	if (!ld->ops->write)
 		ret = -EIO;
 	else
+#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+	{
+		if (0 == strcmp(tty->name, "ttyS1"))
+			do_tty_write(ld->ops->write, tty, file, "-", 1);
 		ret = do_tty_write(ld->ops->write, tty, file, buf, count);
+	}
+#else /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
+		ret = do_tty_write(ld->ops->write, tty, file, buf, count);
+#endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
 	tty_ldisc_deref(ld);
 	return ret;
 }
@@ -2085,7 +2093,6 @@ retry_open:
 	}
 	tty_unlock(tty);
 
-
 	mutex_lock(&tty_mutex);
 	tty_lock(tty);
 	spin_lock_irq(&current->sighand->siglock);
@@ -2107,8 +2114,6 @@ err_file:
 	tty_free_file(filp);
 	return retval;
 }
-
-
 
 /**
  *	tty_poll	-	check tty status
@@ -2995,7 +3000,6 @@ static struct device *tty_get_device(struct tty_struct *tty)
 	return class_find_device(tty_class, NULL, &devt, dev_match_devt);
 }
 
-
 /**
  *	initialize_tty_struct
  *	@tty: tty to initialize
@@ -3061,11 +3065,46 @@ void deinitialize_tty_struct(struct tty_struct *tty)
 
 int tty_put_char(struct tty_struct *tty, unsigned char ch)
 {
+#ifdef CONFIG_SYNO_MICROP_CTRL
+	if (tty->ops->put_char && 0 != strcmp(tty->name, "ttyS1"))
+#else /* CONFIG_SYNO_MICROP_CTRL */
 	if (tty->ops->put_char)
+#endif /* CONFIG_SYNO_MICROP_CTRL */
 		return tty->ops->put_char(tty, ch);
 	return tty->ops->write(tty, &ch, 1);
 }
 EXPORT_SYMBOL_GPL(tty_put_char);
+
+#ifdef CONFIG_SYNO_MICROP_CTRL
+int syno_ttys_write(const int index, const char* szBuf)
+{
+	size_t i = 0;
+	struct tty_driver *drv = NULL;
+	struct tty_struct *tty = NULL;
+
+	list_for_each_entry(drv, &tty_drivers, tty_drivers) {
+		if ( strcmp(drv->name, "ttyS") ) {
+		    continue;
+		}
+		if ( index < 0 || index >= drv->num ) {
+		    continue;
+		}
+		if ( NULL == drv->ttys || NULL == drv->ttys[index] ) {
+		    continue;
+		}
+		tty = drv->ttys[index];
+#ifdef CONFIG_SYNO_X64
+		tty_put_char(tty, '-');
+#endif /* CONFIG_SYNO_X64 */
+		for( i = 0; i < strlen(szBuf); ++i ) {
+		    tty_put_char(tty, szBuf[i]);
+		}
+	}
+
+	return 0;
+}
+EXPORT_SYMBOL(syno_ttys_write);
+#endif /* CONFIG_SYNO_MICROP_CTRL */
 
 struct class *tty_class;
 
@@ -3583,4 +3622,3 @@ int __init tty_init(void)
 #endif
 	return 0;
 }
-

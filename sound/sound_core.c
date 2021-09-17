@@ -64,7 +64,6 @@ static void __exit cleanup_soundcore(void)
 subsys_initcall(init_soundcore);
 module_exit(cleanup_soundcore);
 
-
 #ifdef CONFIG_SOUND_OSS_CORE
 /*
  *	OSS sound core handling. Breaks out sound functions to submodules
@@ -215,7 +214,6 @@ static int __sound_insert_unit(struct sound_unit * s, struct sound_unit **list, 
 	 
 	s->next=*list;
 	*list=s;
-	
 	
 	return n;
 }
@@ -509,7 +507,6 @@ EXPORT_SYMBOL(register_sound_dsp);
  *	the register function.
  */
 
-
 void unregister_sound_special(int unit)
 {
 	sound_remove_unit(&chains[unit % SOUND_STEP], unit);
@@ -562,7 +559,6 @@ void unregister_sound_dsp(int unit)
 	sound_remove_unit(&chains[3], unit);
 }
 
-
 EXPORT_SYMBOL(unregister_sound_dsp);
 
 static struct sound_unit *__look_for_unit(int chain, int unit)
@@ -601,6 +597,10 @@ static int soundcore_open(struct inode *inode, struct file *file)
 	if (preclaim_oss && !new_fops) {
 		spin_unlock(&sound_loader_lock);
 
+#ifdef CONFIG_SYNO_IGNORE_REQUEST_ALSA_MODULE
+		//If CONFIG_SYNO_IGNORE_REQUEST_ALSA_MODULE is opened , skip request_module
+		//Please refer to DSM bug #49398
+#else
 		/*
 		 *  Please, don't change this order or code.
 		 *  For ALSA slot means soundcard and OSS emulation code
@@ -620,6 +620,7 @@ static int soundcore_open(struct inode *inode, struct file *file)
 		 */
 		if (request_module("char-major-%d-%d", SOUND_MAJOR, unit) > 0)
 			request_module("char-major-%d", SOUND_MAJOR);
+#endif /*CONFIG_SYNO_IGNORE_REQUEST_ALSA_MODULE*/
 
 		spin_lock(&sound_loader_lock);
 		s = __look_for_unit(chain, unit);

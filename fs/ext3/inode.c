@@ -871,7 +871,6 @@ int ext3_get_blocks_handle(handle_t *handle, struct inode *inode,
 	int count = 0;
 	ext3_fsblk_t first_block = 0;
 
-
 	trace_ext3_get_blocks_enter(inode, iblock, maxblocks, create);
 	J_ASSERT(handle != NULL || create == 0);
 	depth = ext3_block_to_path(inode,iblock,offsets,&blocks_to_boundary);
@@ -1262,6 +1261,11 @@ static int ext3_write_begin(struct file *file, struct address_space *mapping,
 	 * we allocate blocks but write fails for some reason */
 	int needed_blocks = ext3_writepage_trans_blocks(inode) + 1;
 
+#ifdef CONFIG_SYNO_FS_RECVFILE
+	if (flags & AOP_FLAG_RECVFILE) {
+		needed_blocks = needed_blocks + MAX_PAGES_PER_RECVFILE - 1;
+	}
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 	trace_ext3_write_begin(inode, pos, len, flags);
 
 	index = pos >> PAGE_CACHE_SHIFT;
@@ -1310,10 +1314,18 @@ write_begin_failed:
 	}
 	if (ret == -ENOSPC && ext3_should_retry_alloc(inode->i_sb, &retries))
 		goto retry;
+#ifdef CONFIG_SYNO_FS_RECVFILE
+	if (ret >= 0 && (flags & AOP_FLAG_RECVFILE)) {
+		if (pos + len > inode->i_size) {
+			// Don't need i_size_write because we hold i_mutex.
+			inode->i_size = pos + len;
+			ext3_mark_inode_dirty(handle, inode);
+		}
+	}
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 out:
 	return ret;
 }
-
 
 int ext3_journal_dirty_data(handle_t *handle, struct buffer_head *bh)
 {
@@ -2928,6 +2940,13 @@ struct inode *ext3_iget(struct super_block *sb, unsigned long ino)
 	inode->i_ctime.tv_sec = (signed)le32_to_cpu(raw_inode->i_ctime);
 	inode->i_mtime.tv_sec = (signed)le32_to_cpu(raw_inode->i_mtime);
 	inode->i_atime.tv_nsec = inode->i_ctime.tv_nsec = inode->i_mtime.tv_nsec = 0;
+#ifdef CONFIG_SYNO_EXT3_CREATE_TIME
+	inode->i_create_time.tv_sec = (signed)le32_to_cpu(raw_inode->ext3_create_time);
+	inode->i_create_time.tv_nsec = 0;
+#endif
+#ifdef CONFIG_SYNO_EXT3_ARCHIVE_BIT
+	inode->i_archive_bit = le32_to_cpu(raw_inode->ext3_archive_bit);
+#endif
 
 	ei->i_state_flags = 0;
 	ei->i_dir_start_lookup = 0;
@@ -3135,6 +3154,12 @@ again:
 	raw_inode->i_faddr = cpu_to_le32(ei->i_faddr);
 	raw_inode->i_frag = ei->i_frag_no;
 	raw_inode->i_fsize = ei->i_frag_size;
+#endif
+#ifdef CONFIG_SYNO_EXT3_CREATE_TIME
+	raw_inode->ext3_create_time = cpu_to_le32(inode->i_create_time.tv_sec);
+#endif
+#ifdef CONFIG_SYNO_EXT3_ARCHIVE_BIT
+	raw_inode->ext3_archive_bit = cpu_to_le32(inode->i_archive_bit);
 #endif
 	raw_inode->i_file_acl = cpu_to_le32(ei->i_file_acl);
 	if (!S_ISREG(inode->i_mode)) {
@@ -3372,6 +3397,75 @@ err_out:
 	return error;
 }
 
+#ifdef CONFIG_SYNO_EXT3_STAT
+int ext3_syno_getattr(struct dentry *d, struct kstat *stat, int flags)
+{
+	int err = 0;
+#if defined(CONFIG_SYNO_EXT3_ARCHIVE_BIT) || defined(CONFIG_SYNO_EXT3_CREATE_TIME)
+	struct inode *inode = d->d_inode;
+#endif
+#ifdef CONFIG_SYNO_EXT3_CREATE_TIME
+	if (flags & SYNOST_CREATE_TIME) {
+		stat->syno_create_time = inode->i_create_time;
+	}
+#endif /* CONFIG_SYNO_EXT3_CREATE_TIME */
+#ifdef CONFIG_SYNO_EXT3_ARCHIVE_BIT
+	if (flags & SYNOST_ARCHIVE_BIT) {
+		stat->syno_archive_bit = inode->i_archive_bit;
+	}
+#endif
+#ifdef CONFIG_SYNO_EXT3_ARCHIVE_VERSION
+	if (flags & SYNOST_ARCHIVE_VER) {
+		err = ext3_syno_get_archive_ver(d, &stat->syno_archive_version);
+	}
+#endif
+	return err;
+}
+#endif /* CONFIG_SYNO_EXT3_STAT */
+
+#ifdef CONFIG_SYNO_EXT3_ARCHIVE_VERSION
+int ext3_syno_set_archive_ver(struct dentry *dentry, u32 version)
+{
+	struct inode *inode = dentry->d_inode;
+	struct syno_xattr_archive_version value;
+	int err;
+
+	value.v_magic = cpu_to_le16(0x2552);
+	value.v_struct_version = cpu_to_le16(1);
+	value.v_archive_version = cpu_to_le32(version);
+	err = ext3_xattr_set(inode, EXT3_XATTR_INDEX_SYNO, XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value), 0);
+	if (!err) {
+		inode->i_archive_version = version;
+		inode->i_flags |= S_ARCHIVE_VERSION_CACHED;
+	}
+	return err;
+}
+
+int ext3_syno_get_archive_ver(struct dentry *dentry, u32 *version)
+{
+	struct inode *inode = dentry->d_inode;
+	struct syno_xattr_archive_version value;
+	int err;
+
+	if (IS_ARCHIVE_VERSION_CACHED(inode)) {
+		*version = inode->i_archive_version;
+		return 0;
+	}
+
+	err = ext3_xattr_get(inode, EXT3_XATTR_INDEX_SYNO, XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value));
+	if (0 < err) {
+		inode->i_archive_version = le32_to_cpu(value.v_archive_version);
+	} else if (-ENODATA == err) {
+		inode->i_archive_version = 0;
+	} else {
+		*version = 0;
+		return err;
+	}
+	*version = inode->i_archive_version;
+	inode->i_flags |= S_ARCHIVE_VERSION_CACHED;
+	return 0;
+}
+#endif /* CONFIG_SYNO_EXT3_ARCHIVE_VERSION */
 
 /*
  * How many blocks doth make a writepage()?

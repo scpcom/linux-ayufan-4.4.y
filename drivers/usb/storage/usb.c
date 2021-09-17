@@ -58,6 +58,10 @@
 #include <linux/kthread.h>
 #include <linux/mutex.h>
 #include <linux/utsname.h>
+#if defined(CONFIG_USB_ETRON_HUB)
+#include <linux/usb.h>
+#include <linux/usb/hcd.h>
+#endif /* CONFIG_USB_ETRON_HUB */
 
 #include <scsi/scsi.h>
 #include <scsi/scsi_cmnd.h>
@@ -85,7 +89,6 @@ MODULE_PARM_DESC(delay_use, "seconds to delay before using a new device");
 static char quirks[128];
 module_param_string(quirks, quirks, sizeof(quirks), S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(quirks, "supplemental list of device IDs and their quirks");
-
 
 /*
  * The entries in this table correspond, line for line,
@@ -297,6 +300,22 @@ void fill_inquiry_response(struct us_data *us, unsigned char *data,
 }
 EXPORT_SYMBOL_GPL(fill_inquiry_response);
 
+#if defined(CONFIG_USB_ETRON_HUB)
+static int usb_stor_no_test_unit_ready(struct us_data *us)
+{
+	struct usb_device *udev = us->pusb_dev;
+
+	if (us->srb->cmnd[0] != TEST_UNIT_READY)
+		return -EINVAL;
+
+	if (udev->descriptor.idVendor != cpu_to_le16(0x1759) ||
+		udev->descriptor.idProduct != cpu_to_le16(0x5002))
+		return -EINVAL;
+
+	return 0;
+}
+#endif /* CONFIG_USB_ETRON_HUB */
+
 static int usb_stor_control_thread(void * __us)
 {
 	struct us_data *us = (struct us_data *)__us;
@@ -367,7 +386,12 @@ static int usb_stor_control_thread(void * __us)
 			fill_inquiry_response(us, data_ptr, 36);
 			us->srb->result = SAM_STAT_GOOD;
 		}
-
+#if defined(CONFIG_USB_ETRON_HUB)
+		else if (usb_is_etron_hcd(us->pusb_dev) && !usb_stor_no_test_unit_ready(us)) {
+				usb_stor_dbg(us, "Ignoring TEST_UNIT_READY command\n");
+				us->srb->result = SAM_STAT_GOOD;
+		}
+#endif /* CONFIG_USB_ETRON_HUB */
 		/* we've got a command, let's do it! */
 		else {
 			US_DEBUG(usb_stor_show_command(us, us->srb));
@@ -1027,6 +1051,17 @@ void usb_stor_disconnect(struct usb_interface *intf)
 }
 EXPORT_SYMBOL_GPL(usb_stor_disconnect);
 
+#if defined(CONFIG_USB_ETRON_UAS) || defined(CONFIG_USB_ETRON_UAS_MODULE)
+static int is_uas_device(struct usb_interface *intf)
+{
+	struct usb_device *udev = interface_to_usbdev(intf);
+
+#define USB_QUIRK_UAS_MODE		0x80000000
+
+	return !!(udev->quirks & USB_QUIRK_UAS_MODE);
+}
+#endif /* defined(CONFIG_USB_ETRON_UAS) || defined(CONFIG_USB_ETRON_UAS_MODULE) */
+
 /* The main probe routine for standard devices */
 static int storage_probe(struct usb_interface *intf,
 			 const struct usb_device_id *id)
@@ -1035,6 +1070,11 @@ static int storage_probe(struct usb_interface *intf,
 	struct us_data *us;
 	int result;
 	int size;
+
+#if defined(CONFIG_USB_ETRON_UAS) || defined(CONFIG_USB_ETRON_UAS_MODULE)
+	if (is_uas_device(intf))
+		return -ENODEV;
+#endif /* defined(CONFIG_USB_ETRON_UAS) || defined(CONFIG_USB_ETRON_UAS_MODULE) */
 
 	/*
 	 * If the device isn't standard (is handled by a subdriver

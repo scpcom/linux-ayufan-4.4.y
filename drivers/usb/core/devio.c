@@ -678,10 +678,14 @@ static int checkintf(struct dev_state *ps, unsigned int ifnum)
 		return -EINVAL;
 	if (test_bit(ifnum, &ps->ifclaimed))
 		return 0;
+#ifdef CONFIG_SYNO_USB_UPS
+	/* to ignore the warning log */
+#else
 	/* if not yet claimed, claim it for the driver */
 	dev_warn(&ps->dev->dev, "usbfs: process %d (%s) did not claim "
 		 "interface %u before use\n", task_pid_nr(current),
 		 current->comm, ifnum);
+#endif /* CONFIG_SYNO_USB_UPS */
 	return claimintf(ps, ifnum);
 }
 
@@ -1773,7 +1777,6 @@ static int proc_reapurbnonblock_compat(struct dev_state *ps, void __user *arg)
 	}
 	return retval;
 }
-
 
 #endif
 

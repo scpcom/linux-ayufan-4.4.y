@@ -11,7 +11,11 @@
 /*
  * Time out in seconds for disks and Magneto-opticals (which are slower).
  */
+#ifdef CONFIG_SYNO_SPINUP_DELAY
+#define SD_TIMEOUT		(60 * HZ)
+#else
 #define SD_TIMEOUT		(30 * HZ)
+#endif /* CONFIG_SYNO_SPINUP_DELAY */
 #define SD_MOD_TIMEOUT		(75 * HZ)
 #define SD_FLUSH_TIMEOUT	(60 * HZ)
 #define SD_WRITE_SAME_TIMEOUT	(120 * HZ)
@@ -53,6 +57,20 @@ enum {
 	SD_LBP_DISABLE,		/* Discard disabled due to failed cmd */
 };
 
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+// FIXME: we need share kernel devices type with user space,
+// so this enum must sync with libsynosdk/lib/fs/fs.h DISK_PORT_TYPE
+typedef enum __syno_disk_type {
+	SYNO_DISK_UNKNOWN = 0,
+	SYNO_DISK_SATA,
+	SYNO_DISK_USB,
+	SYNO_DISK_SYNOBOOT,
+	SYNO_DISK_ISCSI,
+	SYNO_DISK_SAS,
+	SYNO_DISK_END, // end of enum
+}SYNO_DISK_TYPE;
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
+
 struct scsi_disk {
 	struct scsi_driver *driver;	/* always &sd_template */
 	struct scsi_device *device;
@@ -65,6 +83,12 @@ struct scsi_disk {
 	u32		unmap_granularity;
 	u32		unmap_alignment;
 	u32		index;
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+	SYNO_DISK_TYPE	synodisktype;
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+	u32		synoindex;
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
 	unsigned int	physical_block_size;
 	unsigned int	max_medium_access_timeouts;
 	unsigned int	medium_access_timed_out;

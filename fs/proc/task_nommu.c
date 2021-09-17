@@ -149,7 +149,14 @@ static int nommu_vma_show(struct seq_file *m, struct vm_area_struct *vma,
 	file = vma->vm_file;
 
 	if (file) {
+#ifdef CONFIG_AUFS_FHSM
+		struct inode *inode;
+
+		file = vma_pr_or_file(file);
+		inode = file_inode(file);
+#else
 		struct inode *inode = file_inode(vma->vm_file);
+#endif /* CONFIG_AUFS_FHSM */
 		dev = inode->i_sb->s_dev;
 		ino = inode->i_ino;
 		pgoff = (loff_t)vma->vm_pgoff << PAGE_SHIFT;
@@ -315,4 +322,3 @@ const struct file_operations proc_tid_maps_operations = {
 	.llseek		= seq_lseek,
 	.release	= seq_release_private,
 };
-

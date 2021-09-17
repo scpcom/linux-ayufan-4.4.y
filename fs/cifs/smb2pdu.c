@@ -76,7 +76,6 @@ static const int smb2_req_struct_sizes[NUMBER_OF_SMB2_COMMANDS] = {
 	/* SMB2_OPLOCK_BREAK */ 24 /* BB this is 36 for LEASE_BREAK variant */
 };
 
-
 static void
 smb2_hdr_assemble(struct smb2_hdr *hdr, __le16 smb2_cmd /* command */ ,
 		  const struct cifs_tcon *tcon)
@@ -303,7 +302,6 @@ free_rsp_buf(int resp_buftype, void *rsp)
 	else if (resp_buftype == CIFS_LARGE_BUFFER)
 		cifs_buf_release(rsp);
 }
-
 
 /*
  *
@@ -809,7 +807,8 @@ tcon_exit:
 tcon_error_exit:
 	if (rsp->hdr.Status == STATUS_BAD_NETWORK_NAME) {
 		cifs_dbg(VFS, "BAD_NETWORK_NAME: %s\n", tree);
-		tcon->bad_network_name = true;
+		if (tcon)
+			tcon->bad_network_name = true;
 	}
 	goto tcon_exit;
 }
@@ -1094,7 +1093,6 @@ validate_buf(unsigned int offset, unsigned int buffer_length,
 	char *end_of_smb = smb_len + 4 /* RFC1001 length field */ + (char *)hdr;
 	char *begin_of_buf = 4 /* RFC1001 len field */ + offset + (char *)hdr;
 	char *end_of_buf = begin_of_buf + buffer_length;
-
 
 	if (buffer_length < min_buf_size) {
 		cifs_dbg(VFS, "buffer length %d smaller than minimum size %d\n",

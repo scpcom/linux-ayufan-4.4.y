@@ -437,9 +437,15 @@ EXPORT_SYMBOL_GPL(kernel_halt);
  *
  *	Shutdown everything and perform a clean system power_off.
  */
+#ifdef CONFIG_SYNO_X86_AUTO_POWER_ON
+extern int syno_schedule_power_on_prepare(void);
+#endif /* CONFIG_SYNO_X86_AUTO_POWER_ON */
 void kernel_power_off(void)
 {
 	kernel_shutdown_prepare(SYSTEM_POWER_OFF);
+#ifdef CONFIG_SYNO_X86_AUTO_POWER_ON 
+	syno_schedule_power_on_prepare();
+#endif /* CONFIG_SYNO_X86_AUTO_POWER_ON */
 	if (pm_power_off_prepare)
 		pm_power_off_prepare();
 	migrate_to_reboot_cpu();
@@ -449,6 +455,25 @@ void kernel_power_off(void)
 	machine_power_off();
 }
 EXPORT_SYMBOL_GPL(kernel_power_off);
+
+#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+
+#ifdef CONFIG_SYNO_X86_SERIAL_PORT_SWAP
+#define UART_PORT1_IOBASE	0x3F8
+#else /* CONFIG_SYNO_X86_SERIAL_PORT_SWAP */
+#define UART_PORT1_IOBASE	0x2F8
+#endif /* CONFIG_SYNO_X86_SERIAL_PORT_SWAP */
+
+#define UART_CMD_PREFIX 45 // "-"
+#define UART_CMD_REBOOT 67 // "C"
+#define UART_CMD_POWEROFF   49 // "1"
+// below is copied from include/linux/serial_reg.h
+#define UART_TX     0   /* Out: Transmit buffer */
+#define UART_IER    1   /* Out: Interrupt Enable Register */
+#define UART_IER_THRI       0x02 /* Enable Transmitter holding register int. */
+#define UART_START_TX   UART_IER_THRI
+#define UART_STOP_TX    0x0
+#endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
 
 static DEFINE_MUTEX(reboot_mutex);
 
@@ -497,6 +522,14 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 	mutex_lock(&reboot_mutex);
 	switch (cmd) {
 	case LINUX_REBOOT_CMD_RESTART:
+#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+		outb(UART_START_TX, UART_PORT1_IOBASE + UART_IER);
+		outb(UART_CMD_PREFIX, UART_PORT1_IOBASE + UART_TX);
+		outb(UART_CMD_REBOOT, UART_PORT1_IOBASE + UART_TX);
+		outb(13, UART_PORT1_IOBASE + UART_TX);
+		outb(10, UART_PORT1_IOBASE + UART_TX);
+		outb(UART_STOP_TX, UART_PORT1_IOBASE + UART_IER);
+#endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
 		kernel_restart(NULL);
 		break;
 
@@ -514,6 +547,14 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 		panic("cannot halt");
 
 	case LINUX_REBOOT_CMD_POWER_OFF:
+#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+		outb(UART_START_TX, UART_PORT1_IOBASE + UART_IER);
+		outb(UART_CMD_PREFIX, UART_PORT1_IOBASE + UART_TX);
+		outb(UART_CMD_POWEROFF, UART_PORT1_IOBASE + UART_TX);
+		outb(13, UART_PORT1_IOBASE + UART_TX);
+		outb(10, UART_PORT1_IOBASE + UART_TX);
+		outb(UART_STOP_TX, UART_PORT1_IOBASE + UART_IER);
+#endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
 		kernel_power_off();
 		do_exit(0);
 		break;
@@ -832,7 +873,6 @@ error:
 	return retval;
 }
 
-
 /*
  * This function implements a generic ability to update ruid, euid,
  * and suid.  This allows you to implement the 4.4 compatible seteuid().
@@ -990,7 +1030,6 @@ SYSCALL_DEFINE3(getresgid, gid_t __user *, rgidp, gid_t __user *, egidp, gid_t _
 
 	return retval;
 }
-
 
 /*
  * "setfsuid()" sets the fsuid - the uid used for filesystem checks. This

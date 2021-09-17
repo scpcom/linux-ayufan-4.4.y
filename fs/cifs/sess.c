@@ -167,8 +167,13 @@ unicode_oslm_strings(char **pbcc_area, const struct nls_table *nls_cp)
 	int bytes_ret = 0;
 
 	/* Copy OS version */
+#ifdef CONFIG_SYNO_CIFS_REPLACE_NATIVE_OS
+	bytes_ret = cifs_strtoUTF16((__le16 *)bcc_ptr, "Synology Linux version ", 32,
+				  nls_cp);
+#else
 	bytes_ret = cifs_strtoUTF16((__le16 *)bcc_ptr, "Linux version ", 32,
 				    nls_cp);
+#endif /* CONFIG_SYNO_CIFS_REPLACE_NATIVE_OS */
 	bcc_ptr += 2 * bytes_ret;
 	bytes_ret = cifs_strtoUTF16((__le16 *) bcc_ptr, init_utsname()->release,
 				    32, nls_cp);
@@ -204,7 +209,6 @@ static void unicode_domain_string(char **pbcc_area, struct cifs_ses *ses,
 
 	*pbcc_area = bcc_ptr;
 }
-
 
 static void unicode_ssetup_strings(char **pbcc_area, struct cifs_ses *ses,
 				   const struct nls_table *nls_cp)
@@ -265,8 +269,13 @@ static void ascii_ssetup_strings(char **pbcc_area, struct cifs_ses *ses,
 
 	/* BB check for overflow here */
 
+#ifdef CONFIG_SYNO_CIFS_REPLACE_NATIVE_OS
+	strcpy(bcc_ptr, "Synology Linux version ");
+	bcc_ptr += strlen("Synology Linux version ");
+#else
 	strcpy(bcc_ptr, "Linux version ");
 	bcc_ptr += strlen("Linux version ");
+#endif /* CONFIG_SYNO_CIFS_REPLACE_NATIVE_OS */
 	strcpy(bcc_ptr, init_utsname()->release);
 	bcc_ptr += strlen(init_utsname()->release) + 1;
 

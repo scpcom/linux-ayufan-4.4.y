@@ -29,6 +29,13 @@ static void * ext3_follow_link(struct dentry *dentry, struct nameidata *nd)
 }
 
 const struct inode_operations ext3_symlink_inode_operations = {
+#ifdef CONFIG_SYNO_EXT3_STAT
+	.syno_getattr	= ext3_syno_getattr,
+#endif
+#ifdef CONFIG_SYNO_EXT3_ARCHIVE_VERSION
+	.syno_get_archive_ver = ext3_syno_get_archive_ver,
+	.syno_set_archive_ver = ext3_syno_set_archive_ver,
+#endif
 	.readlink	= generic_readlink,
 	.follow_link	= page_follow_link_light,
 	.put_link	= page_put_link,
@@ -42,6 +49,13 @@ const struct inode_operations ext3_symlink_inode_operations = {
 };
 
 const struct inode_operations ext3_fast_symlink_inode_operations = {
+#ifdef CONFIG_SYNO_EXT3_STAT
+	.syno_getattr	= ext3_syno_getattr,
+#endif
+#ifdef CONFIG_SYNO_EXT3_ARCHIVE_VERSION
+	.syno_get_archive_ver = ext3_syno_get_archive_ver,
+	.syno_set_archive_ver = ext3_syno_set_archive_ver,
+#endif
 	.readlink	= generic_readlink,
 	.follow_link	= ext3_follow_link,
 	.setattr	= ext3_setattr,

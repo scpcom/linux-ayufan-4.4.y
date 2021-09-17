@@ -280,8 +280,19 @@ int eth_prepare_mac_addr_change(struct net_device *dev, void *p)
 {
 	struct sockaddr *addr = p;
 
+#ifdef CONFIG_SYNO_MAC_ADDRESS
+	/**
+	 * In linux-2.6.24, kernel call dev->set_mac_address() directly to
+	 * set mac address. But in linux-2.6.32, kernel call a middle layer
+	 * function ops->ndo_set_mac_address() to set mac address. However,
+	 * this function will call eth_mac_addr() and will check if network
+	 * interface is on or not. If network interface is running, it returns
+	 * -EBUSY and set mac address action failed.
+	 */
+#else /* CONFIG_SYNO_MAC_ADDRESS */
 	if (!(dev->priv_flags & IFF_LIVE_ADDR_CHANGE) && netif_running(dev))
 		return -EBUSY;
+#endif /* CONFIG_SYNO_MAC_ADDRESS */
 	if (!is_valid_ether_addr(addr->sa_data))
 		return -EADDRNOTAVAIL;
 	return 0;

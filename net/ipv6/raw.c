@@ -272,6 +272,19 @@ static int rawv6_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 				sk->sk_bound_dev_if = addr->sin6_scope_id;
 			}
 
+#ifdef CONFIG_SYNO_IPV6_LINKLOCAL
+			if (__ipv6_addr_is_link_local(addr_type) && !sk->sk_bound_dev_if) {
+				for_each_netdev(sock_net(sk), dev) {
+					unsigned flags = dev_get_flags(dev);
+					if ((flags & IFF_RUNNING) &&
+						!(flags & (IFF_LOOPBACK | IFF_SLAVE))) {
+						sk->sk_bound_dev_if = dev->ifindex;
+						break;
+					}
+				}
+			}
+#endif /* CONFIG_SYNO_IPV6_LINKLOCAL */
+
 			/* Binding to link-local address requires an interface */
 			if (!sk->sk_bound_dev_if)
 				goto out_unlock;
@@ -439,7 +452,6 @@ int rawv6_rcv(struct sock *sk, struct sk_buff *skb)
 	rawv6_rcv_skb(sk, skb);
 	return 0;
 }
-
 
 /*
  *	This should be easy, if there is something there
@@ -950,7 +962,6 @@ static int rawv6_geticmpfilter(struct sock *sk, int level, int optname,
 
 	return 0;
 }
-
 
 static int do_rawv6_setsockopt(struct sock *sk, int level, int optname,
 			    char __user *optval, unsigned int optlen)

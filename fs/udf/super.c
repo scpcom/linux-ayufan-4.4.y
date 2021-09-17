@@ -367,6 +367,10 @@ static int udf_show_options(struct seq_file *seq, struct dentry *root)
 		seq_puts(seq, ",utf8");
 	if (UDF_QUERY_FLAG(sb, UDF_FLAG_NLS_MAP) && sbi->s_nls_map)
 		seq_printf(seq, ",iocharset=%s", sbi->s_nls_map->charset);
+#ifdef CONFIG_SYNO_UDF_CASELESS
+	if (!UDF_QUERY_FLAG(sb, SYNO_UDF_FLAG_CASELESS))
+		seq_printf(seq, ",casesensitive");
+#endif
 
 	return 0;
 }
@@ -435,6 +439,9 @@ enum {
 	Opt_rootdir, Opt_utf8, Opt_iocharset,
 	Opt_err, Opt_uforget, Opt_uignore, Opt_gforget, Opt_gignore,
 	Opt_fmode, Opt_dmode
+#ifdef CONFIG_SYNO_UDF_CASELESS
+	, Opt_synocasesensitive
+#endif
 };
 
 static const match_table_t tokens = {
@@ -465,6 +472,9 @@ static const match_table_t tokens = {
 	{Opt_iocharset,	"iocharset=%s"},
 	{Opt_fmode,     "mode=%o"},
 	{Opt_dmode,     "dmode=%o"},
+#ifdef CONFIG_SYNO_UDF_CASELESS
+	{Opt_synocasesensitive,     "casesensitive"},
+#endif
 	{Opt_err,	NULL}
 };
 
@@ -473,7 +483,9 @@ static int udf_parse_options(char *options, struct udf_options *uopt,
 {
 	char *p;
 	int option;
-
+#ifdef CONFIG_SYNO_UDF_UINT_UID_GID
+	unsigned long ulOption;
+#endif
 	uopt->novrs = 0;
 	uopt->partition = 0xFFFF;
 	uopt->session = 0xFFFFFFFF;
@@ -483,6 +495,9 @@ static int udf_parse_options(char *options, struct udf_options *uopt,
 	uopt->rootdir = 0xFFFFFFFF;
 	uopt->fileset = 0xFFFFFFFF;
 	uopt->nls_map = NULL;
+#ifdef CONFIG_SYNO_UDF_CASELESS
+	uopt->flags |= (1 << SYNO_UDF_FLAG_CASELESS);
+#endif
 
 	if (!options)
 		return 1;
@@ -523,17 +538,29 @@ static int udf_parse_options(char *options, struct udf_options *uopt,
 			uopt->flags &= ~(1 << UDF_FLAG_USE_SHORT_AD);
 			break;
 		case Opt_gid:
+#ifdef CONFIG_SYNO_UDF_UINT_UID_GID
+			if (SYNO_get_option_ul(&args[0], &ulOption))
+				return 0;
+			uopt->gid = make_kgid(current_user_ns(), ulOption);
+#else
 			if (match_int(args, &option))
 				return 0;
 			uopt->gid = make_kgid(current_user_ns(), option);
+#endif /* CONFIG_SYNO_UDF_UINT_UID_GID */
 			if (!gid_valid(uopt->gid))
 				return 0;
 			uopt->flags |= (1 << UDF_FLAG_GID_SET);
 			break;
 		case Opt_uid:
+#ifdef CONFIG_SYNO_UDF_UINT_UID_GID
+			if (SYNO_get_option_ul(&args[0], &ulOption))
+				return 0;
+			uopt->uid = make_kuid(current_user_ns(), ulOption);
+#else
 			if (match_int(args, &option))
 				return 0;
 			uopt->uid = make_kuid(current_user_ns(), option);
+#endif /* CONFIG_SYNO_UDF_UINT_UID_GID */
 			if (!uid_valid(uopt->uid))
 				return 0;
 			uopt->flags |= (1 << UDF_FLAG_UID_SET);
@@ -616,6 +643,11 @@ static int udf_parse_options(char *options, struct udf_options *uopt,
 				return 0;
 			uopt->dmode = option & 0777;
 			break;
+#ifdef CONFIG_SYNO_UDF_CASELESS
+		case Opt_synocasesensitive:
+			uopt->flags &= ~(1 << SYNO_UDF_FLAG_CASELESS);
+			break;
+#endif
 		default:
 			pr_err("bad mount option \"%s\" or missing value\n", p);
 			return 0;

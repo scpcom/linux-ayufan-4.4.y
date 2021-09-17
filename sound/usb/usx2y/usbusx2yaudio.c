@@ -30,7 +30,6 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-
 #include <linux/interrupt.h>
 #include <linux/slab.h>
 #include <linux/usb.h>
@@ -66,7 +65,6 @@
 #else
  #define nr_of_packs() USX2Y_NRPACKS
 #endif
-
 
 static int usX2Y_urb_capt_retire(struct snd_usX2Y_substream *subs)
 {
@@ -257,7 +255,6 @@ static inline int usX2Y_usbframe_complete(struct snd_usX2Y_substream *capsubs,
 	return 0;
 }
 
-
 static void usX2Y_clients_stop(struct usX2Ydev *usX2Y)
 {
 	int s, u;
@@ -381,7 +378,6 @@ static void usX2Y_subs_prepare(struct snd_usX2Y_substream *subs)
 	subs->transfer_done = 0;
 }
 
-
 static void usX2Y_urb_release(struct urb **urb, int free_tb)
 {
 	if (*urb) {
@@ -497,6 +493,9 @@ static int usX2Y_urbs_start(struct snd_usX2Y_substream *subs)
 			}
 			urb->transfer_buffer_length = subs->maxpacksize * nr_of_packs(); 
 			if ((err = usb_submit_urb(urb, GFP_ATOMIC)) < 0) {
+#if defined(CONFIG_SYNO_AUDIO_SUPPRESS_MESSAGE)
+				if (printk_ratelimit())
+#endif /*CONFIG_SYNO_AUDIO_SUPPRESS_MESSAGE*/
 				snd_printk (KERN_ERR "cannot submit datapipe for urb %d, err = %d\n", i, err);
 				err = -EPIPE;
 				goto cleanup;
@@ -558,7 +557,6 @@ static int snd_usX2Y_pcm_trigger(struct snd_pcm_substream *substream, int cmd)
 	}
 	return 0;
 }
-
 
 /*
  * allocate a buffer, setup samplerate
@@ -717,7 +715,6 @@ static int usX2Y_rate_set(struct usX2Ydev *usX2Y, int rate)
 	return err;
 }
 
-
 static int usX2Y_format_set(struct usX2Ydev *usX2Y, snd_pcm_format_t format)
 {
 	int alternate, err;
@@ -746,7 +743,6 @@ static int usX2Y_format_set(struct usX2Ydev *usX2Y, snd_pcm_format_t format)
 	usX2Y->rate = 0;
 	return err;
 }
-
 
 static int snd_usX2Y_pcm_hw_params(struct snd_pcm_substream *substream,
 				   struct snd_pcm_hw_params *hw_params)
@@ -876,8 +872,6 @@ static struct snd_pcm_hardware snd_usX2Y_2c =
 	.fifo_size =              0
 };
 
-
-
 static int snd_usX2Y_pcm_open(struct snd_pcm_substream *substream)
 {
 	struct snd_usX2Y_substream	*subs = ((struct snd_usX2Y_substream **)
@@ -894,8 +888,6 @@ static int snd_usX2Y_pcm_open(struct snd_pcm_substream *substream)
 	return 0;
 }
 
-
-
 static int snd_usX2Y_pcm_close(struct snd_pcm_substream *substream)
 {
 	struct snd_pcm_runtime *runtime = substream->runtime;
@@ -905,7 +897,6 @@ static int snd_usX2Y_pcm_close(struct snd_pcm_substream *substream)
 
 	return 0;
 }
-
 
 static struct snd_pcm_ops snd_usX2Y_pcm_ops = 
 {
@@ -918,7 +909,6 @@ static struct snd_pcm_ops snd_usX2Y_pcm_ops =
 	.trigger =	snd_usX2Y_pcm_trigger,
 	.pointer =	snd_usX2Y_pcm_pointer,
 };
-
 
 /*
  * free a usb stream instance

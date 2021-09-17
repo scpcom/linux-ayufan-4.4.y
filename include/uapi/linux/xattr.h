@@ -17,8 +17,15 @@
 #define XATTR_OS2_PREFIX "os2."
 #define XATTR_OS2_PREFIX_LEN (sizeof(XATTR_OS2_PREFIX) - 1)
 
+#ifdef CONFIG_SYNO_HFSPLUS_EA
+#define XATTR_MAC_OSX_PREFIX ""
+#else
 #define XATTR_MAC_OSX_PREFIX "osx."
+#endif
 #define XATTR_MAC_OSX_PREFIX_LEN (sizeof(XATTR_MAC_OSX_PREFIX) - 1)
+
+#define XATTR_BTRFS_PREFIX "btrfs."
+#define XATTR_BTRFS_PREFIX_LEN (sizeof(XATTR_BTRFS_PREFIX) - 1)
 
 #define XATTR_SECURITY_PREFIX	"security."
 #define XATTR_SECURITY_PREFIX_LEN (sizeof(XATTR_SECURITY_PREFIX) - 1)
@@ -31,6 +38,22 @@
 
 #define XATTR_USER_PREFIX "user."
 #define XATTR_USER_PREFIX_LEN (sizeof(XATTR_USER_PREFIX) - 1)
+
+#ifdef CONFIG_SYNO_FS_XATTR
+#define XATTR_SYNO_PREFIX "syno."
+#define XATTR_SYNO_PREFIX_LEN (sizeof (XATTR_SYNO_PREFIX) - 1)
+#endif
+
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+#define XATTR_SYNO_ARCHIVE_BIT "archive_bit"
+#endif
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#define XATTR_SYNO_ARCHIVE_VERSION "archive_version"
+#define XATTR_SYNO_ARCHIVE_VERSION_VOLUME "archive_version_volume"
+#endif
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+#define XATTR_SYNO_CREATE_TIME "create_time"
+#endif
 
 /* Security namespace */
 #define XATTR_EVM_SUFFIX "evm"
@@ -62,6 +85,5 @@
 #define XATTR_NAME_POSIX_ACL_ACCESS XATTR_SYSTEM_PREFIX XATTR_POSIX_ACL_ACCESS
 #define XATTR_POSIX_ACL_DEFAULT  "posix_acl_default"
 #define XATTR_NAME_POSIX_ACL_DEFAULT XATTR_SYSTEM_PREFIX XATTR_POSIX_ACL_DEFAULT
-
 
 #endif /* _UAPI_LINUX_XATTR_H */

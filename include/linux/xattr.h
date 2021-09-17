@@ -10,7 +10,6 @@
 #ifndef _LINUX_XATTR_H
 #define _LINUX_XATTR_H
 
-
 #include <linux/slab.h>
 #include <linux/types.h>
 #include <linux/spinlock.h>
@@ -29,6 +28,14 @@ struct xattr_handler {
 	int (*set)(struct dentry *dentry, const char *name, const void *buffer,
 		   size_t size, int flags, int handler_flags);
 };
+
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+struct syno_xattr_archive_version {
+	__le16	v_magic;
+	__le16	v_struct_version;
+	__le32	v_archive_version;
+};
+#endif
 
 struct xattr {
 	char *name;

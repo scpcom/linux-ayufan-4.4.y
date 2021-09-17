@@ -51,6 +51,10 @@ struct usb_hub {
 							device present */
 	unsigned long		wakeup_bits[1];	/* ports that have signaled
 							remote wakeup */
+#if defined(CONFIG_USB_ETRON_HUB)
+	unsigned long		bot_mode_bits[1];
+#endif /* CONFIG_USB_ETRON_HUB */
+
 #if USB_MAXCHILDREN > 31 /* 8*sizeof(unsigned long) - 1 */
 #error event_bits[] is too short!
 #endif
@@ -122,4 +126,3 @@ static inline int hub_port_debounce_be_stable(struct usb_hub *hub,
 {
 	return hub_port_debounce(hub, port1, false);
 }
-

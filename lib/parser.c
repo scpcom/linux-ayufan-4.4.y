@@ -164,6 +164,23 @@ int match_int(substring_t *s, int *result)
 	return match_number(s, result, 0);
 }
 
+#if defined(CONFIG_SYNO_ISOFS_UINT_UID_GID) || defined(CONFIG_SYNO_UDF_UINT_UID_GID)
+int SYNO_get_option_ul(substring_t *args, unsigned long *option)
+{
+        int rc;
+        char *string;
+
+        string = match_strdup(args);
+        if (string == NULL)
+                return -ENOMEM;
+        rc = kstrtoul(string, 0, option);
+        kfree(string);
+
+        return rc;
+}
+EXPORT_SYMBOL(SYNO_get_option_ul);
+#endif /* defined(CONFIG_SYNO_ISOFS_UINT_UID_GID) || defined(CONFIG_SYNO_UDF_UINT_UID_GID) */
+
 /**
  * match_octal: - scan an octal representation of an integer from a substring_t
  * @s: substring_t to be scanned

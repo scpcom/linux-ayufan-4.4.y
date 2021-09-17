@@ -1,7 +1,6 @@
 #ifndef _LINUX_FS_H
 #define _LINUX_FS_H
 
-
 #include <linux/linkage.h>
 #include <linux/wait.h>
 #include <linux/kdev_t.h>
@@ -27,6 +26,10 @@
 #include <linux/lockdep.h>
 #include <linux/percpu-rwsem.h>
 #include <linux/blk_types.h>
+
+#ifdef CONFIG_SYNO_FS_RECVFILE
+#include <linux/net.h>
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 
 #include <asm/byteorder.h>
 #include <uapi/linux/fs.h>
@@ -65,12 +68,37 @@ typedef void (dio_iodone_t)(struct kiocb *iocb, loff_t offset,
 			ssize_t bytes, void *private, int ret,
 			bool is_async);
 
+#ifdef CONFIG_SYNO_FS_WINACL 
+/* 
+   Note!!!!! It should be consistent with SYNO_ACL_MAY_XXXXX in <linux/syno_acl_xattr_ds.h>
+*/
+#define MAY_EXEC		(0x0001)
+#define MAY_WRITE		(0x0002)
+#define MAY_READ		(0x0004)
+#define MAY_APPEND		(0x0008)
+#define MAY_ACCESS 		(0x0010)
+#define MAY_OPEN 		(0x0020)
+#define MAY_READ_EXT_ATTR	(0x0040)
+#define MAY_READ_PERMISSION	(0x0080)
+#define MAY_READ_ATTR		(0x0100)
+#define MAY_WRITE_ATTR		(0x0200)
+#define MAY_WRITE_EXT_ATTR	(0x0400)
+#define MAY_WRITE_PERMISSION	(0x0800)
+#define MAY_DEL			(0x1000)
+#define MAY_DEL_CHILD		(0x2000)
+#define MAY_GET_OWNER_SHIP	(0x4000)
+
+#define MASK_RDONLY_CHECK (MAY_WRITE|MAY_APPEND|MAY_WRITE_ATTR|MAY_WRITE_EXT_ATTR|MAY_WRITE_PERMISSION|MAY_DEL|MAY_DEL_CHILD|MAY_GET_OWNER_SHIP)
+
+#else /* CONFIG_SYNO_FS_WINACL */
 #define MAY_EXEC		0x00000001
 #define MAY_WRITE		0x00000002
 #define MAY_READ		0x00000004
 #define MAY_APPEND		0x00000008
 #define MAY_ACCESS		0x00000010
 #define MAY_OPEN		0x00000020
+#endif /* CONFIG_SYNO_FS_WINACL */
+
 #define MAY_CHDIR		0x00000040
 /* called from RCU mode, don't block */
 #define MAY_NOT_BLOCK		0x00000080
@@ -280,6 +308,10 @@ enum positive_aop_returns {
 #define AOP_FLAG_NOFS			0x0004 /* used by filesystem to direct
 						* helper code (eg buffer layer)
 						* to clear GFP_FS from alloc */
+#ifdef CONFIG_SYNO_FS_RECVFILE
+#define AOP_FLAG_RECVFILE		0x0008
+#define AOP_FLAG_RECVFILE_NONDA		0x0010
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 
 /*
  * oh the beauties of C type declarations.
@@ -386,6 +418,9 @@ struct address_space_operations {
 	int (*swap_activate)(struct swap_info_struct *sis, struct file *file,
 				sector_t *span);
 	void (*swap_deactivate)(struct file *file);
+#ifdef CONFIG_SYNO_FS_RECVFILE
+	int (*recvfile_da_check)(struct super_block *sb);
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 };
 
 extern const struct address_space_operations empty_aops;
@@ -507,6 +542,9 @@ static inline int mapping_writably_mapped(struct address_space *mapping)
 #endif
 
 struct posix_acl;
+#ifdef CONFIG_SYNO_FS_WINACL
+struct syno_acl;
+#endif /* CONFIG_SYNO_FS_WINACL */
 #define ACL_NOT_CACHED ((void *)(-1))
 
 #define IOP_FASTPERM	0x0001
@@ -580,6 +618,16 @@ struct inode {
 		struct rcu_head		i_rcu;
 	};
 	u64			i_version;
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+	__u32			i_archive_bit;
+	struct mutex		i_syno_mutex;   /* i_archive_bit */
+#endif
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+	__u32			i_archive_version;
+#endif
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+	struct timespec		i_create_time;
+#endif
 	atomic_t		i_count;
 	atomic_t		i_dio_count;
 	atomic_t		i_writecount;
@@ -606,6 +654,9 @@ struct inode {
 #ifdef CONFIG_IMA
 	atomic_t		i_readcount; /* struct files open RO */
 #endif
+#ifdef CONFIG_SYNO_FS_WINACL
+	struct syno_acl		*i_syno_acl;
+#endif /* CONFIG_SYNO_FS_WINACL */
 	void			*i_private; /* fs or device private pointer */
 };
 
@@ -1165,7 +1216,6 @@ static inline void unlock_flocks(void)
 
 #endif /* !CONFIG_FILE_LOCKING */
 
-
 struct fasync_struct {
 	spinlock_t		fa_lock;
 	int			magic;
@@ -1310,6 +1360,16 @@ struct super_block {
 	char __rcu *s_options;
 	const struct dentry_operations *s_d_op; /* default d_op for dentries */
 
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+	/* We've not sure s_frozen is capable of out intention, thus we
+	 * create another to flag frozen stat. Awful... */
+	struct mutex s_archive_mutex;  /* protect frozen state, also version */
+	u32		s_archive_version;
+#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+	u32		s_archive_version1;
+#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
+#endif /* CONFIG_SYNO_FS_ARCHIVE_VERSION */
+
 	/*
 	 * Saved pool identifier for cleancache (-1 means none)
 	 */
@@ -1444,7 +1504,6 @@ static inline void sb_start_intwrite(struct super_block *sb)
 	__sb_start_write(sb, SB_FREEZE_FS, true);
 }
 
-
 extern bool inode_owner_or_capable(const struct inode *inode);
 
 /*
@@ -1543,9 +1602,16 @@ struct file_operations {
 	long (*fallocate)(struct file *file, int mode, loff_t offset,
 			  loff_t len);
 	int (*show_fdinfo)(struct seq_file *m, struct file *f);
+#ifdef CONFIG_SYNO_FS_RECVFILE
+	ssize_t (*syno_recvfile)(struct file *file, struct socket *sock,
+	                                              loff_t pos, size_t count, size_t * rbytes, size_t * wbytes);
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 };
 
 struct inode_operations {
+#ifdef CONFIG_SYNO_FS_STAT
+	int (*syno_getattr)(struct dentry *, struct kstat *, int flags);
+#endif
 	struct dentry * (*lookup) (struct inode *,struct dentry *, unsigned int);
 	void * (*follow_link) (struct dentry *, struct nameidata *);
 	int (*permission) (struct inode *, int);
@@ -1563,6 +1629,31 @@ struct inode_operations {
 	int (*mknod) (struct inode *,struct dentry *,umode_t,dev_t);
 	int (*rename) (struct inode *, struct dentry *,
 			struct inode *, struct dentry *);
+#ifdef CONFIG_SYNO_FS_WINACL
+	struct syno_acl * (*syno_acl_get)(struct inode *);
+	int (*syno_acl_set)(struct inode *, struct syno_acl *);
+	int (*syno_acl_xattr_get)(struct dentry *, int, void *, size_t);
+	int (*syno_permission)(struct dentry *, int);
+	int (*syno_exec_permission)(struct dentry *);
+	int (*syno_acl_access)(struct dentry *, int);
+	int (*syno_may_delete)(struct dentry *, struct inode *);
+	int (*syno_inode_change_ok)(struct dentry *, struct iattr *);
+	int (*syno_arbit_chg_ok)(struct dentry *, unsigned int cmd, int tag, int mask);
+	int (*syno_setattr_post)(struct dentry *, struct iattr *);
+	int (*syno_acl_init)(struct dentry *, struct inode *);
+	void (*syno_acl_to_mode)(struct dentry *, struct kstat *);
+#endif /* CONFIG_SYNO_FS_WINACL */
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+	int (*syno_get_archive_bit)(struct dentry *, unsigned int *);
+	int (*syno_set_archive_bit)(struct dentry *, unsigned int);
+#endif
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+	int (*syno_get_archive_ver)(struct dentry *, u32 *);
+	int (*syno_set_archive_ver)(struct dentry *, u32);
+#endif
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+	int (*syno_set_crtime)(struct dentry *, struct timespec *);
+#endif
 	int (*setattr) (struct dentry *, struct iattr *);
 	int (*getattr) (struct vfsmount *mnt, struct dentry *, struct kstat *);
 	int (*setxattr) (struct dentry *, const char *,const void *,size_t,int);
@@ -1590,6 +1681,14 @@ extern ssize_t vfs_writev(struct file *, const struct iovec __user *,
 		unsigned long, loff_t *);
 
 struct super_operations {
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+	int (*syno_get_sb_archive_ver)(struct super_block *sb, u32 *version);
+	int (*syno_set_sb_archive_ver)(struct super_block *sb, u32 version);
+#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+	int (*syno_get_sb_archive_ver1)(struct super_block *sb, u32 *version);
+	int (*syno_set_sb_archive_ver1)(struct super_block *sb, u32 version);
+#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
+#endif /* CONFIG_SYNO_FS_ARCHIVE_VERSION */
    	struct inode *(*alloc_inode)(struct super_block *sb);
 	void (*destroy_inode)(struct inode *);
 
@@ -1635,6 +1734,13 @@ struct super_operations {
 #define S_AUTOMOUNT	2048	/* Automount/referral quasi-directory */
 #define S_NOSEC		4096	/* no suid or xattr security attributes */
 
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+#define S_CREATE_TIME_CACHED 0x40000000
+#endif
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#define S_ARCHIVE_VERSION_CACHED 0x80000000
+#endif
+
 /*
  * Note that nosuid etc flags are inode-specific: setting some file-system
  * flags just means all the inodes inherit those flags by default. It might be
@@ -1671,7 +1777,9 @@ struct super_operations {
 #define IS_IMA(inode)		((inode)->i_flags & S_IMA)
 #define IS_AUTOMOUNT(inode)	((inode)->i_flags & S_AUTOMOUNT)
 #define IS_NOSEC(inode)		((inode)->i_flags & S_NOSEC)
-
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#define IS_ARCHIVE_VERSION_CACHED(inode) ((inode)->i_flags & S_ARCHIVE_VERSION_CACHED)
+#endif
 /*
  * Inode state bits.  Protected by inode->i_lock
  *
@@ -1824,6 +1932,9 @@ struct file_system_type {
 
 	struct lock_class_key i_lock_key;
 	struct lock_class_key i_mutex_key;
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+	struct lock_class_key i_syno_mutex_key;
+#endif
 	struct lock_class_key i_mutex_dir_key;
 };
 
@@ -2385,6 +2496,17 @@ extern int generic_file_remap_pages(struct vm_area_struct *, unsigned long addr,
 		unsigned long size, pgoff_t pgoff);
 extern int file_read_actor(read_descriptor_t * desc, struct page *page, unsigned long offset, unsigned long size);
 int generic_write_checks(struct file *file, loff_t *pos, size_t *count, int isblk);
+#ifdef CONFIG_SYNO_FS_RECVFILE
+/**
+* Description for page buffer in recvfile:
+* The max size of per receive file request is "128KB". If PAGE_SIZE is changed from 4K to 64K,
+* maximal number of pages shall change dynamically to keep consistent maximal size "128K".
+* 128K = 2^17 and PAGE_SIZE is determined by PAGE_SHIFT, so formula for max page is
+* "2^(17 - PAGE_SHIFT)".
+*/
+#define MAX_PAGES_PER_RECVFILE (1 << (17 - PAGE_SHIFT))
+extern int do_recvfile(struct file *, struct socket *, loff_t , size_t , size_t * , size_t *);
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 extern ssize_t generic_file_aio_read(struct kiocb *, const struct iovec *, unsigned long, loff_t);
 extern ssize_t __generic_file_aio_write(struct kiocb *, const struct iovec *, unsigned long,
 		loff_t *);
@@ -2449,6 +2571,9 @@ enum {
 
 	/* filesystem does not support filling holes */
 	DIO_SKIP_HOLES	= 0x02,
+#ifdef CONFIG_SYNO_BTRFS_FIX_ASYNC_DIRECT_IO_CSUM_FAILED
+	DIO_NO_ASYNC	= 0x04,
+#endif /* CONFIG_SYNO_BTRFS_FIX_ASYNC_DIRECT_IO_CSUM_FAILED */
 };
 
 void dio_end_io(struct bio *bio, int error);
@@ -2574,6 +2699,9 @@ extern int inode_change_ok(const struct inode *, struct iattr *);
 extern int inode_newsize_ok(const struct inode *, loff_t offset);
 extern void setattr_copy(struct inode *inode, const struct iattr *attr);
 
+#ifdef CONFIG_AUFS_FHSM
+extern int update_time(struct inode *, struct timespec *, int);
+#endif /* CONFIG_AUFS_FHSM */
 extern int file_update_time(struct file *file);
 
 extern int generic_show_options(struct seq_file *m, struct dentry *root);
@@ -2687,5 +2815,121 @@ static inline void inode_has_no_xattr(struct inode *inode)
 	if (!is_sxid(inode->i_mode) && (inode->i_sb->s_flags & MS_NOSEC))
 		inode->i_flags |= S_NOSEC;
 }
+
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#define UTF16_UPCASE_TABLE_SIZE 	0x10000		/* 64k chars */
+#define UNICODE_UTF16_BUFSIZE		4096		/* should be safe enough for namei */
+#define UNICODE_UTF8_BUFSIZE		8192
+int syno_utf8_strcmp(const u_int8_t *utf8str1,const u_int8_t *utf8str2,int len_utf8_str1, int len_utf8_str2, u_int16_t *upcasetable);
+int syno_utf8_toupper(u_int8_t *to,const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable);
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+static inline int syno_op_get_archive_bit(struct dentry *dentry, unsigned int *pArbit)
+{
+	int err = 0;
+	struct inode *inode = dentry->d_inode;
+
+	if (inode->i_op->syno_get_archive_bit) {
+		err = inode->i_op->syno_get_archive_bit(dentry, pArbit);
+		if (-ENODATA == err) {
+			err = 0;
+			*pArbit = 0;
+		}
+	} else {
+		*pArbit = inode->i_archive_bit;
+	}
+
+	return err;
+}
+
+static inline int syno_op_set_archive_bit_nolock(struct dentry *dentry, unsigned int arbit)
+{
+	int err = 0;
+	struct inode *inode = dentry->d_inode;
+
+	if (inode->i_op->syno_set_archive_bit) {
+		err = inode->i_op->syno_set_archive_bit(dentry, arbit);
+	} else {
+		inode->i_archive_bit = arbit;
+		mark_inode_dirty_sync(inode);
+	}
+
+	return err;
+}
+
+static inline int syno_op_set_archive_bit(struct dentry *dentry, unsigned int arbit)
+{
+	int err = 0;
+	struct inode *inode = dentry->d_inode;
+
+	mutex_lock(&inode->i_syno_mutex);
+	err = syno_op_set_archive_bit_nolock(dentry, arbit);
+	mutex_unlock(&inode->i_syno_mutex);
+	return err;
+}
+#if defined(CONFIG_SYNO_FS_WINACL)
+#define IS_SYNOACL_SUPERUSER() (0 == current_fsuid())
+
+static inline int is_syno_arbit_enable(struct inode *inode, struct dentry * dentry, unsigned int arbit)
+{
+	if (inode->i_op->syno_get_archive_bit) {
+		unsigned int tmp = 0;
+		int err = inode->i_op->syno_get_archive_bit(dentry, &tmp);
+
+		if (!err && (arbit & tmp)) {
+			return 1;
+		}
+		if (-EOPNOTSUPP != err){ //err or arbit not enabled
+			return 0;
+		}
+	}
+
+	if (inode->i_archive_bit & arbit) {
+		return 1;
+	}
+	return 0;
+}
+
+#define IS_INODE_SYNOACL(inode, dentry)		is_syno_arbit_enable(inode, dentry, S2_SYNO_ACL_SUPPORT)
+#define IS_SMB_READONLY(dentry)			is_syno_arbit_enable(dentry->d_inode, dentry, S2_SMB_READONLY)
+#define IS_SYNOACL_INHERIT(dentry)		is_syno_arbit_enable(dentry->d_inode, dentry, S2_SYNO_ACL_INHERIT)
+#define IS_SYNOACL_EXIST(dentry)		is_syno_arbit_enable(dentry->d_inode, dentry, S2_SYNO_ACL_EXIST)
+#define HAS_SYNOACL(dentry)			is_syno_arbit_enable(dentry->d_inode, dentry, (S2_SYNO_ACL_EXIST | S2_SYNO_ACL_INHERIT))
+#define IS_SYNOACL_OWNER_IS_GROUP(dentry)	is_syno_arbit_enable(dentry->d_inode, dentry, S2_SYNO_ACL_IS_OWNER_GROUP)
+
+#define IS_FS_SYNOACL(inode)			__IS_FLG(inode, MS_SYNOACL)
+#define IS_SYNOACL(dentry)			(IS_INODE_SYNOACL(dentry->d_inode, dentry) && IS_FS_SYNOACL(dentry->d_inode))
+#define IS_SYNOACL_INODE(inode, dentry)		(IS_INODE_SYNOACL(inode, dentry) && IS_FS_SYNOACL(inode))
+
+#define is_synoacl_owner(dentry)		IS_SYNOACL_OWNER_IS_GROUP(dentry)?in_group_p(dentry->d_inode->i_gid):(dentry->d_inode->i_uid == current_fsuid())
+#define is_synoacl_owner_or_capable(dentry)	(is_synoacl_owner(dentry) || capable(CAP_FOWNER))
+#endif /* CONFIG_SYNO_FS_WINACL */
+
+#endif /* CONFIG_SYNO_FS_ARCHIVE_BIT */
+
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+static inline int syno_op_set_crtime(struct dentry *dentry, struct timespec *time)
+{
+	int error = 0;
+	struct inode *inode = dentry->d_inode;
+
+	mutex_lock(&inode->i_mutex);
+
+	if (inode->i_op->syno_set_crtime) {
+		error = inode->i_op->syno_set_crtime(dentry, time);
+	} else {
+		inode->i_create_time = timespec_trunc(*time, inode->i_sb->s_time_gran);
+		mark_inode_dirty(inode);
+	}
+
+	mutex_unlock(&inode->i_mutex);
+	return error;
+}
+#endif /* CONFIG_SYNO_FS_CREATE_TIME */
+
+#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+#define SYNO_MOUNT_PATH_LEN 128
+#endif
 
 #endif /* _LINUX_FS_H */

@@ -396,6 +396,9 @@ int security_path_rmdir(struct path *dir, struct dentry *dentry)
 		return 0;
 	return security_ops->path_rmdir(dir, dentry);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(security_path_rmdir);
+#endif /* CONFIG_AUFS_FHSM */
 
 int security_path_unlink(struct path *dir, struct dentry *dentry)
 {
@@ -412,6 +415,9 @@ int security_path_symlink(struct path *dir, struct dentry *dentry,
 		return 0;
 	return security_ops->path_symlink(dir, dentry, old_name);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(security_path_symlink);
+#endif /* CONFIG_AUFS_FHSM */
 
 int security_path_link(struct dentry *old_dentry, struct path *new_dir,
 		       struct dentry *new_dentry)
@@ -420,7 +426,9 @@ int security_path_link(struct dentry *old_dentry, struct path *new_dir,
 		return 0;
 	return security_ops->path_link(old_dentry, new_dir, new_dentry);
 }
-
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(security_path_link);
+#endif /* CONFIG_AUFS_FHSM */
 int security_path_rename(struct path *old_dir, struct dentry *old_dentry,
 			 struct path *new_dir, struct dentry *new_dentry)
 {
@@ -438,6 +446,9 @@ int security_path_truncate(struct path *path)
 		return 0;
 	return security_ops->path_truncate(path);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(security_path_truncate);
+#endif /* CONFIG_AUFS_FHSM */
 
 int security_path_chmod(struct path *path, umode_t mode)
 {
@@ -445,6 +456,9 @@ int security_path_chmod(struct path *path, umode_t mode)
 		return 0;
 	return security_ops->path_chmod(path, mode);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(security_path_chmod);
+#endif /* CONFIG_AUFS_FHSM */
 
 int security_path_chown(struct path *path, kuid_t uid, kgid_t gid)
 {
@@ -452,6 +466,9 @@ int security_path_chown(struct path *path, kuid_t uid, kgid_t gid)
 		return 0;
 	return security_ops->path_chown(path, uid, gid);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(security_path_chown);
+#endif /* CONFIG_AUFS_FHSM */
 
 int security_path_chroot(struct path *path)
 {
@@ -528,6 +545,9 @@ int security_inode_readlink(struct dentry *dentry)
 		return 0;
 	return security_ops->inode_readlink(dentry);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(security_inode_readlink);
+#endif /* CONFIG_AUFS_FHSM */
 
 int security_inode_follow_link(struct dentry *dentry, struct nameidata *nd)
 {
@@ -542,6 +562,9 @@ int security_inode_permission(struct inode *inode, int mask)
 		return 0;
 	return security_ops->inode_permission(inode, mask);
 }
+#if defined(CONFIG_SYNO_FS_WINACL) || defined(CONFIG_AUFS_FHSM)
+EXPORT_SYMBOL(security_inode_permission);
+#endif /* CONFIG_SYNO_FS_WINACL || CONFIG_AUFS_FHSM*/
 
 int security_inode_setattr(struct dentry *dentry, struct iattr *attr)
 {
@@ -663,6 +686,9 @@ int security_file_permission(struct file *file, int mask)
 
 	return fsnotify_perm(file, mask);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(security_file_permission);
+#endif /* CONFIG_AUFS_FHSM */
 
 int security_file_alloc(struct file *file)
 {
@@ -723,6 +749,9 @@ int security_mmap_file(struct file *file, unsigned long prot,
 		return ret;
 	return ima_file_mmap(file, prot);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(security_mmap_file);
+#endif /* CONFIG_AUFS_FHSM */
 
 int security_mmap_addr(unsigned long addr)
 {

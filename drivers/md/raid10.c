@@ -97,12 +97,39 @@ static int max_queued_requests = 1024;
 
 static void allow_barrier(struct r10conf *conf);
 static void lower_barrier(struct r10conf *conf);
+
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+static unsigned char
+IsDiskErrorSet(struct mddev *mddev)
+{
+	int i;
+	unsigned char res = 0;
+	struct r10conf *conf = mddev->private;
+	struct md_rdev *rdev_tmp = NULL;
+
+	for (i = 0; i < conf->geo.raid_disks; i++) {
+		rdev_tmp = conf->mirrors[i].rdev;
+		if (rdev_tmp && test_bit(DiskError, &rdev_tmp->flags)) {
+			res = 1;
+			goto END;
+		}
+	}
+END:
+	return res;
+}
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+
 static int enough(struct r10conf *conf, int ignore);
+static int _enough(struct r10conf *conf, int previous, int ignore);
 static sector_t reshape_request(struct mddev *mddev, sector_t sector_nr,
 				int *skipped);
 static void reshape_request_write(struct mddev *mddev, struct r10bio *r10_bio);
 static void end_reshape_write(struct bio *bio, int error);
 static void end_reshape(struct r10conf *conf);
+
+#if defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY)
+static int blRaid10Enough(struct r10conf *conf, struct md_rdev *rdev);
+#endif /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
 
 static void * r10bio_pool_alloc(gfp_t gfp_flags, void *data)
 {
@@ -366,7 +393,6 @@ static void raid10_end_read_request(struct bio *bio, int error)
 	struct md_rdev *rdev;
 	struct r10conf *conf = r10_bio->mddev->private;
 
-
 	slot = r10_bio->read_slot;
 	dev = r10_bio->devs[slot].devnum;
 	rdev = r10_bio->devs[slot].rdev;
@@ -374,6 +400,13 @@ static void raid10_end_read_request(struct bio *bio, int error)
 	 * this branch is our 'one mirror IO has finished' event handler:
 	 */
 	update_head_pos(slot, r10_bio);
+
+#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
+	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
+		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__, __FUNCTION__, __LINE__);
+		SynoAutoRemapReport(conf->mddev, r10_bio->sector, conf->mirrors[dev].rdev->bdev);
+	}
+#endif
 
 	if (uptodate) {
 		/*
@@ -394,10 +427,39 @@ static void raid10_end_read_request(struct bio *bio, int error)
 		 */
 		unsigned long flags;
 		spin_lock_irqsave(&conf->device_lock, flags);
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+		if (!blRaid10Enough(conf, conf->mirrors[dev].rdev))
+#else /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 		if (!enough(conf, rdev->raid_disk))
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUB_NOTIFY */
 			uptodate = 1;
 		spin_unlock_irqrestore(&conf->device_lock, flags);
+
+#ifdef CONFIG_SYNO_MD_SECTOR_STATUS_REPORT
+		if (!IsDeviceDisappear(conf->mirrors[dev].rdev->bdev)) {
+#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
+			if (bio_flagged(bio, BIO_AUTO_REMAP)) {
+				SynoReportBadSector(bio->bi_sector, READ,
+								conf->mddev->md_minor, conf->mirrors[dev].rdev->bdev, __FUNCTION__);
+			}
+#else /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
+			SynoReportBadSector(bio->bi_sector, READ,
+								conf->mddev->md_minor, conf->mirrors[dev].rdev->bdev, __FUNCTION__);
+#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
+		}
+#endif /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
+
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+		/*
+		 * If this rdev is the last drive,
+		 * then this raid10 is crashed because there is no any chance to retry.
+		 */
+		if (uptodate) {
+			md_error(r10_bio->mddev, conf->mirrors[dev].rdev);
+		}
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
 	}
+
 	if (uptodate) {
 		raid_end_bio_io(r10_bio);
 		rdev_dec_pending(rdev, conf->mddev);
@@ -470,6 +532,12 @@ static void raid10_end_write_request(struct bio *bio, int error)
 			 */
 			md_error(rdev->mddev, rdev);
 		else {
+#ifdef CONFIG_SYNO_MD_SECTOR_STATUS_REPORT
+			if (!IsDeviceDisappear(conf->mirrors[dev].rdev->bdev)) {
+				SynoReportBadSector(bio->bi_sector, WRITE, conf->mddev->md_minor,
+									conf->mirrors[dev].rdev->bdev, __FUNCTION__);
+			}
+#endif /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
 			set_bit(WriteErrorSeen,	&rdev->flags);
 			if (!test_and_set_bit(WantReplacement, &rdev->flags))
 				set_bit(MD_RECOVERY_NEEDED,
@@ -1181,6 +1249,17 @@ static void make_request(struct mddev *mddev, struct bio * bio)
 		return;
 	}
 
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+	if (mddev->nodev_and_crashed) {
+#else /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+	if (!blRaid10Enough(conf, NULL)) {
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+		bio_endio(bio, 0);
+		return;
+	}
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+
 	/* If this request crosses a chunk boundary, we need to
 	 * split it.  This will only happen for 1 PAGE (or less) requests.
 	 */
@@ -1621,9 +1700,15 @@ static void status(struct seq_file *seq, struct mddev *mddev)
 	seq_printf(seq, " [%d/%d] [", conf->geo.raid_disks,
 					conf->geo.raid_disks - mddev->degraded);
 	for (i = 0; i < conf->geo.raid_disks; i++)
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+		seq_printf(seq, "%s",
+				   conf->mirrors[i].rdev && test_bit(In_sync, &conf->mirrors[i].rdev->flags) ?
+				   (test_bit(DiskError, &conf->mirrors[i].rdev->flags) ?  "E" : "U") : "_");
+#else /* CONFIG_SYNO_MD_STATUS_DISKERROR */
 		seq_printf(seq, "%s",
 			      conf->mirrors[i].rdev &&
 			      test_bit(In_sync, &conf->mirrors[i].rdev->flags) ? "U" : "_");
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
 	seq_printf(seq, "]");
 }
 
@@ -1632,37 +1717,315 @@ static void status(struct seq_file *seq, struct mddev *mddev)
  * Don't consider the device numbered 'ignore'
  * as we might be about to remove it.
  */
-static int _enough(struct r10conf *conf, struct geom *geo, int ignore)
+static int _enough(struct r10conf *conf, int previous, int ignore)
 {
 	int first = 0;
+	int has_enough = 0;
+	int disks, ncopies;
+	if (previous) {
+		disks = conf->prev.raid_disks;
+		ncopies = conf->prev.near_copies;
+	} else {
+		disks = conf->geo.raid_disks;
+		ncopies = conf->geo.near_copies;
+	}
 
+	rcu_read_lock();
 	do {
 		int n = conf->copies;
 		int cnt = 0;
 		int this = first;
 		while (n--) {
-			if (conf->mirrors[this].rdev &&
-			    this != ignore)
+			struct md_rdev *rdev;
+			if (this != ignore &&
+			    (rdev = rcu_dereference(conf->mirrors[this].rdev)) &&
+			    test_bit(In_sync, &rdev->flags))
 				cnt++;
-			this = (this+1) % geo->raid_disks;
+			this = (this+1) % disks;
 		}
 		if (cnt == 0)
-			return 0;
-		first = (first + geo->near_copies) % geo->raid_disks;
+			goto out;
+		first = (first + ncopies) % disks;
 	} while (first != 0);
-	return 1;
+	has_enough = 1;
+out:
+	rcu_read_unlock();
+	return has_enough;
 }
 
 static int enough(struct r10conf *conf, int ignore)
 {
-	return _enough(conf, &conf->geo, ignore) &&
-		_enough(conf, &conf->prev, ignore);
+	/* when calling 'enough', both 'prev' and 'geo' must
+	 * be stable.
+	 * This is ensured if ->reconfig_mutex or ->device_lock
+	 * is held.
+	 */
+	return _enough(conf, 0, ignore) &&
+		_enough(conf, 1, ignore);
 }
 
+#if defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY)
+#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
+static inline void SynoSetRdevAutoRemap(struct mddev *mddev)
+{
+	struct r10conf *conf = mddev->private;
+	struct geom* geo = &conf->geo;
+	struct md_rdev *rdev;
+	char b[BDEVNAME_SIZE];
+	int rdev_idx = 0;
+
+	if (1 >= geo->near_copies || (geo->raid_disks % geo->near_copies)) {
+		printk("md: %s: not a standard RAID 10, does not support auto remap mode", mdname(mddev));
+		return;
+	}
+
+	/* reset all rdev to auto_remap = MD_AUTO_REMAP_MODE_FORCE_OFF */
+	rdev_for_each(rdev, mddev) {
+		RaidRemapModeSet(rdev->bdev, MD_AUTO_REMAP_MODE_FORCE_OFF);
+	}
+
+	do {
+		int num_data_copies = conf->copies;
+		int survival_cnt = 0;
+		int last_survival_rdev = -1;
+
+		/* check the group of rdevs that has same data chunck */
+		while (num_data_copies--) {
+			if (conf->mirrors[rdev_idx].rdev &&
+				!test_bit(Faulty, &conf->mirrors[rdev_idx].rdev->flags) &&
+				test_bit(In_sync, &conf->mirrors[rdev_idx].rdev->flags)) {
+				survival_cnt++;
+				last_survival_rdev = rdev_idx;
+			}
+			rdev_idx = (rdev_idx + 1) % geo->raid_disks;
+		}
+
+		/* need to set auto_remap = 1 of the last survival rdev in this group */
+		if (1 == survival_cnt) {
+			RaidRemapModeSet(conf->mirrors[last_survival_rdev].rdev->bdev, MD_AUTO_REMAP_MODE_FORCE_ON);
+		}
+	} while (0 != rdev_idx);
+
+	/* print rdev auto_remap mode info */
+	rdev_for_each(rdev, mddev) {
+		if (rdev && rdev->bdev && rdev->bdev->bd_part) {
+			bdevname(rdev->bdev, b);
+			printk("md: %s: set %s to auto_remap [%d]\n", mdname(mddev), b, rdev->bdev->bd_part->auto_remap);
+		}
+	}
+}
+
+static inline unsigned char SynoIsRaidReachMaxDegrade(struct mddev *mddev)
+{
+	struct r10conf *conf = mddev->private;
+	int first = 0;
+	int first_orig = first;
+	int blStandardRaid10 = 0;
+	int ret = 0;
+	struct geom* geo = &conf->geo;
+
+	/* Near copies > 1 and the raid member can be divided by near copies */
+	if (1 < geo->near_copies && !(geo->raid_disks % geo->near_copies)) {
+		blStandardRaid10 = 1;
+	}
+
+	do {
+		int n = conf->copies;
+		int cnt = 0;
+
+		while (n--) {
+			if (conf->mirrors[first].rdev &&
+				!test_bit(Faulty, &conf->mirrors[first].rdev->flags) &&
+				test_bit(In_sync, &conf->mirrors[first].rdev->flags)) {
+				cnt++;
+			}
+			first = (first+1) % geo->raid_disks;
+		}
+
+		if (cnt <= 1) {
+			ret = 1;
+			goto END;
+		}
+
+		if (!blStandardRaid10) {
+			first_orig = (first_orig+1) % geo->raid_disks;
+			first = first_orig;
+		}
+	} while (first != 0);
+
+END:
+	return ret;
+}
+#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
+
+static int
+blRaid10Enough(struct r10conf *conf,
+			   struct md_rdev *rdev)
+{
+	int first = 0;
+	int first_orig = first;
+	int blStandardRaid10 = 0;
+	int ret = 0;
+	struct geom* geo = &conf->geo;
+	/* Near copies > 1 and the raid member can be divided by near copies */
+	if (1 < geo->near_copies && !(geo->raid_disks % geo->near_copies)) {
+		blStandardRaid10 = 1;
+	}
+
+	do {
+		int n = conf->copies;
+		int cnt = 0;
+
+		while (n--) {
+			if (conf->mirrors[first].rdev &&
+				!test_bit(Faulty, &conf->mirrors[first].rdev->flags)&&
+				test_bit(In_sync, &conf->mirrors[first].rdev->flags)) {
+				if (!(rdev && conf->mirrors[first].rdev == rdev)) {
+					cnt++;
+				}
+			}
+			first = (first+1) % geo->raid_disks;
+		}
+
+		if (cnt == 0) {
+			goto END;
+		}
+
+		if (!blStandardRaid10) {
+			first_orig = (first_orig+1) % geo->raid_disks;
+			first = first_orig;
+		}
+	} while (first != 0);
+
+	ret = 1;
+END:
+	return ret;
+}
+#endif /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
+
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+static void
+syno_error_common(struct mddev *mddev,
+				  struct md_rdev *rdev)
+{
+	char b[BDEVNAME_SIZE];
+	struct r10conf *conf = mddev->private;
+
+	if (test_and_clear_bit(In_sync, &rdev->flags)) {
+		unsigned long flags;
+		spin_lock_irqsave(&conf->device_lock, flags);
+		mddev->degraded++;
+
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+		if (!blRaid10Enough(conf, rdev)) {
+			mddev->nodev_and_crashed = 1;
+		}
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+		clear_bit(DiskError, &rdev->flags);
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+		set_bit(Faulty, &rdev->flags);
+		spin_unlock_irqrestore(&conf->device_lock, flags);
+		/*
+		 * if recovery is running, make sure it aborts.
+		 */
+		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
+	} else
+		set_bit(Faulty, &rdev->flags);
+	set_bit(MD_CHANGE_DEVS, &mddev->flags);
+	printk(KERN_ALERT "raid10: Disk failure on %s, disabling device. \n"
+		"	Operation continuing on %d devices\n",
+		bdevname(rdev->bdev,b), conf->geo.raid_disks - mddev->degraded);
+}
+
+static void
+syno_error_for_hotplug(struct mddev *mddev,
+					   struct md_rdev *rdev)
+{
+	char b1[BDEVNAME_SIZE], b2[BDEVNAME_SIZE];
+	struct r10conf *conf = mddev->private;
+	struct md_rdev *rdev_tmp;
+
+	/* remove other disk which are buiding parity currently,
+	 * so the disk is released. And user space can do something on this member.
+	 */
+	if (test_bit(In_sync, &rdev->flags)
+	    && blRaid10Enough(conf, NULL) &&
+		!blRaid10Enough(conf, rdev)) {
+		list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
+			if(!test_bit(Faulty, &rdev_tmp->flags) &&
+			   !test_bit(In_sync, &rdev_tmp->flags) &&
+			   0 != strcmp(bdevname(rdev_tmp->bdev, b1), bdevname(rdev->bdev, b2))) {
+				printk("[%s] %d: %s is being to unplug, but %s is sync now, disable both\n",
+					   __FILE__, __LINE__, bdevname(rdev->bdev, b2), bdevname(rdev_tmp->bdev, b1));
+				SYNORaidRdevUnplug(mddev, rdev_tmp);
+			}
+		}
+	}
+
+	syno_error_common(mddev, rdev);
+}
+
+/**
+ * copy it from original error(...), and modify
+ * the case: when there is only one disk,
+ * and it encounter a read/write fail.
+ *
+ * @param mddev passing from md.c
+ * @param rdev passing from md.c
+ */
+static
+void syno_error_for_internal(struct mddev *mddev,
+							 struct md_rdev *rdev)
+{
+	struct r10conf *conf = mddev->private;
+	struct md_rdev *rdev_tmp;
+	char b1[BDEVNAME_SIZE], b2[BDEVNAME_SIZE];
+
+	if (test_bit(In_sync, &rdev->flags)
+	    && blRaid10Enough(conf, NULL) &&
+		!blRaid10Enough(conf, rdev)) {
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+			/**
+			 * set it to DiskError, scemd would remount read only as soon as
+			 * possible. File system would also remount read only when it
+			 * encounter a write request.
+			 */
+			if (!test_bit(DiskError, &rdev->flags)) {
+				set_bit(DiskError, &rdev->flags);
+				set_bit(MD_CHANGE_DEVS, &mddev->flags);
+			}
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+			/* remove other disk which are buiding parity currently,
+			 * so the disk is released. And user space can do something on this member.
+			 */
+			list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
+				if(!test_bit(Faulty, &rdev_tmp->flags) &&
+				   !test_bit(In_sync, &rdev_tmp->flags) &&
+				   0 != strcmp(bdevname(rdev_tmp->bdev, b1), bdevname(rdev->bdev, b2))) {
+					printk("[%s] %d: %s is faulty, but %s is sync now, disable both\n",
+						   __FILE__, __LINE__, bdevname(rdev->bdev, b2), bdevname(rdev_tmp->bdev, b1));
+					SYNORaidRdevUnplug(mddev, rdev_tmp);
+					set_bit(MD_RECOVERY_INTR, &mddev->recovery);
+				}
+			}
+
+			/*
+			 * Don't fail the drive, act as though we were just a
+			 * normal single drive
+			 */
+			return;
+	}
+
+	syno_error_common(mddev, rdev);
+}
+
+#else /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 static void error(struct mddev *mddev, struct md_rdev *rdev)
 {
 	char b[BDEVNAME_SIZE];
 	struct r10conf *conf = mddev->private;
+	unsigned long flags;
 
 	/*
 	 * If it is not operational, then we have already marked it as dead
@@ -1670,18 +2033,18 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 	 * next level up know.
 	 * else mark the drive as failed
 	 */
+	spin_lock_irqsave(&conf->device_lock, flags);
 	if (test_bit(In_sync, &rdev->flags)
-	    && !enough(conf, rdev->raid_disk))
+	    && !enough(conf, rdev->raid_disk)) {
 		/*
 		 * Don't fail the drive, just return an IO error.
 		 */
-		return;
-	if (test_and_clear_bit(In_sync, &rdev->flags)) {
-		unsigned long flags;
-		spin_lock_irqsave(&conf->device_lock, flags);
-		mddev->degraded++;
 		spin_unlock_irqrestore(&conf->device_lock, flags);
-		/*
+		return;
+	}
+	if (test_and_clear_bit(In_sync, &rdev->flags)) {
+		mddev->degraded++;
+			/*
 		 * if recovery is running, make sure it aborts.
 		 */
 		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
@@ -1689,12 +2052,14 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 	set_bit(Blocked, &rdev->flags);
 	set_bit(Faulty, &rdev->flags);
 	set_bit(MD_CHANGE_DEVS, &mddev->flags);
+	spin_unlock_irqrestore(&conf->device_lock, flags);
 	printk(KERN_ALERT
 	       "md/raid10:%s: Disk failure on %s, disabling device.\n"
 	       "md/raid10:%s: Operation continuing on %d devices.\n",
 	       mdname(mddev), bdevname(rdev->bdev, b),
 	       mdname(mddev), conf->geo.raid_disks - mddev->degraded);
 }
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 
 static void print_conf(struct r10conf *conf)
 {
@@ -1737,6 +2102,12 @@ static int raid10_spare_active(struct mddev *mddev)
 	int count = 0;
 	unsigned long flags;
 
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+	if (IsDiskErrorSet(mddev)) {
+		return 0;
+	}
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+
 	/*
 	 * Find all non-in_sync disks within the RAID10 configuration
 	 * and mark them in_sync
@@ -1777,7 +2148,6 @@ static int raid10_spare_active(struct mddev *mddev)
 	return count;
 }
 
-
 static int raid10_add_disk(struct mddev *mddev, struct md_rdev *rdev)
 {
 	struct r10conf *conf = mddev->private;
@@ -1787,12 +2157,22 @@ static int raid10_add_disk(struct mddev *mddev, struct md_rdev *rdev)
 	int last = conf->geo.raid_disks - 1;
 	struct request_queue *q = bdev_get_queue(rdev->bdev);
 
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+	if (IsDiskErrorSet(mddev)) {
+		return -EINVAL;
+	}
+
+	if (!blRaid10Enough(conf, NULL)) {
+		return -EINVAL;
+	}
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+
 	if (mddev->recovery_cp < MaxSector)
 		/* only hot-add to in-sync arrays, as recovery is
 		 * very different from resync
 		 */
 		return -EBUSY;
-	if (rdev->saved_raid_disk < 0 && !_enough(conf, &conf->prev, -1))
+	if (rdev->saved_raid_disk < 0 && !_enough(conf, 1, -1))
 		return -EINVAL;
 
 	if (rdev->raid_disk >= 0)
@@ -1820,15 +2200,17 @@ static int raid10_add_disk(struct mddev *mddev, struct md_rdev *rdev)
 			set_bit(Replacement, &rdev->flags);
 			rdev->raid_disk = mirror;
 			err = 0;
-			disk_stack_limits(mddev->gendisk, rdev->bdev,
-					  rdev->data_offset << 9);
+			if (mddev->gendisk)
+				disk_stack_limits(mddev->gendisk, rdev->bdev,
+						  rdev->data_offset << 9);
 			conf->fullsync = 1;
 			rcu_assign_pointer(p->replacement, rdev);
 			break;
 		}
 
-		disk_stack_limits(mddev->gendisk, rdev->bdev,
-				  rdev->data_offset << 9);
+		if (mddev->gendisk)
+			disk_stack_limits(mddev->gendisk, rdev->bdev,
+					  rdev->data_offset << 9);
 
 		p->head_position = 0;
 		p->recovery_disabled = mddev->recovery_disabled - 1;
@@ -1922,7 +2304,6 @@ abort:
 	return err;
 }
 
-
 static void end_sync_read(struct bio *bio, int error)
 {
 	struct r10bio *r10_bio = bio->bi_private;
@@ -1935,14 +2316,31 @@ static void end_sync_read(struct bio *bio, int error)
 	} else
 		d = find_bio_disk(conf, r10_bio, bio, NULL, NULL);
 
+#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
+	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
+		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__, __FUNCTION__, __LINE__);
+		SynoAutoRemapReport(conf->mddev, r10_bio->sector, conf->mirrors[d].rdev->bdev);
+	}
+#endif
 	if (test_bit(BIO_UPTODATE, &bio->bi_flags))
 		set_bit(R10BIO_Uptodate, &r10_bio->state);
 	else
+#ifdef CONFIG_SYNO_MD_SECTOR_STATUS_REPORT
+	{
+		if (!IsDeviceDisappear(conf->mirrors[d].rdev->bdev)) {
+			SynoReportBadSector(bio->bi_sector, READ,
+					conf->mddev->md_minor, conf->mirrors[d].rdev->bdev, __FUNCTION__);
+		}
+		atomic_add(r10_bio->sectors,
+				&conf->mirrors[d].rdev->corrected_errors);
+	}
+#else /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
 		/* The write handler will notice the lack of
 		 * R10BIO_Uptodate and record any errors etc
 		 */
 		atomic_add(r10_bio->sectors,
 			   &conf->mirrors[d].rdev->corrected_errors);
+#endif /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
 
 	/* for reconstruct, we always reschedule after a read.
 	 * for resync, only after all reads
@@ -2007,11 +2405,49 @@ static void end_sync_write(struct bio *bio, int error)
 		if (repl)
 			md_error(mddev, rdev);
 		else {
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+			if (IsDeviceDisappear(rdev->bdev)) {
+				set_bit(WriteErrorSeen, &rdev->flags);
+				if (!test_and_set_bit(WantReplacement, &rdev->flags))
+					set_bit(MD_RECOVERY_NEEDED,
+						&rdev->mddev->recovery);
+				set_bit(R10BIO_WriteError, &r10_bio->state);
+			} else {
+#ifdef CONFIG_SYNO_MD_SECTOR_STATUS_REPORT
+				if (-EIO == error) {
+					/**
+					 * A really bad I/O
+					 */
+					SynoReportBadSector(bio->bi_sector, WRITE,
+										conf->mddev->md_minor, conf->mirrors[d].rdev->bdev, __FUNCTION__);
+					set_bit(WriteErrorSeen, &rdev->flags);
+					if (!test_and_set_bit(WantReplacement, &rdev->flags))
+						set_bit(MD_RECOVERY_NEEDED,
+							&rdev->mddev->recovery);
+					set_bit(R10BIO_WriteError, &r10_bio->state);
+				} else if (-EEXIST == error) {
+					/*
+					 * When the raid is not crashed -> the member can rebuild by others.
+					 * So we don't call md_error.
+					 *
+					 * when there is no device can read to write this device
+					 * then we unplug it rather than let it faulty. This process
+					 * is done by hotplug engine automatically.
+					 *
+					 * So we don't need to call md_error in any case.
+					 */
+				} else {
+					;
+				}
+#endif /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
+			}
+#else /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
 			set_bit(WriteErrorSeen, &rdev->flags);
 			if (!test_and_set_bit(WantReplacement, &rdev->flags))
 				set_bit(MD_RECOVERY_NEEDED,
 					&rdev->mddev->recovery);
 			set_bit(R10BIO_WriteError, &r10_bio->state);
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
 		}
 	} else if (is_badblock(rdev,
 			     r10_bio->devs[slot].addr,
@@ -2287,7 +2723,6 @@ static void recovery_request_write(struct mddev *mddev, struct r10bio *r10_bio)
 		generic_make_request(wbio2);
 	}
 }
-
 
 /*
  * Used by fix_read_error() to decay the per rdev read_errors.
@@ -2630,10 +3065,18 @@ static void handle_read_error(struct mddev *mddev, struct r10bio *r10_bio)
 	 * frozen.
 	 */
 	bio = r10_bio->devs[slot].bio;
+#ifdef CONFIG_SYNO_MD_FIX_ACCESS_RELEASED_DEVICE
+#else /* CONFIG_SYNO_MD_FIX_ACCESS_RELEASED_DEVICE */
 	bdevname(bio->bi_bdev, b);
+#endif /* CONFIG_SYNO_MD_FIX_ACCESS_RELEASED_DEVICE */
 	bio_put(bio);
 	r10_bio->devs[slot].bio = NULL;
 
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+	if (!rdev || IsDeviceDisappear(rdev->bdev)) {
+		syno_md_error(mddev, rdev);
+	} else
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
 	if (mddev->ro == 0) {
 		freeze_array(conf, 1);
 		fix_read_error(conf, mddev, r10_bio);
@@ -2646,10 +3089,25 @@ static void handle_read_error(struct mddev *mddev, struct r10bio *r10_bio)
 read_more:
 	rdev = read_balance(conf, r10_bio, &max_sectors);
 	if (rdev == NULL) {
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+		if (mddev->nodev_and_crashed) {
+			/* Oringinal raid10 didn't think about this */
+			printk(KERN_ALERT "md/raid10: no bdev: unrecoverable I/O"
+					" read error for block %llu\n",
+					(unsigned long long)r10_bio->sector);
+		} else
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#ifdef CONFIG_SYNO_MD_FIX_ACCESS_RELEASED_DEVICE
+		printk(KERN_ALERT "md/raid10:%s: unrecoverable I/O"
+		       " read error for block %llu\n",
+		       mdname(mddev),
+		       (unsigned long long)r10_bio->sector);
+#else /* CONFIG_SYNO_MD_FIX_ACCESS_RELEASED_DEVICE */
 		printk(KERN_ALERT "md/raid10:%s: %s: unrecoverable I/O"
 		       " read error for block %llu\n",
 		       mdname(mddev), b,
 		       (unsigned long long)r10_bio->sector);
+#endif /* CONFIG_SYNO_MD_FIX_ACCESS_RELEASED_DEVICE */
 		raid_end_bio_io(r10_bio);
 		return;
 	}
@@ -2732,6 +3190,11 @@ static void handle_write_completed(struct r10conf *conf, struct r10bio *r10_bio)
 					r10_bio->devs[m].addr,
 					r10_bio->sectors, 0);
 			} else {
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+				if (IsDeviceDisappear(rdev->bdev)) {
+					syno_md_error(conf->mddev, rdev);
+				} else
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
 				if (!rdev_set_badblocks(
 					    rdev,
 					    r10_bio->devs[m].addr,
@@ -2769,6 +3232,13 @@ static void handle_write_completed(struct r10conf *conf, struct r10bio *r10_bio)
 				rdev_dec_pending(rdev, conf->mddev);
 			} else if (bio != NULL &&
 				   !test_bit(BIO_UPTODATE, &bio->bi_flags)) {
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+				if (IsDeviceDisappear(rdev->bdev)) {
+					syno_md_error(conf->mddev, rdev);
+					set_bit(R10BIO_Degraded,
+						&r10_bio->state);
+				} else
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
 				if (!narrow_write_error(r10_bio, m)) {
 					md_error(conf->mddev, rdev);
 					set_bit(R10BIO_Degraded,
@@ -2847,7 +3317,6 @@ static void raid10d(struct md_thread *thread)
 	blk_finish_plug(&plug);
 }
 
-
 static int init_resync(struct r10conf *conf)
 {
 	int buffs;
@@ -2907,6 +3376,9 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr,
 	sector_t max_sector, nr_sectors;
 	int i;
 	int max_sync;
+#if defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY)
+	int blStopSync = 0;
+#endif /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
 	sector_t sync_blocks;
 	sector_t sectors_skipped = 0;
 	int chunks_skipped = 0;
@@ -2915,6 +3387,30 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr,
 	if (!conf->r10buf_pool)
 		if (init_resync(conf))
 			return 0;
+
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+	if (!blRaid10Enough(conf, NULL)) {
+		blStopSync = 1;
+	}
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+	if (IsDiskErrorSet(mddev))
+		blStopSync = 1;
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+
+#if defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY)
+	/**
+	 * when last one disk has bad sector or r/w error.
+	 * We just freeze any sync request. Because it is crashed now.
+	 */
+	if (blStopSync) {
+		*skipped = 1;
+		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
+		/* Stop infinity loop sync while creating. */
+		mddev->recovery_cp = MaxSector;
+	}
+#endif /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
 
 	/*
 	 * Allow skipping a full rebuild for incremental assembly
@@ -2936,7 +3432,11 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr,
 	if (test_bit(MD_RECOVERY_SYNC, &mddev->recovery) ||
 	    test_bit(MD_RECOVERY_RESHAPE, &mddev->recovery))
 		max_sector = mddev->resync_max_sectors;
+#if defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY)
+	if (sector_nr >= max_sector || *skipped == 1) {
+#else /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
 	if (sector_nr >= max_sector) {
+#endif /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
 		/* If we aborted, we need to abort the
 		 * sync on the 'current' bitmap chucks (there can
 		 * be several when recovering multiple devices).
@@ -3692,10 +4192,22 @@ static int run(struct mddev *mddev)
 						  mddev->queue);
 	}
 	/* need to check that every block has at least one working mirror */
+#if defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY)
+	/* Original enough is not right for offset and far layout. */
+	if (!blRaid10Enough(conf, NULL)) {
+#else /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
 	if (!enough(conf, -1)) {
+#endif /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+		mddev->nodev_and_crashed = 1;
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
 		printk(KERN_ERR "md/raid10:%s: not enough operational mirrors.\n",
 		       mdname(mddev));
+#ifdef CONFIG_SYNO_MD_STATUS_GET
+		// DS 2.2 #10254
+#else /* CONFIG_SYNO_MD_STATUS_GET */
 		goto out_free_conf;
+#endif /* CONFIG_SYNO_MD_STATUS_GET */
 	}
 
 	if (conf->reshape_progress != MaxSector) {
@@ -3764,7 +4276,6 @@ static int run(struct mddev *mddev)
 			mddev->queue->backing_dev_info.ra_pages = 2 * stripe;
 		blk_queue_merge_bvec(mddev->queue, raid10_mergeable_bvec);
 	}
-
 
 	if (md_integrity_register(mddev))
 		goto out_free_conf;
@@ -4557,7 +5068,6 @@ static void end_reshape(struct r10conf *conf)
 	conf->fullsync = 0;
 }
 
-
 static int handle_reshape_read_error(struct mddev *mddev,
 				     struct r10bio *r10_bio)
 {
@@ -4703,7 +5213,12 @@ static struct md_personality raid10_personality =
 	.run		= run,
 	.stop		= stop,
 	.status		= status,
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+	.error_handler	= syno_error_for_internal,
+	.syno_error_handler = syno_error_for_hotplug,
+#else /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 	.error_handler	= error,
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 	.hot_add_disk	= raid10_add_disk,
 	.hot_remove_disk= raid10_remove_disk,
 	.spare_active	= raid10_spare_active,
@@ -4711,6 +5226,10 @@ static struct md_personality raid10_personality =
 	.quiesce	= raid10_quiesce,
 	.size		= raid10_size,
 	.resize		= raid10_resize,
+#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
+	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
+	.syno_set_rdev_auto_remap = SynoSetRdevAutoRemap,
+#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
 	.takeover	= raid10_takeover,
 	.check_reshape	= raid10_check_reshape,
 	.start_reshape	= raid10_start_reshape,

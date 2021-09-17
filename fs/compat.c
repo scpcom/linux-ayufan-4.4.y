@@ -48,11 +48,23 @@
 #include <linux/slab.h>
 #include <linux/pagemap.h>
 #include <linux/aio.h>
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+#include <linux/mount.h>
+#endif
 
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
 #include <asm/ioctls.h>
 #include "internal.h"
+
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+#include <linux/synolib.h>
+extern int syno_hibernation_log_level;
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+
+#ifdef CONFIG_SYNO_FS_WINACL
+#include "synoacl_int.h"
+#endif /* CONFIG_SYNO_FS_WINACL */
 
 int compat_log = 1;
 
@@ -701,7 +713,6 @@ static void *do_ncp_super_data_conv(void *raw_data)
 	return raw_data;
 }
 
-
 struct compat_nfs_string {
 	compat_uint_t len;
 	compat_uptr_t data;
@@ -1073,6 +1084,12 @@ asmlinkage long compat_sys_getdents64(unsigned int fd,
  */
 COMPAT_SYSCALL_DEFINE3(open, const char __user *, filename, int, flags, umode_t, mode)
 {
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+        if(syno_hibernation_log_level > 0) {
+                syno_do_hibernation_filename_log(filename);
+        }
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+
 	return do_sys_open(AT_FDCWD, filename, flags, mode);
 }
 
@@ -1200,7 +1217,6 @@ int compat_set_fd_set(unsigned long nr, compat_ulong_t __user *ufdset,
 		return -EFAULT;
 	return 0;
 }
-
 
 /*
  * This is a virtual copy of sys_select from fs/select.c and probably
@@ -1463,3 +1479,102 @@ COMPAT_SYSCALL_DEFINE3(open_by_handle_at, int, mountdirfd,
 	return do_handle_open(mountdirfd, handle, flags);
 }
 #endif
+
+#ifdef CONFIG_SYNO_FS_RECVFILE
+COMPAT_SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, compat_size_t __user *, rwbytes32)
+{
+	int err = 0;
+	ssize_t ret;
+	size_t rwbytes64[2];
+	mm_segment_t oldfs = get_fs();
+	if (unlikely(get_user(rwbytes64[0], &rwbytes32[0])))
+		return -EFAULT;
+	if (unlikely(get_user(rwbytes64[1], &rwbytes32[1])))
+		return -EFAULT;
+
+	set_fs(KERNEL_DS);
+	/* The __user pointer cast is valid because of the set_fs() */
+	ret = sys_recvfile(fd, s, offset, nbytes, (size_t __user *)&rwbytes64);
+	set_fs(oldfs);
+
+	/* truncating is ok because it's a user address */
+
+	err = put_user((u32) rwbytes64[0], &rwbytes32[0]);
+	if (err) {
+		ret = err;
+	}
+	err = put_user((u32) rwbytes64[1], &rwbytes32[1]);
+	if (err) {
+		ret = err;
+	}
+
+	return ret;
+}
+#endif /* CONFIG_SYNO_FS_RECVFILE */
+
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+/**
+ * sys_SYNOUtime() is used to update create time.
+ *
+ * @param	filename	The file to be changed create time.
+ * 			times	Create time should be stored in
+ *				actime field.
+ * @return	0	success
+ *			!0	error
+ */
+COMPAT_SYSCALL_DEFINE2(SYNOUtime, const char __user *, filename, struct compat_timespec __user *, ctime)
+{
+	int error;
+	struct path path;
+	struct inode *inode = NULL;
+	compat_time_t tv_sec;
+	s32 tv_nsec;
+	struct timespec crtime;
+
+	if (!ctime) {
+		return -EINVAL;
+	}
+	error = get_user(tv_sec, &ctime->tv_sec);
+	if (error)
+		goto out;
+	error = get_user(tv_nsec, &ctime->tv_nsec);
+	if (error)
+		goto out;
+
+	crtime.tv_sec = tv_sec;
+	crtime.tv_nsec = tv_nsec;
+
+	error = user_path_at(AT_FDCWD, filename, LOOKUP_FOLLOW, &path);
+	if (error)
+		goto out;
+
+	error = mnt_want_write(path.mnt);
+	if (error)
+		goto dput_and_out;
+
+	inode = path.dentry->d_inode;
+	if (!inode_owner_or_capable(inode)) {
+#ifdef CONFIG_SYNO_FS_WINACL
+		if (IS_SYNOACL(path.dentry)) {
+			error = synoacl_op_perm(path.dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR);
+			if (error) 
+				goto drop_write;
+		} else {
+#endif /* CONFIG_SYNO_FS_WINACL */
+		error = -EPERM;
+		goto drop_write;
+#ifdef CONFIG_SYNO_FS_WINACL
+		}
+#endif
+	}
+
+	error = syno_op_set_crtime(path.dentry, &crtime);
+
+drop_write:
+	mnt_drop_write(path.mnt);
+dput_and_out:
+	path_put(&path);
+out:
+	return error;
+}
+#endif /* CONFIG_SYNO_FS_CREATE_TIME */

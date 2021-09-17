@@ -54,9 +54,7 @@ struct inodes_stat_t {
 	int dummy[5];		/* padding for sysctl ABI compatibility */
 };
 
-
 #define NR_FILE  8192	/* this can well be larger on a larger system */
-
 
 /*
  * These are the fs-independent mount-flags: up to 32 flags are supported
@@ -86,6 +84,9 @@ struct inodes_stat_t {
 #define MS_KERNMOUNT	(1<<22) /* this is a kern_mount call */
 #define MS_I_VERSION	(1<<23) /* Update inode I_version field */
 #define MS_STRICTATIME	(1<<24) /* Always perform atime updates */
+#ifdef CONFIG_SYNO_FS_WINACL  
+#define MS_SYNOACL	(1<<25)	/* Synology ACL */
+#endif /* CONFIG_SYNO_FS_WINACL */
 
 /* These sb flags are internal to the kernel */
 #define MS_NOSEC	(1<<28)
@@ -154,6 +155,18 @@ struct inodes_stat_t {
 #define FITHAW		_IOWR('X', 120, int)	/* Thaw */
 #define FITRIM		_IOWR('X', 121, struct fstrim_range)	/* Trim */
 
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#define FIGETVERSION			_IOWR('x', 122, unsigned int)	/* get syno archive version */
+#define FISETVERSION			_IOWR('x', 123, unsigned int)	/* set syno archive version */
+#define FIINCVERSION			_IO('x', 124)	/* increase syno archive version by 1 */
+#define FISETFILEVERSION		_IOWR('x', 125, unsigned int)	/* set file syno archive version */
+#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+#define FIGETBADVERSION			_IOWR('x', 126, unsigned int)	/* fix bad archive version */
+#define FICLEARBADVERSION		_IO('x', 127)	/* fix bad archive version */
+#define FISETBADVERSION			_IOWR('x', 128, unsigned int)	/* fix bad archive version */
+#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
+#endif /* CONFIG_SYNO_FS_ARCHIVE_VERSION */
+
 #define	FS_IOC_GETFLAGS			_IOR('f', 1, long)
 #define	FS_IOC_SETFLAGS			_IOW('f', 2, long)
 #define	FS_IOC_GETVERSION		_IOR('v', 1, long)
@@ -195,7 +208,6 @@ struct inodes_stat_t {
 
 #define FS_FL_USER_VISIBLE		0x0003DFFF /* User visible flags */
 #define FS_FL_USER_MODIFIABLE		0x000380FF /* User modifiable flags */
-
 
 #define SYNC_FILE_RANGE_WAIT_BEFORE	1
 #define SYNC_FILE_RANGE_WRITE		2

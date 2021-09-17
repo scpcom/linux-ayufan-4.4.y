@@ -146,6 +146,9 @@ struct snd_card {
 	struct snd_mixer_oss *mixer_oss;
 	int mixer_oss_change_count;
 #endif
+#if defined(CONFIG_SYNO_AUDIO_USE_EXTERNAL_SPEAKER)
+	unsigned int low_level_dev_id;
+#endif /*CONFIG_SYNO_AUDIO_USE_EXTERNAL_SPEAKER*/
 };
 
 #ifdef CONFIG_PM
@@ -414,7 +417,6 @@ static inline void _snd_printd(int level, const char *format, ...) {}
 __printf(1, 2)
 static inline void snd_printdd(const char *format, ...) {}
 #endif
-
 
 #define SNDRV_OSS_VERSION         ((3<<16)|(8<<8)|(1<<4)|(0))	/* 3.8.1a */
 

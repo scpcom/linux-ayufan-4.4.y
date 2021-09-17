@@ -13,7 +13,6 @@
 
 #include "scsi_priv.h"
 
-
 /*
  * scsi_dev_info_list: structure to hold black/white listed devices.
  */
@@ -31,7 +30,6 @@ struct scsi_dev_info_list_table {
 	const char *name;	/* name of list for /proc (NULL for global) */
 	int key;		/* unique numeric identifier */
 };
-
 
 static const char spaces[] = "                "; /* 16 of them */
 static unsigned scsi_default_dev_flags;
@@ -540,7 +538,6 @@ int scsi_get_device_flags(struct scsi_device *sdev,
 					   SCSI_DEVINFO_GLOBAL);
 }
 
-
 /**
  * scsi_get_device_flags_keyed - get device specific flags from the dynamic device list
  * @sdev:       &scsi_device to get flags for
@@ -649,7 +646,11 @@ static int devinfo_seq_show(struct seq_file *m, void *v)
 	    devinfo_table->name)
 		seq_printf(m, "[%s]:\n", devinfo_table->name);
 
+#ifdef CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+	seq_printf(m, "'%.8s' '%."CONFIG_SYNO_DISK_MODEL_LEN"s' 0x%x\n",
+#else /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
 	seq_printf(m, "'%.8s' '%.16s' 0x%x\n",
+#endif /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
 		   devinfo->vendor, devinfo->model, devinfo->flags);
 	return 0;
 }

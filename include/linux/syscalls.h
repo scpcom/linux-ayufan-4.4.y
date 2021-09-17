@@ -65,6 +65,11 @@ struct perf_event_attr;
 struct file_handle;
 struct sigaltstack;
 
+#ifdef CONFIG_SYNO_FS_STAT
+struct SYNOSTAT;
+struct SYNOSTAT64;
+#endif /* CONFIG_SYNO_FS_STAT */
+
 #include <linux/types.h>
 #include <linux/aio_abi.h>
 #include <linux/capability.h>
@@ -846,4 +851,53 @@ asmlinkage long sys_process_vm_writev(pid_t pid,
 asmlinkage long sys_kcmp(pid_t pid1, pid_t pid2, int type,
 			 unsigned long idx1, unsigned long idx2);
 asmlinkage long sys_finit_module(int fd, const char __user *uargs, int flags);
+
+#ifdef CONFIG_SYNO_SYSTEM_CALL
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+/* 402 */ asmlinkage long sys_SYNOUtime(const char __user *filename, struct timespec __user *ctime);
+#endif
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+/* 403 */ asmlinkage long sys_SYNOArchiveBit(const char __user *filename, int cmd);
+#endif
+/* 404 */ asmlinkage long sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, size_t *rwbytes);
+//* 405 */ asmlinkage long sys_SYNOMTDAlloc(int alloc);
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#if BITS_PER_LONG == 32
+/* 406 */ asmlinkage long sys_SYNOCaselessStat64(char __user *filename, struct stat64 __user *statbuf);
+/* 407 */ asmlinkage long sys_SYNOCaselessLStat64(char __user *filename, struct stat64 __user *statbuf);
+#else
+/* 406 */ asmlinkage long sys_SYNOCaselessStat(char __user *filename, struct stat __user *statbuf);
+/* 407 */ asmlinkage long sys_SYNOCaselessLStat(char __user *filename, struct stat __user *statbuf);
+#endif /* BITS_PER_LONG ==32 */
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#ifdef CONFIG_SYNO_ECRYPTFS_FILENAME_SYSCALL
+/* 410 */ asmlinkage long sys_SYNOEcryptName(const char __user *src, char __user *dst);
+/* 411 */ asmlinkage long sys_SYNODecryptName(const char __user *root, const char __user *src, char __user *dst);
+#endif
+/* 412 */ asmlinkage long sys_SYNOACLCheckPerm(const char __user *szPath, int mask);
+/* 413 */ asmlinkage long sys_SYNOACLIsSupport(const char __user *szPath, int fd, int tag);
+/* 414 */ asmlinkage long sys_SYNOACLGetPerm(const char __user *szPath, int __user *pOutPerm);
+#ifdef CONFIG_SYNO_FS_STAT
+#if BITS_PER_LONG == 32
+/* 419 */ asmlinkage long sys_SYNOStat64(char __user *filename, unsigned int flags, struct SYNOSTAT64 __user *statbuf);
+/* 420 */ asmlinkage long sys_SYNOFStat64(unsigned int fd, unsigned int flags, struct SYNOSTAT64 __user *statbuf);
+/* 421 */ asmlinkage long sys_SYNOLStat64(char __user *filename, unsigned int flags, struct SYNOSTAT64 __user *statbuf);
+#else
+/* 419 */ asmlinkage long sys_SYNOStat(char __user *filename, unsigned int flags, struct SYNOSTAT __user *statbuf);
+/* 420 */ asmlinkage long sys_SYNOFStat(unsigned int fd, unsigned int flags, struct SYNOSTAT __user *statbuf);
+/* 421 */ asmlinkage long sys_SYNOLStat(char __user *filename, unsigned int flags, struct SYNOSTAT __user *statbuf);
+#endif /* BITS_PER_LONG == 32 */
+#endif /* CONFIG_SYNO_FS_STAT */
+#ifdef CONFIG_SYNO_FS_NOTIFY
+/* 422 */ asmlinkage long sys_SYNONotifyInit(unsigned int event_f_flags);
+/* 423 */ asmlinkage long sys_SYNONotifyAddWatch(int synotify_fd, const char  __user *pathname, u64 mask);
+/* 424 */ asmlinkage long sys_SYNONotifyRemoveWatch(int synotify_fd, const char  __user *pathname, u64 mask);
+//* 425 */ asmlinkage long sys_SYNONotifyAddWatch32(int synotify_fd, const char  __user *pathname, u32 mask);
+//* 426 */ asmlinkage long sys_SYNONotifyRemoveWatch32(int synotify_fd, const char  __user *pathname, u32 mask);
+#endif /* CONFIG_SYNO_FS_NOTIFY */
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+/* 427 */ asmlinkage long sys_SYNOArchiveOverwrite(unsigned int fd, unsigned int flags);
+#endif
+#endif /* CONFIG_SYNO_SYSTEM_CALL */
+
 #endif

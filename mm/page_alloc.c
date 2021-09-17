@@ -909,7 +909,6 @@ struct page *__rmqueue_smallest(struct zone *zone, unsigned int order,
 	return NULL;
 }
 
-
 /*
  * This array describes the order lists are fallen back to when
  * the free lists for the desirable migrate type are depleted
@@ -2584,7 +2583,14 @@ rebalance:
 	}
 
 nopage:
+#ifdef CONFIG_SYNO_HIDE_LOWMEM_WARNING
+/*
+ * Do not show nowait page allocation fail warning to prevent
+ * QC team panic when they stress new platform.
+ */
+#else /* CONFIG_SYNO_HIDE_LOWMEM_WARNING */
 	warn_alloc_failed(gfp_mask, order, NULL);
+#endif /* CONFIG_SYNO_HIDE_LOWMEM_WARNING */
 	return page;
 got_pg:
 	if (kmemcheck_enabled)
@@ -3170,7 +3176,6 @@ static int build_zonelists_node(pg_data_t *pgdat, struct zonelist *zonelist,
 	return nr_zones;
 }
 
-
 /*
  *  zonelist_order:
  *  0 = automatic detection of better ordering.
@@ -3189,7 +3194,6 @@ static int build_zonelists_node(pg_data_t *pgdat, struct zonelist *zonelist,
  */
 static int current_zonelist_order = ZONELIST_ORDER_DEFAULT;
 static char zonelist_order_name[3][8] = {"Default", "Node", "Zone"};
-
 
 #ifdef CONFIG_NUMA
 /* The value user specified ....changed by config */
@@ -3275,7 +3279,6 @@ out:
 	return ret;
 }
 
-
 #define MAX_NODE_LOAD (nr_online_nodes)
 static int node_load[MAX_NUMNODES];
 
@@ -3338,7 +3341,6 @@ static int find_next_best_node(int node, nodemask_t *used_node_mask)
 
 	return best_node;
 }
-
 
 /*
  * Build zonelists ordered by node and zones within node.
@@ -6011,7 +6013,6 @@ int alloc_contig_range(unsigned long start, unsigned long end,
 		ret = -EBUSY;
 		goto done;
 	}
-
 
 	/* Grab isolated pages from freelists. */
 	outer_end = isolate_freepages_range(&cc, outer_start, end);

@@ -102,6 +102,9 @@ static const struct xattr_handler *ext4_xattr_handler_map[] = {
 #ifdef CONFIG_EXT4_FS_SECURITY
 	[EXT4_XATTR_INDEX_SECURITY]	     = &ext4_xattr_security_handler,
 #endif
+#ifdef CONFIG_SYNO_EXT4_XATTR
+	[EXT4_XATTR_INDEX_SYNO]          = &ext4_xattr_syno_handler,
+#endif
 };
 
 const struct xattr_handler *ext4_xattr_handlers[] = {
@@ -113,6 +116,9 @@ const struct xattr_handler *ext4_xattr_handlers[] = {
 #endif
 #ifdef CONFIG_EXT4_FS_SECURITY
 	&ext4_xattr_security_handler,
+#endif
+#ifdef CONFIG_SYNO_EXT4_XATTR
+	&ext4_xattr_syno_handler,
 #endif
 	NULL
 };
@@ -1440,8 +1446,6 @@ cleanup:
 	return error;
 }
 
-
-
 /*
  * ext4_xattr_delete_inode()
  *
@@ -1692,3 +1696,39 @@ ext4_exit_xattr(void)
 		mb_cache_destroy(ext4_xattr_cache);
 	ext4_xattr_cache = NULL;
 }
+
+#ifdef CONFIG_SYNO_EXT4_XATTR
+static size_t
+ext4_xattr_syno_list(struct dentry *dentry, char *list, size_t list_size,
+		     const char *name, size_t name_len, int handler_flags)
+{
+	return 0;
+}
+
+static int ext4_xattr_syno_get(struct dentry *dentry, const char *name,
+			  void *buffer, size_t size, int handler_flags)
+{
+	if (strcmp(name, "") == 0)
+		return -EINVAL;
+
+	return ext4_xattr_get(dentry->d_inode, EXT4_XATTR_INDEX_SYNO, name, buffer, size);
+}
+
+static int ext4_xattr_syno_set(struct dentry *dentry, const char *name,
+			  const void *value, size_t size, int flags, int handler_flags)
+{
+	if (strcmp(name, "") == 0){
+		return -EINVAL;
+	}
+
+	return ext4_xattr_set(dentry->d_inode, EXT4_XATTR_INDEX_SYNO, name,
+			      value, size, flags);
+}
+
+struct xattr_handler ext4_xattr_syno_handler = {
+	.prefix	= XATTR_SYNO_PREFIX,
+	.list	= ext4_xattr_syno_list,
+	.get	= ext4_xattr_syno_get,
+	.set	= ext4_xattr_syno_set,
+};
+#endif /* CONFIG_SYNO_EXT4_XATTR */

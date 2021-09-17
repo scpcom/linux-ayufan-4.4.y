@@ -22,6 +22,9 @@
 #include <linux/srcu.h>
 #include <linux/rculist.h>
 #include <linux/wait.h>
+#ifdef CONFIG_AUFS_FHSM
+#include <linux/module.h>
+#endif /* CONFIG_AUFS_FHSM */
 
 #include <linux/fsnotify_backend.h>
 #include "fsnotify.h"
@@ -65,6 +68,9 @@ void fsnotify_get_group(struct fsnotify_group *group)
 {
 	atomic_inc(&group->refcnt);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(fsnotify_get_group);
+#endif /* CONFIG_AUFS_FHSM */
 
 /*
  * Drop a reference to a group.  Free it if it's through.
@@ -74,6 +80,9 @@ void fsnotify_put_group(struct fsnotify_group *group)
 	if (atomic_dec_and_test(&group->refcnt))
 		fsnotify_final_destroy_group(group);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(fsnotify_put_group);
+#endif /* CONFIG_AUFS_FHSM */
 
 /*
  * Create a new fsnotify_group and hold a reference for the group returned.
@@ -102,6 +111,9 @@ struct fsnotify_group *fsnotify_alloc_group(const struct fsnotify_ops *ops)
 
 	return group;
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(fsnotify_alloc_group);
+#endif /* CONFIG_AUFS_FHSM */
 
 int fsnotify_fasync(int fd, struct file *file, int on)
 {

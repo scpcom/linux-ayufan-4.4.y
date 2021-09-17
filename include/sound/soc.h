@@ -19,7 +19,10 @@
 #include <linux/workqueue.h>
 #include <linux/interrupt.h>
 #include <linux/kernel.h>
+#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#else
 #include <linux/regmap.h>
+#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
 #include <linux/log2.h>
 #include <sound/core.h>
 #include <sound/pcm.h>

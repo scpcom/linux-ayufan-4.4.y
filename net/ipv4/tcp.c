@@ -280,6 +280,10 @@
 #include <asm/uaccess.h>
 #include <asm/ioctls.h>
 
+#ifdef CONFIG_SYNO_FS_RECVFILE
+#include <linux/pci.h>
+#endif /* CONFIG_SYNO_FS_RECVFILE */
+
 int sysctl_tcp_fin_timeout __read_mostly = TCP_FIN_TIMEOUT;
 
 int sysctl_tcp_min_tso_segs __read_mostly = 2;
@@ -1632,6 +1636,31 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	do {
 		u32 offset;
 
+#ifdef CONFIG_SYNO_FS_RECVFILE
+        if(flags &  MSG_NOCATCHSIGNAL) {
+			/* Original when we have recvfile(), we remove the following
+			 * sygnal_pending(). But it would cause system hang when smbd
+			 * is receive file and user "kill -9" it. So I copy the
+			 * code back. But in order to keep track, I did not remove
+			 * our define.
+			 */
+			if (signal_pending(current)) {
+				if (sigismember(&current->pending.signal, SIGQUIT) ||
+					sigismember(&current->pending.signal, SIGABRT) ||
+					sigismember(&current->pending.signal, SIGKILL) ||
+					sigismember(&current->pending.signal, SIGTERM) ||
+					sigismember(&current->pending.signal, SIGSTOP) ) {
+
+					printk("%s (%d) Avoiding recvfile() hangs.\n", __FILE__, __LINE__);
+					if (copied)
+						break;
+					copied = timeo ? sock_intr_errno(timeo) : -EAGAIN;
+					break;
+				}
+			}
+        }
+        else
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 		/* Are we at urgent data? Stop if we have read anything or have SIGURG pending. */
 		if (tp->urg_data && tp->urg_seq == *seq) {
 			if (copied)
@@ -1683,6 +1712,11 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 				break;
 
 			if (sk->sk_err) {
+#ifdef CONFIG_SYNO_FS_RECVFILE
+				if ( (msg->msg_flags & MSG_KERNSPACE) &&
+					ECONNRESET == sk->sk_err )
+					printk("connection reset by peer.\n");
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 				copied = sock_error(sk);
 				break;
 			}
@@ -1867,6 +1901,11 @@ do_prequeue:
 			} else
 #endif
 			{
+#ifdef CONFIG_SYNO_FS_RECVFILE
+				if(msg->msg_flags & MSG_KERNSPACE)
+					err = skb_copy_datagram_iovec1(skb, offset, msg->msg_iov, used);
+				else
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 				err = skb_copy_datagram_iovec(skb, offset,
 						msg->msg_iov, used);
 				if (err) {
@@ -2165,7 +2204,6 @@ adjudge_to_death:
 
 	/* It is the last release_sock in its life. It will remove backlog. */
 	release_sock(sk);
-
 
 	/* Now socket is owned by kernel and we acquire BH lock
 	   to finish close. No need to check for user refs.
@@ -3235,7 +3273,6 @@ retry:
 }
 EXPORT_SYMBOL(tcp_alloc_md5sig_pool);
 
-
 /**
  *	tcp_get_md5sig_pool - get md5sig_pool for this user
  *
@@ -3436,7 +3473,6 @@ void __init tcp_init(void)
 		spin_lock_init(&tcp_hashinfo.bhash[i].lock);
 		INIT_HLIST_HEAD(&tcp_hashinfo.bhash[i].chain);
 	}
-
 
 	cnt = tcp_hashinfo.ehash_mask + 1;
 

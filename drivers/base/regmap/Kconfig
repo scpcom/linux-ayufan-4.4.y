@@ -10,6 +10,7 @@ config REGMAP
 	bool
 
 config REGMAP_I2C
+	default y if SYNO_FEATURES
 	tristate
 
 config REGMAP_SPI

@@ -100,6 +100,15 @@ static int ioctl_internal_command(struct scsi_device *sdev, char *cmd,
 
 	if ((driver_byte(result) & DRIVER_SENSE) &&
 	    (scsi_sense_valid(&sshdr))) {
+#ifdef CONFIG_SYNO_DISK_HIBERNATION
+		if (cmd[0] == START_STOP) {
+			if (sdev->nospindown == 0) {
+				sdev->nospindown = 1;
+				printk(KERN_WARNING"host %d, id %d, lun %d, does not support spindown\n",
+					   sdev->host->host_no, sdev->id, sdev->lun);
+			}
+		}
+#endif /* CONFIG_SYNO_DISK_HIBERNATION */
 		switch (sshdr.sense_key) {
 		case ILLEGAL_REQUEST:
 			if (cmd[0] == ALLOW_MEDIUM_REMOVAL)
@@ -179,7 +188,6 @@ static int scsi_ioctl_get_pci(struct scsi_device *sdev, void __user *arg)
         return copy_to_user(arg, name, min(strlen(name), (size_t)20))
 		? -EFAULT: 0;
 }
-
 
 /**
  * scsi_ioctl - Dispatch ioctl to scsi device

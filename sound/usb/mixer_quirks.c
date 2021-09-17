@@ -486,6 +486,18 @@ static int snd_xonar_u1_controls_create(struct usb_mixer_interface *mixer)
 	if (err < 0)
 		return err;
 	mixer->xonar_u1_status = 0x05;
+#if defined(CONFIG_SYNO_AUDIO_ACTIVE_DIGITAL)
+	{
+		u8 status = mixer->xonar_u1_status | 0x02;
+
+		if (!snd_usb_ctl_msg(mixer->chip->dev,
+					usb_sndctrlpipe(mixer->chip->dev, 0), 0x08,
+					USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_OTHER,
+					50, 0, &status, 1)) {
+			mixer->xonar_u1_status = status;
+		}
+	}
+#endif /*CONFIG_SYNO_AUDIO_ACTIVE_DIGITAL*/
 	return 0;
 }
 
@@ -1401,4 +1413,3 @@ void snd_usb_mixer_rc_memory_change(struct usb_mixer_interface *mixer,
 		break;
 	}
 }
-

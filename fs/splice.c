@@ -1111,8 +1111,13 @@ EXPORT_SYMBOL(generic_splice_sendpage);
 /*
  * Attempt to initiate a splice from pipe to file.
  */
+#ifdef CONFIG_AUFS_FHSM
+long do_splice_from(struct pipe_inode_info *pipe, struct file *out,
+		    loff_t *ppos, size_t len, unsigned int flags)
+#else
 static long do_splice_from(struct pipe_inode_info *pipe, struct file *out,
 			   loff_t *ppos, size_t len, unsigned int flags)
+#endif /* CONFIG_AUFS_FHSM */
 {
 	ssize_t (*splice_write)(struct pipe_inode_info *, struct file *,
 				loff_t *, size_t, unsigned int);
@@ -1138,13 +1143,22 @@ static long do_splice_from(struct pipe_inode_info *pipe, struct file *out,
 	file_end_write(out);
 	return ret;
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(do_splice_from);
+#endif /* CONFIG_AUFS_FHSM */
 
 /*
  * Attempt to initiate a splice from a file to a pipe.
  */
+#ifdef CONFIG_AUFS_FHSM
+long do_splice_to(struct file *in, loff_t *ppos,
+		  struct pipe_inode_info *pipe, size_t len,
+		  unsigned int flags)
+#else
 static long do_splice_to(struct file *in, loff_t *ppos,
 			 struct pipe_inode_info *pipe, size_t len,
 			 unsigned int flags)
+#endif /* CONFIG_AUFS_FHSM */
 {
 	ssize_t (*splice_read)(struct file *, loff_t *,
 			       struct pipe_inode_info *, size_t, unsigned int);
@@ -1164,6 +1178,9 @@ static long do_splice_to(struct file *in, loff_t *ppos,
 
 	return splice_read(in, ppos, pipe, len, flags);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL(do_splice_to);
+#endif /* CONFIG_AUFS_FHSM */
 
 /**
  * splice_direct_to_actor - splices data directly between two non-pipes
@@ -1853,7 +1870,6 @@ static int splice_pipe_to_pipe(struct pipe_inode_info *ipipe,
 	struct pipe_buffer *ibuf, *obuf;
 	int ret = 0, nbuf;
 	bool input_wakeup = false;
-
 
 retry:
 	ret = ipipe_prep(ipipe, flags);

@@ -36,6 +36,9 @@
 #include <linux/mutex.h>
 #include <linux/workqueue.h>
 #include <linux/debugfs.h>
+#ifdef CONFIG_SYNO_ENABLE_USBFS_ENTRY
+#include <linux/proc_fs.h>
+#endif /* CONFIG_SYNO_ENABLE_USBFS_ENTRY */
 
 #include <asm/io.h>
 #include <linux/scatterlist.h>
@@ -43,7 +46,6 @@
 #include <linux/dma-mapping.h>
 
 #include "usb.h"
-
 
 const char *usbcore_name = "usbcore";
 
@@ -58,7 +60,6 @@ MODULE_PARM_DESC(autosuspend, "default autosuspend delay");
 #else
 #define usb_autosuspend_delay		0
 #endif
-
 
 /**
  * usb_find_alt_setting() - Given a configuration, find the alternate setting
@@ -316,7 +317,6 @@ static const struct dev_pm_ops usb_device_pm_ops = {
 
 #endif	/* CONFIG_PM */
 
-
 static char *usb_devnode(struct device *dev,
 			 umode_t *mode, kuid_t *uid, kgid_t *gid)
 {
@@ -337,14 +337,12 @@ struct device_type usb_device_type = {
 #endif
 };
 
-
 /* Returns 1 if @usb_bus is WUSB, 0 otherwise */
 static unsigned usb_bus_is_wusb(struct usb_bus *bus)
 {
 	struct usb_hcd *hcd = container_of(bus, struct usb_hcd, self);
 	return hcd->wireless;
 }
-
 
 /**
  * usb_alloc_dev - usb device constructor (usbcore-internal)
@@ -968,6 +966,9 @@ struct dentry *usb_debug_root;
 EXPORT_SYMBOL_GPL(usb_debug_root);
 
 static struct dentry *usb_debug_devices;
+#ifdef CONFIG_SYNO_ENABLE_USBFS_ENTRY
+static struct proc_dir_entry *usbdir = NULL;
+#endif /* CONFIG_SYNO_ENABLE_USBFS_ENTRY */
 
 static int usb_debugfs_init(void)
 {
@@ -983,6 +984,14 @@ static int usb_debugfs_init(void)
 		usb_debug_root = NULL;
 		return -ENOENT;
 	}
+
+#ifdef CONFIG_SYNO_ENABLE_USBFS_ENTRY
+	/* create mount point for /proc/bus/usb */
+	usbdir = proc_mkdir("bus/usb", NULL);
+	if (!usbdir) {
+		printk(KERN_ERR "Fail to create /proc/bus/usb\n");
+	}
+#endif /* CONFIG_SYNO_ENABLE_USBFS_ENTRY */
 
 	return 0;
 }
@@ -1027,10 +1036,19 @@ static int __init usb_init(void)
 	retval = usb_hub_init();
 	if (retval)
 		goto hub_init_failed;
+#if defined(CONFIG_USB_ETRON_HUB)
+	retval = ethub_init();
+	if (retval)
+		goto ethub_init_failed;
+#endif /* CONFIG_USB_ETRON_HUB */
 	retval = usb_register_device_driver(&usb_generic_driver, THIS_MODULE);
 	if (!retval)
 		goto out;
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	ethub_cleanup();
+ethub_init_failed:
+#endif /* CONFIG_USB_ETRON_HUB */
 	usb_hub_cleanup();
 hub_init_failed:
 	usb_devio_cleanup();
@@ -1062,6 +1080,9 @@ static void __exit usb_exit(void)
 	usb_major_cleanup();
 	usb_deregister(&usbfs_driver);
 	usb_devio_cleanup();
+#if defined(CONFIG_USB_ETRON_HUB)
+	ethub_cleanup();
+#endif /* CONFIG_USB_ETRON_HUB */
 	usb_hub_cleanup();
 	bus_unregister_notifier(&usb_bus_type, &usb_bus_nb);
 	bus_unregister(&usb_bus_type);

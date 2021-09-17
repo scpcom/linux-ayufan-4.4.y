@@ -119,7 +119,6 @@ static inline int ext4_jbd2_credits_xattr(struct inode *inode)
 	return credits;
 }
 
-
 /*
  * Ext4 handle operation types -- for logging purposes
  */
@@ -134,7 +133,12 @@ static inline int ext4_jbd2_credits_xattr(struct inode *inode)
 #define EXT4_HT_MIGRATE          8
 #define EXT4_HT_MOVE_EXTENTS     9
 #define EXT4_HT_XATTR           10
+#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION
+#define EXT4_HT_SYNO			11
+#define EXT4_HT_MAX				12
+#else
 #define EXT4_HT_MAX             11
+#endif
 
 /**
  *   struct ext4_journal_cb_entry - Base structure for callback information.

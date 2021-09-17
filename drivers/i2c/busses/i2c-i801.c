@@ -770,7 +770,6 @@ static s32 i801_access(struct i2c_adapter *adap, u16 addr,
 	return 0;
 }
 
-
 static u32 i801_func(struct i2c_adapter *adapter)
 {
 	struct i801_priv *priv = i2c_get_adapdata(adapter);
@@ -1152,6 +1151,10 @@ static int i801_probe(struct pci_dev *dev, const struct pci_device_id *id)
 				   i801_feature_names[i]);
 	}
 	priv->features &= ~disable_features;
+
+#ifdef CONFIG_SYNO_I2C_I801_POLL
+	priv->features &= ~FEATURE_IRQ;
+#endif /* CONFIG_SYNO_I2C_I801_POLL */
 
 	err = pci_enable_device(dev);
 	if (err) {

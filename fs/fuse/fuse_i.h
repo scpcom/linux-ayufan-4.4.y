@@ -24,7 +24,11 @@
 #include <linux/workqueue.h>
 
 /** Max number of pages that can be used in a single read request */
+#ifdef CONFIG_SYNO_FS_RECVFILE
+#define FUSE_MAX_PAGES_PER_REQ 256
+#else
 #define FUSE_MAX_PAGES_PER_REQ 32
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 
 /** Bias for fi->writectr, meaning new writepages must not be sent */
 #define FUSE_NOWRITE INT_MIN

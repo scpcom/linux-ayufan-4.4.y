@@ -2313,7 +2313,6 @@ static const struct seq_operations debug_seq_ops = {
 	.show  = sg_proc_seq_show_debug,
 };
 
-
 struct sg_proc_leaf {
 	const char * name;
 	const struct file_operations * fops;
@@ -2358,7 +2357,6 @@ sg_proc_cleanup(void)
 		remove_proc_entry(sg_proc_leaf_arr[k].name, sg_proc_sgp);
 	remove_proc_entry(sg_proc_sg_dirname, NULL);
 }
-
 
 static int sg_proc_seq_show_int(struct seq_file *s, void *v)
 {
@@ -2512,7 +2510,11 @@ static int sg_proc_seq_show_devstrs(struct seq_file *s, void *v)
 	read_lock_irqsave(&sg_index_lock, iflags);
 	sdp = it ? sg_lookup_dev(it->index) : NULL;
 	if (sdp && (scsidp = sdp->device) && (!sdp->detached))
+#ifdef CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+		seq_printf(s, "%8.8s\t%"CONFIG_SYNO_DISK_MODEL_LEN"."CONFIG_SYNO_DISK_MODEL_LEN"s\t%4.4s\n",
+#else /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
 		seq_printf(s, "%8.8s\t%16.16s\t%4.4s\n",
+#endif /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
 			   scsidp->vendor, scsidp->model, scsidp->rev);
 	else
 		seq_printf(s, "<no active device>\n");

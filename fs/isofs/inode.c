@@ -69,7 +69,7 @@ static void isofs_put_super(struct super_block *sb)
 	return;
 }
 
-static int isofs_read_inode(struct inode *);
+static int isofs_read_inode(struct inode *, int relocated);
 static int isofs_statfs (struct dentry *, struct kstatfs *);
 
 static struct kmem_cache *isofs_inode_cachep;
@@ -138,7 +138,6 @@ static const struct super_operations isofs_sops = {
 	.remount_fs	= isofs_remount,
 	.show_options	= generic_show_options,
 };
-
 
 static const struct dentry_operations isofs_dentry_ops[] = {
 	{
@@ -376,7 +375,9 @@ static int parse_options(char *options, struct iso9660_options *popt)
 {
 	char *p;
 	int option;
-
+#ifdef CONFIG_SYNO_ISOFS_UINT_UID_GID
+	unsigned long ulOption;
+#endif
 	popt->map = 'n';
 	popt->rock = 1;
 	popt->joliet = 1;
@@ -464,17 +465,29 @@ static int parse_options(char *options, struct iso9660_options *popt)
 		case Opt_ignore:
 			break;
 		case Opt_uid:
+#ifdef  CONFIG_SYNO_ISOFS_UINT_UID_GID
+			if (SYNO_get_option_ul(&args[0], &ulOption))
+				return 0;
+			popt->uid = make_kuid(current_user_ns(), ulOption);
+#else
 			if (match_int(&args[0], &option))
 				return 0;
 			popt->uid = make_kuid(current_user_ns(), option);
+#endif /* CONFIG_SYNO_ISOFS_UINT_UID_GID */
 			if (!uid_valid(popt->uid))
 				return 0;
 			popt->uid_set = 1;
 			break;
 		case Opt_gid:
+#ifdef CONFIG_SYNO_ISOFS_UINT_UID_GID
+			if (SYNO_get_option_ul(&args[0], &ulOption))
+				return 0;
+			popt->gid = make_kgid(current_user_ns(), ulOption);
+#else
 			if (match_int(&args[0], &option))
 				return 0;
 			popt->gid = make_kgid(current_user_ns(), option);
+#endif /* CONFIG_SYNO_ISOFS_UINT_UID_GID */
 			if (!gid_valid(popt->gid))
 				return 0;
 			popt->gid_set = 1;
@@ -1040,7 +1053,6 @@ int isofs_get_blocks(struct inode *inode, sector_t iblock,
 		goto abort;
 	}
 
-
 	offset = 0;
 	firstext = ei->i_first_extent;
 	sect_size = ei->i_section_size >> ISOFS_BUFFER_BITS(inode);
@@ -1274,7 +1286,7 @@ out_toomany:
 	goto out;
 }
 
-static int isofs_read_inode(struct inode *inode)
+static int isofs_read_inode(struct inode *inode, int relocated)
 {
 	struct super_block *sb = inode->i_sb;
 	struct isofs_sb_info *sbi = ISOFS_SB(sb);
@@ -1419,7 +1431,7 @@ static int isofs_read_inode(struct inode *inode)
 	 */
 
 	if (!high_sierra) {
-		parse_rock_ridge_inode(de, inode);
+		parse_rock_ridge_inode(de, inode, relocated);
 		/* if we want uid/gid set, override the rock ridge setting */
 		if (sbi->s_uid_set)
 			inode->i_uid = sbi->s_uid;
@@ -1498,9 +1510,10 @@ static int isofs_iget5_set(struct inode *ino, void *data)
  * offset that point to the underlying meta-data for the inode.  The
  * code below is otherwise similar to the iget() code in
  * include/linux/fs.h */
-struct inode *isofs_iget(struct super_block *sb,
-			 unsigned long block,
-			 unsigned long offset)
+struct inode *__isofs_iget(struct super_block *sb,
+			   unsigned long block,
+			   unsigned long offset,
+			   int relocated)
 {
 	unsigned long hashval;
 	struct inode *inode;
@@ -1522,7 +1535,7 @@ struct inode *isofs_iget(struct super_block *sb,
 		return ERR_PTR(-ENOMEM);
 
 	if (inode->i_state & I_NEW) {
-		ret = isofs_read_inode(inode);
+		ret = isofs_read_inode(inode, relocated);
 		if (ret < 0) {
 			iget_failed(inode);
 			inode = ERR_PTR(ret);

@@ -47,7 +47,6 @@ static u8 usb_bos_descriptor [] = {
 	0x00, 0x00			/* __le16 bU2DevExitLat, set later. */
 };
 
-
 static void xhci_common_hub_descriptor(struct xhci_hcd *xhci,
 		struct usb_hub_descriptor *desc, int ports)
 {
@@ -232,6 +231,12 @@ u32 xhci_port_state_to_neutral(u32 state)
 	return (state & XHCI_PORT_RO) | (state & XHCI_PORT_RWS);
 }
 
+#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#include <linux/pci.h>
+
+extern int gSynoFactoryUSB3Disable;
+#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+
 /*
  * find slot id based on port number.
  * @port: The one-based port number from one of the two split roothubs.
@@ -409,6 +414,28 @@ static int xhci_get_ports(struct usb_hcd *hcd, __le32 __iomem ***port_array)
 	return max_ports;
 }
 
+#ifdef CONFIG_SYNO_USB3_WD_FIX
+/*
+ * get the mapping port array.
+ * if hcd is usb3, return usb2's port_array, and vice versa.
+ */
+static int xhci_get_ports_map(struct usb_hcd *hcd, __le32 __iomem ***port_array)
+{
+	int max_ports;
+	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
+
+	if (hcd->speed == HCD_USB3) {
+		max_ports = xhci->num_usb2_ports; // should be the same as num_usb3_ports
+		*port_array = xhci->usb2_ports;
+	} else {
+		max_ports = xhci->num_usb3_ports;
+		*port_array = xhci->usb3_ports;
+	}
+
+	return max_ports;
+}
+#endif /* CONFIG_SYNO_USB3_WD_FIX */
+
 void xhci_set_link_state(struct xhci_hcd *xhci, __le32 __iomem **port_array,
 				int port_id, u32 link_state)
 {
@@ -541,6 +568,11 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	int max_ports;
 	unsigned long flags;
 	u32 temp, status;
+#ifdef CONFIG_SYNO_USB3_WD_FIX
+	u32 temp_map;
+	__le32 __iomem **port_array_map;
+	struct pci_dev *pdev = to_pci_dev(hcd->self.controller);
+#endif /* CONFIG_SYNO_USB3_WD_FIX */
 	int retval = 0;
 	__le32 __iomem **port_array;
 	int slot_id;
@@ -550,6 +582,11 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	u16 timeout = 0;
 
 	max_ports = xhci_get_ports(hcd, &port_array);
+#if CONFIG_SYNO_USB3_WD_FIX
+	if (pdev->vendor == PCI_VENDOR_ID_NEC) {
+		xhci_get_ports_map(hcd, &port_array_map); // max_ports should be the same, only for NEC fixes
+	}
+#endif /* CONFIG_SYNO_USB3_WD_FIX */
 	bus_state = &xhci->bus_state[hcd_index(hcd)];
 
 	spin_lock_irqsave(&xhci->lock, flags);
@@ -829,8 +866,21 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			 * However, khubd will ignore the roothub events until
 			 * the roothub is registered.
 			 */
+#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+			xhci_dbg(xhci, "set port power. hcd->speed:%d.\n",hcd->speed);
+			if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3) {
+				xhci_writel(xhci, temp & ~PORT_POWER,
+					port_array[wIndex]);
+				spin_unlock_irqrestore(&xhci->lock, flags);
+				msleep(500);
+				spin_lock_irqsave(&xhci->lock, flags);
+			} else {
+#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
 			xhci_writel(xhci, temp | PORT_POWER,
 					port_array[wIndex]);
+#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+			}
+#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
 
 			temp = xhci_readl(xhci, port_array[wIndex]);
 			xhci_dbg(xhci, "set port power, actual port %d status  = 0x%x\n", wIndex, temp);
@@ -838,9 +888,22 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			spin_unlock_irqrestore(&xhci->lock, flags);
 			temp = usb_acpi_power_manageable(hcd->self.root_hub,
 					wIndex);
+
 			if (temp)
+#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+			{
+				if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3) {
+					usb_acpi_set_power_state(hcd->self.root_hub,
+						wIndex, false);
+				} else {
+#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
 				usb_acpi_set_power_state(hcd->self.root_hub,
-						wIndex, true);
+					wIndex, true);
+#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+				}
+			}
+#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+
 			spin_lock_irqsave(&xhci->lock, flags);
 			break;
 		case USB_PORT_FEAT_RESET:
@@ -849,6 +912,20 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 
 			temp = xhci_readl(xhci, port_array[wIndex]);
 			xhci_dbg(xhci, "set port reset, actual port %d status  = 0x%x\n", wIndex, temp);
+#ifdef CONFIG_SYNO_USB3_WD_FIX
+			if (pdev->vendor == PCI_VENDOR_ID_NEC) {
+				temp_map = xhci_readl(xhci, port_array_map[wIndex]);
+				xhci_dbg(xhci, "set port reset map, actual port %d status  = 0x%x\n", wIndex, temp_map);
+				// reset if mapping port is in test mode
+				if ((hcd->speed == HCD_USB2) &&
+					((temp_map & USB_PORT_STAT_LINK_STATE) == USB_SS_PORT_LS_COMP_MOD ||
+					(temp_map & USB_PORT_STAT_LINK_STATE) == USB_SS_PORT_LS_LOOPBACK)) {
+					xhci_err(xhci, "set port reset for test mode.\n");
+					xhci_writel(xhci, temp_map | PORT_RESET, port_array_map[wIndex]);
+					temp_map = xhci_readl(xhci, port_array_map[wIndex]);
+				}
+			}
+#endif /* CONFIG_SYNO_USB3_WD_FIX */
 			break;
 		case USB_PORT_FEAT_REMOTE_WAKE_MASK:
 			xhci_set_remote_wake_mask(xhci, port_array,

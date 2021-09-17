@@ -994,6 +994,9 @@ static inline void unmap_shared_mapping_range(struct address_space *mapping,
 
 extern void truncate_pagecache(struct inode *inode, loff_t old, loff_t new);
 extern void truncate_setsize(struct inode *inode, loff_t newsize);
+#ifdef CONFIG_SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
+extern void ecryptfs_truncate_setsize(struct inode *inode, loff_t newsize);
+#endif
 void truncate_pagecache_range(struct inode *inode, loff_t offset, loff_t end);
 int truncate_inode_page(struct address_space *mapping, struct page *page);
 int generic_error_remove_page(struct address_space *mapping, struct page *page);
@@ -1022,6 +1025,30 @@ static inline int fixup_user_fault(struct task_struct *tsk,
 	return -EFAULT;
 }
 #endif
+
+#ifdef CONFIG_AUFS_FHSM
+#ifdef CONFIG_MMU
+extern void vma_do_file_update_time(struct vm_area_struct *, const char[], int);
+extern struct file *vma_do_pr_or_file(struct vm_area_struct *, const char[],
+				      int);
+extern void vma_do_get_file(struct vm_area_struct *, const char[], int);
+extern void vma_do_fput(struct vm_area_struct *, const char[], int);
+
+#define vma_file_update_time(vma)	vma_do_file_update_time(vma, __func__, \
+								__LINE__)
+#define vma_pr_or_file(vma)		vma_do_pr_or_file(vma, __func__, \
+							  __LINE__)
+#define vma_get_file(vma)		vma_do_get_file(vma, __func__, __LINE__)
+#define vma_fput(vma)			vma_do_fput(vma, __func__, __LINE__)
+#else
+extern struct file *vmr_do_pr_or_file(struct vm_region *, const char[], int);
+extern void vmr_do_fput(struct vm_region *, const char[], int);
+
+#define vmr_pr_or_file(region)		vmr_do_pr_or_file(region, __func__, \
+							  __LINE__)
+#define vmr_fput(region)		vmr_do_fput(region, __func__, __LINE__)
+#endif /* CONFIG_MMU */
+#endif /* CONFIG_AUFS_FHSM */
 
 extern int access_process_vm(struct task_struct *tsk, unsigned long addr, void *buf, int len, int write);
 extern int access_remote_vm(struct mm_struct *mm, unsigned long addr,
@@ -1585,7 +1612,11 @@ int write_one_page(struct page *page, int wait);
 void task_dirty_inc(struct task_struct *tsk);
 
 /* readahead.c */
+#ifdef CONFIG_SYNO_INCREASE_READAHEAD
+#define VM_MAX_READAHEAD        CONFIG_SYNO_MAX_READAHEAD_SIZE
+#else /* CONFIG_SYNO_INCREASE_READAHEAD */
 #define VM_MAX_READAHEAD	128	/* kbytes */
+#endif /* CONFIG_SYNO_INCREASE_READAHEAD */
 #define VM_MIN_READAHEAD	16	/* kbytes (includes current page) */
 
 int force_page_cache_readahead(struct address_space *mapping, struct file *filp,
@@ -1677,7 +1708,6 @@ int vm_insert_pfn(struct vm_area_struct *vma, unsigned long addr,
 int vm_insert_mixed(struct vm_area_struct *vma, unsigned long addr,
 			unsigned long pfn);
 int vm_iomap_memory(struct vm_area_struct *vma, phys_addr_t start, unsigned long len);
-
 
 struct page *follow_page_mask(struct vm_area_struct *vma,
 			      unsigned long address, unsigned int foll_flags,

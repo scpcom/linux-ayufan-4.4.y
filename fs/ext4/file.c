@@ -643,6 +643,13 @@ const struct file_operations ext4_file_operations = {
 };
 
 const struct inode_operations ext4_file_inode_operations = {
+#ifdef CONFIG_SYNO_EXT4_STAT
+	.syno_getattr	= ext4_syno_getattr,
+#endif
+#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION
+	.syno_get_archive_ver	= ext4_syno_get_archive_ver,
+	.syno_set_archive_ver	= ext4_syno_set_archive_ver,
+#endif
 	.setattr	= ext4_setattr,
 	.getattr	= ext4_getattr,
 	.setxattr	= generic_setxattr,
@@ -652,4 +659,3 @@ const struct inode_operations ext4_file_inode_operations = {
 	.get_acl	= ext4_get_acl,
 	.fiemap		= ext4_fiemap,
 };
-

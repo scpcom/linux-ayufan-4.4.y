@@ -271,7 +271,14 @@ show_map_vma(struct seq_file *m, struct vm_area_struct *vma, int is_pid)
 	const char *name = NULL;
 
 	if (file) {
+#ifdef CONFIG_AUFS_FHSM
+		struct inode *inode;
+
+		file = vma_pr_or_file(vma);
+		inode = file_inode(file);
+#else
 		struct inode *inode = file_inode(vma->vm_file);
+#endif /* CONFIG_AUFS_FHSM */
 		dev = inode->i_sb->s_dev;
 		ino = inode->i_ino;
 		pgoff = ((loff_t)vma->vm_pgoff) << PAGE_SHIFT;
@@ -442,7 +449,6 @@ struct mem_size_stats {
 	unsigned long nonlinear;
 	u64 pss;
 };
-
 
 static void smaps_pte_entry(pte_t ptent, unsigned long addr,
 		unsigned long ptent_size, struct mm_walk *walk)
@@ -1284,6 +1290,9 @@ static int show_numa_map(struct seq_file *m, void *v, int is_pid)
 	seq_printf(m, "%08lx %s", vma->vm_start, buffer);
 
 	if (file) {
+#ifdef CONFIG_AUFS_FHSM
+		file = vma_pr_or_file(vma);
+#endif
 		seq_printf(m, " file=");
 		seq_path(m, &file->f_path, "\n\t= ");
 	} else if (vma->vm_start <= mm->brk && vma->vm_end >= mm->start_brk) {

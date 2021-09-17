@@ -253,7 +253,6 @@ out_rcu_unlock:
 	goto out;
 }
 
-
 /* bind for INET6 API */
 int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 {
@@ -330,6 +329,19 @@ int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 					 */
 					sk->sk_bound_dev_if = addr->sin6_scope_id;
 				}
+
+#ifdef CONFIG_SYNO_IPV6_LINKLOCAL
+				if (__ipv6_addr_is_link_local(addr_type) && !sk->sk_bound_dev_if) {
+					for_each_netdev(net, dev) {
+						unsigned flags = dev_get_flags(dev);
+						if ((flags & IFF_RUNNING) &&
+							!(flags & (IFF_LOOPBACK | IFF_SLAVE))) {
+							sk->sk_bound_dev_if = dev->ifindex;
+							break;
+						}
+					}
+				}
+#endif /* CONFIG_SYNO_IPV6_LINKLOCAL */
 
 				/* Binding to link-local address requires an interface */
 				if (!sk->sk_bound_dev_if) {
@@ -839,7 +851,6 @@ static int __init inet6_init(void)
 	err = proto_register(&rawv6_prot, 1);
 	if (err)
 		goto out_unregister_udplite_proto;
-
 
 	/* We MUST register RAW sockets before we create the ICMP6,
 	 * IGMP6, or NDISC control sockets.

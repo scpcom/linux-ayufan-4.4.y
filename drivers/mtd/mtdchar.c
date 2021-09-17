@@ -357,6 +357,13 @@ static ssize_t mtdchar_write(struct file *file, const char __user *buf, size_t c
 	return total_retlen;
 } /* mtdchar_write */
 
+#ifdef CONFIG_SYNO_SYSTEM_CALL // FIXME
+SYSCALL_DEFINE1(SYNOMTDAlloc, int, alloc)
+{
+	return 0;
+}
+#endif /* CONFIG_SYNO_SYSTEM_CALL */
+
 /*======================================================================
 
     IOCTL calls for getting device parameters.
@@ -943,6 +950,41 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 		ret = mtd_lock_user_prot_reg(mtd, oinfo.start, oinfo.length);
 		break;
 	}
+
+#ifdef  CONFIG_SYNO_MTD_INFO
+	case MEMMODIFYPARTINFO:
+	{
+		unsigned long adrs[2];
+
+		if (copy_from_user(adrs, (void *)arg, 2* sizeof(unsigned long)))
+			return -EFAULT;
+
+		ret = SYNOMTDModifyPartInfo(mtd, adrs[0], adrs[1]); /* adrs[0] is offset, adrs[1] is the length */
+
+		break;
+	}
+
+	case MEMMODIFYFISINFO:
+	{
+		struct SYNO_MTD_FIS_INFO SynoMtdFisInfo;
+
+		if (strcmp(mtd->name, "FIS directory")) { // cannot apply on other flash partitions
+			return -EOPNOTSUPP;
+		}
+
+		if (copy_from_user(&SynoMtdFisInfo, (struct SYNO_MTD_FIS_INFO *)arg, sizeof(struct SYNO_MTD_FIS_INFO))) {
+			return -EFAULT;
+		}
+
+		if (!SynoMtdFisInfo.name[0]) { // sanity check
+			return -EFAULT;
+		}
+
+		ret = SYNOMTDModifyFisInfo(mtd, SynoMtdFisInfo);
+
+		break;
+	}
+#endif /* CONFIG_SYNO_MTD_INFO */
 
 	/* This ioctl is being deprecated - it truncates the ECC layout */
 	case ECCGETLAYOUT:

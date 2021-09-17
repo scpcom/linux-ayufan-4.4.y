@@ -21,8 +21,4 @@
 # define __XTENSA_UL_CONST(x)	x##UL
 #endif
 
-#ifndef __ASSEMBLY__
-
-#endif
-
 #endif /* _UAPI_XTENSA_TYPES_H */

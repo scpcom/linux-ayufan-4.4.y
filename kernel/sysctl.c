@@ -91,8 +91,190 @@
 #include <linux/nmi.h>
 #endif
 
-
 #if defined(CONFIG_SYSCTL)
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+int SynoDebugFlag = 0;
+EXPORT_SYMBOL(SynoDebugFlag);
+
+int syno_hibernation_log_level=0;
+EXPORT_SYMBOL(syno_hibernation_log_level);
+
+int giSynoAtaDebug=0;
+EXPORT_SYMBOL(giSynoAtaDebug);
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+
+#ifdef CONFIG_SYNO_SPINUP_DELAY
+long unsigned int guiWakeupDisksNum = 1;
+EXPORT_SYMBOL(guiWakeupDisksNum);
+/* The default spinup time interval is 7000ms. if want modify the interval, you
+ * can modify this value. ex. assign 14 to it means 500ms (7000/14) */
+int giDenoOfTimeInterval = 1;
+EXPORT_SYMBOL(giDenoOfTimeInterval);
+#endif /* CONFIG_SYNO_SPINUP_DELAY */
+
+#ifdef CONFIG_SYNO_SATA_PORT_MAP
+char gszSataPortMap[8] = {0};
+EXPORT_SYMBOL(gszSataPortMap);
+#endif /* CONFIG_SYNO_SATA_PORT_MAP */
+
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+unsigned int gSynoSataHostCnt = 0;
+EXPORT_SYMBOL(gSynoSataHostCnt);
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
+
+#ifdef CONFIG_SYNO_DISK_INDEX_MAP
+char gszDiskIdxMap[16] = {0};
+EXPORT_SYMBOL(gszDiskIdxMap);
+#endif /* CONFIG_SYNO_DISK_INDEX_MAP */
+
+#ifdef CONFIG_SYNO_HDD_HOTPLUG
+long g_hdd_hotplug = 0;
+EXPORT_SYMBOL(g_hdd_hotplug);
+#endif /* CONFIG_SYNO_HDD_HOTPLUG */
+
+#ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
+#ifdef CONFIG_SYNO_X64
+int gSynoHasDynModule = 1;
+#else /*CONFIG_SYNO_X64*/
+int gSynoHasDynModule = 0;
+#endif /*CONFIG_SYNO_X64*/
+EXPORT_SYMBOL(gSynoHasDynModule);
+#endif /*CONFIG_SYNO_DYN_MODULE_INSTALL*/
+
+#ifdef CONFIG_SYNO_INSTALL_FLAG
+int gSynoInstallFlag = 0;
+EXPORT_SYMBOL(gSynoInstallFlag);
+#endif /*CONFIG_SYNO_INSTALL_FLAG*/
+
+#ifdef CONFIG_SYNO_HW_REVISION
+char gszSynoHWRevision[4] = {'\0'};
+EXPORT_SYMBOL(gszSynoHWRevision);
+#endif /* CONFIG_SYNO_HW_REVISION */
+
+#ifdef CONFIG_SYNO_HW_VERSION
+char gszSynoHWVersion[16];
+EXPORT_SYMBOL(gszSynoHWVersion);
+#endif /* CONFIG_SYNO_HW_VERSION */
+
+#ifdef CONFIG_SYNO_INTERNAL_HD_NUM
+long g_internal_hd_num = -1;
+long syno_boot_hd_count = 0;
+EXPORT_SYMBOL(g_internal_hd_num);
+#endif /* CONFIG_SYNO_INTERNAL_HD_NUM */
+
+#ifdef CONFIG_SYNO_AHCI_SWITCH
+char g_ahci_switch = '1';
+EXPORT_SYMBOL(g_ahci_switch);
+#endif /* CONFIG_SYNO_AHCI_SWITCH */
+
+#ifdef CONFIG_SYNO_SATA_MV_LED
+long g_sata_mv_led = 0;
+EXPORT_SYMBOL(g_sata_mv_led);
+#endif /* CONFIG_SYNO_SATA_MV_LED */
+
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SWITCH
+int giSynoHddLedEnabled = 1;
+EXPORT_SYMBOL(giSynoHddLedEnabled);
+#endif /* CONFIG_SYNO_ATA_AHCI_LED_SWITCH */ 
+
+#ifdef CONFIG_SYNO_SERIAL
+char gszSerialNum[32];
+EXPORT_SYMBOL(gszSerialNum);
+char gszCustomSerialNum[32];
+EXPORT_SYMBOL(gszCustomSerialNum);
+#endif /* CONFIG_SYNO_SERIAL */
+
+#if defined(CONFIG_SYNO_SATA_PM_DEVICE_GPIO) || defined(CONFIG_SYNO_HAS_SDCARDREADER)
+#include <linux/synosata.h>
+int (*funcSYNOGetHwCapability)(CAPABILITY *) = NULL;
+EXPORT_SYMBOL(funcSYNOGetHwCapability);
+EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void) = NULL;
+EXPORT_SYMBOL(funcSynoEunitPowerctlType);
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+
+#ifdef  CONFIG_SYNO_MD_STATUS_GET
+int gSynoRaidSyncFlag = 0;
+EXPORT_SYMBOL(gSynoRaidSyncFlag);
+#endif /* CONFIG_SYNO_MD_STATUS_GET */
+
+#ifdef CONFIG_SYNO_SATA_DISK_SEQ_REVERSE
+char giDiskSeqReverse[8] = {0};
+EXPORT_SYMBOL(giDiskSeqReverse);
+#endif /* CONFIG_SYNO_SATA_DISK_SEQ_REVERSE */
+
+#ifdef CONFIG_SYNO_INTERNAL_NETIF_NUM
+long g_internal_netif_num = -1;
+EXPORT_SYMBOL(g_internal_netif_num);
+#endif /* CONFIG_SYNO_INTERNAL_NETIF_NUM */
+
+#ifdef CONFIG_SYNO_MAC_ADDRESS
+unsigned char grgbLanMac[CONFIG_SYNO_MAC_MAX][16];
+EXPORT_SYMBOL(grgbLanMac);
+int giVenderFormatVersion = 1;
+EXPORT_SYMBOL(giVenderFormatVersion);
+static int iSynoMacMax = CONFIG_SYNO_MAC_MAX;
+static int iMacEntrySize = 16;
+char gszSkipVenderMacInterfaces[256] = {'\0'};
+EXPORT_SYMBOL(gszSkipVenderMacInterfaces);
+#endif /* CONFIG_SYNO_MAC_ADDRESS */
+
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+long g_is_sas_model = 0;
+EXPORT_SYMBOL(g_is_sas_model);
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+
+#ifdef CONFIG_SYNO_SWITCH_NET_DEVICE_NAME
+unsigned int gSwitchDev = 0;
+char gDevPCIName[CONFIG_SYNO_MAX_SWITCHABLE_NET_DEVICE][CONFIG_SYNO_NET_DEVICE_ENCODING_LENGTH];
+EXPORT_SYMBOL(gSwitchDev);
+EXPORT_SYMBOL(gDevPCIName);
+#endif /* CONFIG_SYNO_SWITCH_NET_DEVICE_NAME */
+
+#ifdef CONFIG_SYNO_DISPLAY_CPUINFO
+unsigned int gSynoCPUInfoCore = 0;
+EXPORT_SYMBOL(gSynoCPUInfoCore);
+char gSynoCPUInfoClock[16];
+EXPORT_SYMBOL(gSynoCPUInfoClock);
+#endif /* CONFIG_SYNO_DISPLAY_CPUINFO */
+
+#ifdef CONFIG_SYNO_BOOT_SATA_DOM
+int gSynoBootSATADOM = 0;
+EXPORT_SYMBOL(gSynoBootSATADOM);
+#endif /* CONFIG_SYNO_BOOT_SATA_DOM */
+#ifdef CONFIG_SYNO_DUAL_HEAD
+int gSynoDualHead = 0;
+EXPORT_SYMBOL(gSynoDualHead);
+unsigned char gszSynoDualHeadPrivateIP[9][32];
+EXPORT_SYMBOL(gszSynoDualHeadPrivateIP);
+static int iSynoMacIFCount = 9;
+static int iSynoDualheadIPValueLen = 32;
+#endif /* CONFIG_SYNO_DUAL_HEAD */
+
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+int gSynoSASWriteConflictPanic = 0;
+EXPORT_SYMBOL(gSynoSASWriteConflictPanic);
+#endif /* CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC */
+
+#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+int gSynoFactoryUSBFastReset = 0;
+EXPORT_SYMBOL(gSynoFactoryUSBFastReset);
+#endif /* CONFIG_SYNO_FACTORY_USB_FAST_RESET */
+
+#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+int gSynoFactoryUSB3Disable = 0;
+EXPORT_SYMBOL(gSynoFactoryUSB3Disable);
+#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
+int giSynoEncPwrCtl = 0;
+extern int SynoProcEncPwrCtl(struct ctl_table *table, int write,
+		        void __user *buffer, size_t *lenp, loff_t *ppos);
+#endif /* CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL */
+
+#ifdef CONFIG_SYNO_TTY_EXPORT
+int (*syno_test_list)(unsigned char, struct tty_struct *);
+EXPORT_SYMBOL(syno_test_list);
+#endif /* CONFIG_SYNO_TTY_EXPORT */
 
 /* External variables not in a header file. */
 extern int sysctl_overcommit_memory;
@@ -146,8 +328,6 @@ static const int cap_last_cap = CAP_LAST_CAP;
 
 #ifdef CONFIG_INOTIFY_USER
 #include <linux/inotify.h>
-#endif
-#ifdef CONFIG_SPARC
 #endif
 
 #ifdef CONFIG_SPARC64
@@ -1063,6 +1243,240 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= proc_dointvec,
 	},
 #endif
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+	{
+		.procname       = "syno_debug_flag",
+		.data           = &SynoDebugFlag,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
+	{
+		.procname       = "syno_hibernation_log_level",
+		.data           = &syno_hibernation_log_level,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
+	{
+		.procname       = "syno_ata_debug",
+		.data           = &giSynoAtaDebug,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
+	{
+		.procname		= "syno_dyn_module",
+		.data			= &gSynoHasDynModule,
+		.maxlen			= sizeof (int),
+		.mode			= 0444,
+		.proc_handler	= proc_dointvec,
+	},
+#endif /*CONFIG_SYNO_DYN_MODULE_INSTALL*/
+#ifdef CONFIG_SYNO_INSTALL_FLAG
+	{
+		.procname       = "syno_install_flag",
+		.data           = &gSynoInstallFlag,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
+#endif /*CONFIG_SYNO_INSTALL_FLAG*/
+#ifdef CONFIG_SYNO_HW_REVISION
+	{
+		.procname		= "syno_hw_revision",
+		.data			= gszSynoHWRevision,
+		.maxlen			= 4,
+		.mode			= 0444,
+		.proc_handler		= proc_dostring,
+	},
+#endif /* CONFIG_SYNO_HW_REVISION */
+#ifdef CONFIG_SYNO_HW_VERSION
+	{
+		.procname       = "syno_hw_version",
+		.data           = gszSynoHWVersion,
+		.maxlen         = 16,
+		.mode           = 0444,
+		.proc_handler   = proc_dostring,
+	},
+#endif /* CONFIG_SYNO_HW_VERSION */
+#ifdef CONFIG_SYNO_INTERNAL_HD_NUM
+	{
+		.procname	= "syno_internal_hd_num",
+		.data		= &g_internal_hd_num,
+		.maxlen		= sizeof (int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec,
+	},
+#endif /* CONFIG_SYNO_INTERNAL_HD_NUM */
+#ifdef CONFIG_SYNO_SPINUP_DELAY
+	{
+		.procname		= "syno_disks_group",
+		.data			= &guiWakeupDisksNum,
+		.maxlen			= sizeof (unsigned int),
+		.mode			= 0644,
+		.proc_handler	= proc_dointvec,
+	},
+	{
+		.procname		= "syno_deno_of_spinup_time",
+		.data			= &giDenoOfTimeInterval,
+		.maxlen			= sizeof (int),
+		.mode			= 0644,
+		.proc_handler	= proc_dointvec,
+	},
+#endif /* CONFIG_SYNO_SPINUP_DELAY */
+#ifdef CONFIG_SYNO_SERIAL
+	{
+		.procname       = "syno_serial",
+		.data           = &gszSerialNum,
+		.maxlen         = 32,
+		.mode           = 0444,
+		.proc_handler   = proc_dostring,
+	},
+	{
+		.procname       = "syno_custom_serial",
+		.data           = &gszCustomSerialNum,
+		.maxlen         = 32,
+		.mode           = 0444,
+		.proc_handler   = proc_dostring,
+	},
+#endif /* CONFIG_SYNO_SERIAL */
+#ifdef CONFIG_SYNO_MD_STATUS_GET
+	{
+		.procname       = "syno_raid_sync_flag",
+		.data           = &gSynoRaidSyncFlag,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
+#endif /* CONFIG_SYNO_MD_STATUS_GET */
+#ifdef CONFIG_SYNO_INTERNAL_NETIF_NUM
+	{
+		.procname		= "syno_internal_netif_num",
+		.data			= &g_internal_netif_num,
+		.maxlen			= sizeof (int),
+		.mode			= 0644,
+		.proc_handler	= proc_dointvec,
+	},
+#endif /* CONFIG_SYNO_INTERNAL_NETIF_NUM */
+#ifdef CONFIG_SYNO_MAC_ADDRESS
+	{
+		.procname		= "syno_mac_address1",
+		.data			= &grgbLanMac[0],
+		.maxlen			= 16,
+		.mode			= 0444,
+		.proc_handler	= proc_dostring,
+	},
+	{
+		.procname		= "syno_mac_address2",
+		.data			= &grgbLanMac[1],
+		.maxlen			= 16,
+		.mode			= 0444,
+		.proc_handler	= proc_dostring,
+	},
+	{
+		.procname		= "syno_mac_address3",
+		.data			= &grgbLanMac[2],
+		.maxlen			= 16,
+		.mode			= 0444,
+		.proc_handler	= proc_dostring,
+	},
+	{
+		.procname		= "syno_mac_address4",
+		.data			= &grgbLanMac[3],
+		.maxlen			= 16,
+		.mode			= 0444,
+		.proc_handler	= proc_dostring,
+	},
+	{
+		.procname		= "syno_mac_addresses",
+		.data			= &grgbLanMac,
+		.maxlen			= sizeof(grgbLanMac),
+		.mode			= 0444,
+		.proc_handler	= SynoProcDoStringVec,
+		.extra1			= &iSynoMacMax,
+		.extra2			= &iMacEntrySize,
+	},
+	{
+		.procname		= "syno_skip_vender_mac_interfaces",
+		.data			= &gszSkipVenderMacInterfaces,
+		.maxlen			= 256,
+		.mode			= 0444,
+		.proc_handler	= proc_dostring,
+	},
+	{
+		.procname		= "syno_vender_format_version",
+		.data			= &giVenderFormatVersion,
+		.maxlen			= sizeof (int),
+		.mode			= 0444,
+		.proc_handler	= proc_dointvec,
+	},
+#endif /* CONFIG_SYNO_MAC_ADDRESS */
+#ifdef CONFIG_SYNO_DUAL_HEAD
+	{
+		.procname       = "syno_dual_head_private_ip",
+		.data           = &gszSynoDualHeadPrivateIP,
+		.maxlen         = sizeof(gszSynoDualHeadPrivateIP),
+		.mode           = 0644,
+		.proc_handler   = SynoProcDoStringVec,
+		.extra1         = &iSynoMacIFCount,
+		.extra2         = &iSynoDualheadIPValueLen,
+	},
+#endif /* CONFIG_SYNO_DUAL_HEAD */
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
+	{
+		.procname		= "syno_is_sas_model",
+		.data			= &g_is_sas_model,
+		.maxlen			= sizeof (int),
+		.mode			= 0644,
+		.proc_handler	= proc_dointvec,
+	},
+#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+#ifdef CONFIG_SYNO_DISPLAY_CPUINFO
+        {
+            .procname       = "syno_CPU_info_core",
+            .data           = &gSynoCPUInfoCore,
+            .maxlen         = sizeof (unsigned int),
+            .mode           = 0644,
+            .proc_handler   = proc_dointvec,
+        },
+        {
+            .procname       = "syno_CPU_info_clock",
+            .data           = &gSynoCPUInfoClock,
+            .maxlen         = 16,
+            .mode           = 0644,
+            .proc_handler   = proc_dostring,
+        },
+#endif /* CONFIG_SYNO_DISPLAY_CPUINFO */
+#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+	{
+		.procname	= "syno_usb_fast_reset",
+		.data		= &gSynoFactoryUSBFastReset,
+		.maxlen		= sizeof (int),
+		.mode		= 0444,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif /* CONFIG_SYNO_FACTORY_USB_FAST_RESET */
+#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+	{
+		.procname	= "syno_disable_usb3",
+		.data		= &gSynoFactoryUSB3Disable,
+		.maxlen		= sizeof (int),
+		.mode		= 0444,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
+	{
+		.procname       = "syno_enc_pwr_ctl",
+		.data           = &giSynoEncPwrCtl,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = SynoProcEncPwrCtl,
+	},
+#endif /* CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL */
 	{ }
 };
 
@@ -2279,7 +2693,6 @@ int proc_doulongvec_ms_jiffies_minmax(struct ctl_table *table, int write,
 				     lenp, ppos, HZ, 1000l);
 }
 
-
 static int do_proc_dointvec_jiffies_conv(bool *negp, unsigned long *lvalp,
 					 int *valp,
 					 int write, void *data)
@@ -2584,6 +2997,114 @@ int proc_do_large_bitmap(struct ctl_table *table, int write,
 	}
 }
 
+#if defined(CONFIG_SYNO_MAC_ADDRESS) || defined(CONFIG_SYNO_DUAL_HEAD)
+/**
+ * Notice: In order to call this handler, the input array of strings
+ * must be in continuous memory allocation
+ * such as str[arrayindex][string]
+ *
+ * Each string must be null terminated
+ *
+ * The extra1 parameter should pass the array size
+ *
+ * The extra2 parameter should pass the size of an array entry
+ *
+ * The output of this function will be one string per line
+ */
+int SynoProcDoStringVec(struct ctl_table *table, int write,
+		void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	char *pStr = (char *)table->data;
+	int *pArraySize = (int *)table->extra1;
+	int *pEntrySize = (int *)table->extra2;
+	int iMaxLen = table->maxlen;
+	size_t iLen = 0;
+	size_t iLenSum = 0;
+	char stBuf[512] = {'\0'};
+	char *pBuf = stBuf;
+	int iArrayIndex = 0;
+#ifdef CONFIG_SYNO_DUAL_HEAD
+	int iOffset = 0;
+	char *p = NULL;
+	char c = -1;
+#endif /* CONFIG_SYNO_DUAL_HEAD */
+
+	if (!pArraySize || !(*pArraySize) || !pEntrySize || !(*pEntrySize) || !iMaxLen || !(*lenp)) {
+		*lenp = 0;
+		return 0;
+	}
+
+	if (write) {
+		// do nothing
+#ifdef CONFIG_SYNO_DUAL_HEAD
+		for (iArrayIndex = 0; iArrayIndex < *pArraySize; iArrayIndex++) {
+			if (0 == c) {
+				pStr = ((char *)table->data) + iArrayIndex * (*pEntrySize);
+				*pStr = 0;
+				continue;
+			}
+			iLen = 0;
+			p = buffer + iOffset;
+			while (iLen < *lenp) {
+				if (get_user(c, p++))
+					return -EFAULT;
+				if (c == 0 || c == '\n')
+					break;
+				iLen++;
+			}
+			if (iLen >= iMaxLen)
+				iLen = iMaxLen-1;
+			pStr = ((char *)table->data) + iArrayIndex * (*pEntrySize);
+			if(copy_from_user(pStr, buffer + iOffset, iLen))
+				return -EFAULT;
+			pStr[iLen] = 0;
+			iOffset += (iLen + 1);
+			*ppos += *lenp;
+		}
+#endif /* CONFIG_SYNO_DUAL_HEAD */
+	} else {
+		// move to desired array index iArrayIndex and offset pStr
+		iLenSum = 0;
+		for (iArrayIndex = 0; iArrayIndex < *pArraySize; iArrayIndex++) {
+			iLen = strlen(pStr);
+			if (0 == iLen) {
+				break;
+			}
+			if (iLenSum + iLen + 1 > *ppos) {
+				pStr += *ppos - iLenSum;
+				iLenSum = *ppos;
+				break;
+			} else {
+				pStr += *pEntrySize;
+				iLenSum += iLen + 1;
+			}
+		}
+
+		// print macs
+		for (; iArrayIndex < *pArraySize; iArrayIndex++) {
+			iLen = strlen(pStr);
+			if (0 == iLen) {
+				break;
+			}
+			strncpy(pBuf, pStr, iLen);
+			pBuf[iLen] = '\n';
+			iLenSum += iLen + 1;
+			pBuf += iLen + 1;
+			pStr = ((char *)table->data) + (iArrayIndex + 1) * (*pEntrySize);
+		}
+
+		if (copy_to_user(buffer, stBuf, iLenSum - *ppos)) {
+			return -EFAULT;
+		}
+
+		*lenp = iLenSum - *ppos;
+		*ppos = iLenSum;
+	}
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_MAC_ADDRESS || CONFIG_SYNO_DUAL_HEAD */
+
 #else /* CONFIG_PROC_SYSCTL */
 
 int proc_dostring(struct ctl_table *table, int write,
@@ -2635,6 +3156,13 @@ int proc_doulongvec_ms_jiffies_minmax(struct ctl_table *table, int write,
     return -ENOSYS;
 }
 
+#if defined(CONFIG_SYNO_MAC_ADDRESS) || defined(CONFIG_SYNO_DUAL_HEAD)
+int SynoProcDoStringVec(struct ctl_table *table, int write,
+			void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+    return -ENOSYS;
+}
+#endif /* CONFIG_SYNO_MAC_ADDRESS || CONFIG_SYNO_DUAL_HEAD */
 
 #endif /* CONFIG_PROC_SYSCTL */
 

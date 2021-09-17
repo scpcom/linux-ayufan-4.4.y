@@ -102,6 +102,11 @@ typedef int (*iterate_devices_callout_fn) (struct dm_target *ti,
 typedef int (*dm_iterate_devices_fn) (struct dm_target *ti,
 				      iterate_devices_callout_fn fn,
 				      void *data);
+#ifdef CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT
+typedef int (*dm_handle_4kn_target_support_fn) (struct dm_target *ti,
+				      iterate_devices_callout_fn fn,
+				      void *data);
+#endif /* CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT */
 
 typedef void (*dm_io_hints_fn) (struct dm_target *ti,
 				struct queue_limits *limits);
@@ -112,6 +117,11 @@ typedef void (*dm_io_hints_fn) (struct dm_target *ti,
  *    1: The target can't handle the next I/O immediately.
  */
 typedef int (*dm_busy_fn) (struct dm_target *ti);
+
+#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
+typedef void (*dm_lvinfoset_fn) (struct dm_target *ti);
+typedef sector_t (*dm_lg_sector_get_fn) (sector_t sector, struct dm_target *ti);
+#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
 
 void dm_error(const char *message);
 
@@ -160,7 +170,14 @@ struct target_type {
 	dm_merge_fn merge;
 	dm_busy_fn busy;
 	dm_iterate_devices_fn iterate_devices;
+#ifdef CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT
+	dm_handle_4kn_target_support_fn handle_4kn_target_support;
+#endif /* CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT */
 	dm_io_hints_fn io_hints;
+#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
+	dm_lvinfoset_fn lvinfoset;
+	dm_lg_sector_get_fn lg_sector_get;
+#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
 
 	/* For internal device-mapper use. */
 	struct list_head list;
@@ -385,6 +402,10 @@ void *dm_get_mdptr(struct mapped_device *md);
  */
 int dm_suspend(struct mapped_device *md, unsigned suspend_flags);
 int dm_resume(struct mapped_device *md);
+#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+int dm_active_get(struct mapped_device *md);
+int dm_active_set(struct mapped_device *md, int value);
+#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
 
 /*
  * Event functions.
@@ -447,9 +468,9 @@ int __must_check dm_set_target_max_io_len(struct dm_target *ti, sector_t len);
 /*
  * Table reference counting.
  */
-struct dm_table *dm_get_live_table(struct mapped_device *md);
-void dm_table_get(struct dm_table *t);
-void dm_table_put(struct dm_table *t);
+struct dm_table *dm_get_live_table(struct mapped_device *md, int *srcu_idx);
+void dm_put_live_table(struct mapped_device *md, int srcu_idx);
+void dm_sync_table(struct mapped_device *md);
 
 /*
  * Queries

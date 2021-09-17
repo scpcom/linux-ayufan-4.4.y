@@ -246,7 +246,6 @@ static struct kobj_type device_ktype = {
 	.namespace	= device_namespace,
 };
 
-
 static int dev_uevent_filter(struct kset *kset, struct kobject *kobj)
 {
 	struct kobj_type *ktype = get_ktype(kobj);
@@ -300,12 +299,51 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 			kfree(tmp);
 		}
 	}
+#ifdef CONFIG_SYNO_PMP_HOTPLUG_TASK
+	/* host with dev->devt 0, if we want to get hotplug of CABLE_CONNECT/CABLE_DISCONNECT
+	 * we must add DEVNAME in env to pass it to hotplug.
+	 **/
+	else {
+		add_uevent_var(env, "DEVNAME=%s", dev_name(dev));
+	}
+#endif /* CONFIG_SYNO_PMP_HOTPLUG_TASK */
 
 	if (dev->type && dev->type->name)
 		add_uevent_var(env, "DEVTYPE=%s", dev->type->name);
 
 	if (dev->driver)
 		add_uevent_var(env, "DRIVER=%s", dev->driver->name);
+
+#if defined(CONFIG_SYSFS_DEPRECATED) || defined(CONFIG_SYNO_DEPRECATED_UEVENT_ENV)
+	if (dev->class) {
+		struct device *parent = dev->parent;
+
+		/* find first bus device in parent chain */
+		while (parent && !parent->bus)
+			parent = parent->parent;
+		if (parent && parent->bus) {
+			const char *path;
+
+			path = kobject_get_path(&parent->kobj, GFP_KERNEL);
+			if (path) {
+				add_uevent_var(env, "PHYSDEVPATH=%s", path);
+				kfree(path);
+			}
+
+			add_uevent_var(env, "PHYSDEVBUS=%s", parent->bus->name);
+
+			if (parent->driver)
+				add_uevent_var(env, "PHYSDEVDRIVER=%s",
+								 parent->driver->name);
+		}
+	} else if (dev->bus) {
+		add_uevent_var(env, "PHYSDEVBUS=%s", dev->bus->name);
+
+		if (dev->driver)
+			add_uevent_var(env, "PHYSDEVDRIVER=%s",
+							 dev->driver->name);
+	}
+#endif /* CONFIG_SYSFS_DEPRECATED || CONFIG_SYNO_DEPRECATED_UEVENT_ENV */
 
 	/* Add common DT information about the device */
 	of_device_uevent(dev, env);
@@ -547,7 +585,6 @@ static void device_remove_attrs(struct device *dev)
 	}
 }
 
-
 static ssize_t show_dev(struct device *dev, struct device_attribute *attr,
 			char *buf)
 {
@@ -764,7 +801,6 @@ class_dir_create_and_add(struct class *class, struct kobject *parent_kobj)
 	}
 	return &dir->kobj;
 }
-
 
 static struct kobject *get_device_parent(struct device *dev,
 					 struct device *parent)
@@ -1527,7 +1563,6 @@ void root_device_unregister(struct device *dev)
 	device_unregister(dev);
 }
 EXPORT_SYMBOL_GPL(root_device_unregister);
-
 
 static void device_create_release(struct device *dev)
 {

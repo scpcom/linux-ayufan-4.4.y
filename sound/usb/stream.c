@@ -14,7 +14,6 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/usb.h>
@@ -53,7 +52,6 @@ static void free_substream(struct snd_usb_substream *subs)
 	}
 	kfree(subs->rate_list.list);
 }
-
 
 /*
  * free a usb stream instance
@@ -359,6 +357,11 @@ int snd_usb_add_audio_stream(struct snd_usb_audio *chip,
 		return err;
 	}
 	as->pcm = pcm;
+#if defined(CONFIG_SYNO_AUDIO_USE_EXTERNAL_SPEAKER)
+	if (pcm && pcm->card) {
+		pcm->card->low_level_dev_id = chip->usb_id;
+	}
+#endif /* CONFIG_SYNO_AUDIO_USE_EXTERNAL_SPEAKER */
 	pcm->private_data = as;
 	pcm->private_free = snd_usb_audio_pcm_free;
 	pcm->info_flags = 0;
@@ -699,4 +702,3 @@ int snd_usb_parse_audio_interface(struct snd_usb_audio *chip, int iface_no)
 	}
 	return 0;
 }
-

@@ -336,7 +336,6 @@ static void pci_ni8420_exit(struct pci_dev *dev)
 	iounmap(p);
 }
 
-
 /* MITE registers */
 #define MITE_IOWBSR1	0xc4
 #define MITE_IOWCR1	0xf4
@@ -1062,7 +1061,6 @@ struct quatech_feature {
 #define QOPR_CLOCK_X8		0x0003
 #define QOPR_CLOCK_RATE_MASK	0x0003
 
-
 static struct quatech_feature quatech_cards[] = {
 	{ PCI_DEVICE_ID_QUATECH_QSC100,   1 },
 	{ PCI_DEVICE_ID_QUATECH_DSC100,   1 },
@@ -1439,6 +1437,24 @@ pci_xr17v35x_setup(struct serial_private *priv,
 	/*
 	 * Setup Multipurpose Input/Output pins.
 	 */
+
+#ifdef CONFIG_SYNO_XR17V35X_SERIAL
+	if (idx == 0) {
+		writeb(0x01, p + 0x8f); /*MPIOINT[7:0]*/
+		writeb(0x00, p + 0x90); /*MPIOLVL[7:0]*/
+		writeb(0x00, p + 0x91); /*MPIO3T[7:0]*/
+		/* Buzzer mute is low active, so set inverse to trigger interrupt */
+		writeb(0x01, p + 0x92); /*MPIOINV[7:0]*/
+		writeb(0x01, p + 0x93); /*MPIOSEL[7:0]*/
+		writeb(0x00, p + 0x94); /*MPIOOD[7:0]*/
+		writeb(0x00, p + 0x95); /*MPIOINT[15:8]*/
+		writeb(0x00, p + 0x96); /*MPIOLVL[15:8]*/
+		writeb(0x00, p + 0x97); /*MPIO3T[15:8]*/
+		writeb(0x00, p + 0x98); /*MPIOINV[15:8]*/
+		writeb(0x00, p + 0x99); /*MPIOSEL[15:8]*/
+		writeb(0x00, p + 0x9a); /*MPIOOD[15:8]*/
+	}
+#else
 	if (idx == 0) {
 		writeb(0x00, p + 0x8f); /*MPIOINT[7:0]*/
 		writeb(0x00, p + 0x90); /*MPIOLVL[7:0]*/
@@ -1453,6 +1469,7 @@ pci_xr17v35x_setup(struct serial_private *priv,
 		writeb(0x00, p + 0x99); /*MPIOSEL[15:8]*/
 		writeb(0x00, p + 0x9a); /*MPIOOD[15:8]*/
 	}
+#endif
 	writeb(0x00, p + UART_EXAR_8XMODE);
 	writeb(UART_FCTR_EXAR_TRGD, p + UART_EXAR_FCTR);
 	writeb(128, p + UART_EXAR_TXTRG);
@@ -1569,7 +1586,6 @@ pci_wch_ch353_setup(struct serial_private *priv,
 
 #define PCI_VENDOR_ID_SUNIX		0x1fd4
 #define PCI_DEVICE_ID_SUNIX_1999	0x1999
-
 
 /* Unknown vendors/cards - this should not be in linux/pci_ids.h */
 #define PCI_SUBDEVICE_ID_UNKNOWN_0x1584	0x1584
@@ -2998,7 +3014,6 @@ static struct pciserial_board pci_boards[] = {
 		.uart_offset	= 0x200,
 		.first_offset	= 0x1000,
 	},
-
 
 	/*
 	 * EKF addition for i960 Boards form EKF with serial port.
@@ -4589,7 +4604,6 @@ static struct pci_device_id serial_pci_tbl[] = {
 		PCI_VENDOR_ID_MAINPINE, PCI_DEVICE_ID_MAINPINE_PBRIDGE,
 		PCI_VENDOR_ID_MAINPINE, 0x3D00,
 		0, 0, pbn_b0_8_115200 },
-
 
 	/*
 	 * PA Semi PA6T-1682M on-chip UART

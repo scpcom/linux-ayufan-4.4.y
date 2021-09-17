@@ -33,7 +33,6 @@
 #include <linux/raid/xor.h>
 #include <linux/vmalloc.h>
 #include <asm/div64.h>
-#include "compat.h"
 #include "ctree.h"
 #include "extent_map.h"
 #include "disk-io.h"
@@ -58,7 +57,6 @@
  * set when it is safe to trust the stripe_pages for caching
  */
 #define RBIO_CACHE_READY_BIT	3
-
 
 #define RBIO_CACHE_SIZE 1024
 
@@ -675,7 +673,6 @@ static noinline int lock_stripe_add(struct btrfs_raid_bio *rbio)
 				goto out;
 			}
 
-
 			/*
 			 * we couldn't merge with the running
 			 * rbio, see if we can merge with the
@@ -1218,7 +1215,6 @@ static noinline void finish_rmw(struct btrfs_raid_bio *rbio)
 			run_xor(pointers + 1, nr_data - 1, PAGE_CACHE_SIZE);
 		}
 
-
 		for (stripe = 0; stripe < bbio->num_stripes; stripe++)
 			kunmap(page_in_rbio(rbio, stripe, pagenr, 0));
 	}
@@ -1417,20 +1413,18 @@ cleanup:
 
 static void async_rmw_stripe(struct btrfs_raid_bio *rbio)
 {
-	rbio->work.flags = 0;
-	rbio->work.func = rmw_work;
+	btrfs_init_work(&rbio->work, rmw_work, NULL, NULL);
 
-	btrfs_queue_worker(&rbio->fs_info->rmw_workers,
-			   &rbio->work);
+	btrfs_queue_work(rbio->fs_info->rmw_workers,
+			 &rbio->work);
 }
 
 static void async_read_rebuild(struct btrfs_raid_bio *rbio)
 {
-	rbio->work.flags = 0;
-	rbio->work.func = read_rebuild_work;
+	btrfs_init_work(&rbio->work, read_rebuild_work, NULL, NULL);
 
-	btrfs_queue_worker(&rbio->fs_info->rmw_workers,
-			   &rbio->work);
+	btrfs_queue_work(rbio->fs_info->rmw_workers,
+			 &rbio->work);
 }
 
 /*
@@ -1540,8 +1534,10 @@ static int full_stripe_write(struct btrfs_raid_bio *rbio)
 	int ret;
 
 	ret = alloc_rbio_parity_pages(rbio);
-	if (ret)
+	if (ret) {
+		__free_raid_bio(rbio);
 		return ret;
+	}
 
 	ret = lock_stripe_add(rbio);
 	if (ret == 0)
@@ -1666,10 +1662,9 @@ static void btrfs_raid_unplug(struct blk_plug_cb *cb, bool from_schedule)
 	plug = container_of(cb, struct btrfs_plug_cb, cb);
 
 	if (from_schedule) {
-		plug->work.flags = 0;
-		plug->work.func = unplug_work;
-		btrfs_queue_worker(&plug->info->rmw_workers,
-				   &plug->work);
+		btrfs_init_work(&plug->work, unplug_work, NULL, NULL);
+		btrfs_queue_work(plug->info->rmw_workers,
+				 &plug->work);
 		return;
 	}
 	run_plug(plug);
@@ -1687,11 +1682,8 @@ int raid56_parity_write(struct btrfs_root *root, struct bio *bio,
 	struct blk_plug_cb *cb;
 
 	rbio = alloc_rbio(root, bbio, raid_map, stripe_len);
-	if (IS_ERR(rbio)) {
-		kfree(raid_map);
-		kfree(bbio);
+	if (IS_ERR(rbio))
 		return PTR_ERR(rbio);
-	}
 	bio_list_add(&rbio->bio_list, bio);
 	rbio->bio_list_bytes = bio->bi_size;
 
@@ -1961,9 +1953,10 @@ static int __raid56_parity_recover(struct btrfs_raid_bio *rbio)
 	 * pages are going to be uptodate.
 	 */
 	for (stripe = 0; stripe < bbio->num_stripes; stripe++) {
-		if (rbio->faila == stripe ||
-		    rbio->failb == stripe)
+		if (rbio->faila == stripe || rbio->failb == stripe) {
+			atomic_inc(&rbio->bbio->error);
 			continue;
+		}
 
 		for (pagenr = 0; pagenr < nr_pages; pagenr++) {
 			struct page *p;
@@ -2041,9 +2034,8 @@ int raid56_parity_recover(struct btrfs_root *root, struct bio *bio,
 	int ret;
 
 	rbio = alloc_rbio(root, bbio, raid_map, stripe_len);
-	if (IS_ERR(rbio)) {
+	if (IS_ERR(rbio))
 		return PTR_ERR(rbio);
-	}
 
 	rbio->read_rebuild = 1;
 	bio_list_add(&rbio->bio_list, bio);
@@ -2052,6 +2044,8 @@ int raid56_parity_recover(struct btrfs_root *root, struct bio *bio,
 	rbio->faila = find_logical_bio_stripe(rbio, bio);
 	if (rbio->faila == -1) {
 		BUG();
+		kfree(raid_map);
+		kfree(bbio);
 		kfree(rbio);
 		return -EIO;
 	}

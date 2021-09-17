@@ -590,6 +590,11 @@ void usb_kick_khubd(struct usb_device *hdev)
 {
 	struct usb_hub *hub = usb_hub_to_struct_hub(hdev);
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(hdev))
+		return ethub_usb_kick_kethubd(hdev);
+#endif /* CONFIG_USB_ETRON_HUB */
+
 	if (hub)
 		kick_khubd(hub);
 }
@@ -606,6 +611,11 @@ void usb_wakeup_notification(struct usb_device *hdev,
 		unsigned int portnum)
 {
 	struct usb_hub *hub;
+
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(hdev))
+		return ethub_usb_wakeup_notification(hdev, portnum);
+#endif /* CONFIG_USB_ETRON_HUB */
 
 	if (!hdev)
 		return;
@@ -969,6 +979,11 @@ int usb_remove_device(struct usb_device *udev)
 {
 	struct usb_hub *hub;
 	struct usb_interface *intf;
+
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(udev))
+		return ethub_usb_remove_device(udev);
+#endif /* CONFIG_USB_ETRON_HUB */
 
 	if (!udev->parent)	/* Can't remove a root hub */
 		return -EINVAL;
@@ -1648,6 +1663,11 @@ static int hub_probe(struct usb_interface *intf, const struct usb_device_id *id)
 	desc = intf->cur_altsetting;
 	hdev = interface_to_usbdev(intf);
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(hdev))
+		return -ENODEV;
+#endif /* CONFIG_USB_ETRON_HUB */
+
 	/*
 	 * Set default autosuspend delay as 0 to speedup bus suspend,
 	 * based on the below considerations:
@@ -1813,6 +1833,11 @@ int usb_hub_claim_port(struct usb_device *hdev, unsigned port1,
 	int rc;
 	struct dev_state **powner;
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(hdev))
+		return ethub_usb_hub_claim_port(hdev, port1, owner);
+#endif /* CONFIG_USB_ETRON_HUB */
+
 	rc = find_port_owner(hdev, port1, &powner);
 	if (rc)
 		return rc;
@@ -1828,6 +1853,11 @@ int usb_hub_release_port(struct usb_device *hdev, unsigned port1,
 	int rc;
 	struct dev_state **powner;
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(hdev))
+		return ethub_usb_hub_release_port(hdev, port1, owner);
+#endif /* CONFIG_USB_ETRON_HUB */
+
 	rc = find_port_owner(hdev, port1, &powner);
 	if (rc)
 		return rc;
@@ -1842,6 +1872,11 @@ void usb_hub_release_all_ports(struct usb_device *hdev, struct dev_state *owner)
 	struct usb_hub *hub = usb_hub_to_struct_hub(hdev);
 	int n;
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(hdev))
+		return ethub_usb_hub_release_all_ports(hdev, owner);
+#endif /* CONFIG_USB_ETRON_HUB */
+
 	for (n = 0; n < hdev->maxchild; n++) {
 		if (hub->ports[n]->port_owner == owner)
 			hub->ports[n]->port_owner = NULL;
@@ -1853,6 +1888,11 @@ void usb_hub_release_all_ports(struct usb_device *hdev, struct dev_state *owner)
 bool usb_device_is_owned(struct usb_device *udev)
 {
 	struct usb_hub *hub;
+
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(udev))
+		return ethub_usb_device_is_owned(udev);
+#endif /* CONFIG_USB_ETRON_HUB */
 
 	if (udev->state == USB_STATE_NOTATTACHED || !udev->parent)
 		return false;
@@ -1900,6 +1940,11 @@ void usb_set_device_state(struct usb_device *udev,
 {
 	unsigned long flags;
 	int wakeup = -1;
+
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(udev))
+		return ethub_usb_set_device_state(udev, new_state);
+#endif /* CONFIG_USB_ETRON_HUB */
 
 	spin_lock_irqsave(&device_state_lock, flags);
 	if (udev->state == USB_STATE_NOTATTACHED)
@@ -2033,6 +2078,11 @@ void usb_disconnect(struct usb_device **pdev)
 	struct usb_device	*udev = *pdev;
 	struct usb_hub		*hub = usb_hub_to_struct_hub(udev);
 	int			i;
+
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(*pdev))
+		return ethub_usb_disconnect(pdev);
+#endif /* CONFIG_USB_ETRON_HUB */
 
 	/* mark the device as inactive, so any further urb submissions for
 	 * this device (and any of its children) will fail immediately.
@@ -2200,7 +2250,6 @@ fail:
 	return err;
 }
 
-
 /**
  * usb_enumerate_device - Read device configs/intfs/otg (usbcore-internal)
  * @udev: newly addressed device (in ADDRESS state)
@@ -2241,6 +2290,33 @@ static int usb_enumerate_device(struct usb_device *udev)
 
 	return 0;
 }
+
+#ifdef CONFIG_SYNO_USB_SERIAL_FIX
+/* Return 1 if found the same serial in other usb device. Otherwizs, return 0. */
+static int device_serial_match(struct usb_device *dev, struct usb_device *udev_search)
+{
+	int child, match = 0;
+	struct usb_device *childdev;
+
+	/* look through all of the children of this device */
+	usb_hub_for_each_child(dev, child, childdev) {
+		if (childdev && childdev != udev_search && childdev->serial) {
+
+			/* Can't down() here. Because when using hub, it will be lock by someone else */
+			if (childdev->serial[0] && strcmp(childdev->serial, udev_search->serial) == 0) {
+				match++;
+			} else {
+				match = device_serial_match(childdev, udev_search);
+			}
+
+			if (match) {
+				break;
+			}
+		}
+	}
+	return match;
+}
+#endif /* CONFIG_SYNO_USB_SERIAL_FIX*/
 
 static void set_usb_port_removable(struct usb_device *udev)
 {
@@ -2299,6 +2375,11 @@ int usb_new_device(struct usb_device *udev)
 {
 	int err;
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(udev))
+		return ethub_usb_new_device(udev);
+#endif /* CONFIG_USB_ETRON_HUB */
+
 	if (udev->parent) {
 		/* Initialize non-root-hub device wakeup to disabled;
 		 * device (un)configuration controls wakeup capable
@@ -2327,6 +2408,74 @@ int usb_new_device(struct usb_device *udev)
 	/* export the usbdev device-node for libusb */
 	udev->dev.devt = MKDEV(USB_DEVICE_MAJOR,
 			(((udev->bus->busnum-1) * 128) + (udev->devnum-1)));
+
+#ifdef CONFIG_SYNO_USB_SERIAL_FIX
+#define SERIAL_LEN 33
+	/* Make a fake serial number from product name */
+	if ( NULL == udev->product ) {
+		udev->product = kmalloc(16, GFP_KERNEL);
+		if (NULL != udev->product) {
+			snprintf(udev->product, 16, "USBDevice");
+		}
+	}
+
+	if (NULL == udev->serial && NULL != udev->product) {
+		int i;
+		char seed = 0xb4; /* pick a random number */
+
+		udev->serial = kmalloc(SERIAL_LEN, GFP_KERNEL);
+		if (NULL != udev->serial) {
+			const int cProductLen = strlen(udev->product);
+
+			printk("Got empty serial number. Generate serial number from product.\n");
+			udev->serial[0] = '\0';
+			for(i = 0; (i < cProductLen) && (i < (SERIAL_LEN-1)/2); i++) {
+				snprintf(udev->serial + strlen(udev->serial),
+					   SERIAL_LEN - strlen(udev->serial),
+					   "%02x", (seed ^= udev->product[cProductLen-i-1]));
+			}
+			udev->serial[SERIAL_LEN-1] = '\0';
+		}
+	}
+
+	if (udev->parent && udev->serial) {
+		int match, counter = 0;
+		struct list_head *buslist;
+		struct usb_bus *bus;
+
+RETRY:
+		match = 0;
+		for (buslist = usb_bus_list.next;
+			  buslist != &usb_bus_list;
+			  buslist = buslist->next) {
+
+			bus = container_of(buslist, struct usb_bus, bus_list);
+			if (!bus->root_hub)
+				continue;
+			match = device_serial_match(bus->root_hub, udev);
+
+			if (match) {
+				break;
+			}
+		}
+		if (match) {
+			int Len = strlen(udev->serial);
+
+			if (Len == 0) {
+				printk("USB serial length is 0!\n");
+			} else if (counter > 9) {
+				printk("There are to many same devices (%d)\n", counter);
+			} else {
+				udev->serial[Len - 1] = counter + '0';
+				udev->serial[Len] = '\0';
+				printk("%s (%d) Same device found. Change serial to %s \n", __FILE__, __LINE__, udev->serial);
+
+				counter++;
+				goto RETRY;
+			}
+		}
+	}
+#endif /* CONFIG_SYNO_USB_SERIAL_FIX */
 
 	/* Tell the world! */
 	announce_device(udev);
@@ -2391,7 +2540,6 @@ fail:
 	return err;
 }
 
-
 /**
  * usb_deauthorize_device - deauthorize a device (usbcore-internal)
  * @usb_dev: USB device
@@ -2404,6 +2552,11 @@ fail:
  */
 int usb_deauthorize_device(struct usb_device *usb_dev)
 {
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(usb_dev))
+		return ethub_usb_deauthorize_device(usb_dev);
+#endif /* CONFIG_USB_ETRON_HUB */
+
 	usb_lock_device(usb_dev);
 	if (usb_dev->authorized == 0)
 		goto out_unauthorized;
@@ -2416,10 +2569,14 @@ out_unauthorized:
 	return 0;
 }
 
-
 int usb_authorize_device(struct usb_device *usb_dev)
 {
 	int result = 0, c;
+
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(usb_dev))
+		return ethub_usb_authorize_device(usb_dev);
+#endif /* CONFIG_USB_ETRON_HUB */
 
 	usb_lock_device(usb_dev);
 	if (usb_dev->authorized == 1)
@@ -2462,7 +2619,6 @@ out_authorized:
 	return result;
 }
 
-
 /* Returns 1 if @hub is a WUSB root hub, 0 otherwise */
 static unsigned hub_is_wusb(struct usb_hub *hub)
 {
@@ -2472,7 +2628,6 @@ static unsigned hub_is_wusb(struct usb_hub *hub)
 	hcd = container_of(hub->hdev->bus, struct usb_hcd, self);
 	return hcd->wireless;
 }
-
 
 #define PORT_RESET_TRIES	5
 #define SET_ADDRESS_TRIES	2
@@ -2484,7 +2639,11 @@ static unsigned hub_is_wusb(struct usb_hub *hub)
 #define HUB_SHORT_RESET_TIME	10
 #define HUB_BH_RESET_TIME	50
 #define HUB_LONG_RESET_TIME	200
-#define HUB_RESET_TIMEOUT	800
+#ifdef CONFIG_SYNO_HUB_RESET_TIMEOUT
+#define HUB_RESET_TIMEOUT   3000
+#else
+#define HUB_RESET_TIMEOUT   800
+#endif /* CONFIG_SYNO_HUB_RESET_TIMEOUT */
 
 static int hub_port_reset(struct usb_hub *hub, int port1,
 			struct usb_device *udev, unsigned int delay, bool warm);
@@ -2910,6 +3069,11 @@ int usb_port_suspend(struct usb_device *udev, pm_message_t msg)
 	int		status;
 	bool		really_suspend = true;
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(udev))
+		return ethub_usb_port_suspend(udev, msg);
+#endif /* CONFIG_USB_ETRON_HUB */
+
 	/* enable remote wakeup when appropriate; this lets the device
 	 * wake up the upstream hub (including maybe the root hub).
 	 *
@@ -3177,6 +3341,11 @@ int usb_port_resume(struct usb_device *udev, pm_message_t msg)
 	int		status;
 	u16		portchange, portstatus;
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(udev))
+		return ethub_usb_port_resume(udev, msg);
+#endif /* CONFIG_USB_ETRON_HUB */
+
 	if (port_dev->did_runtime_put) {
 		status = pm_runtime_get_sync(&port_dev->dev);
 		port_dev->did_runtime_put = false;
@@ -3265,6 +3434,11 @@ int usb_port_resume(struct usb_device *udev, pm_message_t msg)
 int usb_remote_wakeup(struct usb_device *udev)
 {
 	int	status = 0;
+
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(udev))
+		return ethub_usb_remote_wakeup(udev);
+#endif /* CONFIG_USB_ETRON_HUB */
 
 	if (udev->state == USB_STATE_SUSPENDED) {
 		dev_dbg(&udev->dev, "usb %sresume\n", "wakeup-");
@@ -3379,6 +3553,11 @@ static int hub_reset_resume(struct usb_interface *intf)
  */
 void usb_root_hub_lost_power(struct usb_device *rhdev)
 {
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(rhdev))
+		return ethub_usb_root_hub_lost_power(rhdev);
+#endif /* CONFIG_USB_ETRON_HUB */
+
 	dev_warn(&rhdev->dev, "root hub lost power or was reset\n");
 	rhdev->reset_resume = 1;
 }
@@ -3793,7 +3972,6 @@ void usb_unlocked_enable_lpm(struct usb_device *udev)
 }
 EXPORT_SYMBOL_GPL(usb_unlocked_enable_lpm);
 
-
 #else	/* CONFIG_PM */
 
 #define hub_suspend		NULL
@@ -3827,7 +4005,6 @@ EXPORT_SYMBOL_GPL(usb_disable_ltm);
 void usb_enable_ltm(struct usb_device *udev) { }
 EXPORT_SYMBOL_GPL(usb_enable_ltm);
 #endif
-
 
 /* USB 2.0 spec, 7.1.7.3 / fig 7-29:
  *
@@ -3889,6 +4066,11 @@ int hub_port_debounce(struct usb_hub *hub, int port1, bool must_be_connected)
 
 void usb_ep0_reinit(struct usb_device *udev)
 {
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(udev))
+		return ethub_usb_ep0_reinit(udev);
+#endif /* CONFIG_USB_ETRON_HUB */
+
 	usb_disable_endpoint(udev, 0 + USB_DIR_IN, true);
 	usb_disable_endpoint(udev, 0 + USB_DIR_OUT, true);
 	usb_enable_endpoint(udev, &udev->ep0, true);
@@ -4986,6 +5168,13 @@ static int descriptors_changed(struct usb_device *udev,
 		}
 	}
 
+#if defined(CONFIG_SYNO_USB_SERIAL_FIX)
+	//For bug #48602 , when calling usb_reset_device ,
+	//don't compare the serial number if the serial number is empty.
+	//Because the original serial number is empty , and the old one is random-generated by us.
+	//This will cause re-enumerate the device , it's not normal.
+	if (0 != udev->descriptor.iSerialNumber) {
+#endif /* defined(CONFIG_SYNO_USB_SERIAL_FIX) */
 	if (!changed && serial_len) {
 		length = usb_string(udev, udev->descriptor.iSerialNumber,
 				buf, serial_len);
@@ -4998,6 +5187,9 @@ static int descriptors_changed(struct usb_device *udev,
 			changed = 1;
 		}
 	}
+#if defined(CONFIG_SYNO_USB_SERIAL_FIX)
+	}
+#endif /* defined(CONFIG_SYNO_USB_SERIAL_FIX) */
 
 	kfree(buf);
 	return changed;
@@ -5197,6 +5389,11 @@ int usb_reset_device(struct usb_device *udev)
 	unsigned int noio_flag;
 	struct usb_host_config *config = udev->actconfig;
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (usb_is_etron_hcd(udev))
+		return ethub_usb_reset_device(udev);
+#endif /* CONFIG_USB_ETRON_HUB */
+
 	if (udev->state == USB_STATE_NOTATTACHED ||
 			udev->state == USB_STATE_SUSPENDED) {
 		dev_dbg(&udev->dev, "device reset not allowed in state %d\n",
@@ -5263,7 +5460,6 @@ int usb_reset_device(struct usb_device *udev)
 	return ret;
 }
 EXPORT_SYMBOL_GPL(usb_reset_device);
-
 
 /**
  * usb_queue_reset_device - Reset a USB device from an atomic context

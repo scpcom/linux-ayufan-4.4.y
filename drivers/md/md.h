@@ -24,6 +24,14 @@
 #include <linux/wait.h>
 #include <linux/workqueue.h>
 
+#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#define CHECKINTERVAL (7UL*HZ)
+#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+
+#ifdef CONFIG_SYNO_MD_SECTOR_STATUS_REPORT
+#include <linux/raid/libmd-report.h>
+#endif /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
+
 #define MaxSector (~(sector_t)0)
 
 /* Bad block numbers are stored sorted in a single page.
@@ -32,6 +40,13 @@
  * 1 bit is an 'acknowledged' flag.
  */
 #define MD_MAX_BADBLOCKS	(PAGE_SIZE/8)
+
+#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+typedef struct _tag_SYNO_WAKEUP_DEVICE_WORK{
+    struct work_struct work;
+    struct mddev *mddev;
+} SYNO_WAKEUP_DEVICE_WORK;
+#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
 
 /*
  * MD's 'extended' device
@@ -52,6 +67,9 @@ struct md_rdev {
 	struct block_device *bdev;	/* block device handle */
 
 	struct page	*sb_page, *bb_page;
+#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+	struct page	*wakeup_page;
+#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
 	int		sb_loaded;
 	__u64		sb_events;
 	sector_t	data_offset;	/* start of data in array */
@@ -126,6 +144,14 @@ struct md_rdev {
 		sector_t size;		/* in sectors */
 	} badblocks;
 };
+
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+typedef struct _tag_SYNO_UPDATE_SB_WORK{
+    struct work_struct work;
+    struct mddev *mddev;
+} SYNO_UPDATE_SB_WORK;
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+
 enum flag_bits {
 	Faulty,			/* device is known to have a fault */
 	In_sync,		/* device is in_sync with rest of array */
@@ -170,6 +196,9 @@ enum flag_bits {
 				 * a want_replacement device with same
 				 * raid_disk number.
 				 */
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+	DiskError,	/* device is know to have a fault in degraded state */
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
 };
 
 #define BB_LEN_MASK	(0x00000000000001FFULL)
@@ -207,12 +236,16 @@ struct mddev {
 	struct md_personality		*pers;
 	dev_t				unit;
 	int				md_minor;
-	struct list_head 		disks;
+	struct list_head		disks;
 	unsigned long			flags;
 #define MD_CHANGE_DEVS	0	/* Some device status has changed */
 #define MD_CHANGE_CLEAN 1	/* transition to or from 'clean' */
 #define MD_CHANGE_PENDING 2	/* switch from 'clean' to 'active' in progress */
+#define MD_UPDATE_SB_FLAGS (1 | 2 | 4)	/* If these are set, md_update_sb needed */
 #define MD_ARRAY_FIRST_USE 3    /* First use of array, needs initialization */
+#define MD_STILL_CLOSED	4	/* If set, then array has not been opened since
+				 * md_ioctl checked on it.
+				 */
 
 	int				suspended;
 	atomic_t			active_io;
@@ -221,7 +254,7 @@ struct mddev {
 						       * are happening, so run/
 						       * takeover/stop are not safe
 						       */
-	int				ready; /* See when safe to pass 
+	int				ready; /* See when safe to pass
 						* IO requests down */
 	struct gendisk			*gendisk;
 
@@ -271,6 +304,14 @@ struct mddev {
 
 	struct md_thread		*thread;	/* management thread */
 	struct md_thread		*sync_thread;	/* doing resync or reconstruct */
+
+	/* 'last_sync_action' is initialized to "none".  It is set when a
+	 * sync operation (i.e "data-check", "requested-resync", "resync",
+	 * "recovery", or "reshape") is started.  It holds this value even
+	 * when the sync thread is "frozen" (interrupted) or "idle" (stopped
+	 * or finished).  It is overwritten when a new sync operation is begun.
+	 */
+	char				*last_sync_action;
 	sector_t			curr_resync;	/* last block scheduled */
 	/* As resync requests can complete out of order, we cannot easily track
 	 * how much resync has been completed.  So we occasionally pause until
@@ -332,6 +373,18 @@ struct mddev {
 	 * takes a copy of this number and does not attempt recovery again
 	 * until this number changes.
 	 */
+#ifdef CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_HANG
+	/* Resolve the raid 5 hang problem during expansion with disk error
+	 * or hotplug out.
+	 *
+	 * When set disk error or hotplug, md will receive MD_RECOVERY_INTR.
+	 * It breaks the md_do_sync loop. If following reshape is possible,
+	 * resize_stripes will be re-called again. It result to wrong pool_size
+	 * in stripe_cache of r5conf. And the second resize_stripes is not
+	 * necessary when device is set to error or disapear.
+	 */
+	int	reshape_interrupt;
+#endif /* CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_HANG */
 	int				recovery_disabled;
 
 	int				in_sync;	/* know to not need resync */
@@ -411,6 +464,24 @@ struct mddev {
 
 	atomic_t 			max_corr_read_errors; /* max read retries */
 	struct list_head		all_mddevs;
+#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+	unsigned char			blActive;  /* to record whether this md is in active or not */
+	spinlock_t				ActLock;   /* lock for Active attr. */
+	unsigned long			ulLastReq; /* the last time received request */
+#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+    unsigned char           nodev_and_crashed;     // 1 ==> nodev && crashed. deny make_request
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
+#define MD_AUTO_REMAP_MODE_FORCE_OFF 0
+#define MD_AUTO_REMAP_MODE_FORCE_ON 1
+#define MD_AUTO_REMAP_MODE_ISMAXDEGRADE 2
+	unsigned char			auto_remap;
+#endif /* CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP */
+#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
+	void                            *syno_private;    // store lv struct for auto remap report
+	char                            lv_name[16];
+#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
 
 	struct attribute_group		*to_remove;
 
@@ -426,7 +497,6 @@ struct mddev {
 	struct work_struct event_work;	/* used by dm to report failure event */
 	void (*sync_super)(struct mddev *mddev, struct md_rdev *rdev);
 };
-
 
 static inline void rdev_dec_pending(struct md_rdev *rdev, struct mddev *mddev)
 {
@@ -450,6 +520,14 @@ struct md_personality
 	int (*run)(struct mddev *mddev);
 	int (*stop)(struct mddev *mddev);
 	void (*status)(struct seq_file *seq, struct mddev *mddev);
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+	/**
+	 *  for our special purpose, like raid1, there is not exist a
+	 *  easy way for distinguish between hotplug or read/write error
+	 *  on last one disk which is in sync
+	 */
+	void (*syno_error_handler)(struct mddev *mddev, struct md_rdev *rdev);
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 	/* error_handler must set ->faulty and clear ->in_sync
 	 * if appropriate, and should abort recovery if needed 
 	 */
@@ -478,9 +556,12 @@ struct md_personality
 	 * This needs to be installed and then ->run used to activate the
 	 * array.
 	 */
+#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
+	unsigned char (*ismaxdegrade) (struct mddev *mddev);
+	void (*syno_set_rdev_auto_remap) (struct mddev *mddev);
+#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
 	void *(*takeover) (struct mddev *mddev);
 };
-
 
 struct md_sysfs_entry {
 	struct attribute attr;
@@ -561,6 +642,13 @@ static inline void safe_put_page(struct page *p)
 	if (p) put_page(p);
 }
 
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+extern void SynoUpdateSBTask(struct work_struct *work);
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+extern void syno_md_error (struct mddev *mddev, struct md_rdev *rdev);
+extern int IsDeviceDisappear(struct block_device *bdev);
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
 extern int register_md_personality(struct md_personality *p);
 extern int unregister_md_personality(struct md_personality *p);
 extern struct md_thread *md_register_thread(
@@ -595,6 +683,16 @@ extern void md_integrity_add_rdev(struct md_rdev *rdev, struct mddev *mddev);
 extern int strict_strtoul_scaled(const char *cp, unsigned long *res, int scale);
 extern void restore_bitmap_write_access(struct file *file);
 
+#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
+void SynoAutoRemapReport(struct mddev *mddev, sector_t sector, struct block_device *bdev);
+#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
+#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
+void RaidRemapModeSet(struct block_device *, unsigned char);
+#endif /* CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP */
+
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+void SYNORaidRdevUnplug(struct mddev *mddev, struct md_rdev *rdev);
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 extern void mddev_init(struct mddev *mddev);
 extern int md_run(struct mddev *mddev);
 extern void md_stop(struct mddev *mddev);

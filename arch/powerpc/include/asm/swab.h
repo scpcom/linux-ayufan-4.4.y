@@ -10,8 +10,6 @@
 #include <uapi/asm/swab.h>
 
 #ifdef __GNUC__
-#ifndef __powerpc64__
-#endif /* __powerpc64__ */
 
 static __inline__ __u16 ld_le16(const volatile __u16 *addr)
 {

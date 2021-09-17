@@ -2,6 +2,9 @@
 # Makefile for the Linux eCryptfs
 #
 
+#SYNO
+EXTRA_CFLAGS += -I$(srctree)/crypto/ocf
+
 obj-$(CONFIG_ECRYPT_FS) += ecryptfs.o
 
 ecryptfs-y := dentry.o file.o inode.o main.o super.o mmap.o read_write.o \

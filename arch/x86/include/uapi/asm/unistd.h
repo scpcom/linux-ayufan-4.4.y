@@ -4,6 +4,10 @@
 /* x32 syscall flag bit */
 #define __X32_SYSCALL_BIT	0x40000000
 
+#if 1 // SYNO
+#include <linux/syno.h>
+#endif // SYNO
+
 #ifndef __KERNEL__
 # ifdef __i386__
 #  include <asm/unistd_32.h>

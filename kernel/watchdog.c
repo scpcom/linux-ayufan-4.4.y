@@ -47,6 +47,9 @@ static DEFINE_PER_CPU(bool, watchdog_nmi_touch);
 static DEFINE_PER_CPU(unsigned long, hrtimer_interrupts_saved);
 static DEFINE_PER_CPU(struct perf_event *, watchdog_ev);
 #endif
+#ifdef CONFIG_SYNO_SOFTLOCKUP_COUNTER
+static DEFINE_PER_CPU(unsigned long, softlockup_counter);
+#endif
 
 /* boot commands */
 /*
@@ -105,7 +108,11 @@ __setup("nosoftlockup", nosoftlockup_setup);
  */
 static int get_softlockup_thresh(void)
 {
+#ifdef CONFIG_SYNO_SOFTLOCKUP_THRESH_EXTENSION
+	return watchdog_thresh * 4;
+#else
 	return watchdog_thresh * 2;
+#endif
 }
 
 /*
@@ -312,6 +319,15 @@ static enum hrtimer_restart watchdog_timer_fn(struct hrtimer *hrtimer)
 		/* only warn once */
 		if (__this_cpu_read(soft_watchdog_warn) == true)
 			return HRTIMER_RESTART;
+
+#ifdef CONFIG_SYNO_SOFTLOCKUP_COUNTER
+		if (__this_cpu_read(softlockup_counter) >= CONFIG_SYNO_SOFTLOCKUP_COUNTER_MAX) {
+			__this_cpu_write(soft_watchdog_warn, false);
+			return HRTIMER_RESTART;
+		} else {
+			__this_cpu_inc(softlockup_counter);
+		}
+#endif
 
 		printk(KERN_EMERG "BUG: soft lockup - CPU#%d stuck for %us! [%s:%d]\n",
 			smp_processor_id(), duration,

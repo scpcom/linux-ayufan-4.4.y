@@ -80,7 +80,11 @@
  */
 
 #ifdef CONFIG_PCI
+#ifdef CONFIG_SYNO_SATA_88SX7042_MSI
+static int msi = 1;
+#else /* CONFIG_SYNO_SATA_88SX7042_MSI */
 static int msi;
+#endif /* CONFIG_SYNO_SATA_88SX7042_MSI */
 module_param(msi, int, S_IRUGO);
 MODULE_PARM_DESC(msi, "Enable use of PCI MSI (0=off, 1=on)");
 #endif
@@ -94,6 +98,10 @@ static int irq_coalescing_usecs;
 module_param(irq_coalescing_usecs, int, S_IRUGO);
 MODULE_PARM_DESC(irq_coalescing_usecs,
 		 "IRQ coalescing time threshold in usecs");
+
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+extern void sata_print_link_status(struct ata_link *link);
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
 
 enum {
 	/* BAR's are enumerated in terms of pci_resource_start() terms */
@@ -135,6 +143,9 @@ enum {
 	FLASH_CTL		= 0x1046c,
 	GPIO_PORT_CTL		= 0x104f0,
 	RESET_CFG		= 0x180d8,
+#if defined(CONFIG_SYNO_SATA_MV_GPIO_RW) || defined(CONFIG_SYNO_SATA_MV_LED)
+	GPIO_CTL_DATA		= 0x1809c,
+#endif /* CONFIG_SYNO_SATA_MV_GPIO_RW || CONFIG_SYNO_SATA_MV_LED */
 
 	MV_PCI_REG_SZ		= MV_MAJOR_REG_AREA_SZ,
 	MV_SATAHC_REG_SZ	= MV_MAJOR_REG_AREA_SZ,
@@ -591,6 +602,9 @@ static int mv_qc_defer(struct ata_queued_cmd *qc);
 static void mv_qc_prep(struct ata_queued_cmd *qc);
 static void mv_qc_prep_iie(struct ata_queued_cmd *qc);
 static unsigned int mv_qc_issue(struct ata_queued_cmd *qc);
+#ifdef CONFIG_SYNO_FIX_MV_LBA_ERR_RET
+static bool syno_mv_qc_fill_rtf(struct ata_queued_cmd *qc);
+#endif /* CONFIG_SYNO_FIX_MV_LBA_ERR_RET */
 static int mv_hardreset(struct ata_link *link, unsigned int *class,
 			unsigned long deadline);
 static void mv_eh_freeze(struct ata_port *ap);
@@ -650,6 +664,30 @@ static void mv_bmdma_stop(struct ata_queued_cmd *qc);
 static u8   mv_bmdma_status(struct ata_port *ap);
 static u8 mv_sff_check_status(struct ata_port *ap);
 
+#ifdef CONFIG_SYNO_SATA_88SX7042_PHY_PWR_CTRL
+static ssize_t
+syno_mv_phy_ctl_store(struct device *dev, struct device_attribute *attr, const char * buf, size_t count);
+DEVICE_ATTR(syno_phy_ctl, S_IWUGO, NULL, syno_mv_phy_ctl_store);
+#endif /* CONFIG_SYNO_SATA_88SX7042_PHY_PWR_CTRL */
+
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+static struct device_attribute *sata_mv_shost_attrs[] = {
+	&dev_attr_syno_manutil_power_disable,
+	&dev_attr_syno_pm_gpio,
+	&dev_attr_syno_pm_info,
+#ifdef CONFIG_SYNO_SATA_88SX7042_PHY_PWR_CTRL
+	&dev_attr_syno_phy_ctl,
+#endif /* CONFIG_SYNO_SATA_88SX7042_PHY_PWR_CTRL */
+#ifdef CONFIG_SYNO_TRANS_HOST_TO_DISK
+	&dev_attr_syno_diskname_trans,
+#endif /* CONFIG_SYNO_TRANS_HOST_TO_DISK */
+#ifdef CONFIG_SYNO_SATA_DISK_LED_CONTROL
+	&dev_attr_syno_sata_disk_led_ctrl,
+#endif /* CONFIG_SYNO_SATA_DISK_LED_CONTROL */
+	NULL
+};
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+
 /* .sg_tablesize is (MV_MAX_SG_CT / 2) in the structures below
  * because we have to allow room for worst case splitting of
  * PRDs for 64K boundaries in mv_fill_sg().
@@ -659,6 +697,9 @@ static struct scsi_host_template mv5_sht = {
 	ATA_BASE_SHT(DRV_NAME),
 	.sg_tablesize		= MV_MAX_SG_CT / 2,
 	.dma_boundary		= MV_DMA_BOUNDARY,
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+	.syno_index_get         = syno_libata_index_get,
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
 };
 #endif
 static struct scsi_host_template mv6_sht = {
@@ -666,6 +707,9 @@ static struct scsi_host_template mv6_sht = {
 	.can_queue		= MV_MAX_Q_DEPTH - 1,
 	.sg_tablesize		= MV_MAX_SG_CT / 2,
 	.dma_boundary		= MV_DMA_BOUNDARY,
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+	.shost_attrs		= sata_mv_shost_attrs,
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 };
 
 static struct ata_port_operations mv5_ops = {
@@ -696,6 +740,9 @@ static struct ata_port_operations mv6_ops = {
 	.qc_defer		= mv_qc_defer,
 	.qc_prep		= mv_qc_prep,
 	.qc_issue		= mv_qc_issue,
+#ifdef CONFIG_SYNO_FIX_MV_LBA_ERR_RET
+	.qc_fill_rtf	= syno_mv_qc_fill_rtf,
+#endif /* CONFIG_SYNO_FIX_MV_LBA_ERR_RET */
 
 	.dev_config             = mv6_dev_config,
 
@@ -1436,7 +1483,27 @@ static int mv_qc_defer(struct ata_queued_cmd *qc)
 			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
 			return 0;
 		} else
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+		{
+			if (!ap->nr_active_links) {
+				/* Since we are here now, just preempt */
+				if ((pp->pp_flags & MV_PP_FLAG_EDMA_EN) &&
+					(pp->pp_flags & MV_PP_FLAG_NCQ_EN) &&
+					!ata_is_ncq(qc->tf.protocol)) {
+					ap->excl_link = link;
+					qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+				} else {
+					/* normal I/O should preempt in this situation */
+					ap->excl_link = NULL;
+				}
+				return 0;
+			} else {
+				return ATA_DEFER_PORT;
+			}
+		}
+#else
 			return ATA_DEFER_PORT;
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 	}
 
 	/*
@@ -2407,6 +2474,39 @@ static unsigned int mv_qc_issue(struct ata_queued_cmd *qc)
 	return ata_bmdma_qc_issue(qc);
 }
 
+#ifdef CONFIG_SYNO_FIX_MV_LBA_ERR_RET
+static bool syno_mv_qc_fill_rtf(struct ata_queued_cmd *qc)
+{
+	bool bRet = false;
+	struct ata_taskfile *rtf = &qc->result_tf;
+	struct ata_taskfile *tf = &qc->tf;
+
+	/* Fill the result taskfile */
+	bRet = ata_sff_qc_fill_rtf(qc);
+
+    /* MV7042 would return the LBA even if the NCQ command failed because of UNC error,
+	 * and the scsi layer would take that as a partially success (which is not, of course.)
+	 * Since the LBA register value is not defined in the error return of a ATA_CMD_FPDMA_READ in ATA 8 standard,
+	 * we fill the LBA and device in result taskfile with the preceding setup.
+	 * Reference to "American National Standard T13/1699-D Table 136." for more information.
+     */
+	if (ATA_ERR & rtf->command &&
+		ATA_UNC & rtf->feature &&
+		ATA_TFLAG_LBA48 & tf->flags &&
+		ATA_CMD_FPDMA_READ == tf->command) {
+		rtf->lbal		= tf->lbal;
+		rtf->lbam		= tf->lbam;
+		rtf->lbah		= tf->lbah;
+		rtf->device		= tf->device;
+		rtf->hob_lbal	= tf->hob_lbal;
+		rtf->hob_lbam	= tf->hob_lbam;
+		rtf->hob_lbah	= tf->hob_lbah;
+	}
+
+	return bRet;
+}
+#endif /* CONFIG_SYNO_FIX_MV_LBA_ERR_RET */
+
 static struct ata_queued_cmd *mv_get_active_qc(struct ata_port *ap)
 {
 	struct mv_port_priv *pp = ap->private_data;
@@ -2692,6 +2792,14 @@ static void mv_err_intr(struct ata_port *ap)
 		ata_ehi_push_desc(ehi, "parity error");
 	}
 	if (edma_err_cause & (EDMA_ERR_DEV_DCON | EDMA_ERR_DEV_CON)) {
+#ifdef CONFIG_SYNO_SATA_INFO
+		syno_ata_info_print(ap);
+#endif /* CONFIG_SYNO_SATA_INFO */
+#ifdef CONFIG_SYNO_ATA_FAST_PROBE
+		if (edma_err_cause & EDMA_ERR_DEV_CON) {
+			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
+		}
+#endif /* CONFIG_SYNO_ATA_FAST_PROBE */
 		ata_ehi_hotplugged(ehi);
 		ata_ehi_push_desc(ehi, edma_err_cause & EDMA_ERR_DEV_DCON ?
 			"dev disconnect" : "dev connect");
@@ -3143,7 +3251,6 @@ static void mv5_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 	writel(tmp, phy_mmio + MV5_PHY_MODE);
 }
 
-
 #undef ZERO
 #define ZERO(reg) writel(0, port_mmio + (reg))
 static void mv5_reset_hc_port(struct mv_host_priv *hpriv, void __iomem *mmio,
@@ -3326,7 +3433,21 @@ static void mv6_read_preamp(struct mv_host_priv *hpriv, int idx,
 
 static void mv6_enable_leds(struct mv_host_priv *hpriv, void __iomem *mmio)
 {
-	writel(0x00000060, mmio + GPIO_PORT_CTL);
+#ifdef CONFIG_SYNO_SATA_MV_LED
+	if(0 != g_sata_mv_led) {
+		writel(0x00000050, mmio + GPIO_PORT_CTL);
+		writel(0x00000000, mmio + GPIO_CTL_DATA);
+	}else{
+#endif /* CONFIG_SYNO_SATA_MV_LED */
+#ifdef	CONFIG_SYNO_OSS_SATA_LED
+		DBGMESG("set mv led");
+		writel(0x0000007C, mmio + GPIO_PORT_CTL);
+#else /* CONFIG_SYNO_OSS_SATA_LED */
+		writel(0x00000060, mmio + GPIO_PORT_CTL);
+#endif /* CONFIG_SYNO_OSS_SATA_LED */
+#ifdef CONFIG_SYNO_SATA_MV_LED
+	}
+#endif /* CONFIG_SYNO_SATA_MV_LED */
 }
 
 static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
@@ -3361,7 +3482,12 @@ static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 	 * Achieves better receiver noise performance than the h/w default:
 	 */
 	m3 = readl(port_mmio + PHY_MODE3);
+#ifdef CONFIG_SYNO_ENLARGE_RX_NOISE_TRRESHOLD
+	m3 = (m3 & 0x03) | (0x5555601 << 5);
+	m3 |= 0x0c;
+#else /* CONFIG_SYNO_ENLARGE_RX_NOISE_TRRESHOLD */
 	m3 = (m3 & 0x1f) | (0x5555601 << 5);
+#endif /* CONFIG_SYNO_ENLARGE_RX_NOISE_TRRESHOLD */
 
 	/* Guideline 88F5182 (GL# SATA-S11) */
 	if (IS_SOC(hpriv))
@@ -3537,6 +3663,132 @@ static bool soc_is_65n(struct mv_host_priv *hpriv)
 	return false;
 }
 
+#ifdef CONFIG_SYNO_SATA_88SX7042_PHY_PWR_CTRL
+extern struct scsi_device *look_up_scsi_dev_from_ap(struct ata_port *ap);
+/**
+ * Please refer arch/arm/plat-feroceon/mv_hal/sata/CoreDriver/mvSataSoc.c in linux-2.6.32
+ */
+static void syno_mv_phy_ctl(void __iomem *port_mmio, u8 blShutdown)
+{
+	u32 ifcfg = readl(port_mmio + SATA_IFCFG);
+
+	/* Fix for 88SX60x1 FEr SATA#8*/
+	/* according to the spec, bits [31:12] must be set to 0x009B1 */
+	ifcfg = (ifcfg & 0xfff) | 0x9b1000;
+	/* Shutdown phy */
+	if (blShutdown)
+		ifcfg |= (1 << 9);
+	else
+		ifcfg &= ~(1 << 9);
+
+	writelfl(ifcfg, port_mmio + SATA_IFCFG);
+}
+
+static ssize_t
+syno_mv_phy_ctl_store(struct device *dev, struct device_attribute *attr, const char * buf, size_t count)
+{
+	struct Scsi_Host *shost = class_to_shost(dev);
+	struct ata_port *ap = ata_shost_to_port(shost);
+	struct scsi_device *sdev = NULL;
+
+	if (strstr(buf, "off")) {
+		if (NULL != (sdev = look_up_scsi_dev_from_ap(ap)))
+			scsi_remove_device(sdev);
+		syno_mv_phy_ctl(mv_ap_base(ap), 1);
+	} else if (strstr(buf, "on")) {
+		/* a reset is necessary */
+		syno_mv_phy_ctl(mv_ap_base(ap), 0);
+		mv_unexpected_intr(ap, 1);
+	} else {
+		printk("No effect %s\n", buf);
+	}
+
+	return count;
+}
+#endif /* CONFIG_SYNO_SATA_88SX7042_PHY_PWR_CTRL */
+
+#ifdef CONFIG_SYNO_SATA_MV_GPIO_RW
+int syno_sata_mv_gpio_read(const unsigned short hostnum)
+{
+	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
+	struct ata_port *ap = NULL;
+	void __iomem *host_mmio = NULL;
+	u32 gpio_value = 0;
+	int led_idx;
+	int ret = -1;
+
+	if (NULL == shost) {
+		goto END;
+	}
+
+	if (NULL == (ap = ata_shost_to_port(shost))) {
+		goto END;
+	}
+
+	if (NULL == (host_mmio = mv_host_base(ap->host))) {
+		goto END;
+	}
+
+	led_idx = ap->print_id - ap->host->ports[0]->print_id;
+
+	gpio_value = readl(host_mmio + GPIO_CTL_DATA);
+
+	if (gpio_value & (1 << led_idx)) {
+		ret = 1;
+	} else {
+		ret = 0;
+	}
+
+END:
+	if (NULL != shost) {
+		scsi_host_put(shost);
+	}
+	return ret;
+}
+EXPORT_SYMBOL(syno_sata_mv_gpio_read);
+
+/*FIXME - Too brutal and directly, should separate into levels*/
+void syno_sata_mv_gpio_write(u8 blFaulty, const unsigned short hostnum)
+{
+	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
+	struct ata_port *ap = NULL;
+	void __iomem *host_mmio = NULL;
+	u32 gpio_value = 0;
+	int led_idx;
+
+	if(NULL == shost) {
+		goto END;
+	}
+
+	if(NULL == (ap = ata_shost_to_port(shost))) {
+		goto END;
+	}
+
+	if(NULL == (host_mmio = mv_host_base(ap->host))) {
+		goto END;
+	}
+
+	led_idx = ap->print_id - ap->host->ports[0]->print_id;
+
+	gpio_value = readl(host_mmio + GPIO_CTL_DATA);
+
+	if(blFaulty) {
+		gpio_value |= (1 << led_idx);
+	}else {
+		gpio_value &= ~(1 << led_idx);
+	}
+
+	writel(gpio_value, host_mmio + GPIO_CTL_DATA);
+
+END:
+	if (NULL != shost) {
+		scsi_host_put(shost);
+	}
+	return;
+}
+EXPORT_SYMBOL(syno_sata_mv_gpio_write);
+#endif /* CONFIG_SYNO_SATA_MV_GPIO_RW */
+
 static void mv_setup_ifcfg(void __iomem *port_mmio, int want_gen2i)
 {
 	u32 ifcfg = readl(port_mmio + SATA_IFCFG);
@@ -3596,8 +3848,21 @@ static void mv_pmp_select(struct ata_port *ap, int pmp)
 static int mv_pmp_hardreset(struct ata_link *link, unsigned int *class,
 				unsigned long deadline)
 {
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+	int iRet = 0;
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
+
 	mv_pmp_select(link->ap, sata_srst_pmp(link));
+#ifdef CONFIG_SYNO_DEBUG_FLAG
+	iRet = sata_std_hardreset(link, class, deadline);
+	if (0 < giSynoAtaDebug) {
+		DBGMESG("-- Syno Debug Show pmp link status --\n");
+		sata_print_link_status(link);
+	}
+	return iRet;
+#else /* CONFIG_SYNO_DEBUG_FLAG */
 	return sata_std_hardreset(link, class, deadline);
+#endif /* CONFIG_SYNO_DEBUG_FLAG */
 }
 
 static int mv_softreset(struct ata_link *link, unsigned int *class,
@@ -4259,14 +4524,12 @@ static struct platform_driver mv_platform_driver = {
 	},
 };
 
-
 #ifdef CONFIG_PCI
 static int mv_pci_init_one(struct pci_dev *pdev,
 			   const struct pci_device_id *ent);
 #ifdef CONFIG_PM
 static int mv_pci_device_resume(struct pci_dev *pdev);
 #endif
-
 
 static struct pci_driver mv_pci_driver = {
 	.name			= DRV_NAME,
@@ -4373,7 +4636,15 @@ static int mv_pci_init_one(struct pci_dev *pdev,
 	ata_print_version_once(&pdev->dev, DRV_VERSION);
 
 	/* allocate host */
+#ifdef CONFIG_SYNO_SATA_PORT_MAP
+	if(gSynoSataHostCnt < sizeof(gszSataPortMap) && 0 != gszSataPortMap[gSynoSataHostCnt]) {
+		n_ports = gszSataPortMap[gSynoSataHostCnt] - '0';
+	}else{
+#endif /* CONFIG_SYNO_SATA_PORT_MAP */
 	n_ports = mv_get_hc_count(ppi[0]->flags) * MV_PORTS_PER_HC;
+#ifdef CONFIG_SYNO_SATA_PORT_MAP
+	}
+#endif /* CONFIG_SYNO_SATA_PORT_MAP */
 
 	host = ata_host_alloc_pinfo(&pdev->dev, ppi, n_ports);
 	hpriv = devm_kzalloc(&pdev->dev, sizeof(*hpriv), GFP_KERNEL);

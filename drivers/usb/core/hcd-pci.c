@@ -34,7 +34,6 @@
 
 #include "usb.h"
 
-
 /* PCI-based HCs are common, but plenty of non-PCI HCs are used too */
 
 /*
@@ -298,7 +297,6 @@ disable_pci:
 }
 EXPORT_SYMBOL_GPL(usb_hcd_pci_probe);
 
-
 /* may be called without controller electrically present */
 /* may be called with controller, bus, and devices active */
 
@@ -375,6 +373,8 @@ void usb_hcd_pci_shutdown(struct pci_dev *dev)
 	if (test_bit(HCD_FLAG_HW_ACCESSIBLE, &hcd->flags) &&
 			hcd->driver->shutdown) {
 		hcd->driver->shutdown(hcd);
+		if (usb_hcd_is_primary_hcd(hcd) && hcd->irq > 0)
+			free_irq(hcd->irq, hcd);
 		pci_disable_device(dev);
 	}
 }
