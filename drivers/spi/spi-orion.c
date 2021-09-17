@@ -291,7 +291,6 @@ out:
 	return xfer->len - count;
 }
 
-
 static int orion_spi_transfer_one_message(struct spi_master *master,
 					   struct spi_message *m)
 {
@@ -477,7 +476,6 @@ out:
 	spi_master_put(master);
 	return status;
 }
-
 
 static int orion_spi_remove(struct platform_device *pdev)
 {

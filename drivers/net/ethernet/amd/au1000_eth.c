@@ -469,7 +469,6 @@ static int au1000_mii_probe(struct net_device *dev)
 	return 0;
 }
 
-
 /*
  * Buffer allocation/deallocation routines. The buffer descriptor returned
  * has the virtual and dma address of a buffer suitable for
@@ -615,7 +614,6 @@ static const struct ethtool_ops au1000_ethtool_ops = {
 	.set_msglevel = au1000_set_msglevel,
 };
 
-
 /*
  * Initialize the interface.
  *
@@ -649,7 +647,6 @@ static int au1000_init(struct net_device *dev)
 	writel(dev->dev_addr[3]<<24 | dev->dev_addr[2]<<16 |
 		dev->dev_addr[1]<<8 | dev->dev_addr[0],
 					&aup->mac->mac_addr_low);
-
 
 	for (i = 0; i < NUM_RX_DMA; i++)
 		aup->rx_dma_ring[i]->buff_stat |= RX_DMA_ENABLE;

@@ -70,7 +70,6 @@
 
 static const char	hcd_name [] = "ehci_hcd";
 
-
 #undef VERBOSE_DEBUG
 #undef EHCI_URB_TRACE
 
@@ -598,7 +597,6 @@ static int ehci_run (struct usb_hcd *hcd)
 			ehci_info(ehci, "enabled 64bit DMA\n");
 #endif
 	}
-
 
 	// Philips, Intel, and maybe others need CMD_RUN before the
 	// root hub will detect new devices (why?); NEC doesn't

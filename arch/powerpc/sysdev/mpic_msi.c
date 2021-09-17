@@ -57,7 +57,6 @@ static int mpic_msi_reserve_u3_hwirqs(struct mpic *mpic)
 	for (i = 124; i < mpic->num_sources; i++)
 		msi_bitmap_reserve_hwirq(&mpic->msi_bitmap, i);
 
-
 	np = NULL;
 	while ((np = of_find_all_nodes(np))) {
 		pr_debug("mpic: mapping hwirqs for %s\n", np->full_name);

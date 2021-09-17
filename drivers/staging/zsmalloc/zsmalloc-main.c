@@ -10,7 +10,6 @@
  * Released under the terms of GNU General Public License Version 2.0
  */
 
-
 /*
  * This allocator is designed for use with zcache and zram. Thus, the
  * allocator is supposed to work well under low memory conditions. In
@@ -238,7 +237,6 @@ struct mapping_area {
 	char *vm_addr; /* address of kmap_atomic()'ed pages */
 	enum zs_mapmode vm_mm; /* mapping mode */
 };
-
 
 /* per-cpu VM mapping areas for zspage accesses that cross page boundaries */
 static DEFINE_PER_CPU(struct mapping_area, zs_map_area);

@@ -611,7 +611,6 @@ static int max98088_volatile_register(struct snd_soc_codec *codec, unsigned int 
        return max98088_access[reg].vol;
 }
 
-
 /*
  * Load equalizer DSP coefficient configurations registers
  */

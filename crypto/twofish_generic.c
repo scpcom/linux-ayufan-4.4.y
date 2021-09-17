@@ -103,8 +103,6 @@
    x ^= ctx->w[m]; \
    dst[n] = cpu_to_le32(x)
 
-
-
 /* Encrypt one block.  in and out may be the same. */
 static void twofish_encrypt(struct crypto_tfm *tfm, u8 *out, const u8 *in)
 {

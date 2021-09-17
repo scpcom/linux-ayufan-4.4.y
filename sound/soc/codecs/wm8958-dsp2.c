@@ -662,7 +662,6 @@ static int wm8958_vss_put(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
-
 #define WM8958_VSS_SWITCH(xname, xval) {\
 	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = (xname), \
 	.access = SNDRV_CTL_ELEM_ACCESS_READWRITE,\
@@ -912,7 +911,6 @@ void wm8958_dsp2_init(struct snd_soc_codec *codec)
 			     ARRAY_SIZE(wm8958_vss_snd_controls));
 	snd_soc_add_codec_controls(codec, wm8958_enh_eq_snd_controls,
 			     ARRAY_SIZE(wm8958_enh_eq_snd_controls));
-
 
 	/* We don't *require* firmware and don't want to delay boot */
 	request_firmware_nowait(THIS_MODULE, FW_ACTION_HOTPLUG,

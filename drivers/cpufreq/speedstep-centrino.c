@@ -123,7 +123,6 @@ static struct cpufreq_frequency_table banias_1100[] =
 	{ .frequency = CPUFREQ_TABLE_END }
 };
 
-
 /* Low Voltage Intel Pentium M processor 1.20GHz (Banias) */
 static struct cpufreq_frequency_table banias_1200[] =
 {
@@ -338,7 +337,6 @@ static unsigned int get_cur_freq(unsigned int cpu)
 	}
 	return clock_freq;
 }
-
 
 static int centrino_cpu_init(struct cpufreq_policy *policy)
 {

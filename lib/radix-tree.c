@@ -33,7 +33,6 @@
 #include <linux/bitops.h>
 #include <linux/rcupdate.h>
 
-
 #ifdef __KERNEL__
 #define RADIX_TREE_MAP_SHIFT	(CONFIG_BASE_SMALL ? 4 : 6)
 #else
@@ -908,7 +907,6 @@ next:
 	return tagged;
 }
 EXPORT_SYMBOL(radix_tree_range_tag_if_tagged);
-
 
 /**
  *	radix_tree_next_hole    -    find the next hole (not-present entry)

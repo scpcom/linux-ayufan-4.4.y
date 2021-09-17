@@ -67,7 +67,6 @@ static u32 mv_desc_get_src_addr(struct mv_xor_desc_slot *desc,
 	return hw_desc->phy_src_addr[src_idx];
 }
 
-
 static void mv_desc_set_byte_count(struct mv_xor_desc_slot *desc,
 				   u32 byte_count)
 {
@@ -1401,7 +1400,6 @@ static struct platform_driver mv_xor_driver = {
 		.of_match_table = of_match_ptr(mv_xor_dt_ids),
 	},
 };
-
 
 static int __init mv_xor_init(void)
 {

@@ -652,6 +652,7 @@ void out_of_memory(struct zonelist *zonelist, gfp_t gfp_mask,
 	}
 
 	p = select_bad_process(&points, totalpages, mpol_mask, force_kill);
+
 	/* Found nothing?!?! Either we hang forever, or we panic. */
 	if (!p) {
 		dump_header(NULL, gfp_mask, order, NULL, mpol_mask);

@@ -195,4 +195,3 @@ void usb_hub_remove_port_device(struct usb_hub *hub,
 {
 	device_unregister(&hub->ports[port1 - 1]->dev);
 }
-

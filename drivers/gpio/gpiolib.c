@@ -28,7 +28,6 @@
  * only an instruction or two per bit.
  */
 
-
 /* When debugging, extend minimal trust to callers and platform code.
  * Also emit diagnostic messages that may help initial bringup, when
  * board setup or driver bugs are most common.
@@ -102,7 +101,6 @@ static int gpiod_export_link(struct device *dev, const char *name,
 static int gpiod_sysfs_set_active_low(struct gpio_desc *desc, int value);
 static void gpiod_unexport(struct gpio_desc *desc);
 
-
 static inline void desc_set_label(struct gpio_desc *d, const char *label)
 {
 #ifdef CONFIG_DEBUG_FS
@@ -138,7 +136,6 @@ static int desc_to_gpio(const struct gpio_desc *desc)
 {
 	return desc->chip->base + gpio_chip_hwgpio(desc);
 }
-
 
 /* Warn when drivers omit gpio_request() calls -- legal but ill-advised
  * when setting direction, and otherwise illegal.  Until board setup code
@@ -734,7 +731,6 @@ static struct class gpio_class = {
 	.class_attrs =	gpio_class_attrs,
 };
 
-
 /**
  * gpio_export - export a GPIO through sysfs
  * @gpio: gpio to make available, already requested
@@ -1075,7 +1071,6 @@ static int __init gpiolib_sysfs_init(void)
 		spin_lock_irqsave(&gpio_lock, flags);
 	}
 	spin_unlock_irqrestore(&gpio_lock, flags);
-
 
 	return status;
 }
@@ -1611,7 +1606,6 @@ const char *gpiochip_is_requested(struct gpio_chip *chip, unsigned offset)
 }
 EXPORT_SYMBOL_GPL(gpiochip_is_requested);
 
-
 /* Drivers MUST set GPIO direction before making get/set calls.  In
  * some cases this is done in early boot, before IRQs are enabled.
  *
@@ -1991,7 +1985,6 @@ int __gpio_to_irq(unsigned gpio)
 	return gpiod_to_irq(gpio_to_desc(gpio));
 }
 EXPORT_SYMBOL_GPL(__gpio_to_irq);
-
 
 /* There's no value in making it easy to inline GPIO calls that may sleep.
  * Common examples include ones connected to I2C or SPI chips.

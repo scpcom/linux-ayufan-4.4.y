@@ -29,7 +29,6 @@
 #define DRV_NAME "s6gmac"
 #define DRV_PRMT DRV_NAME ": "
 
-
 /* register declarations */
 
 #define S6_GMAC_MACCONF1	0x000
@@ -335,7 +334,6 @@
 #define S6_GMAC_BURST_POSTRD_LEN	0
 #define S6_GMAC_BURST_POSTRD_LEN_MASK		((1 << 20) - 1)
 #define S6_GMAC_BURST_POSTRD_DROP	20
-
 
 /* data handling */
 

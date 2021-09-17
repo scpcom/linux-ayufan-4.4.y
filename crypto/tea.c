@@ -175,7 +175,6 @@ static void xtea_decrypt(struct crypto_tfm *tfm, u8 *dst, const u8 *src)
 	out[1] = cpu_to_le32(z);
 }
 
-
 static void xeta_encrypt(struct crypto_tfm *tfm, u8 *dst, const u8 *src)
 {
 	u32 y, z, sum = 0;

@@ -11,8 +11,6 @@
 #include <linux/tty_flags.h>
 #include <uapi/linux/tty.h>
 
-
-
 /*
  * (Note: the *_driver.minor_start values 1, 64, 128, 192 are
  * hardcoded at present.)
@@ -49,7 +47,6 @@ struct tty_buffer {
  */
 
 #define TTY_BUFFER_PAGE	(((PAGE_SIZE - sizeof(struct tty_buffer)) / 2) & ~0xFF)
-
 
 struct tty_bufhead {
 	struct work_struct work;
@@ -561,7 +558,6 @@ extern void tty_ldisc_release(struct tty_struct *tty, struct tty_struct *o_tty);
 extern void tty_ldisc_init(struct tty_struct *tty);
 extern void tty_ldisc_deinit(struct tty_struct *tty);
 extern void tty_ldisc_begin(void);
-
 
 /* n_tty.c */
 extern struct tty_ldisc_ops tty_ldisc_N_TTY;

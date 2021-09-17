@@ -510,7 +510,6 @@ static int xts_aesni_setkey(struct crypto_tfm *tfm, const u8 *key,
 				  keylen / 2);
 }
 
-
 static void aesni_xts_tweak(void *ctx, u8 *out, const u8 *in)
 {
 	aesni_enc(ctx, out, in);
@@ -1339,7 +1338,6 @@ static struct crypto_alg aesni_algs[] = { {
 		},
 	},
 } };
-
 
 static const struct x86_cpu_id aesni_cpu_id[] = {
 	X86_FEATURE_MATCH(X86_FEATURE_AES),

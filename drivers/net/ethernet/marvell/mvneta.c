@@ -410,7 +410,6 @@ static void mvneta_txq_inc_put(struct mvneta_tx_queue *txq)
 		txq->txq_put_index = 0;
 }
 
-
 /* Clear all MIB counters */
 static void mvneta_mib_counters_clear(struct mvneta_port *pp)
 {
@@ -436,7 +435,6 @@ struct rtnl_link_stats64 *mvneta_get_stats64(struct net_device *dev,
 		stats->rx_packets = pp->rx_stats.packets;
 		stats->rx_bytes	= pp->rx_stats.bytes;
 	} while (u64_stats_fetch_retry_bh(&pp->rx_stats.syncp, start));
-
 
 	do {
 		start = u64_stats_fetch_begin_bh(&pp->tx_stats.syncp);
@@ -552,7 +550,6 @@ static void mvneta_max_rx_size_set(struct mvneta_port *pp, int max_rx_size)
 	mvreg_write(pp, MVNETA_GMAC_CTRL_0, val);
 }
 
-
 /* Set rx queue offset */
 static void mvneta_rxq_offset_set(struct mvneta_port *pp,
 				  struct mvneta_rx_queue *rxq,
@@ -567,7 +564,6 @@ static void mvneta_rxq_offset_set(struct mvneta_port *pp,
 	val |= MVNETA_RXQ_PKT_OFFSET_MASK(offset >> 3);
 	mvreg_write(pp, MVNETA_RXQ_CONFIG_REG(rxq->id), val);
 }
-
 
 /* Tx descriptors helper methods */
 
@@ -631,8 +627,6 @@ static void mvneta_rxq_bm_disable(struct mvneta_port *pp,
 	val &= ~MVNETA_RXQ_HW_BUF_ALLOC;
 	mvreg_write(pp, MVNETA_RXQ_CONFIG_REG(rxq->id), val);
 }
-
-
 
 /* Sets the RGMII Enable bit (RGMIIEn) in port MAC control register */
 static void mvneta_gmac_rgmii_set(struct mvneta_port *pp, int enable)
@@ -1073,7 +1067,6 @@ static void mvneta_add_tx_done_timer(struct mvneta_port *pp)
 	}
 }
 
-
 /* Handle rx descriptor fill by setting buf_cookie and buf_phys_addr */
 static void mvneta_rx_desc_fill(struct mvneta_rx_desc *rx_desc,
 				u32 phys_addr, u32 cookie)
@@ -1159,7 +1152,6 @@ static u32 mvneta_txq_desc_csum(int l3_offs, int l3_proto,
 
 	return command;
 }
-
 
 /* Display more error info */
 static void mvneta_rx_error(struct mvneta_port *pp,
@@ -1566,7 +1558,6 @@ out:
 
 	return NETDEV_TX_OK;
 }
-
 
 /* Free tx resources, when resetting a port */
 static void mvneta_txq_done_force(struct mvneta_port *pp,
@@ -2105,7 +2096,6 @@ static void mvneta_cleanup_rxqs(struct mvneta_port *pp)
 		mvneta_rxq_deinit(pp, &pp->rxqs[queue]);
 }
 
-
 /* Init all Rx queues */
 static int mvneta_setup_rxqs(struct mvneta_port *pp)
 {
@@ -2493,7 +2483,6 @@ static int mvneta_ethtool_get_coalesce(struct net_device *dev,
 	return 0;
 }
 
-
 static void mvneta_ethtool_get_drvinfo(struct net_device *dev,
 				    struct ethtool_drvinfo *drvinfo)
 {
@@ -2504,7 +2493,6 @@ static void mvneta_ethtool_get_drvinfo(struct net_device *dev,
 	strlcpy(drvinfo->bus_info, dev_name(&dev->dev),
 		sizeof(drvinfo->bus_info));
 }
-
 
 static void mvneta_ethtool_get_ringparam(struct net_device *netdev,
 					 struct ethtool_ringparam *ring)

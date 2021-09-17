@@ -51,7 +51,6 @@
 #include <linux/module.h>
 #include <linux/ratelimit.h>
 
-
 /* number of characters left in xmit buffer before select has we have room */
 #define WAKEUP_CHARS 256
 
@@ -1369,7 +1368,6 @@ handle_newline:
 	put_tty_queue(c, ldata);
 }
 
-
 /**
  *	n_tty_write_wakeup	-	asynchronous I/O notifier
  *	@tty: tty device
@@ -1767,7 +1765,6 @@ static int job_control(struct tty_struct *tty, struct file *file)
 	spin_unlock_irq(&tty->ctrl_lock);
 	return 0;
 }
-
 
 /**
  *	n_tty_read		-	read function for tty

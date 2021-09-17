@@ -154,4 +154,3 @@
 	do { etb_writel((t), CS_LAR_KEY, CSMR_LOCKACCESS); } while (0)
 
 #endif /* __ASM_HARDWARE_CORESIGHT_H */
-

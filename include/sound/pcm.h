@@ -422,7 +422,6 @@ struct snd_pcm_substream {
 
 #define SUBSTREAM_BUSY(substream) ((substream)->ref_count > 0)
 
-
 struct snd_pcm_str {
 	int stream;				/* stream (direction) */
 	struct snd_pcm *pcm;
@@ -516,7 +515,6 @@ int snd_pcm_attach_substream(struct snd_pcm *pcm, int stream, struct file *file,
 void snd_pcm_detach_substream(struct snd_pcm_substream *substream);
 void snd_pcm_vma_notify_data(void *client, void *data);
 int snd_pcm_mmap_data(struct snd_pcm_substream *substream, struct file *file, struct vm_area_struct *area);
-
 
 #ifdef CONFIG_SND_DEBUG
 void snd_pcm_debug_name(struct snd_pcm_substream *substream,

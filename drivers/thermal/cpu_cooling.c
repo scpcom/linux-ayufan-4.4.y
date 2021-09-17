@@ -276,7 +276,6 @@ static int cpufreq_apply_cooling(struct cpufreq_cooling_device *cpufreq_device,
 	struct cpumask *mask = &cpufreq_device->allowed_cpus;
 	unsigned int cpu = cpumask_any(mask);
 
-
 	/* Check if the old cooling action is same as new cooling action */
 	if (cpufreq_device->cpufreq_state == cooling_state)
 		return 0;

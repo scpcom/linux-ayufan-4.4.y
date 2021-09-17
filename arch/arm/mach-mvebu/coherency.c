@@ -89,7 +89,6 @@ static dma_addr_t mvebu_hwcc_dma_map_page(struct device *dev, struct page *page,
 	return pfn_to_dma(dev, page_to_pfn(page)) + offset;
 }
 
-
 static void mvebu_hwcc_dma_unmap_page(struct device *dev, dma_addr_t dma_handle,
 			      size_t size, enum dma_data_direction dir,
 			      struct dma_attrs *attrs)

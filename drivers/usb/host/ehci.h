@@ -152,7 +152,6 @@ struct ehci_hcd {			/* one per controller */
 	unsigned		periodic_count;	/* periodic activity count */
 	unsigned		uframe_periodic_max; /* max periodic time per uframe */
 
-
 	/* list of itds & sitds completed while now_frame was still active */
 	struct list_head	cached_itd_list;
 	struct ehci_itd		*last_itd_to_free;

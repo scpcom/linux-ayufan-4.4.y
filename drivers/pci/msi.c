@@ -27,7 +27,6 @@ static int pci_msi_enable = 1;
 
 #define msix_table_size(flags)	((flags & PCI_MSIX_FLAGS_QSIZE) + 1)
 
-
 /* Arch hooks */
 
 #ifndef arch_msi_check_device
@@ -438,7 +437,6 @@ void pci_restore_msi_state(struct pci_dev *dev)
 }
 EXPORT_SYMBOL_GPL(pci_restore_msi_state);
 
-
 #define to_msi_attr(obj) container_of(obj, struct msi_attribute, attr)
 #define to_msi_desc(obj) container_of(obj, struct msi_desc, kobj)
 
@@ -474,7 +472,6 @@ static const struct sysfs_ops msi_irq_sysfs_ops = {
 
 static struct msi_attribute mode_attribute =
 	__ATTR(mode, S_IRUGO, show_msi_mode, NULL);
-
 
 static struct attribute *msi_irq_default_attrs[] = {
 	&mode_attribute.attr,

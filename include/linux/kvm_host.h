@@ -1079,4 +1079,3 @@ static inline bool kvm_vcpu_eligible_for_directed_yield(struct kvm_vcpu *vcpu)
 
 #endif /* CONFIG_HAVE_KVM_CPU_RELAX_INTERCEPT */
 #endif
-

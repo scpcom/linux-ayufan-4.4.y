@@ -429,7 +429,6 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
 	else
 		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
 
-
 	cmd.cmd_timeout_ms = timeout_ms;
 
 	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);

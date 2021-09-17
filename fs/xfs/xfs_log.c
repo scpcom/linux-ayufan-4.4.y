@@ -487,7 +487,6 @@ out_error:
 	return error;
 }
 
-
 /*
  * NOTES:
  *
@@ -531,7 +530,6 @@ xfs_log_done(
 			flags |= XFS_LOG_REL_PERM_RESERV;
 		}
 	}
-
 
 	if ((ticket->t_flags & XLOG_TIC_PERM_RESERV) == 0 ||
 	    (flags & XFS_LOG_REL_PERM_RESERV)) {
@@ -704,7 +702,6 @@ xfs_log_mount_finish(xfs_mount_t *mp)
 		ASSERT(mp->m_flags & XFS_MOUNT_RDONLY);
 	}
 
-
 	return error;
 }
 
@@ -792,7 +789,6 @@ xfs_log_unmount_write(xfs_mount_t *mp)
 
 		if (error)
 			xfs_alert(mp, "%s: unmount record failed", __func__);
-
 
 		spin_lock(&log->l_icloglock);
 		iclog = log->l_iclog;
@@ -1091,7 +1087,6 @@ xlog_space_left(
 	return free_bytes;
 }
 
-
 /*
  * Log function which is called when an io completes.
  *
@@ -1199,7 +1194,6 @@ done:
 	if (mp->m_logbsize == 0)
 		mp->m_logbsize = log->l_iclog_size;
 }	/* xlog_get_iclog_buffer_size */
-
 
 void
 xfs_log_work_queue(
@@ -1395,7 +1389,6 @@ out_free_log:
 out:
 	return ERR_PTR(-error);
 }	/* xlog_alloc_log */
-
 
 /*
  * Write out the commit record of a transaction associated with the given
@@ -1829,9 +1822,6 @@ xlog_state_finish_copy(
 
 	spin_unlock(&log->l_icloglock);
 }	/* xlog_state_finish_copy */
-
-
-
 
 /*
  * print out info relating to regions written which consume
@@ -2326,7 +2316,6 @@ xlog_write(
 	return 0;
 }
 
-
 /*****************************************************************************
  *
  *		State Machine functions
@@ -2444,7 +2433,6 @@ xlog_get_lowest_lsn(
 	return lowest_lsn;
 }
 
-
 STATIC void
 xlog_state_do_callback(
 	struct xlog		*log,
@@ -2544,7 +2532,6 @@ xlog_state_do_callback(
 				}
 
 				iclog->ic_state = XLOG_STATE_CALLBACK;
-
 
 				/*
 				 * Completion of a iclog IO does not imply that
@@ -2663,7 +2650,6 @@ xlog_state_do_callback(
 		wake_up_all(&log->l_flush_wait);
 }
 
-
 /*
  * Finish transitioning this iclog to the dirty state.
  *
@@ -2691,7 +2677,6 @@ xlog_state_done_syncing(
 	ASSERT(atomic_read(&iclog->ic_refcnt) == 0);
 	ASSERT(iclog->ic_bwritecnt == 1 || iclog->ic_bwritecnt == 2);
 
-
 	/*
 	 * If we got an error, either on the first buffer, or in the case of
 	 * split log writes, on the second, we mark ALL iclogs STATE_IOERROR,
@@ -2715,7 +2700,6 @@ xlog_state_done_syncing(
 	spin_unlock(&log->l_icloglock);
 	xlog_state_do_callback(log, aborted, iclog);	/* also cleans log */
 }	/* xlog_state_done_syncing */
-
 
 /*
  * If the head of the in-core log ring is not (ACTIVE or DIRTY), then we must
@@ -2878,7 +2862,6 @@ xlog_regrant_reserve_log_space(
 	xlog_tic_reset_res(ticket);
 }	/* xlog_regrant_reserve_log_space */
 
-
 /*
  * Give back the space left from a reservation.
  *
@@ -2976,7 +2959,6 @@ xlog_state_release_iclog(
 		return xlog_sync(log, iclog);
 	return 0;
 }	/* xlog_state_release_iclog */
-
 
 /*
  * This routine will mark the current iclog in the ring as WANT_SYNC
@@ -3347,7 +3329,6 @@ xlog_state_want_sync(
 	}
 }
 
-
 /*****************************************************************************
  *
  *		TICKET functions
@@ -3496,7 +3477,6 @@ xlog_ticket_alloc(
 
 	return tic;
 }
-
 
 /******************************************************************************
  *
@@ -3873,4 +3853,3 @@ xlog_iclogs_empty(
 	} while (iclog != log->l_iclog);
 	return 1;
 }
-

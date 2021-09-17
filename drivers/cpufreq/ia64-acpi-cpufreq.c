@@ -26,7 +26,6 @@ MODULE_AUTHOR("Venkatesh Pallipadi");
 MODULE_DESCRIPTION("ACPI Processor P-States Driver");
 MODULE_LICENSE("GPL");
 
-
 struct cpufreq_acpi_io {
 	struct acpi_processor_performance	acpi_data;
 	struct cpufreq_frequency_table		*freq_table;
@@ -36,7 +35,6 @@ struct cpufreq_acpi_io {
 static struct cpufreq_acpi_io	*acpi_io_data[NR_CPUS];
 
 static struct cpufreq_driver acpi_cpufreq_driver;
-
 
 static int
 processor_set_pstate (
@@ -55,7 +53,6 @@ processor_set_pstate (
 	}
 	return (int)retval;
 }
-
 
 static int
 processor_get_pstate (
@@ -77,7 +74,6 @@ processor_get_pstate (
 	return (int)retval;
 }
 
-
 /* To be used only after data->acpi_data is initialized */
 static unsigned
 extract_clock (
@@ -95,7 +91,6 @@ extract_clock (
 	}
 	return data->acpi_data.states[i-1].core_frequency;
 }
-
 
 static unsigned int
 processor_get_freq (
@@ -131,7 +126,6 @@ migrate_end:
 	set_cpus_allowed_ptr(current, &saved_mask);
 	return ret;
 }
-
 
 static int
 processor_set_freq (
@@ -211,7 +205,6 @@ migrate_end:
 	return (retval);
 }
 
-
 static unsigned int
 acpi_cpufreq_get (
 	unsigned int		cpu)
@@ -222,7 +215,6 @@ acpi_cpufreq_get (
 
 	return processor_get_freq(data, cpu);
 }
-
 
 static int
 acpi_cpufreq_target (
@@ -246,7 +238,6 @@ acpi_cpufreq_target (
 	return (result);
 }
 
-
 static int
 acpi_cpufreq_verify (
 	struct cpufreq_policy   *policy)
@@ -261,7 +252,6 @@ acpi_cpufreq_verify (
 
 	return (result);
 }
-
 
 static int
 acpi_cpufreq_cpu_init (
@@ -375,7 +365,6 @@ acpi_cpufreq_cpu_init (
 	return (result);
 }
 
-
 static int
 acpi_cpufreq_cpu_exit (
 	struct cpufreq_policy   *policy)
@@ -395,12 +384,10 @@ acpi_cpufreq_cpu_exit (
 	return (0);
 }
 
-
 static struct freq_attr* acpi_cpufreq_attr[] = {
 	&cpufreq_freq_attr_scaling_available_freqs,
 	NULL,
 };
-
 
 static struct cpufreq_driver acpi_cpufreq_driver = {
 	.verify 	= acpi_cpufreq_verify,
@@ -413,7 +400,6 @@ static struct cpufreq_driver acpi_cpufreq_driver = {
 	.attr           = acpi_cpufreq_attr,
 };
 
-
 static int __init
 acpi_cpufreq_init (void)
 {
@@ -421,7 +407,6 @@ acpi_cpufreq_init (void)
 
  	return cpufreq_register_driver(&acpi_cpufreq_driver);
 }
-
 
 static void __exit
 acpi_cpufreq_exit (void)
@@ -432,7 +417,5 @@ acpi_cpufreq_exit (void)
 	return;
 }
 
-
 late_initcall(acpi_cpufreq_init);
 module_exit(acpi_cpufreq_exit);
-

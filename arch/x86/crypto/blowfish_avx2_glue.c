@@ -552,7 +552,6 @@ static struct crypto_alg bf_algs[6] = { {
 	},
 } };
 
-
 static int __init init(void)
 {
 	u64 xcr0;

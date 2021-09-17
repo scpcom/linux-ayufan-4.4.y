@@ -414,7 +414,6 @@ enum tcp_tw_status {
 	TCP_TW_SYN = 3
 };
 
-
 extern enum tcp_tw_status tcp_timewait_state_process(struct inet_timewait_sock *tw,
 						     struct sk_buff *skb,
 						     const struct tcphdr *th);

@@ -46,7 +46,6 @@
 #include "xfs_cksum.h"
 #include "xfs_buf_item.h"
 
-
 #ifdef HAVE_PERCPU_SB
 STATIC void	xfs_icsb_balance_counter(xfs_mount_t *, xfs_sb_field_t,
 						int);
@@ -196,7 +195,6 @@ xfs_uuid_unmount(
 	mutex_unlock(&xfs_uuid_table_mutex);
 }
 
-
 /*
  * Reference counting access wrappers to the perag structures.
  * Because we never free per-ag structures, the only thing we
@@ -329,7 +327,6 @@ xfs_mount_validate_sb(
 		xfs_warn(mp, "bad magic number");
 		return XFS_ERROR(EWRONGFS);
 	}
-
 
 	if (!xfs_sb_good_version(sbp)) {
 		xfs_warn(mp, "bad version");
@@ -744,7 +741,6 @@ xfs_sb_quiet_read_verify(
 {
 	struct xfs_dsb	*dsb = XFS_BUF_TO_SBP(bp);
 
-
 	if (dsb->sb_magicnum == cpu_to_be32(XFS_SB_MAGIC)) {
 		/* XFS filesystem, verify noisily! */
 		xfs_sb_read_verify(bp);
@@ -870,7 +866,6 @@ release_buf:
 	xfs_buf_relse(bp);
 	return error;
 }
-
 
 /*
  * xfs_mount_common
@@ -1128,7 +1123,6 @@ xfs_set_low_space_thresholds(
 		mp->m_low_space[i] = space * (i + 1);
 	}
 }
-
 
 /*
  * Set whether we're using inode alignment.
@@ -1752,7 +1746,6 @@ xfs_mod_sb(xfs_trans_t *tp, __int64_t fields)
 	xfs_trans_log_buf(tp, bp, first, last);
 }
 
-
 /*
  * xfs_mod_incore_sb_unlocked() is a utility routine common used to apply
  * a delta to a specified field in the in-core superblock.  Simply
@@ -2283,7 +2276,6 @@ xfs_icsb_unlock_cntr(
 {
 	clear_bit(XFS_ICSB_FLAG_LOCK, &icsbp->icsb_flags);
 }
-
 
 STATIC void
 xfs_icsb_lock_all_counters(

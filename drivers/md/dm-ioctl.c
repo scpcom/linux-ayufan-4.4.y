@@ -51,6 +51,7 @@ struct vers_iter {
     uint32_t flags;
 };
 
+
 #define NUM_BUCKETS 64
 #define MASK_BUCKETS (NUM_BUCKETS - 1)
 static struct list_head _name_buckets[NUM_BUCKETS];

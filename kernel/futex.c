@@ -449,7 +449,6 @@ static int get_futex_value_locked(u32 *dest, u32 __user *from)
 	return ret ? -EFAULT : 0;
 }
 
-
 /*
  * PI code:
  */
@@ -1963,7 +1962,6 @@ out:
 	return ret;
 }
 
-
 static long futex_wait_restart(struct restart_block *restart)
 {
 	u32 __user *uaddr = restart->futex.uaddr;
@@ -1978,7 +1976,6 @@ static long futex_wait_restart(struct restart_block *restart)
 	return (long)futex_wait(uaddr, restart->futex.flags,
 				restart->futex.val, tp, restart->futex.bitset);
 }
-
 
 /*
  * Userspace tried a 0 -> TID atomic transition of the futex value
@@ -2694,7 +2691,6 @@ long do_futex(u32 __user *uaddr, int op, u32 val, ktime_t *timeout,
 	}
 	return -ENOSYS;
 }
-
 
 SYSCALL_DEFINE6(futex, u32 __user *, uaddr, int, op, u32, val,
 		struct timespec __user *, utime, u32 __user *, uaddr2,

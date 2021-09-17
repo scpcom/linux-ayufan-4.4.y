@@ -493,7 +493,6 @@ fec_restart(struct net_device *ndev, int duplex)
 		writel((unsigned long)fep->bd_dma + sizeof(struct bufdesc)
 			* RX_RING_SIZE,	fep->hwp + FEC_X_DES_START);
 
-
 	for (i = 0; i <= TX_RING_MOD_MASK; i++) {
 		if (fep->tx_skbuff[i]) {
 			dev_kfree_skb_any(fep->tx_skbuff[i]);
@@ -656,7 +655,6 @@ fec_stop(struct net_device *ndev)
 	}
 }
 
-
 static void
 fec_timeout(struct net_device *ndev)
 {
@@ -781,7 +779,6 @@ fec_enet_tx(struct net_device *ndev)
 	}
 	return;
 }
-
 
 /* During a receive, the cur_rx points to the current incoming buffer.
  * When we update through the ring, if the next incoming buffer has

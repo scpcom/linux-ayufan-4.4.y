@@ -452,7 +452,6 @@ TRACE_EVENT(balance_dirty_pages,
 		__entry->paused		= (jiffies - start_time) * 1000 / HZ;
 	),
 
-
 	TP_printk("bdi %s: "
 		  "limit=%lu setpoint=%lu dirty=%lu "
 		  "bdi_setpoint=%lu bdi_dirty=%lu "

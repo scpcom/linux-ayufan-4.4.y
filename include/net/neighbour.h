@@ -148,7 +148,6 @@ struct neigh_hash_table {
 	struct rcu_head		rcu;
 };
 
-
 struct neigh_table {
 	struct neigh_table	*next;
 	int			family;

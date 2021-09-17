@@ -44,7 +44,6 @@ static struct crypto_alg krng_alg = {
 	}
 };
 
-
 /* Module initalization */
 static int __init krng_mod_init(void)
 {

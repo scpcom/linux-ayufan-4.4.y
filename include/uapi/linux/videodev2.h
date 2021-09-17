@@ -818,7 +818,6 @@ struct v4l2_selection {
 	__u32                   reserved[9];
 };
 
-
 /*
  *      A N A L O G   V I D E O   S T A N D A R D
  */
@@ -1055,7 +1054,6 @@ struct v4l2_bt_timings {
    or used depends on the hardware. */
 #define V4L2_DV_FL_HALF_LINE			(1 << 3)
 
-
 /** struct v4l2_dv_timings - DV timings
  * @type:	the type of the timings
  * @bt:	BT656/1120 timings
@@ -1070,7 +1068,6 @@ struct v4l2_dv_timings {
 
 /* Values for the type field */
 #define V4L2_DV_BT_656_1120	0	/* BT.656/1120 timing type */
-
 
 /** struct v4l2_enum_dv_timings - DV timings enumeration
  * @index:	enumeration index
@@ -1127,7 +1124,6 @@ struct v4l2_dv_timings_cap {
 		__u32 raw_data[32];
 	};
 };
-
 
 /*
  *	V I D E O   I N P U T S
@@ -1284,7 +1280,6 @@ struct v4l2_querymenu {
 #define V4L2_CID_MAX_CTRLS		1024
 /*  IDs reserved for driver specific controls */
 #define V4L2_CID_PRIVATE_BASE		0x08000000
-
 
 /*
  *	T U N I N G
@@ -1451,7 +1446,6 @@ struct v4l2_enc_idx {
 	struct v4l2_enc_idx_entry entry[V4L2_ENC_IDX_ENTRIES];
 };
 
-
 #define V4L2_ENC_CMD_START      (0)
 #define V4L2_ENC_CMD_STOP       (1)
 #define V4L2_ENC_CMD_PAUSE      (2)
@@ -1519,7 +1513,6 @@ struct v4l2_decoder_cmd {
 	};
 };
 #endif
-
 
 /*
  *	D A T A   S E R V I C E S   ( V B I )
