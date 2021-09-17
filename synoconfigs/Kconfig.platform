@@ -79,6 +79,7 @@ config SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 config SYNO_HI3536
 	bool "Hisilicon Hi3536 SoC"
 	select SYNO_LSP_HI3536
+	default n
 
 config SYNO_LSP_HI3536
 	bool "Apply Hisilicon Hi3536 LSP"
@@ -98,5 +99,11 @@ config SYNO_HI3536_ALIGN_STRUCTURES
 	bool "Align kernel structures to SDK"
 	depends on SYNO_HI3536
 	default y
+
+config SYNO_HI3536_NVR
+	bool "Hisilicon Hi3536 SoC for NVR"
+	depends on SYNO_HI3536
+	select SYNO_LSP_HI3536
+	default n
 
 endmenu #Platform Selection

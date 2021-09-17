@@ -22,6 +22,13 @@
 #define SEEK_HOLE	4	 
 #define SEEK_MAX	SEEK_HOLE
 
+struct file_clone_range {
+	__s64 src_fd;
+	__u64 src_offset;
+	__u64 src_length;
+	__u64 dest_offset;
+};
+
 struct fstrim_range {
 	__u64 start;
 	__u64 len;
@@ -123,6 +130,8 @@ struct inodes_stat_t {
 #define FIFREEZE	_IOWR('X', 119, int)	 
 #define FITHAW		_IOWR('X', 120, int)	 
 #define FITRIM		_IOWR('X', 121, struct fstrim_range)	 
+#define FICLONE		_IOW(0x94, 9, int)
+#define FICLONERANGE	_IOW(0x94, 13, struct file_clone_range)
 
 #if defined(MY_DEF_HERE)
 #define FIDTRIM	_IOWR('f', 128, struct fstrim_range)	 

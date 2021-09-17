@@ -607,6 +607,9 @@ int efivars_sysfs_init(void)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(efivars_sysfs_init);
-
+#ifdef MY_DEF_HERE
+subsys_initcall(efivars_sysfs_init);
+#else
 module_init(efivars_sysfs_init);
+#endif /* MY_DEF_HERE */
 module_exit(efivars_sysfs_exit);

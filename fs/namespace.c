@@ -55,6 +55,8 @@ static struct kmem_cache *mnt_cache __read_mostly;
 #ifdef MY_ABC_HERE
  
 struct rw_semaphore namespace_sem;
+
+static DEFINE_MUTEX(namespace_mutex);
 #else
 static struct rw_semaphore namespace_sem;
 #endif  
@@ -857,6 +859,9 @@ static void *m_start(struct seq_file *m, loff_t *pos)
 {
 	struct proc_mounts *p = proc_mounts(m);
 
+#ifdef MY_ABC_HERE
+	mutex_lock(&namespace_mutex);
+#endif  
 	down_read(&namespace_sem);
 	return seq_list_start(&p->ns->list, *pos);
 }
@@ -871,6 +876,9 @@ static void *m_next(struct seq_file *m, void *v, loff_t *pos)
 static void m_stop(struct seq_file *m, void *v)
 {
 	up_read(&namespace_sem);
+#ifdef MY_ABC_HERE
+	mutex_unlock(&namespace_mutex);
+#endif  
 }
 
 static int m_show(struct seq_file *m, void *v)
@@ -934,11 +942,17 @@ static void namespace_unlock(void)
 
 	if (likely(list_empty(&unmounted))) {
 		up_write(&namespace_sem);
+#ifdef MY_ABC_HERE
+		mutex_unlock(&namespace_mutex);
+#endif  
 		return;
 	}
 
 	list_splice_init(&unmounted, &head);
 	up_write(&namespace_sem);
+#ifdef MY_ABC_HERE
+	mutex_unlock(&namespace_mutex);
+#endif  
 
 	while (!list_empty(&head)) {
 		mnt = list_first_entry(&head, struct mount, mnt_hash);
@@ -963,6 +977,9 @@ static void namespace_unlock(void)
 
 static inline void namespace_lock(void)
 {
+#ifdef MY_ABC_HERE
+	mutex_lock(&namespace_mutex);
+#endif  
 	down_write(&namespace_sem);
 }
 
@@ -1464,7 +1481,7 @@ static int change_mount_flags(struct vfsmount *mnt, int ms_flags)
 }
 
 #ifdef MY_ABC_HERE
-static struct syno_mnt_options {
+struct syno_mnt_options {
 	long relatime_period;
 };
 

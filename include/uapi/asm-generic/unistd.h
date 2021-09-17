@@ -715,6 +715,12 @@ __SYSCALL(__NR_seccomp, sys_seccomp)
 #define __NR_syscalls 274
 #endif /* MY_DEF_HERE */
 
+#define __NR_copy_file_range 285
+__SYSCALL(__NR_copy_file_range, sys_copy_file_range)
+
+#undef __NR_syscalls
+#define __NR_syscalls 286
+
 /*
  * All syscalls below here should go away really,
  * these are provided for both review and as a porting

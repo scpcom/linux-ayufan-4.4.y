@@ -29,7 +29,7 @@ static struct hlist_head *inode_hashtable __read_mostly;
 static __cacheline_aligned_in_smp DEFINE_SPINLOCK(inode_hash_lock);
 
 __cacheline_aligned_in_smp DEFINE_SPINLOCK(inode_sb_list_lock);
-#if defined(MY_ABC_HERE) || defined(CONFIG_AUFS_FHSM)
+#if defined(MY_DEF_HERE) || defined(CONFIG_AUFS_FHSM)
 EXPORT_SYMBOL(inode_sb_list_lock);
 #endif  
 
@@ -330,7 +330,7 @@ void __iget(struct inode *inode)
 {
 	atomic_inc(&inode->i_count);
 }
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 EXPORT_SYMBOL(__iget);
 #endif
 

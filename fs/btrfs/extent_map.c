@@ -7,7 +7,7 @@
 #include <linux/hardirq.h>
 #include "ctree.h"
 #include "extent_map.h"
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #include "btrfs_inode.h"
 #endif
 
@@ -31,7 +31,7 @@ void extent_map_exit(void)
 
 void extent_map_tree_init(struct extent_map_tree *tree)
 {
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	atomic_set(&tree->nr_extent_maps, 0);
 	INIT_LIST_HEAD(&tree->not_modified_extents);
 	INIT_LIST_HEAD(&tree->syno_modified_extents);
@@ -53,7 +53,7 @@ struct extent_map *alloc_extent_map(void)
 	em->generation = 0;
 	atomic_set(&em->refs, 1);
 	INIT_LIST_HEAD(&em->list);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	INIT_LIST_HEAD(&em->free_list);
 #endif  
 	return em;
@@ -67,7 +67,7 @@ void free_extent_map(struct extent_map *em)
 	if (atomic_dec_and_test(&em->refs)) {
 		WARN_ON(extent_map_in_tree(em));
 		WARN_ON(!list_empty(&em->list));
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		WARN_ON(!list_empty(&em->free_list));
 #endif  
 		if (test_bit(EXTENT_FLAG_FS_MAPPING, &em->flags))
@@ -202,7 +202,7 @@ static int mergable_maps(struct extent_map *prev, struct extent_map *next)
 	return 0;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 static void check_and_insert_extent_map_to_global_extent(struct extent_map_tree *tree, struct extent_map *em, int modified)
 {
 	u64 rootid = 0;
@@ -274,7 +274,7 @@ static void try_merge_map(struct extent_map_tree *tree, struct extent_map *em)
 
 			rb_erase(&merge->rb_node, &tree->map);
 			RB_CLEAR_NODE(&merge->rb_node);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 			check_and_decrease_global_extent(tree, merge);
 #endif
 			free_extent_map(merge);
@@ -291,7 +291,7 @@ static void try_merge_map(struct extent_map_tree *tree, struct extent_map *em)
 		RB_CLEAR_NODE(&merge->rb_node);
 		em->mod_len = (merge->mod_start + merge->mod_len) - em->mod_start;
 		em->generation = max(em->generation, merge->generation);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		check_and_decrease_global_extent(tree, merge);
 #endif
 		free_extent_map(merge);
@@ -367,7 +367,7 @@ int add_extent_mapping(struct extent_map_tree *tree,
 	if (ret)
 		goto out;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	check_and_insert_extent_map_to_global_extent(tree, em, modified);
 #endif
 	setup_extent_mapping(tree, em, modified);
@@ -427,7 +427,7 @@ int remove_extent_mapping(struct extent_map_tree *tree, struct extent_map *em)
 		list_del_init(&em->list);
 	RB_CLEAR_NODE(&em->rb_node);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	check_and_decrease_global_extent(tree, em);
 #endif  
 
@@ -446,7 +446,7 @@ void replace_extent_mapping(struct extent_map_tree *tree,
 	rb_replace_node(&cur->rb_node, &new->rb_node, &tree->map);
 	RB_CLEAR_NODE(&cur->rb_node);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	check_and_decrease_global_extent(tree, cur);
 	check_and_insert_extent_map_to_global_extent(tree, new, modified);
 #endif

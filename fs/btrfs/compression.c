@@ -482,7 +482,7 @@ int btrfs_submit_compressed_read(struct inode *inode, struct bio *bio,
 	tree = &BTRFS_I(inode)->io_tree;
 	em_tree = &BTRFS_I(inode)->extent_tree;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	em = btrfs_get_extent(inode, NULL, 0, page_offset(bio->bi_io_vec->bv_page), PAGE_CACHE_SIZE, 0);
 #else
 	read_lock(&em_tree->lock);

@@ -395,7 +395,7 @@ leave_no_lock:
 	return ret;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
  
 static void btrfs_rm_dev_replace_blocked(struct btrfs_fs_info *fs_info)
@@ -448,7 +448,7 @@ static int btrfs_dev_replace_finishing(struct btrfs_fs_info *fs_info,
 	src_device = dev_replace->srcdev;
 	btrfs_dev_replace_unlock(dev_replace);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	 
 	if (!scrub_ret)
 		btrfs_dev_replace_update_device_in_mapping_tree(fs_info,
@@ -482,7 +482,7 @@ static int btrfs_dev_replace_finishing(struct btrfs_fs_info *fs_info,
 	dev_replace->time_stopped = get_seconds();
 	dev_replace->item_needs_writeback = 1;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (scrub_ret) {
 #else
 	 
@@ -533,14 +533,14 @@ static int btrfs_dev_replace_finishing(struct btrfs_fs_info *fs_info,
 	btrfs_kobj_rm_device(fs_info, src_device);
 	btrfs_kobj_add_device(fs_info, tgt_device);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 	btrfs_rm_dev_replace_blocked(fs_info);
 #endif  
 
 	btrfs_rm_dev_replace_srcdev(fs_info, src_device);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 	btrfs_rm_dev_replace_unblocked(fs_info);
 #endif  
@@ -855,7 +855,7 @@ void btrfs_dev_replace_unlock(struct btrfs_dev_replace *dev_replace)
 	}
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 void btrfs_bio_counter_inc_noblocked(struct btrfs_fs_info *fs_info)
 {

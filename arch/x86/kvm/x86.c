@@ -158,10 +158,6 @@ static void kvm_on_user_return(struct user_return_notifier *urn)
 	struct kvm_shared_msr_values *values;
 	unsigned long flags;
 
-	/*
-	 * Disabling irqs at this point since the following code could be
-	 * interrupted and executed through kvm_arch_hardware_disable()
-	 */
 	local_irq_save(flags);
 	if (locals->registered) {
 		locals->registered = false;

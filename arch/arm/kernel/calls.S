@@ -392,18 +392,17 @@
 		CALL(sys_process_vm_writev)
 		CALL(sys_kcmp)
 		CALL(sys_finit_module)
-#ifdef MY_ABC_HERE
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 /* 380 */	CALL(sys_ni_syscall)		/* reserved sys_sched_setattr */
 		CALL(sys_ni_syscall)		/* reserved sys_sched_getattr */
 		CALL(sys_ni_syscall)		/* reserved sys_renameat2     */
 		CALL(sys_seccomp)
-#else /* MY_DEF_HERE */
+#else 
 /* 380 */	CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
-#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE && defined(MY_ABC_HERE) */ 
 		CALL(sys_ni_syscall)
 /* 385 */	CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
@@ -411,10 +410,11 @@
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 /* 390 */	CALL(sys_ni_syscall)
+		CALL(sys_copy_file_range)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)
+#ifdef MY_ABC_HERE
 /* 395 */	CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)

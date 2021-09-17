@@ -209,9 +209,6 @@ struct scsi_device {
 #ifdef MY_ABC_HERE
 	unsigned char auto_remap;
 #endif  
-#ifdef CONFIG_SYNO_SATA_COMPATIBILITY
-	int iResetPwrCount;   
-#endif  
 #ifdef MY_ABC_HERE
 	unsigned long   idle;    
 	unsigned char	spindown;

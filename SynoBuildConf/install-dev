@@ -15,7 +15,6 @@ ModCrypto=" \
 	${KernelDir}/crypto/md5.ko \
 	${KernelDir}/crypto/sha1_generic.ko \
 	${KernelDir}/crypto/sha256_generic.ko \
-	${KernelDir}/crypto/sha512_generic.ko \
 	${KernelDir}/crypto/cts.ko \
 	"
 #FIXME: The modules below should be included when porting is done
@@ -38,6 +37,7 @@ ModFS=" \
 	${KernelDir}/lib/zlib_deflate/zlib_deflate.ko \
 	${KernelDir}/lib/libcrc32c.ko \
 	${KernelDir}/fs/hfsplus/hfsplus.ko \
+	${KernelDir}/drivers/md/dm-flakey.ko \
 	"
 ModEncFS=" \
 	${KernelDir}/fs/ecryptfs/ecryptfs.ko \
@@ -561,6 +561,8 @@ if [ -r "${VmLinux}" ]; then
 	cp -fv ${VmLinux} ${DebDevBuild}/image/synodebug/
 	gzip -f9 ${DebDevBuild}/image/synodebug/vmlinux
 fi
+
+install -Dm755 "scripts/sign-file" "${DebDevBuild}/usr/syno/bin/sign-file"
 
 # shellcheck source=/dev/null
 source "$ScriptsDir/include/kernel-devel"

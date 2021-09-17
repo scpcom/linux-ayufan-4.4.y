@@ -906,7 +906,7 @@ static int contains_pending_extent(struct btrfs_trans_handle *trans,
 	struct extent_map *em;
 	struct list_head *search_list = &trans->transaction->pending_chunks;
 	int ret = 0;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	u64 physical_start = *start;
 #endif
 
@@ -919,7 +919,7 @@ again:
 		for (i = 0; i < map->num_stripes; i++) {
 			if (map->stripes[i].dev != device)
 				continue;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 			if (map->stripes[i].physical >= physical_start + len ||
 			    map->stripes[i].physical + em->orig_block_len <=
 			    physical_start)
@@ -965,11 +965,11 @@ int find_free_dev_extent(struct btrfs_trans_handle *trans,
 	path = btrfs_alloc_path();
 	if (!path)
 		return -ENOMEM;
-again:
+
 	max_hole_start = search_start;
 	max_hole_size = 0;
-	hole_size = 0;
 
+again:
 	if (search_start >= search_end || device->is_tgtdev_for_dev_replace) {
 		ret = -ENOSPC;
 		goto out;
@@ -1021,7 +1021,7 @@ again:
 			if (contains_pending_extent(trans, device,
 						    &search_start,
 						    hole_size))
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 			{
 				if (key.offset >= search_start)
 					hole_size = key.offset - search_start;
@@ -1055,20 +1055,22 @@ next:
 		cond_resched();
 	}
 
-	if (search_end > search_start)
+	if (search_end > search_start) {
 		hole_size = search_end - search_start;
 
-	if (hole_size > max_hole_size) {
-		max_hole_start = search_start;
-		max_hole_size = hole_size;
+		if (contains_pending_extent(trans, device, &search_start,
+					    hole_size)) {
+			btrfs_release_path(path);
+			goto again;
+		}
+
+		if (hole_size > max_hole_size) {
+			max_hole_start = search_start;
+			max_hole_size = hole_size;
+		}
 	}
 
-	if (contains_pending_extent(trans, device, &search_start, hole_size)) {
-		btrfs_release_path(path);
-		goto again;
-	}
-
-	if (hole_size < num_bytes)
+	if (max_hole_size < num_bytes)
 		ret = -ENOSPC;
 	else
 		ret = 0;
@@ -1131,6 +1133,8 @@ again:
 	if (ret) {
 		btrfs_error(root->fs_info, ret,
 			    "Failed to remove dev extent item");
+	} else {
+		trans->transaction->have_free_bgs = 1;
 	}
 out:
 	btrfs_free_path(path);
@@ -2322,7 +2326,7 @@ int btrfs_remove_chunk(struct btrfs_trans_handle *trans,
 			spin_unlock(&root->fs_info->free_chunk_lock);
 			btrfs_clear_space_info_full(root->fs_info);
 			unlock_chunks(root);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 			trans->transaction->clear_full = true;
 #endif
 
@@ -3859,7 +3863,7 @@ static int __btrfs_alloc_chunk(struct btrfs_trans_handle *trans,
 	ncopies = btrfs_raid_array[index].ncopies;
 
 	if (type & BTRFS_BLOCK_GROUP_DATA) {
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		if (info->super_copy->total_bytes > 1024ULL * 1024 * 1024 * 1024) {
 			max_stripe_size = 10ULL * 1024 * 1024 * 1024;
 			max_chunk_size = 2 * max_stripe_size;
@@ -4976,7 +4980,7 @@ int btrfs_rmap_block(struct btrfs_mapping_tree *map_tree,
 static void btrfs_end_bio(struct bio *bio, int err)
 {
 	struct btrfs_bio *bbio = bio->bi_private;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 	struct btrfs_device *dev = bbio->stripes[0].dev;
 #endif  
@@ -4987,7 +4991,7 @@ static void btrfs_end_bio(struct bio *bio, int err)
 		if (err == -EIO || err == -EREMOTEIO) {
 			unsigned int stripe_index =
 				btrfs_io_bio(bio)->stripe_index;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 			struct btrfs_device *dev;
 #endif  
 
@@ -5011,7 +5015,7 @@ static void btrfs_end_bio(struct bio *bio, int err)
 	if (bio == bbio->orig_bio)
 		is_orig_bio = 1;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 	btrfs_bio_counter_dec(bbio->fs_info);
 #endif  
@@ -5139,7 +5143,7 @@ static void submit_stripe_bio(struct btrfs_root *root, struct btrfs_bio *bbio,
 #endif
 	bio->bi_bdev = dev->bdev;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 	btrfs_bio_counter_inc_noblocked(root->fs_info);
 #endif  
@@ -5212,13 +5216,13 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 	length = bio->bi_size;
 	map_length = length;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 	btrfs_bio_counter_inc_blocked(root->fs_info);
 #endif  
 	ret = __btrfs_map_block(root->fs_info, rw, logical, &map_length, &bbio,
 			      mirror_num, &raid_map);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (ret)  
 		return ret;
 #else
@@ -5232,7 +5236,7 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 	bbio->orig_bio = first_bio;
 	bbio->private = first_bio->bi_private;
 	bbio->end_io = first_bio->bi_end_io;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 	bbio->fs_info = root->fs_info;
 #endif  
@@ -5240,7 +5244,7 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 
 	if (raid_map) {
 		 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		if (rw & WRITE) {
 			return raid56_parity_write(root, bio, bbio,
 						   raid_map, map_length);
@@ -5299,7 +5303,7 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 				  async_submit);
 		dev_nr++;
 	}
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 	btrfs_bio_counter_dec(root->fs_info);
 #endif  

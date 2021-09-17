@@ -842,6 +842,10 @@ asmlinkage long sys_kcmp(pid_t pid1, pid_t pid2, int type,
 			 unsigned long idx1, unsigned long idx2);
 asmlinkage long sys_finit_module(int fd, const char __user *uargs, int flags);
 
+asmlinkage long sys_copy_file_range(int fd_in, loff_t __user *off_in,
+				    int fd_out, loff_t __user *off_out,
+				    size_t len, unsigned int flags);
+
 #ifdef MY_ABC_HERE
 #ifdef MY_ABC_HERE
   asmlinkage long sys_SYNOUtime(const char __user *filename, struct timespec __user *ctime);

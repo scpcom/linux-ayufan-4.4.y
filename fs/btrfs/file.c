@@ -1133,7 +1133,8 @@ out:
 	return 0;
 }
 
-static int prepare_uptodate_page(struct page *page, u64 pos,
+static int prepare_uptodate_page(struct inode *inode,
+				 struct page *page, u64 pos,
 				 bool force_uptodate)
 {
 	int ret = 0;
@@ -1147,6 +1148,10 @@ static int prepare_uptodate_page(struct page *page, u64 pos,
 		if (!PageUptodate(page)) {
 			unlock_page(page);
 			return -EIO;
+		}
+		if (page->mapping != inode->i_mapping) {
+			unlock_page(page);
+			return -EAGAIN;
 		}
 	}
 	return 0;
@@ -1163,6 +1168,7 @@ static noinline int prepare_pages(struct inode *inode, struct page **pages,
 	int faili;
 
 	for (i = 0; i < num_pages; i++) {
+again:
 		pages[i] = find_or_create_page(inode->i_mapping, index + i,
 					       mask | __GFP_WRITE);
 		if (!pages[i]) {
@@ -1172,13 +1178,17 @@ static noinline int prepare_pages(struct inode *inode, struct page **pages,
 		}
 
 		if (i == 0)
-			err = prepare_uptodate_page(pages[i], pos,
+			err = prepare_uptodate_page(inode, pages[i], pos,
 						    force_uptodate);
-		if (i == num_pages - 1)
-			err = prepare_uptodate_page(pages[i],
+		if (!err && i == num_pages - 1)
+			err = prepare_uptodate_page(inode, pages[i],
 						    pos + write_bytes, false);
 		if (err) {
 			page_cache_release(pages[i]);
+			if (err == -EAGAIN) {
+				err = 0;
+				goto again;
+			}
 			faili = i - 1;
 			goto fail;
 		}
@@ -1709,6 +1719,8 @@ int btrfs_sync_file(struct file *file, loff_t start, loff_t end, int datasync)
 		 
 		clear_bit(BTRFS_INODE_NEEDS_FULL_SYNC,
 			  &BTRFS_I(inode)->runtime_flags);
+		 
+		ret = btrfs_inode_check_errors(inode);
 		mutex_unlock(&inode->i_mutex);
 		goto out;
 	}
@@ -1821,7 +1833,7 @@ static int fill_holes(struct btrfs_trans_handle *trans, struct inode *inode,
 	struct extent_map_tree *em_tree = &BTRFS_I(inode)->extent_tree;
 	struct btrfs_key key;
 	int ret;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	int modify_slot = -1;
 	int del_slot = -1;
 	int update_offset = 0;
@@ -1835,7 +1847,7 @@ static int fill_holes(struct btrfs_trans_handle *trans, struct inode *inode,
 	key.type = BTRFS_EXTENT_DATA_KEY;
 	key.offset = offset;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	ret = btrfs_search_slot(trans, root, &key, path, -1, 1);
 #else
 	ret = btrfs_search_slot(trans, root, &key, path, 0, 1);
@@ -1848,7 +1860,7 @@ static int fill_holes(struct btrfs_trans_handle *trans, struct inode *inode,
 	}
 
 	leaf = path->nodes[0];
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (hole_mergeable(inode, leaf, path->slots[0] - 1, offset, end)) {
 		fi = btrfs_item_ptr(leaf, path->slots[0] - 1,
 				    struct btrfs_file_extent_item);
@@ -1911,7 +1923,7 @@ static int fill_holes(struct btrfs_trans_handle *trans, struct inode *inode,
 		return ret;
 
 out:
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (modify_slot >= 0) {
 		fi = btrfs_item_ptr(leaf, modify_slot, struct btrfs_file_extent_item);
 
@@ -2006,7 +2018,7 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 	u64 tail_len;
 	u64 orig_start = offset;
 	u64 cur_offset;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	u64 min_size = btrfs_calc_trans_metadata_size(root, 1);
 #else
 	u64 min_size = btrfs_calc_trunc_metadata_size(root, 1);
@@ -2034,7 +2046,7 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 		goto out_only_mutex;
 	}
 
-	lockstart = round_up(offset , BTRFS_I(inode)->root->sectorsize);
+	lockstart = round_up(offset, BTRFS_I(inode)->root->sectorsize);
 	lockend = round_down(offset + len,
 			     BTRFS_I(inode)->root->sectorsize) - 1;
 	same_page = ((offset >> PAGE_CACHE_SHIFT) ==
@@ -2081,7 +2093,7 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 						tail_start + tail_len, 0, 1);
 				if (ret)
 					goto out_only_mutex;
-				}
+			}
 		}
 	}
 
@@ -2130,7 +2142,7 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 		ret = -ENOMEM;
 		goto out_free;
 	}
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	rsv->size = btrfs_calc_trans_metadata_size(root, 1);
 #else
 	rsv->size = btrfs_calc_trunc_metadata_size(root, 1);
@@ -2288,7 +2300,7 @@ static long btrfs_fallocate(struct file *file, int mode,
 					alloc_start);
 		if (ret)
 			goto out;
-	} else {
+	} else if (offset + len > inode->i_size) {
 		 
 		ret = btrfs_truncate_page(inode, inode->i_size, 0, 0);
 		if (ret)
@@ -2875,6 +2887,10 @@ const struct file_operations btrfs_file_operations = {
 	.compat_ioctl	= btrfs_ioctl,
 #endif  
 #endif
+	.clone_file_range = btrfs_clone_file_range,
+#ifdef MY_DEF_HERE
+	.clone_check_compr = btrfs_clone_check_compr,
+#endif  
 };
 
 void btrfs_auto_defrag_exit(void)

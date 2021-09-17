@@ -1833,7 +1833,33 @@ static inline u8 ata_dev_knobble(struct ata_device *dev)
 
 	return ((ap->cbl == ATA_CBL_SATA) && (!ata_id_is_sata(dev->id)));
 }
+#ifdef MY_DEF_HERE
+static int syno_ata_dev_ncq_compat(struct ata_device *dev) {
+	struct ata_port *ap = NULL;
+	struct pci_dev *pdev = NULL;
+	u16 vendor = 0;
+	u16 device = 0;
+	int ret = 1;
 
+	if (dev && dev->link) {
+		ap = dev->link->ap;
+	}
+
+	if (ap && ap->host) {
+		pdev = to_pci_dev(ap->host->dev);
+		vendor = sata_pmp_gscr_vendor(ap->link.device[0].gscr);
+		device = sata_pmp_gscr_devid(ap->link.device[0].gscr);
+	}
+
+	if (pdev && ((pdev->vendor == 0x1b4b && pdev->device == 0x9170)
+			|| (pdev->vendor == 0x1b4b && pdev->device == 0x9235))
+			&& syno_pm_is_3xxx(vendor, device)) {
+		ret = 0;
+	}
+
+	return ret;
+}
+#endif  
 static int ata_dev_config_ncq(struct ata_device *dev,
 			       char *desc, size_t desc_sz)
 {
@@ -1851,6 +1877,12 @@ static int ata_dev_config_ncq(struct ata_device *dev,
 		return 0;
 	}
 	if (ap->flags & ATA_FLAG_NCQ) {
+#ifdef MY_DEF_HERE
+		if(!syno_ata_dev_ncq_compat(dev)) {
+			snprintf(desc, desc_sz, "NCQ (not used)");
+			return 0;
+		}
+#endif  
 		hdepth = min(ap->scsi_host->can_queue, ATA_MAX_QUEUE - 1);
 		dev->flags |= ATA_DFLAG_NCQ;
 	}

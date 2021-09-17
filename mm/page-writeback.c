@@ -1409,7 +1409,11 @@ void wait_for_stable_page(struct page *page)
 	struct address_space *mapping = page_mapping(page);
 	struct backing_dev_info *bdi = mapping->backing_dev_info;
 
+#ifdef MY_DEF_HERE
+	if (!bdi_cap_stable_pages_required(&syno_backing_dev_info) && !bdi_cap_stable_pages_required(bdi))
+#else  
 	if (!bdi_cap_stable_pages_required(bdi))
+#endif  
 		return;
 
 	wait_on_page_writeback(page);

@@ -96,13 +96,19 @@ void __init arm_dt_init_cpu_maps(void)
 
 		pr_debug(" * %s...\n", cpu->full_name);
 		 
-		if (of_property_read_u32(cpu, "reg", &hwid)) {
+		cell = of_get_property(cpu, "reg", &prop_bytes);
+		if (!cell || prop_bytes < sizeof(*cell)) {
 			pr_debug(" * %s missing reg property\n",
 				     cpu->full_name);
 			return;
 		}
 
-		if (hwid & ~MPIDR_HWID_BITMASK)
+		do {
+			hwid = be32_to_cpu(*cell++);
+			prop_bytes -= sizeof(*cell);
+		} while (!hwid && prop_bytes > 0);
+
+		if (prop_bytes || (hwid & ~MPIDR_HWID_BITMASK))
 			return;
 
 		for (j = 0; j < cpuidx; j++)

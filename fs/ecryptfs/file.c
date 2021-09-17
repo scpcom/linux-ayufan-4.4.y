@@ -11,7 +11,7 @@
 #include <linux/compat.h>
 #include <linux/fs_stack.h>
 #include <linux/aio.h>
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #include <linux/btrfs.h>
 #endif
 #include "ecryptfs_kernel.h"
@@ -269,7 +269,7 @@ ecryptfs_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	struct file *lower_file = NULL;
 	long rc = -ENOTTY;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (cmd == BTRFS_IOC_CLONE || cmd == BTRFS_IOC_CLONE_RANGE)
 		return -EXDEV;
 #endif
@@ -287,7 +287,7 @@ ecryptfs_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	struct file *lower_file = NULL;
 	long rc = -ENOIOCTLCMD;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (cmd == BTRFS_IOC_CLONE || cmd == BTRFS_IOC_CLONE_RANGE)
 		return -EXDEV;
 #endif

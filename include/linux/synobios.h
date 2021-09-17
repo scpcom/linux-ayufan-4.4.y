@@ -222,6 +222,7 @@
 #define EBOX_INFO_UNIQUE_RX415  "RX415"
 #define EBOX_INFO_UNIQUE_DX1215 "DX1215"
 #define EBOX_INFO_UNIQUE_DX517  "DX517"
+#define EBOX_INFO_UNIQUE_RX418  "RX418"
 
 #define SYNO_UNIQUE(x)     (x>>2)
 #define IS_SYNOLOGY_RX4(x) (SYNO_UNIQUE(x) == 0x15 || SYNO_UNIQUE(x) == 0xd) // 0x54 ~ 0x57
@@ -232,12 +233,13 @@
 #define IS_SYNOLOGY_DXC(x) (SYNO_UNIQUE(x) == 0x13) // 0x4c ~ 0x4f
 #define IS_SYNOLOGY_RXC(x) (SYNO_UNIQUE(x) == 0xb) // 0x2c ~ 0x2f
 #define IS_SYNOLOGY_DX213(x) (SYNO_UNIQUE(x) == 0x16) // 0x58 ~ 0x5b
-#define IS_SYNOLOGY_RX413(x) (x == 0x11)
+#define IS_SYNOLOGY_RX413(x) (x == 0x11) // This model is obsoleted
 #define IS_SYNOLOGY_RX1214(x) (x == 0x12)
 #define IS_SYNOLOGY_RX1217(x) (x == 0x14)
 #define IS_SYNOLOGY_RX415(x) (SYNO_UNIQUE(x) == 0x1d) // 0x54 ~ 0x57
 #define IS_SYNOLOGY_DX1215(x) (x == 0x13)
 #define IS_SYNOLOGY_DX517(x) (x == 0x15)
+#define IS_SYNOLOGY_RX418(x) (x == 0x16)
 
 typedef enum _tag_EUNIT_PWRON_TYPE {
 	EUNIT_NOT_SUPPORT,

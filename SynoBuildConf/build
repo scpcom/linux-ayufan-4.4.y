@@ -7,6 +7,9 @@
 # please edit the section [platform kernel] in config/project.depends
 # ========================================================================
 
+# Copy key file
+cp -sv /lnxscripts/config/{signing_key,trusted_certificates,untrusted_certificates} .
+
 export ARCH=${ARCH}
 CC=`echo ${CC} | awk -F" " '{print $1}'`
 export CROSS_COMPILE=${ToolChainPrefix} CC="${CC}"

@@ -270,7 +270,11 @@ static int blkcipher_walk_next(struct blkcipher_desc *desc,
 		return blkcipher_walk_done(desc, walk, -EINVAL);
 	}
 
+#if defined(MY_DEF_HERE)
+	bsize = min(walk->walk_blocksize, n);
+#else /* MY_DEF_HERE */
 	bsize = min(walk->blocksize, n);
+#endif /* MY_DEF_HERE */
 
 	walk->flags &= ~(BLKCIPHER_WALK_SLOW | BLKCIPHER_WALK_COPY |
 			 BLKCIPHER_WALK_DIFF);
@@ -289,11 +293,6 @@ static int blkcipher_walk_next(struct blkcipher_desc *desc,
 		}
 	}
 
-#if defined(MY_DEF_HERE)
-	bsize = min(walk->walk_blocksize, n);
-#else /* MY_DEF_HERE */
-	bsize = min(walk->blocksize, n);
-#endif /* MY_DEF_HERE */
 	n = scatterwalk_clamp(&walk->in, n);
 	n = scatterwalk_clamp(&walk->out, n);
 

@@ -728,6 +728,7 @@ struct sock *inet_csk_clone_lock(const struct sock *sk,
 #if defined(MY_DEF_HERE)
 		newsk->sk_mark = inet_rsk(req)->ir_mark;
 #endif /* MY_DEF_HERE */
+		inet_sk(newsk)->mc_list = NULL;
 
 		newicsk->icsk_retransmits = 0;
 		newicsk->icsk_backoff	  = 0;

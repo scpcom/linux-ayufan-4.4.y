@@ -57,12 +57,13 @@ int iterate_inodes_from_logical(u64 logical, struct btrfs_fs_info *fs_info,
 
 int paths_from_inode(u64 inum, struct inode_fs_paths *ipath);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 int btrfs_find_shared_root(struct btrfs_fs_info *fs_info,
-			 u64 bytenr, u64 datao, struct ulist *root_list,
+			 u64 bytenr, u64 parent_bytenr,
+			 u64 datao, u64 *counted_root, struct ulist *root_list,
 			 struct btrfs_snapshot_size_entry *entry,
 			 struct btrfs_snapshot_size_ctx *ctx);
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 int btrfs_find_all_roots(struct btrfs_trans_handle *trans,
 			 struct btrfs_fs_info *fs_info, u64 bytenr,
 			 u64 time_seq, struct ulist **roots);

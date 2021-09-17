@@ -215,16 +215,12 @@ out:
 
 ssize_t btrfs_listxattr(struct dentry *dentry, char *buffer, size_t size)
 {
-	struct btrfs_key key, found_key;
+	struct btrfs_key key;
 	struct inode *inode = dentry->d_inode;
 	struct btrfs_root *root = BTRFS_I(inode)->root;
 	struct btrfs_path *path;
-	struct extent_buffer *leaf;
-	struct btrfs_dir_item *di;
-	int ret = 0, slot;
+	int ret = 0;
 	size_t total_size = 0, size_left = size;
-	unsigned long name_ptr;
-	size_t name_len;
 
 	key.objectid = btrfs_ino(inode);
 	btrfs_set_key_type(&key, BTRFS_XATTR_ITEM_KEY);
@@ -240,6 +236,13 @@ ssize_t btrfs_listxattr(struct dentry *dentry, char *buffer, size_t size)
 		goto err;
 
 	while (1) {
+		struct extent_buffer *leaf;
+		int slot;
+		struct btrfs_dir_item *di;
+		struct btrfs_key found_key;
+		u32 item_size;
+		u32 cur;
+
 		leaf = path->nodes[0];
 		slot = path->slots[0];
 
@@ -257,39 +260,53 @@ ssize_t btrfs_listxattr(struct dentry *dentry, char *buffer, size_t size)
 
 		if (found_key.objectid != key.objectid)
 			break;
-		if (btrfs_key_type(&found_key) != BTRFS_XATTR_ITEM_KEY)
+		if (found_key.type > BTRFS_XATTR_ITEM_KEY)
 			break;
+		if (found_key.type < BTRFS_XATTR_ITEM_KEY)
+			goto next_item;
 
 		di = btrfs_item_ptr(leaf, slot, struct btrfs_dir_item);
-		if (verify_dir_item(root, leaf, di))
-			goto next;
+		item_size = btrfs_item_size_nr(leaf, slot);
+		cur = 0;
+		while (cur < item_size) {
+			u16 name_len = btrfs_dir_name_len(leaf, di);
+			u16 data_len = btrfs_dir_data_len(leaf, di);
+			u32 this_len = sizeof(*di) + name_len + data_len;
+			unsigned long name_ptr = (unsigned long)(di + 1);
 
-		name_len = btrfs_dir_name_len(leaf, di);
-		total_size += name_len + 1;
+			if (verify_dir_item(root, leaf, di)) {
+				ret = -EIO;
+				goto err;
+			}
 
-		if (!size)
-			goto next;
+			total_size += name_len + 1;
+			 
+			if (!size)
+				goto next;
 
-		if (!buffer || (name_len + 1) > size_left) {
-			ret = -ERANGE;
-			goto err;
-		}
+			if (!buffer || (name_len + 1) > size_left) {
+				ret = -ERANGE;
+				goto err;
+			}
 
-		name_ptr = (unsigned long)(di + 1);
-		read_extent_buffer(leaf, buffer, name_ptr, name_len);
-		buffer[name_len] = '\0';
+			read_extent_buffer(leaf, buffer, name_ptr, name_len);
+			buffer[name_len] = '\0';
 
-#ifdef MY_ABC_HERE
-		if (!strncmp(buffer, XATTR_SYNO_PREFIX, XATTR_SYNO_PREFIX_LEN) ||
-				!strncmp(buffer, XATTR_BTRFS_PREFIX, XATTR_BTRFS_PREFIX_LEN)) {
-			total_size -= name_len + 1;
-			goto next;
-		}
+#ifdef MY_DEF_HERE
+			if (!strncmp(buffer, XATTR_SYNO_PREFIX, XATTR_SYNO_PREFIX_LEN) ||
+					!strncmp(buffer, XATTR_BTRFS_PREFIX, XATTR_BTRFS_PREFIX_LEN)) {
+				total_size -= name_len + 1;
+				goto next;
+			}
 #endif  
 
-		size_left -= name_len + 1;
-		buffer += name_len + 1;
+			size_left -= name_len + 1;
+			buffer += name_len + 1;
 next:
+			cur += this_len;
+			di = (struct btrfs_dir_item *)((char *)di + this_len);
+		}
+next_item:
 		path->slots[0]++;
 	}
 	ret = total_size;
@@ -305,7 +322,7 @@ const struct xattr_handler *btrfs_xattr_handlers[] = {
 	&btrfs_xattr_acl_access_handler,
 	&btrfs_xattr_acl_default_handler,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	&btrfs_xattr_syno_handler,
 #endif  
 	NULL,
@@ -317,7 +334,7 @@ static bool btrfs_is_valid_xattr(const char *name)
 			XATTR_SECURITY_PREFIX_LEN) ||
 	       !strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN) ||
 	       !strncmp(name, XATTR_TRUSTED_PREFIX, XATTR_TRUSTED_PREFIX_LEN) ||
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	       !strncmp(name, XATTR_SYNO_PREFIX, XATTR_SYNO_PREFIX_LEN) ||
 #endif  
 	       !strncmp(name, XATTR_USER_PREFIX, XATTR_USER_PREFIX_LEN) ||
@@ -344,7 +361,7 @@ int btrfs_setxattr(struct dentry *dentry, const char *name, const void *value,
 	if (btrfs_root_readonly(root))
 		return -EROFS;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (!strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN) ||
 		!strncmp(name, XATTR_SYNO_PREFIX, XATTR_SYNO_PREFIX_LEN))
 #else

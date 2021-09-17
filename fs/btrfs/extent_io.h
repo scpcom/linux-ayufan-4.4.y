@@ -45,7 +45,7 @@
 #define EXTENT_BUFFER_DUMMY 9
 #define EXTENT_BUFFER_IN_TREE 10
 #define EXTENT_BUFFER_WRITE_ERR 11     
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #define EXTENT_BUFFER_CLONE 63
 #endif  
 

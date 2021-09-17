@@ -1216,13 +1216,6 @@ static inline void sk_mem_uncharge(struct sock *sk, int size)
 		return;
 	sk->sk_forward_alloc += size;
 
-	/* Avoid a possible overflow.
-	 * TCP send queues can make this happen, if sk_mem_reclaim()
-	 * is not called and more than 2 GBytes are released at once.
-	 *
-	 * If we reach 2 MBytes, reclaim 1 MBytes right now, there is
-	 * no need to hold that much forward allocation anyway.
-	 */
 	if (unlikely(sk->sk_forward_alloc >= 1 << 21))
 		__sk_mem_reclaim(sk, 1 << 20);
 }

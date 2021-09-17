@@ -61,11 +61,15 @@ cifs_prime_dcache(struct dentry *parent, struct qstr *name,
 
 		inode = dentry->d_inode;
 		if (inode) {
+			if (d_mountpoint(dentry))
+				goto out;
 			 
 			if (!(cifs_sb->mnt_cifs_flags & CIFS_MOUNT_SERVER_INUM))
 				fattr->cf_uniqueid = CIFS_I(inode)->uniqueid;
 
-			if (CIFS_I(inode)->uniqueid == fattr->cf_uniqueid) {
+			if (CIFS_I(inode)->uniqueid == fattr->cf_uniqueid &&
+			    (inode->i_mode & S_IFMT) ==
+			    (fattr->cf_mode & S_IFMT)) {
 				cifs_fattr_to_inode(inode, fattr);
 				goto out;
 			}
@@ -107,6 +111,11 @@ cifs_fill_common_info(struct cifs_fattr *fattr, struct cifs_sb_info *cifs_sb)
 		fattr->cf_mode = S_IFREG | cifs_sb->mnt_file_mode;
 		fattr->cf_dtype = DT_REG;
 	}
+
+	if (fattr->cf_cifsattrs & ATTR_REPARSE)
+		fattr->cf_flags |= CIFS_FATTR_NEED_REVAL;
+
+	fattr->cf_flags |= CIFS_FATTR_UNKNOWN_NLINK;
 
 	if (fattr->cf_cifsattrs & ATTR_READONLY)
 		fattr->cf_mode &= ~S_IWUGO;
@@ -189,6 +198,7 @@ initiate_cifs_search(const unsigned int xid, struct file *file)
 			rc = -ENOMEM;
 			goto error_exit;
 		}
+		spin_lock_init(&cifsFile->file_info_lock);
 		file->private_data = cifsFile;
 		cifsFile->tlink = cifs_get_tlink(tlink);
 		tcon = tlink_tcon(tlink);
@@ -477,14 +487,14 @@ find_cifs_entry(const unsigned int xid, struct cifs_tcon *tcon,
 	     is_dir_changed(file)) || (index_to_find < first_entry_in_buffer)) {
 		 
 		cifs_dbg(FYI, "search backing up - close and restart search\n");
-		spin_lock(&cifs_file_list_lock);
+		spin_lock(&cfile->file_info_lock);
 		if (server->ops->dir_needs_close(cfile)) {
 			cfile->invalidHandle = true;
-			spin_unlock(&cifs_file_list_lock);
+			spin_unlock(&cfile->file_info_lock);
 			if (server->ops->close_dir)
 				server->ops->close_dir(xid, tcon, &cfile->fid);
 		} else
-			spin_unlock(&cifs_file_list_lock);
+			spin_unlock(&cfile->file_info_lock);
 		if (cfile->srch_inf.ntwrk_buf_start) {
 			cifs_dbg(FYI, "freeing SMB ff cache buf on search rewind\n");
 			if (cfile->srch_inf.smallBuf)
@@ -590,15 +600,15 @@ static int cifs_filldir(char *find_entry, struct file *file, filldir_t filldir,
 
 	if (file_info->srch_inf.unicode) {
 		struct nls_table *nlt = cifs_sb->local_nls;
+		int map_type;
 
+		map_type = cifs_remap(cifs_sb);
 		name.name = scratch_buf;
 		name.len =
 			cifs_from_utf16((char *)name.name, (__le16 *)de.name,
 					UNICODE_NAME_MAX,
 					min_t(size_t, de.namelen,
-					      (size_t)max_len), nlt,
-					cifs_sb->mnt_cifs_flags &
-						CIFS_MOUNT_MAP_SPECIAL_CHR);
+					      (size_t)max_len), nlt, map_type);
 		name.len -= nls_nullsize(nlt);
 	} else {
 		name.name = de.name;
@@ -631,7 +641,7 @@ static int cifs_filldir(char *find_entry, struct file *file, filldir_t filldir,
 	}
 
 	if ((cifs_sb->mnt_cifs_flags & CIFS_MOUNT_MF_SYMLINKS) &&
-	    CIFSCouldBeMFSymlink(&fattr))
+	    couldbe_mf_symlink(&fattr))
 		 
 		fattr.cf_flags |= CIFS_FATTR_NEED_REVAL;
 
@@ -730,6 +740,7 @@ int cifs_readdir(struct file *file, void *direntry, filldir_t filldir)
 				break;
 			}
 			 
+			*tmp_buf = 0;
 			rc = cifs_filldir(current_entry, file, filldir,
 					  direntry, tmp_buf, max_len);
 			if (rc == -EOVERFLOW) {

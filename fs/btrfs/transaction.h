@@ -27,6 +27,8 @@ struct btrfs_transaction {
 	atomic_t use_count;
 	atomic_t pending_ordered;
 
+	int have_free_bgs;
+
 	enum btrfs_trans_state state;
 	struct list_head list;
 	struct extent_io_tree dirty_pages;
@@ -44,7 +46,7 @@ struct btrfs_transaction {
 	spinlock_t dirty_bgs_lock;
 	struct btrfs_delayed_ref_root delayed_refs;
 	int aborted;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	bool clear_full;
 #endif
 	int dirty_bg_run;
@@ -93,7 +95,7 @@ struct btrfs_trans_handle {
 	struct seq_list delayed_ref_elem;
 	struct list_head qgroup_ref_list;
 	struct list_head new_bgs;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	struct btrfs_pending_snapshot *pending_snap;
 	bool pending_snap_rm;
 #endif  
@@ -141,8 +143,6 @@ struct btrfs_trans_handle *btrfs_attach_transaction_barrier(
 					struct btrfs_root *root);
 struct btrfs_trans_handle *btrfs_start_ioctl_transaction(struct btrfs_root *root);
 int btrfs_wait_for_commit(struct btrfs_root *root, u64 transid);
-int btrfs_write_and_wait_transaction(struct btrfs_trans_handle *trans,
-				     struct btrfs_root *root);
 
 void btrfs_add_dead_root(struct btrfs_root *root);
 int btrfs_defrag_root(struct btrfs_root *root);

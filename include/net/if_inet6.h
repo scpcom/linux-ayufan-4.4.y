@@ -205,8 +205,12 @@ struct inet6_dev {
 	struct ipv6_devconf	cnf;
 	struct ipv6_devstat	stats;
 
+#if defined(MY_DEF_HERE)
+	// do nothing
+#else /* MY_DEF_HERE */
 	struct timer_list	rs_timer;
 	__u8			rs_probes;
+#endif
 
 	unsigned long		tstamp; /* ipv6InterfaceTable update timestamp */
 	struct rcu_head		rcu;
@@ -216,6 +220,8 @@ struct inet6_dev {
 	struct timer_list	regen_timer;
 	struct list_head	tempaddr_list;
 #endif
+	struct timer_list	rs_timer;
+	__u8			rs_probes;
 #endif /* MY_DEF_HERE */
 };
 

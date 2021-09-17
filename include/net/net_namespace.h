@@ -97,6 +97,7 @@ struct net {
 #if defined(CONFIG_IP_DCCP) || defined(CONFIG_IP_DCCP_MODULE)
 	struct netns_dccp	dccp;
 #endif
+#if !defined(MY_DEF_HERE)
 #ifdef CONFIG_NETFILTER
 	struct netns_nf		nf;
 	struct netns_xt		xt;
@@ -108,6 +109,7 @@ struct net {
 #endif
 	struct sock		*nfnl;
 	struct sock		*nfnl_stash;
+#endif
 #endif
 #ifdef CONFIG_WEXT_CORE
 	struct sk_buff_head	wext_nlevents;
@@ -121,6 +123,20 @@ struct net {
 	struct netns_ipvs	*ipvs;
 	struct sock		*diag_nlsk;
 	atomic_t		rt_genid;
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_NETFILTER
+	struct netns_nf		nf;
+	struct netns_xt		xt;
+#if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
+	struct netns_ct		ct;
+#endif
+#if IS_ENABLED(CONFIG_NF_DEFRAG_IPV6)
+	struct netns_nf_frag	nf_frag;
+#endif
+	struct sock		*nfnl;
+	struct sock		*nfnl_stash;
+#endif
+#endif
 };
 
 /*

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/sched.h>
 #include <linux/slab.h>
@@ -418,45 +415,11 @@ static ssize_t btrfs_clone_alignment_show(struct kobject *kobj,
 
 BTRFS_ATTR_RW(clone_alignment, 0444, btrfs_clone_alignment_show, btrfs_no_store);
 
-#ifdef MY_ABC_HERE
-static ssize_t btrfs_check_integrity_show(struct kobject *kobj,
-				struct kobj_attribute *a, char *buf)
-{
-	struct btrfs_fs_info *fs_info = to_fs_info(kobj);
-	return snprintf(buf, PAGE_SIZE, "%u\n", fs_info->check_integrity);
-}
-
-static ssize_t btrfs_check_integrity_store(struct kobject *kobj,
-				 struct kobj_attribute *a,
-				 const char *buf, size_t len)
-{
-	struct btrfs_fs_info *fs_info = to_fs_info(kobj);
-	unsigned int val;
-	int ret;
-
-	if (len > 2)
-		return -EINVAL;
-	ret = kstrtouint(skip_spaces(buf), 0, &val);
-	if (ret)
-		return ret;
-	if (val == 0 || val == 1 || val == 2) {
-		fs_info->check_integrity = val;
-		return len;
-	}
-	return -EINVAL;
-}
-
-BTRFS_ATTR_RW(check_integrity, 0644, btrfs_check_integrity_show, btrfs_check_integrity_store);
-#endif
-
 static struct attribute *btrfs_attrs[] = {
 	BTRFS_ATTR_PTR(label),
 	BTRFS_ATTR_PTR(nodesize),
 	BTRFS_ATTR_PTR(sectorsize),
 	BTRFS_ATTR_PTR(clone_alignment),
-#ifdef MY_ABC_HERE
-	BTRFS_ATTR_PTR(check_integrity),
-#endif
 	NULL,
 };
 

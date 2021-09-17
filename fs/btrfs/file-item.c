@@ -94,7 +94,11 @@ btrfs_lookup_csum(struct btrfs_trans_handle *trans,
 	file_key.objectid = BTRFS_EXTENT_CSUM_OBJECTID;
 	file_key.offset = bytenr;
 	btrfs_set_key_type(&file_key, BTRFS_EXTENT_CSUM_KEY);
+#ifdef MY_DEF_HERE
+	ret = btrfs_search_slot(trans, root, &file_key, path, cow ? csum_size : 0, cow);
+#else
 	ret = btrfs_search_slot(trans, root, &file_key, path, 0, cow);
+#endif  
 	if (ret < 0)
 		goto fail;
 	leaf = path->nodes[0];
@@ -688,7 +692,28 @@ int btrfs_del_csums(struct btrfs_trans_handle *trans,
 			break;
 
 		if (key.offset >= bytenr && csum_end <= end_byte) {
-			ret = btrfs_del_item(trans, root, path);
+			int del_nr = 1;
+
+			if (key.offset > bytenr && path->slots[0] > 0) {
+				int slot = path->slots[0] - 1;
+
+				while (slot >= 0) {
+					struct btrfs_key pk;
+
+					btrfs_item_key_to_cpu(leaf, &pk, slot);
+					if (pk.offset < bytenr ||
+					    pk.type != BTRFS_EXTENT_CSUM_KEY ||
+					    pk.objectid !=
+					    BTRFS_EXTENT_CSUM_OBJECTID)
+						break;
+					path->slots[0] = slot;
+					del_nr++;
+					key.offset = pk.offset;
+					slot--;
+				}
+			}
+			ret = btrfs_del_items(trans, root, path,
+					      path->slots[0], del_nr);
 			if (ret)
 				goto out;
 			if (key.offset == bytenr)
@@ -809,6 +834,8 @@ again:
 		goto insert;
 	}
 
+#ifdef MY_DEF_HERE
+#else
 	btrfs_release_path(path);
 	ret = btrfs_search_slot(trans, root, &file_key, path,
 				csum_size, 1);
@@ -820,6 +847,7 @@ again:
 			goto insert;
 		path->slots[0]--;
 	}
+#endif  
 
 	leaf = path->nodes[0];
 	btrfs_item_key_to_cpu(leaf, &found_key, path->slots[0]);

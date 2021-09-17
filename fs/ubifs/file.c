@@ -7,6 +7,7 @@
 #include <linux/mount.h>
 #include <linux/namei.h>
 #include <linux/slab.h>
+#include <linux/migrate.h>
 #if defined(MY_DEF_HERE)
 #include <linux/buffer_head.h>
 #endif  

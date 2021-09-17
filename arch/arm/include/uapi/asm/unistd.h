@@ -421,6 +421,7 @@
 */
 #define __NR_seccomp			(__NR_SYSCALL_BASE+383)
 #endif /* MY_DEF_HERE */
+#define __NR_copy_file_range		(__NR_SYSCALL_BASE+391)
 #define __NR_SYNOUtime                 (__NR_SYSCALL_BASE+402)
 #define __NR_SYNOArchiveBit            (__NR_SYSCALL_BASE+403)
 #define __NR_recvfile                  (__NR_SYSCALL_BASE+404)

@@ -149,7 +149,8 @@ void tcp_select_initial_window(int __space, __u32 mss,
 	(*rcv_wscale) = 0;
 	if (wscale_ok) {
 		 
-		space = max_t(u32, sysctl_tcp_rmem[2], sysctl_rmem_max);
+		space = max_t(u32, space, sysctl_tcp_rmem[2]);
+		space = max_t(u32, space, sysctl_rmem_max);
 		space = min_t(u32, space, *window_clamp);
 		while (space > 65535 && (*rcv_wscale) < 14) {
 			space >>= 1;

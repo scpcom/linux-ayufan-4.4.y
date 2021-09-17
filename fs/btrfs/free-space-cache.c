@@ -2317,7 +2317,7 @@ u64 btrfs_alloc_from_cluster(struct btrfs_block_group_cache *block_group,
 	if (cluster->block_group != block_group)
 		goto out;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (ctl->free_space < cluster->reserve_bytes + bytes) {
 		goto out;
 	}
@@ -2580,7 +2580,7 @@ setup_cluster_bitmap(struct btrfs_block_group_cache *block_group,
 int btrfs_find_space_cluster(struct btrfs_root *root,
 			     struct btrfs_block_group_cache *block_group,
 			     struct btrfs_free_cluster *cluster,
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 			     u64 offset, u64 bytes, u64 empty_size, u64 reserve_bytes)
 #else
 			     u64 offset, u64 bytes, u64 empty_size)
@@ -2605,7 +2605,7 @@ int btrfs_find_space_cluster(struct btrfs_root *root,
 
 	spin_lock(&ctl->tree_lock);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (ctl->free_space < (reserve_bytes + bytes + empty_size)) {
 #else
 	if (ctl->free_space < bytes) {
@@ -2641,7 +2641,7 @@ int btrfs_find_space_cluster(struct btrfs_root *root,
 		list_add_tail(&cluster->block_group_list,
 			      &block_group->cluster_list);
 		cluster->block_group = block_group;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		cluster->reserve_bytes = reserve_bytes;
 #endif
 	} else {
@@ -2660,7 +2660,7 @@ void btrfs_init_free_cluster(struct btrfs_free_cluster *cluster)
 	spin_lock_init(&cluster->refill_lock);
 	cluster->root = RB_ROOT;
 	cluster->max_size = 0;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	cluster->reserve_bytes = 0;
 #endif
 	cluster->fragmented = false;
@@ -2682,6 +2682,18 @@ static int do_trimming(struct btrfs_block_group_cache *block_group,
 
 	spin_lock(&space_info->lock);
 	spin_lock(&block_group->lock);
+
+#ifdef MY_DEF_HERE
+	if (space_info->bytes_used + space_info->bytes_reserved +
+			space_info->bytes_pinned + space_info->bytes_readonly +
+			space_info->bytes_may_use + reserved_bytes > space_info->total_bytes) {
+		spin_unlock(&block_group->lock);
+		spin_unlock(&space_info->lock);
+		ret = 0;
+		goto end_trim;
+	}
+#endif  
+
 	if (!block_group->ro) {
 		block_group->reserved += reserved_bytes;
 		space_info->bytes_reserved += reserved_bytes;
@@ -2695,6 +2707,9 @@ static int do_trimming(struct btrfs_block_group_cache *block_group,
 	if (!ret)
 		*total_trimmed += trimmed;
 
+#ifdef MY_DEF_HERE
+end_trim:
+#endif  
 	mutex_lock(&ctl->cache_writeout_mutex);
 	btrfs_add_free_space(block_group, reserved_start, reserved_bytes);
 	list_del(&trim_entry->list);
@@ -2765,6 +2780,7 @@ static int trim_no_bitmap(struct btrfs_block_group_cache *block_group,
 		extent_bytes = entry->bytes;
 		start = max(start, extent_start);
 		bytes = min(extent_start + extent_bytes, end) - start;
+
 		if (bytes < minlen) {
 			spin_unlock(&ctl->tree_lock);
 			mutex_unlock(&ctl->cache_writeout_mutex);

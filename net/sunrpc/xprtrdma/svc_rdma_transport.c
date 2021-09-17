@@ -1122,7 +1122,7 @@ static void __svc_rdma_free(struct work_struct *work)
 	dprintk("svcrdma: svc_rdma_free(%p)\n", rdma);
 
 	/* We should only be called from kref_put */
-	BUG_ON(atomic_read(&rdma->sc_xprt.xpt_ref.refcount) != 0);
+	BUG_ON(kref_read(&xprt->xpt_ref) != 0);
 
 	/*
 	 * Destroy queued, but not processed read completions. Note

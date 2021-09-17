@@ -777,6 +777,8 @@ int ipv6_dev_mc_inc(struct net_device *dev, const struct in6_addr *addr)
 	struct ifmcaddr6 *mc;
 	struct inet6_dev *idev;
 
+	ASSERT_RTNL();
+
 	idev = in6_dev_get(dev);
 
 	if (idev == NULL)

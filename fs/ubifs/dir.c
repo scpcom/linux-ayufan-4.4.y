@@ -488,7 +488,6 @@ out:
 		 */
 		err = 0;
 
-
 	/* 2 is a special value indicating that there are no more direntries */
 	file->f_pos = 2;
 	return err;

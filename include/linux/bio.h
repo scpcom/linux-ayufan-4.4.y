@@ -212,12 +212,20 @@ struct bio_integrity_payload {
 struct bio_pair {
 	struct bio			bio1, bio2;
 	struct bio_vec			bv1, bv2;
+#if !defined(MY_DEF_HERE)
 #if defined(CONFIG_BLK_DEV_INTEGRITY)
 	struct bio_integrity_payload	bip1, bip2;
 	struct bio_vec			iv1, iv2;
 #endif
+#endif
 	atomic_t			cnt;
 	int				error;
+#if defined(MY_DEF_HERE)
+#if defined(CONFIG_BLK_DEV_INTEGRITY)
+	struct bio_integrity_payload	bip1, bip2;
+	struct bio_vec			iv1, iv2;
+#endif
+#endif
 };
 extern struct bio_pair *bio_split(struct bio *bi, int first_sectors);
 extern void bio_pair_release(struct bio_pair *dbio);
@@ -530,9 +538,11 @@ struct bio_set {
 
 	mempool_t *bio_pool;
 	mempool_t *bvec_pool;
+#if !defined(MY_DEF_HERE)
 #if defined(CONFIG_BLK_DEV_INTEGRITY)
 	mempool_t *bio_integrity_pool;
 	mempool_t *bvec_integrity_pool;
+#endif
 #endif
 
 	/*
@@ -543,6 +553,12 @@ struct bio_set {
 	struct bio_list		rescue_list;
 	struct work_struct	rescue_work;
 	struct workqueue_struct	*rescue_workqueue;
+#if defined(MY_DEF_HERE)
+#if defined(CONFIG_BLK_DEV_INTEGRITY)
+	mempool_t *bio_integrity_pool;
+	mempool_t *bvec_integrity_pool;
+#endif
+#endif
 };
 
 struct biovec_slab {

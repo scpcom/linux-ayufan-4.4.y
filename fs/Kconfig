@@ -12,7 +12,7 @@ if BLOCK
 
 config LFS_ON_32CPU
 	bool "Support for large (16TB+) filesystems on 32-bit cpu"
-	depends on ARCH_ALPINE && LBDAF
+	depends on (ARCH_ALPINE || SYNO_HI3536) && LBDAF
 	depends on !HUGETLBFS #hugetlbfs not supported yet
 	default n
 	help

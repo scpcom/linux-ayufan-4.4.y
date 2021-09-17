@@ -501,6 +501,7 @@ struct rq {
 	struct hrtimer hrtick_timer;
 #endif
 
+#if !defined(MY_DEF_HERE)
 #ifdef CONFIG_SCHEDSTATS
 	/* latency stats */
 	struct sched_info rq_sched_info;
@@ -518,12 +519,32 @@ struct rq {
 	unsigned int ttwu_count;
 	unsigned int ttwu_local;
 #endif
+#endif
 
 #ifdef CONFIG_SMP
 	struct llist_head wake_list;
 #endif
 
 	struct sched_avg avg;
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_SCHEDSTATS
+	/* latency stats */
+	struct sched_info rq_sched_info;
+	unsigned long long rq_cpu_time;
+	/* could above be rq->cfs_rq.exec_clock + rq->rt_rq.rt_runtime ? */
+
+	/* sys_sched_yield() stats */
+	unsigned int yld_count;
+
+	/* schedule() stats */
+	unsigned int sched_count;
+	unsigned int sched_goidle;
+
+	/* try_to_wake_up() stats */
+	unsigned int ttwu_count;
+	unsigned int ttwu_local;
+#endif
+#endif
 };
 
 static inline int cpu_of(struct rq *rq)

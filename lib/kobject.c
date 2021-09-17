@@ -540,7 +540,7 @@ const struct sysfs_ops kobj_sysfs_ops = {
 	.show	= kobj_attr_show,
 	.store	= kobj_attr_store,
 };
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 EXPORT_SYMBOL(kobj_sysfs_ops);
 #endif
 

@@ -50,8 +50,10 @@ struct bio {
 	struct io_context	*bi_ioc;
 	struct cgroup_subsys_state *bi_css;
 #endif
+#if !defined(MY_DEF_HERE)
 #if defined(CONFIG_BLK_DEV_INTEGRITY)
 	struct bio_integrity_payload *bi_integrity;   
+#endif
 #endif
 
 	unsigned int		bi_max_vecs;	 
@@ -63,6 +65,11 @@ struct bio {
 	struct bio_set		*bi_pool;
 
 	struct bio_vec		bi_inline_vecs[0];
+#if defined(MY_DEF_HERE)
+#if defined(CONFIG_BLK_DEV_INTEGRITY)
+	struct bio_integrity_payload *bi_integrity;   
+#endif
+#endif
 };
 
 #define BIO_RESET_BYTES		offsetof(struct bio, bi_max_vecs)

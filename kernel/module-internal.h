@@ -13,5 +13,8 @@
  */
 
 extern struct key *modsign_keyring;
+#ifdef MY_ABC_HERE
+extern struct key *modsign_blacklist;
+#endif
 
 extern int mod_verify_sig(const void *mod, unsigned long *_modlen);

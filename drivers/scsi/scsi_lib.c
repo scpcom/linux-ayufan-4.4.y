@@ -386,32 +386,6 @@ void scsi_run_host_queues(struct Scsi_Host *shost)
 
 static void __scsi_release_buffers(struct scsi_cmnd *, int);
 
-static struct scsi_cmnd *scsi_end_request(struct scsi_cmnd *cmd, int error,
-					  int bytes, int requeue)
-{
-	struct request_queue *q = cmd->device->request_queue;
-	struct request *req = cmd->request;
-
-	if (blk_end_request(req, error, bytes)) {
-		 
-		if (error && scsi_noretry_cmd(cmd))
-			blk_end_request_all(req, error);
-		else {
-			if (requeue) {
-				 
-				scsi_release_buffers(cmd);
-				scsi_requeue_command(q, cmd);
-				cmd = NULL;
-			}
-			return cmd;
-		}
-	}
-
-	__scsi_release_buffers(cmd, 0);
-	scsi_next_command(cmd);
-	return NULL;
-}
-
 static inline unsigned int scsi_sgtable_index(unsigned short nents)
 {
 	unsigned int index;
@@ -926,8 +900,17 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 		error = 0;
 	}
 
-	if (scsi_end_request(cmd, error, good_bytes, result == 0) == NULL)
-		return;
+	if (!(blk_rq_bytes(req) == 0 && error) &&
+	    !blk_end_request(req, error, good_bytes))
+		goto next_command;
+
+	if (error && scsi_noretry_cmd(cmd)) {
+		blk_end_request_all(req, error);
+		goto next_command;
+	}
+
+	if (result == 0)
+		goto requeue;
 
 	error = __scsi_error_from_host_byte(cmd, result);
 #ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
@@ -1065,7 +1048,6 @@ handle_cmd:
 	switch (action) {
 	case ACTION_FAIL:
 		 
-		scsi_release_buffers(cmd);
 		if (!(req->cmd_flags & REQ_QUIET)) {
 			if (description)
 				scmd_printk(KERN_INFO, cmd, "%s\n",
@@ -1077,8 +1059,9 @@ handle_cmd:
 		}
 		if (!blk_end_request_err(req, error))
 			goto next_command;
-		/*FALLTHRU*/
+		 
 	case ACTION_REPREP:
+	requeue:
 		 
 		scsi_release_buffers(cmd);
 		scsi_requeue_command(q, cmd);

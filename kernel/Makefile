@@ -157,6 +157,20 @@ targets += timeconst.h
 $(obj)/timeconst.h: $(obj)/hz.bc $(src)/timeconst.bc FORCE
 	$(call if_changed,bc)
 
+ifeq ($(CONFIG_SYNO_KEY),y)
+kernel/modsign_certificate.o: signing_key.x509 extra_certificates
+signing_key.x509: signing_key
+	$(call cmd,shipped)
+extra_certificates: trusted_certificates
+	$(call cmd,shipped)
+ifeq ($(CONFIG_SYNO_MODULE_SIG_BLACKLIST),y)
+kernel/modsign_certificate.o: extra_certificates_untrusted
+extra_certificates_untrusted: untrusted_certificates
+	$(call cmd,shipped)
+endif
+
+else
+
 ifeq ($(CONFIG_MODULE_SIG),y)
 #
 # Pull the signing certificate and any extra certificates into the kernel
@@ -217,4 +231,5 @@ x509.genkey:
 	@echo >>x509.genkey "keyUsage=digitalSignature"
 	@echo >>x509.genkey "subjectKeyIdentifier=hash"
 	@echo >>x509.genkey "authorityKeyIdentifier=keyid"
+endif
 endif

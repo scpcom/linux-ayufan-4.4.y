@@ -356,7 +356,7 @@ EXPORT_SYMBOL_GPL(pci_renumber_slot);
 void pci_destroy_slot(struct pci_slot *slot)
 {
 	dev_dbg(&slot->bus->dev, "dev %02x, dec refcount to %d\n",
-		slot->number, atomic_read(&slot->kobj.kref.refcount) - 1);
+		slot->number, kref_read(&slot->kobj.kref) - 1);
 
 	down_write(&pci_bus_sem);
 	kobject_put(&slot->kobj);

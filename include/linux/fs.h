@@ -1351,6 +1351,13 @@ struct file_operations {
 	ssize_t (*syno_recvfile)(struct file *file, struct socket *sock,
 	                                              loff_t pos, size_t count, size_t * rbytes, size_t * wbytes);
 #endif  
+	ssize_t (*copy_file_range)(struct file *, loff_t, struct file *,
+			loff_t, size_t, unsigned int);
+	int (*clone_file_range)(struct file *, loff_t, struct file *, loff_t,
+			u64);
+#ifdef MY_DEF_HERE
+	int (*clone_check_compr)(struct file *, struct file *);
+#endif  
 };
 
 struct inode_operations {
@@ -1470,6 +1477,39 @@ extern ssize_t vfs_readv(struct file *, const struct iovec __user *,
 		unsigned long, loff_t *);
 extern ssize_t vfs_writev(struct file *, const struct iovec __user *,
 		unsigned long, loff_t *);
+extern ssize_t vfs_copy_file_range(struct file *, loff_t , struct file *,
+				   loff_t, size_t, unsigned int);
+#ifdef MY_DEF_HERE
+extern int vfs_clone_file_range(struct file *file_in, loff_t pos_in,
+		struct file *file_out, loff_t pos_out, u64 len, int check_compr);
+#else
+extern int vfs_clone_file_range(struct file *file_in, loff_t pos_in,
+		struct file *file_out, loff_t pos_out, u64 len);
+#endif  
+
+static inline struct inode *file_inode(struct file *f);
+#ifdef MY_DEF_HERE
+static inline int do_clone_file_range(struct file *file_in, loff_t pos_in,
+				      struct file *file_out, loff_t pos_out,
+				      u64 len, int check_compr)
+#else
+static inline int do_clone_file_range(struct file *file_in, loff_t pos_in,
+				      struct file *file_out, loff_t pos_out,
+				      u64 len)
+#endif  
+{
+	int ret;
+
+	sb_start_write(file_inode(file_out)->i_sb);
+#ifdef MY_DEF_HERE
+	ret = vfs_clone_file_range(file_in, pos_in, file_out, pos_out, len, check_compr);
+#else
+	ret = vfs_clone_file_range(file_in, pos_in, file_out, pos_out, len);
+#endif  
+	sb_end_write(file_inode(file_out)->i_sb);
+
+	return ret;
+}
 
 struct super_operations {
 #if defined(MY_DEF_HERE)
@@ -2293,7 +2333,7 @@ enum {
 	DIO_LOCKING	= 0x01,
 
 	DIO_SKIP_HOLES	= 0x02,
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	DIO_NO_ASYNC	= 0x04,
 #endif  
 };

@@ -5608,13 +5608,6 @@ raid5_store_stripe_cache_size(struct mddev *mddev, const char *page, size_t len)
 		return -EINVAL;
 	if (!conf)
 		return -ENODEV;
-#if defined(MY_DEF_HERE)
-	if (mddev->level == 6) {
-		printk(KERN_WARNING "md/raid:%s: skip_copy is not supported for level %d\n",
-			       mdname(mddev), mddev->level);
-		return -EINVAL;
-	}
-#endif  
 
 	if (kstrtoul(page, 10, &new))
 		return -EINVAL;
@@ -5749,6 +5742,14 @@ raid5_store_skip_copy(struct mddev *mddev, const char *page, size_t len)
 	if (!conf)
 		return -ENODEV;
 
+#if defined(MY_DEF_HERE)
+	if (mddev->level == 6) {
+		printk(KERN_WARNING "md/raid:%s: skip_copy is not supported for level %d\n",
+			       mdname(mddev), mddev->level);
+		return -EINVAL;
+	}
+#endif  
+
 	if (kstrtoul(page, 10, &new))
 		return -EINVAL;
 	new = !!new;
@@ -5758,8 +5759,15 @@ raid5_store_skip_copy(struct mddev *mddev, const char *page, size_t len)
 	mddev_suspend(mddev);
 	conf->skip_copy = new;
 	if (new)
+#ifdef MY_DEF_HERE
+	{
+		mddev->queue->backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
+		syno_backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
+	}
+#else  
 		mddev->queue->backing_dev_info.capabilities |=
 						BDI_CAP_STABLE_WRITES;
+#endif  
 	else
 		mddev->queue->backing_dev_info.capabilities &=
 						~BDI_CAP_STABLE_WRITES;
@@ -6127,6 +6135,7 @@ static struct r5conf *setup_conf(struct mddev *mddev)
 	if (mddev->new_level == 5) {
 		conf->skip_copy = 1;
 		mddev->queue->backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
+		syno_backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
 	}
 #endif  
 	conf->recovery_disabled = mddev->recovery_disabled - 1;

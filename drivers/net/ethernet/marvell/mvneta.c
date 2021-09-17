@@ -186,7 +186,7 @@
 #define MVNETA_QUEUE_NEXT_DESC(q, index)	\
 	(((index) < (q)->last_desc) ? ((index) + 1) : 0)
 
-#define MVNETA_TXDONE_COAL_PKTS		1
+#define MVNETA_TXDONE_COAL_PKTS		0	 
 #define MVNETA_RX_COAL_PKTS		32
 #define MVNETA_RX_COAL_USEC		100
 

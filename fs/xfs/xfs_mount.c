@@ -610,7 +610,8 @@ xfs_sb_verify(
 
 	xfs_sb_from_disk(&sb, XFS_BUF_TO_SBP(bp));
 
-	return xfs_mount_validate_sb(mp, &sb, bp->b_bn == XFS_SB_DADDR,
+	return xfs_mount_validate_sb(mp, &sb,
+				     bp->b_maps[0].bm_bn == XFS_SB_DADDR,
 				     check_version);
 }
 

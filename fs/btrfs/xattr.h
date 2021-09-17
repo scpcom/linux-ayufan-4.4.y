@@ -12,7 +12,7 @@
 
 extern const struct xattr_handler btrfs_xattr_acl_access_handler;
 extern const struct xattr_handler btrfs_xattr_acl_default_handler;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 extern const struct xattr_handler btrfs_xattr_syno_handler;
 #endif  
 extern const struct xattr_handler *btrfs_xattr_handlers[];

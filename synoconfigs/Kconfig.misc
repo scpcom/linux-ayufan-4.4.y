@@ -86,6 +86,21 @@ config SYNO_AUTO_INSTALL_ABILITY
 	default y
 	depends on SYNO_HI3536
 
+config SYNO_PSTORE
+	bool "Synology enhancement of Pstore mechanism"
+	default n
+	depends on PSTORE
+
+config SYNO_CRYOTO_PATCH_FOR_LIBKCAPI
+	bool "required patch set from cryptodev-2.6 for libkcapi for FIPS 140-2 validation"
+	default n
+	depends on CRYPTO_USER
+
+config SYNO_FIX_RTC_WAKE_AFTER_POWER_FAILURE
+	bool "fix rtc wake after power failure"
+	default y
+	depends on SYNO_X64
+
 endmenu #MISC Features
 
 menu "Encryption"
@@ -113,6 +128,18 @@ config SYNO_ALPINE_TUNING_CRYPTO_PERFORMANCE
 config SYNO_BACKPORT_ARM_CRYPTO
 	bool "Use ARM related crypto patches packported from upstream kernel 4.7"
 	default n
+
+if MODULES
+
+config SYNO_KEY
+	bool "use keys supply by our system"
+	depends on MODULE_SIG
+
+config SYNO_MODULE_SIG_BLACKLIST
+	bool "Provide keyring for untrusted keys"
+	depends on MODULE_SIG
+
+endif # MODULES
 
 endmenu #Encryption
 

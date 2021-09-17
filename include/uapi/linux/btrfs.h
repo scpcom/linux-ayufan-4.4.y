@@ -25,7 +25,7 @@ struct btrfs_ioctl_vol_args {
 #define BTRFS_SUBVOL_CREATE_ASYNC	(1ULL << 0)
 #define BTRFS_SUBVOL_RDONLY		(1ULL << 1)
 #define BTRFS_SUBVOL_QGROUP_INHERIT	(1ULL << 2)
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #define BTRFS_SUBVOL_HIDE (1ULL << 32)
 #endif  
 #define BTRFS_FSID_SIZE 16
@@ -272,8 +272,9 @@ struct btrfs_ioctl_clone_range_args {
 
 #define BTRFS_DEFRAG_RANGE_COMPRESS 1
 #define BTRFS_DEFRAG_RANGE_START_IO 2
-#ifdef MY_ABC_HERE
-#define BTRFS_DEFRAG_RANGE_SYNO_DEFRAG (1ULL << 2)
+#ifdef MY_DEF_HERE
+#define BTRFS_DEFRAG_RANGE_SYNO_DEFRAG  (1ULL << 2)
+#define BTRFS_DEFRAG_RANGE_PRINT_STDOUT (1ULL << 3)
 #endif  
 
 #define BTRFS_SAME_DATA_DIFFERS	1
@@ -381,7 +382,7 @@ struct btrfs_ioctl_qgroup_create_args {
 	__u64 qgroupid;
 };
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 struct btrfs_ioctl_qgroup_query_args {
 	 
 	__u64 rfer;
@@ -410,7 +411,7 @@ struct btrfs_ioctl_received_subvol_args {
 	struct btrfs_ioctl_timespec stime;  
 	struct btrfs_ioctl_timespec rtime;  
 	__u64	flags;			 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	struct btrfs_ioctl_timespec otime;  
 	__u64	reserved[14];		 
 #else
@@ -418,7 +419,7 @@ struct btrfs_ioctl_received_subvol_args {
 #endif  
 };
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 struct btrfs_ioctl_subvol_info_args {
 	 
 	__u64 root_id;
@@ -434,12 +435,28 @@ struct btrfs_ioctl_subvol_info_args {
 };
 #endif  
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+
+#define BTRFS_SNAP_SIZE_SHOW_EXCL_SIZE 0x1
+#define BTRFS_SNAP_SIZE_SHOW_PROCESSED_SIZE 0x2
+#define BTRFS_SNAP_SIZE_SHOW_MARGINAL_SIZE 0x4
+
+struct btrfs_ioctl_snapshot_size_id_size_map {
+	__u64 snap_id;
+	__u64 marginal_size;
+};
+
 struct btrfs_ioctl_snapshot_size_query_args {
+	 
 	__u64 snap_count;
+	__u64 flags;
+	 
 	__s64 fd;
-	__u64 __user *snap_id;
+	 
+	struct btrfs_ioctl_snapshot_size_id_size_map __user *id_maps;
+	 
 	__u64 calc_size;
+	__u64 processed_size;
 };
 #endif  
 
@@ -449,7 +466,7 @@ struct btrfs_ioctl_snapshot_size_query_args {
 
 #define BTRFS_SEND_FLAG_OMIT_END_CMD		0x4
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
  
 #define BTRFS_SEND_FLAG_CALCULATE_DATA_SIZE    0x8
 
@@ -471,28 +488,28 @@ struct btrfs_ioctl_send_args {
 	__u64 __user *clone_sources;	 
 	__u64 parent_root;		 
 	__u64 flags;			 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	__u64 total_data_size;    
 	__u32 g_verbose;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	__u64 skip_cmd_count;
 #endif  
 
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
 	__u32 reserved_u32;
 	__u64 reserved[1];		 
-#elif defined(MY_ABC_HERE)
+#elif defined(MY_DEF_HERE)
 	__u32 reserved_u32;
 	__u64 reserved[2];		 
-#elif defined(MY_ABC_HERE)
+#elif defined(MY_DEF_HERE)
 	__u64 reserved[3];		 
 #else
 	__u64 reserved[4];		 
 #endif  
 };
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
  
 #define BTRFS_COMPR_CTL_SET			0x1
 #define BTRFS_COMPR_CTL_COMPR_FL	0x2
@@ -642,22 +659,22 @@ static inline char *btrfs_err_str(enum btrfs_err_code err_code)
 #define BTRFS_IOC_GET_SUPPORTED_FEATURES _IOR(BTRFS_IOCTL_MAGIC, 57, \
 				   struct btrfs_ioctl_feature_flags[3])
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #define BTRFS_IOC_SNAPSHOT_SIZE_QUERY _IOWR(BTRFS_IOCTL_MAGIC, 247, \
 				   struct btrfs_ioctl_snapshot_size_query_args)
 #endif  
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #define BTRFS_IOC_COMPR_CTL _IOR(BTRFS_IOCTL_MAGIC, 248, \
 									struct btrfs_ioctl_compr_ctl_args)
 #endif  
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #define BTRFS_IOC_SUBVOL_GETINFO _IOR(BTRFS_IOCTL_MAGIC, 249, \
 				   struct btrfs_ioctl_subvol_info_args)
 #endif  
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #define BTRFS_IOC_QGROUP_QUERY _IOR(BTRFS_IOCTL_MAGIC, 253, \
                                     struct btrfs_ioctl_qgroup_query_args)
 #endif  

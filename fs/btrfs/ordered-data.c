@@ -191,7 +191,7 @@ static int __btrfs_add_ordered_extent(struct inode *inode, u64 file_offset,
 	spin_lock(&root->ordered_extent_lock);
 	list_add_tail(&entry->root_extent_list,
 		      &root->ordered_extents);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	root->fs_info->ordered_extent_nr++;
 #endif
 	root->nr_ordered_extents++;
@@ -532,7 +532,7 @@ void btrfs_remove_ordered_extent(struct inode *inode,
 
 	spin_lock(&root->ordered_extent_lock);
 	list_del_init(&entry->root_extent_list);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	root->fs_info->ordered_extent_nr--;
 #endif
 	root->nr_ordered_extents--;
@@ -554,7 +554,7 @@ static void btrfs_run_ordered_extent_work(struct btrfs_work *work)
 	struct btrfs_ordered_extent *ordered;
 
 	ordered = container_of(work, struct btrfs_ordered_extent, flush_work);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	btrfs_start_ordered_extent(ordered->inode, ordered, 2);
 #else
 	btrfs_start_ordered_extent(ordered->inode, ordered, 1);
@@ -647,7 +647,7 @@ void btrfs_start_ordered_extent(struct inode *inode,
 				       struct btrfs_ordered_extent *entry,
 				       int wait)
 {
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	struct btrfs_root *root = BTRFS_I(entry->inode)->root;;
 #endif
 	u64 start = entry->file_offset;
@@ -656,7 +656,7 @@ void btrfs_start_ordered_extent(struct inode *inode,
 	trace_btrfs_ordered_extent_start(inode, entry);
 
 	if (!test_bit(BTRFS_ORDERED_DIRECT, &entry->flags))
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	{
 		if (2 == wait)mutex_lock(&root->ordered_extent_worker_mutex);
 		filemap_fdatawrite_range(inode->i_mapping, start, end);

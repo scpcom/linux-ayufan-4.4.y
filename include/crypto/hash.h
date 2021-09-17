@@ -97,8 +97,13 @@ struct crypto_ahash {
 		      unsigned int keylen);
 
 	unsigned int reqsize;
+#if !defined(MY_DEF_HERE)
 	bool has_setkey;
+#endif
 	struct crypto_tfm base;
+#if defined(MY_DEF_HERE)
+	bool has_setkey;
+#endif
 };
 
 struct crypto_shash {

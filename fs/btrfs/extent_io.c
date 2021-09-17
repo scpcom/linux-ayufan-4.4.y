@@ -23,6 +23,7 @@
 #include "locking.h"
 #include "rcu-string.h"
 #include "backref.h"
+#include "transaction.h"
 
 static struct kmem_cache *extent_state_cache;
 static struct kmem_cache *extent_buffer_cache;
@@ -729,7 +730,7 @@ __set_extent_bit(struct extent_io_tree *tree, u64 start, u64 end,
 	struct rb_node **p;
 	struct rb_node *parent;
 	int err = 0;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	int counter = 0;
 #endif
 	u64 last_start;
@@ -741,7 +742,7 @@ __set_extent_bit(struct extent_io_tree *tree, u64 start, u64 end,
 again:
 	if (!prealloc && (mask & __GFP_WAIT)) {
 		prealloc = alloc_extent_state(mask);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		if (!prealloc) {
 			if (10 > counter) {
 				counter++;
@@ -2813,7 +2814,7 @@ static noinline_for_stack int writepage_delalloc(struct inode *inode,
 					       page,
 					       &delalloc_start,
 					       &delalloc_end,
-					       128 * 1024 * 1024);
+					       BTRFS_MAX_EXTENT_SIZE);
 		if (nr_delalloc == 0) {
 			delalloc_start = delalloc_end + 1;
 			continue;
@@ -3032,7 +3033,7 @@ static int __extent_writepage(struct page *page, struct writeback_control *wbc,
 	pg_offset = i_size & (PAGE_CACHE_SIZE - 1);
 	if (page->index > end_index ||
 	   (page->index == end_index && !pg_offset)) {
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		page->mapping->a_ops->invalidatepage(page, 0);
 #else
 		page->mapping->a_ops->invalidatepage(page, 0, PAGE_CACHE_SIZE);
@@ -3862,14 +3863,23 @@ int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 			flags |= (FIEMAP_EXTENT_DELALLOC |
 				  FIEMAP_EXTENT_UNKNOWN);
 		} else if (fieinfo->fi_extents_max) {
+			struct btrfs_trans_handle *trans;
+
 			u64 bytenr = em->block_start -
 				(em->start - em->orig_start);
 
 			disko = em->block_start + offset_in_extent;
 
-			ret = btrfs_check_shared(NULL, root->fs_info,
+			trans = btrfs_join_transaction(root);
+			 
+			if (IS_ERR(trans))
+				trans = NULL;
+
+			ret = btrfs_check_shared(trans, root->fs_info,
 						 root->objectid,
 						 btrfs_ino(inode), bytenr);
+			if (trans)
+				btrfs_end_transaction(trans, root);
 			if (ret < 0)
 				goto out_free;
 			if (ret)
@@ -3878,6 +3888,8 @@ int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 		}
 		if (test_bit(EXTENT_FLAG_COMPRESSED, &em->flags))
 			flags |= FIEMAP_EXTENT_ENCODED;
+		if (test_bit(EXTENT_FLAG_PREALLOC, &em->flags))
+			flags |= FIEMAP_EXTENT_UNWRITTEN;
 
 		free_extent_map(em);
 		em = NULL;
@@ -3934,11 +3946,11 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 	unsigned long num_pages;
 	struct page *page;
 	int mapped = !test_bit(EXTENT_BUFFER_DUMMY, &eb->bflags);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	int cloned = test_bit(EXTENT_BUFFER_CLONE, &eb->bflags);
 #endif  
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (unlikely(extent_buffer_under_io(eb))) {
 		printk(KERN_ERR "EXTENT_BUFFER_WRITEBACK = %d,  EXTENT_BUFFER_DIRTY = %d\n",
 				test_bit(EXTENT_BUFFER_WRITEBACK, &eb->bflags), test_bit(EXTENT_BUFFER_DIRTY, &eb->bflags));
@@ -3965,7 +3977,7 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 	do {
 		index--;
 		page = extent_buffer_page(eb, index);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		if (page && (cloned || mapped)) {
 			if (!cloned)  
 #else
@@ -3976,7 +3988,7 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 			if (PagePrivate(page) &&
 			    page->private == (unsigned long)eb) {
 				BUG_ON(test_bit(EXTENT_BUFFER_DIRTY, &eb->bflags));
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 				if (PageDirty(page) || PageWriteback(page)) {
 					smp_mb();
 					BUG_ON(PageDirty(page));
@@ -3992,7 +4004,7 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 				 
 				page_cache_release(page);
 			}
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 			if (!cloned)  
 #endif  
 			spin_unlock(&page->mapping->private_lock);
@@ -4074,7 +4086,7 @@ struct extent_buffer *btrfs_clone_extent_buffer(struct extent_buffer *src)
 	copy_extent_buffer(new, src, 0, 0, src->len);
 	set_bit(EXTENT_BUFFER_UPTODATE, &new->bflags);
 	set_bit(EXTENT_BUFFER_DUMMY, &new->bflags);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	set_bit(EXTENT_BUFFER_CLONE, &new->bflags);
 #endif  
 
@@ -4255,6 +4267,7 @@ struct extent_buffer *alloc_extent_buffer(struct btrfs_fs_info *fs_info,
 				mark_extent_buffer_accessed(exists);
 				goto free_eb;
 			}
+			exists = NULL;
 
 			ClearPagePrivate(p);
 			WARN_ON(PageDirty(p));
@@ -4302,12 +4315,12 @@ again:
 	return eb;
 
 free_eb:
+	WARN_ON(!atomic_dec_and_test(&eb->refs));
 	for (i = 0; i < num_pages; i++) {
 		if (eb->pages[i])
 			unlock_page(eb->pages[i]);
 	}
 
-	WARN_ON(!atomic_dec_and_test(&eb->refs));
 	btrfs_release_extent_buffer(eb);
 	return exists;
 }
@@ -4338,6 +4351,12 @@ static int release_extent_buffer(struct extent_buffer *eb)
 		}
 
 		btrfs_release_extent_buffer_page(eb, 0);
+#ifdef CONFIG_BTRFS_FS_RUN_SANITY_TESTS
+		if (unlikely(test_bit(EXTENT_BUFFER_DUMMY, &eb->bflags))) {
+			__free_extent_buffer(eb);
+			return 1;
+		}
+#endif
 		call_rcu(&eb->rcu_head, btrfs_release_extent_buffer_rcu);
 		return 1;
 	}

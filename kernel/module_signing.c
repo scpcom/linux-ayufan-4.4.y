@@ -160,6 +160,18 @@ static struct key *request_asymmetric_key(const char *signer, size_t signer_len,
 
 	pr_debug("Look up: \"%s\"\n", id);
 
+#ifdef MY_ABC_HERE
+	key = keyring_search(make_key_ref(modsign_blacklist, 1),
+				   &key_type_asymmetric, id);
+	if (!IS_ERR(key)) {
+		/* module is signed with a cert in the blacklist.  reject */
+		pr_err("Module key '%s' is in blacklist\n", id);
+		key_ref_put(key);
+		kfree(id);
+		return ERR_PTR(-EKEYREJECTED);
+	}
+#endif
+
 	key = keyring_search(make_key_ref(modsign_keyring, 1),
 			     &key_type_asymmetric, id);
 	if (IS_ERR(key))

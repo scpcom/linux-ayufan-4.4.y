@@ -178,13 +178,20 @@ struct gendisk {
 	struct timer_rand_state *random;
 	atomic_t sync_io;		 
 	struct disk_events *ev;
+#if !defined(MY_DEF_HERE)
 #ifdef  CONFIG_BLK_DEV_INTEGRITY
 	struct blk_integrity *integrity;
+#endif
 #endif
 	int node_id;
 #ifdef MY_ABC_HERE
 	int systemDisk;
 #endif  
+#if defined(MY_DEF_HERE)
+#ifdef  CONFIG_BLK_DEV_INTEGRITY
+	struct blk_integrity *integrity;
+#endif
+#endif
 };
 
 static inline struct gendisk *part_to_disk(struct hd_struct *part)

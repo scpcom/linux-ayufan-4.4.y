@@ -187,7 +187,11 @@ static int must_snapshot_stable_pages(struct request_queue *q, struct bio *bio)
 	if (bio_data_dir(bio) != WRITE)
 		return 0;
 
+#ifdef MY_DEF_HERE
+	if (!bdi_cap_stable_pages_required(&syno_backing_dev_info) && !bdi_cap_stable_pages_required(&q->backing_dev_info))
+#else /* MY_DEF_HERE */
 	if (!bdi_cap_stable_pages_required(&q->backing_dev_info))
+#endif /* MY_DEF_HERE */
 		return 0;
 
 	return test_bit(BIO_SNAP_STABLE, &bio->bi_flags);

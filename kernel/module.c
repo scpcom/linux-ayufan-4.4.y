@@ -144,12 +144,19 @@ struct load_info {
 	struct _ddebug *debug;
 	unsigned int num_debug;
 	bool sig_ok;
+#if !defined(MY_DEF_HERE)
 #ifdef CONFIG_KALLSYMS
 	unsigned long mod_kallsyms_init_off;
+#endif
 #endif
 	struct {
 		unsigned int sym, str, mod, vers, info, pcpu;
 	} index;
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_KALLSYMS
+	unsigned long mod_kallsyms_init_off;
+#endif
+#endif
 };
 
 static inline int strong_try_module_get(struct module *mod)
@@ -2277,10 +2284,6 @@ static int module_sig_check(struct load_info *info, int flags)
 	const unsigned long markerlen = sizeof(MODULE_SIG_STRING) - 1;
 	const void *mod = info->hdr;
 
-	/*
-	 * Require flags == 0, as a module with version information
-	 * removed is no longer the module that was signed
-	 */
 	if (flags == 0 &&
 	    info->len > markerlen &&
 	    memcmp(mod + info->len - markerlen, MODULE_SIG_STRING, markerlen) == 0) {

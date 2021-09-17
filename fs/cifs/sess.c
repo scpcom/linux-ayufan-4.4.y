@@ -13,67 +13,6 @@
 #include <linux/slab.h>
 #include "cifs_spnego.h"
 
-static bool is_first_ses_reconnect(struct cifs_ses *ses)
-{
-	struct list_head *tmp;
-	struct cifs_ses *tmp_ses;
-
-	list_for_each(tmp, &ses->server->smb_ses_list) {
-		tmp_ses = list_entry(tmp, struct cifs_ses,
-				     smb_ses_list);
-		if (tmp_ses->need_reconnect == false)
-			return false;
-	}
-	 
-	return true;
-}
-
-static __le16 get_next_vcnum(struct cifs_ses *ses)
-{
-	__u16 vcnum = 0;
-	struct list_head *tmp;
-	struct cifs_ses *tmp_ses;
-	__u16 max_vcs = ses->server->max_vcs;
-	__u16 i;
-	int free_vc_found = 0;
-
-	if (max_vcs < 2)
-		max_vcs = 0xFFFF;
-
-	spin_lock(&cifs_tcp_ses_lock);
-	if ((ses->need_reconnect) && is_first_ses_reconnect(ses))
-			goto get_vc_num_exit;   
-	for (i = ses->server->srv_count - 1; i < max_vcs; i++) {
-		if (i == 0)  
-			break;
-
-		free_vc_found = 1;
-
-		list_for_each(tmp, &ses->server->smb_ses_list) {
-			tmp_ses = list_entry(tmp, struct cifs_ses,
-					     smb_ses_list);
-			if (tmp_ses->vcnum == i) {
-				free_vc_found = 0;
-				break;  
-			}
-		}
-		if (free_vc_found)
-			break;  
-	}
-
-	if (i == 0)
-		vcnum = 0;  
-	else if (free_vc_found == 0)
-		vcnum = 1;   
-	else
-		vcnum = i;
-	ses->vcnum = vcnum;
-get_vc_num_exit:
-	spin_unlock(&cifs_tcp_ses_lock);
-
-	return cpu_to_le16(vcnum);
-}
-
 static __u32 cifs_ssetup_hdr(struct cifs_ses *ses, SESSION_SETUP_ANDX *pSMB)
 {
 	__u32 capabilities = 0;
@@ -83,13 +22,12 @@ static __u32 cifs_ssetup_hdr(struct cifs_ses *ses, SESSION_SETUP_ANDX *pSMB)
 					CIFSMaxBufSize + MAX_CIFS_HDR_SIZE - 4,
 					USHRT_MAX));
 	pSMB->req.MaxMpxCount = cpu_to_le16(ses->server->maxReq);
-	pSMB->req.VcNumber = get_next_vcnum(ses);
+	pSMB->req.VcNumber = cpu_to_le16(1);
 
 	capabilities = CAP_LARGE_FILES | CAP_NT_SMBS | CAP_LEVEL_II_OPLOCKS |
 			CAP_LARGE_WRITE_X | CAP_LARGE_READ_X;
 
-	if (ses->server->sec_mode &
-	    (SECMODE_SIGN_REQUIRED | SECMODE_SIGN_ENABLED))
+	if (ses->server->sign)
 		pSMB->req.hdr.Flags2 |= SMBFLG2_SECURITY_SIGNATURE;
 
 	if (ses->capabilities & CAP_UNICODE) {
@@ -169,7 +107,7 @@ static void unicode_ssetup_strings(char **pbcc_area, struct cifs_ses *ses,
 		*(bcc_ptr+1) = 0;
 	} else {
 		bytes_ret = cifs_strtoUTF16((__le16 *) bcc_ptr, ses->user_name,
-					    MAX_USERNAME_SIZE, nls_cp);
+					    CIFS_MAX_USERNAME_LEN, nls_cp);
 	}
 	bcc_ptr += 2 * bytes_ret;
 	bcc_ptr += 2;  
@@ -186,8 +124,8 @@ static void ascii_ssetup_strings(char **pbcc_area, struct cifs_ses *ses,
 	char *bcc_ptr = *pbcc_area;
 
 	if (ses->user_name != NULL) {
-		strncpy(bcc_ptr, ses->user_name, MAX_USERNAME_SIZE);
-		bcc_ptr += strnlen(ses->user_name, MAX_USERNAME_SIZE);
+		strncpy(bcc_ptr, ses->user_name, CIFS_MAX_USERNAME_LEN);
+		bcc_ptr += strnlen(ses->user_name, CIFS_MAX_USERNAME_LEN);
 	}
 	 
 	*bcc_ptr = 0;
@@ -250,11 +188,10 @@ decode_unicode_ssetup(char **pbcc_area, int bleft, struct cifs_ses *ses,
 	return;
 }
 
-static int decode_ascii_ssetup(char **pbcc_area, __u16 bleft,
-			       struct cifs_ses *ses,
-			       const struct nls_table *nls_cp)
+static void decode_ascii_ssetup(char **pbcc_area, __u16 bleft,
+				struct cifs_ses *ses,
+				const struct nls_table *nls_cp)
 {
-	int rc = 0;
 	int len;
 	char *bcc_ptr = *pbcc_area;
 
@@ -262,16 +199,15 @@ static int decode_ascii_ssetup(char **pbcc_area, __u16 bleft,
 
 	len = strnlen(bcc_ptr, bleft);
 	if (len >= bleft)
-		return rc;
+		return;
 
 	kfree(ses->serverOS);
 
 	ses->serverOS = kzalloc(len + 1, GFP_KERNEL);
-	if (ses->serverOS)
+	if (ses->serverOS) {
 		strncpy(ses->serverOS, bcc_ptr, len);
-	if (strncmp(ses->serverOS, "OS/2", 4) == 0) {
-		cifs_dbg(FYI, "OS/2 server\n");
-			ses->flags |= CIFS_SES_OS2;
+		if (strncmp(ses->serverOS, "OS/2", 4) == 0)
+			cifs_dbg(FYI, "OS/2 server\n");
 	}
 
 	bcc_ptr += len + 1;
@@ -279,7 +215,7 @@ static int decode_ascii_ssetup(char **pbcc_area, __u16 bleft,
 
 	len = strnlen(bcc_ptr, bleft);
 	if (len >= bleft)
-		return rc;
+		return;
 
 	kfree(ses->serverNOS);
 
@@ -292,11 +228,9 @@ static int decode_ascii_ssetup(char **pbcc_area, __u16 bleft,
 
 	len = strnlen(bcc_ptr, bleft);
 	if (len > bleft)
-		return rc;
+		return;
 
 	cifs_dbg(FYI, "ascii: bytes left %d\n", bleft);
-
-	return rc;
 }
 
 int decode_ntlmssp_challenge(char *bcc_ptr, int blob_len,
@@ -359,10 +293,10 @@ void build_ntlmssp_negotiate_blob(unsigned char *pbuffer,
 	flags = NTLMSSP_NEGOTIATE_56 |	NTLMSSP_REQUEST_TARGET |
 		NTLMSSP_NEGOTIATE_128 | NTLMSSP_NEGOTIATE_UNICODE |
 		NTLMSSP_NEGOTIATE_NTLM | NTLMSSP_NEGOTIATE_EXTENDED_SEC;
-	if (ses->server->sec_mode &
-			(SECMODE_SIGN_REQUIRED | SECMODE_SIGN_ENABLED)) {
+	if (ses->server->sign) {
 		flags |= NTLMSSP_NEGOTIATE_SIGN;
-		if (!ses->server->session_estab)
+		if (!ses->server->session_estab ||
+				ses->ntlmssp->sesskey_per_smbsess)
 			flags |= NTLMSSP_NEGOTIATE_KEY_XCH;
 	}
 
@@ -377,15 +311,42 @@ void build_ntlmssp_negotiate_blob(unsigned char *pbuffer,
 	sec_blob->DomainName.MaximumLength = 0;
 }
 
-int build_ntlmssp_auth_blob(unsigned char *pbuffer,
+static int size_of_ntlmssp_blob(struct cifs_ses *ses)
+{
+	int sz = sizeof(AUTHENTICATE_MESSAGE) + ses->auth_key.len
+		- CIFS_SESS_KEY_SIZE + CIFS_CPHTXT_SIZE + 2;
+
+	if (ses->domainName)
+		sz += 2 * strnlen(ses->domainName, CIFS_MAX_DOMAINNAME_LEN);
+	else
+		sz += 2;
+
+	if (ses->user_name)
+		sz += 2 * strnlen(ses->user_name, CIFS_MAX_USERNAME_LEN);
+	else
+		sz += 2;
+
+	return sz;
+}
+
+int build_ntlmssp_auth_blob(unsigned char **pbuffer,
 					u16 *buflen,
 				   struct cifs_ses *ses,
 				   const struct nls_table *nls_cp)
 {
 	int rc;
-	AUTHENTICATE_MESSAGE *sec_blob = (AUTHENTICATE_MESSAGE *)pbuffer;
+	AUTHENTICATE_MESSAGE *sec_blob;
 	__u32 flags;
 	unsigned char *tmp;
+
+	rc = setup_ntlmv2_rsp(ses, nls_cp);
+	if (rc) {
+		cifs_dbg(VFS, "Error %d during NTLMSSP authentication\n", rc);
+		*buflen = 0;
+		goto setup_ntlmv2_ret;
+	}
+	*pbuffer = kmalloc(size_of_ntlmssp_blob(ses), GFP_KERNEL);
+	sec_blob = (AUTHENTICATE_MESSAGE *)*pbuffer;
 
 	memcpy(sec_blob->Signature, NTLMSSP_SIGNATURE, 8);
 	sec_blob->MessageType = NtLmAuthenticate;
@@ -394,14 +355,14 @@ int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 		NTLMSSP_REQUEST_TARGET | NTLMSSP_NEGOTIATE_TARGET_INFO |
 		NTLMSSP_NEGOTIATE_128 | NTLMSSP_NEGOTIATE_UNICODE |
 		NTLMSSP_NEGOTIATE_NTLM | NTLMSSP_NEGOTIATE_EXTENDED_SEC;
-	if (ses->server->sec_mode &
-	   (SECMODE_SIGN_REQUIRED | SECMODE_SIGN_ENABLED)) {
+	if (ses->server->sign) {
 		flags |= NTLMSSP_NEGOTIATE_SIGN;
-		if (!ses->server->session_estab)
+		if (!ses->server->session_estab ||
+				ses->ntlmssp->sesskey_per_smbsess)
 			flags |= NTLMSSP_NEGOTIATE_KEY_XCH;
 	}
 
-	tmp = pbuffer + sizeof(AUTHENTICATE_MESSAGE);
+	tmp = *pbuffer + sizeof(AUTHENTICATE_MESSAGE);
 	sec_blob->NegotiateFlags = cpu_to_le32(flags);
 
 	sec_blob->LmChallengeResponse.BufferOffset =
@@ -409,13 +370,9 @@ int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 	sec_blob->LmChallengeResponse.Length = 0;
 	sec_blob->LmChallengeResponse.MaximumLength = 0;
 
-	sec_blob->NtChallengeResponse.BufferOffset = cpu_to_le32(tmp - pbuffer);
+	sec_blob->NtChallengeResponse.BufferOffset =
+				cpu_to_le32(tmp - *pbuffer);
 	if (ses->user_name != NULL) {
-		rc = setup_ntlmv2_rsp(ses, nls_cp);
-		if (rc) {
-			cifs_dbg(VFS, "Error %d during NTLMSSP authentication\n", rc);
-			goto setup_ntlmv2_ret;
-		}
 		memcpy(tmp, ses->auth_key.response + CIFS_SESS_KEY_SIZE,
 				ses->auth_key.len - CIFS_SESS_KEY_SIZE);
 		tmp += ses->auth_key.len - CIFS_SESS_KEY_SIZE;
@@ -431,38 +388,38 @@ int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 	}
 
 	if (ses->domainName == NULL) {
-		sec_blob->DomainName.BufferOffset = cpu_to_le32(tmp - pbuffer);
+		sec_blob->DomainName.BufferOffset = cpu_to_le32(tmp - *pbuffer);
 		sec_blob->DomainName.Length = 0;
 		sec_blob->DomainName.MaximumLength = 0;
 		tmp += 2;
 	} else {
 		int len;
 		len = cifs_strtoUTF16((__le16 *)tmp, ses->domainName,
-				      MAX_USERNAME_SIZE, nls_cp);
+				      CIFS_MAX_USERNAME_LEN, nls_cp);
 		len *= 2;  
-		sec_blob->DomainName.BufferOffset = cpu_to_le32(tmp - pbuffer);
+		sec_blob->DomainName.BufferOffset = cpu_to_le32(tmp - *pbuffer);
 		sec_blob->DomainName.Length = cpu_to_le16(len);
 		sec_blob->DomainName.MaximumLength = cpu_to_le16(len);
 		tmp += len;
 	}
 
 	if (ses->user_name == NULL) {
-		sec_blob->UserName.BufferOffset = cpu_to_le32(tmp - pbuffer);
+		sec_blob->UserName.BufferOffset = cpu_to_le32(tmp - *pbuffer);
 		sec_blob->UserName.Length = 0;
 		sec_blob->UserName.MaximumLength = 0;
 		tmp += 2;
 	} else {
 		int len;
 		len = cifs_strtoUTF16((__le16 *)tmp, ses->user_name,
-				      MAX_USERNAME_SIZE, nls_cp);
+				      CIFS_MAX_USERNAME_LEN, nls_cp);
 		len *= 2;  
-		sec_blob->UserName.BufferOffset = cpu_to_le32(tmp - pbuffer);
+		sec_blob->UserName.BufferOffset = cpu_to_le32(tmp - *pbuffer);
 		sec_blob->UserName.Length = cpu_to_le16(len);
 		sec_blob->UserName.MaximumLength = cpu_to_le16(len);
 		tmp += len;
 	}
 
-	sec_blob->WorkstationName.BufferOffset = cpu_to_le32(tmp - pbuffer);
+	sec_blob->WorkstationName.BufferOffset = cpu_to_le32(tmp - *pbuffer);
 	sec_blob->WorkstationName.Length = 0;
 	sec_blob->WorkstationName.MaximumLength = 0;
 	tmp += 2;
@@ -471,344 +428,243 @@ int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 		(ses->ntlmssp->server_flags & NTLMSSP_NEGOTIATE_EXTENDED_SEC))
 			&& !calc_seckey(ses)) {
 		memcpy(tmp, ses->ntlmssp->ciphertext, CIFS_CPHTXT_SIZE);
-		sec_blob->SessionKey.BufferOffset = cpu_to_le32(tmp - pbuffer);
+		sec_blob->SessionKey.BufferOffset = cpu_to_le32(tmp - *pbuffer);
 		sec_blob->SessionKey.Length = cpu_to_le16(CIFS_CPHTXT_SIZE);
 		sec_blob->SessionKey.MaximumLength =
 				cpu_to_le16(CIFS_CPHTXT_SIZE);
 		tmp += CIFS_CPHTXT_SIZE;
 	} else {
-		sec_blob->SessionKey.BufferOffset = cpu_to_le32(tmp - pbuffer);
+		sec_blob->SessionKey.BufferOffset = cpu_to_le32(tmp - *pbuffer);
 		sec_blob->SessionKey.Length = 0;
 		sec_blob->SessionKey.MaximumLength = 0;
 	}
 
+	*buflen = tmp - *pbuffer;
 setup_ntlmv2_ret:
-	*buflen = tmp - pbuffer;
 	return rc;
 }
 
-int
-CIFS_SessSetup(const unsigned int xid, struct cifs_ses *ses,
-	       const struct nls_table *nls_cp)
+enum securityEnum
+select_sectype(struct TCP_Server_Info *server, enum securityEnum requested)
 {
-	int rc = 0;
-	int wct;
-	struct smb_hdr *smb_buf;
-	char *bcc_ptr;
-	char *str_area;
-	SESSION_SETUP_ANDX *pSMB;
-	__u32 capabilities;
-	__u16 count;
-	int resp_buf_type;
-	struct kvec iov[3];
-	enum securityEnum type;
-	__u16 action, bytes_remaining;
-	struct key *spnego_key = NULL;
-	__le32 phase = NtLmNegotiate;  
-	u16 blob_len;
-	char *ntlmsspblob = NULL;
-
-	if (ses == NULL)
-		return -EINVAL;
-
-	type = ses->server->secType;
-	cifs_dbg(FYI, "sess setup type %d\n", type);
-	if (type == RawNTLMSSP) {
-		 
-		ses->ntlmssp = kmalloc(sizeof(struct ntlmssp_auth), GFP_KERNEL);
-		if (!ses->ntlmssp)
-			return -ENOMEM;
+	switch (server->negflavor) {
+	case CIFS_NEGFLAVOR_EXTENDED:
+		switch (requested) {
+		case Kerberos:
+		case RawNTLMSSP:
+			return requested;
+		case Unspecified:
+			if (server->sec_ntlmssp &&
+			    (global_secflags & CIFSSEC_MAY_NTLMSSP))
+				return RawNTLMSSP;
+			if ((server->sec_kerberos || server->sec_mskerberos) &&
+			    (global_secflags & CIFSSEC_MAY_KRB5))
+				return Kerberos;
+			 
+		default:
+			return Unspecified;
+		}
+	case CIFS_NEGFLAVOR_UNENCAP:
+		switch (requested) {
+		case NTLM:
+		case NTLMv2:
+			return requested;
+		case Unspecified:
+			if (global_secflags & CIFSSEC_MAY_NTLMV2)
+				return NTLMv2;
+			if (global_secflags & CIFSSEC_MAY_NTLM)
+				return NTLM;
+		default:
+			 
+			break;
+		}
+	case CIFS_NEGFLAVOR_LANMAN:
+		switch (requested) {
+		case LANMAN:
+			return requested;
+		case Unspecified:
+			if (global_secflags & CIFSSEC_MAY_LANMAN)
+				return LANMAN;
+			 
+		default:
+			return Unspecified;
+		}
+	default:
+		return Unspecified;
 	}
+}
 
-ssetup_ntlmssp_authenticate:
-	if (phase == NtLmChallenge)
-		phase = NtLmAuthenticate;  
+struct sess_data {
+	unsigned int xid;
+	struct cifs_ses *ses;
+	struct nls_table *nls_cp;
+	void (*func)(struct sess_data *);
+	int result;
 
-	if (type == LANMAN) {
-#ifndef CONFIG_CIFS_WEAK_PW_HASH
-		 
-		return -EOPNOTSUPP;
-#endif
-		wct = 10;  
-	} else if ((type == NTLM) || (type == NTLMv2)) {
-		 
-		wct = 13;  
-	} else  
-		wct = 12;
+	int buf0_type;
+	struct kvec iov[3];
+};
+
+static int
+sess_alloc_buffer(struct sess_data *sess_data, int wct)
+{
+	int rc;
+	struct cifs_ses *ses = sess_data->ses;
+	struct smb_hdr *smb_buf;
 
 	rc = small_smb_init_no_tc(SMB_COM_SESSION_SETUP_ANDX, wct, ses,
-			    (void **)&smb_buf);
+				  (void **)&smb_buf);
+
 	if (rc)
 		return rc;
 
-	pSMB = (SESSION_SETUP_ANDX *)smb_buf;
+	sess_data->iov[0].iov_base = (char *)smb_buf;
+	sess_data->iov[0].iov_len = be32_to_cpu(smb_buf->smb_buf_length) + 4;
+	 
+	sess_data->buf0_type = CIFS_SMALL_BUFFER;
 
+	sess_data->iov[2].iov_base = kmalloc(2000, GFP_KERNEL);
+	if (!sess_data->iov[2].iov_base) {
+		rc = -ENOMEM;
+		goto out_free_smb_buf;
+	}
+
+	return 0;
+
+out_free_smb_buf:
+	kfree(smb_buf);
+	sess_data->iov[0].iov_base = NULL;
+	sess_data->iov[0].iov_len = 0;
+	sess_data->buf0_type = CIFS_NO_BUFFER;
+	return rc;
+}
+
+static void
+sess_free_buffer(struct sess_data *sess_data)
+{
+
+	free_rsp_buf(sess_data->buf0_type, sess_data->iov[0].iov_base);
+	sess_data->buf0_type = CIFS_NO_BUFFER;
+	kfree(sess_data->iov[2].iov_base);
+}
+
+static int
+sess_establish_session(struct sess_data *sess_data)
+{
+	struct cifs_ses *ses = sess_data->ses;
+
+	mutex_lock(&ses->server->srv_mutex);
+	if (!ses->server->session_estab) {
+		if (ses->server->sign) {
+			ses->server->session_key.response =
+				kmemdup(ses->auth_key.response,
+				ses->auth_key.len, GFP_KERNEL);
+			if (!ses->server->session_key.response) {
+				mutex_unlock(&ses->server->srv_mutex);
+				return -ENOMEM;
+			}
+			ses->server->session_key.len =
+						ses->auth_key.len;
+		}
+		ses->server->sequence_number = 0x2;
+		ses->server->session_estab = true;
+	}
+	mutex_unlock(&ses->server->srv_mutex);
+
+	cifs_dbg(FYI, "CIFS session established successfully\n");
+	spin_lock(&GlobalMid_Lock);
+	ses->status = CifsGood;
+	ses->need_reconnect = false;
+	spin_unlock(&GlobalMid_Lock);
+
+	return 0;
+}
+
+static int
+sess_sendreceive(struct sess_data *sess_data)
+{
+	int rc;
+	struct smb_hdr *smb_buf = (struct smb_hdr *) sess_data->iov[0].iov_base;
+	__u16 count;
+
+	count = sess_data->iov[1].iov_len + sess_data->iov[2].iov_len;
+	smb_buf->smb_buf_length =
+		cpu_to_be32(be32_to_cpu(smb_buf->smb_buf_length) + count);
+	put_bcc(count, smb_buf);
+
+	rc = SendReceive2(sess_data->xid, sess_data->ses,
+			  sess_data->iov, 3  ,
+			  &sess_data->buf0_type,
+			  CIFS_LOG_ERROR);
+
+	return rc;
+}
+
+#ifdef CONFIG_CIFS_WEAK_PW_HASH
+static void
+sess_auth_lanman(struct sess_data *sess_data)
+{
+	int rc = 0;
+	struct smb_hdr *smb_buf;
+	SESSION_SETUP_ANDX *pSMB;
+	char *bcc_ptr;
+	struct cifs_ses *ses = sess_data->ses;
+	char lnm_session_key[CIFS_AUTH_RESP_SIZE];
+	__u32 capabilities;
+	__u16 bytes_remaining;
+
+	rc = sess_alloc_buffer(sess_data, 10);
+	if (rc)
+		goto out;
+
+	pSMB = (SESSION_SETUP_ANDX *)sess_data->iov[0].iov_base;
+	bcc_ptr = sess_data->iov[2].iov_base;
 	capabilities = cifs_ssetup_hdr(ses, pSMB);
 
-	iov[0].iov_base = (char *)pSMB;
-	iov[0].iov_len = be32_to_cpu(smb_buf->smb_buf_length) + 4;
+	pSMB->req.hdr.Flags2 &= ~SMBFLG2_UNICODE;
 
-	resp_buf_type = CIFS_SMALL_BUFFER;
-
-	str_area = kmalloc(2000, GFP_KERNEL);
-	if (str_area == NULL) {
-		rc = -ENOMEM;
-		goto ssetup_exit;
-	}
-	bcc_ptr = str_area;
-
-	ses->flags &= ~CIFS_SES_LANMAN;
-
-	iov[1].iov_base = NULL;
-	iov[1].iov_len = 0;
-
-	if (type == LANMAN) {
-#ifdef CONFIG_CIFS_WEAK_PW_HASH
-		char lnm_session_key[CIFS_AUTH_RESP_SIZE];
-
-		pSMB->req.hdr.Flags2 &= ~SMBFLG2_UNICODE;
-
+	if (ses->user_name != NULL) {
+		 
 		pSMB->old_req.PasswordLength = cpu_to_le16(CIFS_AUTH_RESP_SIZE);
 
 		rc = calc_lanman_hash(ses->password, ses->server->cryptkey,
-				 ses->server->sec_mode & SECMODE_PW_ENCRYPT ?
-					true : false, lnm_session_key);
+				      ses->server->sec_mode & SECMODE_PW_ENCRYPT ?
+				      true : false, lnm_session_key);
 
-		ses->flags |= CIFS_SES_LANMAN;
 		memcpy(bcc_ptr, (char *)lnm_session_key, CIFS_AUTH_RESP_SIZE);
 		bcc_ptr += CIFS_AUTH_RESP_SIZE;
-
-		cifs_dbg(FYI, "Negotiating LANMAN setting up strings\n");
-		 
-		ascii_ssetup_strings(&bcc_ptr, ses, nls_cp);
-#endif
-	} else if (type == NTLM) {
-		pSMB->req_no_secext.Capabilities = cpu_to_le32(capabilities);
-		pSMB->req_no_secext.CaseInsensitivePasswordLength =
-			cpu_to_le16(CIFS_AUTH_RESP_SIZE);
-		pSMB->req_no_secext.CaseSensitivePasswordLength =
-			cpu_to_le16(CIFS_AUTH_RESP_SIZE);
-
-		rc = setup_ntlm_response(ses, nls_cp);
-		if (rc) {
-			cifs_dbg(VFS, "Error %d during NTLM authentication\n",
-				 rc);
-			goto ssetup_exit;
-		}
-
-		memcpy(bcc_ptr, ses->auth_key.response + CIFS_SESS_KEY_SIZE,
-				CIFS_AUTH_RESP_SIZE);
-		bcc_ptr += CIFS_AUTH_RESP_SIZE;
-		memcpy(bcc_ptr, ses->auth_key.response + CIFS_SESS_KEY_SIZE,
-				CIFS_AUTH_RESP_SIZE);
-		bcc_ptr += CIFS_AUTH_RESP_SIZE;
-
-		if (ses->capabilities & CAP_UNICODE) {
-			 
-			if (iov[0].iov_len % 2) {
-				*bcc_ptr = 0;
-				bcc_ptr++;
-			}
-			unicode_ssetup_strings(&bcc_ptr, ses, nls_cp);
-		} else
-			ascii_ssetup_strings(&bcc_ptr, ses, nls_cp);
-	} else if (type == NTLMv2) {
-		pSMB->req_no_secext.Capabilities = cpu_to_le32(capabilities);
-
-		pSMB->req_no_secext.CaseInsensitivePasswordLength = 0;
-
-		rc = setup_ntlmv2_rsp(ses, nls_cp);
-		if (rc) {
-			cifs_dbg(VFS, "Error %d during NTLMv2 authentication\n",
-				 rc);
-			goto ssetup_exit;
-		}
-		memcpy(bcc_ptr, ses->auth_key.response + CIFS_SESS_KEY_SIZE,
-				ses->auth_key.len - CIFS_SESS_KEY_SIZE);
-		bcc_ptr += ses->auth_key.len - CIFS_SESS_KEY_SIZE;
-
-		pSMB->req_no_secext.CaseSensitivePasswordLength =
-			cpu_to_le16(ses->auth_key.len - CIFS_SESS_KEY_SIZE);
-
-		if (ses->capabilities & CAP_UNICODE) {
-			if (iov[0].iov_len % 2) {
-				*bcc_ptr = 0;
-				bcc_ptr++;
-			}
-			unicode_ssetup_strings(&bcc_ptr, ses, nls_cp);
-		} else
-			ascii_ssetup_strings(&bcc_ptr, ses, nls_cp);
-	} else if (type == Kerberos) {
-#ifdef CONFIG_CIFS_UPCALL
-		struct cifs_spnego_msg *msg;
-
-		spnego_key = cifs_get_spnego_key(ses);
-		if (IS_ERR(spnego_key)) {
-			rc = PTR_ERR(spnego_key);
-			spnego_key = NULL;
-			goto ssetup_exit;
-		}
-
-		msg = spnego_key->payload.data;
-		 
-		if (msg->version != CIFS_SPNEGO_UPCALL_VERSION) {
-			cifs_dbg(VFS, "incorrect version of cifs.upcall "
-				   "expected %d but got %d)",
-				   CIFS_SPNEGO_UPCALL_VERSION, msg->version);
-			rc = -EKEYREJECTED;
-			goto ssetup_exit;
-		}
-
-		ses->auth_key.response = kmemdup(msg->data, msg->sesskey_len,
-						 GFP_KERNEL);
-		if (!ses->auth_key.response) {
-			cifs_dbg(VFS, "Kerberos can't allocate (%u bytes) memory",
-					msg->sesskey_len);
-			rc = -ENOMEM;
-			goto ssetup_exit;
-		}
-		ses->auth_key.len = msg->sesskey_len;
-
-		pSMB->req.hdr.Flags2 |= SMBFLG2_EXT_SEC;
-		capabilities |= CAP_EXTENDED_SECURITY;
-		pSMB->req.Capabilities = cpu_to_le32(capabilities);
-		iov[1].iov_base = msg->data + msg->sesskey_len;
-		iov[1].iov_len = msg->secblob_len;
-		pSMB->req.SecurityBlobLength = cpu_to_le16(iov[1].iov_len);
-
-		if (ses->capabilities & CAP_UNICODE) {
-			 
-			if ((iov[0].iov_len + iov[1].iov_len) % 2) {
-				*bcc_ptr = 0;
-				bcc_ptr++;
-			}
-			unicode_oslm_strings(&bcc_ptr, nls_cp);
-			unicode_domain_string(&bcc_ptr, ses, nls_cp);
-		} else
-		 
-			ascii_ssetup_strings(&bcc_ptr, ses, nls_cp);
-#else  
-		cifs_dbg(VFS, "Kerberos negotiated but upcall support disabled!\n");
-		rc = -ENOSYS;
-		goto ssetup_exit;
-#endif  
-	} else if (type == RawNTLMSSP) {
-		if ((pSMB->req.hdr.Flags2 & SMBFLG2_UNICODE) == 0) {
-			cifs_dbg(VFS, "NTLMSSP requires Unicode support\n");
-			rc = -ENOSYS;
-			goto ssetup_exit;
-		}
-
-		cifs_dbg(FYI, "ntlmssp session setup phase %d\n", phase);
-		pSMB->req.hdr.Flags2 |= SMBFLG2_EXT_SEC;
-		capabilities |= CAP_EXTENDED_SECURITY;
-		pSMB->req.Capabilities |= cpu_to_le32(capabilities);
-		switch(phase) {
-		case NtLmNegotiate:
-			build_ntlmssp_negotiate_blob(
-				pSMB->req.SecurityBlob, ses);
-			iov[1].iov_len = sizeof(NEGOTIATE_MESSAGE);
-			iov[1].iov_base = pSMB->req.SecurityBlob;
-			pSMB->req.SecurityBlobLength =
-				cpu_to_le16(sizeof(NEGOTIATE_MESSAGE));
-			break;
-		case NtLmAuthenticate:
-			 
-			ntlmsspblob = kzalloc(
-				5*sizeof(struct _AUTHENTICATE_MESSAGE),
-				GFP_KERNEL);
-			if (!ntlmsspblob) {
-				rc = -ENOMEM;
-				goto ssetup_exit;
-			}
-
-			rc = build_ntlmssp_auth_blob(ntlmsspblob,
-						&blob_len, ses, nls_cp);
-			if (rc)
-				goto ssetup_exit;
-			iov[1].iov_len = blob_len;
-			iov[1].iov_base = ntlmsspblob;
-			pSMB->req.SecurityBlobLength = cpu_to_le16(blob_len);
-			 
-			smb_buf->Uid = ses->Suid;
-			break;
-		default:
-			cifs_dbg(VFS, "invalid phase %d\n", phase);
-			rc = -ENOSYS;
-			goto ssetup_exit;
-		}
-		 
-		if ((iov[0].iov_len + iov[1].iov_len) % 2) {
-			*bcc_ptr = 0;
-			bcc_ptr++;
-		}
-		unicode_oslm_strings(&bcc_ptr, nls_cp);
 	} else {
-		cifs_dbg(VFS, "secType %d not supported!\n", type);
-		rc = -ENOSYS;
-		goto ssetup_exit;
+		pSMB->old_req.PasswordLength = 0;
 	}
 
-	iov[2].iov_base = str_area;
-	iov[2].iov_len = (long) bcc_ptr - (long) str_area;
-
-	count = iov[1].iov_len + iov[2].iov_len;
-	smb_buf->smb_buf_length =
-		cpu_to_be32(be32_to_cpu(smb_buf->smb_buf_length) + count);
-
-	put_bcc(count, smb_buf);
-
-	rc = SendReceive2(xid, ses, iov, 3  , &resp_buf_type,
-			  CIFS_LOG_ERROR);
+	cifs_dbg(FYI, "Negotiating LANMAN setting up strings\n");
 	 
-	pSMB = (SESSION_SETUP_ANDX *)iov[0].iov_base;
-	smb_buf = (struct smb_hdr *)iov[0].iov_base;
+	ascii_ssetup_strings(&bcc_ptr, ses, sess_data->nls_cp);
 
-	if ((type == RawNTLMSSP) && (resp_buf_type != CIFS_NO_BUFFER) &&
-	    (smb_buf->Status.CifsError ==
-			cpu_to_le32(NT_STATUS_MORE_PROCESSING_REQUIRED))) {
-		if (phase != NtLmNegotiate) {
-			cifs_dbg(VFS, "Unexpected more processing error\n");
-			goto ssetup_exit;
-		}
-		 
-		phase = NtLmChallenge;  
-		rc = 0;  
-	}
+	sess_data->iov[2].iov_len = (long) bcc_ptr -
+			(long) sess_data->iov[2].iov_base;
+
+	rc = sess_sendreceive(sess_data);
 	if (rc)
-		goto ssetup_exit;
+		goto out;
 
-	if ((smb_buf->WordCount != 3) && (smb_buf->WordCount != 4)) {
+	pSMB = (SESSION_SETUP_ANDX *)sess_data->iov[0].iov_base;
+	smb_buf = (struct smb_hdr *)sess_data->iov[0].iov_base;
+
+	if (smb_buf->WordCount != 3) {
 		rc = -EIO;
 		cifs_dbg(VFS, "bad word count %d\n", smb_buf->WordCount);
-		goto ssetup_exit;
+		goto out;
 	}
-	action = le16_to_cpu(pSMB->resp.Action);
-	if (action & GUEST_LOGIN)
+
+	if (le16_to_cpu(pSMB->resp.Action) & GUEST_LOGIN)
 		cifs_dbg(FYI, "Guest login\n");  
+
 	ses->Suid = smb_buf->Uid;    
 	cifs_dbg(FYI, "UID = %llu\n", ses->Suid);
-	 
+
 	bytes_remaining = get_bcc(smb_buf);
 	bcc_ptr = pByteArea(smb_buf);
-
-	if (smb_buf->WordCount == 4) {
-		blob_len = le16_to_cpu(pSMB->resp.SecurityBlobLength);
-		if (blob_len > bytes_remaining) {
-			cifs_dbg(VFS, "bad security blob length %d\n",
-				 blob_len);
-			rc = -EINVAL;
-			goto ssetup_exit;
-		}
-		if (phase == NtLmChallenge) {
-			rc = decode_ntlmssp_challenge(bcc_ptr, blob_len, ses);
-			 
-			if (rc)
-				goto ssetup_exit;
-		}
-		bcc_ptr += blob_len;
-		bytes_remaining -= blob_len;
-	}
 
 	if (bytes_remaining == 0) {
 		 
@@ -818,28 +674,680 @@ ssetup_ntlmssp_authenticate:
 			++bcc_ptr;
 			--bytes_remaining;
 		}
-		decode_unicode_ssetup(&bcc_ptr, bytes_remaining, ses, nls_cp);
+		decode_unicode_ssetup(&bcc_ptr, bytes_remaining, ses,
+				      sess_data->nls_cp);
 	} else {
-		rc = decode_ascii_ssetup(&bcc_ptr, bytes_remaining,
-					 ses, nls_cp);
+		decode_ascii_ssetup(&bcc_ptr, bytes_remaining, ses,
+				    sess_data->nls_cp);
 	}
 
-ssetup_exit:
-	if (spnego_key) {
-		key_invalidate(spnego_key);
-		key_put(spnego_key);
+	rc = sess_establish_session(sess_data);
+out:
+	sess_data->result = rc;
+	sess_data->func = NULL;
+	sess_free_buffer(sess_data);
+}
+
+#else
+
+static void
+sess_auth_lanman(struct sess_data *sess_data)
+{
+	sess_data->result = -EOPNOTSUPP;
+	sess_data->func = NULL;
+}
+#endif
+
+static void
+sess_auth_ntlm(struct sess_data *sess_data)
+{
+	int rc = 0;
+	struct smb_hdr *smb_buf;
+	SESSION_SETUP_ANDX *pSMB;
+	char *bcc_ptr;
+	struct cifs_ses *ses = sess_data->ses;
+	__u32 capabilities;
+	__u16 bytes_remaining;
+
+	rc = sess_alloc_buffer(sess_data, 13);
+	if (rc)
+		goto out;
+
+	pSMB = (SESSION_SETUP_ANDX *)sess_data->iov[0].iov_base;
+	bcc_ptr = sess_data->iov[2].iov_base;
+	capabilities = cifs_ssetup_hdr(ses, pSMB);
+
+	pSMB->req_no_secext.Capabilities = cpu_to_le32(capabilities);
+	if (ses->user_name != NULL) {
+		pSMB->req_no_secext.CaseInsensitivePasswordLength =
+				cpu_to_le16(CIFS_AUTH_RESP_SIZE);
+		pSMB->req_no_secext.CaseSensitivePasswordLength =
+				cpu_to_le16(CIFS_AUTH_RESP_SIZE);
+
+		rc = setup_ntlm_response(ses, sess_data->nls_cp);
+		if (rc) {
+			cifs_dbg(VFS, "Error %d during NTLM authentication\n",
+					 rc);
+			goto out;
+		}
+
+		memcpy(bcc_ptr, ses->auth_key.response + CIFS_SESS_KEY_SIZE,
+				CIFS_AUTH_RESP_SIZE);
+		bcc_ptr += CIFS_AUTH_RESP_SIZE;
+		memcpy(bcc_ptr, ses->auth_key.response + CIFS_SESS_KEY_SIZE,
+				CIFS_AUTH_RESP_SIZE);
+		bcc_ptr += CIFS_AUTH_RESP_SIZE;
+	} else {
+		pSMB->req_no_secext.CaseInsensitivePasswordLength = 0;
+		pSMB->req_no_secext.CaseSensitivePasswordLength = 0;
 	}
-	kfree(str_area);
+
+	if (ses->capabilities & CAP_UNICODE) {
+		 
+		if (sess_data->iov[0].iov_len % 2) {
+			*bcc_ptr = 0;
+			bcc_ptr++;
+		}
+		unicode_ssetup_strings(&bcc_ptr, ses, sess_data->nls_cp);
+	} else {
+		ascii_ssetup_strings(&bcc_ptr, ses, sess_data->nls_cp);
+	}
+
+	sess_data->iov[2].iov_len = (long) bcc_ptr -
+			(long) sess_data->iov[2].iov_base;
+
+	rc = sess_sendreceive(sess_data);
+	if (rc)
+		goto out;
+
+	pSMB = (SESSION_SETUP_ANDX *)sess_data->iov[0].iov_base;
+	smb_buf = (struct smb_hdr *)sess_data->iov[0].iov_base;
+
+	if (smb_buf->WordCount != 3) {
+		rc = -EIO;
+		cifs_dbg(VFS, "bad word count %d\n", smb_buf->WordCount);
+		goto out;
+	}
+
+	if (le16_to_cpu(pSMB->resp.Action) & GUEST_LOGIN)
+		cifs_dbg(FYI, "Guest login\n");  
+
+	ses->Suid = smb_buf->Uid;    
+	cifs_dbg(FYI, "UID = %llu\n", ses->Suid);
+
+	bytes_remaining = get_bcc(smb_buf);
+	bcc_ptr = pByteArea(smb_buf);
+
+	if (bytes_remaining == 0) {
+		 
+	} else if (smb_buf->Flags2 & SMBFLG2_UNICODE) {
+		 
+		if (((unsigned long) bcc_ptr - (unsigned long) smb_buf) % 2) {
+			++bcc_ptr;
+			--bytes_remaining;
+		}
+		decode_unicode_ssetup(&bcc_ptr, bytes_remaining, ses,
+				      sess_data->nls_cp);
+	} else {
+		decode_ascii_ssetup(&bcc_ptr, bytes_remaining, ses,
+				    sess_data->nls_cp);
+	}
+
+	rc = sess_establish_session(sess_data);
+out:
+	sess_data->result = rc;
+	sess_data->func = NULL;
+	sess_free_buffer(sess_data);
+	kfree(ses->auth_key.response);
+	ses->auth_key.response = NULL;
+}
+
+static void
+sess_auth_ntlmv2(struct sess_data *sess_data)
+{
+	int rc = 0;
+	struct smb_hdr *smb_buf;
+	SESSION_SETUP_ANDX *pSMB;
+	char *bcc_ptr;
+	struct cifs_ses *ses = sess_data->ses;
+	__u32 capabilities;
+	__u16 bytes_remaining;
+
+	rc = sess_alloc_buffer(sess_data, 13);
+	if (rc)
+		goto out;
+
+	pSMB = (SESSION_SETUP_ANDX *)sess_data->iov[0].iov_base;
+	bcc_ptr = sess_data->iov[2].iov_base;
+	capabilities = cifs_ssetup_hdr(ses, pSMB);
+
+	pSMB->req_no_secext.Capabilities = cpu_to_le32(capabilities);
+
+	pSMB->req_no_secext.CaseInsensitivePasswordLength = 0;
+
+	if (ses->user_name != NULL) {
+		 
+		rc = setup_ntlmv2_rsp(ses, sess_data->nls_cp);
+		if (rc) {
+			cifs_dbg(VFS, "Error %d during NTLMv2 authentication\n", rc);
+			goto out;
+		}
+
+		memcpy(bcc_ptr, ses->auth_key.response + CIFS_SESS_KEY_SIZE,
+				ses->auth_key.len - CIFS_SESS_KEY_SIZE);
+		bcc_ptr += ses->auth_key.len - CIFS_SESS_KEY_SIZE;
+
+		pSMB->req_no_secext.CaseSensitivePasswordLength =
+			cpu_to_le16(ses->auth_key.len - CIFS_SESS_KEY_SIZE);
+	} else {
+		pSMB->req_no_secext.CaseSensitivePasswordLength = 0;
+	}
+
+	if (ses->capabilities & CAP_UNICODE) {
+		if (sess_data->iov[0].iov_len % 2) {
+			*bcc_ptr = 0;
+			bcc_ptr++;
+		}
+		unicode_ssetup_strings(&bcc_ptr, ses, sess_data->nls_cp);
+	} else {
+		ascii_ssetup_strings(&bcc_ptr, ses, sess_data->nls_cp);
+	}
+
+	sess_data->iov[2].iov_len = (long) bcc_ptr -
+			(long) sess_data->iov[2].iov_base;
+
+	rc = sess_sendreceive(sess_data);
+	if (rc)
+		goto out;
+
+	pSMB = (SESSION_SETUP_ANDX *)sess_data->iov[0].iov_base;
+	smb_buf = (struct smb_hdr *)sess_data->iov[0].iov_base;
+
+	if (smb_buf->WordCount != 3) {
+		rc = -EIO;
+		cifs_dbg(VFS, "bad word count %d\n", smb_buf->WordCount);
+		goto out;
+	}
+
+	if (le16_to_cpu(pSMB->resp.Action) & GUEST_LOGIN)
+		cifs_dbg(FYI, "Guest login\n");  
+
+	ses->Suid = smb_buf->Uid;    
+	cifs_dbg(FYI, "UID = %llu\n", ses->Suid);
+
+	bytes_remaining = get_bcc(smb_buf);
+	bcc_ptr = pByteArea(smb_buf);
+
+	if (bytes_remaining == 0) {
+		 
+	} else if (smb_buf->Flags2 & SMBFLG2_UNICODE) {
+		 
+		if (((unsigned long) bcc_ptr - (unsigned long) smb_buf) % 2) {
+			++bcc_ptr;
+			--bytes_remaining;
+		}
+		decode_unicode_ssetup(&bcc_ptr, bytes_remaining, ses,
+				      sess_data->nls_cp);
+	} else {
+		decode_ascii_ssetup(&bcc_ptr, bytes_remaining, ses,
+				    sess_data->nls_cp);
+	}
+
+	rc = sess_establish_session(sess_data);
+out:
+	sess_data->result = rc;
+	sess_data->func = NULL;
+	sess_free_buffer(sess_data);
+	kfree(ses->auth_key.response);
+	ses->auth_key.response = NULL;
+}
+
+#ifdef CONFIG_CIFS_UPCALL
+static void
+sess_auth_kerberos(struct sess_data *sess_data)
+{
+	int rc = 0;
+	struct smb_hdr *smb_buf;
+	SESSION_SETUP_ANDX *pSMB;
+	char *bcc_ptr;
+	struct cifs_ses *ses = sess_data->ses;
+	__u32 capabilities;
+	__u16 bytes_remaining;
+	struct key *spnego_key = NULL;
+	struct cifs_spnego_msg *msg;
+	u16 blob_len;
+
+	rc = sess_alloc_buffer(sess_data, 12);
+	if (rc)
+		goto out;
+
+	pSMB = (SESSION_SETUP_ANDX *)sess_data->iov[0].iov_base;
+	bcc_ptr = sess_data->iov[2].iov_base;
+	capabilities = cifs_ssetup_hdr(ses, pSMB);
+
+	spnego_key = cifs_get_spnego_key(ses);
+	if (IS_ERR(spnego_key)) {
+		rc = PTR_ERR(spnego_key);
+		spnego_key = NULL;
+		goto out;
+	}
+
+	msg = spnego_key->payload.data;
+	 
+	if (msg->version != CIFS_SPNEGO_UPCALL_VERSION) {
+		cifs_dbg(VFS,
+		  "incorrect version of cifs.upcall (expected %d but got %d)",
+			      CIFS_SPNEGO_UPCALL_VERSION, msg->version);
+		rc = -EKEYREJECTED;
+		goto out_put_spnego_key;
+	}
+
+	ses->auth_key.response = kmemdup(msg->data, msg->sesskey_len,
+					 GFP_KERNEL);
+	if (!ses->auth_key.response) {
+		cifs_dbg(VFS, "Kerberos can't allocate (%u bytes) memory",
+				msg->sesskey_len);
+		rc = -ENOMEM;
+		goto out_put_spnego_key;
+	}
+	ses->auth_key.len = msg->sesskey_len;
+
+	pSMB->req.hdr.Flags2 |= SMBFLG2_EXT_SEC;
+	capabilities |= CAP_EXTENDED_SECURITY;
+	pSMB->req.Capabilities = cpu_to_le32(capabilities);
+	sess_data->iov[1].iov_base = msg->data + msg->sesskey_len;
+	sess_data->iov[1].iov_len = msg->secblob_len;
+	pSMB->req.SecurityBlobLength = cpu_to_le16(sess_data->iov[1].iov_len);
+
+	if (ses->capabilities & CAP_UNICODE) {
+		 
+		if ((sess_data->iov[0].iov_len
+			+ sess_data->iov[1].iov_len) % 2) {
+			*bcc_ptr = 0;
+			bcc_ptr++;
+		}
+		unicode_oslm_strings(&bcc_ptr, sess_data->nls_cp);
+		unicode_domain_string(&bcc_ptr, ses, sess_data->nls_cp);
+	} else {
+		 
+		ascii_ssetup_strings(&bcc_ptr, ses, sess_data->nls_cp);
+	}
+
+	sess_data->iov[2].iov_len = (long) bcc_ptr -
+			(long) sess_data->iov[2].iov_base;
+
+	rc = sess_sendreceive(sess_data);
+	if (rc)
+		goto out_put_spnego_key;
+
+	pSMB = (SESSION_SETUP_ANDX *)sess_data->iov[0].iov_base;
+	smb_buf = (struct smb_hdr *)sess_data->iov[0].iov_base;
+
+	if (smb_buf->WordCount != 4) {
+		rc = -EIO;
+		cifs_dbg(VFS, "bad word count %d\n", smb_buf->WordCount);
+		goto out_put_spnego_key;
+	}
+
+	if (le16_to_cpu(pSMB->resp.Action) & GUEST_LOGIN)
+		cifs_dbg(FYI, "Guest login\n");  
+
+	ses->Suid = smb_buf->Uid;    
+	cifs_dbg(FYI, "UID = %llu\n", ses->Suid);
+
+	bytes_remaining = get_bcc(smb_buf);
+	bcc_ptr = pByteArea(smb_buf);
+
+	blob_len = le16_to_cpu(pSMB->resp.SecurityBlobLength);
+	if (blob_len > bytes_remaining) {
+		cifs_dbg(VFS, "bad security blob length %d\n",
+				blob_len);
+		rc = -EINVAL;
+		goto out_put_spnego_key;
+	}
+	bcc_ptr += blob_len;
+	bytes_remaining -= blob_len;
+
+	if (bytes_remaining == 0) {
+		 
+	} else if (smb_buf->Flags2 & SMBFLG2_UNICODE) {
+		 
+		if (((unsigned long) bcc_ptr - (unsigned long) smb_buf) % 2) {
+			++bcc_ptr;
+			--bytes_remaining;
+		}
+		decode_unicode_ssetup(&bcc_ptr, bytes_remaining, ses,
+				      sess_data->nls_cp);
+	} else {
+		decode_ascii_ssetup(&bcc_ptr, bytes_remaining, ses,
+				    sess_data->nls_cp);
+	}
+
+	rc = sess_establish_session(sess_data);
+out_put_spnego_key:
+	key_invalidate(spnego_key);
+	key_put(spnego_key);
+out:
+	sess_data->result = rc;
+	sess_data->func = NULL;
+	sess_free_buffer(sess_data);
+	kfree(ses->auth_key.response);
+	ses->auth_key.response = NULL;
+}
+
+#else
+
+static void
+sess_auth_kerberos(struct sess_data *sess_data)
+{
+	cifs_dbg(VFS, "Kerberos negotiated but upcall support disabled!\n");
+	sess_data->result = -ENOSYS;
+	sess_data->func = NULL;
+}
+#endif  
+
+static int
+_sess_auth_rawntlmssp_assemble_req(struct sess_data *sess_data)
+{
+	struct smb_hdr *smb_buf;
+	SESSION_SETUP_ANDX *pSMB;
+	struct cifs_ses *ses = sess_data->ses;
+	__u32 capabilities;
+	char *bcc_ptr;
+
+	pSMB = (SESSION_SETUP_ANDX *)sess_data->iov[0].iov_base;
+	smb_buf = (struct smb_hdr *)pSMB;
+
+	capabilities = cifs_ssetup_hdr(ses, pSMB);
+	if ((pSMB->req.hdr.Flags2 & SMBFLG2_UNICODE) == 0) {
+		cifs_dbg(VFS, "NTLMSSP requires Unicode support\n");
+		return -ENOSYS;
+	}
+
+	pSMB->req.hdr.Flags2 |= SMBFLG2_EXT_SEC;
+	capabilities |= CAP_EXTENDED_SECURITY;
+	pSMB->req.Capabilities |= cpu_to_le32(capabilities);
+
+	bcc_ptr = sess_data->iov[2].iov_base;
+	 
+	if ((sess_data->iov[0].iov_len + sess_data->iov[1].iov_len) % 2) {
+		*bcc_ptr = 0;
+		bcc_ptr++;
+	}
+	unicode_oslm_strings(&bcc_ptr, sess_data->nls_cp);
+
+	sess_data->iov[2].iov_len = (long) bcc_ptr -
+					(long) sess_data->iov[2].iov_base;
+
+	return 0;
+}
+
+static void
+sess_auth_rawntlmssp_authenticate(struct sess_data *sess_data);
+
+static void
+sess_auth_rawntlmssp_negotiate(struct sess_data *sess_data)
+{
+	int rc;
+	struct smb_hdr *smb_buf;
+	SESSION_SETUP_ANDX *pSMB;
+	struct cifs_ses *ses = sess_data->ses;
+	__u16 bytes_remaining;
+	char *bcc_ptr;
+	u16 blob_len;
+
+	cifs_dbg(FYI, "rawntlmssp session setup negotiate phase\n");
+
+	ses->ntlmssp = kmalloc(sizeof(struct ntlmssp_auth), GFP_KERNEL);
+	if (!ses->ntlmssp) {
+		rc = -ENOMEM;
+		goto out;
+	}
+	ses->ntlmssp->sesskey_per_smbsess = false;
+
+	rc = sess_alloc_buffer(sess_data, 12);
+	if (rc)
+		goto out;
+
+	pSMB = (SESSION_SETUP_ANDX *)sess_data->iov[0].iov_base;
+
+	build_ntlmssp_negotiate_blob(pSMB->req.SecurityBlob, ses);
+	sess_data->iov[1].iov_len = sizeof(NEGOTIATE_MESSAGE);
+	sess_data->iov[1].iov_base = pSMB->req.SecurityBlob;
+	pSMB->req.SecurityBlobLength = cpu_to_le16(sizeof(NEGOTIATE_MESSAGE));
+
+	rc = _sess_auth_rawntlmssp_assemble_req(sess_data);
+	if (rc)
+		goto out;
+
+	rc = sess_sendreceive(sess_data);
+
+	pSMB = (SESSION_SETUP_ANDX *)sess_data->iov[0].iov_base;
+	smb_buf = (struct smb_hdr *)sess_data->iov[0].iov_base;
+
+	if (sess_data->buf0_type != CIFS_NO_BUFFER &&
+	    smb_buf->Status.CifsError ==
+			cpu_to_le32(NT_STATUS_MORE_PROCESSING_REQUIRED))
+		rc = 0;
+
+	if (rc)
+		goto out;
+
+	cifs_dbg(FYI, "rawntlmssp session setup challenge phase\n");
+
+	if (smb_buf->WordCount != 4) {
+		rc = -EIO;
+		cifs_dbg(VFS, "bad word count %d\n", smb_buf->WordCount);
+		goto out;
+	}
+
+	ses->Suid = smb_buf->Uid;    
+	cifs_dbg(FYI, "UID = %llu\n", ses->Suid);
+
+	bytes_remaining = get_bcc(smb_buf);
+	bcc_ptr = pByteArea(smb_buf);
+
+	blob_len = le16_to_cpu(pSMB->resp.SecurityBlobLength);
+	if (blob_len > bytes_remaining) {
+		cifs_dbg(VFS, "bad security blob length %d\n",
+				blob_len);
+		rc = -EINVAL;
+		goto out;
+	}
+
+	rc = decode_ntlmssp_challenge(bcc_ptr, blob_len, ses);
+out:
+	sess_free_buffer(sess_data);
+
+	if (!rc) {
+		sess_data->func = sess_auth_rawntlmssp_authenticate;
+		return;
+	}
+
+	kfree(ses->auth_key.response);
+	ses->auth_key.response = NULL;
+	kfree(ses->ntlmssp);
+	ses->ntlmssp = NULL;
+
+	sess_data->func = NULL;
+	sess_data->result = rc;
+}
+
+static void
+sess_auth_rawntlmssp_authenticate(struct sess_data *sess_data)
+{
+	int rc;
+	struct smb_hdr *smb_buf;
+	SESSION_SETUP_ANDX *pSMB;
+	struct cifs_ses *ses = sess_data->ses;
+	__u16 bytes_remaining;
+	char *bcc_ptr;
+	unsigned char *ntlmsspblob = NULL;
+	u16 blob_len;
+
+	cifs_dbg(FYI, "rawntlmssp session setup authenticate phase\n");
+
+	rc = sess_alloc_buffer(sess_data, 12);
+	if (rc)
+		goto out;
+
+	pSMB = (SESSION_SETUP_ANDX *)sess_data->iov[0].iov_base;
+	smb_buf = (struct smb_hdr *)pSMB;
+	rc = build_ntlmssp_auth_blob(&ntlmsspblob,
+					&blob_len, ses, sess_data->nls_cp);
+	if (rc)
+		goto out_free_ntlmsspblob;
+	sess_data->iov[1].iov_len = blob_len;
+	sess_data->iov[1].iov_base = ntlmsspblob;
+	pSMB->req.SecurityBlobLength = cpu_to_le16(blob_len);
+	 
+	smb_buf->Uid = ses->Suid;
+
+	rc = _sess_auth_rawntlmssp_assemble_req(sess_data);
+	if (rc)
+		goto out_free_ntlmsspblob;
+
+	rc = sess_sendreceive(sess_data);
+	if (rc)
+		goto out_free_ntlmsspblob;
+
+	pSMB = (SESSION_SETUP_ANDX *)sess_data->iov[0].iov_base;
+	smb_buf = (struct smb_hdr *)sess_data->iov[0].iov_base;
+	if (smb_buf->WordCount != 4) {
+		rc = -EIO;
+		cifs_dbg(VFS, "bad word count %d\n", smb_buf->WordCount);
+		goto out_free_ntlmsspblob;
+	}
+
+	if (le16_to_cpu(pSMB->resp.Action) & GUEST_LOGIN)
+		cifs_dbg(FYI, "Guest login\n");  
+
+	if (ses->Suid != smb_buf->Uid) {
+		ses->Suid = smb_buf->Uid;
+		cifs_dbg(FYI, "UID changed! new UID = %llu\n", ses->Suid);
+	}
+
+	bytes_remaining = get_bcc(smb_buf);
+	bcc_ptr = pByteArea(smb_buf);
+	blob_len = le16_to_cpu(pSMB->resp.SecurityBlobLength);
+	if (blob_len > bytes_remaining) {
+		cifs_dbg(VFS, "bad security blob length %d\n",
+				blob_len);
+		rc = -EINVAL;
+		goto out_free_ntlmsspblob;
+	}
+	bcc_ptr += blob_len;
+	bytes_remaining -= blob_len;
+
+	if (bytes_remaining == 0) {
+		 
+	} else if (smb_buf->Flags2 & SMBFLG2_UNICODE) {
+		 
+		if (((unsigned long) bcc_ptr - (unsigned long) smb_buf) % 2) {
+			++bcc_ptr;
+			--bytes_remaining;
+		}
+		decode_unicode_ssetup(&bcc_ptr, bytes_remaining, ses,
+				      sess_data->nls_cp);
+	} else {
+		decode_ascii_ssetup(&bcc_ptr, bytes_remaining, ses,
+				    sess_data->nls_cp);
+	}
+
+out_free_ntlmsspblob:
 	kfree(ntlmsspblob);
-	ntlmsspblob = NULL;
-	if (resp_buf_type == CIFS_SMALL_BUFFER) {
-		cifs_dbg(FYI, "ssetup freeing small buf %p\n", iov[0].iov_base);
-		cifs_small_buf_release(iov[0].iov_base);
-	} else if (resp_buf_type == CIFS_LARGE_BUFFER)
-		cifs_buf_release(iov[0].iov_base);
+out:
+	sess_free_buffer(sess_data);
 
-	if ((phase == NtLmChallenge) && (rc == 0))
-		goto ssetup_ntlmssp_authenticate;
+	 if (!rc)
+		rc = sess_establish_session(sess_data);
 
+	kfree(ses->auth_key.response);
+	ses->auth_key.response = NULL;
+	kfree(ses->ntlmssp);
+	ses->ntlmssp = NULL;
+
+	sess_data->func = NULL;
+	sess_data->result = rc;
+}
+
+static int select_sec(struct cifs_ses *ses, struct sess_data *sess_data)
+{
+	int type;
+
+	type = select_sectype(ses->server, ses->sectype);
+	cifs_dbg(FYI, "sess setup type %d\n", type);
+	if (type == Unspecified) {
+		cifs_dbg(VFS,
+			"Unable to select appropriate authentication method!");
+		return -EINVAL;
+	}
+
+	switch (type) {
+	case LANMAN:
+		 
+#ifdef CONFIG_CIFS_WEAK_PW_HASH
+		sess_data->func = sess_auth_lanman;
+		break;
+#else
+		return -EOPNOTSUPP;
+#endif
+	case NTLM:
+		sess_data->func = sess_auth_ntlm;
+		break;
+	case NTLMv2:
+		sess_data->func = sess_auth_ntlmv2;
+		break;
+	case Kerberos:
+#ifdef CONFIG_CIFS_UPCALL
+		sess_data->func = sess_auth_kerberos;
+		break;
+#else
+		cifs_dbg(VFS, "Kerberos negotiated but upcall support disabled!\n");
+		return -ENOSYS;
+		break;
+#endif  
+	case RawNTLMSSP:
+		sess_data->func = sess_auth_rawntlmssp_negotiate;
+		break;
+	default:
+		cifs_dbg(VFS, "secType %d not supported!\n", type);
+		return -ENOSYS;
+	}
+
+	return 0;
+}
+
+int CIFS_SessSetup(const unsigned int xid, struct cifs_ses *ses,
+		    const struct nls_table *nls_cp)
+{
+	int rc = 0;
+	struct sess_data *sess_data;
+
+	if (ses == NULL) {
+		WARN(1, "%s: ses == NULL!", __func__);
+		return -EINVAL;
+	}
+
+	sess_data = kzalloc(sizeof(struct sess_data), GFP_KERNEL);
+	if (!sess_data)
+		return -ENOMEM;
+
+	rc = select_sec(ses, sess_data);
+	if (rc)
+		goto out;
+
+	sess_data->xid = xid;
+	sess_data->ses = ses;
+	sess_data->buf0_type = CIFS_NO_BUFFER;
+	sess_data->nls_cp = (struct nls_table *) nls_cp;
+
+	while (sess_data->func)
+		sess_data->func(sess_data);
+
+	rc = sess_data->result;
+
+out:
+	kfree(sess_data);
 	return rc;
 }

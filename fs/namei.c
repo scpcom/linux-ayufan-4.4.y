@@ -26,7 +26,7 @@
 #include <linux/mnt_namespace.h>
 #include <asm/uaccess.h>
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #include <linux/magic.h>
 #endif
 #ifdef MY_ABC_HERE
@@ -2351,9 +2351,10 @@ done:
 		goto out;
 	}
 	path->dentry = dentry;
-	path->mnt = mntget(nd->path.mnt);
+	path->mnt = nd->path.mnt;
 	if (should_follow_link(dentry->d_inode, nd->flags & LOOKUP_FOLLOW))
 		return 1;
+	mntget(path->mnt);
 	follow_mount(path);
 	error = 0;
 out:
@@ -3850,7 +3851,7 @@ static int vfs_rename_dir(struct inode *old_dir, struct dentry *old_dentry,
 	struct inode *target = new_dentry->d_inode;
 	unsigned max_links = new_dir->i_sb->s_max_links;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (new_dir != old_dir && !(old_dentry->d_sb->s_magic == BTRFS_SUPER_MAGIC && old_dentry->d_inode->i_ino == 256)) {
 #else
 	if (new_dir != old_dir) {

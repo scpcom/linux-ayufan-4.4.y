@@ -1,3 +1,7 @@
+BUG ID: <DSM> #99714 - locking/atomic, kref: Add kref_read()
+Commit Hashes:
+	2c935bc57221cc2edc787c72ea0e2d30cdcd3d5e
+
 BUG ID: <DSM> #97387 - encode_text_output call trace
 Commit Hashes:
 	676d23690fb62b5d51ba5d659935e9f7d9da9f8e
