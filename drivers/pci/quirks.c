@@ -203,6 +203,14 @@ static void quirk_citrine(struct pci_dev *dev)
 }
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_IBM,	PCI_DEVICE_ID_IBM_CITRINE,	quirk_citrine);
 
+static void quirk_nfp6000(struct pci_dev *dev)
+{
+	dev->cfg_size = 0x600;
+}
+DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_NETRONOME,	PCI_DEVICE_ID_NETRONOME_NFP4000,	quirk_nfp6000);
+DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_NETRONOME,	PCI_DEVICE_ID_NETRONOME_NFP6000,	quirk_nfp6000);
+DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_NETRONOME,	PCI_DEVICE_ID_NETRONOME_NFP6000_VF,	quirk_nfp6000);
+
 static void quirk_extend_bar_to_page(struct pci_dev *dev)
 {
 	int i;
@@ -233,14 +241,40 @@ static void quirk_s3_64M(struct pci_dev *dev)
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_S3,	PCI_DEVICE_ID_S3_868,		quirk_s3_64M);
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_S3,	PCI_DEVICE_ID_S3_968,		quirk_s3_64M);
 
+static void quirk_io(struct pci_dev *dev, int pos, unsigned size,
+		     const char *name)
+{
+	u32 region;
+	struct pci_bus_region bus_region;
+	struct resource *res = dev->resource + pos;
+
+	pci_read_config_dword(dev, PCI_BASE_ADDRESS_0 + (pos << 2), &region);
+
+	if (!region)
+		return;
+
+	res->name = pci_name(dev);
+	res->flags = region & ~PCI_BASE_ADDRESS_IO_MASK;
+	res->flags |=
+		(IORESOURCE_IO | IORESOURCE_PCI_FIXED | IORESOURCE_SIZEALIGN);
+	region &= ~(size - 1);
+
+	bus_region.start = region;
+	bus_region.end = region + size - 1;
+	pcibios_bus_to_resource(dev, res, &bus_region);
+
+	dev_info(&dev->dev, FW_BUG "%s quirk: reg 0x%x: %pR\n",
+		 name, PCI_BASE_ADDRESS_0 + (pos << 2), res);
+}
+
 static void quirk_cs5536_vsa(struct pci_dev *dev)
 {
 	static char *name = "CS5536 ISA bridge";
 
 	if (pci_resource_len(dev, 0) != 8) {
-		quirk_io(dev, 0,   8, name);	/* SMB */
-		quirk_io(dev, 1, 256, name);	/* GPIO */
-		quirk_io(dev, 2,  64, name);	/* MFGPT */
+		quirk_io(dev, 0,   8, name);	 
+		quirk_io(dev, 1, 256, name);	 
+		quirk_io(dev, 2,  64, name);	 
 		dev_info(&dev->dev, "%s bug detected (incorrect header); workaround applied\n",
 			 name);
 	}

@@ -521,6 +521,7 @@ struct user_struct {
 	 
 #else  
 	unsigned long unix_inflight;	 
+	atomic_long_t pipe_bufs;   
 
 #ifdef CONFIG_KEYS
 	struct key *uid_keyring;	 
@@ -543,6 +544,7 @@ struct user_struct {
 	unsigned long mq_bytes;	 
 #endif
 	unsigned long unix_inflight;	 
+	atomic_long_t pipe_bufs;   
 #ifdef CONFIG_KEYS
 	struct key *uid_keyring;	 
 	struct key *session_keyring;	 

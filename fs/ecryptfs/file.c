@@ -145,6 +145,15 @@ out:
 	return rc;
 }
 
+static int ecryptfs_mmap(struct file *file, struct vm_area_struct *vma)
+{
+	struct file *lower_file = ecryptfs_file_to_lower(file);
+	 
+	if (!lower_file->f_op->mmap)
+		return -ENODEV;
+	return generic_file_mmap(file, vma);
+}
+
 static int ecryptfs_open(struct inode *inode, struct file *file)
 {
 	int rc = 0;

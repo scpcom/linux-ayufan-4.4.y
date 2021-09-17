@@ -939,9 +939,16 @@ static void hub_activate(struct usb_hub *hub, enum hub_activation_type type)
 	bool need_debounce_delay = false;
 	unsigned delay;
 
-	if (type == HUB_INIT2)
-		goto init2;
-	if (type == HUB_INIT3)
+	if (type == HUB_INIT2 || type == HUB_INIT3) {
+		device_lock(hub->intfdev);
+
+		if (hub->disconnected) {
+			device_unlock(hub->intfdev);
+			kref_put(&hub->kref, hub_release);
+			return;
+		}
+		if (type == HUB_INIT2)
+			goto init2;
 		goto init3;
 	}
 	kref_get(&hub->kref);
@@ -1080,6 +1087,7 @@ static void hub_activate(struct usb_hub *hub, enum hub_activation_type type)
 			PREPARE_DELAYED_WORK(&hub->init_work, hub_init_func3);
 			schedule_delayed_work(&hub->init_work,
 					msecs_to_jiffies(delay));
+			device_unlock(hub->intfdev);
 			return;		 
 		} else {
 			msleep(delay);

@@ -1696,6 +1696,21 @@ bool tcp_prequeue(struct sock *sk, struct sk_buff *skb)
 }
 EXPORT_SYMBOL(tcp_prequeue);
 
+int tcp_filter(struct sock *sk, struct sk_buff *skb)
+{
+	struct tcphdr *th = (struct tcphdr *)skb->data;
+	unsigned int eaten = skb->len;
+	int err;
+
+	err = sk_filter_trim_cap(sk, skb, th->doff * 4);
+	if (!err) {
+		eaten -= skb->len;
+		TCP_SKB_CB(skb)->end_seq -= eaten;
+	}
+	return err;
+}
+EXPORT_SYMBOL(tcp_filter);
+
 int tcp_v4_rcv(struct sk_buff *skb)
 {
 	const struct iphdr *iph;
