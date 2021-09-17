@@ -1,0 +1,1 @@
+obj-$(CONFIG_SYNO_RAMDISK_INTEGRITY_CHECK) += hydrogen.o
