@@ -129,6 +129,7 @@
 #include <linux/inetdevice.h>
 #include <linux/cpu_rmap.h>
 #include <linux/static_key.h>
+#include <linux/synolib.h>
 
 #include "net-sysfs.h"
 
@@ -233,7 +234,7 @@ END:
 #define SYNO_VENDOR_MAC_FAIL        2
 int syno_get_dev_vendor_mac(const char *szDev, char *szMac)
 {
-	extern unsigned char grgbLanMac[CONFIG_SYNO_MAC_MAX][16];
+	extern unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
 #ifdef CONFIG_SYNO_INTERNAL_NETIF_NUM
 	extern unsigned long g_internal_netif_num;
 #endif /* CONFIG_SYNO_INTERNAL_NETIF_NUM */

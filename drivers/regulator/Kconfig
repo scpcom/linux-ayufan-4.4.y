@@ -520,6 +520,14 @@ config REGULATOR_AS3711
 	  This driver provides support for the voltage regulators on the
 	  AS3711 PMIC
 
+config REGULATOR_MV_VBUS
+  tristate "MV vbus voltage regulator"
+  depends on GPIOLIB && SYNO_LSP_ARMADA_2015_T1_1p7
+  help
+    This driver provides support for the voltage regulators on the
+    a380 VBUS. The driver supports suspend/resume toggling of VBUS
+    via gpio pins.
+
 config REGULATOR_ST_FLASHSS
 	tristate "STMicroelectronics FlashSS regulator"
 	depends on ARCH_STI && OF

@@ -95,26 +95,46 @@ static int mxs_phy_suspend(struct usb_phy *x, int suspend)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+static int mxs_phy_on_connect(struct usb_phy *phy, struct usb_device *udev)
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 static int mxs_phy_on_connect(struct usb_phy *phy,
 		enum usb_device_speed speed)
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 {
 	dev_dbg(phy->dev, "%s speed device has connected\n",
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+		(udev->speed == USB_SPEED_HIGH) ? "high" : "non-high");
+
+	if (udev->speed == USB_SPEED_HIGH)
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 		(speed == USB_SPEED_HIGH) ? "high" : "non-high");
 
 	if (speed == USB_SPEED_HIGH)
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 		writel(BM_USBPHY_CTRL_ENHOSTDISCONDETECT,
 		       phy->io_priv + HW_USBPHY_CTRL_SET);
 
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+static int mxs_phy_on_disconnect(struct usb_phy *phy, struct usb_device *udev)
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 static int mxs_phy_on_disconnect(struct usb_phy *phy,
 		enum usb_device_speed speed)
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 {
 	dev_dbg(phy->dev, "%s speed device has disconnected\n",
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+		(udev->speed == USB_SPEED_HIGH) ? "high" : "non-high");
+
+	if (udev->speed == USB_SPEED_HIGH)
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 		(speed == USB_SPEED_HIGH) ? "high" : "non-high");
 
 	if (speed == USB_SPEED_HIGH)
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 		writel(BM_USBPHY_CTRL_ENHOSTDISCONDETECT,
 		       phy->io_priv + HW_USBPHY_CTRL_CLR);
 

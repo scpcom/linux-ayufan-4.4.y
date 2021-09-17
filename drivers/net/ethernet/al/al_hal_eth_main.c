@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -47,6 +47,9 @@ met:
 #include "al_hal_eth_ec_regs.h"
 #include "al_hal_eth_mac_regs.h"
 #include "al_hal_unit_adapter_regs.h"
+#ifdef AL_ETH_SUPPORT_DDP
+#include "al_hal_eth_ddp_internal.h"
+#endif
 
 /* Number of clocks to stop the Tx MAC interface after getting out of EEE mode */
 #define AL_ETH_EEE_STOP_CNT		100000
@@ -105,30 +108,146 @@ met:
 #define AL_ETH_RX_L4_PROTO_IDX_MASK	0x1F
 #define AL_ETH_RX_L4_PROTO_IDX_SHIFT	8
 
+#define AL_ETH_RX_L3_OFFSET_SHIFT	9
+#define AL_ETH_RX_L3_OFFSET_MASK	(0x7f << AL_ETH_RX_L3_OFFSET_SHIFT)
 #define AL_ETH_RX_HASH_SHIFT		16
-#define AL_ETH_RX_HASH_MASK		(0xffff << AL_ETH_RX_HASH_SHIFT)
+#define AL_ETH_RX_HASH_MASK		(0xffff 	<< AL_ETH_RX_HASH_SHIFT)
 #define AL_S2M_DESC_LEN2_SHIFT		16
 #define AL_S2M_DESC_LEN2_MASK		(0xff << AL_S2M_DESC_LEN2_SHIFT)
 
 #define ETH_MAC_GEN_LED_CFG_BLINK_TIMER_VAL 5
 #define ETH_MAC_GEN_LED_CFG_ACT_TIMER_VAL 7
 
-/* Ethernet Rx completion descriptor */
-typedef struct {
-	uint32_t ctrl_meta;
-	uint32_t len;
-	uint32_t word2;
-	uint32_t word3;
-} al_eth_rx_cdesc;
+/* Tx VID Table*/
+#define AL_ETH_TX_VLAN_TABLE_UDMA_MASK		0xF
+#define AL_ETH_TX_VLAN_TABLE_FWD_TO_MAC		(1 << 4)
 
-struct al_eth_epe_p_reg_entry {
-	uint32_t data;
-	uint32_t mask;
-	uint32_t ctrl;
-};
+/* tx gpd defines */
+#define AL_ETH_TX_GPD_L3_PROTO_MASK		0x1f
+#define AL_ETH_TX_GPD_L3_PROTO_SHIFT		0
+#define AL_ETH_TX_GPD_L4_PROTO_MASK		0x1f
+#define AL_ETH_TX_GPD_L4_PROTO_SHIFT		5
+#define AL_ETH_TX_GPD_TUNNEL_CTRL_MASK		0x7
+#define AL_ETH_TX_GPD_TUNNEL_CTRL_SHIFT		10
+#define AL_ETH_TX_GPD_SRC_VLAN_CNT_MASK		0x3
+#define AL_ETH_TX_GPD_SRC_VLAN_CNT_SHIFT	13
+#define AL_ETH_TX_GPD_CAM_DATA_2_SHIFT		32
+#define AL_ETH_TX_GPD_CAM_MASK_2_SHIFT		32
+#define AL_ETH_TX_GPD_CAM_CTRL_VALID_SHIFT	31
+
+/* tx gcp defines */
+#define AL_ETH_TX_GCP_POLY_SEL_MASK		0x1
+#define AL_ETH_TX_GCP_POLY_SEL_SHIFT		0
+#define AL_ETH_TX_GCP_CRC32_BIT_COMP_MASK	0x1
+#define AL_ETH_TX_GCP_CRC32_BIT_COMP_SHIFT	1
+#define AL_ETH_TX_GCP_CRC32_BIT_SWAP_MASK	0x1
+#define AL_ETH_TX_GCP_CRC32_BIT_SWAP_SHIFT	2
+#define AL_ETH_TX_GCP_CRC32_BYTE_SWAP_MASK	0x1
+#define AL_ETH_TX_GCP_CRC32_BYTE_SWAP_SHIFT	3
+#define AL_ETH_TX_GCP_DATA_BIT_SWAP_MASK	0x1
+#define AL_ETH_TX_GCP_DATA_BIT_SWAP_SHIFT	4
+#define AL_ETH_TX_GCP_DATA_BYTE_SWAP_MASK	0x1
+#define AL_ETH_TX_GCP_DATA_BYTE_SWAP_SHIFT	5
+#define AL_ETH_TX_GCP_TRAIL_SIZE_MASK		0xF
+#define AL_ETH_TX_GCP_TRAIL_SIZE_SHIFT		6
+#define AL_ETH_TX_GCP_HEAD_SIZE_MASK		0xFF
+#define AL_ETH_TX_GCP_HEAD_SIZE_SHIFT		16
+#define AL_ETH_TX_GCP_HEAD_CALC_MASK		0x1
+#define AL_ETH_TX_GCP_HEAD_CALC_SHIFT		24
+#define AL_ETH_TX_GCP_MASK_POLARITY_MASK	0x1
+#define AL_ETH_TX_GCP_MASK_POLARITY_SHIFT	25
+
+#define AL_ETH_TX_GCP_OPCODE_1_MASK		0x3F
+#define AL_ETH_TX_GCP_OPCODE_1_SHIFT		0
+#define AL_ETH_TX_GCP_OPCODE_2_MASK		0x3F
+#define AL_ETH_TX_GCP_OPCODE_2_SHIFT		6
+#define AL_ETH_TX_GCP_OPCODE_3_MASK		0x3F
+#define AL_ETH_TX_GCP_OPCODE_3_SHIFT		12
+#define AL_ETH_TX_GCP_OPSEL_1_MASK		0xF
+#define AL_ETH_TX_GCP_OPSEL_1_SHIFT		0
+#define AL_ETH_TX_GCP_OPSEL_2_MASK		0xF
+#define AL_ETH_TX_GCP_OPSEL_2_SHIFT		4
+#define AL_ETH_TX_GCP_OPSEL_3_MASK		0xF
+#define AL_ETH_TX_GCP_OPSEL_3_SHIFT		8
+#define AL_ETH_TX_GCP_OPSEL_4_MASK		0xF
+#define AL_ETH_TX_GCP_OPSEL_4_SHIFT		12
+
+/*  Tx crc_chksum_replace defines */
+#define L4_CHECKSUM_DIS_AND_L3_CHECKSUM_DIS     0x00
+#define L4_CHECKSUM_DIS_AND_L3_CHECKSUM_EN      0x20
+#define L4_CHECKSUM_EN_AND_L3_CHECKSUM_DIS      0x40
+#define L4_CHECKSUM_EN_AND_L3_CHECKSUM_EN       0x60
+
+/* rx gpd defines */
+#define AL_ETH_RX_GPD_OUTER_L3_PROTO_MASK		0x1f
+#define AL_ETH_RX_GPD_OUTER_L3_PROTO_SHIFT		(3 + 0)
+#define AL_ETH_RX_GPD_OUTER_L4_PROTO_MASK		0x1f
+#define AL_ETH_RX_GPD_OUTER_L4_PROTO_SHIFT		(3 + 8)
+#define AL_ETH_RX_GPD_INNER_L3_PROTO_MASK		0x1f
+#define AL_ETH_RX_GPD_INNER_L3_PROTO_SHIFT		(3 + 16)
+#define AL_ETH_RX_GPD_INNER_L4_PROTO_MASK		0x1f
+#define AL_ETH_RX_GPD_INNER_L4_PROTO_SHIFT		(3 + 24)
+#define AL_ETH_RX_GPD_OUTER_PARSE_CTRL_MASK		0xFF
+#define AL_ETH_RX_GPD_OUTER_PARSE_CTRL_SHIFT	32
+#define AL_ETH_RX_GPD_INNER_PARSE_CTRL_MASK		0xFF
+#define AL_ETH_RX_GPD_INNER_PARSE_CTRL_SHIFT	40
+#define AL_ETH_RX_GPD_L3_PRIORITY_MASK			0xFF
+#define AL_ETH_RX_GPD_L3_PRIORITY_SHIFT			48
+#define AL_ETH_RX_GPD_L4_DST_PORT_LSB_MASK		0xFF
+#define AL_ETH_RX_GPD_L4_DST_PORT_LSB_SHIFT		56
+#define AL_ETH_RX_GPD_CAM_DATA_2_SHIFT			32
+#define AL_ETH_RX_GPD_CAM_MASK_2_SHIFT			32
+#define AL_ETH_RX_GPD_CAM_CTRL_VALID_SHIFT		31
+
+#define AL_ETH_RX_GPD_PARSE_RESULT_OUTER_L3_PROTO_IDX_OFFSET	(106 + 5)
+#define AL_ETH_RX_GPD_PARSE_RESULT_OUTER_L4_PROTO_IDX_OFFSET	(106 + 10)
+#define AL_ETH_RX_GPD_PARSE_RESULT_INNER_L3_PROTO_IDX_OFFSET	(0 + 5)
+#define AL_ETH_RX_GPD_PARSE_RESULT_INNER_L4_PROTO_IDX_OFFSET	(0 + 10)
+#define AL_ETH_RX_GPD_PARSE_RESULT_OUTER_PARSE_CTRL			(106 + 4)
+#define AL_ETH_RX_GPD_PARSE_RESULT_INNER_PARSE_CTRL			4
+#define AL_ETH_RX_GPD_PARSE_RESULT_L3_PRIORITY			(106 + 13)
+#define AL_ETH_RX_GPD_PARSE_RESULT_OUTER_L4_DST_PORT_LSB	(106 + 65)
+
+/* rx gcp defines */
+#define AL_ETH_RX_GCP_POLY_SEL_MASK		0x1
+#define AL_ETH_RX_GCP_POLY_SEL_SHIFT		0
+#define AL_ETH_RX_GCP_CRC32_BIT_COMP_MASK	0x1
+#define AL_ETH_RX_GCP_CRC32_BIT_COMP_SHIFT	1
+#define AL_ETH_RX_GCP_CRC32_BIT_SWAP_MASK	0x1
+#define AL_ETH_RX_GCP_CRC32_BIT_SWAP_SHIFT	2
+#define AL_ETH_RX_GCP_CRC32_BYTE_SWAP_MASK      0x1
+#define AL_ETH_RX_GCP_CRC32_BYTE_SWAP_SHIFT	3
+#define AL_ETH_RX_GCP_DATA_BIT_SWAP_MASK	0x1
+#define AL_ETH_RX_GCP_DATA_BIT_SWAP_SHIFT	4
+#define AL_ETH_RX_GCP_DATA_BYTE_SWAP_MASK       0x1
+#define AL_ETH_RX_GCP_DATA_BYTE_SWAP_SHIFT	5
+#define AL_ETH_RX_GCP_TRAIL_SIZE_MASK		0xF
+#define AL_ETH_RX_GCP_TRAIL_SIZE_SHIFT		6
+#define AL_ETH_RX_GCP_HEAD_SIZE_MASK		0xFF
+#define AL_ETH_RX_GCP_HEAD_SIZE_SHIFT		16
+#define AL_ETH_RX_GCP_HEAD_CALC_MASK		0x1
+#define AL_ETH_RX_GCP_HEAD_CALC_SHIFT		24
+#define AL_ETH_RX_GCP_MASK_POLARITY_MASK	0x1
+#define AL_ETH_RX_GCP_MASK_POLARITY_SHIFT	25
+
+#define AL_ETH_RX_GCP_OPCODE_1_MASK		0x3F
+#define AL_ETH_RX_GCP_OPCODE_1_SHIFT		0
+#define AL_ETH_RX_GCP_OPCODE_2_MASK		0x3F
+#define AL_ETH_RX_GCP_OPCODE_2_SHIFT		6
+#define AL_ETH_RX_GCP_OPCODE_3_MASK		0x3F
+#define AL_ETH_RX_GCP_OPCODE_3_SHIFT		12
+#define AL_ETH_RX_GCP_OPSEL_1_MASK		0xF
+#define AL_ETH_RX_GCP_OPSEL_1_SHIFT		0
+#define AL_ETH_RX_GCP_OPSEL_2_MASK		0xF
+#define AL_ETH_RX_GCP_OPSEL_2_SHIFT		4
+#define AL_ETH_RX_GCP_OPSEL_3_MASK		0xF
+#define AL_ETH_RX_GCP_OPSEL_3_SHIFT		8
+#define AL_ETH_RX_GCP_OPSEL_4_MASK		0xF
+#define AL_ETH_RX_GCP_OPSEL_4_SHIFT		12
 
 #define AL_ETH_MDIO_DELAY_PERIOD	1 /* micro seconds to wait when polling mdio status */
 #define AL_ETH_MDIO_DELAY_COUNT		150 /* number of times to poll */
+#define AL_ETH_S2M_UDMA_COMP_COAL_TIMEOUT	200 /* Rx descriptors coalescing timeout in SB clocks */
 
 #define AL_ETH_EPE_ENTRIES_NUM 26
 static struct al_eth_epe_p_reg_entry al_eth_epe_p_regs[AL_ETH_EPE_ENTRIES_NUM] = {
@@ -158,10 +277,6 @@ static struct al_eth_epe_p_reg_entry al_eth_epe_p_regs[AL_ETH_EPE_ENTRIES_NUM] =
 	{ 0x31B00, 0x7FF00, 0x80000017 },
 	{ 0x30400, 0x7FF00, 0x80000018 },
 	{ 0x0, 0x0, 0x8000001F }
-};
-
-struct al_eth_epe_control_entry {
-	uint32_t data[6];
 };
 
 static struct al_eth_epe_control_entry al_eth_epe_control_table[AL_ETH_EPE_ENTRIES_NUM] = {
@@ -194,6 +309,34 @@ static struct al_eth_epe_control_entry al_eth_epe_control_table[AL_ETH_EPE_ENTRI
 };
 
 #define AL_ETH_IS_1G_MAC(mac_mode) (((mac_mode) == AL_ETH_MAC_MODE_RGMII) || ((mac_mode) == AL_ETH_MAC_MODE_SGMII))
+#define AL_ETH_IS_10G_MAC(mac_mode)	(((mac_mode) == AL_ETH_MAC_MODE_10GbE_Serial) ||	\
+					((mac_mode) == AL_ETH_MAC_MODE_10G_SGMII) ||		\
+					((mac_mode) == AL_ETH_MAC_MODE_SGMII_2_5G))
+#define AL_ETH_IS_25G_MAC(mac_mode) ((mac_mode) == AL_ETH_MAC_MODE_KR_LL_25G)
+
+static const char *al_eth_mac_mode_str(enum al_eth_mac_mode mode)
+{
+	switch(mode) {
+	case AL_ETH_MAC_MODE_RGMII:
+		return "RGMII";
+	case AL_ETH_MAC_MODE_SGMII:
+		return "SGMII";
+	case AL_ETH_MAC_MODE_SGMII_2_5G:
+		return "SGMII_2_5G";
+	case AL_ETH_MAC_MODE_10GbE_Serial:
+		return "KR";
+        case AL_ETH_MAC_MODE_KR_LL_25G:
+		return "KR_LL_25G";
+	case AL_ETH_MAC_MODE_10G_SGMII:
+		return "10G_SGMII";
+	case AL_ETH_MAC_MODE_XLG_LL_40G:
+		return "40G_LL";
+	case AL_ETH_MAC_MODE_XLG_LL_50G:
+		return "50G_LL";
+	default:
+		return "N/A";
+	}
+}
 
 /**
  * change and wait udma state
@@ -221,13 +364,76 @@ static int al_udma_state_set_wait(struct al_udma *dma, enum al_udma_state new_st
 
 	do {
 		state = al_udma_state_get(dma);
+		if (state == expected_state)
+			break;
+		al_udelay(1);
 		if (count-- == 0) {
 			al_warn("[%s] warn: dma state didn't change to %s\n",
 				 dma->name, al_udma_states_name[new_state]);
 			return -ETIMEDOUT;
 		}
-	} while (state != expected_state);
+	} while (1);
 	return 0;
+}
+
+static void al_eth_epe_entry_set(struct al_hal_eth_adapter *adapter, uint32_t idx,
+		struct al_eth_epe_p_reg_entry *reg_entry,
+		struct al_eth_epe_control_entry *control_entry)
+{
+	al_reg_write32(&adapter->ec_regs_base->epe_p[idx].comp_data, reg_entry->data);
+	al_reg_write32(&adapter->ec_regs_base->epe_p[idx].comp_mask, reg_entry->mask);
+	al_reg_write32(&adapter->ec_regs_base->epe_p[idx].comp_ctrl, reg_entry->ctrl);
+
+	al_reg_write32(&adapter->ec_regs_base->msp_c[idx].p_comp_data, reg_entry->data);
+	al_reg_write32(&adapter->ec_regs_base->msp_c[idx].p_comp_mask, reg_entry->mask);
+	al_reg_write32(&adapter->ec_regs_base->msp_c[idx].p_comp_ctrl, reg_entry->ctrl);
+
+	/*control table  0*/
+	al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_addr, idx);
+	al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_data_6,
+			control_entry->data[5]);
+	al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_data_2,
+			control_entry->data[1]);
+	al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_data_3,
+			control_entry->data[2]);
+	al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_data_4,
+			control_entry->data[3]);
+	al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_data_5,
+			control_entry->data[4]);
+	al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_data_1,
+			control_entry->data[0]);
+
+	/*control table 1*/
+	al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_addr, idx);
+	al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_data_6,
+			control_entry->data[5]);
+	al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_data_2,
+			control_entry->data[1]);
+	al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_data_3,
+			control_entry->data[2]);
+	al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_data_4,
+			control_entry->data[3]);
+	al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_data_5,
+			control_entry->data[4]);
+	al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_data_1,
+			control_entry->data[0]);
+
+#ifdef AL_ETH_SUPPORT_MACSEC
+	/* macsec parser */
+	al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_addr, idx);
+	al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_data_6,
+			control_entry->data[5]);
+	al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_data_2,
+			control_entry->data[1]);
+	al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_data_3,
+			control_entry->data[2]);
+	al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_data_4,
+			control_entry->data[3]);
+	al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_data_5,
+			control_entry->data[4]);
+	al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_data_1,
+			control_entry->data[0]);
+#endif
 }
 
 static void al_eth_epe_init(struct al_hal_eth_adapter *adapter)
@@ -243,66 +449,16 @@ static void al_eth_epe_init(struct al_hal_eth_adapter *adapter)
 		al_reg_write32(&adapter->ec_regs_base->epe[1].res_def, 0x08000000);
 		al_reg_write32(&adapter->ec_regs_base->epe[1].res_in, 0x7);
 
+#ifdef AL_ETH_SUPPORT_MACSEC
 		al_reg_write32(&adapter->ec_regs_base->msp.p_res_def, 0x08000080);
 		al_reg_write32(&adapter->ec_regs_base->msp.p_res_in, 0x7);
+#endif
 
 		return;
 	}
 	al_dbg("eth [%s]: enable rx parser\n", adapter->name);
-	for (idx = 0; idx < AL_ETH_EPE_ENTRIES_NUM; idx++) {
-		al_reg_write32(&adapter->ec_regs_base->epe_p[idx].comp_data, al_eth_epe_p_regs[idx].data);
-		al_reg_write32(&adapter->ec_regs_base->epe_p[idx].comp_mask, al_eth_epe_p_regs[idx].mask);
-		al_reg_write32(&adapter->ec_regs_base->epe_p[idx].comp_ctrl, al_eth_epe_p_regs[idx].ctrl);
-
-		al_reg_write32(&adapter->ec_regs_base->msp_c[idx].p_comp_data, al_eth_epe_p_regs[idx].data);
-		al_reg_write32(&adapter->ec_regs_base->msp_c[idx].p_comp_mask, al_eth_epe_p_regs[idx].mask);
-		al_reg_write32(&adapter->ec_regs_base->msp_c[idx].p_comp_ctrl, al_eth_epe_p_regs[idx].ctrl);
-
-		/*control table  0*/
-		al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_addr, idx);
-		al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_data_6,
-						al_eth_epe_control_table[idx].data[5]);
-		al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_data_2,
-						al_eth_epe_control_table[idx].data[1]);
-		al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_data_3,
-						al_eth_epe_control_table[idx].data[2]);
-		al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_data_4,
-						al_eth_epe_control_table[idx].data[3]);
-		al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_data_5,
-						al_eth_epe_control_table[idx].data[4]);
-		al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_data_1,
-						al_eth_epe_control_table[idx].data[0]);
-
-		/*control table 1*/
-		al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_addr, idx);
-		al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_data_6,
-						al_eth_epe_control_table[idx].data[5]);
-		al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_data_2,
-						al_eth_epe_control_table[idx].data[1]);
-		al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_data_3,
-						al_eth_epe_control_table[idx].data[2]);
-		al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_data_4,
-						al_eth_epe_control_table[idx].data[3]);
-		al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_data_5,
-						al_eth_epe_control_table[idx].data[4]);
-		al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_data_1,
-						al_eth_epe_control_table[idx].data[0]);
-
-		/* macsec parser */
-		al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_addr, idx);
-		al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_data_6,
-						al_eth_epe_control_table[idx].data[5]);
-		al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_data_2,
-						al_eth_epe_control_table[idx].data[1]);
-		al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_data_3,
-						al_eth_epe_control_table[idx].data[2]);
-		al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_data_4,
-						al_eth_epe_control_table[idx].data[3]);
-		al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_data_5,
-						al_eth_epe_control_table[idx].data[4]);
-		al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_data_1,
-						al_eth_epe_control_table[idx].data[0]);
-	}
+	for (idx = 0; idx < AL_ETH_EPE_ENTRIES_NUM; idx++)
+		al_eth_epe_entry_set(adapter, idx, &al_eth_epe_p_regs[idx], &al_eth_epe_control_table[idx]);
 
 	al_reg_write32(&adapter->ec_regs_base->epe[0].res_def, 0x08000080);
 	al_reg_write32(&adapter->ec_regs_base->epe[0].res_in, 0x7);
@@ -310,16 +466,108 @@ static void al_eth_epe_init(struct al_hal_eth_adapter *adapter)
 	al_reg_write32(&adapter->ec_regs_base->epe[1].res_def, 0x08000080);
 	al_reg_write32(&adapter->ec_regs_base->epe[1].res_in, 0);
 
+#ifdef AL_ETH_SUPPORT_MACSEC
 	al_reg_write32(&adapter->ec_regs_base->msp.p_res_def, 0x08000080);
 	al_reg_write32(&adapter->ec_regs_base->msp.p_res_in, 0x7);
+#endif
 
 	/* header length as function of 4 bits value, for GRE, when C bit is set, the header len should be increase by 4*/
 	al_reg_write32(&adapter->ec_regs_base->epe_h[8].hdr_len, (4 << 16) | 4);
 
-	/* select the inner information when writing the rx descriptor (l3 protocol index etc) */
-	al_reg_write32(&adapter->ec_regs_base->rfw.meta, 0x3f);
+	/* select the outer information when writing the rx descriptor (l3 protocol index etc) */
+	al_reg_write32(&adapter->ec_regs_base->rfw.meta, EC_RFW_META_L3_LEN_CALC);
 
 	al_reg_write32(&adapter->ec_regs_base->rfw.checksum, EC_RFW_CHECKSUM_HDR_SEL);
+}
+
+/**
+ * read 40G MAC registers (indirect access)
+ *
+ * @param adapter pointer to the private structure
+ * @param reg_addr address in the an registers
+ *
+ * @return the register value
+ */
+static uint32_t al_eth_40g_mac_reg_read(
+			struct al_hal_eth_adapter *adapter,
+			uint32_t reg_addr)
+{
+	uint32_t val;
+
+	/* indirect access */
+	al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_40g_ll_addr, reg_addr);
+	val = al_reg_read32(&adapter->mac_regs_base->gen_v3.mac_40g_ll_data);
+
+	al_dbg("[%s]: %s - reg %d. val 0x%x",
+	       adapter->name, __func__, reg_addr, val);
+
+	return val;
+}
+
+/**
+ * write 40G MAC registers (indirect access)
+ *
+ * @param adapter pointer to the private structure
+ * @param reg_addr address in the an registers
+ * @param reg_data value to write to the register
+ *
+ */
+static void al_eth_40g_mac_reg_write(
+			struct al_hal_eth_adapter *adapter,
+			uint32_t reg_addr,
+			uint32_t reg_data)
+{
+	/* indirect access */
+	al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_40g_ll_addr, reg_addr);
+	al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_40g_ll_data, reg_data);
+
+	al_dbg("[%s]: %s - reg %d. val 0x%x",
+	       adapter->name, __func__, reg_addr, reg_data);
+}
+
+/**
+ * read 40G PCS registers (indirect access)
+ *
+ * @param adapter pointer to the private structure
+ * @param reg_addr address in the an registers
+ *
+ * @return the register value
+ */
+static uint32_t al_eth_40g_pcs_reg_read(
+			struct al_hal_eth_adapter *adapter,
+			uint32_t reg_addr)
+{
+	uint32_t val;
+
+	/* indirect access */
+	al_reg_write32(&adapter->mac_regs_base->gen_v3.pcs_40g_ll_addr, reg_addr);
+	val = al_reg_read32(&adapter->mac_regs_base->gen_v3.pcs_40g_ll_data);
+
+	al_dbg("[%s]: %s - reg %d. val 0x%x",
+	       adapter->name, __func__, reg_addr, val);
+
+	return val;
+}
+
+/**
+ * write 40G PCS registers (indirect access)
+ *
+ * @param adapter pointer to the private structure
+ * @param reg_addr address in the an registers
+ * @param reg_data value to write to the register
+ *
+ */
+void al_eth_40g_pcs_reg_write(
+			struct al_hal_eth_adapter *adapter,
+			uint32_t reg_addr,
+			uint32_t reg_data)
+{
+	/* indirect access */
+	al_reg_write32(&adapter->mac_regs_base->gen_v3.pcs_40g_ll_addr, reg_addr);
+	al_reg_write32(&adapter->mac_regs_base->gen_v3.pcs_40g_ll_data, reg_data);
+
+	al_dbg("[%s]: %s - reg %d. val 0x%x",
+	       adapter->name, __func__, reg_addr, reg_data);
 }
 
 /*****************************API Functions  **********************************/
@@ -398,8 +646,17 @@ int al_eth_adapter_init(struct al_hal_eth_adapter *adapter, struct al_eth_adapte
 	conf.max_pkt_size = 0xfffff;
 	al_udma_m2s_packet_size_cfg_set(&adapter->tx_udma, &conf);
 
-	/* set max descriptors to max data buffers number and one for meta desc */
+	/* set m2s (tx) max descriptors to max data buffers number and one for
+	 * meta descriptor
+	 */
 	al_udma_m2s_max_descs_set(&adapter->tx_udma, AL_ETH_PKT_MAX_BUFS + 1);
+
+	/* set s2m (rx) max descriptors to max data buffers */
+	al_udma_s2m_max_descs_set(&adapter->rx_udma, AL_ETH_PKT_MAX_BUFS);
+
+	/* set s2m burst lenght when writing completion descriptors to 64 bytes
+	 */
+	al_udma_s2m_compl_desc_burst_config(&adapter->rx_udma, 64);
 
 	/* if pointer to ec regs provided, then init the tx meta cache of this udma*/
 	if (adapter->ec_regs_base != NULL) {
@@ -457,8 +714,11 @@ int al_eth_adapter_init(struct al_hal_eth_adapter *adapter, struct al_eth_adapte
 	al_reg_write32(&adapter->ec_regs_base->rfw.vid_table_addr, 0x00000000);
 	/* VLAN table data*/
 	al_reg_write32(&adapter->ec_regs_base->rfw.vid_table_data, 0x00000000);
-	/* HASH config (select toeplitz and bits 7:0 of the thash result) */
-	al_reg_write32(&adapter->ec_regs_base->rfw.thash_cfg_1, 0x00000000);
+	/* HASH config (select toeplitz and bits 7:0 of the thash result, enable
+	 * symmetric hash) */
+	al_reg_write32(&adapter->ec_regs_base->rfw.thash_cfg_1,
+			EC_RFW_THASH_CFG_1_ENABLE_IP_SWAP |
+			EC_RFW_THASH_CFG_1_ENABLE_PORT_SWAP);
 
 	al_eth_epe_init(adapter);
 
@@ -495,7 +755,7 @@ int al_eth_ec_mac_ints_config(struct al_hal_eth_adapter *adapter)
 		INT_CONTROL_GRP_SET_ON_POSEDGE | INT_CONTROL_GRP_CLEAR_ON_READ);
 
 	/* unmask MAC int */
-	al_iofic_unmask(adapter->ec_ints_base, AL_INT_GROUP_A, 1);
+	al_iofic_unmask(adapter->ec_ints_base, AL_INT_GROUP_A, 8);
 
 	/* enable ec interrupts */
 	al_iofic_config(adapter->mac_ints_base, AL_INT_GROUP_A,
@@ -508,7 +768,7 @@ int al_eth_ec_mac_ints_config(struct al_hal_eth_adapter *adapter)
 		INT_CONTROL_GRP_SET_ON_POSEDGE | INT_CONTROL_GRP_CLEAR_ON_READ);
 
 	/* eee active */
-	al_iofic_unmask(adapter->mac_ints_base, AL_INT_GROUP_A, AL_BIT(12));
+	al_iofic_unmask(adapter->mac_ints_base, AL_INT_GROUP_B, AL_BIT(14));
 
 	al_iofic_unmask(adapter->unit_regs, AL_INT_GROUP_D, AL_BIT(11));
 	return 0;
@@ -621,6 +881,12 @@ int al_eth_queue_config(struct al_hal_eth_adapter *adapter, enum al_udma_type ty
 
 	rc = al_udma_q_init(udma, qid, q_params);
 
+	if (rc)
+		return rc;
+
+	if (type == UDMA_RX)
+		rc = al_udma_s2m_q_compl_coal_config(&udma->udma_q[qid],
+				AL_TRUE, AL_ETH_S2M_UDMA_COMP_COAL_TIMEOUT);
 	return rc;
 }
 
@@ -644,28 +910,33 @@ int al_eth_rx_pkt_limit_config(struct al_hal_eth_adapter *adapter, uint32_t min_
 
 	/* EC minimum packet length [bytes] in RX */
 	al_reg_write32(&adapter->ec_regs_base->mac.min_pkt, min_rx_len);
-	/* EC maximum packet length [bytes] in RX, reduce 8 bytes to make  */
+	/* EC maximum packet length [bytes] in RX */
 	al_reg_write32(&adapter->ec_regs_base->mac.max_pkt, max_rx_len);
 
-	/* configure the MAC's max rx length, add 8 bytes so the packet get
-	 * discarded by in EC rather by MAC
-	 */
-	if (AL_ETH_IS_1G_MAC(adapter->mac_mode)) {
-		al_reg_write32(&adapter->mac_regs_base->mac_1g.frm_len, max_rx_len + 8);
-	} else {
-		al_reg_write32(&adapter->mac_regs_base->mac_10g.frm_len, max_rx_len + 8);
+	if (adapter->rev_id > AL_ETH_REV_ID_2) {
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_1, min_rx_len);
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_2, max_rx_len);
 	}
+
+	/* configure the MAC's max rx length, add 16 bytes so the packet get
+	 * trimmed by the EC/Async_fifo rather by the MAC
+	*/
+	if (AL_ETH_IS_1G_MAC(adapter->mac_mode))
+		al_reg_write32(&adapter->mac_regs_base->mac_1g.frm_len, max_rx_len + 16);
+	else if (AL_ETH_IS_10G_MAC(adapter->mac_mode) || AL_ETH_IS_25G_MAC(adapter->mac_mode))
+		/* 10G MAC control register  */
+		al_reg_write32(&adapter->mac_regs_base->mac_10g.frm_len, (max_rx_len + 16));
+	else
+		al_eth_40g_mac_reg_write(adapter, ETH_MAC_GEN_V3_MAC_40G_FRM_LENGTH_ADDR, (max_rx_len + 16));
+
 	return 0;
 }
 
 /* configure the mac media type. */
 int al_eth_mac_config(struct al_hal_eth_adapter *adapter, enum al_eth_mac_mode mode)
 {
-	char * mode_str;
-
 	switch(mode) {
 	case AL_ETH_MAC_MODE_RGMII:
-		mode_str = "RGMII";
 		al_reg_write32(&adapter->mac_regs_base->gen.clk_cfg, 0x40003210);
 
 		/* 1G MAC control register */
@@ -708,7 +979,37 @@ int al_eth_mac_config(struct al_hal_eth_adapter *adapter, enum al_eth_mac_mode m
 		al_reg_write32(&adapter->mac_regs_base->gen.rgmii_sel, 0xF);
 		break;
 	case AL_ETH_MAC_MODE_SGMII:
-		mode_str = "SGMII";
+		if (adapter->rev_id > AL_ETH_REV_ID_2) {
+			/* configure and enable the ASYNC FIFO between the MACs and the EC */
+			/* TX min packet size */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_1, 0x00000037);
+			/* TX max packet size */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_2, 0x00002800);
+			/* TX input bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_3, 0x00000080);
+			/* TX output bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_4, 0x00030020);
+			/* TX Valid/ready configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_5, 0x00000121);
+			/* RX min packet size */
+			/* al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_1, 0x00000040); */
+			/* RX max packet size */
+			/* al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_2, 0x00002800); */
+			/* RX input bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_3, 0x00030020);
+			/* RX output bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_4, 0x00000080);
+			/* RX Valid/ready configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_5, 0x00000212);
+			/* V3 additional MAC selection */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_sel, 0x00000000);
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_10g_ll_cfg, 0x00000001);
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_10g_ll_ctrl, 0x00000000);
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.pcs_10g_ll_cfg, 0x00000000);
+			/* ASYNC FIFO ENABLE */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.afifo_ctrl, 0x00003333);
+		}
+
 		al_reg_write32(&adapter->mac_regs_base->gen.clk_cfg, 0x40053210);
 
 		/* 1G MAC control register */
@@ -762,49 +1063,95 @@ int al_eth_mac_config(struct al_hal_eth_adapter *adapter, enum al_eth_mac_mode m
 		/* Setting PCS i/f mode to SGMII (instead of default 1000Base-X) */
 		al_reg_write32(&adapter->mac_regs_base->sgmii.reg_addr, 0x00000014);
 		al_reg_write32(&adapter->mac_regs_base->sgmii.reg_data, 0x0000000b);
+		al_reg_write32_masked(&adapter->mac_regs_base->gen.led_cfg,
+				      ETH_MAC_GEN_LED_CFG_SEL_MASK,
+				      ETH_MAC_GEN_LED_CFG_SEL_DEFAULT_REG);
+		break;
+
+	case AL_ETH_MAC_MODE_SGMII_2_5G:
+		if (adapter->rev_id > AL_ETH_REV_ID_2) {
+			/* configure and enable the ASYNC FIFO between the MACs and the EC */
+			/* TX min packet size */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_1, 0x00000037);
+			/* TX max packet size */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_2, 0x00002800);
+			/* TX input bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_3, 0x00000080);
+			/* TX output bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_4, 0x00030020);
+			/* TX Valid/ready configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_5, 0x00000023);
+			/* RX input bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_3, 0x00030020);
+			/* RX output bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_4, 0x00000080);
+			/* RX Valid/ready configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_5, 0x00000012);
+			/* V3 additional MAC selection */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_sel, 0x00000000);
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_10g_ll_cfg, 0x00000000);
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_10g_ll_ctrl, 0x00000000);
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.pcs_10g_ll_cfg, 0x00000050);
+			/* ASYNC FIFO ENABLE */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.afifo_ctrl, 0x00003333);
+		}
+
+		/* MAC register file */
+		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x01022830);
+		/* XAUI MAC control register */
+		al_reg_write32(&adapter->mac_regs_base->gen.cfg, 0x00000001);
+		al_reg_write32(&adapter->mac_regs_base->mac_10g.if_mode, 0x00000028);
+		al_reg_write32(&adapter->mac_regs_base->mac_10g.control, 0x00001140);
+		/* RXAUI MAC control register */
+		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_32_64, 0x00000401);
+/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_out, 0x00000401); */
+		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_64_32, 0x00000401);
+/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_in, 0x00000401); */
+		al_reg_write32_masked(&adapter->mac_regs_base->gen.mux_sel,
+				      ~ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, 0x00063910);
+		al_reg_write32(&adapter->mac_regs_base->gen.clk_cfg, 0x40003210);
+		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x000004f0);
+		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x00000401);
 
 		al_reg_write32_masked(&adapter->mac_regs_base->gen.led_cfg,
 				      ETH_MAC_GEN_LED_CFG_SEL_MASK,
 				      ETH_MAC_GEN_LED_CFG_SEL_DEFAULT_REG);
 		break;
 
-	case AL_ETH_MAC_MODE_XAUI:
-		mode_str = "XAUI";
-		/* MAC register file */
-		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x01022830);
-		/* XAUI MAC control register */
-		al_reg_write32(&adapter->mac_regs_base->gen.cfg, 0x00000003);
-
-		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_32_64, 0x00000401);
-/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_out, 0x00000401); */
-		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_64_32, 0x00000401);
-/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_in, 0x00000401); */
-		al_reg_write32_masked(&adapter->mac_regs_base->gen.mux_sel, ~ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, 0x06883910);
-		al_reg_write32(&adapter->mac_regs_base->gen.clk_cfg, 0x10003210);
-		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x0000040f);
-		break;
-	case AL_ETH_MAC_MODE_RXAUI:
-		mode_str = "RXAUI";
-		/* MAC register file */
-		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x01022830);
-		/* XAUI MAC control register */
-		al_reg_write32(&adapter->mac_regs_base->gen.cfg, 0x0000000b);
-		/* RXAUI MAC control register */
-		al_reg_write32(&adapter->mac_regs_base->gen.rxaui_cfg, 0x00000005);
-		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_32_64, 0x00000401);
-/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_out, 0x00000401); */
-		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_64_32, 0x00000401);
-/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_in, 0x00000401); */
-		al_reg_write32_masked(&adapter->mac_regs_base->gen.mux_sel, ~ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, 0x002c3910);
-		al_reg_write32(&adapter->mac_regs_base->gen.clk_cfg, 0x0003210);
-		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x00000403);
-		break;
-
 	case AL_ETH_MAC_MODE_10GbE_Serial:
-		mode_str = "KR";
+		if (adapter->rev_id > AL_ETH_REV_ID_2) {
+			/* configure and enable the ASYNC FIFO between the MACs and the EC */
+			/* TX min packet size */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_1, 0x00000037);
+			/* TX max packet size */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_2, 0x00002800);
+			/* TX input bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_3, 0x00000080);
+			/* TX output bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_4, 0x00030020);
+			/* TX Valid/ready configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_5, 0x00000023);
+			/* RX min packet size */
+			/* al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_1, 0x00000040); */
+			/* RX max packet size */
+			/* al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_2, 0x00002800); */
+			/* RX input bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_3, 0x00030020);
+			/* RX output bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_4, 0x00000080);
+			/* RX Valid/ready configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_5, 0x00000012);
+			/* V3 additional MAC selection */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_sel, 0x00000000);
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_10g_ll_cfg, 0x00000000);
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_10g_ll_ctrl, 0x00000000);
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.pcs_10g_ll_cfg, 0x00000050);
+			/* ASYNC FIFO ENABLE */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.afifo_ctrl, 0x00003333);
+		}
 
 		/* MAC register file */
-		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x01022830);
+		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x01022810);
 		/* XAUI MAC control register */
 		al_reg_write32(&adapter->mac_regs_base->gen.cfg, 0x00000005);
 		/* RXAUI MAC control register */
@@ -823,11 +1170,65 @@ int al_eth_mac_config(struct al_hal_eth_adapter *adapter, enum al_eth_mac_mode m
 				      ETH_MAC_GEN_LED_CFG_SEL_MASK,
 				      ETH_MAC_GEN_LED_CFG_SEL_DEFAULT_REG);
 		break;
-	case AL_ETH_MAC_MODE_10G_SGMII:
-		mode_str = "10G_SGMII";
+
+	case AL_ETH_MAC_MODE_KR_LL_25G:
+			/* select 25G SERDES lane 0 and lane 1 */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.ext_serdes_ctrl, 0x00000003);
+		if (adapter->rev_id > AL_ETH_REV_ID_2) {
+			/* configure and enable the ASYNC FIFO between the MACs and the EC */
+			/* TX min packet size */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_1, 0x00000037);
+			/* TX max packet size */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_2, 0x00002800);
+			/* TX input bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_3, 0x00000080);
+			/* TX output bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_4, 0x00030020);
+			/* TX Valid/ready configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_5, 0x00000023);
+			/* RX min packet size */
+			/* al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_1, 0x00000040); */
+			/* RX max packet size */
+			/* al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_2, 0x00002800); */
+			/* RX input bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_3, 0x00030020);
+			/* RX output bus configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_4, 0x00000080);
+			/* RX Valid/ready configuration */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_5, 0x00000012);
+			/* V3 additional MAC selection */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_sel, 0x00000000);
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_10g_ll_cfg, 0x00000000);
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_10g_ll_ctrl, 0x00000000);
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.pcs_10g_ll_cfg, 0x000000a0);
+			/* ASYNC FIFO ENABLE */
+			al_reg_write32(&adapter->mac_regs_base->gen_v3.afifo_ctrl, 0x00003333);
+		}
 
 		/* MAC register file */
-		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x01022830);
+		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x01022810);
+		/* XAUI MAC control register */
+		al_reg_write32(&adapter->mac_regs_base->gen.cfg, 0x00000005);
+		/* RXAUI MAC control register */
+		al_reg_write32(&adapter->mac_regs_base->gen.rxaui_cfg, 0x00000007);
+		al_reg_write32(&adapter->mac_regs_base->gen.sd_cfg, 0x000001F1);
+		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_32_64, 0x00000401);
+/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_out, 0x00000401); */
+		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_64_32, 0x00000401);
+/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_in, 0x00000401); */
+		al_reg_write32_masked(&adapter->mac_regs_base->gen.mux_sel, ~ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, 0x00073910);
+		al_reg_write32(&adapter->mac_regs_base->gen.clk_cfg, 0x10003210);
+		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x000004f0);
+		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x00000401);
+
+		al_reg_write32_masked(&adapter->mac_regs_base->gen.led_cfg,
+				      ETH_MAC_GEN_LED_CFG_SEL_MASK,
+				      ETH_MAC_GEN_LED_CFG_SEL_DEFAULT_REG);
+		break;
+
+	case AL_ETH_MAC_MODE_10G_SGMII:
+		/* MAC register file */
+		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x01022810);
 
 		/* XAUI MAC control register */
 		al_reg_write32(&adapter->mac_regs_base->gen.cfg, 0x00000001);
@@ -855,12 +1256,158 @@ int al_eth_mac_config(struct al_hal_eth_adapter *adapter, enum al_eth_mac_mode m
 				      ETH_MAC_GEN_LED_CFG_SEL_DEFAULT_REG);
 		break;
 
+	case AL_ETH_MAC_MODE_XLG_LL_40G:
+		/* configure and enable the ASYNC FIFO between the MACs and the EC */
+		/* TX min packet size */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_1, 0x00000037);
+		/* TX max packet size */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_2, 0x00002800);
+		/* TX input bus configuration */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_3, 0x00000080);
+		/* TX output bus configuration */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_4, 0x00010040);
+		/* TX Valid/ready configuration */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_5, 0x00000023);
+		/* RX min packet size */
+		/* al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_1, 0x00000040); */
+		/* RX max packet size */
+		/* al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_2, 0x00002800); */
+		/* RX input bus configuration */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_3, 0x00010040);
+		/* RX output bus configuration */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_4, 0x00000080);
+		/* RX Valid/ready configuration */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_5, 0x00000112);
+		/* V3 additional MAC selection */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_sel, 0x00000010);
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_10g_ll_cfg, 0x00000000);
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_10g_ll_ctrl, 0x00000000);
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.pcs_10g_ll_cfg, 0x00000000);
+		/* ASYNC FIFO ENABLE */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.afifo_ctrl, 0x00003333);
+
+		/* cmd_cfg */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_40g_ll_addr, 0x00000008);
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_40g_ll_data, 0x01022810);
+		/* speed_ability //Read-Only */
+		/* al_reg_write32(&adapter->mac_regs_base->gen_v3.pcs_40g_ll_addr, 0x00000008); */
+		/* 40G capable */
+		/* al_reg_write32(&adapter->mac_regs_base->gen_v3.pcs_40g_ll_data, 0x00000002); */
+
+#ifdef AL_HAL_ETH_FAST_AN
+		al_eth_40g_pcs_reg_write(adapter, 0x00010004, 1023);
+		al_eth_40g_pcs_reg_write(adapter, 0x00000000, 0xA04c);
+		al_eth_40g_pcs_reg_write(adapter, 0x00000000, 0x204c);
+#endif
+
+		/* XAUI MAC control register */
+		al_reg_write32_masked(&adapter->mac_regs_base->gen.mux_sel, ~ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, 0x06883910);
+		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x0000040f);
+
+		/* MAC register file */
+/*		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x01022810); */
+		/* XAUI MAC control register */
+		al_reg_write32(&adapter->mac_regs_base->gen.cfg, 0x00000005);
+		/* RXAUI MAC control register */
+		al_reg_write32(&adapter->mac_regs_base->gen.rxaui_cfg, 0x00000007);
+		al_reg_write32(&adapter->mac_regs_base->gen.sd_cfg, 0x000001F1);
+		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_32_64, 0x00000401);
+/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_out, 0x00000401); */
+		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_64_32, 0x00000401);
+/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_in, 0x00000401); */
+/*		al_reg_write32_masked(&adapter->mac_regs_base->gen.mux_sel, ~ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, 0x00073910); *//* XLG_LL_40G change */
+		al_reg_write32(&adapter->mac_regs_base->gen.clk_cfg, 0x10003210);
+/*		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x000004f0); *//* XLG_LL_40G change */
+/*		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x00000401); *//* XLG_LL_40G change */
+
+		al_reg_write32_masked(&adapter->mac_regs_base->gen.led_cfg,
+				      ETH_MAC_GEN_LED_CFG_SEL_MASK,
+				      ETH_MAC_GEN_LED_CFG_SEL_DEFAULT_REG);
+		break;
+
+	case AL_ETH_MAC_MODE_XLG_LL_50G:
+
+		/* configure and enable the ASYNC FIFO between the MACs and the EC */
+		/* TX min packet size */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_1, 0x00000037);
+		/* TX max packet size */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_2, 0x00002800);
+		/* TX input bus configuration */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_3, 0x00000080);
+		/* TX output bus configuration */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_4, 0x00010040);
+		/* TX Valid/ready configuration */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.tx_afifo_cfg_5, 0x00000023);
+		/* RX min packet size */
+		/* al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_1, 0x00000040); */
+		/* RX max packet size */
+		/* al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_2, 0x00002800); */
+		/* RX input bus configuration */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_3, 0x00010040);
+		/* RX output bus configuration */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_4, 0x00000080);
+		/* RX Valid/ready configuration */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.rx_afifo_cfg_5, 0x00000112);
+		/* V3 additional MAC selection */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_sel, 0x00000010);
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_10g_ll_cfg, 0x00000000);
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_10g_ll_ctrl, 0x00000000);
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.pcs_10g_ll_cfg, 0x00000000);
+		/* ASYNC FIFO ENABLE */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.afifo_ctrl, 0x00003333);
+
+		/* cmd_cfg */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_40g_ll_addr, 0x00000008);
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.mac_40g_ll_data, 0x01022810);
+		/* speed_ability //Read-Only */
+		/* al_reg_write32(&adapter->mac_regs_base->gen_v3.pcs_40g_ll_addr, 0x00000008); */
+		/* 40G capable */
+		/* al_reg_write32(&adapter->mac_regs_base->gen_v3.pcs_40g_ll_data, 0x00000002); */
+
+			/* select the 25G serdes for lanes 0/1 */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.ext_serdes_ctrl, 0x0000000F);
+			/* configure the PCS to work with 2 lanes */
+		al_eth_40g_pcs_reg_write(adapter, 0x00010008, 0x0d81);
+			/* configure the PCS to work 32 bit interface */
+		al_reg_write32(&adapter->mac_regs_base->gen_v3.pcs_40g_ll_cfg, 0x00440000);
+
+#ifdef AL_HAL_ETH_FAST_AN
+		al_eth_40g_pcs_reg_write(adapter, 0x00010004, 1023);
+		al_eth_40g_pcs_reg_write(adapter, 0x00000000, 0xA04c);
+		al_eth_40g_pcs_reg_write(adapter, 0x00000000, 0x204c);
+#endif
+
+		/* XAUI MAC control register */
+		al_reg_write32_masked(&adapter->mac_regs_base->gen.mux_sel, ~ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, 0x06883910);
+		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x0000040f);
+
+		/* MAC register file */
+/*		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x01022810); */
+		/* XAUI MAC control register */
+		al_reg_write32(&adapter->mac_regs_base->gen.cfg, 0x00000005);
+		/* RXAUI MAC control register */
+		al_reg_write32(&adapter->mac_regs_base->gen.rxaui_cfg, 0x00000007);
+		al_reg_write32(&adapter->mac_regs_base->gen.sd_cfg, 0x000001F1);
+		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_32_64, 0x00000401);
+/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_out, 0x00000401); */
+		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_64_32, 0x00000401);
+/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_in, 0x00000401); */
+/*		al_reg_write32_masked(&adapter->mac_regs_base->gen.mux_sel, ~ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, 0x00073910); *//* XLG_LL_40G change */
+		al_reg_write32(&adapter->mac_regs_base->gen.clk_cfg, 0x10003210);
+/*		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x000004f0); *//* XLG_LL_40G change */
+/*		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x00000401); *//* XLG_LL_40G change */
+
+		al_reg_write32_masked(&adapter->mac_regs_base->gen.led_cfg,
+				      ETH_MAC_GEN_LED_CFG_SEL_MASK,
+				      ETH_MAC_GEN_LED_CFG_SEL_DEFAULT_REG);
+		break;
+
 	default:
 		al_err("Eth: unsupported MAC mode %d", mode);
 		return -EPERM;
 	}
 	adapter->mac_mode = mode;
-	al_info("configured MAC to %s mode:\n", mode_str);
+	al_info("configured MAC to %s mode:\n", al_eth_mac_mode_str(mode));
 
 	return 0;
 }
@@ -868,11 +1415,22 @@ int al_eth_mac_config(struct al_hal_eth_adapter *adapter, enum al_eth_mac_mode m
 /* start the mac */
 int al_eth_mac_start(struct al_hal_eth_adapter *adapter)
 {
-	if (AL_ETH_IS_1G_MAC(adapter->mac_mode))
+	if (AL_ETH_IS_1G_MAC(adapter->mac_mode)) {
 		/* 1G MAC control register */
 		al_reg_write32_masked(&adapter->mac_regs_base->mac_1g.cmd_cfg, 0x3, 0x3);
-	else	/* MAC register file */
+	} else if (AL_ETH_IS_10G_MAC(adapter->mac_mode) || AL_ETH_IS_25G_MAC(adapter->mac_mode)) {
+		/* 10G MAC control register  */
 		al_reg_write32_masked(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x3, 0x3);
+	} else {
+		uint32_t cmd_cfg;
+
+		cmd_cfg = al_eth_40g_mac_reg_read(adapter, ETH_MAC_GEN_V3_MAC_40G_COMMAND_CONFIG_ADDR);
+
+		cmd_cfg |= (ETH_MAC_GEN_V3_MAC_40G_COMMAND_CONFIG_TX_ENA |
+			    ETH_MAC_GEN_V3_MAC_40G_COMMAND_CONFIG_RX_ENA);
+
+		al_eth_40g_mac_reg_write(adapter, ETH_MAC_GEN_V3_MAC_40G_COMMAND_CONFIG_ADDR, cmd_cfg);
+	}
 
 	return 0;
 }
@@ -883,8 +1441,11 @@ int al_eth_mac_stop(struct al_hal_eth_adapter *adapter)
 	if (AL_ETH_IS_1G_MAC(adapter->mac_mode))
 		/* 1G MAC control register */
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.cmd_cfg, 0x0);
-	else	/* MAC register file */
+	else if (AL_ETH_IS_10G_MAC(adapter->mac_mode) || AL_ETH_IS_25G_MAC(adapter->mac_mode))
+		/* 10G MAC control register  */
 		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x0);
+	else
+		al_eth_40g_mac_reg_write(adapter, ETH_MAC_GEN_V3_MAC_40G_COMMAND_CONFIG_ADDR, 0);
 
 	return 0;
 }
@@ -1049,6 +1610,28 @@ int al_eth_mac_loopback_config(struct al_hal_eth_adapter *adapter, int enable)
 		else
 			reg &= ~AL_BIT(15);
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.cmd_cfg, reg);
+	} else if ((AL_ETH_IS_10G_MAC(adapter->mac_mode) || AL_ETH_IS_10G_MAC(adapter->mac_mode)) && (adapter->rev_id == AL_ETH_REV_ID_3)) {
+		uint32_t reg;
+		al_reg_write16(
+			(uint16_t *)&adapter->mac_regs_base->kr.pcs_addr, ETH_MAC_KR_PCS_CONTROL_1_ADDR);
+		reg = al_reg_read16(
+			(uint16_t *)&adapter->mac_regs_base->kr.pcs_data);
+		if (enable)
+			reg |= AL_BIT(14);
+		else
+			reg &= ~AL_BIT(14);
+		al_reg_write16(
+			(uint16_t *)&adapter->mac_regs_base->kr.pcs_addr, ETH_MAC_KR_PCS_CONTROL_1_ADDR);
+		al_reg_write16(
+			(uint16_t *)&adapter->mac_regs_base->kr.pcs_data, reg);
+	} else if (adapter->mac_mode == AL_ETH_MAC_MODE_XLG_LL_40G) {
+		uint32_t reg;
+		reg = al_eth_40g_pcs_reg_read(adapter, ETH_MAC_GEN_V3_PCS_40G_CONTROL_STATUS_ADDR);
+		if (enable)
+			reg |= AL_BIT(14);
+		else
+			reg &= ~AL_BIT(14);
+		al_eth_40g_pcs_reg_write(adapter, ETH_MAC_GEN_V3_PCS_40G_CONTROL_STATUS_ADDR, reg);
 	} else {
 		al_err("Eth: mac loopback not supported in this mode %d", adapter->mac_mode);
 		return -EPERM;
@@ -1121,6 +1704,9 @@ int al_eth_mdio_config(
 		case AL_ETH_REF_FREQ_500_MHZ:
 			ref_clk_freq_khz = 500000;
 			break;
+                case AL_ETH_REF_FREQ_428_MHZ:
+                        ref_clk_freq_khz = 428000;
+                        break;
 		};
 
 		val &= ~(0x1FF << 7);
@@ -1424,13 +2010,16 @@ al_dump_tx_pkt(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 	const char *l4_csum = (pkt->flags & AL_ETH_TX_FLAGS_L4_CSUM) ?
 	  ((pkt->flags & AL_ETH_TX_FLAGS_L4_PARTIAL_CSUM) ? "L4 PARTIAL CSUM" : "L4 FULL CSUM") : "";
 	const char *fcs = (pkt->flags & AL_ETH_TX_FLAGS_L2_DIS_FCS) ? "Disable FCS" : "";
-	char *l3_proto_name = "unknown";
-	char *l4_proto_name = "unknown";
+	const char *ptp = (pkt->flags & AL_ETH_TX_FLAGS_TS) ? "TX_PTP" : "";
+	const char *l3_proto_name = "unknown";
+	const char *l4_proto_name = "unknown";
+	const char *outer_l3_proto_name = "N/A";
+	const char *tunnel_mode = (pkt->tunnel_mode & AL_ETH_TUNNEL_NO_UDP) ? "TUNNEL" : "";
 	uint32_t total_len = 0;
 	int i;
 
-	al_dbg("[%s %d]: flags: %s %s %s %s\n", tx_dma_q->udma->name, tx_dma_q->qid,
-		tso, l3_csum, l4_csum, fcs);
+	al_dbg("[%s %d]: flags: %s %s %s %s %s %s\n", tx_dma_q->udma->name, tx_dma_q->qid,
+		 tso, l3_csum, l4_csum, fcs, ptp, tunnel_mode);
 
 	switch (pkt->l3_proto_idx) {
 	case AL_ETH_PROTO_ID_IPv4:
@@ -1443,6 +2032,7 @@ al_dump_tx_pkt(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 		l3_proto_name = "unknown";
 		break;
 	}
+
 	switch (pkt->l4_proto_idx) {
 	case AL_ETH_PROTO_ID_TCP:
 		l4_proto_name = "TCP";
@@ -1455,9 +2045,22 @@ al_dump_tx_pkt(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 		break;
 	}
 
-	al_dbg("[%s %d]: L3 proto: %d (%s). L4 proto: %d (%s). vlan source count %d. mod add %d. mod del %d\n",
+	switch (pkt->outer_l3_proto_idx) {
+	case AL_ETH_PROTO_ID_IPv4:
+		outer_l3_proto_name = "IPv4";
+		break;
+	case AL_ETH_PROTO_ID_IPv6:
+		outer_l3_proto_name = "IPv6";
+		break;
+	default:
+		outer_l3_proto_name = "N/A";
+		break;
+	}
+
+	al_dbg("[%s %d]: L3 proto: %d (%s). L4 proto: %d (%s). Outer_L3 proto: %d (%s). vlan source count %d. mod add %d. mod del %d\n",
 			tx_dma_q->udma->name, tx_dma_q->qid, pkt->l3_proto_idx,
 			l3_proto_name, pkt->l4_proto_idx, l4_proto_name,
+			pkt->outer_l3_proto_idx, outer_l3_proto_name,
 			pkt->source_vlan_count, pkt->vlan_mod_add_count,
 			pkt->vlan_mod_del_count);
 
@@ -1474,13 +2077,17 @@ al_dump_tx_pkt(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 				pkt->meta->l3_header_len, pkt->meta->l3_header_offset,
 				pkt->meta->l4_header_len,
 				pkt->meta->mss_idx_sel);
-		else
+		else {
+		const char *ptp_val = (pkt->flags & AL_ETH_TX_FLAGS_TS) ? "Yes" : "No";
 			al_dbg("[%s %d]: meta: store to cache %s. l3 hdr len %d. "
-			       "l3 hdr offset %d. l4 hdr len %d. mss val %d\n",
+		       "l3 hdr offset %d. l4 hdr len %d. mss val %d ts_index %d ts_val:%s \n",
 				tx_dma_q->udma->name, tx_dma_q->qid, store,
 				pkt->meta->l3_header_len, pkt->meta->l3_header_offset,
-				pkt->meta->l4_header_len,
-				pkt->meta->mss_val);
+			pkt->meta->l4_header_len,pkt->meta->mss_val,
+			pkt->meta->ts_index,ptp_val);
+		al_dbg("outer_l3_hdr_offset %d. outer_l3_len %d. \n",
+			pkt->meta->outer_l3_len, pkt->meta->outer_l3_offset);
+		}
 	}
 
 	al_dbg("[%s %d]: num of bufs: %d\n", tx_dma_q->udma->name, tx_dma_q->qid,
@@ -1493,6 +2100,7 @@ al_dump_tx_pkt(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 	al_dbg("[%s %d]: total len: 0x%08x\n", tx_dma_q->udma->name, tx_dma_q->qid, total_len);
 
 }
+
 /* TX */
 /**
  * add packet to transmission queue
@@ -1603,6 +2211,7 @@ int al_eth_tx_pkt_prepare(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 			}
 		}
 
+#ifdef AL_ETH_SUPPORT_MACSEC
 		if (pkt->meta->words_valid & 8) {
 		/* MacSec packets */
 		if (pkt->flags & AL_ETH_TX_FLAGS_L2_MACSEC_PKT) { /* pkt is macsec protected */
@@ -1613,13 +2222,18 @@ int al_eth_tx_pkt_prepare(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 				meta_word_3 |= pkt->macsec_secured_pyld_len	<< AL_ETH_TX_MACSEC_SECURED_PYLD_LEN_LSB_SHIFT;
 			}
 		}
-
+#endif
 		tx_desc->tx_meta.len_ctrl = swap32_to_le(meta_word_0);
 		tx_desc->tx_meta.meta_ctrl = swap32_to_le(meta_word_1);
 		tx_desc->tx_meta.meta1 = swap32_to_le(meta_word_2);
 		tx_desc->tx_meta.meta2 = swap32_to_le(meta_word_3);
 		al_dump_tx_desc(tx_desc);
 	}
+
+#ifdef AL_ETH_SUPPORT_DDP
+	if (pkt->ext_meta_data != NULL)
+		al_eth_ddp_ext_metadata_create(tx_dma_q, &flags, pkt->ext_meta_data);
+#endif
 
 	meta_ctrl = pkt->flags & AL_ETH_TX_PKT_META_FLAGS;
 
@@ -1642,14 +2256,15 @@ int al_eth_tx_pkt_prepare(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 
 	if (tx_dma_q->rev_id > AL_ETH_REV_ID_0) {
 		meta_ctrl |= pkt->tunnel_mode << AL_ETH_TX_TUNNEL_MODE_SHIFT;
-		if (pkt->outer_l3_proto_idx == AL_ETH_PROTO_ID_IPv6)
+		if (pkt->outer_l3_proto_idx == AL_ETH_PROTO_ID_IPv4)
 			meta_ctrl |= 1 << AL_ETH_TX_OUTER_L3_PROTO_SHIFT;
 	}
 
 	flags |= pkt->flags & AL_ETH_TX_PKT_UDMA_FLAGS;
 	for(buf_idx = 0; buf_idx < pkt->num_of_bufs; buf_idx++ ) {
 		uint32_t flags_len = flags;
-				tx_desc = al_udma_desc_get(tx_dma_q);
+
+		tx_desc = al_udma_desc_get(tx_dma_q);
 		/* get ring id, and clear FIRST and Int flags */
 		ring_id = al_udma_ring_id_get(tx_dma_q) <<
 			AL_M2S_DESC_RING_ID_SHIFT;
@@ -1722,20 +2337,75 @@ int al_eth_tso_mss_config(struct al_hal_eth_adapter *adapter, uint8_t idx, uint3
 void al_eth_rx_desc_config(
 			struct al_hal_eth_adapter *adapter,
 			enum al_eth_rx_desc_lro_context_val_res lro_sel,
+			enum al_eth_rx_desc_l4_offset_sel l4_offset_sel,
+			enum al_eth_rx_desc_l3_offset_sel l3_offset_sel,
 			enum al_eth_rx_desc_l4_chk_res_sel l4_sel,
-			enum al_eth_rx_desc_l3_chk_res_sel l3_sel)
+			enum al_eth_rx_desc_l3_chk_res_sel l3_sel,
+			enum al_eth_rx_desc_l3_proto_idx_sel l3_proto_sel,
+			enum al_eth_rx_desc_l4_proto_idx_sel l4_proto_sel,
+			enum al_eth_rx_desc_frag_sel frag_sel)
 {
 	uint32_t reg_val = 0;
 
 	reg_val |= (lro_sel == AL_ETH_L4_OFFSET) ?
 			EC_RFW_CFG_A_0_LRO_CONTEXT_SEL : 0;
 
-	reg_val |= (l4_sel == AL_ETH_l4_INNER_OUTER_CHK) ?
+	reg_val |= (l4_sel == AL_ETH_L4_INNER_OUTER_CHK) ?
 			EC_RFW_CFG_A_0_META_L4_CHK_RES_SEL : 0;
 
 	reg_val |= l3_sel << EC_RFW_CFG_A_0_META_L3_CHK_RES_SEL_SHIFT;
 
 	al_reg_write32(&adapter->ec_regs_base->rfw.cfg_a_0, reg_val);
+
+	reg_val = al_reg_read32(&adapter->ec_regs_base->rfw.meta);
+	if (l3_proto_sel == AL_ETH_L3_PROTO_IDX_INNER)
+		reg_val |= EC_RFW_META_L3_PROT_SEL;
+	else
+		reg_val &= ~EC_RFW_META_L3_PROT_SEL;
+
+	if (l4_proto_sel == AL_ETH_L4_PROTO_IDX_INNER)
+		reg_val |= EC_RFW_META_L4_PROT_SEL;
+	else
+		reg_val &= ~EC_RFW_META_L4_PROT_SEL;
+
+	if (l4_offset_sel == AL_ETH_L4_OFFSET_INNER)
+		reg_val |= EC_RFW_META_L4_OFFSET_SEL;
+	else
+		reg_val &= ~EC_RFW_META_L4_OFFSET_SEL;
+
+	if (l3_offset_sel == AL_ETH_L3_OFFSET_INNER)
+		reg_val |= EC_RFW_META_L3_OFFSET_SEL;
+	else
+		reg_val &= ~EC_RFW_META_L3_OFFSET_SEL;
+
+	if (frag_sel == AL_ETH_FRAG_INNER)
+		reg_val |= EC_RFW_META_FRAG_SEL;
+	else
+		reg_val &= ~EC_RFW_META_FRAG_SEL;
+
+	al_reg_write32(&adapter->ec_regs_base->rfw.meta, reg_val);
+}
+
+/**
+ * Configure RX header split
+ */
+int al_eth_rx_header_split_config(struct al_hal_eth_adapter *adapter, al_bool enable, uint32_t header_len)
+{
+	uint32_t	reg;
+
+	if (adapter->rev_id < AL_ETH_REV_ID_1) {
+		al_err("[%s]: header split feature not supported by this revision\n", adapter->name);
+		return -EINVAL;
+	}
+	reg = al_reg_read32(&adapter->ec_regs_base->rfw.hdr_split);
+	if (enable == AL_TRUE)
+		reg |= EC_RFW_HDR_SPLIT_EN;
+	else
+		reg &= ~EC_RFW_HDR_SPLIT_EN;
+
+	AL_REG_FIELD_SET(reg, EC_RFW_HDR_SPLIT_DEF_LEN_MASK, EC_RFW_HDR_SPLIT_DEF_LEN_SHIFT, header_len);
+	al_reg_write32(&adapter->ec_regs_base->rfw.hdr_split, reg);
+	return 0;
 }
 
 /**
@@ -1761,15 +2431,15 @@ int al_eth_rx_buffer_add(struct al_udma_q *rx_dma_q,
 #endif
 	rx_desc = al_udma_desc_get(rx_dma_q);
 
-	flags_len |= al_udma_ring_id_get(rx_dma_q) << AL_M2S_DESC_RING_ID_SHIFT;
-	flags_len |= buf->len & AL_M2S_DESC_LEN_MASK;
+	flags_len |= al_udma_ring_id_get(rx_dma_q) << AL_S2M_DESC_RING_ID_SHIFT;
+	flags_len |= buf->len & AL_S2M_DESC_LEN_MASK;
 
 	if (flags & AL_ETH_RX_FLAGS_DUAL_BUF) {
 		al_assert(header_buf != NULL); /*header valid in dual buf */
 		al_assert(AL_ADDR_HIGH(buf->addr) == AL_ADDR_HIGH(header_buf->addr)); /* high bits of addresses must be the same */
 
-		flags_len |= (header_buf->len << AL_M2S_DESC_LEN_SHIFT) &
-			AL_M2S_DESC_LEN_MASK;
+		flags_len |= (header_buf->len << AL_S2M_DESC_LEN_SHIFT) &
+			AL_S2M_DESC_LEN_MASK;
 		rx_desc->rx.buf2_ptr_lo = swap32_to_le(AL_ADDR_LOW(header_buf->addr));
 	}
 	rx_desc->rx.len_ctrl = swap32_to_le(flags_len);
@@ -1804,7 +2474,7 @@ uint32_t al_eth_pkt_rx(struct al_udma_q *rx_dma_q, struct al_eth_pkt *pkt)
 	if (rc == 0)
 		return 0;
 
-	al_assert(rc < AL_ETH_PKT_MAX_BUFS);
+	al_assert(rc <= AL_ETH_PKT_MAX_BUFS);
 
 	al_dbg("[%s]: fetch rx packet: queue %d.\n",
 		 rx_dma_q->udma->name, rx_dma_q->qid);
@@ -1816,12 +2486,12 @@ uint32_t al_eth_pkt_rx(struct al_udma_q *rx_dma_q, struct al_eth_pkt *pkt)
 		rx_desc = (al_eth_rx_cdesc *)al_cdesc_next(rx_dma_q, cdesc, i);
 
 		len = swap32_from_le(rx_desc->len);
-#if 0
-		if (i == 0)
+
+		if ((i == 0) && (swap32_from_le(rx_desc->word2) & AL_UDMA_CDESC_BUF2_USED))
 			pkt->rx_header_len = (len & AL_S2M_DESC_LEN2_MASK) >>
 				AL_S2M_DESC_LEN2_SHIFT;
-#endif
-		pkt->bufs[i].len = len & AL_M2S_DESC_LEN_MASK;
+
+		pkt->bufs[i].len = len & AL_S2M_DESC_LEN_MASK;
 	}
 	/* get flags from last desc */
 	pkt->flags = swap32_from_le(rx_desc->ctrl_meta);
@@ -1836,7 +2506,9 @@ uint32_t al_eth_pkt_rx(struct al_udma_q *rx_dma_q, struct al_eth_pkt *pkt)
 	pkt->l4_proto_idx = (pkt->flags >> AL_ETH_RX_L4_PROTO_IDX_SHIFT) & AL_ETH_RX_L4_PROTO_IDX_MASK;
 	pkt->rxhash = (swap32_from_le(rx_desc->len) & AL_ETH_RX_HASH_MASK) >>
 		AL_ETH_RX_HASH_SHIFT;
+	pkt->l3_offset = (swap32_from_le(rx_desc->word2) & AL_ETH_RX_L3_OFFSET_MASK) >> AL_ETH_RX_L3_OFFSET_SHIFT;
 
+#ifdef AL_ETH_SUPPORT_MACSEC
 	/* update MacSec related info */
 	pkt->macsec_rx_flags = (swap32_from_le(rx_desc->word3) & AL_ETH_MACSEC_RX_FLAGS_MASK) >>
 						AL_ETH_MACSEC_RX_FLAGS_LSB_SHIFT;
@@ -1850,15 +2522,33 @@ uint32_t al_eth_pkt_rx(struct al_udma_q *rx_dma_q, struct al_eth_pkt *pkt)
 		pkt->macsec_sign		= (pkt->macsec_rx_flags & AL_ETH_MACSEC_RX_FLAGS_IS_SIGNED_MASK) >>
 							AL_ETH_MACSEC_RX_FLAGS_IS_SIGNED_SHIFT;
 	}
+#endif
 
 	al_udma_cdesc_ack(rx_dma_q, rc);
 	return rc;
 }
 
-int al_eth_thash_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint32_t entry)
+int al_eth_rx_parser_entry_update(struct al_hal_eth_adapter *adapter, uint32_t idx,
+		struct al_eth_epe_p_reg_entry *reg_entry,
+		struct al_eth_epe_control_entry *control_entry)
 {
+	al_eth_epe_entry_set(adapter, idx, reg_entry, control_entry);
+	return 0;
+}
 
+#define AL_ETH_THASH_UDMA_SHIFT		0
+#define AL_ETH_THASH_UDMA_MASK		(0xF << AL_ETH_THASH_UDMA_SHIFT)
+
+#define AL_ETH_THASH_Q_SHIFT		4
+#define AL_ETH_THASH_Q_MASK		(0x3 << AL_ETH_THASH_Q_SHIFT)
+
+int al_eth_thash_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint8_t udma, uint32_t queue)
+{
+	uint32_t entry;
 	al_assert(idx < AL_ETH_RX_THASH_TABLE_SIZE); /*valid THASH index*/
+
+	entry = (udma << AL_ETH_THASH_UDMA_SHIFT) & AL_ETH_THASH_UDMA_MASK;
+	entry |= (queue << AL_ETH_THASH_Q_SHIFT) & AL_ETH_THASH_Q_MASK;
 
 	al_reg_write32(&adapter->ec_regs_base->rfw.thash_table_addr, idx);
 	al_reg_write32(&adapter->ec_regs_base->rfw.thash_table_data, entry);
@@ -1882,6 +2572,7 @@ static uint32_t	al_eth_fwd_ctrl_entry_to_val(struct al_eth_fwd_ctrl_table_entry 
 	AL_REG_FIELD_SET(val,  AL_FIELD_MASK(7,4), 4, entry->queue_sel_1);
 	AL_REG_FIELD_SET(val,  AL_FIELD_MASK(9,8), 8, entry->queue_sel_2);
 	AL_REG_FIELD_SET(val,  AL_FIELD_MASK(13,10), 10, entry->udma_sel);
+	AL_REG_FIELD_SET(val,  AL_FIELD_MASK(18,15), 15, entry->hdr_split_len_sel);
 	AL_REG_BIT_VAL_SET(val, 19, !!(entry->filter == AL_TRUE));
 
 	return val;
@@ -2142,7 +2833,7 @@ int al_eth_fwd_dscp_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, 
 int al_eth_fwd_tc_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint8_t prio)
 {
 
-	al_assert(idx < AL_ETH_FWD_DSCP_TABLE_NUM); /* valid TC index */
+	al_assert(idx < AL_ETH_FWD_TC_TABLE_NUM); /* valid TC index */
 
 	al_reg_write32(&adapter->ec_regs_base->rfw.tc_table_addr, idx);
 	al_reg_write32(&adapter->ec_regs_base->rfw.tc_table_data, prio);
@@ -2216,7 +2907,7 @@ int al_eth_switching_config_set(struct al_hal_eth_adapter *adapter, uint8_t udma
 	AL_ETH_RFW_FILTER_VLAN_VID | \
 	AL_ETH_RFW_FILTER_CTRL_TABLE | \
 	AL_ETH_RFW_FILTER_PROT_INDEX | \
-	((rev_id > AL_ETH_REV_ID_0) ? (AL_ETH_RFW_FILTER_WOL) : 0))
+	((rev_id > AL_ETH_REV_ID_0) ? ((AL_ETH_RFW_FILTER_WOL) | (AL_ETH_RFW_FILTER_PARSE)) : 0))
 
 /* Configure the receive filters */
 int al_eth_filter_config(struct al_hal_eth_adapter *adapter, struct al_eth_filter_params *params)
@@ -2299,6 +2990,37 @@ int al_eth_flow_control_config(struct al_hal_eth_adapter *adapter, struct al_eth
 	switch(params->type){
 	case AL_ETH_FLOW_CONTROL_TYPE_LINK_PAUSE:
 		al_dbg("[%s]: config flow control to link pause mode.\n", adapter->name);
+
+		/* config the mac */
+		if (AL_ETH_IS_1G_MAC(adapter->mac_mode)) {
+			/* set quanta value */
+			al_reg_write32(
+				&adapter->mac_regs_base->mac_1g.pause_quant,
+				params->quanta);
+			al_reg_write32(
+				&adapter->ec_regs_base->efc.xoff_timer_1g,
+				params->quanta_th);
+
+		} else if (AL_ETH_IS_10G_MAC(adapter->mac_mode) || AL_ETH_IS_25G_MAC(adapter->mac_mode)) {
+			/* set quanta value */
+			al_reg_write32(
+				&adapter->mac_regs_base->mac_10g.cl01_pause_quanta,
+				params->quanta);
+			/* set quanta threshold value */
+			al_reg_write32(
+				&adapter->mac_regs_base->mac_10g.cl01_quanta_thresh,
+				params->quanta_th);
+		} else {
+			/* set quanta value */
+			al_eth_40g_mac_reg_write(adapter,
+				ETH_MAC_GEN_V3_MAC_40G_CL01_PAUSE_QUANTA_ADDR,
+				params->quanta);
+			/* set quanta threshold value */
+			al_eth_40g_mac_reg_write(adapter,
+				ETH_MAC_GEN_V3_MAC_40G_CL01_QUANTA_THRESH_ADDR,
+				params->quanta_th);
+		}
+
 		if (params->obay_enable == AL_TRUE)
 			/* Tx path FIFO, unmask pause_on from MAC when PAUSE packet received */
 			al_reg_write32(&adapter->ec_regs_base->efc.ec_pause, 1);
@@ -2333,27 +3055,6 @@ int al_eth_flow_control_config(struct al_hal_eth_adapter *adapter, struct al_eth
 			else
 				al_reg_write32(&adapter->ec_regs_base->fc_udma[i].q_xoff_0, 0);
 		}
-
-		/* config the mac */
-		if (AL_ETH_IS_1G_MAC(adapter->mac_mode)) {
-			/* set quanta value */
-			al_reg_write32(
-				&adapter->mac_regs_base->mac_1g.pause_quant,
-				params->quanta);
-			al_reg_write32(
-				&adapter->ec_regs_base->efc.xoff_timer_1g,
-				params->quanta_th);
-
-		} else {
-			/* set quanta value */
-			al_reg_write32(
-				&adapter->mac_regs_base->mac_10g.cl01_pause_quanta,
-				params->quanta);
-			/* set quanta threshold value */
-			al_reg_write32(
-				&adapter->mac_regs_base->mac_10g.cl01_quanta_thresh,
-				params->quanta_th);
-		}
 	break;
 	case AL_ETH_FLOW_CONTROL_TYPE_PFC:
 		al_dbg("[%s]: config flow control to PFC mode.\n", adapter->name);
@@ -2370,7 +3071,7 @@ int al_eth_flow_control_config(struct al_hal_eth_adapter *adapter, struct al_eth
 					al_reg_write32(&adapter->ec_regs_base->fc_udma[i].q_pause_0 + prio,
 							0);
 
-				if ((adapter->rev_id > AL_ETH_REV_ID_0) && (params->gen_enable == AL_TRUE))
+				if (params->gen_enable == AL_TRUE)
 					al_reg_write32(&adapter->ec_regs_base->fc_udma[i].q_xoff_0 + prio,
 							params->prio_q_map[i][prio]);
 				else
@@ -2389,32 +3090,67 @@ int al_eth_flow_control_config(struct al_hal_eth_adapter *adapter, struct al_eth
 		/* set hysteresis mode thresholds */
 		al_reg_write32(&adapter->ec_regs_base->efc.rx_fifo_hyst, params->rx_fifo_th_low | (params->rx_fifo_th_high << EC_EFC_RX_FIFO_HYST_TH_HIGH_SHIFT));
 
-		/* config the mac */
-		/* set quanta value (same value for all prios) */
-		reg = params->quanta | (params->quanta << 16);
-		al_reg_write32(
-			&adapter->mac_regs_base->mac_10g.cl01_pause_quanta, reg);
-		al_reg_write32(
-			&adapter->mac_regs_base->mac_10g.cl23_pause_quanta, reg);
-		al_reg_write32(
-			&adapter->mac_regs_base->mac_10g.cl45_pause_quanta, reg);
-		al_reg_write32(
-			&adapter->mac_regs_base->mac_10g.cl67_pause_quanta, reg);
-		/* set quanta threshold value (same value for all prios) */
-		reg = params->quanta_th | (params->quanta_th << 16);
-		al_reg_write32(
-			&adapter->mac_regs_base->mac_10g.cl01_quanta_thresh, reg);
-		al_reg_write32(
-			&adapter->mac_regs_base->mac_10g.cl23_quanta_thresh, reg);
-		al_reg_write32(
-			&adapter->mac_regs_base->mac_10g.cl45_quanta_thresh, reg);
-		al_reg_write32(
-			&adapter->mac_regs_base->mac_10g.cl67_quanta_thresh, reg);
+		if (AL_ETH_IS_10G_MAC(adapter->mac_mode) || AL_ETH_IS_25G_MAC(adapter->mac_mode)) {
+			/* config the 10g_mac */
+			/* set quanta value (same value for all prios) */
+			reg = params->quanta | (params->quanta << 16);
+			al_reg_write32(
+				&adapter->mac_regs_base->mac_10g.cl01_pause_quanta, reg);
+			al_reg_write32(
+				&adapter->mac_regs_base->mac_10g.cl23_pause_quanta, reg);
+			al_reg_write32(
+				&adapter->mac_regs_base->mac_10g.cl45_pause_quanta, reg);
+			al_reg_write32(
+				&adapter->mac_regs_base->mac_10g.cl67_pause_quanta, reg);
+			/* set quanta threshold value (same value for all prios) */
+			reg = params->quanta_th | (params->quanta_th << 16);
+			al_reg_write32(
+				&adapter->mac_regs_base->mac_10g.cl01_quanta_thresh, reg);
+			al_reg_write32(
+				&adapter->mac_regs_base->mac_10g.cl23_quanta_thresh, reg);
+			al_reg_write32(
+				&adapter->mac_regs_base->mac_10g.cl45_quanta_thresh, reg);
+			al_reg_write32(
+				&adapter->mac_regs_base->mac_10g.cl67_quanta_thresh, reg);
 
-		/* enable PFC in the MAC */
-		reg = al_reg_read32(&adapter->mac_regs_base->mac_10g.cmd_cfg);
-		reg |= 1 << 19;
-		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, reg);
+			/* enable PFC in the 10g_MAC */
+			reg = al_reg_read32(&adapter->mac_regs_base->mac_10g.cmd_cfg);
+			reg |= 1 << 19;
+			al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, reg);
+		} else {
+			/* config the 40g_mac */
+			/* set quanta value (same value for all prios) */
+			reg = params->quanta | (params->quanta << 16);
+			al_eth_40g_mac_reg_write(adapter,
+				ETH_MAC_GEN_V3_MAC_40G_CL01_PAUSE_QUANTA_ADDR, reg);
+			al_eth_40g_mac_reg_write(adapter,
+				ETH_MAC_GEN_V3_MAC_40G_CL23_PAUSE_QUANTA_ADDR, reg);
+			al_eth_40g_mac_reg_write(adapter,
+				ETH_MAC_GEN_V3_MAC_40G_CL45_PAUSE_QUANTA_ADDR, reg);
+			al_eth_40g_mac_reg_write(adapter,
+				ETH_MAC_GEN_V3_MAC_40G_CL67_PAUSE_QUANTA_ADDR, reg);
+			/* set quanta threshold value (same value for all prios) */
+			reg = params->quanta_th | (params->quanta_th << 16);
+			al_eth_40g_mac_reg_write(adapter,
+				ETH_MAC_GEN_V3_MAC_40G_CL01_QUANTA_THRESH_ADDR, reg);
+			al_eth_40g_mac_reg_write(adapter,
+				ETH_MAC_GEN_V3_MAC_40G_CL23_QUANTA_THRESH_ADDR, reg);
+			al_eth_40g_mac_reg_write(adapter,
+				ETH_MAC_GEN_V3_MAC_40G_CL45_QUANTA_THRESH_ADDR, reg);
+			al_eth_40g_mac_reg_write(adapter,
+				ETH_MAC_GEN_V3_MAC_40G_CL67_QUANTA_THRESH_ADDR, reg);
+
+			/* enable PFC in the 40g_MAC */
+			reg = al_reg_read32(&adapter->mac_regs_base->mac_10g.cmd_cfg);
+			reg |= 1 << 19;
+			al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, reg);
+			reg = al_eth_40g_mac_reg_read(adapter, ETH_MAC_GEN_V3_MAC_40G_COMMAND_CONFIG_ADDR);
+
+			reg |= ETH_MAC_GEN_V3_MAC_40G_COMMAND_CONFIG_PFC_MODE;
+
+			al_eth_40g_mac_reg_write(adapter, ETH_MAC_GEN_V3_MAC_40G_COMMAND_CONFIG_ADDR, reg);
+		}
+
 	break;
 	default:
 		al_err("[%s]: unsupported flow control type %d\n", adapter->name, params->type);
@@ -2445,6 +3181,7 @@ int al_eth_eee_get(struct al_hal_eth_adapter *adapter, struct al_eth_eee_params 
 
 	params->tx_eee_timer = al_reg_read32(&adapter->ec_regs_base->eee.pre_cnt);
 	params->min_interval = al_reg_read32(&adapter->ec_regs_base->eee.post_cnt);
+	params->stop_cnt = al_reg_read32(&adapter->ec_regs_base->eee.stop_cnt);
 
 	return 0;
 }
@@ -2462,11 +3199,28 @@ int al_eth_eee_config(struct al_hal_eth_adapter *adapter, struct al_eth_eee_para
 
 	al_reg_write32(&adapter->ec_regs_base->eee.pre_cnt, params->tx_eee_timer);
 	al_reg_write32(&adapter->ec_regs_base->eee.post_cnt, params->min_interval);
-	al_reg_write32(&adapter->ec_regs_base->eee.stop_cnt, AL_ETH_EEE_STOP_CNT);
+	al_reg_write32(&adapter->ec_regs_base->eee.stop_cnt, params->stop_cnt);
 
 	reg = EC_EEE_CFG_E_MASK_EC_TMI_STOP | EC_EEE_CFG_E_MASK_MAC_EEE |
 	       EC_EEE_CFG_E_ENABLE |
-	       EC_EEE_CFG_E_USE_EC_TX_FIFO;
+	       EC_EEE_CFG_E_USE_EC_TX_FIFO | EC_EEE_CFG_E_USE_EC_RX_FIFO;
+
+	/*
+	 * Addressing RMN: 3732
+	 *
+	 * RMN description:
+	 * When the HW get into eee mode, it can't transmit any pause packet
+	 * (when flow control policy is enabled).
+	 * In such case, the HW has no way to handle extreme pushback from
+	 * the Rx_path fifos.
+	 *
+	 * Software flow:
+	 * Configure RX_FIFO empty as eee mode term.
+	 * That way, nothing will prevent pause packet transmittion in
+	 * case of extreme pushback from the Rx_path fifos.
+	 *
+	 */
+
 	al_reg_write32(&adapter->ec_regs_base->eee.cfg_e, reg);
 
 	return 0;
@@ -2489,16 +3243,16 @@ int al_eth_ts_init(struct al_hal_eth_adapter *adapter)
 	else
 		reg |= EC_GEN_EN_EXT_PTH_1_10_SEL;
 	/*
-	 * clear completion bypass so tx completions will be indicated
-	 * only when the packet timestamped
+	 * set completion bypass so tx timestamps won't be inserted to tx cmpl
+	 * (in order to disable unverified flow)
 	 */
-	reg &= ~EC_GEN_EN_EXT_PTH_COMPLETION_BYPASS;
+	reg |= EC_GEN_EN_EXT_PTH_COMPLETION_BYPASS;
 	al_reg_write32(&adapter->ec_regs_base->gen.en_ext, reg);
 
 	/*TODO: add the following when we have updated regs file:
 	 * reg_rfw_out_cfg_timestamp_sample_out
-                0 (default) – use the timestamp from the SOP info (10G MAC)
-                1 – use the timestamp from the EOP (1G MAC) (noly when MACSEC is disabled)
+		0 (default) – use the timestamp from the SOP info (10G MAC)
+		1 – use the timestamp from the EOP (1G MAC) (noly when MACSEC is disabled)
 	 */
 	return 0;
 }
@@ -2750,7 +3504,7 @@ int al_eth_link_status_get(struct al_hal_eth_adapter *adapter,
 {
 	uint32_t reg;
 
-	if (adapter->mac_mode == AL_ETH_MAC_MODE_10GbE_Serial) {
+	if (AL_ETH_IS_10G_MAC(adapter->mac_mode) || AL_ETH_IS_25G_MAC(adapter->mac_mode)) {
 		reg = al_reg_read32(&adapter->mac_regs_base->gen.mac_10g_stat);
 
 		status->link_up = AL_TRUE;
@@ -2773,10 +3527,35 @@ int al_eth_link_status_get(struct al_hal_eth_adapter *adapter,
 		if (reg & AL_BIT(2))
 			status->link_up = AL_TRUE;
 
+		reg = al_reg_read32(&adapter->mac_regs_base->sgmii.link_stat);
+
+		if ((reg & AL_BIT(3)) == 0)
+			status->link_up = AL_FALSE;
+
+	} else if (adapter->mac_mode == AL_ETH_MAC_MODE_RGMII) {
+		reg = al_reg_read32(&adapter->mac_regs_base->gen.rgmii_stat);
+
+		status->link_up = AL_FALSE;
+
+		if (reg & AL_BIT(4))
+			status->link_up = AL_TRUE;
+
+	} else if (adapter->mac_mode == AL_ETH_MAC_MODE_XLG_LL_40G) {
+		reg = al_reg_read32(&adapter->mac_regs_base->gen_v3.pcs_40g_ll_status);
+
+		status->link_up = AL_FALSE;
+
+		if ((reg & 0x1F) == 0x1F)
+			status->link_up = AL_TRUE;
+
 	} else {
 		/* not implemented yet */
 		return -EPERM;
 	}
+
+	al_dbg("[%s]: mac %s port. link_status: %s.\n", adapter->name,
+		al_eth_mac_mode_str(adapter->mac_mode),
+		(status->link_up == AL_TRUE) ? "LINK_UP" : "LINK_DOWN");
 
 	return 0;
 }
@@ -2818,9 +3597,9 @@ int al_eth_mac_stats_get(struct al_hal_eth_adapter *adapter, struct al_eth_mac_s
 		stats->ifInMulticastPkts = al_reg_read32(mac_1g_regs_base + 0x94);
 		stats->ifInBroadcastPkts = al_reg_read32(mac_1g_regs_base + 0x98);
 		stats->etherStatsPkts = al_reg_read32(mac_1g_regs_base + 0xb4);
-		stats->ifOutUcastPkts = al_reg_read32(mac_1g_regs_base + 0x9c);
-		stats->ifOutMulticastPkts = al_reg_read32(mac_1g_regs_base + 0xa0);
-		stats->ifOutBroadcastPkts = al_reg_read32(mac_1g_regs_base + 0xa4);
+		stats->ifOutUcastPkts = al_reg_read32(mac_1g_regs_base + 0xa0);
+		stats->ifOutMulticastPkts = al_reg_read32(mac_1g_regs_base + 0xa4);
+		stats->ifOutBroadcastPkts = al_reg_read32(mac_1g_regs_base + 0xa8);
 		stats->ifInErrors = al_reg_read32(mac_1g_regs_base + 0x88);
 		stats->ifOutErrors = al_reg_read32(mac_1g_regs_base + 0x8c);
 
@@ -2838,49 +3617,240 @@ int al_eth_mac_stats_get(struct al_hal_eth_adapter *adapter, struct al_eth_mac_s
 		stats->aFrameCheckSequenceErrors = al_reg_read32(mac_1g_regs_base + 0x70);
 		stats->aAlignmentErrors = al_reg_read32(mac_1g_regs_base + 0x74);
 		stats->etherStatsDropEvents = al_reg_read32(mac_1g_regs_base + 0xAC);
+
+		stats->aPAUSEMACCtrlFramesTransmitted = al_reg_read32(mac_1g_regs_base + 0x80);
+		stats->aPAUSEMACCtrlFramesReceived = al_reg_read32(mac_1g_regs_base + 0x84);
+		stats->aFrameTooLongErrors = 0; /* N/A */
+		stats->aInRangeLengthErrors = 0; /* N/A */
+		stats->VLANTransmittedOK = 0; /* N/A */
+		stats->VLANReceivedOK = 0; /* N/A */
+		stats->etherStatsOctets = al_reg_read32(mac_1g_regs_base + 0xB0);
+
+		stats->etherStatsPkts64Octets = al_reg_read32(mac_1g_regs_base + 0xC0);
+		stats->etherStatsPkts65to127Octets = al_reg_read32(mac_1g_regs_base + 0xC4);
+		stats->etherStatsPkts128to255Octets = al_reg_read32(mac_1g_regs_base + 0xC8);
+		stats->etherStatsPkts256to511Octets = al_reg_read32(mac_1g_regs_base + 0xCC);
+		stats->etherStatsPkts512to1023Octets = al_reg_read32(mac_1g_regs_base + 0xD0);
+		stats->etherStatsPkts1024to1518Octets = al_reg_read32(mac_1g_regs_base + 0xD4);
+		stats->etherStatsPkts1519toX = al_reg_read32(mac_1g_regs_base + 0xD8);
+	} else if (AL_ETH_IS_10G_MAC(adapter->mac_mode) || AL_ETH_IS_25G_MAC(adapter->mac_mode)) {
+		if (adapter->rev_id < AL_ETH_REV_ID_3) {
+			void __iomem *mac_10g_regs_base = &adapter->mac_regs_base->mac_10g;
+			uint64_t octets;
+
+			stats->ifInUcastPkts = al_reg_read32(mac_10g_regs_base + 0xE0);
+			stats->ifInMulticastPkts = al_reg_read32(mac_10g_regs_base + 0xE8);
+			stats->ifInBroadcastPkts = al_reg_read32(mac_10g_regs_base + 0xF0);
+			stats->etherStatsPkts = al_reg_read32(mac_10g_regs_base + 0x130);
+			stats->ifOutUcastPkts = al_reg_read32(mac_10g_regs_base + 0x108);
+			stats->ifOutMulticastPkts = al_reg_read32(mac_10g_regs_base + 0x110);
+			stats->ifOutBroadcastPkts = al_reg_read32(mac_10g_regs_base + 0x118);
+			stats->ifInErrors = al_reg_read32(mac_10g_regs_base + 0x190);
+			stats->ifOutErrors = al_reg_read32(mac_10g_regs_base + 0xf8);
+
+			stats->aFramesReceivedOK = al_reg_read32(mac_10g_regs_base + 0x88);
+			stats->aFramesTransmittedOK = al_reg_read32(mac_10g_regs_base + 0x80);
+			/* aOctetsReceivedOK = ifInOctets - 18 * aFramesReceivedOK - 4 * VLANReceivedOK */
+			octets = al_reg_read32(mac_10g_regs_base + 0xD8);
+			octets |= (uint64_t)(al_reg_read32(mac_10g_regs_base + 0xDC)) << 32;
+			octets -= 18 * stats->aFramesReceivedOK;
+			octets -= 4 * al_reg_read32(mac_10g_regs_base + 0xC8);
+			stats->aOctetsReceivedOK = octets;
+
+			/* aOctetsTransmittedOK = ifOutOctets - 18 * aFramesTransmittedOK - 4 * VLANTransmittedOK */
+			octets = al_reg_read32(mac_10g_regs_base + 0xD0);
+			octets |= (uint64_t)(al_reg_read32(mac_10g_regs_base + 0xD4)) << 32;
+			octets -= 18 * stats->aFramesTransmittedOK;
+			octets -= 4 * al_reg_read32(mac_10g_regs_base + 0xC0);
+			stats->aOctetsTransmittedOK = octets;
+
+			stats->etherStatsUndersizePkts = al_reg_read32(mac_10g_regs_base + 0x138);
+			stats->etherStatsFragments = al_reg_read32(mac_10g_regs_base + 0x188);
+			stats->etherStatsJabbers = al_reg_read32(mac_10g_regs_base + 0x180);
+			stats->etherStatsOversizePkts = al_reg_read32(mac_10g_regs_base  + 0x178);
+
+			stats->aFrameCheckSequenceErrors = al_reg_read32(mac_10g_regs_base + 0x90);
+			stats->aAlignmentErrors = al_reg_read32(mac_10g_regs_base + 0x98);
+			stats->etherStatsDropEvents = al_reg_read32(mac_10g_regs_base + 0x120);
+
+			stats->aPAUSEMACCtrlFramesTransmitted = al_reg_read32(mac_10g_regs_base + 0xA0);
+			stats->aPAUSEMACCtrlFramesReceived = al_reg_read32(mac_10g_regs_base + 0xA8);
+			stats->aFrameTooLongErrors = al_reg_read32(mac_10g_regs_base + 0xB0);
+			stats->aInRangeLengthErrors = al_reg_read32(mac_10g_regs_base + 0xB8);
+			stats->VLANTransmittedOK = al_reg_read32(mac_10g_regs_base + 0xC0);
+			stats->VLANReceivedOK = al_reg_read32(mac_10g_regs_base + 0xC8);
+			stats->etherStatsOctets = al_reg_read32(mac_10g_regs_base + 0x128);
+
+			stats->etherStatsPkts64Octets = al_reg_read32(mac_10g_regs_base + 0x140);
+			stats->etherStatsPkts65to127Octets = al_reg_read32(mac_10g_regs_base + 0x148);
+			stats->etherStatsPkts128to255Octets = al_reg_read32(mac_10g_regs_base + 0x150);
+			stats->etherStatsPkts256to511Octets = al_reg_read32(mac_10g_regs_base + 0x158);
+			stats->etherStatsPkts512to1023Octets = al_reg_read32(mac_10g_regs_base + 0x160);
+			stats->etherStatsPkts1024to1518Octets = al_reg_read32(mac_10g_regs_base + 0x168);
+			stats->etherStatsPkts1519toX = al_reg_read32(mac_10g_regs_base + 0x170);
+		} else {
+			void __iomem *mac_10g_regs_base = &adapter->mac_regs_base->mac_10g;
+			uint64_t octets;
+			/* TODO - change to 64 bit */
+			stats->ifInUcastPkts = al_reg_read32(mac_10g_regs_base + 0x140);
+			stats->ifInMulticastPkts = al_reg_read32(mac_10g_regs_base + 0x148);
+			stats->ifInBroadcastPkts = al_reg_read32(mac_10g_regs_base + 0x150);
+			stats->etherStatsPkts = al_reg_read32(mac_10g_regs_base + 0x160);
+			stats->ifOutUcastPkts = al_reg_read32(mac_10g_regs_base + 0x240);
+			stats->ifOutMulticastPkts = al_reg_read32(mac_10g_regs_base + 0x248);
+			stats->ifOutBroadcastPkts = al_reg_read32(mac_10g_regs_base + 0x250);
+			stats->ifInErrors = al_reg_read32(mac_10g_regs_base + 0x138);
+			stats->ifOutErrors = al_reg_read32(mac_10g_regs_base + 0x238);
+
+			stats->aFramesReceivedOK = al_reg_read32(mac_10g_regs_base + 0x120); /*frames_ok*/
+			stats->aFramesTransmittedOK = al_reg_read32(mac_10g_regs_base + 0x220); /*frames_ok*/
+			/* aOctetsReceivedOK = ifInOctets - 18 * aFramesReceivedOK - 4 * VLANReceivedOK */
+			octets = al_reg_read32(mac_10g_regs_base + 0x108); /*OctetsOK*/
+			octets |= (uint64_t)(al_reg_read32(mac_10g_regs_base + 0x10C)) << 32;
+			octets -= 18 * stats->aFramesReceivedOK;
+			octets -= 4 * al_reg_read32(mac_10g_regs_base + 0x130); /*VLANOK*/
+			stats->aOctetsReceivedOK = octets;
+
+			/* aOctetsTransmittedOK = ifOutOctets - 18 * aFramesTransmittedOK - 4 * VLANTransmittedOK */
+			octets = al_reg_read32(mac_10g_regs_base + 0x208); /*OctetsOK*/
+			octets |= (uint64_t)(al_reg_read32(mac_10g_regs_base + 0x20c)) << 32;
+			octets -= 18 * stats->aFramesTransmittedOK;
+			octets -= 4 * al_reg_read32(mac_10g_regs_base + 0x230); /*VLANOK*/
+			stats->aOctetsTransmittedOK = octets;
+
+			stats->etherStatsUndersizePkts = al_reg_read32(mac_10g_regs_base + 0x168);
+			stats->etherStatsFragments = al_reg_read32(mac_10g_regs_base + 0x1b8);
+			stats->etherStatsJabbers = al_reg_read32(mac_10g_regs_base + 0x1b0);
+			stats->etherStatsOversizePkts = al_reg_read32(mac_10g_regs_base  + 0x1a8);
+
+			stats->aFrameCheckSequenceErrors = al_reg_read32(mac_10g_regs_base + 0x128); /* CRCErrors */
+			/* stats->aAlignmentErrors = al_reg_read32(mac_10g_regs_base + 0x98); */ /* not implemented */
+			stats->etherStatsDropEvents = al_reg_read32(mac_10g_regs_base + 0x158);
+		}
 	} else {
-		void __iomem *mac_10g_regs_base = &adapter->mac_regs_base->mac_10g;
 		uint64_t octets;
+		/* TODO - change to 64 bit */
+		stats->ifInUcastPkts = al_eth_40g_mac_reg_read(adapter, 0x140);
+		stats->ifInMulticastPkts = al_eth_40g_mac_reg_read(adapter, 0x148);
+		stats->ifInBroadcastPkts = al_eth_40g_mac_reg_read(adapter, 0x150);
+		stats->etherStatsPkts = al_eth_40g_mac_reg_read(adapter, 0x160);
+		stats->ifOutUcastPkts = al_eth_40g_mac_reg_read(adapter, 0x240);
+		stats->ifOutMulticastPkts = al_eth_40g_mac_reg_read(adapter, 0x248);
+		stats->ifOutBroadcastPkts = al_eth_40g_mac_reg_read(adapter, 0x250);
+		stats->ifInErrors = al_eth_40g_mac_reg_read(adapter, 0x138);
+		stats->ifOutErrors = al_eth_40g_mac_reg_read(adapter, 0x238);
+		stats->aFramesReceivedOK = al_eth_40g_mac_reg_read(adapter, 0x120);
+		stats->aFramesTransmittedOK = al_eth_40g_mac_reg_read(adapter, 0x220);
 
-		stats->ifInUcastPkts = al_reg_read32(mac_10g_regs_base + 0xE0);
-		stats->ifInMulticastPkts = al_reg_read32(mac_10g_regs_base + 0xE8);
-		stats->ifInBroadcastPkts = al_reg_read32(mac_10g_regs_base + 0xF0);
-		stats->etherStatsPkts = al_reg_read32(mac_10g_regs_base + 0x130);
-		stats->ifOutUcastPkts = al_reg_read32(mac_10g_regs_base + 0x108);
-		stats->ifOutMulticastPkts = al_reg_read32(mac_10g_regs_base + 0x110);
-		stats->ifOutBroadcastPkts = al_reg_read32(mac_10g_regs_base + 0x118);
-		stats->ifInErrors = al_reg_read32(mac_10g_regs_base + 0x190);
-		stats->ifOutErrors = al_reg_read32(mac_10g_regs_base + 0xf8);
-
-		stats->aFramesReceivedOK = al_reg_read32(mac_10g_regs_base + 0x88);
-		stats->aFramesTransmittedOK = al_reg_read32(mac_10g_regs_base + 0x80);
 		/* aOctetsReceivedOK = ifInOctets - 18 * aFramesReceivedOK - 4 * VLANReceivedOK */
-		octets = al_reg_read32(mac_10g_regs_base + 0xD8);
-		octets |= (uint64_t)(al_reg_read32(mac_10g_regs_base + 0xDC)) << 32;
+		octets = al_eth_40g_mac_reg_read(adapter, 0x100);
+		octets |= (uint64_t)(al_eth_40g_mac_reg_read(adapter, 0x104)) << 32;
 		octets -= 18 * stats->aFramesReceivedOK;
-		octets -= 4 * al_reg_read32(mac_10g_regs_base + 0xC8);
-		stats->aOctetsReceivedOK = octets;
-
-		/* aOctetsTransmittedOK = ifOutOctets - 18 * aFramesTransmittedOK - 4 * VLANTransmittedOK */
-		octets = al_reg_read32(mac_10g_regs_base + 0xD0);
-		octets |= (uint64_t)(al_reg_read32(mac_10g_regs_base + 0xD4)) << 32;
-		octets -= 18 * stats->aFramesTransmittedOK;
-		octets -= 4 * al_reg_read32(mac_10g_regs_base + 0xC0);
+		octets -= 4 * al_eth_40g_mac_reg_read(adapter, 0x130); /*VLANOK*/
 		stats->aOctetsTransmittedOK = octets;
 
-		stats->etherStatsUndersizePkts = al_reg_read32(mac_10g_regs_base + 0x138);
-		stats->etherStatsFragments = al_reg_read32(mac_10g_regs_base + 0x188);
-		stats->etherStatsJabbers = al_reg_read32(mac_10g_regs_base + 0x180);
-		stats->etherStatsOversizePkts = al_reg_read32(mac_10g_regs_base  + 0x178);
+		/* aOctetsTransmittedOK = ifOutOctets - 18 * aFramesTransmittedOK - 4 * VLANTransmittedOK */
+		octets = al_eth_40g_mac_reg_read(adapter, 0x200);
+		octets |= (uint64_t)(al_eth_40g_mac_reg_read(adapter, 0x204)) << 32;
+		octets -= 18 * stats->aFramesReceivedOK;
+		octets -= 4 * al_eth_40g_mac_reg_read(adapter, 0x230); /*VLANOK*/
+		stats->aOctetsReceivedOK = octets;
 
-		stats->aFrameCheckSequenceErrors = al_reg_read32(mac_10g_regs_base + 0x90);
-		stats->aAlignmentErrors = al_reg_read32(mac_10g_regs_base + 0x98);
-		stats->etherStatsDropEvents = al_reg_read32(mac_10g_regs_base + 0x120);
+		stats->etherStatsUndersizePkts = al_eth_40g_mac_reg_read(adapter, 0x168);
+		stats->etherStatsFragments = al_eth_40g_mac_reg_read(adapter, 0x1b8);
+		stats->etherStatsJabbers = al_eth_40g_mac_reg_read(adapter, 0x1b0);
+		stats->etherStatsOversizePkts = al_eth_40g_mac_reg_read(adapter, 0x1a8);
+		stats->aFrameCheckSequenceErrors = al_eth_40g_mac_reg_read(adapter, 0x128);
+		stats->aAlignmentErrors = al_eth_40g_mac_reg_read(adapter, 0x110);
+		stats->etherStatsDropEvents = al_eth_40g_mac_reg_read(adapter, 0x158);
 	}
+
 	stats->eee_in = al_reg_read32(&adapter->mac_regs_base->stat.eee_in);
 	stats->eee_out = al_reg_read32(&adapter->mac_regs_base->stat.eee_out);
 
-//	stats->etherStatsPkts = 1;
+/*	stats->etherStatsPkts = 1; */
+	return 0;
+}
+
+/**
+* read ec_stat_counters
+*/
+int al_eth_ec_stats_get(struct al_hal_eth_adapter *adapter, struct al_eth_ec_stats *stats)
+{
+	al_assert(stats);
+	stats->faf_in_rx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.faf_in_rx_pkt);
+	stats->faf_in_rx_short = al_reg_read32(&adapter->ec_regs_base->stat.faf_in_rx_short);
+	stats->faf_in_rx_long = al_reg_read32(&adapter->ec_regs_base->stat.faf_in_rx_long);
+	stats->faf_out_rx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.faf_out_rx_pkt);
+	stats->faf_out_rx_short = al_reg_read32(&adapter->ec_regs_base->stat.faf_out_rx_short);
+	stats->faf_out_rx_long = al_reg_read32(&adapter->ec_regs_base->stat.faf_out_rx_long);
+	stats->faf_out_drop = al_reg_read32(&adapter->ec_regs_base->stat.faf_out_drop);
+	stats->rxf_in_rx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.rxf_in_rx_pkt);
+	stats->rxf_in_fifo_err = al_reg_read32(&adapter->ec_regs_base->stat.rxf_in_fifo_err);
+	stats->lbf_in_rx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.lbf_in_rx_pkt);
+	stats->lbf_in_fifo_err = al_reg_read32(&adapter->ec_regs_base->stat.lbf_in_fifo_err);
+	stats->rxf_out_rx_1_pkt = al_reg_read32(&adapter->ec_regs_base->stat.rxf_out_rx_1_pkt);
+	stats->rxf_out_rx_2_pkt = al_reg_read32(&adapter->ec_regs_base->stat.rxf_out_rx_2_pkt);
+	stats->rxf_out_drop_1_pkt = al_reg_read32(&adapter->ec_regs_base->stat.rxf_out_drop_1_pkt);
+	stats->rxf_out_drop_2_pkt = al_reg_read32(&adapter->ec_regs_base->stat.rxf_out_drop_2_pkt);
+	stats->rpe_1_in_rx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.rpe_1_in_rx_pkt);
+	stats->rpe_1_out_rx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.rpe_1_out_rx_pkt);
+	stats->rpe_2_in_rx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.rpe_2_in_rx_pkt);
+	stats->rpe_2_out_rx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.rpe_2_out_rx_pkt);
+	stats->rpe_3_in_rx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.rpe_3_in_rx_pkt);
+	stats->rpe_3_out_rx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.rpe_3_out_rx_pkt);
+	stats->tpe_in_tx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.tpe_in_tx_pkt);
+	stats->tpe_out_tx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.tpe_out_tx_pkt);
+	stats->tpm_tx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.tpm_tx_pkt);
+	stats->tfw_in_tx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.tfw_in_tx_pkt);
+	stats->tfw_out_tx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.tfw_out_tx_pkt);
+	stats->rfw_in_rx_pkt = al_reg_read32(&adapter->ec_regs_base->stat.rfw_in_rx_pkt);
+	stats->rfw_in_vlan_drop = al_reg_read32(&adapter->ec_regs_base->stat.rfw_in_vlan_drop);
+	stats->rfw_in_parse_drop = al_reg_read32(&adapter->ec_regs_base->stat.rfw_in_parse_drop);
+	stats->rfw_in_mc = al_reg_read32(&adapter->ec_regs_base->stat.rfw_in_mc);
+	stats->rfw_in_bc = al_reg_read32(&adapter->ec_regs_base->stat.rfw_in_bc);
+	stats->rfw_in_vlan_exist = al_reg_read32(&adapter->ec_regs_base->stat.rfw_in_vlan_exist);
+	stats->rfw_in_vlan_nexist = al_reg_read32(&adapter->ec_regs_base->stat.rfw_in_vlan_nexist);
+	stats->rfw_in_mac_drop = al_reg_read32(&adapter->ec_regs_base->stat.rfw_in_mac_drop);
+	stats->rfw_in_mac_ndet_drop = al_reg_read32(&adapter->ec_regs_base->stat.rfw_in_mac_ndet_drop);
+	stats->rfw_in_ctrl_drop = al_reg_read32(&adapter->ec_regs_base->stat.rfw_in_ctrl_drop);
+	stats->rfw_in_prot_i_drop = al_reg_read32(&adapter->ec_regs_base->stat.rfw_in_prot_i_drop);
+	stats->eee_in = al_reg_read32(&adapter->ec_regs_base->stat.eee_in);
+	return 0;
+}
+
+/**
+ * read per_udma_counters
+ */
+int al_eth_ec_stat_udma_get(struct al_hal_eth_adapter *adapter, uint8_t idx, struct al_eth_ec_stat_udma *stats)
+{
+
+	al_assert(idx <= 3); /*valid udma_id*/
+	al_assert(stats);
+	stats->rfw_out_rx_pkt = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].rfw_out_rx_pkt);
+	stats->rfw_out_drop = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].rfw_out_drop);
+	stats->msw_in_rx_pkt = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].msw_in_rx_pkt);
+	stats->msw_drop_q_full = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].msw_drop_q_full);
+	stats->msw_drop_sop = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].msw_drop_sop);
+	stats->msw_drop_eop = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].msw_drop_eop);
+	stats->msw_wr_eop = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].msw_wr_eop);
+	stats->msw_out_rx_pkt = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].msw_out_rx_pkt);
+	stats->tso_no_tso_pkt = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tso_no_tso_pkt);
+	stats->tso_tso_pkt = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tso_tso_pkt);
+	stats->tso_seg_pkt = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tso_seg_pkt);
+	stats->tso_pad_pkt = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tso_pad_pkt);
+	stats->tpm_tx_spoof = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tpm_tx_spoof);
+	stats->tmi_in_tx_pkt = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tmi_in_tx_pkt);
+	stats->tmi_out_to_mac = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tmi_out_to_mac);
+	stats->tmi_out_to_rx = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tmi_out_to_rx);
+	stats->tx_q0_bytes = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tx_q0_bytes);
+	stats->tx_q1_bytes = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tx_q1_bytes);
+	stats->tx_q2_bytes = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tx_q2_bytes);
+	stats->tx_q3_bytes = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tx_q3_bytes);
+	stats->tx_q0_pkts = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tx_q0_pkts);
+	stats->tx_q1_pkts = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tx_q1_pkts);
+	stats->tx_q2_pkts = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tx_q2_pkts);
+	stats->tx_q3_pkts = al_reg_read32(&adapter->ec_regs_base->stat_udma[idx].tx_q3_pkts);
 	return 0;
 }
 
@@ -2960,6 +3930,33 @@ int al_eth_flr_rmn(int (* pci_read_config_u32)(void *handle, int where, uint32_t
 	al_reg_write32(mac_base + 0x95c, reg);
 
 	return 0;
+}
+
+int al_eth_flr_rmn_restore_params(int (* pci_read_config_u32)(void *handle, int where, uint32_t *val),
+		int (* pci_write_config_u32)(void *handle, int where, uint32_t val),
+		void *handle,
+		void __iomem    *mac_base,
+		void __iomem    *ec_base,
+		int     mac_addresses_num
+		)
+{
+	struct al_eth_board_params params = { .media_type = 0 };
+	uint8_t mac_addr[6];
+	int rc;
+
+	/* not implemented yet */
+	if (mac_addresses_num > 1)
+		return -EPERM;
+
+	/* save board params so we restore it after reset */
+	al_eth_board_params_get(mac_base, &params);
+	al_eth_mac_addr_read(ec_base, 0, mac_addr);
+
+	rc = al_eth_flr_rmn(pci_read_config_u32, pci_write_config_u32, handle, mac_base);
+	al_eth_board_params_set(mac_base, &params);
+	al_eth_mac_addr_store(ec_base, 0, mac_addr);
+
+	return rc;
 }
 
 /* board params register 1 */
@@ -3283,6 +4280,795 @@ int al_eth_wol_disable(
 {
 	al_reg_write32(&adapter->ec_regs_base->wol.wol_en, 0);
 
+	return 0;
+}
+
+int al_eth_tx_fwd_vid_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx,
+				uint8_t udma_mask, al_bool fwd_to_mac)
+{
+	uint32_t	val = 0;
+	al_assert(idx < AL_ETH_FWD_VID_TABLE_NUM); /* valid VID index */
+	AL_REG_FIELD_SET(val,  AL_ETH_TX_VLAN_TABLE_UDMA_MASK, 0, udma_mask);
+	AL_REG_FIELD_SET(val,  AL_ETH_TX_VLAN_TABLE_FWD_TO_MAC, 4, fwd_to_mac);
+
+	al_reg_write32(&adapter->ec_regs_base->tfw.tx_vid_table_addr, idx);
+	al_reg_write32(&adapter->ec_regs_base->tfw.tx_vid_table_data, val);
+	return 0;
+}
+
+int al_eth_tx_generic_crc_entry_set(struct al_hal_eth_adapter *adapter, uint32_t idx,
+		struct al_eth_tx_gpd_cam_entry *tx_gpd_entry,
+		struct al_eth_tx_gcp_table_entry *tx_gcp_entry,
+		struct al_eth_tx_crc_chksum_replace_cmd_for_protocol_num_entry *tx_replace_entry)
+{
+	uint64_t gpd_data;
+	uint64_t gpd_mask;
+	uint32_t gcp_table_gen;
+	uint32_t tx_alu_opcode;
+	uint32_t tx_alu_opsel;
+	uint32_t replace_table_address;
+	uint32_t tx_replace_cmd;
+
+	gpd_data = ((uint64_t)tx_gpd_entry->l3_proto_idx & AL_ETH_TX_GPD_L3_PROTO_MASK) <<
+		AL_ETH_TX_GPD_L3_PROTO_SHIFT;
+	gpd_data |= ((uint64_t)tx_gpd_entry->l4_proto_idx & AL_ETH_TX_GPD_L4_PROTO_MASK) <<
+		AL_ETH_TX_GPD_L4_PROTO_SHIFT;
+	gpd_data |= ((uint64_t)tx_gpd_entry->tunnel_control & AL_ETH_TX_GPD_TUNNEL_CTRL_MASK) <<
+		AL_ETH_TX_GPD_TUNNEL_CTRL_SHIFT;
+	gpd_data |= ((uint64_t)tx_gpd_entry->source_vlan_count & AL_ETH_TX_GPD_SRC_VLAN_CNT_MASK) <<
+		AL_ETH_TX_GPD_SRC_VLAN_CNT_SHIFT;
+	gpd_mask  = ((uint64_t)tx_gpd_entry->l3_proto_idx_mask & AL_ETH_TX_GPD_L3_PROTO_MASK) <<
+		AL_ETH_TX_GPD_L3_PROTO_SHIFT;
+	gpd_mask |= ((uint64_t)tx_gpd_entry->l4_proto_idx_mask & AL_ETH_TX_GPD_L4_PROTO_MASK) <<
+		AL_ETH_TX_GPD_L4_PROTO_SHIFT;
+	gpd_mask |= ((uint64_t)tx_gpd_entry->tunnel_control_mask & AL_ETH_TX_GPD_TUNNEL_CTRL_MASK) <<
+		AL_ETH_TX_GPD_TUNNEL_CTRL_SHIFT;
+	gpd_mask |= ((uint64_t)tx_gpd_entry->source_vlan_count_mask & AL_ETH_TX_GPD_SRC_VLAN_CNT_MASK) <<
+		AL_ETH_TX_GPD_SRC_VLAN_CNT_SHIFT;
+
+	/* Tx Generic protocol detect Cam compare table */
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gpd_cam_addr, idx);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gpd_cam_ctrl,
+			(uint32_t)((tx_gpd_entry->tx_gpd_cam_ctrl) << AL_ETH_TX_GPD_CAM_CTRL_VALID_SHIFT));
+	al_dbg("al_eth_tx_generic_crc_entry_set, line [%d], tx_gpd_cam_ctrl: %#x", idx, tx_gpd_entry->tx_gpd_cam_ctrl);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gpd_cam_mask_2,
+			(uint32_t)(gpd_mask >> AL_ETH_TX_GPD_CAM_MASK_2_SHIFT));
+	al_dbg("al_eth_tx_generic_crc_entry_set, line [%d], tx_gpd_cam_mask_2: %#x", idx, (uint32_t)(gpd_mask >> AL_ETH_TX_GPD_CAM_MASK_2_SHIFT));
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gpd_cam_mask_1,
+			(uint32_t)(gpd_mask));
+	al_dbg("al_eth_tx_generic_crc_entry_set, line [%d], tx_gpd_cam_mask_1: %#x", idx, (uint32_t)(gpd_mask));
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gpd_cam_data_2,
+			(uint32_t)(gpd_data >> AL_ETH_TX_GPD_CAM_DATA_2_SHIFT));
+	al_dbg("al_eth_tx_generic_crc_entry_set, line [%d], tx_gpd_cam_data_2: %#x", idx, (uint32_t)(gpd_data >> AL_ETH_TX_GPD_CAM_DATA_2_SHIFT));
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gpd_cam_data_1,
+			(uint32_t)(gpd_data));
+	al_dbg("al_eth_tx_generic_crc_entry_set, line [%d], tx_gpd_cam_data_1: %#x", idx, (uint32_t)(gpd_data));
+
+	gcp_table_gen  = (tx_gcp_entry->poly_sel & AL_ETH_TX_GCP_POLY_SEL_MASK) <<
+		AL_ETH_TX_GCP_POLY_SEL_SHIFT;
+	gcp_table_gen |= (tx_gcp_entry->crc32_bit_comp & AL_ETH_TX_GCP_CRC32_BIT_COMP_MASK) <<
+		AL_ETH_TX_GCP_CRC32_BIT_COMP_SHIFT;
+	gcp_table_gen |= (tx_gcp_entry->crc32_bit_swap & AL_ETH_TX_GCP_CRC32_BIT_SWAP_MASK) <<
+		AL_ETH_TX_GCP_CRC32_BIT_SWAP_SHIFT;
+	gcp_table_gen |= (tx_gcp_entry->crc32_byte_swap & AL_ETH_TX_GCP_CRC32_BYTE_SWAP_MASK) <<
+		AL_ETH_TX_GCP_CRC32_BYTE_SWAP_SHIFT;
+	gcp_table_gen |= (tx_gcp_entry->data_bit_swap & AL_ETH_TX_GCP_DATA_BIT_SWAP_MASK) <<
+		AL_ETH_TX_GCP_DATA_BIT_SWAP_SHIFT;
+	gcp_table_gen |= (tx_gcp_entry->data_byte_swap & AL_ETH_TX_GCP_DATA_BYTE_SWAP_MASK) <<
+		AL_ETH_TX_GCP_DATA_BYTE_SWAP_SHIFT;
+	gcp_table_gen |= (tx_gcp_entry->trail_size & AL_ETH_TX_GCP_TRAIL_SIZE_MASK) <<
+		AL_ETH_TX_GCP_TRAIL_SIZE_SHIFT;
+	gcp_table_gen |= (tx_gcp_entry->head_size & AL_ETH_TX_GCP_HEAD_SIZE_MASK) <<
+		AL_ETH_TX_GCP_HEAD_SIZE_SHIFT;
+	gcp_table_gen |= (tx_gcp_entry->head_calc & AL_ETH_TX_GCP_HEAD_CALC_MASK) <<
+		AL_ETH_TX_GCP_HEAD_CALC_SHIFT;
+	gcp_table_gen |= (tx_gcp_entry->mask_polarity & AL_ETH_TX_GCP_MASK_POLARITY_MASK) <<
+		AL_ETH_TX_GCP_MASK_POLARITY_SHIFT;
+	al_dbg("al_eth_tx_generic_crc_entry_set, line [%d], gcp_table_gen: %#x", idx, gcp_table_gen);
+
+	tx_alu_opcode  = (tx_gcp_entry->tx_alu_opcode_1 & AL_ETH_TX_GCP_OPCODE_1_MASK) <<
+		AL_ETH_TX_GCP_OPCODE_1_SHIFT;
+	tx_alu_opcode |= (tx_gcp_entry->tx_alu_opcode_2 & AL_ETH_TX_GCP_OPCODE_2_MASK) <<
+		AL_ETH_TX_GCP_OPCODE_2_SHIFT;
+	tx_alu_opcode |= (tx_gcp_entry->tx_alu_opcode_3 & AL_ETH_TX_GCP_OPCODE_3_MASK) <<
+		AL_ETH_TX_GCP_OPCODE_3_SHIFT;
+	tx_alu_opsel  = (tx_gcp_entry->tx_alu_opsel_1 & AL_ETH_TX_GCP_OPSEL_1_MASK) <<
+		AL_ETH_TX_GCP_OPSEL_1_SHIFT;
+	tx_alu_opsel |= (tx_gcp_entry->tx_alu_opsel_2 & AL_ETH_TX_GCP_OPSEL_2_MASK) <<
+		AL_ETH_TX_GCP_OPSEL_2_SHIFT;
+	tx_alu_opsel |= (tx_gcp_entry->tx_alu_opsel_3 & AL_ETH_TX_GCP_OPSEL_3_MASK) <<
+		AL_ETH_TX_GCP_OPSEL_3_SHIFT;
+	tx_alu_opsel |= (tx_gcp_entry->tx_alu_opsel_4 & AL_ETH_TX_GCP_OPSEL_4_MASK) <<
+		AL_ETH_TX_GCP_OPSEL_4_SHIFT;
+
+	/*  Tx Generic crc prameters table general */
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gcp_table_addr, idx);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gcp_table_gen,
+			gcp_table_gen);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gcp_table_mask_1,
+			tx_gcp_entry->gcp_mask[0]);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gcp_table_mask_2,
+			tx_gcp_entry->gcp_mask[1]);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gcp_table_mask_3,
+			tx_gcp_entry->gcp_mask[2]);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gcp_table_mask_4,
+			tx_gcp_entry->gcp_mask[3]);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gcp_table_mask_5,
+			tx_gcp_entry->gcp_mask[4]);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gcp_table_mask_6,
+			tx_gcp_entry->gcp_mask[5]);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gcp_table_crc_init,
+			tx_gcp_entry->crc_init);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gcp_table_res,
+			tx_gcp_entry->gcp_table_res);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gcp_table_alu_opcode,
+			tx_alu_opcode);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gcp_table_alu_opsel,
+			tx_alu_opsel);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gcp_table_alu_val,
+			tx_gcp_entry->alu_val);
+
+	/*  Tx crc_chksum_replace_cmd */
+	replace_table_address = L4_CHECKSUM_DIS_AND_L3_CHECKSUM_DIS | idx;
+	tx_replace_cmd  = (uint32_t)(tx_replace_entry->l3_csum_en_00) << 0;
+	tx_replace_cmd |= (uint32_t)(tx_replace_entry->l4_csum_en_00) << 1;
+	tx_replace_cmd |= (uint32_t)(tx_replace_entry->crc_en_00)     << 2;
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.crc_csum_replace_table_addr, replace_table_address);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.crc_csum_replace_table,
+			tx_replace_cmd);
+	replace_table_address = L4_CHECKSUM_DIS_AND_L3_CHECKSUM_EN | idx;
+	tx_replace_cmd  = (uint32_t)(tx_replace_entry->l3_csum_en_01) << 0;
+	tx_replace_cmd |= (uint32_t)(tx_replace_entry->l4_csum_en_01) << 1;
+	tx_replace_cmd |= (uint32_t)(tx_replace_entry->crc_en_01)     << 2;
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.crc_csum_replace_table_addr, replace_table_address);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.crc_csum_replace_table,
+			tx_replace_cmd);
+	replace_table_address = L4_CHECKSUM_EN_AND_L3_CHECKSUM_DIS | idx;
+	tx_replace_cmd  = (uint32_t)(tx_replace_entry->l3_csum_en_10) << 0;
+	tx_replace_cmd |= (uint32_t)(tx_replace_entry->l4_csum_en_10) << 1;
+	tx_replace_cmd |= (uint32_t)(tx_replace_entry->crc_en_10)     << 2;
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.crc_csum_replace_table_addr, replace_table_address);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.crc_csum_replace_table,
+			tx_replace_cmd);
+	replace_table_address = L4_CHECKSUM_EN_AND_L3_CHECKSUM_EN | idx;
+	tx_replace_cmd  = (uint32_t)(tx_replace_entry->l3_csum_en_11) << 0;
+	tx_replace_cmd |= (uint32_t)(tx_replace_entry->l4_csum_en_11) << 1;
+	tx_replace_cmd |= (uint32_t)(tx_replace_entry->crc_en_11)     << 2;
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.crc_csum_replace_table_addr, replace_table_address);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.crc_csum_replace_table,
+			tx_replace_cmd);
+
+	return 0;
+}
+
+int al_eth_rx_generic_crc_entry_set(struct al_hal_eth_adapter *adapter, uint32_t idx,
+		struct al_eth_rx_gpd_cam_entry *rx_gpd_entry,
+		struct al_eth_rx_gcp_table_entry *rx_gcp_entry)
+{
+	uint64_t gpd_data;
+	uint64_t gpd_mask;
+	uint32_t gcp_table_gen;
+	uint32_t rx_alu_opcode;
+	uint32_t rx_alu_opsel;
+
+	gpd_data  = ((uint64_t)rx_gpd_entry->outer_l3_proto_idx & AL_ETH_RX_GPD_OUTER_L3_PROTO_MASK) <<
+		AL_ETH_RX_GPD_OUTER_L3_PROTO_SHIFT;
+	gpd_data |= ((uint64_t)rx_gpd_entry->outer_l4_proto_idx & AL_ETH_RX_GPD_OUTER_L4_PROTO_MASK) <<
+		AL_ETH_RX_GPD_OUTER_L4_PROTO_SHIFT;
+	gpd_data |= ((uint64_t)rx_gpd_entry->inner_l3_proto_idx & AL_ETH_RX_GPD_INNER_L3_PROTO_MASK) <<
+		AL_ETH_RX_GPD_INNER_L3_PROTO_SHIFT;
+	gpd_data |= ((uint64_t)rx_gpd_entry->inner_l4_proto_idx & AL_ETH_RX_GPD_INNER_L4_PROTO_MASK) <<
+		AL_ETH_RX_GPD_INNER_L4_PROTO_SHIFT;
+	gpd_data |= ((uint64_t)rx_gpd_entry->parse_ctrl & AL_ETH_RX_GPD_OUTER_PARSE_CTRL_MASK) <<
+		AL_ETH_RX_GPD_OUTER_PARSE_CTRL_SHIFT;
+	gpd_data |= ((uint64_t)rx_gpd_entry->outer_l3_len & AL_ETH_RX_GPD_INNER_PARSE_CTRL_MASK) <<
+		AL_ETH_RX_GPD_INNER_PARSE_CTRL_SHIFT;
+	gpd_data |= ((uint64_t)rx_gpd_entry->l3_priority & AL_ETH_RX_GPD_L3_PRIORITY_MASK) <<
+		AL_ETH_RX_GPD_L3_PRIORITY_SHIFT;
+	gpd_data |= ((uint64_t)rx_gpd_entry->l4_dst_port_lsb & AL_ETH_RX_GPD_L4_DST_PORT_LSB_MASK) <<
+		AL_ETH_RX_GPD_L4_DST_PORT_LSB_SHIFT;
+
+	gpd_mask  = ((uint64_t)rx_gpd_entry->outer_l3_proto_idx_mask & AL_ETH_RX_GPD_OUTER_L3_PROTO_MASK) <<
+		AL_ETH_RX_GPD_OUTER_L3_PROTO_SHIFT;
+	gpd_mask |= ((uint64_t)rx_gpd_entry->outer_l4_proto_idx_mask & AL_ETH_RX_GPD_OUTER_L4_PROTO_MASK) <<
+		AL_ETH_RX_GPD_OUTER_L4_PROTO_SHIFT;
+	gpd_mask |= ((uint64_t)rx_gpd_entry->inner_l3_proto_idx_mask & AL_ETH_RX_GPD_INNER_L3_PROTO_MASK) <<
+		AL_ETH_RX_GPD_INNER_L3_PROTO_SHIFT;
+	gpd_mask |= ((uint64_t)rx_gpd_entry->inner_l4_proto_idx_mask & AL_ETH_RX_GPD_INNER_L4_PROTO_MASK) <<
+		AL_ETH_RX_GPD_INNER_L4_PROTO_SHIFT;
+	gpd_mask |= ((uint64_t)rx_gpd_entry->parse_ctrl_mask & AL_ETH_RX_GPD_OUTER_PARSE_CTRL_MASK) <<
+		AL_ETH_RX_GPD_OUTER_PARSE_CTRL_SHIFT;
+	gpd_mask |= ((uint64_t)rx_gpd_entry->outer_l3_len_mask & AL_ETH_RX_GPD_INNER_PARSE_CTRL_MASK) <<
+		AL_ETH_RX_GPD_INNER_PARSE_CTRL_SHIFT;
+	gpd_mask |= ((uint64_t)rx_gpd_entry->l3_priority_mask & AL_ETH_RX_GPD_L3_PRIORITY_MASK) <<
+		AL_ETH_RX_GPD_L3_PRIORITY_SHIFT;
+	gpd_mask |= ((uint64_t)rx_gpd_entry->l4_dst_port_lsb_mask & AL_ETH_RX_GPD_L4_DST_PORT_LSB_MASK) <<
+		AL_ETH_RX_GPD_L4_DST_PORT_LSB_SHIFT;
+
+	/* Rx Generic protocol detect Cam compare table */
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gpd_cam_addr, idx);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gpd_cam_ctrl,
+			(uint32_t)((rx_gpd_entry->rx_gpd_cam_ctrl) << AL_ETH_RX_GPD_CAM_CTRL_VALID_SHIFT));
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gpd_cam_mask_2,
+			(uint32_t)(gpd_mask >> AL_ETH_RX_GPD_CAM_MASK_2_SHIFT));
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gpd_cam_mask_1,
+			(uint32_t)(gpd_mask));
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gpd_cam_data_2,
+			(uint32_t)(gpd_data >> AL_ETH_RX_GPD_CAM_DATA_2_SHIFT));
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gpd_cam_data_1,
+			(uint32_t)(gpd_data));
+
+	gcp_table_gen  = (rx_gcp_entry->poly_sel & AL_ETH_RX_GCP_POLY_SEL_MASK) <<
+		AL_ETH_RX_GCP_POLY_SEL_SHIFT;
+	gcp_table_gen |= (rx_gcp_entry->crc32_bit_comp & AL_ETH_RX_GCP_CRC32_BIT_COMP_MASK) <<
+		AL_ETH_RX_GCP_CRC32_BIT_COMP_SHIFT;
+	gcp_table_gen |= (rx_gcp_entry->crc32_bit_swap & AL_ETH_RX_GCP_CRC32_BIT_SWAP_MASK) <<
+		AL_ETH_RX_GCP_CRC32_BIT_SWAP_SHIFT;
+	gcp_table_gen |= (rx_gcp_entry->crc32_byte_swap & AL_ETH_RX_GCP_CRC32_BYTE_SWAP_MASK) <<
+		AL_ETH_RX_GCP_CRC32_BYTE_SWAP_SHIFT;
+	gcp_table_gen |= (rx_gcp_entry->data_bit_swap & AL_ETH_RX_GCP_DATA_BIT_SWAP_MASK) <<
+		AL_ETH_RX_GCP_DATA_BIT_SWAP_SHIFT;
+	gcp_table_gen |= (rx_gcp_entry->data_byte_swap & AL_ETH_RX_GCP_DATA_BYTE_SWAP_MASK) <<
+		AL_ETH_RX_GCP_DATA_BYTE_SWAP_SHIFT;
+	gcp_table_gen |= (rx_gcp_entry->trail_size & AL_ETH_RX_GCP_TRAIL_SIZE_MASK) <<
+		AL_ETH_RX_GCP_TRAIL_SIZE_SHIFT;
+	gcp_table_gen |= (rx_gcp_entry->head_size & AL_ETH_RX_GCP_HEAD_SIZE_MASK) <<
+		AL_ETH_RX_GCP_HEAD_SIZE_SHIFT;
+	gcp_table_gen |= (rx_gcp_entry->head_calc & AL_ETH_RX_GCP_HEAD_CALC_MASK) <<
+		AL_ETH_RX_GCP_HEAD_CALC_SHIFT;
+	gcp_table_gen |= (rx_gcp_entry->mask_polarity & AL_ETH_RX_GCP_MASK_POLARITY_MASK) <<
+		AL_ETH_RX_GCP_MASK_POLARITY_SHIFT;
+
+	rx_alu_opcode  = (rx_gcp_entry->rx_alu_opcode_1 & AL_ETH_RX_GCP_OPCODE_1_MASK) <<
+		AL_ETH_RX_GCP_OPCODE_1_SHIFT;
+	rx_alu_opcode |= (rx_gcp_entry->rx_alu_opcode_2 & AL_ETH_RX_GCP_OPCODE_2_MASK) <<
+		AL_ETH_RX_GCP_OPCODE_2_SHIFT;
+	rx_alu_opcode |= (rx_gcp_entry->rx_alu_opcode_3 & AL_ETH_RX_GCP_OPCODE_3_MASK) <<
+		AL_ETH_RX_GCP_OPCODE_3_SHIFT;
+	rx_alu_opsel  = (rx_gcp_entry->rx_alu_opsel_1 & AL_ETH_RX_GCP_OPSEL_1_MASK) <<
+		AL_ETH_RX_GCP_OPSEL_1_SHIFT;
+	rx_alu_opsel |= (rx_gcp_entry->rx_alu_opsel_2 & AL_ETH_RX_GCP_OPSEL_2_MASK) <<
+		AL_ETH_RX_GCP_OPSEL_2_SHIFT;
+	rx_alu_opsel |= (rx_gcp_entry->rx_alu_opsel_3 & AL_ETH_RX_GCP_OPSEL_3_MASK) <<
+		AL_ETH_RX_GCP_OPSEL_3_SHIFT;
+	rx_alu_opsel |= (rx_gcp_entry->rx_alu_opsel_4 & AL_ETH_RX_GCP_OPSEL_4_MASK) <<
+		AL_ETH_RX_GCP_OPSEL_4_SHIFT;
+
+	/*  Rx Generic crc prameters table general */
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gcp_table_addr, idx);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gcp_table_gen,
+			gcp_table_gen);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gcp_table_mask_1,
+			rx_gcp_entry->gcp_mask[0]);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gcp_table_mask_2,
+			rx_gcp_entry->gcp_mask[1]);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gcp_table_mask_3,
+			rx_gcp_entry->gcp_mask[2]);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gcp_table_mask_4,
+			rx_gcp_entry->gcp_mask[3]);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gcp_table_mask_5,
+			rx_gcp_entry->gcp_mask[4]);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gcp_table_mask_6,
+			rx_gcp_entry->gcp_mask[5]);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gcp_table_crc_init,
+			rx_gcp_entry->crc_init);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gcp_table_res,
+			rx_gcp_entry->gcp_table_res);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gcp_table_alu_opcode,
+			rx_alu_opcode);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gcp_table_alu_opsel,
+			rx_alu_opsel);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gcp_table_alu_val,
+			rx_gcp_entry->alu_val);
+	return 0;
+}
+
+#define AL_ETH_TX_GENERIC_CRC_ENTRIES_NUM 7
+#define AL_ETH_RX_GENERIC_CRC_ENTRIES_NUM 31
+
+static struct al_eth_tx_gpd_cam_entry al_eth_generic_tx_crc_gpd[AL_ETH_TX_GENERIC_CRC_ENTRIES_NUM] = {
+
+	/* [0] roce (with grh, bth) */
+	{22,		0,		0,		0,		1,
+	 0x1f,		0x0,		0x0,		0x0,		},
+	/* [1] fcoe */
+	{21,		0,		0,		0,		1,
+	 0x1f,		0x0,		0x0,		0x0,		},
+	/* [2] routable_roce that is refered as l4_protocol, over IPV4 (and udp) */
+	{8,		23,		0,		0,		1,
+	 0x1f,		0x1f,		0x0,		0x0,		},
+	/* [3] routable_roce that is refered as l4_protocol, over IPV6 (and udp) */
+	{11,		23,		0,		0,		1,
+	 0x1f,		0x1f,		0x0,		0x0,		},
+	/* [4] routable_roce that is refered as tunneled_packet, over outer IPV4 and udp */
+	{23,		0,		5,		0,		1,
+	 0x1f,		0x0,		0x5,		0x0,		},
+	/* [5] routable_roce that is refered as tunneled_packet, over outer IPV6 and udp */
+	{23,		0,		3,		0,		1,
+	 0x1f,		0x0,		0x5,		0x0		},
+	/* [6] default match */
+	{0,		0,		0,		0,		1,
+	 0x0,		0x0,		0x0,		0x0		}
+};
+
+static struct al_eth_tx_gcp_table_entry al_eth_generic_tx_crc_gcp[AL_ETH_TX_GENERIC_CRC_ENTRIES_NUM] = {
+
+	/* [0] roce (with grh, bth) */
+	{0,		1,		1,		0,		1,
+	 0,		4,		8,		0,		1,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0xffff7f03,	0x00000000,	0x00000000,
+	 0x00c00000,	0x00000000,	0x00000000},	0xffffffff,	0x20,
+	 0},
+	/* [1] fcoe */
+	{0,		1,		0,		0,		1,
+	 0,		8,		14,		1,		1,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x20,
+	 0},
+	/* [2] routable_roce that is refered as l4_protocol, over IPV4 (and udp) */
+	{0,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x3000cf00,	0x00000f00,	0xc0000000,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x20,
+	 0},
+	/* [3] routable_roce that is refered as l4_protocol, over IPV6 (and udp) */
+	{0,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x7f030000,	0x00000000,	0x000f00c0,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x20,
+	 0},
+	/* [4] routable_roce that is refered as tunneled_packet, over outer IPV4 and udp */
+	{0,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 2,		0,		0,		0,		10,
+	 0,		0,		{0x3000cf00,	0x00000f00,	0xc0000000,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x20,
+	 28},
+	/* [5] routable_roce that is refered as tunneled_packet, over outer IPV6 and udp */
+	{0,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 2,		0,		0,		0,		10,
+	 0,		0,		{0x7f030000,	0x00000000,	0x000f00c0,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x20,
+	 48},
+	/* [6] default match */
+	{0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	  0x00000000},	0x00000000,	0x0,
+	 0}
+};
+
+static struct al_eth_tx_crc_chksum_replace_cmd_for_protocol_num_entry al_eth_tx_crc_chksum_replace_cmd[AL_ETH_TX_GENERIC_CRC_ENTRIES_NUM] = {
+
+	/* [0] roce (with grh, bth) */
+	{0,1,0,1,		0,0,0,0,		0,0,0,0},
+	/* [1] fcoe */
+	{0,1,0,1,		0,0,0,0,		0,0,0,0},
+	/* [2] routable_roce that is refered as l4_protocol, over IPV4 (and udp) */
+	{0,0,1,1,		0,0,0,0,		0,1,0,1},
+	/* [3] routable_roce that is refered as l4_protocol, over IPV6 (and udp) */
+	{0,0,1,1,		0,0,0,0,		0,0,0,0},
+	/* [4] routable_roce that is refered as tunneled_packet, over outer IPV4 and udp */
+	{0,1,0,1,		0,0,0,0,		0,0,0,0},
+	/* [5] routable_roce that is refered as tunneled_packet, over outer IPV6 and udp */
+	{0,1,0,1,		0,0,0,0,		0,0,0,0},
+	/* [6] default match */
+	{0,0,0,0,		0,0,1,1,		0,1,0,1}
+};
+
+static struct al_eth_rx_gpd_cam_entry al_eth_generic_rx_crc_gpd[AL_ETH_RX_GENERIC_CRC_ENTRIES_NUM] = {
+
+	/* [0] roce (with grh, bth) */
+	{22,		0,		0,		0,
+	 0,		0,		0,		0,		1,
+	 0x1f,		0x0,		0x0,		0x0,
+	 0x4,		0x0,		0x0,		0x0},
+	/* [1] fcoe */
+	{21,		0,		0,		0,
+	 0,		0,		0,		0,		1,
+	 0x1f,		0x0,		0x0,		0x0,
+	 0x4,		0x0,		0x0,		0x0},
+	/* [2] routable_roce that is refered as l4_protocol, over IPV4 (and udp) */
+	{8,		23,		0,		0,
+	 0,		0,		0,		0,		1,
+	 0x1f,		0x1f,		0x0,		0x0,
+	 0x4,		0x0,		0x0,		0x0},
+	/* [3] routable_roce that is refered as l4_protocol, over IPV6 (and udp) */
+	{11,		23,		0,		0,
+	 0,		0,		0,		0,		1,
+	 0x1f,		0x1f,		0x0,		0x0,
+	 0x4,		0x0,		0x0,		0x0},
+	/* [4] routable_roce that is refered as tunneled_packet, over outer IPV4 and udp */
+	{8,		13,		23,		0,
+	 0,		0,		0,		0,		1,
+	 0x1f,		0x1f,		0x1f,		0x0,
+	 0x4,		0x0,		0x0,		0x0},
+	/* [5] routable_roce that is refered as tunneled_packet, over outer IPV6 and udp */
+	{11,		13,		23,		0,
+	 0,		0,		0,		0,		1,
+	 0x1f,		0x1f,		0x1f,		0x0,
+	 0x4,		0x0,		0x0,		0x0},
+	/* [6] tunneled roce (with grh, bth) over GRE over IPV4 */
+	{8,		14,		22,		0,
+	 4,		0,		0,		0,		1,
+	 0x1f,		0x1f,		0x1f,		0x0,
+	 0x4,		0x0,		0x0,		0x0},
+	/* [7] tunneled roce (with grh, bth) over GRE over IPV6 */
+	{11,		14,		22,		0,
+	 4,		0,		0,		0,		1,
+	 0x1f,		0x1f,		0x1f,		0x0,
+	 0x4,		0x0,		0x0,		0x0},
+	/* [8] tunneled fcoe over IPV4 */
+	{8,		0,		21,		0,
+	 4,		0,		0,		0,		1,
+	 0x1f,		0x0,		0x1f,		0x0,
+	 0x4,		0x0,		0x0,		0x0},
+        /* [9] tunneled fcoe over IPV6 */
+        {11,		0,		21,		0,
+	 4,		0,		0,		0,		1,
+         0x1f,		0x0,		0x1f,		0x0,
+	 0x4,		0x0,		0x0,		0x0},
+	/* [10] tunneled routable_roce that is refered as l4_protocol, over IPV4 (and udp) over IPV4 */
+	{8,             0,              8,              23,
+	 4,		0,		0,		0,		1,
+	0x1f,		0x0,		0x1f,		0x1f,
+	 0x4,		0x0,		0x0,		0x0},
+	/* [11] tunneled routable_roce that is refered as l4_protocol, over IPV4 (and udp) over IPV6 */
+	{11,		0,		8,		23,
+	4,		0,		0,		0,		1,
+	0x1f,		0x0,		0x1f,		0x1f,
+	0x4,		0x0,		0x0,		0x0},
+	/* [12] tunneled routable_roce that is refered as l4_protocol, over IPV6 (and udp) over IPV4 */
+	{8,		0,		11,		23,
+	4,		0,		0,		0,		1,
+	0x1f,		0x0,		0x1f,		0x1f,
+	0x4,		0x0,		0x0,		0x0},
+	/* [13] tunneled routable_roce that is refered as l4_protocol, over IPV6 (and udp) over IPV6 */
+	{11,		0,		11,		23,
+	4,		0,		0,		0,		1,
+	0x1f,		0x0,		0x1f,		0x1f,
+	0x4,		0x0,		0x0,		0x0},
+	/* [14] l3_pkt - IPV4 */
+	{8,		0,		0,		0,
+	0,		0,		0,		0,		1,
+	0x1f,		0x1f,		0x0,		0x0,
+	0x4,		0x0,		0x0,		0x0},
+	/* [15] l4_hdr over IPV4 */
+	{8,		12,		0,		0,
+	0,		0,		0,		0,		1,
+	0x1f,		0x1e,		0x0,		0x0,
+	0x4,		0x0,		0x0,		0x0},
+	/* [16] l3_pkt - IPV6 */
+	{11,		0,		0,		0,
+	0,		0,		0,		0,		1,
+	0x1f,		0x1f,		0x0,		0x0,
+	0x4,		0x0,		0x0,		0x0},
+	/* [17] l4_hdr over IPV6 */
+	{11,		12,		0,		0,
+	0,		0,		0,		0,		1,
+	0x1f,		0x1e,		0x0,		0x0,
+	0x4,		0x0,		0x0,		0x0},
+	/* [18] IPV4 over IPV4 */
+	{8,		0,		8,		0,
+	4,		0,		0,		0,		1,
+	0x1f,		0x0,		0x1f,		0x1f,
+	0x4,		0x0,		0x0,		0x0},
+	/* [19] l4_hdr over IPV4 over IPV4 */
+	{8,		0,		8,		12,
+	4,		0,		0,		0,		1,
+	0x1f,		0x0,		0x1f,		0x1e,
+	0x4,		0x0,		0x0,		0x0},
+	/* [20] IPV4 over IPV6 */
+	{11,		0,		8,		0,
+	4,		0,		0,		0,		1,
+	0x1f,		0x0,		0x1f,		0x1f,
+	0x4,		0x0,		0x0,		0x0},
+	/* [21] l4_hdr over IPV4 over IPV6 */
+	{11,		0,		8,		12,
+	4,		0,		0,		0,		1,
+	0x1f,		0x0,		0x1f,		0x1e,
+	0x4,		0x0,		0x0,		0x0},
+	/* [22] IPV6 over IPV4 */
+	{8,		0,		11,		0,
+	4,		0,		0,		0,		1,
+	0x1f,		0x0,		0x1f,		0x1f,
+	0x4,		0x0,		0x0,		0x0},
+	/* [23] l4_hdr over IPV6 over IPV4 */
+	{8,		0,		11,		12,
+	4,		0,		0,		0,		1,
+	0x1f,		0x0,		0x1f,		0x1e,
+	0x4,		0x0,		0x0,		0x0},
+	/* [24] IPV6 over IPV6 */
+	{11,		0,		11,		0,
+	4,		0,		0,		0,		1,
+	0x1f,		0x0,		0x1f,		0x1f,
+	0x4,		0x0,		0x0,		0x0},
+	/* [25] l4_hdr over IPV6 over IPV6 */
+	{11,		0,		11,		12,
+	4,		0,		0,		0,		1,
+	0x1f,		0x0,		0x1f,		0x1e,
+	0x4,		0x0,		0x0,		0x0},
+	/* [26] GENERIC_STORAGE_READ, over IPV4 (and udp) */
+	{8,		2,		0,		0,
+	0,		0,		0,		0,		1,
+	0x1f,		0x1f,		0x0,		0x0,
+	0x4,		0x0,		0x0,		0x0},
+	/* [27] GENERIC_STORAGE_READ, over IPV6 (and udp) */
+	{11,		2,		0,		0,
+	0,		0,		0,		0,		1,
+	0x1f,		0x1f,		0x0,		0x0,
+	0x4,		0x0,		0x0,		0x0},
+	/* [28] tunneled GENERIC_STORAGE_READ over IPV4 (and udp) over IPV4/IPV6 */
+	{8,		0,		8,		2,
+	4,		0,		0,		0,		1,
+	0x18,		0x0,		0x1f,		0x1f,
+	0x4,		0x0,		0x0,		0x0},
+	/* [29] tunneled GENERIC_STORAGE_READ over IPV6 (and udp)  over IPV4/IPV6 */
+	{8,		0,		11,		2,
+	4,		0,		0,		0,		1,
+	0x18,		0x0,		0x1f,		0x1f,
+	0x4,		0x0,		0x0,		0x0},
+	/* [30] default match */
+	{0,		0,		0,		0,
+	 0,		0,		0,		0,		1,
+	 0x0,		0x0,		0x0,		0x0,
+	 0x0,		0x0,		0x0,		0x0}
+};
+
+static struct al_eth_rx_gcp_table_entry al_eth_generic_rx_crc_gcp[AL_ETH_RX_GENERIC_CRC_ENTRIES_NUM] = {
+
+	/* [0] roce (with grh, bth) */
+	{0,		 1,		1,		0,		1,
+	 0,		4,		8,		0,		1,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0xffff7f03,	0x00000000,	0x00000000,
+	 0x00c00000,	0x00000000,	0x00000000},	0xffffffff,	0x02000010,
+	 0},
+	/* [1] fcoe */
+	{0,		1,		0,		0,		1,
+	 0,		8,		14,		1,		1,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000010,
+	 0},
+	/* [2] routable_roce that is refered as l4_protocol, over IPV4 (and udp) */
+	{0,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x3000cf00,	0x00000f00,	0xc0000000,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000014,
+	 0},
+	/* [3] routable_roce that is refered as l4_protocol, over IPV6 (and udp) */
+	{0,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x7f030000,	0x00000000,	0x000f00c0,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000010,
+	 0},
+	/* [4] routable_roce that is refered as tunneled_packet, over outer IPV4 and udp */
+	{0,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 2,		0,		0,		0,		10,
+	 0,		0,		{0x3000cf00,	0x00000f00,	0xc0000000,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000014,
+	 28},
+	/* [5] routable_roce that is refered as tunneled_packet, over outer IPV4 and udp */
+	{0,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 2,		0,		0,		0,		10,
+	 0,		0,		{0x7f030000,	0x00000000,	0x000f00c0,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000014,
+	 48},
+	/* [6] tunneled roce (with grh, bth) over IPV4 */
+	{0,		1,		1,		0,		1,
+	 0,		4,		8,		0,		1,
+	 0,		0,		0,		1,		0,
+	 0,		0,		{0xffff7f03,	0x00000000,	0x00000000,
+	 0x00c00000,	0x00000000,	0x00000000},	0xffffffff,	0x02000014,
+	 0},
+	/* [7] tunneled roce (with grh, bth) over IPV6 */
+	{0,		1,		1,		0,		1,
+	 0,		4,		8,		0,		1,
+	 0,		0,		0,		1,		0,
+	 0,		0,		{0xffff7f03,	0x00000000,	0x00000000,
+	 0x00c00000,	0x00000000,	0x00000000},	0xffffffff,	0x02000010,
+	 0},
+	/* [8] tunneled fcoe over IPV4 */
+	{0,		1,		0,		0,		1,
+	 0,		8,		14,		1,		1,
+	 0,		0,		0,		1,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000014,
+	 0},
+	/* [9] tunneled fcoe over IPV6 */
+	{0,		1,		0,		0,		1,
+	 0,		8,		14,		1,		1,
+	 0,		0,		0,		1,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000010,
+	 0},
+	/* [10] tunneled routable_roce that is refered as l4_protocol, over IPV4 (and udp) over IPV4 */
+	{0,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 0,		0,		0,		1,		0,
+	 0,		0,		{0x3000cf00,	0x00000f00,	0xc0000000,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000015,
+	 0},
+	/* [11] tunneled routable_roce that is refered as l4_protocol, over IPV4 (and udp) over IPV6 */
+	{0,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 0,		0,		0,		1,		0,
+	 0,		0,		{0x3000cf00,	0x00000f00,	0xc0000000,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000011,
+	 0},
+	/* [12] tunneled routable_roce that is refered as l4_protocol, over IPV6 (and udp) over IPV4 */
+	{0,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 0,		0,		0,		1,		0,
+	 0,		0,		{0x7f030000,	0x00000000,	0x000f00c0,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000014,
+	 0},
+	/* [13] tunneled routable_roce that is refered as l4_protocol, over IPV6 (and udp) over IPV6 */
+	{0,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 0,		0,		0,		1,		0,
+	 0,		0,		{0x7f030000,	0x00000000,	0x000f00c0,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000010,
+	 0},
+	/* [14] l3_pkt - IPV4 */
+	{0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0x00000000,	0x1,
+	 0},
+	/* [15] l4_hdr over IPV4 */
+	{0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0x00000000,	0x3,
+	 0},
+	/* [16] l3_pkt - IPV6 */
+	{0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0x00000000,	0x0,
+	 0},
+	/* [17] l4_hdr over IPV6 */
+	{0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0x00000000,	0x2,
+	 0},
+	/* [18] IPV4 over IPV4 */
+	{0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0x00000000,	0x5,
+	 0},
+	/* [19] l4_hdr over IPV4 over IPV4 */
+	{0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0x00000000,	0x7,
+	 0},
+	/* [20] IPV4 over IPV6 */
+	{0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0x00000000,	0x1,
+	 0},
+	/* [21] l4_hdr over IPV4 over IPV6 */
+	{0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0x00000000,	0x3,
+	 0},
+	/* [22] IPV6 over IPV4 */
+	{0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0x00000000,	0x4,
+	 0},
+	/* [23] l4_hdr over IPV6 over IPV4 */
+	{0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0x00000000,	0x6,
+	 0},
+	/* [24] IPV6 over IPV6 */
+	{0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0x00000000,	0x0,
+	 0},
+	/* [25] l4_hdr over IPV6 over IPV6 */
+	{0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0x00000000,	0x2,
+	 0},
+	/* [26] GENERIC_STORAGE_READ, over IPV4 (and udp) */
+	{1,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 0,		0,		0,		2,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000014,
+	 0},
+	/* [27] GENERIC_STORAGE_READ, over IPV6 (and udp) */
+	{1,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 0,		0,		0,		2,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000010,
+	 0},
+	/* [28] tunneled GENERIC_STORAGE_READ over IPV4 (and udp) over IPV4/IPV6 */
+	{1,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 0,		0,		0,		3,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000011,
+	 0},
+	/* [29] tunneled GENERIC_STORAGE_READ over IPV6 (and udp)  over IPV4/IPV6 */
+	{1,		1,		1,		0,		1,
+	 0,		4,		0,		0,		1,
+	 0,		0,		0,		3,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0xffffffff,	0x02000010,
+	 0},
+	/* [30] default match */
+	{0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		0,		0,		0,
+	 0,		0,		{0x00000000,	0x00000000,	0x00000000,
+	 0x00000000,	0x00000000,	0x00000000},	0x00000000,	0x0,
+	 0}
+};
+
+int al_eth_generic_crc_init(struct al_hal_eth_adapter *adapter)
+{
+	int idx;
+	al_assert((adapter->rev_id > AL_ETH_REV_ID_2));
+
+	al_dbg("eth [%s]: enable tx_generic_crc\n", adapter->name);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.tx_gcp_legacy, 0x0);
+	al_reg_write32(&adapter->ec_regs_base->tfw_v3.crc_csum_replace, 0x0);
+	al_dbg("eth [%s]: enable rx_generic_crc\n", adapter->name);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.rx_gcp_legacy, 0x0);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.gpd_p1, AL_ETH_RX_GPD_PARSE_RESULT_OUTER_L3_PROTO_IDX_OFFSET);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.gpd_p2, AL_ETH_RX_GPD_PARSE_RESULT_OUTER_L4_PROTO_IDX_OFFSET);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.gpd_p3, AL_ETH_RX_GPD_PARSE_RESULT_INNER_L3_PROTO_IDX_OFFSET);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.gpd_p4, AL_ETH_RX_GPD_PARSE_RESULT_INNER_L4_PROTO_IDX_OFFSET);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.gpd_p5, AL_ETH_RX_GPD_PARSE_RESULT_OUTER_PARSE_CTRL);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.gpd_p6, AL_ETH_RX_GPD_PARSE_RESULT_INNER_PARSE_CTRL);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.gpd_p7, AL_ETH_RX_GPD_PARSE_RESULT_L3_PRIORITY);
+	al_reg_write32(&adapter->ec_regs_base->rfw_v3.gpd_p8, AL_ETH_RX_GPD_PARSE_RESULT_OUTER_L4_DST_PORT_LSB);
+
+	for (idx = 0; idx < AL_ETH_TX_GENERIC_CRC_ENTRIES_NUM; idx++)
+	{
+		al_eth_tx_generic_crc_entry_set(adapter, idx, &al_eth_generic_tx_crc_gpd[idx], &al_eth_generic_tx_crc_gcp[idx], &al_eth_tx_crc_chksum_replace_cmd[idx]);
+	}
+	for (idx = 0; idx < AL_ETH_RX_GENERIC_CRC_ENTRIES_NUM; idx++)
+	{
+		al_eth_rx_generic_crc_entry_set(adapter, idx, &al_eth_generic_rx_crc_gpd[idx], &al_eth_generic_rx_crc_gcp[idx]);
+	}
 	return 0;
 }
 

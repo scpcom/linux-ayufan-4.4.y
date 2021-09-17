@@ -302,7 +302,7 @@ extern void _memset_io(volatile void __iomem *, int, size_t);
  * IO port primitives for more information.
  */
 #ifndef readl
-#ifdef AL_PCIE_RMN_1010
+#ifdef CONFIG_AL_PCIE_RMN_1010
 uint32_t al_dma_read_reg32(const volatile void __iomem *address);
 uint16_t al_dma_read_reg16(const volatile void __iomem *address);
 uint8_t al_dma_read_reg8(const volatile void __iomem *address);
@@ -322,7 +322,7 @@ uint8_t al_dma_read_reg8(const volatile void __iomem *address);
 #define writeb_relaxed(v,c)	__raw_writeb(v,c)
 #define writew_relaxed(v,c)	__raw_writew((__force u16) cpu_to_le16(v),c)
 
-#ifdef AL_PCIE_RMN_1010
+#ifdef CONFIG_AL_PCIE_RMN_1010
 void al_dma_write_reg32(volatile void __iomem *address, u32 val);
 #define writel_relaxed(v,c)	(al_dma_write_reg32(c,v))
 #else

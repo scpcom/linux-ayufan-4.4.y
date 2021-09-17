@@ -186,10 +186,14 @@ alloc_ok:
 					NULL);
 			up_read(&current->mm->mmap_sem);
 
-			if (ret != page_list->nr_pages)
-				goto unpin;
-
 			local_list->nr_iovecs = i + 1;
+			if (ret != page_list->nr_pages) {
+				pr_debug("%s %d: get_user_pages didn't succeed to pin all requested pages!!\n", __func__, __LINE__);
+				/* set the nr_pages that really allocated so the unpin will release it*/
+				page_list->nr_pages = ret > 0 ? ret : 0;
+				goto unpin;
+			}
+
 		}
 		pr_debug("%s %d: added user %d pages (%d vecs)\n", __func__, __LINE__,
 				local_list->nr_pages, local_list->nr_iovecs);
@@ -349,6 +353,7 @@ void dma_free_iovec_data(struct tcp_sock *tp)
 		sg_free_table(local_list->sgts + 1);
 		kfree(local_list->sgts);
 		kfree(tp->ucopy.pinned_list);
+		tp->ucopy.pinned_list = NULL;
 	}
 }
 

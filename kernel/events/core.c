@@ -166,7 +166,6 @@ int sysctl_perf_event_mlock __read_mostly = 512 + (PAGE_SIZE / 1024); /* 'free' 
 /*
  * max perf event sample rate
  */
-#if defined(CONFIG_SYNO_ARMADA)
 #define DEFAULT_MAX_SAMPLE_RATE		100000
 #define DEFAULT_SAMPLE_PERIOD_NS	(NSEC_PER_SEC / DEFAULT_MAX_SAMPLE_RATE)
 #define DEFAULT_CPU_TIME_MAX_PERCENT	25
@@ -187,12 +186,6 @@ void update_perf_cpu_limits(void)
 	do_div(tmp, 100);
 	atomic_set(&perf_sample_allowed_ns, tmp);
 }
-#else /* CONFIG_SYNO_ARMADA */
-#define DEFAULT_MAX_SAMPLE_RATE 100000
-int sysctl_perf_event_sample_rate __read_mostly = DEFAULT_MAX_SAMPLE_RATE;
-static int max_samples_per_tick __read_mostly =
-	DIV_ROUND_UP(DEFAULT_MAX_SAMPLE_RATE, HZ);
-#endif /* CONFIG_SYNO_ARMADA */
 
 int perf_proc_update_handler(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp,
@@ -204,15 +197,12 @@ int perf_proc_update_handler(struct ctl_table *table, int write,
 		return ret;
 
 	max_samples_per_tick = DIV_ROUND_UP(sysctl_perf_event_sample_rate, HZ);
-#if defined(CONFIG_SYNO_ARMADA)
 	perf_sample_period_ns = NSEC_PER_SEC / sysctl_perf_event_sample_rate;
 	update_perf_cpu_limits();
-#endif /* CONFIG_SYNO_ARMADA */
 
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_ARMADA)
 int sysctl_perf_cpu_time_max_percent __read_mostly = DEFAULT_CPU_TIME_MAX_PERCENT;
 
 int perf_cpu_time_max_percent_handler(struct ctl_table *table, int write,
@@ -237,6 +227,24 @@ int perf_cpu_time_max_percent_handler(struct ctl_table *table, int write,
  */
 #define NR_ACCUMULATED_SAMPLES 128
 DEFINE_PER_CPU(u64, running_sample_length);
+
+static void perf_duration_warn(struct irq_work *w)
+{
+	u64 avg_local_sample_len;
+	u64 local_samples_len;
+
+	local_samples_len = __get_cpu_var(running_sample_length);
+	avg_local_sample_len = local_samples_len/NR_ACCUMULATED_SAMPLES;
+
+	printk_ratelimited(KERN_WARNING
+			"perf interrupt took too long (%lld > %lld), lowering "
+			"kernel.perf_event_max_sample_rate to %d\n",
+			avg_local_sample_len,
+			atomic_read(&perf_sample_allowed_ns),
+			sysctl_perf_event_sample_rate);
+}
+
+static DEFINE_IRQ_WORK(perf_duration_work, perf_duration_warn);
 
 void perf_sample_event_took(u64 sample_len_ns)
 {
@@ -269,16 +277,10 @@ void perf_sample_event_took(u64 sample_len_ns)
 	sysctl_perf_event_sample_rate = max_samples_per_tick * HZ;
 	perf_sample_period_ns = NSEC_PER_SEC / sysctl_perf_event_sample_rate;
 
-	printk_ratelimited(KERN_WARNING
-			"perf samples too long (%lld > %d), lowering "
-			"kernel.perf_event_max_sample_rate to %d\n",
-			avg_local_sample_len,
-			atomic_read(&perf_sample_allowed_ns),
-			sysctl_perf_event_sample_rate);
-
 	update_perf_cpu_limits();
+
+	irq_work_queue(&perf_duration_work);
 }
-#endif /* CONFIG_SYNO_ARMADA */
 
 static atomic64_t perf_event_id;
 

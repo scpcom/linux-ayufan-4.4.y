@@ -1559,6 +1559,14 @@ COMPAT_SYSCALL_DEFINE2(SYNOUtime, const char __user *, filename, struct compat_t
 			error = synoacl_op_perm(path.dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR);
 			if (error) 
 				goto drop_write;
+		} else if (inode->i_op->syno_bypass_is_synoacl) {
+			/*
+			 * GlusterFS returns false for [IS|HAS]_SYNOACL, but ACL
+			 * attribute could be checked and got from GlusterFS xlator.
+			 */
+			error = inode->i_op->syno_bypass_is_synoacl(path.dentry, 0, -EPERM);
+			if (error)
+				goto drop_write;
 		} else {
 #endif /* CONFIG_SYNO_FS_WINACL */
 		error = -EPERM;

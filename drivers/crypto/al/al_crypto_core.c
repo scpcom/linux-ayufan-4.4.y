@@ -296,9 +296,9 @@ static void al_crypto_unmask_interrupts(struct al_crypto_device *device,
 	if (single_interrupt)
 		group_a_mask |= AL_INT_GROUP_A_GROUP_B_SUM;
 
-	al_udma_iofic_unmask(regs_base, AL_INT_GROUP_A, group_a_mask);
-	al_udma_iofic_unmask(regs_base, AL_INT_GROUP_B, group_b_mask);
-	al_udma_iofic_unmask(regs_base, AL_INT_GROUP_D, group_d_mask);
+	al_udma_iofic_unmask(regs_base, AL_UDMA_IOFIC_LEVEL_PRIMARY, AL_INT_GROUP_A, group_a_mask);
+	al_udma_iofic_unmask(regs_base, AL_UDMA_IOFIC_LEVEL_PRIMARY, AL_INT_GROUP_B, group_b_mask);
+	al_udma_iofic_unmask(regs_base, AL_UDMA_IOFIC_LEVEL_PRIMARY, AL_INT_GROUP_D, group_d_mask);
 }
 
 /******************************************************************************
@@ -434,6 +434,9 @@ static int al_crypto_setup_interrupts(struct al_crypto_device *device)
 		cpu = next_cpu((i % num_online_cpus() - 1), *cpu_online_mask);
 		cpumask_set_cpu(cpu, &chan->affinity_hint_mask);
 
+#if defined(CONFIG_SYNO_ALPINE_TUNING_CRYPTO_PERFORMANCE)
+		irq_set_affinity(msix->vector, &chan->affinity_hint_mask);
+#endif /* CONFIG_SYNO_ALPINE_TUNING_CRYPTO_PERFORMANCE */
 		irq_set_affinity_hint(msix->vector, &chan->affinity_hint_mask);
 	}
 
@@ -984,6 +987,7 @@ static irqreturn_t al_crypto_do_interrupt_legacy(int irq, void *data)
 
 	al_udma_iofic_mask(
 		(struct unit_regs *)device->udma_regs_base,
+		AL_UDMA_IOFIC_LEVEL_PRIMARY,
 		AL_INT_GROUP_A,
 		AL_INT_GROUP_A_GROUP_B_SUM |
 		AL_INT_GROUP_A_GROUP_D_SUM);
@@ -1087,6 +1091,7 @@ static void al_crypto_group_d_errors_handler(struct al_crypto_device *device)
 	u32 read_cause_group_d, read_cause_crypto_reg_a;
 
 	read_cause_group_d = al_udma_iofic_read_cause(device->udma_regs_base,
+		AL_UDMA_IOFIC_LEVEL_PRIMARY,
 		AL_INT_GROUP_D);
 
 	dev_err(&device->pdev->dev,
@@ -1107,6 +1112,7 @@ static void al_crypto_group_d_errors_handler(struct al_crypto_device *device)
 
 		al_udma_iofic_unmask(
 			(struct unit_regs *)device->udma_regs_base,
+			AL_UDMA_IOFIC_LEVEL_PRIMARY,
 			AL_INT_GROUP_A,
 			AL_INT_GROUP_A_GROUP_D_SUM);
 
@@ -1132,6 +1138,7 @@ static void al_crypto_cleanup_tasklet(unsigned long data)
 
 	al_udma_iofic_unmask(
 		(struct unit_regs *)chan->device->udma_regs_base,
+		AL_UDMA_IOFIC_LEVEL_PRIMARY,
 		AL_INT_GROUP_B,
 		1 << chan->idx);
 }
@@ -1148,6 +1155,7 @@ static inline void al_crypto_cleanup_q_group_fn(
 
 	status = al_udma_iofic_read_cause(
 			(struct unit_regs *)device->udma_regs_base,
+			AL_UDMA_IOFIC_LEVEL_PRIMARY,
 			group);
 
 	for (i = 0; i < device->num_channels; i++) {
@@ -1171,6 +1179,7 @@ static void al_crypto_cleanup_tasklet_msix_rx(unsigned long data)
 
 	status = al_udma_iofic_read_cause(
 			(struct unit_regs *)device->udma_regs_base,
+			AL_UDMA_IOFIC_LEVEL_PRIMARY,
 			AL_INT_GROUP_D);
 
 	if (unlikely(status))
@@ -1180,6 +1189,7 @@ static void al_crypto_cleanup_tasklet_msix_rx(unsigned long data)
 
 	al_udma_iofic_unmask(
 		(struct unit_regs *)device->udma_regs_base,
+		AL_UDMA_IOFIC_LEVEL_PRIMARY,
 		AL_INT_GROUP_A,
 		AL_INT_GROUP_A_GROUP_B_SUM);
 }
@@ -1193,6 +1203,7 @@ static void al_crypto_cleanup_tasklet_legacy(unsigned long data)
 
 	status = al_udma_iofic_read_cause(
 			(struct unit_regs *)device->udma_regs_base,
+			AL_UDMA_IOFIC_LEVEL_PRIMARY,
 			AL_INT_GROUP_A);
 
 	if (unlikely(status & AL_INT_GROUP_A_GROUP_D_SUM))
@@ -1202,6 +1213,7 @@ static void al_crypto_cleanup_tasklet_legacy(unsigned long data)
 
 	al_udma_iofic_unmask(
 		(struct unit_regs *)device->udma_regs_base,
+		AL_UDMA_IOFIC_LEVEL_PRIMARY,
 		AL_INT_GROUP_A,
 		AL_INT_GROUP_A_GROUP_B_SUM);
 }

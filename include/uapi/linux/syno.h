@@ -23,10 +23,6 @@
 #define SYNO_MAXNAME    491
 #endif
 
-#if defined(SYNO_X64)
-#define SYNO_RESIZE_INODE_SIZE_EXTEND_USER
-#endif
-
 #ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
 #if defined (F_CLEAR_ARCHIVE) || defined (F_SETSMB_ARCHIVE) || defined (F_SETSMB_HIDDEN) || \
 	defined (F_SETSMB_SYSTEM) || defined (F_CLRSMB_ARCHIVE) || defined (F_CLRSMB_HIDDEN) || \

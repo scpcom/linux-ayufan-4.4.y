@@ -2893,6 +2893,10 @@ static int ata_eh_followup_srst_needed(struct ata_link *link, int rc)
 	return 0;
 }
 
+#ifdef CONFIG_SYNO_SATA_LINK_SPEED_RETRY
+#define MAX_SPD_RETRY 3
+#endif /* CONFIG_SYNO_SATA_LINK_SPEED_RETRY */
+
 int ata_eh_reset(struct ata_link *link, int classify,
 		 ata_prereset_fn_t prereset, ata_reset_fn_t softreset,
 		 ata_reset_fn_t hardreset, ata_postreset_fn_t postreset)
@@ -2915,6 +2919,9 @@ int ata_eh_reset(struct ata_link *link, int classify,
 	u32 scontrol;
 #endif /* CONFIG_SYNO_SIL3132_INTEL_SSD_WORKAROUND */
 	int nr_unknown, rc;
+#ifdef CONFIG_SYNO_SATA_LINK_SPEED_RETRY
+	int spd_retries = 0;
+#endif /* CONFIG_SYNO_SATA_LINK_SPEED_RETRY */
 
 	/*
 	 * Prepare to reset
@@ -3129,8 +3136,19 @@ int ata_eh_reset(struct ata_link *link, int classify,
 	}
 
 	/* record current link speed */
+#ifdef CONFIG_SYNO_SATA_LINK_SPEED_RETRY
+	/* If read SStatus fail, try again, max 3 times retry */
+	spd_retries = 0;
+	while (sata_scr_read(link, SCR_STATUS, &sstatus) != 0 && spd_retries < MAX_SPD_RETRY) {
+		msleep(5);
+		++spd_retries;
+		ata_link_err(link, "Read current link speed fail, retry %d\n", spd_retries);
+	}
+#else /* CONFIG_SYNO_SATA_LINK_SPEED_RETRY */
 	if (sata_scr_read(link, SCR_STATUS, &sstatus) == 0)
+#endif /* CONFIG_SYNO_SATA_LINK_SPEED_RETRY */
 		link->sata_spd = (sstatus >> 4) & 0xf;
+
 	if (slave && sata_scr_read(slave, SCR_STATUS, &sstatus) == 0)
 		slave->sata_spd = (sstatus >> 4) & 0xf;
 
@@ -3167,6 +3185,15 @@ int ata_eh_reset(struct ata_link *link, int classify,
 
 	if (ap->pflags & ATA_PFLAG_FROZEN)
 		ata_eh_thaw_port(ap);
+
+#ifdef CONFIG_SYNO_EUNIT_SPD_UNKNOWN_RESCAN
+	if (ap->nr_pmp_links > 0 && sata_scr_read(link, SCR_STATUS, &sstatus) == 0) {
+		if (((sstatus >> 4) & 0xf) != link->sata_spd) {
+			printk("Rescan sata_spd\n");
+			link->sata_spd = (sstatus >> 4) & 0xf;
+		}
+	}
+#endif /* CONFIG_SYNO_EUNIT_SPD_UNKNOWN_RESCAN */
 
 	/*
 	 * Make sure onlineness and classification result correspond.

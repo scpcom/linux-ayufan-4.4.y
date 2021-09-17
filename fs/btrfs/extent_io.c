@@ -1268,7 +1268,12 @@ int set_extent_bits(struct extent_io_tree *tree, u64 start, u64 end,
 int clear_extent_bits(struct extent_io_tree *tree, u64 start, u64 end,
 		      unsigned long bits, gfp_t mask)
 {
-	return clear_extent_bit(tree, start, end, bits, 0, 0, NULL, mask);
+	int wake = 0;
+
+	if (bits & EXTENT_LOCKED)
+		wake = 1;
+
+	return clear_extent_bit(tree, start, end, bits, wake, 0, NULL, mask);
 }
 
 int set_extent_delalloc(struct extent_io_tree *tree, u64 start, u64 end,
@@ -1759,6 +1764,9 @@ int extent_clear_unlock_delalloc(struct inode *inode, u64 start, u64 end,
 	if (page_ops == 0)
 		return 0;
 
+	if ((page_ops & PAGE_SET_ERROR) && nr_pages > 0)
+		mapping_set_error(inode->i_mapping, -EIO);
+
 	while (nr_pages > 0) {
 		ret = find_get_pages_contig(inode->i_mapping, index,
 				     min_t(unsigned long,
@@ -1776,6 +1784,8 @@ int extent_clear_unlock_delalloc(struct inode *inode, u64 start, u64 end,
 				clear_page_dirty_for_io(pages[i]);
 			if (page_ops & PAGE_SET_WRITEBACK)
 				set_page_writeback(pages[i]);
+			if (page_ops & PAGE_SET_ERROR)
+				SetPageError(pages[i]);
 			if (page_ops & PAGE_END_WRITEBACK)
 				end_page_writeback(pages[i]);
 			if (page_ops & PAGE_UNLOCK)
@@ -2563,6 +2573,7 @@ static void end_bio_extent_readpage(struct bio *bio, int err)
 					test_bit(BIO_UPTODATE, &bio->bi_flags);
 				if (err)
 					uptodate = 0;
+				offset += len;
 				continue;
 			}
 		}
@@ -2739,8 +2750,10 @@ static int submit_extent_page(int rw, struct extent_io_tree *tree,
 		    bio_add_page(bio, page, page_size, offset) < page_size) {
 			ret = submit_one_bio(rw, bio, mirror_num,
 					     prev_bio_flags);
-			if (ret < 0)
+			if (ret < 0) {
+				*bio_ret = NULL;
 				return ret;
+			}
 			bio = NULL;
 		} else {
 			return 0;
@@ -3566,6 +3579,68 @@ static void end_extent_buffer_writeback(struct extent_buffer *eb)
 	wake_up_bit(&eb->bflags, EXTENT_BUFFER_WRITEBACK);
 }
 
+static void set_btree_ioerr(struct page *page)
+{
+	struct extent_buffer *eb = (struct extent_buffer *)page->private;
+	struct btrfs_inode *btree_ino = BTRFS_I(eb->fs_info->btree_inode);
+
+	SetPageError(page);
+	if (test_and_set_bit(EXTENT_BUFFER_WRITE_ERR, &eb->bflags))
+		return;
+
+	/*
+	 * If writeback for a btree extent that doesn't belong to a log tree
+	 * failed, increment the counter transaction->eb_write_errors.
+	 * We do this because while the transaction is running and before it's
+	 * committing (when we call filemap_fdata[write|wait]_range against
+	 * the btree inode), we might have
+	 * btree_inode->i_mapping->a_ops->writepages() called by the VM - if it
+	 * returns an error or an error happens during writeback, when we're
+	 * committing the transaction we wouldn't know about it, since the pages
+	 * can be no longer dirty nor marked anymore for writeback (if a
+	 * subsequent modification to the extent buffer didn't happen before the
+	 * transaction commit), which makes filemap_fdata[write|wait]_range not
+	 * able to find the pages tagged with SetPageError at transaction
+	 * commit time. So if this happens we must abort the transaction,
+	 * otherwise we commit a super block with btree roots that point to
+	 * btree nodes/leafs whose content on disk is invalid - either garbage
+	 * or the content of some node/leaf from a past generation that got
+	 * cowed or deleted and is no longer valid.
+	 *
+	 * Note: setting AS_EIO/AS_ENOSPC in the btree inode's i_mapping would
+	 * not be enough - we need to distinguish between log tree extents vs
+	 * non-log tree extents, and the next filemap_fdatawait_range() call
+	 * will catch and clear such errors in the mapping - and that call might
+	 * be from a log sync and not from a transaction commit. Also, checking
+	 * for the eb flag EXTENT_BUFFER_WRITE_ERR at transaction commit time is
+	 * not done and would not be reliable - the eb might have been released
+	 * from memory and reading it back again means that flag would not be
+	 * set (since it's a runtime flag, not persisted on disk).
+	 *
+	 * Using the flags below in the btree inode also makes us achieve the
+	 * goal of AS_EIO/AS_ENOSPC when writepages() returns success, started
+	 * writeback for all dirty pages and before filemap_fdatawait_range()
+	 * is called, the writeback for all dirty pages had already finished
+	 * with errors - because we were not using AS_EIO/AS_ENOSPC,
+	 * filemap_fdatawait_range() would return success, as it could not know
+	 * that writeback errors happened (the pages were no longer tagged for
+	 * writeback).
+	 */
+	switch (eb->log_index) {
+	case -1:
+		set_bit(BTRFS_INODE_BTREE_ERR, &btree_ino->runtime_flags);
+		break;
+	case 0:
+		set_bit(BTRFS_INODE_BTREE_LOG1_ERR, &btree_ino->runtime_flags);
+		break;
+	case 1:
+		set_bit(BTRFS_INODE_BTREE_LOG2_ERR, &btree_ino->runtime_flags);
+		break;
+	default:
+		BUG(); /* unexpected, logic error */
+	}
+}
+
 static void end_bio_extent_buffer_writepage(struct bio *bio, int err)
 {
 	int uptodate = err == 0;
@@ -3581,10 +3656,9 @@ static void end_bio_extent_buffer_writepage(struct bio *bio, int err)
 		BUG_ON(!eb);
 		done = atomic_dec_and_test(&eb->io_pages);
 
-		if (!uptodate || test_bit(EXTENT_BUFFER_IOERR, &eb->bflags)) {
-			set_bit(EXTENT_BUFFER_IOERR, &eb->bflags);
+		if (!uptodate || test_bit(EXTENT_BUFFER_WRITE_ERR, &eb->bflags)) {
 			ClearPageUptodate(page);
-			SetPageError(page);
+			set_btree_ioerr(page);
 		}
 
 		end_page_writeback(page);
@@ -3612,7 +3686,7 @@ static noinline_for_stack int write_one_eb(struct extent_buffer *eb,
 	int rw = (epd->sync_io ? WRITE_SYNC : WRITE) | REQ_META;
 	int ret = 0;
 
-	clear_bit(EXTENT_BUFFER_IOERR, &eb->bflags);
+	clear_bit(EXTENT_BUFFER_WRITE_ERR, &eb->bflags);
 	num_pages = num_extent_pages(eb->start, eb->len);
 	atomic_set(&eb->io_pages, num_pages);
 	if (btrfs_header_owner(eb) == BTRFS_TREE_LOG_OBJECTID)
@@ -3629,8 +3703,8 @@ static noinline_for_stack int write_one_eb(struct extent_buffer *eb,
 					 0, epd->bio_flags, bio_flags);
 		epd->bio_flags = bio_flags;
 		if (ret) {
-			set_bit(EXTENT_BUFFER_IOERR, &eb->bflags);
-			SetPageError(p);
+			set_btree_ioerr(p);
+			end_page_writeback(p);
 			if (atomic_sub_and_test(num_pages - i, &eb->io_pages))
 				end_extent_buffer_writeback(eb);
 			ret = -EIO;
@@ -3644,6 +3718,7 @@ static noinline_for_stack int write_one_eb(struct extent_buffer *eb,
 	if (unlikely(ret)) {
 		for (; i < num_pages; i++) {
 			struct page *p = extent_buffer_page(eb, i);
+			clear_page_dirty_for_io(p);
 			unlock_page(p);
 		}
 	}
@@ -4213,19 +4288,6 @@ static struct extent_map *get_extent_skip_holes(struct inode *inode,
 	return NULL;
 }
 
-static noinline int count_ext_ref(u64 inum, u64 offset, u64 root_id, void *ctx)
-{
-	unsigned long cnt = *((unsigned long *)ctx);
-
-	cnt++;
-	*((unsigned long *)ctx) = cnt;
-
-	/* Now we're sure that the extent is shared. */
-	if (cnt > 1)
-		return 1;
-	return 0;
-}
-
 int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 		__u64 start, __u64 len, get_extent_t *get_extent)
 {
@@ -4242,6 +4304,7 @@ int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 	struct extent_map *em = NULL;
 	struct extent_state *cached_state = NULL;
 	struct btrfs_path *path;
+	struct btrfs_root *root = BTRFS_I(inode)->root;
 	int end = 0;
 	u64 em_start = 0;
 	u64 em_len = 0;
@@ -4262,8 +4325,8 @@ int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 	 * lookup the last file extent.  We're not using i_size here
 	 * because there might be preallocation past i_size
 	 */
-	ret = btrfs_lookup_file_extent(NULL, BTRFS_I(inode)->root,
-				       path, btrfs_ino(inode), -1, 0);
+	ret = btrfs_lookup_file_extent(NULL, root, path, btrfs_ino(inode), -1,
+				       0);
 	if (ret < 0) {
 		btrfs_free_path(path);
 		return ret;
@@ -4356,25 +4419,27 @@ int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 		} else if (em->block_start == EXTENT_MAP_DELALLOC) {
 			flags |= (FIEMAP_EXTENT_DELALLOC |
 				  FIEMAP_EXTENT_UNKNOWN);
-		} else {
-			unsigned long ref_cnt = 0;
+		} else if (fieinfo->fi_extents_max) {
+			u64 bytenr = em->block_start -
+				(em->start - em->orig_start);
 
 			disko = em->block_start + offset_in_extent;
 
 			/*
 			 * As btrfs supports shared space, this information
 			 * can be exported to userspace tools via
-			 * flag FIEMAP_EXTENT_SHARED.
+			 * flag FIEMAP_EXTENT_SHARED.  If fi_extents_max == 0
+			 * then we're just getting a count and we can skip the
+			 * lookup stuff.
 			 */
-			ret = iterate_inodes_from_logical(
-					em->block_start,
-					BTRFS_I(inode)->root->fs_info,
-					path, count_ext_ref, &ref_cnt);
-			if (ret < 0 && ret != -ENOENT)
+			ret = btrfs_check_shared(NULL, root->fs_info,
+						 root->objectid,
+						 btrfs_ino(inode), bytenr);
+			if (ret < 0)
 				goto out_free;
-
-			if (ref_cnt > 1)
+			if (ret)
 				flags |= FIEMAP_EXTENT_SHARED;
+			ret = 0;
 		}
 		if (test_bit(EXTENT_FLAG_COMPRESSED, &em->flags))
 			flags |= FIEMAP_EXTENT_ENCODED;
@@ -4441,6 +4506,16 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 
 #ifdef CONFIG_SYNO_BTRFS_FIX_PAGE_WRITEBACK
 	if (unlikely(extent_buffer_under_io(eb))) {
+		printk(KERN_ERR "EXTENT_BUFFER_WRITEBACK = %d,  EXTENT_BUFFER_DIRTY = %d\n",
+				test_bit(EXTENT_BUFFER_WRITEBACK, &eb->bflags), test_bit(EXTENT_BUFFER_DIRTY, &eb->bflags));
+		printk(KERN_ERR "io_pages = %d\n", atomic_read(&eb->io_pages));
+
+		num_pages = num_extent_pages(eb->start, eb->len);
+		for (index = 0; index < num_pages; index++) {
+			page = extent_buffer_page(eb, index);
+			printk(KERN_ERR "page %lu, dirty = %d, writeback = %d, lock = %d\n",
+					index, PageDirty(page), PageWriteback(page), PageLocked(page));
+		}
 		smp_mb();
 		BUG_ON(extent_buffer_under_io(eb));
 	}
@@ -4670,6 +4745,25 @@ struct extent_buffer *find_extent_buffer(struct btrfs_fs_info *fs_info,
 			       start >> PAGE_CACHE_SHIFT);
 	if (eb && atomic_inc_not_zero(&eb->refs)) {
 		rcu_read_unlock();
+		/*
+		 * Lock our eb's refs_lock to avoid races with
+		 * free_extent_buffer. When we get our eb it might be flagged
+		 * with EXTENT_BUFFER_STALE and another task running
+		 * free_extent_buffer might have seen that flag set,
+		 * eb->refs == 2, that the buffer isn't under IO (dirty and
+		 * writeback flags not set) and it's still in the tree (flag
+		 * EXTENT_BUFFER_TREE_REF set), therefore being in the process
+		 * of decrementing the extent buffer's reference count twice.
+		 * So here we could race and increment the eb's reference count,
+		 * clear its stale flag, mark it as dirty and drop our reference
+		 * before the other task finishes executing free_extent_buffer,
+		 * which would later result in an attempt to free an extent
+		 * buffer that is dirty.
+		 */
+		if (test_bit(EXTENT_BUFFER_STALE, &eb->bflags)) {
+			spin_lock(&eb->refs_lock);
+			spin_unlock(&eb->refs_lock);
+		}
 		mark_extent_buffer_accessed(eb);
 		return eb;
 	}
@@ -5059,7 +5153,7 @@ int read_extent_buffer_pages(struct extent_io_tree *tree,
 		goto unlock_exit;
 	}
 
-	clear_bit(EXTENT_BUFFER_IOERR, &eb->bflags);
+	clear_bit(EXTENT_BUFFER_READ_ERR, &eb->bflags);
 	eb->read_mirror = 0;
 	atomic_set(&eb->io_pages, num_reads);
 	for (i = start_i; i < num_pages; i++) {

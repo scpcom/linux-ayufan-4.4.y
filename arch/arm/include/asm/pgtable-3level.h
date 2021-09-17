@@ -196,7 +196,6 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 		clean_pmd_entry(pmdp);	\
 	} while (0)
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
 /*
  * For 3 levels of paging the PTE_EXT_NG bit will be set for user address ptes
  * that are written to a page table but not for ptes created with mk_pte.
@@ -213,7 +212,6 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 					: pte_val(pte_a))				\
 				== (pte_present(pte_b) ? pte_val(pte_b) & ~PTE_EXT_NG	\
 					: pte_val(pte_b)))
-#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,__pte(pte_val(pte)|(ext)))
 

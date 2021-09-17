@@ -34,6 +34,8 @@
 #include <linux/export.h>
 #include <drm/drmP.h>
 
+#include <drm/ati_pcigart.h>
+
 # define ATI_PCIGART_PAGE_SIZE		4096	/**< PCI GART page size */
 
 static int drm_ati_alloc_pcigart_table(struct drm_device *dev,
@@ -135,7 +137,6 @@ int drm_ati_pcigart_init(struct drm_device *dev, struct drm_ati_pcigart_info *ga
 			  (unsigned long long)bus_address,
 			  (unsigned long)address);
 	}
-
 
 	max_ati_pages = (gart_info->table_size / sizeof(u32));
 	max_real_pages = max_ati_pages / (PAGE_SIZE / ATI_PCIGART_PAGE_SIZE);

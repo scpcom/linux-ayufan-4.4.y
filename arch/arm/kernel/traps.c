@@ -396,29 +396,17 @@ void arm_notify_die(const char *str, struct pt_regs *regs,
 int is_valid_bugaddr(unsigned long pc)
 {
 #ifdef CONFIG_THUMB2_KERNEL
-#if defined(CONFIG_SYNO_LSP_ALPINE)
 	u16 bkpt;
 	u16 insn = __opcode_to_mem_thumb16(BUG_INSTR_VALUE);
-#else /* CONFIG_SYNO_LSP_ALPINE */
-	unsigned short bkpt;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
 #else
-#if defined(CONFIG_SYNO_LSP_ALPINE)
 	u32 bkpt;
 	u32 insn = __opcode_to_mem_arm(BUG_INSTR_VALUE);
-#else /* CONFIG_SYNO_LSP_ALPINE */
-	unsigned long bkpt;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
 #endif
 
 	if (probe_kernel_address((unsigned *)pc, bkpt))
 		return 0;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
 	return bkpt == insn;
-#else /* CONFIG_SYNO_LSP_ALPINE */
-	return bkpt == BUG_INSTR_VALUE;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
 }
 
 #endif

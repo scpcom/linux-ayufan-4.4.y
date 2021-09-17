@@ -384,6 +384,9 @@ int al_dma_cleanup_fn(
 
 int udma_fast_memcpy(int len, al_phys_addr_t src, al_phys_addr_t dst);
 
+void al_dma_flr(
+	struct pci_dev		*pdev);
+
 /**
  * Submit pending SW descriptors (enlarge the head) and unlock the prep-lock
  * in the case 'issue-pending' is responsible for submitting the HW descriptors

@@ -528,7 +528,6 @@ nfsd4_decode_close(struct nfsd4_compoundargs *argp, struct nfsd4_close *close)
 	DECODE_TAIL;
 }
 
-
 static __be32
 nfsd4_decode_commit(struct nfsd4_compoundargs *argp, struct nfsd4_commit *commit)
 {
@@ -1983,7 +1982,6 @@ static __be32 fattr_handle_absent_fs(u32 *bmval0, u32 *bmval1, u32 *rdattr_err)
 	return 0;
 }
 
-
 static int get_parent_attributes(struct svc_export *exp, struct kstat *stat)
 {
 	struct path path = exp->ex_path;
@@ -1995,6 +1993,10 @@ static int get_parent_attributes(struct svc_export *exp, struct kstat *stat)
 			break;
 	}
 	err = vfs_getattr(&path, stat);
+#ifdef CONFIG_SYNO_FS_WINACL
+	if (!err && IS_SYNOACL(path.dentry) && uid_eq(current_fsuid(), GLOBAL_ROOT_UID))
+			stat->mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+#endif
 	path_put(&path);
 	return err;
 }
@@ -2049,6 +2051,10 @@ nfsd4_encode_fattr(struct svc_fh *fhp, struct svc_export *exp,
 	err = vfs_getattr(&path, &stat);
 	if (err)
 		goto out_nfserr;
+#ifdef CONFIG_SYNO_FS_WINACL
+	if (IS_SYNOACL(dentry) && uid_eq(current_fsuid(), GLOBAL_ROOT_UID))
+		stat.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+#endif
 	if ((bmval0 & (FATTR4_WORD0_FILES_AVAIL | FATTR4_WORD0_FILES_FREE |
 			FATTR4_WORD0_FILES_TOTAL | FATTR4_WORD0_MAXNAME)) ||
 	    (bmval1 & (FATTR4_WORD1_SPACE_AVAIL | FATTR4_WORD1_SPACE_FREE |
@@ -2645,7 +2651,6 @@ nfsd4_encode_close(struct nfsd4_compoundres *resp, __be32 nfserr, struct nfsd4_c
 	return nfserr;
 }
 
-
 static __be32
 nfsd4_encode_commit(struct nfsd4_compoundres *resp, __be32 nfserr, struct nfsd4_commit *commit)
 {
@@ -2762,7 +2767,6 @@ nfsd4_encode_locku(struct nfsd4_compoundres *resp, __be32 nfserr, struct nfsd4_l
 	return nfserr;
 }
 
-
 static __be32
 nfsd4_encode_link(struct nfsd4_compoundres *resp, __be32 nfserr, struct nfsd4_link *link)
 {
@@ -2775,7 +2779,6 @@ nfsd4_encode_link(struct nfsd4_compoundres *resp, __be32 nfserr, struct nfsd4_li
 	}
 	return nfserr;
 }
-
 
 static __be32
 nfsd4_encode_open(struct nfsd4_compoundres *resp, __be32 nfserr, struct nfsd4_open *open)

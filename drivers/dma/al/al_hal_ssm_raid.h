@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -112,8 +112,6 @@ enum al_raid_op {
 #define	AL_RAID_REDIRECTED_TRANSACTION	AL_BIT(16)
 #define	AL_RAID_REDIRECTED_SRC_UDMA	(AL_BIT(13) | AL_BIT(12))
 #define	AL_RAID_REDIRECTED_SRC_QUEUE	(AL_BIT(9) | AL_BIT(8))
-
-#define AL_RAID_MAX_DST_DESCS	AL_UDMA_DEFAULT_MAX_ACTN_DESCS
 
 struct al_raid_transaction {
 	enum al_raid_op op;

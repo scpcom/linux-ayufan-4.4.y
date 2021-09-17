@@ -763,16 +763,6 @@ static int dwc3_remove(struct platform_device *pdev)
 {
 	struct dwc3	*dwc = platform_get_drvdata(pdev);
 
-	usb_phy_set_suspend(dwc->usb2_phy, 1);
-	usb_phy_set_suspend(dwc->usb3_phy, 1);
-#if defined (CONFIG_SYNO_LSP_MONACO)
-	phy_power_off(dwc->usb2_generic_phy);
-	phy_power_off(dwc->usb3_generic_phy);
-#endif /* CONFIG_SYNO_LSP_MONACO */
-
-	pm_runtime_put(&pdev->dev);
-	pm_runtime_disable(&pdev->dev);
-
 	dwc3_debugfs_exit(dwc);
 
 	switch (dwc->mode) {
@@ -796,6 +786,10 @@ static int dwc3_remove(struct platform_device *pdev)
 
 	usb_phy_set_suspend(dwc->usb2_phy, 1);
 	usb_phy_set_suspend(dwc->usb3_phy, 1);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	phy_power_off(dwc->usb2_generic_phy);
+	phy_power_off(dwc->usb3_generic_phy);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	dwc3_core_exit(dwc);
 

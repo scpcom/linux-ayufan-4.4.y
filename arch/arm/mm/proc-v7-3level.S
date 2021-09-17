@@ -79,8 +79,13 @@ ENTRY(cpu_v7_set_pte_ext)
 	tst	rh, #1 << (57 - 32)		@ L_PTE_NONE
 	bicne	rl, #L_PTE_VALID
 	bne	1f
-	tst	r3, #1 << (55 - 32)		@ L_PTE_DIRTY
-	orreq	r2, #L_PTE_RDONLY
+
+	eor	ip, rh, #1 << (55 - 32)	@ toggle L_PTE_DIRTY in temp reg to
+					@ test for !L_PTE_DIRTY || L_PTE_RDONLY
+	tst	ip, #1 << (55 - 32) | 1 << (58 - 32)
+	orrne	rl, #PTE_AP2
+	biceq	rl, #PTE_AP2
+
 #if defined(CONFIG_SYNO_LSP_ALPINE)
 1:
 #if (HW_PAGES_PER_PAGE >= 2)

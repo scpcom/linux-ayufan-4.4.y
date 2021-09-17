@@ -1265,6 +1265,7 @@ COMPAT_SYSCALL_DEFINE4(sendfile64, int, out_fd, int, in_fd,
 int aggregate_fd = -1;
 atomic_t syno_aggregate_recvfile_count = ATOMIC_INIT(0);
 
+#define SZV_GLUSTERFS "glusterfs"
 static int should_do_aggregate(struct file *file, int fd, loff_t pos, loff_t next_offset)
 {
 	int          blFlush = 0;
@@ -1276,6 +1277,14 @@ static int should_do_aggregate(struct file *file, int fd, loff_t pos, loff_t nex
 		return 0;
 
 	inode = file->f_dentry->d_inode->i_mapping->host;
+
+	if (!strcmp(inode->i_sb->s_type->name, "ecryptfs"))
+		return 0;
+
+	if (0 == strcmp(SZV_GLUSTERFS, inode->i_sb->s_subtype)) {
+		return 0;
+	}
+
 	spin_lock(&aggregate_lock);
 	if (0 == atomic_read(&syno_aggregate_recvfile_count)) {
 	// aggregate_recvfile() is available.
@@ -1337,6 +1346,7 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 	struct inode   *inode = NULL;
 	static loff_t   next_offset = 0;
 	unsigned short  blAggregate = 0;
+	unsigned short  blBufferWrite = 0;
 
 	if (!offset) {
 		ret = -EINVAL;
@@ -1374,46 +1384,86 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 	}
 
 	inode = file->f_dentry->d_inode->i_mapping->host;
+
 	mutex_lock(&inode->i_mutex);
-	if (should_do_aggregate(file, fd, pos, next_offset)) {
-		blAggregate = 1;
+	ret = generic_write_checks(file, &pos, &nbytes, S_ISBLK(inode->i_mode));
+	if (ret != 0) {
+		goto out;
 	}
-	/* refer to sock_read->sock_recvmsg->tcp_recvmsg */
-	do {
-		if (unlikely(blAggregate)) {
-			ret = do_aggregate_recvfile(file, sock, pos, (nbytes >= (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)) ?
-						(MAX_PAGES_PER_RECVFILE * PAGE_SIZE) : nbytes, &bytes_received, &bytes_written, 0);
-			// trans aggregate_recvfile() to normal if it is flushing.
-			if (inode->aggregate_flag & AGGREGATE_RECVFILE_FLUSH &&
-			      !(inode->aggregate_flag & AGGREGATE_RECVFILE_DOING)) {
-				next_offset = pos;
-				atomic_dec(&syno_aggregate_recvfile_count);
-				blAggregate = 0;
-			}
-		} else {
-			ret = do_recvfile(file, sock, pos, (nbytes > (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)) ?
-					   (MAX_PAGES_PER_RECVFILE * PAGE_SIZE) : nbytes, &bytes_received, &bytes_written);
-		}
-		total_received += bytes_received;
-		total_written += bytes_written;
-		if (0 >= ret) {
-			break;
-		}
-		nbytes -= bytes_written;
-		pos += bytes_written;
-	} while(nbytes > 0);
-	mutex_unlock(&inode->i_mutex);
+
+	sb_start_write(inode->i_sb);
+	/*
+	 * We can write back this queue in page reclaim
+	 */
+	current->backing_dev_info = file->f_mapping->backing_dev_info;
+	file_remove_suid(file);
+	file_update_time(file);
+
+	blAggregate = should_do_aggregate(file, fd, pos, next_offset);
+	blBufferWrite = file->f_op->syno_recvfile?1:0;
 	if (unlikely(blAggregate)) {
-		next_offset = pos;
-		atomic_dec(&syno_aggregate_recvfile_count);
+		do {
+			if (blAggregate) {
+				ret = do_aggregate_recvfile(file, sock, pos, (nbytes >= MAX_RECVFILE_BUF) ?
+							MAX_RECVFILE_BUF : nbytes, &bytes_received, &bytes_written, 0);
+				// trans aggregate_recvfile() to normal if it is flushing.
+				if (inode->aggregate_flag & AGGREGATE_RECVFILE_FLUSH &&
+				      !(inode->aggregate_flag & AGGREGATE_RECVFILE_DOING)) {
+					next_offset = pos;
+					atomic_dec(&syno_aggregate_recvfile_count);
+					blAggregate = 0;
+				}
+			} else {
+				ret = do_recvfile(file, sock, pos, (nbytes > MAX_RECVFILE_BUF) ?
+						   MAX_RECVFILE_BUF : nbytes, &bytes_received, &bytes_written);
+			}
+			total_received += bytes_received;
+			total_written += bytes_written;
+			if (0 >= ret) {
+				break;
+			}
+			nbytes -= bytes_written;
+			pos += bytes_written;
+		} while(nbytes > 0);
+		if (blAggregate) {
+			next_offset = pos;
+			atomic_dec(&syno_aggregate_recvfile_count);
+		}
+	} else {
+		if (blBufferWrite) {
+			do {
+				ret = file->f_op->syno_recvfile(file, sock, pos, (nbytes > MAX_RECVFILE_BUF) ?
+					   MAX_RECVFILE_BUF : nbytes, &bytes_received, &bytes_written);
+				total_received += bytes_received;
+				total_written += bytes_written;
+				if (0 >= ret) {
+					break;
+				}
+				nbytes -= bytes_written;
+				pos += bytes_written;
+			} while(nbytes > 0);
+		} else {
+			do {
+				ret = do_recvfile(file, sock, pos, (nbytes > MAX_RECVFILE_BUF) ?
+					   MAX_RECVFILE_BUF : nbytes, &bytes_received, &bytes_written);
+				total_received += bytes_received;
+				total_written += bytes_written;
+				if (0 >= ret) {
+					break;
+				}
+				nbytes -= bytes_written;
+				pos += bytes_written;
+			} while(nbytes > 0);
+		}
 	}
+	sb_end_write(inode->i_sb);
+	current->backing_dev_info = NULL;
+	mutex_unlock(&inode->i_mutex);
 
 	if(ret >= 0) {
 		fsnotify_modify(file);
 		ret = total_written;
-	}
-
-	if(0 > ret && rwbytes) {
+	} else if(rwbytes) {
 #ifdef CONFIG_IA32_EMULATION
 		rwbytes[0]=total_received;
 		rwbytes[1]=total_written;

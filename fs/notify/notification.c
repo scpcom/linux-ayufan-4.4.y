@@ -291,9 +291,6 @@ alloc_holder:
 		goto alloc_holder;
 	}
 
-	group->q_len++;
-	holder->event = event;
-
 #ifdef CONFIG_SYNO_FS_NOTIFY
 	/* we fetch full name after it is decided to inqueue. */
 	if (event->data_type == FSNOTIFY_EVENT_SYNO || event->data_type == FSNOTIFY_EVENT_PATH)
@@ -309,6 +306,10 @@ alloc_holder:
 		}
 	}
 #endif
+
+	group->q_len++;
+	holder->event = event;
+
 	fsnotify_get_event(event);
 	list_add_tail(&holder->event_list, list);
 	if (priv)

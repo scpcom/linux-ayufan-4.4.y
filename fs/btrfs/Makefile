@@ -1,3 +1,6 @@
+ifeq ($(CONFIG_SYNO_LSP_ALPINE),y)
+KBUILD_CPPFLAGS += -Iarch/arm/mach-alpine/include/al_hal/
+endif
 
 obj-$(CONFIG_BTRFS_FS) := btrfs.o
 

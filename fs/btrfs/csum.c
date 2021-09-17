@@ -26,9 +26,13 @@
 #include <linux/crc32c.h>
 #include <linux/cpumask.h>
 #include <linux/percpu.h>
+#include <linux/dma-mapping.h>
+#include <linux/dmaengine.h>
 
 #include "csum.h"
 #include "disk-io.h"
+
+#include <asm/cputype.h>
 
 #ifdef CONFIG_BTRFS_FS_AHASH_CRC
 
@@ -219,8 +223,142 @@ void btrfs_csum_exit(void)
 		kmem_cache_destroy(btrfs_mpage_cache);
 }
 
-#else
+#elif defined(CONFIG_ARCH_ALPINE) && defined(CONFIG_BTRFS_AL_FAST_CRC_DMA)
+#include "../../arch/arm/mach-alpine/include/al_hal/al_hal_ssm_crc_memcpy.h"
+#include "../../drivers/crypto/al/al_crypto.h"
 
+#define CRC_SIZE 4
+
+extern struct al_ssm_dma *al_btrfs_crc_dma[];
+extern int al_btrfs_crc_dma_qid[];
+extern int al_btrfs_crc_q_count;
+
+/* One Q per CPU */
+int crc_q_cnt[NR_CPUS];
+struct al_crc_transaction xaction[NR_CPUS];
+struct al_buf xact_bufs[NR_CPUS];
+u32 zero_crc;
+
+static inline void btrfs_csum_page_digest_sw(struct page	*page,
+	unsigned int	offset,
+	size_t		len,
+	u32		*result)
+{
+	u32 crc;
+	void *kaddr = kmap_atomic(page);
+	crc = btrfs_csum_data(kaddr + offset, ~(u32)0, len);
+	kunmap_atomic(kaddr);
+	btrfs_csum_final(crc, (char *)result);
+}
+
+static inline int fast_crc_dma(int cpuid,
+	struct page	*page,
+	unsigned int	offset,
+	size_t		len,
+	u32		*result)
+{
+	int status;
+
+	xaction[cpuid].src.bufs[0].addr = pfn_to_dma(NULL, page_to_pfn(page))
+							+ offset;
+	xaction[cpuid].src.bufs[0].len = len;
+	xaction[cpuid].crc_out.addr = dma_map_single(NULL, result, CRC_SIZE,
+							DMA_BIDIRECTIONAL);
+	status = al_crc_csum_prepare(al_btrfs_crc_dma[cpuid],
+			al_btrfs_crc_dma_qid[cpuid],
+			   &xaction[cpuid]);
+	if (likely(!status)) {
+		al_crc_memcpy_dma_action(al_btrfs_crc_dma[cpuid],
+			al_btrfs_crc_dma_qid[cpuid], xaction[cpuid].tx_descs_count);
+		crc_q_cnt[cpuid] += 1;
+		return 0;
+	}
+	return -1;
+}
+
+void btrfs_csum_page_digest(
+	struct page	*page,
+	unsigned int	offset,
+	size_t		len,
+	u32		*result)
+{
+	int cpuid = smp_processor_id();
+	u32 status;
+
+	if (fast_crc_dma(cpuid, page, offset, len, result)) {
+		btrfs_csum_page_digest_sw(page, offset, len, result);
+		return;
+	}
+	while (crc_q_cnt[cpuid]) {
+		if (al_crc_memcpy_dma_completion(al_btrfs_crc_dma[cpuid],
+			al_btrfs_crc_dma_qid[cpuid],
+			&status))
+			crc_q_cnt[cpuid] -= 1;
+	}
+}
+
+void *btrfs_csum_mpage_init(unsigned int pages_n)
+{
+	/* Nothing to do here... */
+	return 0;
+}
+
+void btrfs_csum_mpage_digest(
+	void		*mpage_priv,
+	struct page	*page,
+	unsigned int	offset,
+	size_t		len,
+	u32		*result)
+{
+	int cpuid = smp_processor_id();
+	if (fast_crc_dma(cpuid, page, offset, len, result))
+		btrfs_csum_page_digest_sw(page, offset, len, result);
+}
+
+void btrfs_csum_mpage_final(void *mpage_priv)
+{
+	int cpuid = smp_processor_id();
+	u32 status;
+
+	while (crc_q_cnt[cpuid]) {
+		if (al_crc_memcpy_dma_completion(al_btrfs_crc_dma[cpuid],
+				al_btrfs_crc_dma_qid[cpuid],
+				&status))
+			crc_q_cnt[cpuid] -= 1;
+	}
+}
+
+int btrfs_csum_init(void)
+{
+	int i;
+	static bool once;
+	BUG_ON(al_btrfs_crc_q_count < NR_CPUS);
+	/* initalize on first mount */
+	if (!once) {
+		for (i = 0; i < NR_CPUS; i++) {
+			crc_q_cnt[i] = 0;
+			memset((void *)&xaction[i], 0, sizeof(struct al_crc_transaction));
+			xaction[i].crcsum_type = AL_CRC_CHECKSUM_CRC32C;
+			xaction[i].src.bufs = &xact_bufs[i];
+			xaction[i].src.num = 1;
+			xaction[i].crc_out.len = CRC_SIZE;
+			xaction[i].xor_valid = AL_TRUE;
+			xaction[i].in_xor = ~0;
+			xaction[i].res_xor = ~0;
+			xaction[i].crc_iv_in.addr = dma_map_single(NULL, &zero_crc, CRC_SIZE,
+								DMA_BIDIRECTIONAL);
+			xaction[i].crc_iv_in.len = CRC_SIZE;
+		}
+		once = true;
+	}
+	return 0;
+}
+
+void btrfs_csum_exit(void)
+{
+}
+
+#else /* FAST_CRC */
 void btrfs_csum_page_digest(
 	struct page	*page,
 	unsigned int	offset,

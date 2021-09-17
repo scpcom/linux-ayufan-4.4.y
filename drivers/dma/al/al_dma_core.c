@@ -26,9 +26,11 @@
 #include <linux/dma-mapping.h>
 
 #include "../dmaengine.h"
+#include "al_fabric.h"
 #include "al_dma.h"
 #include "al_dma_prep.h"
 #include "al_dma_sysfs.h"
+#include "al_dma_module_params.h"
 #include "al_hal_udma_iofic.h"
 #include "al_hal_udma_config.h"
 #include "al_hal_ssm_crc_memcpy.h"
@@ -36,40 +38,9 @@
 #include "al_hal_udma_debug.h"
 #include "al_hal_iomap.h"
 #include "al_hal_plat_services.h"
+#include "al_hal_unit_adapter_regs.h"
 
-#define OP_SUPPORT_INTERRUPT	1
-#define OP_SUPPORT_MEMCPY	1
-#define OP_SUPPORT_SG		1
-#define OP_SUPPORT_MEMSET	1
-#define OP_SUPPORT_XOR		1
-#define OP_SUPPORT_XOR_VAL	1
-#define OP_SUPPORT_PQ		1
-#define OP_SUPPORT_PQ_VAL	1
-
-static int max_channels = AL_DMA_MAX_CHANNELS;
-module_param(max_channels, int, 0644);
-MODULE_PARM_DESC(
-	max_channels,
-	"maximum number of channels (queues) to enable (default: 4)");
-
-static int ring_alloc_order = 10;
-module_param(ring_alloc_order, int, 0644);
-MODULE_PARM_DESC(
-	ring_alloc_order,
-	 "allocate 2^n descriptors per channel"
-	 " (default: 8 max: 16)");
-
-static int tx_descs_order = 15;
-module_param(tx_descs_order, int, 0644);
-MODULE_PARM_DESC(
-	tx_descs_order,
-	"allocate 2^n of descriptors in Tx queue (default: 15)");
-
-static int rx_descs_order = 15;
-module_param(rx_descs_order, int, 0644);
-MODULE_PARM_DESC(
-	rx_descs_order,
-	"allocate 2^n of descriptors in Rx queue (default: 15)");
+MODULE_LICENSE("GPL");
 
 static dma_cookie_t al_dma_tx_submit_unlock(
 	struct dma_async_tx_descriptor *tx);
@@ -94,6 +65,9 @@ static int al_dma_control(
 	unsigned long		arg);
 
 static int al_dma_setup_interrupts(
+	struct al_dma_device *device);
+
+static void al_dma_free_interrupts(
 	struct al_dma_device *device);
 
 static irqreturn_t al_dma_do_interrupt(
@@ -141,6 +115,7 @@ int al_dma_core_init(
 	int err;
 	struct al_udma_m2s_pkt_len_conf pkt_len_conf;
 	struct al_udma *tx_udma;
+	int max_channels = al_dma_get_max_channels();
 
 	dev_dbg(
 		dma->dev,
@@ -224,54 +199,58 @@ int al_dma_core_init(
 	dma->device_issue_pending = al_dma_issue_pending;
 	dma->device_control = al_dma_control;
 
-#if OP_SUPPORT_INTERRUPT
-	dma_cap_set(DMA_INTERRUPT, dma->cap_mask);
-	dma->device_prep_dma_interrupt = al_dma_prep_interrupt_lock;
-#endif
+	if (al_dma_get_op_support_interrupt()) {
+		dma_cap_set(DMA_INTERRUPT, dma->cap_mask);
+		dma->device_prep_dma_interrupt = al_dma_prep_interrupt_lock;
+	}
 
-#if OP_SUPPORT_MEMCPY
-	dma_cap_set(DMA_MEMCPY, dma->cap_mask);
-	dma->device_prep_dma_memcpy = al_dma_prep_memcpy_lock;
-#endif
+	if (al_dma_get_op_support_memcpy()) {
+		dma_cap_set(DMA_MEMCPY, dma->cap_mask);
+		dma->device_prep_dma_memcpy = al_dma_prep_memcpy_lock;
+	}
 
-#if OP_SUPPORT_SG
-	dma_cap_set(DMA_SG, dma->cap_mask);
-	dma->device_prep_dma_sg = al_dma_prep_sg_lock;
-#endif
+	if (al_dma_get_op_support_sg()) {
+		dma_cap_set(DMA_SG, dma->cap_mask);
+		dma->device_prep_dma_sg = al_dma_prep_sg_lock;
+	}
 
-#if OP_SUPPORT_MEMSET
-	dma_cap_set(DMA_MEMSET, dma->cap_mask);
-	dma->device_prep_dma_memset = al_dma_prep_memset_lock;
-#endif
+	if (al_dma_get_op_support_memset()) {
+		dma_cap_set(DMA_MEMSET, dma->cap_mask);
+		dma->device_prep_dma_memset = al_dma_prep_memset_lock;
+	}
 
-#if OP_SUPPORT_XOR
-	dma_cap_set(DMA_XOR, dma->cap_mask);
-	dma->device_prep_dma_xor = al_dma_prep_xor_lock;
-	dma->max_xor = AL_DMA_MAX_XOR;
-#endif
+	if (al_dma_get_op_support_xor()) {
+		dma_cap_set(DMA_XOR, dma->cap_mask);
+		dma->device_prep_dma_xor = al_dma_prep_xor_lock;
+		dma->max_xor = AL_DMA_MAX_XOR;
+	}
 
-#if OP_SUPPORT_PQ
-	dma_cap_set(DMA_PQ, dma->cap_mask);
-	dma->device_prep_dma_pq = al_dma_prep_pq_lock;
-#endif
+	if (al_dma_get_op_support_pq()) {
+		dma_cap_set(DMA_PQ, dma->cap_mask);
+		dma->device_prep_dma_pq = al_dma_prep_pq_lock;
+	}
 
-#if OP_SUPPORT_PQ_VAL
+	if (al_dma_get_op_support_pq_val()) {
 #ifndef CONFIG_ASYNC_TX_DISABLE_PQ_VAL_DMA
-	dma_cap_set(DMA_PQ_VAL, dma->cap_mask);
-	dma->device_prep_dma_pq_val = al_dma_prep_pq_val_lock;
+		dma_cap_set(DMA_PQ_VAL, dma->cap_mask);
+		dma->device_prep_dma_pq_val = al_dma_prep_pq_val_lock;
 #endif
-#endif
+	}
 
-#if (OP_SUPPORT_PQ || (OP_SUPPORT_PQ_VAL && !defined(CONFIG_ASYNC_TX_DISABLE_PQ_VAL_DMA)))
-	dma_set_maxpq(dma, AL_DMA_MAX_XOR - 2, 0);
+	if (al_dma_get_op_support_pq())
+		dma_set_maxpq(dma, AL_DMA_MAX_XOR - 2, 0);
+	else if (al_dma_get_op_support_pq_val()) {
+#ifndef CONFIG_ASYNC_TX_DISABLE_PQ_VAL_DMA
+		dma_set_maxpq(dma, AL_DMA_MAX_XOR - 2, 0);
 #endif
+	}
 
-#if OP_SUPPORT_XOR_VAL
+	if (al_dma_get_op_support_xor_val()) {
 #ifndef CONFIG_ASYNC_TX_DISABLE_XOR_VAL_DMA
-	dma_cap_set(DMA_XOR_VAL, dma->cap_mask);
-	dma->device_prep_dma_xor_val = al_dma_prep_xor_val_lock;
+		dma_cap_set(DMA_XOR_VAL, dma->cap_mask);
+		dma->device_prep_dma_xor_val = al_dma_prep_xor_val_lock;
 #endif
-#endif
+	}
 
 #ifdef CONFIG_ALPINE_VP_WA
 	dma->copy_align = AL_DMA_ALIGN_SHIFT;
@@ -396,6 +375,8 @@ int al_dma_fast_init(
 
 	struct al_udma_q_params tx_params;
 	struct al_udma_q_params rx_params;
+
+	int max_channels = al_dma_get_max_channels();
 
 	dev_dbg(
 		dma->dev,
@@ -647,8 +628,6 @@ static inline al_phys_addr_t virt_to_physical_address(const volatile void __iome
 	return phys_addr;
 }
 
-extern int hwcc;
-
 #ifdef	CONFIG_AL_PCIE_DEADLOCK_WA_VALIDATE
 #define _al_dma_dma_read_validate(type, val)			\
 {								\
@@ -689,7 +668,7 @@ static inline uint32_t _al_dma_read_reg(const volatile void __iomem *address, in
 	int i;
 
 	/* Use DMA read only if the fast DMA was initialized and HW CC */
-	if (likely((hwcc) && (fast_dma_init))) {
+	if (likely((al_fabric_hwcc_enabled()) && (fast_dma_init))) {
 		local_irq_save(flags);
 
 		phys_addr = virt_to_physical_address(address);
@@ -769,7 +748,7 @@ void al_dma_write_reg32(volatile void __iomem *address, u32 val)
 	int i;
 
 	/* Use DMA write only if the fast DMA was initialized and HW CC */
-	if (likely((hwcc) && (fast_dma_init))) {
+	if (likely((al_fabric_hwcc_enabled()) && (fast_dma_init))) {
 		local_irq_save(flags);
 
 		phys_addr = virt_to_physical_address(address);
@@ -815,6 +794,10 @@ int al_dma_core_terminate(
 		"%s(%p)\n",
 		__func__,
 		device);
+
+	dma_async_device_unregister(&device->common);
+
+	al_dma_free_interrupts(device);
 
 	kfree(device->ssm_dma_params.name);
 
@@ -981,6 +964,7 @@ static int al_dma_setup_interrupts(struct al_dma_device *device)
 
 	al_udma_iofic_unmask(
 		(struct unit_regs *)device->udma_regs_base,
+		AL_UDMA_IOFIC_LEVEL_PRIMARY,
 		AL_INT_GROUP_B,
 		((1 << (device->common.chancnt)) - 1));
 
@@ -1034,6 +1018,40 @@ err_no_irq:
 
 /******************************************************************************
  *****************************************************************************/
+static void al_dma_free_interrupts(struct al_dma_device *device)
+{
+	struct al_dma_chan *chan;
+	struct pci_dev *pdev = device->pdev;
+	struct device *dev = &pdev->dev;
+	struct msix_entry *msix;
+	int i, msixcnt;
+
+	/* The number of MSI-X vectors should equal the number of channels */
+	msixcnt = device->common.chancnt;
+
+	if (pdev->msix_enabled) {
+		msix = &device->msix_entries[0];
+		if (msix->entry == 0) {
+			devm_free_irq(dev, msix->vector, device);
+			pci_disable_msix(pdev);
+			return;
+		}
+
+		for (i = 0; i < msixcnt; i++) {
+			msix = &device->msix_entries[i];
+			chan = al_dma_chan_by_index(device, i);
+			irq_set_affinity_hint(msix->vector, NULL);
+			devm_free_irq(dev, msix->vector, chan);
+		}
+
+		pci_disable_msix(pdev);
+	} else {
+		devm_free_irq(dev, pdev->irq, device);
+	}
+}
+
+/******************************************************************************
+ *****************************************************************************/
 /* al_dma_alloc_chan_resources - allocate/initialize tx and rx descriptor rings
  */
 static int al_dma_alloc_chan_resources(struct dma_chan *c)
@@ -1043,6 +1061,9 @@ static int al_dma_alloc_chan_resources(struct dma_chan *c)
 	struct al_dma_sw_desc **sw_ring;
 	struct al_udma_q_params tx_params;
 	struct al_udma_q_params rx_params;
+	int ring_alloc_order = al_dma_get_ring_alloc_order();
+	int tx_descs_order = al_dma_get_tx_descs_order();
+	int rx_descs_order = al_dma_get_rx_descs_order();
 	uint32_t rc = 0;
 
 	dev_dbg(dev, "al_dma_alloc_chan_resources: channel %d\n",
@@ -1194,6 +1215,8 @@ static void al_dma_free_chan_resources(struct dma_chan *c)
 {
 	struct al_dma_chan *chan = to_al_dma_chan(c);
 	struct device *dev = chan->device->common.dev;
+	struct al_dma_sw_desc **sw_ring;
+	int i;
 
 	dev_dbg(dev, "%s(%p): %p\n", __func__, c, chan);
 
@@ -1202,7 +1225,13 @@ static void al_dma_free_chan_resources(struct dma_chan *c)
 	al_dma_cleanup_fn(chan, 0);
 
 	spin_lock_bh(&chan->cleanup_lock);
+	sw_ring = chan->sw_ring;
+	for (i = 0; i < (1 << chan->alloc_order); i++)
+		al_dma_free_ring_ent(sw_ring[i], chan);
 
+	kfree(chan->sw_ring);
+
+	spin_unlock_bh(&chan->cleanup_lock);
 	if (chan->tx_dma_desc_virt != NULL) {
 		dma_free_coherent(
 			dev,
@@ -1226,8 +1255,6 @@ static void al_dma_free_chan_resources(struct dma_chan *c)
 				  chan->rx_dma_cdesc_virt, chan->rx_dma_cdesc);
 		chan->rx_dma_desc_virt = NULL;
 	}
-
-	spin_unlock_bh(&chan->cleanup_lock);
 
 	return;
 }
@@ -1285,6 +1312,42 @@ static void al_dma_free_ring_ent(
 	struct al_dma_chan	*chan)
 {
 	kmem_cache_free(chan->device->cache, desc);
+}
+
+/* wrappers for accessing PCI configuration space */
+static int al_dma_read_pcie_config(void *handle, int where, uint32_t *val)
+{
+	/* handle is a pointer to the pci_dev */
+	pci_read_config_dword((struct pci_dev *)handle, where, val);
+	return 0;
+}
+
+static int al_dma_write_pcie_config(void *handle, int where, uint32_t val)
+{
+	/* handle is a pointer to the pci_dev */
+	pci_write_config_dword((struct pci_dev *)handle, where, val);
+	return 0;
+}
+
+/* wrapper for PCI function level reset */
+static int al_dma_write_pcie_flr(void *handle)
+{
+	/* handle is a pointer to the pci_dev */
+	__pci_reset_function_locked((struct pci_dev *)handle);
+	udelay(1000);
+	return 0;
+}
+
+/**
+ * al_dma_flr - perform Function Level Reset
+ * @pdev: PCI device to reset
+ */
+void al_dma_flr(struct pci_dev *pdev)
+{
+	al_pcie_perform_flr(al_dma_read_pcie_config,
+			al_dma_write_pcie_config,
+			al_dma_write_pcie_flr,
+			pdev);
 }
 
 /******************************************************************************
@@ -1543,6 +1606,7 @@ static void al_dma_cleanup_tasklet(unsigned long data)
 
 	al_udma_iofic_unmask(
 		(struct unit_regs *)chan->device->udma_regs_base,
+		AL_UDMA_IOFIC_LEVEL_PRIMARY,
 		AL_INT_GROUP_B,
 		1 << chan->idx);
 }

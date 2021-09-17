@@ -1,10 +1,20 @@
-/* al_eth.h: AnnapurnaLabs Unified 1GbE and 10GbE ethernet driver header.
+/*
+ * al_eth.c: AnnapurnaLabs Unified 1GbE and 10GbE ethernet driver header.
  *
- * Copyright (c) 2013 AnnapurnaLabs
+ * Copyright (C) 2014 Annapurna Labs Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation.
+ * the Free Software Foundation; version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef AL_ETH_H
@@ -60,6 +70,8 @@ enum board_t {
 #define AL_ETH_IRQNAME_SIZE	40
 
 #define AL_ETH_DEFAULT_MDIO_FREQ_KHZ	2500
+
+#define AL_ETH_MAX_MTU			9216
 
 struct al_eth_irq {
 	irq_handler_t	handler;
@@ -302,6 +314,7 @@ struct al_eth_adapter {
 	uint8_t		i2c_adapter_id; /**< identifier for the i2c adapter to use to access SFP+ module */
 	enum al_eth_ref_clk_freq	ref_clk_freq; /**< reference clock frequency */
 	unsigned int	mdio_freq; /**< MDIO frequency [Khz] */
+	enum al_eth_board_ext_phy_if phy_if;
 
 	bool up;
 
@@ -317,6 +330,8 @@ struct al_eth_adapter {
 	uint32_t wol;
 
 	struct al_eth_retimer_params	retimer;
+
+	bool				phy_fixup_needed;
 };
 
 #endif /* !(AL_ETH_H) */

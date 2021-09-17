@@ -407,7 +407,12 @@ static void __d_shrink(struct dentry *dentry)
 {
 	if (!d_unhashed(dentry)) {
 		struct hlist_bl_head *b;
-		if (unlikely(dentry->d_flags & DCACHE_DISCONNECTED))
+		/*
+		 * Hashed dentries are normally on the dentry hashtable,
+		 * with the exception of those newly allocated by
+		 * d_obtain_alias, which are always IS_ROOT:
+		 */
+		if (unlikely(IS_ROOT(dentry)))
 			b = &dentry->d_sb->s_anon;
 		else
 			b = d_hash(dentry->d_parent, dentry->d_name.hash);
@@ -1002,34 +1007,6 @@ void shrink_dcache_for_umount(struct super_block *sb)
 		dentry = hlist_bl_entry(hlist_bl_first(&sb->s_anon), struct dentry, d_hash);
 		shrink_dcache_for_umount_subtree(dentry);
 	}
-}
-
-/*
- * This tries to ascend one level of parenthood, but
- * we can race with renaming, so we need to re-check
- * the parenthood after dropping the lock and check
- * that the sequence number still matches.
- */
-static struct dentry *try_to_ascend(struct dentry *old, int locked, unsigned seq)
-{
-	struct dentry *new = old->d_parent;
-
-	rcu_read_lock();
-	spin_unlock(&old->d_lock);
-	spin_lock(&new->d_lock);
-
-	/*
-	 * might go back up the wrong parent if we have had a rename
-	 * or deletion
-	 */
-	if (new != old->d_parent ||
-		 (old->d_flags & DCACHE_DENTRY_KILLED) ||
-		 (!locked && read_seqretry(&rename_lock, seq))) {
-		spin_unlock(&new->d_lock);
-		new = NULL;
-	}
-	rcu_read_unlock();
-	return new;
 }
 
 /*
@@ -1649,51 +1626,6 @@ struct dentry *d_obtain_alias(struct inode *inode)
 	return res;
 }
 EXPORT_SYMBOL(d_obtain_alias);
-
-/**
- * d_splice_alias - splice a disconnected dentry into the tree if one exists
- * @inode:  the inode which may have a disconnected dentry
- * @dentry: a negative dentry which we want to point to the inode.
- *
- * If inode is a directory and has a 'disconnected' dentry (i.e. IS_ROOT and
- * DCACHE_DISCONNECTED), then d_move that in place of the given dentry
- * and return it, else simply d_add the inode to the dentry and return NULL.
- *
- * This is needed in the lookup routine of any filesystem that is exportable
- * (via knfsd) so that we can build dcache paths to directories effectively.
- *
- * If a dentry was found and moved, then it is returned.  Otherwise NULL
- * is returned.  This matches the expected return value of ->lookup.
- *
- */
-struct dentry *d_splice_alias(struct inode *inode, struct dentry *dentry)
-{
-	struct dentry *new = NULL;
-
-	if (IS_ERR(inode))
-		return ERR_CAST(inode);
-
-	if (inode && S_ISDIR(inode->i_mode)) {
-		spin_lock(&inode->i_lock);
-		new = __d_find_alias(inode, 1);
-		if (new) {
-			BUG_ON(!(new->d_flags & DCACHE_DISCONNECTED));
-			spin_unlock(&inode->i_lock);
-			security_d_instantiate(new, inode);
-			d_move(new, dentry);
-			iput(inode);
-		} else {
-			/* already taking inode->i_lock, so d_add() by hand */
-			__d_instantiate(dentry, inode);
-			spin_unlock(&inode->i_lock);
-			security_d_instantiate(dentry, inode);
-			d_rehash(dentry);
-		}
-	} else
-		d_add(dentry, inode);
-	return new;
-}
-EXPORT_SYMBOL(d_splice_alias);
 
 /**
  * d_add_ci - lookup or allocate new dentry with case-exact name
@@ -2561,7 +2493,6 @@ out_err:
 /*
  * Prepare an anonymous dentry for life in the superblock's dentry tree as a
  * named dentry in place of the dentry to be replaced.
- * returns with anon->d_lock held!
  */
 static void __d_materialise_dentry(struct dentry *dentry, struct dentry *anon)
 {
@@ -2581,16 +2512,68 @@ static void __d_materialise_dentry(struct dentry *dentry, struct dentry *anon)
 	list_del_init(&dentry->d_child);
 	anon->d_parent = dparent;
 	list_move(&anon->d_child, &dparent->d_subdirs);
+	if (likely(!d_unhashed(anon))) {
+		hlist_bl_lock(&anon->d_sb->s_anon);
+		__hlist_bl_del(&anon->d_hash);
+		anon->d_hash.pprev = NULL;
+		hlist_bl_unlock(&anon->d_sb->s_anon);
+	}
+	__d_rehash(anon, d_hash(anon->d_parent, anon->d_name.hash));
 
 	write_seqcount_end(&dentry->d_seq);
 	write_seqcount_end(&anon->d_seq);
 
 	dentry_unlock_parents_for_move(anon, dentry);
 	spin_unlock(&dentry->d_lock);
-
-	/* anon->d_lock still locked, returns locked */
-	anon->d_flags &= ~DCACHE_DISCONNECTED;
+	spin_unlock(&anon->d_lock);
 }
+
+/**
+ * d_splice_alias - splice a disconnected dentry into the tree if one exists
+ * @inode:  the inode which may have a disconnected dentry
+ * @dentry: a negative dentry which we want to point to the inode.
+ *
+ * If inode is a directory and has a 'disconnected' dentry (i.e. IS_ROOT and
+ * DCACHE_DISCONNECTED), then d_move that in place of the given dentry
+ * and return it, else simply d_add the inode to the dentry and return NULL.
+ *
+ * This is needed in the lookup routine of any filesystem that is exportable
+ * (via knfsd) so that we can build dcache paths to directories effectively.
+ *
+ * If a dentry was found and moved, then it is returned.  Otherwise NULL
+ * is returned.  This matches the expected return value of ->lookup.
+ *
+ */
+struct dentry *d_splice_alias(struct inode *inode, struct dentry *dentry)
+{
+	struct dentry *new = NULL;
+
+	if (IS_ERR(inode))
+		return ERR_CAST(inode);
+
+	if (inode && S_ISDIR(inode->i_mode)) {
+		spin_lock(&inode->i_lock);
+		new = __d_find_alias(inode, 1);
+		if (new) {
+			BUG_ON(!(new->d_flags & DCACHE_DISCONNECTED));
+			write_seqlock(&rename_lock);
+			__d_materialise_dentry(dentry, new);
+			write_sequnlock(&rename_lock);
+			spin_unlock(&inode->i_lock);
+			security_d_instantiate(new, inode);
+			iput(inode);
+		} else {
+			/* already taking inode->i_lock, so d_add() by hand */
+			__d_instantiate(dentry, inode);
+			spin_unlock(&inode->i_lock);
+			security_d_instantiate(dentry, inode);
+			d_rehash(dentry);
+		}
+	} else
+		d_add(dentry, inode);
+	return new;
+}
+EXPORT_SYMBOL(d_splice_alias);
 
 /**
  * d_materialise_unique - introduce an inode into the tree
@@ -2634,7 +2617,6 @@ struct dentry *d_materialise_unique(struct dentry *dentry, struct inode *inode)
 				 * could splice into our tree? */
 				__d_materialise_dentry(dentry, alias);
 				write_sequnlock(&rename_lock);
-				__d_drop(alias);
 				goto found;
 			} else {
 				/* Nope, but we must(!) avoid directory
@@ -2664,9 +2646,9 @@ struct dentry *d_materialise_unique(struct dentry *dentry, struct inode *inode)
 		BUG_ON(!d_unhashed(actual));
 
 	spin_lock(&actual->d_lock);
-found:
 	_d_rehash(actual);
 	spin_unlock(&actual->d_lock);
+found:
 	spin_unlock(&inode->i_lock);
 out_nolock:
 	if (actual == dentry) {

@@ -54,7 +54,6 @@ static struct pt_types sgi_pt_types[] = {
 	{0,		NULL}
 };
 
-
 static struct kmem_cache * efs_inode_cachep;
 
 static struct inode *efs_alloc_inode(struct super_block *sb)
@@ -113,6 +112,7 @@ static void efs_put_super(struct super_block *s)
 
 static int efs_remount(struct super_block *sb, int *flags, char *data)
 {
+	sync_filesystem(sb);
 	*flags |= MS_RDONLY;
 	return 0;
 }
@@ -360,4 +360,3 @@ static int efs_statfs(struct dentry *dentry, struct kstatfs *buf) {
 
 	return 0;
 }
-

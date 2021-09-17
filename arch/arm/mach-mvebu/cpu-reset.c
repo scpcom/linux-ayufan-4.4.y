@@ -26,7 +26,6 @@
 #define SOFTWARE_REBOOT             0x43
 
 extern void (*arm_pm_restart)(char str, const char *cmd);
-extern void synology_gpio_init(void);
 
 static void synology_power_off(void)
 {
@@ -114,7 +113,6 @@ int __init mvebu_cpu_reset_init(void)
 #if defined(CONFIG_SYNO_ARMADA)
 	pm_power_off = synology_power_off;
 	arm_pm_restart = synology_restart;
-	synology_gpio_init();
 #endif /* CONFIG_SYNO_ARMADA */
 
 	return 0;

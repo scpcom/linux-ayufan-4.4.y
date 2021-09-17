@@ -672,9 +672,6 @@ static int orion_spi_probe(struct platform_device *pdev)
 #if defined(CONFIG_SYNO_LSP_ARMADA)
 	u32 ret;
 	unsigned int num_cs;
-#else /* CONFIG_SYNO_LSP_ARMADA */
-	const u32 *iprop;
-	int size;
 #endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	master = spi_alloc_master(&pdev->dev, sizeof *spi);
@@ -686,22 +683,16 @@ static int orion_spi_probe(struct platform_device *pdev)
 	if (pdev->id != -1)
 		master->bus_num = pdev->id;
 	if (pdev->dev.of_node) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
 		u32 cell_index;
 		if (!of_property_read_u32(pdev->dev.of_node, "cell-index",
-					&cell_index))
+					  &cell_index))
 			master->bus_num = cell_index;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
 		ret = of_property_read_u32(pdev->dev.of_node, "num-cs", &num_cs);
 		if (ret < 0)
 			num_cs = ORION_NUM_CHIPSELECTS;
-#else /* CONFIG_SYNO_LSP_ARMADA */
-		iprop = of_get_property(pdev->dev.of_node, "cell-index",
-					&size);
-		if (iprop && size == sizeof(*iprop))
-			master->bus_num = *iprop;
 #endif /* CONFIG_SYNO_LSP_ARMADA */
-
 	}
 
 #if defined(CONFIG_SYNO_LSP_ARMADA)

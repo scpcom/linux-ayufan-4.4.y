@@ -1476,6 +1476,7 @@ static int btrfs_remount(struct super_block *sb, int *flags, char *data)
 	unsigned int old_metadata_ratio = fs_info->metadata_ratio;
 	int ret;
 
+	sync_filesystem(sb);
 	btrfs_remount_prepare(fs_info);
 
 	ret = btrfs_parse_options(root, data);
@@ -2034,7 +2035,7 @@ static void btrfs_free_cached_objects(struct super_block *sb, int nr_to_drop)
 		spin_unlock(&inode_sb_list_lock);
 
 		binode = BTRFS_I(inode);
-		if (binode->root) {
+		if (binode->root && !btrfs_is_free_space_inode(inode)) {
 			rootid = binode->root->objectid;
 
 			if (rootid == BTRFS_FS_TREE_OBJECTID ||

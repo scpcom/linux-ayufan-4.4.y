@@ -19,9 +19,8 @@
 /include/ "alpine.dtsi"
 
 / {
-	version = "M0 - 2.0";
+	version = "M0 - 2.1";
 	model = "Annapurna Labs Alpine Dev Board";
-	compatible = "annapurna-labs,alpine";
 
 	hypervisor {
 	};
@@ -686,6 +685,8 @@
 			#address-cells = <1>;
 			#size-cells = <1>;
 
+			max-onfi-timing-mode = <1>;
+
 			partition@0 {
 				label = "al_boot";
 				reg = <0x00000000 0x00200000>;
@@ -726,7 +727,7 @@
 				#address-cells = <1>;
 				#size-cells = <1>;
 				compatible = "spi_flash_jedec_detection";
-				spi-max-frequency = <25000000>; /* 25MHz */
+				spi-max-frequency = <37500000>; /* 37.5MHz */
 				reg = <0>;
 
 				partition@0 {

@@ -44,6 +44,17 @@
 #define BTRFS_INODE_IN_DELALLOC_LIST		9
 #define BTRFS_INODE_READDIO_NEED_LOCK		10
 #define BTRFS_INODE_HAS_PROPS		        11
+/*
+ * The following 3 bits are meant only for the btree inode.
+ * When any of them is set, it means an error happened while writing an
+ * extent buffer belonging to:
+ * 1) a non-log btree
+ * 2) a log btree and first log sub-transaction
+ * 3) a log btree and second log sub-transaction
+ */
+#define BTRFS_INODE_BTREE_ERR		        12
+#define BTRFS_INODE_BTREE_LOG1_ERR		13
+#define BTRFS_INODE_BTREE_LOG2_ERR		14
 
 /* in memory btrfs inode */
 struct btrfs_inode {
@@ -83,12 +94,6 @@ struct btrfs_inode {
 	 * to walk them all.
 	 */
 	struct list_head delalloc_inodes;
-
-	/*
-	 * list for tracking inodes that must be sent to disk before a
-	 * rename or truncate commit
-	 */
-	struct list_head ordered_operations;
 
 	/* node for the red-black tree that links inodes in subvolume root */
 	struct rb_node rb_node;
@@ -243,8 +248,17 @@ static inline int btrfs_inode_in_log(struct inode *inode, u64 generation)
 	    BTRFS_I(inode)->last_sub_trans <=
 	    BTRFS_I(inode)->last_log_commit &&
 	    BTRFS_I(inode)->last_sub_trans <=
-	    BTRFS_I(inode)->root->last_log_commit)
-		return 1;
+	    BTRFS_I(inode)->root->last_log_commit) {
+		/*
+		 * After a ranged fsync we might have left some extent maps
+		 * (that fall outside the fsync's range). So return false
+		 * here if the list isn't empty, to make sure btrfs_log_inode()
+		 * will be called and process those extent maps.
+		 */
+		smp_mb();
+		if (list_empty(&BTRFS_I(inode)->extent_tree.modified_extents))
+			return 1;
+	}
 	return 0;
 }
 

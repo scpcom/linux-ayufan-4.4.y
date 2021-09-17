@@ -44,8 +44,12 @@ $(_obj)-$(CONFIG_OCF_HIFN)    += hifn$(_slash)
 $(_obj)-$(CONFIG_OCF_IXP4XX)  += ixp4xx$(_slash)
 $(_obj)-$(CONFIG_OCF_TALITOS) += talitos$(_slash)
 $(_obj)-$(CONFIG_OCF_PASEMI)  += pasemi$(_slash)
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7),y)
+#$(_obj)-$(CONFIG_OCF_EP80579) += ep80579$(_slash)
+else
 $(_obj)-$(CONFIG_OCF_EP80579) += ep80579$(_slash)
-$(_obj)-$(CONFIG_OCF_CRYPTOCTEON) += cryptocteon$(_slash)
+endif
+$(eobj)-$(CONFIG_OCF_CRYPTOCTEON) += cryptocteon$(_slash)
 $(_obj)-$(CONFIG_OCF_KIRKWOOD) += kirkwood$(_slash)
 $(_obj)-$(CONFIG_OCF_OCFNULL) += ocfnull$(_slash)
 $(_obj)-$(CONFIG_OCF_C7108) += c7108$(_slash)

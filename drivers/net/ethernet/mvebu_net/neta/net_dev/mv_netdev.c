@@ -84,7 +84,11 @@ disclaimer.
 #endif
 
 #ifdef CONFIG_OF
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+int port_vbase[MV_ETH_MAX_PORTS] = {0};
+#else
 int port_vbase[MV_ETH_MAX_PORTS];
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 int bm_reg_vbase, pnc_reg_vbase;
 static u32 pnc_phyaddr_base;
 static u32 pnc_win_size;
@@ -1195,6 +1199,21 @@ void mv_eth_link_status_print(int port)
 		link.linkup = mv_pon_link_status();
 #endif /* CONFIG_MV_PON */
 
+#ifdef CONFIG_SYNO_ARMADA
+	if (link.linkup) {
+		printk(KERN_INFO "link up");
+		printk(KERN_INFO ", %s duplex", (link.duplex == MV_ETH_DUPLEX_FULL) ? "full" : "half");
+		printk(KERN_INFO ", speed ");
+
+		if (link.speed == MV_ETH_SPEED_1000)
+			printk(KERN_INFO "1 Gbps\n");
+		else if (link.speed == MV_ETH_SPEED_100)
+			printk(KERN_INFO "100 Mbps\n");
+		else
+			printk(KERN_INFO "10 Mbps\n");
+	} else
+		printk(KERN_INFO "link down\n");
+#else
 	if (link.linkup) {
 		printk(KERN_CONT "link up");
 		printk(KERN_CONT ", %s duplex", (link.duplex == MV_ETH_DUPLEX_FULL) ? "full" : "half");
@@ -1208,6 +1227,7 @@ void mv_eth_link_status_print(int port)
 			printk(KERN_CONT "10 Mbps\n");
 	} else
 		printk(KERN_CONT "link down\n");
+#endif /* CONFIG_SYNO_ARMADA */
 }
 
 static void mv_eth_rx_error(struct eth_port *pp, struct neta_rx_desc *rx_desc)
@@ -1427,6 +1447,11 @@ static struct sk_buff *mv_eth_skb_alloc(struct eth_port *pp, struct bm_pool *poo
 	mvOsCacheLineFlush(pp->dev->dev.parent, skb->head);
 #endif /* CONFIG_MV_ETH_BM_CPU */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	/* Save skb magic(bit 31~2) and pool(bit 1~0) id */
+	MV_NETA_SKB_MAGIC_BPID_SET(skb, (MV_NETA_SKB_MAGIC(skb) | pool->pool));
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+
 	if (phys_addr)
 		*phys_addr = mvOsCacheInvalidate(pp->dev->dev.parent, skb->head, RX_BUF_SIZE(pool->pkt_size));
 
@@ -1437,7 +1462,11 @@ static struct sk_buff *mv_eth_skb_alloc(struct eth_port *pp, struct bm_pool *poo
 static inline struct bm_pool *mv_eth_skb_recycle_get_pool(struct sk_buff *skb)
 {
 	if (mv_eth_is_swf_recycle() && MV_NETA_SKB_RECYCLE_MAGIC_IS_OK(skb))
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		return &mv_eth_pool[MV_NETA_SKB_BPID_GET(skb)];
+#else
 		return &mv_eth_pool[MV_NETA_SKB_RECYCLE_BPID_GET(skb)];
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 	else
 		return NULL;
 }
@@ -1800,11 +1829,16 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq, struct na
 
 		rx_status = rx_desc->status;
 		skb = (struct sk_buff *)rx_desc->bufCookie;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		/* rx desc pool id field valid only when BM works */
+		pool_id = (MV_NETA_BM_CAP()) ? (NETA_RX_GET_BPID(rx_desc)) : (MV_NETA_SKB_BPID_GET(skb));
+#else
 #if !defined(CONFIG_MV_ETH_BM_CPU) && (defined(CONFIG_MV_NETA_SKB_RECYCLE))
 		pool_id = MV_NETA_SKB_RECYCLE_BPID_GET(skb);
 #else
 		pool_id = NETA_RX_GET_BPID(rx_desc);
 #endif
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 		pool = &mv_eth_pool[pool_id];
 
 		if (((rx_status & NETA_RX_FL_DESC_MASK) != NETA_RX_FL_DESC_MASK) ||
@@ -1857,7 +1891,11 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq, struct na
 
 	/* Set skb recycle magic(bit 31~2) and pool(bit 1~0) id  if recycle is enabled */
 	if (mv_eth_is_swf_recycle())
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		MV_NETA_SKB_MAGIC_BPID_SET(skb, (MV_NETA_SKB_MAGIC(skb) | pool->pool));
+#else
 		MV_NETA_SKB_RECYCLE_MAGIC_BPID_SET(skb, (MV_NETA_SKB_RECYCLE_MAGIC(skb) | pool->pool));
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 
 #if defined(CONFIG_MV_ETH_PNC) && defined(CONFIG_MV_ETH_RX_SPECIAL)
 		/* Special RX processing */
@@ -2034,6 +2072,18 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 	}
 	mv_eth_lock(txq_ctrl, flags);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#ifdef CONFIG_MV_NETA_DEBUG_CODE
+	if (pp->flags & MV_ETH_F_DBG_TX) {
+		pr_info("\n%s - eth_tx_%lu: cpu=%d, in_intr=0x%lx, port=%d, txp=%d, txq=%d\n",
+		       dev->name, dev->stats.tx_packets, smp_processor_id(),
+			in_interrupt(), pp->port, tx_spec.txp, tx_spec.txq);
+		mv_eth_skb_print(skb);
+		mvDebugMemDump(skb->data, 64, 1);
+	}
+#endif /* CONFIG_MV_NETA_DEBUG_CODE */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+
 #ifdef CONFIG_MV_ETH_TSO
 	/* GSO/TSO */
 	if (skb_is_gso(skb)) {
@@ -2056,45 +2106,89 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 		frags = 0;
 		goto out;
 	}
-
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	// do nothing
+#else
 	/* Don't use BM for Linux packets: NETA_TX_BM_ENABLE_MASK = 0 */
 	/* NETA_TX_PKT_OFFSET_MASK = 0 - for all descriptors */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 	tx_cmd = mv_eth_skb_tx_csum(pp, skb);
 
 #ifdef CONFIG_MV_PON
 	tx_desc->hw_cmd = tx_spec.hw_cmd;
 #endif
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	//do nothing
+#else
 	/* FIXME: beware of nonlinear --BK */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 	tx_desc->dataSize = skb_headlen(skb);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	//do nothing
+#else
 	tx_desc->bufPhysAddr = mvOsCacheFlush(pp->dev->dev.parent, skb->data, tx_desc->dataSize);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 
 	/* Record skb len in case skb is reset when recycle */
 	skb_len = skb->len;
 
 	if (frags == 1) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		/* First and Last descriptor */
+#else
 		/*
 		 * First and Last descriptor
 		 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 #if defined(CONFIG_MV_ETH_BM_CPU) && defined(CONFIG_MV_NETA_SKB_RECYCLE)
 		struct bm_pool *pool = mv_eth_skb_recycle_get_pool(skb);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		int headroom = skb_headroom(skb);
+
+		if (pool && (headroom < NETA_TX_PKT_OFFSET_MAX) &&
+			(atomic_read(&pool->in_use) > 0) && skb_recycle_check(skb, pool->pkt_size)) {
+			/* SKB can be recycled - Use BM to release buffer after tx finished */
+			/* skb_recycle_check() will reset skb */
+			/* fields as skb->len, skb->data and others become invalid */
+			tx_cmd |= (NETA_TX_BM_ENABLE_MASK |
+#else
 		if (pool && (atomic_read(&pool->in_use) > 0) && skb_recycle_check(skb, pool->pkt_size)) {
 			/* HW release buffer after tx finished */
 			tx_cmd |= NETA_TX_BM_ENABLE_MASK |
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 				  NETA_TX_BM_POOL_ID_MASK(pool->pool) |
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+				  NETA_TX_PKT_OFFSET_MASK(headroom));
+			txq_ctrl->shadow_txq[txq_ctrl->shadow_txq_put_i] = 0;
+			tx_desc->bufPhysAddr = mvOsCacheFlush(pp->dev->dev.parent, skb->head,
+								headroom + tx_desc->dataSize);
+#else
 				  NETA_TX_PKT_OFFSET_MASK(NET_SKB_PAD + MV_ETH_MH_SIZE);
 			txq_ctrl->shadow_txq[txq_ctrl->shadow_txq_put_i] = NULL;
 			tx_desc->bufPhysAddr = virt_to_phys(skb->head);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+
 			atomic_dec(&pool->in_use);
 			STAT_DBG(pool->stats.skb_recycled_ok++);
 		} else {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+			/* SKB can't be recycled - Don't use BM to release buffer */
+			tx_desc->bufPhysAddr = mvOsCacheFlush(pp->dev->dev.parent, skb->data, tx_desc->dataSize);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 			txq_ctrl->shadow_txq[txq_ctrl->shadow_txq_put_i] = ((MV_ULONG) skb | MV_ETH_SHADOW_SKB);
 			if (pool && (atomic_read(&pool->in_use) > 0))
 				STAT_DBG(pool->stats.skb_recycled_err++);
 		}
 #else
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		/* SKB recycle or BM is not supported - Don't use BM to release buffer */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 		txq_ctrl->shadow_txq[txq_ctrl->shadow_txq_put_i] = ((MV_ULONG) skb | MV_ETH_SHADOW_SKB);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		tx_desc->bufPhysAddr = mvOsCacheFlush(pp->dev->dev.parent, skb->data, tx_desc->dataSize);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 #endif /* CONFIG_MV_ETH_BM_CPU && CONFIG_MV_NETA_SKB_RECYCLE */
 
 		if (tx_spec.flags & MV_ETH_F_NO_PAD)
@@ -2107,6 +2201,10 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 
 		mv_eth_shadow_inc_put(txq_ctrl);
 	} else {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		/* For Scatter-Gather buffers - Don't use BM to release buffer */
+		tx_desc->bufPhysAddr = mvOsCacheFlush(pp->dev->dev.parent, skb->data, tx_desc->dataSize);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 
 		/* First but not Last */
 		tx_cmd |= NETA_TX_F_DESC_MASK;
@@ -2130,14 +2228,22 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 
 #ifdef CONFIG_MV_NETA_DEBUG_CODE
 	if (pp->flags & MV_ETH_F_DBG_TX) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		// do nothing
+#else
 		printk(KERN_ERR "\n");
 		printk(KERN_ERR "%s - eth_tx_%lu: cpu=%d, in_intr=0x%lx, port=%d, txp=%d, txq=%d\n",
-		       dev->name, dev->stats.tx_packets, smp_processor_id(),
-			in_interrupt(), pp->port, tx_spec.txp, tx_spec.txq);
+				dev->name, dev->stats.tx_packets, smp_processor_id(),
+				in_interrupt(), pp->port, tx_spec.txp, tx_spec.txq);
 		pr_info("\t skb=%p, head=%p, data=%p, size=%d\n", skb, skb->head, skb->data, skb_len);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 		mv_eth_tx_desc_print(tx_desc);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		// do nothing
+#else
 		/*mv_eth_skb_print(skb);*/
 		mvDebugMemDump(skb->data, 64, 1);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 	}
 #endif /* CONFIG_MV_NETA_DEBUG_CODE */
 
@@ -2155,7 +2261,11 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 out:
 	if (frags > 0) {
 		dev->stats.tx_packets++;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		dev->stats.tx_bytes += skb_len;
+#else
 		dev->stats.tx_bytes += skb->len;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 	} else {
 		dev->stats.tx_dropped++;
 		dev_kfree_skb_any(skb);
@@ -3119,10 +3229,17 @@ void mv_eth_link_event(struct eth_port *pp, int print)
 	}
 
 	if (print) {
+#ifdef CONFIG_SYNO_ARMADA
+		if (dev)
+			printk(KERN_INFO "%s: ", dev->name);
+		else
+			printk(KERN_INFO "%s: ", "none");
+#else
 		if (dev)
 			printk(KERN_ERR "%s: ", dev->name);
 		else
 			printk(KERN_ERR "%s: ", "none");
+#endif /* CONFIG_SYNO_ARMADA */
 
 		mv_eth_link_status_print(pp->port);
 	}
@@ -4602,12 +4719,55 @@ static struct mv_neta_pdata *mv_plat_data_get(struct platform_device *pdev)
 	}
 
 	/* build virtual port base address */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	if (!port_vbase[pdev->id]) {
+		base_addr = devm_ioremap(&pdev->dev, res->start, resource_size(res));
+		if (!base_addr) {
+			pr_err("could not map neta registers\n");
+			return NULL;
+		}
+		port_vbase[pdev->id] = (int)base_addr;
+	}
+
+	/* Only NETA_MBUS_RETRY_REG at Port 0 and Port 2 are used, port 0&1 share
+	  * port 0's NETA_MBUS_RETRY_REG, port 2&3 share port 2's NETA_MBUS_RETRY_REG.
+	  * If port 0 is disabled and port 1 is enabled and if we do not remap IO address for port0,
+	  * then when port 1 tries to access NETA_MBUS_RETRY_REG(1) which is really NETA_MBUS_RETRY_REG(0),
+	  * there will be an invalid memory access because there is no valid port 0's IO memory space,
+	  * so we have to map the IO memory for port 0 even if port 0 is disabled when port 1 is enabled
+	*/
+	if ((pdev->id % 2) == 1) {
+		struct device_node *eth_previous;
+		u32 port_num_previous = 0;
+
+		/* find the previous port which shares NETA_MBUS_RETRY_REG */
+		for_each_node_by_name(eth_previous, "ethernet") {
+			if (0 != of_property_read_u32(eth_previous, "eth,port-num", &port_num_previous)) {
+				pr_err("%s read eth,port-num failed!!!\n", __func__);
+				return NULL;
+			}
+
+			if (port_num_previous == (pdev->id - 1))
+				break;
+		}
+
+		/* if no previous sharing port is found, then return */
+		if (port_num_previous != (pdev->id - 1)) {
+			pr_err("%s eth%d is not found!!!\n", __func__, pdev->id - 1);
+			return NULL;
+		}
+
+		if (!port_vbase[port_num_previous])
+			port_vbase[port_num_previous] = (int)of_iomap(eth_previous, 0);
+	}
+#else
 	base_addr = devm_ioremap(&pdev->dev, res->start, resource_size(res));
 	if (!base_addr) {
 		pr_err("could not map neta registers\n");
 		return NULL;
 	}
 	port_vbase[pdev->id] = (int)base_addr;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 
 	/* get IRQ number */
 	if (pdev->dev.of_node) {
@@ -4689,7 +4849,11 @@ static struct mv_neta_pdata *mv_plat_data_get(struct platform_device *pdev)
 	}
 
 	/* Global Parameters */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	// do nothing
+#else
 	plat_data->tclk = 166666667;    /*mvBoardTclkGet();*/
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 	plat_data->max_port = mv_eth_port_num_get(pdev);
 
 	/* Per port parameters */
@@ -4714,6 +4878,9 @@ static struct mv_neta_pdata *mv_plat_data_get(struct platform_device *pdev)
 
 	clk = devm_clk_get(&pdev->dev, 0);
 	clk_prepare_enable(clk);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	plat_data->tclk = clk_get_rate(clk);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 
 	return plat_data;
 }
@@ -4748,9 +4915,15 @@ static int mv_eth_probe(struct platform_device *pdev)
 	neta_cap_bitmap |= MV_ETH_CAP_PNC;
 #endif
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#ifdef CONFIG_MV_ETH_BM_CPU
+	neta_cap_bitmap |= MV_ETH_CAP_BM;
+#endif
+#else
 #ifdef CONFIG_MV_ETH_BM
 	neta_cap_bitmap |= MV_ETH_CAP_BM;
 #endif
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 
 #ifdef CONFIG_MV_ETH_HWF
 	neta_cap_bitmap |= MV_ETH_CAP_HWF;
@@ -5494,7 +5667,12 @@ int mv_eth_txp_reset(int port, int txp)
 			int mode, rx_port;
 
 			mode = mv_eth_ctrl_txq_mode_get(pp->port, txp, queue, &rx_port);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+			/* The queue state is free does not mean the queue was not ever used */
+			if (mode != MV_ETH_TXQ_HWF) {
+#else
 			if (mode == MV_ETH_TXQ_CPU) {
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 				/* Free all buffers in TXQ */
 				mv_eth_txq_done_force(pp, txq_ctrl);
 				/* reset txq */
@@ -5502,12 +5680,20 @@ int mv_eth_txp_reset(int port, int txp)
 				txq_ctrl->shadow_txq_get_i = 0;
 			}
 #ifdef CONFIG_MV_ETH_HWF
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+			else if (MV_NETA_HWF_CAP())
+#else
 			else if (mode == MV_ETH_TXQ_HWF && MV_NETA_HWF_CAP())
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 				mv_eth_txq_hwf_clean(pp, txq_ctrl, rx_port);
 #endif /* CONFIG_MV_ETH_HWF */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+			// do nothing
+#else
 			else
 				printk(KERN_ERR "%s: port=%d, txp=%d, txq=%d is not in use\n",
-					__func__, pp->port, txp, queue);
+						__func__, pp->port, txp, queue);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 		}
 	}
 	mvNetaTxpReset(port, txp);
@@ -5529,9 +5715,17 @@ int mv_eth_rx_reset(int port)
 #ifndef CONFIG_MV_ETH_BM_CPU
 	{
 		for (rxq = 0; rxq < CONFIG_MV_ETH_RXQ; rxq++) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+			struct sk_buff *skb;
+#else
 			struct eth_pbuf *pkt;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 			struct neta_rx_desc *rx_desc;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+			// do nothing
+#else
 			struct bm_pool *pool;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 			int i, rx_done;
 			MV_NETA_RXQ_CTRL *rx_ctrl = pp->rxq_ctrl[rxq].q;
 
@@ -5548,16 +5742,25 @@ int mv_eth_rx_reset(int port)
 				mvNetaRxqDescSwap(rx_desc);
 #endif /* MV_CPU_BE */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+				skb = (struct sk_buff *)rx_desc->bufCookie;
+				mv_eth_pool_put(pp->pool_long, skb);
+#else
 				pkt = (struct eth_pbuf *)rx_desc->bufCookie;
 				pool = &mv_eth_pool[pkt->pool];
 				mv_eth_pool_put(pool, pkt);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 			}
 		}
 	}
 #else
 	if (!MV_NETA_BM_CAP()) {
 		for (rxq = 0; rxq < CONFIG_MV_ETH_RXQ; rxq++) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+			struct sk_buff *skb;
+#else
 			struct eth_pbuf *pkt;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 			struct neta_rx_desc *rx_desc;
 			struct bm_pool *pool;
 			int i, rx_done;
@@ -5575,10 +5778,18 @@ int mv_eth_rx_reset(int port)
 #if defined(MV_CPU_BE)
 				mvNetaRxqDescSwap(rx_desc);
 #endif /* MV_CPU_BE */
-
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+				skb = (struct sk_buff *)rx_desc->bufCookie;
+				if (pp->pool_short && (skb->data_len <= pp->pool_short->pkt_size))
+					pool = pp->pool_short;
+				else
+					pool = pp->pool_long;
+				mv_eth_pool_put(pool, skb);
+#else
 				pkt = (struct eth_pbuf *)rx_desc->bufCookie;
 				pool = &mv_eth_pool[pkt->pool];
 				mv_eth_pool_put(pool, pkt);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 			}
 		}
 	}

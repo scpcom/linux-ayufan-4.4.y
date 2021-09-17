@@ -28,6 +28,10 @@
 #include <linux/pinctrl/pinconf-generic.h>
 #include <linux/platform_device.h>
 
+#ifdef CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY
+#include <linux/delay.h>
+#endif /* CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY */
+
 #define CHV_INTSTAT			0x300
 #define CHV_INTMASK			0x380
 
@@ -842,6 +846,9 @@ static void chv_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 	unsigned long flags;
 	void __iomem *reg;
 	u32 ctrl0;
+#ifdef CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY
+	int iRetry = 0;
+#endif /* CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY */
 
 	spin_lock_irqsave(&pctrl->lock, flags);
 
@@ -854,6 +861,22 @@ static void chv_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 		ctrl0 &= ~CHV_PADCTRL0_GPIOTXSTATE;
 
 	chv_writel(ctrl0, reg);
+
+#ifdef CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY
+	do {
+		mdelay(10);
+		if (ctrl0 == readl(reg)) {
+			break;
+		}
+		mdelay(10);
+		chv_writel(ctrl0, reg);
+		iRetry++;
+	} while (iRetry < 150);
+
+	if (iRetry != 0) {
+		printk("finish GPIO rewrite %d retry\n", iRetry);
+	}
+#endif /* CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY */
 
 	spin_unlock_irqrestore(&pctrl->lock, flags);
 }

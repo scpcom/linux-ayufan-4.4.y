@@ -1382,7 +1382,10 @@ static ssize_t tun_do_read(struct tun_struct *tun, struct tun_file *tfile,
 		}
 
 		ret = tun_put_user(tun, tfile, skb, iv, len);
-		kfree_skb(skb);
+		if (unlikely(ret < 0))
+			kfree_skb(skb);
+		else
+			consume_skb(skb);
 		break;
 	}
 
@@ -1489,7 +1492,6 @@ static int tun_sendmsg(struct kiocb *iocb, struct socket *sock,
 	tun_put(tun);
 	return ret;
 }
-
 
 static int tun_recvmsg(struct kiocb *iocb, struct socket *sock,
 		       struct msghdr *m, size_t total_len,
@@ -2294,7 +2296,6 @@ static const struct ethtool_ops tun_ethtool_ops = {
 	.set_msglevel	= tun_set_msglevel,
 	.get_link	= ethtool_op_get_link,
 };
-
 
 static int __init tun_init(void)
 {

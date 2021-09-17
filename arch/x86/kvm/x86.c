@@ -1022,7 +1022,6 @@ static void update_pvclock_gtod(struct timekeeper *tk)
 }
 #endif
 
-
 static void kvm_write_wall_clock(struct kvm *kvm, gpa_t wall_clock)
 {
 	int version;
@@ -2176,15 +2175,16 @@ int kvm_set_msr_common(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
 				    msr, data);
 			return 1;
 		} else {
+#ifndef CONFIG_SYNO_KVM_IGNORE_MSRS
 			vcpu_unimpl(vcpu, "ignored wrmsr: 0x%x data %llx\n",
 				    msr, data);
+#endif
 			break;
 		}
 	}
 	return 0;
 }
 EXPORT_SYMBOL_GPL(kvm_set_msr_common);
-
 
 /*
  * Reads an msr value (of 'msr_index') into 'pdata'.
@@ -2474,7 +2474,9 @@ int kvm_get_msr_common(struct kvm_vcpu *vcpu, u32 msr, u64 *pdata)
 			vcpu_unimpl(vcpu, "unhandled rdmsr: 0x%x\n", msr);
 			return 1;
 		} else {
+#ifndef CONFIG_SYNO_KVM_IGNORE_MSRS
 			vcpu_unimpl(vcpu, "ignored rdmsr: 0x%x\n", msr);
+#endif
 			data = 0;
 		}
 		break;
@@ -5902,7 +5904,6 @@ out:
 	return r;
 }
 
-
 static int __vcpu_run(struct kvm_vcpu *vcpu)
 {
 	int r;
@@ -6047,7 +6048,6 @@ static int complete_emulated_mmio(struct kvm_vcpu *vcpu)
 	vcpu->arch.complete_userspace_io = complete_emulated_mmio;
 	return 0;
 }
-
 
 int kvm_arch_vcpu_ioctl_run(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
 {

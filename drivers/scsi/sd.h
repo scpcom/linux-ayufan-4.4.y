@@ -11,7 +11,9 @@
 /*
  * Time out in seconds for disks and Magneto-opticals (which are slower).
  */
-#ifdef CONFIG_SYNO_SPINUP_DELAY
+#ifdef CONFIG_SYNO_VHOST_SCSI_TMF_UNSUPPORTED
+#define SD_TIMEOUT		(1024 * HZ)
+#elif defined(CONFIG_SYNO_SPINUP_DELAY)
 #define SD_TIMEOUT		(60 * HZ)
 #else
 #define SD_TIMEOUT		(30 * HZ)
@@ -25,7 +27,11 @@
  */
 #define SD_MAX_RETRIES		5
 #define SD_PASSTHROUGH_RETRIES	1
+#ifdef CONFIG_SYNO_KVMX64_MAX_MEDIUM_ACCESS_TIMEOUTS
+#define SD_MAX_MEDIUM_TIMEOUTS 1024
+#else
 #define SD_MAX_MEDIUM_TIMEOUTS	2
+#endif /* CONFIG_SYNO_KVMX64_MAX_MEDIUM_ACCESS_TIMEOUTS */
 
 /*
  * Size of the initial data buffer for mode and read capacity data

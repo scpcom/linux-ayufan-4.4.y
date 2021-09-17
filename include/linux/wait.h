@@ -1,7 +1,6 @@
 #ifndef _LINUX_WAIT_H
 #define _LINUX_WAIT_H
 
-
 #include <linux/list.h>
 #include <linux/stddef.h>
 #include <linux/spinlock.h>
@@ -23,6 +22,7 @@ struct __wait_queue {
 struct wait_bit_key {
 	void *flags;
 	int bit_nr;
+#define WAIT_ATOMIC_T_BIT_NR -1
 };
 
 struct wait_bit_queue {
@@ -59,6 +59,9 @@ struct task_struct;
 
 #define __WAIT_BIT_KEY_INITIALIZER(word, bit)				\
 	{ .flags = word, .bit_nr = bit, }
+
+#define __WAIT_ATOMIC_T_KEY_INITIALIZER(p)				\
+	{ .flags = p, .bit_nr = WAIT_ATOMIC_T_BIT_NR, }
 
 extern void __init_waitqueue_head(wait_queue_head_t *q, const char *name, struct lock_class_key *);
 
@@ -146,8 +149,10 @@ void __wake_up_bit(wait_queue_head_t *, void *, int);
 int __wait_on_bit(wait_queue_head_t *, struct wait_bit_queue *, int (*)(void *), unsigned);
 int __wait_on_bit_lock(wait_queue_head_t *, struct wait_bit_queue *, int (*)(void *), unsigned);
 void wake_up_bit(void *, int);
+void wake_up_atomic_t(atomic_t *);
 int out_of_line_wait_on_bit(void *, int, int (*)(void *), unsigned);
 int out_of_line_wait_on_bit_lock(void *, int, int (*)(void *), unsigned);
+int out_of_line_wait_on_atomic_t(atomic_t *, int (*)(atomic_t *), unsigned);
 wait_queue_head_t *bit_waitqueue(void *, int);
 
 #define wake_up(x)			__wake_up(x, TASK_NORMAL, 1, NULL)
@@ -452,7 +457,6 @@ do {									\
 	__ret;								\
 })
 
-
 #define __wait_event_interruptible_locked(wq, condition, exclusive, irq) \
 ({									\
 	int __ret = 0;							\
@@ -481,7 +485,6 @@ do {									\
 	__set_current_state(TASK_RUNNING);				\
 	__ret;								\
 })
-
 
 /**
  * wait_event_interruptible_locked - sleep until a condition gets true
@@ -599,8 +602,6 @@ do {									\
 	((condition)							\
 	 ? 0 : __wait_event_interruptible_locked(wq, condition, 1, 1))
 
-
-
 #define __wait_event_killable(wq, condition, ret)			\
 do {									\
 	DEFINE_WAIT(__wait);						\
@@ -641,7 +642,6 @@ do {									\
 		__wait_event_killable(wq, condition, __ret);		\
 	__ret;								\
 })
-
 
 #define __wait_event_lock_irq(wq, condition, lock, cmd)			\
 do {									\
@@ -715,7 +715,6 @@ do {									\
 		break;							\
 	__wait_event_lock_irq(wq, condition, lock, );			\
 } while (0)
-
 
 #define __wait_event_interruptible_lock_irq(wq, condition,		\
 					    lock, ret, cmd)		\
@@ -862,7 +861,6 @@ do {									\
 	__ret;								\
 })
 
-
 /*
  * These are the old interfaces to sleep waiting for an event.
  * They are racy.  DO NOT use them, use the wait_event* interfaces above.
@@ -958,6 +956,24 @@ static inline int wait_on_bit_lock(void *word, int bit,
 	if (!test_and_set_bit(bit, word))
 		return 0;
 	return out_of_line_wait_on_bit_lock(word, bit, action, mode);
+}
+
+/**
+ * wait_on_atomic_t - Wait for an atomic_t to become 0
+ * @val: The atomic value being waited on, a kernel virtual address
+ * @action: the function used to sleep, which may take special actions
+ * @mode: the task state to sleep in
+ *
+ * Wait for an atomic_t to become 0.  We abuse the bit-wait waitqueue table for
+ * the purpose of getting a waitqueue, but we set the key to a bit number
+ * outside of the target 'word'.
+ */
+static inline
+int wait_on_atomic_t(atomic_t *val, int (*action)(atomic_t *), unsigned mode)
+{
+	if (atomic_read(val) == 0)
+		return 0;
+	return out_of_line_wait_on_atomic_t(val, action, mode);
 }
 	
 #endif

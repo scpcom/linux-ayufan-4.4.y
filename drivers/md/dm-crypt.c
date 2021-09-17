@@ -18,7 +18,6 @@
 #include <linux/crypto.h>
 #include <linux/workqueue.h>
 #include <linux/backing-dev.h>
-#include <linux/percpu.h>
 #if defined(CONFIG_SYNO_LSP_ARMADA)
 #include <asm/atomic.h>
 #else /* CONFIG_SYNO_LSP_ARMADA */
@@ -169,13 +168,6 @@ struct iv_lmk_private {
  */
 enum flags { DM_CRYPT_SUSPENDED, DM_CRYPT_KEY_VALID };
 
-/*
- * Duplicated per-CPU state for cipher.
- */
-struct crypt_cpu {
-	struct ablkcipher_request *req;
-};
-
 #if defined(CONFIG_SYNO_LSP_ARMADA)
 struct crypt_config {
 	struct dm_dev *dev;
@@ -226,8 +218,7 @@ static struct kmem_cache *_crypt_io_pool;
 static void clone_init(struct crypt_io *, struct bio *);
 #else /* CONFIG_SYNO_LSP_ARMADA */
 /*
- * The fields in here must be read only after initialization,
- * changing state should be in crypt_cpu.
+ * The fields in here must be read only after initialization.
  */
 struct crypt_config {
 	struct dm_dev *dev;

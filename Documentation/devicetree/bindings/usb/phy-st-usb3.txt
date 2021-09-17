@@ -7,13 +7,15 @@ This is to document the DT parameters to be passed from the blob in that case.
 Required properties:
 
 MiPHY2:
-- compatible : should be "st,stih407-usb3phy"
+- compatible : should be "st,sti-usb3phy"
 - reg : base physical address of the phy registers and length of memory mapped
 	region.
 	It must have: "usb3-uport", "pipew";
 	So MiPHY and pipe wrapper.
-- st,syscfg: sysconfig register to manage the device.
 - resets: to reset the device.
+- clocks: reference clk to usb3 phy
+- clock-names: clock name of usb3 phy reference clock.
+- st,fvco-ppm: MIPHY PLL FVCO tolerance in PPM.
 
 Optional property:
 - st,auto-calibration: boolean property to advice system to perform
@@ -30,11 +32,13 @@ Example:
 
 /* miPHY2 */
 usb3_phy: usb3_phy@0 {
-	compatible	= "st,stih407-usb3phy";
+	compatible	= "st,sti-usb3phy;
 	#phy-cells	= <0>;
 	resets		= <&softreset STIH407_MIPHY2_SOFTRESET>;
 	reg		= <0x08f90000 0xff>, <0x08f95000 0xff>;
 	reg-names	= "usb3-uport", "pipew";
-	st,syscfg	= <&syscfg_core>;
+	clocks = <&CLK_SYSIN>;
+	clock-names = "miphy_osc";
+	st,fvco-ppm = <0>;
 	st,auto-calibration;
 };

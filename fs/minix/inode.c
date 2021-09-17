@@ -123,6 +123,7 @@ static int minix_remount (struct super_block * sb, int * flags, char * data)
 	struct minix_sb_info * sbi = minix_sb(sb);
 	struct minix_super_block * ms;
 
+	sync_filesystem(sb);
 	ms = sbi->s_ms;
 	if ((*flags & MS_RDONLY) == (sb->s_flags & MS_RDONLY))
 		return 0;
@@ -686,4 +687,3 @@ static void __exit exit_minix_fs(void)
 module_init(init_minix_fs)
 module_exit(exit_minix_fs)
 MODULE_LICENSE("GPL");
-

@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or

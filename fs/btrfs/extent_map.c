@@ -254,7 +254,7 @@ static void try_merge_map(struct extent_map_tree *tree, struct extent_map *em)
 			// decreace nr_extent_maps when extent_map dettached from extent_tree
 			WARN_ON(atomic_read(&tree->nr_extent_maps) == 0);
 			atomic_dec(&tree->nr_extent_maps);
-			if (tree->inode) {
+			if (tree->inode && !btrfs_is_free_space_inode(&tree->inode->vfs_inode)) {
 				WARN_ON(atomic_read(&(tree->inode->root->fs_info->nr_extent_maps)) == 0);
 				atomic_dec(&tree->inode->root->fs_info->nr_extent_maps);
 			}
@@ -278,7 +278,7 @@ static void try_merge_map(struct extent_map_tree *tree, struct extent_map *em)
 		// decreace nr_extent_maps when extent_map dettached from extent_tree
 		WARN_ON(atomic_read(&tree->nr_extent_maps) == 0);
 		atomic_dec(&tree->nr_extent_maps);
-		if (tree->inode) {
+		if (tree->inode && !btrfs_is_free_space_inode(&tree->inode->vfs_inode)) {
 			WARN_ON(atomic_read(&(tree->inode->root->fs_info->nr_extent_maps)) == 0);
 			atomic_dec(&tree->inode->root->fs_info->nr_extent_maps);
 		}
@@ -378,7 +378,7 @@ int add_extent_mapping(struct extent_map_tree *tree,
 
 #ifdef CONFIG_SYNO_BTRFS_FREE_EXTENT_MAPS
 	atomic_inc(&tree->nr_extent_maps);
-	if (tree->inode) {
+	if (tree->inode && !btrfs_is_free_space_inode(&tree->inode->vfs_inode)) {
 		atomic_inc(&tree->inode->root->fs_info->nr_extent_maps);
 	}
 #endif
@@ -472,7 +472,7 @@ int remove_extent_mapping(struct extent_map_tree *tree, struct extent_map *em)
 	// decreace nr_extent_maps when extent_map dettached from extent_tree
 	WARN_ON(atomic_read(&tree->nr_extent_maps) == 0);
 	atomic_dec(&tree->nr_extent_maps);
-	if (tree->inode) {
+	if (tree->inode && !btrfs_is_free_space_inode(&tree->inode->vfs_inode)) {
 		WARN_ON(atomic_read(&(tree->inode->root->fs_info->nr_extent_maps)) == 0);
 		atomic_dec(&tree->inode->root->fs_info->nr_extent_maps);
 	}

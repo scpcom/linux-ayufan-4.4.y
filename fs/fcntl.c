@@ -192,6 +192,11 @@ long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
 		if (err) {
 			goto unlock;
 		}
+	} else if (inode->i_op->syno_bypass_is_synoacl) {
+		err = inode->i_op->syno_bypass_is_synoacl(dentry, 0, -EPERM);
+		if (err) {
+			goto unlock;
+		}
 	} else {
 		if (!inode_owner_or_capable(inode)) {
 			err = -EPERM;
@@ -199,7 +204,12 @@ long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
 		}
 	}
 	if (ALL_SYNO_ACL_ARCHIVE & flags) {
-		if (!IS_FS_SYNOACL(inode)) {
+		if (inode->i_op->syno_bypass_is_synoacl) {
+			err = inode->i_op->syno_bypass_is_synoacl(dentry, 0, -EOPNOTSUPP);
+			if (err) {
+				goto unlock;
+			}
+		} else if (!IS_FS_SYNOACL(inode)) {
 			err = -EOPNOTSUPP;
 			goto unlock;
 		}

@@ -111,6 +111,13 @@
  */
 int al_fabric_get_cause_irq(unsigned int idx, int irq);
 
+/**
+ * Check if Hardware Cache-Coherency is enabled or not
+ * @return   0 if Hardware Cache-Coherency is not enabled and a positive number
+ *           otherwise
+ */
+int al_fabric_hwcc_enabled(void);
+
 int al_fabric_init(void);
 
 #endif /* __AL_FABRIC_H__ */

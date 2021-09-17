@@ -59,6 +59,10 @@
 #define RTC_SZ_INTERRUPT2_INT2FE_MASK	0x2
 #define RTC_SZ_INTERRUPT2_RESERVED1_MASK	0xFFFFFFC0
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#define SAMPLE_NR 100
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+
 typedef struct mvebu_rtc_s {
 	struct rtc_device *rtc_dev;
 	void __iomem      *regbase_rtc;
@@ -142,7 +146,7 @@ static void rtc_next_alarm_time(struct rtc_time *next, struct rtc_time *now, str
 }
 
 #if defined(CONFIG_SYNO_ARMADA_RTC_WORKAROUND)
-#define SAMPLE_SIZE 10
+#define SAMPLE_SIZE 100
 #define RETRY_LIMIT 100
 
 /*
@@ -276,19 +280,54 @@ static irqreturn_t mvebu_rtc_irq_handler(int irq, void *rtc_ptr)
 	return irq_status;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+struct str_time_2_freq {
+	unsigned long nTime;
+	uint8_t nFreq;
+} __packed;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+
 static int mvebu_rtc_read_time(struct device *dev, struct rtc_time *tm)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	/* Functional Errata Ref #: FE-3124064 - WA for failing time read attempts.
+	 * Description:
+	 *		The device supports CPU write and read access to the RTC Time register.
+	 *	However, due to this erratum, Write to RTC TIME register may fail.
+	 *  Read from RTC TIME register may fail.
+	 * Workaround:
+	 *  Before writing to RTC TIME register, issue a dummy write of 0x0 twice to
+	 *  RTC Status register.
+	 *  Configure maximum value (0x3FF) in write clock period in RTC Mbus Bridge
+	 *  Timing Control register.
+	 *  Before writing to RTC TIME register, issue a dummy write of 0x0 twice to
+	 *  RTC Status register.
+	 *		RTC TIME register should be read 100 times, then find the result
+	 *	that appear most frequently, use this result as the correct value.
+	 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 	mvebu_rtc_t *rtc = dev_get_drvdata(dev);
-#if defined(CONFIG_SYNO_ARMADA_RTC_WORKAROUND)
-	unsigned long time_check;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	unsigned long nTimeArray[SAMPLE_NR], i, j, nTime;
+	unsigned long nMax = 0, indexMax = SAMPLE_NR - 1;
+	struct str_time_2_freq sTimeToFreq[SAMPLE_NR];
 #else
 	unsigned long time, time_check;
 #endif
+#if defined(CONFIG_SYNO_ARMADA_RTC_WORKAROUND)
+	int retry_counter = 0;
+#endif /* CONFIG_SYNO_ARMADA_RTC_WORKAROUND */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	if (rtc == NULL) {
+		dev_err(dev, "Can't get driver data of RTC device\n");
+		return 0;
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 	spin_lock_irq(&rtc->lock);
 
-#if defined(CONFIG_SYNO_ARMADA_RTC_WORKAROUND)
-	time_check = syno_mvebu_rtc_read_register_majority(rtc, RTC_TIME_REG_OFFS);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	// do nothing
 #else
 	time = RTC_READ_REG(RTC_TIME_REG_OFFS);
 
@@ -298,11 +337,56 @@ static int mvebu_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	if ((time_check - time) > 1)
 		time_check = RTC_READ_REG(RTC_TIME_REG_OFFS);
 	/* End of WA */
-#endif
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	for (i = 0; i < SAMPLE_NR; i++) {
+		sTimeToFreq[i].nFreq = 0;
+		nTimeArray[i] = RTC_READ_REG(RTC_TIME_REG_OFFS);
+	}
+#else
 	rtc_time_to_tm(time_check, tm);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 	spin_unlock_irq(&rtc->lock);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(CONFIG_SYNO_ARMADA_RTC_WORKAROUND)
+	while(1) {
+#endif /* CONFIG_SYNO_ARMADA_RTC_WORKAROUND */
+	for (i = 0; i < SAMPLE_NR; i++) {
+		nTime = nTimeArray[i];
+		/* if nTime appears in sTimeToFreq array so add the counter of nTime value,
+		   if didn't appear yet in counters array then allocate new member of
+		   sTimeToFreq array with counter = 1 */
+		for (j = 0; j < SAMPLE_NR; j++) {
+			if (sTimeToFreq[j].nFreq == 0 || sTimeToFreq[j].nTime == nTime)
+				break;
+			}
+		if (sTimeToFreq[j].nFreq == 0)
+			sTimeToFreq[j].nTime = nTime;
+		sTimeToFreq[j].nFreq++;
+		/*find the most common result*/
+		if (nMax < sTimeToFreq[j].nFreq) {
+			indexMax = j;
+			nMax = sTimeToFreq[j].nFreq;
+		}
+	}
+
+#if defined(CONFIG_SYNO_ARMADA_RTC_WORKAROUND)
+		if (nMax > SAMPLE_NR / 2) {
+			break;
+		} else {
+			++retry_counter;
+			if (retry_counter == RETRY_LIMIT) {
+				printk("Error: RTC read register hit retry limit!\n");
+				break;
+			}
+		}
+	} /* while loop */
+#endif /* CONFIG_SYNO_ARMADA_RTC_WORKAROUND */
+
+	rtc_time_to_tm(sTimeToFreq[indexMax].nTime, tm);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 	return 0;
 }
 
@@ -320,10 +404,23 @@ static int mvebu_rtc_set_time(struct device *dev, struct rtc_time *tm)
 		mdelay(500); /* Oscillator startup time */
 #endif /* CONFIG_SYNO_ARMADA */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		/*
+		* According to errata FE-3124064, Write to RTC TIME register
+		* may fail. As a workaround, after writing to RTC TIME register,
+		* issue a dummy write of 0x0 twice to RTC Status register.
+		*/
+#else
 		/* WA for failing time set attempts. The HW ERRATA information should be added here */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 		RTC_WRITE_REG(0, RTC_STATUS_REG_OFFS);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		RTC_WRITE_REG(0, RTC_STATUS_REG_OFFS);
+#else
 		mdelay(100);
 		/* End of SW WA */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+
 		RTC_WRITE_REG(time, RTC_TIME_REG_OFFS);
 		spin_unlock_irq(&rtc->lock);
 	}

@@ -22,6 +22,3 @@ ifneq ($(CONFIG_HOTPLUG_CPU), y)
 obj-$(CONFIG_CPU_IDLE_ALPINE)   += sleep-alpine.o
 endif
 
-ifeq ($(CONFIG_SYNO_ALPINE),y)
-obj-y					+= synology-gpio.o
-endif

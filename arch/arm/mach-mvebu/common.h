@@ -16,11 +16,13 @@
 #define __ARCH_MVEBU_COMMON_H
 
 #if defined(CONFIG_SYNO_LSP_ARMADA)
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#define LSP_VERSION    "linux-3.10.70-2015_T1.1p7"
+#elif defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
 #define LSP_VERSION    "linux-3.10.70-2015_T1.1p4"
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else
 #define LSP_VERSION    "linux-3.10.70-2015_T1.1"
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif
 #endif /* CONFIG_SYNO_LSP_ARMADA */
 
 void mvebu_restart(char mode, const char *cmd);

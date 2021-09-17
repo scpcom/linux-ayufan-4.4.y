@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -255,7 +255,27 @@ struct al_eth_mac_stat {
 	uint32_t eee_in;
 	/* [0x8] EEE, number of times the MAC went out of low power  ... */
 	uint32_t eee_out;
-	uint32_t rsrvd[61];
+	/* [0xc] 40G PCS, FEC corrected error indication */
+	uint32_t v3_pcs_40g_ll_cerr_0;
+	/* [0x10] 40G PCS, FEC corrected error indication */
+	uint32_t v3_pcs_40g_ll_cerr_1;
+	/* [0x14] 40G PCS, FEC corrected error indication */
+	uint32_t v3_pcs_40g_ll_cerr_2;
+	/* [0x18] 40G PCS, FEC corrected error indication */
+	uint32_t v3_pcs_40g_ll_cerr_3;
+	/* [0x1c] 40G PCS, FEC uncorrectable error indication */
+	uint32_t v3_pcs_40g_ll_ncerr_0;
+	/* [0x20] 40G PCS, FEC uncorrectable error indication */
+	uint32_t v3_pcs_40g_ll_ncerr_1;
+	/* [0x24] 40G PCS, FEC uncorrectable error indication */
+	uint32_t v3_pcs_40g_ll_ncerr_2;
+	/* [0x28] 40G PCS, FEC uncorrectable error indication */
+	uint32_t v3_pcs_40g_ll_ncerr_3;
+	/* [0x2c] 10G_LL PCS, FEC corrected error indication */
+	uint32_t v3_pcs_10g_ll_cerr;
+	/* [0x30] 10G_LL PCS, FEC uncorrectable error indication */
+	uint32_t v3_pcs_10g_ll_ncerr;
+	uint32_t rsrvd[51];
 };
 struct al_eth_mac_stat_lane {
 	/* [0x0] Character error */
@@ -265,6 +285,99 @@ struct al_eth_mac_stat_lane {
 	/* [0x8] Comma detection */
 	uint32_t pat;
 	uint32_t rsrvd[13];
+};
+struct al_eth_mac_gen_v3 {
+	/* [0x0] ASYNC FIFOs control */
+	uint32_t afifo_ctrl;
+	/* [0x4] TX ASYNC FIFO configuration */
+	uint32_t tx_afifo_cfg_1;
+	/* [0x8] TX ASYNC FIFO configuration */
+	uint32_t tx_afifo_cfg_2;
+	/* [0xc] TX ASYNC FIFO configuration */
+	uint32_t tx_afifo_cfg_3;
+	/* [0x10] TX ASYNC FIFO configuration */
+	uint32_t tx_afifo_cfg_4;
+	/* [0x14] TX ASYNC FIFO configuration */
+	uint32_t tx_afifo_cfg_5;
+	/* [0x18] RX ASYNC FIFO configuration */
+	uint32_t rx_afifo_cfg_1;
+	/* [0x1c] RX ASYNC FIFO configuration */
+	uint32_t rx_afifo_cfg_2;
+	/* [0x20] RX ASYNC FIFO configuration */
+	uint32_t rx_afifo_cfg_3;
+	/* [0x24] RX ASYNC FIFO configuration */
+	uint32_t rx_afifo_cfg_4;
+	/* [0x28] RX ASYNC FIFO configuration */
+	uint32_t rx_afifo_cfg_5;
+	/* [0x2c] MAC selection configuration */
+	uint32_t mac_sel;
+	/* [0x30] 10G LL MAC configuration */
+	uint32_t mac_10g_ll_cfg;
+	/* [0x34] 10G LL MAC control */
+	uint32_t mac_10g_ll_ctrl;
+	/* [0x38] 10G LL PCS configuration */
+	uint32_t pcs_10g_ll_cfg;
+	/* [0x3c] 10G LL PCS status */
+	uint32_t pcs_10g_ll_status;
+	/* [0x40] 40G LL PCS configuration */
+	uint32_t pcs_40g_ll_cfg;
+	/* [0x44] 40G LL PCS status */
+	uint32_t pcs_40g_ll_status;
+	/* [0x48] PCS 40G  register file address */
+	uint32_t pcs_40g_ll_addr;
+	/* [0x4c] PCS 40G register file data */
+	uint32_t pcs_40g_ll_data;
+	/* [0x50] 40G LL MAC configuration */
+	uint32_t mac_40g_ll_cfg;
+	/* [0x54] 40G LL MAC status */
+	uint32_t mac_40g_ll_status;
+	/* [0x58] Preamble configuration (high [55:32]) */
+	uint32_t preamble_cfg_high;
+	/* [0x5c] Preamble configuration (low [31:0]) */
+	uint32_t preamble_cfg_low;
+	/* [0x60] MAC 40G register file address */
+	uint32_t mac_40g_ll_addr;
+	/* [0x64] MAC 40G register file data */
+	uint32_t mac_40g_ll_data;
+	/* [0x68] 40G LL MAC control */
+	uint32_t mac_40g_ll_ctrl;
+	/* [0x6c] PCS 40G  register file address */
+	uint32_t pcs_40g_fec_91_ll_addr;
+	/* [0x70] PCS 40G register file data */
+	uint32_t pcs_40g_fec_91_ll_data;
+	/* [0x74] 40G LL PCS EEE configuration */
+	uint32_t pcs_40g_ll_eee_cfg;
+	/* [0x78] 40G LL PCS EEE status */
+	uint32_t pcs_40g_ll_eee_status;
+	/* [0x7c] SERDES 32-bit interface shift configuration (when s ... */
+	uint32_t serdes_32_tx_shift;
+	/* [0x80] SERDES 32-bit interface shift configuration (when s ... */
+	uint32_t serdes_32_rx_shift;
+	/* [0x84] SERDES 32-bit interface bit selection */
+	uint32_t serdes_32_tx_sel;
+	/* [0x88] SERDES 32-bit interface bit selection */
+	uint32_t serdes_32_rx_sel;
+	/* [0x8c] AN/LT wrapper  control */
+	uint32_t an_lt_ctrl;
+	/* [0x90] AN/LT wrapper  register file address */
+	uint32_t an_lt_0_addr;
+	/* [0x94] AN/LT wrapper register file data */
+	uint32_t an_lt_0_data;
+	/* [0x98] AN/LT wrapper  register file address */
+	uint32_t an_lt_1_addr;
+	/* [0x9c] AN/LT wrapper register file data */
+	uint32_t an_lt_1_data;
+	/* [0xa0] AN/LT wrapper  register file address */
+	uint32_t an_lt_2_addr;
+	/* [0xa4] AN/LT wrapper register file data */
+	uint32_t an_lt_2_data;
+	/* [0xa8] AN/LT wrapper  register file address */
+	uint32_t an_lt_3_addr;
+	/* [0xac] AN/LT wrapper register file data */
+	uint32_t an_lt_3_data;
+	/* [0xb0] External SERDES control */
+	uint32_t ext_serdes_ctrl;
+	uint32_t rsrvd[19];
 };
 
 struct al_eth_mac_regs {
@@ -276,6 +389,7 @@ struct al_eth_mac_regs {
 	struct al_eth_mac_sgmii sgmii;                          /* [0xb00] */
 	struct al_eth_mac_stat stat;                            /* [0xc00] */
 	struct al_eth_mac_stat_lane stat_lane[4];               /* [0xd00] */
+	struct al_eth_mac_gen_v3 gen_v3;                        /* [0xe00] */
 };
 
 /*
@@ -824,6 +938,396 @@ struct al_eth_mac_regs {
 #define ETH_MAC_SGMII_LINK_STAT_HD_ENA   (1 << 4)
 
 #define ETH_MAC_SGMII_LINK_STAT_LED_LINK (1 << 5)
+
+/**** afifo_ctrl register ****/
+/* enable tx input operation */
+#define ETH_MAC_GEN_V3_AFIFO_CTRL_EN_TX_IN (1 << 0)
+/* enable tx output operation */
+#define ETH_MAC_GEN_V3_AFIFO_CTRL_EN_TX_OUT (1 << 1)
+/* enable rx input operation */
+#define ETH_MAC_GEN_V3_AFIFO_CTRL_EN_RX_IN (1 << 4)
+/* enable rx output operation */
+#define ETH_MAC_GEN_V3_AFIFO_CTRL_EN_RX_OUT (1 << 5)
+/* enable tx FIFO input operation */
+#define ETH_MAC_GEN_V3_AFIFO_CTRL_EN_TX_FIFO_IN (1 << 8)
+/* enable tx FIFO output operation */
+#define ETH_MAC_GEN_V3_AFIFO_CTRL_EN_TX_FIFO_OUT (1 << 9)
+/* enable rx FIFO input operation */
+#define ETH_MAC_GEN_V3_AFIFO_CTRL_EN_RX_FIFO_IN (1 << 12)
+/* enable rx FIFO output operation */
+#define ETH_MAC_GEN_V3_AFIFO_CTRL_EN_RX_FIFO_OUT (1 << 13)
+
+/**** tx_afifo_cfg_1 register ****/
+/* minimum packet size configuration */
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_1_MIN_PKT_SIZE_MASK 0x0000FFFF
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_1_MIN_PKT_SIZE_SHIFT 0
+
+/**** tx_afifo_cfg_2 register ****/
+/* maximum packet size configuration */
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_2_MAX_PKT_SIZE_MASK 0x0000FFFF
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_2_MAX_PKT_SIZE_SHIFT 0
+
+/**** tx_afifo_cfg_3 register ****/
+/* input bus width */
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_3_INPUT_BUS_W_MASK 0x0000FFFF
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_3_INPUT_BUS_W_SHIFT 0
+/* input bus width divide factor */
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_3_INPUT_BUS_W_F_MASK 0xFFFF0000
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_3_INPUT_BUS_W_F_SHIFT 16
+
+/**** tx_afifo_cfg_4 register ****/
+/* output bus width */
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_4_OUTPUT_BUS_W_MASK 0x0000FFFF
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_4_OUTPUT_BUS_W_SHIFT 0
+/* output bus width divide factor */
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_4_OUTPUT_BUS_W_F_MASK 0xFFFF0000
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_4_OUTPUT_BUS_W_F_SHIFT 16
+
+/**** tx_afifo_cfg_5 register ****/
+/* determines if the input bus is valid/read or “write enable” */
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_5_INPUT_BUS_VALID_RDY (1 << 0)
+/* determines if the output bus is valid/read or “write enable” */
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_5_OUTPUT_BUS_VALID_RDY (1 << 1)
+/* Swap input bus bytes */
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_5_INPUT_BUS_SWAP_BYTES (1 << 4)
+/* Swap output bus bytes */
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_5_OUTPUT_BUS_SWAP_BYTES (1 << 5)
+/* output clock select
+0 – mac_ll_tx_clk
+1 – clk_mac_sys_clk */
+#define ETH_MAC_GEN_V3_TX_AFIFO_CFG_5_OUTPUT_CLK_SEL (1 << 8)
+
+/**** rx_afifo_cfg_1 register ****/
+/* minimum packet size configuration */
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_1_MIN_PKT_SIZE_MASK 0x0000FFFF
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_1_MIN_PKT_SIZE_SHIFT 0
+
+/**** rx_afifo_cfg_2 register ****/
+/* maximum packet size configuration */
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_2_MAX_PKT_SIZE_MASK 0x0000FFFF
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_2_MAX_PKT_SIZE_SHIFT 0
+
+/**** rx_afifo_cfg_3 register ****/
+/* input bus width */
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_3_INPUT_BUS_W_MASK 0x0000FFFF
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_3_INPUT_BUS_W_SHIFT 0
+/* input bus width divide factor */
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_3_INPUT_BUS_W_F_MASK 0xFFFF0000
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_3_INPUT_BUS_W_F_SHIFT 16
+
+/**** rx_afifo_cfg_4 register ****/
+/* output bus width */
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_4_OUTPUT_BUS_W_MASK 0x0000FFFF
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_4_OUTPUT_BUS_W_SHIFT 0
+/* output bus width divide factor */
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_4_OUTPUT_BUS_W_F_MASK 0xFFFF0000
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_4_OUTPUT_BUS_W_F_SHIFT 16
+
+/**** rx_afifo_cfg_5 register ****/
+/* determines if the input bus is valid/read or “write enable” */
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_5_INPUT_BUS_VALID_RDY (1 << 0)
+/* determines if the output bus is valid/read or “write enable” */
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_5_OUTPUT_BUS_VALID_RDY (1 << 1)
+/* Swap input bus bytes */
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_5_INPUT_BUS_SWAP_BYTES (1 << 4)
+/* Swap output bus bytes */
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_5_OUTPUT_BUS_SWAP_BYTES (1 << 5)
+/* input clock select0 – mac_ll_rx_clk1 – clk_serdes_int_0_tx_dw ... */
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_5_INPUT_CLK_SEL_MASK 0x00000300
+#define ETH_MAC_GEN_V3_RX_AFIFO_CFG_5_INPUT_CLK_SEL_SHIFT 8
+
+/**** mac_sel register ****/
+/* Select the MAC that is connected to the SGMII PCS */
+#define ETH_MAC_GEN_V3_MAC_SEL_MAC_10G_SGMII (1 << 0)
+/* Select between the 10G and 40G MAC
+0 – 10G MAC
+1 – 40G MAC */
+#define ETH_MAC_GEN_V3_MAC_SEL_MAC_10G_40G (1 << 4)
+
+/**** mac_10g_ll_cfg register ****/
+/* select between 10G (KR PCS) and 1G (SGMII) mode */
+#define ETH_MAC_GEN_V3_MAC_10G_LL_CFG_MODE_1G (1 << 0)
+/* enable Magic packet detection in the MAC (all other packets a ... */
+#define ETH_MAC_GEN_V3_MAC_10G_LL_CFG_MAGIC_ENA (1 << 5)
+
+/**** mac_10g_ll_ctrl register ****/
+/* Force the MAC to stop TX transmission after low power mode. */
+#define ETH_MAC_GEN_V3_MAC_10G_LL_CTRL_LPI_TXHOLD (1 << 0)
+
+/**** pcs_10g_ll_cfg register ****/
+/* RX FEC Enable */
+#define ETH_MAC_GEN_V3_PCS_10G_LL_CFG_FEC_EN_RX (1 << 0)
+/* TX FEC enable */
+#define ETH_MAC_GEN_V3_PCS_10G_LL_CFG_FEC_EN_TX (1 << 1)
+/* RX FEC error propagation enable, 
+(debug, always 0) */
+#define ETH_MAC_GEN_V3_PCS_10G_LL_CFG_FEC_ERR_ENA (1 << 2)
+/* Gearbox configuration:
+00 -16 
+01 – 20
+10 – 32
+11 – reserved */
+#define ETH_MAC_GEN_V3_PCS_10G_LL_CFG_TX_GB_CFG_MASK 0x00000030
+#define ETH_MAC_GEN_V3_PCS_10G_LL_CFG_TX_GB_CFG_SHIFT 4
+/* Gearbox configuration:
+00 -16 
+01 – 20
+10 – 32
+11 – reserved */
+#define ETH_MAC_GEN_V3_PCS_10G_LL_CFG_RX_GB_CFG_MASK 0x000000C0
+#define ETH_MAC_GEN_V3_PCS_10G_LL_CFG_RX_GB_CFG_SHIFT 6
+
+/**** pcs_10g_ll_status register ****/
+/* FEC locked indication */
+#define ETH_MAC_GEN_V3_PCS_10G_LL_STATUS_FEC_LOCKED (1 << 0)
+/**** pcs_40g_ll_cfg register ****/
+/* RX FEC Enable */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_FEC_EN_RX_MASK 0x0000000F
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_FEC_EN_RX_SHIFT 0
+/* TX FEC enable */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_FEC_EN_TX_MASK 0x000000F0
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_FEC_EN_TX_SHIFT 4
+/* RX FEC error propagation enable, (debug, always 0) */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_FEC_ERR_EN_MASK 0x00000F00
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_FEC_ERR_EN_SHIFT 8
+/* SERDES width, 16 bit enable
+1 – 16
+2 – 32 */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_SD_16B (1 << 12)
+/* FEC 91 enable */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_FEC91_ENA (1 << 13)
+/* PHY LOS indication selection 00 - Select register value from  ... */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_PHY_LOS_SEL_MASK 0x00030000
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_PHY_LOS_SEL_SHIFT 16
+/* PHY LOS default value */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_PHY_LOS_DEF (1 << 18)
+/* PHY LOS polarity */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_PHY_LOS_POL (1 << 19)
+/* Energy detect  indication selection 00 - Select register valu ... */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_ENERGY_DETECT_SEL_MASK 0x00300000
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_ENERGY_DETECT_SEL_SHIFT 20
+/* Energy detect default value */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_ENERGY_DETECT_DEF (1 << 22)
+/* Energy detect polarity */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_CFG_ENERGY_DETECT_POL (1 << 23)
+
+/**** pcs_40g_ll_status register ****/
+/* Block lock */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_STATUS_BLOCK_LOCK_MASK 0x0000000F
+#define ETH_MAC_GEN_V3_PCS_40G_LL_STATUS_BLOCK_LOCK_SHIFT 0
+/* align done */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_STATUS_ALIGN_DONE (1 << 4)
+/* high BER */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_STATUS_HIGH_BER (1 << 8)
+/* FEC locked indication */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_STATUS_FEC_LOCKED_MASK 0x0000F000
+#define ETH_MAC_GEN_V3_PCS_40G_LL_STATUS_FEC_LOCKED_SHIFT 12
+
+/**** pcs_40g_ll_addr register ****/
+/* Address value */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_ADDR_VAL_MASK 0x0001FFFF
+#define ETH_MAC_GEN_V3_PCS_40G_LL_ADDR_VAL_SHIFT 0
+
+/**** pcs_40g_ll_data register ****/
+/* Data value */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_DATA_VAL_MASK 0x0000FFFF
+#define ETH_MAC_GEN_V3_PCS_40G_LL_DATA_VAL_SHIFT 0
+
+/**** mac_40g_ll_cfg register ****/
+/* change TX CRC polarity */
+#define ETH_MAC_GEN_V3_MAC_40G_LL_CFG_SWAP_FF_TX_CRC (1 << 0)
+/* force TX remote fault */
+#define ETH_MAC_GEN_V3_MAC_40G_LL_CFG_TX_REM_FAULT (1 << 4)
+/* force TX local fault */
+#define ETH_MAC_GEN_V3_MAC_40G_LL_CFG_TX_LOC_FAULT (1 << 5)
+/* force TX Link fault */
+#define ETH_MAC_GEN_V3_MAC_40G_LL_CFG_TX_LI_FAULT (1 << 6)
+/* PHY LOS indication selection 00 - Select register value from  ... */
+#define ETH_MAC_GEN_V3_MAC_40G_LL_CFG_PHY_LOS_SEL_MASK 0x00000300
+#define ETH_MAC_GEN_V3_MAC_40G_LL_CFG_PHY_LOS_SEL_SHIFT 8
+/* PHY LOS default value */
+#define ETH_MAC_GEN_V3_MAC_40G_LL_CFG_PHY_LOS_DEF (1 << 10)
+/* PHY LOS polarity */
+#define ETH_MAC_GEN_V3_MAC_40G_LL_CFG_PHY_LOS_POL (1 << 11)
+
+/**** mac_40g_ll_status register ****/
+/* pause on indication */
+#define ETH_MAC_GEN_V3_MAC_40G_LL_STATUS_PAUSE_ON_MASK 0x000000FF
+#define ETH_MAC_GEN_V3_MAC_40G_LL_STATUS_PAUSE_ON_SHIFT 0
+/* local fault indication received */
+#define ETH_MAC_GEN_V3_MAC_40G_LL_STATUS_LOC_FAULT (1 << 8)
+/* remote fault indication received */
+#define ETH_MAC_GEN_V3_MAC_40G_LL_STATUS_REM_FAULT (1 << 9)
+/* Link fault indication */
+#define ETH_MAC_GEN_V3_MAC_40G_LL_STATUS_LI_FAULT (1 << 10)
+
+/**** preamble_cfg_high register ****/
+/* preamble value */
+#define ETH_MAC_GEN_V3_PREAMBLE_CFG_HIGH_VAL_MASK 0x00FFFFFF
+#define ETH_MAC_GEN_V3_PREAMBLE_CFG_HIGH_VAL_SHIFT 0
+
+/**** mac_40g_ll_addr register ****/
+/* Address value */
+#define ETH_MAC_GEN_V3_MAC_40G_LL_ADDR_VAL_MASK 0x000003FF
+#define ETH_MAC_GEN_V3_MAC_40G_LL_ADDR_VAL_SHIFT 0
+
+/**** mac_40g_ll_ctrl register ****/
+/* Force the MAC to stop TX transmission after low power mode. */
+#define ETH_MAC_GEN_V3_MAC_40G_LL_CTRL_LPI_TXHOLD (1 << 0)
+
+#define ETH_MAC_GEN_V3_MAC_40G_LL_CTRL_REG_LOWP_ENA (1 << 1)
+
+/**** pcs_40g_fec_91_ll_addr register ****/
+/* Address value */
+#define ETH_MAC_GEN_V3_PCS_40G_FEC_91_LL_ADDR_VAL_MASK 0x000001FF
+#define ETH_MAC_GEN_V3_PCS_40G_FEC_91_LL_ADDR_VAL_SHIFT 0
+
+/**** pcs_40g_fec_91_ll_data register ****/
+/* Data value */
+#define ETH_MAC_GEN_V3_PCS_40G_FEC_91_LL_DATA_VAL_MASK 0x0000FFFF
+#define ETH_MAC_GEN_V3_PCS_40G_FEC_91_LL_DATA_VAL_SHIFT 0
+
+/**** pcs_40g_ll_eee_cfg register ****/
+/* Low power timer configuration */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_EEE_CFG_TIMER_VAL_MASK 0x000000FF
+#define ETH_MAC_GEN_V3_PCS_40G_LL_EEE_CFG_TIMER_VAL_SHIFT 0
+/* Low power Fast wake */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_EEE_CFG_LPI_FW (1 << 8)
+
+/**** pcs_40g_ll_eee_status register ****/
+/* TX LPI mode */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_EEE_STATUS_TX_LPI_MODE_MASK 0x00000003
+#define ETH_MAC_GEN_V3_PCS_40G_LL_EEE_STATUS_TX_LPI_MODE_SHIFT 0
+/* TX LPI state */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_EEE_STATUS_TX_LPI_STATE_MASK 0x00000070
+#define ETH_MAC_GEN_V3_PCS_40G_LL_EEE_STATUS_TX_LPI_STATE_SHIFT 4
+/* TX LPI mode */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_EEE_STATUS_RX_LPI_MODE (1 << 8)
+/* TX LPI state */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_EEE_STATUS_RX_LPI_STATE_MASK 0x00007000
+#define ETH_MAC_GEN_V3_PCS_40G_LL_EEE_STATUS_RX_LPI_STATE_SHIFT 12
+/* TX LPI active */
+#define ETH_MAC_GEN_V3_PCS_40G_LL_EEE_STATUS_RX_LPI_ACTIVE (1 << 15)
+
+/**** serdes_32_tx_shift register ****/
+/* bit shift */
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SHIFT_SERDES_0_MASK 0x0000001F
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SHIFT_SERDES_0_SHIFT 0
+/* bit shift */
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SHIFT_SERDES_1_MASK 0x000003E0
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SHIFT_SERDES_1_SHIFT 5
+/* bit shift */
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SHIFT_SERDES_2_MASK 0x00007C00
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SHIFT_SERDES_2_SHIFT 10
+/* bit shift */
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SHIFT_SERDES_3_MASK 0x000F8000
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SHIFT_SERDES_3_SHIFT 15
+
+/**** serdes_32_rx_shift register ****/
+/* bit shift */
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SHIFT_SERDES_0_MASK 0x0000001F
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SHIFT_SERDES_0_SHIFT 0
+/* bit shift */
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SHIFT_SERDES_1_MASK 0x000003E0
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SHIFT_SERDES_1_SHIFT 5
+/* bit shift */
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SHIFT_SERDES_2_MASK 0x00007C00
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SHIFT_SERDES_2_SHIFT 10
+/* bit shift */
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SHIFT_SERDES_3_MASK 0x000F8000
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SHIFT_SERDES_3_SHIFT 15
+
+/**** serdes_32_tx_sel register ****/
+/* 0 – directly from serdes1 – swapped2 – swapped with shift3 -  ... */
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SEL_SERDES_0_MASK 0x00000003
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SEL_SERDES_0_SHIFT 0
+/* 0 – directly from serdes1 – swapped2 – swapped with shift3 -  ... */
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SEL_SERDES_1_MASK 0x00000030
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SEL_SERDES_1_SHIFT 4
+/* 0 – directly from serdes1 – swapped2 – swapped with shift3 -  ... */
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SEL_SERDES_2_MASK 0x00000300
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SEL_SERDES_2_SHIFT 8
+/* 0 – directly from serdes1 – swapped2 – swapped with shift3 -  ... */
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SEL_SERDES_3_MASK 0x00003000
+#define ETH_MAC_GEN_V3_SERDES_32_TX_SEL_SERDES_3_SHIFT 12
+
+/**** serdes_32_rx_sel register ****/
+/* 0 – directly from serdes1 – swapped2 – swapped with shift3 -  ... */
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SEL_SERDES_0_MASK 0x00000003
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SEL_SERDES_0_SHIFT 0
+/* 0 – directly from serdes1 – swapped2 – swapped with shift3 -  ... */
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SEL_SERDES_1_MASK 0x00000030
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SEL_SERDES_1_SHIFT 4
+/* 0 – directly from serdes1 – swapped2 – swapped with shift3 -  ... */
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SEL_SERDES_2_MASK 0x00000300
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SEL_SERDES_2_SHIFT 8
+/* 0 – directly from serdes1 – swapped2 – swapped with shift3 -  ... */
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SEL_SERDES_3_MASK 0x00003000
+#define ETH_MAC_GEN_V3_SERDES_32_RX_SEL_SERDES_3_SHIFT 12
+
+/**** an_lt_ctrl register ****/
+/* reset lane [3:0] */
+#define ETH_MAC_GEN_V3_AN_LT_CTRL_SW_RESET_MASK 0x0000000F
+#define ETH_MAC_GEN_V3_AN_LT_CTRL_SW_RESET_SHIFT 0
+
+/**** an_lt_0_addr register ****/
+/* Address value */
+#define ETH_MAC_GEN_V3_AN_LT_0_ADDR_VAL_MASK 0x0000FFFF
+#define ETH_MAC_GEN_V3_AN_LT_0_ADDR_VAL_SHIFT 0
+
+/**** an_lt_1_addr register ****/
+/* Address value */
+#define ETH_MAC_GEN_V3_AN_LT_1_ADDR_VAL_MASK 0x0000FFFF
+#define ETH_MAC_GEN_V3_AN_LT_1_ADDR_VAL_SHIFT 0
+
+/**** an_lt_2_addr register ****/
+/* Address value */
+#define ETH_MAC_GEN_V3_AN_LT_2_ADDR_VAL_MASK 0x0000FFFF
+#define ETH_MAC_GEN_V3_AN_LT_2_ADDR_VAL_SHIFT 0
+
+/**** an_lt_3_addr register ****/
+/* Address value */
+#define ETH_MAC_GEN_V3_AN_LT_3_ADDR_VAL_MASK 0x0000FFFF
+#define ETH_MAC_GEN_V3_AN_LT_3_ADDR_VAL_SHIFT 0
+
+/**** ext_serdes_ctrl register ****/
+/* Lane 0, SERDES selection:01 – 10G SERDES, lane 010 – 25G SERD ... */
+#define ETH_MAC_GEN_V3_EXT_SERDES_CTRL_LANE_0_SEL_25_10_MASK 0x00000003
+#define ETH_MAC_GEN_V3_EXT_SERDES_CTRL_LANE_0_SEL_25_10_SHIFT 0
+/* Lane 1, SERDES selection:01 – 10G SERDES, lane 110 – 25G SERD ... */
+#define ETH_MAC_GEN_V3_EXT_SERDES_CTRL_LANE_1_SEL_25_10_MASK 0x0000000C
+#define ETH_MAC_GEN_V3_EXT_SERDES_CTRL_LANE_1_SEL_25_10_SHIFT 2
+/* Lane 2, SERDES selection:01 – 10G SERDES, lane 210 – 25G SERD ... */
+#define ETH_MAC_GEN_V3_EXT_SERDES_CTRL_LANE_2_SEL_25_10_MASK 0x00000030
+#define ETH_MAC_GEN_V3_EXT_SERDES_CTRL_LANE_2_SEL_25_10_SHIFT 4
+/* Lane 3, SERDES selection:01 – 10G SERDES, lane 310 – 25G SERD ... */
+#define ETH_MAC_GEN_V3_EXT_SERDES_CTRL_LANE_3_SEL_25_10_MASK 0x000000C0
+#define ETH_MAC_GEN_V3_EXT_SERDES_CTRL_LANE_3_SEL_25_10_SHIFT 6
+
+/*** MAC Core registers addresses ***/
+/* command config */
+#define ETH_MAC_GEN_V3_MAC_40G_COMMAND_CONFIG_ADDR	0x00000008
+#define ETH_MAC_GEN_V3_MAC_40G_COMMAND_CONFIG_TX_ENA	(1 << 0)
+#define ETH_MAC_GEN_V3_MAC_40G_COMMAND_CONFIG_RX_ENA	(1 << 1)
+#define ETH_MAC_GEN_V3_MAC_40G_COMMAND_CONFIG_PFC_MODE	(1 << 19)
+
+/* frame length */
+#define ETH_MAC_GEN_V3_MAC_40G_FRM_LENGTH_ADDR		0x00000014
+
+#define ETH_MAC_GEN_V3_MAC_40G_CL01_PAUSE_QUANTA_ADDR	0x00000054
+#define ETH_MAC_GEN_V3_MAC_40G_CL23_PAUSE_QUANTA_ADDR	0x00000058
+#define ETH_MAC_GEN_V3_MAC_40G_CL45_PAUSE_QUANTA_ADDR	0x0000005C
+#define ETH_MAC_GEN_V3_MAC_40G_CL67_PAUSE_QUANTA_ADDR	0x00000060
+#define ETH_MAC_GEN_V3_MAC_40G_CL01_QUANTA_THRESH_ADDR	0x00000064
+#define ETH_MAC_GEN_V3_MAC_40G_CL23_QUANTA_THRESH_ADDR	0x00000068
+#define ETH_MAC_GEN_V3_MAC_40G_CL45_QUANTA_THRESH_ADDR	0x0000006C
+#define ETH_MAC_GEN_V3_MAC_40G_CL67_QUANTA_THRESH_ADDR	0x00000070
+
+/*** PCS Core registers addresses ***/
+/* 40g control/status */
+#define ETH_MAC_GEN_V3_PCS_40G_CONTROL_STATUS_ADDR      0x00000000
+/* 10g control_1 */
+#define ETH_MAC_KR_PCS_CONTROL_1_ADDR                   0x00000000
 
 #ifdef __cplusplus
 }

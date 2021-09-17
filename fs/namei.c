@@ -35,6 +35,7 @@
 #include <linux/fs_struct.h>
 #include <linux/posix_acl.h>
 #include <linux/hash.h>
+#include <linux/mnt_namespace.h>
 #include <asm/uaccess.h>
 
 #ifdef CONFIG_SYNO_BTRFS_RENAME_READONLY_SUBVOL
@@ -1239,39 +1240,63 @@ int follow_up(struct path *path)
 int syno_fetch_mountpoint_fullpath(struct vfsmount *mnt, size_t buf_len, char *mnt_full_path)
 {
 	int ret = -1;
-	struct mount *tmp_mnt = NULL;
 	char *mnt_dentry_path = NULL;
 	char *mnt_dentry_path_buf = NULL;
-	char *mnt_full_path_buf = NULL;
-	mnt_dentry_path_buf = kmalloc(PATH_MAX, GFP_ATOMIC);
-	mnt_full_path_buf = kmalloc(PATH_MAX, GFP_ATOMIC);
+	struct nsproxy *nsproxy = current->nsproxy;
+	struct mnt_namespace *mnt_space = NULL;
+	struct mount *real_mnt = NULL;
+	struct mount *root_mnt = NULL;
+	struct path root_path;
+	struct path mnt_path;
 
-	if(!mnt_dentry_path_buf || !mnt_full_path_buf) {
+	mnt_dentry_path_buf = kmalloc(PATH_MAX, GFP_ATOMIC);
+	if(!mnt_dentry_path_buf) {
 		ret = -ENOMEM;
 		goto ERR;
 	}
 
-	tmp_mnt = real_mount(mnt);
-	br_read_lock(&vfsmount_lock);
-	do{
-		mnt_dentry_path = dentry_path_raw(tmp_mnt->mnt_mountpoint, mnt_dentry_path_buf, PATH_MAX - 1);
-		if(IS_ERR(mnt_dentry_path)){
-			br_read_unlock(&vfsmount_lock);
-			ret = PTR_ERR(mnt_dentry_path);
-			goto ERR;
-		}
-		snprintf(mnt_full_path_buf, PATH_MAX, "%s", mnt_full_path);
-		if(mnt_full_path_buf[0] == '/' && (mnt_dentry_path[0] == '/' && mnt_dentry_path[1] == 0))
-			snprintf(mnt_full_path, buf_len, "%s", mnt_full_path_buf);
-		else
-			snprintf(mnt_full_path, buf_len, "%s%s", mnt_dentry_path, mnt_full_path_buf);
-		tmp_mnt = tmp_mnt->mnt_parent;
-	} while (tmp_mnt != tmp_mnt->mnt_parent);
-	br_read_unlock(&vfsmount_lock);
+	if (!nsproxy) {
+		ret = -EINVAL;
+		goto ERR;
+	}
+
+	mnt_space = nsproxy->mnt_ns;
+	if (!mnt_space || !mnt_space->root) {
+		ret = -EINVAL;
+		goto ERR;
+	}
+
+	get_mnt_ns(mnt_space);
+
+	root_mnt = mnt_space->root;
+	memset(&root_path, 0, sizeof(struct path));
+	root_path.mnt = &root_mnt->mnt;
+	root_path.dentry = root_mnt->mnt.mnt_root;
+
+	real_mnt = real_mount(mnt);
+	memset(&mnt_path, 0, sizeof(struct path));
+	mnt_path.mnt = &real_mnt->mnt;
+	mnt_path.dentry = real_mnt->mnt.mnt_root;
+
+	path_get(&mnt_path);
+	path_get(&root_path);
+
+	mnt_dentry_path = __d_path(&mnt_path, &root_path, mnt_dentry_path_buf, PATH_MAX-1);
+	if(IS_ERR_OR_NULL(mnt_dentry_path)){
+		ret = PTR_ERR(mnt_dentry_path);
+		goto RESOURCE_PUT;
+	}
+
+	snprintf(mnt_full_path, buf_len, "%s", mnt_dentry_path);
+
 	ret = 0;
+
+RESOURCE_PUT:
+	path_put(&root_path);
+	path_put(&mnt_path);
+	put_mnt_ns(mnt_space);
 ERR:
 	kfree(mnt_dentry_path_buf);
-	kfree(mnt_full_path_buf);
 	return ret;
 }
 #endif /* CONFIG_SYNO_FS_NOTIFY */
@@ -2337,7 +2362,7 @@ static int link_path_walk(const char *name, struct nameidata *nd)
 		nd->last = this;
 		nd->last_type = type;
 #ifdef CONFIG_SYNO_FS_CASELESS_STAT
-		if (!name[len]) {
+		if (!name[len] && caseless_flag) {
 			nd->flags |= LOOKUP_TO_LASTCOMPONENT;
 		}
 		if (caseless_flag && (LAST_DOTDOT == type || LAST_DOT == type)) {
@@ -2754,7 +2779,7 @@ struct dentry *lookup_one_len(const char *name, struct dentry *base, int len)
 
 #ifdef CONFIG_SYNO_FS_CASELESS_STAT
 int syno_user_path_at(int dfd, const char __user *name, unsigned flags,
-		 struct path *path, char **real_filename, int *real_filename_len, int *last_component)
+		 struct path *path, char **real_filename, int *real_filename_len)
 {
 	struct nameidata nd;
 	struct filename *tmp = getname(name);
@@ -2771,9 +2796,6 @@ int syno_user_path_at(int dfd, const char __user *name, unsigned flags,
 		if (!err) {
 			*path = nd.path;
 			*real_filename_len = nd.real_filename_len;
-			if (nd.flags & LOOKUP_TO_LASTCOMPONENT) {
-				*last_component = 1;
-			}
 		}
 	}
 	return err;

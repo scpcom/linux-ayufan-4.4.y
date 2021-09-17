@@ -120,12 +120,38 @@ static inline void config_group_put(struct config_group *group)
 extern struct config_item *config_group_find_item(struct config_group *,
 						  const char *);
 
-
 struct configfs_attribute {
 	const char		*ca_name;
 	struct module 		*ca_owner;
 	umode_t			ca_mode;
+	ssize_t (*show)(struct config_item *, char *);
+	ssize_t (*store)(struct config_item *, const char *, size_t);
 };
+
+#define CONFIGFS_ATTR(_pfx, _name)			\
+static struct configfs_attribute _pfx##attr_##_name = {	\
+	.ca_name	= __stringify(_name),		\
+	.ca_mode	= S_IRUGO | S_IWUSR,		\
+	.ca_owner	= THIS_MODULE,			\
+	.show		= _pfx##_name##_show,		\
+	.store		= _pfx##_name##_store,		\
+}
+
+#define CONFIGFS_ATTR_RO(_pfx, _name)			\
+static struct configfs_attribute _pfx##attr_##_name = {	\
+	.ca_name	= __stringify(_name),		\
+	.ca_mode	= S_IRUGO,			\
+	.ca_owner	= THIS_MODULE,			\
+	.show		= _pfx##_name##_show,		\
+}
+
+#define CONFIGFS_ATTR_WO(_pfx, _name)			\
+static struct configfs_attribute _pfx##attr_##_name = {	\
+	.ca_name	= __stringify(_name),		\
+	.ca_mode	= S_IWUSR,			\
+	.ca_owner	= THIS_MODULE,			\
+	.store		= _pfx##_name##_store,		\
+}
 
 /*
  * Users often need to create attribute structures for their configurable
@@ -254,7 +280,8 @@ void configfs_unregister_subsystem(struct configfs_subsystem *subsys);
 
 /* These functions can sleep and can alloc with GFP_KERNEL */
 /* WARNING: These cannot be called underneath configfs callbacks!! */
-int configfs_depend_item(struct configfs_subsystem *subsys, struct config_item *target);
-void configfs_undepend_item(struct configfs_subsystem *subsys, struct config_item *target);
+int configfs_depend_item(struct configfs_subsystem *subsys,
+			 struct config_item *target);
+void configfs_undepend_item(struct config_item *target);
 
 #endif /* _CONFIGFS_H_ */

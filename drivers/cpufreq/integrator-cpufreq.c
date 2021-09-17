@@ -62,8 +62,8 @@ static int integrator_verify_policy(struct cpufreq_policy *policy)
 #if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
 	cpufreq_verify_within_cpu_limits(policy);
 #else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
-	cpufreq_verify_within_limits(policy, 
-				     policy->cpuinfo.min_freq, 
+	cpufreq_verify_within_limits(policy,
+				     policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
 #endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
@@ -76,8 +76,8 @@ static int integrator_verify_policy(struct cpufreq_policy *policy)
 #if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
 	cpufreq_verify_within_cpu_limits(policy);
 #else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
-	cpufreq_verify_within_limits(policy, 
-				     policy->cpuinfo.min_freq, 
+	cpufreq_verify_within_limits(policy,
+				     policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
 
 #endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */

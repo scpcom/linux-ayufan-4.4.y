@@ -48,7 +48,7 @@ struct dma_async_tx_descriptor *al_dma_prep_sg_lock(
 		flags);
 
 	BUG_ON(src_nents > AL_SSM_MAX_SRC_DESCS);
-	BUG_ON(dst_nents > AL_UDMA_DEFAULT_MAX_ACTN_DESCS);
+	BUG_ON(dst_nents > AL_SSM_MAX_DST_DESCS);
 
 	if (likely(al_dma_get_sw_desc_lock(chan, sw_desc_num_req) == 0))
 		idx = chan->head;

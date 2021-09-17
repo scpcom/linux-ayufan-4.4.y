@@ -37,6 +37,9 @@
 #include <asm/io.h>
 #include <asm/irq.h>
 #include <asm/uaccess.h>
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+#include <linux/synobios.h>
+#endif
 
 MODULE_DESCRIPTION("PHY library");
 MODULE_AUTHOR("Andy Fleming");
@@ -120,10 +123,32 @@ static int phy_needs_fixup(struct phy_device *phydev, struct phy_fixup *fixup)
 		if (strcmp(fixup->bus_id, PHY_ANY_ID) != 0)
 			return 0;
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (!phydev->is_c45) {
+		if ((fixup->phy_uid & fixup->phy_uid_mask) !=
+				(phydev->phy_id & fixup->phy_uid_mask))
+			if (fixup->phy_uid != PHY_ANY_UID)
+				return 0;
+	} else {
+		const int num_ids = ARRAY_SIZE(phydev->c45_ids.device_ids);
+		int i;
+
+		for (i = 1; i < num_ids; i++) {
+			if (!(phydev->c45_ids.devices_in_package & (1 << i)))
+				continue;
+
+			if ((fixup->phy_uid & fixup->phy_uid_mask) !=
+				(phydev->c45_ids.device_ids[i] & fixup->phy_uid_mask))
+				if (fixup->phy_uid != PHY_ANY_UID)
+					return 0;
+		}
+	}
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	if ((fixup->phy_uid & fixup->phy_uid_mask) !=
 			(phydev->phy_id & fixup->phy_uid_mask))
 		if (fixup->phy_uid != PHY_ANY_UID)
 			return 0;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	return 1;
 }
@@ -186,6 +211,9 @@ struct phy_device *phy_device_create(struct mii_bus *bus, int addr, int phy_id,
 	dev_set_name(&dev->dev, PHY_ID_FMT, bus->id, addr);
 
 	dev->state = PHY_DOWN;
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+	dev->is_phyerr_reset = 0;
+#endif
 
 	mutex_init(&dev->lock);
 	INIT_DELAYED_WORK(&dev->state_queue, phy_state_machine);
@@ -761,6 +789,17 @@ EXPORT_SYMBOL(genphy_restart_aneg);
 int genphy_config_aneg(struct phy_device *phydev)
 {
 	int result;
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+	int reg_val = 0;
+
+	if (!syno_is_hw_version(HW_DS2015xs)) {
+		phy_write(phydev, 31, 0x0);
+		reg_val = phy_read(phydev, MII_BMCR);
+		reg_val |= BMCR_RESET;
+		phy_write(phydev, MII_BMCR, reg_val);
+		mdelay(20);
+	}
+#endif
 
 	if (AUTONEG_ENABLE != phydev->autoneg)
 		return genphy_setup_forced(phydev);

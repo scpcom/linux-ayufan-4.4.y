@@ -50,6 +50,7 @@
 #include <linux/init_ohci1394_dma.h>
 #include <linux/kvm_para.h>
 #include <linux/dma-contiguous.h>
+#include <linux/synolib.h>
 
 #include <linux/errno.h>
 #include <linux/kernel.h>
@@ -114,7 +115,6 @@
 #if defined(CONFIG_SYNO_ATA_PWR_CTRL) && defined(CONFIG_SYNO_X64)
 #include  <linux/synobios.h>
 
-extern int grgPwrCtlPin[];
 #ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
 #include <linux/gpio.h>
 #endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
@@ -124,93 +124,13 @@ extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
 #endif /* CONFIG_SYNO_ICH_GPIO_CTRL */
 #endif /* CONFIG_SYNO_ATA_PWR_CTRL && CONFIG_SYNO_X64 */
 
-#ifdef CONFIG_SYNO_SATA_PORT_MAP
-extern char gszSataPortMap[8];
-#endif /* CONFIG_SYNO_SATA_PORT_MAP */
-
-#ifdef CONFIG_SYNO_DISK_INDEX_MAP
-extern char gszDiskIdxMap[16];
-#endif /* CONFIG_SYNO_DISK_INDEX_MAP */
-
-#ifdef CONFIG_SYNO_FIXED_DISK_NAME_MV14XX
-extern char gszDiskIdxMapMv14xx[8];
-#endif /* CONFIG_SYNO_FIXED_DISK_NAME_MV14XX */
-
 #ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
 extern int gSynoHasDynModule;
 #endif /*CONFIG_SYNO_DYN_MODULE_INSTALL*/
 
-#ifdef  CONFIG_SYNO_HW_REVISION
-extern char gszSynoHWRevision[];
-#endif /* CONFIG_SYNO_HW_REVISION */
-
-#ifdef CONFIG_SYNO_HW_VERSION
-extern char gszSynoHWVersion[];
-#endif /* CONFIG_SYNO_HW_VERSION */
-
 #ifdef CONFIG_SYNO_INTERNAL_HD_NUM
-extern long g_internal_hd_num;
+extern long g_syno_hdd_powerup_seq;
 #endif /* CONFIG_SYNO_INTERNAL_HD_NUM */
-
-#ifdef CONFIG_SYNO_AHCI_SWITCH
-extern char g_ahci_switch;
-#endif /* CONFIG_SYNO_AHCI_SWITCH */
-
-#ifdef CONFIG_SYNO_HDD_HOTPLUG
-extern long g_hdd_hotplug;
-#endif /* CONFIG_SYNO_HDD_HOTPLUG */
-
-#ifdef CONFIG_SYNO_MAC_ADDRESS
-extern unsigned char grgbLanMac[CONFIG_SYNO_MAC_MAX][16];
-extern int giVenderFormatVersion;
-extern char gszSkipVenderMacInterfaces[256];
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
-
-#ifdef CONFIG_SYNO_SERIAL
-extern char gszSerialNum[32];
-extern char gszCustomSerialNum[32];
-#endif /* CONFIG_SYNO_SERIAL */
-
-#ifdef CONFIG_SYNO_SATA_DISK_SEQ_REVERSE
-extern char giDiskSeqReverse[8];
-#endif /* CONFIG_SYNO_SATA_DISK_SEQ_REVERSE */
-
-#ifdef CONFIG_SYNO_INTERNAL_NETIF_NUM
-extern long g_internal_netif_num;
-#endif /* CONFIG_SYNO_INTERNAL_NETIF_NUM*/
-
-#ifdef CONFIG_SYNO_SATA_MV_LED
-extern long g_sata_mv_led;
-#endif /* CONFIG_SYNO_SATA_MV_LED */
-
-#ifdef CONFIG_SYNO_SAS_DISK_NAME
-extern long g_is_sas_model;
-#endif /* CONFIG_SYNO_SAS_DISK_NAME */
-
-#ifdef CONFIG_SYNO_DUAL_HEAD
-extern int gSynoDualHead;
-#endif /* CONFIG_SYNO_DUAL_HEAD */
-
-#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
-extern int gSynoSASWriteConflictPanic;
-#endif /* CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC */
-
-#ifdef CONFIG_SYNO_BOOT_SATA_DOM
-extern int gSynoBootSATADOM;
-#endif /* CONFIG_SYNO_BOOT_SATA_DOM */
-
-#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
-extern int gSynoFactoryUSBFastReset;
-#endif /* CONFIG_SYNO_FACTORY_USB_FAST_RESET */
-
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
-extern int gSynoFactoryUSB3Disable;
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
-
-#ifdef CONFIG_SYNO_CASTRATED_XHC
-extern char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13];
-extern unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC];
-#endif /* CONFIG_SYNO_CASTRATED_XHC */
 
 /*
  * max_low_pfn_mapped: highest direct mapped pfn under 4GB
@@ -376,7 +296,7 @@ void * __init extend_brk(size_t size, size_t align)
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_ATA_PWR_CTRL) && defined(CONFIG_SYNO_X64)
+#if defined(CONFIG_SYNO_ATA_PWR_CTRL) && defined(CONFIG_SYNO_X64) && !defined(CONFIG_SYNO_BRASWELL)
 /*
  * Synology sata power control functions
  */
@@ -396,8 +316,6 @@ static u8 SYNO_GET_HDD_ENABLE_PIN(const int index)
 	u8 HddEnPinMap[] = {16, 20, 21, 32};
 #elif defined(CONFIG_SYNO_AVOTON)
 	u8 HddEnPinMap[] = {10, 15, 16, 17};
-#elif defined(CONFIG_SYNO_BRASWELL)
-	u8 HddEnPinMap[] = {61, 60, 64, 58};
 #else
 	u8 *HddEnPinMap = NULL;
 #endif
@@ -407,7 +325,7 @@ static u8 SYNO_GET_HDD_ENABLE_PIN(const int index)
 		goto END;
 	}
 
-	if (1 > index || (0 < g_internal_hd_num && g_internal_hd_num < index)) {
+	if (1 > index || (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < index)) {
 		printk("SYNO_GET_HDD_ENABLE_PIN(%d) is illegal", index);
 		WARN_ON(1);
 		goto END;
@@ -458,8 +376,7 @@ int SYNO_CTRL_HDD_POWERON(int index, int value)
 				goto END;
 		}
 	}else if(syno_is_hw_version(HW_DS412p) ||
-		 syno_is_hw_version(HW_DS415p) ||
-		 syno_is_hw_version(HW_DS416p)) {
+		 syno_is_hw_version(HW_DS415p)) {
 		switch(index){
 			case 0:
 				/* index is 1-based, so apply 0 for all*/
@@ -477,9 +394,7 @@ int SYNO_CTRL_HDD_POWERON(int index, int value)
 			default:
 				goto END;
 		}
-	}else if(syno_is_hw_version(HW_DS713p) ||
-		syno_is_hw_version(HW_DS716p) ||
-		syno_is_hw_version(HW_DS216p)) {
+	}else if(syno_is_hw_version(HW_DS713p)) {
 		switch(index){
 			case 0:
 				/* index is 1-based, so apply 0 for all*/
@@ -516,8 +431,6 @@ static u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
 	u8 przPinMap[]   = {33, 35, 49, 18};
 #elif defined(CONFIG_SYNO_AVOTON)
 	u8 przPinMap[] = {18, 28, 34, 44};
-#elif defined(CONFIG_SYNO_BRASWELL)
-	u8 przPinMap[] = {56, 59, 63, 57};
 #else
 	u8 *przPinMap = NULL;
 #endif
@@ -527,7 +440,7 @@ static u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
 		goto END;
 	}
 
-	if (1 > index || (0 < g_internal_hd_num && g_internal_hd_num < index)) {
+	if (1 > index || (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < index)) {
 		printk("SYNO_GET_HDD_PRESENT_PIN(%d) is illegal", index);
 		WARN_ON(1);
 		goto END;
@@ -550,7 +463,7 @@ int SYNO_CHECK_HDD_PRESENT(int index)
 	u8 iPin = SYNO_GET_HDD_PRESENT_PIN(index);
 
 	/* please check spec with HW */
-#if defined(CONFIG_SYNO_AVOTON) || defined(CONFIG_SYNO_BRASWELL)
+#if defined(CONFIG_SYNO_AVOTON)
 	const int iInverseValue = 1;
 #else
 	const int iInverseValue = 0;
@@ -561,7 +474,7 @@ int SYNO_CHECK_HDD_PRESENT(int index)
 	}
 
 	/* Check is internal disk*/
-	if (0 < g_internal_hd_num && g_internal_hd_num < index) {
+	if (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < index) {
 		goto END;
 	}
 
@@ -591,7 +504,7 @@ int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
 {
 	int iRet = 0;
 
-	if (0 > g_internal_hd_num || SYNO_MAX_HDD_PRZ < g_internal_hd_num) {
+	if (0 > g_syno_hdd_powerup_seq || SYNO_MAX_HDD_PRZ < g_syno_hdd_powerup_seq) {
 		goto END;
 	}
 
@@ -599,10 +512,7 @@ int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
 	    syno_is_hw_version(HW_DS712pv10) ||
 	    syno_is_hw_version(HW_DS412p) ||
 	    syno_is_hw_version(HW_DS415p) ||
-	    syno_is_hw_version(HW_DS416p) ||
-	    syno_is_hw_version(HW_DS713p) ||
-		syno_is_hw_version(HW_DS716p) ||
-		syno_is_hw_version(HW_DS216p)) {
+	    syno_is_hw_version(HW_DS713p)) {
 		iRet = 1;
 	} else {
 		goto END;
@@ -853,60 +763,6 @@ static void __init memblock_x86_reserve_range_setup_data(void)
 	}
 }
 
-#ifdef CONFIG_SYNO_SATA_PORT_MAP
-static int __init early_sataport_map(char *p)
-{
-	snprintf(gszSataPortMap, sizeof(gszSataPortMap), "%s", p);
-
-	if(0 != gszSataPortMap[0]) {
-		printk("Sata Port Map: %s\n", gszSataPortMap);
-	}
-
-	return 1;
-}
-__setup("SataPortMap=", early_sataport_map);
-#endif /* CONFIG_SYNO_SATA_PORT_MAP */
-
-#ifdef CONFIG_SYNO_DISK_INDEX_MAP
-static int __init early_disk_idx_map(char *p)
-{
-	snprintf(gszDiskIdxMap, sizeof(gszDiskIdxMap), "%s", p);
-
-	if('\0' != gszDiskIdxMap[0]) {
-		printk("Disk Index Map: %s\n", gszDiskIdxMap);
-	}
-
-	return 1;
-}
-__setup("DiskIdxMap=", early_disk_idx_map);
-#endif /* CONFIG_SYNO_DISK_INDEX_MAP */
-
-#ifdef CONFIG_SYNO_FIXED_DISK_NAME_MV14XX
-static int __init early_disk_idx_map_mv14xx(char *p)
-{
-	snprintf(gszDiskIdxMapMv14xx, sizeof(gszDiskIdxMapMv14xx), "%s", p);
-
-	if('\0' != gszDiskIdxMapMv14xx[0]) {
-		printk("Disk Indx Map on MV14xx: %s\n", gszDiskIdxMapMv14xx);
-	}
-
-	return 1;
-}
-__setup("DiskIdxMapMv14xx=", early_disk_idx_map_mv14xx);
-#endif /* CONFIG_SYNO_FIXED_DISK_NAME_MV14XX */
-
-#ifdef CONFIG_SYNO_HW_REVISION
-static int __init early_hw_revision(char *p)
-{
-	snprintf(gszSynoHWRevision, 4, "%s", p);
-
-	printk("Synology Hardware Revision: %s\n", gszSynoHWRevision);
-
-	return 1;
-}
-__setup("rev=", early_hw_revision);
-#endif /* CONFIG_SYNO_HW_REVISION */
-
 #ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
 static int __init early_is_dyn_module(char *p)
 {
@@ -928,324 +784,6 @@ END:
 }
 __setup("syno_dyn_module=", early_is_dyn_module);
 #endif /* CONFIG_SYNO_DYN_MODULE_INSTALL */
-
-#ifdef CONFIG_SYNO_HW_VERSION
-static int __init early_hw_version(char *p)
-{
-	char *szPtr;
-
-	snprintf(gszSynoHWVersion, 16, "%s", p);
-
-	szPtr = gszSynoHWVersion;
-	while ((*szPtr != ' ') && (*szPtr != '\t') && (*szPtr != '\0')) {
-		szPtr++;
-	}
-	*szPtr = 0;
-	strcat(gszSynoHWVersion, "-j");
-
-	printk("Synology Hardware Version: %s\n", gszSynoHWVersion);
-
-	return 1;
-}
-__setup("syno_hw_version=", early_hw_version);
-#endif /* CONFIG_SYNO_HW_VERSION */
-
-#ifdef CONFIG_SYNO_INTERNAL_HD_NUM
-static int __init early_internal_hd_num(char *p)
-{
-	g_internal_hd_num = simple_strtol(p, NULL, 10);
-
-	printk("Internal HD num: %d\n", (int)g_internal_hd_num);
-
-    return 1;
-}
-__setup("ihd_num=", early_internal_hd_num);
-#endif /* CONFIG_SYNO_INTERNAL_HD_NUM */
-
-#ifdef  CONFIG_SYNO_AHCI_SWITCH
-static int __init early_ahci_switch(char *p)
-{
-	g_ahci_switch = p[0];
-	if ('0' == g_ahci_switch) {
-		printk("AHCI: 0\n");
-	} else {
-		printk("AHCI: 1\n");
-	}
-
-	return 1;
-}
-__setup("ahci=", early_ahci_switch);
-#endif /* CONFIG_SYNO_AHCI_SWITCH */
-
-#ifdef CONFIG_SYNO_HDD_HOTPLUG
-static int __init early_hdd_hotplug(char *p)
-{
-	g_hdd_hotplug = simple_strtol(p, NULL, 10);
-
-	if ( g_hdd_hotplug > 0 ) {
-		printk("Support HDD Hotplug.\n");
-	}
-
-	return 1;
-}
-__setup("HddHotplug=", early_hdd_hotplug);
-#endif /* CONFIG_SYNO_HDD_HOTPLUG */
-#ifdef CONFIG_SYNO_MAC_ADDRESS
-static int __init early_mac1(char *p)
-{
-	snprintf(grgbLanMac[0], sizeof(grgbLanMac[0]), "%s", p);
-
-	printk("Mac1: %s\n", grgbLanMac[0]);
-
-	return 1;
-}
-__setup("mac1=", early_mac1);
-
-static int __init early_mac2(char *p)
-{
-	snprintf(grgbLanMac[1], sizeof(grgbLanMac[1]), "%s", p);
-
-	printk("Mac2: %s\n", grgbLanMac[1]);
-
-	return 1;
-}
-__setup("mac2=", early_mac2);
-
-static int __init early_mac3(char *p)
-{
-	snprintf(grgbLanMac[2], sizeof(grgbLanMac[2]), "%s", p);
-
-	printk("Mac3: %s\n", grgbLanMac[2]);
-
-	return 1;
-}
-__setup("mac3=", early_mac3);
-
-static int __init early_mac4(char *p)
-{
-	snprintf(grgbLanMac[3], sizeof(grgbLanMac[3]), "%s", p);
-
-	printk("Mac4: %s\n", grgbLanMac[3]);
-
-	return 1;
-}
-__setup("mac4=", early_mac4);
-
-static int __init early_macs(char *p)
-{
-	int iMacCount = 0;
-	char *pBegin = p;
-	char *pEnd = strstr(pBegin, ",");
-
-	while (NULL != pEnd && CONFIG_SYNO_MAC_MAX > iMacCount) {
-		*pEnd = '\0';
-		snprintf(grgbLanMac[iMacCount], sizeof(grgbLanMac[iMacCount]), "%s", pBegin);
-		pBegin = pEnd + 1;
-		pEnd = strstr(pBegin, ",");
-		iMacCount++;
-	}
-
-	if ('\0' != *pBegin && CONFIG_SYNO_MAC_MAX > iMacCount) {
-		snprintf(grgbLanMac[iMacCount], sizeof(grgbLanMac[iMacCount]), "%s", pBegin);
-	}
-
-	return 1;
-}
-__setup("macs=", early_macs);
-
-static int __init early_skip_vender_mac_interfaces(char *p)
-{
-	snprintf(gszSkipVenderMacInterfaces, sizeof(gszSkipVenderMacInterfaces), "%s", p);
-
-	printk("Skip vender mac interfaces: %s\n", gszSkipVenderMacInterfaces);
-
-	return 1;
-}
-__setup("skip_vender_mac_interfaces=", early_skip_vender_mac_interfaces);
-
-static int __init early_vender_format_version(char *p)
-{
-	giVenderFormatVersion = simple_strtol(p, NULL, 10);
-
-	printk("Vender format version: %d\n", giVenderFormatVersion);
-
-	return 1;
-}
-__setup("vender_format_version=", early_vender_format_version);
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
-
-#ifdef CONFIG_SYNO_SERIAL
-static int __init early_sn(char *p)
-{
-	snprintf(gszSerialNum, sizeof(gszSerialNum), "%s", p);
-	printk("Serial Number: %s\n", gszSerialNum);
-	return 1;
-}
-__setup("sn=", early_sn);
-
-static int __init early_custom_sn(char *p)
-{
-	snprintf(gszCustomSerialNum, sizeof(gszCustomSerialNum), "%s", p);
-	printk("Custom Serial Number: %s\n", gszCustomSerialNum);
-	return 1;
-}
-__setup("custom_sn=", early_custom_sn);
-#endif /* CONFIG_SYNO_SERIAL */
-
-#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
-static int __init early_factory_usb_fast_reset(char *p)
-{
-	gSynoFactoryUSBFastReset = simple_strtol(p, NULL, 10);
-
-	printk("Factory USB Fast Reset: %d\n", (int)gSynoFactoryUSBFastReset);
-
-	return 1;
-}
-__setup("syno_usb_fast_reset=", early_factory_usb_fast_reset);
-#endif /* CONFIG_SYNO_FACTORY_USB_FAST_RESET */
-
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
-static int __init early_factory_usb3_disable(char *p)
-{
-	gSynoFactoryUSB3Disable = simple_strtol(p, NULL, 10);
-
-	printk("Factory USB3 Disable: %d\n", (int)gSynoFactoryUSB3Disable);
-
-	return 1;
-}
-__setup("syno_disable_usb3=", early_factory_usb3_disable);
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
-
-#ifdef CONFIG_SYNO_CASTRATED_XHC
-static int __init early_castrated_xhc(char *p)
-{
-	int iCount = 0;
-	char *pBegin = p;
-	char *pEnd = strstr(pBegin, ",");
-	char *pPortSep = NULL;
-
-	while (iCount < CONFIG_SYNO_NUM_CASTRATED_XHC) {
-		if(NULL != pEnd)
-			*pEnd = '\0';
-		pPortSep = strstr(pBegin, "@");
-		if (pPortSep == NULL) {
-			printk("Castrated xHC - Parameter format not correct\n");
-			break;
-		}
-		*pPortSep = '\0';
-		snprintf(gSynoCastratedXhcAddr[iCount],
-				sizeof(gSynoCastratedXhcAddr[iCount]), "%s", pBegin);
-		gSynoCastratedXhcPortBitmap[iCount] = simple_strtoul(pPortSep + 1, NULL,
-				16);
-		if (NULL == pEnd)
-			break;
-		pBegin = pEnd + 1;
-		pEnd = strstr(pBegin, ",");
-		iCount++;
-	}
-
-	return 1;
-}
-__setup("syno_castrated_xhc=", early_castrated_xhc);
-#endif /* CONFIG_SYNO_CASTRATED_XHC */
-
-#ifdef CONFIG_SYNO_SATA_DISK_SEQ_REVERSE
-static int __init early_disk_seq_reserve(char *p)
-{
-	snprintf(giDiskSeqReverse, sizeof(giDiskSeqReverse), "%s", p);
-
-	if('\0' != giDiskSeqReverse[0]) {
-		printk("Disk Sequence Reverse: %s\n", giDiskSeqReverse);
-	}
-
-	return 1;
-}
-__setup("DiskSeqReverse=", early_disk_seq_reserve);
-#endif /* CONFIG_SYNO_SATA_DISK_SEQ_REVERSE */
-
-#ifdef CONFIG_SYNO_INTERNAL_NETIF_NUM
-static int __init early_internal_netif_num(char *p)
-{
-	g_internal_netif_num = simple_strtol(p, NULL, 10);
-
-	if ( g_internal_netif_num >= 0 ) {
-		printk("Internal netif num: %d\n", (int)g_internal_netif_num);
-	}
-
-	return 1;
-}
-__setup("netif_num=", early_internal_netif_num);
-#endif /*CONFIG_SYNO_INTERNAL_NETIF_NUM*/
-
-#ifdef CONFIG_SYNO_SATA_MV_LED
-static int __init early_sataled_special(char *p)
-{
-	g_sata_mv_led = simple_strtol(p, NULL, 10);
-
-	if ( g_sata_mv_led >= 0 ) {
-		printk("Special Sata LEDs.\n");
-	}
-
-	return 1;
-}
-__setup("SataLedSpecial=", early_sataled_special);
-#endif /* CONFIG_SYNO_SATA_MV_LED */
-
-#ifdef CONFIG_SYNO_SAS_DISK_NAME
-static int __init early_SASmodel(char *p)
-{
-	g_is_sas_model = simple_strtol(p, NULL, 10);
-
-	if (1 == g_is_sas_model) {
-		printk("SAS model: %d\n", (int)g_is_sas_model);
-	}
-
-	return 1;
-}
-__setup("SASmodel=", early_SASmodel);
-#endif /* CONFIG_SYNO_SAS_DISK_NAME */
-
-#ifdef CONFIG_SYNO_DUAL_HEAD
-static int __init early_dual_head(char *p)
-{
-	gSynoDualHead = simple_strtol(p, NULL, 10);
-#ifdef CONFIG_SYNO_BOOT_SATA_DOM
-	gSynoBootSATADOM = gSynoDualHead;
-#endif /* CONFIG_SYNO_BOOT_SATA_DOM */
-#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
-	gSynoSASWriteConflictPanic = gSynoDualHead;
-#endif
-
-	printk("Synology Dual Head: %d\n", gSynoDualHead);
-
-	return 1;
-}
-__setup("dual_head=", early_dual_head);
-#endif /* CONFIG_SYNO_DUAL_HEAD */
-
-#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
-static int __init early_sas_reservation_write_conflict(char *p)
-{
-	gSynoSASWriteConflictPanic = simple_strtol(p, NULL, 10);
-
-	printk("Let kernel panic if sas reservation write conflict: %d\n", gSynoSASWriteConflictPanic);
-
-	return 1;
-}
-__setup("sas_reservation_write_conflict=", early_sas_reservation_write_conflict);
-#endif /* CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC */
-
-#ifdef CONFIG_SYNO_BOOT_SATA_DOM
-static int __init early_synoboot_satadom(char *p)
-{
-	gSynoBootSATADOM = simple_strtol(p, NULL, 10);
-
-	printk("Synology boot device SATADOM: %d\n", gSynoBootSATADOM);
-
-	return 1;
-}
-__setup("synoboot_satadom=", early_synoboot_satadom);
-#endif /* CONFIG_SYNO_BOOT_SATA_DOM */
 
 /*
  * --------- Crashkernel reservation ------------------------------

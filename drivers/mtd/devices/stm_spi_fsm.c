@@ -3221,8 +3221,8 @@ static int fsm_mtd_erase(struct mtd_info *mtd, struct erase_info *instr)
  */
 static int fsm_mtd_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
-#ifdef CONFIG_SYNO_MONACO_SPI_WITHOUT_LOCK
-	/* no longer lock mtd */
+#if defined(CONFIG_SYNO_MONACO_SPI_WITHOUT_LOCK)
+	/* stm no longer lock spi flash */
 	return 0;
 #endif
 	

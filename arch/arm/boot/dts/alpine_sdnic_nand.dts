@@ -16,12 +16,29 @@
 
 /dts-v1/;
 
+/* Reserve application bar 0 for both 2GB and 4GB configurations */
+/memreserve/ 0x30000000 0x8000000;
+/memreserve/ 0xb0000000 0x8000000;
+
+/* Reserve APCEA memory for both 2GB and 4GB configurations */
+/memreserve/ 0x38000000 0x8000000;
+/memreserve/ 0xb8000000 0x8000000;
+
+/* Reserve 16K for uC update (from 1MB)*/
+/memreserve/ 0x00100000 0x00004000;
+
+/* Reserve 1MB from 32MB offset for trace functionality */
+/memreserve/ 0x02000000 0x00100000;
+
+/* Reserve 15MB from 33MB offset for device memory to be used by host */
+/memreserve/ 0x02100000 0x00F00000;
+
+
 /include/ "alpine.dtsi"
 
 / {
-	version = "2.0";
+	version = "2.5";
 	model = "Annapurna Labs Alpine Smart NIC with NAND";
-	compatible = "annapurna-labs,alpine";
 
 	soc {
 		board-cfg {
@@ -197,6 +214,99 @@
 					inv-tx-lanes = <>;
 					inv-rx-lanes = <>;
 					ssc = "disabled";
+
+					lane_0_params {
+						rx {
+							override = "enabled";
+							dcgain = <0x0>;
+							dfe_3db_freq = <0x7>;
+							dfe_gain = <0x0>;
+							dfe_1st_tap_ctrl = <0x0>;
+							dfe_2nd_tap_ctrl = <0x8>;
+							dfe_3rd_tap_ctrl = <0x0>;
+							dfe_4th_tap_ctrl = <0x8>;
+							low_freq_agc_gain = <0x7>;
+							high_freq_agc_boost = <0x4>;
+							precal_code_sel = <0x0>;
+						};
+						tx {
+							override = "enabled";
+							amp = <1>;
+							total_driver_units = <25>;
+							post_emph = <6>;
+							pre_emph = <0>;
+							slew_rate = <0>;
+						};
+					};
+					lane_1_params {
+						rx {
+							override = "enabled";
+							dcgain = <0x0>;
+							dfe_3db_freq = <0x7>;
+							dfe_gain = <0x0>;
+							dfe_1st_tap_ctrl = <0x0>;
+							dfe_2nd_tap_ctrl = <0x8>;
+							dfe_3rd_tap_ctrl = <0x0>;
+							dfe_4th_tap_ctrl = <0x8>;
+							low_freq_agc_gain = <0x7>;
+							high_freq_agc_boost = <0x4>;
+							precal_code_sel = <0x0>;
+						};
+						tx {
+							override = "enabled";
+							amp = <1>;
+							total_driver_units = <25>;
+							post_emph = <6>;
+							pre_emph = <0>;
+							slew_rate = <0>;
+						};
+					};
+					lane_2_params {
+						rx {
+							override = "enabled";
+							dcgain = <0x0>;
+							dfe_3db_freq = <0x7>;
+							dfe_gain = <0x0>;
+							dfe_1st_tap_ctrl = <0x0>;
+							dfe_2nd_tap_ctrl = <0x8>;
+							dfe_3rd_tap_ctrl = <0x0>;
+							dfe_4th_tap_ctrl = <0x8>;
+							low_freq_agc_gain = <0x7>;
+							high_freq_agc_boost = <0x4>;
+							precal_code_sel = <0x0>;
+						};
+						tx {
+							override = "enabled";
+							amp = <1>;
+							total_driver_units = <25>;
+							post_emph = <6>;
+							pre_emph = <0>;
+							slew_rate = <0>;
+						};
+					};
+					lane_3_params {
+						rx {
+							override = "enabled";
+							dcgain = <0x0>;
+							dfe_3db_freq = <0x7>;
+							dfe_gain = <0x0>;
+							dfe_1st_tap_ctrl = <0x0>;
+							dfe_2nd_tap_ctrl = <0x8>;
+							dfe_3rd_tap_ctrl = <0x0>;
+							dfe_4th_tap_ctrl = <0x8>;
+							low_freq_agc_gain = <0x7>;
+							high_freq_agc_boost = <0x4>;
+							precal_code_sel = <0x0>;
+						};
+						tx {
+							override = "enabled";
+							amp = <1>;
+							total_driver_units = <25>;
+							post_emph = <6>;
+							pre_emph = <0>;
+							slew_rate = <0>;
+						};
+					};
 				};
 			};
 
@@ -228,11 +338,15 @@
 					 * Relevant when MAC mode is auto-detect or when phy_type is i2c
 					 */
 					i2c-id = <3>; /* I2C Mux Channel 2 */
+					freeze-serdes-params = "enable";
 
 					10g-serial {
 						/*
 						 * in case of 10g-serial mode indicate
-						 * if DAC are used and what is the length of it.
+						 * if passive DAC (direct attached cable) are used
+						 * and what is the length (in meters) of it.
+						 * in case of active DAC the parameter should be
+						 * set to disable.
 						 * in auto-detect mode will be the default value
 						 * in case the SFP EEPROM can't be accessed
 						 */
@@ -285,11 +399,15 @@
 					 * Relevant when MAC mode is auto-detect or when phy_type is i2c
 					 */
 					i2c-id = <3>; /* I2C Mux Channel 2 */
+					freeze-serdes-params = "enable";
 
 					10g-serial {
 						/*
 						 * in case of 10g-serial mode indicate
-						 * if DAC are used and what is the length of it.
+						 * if passive DAC (direct attached cable) are used
+						 * and what is the length (in meters) of it.
+						 * in case of active DAC the parameter should be
+						 * set to disable.
 						 * in auto-detect mode will be the default value
 						 * in case the SFP EEPROM can't be accessed
 						 */
@@ -327,11 +445,15 @@
 					 * Relevant when MAC mode is auto-detect or when phy_type is i2c
 					 */
 					i2c-id = <2>; /* I2C Mux Channel 1 */
+					freeze-serdes-params = "enable";
 
 					10g-serial {
 						/*
 						 * in case of 10g-serial mode indicate
-						 * if DAC are used and what is the length of it.
+						 * if passive DAC (direct attached cable) are used
+						 * and what is the length (in meters) of it.
+						 * in case of active DAC the parameter should be
+						 * set to disable.
 						 * in auto-detect mode will be the default value
 						 * in case the SFP EEPROM can't be accessed
 						 */
@@ -385,6 +507,7 @@
 					 * Relevant when MAC mode is auto-detect or when phy_type is i2c
 					 */
 					i2c-id = <1>; /* I2C Mux Channel 0 */
+					freeze-serdes-params = "enable";
 
 					10g-serial {
 						/*
@@ -482,6 +605,8 @@
 			#address-cells = <1>;
 			#size-cells = <1>;
 
+			max-onfi-timing-mode = <1>;
+
 			partition@0 {
 				label = "al_boot";
 				reg = <0x00000000 0x00200000>;
@@ -496,7 +621,11 @@
 			};
 			partition@3 {
 				label = "ubifs";
-				reg = <0x01000000 0x03f000000>;
+				reg = <0x01000000 0x037000000>;
+			};
+			partition@4 {
+				label = "ubifs_apps";
+				reg = <0x38000000 0x008000000>;
 			};
 		};
 
@@ -516,7 +645,7 @@
 				#address-cells = <1>;
 				#size-cells = <1>;
 				compatible = "spi_flash_jedec_detection";
-				spi-max-frequency = <25000000>; /* 25MHz */
+				spi-max-frequency = <37500000>; /* 37.5MHz */
 				reg = <0>;
 
 				partition@0 {

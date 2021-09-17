@@ -73,6 +73,10 @@ struct al_crypto_ablkcipher_req_ctx {
 	enum al_crypto_dir dir;
 };
 
+struct al_crypto_aead_req_ctx {
+	u8 iv[AL_CRYPTO_MAX_IV_LENGTH] ____cacheline_aligned;
+};
+
 struct al_crypto_alg_template {
 	char name[CRYPTO_MAX_ALG_NAME];
 	char driver_name[CRYPTO_MAX_ALG_NAME];
@@ -384,6 +388,9 @@ static int al_crypto_cra_init_aead(struct crypto_tfm *tfm)
 	dev_dbg(&device->pdev->dev, "%s\n", __func__);
 
 	al_crypto_cra_init(tfm);
+
+	tfm->crt_aead.reqsize =
+			sizeof(struct al_crypto_aead_req_ctx);
 
 	AL_CRYPTO_STATS_LOCK(&ctx->chan->stats_gen_lock);
 	AL_CRYPTO_STATS_INC(ctx->chan->stats_gen.aead_tfms, 1);
@@ -781,6 +788,17 @@ static int ablkcipher_do_crypt(struct ablkcipher_request *req, bool lock)
 			(ctx->sa.enc_type != AL_CRYPT_TRIPDES_ECB)) {
 		xaction->enc_iv_in.addr = dma_map_single(to_dev(chan),
 					req->info, ivsize, DMA_TO_DEVICE);
+		if (dma_mapping_error(to_dev(chan), xaction->enc_iv_in.addr)) {
+			dev_err(to_dev(chan),
+				"dma_map_single failed!\n");
+
+			al_crypto_dma_unmap_ablkcipher(chan, req, src_nents, dst_nents,
+					desc);
+
+			if (likely(lock))
+				spin_unlock_bh(&chan->prep_lock);
+			return -ENOMEM;
+		}
 		xaction->enc_iv_in.len = ivsize;
 	}
 
@@ -1033,7 +1051,7 @@ static inline void al_crypto_dma_unmap_aead(struct al_crypto_chan *chan,
 	}
 
 	 dma_unmap_sg(to_dev(chan), req->assoc, assoc_nents,
-		 DMA_FROM_DEVICE);
+		 DMA_BIDIRECTIONAL);
 
 	if (desc && desc->hal_xaction.enc_iv_in.len)
 		dma_unmap_single(to_dev(chan),
@@ -1096,19 +1114,21 @@ static inline void aead_update_stats(struct al_crypto_transaction *xaction,
 		AL_CRYPTO_STATS_INC(chan->stats_prep.aead_reqs_gt4096, 1);
 }
 
-static inline void aead_prepare_xaction_buffers(
+static inline int aead_prepare_xaction_buffers(
 		struct aead_request *req,
 		struct al_crypto_sw_desc *desc,
 		u8 *iv)
 {
 	struct crypto_aead *aead = crypto_aead_reqtfm(req);
 	struct al_crypto_ctx *ctx = crypto_aead_ctx(aead);
+	struct al_crypto_aead_req_ctx *rctx = aead_request_ctx(req);
 	struct al_crypto_chan *chan = ctx->chan;
 	int i;
 	int src_idx, src_idx_old, dst_idx;
 	struct scatterlist *sg;
 	int ivsize = crypto_aead_ivsize(aead);
 	struct al_crypto_transaction *xaction = &desc->hal_xaction;
+	int rc = 0;
 
 	src_idx = 0;
 	dst_idx = 0;
@@ -1126,11 +1146,18 @@ static inline void aead_prepare_xaction_buffers(
 		dst_idx++;
 	}
 
+	/* IV might be allocated on stack, copy for DMA */
+	memcpy(rctx->iv, iv, ivsize);
 	/* map and add IV */
 	desc->src_bufs[src_idx].addr = desc->dst_bufs[dst_idx].addr =
 		xaction->enc_iv_in.addr =
-			dma_map_single(to_dev(chan), iv, ivsize,
+			dma_map_single(to_dev(chan), rctx->iv, ivsize,
 					DMA_TO_DEVICE);
+	if (dma_mapping_error(to_dev(chan), xaction->enc_iv_in.addr)) {
+		dev_err(to_dev(chan),
+				"dma_map_single failed!\n");
+		return -ENOMEM;
+	}
 	desc->src_bufs[src_idx].len = desc->dst_bufs[dst_idx].len =
 		xaction->enc_iv_in.len =
 			ivsize;
@@ -1159,13 +1186,15 @@ static inline void aead_prepare_xaction_buffers(
 	xaction->src.num = src_idx;
 	xaction->dst.bufs = &desc->dst_bufs[0];
 	xaction->dst.num = dst_idx;
+
+	return rc;
 }
 
 /******************************************************************************
  *****************************************************************************/
 /* Prepare encryption+auth transaction to be processed by HAL
  */
-static inline void aead_prepare_xaction(enum al_crypto_dir dir,
+static inline int aead_prepare_xaction(enum al_crypto_dir dir,
 		struct aead_request *req,
 		struct al_crypto_sw_desc *desc,
 		u8 *iv)
@@ -1177,12 +1206,18 @@ static inline void aead_prepare_xaction(enum al_crypto_dir dir,
 	struct scatterlist *sg;
 	int ivsize = crypto_aead_ivsize(aead);
 	int authsize = crypto_aead_authsize(aead);
+	int rc = 0;
 
 	xaction = &desc->hal_xaction;
 	memset(xaction, 0, sizeof(struct al_crypto_transaction));
 	xaction->dir = dir;
 
-	aead_prepare_xaction_buffers(req, desc, iv);
+	rc = aead_prepare_xaction_buffers(req, desc, iv);
+	if (unlikely(rc != 0)) {
+		dev_err(to_dev(chan),
+			"aead_prepare_xaction_buffers failed!\n");
+		return rc;
+	}
 
 	if (dir == AL_CRYPT_ENCRYPT) {
 		/* set signature buffer for auth */
@@ -1224,6 +1259,8 @@ static inline void aead_prepare_xaction(enum al_crypto_dir dir,
 	xaction->flags = AL_SSM_INTERRUPT;
 
 	aead_update_stats(xaction, chan);
+
+	return rc;
 }
 
 /******************************************************************************
@@ -1304,7 +1341,17 @@ static int aead_perform(enum al_crypto_dir dir, struct aead_request *req,
 	desc->assoc_nents = assoc_nents;
 	desc->dst_nents = dst_nents;
 
-	aead_prepare_xaction(dir, req, desc, iv);
+	rc = aead_prepare_xaction(dir, req, desc, iv);
+	if (unlikely(rc != 0)) {
+		dev_err(to_dev(chan),
+			"aead_prepare_xaction failed!\n");
+
+		al_crypto_dma_unmap_aead(chan, req, src_nents, assoc_nents,
+				dst_nents, desc);
+
+		spin_unlock_bh(&chan->prep_lock);
+		return rc;
+	}
 
 	/* send crypto transaction to engine */
 	rc = al_crypto_dma_prepare(chan->hal_crypto, chan->idx,

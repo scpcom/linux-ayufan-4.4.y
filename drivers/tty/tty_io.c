@@ -1284,7 +1284,6 @@ static void pty_line_name(struct tty_driver *driver, int index, char *p)
  *
  *	Locking: None
  */
-#if defined(CONFIG_SYNO_ARMADA)
 static ssize_t tty_line_name(struct tty_driver *driver, int index, char *p)
 {
 	if (driver->flags & TTY_DRIVER_UNNUMBERED_NODE)
@@ -1293,16 +1292,6 @@ static ssize_t tty_line_name(struct tty_driver *driver, int index, char *p)
 		return sprintf(p, "%s%d", driver->name,
 			       index + driver->name_base);
 }
-#else /* CONFIG_SYNO_ARMADA */
-static void tty_line_name(struct tty_driver *driver, int index, char *p)
-{
-	if (driver->flags & TTY_DRIVER_UNNUMBERED_NODE)
-		return sprintf(p, "%s", driver->name);
-	else
-		return sprintf(p, "%s%d", driver->name,
-			       index + driver->name_base);
-}
-#endif /* CONFIG_SYNO_ARMADA */
 
 /**
  *	tty_driver_lookup_tty() - find an existing tty, if any
@@ -1726,9 +1715,7 @@ int tty_release(struct inode *inode, struct file *filp)
 	int	pty_master, tty_closing, o_tty_closing, do_sleep;
 	int	idx;
 	char	buf[64];
-#if defined(CONFIG_SYNO_ARMADA)
 	long	timeout = 0;
-#endif /* CONFIG_SYNO_ARMADA */
 
 	if (tty_paranoia_check(tty, inode, __func__))
 		return 0;
@@ -1813,15 +1800,11 @@ int tty_release(struct inode *inode, struct file *filp)
 				__func__, tty_name(tty, buf));
 		tty_unlock_pair(tty, o_tty);
 		mutex_unlock(&tty_mutex);
-#if defined(CONFIG_SYNO_ARMADA)
 		schedule_timeout_killable(timeout);
 		if (timeout < 120 * HZ)
 			timeout = 2 * timeout + 1;
 		else
 			timeout = MAX_SCHEDULE_TIMEOUT;
-#else /* CONFIG_SYNO_ARMADA */
-		schedule();
-#endif /* CONFIG_SYNO_ARMADA */
 	}
 
 	/*
@@ -3609,7 +3592,6 @@ static ssize_t show_cons_active(struct device *dev,
 		if (i >= ARRAY_SIZE(cs))
 			break;
 	}
-#if defined(CONFIG_SYNO_ARMADA)
 	while (i--) {
 		int index = cs[i]->index;
 		struct tty_driver *drv = cs[i]->device(cs[i], &index);
@@ -3623,11 +3605,6 @@ static ssize_t show_cons_active(struct device *dev,
 
 		count += sprintf(buf + count, "%c", i ? ' ':'\n');
 	}
-#else /* CONFIG_SYNO_ARMADA */
-	while (i--)
-		count += sprintf(buf + count, "%s%d%c",
-				 cs[i]->name, cs[i]->index, i ? ' ':'\n');
-#endif /* CONFIG_SYNO_ARMADA */
 	console_unlock();
 
 	return count;

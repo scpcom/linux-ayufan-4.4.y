@@ -130,7 +130,6 @@ static void iot_examine_bio(struct io_tracker *t, struct bio *bio)
 
 /*----------------------------------------------------------------*/
 
-
 /*
  * This queue is divided up into different levels.  Allowing us to push
  * entries to the back of any of the levels.  Think of it as a partially
@@ -344,7 +343,6 @@ static int alloc_entries(struct mq_policy *mq, unsigned elts)
 			free_entries(mq);
 			return -ENOMEM;
 		}
-
 
 		list_add(&e->list, &mq->free);
 	}
@@ -959,23 +957,21 @@ out:
 	return r;
 }
 
-static void remove_mapping(struct mq_policy *mq, dm_oblock_t oblock)
+static void mq_remove_mapping(struct dm_cache_policy *p, dm_oblock_t oblock)
 {
-	struct entry *e = hash_lookup(mq, oblock);
+	struct mq_policy *mq = to_mq_policy(p);
+	struct entry *e;
+
+	mutex_lock(&mq->lock);
+
+	e = hash_lookup(mq, oblock);
 
 	BUG_ON(!e || !e->in_cache);
 
 	del(mq, e);
 	e->in_cache = false;
 	push(mq, e);
-}
 
-static void mq_remove_mapping(struct dm_cache_policy *p, dm_oblock_t oblock)
-{
-	struct mq_policy *mq = to_mq_policy(p);
-
-	mutex_lock(&mq->lock);
-	remove_mapping(mq, oblock);
 	mutex_unlock(&mq->lock);
 }
 

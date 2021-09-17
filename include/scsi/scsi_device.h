@@ -206,6 +206,9 @@ struct scsi_device {
 	struct list_head    spinup_list;
 	/* Indicates the disk is already spinning up */
 	unsigned int	    spinup_in_process;
+	/* Timer for spinup time */
+	unsigned long		spinup_timer;
+#define SYNO_SPINUP_RESEND_TIMER 20 * HZ
 #endif /* CONFIG_SYNO_SAS_SPINUP_DELAY */
 
 #ifdef CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT

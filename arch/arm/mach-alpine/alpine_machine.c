@@ -65,8 +65,6 @@ static void __iomem *serdes_base;
 #define SOFTWARE_SHUTDOWN       0x31
 #define SOFTWARE_REBOOT         0x43
 
-extern void synology_gpio_init(void);
-
 #ifdef CONFIG_SYNO_ALPINE_SUPPORT_WOL
 #include <linux/netdevice.h>
 #include <linux/ethtool.h>
@@ -227,13 +225,44 @@ int alpine_serdes_eth_mode_set(
 
 	if (!group_mode->mode_set || (group_mode->mode != mode)) {
 		struct al_serdes_obj obj;
+		struct al_serdes_adv_tx_params tx_params[AL_SRDS_NUM_LANES];
+		struct al_serdes_adv_rx_params rx_params[AL_SRDS_NUM_LANES];
+		int i;
 
 		al_serdes_handle_init(serdes_base, &obj);
+
+		/* save group params */
+		for (i = 0; i < AL_SRDS_NUM_LANES; i++) {
+			al_serdes_tx_advanced_params_get(
+					&obj,
+					group,
+					i,
+					&tx_params[i]);
+			al_serdes_rx_advanced_params_get(
+					&obj,
+					group,
+					i,
+					&rx_params[i]);
+		}
 
 		if (mode == ALPINE_SERDES_ETH_MODE_SGMII)
 			al_serdes_mode_set_sgmii(&obj, group);
 		else
 			al_serdes_mode_set_kr(&obj, group);
+
+		/* restore group params */
+		for (i = 0; i < AL_SRDS_NUM_LANES; i++) {
+			al_serdes_tx_advanced_params_set(
+					&obj,
+					group,
+					i,
+					&tx_params[i]);
+			al_serdes_rx_advanced_params_set(
+					&obj,
+					group,
+					i,
+					&rx_params[i]);
+		}
 
 		group_mode->mode = mode;
 		group_mode->mode_set = true;
@@ -288,10 +317,6 @@ static void __init al_init(void)
 	al_serdes_resource_init();
 
 	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
-
-#if defined(CONFIG_SYNO_ALPINE)
-	synology_gpio_init();
-#endif /* CONFIG_SYNO_ALPINE */
 }
 
 static const char *al_match[] __initdata = {

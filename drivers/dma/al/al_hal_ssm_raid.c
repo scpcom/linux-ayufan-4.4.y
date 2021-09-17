@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -455,7 +455,7 @@ int al_raid_dma_prepare(
 
 	/* calc rx (S2M) descriptors */
 	rx_descs = _al_raid_xaction_rx_descs_count(xaction);
-	al_assert(rx_descs <= AL_UDMA_DEFAULT_MAX_ACTN_DESCS);
+	al_assert(rx_descs <= AL_SSM_MAX_DST_DESCS);
 	rc =  al_udma_q_handle_get(&raid_dma->m2m_udma.rx_udma, qid, &rx_udma_q);
 
 	al_assert(rc == 0); /* assert valid rx q handle */

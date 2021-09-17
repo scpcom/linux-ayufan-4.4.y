@@ -383,6 +383,8 @@ again:
 #else
 	__hfs_brec_find(parent, fd, hfs_find_rec_by_key);
 #endif /* CONFIG_SYNO_HFSPLUS_BREC_FIND_RET_CHECK */
+	if (fd->record < 0)
+		return -ENOENT;
 	hfs_bnode_dump(parent);
 	rec = fd->record;
 

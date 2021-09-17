@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -68,6 +68,7 @@ int al_ssm_dma_init(
 	m2m_params.s2m_regs_base = &unit_regs->s2m;
 	m2m_params.num_of_queues = params->num_of_queues;
 	m2m_params.max_m2s_descs_per_pkt = AL_SSM_MAX_SRC_DESCS;
+	m2m_params.max_s2m_descs_per_pkt = AL_SSM_MAX_DST_DESCS;
 
 	/* initialize the udma  */
 	rc =  al_m2m_udma_init(&ssm_dma->m2m_udma, &m2m_params);

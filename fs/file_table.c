@@ -29,6 +29,10 @@
 
 #include <linux/atomic.h>
 
+#ifdef CONFIG_SYNO_FS_UNMOUNT
+#include "mount.h"
+#endif /* CONFIG_SYNO_FS_UNMOUNT */
+
 #include "internal.h"
 
 /* sysctl tunables... */
@@ -474,6 +478,46 @@ void mark_files_ro(struct super_block *sb)
 	} while_file_list_for_each_entry;
 	lg_global_unlock(&files_lglock);
 }
+
+#ifdef CONFIG_SYNO_FS_UNMOUNT
+#define MAX_SHOWN_OPENED_FILE 10
+void fs_show_opened_file(struct mount *mnt)
+{
+	struct file *file;
+	char *file_name_buf;
+	char *mnt_point_buf;
+	char *file_name;
+	char *mnt_point_name;
+	unsigned num_show = 0;
+
+	file_name_buf = kmalloc(PATH_MAX, GFP_KERNEL);
+	mnt_point_buf = kmalloc(PATH_MAX, GFP_KERNEL);
+
+	if (!file_name_buf || !mnt_point_buf) {
+		goto over;
+	}
+	mnt_point_name = dentry_path_raw(mnt->mnt_mountpoint, mnt_point_buf, PATH_MAX - 1);
+	if (IS_ERR(mnt_point_name)) {
+		goto over;
+	}
+	lg_global_lock(&files_lglock);
+	do_file_list_for_each_entry(mnt->mnt.mnt_sb, file) {
+		file_name = dentry_path_raw(file->f_path.dentry, file_name_buf, PATH_MAX - 1);
+		if (IS_ERR(file_name)) {
+			continue;
+		}
+		printk(KERN_WARNING "VFS: opened file in mnt_point: (%s), file: (%s)\n", mnt_point_name, file_name);
+		if (MAX_SHOWN_OPENED_FILE <= ++num_show) {
+			break;
+		}
+	} while_file_list_for_each_entry;
+	lg_global_unlock(&files_lglock);
+
+over:
+	kfree(file_name_buf);
+	kfree(mnt_point_buf);
+}
+#endif /* CONFIG_SYNO_FS_UNMOUNT */
 
 void __init files_init(unsigned long mempages)
 { 

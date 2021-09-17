@@ -805,7 +805,7 @@ static u32 ich10_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 
 static u32 c206_writable_pin[] = {0, 5, 16, 20, 21, 22, 34, 38, 48, 52, 54, 69, 70, 71};
 static u32 c226_writable_pin[] = {5, 16, 18, 19, 20, 21, 23, 32, 33, 34, 35, 36, 37, 45};
 static u32 avoton_writable_pin[] = {10, 15, 16, 17, 49, 50, 53, 54};
-static u32 broadwell_writable_pin[] = {3, 28, 45, 70, 71};
+static u32 broadwell_writable_pin[] = {3, 4, 28, 45, 70, 71};
 
 #ifdef CONFIG_SYNO_AVOTON
 /* for avoton gpio we define that

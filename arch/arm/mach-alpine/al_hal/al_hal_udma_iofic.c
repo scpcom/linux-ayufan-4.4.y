@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -138,10 +138,13 @@ int al_udma_iofic_config(struct unit_regs __iomem *regs, enum al_iofic_mode mode
 /*
  * return the offset of the unmask register for a given group
  */
-uint32_t __iomem * al_udma_iofic_unmask_offset_get(struct unit_regs __iomem *regs, int group)
+uint32_t __iomem * al_udma_iofic_unmask_offset_get(
+	struct unit_regs __iomem	*regs,
+	enum al_udma_iofic_level	level,
+	int				group)
 {
-
-	return al_iofic_unmask_offset_get(&regs->gen.interrupt_regs.main_iofic, group);
+	al_assert(al_udma_iofic_level_and_group_valid(level, group));
+	return al_iofic_unmask_offset_get(al_udma_iofic_reg_base_get(regs, level), group);
 }
 
 /** @} end of UDMA group */

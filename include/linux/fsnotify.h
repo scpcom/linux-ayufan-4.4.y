@@ -50,7 +50,7 @@ static inline void SYNO_ArchiveModify(struct inode *inode, int blSetSMBArchive)
 
 #ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
 	mutex_lock(&inode->i_syno_mutex);
-	if (syno_op_get_archive_bit(dentry, &old_archive_bit)) {
+	if (IS_GLUSTER_FS(inode) || syno_op_get_archive_bit(dentry, &old_archive_bit)) {
 		goto next;
 	}
 
@@ -217,8 +217,10 @@ static inline void fsnotify_move(struct inode *old_dir, struct inode *new_dir,
 	}
 #endif
 
-	fsnotify(old_dir, old_dir_mask, old_dir, FSNOTIFY_EVENT_INODE, old_name, fs_cookie);
-	fsnotify(new_dir, new_dir_mask, new_dir, FSNOTIFY_EVENT_INODE, new_name, fs_cookie);
+	fsnotify(old_dir, old_dir_mask, source, FSNOTIFY_EVENT_INODE, old_name,
+		 fs_cookie);
+	fsnotify(new_dir, new_dir_mask, source, FSNOTIFY_EVENT_INODE, new_name,
+		 fs_cookie);
 
 #if defined(CONFIG_SYNO_FS_ARCHIVE_BIT) || defined(CONFIG_SYNO_FS_ARCHIVE_VERSION)
 	SYNO_ArchiveModify(old_dir, 0);

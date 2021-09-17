@@ -446,7 +446,6 @@ fail:
 	return ret;
 }
 
-
 int __init dmar_table_init(void)
 {
 	static int dmar_table_initialized;
@@ -567,7 +566,6 @@ int __init detect_intel_iommu(void)
 	return ret ? 1 : -ENODEV;
 }
 
-
 static void unmap_iommu(struct intel_iommu *iommu)
 {
 	iounmap(iommu->reg);
@@ -685,6 +683,7 @@ int alloc_iommu(struct dmar_drhd_unit *drhd)
 	}
 	iommu->agaw = agaw;
 	iommu->msagaw = msagaw;
+	iommu->segment = drhd->segment;
 
 	iommu->node = -1;
 
@@ -1041,7 +1040,6 @@ int dmar_enable_qi(struct intel_iommu *iommu)
 		return -ENOMEM;
 
 	qi = iommu->qi;
-
 
 	desc_page = alloc_pages_node(iommu->node, GFP_ATOMIC | __GFP_ZERO, 0);
 	if (!desc_page) {

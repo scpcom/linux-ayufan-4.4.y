@@ -1401,6 +1401,20 @@ void ata_sff_flush_pio_task(struct ata_port *ap)
 
 	cancel_delayed_work_sync(&ap->sff_pio_task);
 
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+	/*
+	 * FIXME:
+	 * The following kernel upstream fix doesn't apply to our kernel
+	 *
+	 *    commit ce7514526742c0898b837d4395f515b79dfb5a12 upstream.
+	 *    libata: prevent HSM state change race between ISR and PIO
+	 *
+	 * ata_sff_flush_pio_task() is used when sending internal commands. We add
+	 * another path to use internal commands, the commands may come from user
+	 * space and will be preempted by EH, EH also use internal commands. This
+	 * spin_lock_irq may cause deadlock, so we remove it.
+	 */
+#else /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 	/*
 	 * We wanna reset the HSM state to IDLE.  If we do so without
 	 * grabbing the port lock, critical sections protected by it which
@@ -1410,8 +1424,13 @@ void ata_sff_flush_pio_task(struct ata_port *ap)
 	 * ata_sff_hsm_move() causing ata_sff_hsm_move() to BUG().
 	 */
 	spin_lock_irq(ap->lock);
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 	ap->hsm_task_state = HSM_ST_IDLE;
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+	/* Please see above FIXME */
+#else /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 	spin_unlock_irq(ap->lock);
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 
 	ap->sff_pio_task_link = NULL;
 

@@ -9,6 +9,7 @@
 #include <linux/namei.h>
 #include <linux/hardirq.h>
 #include <linux/security.h>
+#include <linux/uaccess.h>
 #include <asm/page.h>
 
 #define MAX_BUF_SIZE 64
@@ -68,9 +69,9 @@ void syno_do_hibernation_bio_log(const char *szDevName)
 {
 	char szFileName[MAX_BUF_SIZE] = "Block I/O\0";
 
-    if (NULL == szDevName) {
+	if (NULL == szDevName) {
 		return;
-    }
+	}
 
 	SynoHibernationLogForm(-1, szFileName, szDevName, &gMsgQueue);
 
@@ -95,9 +96,9 @@ void syno_do_hibernation_inode_log(struct inode *inode)
 	struct kstatfs Statfs;
 	int iErr = -1;
 
-    if (NULL == pDentry) {
+	if (NULL == pDentry) {
 		return;
-    }
+	}
 
 	spin_lock(&pDentry->d_lock);
 
@@ -130,15 +131,25 @@ EXPORT_SYMBOL(syno_do_hibernation_inode_log);
  *
  * @param szFileName	[IN] The file name that is operated in FS system call
  */
-void syno_do_hibernation_filename_log(const char __user *szFileName)
+void syno_do_hibernation_filename_log(const char __user *szUserFileName)
 {
 	struct kstatfs Statfs;
 	struct path FilePath;
-    int iIno = 0;
+	int iIno = 0;
+	char szFileName[MSG_SIZE];
 
-    if (NULL == szFileName) {
+	if (NULL == szUserFileName) {
 		goto END;
-    }
+	}
+
+	if (copy_from_user(szFileName, szUserFileName, MSG_SIZE)) {
+		goto END;
+	}
+	if (MSG_SIZE > strlen(szFileName)) {
+		strncpy(szFileName, szFileName, strlen(szFileName));
+	} else {
+		szFileName[MSG_SIZE-1] = '\0';
+	}
 
 	/* Get filepath  */
 	if (0 != user_lpath(szFileName, &FilePath)) {
@@ -236,40 +247,41 @@ static void SynoHibernationLogForm(const int iIno ,const char __user *szFileName
 	}
 
 	/* A simple black list of filenames that should not be considered as the cause of hibernation issue */
-    if (NULL == szFileName) {
+	if (NULL == szFileName) {
 		szFileName = "Missing\0";
-    }else if (strstr(szFileName, "pipe:[") == szFileName ||
-			  strstr(szFileName, "socket:[") == szFileName ||
-			  strstr(szFileName, "/etc/ld.so.cache") != NULL || //a cache list of dynamic libraries.
-			  strstr(szFileName, "eventfd") != NULL) { //an eventfd does not descrip a real file on disk.
+	} else if (strstr(szFileName, "pipe:[") == szFileName ||
+	  strstr(szFileName, "socket:[") == szFileName ||
+	  strstr(szFileName, "/etc/ld.so.cache") != NULL || //a cache list of dynamic libraries.
+	  strstr(szFileName, "eventfd") != NULL) { //an eventfd does not descrip a real file on disk.
 		iErr = 0;
 		goto END;
 	}
 
-    /* get the parent process name */
-    SynoProcessNameGet(Parent, 1, szParent, MAX_BUF_SIZE);
+	/* get the parent process name */
+	SynoProcessNameGet(Parent, 1, szParent, MAX_BUF_SIZE);
 	/* get the current process name */
-    SynoProcessNameGet(current, 1, p_kups, MAX_BUF_SIZE);
-    /* the full command arguments of the current task makes the message unnecessarily long, save it for the higher log level */
-    if (3 > syno_hibernation_log_level || 0 > iIno) {
+	SynoProcessNameGet(current, 1, p_kups, MAX_BUF_SIZE);
+	/* the full command arguments of the current task makes the message unnecessarily long, save it for the higher log level */
+	if (3 > syno_hibernation_log_level || 0 > iIno) {
 		snprintf(szCurrent, sizeof(szCurrent), "comm:(%s)", p_kups);
-    }else {
+	} else {
 		SynoProcessNameGet(current, 0, p_cups, MAX_BUF_SIZE);
 		snprintf(szCurrent, sizeof(szCurrent), "comm:(%s), u:(%s)", p_kups, p_cups);
-    }
+	}
 
 	/* These logs are only shown in higher log level */
 	if (3 > syno_hibernation_log_level) {
 		if (strstr(szFileName, "/usr/syno/lib") == szFileName || //loading share libraries are not likely to affect disk hibernation.
-			strstr(szFileName, "/lib") == szFileName ||
-			strstr(szCurrent, "syslog-ng") != NULL ||
-			strstr(szCurrent, "swapper") != NULL || // the following message are not useful in most cases
-			strstr(szCurrent, "kworker") != NULL ||
-			strstr(szCurrent, "ksoftirqd") != NULL ||
-			strstr(szCurrent, "jbd2") != NULL ||
-			strstr(szCurrent, "_raid") != NULL) {
-				iErr = 0;
-				goto END;
+				strstr(szFileName, "/usr/lib") == szFileName ||
+				strstr(szFileName, "/lib") == szFileName ||
+				strstr(szCurrent, "syslog-ng") != NULL ||
+				strstr(szCurrent, "swapper") != NULL || // the following message are not useful in most cases
+				strstr(szCurrent, "kworker") != NULL ||
+				strstr(szCurrent, "ksoftirqd") != NULL ||
+				strstr(szCurrent, "jbd2") != NULL ||
+				strstr(szCurrent, "_raid") != NULL) {
+			iErr = 0;
+			goto END;
 		}
 	}
 
@@ -296,14 +308,11 @@ static void SynoHibernationLogForm(const int iIno ,const char __user *szFileName
 
 	/* queue the log message */
 	if (0 == kfifo_in_spinlocked(&gMsgQueue, szMsg, MSG_SIZE, &gMsgQueueLock)) {
-        goto END;
+		goto END;
 	}
 
 	iErr = 0;
 END:
-    if (0 > iErr) {
-		printk(KERN_DEBUG"[Hibernation debug error]: Fail on hibernation log forming\n");
-    }
 	return;
 }
 
@@ -410,8 +419,8 @@ static void SynoFileInfoGet(struct task_struct *pTask, int const fd, char *szFil
 
 	if (!pFile) {
 		spin_unlock(&pFileStr->file_lock);
-		snprintf(szFileBuf, sizeof(szFileBuf), "UNKOWN");
-		snprintf(szDevBuf, sizeof(szDevBuf), "UNKOWN");
+		snprintf(szFileBuf, MAX_BUF_SIZE, "UNKOWN");
+		snprintf(szDevBuf, BDEVNAME_SIZE, "UNKOWN");
 		iErr = 0;
 		goto END;
 	}
@@ -434,7 +443,7 @@ static void SynoFileInfoGet(struct task_struct *pTask, int const fd, char *szFil
 	path_put(&FilePath);
 	free_page((unsigned long)pageTmp);
 
-    iErr = 0;
+	iErr = 0;
 
 END:
 	if (0 != iErr) {
@@ -463,13 +472,13 @@ static void SynoProcessNameGet(struct task_struct *task, unsigned char kp, char 
 	}
 
 	memset(buf, 0, buf_size);
-	if(kp) {
-		if(SynoCommGet(task, buf, buf_size) < 0){
+	if (kp) {
+		if (SynoCommGet(task, buf, buf_size) < 0) {
 			buf[0] = '\0';
 			goto END;
 		}
-	}else{
-		if(SynoUserMMNameGet(task, buf, buf_size) < 0){
+	} else {
+		if (SynoUserMMNameGet(task, buf, buf_size) < 0) {
 			buf[0] = '\0';
 			goto END;
 		}
@@ -480,7 +489,7 @@ END:
 
 static int SynoCommGet(struct task_struct *task, char *ptr, int length)
 {
-	if(!task){
+	if (!task) {
 		return -1;
 	}
 
@@ -498,59 +507,58 @@ static int SynoUserMMNameGet(struct task_struct *task, char *ptr, int length)
 	char buffer[256];
 	int buf_size = sizeof(buffer);
 
-	if(!task) {
+	if (!task) {
 		return -1;
 	}
 
 	mm = syno_get_task_mm(task);
-	if(!mm) {
+	if (!mm) {
 		printk("%s %d get_task_mm_syno == NULL \n", __FUNCTION__, __LINE__);
 		goto END;
 	}
 
-	if(!mm->arg_end) {
+	if (!mm->arg_end) {
 		printk("!mm->arg_end \n");
 		goto END;
 	}
 
 	len = mm->arg_end - mm->arg_start;
 
-	if(len <= 0) {
+	if (len <= 0) {
 		printk("len <= 0 \n");
 		goto END;
 	}
 
-	if(len > PAGE_SIZE) {
+	if (len > PAGE_SIZE) {
 		len = PAGE_SIZE;
 	}
 
-	if(len > buf_size) {
+	if (len > buf_size) {
 		len = buf_size;
 	}
 
 	res_len = syno_access_process_vm(task, mm->arg_start, buffer, len, 0);
-	if(res_len <= 0) {
+	if (res_len <= 0) {
 		printk(KERN_DEBUG"access_process_vm_syno  fail\n");
 		goto END;
 	}
 
 	/*repalce all 0 by space to aviod string formate problem*/
-	for (iBufferIdx = 0;iBufferIdx < res_len;iBufferIdx++)
-	{
+	for (iBufferIdx = 0; iBufferIdx < res_len; ++iBufferIdx) {
 		if (buffer[iBufferIdx] == '\0' ) {
 			buffer[iBufferIdx] = ' ';
 		}
 	}
 
-	if(res_len >= buf_size) {
-		res_len = buf_size-1;
+	if (res_len >= buf_size) {
+		res_len = buf_size - 1;
 	}
 	buffer[res_len] = '\0';
 	strlcpy(ptr, buffer, length);
 
 	res = 0;
 END:
-	if(mm) {
+	if (mm) {
 		mmput(mm);
 	}
 	return res;

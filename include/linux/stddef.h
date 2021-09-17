@@ -3,7 +3,8 @@
 
 #include <uapi/linux/stddef.h>
 
-
+#ifdef CONFIG_SYNO_MONACO_SDK_BUILD_FAILED_FIX
+#if !defined(__cplusplus)
 #undef NULL
 #define NULL ((void *)0)
 
@@ -11,6 +12,16 @@ enum {
 	false	= 0,
 	true	= 1
 };
+#endif
+#else
+#undef NULL
+#define NULL ((void *)0)
+
+enum {
+	false	= 0,
+	true	= 1
+};
+#endif /* CONFIG_SYNO_MONACO_SDK_BUILD_FAILED_FIX */
 
 #undef offsetof
 #ifdef __compiler_offsetof

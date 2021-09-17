@@ -97,3 +97,10 @@ config BTRFS_FS_AHASH_CRC
 	help
 	  Use asynchronous CRC hash when calculating checksum for
 	  data.
+
+config BTRFS_AL_FAST_CRC_DMA
+	bool "Use Alpine DMA engine to calculate CRC hash"
+	default n
+	depends on BTRFS_FS && !BTRFS_FS_AHASH_CRC && ARCH_ALPINE
+	help
+	  Use Alpine crypto engine to calculate CRC hash

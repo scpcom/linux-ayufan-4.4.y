@@ -717,6 +717,9 @@ enum btrfs_compression_type {
 	BTRFS_COMPRESS_LZO   = 2,
 	BTRFS_COMPRESS_TYPES = 2,
 	BTRFS_COMPRESS_LAST  = 3,
+#ifdef CONFIG_SYNO_BTRFS_COMPR_DEFAULT_SETTING
+	BTRFS_COMPRESS_DEFAULT = 2,
+#endif
 };
 
 struct btrfs_inode_item {
@@ -764,7 +767,6 @@ struct btrfs_dir_item {
 #ifdef CONFIG_SYNO_BTRFS_SUBVOLUME_HIDE
 #define BTRFS_ROOT_SUBVOL_HIDE		(1ULL << 32)
 #endif
-
 /*
  * Internal in-memory flag that a subvolume has been marked for deletion but
  * still visible as a directory
@@ -1510,9 +1512,6 @@ struct btrfs_fs_info {
 	 * during commit to protect us from the relocation code
 	 */
 	struct mutex reloc_mutex;
-#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
-	struct mutex pending_snapshots_mutex;
-#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
 
 	struct list_head trans_list;
 	struct list_head dead_roots;
@@ -1760,6 +1759,10 @@ struct btrfs_fs_info {
 	wait_queue_head_t replace_wait;
 #endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
 
+#ifdef CONFIG_SYNO_BTRFS_CHECK_INTEGRITY
+	unsigned int check_integrity; // 0 -> no check, 1 -> WARN() if fail, 2 -> BUG() if fail
+#endif
+
 	struct semaphore uuid_tree_rescan_sem;
 	unsigned int update_uuid_tree_gen:1;
 
@@ -1768,6 +1771,7 @@ struct btrfs_fs_info {
 
 	spinlock_t unused_bgs_lock;
 	struct list_head unused_bgs;
+	struct mutex unused_bg_unpin_mutex;
 
 	/*
 	 * Chunks that can't be freed yet (under a trim/discard operation)
@@ -1952,7 +1956,6 @@ struct btrfs_root {
 	int send_in_progress;
 	struct btrfs_subvolume_writers *subv_writers;
 	atomic_t will_be_snapshoted;
-
 };
 
 struct btrfs_ioctl_defrag_range_args {
@@ -3354,7 +3357,7 @@ int btrfs_run_delayed_refs(struct btrfs_trans_handle *trans,
 			   struct btrfs_root *root, unsigned long count);
 int btrfs_async_run_delayed_refs(struct btrfs_root *root,
 				 unsigned long count, int wait);
-int btrfs_lookup_extent(struct btrfs_root *root, u64 start, u64 len);
+int btrfs_lookup_data_extent(struct btrfs_root *root, u64 start, u64 len);
 int btrfs_lookup_extent_info(struct btrfs_trans_handle *trans,
 			     struct btrfs_root *root, u64 bytenr,
 			     u64 offset, int metadata, u64 *refs, u64 *flags);
@@ -3404,7 +3407,6 @@ int btrfs_free_extent(struct btrfs_trans_handle *trans,
 		      struct btrfs_root *root,
 		      u64 bytenr, u64 num_bytes, u64 parent, u64 root_objectid,
 		      u64 owner, u64 offset, int no_quota);
-
 int btrfs_free_reserved_extent(struct btrfs_root *root, u64 start, u64 len,
 			       int delalloc);
 int btrfs_free_and_pin_reserved_extent(struct btrfs_root *root,
@@ -3417,7 +3419,6 @@ int btrfs_inc_extent_ref(struct btrfs_trans_handle *trans,
 			 struct btrfs_root *root,
 			 u64 bytenr, u64 num_bytes, u64 parent,
 			 u64 root_objectid, u64 owner, u64 offset, int no_quota);
-
 int btrfs_write_dirty_block_groups(struct btrfs_trans_handle *trans,
 				    struct btrfs_root *root);
 int btrfs_extent_readonly(struct btrfs_root *root, u64 bytenr);
@@ -3428,6 +3429,9 @@ int btrfs_make_block_group(struct btrfs_trans_handle *trans,
 			   struct btrfs_root *root, u64 bytes_used,
 			   u64 type, u64 chunk_objectid, u64 chunk_offset,
 			   u64 size);
+struct btrfs_trans_handle *btrfs_start_trans_remove_block_group(
+				struct btrfs_fs_info *fs_info,
+				const u64 chunk_offset);
 int btrfs_remove_block_group(struct btrfs_trans_handle *trans,
 			     struct btrfs_root *root, u64 group_start,
 			     struct extent_map *em);
@@ -3452,6 +3456,7 @@ int btrfs_check_data_free_space(struct inode *inode, u64 bytes);
 void btrfs_free_reserved_data_space(struct inode *inode, u64 bytes);
 void btrfs_trans_release_metadata(struct btrfs_trans_handle *trans,
 				struct btrfs_root *root);
+void btrfs_trans_release_chunk_metadata(struct btrfs_trans_handle *trans);
 int btrfs_orphan_reserve_metadata(struct btrfs_trans_handle *trans,
 				  struct inode *inode);
 void btrfs_orphan_release_metadata(struct inode *inode);
@@ -3506,8 +3511,12 @@ int btrfs_init_space_info(struct btrfs_fs_info *fs_info);
 int btrfs_delayed_refs_qgroup_accounting(struct btrfs_trans_handle *trans,
 					 struct btrfs_fs_info *fs_info);
 int __get_raid_index(u64 flags);
-int btrfs_start_nocow_write(struct btrfs_root *root);
-void btrfs_end_nocow_write(struct btrfs_root *root);
+int btrfs_start_write_no_snapshoting(struct btrfs_root *root);
+void btrfs_end_write_no_snapshoting(struct btrfs_root *root);
+void check_system_chunk(struct btrfs_trans_handle *trans,
+			struct btrfs_root *root,
+			const u64 type,
+			const bool is_allocation);
 /* ctree.c */
 int btrfs_bin_search(struct extent_buffer *eb, struct btrfs_key *key,
 		     int level, int *slot);

@@ -57,7 +57,7 @@ MODULE_AUTHOR("Annapurna Labs");
 #define ONFI_ROW_ADDR_CYCLE_MASK 0x0f
 #define ONFI_ROW_ADDR_CYCLE_POS  0
 
-#define AL_NAND_MAX_CHIPS 1
+#define AL_NAND_MAX_CHIPS 4
 #define AL_NAND_ECC_SUPPORT
 
 struct nand_data {
@@ -925,7 +925,7 @@ static int al_nand_probe(struct platform_device *pdev)
 	nand->ecc.size = 512 << nand_dat->ecc_config.messageSize;
 	nand_dat->cw_size = 512 << nand_dat->ecc_config.messageSize;
 
-	ret = nand_scan_ident(mtd, 1, NULL);
+	ret = nand_scan_ident(mtd, AL_NAND_MAX_CHIPS, NULL);
 	if (ret) {
 		pr_err("%s: nand_scan_ident failed\n", __func__);
 		goto err;

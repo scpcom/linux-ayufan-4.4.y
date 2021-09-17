@@ -688,7 +688,7 @@ static u32 xhci_get_port_status(struct usb_hcd *hcd,
 	}
 	/* Update Port Link State for super speed ports*/
 	if (hcd->speed == HCD_USB3) {
-		xhci_hub_report_link_state(&status, raw_port_status);
+		xhci_hub_report_link_state(xhci, &status, raw_port_status);
 		/*
 		 * Verify if all USB3 Ports Have entered U0 already.
 		 * Delete Compliance Mode Timer if so.

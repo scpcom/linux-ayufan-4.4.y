@@ -145,6 +145,9 @@ int ecryptfs_privileged_open(struct file **lower_file,
 	 * lower file is fput() when all eCryptfs files for the inode are
 	 * released. */
 	flags |= IS_RDONLY(lower_dentry->d_inode) ? O_RDONLY : O_RDWR;
+#ifdef CONFIG_SYNO_FS_ECRYPTFS_LOWER_INIT
+	lower_dentry->d_inode->i_opflags |= IOP_ECRYPTFS_LOWER_INIT;
+#endif
 	(*lower_file) = dentry_open(&req.path, flags, cred);
 	if (!IS_ERR(*lower_file))
 		goto out;

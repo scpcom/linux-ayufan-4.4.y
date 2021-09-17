@@ -12,6 +12,7 @@
  */
 #include <linux/rwsem.h>
 #include <linux/mutex.h>
+#include <linux/ww_mutex.h>
 #include <linux/sched.h>
 #include <linux/delay.h>
 #include <linux/lockdep.h>
@@ -1107,7 +1108,6 @@ static inline void print_testname(const char *testname)
 	DO_TESTCASE_6IRW(desc, name, 231);			\
 	DO_TESTCASE_6IRW(desc, name, 312);			\
 	DO_TESTCASE_6IRW(desc, name, 321);
-
 
 void locking_selftest(void)
 {

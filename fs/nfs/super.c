@@ -1907,7 +1907,6 @@ static int nfs23_validate_mount_data(void *options,
 			args->version = 2;
 		}
 
-
 		memcpy(mntfh->data, data->root.data, mntfh->size);
 		if (mntfh->size < sizeof(mntfh->data))
 			memset(mntfh->data + mntfh->size, 0,
@@ -2132,6 +2131,8 @@ nfs_remount(struct super_block *sb, int *flags, char *raw_data)
 	struct nfs_mount_data *options = (struct nfs_mount_data *)raw_data;
 	struct nfs4_mount_data *options4 = (struct nfs4_mount_data *)raw_data;
 	u32 nfsvers = nfss->nfs_client->rpc_ops->version;
+
+	sync_filesystem(sb);
 
 	/*
 	 * Userspace mount programs that send binary options generally send

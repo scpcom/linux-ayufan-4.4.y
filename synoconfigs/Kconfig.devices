@@ -26,6 +26,13 @@ config SYNO_MD_BOOT_CONDITIONAL_ASSEMBLE
 	  Do not assemble devices which derived from expansion box
 	  Do not assemble devices which is not belong to root devices
 
+config SYNO_MD_RAID1_BUGON_MAGIC_WORKAROUND
+	bool "Fix possible RAID1 BUG ON, when LUN creating/removing and restarting iSCSI service"
+	default y
+	help
+	  <DSM> #83408
+	  Possible RAID1 BUG ON, when LUN creating/removing and restarting iSCSI service
+
 config SYNO_MD_FORCE_START_DIRTY_DEGRADED
 	bool "Force assemble dirty degraded RAID with level 4, 5 or 6"
 	default y
@@ -123,6 +130,28 @@ config SYNO_MD_RAID5_BS_REWRITE
 	  But some disk really need this.
 	  Previous Naming: SYNO_RAID5_BS_REWRITE
 
+config SYNO_MD_STRIPE_MEMORY_ESTIMATION
+	bool "Raid5/6 stripe cache memory usage"
+	default y
+	help
+	  <DSM> #86302
+	  Provide an interface to get the estimation of the memory usage of stripe.
+
+config SYNO_MD_RAID6_RMW
+	bool "Enable RAID6 read-modify-write"
+	default y
+	help
+	  <DSM> #80067
+	  RAID6 can use rmw in linux 4.1, we back port it to linux 3.10.x.
+
+
+config SYNO_MD_RAID5_ENABLE_SSD_TRIM
+	bool "Default enable trim for raid5"
+	default y
+	help
+		<DSM> #84970
+		Default enable trim for raid5.
+
 config SYNO_MD_FLASHCACHE_SUPPORT
 	bool "Make bio of flashcache can return error once md device failed"
 	default y
@@ -197,8 +226,48 @@ config SYNO_MD_SYNC_MSG
 	bool "Let md sync action log be stored in /var/log/messages."
 	default y
 	help
-		<DSM> #80529
+		<DSM> #80528
 		Let md sync action log be stored in /var/log/messages.
+
+config SYNO_MD_FIX_RAID5_RESHAPE_READ_FROM_OLD_LAYOUT
+	bool "Fix raid 5 read data from old layout during expansion."
+	default y
+	help
+		<DSM> #76897
+		There is a race between reading and writing raid 5 layout config when reshaping.
+		When this happened, raid 5 used old layout to read logical address, and get wrong data.
+		It is a temporary read error, since after that specific time, raid 5 will use new layout to read.
+		But, it may cause some problems (e.g. file system error) if someone tries to write to that logical address.
+
+config SYNO_MD_FIX_RAID5_RESHAPE_SUSPEND_DEADLOCK
+	bool "Fix raid5_start_reshape() and mddev_suspend() deadlock"
+	default y
+	help
+		<DSM> #66390, #74706
+		There are two deadlock between raid5_start_reshape() and mddev_suspend().
+		For #66390, it's about suspend range and active_io count.
+		For #74706, it's about update superblock and active_io count.
+
+config SYNO_MD_ENABLE_RAID5_SKIP_COPY
+	bool "Enable raid 5 skip_copy feature"
+	depends on SYNO_ALPINE
+	help
+		Enable the backported upstream commit d592a99691 by default,
+		avoids copying data from bio to stripe cache.
+
+config SYNO_MD_ROOT_SWAP_PARALLEL_RESYNC
+	bool "Let md0 and md1 can do resync without waiting for other mds."
+	default y
+	help
+		<DSM> #86155
+		Let md0 and md1 can do resync without waiting for other mds.
+
+config SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
+	bool "Fix when md call finish_reshape and mount deadlock workaround."
+	default y
+	help
+		<DSM> #72011
+		Fix when md call finish_reshape and mount deadlock workaround.
 
 endmenu #MD
 
@@ -224,8 +293,8 @@ config SYNO_BADSECTOR_TEST
 config SYNO_MAX_INTERNAL_DISK
 	int "Maximum Internal Disk Number"
 	depends on SYNO_FIXED_DISK_NAME || SYNO_BADSECTOR_TEST
-	default "19" if SYNO_BROMOLOW || SYNO_GRANTLEY || SYNO_BROADWELL
-	default "15" if !SYNO_BROMOLOW && !SYNO_GRANTLEY && !SYNO_BROADWELL
+	default "19" if SYNO_BROMOLOW || SYNO_GRANTLEY || SYNO_KVMX64 || SYNO_BROADWELL
+	default "15" if !SYNO_BROMOLOW && !SYNO_GRANTLEY && !SYNO_KVMX64 && !SYNO_BROADWELL
 	help
 	  <DSM> No Bug Entry
 	  Maximum SCSI internal disk. We will reserve device name for
@@ -304,6 +373,13 @@ config SYNO_FIXED_DISK_NAME_MV14XX
 		<DSM> #84462
 			Add boot argument DiskIdxMapMv14xx to adjust the disk ports of Marvell 1475.
 
+config SYNO_MV1475_SGPIO_LED_CTRL
+	bool "Using Marvell 1475 control disk led"
+	default y
+	help
+		<DSM> #?????
+			Add disk led control mechanism for Marvell 1475 sata controlleri by SGPIO.
+
 config SYNO_SCSI_GET_ATA_IDENTITY
 	bool "Get ata identity via ATA PASS THRU command in scsi layer"
 	default y
@@ -361,7 +437,7 @@ config SYNO_ATA_AHCI_LED_SWITCH
 
 config SYNO_ATA_PWR_CTRL
     bool "Disk Power Control"
-	depends on SYNO_INTERNAL_HD_NUM && SYNO_HW_VERSION && (SYNO_ICH_GPIO_CTRL || SYNO_X86_PINCTRL_GPIO)
+	depends on SYNO_INTERNAL_HD_NUM && SYNO_HW_VERSION
 	default y
 	help
 	  <DSM> No Bug Entry
@@ -423,6 +499,13 @@ config SYNO_MV_9235_GPIO_CTRL
 	help
 	  <DSM> #46891
 	  Provides the infterfaces to operate the GPIO pins on Marvell 9235.
+
+config SYNO_MV_9170_GPIO_CTRL
+	bool "Interfaces For Marvell 9170 GPIO Control"
+	default y
+	help
+	  <DSM> #89201
+	  Provides the infterfaces to operate the GPIO pins on Marvell 9170.
 
 config SYNO_SCSI_DEVICE_INDEX
 	bool "Get device index from scsi layer"
@@ -551,16 +634,6 @@ config SYNO_MV_9235_PORTING
 	  Add new SATA 6G chip (mv9235) and its workaround given by Marvell.
 	  The workaround is to solve hang problem when issuing SMART command.
 
-config SYNO_MV_9235_6G_WORKAROUND
-	bool "Marvell 88SE9235 workaround for WD Red 6Gbps link problem"
-	depends on SYNO_MV_9235_PORTING
-	default y
-	help
-	  <DSM> #47008
-	  WD Red will link up 3.0 Gbps after hotplugging.
-	  The only thing we can do to fix it is to enforce it tries to link up
-	  with 6.0 Gbps
-
 config SYNO_MV_9235_SRST_FIX
 	bool "Marvell 88SE9235 SRST fix"
 	depends on SYNO_MV_9235_PORTING
@@ -628,6 +701,9 @@ config SYNO_SATA_PM_SAMSUNG_PROBE_TIME_FIX
 	  porting #47 SYNO_SATA_SIL3132_HD_DETECT.
 	  We still port this define for compatibility.
 
+
+
+
 config SYNO_UNC_LBA_RESTORE
 	bool "ATA UNC LBA return error workaround"
 	default y
@@ -635,9 +711,9 @@ config SYNO_UNC_LBA_RESTORE
 	  <DSM> #72618 #73898
 	  Some of the sata controllers return LBA registers even if the NCQ READ command failed.
 	  These register values are not defined in ATA standard and cannot be trusted.
-	  Passing these untrusted values to SCSI layer might cause in data lost due to 
+	  Passing these untrusted values to SCSI layer might cause in data lost due to
 	  incorrect BIO completed-byte calculation.
-	  This fix only target on UNC error and will restore the result LBA with the preceded setup 
+	  This fix only target on UNC error and will restore the result LBA with the preceded setup
 	  right before these information are formed into sense data and returned to SCSI layer.
 
 config SYNO_SATA_WCACHE_DISABLE
@@ -778,6 +854,7 @@ config SYNO_SATA_PM_CLEANUP_CLASS
 	  the port would be set ATA_DEV_NONE, and this port would skip reset and
 	  lost connect. We should cleanup the class register to ATA_DEV_UNKNOWN
 
+
 config SYNO_AHCI_SOFTWARE_ACITIVITY
 	bool "AHCI software acitivty led"
 	depends on SYNO_LEDS_TRIGGER
@@ -800,7 +877,7 @@ config SYNO_SATA_CHIP_REORDER
        help
          <Linux Kernel Porting - linux-3.10.x> #417
          For disk ordering. sata_sil24.o sould be after sata_mv.o
-		 
+
 config SYNO_FORCE_EH_FULL_RECOVER_RETRY
 	bool "Force to reset all links of a PMP while retrying EH recover"
 	default y
@@ -870,13 +947,29 @@ config SYNO_SII3132_MEDIA_ERROR_RETRY
 	help
 	  SiI3132 may get media error in some models, we could add retry for them
 
+config SYNO_EUNIT_LIMITATION
+	bool "Limit Eunit Speed To 1.5Gbps"
+	default n
+	help
+	  <Linux Kernel Porting - linux-3.10.x> #428
+		Limit eunit to 1.5Gbps to avoid eunit drop. Cedarview and Pinview have to open this
+		option
+
 config SYNO_AHCI_PMP_SII3x26_DEFER_CMD
 	bool "Enable SiI3x26 defer function in ahci driver"
-	depends on (SYNO_BRASWELL || SYNO_ALPINE || SYNO_AVOTON) && SYNO_SATA_PM_DEVICE_GPIO
+	depends on (SYNO_BRASWELL || SYNO_ALPINE || SYNO_AVOTON || SYNO_ARMADA) && SYNO_SATA_PM_DEVICE_GPIO
 	default n
 	help
 	  Marvell 88se9215 with PMP SiI3x26 often occurred "DRDY (timeout)" issue
 	  We add defer function to fix this bug.
+
+config SYNO_SATA_LINK_SPEED_RETRY
+	bool "Enable SATA Link Speed Retry"
+	default y
+	help
+	  <DSM> #82677
+	    Read SStatus may fail after hardreset and the link speed will be <Unknown>
+	    Retry to read again to record the link speed.
 
 config SYNO_EARLY_NCQ_ANALYZE
 	bool "Analyze NCQ Error Early"
@@ -899,6 +992,54 @@ config SYNO_DISK_NCQ_COMPATIBILITY
 	  <DSM> #84910
 	  The system would do untar before hotplugd initialized after DSM update.
 	  Therefore, we should disable ncq in kernel to prevent the ncq error.
+
+config SYNO_KVMX64_MAX_MEDIUM_ACCESS_TIMEOUTS
+	bool "Increase max medium access timeouts"
+	default y
+	depends on SYNO_KVMX64
+	help
+	  <Virtualization> #832
+	  By chance virtual machines may encounter medium access timeout when booting.
+	  The disk is disabled and cause the system boot to junior mode.
+	  This fix increase the medium access timeouts.
+
+config SYNO_PMP_HORKAGE
+	bool "Enable horkage on pmp"
+	depends on SYNO_SATA_PM_DEVICE_GPIO
+	default y
+	help
+	  <DSM> #87131
+		Set horkage only on PMP
+
+config SYNO_MV9215_EXTPORT_NCQ_OFF
+	bool "Disable marvell 9215 ncq on pm port"
+	depends on SYNO_SATA_PM_DEVICE_GPIO
+	default n
+	help
+	  <DSM> #87926
+		Disable ncq on marvell 9215 external port
+
+config SYNO_CHERRYVIEW_GPIO_WRITE_RETRY
+	bool "Retry GPIO write if write failed"
+	depends on SYNO_PINCTRL_CHERRYVIEW
+	default y
+	help
+	  <DSM> #88143
+		Retry gpio set if set fail
+
+config SYNO_GET_DISK_SPEED
+	bool "Get disk speed from disk driver"
+	default y
+	help
+	  <DSM> #89305
+		Support getting disk link speed from disk driver
+
+config SYNO_EUNIT_SPD_UNKNOWN_RESCAN
+	bool "Rescan sata speed after thaw port"
+	default n
+	help
+	  <DSM> #88953
+		Speeed rescan after thaw port
 
 endmenu #SATA
 
@@ -989,6 +1130,22 @@ config SYNO_SAS_SYSFS_BLOCK_DEV_LINK
 
 		Previous Naming: SYNO_SYSFS_BLOCK_DEV_LINK
 
+config SYNO_SAS_SPINUP_DELAY
+	bool "Support SAS disk spinup queue"
+	default y
+	depends on SYNO_SAS_DISK_NAME
+	help
+	  <DSM> #35222
+	  Implement spinup delay queue in SCSI layer to limit numbers of disks spun up concurrently.
+	  Which is used to handle un-sufficient power supply to bare total power consumption when all disks spin up concurrently.
+
+config SYNO_SAS_SPINUP_DELAY_DEBUG
+	bool "Print out debug message for SAS disk spinup queue"
+	default n
+	depends on SYNO_SAS_SPINUP_DELAY
+	help
+	  Print out debug message for SYNO_SAS_SPINUP_DELAY
+
 config SYNO_SAS_SHOW_DISK_PHY_INFO
 	bool "Show phy info in kernel log when disk hotplug in"
 	default y
@@ -1026,27 +1183,27 @@ config SYNO_SAS_MPT2_HOTPLUG_PHY
 config SYNO_SAS_MPT2_RESET_ON_REBOOT
 	bool "Issue hard reset on LSI 2308 SAS controller when rebooting"
 	default n
-	depends on SCSI_MPT2SAS
 	help
 	  On Synology SAS card, we exclude PCI reset signal from LSI 2308 and it leads to a topology discovery problem after reboot.
 	  Our workaround here is to issue hard reset when system power off or reboot.
 	  Every platform which uses Synology SAS card is suggested to enable this config, except bromolow.
 
-config SYNO_SAS_SPINUP_DELAY
-	bool "Support SAS disk spinup queue"
-	default y
-	depends on SCSI_MPT2SAS
-	help
-	  <DSM> #35222
-	  Implement spinup delay queue in SCSI layer to limit numbers of disks spun up concurrently.
-	  Which is used to handle un-sufficient power supply to bare total power consumption when all disks spin up concurrently.
-
-config SYNO_SAS_SPINUP_DELAY_DEBUG
-	bool "Print out debug message for SAS disk spinup queue"
+config SYNO_SAS_MPT2_TEST_UNIT_RETRY
+	bool "TEST_UNIT_READY retry until the disk is ready or timeout"
 	default n
-	depends on SYNO_SAS_SPINUP_DELAY
 	help
-	  Print out debug message for SYNO_SAS_SPINUP_DELAY
+	  <DSM> #81730
+	  For some disks would spend more times doing TEST_UNIT_READY. When our system want to assemble md0 but disk is not ready,
+	  md0 would fail. Our mechanism is to retry TEST_UNIT_READY until this disk is ready in first round check,
+	  do not retry next round except timeout.
+
+config SYNO_SAS_RESERVATION_CONFLICT_WORKAROUND
+	bool "RESERVATION_CONFLICT status ignore for some disk return to sas driver"
+	default n
+	help
+	  <DSM> #81080
+	  For some disks would return RESERVATION_CONFLICT scsi status to SAS driver, it lead to one side cannot get the disk information on RC18015xs+.
+	  So we ignore RESERVATION_CONFLICT when driver do TEST_UNIT_READY to ask scsi status.
 
 config SYNO_SAS_ENCOLURE_PWR_CTL
 	bool "Encolure power control"
@@ -1054,15 +1211,6 @@ config SYNO_SAS_ENCOLURE_PWR_CTL
 	help
 	  <DSM> #62317
 	  Export interface to control PCH GPIO for Banana Split power control.
-
-config SYNO_EUNIT_LIMITATION
-	bool "Limit Eunit Speed To 1.5Gbps"
-	default n
-	depends on X86_64
-	help
-	  <Linux Kernel Porting - linux-3.10.x> #428
-		Limit eunit to 1.5Gbps to avoid eunit drop. Cedarview and Pinview have to open this
-		option
 
 config SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 	bool "Enable SCSI queue depth lock"
@@ -1103,6 +1251,14 @@ config SYNO_IGB_LED_SWITCH
 	  There is only the funtion pointer declaired as "funcSynoNicLedCtrl" in
 	  the kernel. Drivers should assign the entity to this function pointer
 	  to make the function work.
+
+config SYNO_AVOTON_PHY_OPS
+	bool "Avoton-specific NIC phy operation"
+	default y if SYNO_AVOTON
+	help
+		<DSM> #59974,#61840,#62300
+		Some more operations are needed on NIC phy on avoton platform. This config is
+		used by out of tree igb driver.
 
 config SYNO_ALPINE_SUPPORT_WOL
 	bool "Support WOL on Alpine Platform"
@@ -1218,6 +1374,15 @@ config SYNO_LYNXPOINT_XHCI_QUIRK
 	  USB 2.0 devices can't be detected at USB 3.0 port. So we port _PS0 as a PCI quirks.
 	  It will be applied at boot time.
 
+config SYNO_ICH_UHCI_NO_MMIO_OFF
+	bool "Set Pinview UHCI Controller MMIO As 'Always On'"
+	depends on SYNO_X64
+	default n
+	help
+	  <Linux Kernel Porting - linux-3.10.x> #438
+	  Disabling Pineview's UHCI controller MMIO might cause system hang during boot time.
+	  Enable this to set the intel UHCI controller as a 'MMIO always on' device and prevent the situation.
+
 config SYNO_USB3_RESET_WAIT
 	bool "Add extra delay time for USB reset in xhci driver"
 	default y
@@ -1227,15 +1392,6 @@ config SYNO_USB3_RESET_WAIT
 	  NEC Chip has a compatibility issue on specific device during USB reset time.
 	  The USB device may meet "read descripter error" or "set address error".
 
-config SYNO_ICH_UHCI_NO_MMIO_OFF
-	bool "Set Pinview UHCI Controller MMIO As 'Always On'"
-	depends on SYNO_X64
-	default n
-	help
-	  <Linux Kernel Porting - linux-3.10.x> #438
-	  Disabling Pineview's UHCI controller MMIO might cause system hang during boot time.
-	  Enable this to set the intel UHCI controller as a 'MMIO always on' device and prevent the situation.	  
-
 config SYNO_USB_STOR_EXTRA_DELAY
 	bool "Add an extra delay time for USB storage"
 	default y
@@ -1244,12 +1400,20 @@ config SYNO_USB_STOR_EXTRA_DELAY
 	  Add an extra delay time in module parameter of USB storage.
 	  It is used in support case to improve USB compatibility.
 
+config SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD
+	bool "Lower bulk transfer speed to EJ168 USB controller"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  <DSM> #78051
+	  We apply Etron's fix for EJ188 HC died issue to EJ168 USB controller
+
 config SYNO_INTEL_USB3_LPM_ENABLE
 	bool "Enable USB 3.0 LPM on Intel HCs"
 	default y
 	depends on X86_64
 	help
-	  <DSM> #80664
+	  <DSM> #80659
 	  This is used to enable link power management. When link error rate (which
 	  might be caused by eletronic interferences or other disturbing factors in
 	  physical layer) is high, to enable LPM would cause USB 3.0 devices
@@ -1270,6 +1434,7 @@ config SYNO_GET_SN_WORKAROUNDS
 config SYNO_USB_UPS_DISCONNECT_FILTER
 	bool "Filter abnormal disconnect from UPS via USB"
 	default y
+	depends on SYNO_USB_DEVICE_QUIRKS
 	help
 	  For some UPS devices which generate link violation or EMI through USB
 	  cable lead USB host receiving port disconnect events or port disable
@@ -1309,6 +1474,26 @@ config SYNO_DISABLE_USB3_DOWNGRADE
 	  Let the syno_disable_usb3 flag do not affect the USB3 ports of SoC for
 	  Braswell for factory.
 
+config SYNO_SYNCHRONIZE_CACHE_FILTER
+	bool "Filter the SYNCHRONIZE_CACHE command for some buggy USB storage"
+	default y
+	depends on SYNO_USB_DEVICE_QUIRKS
+	help
+	  Some iStoragePro series (Vendor=0984 ProdID=1403 Rev= 2.13) have a bug
+	  with SYNCHRONIZE_CACHE (a SCSI command), which they do not response their
+	  CSW to the host (i.e. cannot finish the command) sometimes and then cause
+	  the USB-storage driver reset them. Because USB resetting leads iStorages
+	  to launch their "auto-lock", so SYNCHRONIZE_CACHE could cause their
+	  disconnection.
+
+config SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
+	bool "Empty transfer rings with a disconnected USB device"
+	default y
+	help
+	  There is a chance that can't delete scsi disk of USB device after plugged
+	  out USB device until timeout of a SCSI command. That is because there
+	  are some urbs waiting for completion of the corresponding xHCI TDs.
+
 config SYNO_USB_POWER_RESET
 	bool "Support power cycle before USB re-enumeration"
 	default n
@@ -1321,35 +1506,6 @@ config SYNO_XHCI_SPEED_DOWNGRADE_RECOVERY
 	default y
 	help
 	  Try to recover speed downgrade issue on USB 3.0 port by USB reset.
-
-config SYNO_SYNCHRONIZE_CACHE_FILTER
-	bool "Filter the SYNCHRONIZE_CACHE command for some buggy USB storage"
-	default y
-	help
-	  Some iStoragePro series (Vendor=0984 ProdID=1403 Rev= 2.13) have a bug
-	  with SYNCHRONIZE_CACHE (a SCSI command), which they do not response their
-	  CSW to the host (i.e. cannot finish the command) sometimes and then cause
-	  the USB-storage driver reset them. Because USB resetting leads iStorages
-	  to launch their "auto-lock", so SYNCHRONIZE_CACHE could cause their
-	  disconnection.
-
-config SYNO_USB3_SURPRESS_WARN
-	bool "Surpress the usb warning messages from some devices"
-	default y
-	help
-	  When a device attached to the roothub is suspended, the endpoint rings
-	  are stopped.  The host may generate a completion event with the
-	  completion code set to 'Stopped' or 'Stopped Invalid' when the ring is
-	  halted.  The current xHCI code prints a warning in that case, which can
-	  be really annoying if the USB device is coming into and out of suspend.
-
-config SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
-	bool "Empty transfer rings with a disconnected USB device"
-	default y
-	help
-	  There is a chance that can't delete scsi disk of USB device after plugged
-	  out USB device until timeout of a SCSI command. That is because there
-	  are some urbs waiting for completion of the corresponding xHCI TDs.
 
 config SYNO_CASTRATED_XHC
 	bool "special treatment for ports of xHC without defferential pairs of USB3"
@@ -1364,6 +1520,79 @@ config SYNO_NUM_CASTRATED_XHC
 	default "5"
 	help
 	  Maximum number of castrated xHC
+
+config SYNO_ENHANCE_STORAGE_DISCONNECTION
+	bool "Avoid long disconnection time for USB storage"
+	default n
+	help
+	  <USB compatibility> #536
+	  When the scsi mass storage device is disconnected, the current urbs
+	  queued to hcd driver must be cancelled, otherwise the current urbs
+	  are pending at hcd driver and the active urb programmed at host
+	  controller will never be completed. The class driver shall dequeue
+	  or cancel all the urb request submitted to hcd once the device is
+	  disconnected and no longer exits.
+
+config SYNO_PHISON_USB_FACTORY
+	bool "For product testing of USB"
+	default y
+	help
+	  <DSM> #86516
+	  For product testing, we introduce Phison flashes to test each USB port,
+	  and use their ability which downgrade USB3-speed to USB2-speed by a
+	  specified CDB. This config is dealing with related problems on the
+	  sequence of product testing.
+
+config SYNO_USB_BUGGY_PORT_RESET_BIT_QUIRK
+	bool "Avoid long disconnection time after USB device is plugged out"
+	default n
+	help
+	  <DSM> #86849
+	  If the USB device is plugged out when USB reset is being executed, the
+	  long disconnection time issue will occur on the USB controller of
+	  Broadwell-DE. The PORT_RESET bit of portsc register is not cleared for
+	  more than 30 seconds after USB device went away, which will cause many
+	  unnecessary port reset.
+
+config SYNO_USB_VBUS_GPIO_CONTROL
+	bool "Vbus GPIO control"
+	default n
+	help
+	  If there are GPIO-controllable Vbus, this CONFIG should be included. We
+	  can do a workaround for some USB problems by USB power switching or turn
+	  off Vbus when not in the operating system (i.e. power off during reboot).
+
+config SYNO_USB_VBUS_NUM_GPIO
+	int "Maximun number of GPIO for Vbus switching"
+	depends on SYNO_USB_VBUS_GPIO_CONTROL
+	default "5"
+	help
+	  Maximum number of GPIO for Vbus switching
+
+config SYNO_USB_DEVICE_QUIRKS
+	bool "USB device quirks"
+	default y
+	help
+	  This is the collection of special dealing for USB device quirks.
+
+config SYNO_USB_HC_MORE_TRANSACTION_TRIES
+	bool "HC more transaction tries"
+	default y
+	depends on SYNO_USB_DEVICE_QUIRKS
+	help
+	  This config is used for dealing with the support ticket #710935, which the
+	  user's printer, EPSON C1100, couldn't print. I found that there were so
+	  many Transaction Errors (which means the Host Controller did not receive a
+	  valid response from the device, e.g. timeout, bad CRC, bad PID) occurring
+	  on the eHC (Enhance Host Controller) while printing in progress, and the
+	  eHC driver retried until a counter was decreased down to zero, and then
+	  the printing job was aborted. I thought that was because the printer is
+	  too slow to receive data (Transaction Error: timeout), though the printer
+	  is a HighSpeed printer... Therefore, I vastly increased the counter to
+	  give the printer more time to receive data. It seems like it works well
+	  then. there are GPIO-controllable Vbus, this CONFIG should be included. We
+	  can do a workaround for some USB problems by USB power switching or turn
+	  off Vbus when not in the operating system (i.e. power off during reboot).
 
 endmenu #USB
 
@@ -1491,7 +1720,7 @@ config SYNO_MONACO_SPI_WITHOUT_LOCK
 	default y
 	depends on SYNO_MONACO
 	help
-	  <DSM> #81160
+	  <DSM> #81159
 	  The kernel for monaco doesn't lock the SPI flash after access to
 	  workaround the issue that it cannot be unlocked under u-boot.
 
@@ -1528,8 +1757,8 @@ config SYNO_LEDS_TRIGGER
 	 <DSM> #59785 #60338
 	 This allows multiple LEDs to be controlled by other part of kernel.
 	 Provieds an interface for other kernel modules to control LEDs under LED sub-system
-	 Say yes if you want to use led triggers on Synology devices.		 
-	 
+	 Say yes if you want to use led triggers on Synology devices.
+
 config SYNO_LP3943_FEATURES
 	  bool "Customized features of LP3943 led dirver for Synology Corp. NAS product"
 	  depends on LEDS_LP3943
@@ -1548,7 +1777,7 @@ config SYNO_LP3943_REVERSE_BRIGHTNESS
 	  It's a work around for HW designed.
 	  change the brightness setting to: 0 = LED ON, 255 = LED OFF
 
-	 
+
 endmenu #LEDs
 
 menu "ALSA"
@@ -1606,6 +1835,13 @@ config SYNO_XR17V35X_SERIAL
 	  help
         Platform grantley is outsoucing board.
         we add a PCI to Serial card XR17V352 to connect Microp and use its MPIO as buzzer mute GPIO.
+
+config SYNO_SAS_TASK_ABORT_MESSAGE
+	  bool "show task abort message in var/log/messages"
+	  default y
+	  help
+	  <DSM> #89186
+	  [SAS driver] console log level change, task abort to level notice.
 
 endmenu #ALSA
 

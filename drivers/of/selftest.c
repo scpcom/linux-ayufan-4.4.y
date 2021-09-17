@@ -153,6 +153,7 @@ static void __init of_selftest_property_string(void)
 	struct device_node *np;
 	int rc;
 
+	pr_info("start\n");
 	np = of_find_node_by_path("/testcase-data/phandle-tests/consumer-a");
 	if (!np) {
 		pr_err("No testcase data in device tree\n");
@@ -384,7 +385,7 @@ static int __init of_selftest(void)
 
 	pr_info("start of selftest - you will see error messages\n");
 	of_selftest_parse_phandle_with_args();
-	of_selftest_property_match_string();
+	of_selftest_property_string();
 #if defined(CONFIG_SYNO_LSP_ARMADA)
 	of_selftest_parse_interrupts();
 	of_selftest_parse_interrupts_extended();

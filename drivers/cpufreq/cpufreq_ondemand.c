@@ -207,20 +207,8 @@ static void od_check_cpu(int cpu, unsigned int load)
 #else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		return;
 #endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
-	}
-
-	/* Check for frequency decrease */
-	/* if we cannot reduce the frequency anymore, break out early */
-	if (policy->cur == policy->min)
-		return;
-
-	/*
-	 * The optimal frequency is the frequency that is the lowest that can
-	 * support the current CPU usage without triggering the up policy. To be
-	 * safe, we focus 10 points under the threshold.
-	 */
-	if (load_freq < od_tuners->adj_up_threshold
-			* policy->cur) {
+	} else {
+		/* Calculate the next frequency proportional to load */
 		unsigned int freq_next;
 		freq_next = load * policy->cpuinfo.max_freq / 100;
 

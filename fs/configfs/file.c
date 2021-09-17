@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- mode: c; c-basic-offset: 8; -*-
  * vim: noexpandtab sw=8 ts=8 sts=0:
  *
@@ -50,7 +53,6 @@ struct configfs_buffer {
 	int			needs_read_fill;
 };
 
-
 /**
  *	fill_read_buffer - allocate and fill buffer from item.
  *	@dentry:	dentry pointer.
@@ -74,7 +76,15 @@ static int fill_read_buffer(struct dentry * dentry, struct configfs_buffer * buf
 	if (!buffer->page)
 		return -ENOMEM;
 
-	count = ops->show_attribute(item,attr,buffer->page);
+#ifdef MY_ABC_HERE
+	if (ops && ops->show_attribute)
+#else
+	if (ops->show_attribute)
+#endif
+		count = ops->show_attribute(item,attr,buffer->page);
+	else
+		count = attr->show(item, buffer->page);
+
 	buffer->needs_read_fill = 0;
 	BUG_ON(count > (ssize_t)SIMPLE_ATTR_SIZE);
 	if (count >= 0)
@@ -123,7 +133,6 @@ out:
 	return retval;
 }
 
-
 /**
  *	fill_write_buffer - copy buffer from userspace.
  *	@buffer:	data buffer for file.
@@ -154,7 +163,6 @@ fill_write_buffer(struct configfs_buffer * buffer, const char __user * buf, size
 	return error ? -EFAULT : count;
 }
 
-
 /**
  *	flush_write_buffer - push buffer to config_item.
  *	@dentry:	dentry to the attribute
@@ -173,9 +181,14 @@ flush_write_buffer(struct dentry * dentry, struct configfs_buffer * buffer, size
 	struct config_item * item = to_item(dentry->d_parent);
 	struct configfs_item_operations * ops = buffer->ops;
 
-	return ops->store_attribute(item,attr,buffer->page,count);
+#ifdef MY_ABC_HERE
+	if (ops && ops->store_attribute)
+#else
+	if (ops->store_attribute)
+#endif
+		return ops->store_attribute(item,attr,buffer->page,count);
+	return attr->store(item, buffer->page, count);
 }
-
 
 /**
  *	configfs_write_file - write an attribute.
@@ -237,10 +250,13 @@ static int check_perm(struct inode * inode, struct file * file)
 	 * and we must have a store method.
 	 */
 	if (file->f_mode & FMODE_WRITE) {
-
-		if (!(inode->i_mode & S_IWUGO) || !ops->store_attribute)
+		if (!(inode->i_mode & S_IWUGO) ||
+#ifdef MY_ABC_HERE
+				(!(ops && ops->store_attribute) && !attr->store))
+#else
+				(!ops->store_attribute && !attr->store))
+#endif
 			goto Eaccess;
-
 	}
 
 	/* File needs read support.
@@ -248,7 +264,12 @@ static int check_perm(struct inode * inode, struct file * file)
 	 * must be a show method for it.
 	 */
 	if (file->f_mode & FMODE_READ) {
-		if (!(inode->i_mode & S_IRUGO) || !ops->show_attribute)
+		if (!(inode->i_mode & S_IRUGO) ||
+#ifdef MY_ABC_HERE
+				(!(ops && ops->show_attribute) && !attr->show))
+#else
+				(!ops->show_attribute && !attr->show))
+#endif
 			goto Eaccess;
 	}
 
@@ -313,7 +334,6 @@ const struct file_operations configfs_file_operations = {
 	.release	= configfs_release,
 };
 
-
 int configfs_add_file(struct dentry * dir, const struct configfs_attribute * attr, int type)
 {
 	struct configfs_dirent * parent_sd = dir->d_fsdata;
@@ -326,7 +346,6 @@ int configfs_add_file(struct dentry * dir, const struct configfs_attribute * att
 
 	return error;
 }
-
 
 /**
  *	configfs_create_file - create an attribute file for an item.
@@ -341,4 +360,3 @@ int configfs_create_file(struct config_item * item, const struct configfs_attrib
 	return configfs_add_file(item->ci_dentry, attr,
 				 CONFIGFS_ITEM_ATTR);
 }
-

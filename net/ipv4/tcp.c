@@ -284,6 +284,12 @@
 #include <linux/pci.h>
 #endif /* CONFIG_SYNO_FS_RECVFILE */
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(CONFIG_ARCH_ALPINE) && defined(CONFIG_NET_DMA)
+#include <mach/al_fabric.h>
+#endif
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 int sysctl_tcp_fin_timeout __read_mostly = TCP_FIN_TIMEOUT;
 
 #if defined(CONFIG_SYNO_LSP_ALPINE)
@@ -1609,6 +1615,16 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	struct sk_buff *skb;
 	u32 urg_hole = 0;
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#ifdef CONFIG_NET_DMA
+#ifdef CONFIG_ARCH_ALPINE
+	int hwcc_enabled = al_fabric_hwcc_enabled();
+#else
+	int hwcc_enabled = 0;
+#endif
+#endif
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 	lock_sock(sk);
 
 	err = -ENOTCONN;
@@ -1652,7 +1668,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		int available = 0;
 
 #if defined(CONFIG_SYNO_LSP_ALPINE)
-		if ((available < target) && hwcc &&
+		if ((available < target) && hwcc_enabled &&
 #if defined(CONFIG_SYNO_ALPINE)
 		    (msg->msg_flags & MSG_KERNSPACE) && (flags & MSG_KERNSPACE) &&
 #endif /* CONFIG_SYNO_ALPINE */
@@ -3577,6 +3593,10 @@ void __init tcp_init(void)
 	sysctl_tcp_rmem[0] = SK_MEM_QUANTUM;
 	sysctl_tcp_rmem[1] = 87380;
 	sysctl_tcp_rmem[2] = max(87380, max_rshare);
+#ifdef CONFIG_SYNO_KVMX64
+	sysctl_tcp_rmem[0] *= 2;
+	sysctl_tcp_rmem[1] *= 2;
+#endif
 
 	pr_info("Hash tables configured (established %u bind %u)\n",
 		tcp_hashinfo.ehash_mask + 1, tcp_hashinfo.bhash_size);

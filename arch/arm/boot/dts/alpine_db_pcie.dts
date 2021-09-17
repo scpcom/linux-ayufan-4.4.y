@@ -19,9 +19,8 @@
 /include/ "alpine.dtsi"
 
 / {
-	version = "2.3";
+	version = "2.5";
 	model = "Annapurna Labs Alpine Dev Board";
-	compatible = "annapurna-labs,alpine";
 
 	hypervisor {
 	};
@@ -580,7 +579,7 @@
 		/* pmu { status = "disabled"; }; */
 		/* arch-timer { compatible = "disabled"; }; */
 		timer0 { status = "disabled"; };
-		timer1 { status = "disabled"; };
+		/* timer1 { status = "disabled"; }; */
 		timer2 { status = "disabled"; };
 		timer3 { status = "disabled"; };
 		wdt1 { status = "disabled"; };
@@ -609,6 +608,8 @@
 		nand-flash {
 			#address-cells = <1>;
 			#size-cells = <1>;
+
+			max-onfi-timing-mode = <1>;
 
 			partition@0 {
 				label = "al_boot";
@@ -650,7 +651,7 @@
 				#address-cells = <1>;
 				#size-cells = <1>;
 				compatible = "spi_flash_jedec_detection";
-				spi-max-frequency = <25000000>; /* 25MHz */
+				spi-max-frequency = <37500000>; /* 37.5MHz */
 				reg = <0>;
 
 				partition@0 {

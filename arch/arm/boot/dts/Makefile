@@ -95,8 +95,13 @@ ifeq ($(CONFIG_SYNO_LSP_ARMADA),y)
 dtb-$(CONFIG_ARCH_MVEBU) += armada-38x-modular.dtb \
 	armada-388-customer0.dtb \
 	armada-385-customer1.dtb \
-	armada-382-customer2.dtb \
-	armada-385-customer3.dtb
+	armada-382-customer2.dtb
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7),y)
+dtb-$(CONFIG_ARCH_MVEBU) += armada-385-customer3.dtb \
+	armada-388-clearfog.dtb
+else
+dtb-$(CONFIG_ARCH_MVEBU) += armada-385-customer3.dtb
+endif
 else
 dtb-$(CONFIG_ARCH_MVEBU) += armada-370-db.dtb \
 	armada-370-mirabox.dtb \
@@ -248,17 +253,17 @@ dtb-$(CONFIG_ARCH_VT8500) += vt8500-bv07.dtb \
 dtb-$(CONFIG_ARCH_ZYNQ) += zynq-zc702.dtb
 
 dtb-$(CONFIG_ARCH_ALPINE) += \
-	alpine_db_m0.dtb \
-	alpine_db.dtb \
-	alpine_db_pcie.dtb \
-	alpine_db_pcie01g0.dtb \
-	alpine_db_xen.dtb \
-	alpine_niagara312a.dtb \
-	alpine_sdnic.dtb \
-	alpine_sdnic_nand.dtb \
-	alpine_sdnic_2ep.dtb \
 	alpine_security_box.dtb \
-	alpine_haifa_interposer.dtb \
+	alpine_k2s.dtb \
+	alpine_sdnic_nand.dtb \
+	alpine_sdnic.dtb \
+	alpine_db_pcie_no_arch_timer.dtb \
+	alpine_db_pcie.dtb \
+	alpine_db_al314.dtb \
+	alpine_db_al212.dtb \
+	alpine_db_no_arch_timer.dtb \
+	alpine_db.dtb \
+	alpine_db_m0.dtb \
 
 targets += dtbs
 targets += $(dtb-y)

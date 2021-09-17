@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -1316,6 +1316,11 @@ void al_serdes_tx_advanced_params_get(struct al_serdes_obj	     	*obj,
 				SERDES_IREG_TX_DRV_3_LEVNP1_SHIFT;
 	tx_params->slew_rate = (reg_val & SERDES_IREG_TX_DRV_3_SLEW_MASK) >>
 				SERDES_IREG_TX_DRV_3_SLEW_SHIFT;
+
+	al_serdes_reg_read(obj, grp, lane, AL_SRDS_REG_TYPE_PMA,
+			SERDES_IREG_FLD_TX_DRV_OVERRIDE_EN_REG_NUM,
+			&reg_val);
+	tx_params->override = ((reg_val & SERDES_IREG_FLD_TX_DRV_OVERRIDE_EN) == 0);
 }
 
 void al_serdes_rx_advanced_params_set(struct al_serdes_obj	      *obj,
@@ -1580,17 +1585,76 @@ static inline void al_serdes_common_cfg_eth(struct al_serdes_group_info *grp_inf
 				(0xcc << SERDES_IREG_FLD_EYE_DIAG_SAMPLE_CNT_LSB_SHIFT));
 }
 
+struct al_serdes_mode_rx_tx_inv_state {
+	al_bool		restore;
+	uint32_t	pipe_rst;
+	uint32_t	ipd_multi[AL_SRDS_NUM_LANES];
+	uint8_t		inv_value[AL_SRDS_NUM_LANES];
+};
+
+static void al_serdes_mode_rx_tx_inv_state_save(
+	struct al_serdes_group_info		*grp_info,
+	struct al_serdes_mode_rx_tx_inv_state	*state)
+{
+	if (al_reg_read32(&grp_info->regs_base->gen.irst) & SERDES_GEN_IRST_POR_B_A) {
+		int i;
+
+		state->restore = AL_TRUE;
+		state->pipe_rst = al_reg_read32(&grp_info->regs_base->gen.irst);
+
+		for (i = 0; i < AL_SRDS_NUM_LANES; i++) {
+			state->inv_value[i] = al_serdes_grp_reg_read(
+				grp_info,
+				i,
+				AL_SRDS_REG_TYPE_PMA,
+				SERDES_IREG_FLD_POLARITY_RX_REG_NUM);
+			state->ipd_multi[i] =
+				al_reg_read32(&grp_info->regs_base->lane[i].ipd_multi);
+		}
+	} else {
+		state->restore = AL_FALSE;
+	}
+}
+
+static void al_serdes_mode_rx_tx_inv_state_restore(
+	struct al_serdes_group_info		*grp_info,
+	struct al_serdes_mode_rx_tx_inv_state	*state)
+{
+	if (state->restore) {
+		int i;
+
+		for (i = 0; i < AL_SRDS_NUM_LANES; i++) {
+			al_serdes_grp_reg_write(
+				grp_info,
+				i,
+				AL_SRDS_REG_TYPE_PMA,
+				SERDES_IREG_FLD_POLARITY_RX_REG_NUM,
+				state->inv_value[i]);
+			al_reg_write32(
+				&grp_info->regs_base->lane[i].ipd_multi, state->ipd_multi[i]);
+			al_reg_write32_masked(
+				&grp_info->regs_base->gen.irst,
+				(SERDES_GEN_IRST_PIPE_RST_L0_B_A_SEL >> i) |
+				(SERDES_GEN_IRST_PIPE_RST_L0_B_A >> i),
+				state->pipe_rst);
+		}
+	}
+}
+
 void al_serdes_mode_set_sgmii(
 	struct al_serdes_obj	*obj,
 	enum al_serdes_group	grp)
 {
 	struct al_serdes_group_info *grp_info;
+	struct al_serdes_mode_rx_tx_inv_state rx_tx_inv_state;
 
 	al_assert(obj);
 	al_assert(((int)grp) >= AL_SRDS_GRP_A);
 	al_assert(((int)grp) <= AL_SRDS_GRP_D);
 
 	grp_info = &obj->grp_info[grp];
+
+	al_serdes_mode_rx_tx_inv_state_save(grp_info, &rx_tx_inv_state);
 
 	al_reg_write32(&grp_info->regs_base->gen.irst, 0x000000);
 	al_reg_write32(&grp_info->regs_base->lane[0].ictl_multi, 0x10110010);
@@ -1801,6 +1865,8 @@ void al_serdes_mode_set_sgmii(
 
 	al_serdes_common_cfg_eth(grp_info);
 
+	al_serdes_mode_rx_tx_inv_state_restore(grp_info, &rx_tx_inv_state);
+
 	al_reg_write32(&grp_info->regs_base->gen.irst, 0x0011F0);
 	al_serdes_ns_delay(500);
 }
@@ -1810,12 +1876,15 @@ void al_serdes_mode_set_kr(
 	enum al_serdes_group	grp)
 {
 	struct al_serdes_group_info *grp_info;
+	struct al_serdes_mode_rx_tx_inv_state rx_tx_inv_state;
 
 	al_assert(obj);
 	al_assert(((int)grp) >= AL_SRDS_GRP_A);
 	al_assert(((int)grp) <= AL_SRDS_GRP_D);
 
 	grp_info = &obj->grp_info[grp];
+
+	al_serdes_mode_rx_tx_inv_state_save(grp_info, &rx_tx_inv_state);
 
 	al_reg_write32(&grp_info->regs_base->gen.irst, 0x000000);
 	al_reg_write32(&grp_info->regs_base->lane[0].ictl_multi, 0x30330030);
@@ -2026,6 +2095,8 @@ void al_serdes_mode_set_kr(
 
 	al_serdes_common_cfg_eth(grp_info);
 
+	al_serdes_mode_rx_tx_inv_state_restore(grp_info, &rx_tx_inv_state);
+
 	al_reg_write32(&grp_info->regs_base->gen.irst, 0x0011F0);
 	al_serdes_ns_delay(500);
 }
@@ -2090,6 +2161,11 @@ void al_serdes_rx_advanced_params_get(struct al_serdes_obj           *obj,
 	rx_params->high_freq_agc_boost = (temp_val &
 			SERDES_IREG_RX_CALEQ_5_HIFREQAGCCAP_MASK) >>
 			SERDES_IREG_RX_CALEQ_5_HIFREQAGCCAP_SHIFT;
+
+	al_serdes_reg_read(obj, grp, lane, AL_SRDS_REG_TYPE_PMA,
+			SERDES_IREG_FLD_RX_DRV_OVERRIDE_EN_REG_NUM,
+			&temp_val);
+	rx_params->override = ((temp_val & SERDES_IREG_FLD_RX_DRV_OVERRIDE_EN) == 0);
 }
 
 #if (	SERDES_IREG_FLD_RXCALEYEDIAGFSMIN_LOCWREN_REG_NUM != \

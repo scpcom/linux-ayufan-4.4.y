@@ -132,6 +132,26 @@ config SYNO_ALPINE_CHANGE_RJ45_LED_BEHAVIOR
 	help
 	  Adjust LED behavior to match HW spec.
 
+config SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
+	bool "Workaround for PHY status error and cannot be woke on lan"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  When DS1515 power off, the power noise writes random value to phy,
+	  making its status invalid, and breaks the WOL function.
+	  To reduce the chance this issue occurs, we switch the PHY page to a
+	  read-only page before power off, so that the noise must switch to
+	  writable page first to make some trouble.
+
+config SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+	bool "Workaround for RTL8211DN occasionally has error packets or cannot TX"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  Alpine models with RTL8211DN phy fail the reboot stress that has error
+	  packets or unable to TX. To workaround, we detect this situation and
+	  reset phy.
+
 config SYNO_MONACO_NETWORK_FIXED
 	bool "Fix network when link speed on 10Mb/s"
 	default y
@@ -139,6 +159,13 @@ config SYNO_MONACO_NETWORK_FIXED
 	help
 	  It is a workaround for link speed 10Mb/s.
 	  After applying this patch, the tx clk is 2.5MHz.
+
+config SYNO_MONACO_JUMBO_FRAME
+	bool "Fix MTU 9000 and 1500 hybrid test kernel panic"
+	default y
+	depends on SYNO_MONACO
+	help
+	  <DSM> #86057
 
 config SYNO_PHY_INIT
 	bool "syno initialization of phy device"
@@ -158,7 +185,7 @@ config SYNO_INCREASE_SKB_SIZE
        default y
        depends on SYNO_MONACO
        help
-       <DSM> 86053
+       <DSM> 86052
        We find that STM mac receive packets which size is large than mtu 1500.
        It will make skb_put trigger skb_over_panic. This config increase skb size to 2K.
 
@@ -170,5 +197,12 @@ config SYNO_INCREASE_TSQ_SIZE
 	   <DSM> 83574
 	   We found that the size of tcp small queues would affect
 	   the performance of RX's throughput.
+
+config SYNO_IPV6_EXPORT_IN6ADDR_ANY
+	bool "Export in6addr_any value for modules"
+	default y
+	help
+	  <Snapshot & Replication> #817
+	  export symbol in6addr_any for rodsp ipv6 support
 
 endmenu #Network

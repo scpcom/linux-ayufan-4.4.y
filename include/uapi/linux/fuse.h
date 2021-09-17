@@ -155,6 +155,17 @@ struct fuse_attr {
 	uint32_t	padding;
 };
 
+#ifdef CONFIG_SYNO_FUSE_STAT
+struct fuse_synostat {
+	uint64_t	create_time_sec;
+	uint32_t	create_time_nsec;
+	uint32_t	archive_version;
+	uint32_t	archive_bit;
+	uint32_t	name_len;
+	char		name[0];
+};
+#endif /* CONFIG_SYNO_FUSE_STAT */
+
 struct fuse_kstatfs {
 	uint64_t	blocks;
 	uint64_t	bfree;
@@ -544,7 +555,11 @@ struct fuse_lk_out {
 
 struct fuse_access_in {
 	uint32_t	mask;
+#ifdef CONFIG_SYNO_FUSE_WINACL
+	uint32_t	syno_acl_access;
+#else
 	uint32_t	padding;
+#endif /* CONFIG_SYNO_FUSE_WINACL */
 };
 
 struct fuse_init_in {

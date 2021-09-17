@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -373,11 +373,13 @@ int al_eth_rx_equal_run(struct al_eth_lm_context	*lm_context)
 			return test_score;
 		}
 
-		if (test_score > best_score)
+		if (test_score > best_score) {
+			best_score = test_score;
 			al_serdes_rx_advanced_params_get(lm_context->serdes_obj,
 							 lm_context->grp,
 							 lm_context->lane,
 							 &rx_params);
+		}
 	}
 
 	rx_params.precal_code_sel = 0;
@@ -389,7 +391,7 @@ int al_eth_rx_equal_run(struct al_eth_lm_context	*lm_context)
 
 	lm_debug("-------------------- best dcgain %d ------------------------------------\n", best_dcgain);
 	lm_debug("%6d|%8x|%8x|%9x|%6x|%6x|%6x|%6x|%10x|%10x|\n",
-		test_score, rx_params.dcgain, rx_params.dfe_3db_freq,
+		best_score, rx_params.dcgain, rx_params.dfe_3db_freq,
 		rx_params.dfe_gain, rx_params.dfe_first_tap_ctrl,
 		rx_params.dfe_secound_tap_ctrl, rx_params.dfe_third_tap_ctrl,
 		rx_params.dfe_fourth_tap_ctrl, rx_params.low_freq_agc_gain,

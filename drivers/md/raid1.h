@@ -133,6 +133,12 @@ struct r1bio {
 	 * if the IO is in WRITE direction, then multiple bios are used.
 	 * We choose the number when they are allocated.
 	 */
+#ifdef CONFIG_SYNO_MD_RAID1_BUGON_MAGIC_WORKAROUND
+	/*
+	 * For issue #88948, add a dummy structure to avoid it
+	 */
+	struct bio      dummy;
+#endif
 	struct bio		*bios[0];
 	/* DO NOT PUT ANY NEW FIELDS HERE - bios array is contiguously alloced*/
 };

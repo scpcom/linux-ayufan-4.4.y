@@ -103,10 +103,17 @@ struct usb_phy {
 				int suspend);
 
 	/* notify phy connect status change */
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+	int	(*notify_connect)(struct usb_phy *x,
+			struct usb_device *udev);
+	int	(*notify_disconnect)(struct usb_phy *x,
+			struct usb_device *udev);
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	int	(*notify_connect)(struct usb_phy *x,
 			enum usb_device_speed speed);
 	int	(*notify_disconnect)(struct usb_phy *x,
 			enum usb_device_speed speed);
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 };
 
 /**
@@ -290,12 +297,22 @@ usb_phy_set_suspend(struct usb_phy *x, int suspend)
 		return 0;
 }
 
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+static inline int
+usb_phy_notify_connect(struct usb_phy *x, struct usb_device *udev)
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 static inline int
 usb_phy_notify_connect(struct usb_phy *x, enum usb_device_speed speed)
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 {
 #if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+	if (x && x->notify_connect && udev)
+		return x->notify_connect(x, udev);
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	if (x && x->notify_connect)
 		return x->notify_connect(x, speed);
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 #else /* CONFIG_SYNO_LSP_MONACO */
 	if (x->notify_connect)
 		return x->notify_connect(x, speed);
@@ -304,12 +321,22 @@ usb_phy_notify_connect(struct usb_phy *x, enum usb_device_speed speed)
 		return 0;
 }
 
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+static inline int
+usb_phy_notify_disconnect(struct usb_phy *x, struct usb_device *udev)
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 static inline int
 usb_phy_notify_disconnect(struct usb_phy *x, enum usb_device_speed speed)
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 {
 #if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+	if (x && x->notify_disconnect && udev)
+		return x->notify_disconnect(x, udev);
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	if (x && x->notify_disconnect)
 		return x->notify_disconnect(x, speed);
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 #else /* CONFIG_SYNO_LSP_MONACO */
 	if (x->notify_disconnect)
 		return x->notify_disconnect(x, speed);

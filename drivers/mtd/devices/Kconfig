@@ -291,5 +291,5 @@ config MTD_DOCPROBE_55AA
 	  Millennium will it be absent.  Enable this option if you are using
 	  LinuxBIOS or if you need to recover a DiskOnChip Millennium on which
 	  you have managed to wipe the first block.
-
+	  
 endmenu

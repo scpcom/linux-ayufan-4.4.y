@@ -19,6 +19,12 @@ config AT803X_PHY
 	---help---
 	  Currently supports the AT8030 and AT8035 model
 
+config AQR105_PHY
+	bool "Drivers for Aqantia aqr105 phy"
+	depends on SYNO_LSP_ALPINE
+	---help---
+	  Currently supports the AQR105 model
+
 config AMD_PHY
 	tristate "Drivers for the AMD PHYs"
 	---help---

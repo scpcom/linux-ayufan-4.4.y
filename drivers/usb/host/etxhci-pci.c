@@ -31,7 +31,11 @@
 #define PCI_DEVICE_ID_ETRON_EJ168	0x7023
 #define PCI_DEVICE_ID_ETRON_EJ188	0x7052
 
-static const char hcd_name[] = "etxhci_hcd-150407";
+#ifdef CONFIG_SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD
+static const char hcd_name[] = "etxhci_hcd_150526_syno";
+#else
+static const char hcd_name[] = "etxhci_hcd-150603d1";
+#endif /* CONFIG_SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD */
 
 /* called after powerup, by probe or system-pm "wakeup" */
 static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
@@ -63,7 +67,14 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 		xhci_init_ejxxx(xhci);
 
 		if (pdev->device == PCI_DEVICE_ID_ETRON_EJ168)
+#ifdef CONFIG_SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD
+		{
+#endif  /* CONFIG_SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD */
 			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ168;
+#ifdef CONFIG_SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD
+			xhci->quirks |= XHCI_BULK_XFER_QUIRK;
+		}
+#endif /* CONFIG_SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD */
 		else if (pdev->device == PCI_DEVICE_ID_ETRON_EJ188) {
 			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ188;
 			xhci->quirks |= XHCI_BULK_XFER_QUIRK;
@@ -124,6 +135,10 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 		return -ENODEV;
 
 	driver = (struct hc_driver *)id->driver_data;
+
+	/* Prevent runtime suspending between USB-2 and USB-3 initialization */
+	pm_runtime_get_noresume(&dev->dev);
+
 	/* Register the USB 2.0 roothub.
 	 * FIXME: USB core must know to register the USB 2.0 roothub first.
 	 * This is sort of silly, because we could just set the HCD driver flags
@@ -133,7 +148,7 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	retval = usb_hcd_pci_probe(dev, id);
 
 	if (retval)
-		return retval;
+		goto put_runtime_pm;
 
 	/* USB 2.0 roothub is stored in the PCI device now. */
 	hcd = dev_get_drvdata(&dev->dev);
@@ -154,6 +169,7 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 			IRQF_SHARED);
 	if (retval)
 		goto put_usb3_hcd;
+	/* Roothub already marked as USB 3.0 speed */
 
 	xhci->bulk_xfer_wq = create_singlethread_workqueue(pci_name(dev));
 	if (!xhci->bulk_xfer_wq) {
@@ -165,13 +181,17 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	INIT_LIST_HEAD(&xhci->bulk_xfer_list);
 	xhci->bulk_xfer_count = 0;
 
-	/* Roothub already marked as USB 3.0 speed */
+	/* USB-2 and USB-3 roothubs initialized, allow runtime pm suspend */
+	pm_runtime_put_noidle(&dev->dev);
+
 	return 0;
 
 put_usb3_hcd:
 	usb_put_hcd(xhci->shared_hcd);
 dealloc_usb2_hcd:
 	usb_hcd_pci_remove(dev);
+put_runtime_pm:
+	pm_runtime_put_noidle(&dev->dev);
 	return retval;
 }
 

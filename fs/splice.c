@@ -1638,6 +1638,9 @@ done:
 #endif /* CONFIG_SYNO_LSP_ALPINE */
 
 #if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+// do nothing
+#else
 ssize_t generic_splice_from_socket(struct file *file, struct socket *sock,
 				   loff_t __user *ppos, size_t count_req)
 {
@@ -1795,6 +1798,7 @@ cleanup:
 err:
 	return written ? written : ret;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 #endif /* CONFIG_SYNO_LSP_ARMADA */
 
 /*

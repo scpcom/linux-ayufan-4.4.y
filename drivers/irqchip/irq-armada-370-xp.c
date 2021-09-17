@@ -310,7 +310,11 @@ static int armada_xp_set_affinity(struct irq_data *d,
 {
 	unsigned long reg;
 	unsigned long new_mask = 0;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	unsigned long present_mask = 0;
+#else
 	unsigned long online_mask = 0;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 	unsigned long count = 0;
 	irq_hw_number_t hwirq = irqd_to_hwirq(d);
 	int cpu;
@@ -335,14 +339,22 @@ static int armada_xp_set_affinity(struct irq_data *d,
 	if (count > 1)
 #endif /* CONFIG_SYNO_LSP_ARMADA */
 		return -EINVAL;
-
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	for_each_cpu(cpu, cpu_present_mask)
+		present_mask |= 1 << cpu_logical_map(cpu);
+#else
 	for_each_cpu(cpu, cpu_online_mask)
 		online_mask |= 1 << cpu_logical_map(cpu);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 
 	raw_spin_lock(&irq_controller_lock);
 
 	reg = readl(main_int_base + ARMADA_370_XP_INT_SOURCE_CTL(hwirq));
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+	reg = (reg & (~present_mask)) | new_mask;
+#else
 	reg = (reg & (~online_mask)) | new_mask;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 	writel(reg, main_int_base + ARMADA_370_XP_INT_SOURCE_CTL(hwirq));
 
 	raw_spin_unlock(&irq_controller_lock);

@@ -1415,8 +1415,8 @@ static int btrfs_wq_run_delayed_node(struct btrfs_delayed_root *delayed_root,
 		return -ENOMEM;
 
 	async_work->delayed_root = delayed_root;
-	btrfs_init_work(&async_work->work, btrfs_async_run_delayed_root,
-			NULL, NULL);
+	btrfs_init_work(&async_work->work, btrfs_delayed_meta_helper,
+			btrfs_async_run_delayed_root, NULL, NULL);
 	async_work->nr = nr;
 
 	btrfs_queue_work(root->fs_info->delayed_workers, &async_work->work);
@@ -1886,14 +1886,6 @@ release_node:
 int btrfs_delayed_delete_inode_ref(struct inode *inode)
 {
 	struct btrfs_delayed_node *delayed_node;
-
-	/*
-	 * we don't do delayed inode updates during log recovery because it
-	 * leads to enospc problems.  This means we also can't do
-	 * delayed inode refs
-	 */
-	if (BTRFS_I(inode)->root->fs_info->log_root_recovering)
-		return -EAGAIN;
 
 	delayed_node = btrfs_get_or_create_delayed_node(inode);
 	if (IS_ERR(delayed_node))

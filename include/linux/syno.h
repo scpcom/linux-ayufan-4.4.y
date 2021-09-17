@@ -32,6 +32,10 @@
 #define SYNO_YOTAWIMAX_NET_NOLINK_EVENT (0xffffffff)
 #endif
 
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+#define SYNO_NET_PHY_NOLINK_SPEED_INIT
+#endif
+
 #ifdef CONFIG_MACH_SYNOLOGY_6281
 #define SYNO_6281_MTU_WA
 #endif

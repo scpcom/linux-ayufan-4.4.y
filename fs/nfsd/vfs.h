@@ -5,6 +5,9 @@
 #ifndef LINUX_NFSD_VFS_H
 #define LINUX_NFSD_VFS_H
 
+#ifdef CONFIG_SYNO_FS_WINACL
+#include <linux/sched.h>
+#endif
 #include "nfsfh.h"
 #include "nfsd.h"
 
@@ -135,7 +138,16 @@ static inline __be32 fh_getattr(struct svc_fh *fh, struct kstat *stat)
 {
 	struct path p = {.mnt = fh->fh_export->ex_path.mnt,
 			 .dentry = fh->fh_dentry};
+#ifdef CONFIG_SYNO_FS_WINACL
+	int err = 0;
+
+	err = vfs_getattr(&p, stat);
+	if (!err && IS_SYNOACL(fh->fh_dentry) && uid_eq(current_fsuid(), GLOBAL_ROOT_UID))
+		stat->mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+	return nfserrno(err);
+#else
 	return nfserrno(vfs_getattr(&p, stat));
+#endif
 }
 
 #endif /* LINUX_NFSD_VFS_H */

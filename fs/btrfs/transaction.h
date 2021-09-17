@@ -55,7 +55,6 @@ struct btrfs_transaction {
 	wait_queue_head_t writer_wait;
 	wait_queue_head_t commit_wait;
 	struct list_head pending_snapshots;
-	struct list_head ordered_operations;
 	struct list_head pending_chunks;
 	struct list_head switch_commits;
 	struct btrfs_delayed_ref_root delayed_refs;
@@ -88,6 +87,7 @@ struct btrfs_transaction {
 struct btrfs_trans_handle {
 	u64 transid;
 	u64 bytes_reserved;
+	u64 chunk_bytes_reserved;
 	u64 qgroup_reserved;
 	unsigned long use_count;
 	unsigned long blocks_reserved;
@@ -111,6 +111,10 @@ struct btrfs_trans_handle {
 	struct seq_list delayed_ref_elem;
 	struct list_head qgroup_ref_list;
 	struct list_head new_bgs;
+#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+	struct btrfs_pending_snapshot *pending_snap;
+	bool pending_snap_rm;
+#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
 };
 
 struct btrfs_pending_snapshot {
@@ -140,6 +144,10 @@ int btrfs_end_transaction(struct btrfs_trans_handle *trans,
 			  struct btrfs_root *root);
 struct btrfs_trans_handle *btrfs_start_transaction(struct btrfs_root *root,
 						   int num_items);
+struct btrfs_trans_handle *btrfs_start_transaction_fallback_global_rsv(
+					struct btrfs_root *root,
+					unsigned int num_items,
+					int min_factor);
 struct btrfs_trans_handle *btrfs_start_transaction_lflush(
 					struct btrfs_root *root, int num_items);
 struct btrfs_trans_handle *btrfs_join_transaction(struct btrfs_root *root);

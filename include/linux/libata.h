@@ -115,6 +115,10 @@ typedef enum {
 } SYNO_PM_RETRY_TYPE;
 #endif /* CONFIG_SYNO_SATA_PM_LINK_RETRY */
 
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#define SYNO_PM_VIRTUAL_SCSI_CHANNEL 15
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+
 /* NEW: debug levels */
 #define HAVE_LIBATA_MSG 1
 
@@ -527,6 +531,13 @@ enum {
 #ifdef CONFIG_SYNO_MV_9235_PORTING
 	SYNO_STATUS_IS_MV9235		= 1 << 3,
 #endif /* CONFIG_SYNO_MV_9235_PORTING */
+	/* struct ap_port uiStsFlags*/
+#ifdef CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD
+	SYNO_STATUS_IS_SIL3x26		= 1 << 0,
+#endif /* CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD */
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+	SYNO_STATUS_DEEP_SLEEP_FAILED	= 1 << 1,  /* PMP deep sleep failed last time */
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 };
 
 enum ata_xfer_mask {
@@ -862,6 +873,10 @@ struct ata_port {
 	unsigned long		flags;	/* ATA_FLAG_xxx */
 	/* Flags that change dynamically, protected by ap->lock */
 	unsigned int		pflags; /* ATA_PFLAG_xxx */
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+	/* Flags used for DSM #88070 and #90197 */
+	unsigned int		uiStsFlags; /* SYNO_STATUS_xxx */
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 	unsigned int		print_id; /* user visible unique port ID */
 	unsigned int		port_no; /* 0 based port no. inside the host */
 
@@ -1376,7 +1391,11 @@ extern unsigned int syno_pm_gpio_output_enable(struct ata_link *link);
 extern int syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo);
 extern unsigned int syno_sata_pmp_is_rp(struct ata_port *ap);
 extern struct ata_port *SynoEunitFindMaster(struct ata_port *ap);
+extern void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag);
 int syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn);
+
+extern u8 syno_pm_is_synology_3xxx(const struct ata_port *ap);
+extern u8 syno_pm_is_synology_9705(const struct ata_port *ap);
 #endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 
 #ifdef CONFIG_SYNO_FIXED_DISK_NAME

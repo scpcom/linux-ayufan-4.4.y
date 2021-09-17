@@ -52,7 +52,6 @@ struct SYNOSTAT_EXTRA {
 	struct timespec create_time;
 	unsigned int archive_version;
 	unsigned int archive_bit;
-	unsigned int last_component;
 };
 struct SYNOSTAT {
 	struct stat st;
@@ -67,7 +66,7 @@ struct SYNOSTAT {
 #define SYNOST_ARCHIVE_VER  0x00000004  /* Archive Version (aka Backup Version) */
 #define SYNOST_CREATE_TIME  0x00000008  /* Create Time */
 
-#define SYNOST_ALL          SYNOST_STAT|SYNOST_ARBIT|SYNOST_BKPVER|SYNOST_CREATIME
+#define SYNOST_ALL          SYNOST_STAT|SYNOST_ARCHIVE_BIT|SYNOST_ARCHIVE_VER|SYNOST_CREATE_TIME
 #define SYNOST_IS_CASELESS      0x10000000      /* Is Caseless */
 
 #endif /* __KERNEL__ */

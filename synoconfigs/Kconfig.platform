@@ -29,7 +29,7 @@ config SYNO_AVOTON
 	bool "Intel-Avoton"
 	depends on X86_64
 	help
-	
+
 config SYNO_BRASWELL
 	bool "Intel-Braswell"
 	depends on X86_64
@@ -60,6 +60,12 @@ config SYNO_LSP_ARMADA
 config SYNO_LSP_ARMADA_2015_T1_1p4
 	bool "Apply Marvell LSP 2015_T1.1p4"
 	depends on SYNO_LSP_ARMADA
+	default y
+	help
+
+config SYNO_LSP_ARMADA_2015_T1_1p7
+	bool "Apply Marvell LSP 2015_T1.1p7"
+	depends on SYNO_LSP_ARMADA && SYNO_LSP_ARMADA_2015_T1_1p4
 	default y
 	help
 

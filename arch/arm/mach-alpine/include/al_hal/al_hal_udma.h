@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -112,7 +112,14 @@ union al_udma_desc {
 #define AL_M2S_DESC_LEN_ADJ_SHIFT	20
 #define AL_M2S_DESC_LEN_ADJ_MASK	(0x7 << AL_M2S_DESC_LEN_ADJ_SHIFT)
 #define AL_M2S_DESC_LEN_SHIFT		0
-#define AL_M2S_DESC_LEN_MASK		(0xffff << AL_M2S_DESC_LEN_SHIFT)
+#define AL_M2S_DESC_LEN_MASK		(0xfffff << AL_M2S_DESC_LEN_SHIFT)
+
+#define AL_S2M_DESC_NO_SNOOP_H		AL_BIT(29)
+#define AL_S2M_DESC_INT_EN		AL_BIT(28)	/** enable interrupt */
+#define AL_S2M_DESC_RING_ID_SHIFT	24
+#define AL_S2M_DESC_RING_ID_MASK 	(0x3 << AL_S2M_DESC_RING_ID_SHIFT)
+#define AL_S2M_DESC_LEN_SHIFT		0
+#define AL_S2M_DESC_LEN_MASK		(0xffff << AL_S2M_DESC_LEN_SHIFT)
 
 /* TX/RX descriptor VMID field (in the buffer address 64 bit field) */
 #define AL_UDMA_DESC_VMID_SHIFT		48
@@ -134,7 +141,8 @@ union al_udma_cdesc {
 #define AL_UDMA_CDESC_ERROR		AL_BIT(31)
 #define AL_UDMA_CDESC_LAST		AL_BIT(27)
 #define AL_UDMA_CDESC_FIRST		AL_BIT(26)
-
+/* word 2 */
+#define AL_UDMA_CDESC_BUF2_USED		AL_BIT(31)
 /** Basic Buffer structure */
 struct al_buf {
 	al_phys_addr_t addr; /**< Buffer physical address */
@@ -200,7 +208,7 @@ struct al_udma_params {
 	union udma_regs __iomem *udma_reg; /**< pointer to the UDMA registers */
 	enum al_udma_type type;	/**< Tx or Rx */
 	uint8_t num_of_queues; /**< number of queues supported by the UDMA */
-	char *name; /**< the upper layer must keep the string area */
+	const char *name; /**< the upper layer must keep the string area */
 };
 
 /* Fordward decleration */
@@ -272,7 +280,7 @@ struct __cache_aligned al_udma_q {
 
 /* UDMA */
 struct al_udma {
-	char *name;
+	const char *name;
 	enum al_udma_type type;	/* Tx or Rx */
 	enum al_udma_state state;
 	uint8_t num_of_queues; /* number of queues supported by the UDMA */
@@ -406,14 +414,17 @@ static INLINE al_bool al_udma_is_empty(struct al_udma_q *udma_q)
 static INLINE union al_udma_desc *al_udma_desc_get(struct al_udma_q *udma_q)
 {
 	union al_udma_desc *desc;
+	uint16_t next_desc_idx;
 
 	al_assert(udma_q);
 
-	desc = udma_q->desc_base_ptr + udma_q->next_desc_idx;
+	next_desc_idx = udma_q->next_desc_idx;
+	desc = udma_q->desc_base_ptr + next_desc_idx;
 
-	udma_q->next_desc_idx++;
+	next_desc_idx++;
+
 	/* if reached end of queue, wrap around */
-	udma_q->next_desc_idx &= udma_q->size_mask;
+	udma_q->next_desc_idx = next_desc_idx & udma_q->size_mask;
 
 	return desc;
 }
@@ -454,7 +465,7 @@ static INLINE uint32_t al_udma_ring_id_get(struct al_udma_q *udma_q)
 static INLINE int al_udma_desc_action_add(struct al_udma_q *udma_q,
 					  uint32_t num)
 {
-	u32 *addr;
+	uint32_t *addr;
 
 	al_assert(udma_q);
 	al_assert((num > 0) && (num <= udma_q->size));
@@ -484,22 +495,22 @@ static INLINE int al_udma_desc_action_add(struct al_udma_q *udma_q,
  * @param offset offset desciptors
  *
  */
-static INLINE union al_udma_cdesc *al_cdesc_next(
+static INLINE volatile union al_udma_cdesc *al_cdesc_next(
 	struct al_udma_q		*udma_q,
 	volatile union al_udma_cdesc	*cdesc,
 	uint32_t			offset)
 {
-	uint8_t *tmp = (uint8_t *) cdesc + offset * udma_q->cdesc_size;
+	volatile uint8_t *tmp = (volatile uint8_t *) cdesc + offset * udma_q->cdesc_size;
 	al_assert(udma_q);
 	al_assert(cdesc);
 
 	/* if wrap around */
-	if (unlikely(((uint8_t *) tmp > udma_q->end_cdesc_ptr)))
+	if (unlikely((tmp > udma_q->end_cdesc_ptr)))
 		return (union al_udma_cdesc *)
 			(udma_q->cdesc_base_ptr +
 			(tmp - udma_q->end_cdesc_ptr - udma_q->cdesc_size));
 
-	return (union al_udma_cdesc *) tmp;
+	return (volatile union al_udma_cdesc *) tmp;
 }
 
 /**
@@ -533,17 +544,17 @@ static INLINE al_bool al_udma_new_cdesc(struct al_udma_q *udma_q,
  * @return pointer to the completion descriptor that follows the one pointed by
  * cdesc
  */
-static INLINE union al_udma_cdesc *al_cdesc_next_update(
+static INLINE volatile union al_udma_cdesc *al_cdesc_next_update(
 	struct al_udma_q		*udma_q,
 	volatile union al_udma_cdesc	*cdesc)
 {
 	/* if last desc, wrap around */
-	if (unlikely(((uint8_t *) cdesc == udma_q->end_cdesc_ptr))) {
+	if (unlikely(((volatile uint8_t *) cdesc == udma_q->end_cdesc_ptr))) {
 		udma_q->comp_ring_id =
 		    (udma_q->comp_ring_id + 1) & DMA_RING_ID_MASK;
 		return (union al_udma_cdesc *) udma_q->cdesc_base_ptr;
 	}
-	return (union al_udma_cdesc *) ((uint8_t *) cdesc + udma_q->cdesc_size);
+	return (volatile union al_udma_cdesc *) ((volatile uint8_t *) cdesc + udma_q->cdesc_size);
 }
 
 /**
@@ -571,7 +582,7 @@ uint32_t al_udma_cdesc_packet_get(
 
 /** get completion descriptor pointer from its index */
 #define al_udma_cdesc_idx_to_ptr(udma_q, idx)				\
-	((volatile union al_udma_cdesc *) ((udma_q)->cdesc_base_ptr +		\
+	((volatile union al_udma_cdesc *) ((udma_q)->cdesc_base_ptr +	\
 				(idx) * (udma_q)->cdesc_size))
 
 /**
@@ -580,6 +591,7 @@ uint32_t al_udma_cdesc_packet_get(
  * @param udma_q udma queue handle
  * @param cdesc pointer that set by this function to the first descriptor
  * note: desc is valid only when return value is not zero
+ * note: pass NULL if not interested
  * @return number of descriptors. 0 means no completed descriptors were found.
  * note: the descriptors that belong to the completed packet will still be
  * considered as used, that means the upper layer is safe to access those

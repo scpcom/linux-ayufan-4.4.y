@@ -1317,6 +1317,7 @@ static int reiserfs_remount(struct super_block *s, int *mount_flags, char *arg)
 	int i;
 #endif
 
+	sync_filesystem(s);
 	reiserfs_write_lock(s);
 
 #ifdef CONFIG_QUOTA
@@ -2003,7 +2004,6 @@ static int reiserfs_fill_super(struct super_block *s, void *data, int silent)
 			}
 		} else
 			set_sb_mnt_count(rs, sb_mnt_count(rs) + 1);
-
 
 		journal_mark_dirty(&th, s, SB_BUFFER_WITH_SB(s));
 		errval = journal_end(&th, s, 1);

@@ -22,7 +22,9 @@
 #define	EXT3_XATTR_INDEX_LUSTRE			5
 #define EXT3_XATTR_INDEX_SECURITY	        6
 #ifdef CONFIG_SYNO_EXT3_XATTR
-#define EXT3_XATTR_INDEX_SYNO	7
+/* Wrong syno ext3 xattr index while initial porting from linux-3.x */
+#define EXT3_XATTR_INDEX_SYNO_BAD	7
+#define EXT3_XATTR_INDEX_SYNO	8
 #endif
 
 struct ext3_xattr_header {

@@ -137,7 +137,6 @@ static const match_table_t tokens = {
 	{Opt_err, NULL}
 };
 
-
 STATIC unsigned long
 suffix_kstrtoint(char *s, unsigned int base, int *res)
 {
@@ -1218,6 +1217,7 @@ xfs_fs_remount(
 	char			*p;
 	int			error;
 
+	sync_filesystem(sb);
 	while ((p = strsep(&options, ",")) != NULL) {
 		int token;
 

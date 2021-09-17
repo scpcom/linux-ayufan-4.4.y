@@ -1,11 +1,30 @@
+/*
+* Copyright (C) 2015 Annapurna Labs Ltd.
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; version 2 of the License.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
 #include "linux/export.h"
 #include "al_hal_udma.h"
 #include "al_hal_udma_config.h"
 #include "al_hal_iofic.h"
 #include "al_hal_udma_iofic.h"
 #include "al_hal_udma_debug.h"
+#include "al_hal_udma_fast.h"
 #include "al_hal_m2m_udma.h"
 #include "al_hal_serdes.h"
+#include "al_hal_ssm.h"
 
 EXPORT_SYMBOL(al_iofic_moder_res_config);
 EXPORT_SYMBOL(al_udma_q_handle_get);
@@ -41,3 +60,10 @@ EXPORT_SYMBOL(al_serdes_tx_deemph_dec);
 EXPORT_SYMBOL(al_serdes_handle_init);
 EXPORT_SYMBOL(al_serdes_tx_deemph_preset);
 EXPORT_SYMBOL(al_serdes_pma_hard_reset_lane);
+EXPORT_SYMBOL(al_ssm_dma_init);
+EXPORT_SYMBOL(al_ssm_dma_q_init);
+EXPORT_SYMBOL(al_ssm_dma_state_set);
+EXPORT_SYMBOL(al_ssm_dma_handle_get);
+EXPORT_SYMBOL(al_ssm_dma_rx_queue_handle_get);
+EXPORT_SYMBOL(al_ssm_dma_tx_queue_handle_get);
+EXPORT_SYMBOL(al_udma_fast_memcpy_q_prepare);

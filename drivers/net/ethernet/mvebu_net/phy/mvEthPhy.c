@@ -159,6 +159,7 @@ MV_STATUS mvEthPhyRegRead(MV_U32 phyAddr, MV_U32 regOffs, MV_U16 *data)
 
 	return MV_OK;
 }
+EXPORT_SYMBOL(mvEthPhyRegRead);
 
 MV_STATUS mvEthPhyRegPrint(MV_U32 phyAddr, MV_U32 regOffs)
 {
@@ -247,6 +248,7 @@ MV_STATUS mvEthPhyRegWrite(MV_U32 phyAddr, MV_U32 regOffs, MV_U16 data)
 
 	return MV_OK;
 }
+EXPORT_SYMBOL(mvEthPhyRegWrite);
 
 /*******************************************************************************
 * mvEthPhyReset - Reset ethernet Phy.
@@ -624,6 +626,9 @@ MV_STATUS mvEthPhyAdvertiseSet(MV_U32 phyAddr, MV_U16 advertise)
 	return MV_OK;
 }
 
+DEFINE_SPINLOCK(phy_smi_lock);
+EXPORT_SYMBOL(phy_smi_lock);
+
 /*******************************************************************************
 * mvEthPhyAdvertiseGet -
 *
@@ -647,6 +652,7 @@ MV_STATUS mvEthPhyAdvertiseSet(MV_U32 phyAddr, MV_U16 advertise)
 MV_STATUS mvEthPhyAdvertiseGet(MV_U32 phyAddr, MV_U16 *advertise)
 {
 	MV_U16 regVal, tmp;
+	spin_lock(&phy_smi_lock);
 
 	if (advertise == NULL)
 		return MV_BAD_PARAM;
@@ -659,5 +665,6 @@ MV_STATUS mvEthPhyAdvertiseGet(MV_U32 phyAddr, MV_U16 *advertise)
 	tmp |= (((regVal & ETH_PHY_1000BASE_ADVERTISE_MASK) >> ETH_PHY_1000BASE_ADVERTISE_OFFSET) << 4);
 	*advertise = tmp;
 
+	spin_unlock(&phy_smi_lock);
 	return MV_OK;
 }

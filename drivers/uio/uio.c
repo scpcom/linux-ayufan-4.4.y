@@ -650,7 +650,11 @@ static const struct vm_operations_struct uio_physical_vm_ops = {
 #endif
 };
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+static int uio_mmap_physical(struct vm_area_struct *vma, int cacheable)
+#else /* CONFIG_SYNO_LSP_ALPINE */
 static int uio_mmap_physical(struct vm_area_struct *vma)
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 {
 	struct uio_device *idev = vma->vm_private_data;
 	int mi = uio_find_mem_index(vma);
@@ -663,7 +667,13 @@ static int uio_mmap_physical(struct vm_area_struct *vma)
 		return -EINVAL;
 
 	vma->vm_ops = &uio_physical_vm_ops;
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (!cacheable)
+		vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	/*
 	 * We cannot use the vm_iomap_memory() helper here,
@@ -711,10 +721,18 @@ static int uio_mmap(struct file *filep, struct vm_area_struct *vma)
 
 	switch (idev->info->mem[mi].memtype) {
 		case UIO_MEM_PHYS:
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+			return uio_mmap_physical(vma, 0);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 			return uio_mmap_physical(vma);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		case UIO_MEM_LOGICAL:
 		case UIO_MEM_VIRTUAL:
 			return uio_mmap_logical(vma);
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		case UIO_MEM_PHYS_CACHEABLE:
+			return uio_mmap_physical(vma, 1);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		default:
 			return -EINVAL;
 	}

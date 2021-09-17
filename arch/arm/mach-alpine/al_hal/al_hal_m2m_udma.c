@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -89,6 +89,9 @@ int al_m2m_udma_init(struct al_m2m_udma *m2m_udma,
 			 dma_params.name, rc);
 		return rc;
 	}
+
+	al_udma_s2m_max_descs_set(&m2m_udma->rx_udma, params->max_s2m_descs_per_pkt);
+
 	return 0;
 }
 

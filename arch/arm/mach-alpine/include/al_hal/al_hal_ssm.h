@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -49,6 +49,7 @@ met:
 #include "al_hal_m2m_udma.h"
 
 #define AL_SSM_MAX_SRC_DESCS	31
+#define AL_SSM_MAX_DST_DESCS	31
 
 enum al_ssm_op_flags {
 	AL_SSM_INTERRUPT = AL_BIT(0), /* enable interrupt when the xaction

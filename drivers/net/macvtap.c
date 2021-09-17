@@ -349,7 +349,6 @@ static struct rtnl_link_ops macvtap_link_ops __read_mostly = {
 	.dellink	= macvtap_dellink,
 };
 
-
 static void macvtap_sock_write_space(struct sock *sk)
 {
 	wait_queue_head_t *wqueue;
@@ -886,7 +885,10 @@ static ssize_t macvtap_do_read(struct macvtap_queue *q, struct kiocb *iocb,
 			continue;
 		}
 		ret = macvtap_put_user(q, skb, iv, len);
-		kfree_skb(skb);
+		if (unlikely(ret < 0))
+			kfree_skb(skb);
+		else
+			consume_skb(skb);
 		break;
 	}
 

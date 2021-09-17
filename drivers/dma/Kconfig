@@ -352,7 +352,7 @@ config ST_FDMA_MCHI
 	  Enable MCHI extensions support for ST FDMA dmaengine implementation
 
 config AL_DMA
-	bool "Annapurna Labs DMA support"
+	tristate "Annapurna Labs DMA support"
 	depends on ARCH_ALPINE
 	select DMA_ENGINE
 	select ASYNC_TX_ENABLE_CHANNEL_SWITCH

@@ -190,7 +190,6 @@ bool sk_net_capable(const struct sock *sk, int cap)
 }
 EXPORT_SYMBOL(sk_net_capable);
 
-
 #ifdef CONFIG_MEMCG_KMEM
 int mem_cgroup_sockets_init(struct mem_cgroup *memcg, struct cgroup_subsys *ss)
 {
@@ -313,7 +312,11 @@ static struct lock_class_key af_callback_keys[AF_MAX];
 /* Run time adjustable parameters. */
 __u32 sysctl_wmem_max __read_mostly = SK_WMEM_MAX;
 EXPORT_SYMBOL(sysctl_wmem_max);
+#ifdef CONFIG_SYNO_KVMX64
+__u32 sysctl_rmem_max __read_mostly = 2 * SK_RMEM_MAX;
+#else
 __u32 sysctl_rmem_max __read_mostly = SK_RMEM_MAX;
+#endif
 EXPORT_SYMBOL(sysctl_rmem_max);
 __u32 sysctl_wmem_default __read_mostly = SK_WMEM_MAX;
 __u32 sysctl_rmem_default __read_mostly = SK_RMEM_MAX;

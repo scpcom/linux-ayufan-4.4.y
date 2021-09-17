@@ -1,42 +1,24 @@
 /*******************************************************************************
-Copyright (C) 2011 Annapurna Labs Ltd.
+Copyright (C) 2015 Annapurna Labs Ltd.
 
-This software file is triple licensed: you can use it either under the terms of
-Commercial, the GPL, or the BSD license, at your option.
+This file may be licensed under the terms of the Annapurna Labs Commercial
+License Agreement.
 
-a) If you received this File from Annapurna Labs and you have entered into a
-   commercial license agreement (a "Commercial License") with Annapurna Labs,
-   the File is licensed to you under the terms of the applicable Commercial
-   License.
+Alternatively, this file can be distributed under the terms of the GNU General
+Public License V2 as published by the Free Software Foundation and can be
+found at http://www.gnu.org/licenses/gpl-2.0.html
 
-Alternatively,
+Alternatively, redistribution and use in source and binary forms, with or
+without modification, are permitted provided that the following conditions are
+met:
 
-b) This file is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License as
-   published by the Free Software Foundation; either version 2 of the
-   License, or (at your option) any later version.
+    *     Redistributions of source code must retain the above copyright notice,
+ this list of conditions and the following disclaimer.
 
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public
-   License along with this library; if not, write to the Free
-   Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
-   MA 02110-1301 USA
-
-Alternatively,
-
-c) Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
-
-    *   Redistributions of source code must retain the above copyright notice,
-        this list of conditions and the following disclaimer.
-
-    *   Redistributions in binary form must reproduce the above copyright
-        notice, this list of conditions and the following disclaimer in the
-        documentation and/or other materials provided with the distribution.
+    *     Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -50,6 +32,7 @@ c) Redistribution and use in source and binary forms, with or without
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
+
 /**
  * @defgroup group_services Platform Services API
  *  Platform Services API

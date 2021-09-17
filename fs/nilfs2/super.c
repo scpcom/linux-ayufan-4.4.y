@@ -154,7 +154,6 @@ void nilfs_warning(struct super_block *sb, const char *function,
 	va_end(args);
 }
 
-
 struct inode *nilfs_alloc_inode(struct super_block *sb)
 {
 	struct nilfs_inode_info *ii;
@@ -1114,6 +1113,7 @@ static int nilfs_remount(struct super_block *sb, int *flags, char *data)
 	unsigned long old_mount_opt;
 	int err;
 
+	sync_filesystem(sb);
 	old_sb_flags = sb->s_flags;
 	old_mount_opt = nilfs->ns_mount_opt;
 

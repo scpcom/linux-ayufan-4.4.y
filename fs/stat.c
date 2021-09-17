@@ -546,7 +546,7 @@ SYSCALL_DEFINE4(fstatat64, int, dfd, const char __user *, filename,
  * The filename will be convert to real filename and return to user space.
  * In caller, the length of filename must equal or be larger than SYNO_SMB_PSTRING_LEN.
 */
-int __SYNOCaselessStat(char __user * filename, int nofollowLink, struct kstat *stat, int *last_component, int flags)
+int __SYNOCaselessStat(char __user * filename, int nofollowLink, struct kstat *stat, int flags)
 {
 	struct path path;
 	int error;
@@ -573,7 +573,7 @@ int __SYNOCaselessStat(char __user * filename, int nofollowLink, struct kstat *s
 	} else {
 		f = LOOKUP_FOLLOW|LOOKUP_CASELESS_COMPARE;
 	}
-	error = syno_user_path_at(AT_FDCWD, filename, f, &path, &real_filename, &real_filename_len, last_component);
+	error = syno_user_path_at(AT_FDCWD, filename, f, &path, &real_filename, &real_filename_len);
 	if (!error) {
 		error = syno_vfs_getattr(&path, stat, flags);
 		path_put(&path);
@@ -603,11 +603,10 @@ EXPORT_SYMBOL(__SYNOCaselessStat);
 SYSCALL_DEFINE2(SYNOCaselessStat64, char __user *, filename, struct stat64 __user *, statbuf)
 {
 #ifdef CONFIG_SYNO_FS_CASELESS_STAT
-	int last_component = 0;
 	long error = -1;
 	struct kstat stat;
 
-	error = __SYNOCaselessStat(filename, 0, &stat, &last_component, 0);
+	error = __SYNOCaselessStat(filename, 0, &stat, 0);
 	if (!error) {
 		error = cp_new_stat64(&stat, statbuf);
 	}
@@ -621,11 +620,10 @@ SYSCALL_DEFINE2(SYNOCaselessStat64, char __user *, filename, struct stat64 __use
 SYSCALL_DEFINE2(SYNOCaselessLStat64, char __user *, filename, struct stat64 __user *, statbuf)
 {
 #ifdef CONFIG_SYNO_FS_CASELESS_STAT
-	int last_component = 0;
 	long error = -1;
 	struct kstat stat;
 
-	error = __SYNOCaselessStat(filename, 1, &stat, &last_component, 0);
+	error = __SYNOCaselessStat(filename, 1, &stat, 0);
 	if (!error) {
 		error = cp_new_stat64(&stat, statbuf);
 	}
@@ -640,11 +638,10 @@ SYSCALL_DEFINE2(SYNOCaselessLStat64, char __user *, filename, struct stat64 __us
 SYSCALL_DEFINE2(SYNOCaselessStat, char __user *, filename, struct stat __user *, statbuf)
 {
 #ifdef CONFIG_SYNO_FS_CASELESS_STAT
-	int last_component = 0;
 	long error = -1;
 	struct kstat stat;
 
-	error = __SYNOCaselessStat(filename, 0, &stat, &last_component, 0);
+	error = __SYNOCaselessStat(filename, 0, &stat, 0);
 	if (!error) {
 		error = cp_new_stat(&stat, statbuf);
 	}
@@ -658,11 +655,10 @@ SYSCALL_DEFINE2(SYNOCaselessStat, char __user *, filename, struct stat __user *,
 SYSCALL_DEFINE2(SYNOCaselessLStat, char __user *, filename, struct stat __user *, statbuf)
 {
 #ifdef CONFIG_SYNO_FS_CASELESS_STAT
-	int last_component = 0;
 	long error = -1;
 	struct kstat stat;
 
-	error = __SYNOCaselessStat(filename, 1, &stat, &last_component, 0);
+	error = __SYNOCaselessStat(filename, 1, &stat, 0);
 	if (!error) {
 		error = cp_new_stat(&stat, statbuf);
 	}
@@ -734,15 +730,7 @@ static int do_SYNOStat64(char __user * filename, int no_follow_link, int flags, 
 
 	if (flags & SYNOST_IS_CASELESS) {
 #ifdef CONFIG_SYNO_FS_CASELESS_STAT
-		int last_component = 0;
-		error = __SYNOCaselessStat(filename, no_follow_link, &kst, &last_component, flags);
-		if (-ENOENT == error) {
-			if (statbuf){
-				if (__put_user(last_component, &statbuf->ext.last_component)){
-					goto Out;
-				}
-			}
-		}
+		error = __SYNOCaselessStat(filename, no_follow_link, &kst, flags);
 #else
 		error = -EOPNOTSUPP;
 #endif /* CONFIG_SYNO_FS_CASELESS_STAT */
@@ -844,15 +832,7 @@ static int do_SYNOStat(char __user * filename, int no_follow_link, int flags, st
 
 	if (flags & SYNOST_IS_CASELESS) {
 #ifdef CONFIG_SYNO_FS_CASELESS_STAT
-		int last_component = 0;
-		error = __SYNOCaselessStat(filename, no_follow_link, &kst, &last_component, flags);
-		if (-ENOENT == error) {
-			if (statbuf){
-				if (__put_user(last_component, &statbuf->ext.last_component)){
-					goto Out;
-				}
-			}
-		}
+		error = __SYNOCaselessStat(filename, no_follow_link, &kst, flags);
 #else
 		error = -EOPNOTSUPP;
 #endif /* CONFIG_SYNO_FS_CASELESS_STAT */

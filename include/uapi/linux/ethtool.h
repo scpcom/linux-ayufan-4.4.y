@@ -609,7 +609,6 @@ struct ethtool_rxnfc {
 	__u32				rule_locs[0];
 };
 
-
 /**
  * struct ethtool_rxfh_indir - command to get or set RX flow hash indirection
  * @cmd: Specific command number - %ETHTOOL_GRXFHINDIR or %ETHTOOL_SRXFHINDIR
@@ -824,7 +823,6 @@ enum ethtool_sfeatures_retval_bits {
 #define ETHTOOL_F_WISH          (1 << ETHTOOL_F_WISH__BIT)
 #define ETHTOOL_F_COMPAT        (1 << ETHTOOL_F_COMPAT__BIT)
 
-
 /* CMDs currently supported */
 #define ETHTOOL_GSET		0x00000001 /* Get settings. */
 #define ETHTOOL_SSET		0x00000002 /* Set settings. */
@@ -974,6 +972,9 @@ enum ethtool_sfeatures_retval_bits {
 #define SPEED_100		100
 #define SPEED_1000		1000
 #define SPEED_2500		2500
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#define SPEED_5000		5000
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #define SPEED_10000		10000
 #define SPEED_UNKNOWN		-1
 

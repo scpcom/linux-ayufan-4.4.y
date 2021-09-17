@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -43,6 +43,8 @@ met:
 #ifndef __AL_HAL_UDMA_M2S_REG_H
 #define __AL_HAL_UDMA_M2S_REG_H
 
+#include "al_hal_plat_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -67,29 +69,53 @@ struct udma_axi_m2s {
 	uint32_t data_rd_cfg;
 	/* [0x1c] Descriptors read master configuration */
 	uint32_t desc_rd_cfg_3;
-	/* [0x20] Descriptors write master configuration (completion) ... */
+	/* [0x20] Descriptors write master configuration (completion) */
 	uint32_t desc_wr_cfg_1;
 	/* [0x24] AXI outstanding  configuration */
 	uint32_t ostand_cfg;
 	uint32_t rsrvd[54];
 };
-
 struct udma_m2s {
-	/* [0x0] DMA state */
+	/*
+	 * [0x0] DMA state.
+	 * 00  - No pending tasks
+	 * 01 – Normal (active)
+	 * 10 – Abort (error condition)
+	 * 11 – Reserved
+	 */
 	uint32_t state;
 	/* [0x4] CPU request to change DMA state */
 	uint32_t change_state;
 	uint32_t rsrvd_0;
-	/* [0xc] M2S DMA error log mask */
+	/*
+	 * [0xc] M2S DMA error log mask.
+	 * Each error has an interrupt controller cause bit.
+	 * This register determines if these errors cause the M2S DMA to log the
+	 * error condition.
+	 * 0 - Log is enabled.
+	 * 1 - Log is masked.
+	 */
 	uint32_t err_log_mask;
 	uint32_t rsrvd_1;
-	/* [0x14] DMA header log */
+	/*
+	 * [0x14] DMA header log.
+	 * Sample the packet header that caused the error.
+	 */
 	uint32_t log_0;
-	/* [0x18] DMA header log */
+	/*
+	 * [0x18] DMA header log.
+	 * Sample the packet header that caused the error.
+	 */
 	uint32_t log_1;
-	/* [0x1c] DMA header log */
+	/*
+	 * [0x1c] DMA header log.
+	 * Sample the packet header that caused the error.
+	 */
 	uint32_t log_2;
-	/* [0x20] DMA header log */
+	/*
+	 * [0x20] DMA header log.
+	 * Sample the packet header that caused the error.
+	 */
 	uint32_t log_3;
 	/* [0x24] DMA clear error log */
 	uint32_t clear_err_log;
@@ -101,13 +127,25 @@ struct udma_m2s {
 	uint32_t unack_fifo_status;
 	/* [0x34] Select queue for debug */
 	uint32_t indirect_ctrl;
-	/* [0x38] M2S prefetch FIFO status */
+	/*
+	 * [0x38] M2S prefetch FIFO status.
+	 * Status of the selected queue in M2S_indirect_ctrl
+	 */
 	uint32_t sel_pref_fifo_status;
-	/* [0x3c] M2S completion FIFO status */
+	/*
+	 * [0x3c] M2S completion FIFO status.
+	 * Status of the selected queue in M2S_indirect_ctrl
+	 */
 	uint32_t sel_comp_fifo_status;
-	/* [0x40] M2S rate limit status */
+	/*
+	 * [0x40] M2S rate limit status.
+	 * Status of the selected queue in M2S_indirect_ctrl
+	 */
 	uint32_t sel_rate_limit_status;
-	/* [0x44] M2S DWRR scheduler status */
+	/*
+	 * [0x44] M2S DWRR scheduler status.
+	 * Status of the selected queue in M2S_indirect_ctrl
+	 */
 	uint32_t sel_dwrr_status;
 	/* [0x48] M2S state machine and FIFO clear control */
 	uint32_t clear_ctrl;
@@ -121,7 +159,6 @@ struct udma_m2s {
 	uint32_t stream_cfg;
 	uint32_t rsrvd[41];
 };
-
 struct udma_m2s_rd {
 	/* [0x0] M2S descriptor prefetch configuration */
 	uint32_t desc_pref_cfg_1;
@@ -134,7 +171,6 @@ struct udma_m2s_rd {
 	uint32_t data_cfg;
 	uint32_t rsrvd[11];
 };
-
 struct udma_m2s_dwrr {
 	/* [0x0] Tx DMA DWRR scheduler configuration */
 	uint32_t cfg_sched;
@@ -145,9 +181,15 @@ struct udma_m2s_dwrr {
 struct udma_m2s_rate_limiter {
 	/* [0x0] Token bucket rate limit configuration */
 	uint32_t gen_cfg;
-	/* [0x4] Token bucket rate limit control */
+	/*
+	 * [0x4] Token bucket rate limit control.
+	 * Controls the cycle counters.
+	 */
 	uint32_t ctrl_cycle_cnt;
-	/* [0x8] Token bucket rate limit control */
+	/*
+	 * [0x8] Token bucket rate limit control.
+	 * Controls the token bucket counter.
+	 */
 	uint32_t ctrl_token;
 	uint32_t rsrvd[13];
 };
@@ -163,7 +205,11 @@ struct udma_rlimit_common {
 	uint32_t cfg_token_size_2;
 	/* [0x10] Token bucket rate limit configuration */
 	uint32_t sw_ctrl;
-	/* [0x14] Mask the different types of rate limiter */
+	/*
+	 * [0x14] Mask the different types of rate limiter.
+	 * 0 - Rate limit is active.
+	 * 1 - Rate limit is masked.
+	 */
 	uint32_t mask;
 };
 
@@ -171,51 +217,69 @@ struct udma_m2s_stream_rate_limiter {
 	struct udma_rlimit_common rlimit;
 	uint32_t rsrvd[10];
 };
-
 struct udma_m2s_comp {
 	/* [0x0] Completion controller configuration */
 	uint32_t cfg_1c;
 	/* [0x4] Completion controller coalescing configuration */
 	uint32_t cfg_coal;
-	/* [0x8] Completion controller application acknowledge confi ... */
+	/* [0x8] Completion controller application acknowledge configuration */
 	uint32_t cfg_application_ack;
 	uint32_t rsrvd[61];
 };
-
 struct udma_m2s_stat {
 	/* [0x0] Statistics counters configuration */
 	uint32_t cfg_st;
 	/* [0x4] Counting number of descriptors with First-bit set. */
 	uint32_t tx_pkt;
-	/* [0x8] Counting the net length of the data buffers [64-bit ... */
+	/*
+	 * [0x8] Counting the net length of the data buffers [64-bit]
+	 * Should be read before tx_bytes_high
+	 */
 	uint32_t tx_bytes_low;
-	/* [0xc] Counting the net length of the data buffers [64-bit ... */
+	/*
+	 * [0xc] Counting the net length of the data buffers [64-bit],
+	 * Should be read after tx_bytes_low (value is sampled when reading
+	 * Should be read before tx_bytes_low
+	 */
 	uint32_t tx_bytes_high;
-	/* [0x10] Total number of descriptors read from the host memo ... */
+	/* [0x10] Total number of descriptors read from the host memory */
 	uint32_t prefed_desc;
 	/* [0x14] Number of packets read from the unack FIFO */
 	uint32_t comp_pkt;
-	/* [0x18] Number of descriptors written into the completion r ... */
+	/* [0x18] Number of descriptors written into the completion ring */
 	uint32_t comp_desc;
-	/* [0x1c] Number of acknowledged packets */
+	/*
+	 * [0x1c] Number of acknowledged packets.
+	 * (acknowledge received from the stream interface)
+	 */
 	uint32_t ack_pkts;
 	uint32_t rsrvd[56];
 };
-
 struct udma_m2s_feature {
-	/* [0x0] M2S Feature register */
+	/*
+	 * [0x0] M2S Feature register.
+	 * M2S instantiation parameters
+	 */
 	uint32_t reg_1;
 	/* [0x4] Reserved M2S feature register */
 	uint32_t reg_2;
-	/* [0x8] M2S Feature register */
+	/*
+	 * [0x8] M2S Feature register.
+	 * M2S instantiation parameters
+	 */
 	uint32_t reg_3;
-	/* [0xc] M2S Feature register */
+	/*
+	 * [0xc] M2S Feature register.
+	 * M2S instantiation parameters
+	 */
 	uint32_t reg_4;
-	/* [0x10] M2S Feature register */
+	/*
+	 * [0x10] M2S Feature register.
+	 * M2S instantiation parameters
+	 */
 	uint32_t reg_5;
 	uint32_t rsrvd[59];
 };
-
 struct udma_m2s_q {
 	uint32_t rsrvd_0[8];
 	/* [0x20] M2S descriptor ring configuration */
@@ -226,7 +290,9 @@ struct udma_m2s_q {
 	uint32_t tdrbp_low;
 	/* [0x2c] TX Descriptor Ring Base Pointer [63:32] */
 	uint32_t tdrbp_high;
-	/* [0x30] TX Descriptor Ring Length[23:2] */
+	/*
+	 * [0x30] TX Descriptor Ring Length[23:2]
+	 */
 	uint32_t tdrl;
 	/* [0x34] TX Descriptor Ring Head Pointer */
 	uint32_t tdrhp;
@@ -242,7 +308,10 @@ struct udma_m2s_q {
 	uint32_t tcrbp_high;
 	/* [0x4c] TX Completion Ring Head Pointer */
 	uint32_t tcrhp;
-	/* [0x50] Tx Completion Ring Head Pointer internal (Before th ... */
+	/*
+	 * [0x50] Tx Completion Ring Head Pointer internal (Before the
+	 * coalescing FIFO)
+	 */
 	uint32_t tcrhp_internal;
 	uint32_t rsrvd_1[3];
 	/* [0x60] Rate limit configuration */
@@ -305,8 +374,10 @@ struct udma_m2s_regs {
 /* Bus size, 128-bit */
 #define UDMA_AXI_M2S_COMP_WR_CFG_2_AWSIZE_MASK 0x00700000
 #define UDMA_AXI_M2S_COMP_WR_CFG_2_AWSIZE_SHIFT 20
-/* AXI Master QoS.
-Used for arbitration between AXI masters */
+/*
+ * AXI Master QoS.
+ * Used for arbitration between AXI masters
+ */
 #define UDMA_AXI_M2S_COMP_WR_CFG_2_AWQOS_MASK 0x07000000
 #define UDMA_AXI_M2S_COMP_WR_CFG_2_AWQOS_SHIFT 24
 /* Protection Type */
@@ -331,8 +402,10 @@ Used for arbitration between AXI masters */
 /* Bus size, 128-bit */
 #define UDMA_AXI_M2S_DATA_RD_CFG_2_ARSIZE_MASK 0x00700000
 #define UDMA_AXI_M2S_DATA_RD_CFG_2_ARSIZE_SHIFT 20
-/* AXI Master QoS.
-Used for arbitration between AXI masters */
+/*
+ * AXI Master QoS.
+ * Used for arbitration between AXI masters
+ */
 #define UDMA_AXI_M2S_DATA_RD_CFG_2_ARQOS_MASK 0x07000000
 #define UDMA_AXI_M2S_DATA_RD_CFG_2_ARQOS_SHIFT 24
 /* Protection Type */
@@ -357,8 +430,10 @@ Used for arbitration between AXI masters */
 /* Bus size, 128-bit */
 #define UDMA_AXI_M2S_DESC_RD_CFG_2_ARSIZE_MASK 0x00700000
 #define UDMA_AXI_M2S_DESC_RD_CFG_2_ARSIZE_SHIFT 20
-/* AXI Master QoS
-Used for arbitration between AXI masters */
+/*
+ * AXI Master QoS
+ * Used for arbitration between AXI masters
+ */
 #define UDMA_AXI_M2S_DESC_RD_CFG_2_ARQOS_MASK 0x07000000
 #define UDMA_AXI_M2S_DESC_RD_CFG_2_ARQOS_SHIFT 24
 /* Protection Type */
@@ -366,38 +441,68 @@ Used for arbitration between AXI masters */
 #define UDMA_AXI_M2S_DESC_RD_CFG_2_ARPROT_SHIFT 28
 
 /**** data_rd_cfg register ****/
-/* Defines the maximum number of AXI beats for a single AXI burs ... */
+/*
+ * Defines the maximum number of AXI beats for a single AXI burst.
+ * This value is used for a burst split decision.
+ */
 #define UDMA_AXI_M2S_DATA_RD_CFG_MAX_AXI_BEATS_MASK 0x000000FF
 #define UDMA_AXI_M2S_DATA_RD_CFG_MAX_AXI_BEATS_SHIFT 0
-/* Enable breaking data read request */
+/*
+ * Enable breaking data read request.
+ * Aligned to max_AXI_beats when the total read size is less than max_AXI_beats
+ */
 #define UDMA_AXI_M2S_DATA_RD_CFG_ALWAYS_BREAK_ON_MAX_BOUDRY (1 << 16)
 
 /**** desc_rd_cfg_3 register ****/
-/* Defines the maximum number of AXI beats for a single AXI burs ... */
+/*
+ * Defines the maximum number of AXI beats for a single AXI burst.
+ * This value is used for a burst split decision.
+ * Maximum burst size for reading data( in AXI beats, 128-bits)
+ * (default – 16 beats, 256 bytes)
+ */
 #define UDMA_AXI_M2S_DESC_RD_CFG_3_MAX_AXI_BEATS_MASK 0x000000FF
 #define UDMA_AXI_M2S_DESC_RD_CFG_3_MAX_AXI_BEATS_SHIFT 0
-/* Enable breaking descriptor read request */
+/*
+ * Enable breaking descriptor read request.
+ * Aligned to max_AXI_beats when the total read size is less than max_AXI_beats.
+ */
 #define UDMA_AXI_M2S_DESC_RD_CFG_3_ALWAYS_BREAK_ON_MAX_BOUDRY (1 << 16)
 
 /**** desc_wr_cfg_1 register ****/
-/* Defines the maximum number of AXI beats for a single AXI burs ... */
+/*
+ * Defines the maximum number of AXI beats for a single AXI burst.
+ * This value is used for a burst split decision.
+ */
 #define UDMA_AXI_M2S_DESC_WR_CFG_1_MAX_AXI_BEATS_MASK 0x000000FF
 #define UDMA_AXI_M2S_DESC_WR_CFG_1_MAX_AXI_BEATS_SHIFT 0
-/* Minimum burst for writing completion descriptors */
+/*
+ * Minimum burst for writing completion descriptors.
+ * Defined in AXI beats
+ * 4 Descriptors per beat.
+ * Value must be aligned to cache lines (64 bytes).
+ * Default value is 2 cache lines, 32 descriptors, 8 beats.
+ */
 #define UDMA_AXI_M2S_DESC_WR_CFG_1_MIN_AXI_BEATS_MASK 0x00FF0000
 #define UDMA_AXI_M2S_DESC_WR_CFG_1_MIN_AXI_BEATS_SHIFT 16
 
 /**** ostand_cfg register ****/
-/* Maximum number of outstanding data reads to the AXI (AXI tran ... */
+/* Maximum number of outstanding data reads to the AXI (AXI transactions) */
 #define UDMA_AXI_M2S_OSTAND_CFG_MAX_DATA_RD_MASK 0x0000003F
 #define UDMA_AXI_M2S_OSTAND_CFG_MAX_DATA_RD_SHIFT 0
-/* Maximum number of outstanding descriptor reads to the AXI (AX ... */
+/*
+ * Maximum number of outstanding descriptor reads to the AXI (AXI transactions)
+ */
 #define UDMA_AXI_M2S_OSTAND_CFG_MAX_DESC_RD_MASK 0x00003F00
 #define UDMA_AXI_M2S_OSTAND_CFG_MAX_DESC_RD_SHIFT 8
-/* Maximum number of outstanding descriptor writes to the AXI (A ... */
+/*
+ * Maximum number of outstanding descriptor writes to the AXI (AXI transactions)
+ */
 #define UDMA_AXI_M2S_OSTAND_CFG_MAX_COMP_REQ_MASK 0x003F0000
 #define UDMA_AXI_M2S_OSTAND_CFG_MAX_COMP_REQ_SHIFT 16
-/* Maximum number of outstanding data beats for descriptor write ... */
+/*
+ * Maximum number of outstanding data beats for descriptor write to AXI (AXI
+ * beats)
+ */
 #define UDMA_AXI_M2S_OSTAND_CFG_MAX_COMP_DATA_WR_MASK 0xFF000000
 #define UDMA_AXI_M2S_OSTAND_CFG_MAX_COMP_DATA_WR_SHIFT 24
 
@@ -420,11 +525,18 @@ Used for arbitration between AXI masters */
 #define UDMA_M2S_CHANGE_STATE_NORMAL (1 << 0)
 /* Stop normal operation */
 #define UDMA_M2S_CHANGE_STATE_DIS    (1 << 1)
-/* Stop all machines */
+/*
+ * Stop all machines.
+ * (Prefetch, scheduling, completion and stream interface)
+ */
 #define UDMA_M2S_CHANGE_STATE_ABORT  (1 << 2)
 
 /**** err_log_mask register ****/
-/* Mismatch of packet serial number */
+/*
+ * Mismatch of packet serial number.
+ * (between first packet in the unacknowledged FIFO and received ack from the
+ * stream)
+ */
 #define UDMA_M2S_ERR_LOG_MASK_COMP_PKT_MISMATCH (1 << 0)
 /* Parity error */
 #define UDMA_M2S_ERR_LOG_MASK_STREAM_AXI_PARITY (1 << 1)
@@ -534,13 +646,24 @@ Used for arbitration between AXI masters */
 /* Maximum packet size for the M2S */
 #define UDMA_M2S_CFG_LEN_MAX_PKT_SIZE_MASK 0x000FFFFF
 #define UDMA_M2S_CFG_LEN_MAX_PKT_SIZE_SHIFT 0
-/* Length encoding for 64K */
+/*
+ * Length encoding for 64K.
+ * 0 - length 0x0000 = 0
+ * 1 - length 0x0000 = 64k
+ */
 #define UDMA_M2S_CFG_LEN_ENCODE_64K  (1 << 24)
 
 /**** stream_cfg register ****/
-/* Disables the stream interface operation */
+/*
+ * Disables the stream interface operation.
+ * Changing to 1 stops at the end of packet transmission.
+ */
 #define UDMA_M2S_STREAM_CFG_DISABLE  (1 << 0)
-/* Configuration of the stream FIFO read control */
+/*
+ * Configuration of the stream FIFO read control.
+ * 0 - Cut through
+ * 1 - Threshold based
+ */
 #define UDMA_M2S_STREAM_CFG_RD_MODE  (1 << 1)
 /* Minimum number of beats to start packet transmission. */
 #define UDMA_M2S_STREAM_CFG_RD_TH_MASK 0x0003FF00
@@ -555,44 +678,85 @@ Used for arbitration between AXI masters */
 /* Maximum number of descriptors per packet */
 #define UDMA_M2S_RD_DESC_PREF_CFG_2_MAX_DESC_PER_PKT_MASK 0x0000001F
 #define UDMA_M2S_RD_DESC_PREF_CFG_2_MAX_DESC_PER_PKT_SHIFT 0
-/* Force RR arbitration in the prefetch arbiter */
+/*
+ * Force RR arbitration in the prefetch arbiter.
+ * 0 -Standard arbitration based on queue QoS
+ * 1 - Force Round Robin arbitration
+ */
 #define UDMA_M2S_RD_DESC_PREF_CFG_2_PREF_FORCE_RR (1 << 16)
 
 /**** desc_pref_cfg_3 register ****/
-/* Minimum descriptor burst size when prefetch FIFO level is bel ... */
+/*
+ * Minimum descriptor burst size when prefetch FIFO level is below the
+ * descriptor prefetch threshold
+ * (must be 1)
+ */
 #define UDMA_M2S_RD_DESC_PREF_CFG_3_MIN_BURST_BELOW_THR_MASK 0x0000000F
 #define UDMA_M2S_RD_DESC_PREF_CFG_3_MIN_BURST_BELOW_THR_SHIFT 0
-/* Minimum descriptor burst size when prefetch FIFO level is abo ... */
+/*
+ * Minimum descriptor burst size when prefetch FIFO level is above the
+ * descriptor prefetch threshold
+ */
 #define UDMA_M2S_RD_DESC_PREF_CFG_3_MIN_BURST_ABOVE_THR_MASK 0x000000F0
 #define UDMA_M2S_RD_DESC_PREF_CFG_3_MIN_BURST_ABOVE_THR_SHIFT 4
-/* Descriptor fetch threshold */
+/*
+ * Descriptor fetch threshold.
+ * Used as a threshold to determine the allowed minimum descriptor burst size.
+ * (Must be at least max_desc_per_pkt)
+ */
 #define UDMA_M2S_RD_DESC_PREF_CFG_3_PREF_THR_MASK 0x0000FF00
 #define UDMA_M2S_RD_DESC_PREF_CFG_3_PREF_THR_SHIFT 8
 
 /**** data_cfg register ****/
-/* Maximum number of data beats in the data read FIFO */
+/*
+ * Maximum number of data beats in the data read FIFO.
+ * Defined based on data FIFO size
+ * (default FIFO size 2KB → 128 beats)
+ */
 #define UDMA_M2S_RD_DATA_CFG_DATA_FIFO_DEPTH_MASK 0x000003FF
 #define UDMA_M2S_RD_DATA_CFG_DATA_FIFO_DEPTH_SHIFT 0
-/* Maximum number of packets in the data read FIFO */
+/*
+ * Maximum number of packets in the data read FIFO.
+ * Defined based on header FIFO size
+ */
 #define UDMA_M2S_RD_DATA_CFG_MAX_PKT_LIMIT_MASK 0x00FF0000
 #define UDMA_M2S_RD_DATA_CFG_MAX_PKT_LIMIT_SHIFT 16
 
 /**** cfg_sched register ****/
-/* Enable the DWRR scheduler */
+/*
+ * Enable the DWRR scheduler.
+ * If this bit is 0, queues with same QoS will be served with RR scheduler.
+ */
 #define UDMA_M2S_DWRR_CFG_SCHED_EN_DWRR (1 << 0)
-/* Scheduler operation mode.
-0 - Byte mode
-1 - Packet mode */
+/*
+ * Scheduler operation mode.
+ * 0 - Byte mode
+ * 1 - Packet mode
+ */
 #define UDMA_M2S_DWRR_CFG_SCHED_PKT_MODE_EN (1 << 4)
-/* Enable incrementing the weight factor between DWRR iterations */
+/*
+ * Enable incrementing the weight factor between DWRR iterations.
+ * 00 - Don't increase the increment factor.
+ * 01 - Increment once
+ * 10 - Increment exponential
+ * 11 - Reserved
+ */
 #define UDMA_M2S_DWRR_CFG_SCHED_WEIGHT_INC_MASK 0x00000300
 #define UDMA_M2S_DWRR_CFG_SCHED_WEIGHT_INC_SHIFT 8
-/* Increment factor power of 2 */
+/*
+ * Increment factor power of 2.
+ * 7 --> 128 bytes
+ * This is the factor used to multiply the weight.
+ */
 #define UDMA_M2S_DWRR_CFG_SCHED_INC_FACTOR_MASK 0x000F0000
 #define UDMA_M2S_DWRR_CFG_SCHED_INC_FACTOR_SHIFT 16
 
 /**** ctrl_deficit_cnt register ****/
-/* Init value for the deficit counter */
+/*
+ * Init value for the deficit counter.
+ * Initializes the deficit counters of all queues to this value any time this
+ * register is written.
+ */
 #define UDMA_M2S_DWRR_CTRL_DEFICIT_CNT_INIT_MASK 0x00FFFFFF
 #define UDMA_M2S_DWRR_CTRL_DEFICIT_CNT_INIT_SHIFT 0
 
@@ -600,9 +764,11 @@ Used for arbitration between AXI masters */
 /* Size of the basic token fill cycle, system clock cycles */
 #define UDMA_M2S_RATE_LIMITER_GEN_CFG_SHORT_CYCLE_SIZE_MASK 0x0000FFFF
 #define UDMA_M2S_RATE_LIMITER_GEN_CFG_SHORT_CYCLE_SIZE_SHIFT 0
-/* Rate limiter operation mode.
-0 - Byte mode
-1 - Packet mode */
+/*
+ * Rate limiter operation mode.
+ * 0 - Byte mode
+ * 1 - Packet mode
+ */
 #define UDMA_M2S_RATE_LIMITER_GEN_CFG_PKT_MODE_EN (1 << 24)
 
 /**** ctrl_cycle_cnt register ****/
@@ -610,7 +776,11 @@ Used for arbitration between AXI masters */
 #define UDMA_M2S_RATE_LIMITER_CTRL_CYCLE_CNT_RST (1 << 0)
 
 /**** ctrl_token register ****/
-/* Init value for the token counter */
+/*
+ * Init value for the token counter.
+ * Initializes the token counters of all queues to this value any time this
+ * register is written.
+ */
 #define UDMA_M2S_RATE_LIMITER_CTRL_TOKEN_RST_MASK 0x00FFFFFF
 #define UDMA_M2S_RATE_LIMITER_CTRL_TOKEN_RST_SHIFT 0
 
@@ -651,24 +821,35 @@ Used for arbitration between AXI masters */
 #define UDMA_M2S_STREAM_RATE_LIMITER_MASK_EXTERNAL_PAUSE (1 << 3)
 
 /**** cfg_1c register ****/
-/* Completion FIFO size
- (descriptors per queue) */
+/*
+ * Completion FIFO size
+ *  (descriptors per queue)
+ */
 #define UDMA_M2S_COMP_CFG_1C_COMP_FIFO_DEPTH_MASK 0x000000FF
 #define UDMA_M2S_COMP_CFG_1C_COMP_FIFO_DEPTH_SHIFT 0
-/* Unacknowledged FIFO size.
-(descriptors) */
+/*
+ * Unacknowledged FIFO size.
+ * (descriptors)
+ */
 #define UDMA_M2S_COMP_CFG_1C_UNACK_FIFO_DEPTH_MASK 0x0001FF00
 #define UDMA_M2S_COMP_CFG_1C_UNACK_FIFO_DEPTH_SHIFT 8
-/* Enable promotion */
+/*
+ * Enable promotion.
+ * Enable the promotion of the current queue in progress for the completion
+ * write scheduler.
+ */
 #define UDMA_M2S_COMP_CFG_1C_Q_PROMOTION (1 << 24)
 /* Force RR arbitration in the completion arbiter */
 #define UDMA_M2S_COMP_CFG_1C_FORCE_RR (1 << 25)
-/* Minimum number of free completion entries to qualify for prom ... */
+/* Minimum number of free completion entries to qualify for promotion */
 #define UDMA_M2S_COMP_CFG_1C_Q_FREE_MIN_MASK 0xF0000000
 #define UDMA_M2S_COMP_CFG_1C_Q_FREE_MIN_SHIFT 28
 
 /**** cfg_application_ack register ****/
-/* Acknowledge timeout timer */
+/*
+ * Acknowledge timeout timer.
+ * ACK from the application through the stream interface)
+ */
 #define UDMA_M2S_COMP_CFG_APPLICATION_ACK_TOUT_MASK 0x00FFFFFF
 #define UDMA_M2S_COMP_CFG_APPLICATION_ACK_TOUT_SHIFT 0
 
@@ -677,21 +858,33 @@ Used for arbitration between AXI masters */
 #define UDMA_M2S_STAT_CFG_ST_USE_EXTRA_LEN (1 << 0)
 
 /**** reg_1 register ****/
-/* Read the size of the descriptor prefetch FIFO (descriptors) */
+/*
+ * Read the size of the descriptor prefetch FIFO
+ * (descriptors).
+ */
 #define UDMA_M2S_FEATURE_REG_1_DESC_PREFERCH_FIFO_DEPTH_MASK 0x000000FF
 #define UDMA_M2S_FEATURE_REG_1_DESC_PREFERCH_FIFO_DEPTH_SHIFT 0
 
 /**** reg_3 register ****/
-/* Maximum number of data beats in the data read FIFO */
+/*
+ * Maximum number of data beats in the data read FIFO.
+ * Defined based on data FIFO size
+ * (default FIFO size 2KB → 128 beats)
+ */
 #define UDMA_M2S_FEATURE_REG_3_DATA_FIFO_DEPTH_MASK 0x000003FF
 #define UDMA_M2S_FEATURE_REG_3_DATA_FIFO_DEPTH_SHIFT 0
-/* Maximum number of packets in the data read FIFO */
+/*
+ * Maximum number of packets in the data read FIFO.
+ * Defined based on header FIFO size
+ */
 #define UDMA_M2S_FEATURE_REG_3_DATA_RD_MAX_PKT_LIMIT_MASK 0x00FF0000
 #define UDMA_M2S_FEATURE_REG_3_DATA_RD_MAX_PKT_LIMIT_SHIFT 16
 
 /**** reg_4 register ****/
-/* Size of the completion FIFO of each queue
-(words) */
+/*
+ * Size of the completion FIFO of each queue
+ * (words)
+ */
 #define UDMA_M2S_FEATURE_REG_4_COMP_FIFO_DEPTH_MASK 0x000000FF
 #define UDMA_M2S_FEATURE_REG_4_COMP_FIFO_DEPTH_SHIFT 0
 /* Size of the unacknowledged FIFO (descriptors) */
@@ -705,29 +898,46 @@ Used for arbitration between AXI masters */
 /* Maximum number of outstanding descriptor reads to AXI */
 #define UDMA_M2S_FEATURE_REG_5_MAX_DESC_RD_OSTAND_MASK 0x00003F00
 #define UDMA_M2S_FEATURE_REG_5_MAX_DESC_RD_OSTAND_SHIFT 8
-/* Maximum number of outstanding descriptor writes to AXI */
+/*
+ * Maximum number of outstanding descriptor writes to AXI.
+ * (AXI transactions)
+ */
 #define UDMA_M2S_FEATURE_REG_5_MAX_COMP_REQ_MASK 0x003F0000
 #define UDMA_M2S_FEATURE_REG_5_MAX_COMP_REQ_SHIFT 16
-/* Maximum number of outstanding data beats for descriptor write ... */
+/*
+ * Maximum number of outstanding data beats for descriptor write to AXI.
+ * (AXI beats)
+ */
 #define UDMA_M2S_FEATURE_REG_5_MAX_COMP_DATA_WR_OSTAND_MASK 0xFF000000
 #define UDMA_M2S_FEATURE_REG_5_MAX_COMP_DATA_WR_OSTAND_SHIFT 24
 
 /**** cfg register ****/
-/* Length offset to be used for each packet from this queue */
+/*
+ * Length offset to be used for each packet from this queue.
+ * (length offset is used for the scheduler and rate limiter).
+ */
 #define UDMA_M2S_Q_CFG_PKT_LEN_OFFSET_MASK 0x0000FFFF
 #define UDMA_M2S_Q_CFG_PKT_LEN_OFFSET_SHIFT 0
-/* Enable operation of this queue.
-Start prefetch. */
+/*
+ * Enable operation of this queue.
+ * Start prefetch.
+ */
 #define UDMA_M2S_Q_CFG_EN_PREF       (1 << 16)
-/* Enable operation of this queue.
-Start scheduling. */
+/*
+ * Enable operation of this queue.
+ * Start scheduling.
+ */
 #define UDMA_M2S_Q_CFG_EN_SCHEDULING (1 << 17)
 /* Allow prefetch of less than minimum prefetch burst size. */
 #define UDMA_M2S_Q_CFG_ALLOW_LT_MIN_PREF (1 << 20)
 /* Configure the AXI AWCACHE for completion write.  */
 #define UDMA_M2S_Q_CFG_AXI_AWCACHE_COMP_MASK 0x0F000000
 #define UDMA_M2S_Q_CFG_AXI_AWCACHE_COMP_SHIFT 24
-/* AXI QoS for the selected queue */
+/*
+ * AXI QoS for the selected queue.
+ * This value is used in AXI transactions associated with this queue and the
+ * prefetch and completion arbiters.
+ */
 #define UDMA_M2S_Q_CFG_AXI_QOS_MASK  0x70000000
 #define UDMA_M2S_Q_CFG_AXI_QOS_SHIFT 28
 
@@ -735,25 +945,51 @@ Start scheduling. */
 /* Indicates how many entries are used in the queue */
 #define UDMA_M2S_Q_STATUS_Q_USED_MASK 0x01FFFFFF
 #define UDMA_M2S_Q_STATUS_Q_USED_SHIFT 0
-/* prefetch status0 – prefetch operation is stopped1 – prefetch  ... */
+/*
+ * prefetch status
+ * 0 – prefetch operation is stopped
+ * 1 – prefetch is operational
+ */
 #define UDMA_M2S_Q_STATUS_PREFETCH   (1 << 28)
-/* Queue scheduler status0 – queue is not active and not partici ... */
+/*
+ * Queue scheduler status
+ * 0 – queue is not active and not participating in scheduling
+ * 1 – queue is active and participating in the scheduling process
+ */
 #define UDMA_M2S_Q_STATUS_SCHEDULER  (1 << 29)
 /* Queue is suspended due to DMB */
 #define UDMA_M2S_Q_STATUS_Q_DMB      (1 << 30)
-/* Queue full indication */
+/*
+ * Queue full indication.
+ * (used by the host when head pointer equals tail pointer).
+ */
 #define UDMA_M2S_Q_STATUS_Q_FULL     (1 << 31)
-/* M2S Descriptor Ring Base address [31:4] */
+/*
+ * M2S Descriptor Ring Base address [31:4].
+ * Value of the base address of the M2S descriptor ring
+ * [3:0] - 0 - 16B alignment is enforced
+ * ([11:4] should be 0 for 4KB alignment)
+ */
 #define UDMA_M2S_Q_TDRBP_LOW_ADDR_MASK 0xFFFFFFF0
 #define UDMA_M2S_Q_TDRBP_LOW_ADDR_SHIFT 4
 
 /**** TDRL register ****/
-/* Length of the descriptor ring */
+/*
+ * Length of the descriptor ring.
+ * (descriptors)
+ * Associated with the ring base address, ends at maximum burst size alignment.
+ */
 #define UDMA_M2S_Q_TDRL_OFFSET_MASK  0x00FFFFFF
 #define UDMA_M2S_Q_TDRL_OFFSET_SHIFT 0
 
 /**** TDRHP register ****/
-/* Relative offset of the next descriptor that needs to be read  ... */
+/*
+ * Relative offset of the next descriptor that needs to be read into the
+ * prefetch FIFO.
+ * Incremented when the DMA reads valid descriptors from the host memory to the
+ * prefetch FIFO.
+ * Note that this is the offset in # of descriptors and not in byte address.
+ */
 #define UDMA_M2S_Q_TDRHP_OFFSET_MASK 0x00FFFFFF
 #define UDMA_M2S_Q_TDRHP_OFFSET_SHIFT 0
 /* Ring ID */
@@ -766,7 +1002,10 @@ Start scheduling. */
 #define UDMA_M2S_Q_TDRTP_INC_VAL_SHIFT 0
 
 /**** TDRTP register ****/
-/* Relative offset of the next free descriptor in the host memor ... */
+/*
+ * Relative offset of the next free descriptor in the host memory.
+ * Note that this is the offset in # of descriptors and not in byte address.
+ */
 #define UDMA_M2S_Q_TDRTP_OFFSET_MASK 0x00FFFFFF
 #define UDMA_M2S_Q_TDRTP_OFFSET_SHIFT 0
 /* Ring ID */
@@ -774,18 +1013,33 @@ Start scheduling. */
 #define UDMA_M2S_Q_TDRTP_RING_ID_SHIFT 30
 
 /**** TDCP register ****/
-/* Relative offset of the first descriptor in the prefetch FIFO */
+/*
+ * Relative offset of the first descriptor in the prefetch FIFO.
+ * This is the next descriptor that will be read by the scheduler.
+ */
 #define UDMA_M2S_Q_TDCP_OFFSET_MASK  0x00FFFFFF
 #define UDMA_M2S_Q_TDCP_OFFSET_SHIFT 0
 /* Ring ID */
 #define UDMA_M2S_Q_TDCP_RING_ID_MASK 0xC0000000
 #define UDMA_M2S_Q_TDCP_RING_ID_SHIFT 30
-/* M2S Descriptor Ring Base address [31:4] */
+/*
+ * M2S Descriptor Ring Base address [31:4].
+ * Value of the base address of the M2S descriptor ring
+ * [3:0] - 0 - 16B alignment is enforced
+ * ([11:4] should be 0 for 4KB alignment)
+ * NOTE:
+ * Length of the descriptor ring (in descriptors) associated with the ring base
+ * address. Ends at maximum burst size alignment.
+ */
 #define UDMA_M2S_Q_TCRBP_LOW_ADDR_MASK 0xFFFFFFF0
 #define UDMA_M2S_Q_TCRBP_LOW_ADDR_SHIFT 4
 
 /**** TCRHP register ****/
-/* Relative offset of the next descriptor that needs to be updat ... */
+/*
+ * Relative offset of the next descriptor that needs to be updated by the
+ * completion controller.
+ * Note: This is in descriptors and not in byte address.
+ */
 #define UDMA_M2S_Q_TCRHP_OFFSET_MASK 0x00FFFFFF
 #define UDMA_M2S_Q_TCRHP_OFFSET_SHIFT 0
 /* Ring ID */
@@ -793,7 +1047,11 @@ Start scheduling. */
 #define UDMA_M2S_Q_TCRHP_RING_ID_SHIFT 30
 
 /**** TCRHP_internal register ****/
-/* Relative offset of the next descriptor that needs to be updat ... */
+/*
+ * Relative offset of the next descriptor that needs to be updated by the
+ * completion controller.
+ * Note: This is in descriptors and not in byte address.
+ */
 #define UDMA_M2S_Q_TCRHP_INTERNAL_OFFSET_MASK 0x00FFFFFF
 #define UDMA_M2S_Q_TCRHP_INTERNAL_OFFSET_SHIFT 0
 /* Ring ID */
@@ -833,7 +1091,10 @@ Start scheduling. */
 #define UDMA_M2S_Q_RATE_LIMIT_MASK_EXTERNAL_RATE_LIMITER (1 << 0)
 /* Mask the internal rate limiter. */
 #define UDMA_M2S_Q_RATE_LIMIT_MASK_INTERNAL_RATE_LIMITER (1 << 1)
-/* Mask the internal pause mechanism for DMB */
+/*
+ * Mask the internal pause mechanism for DMB.
+ * (Data Memory Barrier).
+ */
 #define UDMA_M2S_Q_RATE_LIMIT_MASK_INTERNAL_PAUSE_DMB (1 << 2)
 /* Mask the external application pause interface. */
 #define UDMA_M2S_Q_RATE_LIMIT_MASK_EXTERNAL_PAUSE (1 << 3)
@@ -848,7 +1109,11 @@ Start scheduling. */
 #define UDMA_M2S_Q_DWRR_CFG_1_PAUSE  (1 << 25)
 
 /**** dwrr_cfg_2 register ****/
-/* Value for the queue QoS */
+/*
+ * Value for the queue QoS.
+ * Queues with the same QoS value are scheduled with RR/DWRR.
+ * Only LOG(number of queues) is used.
+ */
 #define UDMA_M2S_Q_DWRR_CFG_2_Q_QOS_MASK 0x000000FF
 #define UDMA_M2S_Q_DWRR_CFG_2_Q_QOS_SHIFT 0
 
@@ -868,8 +1133,10 @@ Start scheduling. */
 #define UDMA_M2S_Q_COMP_CFG_DIS_COMP_COAL (1 << 1)
 
 /**** q_sw_ctrl register ****/
-/* Reset the DMB hardware barrier
-(enable queue operation). */
+/*
+ * Reset the DMB hardware barrier
+ * (enable queue operation).
+ */
 #define UDMA_M2S_Q_SW_CTRL_RST_DMB (1 << 0)
 /* Reset the tail pointer hardware. */
 #define UDMA_M2S_Q_SW_CTRL_RST_TAIL_PTR (1 << 1)

@@ -60,6 +60,7 @@ SYNO_DISK_VENDOR gDiskVendor[] = {
 	{"OCZ", 3},
 	{"Crucial", 7},
 	{"Micron", 6},
+	{"MICRON", 6},
 	{NULL, 0}
 };
 
@@ -70,6 +71,11 @@ SYNO_DISK_VENDOR gDiskVendor[] = {
 extern int syno_get_ata_identity(struct scsi_device *sdev, u16 *id);
 #endif /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
 #endif /* CONFIG_SYNO_INQUIRY_STANDARD */
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#include <linux/libata.h>
+#define to_ata_port(d) container_of(d, struct ata_port, tdev)
+extern u8 syno_is_synology_pm(const struct ata_port *ap);
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 
 #define ALLOC_FAILURE_MSG	KERN_ERR "%s: Allocation failure during" \
 	" SCSI scanning, some SCSI devices might not be configured\n"
@@ -284,6 +290,7 @@ static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
 #ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 	INIT_LIST_HEAD(&sdev->spinup_list);
 	sdev->spinup_in_process = 0;
+	sdev->spinup_timer = 0;
 	sdev->spinup_queue = NULL;
 #endif /* CONFIG_SYNO_SAS_SPINUP_DELAY */
 
@@ -782,6 +789,31 @@ static void sanitize_inquiry_string(unsigned char *s, int len)
 	}
 }
 
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+static int syno_is_pmp_device(struct device *dev)
+{
+	struct ata_port *pPmPort = NULL;
+	int iRet = 0;
+	if (!dev || !dev->type) {
+		goto End;
+	}
+	while (strcmp(dev->type->name, "ata_port")) {
+		if (!dev->type->name || !dev->parent) {
+			goto End;
+		}
+		dev = dev->parent;
+	}
+	pPmPort = to_ata_port(dev);
+	if(!pPmPort || !syno_is_synology_pm(pPmPort)) {
+		goto End;
+	}
+
+	iRet = 1;
+End:
+	return iRet;
+}
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+
 /**
  * scsi_probe_lun - probe a single LUN using a SCSI INQUIRY
  * @sdev:	scsi_device to probe
@@ -804,6 +836,17 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	int response_len = 0;
 	int pass, count, result;
 	struct scsi_sense_hdr sshdr;
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+	/* Standard Inquiry Data for Virtual Device */
+	unsigned char SYNO_INQUIRY_VIRTUALD_DATA[] = {
+					0x03,0x00,0x04,0x02,0x20,0x00,0x00,0x00,
+					'S', 'y', 'n', 'o', 'l', 'o', 'g', 'y',
+					'V', 'i', 'r', 't', 'u', 'a', 'l', ' ',
+					'D', 'e', 'v', 'i', 'c', 'e', ' ', ' ',
+					0x31,0x2E,0x30,0x30
+					};
+	int iVirtualInquiryLen = 36;
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 
 	*bflags = 0;
 
@@ -829,11 +872,24 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 
 		memset(inq_result, 0, try_inquiry_len);
 
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+		if (sdev->channel == SYNO_PM_VIRTUAL_SCSI_CHANNEL) {
+			if (syno_is_pmp_device(&sdev->sdev_gendev)) {
+				result = 0;
+				memset(inq_result, 0, iVirtualInquiryLen);
+				memcpy(inq_result, SYNO_INQUIRY_VIRTUALD_DATA, iVirtualInquiryLen);
+				sdev->inquiry_len = iVirtualInquiryLen;
+			}
+		} else {
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 		result = scsi_execute_req(sdev,  scsi_cmd, DMA_FROM_DEVICE,
 					  inq_result, try_inquiry_len, &sshdr,
 					  HZ / 2 + HZ * scsi_inq_timeout, 3,
 					  &resid);
 
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+		}
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 		SCSI_LOG_SCAN_BUS(3, printk(KERN_INFO "scsi scan: INQUIRY %s "
 				"with code 0x%x\n",
 				result ? "failed" : "successful", result));
@@ -1035,6 +1091,10 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	sdev->vendor = (char *) (sdev->inquiry + 8);
 #ifdef CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
 	if(!(SYNO_PORT_TYPE_USB == sdev->host->hostt->syno_port_type)) {
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+		if(sdev->channel != SYNO_PM_VIRTUAL_SCSI_CHANNEL ||
+				!syno_is_pmp_device(&sdev->sdev_gendev))
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 		scsi_ata_identify_device_get_model_name(sdev, (unsigned char *)&szDiskModel);
 	}
 

@@ -441,7 +441,23 @@ extern "C" {
 	MV_BOBCAT2_A0_NAME,\
 	MV_BOBCAT2_B0_NAME,\
 }
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+/* BobK  Family */
+#define MV_BOBK_DEV_ID		0xBC00
 
+/* BobK deivces matrix */
+#define MV_BOBK_CETUS_98DX4235_DEV_ID		0xBE00
+#define MV_BOBK_CAELUM_98DX4203_DEV_ID		0xBC00
+#define MV_BOBK_LEWIS_98DX8212_DEV_ID		0xBE10
+
+/* BobK  Revisions */
+#define MV_BOBK_A0_ID		0x0
+#define MV_BOBK_A0_NAME		"A0"
+
+#define MV_BOBK_ID_ARRAY { \
+	 MV_BOBK_A0_NAME,\
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
  /* Lion2  Family */
 #define MV_LION2_DEV_ID		0x8000
 

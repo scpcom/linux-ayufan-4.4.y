@@ -442,8 +442,13 @@ int fat_fill_inode(struct inode *inode, struct msdos_dir_entry *de)
 
 	fat_time_fat2unix(sbi, &inode->i_mtime, de->time, de->date, 0);
 	if (sbi->options.isvfat) {
+#ifdef CONFIG_SYNO_FAT_CREATE_TIME
+		fat_time_fat2unix(sbi, &inode->i_create_time, de->ctime,
+				  de->cdate, de->ctime_cs);
+#else
 		fat_time_fat2unix(sbi, &inode->i_ctime, de->ctime,
 				  de->cdate, de->ctime_cs);
+#endif /* CONFIG_SYNO_FAT_CREATE_TIME */
 		fat_time_fat2unix(sbi, &inode->i_atime, 0, de->adate, 0);
 	} else
 		inode->i_ctime = inode->i_atime = inode->i_mtime;
@@ -639,6 +644,8 @@ static int fat_remount(struct super_block *sb, int *flags, char *data)
 	struct msdos_sb_info *sbi = MSDOS_SB(sb);
 	*flags |= MS_NODIRATIME | (sbi->options.isvfat ? 0 : MS_NOATIME);
 
+	sync_filesystem(sb);
+
 	/* make sure we update state on remount. */
 	new_rdonly = *flags & MS_RDONLY;
 	if (new_rdonly != (sb->s_flags & MS_RDONLY)) {
@@ -719,8 +726,13 @@ retry:
 			  &raw_entry->date, NULL);
 	if (sbi->options.isvfat) {
 		__le16 atime;
+#ifdef CONFIG_SYNO_FAT_CREATE_TIME
+		fat_time_unix2fat(sbi, &inode->i_create_time, &raw_entry->ctime,
+				  &raw_entry->cdate, &raw_entry->ctime_cs);
+#else
 		fat_time_unix2fat(sbi, &inode->i_ctime, &raw_entry->ctime,
 				  &raw_entry->cdate, &raw_entry->ctime_cs);
+#endif /* CONFIG_SYNO_FAT_CREATE_TIME */
 		fat_time_unix2fat(sbi, &inode->i_atime, &atime,
 				  &raw_entry->adate, NULL);
 	}

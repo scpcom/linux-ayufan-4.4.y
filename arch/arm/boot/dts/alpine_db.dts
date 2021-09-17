@@ -19,9 +19,8 @@
 /include/ "alpine.dtsi"
 
 / {
-	version = "2.4";
+	version = "2.5";
 	model = "Annapurna Labs Alpine Dev Board";
-	compatible = "annapurna-labs,alpine";
 
 	hypervisor {
 	};
@@ -167,6 +166,7 @@
 				 *              r2l/l2r clocks are bypassed
 				 * - "pcie_g2x2_usb" - PCIe gen 2 x2 + USB
 				 * - "sgmii" - SGMII (up to 4 ports)
+				 * - "sgmii-2.5g" - SGMII 2.5G (up to 4 ports)
 				 * - "10gbe" - 10GbE (up to 4 ports)
 				 */
 
@@ -437,7 +437,7 @@
 					status = "enabled";
 
 					/*
-					 * MAC mode (rgmii, sgmii, 1g-serial, 10g-serial, auto-detect, auto-detect-auto-speed)
+					 * MAC mode (rgmii, sgmii, sgmii-2.5g, 1g-serial, 10g-serial, auto-detect, auto-detect-auto-speed)
 					 * - auto-detect mode is relevant when SFP exists. in this mode
 					 * SFP EEPROM will be read to detect what SFP inserted
 					 * - auto-detect-auto-speed mode is relevant when SFP exists and
@@ -499,7 +499,7 @@
 					status = "enabled";
 
 					/*
-					 * MAC mode (rgmii, sgmii, 1g-serial, 10g-serial, auto-detect, auto-detect-auto-speed)
+					 * MAC mode (rgmii, sgmii, sgmii-2.5g, 1g-serial, 10g-serial, auto-detect, auto-detect-auto-speed)
 					 * - auto-detect mode is relevant when SFP exists. in this mode
 					 * SFP EEPROM will be read to detect what SFP inserted
 					 * - auto-detect-auto-speed mode is relevant when SFP exists and
@@ -532,7 +532,7 @@
 					status = "enabled";
 
 					/*
-					 * MAC mode (rgmii, sgmii, 1g-serial, 10g-serial, auto-detect, auto-detect-auto-speed)
+					 * MAC mode (rgmii, sgmii, sgmii-2.5g, 1g-serial, 10g-serial, auto-detect, auto-detect-auto-speed)
 					 * - auto-detect mode is relevant when SFP exists. in this mode
 					 * SFP EEPROM will be read to detect what SFP inserted
 					 * - auto-detect-auto-speed mode is relevant when SFP exists and
@@ -593,7 +593,7 @@
 					status = "enabled";
 
 					/*
-					 * MAC mode (rgmii, sgmii, 1g-serial, 10g-serial, auto-detect, auto-detect-auto-speed)
+					 * MAC mode (rgmii, sgmii, sgmii-2.5g, 1g-serial, 10g-serial, auto-detect, auto-detect-auto-speed)
 					 * - auto-detect mode is relevant when SFP exists. in this mode
 					 * SFP EEPROM will be read to detect what SFP inserted
 					 * - auto-detect-auto-speed mode is relevant when SFP exists and
@@ -656,7 +656,7 @@
 		/* pmu { status = "disabled"; }; */
 		/* arch-timer { compatible = "disabled"; }; */
 		timer0 { status = "disabled"; };
-		timer1 { status = "disabled"; };
+		/* timer1 { status = "disabled"; }; */
 		timer2 { status = "disabled"; };
 		timer3 { status = "disabled"; };
 		wdt1 { status = "disabled"; };
@@ -685,6 +685,8 @@
 		nand-flash {
 			#address-cells = <1>;
 			#size-cells = <1>;
+
+			max-onfi-timing-mode = <1>;
 
 			partition@0 {
 				label = "al_boot";
@@ -726,7 +728,7 @@
 				#address-cells = <1>;
 				#size-cells = <1>;
 				compatible = "spi_flash_jedec_detection";
-				spi-max-frequency = <25000000>; /* 25MHz */
+				spi-max-frequency = <37500000>; /* 37.5MHz */
 				reg = <0>;
 
 				partition@0 {

@@ -577,6 +577,9 @@ struct usb_device {
 	int maxchild;
 
 	u32 quirks;
+#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+	u32 syno_quirks;
+#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
 	atomic_t urbnum;
 
 	unsigned long active_duration;

@@ -296,8 +296,6 @@ __read_mostly int scheduler_running;
  */
 int sysctl_sched_rt_runtime = 950000;
 
-
-
 /*
  * __task_rq_lock - lock the rq @p resides on.
  */
@@ -2080,7 +2078,6 @@ unsigned long this_cpu_load(void)
 	struct rq *this = this_rq();
 	return this->cpu_load[0];
 }
-
 
 /*
  * Global load-average calculations
@@ -5270,6 +5267,14 @@ static int __cpuinit sched_cpu_active(struct notifier_block *nfb,
 				      unsigned long action, void *hcpu)
 {
 	switch (action & ~CPU_TASKS_FROZEN) {
+	case CPU_ONLINE:
+		/*
+		 * At this point a starting CPU has marked itself as online via
+		 * set_cpu_online(). But it might not yet have marked itself
+		 * as active, which is essential from here on.
+		 *
+		 * Thus, fall-through and help the starting CPU along.
+		 */
 	case CPU_DOWN_FAILED:
 		set_cpu_active((long)hcpu, true);
 		return NOTIFY_OK;

@@ -992,7 +992,8 @@ grow_dev_page(struct block_device *bdev, sector_t block,
 				(sector_t)((sector_t)index <<
 					(sector_t)sizebits), size);
 #else /* CONFIG_SYNO_LSP_ARMADA */
-						index << sizebits, size);
+						(sector_t)index << sizebits,
+						size);
 #endif /* CONFIG_SYNO_LSP_ARMADA */
 			goto done;
 		}
@@ -1016,10 +1017,11 @@ grow_dev_page(struct block_device *bdev, sector_t block,
 	link_dev_buffers(page, bh);
 #if defined(CONFIG_SYNO_LSP_ARMADA)
 	end_block = init_page_buffers(page, bdev,
-			(sector_t)((sector_t)index << (sector_t)sizebits), size);
+			(sector_t)((sector_t)index << (sector_t)sizebits),
 #else /* CONFIG_SYNO_LSP_ARMADA */
-	end_block = init_page_buffers(page, bdev, index << sizebits, size);
+	end_block = init_page_buffers(page, bdev, (sector_t)index << sizebits,
 #endif /* CONFIG_SYNO_LSP_ARMADA */
+			size);
 	spin_unlock(&inode->i_mapping->private_lock);
 done:
 	ret = (block < end_block) ? 1 : -ENXIO;

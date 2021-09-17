@@ -136,6 +136,9 @@ static int al_crypto_pci_probe(
 	pci_set_drvdata(pdev, device);
 	dev_set_drvdata(dev, device);
 
+#ifdef CONFIG_BTRFS_AL_FAST_CRC_DMA
+	BUG_ON(!al_crypto_get_use_virtual_function());
+#endif
 	/*
 	 * When VF is used the PF is dedicated to crc and the VF is dedicated
 	 * to crypto
@@ -143,8 +146,12 @@ static int al_crypto_pci_probe(
 	if (al_crypto_get_use_virtual_function()) {
 		if (pdev->is_physfn && (pci_sriov_get_totalvfs(pdev) > 0))
 			sriov_crc_channels = 0;
-		else if (pdev->is_virtfn)
+		else if (pdev->is_virtfn) {
 			sriov_crc_channels = al_crypto_get_max_channels();
+#ifdef CONFIG_BTRFS_AL_FAST_CRC_DMA
+			BUG_ON(sriov_crc_channels < NR_CPUS);
+#endif
+		}
 	}
 
 	device->max_channels = al_crypto_get_max_channels();

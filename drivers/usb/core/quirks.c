@@ -13,6 +13,9 @@
 
 #include <linux/usb.h>
 #include <linux/usb/quirks.h>
+#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+#include <linux/usb/syno_quirks.h>
+#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
 #include "usb.h"
 
 /* Lists of quirky USB devices, split in device quirks and interface quirks.
@@ -164,6 +167,47 @@ static const struct usb_device_id usb_quirk_list[] = {
 	{ }  /* terminating entry must be last */
 };
 
+/* List of quirky USB devices which should be applied with Synology USB quirks
+ */
+#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+static const struct usb_device_id syno_usb_quirk_list[] = {
+	/* Cyper Power UPSes */
+	{ USB_DEVICE(0x0764, 0x0005), .driver_info =
+		SYNO_USB_QUIRK_UPS_DISCONNECT_FILTER },
+
+	/* Cyper Power UPSes, e.g. CP1500 AVR UPS */
+	{ USB_DEVICE(0x0764, 0x0501), .driver_info =
+		SYNO_USB_QUIRK_UPS_DISCONNECT_FILTER },
+
+	/* Cyper Power UPSes, e.g. PR1500LCDRT2U UPS */
+	{ USB_DEVICE(0x0764, 0x0601), .driver_info =
+		SYNO_USB_QUIRK_UPS_DISCONNECT_FILTER },
+
+	/* MGE UPSes, e.g. EATON Ellipse PRO 650 IEC */
+	{ USB_DEVICE(0x0463, 0xffff), .driver_info =
+		SYNO_USB_QUIRK_UPS_DISCONNECT_FILTER },
+
+	/* UPSes, e.g. FT-BS 500VA */
+	{ USB_DEVICE(0x0665, 0x5161), .driver_info =
+		SYNO_USB_QUIRK_UPS_DISCONNECT_FILTER |
+		SYNO_USB_QUIRK_LIMITED_UPS_DISCONNECT_FILTERING },
+
+	/* APC UPSes, e.g. APC BR550GI */
+	{ USB_DEVICE(0x051d, 0x0002), .driver_info =
+		SYNO_USB_QUIRK_UPS_DISCONNECT_FILTER },
+
+	/* iStorage Pro series */
+	{ USB_DEVICE(0x0984, 0x1403), .driver_info =
+		SYNO_USB_QUIRK_SYNCHRONIZE_CACHE_FILTER },
+
+	/* EPSON C1100 */
+	{ USB_DEVICE(0x04b8, 0x0007), .driver_info =
+		SYNO_USB_QUIRK_HC_MORE_TRANSACTION_TRIES },
+
+	{ }  /* terminating entry must be last */
+};
+#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
+
 static const struct usb_device_id usb_interface_quirk_list[] = {
 	/* Logitech UVC Cameras */
 	{ USB_VENDOR_AND_INTERFACE_INFO(0x046d, USB_CLASS_VIDEO, 1, 0),
@@ -227,6 +271,9 @@ static u32 __usb_detect_quirks(struct usb_device *udev,
 void usb_detect_quirks(struct usb_device *udev)
 {
 	udev->quirks = __usb_detect_quirks(udev, usb_quirk_list);
+#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+	udev->syno_quirks = __usb_detect_quirks(udev, syno_usb_quirk_list);
+#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
 	if (udev->quirks)
 		dev_dbg(&udev->dev, "USB quirks for this device: %x\n",
 			udev->quirks);

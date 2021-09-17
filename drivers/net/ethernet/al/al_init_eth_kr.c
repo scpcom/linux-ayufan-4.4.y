@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -404,8 +404,8 @@ int al_eth_kr_lt_transmitter_task_run(struct al_eth_kr_data *kr_data)
 {
 	struct al_eth_kr_status_report_data report;
 	unsigned int coeff_status_cur;
-	struct al_eth_kr_coef_up_data ldcoeff = {0};
-	unsigned int val;
+	struct al_eth_kr_coef_up_data ldcoeff = { 0, 0, 0, 0, 0 };
+	uint32_t val;
 	int i;
 	enum al_eth_kr_mac_lt_state nextstate;
 	int rc = 0;
@@ -607,7 +607,7 @@ int al_eth_kr_lt_transmitter_task_run(struct al_eth_kr_data *kr_data)
 		 * We can now either choose to finish here,
 		 * or keep going with another coefficient.
 		 */
-		if (kr_data->curr_coeff < COEFF_TO_MANIPULATE_LAST) {
+		if ((int)kr_data->curr_coeff < COEFF_TO_MANIPULATE_LAST) {
 			int i;
 
 			for (i = 0 ; i < QARRAY_SIZE ; i++)
@@ -778,9 +778,11 @@ int al_eth_an_lt_execute(struct al_hal_eth_adapter	*adapter,
 			 struct al_eth_an_adv		*an_adv,
 			 struct al_eth_an_adv		*partner_adv)
 {
-	struct al_eth_kr_data		kr_data = {0};
+	struct al_eth_kr_data		kr_data;
 	int				rc;
 	struct al_serdes_adv_rx_params  rx_params;
+
+	al_memset(&kr_data, 0, sizeof(struct al_eth_kr_data));
 
 	kr_data.adapter = adapter;
 	kr_data.serdes_obj = serdes_obj;

@@ -537,6 +537,11 @@ static int ahash_init(struct ahash_request *req)
 					req_ctx->interm,
 					AL_CRYPTO_HASH_MAX_DIGEST_SIZE,
 					DMA_BIDIRECTIONAL);
+	if (dma_mapping_error(to_dev(chan), req_ctx->interm_dma_addr)) {
+		dev_err(to_dev(chan),
+			"dma_map_single failed!\n");
+		return -ENOMEM;
+	}
 	req_ctx->hashed_len = 0;
 
 	return 0;
@@ -750,6 +755,12 @@ static int ahash_process_req(struct ahash_request *req, unsigned int nbytes)
 							buf,
 							*buflen,
 							DMA_TO_DEVICE);
+			if (dma_mapping_error(to_dev(chan),
+					req_ctx->buf_dma_addr)) {
+				dev_err(to_dev(chan),
+					"dma_map_single failed!\n");
+				return -ENOMEM;
+			}
 			req_ctx->buf_dma_len = *buflen;
 		} else
 			req_ctx->buf_dma_len = 0;

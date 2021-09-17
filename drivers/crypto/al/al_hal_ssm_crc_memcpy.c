@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -599,6 +599,7 @@ int al_crc_csum_prepare(struct al_ssm_dma *dma, uint32_t qid,
 
 	return 0;
 }
+EXPORT_SYMBOL(al_crc_csum_prepare);
 
 /******************************************************************************
  *****************************************************************************/
@@ -616,6 +617,7 @@ int al_crc_memcpy_dma_action(struct al_ssm_dma *dma, uint32_t qid,
 	al_udma_desc_action_add(tx_udma_q, tx_descs);
 	return 0;
 }
+EXPORT_SYMBOL(al_crc_memcpy_dma_action);
 
 /******************************************************************************
  *****************************************************************************/
@@ -660,3 +662,4 @@ int al_crc_memcpy_dma_completion(struct al_ssm_dma *dma, uint32_t qid,
 
 	return 1;
 }
+EXPORT_SYMBOL(al_crc_memcpy_dma_completion);

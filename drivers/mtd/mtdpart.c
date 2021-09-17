@@ -30,11 +30,13 @@
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
 #include <linux/err.h>
+#include <linux/synolib.h>
 
 #include "mtdcore.h"
 
 #ifdef CONFIG_SYNO_MAC_ADDRESS
-extern unsigned char grgbLanMac[CONFIG_SYNO_MAC_MAX][16];
+extern unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
+extern int giVenderFormatVersion;
 #endif /* CONFIG_SYNO_MAC_ADDRESS */
 #ifdef CONFIG_SYNO_SERIAL
 extern char gszSerialNum[];
@@ -578,8 +580,8 @@ out_register:
 		u_char ucSum;
 #ifdef CONFIG_SYNO_MAC_ADDRESS
 		int n = 0;
-		int gVenderMacNumber = 0;
-		char rgbLanMac[CONFIG_SYNO_MAC_MAX][6];
+		int MacNumber = 0;
+		char rgbLanMac[SYNO_MAC_MAX_NUMBER][6];
 #endif /* CONFIG_SYNO_MAC_ADDRESS */
 #ifdef CONFIG_SYNO_SERIAL
 		char szSerialBuffer[32];
@@ -595,12 +597,22 @@ out_register:
 #ifdef CONFIG_SYNO_MAC_ADDRESS
 		/**
 		 * FIXME: current vender structure on arm platform only support
-		 * max 4 lans instead of CONFIG_SYNO_MAC_MAX.
+		 * max 4 lans instead of SYNO_MAC_MAX_NUMBER.
 		 * If more lans needed, check DSM #52055
 		 */
 		x = 0;
-		gVenderMacNumber = 0;
-		for (n = 0; n < CONFIG_SYNO_MAC_MAX; n++) {
+		switch (giVenderFormatVersion) {
+		case 1:
+			MacNumber = 4;
+			break;
+		case 2:
+			MacNumber = 8;
+			break;
+		default:
+			printk(KERN_ERR, "Undefined verder version %d\n", giVenderFormatVersion);
+		}
+
+		for (n = 0; n < MacNumber; n++) {
 			for (Sum=0,ucSum=0,i=0; i<6; i++) {
 				Sum+=rgbszBuf[i+x];
 				ucSum+=rgbszBuf[i+x];
@@ -633,7 +645,6 @@ out_register:
 			}
 
 			x++;
-			gVenderMacNumber++;
 		}
 #endif /* CONFIG_SYNO_MAC_ADDRESS */
 #ifdef CONFIG_SYNO_SERIAL

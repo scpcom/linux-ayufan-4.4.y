@@ -2200,11 +2200,20 @@ static inline void stmmac_rx_refill(struct stmmac_priv *priv)
 			skb = netdev_alloc_skb_ip_align(priv->dev, bfsize);
 			if (unlikely(!skb)) {
 				/* so for a while no zero-copy! */
-				priv->rx_zeroc_thresh = STMMAC_RX_THRESH(priv);
+#if defined(CONFIG_SYNO_MONACO_JUMBO_FRAME)
+				if(bfsize > DEFAULT_BUFSIZE )
+					priv->rx_zeroc_thresh = STMMAC_RX_THRESH(priv)*2;
+				else
+#endif /* CONFIG_SYNO_MONACO_JUMBO_FRAME */
+					priv->rx_zeroc_thresh = STMMAC_RX_THRESH(priv);
+
 				if (unlikely(net_ratelimit()))
 					dev_err(priv->device,
 						"fail to alloc skb entry %d\n",
 						entry);
+#if defined(CONFIG_SYNO_MONACO_JUMBO_FRAME)
+				priv->dev->stats.rx_dropped++;
+#endif /* CONFIG_SYNO_MONACO_JUMBO_FRAME */
 				break;
 			}
 

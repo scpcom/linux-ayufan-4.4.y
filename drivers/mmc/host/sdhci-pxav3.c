@@ -285,6 +285,10 @@ static int pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
 		    uhs == MMC_TIMING_UHS_DDR50) {
 			reg_val &= ~SDIO3_CONF_CLK_INV;
 			reg_val |= SDIO3_CONF_SD_FB_CLK;
+		} else if (uhs == MMC_TIMING_MMC_HS ||
+		           uhs == MMC_TIMING_SD_HS) {
+			reg_val &= ~SDIO3_CONF_CLK_INV;
+			reg_val &= ~SDIO3_CONF_SD_FB_CLK;
 		} else {
 			reg_val |= SDIO3_CONF_CLK_INV;
 			reg_val &= ~SDIO3_CONF_SD_FB_CLK;
@@ -316,13 +320,23 @@ static struct sdhci_pltfm_data sdhci_pxav3_pdata = {
 		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
 		| SDHCI_QUIRK_32BIT_ADMA_SIZE
 #if defined(CONFIG_SYNO_LSP_ARMADA)
-		| SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
+//		| SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
 		| SDHCI_QUIRK_MISSING_CAPS,
 #else /* CONFIG_SYNO_LSP_ARMADA */
 		| SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
 #endif /* CONFIG_SYNO_LSP_ARMADA */
 	.ops = &pxav3_sdhci_ops,
 };
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+static struct sdhci_pltfm_data sdhci_armada_380_pdata = {
+	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
+		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
+		| SDHCI_QUIRK_32BIT_ADMA_SIZE
+		| SDHCI_QUIRK_MISSING_CAPS,
+	.ops = &pxav3_sdhci_ops,
+};
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 
 #ifdef CONFIG_OF
 static const struct of_device_id sdhci_pxav3_of_match[] = {
@@ -333,7 +347,11 @@ static const struct of_device_id sdhci_pxav3_of_match[] = {
 	},
 	{
 		.compatible = "marvell,armada-380-sdhci",
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		.data = &sdhci_armada_380_pdata,
+#else
 		.data = &sdhci_pxav3_pdata,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 #endif /* CONFIG_SYNO_LSP_ARMADA */
 	},
 	{},

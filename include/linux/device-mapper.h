@@ -468,9 +468,9 @@ int __must_check dm_set_target_max_io_len(struct dm_target *ti, sector_t len);
 /*
  * Table reference counting.
  */
-struct dm_table *dm_get_live_table(struct mapped_device *md);
-void dm_table_get(struct dm_table *t);
-void dm_table_put(struct dm_table *t);
+struct dm_table *dm_get_live_table(struct mapped_device *md, int *srcu_idx);
+void dm_put_live_table(struct mapped_device *md, int srcu_idx);
+void dm_sync_table(struct mapped_device *md);
 
 /*
  * Queries
@@ -599,7 +599,11 @@ extern struct ratelimit_state dm_ratelimit_state;
  */
 #define dm_target_offset(ti, sector) ((sector) - (ti)->begin)
 
+#ifdef CONFIG_SYNO_DM_TO_SECTOR_FIX
+static inline sector_t to_sector(unsigned long long n)
+#else
 static inline sector_t to_sector(unsigned long n)
+#endif
 {
 	return (n >> SECTOR_SHIFT);
 }

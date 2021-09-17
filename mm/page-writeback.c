@@ -691,8 +691,13 @@ static unsigned long bdi_position_ratio(struct backing_dev_info *bdi,
 	 *     => fast response on large errors; small oscillation near setpoint
 	 */
 	setpoint = (freerun + limit) / 2;
+#ifdef CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO
+	x = div_s64(((s64)setpoint - (s64)dirty) << RATELIMIT_CALC_SHIFT,
+		    (limit - setpoint) | 1);
+#else /* CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO */
 	x = div_s64(((s64)setpoint - (s64)dirty) << RATELIMIT_CALC_SHIFT,
 		    limit - setpoint + 1);
+#endif /* CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO */
 	pos_ratio = x;
 	pos_ratio = pos_ratio * x >> RATELIMIT_CALC_SHIFT;
 	pos_ratio = pos_ratio * x >> RATELIMIT_CALC_SHIFT;
@@ -743,7 +748,11 @@ static unsigned long bdi_position_ratio(struct backing_dev_info *bdi,
 	 * scale global setpoint to bdi's:
 	 *	bdi_setpoint = setpoint * bdi_thresh / thresh
 	 */
+#ifdef CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO
+	x = div_u64((u64)bdi_thresh << 16, thresh | 1);
+#else /* CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO */
 	x = div_u64((u64)bdi_thresh << 16, thresh + 1);
+#endif /* CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO */
 	bdi_setpoint = setpoint * (u64)x >> 16;
 	/*
 	 * Use span=(8*write_bw) in single bdi case as indicated by
@@ -757,8 +766,13 @@ static unsigned long bdi_position_ratio(struct backing_dev_info *bdi,
 	x_intercept = bdi_setpoint + span;
 
 	if (bdi_dirty < x_intercept - span / 4) {
+#ifdef CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO
+		pos_ratio = div_u64(pos_ratio * (x_intercept - bdi_dirty),
+				    (x_intercept - bdi_setpoint) | 1);
+#else /* CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO */
 		pos_ratio = div_u64(pos_ratio * (x_intercept - bdi_dirty),
 				    x_intercept - bdi_setpoint + 1);
+#endif /* CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO */
 	} else
 		pos_ratio /= 4;
 

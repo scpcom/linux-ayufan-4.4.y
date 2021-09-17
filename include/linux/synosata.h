@@ -7,14 +7,14 @@
 #include <uapi/linux/synosata.h>
 
 /*
- * We use g_internal_hd_num this variable pass from uboot for determine whether wake up in sequence.
+ * We use g_syno_hdd_powerup_seq this variable pass from uboot for determine whether wake up in sequence.
  * because if we need power in sequence at booting,
  * it's mean we also need wake up in sequence for power issue
  *
- * For old product, they don't passing g_internal_hd_num from u-boot, but in new kernel it had defined.
+ * For old product, they don't passing g_syno_hdd_powerup_seq from u-boot, but in new kernel it had defined.
  * so the default value is -1, it will still doing original job. So this define can compatible to old platform.
  *
- * I put the g_internal_hd_num check in the sata driver instaed of this. Because we only need to check in
+ * I put the g_syno_hdd_powerup_seq check in the sata driver instaed of this. Because we only need to check in
  * queuecommand. Others is just callbacks. We don't need it really.
  *
  * -1 : no specify. Always do spinup delay
@@ -22,7 +22,7 @@
  * >0 : The number that we would delay
  */
 #ifdef CONFIG_SYNO_INTERNAL_HD_NUM
-extern long g_internal_hd_num;
+extern long g_syno_hdd_powerup_seq;
 extern long syno_boot_hd_count;
 #endif /* CONFIG_SYNO_INTERNAL_HD_NUM */
 
@@ -36,9 +36,9 @@ static inline void SleepForLatency(void)
 #ifdef CONFIG_SYNO_SPINUP_DELAY
 static inline void SleepForHD(int i)
 {
-	if ((syno_boot_hd_count != g_internal_hd_num - 1) && /* the last disk shouldn't wait */
-		(( g_internal_hd_num < 0 ) || /* not specified in boot command line */
-		  syno_boot_hd_count < g_internal_hd_num) ) {
+	if ((syno_boot_hd_count != g_syno_hdd_powerup_seq - 1) && /* the last disk shouldn't wait */
+		(( g_syno_hdd_powerup_seq < 0 ) || /* not specified in boot command line */
+		  syno_boot_hd_count < g_syno_hdd_powerup_seq) ) {
 		printk("Delay 10 seconds to wait for disk %d ready.\n", i);
 		mdelay(10000);
 	}
@@ -58,8 +58,8 @@ static inline void SleepForHW(int iDisk, int iIsDoLatency)
 {
 	/* the first shouldn't wait */
 	if (syno_boot_hd_count &&
-		(( g_internal_hd_num < 0 ) || /* not specified in boot command line */
-		  syno_boot_hd_count < g_internal_hd_num) ) {
+		(( g_syno_hdd_powerup_seq < 0 ) || /* not specified in boot command line */
+		  syno_boot_hd_count < g_syno_hdd_powerup_seq) ) {
 		if (iIsDoLatency) {
 			printk("Delay 5 seconds to wait for disk %d ready.\n", iDisk);
 			mdelay(5000);
@@ -446,7 +446,7 @@ syno_support_disk_num(unsigned short vendor,
 	} else if (syno_pm_is_9705(vendor, devid)) {
 		if (IS_SYNOLOGY_RX413(syno_uniq)) {
 			ret = 4;
-		} else if (IS_SYNOLOGY_RX1214(syno_uniq) || IS_SYNOLOGY_DX1215(syno_uniq)) {
+		} else if (IS_SYNOLOGY_RX1214(syno_uniq) || IS_SYNOLOGY_RX1217(syno_uniq) || IS_SYNOLOGY_DX1215(syno_uniq)) {
 			ret = 3;
 		} else {
 			printk("%s not synology device", __FUNCTION__);

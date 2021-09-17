@@ -37,6 +37,9 @@
 
 #define AL_CRYPTO_CRA_PRIORITY	300
 
+#ifdef CONFIG_BTRFS_AL_FAST_CRC_DMA
+// do nothing
+#else /* CONFIG_BTRFS_AL_FAST_CRC_DMA */
 static int crc_init(struct ahash_request *req);
 
 static int crc_update(struct ahash_request *req);
@@ -53,6 +56,7 @@ static int crc_import(struct ahash_request *req, const void *in);
 
 static int crc_setkey(struct crypto_ahash *ahash,
 			const u8 *key, unsigned int keylen);
+#endif /* CONFIG_BTRFS_AL_FAST_CRC_DMA */
 
 struct al_crc_req_ctx {
 	/* Make sure the following field isn't share the same cache line
@@ -78,6 +82,9 @@ struct al_crc_template {
 	enum al_crc_checksum_type crcsum_type;
 };
 
+#ifdef CONFIG_BTRFS_AL_FAST_CRC_DMA
+// do nothing
+#else /* CONFIG_BTRFS_AL_FAST_CRC_DMA */
 static struct al_crc_template driver_crc[] = {
 		{
 		.name = "crc32c",
@@ -99,6 +106,7 @@ static struct al_crc_template driver_crc[] = {
 		.crcsum_type = AL_CRC_CHECKSUM_CRC32C,
 	},
 };
+#endif /* CONFIG_BTRFS_AL_FAST_CRC_DMA */
 
 struct al_crc {
 	struct list_head entry;
@@ -109,6 +117,9 @@ struct al_crc {
 
 /******************************************************************************
  *****************************************************************************/
+#ifdef CONFIG_BTRFS_AL_FAST_CRC_DMA
+// do nothing
+#else /* CONFIG_BTRFS_AL_FAST_CRC_DMA */
 static int al_crc_cra_init(struct crypto_tfm *tfm)
 {
 	struct crypto_alg *base = tfm->__crt_alg;
@@ -152,6 +163,7 @@ static void al_crc_cra_exit(struct crypto_tfm *tfm)
 
 	return;
 }
+#endif /* CONFIG_BTRFS_AL_FAST_CRC_DMA */
 
 /******************************************************************************
  *****************************************************************************/
@@ -214,6 +226,9 @@ void al_crypto_cleanup_single_crc(
 
 /******************************************************************************
  *****************************************************************************/
+#ifdef CONFIG_BTRFS_AL_FAST_CRC_DMA
+// do nothing
+#else /* CONFIG_BTRFS_AL_FAST_CRC_DMA */
 static int crc_init(struct ahash_request *req)
 {
 	struct crypto_ahash *ahash = crypto_ahash_reqtfm(req);
@@ -231,9 +246,14 @@ static int crc_init(struct ahash_request *req)
 					&req_ctx->result,
 					digestsize,
 					DMA_BIDIRECTIONAL);
+	if (dma_mapping_error(to_dev(chan), req_ctx->crc_dma_addr)) {
+		dev_err(to_dev(chan), "dma_map_single failed\n");
+		return -ENOMEM;
+	}
 
 	return 0;
 }
+#endif /* CONFIG_BTRFS_AL_FAST_CRC_DMA */
 
 /******************************************************************************
  *****************************************************************************/
@@ -336,6 +356,9 @@ static inline void crc_req_prepare_xaction(struct ahash_request *req,
 
 /******************************************************************************
  *****************************************************************************/
+#ifdef CONFIG_BTRFS_AL_FAST_CRC_DMA
+// do nothing
+#else /* CONFIG_BTRFS_AL_FAST_CRC_DMA */
 /* Main CRC processing function that handles update/final/finup and digest
  *
  * Implementation is based on the assumption that the caller waits for
@@ -558,7 +581,38 @@ static struct al_crc *al_crc_alloc(
 
 	return t_alg;
 }
+#endif /* CONFIG_BTRFS_AL_FAST_CRC_DMA */
 
+#ifdef CONFIG_BTRFS_AL_FAST_CRC_DMA
+struct al_ssm_dma *al_btrfs_crc_dma[NR_CPUS];
+int al_btrfs_crc_dma_qid[NR_CPUS];
+int al_btrfs_crc_q_count;
+
+EXPORT_SYMBOL(al_btrfs_crc_dma);
+EXPORT_SYMBOL(al_btrfs_crc_dma_qid);
+EXPORT_SYMBOL(al_btrfs_crc_q_count);
+
+int al_crypto_crc_init(struct al_crypto_device *device)
+{
+	int i;
+	/*Instead of registering AHASH crypto algs in system,
+	initialize data structures for BTRFS FAST CRC shortcut*/
+	for (i = 0; i < device->num_channels; i++) {
+		if (device->channels[i]->type == AL_MEM_CRC_MEMCPY_Q) {
+			al_btrfs_crc_dma[al_btrfs_crc_q_count] = &device->hal_crypto;
+			al_btrfs_crc_dma_qid[al_btrfs_crc_q_count] = i;
+			al_btrfs_crc_q_count++;
+		}
+	}
+	return 0;
+}
+
+void al_crypto_crc_terminate(struct al_crypto_device *device)
+{
+
+}
+
+#else
 /******************************************************************************
  *****************************************************************************/
 int al_crypto_crc_init(struct al_crypto_device *device)
@@ -618,3 +672,4 @@ void al_crypto_crc_terminate(struct al_crypto_device *device)
 		kfree(t_alg);
 	}
 }
+#endif

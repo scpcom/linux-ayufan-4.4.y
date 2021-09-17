@@ -302,7 +302,10 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 			 struct inode *parent)
 {
 	const struct prop_handler *h;
+#ifdef CONFIG_SYNO_BTRFS_RESERVE_PROP_SPACE_FOR_COMPRESSION
+#else
 	struct btrfs_root *root = BTRFS_I(inode)->root;
+#endif
 	int ret;
 
 	if (!test_bit(BTRFS_INODE_HAS_PROPS,
@@ -311,7 +314,10 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 
 	for (h = &prop_handlers[0]; h->xattr_name; h++) {
 		const char *value;
+#ifdef CONFIG_SYNO_BTRFS_RESERVE_PROP_SPACE_FOR_COMPRESSION
+#else
 		u64 num_bytes;
+#endif
 
 		if (!h->inheritable)
 			continue;
@@ -320,14 +326,20 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 		if (!value)
 			continue;
 
+#ifdef CONFIG_SYNO_BTRFS_RESERVE_PROP_SPACE_FOR_COMPRESSION
+#else
 		num_bytes = btrfs_calc_trans_metadata_size(root, 1);
 		ret = btrfs_block_rsv_add(root, trans->block_rsv,
 					  num_bytes, BTRFS_RESERVE_NO_FLUSH);
 		if (ret)
 			goto out;
+#endif
 		ret = __btrfs_set_prop(trans, inode, h->xattr_name,
 				       value, strlen(value), 0);
+#ifdef CONFIG_SYNO_BTRFS_RESERVE_PROP_SPACE_FOR_COMPRESSION
+#else
 		btrfs_block_rsv_release(root, trans->block_rsv, num_bytes);
+#endif
 		if (ret)
 			goto out;
 	}

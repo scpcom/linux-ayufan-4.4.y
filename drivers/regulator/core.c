@@ -1470,7 +1470,7 @@ struct regulator *devm_regulator_get_optional(struct device *dev,
 EXPORT_SYMBOL_GPL(devm_regulator_get_optional);
 #endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
-/* Locks held by regulator_put() */
+/* regulator_list_mutex lock held by regulator_put() */
 static void _regulator_put(struct regulator *regulator)
 {
 	struct regulator_dev *rdev;

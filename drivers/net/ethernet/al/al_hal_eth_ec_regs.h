@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -236,7 +236,7 @@ Table data */
 	uint32_t default_vlan;
 	/* [0x6c] Default HASH output values */
 	uint32_t default_hash;
-	/* [0x70] Default override values, in case a packet was filte ... */
+	/* [0x70] Default override values, if a packet was filtered b ... */
 	uint32_t default_or;
 	/* [0x74] Latched information when a drop condition occurred */
 	uint32_t drop_latch;
@@ -287,7 +287,7 @@ struct al_ec_rfw_udma {
 	uint32_t def_cfg;
 };
 struct al_ec_rfw_hash {
-	/* [0x0] key configuration (320 bits */
+	/* [0x0] key configuration (320 bits) */
 	uint32_t key;
 };
 struct al_ec_rfw_priority {
@@ -340,7 +340,7 @@ struct al_ec_tso {
 	uint32_t ctrl_last;
 	/* [0x24] Additional TSO configurations */
 	uint32_t cfg_add_0;
-	/* [0x28] TSO configuration for tunneled packets */
+	/* [0x28] TSO configuration for tunnelled packets */
 	uint32_t cfg_tunnel;
 	uint32_t rsrvd[13];
 };
@@ -374,7 +374,7 @@ struct al_ec_tfw {
 	uint32_t tx_vid_table_data;
 	/* [0xc] Tx FIFO Rd configuration */
 	uint32_t tx_rd_fifo;
-	/* [0x10] Tx FIFO rRd configuration, checksum insertion */
+	/* [0x10] Tx FIFO Rd configuration, checksum insertion */
 	uint32_t tx_checksum;
 	/* [0x14] Tx forwarding general configuration register */
 	uint32_t tx_gen;
@@ -409,17 +409,17 @@ struct al_ec_tmi {
 struct al_ec_efc {
 	/* [0x0] Mask of pause_on  [7:0] for the Ethernet controller ... */
 	uint32_t ec_pause;
-	/* [0x4] Mask of Ethernet controller "almost full" indicatio ... */
+	/* [0x4] Mask of Ethernet controller Almost Full indication  ... */
 	uint32_t ec_xoff;
 	/* [0x8] Mask for generating XON indication pulse */
 	uint32_t xon;
 	/* [0xc] Mask for generating GPIO output XOFF indication fro ... */
 	uint32_t gpio;
-	/* [0x10] Rx FIFO threshold for generating the almost full in ... */
+	/* [0x10] Rx FIFO threshold for generating the Almost Full in ... */
 	uint32_t rx_fifo_af;
-	/* [0x14] Rx FIFO threshold for generating the almost full in ... */
+	/* [0x14] Rx FIFO threshold for generating the Almost Full in ... */
 	uint32_t rx_fifo_hyst;
-	/* [0x18] Rx FIFO threshold for generating the almost full in ... */
+	/* [0x18] Rx FIFO threshold for generating the Almost Full in ... */
 	uint32_t stat;
 	/* [0x1c] XOFF timer for the 1G MACSets the interval (in SB_C ... */
 	uint32_t xoff_timer_1g;
@@ -462,21 +462,21 @@ struct al_ec_fc_udma {
 	uint32_t q_gpio_7;
 	/* [0x40] Mask of "pause_on"  [7:0] for the UDMA stream inter ... */
 	uint32_t s_pause;
-	/* [0x44] Mask of Rx “almost full” indication for generating  ... */
+	/* [0x44] Mask of Rx Almost Full indication for generating XO ... */
 	uint32_t q_xoff_0;
-	/* [0x48] Mask of RXx "almost full" indication for generating ... */
+	/* [0x48] Mask of Rx Almost Full indication for generating XO ... */
 	uint32_t q_xoff_1;
-	/* [0x4c] Mask of Rx "almost full" indication for generating  ... */
+	/* [0x4c] Mask of Rx Almost Full indication for generating XO ... */
 	uint32_t q_xoff_2;
-	/* [0x50] Mask of Rx "almost full" indication for generating  ... */
+	/* [0x50] Mask of Rx Almost Full indication for generating XO ... */
 	uint32_t q_xoff_3;
-	/* [0x54] Mask of Rx "almost full" indication for generating  ... */
+	/* [0x54] Mask of Rx Almost Full indication for generating XO ... */
 	uint32_t q_xoff_4;
-	/* [0x58] Mask of Rx "almost full" indication for generating  ... */
+	/* [0x58] Mask of Rx Almost Full indication for generating XO ... */
 	uint32_t q_xoff_5;
-	/* [0x5c] Mask of Rx "almost full" indication for generating  ... */
+	/* [0x5c] Mask of Rx Almost Full indication for generating XO ... */
 	uint32_t q_xoff_6;
-	/* [0x60] Mask of Rx almost full" indication for generating X ... */
+	/* [0x60] Mask of Rx Almost Full indication for generating XO ... */
 	uint32_t q_xoff_7;
 	uint32_t rsrvd[7];
 };
@@ -492,7 +492,7 @@ struct al_ec_eee {
 	uint32_t pre_cnt;
 	/* [0x8] Number of clocks to stop MAC EEE mode after getting ... */
 	uint32_t post_cnt;
-	/* [0xc] Number of clocks to stop the TX MAC interface after ... */
+	/* [0xc] Number of clocks to stop the Tx MAC interface after ... */
 	uint32_t stop_cnt;
 	/* [0x10] EEE status */
 	uint32_t stat_eee;
@@ -501,15 +501,15 @@ struct al_ec_eee {
 struct al_ec_stat {
 	/* [0x0] Rx Frequency adjust FIFO input  packets */
 	uint32_t faf_in_rx_pkt;
-	/* [0x4] Rx Frequency adjust FIFO input  short error packets ... */
+	/* [0x4] Rx Frequency adjust FIFO input short error packets */
 	uint32_t faf_in_rx_short;
 	/* [0x8] Rx Frequency adjust FIFO input  long error packets */
 	uint32_t faf_in_rx_long;
 	/* [0xc] Rx Frequency adjust FIFO output  packets */
 	uint32_t faf_out_rx_pkt;
-	/* [0x10] Rx Frequency adjust FIFO output  short error packet ... */
+	/* [0x10] Rx Frequency adjust FIFO output short error packets ... */
 	uint32_t faf_out_rx_short;
-	/* [0x14] Rx Frequency adjust FIFO output  long error packets ... */
+	/* [0x14] Rx Frequency adjust FIFO output long error packets */
 	uint32_t faf_out_rx_long;
 	/* [0x18] Rx Frequency adjust FIFO output  drop packets */
 	uint32_t faf_out_drop;
@@ -517,7 +517,7 @@ struct al_ec_stat {
 	uint32_t rxf_in_rx_pkt;
 	/* [0x20] Number of error packets written into the Rx FIFO (w ... */
 	uint32_t rxf_in_fifo_err;
-	/* [0x24] Number of packets written into the loopback  FIFO ( ... */
+	/* [0x24] Number of packets written into the loopback FIFO (w ... */
 	uint32_t lbf_in_rx_pkt;
 	/* [0x28] Number of error packets written into the loopback F ... */
 	uint32_t lbf_in_fifo_err;
@@ -527,7 +527,7 @@ struct al_ec_stat {
 	uint32_t rxf_out_rx_2_pkt;
 	/* [0x34] Rx FIFO output drop packets from FIFO 1 */
 	uint32_t rxf_out_drop_1_pkt;
-	/* [0x38] Rx FIFO output drop packets from FIFO 2 (loop back) ... */
+	/* [0x38] Rx FIFO output drop packets from FIFO 2 (loopback) */
 	uint32_t rxf_out_drop_2_pkt;
 	/* [0x3c] Rx Parser 1, input packet counter */
 	uint32_t rpe_1_in_rx_pkt;
@@ -692,84 +692,86 @@ struct al_ec_wol {
 	uint32_t magic_pswd_l;
 	/* [0x8] Password for magic+password packet detection -  47: ... */
 	uint32_t magic_pswd_h;
-	/* [0xc] Configured L3 Destination IP address for WoL Ipv6 p ... */
+	/* [0xc] Configured L3 Destination IP address for WoL IPv6 p ... */
 	uint32_t ipv6_dip_word0;
-	/* [0x10] Configured L3 Destination IP address for WoL Ipv6 p ... */
+	/* [0x10] Configured L3 Destination IP address for WoL IPv6 p ... */
 	uint32_t ipv6_dip_word1;
-	/* [0x14] Configured L3 Destination IP address for WoL Ipv6 p ... */
+	/* [0x14] Configured L3 Destination IP address for WoL IPv6 p ... */
 	uint32_t ipv6_dip_word2;
-	/* [0x18] Configured L3 Destination IP address for WoL Ipv6 p ... */
+	/* [0x18] Configured L3 Destination IP address for WoL IPv6 p ... */
 	uint32_t ipv6_dip_word3;
-	/* [0x1c] Configured L3 Destination IP address for WoL Ipv4 p ... */
+	/* [0x1c] Configured L3 Destination IP address for WoL IPv4 p ... */
 	uint32_t ipv4_dip;
 	/* [0x20] Configured EtherType for WoL EtherType_da/EtherType ... */
 	uint32_t ethertype;
 	uint32_t rsrvd[7];
 };
 struct al_ec_pth {
-	/* [0x0] system time counter (Time of Day) */
+	/* [0x0] System time counter (Time of Day) */
 	uint32_t system_time_seconds;
-	/* [0x4] system time subseconds in a seconds (resolution wit ... */
+	/* [0x4] System time subseconds in a second (MSBs) */
 	uint32_t system_time_subseconds_msb;
-	/* [0x8] system time subseconds in a seconds (resolution wit ... */
+	/* [0x8] System time subseconds in a second (LSBs) */
 	uint32_t system_time_subseconds_lsb;
-	/* [0xc] clock period in femtoseconds */
+	/* [0xc] Clock period in femtoseconds (MSB) */
 	uint32_t clock_period_msb;
-	/* [0x10] clock period in femtoseconds */
+	/* [0x10] Clock period in femtoseconds (LSB) */
 	uint32_t clock_period_lsb;
-	/* [0x14] control for internally updating the system time reg ... */
+	/* [0x14] Control register for internal updates to the system ... */
 	uint32_t int_update_ctrl;
-	/* [0x18] value to update system time with, on next internal  ... */
+	/* [0x18] Value to update system_time_seconds with */
 	uint32_t int_update_seconds;
-	/* [0x1c] value to update system time with, on next internal  ... */
+	/* [0x1c] Value to update system_time_subseconds_msb with */
 	uint32_t int_update_subseconds_msb;
-	/* [0x20] value to update system time with, on next internal  ... */
+	/* [0x20] Value to update system_time_subseconds_lsb with */
 	uint32_t int_update_subseconds_lsb;
-	/* [0x24] control for internally updating the system time reg ... */
+	/* [0x24] Control register for external updates to the system ... */
 	uint32_t ext_update_ctrl;
-	/* [0x28] value to update system time with, on next internal  ... */
+	/* [0x28] Value to update system_time_seconds with */
 	uint32_t ext_update_seconds;
-	/* [0x2c] value to update system time with, on next internal  ... */
+	/* [0x2c] Value to update system_time_subseconds_msb with */
 	uint32_t ext_update_subseconds_msb;
-	/* [0x30] value to update system time with, on next internal  ... */
+	/* [0x30] Value to update system_time_subseconds_lsb with */
 	uint32_t ext_update_subseconds_lsb;
-	/* [0x34] value to be added to system_time upon SW read, to c ... */
+	/* [0x34] This value represents the APB transaction delay fro ... */
 	uint32_t read_compensation_subseconds_msb;
-	/* [0x38] value to be added to system_time upon SW read, to c ... */
+	/* [0x38] This value represents the APB transaction delay fro ... */
 	uint32_t read_compensation_subseconds_lsb;
-	/* [0x3c] value to be added to system_time upon SW write to c ... */
+	/* [0x3c] This value is used for two purposes:1 */
 	uint32_t int_write_compensation_subseconds_msb;
-	/* [0x40] value to be added to system_time upon SW write to c ... */
+	/* [0x40] This value is used for two purposes:1 */
 	uint32_t int_write_compensation_subseconds_lsb;
-	/* [0x44] value to be added to system_time upon system_time u ... */
+	/* [0x44] This value represents the number of cycles it for a ... */
 	uint32_t ext_write_compensation_subseconds_msb;
-	/* [0x48] value to be added to system_time upon system_time u ... */
+	/* [0x48] This value represents the number of cycles it for a ... */
 	uint32_t ext_write_compensation_subseconds_lsb;
-	/* [0x4c] value to be added to system_time before transferrin ... */
+	/* [0x4c] Value to be added to system_time before transferrin ... */
 	uint32_t sync_compensation_subseconds_msb;
-	/* [0x50] value to be added to system_time before transferrin ... */
+	/* [0x50] Value to be added to system_time before transferrin ... */
 	uint32_t sync_compensation_subseconds_lsb;
 	uint32_t rsrvd[11];
 };
 struct al_ec_pth_egress {
-	/* [0x0] control register for egress trigger #0 */
+	/* [0x0] Control register for egress trigger #k */
 	uint32_t trigger_ctrl;
-	/* [0x4] next egress trigger (#0) */
+	/* [0x4] threshold for next egress trigger (#k) - secondsWri ... */
 	uint32_t trigger_seconds;
-	/* [0x8] next egress trigger (#0) */
+	/* [0x8] Threshold for next egress trigger (#k) - subseconds ... */
 	uint32_t trigger_subseconds_msb;
-	/* [0xc] next egress trigger (#0) */
+	/* [0xc] threshold for next egress trigger (#k) - subseconds ... */
 	uint32_t trigger_subseconds_lsb;
-	/* [0x10] External output pulse width */
+	/* [0x10] External output pulse width (subseconds_msb)(Atomic ... */
 	uint32_t pulse_width_subseconds_msb;
-	/* [0x14] External output pulse width */
+	/* [0x14] External output pulse width (subseconds_lsb)(Atomic ... */
 	uint32_t pulse_width_subseconds_lsb;
 	uint32_t rsrvd[2];
 };
 struct al_ec_pth_db {
-	/* [0x0] timestamp[0], in resolution of 2^18 femtosec =~ 0 */
+	/* [0x0] timestamp[k], in resolution of 2^18 femtosec =~ 0 */
 	uint32_t ts;
-	uint32_t rsrvd[5];
+	/* [0x4] Timestamp entry is valid */
+	uint32_t qual;
+	uint32_t rsrvd[4];
 };
 struct al_ec_roce {
 	/* [0x0] RoCE configuration  */
@@ -814,7 +816,7 @@ struct al_ec_roce_qp_db {
 	/* [0xc] READ_RESPONSE Control */
 	uint32_t rr_ctrl;
 	/* [0x10] WRITE REQUEST Control */
-	uint32_t wr_ctrl;
+	uint32_t wr_ctrl;  
 	/* [0x14] WRITE REQUEST PSN control */
 	uint32_t wr_psn;
 	/* [0x18] WRITE REQUEST, LAST PSN value that the SW sampled */
@@ -850,49 +852,210 @@ struct al_ec_roce_qp_db {
 	/* [0x54] READ REQUEST FIFO control */
 	uint32_t rr_fifo_ctrl;
 };
+struct al_ec_gen_v3 {
+	/* [0x0] Bypass enable */
+	uint32_t bypass;
+	/* [0x4] Rx Completion descriptor */
+	uint32_t rx_comp_desc;
+	uint32_t rsrvd[2];
+};
+struct al_ec_tfw_v3 {
+	/* [0x0] Generic protocol detect Cam compare table address */
+	uint32_t tx_gpd_cam_addr;
+	/* [0x4] Tx Generic protocol detect Cam compare data_1 (low) ... */
+	uint32_t tx_gpd_cam_data_1;
+	/* [0x8] Tx Generic protocol detect Cam compare data_2 (high ... */
+	uint32_t tx_gpd_cam_data_2;
+	/* [0xc] Tx Generic protocol detect Cam compare mask_1 (low) ... */
+	uint32_t tx_gpd_cam_mask_1;
+	/* [0x10] Tx Generic protocol detect Cam compare mask_1 (high ... */
+	uint32_t tx_gpd_cam_mask_2;
+	/* [0x14] Tx Generic protocol detect Cam compare control */
+	uint32_t tx_gpd_cam_ctrl;
+	/* [0x18] Tx Generic crc parameters legacy */
+	uint32_t tx_gcp_legacy;
+	/* [0x1c] Tx Generic crc prameters table address */
+	uint32_t tx_gcp_table_addr;
+	/* [0x20] Tx Generic crc prameters table general */
+	uint32_t tx_gcp_table_gen;
+	/* [0x24] Tx Generic crc parametrs tabel mask word 1 */
+	uint32_t tx_gcp_table_mask_1;
+	/* [0x28] Tx Generic crc parametrs tabel mask word 2 */
+	uint32_t tx_gcp_table_mask_2;
+	/* [0x2c] Tx Generic crc parametrs tabel mask word 3 */
+	uint32_t tx_gcp_table_mask_3;
+	/* [0x30] Tx Generic crc parametrs tabel mask word 4 */
+	uint32_t tx_gcp_table_mask_4;
+	/* [0x34] Tx Generic crc parametrs tabel mask word 5 */
+	uint32_t tx_gcp_table_mask_5;
+	/* [0x38] Tx Generic crc parametrs tabel mask word 6 */
+	uint32_t tx_gcp_table_mask_6;
+	/* [0x3c] Tx Generic crc parametrs tabel crc init */
+	uint32_t tx_gcp_table_crc_init;
+	/* [0x40] Tx Generic crc parametrs tabel result configuration ... */
+	uint32_t tx_gcp_table_res;
+	/* [0x44] Tx Generic crc parameters table alu opcode */
+	uint32_t tx_gcp_table_alu_opcode;
+	/* [0x48] Tx Generic crc parameters table alu opsel */
+	uint32_t tx_gcp_table_alu_opsel;
+	/* [0x4c] Tx Generic crc parameters table alu constant value */
+	uint32_t tx_gcp_table_alu_val;
+	/* [0x50] Tx CRC/Checksum replace */
+	uint32_t crc_csum_replace;
+	/* [0x54] CRC/Checksum replace table address */
+	uint32_t crc_csum_replace_table_addr;
+	/* [0x58] CRC/Checksum replace table */
+	uint32_t crc_csum_replace_table;
+	uint32_t rsrvd;
+};
+struct al_ec_rfw_v3 {
+	/* [0x0] Rx Generic protocol detect Cam compare table addres ... */
+	uint32_t rx_gpd_cam_addr;
+	/* [0x4] Rx Generic protocol detect Cam compare data_1 (low) ... */
+	uint32_t rx_gpd_cam_data_1;
+	/* [0x8] Rx Generic protocol detect Cam compare data_2 (high ... */
+	uint32_t rx_gpd_cam_data_2;
+	/* [0xc] Rx Generic protocol detect Cam compare mask_1 (low) ... */
+	uint32_t rx_gpd_cam_mask_1;
+	/* [0x10] Rx Generic protocol detect Cam compare mask_1 (high ... */
+	uint32_t rx_gpd_cam_mask_2;
+	/* [0x14] Rx Generic protocol detect Cam compare control */
+	uint32_t rx_gpd_cam_ctrl;
+	/* [0x18] Generic protocol detect Parser result vector pointe ... */
+	uint32_t gpd_p1;
+	/* [0x1c] Generic protocol detect Parser result vector pointe ... */
+	uint32_t gpd_p2;
+	/* [0x20] Generic protocol detect Parser result vector pointe ... */
+	uint32_t gpd_p3;
+	/* [0x24] Generic protocol detect Parser result vector pointe ... */
+	uint32_t gpd_p4;
+	/* [0x28] Generic protocol detect Parser result vector pointe ... */
+	uint32_t gpd_p5;
+	/* [0x2c] Generic protocol detect Parser result vector pointe ... */
+	uint32_t gpd_p6;
+	/* [0x30] Generic protocol detect Parser result vector pointe ... */
+	uint32_t gpd_p7;
+	/* [0x34] Generic protocol detect Parser result vector pointe ... */
+	uint32_t gpd_p8;
+	/* [0x38] Rx Generic crc parameters legacy */
+	uint32_t rx_gcp_legacy;
+	/* [0x3c] Rx Generic crc prameters table address */
+	uint32_t rx_gcp_table_addr;
+	/* [0x40] Rx Generic crc prameters table general */
+	uint32_t rx_gcp_table_gen;
+	/* [0x44] Rx Generic crc parametrs tabel mask word 1 */
+	uint32_t rx_gcp_table_mask_1;
+	/* [0x48] Rx Generic crc parametrs tabel mask word 2 */
+	uint32_t rx_gcp_table_mask_2;
+	/* [0x4c] Rx Generic crc parametrs tabel mask word 3 */
+	uint32_t rx_gcp_table_mask_3;
+	/* [0x50] Rx Generic crc parametrs tabel mask word 4 */
+	uint32_t rx_gcp_table_mask_4;
+	/* [0x54] Rx Generic crc parametrs tabel mask word 5 */
+	uint32_t rx_gcp_table_mask_5;
+	/* [0x58] Rx Generic crc parametrs tabel mask word 6 */
+	uint32_t rx_gcp_table_mask_6;
+	/* [0x5c] Rx Generic crc parametrs tabel crc init */
+	uint32_t rx_gcp_table_crc_init;
+	/* [0x60] Rx Generic crc parametrs tabel result configuration ... */
+	uint32_t rx_gcp_table_res;
+	/* [0x64] Rx Generic crc  parameters table alu opcode */
+	uint32_t rx_gcp_table_alu_opcode;
+	/* [0x68] Rx Generic crc  parameters table alu opsel */
+	uint32_t rx_gcp_table_alu_opsel;
+	/* [0x6c] Rx Generic crc  parameters table alu constant value ... */
+	uint32_t rx_gcp_table_alu_val;
+	/* [0x70] Generic crc engin parameters alu Parser result vect ... */
+	uint32_t rx_gcp_alu_p1;
+	/* [0x74] Generic crc engine parameters alu Parser result vec ... */
+	uint32_t rx_gcp_alu_p2;
+	/* [0x78] Header split control table address */
+	uint32_t hs_ctrl_table_addr;
+	/* [0x7c] Header split control table */
+	uint32_t hs_ctrl_table;
+	/* [0x80] Header split control alu opcode */
+	uint32_t hs_ctrl_table_alu_opcode;
+	/* [0x84] Header split control alu opsel */
+	uint32_t hs_ctrl_table_alu_opsel;
+	/* [0x88] Header split control alu constant value */
+	uint32_t hs_ctrl_table_alu_val;
+	/* [0x8c] Header split control configuration */
+	uint32_t hs_ctrl_cfg;
+	/* [0x90] Header split control alu Parser result vector point ... */
+	uint32_t hs_ctrl_alu_p1;
+	/* [0x94] Header split control alu Parser result vector point ... */
+	uint32_t hs_ctrl_alu_p2;
+};
+struct al_ec_crypto {
+	/* [0x0] Tx inline crypto configuration */
+	uint32_t tx_config;
+	/* [0x4] Rx inline crypto configuration */
+	uint32_t rx_config;
+	/* [0x8] inline XTS alpha [31:0] */
+	uint32_t xts_alpha_1;
+	/* [0xc] inline XTS alpha [63:32] */
+	uint32_t xts_alpha_2;
+	/* [0x10] inline XTS alpha [95:64] */
+	uint32_t xts_alpha_3;
+	/* [0x14] inline XTS alpha [127:96] */
+	uint32_t xts_alpha_4;
+	/* [0x18] inline XTS sector ID increment [31:0] */
+	uint32_t xts_sector_id_1;
+	/* [0x1c] inline XTS sector ID increment [63:32] */
+	uint32_t xts_sector_id_2;
+	/* [0x20] inline XTS sector ID increment [95:64] */
+	uint32_t xts_sector_id_3;
+	/* [0x24] inline XTS sector ID increment [127:96] */
+	uint32_t xts_sector_id_4;
+};
 
 struct al_ec_regs {
 	uint32_t rsrvd_0[32];
-	struct al_ec_gen gen;                                   /* [0x80] */
-	struct al_ec_mac mac;                                   /* [0xc0] */
-	struct al_ec_rxf rxf;                                   /* [0x100] */
-	struct al_ec_epe epe[2];                                /* [0x180] */
-	struct al_ec_epe_res epe_res;                           /* [0x200] */
-	struct al_ec_epe_h epe_h[32];                           /* [0x280] */
-	struct al_ec_epe_p epe_p[32];                           /* [0x300] */
-	struct al_ec_epe_a epe_a[32];                           /* [0x680] */
-	struct al_ec_rfw rfw;                                   /* [0x700] */
-	struct al_ec_rfw_udma rfw_udma[4];                      /* [0x7f0] */
-	struct al_ec_rfw_hash rfw_hash[10];                     /* [0x800] */
-	struct al_ec_rfw_priority rfw_priority[8];              /* [0x828] */
-	struct al_ec_rfw_default rfw_default[8];                /* [0x848] */
-	struct al_ec_fwd_mac fwd_mac[32];                       /* [0x868] */
-	struct al_ec_msw msw;                                   /* [0xae8] */
-	struct al_ec_tso tso;                                   /* [0xb00] */
-	struct al_ec_tso_sel tso_sel[8];                        /* [0xb60] */
-	struct al_ec_tpe tpe;                                   /* [0xb80] */
-	struct al_ec_tpm_udma tpm_udma[4];                      /* [0xbc0] */
-	struct al_ec_tpm_sel tpm_sel[4];                        /* [0xbf0] */
-	struct al_ec_tfw tfw;                                   /* [0xc00] */
-	struct al_ec_tfw_udma tfw_udma[4];                      /* [0xc60] */
-	struct al_ec_tmi tmi;                                   /* [0xcc0] */
-	struct al_ec_efc efc;                                   /* [0xcd0] */
-	struct al_ec_fc_udma fc_udma[4];                        /* [0xd00] */
-	struct al_ec_tpg_rpa_res tpg_rpa_res;                   /* [0xf00] */
-	struct al_ec_eee eee;                                   /* [0x1000] */
-	struct al_ec_stat stat;                                 /* [0x1100] */
-	struct al_ec_stat_udma stat_udma[4];                    /* [0x1300] */
-	struct al_ec_msp msp;                                   /* [0x1700] */
-	struct al_ec_msp_p msp_p[32];                           /* [0x1740] */
-	struct al_ec_msp_c msp_c[32];                           /* [0x17c0] */
-	struct al_ec_crce crce;                                 /* [0x1b40] */
-	struct al_ec_wol wol;                                   /* [0x1b80] */
+	struct al_ec_gen gen;                                /* [0x80] */
+	struct al_ec_mac mac;                                /* [0xc0] */
+	struct al_ec_rxf rxf;                                /* [0x100] */
+	struct al_ec_epe epe[2];                             /* [0x180] */
+	struct al_ec_epe_res epe_res;                        /* [0x200] */
+	struct al_ec_epe_h epe_h[32];                        /* [0x280] */
+	struct al_ec_epe_p epe_p[32];                        /* [0x300] */
+	struct al_ec_epe_a epe_a[32];                        /* [0x680] */
+	struct al_ec_rfw rfw;                                /* [0x700] */
+	struct al_ec_rfw_udma rfw_udma[4];                   /* [0x7f0] */
+	struct al_ec_rfw_hash rfw_hash[10];                  /* [0x800] */
+	struct al_ec_rfw_priority rfw_priority[8];           /* [0x828] */
+	struct al_ec_rfw_default rfw_default[8];             /* [0x848] */
+	struct al_ec_fwd_mac fwd_mac[32];                    /* [0x868] */
+	struct al_ec_msw msw;                                /* [0xae8] */
+	struct al_ec_tso tso;                                /* [0xb00] */
+	struct al_ec_tso_sel tso_sel[8];                     /* [0xb60] */
+	struct al_ec_tpe tpe;                                /* [0xb80] */
+	struct al_ec_tpm_udma tpm_udma[4];                   /* [0xbc0] */
+	struct al_ec_tpm_sel tpm_sel[4];                     /* [0xbf0] */
+	struct al_ec_tfw tfw;                                /* [0xc00] */
+	struct al_ec_tfw_udma tfw_udma[4];                   /* [0xc60] */
+	struct al_ec_tmi tmi;                                /* [0xcc0] */
+	struct al_ec_efc efc;                                /* [0xcd0] */
+	struct al_ec_fc_udma fc_udma[4];                     /* [0xd00] */
+	struct al_ec_tpg_rpa_res tpg_rpa_res;                /* [0xf00] */
+	struct al_ec_eee eee;                                /* [0x1000] */
+	struct al_ec_stat stat;                              /* [0x1100] */
+	struct al_ec_stat_udma stat_udma[4];                 /* [0x1300] */
+	struct al_ec_msp msp;                                /* [0x1700] */
+	struct al_ec_msp_p msp_p[32];                        /* [0x1740] */
+	struct al_ec_msp_c msp_c[32];                        /* [0x17c0] */
+	struct al_ec_crce crce;                              /* [0x1b40] */
+	struct al_ec_wol wol;                                /* [0x1b80] */
 	uint32_t rsrvd_1[80];
-	struct al_ec_pth pth;                                   /* [0x1d00] */
-	struct al_ec_pth_egress pth_egress[8];                  /* [0x1d80] */
-	struct al_ec_pth_db pth_db[16];                         /* [0x1e80] */
-	struct al_ec_roce roce;                                 /* [0x2000] */
-	struct al_ec_roce_qp_db roce_qp_db[16];                 /* [0x2100] */
+	struct al_ec_pth pth;                                /* [0x1d00] */
+	struct al_ec_pth_egress pth_egress[8];               /* [0x1d80] */
+	struct al_ec_pth_db pth_db[16];                      /* [0x1e80] */
+	struct al_ec_roce roce;                              /* [0x2000] */
+	struct al_ec_roce_qp_db roce_qp_db[16];              /* [0x2100] */
+	struct al_ec_gen_v3 gen_v3;                             /* [0x2680] */
+	struct al_ec_tfw_v3 tfw_v3;                             /* [0x2690] */
+	struct al_ec_rfw_v3 rfw_v3;                             /* [0x26f0] */
+	uint32_t rsrvd_2[2];
+	struct al_ec_crypto crypto;                             /* [0x2790] */
 };
 
 /*
@@ -981,7 +1144,7 @@ struct al_ec_regs {
 #define EC_GEN_FIFO_EN_RX_FIFO           (1 << 2)
 /* Enable Rx forwarding FIFO operation. */
 #define EC_GEN_FIFO_EN_RFW_FIFO          (1 << 3)
-/* Enable Rx multistream write FIFO operation */
+/* Enable Rx multi-stream write FIFO operation */
 #define EC_GEN_FIFO_EN_MSW_FIFO          (1 << 4)
 /* Enable Rx first parser FIFO operation. */
 #define EC_GEN_FIFO_EN_RPE_1_FIFO        (1 << 5)
@@ -1049,21 +1212,28 @@ struct al_ec_regs {
 
 /**** en_ext register ****/
 /* Enable Usage of Ethernet port memories for testing */
-#define EC_GEN_EN_EXT_MEM_FOR_TEST       (1 << 0)
-/* Enable MAC loop back (RX --> TX, after MAC layer) for 802 */
+#define EC_GEN_EN_EXT_MEM_FOR_TEST_MASK  0x0000000F
+#define EC_GEN_EN_EXT_MEM_FOR_TEST_SHIFT 0
+#define EC_GEN_EN_EXT_MEM_FOR_TEST_VAL_EN	\
+	(0xa << EC_GEN_EN_EXT_MEM_FOR_TEST_SHIFT)
+#define EC_GEN_EN_EXT_MEM_FOR_TEST_VAL_DIS	\
+	(0x0 << EC_GEN_EN_EXT_MEM_FOR_TEST_SHIFT)
+/* Enable MAC loop back (Rx --> Tx, after MAC layer) for 802 */
 #define EC_GEN_EN_EXT_MAC_LB             (1 << 4)
-/* CRC forward value for the MAC TX when working in loop back mo ... */
+/* CRC forward value for the MAC Tx when working in loopback mod ... */
 #define EC_GEN_EN_EXT_MAC_LB_CRC_FWD     (1 << 5)
-/* Ready signal configuration when in loop back mode:00 – ready  ... */
+/* Ready signal configuration when in loopback mode:00 - Ready f ... */
 #define EC_GEN_EN_EXT_MAC_LB_READY_CFG_MASK 0x000000C0
 #define EC_GEN_EN_EXT_MAC_LB_READY_CFG_SHIFT 6
-/* Bypass the PTH completion update */
+/* Bypass the PTH completion update. */
 #define EC_GEN_EN_EXT_PTH_COMPLETION_BYPASS (1 << 16)
-/* selection between the 1G and 10G MAC:
-0 – 1G
-1 – 10G */
+/* Selection between the 1G and 10G MAC:
+0 - 1G
+1 - 10G */
 #define EC_GEN_EN_EXT_PTH_1_10_SEL       (1 << 17)
-/* selection between descriptor caching option (WORD selection)0 ... */
+/* avoid timestamping every pkt in 1G */
+#define EC_GEN_EN_EXT_PTH_CFG_1G_TIMESTAMP_OPT (1 << 18)
+/* Selection between descriptor caching options (WORD selection) ... */
 #define EC_GEN_EN_EXT_CACHE_WORD_SPLIT   (1 << 20)
 
 /**** gen register ****/
@@ -1195,7 +1365,7 @@ struct al_ec_regs {
 #define EC_EPE_ACT_TABLE_DATA_6_VAL_SHIFT 0
 
 /**** res_in register ****/
-/* Selector for input parse_en0 – Input vector1 – Default value  ... */
+/* Selector for input parse_en0 - Input vector1 - Default value  ... */
 #define EC_EPE_RES_IN_SEL_PARSE_EN       (1 << 0)
 /* Selector for input protocol_index 0 - Input vector 1 - Defaul ... */
 #define EC_EPE_RES_IN_SEL_PROT_INDEX     (1 << 1)
@@ -1354,7 +1524,7 @@ struct al_ec_regs {
 /* Hash function output selection:000 - [7:0]001 - [15:8]010 - [ ... */
 #define EC_RFW_THASH_CFG_1_OUT_SEL_MASK  0x00000007
 #define EC_RFW_THASH_CFG_1_OUT_SEL_SHIFT 0
-/* Selects between hash functions00 - toeplitz01 - CRC-3210 – 0x ... */
+/* Selects between hash functions00 - toeplitz01 - CRC-3210 - 0x ... */
 #define EC_RFW_THASH_CFG_1_FUNC_SEL_MASK 0x00000300
 #define EC_RFW_THASH_CFG_1_FUNC_SEL_SHIFT 8
 /* Enable SIP/DIP swap if SIP<DIP */
@@ -1366,9 +1536,9 @@ struct al_ec_regs {
 /* Hash function output selection:000 - [7:0]001 - [15:8]010 - [ ... */
 #define EC_RFW_MHASH_CFG_1_OUT_SEL_MASK  0x00000007
 #define EC_RFW_MHASH_CFG_1_OUT_SEL_SHIFT 0
-/* Selects the input to the MAC hash fiunction0 - DA1 - DA + SA ... */
+/* Selects the input to the MAC hash function0 - DA1 - DA + SA ... */
 #define EC_RFW_MHASH_CFG_1_INPUT_SEL     (1 << 4)
-/* Selects between hash functions00 - toeplitz01 - CRC-3210 – 0x ... */
+/* Selects between hash functions00 - toeplitz01 - CRC-3210 - 0x ... */
 #define EC_RFW_MHASH_CFG_1_FUNC_SEL_MASK 0x00000300
 #define EC_RFW_MHASH_CFG_1_FUNC_SEL_SHIFT 8
 
@@ -1392,13 +1562,13 @@ struct al_ec_regs {
 #define EC_RFW_META_L3_LEN_SEL           (1 << 0)
 /* Selection of the L3 offset source:1 - Inner packet0 - Outer p ... */
 #define EC_RFW_META_L3_OFFSET_SEL        (1 << 1)
-/* selection of the l3 protocol index source: 1 - inner packet 0 ... */
+/* Selection of the l3 protocol index source: 1 - Inner packet 0 ... */
 #define EC_RFW_META_L3_PROT_SEL          (1 << 2)
-/* selection of the l4 protocol index source:  1 - inner packet  ... */
+/* Selection of the l4 protocol index source:  1 - Inner packet  ... */
 #define EC_RFW_META_L4_PROT_SEL          (1 << 3)
 /* Selects how to calculate the L3 header length when L3 is IpPv ... */
 #define EC_RFW_META_L3_LEN_CALC          (1 << 4)
-/* Selection of the Ipv4 fragment indication source:  1 - Inner  ... */
+/* Selection of the IPv4 fragment indication source:  1 - Inner  ... */
 #define EC_RFW_META_FRAG_SEL             (1 << 5)
 /* Selection of the L4 offset source:1 - Inner packet0 - Outer p ... */
 #define EC_RFW_META_L4_OFFSET_SEL        (1 << 6)
@@ -1510,7 +1680,7 @@ struct al_ec_regs {
 #define EC_RFW_TC_TABLE_DATA_VAL_SHIFT   0
 
 /**** ctrl_table_addr register ****/
-/* Address for accessing the table[0] – VLAN table control out[1 ... */
+/* Address for accessing the table[0] - VLAN table control out[1 ... */
 #define EC_RFW_CTRL_TABLE_ADDR_VAL_MASK  0x000007FF
 #define EC_RFW_CTRL_TABLE_ADDR_VAL_SHIFT 0
 
@@ -1527,10 +1697,16 @@ struct al_ec_regs {
 #define EC_RFW_OUT_CFG_DROP_EN           (1 << 2)
 /* Swap output byte order */
 #define EC_RFW_OUT_CFG_SWAP_OUT_BYTE     (1 << 3)
-/* Enable the insertion of the MACSEC decoding result into the M ... */
+/* Enable the insertion of the MACsec decoding result into the M ... */
 #define EC_RFW_OUT_CFG_EN_MACSEC_DEC     (1 << 4)
-/* Sample time of the time stamp:0 – SOP (for 10G MAC)1 – EOP (f ... */
+/* Sample time of the time stamp:0 - SOP (for 10G MAC)1 - EOP (f ... */
 #define EC_RFW_OUT_CFG_TIMESTAMP_SAMPLE  (1 << 5)
+/* Determines which queue to write into the packet header0 - Ori ... */
+#define EC_RFW_OUT_CFG_QUEUE_OR_SEL   (1 << 6)
+/* Determines the logic of the drop indication:0 - Sample the dr ... */
+#define EC_RFW_OUT_CFG_DROP_LOGIC_SEL (1 << 7)
+/* Determines the logic of the drop indication:0 - Sample the dr ... */
+#define EC_RFW_OUT_CFG_PKT_TYPE_DEF   (1 << 8)
 
 /**** fsm_table_addr register ****/
 /* Address for accessing the table :[2:0] - Outer header control ... */
@@ -1538,7 +1714,7 @@ struct al_ec_regs {
 #define EC_RFW_FSM_TABLE_ADDR_VAL_SHIFT  0
 
 /**** fsm_table_data register ****/
-/* Flow steering mechanism output selectors:[1:0] – Input select ... */
+/* Flow steering mechanism output selectors:[1:0] - Input select ... */
 #define EC_RFW_FSM_TABLE_DATA_VAL_MASK   0x00000007
 #define EC_RFW_FSM_TABLE_DATA_VAL_SHIFT  0
 
@@ -1579,9 +1755,9 @@ struct al_ec_regs {
 #define EC_RFW_CHECKSUM_HDR_SEL          (1 << 1)
 /* Enable L4 checksum when L3 fragmentation is detected */
 #define EC_RFW_CHECKSUM_L4_FRAG_EN       (1 << 2)
-/* L3 Checksum result selection for the Metadata descriptor0 – o ... */
+/* L3 Checksum result selection for the Metadata descriptor0 - O ... */
 #define EC_RFW_CHECKSUM_L3_CKS_SEL       (1 << 4)
-/* L4 Checksum result selection for the Metadata descriptor0 – o ... */
+/* L4 Checksum result selection for the Metadata descriptor0 - O ... */
 #define EC_RFW_CHECKSUM_L4_CKS_SEL       (1 << 5)
 
 /**** lro_cfg_1 register ****/
@@ -1769,10 +1945,10 @@ struct al_ec_regs {
 #define EC_RFW_LRO_STORE_TCP             (1 << 2)
 /* Store packet information if protocol match. */
 #define EC_RFW_LRO_STORE_UDP             (1 << 3)
-/* Store packet if Ipv4 flags match the register value with mask */
+/* Store packet if IPv4 flags match the register value with mask */
 #define EC_RFW_LRO_STORE_IPV4_FLAGS_VAL_MASK 0x00000070
 #define EC_RFW_LRO_STORE_IPV4_FLAGS_VAL_SHIFT 4
-/* Mask for Ipv4 flags */
+/* Mask for IPv4 flags */
 #define EC_RFW_LRO_STORE_IPV4_FLAGS_MASK_MASK 0x00000380
 #define EC_RFW_LRO_STORE_IPV4_FLAGS_MASK_SHIFT 7
 /* Store packet if TCP control and ECN match the register value  ... */
@@ -1787,8 +1963,8 @@ struct al_ec_regs {
 #define EC_RFW_VID_TABLE_DEF_VAL_MASK    0x0000003F
 #define EC_RFW_VID_TABLE_DEF_VAL_SHIFT   0
 /* Default data selection
-0 – Default value
-1 – Table data out */
+0 - Default value
+1 - Table data out */
 #define EC_RFW_VID_TABLE_DEF_SEL         (1 << 6)
 
 /**** ctrl_table_def register ****/
@@ -1799,37 +1975,37 @@ struct al_ec_regs {
 #define EC_RFW_CTRL_TABLE_DEF_SEL        (1 << 20)
 
 /**** cfg_a_0 register ****/
-/* selection of the L3 checksum result in the Metadata00 – L3 ch ... */
+/* Selection of the L3 checksum result in the Metadata00 - L3 ch ... */
 #define EC_RFW_CFG_A_0_META_L3_CHK_RES_SEL_MASK 0x00000003
 #define EC_RFW_CFG_A_0_META_L3_CHK_RES_SEL_SHIFT 0
-/* selection of the L4 checksum result in the Metadata0 – L4 che ... */
+/* Selection of the L4 checksum result in the Metadata0 - L4 che ... */
 #define EC_RFW_CFG_A_0_META_L4_CHK_RES_SEL (1 << 2)
-/* selection of the LRO_contet_value result in the Metadata0 – L ... */
+/* Selection of the LRO_context_value result in the Metadata0 -  ... */
 #define EC_RFW_CFG_A_0_LRO_CONTEXT_SEL   (1 << 4)
 
 /**** thash_cfg_3 register ****/
-/* enable Hash value for RoCE packets in outer packet */
+/* Enable Hash value for RoCE packets in outer packet. */
 #define EC_RFW_THASH_CFG_3_ENABLE_OUTER_ROCE (1 << 0)
-/* enable Hash value for RoCE packets in inner packet */
+/* Enable Hash value for RoCE packets in inner packet. */
 #define EC_RFW_THASH_CFG_3_ENABLE_INNER_ROCE (1 << 1)
-/* enable Hash value for FcoE packets in outer packet */
+/* Enable Hash value for FcoE packets in outer packet. */
 #define EC_RFW_THASH_CFG_3_ENABLE_OUTER_FCOE (1 << 2)
-/* enable Hash value for FcoE packets in inner packet */
+/* Enable Hash value for FcoE packets in inner packet. */
 #define EC_RFW_THASH_CFG_3_ENABLE_INNER_FCOE (1 << 3)
 
 /**** thash_mask_outer_ipv6 register ****/
-/* Ipv6 source IP address */
+/* IPv6 source IP address */
 #define EC_RFW_THASH_MASK_OUTER_IPV6_SRC_MASK 0x0000FFFF
 #define EC_RFW_THASH_MASK_OUTER_IPV6_SRC_SHIFT 0
-/* Ipv6 destination IP address */
+/* IPv6 destination IP address */
 #define EC_RFW_THASH_MASK_OUTER_IPV6_DST_MASK 0xFFFF0000
 #define EC_RFW_THASH_MASK_OUTER_IPV6_DST_SHIFT 16
 
 /**** thash_mask_outer register ****/
-/* Ipv4 source IP address */
+/* IPv4 source IP address */
 #define EC_RFW_THASH_MASK_OUTER_IPV4_SRC_MASK 0x0000000F
 #define EC_RFW_THASH_MASK_OUTER_IPV4_SRC_SHIFT 0
-/* Ipv4 destination IP address */
+/* IPv4 destination IP address */
 #define EC_RFW_THASH_MASK_OUTER_IPV4_DST_MASK 0x000000F0
 #define EC_RFW_THASH_MASK_OUTER_IPV4_DST_SHIFT 4
 /* TCP source port */
@@ -1846,18 +2022,18 @@ struct al_ec_regs {
 #define EC_RFW_THASH_MASK_OUTER_UDP_DST_PORT_SHIFT 14
 
 /**** thash_mask_inner_ipv6 register ****/
-/* Ipv6 source IP address */
+/* IPv6 source IP address */
 #define EC_RFW_THASH_MASK_INNER_IPV6_SRC_MASK 0x0000FFFF
 #define EC_RFW_THASH_MASK_INNER_IPV6_SRC_SHIFT 0
-/* Ipv6 destination IP address */
+/* IPv6 destination IP address */
 #define EC_RFW_THASH_MASK_INNER_IPV6_DST_MASK 0xFFFF0000
 #define EC_RFW_THASH_MASK_INNER_IPV6_DST_SHIFT 16
 
 /**** thash_mask_inner register ****/
-/* Ipv4 source IP address */
+/* IPv4 source IP address */
 #define EC_RFW_THASH_MASK_INNER_IPV4_SRC_MASK 0x0000000F
 #define EC_RFW_THASH_MASK_INNER_IPV4_SRC_SHIFT 0
-/* Ipv4 destination IP address */
+/* IPv4 destination IP address */
 #define EC_RFW_THASH_MASK_INNER_IPV4_DST_MASK 0x000000F0
 #define EC_RFW_THASH_MASK_INNER_IPV4_DST_SHIFT 4
 /* TCP source port */
@@ -1925,21 +2101,21 @@ struct al_ec_regs {
 #define EC_FWD_MAC_CTRL_RX_VAL_QID_SHIFT	7
 
 /* Entry is valid for Rx forwarding engine. */
-#define EC_FWD_MAC_CTRL_RX_VALID		(1 << 15)
+#define EC_FWD_MAC_CTRL_RX_VALID         (1 << 15)
 /* Control value for Tx forwarding engine */
-#define EC_FWD_MAC_CTRL_TX_VAL_MASK		0x001F0000
-#define EC_FWD_MAC_CTRL_TX_VAL_SHIFT		16
+#define EC_FWD_MAC_CTRL_TX_VAL_MASK      0x001F0000
+#define EC_FWD_MAC_CTRL_TX_VAL_SHIFT     16
 /* Entry is valid for Tx forwarding engine. */
-#define EC_FWD_MAC_CTRL_TX_VALID		(1 << 31)
+#define EC_FWD_MAC_CTRL_TX_VALID         (1 << 31)
 
 /**** uc register ****/
 /* timer max value for waiting for a stream to be ready to accep ... */
 #define EC_MSW_UC_TIMER_MASK             0x0000FFFF
 #define EC_MSW_UC_TIMER_SHIFT            0
-/* drop packet if target queue in the UDMA is full */
+/* Drop packet if target queue in the UDMA is full */
 #define EC_MSW_UC_Q_FULL_DROP_MASK       0x000F0000
 #define EC_MSW_UC_Q_FULL_DROP_SHIFT      16
-/* Drop packet if timer expires */
+/* Drop packet if timer expires. */
 #define EC_MSW_UC_TIMER_DROP_MASK        0x0F000000
 #define EC_MSW_UC_TIMER_DROP_SHIFT       24
 
@@ -1988,7 +2164,7 @@ struct al_ec_regs {
 /* Data to be written into the control BIS. */
 #define EC_TSO_CTRL_FIRST_DATA_MASK      0x000001FF
 #define EC_TSO_CTRL_FIRST_DATA_SHIFT     0
-/* Mask for control bits,[0] – Use original packet header */
+/* Mask for control bits */
 #define EC_TSO_CTRL_FIRST_MASK_MASK      0x01FF0000
 #define EC_TSO_CTRL_FIRST_MASK_SHIFT     16
 
@@ -1996,7 +2172,7 @@ struct al_ec_regs {
 /* Data to be written into the control BIS. */
 #define EC_TSO_CTRL_MIDDLE_DATA_MASK     0x000001FF
 #define EC_TSO_CTRL_MIDDLE_DATA_SHIFT    0
-/* Mask for the control bits[0] - Use original packet header */
+/* Mask for the control bits */
 #define EC_TSO_CTRL_MIDDLE_MASK_MASK     0x01FF0000
 #define EC_TSO_CTRL_MIDDLE_MASK_SHIFT    16
 
@@ -2004,16 +2180,16 @@ struct al_ec_regs {
 /* Data to be written into the control BIS. */
 #define EC_TSO_CTRL_LAST_DATA_MASK       0x000001FF
 #define EC_TSO_CTRL_LAST_DATA_SHIFT      0
-/* Mask for the control bits[0] - Use original packet header */
+/* Mask for the control bits */
 #define EC_TSO_CTRL_LAST_MASK_MASK       0x01FF0000
 #define EC_TSO_CTRL_LAST_MASK_SHIFT      16
 
 /**** cfg_add_0 register ****/
-/* MSS selection option:0 – MSS value is selected using MSS_sel  ... */
+/* MSS selection option:0 - MSS value is selected using MSS_sel  ... */
 #define EC_TSO_CFG_ADD_0_MSS_SEL         (1 << 0)
 
 /**** cfg_tunnel register ****/
-/* enable TSO with tunneling */
+/* Enable TSO with tunnelling */
 #define EC_TSO_CFG_TUNNEL_EN_TUNNEL_TSO  (1 << 0)
 /* Enable outer UDP checksum update */
 #define EC_TSO_CFG_TUNNEL_EN_UDP_CHKSUM  (1 << 8)
@@ -2021,11 +2197,11 @@ struct al_ec_regs {
 #define EC_TSO_CFG_TUNNEL_EN_UDP_LEN     (1 << 9)
 /* Enable outer Ip6  length update */
 #define EC_TSO_CFG_TUNNEL_EN_IPV6_PLEN   (1 << 10)
-/* Enable outer Ipv4 checksum update */
+/* Enable outer IPv4 checksum update */
 #define EC_TSO_CFG_TUNNEL_EN_IPV4_CHKSUM (1 << 11)
-/* Enable outer Ipv4 Identification update */
+/* Enable outer IPv4 Identification update */
 #define EC_TSO_CFG_TUNNEL_EN_IPV4_IDEN   (1 << 12)
-/* Enable outer Ipv4 length update */
+/* Enable outer IPv4 length update */
 #define EC_TSO_CFG_TUNNEL_EN_IPV4_TLEN   (1 << 13)
 
 /**** mss register ****/
@@ -2079,7 +2255,7 @@ struct al_ec_regs {
 #define EC_TFW_TX_VID_TABLE_DATA_VAL_SHIFT 0
 
 /**** tx_rd_fifo register ****/
-/* Read data thheshold when cut through mode is enabled. */
+/* Read data threshold when cut through mode is enabled. */
 #define EC_TFW_TX_RD_FIFO_READ_TH_MASK   0x0000FFFF
 #define EC_TFW_TX_RD_FIFO_READ_TH_SHIFT  0
 /* Enable cut through operation of the Tx FIFO. */
@@ -2096,11 +2272,11 @@ struct al_ec_regs {
 /**** tx_gen register ****/
 /* Force forward of all Tx packets to MAC. */
 #define EC_TFW_TX_GEN_FWD_ALL_TO_MAC     (1 << 0)
-/* Select the Packet generator as the source of Tx packets0 – Tx ... */
+/* Select the Packet generator as the source of Tx packets0 - Tx ... */
 #define EC_TFW_TX_GEN_SELECT_PKT_GEN     (1 << 1)
 
 /**** tx_spf register ****/
-/* Select the VID for spoofing check:[0] – Packet VID[1] – Forwa ... */
+/* Select the VID for spoofing check:[0] - Packet VID[1] - Forwa ... */
 #define EC_TFW_TX_SPF_VID_SEL            (1 << 0)
 
 /**** data_fifo register ****/
@@ -2175,23 +2351,23 @@ struct al_ec_regs {
 /* Mask of pause_on [7:0] */
 #define EC_EFC_EC_PAUSE_MASK_MAC_MASK    0x000000FF
 #define EC_EFC_EC_PAUSE_MASK_MAC_SHIFT   0
-/* Mask of gpio input [7:0] */
+/* Mask of GPIO input [7:0] */
 #define EC_EFC_EC_PAUSE_MASK_GPIO_MASK   0x0000FF00
 #define EC_EFC_EC_PAUSE_MASK_GPIO_SHIFT  8
 
 /**** ec_xoff register ****/
 /* Mask 1 for XOFF [7:0]
-Mask 1 for almost full indication, */
+Mask 1 for Almost Full indication, */
 #define EC_EFC_EC_XOFF_MASK_1_MASK       0x000000FF
 #define EC_EFC_EC_XOFF_MASK_1_SHIFT      0
-/* Mask 2 for XOFF [7:0] Mask 2 for sampled almost full indicati ... */
+/* Mask 2 for XOFF [7:0] Mask 2 for sampled Almost Full indicati ... */
 #define EC_EFC_EC_XOFF_MASK_2_MASK       0x0000FF00
 #define EC_EFC_EC_XOFF_MASK_2_SHIFT      8
 
 /**** xon register ****/
 /* Mask 1 for generating XON pulse, masking XOFF [0] */
 #define EC_EFC_XON_MASK_1                (1 << 0)
-/* Mask 2 for generating XON pulse, masking “almost full” indica ... */
+/* Mask 2 for generating XON pulse, masking Almost Full indicati ... */
 #define EC_EFC_XON_MASK_2                (1 << 1)
 
 /**** gpio register ****/
@@ -2357,7 +2533,7 @@ Mask 1 for almost full indication, */
 #define EC_EEE_CFG_E_USE_EC_TX_FIFO      (1 << 2)
 /* Use Ethernet controller Rx FIFO empty status for EEE control */
 #define EC_EEE_CFG_E_USE_EC_RX_FIFO      (1 << 3)
-/* Enable Low power signaling. */
+/* Enable Low power signalling. */
 #define EC_EEE_CFG_E_ENABLE              (1 << 4)
 /* Mask output to MAC.  */
 #define EC_EEE_CFG_E_MASK_MAC_EEE        (1 << 8)
@@ -2390,7 +2566,7 @@ Mask 1 for almost full indication, */
 #define EC_MSP_P_ACT_TABLE_DATA_1_VAL_SHIFT 0
 
 /**** p_act_table_data_2 register ****/
-/* table data  [8:0] - offset to data in the packet [bits] [17:9 ... */
+/* Table data  [8:0] - Offset to data in the packet [bits][17:9] ... */
 #define EC_MSP_P_ACT_TABLE_DATA_2_VAL_MASK 0x1FFFFFFF
 #define EC_MSP_P_ACT_TABLE_DATA_2_VAL_SHIFT 0
 
@@ -2414,7 +2590,7 @@ Mask 1 for almost full indication, */
 #define EC_MSP_P_RES_IN_SEL_PARSE_EN     (1 << 0)
 /* Selector for input protocol_index  0 - Input vector  1 - Defa ... */
 #define EC_MSP_P_RES_IN_SEL_PROT_INDEX   (1 << 1)
-/* Selector for input hdr_offset  0 - input vector  1 - Default  ... */
+/* Selector for input hdr_offset  0 - Input vector 1 - Default v ... */
 #define EC_MSP_P_RES_IN_SEL_HDR_OFFSET   (1 << 2)
 
 /**** h_hdr_len register ****/
@@ -2497,14 +2673,22 @@ Mask 1 for almost full indication, */
 #define EC_CRCE_SWAP_EN_FCOE_CRC32_BIT_COMP (1 << 9)
 
 /**** gen_cfg register ****/
-/* default result for undetected protocols. */
+/* Default result for undetected protocols. */
 #define EC_CRCE_GEN_CFG_RES_DEF          (1 << 0)
-/* Enable CRC (RoCE/FCoE) insertion in the TX data path(override ... */
+/* Enable CRC (RoCE/FCoE) insertion in the Tx data path(override ... */
 #define EC_CRCE_GEN_CFG_EN_TX_CRC_INS    (1 << 4)
-/* Enable RoCE insertion in the TX data path */
+/* Enable RoCE insertion in the Tx data path */
 #define EC_CRCE_GEN_CFG_EN_TX_ROCE_INS   (1 << 5)
-/* Enable FcoE insertion in the TX data path */
+/* Enable FcoE insertion in the Tx data path */
 #define EC_CRCE_GEN_CFG_EN_TX_FCOE_INS   (1 << 6)
+/* Enable CRC (RoCE/FCoE) insertion in the Tx data path (overrid ... */
+#define EC_CRCE_GEN_CFG_EN_TX_CKS_DIS (1 << 8)
+/* Disable checksum insertion when RoCE packet is detected */
+#define EC_CRCE_GEN_CFG_EN_TX_ROCE_CKS_DIS (1 << 9)
+/* Disable checksum insertion when FcoE packet is detected */
+#define EC_CRCE_GEN_CFG_EN_TX_FCOE_CKS_DIS (1 << 10)
+/* TX L3 offset selection0 - Standard L3 offset selection from t ... */
+#define EC_CRCE_GEN_CFG_TX_OFFSET_SELECTION (1 << 12)
 
 /**** wol_en register ****/
 /* Interrupt enable WoL MAC DA Unicast detected  packet */
@@ -2564,20 +2748,20 @@ Mask 1 for almost full indication, */
 #define EC_PTH_CLOCK_PERIOD_LSB_VAL_SHIFT 14
 
 /**** int_update_ctrl register ****/
-/* 1'b0 - update on next ingress trigger1'b1 - update on next wr ... */
+/* This field chooses between two methods for SW to update the s ... */
 #define EC_PTH_INT_UPDATE_CTRL_UPDATE_TRIG (1 << 0)
-/* 3’b000 – set system time according to the value in SYSTEM_INT ... */
+/* 3'b000 - Set system time according to the value in {int_updat ... */
 #define EC_PTH_INT_UPDATE_CTRL_UPDATE_METHOD_MASK 0x0000000E
 #define EC_PTH_INT_UPDATE_CTRL_UPDATE_METHOD_SHIFT 1
-/* 1'b1 - next update writes subseconds field1'b0 - next update  ... */
+/* 1'b1 - Next update writes to system_time_subseconds1'b0 - Nex ... */
 #define EC_PTH_INT_UPDATE_CTRL_SUBSECOND_MASK (1 << 4)
-/* 1'b1 - next update writes subseconds1'b0 - next update doesn' ... */
+/* 1'b1 - Next update writes to system_time_seconds1'b0 - Next u ... */
 #define EC_PTH_INT_UPDATE_CTRL_SECOND_MASK (1 << 5)
-
+/* Enabling / disabling the internal ingress trigger (ingress_tr ... */
 #define EC_PTH_INT_UPDATE_CTRL_INT_TRIG_EN (1 << 16)
-
+/* Determines if internal ingress trigger (ingress_trigger #0) s ... */
 #define EC_PTH_INT_UPDATE_CTRL_PULSE_LEVEL_N (1 << 17)
-
+/* Internal ingress trigger polarity (ingress_trigger #0)1'b0 -  ... */
 #define EC_PTH_INT_UPDATE_CTRL_POLARITY  (1 << 18)
 
 /**** int_update_subseconds_lsb register ****/
@@ -2587,20 +2771,20 @@ Mask 1 for almost full indication, */
 
 #define EC_PTH_INT_UPDATE_SUBSECONDS_LSB_VAL_MASK 0xFFFFC000
 #define EC_PTH_INT_UPDATE_SUBSECONDS_LSB_VAL_SHIFT 14
-/* 3’b000 – set system time according to the value in SYSTEM_INT ... */
+/* 3'b000 - Set system time according to the value in {int_updat ... */
 #define EC_PTH_EXT_UPDATE_CTRL_UPDATE_METHOD_MASK 0x0000000E
 #define EC_PTH_EXT_UPDATE_CTRL_UPDATE_METHOD_SHIFT 1
-/* 1'b1 - next update writes subseconds field1'b0 - next update  ... */
+/* 1'b1 - next update writes to system_time_subseconds1'b0 - nex ... */
 #define EC_PTH_EXT_UPDATE_CTRL_SUBSECOND_MASK (1 << 4)
-/* 1'b1 - next update writes subseconds1'b0 - next update doesn' ... */
+/* 1'b1 - Next update writes to system_time_seconds1'b0 - Next u ... */
 #define EC_PTH_EXT_UPDATE_CTRL_SECOND_MASK (1 << 5)
-
+/* Enabling / disabling the external ingress triggers (ingress_t ... */
 #define EC_PTH_EXT_UPDATE_CTRL_EXT_TRIG_EN_MASK 0x00001F00
 #define EC_PTH_EXT_UPDATE_CTRL_EXT_TRIG_EN_SHIFT 8
-
+/* Determines if external ingress triggers (ingress_triggers #1- ... */
 #define EC_PTH_EXT_UPDATE_CTRL_PULSE_LEVEL_N_MASK 0x001F0000
 #define EC_PTH_EXT_UPDATE_CTRL_PULSE_LEVEL_N_SHIFT 16
-
+/* bit-field configurations of external ingress trigger polarity ... */
 #define EC_PTH_EXT_UPDATE_CTRL_POLARITY_MASK 0x1F000000
 #define EC_PTH_EXT_UPDATE_CTRL_POLARITY_SHIFT 24
 
@@ -2625,19 +2809,16 @@ Mask 1 for almost full indication, */
 #define EC_PTH_SYNC_COMPENSATION_SUBSECONDS_LSB_VAL_SHIFT 14
 
 /**** trigger_ctrl register ****/
-/* 1'b1 - trigger enabled
-1'b0 - trigger disabled */
+/* Enabling / disabling the egress trigger1'b1 - Enabled1'b0 - D ... */
 #define EC_PTH_EGRESS_TRIGGER_CTRL_EN    (1 << 0)
-/* 1'b1 - periodic trigger
-1'b0 - single event trigger */
+/* Configuration that determines if the egress trigger is a peri ... */
 #define EC_PTH_EGRESS_TRIGGER_CTRL_PERIODIC (1 << 1)
-/* 1'b0 - regular polarity
-1'b1 - negative polarity */
+/* Configuration of egress trigger polarity */
 #define EC_PTH_EGRESS_TRIGGER_CTRL_POLARITY (1 << 2)
-/* periodic pulse period (miliseconds) */
+/* If the pulse is marked as periodic (see periodic field), this ... */
 #define EC_PTH_EGRESS_TRIGGER_CTRL_PERIOD_SUBSEC_MASK 0x00FFFFF0
 #define EC_PTH_EGRESS_TRIGGER_CTRL_PERIOD_SUBSEC_SHIFT 4
-/* periodic pulse period (seconds) */
+/* If the pulse is marked as periodic (see periodic field), this ... */
 #define EC_PTH_EGRESS_TRIGGER_CTRL_PERIOD_SEC_MASK 0xFF000000
 #define EC_PTH_EGRESS_TRIGGER_CTRL_PERIOD_SEC_SHIFT 24
 
@@ -2656,6 +2837,13 @@ Mask 1 for almost full indication, */
 
 #define EC_PTH_EGRESS_PULSE_WIDTH_SUBSECONDS_LSB_VAL_MASK 0xFFFFC000
 #define EC_PTH_EGRESS_PULSE_WIDTH_SUBSECONDS_LSB_VAL_SHIFT 14
+
+/**** qual register ****/
+
+#define EC_PTH_DB_QUAL_TS_VALID       (1 << 0)
+
+#define EC_PTH_DB_QUAL_RESERVED_31_1_MASK 0xFFFFFFFE
+#define EC_PTH_DB_QUAL_RESERVED_31_1_SHIFT 1
 
 /**** roce_gen_cfg_1 register ****/
 /* Ignore number of segments check for Middle packets */
@@ -2745,7 +2933,7 @@ Mask 1 for almost full indication, */
 #define EC_ROCE_QP_DB_QP_VAL_VALID       (1 << 31)
 
 /**** roce_qp_cfg_1 register ****/
-/* QP service type:[3] – ignore service type[2:0] – service type ... */
+/* QP service type:[3] - Ignore service type[2:0] - Service type ... */
 #define EC_ROCE_QP_DB_ROCE_QP_CFG_1_SERVICE_TYPE_MASK 0x0000000F
 #define EC_ROCE_QP_DB_ROCE_QP_CFG_1_SERVICE_TYPE_SHIFT 0
 /* Enable RR address translation for this QP */
@@ -2834,7 +3022,7 @@ Mask 1 for almost full indication, */
 #define EC_ROCE_QP_DB_WR_PSN_HW_VAL_SHIFT 0
 
 /**** p_key register ****/
-/* value */
+/* Value */
 #define EC_ROCE_QP_DB_P_KEY_VAL_MASK     0x0000FFFF
 #define EC_ROCE_QP_DB_P_KEY_VAL_SHIFT    0
 
@@ -2862,9 +3050,9 @@ Mask 1 for almost full indication, */
 /* FIFO status – used */
 #define EC_ROCE_QP_DB_RR_FIFO_STATUS_USED_MASK 0x0000007F
 #define EC_ROCE_QP_DB_RR_FIFO_STATUS_USED_SHIFT 0
-/* FIFO status – empty */
+/* FIFO status - empty */
 #define EC_ROCE_QP_DB_RR_FIFO_STATUS_EMPTY (1 << 16)
-/* FIFO status – full */
+/* FIFO status - full */
 #define EC_ROCE_QP_DB_RR_FIFO_STATUS_FULL (1 << 20)
 
 /**** rr_fifo_ctrl register ****/
@@ -2873,6 +3061,390 @@ Mask 1 for almost full indication, */
 /* FIFO reset */
 #define EC_ROCE_QP_DB_RR_FIFO_CTRL_SIZE_MASK 0x00007F00
 #define EC_ROCE_QP_DB_RR_FIFO_CTRL_SIZE_SHIFT 8
+
+/**** bypass register ****/
+/* Bypass outstanding module */
+#define EC_GEN_V3_BYPASS_OUTSTANDING_CTRL (1 << 0)
+/* Bypass Tx inline crypto module */
+#define EC_GEN_V3_BYPASS_TX_CRYPTO       (1 << 1)
+/* Bypass Rx inline crypto module */
+#define EC_GEN_V3_BYPASS_RX_CRYPTO       (1 << 2)
+/* Bypass Tx XTS read */
+#define EC_GEN_V3_BYPASS_TX_XTS_READ     (1 << 3)
+/* Bypass rdma_sop_ready */
+#define EC_GEN_V3_BYPASS_RDMA            (1 << 4)
+
+/**** rx_comp_desc register ****/
+/* Selection for word0[13]:0- legacy SR-A01- per generic protoco ... */
+#define EC_GEN_V3_RX_COMP_DESC_W0_L3_CKS_RES_SEL (1 << 0)
+/* Selection for word0[14]:0- legacy SR-A01- per generic protoco ... */
+#define EC_GEN_V3_RX_COMP_DESC_W0_L4_CKS_RES_SEL (1 << 1)
+/* Selection for word3[2:0]:0- priority (legacy SR-A0)1- rdma_in ... */
+#define EC_GEN_V3_RX_COMP_DESC_W3_PRIORITY_RDMA_INFO_2_0_SEL (1 << 2)
+/* Selection for word3[10:3]:0- l4_offset / lro value (legacy SR ... */
+#define EC_GEN_V3_RX_COMP_DESC_W3_L4_OFFSET_RDMA_INFO_10_3_SEL_MASK 0x00000018
+#define EC_GEN_V3_RX_COMP_DESC_W3_L4_OFFSET_RDMA_INFO_10_3_SEL_SHIFT 3
+/* Selection for word3[12:11]:0-lro_context_result (legacy SR-A0 ... */
+#define EC_GEN_V3_RX_COMP_DESC_W3_LRO_RES_RDMA_INFO_12_11_SEL (1 << 5)
+/* Selection for word3[15:13]:0-switch source port (legacy SR-A0 ... */
+#define EC_GEN_V3_RX_COMP_DESC_W3_SPORT_RDMA_INFO_15_13_SEL (1 << 6)
+/* Selection for word3[28:16]:0-macseec decryption status[12:0]  ... */
+#define EC_GEN_V3_RX_COMP_DESC_W3_DEC_STAT_12_0_RDMA_INFO_28_16_SEL (1 << 7)
+/* Selection for word3[29]:0-macsec decryption status[13] (legac ... */
+#define EC_GEN_V3_RX_COMP_DESC_W3_DEC_STAT_13_L4_CKS_RES_SEL (1 << 8)
+/* Selection for word3[30]:0-macsec decryption status[14] (legac ... */
+#define EC_GEN_V3_RX_COMP_DESC_W3_DEC_STAT_14_L3_CKS_RES_SEL (1 << 9)
+/* Selection for word3[31]:0-macsec decryption status[15] (legac ... */
+#define EC_GEN_V3_RX_COMP_DESC_W3_DEC_STAT_15_CRC_RES_SEL (1 << 10)
+/* Selection for words 4-70- word 4 time stamp, word 5-7 reserve ... */
+#define EC_GEN_V3_RX_COMP_DESC_W4_DDP_DEBUG_SEL (1 << 11)
+
+/**** tx_gpd_cam_addr register ****/
+/* Cam compare table address */
+#define EC_TFW_V3_TX_GPD_CAM_ADDR_VAL_MASK 0x0000001F
+#define EC_TFW_V3_TX_GPD_CAM_ADDR_VAL_SHIFT 0
+/* cam entry is valid */
+#define EC_TFW_V3_TX_GPD_CAM_CTRL_VALID  (1 << 31)
+
+/**** tx_gcp_legacy register ****/
+/* 0-choose parameters from table1- choose legacy crce roce para ... */
+#define EC_TFW_V3_TX_GCP_LEGACY_PARAM_SEL (1 << 0)
+
+/**** tx_gcp_table_addr register ****/
+/* parametrs table address */
+#define EC_TFW_V3_TX_GCP_TABLE_ADDR_VAL_MASK 0x0000001F
+#define EC_TFW_V3_TX_GCP_TABLE_ADDR_VAL_SHIFT 0
+
+/**** tx_gcp_table_gen register ****/
+/* polynomial selcet
+0-crc32(0x104C11DB7)
+1-crc32c(0x11EDC6F41) */
+#define EC_TFW_V3_TX_GCP_TABLE_GEN_POLY_SEL (1 << 0)
+/* Enable bit complement on crc result */
+#define EC_TFW_V3_TX_GCP_TABLE_GEN_CRC32_BIT_COMP (1 << 1)
+/* Enable bit swap on crc result */
+#define EC_TFW_V3_TX_GCP_TABLE_GEN_CRC32_BIT_SWAP (1 << 2)
+/* Enable byte swap on crc result */
+#define EC_TFW_V3_TX_GCP_TABLE_GEN_CRC32_BYTE_SWAP (1 << 3)
+/* Enable bit swap on input data */
+#define EC_TFW_V3_TX_GCP_TABLE_GEN_DATA_BIT_SWAP (1 << 4)
+/* Enable byte swap on input data */
+#define EC_TFW_V3_TX_GCP_TABLE_GEN_DATA_BYTE_SWAP (1 << 5)
+/* Number of bytes in trailer which are not part of crc calculat ... */
+#define EC_TFW_V3_TX_GCP_TABLE_GEN_TRAIL_SIZE_MASK 0x000003C0
+#define EC_TFW_V3_TX_GCP_TABLE_GEN_TRAIL_SIZE_SHIFT 6
+/* Number of bytes in header which are not part of crc calculati ... */
+#define EC_TFW_V3_TX_GCP_TABLE_GEN_HEAD_SIZE_MASK 0x00FF0000
+#define EC_TFW_V3_TX_GCP_TABLE_GEN_HEAD_SIZE_SHIFT 16
+/* corrected offset calculation0- subtract head_size (roce)1- ad ... */
+#define EC_TFW_V3_TX_GCP_TABLE_GEN_HEAD_CALC (1 << 24)
+/* 0-replace masked bits with 01-replace masked bits with 1 (roc ... */
+#define EC_TFW_V3_TX_GCP_TABLE_GEN_MASK_POLARITY (1 << 25)
+
+/**** tx_gcp_table_res register ****/
+/* Not in use */
+#define EC_TFW_V3_TX_GCP_TABLE_RES_SEL_MASK 0x0000001F
+#define EC_TFW_V3_TX_GCP_TABLE_RES_SEL_SHIFT 0
+/* Not in use */
+#define EC_TFW_V3_TX_GCP_TABLE_RES_EN    (1 << 5)
+/* Not in use */
+#define EC_TFW_V3_TX_GCP_TABLE_RES_DEF   (1 << 6)
+
+/**** tx_gcp_table_alu_opcode register ****/
+/* first opcode 
+e.g. (A op1 B) op3 (C op2 D) */
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_OPCODE_OPCODE_1_MASK 0x0000003F
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_OPCODE_OPCODE_1_SHIFT 0
+/* second opcode 
+e.g. (A op1 B) op3 (C op2 D) */
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_OPCODE_OPCODE_2_MASK 0x00000FC0
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_OPCODE_OPCODE_2_SHIFT 6
+/* third opcode 
+e.g. (A op1 B) op3 (C op2 D) */
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_OPCODE_OPCODE_3_MASK 0x0003F000
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_OPCODE_OPCODE_3_SHIFT 12
+
+/**** tx_gcp_table_alu_opsel register ****/
+/* frst opsel, input selection */
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_OPSEL_OPSEL_1_MASK 0x0000000F
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_OPSEL_OPSEL_1_SHIFT 0
+/* second opsel, input selection */
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_OPSEL_OPSEL_2_MASK 0x000000F0
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_OPSEL_OPSEL_2_SHIFT 4
+/* third opsel, input selction */
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_OPSEL_OPSEL_3_MASK 0x00000F00
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_OPSEL_OPSEL_3_SHIFT 8
+/* fourth opsel, input selction */
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_OPSEL_OPSEL_4_MASK 0x0000F000
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_OPSEL_OPSEL_4_SHIFT 12
+
+/**** tx_gcp_table_alu_val register ****/
+/* value for alu input */
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_VAL_VAL_MASK 0x000001FF
+#define EC_TFW_V3_TX_GCP_TABLE_ALU_VAL_VAL_SHIFT 0
+
+/**** crc_csum_replace register ****/
+/* 0- use table
+1- legacy SR-A0 */
+#define EC_TFW_V3_CRC_CSUM_REPLACE_L3_CSUM_LEGACY_SEL (1 << 0)
+/* 0- use table
+1- legacy SR-A0 */
+#define EC_TFW_V3_CRC_CSUM_REPLACE_L4_CSUM_LEGACY_SEL (1 << 1)
+/* 0- use table
+1- legacy SR-A0 */
+#define EC_TFW_V3_CRC_CSUM_REPLACE_CRC_LEGACY_SEL (1 << 2)
+
+/**** crc_csum_replace_table_addr register ****/
+/* parametrs table address */
+#define EC_TFW_V3_CRC_CSUM_REPLACE_TABLE_ADDR_VAL_MASK 0x0000007F
+#define EC_TFW_V3_CRC_CSUM_REPLACE_TABLE_ADDR_VAL_SHIFT 0
+
+/**** crc_csum_replace_table register ****/
+/* L3 Checksum replace enable */
+#define EC_TFW_V3_CRC_CSUM_REPLACE_TABLE_L3_CSUM_EN (1 << 0)
+/* L4 Checksum replace enable */
+#define EC_TFW_V3_CRC_CSUM_REPLACE_TABLE_L4_CSUM_EN (1 << 1)
+/* CRC replace enable */
+#define EC_TFW_V3_CRC_CSUM_REPLACE_TABLE_CRC_EN (1 << 2)
+
+/**** rx_gpd_cam_addr register ****/
+/* Cam compare table address */
+#define EC_RFW_V3_RX_GPD_CAM_ADDR_VAL_MASK 0x0000001F
+#define EC_RFW_V3_RX_GPD_CAM_ADDR_VAL_SHIFT 0
+/* cam entry is valid */
+#define EC_RFW_V3_RX_GPD_CAM_CTRL_VALID  (1 << 31)
+
+/**** gpd_p1 register ****/
+/* Location in bytes of the gpd cam data1 in the parser result v ... */
+#define EC_RFW_V3_GPD_P1_OFFSET_MASK     0x000003FF
+#define EC_RFW_V3_GPD_P1_OFFSET_SHIFT    0
+
+/**** gpd_p2 register ****/
+/* Location in bytes of the gpd cam data2 in the parser result v ... */
+#define EC_RFW_V3_GPD_P2_OFFSET_MASK     0x000003FF
+#define EC_RFW_V3_GPD_P2_OFFSET_SHIFT    0
+
+/**** gpd_p3 register ****/
+/* Location in bytes of the gpd cam data3 in the parser result v ... */
+#define EC_RFW_V3_GPD_P3_OFFSET_MASK     0x000003FF
+#define EC_RFW_V3_GPD_P3_OFFSET_SHIFT    0
+
+/**** gpd_p4 register ****/
+/* Location in bytes of the gpd cam data4 in the parser result v ... */
+#define EC_RFW_V3_GPD_P4_OFFSET_MASK     0x000003FF
+#define EC_RFW_V3_GPD_P4_OFFSET_SHIFT    0
+
+/**** gpd_p5 register ****/
+/* Location in bytes of the gpd cam data5 in the parser result v ... */
+#define EC_RFW_V3_GPD_P5_OFFSET_MASK     0x000003FF
+#define EC_RFW_V3_GPD_P5_OFFSET_SHIFT    0
+
+/**** gpd_p6 register ****/
+/* Location in bytes of the gpd cam data6 in the parser result v ... */
+#define EC_RFW_V3_GPD_P6_OFFSET_MASK     0x000003FF
+#define EC_RFW_V3_GPD_P6_OFFSET_SHIFT    0
+
+/**** gpd_p7 register ****/
+/* Location in bytes of the gpd cam data7 in the parser result v ... */
+#define EC_RFW_V3_GPD_P7_OFFSET_MASK     0x000003FF
+#define EC_RFW_V3_GPD_P7_OFFSET_SHIFT    0
+
+/**** gpd_p8 register ****/
+/* Location in bytes of the gpd cam data8 in the parser result v ... */
+#define EC_RFW_V3_GPD_P8_OFFSET_MASK     0x000003FF
+#define EC_RFW_V3_GPD_P8_OFFSET_SHIFT    0
+
+/**** rx_gcp_legacy register ****/
+/* 0-choose parameters from table1- choose legacy crce roce para ... */
+#define EC_RFW_V3_RX_GCP_LEGACY_PARAM_SEL (1 << 0)
+
+/**** rx_gcp_table_addr register ****/
+/* parametrs table address */
+#define EC_RFW_V3_RX_GCP_TABLE_ADDR_VAL_MASK 0x0000001F
+#define EC_RFW_V3_RX_GCP_TABLE_ADDR_VAL_SHIFT 0
+
+/**** rx_gcp_table_gen register ****/
+/* polynomial selcet
+0-crc32(0x104C11DB7)
+1-crc32c(0x11EDC6F41) */
+#define EC_RFW_V3_RX_GCP_TABLE_GEN_POLY_SEL (1 << 0)
+/* Enable bit complement on crc result */
+#define EC_RFW_V3_RX_GCP_TABLE_GEN_CRC32_BIT_COMP (1 << 1)
+/* Enable bit swap on crc result */
+#define EC_RFW_V3_RX_GCP_TABLE_GEN_CRC32_BIT_SWAP (1 << 2)
+/* Enable byte swap on crc result */
+#define EC_RFW_V3_RX_GCP_TABLE_GEN_CRC32_BYTE_SWAP (1 << 3)
+/* Enable bit swap on input data */
+#define EC_RFW_V3_RX_GCP_TABLE_GEN_DATA_BIT_SWAP (1 << 4)
+/* Enable byte swap on input data */
+#define EC_RFW_V3_RX_GCP_TABLE_GEN_DATA_BYTE_SWAP (1 << 5)
+/* Number of bytes in trailer which are not part of crc calculat ... */
+#define EC_RFW_V3_RX_GCP_TABLE_GEN_TRAIL_SIZE_MASK 0x000003C0
+#define EC_RFW_V3_RX_GCP_TABLE_GEN_TRAIL_SIZE_SHIFT 6
+/* Number of bytes in header which are not part of crc calculati ... */
+#define EC_RFW_V3_RX_GCP_TABLE_GEN_HEAD_SIZE_MASK 0x00FF0000
+#define EC_RFW_V3_RX_GCP_TABLE_GEN_HEAD_SIZE_SHIFT 16
+/* corrected offset calculation0- subtract head_size (roce)1- ad ... */
+#define EC_RFW_V3_RX_GCP_TABLE_GEN_HEAD_CALC (1 << 24)
+/* 0-replace masked bits with 01-replace masked bits with 1 (roc ... */
+#define EC_RFW_V3_RX_GCP_TABLE_GEN_MASK_POLARITY (1 << 25)
+
+/**** rx_gcp_table_res register ****/
+/* Bit mask for crc/checksum result options for metadata W0[13][ ... */
+#define EC_RFW_V3_RX_GCP_TABLE_RES_SEL_0_MASK 0x0000001F
+#define EC_RFW_V3_RX_GCP_TABLE_RES_SEL_0_SHIFT 0
+/* Bit mask for crc/checksum result options for metadata W0[14][ ... */
+#define EC_RFW_V3_RX_GCP_TABLE_RES_SEL_1_MASK 0x000003E0
+#define EC_RFW_V3_RX_GCP_TABLE_RES_SEL_1_SHIFT 5
+/* Bit mask for crc/checksum result options for metadata W3[29][ ... */
+#define EC_RFW_V3_RX_GCP_TABLE_RES_SEL_2_MASK 0x00007C00
+#define EC_RFW_V3_RX_GCP_TABLE_RES_SEL_2_SHIFT 10
+/* Bit mask for crc/checksum result options for metadata W3[30][ ... */
+#define EC_RFW_V3_RX_GCP_TABLE_RES_SEL_3_MASK 0x000F8000
+#define EC_RFW_V3_RX_GCP_TABLE_RES_SEL_3_SHIFT 15
+/* Bit mask for crc/checksum result options for metadata W3[31][ ... */
+#define EC_RFW_V3_RX_GCP_TABLE_RES_SEL_4_MASK 0x01F00000
+#define EC_RFW_V3_RX_GCP_TABLE_RES_SEL_4_SHIFT 20
+/* enable crc result check */
+#define EC_RFW_V3_RX_GCP_TABLE_RES_EN    (1 << 25)
+/* default value for crc check for non-crc protocol */
+#define EC_RFW_V3_RX_GCP_TABLE_RES_DEF   (1 << 26)
+
+/**** rx_gcp_table_alu_opcode register ****/
+/* first opcode 
+e.g. (A op1 B) op3 (C op2 D) */
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_OPCODE_OPCODE_1_MASK 0x0000003F
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_OPCODE_OPCODE_1_SHIFT 0
+/* second opcode 
+e.g. (A op1 B) op3 (C op2 D) */
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_OPCODE_OPCODE_2_MASK 0x00000FC0
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_OPCODE_OPCODE_2_SHIFT 6
+/* third opcode 
+e.g. (A op1 B) op3 (C op2 D) */
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_OPCODE_OPCODE_3_MASK 0x0003F000
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_OPCODE_OPCODE_3_SHIFT 12
+
+/**** rx_gcp_table_alu_opsel register ****/
+/* frst opsel, input selection */
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_OPSEL_OPSEL_1_MASK 0x0000000F
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_OPSEL_OPSEL_1_SHIFT 0
+/* second opsel, input selection */
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_OPSEL_OPSEL_2_MASK 0x000000F0
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_OPSEL_OPSEL_2_SHIFT 4
+/* third opsel, input selction */
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_OPSEL_OPSEL_3_MASK 0x00000F00
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_OPSEL_OPSEL_3_SHIFT 8
+/* fourth opsel, input selction */
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_OPSEL_OPSEL_4_MASK 0x0000F000
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_OPSEL_OPSEL_4_SHIFT 12
+
+/**** rx_gcp_table_alu_val register ****/
+/* value for alu input */
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_VAL_VAL_MASK 0x000001FF
+#define EC_RFW_V3_RX_GCP_TABLE_ALU_VAL_VAL_SHIFT 0
+
+/**** rx_gcp_alu_p1 register ****/
+/* Location in bytes of field 1 in the parser result vector */
+#define EC_RFW_V3_RX_GCP_ALU_P1_OFFSET_MASK 0x000003FF
+#define EC_RFW_V3_RX_GCP_ALU_P1_OFFSET_SHIFT 0
+/* Right shift for field 1 in the parser result vector */
+#define EC_RFW_V3_RX_GCP_ALU_P1_SHIFT_MASK 0x000F0000
+#define EC_RFW_V3_RX_GCP_ALU_P1_SHIFT_SHIFT 16
+
+/**** rx_gcp_alu_p2 register ****/
+/* Location in bytes of field 2 in the parser result vector */
+#define EC_RFW_V3_RX_GCP_ALU_P2_OFFSET_MASK 0x000003FF
+#define EC_RFW_V3_RX_GCP_ALU_P2_OFFSET_SHIFT 0
+/* Right shift for field 2 in the parser result vector */
+#define EC_RFW_V3_RX_GCP_ALU_P2_SHIFT_MASK 0x000F0000
+#define EC_RFW_V3_RX_GCP_ALU_P2_SHIFT_SHIFT 16
+
+/**** hs_ctrl_table_addr register ****/
+/* Header split control table address */
+#define EC_RFW_V3_HS_CTRL_TABLE_ADDR_VAL_MASK 0x000000FF
+#define EC_RFW_V3_HS_CTRL_TABLE_ADDR_VAL_SHIFT 0
+
+/**** hs_ctrl_table register ****/
+/* Header split length select 0 – legacy1 – rdma2 – alu3 – reser ... */
+#define EC_RFW_V3_HS_CTRL_TABLE_SEL_MASK 0x00000003
+#define EC_RFW_V3_HS_CTRL_TABLE_SEL_SHIFT 0
+/* enable header split */
+#define EC_RFW_V3_HS_CTRL_TABLE_ENABLE   (1 << 2)
+
+/**** hs_ctrl_table_alu_opcode register ****/
+/* first opcode
+e.g. (A op1 B) op3 (C op2 D) */
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_OPCODE_OPCODE_1_MASK 0x0000003F
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_OPCODE_OPCODE_1_SHIFT 0
+/* second opcode
+e.g. (A op1 B) op3 (C op2 D) */
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_OPCODE_OPCODE_2_MASK 0x00000FC0
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_OPCODE_OPCODE_2_SHIFT 6
+/* third opcode
+e.g. (A op1 B) op3 (C op2 D) */
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_OPCODE_OPCODE_3_MASK 0x0003F000
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_OPCODE_OPCODE_3_SHIFT 12
+
+/**** hs_ctrl_table_alu_opsel register ****/
+/* frst opsel, input selection */
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_OPSEL_OPSEL_1_MASK 0x0000000F
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_OPSEL_OPSEL_1_SHIFT 0
+/* second opsel, input selection */
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_OPSEL_OPSEL_2_MASK 0x000000F0
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_OPSEL_OPSEL_2_SHIFT 4
+/* third opsel, input selction */
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_OPSEL_OPSEL_3_MASK 0x00000F00
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_OPSEL_OPSEL_3_SHIFT 8
+/* fourth opsel, input selction */
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_OPSEL_OPSEL_4_MASK 0x0000F000
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_OPSEL_OPSEL_4_SHIFT 12
+
+/**** hs_ctrl_table_alu_val register ****/
+/* value for alu input */
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_VAL_VAL_MASK 0x0000FFFF
+#define EC_RFW_V3_HS_CTRL_TABLE_ALU_VAL_VAL_SHIFT 0
+
+/**** hs_ctrl_cfg register ****/
+/* Header split enable static selction0 – legacy1 – header split ... */
+#define EC_RFW_V3_HS_CTRL_CFG_ENABLE_SEL (1 << 0)
+/* Header split length static selction0 – legacy1 – header split ... */
+#define EC_RFW_V3_HS_CTRL_CFG_LENGTH_SEL (1 << 1)
+
+/**** hs_ctrl_alu_p1 register ****/
+/* Location in bytes of field 1 in the parser result vector */
+#define EC_RFW_V3_HS_CTRL_ALU_P1_OFFSET_MASK 0x000003FF
+#define EC_RFW_V3_HS_CTRL_ALU_P1_OFFSET_SHIFT 0
+/* Right shift for field 1 in the parser result vector */
+#define EC_RFW_V3_HS_CTRL_ALU_P1_SHIFT_MASK 0x000F0000
+#define EC_RFW_V3_HS_CTRL_ALU_P1_SHIFT_SHIFT 16
+
+/**** hs_ctrl_alu_p2 register ****/
+/* Location in bytes of field 2 in the parser result vector */
+#define EC_RFW_V3_HS_CTRL_ALU_P2_OFFSET_MASK 0x000003FF
+#define EC_RFW_V3_HS_CTRL_ALU_P2_OFFSET_SHIFT 0
+/* Right shift for field 2 in the parser result vector */
+#define EC_RFW_V3_HS_CTRL_ALU_P2_SHIFT_MASK 0x000F0000
+#define EC_RFW_V3_HS_CTRL_ALU_P2_SHIFT_SHIFT 16
+
+/**** tx_config register ****/
+/* [0] pre increment word swap[1] pre increment byte swap[2] pre ... */
+#define EC_CRYPTO_TX_CONFIG_TWEAK_ENDIANITY_SWAP_MASK 0x0000003F
+#define EC_CRYPTO_TX_CONFIG_TWEAK_ENDIANITY_SWAP_SHIFT 0
+/* [0] pre encryption word swap[1] pre encryption byte swap[2] p ... */
+#define EC_CRYPTO_TX_CONFIG_DATA_ENDIANITY_SWAP_MASK 0x00003F00
+#define EC_CRYPTO_TX_CONFIG_DATA_ENDIANITY_SWAP_SHIFT 8
+/* Enabling pipe line optimization */
+#define EC_CRYPTO_TX_CONFIG_PIPE_CALC_EN (1 << 16)
+
+/**** rx_config register ****/
+/* [0] pre increment word swap[1] pre increment byte swap[2] pre ... */
+#define EC_CRYPTO_RX_CONFIG_TWEAK_ENDIANITY_SWAP_MASK 0x0000003F
+#define EC_CRYPTO_RX_CONFIG_TWEAK_ENDIANITY_SWAP_SHIFT 0
+/* [0] pre encryption word swap[1] pre encryption byte swap[2] p ... */
+#define EC_CRYPTO_RX_CONFIG_DATA_ENDIANITY_SWAP_MASK 0x00003F00
+#define EC_CRYPTO_RX_CONFIG_DATA_ENDIANITY_SWAP_SHIFT 8
+/* Enabling pipe line optimization */
+#define EC_CRYPTO_RX_CONFIG_PIPE_CALC_EN (1 << 16)
 
 #ifdef __cplusplus
 }

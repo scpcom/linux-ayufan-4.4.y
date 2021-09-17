@@ -15,7 +15,6 @@ typedef struct svc_buf	svc_buf;
 
 #define NFSDDBG_FACILITY		NFSDDBG_PROC
 
-
 static __be32
 nfsd_proc_null(struct svc_rqst *rqstp, void *argp, void *resp)
 {
@@ -117,7 +116,7 @@ nfsd_proc_readlink(struct svc_rqst *rqstp, struct nfsd_readlinkargs *argp,
  */
 static __be32
 nfsd_proc_read(struct svc_rqst *rqstp, struct nfsd_readargs *argp,
-				       struct nfsd_readres  *resp)
+					   struct nfsd_readres  *resp)
 {
 	__be32	nfserr;
 
@@ -142,7 +141,7 @@ nfsd_proc_read(struct svc_rqst *rqstp, struct nfsd_readargs *argp,
 	resp->count = argp->count;
 	nfserr = nfsd_read(rqstp, fh_copy(&resp->fh, &argp->fh),
 				  argp->offset,
-			   	  rqstp->rq_vec, argp->vlen,
+				  rqstp->rq_vec, argp->vlen,
 				  &resp->count);
 
 	if (nfserr) return nfserr;
@@ -168,7 +167,7 @@ nfsd_proc_write(struct svc_rqst *rqstp, struct nfsd_writeargs *argp,
 	nfserr = nfsd_write(rqstp, fh_copy(&resp->fh, &argp->fh), NULL,
 				   argp->offset,
 				   rqstp->rq_vec, argp->vlen,
-			           &cnt,
+					   &cnt,
 				   &stable);
 	return nfsd_return_attrs(nfserr, resp);
 }
@@ -235,7 +234,7 @@ nfsd_proc_create(struct svc_rqst *rqstp, struct nfsd_createargs *argp,
 		 */
 		nfserr = nfserr_acces;
 		if (!newfhp->fh_dentry) {
-			printk(KERN_WARNING 
+			printk(KERN_WARNING
 				"nfsd_proc_create: file handle not verified\n");
 			goto out_unlock;
 		}
@@ -354,7 +353,7 @@ nfsd_proc_remove(struct svc_rqst *rqstp, struct nfsd_diropargs *argp,
 
 static __be32
 nfsd_proc_rename(struct svc_rqst *rqstp, struct nfsd_renameargs *argp,
-				  	 void		        *resp)
+					 void		        *resp)
 {
 	__be32	nfserr;
 
@@ -364,7 +363,7 @@ nfsd_proc_rename(struct svc_rqst *rqstp, struct nfsd_renameargs *argp,
 		SVCFH_fmt(&argp->tfh), argp->tlen, argp->tname);
 
 	nfserr = nfsd_rename(rqstp, &argp->ffh, argp->fname, argp->flen,
-				    &argp->tfh, argp->tname, argp->tlen);
+					&argp->tfh, argp->tname, argp->tlen);
 	fh_put(&argp->ffh);
 	fh_put(&argp->tfh);
 	return nfserr;
@@ -392,7 +391,7 @@ nfsd_proc_link(struct svc_rqst *rqstp, struct nfsd_linkargs *argp,
 
 static __be32
 nfsd_proc_symlink(struct svc_rqst *rqstp, struct nfsd_symlinkargs *argp,
-				          void			  *resp)
+						  void			  *resp)
 {
 	struct svc_fh	newfh;
 	__be32		nfserr;
@@ -407,8 +406,7 @@ nfsd_proc_symlink(struct svc_rqst *rqstp, struct nfsd_symlinkargs *argp,
 	 */
 	nfserr = nfsd_symlink(rqstp, &argp->ffh, argp->fname, argp->flen,
 						 argp->tname, argp->tlen,
-				 		 &newfh, &argp->attrs);
-
+						 &newfh, &argp->attrs);
 
 	fh_put(&argp->ffh);
 	fh_put(&newfh);
@@ -435,7 +433,7 @@ nfsd_proc_mkdir(struct svc_rqst *rqstp, struct nfsd_createargs *argp,
 	argp->attrs.ia_valid &= ~ATTR_SIZE;
 	fh_init(&resp->fh, NFS_FHSIZE);
 	nfserr = nfsd_create(rqstp, &argp->fh, argp->name, argp->len,
-				    &argp->attrs, S_IFDIR, 0, &resp->fh);
+					&argp->attrs, S_IFDIR, 0, &resp->fh);
 	fh_put(&argp->fh);
 	return nfsd_return_dirop(nfserr, resp);
 }
@@ -445,7 +443,7 @@ nfsd_proc_mkdir(struct svc_rqst *rqstp, struct nfsd_createargs *argp,
  */
 static __be32
 nfsd_proc_rmdir(struct svc_rqst *rqstp, struct nfsd_diropargs *argp,
-				 	void		      *resp)
+					void		      *resp)
 {
 	__be32	nfserr;
 
@@ -468,7 +466,7 @@ nfsd_proc_readdir(struct svc_rqst *rqstp, struct nfsd_readdirargs *argp,
 	loff_t		offset;
 
 	dprintk("nfsd: READDIR  %s %d bytes at %d\n",
-		SVCFH_fmt(&argp->fh),		
+		SVCFH_fmt(&argp->fh),
 		argp->count, argp->cookie);
 
 	/* Shrink to the client read size */
@@ -485,8 +483,8 @@ nfsd_proc_readdir(struct svc_rqst *rqstp, struct nfsd_readdirargs *argp,
 	resp->common.err = nfs_ok;
 	/* Read directory and encode entries on the fly */
 	offset = argp->cookie;
-	nfserr = nfsd_readdir(rqstp, &argp->fh, &offset, 
-			      &resp->common, nfssvc_encode_entry);
+	nfserr = nfsd_readdir(rqstp, &argp->fh, &offset,
+				  &resp->common, nfssvc_encode_entry);
 
 	resp->count = resp->buffer - argp->buffer;
 	if (resp->offset)
@@ -523,7 +521,7 @@ struct nfsd_void { int dummy; };
 #define FH 8		/* filehandle */
 #define	AT 18		/* attributes */
 
-static struct svc_procedure		nfsd_procedures2[18] = {
+static struct svc_procedure             nfsd_procedures2[32] = {
 	[NFSPROC_NULL] = {
 		.pc_func = (svc_procfunc) nfsd_proc_null,
 		.pc_decode = (kxdrproc_t) nfssvc_decode_void,
@@ -692,10 +690,9 @@ static struct svc_procedure		nfsd_procedures2[18] = {
 	},
 };
 
-
 struct svc_version	nfsd_version2 = {
 		.vs_vers	= 2,
-		.vs_nproc	= 18,
+		.vs_nproc       = 32,
 		.vs_proc	= nfsd_procedures2,
 		.vs_dispatch	= nfsd_dispatch,
 		.vs_xdrsize	= NFS2_SVC_XDRSIZE,
@@ -753,4 +750,3 @@ nfserrno (int errno)
 	printk (KERN_INFO "nfsd: non-standard errno: %d\n", errno);
 	return nfserr_io;
 }
-

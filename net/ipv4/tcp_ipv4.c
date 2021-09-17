@@ -2200,6 +2200,9 @@ void tcp_v4_destroy_sock(struct sock *sk)
 #ifdef CONFIG_NET_DMA
 	/* Cleans up our sk_async_wait_queue */
 	__skb_queue_purge(&sk->sk_async_wait_queue);
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	dma_free_iovec_data(tp);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #endif
 
 	/* Clean prequeue, it must be empty really */

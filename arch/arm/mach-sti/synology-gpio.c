@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Synology Monaco NAS Board GPIO Setup
  *
@@ -33,266 +30,90 @@
 #include <linux/platform_device.h>
 #include <linux/of_platform.h>
 #include <linux/slab.h>
+#include <linux/syno_gpio.h>
 
-#ifdef  MY_ABC_HERE
-extern char gszSynoHWVersion[];
-#endif
+extern SYNO_GPIO syno_gpio;
+void gpio_info_init(SYNO_GPIO_INFO **gpio_info, SYNO_GPIO_INFO *init_info);
+/*
+ *  DS216play GPIO config table
+ *
+ *  Pin     In/Out    Function
+ *  114       In       Fan 1 fail
+ *  125       In       Model ID 0
+ *  126       In       Model ID 1
+ *  127       In       Model ID 2
+ *  112      Out       HDD 1 power enable
+ *  113      Out       PHY LED
+ *  115      Out       HDD 2 power enable
+ *  118      Out       HDD LED
+ *  120      Out       Fan Low
+ *  121      Out       Fan Mid
+ *  122      Out       Fan High
+ */
 
-#define GPIO_UNDEF				0xFF
-
-#define DISK_LED_OFF			0
-#define DISK_LED_GREEN_SOLID	1
-#define DISK_LED_ORANGE_SOLID	2
-#define DISK_LED_ORANGE_BLINK	3
-#define DISK_LED_GREEN_BLINK    4
-
-#define SYNO_LED_OFF		0
-#define SYNO_LED_ON		1
-#define SYNO_LED_BLINKING	2
-
-#define OUTPUT 0
-#define INPUT 1
-#define ACTIVE_LOW 0
-#define ACTIVE_HIGH 1
-#define ACTIVE_KEEP_VALUE 2
-
-struct syno_gpio_device {
-	const char *name;
-	u8 nr_gpio;
-	u8 gpio_port[4];
-	u8 gpio_direction[4];
-	u8 gpio_init_value[4];
-};
-
-struct syno_gpio_device fan_ctrl = {
+static SYNO_GPIO_INFO fan_ctrl = {
 	.name				= "fan ctrl",
 	.nr_gpio			= 3,
 	.gpio_port			= {122, 121, 120}, /* MAX MID LOW */
-	.gpio_direction		= {OUTPUT, OUTPUT, OUTPUT},
-	.gpio_init_value	= {ACTIVE_KEEP_VALUE, ACTIVE_KEEP_VALUE, ACTIVE_KEEP_VALUE}
+	.gpio_direction		= OUTPUT,
+	.gpio_init_value	= INIT_KEEP_VALUE,
+	.gpio_polarity		= ACTIVE_HIGH,
 };
-
-struct syno_gpio_device hdd_pm_ctrl = {
-	.name				= "sata power",
-	.nr_gpio			= 2,
-	.gpio_port			= {112, 115},
-	.gpio_direction		= {OUTPUT, OUTPUT},
-	.gpio_init_value	= {ACTIVE_KEEP_VALUE, ACTIVE_KEEP_VALUE}
-};
-
-struct syno_gpio_device fan_sense = {
+static SYNO_GPIO_INFO fan_fail = {
 	.name				= "fan sense",
 	.nr_gpio			= 1,
 	.gpio_port			= {114},
-	.gpio_direction		= {INPUT},
+	.gpio_direction		= INPUT,
+	.gpio_polarity		= ACTIVE_HIGH,
 };
-
-struct syno_gpio_device model_id = {
-	.name 				= "model id",
+static SYNO_GPIO_INFO hdd_enable = {
+	.name				= "sata power",
+	.nr_gpio			= 2,
+	.gpio_port			= {112, 115},
+	.gpio_direction		= OUTPUT,
+	.gpio_init_value	= INIT_KEEP_VALUE,
+	.gpio_polarity		= ACTIVE_HIGH,
+};
+static SYNO_GPIO_INFO model_id = {
+	.name				= "model id",
 	.nr_gpio			= 3,
 	.gpio_port			= {125, 126, 127},
-	.gpio_direction		= {INPUT, INPUT, INPUT}
+	.gpio_direction		= INPUT,
+	.gpio_polarity		= ACTIVE_HIGH,
 };
-
-struct syno_gpio_device disk_led_ctrl = {
+static SYNO_GPIO_INFO disk_led_ctrl = {
 	.name				= "disk led ctrl",
 	.nr_gpio			= 1,
 	.gpio_port			= {118},
-	.gpio_direction		= {OUTPUT},
-	.gpio_init_value	= {ACTIVE_LOW}
+	.gpio_direction		= OUTPUT,
+	.gpio_init_value	= INIT_LOW,
+	.gpio_polarity		= ACTIVE_LOW,
 };
-
-struct syno_gpio_device phy_led_ctrl = {
+static SYNO_GPIO_INFO phy_led_ctrl = {
 	.name               = "phy led ctrl",
 	.nr_gpio			= 1,
 	.gpio_port			= {113},
-	.gpio_direction		= {OUTPUT},
-	.gpio_init_value	= {ACTIVE_HIGH}
+	.gpio_direction		= OUTPUT,
+	.gpio_init_value	= INIT_HIGH,
+	.gpio_polarity		= ACTIVE_HIGH,
 };
 
-unsigned int SynoModelIDGet(void)
+void MONACO_ds216play_GPIO_init(void)
 {
-	return 0;
+	syno_gpio.fan_ctrl 		= &fan_ctrl;
+	syno_gpio.fan_fail 		= &fan_fail;
+	syno_gpio.hdd_enable 	= &hdd_enable;
+	syno_gpio.model_id 		= &model_id;
+	syno_gpio.disk_led_ctrl = &disk_led_ctrl;
+	syno_gpio.phy_led_ctrl 	= &phy_led_ctrl;
 }
 
-int SYNO_MONACO_GPIO_PIN(int pin, int *pValue, int isWrite)
-{
-	int ret = -1;
-
-	if (!pValue)
-		goto END;
-
-	if (1 == isWrite)
-		gpio_set_value(pin, *pValue);
-	else
-		*pValue = gpio_get_value(pin);
-
-	ret = 0;
-END:
-	return 0;
-}
-
-int SYNO_MONACO_GPIO_BLINK(int pin, int blink)
-{
-	return 0;
-}
-
-void SYNO_ENABLE_HDD_LED(int blEnable)
-{
-	gpio_set_value(disk_led_ctrl.gpio_port[0], blEnable);
-}
-
-void SYNO_ENABLE_PHY_LED(int blEnable)
-{
-	gpio_set_value(phy_led_ctrl.gpio_port[0], blEnable);
-}
-
-int SYNO_SOC_HDD_LED_SET(int index, int status)
-{
-	return 0;
-}
-
-int SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
-{
-	return 0;
-}
-
-int SYNO_CTRL_USB_HDD_LED_SET(int status)
-{
-	return 0;
-}
-
-int SYNO_CTRL_POWER_LED_SET(int status)
-{
-	return 0;
-}
-
-int SYNO_CTRL_HDD_POWERON(int index, int value)
-{
-	if ((index <= 0) || (hdd_pm_ctrl.nr_gpio < index))
-		goto ERROR;
-
-	if (hdd_pm_ctrl.gpio_port[index - 1])
-		gpio_set_value(hdd_pm_ctrl.gpio_port[index - 1], value);
-
-	return 0;
-ERROR:
-	printk(KERN_NOTICE "HDD index error : HDD[%d] %s\n", index, __func__);
-	WARN_ON_ONCE(1);
-	return -1;
-}
-
-int SYNO_CTRL_FAN_PERSISTER(int index, int status, int isWrite)
-{
-	if ((index <= 0) || fan_ctrl.nr_gpio < index)
-		goto ERROR;
-
-	gpio_set_value(fan_ctrl.gpio_port[index - 1], status);
-
-	return 0;
-ERROR:
-	printk(KERN_NOTICE "FAN index error : FAN[%d] %s\n",index, __func__);
-	WARN_ON_ONCE(1);
-	return -1;
-}
-
-int SYNO_CTRL_FAN_STATUS_GET(int index, int *pValue)
-{
-	if ((index <= 0) || fan_sense.nr_gpio < index)
-		goto ERROR;
-
-	*pValue = gpio_get_value(fan_sense.gpio_port[index - 1]);
-
-	return 0;
-ERROR:
-	printk(KERN_NOTICE "FAN SENSE index error : FAN[%d] %s\n", index, __func__);
-	WARN_ON_ONCE(1);
-	return -1;
-}
-
-int SYNO_CTRL_ALARM_LED_SET(int status)
-{
-	return 0;
-}
-
-int SYNO_CTRL_BACKPLANE_STATUS_GET(int *pStatus)
-{
-	return 0;
-}
-
-int SYNO_CTRL_BUZZER_CLEARED_GET(int *pValue)
-{
-	return 0;
-}
-
-/* SYNO_CHECK_HDD_PRESENT
- * Check HDD present for evansport
- * input : index - disk index, 1-based.
- * output: 0 - HDD not present,  1 - HDD present.
- */
-int SYNO_CHECK_HDD_PRESENT(int index)
-{
-	return 1;
-}
-
-/* SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER
- * Query support HDD dynamic Power .
- * output: 0 - support, 1 - not support.
- */
-int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
-{
-	return 1;
-}
-
-struct disk_cnt {
-	char *hw_version;
-	int max_disk_id;
-};
-
-static inline int MAX_DISK(struct disk_cnt *tbl)
-{
-	int i=0;
-	while (tbl[i].hw_version) {
-		if (syno_is_hw_version(tbl[i].hw_version))
-			return tbl[i].max_disk_id;
-		i++;
-	}
-	return 255;
-}
-
-unsigned char SYNOMonacoIsBoardNeedPowerUpHDD(u32 disk_id)
-{
-	int max_disk = 0;
-	if (syno_is_hw_version(HW_DS216play)) {
-		max_disk = 2;
-	}
-
-	return (disk_id <= max_disk)? 1 : 0;
-}
-
-EXPORT_SYMBOL(SYNOMonacoIsBoardNeedPowerUpHDD);
-EXPORT_SYMBOL(SYNO_MONACO_GPIO_PIN);
-EXPORT_SYMBOL(SYNO_MONACO_GPIO_BLINK);
-EXPORT_SYMBOL(SYNO_ENABLE_HDD_LED);
-EXPORT_SYMBOL(SYNO_ENABLE_PHY_LED);
-EXPORT_SYMBOL(SYNO_SOC_HDD_LED_SET);
-EXPORT_SYMBOL(SYNO_CTRL_EXT_CHIP_HDD_LED_SET);
-EXPORT_SYMBOL(SYNO_CTRL_USB_HDD_LED_SET);
-EXPORT_SYMBOL(SYNO_CTRL_POWER_LED_SET);
-EXPORT_SYMBOL(SYNO_CTRL_HDD_POWERON);
-EXPORT_SYMBOL(SYNO_CTRL_FAN_PERSISTER);
-EXPORT_SYMBOL(SYNO_CTRL_FAN_STATUS_GET);
-EXPORT_SYMBOL(SYNO_CTRL_ALARM_LED_SET);
-EXPORT_SYMBOL(SYNO_CTRL_BACKPLANE_STATUS_GET);
-EXPORT_SYMBOL(SYNO_CTRL_BUZZER_CLEARED_GET);
-EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
-
-static int syno_gpio_device_init(struct syno_gpio_device *gpio_dev, 
+static int syno_gpio_device_init(SYNO_GPIO_INFO *gpio_dev,
 		struct platform_device *pdev)
 {
 	u8 i = 0, value = -1;
 	int ret = -1;
-	const struct syno_gpio_device *gd = gpio_dev;
+	const SYNO_GPIO_INFO *gd = gpio_dev;
 
 	if (NULL == gd)
 		goto ERROR;
@@ -305,14 +126,14 @@ static int syno_gpio_device_init(struct syno_gpio_device *gpio_dev,
 		if (ret)
 			goto ERROR;
 
-		if (ACTIVE_KEEP_VALUE == gd->gpio_direction[i])
+		if (INIT_KEEP_VALUE == gd->gpio_init_value)
 			value = gpio_get_value(gd->gpio_port[i]);
 		else
-			value = gd->gpio_init_value[i];
+			value = gd->gpio_init_value;
 
-		if (0 == gd->gpio_direction[i])
+		if (OUTPUT == gd->gpio_direction)
 			ret = gpio_direction_output(gd->gpio_port[i], value);
-		else if (1 == gd->gpio_direction[i])
+		else if (INPUT == gd->gpio_direction)
 			ret = gpio_direction_input(gd->gpio_port[i]);
 
 		if (ret)
@@ -328,13 +149,13 @@ ERROR:
 
 static int synology_gpio_probe(struct platform_device *pdev)
 {
-	syno_gpio_device_init(&fan_ctrl, pdev);
-	syno_gpio_device_init(&hdd_pm_ctrl, pdev);
-	syno_gpio_device_init(&fan_sense, pdev);
-	syno_gpio_device_init(&model_id, pdev);
-	syno_gpio_device_init(&disk_led_ctrl, pdev);
-	syno_gpio_device_init(&phy_led_ctrl, pdev);
-
+	MONACO_ds216play_GPIO_init();
+	syno_gpio_device_init(syno_gpio.fan_ctrl, pdev);
+	syno_gpio_device_init(syno_gpio.fan_fail, pdev);
+	syno_gpio_device_init(syno_gpio.hdd_enable, pdev);
+	syno_gpio_device_init(syno_gpio.model_id, pdev);
+	syno_gpio_device_init(syno_gpio.disk_led_ctrl, pdev);
+	syno_gpio_device_init(syno_gpio.phy_led_ctrl, pdev);
 	return 0;
 }
 static int synology_gpio_remove(struct platform_device *pdev)

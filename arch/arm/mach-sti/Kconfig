@@ -106,4 +106,9 @@ config SYNO_MONACO_PERF_ENHANCED
 	default n
 	depends on SYNO_LSP_MONACO
 
+config SYNO_MONACO_USB_PHY_FIX
+	bool "#87647 Monaco USB Phy RX Calibration bug fix"
+	default y
+	depends on SYNO_LSP_MONACO
+
 endif

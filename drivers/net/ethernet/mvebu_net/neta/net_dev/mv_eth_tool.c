@@ -127,7 +127,11 @@ int mv_eth_tool_restore_settings(struct net_device *netdev)
 					mvNetaLinkStatus(priv->port, &ps);
 
 					if (!ps.linkup)
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+						err = -EINVAL;
+#else
 						err = 0;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 				}
 			}
 		}
@@ -204,12 +208,21 @@ int mv_eth_tool_get_settings(struct net_device *netdev, struct ethtool_cmd *cmd)
 	cmd->port = PORT_MII;
 	cmd->phy_address = phy_addr;
 	cmd->transceiver = XCVR_INTERNAL;
+
 	/* check if speed and duplex are AN */
 	mvNetaSpeedDuplexGet(priv->port, &speed, &duplex);
 	if (speed == MV_ETH_SPEED_AN && duplex == MV_ETH_DUPLEX_AN) {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		MV_U16 advertise;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 		cmd->lp_advertising = cmd->advertising = 0;
 		cmd->autoneg = AUTONEG_ENABLE;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		mvEthPhyAdvertiseGet(phy_addr, &advertise);
+		cmd->advertising = advertise;
+#else
 		mvEthPhyAdvertiseGet(phy_addr, (MV_U16 *)&(cmd->advertising));
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 
 		mvEthPhyRegRead(phy_addr, MII_LPA, &lp_ad);
 		if (lp_ad & LPA_LPACK)
@@ -228,6 +241,10 @@ int mv_eth_tool_get_settings(struct net_device *netdev, struct ethtool_cmd *cmd)
 			cmd->lp_advertising |= ADVERTISED_1000baseT_Half;
 		if (stat1000 & LPA_1000FULL)
 			cmd->lp_advertising |= ADVERTISED_1000baseT_Full;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		cmd->advertising = cmd->lp_advertising;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 	} else
 		cmd->autoneg = AUTONEG_DISABLE;
 
@@ -273,6 +290,9 @@ int mv_eth_tool_set_settings(struct net_device *dev, struct ethtool_cmd *cmd)
 		priv->speed_cfg = _speed;
 		priv->autoneg_cfg = _autoneg;
 		priv->advertise_cfg = _advertise;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+		err = mv_eth_tool_restore_settings(dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
 	}
 	return err;
 }

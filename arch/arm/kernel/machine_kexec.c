@@ -186,8 +186,6 @@ void machine_kexec(struct kimage *image)
 	reboot_entry_phys = (unsigned long)reboot_entry +
 		(reboot_code_buffer_phys - (unsigned long)reboot_code_buffer);
 
-	flush_icache_range((unsigned long) reboot_code_buffer,
-			   (unsigned long) reboot_code_buffer + KEXEC_CONTROL_PAGE_SIZE);
 	printk(KERN_INFO "Bye!\n");
 
 	if (kexec_reinit)

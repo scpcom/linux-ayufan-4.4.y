@@ -32,6 +32,9 @@
 #include <linux/compat.h>
 #include <linux/fs_stack.h>
 #include <linux/aio.h>
+#ifdef CONFIG_SYNO_ECRYPTFS_BLOCK_BTRFS_CLONE
+#include <linux/btrfs.h>
+#endif
 #include "ecryptfs_kernel.h"
 
 /**
@@ -309,6 +312,10 @@ ecryptfs_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	struct file *lower_file = NULL;
 	long rc = -ENOTTY;
 
+#ifdef CONFIG_SYNO_ECRYPTFS_BLOCK_BTRFS_CLONE
+	if (cmd == BTRFS_IOC_CLONE || cmd == BTRFS_IOC_CLONE_RANGE)
+		return -EXDEV;
+#endif
 	if (ecryptfs_file_to_private(file))
 		lower_file = ecryptfs_file_to_lower(file);
 	if (lower_file && lower_file->f_op && lower_file->f_op->unlocked_ioctl)
@@ -323,6 +330,10 @@ ecryptfs_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	struct file *lower_file = NULL;
 	long rc = -ENOIOCTLCMD;
 
+#ifdef CONFIG_SYNO_ECRYPTFS_BLOCK_BTRFS_CLONE
+	if (cmd == BTRFS_IOC_CLONE || cmd == BTRFS_IOC_CLONE_RANGE)
+		return -EXDEV;
+#endif
 	if (ecryptfs_file_to_private(file))
 		lower_file = ecryptfs_file_to_lower(file);
 	if (lower_file && lower_file->f_op && lower_file->f_op->compat_ioctl)

@@ -40,6 +40,3 @@ obj-$(CONFIG_SMP)                += platsmp.o headsmp.o
 obj-$(CONFIG_HOTPLUG_CPU)        += hotplug.o
 endif
 
-ifeq ($(CONFIG_SYNO_ARMADA),y)
-obj-y	+= synology-gpio.o
-endif

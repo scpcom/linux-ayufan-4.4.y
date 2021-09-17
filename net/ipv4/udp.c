@@ -405,7 +405,6 @@ static inline int compute_score2(struct sock *sk, struct net *net,
 	return score;
 }
 
-
 /* called with read_rcu_lock() */
 static struct sock *udp4_lib_lookup2(struct net *net,
 		__be32 saddr, __be16 sport,
@@ -1116,7 +1115,6 @@ out:
 	return ret;
 }
 
-
 /**
  *	first_packet_length	- return length of first packet in receive queue
  *	@sk: socket
@@ -1293,14 +1291,11 @@ csum_copy_err:
 	}
 	unlock_sock_fast(sk, slow);
 
-	if (noblock)
-		return -EAGAIN;
-
-	/* starting over for a new packet */
+	/* starting over for a new packet, but check if we need to yield */
+	cond_resched();
 	msg->msg_flags &= ~MSG_TRUNC;
 	goto try_again;
 }
-
 
 int udp_disconnect(struct sock *sk, int flags)
 {
@@ -1518,7 +1513,6 @@ int udp_queue_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	    udp_lib_checksum_complete(skb))
 		goto csum_error;
 
-
 	if (sk_rcvqueues_full(sk, skb, sk->sk_rcvbuf))
 		goto drop;
 
@@ -1544,7 +1538,6 @@ drop:
 	kfree_skb(skb);
 	return -1;
 }
-
 
 static void flush_stack(struct sock **stack, unsigned int count,
 			struct sk_buff *skb, unsigned int final)

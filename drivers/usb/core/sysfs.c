@@ -9,7 +9,6 @@
  *
  */
 
-
 #include <linux/kernel.h>
 #include <linux/string.h>
 #include <linux/usb.h>
@@ -202,6 +201,35 @@ show_quirks(struct device *dev, struct device_attribute *attr, char *buf)
 	return sprintf(buf, "0x%x\n", udev->quirks);
 }
 static DEVICE_ATTR(quirks, S_IRUGO, show_quirks, NULL);
+
+#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+static ssize_t
+show_syno_quirks(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct usb_device *udev;
+
+	udev = to_usb_device(dev);
+	return sprintf(buf, "0x%x\n", udev->syno_quirks);
+}
+
+static ssize_t
+set_syno_quirks(struct device *dev, struct device_attribute *attr,
+		const char * buf, size_t count)
+{
+	struct usb_device *udev;
+	unsigned int val;
+
+	if (0 > kstrtouint(buf, 16, &val))
+		return -EINVAL;
+
+	udev = to_usb_device(dev);
+	udev->syno_quirks = val;
+
+	return count;
+}
+static DEVICE_ATTR(syno_quirks, S_IWUSR | S_IRUGO,
+		show_syno_quirks, set_syno_quirks);
+#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
 
 static ssize_t
 show_avoid_reset_quirk(struct device *dev, struct device_attribute *attr, char *buf)
@@ -546,7 +574,6 @@ static void remove_power_attributes(struct device *dev)
 
 #endif	/* CONFIG_PM_RUNTIME */
 
-
 /* Descriptor fields */
 #define usb_descriptor_attr_le16(field, format_string)			\
 static ssize_t								\
@@ -583,8 +610,6 @@ usb_descriptor_attr(bDeviceProtocol, "%02x\n")
 usb_descriptor_attr(bNumConfigurations, "%d\n")
 usb_descriptor_attr(bMaxPacketSize0, "%d\n")
 
-
-
 /* show if the device is authorized (1) or not (0) */
 static ssize_t usb_dev_authorized_show(struct device *dev,
 				       struct device_attribute *attr,
@@ -593,7 +618,6 @@ static ssize_t usb_dev_authorized_show(struct device *dev,
 	struct usb_device *usb_dev = to_usb_device(dev);
 	return snprintf(buf, PAGE_SIZE, "%u\n", usb_dev->authorized);
 }
-
 
 /*
  * Authorize a device to be used in the system
@@ -642,7 +666,6 @@ static ssize_t usb_remove_store(struct device *dev,
 }
 static DEVICE_ATTR_IGNORE_LOCKDEP(remove, 0200, NULL, usb_remove_store);
 
-
 static struct attribute *dev_attrs[] = {
 	/* current configuration's attributes */
 	&dev_attr_configuration.attr,
@@ -667,6 +690,9 @@ static struct attribute *dev_attrs[] = {
 	&dev_attr_version.attr,
 	&dev_attr_maxchild.attr,
 	&dev_attr_quirks.attr,
+#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+	&dev_attr_syno_quirks.attr,
+#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
 	&dev_attr_avoid_reset_quirk.attr,
 	&dev_attr_authorized.attr,
 	&dev_attr_remove.attr,

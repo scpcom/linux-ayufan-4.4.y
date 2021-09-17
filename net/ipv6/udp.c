@@ -100,7 +100,6 @@ static unsigned int udp6_portaddr_hash(struct net *net,
 	return hash ^ port;
 }
 
-
 int udp_v6_get_port(struct sock *sk, unsigned short snum)
 {
 	unsigned int hash2_nulladdr =
@@ -194,7 +193,6 @@ static inline int compute_score2(struct sock *sk, struct net *net,
 	}
 	return score;
 }
-
 
 /* called with read_rcu_lock() */
 static struct sock *udp6_lib_lookup2(struct net *net,
@@ -353,7 +351,6 @@ struct sock *udp6_lib_lookup(struct net *net, const struct in6_addr *saddr, __be
 }
 EXPORT_SYMBOL_GPL(udp6_lib_lookup);
 
-
 /*
  * 	This should be easy, if there is something there we
  * 	return it, otherwise we block.
@@ -494,10 +491,8 @@ csum_copy_err:
 	}
 	unlock_sock_fast(sk, slow);
 
-	if (noblock)
-		return -EAGAIN;
-
-	/* starting over for a new packet */
+	/* starting over for a new packet, but check if we need to yield */
+	cond_resched();
 	msg->msg_flags &= ~MSG_TRUNC;
 	goto try_again;
 }
@@ -1486,7 +1481,6 @@ static struct inet_protosw udpv6_protosw = {
 	.no_check =  UDP_CSUM_DEFAULT,
 	.flags =     INET_PROTOSW_PERMANENT,
 };
-
 
 int __init udpv6_init(void)
 {

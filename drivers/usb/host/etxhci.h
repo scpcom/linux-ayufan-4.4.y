@@ -88,9 +88,10 @@ struct xhci_cap_regs {
 #define HCS_IST(p)		(((p) >> 0) & 0xf)
 /* bits 4:7, max number of Event Ring segments */
 #define HCS_ERST_MAX(p)		(((p) >> 4) & 0xf)
+/* bits 21:25 Hi 5 bits of Scratchpad buffers SW must allocate for the HW */
 /* bit 26 Scratchpad restore - for save/restore HW state - not used yet */
-/* bits 27:31 number of Scratchpad buffers SW must allocate for the HW */
-#define HCS_MAX_SCRATCHPAD(p)   (((p) >> 27) & 0x1f)
+/* bits 27:31 Lo 5 bits of Scratchpad buffers SW must allocate for the HW */
+#define HCS_MAX_SCRATCHPAD(p)   ((((p) >> 16) & 0x3e0) | (((p) >> 27) & 0x1f))
 
 /* HCSPARAMS3 - hcs_params3 - bitmasks */
 /* bits 0:7, Max U1 to U0 latency for the roothub ports */
@@ -1115,6 +1116,8 @@ struct xhci_td {
 	struct xhci_segment	*start_seg;
 	union xhci_trb		*first_trb;
 	union xhci_trb		*last_trb;
+	/* actual_length of the URB has already been set */
+	bool			urb_length_set;
 };
 
 /* xHCI command default timeout value */
@@ -1562,7 +1565,7 @@ static inline void etxhci_unregister_pci(void) {}
 
 /* xHCI host controller glue */
 typedef void (*xhci_get_quirks_t)(struct device *, struct xhci_hcd *);
-int xhci_handshake(struct xhci_hcd *xhci, void __iomem *ptr,
+int etxhci_handshake(struct xhci_hcd *xhci, void __iomem *ptr,
 		u32 mask, u32 done, int usec);
 void etxhci_quiesce(struct xhci_hcd *xhci);
 int etxhci_halt(struct xhci_hcd *xhci);
@@ -1649,7 +1652,7 @@ void xhci_queue_config_ep_quirk(struct xhci_hcd *xhci,
 		unsigned int slot_id, unsigned int ep_index,
 		struct xhci_dequeue_state *deq_state);
 void etxhci_stop_endpoint_command_watchdog(unsigned long arg);
-int xhci_cancel_cmd(struct xhci_hcd *xhci, struct xhci_command *command,
+int etxhci_cancel_cmd(struct xhci_hcd *xhci, struct xhci_command *command,
 		union xhci_trb *cmd_trb);
 void etxhci_ring_ep_doorbell(struct xhci_hcd *xhci, unsigned int slot_id,
 		unsigned int ep_index, unsigned int stream_id);

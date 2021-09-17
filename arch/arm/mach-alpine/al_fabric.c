@@ -55,7 +55,7 @@ struct sys_fabric_irq_struct {
 
 static struct sys_fabric_irq_struct	sf_irq_arr[AL_FABRIC_INSTANCE_N];
 
-int hwcc;
+int al_fabric_hwcc;
 
 static int al_fabric_plat_device_notifier(struct notifier_block *nb,
 				       unsigned long event, void *__dev)
@@ -66,11 +66,11 @@ static int al_fabric_plat_device_notifier(struct notifier_block *nb,
 		return NOTIFY_DONE;
 
 #ifdef CONFIG_ARM_HWCC_FLAG
-	dev->archdata.hwcc = hwcc;
+	dev->archdata.hwcc = al_fabric_hwcc;
 #endif
 	dma_set_coherent_mask(dev, PHYS_MASK);
 
-	if (!hwcc)
+	if (!al_fabric_hwcc)
 		return NOTIFY_OK;
 
 	set_dma_ops(dev, &arm_coherent_dma_ops);
@@ -93,11 +93,11 @@ static int al_fabric_pci_device_notifier(struct notifier_block *nb,
 		return NOTIFY_DONE;
 
 #ifdef CONFIG_ARM_HWCC_FLAG
-	dev->archdata.hwcc = hwcc;
+	dev->archdata.hwcc = al_fabric_hwcc;
 #endif
 	dma_set_coherent_mask(dev, PHYS_MASK);
 
-	if (!hwcc)
+	if (!al_fabric_hwcc)
 		return NOTIFY_OK;
 
 	set_dma_ops(dev, &arm_coherent_dma_ops);
@@ -202,6 +202,12 @@ int al_fabric_get_cause_irq(unsigned int idx, int irq)
 	return sf_irq_arr[idx].irq_cause_base + irq;
 }
 
+int al_fabric_hwcc_enabled(void)
+{
+	return al_fabric_hwcc;
+}
+EXPORT_SYMBOL(al_fabric_hwcc_enabled);
+
 int __init al_fabric_init(void)
 {
 	struct device_node *ccu_node;
@@ -244,13 +250,13 @@ int __init al_fabric_init(void)
 			&& prop;
 	}
 	if (ccu_node && of_device_is_available(ccu_node)) {
-		hwcc = !of_property_read_u32(ccu_node, "io_coherency", &prop)
+		al_fabric_hwcc = !of_property_read_u32(ccu_node, "io_coherency", &prop)
 			&& prop;
 
-		if (hwcc)
+		if (al_fabric_hwcc)
 			printk("Enabling IO Cache Coherency.\n");
 
-		al_ccu_init(ccu_address, hwcc);
+		al_ccu_init(ccu_address, al_fabric_hwcc);
 
 		bus_register_notifier(&platform_bus_type,
 					&al_fabric_plat_device_nb);

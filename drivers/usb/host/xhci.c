@@ -436,7 +436,7 @@ static void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
 }
 #endif
 #else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
-static void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
+static inline void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
 {
 }
 #endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */

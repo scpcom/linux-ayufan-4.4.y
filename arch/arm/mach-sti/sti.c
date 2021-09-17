@@ -33,40 +33,65 @@
 extern int (*syno_standby_power_enable)(void);
 #endif
 
+#define BAUDRATE_VAL_M1(bps, clk)  \
+	((((bps * (1 << 14)) + (1 << 13)) / (clk / (1 << 6))))
+
 static void synology_power_off(void)
 {
-	struct file *filp = NULL;
-	mm_segment_t fs;
-	const char cmd[] = "1";
 
-	filp = filp_open("/dev/ttyS1", O_RDWR, 0);
-	if (IS_ERR(filp))
-		return;
+	if ( of_aliases ) {
+		int reg,size_reg;
+		unsigned long microp_rate;
+		void __iomem *microp_base;
+		const void *prop = of_get_property(of_aliases,"ttyS1",NULL);
+		struct device_node *microp;
+		struct clk *clk;
 
-	fs = get_fs();
-	set_fs(KERNEL_DS);
+		if (prop)
+			microp = of_find_node_by_path(prop);
+		else
+			goto END;
+
+		if  (!IS_ERR_OR_NULL(microp)) {
+			if (!of_property_read_u32_index(microp, "reg", 0, &reg)) {
+				if (!of_property_read_u32_index(microp, "reg", 1, &size_reg)) {
+					microp_base = ioremap_nocache(reg, size_reg);
+				}
+			}
+
+			clk = of_clk_get(microp, 0);
+			if (clk)
+				microp_rate = clk_get_rate(clk);
+
+		} else
+			goto END;
+
+		writel(0x1189 & ~0x80, microp_base + 0x0c); /* ctrl */
+		writel(BAUDRATE_VAL_M1(9600, microp_rate), microp_base); /* baud rate 9600 */
+		writel(20, microp_base + 0x1c); /* timeout */
+		writel(1, microp_base + 0x10); /* int */
+		writel(0x1189, microp_base + 0x0c); /* ctrl */
 
 #if defined(CONFIG_SYNO_MONACO_SUPPORT_WOL)
-	if (NULL != syno_standby_power_enable) {
-		const char cmd_wol_enable[] = "l";
-		const char cmd_wol_disable[] = "k";
+		if (NULL != syno_standby_power_enable) {
+			if (syno_standby_power_enable())
+				writel('l', microp_base + 0x4);
+			else
+				writel('k', microp_base + 0x4);
+		}
 
-		if (syno_standby_power_enable())
-			filp->f_op->write(filp, cmd_wol_enable, strlen(cmd_wol_enable), &filp->f_pos);
-		else
-			filp->f_op->write(filp, cmd_wol_disable, strlen(cmd_wol_disable), &filp->f_pos);
-	}
-
-	mdelay(200);
+		mdelay(200);
 #endif
-	filp->f_op->write(filp, cmd, strlen(cmd), &filp->f_pos);
-	set_fs(fs);
+
+		writel('1', microp_base + 0x4);
+	}
+END:
 	mdelay(100);
-	filp_close(filp, NULL);
 	printk(KERN_ERR "syno power off failed!\n");
+
 }
 
-#endif
+#endif /* CONFIG_SYNO_MONACO */
 /*
  * Temporary function to enable clocks in ClockgenTel:
  * -VCO to 540 MHz

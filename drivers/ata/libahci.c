@@ -53,12 +53,18 @@
 #ifdef CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY
 #include <linux/pci.h>
 #include <linux/leds.h>
+#if defined(CONFIG_SYNO_ALPINE)
+#include <linux/pci_ids.h>
+#endif /* CONFIG_SYNO_ALPINE */
 #endif /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
 #include "ahci.h"
 #include "libata.h"
 #ifdef CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY
 extern void syno_ledtrig_active_set(int iLedNum);
 extern int *gpGreenLedMap;
+#if defined(CONFIG_SYNO_ALPINE)
+extern int SYNO_CTRL_HDD_ACT_NOTIFY(int index);
+#endif /* CONFIG_SYNO_ALPINE */
 #endif /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
 
 static int ahci_skip_host_reset;
@@ -934,6 +940,17 @@ static int syno_need_ahci_software_activity(struct ata_port *ap)
 					break;
 			}
 		}
+#if defined(CONFIG_SYNO_ALPINE)
+		if (pdev != NULL && pdev->vendor == PCI_VENDOR_ID_ANNAPURNA_LABS) {
+			switch (pdev->device) {
+				case 0x0031:
+					ret = 1;
+					break;
+				default:
+					break;
+			}
+		}
+#endif /* CONFIG_SYNO_ALPINE */
 	}
 
 END:
@@ -942,10 +959,14 @@ END:
 
 static void syno_sw_activity(struct ata_port *ap)
 {
+#if defined(CONFIG_SYNO_ALPINE)
+	SYNO_CTRL_HDD_ACT_NOTIFY(ap->syno_disk_index);
+#else /* CONFIG_SYNO_ALPINE */
 	if(NULL == gpGreenLedMap){
 		return;
 	}
 	syno_ledtrig_active_set(gpGreenLedMap[ap->syno_disk_index]);		
+#endif /* CONFIG_SYNO_ALPINE */
 }
 
 /**
@@ -1949,10 +1970,11 @@ EXPORT_SYMBOL_GPL(sata_syno_ahci_defer_cmd);
 int ahci_syno_pmp_3x26_qc_defer(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
-	if (!sata_pmp_attached(ap))
-		return ata_std_qc_defer(qc);
-	else
+	if (sata_pmp_attached(ap) && (ap->uiStsFlags & SYNO_STATUS_IS_SIL3x26)) {
 		return sata_syno_ahci_defer_cmd(qc);
+	}
+	else
+		return ata_std_qc_defer(qc);
 }
 EXPORT_SYMBOL_GPL(ahci_syno_pmp_3x26_qc_defer);
 #endif

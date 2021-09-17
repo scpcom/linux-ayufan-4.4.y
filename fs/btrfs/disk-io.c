@@ -44,7 +44,6 @@
 #include "btrfs_inode.h"
 #include "volumes.h"
 #include "print-tree.h"
-#include "async-thread.h"
 #include "locking.h"
 #include "tree-log.h"
 #include "free-space-cache.h"
@@ -65,8 +64,6 @@ static void end_workqueue_fn(struct btrfs_work *work);
 static void free_fs_root(struct btrfs_root *root);
 static int btrfs_check_super_valid(struct btrfs_fs_info *fs_info,
 				    int read_only);
-static void btrfs_destroy_ordered_operations(struct btrfs_transaction *t,
-					     struct btrfs_root *root);
 static void btrfs_destroy_ordered_extents(struct btrfs_root *root);
 static int btrfs_destroy_delayed_refs(struct btrfs_transaction *trans,
 				      struct btrfs_root *root);
@@ -666,7 +663,7 @@ static int btree_readpage_end_io_hook(struct btrfs_io_bio *io_bio,
 		goto err;
 
 	eb->read_mirror = mirror;
-	if (test_bit(EXTENT_BUFFER_IOERR, &eb->bflags)) {
+	if (test_bit(EXTENT_BUFFER_READ_ERR, &eb->bflags)) {
 		ret = -EIO;
 		goto err;
 	}
@@ -739,7 +736,7 @@ static int btree_io_failed_hook(struct page *page, int failed_mirror)
 	struct btrfs_root *root = BTRFS_I(page->mapping->host)->root;
 
 	eb = (struct extent_buffer *)page->private;
-	set_bit(EXTENT_BUFFER_IOERR, &eb->bflags);
+	set_bit(EXTENT_BUFFER_READ_ERR, &eb->bflags);
 	eb->read_mirror = failed_mirror;
 	atomic_dec(&eb->io_pages);
 	if (test_and_clear_bit(EXTENT_BUFFER_READAHEAD, &eb->bflags))
@@ -751,35 +748,41 @@ static void end_workqueue_bio(struct bio *bio, int err)
 {
 	struct end_io_wq *end_io_wq = bio->bi_private;
 	struct btrfs_fs_info *fs_info;
+	struct btrfs_workqueue *wq;
+	btrfs_work_func_t func;
 
 	fs_info = end_io_wq->info;
 	end_io_wq->error = err;
-	btrfs_init_work(&end_io_wq->work, end_workqueue_fn, NULL, NULL);
 
 	if (bio->bi_rw & REQ_WRITE) {
-		if (end_io_wq->metadata == BTRFS_WQ_ENDIO_METADATA)
-			btrfs_queue_work(fs_info->endio_meta_write_workers,
-					 &end_io_wq->work);
-		else if (end_io_wq->metadata == BTRFS_WQ_ENDIO_FREE_SPACE)
-			btrfs_queue_work(fs_info->endio_freespace_worker,
-					 &end_io_wq->work);
-		else if (end_io_wq->metadata == BTRFS_WQ_ENDIO_RAID56)
-			btrfs_queue_work(fs_info->endio_raid56_workers,
-					 &end_io_wq->work);
-		else
-			btrfs_queue_work(fs_info->endio_write_workers,
-					 &end_io_wq->work);
+		if (end_io_wq->metadata == BTRFS_WQ_ENDIO_METADATA) {
+			wq = fs_info->endio_meta_write_workers;
+			func = btrfs_endio_meta_write_helper;
+		} else if (end_io_wq->metadata == BTRFS_WQ_ENDIO_FREE_SPACE) {
+			wq = fs_info->endio_freespace_worker;
+			func = btrfs_freespace_write_helper;
+		} else if (end_io_wq->metadata == BTRFS_WQ_ENDIO_RAID56) {
+			wq = fs_info->endio_raid56_workers;
+			func = btrfs_endio_raid56_helper;
+		} else {
+			wq = fs_info->endio_write_workers;
+			func = btrfs_endio_write_helper;
+		}
 	} else {
-		if (end_io_wq->metadata == BTRFS_WQ_ENDIO_RAID56)
-			btrfs_queue_work(fs_info->endio_raid56_workers,
-					 &end_io_wq->work);
-		else if (end_io_wq->metadata)
-			btrfs_queue_work(fs_info->endio_meta_workers,
-					 &end_io_wq->work);
-		else
-			btrfs_queue_work(fs_info->endio_workers,
-					 &end_io_wq->work);
+		if (end_io_wq->metadata == BTRFS_WQ_ENDIO_RAID56) {
+			wq = fs_info->endio_raid56_workers;
+			func = btrfs_endio_raid56_helper;
+		} else if (end_io_wq->metadata) {
+			wq = fs_info->endio_meta_workers;
+			func = btrfs_endio_meta_helper;
+		} else {
+			wq = fs_info->endio_workers;
+			func = btrfs_endio_helper;
+		}
 	}
+
+	btrfs_init_work(&end_io_wq->work, func, end_workqueue_fn, NULL, NULL);
+	btrfs_queue_work(wq, &end_io_wq->work);
 }
 
 /*
@@ -886,7 +889,7 @@ int btrfs_wq_submit_bio(struct btrfs_fs_info *fs_info, struct inode *inode,
 	async->submit_bio_start = submit_bio_start;
 	async->submit_bio_done = submit_bio_done;
 
-	btrfs_init_work(&async->work, run_one_async_start,
+	btrfs_init_work(&async->work, btrfs_worker_helper, run_one_async_start,
 			run_one_async_done, run_one_async_free);
 
 	async->bio_flags = bio_flags;
@@ -1819,6 +1822,7 @@ static int cleaner_kthread(void *arg)
 {
 	struct btrfs_root *root = arg;
 	int again;
+	struct btrfs_trans_handle *trans;
 
 	do {
 		again = 0;
@@ -1857,6 +1861,34 @@ sleep:
 			__set_current_state(TASK_RUNNING);
 		}
 	} while (!kthread_should_stop());
+
+	/*
+	 * Transaction kthread is stopped before us and wakes us up.
+	 * However we might have started a new transaction and COWed some
+	 * tree blocks when deleting unused block groups for example. So
+	 * make sure we commit the transaction we started to have a clean
+	 * shutdown when evicting the btree inode - if it has dirty pages
+	 * when we do the final iput() on it, eviction will trigger a
+	 * writeback for it which will fail with null pointer dereferences
+	 * since work queues and other resources were already released and
+	 * destroyed by the time the iput/eviction/writeback is made.
+	 */
+	trans = btrfs_attach_transaction(root);
+	if (IS_ERR(trans)) {
+		if (PTR_ERR(trans) != -ENOENT)
+			btrfs_err(root->fs_info,
+				  "cleaner transaction attach returned %ld",
+				  PTR_ERR(trans));
+	} else {
+		int ret;
+
+		ret = btrfs_commit_transaction(trans, root);
+		if (ret)
+			btrfs_err(root->fs_info,
+				  "cleaner open transaction commit returned %d",
+				  ret);
+	}
+
 	return 0;
 }
 
@@ -2247,6 +2279,10 @@ int open_ctree(struct super_block *sb,
 	bool create_uuid_tree;
 	bool check_uuid_tree;
 
+#ifdef CONFIG_SYNO_BTRFS_CHECK_INTEGRITY
+	fs_info->check_integrity = 0;
+#endif
+
 	tree_root = fs_info->tree_root = btrfs_alloc_root(fs_info);
 	chunk_root = fs_info->chunk_root = btrfs_alloc_root(fs_info);
 	if (!tree_root || !chunk_root) {
@@ -2319,11 +2355,9 @@ int open_ctree(struct super_block *sb,
 	spin_lock_init(&fs_info->qgroup_op_lock);
 	spin_lock_init(&fs_info->buffer_lock);
 	spin_lock_init(&fs_info->unused_bgs_lock);
+	mutex_init(&fs_info->unused_bg_unpin_mutex);
 	rwlock_init(&fs_info->tree_mod_log_lock);
 	mutex_init(&fs_info->reloc_mutex);
-#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
-	mutex_init(&fs_info->pending_snapshots_mutex);
-#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
 	mutex_init(&fs_info->delalloc_root_mutex);
 	seqlock_init(&fs_info->profiles_lock);
 
@@ -2557,7 +2591,11 @@ int open_ctree(struct super_block *sb,
 	 * In the long term, we'll store the compression type in the super
 	 * block, and it'll be used for per file compression control.
 	 */
+#ifdef CONFIG_SYNO_BTRFS_COMPR_DEFAULT_SETTING
+	fs_info->compress_type = BTRFS_COMPRESS_DEFAULT;
+#else
 	fs_info->compress_type = BTRFS_COMPRESS_ZLIB;
+#endif
 
 	ret = btrfs_parse_options(tree_root, options);
 	if (ret) {
@@ -3906,6 +3944,17 @@ void btrfs_mark_buffer_dirty(struct extent_buffer *buf)
 		__percpu_counter_add(&root->fs_info->dirty_metadata_bytes,
 				     buf->len,
 				     root->fs_info->dirty_metadata_batch);
+
+#ifdef CONFIG_SYNO_BTRFS_CHECK_INTEGRITY
+	if (unlikely(root->fs_info->check_integrity && btrfs_header_level(buf) == 0 && check_leaf(root, buf))) {
+		btrfs_print_leaf(root, buf);
+		if (root->fs_info->check_integrity == 1)
+			WARN_ON(1);
+		if (root->fs_info->check_integrity == 2)
+			BUG_ON(1);
+	}
+#endif
+
 #ifdef CONFIG_BTRFS_FS_CHECK_INTEGRITY
 	if (btrfs_header_level(buf) == 0 && check_leaf(root, buf)) {
 		btrfs_print_leaf(root, buf);
@@ -3928,17 +3977,6 @@ static void __btrfs_btree_balance_dirty(struct btrfs_root *root,
 
 	if (flush_delayed)
 		btrfs_balance_delayed_items(root);
-
-#ifdef CONFIG_SYNO_BTRFS_PREVENT_FLUSH_STUCK_IN_BALANCE_DIRTY_PAGES
-	/*
-	 * flush-btrfs-X will be stuck in balance_dirty_pages() forever.
-	 * the flush-X thread is forked by bdi_forker_thread().
-	 * balance_dirty_pages_ratelimited() will be called every metadata change.
-	 * we could pass it safely.
-	 */
-	if (current->comm && !strncmp(current->comm, "flush-btrfs-", 12))
-		return;
-#endif
 
 	ret = percpu_counter_compare(&root->fs_info->dirty_metadata_bytes,
 				     BTRFS_DIRTY_METADATA_THRESH);
@@ -3985,34 +4023,6 @@ static void btrfs_error_commit_super(struct btrfs_root *root)
 
 	/* cleanup FS via transaction */
 	btrfs_cleanup_transaction(root);
-}
-
-static void btrfs_destroy_ordered_operations(struct btrfs_transaction *t,
-					     struct btrfs_root *root)
-{
-	struct btrfs_inode *btrfs_inode;
-	struct list_head splice;
-
-	INIT_LIST_HEAD(&splice);
-
-	mutex_lock(&root->fs_info->ordered_operations_mutex);
-	spin_lock(&root->fs_info->ordered_root_lock);
-
-	list_splice_init(&t->ordered_operations, &splice);
-	while (!list_empty(&splice)) {
-		btrfs_inode = list_entry(splice.next, struct btrfs_inode,
-					 ordered_operations);
-
-		list_del_init(&btrfs_inode->ordered_operations);
-		spin_unlock(&root->fs_info->ordered_root_lock);
-
-		btrfs_invalidate_inodes(btrfs_inode->root);
-
-		spin_lock(&root->fs_info->ordered_root_lock);
-	}
-
-	spin_unlock(&root->fs_info->ordered_root_lock);
-	mutex_unlock(&root->fs_info->ordered_operations_mutex);
 }
 
 static void btrfs_destroy_ordered_extents(struct btrfs_root *root)
@@ -4245,8 +4255,6 @@ again:
 void btrfs_cleanup_one_transaction(struct btrfs_transaction *cur_trans,
 				   struct btrfs_root *root)
 {
-	btrfs_destroy_ordered_operations(cur_trans, root);
-
 	btrfs_destroy_delayed_refs(cur_trans, root);
 
 	cur_trans->state = TRANS_STATE_COMMIT_START;

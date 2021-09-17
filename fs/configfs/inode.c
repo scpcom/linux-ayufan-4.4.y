@@ -168,9 +168,8 @@ static void configfs_set_inode_lock_class(struct configfs_dirent *sd,
 			 * In practice the maximum level of locking depth is
 			 * already reached. Just inform about possible reasons.
 			 */
-			printk(KERN_INFO "configfs: Too many levels of inodes"
-			       " for the locking correctness validator.\n");
-			printk(KERN_INFO "Spurious warnings may appear.\n");
+			pr_info("Too many levels of inodes for the locking correctness validator.\n");
+			pr_info("Spurious warnings may appear.\n");
 		}
 	}
 }
@@ -238,7 +237,6 @@ const unsigned char * configfs_get_name(struct configfs_dirent *sd)
 	}
 	return NULL;
 }
-
 
 /*
  * Unhashes the dentry corresponding to given configfs_dirent

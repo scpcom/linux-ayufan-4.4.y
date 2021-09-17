@@ -529,7 +529,7 @@ static int scsi_sdev_check_buf_bit(const char *buf)
 			return 1;
 		else if (buf[0] == '0')
 			return 0;
-		else 
+		else
 			return -EINVAL;
 	} else
 		return -EINVAL;
@@ -618,6 +618,52 @@ END:
 
 static DEVICE_ATTR(syno_spindown, S_IRUGO, sdev_show_syno_spindown, NULL);
 #endif /* CONFIG_SYNO_DISK_HIBERNATION */
+
+#ifdef CONFIG_SYNO_GET_DISK_SPEED
+const char *disk_spd_string(unsigned char spd)
+{
+	char *szRet;
+	static const char * const spd_str[] = {
+		"unknown",
+		"1.5 Gbps",
+		"3.0 Gbps",
+		"6.0 Gbps",
+		"12.0 Gbps"
+	};
+
+	if (spd > (ARRAY_SIZE(spd_str) - 1)){
+		szRet = spd_str[0];
+	}else{
+		szRet = spd_str[spd];
+	}
+
+	return szRet;
+}
+
+static ssize_t
+sdev_show_syno_disk_spd(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	        struct scsi_device *sdev = to_scsi_device(dev);
+		int iRet = -EFAULT;
+		int iDiskSpd = NULL;
+
+		if (NULL == (sdev = to_scsi_device(dev))){
+			goto END;
+		}
+
+		if (NULL == sdev->host->hostt->syno_get_disk_speed){
+			goto END;
+		}else {
+			//Get the speed of disk, and use disk_spd_string to parse the speed.
+			iDiskSpd = sdev->host->hostt->syno_get_disk_speed(sdev->host, sdev->id);
+			iRet = snprintf (buf, 20, "%s\n", disk_spd_string(iDiskSpd));
+		}
+END:
+		return iRet;
+}
+
+static DEVICE_ATTR(syno_disk_spd, S_IRUGO, sdev_show_syno_disk_spd, NULL);
+#endif /* CONFIG_SYNO_GET_DISK_SPEED  */
 
 #ifdef CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT
 /**
@@ -891,6 +937,9 @@ static struct attribute *scsi_sdev_attrs[] = {
 #ifdef CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT
 	&dev_attr_syno_scmd_min_timeout.attr,
 #endif /* CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT */
+#ifdef CONFIG_SYNO_GET_DISK_SPEED
+	&dev_attr_syno_disk_spd.attr,
+#endif /* CONFIG_SYNO_GET_DISK_SPEED */
 	REF_EVT(media_change),
 	NULL
 };

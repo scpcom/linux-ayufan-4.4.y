@@ -4,6 +4,7 @@
 #include <linux/err.h>
 #include <linux/bug.h>
 #include <linux/virtio.h>
+#include <linux/virtio_byteorder.h>
 #include <uapi/linux/virtio_config.h>
 
 /**
@@ -162,5 +163,170 @@ int virtqueue_set_affinity(struct virtqueue *vq, int cpu)
 	return 0;
 }
 
+/* Memory accessors */
+static inline u16 virtio16_to_cpu(struct virtio_device *vdev, __virtio16 val)
+{
+	return __virtio16_to_cpu(virtio_has_feature(vdev, VIRTIO_F_VERSION_1), val);
+}
+
+static inline __virtio16 cpu_to_virtio16(struct virtio_device *vdev, u16 val)
+{
+	return __cpu_to_virtio16(virtio_has_feature(vdev, VIRTIO_F_VERSION_1), val);
+}
+
+static inline u32 virtio32_to_cpu(struct virtio_device *vdev, __virtio32 val)
+{
+	return __virtio32_to_cpu(virtio_has_feature(vdev, VIRTIO_F_VERSION_1), val);
+}
+
+static inline __virtio32 cpu_to_virtio32(struct virtio_device *vdev, u32 val)
+{
+	return __cpu_to_virtio32(virtio_has_feature(vdev, VIRTIO_F_VERSION_1), val);
+}
+
+static inline u64 virtio64_to_cpu(struct virtio_device *vdev, __virtio64 val)
+{
+	return __virtio64_to_cpu(virtio_has_feature(vdev, VIRTIO_F_VERSION_1), val);
+}
+
+static inline __virtio64 cpu_to_virtio64(struct virtio_device *vdev, u64 val)
+{
+	return __cpu_to_virtio64(virtio_has_feature(vdev, VIRTIO_F_VERSION_1), val);
+}
+
+/* Config space accessors. */
+#define virtio_cread(vdev, structname, member, ptr)			\
+	do {								\
+		/* Must match the member's type, and be integer */	\
+		if (!typecheck(typeof((((structname*)0)->member)), *(ptr))) \
+			(*ptr) = 1;					\
+									\
+		switch (sizeof(*ptr)) {					\
+		case 1:							\
+			*(ptr) = virtio_cread8(vdev,			\
+					       offsetof(structname, member)); \
+			break;						\
+		case 2:							\
+			*(ptr) = virtio_cread16(vdev,			\
+						offsetof(structname, member)); \
+			break;						\
+		case 4:							\
+			*(ptr) = virtio_cread32(vdev,			\
+						offsetof(structname, member)); \
+			break;						\
+		case 8:							\
+			*(ptr) = virtio_cread64(vdev,			\
+						offsetof(structname, member)); \
+			break;						\
+		default:						\
+			BUG();						\
+		}							\
+	} while(0)
+
+/* Config space accessors. */
+#define virtio_cwrite(vdev, structname, member, ptr)			\
+	do {								\
+		/* Must match the member's type, and be integer */	\
+		if (!typecheck(typeof((((structname*)0)->member)), *(ptr))) \
+			BUG_ON((*ptr) == 1);				\
+									\
+		switch (sizeof(*ptr)) {					\
+		case 1:							\
+			virtio_cwrite8(vdev,				\
+				       offsetof(structname, member),	\
+				       *(ptr));				\
+			break;						\
+		case 2:							\
+			virtio_cwrite16(vdev,				\
+					offsetof(structname, member),	\
+					*(ptr));			\
+			break;						\
+		case 4:							\
+			virtio_cwrite32(vdev,				\
+					offsetof(structname, member),	\
+					*(ptr));			\
+			break;						\
+		case 8:							\
+			virtio_cwrite64(vdev,				\
+					offsetof(structname, member),	\
+					*(ptr));			\
+			break;						\
+		default:						\
+			BUG();						\
+		}							\
+	} while(0)
+
+static inline u8 virtio_cread8(struct virtio_device *vdev, unsigned int offset)
+{
+	u8 ret;
+	vdev->config->get(vdev, offset, &ret, sizeof(ret));
+	return ret;
+}
+
+static inline void virtio_cread_bytes(struct virtio_device *vdev,
+				      unsigned int offset,
+				      void *buf, size_t len)
+{
+	vdev->config->get(vdev, offset, buf, len);
+}
+
+static inline void virtio_cwrite8(struct virtio_device *vdev,
+				  unsigned int offset, u8 val)
+{
+	vdev->config->set(vdev, offset, &val, sizeof(val));
+}
+
+static inline u16 virtio_cread16(struct virtio_device *vdev,
+				 unsigned int offset)
+{
+	u16 ret;
+	vdev->config->get(vdev, offset, &ret, sizeof(ret));
+	return ret;
+}
+
+static inline void virtio_cwrite16(struct virtio_device *vdev,
+				   unsigned int offset, u16 val)
+{
+	vdev->config->set(vdev, offset, &val, sizeof(val));
+}
+
+static inline u32 virtio_cread32(struct virtio_device *vdev,
+				 unsigned int offset)
+{
+	u32 ret;
+	vdev->config->get(vdev, offset, &ret, sizeof(ret));
+	return ret;
+}
+
+static inline void virtio_cwrite32(struct virtio_device *vdev,
+				   unsigned int offset, u32 val)
+{
+	vdev->config->set(vdev, offset, &val, sizeof(val));
+}
+
+static inline u64 virtio_cread64(struct virtio_device *vdev,
+				 unsigned int offset)
+{
+	u64 ret;
+	vdev->config->get(vdev, offset, &ret, sizeof(ret));
+	return ret;
+}
+
+static inline void virtio_cwrite64(struct virtio_device *vdev,
+				   unsigned int offset, u64 val)
+{
+	vdev->config->set(vdev, offset, &val, sizeof(val));
+}
+
+/* Conditional config space accessors. */
+#define virtio_cread_feature(vdev, fbit, structname, member, ptr)	\
+	({								\
+		int _r = 0;						\
+		if (!virtio_has_feature(vdev, fbit))			\
+			_r = -ENOENT;					\
+		else							\
+			virtio_cread((vdev), structname, member, ptr);	\
+		_r;							\
+	})
 
 #endif /* _LINUX_VIRTIO_CONFIG_H */

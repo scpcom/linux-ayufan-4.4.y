@@ -1,10 +1,20 @@
-/* al_eth.c: AnnapurnaLabs Unified 1GbE and 10GbE ethernet driver.
+/*
+ * al_eth.c: AnnapurnaLabs Unified 1GbE and 10GbE ethernet driver.
  *
- * Copyright (c) 2012 AnnapurnaLabs
+ * Copyright (C) 2014 Annapurna Labs Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation.
+ * the Free Software Foundation; version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
@@ -128,6 +138,10 @@ struct al_udma *al_eth_udma_get(struct al_eth_adapter *adapter, int tx)
 }
 
 /* MDIO */
+#define AL_ETH_MDIO_C45_DEV_MASK	0x1f0000
+#define AL_ETH_MDIO_C45_DEV_SHIFT	16
+#define AL_ETH_MDIO_C45_REG_MASK	0xffff
+
 static int
 al_mdio_read(struct mii_bus *bp, int mii_id, int reg)
 {
@@ -137,8 +151,18 @@ al_mdio_read(struct mii_bus *bp, int mii_id, int reg)
 	int timeout = MDIO_TIMEOUT_MSEC;
 
 	while (timeout > 0) {
-		rc = al_eth_mdio_read(&adapter->hal_adapter, adapter->phy_addr,
-				      MDIO_DEVAD_NONE, reg, &value);
+		if (reg & MII_ADDR_C45) {
+			al_dbg("%s [c45]: dev %x reg %x val %x\n",
+				__func__,
+				((reg & AL_ETH_MDIO_C45_DEV_MASK) >> AL_ETH_MDIO_C45_DEV_SHIFT),
+				(reg & AL_ETH_MDIO_C45_REG_MASK), value);
+			rc = al_eth_mdio_read(&adapter->hal_adapter, adapter->phy_addr,
+				((reg & AL_ETH_MDIO_C45_DEV_MASK) >> AL_ETH_MDIO_C45_DEV_SHIFT),
+				(reg & AL_ETH_MDIO_C45_REG_MASK), &value);
+		} else {
+			rc = al_eth_mdio_read(&adapter->hal_adapter, adapter->phy_addr,
+					      MDIO_DEVAD_NONE, reg, &value);
+		}
 
 		if (rc == 0)
 			return value;
@@ -164,8 +188,18 @@ al_mdio_write(struct mii_bus *bp, int mii_id, int reg, u16 val)
 	int timeout = MDIO_TIMEOUT_MSEC;
 
 	while (timeout > 0) {
-		rc = al_eth_mdio_write(&adapter->hal_adapter, adapter->phy_addr,
+		if (reg & MII_ADDR_C45) {
+			al_dbg("%s [c45]: device %x reg %x val %x\n",
+				__func__,
+				((reg & AL_ETH_MDIO_C45_DEV_MASK) >> AL_ETH_MDIO_C45_DEV_SHIFT),
+				(reg & AL_ETH_MDIO_C45_REG_MASK), val);
+			rc = al_eth_mdio_write(&adapter->hal_adapter, adapter->phy_addr,
+				((reg & AL_ETH_MDIO_C45_DEV_MASK) >> AL_ETH_MDIO_C45_DEV_SHIFT),
+				(reg & AL_ETH_MDIO_C45_REG_MASK), val);
+		} else {
+			rc = al_eth_mdio_write(&adapter->hal_adapter, adapter->phy_addr,
 				       MDIO_DEVAD_NONE, reg, val);
+		}
 
 		if (rc == 0)
 			return 0;
@@ -192,6 +226,14 @@ static int al_eth_ioctl(struct net_device *netdev, struct ifreq *ifr, int cmd)
 	netdev_info(adapter->netdev, "ioctl: phy id 0x%x, reg 0x%x, val_in 0x%x\n",
 			mdio->phy_id, mdio->reg_num, mdio->val_in);
 
+#if defined(CONFIG_SYNO_ALPINE)
+	/* if the interface is not fully ready yet, the members of phydev will be at
+	 * invalid addresses */
+	if (!adapter->up)
+		return -EBUSY;
+	/* maybe the upper caller should do this check earlier? */
+#endif /* CONFIG_SYNO_ALPINE */
+
 	if (adapter->mdio_bus) {
 		phydev = adapter->mdio_bus->phy_map[adapter->phy_addr];
 		if (phydev)
@@ -202,6 +244,9 @@ static int al_eth_ioctl(struct net_device *netdev, struct ifreq *ifr, int cmd)
 }
 static int al_eth_flow_ctrl_config(struct al_eth_adapter *adapter);
 static uint8_t al_eth_flow_ctrl_mutual_cap_get(struct al_eth_adapter *adapter);
+static void al_eth_down(struct al_eth_adapter *adapter);
+static int al_eth_up(struct al_eth_adapter *adapter);
+static void al_eth_serdes_mode_set(struct al_eth_adapter *adapter);
 
 #ifdef CONFIG_SYNO_ALPINE_CHANGE_RJ45_LED_BEHAVIOR
 /* We want to change backplane RJ45 link speed LED behavior:
@@ -220,7 +265,7 @@ static void syno_update_rtl8211dn_led(struct phy_device *phydev, int speed)
 
 	/* Write Register 28 to change link speed LED */
 	/* Green LED on only when 1000Mbps. Orange LED on only when 100Mbps */
-	phy_write(phydev, 0x1c, 0x0042);
+	phy_write(phydev, 0x1c, 0x0742);
 
 	/* After LED setting, switch to the PHY's Page0:
 	 * Write Register 31 Data=0x0000
@@ -234,7 +279,9 @@ static void al_eth_adjust_link(struct net_device *dev)
 	struct al_eth_adapter *adapter = netdev_priv(dev);
 	struct al_eth_link_config *link_config = &adapter->link_config;
 	struct phy_device *phydev = adapter->phydev;
+	enum al_eth_mac_mode mac_mode_needed = AL_ETH_MAC_MODE_RGMII;
 	int new_state = 0;
+	int force_1000_base_x = false;
 
 	if (phydev->link) {
 		if (phydev->duplex != link_config->active_duplex) {
@@ -248,10 +295,18 @@ static void al_eth_adjust_link(struct net_device *dev)
 			case SPEED_1000:
 			case SPEED_100:
 			case SPEED_10:
+				mac_mode_needed = (adapter->mac_mode == AL_ETH_MAC_MODE_RGMII) ?
+							AL_ETH_MAC_MODE_RGMII:
+							AL_ETH_MAC_MODE_SGMII;
 #ifdef CONFIG_SYNO_ALPINE_CHANGE_RJ45_LED_BEHAVIOR
 				if (!syno_is_hw_version(HW_DS2015xs))
 					syno_update_rtl8211dn_led(phydev, phydev->speed);
 #endif
+				break;
+			case SPEED_10000:
+			case SPEED_5000:
+			case SPEED_2500:
+				mac_mode_needed = AL_ETH_MAC_MODE_10GbE_Serial;
 				break;
 			default:
 				if (netif_msg_link(adapter))
@@ -270,15 +325,30 @@ static void al_eth_adjust_link(struct net_device *dev)
 
 		if (new_state) {
 			int rc;
-			/* change the MAC link configuration */
-			rc = al_eth_mac_link_config(&adapter->hal_adapter,
-					false,
-					true,
-					link_config->active_speed,
-					link_config->active_duplex ? AL_TRUE : AL_FALSE);
-			if (rc) {
-				netdev_warn(adapter->netdev,
-				"Failed to config the mac with the new link settings!");
+
+			if (adapter->mac_mode != mac_mode_needed) {
+				al_eth_down(adapter);
+				adapter->mac_mode = mac_mode_needed;
+				if (link_config->active_speed > 1000) {
+					al_eth_serdes_mode_set(adapter);
+				} else {
+					al_eth_serdes_mode_set(adapter);
+					force_1000_base_x = true;
+				}
+				al_eth_up(adapter);
+			}
+
+			if (adapter->mac_mode != AL_ETH_MAC_MODE_10GbE_Serial) {
+				/* change the MAC link configuration */
+				rc = al_eth_mac_link_config(&adapter->hal_adapter,
+						force_1000_base_x,
+						link_config->autoneg,
+						link_config->active_speed,
+						link_config->active_duplex ? AL_TRUE : AL_FALSE);
+				if (rc) {
+					netdev_warn(adapter->netdev,
+					"Failed to config the mac with the new link settings!");
+				}
 			}
 		}
 
@@ -354,6 +424,7 @@ static int al_eth_mdiobus_setup(struct al_eth_adapter *adapter)
 {
 	struct phy_device *phydev;
 	int i;
+	int ret = 0;
 
 	adapter->mdio_bus = mdiobus_alloc();
 	if (adapter->mdio_bus == NULL)
@@ -377,24 +448,49 @@ static int al_eth_mdiobus_setup(struct al_eth_adapter *adapter)
 	for (i = 0; i < PHY_MAX_ADDR; i++)
 		adapter->mdio_bus->irq[i] = PHY_POLL;
 
-	i = mdiobus_register(adapter->mdio_bus);
-	if (i) {
-		netdev_warn(adapter->netdev, "mdiobus_reg failed (0x%x)\n", i);
-		mdiobus_free(adapter->mdio_bus);
-		return i;
+	if (adapter->phy_if != AL_ETH_BOARD_PHY_IF_XMDIO) {
+
+		i = mdiobus_register(adapter->mdio_bus);
+		if (i) {
+			netdev_warn(adapter->netdev, "mdiobus_reg failed (0x%x)\n", i);
+			mdiobus_free(adapter->mdio_bus);
+			return i;
+		}
+
+		phydev = adapter->mdio_bus->phy_map[adapter->phy_addr];
+	} else {
+		adapter->mdio_bus->phy_mask = 0xffffffff;
+		i = mdiobus_register(adapter->mdio_bus);
+		if (i) {
+			netdev_warn(adapter->netdev, "mdiobus_reg failed (0x%x)\n", i);
+			mdiobus_free(adapter->mdio_bus);
+			return i;
+		}
+
+		phydev = get_phy_device(adapter->mdio_bus, adapter->phy_addr, true);
+		if (!phydev) {
+			pr_err("phy device get failed\n");
+			goto error;
+		}
+
+		ret = phy_device_register(phydev);
+		if (ret) {
+			pr_err("phy device register failed\n");
+			goto error;
+		}
 	}
 
-	phydev = adapter->mdio_bus->phy_map[adapter->phy_addr];
-
-	if (!phydev || !phydev->drv) {
-		netdev_warn(adapter->netdev, "No PHY devices\n");
-		mdiobus_unregister(adapter->mdio_bus);
-		kfree(adapter->mdio_bus->irq);
-		mdiobus_free(adapter->mdio_bus);
-		return -ENODEV;
-	}
+	if (!phydev || !phydev->drv)
+		goto error;
 
 	return 0;
+
+error:
+	netdev_warn(adapter->netdev, "No PHY devices\n");
+	mdiobus_unregister(adapter->mdio_bus);
+	kfree(adapter->mdio_bus->irq);
+	mdiobus_free(adapter->mdio_bus);
+	return -ENODEV;
 }
 
 /**
@@ -410,6 +506,7 @@ static void al_eth_mdiobus_teardown(struct al_eth_adapter *adapter)
 	mdiobus_unregister(adapter->mdio_bus);
 	kfree(adapter->mdio_bus->irq);
 	mdiobus_free(adapter->mdio_bus);
+	phy_device_free(adapter->phydev);
 }
 
 static void al_eth_tx_timeout(struct net_device *dev)
@@ -426,6 +523,7 @@ static int al_eth_change_mtu(struct net_device *dev, int new_mtu)
 	int max_frame = new_mtu + ETH_HLEN + ETH_FCS_LEN + VLAN_HLEN;
 
 	if ((new_mtu < AL_ETH_MIN_FRAME_LEN) ||
+			(new_mtu > AL_ETH_MAX_MTU) ||
 			(max_frame > AL_ETH_MAX_FRAME_LEN)) {
 		netdev_err(dev, "Invalid MTU setting\n");
 		return -EINVAL;
@@ -549,12 +647,19 @@ al_eth_board_params_init(struct al_eth_adapter *adapter)
 		adapter->ref_clk_freq = params.ref_clk_freq;
 		adapter->dont_override_serdes = params.dont_override_serdes;
 		adapter->link_config.active_duplex = !params.half_duplex;
+#if defined(CONFIG_SYNO_ALPINE)
 		adapter->link_config.autoneg = !params.an_disable;
+#else /* CONFIG_SYNO_ALPINE */
+		adapter->link_config.autoneg = (adapter->phy_exist) ?
+						(params.an_mode == AL_ETH_BOARD_AUTONEG_IN_BAND) :
+						(!params.an_disable);
+#endif /* CONFIG_SYNO_ALPINE */
 		adapter->link_config.force_1000_base_x = params.force_1000_base_x;
 		adapter->retimer.exist = params.retimer_exist;
 		adapter->retimer.bus_id = params.retimer_bus_id;
 		adapter->retimer.i2c_addr = params.retimer_i2c_addr;
 		adapter->retimer.channel = params.retimer_channel;
+		adapter->phy_if = params.phy_if;
 
 		switch (params.speed) {
 		default:
@@ -599,6 +704,10 @@ al_eth_board_params_init(struct al_eth_adapter *adapter)
 			adapter->mac_mode = AL_ETH_MAC_MODE_SGMII;
 			adapter->use_lm = true;
 			break;
+		case AL_ETH_BOARD_MEDIA_TYPE_SGMII_2_5G:
+			adapter->mac_mode = AL_ETH_MAC_MODE_SGMII_2_5G;
+			adapter->use_lm = false;
+			break;
 		case AL_ETH_BOARD_MEDIA_TYPE_10GBASE_SR:
 			adapter->mac_mode = AL_ETH_MAC_MODE_10GbE_Serial;
 			adapter->use_lm = true;
@@ -613,6 +722,10 @@ al_eth_board_params_init(struct al_eth_adapter *adapter)
 			adapter->auto_speed = true;
 			adapter->mac_mode_set = false;
 			adapter->use_lm = true;
+			break;
+		case AL_ETH_BOARD_MEDIA_TYPE_NBASE_T:
+			adapter->mac_mode = AL_ETH_MAC_MODE_10GbE_Serial;
+			adapter->phy_fixup_needed = true;
 			break;
 		default:
 			dev_err(&adapter->pdev->dev,
@@ -787,7 +900,9 @@ al_eth_hw_init(struct al_eth_adapter *adapter)
 	}
 
 	rc = al_eth_mdio_config(&adapter->hal_adapter,
-		AL_ETH_MDIO_TYPE_CLAUSE_22 , AL_TRUE/*shared_mdio_if*/,
+		(adapter->phy_if == AL_ETH_BOARD_PHY_IF_XMDIO) ?
+				AL_ETH_MDIO_TYPE_CLAUSE_45 : AL_ETH_MDIO_TYPE_CLAUSE_22,
+		AL_TRUE/*shared_mdio_if*/,
 		adapter->ref_clk_freq, adapter->mdio_freq);
 	if (rc) {
 		dev_err(&adapter->pdev->dev, "%s failed at mdio config!\n", __func__);
@@ -906,7 +1021,10 @@ al_eth_init_rings(struct al_eth_adapter *adapter)
 		al_udma_q_handle_get(&adapter->hal_adapter.tx_udma, i, &ring->dma_q);
 		ring->sw_count = adapter->tx_ring_count;
 		ring->hw_count = adapter->tx_descs_count;
-		ring->unmask_reg_offset = al_udma_iofic_unmask_offset_get((struct unit_regs *)adapter->udma_base, AL_INT_GROUP_C);
+		ring->unmask_reg_offset = al_udma_iofic_unmask_offset_get(
+						(struct unit_regs *)adapter->udma_base,
+						AL_UDMA_IOFIC_LEVEL_PRIMARY,
+						AL_INT_GROUP_C);
 		ring->unmask_val = ~(1 << i);
 	}
 
@@ -920,7 +1038,10 @@ al_eth_init_rings(struct al_eth_adapter *adapter)
 		al_udma_q_handle_get(&adapter->hal_adapter.rx_udma, i, &ring->dma_q);
 		ring->sw_count = adapter->rx_ring_count;
 		ring->hw_count = adapter->rx_descs_count;
-		ring->unmask_reg_offset = al_udma_iofic_unmask_offset_get((struct unit_regs *)adapter->udma_base, AL_INT_GROUP_B);
+		ring->unmask_reg_offset = al_udma_iofic_unmask_offset_get(
+						(struct unit_regs *)adapter->udma_base,
+						AL_UDMA_IOFIC_LEVEL_PRIMARY,
+						AL_INT_GROUP_B);
 		ring->unmask_val = ~(1 << i);
 	}
 }
@@ -2026,13 +2147,15 @@ static irqreturn_t al_eth_intr_intx_all(int irq, void *data)
 	struct unit_regs __iomem *regs_base = (struct unit_regs __iomem *)adapter->udma_base;
 	uint32_t reg;
 
-	reg = al_udma_iofic_read_cause(regs_base, AL_INT_GROUP_A);
+	reg = al_udma_iofic_read_cause(regs_base, AL_UDMA_IOFIC_LEVEL_PRIMARY, AL_INT_GROUP_A);
 	if (likely(reg))
 		pr_debug("%s group A cause %x\n", __func__, reg);
 
 	if (unlikely(reg & AL_INT_GROUP_A_GROUP_D_SUM)) {
 		struct al_iofic_grp_ctrl __iomem *sec_ints_base;
-		uint32_t cause_d =  al_udma_iofic_read_cause(regs_base, AL_INT_GROUP_D);
+		uint32_t cause_d =  al_udma_iofic_read_cause(regs_base,
+							     AL_UDMA_IOFIC_LEVEL_PRIMARY,
+							     AL_INT_GROUP_D);
 
 		sec_ints_base = &regs_base->gen.interrupt_regs.secondary_iofic_ctrl[0];
 		if (cause_d) {
@@ -2047,28 +2170,34 @@ static irqreturn_t al_eth_intr_intx_all(int irq, void *data)
 		}
 	}
 	if (reg & AL_INT_GROUP_A_GROUP_B_SUM) {
-		uint32_t cause_b = al_udma_iofic_read_cause(regs_base, AL_INT_GROUP_B);
+		uint32_t cause_b = al_udma_iofic_read_cause(regs_base,
+							    AL_UDMA_IOFIC_LEVEL_PRIMARY,
+							    AL_INT_GROUP_B);
 		int qid;
 		for (qid = 0; qid < adapter->num_rx_queues; qid++) {
 			if (cause_b & (1 << qid)) {
 				/* mask */
 				al_udma_iofic_mask(
-				(struct unit_regs __iomem *)adapter->udma_base,
-				AL_INT_GROUP_B, 1 << qid);
+					(struct unit_regs __iomem *)adapter->udma_base,
+					AL_UDMA_IOFIC_LEVEL_PRIMARY,
+					AL_INT_GROUP_B, 1 << qid);
 
 				napi_schedule(&adapter->al_napi[AL_ETH_RXQ_NAPI_IDX(adapter, qid)].napi);
 			}
 		}
 	}
 	if (reg & AL_INT_GROUP_A_GROUP_C_SUM) {
-		uint32_t cause_c = al_udma_iofic_read_cause(regs_base, AL_INT_GROUP_C);
+		uint32_t cause_c = al_udma_iofic_read_cause(regs_base,
+							    AL_UDMA_IOFIC_LEVEL_PRIMARY,
+							    AL_INT_GROUP_C);
 		int qid;
 		for (qid = 0; qid < adapter->num_tx_queues; qid++) {
 			if (cause_c & (1 << qid)) {
 				/* mask */
 				al_udma_iofic_mask(
-				(struct unit_regs __iomem *)adapter->udma_base,
-				AL_INT_GROUP_C, 1 << qid);
+					(struct unit_regs __iomem *)adapter->udma_base,
+					AL_UDMA_IOFIC_LEVEL_PRIMARY,
+					AL_INT_GROUP_C, 1 << qid);
 
 				napi_schedule(&adapter->al_napi[AL_ETH_TXQ_NAPI_IDX(adapter, qid)].napi);
 			}
@@ -2285,8 +2414,10 @@ al_eth_setup_int_mode(struct al_eth_adapter *adapter, int dis_msi)
 }
 
 #ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
-static int al_eth_set_coalesce(struct net_device *net_dev,
-				    struct ethtool_coalesce *coalesce);
+static void al_eth_set_coalesce(
+			struct al_eth_adapter *adapter,
+			unsigned int tx_usecs,
+			unsigned int rx_usecs);
 #endif /* CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE */
 
 static int
@@ -2297,9 +2428,6 @@ al_eth_configure_int_mode(struct al_eth_adapter *adapter)
 	uint32_t	m2s_aborts_disable = 0x480;
 	uint32_t	s2m_errors_disable = 0x1E0;
 	uint32_t	s2m_aborts_disable = 0x1E0;
-#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
-	struct ethtool_coalesce coalesce;
-#endif
 
 	/* single INTX mode */
 	if (adapter->msix_vecs == 0)
@@ -2333,16 +2461,9 @@ al_eth_configure_int_mode(struct al_eth_adapter *adapter)
 	/* set interrupt moderation resolution to 15us */
 	al_iofic_moder_res_config(&((struct unit_regs *)(adapter->udma_base))->gen.interrupt_regs.main_iofic, AL_INT_GROUP_B, 15);
 	al_iofic_moder_res_config(&((struct unit_regs *)(adapter->udma_base))->gen.interrupt_regs.main_iofic, AL_INT_GROUP_C, 15);
-	/* by default interrupt coalescing is disabled */
-	adapter->tx_usecs = 0;
-	adapter->rx_usecs = 0;
 
 #ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
-	// directly adjust interrupt coalescing values
-	coalesce.use_adaptive_tx_coalesce = 0;
-	coalesce.tx_coalesce_usecs = 208;
-	coalesce.rx_coalesce_usecs = 112;
-	al_eth_set_coalesce(adapter->netdev, &coalesce);
+	al_eth_set_coalesce(adapter, 208, 112);
 #endif /* CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE */
 	return 0;
 }
@@ -2462,10 +2583,10 @@ static void al_eth_interrupts_unmask(struct al_eth_adapter *adapter)
 				AL_INT_GROUP_A_GROUP_C_SUM |
 				AL_INT_GROUP_A_GROUP_D_SUM;
 
-	al_udma_iofic_unmask(regs_base, AL_INT_GROUP_A, group_a_mask);
-	al_udma_iofic_unmask(regs_base, AL_INT_GROUP_B, group_b_mask);
-	al_udma_iofic_unmask(regs_base, AL_INT_GROUP_C, group_c_mask);
-	al_udma_iofic_unmask(regs_base, AL_INT_GROUP_D, group_d_mask);
+	al_udma_iofic_unmask(regs_base, AL_UDMA_IOFIC_LEVEL_PRIMARY, AL_INT_GROUP_A, group_a_mask);
+	al_udma_iofic_unmask(regs_base, AL_UDMA_IOFIC_LEVEL_PRIMARY, AL_INT_GROUP_B, group_b_mask);
+	al_udma_iofic_unmask(regs_base, AL_UDMA_IOFIC_LEVEL_PRIMARY, AL_INT_GROUP_C, group_c_mask);
+	al_udma_iofic_unmask(regs_base, AL_UDMA_IOFIC_LEVEL_PRIMARY, AL_INT_GROUP_D, group_d_mask);
 }
 
 static void al_eth_interrupts_mask(struct al_eth_adapter *adapter)
@@ -2473,10 +2594,10 @@ static void al_eth_interrupts_mask(struct al_eth_adapter *adapter)
 	struct unit_regs __iomem *regs_base = (struct unit_regs __iomem *)adapter->udma_base;
 
 	/* mask all interrupts */
-	al_udma_iofic_mask(regs_base, AL_INT_GROUP_A, 0x7);
-	al_udma_iofic_mask(regs_base, AL_INT_GROUP_B, 0xF);
-	al_udma_iofic_mask(regs_base, AL_INT_GROUP_C, 0xF);
-	al_udma_iofic_mask(regs_base, AL_INT_GROUP_D, 0xFFFFFFFF);
+	al_udma_iofic_mask(regs_base, AL_UDMA_IOFIC_LEVEL_PRIMARY, AL_INT_GROUP_A, 0x7);
+	al_udma_iofic_mask(regs_base, AL_UDMA_IOFIC_LEVEL_PRIMARY, AL_INT_GROUP_B, 0xF);
+	al_udma_iofic_mask(regs_base, AL_UDMA_IOFIC_LEVEL_PRIMARY, AL_INT_GROUP_C, 0xF);
+	al_udma_iofic_mask(regs_base, AL_UDMA_IOFIC_LEVEL_PRIMARY, AL_INT_GROUP_D, 0xFFFFFFFF);
 }
 
 static int
@@ -2557,26 +2678,6 @@ al_eth_napi_enable_all(struct al_eth_adapter *adapter)
 		napi_enable(&adapter->al_napi[i].napi);
 }
 
-/* the following defines should be moved to hal */
-#define AL_ETH_FSM_ENTRY_OUTER(idx)	   (idx & 7)
-#define AL_ETH_FSM_ENTRY_IPV4_TCP	   0
-#define AL_ETH_FSM_ENTRY_IPV4_UDP	   1
-#define AL_ETH_FSM_ENTRY_IPV6_TCP	   2
-#define AL_ETH_FSM_ENTRY_IPV6_UDP	   3
-#define AL_ETH_FSM_ENTRY_IPV6_NO_UDP_TCP   4
-#define AL_ETH_FSM_ENTRY_IPV4_NO_UDP_TCP   5
-
-/* FSM DATA format */
-#define AL_ETH_FSM_DATA_OUTER_2_TUPLE	0
-#define AL_ETH_FSM_DATA_OUTER_4_TUPLE	1
-#define AL_ETH_FSM_DATA_INNER_2_TUPLE	2
-#define AL_ETH_FSM_DATA_INNER_4_TUPLE	3
-
-#define AL_ETH_FSM_DATA_HASH_SEL	(1 << 2)
-
-#define AL_ETH_FSM_DATA_DEFAULT_Q	0
-#define AL_ETH_FSM_DATA_DEFAULT_UDMA	0
-
 /* init FSM, no tunneling supported yet, if packet is tcp/udp over ipv4/ipv6, use 4 tuple hash */
 static void
 al_eth_fsm_table_init(struct al_eth_adapter *adapter)
@@ -2598,29 +2699,11 @@ al_eth_fsm_table_init(struct al_eth_adapter *adapter)
 			val = AL_ETH_FSM_DATA_OUTER_2_TUPLE | AL_ETH_FSM_DATA_HASH_SEL;
 			break;
 		default:
-			val = AL_ETH_FSM_DATA_DEFAULT_Q | AL_ETH_FSM_DATA_DEFAULT_UDMA;
+			val = (0 << AL_ETH_FSM_DATA_DEFAULT_Q_SHIFT |
+			      ((1 << 0) << AL_ETH_FSM_DATA_DEFAULT_UDMA_SHIFT));
 		}
 		al_eth_fsm_table_set(&adapter->hal_adapter, i, val);
 	}
-}
-
-#define AL_ETH_THASH_UDMA_SHIFT		0
-#define AL_ETH_THASH_UDMA_MASK		(0xF << AL_ETH_THASH_UDMA_SHIFT)
-
-#define AL_ETH_THASH_Q_SHIFT		4
-#define AL_ETH_THASH_Q_MASK		(0x3 << AL_ETH_THASH_Q_SHIFT)
-
-static void
-al_eth_set_thash_table_entry(struct al_eth_adapter *adapter, uint8_t idx, uint8_t udma, uint32_t queue)
-{
-	uint32_t entry;
-
-	BUG_ON(udma != 0); /* currenty only UDMA 0 supported */
-	BUG_ON(queue >= AL_ETH_NUM_QUEUES);
-
-	entry = (udma << AL_ETH_THASH_UDMA_SHIFT) & AL_ETH_THASH_UDMA_MASK;
-	entry |= (queue << AL_ETH_THASH_Q_SHIFT) & AL_ETH_THASH_Q_MASK;
-	al_eth_thash_table_set(&adapter->hal_adapter, idx, entry);
 }
 
 /* the following defines should be moved to hal */
@@ -2800,13 +2883,30 @@ al_eth_config_rx_fwd(struct al_eth_adapter *adapter)
 		al_eth_hash_key_set(&adapter->hal_adapter, i,
 				    htonl(adapter->toeplitz_hash_key[i]));
 
-	for (i = 0; i < AL_ETH_RX_RSS_TABLE_SIZE; i++) {
-		adapter->rss_ind_tbl[i] =
-			ethtool_rxfh_indir_default(i, AL_ETH_NUM_QUEUES);
-		al_eth_set_thash_table_entry(adapter, i, 0, adapter->rss_ind_tbl[i]);
-	}
+	for (i = 0; i < AL_ETH_RX_RSS_TABLE_SIZE; i++)
+		al_eth_thash_table_set(&adapter->hal_adapter, i, 0, adapter->rss_ind_tbl[i]);
 
 	al_eth_fsm_table_init(adapter);
+}
+
+static void al_eth_set_coalesce(
+			struct al_eth_adapter *adapter,
+			unsigned int tx_usecs,
+			unsigned int rx_usecs);
+
+static void al_eth_restore_ethtool_params(struct al_eth_adapter *adapter)
+{
+	int i;
+	unsigned int tx_usecs = adapter->tx_usecs;
+	unsigned int rx_usecs = adapter->rx_usecs;
+
+	adapter->tx_usecs = 0;
+	adapter->rx_usecs = 0;
+
+	al_eth_set_coalesce(adapter, tx_usecs, rx_usecs);
+
+	for (i = 0; i < AL_ETH_RX_RSS_TABLE_SIZE; i++)
+		al_eth_thash_table_set(&adapter->hal_adapter, i, 0, adapter->rss_ind_tbl[i]);
 }
 
 static void al_eth_up_complete(struct al_eth_adapter *adapter)
@@ -2837,6 +2937,8 @@ static void al_eth_up_complete(struct al_eth_adapter *adapter)
 
 	/* enable flow control */
 	al_eth_flow_ctrl_enable(adapter);
+
+	al_eth_restore_ethtool_params(adapter);
 
 	/* enable the mac tx and rx paths */
 	al_eth_mac_start(&adapter->hal_adapter);
@@ -2923,7 +3025,7 @@ al_eth_flow_steer(struct net_device *netdev, const struct sk_buff *skb,
 	rc = flow_id & (AL_ETH_RX_THASH_TABLE_SIZE - 1);
 
 	adapter->rss_ind_tbl[rc] = rxq_index;
-	al_eth_set_thash_table_entry(adapter, rc, 0, rxq_index);
+	al_eth_thash_table_set(&adapter->hal_adapter, rc, 0, rxq_index);
 	if (skb->protocol == htons(ETH_P_IP)) {
 		int nhoff = skb_network_offset(skb);
 		const struct iphdr *ip = (const struct iphdr *)(skb->data + nhoff);
@@ -3054,6 +3156,32 @@ static uint8_t al_eth_get_rand_byte(void)
 	return byte;
 }
 
+static void al_eth_serdes_mode_set(struct al_eth_adapter *adapter)
+{
+#ifdef CONFIG_ARCH_ALPINE
+	enum alpine_serdes_eth_mode mode =
+		(adapter->mac_mode == AL_ETH_MAC_MODE_SGMII) ?
+		ALPINE_SERDES_ETH_MODE_SGMII :
+		ALPINE_SERDES_ETH_MODE_KR;
+
+	if ((adapter->mac_mode != AL_ETH_MAC_MODE_SGMII) &&
+		(adapter->mac_mode != AL_ETH_MAC_MODE_10GbE_Serial)) {
+		netdev_err(adapter->netdev, "%s: mac_mode not supported\n", __func__);
+		return;
+	}
+
+	if (alpine_serdes_eth_mode_set(adapter->serdes_grp, mode))
+		netdev_err(
+			adapter->netdev,
+			"%s: alpine_serdes_eth_mode_set(%d, %d) failed!\n",
+			__func__,
+			adapter->serdes_grp,
+			mode);
+
+	al_udelay(1000);
+#endif
+}
+
 static void al_eth_lm_mode_apply(struct al_eth_adapter		*adapter,
 				 enum al_eth_lm_link_mode	new_mode)
 {
@@ -3062,26 +3190,18 @@ static void al_eth_lm_mode_apply(struct al_eth_adapter		*adapter,
 	if (new_mode == AL_ETH_LM_MODE_DISCONNECTED)
 		return;
 
-	adapter->mac_mode = (new_mode == AL_ETH_LM_MODE_1G) ?
-			    AL_ETH_MAC_MODE_SGMII : AL_ETH_MAC_MODE_10GbE_Serial;
-#ifdef CONFIG_ARCH_ALPINE
-	if ((adapter->auto_speed) && (last_mac_mode != adapter->mac_mode)) {
-		enum alpine_serdes_eth_mode mode =
-			(adapter->mac_mode == AL_ETH_MAC_MODE_SGMII) ?
-			ALPINE_SERDES_ETH_MODE_SGMII :
-			ALPINE_SERDES_ETH_MODE_KR;
-
-		if (alpine_serdes_eth_mode_set(adapter->serdes_grp, mode))
-			netdev_err(
-				adapter->netdev,
-				"%s: alpine_serdes_eth_mode_set(%d, %d) failed!\n",
-				__func__,
-				adapter->serdes_grp,
-				mode);
-
-		al_udelay(1000);
+	if (new_mode == AL_ETH_LM_MODE_1G) {
+		adapter->mac_mode = AL_ETH_MAC_MODE_SGMII;
+		adapter->link_config.active_speed = SPEED_1000;
+	} else {
+		adapter->mac_mode = AL_ETH_MAC_MODE_10GbE_Serial;
+		adapter->link_config.active_speed = SPEED_10000;
 	}
-#endif
+
+	adapter->link_config.active_duplex = DUPLEX_FULL;
+
+	if ((adapter->auto_speed) && (last_mac_mode != adapter->mac_mode))
+		al_eth_serdes_mode_set(adapter);
 }
 
 static void al_eth_serdes_init(struct al_eth_adapter *adapter)
@@ -3233,6 +3353,7 @@ static void al_eth_lm_config(struct al_eth_adapter *adapter)
 				params.default_mode = AL_ETH_LM_MODE_10G_OPTIC;
 			break;
 		case AL_ETH_MAC_MODE_SGMII:
+		case AL_ETH_MAC_MODE_SGMII_2_5G:
 			params.default_mode = AL_ETH_LM_MODE_1G;
 			break;
 		default:
@@ -3263,6 +3384,30 @@ static void al_eth_lm_config(struct al_eth_adapter *adapter)
 
 	al_eth_lm_init(&adapter->lm_context, &params);
 
+}
+
+#define AQUANTIA_AQR105_ID			0x3a1b4a2
+
+static int al_eth_aq_phy_fixup(struct phy_device *phydev)
+{
+	int temp = 0;
+
+	temp = phy_read(phydev, (MII_ADDR_C45 | (7 * 0x10000) | 0x20));
+	temp &= ~(1 << 12);
+
+	phy_write(phydev, (MII_ADDR_C45 | (7 * 0x10000) | 0x20), temp);
+
+	temp = phy_read(phydev, (MII_ADDR_C45 | (7 * 0x10000) | 0xc400));
+	temp |= ((1 << 15) | (1 << 11) | (1 << 10));
+	phy_write(phydev, (MII_ADDR_C45 | (7 * 0x10000) | 0xc400), temp);
+
+	temp = phy_read(phydev, (MII_ADDR_C45 | (7 * 0x10000) | 0));
+	temp |= (1 << 9);
+	temp &= ~(1 << 15);
+
+	phy_write(phydev, (MII_ADDR_C45 | (7 * 0x10000) | 0), temp);
+
+	return 0;
 }
 
 /**
@@ -3327,6 +3472,13 @@ static int al_eth_open(struct net_device *netdev)
 		rc = al_eth_up(adapter);
 		if (rc)
 			return rc;
+
+		if (adapter->phy_fixup_needed) {
+			rc = phy_register_fixup_for_uid(AQUANTIA_AQR105_ID, 0xffffffff,
+							al_eth_aq_phy_fixup);
+			if (rc)
+				netdev_warn(adapter->netdev, "failed to register PHY fixup\n");
+		}
 
 		rc = al_eth_mdiobus_setup(adapter);
 		if (rc) {
@@ -3459,8 +3611,38 @@ static int al_eth_get_coalesce(struct net_device *net_dev,
 	return 0;
 }
 
-static int al_eth_set_coalesce(struct net_device *net_dev,
-				    struct ethtool_coalesce *coalesce)
+static void al_eth_set_coalesce(
+			struct al_eth_adapter *adapter,
+			unsigned int tx_usecs,
+			unsigned int rx_usecs)
+{
+	struct unit_regs *udma_base = (struct unit_regs *)(adapter->udma_base);
+
+	if (adapter->tx_usecs != tx_usecs) {
+		int qid;
+		uint interval = (tx_usecs + 15) / 16;
+		BUG_ON(interval > 255);
+		adapter->tx_usecs  = interval * 16;
+		for (qid = 0; qid < adapter->num_tx_queues; qid++)
+			al_iofic_msix_moder_interval_config(
+						&udma_base->gen.interrupt_regs.main_iofic,
+						AL_INT_GROUP_C, qid, interval);
+	}
+	if (adapter->rx_usecs != rx_usecs) {
+		int qid;
+		uint interval = (rx_usecs + 15) / 16;
+		BUG_ON(interval > 255);
+		adapter->rx_usecs  = interval * 16;
+		for (qid = 0; qid < adapter->num_rx_queues; qid++)
+			al_iofic_msix_moder_interval_config(
+						&udma_base->gen.interrupt_regs.main_iofic,
+						AL_INT_GROUP_B, qid, interval);
+	}
+}
+
+static int al_eth_ethtool_set_coalesce(
+			struct net_device *net_dev,
+			struct ethtool_coalesce *coalesce)
 {
 	struct al_eth_adapter *adapter = netdev_priv(net_dev);
 	unsigned int tx_usecs = adapter->tx_usecs;
@@ -3484,24 +3666,8 @@ static int al_eth_set_coalesce(struct net_device *net_dev,
 	if (rx_usecs > (255 * 16))
 		return -EINVAL;
 
-	if (adapter->tx_usecs != tx_usecs) {
-		int qid;
-		uint interval = (tx_usecs + 15) / 16;
-		BUG_ON(interval > 255);
-		adapter->tx_usecs  = interval * 16;
-		for (qid = 0; qid < adapter->num_tx_queues; qid++)
-			al_iofic_msix_moder_interval_config(&((struct unit_regs *)(adapter->udma_base))->gen.interrupt_regs.main_iofic,
-						   AL_INT_GROUP_C, qid, interval);
-	}
-	if (adapter->rx_usecs != rx_usecs) {
-		int qid;
-		uint interval = (rx_usecs + 15) / 16;
-		BUG_ON(interval > 255);
-		adapter->rx_usecs  = interval * 16;
-		for (qid = 0; qid < adapter->num_rx_queues; qid++)
-			al_iofic_msix_moder_interval_config(&((struct unit_regs *)(adapter->udma_base))->gen.interrupt_regs.main_iofic,
-						   AL_INT_GROUP_B, qid, interval);
-	}
+	al_eth_set_coalesce(adapter, tx_usecs, rx_usecs);
+
 	return 0;
 }
 
@@ -3700,7 +3866,7 @@ static int al_eth_set_rxfh_indir(struct net_device *netdev, const u32 *indir)
 
 	for (i = 0; i < AL_ETH_RX_RSS_TABLE_SIZE; i++) {
 		adapter->rss_ind_tbl[i] = indir[i];
-		al_eth_set_thash_table_entry(adapter, i, 0, indir[i]);
+		al_eth_thash_table_set(&adapter->hal_adapter, i, 0, indir[i]);
 	}
 
 	return 0;
@@ -3772,6 +3938,9 @@ static void al_eth_get_wol(struct net_device *netdev,
 
 	wol->wolopts = adapter->wol;
 
+#if defined(CONFIG_SYNO_ALPINE)
+	if (netdev->operstate == IF_OPER_UP) {
+#endif /* CONFIG_SYNO_ALPINE */
 	if ((adapter) && (adapter->phy_exist) && (adapter->mdio_bus)) {
 		phydev = adapter->mdio_bus->phy_map[adapter->phy_addr];
 		if (phydev) {
@@ -3780,6 +3949,9 @@ static void al_eth_get_wol(struct net_device *netdev,
 			return;
 		}
 	}
+#if defined(CONFIG_SYNO_ALPINE)
+	}
+#endif /* CONFIG_SYNO_ALPINE */
 
 	wol->supported |= WAKE_UCAST | WAKE_MCAST | WAKE_BCAST;
 }
@@ -3787,13 +3959,20 @@ static void al_eth_get_wol(struct net_device *netdev,
 static int al_eth_set_wol(struct net_device *netdev, struct ethtool_wolinfo *wol)
 {
 	struct al_eth_adapter *adapter = netdev_priv(netdev);
+#if defined(CONFIG_SYNO_ALPINE)
+	// do nothing
+#else /* CONFIG_SYNO_ALPINE */
 	struct phy_device *phydev;
+#endif /* CONFIG_SYNO_ALPINE */
 
 	if (wol->wolopts & (WAKE_ARP | WAKE_MAGICSECURE))
 		return -EOPNOTSUPP;
 
 	adapter->wol = wol->wolopts;
 
+#if defined(CONFIG_SYNO_ALPINE)
+	// do nothing
+#else /* CONFIG_SYNO_ALPINE */
 	if ((adapter) && (adapter->phy_exist) && (adapter->mdio_bus)) {
 		phydev = adapter->mdio_bus->phy_map[adapter->phy_addr];
 		if (phydev)
@@ -3801,6 +3980,7 @@ static int al_eth_set_wol(struct net_device *netdev, struct ethtool_wolinfo *wol
 	}
 
 	device_set_wakeup_enable(&adapter->pdev->dev, adapter->wol);
+#endif /* CONFIG_SYNO_ALPINE */
 
 	return 0;
 }
@@ -3814,6 +3994,10 @@ void syno_alpine_wol_set_wrapper(unsigned int device)
 	unsigned short szMacTmp[MAC_ADDR_LEN/2] = {'0'};
 	struct al_eth_adapter *priv = NULL;
 	struct pci_dev *pcidev = NULL;
+#ifdef CONFIG_SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
+	uint16_t tmp_val = 0;
+	int tmp_val32 = 0, reg_gbsr = 0, reg_insr = 0, reg_rxerc = 0;
+#endif
 
 	while (NULL != (pcidev = pci_get_device(PCI_VENDOR_ID_ANNAPURNA_LABS, device, pcidev))) {
 		if (NULL == (priv = pci_get_drvdata(pcidev))) {
@@ -3831,6 +4015,16 @@ void syno_alpine_wol_set_wrapper(unsigned int device)
 			continue;
 		}
 
+#ifdef CONFIG_SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
+		phy_write(priv->phydev, 31, 0x0);
+		reg_gbsr = phy_read(priv->phydev, 0x0a);
+		printk("phy reg MII_STAT1000 is 0x%08x\n", reg_gbsr);
+		reg_insr = phy_read(priv->phydev, 0x13);
+		printk("phy reg MII_FCSCOUNTER is 0x%08x\n", reg_insr);
+		reg_rxerc = phy_read(priv->phydev, 0x18);
+		printk("phy reg MII_LBRERROR is 0x%08x\n", reg_rxerc);
+#endif
+
 		if (!(priv->wol & WAKE_MAGIC)) {
 			continue;
 		}
@@ -3839,6 +4033,18 @@ void syno_alpine_wol_set_wrapper(unsigned int device)
 		for (idx = 0; idx < 3; ++idx) {
 			szMacTmp[idx] = (priv->netdev->dev_addr[idx*2] & 0xff) | (priv->netdev->dev_addr[idx*2 + 1] & 0xff) << 8;
 		}
+
+#ifdef CONFIG_SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
+		if ((0 != (reg_gbsr & 0xff)) || (0 != (reg_insr & 0x300)) || (0 != (reg_rxerc & 0xffff))) {
+			//Try to reset PHY in case PHY has error and WOL will fail.
+			printk("WA: Reset Phy first to avoid from WOL error..\n");
+			tmp_val32 = phy_read(priv->phydev, MII_BMCR);
+			tmp_val = (uint16_t) tmp_val32;
+			tmp_val |= BMCR_RESET;
+			phy_write(priv->phydev, MII_BMCR, tmp_val);
+			mdelay(40);
+		}
+#endif
 
 		/* Tell phy about MAC address */
 		phy_write(priv->phydev, 31, 0x7);
@@ -3855,6 +4061,11 @@ void syno_alpine_wol_set_wrapper(unsigned int device)
 		phy_write(priv->phydev, 30, 0x6D);
 		phy_write(priv->phydev, 21, 0x1000);
 		phy_write(priv->phydev, 31, 0x0000); //set PHY to page 0
+#ifdef CONFIG_SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
+		if (syno_is_hw_version(HW_DS1515)) {
+			phy_write(priv->phydev, 31, 0x0003); //set PHY to read-only page 3
+		}
+#endif
 	}
 
 	return;
@@ -3886,7 +4097,7 @@ static const struct ethtool_ops al_eth_ethtool_ops = {
 	.nway_reset		= al_eth_nway_reset,
 	.get_link		= ethtool_op_get_link,
 	.get_coalesce		= al_eth_get_coalesce,
-	.set_coalesce		= al_eth_set_coalesce,
+	.set_coalesce		= al_eth_ethtool_set_coalesce,
 	.get_ringparam		= al_eth_get_ringparam,
 /*	.set_ringparam		= al_set_ringparam,*/
 	.get_pauseparam		= al_eth_get_pauseparam,
@@ -4203,6 +4414,7 @@ al_eth_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	static int adapters_found;
 	u16 dev_id;
 	u8 rev_id;
+	int i;
 
 	int rc;
 
@@ -4366,6 +4578,9 @@ al_eth_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	netdev->features &= ~NETIF_F_MQ_TX_LOCK_OPT;
 #endif
 	netdev->priv_flags |= IFF_UNICAST_FLT;
+
+	for (i = 0; i < AL_ETH_RX_RSS_TABLE_SIZE; i++)
+		adapter->rss_ind_tbl[i] = ethtool_rxfh_indir_default(i, AL_ETH_NUM_QUEUES);
 
 	rc = register_netdev(netdev);
 	if (rc) {

@@ -23,6 +23,9 @@
 #include <linux/virtio_config.h>
 #include <linux/virtio_scsi.h>
 #include <linux/cpu.h>
+#if defined(CONFIG_SYNO_KVMX64) && defined(CONFIG_SYNO_FIXED_DISK_NAME)
+#include <linux/pci.h>
+#endif
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_device.h>
 #include <scsi/scsi_cmnd.h>
@@ -603,6 +606,10 @@ static int virtscsi_tmf(struct virtio_scsi *vscsi, struct virtio_scsi_cmd *cmd)
 	DECLARE_COMPLETION_ONSTACK(comp);
 	int ret = FAILED;
 
+#ifdef CONFIG_SYNO_VHOST_SCSI_TMF_UNSUPPORTED
+	ret = SUCCESS;
+	goto out;
+#endif
 	cmd->comp = &comp;
 	if (virtscsi_kick_cmd(&vscsi->ctrl_vq, cmd,
 			      sizeof cmd->req.tmf, sizeof cmd->resp.tmf,
@@ -699,6 +706,27 @@ static void virtscsi_target_destroy(struct scsi_target *starget)
 	kfree(tgt);
 }
 
+#if defined(CONFIG_SYNO_KVMX64) && defined(CONFIG_SYNO_FIXED_DISK_NAME)
+int virtscsi_index_get(struct Scsi_Host *host, uint cahnnel, uint id, uint lun)
+{
+	int index = 0;
+	struct device *dev = host->shost_gendev.parent;
+	struct pci_dev *pcidev = NULL;
+
+	while (dev) {
+		if (dev->driver && dev->driver->name && !strcmp(dev->driver->name, "virtio-pci")) {
+			pcidev = to_pci_dev(dev);
+			break;
+		}
+		dev = dev->parent;
+	}
+	if (pcidev && PCI_SLOT(pcidev->devfn) >= CONFIG_SYNO_KVMX64_PCI_SLOT_SYSTEM) {
+		index = PCI_SLOT(pcidev->devfn) - CONFIG_SYNO_KVMX64_PCI_SLOT_SYSTEM;
+	}
+	return index;
+}
+#endif /* CONFIG_SYNO_KVMX64 && CONFIG_SYNO_FIXED_DISK_NAME */
+
 static struct scsi_host_template virtscsi_host_template_single = {
 	.module = THIS_MODULE,
 	.name = "Virtio SCSI HBA",
@@ -713,6 +741,9 @@ static struct scsi_host_template virtscsi_host_template_single = {
 	.use_clustering = ENABLE_CLUSTERING,
 	.target_alloc = virtscsi_target_alloc,
 	.target_destroy = virtscsi_target_destroy,
+#if defined(CONFIG_SYNO_KVMX64) && defined(CONFIG_SYNO_FIXED_DISK_NAME)
+	.syno_index_get = virtscsi_index_get,
+#endif /* CONFIG_SYNO_KVMX64 && CONFIG_SYNO_FIXED_DISK_NAME */
 };
 
 static struct scsi_host_template virtscsi_host_template_multi = {
@@ -1045,7 +1076,6 @@ static int __init init(void)
 		pr_err("kmem_cache_create() for virtscsi_cmd_cache failed\n");
 		goto error;
 	}
-
 
 	virtscsi_cmd_pool =
 		mempool_create_slab_pool(VIRTIO_SCSI_MEMPOOL_SZ,

@@ -46,6 +46,7 @@ static int qnx4_remount(struct super_block *sb, int *flags, char *data)
 {
 	struct qnx4_sb_info *qs;
 
+	sync_filesystem(sb);
 	qs = qnx4_sb(sb);
 	qs->Version = QNX4_VERSION;
 	*flags |= MS_RDONLY;
@@ -216,7 +217,6 @@ static int qnx4_fill_super(struct super_block *s, void *data, int silent)
 	s->s_flags |= MS_RDONLY;	/* Yup, read-only yet */
 	qnx4_sb(s)->sb_buf = bh;
 	qnx4_sb(s)->sb = (struct qnx4_super_block *) bh->b_data;
-
 
  	/* check before allocating dentries, inodes, .. */
 	errmsg = qnx4_checkroot(s);
@@ -441,4 +441,3 @@ static void __exit exit_qnx4_fs(void)
 module_init(init_qnx4_fs)
 module_exit(exit_qnx4_fs)
 MODULE_LICENSE("GPL");
-

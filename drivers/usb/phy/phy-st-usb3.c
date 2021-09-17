@@ -20,15 +20,31 @@
 #include <linux/regmap.h>
 #include <linux/reset.h>
 #include <linux/delay.h>
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 #include <linux/mfd/syscon.h>
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 #include <linux/usb/phy.h>
 
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#include "phy-st-usb3.h"
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 #define phy_to_priv(x)	container_of((x), struct sti_usb3_miphy, phy)
 
 #define SSC_ON	0x11
 #define SSC_OFF	0x01
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 
 #ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+/* module param to disable MIPHY SSC */
+static int miphy_ssc_off;
+module_param(miphy_ssc_off, int, S_IRUGO | S_IWUSR);
+MODULE_PARM_DESC(miphy_ssc_off, "turn off miphy ssc");
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 /* Set MIPHY timer to 2s */
 #define MIPHY_DEFAULT_TIMER	2000
 static int miphy_timer_msecs = MIPHY_DEFAULT_TIMER;
@@ -36,6 +52,8 @@ module_param(miphy_timer_msecs, int, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(miphy_timer_msecs, "miphy timer init in msecs");
 #define MIPHY_TIMER(x)	(jiffies + msecs_to_jiffies(x))
 
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 /* MiPHY_2 RX status */
 #define MIPHY2_RX_CAL_COMPLETED		BIT(0)
 #define MIPHY2_RX_OFFSET		BIT(1)
@@ -45,7 +63,74 @@ MODULE_PARM_DESC(miphy_timer_msecs, "miphy timer init in msecs");
 /* MiPHY2 Status */
 #define MiPHY2_STATUS_1			0x2
 #define MIPHY2_PHY_READY		BIT(0)
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 #endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+/* This is the list of VID/PID for buggy HDDs that turn OFF SSC*/
+static struct usb_device_id usb_blacklist[] = {
+	{USB_DEVICE(0x07ab, 0xfc9f)},	/* USB3.0 freecom */
+	{USB_DEVICE(0x1058, 0x1148)},	/* USB3.0 WD my Book */
+	{}			/* Terminating entry */
+};
+
+static int sti_usb3_miphy_on_connect(struct usb_phy *phy_dev,
+				     struct usb_device *udev)
+{
+	struct sti_usb3_miphy *miphy = phy_to_priv(phy_dev);
+	int i;
+
+	if (miphy_ssc_off)
+		writeb_relaxed(SSC_OFF, miphy->usb3_base + MIPHY_BOUNDARY_SEL);
+
+	for (i = 0; i < ARRAY_SIZE(usb_blacklist); ++i) {
+		if ((udev->descriptor.idVendor == usb_blacklist[i].idVendor) &&
+		    (udev->descriptor.idProduct ==
+		     usb_blacklist[i].idProduct)) {
+			dev_warn(miphy->dev,
+				 "miphy disable SSC for known buggy device\n");
+			writeb_relaxed(SSC_OFF,
+				       miphy->usb3_base + MIPHY_BOUNDARY_SEL);
+		}
+	}
+
+	return 0;
+}
+
+static int sti_usb3_miphy_on_disconnect(struct usb_phy *phy_dev,
+					struct usb_device *udev)
+{
+	struct sti_usb3_miphy *miphy = phy_to_priv(phy_dev);
+	u8 val;
+
+	if (miphy->sw_auto_calib) {
+		val = readb_relaxed(miphy->usb3_base + MIPHY_RESET);
+		val |= RX_CAL_RST_SW;
+		writeb_relaxed(val, miphy->usb3_base + MIPHY_RESET);
+		writeb_relaxed(CLEAR_MASK, miphy->usb3_base + MIPHY_RESET);
+		dev_dbg(miphy->dev, "miphy autocalibration done\n");
+
+		/*
+		 * Set a safe delay after calibration; we use the same range as
+		 * in the phy-miphy28lp driver, where a delay is set after miphy
+		 * reset.
+		 * Here we are in the same case given that we are performing a
+		 * reset to allow miphy to re-calibrate itself.
+		 */
+		usleep_range(10, 20);
+
+		/* Check status */
+		if ((readb_relaxed(miphy->usb3_base + MIPHY_RX_EQU_GAIN_FDB_2))
+		    || (readb_relaxed(miphy->usb3_base +
+				      MIPHY_RX_EQU_GAIN_FDB_3)))
+			dev_err(miphy->dev, "miphy autocalibration failed!\n");
+	}
+
+	if (!miphy->no_ssc && !miphy_ssc_off)
+		writeb_relaxed(SSC_ON, miphy->usb3_base + MIPHY_BOUNDARY_SEL);
+
+	return 0;
+}
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 /* MiPHY_2 Control */
 #define	SYSCFG5071			0x11c
 #define MIPHY2_PX_TX_POLARITY		BIT(0)
@@ -172,6 +257,7 @@ static int sti_usb3_miphy_autocalibration(struct usb_phy *phy_dev,
 
 	return 0;
 }
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 #ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static void sti_usb3_miphy_work(struct work_struct *work)
 {
@@ -232,6 +318,323 @@ static void sti_usb3_miphy_timer_init(struct sti_usb3_miphy *phy_dev)
 }
 #endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+static void sti_miphy_reset(struct sti_usb3_miphy *phy_dev, bool do_reset)
+{
+	if (do_reset) {
+		writeb_relaxed(RST_APPLI | RST_CONF,
+				phy_dev->usb3_base + MIPHY_CONF_RESET);
+		writeb_relaxed(RST_APPLI,
+				phy_dev->usb3_base + MIPHY_CONF_RESET);
+	} else
+		writeb_relaxed(CLEAR_MASK,
+				phy_dev->usb3_base + MIPHY_CONF_RESET);
+
+	/* extra delay after resetting to let miphy calibrate itself */
+	usleep_range(10, 20);
+}
+
+static void sti_miphy_ctrl(struct sti_usb3_miphy *phy_dev)
+{
+	u8 val;
+
+	/* disable link reset */
+	val = readb_relaxed(phy_dev->usb3_base + MIPHY_CONTROL);
+	val |= DIS_LINK_RST;
+	if (phy_dev->release > MIPHY_CUT_250)
+		val |= MIPHY_90OHM_EN;
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_CONTROL);
+
+	/* Select MIPHY Bank1 for USB3 */
+	writeb_relaxed(CLEAR_MASK, phy_dev->usb3_base + MIPHY_CONF);
+
+	/* PLL ratio 20dec to get USB3 px_clk_tx/rx set to 250MHz */
+	writeb_relaxed(txrx_spdsel(2), phy_dev->usb3_base + MIPHY_SPEED);
+
+	/* MIPHY Synchar control */
+	val = SYNC_CHAR_EN(0xb);
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_SYNCHAR_CONTROL);
+}
+
+static void sti_miphy_pll_config(struct sti_usb3_miphy *phy_dev)
+{
+	struct miphy_pll *pll = phy_dev->pll;
+	u8 val;
+
+	if (phy_dev->release > MIPHY_CUT_250) {
+		val = PLL_IVCO_MAN_EN | PLL_IVCO_MAN(0xb) | PLL_ACT_FILT_EN;
+		writeb_relaxed(val,
+			       phy_dev->usb3_base + MIPHY_PLL_COMMON_MISC_2);
+		writeb_relaxed(PLL_CAL_AN_TARGET_LSB(4),
+			       phy_dev->usb3_base + MIPHY_PLL_VCODIV_1);
+		writeb_relaxed(PLL_CAL_AN_TARGET_MSB,
+			       phy_dev->usb3_base + MIPHY_PLL_VCODIV_2);
+		writeb_relaxed(PLL_CAL_TIME_MSB,
+			       phy_dev->usb3_base + MIPHY_PLL_VCODIV_4);
+	}
+
+	/* external refres used for internal i bias current */
+	val = readb_relaxed(phy_dev->usb3_base + MIPHY_PLL_SPAREIN);
+	val |= I_BIAS_REF;
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_PLL_SPAREIN);
+
+	/* select PLL ref clk */
+	writeb_relaxed(pll->refclk, phy_dev->usb3_base + MIPHY_PLL_CLKREF_FREQ);
+
+	/* setting PLL Ratio */
+	pll->ratio = MIPHY_PLL_RATIO(pll->Fvco_ppm, pll->refclk);
+	writeb_relaxed(CALSET_1(pll->ratio),
+			phy_dev->usb3_base + MIPHY_PLL_CALSET_1);
+	writeb_relaxed(CALSET_2(pll->ratio),
+			phy_dev->usb3_base + MIPHY_PLL_CALSET_2);
+	writeb_relaxed(CALSET_3(pll->ratio),
+			phy_dev->usb3_base + MIPHY_PLL_CALSET_3);
+
+	if (phy_dev->release < MIPHY_CUT_240)
+		writeb_relaxed(PLL_DRIVEBOOST_EN,
+				phy_dev->usb3_base + MIPHY_PLL_CALSET_4);
+
+	/* SSC_sw_enable */
+	writeb_relaxed(GENSEL_SEL | SSC_SEL,
+			phy_dev->usb3_base + MIPHY_BOUNDARY_SEL);
+	writeb_relaxed(SSC_EN_SW, phy_dev->usb3_base + MIPHY_BOUNDARY_2);
+
+	/* set pll ssc modulation */
+	pll->ssc_period = MIPHY_PLL_SSC_PERIOD(pll->refclk);
+	pll->ssc_step = MIPHY_PLL_SSC_STEP(pll->ssc_period, pll->refclk);
+	writeb_relaxed(SBR_2(pll->ssc_period),
+		       phy_dev->usb3_base + MIPHY_PLL_SBR_2);
+	writeb_relaxed(SBR_3(pll->ssc_step),
+		       phy_dev->usb3_base + MIPHY_PLL_SBR_3);
+	writeb_relaxed(SBR_4(pll->ssc_period, pll->ssc_step),
+		       phy_dev->usb3_base + MIPHY_PLL_SBR_4);
+
+	/* Refresh pll settings */
+	val = readb_relaxed(phy_dev->usb3_base + MIPHY_PLL_SBR_1);
+	val ^= PLL_CHANGE_SW;
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_PLL_SBR_1);
+}
+
+static void sti_miphy_rx_config(struct sti_usb3_miphy *phy_dev)
+{
+	u8 val;
+	u8 offset;
+
+	/* MIPHY RX LOCK */
+	val = readb_relaxed(phy_dev->usb3_base + MIPHY_RX_LOCK_CTRL_1);
+	val |= ERR_8B10B_RST;
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_RX_LOCK_CTRL_1);
+
+	val = rx_setting_to_optimize(1, 3, 0);
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_RX_LOCK_SETTINGS_OPT);
+	val = STEP_CDR_DRIFT(7);
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_RX_LOCK_STEP);
+
+	/* RX Channel compensation and calibration */
+	val = STEP_VGA_GAIN(2) | STEP_EQU_BOOST(2);
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_RX_CAL_VGA_STEP);
+	val = RX_BUFF_CTL_MAN(5);
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_RX_BUFFER_CTRL);
+	val = EQU_BOOST_MAN(0) | EQU_GAIN_MAN(0x1E);
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_RX_EQU_GAIN_1);
+
+	/* Enable full constellation, equalizer boost adaptation and overall
+	 * alog calibaration.
+	 */
+	val = FULL_CONST_EN | EQU_ADPT_EN | RX_ALGO_CAL_EN;
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_RX_CAL_CTRL_1);
+	val = readb_relaxed(phy_dev->usb3_base + MIPHY_RX_CAL_CTRL_2);
+	val &= ~RX_CAL_FREEZE_EN;
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_RX_CAL_CTRL_2);
+
+	val = CAL_OFFSET_VGA_LEN(3) | CAL_OFFSET_THR_LEN(3) |
+		OFFSET_COMP_EN | VGA_OFFSET_POL;
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_RX_CAL_OFFSET_CTRL);
+	val = CAL_EYE_CONV_LEN(2) | CAL_EYE_AVG_LEN(3);
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_RX_CAL_OPT_LENGTH);
+
+	/* manual input bridge=1, manual threshold=1, Input bridge=1 */
+	val = INPUT_BRIDGE_EN(1) | PWR_CTL_MAN(9);
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_RX_POWER_CTRL_1);
+	val = RX_CLK_EN_MAN(1) | VTH_THRESHOLD_EN_MAN(0xA);
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_RX_POWER_CTRL_2);
+
+	/* Rx Kpi_GAIN for PI settings */
+	if (phy_dev->release > MIPHY_CUT_250)
+		val = Kp_GAIN(0xb) | Ki_GAIN(4) | AUTO_GAIN_EN;
+	else
+		val = Kp_GAIN(0xa) | Ki_GAIN(4) | AUTO_GAIN_EN;
+	writeb_relaxed(val, phy_dev->usb3_base + MIPHY_RX_K_GAIN);
+
+	/* MIPHY Bias boost */
+	if (phy_dev->release > MIPHY_CUT_250)
+		offset = MIPHY_BIAS_BOOST_1(1);
+	else
+		offset = MIPHY_BIAS_BOOST_1(0);
+	writeb_relaxed(CLEAR_MASK, phy_dev->usb3_base + offset);
+
+	if (phy_dev->release > MIPHY_CUT_250) {
+		val = 0x20;
+		offset = MIPHY_BIAS_BOOST_2(1);
+	} else {
+		val = 0xA7;
+		offset = MIPHY_BIAS_BOOST_2(0);
+	}
+	writeb_relaxed(val, phy_dev->usb3_base + offset);
+
+	/* MiPHY RX eye calibration */
+	if (phy_dev->release > MIPHY_CUT_250) {
+		val = EYE_MIN_TARGET(5) | PATTERN_LENGTH(5);
+		writeb_relaxed(val, phy_dev->usb3_base + MIPHY_RX_CAL_EYE_MIN);
+	}
+
+	if (phy_dev->release < MIPHY_CUT_240) {
+		writeb_relaxed(VGA_GAIN_MAN,
+				phy_dev->usb3_base + MIPHY_RX_VGA_GAIN);
+
+		/* Enable RX autocalibration */
+		writeb_relaxed(RX_AUTO_CAL_EN,
+				phy_dev->usb3_base + MIPHY_SPARE_1);
+
+		/* Enable RX bias boost */
+		writeb_relaxed(TST_BIAS_BOOST,
+				phy_dev->usb3_base + MIPHY_TST_BIAS_BOOST_2(0));
+		writeb_relaxed(VTH_BIAS_PROG,
+				phy_dev->usb3_base + MIPHY_RXBUF_EQ_1(0));
+	}
+}
+
+static void sti_miphy_comp(struct sti_usb3_miphy *phy_dev)
+{
+	u8 val;
+
+	writeb_relaxed(CLEAR_MASK, phy_dev->usb3_base + MIPHY_TX_CAL_MAN);
+
+	if (phy_dev->release > MIPHY_CUT_250) {
+		writeb_relaxed(CLEAR_MASK,
+			       phy_dev->usb3_base + MIPHY_COMP_POSTP);
+		writeb_relaxed(CLEAR_MASK,
+			       phy_dev->usb3_base + MIPHY_COMP_POSTP2);
+
+		val = COMP_RX_AVG_END(8) | COMP_RX_TEMPO_END(8);
+		writeb_relaxed(val, phy_dev->usb3_base + MIPHY_COMP_FSM_4);
+		val = COMP_TX_AVG_END(8) | COMP_TX_TEMPO_END(8);
+		writeb_relaxed(val, phy_dev->usb3_base + MIPHY_COMP_FSM_5);
+	} else {
+		/* TX compensation offset to re-center TX impedance */
+		val = COMP_TX_OFFSET(2) | COMP_RX_OFFSET(0);
+		writeb_relaxed(val, phy_dev->usb3_base + MIPHY_COMP_POSTP);
+
+		/* Start new single measurement cycle */
+		val = readb_relaxed(phy_dev->usb3_base + MIPHY_COMP_FSM_1);
+		val |= COMP_START;
+		writeb_relaxed(val, phy_dev->usb3_base + MIPHY_COMP_FSM_1);
+	}
+}
+
+static void sti_pipew_cfg(struct sti_usb3_miphy *phy_dev)
+{
+	struct miphy_pll *pll = phy_dev->pll;
+	unsigned int val;
+
+	/* P2 PIPE Wrapper Configuration */
+	writeb_relaxed(PIPEW_DELAY_0(PIPEW_P2_DELAY),
+			phy_dev->pipe_base + PIPEW_DELAY_P2_USB_COM_RISE_0);
+	writeb_relaxed(PIPEW_DELAY_1(PIPEW_P2_DELAY),
+			phy_dev->pipe_base + PIPEW_DELAY_P2_USB_COM_RISE_1);
+	writeb_relaxed(PIPEW_DELAY_2(PIPEW_P2_DELAY),
+			phy_dev->pipe_base + PIPEW_DELAY_P2_USB_COM_RISE_2);
+
+	writeb_relaxed(PIPEW_DELAY_0(PIPEW_P2_DELAY),
+			phy_dev->pipe_base + PIPEW_DELAY_P2_USB_COM_FALL_0);
+	writeb_relaxed(PIPEW_DELAY_1(PIPEW_P2_DELAY),
+			phy_dev->pipe_base + PIPEW_DELAY_P2_USB_COM_FALL_1);
+	writeb_relaxed(PIPEW_DELAY_2(PIPEW_P2_DELAY),
+			phy_dev->pipe_base + PIPEW_DELAY_P2_USB_COM_FALL_2);
+
+	writeb_relaxed(PIPEW_DETECT_0(PIPEW_P2_DETECT),
+			phy_dev->pipe_base + PIPEW_DETECT_P2_USB_RISE_THR_0);
+	writeb_relaxed(PIPEW_DETECT_1(PIPEW_P2_DETECT),
+			phy_dev->pipe_base + PIPEW_DETECT_P2_USB_RISE_THR_1);
+	writeb_relaxed(PIPEW_DETECT_2(PIPEW_P2_DETECT),
+			phy_dev->pipe_base + PIPEW_DETECT_P2_USB_RISE_THR_2);
+
+	/* P3 PIPE Wrapper Configuration */
+	val = PIPEW_P3_DELAY(pll->refclk);
+	writeb_relaxed(PIPEW_DELAY_0(val),
+		       phy_dev->pipe_base + PIPEW_DELAY_P3_USB_COM_RISE_0);
+	writeb_relaxed(PIPEW_DELAY_1(val),
+		       phy_dev->pipe_base + PIPEW_DELAY_P3_USB_COM_RISE_1);
+	writeb_relaxed(PIPEW_DELAY_2(val),
+		       phy_dev->pipe_base + PIPEW_DELAY_P3_USB_COM_RISE_2);
+
+	writeb_relaxed(PIPEW_DELAY_0(val),
+		       phy_dev->pipe_base + PIPEW_DELAY_P3_USB_COM_FALL_0);
+	writeb_relaxed(PIPEW_DELAY_1(val),
+		       phy_dev->pipe_base + PIPEW_DELAY_P3_USB_COM_FALL_1);
+	writeb_relaxed(PIPEW_DELAY_2(val),
+		       phy_dev->pipe_base + PIPEW_DELAY_P3_USB_COM_FALL_2);
+
+	val = PIPEW_P3_DETECT(pll->refclk);
+	writeb_relaxed(PIPEW_DETECT_0(val),
+		       phy_dev->pipe_base + PIPEW_DETECT_P3_USB_RISE_THR_0);
+	writeb_relaxed(PIPEW_DETECT_1(val),
+		       phy_dev->pipe_base + PIPEW_DETECT_P3_USB_RISE_THR_1);
+	writeb_relaxed(PIPEW_DETECT_2(val),
+		       phy_dev->pipe_base + PIPEW_DETECT_P3_USB_RISE_THR_2);
+
+	/* pipe Wrapper usb3 TX swing de-emph margin PREEMPH[7:4], SWING[3:0] */
+	val = TX_SWING(0x7) | TX_PREEMPH(0x6);
+	writeb_relaxed(val, phy_dev->pipe_base + PIPEW_USB3_MARG_0);
+	writeb_relaxed(val, phy_dev->pipe_base + PIPEW_USB3_MARG_2);
+	writeb_relaxed(val, phy_dev->pipe_base + PIPEW_USB3_MARG_4);
+	writeb_relaxed(val, phy_dev->pipe_base + PIPEW_USB3_MARG_6);
+
+	/* updates the TX de-emphasis and swing settings for the MiPHY */
+	val = TX_MARG_UPDATE;
+	writeb_relaxed(val, phy_dev->pipe_base + PIPEW_USB3_MARG_1);
+	writeb_relaxed(val, phy_dev->pipe_base + PIPEW_USB3_MARG_3);
+	writeb_relaxed(val, phy_dev->pipe_base + PIPEW_USB3_MARG_5);
+	writeb_relaxed(val, phy_dev->pipe_base + PIPEW_USB3_MARG_7);
+}
+
+static void sti_usb3_miphy28lp(struct sti_usb3_miphy *phy_dev)
+{
+	dev_info(phy_dev->dev, "MiPHY28LP setup\n");
+
+	/* read MIPHY release */
+	phy_dev->release = readb_relaxed(phy_dev->usb3_base + MIPHY_REVISION);
+	phy_dev->release |= MIPHY_VER(readb_relaxed(phy_dev->usb3_base +
+						    MIPHY_VERSION));
+
+	dev_info(phy_dev->dev, "MiPHY28LP release %#x found\n",
+		 phy_dev->release);
+
+	/* Putting MIPHY Macro in reset */
+	sti_miphy_reset(phy_dev, true);
+
+	sti_miphy_ctrl(phy_dev);
+	sti_miphy_pll_config(phy_dev);
+	sti_miphy_rx_config(phy_dev);
+	sti_miphy_comp(phy_dev);
+
+	/* setting MIPHY Macro out of reset */
+	sti_miphy_reset(phy_dev, false);
+
+	/*
+	 * There are spare hard disks that don't support Host SSC modulation
+	 * so, although that must be ON for USB3 to avoid failures on Electrical
+	 * tests and because USB3 could impact signal at 2.4GHZ (WIFI...), we
+	 * let the user to choose to disable it via DT.
+	 */
+	if (phy_dev->no_ssc || miphy_ssc_off)
+		writeb_relaxed(SSC_OFF,
+			       phy_dev->usb3_base + MIPHY_BOUNDARY_SEL);
+
+	/* configure MIPHY pipew */
+	sti_pipew_cfg(phy_dev);
+}
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 static void sti_usb3_miphy28lp(struct sti_usb3_miphy *phy_dev)
 {
 	int i;
@@ -273,10 +676,15 @@ static void sti_usb3_miphy28lp(struct sti_usb3_miphy *phy_dev)
 	writeb_relaxed(0X67, phy_dev->pipe_base + 0x6E);
 	writeb_relaxed(0X0D, phy_dev->pipe_base + 0x6F);
 }
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 
 static int sti_usb3_miphy_init(struct usb_phy *phy)
 {
 	struct sti_usb3_miphy *phy_dev = phy_to_priv(phy);
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+	if (!IS_ERR(phy_dev->rstc))
+		reset_control_deassert(phy_dev->rstc);
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	int ret;
 
 	ret = regmap_update_bits(phy_dev->regmap, phy_dev->cfg->syscfg,
@@ -285,6 +693,7 @@ static int sti_usb3_miphy_init(struct usb_phy *phy)
 		return ret;
 
 	reset_control_deassert(phy_dev->rstc);
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 
 	/* Program the MiPHY2 internal registers */
 	sti_usb3_miphy28lp(phy_dev);
@@ -300,7 +709,12 @@ static void sti_usb3_miphy_shutdown(struct usb_phy *phy)
 {
 	struct sti_usb3_miphy *phy_dev = phy_to_priv(phy);
 
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+	if (!IS_ERR(phy_dev->rstc))
+		reset_control_assert(phy_dev->rstc);
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	reset_control_assert(phy_dev->rstc);
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 #ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	del_timer(&phy_dev->miphy_timer);
 #endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
@@ -313,18 +727,47 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 	struct device_node *np = pdev->dev.of_node;
 	const struct of_device_id *match;
 	struct sti_usb3_miphy *phy_dev;
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+	struct miphy_pll *phy_pll;
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	struct device *dev = &pdev->dev;
 	struct usb_phy *phy;
 	struct resource *res;
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+	struct clk *clk;
+	unsigned long rate;
+	u32 ret;
+
+	if (!np)
+		return -ENODEV;
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 
 	phy_dev = devm_kzalloc(dev, sizeof(*phy_dev), GFP_KERNEL);
 	if (!phy_dev)
 		return -ENOMEM;
 
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+	phy_pll = devm_kzalloc(dev, sizeof(*phy_pll), GFP_KERNEL);
+	if (!phy_pll)
+		return -ENOMEM;
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+
 	match = of_match_device(sti_usb3_miphy_of_match, &pdev->dev);
 	if (!match)
 		return -ENODEV;
 
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+	clk = devm_clk_get(dev, "miphy_osc");
+	if (IS_ERR(clk)) {
+		dev_err(dev, "miphy_osc clk not found\n");
+		return PTR_ERR(clk);
+	}
+
+	ret = clk_prepare_enable(clk);
+	if (ret) {
+		dev_err(phy_dev->dev, "Failed to enable miphy osc clock\n");
+		return ret;
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	phy_dev->cfg = match->data;
 	phy_dev->dev = dev;
 
@@ -332,8 +775,30 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 	if (IS_ERR(phy_dev->rstc)) {
 		dev_err(dev, "failed to ctrl MiPHY2 USB3 reset\n");
 		return PTR_ERR(phy_dev->rstc);
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	}
 
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+	rate = clk_get_rate(clk);
+	phy_pll->refclk = rate / 1000000;
+
+	dev_info(dev, "USB3 MiPHY Ref clk %d MHz enabled\n", phy_pll->refclk);
+
+	if (of_property_read_u32(np, "st,fvco-ppm", &phy_pll->Fvco_ppm)) {
+		dev_warn(dev, "phy fvco ppm not set use 0 ppm by default\n");
+		phy_pll->Fvco_ppm = 0;
+	}
+
+	phy_dev->pll = phy_pll;
+	phy_dev->dev = dev;
+
+	phy_dev->rstc = devm_reset_control_get(dev, NULL);
+	if (IS_ERR(phy_dev->rstc))
+		dev_warn(dev, "MiPHY2 USB3 reset is missing...\n");
+	else {
+		dev_dbg(dev, "MiPHY2 USB3 reset!\n");
+		reset_control_deassert(phy_dev->rstc);
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	dev_info(dev, "reset MiPHY\n");
 	reset_control_deassert(phy_dev->rstc);
 
@@ -341,11 +806,16 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 	if (IS_ERR(phy_dev->regmap)) {
 		dev_err(dev, "No syscfg phandle specified\n");
 		return PTR_ERR(phy_dev->regmap);
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	}
 
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "usb3-uport");
 	if (res) {
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+		phy_dev->usb3_base = devm_ioremap_resource(&pdev->dev, res);
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 		phy_dev->usb3_base = devm_request_and_ioremap(&pdev->dev, res);
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 		if (!phy_dev->usb3_base) {
 			dev_err(&pdev->dev, "Unable to map base registers\n");
 			return -ENOMEM;
@@ -354,7 +824,11 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 	/* Check for PIPE registers */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "pipew");
 	if (res) {
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+		phy_dev->pipe_base = devm_ioremap_resource(&pdev->dev, res);
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 		phy_dev->pipe_base = devm_request_and_ioremap(&pdev->dev, res);
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 		if (!phy_dev->pipe_base) {
 			dev_err(&pdev->dev, "Unable to map PIPE registers\n");
 			return -ENOMEM;
@@ -375,6 +849,12 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 
 	INIT_WORK(&phy_dev->miphy_work, sti_usb3_miphy_work);
 #endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+	phy_dev->sw_auto_calib =
+		of_property_read_bool(np, "st,auto-calibration");
+
+	phy_dev->no_ssc = of_property_read_bool(np, "st,no-ssc");
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 
 	phy = &phy_dev->phy;
 	phy->dev = dev;
@@ -382,8 +862,13 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 	phy->init = sti_usb3_miphy_init;
 	phy->type = USB_PHY_TYPE_USB3;
 	phy->shutdown = sti_usb3_miphy_shutdown;
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+	phy->notify_connect = sti_usb3_miphy_on_connect;
+	phy->notify_disconnect = sti_usb3_miphy_on_disconnect;
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	if (of_property_read_bool(np, "st,auto-calibration"))
 		phy->notify_disconnect = sti_usb3_miphy_autocalibration;
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 
 	usb_add_phy_dev(phy);
 
@@ -398,7 +883,12 @@ static int sti_usb3_miphy_remove(struct platform_device *pdev)
 {
 	struct sti_usb3_miphy *phy_dev = platform_get_drvdata(pdev);
 
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+	if (!IS_ERR(phy_dev->rstc))
+		reset_control_assert(phy_dev->rstc);
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	reset_control_assert(phy_dev->rstc);
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 
 	usb_remove_phy(&phy_dev->phy);
 #ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
@@ -413,8 +903,13 @@ static int sti_usb3_miphy_remove(struct platform_device *pdev)
 
 static const struct of_device_id sti_usb3_miphy_of_match[] = {
 	{
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+	 .compatible = "st,sti-usb3phy"
+	},
+#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	 .compatible = "st,sti-usb3phy",
 	 .data = &sti_usb3_miphy_cfg},
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	{},
 };
 
@@ -445,6 +940,12 @@ static int __init miphy_cmdline_opt(char *str)
 			if (kstrtoint(opt + 18, 0, &miphy_timer_msecs))
 				goto err;
 		}
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+		if (!strncmp(opt, "miphy_ssc_off:", 14)) {
+			if (kstrtoint(opt + 14, 0, &miphy_ssc_off))
+				goto err;
+		}
+#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
 	}
 	return 0;
 

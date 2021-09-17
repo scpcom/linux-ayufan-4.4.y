@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -52,6 +52,9 @@ met:
 #include "al_hal_common.h"
 #include "al_hal_udma.h"
 #include "al_hal_eth_macsec.h"
+#ifdef AL_ETH_SUPPORT_DDP
+#include "al_hal_eth_ddp.h"
+#endif
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
@@ -59,15 +62,23 @@ extern "C" {
 #endif
 /* *INDENT-ON* */
 
-#define AL_ETH_PKT_MAX_BUFS		19
+#ifndef AL_ETH_PKT_MAX_BUFS
+#define AL_ETH_PKT_MAX_BUFS 19
+#endif
+
+/* uncomment the following line to enable support of macsec */
+/*#define	AL_ETH_SUPPORT_MACSEC */
+
 #define AL_ETH_UDMA_TX_QUEUES		4
 #define AL_ETH_UDMA_RX_QUEUES		4
 
 /* PCI Adapter Device/Revision ID */
 #define AL_ETH_DEV_ID_STANDARD		0x0001
 #define AL_ETH_DEV_ID_ADVANCED		0x0002
-#define AL_ETH_REV_ID_0		0
-#define AL_ETH_REV_ID_1		1
+#define AL_ETH_REV_ID_0			0 /* Alpine Rev 0 */
+#define AL_ETH_REV_ID_1			1 /* Alpine Rev 1 */
+#define AL_ETH_REV_ID_2			2 /* PeakRock basic */
+#define AL_ETH_REV_ID_3			3 /* PeakRock advanced */
 
 /* PCI BARs */
 #define AL_ETH_UDMA_BAR			0
@@ -75,7 +86,7 @@ extern "C" {
 #define AL_ETH_MAC_BAR			2
 
 #define AL_ETH_MAX_FRAME_LEN		10000
-#define AL_ETH_MIN_FRAME_LEN		30
+#define AL_ETH_MIN_FRAME_LEN		60
 
 #define AL_ETH_TSO_MSS_MAX_IDX		8
 #define AL_ETH_TSO_MSS_MIN_VAL		1
@@ -88,6 +99,9 @@ enum AL_ETH_PROTO_ID {
 	AL_ETH_PROTO_ID_IPv6	= 11,
 	AL_ETH_PROTO_ID_TCP	= 12,
 	AL_ETH_PROTO_ID_UDP	= 13,
+	AL_ETH_PROTO_ID_FCOE    = 21,
+	AL_ETH_PROTO_ID_GRH     = 22, /** RoCE l3 header */
+	AL_ETH_PROTO_ID_BTH     = 23, /** RoCE l4 header */
 	AL_ETH_PROTO_ID_ANY	= 32, /**< for sw usage only */
 };
 #define AL_ETH_PROTOCOLS_NUM		(AL_ETH_PROTO_ID_ANY)
@@ -112,12 +126,14 @@ enum AL_ETH_TX_TUNNEL_MODE {
 
 /** MAC media mode */
 enum al_eth_mac_mode {
-	AL_ETH_MAC_MODE_RGMII = 0,
-	AL_ETH_MAC_MODE_XAUI  = 1,	/**< Reserved and not supported */
-	AL_ETH_MAC_MODE_RXAUI = 2,	/**< Reserved and not supported */
-	AL_ETH_MAC_MODE_SGMII = 3,
-	AL_ETH_MAC_MODE_10GbE_Serial    = 4,	/**< Applies to XFI and KR modes */
-	AL_ETH_MAC_MODE_10G_SGMII	= 5 /**< SGMII using the 10G MAC, don't use*/
+	AL_ETH_MAC_MODE_RGMII,
+	AL_ETH_MAC_MODE_SGMII,
+	AL_ETH_MAC_MODE_SGMII_2_5G,
+	AL_ETH_MAC_MODE_10GbE_Serial,	/**< Applies to XFI and KR modes */
+	AL_ETH_MAC_MODE_10G_SGMII,	/**< SGMII using the 10G MAC, don't use*/
+	AL_ETH_MAC_MODE_XLG_LL_40G,	/**< applies to 40G mode using the 40G low latency (LL) MAC */
+	AL_ETH_MAC_MODE_KR_LL_25G,	/**< applies to 25G mode using the 10/25G low latency (LL) MAC */
+	AL_ETH_MAC_MODE_XLG_LL_50G	/**< applies to 50G mode using the 40/50G low latency (LL) MAC */
 };
 
 struct al_eth_capabilities {
@@ -170,16 +186,26 @@ enum al_eth_tx_switch_vid_sel_type {
 };
 
 /** Rx descriptor configurations */
+/* Note: when selecting rx descriptor field to inner packet, then that field
+* will be set according to inner packet when packet is tunneled, for non-tunneled
+* packets, the field will be set according to the packets header */
+
 /** selection of the LRO_context_value result in the Metadata */
 enum al_eth_rx_desc_lro_context_val_res {
 	AL_ETH_LRO_CONTEXT_VALUE = 0, /**< LRO_context_value */
 	AL_ETH_L4_OFFSET = 1, /**< L4_offset */
 };
 
+/** selection of the L4 offset in the Metadata */
+enum al_eth_rx_desc_l4_offset_sel {
+	AL_ETH_L4_OFFSET_OUTER = 0, /**< set L4 offset of the outer packet */
+	AL_ETH_L4_OFFSET_INNER = 1, /**< set L4 offset of the inner packet */
+};
+
 /** selection of the L4 checksum result in the Metadata */
 enum al_eth_rx_desc_l4_chk_res_sel {
 	AL_ETH_L4_INNER_CHK = 0, /**< L4 checksum */
-	AL_ETH_l4_INNER_OUTER_CHK = 1, /**< Logic AND between outer and inner
+	AL_ETH_L4_INNER_OUTER_CHK = 1, /**< Logic AND between outer and inner
 					    L4 checksum result */
 };
 
@@ -198,6 +224,38 @@ enum al_eth_rx_desc_l3_chk_res_sel {
 				       CRC result,based on the checksum and
 				       RoCE/FCoE CRC input selections. */
 };
+
+/** selection of the L3 protocol index in the Metadata */
+enum al_eth_rx_desc_l3_proto_idx_sel {
+	AL_ETH_L3_PROTO_IDX_OUTER = 0, /**< set L3 proto index of the outer packet */
+	AL_ETH_L3_PROTO_IDX_INNER = 1, /**< set L3 proto index of the inner packet */
+};
+
+/** selection of the L3 offset in the Metadata */
+enum al_eth_rx_desc_l3_offset_sel {
+	AL_ETH_L3_OFFSET_OUTER = 0, /**< set L3 offset of the outer packet */
+	AL_ETH_L3_OFFSET_INNER = 1, /**< set L3 offset of the inner packet */
+};
+
+/** selection of the L4 protocol index in the Metadata */
+enum al_eth_rx_desc_l4_proto_idx_sel {
+	AL_ETH_L4_PROTO_IDX_OUTER = 0, /**< set L4 proto index of the outer packet */
+	AL_ETH_L4_PROTO_IDX_INNER = 1, /**< set L4 proto index of the inner packet */
+};
+
+/** selection of the frag indication in the Metadata */
+enum al_eth_rx_desc_frag_sel {
+	AL_ETH_FRAG_OUTER = 0, /**< set frag of the outer packet */
+	AL_ETH_FRAG_INNER = 1, /**< set frag of the inner packet */
+};
+
+/** Ethernet Rx completion descriptor */
+typedef struct {
+	uint32_t ctrl_meta;
+	uint32_t len;
+	uint32_t word2;
+	uint32_t word3;
+} al_eth_rx_cdesc;
 
 /** Flow Contol parameters */
 struct al_eth_flow_control_params{
@@ -312,15 +370,19 @@ struct al_eth_pkt{
 	 */
 	uint16_t vmid;
 
-	struct al_buf	bufs[AL_ETH_PKT_MAX_BUFS];
-	uint8_t num_of_bufs;
 	uint32_t rx_header_len; /**< header buffer length of rx packet, not used */
 	struct al_eth_meta_data *meta; /**< if null, then no meta added */
 #ifdef AL_ETH_RX_DESC_RAW_GET
 	uint32_t rx_desc_raw[4];
 #endif
 	uint16_t rxhash;
+	uint16_t l3_offset;
 
+#ifdef AL_ETH_SUPPORT_DDP
+	struct al_eth_ext_metadata *ext_meta_data;
+#endif
+
+#ifdef AL_ETH_SUPPORT_MACSEC
 	/** MacSec */
 	uint8_t macsec_secure_channel:6;  /**< index of point-to-point secure channel */
 	uint8_t macsec_association_number:2; /**< used for hot-swap of SAs (crypto parameters) */
@@ -328,6 +390,9 @@ struct al_eth_pkt{
 	uint16_t macsec_rx_flags;		/**< see flags description in al_hal_eth_macsec.h, MACSEC_RX_FLAGS_* */
 	al_bool macsec_encrypt;
 	al_bool macsec_sign;
+#endif
+	uint8_t num_of_bufs;
+	struct al_buf	bufs[AL_ETH_PKT_MAX_BUFS];
 };
 
 struct al_ec_regs;
@@ -536,6 +601,7 @@ enum al_eth_ref_clk_freq {
 	AL_ETH_REF_FREQ_187_5_MHZ	= 1,
 	AL_ETH_REF_FREQ_250_MHZ		= 2,
 	AL_ETH_REF_FREQ_500_MHZ		= 3,
+	AL_ETH_REF_FREQ_428_MHZ         = 4,
 };
 
 /**
@@ -659,14 +725,40 @@ int al_eth_tso_mss_config(struct al_hal_eth_adapter *adapter, uint8_t idx, uint3
  *
  * @param adapter pointer to the private structure
  * @param lro_sel select LRO context or l4 offset
+ * @param l4_offset_sel select l4 offset source
  * @param l4_sel  select the l4 checksum result
  * @param l3_sel  select the l3 checksum result
+ * @param l3_proto_sel select the l3 protocol index source
+ * @param l4_proto_sel select the l4 protocol index source
+ * @param frag_sel select the frag indication source
  */
 void al_eth_rx_desc_config(
 			struct al_hal_eth_adapter *adapter,
 			enum al_eth_rx_desc_lro_context_val_res lro_sel,
+			enum al_eth_rx_desc_l4_offset_sel l4_offset_sel,
+			enum al_eth_rx_desc_l3_offset_sel l3_offset_sel,
 			enum al_eth_rx_desc_l4_chk_res_sel l4_sel,
-			enum al_eth_rx_desc_l3_chk_res_sel l3_sel);
+			enum al_eth_rx_desc_l3_chk_res_sel l3_sel,
+			enum al_eth_rx_desc_l3_proto_idx_sel l3_proto_sel,
+			enum al_eth_rx_desc_l4_proto_idx_sel l4_proto_sel,
+			enum al_eth_rx_desc_frag_sel frag_sel);
+
+/**
+ * Configure RX header split
+ *
+ * @param adapter pointer to the private structure
+ * @param enable header split when AL_TRUE
+ * @param header_split_len length in bytes of the header split, this value used when
+ * CTRL TABLE header split len select is set to
+ * AL_ETH_CTRL_TABLE_HDR_SPLIT_LEN_SEL_REG, in this case the controller will
+ * store the first header_split_len bytes into buf2, then the rest (if any) into buf1.
+ * when CTRL_TABLE header split len select set to other value, then the header_len
+ * determined according to the parser, and the header_split_len parameter is not
+ * used.
+ *
+ * return 0 on success. otherwise on failure.
+ */
+int al_eth_rx_header_split_config(struct al_hal_eth_adapter *adapter, al_bool enable, uint32_t header_len);
 
 /**
  * add buffer to receive queue
@@ -708,8 +800,72 @@ void al_eth_rx_buffer_action(struct al_udma_q *rx_dma_q,
  */
  uint32_t al_eth_pkt_rx(struct al_udma_q *rx_dma_q, struct al_eth_pkt *pkt);
 
+/* RX parser table */
+struct al_eth_epe_p_reg_entry {
+	uint32_t data;
+	uint32_t mask;
+	uint32_t ctrl;
+};
+
+struct al_eth_epe_control_entry {
+	uint32_t data[6];
+};
+
+/**
+ * update rx parser entry
+ *
+ * @param adapter pointer to the private structure
+ * @param idx the protocol index to update
+ * @param reg_entry contents of parser register entry
+ * @param control entry contents of control table entry
+ *
+ * @return 0 on success. otherwise on failure.
+ */
+int al_eth_rx_parser_entry_update(struct al_hal_eth_adapter *adapter, uint32_t idx,
+		struct al_eth_epe_p_reg_entry *reg_entry,
+		struct al_eth_epe_control_entry *control_entry);
+
 /* Flow Steering and filtering */
-int al_eth_thash_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint32_t entry);
+int al_eth_thash_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint8_t udma, uint32_t queue);
+
+/* FSM table bits */
+/** FSM table has 7 bits input address:
+ *  bits[2:0] are the outer packet's type (IPv4, TCP...)
+ *  bits[5:3] are the inner packet's type
+ *  bit[6] is set when packet is tunneled.
+ *
+ * The output of each entry:
+ *  bits[1:0] - input selection: selects the input for the thash (2/4 tuple, inner/outer)
+ *  bit[2] - selects whether to use thash output, or default values for the queue and udma
+ *  bits[6:3] default UDMA mask: the UDMAs to select when bit 2 above was unset
+ *  bits[9:5] defualt queue: the queue index to select when bit 2 above was unset
+ */
+
+#define AL_ETH_FSM_ENTRY_IPV4_TCP	   0
+#define AL_ETH_FSM_ENTRY_IPV4_UDP	   1
+#define AL_ETH_FSM_ENTRY_IPV6_TCP	   2
+#define AL_ETH_FSM_ENTRY_IPV6_UDP	   3
+#define AL_ETH_FSM_ENTRY_IPV6_NO_UDP_TCP   4
+#define AL_ETH_FSM_ENTRY_IPV4_NO_UDP_TCP   5
+#define AL_ETH_FSM_ENTRY_IPV4_FRAGMENTED   6
+#define AL_ETH_FSM_ENTRY_NOT_IP		   7
+
+#define AL_ETH_FSM_ENTRY_OUTER(idx)	   ((idx) & 7)
+#define AL_ETH_FSM_ENTRY_INNER(idx)	   (((idx) >> 3) & 7)
+#define AL_ETH_FSM_ENTRY_TUNNELED(idx)	   (((idx) >> 6) & 1)
+
+/* FSM DATA format */
+#define AL_ETH_FSM_DATA_OUTER_2_TUPLE	0
+#define AL_ETH_FSM_DATA_OUTER_4_TUPLE	1
+#define AL_ETH_FSM_DATA_INNER_2_TUPLE	2
+#define AL_ETH_FSM_DATA_INNER_4_TUPLE	3
+
+#define AL_ETH_FSM_DATA_HASH_SEL	(1 << 2)
+
+#define AL_ETH_FSM_DATA_DEFAULT_Q_SHIFT		5
+#define AL_ETH_FSM_DATA_DEFAULT_UDMA_SHIFT	3
+
+/* set fsm table entry */
 int al_eth_fsm_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint32_t entry);
 
 enum AL_ETH_FWD_CTRL_IDX_VLAN_TABLE_OUT {
@@ -813,11 +969,22 @@ enum AL_ETH_CTRL_TABLE_UDMA_SEL {
 	AL_ETH_CTRL_TABLE_UDMA_SEL_VAL_0		= 15,
 };
 
+enum AL_ETH_CTRL_TABLE_HDR_SPLIT_LEN_SEL {
+	AL_ETH_CTRL_TABLE_HDR_SPLIT_LEN_SEL_0		= 0,
+	AL_ETH_CTRL_TABLE_HDR_SPLIT_LEN_SEL_REG		= 1, /**< select header len from the hdr_split register (set by al_eth_rx_header_split_config())*/
+	AL_ETH_CTRL_TABLE_HDR_SPLIT_LEN_SEL_OUTER_L3_OFFSET = 2,
+	AL_ETH_CTRL_TABLE_HDR_SPLIT_LEN_SEL_OUTER_L4_OFFSET = 3,
+	AL_ETH_CTRL_TABLE_HDR_SPLIT_LEN_SEL_TUNNEL_START_OFFSET = 4,
+	AL_ETH_CTRL_TABLE_HDR_SPLIT_LEN_SEL_INNER_L3_OFFSET = 5,
+	AL_ETH_CTRL_TABLE_HDR_SPLIT_LEN_SEL_INNER_L4_OFFSET = 6,
+};
+
 struct al_eth_fwd_ctrl_table_entry {
 	enum AL_ETH_CTRL_TABLE_PRIO_SEL		prio_sel;
 	enum AL_ETH_CTRL_TABLE_QUEUE_SEL_1	queue_sel_1; /**< queue id source */
 	enum AL_ETH_CTRL_TABLE_QUEUE_SEL_2	queue_sel_2; /**< mix queue id with priority */
 	enum AL_ETH_CTRL_TABLE_UDMA_SEL		udma_sel;
+	enum AL_ETH_CTRL_TABLE_HDR_SPLIT_LEN_SEL hdr_split_len_sel;
 	al_bool 	filter; /**< set to AL_TRUE to enable filtering */
 };
 /**
@@ -871,7 +1038,7 @@ struct al_eth_fwd_mac_table_entry {
 	al_bool		rx_valid;
 	uint8_t		udma_mask; /**< target udma */
 	uint8_t		qid; /**< target queue */
-	al_bool 	filter; /**< set to AL_TRUE to enable filtering */
+	al_bool		filter; /**< set to AL_TRUE to enable filtering */
 };
 
 /**
@@ -1052,6 +1219,8 @@ int al_eth_fwd_default_priority_config(struct al_hal_eth_adapter *adapter, uint3
 #define AL_ETH_RFW_FILTER_BC                 (1 << 4)
 /* filter all multicast */
 #define AL_ETH_RFW_FILTER_MC                 (1 << 5)
+/* filter packet based on parser drop */
+#define AL_ETH_RFW_FILTER_PARSE              (1 << 6)
 /* filter packet based on VLAN table output */
 #define AL_ETH_RFW_FILTER_VLAN_VID           (1 << 7)
 /* filter packet based on control table output */
@@ -1115,6 +1284,7 @@ struct al_eth_eee_params{
 	uint8_t enable;
 	uint32_t tx_eee_timer; /**< time in cycles the interface delays prior to entering eee state */
 	uint32_t min_interval; /**< minimum interval in cycles between two eee states */
+	uint32_t stop_cnt; /**< time in cycles to stop Tx mac i/f after getting out of eee state */
 };
 
 /**
@@ -1422,28 +1592,78 @@ int al_eth_led_set(struct al_hal_eth_adapter *adapter, al_bool link_is_up);
 /* get statistics */
 
 struct al_eth_mac_stats{
+	/* sum the data and padding octets (i.e. without header and FCS) received with a valid frame. */
 	uint64_t aOctetsReceivedOK;
+	/* sum of Payload and padding octets of frames transmitted without error*/
 	uint64_t aOctetsTransmittedOK;
+	/* total number of packets received. Good and bad packets */
 	uint32_t etherStatsPkts;
+	/* number of received unicast packets */
 	uint32_t ifInUcastPkts;
+	/* number of received multicast packets */
 	uint32_t ifInMulticastPkts;
+	/* number of received broadcast packets */
 	uint32_t ifInBroadcastPkts;
+	/* Number of frames received with FIFO Overflow, CRC, Payload Length, Jabber and Oversized, Alignment or PHY/PCS error indication */
 	uint32_t ifInErrors;
 
+	/* number of transmitted unicast packets */
 	uint32_t ifOutUcastPkts;
+	/* number of transmitted multicast packets */
 	uint32_t ifOutMulticastPkts;
+	/* number of transmitted broadcast packets */
 	uint32_t ifOutBroadcastPkts;
+	/* number of frames transmitted with FIFO Overflow, FIFO Underflow or Controller indicated error */
 	uint32_t ifOutErrors;
 
+	/* number of Frame received without error (Including Pause Frames). */
 	uint32_t aFramesReceivedOK;
+	/* number of Frames transmitter without error (Including Pause Frames) */
 	uint32_t aFramesTransmittedOK;
+	/* number of packets received with less than 64 octets */
 	uint32_t etherStatsUndersizePkts;
+	/* Too short frames with CRC error, available only for RGMII and 1G Serial modes */
 	uint32_t etherStatsFragments;
+	/* Too long frames with CRC error */
 	uint32_t etherStatsJabbers;
+	/* packet that exceeds the valid maximum programmed frame length */
 	uint32_t etherStatsOversizePkts;
+	/* number of frames received with a CRC error */
 	uint32_t aFrameCheckSequenceErrors;
+	/* number of frames received with alignment error */
 	uint32_t aAlignmentErrors;
+	/* number of dropped packets due to FIFO overflow */
 	uint32_t etherStatsDropEvents;
+	/* number of transmitted pause frames. */
+	uint32_t aPAUSEMACCtrlFramesTransmitted;
+	/* number of received pause frames. */
+	uint32_t aPAUSEMACCtrlFramesReceived;
+	/* frame received exceeded the maximum length programmed with register FRM_LGTH, available only for 10G modes */
+	uint32_t aFrameTooLongErrors;
+	/* received frame with bad length/type (between 46 and 0x600 or less
+	 * than 46 for packets longer than 64), available only for 10G modes */
+	uint32_t aInRangeLengthErrors;
+	/* Valid VLAN tagged frames transmitted */
+	uint32_t VLANTransmittedOK;
+	/* Valid VLAN tagged frames received */
+	uint32_t VLANReceivedOK;
+	/* Total number of octets received. Good and bad packets */
+	uint32_t etherStatsOctets;
+
+	/* packets of 64 octets length is received (good and bad frames are counted) */
+	uint32_t etherStatsPkts64Octets;
+	/* Frames (good and bad) with 65 to 127 octets */
+	uint32_t etherStatsPkts65to127Octets;
+	/* Frames (good and bad) with 128 to 255 octets */
+	uint32_t etherStatsPkts128to255Octets;
+	/* Frames (good and bad) with 256 to 511 octets */
+	uint32_t etherStatsPkts256to511Octets;
+	/* Frames (good and bad) with 512 to 1023 octets */
+	uint32_t etherStatsPkts512to1023Octets;
+	/* Frames (good and bad) with 1024 to 1518 octets */
+	uint32_t etherStatsPkts1024to1518Octets;
+	/* frames with 1519 bytes to the maximum length programmed in the register FRAME_LENGTH. */
+	uint32_t etherStatsPkts1519toX;
 
 	uint32_t eee_in;
 	uint32_t eee_out;
@@ -1457,6 +1677,157 @@ struct al_eth_mac_stats{
  * @return return 0 on success. otherwise on failure.
  */
 int al_eth_mac_stats_get(struct al_hal_eth_adapter *adapter, struct al_eth_mac_stats *stats);
+
+struct al_eth_ec_stats{
+	/* Rx Frequency adjust FIFO input  packets */
+	uint32_t faf_in_rx_pkt;
+	/* Rx Frequency adjust FIFO input  short error packets */
+	uint32_t faf_in_rx_short;
+	/* Rx Frequency adjust FIFO input  long error packets */
+	uint32_t faf_in_rx_long;
+	/* Rx Frequency adjust FIFO output  packets */
+	uint32_t faf_out_rx_pkt;
+	/* Rx Frequency adjust FIFO output  short error packets */
+	uint32_t faf_out_rx_short;
+	/* Rx Frequency adjust FIFO output  long error packets */
+	uint32_t faf_out_rx_long;
+	/* Rx Frequency adjust FIFO output  drop packets */
+	uint32_t faf_out_drop;
+	/* Number of packets written into the Rx FIFO (without FIFO error indication) */
+	uint32_t rxf_in_rx_pkt;
+	/* Number of error packets written into the Rx FIFO (with FIFO error indication, */
+	/* FIFO full indication during packet reception) */
+	uint32_t rxf_in_fifo_err;
+	/* Number of packets read from Rx FIFO 1 */
+	uint32_t lbf_in_rx_pkt;
+	/* Number of packets read from Rx FIFO 2 (loopback FIFO) */
+	uint32_t lbf_in_fifo_err;
+	/* Rx FIFO output drop packets from FIFO 1 */
+	uint32_t rxf_out_rx_1_pkt;
+	/* Rx FIFO output drop packets from FIFO 2 (loop back) */
+	uint32_t rxf_out_rx_2_pkt;
+	/* Rx FIFO output drop packets from FIFO 1 */
+	uint32_t rxf_out_drop_1_pkt;
+	/* Rx FIFO output drop packets from FIFO 2 (loop back) */
+	uint32_t rxf_out_drop_2_pkt;
+	/* Rx Parser 1, input packet counter */
+	uint32_t rpe_1_in_rx_pkt;
+	/* Rx Parser 1, output packet counter */
+	uint32_t rpe_1_out_rx_pkt;
+	/* Rx Parser 2, input packet counter */
+	uint32_t rpe_2_in_rx_pkt;
+	/* Rx Parser 2, output packet counter */
+	uint32_t rpe_2_out_rx_pkt;
+	/* Rx Parser 3 (MACsec), input packet counter */
+	uint32_t rpe_3_in_rx_pkt;
+	/* Rx Parser 3 (MACsec), output packet counter */
+	uint32_t rpe_3_out_rx_pkt;
+	/* Tx parser, input packet counter */
+	uint32_t tpe_in_tx_pkt;
+	/* Tx parser, output packet counter */
+	uint32_t tpe_out_tx_pkt;
+	/* Tx packet modification, input packet counter */
+	uint32_t tpm_tx_pkt;
+	/* Tx forwarding input packet counter */
+	uint32_t tfw_in_tx_pkt;
+	/* Tx forwarding input packet counter */
+	uint32_t tfw_out_tx_pkt;
+	/* Rx forwarding input packet counter */
+	uint32_t rfw_in_rx_pkt;
+	/* Rx Forwarding, packet with VLAN command drop indication */
+	uint32_t rfw_in_vlan_drop;
+	/* Rx Forwarding, packets with parse drop indication */
+	uint32_t rfw_in_parse_drop;
+	/* Rx Forwarding, multicast packets */
+	uint32_t rfw_in_mc;
+	/* Rx Forwarding, broadcast packets */
+	uint32_t rfw_in_bc;
+	/* Rx Forwarding, tagged packets */
+	uint32_t rfw_in_vlan_exist;
+	/* Rx Forwarding, untagged packets */
+	uint32_t rfw_in_vlan_nexist;
+	/* Rx Forwarding, packets with MAC address drop indication (from the MAC address table) */
+	uint32_t rfw_in_mac_drop;
+	/* Rx Forwarding, packets with undetected MAC address */
+	uint32_t rfw_in_mac_ndet_drop;
+	/* Rx Forwarding, packets with drop indication from the control table */
+	uint32_t rfw_in_ctrl_drop;
+	/* Rx Forwarding, packets with L3_protocol_index drop indication */
+	uint32_t rfw_in_prot_i_drop;
+	/* EEE, number of times the system went into EEE state */
+	uint32_t eee_in;
+};
+
+/**
+ * get ec statistics
+ * @param adapter pointer to the private structure.
+ * @param stats pointer to structure that will be filled with statistics.
+ *
+ * @return return 0 on success. otherwise on failure.
+ */
+int al_eth_ec_stats_get(struct al_hal_eth_adapter *adapter, struct al_eth_ec_stats *stats);
+
+struct al_eth_ec_stat_udma{
+	/* Rx forwarding output packet counter */
+	uint32_t rfw_out_rx_pkt;
+	/* Rx forwarding output drop packet counter */
+	uint32_t rfw_out_drop;
+	/* Multi-stream write, number of Rx packets */
+	uint32_t msw_in_rx_pkt;
+	/* Multi-stream write, number of dropped packets at SOP,  Q full indication */
+	uint32_t msw_drop_q_full;
+	/* Multi-stream write, number of dropped packets at SOP */
+	uint32_t msw_drop_sop;
+	/* Multi-stream write, number of dropped packets at EOP, */
+	/*EOP was written with error indication (not all packet data was written) */
+	uint32_t msw_drop_eop;
+	/* Multi-stream write, number of packets written to the stream FIFO with EOP and without packet loss */
+	uint32_t msw_wr_eop;
+	/* Multi-stream write, number of packets read from the FIFO into the stream */
+	uint32_t msw_out_rx_pkt;
+	/* Number of transmitted packets without TSO enabled */
+	uint32_t tso_no_tso_pkt;
+	/* Number of transmitted packets with TSO enabled */
+	uint32_t tso_tso_pkt;
+	/* Number of TSO segments that were generated */
+	uint32_t tso_seg_pkt;
+	/* Number of TSO segments that required padding */
+	uint32_t tso_pad_pkt;
+	/* Tx Packet modification, MAC SA spoof error */
+	uint32_t tpm_tx_spoof;
+	/* Tx MAC interface, input packet counter */
+	uint32_t tmi_in_tx_pkt;
+	/* Tx MAC interface, number of packets forwarded to the MAC */
+	uint32_t tmi_out_to_mac;
+	/* Tx MAC interface, number of packets forwarded to the Rx data path */
+	uint32_t tmi_out_to_rx;
+	/* Tx MAC interface, number of transmitted bytes */
+	uint32_t tx_q0_bytes;
+	/* Tx MAC interface, number of transmitted bytes */
+	uint32_t tx_q1_bytes;
+	/* Tx MAC interface, number of transmitted bytes */
+	uint32_t tx_q2_bytes;
+	/* Tx MAC interface, number of transmitted bytes */
+	uint32_t tx_q3_bytes;
+	/* Tx MAC interface, number of transmitted packets */
+	uint32_t tx_q0_pkts;
+	/* Tx MAC interface, number of transmitted packets */
+	uint32_t tx_q1_pkts;
+	/* Tx MAC interface, number of transmitted packets */
+	uint32_t tx_q2_pkts;
+	/* Tx MAC interface, number of transmitted packets */
+	uint32_t tx_q3_pkts;
+};
+
+/**
+ * get per_udma statistics
+ * @param adapter pointer to the private structure.
+ * @param idx udma_id value
+ * @param stats pointer to structure that will be filled with statistics.
+ *
+ * @return return 0 on success. otherwise on failure.
+ */
+int al_eth_ec_stat_udma_get(struct al_hal_eth_adapter *adapter, uint8_t idx, struct al_eth_ec_stat_udma *stats);
 
 /* trafic control */
 
@@ -1477,6 +1848,27 @@ int al_eth_flr_rmn(int (* pci_read_config_u32)(void *handle, int where, uint32_t
 		   void *handle,
 		   void __iomem	*mac_base);
 
+/**
+ * perform Function Level Reset RMN but restore registers that contain board specific data
+ *
+ * the data that save and restored is the board params and mac addresses
+ *
+ * @param pci_read_config_u32 pointer to function that reads register from pci header
+ * @param pci_write_config_u32 pointer to function that writes register from pci header
+ * @param handle pointer passes to the above functions as first parameter
+ * @param mac_base base address of the MAC registers
+ * @param ec_base base address of the Ethernet Controller registers
+ * @param mac_addresses_num number of mac addresses to restore
+ *
+ * @return 0.
+ */
+int al_eth_flr_rmn_restore_params(int (* pci_read_config_u32)(void *handle, int where, uint32_t *val),
+		int (* pci_write_config_u32)(void *handle, int where, uint32_t val),
+		void *handle,
+		void __iomem	*mac_base,
+		void __iomem	*ec_base,
+		int	mac_addresses_num);
+
 /* board specific information (media type, phy address, etc.. */
 
 enum al_eth_board_media_type {
@@ -1486,6 +1878,8 @@ enum al_eth_board_media_type {
 	AL_ETH_BOARD_MEDIA_TYPE_SGMII			= 3,
 	AL_ETH_BOARD_MEDIA_TYPE_1000BASE_X		= 4,
 	AL_ETH_BOARD_MEDIA_TYPE_AUTO_DETECT_AUTO_SPEED	= 5,
+	AL_ETH_BOARD_MEDIA_TYPE_SGMII_2_5G		= 6,
+	AL_ETH_BOARD_MEDIA_TYPE_NBASE_T			= 7,
 };
 
 enum al_eth_board_mdio_freq {
@@ -1634,7 +2028,7 @@ struct al_eth_wol_params {
 			    example: for ip = 192.168.1.2
 			       ipv4[0]=2, ipv4[1]=1, ipv4[2]=168, ipv4[3]=192 */
 	uint8_t *ipv6; /** 16 bytes array of the ipv6 to use.
-		           example: ip = 2607:f0d0:1002:0051:0000:0000:5231:1234
+			   example: ip = 2607:f0d0:1002:0051:0000:0000:5231:1234
 			       ipv6[0]=34, ipv6[1]=12, ipv6[2]=31 .. */
 	uint16_t ethr_type1; /**< first ethertype to use */
 	uint16_t ethr_type2; /**< secound ethertype to use */
@@ -1670,6 +2064,219 @@ int al_eth_wol_enable(
  */
 int al_eth_wol_disable(
 		struct al_hal_eth_adapter *adapter);
+
+/**
+ * Configure tx fwd vlan table entry
+ *
+ * @param adapter pointer to the private structure
+ * @param idx the entry index within the vlan table. The HW uses the vlan id
+ * field of the packet when accessing this table.
+ * @param udma_mask vlan table value that indicates that the packet should be forward back to
+ * the udmas, through the Rx path (udma_mask is one-hot representation)
+ * @param fwd_to_mac vlan table value that indicates that the packet should be forward to mac
+ *
+ * @return 0 on success. otherwise on failure.
+ */
+int al_eth_tx_fwd_vid_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint8_t udma_mask, al_bool fwd_to_mac);
+
+/** Tx Generic protocol detect Cam compare table entry  */
+struct al_eth_tx_gpd_cam_entry {
+	enum AL_ETH_PROTO_ID l3_proto_idx;
+	enum AL_ETH_PROTO_ID l4_proto_idx;
+	enum AL_ETH_TX_TUNNEL_MODE tunnel_control;
+	uint8_t source_vlan_count:2;
+	uint8_t tx_gpd_cam_ctrl:1;
+	uint8_t l3_proto_idx_mask:5;
+	uint8_t l4_proto_idx_mask:5;
+	uint8_t tunnel_control_mask:3;
+	uint8_t source_vlan_count_mask:2;
+};
+
+/** Rx Generic protocol detect Cam compare table entry  */
+struct al_eth_rx_gpd_cam_entry {
+	enum AL_ETH_PROTO_ID outer_l3_proto_idx;
+	enum AL_ETH_PROTO_ID outer_l4_proto_idx;
+	enum AL_ETH_PROTO_ID inner_l3_proto_idx;
+	enum AL_ETH_PROTO_ID inner_l4_proto_idx;
+	uint8_t parse_ctrl;
+	uint8_t outer_l3_len;
+	uint8_t l3_priority;
+	uint8_t l4_dst_port_lsb;
+	uint8_t rx_gpd_cam_ctrl:1;
+	uint8_t outer_l3_proto_idx_mask:5;
+	uint8_t outer_l4_proto_idx_mask:5;
+	uint8_t inner_l3_proto_idx_mask:5;
+	uint8_t inner_l4_proto_idx_mask:5;
+	uint8_t parse_ctrl_mask;
+	uint8_t outer_l3_len_mask;
+	uint8_t l3_priority_mask;
+	uint8_t l4_dst_port_lsb_mask;
+};
+
+enum AL_ETH_ALU_OPCODE {
+	AL_ALU_FWD_A					= 0,
+	AL_ALU_ARITHMETIC_ADD				= 1,
+	AL_ALU_ARITHMETIC_SUBTRACT			= 2,
+	AL_ALU_BITWISE_AND				= 3,
+	AL_ALU_BITWISE_OR				= 4,
+	AL_ALU_SHIFT_RIGHT_A_BY_B			= 5,
+	AL_ALU_SHIFT_LEFT_A_BY_B			= 6,
+	AL_ALU_BITWISE_XOR				= 7,
+	AL_ALU_FWD_INV_A				= 16,
+	AL_ALU_ARITHMETIC_ADD_INV_A_AND_B		= 17,
+	AL_ALU_ARITHMETIC_SUBTRACT_INV_A_AND_B		= 18,
+	AL_ALU_BITWISE_AND_INV_A_AND_B			= 19,
+	AL_ALU_BITWISE_OR_INV_A_AND_B			= 20,
+	AL_ALU_SHIFT_RIGHT_INV_A_BY_B			= 21,
+	AL_ALU_SHIFT_LEFT_INV_A_BY_B			= 22,
+	AL_ALU_BITWISE_XOR_INV_A_AND_B			= 23,
+	AL_ALU_ARITHMETIC_ADD_A_AND_INV_B		= 33,
+	AL_ALU_ARITHMETIC_SUBTRACT_A_AND_INV_B		= 34,
+	AL_ALU_BITWISE_AND_A_AND_INV_B			= 35,
+	AL_ALU_BITWISE_OR_A_AND_INV_B			= 36,
+	AL_ALU_SHIFT_RIGHT_A_BY_INV_B			= 37,
+	AL_ALU_SHIFT_LEFT_A_BY_INV_B			= 38,
+	AL_ALU_BITWISE_XOR_A_AND_INV_B			= 39,
+	AL_ALU_ARITHMETIC_ADD_INV_A_AND_INV_B		= 49,
+	AL_ALU_ARITHMETIC_SUBTRACT_INV_A_AND		= 50,
+	AL_ALU_BITWISE_AND_INV_A_AND_INV_B		= 51,
+	AL_ALU_BITWISE_OR_INV_A_AND_INV_B		= 52,
+	AL_ALU_SHIFT_RIGHT_INV_A_BY_INV_B		= 53,
+	AL_ALU_SHIFT_LEFT_INV_A_BY_INV_B		= 54,
+	AL_ALU_BITWISE_XOR_INV_A_AND_INV_B		= 55
+};
+
+enum AL_ETH_TX_GCP_ALU_OPSEL {
+	AL_ETH_TX_GCP_ALU_L3_OFFSET			= 0,
+	AL_ETH_TX_GCP_ALU_OUTER_L3_OFFSET		= 1,
+	AL_ETH_TX_GCP_ALU_L3_LEN			= 2,
+	AL_ETH_TX_GCP_ALU_OUTER_L3_LEN			= 3,
+	AL_ETH_TX_GCP_ALU_L4_OFFSET			= 4,
+	AL_ETH_TX_GCP_ALU_L4_LEN			= 5,
+	AL_ETH_TX_GCP_ALU_TABLE_VAL			= 10
+};
+
+enum AL_ETH_RX_GCP_ALU_OPSEL {
+	AL_ETH_RX_GCP_ALU_OUTER_L3_OFFSET		= 0,
+	AL_ETH_RX_GCP_ALU_INNER_L3_OFFSET		= 1,
+	AL_ETH_RX_GCP_ALU_OUTER_L4_OFFSET		= 2,
+	AL_ETH_RX_GCP_ALU_INNER_L4_OFFSET		= 3,
+	AL_ETH_RX_GCP_ALU_OUTER_L3_HDR_LEN_LAT		= 4,
+	AL_ETH_RX_GCP_ALU_INNER_L3_HDR_LEN_LAT		= 5,
+	AL_ETH_RX_GCP_ALU_OUTER_L3_HDR_LEN_SEL		= 6,
+	AL_ETH_RX_GCP_ALU_INNER_L3_HDR_LEN_SEL		= 7,
+	AL_ETH_RX_GCP_ALU_PARSE_RESULT_VECTOR_OFFSET_1	= 8,
+	AL_ETH_RX_GCP_ALU_PARSE_RESULT_VECTOR_OFFSET_2	= 9,
+	AL_ETH_RX_GCP_ALU_TABLE_VAL			= 10
+};
+
+/** Tx Generic crc prameters table entry  */
+
+struct al_eth_tx_gcp_table_entry {
+	uint8_t poly_sel:1;
+	uint8_t crc32_bit_comp:1;
+	uint8_t crc32_bit_swap:1;
+	uint8_t crc32_byte_swap:1;
+	uint8_t data_bit_swap:1;
+	uint8_t data_byte_swap:1;
+	uint8_t trail_size:4;
+	uint8_t head_size:8;
+	uint8_t head_calc:1;
+	uint8_t mask_polarity:1;
+	enum AL_ETH_ALU_OPCODE tx_alu_opcode_1;
+	enum AL_ETH_ALU_OPCODE tx_alu_opcode_2;
+	enum AL_ETH_ALU_OPCODE tx_alu_opcode_3;
+	enum AL_ETH_TX_GCP_ALU_OPSEL tx_alu_opsel_1;
+	enum AL_ETH_TX_GCP_ALU_OPSEL tx_alu_opsel_2;
+	enum AL_ETH_TX_GCP_ALU_OPSEL tx_alu_opsel_3;
+	enum AL_ETH_TX_GCP_ALU_OPSEL tx_alu_opsel_4;
+	uint32_t gcp_mask[6];
+	uint32_t crc_init;
+	uint8_t gcp_table_res:7;
+	uint16_t alu_val:9;
+};
+
+/** Rx Generic crc prameters table entry  */
+
+struct al_eth_rx_gcp_table_entry {
+	uint8_t poly_sel:1;
+	uint8_t crc32_bit_comp:1;
+	uint8_t crc32_bit_swap:1;
+	uint8_t crc32_byte_swap:1;
+	uint8_t data_bit_swap:1;
+	uint8_t data_byte_swap:1;
+	uint8_t trail_size:4;
+	uint8_t head_size:8;
+	uint8_t head_calc:1;
+	uint8_t mask_polarity:1;
+	enum AL_ETH_ALU_OPCODE rx_alu_opcode_1;
+	enum AL_ETH_ALU_OPCODE rx_alu_opcode_2;
+	enum AL_ETH_ALU_OPCODE rx_alu_opcode_3;
+	enum AL_ETH_RX_GCP_ALU_OPSEL rx_alu_opsel_1;
+	enum AL_ETH_RX_GCP_ALU_OPSEL rx_alu_opsel_2;
+	enum AL_ETH_RX_GCP_ALU_OPSEL rx_alu_opsel_3;
+	enum AL_ETH_RX_GCP_ALU_OPSEL rx_alu_opsel_4;
+	uint32_t gcp_mask[6];
+	uint32_t crc_init;
+	uint32_t gcp_table_res:27;
+	uint16_t alu_val:9;
+};
+
+/** Tx per_protocol_number crc & l3_checksum & l4_checksum command table entry  */
+
+struct al_eth_tx_crc_chksum_replace_cmd_for_protocol_num_entry {
+        al_bool crc_en_00; /*from Tx_buffer_descriptor: enable_l4_checksum is 0 ,enable_l3_checksum is 0 */
+        al_bool crc_en_01; /*from Tx_buffer_descriptor: enable_l4_checksum is 0 ,enable_l3_checksum is 1 */
+        al_bool crc_en_10; /*from Tx_buffer_descriptor: enable_l4_checksum is 1 ,enable_l3_checksum is 0 */
+        al_bool crc_en_11; /*from Tx_buffer_descriptor: enable_l4_checksum is 1 ,enable_l3_checksum is 1 */
+        al_bool l4_csum_en_00; /*from Tx_buffer_descriptor: enable_l4_checksum is 0 ,enable_l3_checksum is 0 */
+        al_bool l4_csum_en_01; /*from Tx_buffer_descriptor: enable_l4_checksum is 0 ,enable_l3_checksum is 1 */
+        al_bool l4_csum_en_10; /*from Tx_buffer_descriptor: enable_l4_checksum is 1 ,enable_l3_checksum is 0 */
+        al_bool l4_csum_en_11; /*from Tx_buffer_descriptor: enable_l4_checksum is 1 ,enable_l3_checksum is 1 */
+        al_bool l3_csum_en_00; /*from Tx_buffer_descriptor: enable_l4_checksum is 0 ,enable_l3_checksum is 0 */
+        al_bool l3_csum_en_01; /*from Tx_buffer_descriptor: enable_l4_checksum is 0 ,enable_l3_checksum is 1 */
+        al_bool l3_csum_en_10; /*from Tx_buffer_descriptor: enable_l4_checksum is 1 ,enable_l3_checksum is 0 */
+        al_bool l3_csum_en_11; /*from Tx_buffer_descriptor: enable_l4_checksum is 1 ,enable_l3_checksum is 1 */
+};
+
+/**
+ * Configure tx_generic_crc_entry
+ *
+ * @param adapter pointer to the private structure
+ * @param idx the entry index
+ * @param tx_gpd_entry entry data for the Tx protocol detect Cam compare table
+ * @param tx_gcp_entry entry data for the Tx Generic crc prameters table
+ *
+ * @return 0 on success. otherwise on failure.
+ *
+ */
+int al_eth_tx_generic_crc_entry_set(struct al_hal_eth_adapter *adapter, uint32_t idx,
+		struct al_eth_tx_gpd_cam_entry *tx_gpd_entry,
+		struct al_eth_tx_gcp_table_entry *tx_gcp_entry,
+		struct al_eth_tx_crc_chksum_replace_cmd_for_protocol_num_entry *tx_replace_entry);
+
+/**
+ * Configure rx_generic_crc_entry
+ *
+ * @param adapter pointer to the private structure
+ * @param idx the entry index
+ * @param rx_gpd_entry entry data for the Tx protocol detect Cam compare table
+ * @param rx_gcp_entry entry data for the Tx Generic crc prameters table
+ *
+ * @return 0 on success. otherwise on failure.
+ *
+ */
+int al_eth_rx_generic_crc_entry_set(struct al_hal_eth_adapter *adapter, uint32_t idx,
+		struct al_eth_rx_gpd_cam_entry *rx_gpd_entry,
+		struct al_eth_rx_gcp_table_entry *rx_gcp_entry);
+
+/**
+ * Configure generic_crc
+ *
+ * @param adapter pointer to the private structure
+ *
+ */
+int al_eth_generic_crc_init(struct al_hal_eth_adapter *adapter);
 
 #ifdef __cplusplus
 }

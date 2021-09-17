@@ -5,7 +5,7 @@ This file may be licensed under the terms of the Annapurna Labs Commercial
 License Agreement.
 
 Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
+Public License V2 as published by the Free Software Foundation and can be
 found at http://www.gnu.org/licenses/gpl-2.0.html
 
 Alternatively, redistribution and use in source and binary forms, with or
@@ -84,6 +84,7 @@ struct al_m2m_udma_params {
 	char *name; /** the upper layer must keep the string area */
 	uint8_t num_of_queues;/** number of queues */
 	uint8_t max_m2s_descs_per_pkt; /** maximum descriptors per m2s packet */
+	uint8_t max_s2m_descs_per_pkt; /** maximum descriptors per s2m packet */
 };
 
 /**

@@ -32,6 +32,16 @@ const struct ata_port_operations sata_pmp_port_ops = {
 	.error_handler		= sata_pmp_error_handler,
 };
 
+#if defined (CONFIG_SYNO_X64)
+#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+#include <linux/gpio.h>
+#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+
+#ifdef CONFIG_SYNO_ICH_GPIO_CTRL
+extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
+#endif /* CONFIG_SYNO_ICH_GPIO_CTRL */
+#endif /* CONFIG_SYNO_X64 */
+
 /**
  *	sata_pmp_read - read PMP register
  *	@link: link to read PMP register for
@@ -73,6 +83,16 @@ static unsigned int sata_pmp_read(struct ata_link *link, int reg, u32 *r_val)
 	*r_val = tf.nsect | tf.lbal << 8 | tf.lbam << 16 | tf.lbah << 24;
 	return 0;
 }
+
+#if defined(CONFIG_SYNO_X64)
+#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+#include <linux/gpio.h>
+#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#ifdef CONFIG_SYNO_ICH_GPIO_CTRL
+extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
+#endif /* CONFIG_SYNO_ICH_GPIO_CTRL */
+extern int grgPwrCtlPin[];
+#endif /*CONFIG_SYNO_X64 */
 
 /**
  *	sata_pmp_write - write PMP register
@@ -135,20 +155,68 @@ syno_pm_gpio_config(struct ata_port *ap)
 		/* 9705 SATA Blink rate*/
 		sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_SATA_BLINK_RATE, 0x2082082);
 
+		/* 9705 enable FIFO, the values are from Marvell application note */
+		sata_pmp_write(&(ap->link), 0x090, 0x00001F1F);
+		sata_pmp_write(&(ap->link), 0x091, 0xFFF0003A);
+
+		/* 9705 host port OOB upper bond, the values are from Marvell application note */
+		sata_pmp_write(&(ap->link), 0x248, 0x62D8);
 	}
 }
 
-/* 9705 TX Amp enhanced */
-static void
-syno_pm_9705_max_tx_amp(struct ata_port *ap)
+static inline int
+syno_pm_device_config_set(struct ata_port *ap, int pmp, int reg, u32 val)
 {
+	struct ata_link *pmp_link = NULL;
+	int iRet = -1;
+
+	if (!ap) {
+		goto END;
+	}
+	pmp_link = &(ap->pmp_link[pmp]);
+	if (!pmp_link) {
+		goto END;
+	}
+	iRet = sata_pmp_write(pmp_link, reg, val);
+
+END:
+	return iRet;
+}
+
+static inline void
+syno_pm_device_config(struct ata_port *ap)
+{
+	/* 9705 device port OOB upper bond, the values are from Marvell application note */
+	if (syno_pm_is_9705(sata_pmp_gscr_vendor(ap->link.device->gscr),
+				        sata_pmp_gscr_devid(ap->link.device->gscr))) {
+		syno_pm_device_config_set(ap, 0, 0x48, 0x62D8);
+		syno_pm_device_config_set(ap, 1, 0x48, 0x62D8);
+		syno_pm_device_config_set(ap, 2, 0x48, 0x62D8);
+		syno_pm_device_config_set(ap, 3, 0x48, 0x62D8);
+		syno_pm_device_config_set(ap, 4, 0x48, 0x62D8);
+	}
 	/* Set MV9705 register for Denlow DS3615xs */
 	if (syno_is_hw_version(HW_DS3615xs) ||
-		IS_SYNOLOGY_DX1215(ap->PMSynoUnique)){ // this modification applied to DX1215 with all modles
-			sata_pmp_write(&(ap->link), 0x091, 0xE7F);
-			sata_pmp_write(&(ap->link), 0x191, 0xE7F);
-			sata_pmp_write(&(ap->link), 0x291, 0xE7F);
-			sata_pmp_write(&(ap->link), 0x391, 0xE7F);
+			IS_SYNOLOGY_DX1215(ap->PMSynoUnique)) { // this modification applied to DX1215 with all modles
+		syno_pm_device_config_set(ap, 0, 0x91, 0xE7F);
+		syno_pm_device_config_set(ap, 1, 0x91, 0xE7F);
+		syno_pm_device_config_set(ap, 2, 0x91, 0xE7F);
+		syno_pm_device_config_set(ap, 3, 0x91, 0xE7F);
+		syno_pm_device_config_set(ap, 4, 0x91, 0xE7F);
+	}
+	if (IS_SYNOLOGY_RX1217(ap->PMSynoUnique)) {
+		if (0 == ap->PMSynoEMID) {
+			syno_pm_device_config_set(ap, 0, 0x91, 0xEFF);
+		} else if (1 == ap->PMSynoEMID) {
+			syno_pm_device_config_set(ap, 0, 0x91, 0xEFF);
+			syno_pm_device_config_set(ap, 1, 0x91, 0xE7F);
+		} else if (2 == ap->PMSynoEMID) {
+			syno_pm_device_config_set(ap, 1, 0x91, 0xE79);
+			syno_pm_device_config_set(ap, 2, 0x91, 0xF7F);
+		} else if (3 == ap->PMSynoEMID) {
+			syno_pm_device_config_set(ap, 0, 0x91, 0xEFF);
+			syno_pm_device_config_set(ap, 2, 0x91, 0xF7F);
+		}
 	}
 }
 
@@ -405,8 +473,7 @@ END:
 	return uiRet;
 }
 
-static u8
-syno_pm_is_synology_3xxx(const struct ata_port *ap)
+u8 syno_pm_is_synology_3xxx(const struct ata_port *ap)
 {
 	u8 ret = 0;
 
@@ -430,8 +497,7 @@ END:
 	return ret;
 }
 
-static u8
-syno_pm_is_synology_9705(const struct ata_port *ap)
+u8 syno_pm_is_synology_9705(const struct ata_port *ap)
 {
 	u8 ret = 0;
 
@@ -442,6 +508,7 @@ syno_pm_is_synology_9705(const struct ata_port *ap)
 
 	if (!IS_SYNOLOGY_RX413(ap->PMSynoUnique) &&
 		!IS_SYNOLOGY_RX1214(ap->PMSynoUnique) &&
+		!IS_SYNOLOGY_RX1217(ap->PMSynoUnique) &&
 		!IS_SYNOLOGY_DX1215(ap->PMSynoUnique)) {
 		goto END;
 	}
@@ -900,6 +967,7 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 							&pm_pkg);
 	if (syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg)) {
 		printk("ata%d pm unique read fail\n", ap->print_id);
+		ap->uiStsFlags |= SYNO_STATUS_DEEP_SLEEP_FAILED;
 		goto END;
 	}
 
@@ -920,6 +988,7 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 	if(IS_SYNOLOGY_DXC(ap->PMSynoUnique) ||
 	   IS_SYNOLOGY_RXC(ap->PMSynoUnique) ||
 	   IS_SYNOLOGY_RX1214(ap->PMSynoUnique) ||
+	   IS_SYNOLOGY_RX1217(ap->PMSynoUnique) ||
 	   IS_SYNOLOGY_DX1215(ap->PMSynoUnique)) {
 		if(0 != ap->PMSynoEMID) {
 			goto END;
@@ -1246,6 +1315,9 @@ static int sata_pmp_configure(struct ata_device *dev, int print_info)
 			reason = "failed to write Sil3x26 Private Register";
 			goto fail;
 		}
+#ifdef CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD
+		ap->uiStsFlags |= SYNO_STATUS_IS_SIL3x26;
+#endif /* CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD */
 	}
 
 	if (print_info) {
@@ -1480,10 +1552,6 @@ int sata_pmp_attach(struct ata_device *dev)
 	/* Get information for all PM we supported */
 	syno_pm_gpio_config(ap);
 	syno_prepare_custom_info(ap);
-	if (syno_pm_is_synology_9705(ap)){
-		syno_pm_9705_max_tx_amp(ap);
-	}
-
 #ifdef CONFIG_SYNO_HW_VERSION
 	/* DX510 has {ICRC, ABRT} problem under heavy loading IO, force 1.5Gbps can avoid this problem */
 	if (IS_SYNOLOGY_DX510(ap->PMSynoUnique)) {
@@ -1545,10 +1613,10 @@ int sata_pmp_attach(struct ata_device *dev)
 	}
 	/* Only the following chips need the retry */
 	if (pdev && ((pdev->vendor == 0x1095 && pdev->device == 0x3132) ||
-				 (pdev->vendor == 0x1095 && pdev->device == 0x3531) ||
-				 (pdev->vendor == 0x1b4b && pdev->device == 0x9215)) ) {
+				 (pdev->vendor == 0x1095 && pdev->device == 0x3531))) {
 		ap->syno_pm_need_retry = PM_RETRY;
-	}else if (pdev && ((pdev->vendor == 0x1b4b && pdev->device == 0x9170))) {
+	}else if (pdev && ((pdev->vendor == 0x1b4b && pdev->device == 0x9170) ||
+				(pdev->vendor == 0x1b4b && pdev->device == 0x9215))) {
 		/* These chip will retry every time, while others only need it for first attach*/
 		ap->syno_pm_need_retry = PM_ALWAYS_RETRY;
 	}
@@ -1576,6 +1644,10 @@ int sata_pmp_attach(struct ata_device *dev)
 	spin_unlock_irqrestore(ap->lock, flags);
 
 	sata_pmp_quirks(ap);
+
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+	syno_pm_device_config(ap);
+#endif
 
 	if (ap->ops->pmp_attach)
 		ap->ops->pmp_attach(ap);
@@ -1641,6 +1713,9 @@ static void sata_pmp_detach(struct ata_device *dev)
 #ifdef CONFIG_SYNO_PMP_HOTPLUG_TASK
 	ap->pflags |= ATA_PFLAG_PMP_DISCONNECT;
 #endif /* CONFIG_SYNO_PMP_HOTPLUG_TASK */
+#ifdef CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD
+	ap->uiStsFlags &= !SYNO_STATUS_IS_SIL3x26;
+#endif /* CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD */
 }
 
 /**
@@ -1708,6 +1783,7 @@ static int sata_pmp_same_pmp(struct ata_device *dev, const u32 *new_gscr)
 					   "Got different EBox Model old [0x%x], new [0x%x]\n", SYNO_UNIQUE(old_syno_unique), SYNO_UNIQUE(ap->PMSynoUnique));
 		return 0;
 	}
+	syno_pm_device_config(ap);
 #endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 
 	return 1;

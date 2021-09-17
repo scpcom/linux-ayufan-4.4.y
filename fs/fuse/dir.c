@@ -14,6 +14,14 @@
 #include <linux/namei.h>
 #include <linux/slab.h>
 
+#ifdef CONFIG_SYNO_FUSE_WINACL
+#include "../synoacl_int.h"
+#endif /* CONFIG_SYNO_FUSE_WINACL */
+
+#if defined(CONFIG_SYNO_FUSE_ARCHIVE_VERSION) || defined(CONFIG_SYNO_FUSE_ARCHIVE_BIT)
+#include <linux/xattr.h>
+#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VERSION || CONFIG_SYNO_FUSE_ARCHIVE_BIT */
+
 static bool fuse_use_readdirplus(struct inode *dir, struct file *filp)
 {
 	struct fuse_conn *fc = get_fuse_conn(dir);
@@ -135,16 +143,39 @@ static void fuse_invalidate_entry(struct dentry *entry)
 	fuse_invalidate_entry_cache(entry);
 }
 
+#ifdef CONFIG_SYNO_FUSE_STAT
+static void fuse_lookup_init(struct fuse_conn *fc, struct fuse_req *req,
+			     u64 nodeid, struct qstr *name,
+			     struct fuse_entry_out *outarg,
+			     struct fuse_synostat *synostat,
+			     int syno_stat_flags, int is_glusterfs)
+#else
 static void fuse_lookup_init(struct fuse_conn *fc, struct fuse_req *req,
 			     u64 nodeid, struct qstr *name,
 			     struct fuse_entry_out *outarg)
+#endif /* CONFIG_SYNO_FUSE_STAT */
 {
 	memset(outarg, 0, sizeof(struct fuse_entry_out));
 	req->in.h.opcode = FUSE_LOOKUP;
 	req->in.h.nodeid = nodeid;
+#ifdef CONFIG_SYNO_FUSE_STAT
+	if (is_glusterfs) {
+		req->in.numargs = 2;
+		req->in.args[1].size = sizeof(syno_stat_flags);
+		req->in.args[1].value = &syno_stat_flags;
+	} else
+#endif /* CONFIG_SYNO_FUSE_STAT */
 	req->in.numargs = 1;
 	req->in.args[0].size = name->len + 1;
 	req->in.args[0].value = name->name;
+#ifdef CONFIG_SYNO_FUSE_STAT
+	if (synostat && is_glusterfs) {
+		req->out.numargs = 2;
+		req->out.argvar = 1;
+		req->out.args[1].size = FUSE_SYNOSTAT_SIZE;
+		req->out.args[1].value = synostat;
+	} else
+#endif /* CONFIG_SYNO_FUSE_STAT */
 	req->out.numargs = 1;
 	if (fc->minor < 9)
 		req->out.args[0].size = FUSE_COMPAT_ENTRY_OUT_SIZE;
@@ -214,8 +245,13 @@ static int fuse_dentry_revalidate(struct dentry *entry, unsigned int flags)
 		attr_version = fuse_get_attr_version(fc);
 
 		parent = dget_parent(entry);
+#ifdef CONFIG_SYNO_FUSE_STAT
+		fuse_lookup_init(fc, req, get_node_id(parent->d_inode),
+				 &entry->d_name, &outarg, NULL, 0, IS_GLUSTER_FS(inode));
+#else
 		fuse_lookup_init(fc, req, get_node_id(parent->d_inode),
 				 &entry->d_name, &outarg);
+#endif /* CONFIG_SYNO_FUSE_STAT */
 		fuse_request_send(fc, req);
 		dput(parent);
 		err = req->out.h.error;
@@ -287,14 +323,27 @@ static struct dentry *fuse_d_add_directory(struct dentry *entry,
 	return d_splice_alias(inode, entry);
 }
 
+#ifdef CONFIG_SYNO_FUSE_STAT
+int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
+		     struct fuse_entry_out *outarg, struct inode **inode,
+		     struct fuse_synostat *synostat, int syno_stat_flags)
+#else
 int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 		     struct fuse_entry_out *outarg, struct inode **inode)
+#endif /* CONFIG_SYNO_FUSE_STAT */
 {
 	struct fuse_conn *fc = get_fuse_conn_super(sb);
 	struct fuse_req *req;
 	struct fuse_forget_link *forget;
 	u64 attr_version;
 	int err;
+#ifdef CONFIG_SYNO_FUSE_STAT
+	char *result_name = NULL;
+	int result_name_len = 0;
+	int caseless = IS_GLUSTER_FS_SB(sb) && (syno_stat_flags & SYNOST_IS_CASELESS);
+	char *new_dname = NULL;
+	const char *ext_dname = NULL;
+#endif /* CONFIG_SYNO_FUSE_STAT */
 
 	*inode = NULL;
 	err = -ENAMETOOLONG;
@@ -315,8 +364,21 @@ int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 
 	attr_version = fuse_get_attr_version(fc);
 
+#ifdef CONFIG_SYNO_FUSE_STAT
+	if (caseless && synostat) {
+		result_name = synostat->name;
+		synostat->name_len = SYNO_FUSE_ENTRY_NAME_LEN + 1;
+	}
+	fuse_lookup_init(fc, req, nodeid, name, outarg, synostat, syno_stat_flags, IS_GLUSTER_FS_SB(sb));
+	fuse_request_send(fc, req);
+	if (caseless && synostat) {
+		result_name_len = req->out.args[1].size - sizeof(*synostat);
+		result_name[result_name_len] = '\0';
+	}
+#else
 	fuse_lookup_init(fc, req, nodeid, name, outarg);
 	fuse_request_send(fc, req);
+#endif /* CONFIG_SYNO_FUSE_STAT */
 	err = req->out.h.error;
 	fuse_put_request(fc, req);
 	/* Zero nodeid is same as -ENOENT, but with valid timeout */
@@ -332,6 +394,32 @@ int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 	*inode = fuse_iget(sb, outarg->nodeid, outarg->generation,
 			   &outarg->attr, entry_attr_timeout(outarg),
 			   attr_version);
+#ifdef CONFIG_SYNO_FUSE_STAT
+	if (caseless && synostat && dentry_string_cmp(name->name, result_name, result_name_len)) {
+		if (result_name_len > (DNAME_INLINE_LEN - 1) && result_name_len > name->len) {
+			new_dname = kmalloc(result_name_len + 1, GFP_KERNEL);
+			if (!new_dname) {
+				return -1;
+			}
+			if (name->len > (DNAME_INLINE_LEN -1)) {
+				ext_dname = name->name;
+			}
+			memcpy((unsigned char*)new_dname, result_name, result_name_len);
+			new_dname[result_name_len] = 0;
+
+			name->len = result_name_len;
+			name->name = new_dname;
+
+			if (ext_dname) {
+				kfree(ext_dname);
+			}
+		} else {
+			memcpy((unsigned char *)name->name, result_name, result_name_len);
+			((char*)name->name)[result_name_len] = 0;
+			name->len = result_name_len;
+		}
+	}
+#endif /* CONFIG_SYNO_FUSE_STAT */
 	err = -ENOMEM;
 	if (!*inode) {
 		fuse_queue_forget(fc, forget, outarg->nodeid, 1);
@@ -350,13 +438,26 @@ static struct dentry *fuse_lookup(struct inode *dir, struct dentry *entry,
 {
 	int err;
 	struct fuse_entry_out outarg;
+#ifdef CONFIG_SYNO_FUSE_STAT
+	struct fuse_synostat *synostat = NULL;
+#endif /* CONFIG_SYNO_FUSE_STAT */
 	struct inode *inode;
 	struct dentry *newent;
 	struct fuse_conn *fc = get_fuse_conn(dir);
 	bool outarg_valid = true;
 
+#ifdef CONFIG_SYNO_FUSE_STAT
+	if ((flags & LOOKUP_CASELESS_COMPARE) && IS_GLUSTER_FS(dir)) {
+		synostat = kmalloc(FUSE_SYNOSTAT_SIZE, GFP_KERNEL);
+		memset(synostat, 0, FUSE_SYNOSTAT_SIZE);
+	}
+	err = fuse_lookup_name(dir->i_sb, get_node_id(dir), &entry->d_name,
+			       &outarg, &inode, synostat, (flags & LOOKUP_CASELESS_COMPARE) ? SYNOST_IS_CASELESS : 0);
+	kfree(synostat);
+#else
 	err = fuse_lookup_name(dir->i_sb, get_node_id(dir), &entry->d_name,
 			       &outarg, &inode);
+#endif /* CONFIG_SYNO_FUSE_STAT */
 	if (err == -ENOENT) {
 		outarg_valid = false;
 		err = 0;
@@ -1053,7 +1154,11 @@ int fuse_allow_current_process(struct fuse_conn *fc)
 	return 0;
 }
 
+#ifdef CONFIG_SYNO_FUSE_WINACL
+static int fuse_access(struct inode *inode, int mask, int syno_acl_access)
+#else
 static int fuse_access(struct inode *inode, int mask)
+#endif /* CONFIG_SYNO_FUSE_WINACL */
 {
 	struct fuse_conn *fc = get_fuse_conn(inode);
 	struct fuse_req *req;
@@ -1068,6 +1173,12 @@ static int fuse_access(struct inode *inode, int mask)
 		return PTR_ERR(req);
 
 	memset(&inarg, 0, sizeof(inarg));
+#ifdef CONFIG_SYNO_FUSE_WINACL
+	inarg.syno_acl_access = syno_acl_access;
+	if (IS_GLUSTER_FS(inode) && syno_acl_access) {
+		inarg.mask = mask & SYNO_PERM_FULL_CONTROL;
+	} else
+#endif /* CONFIG_SYNO_FUSE_WINACL */
 	inarg.mask = mask & (MAY_READ | MAY_WRITE | MAY_EXEC);
 	req->in.h.opcode = FUSE_ACCESS;
 	req->in.h.nodeid = get_node_id(inode);
@@ -1150,8 +1261,17 @@ static int fuse_permission(struct inode *inode, int mask)
 		if (mask & MAY_NOT_BLOCK)
 			return -ECHILD;
 
+#ifdef CONFIG_SYNO_FUSE_WINACL
+		err = fuse_access(inode, mask, 0);
+#else
 		err = fuse_access(inode, mask);
+#endif /* CONFIG_SYNO_FUSE_WINACL */
 	} else if ((mask & MAY_EXEC) && S_ISREG(inode->i_mode)) {
+#ifdef CONFIG_SYNO_FUSE_WINACL
+		if (IS_GLUSTER_FS(inode)) {
+			return fuse_access(inode, mask, 0);
+		}
+#endif /* CONFIG_SYNO_FUSE_WINACL */
 		if (!(inode->i_mode & S_IXUGO)) {
 			if (refreshed)
 				return -EACCES;
@@ -1727,8 +1847,13 @@ static int fuse_getattr(struct vfsmount *mnt, struct dentry *entry,
 	return fuse_update_attributes(inode, stat, NULL, NULL);
 }
 
+#ifdef CONFIG_SYNO_FUSE_ARCHIVE_VERSION
+int fuse_setxattr(struct dentry *entry, const char *name,
+			 const void *value, size_t size, int flags)
+#else
 static int fuse_setxattr(struct dentry *entry, const char *name,
 			 const void *value, size_t size, int flags)
+#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VERSION */
 {
 	struct inode *inode = entry->d_inode;
 	struct fuse_conn *fc = get_fuse_conn(inode);
@@ -1767,8 +1892,13 @@ static int fuse_setxattr(struct dentry *entry, const char *name,
 	return err;
 }
 
+#ifdef CONFIG_SYNO_FUSE_ARCHIVE_VERSION
+ssize_t fuse_getxattr(struct dentry *entry, const char *name,
+			     void *value, size_t size)
+#else
 static ssize_t fuse_getxattr(struct dentry *entry, const char *name,
 			     void *value, size_t size)
+#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VERSION */
 {
 	struct inode *inode = entry->d_inode;
 	struct fuse_conn *fc = get_fuse_conn(inode);
@@ -1898,6 +2028,220 @@ static int fuse_removexattr(struct dentry *entry, const char *name)
 	return err;
 }
 
+#ifdef CONFIG_SYNO_FUSE_STAT
+static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int stat_flag)
+{
+	int err = 0;
+	struct inode *dir;
+	struct fuse_entry_out outarg;
+	struct fuse_synostat *synostat = NULL;
+	struct inode *inode;
+	struct qstr name;
+
+	if (!dentry->d_parent || !dentry->d_parent->d_inode) {
+		printk(KERN_WARNING"fuse syno getattr null entry\n");
+		return -EINVAL;
+	}
+	dir = dentry->d_parent->d_inode;
+
+	if (!IS_GLUSTER_FS(dentry->d_inode)) {
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+			stat->syno_create_time = dentry->d_inode->i_create_time;
+#endif /* CONFIG_SYNO_FS_CREATE_TIME */
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+			stat->syno_archive_bit = dentry->d_inode->i_archive_bit;
+#endif /* CONFIG_SYNO_FS_ARCHIVE_BIT */
+#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+			stat->syno_archive_version = dentry->d_inode->i_archive_version;
+#endif /* CONFIG_SYNO_FS_ARCHIVE_VERSION */
+		return 0;
+	}
+
+	if (stat_flag & (SYNOST_ALL | SYNOST_IS_CASELESS)) {
+		synostat = kmalloc(FUSE_SYNOSTAT_SIZE, GFP_KERNEL);
+		memset(synostat, 0, FUSE_SYNOSTAT_SIZE);
+	}
+	if (get_node_id(dentry->d_inode) == FUSE_ROOT_ID) {
+		name.name = ".";
+		name.len = 1;
+		err = fuse_lookup_name(dir->i_sb, get_node_id(dir), &name,
+				       &outarg, &inode, synostat, stat_flag);
+	} else {
+		err = fuse_lookup_name(dir->i_sb, get_node_id(dir), &dentry->d_name,
+				       &outarg, &inode, synostat, stat_flag);
+	}
+	if (err)
+		goto out;
+
+	if (stat_flag & SYNOST_ARCHIVE_BIT) {
+		stat->syno_archive_bit = synostat->archive_bit;
+	}
+	if (stat_flag & SYNOST_CREATE_TIME) {
+		stat->syno_create_time.tv_sec = synostat->create_time_sec;
+		stat->syno_create_time.tv_nsec = synostat->create_time_nsec;
+	}
+	if (stat_flag & SYNOST_ARCHIVE_VER) {
+		stat->syno_archive_version = synostat->archive_version;
+	}
+out:
+	kfree (synostat);
+	iput(inode);
+	return err;
+}
+#endif /* CONFIG_SYNO_FUSE_STAT */
+
+#ifdef CONFIG_SYNO_FUSE_ARCHIVE_VERSION
+static int fuse_syno_set_archive_version(struct dentry *dentry, u32 archive_version)
+{
+	struct syno_xattr_archive_version value;
+
+	value.v_magic = cpu_to_le16(0x2552);
+	value.v_struct_version = cpu_to_le16(1);
+	value.v_archive_version = cpu_to_le32(archive_version);
+
+	return fuse_setxattr(dentry, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_VERSION_GLUSTER, &value, sizeof(value), 0);
+}
+#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VERSION */
+
+#ifdef CONFIG_SYNO_FUSE_CREATE_TIME
+static int fuse_syno_set_create_time(struct dentry *dentry, struct timespec* time)
+{
+	struct syno_gf_xattr_crtime time_le;
+	struct inode *inode = dentry->d_inode;
+
+	if (!IS_GLUSTER_FS(inode)) {
+		return -EOPNOTSUPP;
+	}
+	time_le.sec = cpu_to_le64(time->tv_sec);
+	time_le.nsec = cpu_to_le32(time->tv_nsec);
+
+	return fuse_setxattr(dentry, XATTR_SYNO_PREFIX XATTR_SYNO_CREATE_TIME, &time_le, sizeof(time_le), 0);
+}
+#endif /* CONFIG_SYNO_FUSE_CREATE_TIME */
+
+#ifdef CONFIG_SYNO_FUSE_ARCHIVE_BIT
+static int fuse_syno_get_archive_bit(struct dentry *entry, unsigned int *archive_bit)
+{
+	int err;
+	struct inode *inode = entry->d_inode;
+	struct kstat stat;
+
+	if (!IS_GLUSTER_FS(inode)) {
+		*archive_bit = inode->i_archive_bit;
+		return 0;
+	}
+
+	memset (&stat, 0, sizeof(stat));
+	err = fuse_syno_getattr(entry, &stat, SYNOST_ARCHIVE_BIT);
+	*archive_bit = stat.syno_archive_bit;
+
+	return err;
+}
+
+static int fuse_syno_set_archive_bit(struct dentry *dentry, unsigned int arbit)
+{
+	int err;
+	struct inode *inode = dentry->d_inode;
+	__le32 arbit_le32 = cpu_to_le32(arbit);
+
+	if (!IS_GLUSTER_FS(inode)) {
+		inode->i_archive_bit = arbit;
+		inode->i_ctime = CURRENT_TIME;
+		mark_inode_dirty_sync(inode);
+		return 0;
+	}
+
+	err = fuse_setxattr(dentry, XATTR_SYNO_PREFIX""XATTR_SYNO_ARCHIVE_BIT, &arbit_le32, sizeof(arbit_le32), 0);
+	inode->i_archive_bit = arbit;
+	return err;
+}
+#endif /* CONFIG_SYNO_FS_ARCHIVE_BIT */
+
+#ifdef CONFIG_SYNO_FUSE_WINACL
+static int fuse_syno_acl_sys_get_perm(struct dentry *dentry, int *allow_out)
+{
+	__le32 allow_le32 = 0;
+	int error;
+
+	if (!IS_GLUSTER_FS(dentry->d_inode)) {
+		return -EOPNOTSUPP;
+	}
+
+	error = fuse_getxattr(dentry, SYNO_ACL_XATTR_PERM, &allow_le32, sizeof(allow_le32));
+	if (error >= 0) {
+		error = 0;
+		*allow_out = le32_to_cpu(allow_le32);
+	}
+
+	return error;
+}
+
+static int fuse_syno_acl_sys_is_support(struct dentry *dentry, int tag)
+{
+	struct inode *inode = dentry->d_inode;
+	uint32_t archive_bit = 0;
+	int error;
+
+	if (!IS_GLUSTER_FS(inode)) {
+		return -EOPNOTSUPP;
+	}
+
+	if (SYNO_KERNEL_IS_FS_SUPPORT == tag) {
+		return 1;
+	} else if (SYNO_KERNEL_IS_FILE_SUPPORT == tag) {
+		error = inode->i_op->syno_get_archive_bit(dentry, &archive_bit);
+		if (0 == error) {
+			return !!(archive_bit & S2_SYNO_ACL_SUPPORT);
+		}
+	} else {
+		return 0;
+	}
+	return error;
+}
+
+static int fuse_syno_acl_sys_check_perm(struct dentry *dentry, int mask)
+{
+	if (!IS_GLUSTER_FS(dentry->d_inode)) {
+		return -EOPNOTSUPP;
+	}
+	return fuse_access(dentry->d_inode, mask, 1);
+}
+
+static int fuse_syno_acl_xattr_get(struct dentry *dentry, int cmd, void *value, size_t size)
+{
+	if (IS_GLUSTER_FS(dentry->d_inode)) {
+		if (SYNO_ACL_INHERITED == cmd)
+			return fuse_getxattr(dentry, SYNO_ACL_XATTR_INHERIT, value, size);
+		else if (SYNO_ACL_PSEUDO_INHERIT_ONLY == cmd)
+			return fuse_getxattr(dentry, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY, value, size);
+		else
+			return -EOPNOTSUPP;
+	}
+	return synoacl_mod_get_acl_xattr(dentry, cmd, value, size);
+}
+
+static int fuse_syno_bypass_is_synoacl(struct dentry *dentry, int cmd, int reterror)
+{
+	if (IS_GLUSTER_FS(dentry->d_inode)) {
+		return 0;
+	}
+	return reterror;
+}
+
+static int fuse_syno_archive_bit_change_ok(struct dentry *dentry, unsigned int cmd, int tag, int mask)
+{
+	if (IS_GLUSTER_FS(dentry->d_inode)) {
+		return 0;
+	}
+
+	if ((NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT) & tag) {
+		return -EOPNOTSUPP;
+	}
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_FUSE_WINACL */
+
 static const struct inode_operations fuse_dir_inode_operations = {
 	.lookup		= fuse_lookup,
 	.mkdir		= fuse_mkdir,
@@ -1916,6 +2260,27 @@ static const struct inode_operations fuse_dir_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
+#ifdef CONFIG_SYNO_FS_STAT
+	.syno_getattr	= fuse_syno_getattr,
+#endif /* CONFIG_SYNO_FS_STAT */
+#ifdef CONFIG_SYNO_FUSE_ARCHIVE_VERSION
+	.syno_set_archive_ver	= fuse_syno_set_archive_version,
+#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VERSION */
+#ifdef CONFIG_SYNO_FUSE_CREATE_TIME
+	.syno_set_crtime	= fuse_syno_set_create_time,
+#endif /* CONFIG_SYNO_FUSE_CREATE_TIME */
+#ifdef CONFIG_SYNO_FUSE_ARCHIVE_BIT
+	.syno_get_archive_bit	= fuse_syno_get_archive_bit,
+	.syno_set_archive_bit	= fuse_syno_set_archive_bit,
+#endif /* CONFIG_SYNO_FUSE_ARCHIVE_BIT */
+#ifdef CONFIG_SYNO_FUSE_WINACL
+	.syno_acl_sys_get_perm	= fuse_syno_acl_sys_get_perm,
+	.syno_acl_sys_is_support	= fuse_syno_acl_sys_is_support,
+	.syno_acl_sys_check_perm	= fuse_syno_acl_sys_check_perm,
+	.syno_acl_xattr_get	= fuse_syno_acl_xattr_get,
+	.syno_bypass_is_synoacl = fuse_syno_bypass_is_synoacl,
+	.syno_arbit_chg_ok = fuse_syno_archive_bit_change_ok,
+#endif /* CONFIG_SYNO_FUSE_WINACL */
 };
 
 static const struct file_operations fuse_dir_operations = {
@@ -1937,6 +2302,27 @@ static const struct inode_operations fuse_common_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
+#ifdef CONFIG_SYNO_FS_STAT
+	.syno_getattr	= fuse_syno_getattr,
+#endif /* CONFIG_SYNO_FS_STAT */
+#ifdef CONFIG_SYNO_FUSE_ARCHIVE_VERSION
+	.syno_set_archive_ver	= fuse_syno_set_archive_version,
+#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VERSION */
+#ifdef CONFIG_SYNO_FUSE_CREATE_TIME
+	.syno_set_crtime	= fuse_syno_set_create_time,
+#endif /* CONFIG_SYNO_FUSE_CREATE_TIME */
+#ifdef CONFIG_SYNO_FUSE_ARCHIVE_BIT
+	.syno_get_archive_bit	= fuse_syno_get_archive_bit,
+	.syno_set_archive_bit	= fuse_syno_set_archive_bit,
+#endif /* CONFIG_SYNO_FUSE_ARCHIVE_BIT */
+#ifdef CONFIG_SYNO_FUSE_WINACL
+	.syno_acl_sys_get_perm	= fuse_syno_acl_sys_get_perm,
+	.syno_acl_sys_is_support	= fuse_syno_acl_sys_is_support,
+	.syno_acl_sys_check_perm	= fuse_syno_acl_sys_check_perm,
+	.syno_acl_xattr_get	= fuse_syno_acl_xattr_get,
+	.syno_bypass_is_synoacl = fuse_syno_bypass_is_synoacl,
+	.syno_arbit_chg_ok = fuse_syno_archive_bit_change_ok,
+#endif /* CONFIG_SYNO_FUSE_WINACL */
 };
 
 static const struct inode_operations fuse_symlink_inode_operations = {
@@ -1949,6 +2335,27 @@ static const struct inode_operations fuse_symlink_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
+#ifdef CONFIG_SYNO_FS_STAT
+	.syno_getattr	= fuse_syno_getattr,
+#endif /* CONFIG_SYNO_FS_STAT */
+#ifdef CONFIG_SYNO_FUSE_ARCHIVE_VERSION
+	.syno_set_archive_ver	= fuse_syno_set_archive_version,
+#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VERSION */
+#ifdef CONFIG_SYNO_FUSE_CREATE_TIME
+	.syno_set_crtime	= fuse_syno_set_create_time,
+#endif /* CONFIG_SYNO_FUSE_CREATE_TIME */
+#ifdef CONFIG_SYNO_FUSE_ARCHIVE_BIT
+	.syno_get_archive_bit	= fuse_syno_get_archive_bit,
+	.syno_set_archive_bit	= fuse_syno_set_archive_bit,
+#endif /* CONFIG_SYNO_FUSE_ARCHIVE_BIT */
+#ifdef CONFIG_SYNO_FUSE_WINACL
+	.syno_acl_sys_get_perm	= fuse_syno_acl_sys_get_perm,
+	.syno_acl_sys_is_support	= fuse_syno_acl_sys_is_support,
+	.syno_acl_sys_check_perm	= fuse_syno_acl_sys_check_perm,
+	.syno_acl_xattr_get	= fuse_syno_acl_xattr_get,
+	.syno_bypass_is_synoacl = fuse_syno_bypass_is_synoacl,
+	.syno_arbit_chg_ok = fuse_syno_archive_bit_change_ok,
+#endif /* CONFIG_SYNO_FUSE_WINACL */
 };
 
 void fuse_init_common(struct inode *inode)

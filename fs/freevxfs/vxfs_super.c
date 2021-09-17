@@ -47,12 +47,9 @@
 #include "vxfs_dir.h"
 #include "vxfs_inode.h"
 
-
 MODULE_AUTHOR("Christoph Hellwig");
 MODULE_DESCRIPTION("Veritas Filesystem (VxFS) driver");
 MODULE_LICENSE("Dual BSD/GPL");
-
-
 
 static void		vxfs_put_super(struct super_block *);
 static int		vxfs_statfs(struct dentry *, struct kstatfs *);
@@ -124,6 +121,7 @@ vxfs_statfs(struct dentry *dentry, struct kstatfs *bufp)
 
 static int vxfs_remount(struct super_block *sb, int *flags, char *data)
 {
+	sync_filesystem(sb);
 	*flags |= MS_RDONLY;
 	return 0;
 }

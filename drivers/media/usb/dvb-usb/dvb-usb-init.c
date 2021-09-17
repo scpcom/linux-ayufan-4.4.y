@@ -18,7 +18,7 @@ int dvb_usb_debug;
 module_param_named(debug, dvb_usb_debug, int, 0644);
 MODULE_PARM_DESC(debug, "set debugging level (1=info,xfer=2,pll=4,ts=8,err=16,rc=32,fw=64,mem=128,uxfer=256  (or-able))." DVB_USB_DEBUG_STATUS);
 
-int dvb_usb_disable_rc_polling;
+int dvb_usb_disable_rc_polling = 1;
 module_param_named(disable_rc_polling, dvb_usb_disable_rc_polling, int, 0644);
 MODULE_PARM_DESC(disable_rc_polling, "disable remote control polling (default: 0).");
 
@@ -122,7 +122,6 @@ static int dvb_usb_adapter_exit(struct dvb_usb_device *d)
 	d->state &= ~DVB_USB_STATE_DVB;
 	return 0;
 }
-
 
 /* general initialization functions */
 static int dvb_usb_exit(struct dvb_usb_device *d)

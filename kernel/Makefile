@@ -10,7 +10,8 @@ obj-y     = fork.o exec_domain.o panic.o printk.o \
 	    kthread.o wait.o sys_ni.o posix-cpu-timers.o mutex.o \
 	    hrtimer.o rwsem.o nsproxy.o srcu.o semaphore.o \
 	    notifier.o ksysfs.o cred.o \
-	    async.o range.o groups.o lglock.o smpboot.o
+	    async.o range.o groups.o lglock.o smpboot.o \
+	    syno_bootargs.o
 
 ifdef CONFIG_FUNCTION_TRACER
 # Do not trace debug files and internal ftrace files
@@ -111,6 +112,7 @@ obj-$(CONFIG_PADATA) += padata.o
 obj-$(CONFIG_CRASH_DUMP) += crash_dump.o
 obj-$(CONFIG_JUMP_LABEL) += jump_label.o
 obj-$(CONFIG_CONTEXT_TRACKING) += context_tracking.o
+obj-$(CONFIG_SYNO_GPIO) += syno_gpio.o
 
 $(obj)/configs.o: $(obj)/config_data.h
 

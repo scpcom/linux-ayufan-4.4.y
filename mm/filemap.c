@@ -2265,32 +2265,13 @@ int do_recvfile(struct file *file, struct socket *sock, loff_t pos,
 	struct page           *page = NULL;
 	struct page           *rgPageList[MAX_PAGES_PER_RECVFILE + 1];
 	struct address_space  *mapping = file->f_mapping;
-	struct inode          *inode = mapping->host;
-
-	sb_start_write(inode->i_sb);
-
-	/*
-	 * We can write back this queue in page reclaim
-	 */
-	current->backing_dev_info = mapping->backing_dev_info;
-
-	err = generic_write_checks(file, &pos, &count, S_ISBLK(inode->i_mode));
-	if (err != 0 || count == 0) {
-		goto done;
-	}
 
 	/* Check hook functions */
-	if ((!mapping->a_ops->write_begin || !mapping->a_ops->write_end) && !file->f_op->syno_recvfile) {
+	if ((!mapping->a_ops->write_begin || !mapping->a_ops->write_end)) {
 		printk("write_begin() or write_end() or syno_recvfile() are not implemented\n");
 		goto done;
 	}
-	file_remove_suid(file);
-	file_update_time(file);
-	if (file->f_op->syno_recvfile) {
-		err = file->f_op->syno_recvfile(file, sock, pos, count, rbytes, wbytes);
-		goto done;
-	}
-	if (mapping->a_ops->recvfile_da_check && mapping->a_ops->recvfile_da_check(inode->i_sb)) {
+	if (mapping->a_ops->recvfile_da_check && mapping->a_ops->recvfile_da_check(mapping->host->i_sb)) {
 		flags |= AOP_FLAG_RECVFILE_NONDA;
 	}
 
@@ -2387,8 +2368,6 @@ release_pages:
 	balance_dirty_pages_ratelimited(mapping);
 
 done:
-	sb_end_write(inode->i_sb);
-	current->backing_dev_info = NULL;
 	return err?err:bytes_received;
 }
 extern int aggregate_fd;
@@ -2417,13 +2396,6 @@ int do_aggregate_recvfile(struct file *file, struct socket *sock, loff_t pos,
 	static struct kvec     iov[MAX_PAGES_PER_AGGREGATE_RECVFILE + 1];
 	static struct page    *rgPageList[MAX_PAGES_PER_AGGREGATE_RECVFILE + 1];
 
-	sb_start_write(inode->i_sb);
-
-	/*
-	 * We can write back this queue in page reclaim
-	 */
-	current->backing_dev_info = mapping->backing_dev_info;
-
 	/* Check address_ops functions */
 	if (!mapping->a_ops->write_begin || !mapping->a_ops->aggregate_write_end) {
 		printk("write_begin() or aggregate_write_end() is not implemented\n");
@@ -2436,12 +2408,9 @@ int do_aggregate_recvfile(struct file *file, struct socket *sock, loff_t pos,
 		}
 		goto release_pages;
 	}
-	err = generic_write_checks(file, &pos, &count, S_ISBLK(inode->i_mode));
-	if (err != 0 || count == 0) {
+	if (count == 0) {
 		goto done;
 	}
-	file_remove_suid(file);
-	file_update_time(file);
 	if (offset || (count & (PAGE_CACHE_SIZE - 1))) {
 		isPageAlign = 0;
 	}
@@ -2509,8 +2478,6 @@ release_pages:
 	balance_dirty_pages_ratelimited(mapping);
 
 done:
-	sb_end_write(inode->i_sb);
-	current->backing_dev_info = NULL;
 	return err?err:bytes_received;
 }
 

@@ -1142,6 +1142,8 @@ static int gfs2_remount_fs(struct super_block *sb, int *flags, char *data)
 	struct gfs2_tune *gt = &sdp->sd_tune;
 	int error;
 
+	sync_filesystem(sb);
+
 	spin_lock(&gt->gt_spin);
 	args.ar_commit = gt->gt_logd_secs;
 	args.ar_quota_quantum = gt->gt_quota_quantum;
@@ -1582,4 +1584,3 @@ const struct super_operations gfs2_super_ops = {
 	.drop_inode		= gfs2_drop_inode,
 	.show_options		= gfs2_show_options,
 };
-
