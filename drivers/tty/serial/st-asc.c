@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #if defined(CONFIG_SERIAL_ST_ASC_CONSOLE) && defined(CONFIG_MAGIC_SYSRQ)
 #define SUPPORT_SYSRQ
@@ -26,7 +23,7 @@
 #include <linux/st-asc.h>
 
 #define DRIVER_NAME "st-asc"
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO)
 #define ASC_SERIAL_NAME "ttyS"
 #else  
 #define ASC_SERIAL_NAME "ttyAS"
@@ -703,7 +700,7 @@ static struct uart_driver asc_uart_driver = {
 	.owner		= THIS_MODULE,
 	.driver_name	= DRIVER_NAME,
 	.dev_name	= ASC_SERIAL_NAME,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO)
 	.major		= TTY_MAJOR,
 	.minor		= 64,
 #else

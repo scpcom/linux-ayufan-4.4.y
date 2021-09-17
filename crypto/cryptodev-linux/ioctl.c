@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <crypto/hash.h>
 #include <linux/crypto.h>
@@ -635,7 +632,7 @@ static inline void tfm_info_to_alg_info(struct alg_info *dst, struct crypto_tfm 
 			"%s", crypto_tfm_alg_driver_name(tfm));
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
  
 #else  
 static unsigned int is_known_accelerated(struct crypto_tfm *tfm)
@@ -1004,7 +1001,7 @@ static const struct file_operations cryptodev_fops = {
 };
 
 static struct miscdevice cryptodev = {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	.minor = CRYPTODEV_MINOR,
 #else  
 	.minor = MISC_DYNAMIC_MINOR,

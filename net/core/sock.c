@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -178,7 +175,7 @@ static struct lock_class_key af_callback_keys[AF_MAX];
 
 __u32 sysctl_wmem_max __read_mostly = SK_WMEM_MAX;
 EXPORT_SYMBOL(sysctl_wmem_max);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_KVMX64
 __u32 sysctl_rmem_max __read_mostly = 2 * SK_RMEM_MAX;
 #else
 __u32 sysctl_rmem_max __read_mostly = SK_RMEM_MAX;
@@ -1985,7 +1982,7 @@ void sock_init_data(struct socket *sock, struct sock *sk)
 
 	sk->sk_stamp = ktime_set(-1L, 0);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 #else  
 	sk->sk_pacing_rate = ~0U;

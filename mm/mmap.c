@@ -1645,7 +1645,7 @@ struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
 			vma_tmp = rb_entry(rb_node,
 					   struct vm_area_struct, vm_rb);
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_64KB)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_64KB)
 	 
 				if ((vma_tmp->vm_end - 1) >= addr) {
 					WARN(!(vma_tmp->vm_end),

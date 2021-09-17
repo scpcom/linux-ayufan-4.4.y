@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #undef TRACE_SYSTEM
 #define TRACE_SYSTEM btrfs
 
@@ -330,7 +327,7 @@ DECLARE_EVENT_CLASS(btrfs__writepage,
 				 BTRFS_I(inode)->root->root_key.objectid;
 	),
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	TP_printk("root = %llu(%s), ino = %lu, page_index = %llu, "
 		  "nr_to_write = %ld, pages_skipped = %ld, range_start = %llu, "
 		  "range_end = %llu, for_kupdate = %d, "

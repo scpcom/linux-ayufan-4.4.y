@@ -242,7 +242,7 @@ extern struct cpu_tlb_fns cpu_tlb;
 #define tlb_op(f, regs, arg)	__tlb_op(f, "p15, 0, %0, " regs, arg)
 #define tlb_l2_op(f, regs, arg)	__tlb_op(f, "p15, 1, %0, " regs, arg)
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static inline void __local_flush_tlb_all(void)
 {
 	const int zero = 0;
@@ -254,7 +254,7 @@ static inline void __local_flush_tlb_all(void)
 }
 #endif  
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static inline void local_flush_tlb_all(void)
 {
 	const int zero = 0;
@@ -309,7 +309,7 @@ static inline void local_flush_tlb_all(void)
 }
 #endif  
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static inline void __local_flush_tlb_mm(struct mm_struct *mm)
 {
 	const int zero = 0;
@@ -394,7 +394,7 @@ static inline void local_flush_tlb_mm(struct mm_struct *mm)
 }
 #endif  
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static inline void
 __local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 {
@@ -505,19 +505,19 @@ local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 {
 	const int zero = 0;
 	const unsigned int __tlb_flag = __cpu_tlb_flags;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	unsigned long uaddr_last;
 #endif  
 
 	uaddr = (uaddr & PAGE_MASK) | ASID(vma->vm_mm);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	uaddr_last = uaddr+PAGE_SIZE;
 #endif  
 
 	if (tlb_flag(TLB_WB))
 		dsb();
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 	for (; uaddr < uaddr_last; uaddr += HW_PAGE_SIZE) {
 #endif  
@@ -538,7 +538,7 @@ local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 #else
 	tlb_op(TLB_V7_UIS_PAGE, "c8, c3, 1", uaddr);
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	}
 #endif  
 
@@ -548,7 +548,7 @@ local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 #endif  
 #endif  
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static inline void __local_flush_tlb_kernel_page(unsigned long kaddr)
 {
 	const int zero = 0;
@@ -643,19 +643,19 @@ static inline void local_flush_tlb_kernel_page(unsigned long kaddr)
 {
 	const int zero = 0;
 	const unsigned int __tlb_flag = __cpu_tlb_flags;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	unsigned long kaddr_last;
 #endif  
 
 	kaddr &= PAGE_MASK;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	kaddr_last = kaddr+PAGE_SIZE;
 #endif  
 
 	if (tlb_flag(TLB_WB))
 		dsb();
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	for (; kaddr < kaddr_last; kaddr += HW_PAGE_SIZE) {
 #endif  
 	tlb_op(TLB_V4_U_PAGE, "c8, c7, 1", kaddr);
@@ -668,7 +668,7 @@ static inline void local_flush_tlb_kernel_page(unsigned long kaddr)
 	tlb_op(TLB_V6_D_PAGE, "c8, c6, 1", kaddr);
 	tlb_op(TLB_V6_I_PAGE, "c8, c5, 1", kaddr);
 	tlb_op(TLB_V7_UIS_PAGE, "c8, c3, 1", kaddr);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	}
 #endif  
 
@@ -694,7 +694,7 @@ static inline void local_flush_bp_all(void)
 }
 #endif  
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 static inline void __local_flush_bp_all(void)
 {
@@ -731,7 +731,7 @@ static inline void dummy_flush_tlb_a15_erratum(void)
 {
 	 
 	asm("mcr p15, 0, %0, c8, c3, 1" : : "r" (0));
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	dsb(ish);
 #else  
 	dsb();
@@ -751,7 +751,7 @@ static inline void flush_pmd_entry(void *pmd)
 	tlb_l2_op(TLB_L2CLEAN_FR, "c15, c9, 1  @ L2 flush_pmd", pmd);
 
 	if (tlb_flag(TLB_WB))
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		dsb(ishst);
 #else  
 		dsb();
@@ -802,7 +802,7 @@ static inline void update_mmu_cache(struct vm_area_struct *vma,
 }
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define update_mmu_cache_pmd(vma, address, pmd) do { } while (0)
 #endif  
 

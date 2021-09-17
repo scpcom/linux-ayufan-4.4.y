@@ -1031,7 +1031,7 @@ int write_cache_pages(struct address_space *mapping,
 			cycled = 1;
 		else
 			cycled = 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		end = PGOFF_MAX;
 #else  
 		end = -1;
@@ -1412,7 +1412,7 @@ void wait_for_stable_page(struct page *page)
 	struct address_space *mapping = page_mapping(page);
 	struct backing_dev_info *bdi = mapping->backing_dev_info;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY
 	if (!bdi_cap_stable_pages_required(&syno_backing_dev_info) && !bdi_cap_stable_pages_required(bdi))
 #else  
 	if (!bdi_cap_stable_pages_required(bdi))

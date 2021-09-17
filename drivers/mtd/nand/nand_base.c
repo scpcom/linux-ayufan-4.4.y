@@ -19,7 +19,7 @@
 #include <linux/io.h>
 #include <linux/mtd/partitions.h>
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #ifdef CONFIG_DEBUG_FS
 #include <linux/debugfs.h>
 struct dentry *file_erasebb;
@@ -77,7 +77,7 @@ static struct nand_ecclayout nand_oob_128 = {
 		 .length = 78} }
 };
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 int nand_get_device(struct mtd_info *mtd, int new_state);
 
 int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
@@ -115,7 +115,7 @@ static int check_offs_len(struct mtd_info *mtd,
 #else  
  
 #endif  
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 void nand_release_device(struct mtd_info *mtd)
 #else  
 static void nand_release_device(struct mtd_info *mtd)
@@ -134,7 +134,7 @@ static void nand_release_device(struct mtd_info *mtd)
 	wake_up(&chip->controller->wq);
 	spin_unlock(&chip->controller->lock);
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(nand_release_device);
 #endif  
 
@@ -382,7 +382,7 @@ static int nand_default_block_markbad(struct mtd_info *mtd, loff_t ofs)
 	return ret;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 int nand_check_wp(struct mtd_info *mtd)
 #else  
 static int nand_check_wp(struct mtd_info *mtd)
@@ -396,7 +396,7 @@ static int nand_check_wp(struct mtd_info *mtd)
 	chip->cmdfunc(mtd, NAND_CMD_STATUS, -1, -1);
 	return (chip->read_byte(mtd) & NAND_STATUS_WP) ? 0 : 1;
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(nand_check_wp);
 #endif  
 
@@ -636,7 +636,7 @@ static void panic_nand_get_device(struct nand_chip *chip,
 	chip->state = new_state;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 int nand_get_device(struct mtd_info *mtd, int new_state)
 #else  
 static int
@@ -672,7 +672,7 @@ retry:
 	remove_wait_queue(wq, &wait);
 	goto retry;
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(nand_get_device);
 #endif  
 
@@ -1137,7 +1137,7 @@ static int nand_read_page_syndrome(struct mtd_info *mtd, struct nand_chip *chip,
 	return max_bitflips;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 uint8_t *nand_transfer_oob(struct nand_chip *chip, uint8_t *oob,
 				  struct mtd_oob_ops *ops, size_t len)
 #else  
@@ -1182,11 +1182,11 @@ static uint8_t *nand_transfer_oob(struct nand_chip *chip, uint8_t *oob,
 	}
 	return NULL;
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(nand_transfer_oob);
 #endif  
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
 			    struct mtd_oob_ops *ops)
 #else  
@@ -1319,7 +1319,7 @@ static int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
 
 	return max_bitflips;
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(nand_do_read_ops);
 #endif  
 
@@ -1454,7 +1454,7 @@ static int nand_write_oob_syndrome(struct mtd_info *mtd,
 	return status & NAND_STATUS_FAIL ? -EIO : 0;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 int nand_do_read_oob(struct mtd_info *mtd, loff_t from,
 			    struct mtd_oob_ops *ops)
 #else  
@@ -1546,7 +1546,7 @@ static int nand_do_read_oob(struct mtd_info *mtd, loff_t from,
 
 	return  mtd->ecc_stats.corrected - stats.corrected ? -EUCLEAN : 0;
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(nand_do_read_oob);
 #endif  
 
@@ -1820,7 +1820,7 @@ static int nand_write_page(struct mtd_info *mtd, struct nand_chip *chip,
 	return 0;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 uint8_t *nand_fill_oob(struct mtd_info *mtd, uint8_t *oob, size_t len,
 			      struct mtd_oob_ops *ops)
 #else  
@@ -1869,13 +1869,13 @@ static uint8_t *nand_fill_oob(struct mtd_info *mtd, uint8_t *oob, size_t len,
 	}
 	return NULL;
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(nand_fill_oob);
 #endif  
 
 #define NOTALIGNED(x)	((x & (chip->subpagesize - 1)) != 0)
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 int nand_do_write_ops(struct mtd_info *mtd, loff_t to,
 			     struct mtd_oob_ops *ops)
 #else  
@@ -1992,7 +1992,7 @@ err_out:
 	chip->select_chip(mtd, -1);
 	return ret;
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(nand_do_write_ops);
 #endif  
 
@@ -2046,7 +2046,7 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 	return ret;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
 			     struct mtd_oob_ops *ops)
 #else  
@@ -2117,7 +2117,7 @@ static int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
 
 	return 0;
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(nand_do_write_oob);
 #endif  
 
@@ -2250,7 +2250,7 @@ int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 
 	while (len) {
 		 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if (!nand_erasebb &&
 			nand_block_checkbad(mtd, ((loff_t) page) <<
 					chip->page_shift, 0, allowbbt)) {
@@ -2347,7 +2347,7 @@ erase_exit:
 	return ret;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 void nand_sync(struct mtd_info *mtd)
 #else  
 static void nand_sync(struct mtd_info *mtd)
@@ -2359,7 +2359,7 @@ static void nand_sync(struct mtd_info *mtd)
 	 
 	nand_release_device(mtd);
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(nand_sync);
 #endif  
 
@@ -2413,7 +2413,7 @@ static int nand_onfi_get_features(struct mtd_info *mtd, struct nand_chip *chip,
 	return 0;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 int nand_suspend(struct mtd_info *mtd)
 #else  
 static int nand_suspend(struct mtd_info *mtd)
@@ -2422,7 +2422,7 @@ static int nand_suspend(struct mtd_info *mtd)
 	return nand_get_device(mtd, FL_PM_SUSPENDED);
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 void nand_resume(struct mtd_info *mtd)
 #else  
 static void nand_resume(struct mtd_info *mtd)
@@ -3383,7 +3383,7 @@ EXPORT_SYMBOL_GPL(nand_release);
 
 static int __init nand_base_init(void)
 {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #ifdef CONFIG_DEBUG_FS
 	file_erasebb = debugfs_create_u8("nanderasebb", 0644, NULL,
 					 &nand_erasebb);
@@ -3395,7 +3395,7 @@ static int __init nand_base_init(void)
 
 static void __exit nand_base_exit(void)
 {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #ifdef CONFIG_DEBUG_FS
 	debugfs_remove(file_erasebb);
 #endif

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #undef DEBUG
 
@@ -752,7 +749,7 @@ static int __exit sgiseeq_remove(struct platform_device *pdev)
 	dma_free_noncoherent(&pdev->dev, sizeof(*sp->srings), sp->srings,
 			     sp->srings_dma);
 	free_netdev(dev);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

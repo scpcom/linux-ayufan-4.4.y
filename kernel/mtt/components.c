@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/slab.h>
 #include <linux/kobject.h>
@@ -214,7 +211,7 @@ static struct mtt_component_obj *create_mtt_component_obj(int comp_id,
 							  int early)
 {
 	struct mtt_component_obj *mtt_component;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 	int retval;
 #endif  
@@ -229,7 +226,7 @@ static struct mtt_component_obj *create_mtt_component_obj(int comp_id,
 	mtt_component->active_filter = mtt_sys_config.filter;
 
 	if (!early) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		char sname[16];
 		const char *pname;
 

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt)	"(stc): " fmt
 #include <linux/module.h>
@@ -380,7 +377,7 @@ void st_tx_wakeup(struct st_data_s *st_data)
 	clear_bit(ST_TX_SENDING, &st_data->tx_state);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static void st_tx_wakeup_work(struct work_struct *work)
 {
 	struct st_data_s *st_data = container_of(work, struct st_data_s,
@@ -641,7 +638,7 @@ static void st_tty_wakeup(struct tty_struct *tty)
 	 
 	clear_bit(TTY_DO_WRITE_WAKEUP, &tty->flags);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	schedule_work(&st_gdata->wakeup_work);
 #else  
 	st_tx_wakeup((void *)st_gdata);
@@ -696,7 +693,7 @@ int st_core_init(struct st_data_s **core_data)
 
 	skb_queue_head_init(&st_gdata->txq);
 	skb_queue_head_init(&st_gdata->tx_waitq);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	INIT_WORK(&st_gdata->wakeup_work, st_tx_wakeup_work);
 #endif  
 

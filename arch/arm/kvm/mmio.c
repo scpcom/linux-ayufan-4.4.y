@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kvm_host.h>
 #include <asm/kvm_mmio.h>
@@ -80,7 +77,7 @@ static int decode_hsr(struct kvm_vcpu *vcpu, phys_addr_t fault_ipa,
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
  
 static int kvm_arm_mmio_read_write(struct kvm_vcpu *vcpu, struct kvm_run *run,
 		 struct kvm_exit_mmio *mmio)
@@ -134,7 +131,7 @@ int io_mem_abort(struct kvm_vcpu *vcpu, struct kvm_run *run,
 	if (vgic_handle_mmio(vcpu, run, &mmio))
 		return 1;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (kvm_arm_mmio_read_write(vcpu, run, &mmio))
 		return 1;
 #endif  

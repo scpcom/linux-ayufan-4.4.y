@@ -1,12 +1,9 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #include <linux/zutil.h>
 #include <linux/errno.h>
 #include <linux/slab.h>
 #include <linux/vmalloc.h>
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static int zlib_inflate_data(void *unzip_buf, unsigned int sz,
 		      const void *buf, unsigned int len, int header)
 #else  
@@ -18,7 +15,7 @@ int zlib_inflate_blob(void *gunzip_buf, unsigned int sz,
 	const u8 *zbuf = buf;
 	struct z_stream_s *strm;
 	int rc;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	int windowBits = header ? MAX_WBITS : -MAX_WBITS;
 #endif  
 
@@ -32,7 +29,7 @@ int zlib_inflate_blob(void *gunzip_buf, unsigned int sz,
 
 	strm->next_in = zbuf;
 	strm->avail_in = len;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	strm->next_out = unzip_buf;
 	strm->avail_out = sz;
 
@@ -60,7 +57,7 @@ gunzip_nomem2:
 gunzip_nomem1:
 	return rc;  
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 int zlib_inflate_blob(void *gunzip_buf, unsigned int sz,
 		      const void *buf, unsigned int len)

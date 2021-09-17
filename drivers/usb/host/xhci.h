@@ -577,7 +577,7 @@ struct xhci_virt_device {
 	struct xhci_tt_bw_info		*tt_info;
 	 
 	u16				current_mel;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
 	bool			disconnected;
 #endif  
 };
@@ -703,7 +703,7 @@ struct xhci_event_cmd {
 	__le32 flags;
 };
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 #define TRB_BSR		(1<<9)
 enum xhci_setup_dev {
@@ -986,13 +986,13 @@ struct xhci_bus_state {
 	unsigned long		resume_done[USB_MAXCHILDREN];
 	 
 	unsigned long		resuming_ports;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	unsigned long		rexit_ports;
 	struct completion	rexit_done[USB_MAXCHILDREN];
 #endif  
 };
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 #define	XHCI_MAX_REXIT_TIMEOUT	(20 * 1000)
 #endif  
@@ -1346,7 +1346,7 @@ int xhci_free_streams(struct usb_hcd *hcd, struct usb_device *udev,
 		struct usb_host_endpoint **eps, unsigned int num_eps,
 		gfp_t mem_flags);
 int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 int xhci_enable_device(struct usb_hcd *hcd, struct usb_device *udev);
 #endif  
 int xhci_update_device(struct usb_hcd *hcd, struct usb_device *udev);
@@ -1370,7 +1370,7 @@ struct xhci_segment *trb_in_td(struct xhci_segment *start_seg,
 int xhci_is_vendor_info_code(struct xhci_hcd *xhci, unsigned int trb_comp_code);
 void xhci_ring_cmd_db(struct xhci_hcd *xhci);
 int xhci_queue_slot_control(struct xhci_hcd *xhci, u32 trb_type, u32 slot_id);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 int xhci_queue_address_device(struct xhci_hcd *xhci, dma_addr_t in_ctx_ptr,
 		u32 slot_id, enum xhci_setup_dev);
 #else  

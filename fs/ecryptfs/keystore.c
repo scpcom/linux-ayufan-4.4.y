@@ -1067,14 +1067,14 @@ parse_tag_1_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	size_t body_size;
 	struct ecryptfs_auth_tok_list_item *auth_tok_list_item;
 	size_t length_size;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	u8 tag_version;
 #endif  
 	int rc = 0;
 
 	(*packet_size) = 0;
 	(*new_auth_tok) = NULL;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 #else  
 	 
@@ -1118,7 +1118,7 @@ parse_tag_1_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		rc = -EINVAL;
 		goto out_free;
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	tag_version = data[(*packet_size)++];
 	if (unlikely(tag_version != 0x03 && tag_version != 0x04)) {
 		printk(KERN_WARNING "Unknown version number [%d]\n",
@@ -1134,7 +1134,7 @@ parse_tag_1_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	ecryptfs_to_hex((*new_auth_tok)->token.private_key.signature,
 			&data[(*packet_size)], ECRYPTFS_SIG_SIZE);
 	*packet_size += ECRYPTFS_SIG_SIZE;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (tag_version == 0x03) {
 		 
 		(*packet_size)++;
@@ -1196,7 +1196,7 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	size_t body_size;
 	struct ecryptfs_auth_tok_list_item *auth_tok_list_item;
 	size_t length_size;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	size_t min_body_size;
 	u8 file_version;
 #endif  
@@ -1204,13 +1204,13 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 
 	(*packet_size) = 0;
 	(*new_auth_tok) = NULL;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 #else  
 	 
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 	min_body_size = (1  
 			   + 1  
@@ -1248,7 +1248,7 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		       rc);
 		goto out_free;
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (unlikely(body_size < min_body_size)) {
 #else  
 	if (unlikely(body_size < (ECRYPTFS_SALT_SIZE + 5))) {
@@ -1263,7 +1263,7 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		rc = -EINVAL;
 		goto out_free;
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	file_version = data[(*packet_size)++];
 	if (unlikely(file_version != 0x04 && file_version != 0x05)) {
 		printk(KERN_WARNING "Unknown version number [%d]\n",
@@ -1288,7 +1288,7 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		rc = -EINVAL;
 		goto out_free;
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 #else  
 	if (unlikely(data[(*packet_size)++] != 0x04)) {
@@ -1311,7 +1311,7 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		crypt_stat->key_size =
 			(*new_auth_tok)->session_key.encrypted_key_size;
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 	if (file_version != 0x04) {
 		rc = ecryptfs_cipher_mode_code_to_string(
@@ -1819,7 +1819,7 @@ write_tag_1_packet(char *dest, size_t *remaining_bytes,
 	size_t encrypted_session_key_valid = 0;
 	size_t packet_size_length;
 	size_t max_packet_size;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	u8 cipher_mode_code;
 #endif  
 	int rc = 0;
@@ -1859,7 +1859,7 @@ encrypted_session_key_set:
 			   + 3                        
 			   + 1                        
 			   + ECRYPTFS_SIG_SIZE        
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			   + 1                        
 #else  
 			   + 1                        
@@ -1882,7 +1882,7 @@ encrypted_session_key_set:
 		goto out;
 	}
 	(*packet_size) += packet_size_length;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	cipher_mode_code =
 		ecryptfs_code_for_cipher_mode_string(crypt_stat->cipher_mode);
 	if (cipher_mode_code == 0) {
@@ -1984,7 +1984,7 @@ write_tag_3_packet(char *dest, size_t *remaining_bytes,
 	struct scatterlist src_sg[2];
 	struct mutex *tfm_mutex = NULL;
 	u8 cipher_code;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	u8 cipher_mode_code;
 #endif  
 	size_t packet_size_length;
@@ -2111,7 +2111,7 @@ write_tag_3_packet(char *dest, size_t *remaining_bytes,
 	}
 encrypted_session_key_set:
 	 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 	cipher_mode_code =
 		ecryptfs_code_for_cipher_mode_string(crypt_stat->cipher_mode);
@@ -2134,7 +2134,7 @@ encrypted_session_key_set:
 			   + 1                        
 			   + key_rec->enc_key_size);  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (cipher_mode_code != ECRYPTFS_CIPHER_MODE_CBC) {
 		max_packet_size += 1;  
 	}
@@ -2158,7 +2158,7 @@ encrypted_session_key_set:
 		goto out;
 	}
 	(*packet_size) += packet_size_length;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 	if (cipher_mode_code == ECRYPTFS_CIPHER_MODE_CBC) {
 			dest[(*packet_size)++] = 0x04;
@@ -2179,7 +2179,7 @@ encrypted_session_key_set:
 	}
 
 	dest[(*packet_size)++] = cipher_code;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (cipher_mode_code != ECRYPTFS_CIPHER_MODE_CBC)
 		dest[(*packet_size)++] = cipher_mode_code;
 #endif  

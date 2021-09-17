@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/bitops.h>
 #include <linux/device.h>
@@ -124,7 +121,7 @@ int fdtv_stop_feed(struct dvb_demux_feed *dvbdmxfeed)
 	      (demux->dmx.frontend->source != DMX_MEMORY_FE))) {
 
 		if (dvbdmxfeed->ts_type & TS_DECODER) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 			if (dvbdmxfeed->pes_type >= DMX_PES_LAST ||
 			    !demux->pesfilter[dvbdmxfeed->pes_type])
 				return -EINVAL;
@@ -138,7 +135,7 @@ int fdtv_stop_feed(struct dvb_demux_feed *dvbdmxfeed)
 			demux->pesfilter[dvbdmxfeed->pes_type] = NULL;
 		}
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if (!(dvbdmxfeed->ts_type & TS_DECODER &&
 		      dvbdmxfeed->pes_type < DMX_PES_LAST))
 			return 0;

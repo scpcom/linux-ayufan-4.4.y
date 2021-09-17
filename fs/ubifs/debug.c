@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/debugfs.h>
@@ -242,7 +239,7 @@ void ubifs_dump_inode(struct ubifs_info *c, const struct inode *inode)
 	       (unsigned long long)ui->ui_size);
 	pr_err("\tflags          %d\n", ui->flags);
 	pr_err("\tcompr_type     %d\n", ui->compr_type);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 	pr_err("\tlast_page_read %llu\n", (unsigned long long)ui->last_page_read);
 	pr_err("\tread_in_a_row  %llu\n", (unsigned long long)ui->read_in_a_row);
 #else  

@@ -47,7 +47,7 @@ EXPORT_PER_CPU_SYMBOL_GPL(cpu_data);
 
 struct secondary_data secondary_data;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 volatile int pen_release = -1;
 #else  
 volatile int __cpuinitdata pen_release = -1;
@@ -249,7 +249,7 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 	local_irq_enable();
 	local_fiq_enable();
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	asm volatile("cpsie	a");
 #endif  
@@ -259,7 +259,7 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 
 void __init smp_cpus_done(unsigned int max_cpus)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	printk(KERN_INFO "SMP: Total of %d processors activated.\n",
 	       num_online_cpus());
 #else  
@@ -387,7 +387,7 @@ static void __cpuinit broadcast_timer_setup(struct clock_event_device *evt)
 	evt->features	= CLOCK_EVT_FEAT_ONESHOT |
 			  CLOCK_EVT_FEAT_PERIODIC |
 			  CLOCK_EVT_FEAT_DUMMY;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	evt->rating	= 400;
 #else  
 	evt->rating	= 100;

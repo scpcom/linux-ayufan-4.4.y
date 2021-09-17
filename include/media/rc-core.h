@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _RC_CORE
 #define _RC_CORE
@@ -39,7 +36,7 @@ struct rc_dev {
 	bool				idle;
 	u64				allowed_protos;
 	u64				enabled_protocols;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	u32				users;
 #endif  
 	u32				scanmask;
@@ -75,7 +72,7 @@ struct rc_dev *rc_allocate_device(void);
 void rc_free_device(struct rc_dev *dev);
 int rc_register_device(struct rc_dev *dev);
 void rc_unregister_device(struct rc_dev *dev);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 int rc_open(struct rc_dev *rdev);
 void rc_close(struct rc_dev *rdev);

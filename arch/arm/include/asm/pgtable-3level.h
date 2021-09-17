@@ -1,11 +1,8 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _ASM_PGTABLE_3LEVEL_H
 #define _ASM_PGTABLE_3LEVEL_H
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
 #define PTRS_PER_PTE		(512 >> (CONFIG_ARM_PAGE_SIZE_LARGE_SHIFT - 12))
 #else  
 #define PTRS_PER_PTE		512
@@ -15,7 +12,7 @@
 
 #define PTE_HWTABLE_PTRS	(0)
 #define PTE_HWTABLE_OFF		(0)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define PTE_HWTABLE_SIZE	(512 * 8)  
 #define PTE_HWTABLE_MASK	(~(PTE_HWTABLE_SIZE-1))
 #else  
@@ -37,7 +34,7 @@
 
 #define USER_PTRS_PER_PGD	(PAGE_OFFSET / PGDIR_SIZE)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
  
 #define HPAGE_SHIFT		PMD_SHIFT
 #define HPAGE_SIZE		(_AC(1, UL) << HPAGE_SHIFT)
@@ -57,7 +54,7 @@
 #define L_PTE_NONE		(_AT(pteval_t, 1) << 57)	 
 #define L_PTE_RDONLY		(_AT(pteval_t, 1) << 58)	 
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define PMD_SECT_VALID		(_AT(pmdval_t, 1) << 0)
 #define PMD_SECT_DIRTY		(_AT(pmdval_t, 1) << 55)
 #define PMD_SECT_SPLITTING	(_AT(pmdval_t, 1) << 56)
@@ -112,7 +109,7 @@
 
 static inline pmd_t *pud_page_vaddr(pud_t pud)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	return __va(pud_val(pud) & PHYS_MASK & (s32)PTE_HWTABLE_MASK);
 #else  
 	return __va(pud_val(pud) & PHYS_MASK & (s32)PAGE_MASK);
@@ -147,7 +144,7 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,__pte(pte_val(pte)|(ext)))
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define pte_huge(pte)		(pte_val(pte) && !(pte_val(pte) & PTE_TABLE_BIT))
 #define pte_mkhuge(pte)		(__pte(pte_val(pte) & ~PTE_TABLE_BIT))
 

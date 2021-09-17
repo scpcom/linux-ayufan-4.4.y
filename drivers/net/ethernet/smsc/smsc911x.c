@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -2070,7 +2067,7 @@ static int smsc911x_drv_remove(struct platform_device *pdev)
 	mdiobus_unregister(pdata->mii_bus);
 	mdiobus_free(pdata->mii_bus);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  
@@ -2321,7 +2318,7 @@ out_disable_resources:
 out_enable_resources_fail:
 	smsc911x_free_resources(pdev);
 out_request_resources_fail:
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

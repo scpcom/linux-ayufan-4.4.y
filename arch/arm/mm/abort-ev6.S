@@ -35,13 +35,13 @@ ENTRY(v6_early_abort)
 	bne	do_DataAbort
 	bic	r1, r1, #1 << 11		@ clear bit 11 of FSR
 	ldr	r3, [r4]			@ read aborted ARM instruction
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(MY_ABC_HERE)
  ARM_BE8(rev	r3, r3)
-#else /* MY_DEF_HERE || MY_ABC_HERE */
+#else /* CONFIG_SYNO_LSP_ALPINE || MY_ABC_HERE */
 #ifdef CONFIG_CPU_ENDIAN_BE8
 	rev	r3, r3
 #endif
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif /* CONFIG_SYNO_LSP_ALPINE || MY_ABC_HERE */
 
 	do_ldrd_abort tmp=ip, insn=r3
 	tst	r3, #1 << 20			@ L = 0 -> write

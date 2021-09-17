@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/clk-provider.h>
 #include <linux/module.h>
@@ -25,7 +22,7 @@ static unsigned int _get_table_maxdiv(const struct clk_div_table *table)
 	return maxdiv;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static unsigned int _get_table_mindiv(const struct clk_div_table *table)
 {
 	unsigned int mindiv = UINT_MAX;
@@ -134,7 +131,7 @@ static bool _is_valid_div(struct clk_divider *divider, unsigned int div)
 	return true;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static int _round_up_table(const struct clk_div_table *table, int div)
 {
 	const struct clk_div_table *clkt;
@@ -239,7 +236,7 @@ static int clk_divider_bestdiv(struct clk_hw *hw, unsigned long rate,
 	struct clk_divider *divider = to_clk_divider(hw);
 	int i, bestdiv = 0;
 	unsigned long parent_rate, best = 0, now, maxdiv;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	unsigned long parent_rate_saved = *best_parent_rate;
 #endif  
 
@@ -250,7 +247,7 @@ static int clk_divider_bestdiv(struct clk_hw *hw, unsigned long rate,
 
 	if (!(__clk_get_flags(hw->clk) & CLK_SET_RATE_PARENT)) {
 		parent_rate = *best_parent_rate;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		bestdiv = _div_round(divider, parent_rate, rate);
 #else  
 		bestdiv = DIV_ROUND_UP(parent_rate, rate);
@@ -262,7 +259,7 @@ static int clk_divider_bestdiv(struct clk_hw *hw, unsigned long rate,
 
 	maxdiv = min(ULONG_MAX / rate, maxdiv);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	for (i = 1; i <= maxdiv; i = _next_div(divider, i)) {
 		if (!_is_valid_div(divider, i))
 			continue;
@@ -321,7 +318,7 @@ static int clk_divider_set_rate(struct clk_hw *hw, unsigned long rate,
 	u32 val;
 
 	div = parent_rate / rate;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (!_is_valid_div(divider, div))
 		return -EINVAL;
 #endif  

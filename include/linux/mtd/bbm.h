@@ -59,7 +59,7 @@ struct nand_bbt_descr {
  
 #define NAND_BBT_NO_OOB_BBM	0x00080000
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 #define NAND_BBT_SCANSTMBOOTECC	0x00080000
 #define NAND_BBT_SCANSTMAFMECC	0x00100000
@@ -80,7 +80,7 @@ struct nand_bbt_descr {
 #define NAND_SMALL_BADBLOCK_POS		5
 #define NAND_LARGE_BADBLOCK_POS		0
 #define ONENAND_BADBLOCK_POS		0
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 #define NAND_BBM_PAGE_0		0x00000001
 #define NAND_BBM_PAGE_1		0x00000002

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -35,9 +32,9 @@
 #include <linux/prefetch.h>
 #include <linux/cache.h>
 #include <linux/i2c.h>
-#if defined(MY_DEF_HERE) || \
-	defined(MY_DEF_HERE) || \
-	defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE_SUPPORT_WOL) || \
+	defined(CONFIG_SYNO_ALPINE_CHANGE_RJ45_LED_BEHAVIOR) || \
+	defined(CONFIG_SYNO_ALPINE_AQR107_PHY)
 #include <linux/synobios.h>
 #endif  
 
@@ -124,11 +121,11 @@ struct al_udma *al_eth_udma_get(struct al_eth_adapter *adapter, int tx)
 #define AL_ETH_MDIO_C45_DEV_SHIFT	16
 #define AL_ETH_MDIO_C45_REG_MASK	0xffff
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_AQR107_PHY
 static struct mii_bus *BUS_P = NULL;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_AQR107_PHY
 static int
 __al_mdio_read(struct mii_bus *bp, int mii_id, int reg)
 {
@@ -227,7 +224,7 @@ al_mdio_read(struct mii_bus *bp, int mii_id, int reg)
 }
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_AQR107_PHY
 static int
 __al_mdio_write(struct mii_bus *bp, int mii_id, int reg, u16 val)
 {
@@ -330,14 +327,14 @@ static int al_eth_ioctl(struct net_device *netdev, struct ifreq *ifr, int cmd)
 	struct mii_ioctl_data *mdio = if_mii(ifr);
 	struct phy_device *phydev;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_AQR107_PHY
 	al_dbg("ioctl: phy id 0x%x, reg 0x%x, val_in 0x%x\n",
 #else  
 	netdev_info(adapter->netdev, "ioctl: phy id 0x%x, reg 0x%x, val_in 0x%x\n",
 #endif  
 			mdio->phy_id, mdio->reg_num, mdio->val_in);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	 
 	if (!adapter->up)
 		return -EBUSY;
@@ -358,7 +355,7 @@ static void al_eth_down(struct al_eth_adapter *adapter);
 static int al_eth_up(struct al_eth_adapter *adapter);
 static void al_eth_serdes_mode_set(struct al_eth_adapter *adapter);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_CHANGE_RJ45_LED_BEHAVIOR
  
 static void syno_update_rtl8211e_led(struct phy_device *phydev, enum al_eth_mac_mode mac_mode_needed)
 {
@@ -404,7 +401,7 @@ static void al_eth_adjust_link(struct net_device *dev)
 	enum al_eth_mac_mode mac_mode_needed = AL_ETH_MAC_MODE_RGMII;
 	int new_state = 0;
 	int force_1000_base_x = false;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_AQR107_PHY
 	enum al_eth_mac_mode syno_mac_mode_needed = AL_ETH_MAC_MODE_SGMII;
 #endif  
 
@@ -420,7 +417,7 @@ static void al_eth_adjust_link(struct net_device *dev)
 			case SPEED_1000:
 			case SPEED_100:
 			case SPEED_10:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_AQR107_PHY
 				if (syno_is_hw_version(HW_DS1817)) {
 					syno_mac_mode_needed = AL_ETH_MAC_MODE_10GbE_Serial;
 				} else {
@@ -429,13 +426,13 @@ static void al_eth_adjust_link(struct net_device *dev)
 #endif  
 				mac_mode_needed = (adapter->mac_mode == AL_ETH_MAC_MODE_RGMII) ?
 							AL_ETH_MAC_MODE_RGMII:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_AQR107_PHY
 							syno_mac_mode_needed;
 #else  
 							AL_ETH_MAC_MODE_SGMII;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_CHANGE_RJ45_LED_BEHAVIOR
 				if (!syno_is_hw_version(HW_DS2015xs)) {
 					if (syno_is_hw_version(HW_DS1817)) {
 						syno_update_rtl8211e_led(phydev, mac_mode_needed);
@@ -515,7 +512,7 @@ static void al_eth_adjust_link(struct net_device *dev)
 		phy_print_status(phydev);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_AQR107_PHY
 static void syno_update_aqr107_led(struct phy_device *phydev)
 {
 	u32 temp = 0;
@@ -564,7 +561,7 @@ static int al_eth_phy_init(struct al_eth_adapter *adapter)
 
 	phydev->supported &= (PHY_GBIT_FEATURES |
 				SUPPORTED_Pause |
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_AQR107_PHY
 				SUPPORTED_Asym_Pause |
 				SUPPORTED_10000baseT_Full);
 #else  
@@ -579,7 +576,7 @@ static int al_eth_phy_init(struct al_eth_adapter *adapter)
 	adapter->phydev = phydev;
 	 
 	phy_start(adapter->phydev);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_AQR107_PHY
 	if (syno_is_hw_version(HW_DS1817)) {
 		syno_update_aqr107_led(phydev);
 	}
@@ -602,7 +599,7 @@ static int al_eth_mdiobus_setup(struct al_eth_adapter *adapter)
 		 (adapter->pdev->bus->number << 8) | adapter->pdev->devfn);
 	adapter->mdio_bus->priv     = adapter;
 	adapter->mdio_bus->parent   = &adapter->pdev->dev;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_AQR107_PHY
 	adapter->mdio_bus->read     = &__al_mdio_read;
 	adapter->mdio_bus->write    = &__al_mdio_write;
 #else  
@@ -770,7 +767,7 @@ al_eth_board_params_init(struct al_eth_adapter *adapter)
 		adapter->phy_exist = false;
 		adapter->an_en = false;
 		adapter->lt_en = false;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
 		adapter->rx_eq_en = true;
 #endif  
 		adapter->ref_clk_freq = AL_ETH_REF_FREQ_375_MHZ;
@@ -781,7 +778,7 @@ al_eth_board_params_init(struct al_eth_adapter *adapter)
 		adapter->phy_exist = false;
 		adapter->an_en = false;
 		adapter->lt_en = false;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
 		adapter->rx_eq_en = true;
 #endif  
 		adapter->ref_clk_freq = AL_ETH_REF_FREQ_375_MHZ;
@@ -802,7 +799,7 @@ al_eth_board_params_init(struct al_eth_adapter *adapter)
 		adapter->phy_addr = params.phy_mdio_addr;
 		adapter->an_en = params.autoneg_enable;
 		adapter->lt_en = params.kr_lt_enable;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
 		adapter->rx_eq_en = true;
 #endif  
 		adapter->serdes_grp = params.serdes_grp;
@@ -812,7 +809,7 @@ al_eth_board_params_init(struct al_eth_adapter *adapter)
 		adapter->ref_clk_freq = params.ref_clk_freq;
 		adapter->dont_override_serdes = params.dont_override_serdes;
 		adapter->link_config.active_duplex = !params.half_duplex;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 		adapter->link_config.autoneg = !params.an_disable;
 #else  
 		adapter->link_config.autoneg = (adapter->phy_exist) ?
@@ -1972,7 +1969,7 @@ static	struct sk_buff *al_eth_rx_skb(struct al_eth_adapter *adapter,
 
 	skb->len += len;
 	skb->data_len += len;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_SKB_TRUESIZE_ADJUST
 	skb->truesize += 2048;  
 #else  
 	skb->truesize += len;
@@ -2411,7 +2408,7 @@ al_eth_setup_int_mode(struct al_eth_adapter *adapter, int dis_msi)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 static void al_eth_set_coalesce(
 			struct al_eth_adapter *adapter,
 			unsigned int tx_usecs,
@@ -2459,7 +2456,7 @@ al_eth_configure_int_mode(struct al_eth_adapter *adapter)
 	al_iofic_moder_res_config(&((struct unit_regs *)(adapter->udma_base))->gen.interrupt_regs.main_iofic, AL_INT_GROUP_B, 15);
 	al_iofic_moder_res_config(&((struct unit_regs *)(adapter->udma_base))->gen.interrupt_regs.main_iofic, AL_INT_GROUP_C, 15);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 	al_eth_set_coalesce(adapter, 208, 112);
 #endif  
 	return 0;
@@ -2471,7 +2468,7 @@ al_eth_request_irq(struct al_eth_adapter *adapter)
 	unsigned long flags;
 	struct al_eth_irq *irq;
 	int rc = 0, i;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 	const char *device_name = dev_name(adapter->netdev->dev.parent);
 	int cpu = 0;
 #endif  
@@ -2495,7 +2492,7 @@ al_eth_request_irq(struct al_eth_adapter *adapter)
 					    " to 0x%lx (irq vector: %d)\n",
 					    i, irq->affinity_hint_mask.bits[0], irq->vector);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 		 
 		if (strlen(device_name) >= 10) {
 			cpu = (int)(device_name[9] - '0');
@@ -3263,7 +3260,7 @@ static void al_eth_link_status_task(struct work_struct *work)
 #endif
 
 	if ((rc == 0) && (link_up == true)) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
 		netdev_dbg(adapter->netdev, "%s link up\n", __func__);
 #else  
 		netdev_info(adapter->netdev, "%s link up\n", __func__);
@@ -3332,7 +3329,7 @@ static void al_eth_lm_config(struct al_eth_adapter *adapter)
 	}
 
 	params.link_training = adapter->lt_en;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
 	params.rx_equal = adapter->rx_eq_en;
 #else  
 	params.rx_equal = true;
@@ -3494,7 +3491,7 @@ al_eth_get_settings(struct net_device *netdev, struct ethtool_cmd *ecmd)
 	if (phydev)
 		return phy_ethtool_gset(phydev, ecmd);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	if (adapter->mac_mode == AL_ETH_MAC_MODE_10GbE_Serial) {
 		ecmd->speed = SPEED_10000;
 		ecmd->autoneg = AUTONEG_DISABLE;
@@ -3874,7 +3871,7 @@ static void al_eth_get_wol(struct net_device *netdev,
 
 	wol->wolopts = adapter->wol;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	if (netdev->operstate == IF_OPER_UP) {
 #endif  
 	if ((adapter) && (adapter->phy_exist) && (adapter->mdio_bus)) {
@@ -3885,7 +3882,7 @@ static void al_eth_get_wol(struct net_device *netdev,
 			return;
 		}
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	}
 #endif  
 
@@ -3895,7 +3892,7 @@ static void al_eth_get_wol(struct net_device *netdev,
 static int al_eth_set_wol(struct net_device *netdev, struct ethtool_wolinfo *wol)
 {
 	struct al_eth_adapter *adapter = netdev_priv(netdev);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	 
 #else  
 	struct phy_device *phydev;
@@ -3906,7 +3903,7 @@ static int al_eth_set_wol(struct net_device *netdev, struct ethtool_wolinfo *wol
 
 	adapter->wol = wol->wolopts;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	 
 #else  
 	if ((adapter) && (adapter->phy_exist) && (adapter->mdio_bus)) {
@@ -3921,7 +3918,7 @@ static int al_eth_set_wol(struct net_device *netdev, struct ethtool_wolinfo *wol
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_SUPPORT_WOL
 #define MAC_ADDR_LEN (6)
 
 void syno_alpine_wol_set_wrapper(unsigned int device)
@@ -3930,7 +3927,7 @@ void syno_alpine_wol_set_wrapper(unsigned int device)
 	unsigned short szMacTmp[MAC_ADDR_LEN/2] = {'0'};
 	struct al_eth_adapter *priv = NULL;
 	struct pci_dev *pcidev = NULL;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
 	uint16_t tmp_val = 0;
 	int tmp_val32 = 0, reg_gbsr = 0, reg_insr = 0, reg_rxerc = 0;
 #endif
@@ -3951,7 +3948,7 @@ void syno_alpine_wol_set_wrapper(unsigned int device)
 			continue;
 		}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
 		phy_write(priv->phydev, 31, 0x0);
 		reg_gbsr = phy_read(priv->phydev, 0x0a);
 		printk("phy reg MII_STAT1000 is 0x%08x\n", reg_gbsr);
@@ -3970,7 +3967,7 @@ void syno_alpine_wol_set_wrapper(unsigned int device)
 			szMacTmp[idx] = (priv->netdev->dev_addr[idx*2] & 0xff) | (priv->netdev->dev_addr[idx*2 + 1] & 0xff) << 8;
 		}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
 		if ((0 != (reg_gbsr & 0xff)) || (0 != (reg_insr & 0x300)) || (0 != (reg_rxerc & 0xffff))) {
 			 
 			printk("WA: Reset Phy first to avoid from WOL error..\n");
@@ -3994,7 +3991,7 @@ void syno_alpine_wol_set_wrapper(unsigned int device)
 		phy_write(priv->phydev, 30, 0x6D);
 		phy_write(priv->phydev, 21, 0x1000);
 		phy_write(priv->phydev, 31, 0x0000);  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
 		if (syno_is_hw_version(HW_DS1515) || syno_is_hw_version(HW_DS1517) || syno_is_hw_version(HW_RS1219)) {
 			phy_write(priv->phydev, 31, 0x0003);  
 		}
@@ -4296,7 +4293,7 @@ static const struct net_device_ops al_eth_netdev_ops = {
 	.ndo_set_features       = al_set_features,
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_AQR107_PHY
 struct mii_bus *al_get_mdiobus_by_name(const char *ethname)
 {
 	struct mii_bus *bus_p = BUS_P;
@@ -4536,7 +4533,7 @@ al_eth_remove(struct pci_dev *pdev)
 		writel(0, adapter->internal_pcie_base + 0x1800000 + 0x1210);
 
 	al_eth_hw_stop(adapter);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_AQR107_PHY
 	if (adapter->mdio_bus)
 	{
 		if (adapter->mdio_bus->irq)

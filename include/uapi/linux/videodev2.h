@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _UAPI__LINUX_VIDEODEV2_H
 #define _UAPI__LINUX_VIDEODEV2_H
@@ -67,7 +64,7 @@ enum v4l2_buf_type {
 #endif
 	V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE = 9,
 	V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE  = 10,
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	V4L2_BUF_TYPE_DVB_CAPTURE	   = 11,
 	V4L2_BUF_TYPE_DVB_OUTPUT	   = 12,
@@ -81,7 +78,7 @@ enum v4l2_buf_type {
 	((type) == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE	\
 	 || (type) == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE)
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define V4L2_TYPE_IS_OUTPUT(type)				\
 	((type) == V4L2_BUF_TYPE_VIDEO_OUTPUT			\
 	 || (type) == V4L2_BUF_TYPE_DVB_OUTPUT			\
@@ -187,7 +184,7 @@ struct v4l2_capability {
 #define V4L2_CAP_RADIO			0x00040000   
 #define V4L2_CAP_MODULATOR		0x00080000   
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 #define V4L2_CAP_DVB_CAPTURE		0x00100000   
 #define V4L2_CAP_DVB_OUTPUT		0x00200000   
@@ -198,7 +195,7 @@ struct v4l2_capability {
 #define V4L2_CAP_STREAMING              0x04000000   
 
 #define V4L2_CAP_DEVICE_CAPS            0x80000000   
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 struct v4l2_dvb_format {
 	__u32 data_type;
@@ -282,7 +279,7 @@ struct v4l2_pix_format {
 #define V4L2_PIX_FMT_NV21M   v4l2_fourcc('N', 'M', '2', '1')  
 #define V4L2_PIX_FMT_NV12MT  v4l2_fourcc('T', 'M', '1', '2')  
 #define V4L2_PIX_FMT_NV12MT_16X16 v4l2_fourcc('V', 'M', '1', '2')  
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 #define V4L2_PIX_FMT_NV16M   v4l2_fourcc('N', 'M', '1', '6')  
 #define V4L2_PIX_FMT_NV24M   v4l2_fourcc('N', 'M', '2', '4')  
@@ -1257,7 +1254,7 @@ struct v4l2_format {
 		struct v4l2_window		win;      
 		struct v4l2_vbi_format		vbi;      
 		struct v4l2_sliced_vbi_format	sliced;   
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		struct v4l2_dvb_format		dvb;	  
 #endif  
 		__u8	raw_data[200];                    
@@ -1278,7 +1275,7 @@ struct v4l2_streamparm {
 #define V4L2_EVENT_EOS				2
 #define V4L2_EVENT_CTRL				3
 #define V4L2_EVENT_FRAME_SYNC			4
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define V4L2_EVENT_SOURCE_CHANGE		5
 #endif  
 #define V4L2_EVENT_PRIVATE_START		0x08000000
@@ -1309,7 +1306,7 @@ struct v4l2_event_ctrl {
 struct v4l2_event_frame_sync {
 	__u32 frame_sequence;
 };
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define V4L2_EVENT_SRC_CH_RESOLUTION		(1 << 0)
 
 struct v4l2_event_src_change {
@@ -1323,7 +1320,7 @@ struct v4l2_event {
 		struct v4l2_event_vsync		vsync;
 		struct v4l2_event_ctrl		ctrl;
 		struct v4l2_event_frame_sync	frame_sync;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		struct v4l2_event_src_change	src_change;
 #endif  
 		__u8				data[64];

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "xfs.h"
 #include "xfs_fs.h"
@@ -872,7 +869,7 @@ xlog_iodone(xfs_buf_t *bp)
 
 	ASSERT(XFS_BUF_ISASYNC(bp));
 	xlog_state_done_syncing(iclog, aborted);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	xfs_buf_unlock(bp);
 #else  
@@ -1029,7 +1026,7 @@ xlog_alloc_log(
 	if (!bp)
 		goto out_free_log;
 	bp->b_iodone = xlog_iodone;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	ASSERT(xfs_buf_islocked(bp));
 	xfs_buf_unlock(bp);
@@ -1060,7 +1057,7 @@ xlog_alloc_log(
 		if (!bp)
 			goto out_free_iclog;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		ASSERT(xfs_buf_islocked(bp));
 		xfs_buf_unlock(bp);
 
@@ -1089,7 +1086,7 @@ xlog_alloc_log(
 		iclog->ic_callback_tail = &(iclog->ic_callback);
 		iclog->ic_datap = (char *)iclog->ic_data + log->l_iclog_hsize;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 		ASSERT(xfs_buf_islocked(iclog->ic_bp));
 #endif  
@@ -1262,7 +1259,7 @@ xlog_bdstrat(
 {
 	struct xlog_in_core	*iclog = bp->b_fspriv;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	xfs_buf_lock(bp);
 #endif  
 	if (iclog->ic_state & XLOG_STATE_IOERROR) {
@@ -1413,7 +1410,7 @@ xlog_dealloc_log(
 
 	xlog_cil_destroy(log);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	iclog = log->l_iclog;
 	for (i = 0; i < log->l_iclog_bufs; i++) {

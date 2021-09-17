@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __ASM_SPINLOCK_H
 #define __ASM_SPINLOCK_H
 
@@ -35,7 +32,7 @@ static inline void dsb_sev(void)
 {
 #if __LINUX_ARM_ARCH__ >= 7
 	__asm__ __volatile__ (
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		"dsb ishst\n"
 #else  
 		"dsb\n"
@@ -56,7 +53,7 @@ static inline void dsb_sev(void)
 
 #define arch_spin_lock_flags(lock, flags) arch_spin_lock(lock)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #ifdef CONFIG_ARCH_ALPINE
 extern unsigned int al_spin_lock_wfe_enable;
 #else  
@@ -81,7 +78,7 @@ static inline void arch_spin_lock(arch_spinlock_t *lock)
 	: "cc");
 
 	while (lockval.tickets.next != lockval.tickets.owner) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		if (al_spin_lock_wfe_enable)
 			wfe();
 #else  
@@ -122,7 +119,7 @@ static inline void arch_spin_unlock(arch_spinlock_t *lock)
 {
 	smp_mb();
 	lock->tickets.owner++;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (al_spin_lock_wfe_enable)
 		dsb_sev();
 #else  

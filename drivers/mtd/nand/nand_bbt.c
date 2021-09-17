@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/slab.h>
 #include <linux/types.h>
@@ -49,11 +46,11 @@ static int check_pattern(uint8_t *buf, int len, int paglen, struct nand_bbt_desc
 
 static int check_short_pattern(uint8_t *buf, struct nand_bbt_descr *td)
 {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	int ooblen, e, i = 0;
 #endif  
 	 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (memcmp(buf + td->offs, td->pattern, td->len))
 			goto check_stm_ecc;
 #else  
@@ -61,7 +58,7 @@ static int check_short_pattern(uint8_t *buf, struct nand_bbt_descr *td)
 		return -1;
 #endif  
 	return 0;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  check_stm_ecc:
 	 
 	if (td->options & NAND_BBT_SCANSTMBOOTECC) {
@@ -219,7 +216,7 @@ static int scan_read_oob(struct mtd_info *mtd, uint8_t *buf, loff_t offs,
 	struct mtd_oob_ops ops;
 	int res, ret = 0;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	ops.mode = MTD_OPS_RAW;
 #else  
 	ops.mode = MTD_OPS_PLACE_OOB;
@@ -1042,7 +1039,7 @@ static struct nand_bbt_descr bbt_mirror_no_oob_descr = {
 	.pattern = mirror_pattern
 };
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 static struct nand_bbt_descr bbt_main_descr_ode = {
 	.options = NAND_BBT_LASTBLOCK | NAND_BBT_CREATE | NAND_BBT_WRITE
@@ -1109,7 +1106,7 @@ int nand_default_bbt(struct mtd_info *mtd)
 			if (this->bbt_options & NAND_BBT_NO_OOB) {
 				this->bbt_td = &bbt_main_no_oob_descr;
 				this->bbt_md = &bbt_mirror_no_oob_descr;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 			} else if (this->ecc.mode == NAND_ECC_4BITONDIE) {
 				this->bbt_td = &bbt_main_descr_ode;
 				this->bbt_md = &bbt_mirror_descr_ode;
@@ -1153,13 +1150,13 @@ int nand_isbad_bbt(struct mtd_info *mtd, loff_t offs, int allowbbt)
 	}
 	return 1;
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(nand_isbad_bbt);
 #endif  
 
 EXPORT_SYMBOL(nand_scan_bbt);
 EXPORT_SYMBOL(nand_default_bbt);
 EXPORT_SYMBOL_GPL(nand_update_bbt);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #include "stm_nand_bbt.c"
 #endif  

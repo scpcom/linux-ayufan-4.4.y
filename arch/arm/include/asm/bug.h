@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _ASMARM_BUG_H
 #define _ASMARM_BUG_H
 
@@ -23,7 +20,7 @@
 
 #ifdef CONFIG_DEBUG_BUGVERBOSE
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define __BUG(__file, __line, __value)				\
 do {								\
 	asm volatile("1:\t" BUG_INSTR(__value) "\n"  \
@@ -53,7 +50,7 @@ do {								\
 
 #else   
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define __BUG(__file, __line, __value)				\
 do {								\
 	asm volatile(BUG_INSTR(__value) "\n");			\

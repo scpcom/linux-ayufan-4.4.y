@@ -1,9 +1,6 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/platform_device.h>
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #include <linux/usb.h>
 #include <linux/usb/hcd.h>
 #include <linux/usb/xhci_pdriver.h>
@@ -15,7 +12,7 @@
 int dwc3_host_init(struct dwc3 *dwc)
 {
 	struct platform_device	*xhci;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	struct usb_hcd *hcd;
 	struct xhci_hcd *xhci_dev;
 	struct usb_xhci_pdata	pdata;
@@ -43,7 +40,7 @@ int dwc3_host_init(struct dwc3 *dwc)
 		dev_err(dwc->dev, "couldn't add resources to xHCI device\n");
 		goto err1;
 	}
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	memset(&pdata, 0, sizeof(pdata));
 
@@ -64,7 +61,7 @@ int dwc3_host_init(struct dwc3 *dwc)
 		dev_err(dwc->dev, "failed to register xHCI device\n");
 		goto err1;
 	}
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	hcd = platform_get_drvdata(xhci);
 	xhci_dev = hcd_to_xhci(hcd);

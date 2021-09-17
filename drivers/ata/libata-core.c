@@ -66,7 +66,7 @@ static void ata_dev_xfermask(struct ata_device *dev);
 static unsigned long ata_dev_blacklisted(const struct ata_device *dev);
 
 atomic_t ata_print_id = ATOMIC_INIT(0);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SWITCH
 EXPORT_SYMBOL(ata_print_id);
 #endif  
 
@@ -91,7 +91,7 @@ static int ata_force_tbl_size;
 
 static char ata_force_param_buf[PAGE_SIZE] __initdata;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DS1815P_SPEED_LIMIT
 extern int g_syno_ds1815p_speed_limit;
 #endif  
 
@@ -2040,7 +2040,7 @@ int ata_dev_configure(struct ata_device *dev)
 	}
 #endif  
 
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_DS1815P_SPEED_LIMIT) && defined(MY_ABC_HERE)
 	if (1 == g_syno_ds1815p_speed_limit) {
 		 
 		if (syno_is_hw_version(HW_DS1815p)) {

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -101,7 +98,7 @@ static void st_dwc3_dt_get_pdata(struct platform_device *pdev,
 	    of_property_read_bool(np, "st,dwc3-drd-device");
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static u32 st_dwc3_gsbuscfg_setup(struct device *dev, int index)
 {
 	struct device_node *np = dev->of_node;
@@ -122,7 +119,7 @@ static u32 st_dwc3_gsbuscfg_setup(struct device *dev, int index)
 static int st_dwc3_probe(struct platform_device *pdev)
 {
 	struct st_dwc3 *dwc3_data;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	struct dwc3_cfg_ops cfg_ops;
 #endif  
 	struct resource *res;
@@ -169,7 +166,7 @@ static int st_dwc3_probe(struct platform_device *pdev)
 		return PTR_ERR(dwc3_data->rstc_s);
 
 	reset_control_deassert(dwc3_data->rstc_s);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	memset(&cfg_ops, 0, sizeof(cfg_ops));
 
 	if (of_find_property(node, "st,gsbuscfg", NULL)) {

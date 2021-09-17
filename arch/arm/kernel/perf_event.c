@@ -278,7 +278,7 @@ validate_group(struct perf_event *event)
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO)
 static irqreturn_t armpmu_dispatch_irq(int irq, void *dev)
 {
     struct pmu_hw_events *cpuc  = (struct pmu_hw_events *)dev;

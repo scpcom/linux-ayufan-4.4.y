@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/clk.h>
@@ -321,7 +318,7 @@ err:
 	return ret;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_PM_SLEEP
 static int st_rc_suspend(struct device *dev)
 {
@@ -463,7 +460,7 @@ static struct platform_driver st_rc_driver = {
 		.name = IR_ST_NAME,
 		.owner	= THIS_MODULE,
 		.of_match_table = of_match_ptr(st_rc_match),
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		.pm     = DEV_PM_OPS,
 #else  
 #ifdef CONFIG_PM

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/of.h>
 #include <linux/init.h>
@@ -1127,7 +1124,7 @@ static int uniperif_tdm_clk_get(struct uniperif_tdm *tdm)
 		return -EINVAL;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	result = snd_stm_clk_prepare_enable(tdm->clk);
 #else  
 	result = snd_stm_clk_enable(tdm->clk);
@@ -1146,7 +1143,7 @@ static int uniperif_tdm_clk_get(struct uniperif_tdm *tdm)
 	return 0;
 
 error_clk_set_rate:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	snd_stm_clk_disable_unprepare(tdm->clk);
 #else  
 	snd_stm_clk_disable(tdm->clk);
@@ -1165,7 +1162,7 @@ static void uniperif_tdm_clk_put(struct uniperif_tdm *tdm)
 
 	if (!IS_ERR(tdm->clk)) {
 		 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		snd_stm_clk_disable_unprepare(tdm->clk);
 #else  
 		snd_stm_clk_disable(tdm->clk);
@@ -1197,7 +1194,7 @@ static int uniperif_tdm_pclk_get(struct uniperif_tdm *tdm)
 		return -EINVAL;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	result = snd_stm_clk_prepare_enable(tdm->pclk);
 #else  
 	result = snd_stm_clk_enable(tdm->pclk);
@@ -1216,7 +1213,7 @@ static int uniperif_tdm_pclk_get(struct uniperif_tdm *tdm)
 	return 0;
 
 error_pclk_set_rate:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	snd_stm_clk_disable_unprepare(tdm->pclk);
 #else  
 	snd_stm_clk_disable(tdm->pclk);
@@ -1235,7 +1232,7 @@ static void uniperif_tdm_pclk_put(struct uniperif_tdm *tdm)
 
 	if (!IS_ERR(tdm->pclk)) {
 		 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		snd_stm_clk_disable_unprepare(tdm->pclk);
 #else  
 		snd_stm_clk_disable(tdm->pclk);

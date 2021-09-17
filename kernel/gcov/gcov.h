@@ -1,13 +1,10 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef GCOV_H
 #define GCOV_H GCOV_H
 
 #include <linux/types.h>
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 #define GCOV_COUNTERS		5
 #endif  
@@ -23,7 +20,7 @@ typedef long gcov_type;
 typedef long long gcov_type;
 #endif
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 struct gcov_info;
 

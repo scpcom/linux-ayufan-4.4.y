@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/pm.h>
@@ -31,7 +28,7 @@ static int st_wakeup_get_devtree_child_data(struct device *dev,
 {
 	struct st_wakeup_pins_drvdata *drvdata = dev_get_drvdata(dev);
 	struct st_lpm_pio_setting *pio_settings;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	int *irq, error, gpio;
 	static int i;
 #else  
@@ -39,7 +36,7 @@ static int st_wakeup_get_devtree_child_data(struct device *dev,
 #endif  
 	u32 reg;
 	unsigned int gpio_flags;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	u32 irq_flags = IRQF_TRIGGER_RISING
 			|IRQF_TRIGGER_FALLING
 			| IRQF_NO_SUSPEND;
@@ -97,7 +94,7 @@ static int st_wakeup_get_devtree_child_data(struct device *dev,
 				return -ENODEV;
 			}
 			pio_settings->pio_level = reg;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 
 			irq_flags = pio_settings->pio_level ?
 				IRQF_TRIGGER_HIGH : IRQF_TRIGGER_LOW;
@@ -127,7 +124,7 @@ static int st_wakeup_get_devtree_child_data(struct device *dev,
 	}
 
 	error = request_any_context_irq(*irq, (irq_handler_t)st_gpio_wakeup_isr,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 					irq_flags, dev->kobj.name, NULL);
 #else  
 					IRQF_TRIGGER_RISING,
@@ -170,7 +167,7 @@ static int st_wakeup_pins_get_devtree_drvdata(struct device *dev)
 
 	return 0;
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static int st_wakeup_pins_restore_pins_config(void *dev)
 {
 	struct st_wakeup_pins_drvdata *drvdata;
@@ -217,7 +214,7 @@ static int st_wakeup_pins_probe(struct platform_device *pdev)
 		st_lpm_setup_pio(&drvdata->wkpins_data[i].pio_settings);
 
 	device_init_wakeup(&pdev->dev, true);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	st_lpm_register_callback(ST_LPM_GPIO_WAKEUP,
 				 st_wakeup_pins_restore_pins_config,
 				 (void *)&pdev->dev);

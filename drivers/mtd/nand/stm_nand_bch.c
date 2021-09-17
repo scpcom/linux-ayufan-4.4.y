@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/delay.h>
@@ -2298,7 +2295,7 @@ static void bch_calc_timing_registers(struct nand_timing_spec *spec,
 		       (n_telqv & 0xff) << 24);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static void nandi_clk_enable(struct nandi_controller *nandi, bool enable)
 {
 	if (nandi->emi_clk)
@@ -2813,7 +2810,7 @@ static int stm_nand_bch_remove(struct platform_device *pdev)
 	nand_release(&nandi->info.mtd);
 	nandi_exit_controller(nandi);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	nandi_clk_enable(nandi, false);
 #else  
 	nandi_clk_disable(nandi);
@@ -2822,7 +2819,7 @@ static int stm_nand_bch_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_PM_SLEEP
 static int stm_nand_bch_suspend(struct device *dev)
 {

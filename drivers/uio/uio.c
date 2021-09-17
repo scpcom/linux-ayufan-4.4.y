@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/init.h>
@@ -617,7 +614,7 @@ static const struct vm_operations_struct uio_physical_vm_ops = {
 #endif
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 static int uio_mmap_physical(struct vm_area_struct *vma, int cacheable)
 #else  
 static int uio_mmap_physical(struct vm_area_struct *vma)
@@ -635,7 +632,7 @@ static int uio_mmap_physical(struct vm_area_struct *vma)
 
 	vma->vm_ops = &uio_physical_vm_ops;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (!cacheable)
 		vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
 #else  
@@ -679,7 +676,7 @@ static int uio_mmap(struct file *filep, struct vm_area_struct *vma)
 
 	switch (idev->info->mem[mi].memtype) {
 		case UIO_MEM_PHYS:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			return uio_mmap_physical(vma, 0);
 #else  
 			return uio_mmap_physical(vma);
@@ -687,7 +684,7 @@ static int uio_mmap(struct file *filep, struct vm_area_struct *vma)
 		case UIO_MEM_LOGICAL:
 		case UIO_MEM_VIRTUAL:
 			return uio_mmap_logical(vma);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		case UIO_MEM_PHYS_CACHEABLE:
 			return uio_mmap_physical(vma, 1);
 #endif  

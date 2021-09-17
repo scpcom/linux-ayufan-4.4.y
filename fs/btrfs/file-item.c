@@ -12,7 +12,7 @@
 #endif  
 #include "ctree.h"
 #include "disk-io.h"
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #include "csum.h"
 #endif  
 #include "transaction.h"
@@ -434,7 +434,7 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 {
 	struct btrfs_ordered_sum *sums;
 	struct btrfs_ordered_extent *ordered;
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(MY_ABC_HERE)
 	 
 #else  
 	char *data;
@@ -448,7 +448,7 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 	unsigned long total_bytes = 0;
 	unsigned long this_sum_bytes = 0;
 	u64 offset;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	void *mpage_priv = btrfs_csum_mpage_init(bio->bi_vcnt);
 #endif  
 #if defined(MY_ABC_HERE)
@@ -516,12 +516,12 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 			index = 0;
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		btrfs_csum_mpage_digest(mpage_priv,
 					bvec->bv_page,
 					bvec->bv_offset,
 					bvec->bv_len,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 					&(sums->sums[index]));
 #else  
 					&sector_sum->sum);
@@ -581,7 +581,7 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 		bvec++;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 	btrfs_csum_mpage_final(mpage_priv);
 #endif  

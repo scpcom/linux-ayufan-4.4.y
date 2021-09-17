@@ -3,7 +3,7 @@
 #endif
  
 #include <linux/ctype.h>
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4) || defined(MY_ABC_HERE)
 #include <linux/cpu.h>
 #endif  
 #include <linux/module.h>
@@ -179,7 +179,7 @@ const void *of_get_property(const struct device_node *np, const char *name,
 }
 EXPORT_SYMBOL(of_get_property);
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4) || defined(MY_ABC_HERE)
  
 bool __weak arch_match_cpu_phys_id(int cpu, u64 phys_id)
 {

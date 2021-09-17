@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * vlock.S - simple voting lock implementation for ARM
  *
@@ -45,11 +42,11 @@
 	dmb
 	mov	\rscratch, #0
 	strb	\rscratch, [\rbase, \rcpu]
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	dsb	st
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	sev
 .endm
 
@@ -109,11 +106,11 @@ ENTRY(vlock_unlock)
 	dmb
 	mov	r1, #VLOCK_OWNER_NONE
 	strb	r1, [r0, #VLOCK_OWNER_OFFSET]
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	dsb	st
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	sev
 	bx	lr
 ENDPROC(vlock_unlock)

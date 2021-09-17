@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _LINUX_LIRC_DEV_H
 #define _LINUX_LIRC_DEV_H
@@ -134,7 +131,7 @@ struct lirc_driver {
 	struct lirc_buffer *rbuf;
 	int (*set_use_inc) (void *data);
 	void (*set_use_dec) (void *data);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	struct rc_dev *rdev;
 #endif  
 	const struct file_operations *fops;

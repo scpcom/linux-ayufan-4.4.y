@@ -549,7 +549,7 @@ dma_cookie_t dma_async_memcpy_buf_to_pg(struct dma_chan *chan,
 dma_cookie_t dma_async_memcpy_pg_to_pg(struct dma_chan *chan,
 	struct page *dest_pg, unsigned int dest_off, struct page *src_pg,
 	unsigned int src_off, size_t len);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 dma_cookie_t dma_async_memcpy_sg_to_sg(struct dma_chan *chan,
 	struct scatterlist *dst_sg, unsigned int dst_nents,
 	struct scatterlist *src_sg, unsigned int src_nents);
@@ -706,18 +706,18 @@ struct dma_page_list {
 };
 
 struct dma_pinned_list {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	int kernel;
 #endif  
 	int nr_iovecs;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	int nr_pages;
 	struct sg_table	*sgts;
 #endif  
 	struct dma_page_list page_list[0];
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 struct tcp_sock;
 int dma_pin_iovec_pages(struct tcp_sock *tp, struct iovec *iov, size_t len);
 #else  
@@ -728,7 +728,7 @@ void dma_unpin_iovec_pages(struct dma_pinned_list* pinned_list);
 struct dma_pinned_list *dma_pin_kernel_iovec_pages(struct iovec *iov, size_t len);
 void dma_unpin_kernel_iovec_pages(struct dma_pinned_list* pinned_list);
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 void dma_free_iovec_data(struct tcp_sock *tp);
 
 int dma_memcpy_fill_sg_from_iovec(struct dma_chan *chan, struct iovec *iov,

@@ -199,7 +199,7 @@ static inline void flush_cache_vmap(unsigned long start, unsigned long end)
 		flush_cache_all();
 	else
 		 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		dsb(ishst);
 #else  
 		dsb();

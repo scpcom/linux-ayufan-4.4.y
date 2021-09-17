@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -92,7 +89,7 @@ static struct dvb_pll_desc dvb_pll_thomson_dtt759x = {
 	},
 };
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static void thomson_dtt7546x_bw(struct dvb_frontend *fe, u8 *buf)
 {
 	 
@@ -502,7 +499,7 @@ static struct dvb_pll_desc *pll_list[] = {
 	[DVB_PLL_THOMSON_DTT7579]        = &dvb_pll_thomson_dtt7579,
 	[DVB_PLL_THOMSON_DTT759X]        = &dvb_pll_thomson_dtt759x,
 	[DVB_PLL_THOMSON_DTT7520X]       = &dvb_pll_thomson_dtt7520x,
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	[DVB_PLL_THOMSON_DTT7546X]       = &dvb_pll_thomson_dtt7546x,
 #endif  
 	[DVB_PLL_LG_Z201]                = &dvb_pll_lg_z201,

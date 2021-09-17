@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef DW_SPI_HEADER_H
 #define DW_SPI_HEADER_H
 
@@ -132,7 +129,7 @@ struct dw_spi {
 	u32			dma_width;
 	int			cs_change;
 	irqreturn_t		(*transfer_handler)(struct dw_spi *dws);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	void			(*cs_control)(struct dw_spi *dws, u32 command);
 						 
 #else  
@@ -189,7 +186,7 @@ static inline void spi_set_clk(struct dw_spi *dws, u16 div)
 
 static inline void spi_chip_sel(struct dw_spi *dws, u16 cs)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (cs >= dws->num_cs)
 		return;
 
@@ -226,7 +223,7 @@ struct dw_spi_chip {
 	u8 poll_mode;	 
 	u8 type;	 
 	u8 enable_dma;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	void (*cs_control)(struct dw_spi *dws, u32 command);
 #else  
 	void (*cs_control)(u32 command);

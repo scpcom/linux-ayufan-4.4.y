@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/mm.h>
 #include <linux/module.h>
@@ -26,7 +23,7 @@
 static int zero;
 static int one = 1;
 static int four = 4;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
  
 #else  
 static int gso_max_segs = GSO_MAX_SEGS;
@@ -779,7 +776,7 @@ static struct ctl_table ipv4_table[] = {
 		.extra2		= &four,
 	},
 	{
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		.procname       = "tcp_default_delack_segs",
 		.data           = &sysctl_tcp_default_delack_segs,
 		.maxlen         = sizeof(int),

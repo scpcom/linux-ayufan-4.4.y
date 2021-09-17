@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/export.h>
@@ -22,7 +19,7 @@
 
 void __init early_init_dt_add_memory_arch(u64 base, u64 size)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #ifdef CONFIG_ARM_LPAE
 	 
 #else  

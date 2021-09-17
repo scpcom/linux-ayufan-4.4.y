@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __LINUX_GPIO_H
 #define __LINUX_GPIO_H
 
@@ -32,7 +29,7 @@ struct gpio {
 };
 
 #ifdef CONFIG_GPIOLIB
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
 extern int syno_gpio_value_set(int iPin, int iValue);
 extern int syno_gpio_value_get(int iPin, int *pValue);
 #endif  
@@ -198,7 +195,7 @@ static inline int gpio_to_irq(unsigned gpio)
 	return -EINVAL;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static inline int gpio_lock_as_irq(struct gpio_chip *chip, unsigned int offset)
 {
 	WARN_ON(1);

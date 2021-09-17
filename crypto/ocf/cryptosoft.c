@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/version.h>
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38) && !defined(AUTOCONF_INCLUDED)
@@ -232,7 +229,7 @@ static device_method_t swcr_methods = {
 	DEVMETHOD(cryptodev_process,	swcr_process),
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
 static DEFINE_SPINLOCK(syno_softcrypto_lock);
 #endif
 #define debug swcr_debug
@@ -293,7 +290,7 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 	int error;
 	char *algo;
 	int mode;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
 	unsigned long flags;
 #endif
 
@@ -303,7 +300,7 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 		return EINVAL;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
 	spin_lock_irqsave(&syno_softcrypto_lock, flags);
 #endif
 	if (swcr_sessions) {
@@ -327,7 +324,7 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 				swcr_sesnum = 0;
 			else
 				swcr_sesnum /= 2;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
 			spin_unlock_irqrestore(&syno_softcrypto_lock, flags);
 #endif
 			dprintk("%s,%d: ENOBUFS\n", __FILE__, __LINE__);
@@ -347,7 +344,7 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 	swd = &swcr_sessions[i];
 	*sid = i;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
 	*swd = (struct swcr_data *) kmalloc(sizeof(struct swcr_data),
 										SLAB_ATOMIC);
 	if (*swd == NULL) {
@@ -361,12 +358,12 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 #endif
 
 	while (cri) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE
 		if (*swd == NULL) {
 #endif
 		*swd = (struct swcr_data *) kmalloc(sizeof(struct swcr_data),
 		SLAB_ATOMIC);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE
 		}
 #endif
 
@@ -534,7 +531,7 @@ swcr_freesession(device_t dev, u_int64_t tid)
 {
 	struct swcr_data *swd;
 	u_int32_t sid = CRYPTO_SESID2LID(tid);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
 	unsigned long flags;
 	struct swcr_data *swd_next = NULL;
 #endif
@@ -549,7 +546,7 @@ swcr_freesession(device_t dev, u_int64_t tid)
 	if (sid == 0)
 		return(0);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
 	 
 	spin_lock_irqsave(&syno_softcrypto_lock, flags);
 	swd = swcr_sessions[sid];
@@ -601,7 +598,7 @@ swcr_freesession(device_t dev, u_int64_t tid)
 				kfree(swd->u.hmac.sw_key);
 		}
 		kfree(swd);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
 		swd = swd_next;
 	}
 #else

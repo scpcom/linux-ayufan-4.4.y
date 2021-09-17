@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _LINUX_MM_TYPES_H
 #define _LINUX_MM_TYPES_H
 
@@ -176,7 +173,7 @@ struct vm_area_struct {
 
 	const struct vm_operations_struct *vm_ops;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	pgoff_t vm_pgoff;		 
 #else  
 	unsigned long vm_pgoff;		 

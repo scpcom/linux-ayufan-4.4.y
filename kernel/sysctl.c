@@ -163,7 +163,7 @@ long g_sata_mv_led = 0;
 EXPORT_SYMBOL(g_sata_mv_led);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SWITCH
 int giSynoHddLedEnabled = 1;
 EXPORT_SYMBOL(giSynoHddLedEnabled);
 #endif   
@@ -290,7 +290,7 @@ int gSynoFactoryUSB3Disable = 0;
 EXPORT_SYMBOL(gSynoFactoryUSB3Disable);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CASTRATED_XHC
 char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13] = {{0}};
 unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC] = {0};
 EXPORT_SYMBOL(gSynoCastratedXhcAddr);
@@ -306,7 +306,7 @@ EXPORT_SYMBOL(gSynoUsbVbusPort);
 EXPORT_SYMBOL(gSynoUsbVbusGpp);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 int giSynoEncPwrCtl = 0;
 extern int SynoProcEncPwrCtl(struct ctl_table *table, int write,
 		        void __user *buffer, size_t *lenp, loff_t *ppos);
@@ -324,12 +324,12 @@ int (*syno_get_current)(unsigned char, struct tty_struct *);
 EXPORT_SYMBOL(syno_get_current);
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_SUPPORT_WOL)
 int (*syno_standby_power_enable)(void) = NULL;
 EXPORT_SYMBOL(syno_standby_power_enable);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MEM_MODE_INFO
 int gSynoMemMode = 0;
 EXPORT_SYMBOL(gSynoMemMode);
 #endif  
@@ -349,7 +349,7 @@ int g_syno_nvc_index_map[SATA_REMAP_MAX] = {-1};
 EXPORT_SYMBOL(g_syno_nvc_index_map);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DS1815P_SPEED_LIMIT
 int g_syno_ds1815p_speed_limit = 1;
 EXPORT_SYMBOL(g_syno_ds1815p_speed_limit);
 #endif  
@@ -1624,7 +1624,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 	{
 		.procname       = "syno_enc_pwr_ctl",
 		.data           = &giSynoEncPwrCtl,
@@ -1633,7 +1633,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = SynoProcEncPwrCtl,
 	},
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MEM_MODE_INFO
 	{
 		.procname	= "syno_mem_mode",
 		.data		= &gSynoMemMode,

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __ARM_KVM_MMU_H__
 #define __ARM_KVM_MMU_H__
@@ -41,7 +38,7 @@ void kvm_clear_hyp_idmap(void);
 
 static inline void kvm_set_pte(pte_t *pte, pte_t new_pte)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	pte_val(*pte) = pte_val(new_pte);
 #else  
 	pte_val(*pte) = new_pte;

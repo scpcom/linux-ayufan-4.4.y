@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <generated/autoconf.h>
 #include <linux/types.h>
@@ -68,7 +65,7 @@ static device_method_t elp_methods = {
 	DEVMETHOD(cryptodev_newsession,	elp_newsession),
 	DEVMETHOD(cryptodev_freesession,elp_freesession),
 	DEVMETHOD(cryptodev_process,	elp_process),
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 	DEVMETHOD(cryptodev_kprocess,	NULL),
 #else
 	DEVMETHOD(cryptodev_kprocess,	elp_kprocess),
@@ -124,7 +121,7 @@ MODULE_PARM_DESC(irq_mode, "Enable IRQ mode");
 
 extern char *pka_errmsgs[];
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 static DEFINE_SPINLOCK(syno_ocf_lock);
 #endif
 
@@ -135,7 +132,7 @@ static int elp_newsession(device_t arg, u_int32_t *sidp, struct cryptoini *cri)
 	struct elp_session *ses = NULL;
 	int sesn = 0;
 	int ret = EINVAL;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 	unsigned long flags = 0;
 #endif
 
@@ -144,7 +141,7 @@ static int elp_newsession(device_t arg, u_int32_t *sidp, struct cryptoini *cri)
 		goto err;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 	spin_lock_irqsave(&syno_ocf_lock, flags);
 #endif
 	for (c = cri; c != NULL; c = c->cri_next) {
@@ -336,18 +333,18 @@ static int elp_newsession(device_t arg, u_int32_t *sidp, struct cryptoini *cri)
 	*sidp = ELP_SID(sc->sc_cid, sesn);
 	sc->stats.open_sessions++;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 	spin_unlock_irqrestore(&syno_ocf_lock, flags);
 #endif
 	return (0);
 err1:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 	spin_unlock_irqrestore(&syno_ocf_lock, flags);
 #endif
 	DPRINTF(ELP_ERR, "%s: wrong key len\n", __FUNCTION__);
 	return ret;
 err:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 	spin_unlock_irqrestore(&syno_ocf_lock, flags);
 #endif
 	return ret;
@@ -359,7 +356,7 @@ static int elp_freesession(device_t dev, u_int64_t tid)
 	int session, ret = EINVAL;
 	u_int32_t sid = ((u_int32_t) tid) & 0xffffffff;
 	struct elp_session *ses = NULL;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 	unsigned long flags = 0;
 #endif
 
@@ -368,7 +365,7 @@ static int elp_freesession(device_t dev, u_int64_t tid)
 		return ret;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 	spin_lock_irqsave(&syno_ocf_lock, flags);
 #endif
 	session = ELP_SESSION(sid);
@@ -381,7 +378,7 @@ static int elp_freesession(device_t dev, u_int64_t tid)
 	} else
 		DPRINTF(ELP_ERR, "Invalid session to free %d\n", session);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 	spin_unlock_irqrestore(&syno_ocf_lock, flags);
 #endif
 	return (ret);
@@ -675,7 +672,7 @@ static int elp_process(device_t dev, struct cryptop *crp, int hint)
 		if (ses->ses_direction == ELP_SESDIR_INBOUND) {
 			same_buff = 1;
 		}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 		if ((err = spacc_add_dst_ddt (handle, (unsigned char*)crp->crp_buf, crp->crp_ilen, sc, same_buff)) != SPACC_CRYPTO_OK) {
 #else
 		if ((err = spacc_add_dst_ddt (handle, (unsigned char*)crp->crp_out_buf, crp->crp_ilen, sc, same_buff)) != SPACC_CRYPTO_OK) {
@@ -1095,7 +1092,7 @@ void elp_register_ocf(struct elp_softc *sc)
 	 
 	DPRINTF(ELP_ERR, DRV_NAME);
 
-#if !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_COMCERTO)
 	printk("\nm86xxx_elp: Registering  key ");
 	crypto_kregister(sc->sc_cid, CRK_MOD_EXP, 0);
 #endif
@@ -1112,7 +1109,7 @@ void elp_register_ocf(struct elp_softc *sc)
 	printk("aes ");
 	crypto_register(sc->sc_cid, CRYPTO_AES_CBC, 0, 0);
 
-#if !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_COMCERTO)
 	printk("rc4 ");
 	crypto_register(sc->sc_cid, CRYPTO_ARC4, 0, 0);
 #endif
@@ -1221,7 +1218,7 @@ static void elp_spacc_tasklet(unsigned long arg)
 	unsigned long flags;
 	struct elp_softc *sc = (struct elp_softc *)arg;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 	if(irqs_disabled()) {
 		tasklet_schedule(&irq_spacc_tasklet);
 		return;
@@ -1238,7 +1235,7 @@ static void elp_spacc_tasklet(unsigned long arg)
 		if (_spacc_dev.job_pool[jobid][0] == 0xFFFFFFFF) {
 			DPRINTF(ELP_ERR, "Invalid job id (%d) popped off the stack\n", jobid);
 			spacc_ack_int();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 			spin_unlock_irqrestore(&reg_lock, flags);
 #endif
 			continue;

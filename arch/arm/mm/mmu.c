@@ -24,7 +24,7 @@
 #include <asm/system_info.h>
 #include <asm/traps.h>
 
-#if (defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)) ||\
+#if (defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)) ||\
 	(defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM))
 #include <asm/fixmap.h>
 #endif
@@ -419,7 +419,7 @@ static void __init build_mem_type_table(void)
 		mem_types[MT_CACHECLEAN].prot_sect |= PMD_SECT_APX|PMD_SECT_AP_WRITE;
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #ifdef CONFIG_ARM_UNIPROCESSOR_IOCC
 		{
 #else  
@@ -579,7 +579,7 @@ static pte_t * __init early_pte_alloc_and_install(pmd_t *pmd,
 static pte_t * __init early_pte_alloc(pmd_t *pmd, unsigned long addr, unsigned long prot)
 {
 	if (pmd_none(*pmd)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		pte_t *pte = early_alloc(max_t(size_t,
 					PTE_HWTABLE_OFF + PTE_HWTABLE_SIZE,
 					PAGE_SIZE));
@@ -1139,7 +1139,7 @@ void __init arm_mm_memblock_reserve(void)
 #endif
 }
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
  
 static void __init prepare_highmem_tables(void)
 {
@@ -1242,7 +1242,7 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 	create_mapping(&map);
 #endif  
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
 	prepare_highmem_tables();
 #endif  
 

@@ -7,7 +7,7 @@
 #include <linux/errno.h>
 #include <linux/of.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 struct of_pci_range_iter {
 	const __be32 *range, *end;
 	int np, pna;
@@ -33,7 +33,7 @@ struct of_pci_range_iter {
 	} while (0)
 #endif  
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 struct of_pci_range_parser {
 	struct device_node *node;
 	const __be32 *range;
@@ -84,12 +84,12 @@ static inline unsigned long pci_address_to_pio(phys_addr_t addr) { return -1; }
 #define pci_address_to_pio pci_address_to_pio
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 struct of_pci_range_iter *of_pci_process_ranges(struct of_pci_range_iter *iter,
 						struct device_node *node);
 #endif  
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 extern int of_pci_range_parser_init(struct of_pci_range_parser *parser,
 			struct device_node *node);
 extern struct of_pci_range *of_pci_range_parser_one(
@@ -122,7 +122,7 @@ static inline const __be32 *of_get_address(struct device_node *dev, int index,
 {
 	return NULL;
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 struct of_pci_range_iter *of_pci_process_ranges(struct of_pci_range_iter *iter,
 						struct device_node *node)
 {
@@ -130,7 +130,7 @@ struct of_pci_range_iter *of_pci_process_ranges(struct of_pci_range_iter *iter,
 }
 #endif  
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 static inline int of_pci_range_parser_init(struct of_pci_range_parser *parser,
 		struct device_node *node)
 {

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _CRYPTO_TESTMGR_H
 #define _CRYPTO_TESTMGR_H
@@ -14015,7 +14012,7 @@ static struct aead_testvec hmac_sha256_aes_cbc_enc_tv_template[] = {
 	},
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define HMAC_SHA384_AES_CBC_ENC_TEST_VECTORS 7
 
 static struct aead_testvec hmac_sha384_aes_cbc_enc_tv_template[] = {

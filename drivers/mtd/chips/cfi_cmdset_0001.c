@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/types.h>
@@ -208,7 +205,7 @@ static void fixup_no_write_suspend(struct mtd_info *mtd)
 }
 #endif
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static void fixup_st_m28wXX0_disable_bufferwrite(struct mtd_info *mtd)
 {
 	struct map_info *map = mtd->priv;
@@ -280,7 +277,7 @@ static struct cfi_fixup cfi_fixup_table[] = {
 #ifdef CMDSET0001_DISABLE_WRITE_SUSPEND
 	{ CFI_MFR_ANY, CFI_ID_ANY, fixup_no_write_suspend },
 #endif
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	{ CFI_MFR_ST, 0x00ba,  
 		fixup_st_m28wXX0_disable_bufferwrite },
 	{ CFI_MFR_ST, 0x00bb,   fixup_st_m28w320cb },
@@ -294,7 +291,7 @@ static struct cfi_fixup cfi_fixup_table[] = {
 #if !FORCE_WORD_WRITE
 	{ CFI_MFR_ANY, CFI_ID_ANY, fixup_use_write_buffers },
 #endif
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	{ CFI_MFR_ST, 0x00ba,   fixup_st_m28w320ct },
 	{ CFI_MFR_ST, 0x00bb,   fixup_st_m28w320cb },
@@ -1042,7 +1039,7 @@ static int inval_cache_and_wait_for_operation(
 	struct cfi_private *cfi = map->fldrv_priv;
 	map_word status, status_OK = CMD(0x80);
 	int chip_state = chip->state;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	unsigned int sleep_time, reset_timeo;
 	long int timeo;
 #else  
@@ -1087,7 +1084,7 @@ static int inval_cache_and_wait_for_operation(
 			timeo = reset_timeo;
 			chip->write_suspended = 0;
 		}
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if (timeo <= 0) {
 #else  
 		if (!timeo) {
@@ -1721,7 +1718,7 @@ static int __xipram do_erase_oneblock(struct map_info *map, struct flchip *chip,
 			printk(KERN_ERR "%s: block erase error: (bad command sequence, status 0x%lx)\n", map->name, chipstatus);
 			ret = -EINVAL;
 		} else if (chipstatus & 0x02) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 			printk(KERN_ERR "%s: block erase error: (protection bit"
 			       " set, status 0x%lx)\n", map->name, chipstatus);
 #else  
@@ -1869,7 +1866,7 @@ static int __xipram do_xxlock_oneblock(struct map_info *map, struct flchip *chip
 	} else
 		BUG();
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	if (extp && (extp->FeatureSupport & (1 << 5))) {
 		 
@@ -1922,7 +1919,7 @@ static int cfi_intelext_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 
 static int cfi_intelext_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	struct map_info *map = mtd->priv;
 	struct cfi_private *cfi = map->fldrv_priv;
 	struct cfi_pri_intelext *extp = cfi->cmdset_priv;
@@ -1936,7 +1933,7 @@ static int cfi_intelext_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 		ofs, len, NULL);
 #endif
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	if (extp && (extp->FeatureSupport & (1 << 3)))
 		ret = cfi_varsize_frob(mtd, do_xxlock_oneblock,

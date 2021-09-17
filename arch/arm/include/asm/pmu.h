@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __ARM_PMU_H__
 #define __ARM_PMU_H__
@@ -32,7 +29,7 @@ struct pmu_hw_events {
 	unsigned long           *used_mask;
 
 	raw_spinlock_t		pmu_lock;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	struct pmu		*pmu;
 #endif  

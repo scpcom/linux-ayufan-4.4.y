@@ -269,7 +269,7 @@ do {									\
 	: "cc")
 
 #ifndef __ARMEB__
-#if defined(MY_DEF_HERE) && defined(CONFIG_VHOST_NET)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_VHOST_NET)
 #define __get_user_asm_half(x,addr,err)				\
 	__asm__ __volatile__(					\
 	"1:	" TUSER(ldrh) "	%1,[%2],#0\n"			\
@@ -370,7 +370,7 @@ do {									\
 	: "cc")
 
 #ifndef __ARMEB__
-#if defined(MY_DEF_HERE) && defined(CONFIG_VHOST_NET)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_VHOST_NET)
 #define __put_user_asm_half(x,__pu_addr,err)			\
 	__asm__ __volatile__(					\
 	"1:	" TUSER(strh) "	%1,[%2],#0\n"			\

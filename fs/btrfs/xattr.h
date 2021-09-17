@@ -6,7 +6,7 @@
 #define __XATTR__
 
 #include <linux/xattr.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 #include "transaction.h"
 #endif  
 

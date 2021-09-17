@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/device.h>
 #include <linux/pinctrl/devinfo.h>
@@ -36,7 +33,7 @@ int pinctrl_bind_pins(struct device *dev)
 		goto cleanup_get;
 	}
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #ifdef CONFIG_PM
 	 
 	dev->pins->sleep_state = pinctrl_lookup_state(dev->pins->p,

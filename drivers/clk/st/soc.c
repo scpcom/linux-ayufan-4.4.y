@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/of_platform.h>
@@ -203,7 +200,7 @@ static const struct st_clk_tree stih410_clktree[] = {
 	CLKTREE_SET_PARENT("CLK_MAIN_DISP", "CLK_S_C0_PLL1_ODF_0"),
 	CLKTREE_SET_PARENT("CLK_AUX_DISP", "CLK_S_C0_PLL1_ODF_0"),
 	CLKTREE_SET_PARENT("CLK_COMPO_DVP", "CLK_S_C0_PLL1_ODF_0"),
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_NETWORK_FIXED)
 	CLKTREE_SET_RATE("CLK_S_C0_FS0_CH3", 125000000),
 #else
 	CLKTREE_SET_RATE("CLK_S_C0_FS0_CH3", 250000000),
@@ -260,7 +257,7 @@ static const struct st_soc_clk_init stih410_soc_clks[] = {
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_FDMA"),
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_NAND"),
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_DSS_LPC"),
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	SOC_CLK_INIT("CLK_PROC_STFE"),
 #else  
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_PROC_STFE"),
@@ -374,7 +371,7 @@ static const struct st_soc_clk_init stih407_soc_clks[] = {
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_FDMA"),
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_NAND"),
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_HVA"),
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	SOC_CLK_INIT("CLK_PROC_STFE"),
 #else  
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_PROC_STFE"),

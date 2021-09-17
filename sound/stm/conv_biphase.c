@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/module.h>
@@ -300,7 +297,7 @@ static int conv_biphase_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_PM_SLEEP
 static int conv_biphase_sc_resume(struct device *dev)
 {
@@ -336,7 +333,7 @@ MODULE_DEVICE_TABLE(of, conv_biphase_match);
 static struct platform_driver conv_biphase_platform_driver = {
 	.driver.name	= "snd_conv_biphase",
 	.driver.of_match_table = conv_biphase_match,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	.driver.pm	= CONV_BIPHASE_SC_PM_OPS,
 #endif  
 	.probe		= conv_biphase_probe,

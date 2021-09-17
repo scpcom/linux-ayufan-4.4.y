@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __NETNS_CONNTRACK_H
 #define __NETNS_CONNTRACK_H
 
@@ -35,7 +32,7 @@ struct nf_tcp_net {
 	unsigned int tcp_loose;
 	unsigned int tcp_be_liberal;
 	unsigned int tcp_max_retrans;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	unsigned int tcp_window_tracking;
 #endif  
 };

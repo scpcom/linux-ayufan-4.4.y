@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/slab.h>
 #include <linux/mutex.h>
@@ -119,7 +116,7 @@ static unsigned int regmap_debugfs_get_dump_start(struct regmap *map,
 			reg_offset = fpos_offset / map->debugfs_tot_len;
 			*pos = c->min + (reg_offset * map->debugfs_tot_len);
 			mutex_unlock(&map->cache_lock);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 			return c->base_reg + (reg_offset * map->reg_stride);
 #else  
 			return c->base_reg + reg_offset;

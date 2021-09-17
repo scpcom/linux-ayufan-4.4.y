@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel_stat.h>
 #include <linux/irq.h>
@@ -9,7 +6,7 @@
 #include <linux/irqchip.h>
 #include <linux/seq_file.h>
 #include <linux/ratelimit.h>
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #include <linux/export.h>
 #endif  
 
@@ -56,7 +53,7 @@ void __init init_IRQ(void)
 		panic("No interrupt controller found.");
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 void set_irq_flags(unsigned int irq, unsigned int flags)
 {
 	unsigned long clr = 0;

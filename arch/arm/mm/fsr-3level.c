@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 static struct fsr_info fsr_info[] = {
 	{ do_bad,		SIGBUS,  0,		"unknown 0"			},
 	{ do_bad,		SIGBUS,  0,		"unknown 1"			},
@@ -12,7 +9,7 @@ static struct fsr_info fsr_info[] = {
 	{ do_page_fault,	SIGSEGV, SEGV_MAPERR,	"level 3 translation fault"	},
 	{ do_bad,		SIGBUS,  0,		"reserved access flag fault"	},
 	{ do_bad,		SIGSEGV, SEGV_ACCERR,	"level 1 access flag fault"	},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 access flag fault"	},
 #else  
 	{ do_bad,		SIGSEGV, SEGV_ACCERR,	"level 2 access flag fault"	},
@@ -20,7 +17,7 @@ static struct fsr_info fsr_info[] = {
 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 3 access flag fault"	},
 	{ do_bad,		SIGBUS,  0,		"reserved permission fault"	},
 	{ do_bad,		SIGSEGV, SEGV_ACCERR,	"level 1 permission fault"	},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 permission fault"	},
 #else  
 	{ do_sect_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 permission fault"	},

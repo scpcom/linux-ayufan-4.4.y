@@ -345,7 +345,7 @@ static void skb_release_data(struct sk_buff *skb)
 			       &skb_shinfo(skb)->dataref)) {
 		if (skb_shinfo(skb)->nr_frags) {
 			int i;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			int nr_frags = skb_shinfo(skb)->nr_frags;
 
 			if(nr_frags > 1) {
@@ -424,7 +424,7 @@ static void kfree_skbmem(struct sk_buff *skb)
 	}
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 void skb_release_head_state(struct sk_buff *skb)
 #else  
 static void skb_release_head_state(struct sk_buff *skb)
@@ -452,7 +452,7 @@ static void skb_release_head_state(struct sk_buff *skb)
 #endif
 #endif
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 EXPORT_SYMBOL(skb_release_head_state);
 #endif  
 

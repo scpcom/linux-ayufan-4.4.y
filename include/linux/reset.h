@@ -13,7 +13,7 @@ struct device_node;
 int reset_control_reset(struct reset_control *rstc);
 int reset_control_assert(struct reset_control *rstc);
 int reset_control_deassert(struct reset_control *rstc);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 int reset_control_is_asserted(struct reset_control *rstc);
 #endif  
 

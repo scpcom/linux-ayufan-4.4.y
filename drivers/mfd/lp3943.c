@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * TI/National Semiconductor LP3943 MFD Core Driver
  *
@@ -126,7 +123,7 @@ static int lp3943_probe(struct i2c_client *cl, const struct i2c_device_id *id)
 	lp3943->mux_cfg = lp3943_mux_cfg;
 	i2c_set_clientdata(cl, lp3943);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LP3943_PRESENT
 	/* Disable PWM, Set all pin MUX to GPI */
 	lp3943_update_bits(lp3943, 0x2, 0xff, 0x0);
 	lp3943_update_bits(lp3943, 0x3, 0xff, 0x0);
@@ -136,7 +133,7 @@ static int lp3943_probe(struct i2c_client *cl, const struct i2c_device_id *id)
 	lp3943_update_bits(lp3943, 0x7, 0xff, 0x0);
 	lp3943_update_bits(lp3943, 0x8, 0xff, 0x0);
 	lp3943_update_bits(lp3943, 0x9, 0xff, 0x0);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LP3943_PRESENT */
 
 	return mfd_add_devices(dev, -1, lp3943_devs, ARRAY_SIZE(lp3943_devs),
 			       NULL, 0, NULL);

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <scsi/osd_ore.h>
@@ -434,7 +431,7 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 
 	if (offset >= i_size) {
 		*uptodate = true;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 		dprintk("%s: g_zero_page index=0x%llx\n", __func__, (unsigned long long)index);
 #else  
 		dprintk("%s: g_zero_page index=0x%lx\n", __func__, index);
@@ -446,7 +443,7 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 	if (!page) {
 		page = find_or_create_page(mapping, index, GFP_NOFS);
 		if (unlikely(!page)) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 			dprintk("%s: grab_cache_page Failed index=0x%llx\n",
 				__func__, (unsigned long long)index);
 #else  
@@ -461,7 +458,7 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 		*uptodate = true;
 	else
 		*uptodate = PageUptodate(page);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 	dprintk("%s: index=0x%llx uptodate=%d\n", __func__, (unsigned long long)index, *uptodate);
 #else  
 	dprintk("%s: index=0x%lx uptodate=%d\n", __func__, index, *uptodate);

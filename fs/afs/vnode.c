@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -694,7 +691,7 @@ int afs_vnode_store_data(struct afs_writeback *wb, pgoff_t first, pgoff_t last,
 	struct afs_vnode *vnode = wb->vnode;
 	int ret;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 	_enter("%s{%x:%u.%u},%x,%llx,%llx,%x,%x",
 	       vnode->volume->vlocation->vldb.name,
 	       vnode->fid.vid,

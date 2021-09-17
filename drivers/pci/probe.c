@@ -152,7 +152,7 @@ int __pci_read_base(struct pci_dev *dev, enum pci_bar_type type,
 	bool bar_too_big = false, bar_disabled = false;
 
 	mask = type ? PCI_ROM_ADDRESS_MASK : ~0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF
 	if (PCI_VENDOR_ID_INTEL == dev->vendor && 0x2934 == dev->device) {
 		dev_printk(KERN_INFO, &dev->dev, "[%04x:%04x] Reading BAR - reg %x\n",
 		   dev->vendor, dev->device, pos);
@@ -251,7 +251,7 @@ fail:
 out:
 	if (!dev->mmio_always_on)
 		pci_write_config_word(dev, PCI_COMMAND, orig_cmd);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF
 	if (PCI_VENDOR_ID_INTEL == dev->vendor && 0x2934 == dev->device) {
 		dev_printk(KERN_INFO, &dev->dev, "[%04x:%04x] Sizing Complete - reg %x\n",
 		   dev->vendor, dev->device, pos);
@@ -607,7 +607,7 @@ static struct pci_bus *pci_alloc_child_bus(struct pci_bus *parent,
 
 	child->parent = parent;
 	child->ops = parent->ops;
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 	child->msi = parent->msi;
 #endif  
 	child->sysdata = parent->sysdata;
@@ -1350,7 +1350,7 @@ static void pcie_write_mrrs(struct pci_dev *dev)
 			"with pci=pcie_bus_safe.\n");
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 int pcie_bus_configure_set(struct pci_dev *dev, void *data)
 #else  
 static int pcie_bus_configure_set(struct pci_dev *dev, void *data)

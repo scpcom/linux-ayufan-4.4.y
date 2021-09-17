@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/errno.h>
@@ -9,7 +6,7 @@
 #include <linux/io.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #include <linux/reboot.h>
 #include <linux/notifier.h>
 #endif  
@@ -25,7 +22,7 @@
 
 static void __iomem *sbc_base;
 static unsigned long sbc_ph_base;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 void *abap_prg_base;
 static unsigned long abap_ph_base;
 
@@ -108,12 +105,12 @@ void __init sti_smp_prepare_cpus(unsigned int max_cpus)
 		of_node_put(np);
 
 		if (max_cpus > 1) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 			 
 #else  
 			 
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_KEXEC
 			register_reboot_notifier(&kexec_notifier);
 #endif
@@ -127,7 +124,7 @@ void __init sti_smp_prepare_cpus(unsigned int max_cpus)
 				__cpuc_flush_dcache_area(cpu_strt_ptr, 4);
 				outer_clean_range(__pa(cpu_strt_ptr),
 						  __pa(cpu_strt_ptr + 1));
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 
 				np = of_find_node_by_name(NULL, "abap-regs");
 				if (IS_ERR_OR_NULL(np))
@@ -160,7 +157,7 @@ void __init sti_smp_prepare_cpus(unsigned int max_cpus)
 				return;
 
 			writel(entry_pa, sbc_base + sbc_offset);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifndef CONFIG_KEXEC
 			iounmap(sbc_base);
 #endif
@@ -207,7 +204,7 @@ static inline void cpu_leave_lowpower(void)
 	  : "cc");
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static inline void platform_do_lowpower(unsigned int cpu, int *spurious)
 #else  
 static inline void platform_do_lowpower_ram(unsigned int cpu, int *spurious)
@@ -227,7 +224,7 @@ static inline void platform_do_lowpower_ram(unsigned int cpu, int *spurious)
 	}
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_KEXEC
 static void kexec_sleep(unsigned int cpu)
 {
@@ -293,7 +290,7 @@ void __ref sti_cpu_die(unsigned int cpu)
 {
 	int spurious = 0;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	 
 #ifdef CONFIG_KEXEC
 	if (kexec_case) {

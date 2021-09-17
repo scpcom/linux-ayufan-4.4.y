@@ -95,7 +95,7 @@ extern int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
 
 #define NAND_CMD_NONE		-1
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 #define NAND_FEATURE_MICRON_ARRAY_OP_MODE	0x90
 #endif  
@@ -105,7 +105,7 @@ extern int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
 #define NAND_STATUS_TRUE_READY	0x20
 #define NAND_STATUS_READY	0x40
 #define NAND_STATUS_WP		0x80
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define NAND_STATUS_ECCREWRITE	0x08
 #endif  
 
@@ -115,7 +115,7 @@ typedef enum {
 	NAND_ECC_HW,
 	NAND_ECC_HW_SYNDROME,
 	NAND_ECC_HW_OOB_FIRST,
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	NAND_ECC_4BITONDIE,
 #endif  
 	NAND_ECC_SOFT_BCH,
@@ -129,7 +129,7 @@ typedef enum {
 
 #define NAND_GET_DEVICE		0x80
 
-#if defined (MY_DEF_HERE) || defined(CONFIG_SYNO_LSP_HI3536)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_HI3536)
  
 #define NAND_NO_AUTOINCR	0x00000001
 #endif  
@@ -142,7 +142,7 @@ typedef enum {
 #endif  
 
 #define NAND_CACHEPRG		0x00000008
-#if defined (MY_DEF_HERE) || defined(CONFIG_SYNO_LSP_HI3536)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_HI3536)
 
 #define NAND_COPYBACK		0x00000010
 
@@ -166,7 +166,7 @@ typedef enum {
 #define NAND_ROM		0x00000800
 
 #define NAND_SUBPAGE_READ	0x00001000
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 #define NAND_CACHERD		0x00001000
 
@@ -181,12 +181,12 @@ typedef enum {
 
 #define NAND_SAMSUNG_LP_OPTIONS NAND_CACHEPRG
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define NAND_CANAUTOINCR(chip) (!(chip->options & NAND_NO_AUTOINCR))
 #endif  
 #define NAND_HAS_CACHEPROG(chip) ((chip->options & NAND_CACHEPRG))
 #define NAND_HAS_SUBPAGE_READ(chip) ((chip->options & NAND_SUBPAGE_READ))
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define NAND_CHIPOPTIONS_MSK	(0x0000ffff & ~NAND_NO_AUTOINCR)
 #endif  
 
@@ -288,7 +288,7 @@ struct nand_onfi_params {
 } __attribute__((packed));
 
 #define ONFI_CRC_BASE	0x4F4E
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 struct nand_timing_spec {
 	int	tR;		 
@@ -439,7 +439,7 @@ struct nand_chip {
 	unsigned int	bb_page;
 #endif  
 	unsigned int bbt_options;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	unsigned int bbm;
 #endif  
 
@@ -460,7 +460,7 @@ struct nand_chip {
 #endif  
 	int badblockpos;
 	int badblockbits;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	int planes_per_chip;
 	int luns_per_chip;
 #endif  
@@ -558,7 +558,7 @@ struct nand_manufacturers {
 
 extern struct nand_flash_dev nand_flash_ids[];
 extern struct nand_manufacturers nand_manuf_ids[];
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 extern int nand_decode_readid(struct mtd_info *mtd, struct nand_chip *chip,
 			      struct nand_flash_dev *type, uint8_t *id,
 			      int max_id_len);
@@ -574,7 +574,7 @@ extern int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 			   int allowbbt);
 extern int nand_do_read(struct mtd_info *mtd, loff_t from, size_t len,
 			size_t *retlen, uint8_t *buf);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 extern void nand_sync(struct mtd_info *mtd);
 extern int nand_suspend(struct mtd_info *mtd);
 extern void nand_resume(struct mtd_info *mtd);

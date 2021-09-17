@@ -16,7 +16,7 @@ static int num_pages_spanned(struct iovec *iov)
 	((unsigned long)iov->iov_base & PAGE_MASK)) >> PAGE_SHIFT);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define NETDMA_MAX_NR_IOVECS	UIO_MAXIOV
 #define NETDMA_MAX_NR_PAGES	NETDMA_MAX_NR_IOVECS
  
@@ -34,7 +34,7 @@ struct dma_pinned_list *dma_pin_iovec_pages(struct iovec *iov, size_t len)
 	int iovec_len_used = 0;
 	int iovec_pages_used = 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (!tp->ucopy.pinned_list) {
 		 
 		local_list = kmalloc(sizeof(*local_list)
@@ -79,7 +79,7 @@ alloc_ok:
 		nr_iovecs++;
 	} while (iovec_len_used < len);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 	if (unlikely((nr_iovecs > NETDMA_MAX_NR_IOVECS) || (iovec_pages_used > NETDMA_MAX_NR_PAGES)))
 		return -1;
@@ -102,7 +102,7 @@ alloc_ok:
 
 	local_list->nr_iovecs = 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (local_list->kernel) {
 		for (i = 0; i < nr_iovecs; i++) {
 			struct dma_page_list *page_list = &local_list->page_list[i];
@@ -274,7 +274,7 @@ void dma_unpin_iovec_pages(struct dma_pinned_list *pinned_list)
 	if (!pinned_list)
 		return;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (!pinned_list->kernel) {
 		for (i = 0; i < pinned_list->nr_iovecs; i++) {
 			struct dma_page_list *page_list = &pinned_list->page_list[i];
@@ -297,7 +297,7 @@ void dma_unpin_iovec_pages(struct dma_pinned_list *pinned_list)
 #endif  
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 void dma_free_iovec_data(struct tcp_sock *tp)
 {
 	struct dma_pinned_list *local_list = tp->ucopy.pinned_list;

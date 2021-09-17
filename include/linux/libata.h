@@ -63,7 +63,7 @@ extern int giSynoAtaDebug;
 #define ISSUEREADTIMEOUT (30UL*HZ)
 #endif  
 
-#ifdef MY_DEF_HERE 
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SWITCH 
 extern int giSynoHddLedEnabled;
 #endif  
 
@@ -438,7 +438,7 @@ enum {
 #ifdef MY_ABC_HERE
 	SYNO_STATUS_IS_MV9235		= 1 << 3,
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SIL_PORTING
 	SYNO_STATUS_IS_SIL			= 1 << 4,
 #endif  
 	 
@@ -993,7 +993,7 @@ struct ata_port_operations {
 	ssize_t (*sw_activity_show)(struct ata_device *dev, char *buf);
 	ssize_t (*sw_activity_store)(struct ata_device *dev,
 				     enum sw_activity val);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	ssize_t (*transmit_led_message)(struct ata_port *ap, u32 state,
 					ssize_t size);
 #endif  

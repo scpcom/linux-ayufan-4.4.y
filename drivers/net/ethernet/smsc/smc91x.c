@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 static const char version[] =
 	"smc91x.c: v1.1, sep 22 2004 by Nicolas Pitre <nico@fluxnic.net>\n";
@@ -1715,7 +1712,7 @@ static int smc_drv_probe(struct platform_device *pdev)
 	return 0;
 
  out_iounmap:
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  
@@ -1738,7 +1735,7 @@ static int smc_drv_remove(struct platform_device *pdev)
 	struct smc_local *lp = netdev_priv(ndev);
 	struct resource *res;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 

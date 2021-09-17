@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _UIO_DRIVER_H_
 #define _UIO_DRIVER_H_
@@ -70,7 +67,7 @@ extern void uio_event_notify(struct uio_info *info);
 #define UIO_MEM_PHYS	1
 #define UIO_MEM_LOGICAL	2
 #define UIO_MEM_VIRTUAL 3
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define UIO_MEM_PHYS_CACHEABLE 4
 #endif  
 

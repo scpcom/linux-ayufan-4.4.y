@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  arch/arm/mach-sti/headsmp.S
  *
@@ -77,7 +74,7 @@ ENDPROC(sti_secondary_startup)
 	.align
 1:	.long	.
 	.long	pen_release
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 ENTRY(sti_abap_c_start)
 	wfi
 	adr	r6, slave_jump_add
@@ -93,4 +90,4 @@ stm_abap_c_end:
 sti_abap_c_size:
 	.long stm_abap_c_end - sti_abap_c_start
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */

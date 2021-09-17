@@ -1,13 +1,10 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/blkdev.h>
 #include <linux/ratelimit.h>
 #include "ctree.h"
 #include "volumes.h"
 #include "disk-io.h"
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #include "csum.h"
 #endif  
 #include "ordered-data.h"
@@ -1448,7 +1445,7 @@ static int scrub_checksum_data(struct scrub_block *sblock)
 	u8 csum[BTRFS_CSUM_SIZE];
 	u8 *on_disk_csum;
 	struct page *page;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 #else  
 	void *buffer;
@@ -1457,7 +1454,7 @@ static int scrub_checksum_data(struct scrub_block *sblock)
 	int fail = 0;
 	u64 len;
 	int index;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	int use_page_digest;
 #endif  
 
@@ -1467,7 +1464,7 @@ static int scrub_checksum_data(struct scrub_block *sblock)
 
 	on_disk_csum = sblock->pagev[0]->csum;
 	page = sblock->pagev[0]->page;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	len = sctx->sectorsize;
 	use_page_digest = (len <= PAGE_SIZE) ? 1 : 0;
 #else  
@@ -1480,7 +1477,7 @@ static int scrub_checksum_data(struct scrub_block *sblock)
 	for (;;) {
 		u64 l = min_t(u64, len, PAGE_SIZE);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		if (use_page_digest) {
 			btrfs_csum_page_digest(page, 0, l, (u32 *)&csum);
 		} else {
@@ -1499,14 +1496,14 @@ static int scrub_checksum_data(struct scrub_block *sblock)
 		BUG_ON(index >= sblock->page_count);
 		BUG_ON(!sblock->pagev[index]->page);
 		page = sblock->pagev[index]->page;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		 
 #else  
 		buffer = kmap_atomic(page);
 #endif  
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (!use_page_digest)
 		btrfs_csum_final(crc, csum);
 #else  

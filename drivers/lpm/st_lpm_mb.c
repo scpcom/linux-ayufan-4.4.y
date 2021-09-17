@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/platform_device.h>
 #include <linux/module.h>
@@ -33,26 +30,26 @@ static const struct st_lpm_wkup_dev_name wkup_dev_name_tab[] = {
 };
 
 enum lpm_services {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	LPM_FW_RELOAD,
 #endif  
 	LPM_CUST_FEAT,
 	LPM_EDID,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	LPM_SBC_TRACES,
 	LPM_SBC_TRACES_IN_SUSPEND
 #endif  
 };
 
 static struct st_lpm_version lpm_fw_ver_vs_services[] = {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	  
 	[LPM_FW_RELOAD] = {.major_soft = 1, .minor_soft = 2, .patch_soft = 0},
 #endif  
 	  
 	[LPM_CUST_FEAT] = {.major_soft = 1, .minor_soft = 4, .patch_soft = 0},
 	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	[LPM_EDID] = {.major_soft = 1, .minor_soft = 4,	.patch_soft = 2},
 	 
 	[LPM_SBC_TRACES] = {.major_soft = 1, .minor_soft = 8, .patch_soft = 0},
@@ -94,7 +91,7 @@ struct st_lpm_driver_data {
 	void * __iomem iomem_base[3];
 	struct lpm_message fw_reply_msg;
 	struct lpm_message fw_request_msg;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	char fw_name[30];
 #else  
 	char fw_name[20];
@@ -114,7 +111,7 @@ struct st_lpm_driver_data {
 	bool fwstatus;
 	struct device *dev;
 	struct st_lpm_version fw_ver;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	const struct firmware *fw;
 	u16 trace_data_value;
 #endif  
@@ -152,7 +149,7 @@ struct st_lpm_driver_data {
 
 #define DEFAULT_EXIT_CPS	0xb8
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static int lpm_config_reboot(enum st_lpm_config_reboot_type type, void *data)
 {
 	struct st_lpm_adv_feature feature;
@@ -202,7 +199,7 @@ static void lpm_configure_power_on_gpio(struct st_lpm_driver_data *lpm_drv)
 static int lpm_exchange_msg(struct lpm_message *command,
 	struct lpm_message *response, void *private_data);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
  
 static int lpm_setup_tracedata(u16 trace_modules, void *data)
 {
@@ -318,7 +315,7 @@ static irqreturn_t lpm_threaded_isr(int this_irq, void *params)
 	struct lpm_message command;
 	struct lpm_message *msg_p;
 	char *buf = command.buf;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	u8 length;
 	u32 offset;
 	char data[128];
@@ -339,7 +336,7 @@ static irqreturn_t lpm_threaded_isr(int this_irq, void *params)
 		command.command_id = LPM_MSG_VER | LPM_MSG_REPLY;
 		break;
 	case LPM_MSG_INFORM_HOST:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		if (msg_p->buf[0] == ST_LPM_LONG_PIO_PRESS) {
 			err = st_lpm_notify(ST_LPM_FP_PIO_PRESS);
 			if (err >= 0) {
@@ -686,7 +683,7 @@ static int lpm_read_edid_info(u8 *edid_buf, u8 block_num, void *data)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
  
 static int lpm_reload_fw_prepare(void *data)
 {
@@ -798,7 +795,7 @@ static int lpm_offset_dmem(enum st_lpm_sbc_dmem_offset_type type, void *data)
 	return  lpm_drv->data_ptr[type];
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 static int lpm_config_reboot(enum st_lpm_config_reboot_type type, void *data)
 {
@@ -846,7 +843,7 @@ static struct st_lpm_ops st_lpm_mb_ops = {
 	.ir_enable = lpm_ir_enable,
 	.write_edid = lpm_write_edid_info,
 	.read_edid = lpm_read_edid_info,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	.reload_fw_prepare = lpm_reload_fw_prepare,
 	.start_loaded_fw = lpm_start_loaded_fw,
 	.setup_tracedata = lpm_setup_tracedata,
@@ -859,7 +856,7 @@ static struct of_device_id lpm_child_match_table[] = {
 	{ }
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifndef CONFIG_SBC_FW_LOADED_BY_PBL
 static int lpm_load_fw(struct st_lpm_driver_data *lpm_drv, bool reload)
 {
@@ -1091,13 +1088,13 @@ static ssize_t st_lpm_show_wakeup(struct device *dev,
 	char data[2] = {0, 0};
 	char wkup_dev_name[50] = "";
 	enum st_lpm_wakeup_devices wakeup_device = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	s16 ValidSize;
 #endif  
 
 	if (st_lpm_get_wakeup_device(&wakeup_device) < 0)
 		dev_err(dev, "<%s> firmware not responding\n", __func__);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	if (ST_LPM_WAKEUP_PIO & wakeup_device)
 		if (st_lpm_get_wakeup_info(ST_LPM_WAKEUP_PIO, &ValidSize,
 					   2, data) < 0)
@@ -1124,7 +1121,7 @@ static ssize_t st_lpm_show_wakeup(struct device *dev,
 			data[0], data[1]);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifndef CONFIG_SBC_FW_LOADED_BY_PBL
 static ssize_t st_lpm_load_fw(struct device *dev,
 			      struct device_attribute *attr, const char *buf,
@@ -1314,7 +1311,7 @@ static int st_sbc_get_devtree_pdata(struct device *dev,
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_PM_SLEEP
 static void st_lpm_check_wakeup_device(
 	struct st_lpm_driver_data *lpm_drv,
@@ -1454,7 +1451,7 @@ static int st_lpm_probe(struct platform_device *pdev)
 	int count = 0;
 	u32 confreg;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	dev_dbg(&pdev->dev, "st lpm probe\n");
 #else  
 	dev_dbg(lpm_drv->dev, "st lpm probe\n");
@@ -1562,13 +1559,13 @@ static int st_lpm_probe(struct platform_device *pdev)
 	if (confreg & BIT(0)) {  
 		err = st_lpm_get_fw_state(&lpm_drv->sbc_state);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		if (!err && lpm_drv->sbc_state == ST_LPM_SBC_RUNNING) {
 #else  
 		if (lpm_drv->sbc_state == ST_LPM_SBC_RUNNING)
 #endif  
 			lpm_sec_init(lpm_drv);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 			of_platform_populate(lpm_drv->dev->of_node,
 					     lpm_child_match_table,
 					     NULL, lpm_drv->dev);
@@ -1584,13 +1581,13 @@ static int st_lpm_probe(struct platform_device *pdev)
 	} else {
 #ifdef CONFIG_SBC_FW_LOADED_BY_PBL
 		dev_dbg(lpm_drv->dev, "SBC Firmware loaded but not booted\n");
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		err = lpm_start_loaded_fw(lpm_drv);
 #else  
 		err = lpm_start_fw(lpm_drv);
 #endif  
 		if (err) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 			dev_err(lpm_drv->dev, "Failed to start SBC Fw\n");
 #else  
 			dev_err(pdev->dev, "Failed to start SBC Fw\n");
@@ -1598,7 +1595,7 @@ static int st_lpm_probe(struct platform_device *pdev)
 			return err;
 		}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		of_platform_populate(lpm_drv->dev->of_node,
 				     lpm_child_match_table,
 				     NULL, lpm_drv->dev);
@@ -1612,7 +1609,7 @@ static int st_lpm_probe(struct platform_device *pdev)
 					      &pdev->dev, GFP_KERNEL,
 					      (struct st_lpm_driver_data *)
 					      lpm_drv,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 					      (void *)lpm_firmware_cb);
 #else  
 					      (void *)lpm_load_fw);
@@ -1628,7 +1625,7 @@ static int st_lpm_probe(struct platform_device *pdev)
 		return err;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifndef CONFIG_SBC_FW_LOADED_BY_PBL
 	err = device_create_file(&pdev->dev, &dev_attr_loadfw);
 	if (err) {
@@ -1684,7 +1681,7 @@ static struct of_device_id st_lpm_match[] = {
 };
 MODULE_DEVICE_TABLE(of, st_lpm_match);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static void st_lpm_setup_ir_init(void)
 {
 	static struct st_lpm_ir_keyinfo ir_key[2] = {
@@ -1963,7 +1960,7 @@ static void st_lpm_shutdown(struct platform_device *pdev)
 
 	st_lpm_set_wakeup_device(lpm_drv->wakeup_bitmap);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	lpm_config_reboot(ST_LPM_REBOOT_WITH_DDR_OFF, lpm_drv);
 #else  
 	st_lpm_config_reboot(ST_LPM_REBOOT_WITH_DDR_OFF);

@@ -18,7 +18,7 @@
 #include <net/net_ratelimit.h>
 
 static int zero = 0;
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE) || defined(CONFIG_SYNO_HI3536)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_HI3536)
  
 #else  
 static int one = 1;
@@ -28,7 +28,7 @@ static int min_sndbuf = SOCK_MIN_SNDBUF;
 static int min_rcvbuf = SOCK_MIN_RCVBUF;
 
 #ifdef CONFIG_RPS
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 static int rps_sock_flow_init(void)
 {
 	unsigned int orig_size = 0, size = 256;
@@ -195,7 +195,7 @@ static struct ctl_table net_core_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec
 	},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	{
 		.procname	= "hh_output_relaxed",
 		.data		= &hh_output_relaxed,
@@ -225,7 +225,7 @@ static struct ctl_table net_core_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec
 	},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	{
 		.procname	= "netdev_skb_tstamp",
 		.data		= &netdev_skb_tstamp,
@@ -323,7 +323,7 @@ static __net_initdata struct pernet_operations sysctl_core_ops = {
 static __init int sysctl_core_init(void)
 {
 	register_net_sysctl(&init_net, "net/core", net_core_table);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 	if (0 != rps_sock_flow_init()) {
 		printk("Error! Failed to init RFS for networking!\n");
 	}

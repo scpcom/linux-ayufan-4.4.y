@@ -2983,7 +2983,7 @@ static noinline_for_stack int __extent_writepage_io(struct inode *inode,
 			set_range_writeback(tree, cur, cur + iosize - 1);
 			if (!PageWriteback(page)) {
 				btrfs_err(BTRFS_I(inode)->root->fs_info,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 					   "page %llu not writeback, cur %llu end %llu",
 				       (unsigned long long)page->index, cur, end);
 #else  

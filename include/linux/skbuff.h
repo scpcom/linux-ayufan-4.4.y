@@ -417,7 +417,7 @@ static inline struct sk_buff *alloc_skb_head(gfp_t priority)
 	return __alloc_skb_head(priority, -1);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 extern void skb_release_head_state(struct sk_buff *skb);
 #endif  
 extern struct sk_buff *skb_morph(struct sk_buff *dst, struct sk_buff *src);

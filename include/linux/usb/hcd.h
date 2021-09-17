@@ -217,7 +217,7 @@ struct hc_driver {
 	void	(*reset_bandwidth)(struct usb_hcd *, struct usb_device *);
 		 
 	int	(*address_device)(struct usb_hcd *, struct usb_device *udev);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		 
 	int	(*enable_device)(struct usb_hcd *, struct usb_device *udev);
 #endif  

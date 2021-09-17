@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/clk-private.h>
 #include <linux/module.h>
@@ -89,7 +86,7 @@ static struct dentry *rootdir;
 static struct dentry *orphandir;
 static int inited = 0;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static void clk_summary_show_one(struct seq_file *s, struct clk *c, int level)
 {
 	const char *parent_name;
@@ -169,7 +166,7 @@ static int clk_summary_show(struct seq_file *s, void *data)
 {
 	struct clk *c;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	seq_printf(s, "                                                         -----HW Status-----\n");
 	seq_printf(s, "   clock                        enable_cnt  prepare_cnt  enabled/parent/rate  rate\n");
 	seq_printf(s, "------------------------------------------------------------------------------------------\n");
@@ -1039,7 +1036,7 @@ int clk_set_rate(struct clk *clk, unsigned long rate)
 	int ret = 0;
 
 	clk_prepare_lock();
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 
 	if (rate == clk->rate)
@@ -1110,7 +1107,7 @@ static struct clk *__clk_init_parent(struct clk *clk)
 	};
 
 	index = clk->ops->get_parent(clk->hw);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (index >= clk->num_parents)
 		goto out;
 #endif  
@@ -1245,7 +1242,7 @@ int clk_set_parent(struct clk *clk, struct clk *parent)
 		return -ENOSYS;
 
 	clk_prepare_lock();
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 
 	if (clk->parent == parent)
@@ -1358,7 +1355,7 @@ int __clk_init(struct device *dev, struct clk *clk)
 	hlist_for_each_entry_safe(orphan, tmp2, &clk_orphan_list, child_node) {
 		if (orphan->ops->get_parent) {
 			i = orphan->ops->get_parent(orphan->hw);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 			if (i < orphan->num_parents)
 #endif  
 			if (!strcmp(clk->name, orphan->parent_names[i]))

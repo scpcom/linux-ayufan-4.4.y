@@ -427,13 +427,13 @@ __und_usr:
 	bne	__und_usr_thumb
 	sub	r4, r2, #4			@ ARM instr at LR - 4
 1:	ldrt	r0, [r4]
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(MY_ABC_HERE)
  ARM_BE8(rev	r0, r0)				@ little endian instruction
-#else /* MY_DEF_HERE || MY_ABC_HERE */
+#else /* CONFIG_SYNO_LSP_ALPINE || MY_ABC_HERE */
 #ifdef CONFIG_CPU_ENDIAN_BE8
 	rev	r0, r0				@ little endian instruction
 #endif
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif /* CONFIG_SYNO_LSP_ALPINE || MY_ABC_HERE */
 
 	@ r0 = 32-bit ARM instruction which caused the exception
 	@ r2 = PC value for the following instruction (:= regs->ARM_pc)

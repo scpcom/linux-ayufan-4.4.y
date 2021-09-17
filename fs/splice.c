@@ -14,7 +14,7 @@
 #include <linux/swap.h>
 #include <linux/writeback.h>
 #include <linux/export.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #include <linux/buffer_head.h>
 #include <linux/module.h>
 #include <linux/sizes.h>
@@ -1157,7 +1157,7 @@ static long do_splice(struct file *in, loff_t __user *off_in,
 	return -EINVAL;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #include <net/sock.h>
 struct RECV_FILE_CONTROL_BLOCK
 {
@@ -1167,7 +1167,7 @@ struct RECV_FILE_CONTROL_BLOCK
 	void *rv_fsdata;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
  
 #else  
 #ifdef CONFIG_ARM_PAGE_SIZE_32KB
@@ -1736,7 +1736,7 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 #else  
 	long error;
 #endif  
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(MY_ABC_HERE)
 	struct socket *sock = NULL;
 #endif  
 
@@ -1745,7 +1745,7 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 
 	error = -EBADF;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 	sock = sockfd_lookup(fd_in, (int *)&error);
 	if(sock){

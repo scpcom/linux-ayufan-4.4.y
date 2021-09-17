@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __LPM_H
 #define __LPM_H
@@ -175,7 +172,7 @@ struct st_lpm_cec_custom_msg {
 
 enum st_lpm_inform_host_event {
 	ST_LPM_LONG_PIO_PRESS = 1,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	ST_LPM_ALARM_TIMER,
 	ST_LPM_TRACE_DATA,
 #else  
@@ -193,7 +190,7 @@ struct st_lpm_cec_osd_msg {
 #define ST_LPM_EDID_BLK_SIZE		128
 #define ST_LPM_EDID_MAX_BLK_NUM		3
 #define ST_LPM_EDID_BLK_END		0xFF
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
  
 enum st_lpm_trace_mask {
 	ST_LPM_TRACE_IR = BIT(0),
@@ -220,7 +217,7 @@ union st_lpm_cec_params {
 
 int st_lpm_configure_wdt(u16 time_in_ms, u8 wdt_type);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_ST_LPM
 int st_lpm_get_fw_state(enum st_lpm_sbc_state *fw_state);
 #else
@@ -235,14 +232,14 @@ int st_lpm_get_fw_state(enum st_lpm_sbc_state *fw_state);
 
 int st_lpm_get_wakeup_device(enum st_lpm_wakeup_devices *wakeupdevice);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 int st_lpm_get_trigger_data(enum st_lpm_wakeup_devices wakeup_device,
 		unsigned int size_max, unsigned int size_min,
 		char *data);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 int st_lpm_get_wakeup_info(enum st_lpm_wakeup_devices wakeupdevice,
 #else  
 int st_lpm_get_wakeup_info(enum st_lpm_wakeup_devices *wakeupdevice,
@@ -290,7 +287,7 @@ int st_lpm_get_adv_feature(bool all_features, bool custom_feature,
 enum st_lpm_callback_type {
 	ST_LPM_FP_PIO_PRESS,
 	ST_LPM_RTC,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	ST_LPM_GPIO_WAKEUP,
 #endif  
 	ST_LPM_MAX,  
@@ -301,7 +298,7 @@ int st_lpm_register_callback(enum st_lpm_callback_type type,
 
 int st_lpm_notify(enum st_lpm_callback_type type);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 int st_lpm_reload_fw_prepare(void);
 
 int st_start_loaded_fw(void);
@@ -337,7 +334,7 @@ int st_lpm_config_reboot(enum st_lpm_config_reboot_type type);
 int st_lpm_sbc_ir_enable(bool enable);
 
 int st_lpm_poweroff(void);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 int st_lpm_setup_tracedata(u16 trace_modules);
 #endif  
 
@@ -363,7 +360,7 @@ struct st_lpm_ops {
 
 	int (*read_edid)(u8 *edid_buf, u8 block_num, void *data);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	int (*reload_fw_prepare)(void *data);
 
 	int (*start_loaded_fw)(void *data);

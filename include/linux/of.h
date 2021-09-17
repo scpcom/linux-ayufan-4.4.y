@@ -256,7 +256,7 @@ extern int of_device_is_available(const struct device_node *device);
 extern const void *of_get_property(const struct device_node *node,
 				const char *name,
 				int *lenp);
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4) || defined(MY_ABC_HERE)
 extern struct device_node *of_get_cpu_node(int cpu, unsigned int *thread);
 #endif  
 #define for_each_property_of_node(dn, pp) \
@@ -444,7 +444,7 @@ static inline const void *of_get_property(const struct device_node *node,
 {
 	return NULL;
 }
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4) || defined(MY_ABC_HERE)
 static inline struct device_node *of_get_cpu_node(int cpu,
 					unsigned int *thread)
 {

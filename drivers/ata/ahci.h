@@ -17,7 +17,7 @@
 #define EM_MSG_LED_VALUE_OFF          0xfff80000
 #define EM_MSG_LED_VALUE_ON           0x00010000
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
 #define EM_MSG_LOCATE_LED_MASK        0x00380000
 #define EM_MSG_FAULT_LED_MASK         0x01c00000
 
@@ -200,7 +200,7 @@ enum {
 	AHCI_HFLAG_YES_FBS		= (1 << 14),  
 	AHCI_HFLAG_DELAY_ENGINE		= (1 << 15),  
 	AHCI_HFLAG_MULTI_MSI		= (1 << 16),  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	AHCI_HFLAG_MSIX			= (1 << 17),  
 #endif  
 #ifdef MY_ABC_HERE
@@ -253,7 +253,7 @@ struct ahci_em_priv {
 	unsigned long saved_activity;
 	unsigned long activity;
 	unsigned long led_state;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
 	unsigned long saved_locate;
 	unsigned long locate;
 	unsigned long saved_fault;
@@ -281,7 +281,7 @@ struct ahci_port_priv {
 	int			fbs_last_dev;	 
 	 
 	struct ahci_em_priv	em_priv[EM_MAX_SLOTS];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	char			msix_name[16];
 #endif  
 };
@@ -299,7 +299,7 @@ struct ahci_host_priv {
 	u32			em_buf_sz;	 
 	u32			em_msg_type;	 
 	struct clk		*clk;		 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	struct msix_entry *msix_entries;
 	unsigned int msix_vecs;
 	unsigned int		int_moderation;
@@ -331,7 +331,7 @@ extern int sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc);
 extern int ahci_syno_pmp_3x26_qc_defer(struct ata_queued_cmd *qc);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
 extern struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
                                             const struct scsi_device *scsidev);
 #endif  
@@ -359,7 +359,7 @@ void ahci_set_em_messages(struct ahci_host_priv *hpriv,
 			  struct ata_port_info *pi);
 int ahci_reset_em(struct ata_host *host);
 irqreturn_t ahci_interrupt(int irq, void *dev_instance);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 void ahci_hw_port_interrupt(struct ata_port *ap);
 void ahci_port_intr(struct ata_port *ap);
 #endif  

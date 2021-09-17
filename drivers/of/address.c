@@ -210,7 +210,7 @@ int of_pci_address_to_resource(struct device_node *dev, int bar,
 }
 EXPORT_SYMBOL_GPL(of_pci_address_to_resource);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 struct of_pci_range_iter *of_pci_process_ranges(struct of_pci_range_iter *iter,
 						struct device_node *node)
 {
@@ -264,7 +264,7 @@ struct of_pci_range_iter *of_pci_process_ranges(struct of_pci_range_iter *iter,
 EXPORT_SYMBOL_GPL(of_pci_process_ranges);
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO)
 int of_pci_range_parser_init(struct of_pci_range_parser *parser,
 		struct device_node *node)
 {

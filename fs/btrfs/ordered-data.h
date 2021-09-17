@@ -4,7 +4,7 @@
  
 #ifndef __BTRFS_ORDERED_DATA__
 #define __BTRFS_ORDERED_DATA__
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 #include "ctree.h"
 #endif  
 

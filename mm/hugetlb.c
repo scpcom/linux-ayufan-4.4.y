@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/list.h>
 #include <linux/init.h>
@@ -1901,7 +1898,7 @@ static void hugetlb_vm_op_close(struct vm_area_struct *vma)
 	struct resv_map *reservations = vma_resv_map(vma);
 	struct hugepage_subpool *spool = subpool_vma(vma);
 	unsigned long reserve;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 	pgoff_t start;
 	pgoff_t end;
 #else  
@@ -2306,7 +2303,7 @@ static int hugetlb_no_page(struct mm_struct *mm, struct vm_area_struct *vma,
 	int ret = VM_FAULT_SIGBUS;
 	int anon_rmap = 0;
 	pgoff_t idx;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 	loff_t size;
 #else  
 	unsigned long size;

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/bitops.h>
 #include <linux/module.h>
@@ -79,7 +76,7 @@ int sch_direct_xmit(struct sk_buff *skb, struct Qdisc *q,
 {
 	int ret = NETDEV_TX_BUSY;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (!netif_supports_mq_tx_lock_opt(dev)) {
 		 
 		spin_unlock(root_lock);
@@ -96,7 +93,7 @@ int sch_direct_xmit(struct sk_buff *skb, struct Qdisc *q,
 	if (!netif_xmit_frozen_or_stopped(txq))
 		ret = dev_hard_start_xmit(skb, dev, txq);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (!netif_supports_mq_tx_lock_opt(dev)) {
 		HARD_TX_UNLOCK(dev, txq);
 

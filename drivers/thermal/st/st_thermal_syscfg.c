@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/of.h>
 #include <linux/module.h>
@@ -29,7 +26,7 @@ static const struct reg_field st_415sas_regfields[MAX_REGFIELDS] = {
 	[DCORRECT] = REG_FIELD(STIH415_SAS_THSENS_CONF, 4, 8),
 	[OVERFLOW] = REG_FIELD(STIH415_SAS_THSENS_STATUS, 8, 8),
 	[DATA] = REG_FIELD(STIH415_SAS_THSENS_STATUS, 10, 16),
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	[DATARDY] = REG_FIELD(STIH415_SAS_THSENS_STATUS, 9, 9),
 	[DC_CALIB] = REG_FIELD(0, 22, 26),
 #endif  
@@ -40,7 +37,7 @@ static const struct reg_field st_415mpe_regfields[MAX_REGFIELDS] = {
 	[DCORRECT] = REG_FIELD(STIH415_MPE_THSENS_CONF, 3, 7),
 	[OVERFLOW] = REG_FIELD(STIH415_MPE_THSENS_STATUS, 9, 9),
 	[DATA] = REG_FIELD(STIH415_MPE_THSENS_STATUS, 11, 18),
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	[DATARDY] = REG_FIELD(STIH415_MPE_THSENS_STATUS, 10, 10),
 	[DC_CALIB] = REG_FIELD(0, 22, 26),
 #endif  
@@ -51,7 +48,7 @@ static const struct reg_field st_416sas_regfields[MAX_REGFIELDS] = {
 	[DCORRECT] = REG_FIELD(STIH416_SAS_THSENS_CONF, 4, 8),
 	[OVERFLOW] = REG_FIELD(STIH416_SAS_THSENS_STATUS1, 8, 8),
 	[DATA] = REG_FIELD(STIH416_SAS_THSENS_STATUS2, 10, 16),
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	[DATARDY] = REG_FIELD(STIH416_SAS_THSENS_STATUS2, 9, 9),
 	[DC_CALIB] = REG_FIELD(0, 22, 26),
 #endif  
@@ -62,7 +59,7 @@ static const struct reg_field st_127_regfields[MAX_REGFIELDS] = {
 	[DCORRECT] = REG_FIELD(STID127_THSENS_CONF, 2, 6),
 	[OVERFLOW] = REG_FIELD(STID127_THSENS_STATUS, 9, 9),
 	[DATA] = REG_FIELD(STID127_THSENS_STATUS, 11, 18),
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	[DATARDY] = REG_FIELD(STID127_THSENS_STATUS, 10, 10),
 	[DC_CALIB] = REG_FIELD(0, 22, 26),
 #endif  
@@ -83,7 +80,7 @@ static int st_syscfg_alloc_regfields(struct st_thermal_sensor *sensor)
 	if (ret)
 		return ret;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	sensor->pwr = devm_regmap_field_alloc(dev, sensor->regmap[TH_REGS],
 #else  
 	sensor->pwr = devm_regmap_field_alloc(dev, sensor->regmap,
@@ -99,7 +96,7 @@ static int st_syscfg_alloc_regfields(struct st_thermal_sensor *sensor)
 
 static int st_syscfg_do_memmap_regmap(struct st_thermal_sensor *sensor)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	struct regmap *rmap;
 
 	rmap = syscon_regmap_lookup_by_compatible(sensor->data->sys_compat);

@@ -60,7 +60,7 @@ static inline pmd_t *pmd_off_k(unsigned long virt)
 }
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 static inline void set_fix_pte(unsigned long va, pte_t pte)
 {
 #if defined (CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
@@ -119,7 +119,7 @@ extern __init void add_static_vm_early(struct static_vm *svm);
 #ifdef CONFIG_ZONE_DMA
 extern phys_addr_t arm_dma_limit;
 #else
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define arm_dma_limit ((phys_addr_t)PHYS_MASK)
 #else  
 #define arm_dma_limit ((phys_addr_t)~0)

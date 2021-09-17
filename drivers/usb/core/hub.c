@@ -2334,7 +2334,7 @@ static unsigned hub_is_wusb(struct usb_hub *hub)
 #define SYNO_HUB_SPEED_MORPH_TRIES	(5)
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO)
  
 static bool use_new_scheme(struct usb_device *udev, int retry)
 {
@@ -2354,7 +2354,7 @@ static bool use_new_scheme(struct usb_device *udev, int retry)
 static int hub_port_reset(struct usb_hub *hub, int port1,
 			struct usb_device *udev, unsigned int delay, bool warm);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO)
  
 static bool hub_port_warm_reset_required(struct usb_hub *hub, u16 portstatus)
 {
@@ -2890,9 +2890,9 @@ static int finish_port_resume(struct usb_device *udev)
 	}
 	return status;
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static int wait_for_device_present(struct usb_device *udev,
 #else  
 static int wait_for_ss_port_enable(struct usb_device *udev,
@@ -2903,7 +2903,7 @@ static int wait_for_ss_port_enable(struct usb_device *udev,
 {
 	int status = 0, delay_ms = 0;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	while (delay_ms < 15000) {
 #else  
 	while (delay_ms < 2000) {
@@ -2999,8 +2999,8 @@ int usb_port_resume(struct usb_device *udev, pm_message_t msg)
 	}
 
 	clear_bit(port1, hub->busy_bits);
-#if defined (MY_DEF_HERE)
-#ifdef MY_DEF_HERE
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	if (udev->persist_enabled)
 		status = wait_for_device_present(udev, hub, &port1, &portchange,
 #else  
@@ -3416,7 +3416,7 @@ int usb_disable_lpm(struct usb_device *udev)
 
 	if (!udev || !udev->parent ||
 			udev->speed != USB_SPEED_SUPER ||
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 			!udev->lpm_capable ||
 			udev->state < USB_STATE_DEFAULT)
 #else  
@@ -3467,7 +3467,7 @@ void usb_enable_lpm(struct usb_device *udev)
 
 	if (!udev || !udev->parent ||
 			udev->speed != USB_SPEED_SUPER ||
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 			!udev->lpm_capable ||
 			udev->state < USB_STATE_DEFAULT)
 #else  
@@ -3639,7 +3639,7 @@ static int check_superspeed(struct usb_hub *hub, struct usb_device *udev)
 }
 #endif  
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 static int hub_enable_device(struct usb_device *udev)
 {
@@ -3761,7 +3761,7 @@ port_speed_morph:
 	}
  
 	for (i = 0; i < GET_DESCRIPTOR_TRIES; (++i, msleep(100))) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		bool did_new_scheme = false;
 
 		if (use_new_scheme(udev, retry_counter)) {
@@ -3854,7 +3854,7 @@ port_speed_morph:
 			}
 
 			msleep(10);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 			 
 			if (did_new_scheme)
 				break;
@@ -3880,7 +3880,7 @@ port_speed_morph:
 	if (retval)
 		goto fail;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
 #else  
 	if (hcd->phy && !hdev->parent)
 		usb_phy_notify_connect(hcd->phy, udev->speed);
@@ -3928,7 +3928,7 @@ port_speed_morph:
 
 	usb_detect_quirks(udev);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	if (udev->wusb == 0 && le16_to_cpu(udev->descriptor.idVendor) == 0x1a0a
 	    && le16_to_cpu(udev->descriptor.idProduct) == 0x0201) {
@@ -3947,7 +3947,7 @@ port_speed_morph:
 #ifdef MY_ABC_HERE
 		&& 0 == gSynoFactoryUSB3Disable
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CASTRATED_XHC
 		&& !(SYNO_USB_PORT_CASTRATED_XHC & hub->ports[port1 - 1]->flag)
 #endif  
 #ifdef MY_ABC_HERE
@@ -3965,7 +3965,7 @@ port_speed_morph:
 	}
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
 	if (hcd->phy && !hdev->parent)
 		usb_phy_notify_connect(hcd->phy, udev);
 #endif  
@@ -4185,7 +4185,7 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 #endif  
 		if (hcd->phy && !hdev->parent &&
 				!(portstatus & USB_PORT_STAT_CONNECTION))
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
 			usb_phy_notify_disconnect(hcd->phy, udev);
 #else  
 			usb_phy_notify_disconnect(hcd->phy, udev->speed);
@@ -4388,7 +4388,7 @@ static int hub_handle_remote_wakeup(struct usb_hub *hub, unsigned int port,
 	return connect_change;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static void wait_for_reset_resume(struct usb_hub *hub, int port)
 {
 	struct usb_device *udev;
@@ -4542,7 +4542,7 @@ static void hub_events(void)
 					!connect_change && !wakeup_change)
 				continue;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 			wait_for_reset_resume(hub, i);
 #endif  
 			ret = hub_port_status(hub, i,

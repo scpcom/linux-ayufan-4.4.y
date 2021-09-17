@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/mm.h>
 #include <linux/sched.h>
@@ -142,7 +139,7 @@ void put_page(struct page *page)
 }
 EXPORT_SYMBOL(put_page);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 void put_page_n(struct page *page, unsigned int c)
 {
 	if (c == 1) {

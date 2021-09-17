@@ -2516,7 +2516,7 @@ static int mvneta_remove(struct platform_device *pdev)
 	irq_dispose_mapping(dev->irq);
 	free_netdev(dev);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 

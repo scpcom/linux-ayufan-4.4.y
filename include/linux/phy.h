@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __PHY_H
 #define __PHY_H
@@ -38,7 +35,7 @@ typedef enum {
 	PHY_INTERFACE_MODE_GMII,
 	PHY_INTERFACE_MODE_SGMII,
 	PHY_INTERFACE_MODE_TBI,
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	PHY_INTERFACE_MODE_REVMII,
 #endif  
 	PHY_INTERFACE_MODE_RMII,
@@ -182,7 +179,7 @@ struct phy_device {
 
 	void (*adjust_state)(struct net_device *dev);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
 	int is_phyerr_reset;
 #endif
 };

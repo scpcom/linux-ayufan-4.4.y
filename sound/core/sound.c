@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/slab.h>
@@ -271,7 +268,7 @@ static int find_snd_minor(int type, struct snd_card *card, int dev)
 	return -1;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 int snd_find_minor(int type, int card_num, int dev)
 {

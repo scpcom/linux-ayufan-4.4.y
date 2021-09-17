@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -40,14 +37,14 @@ void dwc3_set_mode(struct dwc3 *dwc, u32 mode)
 	dwc3_writel(dwc->regs, DWC3_GCTL, reg);
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static int dwc3_core_soft_reset(struct dwc3 *dwc)
 #else  
 static void dwc3_core_soft_reset(struct dwc3 *dwc)
 #endif  
 {
 	u32		reg;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	int		ret;
 #endif  
 
@@ -55,7 +52,7 @@ static void dwc3_core_soft_reset(struct dwc3 *dwc)
 	reg |= DWC3_GCTL_CORESOFTRESET;
 	dwc3_writel(dwc->regs, DWC3_GCTL, reg);
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_USB_DWC3_AL)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_USB_DWC3_AL)
 	 
 	reg = dwc3_readl(dwc->regs, DWC3_GUSB3PIPECTL(0));
 	reg |= (1 << 9);  
@@ -77,7 +74,7 @@ static void dwc3_core_soft_reset(struct dwc3 *dwc)
 
 	usb_phy_init(dwc->usb2_phy);
 	usb_phy_init(dwc->usb3_phy);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	ret = phy_init(dwc->usb2_generic_phy);
 	if (ret < 0)
 		return ret;
@@ -102,7 +99,7 @@ static void dwc3_core_soft_reset(struct dwc3 *dwc)
 	reg = dwc3_readl(dwc->regs, DWC3_GCTL);
 	reg &= ~DWC3_GCTL_CORESOFTRESET;
 	dwc3_writel(dwc->regs, DWC3_GCTL, reg);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	return 0;
 #endif  
@@ -242,7 +239,7 @@ static void dwc3_cache_hwparams(struct dwc3 *dwc)
 	parms->hwparams8 = dwc3_readl(dwc->regs, DWC3_GHWPARAMS8);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
  
 static void dwc3_gsbus_setup(struct dwc3 *dwc)
 {
@@ -288,7 +285,7 @@ static int dwc3_core_init(struct dwc3 *dwc)
 		cpu_relax();
 	} while (true);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	ret = dwc3_core_soft_reset(dwc);
 	if (ret)
 		goto err0;
@@ -315,7 +312,7 @@ static int dwc3_core_init(struct dwc3 *dwc)
 
 	dwc3_writel(dwc->regs, DWC3_GCTL, reg);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	dwc3_gsbus_setup(dwc);
 #endif  
 	return 0;
@@ -328,7 +325,7 @@ static void dwc3_core_exit(struct dwc3 *dwc)
 {
 	usb_phy_shutdown(dwc->usb2_phy);
 	usb_phy_shutdown(dwc->usb3_phy);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	phy_exit(dwc->usb2_generic_phy);
 	phy_exit(dwc->usb3_generic_phy);
 #endif  
@@ -342,7 +339,7 @@ static int dwc3_probe(struct platform_device *pdev)
 	struct resource		*res;
 	struct dwc3		*dwc;
 	struct device		*dev = &pdev->dev;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	struct dwc3_cfg_ops	*cfg_ops = dev_get_platdata(dev->parent);
 #endif  
 
@@ -397,7 +394,7 @@ static int dwc3_probe(struct platform_device *pdev)
 	}
 
 	if (node) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		dwc->usb2_phy = devm_usb_get_phy_by_phandle(dev, "usb2-phy", 0);
 		dwc->usb3_phy = devm_usb_get_phy_by_phandle(dev, "usb3-phy", 0);
 #else  
@@ -411,7 +408,7 @@ static int dwc3_probe(struct platform_device *pdev)
 
 	if (IS_ERR(dwc->usb2_phy)) {
 		ret = PTR_ERR(dwc->usb2_phy);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if (ret == -ENXIO || ret == -ENODEV) {
 			dwc->usb2_phy = NULL;
 		} else if (ret == -EPROBE_DEFER) {
@@ -429,7 +426,7 @@ static int dwc3_probe(struct platform_device *pdev)
 		return -EPROBE_DEFER;
 #endif  
 	}
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	if (IS_ERR(dwc->usb3_phy)) {
 		ret = PTR_ERR(dwc->usb3_phy);
@@ -455,7 +452,7 @@ static int dwc3_probe(struct platform_device *pdev)
 	}
 #endif  
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	dwc->usb2_generic_phy = devm_phy_get(dev, "usb2-phy");
 	if (IS_ERR(dwc->usb2_generic_phy)) {
@@ -498,7 +495,7 @@ static int dwc3_probe(struct platform_device *pdev)
 	dev->dma_parms	= dev->parent->dma_parms;
 	dma_set_coherent_mask(dev, dev->parent->coherent_dma_mask);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	dwc->cfg_ops = cfg_ops;
 #endif  
 	if (!strncmp("super", maximum_speed, 5))
@@ -532,7 +529,7 @@ static int dwc3_probe(struct platform_device *pdev)
 		dev_err(dev, "failed to initialize core\n");
 		goto err0;
 	}
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	usb_phy_set_suspend(dwc->usb2_phy, 0);
 	usb_phy_set_suspend(dwc->usb3_phy, 0);
@@ -548,7 +545,7 @@ static int dwc3_probe(struct platform_device *pdev)
 	ret = dwc3_event_buffers_setup(dwc);
 	if (ret) {
 		dev_err(dwc->dev, "failed to setup event buffers\n");
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		goto err_usb3phy_power;
 #else  
 		goto err1;
@@ -628,7 +625,7 @@ err3:
 
 err2:
 	dwc3_event_buffers_cleanup(dwc);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 err_usb3phy_power:
 	phy_power_off(dwc->usb3_generic_phy);
@@ -638,7 +635,7 @@ err_usb2phy_power:
 #endif  
 
 err1:
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	usb_phy_set_suspend(dwc->usb2_phy, 1);
 	usb_phy_set_suspend(dwc->usb3_phy, 1);
 #endif  
@@ -677,7 +674,7 @@ static int dwc3_remove(struct platform_device *pdev)
 
 	usb_phy_set_suspend(dwc->usb2_phy, 1);
 	usb_phy_set_suspend(dwc->usb3_phy, 1);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	phy_power_off(dwc->usb2_generic_phy);
 	phy_power_off(dwc->usb3_generic_phy);
 #endif  
@@ -758,7 +755,7 @@ static int dwc3_suspend(struct device *dev)
 
 	usb_phy_shutdown(dwc->usb3_phy);
 	usb_phy_shutdown(dwc->usb2_phy);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	phy_exit(dwc->usb2_generic_phy);
 	phy_exit(dwc->usb3_generic_phy);
 #endif  
@@ -770,13 +767,13 @@ static int dwc3_resume(struct device *dev)
 {
 	struct dwc3	*dwc = dev_get_drvdata(dev);
 	unsigned long	flags;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	int		ret;
 #endif  
 
 	usb_phy_init(dwc->usb3_phy);
 	usb_phy_init(dwc->usb2_phy);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	ret = phy_init(dwc->usb2_generic_phy);
 	if (ret < 0)
 		return ret;
@@ -791,7 +788,7 @@ static int dwc3_resume(struct device *dev)
 	spin_lock_irqsave(&dwc->lock, flags);
 
 	dwc3_writel(dwc->regs, DWC3_GCTL, dwc->gctl);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	dwc3_gsbus_setup(dwc);
 #endif  
 
@@ -813,7 +810,7 @@ static int dwc3_resume(struct device *dev)
 	pm_runtime_enable(dev);
 
 	return 0;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 err_usb2phy_init:
 	phy_exit(dwc->usb2_generic_phy);

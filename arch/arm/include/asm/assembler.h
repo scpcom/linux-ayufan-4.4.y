@@ -42,7 +42,7 @@
 #define put_byte_3      lsl #0
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(MY_ABC_HERE)
  
 #ifdef CONFIG_CPU_ENDIAN_BE8
 #define ARM_BE8(code...) code
@@ -213,7 +213,7 @@
 #ifdef CONFIG_SMP
 #if __LINUX_ARM_ARCH__ >= 7
 	.ifeqs "\mode","arm"
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	ALT_SMP(dmb	ish)
 	.else
 	ALT_SMP(W(dmb)	ish)

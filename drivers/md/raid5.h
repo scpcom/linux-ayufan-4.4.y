@@ -55,7 +55,7 @@ struct stripe_head {
 		 
 		struct bio	req, rreq;
 		struct bio_vec	vec, rvec;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		struct page	*page, *orig_page;
 #else  
 		struct page	*page;
@@ -108,7 +108,7 @@ enum r5dev_flags {
 	R5_NeedReplace,	 
 	R5_WantReplace,  
 	R5_Discard,	 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	R5_SkipCopy,  
 #endif  
 };
@@ -215,7 +215,7 @@ struct r5conf {
 	atomic_t		pending_full_writes;  
 	int			bypass_count;  
 	int			bypass_threshold;  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	int			skip_copy;
 #endif  
 #ifdef MY_ABC_HERE

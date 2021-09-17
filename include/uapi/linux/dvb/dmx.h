@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _UAPI_DVBDMX_H_
 #define _UAPI_DVBDMX_H_
@@ -53,7 +50,7 @@ typedef enum dmx_ts_pes
 	DMX_PES_TELETEXT3,
 	DMX_PES_SUBTITLE3,
 	DMX_PES_PCR3,
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	DMX_PES_OTHER,
 
@@ -275,7 +272,7 @@ typedef enum {
 	DMX_SOURCE_FRONT1,
 	DMX_SOURCE_FRONT2,
 	DMX_SOURCE_FRONT3,
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	DMX_SOURCE_FRONT4,
 	DMX_SOURCE_FRONT5,
 	DMX_SOURCE_FRONT6,
@@ -292,7 +289,7 @@ typedef enum {
 	DMX_SOURCE_DVR0   = 16,
 	DMX_SOURCE_DVR1,
 	DMX_SOURCE_DVR2,
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	DMX_SOURCE_DVR3,
 	DMX_SOURCE_DVR4,
 	DMX_SOURCE_DVR5,

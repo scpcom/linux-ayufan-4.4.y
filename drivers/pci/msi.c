@@ -23,7 +23,7 @@ static int pci_msi_enable = 1;
 
 #define msix_table_size(flags)	((flags & PCI_MSIX_FLAGS_QSIZE) + 1)
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #if defined(CONFIG_GENERIC_HARDIRQS)
 int __weak arch_setup_msi_irq(struct pci_dev *dev, struct msi_desc *desc)
 {
@@ -128,7 +128,7 @@ int __weak arch_msi_check_device(struct pci_dev *dev, int nvec, int type)
 }
 #endif  
 
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 int __weak arch_setup_msi_irqs(struct pci_dev *dev, int nvec, int type)
 {
 	struct msi_desc *entry;
@@ -170,7 +170,7 @@ int default_setup_msi_irqs(struct pci_dev *dev, int nvec, int type)
 #endif
 #endif  
 
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
  
 #else  
 #ifndef arch_teardown_msi_irqs
@@ -180,7 +180,7 @@ int default_setup_msi_irqs(struct pci_dev *dev, int nvec, int type)
 
 #endif  
 
-#if defined (HAVE_DEFAULT_MSI_TEARDOWN_IRQS) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (HAVE_DEFAULT_MSI_TEARDOWN_IRQS) || defined(CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 void default_teardown_msi_irqs(struct pci_dev *dev)
 {
 	struct msi_desc *entry;
@@ -196,7 +196,7 @@ void default_teardown_msi_irqs(struct pci_dev *dev)
 }
 #endif
 
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 void __weak arch_teardown_msi_irqs(struct pci_dev *dev)
 {
 	return default_teardown_msi_irqs(dev);
@@ -208,7 +208,7 @@ void __weak arch_teardown_msi_irqs(struct pci_dev *dev)
 #endif
 #endif  
 
-#if defined(HAVE_DEFAULT_MSI_RESTORE_IRQS) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(HAVE_DEFAULT_MSI_RESTORE_IRQS) || defined(CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 void default_restore_msi_irqs(struct pci_dev *dev, int irq)
 {
 	struct msi_desc *entry;
@@ -227,7 +227,7 @@ void default_restore_msi_irqs(struct pci_dev *dev, int irq)
 		write_msi_msg(irq, &entry->msg);
 }
 #endif
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 
 void __weak arch_restore_msi_irqs(struct pci_dev *dev, int irq)
 {

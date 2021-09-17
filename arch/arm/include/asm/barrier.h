@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __ASM_BARRIER_H
 #define __ASM_BARRIER_H
 
@@ -16,7 +13,7 @@
 #define wfi()	__asm__ __volatile__ ("wfi" : : : "memory")
 #endif
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #if __LINUX_ARM_ARCH__ >= 7
 #define isb(option) __asm__ __volatile__ ("isb " #option : : : "memory")
 #define dsb(option) __asm__ __volatile__ ("dsb " #option : : : "memory")
@@ -71,7 +68,7 @@
 #elif defined(CONFIG_ARM_DMA_MEM_BUFFERABLE) || defined(CONFIG_SMP)
 #define mb()		do { dsb(); outer_sync(); } while (0)
 #define rmb()		dsb()
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define wmb()		do { dsb(st); outer_sync(); } while (0)
 #else  
 #define wmb()		mb()
@@ -87,7 +84,7 @@
 #define smp_rmb()	barrier()
 #define smp_wmb()	barrier()
 #else
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define smp_mb()	dmb(ish)
 #define smp_rmb()	smp_mb()
 #define smp_wmb()	dmb(ishst)

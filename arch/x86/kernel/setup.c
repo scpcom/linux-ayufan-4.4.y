@@ -96,7 +96,7 @@
 #if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
 #include  <linux/synobios.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
 #include <linux/gpio.h>
 #endif  
 
@@ -258,7 +258,7 @@ void * __init extend_brk(size_t size, size_t align)
 	return ret;
 }
 
-#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE) && !defined(CONFIG_SYNO_BRASWELL)
  
 #define SYNO_MAX_HDD_PRZ	4
 #define GPIO_UNDEF			0xFF
@@ -267,9 +267,9 @@ static u8 SYNO_GET_HDD_ENABLE_PIN(const int index)
 {
 	u8 ret = GPIO_UNDEF;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_CEDARVIEW)
 	u8 HddEnPinMap[] = {16, 20, 21, 32};
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_AVOTON)
 	u8 HddEnPinMap[] = {10, 15, 16, 17};
 #else
 	u8 *HddEnPinMap = NULL;
@@ -296,7 +296,7 @@ static u32 SYNO_X86_GPIO_PIN_SET(int pin, int *pValue)
 	u32 ret = 0;
 #if defined(MY_ABC_HERE)
 	ret = syno_pch_lpc_gpio_pin(pin, pValue, 1);
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_X86_PINCTRL_GPIO)
 	ret = syno_gpio_value_set(pin, *pValue);
 #endif
 	return ret;
@@ -375,9 +375,9 @@ static u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
 {
 	u8 ret = GPIO_UNDEF;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_CEDARVIEW)
 	u8 przPinMap[]   = {33, 35, 49, 18};
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_AVOTON)
 	u8 przPinMap[] = {18, 28, 34, 44};
 #else
 	u8 *przPinMap = NULL;
@@ -402,7 +402,7 @@ int SYNO_CHECK_HDD_PRESENT(int index)
 	int iPrzVal = 1;  
 	u8 iPin = SYNO_GET_HDD_PRESENT_PIN(index);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_AVOTON)
 	const int iInverseValue = 1;
 #else
 	const int iInverseValue = 0;
@@ -418,7 +418,7 @@ int SYNO_CHECK_HDD_PRESENT(int index)
 
 #if defined(MY_ABC_HERE)
 	syno_pch_lpc_gpio_pin(iPin, &iPrzVal, 0);
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_X86_PINCTRL_GPIO)
 	syno_gpio_value_get(iPin, &iPrzVal);
 #endif
 
@@ -464,7 +464,7 @@ EXPORT_SYMBOL(SYNO_GET_HDD_PRESENT_PIN);
 EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
  
 int SynoProcEncPwrCtl(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp, loff_t *ppos)

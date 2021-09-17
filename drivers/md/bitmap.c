@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/blkdev.h>
 #include <linux/module.h>
@@ -722,7 +719,7 @@ static void bitmap_file_set_bit(struct bitmap *bitmap, sector_t block)
 	else
 		set_bit_le(bit, kaddr);
 	kunmap_atomic(kaddr);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 	pr_debug("set file bit %lu page %llu\n", bit, (unsigned long long)page->index);
 #else  
 	pr_debug("set file bit %lu page %lu\n", bit, page->index);

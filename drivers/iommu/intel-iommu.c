@@ -598,7 +598,7 @@ static struct intel_iommu *device_to_iommu(struct device *dev, u8 *bus, u8 *devf
 	if (dev_is_pci(dev)) {
 		pdev = to_pci_dev(dev);
 		segment = pci_domain_nr(pdev->bus);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_WORKAROUND_NOT_PORTING_ACPI_COMPANION
 	}
 #else
 	} else if (ACPI_COMPANION(dev))

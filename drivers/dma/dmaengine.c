@@ -259,7 +259,7 @@ EXPORT_SYMBOL(dma_find_channel);
 
 struct dma_chan *net_dma_find_channel(void)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	struct dma_chan *chan = dma_find_channel(DMA_SG);
 #else  
 	struct dma_chan *chan = dma_find_channel(DMA_MEMCPY);
@@ -884,7 +884,7 @@ dma_async_memcpy_pg_to_pg(struct dma_chan *chan, struct page *dest_pg,
 }
 EXPORT_SYMBOL(dma_async_memcpy_pg_to_pg);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
  
 dma_cookie_t
 dma_async_memcpy_sg_to_sg(struct dma_chan *chan,

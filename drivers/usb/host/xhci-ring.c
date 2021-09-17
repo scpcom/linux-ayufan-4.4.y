@@ -1178,7 +1178,7 @@ static void handle_vendor_event(struct xhci_hcd *xhci,
 		handle_cmd_completion(xhci, &event->event_cmd);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
 static void xhci_giveback_error_urb(struct xhci_hcd *xhci,
 		int slot_id)
 {
@@ -1349,7 +1349,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 		}
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
 	if (!(temp & PORT_CONNECT) &&
 		(temp & PORT_WRC)) {
 		slot_id = xhci_find_slot_id_by_port(hcd, xhci,
@@ -1382,7 +1382,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 		}
 	}
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	if (!DEV_SUPERSPEED(temp) &&
 			test_and_clear_bit(faked_port_index,
@@ -3322,7 +3322,7 @@ int xhci_queue_slot_control(struct xhci_hcd *xhci, u32 trb_type, u32 slot_id)
 			TRB_TYPE(trb_type) | SLOT_ID_FOR_TRB(slot_id), false);
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 int xhci_queue_address_device(struct xhci_hcd *xhci, dma_addr_t in_ctx_ptr,
 			      u32 slot_id, enum xhci_setup_dev setup)
 {

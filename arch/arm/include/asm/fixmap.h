@@ -4,7 +4,7 @@
 #ifndef _ASM_FIXMAP_H
 #define _ASM_FIXMAP_H
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
 #define FIXADDR_START		0xff400000UL
 #define FIXADDR_TOP		0xff800000UL
 #elif defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)

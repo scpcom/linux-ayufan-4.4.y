@@ -393,13 +393,13 @@ ENTRY(vector_swi)
 #else
  USER(	ldr	r10, [lr, #-4]		)	@ get SWI instruction
 #endif
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(MY_ABC_HERE)
  ARM_BE8(rev	r10, r10)			@ little endian instruction
-#else /* MY_DEF_HERE || MY_ABC_HERE */
+#else /* CONFIG_SYNO_LSP_ALPINE || MY_ABC_HERE */
 #ifdef CONFIG_CPU_ENDIAN_BE8
 	rev	r10, r10			@ little endian instruction
 #endif
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif /* CONFIG_SYNO_LSP_ALPINE || MY_ABC_HERE */
 
 #elif defined(CONFIG_AEABI)
 
@@ -562,7 +562,7 @@ sys_fstatfs64_wrapper:
 		b	sys_fstatfs64
 ENDPROC(sys_fstatfs64_wrapper)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 sys_mmap2:
 		str	r5, [sp, #4]
 #if (PAGE_SHIFT > 12)
@@ -570,7 +570,7 @@ sys_mmap2:
 #else /* PAGE_SHIFT > 12 */
 		b	sys_mmap_pgoff
 #endif /* PAGE_SHIFT > 12 */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ALPINE */
 /*
  * Note: off_4k (r5) is always units of 4K.  If we can't do the requested
  * offset, we return EINVAL.
@@ -624,7 +624,7 @@ sys_mmap2:
 		b	sys_mmap_pgoff
 #endif
 #endif /* MY_ABC_HERE */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 ENDPROC(sys_mmap2)
 
 #ifdef CONFIG_OABI_COMPAT

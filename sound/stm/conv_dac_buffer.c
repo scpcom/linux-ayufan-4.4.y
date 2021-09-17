@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/i2c.h>
@@ -192,7 +189,7 @@ static int dac_buffer_parse_dt(struct i2c_client *client,
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_PM_SLEEP
 static int dac_buffer_suspend(struct device *dev)
 {
@@ -283,7 +280,7 @@ static int dac_buffer_probe(struct i2c_client *client,
 
 	dac_buffer_setting(conv);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	 
 	i2c_set_clientdata(client, conv);
 #else  
@@ -300,13 +297,13 @@ static int dac_buffer_remove(struct i2c_client *client)
 	BUG_ON(!conv);
 	BUG_ON(!snd_stm_magic_valid(conv));
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	dac_buffer_set_muted(1, conv);
 #else  
 	dac_buffer_set_muted(AUDIO_OUT_MUTED,  conv->i2c_client);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	dac_buffer_set_enabled(0, conv);
 #else  
 	dac_buffer_set_enabled(AUDIO_OUT_OFF, conv->i2c_client);
@@ -328,7 +325,7 @@ static struct i2c_driver dac_buffer_driver = {
 	.driver = {
 		.name = "snd_dac_buffer",
 		.owner = THIS_MODULE,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		.pm = DAC_BUFF_PM_OPS,
 #endif  
 	},
@@ -337,7 +334,7 @@ static struct i2c_driver dac_buffer_driver = {
 	.id_table = dac_buffer_i2c_ids,
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 module_i2c_driver(dac_buffer_driver);
 #else  
 static int dac_buffer_init(void)

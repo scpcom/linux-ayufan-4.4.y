@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/of.h>
 #include <linux/of_platform.h>
@@ -21,12 +18,12 @@
 #include <linux/of.h>
 #include <linux/of_fdt.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO)
 #include <linux/fs.h>
 #include <linux/uaccess.h>
 #include <linux/delay.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_SUPPORT_WOL)
 extern int (*syno_standby_power_enable)(void);
 #endif
 
@@ -69,7 +66,7 @@ static void synology_power_off(void)
 		writel(1, microp_base + 0x10);  
 		writel(0x1189, microp_base + 0x0c);  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_SUPPORT_WOL)
 		if (NULL != syno_standby_power_enable) {
 			if (syno_standby_power_enable())
 				writel('l', microp_base + 0x4);
@@ -182,14 +179,14 @@ void __init sti_init_machine_late(void)
 		gpio_request_one(TSOUT1_BYTECLK_GPIO,
 			GPIOF_OUT_INIT_LOW, "tsout1_byteclk");
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO)
 	pm_power_off = synology_power_off;
 #endif
 }
 
 void __init sti_init_machine(void)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 	struct platform_device_info devinfo = { .name = "cpufreq-cpu0", };
 #endif  
@@ -201,13 +198,13 @@ void __init sti_init_machine(void)
 
 	if (of_machine_is_compatible("st,stid127"))
 		stid127_setup_clockgentel();
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 
 	platform_device_register_full(&devinfo);
 #endif  
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static int sti_register_cpufreqcpu0(void)
 {
 	struct platform_device_info devinfo = { .name = "cpufreq-cpu0", };

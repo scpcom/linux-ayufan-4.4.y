@@ -215,7 +215,7 @@ struct nand_manufacturers nand_manuf_ids[] = {
 EXPORT_SYMBOL(nand_manuf_ids);
 EXPORT_SYMBOL(nand_flash_ids);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 struct nand_timing_spec nand_onfi_timing_specs[] = {
 	 

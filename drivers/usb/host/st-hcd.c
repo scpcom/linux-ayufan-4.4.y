@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/platform_device.h>
 #include <linux/slab.h>
@@ -16,7 +13,7 @@
 #include <linux/module.h>
 #include <linux/reset.h>
 #include <linux/regmap.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #include <linux/st_amba_bridge.h>
 #endif  
 #include <linux/phy/phy.h>
@@ -266,13 +263,13 @@ static int st_hcd_probe_resets(struct platform_device *pdev,
 static int st_hcd_probe_ehci_setup(struct platform_device *pdev)
 {
 	struct resource *res;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	struct st_amba_bridge *amba_bridge;
 	struct st_amba_bridge_config *amba_config;
 	void __iomem *amba_base;
 #endif  
 	void __iomem *ehci_regs;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "protocol");
 	if (!res)
 		return -ENODEV;

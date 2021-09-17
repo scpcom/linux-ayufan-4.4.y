@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/init.h>
@@ -1631,7 +1628,7 @@ err_io:
 	free_netdev(ndev);
 err_alloc:
 	release_mem_region(res->start, resource_size(res));
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  
@@ -1649,7 +1646,7 @@ static int xgmac_remove(struct platform_device *pdev)
 	free_irq(ndev->irq, ndev);
 	free_irq(priv->pmt_irq, ndev);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

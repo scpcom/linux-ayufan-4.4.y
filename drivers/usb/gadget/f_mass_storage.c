@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/blkdev.h>
 #include <linux/completion.h>
@@ -45,7 +42,7 @@ struct fsg_common {
 	struct usb_composite_dev *cdev;
 	struct fsg_dev		*fsg, *new_fsg;
 	wait_queue_head_t	fsg_wait;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	wait_queue_head_t	fsg_write_thread_wait;
 
 	bool write_thread_wakeup;
@@ -62,7 +59,7 @@ struct fsg_common {
 
 	struct fsg_buffhd	*next_buffhd_to_fill;
 	struct fsg_buffhd	*next_buffhd_to_drain;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	struct fsg_buffhd	*next_buffhd_to_write;
 	struct fsg_buffhd	*last_buffhd_to_write;
 #endif  
@@ -86,7 +83,7 @@ struct fsg_common {
 	u32			tag;
 	u32			residue;
 	u32			usb_amount_left;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	u32			num_write_bufs;
 #endif  
 
@@ -100,7 +97,7 @@ struct fsg_common {
 	int			thread_wakeup_needed;
 	struct completion	thread_notifier;
 	struct task_struct	*thread_task;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	struct task_struct	*write_thread_task;
 #endif  
 
@@ -402,7 +399,7 @@ static int sleep_thread(struct fsg_common *common)
 	return rc;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
  
 static inline void wait_for_writing_thread_done(struct fsg_common *common)
 {
@@ -443,7 +440,7 @@ static int do_read(struct fsg_common *common)
 	if (unlikely(amount_left == 0))
 		return -EIO;		 
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (common->num_write_bufs != 0)
 		DBG(common, "Start waiting with %d buffers in queue\n",
 				common->num_write_bufs);
@@ -573,7 +570,7 @@ static int do_write(struct fsg_common *common)
 
 		bh = common->next_buffhd_to_fill;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		if (bh->state == BUF_STATE_BUSY)
 			sleep_thread(common);
 #endif  
@@ -612,7 +609,7 @@ static int do_write(struct fsg_common *common)
 		if (bh->state == BUF_STATE_FULL) {
 			smp_rmb();
 			common->next_buffhd_to_drain = bh->next;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			 
 #else  
 			bh->state = BUF_STATE_EMPTY;
@@ -641,7 +638,7 @@ static int do_write(struct fsg_common *common)
 			if (amount == 0)
 				goto empty_write;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			if (common->use_writing_thread) {
 				bh->file = curlun->filp;
 				bh->amount = amount;
@@ -729,7 +726,7 @@ static int do_synchronize_cache(struct fsg_common *common)
 	struct fsg_lun	*curlun = common->curlun;
 	int		rc;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	wait_for_writing_thread_done(common);
 #endif  
 
@@ -778,7 +775,7 @@ static int do_verify(struct fsg_common *common)
 	amount_left = verification_length << curlun->blkbits;
 	file_offset = ((loff_t) lba) << curlun->blkbits;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (common->num_write_bufs != 0)
 		DBG(common, "Start waiting with %d buffers in queue\n",
 				common->num_write_bufs);
@@ -1099,7 +1096,7 @@ static int do_prevent_allow(struct fsg_common *common)
 		return -EINVAL;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	wait_for_writing_thread_done(common);
 #endif  
 
@@ -1184,7 +1181,7 @@ static int throw_away_data(struct fsg_common *common)
 	u32			amount;
 	int			rc;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	wait_for_writing_thread_done(common);
 #endif  
 
@@ -1949,7 +1946,7 @@ static void handle_exception(struct fsg_common *common)
 		}
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	wait_for_writing_thread_done(common);
 #endif  
 
@@ -2133,7 +2130,7 @@ static int fsg_main_thread(void *common_)
 	complete_and_exit(&common->thread_notifier, 0);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 static int fsg_write_thread(void *common_)
 {
 	struct fsg_common	*common = common_;
@@ -2271,7 +2268,7 @@ static struct fsg_common *fsg_common_init(struct fsg_common *common,
 	common->ep0req = cdev->req;
 	common->cdev = cdev;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	common->next_buffhd_to_write = common->last_buffhd_to_write = NULL;
 	common->num_write_bufs = 0;
 	common->use_writing_thread = true;
@@ -2379,7 +2376,7 @@ buffhds_first_it:
 	}
 	init_completion(&common->thread_notifier);
 	init_waitqueue_head(&common->fsg_wait);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	init_waitqueue_head(&common->fsg_write_thread_wait);
 
 	common->write_thread_task =
@@ -2419,7 +2416,7 @@ buffhds_first_it:
 
 	wake_up_process(common->thread_task);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (common->use_writing_thread)
 		wake_up_process(common->write_thread_task);
 #endif  

@@ -106,7 +106,7 @@ static const struct usb_device_id usb_quirk_list[] = {
 
 	{ USB_DEVICE(0x8086, 0xf1a5), .driver_info = USB_QUIRK_RESET_RESUME },
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	 
 	{ USB_DEVICE(0x13fe, 0x3e00), .driver_info = USB_QUIRK_RESET },
 #endif  

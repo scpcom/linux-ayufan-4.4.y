@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/slab.h>
 #include <linux/time.h>
@@ -278,7 +275,7 @@ int snd_pcm_update_state(struct snd_pcm_substream *substream,
 		wake_up(&runtime->sleep);
 	return 0;
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(snd_pcm_update_state);
 #endif  
 
@@ -513,7 +510,7 @@ int snd_pcm_update_hw_ptr(struct snd_pcm_substream *substream)
 {
 	return snd_pcm_update_hw_ptr0(substream, 0);
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(snd_pcm_update_hw_ptr);
 #endif  
 

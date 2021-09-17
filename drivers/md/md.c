@@ -7460,7 +7460,7 @@ void md_do_sync(struct md_thread *thread)
 
 #ifdef MY_ABC_HERE
 	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LOWER_MD_RESYNC_NICE
 	set_user_nice(current, 10);
 #endif
 #endif  
@@ -7568,7 +7568,7 @@ void md_do_sync(struct md_thread *thread)
 		}
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY
 #ifdef MY_DEF_HERE
 	if (mddev->level == 4 || mddev->level == 5 || mddev->level == 6 || mddev->level == SYNO_RAID_LEVEL_F1) {
 #else  
@@ -8714,7 +8714,7 @@ blDenyDisks(const struct block_device *pBDev)
 		goto END;
 	}
 	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_KVMX64
 	 
 #else
 	if (!(pBDev->bd_disk->systemDisk)) {

@@ -15,7 +15,7 @@
 #include "inode-map.h"
 #include "volumes.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define BITS_PER_BITMAP		(PAGE_CACHE_SIZE * 8LLU)
 #else  
 #define BITS_PER_BITMAP		(PAGE_CACHE_SIZE * 8)

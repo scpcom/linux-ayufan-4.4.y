@@ -138,12 +138,12 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 {
 	struct usb_port *port_dev = NULL;
 	int retval;
-#if defined(MY_DEF_HERE) ||\
+#if defined(CONFIG_SYNO_CASTRATED_XHC) ||\
 	defined(MY_DEF_HERE)
 	struct usb_device *hdev = hub->hdev;
 	int i = 0;
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CASTRATED_XHC
 	extern char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13];
 	extern unsigned gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC];
 #endif  
@@ -171,7 +171,7 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 	port_dev->power_cycle_counter = SYNO_POWER_CYCLE_TRIES;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CASTRATED_XHC
 	if (hdev && hdev->serial) {
 		for (i = 0; i < CONFIG_SYNO_NUM_CASTRATED_XHC; i++) {
 			if (0 == strcmp(gSynoCastratedXhcAddr[i], hdev->serial) &&

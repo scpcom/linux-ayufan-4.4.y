@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _ELPVAR_H_
 #define _ELPVAR_H_
@@ -9,7 +6,7 @@
 
 #include <asm/io.h>
 #include "m86xxx_utils.h"
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 #include "../ocf-compat.h"
 #else
 #include "ocf-compat.h"

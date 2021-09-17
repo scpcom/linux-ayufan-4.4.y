@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/phy.h>
 #include <linux/module.h>
@@ -18,7 +15,7 @@
 #define AT803X_MMD_ACCESS_CONTROL		0x0D
 #define AT803X_MMD_ACCESS_CONTROL_DATA		0x0E
 #define AT803X_FUNC_DATA			0x4003
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define AT803X_DEBUG_ADDR			0x1D
 #define AT803X_DEBUG_DATA			0x1E
 #define AT803X_DEBUG_SYSTEM_MODE_CTRL		0x05
@@ -29,7 +26,7 @@ MODULE_DESCRIPTION("Atheros 803x PHY driver");
 MODULE_AUTHOR("Matus Ujhelyi");
 MODULE_LICENSE("GPL");
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 static int at803x_set_wol(struct phy_device *phydev,
 			  struct ethtool_wolinfo *wol)
 {
@@ -128,7 +125,7 @@ static void at803x_set_wol_mac_addr(struct phy_device *phydev)
 static int at803x_config_init(struct phy_device *phydev)
 {
 	int val;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	int ret;
 	u32 features;
 #else  
@@ -168,7 +165,7 @@ static int at803x_config_init(struct phy_device *phydev)
 	phydev->supported = features;
 	phydev->advertising = features;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	ret = phy_write(phydev, AT803X_DEBUG_ADDR,
 			AT803X_DEBUG_SYSTEM_MODE_CTRL);
 	if (ret)
@@ -187,7 +184,7 @@ static int at803x_config_init(struct phy_device *phydev)
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 static struct phy_driver at803x_driver[] = {
 {
 	 
@@ -199,7 +196,7 @@ static struct phy_driver at8035_driver = {
 	.name		= "Atheros 8035 ethernet",
 	.phy_id_mask	= 0xffffffef,
 	.config_init	= at803x_config_init,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	.set_wol	= at803x_set_wol,
 	.get_wol	= at803x_get_wol,
 #endif  
@@ -210,7 +207,7 @@ static struct phy_driver at8035_driver = {
 	.driver		= {
 		.owner = THIS_MODULE,
 	},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 }, {
 	 
 #else  
@@ -222,7 +219,7 @@ static struct phy_driver at8030_driver = {
 	.name		= "Atheros 8030 ethernet",
 	.phy_id_mask	= 0xffffffef,
 	.config_init	= at803x_config_init,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	.set_wol	= at803x_set_wol,
 	.get_wol	= at803x_get_wol,
 #endif  
@@ -233,7 +230,7 @@ static struct phy_driver at8030_driver = {
 	.driver		= {
 		.owner = THIS_MODULE,
 	},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 }, {
 	 
 	.phy_id		= 0x004dd074,
@@ -254,7 +251,7 @@ static struct phy_driver at8030_driver = {
 };
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 static int __init atheros_init(void)
 {
 	return phy_drivers_register(at803x_driver,
@@ -299,7 +296,7 @@ module_exit(atheros_exit);
 
 static struct mdio_device_id __maybe_unused atheros_tbl[] = {
 	{ 0x004dd076, 0xffffffef },
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	{ 0x004dd074, 0xffffffef },
 #endif  
 	{ 0x004dd072, 0xffffffef },

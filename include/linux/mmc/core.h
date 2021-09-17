@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef LINUX_MMC_CORE_H
 #define LINUX_MMC_CORE_H
@@ -66,7 +63,7 @@ struct mmc_command {
 	unsigned int		error;		 
 
 	unsigned int		cmd_timeout_ms;	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	 
 	bool			sanitize_busy;
 #endif  

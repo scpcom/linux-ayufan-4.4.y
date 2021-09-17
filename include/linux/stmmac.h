@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __STMMAC_PLATFORM_DATA
 #define __STMMAC_PLATFORM_DATA
@@ -43,7 +40,7 @@ struct stmmac_mdio_bus_data {
 	unsigned int phy_mask;
 	int *irqs;
 	int probed_phy_irq;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #ifdef CONFIG_OF
 	int reset_gpio, active_low;
 	u32 delays[3];
@@ -73,7 +70,7 @@ struct plat_stmmacenet_data {
 	int bugged_jumbo;
 	int pmt;
 	int force_sf_dma_mode;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	int force_thresh_dma_mode;
 	int riwt_off;
 	int max_speed;
@@ -83,7 +80,7 @@ struct plat_stmmacenet_data {
 #endif  
 	void (*fix_mac_speed)(void *priv, unsigned int speed);
 	void (*bus_setup)(void __iomem *ioaddr);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	void *(*setup)(struct platform_device *pdev);
 	void (*free)(struct platform_device *pdev, void *priv);
 	int (*init)(struct platform_device *pdev, void *priv);
@@ -95,11 +92,11 @@ struct plat_stmmacenet_data {
 	void *custom_cfg;
 	void *custom_data;
 	void *bsp_priv;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	int eee_force_disable;
 #endif  
 };
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 struct stmmac_of_data {
 	int has_gmac;

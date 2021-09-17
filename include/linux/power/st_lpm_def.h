@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __LPM_DEF_H_
 #define __LPM_DEF_H_
@@ -77,7 +74,7 @@
 #define LPM_MSG_GET_IRQ_SIZE	0x3
 
 #define LPM_MSG_TRACE_DATA	0x43
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #define LPM_MSG_TRACE_DATA_SIZE	0x2
 #else  
 #define LPM_MSG_TRACE_DATA_SIZE	0x0
@@ -131,7 +128,7 @@
 #define PEN_HOLD_VAR_OFFSET_4xx		0xa4
 
 #define LPM_DMEM_PEN_HOLD_VAR_RESET	{0xFF, 0xFF, 0xFF, 0xFF}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #define LPM_POWER_STATUS 0x48
 #define XP70_IDLE_MODE 0xF
 #endif  

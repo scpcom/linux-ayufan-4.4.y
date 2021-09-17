@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/interrupt.h>
@@ -130,7 +127,7 @@ struct st_pcie_ops {
 
 struct st_pcie {
 	struct device *dev;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	u8 root_bus_nr;
 #endif  
 
@@ -339,7 +336,7 @@ static inline unsigned config_addr(int where, int is_root_bus)
 {
 	return (where & ~3) | (!is_root_bus << 12);
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static int st_pcie_valid_config(struct st_pcie *pp,
 				struct pci_bus *bus, int dev)
 {
@@ -364,7 +361,7 @@ static int st_pcie_config_read(struct pci_bus *bus, unsigned int devfn,
 {
 	u32 bdf;
 	u32 data;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 	int slot = PCI_SLOT(devfn);
 #endif  
@@ -373,7 +370,7 @@ static int st_pcie_config_read(struct pci_bus *bus, unsigned int devfn,
 	int is_root_bus = pci_is_root_bus(bus);
 	int retry_count = 0;
 	int ret;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	if (st_pcie_valid_config(priv, bus, PCI_SLOT(devfn)) == 0) {
 		*val = 0xffffffff;
 		return PCIBIOS_DEVICE_NOT_FOUND;
@@ -411,7 +408,7 @@ retry:
 	atomic_set(&abort_flag, 0);
 	ret = PCIBIOS_SUCCESSFUL;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	 
@@ -423,7 +420,7 @@ retry:
 	abort_end = (unsigned long)&&config_read_end;
 
 config_read_start:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	 
 	data = readl(priv->config_area + config_addr(where,
 		     bus->parent->number == priv->root_bus_nr));
@@ -443,7 +440,7 @@ config_read_start:
 
 config_read_end:
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	spin_unlock(&stm_pcie_io_spinlock);
@@ -478,14 +475,14 @@ static int st_pcie_config_write(struct pci_bus *bus, unsigned int devfn,
 	unsigned long flags;
 	u32 bdf;
 	u32 data = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 	int slot = PCI_SLOT(devfn);
 #endif  
 	struct st_pcie *priv = sys_to_pcie(bus->sysdata);
 	int is_root_bus = pci_is_root_bus(bus);
 	int ret;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	void __iomem *raw_config_area = priv->config_area;
@@ -493,13 +490,13 @@ static int st_pcie_config_write(struct pci_bus *bus, unsigned int devfn,
 #endif
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	if (st_pcie_valid_config(priv, bus, PCI_SLOT(devfn)) == 0)
 #else  
 	if (!priv || (is_root_bus && slot != 1) || !link_up(priv))
 #endif  
 		return PCIBIOS_DEVICE_NOT_FOUND;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	if (is_root_bus) {
 		 
 		data = dbi_readl(priv, (where & ~0x3));
@@ -518,7 +515,7 @@ static int st_pcie_config_write(struct pci_bus *bus, unsigned int devfn,
 
 	atomic_set(&abort_flag, 0);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	 
@@ -531,7 +528,7 @@ static int st_pcie_config_write(struct pci_bus *bus, unsigned int devfn,
 
 config_write_start:
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	 
 	if (size != 4)
 		data = readl(priv->config_area + config_addr(where,
@@ -553,7 +550,7 @@ config_write_start:
 
 	data = shift_data_write(where, size, val, data);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	writel(data, priv->config_area + config_addr(where,
 	       bus->parent->number == priv->root_bus_nr));
 #else  
@@ -568,7 +565,7 @@ config_write_start:
 
 config_write_end:
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	spin_unlock(&stm_pcie_io_spinlock);
@@ -637,7 +634,7 @@ static int st_pcie_hw_setup(struct st_pcie *priv,
 
 	st_pcie_board_reset(priv);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	err = priv->data->enable_ltssm(priv);
 	if (err)
 		return err;
@@ -686,7 +683,7 @@ static irqreturn_t st_pcie_sys_err(int irq, void *dev_data)
 static int st_pcie_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
 {
 	struct st_pcie *pcie = sys_to_pcie(dev->bus->sysdata);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	int i = (slot + pin - 1) % 4;
 #else  
 	int i = (slot - 1 + pin - 1) % 4;
@@ -730,7 +727,7 @@ static struct pci_bus *st_pcie_scan(int nr, struct pci_sys_data *sys)
 {
 	struct st_pcie *pcie = sys_to_pcie(sys);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	pcie->root_bus_nr = sys->busnr;
 #endif  
 	return pci_scan_root_bus(pcie->dev, sys->busnr, &st_pcie_config_ops,

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <crypto/hash.h>
 #include <linux/err.h>
@@ -1729,7 +1726,7 @@ static const struct alg_test_desc alg_test_descs[] = {
 			}
 		}
 	}, {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		.alg = "authenc(hmac(sha384),cbc(aes))",
 		.test = alg_test_aead,
 		.fips_allowed = 1,

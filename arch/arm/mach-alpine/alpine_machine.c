@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/of.h>
 #include <linux/of_address.h>
@@ -43,7 +40,7 @@
 static void __iomem *wd0_base;
 static void __iomem *serdes_base;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 #include <linux/syno.h>
 #include <linux/serial_reg.h>
 #define UART1_REG(x)            (AL_UART_BASE(1) + ((UART_##x) << 2))
@@ -51,7 +48,7 @@ static void __iomem *serdes_base;
 #define SOFTWARE_SHUTDOWN       0x31
 #define SOFTWARE_REBOOT         0x43
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_SUPPORT_WOL
 #include <linux/netdevice.h>
 #include <linux/ethtool.h>
 extern void syno_alpine_wol_set(void);
@@ -81,10 +78,10 @@ static void __init al_timer_init(void)
 	clocksource_of_init();
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 static void synology_power_off(void)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_SUPPORT_WOL
 	syno_alpine_wol_set();
 #endif  
 	printk(KERN_EMERG "Synology shutdown\n");
@@ -275,7 +272,7 @@ EXPORT_SYMBOL(alpine_serdes_eth_group_unlock);
 
 static void __init al_init(void)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	pm_power_off = synology_power_off;
 #else  
 	pm_power_off = al_power_off;
@@ -330,7 +327,7 @@ DT_MACHINE_START(AL_DT, "AnnapurnaLabs Alpine (Device Tree)")
 	.init_time	= al_timer_init,
 	.init_machine	= al_init,
 	.dt_compat	= al_match,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	.restart	= synology_restart,
 #else  
 	.restart	= al_restart,

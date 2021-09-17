@@ -64,7 +64,7 @@
 #include <asm/uaccess.h>
 #include <asm/io.h>
 #include <asm/unistd.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_TURN_OFF_VBUS_GPIO_BEFORE_POWEROFF
 #include <linux/gpio.h>
 #ifdef MY_ABC_HERE
 extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
@@ -287,7 +287,7 @@ out_unlock:
 	return retval;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_TURN_OFF_VBUS_GPIO_BEFORE_POWEROFF
 static void syno_turnoff_all_usb_vbus_gpio(void)
 {
 	int gpio_off_value = 0;
@@ -328,7 +328,7 @@ void kernel_restart_prepare(char *cmd)
 #if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
 	syno_stmmac_release();
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	syscore_shutdown();
 #endif  
 }
@@ -385,7 +385,7 @@ static void kernel_shutdown_prepare(enum system_states state)
 	system_state = state;
 	usermodehelper_disable();
 	device_shutdown();
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_TURN_OFF_VBUS_GPIO_BEFORE_POWEROFF
 	if (SYSTEM_POWER_OFF == system_state)
 		syno_turnoff_all_usb_vbus_gpio();
 #endif  

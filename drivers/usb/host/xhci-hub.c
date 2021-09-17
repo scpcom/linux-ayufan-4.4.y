@@ -438,7 +438,7 @@ void xhci_del_comp_mod_timer(struct xhci_hcd *xhci, u32 status, u16 wIndex)
 	}
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 static u32 xhci_get_port_status(struct usb_hcd *hcd,
 		struct xhci_bus_state *bus_state,
@@ -628,7 +628,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		if (!wIndex || wIndex > max_ports)
 			goto error;
 		wIndex--;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 		status = 0;
 #endif  
@@ -637,7 +637,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			retval = -ENODEV;
 			break;
 		}
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		status = xhci_get_port_status(hcd, bus_state, port_array,
 				wIndex, temp, flags);
 		if (status == 0xffffffff)
@@ -861,7 +861,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		case USB_PORT_FEAT_POWER:
 			 
 #if defined(MY_ABC_HERE) \
-			&& !defined(MY_DEF_HERE)
+			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
 			xhci_dbg(xhci, "set port power. hcd->speed:%d.\n",hcd->speed);
 			if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3) {
 				xhci_writel(xhci, temp & ~PORT_POWER,
@@ -874,7 +874,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			xhci_writel(xhci, temp | PORT_POWER,
 					port_array[wIndex]);
 #if defined(MY_ABC_HERE) \
-			&& !defined(MY_DEF_HERE)
+			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
 			}
 #endif  
 
@@ -887,7 +887,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 
 			if (temp)
 #if defined(MY_ABC_HERE) \
-			&& !defined(MY_DEF_HERE)
+			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
 			{
 				if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3) {
 					usb_acpi_set_power_state(hcd->self.root_hub,
@@ -897,7 +897,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 				usb_acpi_set_power_state(hcd->self.root_hub,
 					wIndex, true);
 #if defined(MY_ABC_HERE) \
-			&& !defined(MY_DEF_HERE)
+			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
 				}
 			}
 #endif  

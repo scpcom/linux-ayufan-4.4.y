@@ -4161,7 +4161,7 @@ int __meminit init_per_zone_wmark_min(void)
 		min_free_kbytes = 128;
 	if (min_free_kbytes > 65536)
 		min_free_kbytes = 65536;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PULL_UP_MIN_FREE_KBYTES)
 	min_free_kbytes = 16384;
 #endif  
 	setup_per_zone_wmarks();
@@ -4792,7 +4792,7 @@ static void dump_page_flags(unsigned long flags)
 
 void dump_page(struct page *page)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	printk(KERN_ALERT
 	       "page:%p count:%d mapcount:%d mapping:%p index:%#llx\n",
 		page, atomic_read(&page->_count), page_mapcount(page),

@@ -234,7 +234,7 @@ static const struct hc_driver xhci_pci_hc_driver = {
 	.check_bandwidth =	xhci_check_bandwidth,
 	.reset_bandwidth =	xhci_reset_bandwidth,
 	.address_device =	xhci_address_device,
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	.enable_device =	xhci_enable_device,
 #endif  
 	.update_hub_device =	xhci_update_hub_device,

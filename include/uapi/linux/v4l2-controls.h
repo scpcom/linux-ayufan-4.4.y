@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __LINUX_V4L2_CONTROLS_H
 #define __LINUX_V4L2_CONTROLS_H
@@ -15,7 +12,7 @@
 #define V4L2_CTRL_CLASS_IMAGE_PROC	0x009f0000	 
 #define V4L2_CTRL_CLASS_DV		0x00a00000	 
 #define V4L2_CTRL_CLASS_FM_RX		0x00a10000	 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define V4L2_CTRL_CLASS_TSMUX		0x00b00000	 
 #endif  
 
@@ -770,7 +767,7 @@ enum v4l2_deemphasis {
 };
 
 #define V4L2_CID_RDS_RECEPTION			(V4L2_CID_FM_RX_CLASS_BASE + 2)
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 #define V4L2_CID_TSMUX_CLASS_BASE		(V4L2_CTRL_CLASS_TSMUX | 0x900)
 #define V4L2_CID_TSMUX_CLASS			(V4L2_CTRL_CLASS_TSMUX | 1)

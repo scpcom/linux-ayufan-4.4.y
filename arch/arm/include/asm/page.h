@@ -5,7 +5,7 @@
 #ifndef _ASMARM_PAGE_H
 #define _ASMARM_PAGE_H
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
 #define PAGE_SHIFT		CONFIG_ARM_PAGE_SIZE_LARGE_SHIFT
 #elif defined(MY_ABC_HERE)
 #ifdef CONFIG_MV_8KB_SW_PAGE_SIZE_SUPPORT
@@ -32,7 +32,7 @@
 #define PAGE_SIZE		(_AC(1,UL) << PAGE_SHIFT)
 #define PAGE_MASK		(~((1 << PAGE_SHIFT) - 1))
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
  
 #define HW_PAGE_SHIFT		12
 #define HW_PAGE_SIZE		(1 << HW_PAGE_SHIFT)

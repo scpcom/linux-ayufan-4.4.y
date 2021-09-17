@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/init.h>
@@ -31,7 +28,7 @@ static int probed;
 #define sbridge_mc_printk(mci, level, fmt, arg...)		\
 	edac_mc_chipset_printk(mci, level, "sbridge", fmt, ##arg)
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define GET_BITFIELD(v, lo, hi)	\
 	(((v) & GENMASK_ULL(hi, lo)) >> (lo))
 #else  

@@ -13,13 +13,13 @@
 #include <linux/device.h>
 #include <linux/dmi.h>
 #include <linux/gfp.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #include <linux/gpio.h>
 #include <linux/of_gpio.h>
 #endif  
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
 #include <scsi/scsi.h>
 #include <scsi/scsi_eh.h>
 #include <scsi/scsi_device.h>
@@ -28,7 +28,7 @@
 #endif  
 #include <linux/libata.h>
 #include "ahci.h"
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_ALPINE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARCH_ALPINE)
 #include "al_hal_iofic.h"
 #include "al_hal_iofic_regs.h"
 #endif  
@@ -69,7 +69,7 @@ enum board_ids {
 	board_ahci_sb600,
 	board_ahci_sb700,	 
 	board_ahci_vt8251,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	board_ahci_alpine,
 #endif  
 
@@ -111,7 +111,7 @@ static struct ata_port_operations ahci_p5wdh_ops = {
 	.hardreset		= ahci_p5wdh_hardreset,
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 ssize_t al_ahci_transmit_led_message(struct ata_port *ap, u32 state,
 					    ssize_t size);
 
@@ -232,7 +232,7 @@ static const struct ata_port_info ahci_port_info[] = {
 		.udma_mask	= ATA_UDMA6,
 		.port_ops	= &ahci_vt8251_ops,
 	},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	[board_ahci_alpine] = {
 		AHCI_HFLAGS	(AHCI_HFLAG_NO_PMP | AHCI_HFLAG_MSIX),
 		.flags		= AHCI_FLAG_COMMON,
@@ -401,7 +401,7 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	{ PCI_VDEVICE(ATI, 0x4394), board_ahci_sb700 },  
 	{ PCI_VDEVICE(ATI, 0x4395), board_ahci_sb700 },  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 	{ PCI_VDEVICE(ANNAPURNA_LABS, 0x0031), board_ahci_alpine },  
 #endif  
@@ -533,7 +533,7 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	  .driver_data = board_ahci_yes_fbs },
 	{ PCI_DEVICE(PCI_VENDOR_ID_TTI, 0x0642),
 	  .driver_data = board_ahci_yes_fbs },
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_LSP_ALPINE)
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9235),
 	  .driver_data = board_ahci_yes_fbs },			 
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9215),
@@ -1560,7 +1560,7 @@ static inline void ahci_gtf_filter_workaround(struct ata_host *host)
 {}
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_ALPINE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARCH_ALPINE)
 #define al_ahci_iofic_base(base)	((base) + 0x2000)
 
 static ssize_t al_ahci_show_msix_moder(struct device *dev,
@@ -1705,7 +1705,7 @@ int ahci_init_interrupts(struct pci_dev *pdev, struct ahci_host_priv *hpriv)
 	int rc;
 	unsigned int maxvec;
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_ALPINE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARCH_ALPINE)
 	if (hpriv->flags & AHCI_HFLAG_MSIX) {
 		if (!al_ahci_init_msix(pdev, hpriv))
 			return hpriv->msix_vecs;
@@ -1731,7 +1731,7 @@ int ahci_init_interrupts(struct pci_dev *pdev, struct ahci_host_priv *hpriv)
 int ahci_host_activate(struct ata_host *host, int irq, unsigned int n_msis)
 {
 	int i, rc;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	struct ahci_host_priv *hpriv = host->private_data;
 	int port_irq;
 #endif  
@@ -1744,7 +1744,7 @@ int ahci_host_activate(struct ata_host *host, int irq, unsigned int n_msis)
 		return rc;
 
 	for (i = 0; i < host->n_ports; i++) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		struct ata_port *ap = host->ports[i];
 		struct ahci_port_priv *pp = ap->private_data;
 
@@ -1776,7 +1776,7 @@ int ahci_host_activate(struct ata_host *host, int irq, unsigned int n_msis)
 			goto out_free_irqs;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	for (i = 0; i < host->n_ports; i++) {
 		if (hpriv->msix_entries)
 #ifdef CONFIG_ARCH_ALPINE
@@ -1802,7 +1802,7 @@ int ahci_host_activate(struct ata_host *host, int irq, unsigned int n_msis)
 out_free_all_irqs:
 	i = host->n_ports;
 out_free_irqs:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	for (i--; i >= 0; i--) {
 		if (hpriv->msix_entries)
 #ifdef CONFIG_ARCH_ALPINE
@@ -1829,7 +1829,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct device *dev = &pdev->dev;
 	struct ahci_host_priv *hpriv;
 	struct ata_host *host;
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_ALPINE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARCH_ALPINE)
 	struct device_node *np;
 #endif  
 	int n_ports, n_msis, i, rc;
@@ -1976,7 +1976,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	ahci_set_em_messages(hpriv, &pi);
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_ALPINE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARCH_ALPINE)
 	for (i = 0; i < AHCI_MAX_PORTS; i++)
 		hpriv->led_gpio[i] = -1;
 

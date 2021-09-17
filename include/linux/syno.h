@@ -5,22 +5,22 @@
 #ifndef __SYNO_H_
 #define __SYNO_H_
 
-#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && defined(CONFIG_SYNO_CEDARVIEW)
 #define SYNO_CEDARVIEW_USE_EFI_REBOOT
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_FLASH_PART
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_GPIO_CTRL
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_POWEROFF
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_POWEROFF
 #define SYNO_EVANSPORT_TTYS1_PORT	0x2F8
 #define SYNO_EVANSPORT_SET8N1		0x3
 #define SYNO_EVANSPORT_SHUTDOWN_CMD	0x31
@@ -29,19 +29,19 @@
 #endif
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_EXPORT_SYMBOL
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_NON_PREEMPT_SMB
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_WOL_WORKAROUND
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_IPV4_ROUTE_WORKAROUND
 #endif
 
@@ -75,7 +75,7 @@
 
 #define SYNO_FIX_MD_RESIZE_BUSY_LOOP 5
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
 #define SYNO_ATA_AHCI_LED_MSG
 #endif
 

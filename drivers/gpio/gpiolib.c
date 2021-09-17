@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
@@ -40,7 +37,7 @@ struct gpio_desc {
 #define FLAG_ACTIVE_LOW	6	 
 #define FLAG_OPEN_DRAIN	7	 
 #define FLAG_OPEN_SOURCE 8	 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define FLAG_USED_AS_IRQ 9	 
 #endif  
 
@@ -75,7 +72,7 @@ static int gpiod_get_value(const struct gpio_desc *desc);
 static void gpiod_set_value(struct gpio_desc *desc, int value);
 static int gpiod_cansleep(const struct gpio_desc *desc);
 static int gpiod_to_irq(const struct gpio_desc *desc);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static int gpiod_lock_as_irq(struct gpio_desc *desc);
 static void gpiod_unlock_as_irq(struct gpio_desc *desc);
 #endif  
@@ -85,7 +82,7 @@ static int gpiod_export_link(struct device *dev, const char *name,
 static int gpiod_sysfs_set_active_low(struct gpio_desc *desc, int value);
 static void gpiod_unexport(struct gpio_desc *desc);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #ifdef CONFIG_DEBUG_FS
 #define gpiod_emerg(desc, fmt, ...)			                \
 	pr_emerg("gpio-%d (%s): " fmt, desc_to_gpio(desc), desc->label, \
@@ -141,7 +138,7 @@ static struct gpio_desc *gpio_to_desc(unsigned gpio)
 		return &gpio_desc[gpio];
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 static struct gpio_desc *gpiochip_offset_to_desc(struct gpio_chip *chip,
 						 unsigned int offset)
@@ -377,7 +374,7 @@ static int gpio_setup_irq(struct gpio_desc *desc, struct device *dev,
 	desc->flags &= ~GPIO_TRIGGER_MASK;
 
 	if (!gpio_flags) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		gpiod_unlock_as_irq(desc);
 #endif  
 		ret = 0;
@@ -417,7 +414,7 @@ static int gpio_setup_irq(struct gpio_desc *desc, struct device *dev,
 				"gpiolib", value_sd);
 	if (ret < 0)
 		goto free_id;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	ret = gpiod_lock_as_irq(desc);
 	if (ret < 0) {
 		gpiod_warn(desc, "failed to flag the GPIO for IRQ\n");
@@ -1485,7 +1482,7 @@ static int gpiod_direction_input(struct gpio_desc *desc)
 	if (status) {
 		status = chip->request(chip, offset);
 		if (status < 0) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 			gpiod_dbg(desc, "chip request fail, %d\n", status);
 #else  
 			pr_debug("GPIO-%d: chip request fail, %d\n",
@@ -1505,7 +1502,7 @@ lose:
 	return status;
 fail:
 	spin_unlock_irqrestore(&gpio_lock, flags);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (status)
 		gpiod_dbg(desc, "%s status %d\n", __func__, status);
 #else  
@@ -1534,7 +1531,7 @@ static int gpiod_direction_output(struct gpio_desc *desc, int value)
 		return -EINVAL;
 	}
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	if (test_bit(FLAG_USED_AS_IRQ, &desc->flags)) {
 
@@ -1567,7 +1564,7 @@ static int gpiod_direction_output(struct gpio_desc *desc, int value)
 	if (status) {
 		status = chip->request(chip, offset);
 		if (status < 0) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 			gpiod_dbg(desc, "chip request fail, %d\n", status);
 #else  
 			pr_debug("GPIO-%d: chip request fail, %d\n",
@@ -1587,7 +1584,7 @@ lose:
 	return status;
 fail:
 	spin_unlock_irqrestore(&gpio_lock, flags);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (status)
 		gpiod_dbg(desc, "%s: gpio status %d\n", __func__, status);
 #else  
@@ -1635,7 +1632,7 @@ static int gpiod_set_debounce(struct gpio_desc *desc, unsigned debounce)
 
 fail:
 	spin_unlock_irqrestore(&gpio_lock, flags);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (status)
 		gpiod_dbg(desc, "%s: status %d\n", __func__, status);
 #else  
@@ -1692,7 +1689,7 @@ static void _gpio_set_open_drain_value(struct gpio_desc *desc, int value)
 			set_bit(FLAG_IS_OUT, &desc->flags);
 	}
 	trace_gpio_direction(desc_to_gpio(desc), value, err);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (err < 0)
 		gpiod_err(desc,
 			  "%s: Error in set_value for open drain err %d\n",
@@ -1720,7 +1717,7 @@ static void _gpio_set_open_source_value(struct gpio_desc *desc, int value)
 			clear_bit(FLAG_IS_OUT, &desc->flags);
 	}
 	trace_gpio_direction(desc_to_gpio(desc), !value, err);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (err < 0)
 		gpiod_err(desc,
 			  "%s: Error in set_value for open source err %d\n",
@@ -1788,7 +1785,7 @@ int __gpio_to_irq(unsigned gpio)
 }
 EXPORT_SYMBOL_GPL(__gpio_to_irq);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 static int gpiod_lock_as_irq(struct gpio_desc *desc)
 {
@@ -1879,7 +1876,7 @@ static void gpiolib_dbg_show(struct seq_file *s, struct gpio_chip *chip)
 	unsigned		gpio = chip->base;
 	struct gpio_desc	*gdesc = &chip->desc[0];
 	int			is_out;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	int			is_irq;
 #endif  
 
@@ -1889,7 +1886,7 @@ static void gpiolib_dbg_show(struct seq_file *s, struct gpio_chip *chip)
 
 		gpiod_get_direction(gdesc);
 		is_out = test_bit(FLAG_IS_OUT, &gdesc->flags);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		is_irq = test_bit(FLAG_USED_AS_IRQ, &gdesc->flags);
 		seq_printf(s, " gpio-%-3d (%-20.20s) %s %s %s",
 			gpio, gdesc->label,
@@ -2008,7 +2005,7 @@ subsys_initcall(gpiolib_debugfs_init);
 
 #endif	 
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
 int syno_gpio_value_set(int iPin, int iValue)
 {
 	int iRet = -1;

@@ -25,7 +25,7 @@ static void quirk_mmio_always_on(struct pci_dev *dev)
 }
 DECLARE_PCI_FIXUP_CLASS_EARLY(PCI_ANY_ID, PCI_ANY_ID,
 				PCI_CLASS_BRIDGE_HOST, 8, quirk_mmio_always_on);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF
 DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_INTEL, 0x2934, quirk_mmio_always_on);
 #endif  
 
@@ -2067,7 +2067,7 @@ static void quirk_msi_intx_disable_qca_bug(struct pci_dev *dev)
 	}
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_ANNAPURNA_LABS,
 			PCI_DEVICE_ID_AL_ETH,
 			quirk_msi_intx_disable_bug);
@@ -2538,7 +2538,7 @@ static void mv9170_non_spi_programming(struct pci_dev *dev)
 DECLARE_PCI_FIXUP_FINAL(0x1b4b, 0x9170, mv9170_non_spi_programming);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LYNXPOINT_XHCI_QUIRK
  
 static void intel_lynxpoint_xhci_quirk(struct pci_dev *dev)
 {

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -1300,7 +1297,7 @@ static int lpc_eth_drv_probe(struct platform_device *pdev)
 	return 0;
 
 err_out_unregister_netdev:
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  
@@ -1331,7 +1328,7 @@ static int lpc_eth_drv_remove(struct platform_device *pdev)
 	struct netdata_local *pldat = netdev_priv(ndev);
 
 	unregister_netdev(ndev);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

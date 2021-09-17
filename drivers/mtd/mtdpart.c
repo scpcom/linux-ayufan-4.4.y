@@ -90,7 +90,7 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 		struct mtd_oob_ops *ops)
 {
 	struct mtd_part *part = PART(mtd);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	struct mtd_ecc_stats stats;
 #endif  
 	int res;
@@ -100,7 +100,7 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 	if (ops->datbuf && from + ops->len > mtd->size)
 		return -EINVAL;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	stats = part->master->ecc_stats;
 
 #endif  
@@ -119,7 +119,7 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 	}
 
 	res = part->master->_read_oob(part->master, from + part->offset, ops);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	mtd->ecc_stats.corrected += part->master->ecc_stats.corrected -
 		stats.corrected;
@@ -360,7 +360,7 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 	slave->mtd.owner = master->owner;
 	slave->mtd.backing_dev_info = master->backing_dev_info;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	slave->mtd.flags |= MTD_SLAVE_PARTITION;
 
@@ -515,7 +515,7 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 		}
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO)
 	 
 	if (slave->offset == 0 && slave->mtd.size == master->size)
 		slave->mtd.flags |= MTD_SPANS_MASTER;
@@ -785,7 +785,7 @@ int add_mtd_partitions(struct mtd_info *master,
 
 	return 0;
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 struct mtd_info *get_mtd_partition_slave(struct mtd_info *master, char *name,
 					 uint64_t *offset)
@@ -845,7 +845,7 @@ int deregister_mtd_parser(struct mtd_part_parser *p)
 EXPORT_SYMBOL_GPL(deregister_mtd_parser);
 
 static const char * const default_mtd_part_types[] = {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_MONACO) || defined(MY_ABC_HERE)
 	"RedBoot",
 #endif  
 	"cmdlinepart",

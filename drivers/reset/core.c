@@ -84,7 +84,7 @@ int reset_control_deassert(struct reset_control *rstc)
 }
 EXPORT_SYMBOL_GPL(reset_control_deassert);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 int reset_control_is_asserted(struct reset_control *rstc)
 {
@@ -144,7 +144,7 @@ struct reset_control *reset_control_get(struct device *dev, const char *id)
 
 	if (!rcdev) {
 		mutex_unlock(&reset_controller_list_mutex);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		return ERR_PTR(-EPROBE_DEFER);
 #else  
 		return ERR_PTR(-ENODEV);

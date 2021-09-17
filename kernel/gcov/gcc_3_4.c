@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/errno.h>
 #include <linux/slab.h>
@@ -9,7 +6,7 @@
 #include <linux/vmalloc.h>
 #include "gcov.h"
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define GCOV_COUNTERS		5
 
 static struct gcov_info *gcov_info_head;

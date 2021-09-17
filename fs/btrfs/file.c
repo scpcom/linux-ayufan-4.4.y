@@ -12,7 +12,7 @@
 #include <linux/mpage.h>
 #include <linux/aio.h>
 #include <linux/falloc.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #include <linux/socket.h>
 #include <net/sock.h>
 #include <linux/net.h>
@@ -2808,14 +2808,14 @@ out:
 	return offset;
 }
 
-#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && !defined(CONFIG_SYNO_ALPINE)
 #define MSG_KERNSPACE       0x1000000
 #define MSG_NOCATCHSIG   0x2000000
 
 static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 					loff_t __user *ppos, size_t count)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	struct inode *inode = file_inode(file);
 #else  
 	struct inode *inode = fdentry(file)->d_inode;
@@ -2876,7 +2876,7 @@ static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 					num_pages << PAGE_CACHE_SHIFT)))
 		goto out_free;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	if ((err = prepare_pages(file_inode(file), pages, num_pages,
 					pos, count, false))) {
 #else  
@@ -2911,7 +2911,7 @@ static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 	recvtimeo = sock->sk->sk_rcvtimeo;
 	sock->sk->sk_rcvtimeo = 8 * HZ;
 	copied = kernel_recvmsg(sock, &msg, iov, num_pages, count,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
                              MSG_WAITALL | MSG_NOCATCHSIGNAL);
 #else  
                              MSG_WAITALL | MSG_NOCATCHSIG);
@@ -3168,7 +3168,7 @@ const struct file_operations btrfs_file_operations = {
 	.read		= do_sync_read,
 	.write		= do_sync_write,
 	.aio_read       = generic_file_aio_read,
-#if (defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)) || \
+#if (defined(CONFIG_SYNO_LSP_ALPINE) && !defined(CONFIG_SYNO_ALPINE)) || \
 	defined(MY_ABC_HERE)
 	.splice_from_socket	= btrfs_splice_from_socket,
 #endif  

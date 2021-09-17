@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -143,7 +140,7 @@ static void mmc_queue_setup_discard(struct request_queue *q,
 	 
 	if (card->pref_erase > max_discard)
 		q->limits.discard_granularity = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	if (mmc_can_secure_erase_trim(card))
 #else  
 	if (mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))

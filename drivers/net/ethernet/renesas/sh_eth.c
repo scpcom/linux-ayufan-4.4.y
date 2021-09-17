@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/module.h>
@@ -2641,7 +2638,7 @@ static int sh_eth_drv_remove(struct platform_device *pdev)
 	unregister_netdev(ndev);
 	pm_runtime_disable(&pdev->dev);
 	free_netdev(ndev);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __STMFP_PLATFORM_DATA
 #define __STMFP_PLATFORM_DATA
@@ -42,7 +39,7 @@ struct plat_fpif_data {
 	struct stmfp_mdio_bus_data *mdio_bus_data;
 	int buf_thr;
 	int q_idx;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	const char *mac_addr;
 #endif  
 };

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -666,7 +663,7 @@ static struct flash_info flash_types[] = {
 		   FLASH_CAPS_WRITE_1_1_4	| \
 		   FLASH_CAPS_WRITE_1_4_4	| \
 		   FLASH_CAPS_BLK_LOCKING)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO)
 	JEDEC_INFO("n25q064", 0x20ba17, 64 * 1024,  128,
 		   N25Q_CAPS, 108, n25q_config, n25q_resume),
 #endif  
@@ -2715,7 +2712,7 @@ static int fsm_mtd_erase(struct mtd_info *mtd, struct erase_info *instr)
 
 static int fsm_mtd_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_SPI_WITHOUT_LOCK)
 	 
 	return 0;
 #endif
@@ -3100,7 +3097,7 @@ static int stm_spi_fsm_probe(struct platform_device *pdev)
 	if (pdev->dev.of_node)
 		ppdata.of_node = of_parse_phandle(pdev->dev.of_node,
 							"partitions", 0);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO)
 	memset(&ppdata, 0, sizeof(struct mtd_part_parser_data));
 #endif
 	ret = mtd_device_parse_register(&fsm->mtd, NULL, &ppdata,
@@ -3159,7 +3156,7 @@ static struct of_device_id spi_fsm_match[] = {
 MODULE_DEVICE_TABLE(of, spi_fsm_match);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_PM_SLEEP
 static int stm_spi_fsm_suspend(struct device *dev)
 {

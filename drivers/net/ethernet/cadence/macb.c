@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 #include <linux/clk.h>
@@ -1487,7 +1484,7 @@ err_out_put_pclk:
 err_out_free_dev:
 	free_netdev(dev);
 err_out:
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  
@@ -1516,7 +1513,7 @@ static int __exit macb_remove(struct platform_device *pdev)
 		clk_disable_unprepare(bp->pclk);
 		clk_put(bp->pclk);
 		free_netdev(dev);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 		platform_set_drvdata(pdev, NULL);
 #endif  

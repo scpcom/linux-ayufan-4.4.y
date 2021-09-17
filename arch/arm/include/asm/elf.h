@@ -56,7 +56,7 @@ typedef struct user_fp elf_fpregset_t;
 #define R_ARM_ABS32		2
 #define R_ARM_CALL		28
 #define R_ARM_JUMP24		29
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define R_ARM_TARGET1		38
 #endif  
 #define R_ARM_V4BX		40
@@ -97,7 +97,7 @@ int dump_task_regs(struct task_struct *t, elf_gregset_t *elfregs);
 #define ELF_CORE_COPY_TASK_REGS dump_task_regs
 
 #define CORE_DUMP_USE_REGSET
-#if defined(MY_DEF_HERE) || (defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT))
+#if defined(CONFIG_SYNO_LSP_ALPINE) || (defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT))
 #define ELF_EXEC_PAGESIZE	PAGE_SIZE
 #else  
 #define ELF_EXEC_PAGESIZE	4096

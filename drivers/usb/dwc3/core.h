@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __DRIVERS_USB_DWC3_CORE_H
 #define __DRIVERS_USB_DWC3_CORE_H
@@ -16,7 +13,7 @@
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #include <linux/phy/phy.h>
 
 #endif  
@@ -306,7 +303,7 @@
 #define DWC3_DEPCMD_TYPE_BULK		2
 #define DWC3_DEPCMD_TYPE_INTR		3
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 struct dwc3_cfg_ops;
 #endif  
 struct dwc3_trb;
@@ -519,7 +516,7 @@ struct dwc3 {
 
 	struct usb_phy		*usb2_phy;
 	struct usb_phy		*usb3_phy;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	struct phy		*usb2_generic_phy;
 	struct phy		*usb3_generic_phy;
@@ -588,10 +585,10 @@ struct dwc3 {
 
 	u8			test_mode;
 	u8			test_mode_nr;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	struct dwc3_cfg_ops     *cfg_ops;
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #ifdef CONFIG_USB_DWC3_AL_RMN_2648
 	void __iomem *		serdes_regs_base;
 	u32			serdes_group;
@@ -604,7 +601,7 @@ struct dwc3 {
 #endif
 #endif  
 };
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
  
 struct dwc3_cfg_ops {
 	u32 (*dwc3_gsbuscfg)(struct device *dev, int index);

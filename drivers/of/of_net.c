@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/etherdevice.h>
 #include <linux/kernel.h>
@@ -14,7 +11,7 @@ static const char *phy_modes[] = {
 	[PHY_INTERFACE_MODE_GMII]	= "gmii",
 	[PHY_INTERFACE_MODE_SGMII]	= "sgmii",
 	[PHY_INTERFACE_MODE_TBI]	= "tbi",
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	[PHY_INTERFACE_MODE_REVMII]	= "rev-mii",
 #endif  
 	[PHY_INTERFACE_MODE_RMII]	= "rmii",

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _V4L2_DEV_H
 #define _V4L2_DEV_H
@@ -20,7 +17,7 @@
 #define VFL_TYPE_VBI		1
 #define VFL_TYPE_RADIO		2
 #define VFL_TYPE_SUBDEV		3
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define VFL_TYPE_TSMUX		4
 #define VFL_TYPE_MAX		5
 #else  

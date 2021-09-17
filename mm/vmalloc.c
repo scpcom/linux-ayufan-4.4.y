@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/vmalloc.h>
 #include <linux/mm.h>
@@ -474,7 +471,7 @@ void set_iounmap_nonlazy(void)
 {
 	atomic_set(&vmap_lazy_nr, lazy_max_pages()+1);
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(set_iounmap_nonlazy);
 #endif  
 

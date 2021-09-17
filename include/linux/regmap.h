@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __LINUX_REGMAP_H
 #define __LINUX_REGMAP_H
 
@@ -16,7 +13,7 @@ struct irq_domain;
 struct spi_device;
 struct regmap;
 struct regmap_range_cfg;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 struct regmap_field;
 #endif  
 
@@ -227,7 +224,7 @@ static inline bool regmap_reg_in_range(unsigned int reg,
 bool regmap_reg_in_ranges(unsigned int reg,
 			  const struct regmap_range *ranges,
 			  unsigned int nranges);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 struct reg_field {
 	unsigned int reg;

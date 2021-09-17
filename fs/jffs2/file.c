@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -77,7 +74,7 @@ static int jffs2_do_readpage_nolock (struct inode *inode, struct page *pg)
 	unsigned char *pg_buf;
 	int ret;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 	jffs2_dbg(2, "%s(): ino #%lu, page at offset 0x%llx\n",
 		  __func__, inode->i_ino, (unsigned long long)pg->index << PAGE_CACHE_SHIFT);
 #else  
@@ -238,7 +235,7 @@ static int jffs2_write_end(struct file *filp, struct address_space *mapping,
 	int ret = 0;
 	uint32_t writtenlen = 0;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 	jffs2_dbg(1, "%s(): ino #%lu, page at 0x%llx, range %d-%d, flags %lx\n",
 		  __func__, inode->i_ino, (unsigned long long)pg->index << PAGE_CACHE_SHIFT,
 		  start, end, pg->flags);

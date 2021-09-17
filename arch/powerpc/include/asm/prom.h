@@ -25,7 +25,7 @@ void of_parse_dma_window(struct device_node *dn, const void *dma_window_prop,
 
 extern void kdump_move_device_tree(void);
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4) || defined(MY_ABC_HERE)
  
 #else  
  

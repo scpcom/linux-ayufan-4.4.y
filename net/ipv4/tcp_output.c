@@ -707,7 +707,7 @@ static int tcp_transmit_skb(struct sock *sk, struct sk_buff *skb, int clone_it,
 
 	skb_orphan(skb);
 	skb->sk = sk;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	skb->destructor = (sysctl_tcp_limit_output_bytes > 0) ?
 			  tcp_wfree : sock_wfree;
 #else  
@@ -1422,7 +1422,7 @@ static bool tcp_tso_should_defer(struct sock *sk, struct sk_buff *skb)
 	limit = min(send_win, cong_win);
 
 	if (limit >= min_t(unsigned int, sk->sk_gso_max_size,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			   sk->sk_gso_max_segs * tp->mss_cache))
 #else  
 			   tp->xmit_size_goal_segs * tp->mss_cache))
@@ -1619,12 +1619,12 @@ static bool tcp_write_xmit(struct sock *sk, unsigned int mss_now, int nonagle,
 				break;
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		 
 #else  
 		 
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		if (atomic_read(&sk->sk_wmem_alloc) >= sysctl_tcp_limit_output_bytes) {
 #else  
 		limit = max_t(unsigned int, sysctl_tcp_limit_output_bytes,
@@ -1635,7 +1635,7 @@ static bool tcp_write_xmit(struct sock *sk, unsigned int mss_now, int nonagle,
 			set_bit(TSQ_THROTTLED, &tp->tsq_flags);
 			 
 			smp_mb__after_clear_bit();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 			 
 			if (atomic_read(&sk->sk_wmem_alloc) >= sysctl_tcp_limit_output_bytes)
 #else  

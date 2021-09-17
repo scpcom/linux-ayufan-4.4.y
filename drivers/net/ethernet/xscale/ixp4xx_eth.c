@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/delay.h>
 #include <linux/dma-mapping.h>
@@ -1417,7 +1414,7 @@ err_phy_dis:
 	phy_disconnect(port->phydev);
 err_free_mem:
 	npe_port_tab[NPE_ID(port->id)] = NULL;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  
@@ -1437,7 +1434,7 @@ static int eth_remove_one(struct platform_device *pdev)
 	unregister_netdev(dev);
 	phy_disconnect(port->phydev);
 	npe_port_tab[NPE_ID(port->id)] = NULL;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

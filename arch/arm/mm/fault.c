@@ -409,7 +409,7 @@ do_translation_fault(unsigned long addr, unsigned int fsr,
 }
 #endif					 
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
  
 #else  
  

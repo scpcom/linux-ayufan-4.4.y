@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -62,7 +59,7 @@ int efi_enabled(int facility)
 }
 EXPORT_SYMBOL(efi_enabled);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_EFI
 static bool __initdata disable_runtime = true;
 static int __init setup_withefi(char *arg)
 {
@@ -711,7 +708,7 @@ void __init efi_init(void)
 
 	set_bit(EFI_MEMMAP, &x86_efi_facility);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CEDARVIEW_USE_EFI_REBOOT
 	 
 	reboot_type = BOOT_EFI;
 #endif

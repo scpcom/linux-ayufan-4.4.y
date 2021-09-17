@@ -45,7 +45,7 @@
 
 #define IOREMAP_MAX_ORDER	24
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
  
 #ifndef CONSISTENT_DMA_SIZE
 #define CONSISTENT_DMA_SIZE	SZ_2M
@@ -57,7 +57,7 @@
 #else  
 #define CONSISTENT_END		(0xffe00000UL)
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define CONSISTENT_BASE		(CONSISTENT_END - CONSISTENT_DMA_SIZE)
 #endif  
 

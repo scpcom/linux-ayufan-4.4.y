@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _ASM_PGTABLE_3LEVEL_HWDEF_H
 #define _ASM_PGTABLE_3LEVEL_HWDEF_H
@@ -9,7 +6,7 @@
 #define PMD_TYPE_FAULT		(_AT(pmdval_t, 0) << 0)
 #define PMD_TYPE_TABLE		(_AT(pmdval_t, 3) << 0)
 #define PMD_TYPE_SECT		(_AT(pmdval_t, 1) << 0)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define PMD_TABLE_BIT		(_AT(pmdval_t, 1) << 1)
 #endif  
 #define PMD_BIT4		(_AT(pmdval_t, 0))
@@ -20,7 +17,7 @@
 
 #define PMD_SECT_BUFFERABLE	(_AT(pmdval_t, 1) << 2)
 #define PMD_SECT_CACHEABLE	(_AT(pmdval_t, 1) << 3)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define PMD_SECT_USER		(_AT(pmdval_t, 1) << 6)		 
 #define PMD_SECT_RDONLY		(_AT(pmdval_t, 1) << 7)		 
 #endif  
@@ -43,7 +40,7 @@
 #define PTE_TYPE_MASK		(_AT(pteval_t, 3) << 0)
 #define PTE_TYPE_FAULT		(_AT(pteval_t, 0) << 0)
 #define PTE_TYPE_PAGE		(_AT(pteval_t, 3) << 0)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define PTE_TABLE_BIT		(_AT(pteval_t, 1) << 1)
 #endif  
 #define PTE_BUFFERABLE		(_AT(pteval_t, 1) << 2)		 

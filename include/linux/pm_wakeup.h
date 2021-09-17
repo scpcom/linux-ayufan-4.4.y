@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _LINUX_PM_WAKEUP_H
 #define _LINUX_PM_WAKEUP_H
@@ -56,7 +53,7 @@ extern int device_wakeup_disable(struct device *dev);
 extern void device_set_wakeup_capable(struct device *dev, bool capable);
 extern int device_init_wakeup(struct device *dev, bool val);
 extern int device_set_wakeup_enable(struct device *dev, bool enable);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 bool device_child_may_wakeup(struct device *parent);
 #endif  
 extern void __pm_stay_awake(struct wakeup_source *ws);
@@ -66,7 +63,7 @@ extern void pm_relax(struct device *dev);
 extern void __pm_wakeup_event(struct wakeup_source *ws, unsigned int msec);
 extern void pm_wakeup_event(struct device *dev, unsigned int msec);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define WAKEUP_SOURCE_ADDED		0x1
 #define WAKEUP_SOURCE_REMOVED		0x2
 extern void wakeup_source_notifier_register(struct notifier_block *nb);
@@ -149,7 +146,7 @@ static inline void __pm_wakeup_event(struct wakeup_source *ws, unsigned int msec
 
 static inline void pm_wakeup_event(struct device *dev, unsigned int msec) {}
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static inline void wakeup_source_notifier_register(struct notifier_block *nb)
 {};
 

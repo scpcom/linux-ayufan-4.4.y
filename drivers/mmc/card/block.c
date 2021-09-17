@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/moduleparam.h>
 #include <linux/module.h>
@@ -48,7 +45,7 @@ MODULE_ALIAS("mmc:block");
 #define INAND_CMD38_ARG_SECTRIM1 0x81
 #define INAND_CMD38_ARG_SECTRIM2 0x88
 #define MMC_BLK_TIMEOUT_MS  (10 * 60 * 1000)         
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #define MMC_SANITIZE_REQ_TIMEOUT 240000
 #define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
 #endif  
@@ -384,7 +381,7 @@ static int ioctl_rpmb_card_status_poll(struct mmc_card *card, u32 *status,
 
 	return err;
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static int ioctl_do_sanitize(struct mmc_card *card)
 {
 	int err;
@@ -501,7 +498,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
 		if (err)
 			goto cmd_rel_host;
 	}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	if (MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_SANITIZE_START) {
 		err = ioctl_do_sanitize(card);
 
@@ -991,14 +988,14 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
 {
 	struct mmc_blk_data *md = mq->data;
 	struct mmc_card *card = md->queue.card;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	unsigned int from, nr, arg;
 #else  
 	unsigned int from, nr, arg, trim_arg, erase_arg;
 #endif  
 	int err = 0, type = MMC_BLK_SECDISCARD;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	if (!(mmc_can_secure_erase_trim(card))) {
 #else  
 	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
@@ -1010,7 +1007,7 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
 	from = blk_rq_pos(req);
 	nr = blk_rq_sectors(req);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
 		arg = MMC_SECURE_TRIM1_ARG;
 	else
@@ -1026,7 +1023,7 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
 	}
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 	if (mmc_erase_group_aligned(card, from, nr))
 		arg = erase_arg;
@@ -1072,7 +1069,7 @@ retry:
 			goto out;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	 
 #elif defined(CONFIG_SYNO_LSP_HI3536)
 	if (mmc_can_sanitize(card)) {

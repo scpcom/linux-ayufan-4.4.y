@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/delay.h>
@@ -20,7 +17,7 @@
 #include "gadget.h"
 #include "io.h"
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #ifdef CONFIG_USB_DWC3_AL_RMN_2648
 #include <linux/of.h>
 #include <mach/alpine_machine.h>
@@ -886,7 +883,7 @@ static int __dwc3_gadget_ep_queue(struct dwc3_ep *dep, struct dwc3_request *req)
 	req->direction		= dep->direction;
 	req->epnum		= dep->number;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 #else  
 	 
@@ -927,7 +924,7 @@ static int __dwc3_gadget_ep_queue(struct dwc3_ep *dep, struct dwc3_request *req)
 		return ret;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	ret = __dwc3_gadget_kick_transfer(dep, 0, 1);
 	if (ret && ret != -EBUSY) {
 		dev_dbg(dwc->dev, "%s: failed to kick transfers\n",
@@ -1650,7 +1647,7 @@ static void dwc3_endpoint_interrupt(struct dwc3 *dwc,
 {
 	struct dwc3_ep		*dep;
 	u8			epnum = event->endpoint_number;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	int ret;
 #endif  
 
@@ -1679,7 +1676,7 @@ static void dwc3_endpoint_interrupt(struct dwc3 *dwc,
 
 		dwc3_endpoint_transfer_complete(dwc, dep, event, 1);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		ret = __dwc3_gadget_kick_transfer(dep, 0, 1);
 		if (!ret || ret == -EBUSY)
 			dev_dbg(dwc->dev, "%s: failed to kick transfers\n",
@@ -1695,7 +1692,7 @@ static void dwc3_endpoint_interrupt(struct dwc3 *dwc,
 
 		dwc3_endpoint_transfer_complete(dwc, dep, event, 0);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		ret = __dwc3_gadget_kick_transfer(dep, 0, 0);
 		if (!ret || ret == -EBUSY) {
 			dev_dbg(dwc->dev, "%s: failed to kick transfers\n",
@@ -2027,7 +2024,7 @@ static void dwc3_gadget_wakeup_interrupt(struct dwc3 *dwc)
 	dwc->gadget_driver->resume(&dwc->gadget);
 }
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_USB_DWC3_AL_RMN_2648)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_USB_DWC3_AL_RMN_2648)
 #define DWC3_GDBGLTSSM_LINK_STATE_MASK		0x03C00000
 #define DWC3_GDBGLTSSM_LINK_STATE_SHIFT		22
 #define DWC3_GDBGLTSSM_LINK_SUB_STATE_MASK	0x003C0000
@@ -2251,7 +2248,7 @@ static void dwc3_gadget_linksts_change_interrupt(struct dwc3 *dwc,
 		}
 	}
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_USB_DWC3_AL_RMN_2648)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_USB_DWC3_AL_RMN_2648)
 	if (next == DWC3_LINK_STATE_POLL) {
 		 
 		dwc3_al_rmn_2648(dwc);
@@ -2401,7 +2398,7 @@ static irqreturn_t dwc3_interrupt(int irq, void *_dwc)
 	return ret;
 }
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_USB_DWC3_AL_VBUS_GPIO)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_USB_DWC3_AL_VBUS_GPIO)
 static void dwc3_vbus_work(struct work_struct *work)
 {
 	struct dwc3 *dwc = container_of(work, struct dwc3, vbus_work.work);
@@ -2445,7 +2442,7 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 {
 	u32					reg;
 	int					ret;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #if defined(CONFIG_USB_DWC3_AL_RMN_2648) || \
 		defined(CONFIG_USB_DWC3_AL_VBUS_GPIO)
 	struct device_node			*np;
@@ -2494,7 +2491,7 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 	if (ret)
 		goto err4;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #ifdef CONFIG_USB_DWC3_AL_RMN_2648
 	np = of_find_compatible_node(NULL, NULL, "annapurna-labs,al-usb");
 	if (!np) {
@@ -2569,7 +2566,7 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 	ret = usb_add_gadget_udc(dwc->dev, &dwc->gadget);
 	if (ret) {
 		dev_err(dwc->dev, "failed to register udc\n");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		goto err7;
 #else  
 		goto err5;
@@ -2578,7 +2575,7 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 
 	return 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 err7:
 #ifdef CONFIG_USB_DWC3_AL_VBUS_GPIO
 	if (gpio_is_valid(dwc->vbus_gpio))
@@ -2618,7 +2615,7 @@ void dwc3_gadget_exit(struct dwc3 *dwc)
 {
 	usb_del_gadget_udc(&dwc->gadget);
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_USB_DWC3_AL_VBUS_GPIO)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_USB_DWC3_AL_VBUS_GPIO)
 	if (gpio_is_valid(dwc->vbus_gpio)) {
 		free_irq(gpio_to_irq(dwc->vbus_gpio), dwc);
 		gpio_free(dwc->vbus_gpio);

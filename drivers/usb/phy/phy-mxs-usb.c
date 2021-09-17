@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -84,7 +81,7 @@ static int mxs_phy_suspend(struct usb_phy *x, int suspend)
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
 static int mxs_phy_on_connect(struct usb_phy *phy, struct usb_device *udev)
 #else  
 static int mxs_phy_on_connect(struct usb_phy *phy,
@@ -92,7 +89,7 @@ static int mxs_phy_on_connect(struct usb_phy *phy,
 #endif  
 {
 	dev_dbg(phy->dev, "%s speed device has connected\n",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
 		(udev->speed == USB_SPEED_HIGH) ? "high" : "non-high");
 
 	if (udev->speed == USB_SPEED_HIGH)
@@ -107,7 +104,7 @@ static int mxs_phy_on_connect(struct usb_phy *phy,
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
 static int mxs_phy_on_disconnect(struct usb_phy *phy, struct usb_device *udev)
 #else  
 static int mxs_phy_on_disconnect(struct usb_phy *phy,
@@ -115,7 +112,7 @@ static int mxs_phy_on_disconnect(struct usb_phy *phy,
 #endif  
 {
 	dev_dbg(phy->dev, "%s speed device has disconnected\n",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
 		(udev->speed == USB_SPEED_HIGH) ? "high" : "non-high");
 
 	if (udev->speed == USB_SPEED_HIGH)

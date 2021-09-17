@@ -1,13 +1,10 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/pci.h>
 #include <linux/ioport.h>
 #include <linux/io.h>
-#if defined (MY_DEF_HERE)
-#ifdef MY_DEF_HERE
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 #include <linux/of.h>
 #endif  
@@ -38,8 +35,8 @@ EXPORT_SYMBOL(pcibios_min_mem);
 
 void pci_iounmap(struct pci_dev *dev, void __iomem *addr)
 {
-#if defined (MY_DEF_HERE)
-#ifdef MY_DEF_HERE
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	if (of_machine_is_compatible("st,stih407")

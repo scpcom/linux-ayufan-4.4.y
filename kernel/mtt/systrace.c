@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/io.h>
 #include <linux/mm.h>
@@ -509,7 +506,7 @@ static int systrace_probe(struct platform_device *pdev)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_PM
 static int systrace_suspend(struct device *dev)
 {
@@ -547,7 +544,7 @@ static struct platform_driver systrace_driver = {
 	.driver = {
 		   .owner = THIS_MODULE,
 		   .name = "stm-systrace",
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		   .pm = SYSTRACE_PM_OPS,
 #endif  
 		   .of_match_table = st_stm_systrace_match,

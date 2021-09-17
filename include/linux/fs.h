@@ -31,7 +31,7 @@
 #include <linux/percpu-rwsem.h>
 #include <linux/blk_types.h>
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_LSP_ALPINE)
 #include <linux/net.h>
 #endif  
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
@@ -1339,7 +1339,7 @@ struct file_operations {
 	ssize_t (*splice_write)(struct pipe_inode_info *, struct file *, loff_t *, size_t, unsigned int);
 	ssize_t (*splice_read)(struct file *, loff_t *, struct pipe_inode_info *, size_t, unsigned int);
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(MY_ABC_HERE)
 	ssize_t (*splice_from_socket)(struct file *file, struct socket *sock,
 					loff_t __user *ppos, size_t count);
 #endif  
@@ -1756,7 +1756,7 @@ extern struct dentry *mount_pseudo(struct file_system_type *, char *,
 #define fops_put(fops) \
 	do { if (fops) module_put((fops)->owner); } while(0)
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DRM_I915_BACKPORT
  
 #define replace_fops(f, fops) \
 	do {    \
@@ -2260,7 +2260,7 @@ extern int do_aggregate_recvfile(struct file *file, struct socket *sock, loff_t 
 extern int flush_aggregate_recvfile(int fd);
 extern int flush_aggregate_recvfile_filp(struct file *file);
 #else  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 #ifdef CONFIG_ARM_PAGE_SIZE_32KB
 #define MAX_PAGES_PER_RECVFILE (SZ_1M / PAGE_SIZE)
 #else  

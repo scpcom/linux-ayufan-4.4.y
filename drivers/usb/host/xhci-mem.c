@@ -2133,7 +2133,7 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 	for (i = 0; i < USB_MAXCHILDREN; ++i) {
 		xhci->bus_state[0].resume_done[i] = 0;
 		xhci->bus_state[1].resume_done[i] = 0;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		 
 		init_completion(&xhci->bus_state[1].rexit_done[i]);
 #endif  

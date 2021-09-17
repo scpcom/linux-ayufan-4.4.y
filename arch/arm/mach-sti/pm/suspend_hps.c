@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
   
 #include <asm/idmap.h>
 #include <asm/cacheflush.h>
@@ -31,7 +28,7 @@
 #define STID127_A9_PLL_POWER_DOWN	(0x0)
 #define STID127_A9_PLL_LOCK_STATUS	(0x98)
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 #define STIH407_A9_CLK_SELECTION	(0x1a4)
 #define STIH407_A9_PLL_POWER_DOWN	(0x1a8)
@@ -75,7 +72,7 @@ static struct poke_operation sti_hps_ddr_exit[] = {
 	WHILE_NE32(DDR_STAT, DDR_STAT_MASK, DDR_STAT_ACCESS),
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 static  struct poke_operation stih41x_hps_ddr_pll_enter[] = {
 	OR32(DDR_PLL_CFG_OFFSET, 1),
@@ -122,7 +119,7 @@ static struct poke_operation stid127_hps_a9_clk_exit[] = {
 	UPDATE32(STID127_A9_CLK_SELECTION, ~(1 << 2), 0),
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 static  struct poke_operation stih407_hps_ddr_pll_enter[] = {
 #ifdef STIH407_HPS_ISSUE_RESOLVE
@@ -400,7 +397,7 @@ int sti_hps_setup(struct sti_hw_state_desc *state, unsigned long *ddr_pctl_addr,
 						     ddr_pctl_addr[i]);
 		}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		if (of_machine_is_compatible("st,stid127")) {
 #else  
 		if (of_machine_is_compatible("st,stih416")) {
@@ -470,7 +467,7 @@ int sti_hps_setup(struct sti_hw_state_desc *state, unsigned long *ddr_pctl_addr,
 						     sizeof(
 						     stid127_hps_a9_clk_exit),
 						     reg);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		} else if (of_machine_is_compatible("st,stih407") ||
 			   of_machine_is_compatible("st,stih410") ||
 			   of_machine_is_compatible("st,stih416")) {

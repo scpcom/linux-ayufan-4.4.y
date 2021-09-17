@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/irq.h>
 #include <linux/io.h>
@@ -351,7 +348,7 @@ static int __init sti_suspend_setup(void)
 				      lp_info);
 
 		if (!ret && hw_state->init_time_prepare == 0x1) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 			sti_suspend.index = sti_suspend.hw_state_nr;
 #else  
 			sti_suspend.index = i;

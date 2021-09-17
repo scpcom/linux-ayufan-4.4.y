@@ -12,7 +12,7 @@
 #include <linux/virtio_config.h>
 #include <linux/virtio_scsi.h>
 #include <linux/cpu.h>
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_KVMX64) && defined(MY_ABC_HERE)
 #include <linux/pci.h>
 #endif
 #include <scsi/scsi_host.h>
@@ -598,7 +598,7 @@ static void virtscsi_target_destroy(struct scsi_target *starget)
 	kfree(tgt);
 }
 
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_KVMX64) && defined(MY_ABC_HERE)
 int virtscsi_index_get(struct Scsi_Host *host, uint cahnnel, uint id, uint lun)
 {
 	int index = 0;
@@ -633,7 +633,7 @@ static struct scsi_host_template virtscsi_host_template_single = {
 	.use_clustering = ENABLE_CLUSTERING,
 	.target_alloc = virtscsi_target_alloc,
 	.target_destroy = virtscsi_target_destroy,
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_KVMX64) && defined(MY_ABC_HERE)
 	.syno_index_get = virtscsi_index_get,
 #endif  
 };

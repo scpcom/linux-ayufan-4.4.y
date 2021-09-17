@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef MTD_PARTITIONS_H
 #define MTD_PARTITIONS_H
@@ -28,7 +25,7 @@ struct mtd_part_parser_data {
 	struct device_node *of_node;
 };
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 struct mtd_info *get_mtd_partition_slave(struct mtd_info *master, char *name,
 					 uint64_t *offset);
 

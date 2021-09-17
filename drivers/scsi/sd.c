@@ -21,7 +21,7 @@
 #include <linux/async.h>
 #include <linux/slab.h>
 #include <linux/pm_runtime.h>
-#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_KVMX64) && defined(MY_DEF_HERE)
 #include <linux/pci.h>
 #endif
 #include <asm/uaccess.h>
@@ -140,7 +140,7 @@ static DEFINE_IDA(iscsi_index_ida);
 #endif  
 extern int g_is_sas_model;
  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_PLATFORM_HAS_INTERNAL_EXPANDER
 #define SCSI_HOST_SEARCH_DEPTH 7 
 #else
  
@@ -148,7 +148,7 @@ extern int g_is_sas_model;
 #endif  
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_KVMX64)
 #define _isCDSM_(sptr) (!(sptr->host->host_no || sptr->channel || sptr->id))
 #endif  
 
@@ -2952,7 +2952,7 @@ OUT:
 static SYNO_DISK_TYPE syno_disk_type_get(struct device *dev)
 {
 	struct scsi_device *sdp = to_scsi_device(dev);
-#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_KVMX64) && defined(MY_DEF_HERE)
 	struct device *virtdev = sdp->host->shost_gendev.parent;
 	struct pci_dev *pcidev = NULL;
 #endif  
@@ -2960,7 +2960,7 @@ static SYNO_DISK_TYPE syno_disk_type_get(struct device *dev)
 	bool blIsSynoboot = false;
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_KVMX64)
 	if (_isCDSM_(sdp) && !sdp->lun) {
 		return SYNO_DISK_SYNOBOOT;
 	}
@@ -2978,7 +2978,7 @@ static SYNO_DISK_TYPE syno_disk_type_get(struct device *dev)
 	}
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_KVMX64
 	if(strcmp(sdp->host->hostt->name, "Virtio SCSI HBA") == 0){
 #ifdef MY_DEF_HERE
 		while (virtdev) {
@@ -3217,13 +3217,13 @@ static int sd_probe(struct device *dev)
 				}
 #endif  
 				if (sdp->host->hostt->syno_index_get) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_KVMX64)
 					if (_isCDSM_(sdp)) {
 						want_idx = (0 < sdp->lun ? sdp->lun - 1 : 0);
 					} else {
 #endif  
 						want_idx = sdp->host->hostt->syno_index_get(sdp->host, sdp->channel, sdp->id, sdp->lun);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_KVMX64)
 					}
 #endif  
 #ifdef MY_DEF_HERE

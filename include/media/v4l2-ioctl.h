@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _V4L2_IOCTL_H
 #define _V4L2_IOCTL_H
@@ -32,7 +29,7 @@ struct v4l2_ioctl_ops {
 					      struct v4l2_fmtdesc *f);
 	int (*vidioc_enum_fmt_vid_out_mplane)(struct file *file, void *fh,
 					      struct v4l2_fmtdesc *f);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		 
 	int (*vidioc_enum_fmt_dvb_cap)     (struct file *file, void *fh,
 					    struct v4l2_fmtdesc *f);
@@ -60,7 +57,7 @@ struct v4l2_ioctl_ops {
 					   struct v4l2_format *f);
 	int (*vidioc_g_fmt_vid_out_mplane)(struct file *file, void *fh,
 					   struct v4l2_format *f);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		 
 	int (*vidioc_g_fmt_dvb_cap)    (struct file *file, void *fh,
 					struct v4l2_format *f);
@@ -88,7 +85,7 @@ struct v4l2_ioctl_ops {
 					   struct v4l2_format *f);
 	int (*vidioc_s_fmt_vid_out_mplane)(struct file *file, void *fh,
 					   struct v4l2_format *f);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		 
 	int (*vidioc_s_fmt_dvb_cap)    (struct file *file, void *fh,
 					struct v4l2_format *f);
@@ -116,7 +113,7 @@ struct v4l2_ioctl_ops {
 					     struct v4l2_format *f);
 	int (*vidioc_try_fmt_vid_out_mplane)(struct file *file, void *fh,
 					     struct v4l2_format *f);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		 
 	int (*vidioc_try_fmt_dvb_cap)    (struct file *file, void *fh,
 					  struct v4l2_format *f);

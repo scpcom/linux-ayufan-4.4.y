@@ -5,7 +5,7 @@
 #define __OF_PCI_H
 
 #include <linux/pci.h>
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 #include <linux/msi.h>
 #endif  
 
@@ -21,12 +21,12 @@ int of_irq_map_pci(const struct pci_dev *pdev, struct of_irq *out_irq);
 struct device_node;
 struct device_node *of_pci_find_child_device(struct device_node *parent,
 					     unsigned int devfn);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 int of_pci_get_devfn(struct device_node *np);
 int of_pci_parse_bus_range(struct device_node *node, struct resource *res);
 #endif  
 
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 int of_pci_get_devfn(struct device_node *np);
 int of_pci_parse_bus_range(struct device_node *node, struct resource *res);
 

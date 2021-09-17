@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/clk.h>
 #include <linux/kernel.h>
@@ -42,7 +39,7 @@ static int phyaddr = -1;
 module_param(phyaddr, int, S_IRUGO);
 MODULE_PARM_DESC(phyaddr, "Physical device address");
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_MONACO_PERF_ENHANCED)
 #define DMA_TX_SIZE 192
 #else  
 #define DMA_TX_SIZE 256
@@ -796,7 +793,7 @@ static int stmmac_set_bfsize(int mtu, int bufsize)
 	else if (mtu > DEFAULT_BUFSIZE)
 		ret = BUF_SIZE_2KiB;
 	else
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_INCREASE_SKB_SIZE
 		ret = BUF_SIZE_2KiB;
 #else  
 		ret = DEFAULT_BUFSIZE;
@@ -1820,7 +1817,7 @@ static inline void stmmac_rx_refill(struct stmmac_priv *priv)
 			skb = netdev_alloc_skb_ip_align(priv->dev, bfsize);
 			if (unlikely(!skb)) {
 				 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_JUMBO_FRAME)
 				if(bfsize > DEFAULT_BUFSIZE )
 					priv->rx_zeroc_thresh = STMMAC_RX_THRESH(priv)*2;
 				else
@@ -1831,7 +1828,7 @@ static inline void stmmac_rx_refill(struct stmmac_priv *priv)
 					dev_err(priv->device,
 						"fail to alloc skb entry %d\n",
 						entry);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_JUMBO_FRAME)
 				priv->dev->stats.rx_dropped++;
 #endif  
 				break;

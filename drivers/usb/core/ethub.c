@@ -24,7 +24,7 @@
 #include <linux/mutex.h>
 #include <linux/freezer.h>
 #include <linux/pm_qos.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_USB_HAS_EXTERNAL_ETRON_CONTROLLER
 #include <linux/pci.h>
 #include <linux/synobios.h>
 #endif  
@@ -40,7 +40,7 @@
 #endif
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_USB_HAS_EXTERNAL_ETRON_CONTROLLER
 #define SYNO_SERIAL_EXT_CONTROLLER "syno.ext.controller"
 #define PCI_VENDOR_ID_ETRON		0x1b6f
 #define PCI_DEVICE_ID_ETRON_EJ168	0x7023
@@ -70,7 +70,7 @@ static const char ethub_name[] = "ethub";
 #define HUB_DEBOUNCE_STEP	  25
 #define HUB_DEBOUNCE_STABLE	 100
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_USB_HAS_EXTERNAL_ETRON_CONTROLLER
 static int is_syno_etron_ext_controller(struct usb_device *udev);
 #endif  
 
@@ -1473,7 +1473,7 @@ static int usb_enumerate_device(struct usb_device *udev)
 		udev->serial = usb_cache_string(udev, udev->descriptor.iSerialNumber);
 	} while (!udev->serial && retry--);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_GET_SN_WORKAROUNDS
 	if (0x054c == le16_to_cpu(udev->descriptor.idVendor) &&
 		0x05bf == le16_to_cpu(udev->descriptor.idProduct) &&
 		NULL == udev->serial) {
@@ -1618,7 +1618,7 @@ int ethub_usb_new_device(struct usb_device *udev)
 
 #ifdef MY_ABC_HERE
 #define SERIAL_LEN 33
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_USB_HAS_EXTERNAL_ETRON_CONTROLLER
 	if (0 == is_syno_etron_ext_controller(udev)) {
 		snprintf(udev->serial, SERIAL_LEN, "%s", SYNO_SERIAL_EXT_CONTROLLER);
 	}
@@ -3691,7 +3691,7 @@ int usb_is_etron_hcd(struct usb_device *udev)
 }
 EXPORT_SYMBOL_GPL(usb_is_etron_hcd);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_USB_HAS_EXTERNAL_ETRON_CONTROLLER
 static int is_syno_etron_ext_controller(struct usb_device *udev)
 {
 	int ret = -1;

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -128,7 +125,7 @@ int st_lpm_read_edid(unsigned char *data, u8 block_num)
 }
 EXPORT_SYMBOL(st_lpm_read_edid);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
  
 int st_lpm_setup_tracedata(u16 trace_modules)
 {
@@ -274,7 +271,7 @@ int st_lpm_setup_ir(u8 num_keys, struct st_lpm_ir_keyinfo *ir_key_info)
 }
 EXPORT_SYMBOL(st_lpm_setup_ir);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
  
 int st_lpm_get_trigger_data(enum st_lpm_wakeup_devices wakeup_device,
@@ -301,7 +298,7 @@ int st_lpm_get_trigger_data(enum st_lpm_wakeup_devices wakeup_device,
 EXPORT_SYMBOL(st_lpm_get_trigger_data);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 int st_lpm_get_wakeup_info(enum st_lpm_wakeup_devices wakeupdevice,
 #else  
 int st_lpm_get_wakeup_info(enum st_lpm_wakeup_devices *wakeupdevice,
@@ -315,7 +312,7 @@ int st_lpm_get_wakeup_info(enum st_lpm_wakeup_devices *wakeupdevice,
 		.command_id = LPM_MSG_GET_IRQ,
 	};
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	command.buf[0] = wakeupdevice;
 	command.buf[1] = (wakeupdevice & 0xFF00) >> 8;
 #else  
@@ -646,7 +643,7 @@ int st_lpm_set_adv_feature(u8 enabled, struct st_lpm_adv_feature *feature)
 	struct lpm_message command = {
 		.command_id = LPM_MSG_SET_ADV_FEA,
 	};
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	int ret;
 #endif  
 
@@ -657,7 +654,7 @@ int st_lpm_set_adv_feature(u8 enabled, struct st_lpm_adv_feature *feature)
 	command.buf[0] = feature->feature_name;
 	command.buf[1] = enabled;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	 
 	if (feature->feature_name == ST_LPM_SBC_IDLE)
 		ret = st_lpm_ops_exchange_msg(&command, NULL);
@@ -865,7 +862,7 @@ int st_lpm_notify(enum st_lpm_callback_type type)
 }
 EXPORT_SYMBOL(st_lpm_notify);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 int st_lpm_reload_fw_prepare(void)
 {
 	if (!st_lpm_ops || !st_lpm_ops->reload_fw_prepare)

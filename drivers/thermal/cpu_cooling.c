@@ -84,7 +84,7 @@ static int get_property(unsigned int cpu, unsigned long input,
 		if (freq == table[i].frequency)
 			continue;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if (freq != CPUFREQ_ENTRY_INVALID && descend == -1)
 			descend = !!(freq > table[i].frequency);
 #else  

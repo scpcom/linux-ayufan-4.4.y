@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/kernel.h>
@@ -66,7 +63,7 @@ struct irq_chip gic_arch_extn = {
 };
 
 #ifndef MAX_GIC_NR
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define MAX_GIC_NR	2
 #else  
 #define MAX_GIC_NR	1
@@ -639,7 +636,7 @@ static void gic_cpu_restore(unsigned int gic_nr)
 	writel_relaxed(1, cpu_base + GIC_CPU_CTRL);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 static void gic_cpu_mask(unsigned int gic_nr)
 {
 	void __iomem *cpu_base;
@@ -684,7 +681,7 @@ static int gic_notifier(struct notifier_block *self, unsigned long cmd,	void *v)
 		}
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 	if (cmd == CPU_PM_ENTER)
 		gic_cpu_mask(0);

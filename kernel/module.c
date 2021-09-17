@@ -2542,7 +2542,7 @@ static int check_modinfo(struct module *mod, struct load_info *info, int flags)
 	return 0;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static int find_module_sections(struct module *mod, struct load_info *info)
 #else  
 static void find_module_sections(struct module *mod, struct load_info *info)
@@ -2576,7 +2576,7 @@ static void find_module_sections(struct module *mod, struct load_info *info)
 #ifdef CONFIG_CONSTRUCTORS
 	mod->ctors = section_objs(info, ".ctors",
 				  sizeof(*mod->ctors), &mod->num_ctors);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (!mod->ctors)
 		mod->ctors = section_objs(info, ".init_array",
 				sizeof(*mod->ctors), &mod->num_ctors);
@@ -2625,7 +2625,7 @@ static void find_module_sections(struct module *mod, struct load_info *info)
 
 	info->debug = section_objs(info, "__verbose",
 				   sizeof(*info->debug), &info->num_debug);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	return 0;
 #endif  
@@ -3003,7 +3003,7 @@ static int load_module(struct load_info *info, const char __user *uargs,
 	if (err)
 		goto unlink_mod;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	err = find_module_sections(mod, info);
 	if (err)
 		goto free_unload;

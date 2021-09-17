@@ -160,11 +160,11 @@ mcpm_setup_leave:
 
 	mov	r0, #INBOUND_NOT_COMING_UP
 	strb	r0, [r8, #MCPM_SYNC_CLUSTER_INBOUND]
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	dsb	st
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	sev
 
 	mov	r0, r11

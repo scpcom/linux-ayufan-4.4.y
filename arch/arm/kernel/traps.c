@@ -184,7 +184,7 @@ static void dump_backtrace(struct pt_regs *regs, struct task_struct *tsk)
 }
 #endif
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #ifdef CONFIG_KPTRACE
 int get_stack(char *buf, unsigned long *sp, size_t size, size_t depth)
 {
@@ -825,7 +825,7 @@ void __init early_trap_init(void *vectors_base)
 
 	flush_icache_range(vectors, vectors + PAGE_SIZE * 2);
 	modify_domain(DOMAIN_USER, DOMAIN_CLIENT);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	asm volatile("cpsie	a");
 #endif  

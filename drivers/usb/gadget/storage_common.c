@@ -1,11 +1,8 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/usb/storage.h>
 #include <scsi/scsi.h>
 #include <asm/unaligned.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #include <linux/sizes.h>
 #endif  
 
@@ -131,14 +128,14 @@ MODULE_PARM_DESC(num_buffers, "Number of pipeline buffers");
 
 static inline int fsg_num_buffers_validate(void)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (fsg_num_buffers >= 2 && fsg_num_buffers <= 1024)
 #else  
 	if (fsg_num_buffers >= 2 && fsg_num_buffers <= 4)
 #endif  
 		return 0;
 	pr_err("fsg_num_buffers %u is out of range (%d to %d)\n",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	       fsg_num_buffers, 2 ,1024);
 #else  
 	       fsg_num_buffers, 2 ,4);
@@ -146,7 +143,7 @@ static inline int fsg_num_buffers_validate(void)
 	return -EINVAL;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define FSG_BUFLEN	((u32)SZ_128K)
 #else  
 #define FSG_BUFLEN	((u32)16384)
@@ -164,7 +161,7 @@ struct fsg_buffhd {
 	void				*buf;
 	enum fsg_buffer_state		state;
 	struct fsg_buffhd		*next;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	struct fsg_buffhd		*next_to_write;
 	struct file				*file;
 	loff_t					file_offset;

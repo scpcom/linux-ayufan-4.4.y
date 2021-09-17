@@ -78,7 +78,7 @@ struct list_head ptype_base[PTYPE_HASH_SIZE] __read_mostly;
 struct list_head ptype_all __read_mostly;	 
 static struct list_head offload_base __read_mostly;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_E1000E_LED_SWITCH) || defined(MY_DEF_HERE)
 void (*funcSynoNicLedCtrl)(int iEnable) = NULL;
 EXPORT_SYMBOL(funcSynoNicLedCtrl);
 #endif  
@@ -508,7 +508,7 @@ int __init netdev_boot_setup(char *str)
 
 __setup("netdev=", netdev_boot_setup);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 int netdev_skb_tstamp __read_mostly = 1;
 #endif  
 
@@ -1178,7 +1178,7 @@ EXPORT_SYMBOL(net_disable_timestamp);
 static inline void net_timestamp_set(struct sk_buff *skb)
 {
 	skb->tstamp.tv64 = 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (static_key_false(&netstamp_needed)) {
 		if (netdev_skb_tstamp)
 			__net_timestamp(skb);
@@ -1189,7 +1189,7 @@ static inline void net_timestamp_set(struct sk_buff *skb)
 #endif  
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define net_timestamp_check(COND, SKB)			\
 	if (static_key_false(&netstamp_needed)) {		\
 		if (netdev_skb_tstamp && (COND) && !(SKB)->tstamp.tv64)	\

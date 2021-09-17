@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __LINUX_PINCTRL_CONSUMER_H
 #define __LINUX_PINCTRL_CONSUMER_H
@@ -31,7 +28,7 @@ extern int pinctrl_select_state(struct pinctrl *p, struct pinctrl_state *s);
 extern struct pinctrl * __must_check devm_pinctrl_get(struct device *dev);
 extern void devm_pinctrl_put(struct pinctrl *p);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #ifdef CONFIG_PM
 extern int pinctrl_pm_select_default_state(struct device *dev);
 extern int pinctrl_pm_select_sleep_state(struct device *dev);
@@ -209,7 +206,7 @@ static inline int pin_config_group_set(const char *dev_name,
 {
 	return 0;
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 static inline int pinctrl_pm_select_default_state(struct device *dev)
 {

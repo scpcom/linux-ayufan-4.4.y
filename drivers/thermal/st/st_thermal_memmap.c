@@ -1,10 +1,7 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/of.h>
 #include <linux/module.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #include <linux/of_address.h>
 #endif  
 
@@ -26,12 +23,12 @@ static const struct reg_field st_thermal_memmap_regfields[MAX_REGFIELDS] = {
 	[DCORRECT] = REG_FIELD(STIH416_MPE_CONF, 5, 9),
 	[OVERFLOW] = REG_FIELD(STIH416_MPE_STATUS, 9, 9),
 	[DATA] = REG_FIELD(STIH416_MPE_STATUS, 11, 18),
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	[DATARDY] = REG_FIELD(STIH416_MPE_STATUS, 10, 10),
 #endif  
 	[INT_ENABLE] = REG_FIELD(STIH416_MPE_INT_EN, 0, 0),
 	[INT_THRESH_LOW] = REG_FIELD(STIH416_MPE_INT_THRESH, 8, 15),
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	[DC_CALIB] = REG_FIELD(0, 22, 26),
 #endif  
 };
@@ -62,7 +59,7 @@ static int st_memmap_power_ctrl(struct st_thermal_sensor *sensor,
 	const unsigned int mask = (THERMAL_PDN | THERMAL_SRSTN);
 	const unsigned int val = power_state ? mask : 0;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	return regmap_update_bits(sensor->regmap[TH_REGS], STIH416_MPE_CONF,
 #else  
 	return regmap_update_bits(sensor->regmap, STIH416_MPE_CONF,
@@ -73,7 +70,7 @@ static int st_memmap_power_ctrl(struct st_thermal_sensor *sensor,
 static int st_memmap_alloc_regfields(struct st_thermal_sensor *sensor)
 {
 	struct device *dev = sensor_to_dev(sensor);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	struct regmap *regmap = sensor->regmap[TH_REGS];
 #else  
 	struct regmap *regmap = sensor->regmap;
@@ -95,7 +92,7 @@ static int st_memmap_alloc_regfields(struct st_thermal_sensor *sensor)
 	if (IS_ERR(sensor->int_thresh_hi) ||
 	    IS_ERR(sensor->int_thresh_low) ||
 	    IS_ERR(sensor->int_enable)) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		dev_err(dev, "failed to alloc reg field(s)\n");
 #else  
 		dev_err(dev, "%s,failed to alloc reg field(s)\n", __func__);
@@ -160,7 +157,7 @@ static void st_memmap_clear_irq(struct thermal_zone_device *th,
 	    (temp < mcelsius(sensor->passive_temp))) {
 		sensor->th_dev->polling_delay = 0;
 		 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		regmap_write(sensor->regmap[TH_REGS], STIH416_MPE_INT_EVT, 1);
 #else  
 		regmap_write(sensor->regmap, STIH416_MPE_INT_EVT, 1);
@@ -177,7 +174,7 @@ static struct regmap_config st_416mpe_regmap_config = {
 static int st_memmap_do_memmap_regmap(struct st_thermal_sensor *sensor)
 {
 	struct device *dev = sensor_to_dev(sensor);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	struct device_node *np = dev->of_node;
 	struct resource res;
 	void __iomem *iobase;

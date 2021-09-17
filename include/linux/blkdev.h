@@ -39,7 +39,7 @@ struct bsg_job;
 struct blkcg_gq;
 
 #define BLKDEV_MIN_RQ	4
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define BLKDEV_MAX_RQ	1024	 
 #else  
 #define BLKDEV_MAX_RQ	128	 

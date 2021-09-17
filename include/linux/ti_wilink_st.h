@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef TI_WILINK_ST_H
 #define TI_WILINK_ST_H
@@ -59,7 +56,7 @@ struct st_data_s {
 	unsigned long ll_state;
 	void *kim_data;
 	struct tty_struct *tty;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	struct work_struct wakeup_work;
 #endif  
 };

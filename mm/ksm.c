@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/errno.h>
 #include <linux/mm.h>
@@ -1463,7 +1460,7 @@ again:
 
 		anon_vma_lock_read(anon_vma);
 		anon_vma_interval_tree_foreach(vmac, &anon_vma->rb_root,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 					       0, PGOFF_MAX) {
 #else  
 					       0, ULONG_MAX) {
@@ -1515,7 +1512,7 @@ again:
 
 		anon_vma_lock_read(anon_vma);
 		anon_vma_interval_tree_foreach(vmac, &anon_vma->rb_root,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 					       0, PGOFF_MAX) {
 #else  
 					       0, ULONG_MAX) {
@@ -1566,7 +1563,7 @@ again:
 
 		anon_vma_lock_read(anon_vma);
 		anon_vma_interval_tree_foreach(vmac, &anon_vma->rb_root,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 					       0, PGOFF_MAX) {
 #else  
 					       0, ULONG_MAX) {

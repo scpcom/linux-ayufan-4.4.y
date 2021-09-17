@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/highmem.h>
@@ -543,7 +540,7 @@ static inline struct map_info *free_map_info(struct map_info *info)
 static struct map_info *
 build_map_info(struct address_space *mapping, loff_t offset, bool is_register)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 	pgoff_t pgoff = offset >> PAGE_SHIFT;
 #else  
 	unsigned long pgoff = offset >> PAGE_SHIFT;

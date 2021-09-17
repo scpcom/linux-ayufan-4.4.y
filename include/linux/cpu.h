@@ -20,7 +20,7 @@ struct cpu {
 extern int register_cpu(struct cpu *cpu, int num);
 extern struct device *get_cpu_device(unsigned cpu);
 extern bool cpu_is_hotpluggable(unsigned cpu);
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4) || defined(MY_ABC_HERE)
 extern bool arch_match_cpu_phys_id(int cpu, u64 phys_id);
 #endif  
 

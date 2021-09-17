@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _ASM_GENERIC_GPIO_H
 #define _ASM_GENERIC_GPIO_H
 
@@ -107,7 +104,7 @@ extern int __gpio_cansleep(unsigned gpio);
 
 extern int __gpio_to_irq(unsigned gpio);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 extern int gpio_lock_as_irq(struct gpio_chip *chip, unsigned int offset);
 extern void gpio_unlock_as_irq(struct gpio_chip *chip, unsigned int offset);
 #endif  

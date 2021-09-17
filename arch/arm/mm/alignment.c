@@ -16,7 +16,7 @@
 #include <asm/cp15.h>
 #include <asm/system_info.h>
 #include <asm/unaligned.h>
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(MY_ABC_HERE)
 #include <asm/opcodes.h>
 #endif  
 
@@ -667,7 +667,7 @@ do_alignment(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 	if (thumb_mode(regs)) {
 		u16 *ptr = (u16 *)(instrptr & ~1);
 		fault = probe_kernel_address(ptr, tinstr);
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(MY_ABC_HERE)
 		tinstr = __mem_to_opcode_thumb16(tinstr);
 #endif  
 		if (!fault) {
@@ -676,7 +676,7 @@ do_alignment(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 				 
 				u16 tinst2 = 0;
 				fault = probe_kernel_address(ptr + 1, tinst2);
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(MY_ABC_HERE)
 				tinst2 = __mem_to_opcode_thumb16(tinst2);
 				instr = __opcode_thumb32_compose(tinstr, tinst2);
 #else  
@@ -690,7 +690,7 @@ do_alignment(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 		}
 	} else {
 		fault = probe_kernel_address(instrptr, instr);
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(MY_ABC_HERE)
 		instr = __mem_to_opcode_arm(instr);
 #endif  
 	}

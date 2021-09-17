@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/cpu.h>
 #include <linux/cpumask.h>
@@ -57,7 +54,7 @@ static void __init parse_dt_topology(void)
 	unsigned long max_capacity = 0;
 	unsigned long capacity = 0;
 	int alloc_size, cpu = 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	extern unsigned long cpu_clock_freq;
 #endif  
 
@@ -93,7 +90,7 @@ static void __init parse_dt_topology(void)
 
 		capacity = ((be32_to_cpup(rate)) >> 20) * cpu_eff->efficiency;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		if (!cpu_clock_freq) {
 			cpu_clock_freq = be32_to_cpup(rate);
 			if (cpu_clock_freq)

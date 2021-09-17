@@ -257,7 +257,7 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
 	card->ext_csd.rev = ext_csd[EXT_CSD_REV];
 #if defined(CONFIG_SYNO_LSP_HI3536)
 	if (card->ext_csd.rev > 8) {
-#elif defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#elif defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 	if (card->ext_csd.rev > 7) {
 #else
 	if (card->ext_csd.rev > 6) {
@@ -926,7 +926,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 	mmc_set_clock(host, max_dtr);
 
 	if (mmc_card_highspeed(card)) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_8V)
 			&& (host->caps & MMC_CAP_1_8V_DDR))
 				ddr = MMC_1_8V_DDR_MODE;
@@ -1049,7 +1049,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 					goto err;
 			}
 			mmc_card_set_ddr_mode(card);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 			mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
 #else  
 			mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);

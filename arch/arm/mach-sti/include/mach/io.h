@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __ASM_ARM_ARCH_IO_H
 #define __ASM_ARM_ARCH_IO_H
@@ -9,7 +6,7 @@
 
 #define __io(a)		__typesafe_io((a) & IO_SPACE_LIMIT)
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 

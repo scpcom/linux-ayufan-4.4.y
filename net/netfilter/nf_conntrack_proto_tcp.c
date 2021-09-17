@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/types.h>
 #include <linux/timer.h>
@@ -31,7 +28,7 @@ static int nf_ct_tcp_loose __read_mostly = 1;
 
 static int nf_ct_tcp_max_retrans __read_mostly = 3;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
  
 static int nf_ct_tcp_window_tracking __read_mostly = 1;
 #endif  
@@ -711,7 +708,7 @@ static int tcp_packet(struct nf_conn *ct,
 		break;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (tn->tcp_window_tracking > 0) {
 		if (!tcp_in_window(ct, &ct->proto.tcp, dir, index,
 				   skb, dataoff, th, pf)) {
@@ -1149,7 +1146,7 @@ static struct ctl_table tcp_sysctl_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec,
 	},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	{
 		.procname	= "nf_conntrack_tcp_window_tracking",
 		.maxlen		= sizeof(unsigned int),
@@ -1240,7 +1237,7 @@ static struct ctl_table tcp_compat_sysctl_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec,
 	},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	{
 		.procname	= "ip_conntrack_tcp_window_tracking",
 		.maxlen		= sizeof(unsigned int),
@@ -1279,7 +1276,7 @@ static int tcp_kmemdup_sysctl_table(struct nf_proto_net *pn,
 	pn->ctl_table[10].data = &tn->tcp_loose;
 	pn->ctl_table[11].data = &tn->tcp_be_liberal;
 	pn->ctl_table[12].data = &tn->tcp_max_retrans;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	pn->ctl_table[13].data = &tn->tcp_window_tracking;
 #endif  
 #endif
@@ -1310,7 +1307,7 @@ static int tcp_kmemdup_compat_sysctl_table(struct nf_proto_net *pn,
 	pn->ctl_compat_table[10].data = &tn->tcp_loose;
 	pn->ctl_compat_table[11].data = &tn->tcp_be_liberal;
 	pn->ctl_compat_table[12].data = &tn->tcp_max_retrans;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	pn->ctl_compat_table[13].data = &tn->tcp_window_tracking;
 #endif  
 #endif
@@ -1333,7 +1330,7 @@ static int tcp_init_net(struct net *net, u_int16_t proto)
 		tn->tcp_loose = nf_ct_tcp_loose;
 		tn->tcp_be_liberal = nf_ct_tcp_be_liberal;
 		tn->tcp_max_retrans = nf_ct_tcp_max_retrans;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		tn->tcp_window_tracking = nf_ct_tcp_window_tracking;
 #endif  
 	}

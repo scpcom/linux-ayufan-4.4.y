@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 
 #include <linux/wait.h>
 #include <linux/backing-dev.h>
@@ -25,7 +22,7 @@ struct backing_dev_info default_backing_dev_info = {
 };
 EXPORT_SYMBOL_GPL(default_backing_dev_info);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY
 struct backing_dev_info syno_backing_dev_info = {
 	.name           = "syno",
 	.ra_pages       = VM_MAX_READAHEAD * 1024 / PAGE_CACHE_SIZE,
@@ -33,7 +30,7 @@ struct backing_dev_info syno_backing_dev_info = {
 	.capabilities   = BDI_CAP_MAP_COPY,
 };
 EXPORT_SYMBOL_GPL(syno_backing_dev_info);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY */
 
 struct backing_dev_info noop_backing_dev_info = {
 	.name		= "noop",
@@ -245,7 +242,7 @@ static ssize_t stable_pages_required_show(struct device *dev,
 			bdi_cap_stable_pages_required(bdi) ? 1 : 0);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY
 static ssize_t stable_pages_required_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
@@ -266,7 +263,7 @@ static ssize_t stable_pages_required_store(struct device *dev,
 
 	return count;                                                          
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY */
 
 #define __ATTR_RW(attr) __ATTR(attr, 0644, attr##_show, attr##_store)
 
@@ -274,11 +271,11 @@ static struct device_attribute bdi_dev_attrs[] = {
 	__ATTR_RW(read_ahead_kb),
 	__ATTR_RW(min_ratio),
 	__ATTR_RW(max_ratio),
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY
 	__ATTR_RW(stable_pages_required),
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY */
 	__ATTR_RO(stable_pages_required),
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY */
 	__ATTR_NULL,
 };
 
@@ -307,11 +304,11 @@ static int __init default_bdi_init(void)
 	if (!err)
 		bdi_register(&default_backing_dev_info, NULL, "default");
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY
 	err = bdi_init(&syno_backing_dev_info);
 	if (!err)
 		bdi_register(&syno_backing_dev_info, NULL, "syno");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY */
 
 	err = bdi_init(&noop_backing_dev_info);
 

@@ -193,7 +193,7 @@ static void __dma_free_buffer(struct page *page, size_t size)
 
 #ifdef CONFIG_MMU
 #ifdef CONFIG_HUGETLB_PAGE
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #warning ARM Coherent DMA allocator does not (yet) support huge TLB
 #else  
 #error ARM Coherent DMA allocator does not (yet) support huge TLB
@@ -391,7 +391,7 @@ static void __dma_remap(struct page *page, size_t size, pgprot_t prot)
 	unsigned end = start + size;
 
 	apply_to_page_range(&init_mm, start, size, __dma_update_pte, &prot);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	dsb();
 #endif  

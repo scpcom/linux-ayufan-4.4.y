@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "fuse_i.h"
 
@@ -720,7 +717,7 @@ static int fuse_check_page(struct page *page)
 	       1 << PG_active |
 	       1 << PG_reclaim))) {
 		printk(KERN_WARNING "fuse: trying to steal weird page\n");
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		printk(KERN_WARNING "  page=%p index=%lli flags=%08lx, count=%i, mapcount=%i, mapping=%p\n", page, page->index, page->flags, page_count(page), page_mapcount(page), page->mapping);
 #else  
 		printk(KERN_WARNING "  page=%p index=%li flags=%08lx, count=%i, mapcount=%i, mapping=%p\n", page, page->index, page->flags, page_count(page), page_mapcount(page), page->mapping);

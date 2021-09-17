@@ -55,7 +55,7 @@
 #include <linux/pci.h>
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #if defined(CONFIG_ARCH_ALPINE) && defined(CONFIG_NET_DMA)
 #include <mach/al_fabric.h>
 #endif
@@ -63,7 +63,7 @@
 
 int sysctl_tcp_fin_timeout __read_mostly = TCP_FIN_TIMEOUT;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
  
 #elif defined(MY_ABC_HERE)
 int sysctl_tcp_min_tso_segs __read_mostly = 22;
@@ -531,7 +531,7 @@ static unsigned int tcp_xmit_size_goal(struct sock *sk, u32 mss_now,
 	xmit_size_goal = mss_now;
 
 	if (large_allowed && sk_can_gso(sk)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		xmit_size_goal = ((sk->sk_gso_max_size - 1) -
 				  inet_csk(sk)->icsk_af_ops->net_header_len -
 				  inet_csk(sk)->icsk_ext_hdr_len -
@@ -551,7 +551,7 @@ static unsigned int tcp_xmit_size_goal(struct sock *sk, u32 mss_now,
 				       sk->sk_gso_max_size - 1 - hlen);
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		 
 #else  
 		 
@@ -1094,7 +1094,7 @@ void tcp_cleanup_rbuf(struct sock *sk, int copied)
 		    
 		if (icsk->icsk_ack.blocked ||
 		     
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		    tp->rcv_nxt - tp->rcv_wup > (icsk->icsk_ack.rcv_mss * sysctl_tcp_default_delack_segs) ||
 #else  
 		    tp->rcv_nxt - tp->rcv_wup > icsk->icsk_ack.rcv_mss ||
@@ -1147,7 +1147,7 @@ static void tcp_service_net_dma(struct sock *sk, bool wait)
 	if (!tp->ucopy.dma_chan)
 		return;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (!tp->ucopy.pinned)
 		return;
 #endif  
@@ -1281,7 +1281,7 @@ int tcp_read_sock(struct sock *sk, read_descriptor_t *desc,
 }
 EXPORT_SYMBOL(tcp_read_sock);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 extern int hwcc;
 #endif  
  
@@ -1306,7 +1306,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 #endif
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #ifdef CONFIG_NET_DMA
 #ifdef CONFIG_ARCH_ALPINE
 	int hwcc_enabled = al_fabric_hwcc_enabled();
@@ -1380,9 +1380,9 @@ tnk_tcp_recv:
 	{
 		int available = 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		if ((available < target) && hwcc_enabled &&
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 		    (msg->msg_flags & MSG_KERNSPACE) && (flags & MSG_KERNSPACE) &&
 #endif  
 		    (len > sysctl_tcp_dma_copybreak) && !(flags & MSG_PEEK) &&
@@ -1649,7 +1649,7 @@ do_prequeue:
 
 		if (!(flags & MSG_TRUNC)) {
 #ifdef CONFIG_NET_DMA
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
 #else  
 			if (!tp->ucopy.dma_chan && tp->ucopy.pinned_list)
@@ -1752,7 +1752,7 @@ skip_copy:
 	tcp_service_net_dma(sk, true);   
 	tp->ucopy.dma_chan = NULL;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (tp->ucopy.pinned) {
 		dma_unpin_iovec_pages(tp->ucopy.pinned_list);
 		tp->ucopy.pinned = false;
@@ -2127,7 +2127,7 @@ int tcp_disconnect(struct sock *sk, int flags)
 	__skb_queue_purge(&tp->out_of_order_queue);
 #ifdef CONFIG_NET_DMA
 	__skb_queue_purge(&sk->sk_async_wait_queue);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	dma_free_iovec_data(tp);
 #endif  
 #endif
@@ -3288,7 +3288,7 @@ void __init tcp_init(void)
 	sysctl_tcp_rmem[0] = SK_MEM_QUANTUM;
 	sysctl_tcp_rmem[1] = 87380;
 	sysctl_tcp_rmem[2] = max(87380, max_rshare);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_KVMX64
 	sysctl_tcp_rmem[0] *= 2;
 	sysctl_tcp_rmem[1] *= 2;
 #endif

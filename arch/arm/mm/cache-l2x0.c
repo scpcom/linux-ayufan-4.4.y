@@ -327,7 +327,7 @@ static void l2x0_disable(void)
 	raw_spin_lock_irqsave(&l2x0_lock, flags);
 	__l2x0_flush_all();
 	writel_relaxed(0, l2x0_base + L2X0_CTRL);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	dsb(st);
 #else  
 	dsb();
@@ -339,7 +339,7 @@ static void l2x0_unlock(u32 cache_id)
 {
 	int lockregs;
 	int i;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	u32 way_mask = 0;
 #endif  
 
@@ -356,7 +356,7 @@ static void l2x0_unlock(u32 cache_id)
 		break;
 	}
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	if (of_machine_is_compatible("st,stih301"))
 		way_mask = 0x0F;
@@ -389,8 +389,8 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 #endif  
 	int way_size_shift = L2X0_WAY_SIZE_SHIFT;
 	const char *type;
-#if defined (MY_DEF_HERE)
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_MONACO)
+#if defined (CONFIG_SYNO_MONACO_PERF_ENHANCED)
 #else  
 	u32 pf;
 #endif  
@@ -492,13 +492,13 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 	l2x0_size = ways * way_size * SZ_1K;
 #endif  
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	if (of_machine_is_compatible("st,stih301"))
 		l2x0_size = 512 * SZ_1K;
 #endif  
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	writel(0x3, l2x0_base + L2X0_POWER_CTRL);
 #endif  
@@ -517,8 +517,8 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 		writel_relaxed(L2X0_CTRL_EN, l2x0_base + L2X0_CTRL);
 	}
 
-#if defined (MY_DEF_HERE)
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_MONACO)
+#if defined (CONFIG_SYNO_MONACO_PERF_ENHANCED)
 	 
 	writel_relaxed(0x58800000, l2x0_base + L2X0_PREFETCH_CTRL);
 #else  
@@ -532,7 +532,7 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 	aux = readl_relaxed(l2x0_base + L2X0_AUX_CTRL);
 
 	l2x0_saved_regs.aux_ctrl = aux;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	l2x0_saved_regs.pwr_ctrl = readl_relaxed(l2x0_base + L2X0_POWER_CTRL);
 #endif  
 

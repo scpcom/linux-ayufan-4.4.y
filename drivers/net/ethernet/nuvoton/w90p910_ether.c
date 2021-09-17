@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/init.h>
@@ -1034,7 +1031,7 @@ failed_put_clk:
 	clk_put(ether->clk);
 failed_free_rxirq:
 	free_irq(ether->rxirq, pdev);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  
@@ -1066,7 +1063,7 @@ static int w90p910_ether_remove(struct platform_device *pdev)
 	free_irq(ether->rxirq, dev);
 
 	del_timer_sync(&ether->check_timer);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

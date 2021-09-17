@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/pci.h>
 #include <linux/slab.h>
@@ -36,11 +33,11 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 		xhci_init_ejxxx(xhci);
 
 		if (pdev->device == PCI_DEVICE_ID_ETRON_EJ168)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD
 		{
 #endif   
 			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ168;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD
 			xhci->quirks |= XHCI_BULK_XFER_QUIRK;
 		}
 #endif  

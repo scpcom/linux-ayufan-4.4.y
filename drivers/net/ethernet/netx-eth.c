@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/interrupt.h>
@@ -400,7 +397,7 @@ exit_free_pfifo:
 exit_free_xc:
 	free_xc(priv->xc);
 exit_free_netdev:
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

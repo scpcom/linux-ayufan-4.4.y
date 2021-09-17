@@ -122,7 +122,7 @@ struct sdhci_host {
 #define SDHCI_AUTO_CMD23	(1<<7)	 
 #define SDHCI_PV_ENABLED	(1<<8)	 
 #define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define SDHCI_SDR104_NEEDS_TUNING (1<<10)	 
 #else  
 #define SDHCI_HS200_NEEDS_TUNING (1<<10)	 
@@ -144,7 +144,7 @@ struct sdhci_host {
 	struct mmc_command *cmd;	 
 	struct mmc_data *data;	 
 	unsigned int data_early:1;	 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	unsigned int busy_handle:1;	 
 #endif  
 

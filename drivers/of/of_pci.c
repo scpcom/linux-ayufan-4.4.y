@@ -7,7 +7,7 @@
 #include <linux/of_pci.h>
 #include <asm/prom.h>
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 static inline int __of_pci_pci_compare(struct device_node *node,
 				       unsigned int data)
 {
@@ -54,7 +54,7 @@ struct device_node *of_pci_find_child_device(struct device_node *parent,
 }
 EXPORT_SYMBOL_GPL(of_pci_find_child_device);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
  
 int of_pci_get_devfn(struct device_node *np)
 {
@@ -89,7 +89,7 @@ int of_pci_parse_bus_range(struct device_node *node, struct resource *res)
 EXPORT_SYMBOL_GPL(of_pci_parse_bus_range);
 #endif  
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 
 #ifdef CONFIG_PCI_MSI
 

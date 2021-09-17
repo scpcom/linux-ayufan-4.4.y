@@ -13,7 +13,7 @@
 #include <linux/mfd/core.h>
 #include <linux/mfd/lpc_ich.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_AVOTON
 #include <linux/synobios.h>
 #endif  
 #define ACPIBASE		0x40
@@ -742,7 +742,7 @@ static u32 c226_writable_pin[] = {5, 16, 18, 19, 20, 21, 23, 32, 33, 34, 35, 36,
 static u32 avoton_writable_pin[] = {10, 15, 16, 17, 49, 50, 53, 54};
 static u32 broadwell_writable_pin[] = {3, 4, 5, 28, 45, 70, 71};
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_AVOTON
  
 static u32 coreWellGpio = 0;
 static u32 susWellGpio = 0;
@@ -750,7 +750,7 @@ static u32 avoton_corewell_gpioin_pin = 0x18041831;
 static u32 avoton_suswell_gpioin_pin = 0xC181114;
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_AVOTON)
  
 #define GPIO_MAX_PIN 63
 #else
@@ -766,7 +766,7 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
     int i = 0;
     u32 addr_use_select, addr_io_select, addr_lvl;
 	u32 val_lvl;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_AVOTON)
 	u32 *pVal_lvl = NULL;
 	u32 gpioin_pin = 0;
 #else  
@@ -799,7 +799,7 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
     if (mppPin < 32) {
         addr_use_select = gpiobase + 0x00;
         addr_io_select = gpiobase + 0x04;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_AVOTON)
 		addr_lvl = gpiobase + 0x08;
 		pVal_lvl = &coreWellGpio;
 		gpioin_pin = avoton_corewell_gpioin_pin;
@@ -809,7 +809,7 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
     } else if (mppPin < 64) {
         addr_use_select = gpiobase + 0x30;
         addr_io_select = gpiobase + 0x34;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_AVOTON)
 		addr_lvl = gpiobase + 0x88;
 		pVal_lvl = &susWellGpio;
 		gpioin_pin = avoton_suswell_gpioin_pin;
@@ -824,7 +824,7 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
         mppPin %= 32;
 	}
  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_AVOTON
 	if (0 == isWrite) {
          
 		if ((1 << mppPin) & gpioin_pin) {
@@ -966,7 +966,7 @@ gpe0_done:
 #ifdef MY_ABC_HERE
 	gpiobase = base_addr;
 	syno_gpio_init(dev);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_AVOTON
 	 
 	if (syno_is_hw_version(HW_DS415p) || syno_is_hw_version(HW_RS1219p)) {
 		susWellGpio = 0x640000;

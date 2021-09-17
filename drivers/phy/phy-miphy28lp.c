@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/platform_device.h>
 #include <linux/io.h>
@@ -92,7 +89,7 @@ static const struct miphy_initval miphylp28_initvals_sata[] = {
 	 
 	{0xd3, 0x00},
 	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	{0x4e, 0xd1}, {0x99, 0x5f}, {0x0a, 0x40},
 	{0x97, 0xc0},
 #else  
@@ -119,7 +116,7 @@ static const struct miphy_initval miphylp28_initvals_sata[] = {
 	{0x00, 0x00},
 	 
 	{0x01, 0x05}, {0xe9, 0x00}, {0x3a, 0x40}, {0x01, 0x00}, {0xe9, 0x40},
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	 
 	{0x62, 0x02}, {0x65, 0xC0},
 #endif  
@@ -210,7 +207,7 @@ static inline int miphy_is_ready(struct miphy28lp_phy *phy_miphy)
 	unsigned long finish = jiffies + 5 * HZ;
 	u8 mask = MIPHY_PLL_HFC_RDY;
 	u8 val;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	bool phyrdy = false, offcmp = false;
 #endif  
 	struct miphy28lp_dev *miphy_dev = to_miphy28lp_dev(phy_miphy);
@@ -223,7 +220,7 @@ static inline int miphy_is_ready(struct miphy28lp_phy *phy_miphy)
 		if ((val & mask) != mask)
 			cpu_relax();
 		else
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 			phyrdy = true;
 	} while ((phyrdy == false) && (!time_after_eq(jiffies, finish)));
 

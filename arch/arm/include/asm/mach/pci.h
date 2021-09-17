@@ -10,7 +10,7 @@
 struct pci_sys_data;
 struct pci_ops;
 struct pci_bus;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 struct device;
 #endif  
 
@@ -32,7 +32,7 @@ struct hw_pci {
 					  resource_size_t start,
 					  resource_size_t size,
 					  resource_size_t align);
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 	void		(*add_bus)(struct pci_bus *bus);
 	void		(*remove_bus)(struct pci_bus *bus);
 #endif  
@@ -60,14 +60,14 @@ struct pci_sys_data {
 					  resource_size_t start,
 					  resource_size_t size,
 					  resource_size_t align);
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 	void		(*add_bus)(struct pci_bus *bus);
 	void		(*remove_bus)(struct pci_bus *bus);
 #endif  
 	void		*private_data;	 
 };
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 void pci_common_init_dev(struct device *, struct hw_pci *);
 
 static inline void pci_common_init(struct hw_pci *hw)

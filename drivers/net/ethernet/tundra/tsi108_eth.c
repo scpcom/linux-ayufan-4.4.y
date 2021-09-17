@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/types.h>
@@ -1491,7 +1488,7 @@ static int tsi108_ether_remove(struct platform_device *pdev)
 
 	unregister_netdev(dev);
 	tsi108_stop_ethernet(dev);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

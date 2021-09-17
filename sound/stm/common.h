@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __SOUND_STM_COMMON_H
 #define __SOUND_STM_COMMON_H
@@ -90,12 +87,12 @@ struct snd_stm_clk;
 struct snd_stm_clk *snd_stm_clk_get(struct device *dev, const char *id,
 		struct snd_card *card, int card_device);
 void snd_stm_clk_put(struct snd_stm_clk *clk);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 int snd_stm_clk_prepare_enable(struct snd_stm_clk *clk);
 int snd_stm_clk_prepare(struct snd_stm_clk *clk);
 #endif  
 int snd_stm_clk_enable(struct snd_stm_clk *clk);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 int snd_stm_clk_disable_unprepare(struct snd_stm_clk *clk);
 int snd_stm_clk_unprepare(struct snd_stm_clk *clk);
 #endif  

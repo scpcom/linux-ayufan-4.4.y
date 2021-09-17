@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/mm.h>
 #include <linux/kexec.h>
@@ -8,7 +5,7 @@
 #include <linux/reboot.h>
 #include <linux/io.h>
 #include <linux/irq.h>
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #include <linux/cpu.h>
 #endif  
 #include <linux/memblock.h>
@@ -70,8 +67,8 @@ void machine_crash_nonpanic_core(void *unused)
 
 	set_cpu_online(smp_processor_id(), false);
 	atomic_dec(&waiting_for_crash_ipi);
-#if defined (MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4)
 	while (1)
 		cpu_relax();
 #endif  
@@ -110,8 +107,8 @@ void machine_crash_shutdown(struct pt_regs *regs)
 
 	local_irq_disable();
 
-#if defined (MY_DEF_HERE)
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (CONFIG_SYNO_LSP_MONACO_SDK2_15_4)
 #else  
 	system_state = SYSTEM_RESTART;
 #endif  
@@ -128,8 +125,8 @@ void machine_crash_shutdown(struct pt_regs *regs)
 
 	crash_save_cpu(regs, smp_processor_id());
 	machine_kexec_mask_interrupts();
-#if defined (MY_DEF_HERE)
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (CONFIG_SYNO_LSP_MONACO_SDK2_15_4)
 #else  
 	disable_nonboot_cpus();
 #endif  

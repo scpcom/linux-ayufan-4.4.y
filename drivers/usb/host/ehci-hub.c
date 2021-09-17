@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/usb/otg.h>
 #if defined(CONFIG_SYNO_LSP_HI3536_V2060)
@@ -52,7 +49,7 @@ static void ehci_handover_companion_ports(struct ehci_hcd *ehci)
 		}
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	port = HCS_N_PORTS(ehci->hcs_params);
 	while (port--) {
 		if (test_bit(port, &ehci->owned_ports)) {
@@ -874,7 +871,7 @@ static int ehci_hub_control (
 			set_bit(wIndex, &ehci->suspended_ports);
 			break;
 		case USB_PORT_FEAT_POWER:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 			if (!(temp & PORT_OC) && HCS_PPC(ehci->hcs_params))
 #else  
 			if (HCS_PPC (ehci->hcs_params))

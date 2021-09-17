@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/io.h>
@@ -1897,7 +1894,7 @@ static int cpsw_remove(struct platform_device *pdev)
 	struct cpsw_priv *priv = netdev_priv(ndev);
 	int i;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

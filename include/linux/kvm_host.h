@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __KVM_HOST_H
 #define __KVM_HOST_H
 
@@ -840,7 +837,7 @@ void kvm_eventfd_init(struct kvm *kvm);
 int kvm_ioeventfd(struct kvm *kvm, struct kvm_ioeventfd *args);
 
 #ifdef CONFIG_HAVE_KVM_IRQCHIP
-#if defined(MY_DEF_HERE) && !defined(__KVM_HAVE_IOAPIC)
+#if defined(CONFIG_SYNO_LSP_ALPINE) && !defined(__KVM_HAVE_IOAPIC)
  
 #else  
 int kvm_irqfd(struct kvm *kvm, struct kvm_irqfd *args);

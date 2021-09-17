@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _LINUX_RMAP_H
 #define _LINUX_RMAP_H
  
@@ -23,7 +20,7 @@ struct anon_vma_chain {
 	struct vm_area_struct *vma;
 	struct anon_vma *anon_vma;
 	struct list_head same_vma;    
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	struct rb_node rb;			 
 	pgoff_t rb_subtree_last;
 #else  
@@ -31,7 +28,7 @@ struct anon_vma_chain {
 	unsigned long rb_subtree_last;
 #endif  
 #ifdef CONFIG_DEBUG_VM_RB
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	pgoff_t cached_vma_start, cached_vma_last;
 #else  
 	unsigned long cached_vma_start, cached_vma_last;

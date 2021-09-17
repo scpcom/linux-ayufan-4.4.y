@@ -871,7 +871,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
 	mod_timer(&host->timer, jiffies + 10 * HZ);
 
 	host->cmd = cmd;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	host->busy_handle = 0;
 #endif  
 
@@ -1297,7 +1297,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
 		u16 clk, ctrl_2;
 
 		if ((ios->timing == MMC_TIMING_MMC_HS200) ||
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		    (ios->timing == MMC_TIMING_MMC_DDR52) ||
 #endif  
 		    (ios->timing == MMC_TIMING_UHS_SDR50) ||
@@ -1338,7 +1338,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
 			ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
 			 
 			ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 			if ((ios->timing == MMC_TIMING_MMC_HS200) ||
 			    (ios->timing == MMC_TIMING_UHS_SDR104))
 				ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
@@ -1352,7 +1352,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
 				ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
 			else if (ios->timing == MMC_TIMING_UHS_SDR50)
 				ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 			else if ((ios->timing == MMC_TIMING_UHS_DDR50) ||
 				 (ios->timing == MMC_TIMING_MMC_DDR52))
 				ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
@@ -1639,7 +1639,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
 
 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR50) &&
 	    (host->flags & SDHCI_SDR50_NEEDS_TUNING ||
 	     host->flags & SDHCI_SDR104_NEEDS_TUNING))
@@ -1973,7 +1973,7 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
 		if (host->cmd->data)
 			DBG("Cannot wait for busy signal when also "
 				"doing a data transfer");
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		else if (host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ) {
 			 
 		} else if (host->busy_handle == 0) {
@@ -2042,7 +2042,7 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
 		 
 		if (host->cmd && (host->cmd->flags & MMC_RSP_BUSY)) {
 			if (intmask & SDHCI_INT_DATA_END) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 				 
 				if (host->busy_handle)
 				sdhci_finish_command(host);
@@ -2627,7 +2627,7 @@ int sdhci_add_host(struct sdhci_host *host)
 		       SDHCI_SUPPORT_DDR50))
 		mmc->caps |= MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (caps[1] & SDHCI_SUPPORT_SDR104) {
 		mmc->caps |= MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_SDR50;
 		 
@@ -2647,7 +2647,7 @@ int sdhci_add_host(struct sdhci_host *host)
 	if (caps[1] & SDHCI_USE_SDR50_TUNING)
 		host->flags |= SDHCI_SDR50_NEEDS_TUNING;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	if (mmc->caps2 & MMC_CAP2_HS200)
 		host->flags |= SDHCI_SDR104_NEEDS_TUNING;

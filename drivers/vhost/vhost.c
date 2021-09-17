@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/eventfd.h>
 #include <linux/vhost.h>
@@ -1307,7 +1304,7 @@ int vhost_add_used_n(struct vhost_virtqueue *vq, struct vring_used_elem *heads,
 	r = __vhost_add_used_n(vq, heads, count);
 
 	smp_wmb();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (__put_user(vq->last_used_idx, &vq->used->idx)) {
 #else  
 	if (put_user(vq->last_used_idx, &vq->used->idx)) {
@@ -1353,7 +1350,7 @@ static bool vhost_notify(struct vhost_dev *dev, struct vhost_virtqueue *vq)
 	if (unlikely(!v))
 		return true;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (__get_user(event, vhost_used_event(vq))) {
 #else  
 	if (get_user(event, vhost_used_event(vq))) {

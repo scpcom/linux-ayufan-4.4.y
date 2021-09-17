@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "al_hal_eth.h"
 #include "al_hal_udma_iofic.h"
@@ -1632,7 +1629,7 @@ static int al_eth_mdio_lock(struct al_hal_eth_adapter *adapter)
 		}
 		al_udelay(AL_ETH_MDIO_DELAY_PERIOD);
 	}while(count++ < (AL_ETH_MDIO_DELAY_COUNT * 4));
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	al_dbg(" %s mdio failed to take ownership. MDIO info reg: 0x%08x\n",
 #else  
 	al_err(" %s mdio failed to take ownership. MDIO info reg: 0x%08x\n",

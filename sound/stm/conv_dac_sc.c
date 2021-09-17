@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/module.h>
@@ -129,7 +126,7 @@ static int conv_dac_sc_set_enabled(int enabled, void *priv)
 			enabled ? "En" : "Dis", conv->bus_id);
 
 	if (enabled) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		 
 		if (conv->sbana)
 			regmap_field_write(conv->sbana, 0);
@@ -151,7 +148,7 @@ static int conv_dac_sc_set_enabled(int enabled, void *priv)
 			regmap_field_write(conv->nsb, 0);
 		if (conv->sb)
 			regmap_field_write(conv->sb, 1);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		 
 		if (conv->sbana)
 			regmap_field_write(conv->sbana, 1);
@@ -190,7 +187,7 @@ static struct snd_stm_conv_ops conv_dac_sc_ops = {
 	.set_muted	  = conv_dac_sc_set_muted,
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static int conv_dac_sc_set_idle(struct conv_dac_sc *conv)
 {
 	BUG_ON(!conv);
@@ -230,7 +227,7 @@ static int conv_dac_sc_register(struct snd_device *snd_device)
 {
 	struct conv_dac_sc *conv = snd_device->device_data;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 	BUG_ON(!conv);
 	BUG_ON(!snd_stm_magic_valid(conv));
@@ -238,7 +235,7 @@ static int conv_dac_sc_register(struct snd_device *snd_device)
 
 	dev_dbg(conv->dev, "%s(snd_device=%p)", __func__, snd_device);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	return conv_dac_sc_set_idle(conv);
 #else  
 	 
@@ -514,7 +511,7 @@ static int conv_dac_sc_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_PM_SLEEP
 static int conv_dac_sc_resume(struct device *dev)
 {
@@ -550,7 +547,7 @@ MODULE_DEVICE_TABLE(of, conv_dac_sc_match);
 static struct platform_driver conv_dac_sc_platform_driver = {
 	.driver.name	= "snd_conv_dac_sc",
 	.driver.of_match_table = conv_dac_sc_match,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	.driver.pm	= CONV_DAC_SC_PM_OPS,
 #endif  
 	.probe		= conv_dac_sc_probe,

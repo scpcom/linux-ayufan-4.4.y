@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef REMOTEPROC_H
 #define REMOTEPROC_H
@@ -106,7 +103,7 @@ enum rproc_state {
 
 enum rproc_crash_type {
 	RPROC_MMUFAULT,
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	RPROC_WATCHDOG,
 #endif  
 };

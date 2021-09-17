@@ -58,7 +58,7 @@ static unsigned park = 0;
 module_param (park, uint, S_IRUGO);
 MODULE_PARM_DESC (park, "park setting; 1-3 back-to-back async packets");
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MONACO
 static bool ignore_oc = 1;
 #else
 static bool ignore_oc = 0;

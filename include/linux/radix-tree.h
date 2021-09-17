@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _LINUX_RADIX_TREE_H
 #define _LINUX_RADIX_TREE_H
@@ -16,7 +13,7 @@
 #define rdx_t	unsigned long long
 #define RDX_TREE_KEY_MAX_VALUE	ULLONG_MAX
 #else  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define rdx_t	unsigned long
 #define RDX_TREE_KEY_MAX_VALUE	ULONG_MAX
 #endif  
@@ -90,7 +87,7 @@ static inline void radix_tree_replace_slot(void **pslot, void *item)
 	rcu_assign_pointer(*pslot, item);
 }
 
-#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_HI3536)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_HI3536)
 int radix_tree_insert(struct radix_tree_root *, rdx_t, void *);
 void *radix_tree_lookup(struct radix_tree_root *, rdx_t);
 void **radix_tree_lookup_slot(struct radix_tree_root *, rdx_t);
@@ -172,7 +169,7 @@ static inline void radix_tree_preload_end(void)
 }
 
 struct radix_tree_iter {
-#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_HI3536)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_HI3536)
 	rdx_t	index;
 	rdx_t	next_index;
 #else  
@@ -187,7 +184,7 @@ struct radix_tree_iter {
 #define RADIX_TREE_ITER_CONTIG		0x0200	 
 
 static __always_inline void **
-#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_HI3536)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_HI3536)
 radix_tree_iter_init(struct radix_tree_iter *iter, rdx_t start)
 #else  
 radix_tree_iter_init(struct radix_tree_iter *iter, unsigned long start)

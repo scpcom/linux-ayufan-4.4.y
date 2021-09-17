@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) "TCP: " fmt
 
@@ -1776,7 +1773,7 @@ process:
 	if (!sock_owned_by_user(sk)) {
 #ifdef CONFIG_NET_DMA
 		struct tcp_sock *tp = tcp_sk(sk);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
 #else  
 		if (!tp->ucopy.dma_chan && tp->ucopy.pinned_list)
@@ -1947,7 +1944,7 @@ void tcp_v4_destroy_sock(struct sock *sk)
 #ifdef CONFIG_NET_DMA
 	 
 	__skb_queue_purge(&sk->sk_async_wait_queue);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	dma_free_iovec_data(tp);
 #endif  
 #endif

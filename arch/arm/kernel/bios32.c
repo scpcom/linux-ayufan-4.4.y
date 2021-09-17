@@ -246,7 +246,7 @@ void pcibios_fixup_bus(struct pci_bus *bus)
 }
 EXPORT_SYMBOL(pcibios_fixup_bus);
 
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 void pcibios_add_bus(struct pci_bus *bus)
 {
 	struct pci_sys_data *sys = bus->sysdata;
@@ -326,7 +326,7 @@ static int pcibios_init_resources(int busnr, struct pci_sys_data *sys)
 	return 0;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static void pcibios_init_hw(struct device *parent, struct hw_pci *hw,
 			    struct list_head *head)
 #else  
@@ -335,7 +335,7 @@ static void pcibios_init_hw(struct hw_pci *hw, struct list_head *head)
 {
 	struct pci_sys_data *sys = NULL;
 	int ret;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	int nr;
 	static int busnr;
 
@@ -356,7 +356,7 @@ static void pcibios_init_hw(struct hw_pci *hw, struct list_head *head)
 		sys->swizzle = hw->swizzle;
 		sys->map_irq = hw->map_irq;
 		sys->align_resource = hw->align_resource;
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 		sys->add_bus = hw->add_bus;
 		sys->remove_bus = hw->remove_bus;
 #endif  
@@ -377,7 +377,7 @@ static void pcibios_init_hw(struct hw_pci *hw, struct list_head *head)
 			if (hw->scan)
 				sys->bus = hw->scan(nr, sys);
 			else
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 				sys->bus = pci_scan_root_bus(parent, sys->busnr,
 						hw->ops, sys, &sys->resources);
 #else  
@@ -399,7 +399,7 @@ static void pcibios_init_hw(struct hw_pci *hw, struct list_head *head)
 	}
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 void pci_common_init_dev(struct device *parent, struct hw_pci *hw)
 #else  
 void pci_common_init(struct hw_pci *hw)
@@ -411,7 +411,7 @@ void pci_common_init(struct hw_pci *hw)
 	pci_add_flags(PCI_REASSIGN_ALL_RSRC);
 	if (hw->preinit)
 		hw->preinit();
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	pcibios_init_hw(parent, hw, &head);
 #else  
 	pcibios_init_hw(hw, &head);

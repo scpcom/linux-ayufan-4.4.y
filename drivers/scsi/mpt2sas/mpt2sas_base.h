@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef MPT2SAS_BASE_H_INCLUDED
 #define MPT2SAS_BASE_H_INCLUDED
@@ -590,7 +587,7 @@ struct MPT2SAS_ADAPTER {
 	u8		mfg_pg10_hide_flag;
 	u8		hide_drives;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_MPT2_RESET_ON_REBOOT
 	u8		shutdown;
 #endif  
 };

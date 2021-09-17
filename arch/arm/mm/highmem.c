@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/highmem.h>
@@ -55,14 +52,14 @@ void *kmap_atomic(struct page *page)
 	vaddr = __fix_to_virt(FIX_KMAP_BEGIN + idx);
 #ifdef CONFIG_DEBUG_HIGHMEM
 	 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	BUG_ON(!pte_none(get_fix_pte(vaddr)));
 #else  
 	BUG_ON(!pte_none(get_top_pte(vaddr)));
 #endif  
 #endif
 	 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	set_fix_pte(vaddr, mk_pte(page, kmap_prot));
 #else  
 	set_top_pte(vaddr, mk_pte(page, kmap_prot));
@@ -85,7 +82,7 @@ void __kunmap_atomic(void *kvaddr)
 			__cpuc_flush_dcache_area((void *)vaddr, PAGE_SIZE);
 #ifdef CONFIG_DEBUG_HIGHMEM
 		BUG_ON(vaddr != __fix_to_virt(FIX_KMAP_BEGIN + idx));
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		set_fix_pte(vaddr, __pte(0));
 #else  
 		set_top_pte(vaddr, __pte(0));
@@ -113,13 +110,13 @@ void *kmap_atomic_pfn(unsigned long pfn)
 	idx = type + KM_TYPE_NR * smp_processor_id();
 	vaddr = __fix_to_virt(FIX_KMAP_BEGIN + idx);
 #ifdef CONFIG_DEBUG_HIGHMEM
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	BUG_ON(!pte_none(get_fix_pte(vaddr)));
 #else  
 	BUG_ON(!pte_none(get_top_pte(vaddr)));
 #endif  
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	set_fix_pte(vaddr, pfn_pte(pfn, kmap_prot));
 #else  
 	set_top_pte(vaddr, pfn_pte(pfn, kmap_prot));
@@ -135,7 +132,7 @@ struct page *kmap_atomic_to_page(const void *ptr)
 	if (vaddr < FIXADDR_START)
 		return virt_to_page(ptr);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	return pte_page(get_fix_pte(vaddr));
 #else  
 	return pte_page(get_top_pte(vaddr));

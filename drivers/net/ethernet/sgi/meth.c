@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/delay.h>
 #include <linux/dma-mapping.h>
@@ -781,7 +778,7 @@ static int __exit meth_remove(struct platform_device *pdev)
 
 	unregister_netdev(dev);
 	free_netdev(dev);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

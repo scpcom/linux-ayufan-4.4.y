@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/device.h>
 #include <linux/slab.h>
@@ -753,7 +750,7 @@ struct regmap *devm_regmap_init(struct device *dev,
 }
 EXPORT_SYMBOL_GPL(devm_regmap_init);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static void regmap_field_init(struct regmap_field *rm_field,
 	struct regmap *regmap, struct reg_field reg_field)
 {
@@ -1180,7 +1177,7 @@ int regmap_raw_write(struct regmap *map, unsigned int reg,
 	return ret;
 }
 EXPORT_SYMBOL_GPL(regmap_raw_write);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 int regmap_field_write(struct regmap_field *field, unsigned int val)
 {
@@ -1402,7 +1399,7 @@ int regmap_raw_read(struct regmap *map, unsigned int reg, void *val,
 	return ret;
 }
 EXPORT_SYMBOL_GPL(regmap_raw_read);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 int regmap_field_read(struct regmap_field *field, unsigned int *val)
 {

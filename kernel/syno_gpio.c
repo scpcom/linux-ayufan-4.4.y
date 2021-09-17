@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/gpio.h>
 #include <linux/slab.h>
@@ -26,7 +23,7 @@ EXPORT_SYMBOL(syno_gpio);
 
 int SYNO_GPIO_READ(int pin)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_X86_PINCTRL_GPIO)
 	int iVal=0;
 	syno_gpio_value_get(pin, &iVal);
 	return iVal;
@@ -44,7 +41,7 @@ EXPORT_SYMBOL(SYNO_GPIO_READ);
 
 void SYNO_GPIO_WRITE(int pin, int pValue)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_X86_PINCTRL_GPIO)
 	syno_gpio_value_set(pin, pValue);
 #else
 	if (gpio_cansleep(pin)) {

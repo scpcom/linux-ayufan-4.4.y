@@ -5,7 +5,7 @@
 #define __EXTENTIO__
 
 #include <linux/rbtree.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 #include <linux/pagemap.h>
 #endif  
 

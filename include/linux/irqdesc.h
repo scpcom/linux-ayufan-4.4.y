@@ -127,7 +127,7 @@ static inline int irq_balancing_disabled(unsigned int irq)
 	return desc->status_use_accessors & IRQ_NO_BALANCING_MASK;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static inline int irq_is_per_cpu(unsigned int irq)
 {
 	struct irq_desc *desc;

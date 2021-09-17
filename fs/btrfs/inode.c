@@ -32,7 +32,7 @@
 #include <asm/unaligned.h>
 #include "ctree.h"
 #include "disk-io.h"
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #include "csum.h"
 #endif  
 #include "transaction.h"
@@ -2861,7 +2861,7 @@ static int btrfs_readpage_end_io_hook(struct btrfs_io_bio *io_bio,
 	phy_offset >>= inode->i_sb->s_blocksize_bits;
 	csum_expected = *(((u32 *)io_bio->csum) + phy_offset);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	btrfs_csum_page_digest(page, offset, end - start + 1, &csum);
 #else  
 	kaddr = kmap_atomic(page);
@@ -2871,7 +2871,7 @@ static int btrfs_readpage_end_io_hook(struct btrfs_io_bio *io_bio,
 	if (csum != csum_expected)
 		goto zeroit;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 #else  
 	kunmap_atomic(kaddr);
@@ -2880,7 +2880,7 @@ good:
 	return 0;
 
 zeroit:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	kaddr = kmap_atomic(page);
 #endif  
 	if (__ratelimit(&_rs))

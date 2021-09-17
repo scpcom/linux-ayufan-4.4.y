@@ -1663,7 +1663,7 @@ u64 scsi_calculate_bounce_limit(struct Scsi_Host *shost)
 	if (!PCI_DMA_BUS_IS_PHYS)
 		return BLK_BOUNCE_ANY;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	host_dev = shost->dma_dev;
 #else  
 	host_dev = scsi_get_device(shost);

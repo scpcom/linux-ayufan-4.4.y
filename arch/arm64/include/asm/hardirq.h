@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __ASM_HARDIRQ_H
 #define __ASM_HARDIRQ_H
@@ -38,7 +35,7 @@ static inline void ack_bad_irq(unsigned int irq)
 
 extern void handle_IRQ(unsigned int, struct pt_regs *);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
  
 #define set_irq_flags(irq, flags)

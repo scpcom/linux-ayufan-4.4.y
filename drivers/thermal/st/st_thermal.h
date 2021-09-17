@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __STI_THERMAL_SYSCFG_H
 #define __STI_THERMAL_SYSCFG_H
@@ -16,19 +13,19 @@ enum {
 	DCORRECT,
 	OVERFLOW,
 	DATA,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	DATARDY,
 #endif  
 	INT_ENABLE,
 	INT_THRESH_LOW,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	DC_CALIB,
 #endif  
 	 
 	MAX_REGFIELDS
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 enum {
 	TH_REGS,
 	TH_CALIB,
@@ -71,7 +68,7 @@ struct st_thermal_sensor {
 	const struct st_thermal_compat_data *data;
 	struct clk *clk;
 	unsigned int passive_temp;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	unsigned int dc_offset;
 	struct regmap *regmap[MAX_IOBASE];
 #else  
@@ -81,17 +78,17 @@ struct st_thermal_sensor {
 	struct regmap_field *dcorrect;
 	struct regmap_field *overflow;
 	struct regmap_field *temp_data;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	struct regmap_field *datardy;
 #endif  
 	struct regmap_field *int_thresh_hi;
 	struct regmap_field *int_thresh_low;
 	struct regmap_field *int_enable;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	struct regmap_field *dc_calib;
 #endif  
 	int irq;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 	void __iomem *mmio_base;
 #endif  

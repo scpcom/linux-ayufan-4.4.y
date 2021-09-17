@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) KBUILD_MODNAME ":%s: " fmt, __func__
 
@@ -769,7 +766,7 @@ static int ep93xx_eth_remove(struct platform_device *pdev)
 	dev = platform_get_drvdata(pdev);
 	if (dev == NULL)
 		return 0;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

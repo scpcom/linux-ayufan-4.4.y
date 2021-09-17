@@ -72,7 +72,7 @@ struct SYNO_MTD_FIS_INFO {
 #define MTD_BIT_WRITEABLE	0x800	 
 #define MTD_NO_ERASE		0x1000	 
 #define MTD_POWERUP_LOCK	0x2000	 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define MTD_SLAVE_PARTITION	0x00010000	 
 #define MTD_SPANS_MASTER	0x00020000	 
 #endif  

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _LINUX_EDAC_H_
 #define _LINUX_EDAC_H_
@@ -152,7 +149,7 @@ enum edac_type {
 #define EDAC_FLAG_S16ECD16ED	BIT(EDAC_S16ECD16ED)
 
 enum scrub_type {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	SCRUB_UNKNOWN		= BIT(0),
 	SCRUB_NONE		= BIT(1),
 	SCRUB_SW_PROG		= BIT(2),
@@ -177,7 +174,7 @@ enum scrub_type {
 #endif  
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define SCRUB_FLAG_SW_PROG	SCRUB_SW_PROG
 #define SCRUB_FLAG_SW_SRC	SCRUB_SW_SRC
 #define SCRUB_FLAG_SW_PROG_SRC	SCRUB_SW_PROG_SRC

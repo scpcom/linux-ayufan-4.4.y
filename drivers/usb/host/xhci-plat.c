@@ -8,7 +8,7 @@
 #include <linux/usb/phy.h>
 #endif  
 #include <linux/slab.h>
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #include <linux/of.h>
 #include <linux/dma-mapping.h>
 #include <linux/usb/xhci_pdriver.h>
@@ -60,7 +60,7 @@ static const struct hc_driver xhci_plat_xhci_driver = {
 	.check_bandwidth =	xhci_check_bandwidth,
 	.reset_bandwidth =	xhci_reset_bandwidth,
 	.address_device =	xhci_address_device,
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	.enable_device =	xhci_enable_device,
 #endif  
 	.update_hub_device =	xhci_update_hub_device,
@@ -72,7 +72,7 @@ static const struct hc_driver xhci_plat_xhci_driver = {
 	.hub_status_data =	xhci_hub_status_data,
 	.bus_suspend =		xhci_bus_suspend,
 	.bus_resume =		xhci_bus_resume,
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	.enable_usb3_lpm_timeout =	xhci_enable_usb3_lpm_timeout,
 	.disable_usb3_lpm_timeout =	xhci_disable_usb3_lpm_timeout,
@@ -86,7 +86,7 @@ int common_xhci_plat_probe(struct platform_device *pdev,
 static int xhci_plat_probe(struct platform_device *pdev)
 #endif  
 {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	struct device_node	*node = pdev->dev.of_node;
 	struct usb_xhci_pdata	*pdata = dev_get_platdata(&pdev->dev);
 #endif  
@@ -115,7 +115,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	if (!res)
 		return -ENODEV;
 
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 	 
 	ret = dma_set_coherent_mask(&pdev->dev, DMA_BIT_MASK(32));
 	if (ret)
@@ -181,7 +181,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	if (ret)
 		goto unmap_registers;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	hcd = platform_get_drvdata(pdev);
 #else  
 	hcd = dev_get_drvdata(&pdev->dev);
@@ -197,7 +197,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 		goto dealloc_usb2_hcd;
 	}
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if ((node && of_property_read_bool(node, "usb3-lpm-capable")) ||
 			(pdata && pdata->usb3_lpm_capable))
 		xhci->quirks |= XHCI_LPM_SUPPORT;
@@ -281,8 +281,8 @@ static int xhci_plat_remove(struct platform_device *dev)
 
 	return 0;
 }
-#if defined (MY_DEF_HERE)
-#ifdef MY_DEF_HERE
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_PM_SLEEP
 static int xhci_plat_suspend(struct device *dev)
 {
@@ -480,7 +480,7 @@ static struct platform_driver usb_xhci_driver = {
 #endif  
 	.driver	= {
 		.name = "xhci-hcd",
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 		.pm = DEV_PM_OPS,
 		.of_match_table = of_match_ptr(usb_xhci_of_match),
 #endif  

@@ -11,7 +11,7 @@
 #include <linux/platform_device.h>
 #include <linux/slab.h>
 #include <linux/spinlock.h>
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 #include <linux/irq.h>
 #endif  
 #if defined(MY_ABC_HERE)
@@ -60,7 +60,7 @@ static struct pmu_hw_events *cpu_pmu_get_cpu_events(void)
 	return &__get_cpu_var(cpu_hw_events);
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 static void cpu_pmu_enable_percpu_irq(void *irq)
 {
@@ -120,7 +120,7 @@ static void cpu_pmu_free_irq(struct arm_pmu *cpu_pmu)
 		if (!cpumask_test_and_clear_cpu(i, &cpu_pmu->active_irqs))
 			continue;
 		irq = platform_get_irq(pmu_device, i);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if (irq >= 0) {
 			if (irq_is_per_cpu(irq)) {
 				WARN_ON(irqs > 1);
@@ -190,7 +190,7 @@ static int cpu_pmu_request_irq(struct arm_pmu *cpu_pmu, irq_handler_t handler)
 		irq = platform_get_irq(pmu_device, i);
 		if (irq < 0)
 			continue;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if (irq_is_per_cpu(irq)) {
 			 
 			WARN_ON(irqs > 1);
@@ -252,7 +252,7 @@ static void cpu_pmu_init(struct arm_pmu *cpu_pmu)
 		struct pmu_hw_events *events = &per_cpu(cpu_hw_events, cpu);
 		events->events = per_cpu(hw_events, cpu);
 		events->used_mask = per_cpu(used_mask, cpu);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		events->pmu = &cpu_pmu->pmu;
 #endif  
 		raw_spin_lock_init(&events->pmu_lock);

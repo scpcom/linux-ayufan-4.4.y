@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/spinlock.h>
 #include <linux/errno.h>
@@ -258,7 +255,7 @@ static int pl061_probe(struct amba_device *adev, const struct amba_id *id)
 		irq_base = pdata->irq_base;
 		if (irq_base <= 0)
 			return -ENODEV;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	} else if (adev->dev.of_node) {
 		const void *ptr;
 		unsigned int baseidx = -1;  
@@ -270,7 +267,7 @@ static int pl061_probe(struct amba_device *adev, const struct amba_id *id)
 #endif  
 	} else {
 		chip->gc.base = -1;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		 
 #else  
 		irq_base = 0;

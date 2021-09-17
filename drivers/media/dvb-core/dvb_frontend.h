@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _DVB_FRONTEND_H_
 #define _DVB_FRONTEND_H_
@@ -217,7 +214,7 @@ struct dvb_frontend_ops {
 	int (*i2c_gate_ctrl)(struct dvb_frontend* fe, int enable);
 	int (*ts_bus_ctrl)(struct dvb_frontend* fe, int acquire);
 	int (*set_lna)(struct dvb_frontend *);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	int (*set_rf_input_src)(struct dvb_frontend *fe);
 #endif  
 
@@ -302,7 +299,7 @@ struct dtv_frontend_properties {
 	u8			atscmh_sccc_code_mode_d;
 
 	u32			lna;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	u32			rf_input_max;
 	u32			rf_input_src;

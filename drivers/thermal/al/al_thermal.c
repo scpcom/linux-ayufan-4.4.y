@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/err.h>
 #include <linux/of.h>
@@ -100,7 +97,7 @@ static int al_thermal_resume(struct device *dev)
 static SIMPLE_DEV_PM_OPS(al_thermal_pm_ops, al_thermal_suspend,
 		al_thermal_resume);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_CPU_TEMPERATURE
 struct thermal_zone_device *g_syno_al_thermal = NULL;
 #endif  
 
@@ -157,7 +154,7 @@ static int al_thermal_probe(struct platform_device *pdev)
 		err = PTR_ERR(al_thermal);
 		return err;
 	}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_CPU_TEMPERATURE
 	g_syno_al_thermal = al_thermal;
 #endif  
 
@@ -169,7 +166,7 @@ static int al_thermal_probe(struct platform_device *pdev)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_CPU_TEMPERATURE
 int syno_alpine_get_cpu_temperature(int *temperature)
 {
 	int ret = -EIO;

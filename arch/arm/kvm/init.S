@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (C) 2012 - Virtual Open Systems and Columbia University
  * Author: Christoffer Dall <c.dall@virtualopensystems.com>
@@ -145,11 +142,11 @@ target:	@ We're now in the trampoline code, switch page tables
 
 	@ Invalidate the old TLBs
 	mcr	p15, 4, r0, c8, c7, 0	@ TLBIALLH
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	dsb	ish
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	eret
 

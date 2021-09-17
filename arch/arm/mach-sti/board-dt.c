@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/clk-provider.h>
 #include <linux/clocksource.h>
@@ -107,7 +104,7 @@ static const char *sti_dt_match[] __initdata = {
 	NULL
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 void __init sti_init_early(void)
 {
@@ -123,7 +120,7 @@ void __init sti_init_early(void)
 
 DT_MACHINE_START(STM, "STi SoC with Flattened Device Tree")
 	.map_io		= debug_ll_io_init,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 	.init_early	= sti_init_early,
 #endif  

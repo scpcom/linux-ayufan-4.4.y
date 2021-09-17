@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt)    "%s: " fmt, __func__
 
@@ -15,7 +12,7 @@
 #include <linux/debugfs.h>
 #include <linux/remoteproc.h>
 #include <linux/iommu.h>
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #include <linux/io.h>
 #endif  
 #include <linux/idr.h>
@@ -36,7 +33,7 @@ static DEFINE_IDA(rproc_dev_index);
 
 static const char * const rproc_crash_names[] = {
 	[RPROC_MMUFAULT]	= "mmufault",
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	[RPROC_WATCHDOG]	= "watchdog timeout",
 #endif  
 };
@@ -347,7 +344,7 @@ static int rproc_handle_devmem(struct rproc *rproc, struct fw_rsc_devmem *rsc,
 		return -ENOMEM;
 	}
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (rproc->domain) {
 		ret = iommu_map(rproc->domain, rsc->da, rsc->pa, rsc->len,
 				rsc->flags);
@@ -358,7 +355,7 @@ static int rproc_handle_devmem(struct rproc *rproc, struct fw_rsc_devmem *rsc,
 		dev_err(dev, "failed to map devmem: %d\n", ret);
 		goto out;
 	}
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	} else {
 		mapping->va = ioremap(rsc->pa, rsc->len);
 		if (!mapping->va) {
@@ -413,7 +410,7 @@ static int rproc_handle_carveout(struct rproc *rproc,
 		return -ENOMEM;
 	}
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	va = dma_alloc_coherent(dev->parent, rsc->len, &dma, GFP_KERNEL);
 	if (!va) {
@@ -427,7 +424,7 @@ static int rproc_handle_carveout(struct rproc *rproc,
 #endif  
 
 	if (rproc->domain) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 		va = dma_alloc_coherent(dev->parent, rsc->len, &dma,
 					GFP_KERNEL);
@@ -459,7 +456,7 @@ static int rproc_handle_carveout(struct rproc *rproc,
 
 		dev_dbg(dev, "carveout mapped 0x%x to 0x%llx\n",
 					rsc->da, (unsigned long long)dma);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	} else {
 		 
 		va = ioremap(rsc->da, rsc->len);
@@ -472,7 +469,7 @@ static int rproc_handle_carveout(struct rproc *rproc,
 		dma = 0;
 #endif  
 	}
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	dev_dbg(dev, "carveout va %p, dma %llx, len 0x%x\n", va,
 					(unsigned long long)dma, rsc->len);
@@ -572,7 +569,7 @@ static void rproc_resource_cleanup(struct rproc *rproc)
 	}
 
 	list_for_each_entry_safe(entry, tmp, &rproc->carveouts, node) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if (entry->dma)
 			dma_free_coherent(dev->parent, entry->len, entry->va,
 					  entry->dma);
@@ -588,7 +585,7 @@ static void rproc_resource_cleanup(struct rproc *rproc)
 	list_for_each_entry_safe(entry, tmp, &rproc->mappings, node) {
 		size_t unmapped;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if (rproc->domain) {
 			unmapped = iommu_unmap(rproc->domain, entry->da,
 					       entry->len);

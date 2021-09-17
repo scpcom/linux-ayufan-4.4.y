@@ -211,7 +211,7 @@ struct ucred {
 #define MSG_SENDPAGE_NOTLAST 0x20000  
 #define MSG_EOF         MSG_FIN
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_ALPINE)
 #define MSG_KERNSPACE       0x40000
 #define MSG_NOCATCHSIGNAL   0x80000
 #endif  

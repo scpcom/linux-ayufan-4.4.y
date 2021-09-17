@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef AL_ETH_H
 #define AL_ETH_H
@@ -261,7 +258,7 @@ struct al_eth_adapter {
 
 	bool			an_en;	 
 	bool			lt_en;	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
 	bool			rx_eq_en;
 #endif  
 

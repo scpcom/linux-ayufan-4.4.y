@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -380,7 +377,7 @@ int add_mtd_device(struct mtd_info *mtd)
 			       mtd->name);
 	}
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	if (!(mtd->flags & MTD_SLAVE_PARTITION))
 		mtd->flags |= MTD_SPANS_MASTER;

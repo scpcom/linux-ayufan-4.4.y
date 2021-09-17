@@ -1255,7 +1255,7 @@ static netdev_features_t bond_fix_features(struct net_device *dev,
 		goto out;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	features &= ~(NETIF_F_GSO_SOFTWARE | NETIF_F_GSO_ROBUST);
 #endif  
 	mask = features;
@@ -1274,7 +1274,7 @@ out:
 	return features;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define BOND_VLAN_FEATURES	(NETIF_F_ALL_CSUM | NETIF_F_SG | \
 				 NETIF_F_FRAGLIST | \
 				 NETIF_F_HIGHDMA | NETIF_F_LRO)

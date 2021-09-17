@@ -26,7 +26,7 @@ extern void syno_ledtrig_active_set(int iLedNum);
 extern int *gpGreenLedMap;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DS1815P_SPEED_LIMIT
 extern int g_syno_ds1815p_speed_limit;
 #endif  
 
@@ -1295,11 +1295,11 @@ static void sil24_init_controller(struct ata_host *host)
 				dev_err(host->dev,
 					"failed to clear port RST\n");
 		}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_INCREASE_SIL3132_OUT_SWING
 		tmp = readl(port + PORT_PHY_CFG);
 		tmp &= ~0x1f;
 		if (syno_is_hw_version(HW_DS1815p)) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DS1815P_SPEED_LIMIT
 			 
 			if (1 == g_syno_ds1815p_speed_limit) {
 				dev_info(host->dev, "Increase sil3132 swing to 0x15\n");
@@ -1418,7 +1418,7 @@ static int sil24_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	pci_set_master(pdev);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SIL_PORTING
 	if (pdev->vendor == 0x1095 && (pdev->device == 0x3132 || pdev->device == 0x3531)) {
 		int i=0;
 

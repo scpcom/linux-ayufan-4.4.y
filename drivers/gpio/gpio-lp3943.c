@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * TI/National Semiconductor LP3943 GPIO driver
  *
@@ -210,7 +207,7 @@ static int lp3943_gpio_probe(struct platform_device *pdev)
 	lp3943_gpio->chip = lp3943_gpio_chip;
 	lp3943_gpio->chip.dev = &pdev->dev;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LP3943_PRESENT
 	lp3943_gpio->input_mask = 0xffff;
 
 	if (pdev->dev.of_node) {
@@ -222,7 +219,7 @@ static int lp3943_gpio_probe(struct platform_device *pdev)
 			baseidx = be32_to_cpup(ptr);
 		lp3943_gpio->chip.base = baseidx;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LP3943_PRESENT */
 
 	platform_set_drvdata(pdev, lp3943_gpio);
 

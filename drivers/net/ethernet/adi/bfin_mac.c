@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define DRV_VERSION	"1.1"
 #define DRV_DESC	"Blackfin on-chip Ethernet MAC driver"
@@ -1490,7 +1487,7 @@ out_err_mii_probe:
 	mdiobus_unregister(lp->mii_bus);
 	mdiobus_free(lp->mii_bus);
 out_err_probe_mac:
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  
@@ -1506,7 +1503,7 @@ static int bfin_mac_remove(struct platform_device *pdev)
 
 	bfin_phc_release(lp);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  
@@ -1641,7 +1638,7 @@ static int bfin_mii_bus_remove(struct platform_device *pdev)
 	struct bfin_mii_bus_platform_data *mii_bus_pd =
 		dev_get_platdata(&pdev->dev);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

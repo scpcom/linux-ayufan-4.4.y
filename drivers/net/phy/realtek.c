@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/phy.h>
 #include <linux/module.h>
@@ -12,7 +9,7 @@
 #define RTL821x_INER_INIT	0x6400
 #define RTL821x_INSR		0x13
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define	RTL8211E_INER_LINK_STATUS	0x400
 #else  
 #define	RTL8211E_INER_LINK_STAT	0x10
@@ -49,7 +46,7 @@ static int rtl8211e_config_intr(struct phy_device *phydev)
 	int err;
 
 	if (phydev->interrupts == PHY_INTERRUPT_ENABLED)
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		err = phy_write(phydev, RTL821x_INER,
 				RTL8211E_INER_LINK_STATUS);
 #else  
@@ -75,7 +72,7 @@ static struct phy_driver rtl8211b_driver = {
 	.driver		= { .owner = THIS_MODULE,},
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
  
 static struct phy_driver rtl8211dn_driver = {
 	.phy_id		= 0x001cc914,
@@ -113,7 +110,7 @@ static int __init realtek_init(void)
 	ret = phy_driver_register(&rtl8211b_driver);
 	if (ret < 0)
 		return -ENODEV;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	ret = phy_driver_register(&rtl8211dn_driver);
 	if (ret < 0)
 		return -ENODEV;
@@ -124,7 +121,7 @@ static int __init realtek_init(void)
 static void __exit realtek_exit(void)
 {
 	phy_driver_unregister(&rtl8211b_driver);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	phy_driver_unregister(&rtl8211dn_driver);
 #endif  
 	phy_driver_unregister(&rtl8211e_driver);
@@ -135,7 +132,7 @@ module_exit(realtek_exit);
 
 static struct mdio_device_id __maybe_unused realtek_tbl[] = {
 	{ 0x001cc912, 0x001fffff },
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	{ 0x001cc914, 0x001fffff },
 #endif  
 	{ 0x001cc915, 0x001fffff },

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/preempt.h>
 #include <linux/smp.h>
@@ -110,7 +107,7 @@ void flush_tlb_all(void)
 	if (tlb_ops_need_broadcast())
 		on_each_cpu(ipi_flush_tlb_all, NULL, 1);
 	else
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		__flush_tlb_all();
 #else  
 		local_flush_tlb_all();
@@ -123,7 +120,7 @@ void flush_tlb_mm(struct mm_struct *mm)
 	if (tlb_ops_need_broadcast())
 		on_each_cpu_mask(mm_cpumask(mm), ipi_flush_tlb_mm, mm, 1);
 	else
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		__flush_tlb_mm(mm);
 #else  
 		local_flush_tlb_mm(mm);
@@ -140,7 +137,7 @@ void flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 		on_each_cpu_mask(mm_cpumask(vma->vm_mm), ipi_flush_tlb_page,
 					&ta, 1);
 	} else
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		__flush_tlb_page(vma, uaddr);
 #else  
 		local_flush_tlb_page(vma, uaddr);
@@ -155,7 +152,7 @@ void flush_tlb_kernel_page(unsigned long kaddr)
 		ta.ta_start = kaddr;
 		on_each_cpu(ipi_flush_tlb_kernel_page, &ta, 1);
 	} else
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		__flush_tlb_kernel_page(kaddr);
 #else  
 		local_flush_tlb_kernel_page(kaddr);
@@ -195,7 +192,7 @@ void flush_bp_all(void)
 	if (tlb_ops_need_broadcast())
 		on_each_cpu(ipi_flush_bp_all, NULL, 1);
 	else
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		__flush_bp_all();
 #else  
 		local_flush_bp_all();

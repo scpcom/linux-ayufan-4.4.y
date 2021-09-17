@@ -1080,7 +1080,7 @@ int usb_resume(struct device *dev, pm_message_t msg)
 
 void usb_enable_autosuspend(struct usb_device *udev)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	 
 #else  
 	pm_runtime_allow(&udev->dev);

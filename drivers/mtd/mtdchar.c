@@ -555,7 +555,7 @@ static int shrink_ecclayout(const struct nand_ecclayout *from,
 		to->oobavail += from->oobfree[i].length;
 		to->oobfree[i] = from->oobfree[i];
 	}
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	to->eccbytes = from->eccbytes;
 #endif  
 

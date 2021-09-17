@@ -504,7 +504,7 @@ static int ecryptfs_encrypt_extent(struct page *enc_extent_page,
 					  crypt_stat->extent_size, extent_iv);
 #endif  
 	if (rc < 0) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 		printk(KERN_ERR "%s: Error attempting to encrypt page with "
 		       "page->index = [%lld], extent_offset = [%ld]; "
 		       "rc = [%d]\n", __func__, (unsigned long long)page->index, extent_offset,
@@ -659,7 +659,7 @@ static int ecryptfs_decrypt_extent(struct page *page,
 					  crypt_stat->extent_size, extent_iv);
 #endif  
 	if (rc < 0) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 		printk(KERN_ERR "%s: Error attempting to decrypt to page with "
 		       "page->index = [%lld], extent_offset = [%ld]; "
 		       "rc = [%d]\n", __func__, (unsigned long long)page->index, extent_offset,
@@ -978,7 +978,7 @@ out_unlock:
 	}
 	mutex_lock(&crypt_stat->cs_tfm_mutex);
 	rc = ecryptfs_crypto_api_algify_cipher_name(&full_alg_name,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 						    crypt_stat->cipher,
 						    crypt_stat->cipher_mode);
 #else  
@@ -992,7 +992,7 @@ out_unlock:
 		rc = PTR_ERR(crypt_stat->tfm);
 		crypt_stat->tfm = NULL;
 		ecryptfs_printk(KERN_ERR, "cryptfs: init_crypt_ctx(): "
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 				"Error initializing cipher [%s] and mode [%s]\n",
 				crypt_stat->cipher,
 				crypt_stat->cipher_mode);
@@ -1036,7 +1036,7 @@ void ecryptfs_set_default_sizes(struct ecryptfs_crypt_stat *crypt_stat)
 	if (crypt_stat->flags & ECRYPTFS_METADATA_IN_XATTR)
 		crypt_stat->metadata_size = ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE;
 	else {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 		crypt_stat->metadata_size = ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE;
 #endif  
 		if (PAGE_CACHE_SIZE <= ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE)
@@ -1143,7 +1143,7 @@ static void ecryptfs_set_default_crypt_stat_vals(
 						      mount_crypt_stat);
 	ecryptfs_set_default_sizes(crypt_stat);
 	strcpy(crypt_stat->cipher, ECRYPTFS_DEFAULT_CIPHER);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	strcpy(crypt_stat->cipher_mode, ECRYPTFS_DEFAULT_CIPHER_MODE);
 #endif  
 	crypt_stat->key_size = ECRYPTFS_DEFAULT_KEY_BYTES;
@@ -1160,7 +1160,7 @@ int ecryptfs_new_file_context(struct inode *ecryptfs_inode)
 	    &ecryptfs_superblock_to_private(
 		    ecryptfs_inode->i_sb)->mount_crypt_stat;
 	int cipher_name_len;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	int cipher_mode_name_len;
 #endif  
 	int rc = 0;
@@ -1182,7 +1182,7 @@ int ecryptfs_new_file_context(struct inode *ecryptfs_inode)
 	       mount_crypt_stat->global_default_cipher_name,
 	       cipher_name_len);
 	crypt_stat->cipher[cipher_name_len] = '\0';
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
     cipher_mode_name_len =
 	strlen(mount_crypt_stat->global_default_cipher_mode_name);
     memcpy(crypt_stat->cipher_mode,
@@ -1279,7 +1279,7 @@ void ecryptfs_write_crypt_stat_flags(char *page_virt,
 	(*written) = 4;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 struct ecryptfs_cipher_mode_code_str_map_elem {
 	char mode_str[ECRYPTFS_MAX_CIPHER_MODE_NAME_SIZE + 1];
 	u8 mode_code;

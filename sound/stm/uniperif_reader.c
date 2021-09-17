@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <asm/cacheflush.h>
 #include <linux/init.h>
@@ -195,7 +192,7 @@ static int uniperif_reader_open(struct snd_pcm_substream *substream)
 		goto error;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 	 
 	result = snd_stm_pcm_hw_constraint_transfer_bytes(runtime,
@@ -870,7 +867,7 @@ static int uniperif_reader_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_PM_SLEEP
 static int uniperif_reader_suspend(struct device *dev)
 {

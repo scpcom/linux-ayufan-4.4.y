@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/export.h>
 #include <linux/slab.h>
@@ -286,7 +283,7 @@ void sg_miter_start(struct sg_mapping_iter *miter, struct scatterlist *sgl,
 }
 EXPORT_SYMBOL(sg_miter_start);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 static bool sg_miter_get_next_page(struct sg_mapping_iter *miter)
 {
 	if (!miter->__remaining) {
@@ -333,7 +330,7 @@ bool sg_miter_next(struct sg_mapping_iter *miter)
 {
 	sg_miter_stop(miter);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (!sg_miter_get_next_page(miter))
 		return false;
 #else  
@@ -393,12 +390,12 @@ void sg_miter_stop(struct sg_mapping_iter *miter)
 }
 EXPORT_SYMBOL(sg_miter_stop);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
  
 #else  
  
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 static size_t sg_copy_buffer(struct scatterlist *sgl, unsigned int nents,
 			     void *buf, size_t buflen, off_t skip,
 			     bool to_buffer)
@@ -419,7 +416,7 @@ static size_t sg_copy_buffer(struct scatterlist *sgl, unsigned int nents,
 
 	sg_miter_start(&miter, sgl, nents, sg_flags);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (!sg_miter_skip(&miter, skip))
 		return false;
 #endif  
@@ -448,7 +445,7 @@ static size_t sg_copy_buffer(struct scatterlist *sgl, unsigned int nents,
 size_t sg_copy_from_buffer(struct scatterlist *sgl, unsigned int nents,
 			   void *buf, size_t buflen)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	return sg_copy_buffer(sgl, nents, buf, buflen, 0, false);
 #else  
 	return sg_copy_buffer(sgl, nents, buf, buflen, 0);
@@ -459,7 +456,7 @@ EXPORT_SYMBOL(sg_copy_from_buffer);
 size_t sg_copy_to_buffer(struct scatterlist *sgl, unsigned int nents,
 			 void *buf, size_t buflen)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	return sg_copy_buffer(sgl, nents, buf, buflen, 0, true);
 #else  
 	return sg_copy_buffer(sgl, nents, buf, buflen, 1);
@@ -467,7 +464,7 @@ size_t sg_copy_to_buffer(struct scatterlist *sgl, unsigned int nents,
 }
 EXPORT_SYMBOL(sg_copy_to_buffer);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
  
 size_t sg_pcopy_from_buffer(struct scatterlist *sgl, unsigned int nents,
 			    void *buf, size_t buflen, off_t skip)

@@ -26,7 +26,7 @@
 #else  
 #define PTE_HWTABLE_PTRS	(PTRS_PER_PTE)
 #define PTE_HWTABLE_OFF		(PTE_HWTABLE_PTRS * sizeof(pte_t))
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define PTE_HWTABLE_SIZE	(PTE_HWTABLE_PTRS * sizeof(u32))
 #define PTE_HWTABLE_MASK	(~((PTE_HWTABLE_SIZE*2)-1))
 #else  

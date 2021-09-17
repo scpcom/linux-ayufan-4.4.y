@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef ASM_GLUE_CACHE_H
 #define ASM_GLUE_CACHE_H
@@ -97,7 +94,7 @@
 #endif
 
 #if defined(CONFIG_CPU_V6) || defined(CONFIG_CPU_V6K)
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 #  define MULTI_CACHE 1
  
@@ -111,7 +108,7 @@
 #endif
 
 #if defined(CONFIG_CPU_V7)
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 #  define MULTI_CACHE 1
  

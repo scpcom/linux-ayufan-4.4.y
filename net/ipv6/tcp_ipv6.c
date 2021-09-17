@@ -1371,7 +1371,7 @@ process:
 	if (!sock_owned_by_user(sk)) {
 #ifdef CONFIG_NET_DMA
 		struct tcp_sock *tp = tcp_sk(sk);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
 #else  
 		if (!tp->ucopy.dma_chan && tp->ucopy.pinned_list)

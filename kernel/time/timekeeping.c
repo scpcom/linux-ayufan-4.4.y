@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/timekeeper_internal.h>
 #include <linux/module.h>
@@ -367,7 +364,7 @@ void do_gettimeofday(struct timeval *tv)
 {
 	struct timespec now;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #ifdef CONFIG_ARCH_ALPINE
 	if (!al_gettimeofday_use_jiffies) {
 #endif  

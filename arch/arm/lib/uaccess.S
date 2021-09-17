@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/arch/arm/lib/uaccess.S
  *
@@ -18,17 +15,17 @@
 #include <asm/assembler.h>
 #include <asm/errno.h>
 #include <asm/domain.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #include <asm/page.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 		.text
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ALPINE */
 #define PAGE_SHIFT 12
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 /* Prototype: int __copy_to_user(void *to, const char *from, size_t n)
  * Purpose  : copy a block to user memory from kernel memory

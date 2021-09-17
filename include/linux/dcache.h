@@ -194,7 +194,7 @@ static inline int dname_external(struct dentry *dentry)
 }
 
 #ifdef MY_ABC_HERE
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(CONFIG_SYNO_HI3536)
+#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE) || defined(CONFIG_SYNO_HI3536)
 extern int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount);
 extern int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount);
 #else  

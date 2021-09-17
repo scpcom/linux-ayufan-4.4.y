@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 static const char version[] =
 	 "smc911x.c: v1.0 04-16-2005 by Dustin McIntire <dustin@sensoria.com>\n";
@@ -1719,7 +1716,7 @@ static int smc911x_drv_probe(struct platform_device *pdev)
 	ndev->base_addr = res->start;
 	ret = smc911x_probe(ndev);
 	if (ret != 0) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 		platform_set_drvdata(pdev, NULL);
 #endif  
@@ -1748,7 +1745,7 @@ static int smc911x_drv_remove(struct platform_device *pdev)
 	struct resource *res;
 
 	DBG(SMC_DEBUG_FUNC, "--> %s\n", __func__);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

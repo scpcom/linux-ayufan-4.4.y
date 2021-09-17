@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -112,7 +109,7 @@ static int stmfp_if_config_dt(struct platform_device *pdev,
 				struct device_node *node, int version)
 {
 	int ret = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	const char *mac;
 #endif  
 
@@ -155,7 +152,7 @@ static int stmfp_if_config_dt(struct platform_device *pdev,
 		dev_warn(&pdev->dev, "Incorrect interface names in DT\n");
 		ret = -ENODEV;
 	}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 	 
 	mac =  of_get_mac_address(node);
 	if (mac) {
@@ -2086,7 +2083,7 @@ static int fpif_init(struct fpif_grp *fpgrp)
 		netdev->hard_header_len += FP_HDR_SIZE;
 		strncpy(netdev->name, priv->plat->ifname,
 			sizeof(priv->plat->ifname));
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		netdev->watchdog_timeo = 5 * HZ;
 		if (fpif_data->mac_addr)
 			memcpy(netdev->dev_addr, fpif_data->mac_addr, ETH_ALEN);

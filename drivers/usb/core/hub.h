@@ -83,7 +83,7 @@ struct usb_port {
 #if defined (MY_ABC_HERE)
 	unsigned int power_cycle_counter;
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CASTRATED_XHC
 #define SYNO_USB_PORT_CASTRATED_XHC 0x01
 	unsigned int flag;
 #endif  

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 static const char version1[] =
 "ne.c:v1.10 9/23/94 Donald Becker (becker@scyld.com)\n";
@@ -702,7 +699,7 @@ static int ne_drv_remove(struct platform_device *pdev)
 		free_irq(dev->irq, dev);
 		release_region(dev->base_addr, NE_IO_EXTENT);
 		free_netdev(dev);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 		platform_set_drvdata(pdev, NULL);
 #endif  

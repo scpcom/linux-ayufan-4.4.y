@@ -30,7 +30,7 @@
 #include <linux/btrfs.h>
 #include "delayed-inode.h"
 #include "ctree.h"
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #include "csum.h"
 #endif  
 #include "disk-io.h"
@@ -54,7 +54,7 @@
 
 static const struct super_operations btrfs_super_ops;
 static struct file_system_type btrfs_fs_type;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 static unsigned long btrfs_csum_initialized;
 #endif  
 
@@ -1293,7 +1293,7 @@ static struct dentry *btrfs_mount(struct file_system_type *fs_type, int flags,
 	if (!(flags & MS_RDONLY))
 		mode |= FMODE_WRITE;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 	if (!test_and_set_bit(1, &btrfs_csum_initialized)) {
 		error = btrfs_csum_init();
@@ -2275,7 +2275,7 @@ static void __exit exit_btrfs_fs(void)
 	extent_map_exit();
 	extent_io_exit();
 	btrfs_interface_exit();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	btrfs_csum_exit();
 #endif  
 	unregister_filesystem(&btrfs_fs_type);

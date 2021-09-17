@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "init.h"
 
@@ -3030,7 +3027,7 @@ SiSSetMode(struct SiS_Private *SiS_Pr, unsigned short ModeNo)
 }
 
 #ifndef GETBITSTR
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define GENBITSMASK(mask)   	GENMASK(1?mask,0?mask)
 #define GETBITS(var,mask)   	(((var) & GENBITSMASK(mask)) >> (0?mask))
 #else  

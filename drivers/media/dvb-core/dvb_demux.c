@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/sched.h>
 #include <linux/spinlock.h>
@@ -595,7 +592,7 @@ static int dmx_ts_feed_set(struct dmx_ts_feed *ts_feed, u16 pid, int ts_type,
 		return -ERESTARTSYS;
 
 	if (ts_type & TS_DECODER) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if (pes_type == DMX_PES_OTHER) {
 			mutex_unlock(&demux->mutex);
 			return -EINVAL;
@@ -774,7 +771,7 @@ static int dvbdmx_release_ts_feed(struct dmx_demux *dmx,
 
 	feed->pid = 0xffff;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (feed->ts_type & TS_DECODER && feed->pes_type != DMX_PES_OTHER)
 		demux->pesfilter[feed->pes_type] = NULL;
 #else  
@@ -1193,7 +1190,7 @@ int dvb_dmx_init(struct dvb_demux *dvbdemux)
 
 	INIT_LIST_HEAD(&dvbdemux->frontend_list);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	for (i = 0; i < DMX_PES_LAST; i++) {
 		dvbdemux->pesfilter[i] = NULL;
 		dvbdemux->pids[i] = 0xffff;

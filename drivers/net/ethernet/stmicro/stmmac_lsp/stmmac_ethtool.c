@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/etherdevice.h>
 #include <linux/ethtool.h>
@@ -566,7 +563,7 @@ static void stmmac_get_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
 	spin_unlock_irq(&priv->lock);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_SUPPORT_WOL)
 #define MAC_ADDR_LEN      (6)
 extern int (*syno_standby_power_enable)(void);
 int keep_standby_power(void) {
@@ -815,7 +812,7 @@ static const struct ethtool_ops stmmac_ethtool_ops = {
 	.get_ethtool_stats = stmmac_get_ethtool_stats,
 	.get_strings = stmmac_get_strings,
 	.get_wol = stmmac_get_wol,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO_SUPPORT_WOL)
 	.set_wol = syno_stmmac_set_wol,
 #else
 	.set_wol = stmmac_set_wol,

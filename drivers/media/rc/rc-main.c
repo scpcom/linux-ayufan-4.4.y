@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <media/rc-core.h>
 #include <linux/spinlock.h>
@@ -498,7 +495,7 @@ void rc_keydown_notimeout(struct rc_dev *dev, int scancode, u8 toggle)
 }
 EXPORT_SYMBOL_GPL(rc_keydown_notimeout);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 int rc_open(struct rc_dev *rdev)
 {
 	int rval = 0;
@@ -524,14 +521,14 @@ static int ir_open(struct input_dev *idev)
 {
 	struct rc_dev *rdev = input_get_drvdata(idev);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	return rc_open(rdev);
 #else  
 	return rdev->open(rdev);
 #endif  
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 void rc_close(struct rc_dev *rdev)
 {
 	if (rdev) {
@@ -551,7 +548,7 @@ static void ir_close(struct input_dev *idev)
 {
 	struct rc_dev *rdev = input_get_drvdata(idev);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	rc_close(rdev);
 #else  
 	 if (rdev)
@@ -868,7 +865,7 @@ int rc_register_device(struct rc_dev *dev)
 	memcpy(&dev->input_dev->id, &dev->input_id, sizeof(dev->input_id));
 	dev->input_dev->phys = dev->input_phys;
 	dev->input_dev->name = dev->input_name;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	mutex_unlock(&dev->lock);
 

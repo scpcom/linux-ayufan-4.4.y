@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/types.h>
@@ -445,7 +442,7 @@ static void determine_valid_ioctls(struct video_device *vdev)
 {
 	DECLARE_BITMAP(valid_ioctls, BASE_VIDIOC_PRIVATE);
 	const struct v4l2_ioctl_ops *ops = vdev->ioctl_ops;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	bool is_vid = ((vdev->vfl_type == VFL_TYPE_GRABBER) ||
 				(vdev->vfl_type == VFL_TYPE_TSMUX));
 #else  
@@ -653,7 +650,7 @@ int __video_register_device(struct video_device *vdev, int type, int nr,
 	case VFL_TYPE_SUBDEV:
 		name_base = "v4l-subdev";
 		break;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	case VFL_TYPE_TSMUX:
 		name_base = "tsmux";
 		break;

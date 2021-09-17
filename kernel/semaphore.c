@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/compiler.h>
 #include <linux/kernel.h>
@@ -14,7 +11,7 @@ static noinline void __down(struct semaphore *sem);
 static noinline int __down_interruptible(struct semaphore *sem);
 static noinline int __down_killable(struct semaphore *sem);
 static noinline int __down_timeout(struct semaphore *sem, long jiffies);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static noinline int __down_timeout_interruptible(struct semaphore *sem,
 		long jiffies);
 #endif  
@@ -96,7 +93,7 @@ int down_timeout(struct semaphore *sem, long jiffies)
 }
 EXPORT_SYMBOL(down_timeout);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
  
 int down_timeout_interruptible(struct semaphore *sem, long jiffies)
 {
@@ -185,7 +182,7 @@ static noinline int __sched __down_timeout(struct semaphore *sem, long jiffies)
 {
 	return __down_common(sem, TASK_UNINTERRUPTIBLE, jiffies);
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static noinline int __sched __down_timeout_interruptible(struct semaphore *sem,
 		long jiffies)
 {

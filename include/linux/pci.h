@@ -362,7 +362,7 @@ struct pci_bus {
 	struct resource busn_res;	 
 
 	struct pci_ops	*ops;		 
-#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(MY_ABC_HERE)
 	struct msi_chip	*msi;		 
 #endif  
 	void		*sysdata;	 

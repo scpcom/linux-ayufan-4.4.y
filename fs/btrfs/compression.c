@@ -101,7 +101,7 @@ static int check_compressed_csum(struct inode *inode,
 		kunmap_atomic(kaddr);
 
 		if (csum != *cb_sum) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			btrfs_err(BTRFS_I(inode)->root->fs_info,
 #else  
 			btrfs_info(BTRFS_I(inode)->root->fs_info,

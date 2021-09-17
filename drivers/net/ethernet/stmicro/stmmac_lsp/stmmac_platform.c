@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/platform_device.h>
 #include <linux/io.h>
@@ -259,7 +256,7 @@ static void stmmac_pltfr_shutdown(struct platform_device *pdev)
 		stmmac_set_mac(priv->ioaddr, true);
 	}
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_PM_SLEEP
 static int stmmac_pltfr_suspend(struct device *dev)
 {
@@ -334,7 +331,7 @@ struct platform_driver stmmac_pltfr_driver = {
 	.driver = {
 		   .name = STMMAC_RESOURCE_NAME,
 		   .owner = THIS_MODULE,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		   .pm = DEV_PM_OPS,
 #else  
 		   .pm = &stmmac_pltfr_pm_ops,

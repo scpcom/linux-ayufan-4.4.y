@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _DVBFRONTEND_H_
 #define _DVBFRONTEND_H_
@@ -321,7 +318,7 @@ struct dvb_frontend_event {
 #define DTV_STAT_ERROR_BLOCK_COUNT	68
 #define DTV_STAT_TOTAL_BLOCK_COUNT	69
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define DTV_RF_INPUT_SOURCE_SELECT	70
 #define DTV_RF_INPUT_SOURCE_MAX		71
 

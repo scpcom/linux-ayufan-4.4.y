@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/slab.h>
 
@@ -516,7 +513,7 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 
 		if (offset >= i_size) {
 			*uptodate = true;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 			EXOFS_DBGMSG("offset >= i_size index=0x%llx\n", _LLU(index));
 #else  
 			EXOFS_DBGMSG("offset >= i_size index=0x%lx\n", index);
@@ -539,7 +536,7 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 			*uptodate = true;
 		else
 			*uptodate = PageUptodate(page);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 		EXOFS_DBGMSG("index=0x%llx uptodate=%d\n", _LLU(index), *uptodate);
 #else  
 		EXOFS_DBGMSG("index=0x%lx uptodate=%d\n", index, *uptodate);

@@ -15,10 +15,10 @@
 #include "../scsi/scsi_transport_api.h"
 
 #include <linux/libata.h>
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_MONACO)
 #include <linux/of.h>
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MONACO)
 #include <linux/platform_device.h>
 #endif
 
@@ -1483,12 +1483,12 @@ static unsigned int ata_eh_speed_down(struct ata_device *dev,
 	return action;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SII3132_MEDIA_ERROR_RETRY
 static int syno_media_error_retry(struct ata_queued_cmd *qc)
 {
 	int iRet = 1;
 
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_SIL_PORTING) && defined(MY_ABC_HERE)
 	if (qc && (syno_is_hw_version(HW_DS1815p) || syno_is_hw_version(HW_DS1515p) || syno_is_hw_version(HW_DS415p))) {
 		struct ata_port *ap = qc->ap;
 		if (ap && (ap->link.uiStsFlags & SYNO_STATUS_IS_SIL)) {
@@ -1503,12 +1503,12 @@ static int syno_media_error_retry(struct ata_queued_cmd *qc)
 
 static inline int ata_eh_worth_retry(struct ata_queued_cmd *qc)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SII3132_MEDIA_ERROR_RETRY
 	if (syno_media_error_retry(qc)) {
 #endif
 	if (qc->err_mask & AC_ERR_MEDIA)
 		return 0;	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SII3132_MEDIA_ERROR_RETRY
 	}
 #endif
 	if (qc->flags & ATA_QCFLAG_IO)
@@ -2786,7 +2786,7 @@ static int ata_eh_schedule_probe(struct ata_device *dev)
 	return 1;
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_MONACO)
 	struct platform_device *plat_dev = NULL;
 #endif
 
@@ -2952,7 +2952,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 		}
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_EUNIT_LIMITATION
  
 		if(syno_is_hw_version(HW_DS1812p) ||
 			syno_is_hw_version(HW_DS1813p)) {

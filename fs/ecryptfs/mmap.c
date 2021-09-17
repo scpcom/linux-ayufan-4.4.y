@@ -31,7 +31,7 @@ static int ecryptfs_writepage(struct page *page, struct writeback_control *wbc)
 		if (-EDQUOT != rc && -ENOSPC != rc)
 #endif  
 		ecryptfs_printk(KERN_WARNING, "Error encrypting "
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 				"page (upper index [0x%.16llx])\n", (unsigned long long)page->index);
 #else  
 				"page (upper index [0x%.16lx])\n", page->index);
@@ -168,7 +168,7 @@ out:
 		ClearPageUptodate(page);
 	else
 		SetPageUptodate(page);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 	ecryptfs_printk(KERN_DEBUG, "Unlocking page with index = [0x%.16llx]\n",
 			(unsigned long long)page->index);
 #else  
@@ -261,7 +261,7 @@ static int ecryptfs_write_begin(struct file *file,
 			} else if (len < PAGE_CACHE_SIZE) {
 				rc = ecryptfs_decrypt_page(page);
 				if (rc) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 					printk(KERN_ERR "%s: Error decrypting "
 					       "page at index [%lld]; "
 					       "rc = [%d]\n",
@@ -435,7 +435,7 @@ static int ecryptfs_write_end(struct file *file,
 	int rc;
 
 	ecryptfs_printk(KERN_DEBUG, "Calling fill_zeros_to_end_of_page"
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 			"(page w/ index = [0x%.16llx], to = [%d])\n", (unsigned long long)index, to);
 #else  
 			"(page w/ index = [0x%.16lx], to = [%d])\n", index, to);
@@ -461,7 +461,7 @@ static int ecryptfs_write_end(struct file *file,
 	rc = fill_zeros_to_end_of_page(page, to);
 	if (rc) {
 		ecryptfs_printk(KERN_WARNING, "Error attempting to fill "
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			"zeros in page with index = [0x%.16llxlx]\n", (unsigned long long)index);
 #else  
 			"zeros in page with index = [0x%.16lx]\n", index);
@@ -474,7 +474,7 @@ static int ecryptfs_write_end(struct file *file,
 		if (-EDQUOT != rc && -ENOSPC != rc)
 #endif  
 		ecryptfs_printk(KERN_WARNING, "Error encrypting page (upper "
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 				"index [0x%.16llx])\n", (unsigned long long)index);
 #else  
 				"index [0x%.16lx])\n", index);

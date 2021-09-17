@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -167,7 +164,7 @@ static struct watchdog_device lpc_wdt_dev = {
 	.max_timeout = WATCHDOG_MAX32,
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_PM_SLEEP
 static int st_lpc_wdt_suspend(struct device *dev)
 {

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __ASM_ARM_THREAD_INFO_H
 #define __ASM_ARM_THREAD_INFO_H
@@ -9,7 +6,7 @@
 
 #include <linux/compiler.h>
 #include <asm/fpstate.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #include <asm/page.h>
 
 #if (PAGE_SHIFT > 12)

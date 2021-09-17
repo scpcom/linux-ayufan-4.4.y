@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _DVB_DEMUX_H_
 #define _DVB_DEMUX_H_
@@ -101,7 +98,7 @@ struct dvb_demux {
 
 	struct list_head frontend_list;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	struct dvb_demux_feed *pesfilter[DMX_PES_LAST];
 	u16 pids[DMX_PES_LAST];
 #else  

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #include "amd64_edac.h"
 #include <asm/amd_nb.h>
 
@@ -247,7 +244,7 @@ static void get_cs_base_and_mask(struct amd64_pvt *pvt, int csrow, u8 dct,
 	if (boot_cpu_data.x86 == 0xf && pvt->ext_model < K8_REV_F) {
 		csbase		= pvt->csels[dct].csbases[csrow];
 		csmask		= pvt->csels[dct].csmasks[csrow];
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		base_bits	= GENMASK_ULL(31, 21) | GENMASK_ULL(15, 9);
 		mask_bits	= GENMASK_ULL(29, 21) | GENMASK_ULL(15, 9);
 #else  
@@ -260,7 +257,7 @@ static void get_cs_base_and_mask(struct amd64_pvt *pvt, int csrow, u8 dct,
 		csbase          = pvt->csels[dct].csbases[csrow];
 		csmask          = pvt->csels[dct].csmasks[csrow >> 1];
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		*base  = (csbase & GENMASK_ULL(15,  5)) << 6;
 		*base |= (csbase & GENMASK_ULL(30, 19)) << 8;
 
@@ -291,7 +288,7 @@ static void get_cs_base_and_mask(struct amd64_pvt *pvt, int csrow, u8 dct,
 		csmask		= pvt->csels[dct].csmasks[csrow >> 1];
 		addr_shift	= 8;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if (pvt->fam == 0x15)
 			base_bits = mask_bits =
 				GENMASK_ULL(30,19) | GENMASK_ULL(13,5);
@@ -416,7 +413,7 @@ static u64 sys_addr_to_dram_addr(struct mem_ctl_info *mci, u64 sys_addr)
 		}
 	}
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	dram_addr = (sys_addr & GENMASK_ULL(39, 0)) - dram_base;
 #else  
 	dram_addr = (sys_addr & GENMASK(0, 39)) - dram_base;
@@ -446,7 +443,7 @@ static u64 dram_addr_to_input_addr(struct mem_ctl_info *mci, u64 dram_addr)
 	pvt = mci->pvt_info;
 
 	intlv_shift = num_node_interleave_bits(dram_intlv_en(pvt, 0));
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	input_addr = ((dram_addr >> intlv_shift) & GENMASK_ULL(35, 12)) +
 		      (dram_addr & 0xfff);
 #else  
@@ -671,7 +668,7 @@ static u64 get_error_address(struct mce *m)
 		end_bit   = 39;
 	}
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	addr = m->addr & GENMASK_ULL(end_bit, start_bit);
 #else  
 	addr = m->addr & GENMASK(start_bit, end_bit);
@@ -684,7 +681,7 @@ static u64 get_error_address(struct mce *m)
 		u16 mce_nid;
 		u8 intlv_en;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if ((addr & GENMASK_ULL(47, 24)) >> 24 != 0x00fdf7)
 			return addr;
 #else  
@@ -698,7 +695,7 @@ static u64 get_error_address(struct mce *m)
 		amd64_read_pci_cfg(pvt->F1, DRAM_LOCAL_NODE_LIM, &tmp);
 		intlv_en = tmp >> 21 & 0x7;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		cc6_base  = (tmp & GENMASK_ULL(20, 0)) << 3;
 #else  
 		cc6_base  = (tmp & GENMASK(0, 20)) << 3;
@@ -708,7 +705,7 @@ static u64 get_error_address(struct mce *m)
 
 		cc6_base <<= 24;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if (!intlv_en)
 			return cc6_base | (addr & GENMASK_ULL(23, 0));
 #else  
@@ -718,7 +715,7 @@ static u64 get_error_address(struct mce *m)
 
 		amd64_read_pci_cfg(pvt->F1, DRAM_LOCAL_NODE_BASE, &tmp);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 							 
 		tmp_addr  = (addr & GENMASK_ULL(23, 12)) << __fls(intlv_en + 1);
 
@@ -790,7 +787,7 @@ static void read_dram_base_limit_regs(struct amd64_pvt *pvt, unsigned range)
 
 	amd64_read_pci_cfg(f1, DRAM_LOCAL_NODE_LIM, &llim);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	pvt->ranges[range].lim.lo &= GENMASK_ULL(15, 0);
 #else  
 	pvt->ranges[range].lim.lo &= GENMASK(0, 15);
@@ -798,7 +795,7 @@ static void read_dram_base_limit_regs(struct amd64_pvt *pvt, unsigned range)
 
 	pvt->ranges[range].lim.lo |= ((llim & 0x1fff) << 3 | 0x7) << 16;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	pvt->ranges[range].lim.hi &= GENMASK_ULL(7, 0);
 #else  
 	pvt->ranges[range].lim.hi &= GENMASK(0, 7);
@@ -1054,7 +1051,7 @@ static u64 f1x_get_norm_dct_addr(struct amd64_pvt *pvt, u8 range,
 		else
 			chan_off = dram_base;
 	}
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	return (sys_addr & GENMASK_ULL(47,6)) - (chan_off & GENMASK_ULL(47,23));
 #else  
 

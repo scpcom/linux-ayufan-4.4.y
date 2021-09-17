@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #undef TRACE_SYSTEM
 #define TRACE_SYSTEM writeback
 
@@ -54,7 +51,7 @@ TRACE_EVENT(writeback_dirty_page,
 		__entry->index = page->index;
 	),
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 	TP_printk("bdi %s: ino=%lu index=%llu",
 		__entry->name,
 		__entry->ino,

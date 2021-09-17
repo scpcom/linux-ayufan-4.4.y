@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _DRIVERS_MMC_SDHCI_PLTFM_H
 #define _DRIVERS_MMC_SDHCI_PLTFM_H
@@ -12,7 +9,7 @@
 struct sdhci_pltfm_data {
 	const struct sdhci_ops *ops;
 	unsigned int quirks;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	unsigned int quirks2;
 #endif  
 };

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * include/linux/backing-dev.h
  *
@@ -276,9 +273,9 @@ int bdi_set_max_ratio(struct backing_dev_info *bdi, unsigned int max_ratio);
 #endif
 
 extern struct backing_dev_info default_backing_dev_info;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY
 extern struct backing_dev_info syno_backing_dev_info;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY */
 extern struct backing_dev_info noop_backing_dev_info;
 
 int writeback_in_progress(struct backing_dev_info *bdi);

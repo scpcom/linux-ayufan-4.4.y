@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/module.h>
@@ -695,7 +692,7 @@ static int st_gpio_direction_output(struct gpio_chip *chip,
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 static int st_gpio_xlate(struct gpio_chip *gc,
 			const struct of_phandle_args *gpiospec, u32 *flags)
@@ -1383,7 +1380,7 @@ static struct gpio_chip st_gpio_template = {
 	.direction_input	= st_gpio_direction_input,
 	.direction_output	= st_gpio_direction_output,
 	.ngpio			= ST_GPIO_PINS_PER_BANK,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 	.of_gpio_n_cells	= 1,
 	.of_xlate		= st_gpio_xlate,
@@ -1492,7 +1489,7 @@ static int st_gpiolib_register_bank(struct st_pinctrl *info,
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #ifdef CONFIG_PM_SLEEP
 static void st_pctl_get_function(struct st_pio_control *pc,
 				int pin_id, int *function)
@@ -1941,12 +1938,12 @@ static struct platform_driver st_pctl_driver = {
 		.name = "st-pinctrl",
 		.owner = THIS_MODULE,
 		.of_match_table = st_pctl_of_match,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		.pm = ST_PCTL_PM,
 #endif  
 	},
 	.probe = st_pctl_probe,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 #ifdef CONFIG_PM
 	.suspend = st_pctl_suspend,

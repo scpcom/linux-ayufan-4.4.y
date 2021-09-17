@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -2603,9 +2600,9 @@ void neigh_app_ns(struct neighbour *n)
 EXPORT_SYMBOL(neigh_app_ns);
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 int hh_output_relaxed __read_mostly = 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 EXPORT_SYMBOL(hh_output_relaxed);
 #endif  
 #endif  

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _NET_NEIGHBOUR_H
 #define _NET_NEIGHBOUR_H
 
@@ -333,12 +330,12 @@ static inline int neigh_hh_output(const struct hh_cache *hh, struct sk_buff *skb
 {
 	unsigned int seq = 0;
 	int hh_len;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	int retry;
 #endif  
 
 	do {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		if (!hh_output_relaxed)
 			seq = read_seqbegin(&hh->hh_lock);
 #else  
@@ -354,7 +351,7 @@ static inline int neigh_hh_output(const struct hh_cache *hh, struct sk_buff *skb
 			memcpy(skb->data - hh_alen, hh->hh_data, hh_alen);
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		retry = 0;
 		if (!hh_output_relaxed)
 			retry = read_seqretry(&hh->hh_lock, seq);

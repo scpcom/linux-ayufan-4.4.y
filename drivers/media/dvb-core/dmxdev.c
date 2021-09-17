@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/sched.h>
 #include <linux/spinlock.h>
@@ -141,7 +138,7 @@ static int dvb_dvr_open(struct inode *inode, struct file *file)
 	}
 
 	if ((file->f_flags & O_ACCMODE) == O_WRONLY) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		if (!dvbdev->writers) {
 			mutex_unlock(&dmxdev->mutex);
 			return -EBUSY;
@@ -162,7 +159,7 @@ static int dvb_dvr_open(struct inode *inode, struct file *file)
 		}
 		dmxdev->demux->disconnect_frontend(dmxdev->demux);
 		dmxdev->demux->connect_frontend(dmxdev->demux, front);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		dvbdev->writers--;
 #endif  
 	}
@@ -179,7 +176,7 @@ static int dvb_dvr_release(struct inode *inode, struct file *file)
 	mutex_lock(&dmxdev->mutex);
 
 	if ((file->f_flags & O_ACCMODE) == O_WRONLY) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		dvbdev->writers++;
 #endif  
 		dmxdev->demux->disconnect_frontend(dmxdev->demux);
@@ -560,7 +557,7 @@ static int dvb_dmxdev_start_feed(struct dmxdev *dmxdev,
 
 	ts_pes = para->pes_type;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (ts_pes != DMX_PES_OTHER)
 		ts_type = TS_DECODER;
 	else
@@ -864,7 +861,7 @@ static int dvb_dmxdev_pes_filter_set(struct dmxdev *dmxdev,
 	dvb_dmxdev_filter_stop(dmxdevfilter);
 	dvb_dmxdev_filter_reset(dmxdevfilter);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if ((unsigned)params->pes_type >= DMX_PES_LAST)
 		return -EINVAL;
 #else  
@@ -1209,7 +1206,7 @@ static const struct file_operations dvb_dvr_fops = {
 static struct dvb_device dvbdev_dvr = {
 	.priv = NULL,
 	.readers = 1,
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	.writers = 1,
 #endif  
 	.users = 1,

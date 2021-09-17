@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt)    "%s: " fmt, __func__
 
@@ -53,7 +50,7 @@ static ssize_t rproc_state_read(struct file *filp, char __user *userbuf,
 	return simple_read_from_buffer(userbuf, count, ppos, buf, i);
 }
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static ssize_t rproc_state_write(struct file *filp, const char __user *userbuf,
 				 size_t count, loff_t *ppos)
 {
@@ -79,7 +76,7 @@ static ssize_t rproc_state_write(struct file *filp, const char __user *userbuf,
 #endif  
 static const struct file_operations rproc_state_ops = {
 	.read = rproc_state_read,
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	.write = rproc_state_write,
 #endif  
 	.open = simple_open,

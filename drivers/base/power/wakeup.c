@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/device.h>
 #include <linux/slab.h>
@@ -10,7 +7,7 @@
 #include <linux/suspend.h>
 #include <linux/seq_file.h>
 #include <linux/debugfs.h>
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #include <linux/notifier.h>
 #endif  
 #include <trace/events/power.h>
@@ -20,7 +17,7 @@
 bool events_check_enabled __read_mostly;
 
 static atomic_t combined_event_count = ATOMIC_INIT(0);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static BLOCKING_NOTIFIER_HEAD(wakeup_source_cb);
 #endif  
 
@@ -168,7 +165,7 @@ int device_wakeup_enable(struct device *dev)
 	ret = device_wakeup_attach(dev, ws);
 	if (ret)
 		wakeup_source_unregister(ws);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	blocking_notifier_call_chain(&wakeup_source_cb, WAKEUP_SOURCE_ADDED,
 		(void *)dev);
 #endif  
@@ -196,7 +193,7 @@ int device_wakeup_disable(struct device *dev)
 		return -EINVAL;
 
 	ws = device_wakeup_detach(dev);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (ws) {
 		blocking_notifier_call_chain(&wakeup_source_cb,
 			WAKEUP_SOURCE_REMOVED, (void *)dev);
@@ -210,7 +207,7 @@ int device_wakeup_disable(struct device *dev)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(device_wakeup_disable);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 void wakeup_source_notifier_register(struct notifier_block *nb)
 {
 	if (!nb)
@@ -268,7 +265,7 @@ int device_set_wakeup_enable(struct device *dev, bool enable)
 	return enable ? device_wakeup_enable(dev) : device_wakeup_disable(dev);
 }
 EXPORT_SYMBOL_GPL(device_set_wakeup_enable);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
  
 static int __device_child_may_wakeup(struct device *dev, void *c)
 {

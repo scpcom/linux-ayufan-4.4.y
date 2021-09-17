@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * if_alg: User-space algorithm interface
  *
@@ -48,7 +45,7 @@ struct af_alg_completion {
 struct af_alg_control {
 	struct af_alg_iv *iv;
 	int op;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CRYOTO_PATCH_FOR_LIBKCAPI
 	unsigned int aead_assoclen;
 #endif
 };
@@ -59,7 +56,7 @@ struct af_alg_type {
 	int (*setkey)(void *private, const u8 *key, unsigned int keylen);
 	int (*accept)(void *private, struct sock *sk);
 	int (*accept_nokey)(void *private, struct sock *sk);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CRYOTO_PATCH_FOR_LIBKCAPI
 	int (*setauthsize)(void *private, unsigned int authsize);
 #endif
 

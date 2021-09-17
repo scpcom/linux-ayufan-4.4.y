@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define __DVB_CORE__
 
@@ -926,7 +923,7 @@ static struct dtv_cmds_h dtv_cmds[DTV_MAX_COMMAND + 1] = {
 	_DTV_CMD(DTV_DVBT2_PLP_ID_LEGACY, 1, 0),
 	_DTV_CMD(DTV_LNA, 1, 0),
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	_DTV_CMD(DTV_RF_INPUT_SOURCE_SELECT, 1, 0),
 
 #endif  
@@ -952,7 +949,7 @@ static struct dtv_cmds_h dtv_cmds[DTV_MAX_COMMAND + 1] = {
 	_DTV_CMD(DTV_ATSCMH_SCCC_CODE_MODE_B, 0, 0),
 	_DTV_CMD(DTV_ATSCMH_SCCC_CODE_MODE_C, 0, 0),
 	_DTV_CMD(DTV_ATSCMH_SCCC_CODE_MODE_D, 0, 0),
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	_DTV_CMD(DTV_RF_INPUT_SOURCE_MAX, 0, 0),
 
 #endif  
@@ -1334,7 +1331,7 @@ static int dtv_property_process_get(struct dvb_frontend *fe,
 		tvp->u.data = c->lna;
 		break;
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	case DTV_RF_INPUT_SOURCE_MAX:
 		tvp->u.data = c->rf_input_max;
 		break;
@@ -1668,7 +1665,7 @@ static int dtv_property_process_set(struct dvb_frontend *fe,
 		if (fe->ops.set_lna)
 			r = fe->ops.set_lna(fe);
 		break;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 	case DTV_RF_INPUT_SOURCE_SELECT:
 		c->rf_input_src = tvp->u.data;

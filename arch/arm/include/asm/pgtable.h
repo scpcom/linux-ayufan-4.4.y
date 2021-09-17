@@ -19,7 +19,7 @@
 #include <asm/memory.h>
 #include <asm/pgtable-hwdef.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 #include <asm/tlbflush.h>
 #endif  
 
@@ -55,7 +55,7 @@ extern void __pgd_error(const char *file, int line, pgd_t);
 #define FIRST_USER_ADDRESS	PAGE_SIZE
 #endif  
 #else  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 #define FIRST_USER_ADDRESS	(PAGE_SIZE)
 #else  
 #define FIRST_USER_ADDRESS	(PAGE_SIZE * 2)
@@ -160,7 +160,7 @@ extern pgd_t swapper_pg_dir[PTRS_PER_PGD];
 
 static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	return __va(pmd_val(pmd) & PHYS_MASK & (s32)PTE_HWTABLE_MASK);
 #else  
 	return __va(pmd_val(pmd) & PHYS_MASK & (s32)PAGE_MASK);

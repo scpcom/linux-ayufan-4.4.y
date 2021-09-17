@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifdef CONFIG_ZSMALLOC_DEBUG
 #define DEBUG
@@ -35,7 +32,7 @@
 #define MAX_PHYSMEM_BITS 36
 #else  
  
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
+#if defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
 #define MAX_PHYSMEM_BITS PHYS_MASK_SHIFT
 #else  
 #define MAX_PHYSMEM_BITS BITS_PER_LONG
@@ -52,7 +49,7 @@
 	MAX(32, (ZS_MAX_PAGES_PER_ZSPAGE << PAGE_SHIFT >> OBJ_INDEX_BITS))
 #define ZS_MAX_ALLOC_SIZE	PAGE_SIZE
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ZRAM_32KB_PAGE_SUPPORT
  
 #define ZS_SIZE_CLASS_DELTA	(1 << 4)
 #else  

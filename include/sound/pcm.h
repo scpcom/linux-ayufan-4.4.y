@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __SOUND_PCM_H
 #define __SOUND_PCM_H
 
@@ -820,7 +817,7 @@ void snd_pcm_timer_done(struct snd_pcm_substream *substream);
 static inline void snd_pcm_gettime(struct snd_pcm_runtime *runtime,
 				   struct timespec *tv)
 {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	if (runtime->tstamp_type == SNDRV_PCM_TSTAMP_TYPE_MONOTONIC)
 		getrawmonotonic(tv);
 #else  

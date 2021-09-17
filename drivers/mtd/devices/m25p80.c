@@ -587,7 +587,7 @@ struct flash_info {
 	})
 
 static const struct spi_device_id m25p_ids[] = {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 	{ "spi_flash_jedec_detection", INFO(0xD373C7, 0, 0, 0, 0) },
 #endif  
@@ -630,10 +630,10 @@ static const struct spi_device_id m25p_ids[] = {
 	{ "mx25l6405d",  INFO(0xc22017, 0, 64 * 1024, 128, 0) },
 	{ "mx25l12805d", INFO(0xc22018, 0, 64 * 1024, 256, 0) },
 	{ "mx25l12855e", INFO(0xc22618, 0, 64 * 1024, 256, 0) },
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	{ "mx25u6435f",  INFO(0xc22537, 0, 64 * 1024, 128, 0) },
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	{ "mx25u12835f", INFO(0xc22538, 0, 64 * 1024, 256, 0) },
 #endif  
 	{ "mx25l25635e", INFO(0xc22019, 0, 64 * 1024, 512, 0) },
@@ -705,7 +705,7 @@ static const struct spi_device_id m25p_ids[] = {
 	{ "m25px32",    INFO(0x207116,  0, 64 * 1024, 64, SECT_4K) },
 	{ "m25px32-s0", INFO(0x207316,  0, 64 * 1024, 64, SECT_4K) },
 	{ "m25px32-s1", INFO(0x206316,  0, 64 * 1024, 64, SECT_4K) },
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	{ "m25px64",    INFO(0x207117,  0, 64 * 1024, 128, SECT_4K) },
 
 	{ "n25q128", INFO(0x20ba18, 0, 64 * 1024, 256, 0) },
@@ -782,7 +782,7 @@ static int m25p_probe(struct spi_device *spi)
 	struct mtd_part_parser_data	ppdata;
 	struct device_node __maybe_unused *np = spi->dev.of_node;
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_ALPINE) || defined(MY_ABC_HERE)
 	memset(&ppdata, 0x0, sizeof(ppdata));
 #endif  
 #ifdef CONFIG_MTD_OF_PARTS

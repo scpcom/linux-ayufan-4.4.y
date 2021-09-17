@@ -38,11 +38,11 @@
 ENTRY(v7wbi_flush_user_tlb_range)
 	vma_vm_mm r3, r2			@ get vma->vm_mm
 	mmid	r3, r3				@ get vm_mm->context.id
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	dsb	ish
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	mov	r0, r0, lsr #PAGE_SHIFT		@ align address
 	mov	r1, r1, lsr #PAGE_SHIFT
 	asid	r3, r3				@ mask ASID
@@ -60,7 +60,7 @@ ENTRY(v7wbi_flush_user_tlb_range)
 #endif
 	ALT_UP(mcr	p15, 0, r0, c8, c7, 1)	@ TLB invalidate U MVA
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	add	r0, r0, #HW_PAGE_SIZE
 #elif defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && !defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
 	add	r0, r0, #0x1000
@@ -69,11 +69,11 @@ ENTRY(v7wbi_flush_user_tlb_range)
 #endif
 	cmp	r0, r1
 	blo	1b
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO)
 	dsb	ish
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	mov	pc, lr
 ENDPROC(v7wbi_flush_user_tlb_range)
 
@@ -86,11 +86,11 @@ ENDPROC(v7wbi_flush_user_tlb_range)
  *	- end   - end address (exclusive, may not be aligned)
  */
 ENTRY(v7wbi_flush_kern_tlb_range)
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	dsb	ish
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	mov	r0, r0, lsr #PAGE_SHIFT		@ align address
 	mov	r1, r1, lsr #PAGE_SHIFT
 	mov	r0, r0, lsl #PAGE_SHIFT
@@ -102,7 +102,7 @@ ENTRY(v7wbi_flush_kern_tlb_range)
 	ALT_SMP(mcr	p15, 0, r0, c8, c3, 1)	@ TLB invalidate U MVA (shareable)
 #endif
 	ALT_UP(mcr	p15, 0, r0, c8, c7, 1)	@ TLB invalidate U MVA
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	add	r0, r0, #HW_PAGE_SIZE
 #elif defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && !defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
 	add	r0, r0, #0x1000
@@ -111,11 +111,11 @@ ENTRY(v7wbi_flush_kern_tlb_range)
 #endif
 	cmp	r0, r1
 	blo	1b
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_MONACO)
 	dsb	ish
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	isb
 	mov	pc, lr
 ENDPROC(v7wbi_flush_kern_tlb_range)

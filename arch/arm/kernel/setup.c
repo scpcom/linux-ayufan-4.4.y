@@ -118,7 +118,7 @@ EXPORT_SYMBOL(system_serial_high);
 unsigned int elf_hwcap __read_mostly;
 EXPORT_SYMBOL(elf_hwcap);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 unsigned long cpu_clock_freq = 0;
 EXPORT_SYMBOL(cpu_clock_freq);
 #endif  
@@ -854,7 +854,7 @@ static int c_show(struct seq_file *m, void *v)
 		seq_printf(m, "model name\t: %s rev %d (%s)\n",
 			   cpu_name, cpuid & 15, elf_platform);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		if (cpu_clock_freq)
 			seq_printf(m, "Speed\t\t: %lu.%01luGHz\n",
 				cpu_clock_freq / 1000000000,

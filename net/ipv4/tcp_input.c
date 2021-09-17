@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) "TCP: " fmt
 
@@ -50,7 +47,7 @@ int sysctl_tcp_thin_dupack __read_mostly;
 
 int sysctl_tcp_moderate_rcvbuf __read_mostly = 1;
 int sysctl_tcp_early_retrans __read_mostly = 3;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 int sysctl_tcp_default_delack_segs __read_mostly = 1;
 #endif  
 #if defined(CONFIG_SYNO_LSP_HI3536)
@@ -530,7 +527,7 @@ static void tcp_rtt_estimator(struct sock *sk, const __u32 mrtt)
 	}
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
  
 #else  
  
@@ -2592,7 +2589,7 @@ static int tcp_ack(struct sock *sk, const struct sk_buff *skb, int flag)
 	u32 ack_seq = TCP_SKB_CB(skb)->seq;
 	u32 ack = TCP_SKB_CB(skb)->ack_seq;
 	bool is_dupack = false;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	u32 prior_in_flight;
 #else  
 	u32 prior_in_flight, prior_cwnd = tp->snd_cwnd, prior_rtt = tp->srtt;
@@ -2688,7 +2685,7 @@ static int tcp_ack(struct sock *sk, const struct sk_buff *skb, int flag)
 
 	if (icsk->icsk_pending == ICSK_TIME_RETRANS)
 		tcp_schedule_loss_probe(sk);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	 
 #else  
 	if (tp->srtt != prior_rtt || tp->snd_cwnd != prior_cwnd)
@@ -3843,7 +3840,7 @@ static void __tcp_ack_snd_check(struct sock *sk, int ofo_possible)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (((tp->rcv_nxt - tp->rcv_wup) > (inet_csk(sk)->icsk_ack.rcv_mss * sysctl_tcp_default_delack_segs) &&
 #else  
 	if (((tp->rcv_nxt - tp->rcv_wup) > inet_csk(sk)->icsk_ack.rcv_mss &&
@@ -3986,7 +3983,7 @@ static bool tcp_dma_try_early_copy(struct sock *sk, struct sk_buff *skb,
 	if (tp->ucopy.wakeup)
 		return false;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
 #else  
 	if (!tp->ucopy.dma_chan && tp->ucopy.pinned_list)
@@ -4570,7 +4567,7 @@ int tcp_rcv_state_process(struct sock *sk, struct sk_buff *skb,
 				} else
 					tcp_init_metrics(sk);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 				 
 #else  
 				tcp_update_pacing_rate(sk);

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/module.h>
@@ -443,7 +440,7 @@ int snd_stm_buffer_mmap(struct snd_pcm_substream *substream,
 }
 EXPORT_SYMBOL(snd_stm_buffer_mmap);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 int snd_stm_pcm_transfer_bytes(unsigned int bytes_per_frame,
 		unsigned int max_transfer_bytes)
 {

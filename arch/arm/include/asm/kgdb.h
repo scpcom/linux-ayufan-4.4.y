@@ -6,7 +6,7 @@
 #define __ARM_KGDB_H__
 
 #include <linux/ptrace.h>
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(MY_ABC_HERE)
 #include <asm/opcodes.h>
 #endif  
 
@@ -20,7 +20,7 @@
 
 static inline void arch_kgdb_breakpoint(void)
 {
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(MY_ABC_HERE)
 	asm(__inst_arm(0xe7ffdeff));
 #else  
 	asm(".word 0xe7ffdeff");

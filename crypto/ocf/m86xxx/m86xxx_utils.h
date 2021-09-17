@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _ELPUTILS_H_
 #define _ELPUTILS_H_
@@ -101,7 +98,7 @@ void   mfree(void *buf);
 
 #define PDUMPWORD(t,b,s,m,e)     do {if(1){ dumpword(b,s,m);}}  while(0)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_COMCERTO)
 
 extern int elp_debug;
 #define	DPRINTF(flags, a...)	if (flags&ELP_ERR) {\

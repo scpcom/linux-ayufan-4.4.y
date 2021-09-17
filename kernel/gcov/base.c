@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt)	"gcov: " fmt
 
@@ -9,7 +6,7 @@
 #include <linux/mutex.h>
 #include "gcov.h"
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 static struct gcov_info *gcov_info_head;
 #endif  
@@ -22,7 +19,7 @@ void __gcov_init(struct gcov_info *info)
 
 	mutex_lock(&gcov_lock);
 	if (gcov_version == 0) {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 		gcov_version = gcov_info_version(info);
 #else  
 		gcov_version = info->version;
@@ -31,7 +28,7 @@ void __gcov_init(struct gcov_info *info)
 		pr_info("version magic: 0x%x\n", gcov_version);
 	}
 	 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	gcov_info_link(info);
 #else  
 	info->next = gcov_info_head;
@@ -66,7 +63,7 @@ void __gcov_merge_delta(gcov_type *counters, unsigned int n_counters)
 	 
 }
 EXPORT_SYMBOL(__gcov_merge_delta);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 
 void __gcov_merge_ior(gcov_type *counters, unsigned int n_counters)
 {
@@ -77,7 +74,7 @@ EXPORT_SYMBOL(__gcov_merge_ior);
 
 void gcov_enable_events(void)
 {
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	struct gcov_info *info = NULL;
 #else  
 	struct gcov_info *info;
@@ -86,7 +83,7 @@ void gcov_enable_events(void)
 	mutex_lock(&gcov_lock);
 	gcov_events_enabled = 1;
 	 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	while ((info = gcov_info_next(info)))
 		gcov_event(GCOV_ADD, info);
 #else  
@@ -106,7 +103,7 @@ static int gcov_module_notifier(struct notifier_block *nb, unsigned long event,
 				void *data)
 {
 	struct module *mod = data;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	struct gcov_info *info = NULL;
 	struct gcov_info *prev = NULL;
 #else  
@@ -117,7 +114,7 @@ static int gcov_module_notifier(struct notifier_block *nb, unsigned long event,
 	if (event != MODULE_STATE_GOING)
 		return NOTIFY_OK;
 	mutex_lock(&gcov_lock);
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	while ((info = gcov_info_next(info))) {
 		if (within(info, mod->module_core, mod->core_size)) {

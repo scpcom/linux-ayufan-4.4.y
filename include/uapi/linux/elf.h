@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _UAPI_LINUX_ELF_H
 #define _UAPI_LINUX_ELF_H
 
@@ -30,7 +27,7 @@ typedef __s64	Elf64_Sxword;
 #define PT_SHLIB   5
 #define PT_PHDR    6
 #define PT_TLS     7                
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #ifdef CONFIG_ST_ELF_EXTENSIONS
 #define PT_ST_INFO	0x50000000	 
 #endif  
@@ -217,7 +214,7 @@ typedef struct elf64_hdr {
 #define PF_R		0x4
 #define PF_W		0x2
 #define PF_X		0x1
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #ifdef CONFIG_ST_ELF_EXTENSIONS
 #define PF_ZLIB		(1 << 8)	 
 #define PF_AUX		(1 << 9)	 
@@ -259,7 +256,7 @@ typedef struct elf64_phdr {
 #define SHT_SHLIB	10
 #define SHT_DYNSYM	11
 #define SHT_NUM		12
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #ifdef CONFIG_ST_ELF_EXTENSIONS
 #define SHT_ST_INFO	0x50000000	 
 #endif  
@@ -269,7 +266,7 @@ typedef struct elf64_phdr {
 #define SHT_LOUSER	0x80000000
 #define SHT_HIUSER	0xffffffff
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
   
 #define SHF_NULL	0x0
 #endif  
@@ -277,7 +274,7 @@ typedef struct elf64_phdr {
 #define SHF_ALLOC	0x2
 #define SHF_EXECINSTR	0x4
 #define SHF_MASKPROC	0xf0000000
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #define SHF_MERGE	0x10
 #define SHF_STRINGS	0x20
 #ifdef CONFIG_ST_ELF_EXTENSIONS

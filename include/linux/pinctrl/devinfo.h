@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef PINCTRL_DEVINFO_H
 #define PINCTRL_DEVINFO_H
@@ -12,7 +9,7 @@
 struct dev_pin_info {
 	struct pinctrl *p;
 	struct pinctrl_state *default_state;
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #ifdef CONFIG_PM
 	struct pinctrl_state *sleep_state;
 	struct pinctrl_state *idle_state;

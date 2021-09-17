@@ -1,12 +1,9 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _LINUX_STDDEF_H
 #define _LINUX_STDDEF_H
 
 #include <uapi/linux/stddef.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MONACO_SDK_BUILD_FAILED_FIX
 #if !defined(__cplusplus)
 #undef NULL
 #define NULL ((void *)0)

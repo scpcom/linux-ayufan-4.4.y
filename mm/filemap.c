@@ -1604,7 +1604,7 @@ static int sock2iov(struct socket *sock, struct kvec *iov,
 
 	kmsg_ret = kernel_recvmsg(
 			sock, &msg, &iov[start_page], page_count, bytes_to_received,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 			MSG_WAITALL | MSG_NOCATCHSIGNAL | MSG_KERNSPACE);
 #else  
 			MSG_WAITALL | MSG_NOCATCHSIGNAL);
@@ -1990,7 +1990,7 @@ struct page *grab_cache_page_write_begin(struct address_space *mapping,
 	if (flags & AOP_FLAG_NOFS)
 		gfp_notmask = __GFP_FS;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PKMAP_NOT_ENOUGH_FIX
 	 
 	gfp_notmask |= __GFP_HIGHMEM;
 #endif

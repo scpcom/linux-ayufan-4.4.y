@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _REGMAP_INTERNAL_H
 #define _REGMAP_INTERNAL_H
@@ -161,7 +158,7 @@ struct regmap_range_node {
 	unsigned int window_len;
 };
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 struct regmap_field {
 	struct regmap *regmap;
 	unsigned int mask;

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/interrupt.h>
@@ -1617,7 +1614,7 @@ static int bcm_enet_remove(struct platform_device *pdev)
 	clk_disable_unprepare(priv->mac_clk);
 	clk_put(priv->mac_clk);
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 #else  
 	platform_set_drvdata(pdev, NULL);
 #endif  

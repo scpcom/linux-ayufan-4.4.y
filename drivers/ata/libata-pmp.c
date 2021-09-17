@@ -28,7 +28,7 @@ const struct ata_port_operations sata_pmp_port_ops = {
 };
 
 #if defined (MY_DEF_HERE)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
 #include <linux/gpio.h>
 #endif  
 
@@ -66,7 +66,7 @@ static unsigned int sata_pmp_read(struct ata_link *link, int reg, u32 *r_val)
 }
 
 #if defined(MY_DEF_HERE)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
 #include <linux/gpio.h>
 #endif  
 #ifdef MY_ABC_HERE

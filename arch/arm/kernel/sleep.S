@@ -84,9 +84,9 @@ ENDPROC(cpu_resume_after_mmu)
 	.data
 	.align
 ENTRY(cpu_resume)
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(MY_ABC_HERE)
 ARM_BE8(setend be)			@ ensure we are in BE mode
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif /* CONFIG_SYNO_LSP_ALPINE || MY_ABC_HERE */
 #ifdef CONFIG_SMP
 	adr	r0, sleep_save_sp
 	ALT_SMP(mrc p15, 0, r1, c0, c0, 5)

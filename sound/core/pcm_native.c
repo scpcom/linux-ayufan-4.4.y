@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/mm.h>
 #include <linux/module.h>
@@ -850,7 +847,7 @@ int snd_pcm_start(struct snd_pcm_substream *substream)
 	return snd_pcm_action(&snd_pcm_action_start, substream,
 			      SNDRV_PCM_STATE_RUNNING);
 }
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 EXPORT_SYMBOL_GPL(snd_pcm_start);
 #endif  
 

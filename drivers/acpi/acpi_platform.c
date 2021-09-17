@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/acpi.h>
 #include <linux/device.h>
@@ -16,7 +13,7 @@ ACPI_MODULE_NAME("platform");
 static const struct acpi_device_id acpi_platform_device_ids[] = {
 
 	{ "PNP0D40" },
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PINCTRL_CHERRYVIEW
 	{ "INT33FF" },  
 #endif  
 

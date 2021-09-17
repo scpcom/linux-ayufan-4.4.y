@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 #include <linux/cache.h>
@@ -28,7 +25,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Netfilter Core Team <coreteam@netfilter.org>");
 MODULE_DESCRIPTION("IPv4 packet filter");
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 static bool allow_inaccurate_counters = false;
 module_param(allow_inaccurate_counters, bool, 0644);
 MODULE_PARM_DESC(
@@ -305,7 +302,7 @@ ipt_do_table(struct sk_buff *skb,
 	IP_NF_ASSERT(table->valid_hooks & (1 << hook));
 	local_bh_disable();
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	addend = 0;
         if (!allow_inaccurate_counters)
 		addend = xt_write_recseq_begin();
@@ -411,7 +408,7 @@ ipt_do_table(struct sk_buff *skb,
 		 __func__, *stackptr, origptr);
 	*stackptr = origptr;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (!allow_inaccurate_counters || addend)
 		xt_write_recseq_end(addend);
 #else  

@@ -53,7 +53,7 @@ void scu_enable(void __iomem *scu_base)
 	scu_ctrl = __raw_readl(scu_base + SCU_CTRL);
 #endif  
 
-#if defined (MY_DEF_HERE)
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	 
 	scu_ctrl |= BIT(5);
 	__raw_writel(scu_ctrl, scu_base + SCU_CTRL);

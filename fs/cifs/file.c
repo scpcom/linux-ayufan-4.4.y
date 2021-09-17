@@ -1862,7 +1862,7 @@ retry:
 		unsigned int i, nr_pages, found_pages;
 		pgoff_t next = 0, tofind, saved_index = index;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 		tofind = min((pgoff_t)((cifs_sb->wsize / PAGE_CACHE_SIZE) - 1),
 #else  
 		tofind = min((cifs_sb->wsize / PAGE_CACHE_SIZE) - 1,
@@ -2949,7 +2949,7 @@ cifs_readpages_read_into_pages(struct TCP_Server_Info *server,
 
 	eof = CIFS_I(rdata->mapping->host)->server_eof;
 	eof_index = eof ? (eof - 1) >> PAGE_CACHE_SHIFT : 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_ALPINE
 	cifs_dbg(FYI, "eof=%llu eof_index=%llu\n", eof, (unsigned long long)eof_index);
 #else  
 	cifs_dbg(FYI, "eof=%llu eof_index=%lu\n", eof, eof_index);
@@ -2963,7 +2963,7 @@ cifs_readpages_read_into_pages(struct TCP_Server_Info *server,
 			 
 			iov.iov_base = kmap(page);
 			iov.iov_len = PAGE_CACHE_SIZE;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			cifs_dbg(FYI, "%u: idx=%llu iov_base=%p iov_len=%zu\n",
 				 i, page->index, iov.iov_base, iov.iov_len);
 #else  
@@ -2975,7 +2975,7 @@ cifs_readpages_read_into_pages(struct TCP_Server_Info *server,
 			 
 			iov.iov_base = kmap(page);
 			iov.iov_len = len;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			cifs_dbg(FYI, "%u: idx=%llu iov_base=%p iov_len=%zu\n",
 #else  
 			cifs_dbg(FYI, "%u: idx=%lu iov_base=%p iov_len=%zu\n",

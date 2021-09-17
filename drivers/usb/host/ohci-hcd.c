@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/moduleparam.h>
@@ -82,7 +79,7 @@ static inline void sb800_prefetch(struct ohci_hcd *ohci, int on)
 #define IRQ_NOTMINE	IRQ_NONE
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 static bool distrust_firmware = 0;
 #else  
 static bool distrust_firmware = 1;

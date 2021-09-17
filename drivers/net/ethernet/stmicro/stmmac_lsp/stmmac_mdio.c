@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/mii.h>
 #include <linux/phy.h>
@@ -89,7 +86,7 @@ int stmmac_mdio_reset(struct mii_bus *bus)
 
 #ifdef CONFIG_OF
 	if (priv->device->of_node) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 #else  
 		int reset_gpio, active_low;
 #endif  
@@ -108,7 +105,7 @@ int stmmac_mdio_reset(struct mii_bus *bus)
 						"snps,reset-active-low");
 			of_property_read_u32_array(np,
 				"snps,reset-delays-us", data->delays, 3);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 			if (gpio_request(data->reset_gpio, "mdio-reset"))
 				return 0;
 #else  
@@ -126,7 +123,7 @@ int stmmac_mdio_reset(struct mii_bus *bus)
 			udelay(data->delays[2]);
 #endif  
 		}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		gpio_direction_output(data->reset_gpio,
 				      data->active_low ? 1 : 0);
 		udelay(data->delays[0]);

@@ -395,7 +395,7 @@ static void shrink_buffers(struct stripe_head *sh)
 	int num = sh->raid_conf->pool_size;
 
 	for (i = 0; i < num ; i++) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		WARN_ON(sh->dev[i].page != sh->dev[i].orig_page);
 #endif  
 		p = sh->dev[i].page;
@@ -418,7 +418,7 @@ static int grow_buffers(struct stripe_head *sh)
 			return 1;
 		}
 		sh->dev[i].page = page;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		sh->dev[i].orig_page = page;
 #endif  
 	}
@@ -730,7 +730,7 @@ static void ops_run_io(struct stripe_head *sh, struct stripe_head_state *s)
 						 + rdev->data_offset);
 			if (test_bit(R5_ReadNoMerge, &sh->dev[i].flags))
 				bi->bi_rw |= REQ_FLUSH;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			if (test_bit(R5_SkipCopy, &sh->dev[i].flags))
 				WARN_ON(test_bit(R5_UPTODATE, &sh->dev[i].flags));
 			sh->dev[i].vec.bv_page = sh->dev[i].page;
@@ -777,7 +777,7 @@ static void ops_run_io(struct stripe_head *sh, struct stripe_head_state *s)
 			else
 				rbi->bi_sector = (sh->sector
 						  + rrdev->data_offset);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			if (test_bit(R5_SkipCopy, &sh->dev[i].flags))
 				WARN_ON(test_bit(R5_UPTODATE, &sh->dev[i].flags));
 			sh->dev[i].rvec.bv_page = sh->dev[i].page;
@@ -807,7 +807,7 @@ static void ops_run_io(struct stripe_head *sh, struct stripe_head_state *s)
 }
 
 static struct dma_async_tx_descriptor *
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 async_copy_data(int frombio, struct bio *bio, struct page **page,
 	sector_t sector, struct dma_async_tx_descriptor *tx,
 	struct stripe_head *sh)
@@ -851,10 +851,10 @@ async_copy_data(int frombio, struct bio *bio, struct page *page,
 		if (clen > 0) {
 			b_offset += bvl->bv_offset;
 			bio_page = bvl->bv_page;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			if (frombio) {
 				if (sh->raid_conf->skip_copy &&
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY)
 				    sh->raid_conf->mddev->degraded == 0 &&
 				    !test_bit(MD_RECOVERY_RUNNING, &sh->raid_conf->mddev->recovery) &&
 #endif  
@@ -943,7 +943,7 @@ static void ops_run_biofill(struct stripe_head *sh)
 			spin_unlock_irq(&sh->stripe_lock);
 			while (rbi && rbi->bi_sector <
 				dev->sector + STRIPE_SECTORS) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 				tx = async_copy_data(0, rbi, &dev->page,
 					dev->sector, tx, sh);
 #else  
@@ -968,7 +968,7 @@ static void mark_target_uptodate(struct stripe_head *sh, int target)
 		return;
 
 	tgt = &sh->dev[target];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY)
 	 
 	if (!test_bit(R5_SkipCopy, &tgt->flags))
 #endif  
@@ -1330,7 +1330,7 @@ ops_run_biodrain(struct stripe_head *sh, struct dma_async_tx_descriptor *tx)
 			dev->towrite = NULL;
 			BUG_ON(dev->written);
 			wbi = dev->written = chosen;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			WARN_ON(dev->page != dev->orig_page);
 #endif  
 			spin_unlock_irq(&sh->stripe_lock);
@@ -1343,7 +1343,7 @@ ops_run_biodrain(struct stripe_head *sh, struct dma_async_tx_descriptor *tx)
 					set_bit(R5_SyncIO, &dev->flags);
 				if (wbi->bi_rw & REQ_DISCARD)
 					set_bit(R5_Discard, &dev->flags);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 				else {
 					tx = async_copy_data(1, wbi, &dev->page,
 							dev->sector, tx, sh);
@@ -1388,7 +1388,7 @@ static void ops_complete_reconstruct(void *stripe_head_ref)
 		struct r5dev *dev = &sh->dev[i];
 
 		if (dev->written || i == pd_idx || i == qd_idx) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			if (!discard && !test_bit(R5_SkipCopy, &dev->flags))
 #else  
 			if (!discard)
@@ -1795,7 +1795,7 @@ static int resize_stripes(struct r5conf *conf, int newsize)
 		osh = get_free_stripe(conf);
 		spin_unlock_irq(&conf->device_lock);
 		atomic_set(&nsh->count, 1);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		for(i=0; i<conf->pool_size; i++) {
 			nsh->dev[i].page = osh->dev[i].page;
 			nsh->dev[i].orig_page = osh->dev[i].page;
@@ -1846,7 +1846,7 @@ static int resize_stripes(struct r5conf *conf, int newsize)
 			if (nsh->dev[i].page == NULL) {
 				struct page *p = alloc_page(GFP_NOIO);
 				nsh->dev[i].page = p;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 				nsh->dev[i].orig_page = p;
 #endif  
 				if (!p)
@@ -2437,7 +2437,7 @@ static void raid5_build_block(struct stripe_head *sh, int i, int previous)
 
 	bio_init(&dev->req);
 	dev->req.bi_io_vec = &dev->vec;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	dev->req.bi_max_vecs = 1;
 	dev->req.bi_private = sh;
 
@@ -3144,7 +3144,7 @@ handle_failed_stripe(struct r5conf *conf, struct stripe_head *sh,
 		 
 		bi = sh->dev[i].written;
 		sh->dev[i].written = NULL;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 		if (test_and_clear_bit(R5_SkipCopy, &sh->dev[i].flags)) {
 			WARN_ON(test_bit(R5_UPTODATE, &sh->dev[i].flags));
 			sh->dev[i].page = sh->dev[i].orig_page;
@@ -3414,7 +3414,7 @@ static void handle_stripe_clean_event(struct r5conf *conf,
 			dev = &sh->dev[i];
 			if (!test_bit(R5_LOCKED, &dev->flags) &&
 			    (test_bit(R5_UPTODATE, &dev->flags) ||
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 			     test_bit(R5_Discard, &dev->flags) ||
 			     test_bit(R5_SkipCopy, &dev->flags))) {
 #else  
@@ -3425,7 +3425,7 @@ static void handle_stripe_clean_event(struct r5conf *conf,
 				pr_debug("Return write for disc %d\n", i);
 				if (test_and_clear_bit(R5_Discard, &dev->flags))
 					clear_bit(R5_UPTODATE, &dev->flags);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 				if (test_and_clear_bit(R5_SkipCopy, &dev->flags)) {
 					WARN_ON(test_bit(R5_UPTODATE, &dev->flags));
 					dev->page = dev->orig_page;
@@ -3449,13 +3449,13 @@ static void handle_stripe_clean_event(struct r5conf *conf,
 						0);
 			} else if (test_bit(R5_Discard, &dev->flags))
 				discard_pending = 1;
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY)
 			if (!test_bit(R5_LOCKED, &dev->flags)) {
 #endif  
 			WARN_ON(test_bit(R5_SkipCopy, &dev->flags));
 			WARN_ON(dev->page != dev->orig_page);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY)
 			}
 #endif  
 #endif  
@@ -5876,7 +5876,7 @@ raid5_preread_bypass_threshold = __ATTR(preread_bypass_threshold,
 					raid5_show_preread_threshold,
 					raid5_store_preread_threshold);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 static ssize_t
 raid5_show_skip_copy(struct mddev *mddev, char *page)
 {
@@ -5897,7 +5897,7 @@ raid5_store_skip_copy(struct mddev *mddev, const char *page, size_t len)
 	if (!conf)
 		return -ENODEV;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	if (mddev->level == 6) {
 		printk(KERN_WARNING "md/raid:%s: skip_copy is not supported for level %d\n",
 			       mdname(mddev), mddev->level);
@@ -5914,7 +5914,7 @@ raid5_store_skip_copy(struct mddev *mddev, const char *page, size_t len)
 	mddev_suspend(mddev);
 	conf->skip_copy = new;
 	if (new)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY
 	{
 		mddev->queue->backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
 		syno_backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
@@ -6024,7 +6024,7 @@ static struct attribute *raid5_attrs[] =  {
 	&raid5_stripecache_active.attr,
 	&raid5_preread_bypass_threshold.attr,
 	&raid5_group_thread_cnt.attr,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
 	&raid5_skip_copy.attr,
 #endif  
 #ifdef MY_ABC_HERE
@@ -6298,7 +6298,7 @@ static struct r5conf *setup_conf(struct mddev *mddev)
 #endif  
 
 	conf->bypass_threshold = BYPASS_THRESHOLD;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MD_ENABLE_RAID5_SKIP_COPY
 	if (mddev->new_level == 5) {
 		conf->skip_copy = 1;
 		mddev->queue->backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
@@ -6730,8 +6730,8 @@ static int run(struct mddev *mddev)
 				discard_supported = false;
 			}
 		}
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(CONFIG_SYNO_ALPINE)
 		 
 #else  
 		 
